@@ -6576,8 +6576,13 @@ def t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat():
         rc, o, e = m4(S, S, rcp)
         chot(rc == 0 and json.loads(rcp.read_text())["canh_ancestry"] == 0, f"H == S phải 0 với 0 cạnh: {rc} {e!r}")
         rcp.unlink()
+        # ADR-0066 (packet B r13 mục tiêu 5): S không tổ tiên H, vùng bằng nhau ⇒ 0 `merge_base`; vùng lệch ⇒ 12.
         rc, o, e = m4(c0, S, rcp)
-        chot(rc == 12 and "không phải tổ tiên" in e and not rcp.exists(), f"S không tổ tiên H phải 12, không receipt: {rc} {e!r}")
+        chot(rc == 0 and json.loads(rcp.read_text(encoding="utf-8")).get("quan_he_S_H") == "merge_base",
+             f"S không tổ tiên H, vùng bằng nhau phải 0 merge_base: {rc} {e!r}")
+        rcp.unlink()
+        rc, o, e = m4(S, S3, rcp)
+        chot(rc == 12 and "VUNG_LECH" in e and not rcp.exists(), f"S không tổ tiên H, vùng lệch phải 12 VUNG_LECH: {rc} {e!r}")
         rc, o, e = m4(H_thu_hoi, S, rcp)
         chot(rc == 12 and "CHƯA KÍCH HOẠT" in e and not rcp.exists(), f"bản ghi thu hồi HỢP LỆ khi inactive phải 12: {rc} {e!r}")
         # F01/Q13: marker MỚI khi descriptor CHƯA ghim (A0) ⇒ 12, kể cả policy JSON hợp lệ; policy mà không marker ⇒ 12
@@ -6865,6 +6870,8 @@ def t137_M9_workflow_admission_hop_dong_tinh_va_actionlint_shellcheck():
         return
     chot(WORKFLOW_THU_HOI.is_file(), f"không thấy {WORKFLOW_THU_HOI}")
     van = WORKFLOW_THU_HOI.read_text(encoding="utf-8")
+    # ADR-0066 (packet B r13 mục tiêu 5/B10): chú thích đầu tệp mang câu mới, không còn câu "còn đòi S là tổ tiên của H".
+    chot(_amb_b10(van) == (True, True), f"B10 chú thích workflow (vế dương, vế âm): {_amb_b10(van)}")
     d = yaml.safe_load(van)
     on = d.get("on", d.get(True))
     chot(isinstance(on, dict) and list(on) == ["pull_request_target"], f"on phải CHỈ có pull_request_target: {on}")
@@ -7058,7 +7065,8 @@ def t138_A12_bien_nhan_receipt_du_truong_va_neo_doc_lap_cay_PR():
         chot(d["T"] == _g_a0(cay, "rev-parse", f"{H}^{{tree}}") and d["tree_S"] == _g_a0(cay, "rev-parse", f"{S}^{{tree}}")
              and d["oid_bo_kiem_tai_S"] == _g_a0(cay, "rev-parse", f"{S}:ops/lease_publish.py"), "T/tree_S/OID bộ kiểm lệch git")
         chot(d["so_object_da_doc"] >= 4 and d["tong_bytes"] > 0 and d["event"] == "thu_hoi_admission_receipt", f"đếm reader: {d}")
-        chot(all(isinstance(v, (int, float)) for v in d["ngan_sach"].values()) and len(d["ngan_sach"]) == 8, "ngân sách 8 trần có đơn vị số")
+        chot(all(isinstance(v, (int, float)) for v in d["ngan_sach"].values()) and len(d["ngan_sach"]) == 9,
+             "ngân sách 9 trần có đơn vị số (ADR-0066 thêm max_commits_merge_base)")
 
 
 @ca
@@ -7162,13 +7170,23 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
         ("C3-sorted-khong-key", "khoá thừa {sorted(thua, key=repr)}", "khoá thừa {sorted(thua)}",
          t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu, "GIET", "kiem_ban_ghi_thu_hoi"),
     ]
+    muts += [(i, c, m, globals()[d], "GIET", "ADR-0066", dau, tep) for i, c, m, ds, tep in _AMB_DOT_BIEN for d, dau in ds]
     ket = {"GIET": 0, "SONG": 0, "TIN_DUNG_GIA": [], "SAI_KY_VONG": []}
     with San() as s:
         sys.dont_write_bytecode = True
-        for i, (ten, cu, moi, dich, ky_vong, seam) in enumerate(muts):
-            chot(nguon.count(cu) == 1, f"neo mutant {ten} không duy nhất ({nguon.count(cu)})")
+        for i, (ten, cu, moi, dich, ky_vong, seam, *them) in enumerate(muts):
+            dau, tep = (list(them) + [None, None])[:2]
+            ban = WORKFLOW_THU_HOI.read_text(encoding="utf-8") if tep == "wf" else nguon
+            for c, n in (zip(cu, moi) if isinstance(cu, tuple) else ((cu, moi),)):
+                chot(ban.count(c) == 1, f"neo mutant {ten} không duy nhất ({ban.count(c)})")
+                ban = ban.replace(c, n)
             p = s / f"lease_publish_a0_mut_{i}.py"
-            p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+            p.write_text(nguon if tep == "wf" else ban, encoding="utf-8")
+            wf_cu = globals()["WORKFLOW_THU_HOI"]
+            if tep == "wf":
+                globals()["WORKFLOW_THU_HOI"] = s / f"wf_mut_{i}" / ".github" / "workflows" / wf_cu.name
+                globals()["WORKFLOW_THU_HOI"].parent.mkdir(parents=True)
+                globals()["WORKFLOW_THU_HOI"].write_text(ban, encoding="utf-8")
             importlib.invalidate_caches()
             spec = importlib.util.spec_from_file_location(f"lp_a0_m{i}", p)
             mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
@@ -7177,13 +7195,15 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
                 try:
                     dich()
                     thuc = "SONG"
-                except TinHieuChotCa:
-                    thuc = "GIET"
+                except TinHieuChotCa as ex:
+                    # ADR-0066: hàng có `dau` ⇒ ca phải đỏ ở ĐÚNG khẳng định ấy, không ở khẳng định khác.
+                    thuc = "GIET" if dau is None or str(ex).startswith(dau) else f"GIET_SAI_CHO({str(ex)[:120]})"
                 except Exception as ex:  # noqa: BLE001 — chết vì lỗi VÔ CAN: không nhận công
                     thuc = "TIN_DUNG_GIA"
                     ket["TIN_DUNG_GIA"].append(f"{ten}: {type(ex).__name__}: {str(ex)[:120]}")
             finally:
                 globals()["_nap_cong"] = cu_nap
+                globals()["WORKFLOW_THU_HOI"] = wf_cu
             if thuc in ("GIET", "SONG"):
                 ket[thuc] += 1
             if thuc != ky_vong:
@@ -7192,8 +7212,8 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
           f"tín dụng giả={len(ket['TIN_DUNG_GIA'])}")
     chot(not ket["TIN_DUNG_GIA"], f"mutant chết vì lỗi VÔ CAN (tín dụng giả): {ket['TIN_DUNG_GIA']}")
     chot(not ket["SAI_KY_VONG"], f"catalog lệch: {ket['SAI_KY_VONG']}")
-    chot(ket["GIET"] + ket["SONG"] == len(muts) == 37, f"mẫu số phải cố định 37: {ket}")
-    chot(ket["GIET"] == 34 and ket["SONG"] == 3, f"catalog kỳ vọng 34 giết / 3 SỐNG: {ket}")
+    chot(ket["GIET"] + ket["SONG"] == len(muts) == 83, f"mẫu số phải cố định 83 (37 A0 + 46 amb-m* ADR-0066): {ket}")
+    chot(ket["GIET"] == 80 and ket["SONG"] == 3, f"catalog kỳ vọng 80 giết / 3 SỐNG: {ket}")
 
 
 # wp488 review lượt 1: regression hints; fixture/control local, không mạng.
@@ -14770,6 +14790,519 @@ def t237_cai_actionlint_retry_song_qua_5xx():
             f"cài; được rc={rc}, {n} yêu cầu, stdout={ra!r}")
 
     bang(not loi, "retry của `cai_actionlint.sh` sai:\n  - " + "\n  - ".join(loi))
+
+
+# ===================== ADR-0066 — packet THU-HOI-ADMISSION-MERGE-BASE-B r13 (#1266) =====================
+# Ca B1–B10 của đặc tả `ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r13.md` §5; tên ca theo hậu tố đóng băng §5.1.
+# Mọi tên CHỈ có ở mã mới (`to_mau_hai_phia`, …) chỉ dùng TRONG thân ca, để tệp này nạp được trên mã nền (§6 bước 3).
+# Mỗi khẳng định giá trị là MỘT `chot` riêng, thông điệp mở bằng `B<n> <khẳng định>:` — bảng đột biến của t139 neo
+# vào tiền tố ấy để đo "đỏ ở CHÍNH khẳng định ấy" (§5 ma trận nghĩa vụ đầu ra).
+_AMB_VUNG = ("ops/thu-hoi/", ".github/coordination/change-impact.v1.json")
+
+
+def _amb_kho(s: Path) -> Path:
+    cay = s / "kho"
+    cay.mkdir()
+    _g_a0(cay, "init", "-q", "-b", "master")
+    _g_a0(cay, "config", "maintenance.auto", "false"); _g_a0(cay, "config", "gc.auto", "0")
+    return cay
+
+
+def _amb_cay_rong(cay: Path, dong: str = "") -> str:
+    # BYTES vào stdin: chế độ text trên Windows đổi LF→CRLF, mktree nhận tên có `\r` (B14 lượt 1, P2)
+    return subprocess.run(["git", "-C", str(cay), "mktree"], input=dong.encode("utf-8"), capture_output=True, check=True).stdout.decode().strip()
+
+
+def _amb_cm(cay: Path, tree: str, cha: tuple, gio: int, msg: str) -> str:
+    """Commit bằng `commit-tree` với giờ committer/author ĐÚNG `gio` (giây, +0000)."""
+    env = dict({k: v for k, v in os.environ.items() if not k.startswith("GIT_")},
+               GIT_AUTHOR_DATE=f"@{gio} +0000", GIT_COMMITTER_DATE=f"@{gio} +0000")
+    a = [x for c in cha for x in ("-p", c)]
+    return _g_a0(cay, "commit-tree", tree, *a, "-m", msg, env=env)
+
+
+def _amb_cm_hong(cay: Path, tree: str, cha: tuple, dong_committer: str) -> str:
+    """Commit có dòng committer tuỳ ý (giây không phải số nguyên), lưu bằng `hash-object --literally`."""
+    than = f"tree {tree}\n" + "".join(f"parent {c}\n" for c in cha) + \
+        f"author a <a@b> 100 +0000\n{dong_committer}\n\nhong\n"
+    return subprocess.run(["git", "-C", str(cay), "hash-object", "-t", "commit", "--literally", "-w", "--stdin"],
+                          input=than.encode("utf-8"), capture_output=True, check=True).stdout.decode().strip()
+
+
+def _amb_m4(mod, cay: Path, H: str, S: str, receipt=None):
+    argv = ["kiem-thu-hoi-github", H, "--canonical-base", S, "--nhanh-mac-dinh", "master", "--root", str(cay)]
+    if receipt is not None:
+        argv += ["--receipt", str(receipt)]
+    return _goi_main(mod, *argv)
+
+
+def _amb_receipt(rcp: Path) -> dict:
+    return __import__("json").loads(rcp.read_text(encoding="utf-8")) if rcp.is_file() else {}
+
+
+def _amb_merge_base_git(cay: Path, S: str, H: str) -> list:
+    """Oracle ĐỘC LẬP với mã ứng viên: `GIT_NO_REPLACE_OBJECTS=1 git merge-base --all S H`, đã sắp."""
+    env = dict({k: v for k, v in os.environ.items() if not k.startswith("GIT_")}, GIT_NO_REPLACE_OBJECTS="1")
+    p = subprocess.run(["git", "-C", str(cay), "merge-base", "--all", S, H], capture_output=True, text=True, env=env)
+    return sorted(p.stdout.split())
+
+
+def _amb_vung_git(cay: Path, ref: str) -> dict:
+    """Oracle vùng: `git ls-tree <ref> -- ops/thu-hoi/ .github/coordination/change-impact.v1.json` ⇒ {đường dẫn đầy đủ: [mode, kiểu, OID]}."""
+    van = _g_a0(cay, "ls-tree", "-z", ref, "--", *_AMB_VUNG)
+    kq = {}
+    for muc in filter(None, van.split("\0")):
+        dau, _, duong = muc.partition("\t")
+        mode, loai, oid = dau.split()
+        kq[duong] = [mode, loai, oid]
+    return kq
+
+
+def _amb_token_quan_he(o: str) -> list:
+    dong = [d for d in o.splitlines() if d.startswith("THU_HOI_ADMISSION ")]
+    return [t for d in dong for t in d.split() if t.startswith("quan_he=")]
+
+
+@ca
+def t238_amb01_to_tien_giu_nguyen():
+    """B1: S là tổ tiên H (H con trực tiếp của S) ⇒ rc 0, receipt v2 chế độ `to_tien`, token `quan_he=to_tien`."""
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, S) = _kho_do_thi(s)
+        H = _them_commit(cay, "amb01", S, {"docs/b.md": b"b\n"})
+        rcp = s / "r.json"
+        rc, o, e = _amb_m4(mod, cay, H, S, rcp)
+        d = _amb_receipt(rcp)
+        chot(rc == 0, f"B1 rc: {rc} {e!r}")
+        chot(type(d.get("schema_version")) is int and d.get("schema_version") == 2, f"B1 schema_version: {d.get('schema_version')!r}")
+        chot(d.get("quan_he_S_H") == "to_tien", f"B1 quan_he_S_H: {d.get('quan_he_S_H')!r}")
+        chot(d.get("merge_bases") == [S], f"B1 merge_bases: {d.get('merge_bases')!r} != [S]")
+        chot(type(d.get("canh_ancestry")) is int and d.get("canh_ancestry") == 1, f"B1 canh_ancestry: {d.get('canh_ancestry')!r}")
+        chot("vung_tai_S" in d and d["vung_tai_S"] is None, f"B1 vung_tai_S: {d.get('vung_tai_S', 'VẮNG')!r}")
+        chot(d.get("ngan_sach", {}).get("max_commits_merge_base") == 50000,
+             f"B1 ngan_sach.max_commits_merge_base: {d.get('ngan_sach')!r}")
+        chot(_amb_token_quan_he(o) == ["quan_he=to_tien"], f"B1 token quan_he: {_amb_token_quan_he(o)} trong {o!r}")
+
+
+@ca
+def t239_amb01b_to_tien_khong_doc_vung_S():
+    """B1b: S có `.github/coordination` là TỆP THƯỜNG, H (con của S) xoá nó ⇒ rc 0 `to_tien`, `vung_tai_S = null`:
+    chế độ `to_tien` không gọi hàm vùng (nền cũng rc 0 — trong miền của bất biến tương thích)."""
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, S0) = _kho_do_thi(s)
+        S = _them_commit(cay, "amb01b-s", S0, {".github/coordination": b"tep thuong\n"})
+        H = _them_commit(cay, "amb01b-h", S, {}, xoa=(".github/coordination",))
+        rcp = s / "r.json"
+        rc, o, e = _amb_m4(mod, cay, H, S, rcp)
+        d = _amb_receipt(rcp)
+        chot(rc == 0, f"B1b rc: {rc} {e!r}")
+        chot(d.get("quan_he_S_H") == "to_tien", f"B1b quan_he_S_H: {d.get('quan_he_S_H')!r}")
+        chot("vung_tai_S" in d and d["vung_tai_S"] is None, f"B1b vung_tai_S: {d.get('vung_tai_S', 'VẮNG')!r}")
+
+
+@ca
+def t240_amb01c_to_tien_committer_hong_o_commit_doc_them():
+    """B1c: `B → R_bad → S → H`, mọi tree rỗng; `R_bad` có giây committer không phải số nguyên ⇒ rc 12 nêu
+    `committer` và OID `R_bad` (nền rc 0 — chặt hơn nền có chủ đích, mục tiêu 4)."""
+    mod = _nap_cong()
+    with San() as s:
+        cay = _amb_kho(s)
+        t0 = _amb_cay_rong(cay)
+        B = _amb_cm(cay, t0, (), 100, "B")
+        R_bad = _amb_cm_hong(cay, t0, (B,), "committer a <a@b> xyz +0000")
+        S = _amb_cm(cay, t0, (R_bad,), 120, "S")
+        H = _amb_cm(cay, t0, (S,), 130, "H")
+        rcp = s / "r.json"
+        rc, o, e = _amb_m4(mod, cay, H, S, rcp)
+        chot(rc == 12, f"B1c rc: {rc} {o!r} {e!r}")
+        chot("committer" in e and R_bad in e, f"B1c thông báo phải nêu committer và OID R_bad {R_bad}: {e!r}")
+        chot(not rcp.exists(), "B1c không được có receipt")
+
+
+@ca
+def t241_amb02_merge_base_vung_bang_nhau():
+    """B2: H rẽ từ B, master đi tiếp đổi tệp ngoài vùng; vùng vắng ở S và B ⇒ rc 0, `merge_base`, `[B]`."""
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, B) = _kho_do_thi(s)
+        S = _them_commit(cay, "amb02-s", B, {"docs/m.md": b"m\n"})
+        H = _them_commit(cay, "amb02-h", B, {"docs/h.md": b"h\n"})
+        chot(_amb_merge_base_git(cay, S, H) == [B], "fixture B2: oracle git merge-base phải là [B]")
+        chot(_amb_vung_git(cay, S) == {}, "fixture B2: oracle ls-tree vùng tại S phải rỗng")
+        rcp = s / "r.json"
+        rc, o, e = _amb_m4(mod, cay, H, S, rcp)
+        d = _amb_receipt(rcp)
+        chot(rc == 0, f"B2 rc: {rc} {e!r}")
+        chot(type(d.get("schema_version")) is int and d.get("schema_version") == 2, f"B2 schema_version: {d.get('schema_version')!r}")
+        chot(d.get("quan_he_S_H") == "merge_base", f"B2 quan_he_S_H: {d.get('quan_he_S_H')!r}")
+        chot(d.get("merge_bases") == _amb_merge_base_git(cay, S, H), f"B2 merge_bases: {d.get('merge_bases')!r} != [B]")
+        chot("canh_ancestry" in d and d["canh_ancestry"] is None, f"B2 canh_ancestry: {d.get('canh_ancestry', 'VẮNG')!r}")
+        chot(d.get("vung_tai_S") == _amb_vung_git(cay, S), f"B2 vung_tai_S: {d.get('vung_tai_S', 'VẮNG')!r} != {{}}")
+        chot(_amb_token_quan_he(o) == ["quan_he=merge_base"], f"B2 token quan_he: {_amb_token_quan_he(o)} trong {o!r}")
+
+
+@ca
+def t242_amb02b_merge_base_vung_khong_rong():
+    """B2b: vùng KHÔNG rỗng và bằng nhau ở S' và B = S2 của `_mau_t133` (policy + marker cũ) ⇒ rc 0, `[S2]`,
+    `vung_tai_S` bằng đúng bản đồ dựng từ `git ls-tree S' -- ops/thu-hoi/ <policy>` (hai khoá)."""
+    import shutil
+    mod = _nap_cong()
+    mau = _mau_t133()
+    with San() as s:
+        cay = s / "kho"
+        shutil.copytree(mau["cay"], cay, symlinks=True)
+        h = mau["h"]
+        S2, H = h["S2"], h["H_them_tren_S2"]
+        S = _them_commit(cay, "amb02b-s", S2, {"docs/x.md": b"x\n"})
+        vung = _amb_vung_git(cay, S)
+        chot(len(vung) == 2 and _amb_merge_base_git(cay, S, H) == [S2], f"fixture B2b: {vung} {_amb_merge_base_git(cay, S, H)}")
+        rcp = s / "r.json"
+        rc, o, e = _amb_m4(mod, cay, H, S, rcp)
+        d = _amb_receipt(rcp)
+        chot(rc == 0, f"B2b rc: {rc} {e!r}")
+        chot(d.get("quan_he_S_H") == "merge_base", f"B2b quan_he_S_H: {d.get('quan_he_S_H')!r}")
+        chot(d.get("merge_bases") == [S2], f"B2b merge_bases: {d.get('merge_bases')!r} != [S2]")
+        chot(d.get("vung_tai_S") == vung, f"B2b vung_tai_S: {d.get('vung_tai_S', 'VẮNG')!r} != {vung!r}")
+
+
+def _amb_vung_lech(mod, ten, cay, H, S, duong=None, sha=None):
+    rcp = cay.parent / f"r-{ten}.json"
+    rc, o, e = _amb_m4(mod, cay, H, S, rcp)
+    chot(rc == 12, f"{ten} rc: {rc} {o!r} {e!r}")
+    chot("VUNG_LECH" in e, f"{ten} nhãn VUNG_LECH: {e!r}")
+    if sha is not None:
+        chot(sha in e, f"{ten} SHA merge-base lệch {sha}: {e!r}")
+    if duong is not None:
+        chot(duong in e, f"{ten} đường dẫn lệch {duong}: {e!r}")
+    chot(not rcp.exists(), f"{ten} không được có receipt")
+
+
+@ca
+def t243_amb03_policy_lech_sau_merge_base():
+    """B3: master thêm policy sau B ⇒ rc 12 `VUNG_LECH`, nêu đường policy (oracle `git diff --name-only B S`)."""
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, B) = _kho_do_thi(s)
+        S = _them_commit(cay, "amb03-s", B, {mod.PATH_POLICY_CLOSURE: b"{}\n"})
+        H = _them_commit(cay, "amb03-h", B, {"docs/h.md": b"h\n"})
+        lech = _g_a0(cay, "diff", "--name-only", B, S, "--", *_AMB_VUNG).split()
+        chot(lech == [".github/coordination/change-impact.v1.json"], f"fixture B3: {lech}")
+        _amb_vung_lech(mod, "B3", cay, H, S, duong=lech[0])
+
+
+@ca
+def t244_amb03b_thu_hoi_moi_tren_master():
+    """B3b: master thêm một bản ghi thu hồi sau B; H không có ⇒ rc 12 `VUNG_LECH`, nêu đường bản ghi."""
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, B) = _kho_do_thi(s)
+        S = _them_commit(cay, "amb03b-s", B, {"ops/thu-hoi/wp1-exec-1-codex-20260901.yaml": _yaml_bytes(_ban_ghi_thu_hoi())})
+        H = _them_commit(cay, "amb03b-h", B, {"docs/h.md": b"h\n"})
+        lech = _g_a0(cay, "diff", "--name-only", B, S, "--", *_AMB_VUNG).split()
+        chot(lech == ["ops/thu-hoi/wp1-exec-1-codex-20260901.yaml"], f"fixture B3b: {lech}")
+        _amb_vung_lech(mod, "B3b", cay, H, S, duong=lech[0])
+
+
+@ca
+def t245_amb04_append_only_qua_merge_base():
+    """B4: B và S cùng có một bản ghi; H XOÁ nó; S không là tổ tiên H ⇒ vùng bằng nhau, rồi append-only S→T ⇒ 8."""
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, B0) = _kho_do_thi(s)
+        rec = "ops/thu-hoi/wp1-exec-1-codex-20260901.yaml"
+        B = _them_commit(cay, "amb04-b", B0, {rec: _yaml_bytes(_ban_ghi_thu_hoi())})
+        S = _them_commit(cay, "amb04-s", B, {"docs/m.md": b"m\n"})
+        H = _them_commit(cay, "amb04-h", B, {"docs/h.md": b"h\n"}, xoa=(rec,))
+        rc, o, e = _amb_m4(mod, cay, H, S)
+        chot(rc == 8 and "append-only" in e, f"B4 append-only qua merge-base phải 8: {rc} {e!r}")
+
+
+@ca
+def t246_amb05_criss_cross_mot_base_lech():
+    """B5: criss-cross hai merge-base; merge-base đứng ĐẦU theo thứ tự sắp có vùng bằng S, cái còn lại lệch ⇒ rc 12 `VUNG_LECH` nêu SHA của merge-base lệch."""
+    mod = _nap_cong()
+    with San() as s:
+        cay = _amb_kho(s)
+        t0 = _amb_cay_rong(cay)
+        B0 = _amb_cm(cay, t0, (), 100, "B0")
+        t_pol = subprocess.run(["git", "-C", str(cay), "hash-object", "-w", "--stdin"], input=b"{}\n", capture_output=True, check=True).stdout.decode().strip()
+        for dong in ("100644 blob {}\tchange-impact.v1.json\n", "040000 tree {}\tcoordination\n", "040000 tree {}\t.github\n"):
+            t_pol = _amb_cay_rong(cay, dong.format(t_pol))        # policy tại .github/coordination/change-impact.v1.json
+        X1 = _amb_cm(cay, t0, (B0,), 110, "X1")
+        for nonce in range(64):     # chọn X2 sao cho X1 < X2 (X1 — vùng bằng S — đứng đầu thứ tự sắp)
+            X2 = _amb_cm(cay, t_pol, (B0,), 111, f"X2 {nonce}")
+            if X1 < X2:
+                break
+        chot(X1 < X2, "fixture B5: không dựng được X1 < X2")
+        chot(list(_amb_vung_git(cay, X2)) == [".github/coordination/change-impact.v1.json"], f"fixture B5 policy X2: {_amb_vung_git(cay, X2)}")
+        S = _amb_cm(cay, t0, (X1, X2), 120, "S")
+        H = _amb_cm(cay, t0, (X2, X1), 121, "H")
+        chot(_amb_merge_base_git(cay, S, H) == [X1, X2], f"fixture B5: {_amb_merge_base_git(cay, S, H)}")
+        _amb_vung_lech(mod, "B5", cay, H, S, sha=X2)
+
+
+@ca
+def t247_amb05b_lech_gio_dua_lai_hang_doi():
+    """B5b: giờ commit lệch `H→Y→C`, `S→C`, `C→R`; H=10 Y=1 S=5 C=4 R=3 ⇒ rc 0, `merge_bases == [C]` bằng oracle Git."""
+    mod = _nap_cong()
+    with San() as s:
+        cay = _amb_kho(s)
+        t0 = _amb_cay_rong(cay)
+        R = _amb_cm(cay, t0, (), 3, "R")
+        C = _amb_cm(cay, t0, (R,), 4, "C")
+        S = _amb_cm(cay, t0, (C,), 5, "S")
+        Y = _amb_cm(cay, t0, (C,), 1, "Y")
+        H = _amb_cm(cay, t0, (Y,), 10, "H")
+        chot(_amb_merge_base_git(cay, S, H) == [C], "fixture B5b: oracle git phải [C]")
+        rcp = s / "r.json"
+        rc, o, e = _amb_m4(mod, cay, H, S, rcp)
+        d = _amb_receipt(rcp)
+        chot(rc == 0, f"B5b rc: {rc} {e!r}")
+        chot(d.get("quan_he_S_H") == "merge_base" and d.get("merge_bases") == _amb_merge_base_git(cay, S, H),
+             f"B5b merge_bases: {d.get('quan_he_S_H')!r} {d.get('merge_bases')!r} != [C]")
+
+
+@ca
+def t248_amb05c_committer_hong():
+    """B5c: cha thứ nhất của S (phía S, không là tổ tiên H) có giây committer không phải số nguyên ⇒ rc 12 nêu `committer` và OID ấy."""
+    mod = _nap_cong()
+    with San() as s:
+        cay = _amb_kho(s)
+        t0 = _amb_cay_rong(cay)
+        R = _amb_cm(cay, t0, (), 100, "R")
+        P = _amb_cm_hong(cay, t0, (R,), "committer a <a@b> 1e9 +0000")
+        S = _amb_cm(cay, t0, (P,), 120, "S")
+        H = _amb_cm(cay, t0, (R,), 130, "H")
+        rcp = s / "r.json"
+        rc, o, e = _amb_m4(mod, cay, H, S, rcp)
+        chot(rc == 12, f"B5c rc: {rc} {o!r} {e!r}")
+        chot("committer" in e and P in e, f"B5c thông báo phải nêu committer và OID {P}: {e!r}")
+        chot(not rcp.exists(), "B5c không được có receipt")
+
+
+@ca
+def t249_amb05d_khong_nhan_ung_vien_stale():
+    """B5d: gọi THẲNG hàm tô màu. `R0…R9` (100…109), B (110) con R9, S (120) con B, X gốc riêng (1), H (130) cha
+    B và X ⇒ ứng viên TRƯỚC lọc đúng `[B]` (commit đủ hai cờ mà đã stale không được ghi), merge-base `[B]`."""
+    mod = _nap_cong()
+    with San() as s:
+        cay = _amb_kho(s)
+        t0 = _amb_cay_rong(cay)
+        r = None
+        for i in range(10):
+            r = _amb_cm(cay, t0, (r,) if r else (), 100 + i, f"R{i}")
+        B = _amb_cm(cay, t0, (r,), 110, "B")
+        S = _amb_cm(cay, t0, (B,), 120, "S")
+        X = _amb_cm(cay, t0, (), 1, "X")
+        H = _amb_cm(cay, t0, (B, X), 130, "H")
+        kho = mod.KhoObject(cay)
+        try:
+            kq = mod.to_mau_hai_phia(kho, S, H)
+        finally:
+            kho.dong()
+        chot(kq["ung_vien"] == [B], f"B5d ứng viên trước lọc: {kq['ung_vien']} != [B]")
+        chot(kq["merge_bases"] == [B], f"B5d merge_bases: {kq['merge_bases']}")
+
+
+@ca
+def t250_amb06_khong_chung_goc():
+    """B6: S và H không chung gốc ⇒ rc 12, nhãn `KHONG_CO_MERGE_BASE`."""
+    mod = _nap_cong()
+    with San() as s:
+        cay = _amb_kho(s)
+        t0 = _amb_cay_rong(cay)
+        S = _amb_cm(cay, t0, (), 100, "S goc 1")
+        H = _amb_cm(cay, t0, (), 101, "H goc 2")
+        rcp = s / "r.json"
+        rc, o, e = _amb_m4(mod, cay, H, S, rcp)
+        chot(rc == 12, f"B6 rc: {rc} {o!r} {e!r}")
+        chot("KHONG_CO_MERGE_BASE" in e, f"B6 nhãn KHONG_CO_MERGE_BASE: {e!r}")
+        chot(not rcp.exists(), "B6 không được có receipt")
+
+
+@ca
+def t251_amb07_vuot_ngan_sach_merge_base():
+    """B7: `max_commits_merge_base` nhỏ hơn số commit bước tô màu phải đọc ⇒ rc 12 nêu tên khoá."""
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, B) = _kho_do_thi(s)
+        S = _them_commit(cay, "amb07-s", B, {"docs/m.md": b"m\n"})
+        H = _them_commit(cay, "amb07-h", B, {"docs/h.md": b"h\n"})
+        with mock.patch.dict(mod.NGAN_SACH_MAC_DINH, {"max_commits_merge_base": 2}):
+            rc, o, e = _amb_m4(mod, cay, H, S)
+        chot(rc == 12 and "max_commits_merge_base" in e, f"B7 vượt ngân sách merge-base phải 12 nêu khoá: {rc} {e!r}")
+
+
+@ca
+def t252_amb08a_replace_khong_doi_merge_base():
+    """B8a: `refs/replace` ở kho nguồn làm `git merge-base --all` (theo replace) trả commit có vùng bằng S, trong
+    khi merge-base THẬT trên đồ thị đã băm có vùng lệch ⇒ rc 12 `VUNG_LECH` nêu SHA merge-base thật."""
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, B0) = _kho_do_thi(s)
+        P = mod.PATH_POLICY_CLOSURE
+        B_that = _them_commit(cay, "amb08a-b", B0, {P: b"{}\n"})
+        S = _them_commit(cay, "amb08a-s", B_that, {"docs/m.md": b"m\n"}, xoa=(P,))
+        H = _them_commit(cay, "amb08a-h", B_that, {"docs/h.md": b"h\n"}, xoa=(P,))
+        H_gia = _g_a0(cay, "commit-tree", _g_a0(cay, "rev-parse", f"{H}^{{tree}}"), "-p", B0, "-m", "H gia")
+        _g_a0(cay, "replace", "-f", H, H_gia)
+        theo_replace = sorted(_g_a0(cay, "merge-base", "--all", S, H).split())
+        chot(theo_replace == [B0] and _amb_merge_base_git(cay, S, H) == [B_that],
+             f"fixture B8a: theo replace {theo_replace}, đồ thị thật {_amb_merge_base_git(cay, S, H)}")
+        _amb_vung_lech(mod, "B8a", cay, H, S, sha=B_that)
+
+
+@ca
+def t253_amb08b_bam_lech_chi_tren_nhanh_S():
+    """B8b: cha thứ nhất của S (phía S, mới hơn merge-base, không là tổ tiên H) bị seam `sau_cat_file` đổi bytes ⇒
+    rc 12, thông báo băm lệch của bộ đọc nêu OID ấy."""
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        cay = _amb_kho(s)
+        t0 = _amb_cay_rong(cay)
+        R = _amb_cm(cay, t0, (), 100, "R")
+        P = _amb_cm(cay, t0, (R,), 110, "P")
+        S = _amb_cm(cay, t0, (P,), 120, "S")
+        H = _amb_cm(cay, t0, (R,), 130, "H")
+        Goc = mod.KhoObject
+
+        def lech(oid, loai, kich, than):
+            return (loai, kich, than + b"X") if oid == P else (loai, kich, than)
+        with mock.patch.object(mod, "KhoObject", lambda goc, **k: Goc(goc, sau_cat_file=lech, **k)):
+            rc, o, e = _amb_m4(mod, cay, H, S)
+        chot(rc == 12 and "băm ra" in e and P[:12] in e, f"B8b băm lệch ở nhánh S phải 12 nêu {P[:12]}: {rc} {e!r}")
+
+
+@ca
+def t254_amb09_vuot_ngan_sach_khi_dem_canh():
+    """B9: S là tổ tiên H; `max_parent_path_edges` nhỏ hơn số cạnh witness ⇒ rc 12 `đường parent > … cạnh`, KHÔNG
+    nhãn `KHONG_CO_MERGE_BASE` hay `VUNG_LECH`, không receipt."""
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        cay, (_, _, S) = _kho_do_thi(s)
+        H1 = _them_commit(cay, "amb09-1", S, {"docs/b.md": b"b\n"})
+        H = _them_commit(cay, "amb09-2", H1, {"docs/c.md": b"c\n"})
+        rcp = s / "r.json"
+        with mock.patch.dict(mod.NGAN_SACH_MAC_DINH, {"max_parent_path_edges": 1}):
+            rc, o, e = _amb_m4(mod, cay, H, S, rcp)
+        chot(rc == 12 and "đường parent > 1 cạnh" in e, f"B9 rc/thông báo ngân sách: {rc} {e!r}")
+        chot("VUNG_LECH" not in e, f"B9 không được có nhãn VUNG_LECH: {e!r}")
+        chot("KHONG_CO_MERGE_BASE" not in e, f"B9 không được có nhãn KHONG_CO_MERGE_BASE: {e!r}")
+        chot(not rcp.exists(), "B9 không được có receipt")
+
+
+# Bảng đột biến amb-m* (đặc tả §5.1), đăng ký vào catalog của t139: (ID, cũ, mới, [(ca đích, tiền tố `chot` mà ca PHẢI
+# đỏ ở đó)], tệp). Đột biến chỉ đổi giá trị phải đỏ ở CHÍNH khẳng định ấy (§5); tệp "wf" ⇒ đặt lên WORKFLOW_THU_HOI;
+# `cũ`/`mới` là tuple ⇒ nhiều chỗ, mỗi neo duy nhất.
+_AMB_DOT_BIEN = [
+    ('amb-m01-luon-di-merge-base', '        if merge_bases == [S]:\n', '        if False:\n', [('t238_amb01_to_tien_giu_nguyen', 'B1 quan_he_S_H')], None),
+    ('amb-m02-bat-lai-to-tien', '            quan_he, canh = "merge_base", None\n', '            quan_he, canh = "merge_base", kho.to_tien(S, H)\n',
+     [('t241_amb02_merge_base_vung_bang_nhau', 'B2 rc'), ('t133_M4_kiem_thu_hoi_github_receipt_append_only_va_che_do_chua_kich_hoat', 'S không tổ tiên H, vùng bằng nhau')], None),
+    ('amb-m03-bo-cong-so-vung', '                if lech:\n', '                if False:\n', [('t243_amb03_policy_lech_sau_merge_base', 'B3 rc'), ('t244_amb03b_thu_hoi_moi_tren_master', 'B3b rc')], None),
+    ('amb-m04-bo-append-only', '            if map_T.get(duong) != bo:\n', '            if False:\n', [('t245_amb04_append_only_qua_merge_base', 'B4')], None),
+    ('amb-m05-chi-so-base-dau', '            for mb in merge_bases:\n', '            for mb in merge_bases[:1]:\n', [('t246_amb05_criss_cross_mot_base_lech', 'B5 rc')], None),
+    ('amb-m06-rong-la-dat', '        elif not merge_bases:\n', '        elif False:\n', [('t250_amb06_khong_chung_goc', 'B6 rc')], None),
+    ('amb-m07-nuot-vuot-ngan-sach', '            if len(da_doc) + 1 > tran:\n', '            if False:\n', [('t251_amb07_vuot_ngan_sach_merge_base', 'B7')], None),
+    ('amb-m08-git-merge-base-thay-bo-doc', '        merge_bases = to_mau_hai_phia(kho, S, H)["merge_bases"]\n', '        merge_bases = sorted(subprocess.run(["git", "-C", str(goc), "merge-base", "--all", S, H], capture_output=True, text=True).stdout.split())\n',
+     [('t252_amb08a_replace_khong_doi_merge_base', 'B8a rc')], None),
+    ('amb-m09-nuot-ngan-sach-dem-canh', '            canh = kho.to_tien(S, H)\n', '            try:\n                canh = kho.to_tien(S, H)\n            except Chan:\n                quan_he, canh, vung_S = "merge_base", None, vung_commit(kho, tree_S)\n',
+     [('t254_amb09_vuot_ngan_sach_khi_dem_canh', 'B9 rc')], None),
+    ('amb-m10-ghi-lai-cau-cu', 'Bộ kiểm không còn đòi S là tổ tiên của H (ADR-0066): khi\n#       S không phải tổ tiên của H, vùng bộ kiểm đọc phải giống hệt tại S và tại mọi merge-base của\n#       (S, H), rồi mọi phép kiểm chạy trên T = tree(H).\n', 'Bộ kiểm còn đòi S là tổ tiên của H — đó là thiết kế\n#       fail-close giữ nguyên theo quyết định chủ kho cho #618 (đường (a)), không phải dương tính giả.\n',
+     [('t255_amb10_chu_thich_workflow_adr0066', 'B10 vế âm')], 'wf'),
+    ('amb-m13-luon-goi-ham-vung', '            quan_he, vung_S = "to_tien", None\n', '            quan_he, vung_S = "to_tien", None\n            vung_commit(kho, tree_S)\n', [('t239_amb01b_to_tien_khong_doc_vung_S', 'B1b rc')], None),
+    ('amb-m14-to-mau-khong-bam-lai', '            _, cha = kho.commit(oid)\n            da_doc[oid] = (cha, _gio_commit(oid, kho.doc(oid, "commit")))\n', '            than = subprocess.run([kho.git_exe, "cat-file", "commit", oid], capture_output=True, env=kho.env).stdout\n            cha = [d[7:].decode() for d in than.split(b"\\n\\n")[0].split(b"\\n") if d.startswith(b"parent ")]\n            da_doc[oid] = (cha, _gio_commit(oid, than))\n',
+     [('t253_amb08b_bam_lech_chi_tren_nhanh_S', 'B8b')], None),
+    ('amb-m15-khong-dua-lai-hang-doi', '            heapq.heappush(hang, (-doc(oid)[1], thu_tu[0], oid))\n', '            if cu is None:\n                heapq.heappush(hang, (-doc(oid)[1], thu_tu[0], oid))\n',
+     [('t247_amb05b_lech_gio_dua_lai_hang_doi', 'B5b rc')], None),
+    ('amb-m16-committer-hong-thanh-0', '            da_doc[oid] = (cha, _gio_commit(oid, kho.doc(oid, "commit")))\n', '            try:\n                gio = _gio_commit(oid, kho.doc(oid, "commit"))\n            except Chan:\n                gio = 0\n            da_doc[oid] = (cha, gio)\n',
+     [('t248_amb05c_committer_hong', 'B5c rc')], None),
+    ('amb-m17-nhan-ung-vien-stale', '        if f & _CO_H and f & _CO_S and not f & _CO_STALE:\n', '        if f & _CO_H and f & _CO_S:\n', [('t249_amb05d_khong_nhan_ung_vien_stale', 'B5d ứng viên')], None),
+    ('amb-m18-khong-kiem-committer-khi-xep-hang', ('            da_doc[oid] = (cha, _gio_commit(oid, kho.doc(oid, "commit")))\n', '        cha, _ = doc(oid)\n'), ('            try:\n                gio = _gio_commit(oid, kho.doc(oid, "commit"))\n            except Chan:\n                gio = 0\n            da_doc[oid] = (cha, gio)\n', '        cha, _ = doc(oid)\n        _gio_commit(oid, kho.doc(oid, "commit"))\n'),
+     [('t240_amb01c_to_tien_committer_hong_o_commit_doc_them', 'B1c rc')], None),
+    ('amb-m19-vung-tai-S-sai-tuple', '            "vung_tai_S": None if vung_S is None else {p: list(v) for p, v in vung_S.items()},\n', '            "vung_tai_S": None if vung_S is None else {p: [v[0], v[1], vung_S[min(vung_S)][2]] for p, v in vung_S.items()},\n',
+     [('t242_amb02b_merge_base_vung_khong_rong', 'B2b vung_tai_S')], None),
+    ('amb-m20-vung-tai-S-them-entry', '            "vung_tai_S": None if vung_S is None else {p: list(v) for p, v in vung_S.items()},\n', '            "vung_tai_S": None if vung_S is None else dict({p: list(v) for p, v in vung_S.items()}, **{"ops/thu-hoi/x.yaml": ["100644", "blob", "0" * 40]}),\n',
+     [('t241_amb02_merge_base_vung_bang_nhau', 'B2 vung_tai_S')], None),
+    ('amb-m21-bo-token-quan-he', '          f"quan_he={quan_he}")', '          f"")', [('t238_amb01_to_tien_giu_nguyen', 'B1 token quan_he'), ('t241_amb02_merge_base_vung_bang_nhau', 'B2 token quan_he')], None),
+    ('amb-m22-schema-van-1', '            "schema_version": 2, "event"', '            "schema_version": 1, "event"', [('t238_amb01_to_tien_giu_nguyen', 'B1 schema_version'), ('t241_amb02_merge_base_vung_bang_nhau', 'B2 schema_version')], None),
+    ('amb-m23-canh-hang-0', '"tree_S": tree_S, "canh_ancestry": canh,', '"tree_S": tree_S, "canh_ancestry": 0 if canh is not None else canh,', [('t238_amb01_to_tien_giu_nguyen', 'B1 canh_ancestry')], None),
+    ('amb-m24-canh-so-o-merge-base', '"tree_S": tree_S, "canh_ancestry": canh,', '"tree_S": tree_S, "canh_ancestry": 0 if canh is None else canh,', [('t241_amb02_merge_base_vung_bang_nhau', 'B2 canh_ancestry')], None),
+    ('amb-m25-merge-bases-phat-S', '            "merge_bases": merge_bases,\n', '            "merge_bases": [S] if quan_he == "merge_base" else merge_bases,\n',
+     [('t241_amb02_merge_base_vung_bang_nhau', 'B2 merge_bases'), ('t242_amb02b_merge_base_vung_khong_rong', 'B2b merge_bases')], None),
+    ('amb-m26-vung-to-tien-khong-null', '            "vung_tai_S": None if vung_S is None else {p: list(v) for p, v in vung_S.items()},\n', '            "vung_tai_S": {} if vung_S is None else {p: list(v) for p, v in vung_S.items()},\n',
+     [('t238_amb01_to_tien_giu_nguyen', 'B1 vung_tai_S'), ('t239_amb01b_to_tien_khong_doc_vung_S', 'B1b vung_tai_S')], None),
+    ('amb-m27-receipt-bo-khoa-ngan-sach-moi', '"ngan_sach": kho.ngan_sach,', '"ngan_sach": {k: v for k, v in kho.ngan_sach.items() if k != "max_commits_merge_base"},',
+     [('t238_amb01_to_tien_giu_nguyen', 'B1 ngan_sach.max_commits_merge_base')], None),
+    ('amb-m28-phat-quan-he-nguoc', '            "quan_he_S_H": quan_he,\n', '            "quan_he_S_H": {"to_tien": "merge_base", "merge_base": "to_tien"}[quan_he],\n',
+     [('t238_amb01_to_tien_giu_nguyen', 'B1 quan_he_S_H'), ('t241_amb02_merge_base_vung_bang_nhau', 'B2 quan_he_S_H'), ('t242_amb02b_merge_base_vung_khong_rong', 'B2b quan_he_S_H')], None),
+    ('amb-m29-phat-merge-bases-H', '            "merge_bases": merge_bases,\n', '            "merge_bases": [H] if quan_he == "to_tien" else merge_bases,\n', [('t238_amb01_to_tien_giu_nguyen', 'B1 merge_bases')], None),
+    ('amb-m30-doi-nhan-vung-lech', 'NHAN_VUNG_LECH, NHAN_KHONG_CO_MERGE_BASE = "VUNG_LECH", "KHONG_CO_MERGE_BASE"', 'NHAN_VUNG_LECH, NHAN_KHONG_CO_MERGE_BASE = "VUNG_KHAC", "KHONG_CO_MERGE_BASE"',
+     [('t243_amb03_policy_lech_sau_merge_base', 'B3 nhãn VUNG_LECH'), ('t244_amb03b_thu_hoi_moi_tren_master', 'B3b nhãn VUNG_LECH'), ('t246_amb05_criss_cross_mot_base_lech', 'B5 nhãn VUNG_LECH'), ('t252_amb08a_replace_khong_doi_merge_base', 'B8a nhãn VUNG_LECH')], None),
+    ('amb-m31-doi-nhan-khong-co-merge-base', 'NHAN_VUNG_LECH, NHAN_KHONG_CO_MERGE_BASE = "VUNG_LECH", "KHONG_CO_MERGE_BASE"', 'NHAN_VUNG_LECH, NHAN_KHONG_CO_MERGE_BASE = "VUNG_LECH", "KHONG_GOC_CHUNG"',
+     [('t250_amb06_khong_chung_goc', 'B6 nhãn KHONG_CO_MERGE_BASE')], None),
+    ('amb-m32-thong-bao-sai-duong-dan', 'đường dẫn lệch đầu tiên {lech[0]}")', 'đường dẫn lệch đầu tiên {\'x\'}")',
+     [('t243_amb03_policy_lech_sau_merge_base', 'B3 đường dẫn lệch'), ('t244_amb03b_thu_hoi_moi_tren_master', 'B3b đường dẫn lệch')], None),
+    ('amb-m33-thong-bao-sai-sha', 'merge-base {mb} khác S', 'merge-base {S} khác S', [('t246_amb05_criss_cross_mot_base_lech', 'B5 SHA merge-base lệch'), ('t252_amb08a_replace_khong_doi_merge_base', 'B8a SHA merge-base lệch')], None),
+    ('amb-m34-chen-nhan-vung-lech-vao-loi-b9', 'f"KHÔNG_XÁC_ĐỊNH: đường parent > {gioi_han} cạnh"', 'f"KHÔNG_XÁC_ĐỊNH: VUNG_LECH đường parent > {gioi_han} cạnh"',
+     [('t254_amb09_vuot_ngan_sach_khi_dem_canh', 'B9 không được có nhãn VUNG_LECH')], None),
+    ('amb-m35-chen-nhan-khong-co-merge-base-vao-loi-b9', 'f"KHÔNG_XÁC_ĐỊNH: đường parent > {gioi_han} cạnh"', 'f"KHÔNG_XÁC_ĐỊNH: KHONG_CO_MERGE_BASE đường parent > {gioi_han} cạnh"',
+     [('t254_amb09_vuot_ngan_sach_khi_dem_canh', 'B9 không được có nhãn KHONG_CO_MERGE_BASE')], None),
+]
+
+
+_AMB_CAU_MOI = ("Bộ kiểm không còn đòi S là tổ tiên của H (ADR-0066): khi S không phải tổ tiên của H, vùng bộ kiểm đọc "
+                "phải giống hệt tại S và tại mọi merge-base của (S, H), rồi mọi phép kiểm chạy trên T = tree(H).")
+_AMB_CUM_CU = "Bộ kiểm còn đòi S là tổ tiên của H"
+
+
+def _amb_doan_chu_thich(van: str) -> list:
+    """Khối chú thích đầu tệp (trước `on:`), nối dòng từng đoạn: bỏ `#` + khoảng trắng đầu, dòng `#` trống ngắt đoạn."""
+    doan, cur = [], []
+    for dong in van.splitlines():
+        if dong.startswith("on:"):
+            break
+        t = dong.strip()
+        if not t.startswith("#"):
+            continue
+        t = t.lstrip("#").strip()
+        if not t:
+            doan.append(" ".join(cur)); cur = []
+        else:
+            cur.append(t)
+    doan.append(" ".join(cur))
+    return [" ".join(d.split()) for d in doan if d.strip()]
+
+
+def _amb_b10(van: str) -> tuple:
+    doan = _amb_doan_chu_thich(van)
+    return any(_AMB_CAU_MOI in d for d in doan), not any(_AMB_CUM_CU in d for d in doan)
+
+
+@ca
+def t255_amb10_chu_thich_workflow_adr0066():
+    """B10: chú thích đầu `ops-thu-hoi-admission.yml` — vế dương có NGUYÊN câu mới (đã nối dòng), vế âm không còn cụm
+    lõi của câu cũ. Kèm tự kiểm vị từ trên bản sửa tại chỗ (§5 B10 cột đột biến)."""
+    if not WORKFLOW_THU_HOI.parent.is_dir():
+        chot(not (HERE.parent / ".git").exists(), "kho thật mà không thấy thư mục workflow")
+        return
+    van = WORKFLOW_THU_HOI.read_text(encoding="utf-8")
+    duong, am = _amb_b10(van)
+    chot(am, f"B10 vế âm: còn cụm {_AMB_CUM_CU!r}")
+    chot(duong, "B10 vế dương: thiếu nguyên câu mới (ADR-0066) trong khối chú thích đầu tệp")
+    # Tự kiểm vị từ: mỗi biến đổi phải làm ĐÚNG vế tương ứng đỏ; ngắt dòng lại giữ nguyên chữ ⇒ vẫn đạt.
+    for mo_ta, cu, moi, mong in (
+            ("bỏ 'không còn'", "Bộ kiểm không còn đòi", "Bộ kiểm đòi", (False, True)),
+            ("'mọi merge-base' → 'một merge-base'", "mọi merge-base", "một merge-base", (False, True)),
+            ("cắt hậu tố", ", rồi mọi phép kiểm chạy trên T = tree(H).", ".", (False, True)),
+            ("ghi lại câu cũ", "Bộ kiểm không còn đòi S là tổ tiên của H",
+             "Bộ kiểm còn đòi S là tổ tiên của H — x. Bộ kiểm không còn đòi S là tổ tiên của H", (True, False)),
+            ("ngắt dòng lại", "vùng bộ kiểm đọc phải", "vùng bộ kiểm\n#       đọc phải", (True, True))):
+        chot(van.count(cu) == 1, f"B10 tự kiểm: neo {mo_ta!r} không duy nhất ({van.count(cu)})")
+        chot(_amb_b10(van.replace(cu, moi)) == mong, f"B10 tự kiểm {mo_ta}: {_amb_b10(van.replace(cu, moi))} != {mong}")
 
 
 def main(chon=None, nen=None, so=None) -> int:

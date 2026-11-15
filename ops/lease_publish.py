@@ -1348,6 +1348,8 @@ NGAN_SACH_MAC_DINH = {
     "max_alternate_stores": 8,
     "max_alternate_depth": 4,
     "max_reader_wall_seconds": 60.0,
+    # ADR-0066: commit PHÂN BIỆT tô màu + lọc cực đại đọc; #1179 đo cả master 5.444 commit (06-11-2026), dư ~9 lần.
+    "max_commits_merge_base": 50000,
 }
 _RE_ISO_Z = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 _KHOA_THU_HOI_BAT_BUOC = ("schema_version", "event", "lease_id", "packet_issue", "thu_hoi_boi",
@@ -2091,6 +2093,95 @@ class KhoObject:
         self._td.cleanup()
 
 
+# ADR-0066 (packet THU-HOI-ADMISSION-MERGE-BASE-B r13) — bộ kiểm không còn đòi S là tổ tiên của H. Ba hàm dưới
+# chỉ đọc qua bộ đọc ĐÃ BĂM của `KhoObject` (no-replace, GIT_DIR tạm): không `git merge-base`, không plumbing khác.
+_CO_H, _CO_S, _CO_STALE = 1, 2, 4
+NHAN_VUNG_LECH, NHAN_KHONG_CO_MERGE_BASE = "VUNG_LECH", "KHONG_CO_MERGE_BASE"
+
+
+def _gio_commit(oid: str, than: bytes) -> int:
+    """Giây của ĐÚNG MỘT dòng header cấp đầu `committer … <giây> <múi giờ>` trước dòng trống đầu của bytes đã băm (dòng
+    tiếp nối mở bằng dấu cách không là header). Thiếu/thừa dòng, giây không nguyên ⇒ 12; không mặc định 0."""
+    dau = than.split(b"\n\n", 1)[0]
+    dong_c = [d for d in dau.split(b"\n") if d.startswith(b"committer ")]
+    if len(dong_c) != 1:
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: commit {oid} có {len(dong_c)} dòng committer (cần đúng 1)")
+    _, sep, duoi = dong_c[0].rpartition(b"> ")
+    phan = duoi.split(b" ")
+    try:
+        if not sep or len(phan) != 2 or re.fullmatch(rb"[0-9]+", phan[0]) is None:
+            raise ValueError(phan[0])
+        return int(phan[0])
+    except ValueError:
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: commit {oid} dòng committer hỏng, giây không phải số nguyên: "
+                                      f"{dong_c[0][:200]!r}") from None
+
+
+def to_mau_hai_phia(kho: "KhoObject", S: str, H: str) -> dict:
+    """Tô màu hai phía (S, H), hợp đồng mục tiêu 1 đặc tả B r13: cờ OR xuống mọi cha; hàng đợi theo giờ committer, vào lại
+    khi NHẬN THÊM cờ; ứng viên = đủ hai cờ mà CHƯA stale; dừng khi hết commit chưa stale; lọc cực đại bằng chính bộ đọc.
+    Mọi commit đọc (kể cả chỉ để xếp hàng) qua kiểm `committer`. Trả ứng viên trước lọc, merge-base đã sắp, số commit."""
+    import heapq
+    tran = kho.ngan_sach["max_commits_merge_base"]
+    da_doc: dict = {}
+
+    def doc(oid):
+        if oid not in da_doc:
+            if len(da_doc) + 1 > tran:
+                raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: > {tran} commit phân biệt (max_commits_merge_base)")
+            _, cha = kho.commit(oid)
+            da_doc[oid] = (cha, _gio_commit(oid, kho.doc(oid, "commit")))
+        return da_doc[oid]
+
+    co: dict = {}
+    hang: list = []
+    thu_tu = [0]
+
+    def nhan(oid, them):
+        cu = co.get(oid)
+        moi = (cu or 0) | them
+        if moi != cu:
+            co[oid] = moi
+            thu_tu[0] += 1
+            heapq.heappush(hang, (-doc(oid)[1], thu_tu[0], oid))
+
+    nhan(H, _CO_H)
+    nhan(S, _CO_S)
+    ung_vien: list = []
+    while any(not co[o] & _CO_STALE for _, _, o in hang):
+        oid = heapq.heappop(hang)[2]
+        cha, _ = doc(oid)
+        f = co[oid]
+        if f & _CO_H and f & _CO_S and not f & _CO_STALE:
+            ung_vien.append(oid)
+            co[oid] = f = f | _CO_STALE
+        for c in cha:
+            nhan(c, f)
+    cuc_dai = list(ung_vien)
+    if len(ung_vien) >= 2:
+        def to_tien_that_su(goc_ds):   # tổ tiên THẬT SỰ của các gốc (không gồm chính gốc), đọc trong cùng ngân sách
+            tham, ngan = set(), [c for g in goc_ds for c in doc(g)[0]]
+            while ngan:
+                o = ngan.pop()
+                if o not in tham:
+                    tham.add(o)
+                    ngan.extend(doc(o)[0])
+            return tham
+        cuc_dai = [u for u in ung_vien if u not in to_tien_that_su([v for v in ung_vien if v != u])]
+    return {"ung_vien": ung_vien, "merge_bases": sorted(set(cuc_dai)), "so_commit_doc": len(da_doc)}
+
+
+def vung_commit(kho: "KhoObject", tree_oid: str) -> dict:
+    """Vùng bộ kiểm đọc của một cây: entry trực tiếp dưới `ops/thu-hoi` (`namespace`) cộng `PATH_POLICY_CLOSURE`
+    (`tim`, vắng ⇒ không có khoá). Giá trị thống nhất ``(mode, kiểu, OID)``; tổ tiên không phải thư mục ⇒ 12."""
+    vung = dict(kho.namespace(tree_oid, THU_MUC_SO))
+    muc = kho.tim(tree_oid, PATH_POLICY_CLOSURE)
+    if muc is not None:
+        mode, oid, loai = muc                 # `tim` trả (mode, OID, kiểu) — đổi về thứ tự của `namespace`
+        vung[PATH_POLICY_CLOSURE] = (mode, loai, oid)
+    return vung
+
+
 def _ls_tree_z(goc: Path, ref: str, thu_muc: str, de_quy: bool = True) -> list[tuple]:
     """`ls-tree -r -z` — tên đi NUL-delimited, KHÔNG qua lớp quote của Git (F02: tên Unicode thường như
     `thu hồi.yaml` bị quote thành `"thu h\\341\\273\\223i.yaml"` và dispatcher không thấy tiền tố).
@@ -2347,8 +2438,12 @@ def _du_bao_ai_dang_giu(goc: Path, refs: list[str], cac_lease: list[dict], nhanh
 
 
 def lenh_kiem_thu_hoi_github(a) -> int:
-    """M4 — cổng tiếp nhận: ancestry S→H, T = tree(H), map append-only, validator toàn namespace T,
-    receipt S/H/T. Chế độ chưa kích hoạt: tập revocation phải RỖNG ở cả S lẫn T."""
+    """M4 — cổng tiếp nhận: quan hệ S–H (ADR-0066), T = tree(H), map append-only, validator toàn namespace T,
+    receipt S/H/T. Chế độ chưa kích hoạt: tập revocation phải RỖNG ở cả S lẫn T.
+
+    ADR-0066: tô màu hai phía (S, H) trên bộ đọc đã băm. Tập merge-base cực đại đúng bằng `[S]` ⇒ chế độ `to_tien`
+    (đếm cạnh như nền, không đọc vùng); khác `[S]` mà có phần tử ⇒ chế độ `merge_base`: vùng bộ kiểm đọc tại MỌI
+    merge-base phải bằng vùng tại S, lệch ⇒ 12 `VUNG_LECH`; rỗng ⇒ 12 `KHONG_CO_MERGE_BASE`."""
     S, H = str(a.canonical_base).strip(), str(a.H).strip()
     if not SHA40.match(S) or not SHA40.match(H):
         raise Chan(RC_THAM_SO, "S và H phải là SHA40 hex thường")
@@ -2358,8 +2453,23 @@ def lenh_kiem_thu_hoi_github(a) -> int:
     goc = Path(a.goc or ".").resolve()
     kho = KhoObject(goc)
     try:
-        canh = kho.to_tien(S, H)
+        merge_bases = to_mau_hai_phia(kho, S, H)["merge_bases"]
         tree_S, _ = kho.commit(S)
+        if merge_bases == [S]:
+            quan_he, vung_S = "to_tien", None
+            canh = kho.to_tien(S, H)
+        elif not merge_bases:
+            raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {NHAN_KHONG_CO_MERGE_BASE}: S {S[:12]} và H {H[:12]} "
+                                          "không chung gốc trên đồ thị đã băm")
+        else:
+            quan_he, canh = "merge_base", None
+            vung_S = vung_commit(kho, tree_S)
+            for mb in merge_bases:
+                vung_mb = vung_commit(kho, kho.commit(mb)[0])
+                lech = sorted(d for d in set(vung_S) | set(vung_mb) if vung_S.get(d) != vung_mb.get(d))
+                if lech:
+                    raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {NHAN_VUNG_LECH}: merge-base {mb} khác S ở vùng "
+                                                  f"bộ kiểm đọc, đường dẫn lệch đầu tiên {lech[0]}")
         tree_T, _ = kho.commit(H)
         map_S = kho.namespace(tree_S, THU_MUC_SO)
         map_T = kho.namespace(tree_T, THU_MUC_SO)
@@ -2410,9 +2520,12 @@ def lenh_kiem_thu_hoi_github(a) -> int:
                        f"KHÔNG_XÁC_ĐỊNH: chế độ CHƯA KÍCH HOẠT đòi tập revocation RỖNG — S có {len(thu_hoi_S)}, T có {len(thu_hoi_T)}")
         bo_kiem = kho.tim(tree_S, PATH_BO_KIEM)
         receipt = {
-            "schema_version": 1, "event": "thu_hoi_admission_receipt", "che_do": "chua_kich_hoat",
+            "schema_version": 2, "event": "thu_hoi_admission_receipt", "che_do": "chua_kich_hoat",
             "kho_canonical": KHO_CANONICAL, "nhanh_mac_dinh": a.nhanh_mac_dinh,
             "S": S, "H": H, "T": tree_T, "tree_S": tree_S, "canh_ancestry": canh,
+            "quan_he_S_H": quan_he,
+            "merge_bases": merge_bases,
+            "vung_tai_S": None if vung_S is None else {p: list(v) for p, v in vung_S.items()},
             "so_thu_hoi_S": {p: list(v) for p, v in map_S.items()},
             "so_thu_hoi_T": {p: list(v) for p, v in map_T.items()},
             "metadata_T": metadata_T, "thu_hoi_moi": [p for p in thu_hoi_T if p not in map_S],
@@ -2430,7 +2543,8 @@ def lenh_kiem_thu_hoi_github(a) -> int:
     if getattr(a, "receipt", None):
         Path(a.receipt).write_text(van + "\n", encoding="utf-8")
     print(f"THU_HOI_ADMISSION {receipt['ket_luan']}: S={S[:12]} H={H[:12]} T={tree_T[:12]} "
-          f"ancestry={canh} cạnh; sổ S={len(map_S)} T={len(map_T)} entry; object đã băm={kho.so_object}")
+          f"ancestry={canh} cạnh; sổ S={len(map_S)} T={len(map_T)} entry; object đã băm={kho.so_object} "
+          f"quan_he={quan_he}")
     return RC_OK
 
 

@@ -19,8 +19,9 @@ name: thu-hoi
 #       `workflow_ref` phải trỏ `refs/heads/<nhánh mặc định>` (finding F07 cross-review A0: checkout đúng
 #       một commit không tự chứng minh tệp workflow được lấy từ commit ấy — nên đo cả hai).
 #   S — `base.sha` của event: mốc SO SỔ revocation (`--canonical-base`), KHÔNG còn là mốc checkout.
-#       Chống lùi: S phải là tổ tiên của C. Bộ kiểm còn đòi S là tổ tiên của H — đó là thiết kế
-#       fail-close giữ nguyên theo quyết định chủ kho cho #618 (đường (a)), không phải dương tính giả.
+#       Chống lùi: S phải là tổ tiên của C. Bộ kiểm không còn đòi S là tổ tiên của H (ADR-0066): khi
+#       S không phải tổ tiên của H, vùng bộ kiểm đọc phải giống hệt tại S và tại mọi merge-base của
+#       (S, H), rồi mọi phép kiểm chạy trên T = tree(H).
 #   H — fetch `refs/pull/<n>/head` từ endpoint canonical tường minh; OID nhận được phải bằng `head.sha`.
 #   T — tree(H) do bộ kiểm tự lấy từ bytes đã băm.
 # Vì sao gỡ `workflow_sha == base.sha`: với `pull_request_target`, GitHub nạp định nghĩa từ HEAD nhánh

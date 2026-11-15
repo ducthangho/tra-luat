@@ -78,7 +78,7 @@ thay_the_cho_ghi_chu: >-
 ke_thua_g1: 'g1 khong de lai commit/nhanh agent/wp1265-* nao tren may chu (do 13-11); g2 bat dau tu dau tren base moi.'
 vi_tri_dong_20: 'Sau P2, bang §20 co ADR-0065 roi ADR-0067; dong ADR-0066 chen GIUA hai dong ay ("ngay sau dong ADR-0065", dac ta muc 2.2).'
 leased_at_utc: '2026-11-15T00:35:00Z'
-heartbeat_at: '2026-11-15T00:35:00Z'
+heartbeat_at: '2026-11-15T00:49:47Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Executor cap nhat heartbeat_at <= 6h/lan; phien dieu phoi doc lai lease truoc moi lan ghi nhanh agent/ (bai hoc #1288 g1).'
 lease_until: '2026-11-16T00:35:00Z'

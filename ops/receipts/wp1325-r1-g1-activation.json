@@ -1,0 +1,19 @@
+{
+  "schema": "wp1325_r41_private_source_activation.v1",
+  "starts_utc": "2026-11-15T07:37:48Z",
+  "deadline_utc": "2026-11-15T10:07:48Z",
+  "lease_id": "wp1325-r1-g1-claude",
+  "packet": 1325,
+  "revision": 1,
+  "generation": 1,
+  "mission_revision": 41,
+  "owner_instruction": "https://github.com/ducthangho/tra-luat/issues/1325#issuecomment-6891145080",
+  "spec_ref": "refs/heads/ops/wp1325-r1-spec@79922afc07fc63a35930b29b7650f646b1da3169",
+  "spec_sha256": "51c57ea6097e66ac905782b23bfe9bcede357ed146d808dbfa8c22498dca2e81",
+  "whole_fit": "90worker+20freshCodexreview+20artifacts/stop+20publisher/queue=150continuousminutes; queue counts; recompute remaining fit before every batch",
+  "history_preserved": true,
+  "pause_refund_reset_extension": false,
+  "original_r40_CI_failure_closed": false,
+  "source_code_publication": false,
+  "target_G5": false
+}

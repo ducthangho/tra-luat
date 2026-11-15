@@ -1,0 +1,17 @@
+{
+  "schema": "wp1325_r45_source_lease_activation.v1",
+  "observed_utc": "2026-11-15T10:36:27Z",
+  "stage_original_start": "2026-11-15T09:34:08Z",
+  "stage_original_expiry": "2026-11-16T01:34:08Z",
+  "lease_id": "wp1325-r2-g2-claude",
+  "spec_ref": "refs/heads/ops/wp1325-r2-g2@401d171943189ed79625c5cda53ce1bb3887ce2c",
+  "spec_sha256": "28eaa039f7dce189c2255ffad731b9c5874bae2a6859840cea611fe28a7608cf",
+  "owner_instruction": "https://github.com/ducthangho/tra-luat/issues/1325#issuecomment-6892911214",
+  "independent_spec_review": "5bf60567911944e68e9f7f158ce0d581",
+  "freeze": "https://github.com/ducthangho/tra-luat/issues/1325#issuecomment-6893067051",
+  "original_clock_retained": true,
+  "source_lease_issued": true,
+  "source_executor_not_yet_dispatched": true,
+  "target_G5": false,
+  "merge_allowed": false
+}

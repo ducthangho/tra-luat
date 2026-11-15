@@ -27,7 +27,7 @@ Giá của điều kiện ấy, đo ngày 15-11-2026 trên kho đã fetch đủ 
   nhắc `thu-hoi`; hai số này ADR chép từ đặc tả, không đo lại. Phép đếm không tách được lần merge nào do admission
   đòi và lần nào vì lý do khác, nên 206 là trần, không phải số lần admission gây ra.
 - Vùng mà bộ kiểm đọc chưa từng đổi trên master:
-  `git log --first-parent --format=%H 426d1b0 -- ops/thu-hoi/ .github/coordination/change-impact.v1.json` ra 0 commit.
+  `git log --first-parent --format=%H 426d1b0 -- ops/thu-hoi .github/coordination/change-impact.v1.json` ra 0 commit.
   Tại `426d1b0`, `ops/thu-hoi` vắng và tệp policy chưa tồn tại.
 
 Tức điều kiện "S tổ tiên H" đòi mọi PR có head không chứa S phải hoà base thì cổng mới xanh, trong khi tình huống nó

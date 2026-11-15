@@ -1,0 +1,57 @@
+# luc 2026-11-15T07:46:06Z
+# fetch du: thieu 0 / thua 0 / 230 nhanh (ls-remote vs for-each-ref); master cuc bo dong bo origin/master 6e1047e
+## ai-dang-giu docs/adr/0066-admission-thu-hoi-theo-merge-base.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp1265-r13-g1-claude	refs/remotes/origin/ops/wp1265-r13-g1-lease:ops/leases/wp1265-r13-g1-claude.yaml
+HẾT_HẠN	wp1265-r13-g2-claude	refs/remotes/origin/ops/wp1265-r13-g1-lease:ops/leases/wp1265-r13-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu docs/PROTOCOL_DA_PHIEN.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp538-r1-g1-codex-windows	refs/heads/master:ops/leases/wp538-r1-g1-codex-windows.yaml
+HẾT_HẠN	wp538-r2-g2-codex-windows	refs/heads/master:ops/leases/wp538-r2-g2-codex-windows.yaml
+HẾT_HẠN	wp1099-cloud-setup-p3b-r10-g1-claude	refs/remotes/origin/ops/cap-lease-1099-g1:ops/leases/wp1099-cloud-setup-p3b-r10-g1-claude.yaml
+HẾT_HẠN	wp1099-cloud-setup-p3b-r11-g1-claude	refs/remotes/origin/ops/cap-lease-1099-g1:ops/leases/wp1099-cloud-setup-p3b-r11-g1-claude.yaml
+HẾT_HẠN	wp1099-cloud-setup-p3b-r9-g1-claude	refs/remotes/origin/ops/cap-lease-1099-g1:ops/leases/wp1099-cloud-setup-p3b-r9-g1-claude.yaml
+HẾT_HẠN	dieu-kien-merge-cong-r1-g1-claude-remote-20261101	refs/remotes/origin/ops/dieu-kien-merge-cong-r1-lease:ops/leases/dieu-kien-merge-cong-r1-g1-claude-remote-20261101.yaml
+HẾT_HẠN	dieu-kien-merge-va-so-sach-r1-g1-claude-remote-20261031	refs/remotes/origin/ops/dieu-kien-merge-r1-lease:ops/leases/dieu-kien-merge-va-so-sach-r1-g1-claude-remote-20261031.yaml
+HẾT_HẠN	giam-hoi-p1-r7-g1-codex	refs/remotes/origin/ops/giam-hoi-p1-lease:ops/leases/giam-hoi-p1-r7-g1-codex.yaml
+HẾT_HẠN	giam-hoi-p2-r10-g1-codex	refs/remotes/origin/ops/giam-hoi-p2-lease:ops/leases/giam-hoi-p2-r10-g1-codex.yaml
+HẾT_HẠN	giam-hoi-p2-r11-g1-claude	refs/remotes/origin/ops/giam-hoi-p2-lease:ops/leases/giam-hoi-p2-r11-g1-claude.yaml
+HẾT_HẠN	pr1184-merge-contract-r1-g1-codex	refs/remotes/origin/ops/pr1187-r1-g1-lease:ops/leases/pr1184-merge-contract-r1-g1-codex.yaml
+HẾT_HẠN	pr1184-merge-contract-r2-g2-codex	refs/remotes/origin/ops/pr1187-r1-g1-lease:ops/leases/pr1184-merge-contract-r2-g2-codex.yaml
+HẾT_HẠN	pr1184-merge-contract-r2-g3-codex-service	refs/remotes/origin/ops/pr1187-r1-g1-lease:ops/leases/pr1184-merge-contract-r2-g3-codex-service.yaml
+HẾT_HẠN	windows-local-may-chu-kho-r1-g1-claude-remote-20261029	refs/remotes/origin/ops/windows-local-may-chu-kho-r1-lease:ops/leases/windows-local-may-chu-kho-r1-g1-claude-remote-20261029.yaml
+HẾT_HẠN	windows-local-may-chu-kho-r2-g1-claude-remote-20261030	refs/remotes/origin/ops/windows-local-may-chu-kho-r2-lease:ops/leases/windows-local-may-chu-kho-r2-g1-claude-remote-20261030.yaml
+HẾT_HẠN	windows-local-may-chu-kho-r3-g1-claude-remote-20261031	refs/remotes/origin/ops/windows-local-may-chu-kho-r3-lease:ops/leases/windows-local-may-chu-kho-r3-g1-claude-remote-20261031.yaml
+HẾT_HẠN	adr-0060-mac-dinh-r3-g1-codex-20261102	refs/remotes/origin/ops/wp1124-r3-g1-lease:ops/leases/adr-0060-mac-dinh-r3-g1-codex-20261102.yaml
+HẾT_HẠN	adr-0060-mac-dinh-r4-g1-codex-20261102	refs/remotes/origin/ops/wp1124-r4-g1-lease:ops/leases/adr-0060-mac-dinh-r4-g1-codex-20261102.yaml
+HẾT_HẠN	adr-0060-mac-dinh-r6-g1-codex-20261103	refs/remotes/origin/ops/wp1124-r6-g1-lease:ops/leases/adr-0060-mac-dinh-r6-g1-codex-20261103.yaml
+HẾT_HẠN	wp1174-r10-g7-codex	refs/remotes/origin/ops/wp1174-r10-g7-lease:ops/leases/wp1174-r10-g7-codex.yaml
+HẾT_HẠN	wp1174-r11-g8-codex	refs/remotes/origin/ops/wp1174-r11-g8-lease:ops/leases/wp1174-r11-g8-codex.yaml
+HẾT_HẠN	wp1174-r12-g9-codex	refs/remotes/origin/ops/wp1174-r12-g9-lease:ops/leases/wp1174-r12-g9-codex.yaml
+HẾT_HẠN	wp1174-r13-g10-codex	refs/remotes/origin/ops/wp1174-r13-g10-lease:ops/leases/wp1174-r13-g10-codex.yaml
+HẾT_HẠN	wp1174-r14-g11-codex	refs/remotes/origin/ops/wp1174-r14-g11-lease:ops/leases/wp1174-r14-g11-codex.yaml
+HẾT_HẠN	wp1174-r15-g12-codex	refs/remotes/origin/ops/wp1174-r15-g12-lease:ops/leases/wp1174-r15-g12-codex.yaml
+HẾT_HẠN	wp1174-r16-g13-codex	refs/remotes/origin/ops/wp1174-r16-g13-lease:ops/leases/wp1174-r16-g13-codex.yaml
+HẾT_HẠN	wp1174-r17-g14-codex	refs/remotes/origin/ops/wp1174-r17-g14-lease:ops/leases/wp1174-r17-g14-codex.yaml
+HẾT_HẠN	wp1174-r18-g15-codex	refs/remotes/origin/ops/wp1174-r18-g15-lease:ops/leases/wp1174-r18-g15-codex.yaml
+HẾT_HẠN	wp1174-r19-g16-agy	refs/remotes/origin/ops/wp1174-r19-g16-lease:ops/leases/wp1174-r19-g16-agy.yaml
+HẾT_HẠN	wp1174-r20-g17-codex	refs/remotes/origin/ops/wp1174-r20-g17-lease:ops/leases/wp1174-r20-g17-codex.yaml
+HẾT_HẠN	wp1174-r21-g18-codex	refs/remotes/origin/ops/wp1174-r21-g18-lease:ops/leases/wp1174-r21-g18-codex.yaml
+HẾT_HẠN	wp1174-r22-g19-codex	refs/remotes/origin/ops/wp1174-r22-g19-lease:ops/leases/wp1174-r22-g19-codex.yaml
+HẾT_HẠN	wp1174-r23-g20-codex	refs/remotes/origin/ops/wp1174-r22-g19-lease:ops/leases/wp1174-r23-g20-codex.yaml
+HẾT_HẠN	wp1174-r24-g21-codex	refs/remotes/origin/ops/wp1174-r22-g19-lease:ops/leases/wp1174-r24-g21-codex.yaml
+HẾT_HẠN	wp1174-r25-g22-codex	refs/remotes/origin/ops/wp1174-r22-g19-lease:ops/leases/wp1174-r25-g22-codex.yaml
+HẾT_HẠN	wp1174-r26-g23-codex	refs/remotes/origin/ops/wp1174-r22-g19-lease:ops/leases/wp1174-r26-g23-codex.yaml
+HẾT_HẠN	wp1174-r7-g5-codex	refs/remotes/origin/ops/wp1174-r7-g5-lease:ops/leases/wp1174-r7-g5-codex.yaml
+HẾT_HẠN	wp1174-r9-g6-codex	refs/remotes/origin/ops/wp1174-r9-g6-lease:ops/leases/wp1174-r9-g6-codex.yaml
+HẾT_HẠN	wp1240-r1-g1-claude	refs/remotes/origin/ops/wp1240-r1-g1-lease:ops/leases/wp1240-r1-g1-claude.yaml
+HẾT_HẠN	wp1265-r13-g1-claude	refs/remotes/origin/ops/wp1265-r13-g1-lease:ops/leases/wp1265-r13-g1-claude.yaml
+HẾT_HẠN	wp1265-r13-g2-claude	refs/remotes/origin/ops/wp1265-r13-g1-lease:ops/leases/wp1265-r13-g2-claude.yaml
+HẾT_HẠN	wp825-r1-g1-claude	refs/remotes/origin/ops/wp825-r1-g1-lease:ops/leases/wp825-r1-g1-claude.yaml
+HẾT_HẠN	wp834-r1-g1-claude	refs/remotes/origin/ops/wp834-r1-g1-lease:ops/leases/wp834-r1-g1-claude.yaml
+HẾT_HẠN	wp943-r1-g1-claude	refs/remotes/origin/ops/wp943-r1-g1-lease:ops/leases/wp943-r1-g1-claude.yaml
+HẾT_HẠN	wp977-r1-g1-claude	refs/remotes/origin/ops/wp977-r1-g1-lease:ops/leases/wp977-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

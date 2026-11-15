@@ -1,0 +1,78 @@
+Review trên HEAD `017fc8527c3a69b672e7b1a8b661735bb9cd3de8`, tree `380b0250e6b7cf58f70aef9b0d0d9d0c1d53e68c`; cha duy nhất đúng base `426d1b06e292a7db272a0f942bef0794479b58a6`. SHA-256 đặc tả khớp `10fe7e052b3e0f4c0acc79e844b6d746466e6b3c98fa030222a08df80203d855`.
+
+Identity: `openai_codex / openai / codex_cli / machine`, run `463bb7e0`; model/effort phục vụ: `KHONG_DO_DUOC`. Môi trường Linux, Python 3.13.18, Git 2.43.0, sandbox `workspace-write`. Phép đo và đột biến chạy trong `/tmp/rv1265-copy`, `TMPDIR=/tmp/rv1265-tmp`; không gọi mạng hay push.
+
+**1. Bảng nghiệm thu A1–A9**
+
+Lệnh đo tổng hợp: `python3 -B /tmp/rv1265-tmp/measure.py`, rc **0**. Script khớp nguyên câu trong từng đoạn, giữ backtick và giới hạn đúng mục. [Script](/tmp/rv1265-tmp/measure.py), [log](/tmp/rv1265-tmp/measure.log), [kết quả JSON](/tmp/rv1265-tmp/measure.json).
+
+| Tiêu chí | Lệnh/phép đo | Số đo | Đột biến đã chạy | Kết quả |
+|---|---|---|---|---|
+| A1 | `python3 -B .claude/dev/packet_loop.py adr-song --root .` | rc 0; 66 ADR, 66 dòng §20 | Xoá dòng ADR-0066 → rc 9, báo thiếu dòng §20 | passed |
+| A2 | Script: khớp R1 trong Quyết định | 1 câu khớp | Bỏ “không còn” → 0; ngắt dòng lại vẫn 1 | passed |
+| A3 | Script: đếm riêng hai token | Hash r9: 2; comment ID: 2 | Xoá từng token khỏi ADR → 0 tương ứng | passed |
+| A4 | Script: khớp riêng R2–R6 đúng mục | Mỗi câu khớp 1 lần | Chạy đủ 8 biến thể nêu trong spec; mỗi biến thể chỉ làm mất câu tương ứng. Ngắt dòng lại vẫn khớp | passed |
+| A5 | Script: đếm và so nguyên dòng bảng | 1 dòng, nội dung đúng; nằm giữa ADR-0065 và ADR-0067 | Nhân đôi → 2; đổi cột cổng → lệch nội dung | passed |
+| A6 | Script và `git show`, `grep -c`, `wc -l` | Đủ 6/6 vị trí; số liệu khớp | Bỏ dòng `gate_lifecycle.py` → đúng vị trí ấy đỏ | passed |
+| A7 | `python3 -B .claude/dev/packet_loop.py doctrine-scan --root .` | rc 0; 12 tệp, 0 chỗ chép doctrine | Kiểm thêm ngoài yêu cầu: chèn `max_attempts_per_packet` vào adapter → rc 6, đúng thông báo | passed |
+| A8 | `git diff --numstat BASE...HEAD` | 2 tệp; +170/−0 dòng | Kiểm thêm ngoài yêu cầu: thêm 451 dòng vào ADR của candidate tạm → +621, vượt trần | passed |
+| A9 | `git diff --name-only BASE...HEAD` | Đúng hai tệp trong write set | Candidate tạm thêm `review-outside-write-set.txt` → phát hiện tệp ngoài phạm vi | passed |
+
+`BASE` ở bảng là exact OID nêu trên. Ref `origin/master` không có trong bản sao; tôi dùng OID base được assignment chỉ định, không tự tạo ref. A8/A9 dùng index tạm và commit object riêng, không đổi HEAD. Tất cả đột biến đã khôi phục; bản sao cuối lượt sạch.
+
+Số đo tại base, theo thứ tự sáu vị trí cổng:
+
+| Tệp | Số dòng | `grep -c 'ADR-0066'` |
+|---|---:|---:|
+| `ops/lease_publish.py` | 2604 | 0 |
+| `.claude/dev/packet_loop.py` | 6247 | 0 |
+| `.claude/dev/launcher.py` | 5988 | 0 |
+| `.claude/dev/gate_lifecycle.py` | 1688 | 0 |
+| `.github/workflows/ci.yml` | 1184 | 0 |
+| `.github/workflows/ops-publish-lease.yml` | 277 | 0 |
+
+Không có số lệch. Mọi `git show` và `wc` rc 0; `grep` rc **1** vì không có dòng khớp, stdout đúng `0`.
+
+Đo lịch sử cũng khớp: **571/206/121/58**; lịch sử first-parent chạm vùng: **0**, hai đường dẫn vùng vắng tại base. Ba phép đọc S đúng dòng **2364, 2400, 2411**. Hash đặc tả r9 khớp.
+
+Hai gate sau khôi phục:
+
+- `adr-song`: rc **0**, dòng kết: `adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])`
+- `doctrine-scan`: rc **0**, dòng kết: `doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine`
+
+`git diff --check BASE HEAD`: rc **0**. A10/CI: **not_run**, ngoài phạm vi assignment. Windows và full mutant audit không bắt buộc cho diff chỉ gồm Markdown theo ADR-0060.
+
+**2. Finding**
+
+**F1 — P2 — lớp `khang-dinh-tuong-thich-vuot-mien`**, một biểu hiện tại [ADR-0066:112](/tmp/rv1265-copy/docs/adr/0066-admission-thu-hoi-theo-merge-base.md:112).
+
+Câu “không ở chỗ nào lỏng hơn nền” mở rộng nhận định về hai trường hợp lỗi tài nguyên/header thành khẳng định cho toàn bộ admission. Khẳng định tuyệt đối này không đúng với R3: cổng mới chủ ý nhận một số đầu vào mà cổng cũ từ chối.
+
+Phản chứng đã chạy bằng `python3 -B /tmp/rv1265-tmp/counterexample.py`, rc **0**:
+
+- Dựng DAG `B→S`, `B→H`, cả ba tree rỗng; merge-base duy nhất là B, vùng B bằng vùng S.
+- Bộ kiểm nền trả **12**, đúng lỗi “S … không phải tổ tiên của H”.
+- Giữ nguyên các phép kiểm phía sau và bỏ riêng yêu cầu ancestry cũ trong oracle thử nghiệm: trả **0**. R3/B2 cũng yêu cầu nhận trường hợp này.
+- Đối chứng H là con của S: bộ kiểm nền trả **0**.
+
+Đây là phản chứng cho phạm vi câu chữ; **chưa chạy implementation tương lai của packet B**. [Script](/tmp/rv1265-tmp/counterexample.py), [log](/tmp/rv1265-tmp/counterexample.log).
+
+Gợi ý xử lý đủ bốn phần:
+
+- **Ở đâu:** sửa câu 112 trong ADR, thuộc write set; không cần sửa mã hay đặc tả đóng băng.
+- **Thế nào:** giới hạn nhận định “chỉ siết thêm” vào nhánh S là tổ tiên H và hai loại lỗi đang giải thích; phân biệt với việc thay điều kiện ancestry bằng R3.
+- **Kiểm đóng lớp:** đối chiếu cả DAG phân nhánh và đối chứng tổ tiên; câu khẳng định tuyệt đối phải bị đánh dấu trái kết quả.
+- **Rủi ro khi sửa:** tránh chuyển sang khẳng định tương thích vô điều kiện trong nhánh tổ tiên, vì ngân sách dùng chung và header commit đọc thêm vẫn có thể đổi rc 0 thành 12.
+
+Không có finding P0/P1 hay lớp khác.
+
+**3. Trả lời (a)–(d)**
+
+- **(a)** Sáu dòng gạch đầu dòng hợp lệ. Mục tiêu 1g/A6 đòi một dòng cho từng vị trí, không bắt buộc bảng. Mỗi dòng có đủ lệnh, số dòng và kết quả.
+- **(b)** Ba lý do tự suy là lập luận lựa chọn thiết kế, phù hợp mục 0 và mục tiêu 1b; không trái ADR-0060/protocol. Phép đếm 206 merge tự nó không chứng minh cả 206 lần đều do admission gây ra.
+- **(c)** Dòng Ký hiệu và mục Giới hạn không làm khớp sai R1–R6. Đoạn “ba trạng thái” thực tế được yêu cầu tại §5 của đặc tả. Các phần thêm này không tạo finding; F1 nằm trong mục Giữ nguyên.
+- **(d)** Tham chiếu đúng: đặc tả B r13, §4 `muc_tieu`, mục **4** quy định miền tương thích, phép chiếu receipt, schema 2 và ngân sách mới.
+
+Các facts GitHub bên ngoài chưa được xác minh qua mạng theo giới hạn offline. A1–A9 đạt, nhưng F1 P2 còn mở nên chưa đủ điều kiện approve.
+
+KET_LUAN: request_changes

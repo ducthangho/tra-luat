@@ -1,0 +1,10 @@
+# LAN 1 (truoc han rut 07:45Z — D4 phai do)
+# checkout: 6e1047e5144ea0b013cf3cfd663dc0d9a3ada0f9 (+ thay doi chua commit trong ops/land) ; luc: 2026-11-15T07:19:12Z
+  THIẾU  D4 lease: không khớp lease_cuoi/packet/generation hoặc lease_until chưa qua
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D4
+rc=12
+
+# LAN 2 (sau han rut 07:45Z)
+# checkout: 6e1047e5144ea0b013cf3cfd663dc0d9a3ada0f9 (+ thay doi chua commit trong ops/land) ; origin/master: 6e1047e5144ea0b013cf3cfd663dc0d9a3ada0f9 ; luc: 2026-11-15T07:46:32Z
+ĐÓNG ĐƯỢC WP wp1265 — merge 6e1047e5144ea0b013cf3cfd663dc0d9a3ada0f9
+rc=0

@@ -1,0 +1,29 @@
+# do tren checkout 6e1047e5144ea0b013cf3cfd663dc0d9a3ada0f9 (= merge 6e1047e, cay sach ngoai ops/land), luc 2026-11-15T07:16:59Z
+## A1 adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## A7 doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+## A8 git diff --numstat 6e1047e^1..6e1047e (= origin/master...HEAD cua PR, base 426d1b0)
+1	0	docs/PROTOCOL_DA_PHIEN.md
+173	0	docs/adr/0066-admission-thu-hoi-theo-merge-base.md
+## A9 git diff --name-only 6e1047e^1..6e1047e
+docs/PROTOCOL_DA_PHIEN.md
+docs/adr/0066-admission-thu-hoi-theo-merge-base.md
+## A3 dem dinh danh trong ADR
+465538364b1a3f9477782fba79869bbd1c9351140e3fa9df50451baae22f9c79 2
+issuecomment-5819533474 2
+## A5 so dong bang §20 co o dau `ADR-0066`
+1
+1546-| `ADR-0065` | Model/effort phục vụ của reviewer là trường ghi nếu đo được; `KHONG_DO_DUOC` không
+1547:| `ADR-0066` | Admission thu-hoi: bỏ 'S tổ tiên H', thay bằng cổng vùng bằng nhau ở mọi merge-base 
+1548-| `ADR-0067` | Danh sách đóng E1–E5: agent chỉ hỏi chủ kho trong năm tình huống; đóng băng đặc
+## H3 so voi H2 (phan khong co review offline)
+ docs/adr/0066-admission-thu-hoi-theo-merge-base.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+-  `git log --first-parent --format=%H 426d1b0 -- ops/thu-hoi/ .github/coordination/change-impact.v1.json` ra 0 commit.
++  `git log --first-parent --format=%H 426d1b0 -- ops/thu-hoi .github/coordination/change-impact.v1.json` ra 0 commit.
+## tree merge vs tree H3
+1f09c3254303c95c8c2bfc55535ddf2023e1d6e3
+81dccad5937ba94dd04d7474925fb0fb2cbeb280

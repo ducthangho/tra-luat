@@ -1,0 +1,64 @@
+# packet-loop 16 manh do TAI CHO tren DUNG cay b8bc64f (bu cho job gom gate-packet-loop bo_qua tren push master — M2)
+# container phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS, 2026-11-16T23:07–23:3xZ, Linux 4 nhan, Python 3.13.18 (CI dung 3.12), PyYAML 6.0.3, jsonschema 4.26.0, rg, actionlint 1.7.7, shellcheck 0.9.0
+# ban sao: git clone --no-hardlinks <kho phien> ; checkout --detach b8bc64f ; core.abbrev 7 ; env PYTHONUTF8=1 PYTHONDONTWRITEBYTECODE=1
+# lenh moi manh (nhu ci.yml): PACKET_LOOP_MANH=i/16 PACKET_LOOP_RA=<tep> python3 .claude/dev/packet_loop_test_manh.py
+# lenh gom: PACKET_LOOP=chay KQ_MANH=success python3 .claude/dev/packet_loop_test_manh.py --gom <thu muc> --n 16
+## checkout
+b8bc64f99f43f382ceb90aadbe57df783842a28d a257ce426d099ce022daf48194b8990e0d58fa6e
+## LICH SU DO (giu ca lan do — do gian, khong phai ma; nguyen nhan da tach bang phep thu mot bien)
+manh 2 rc=0 71s
+manh 1 rc=0 100s
+manh 3 rc=0 60s
+manh 0 rc=1 191s
+manh 5 rc=0 79s
+manh 4 rc=0 140s
+manh 6 rc=0 67s
+manh 7 rc=1 104s
+manh 8 rc=0 78s
+manh 9 rc=0 76s
+manh 10 rc=0 81s
+manh 12 rc=0 87s
+manh 11 rc=0 140s
+manh 13 rc=0 84s
+manh 14 rc=0 73s
+manh 15 rc=0 70s
+manh 7 lan2 rc=1 107s
+manh 0 lan2 rc=1 200s
+manh 7 lan3 (sau unshallow) rc=0 100s
+manh 0 lan3 (sau unshallow) rc=1 189s
+manh 0 lan4 (cay sach, ra ngoai cay) rc=0 193s
+# lan 1: 16 manh song song 3 luong, RA trong cay (manh/), kho NONG (shallow): manh 0 + manh 7 rc 1; gom 2 loi.
+#   manh 7 do r1187_actual_milestone: ca doi ADR0062_OID 1f0941e9 nam tren --first-parent refs/remotes/origin/master; kho nong => chuoi cat => do.
+#   lan 2 (chay rieng, van nong): manh 7 van do => khong phai song song. lan 3 SAU khi bo nong (git fetch --unshallow; is-shallow=false; rev-list --first-parent co 1f0941e9): manh 7 rc 0 98/98.
+#   manh 0 do: carrier wp1174 (_native_report_valid1174) — 84/84 ca dat, overall_status passed, nhung cay KHONG sach (manh/*.json chua theo doi trong cay;
+#   lan 1 con doi giua chung vi manh song song ghi vao). CI moi manh mot runner moi nen cay sach. lan 4: chuyen RA RA NGOAI cay, git status rong: rc 0.
+#   Manh 1-6, 8-15 dat ngay lan 1 (kho nong chi gay DO GIA, khong lam xanh gia); khong chay lai.
+## gom (16 tep manh-*.json ben canh, ban sao tu thu muc RA)
+GOM: mọi mảnh khớp phân hoạch
+GOM: ĐẠT · 16 mảnh · 1503 ca bắt buộc (sổ 1505 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)
+## manh 0 lan 4 (dong ket)
+nền: 84/84 đạt · BỎ QUA: 0
+WP1174_NATIVE_REPORT_V1 overall_status=passed (rut gon)
+TỔNG: ĐẠT
+MẢNH: ca 0/16 · đột biến - · 84/84 ca · 0 lượt đột biến · carrier=có · 190s · rc=0
+## manh 7 lan 3 (dong ket)
+nền: 98/98 đạt · BỎ QUA: 0
+TỔNG: ĐẠT
+MẢNH: ca 7/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 98s · rc=0
+## sha256 tep manh
+6ab1f030661472c6ff5c9fdd92cd0ba98766298062c98a252d0e67a3d7335bb8  manh-0.json
+8eacaefe53318be0ac6f1fbe319628b8ecc94f1e504f4db422944d16b08c860e  manh-1.json
+42fe40fc2c673568e5d9ef11d69e35c8fe14957d56d080e7031cf0ee65eb878d  manh-2.json
+f9c0e82bd267ca94a67078180cec05382e48a23da2465ee8e9db9f3edec5a180  manh-3.json
+17f2e3500d6fb16bab28f18f9a6e7136b6a18260a6770f4b0c24bcb53c4c9ffb  manh-4.json
+9ebf28749d74c9a7517db021b11bbdd4eb9668ae8d40b4b9440ffd6d69fb1fe8  manh-5.json
+02d3697a72e0a98324b479a97db82a6cbdb59d8dcc6277546325fc8f8007f298  manh-6.json
+a735d435221dd903b4de16b5799b2bfa872d01ece087a13ced84bf15eed56baa  manh-7.json
+b2a249bf8942dc5b91fbd98a609532593573cfa028475ef97aeed478d29d11b7  manh-8.json
+b4229b98bbfc831a695ca3d9cd8b69fd9674541767389393b0299b44ba9aee4f  manh-9.json
+55fb14ccbfa1c5aef065e5c3ae40a9859fff0b3b8b461dae697ea03771ce8f15  manh-10.json
+b54a1b721fb183405cfa11eb060eb495262feac01593efc7be8d46045e57e49d  manh-11.json
+f73daf756efa31727edcf972b6b989ac828a279429a98ab9298cee59ddcdbbe0  manh-12.json
+bd59ca1af0bad3fa7422ca8003fee54bda65ca73fe888d3d9a0c1cee0be7809f  manh-13.json
+d59bd32a478738c89fca9ea3d90a40709cbb8cd147ce46e0c3a89c38fcfe3e42  manh-14.json
+acaedb883cc16b1e0976f65143061f2e84a595fe06aa6c29190d26e3cbb587e5  manh-15.json

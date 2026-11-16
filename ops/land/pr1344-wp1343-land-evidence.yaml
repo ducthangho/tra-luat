@@ -2,7 +2,7 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
 #
 # TRANG THAI: merged (b8bc64f), landed true. Bon moc §10.2.2 cua ci.yml 43969906464: run/checkout/workflow_definition measured passed;
-#   gate_output 22/23 job co dau hieu duong — job gom gate-packet-loop tu khai "KHONG DO" (packet_loop=bo_qua, M2 cua chinh packet nay:
+#   gate_output owner_waived (M8) — 22/23 job co dau hieu duong — job gom gate-packet-loop tu khai "KHONG DO" (packet_loop=bo_qua, M2 cua chinh packet nay:
 #   push master khong chay bo ca). Bu bang do TAI CHO 16 manh tren DUNG cay b8bc64f (packet-loop-tai-cho-b8bc64f.txt).
 # UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head 4b0a3d2 (issuecomment-6931217894, app null).
 # NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
@@ -73,9 +73,14 @@ post_merge_checks:
       phan-chung-buoc-43969906464.txt: xoa dau hieu 3 buoc => not_measured, rc 0.
   - name: 'packet-loop 16 manh do TAI CHO tren dung cay b8bc64f (bu cho job gom bo_qua)'
     sha: b8bc64f99f43f382ceb90aadbe57df783842a28d
-    conclusion: CHO_DO
-    nguon: [packet-loop-tai-cho-b8bc64f.txt]
-    ghi_chu: CHO_DO
+    conclusion: success
+    nguon: [packet-loop-tai-cho-b8bc64f.txt, packet-loop-tai-cho/]
+    ghi_chu: >-
+      measured — packet-loop-tai-cho-b8bc64f.txt: checkout b8bc64f / tree a257ce42; 16 manh rc 0, gom "GOM: ĐẠT · 16 mảnh · 1503 ca bắt
+      buộc (sổ 1505 − CA_DAI)"; 16 tep manh-*.json kem sha256. Lan do dau DO 2 manh (0, 7) do GIAN: kho nong lam r1187_actual_milestone
+      mat ADR-0062 tren --first-parent (CI dung fetch-depth 0), va carrier wp1174 doi cay sach (CI moi manh mot runner). Tach bang phep thu
+      mot bien: chay rieng van do (khong phai song song); bo nong => manh 7 dat; dua tep ra ngoai cay => manh 0 dat. Python 3.13 (CI 3.12).
+      Do TAI CHO, khong phai CI: khong thay the moc §10.2.2 gate_output cua run CI (xem bien-ban-m8.yaml: owner_waived).
   - name: 'packet-loop-dot-bien.yml workflow_dispatch tren master (N5 ve CA_DAI + bang dot bien)'
     run_id: 43969913298
     sha: b8bc64f99f43f382ceb90aadbe57df783842a28d
@@ -88,9 +93,9 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1343-r3-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1343.'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: CHO_DO}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 (23:34:16Z, sau han) rc 0 "ĐÓNG ĐƯỢC WP wp1343". gate_output owner_waived (M2 + chi dao #1206 issuecomment-6918292696).'}
   - {item: 'dong Issue #1343', ket_qua: 'not_measured — sau khi PR ghi so merge.'}
-  - {item: 'nhanh ops/do-gate-b8bc64f', ket_qua: 'measured — phien dieu phoi tao luc 23:06Z tro dung b8bc64f de dispatch ci.yml, roi BO dispatch (ci.yml dispatch luon keo Windows, trai chi dao). Nhanh khong co commit rieng (behind_by 0); don duoc qua ops-don-ref.'}
+  - {item: 'nhanh ops/do-gate-b8bc64f', ket_qua: 'loi_khai_co_neo — phien dieu phoi tao luc 23:06Z tro dung b8bc64f de dispatch ci.yml, roi BO dispatch (ci.yml dispatch luon keo Windows, trai chi dao). Nhanh khong co commit rieng (behind_by 0); don duoc qua ops-don-ref.'}
 # ---- het truong chuan
 packet_id: wp1343
 packet_issue: 1343
@@ -112,13 +117,20 @@ lease:
   lease_id: wp1343-r3-g1-claude
   path: ops/leases/wp1343-r3-g1-claude.yaml (nhanh ops/wp1343-r1-g1-lease)
   write_set_so_tep: 6
-  thu_hoi_cuoi: CHO_DO
+  thu_hoi_cuoi: >-
+    RUT HAN sau merge: lease_until 2026-11-17T16:40:00Z -> 2026-11-16T23:20:00Z (commit f847ebb, push 23:05Z truoc han moi), kem ngan sach
+    that (Codex 1/10, CI Ubuntu 1/4, Windows 0/0); tep lease-wp1343-r3-g1-claude-sau-rut-han.yaml.txt. ops-publish-lease 43976097118 success.
+    ai-dang-giu-sau-rut-han.txt (23:32Z, thieu 0 / 265 nhanh): ca 6 tep write set NGUOI_GIU 0, wp1343-r3 HET_HAN (r1/r2 da bi thay the).
   diff_do: 'measured — nghiem-thu-b8bc64f.txt numstat b8bc64f^1..b8bc64f: 6 tep, +450/-66.'
 
 trang_thai_packet:
   merged: true
-  landed: CHO_DO
-  landed_dieu_kien: CHO_DO
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren b8bc64f: run/checkout/workflow_definition passed; gate_output owner_waived cho DUNG MOT job (gom
+    gate-packet-loop "KHONG DO" theo M2 cua chinh packet nay, chi dao chu kho), 22/23 job con lai co dau hieu duong; bo ca packet-loop do bu
+    tai cho tren dung cay: GOM DAT 1503 ca. (2) lease nha: DAT (wp1343-r3 HET_HAN). (3) bookkeeping: ho so nay + M8 rc 0. (4) review neo
+    4b0a3d2: connector sach + audit chu kho. (5) uy quyen: audit tu dang 6931217894. (6) muc tieu: N1-N6 dat. (7) tran: 450/450.
   canh_bao_cho_chu_kho: >-
     (i) Tu nay moi push master, job gate-packet-loop in "KHONG DO" (M2): bo ca packet-loop KHONG duoc do hau merge tren CI; ho so land
     cua packet sau phai do bu (nhu ho so nay) hoac chap nhan not_measured. (ii) danh_gia_gate.py (b87f9697) chua biet job gom/manh moi:
@@ -134,7 +146,7 @@ nghiem_thu:
   N2: 'loi_khai_co_neo — executor: GOM DAT 16 manh 1492 ca tren may 4 nhan; measured CI PR: GOM DAT 1503 ca.'
   N3: 'loi_khai_co_neo — executor: ca gom do khi manh do/thieu/lech tap/CA_DAI lot (trong ci_duong_nhanh_test).'
   N4: 'measured — nghiem-thu-b8bc64f.txt: actionlint ci.yml + packet-loop-dot-bien.yml rc 0. t161/t162, ci_dang_ky_test: gate-ops/gate-registry passed trong danh-gia-gate-output-43969906464.txt.'
-  N5: 'measured — CI PR 43929227587: manh cham nhat 234 s <= 300 s, gom DAT 1503 ca; workflow dem 43969913298 tren master: CA_DAI 2/2 dat.'
+  N5: 'measured — readback-jobs-43929227587.json, readback-jobs-43969913298.json: CI PR 43929227587 manh cham nhat 234 s <= 300 s, gom DAT 1503 ca; workflow dem 43969913298 tren master: CA_DAI 2/2 dat.'
   N6: 'measured — nghiem-thu-b8bc64f.txt: adr-song rc 0 (66/66); doctrine-scan rc 0; ruff 0.16.9 --select F delta 0 tren 4 tep .py write set.'
 
 khong_do_duoc:

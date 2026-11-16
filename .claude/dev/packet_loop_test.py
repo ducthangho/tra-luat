@@ -16048,6 +16048,50 @@ def _pending_rejections1315(c):
         assert changed == adopted and m._1174_bytes(changed) != original[1]
         image(changed)
         invoke(argv,rejected=True,reason="pending recovery exact adopted projection required",label=variant)
+    # r5/g7b: same coercion class one level down, in the immutable adoption wrapper. Only
+    # adoption.payload.target_projection.history[1].attempt changes; payload_sha256 and
+    # the witness high_water are recomputed; snapshot, tombstone and live prefix stay intact.
+    assert type(adopted["adoption"]["payload"]["target_projection"]["history"][1]["attempt"]) is int
+    def coerced_projection(value):
+        changed=copy.deepcopy(adopted);p=changed["adoption"]["payload"]
+        p["target_projection"]["history"][1]["attempt"]=value
+        assert p == adopted["adoption"]["payload"] and m._1174_bytes(p) != m._1174_bytes(adopted["adoption"]["payload"]),value
+        changed["adoption"]["payload_sha256"]=hashlib.sha256(m._1174_bytes(p)).hexdigest()
+        return changed
+    for variant,value in [("adoption_projection_attempt_bool",True),("adoption_projection_attempt_float",1.0)]:
+        restore();image(coerced_projection(value))
+        invoke(argv,rejected=True,reason="adoption deterministic source projection",label=variant)
+    # The retired-lineage walk is also the only projection/identity check for
+    # predecessors below the active record, so lock it directly (pure read of the tombstone).
+    restore();m._1174_tripwire(copy.deepcopy(adopted))
+    def identity_number(key,kind):
+        changed=copy.deepcopy(adopted);assert type(changed[key]) is int
+        changed[key]=kind(changed[key]);assert changed == adopted,key;return changed
+    for label,changed,reason in [
+        ("lineage_projection_attempt_bool",coerced_projection(True),"retired lineage deterministic projection"),
+        ("lineage_projection_attempt_float",coerced_projection(1.0),"retired lineage deterministic projection"),
+        # packet is already exact through the tombstone derivation; kept as a control of that.
+        ("lineage_identity_packet_float",identity_number("packet",float),"tombstone generations"),
+        ("lineage_identity_mission_float",identity_number("mission",float),"retired lineage source identity/schema")]:
+        before=tuple(p.read_bytes() for p in paths)
+        try:m._1174_tripwire(changed)
+        except m._1174Error as ex:assert reason in str(ex),(label,str(ex))
+        else:raise AssertionError("retired lineage accepted type-coerced "+label)
+        assert before == tuple(p.read_bytes() for p in paths),label
+    # Caller comment copy. The synthetic API comments carry no number, so both sides get the
+    # integer id a real comment has and the receipt digest is rebound; the exact copy must
+    # still recover (control) while the same copy with id 900005.0 must not.
+    def numbered(kind):
+        restore();facts["comments"][0]["id"]=900005
+        facts["verified_i2"]["comments_sha256"]=hashlib.sha256(m._1174_bytes(facts["comments"])).hexdigest()
+        copied=copy.deepcopy(facts["comments"]);copied[0]["id"]=kind(900005)
+        assert copied == facts["comments"]
+        (c.tmp/"cm-numbered.json").write_bytes(m._1174_bytes(copied))
+        assert (m._1174_bytes(copied) == m._1174_bytes(facts["comments"])) is (kind is int)
+        result=list(argv);result[result.index("--lease-comments")+1]=str(c.tmp/"cm-numbered.json");return result
+    rc,r,err=invoke(numbered(int),label="comments_int_control")
+    assert rc == 0 and r["status"] == "completed_no_dispatch" and not r["dispatch_allowed"],(rc,r,err)
+    invoke(numbered(float),rejected=True,reason="scoped lease comments differ from API",label="comments_int_float")
     for variant,reason in [
         ("no_i2","scoped lease authority missing"), ("context_generation","scoped lease authority mismatch"),
         ("lease_generation","scoped lease authority mismatch"), ("identity","scoped lease authority mismatch"),
@@ -16152,6 +16196,9 @@ def _pending_closure1315(c):
         ("latest_head",lambda p:p["reviews"][-1].update(reviewed_sha="f"*40)),
         ("pending_reviewing_head",lambda p:p.update(reviewing_head_sha="f"*40)),
         ("predecessor_generation",lambda p:p.update(generation=0)),
+        # r5/g7b: equal to lineage generation 1 under Python ==, not an exact integer.
+        ("predecessor_generation_bool",lambda p:p.update(generation=True)),
+        ("predecessor_generation_float",lambda p:p.update(generation=1.0)),
         ("lease_generation",lambda p:p["ngu_canh_lease"].update(generation=3)),
         ("lease_context_id",lambda p:p["lease"].update(lease_id="other-predecessor-lease")),
         ("owner_policy_absent",lambda p:p["scoped_review"].update(assurance="same_provider_approved"))]

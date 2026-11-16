@@ -246,6 +246,81 @@ pending-recovery path the whole-postimage byte comparison runs before them. The
 "Not measured by this author" list below applies unchanged to this revision,
 and a fresh independent source review of the new head is outstanding.
 
+## r5/g7b remediation: the coercion class on the whole recovery path
+
+Base `H`: `4ebcbaf9b8c06ae883dcbd5cf128f2f621df7ca5`. The independent review of
+that head (`changes_requested`) showed the same class still open one level
+down: the adoption wrapper copied into the expected projection was itself
+validated with Python equality, so
+`adoption.payload.target_projection.history[1].attempt` changed from `1` to
+`true`, with `payload_sha256` and the witness `high_water` recomputed, recovered
+with rc 0 and was persisted. The g7 section above fixed only the two comparisons
+it was pointed at. This revision instead enumerated every comparison of
+JSON-derived composite or numeric data executed by `record-lease` on an adopted
+`approved_pending` state; the full table is in the author handoff. That review
+is not an approval of this revision.
+
+Changed comparisons (five lines of `packet_loop.py`, nothing else):
+
+| Where | Before | Now |
+|---|---|---|
+| `_1174_adoption_record`, deterministic payload | `p == _1174_adopt_payload(...)` | canonical bytes of both |
+| `_1174_tripwire`, retired-lineage projection | `p["target_projection"] == projection` | canonical bytes of both |
+| `_1174_tripwire`, lineage identity fields | `predecessor.get(k) == v` | canonical bytes of both |
+| `_1174_record_lease`, caller comment copy against API comments | parsed values `==` | canonical bytes of both |
+| `_1315_pending_projection`, predecessor generation | `==` only | exact `int` type, then `==` |
+
+The first is the reviewer's demonstrated defect. The second and third are the
+only projection and identity checks for predecessors below the active record and
+for the other callers of the walk. The fourth let a caller copy differing only
+in number type count as the API comments. The fifth was already rejected later
+by the lineage walk; the new function no longer depends on that.
+
+Why a correctly typed state cannot be rejected: `_1174_bytes` is a function of
+value and type only (sorted keys), every compared operand is parsed JSON, and
+serialising a parsed canonical value reproduces its bytes. Two operands that are
+equal with equal types therefore have equal bytes; only operands that differed
+in type (`1`, `true`, `1.0`) change outcome. All callers of the two WP1174
+validators (adoption, replay, ordinary commands, read-only diagnostics) get the
+stricter check; the WP1174 adoption, witness, lifecycle and WP1303 target cases
+were re-run for that reason.
+
+Left unchanged, with the reason: comparisons whose operands are both exact-typed
+before use (witness, `high_water`, operation, counters, admission scalars after
+`_1174_field_types`); and in `_1174_postimage` the immutable-field comparison,
+the changed-key set and the append-only prefixes, plus the predecessor
+lease/context comparison in `_1174_record_lease`. Those four still use Python
+equality. On this path a type-changed operand reaching them is rejected by the
+byte-exact projection or postimage check before any probe, sync or write (the
+g7 note above wrongly said the postimage byte check runs before the
+immutable-field comparison; it runs directly after it). `_1174_adopt` recovery
+(`recovery immutable source projection`) is not on this path and now follows a
+byte-exact `_1174_adoption_record` call.
+
+Tests (existing frozen case IDs only; `CASES` and `MUTANTS` unchanged):
+
+- `wp1315_adopted_pending_rejections`: nested adoption-projection probes
+  `1 -> true` and `1 -> 1.0` through `main`, hashes and `high_water` recomputed,
+  requiring rc 8, `dispatch_allowed` false, no probe/sync/write, unchanged
+  source/state/witness bytes and the reason
+  `adoption deterministic source projection`; direct `_1174_tripwire` probes for
+  the same projection values and for a float `mission`, with an untouched
+  control; a caller comment copy with an integer id as a float, after a control
+  in which the exact copy recovers.
+- `wp1315_pending_predecessor_closure`: predecessor `generation` as `true` and
+  `1.0`, with the snapshot digest, tombstone and projection rebuilt.
+
+Evidence, measurements and hashes for this revision are in
+`wp1315-input/AUTHOR-HANDOFF-G7B.json` (author-run, private synthetic Linux
+checks; not an independent review). Limits: the retired-lineage comparisons
+cannot be reached through `main` independently of `_1174_adoption_record` in the
+frozen fixtures, because the active record is checked first and deeper records
+sit inside a hash-bound snapshot; they are locked by direct calls. Comparisons
+against admission fields rely on the exact typing done when the admission is
+resolved, which the fixtures replace by a seam. The "Not measured by this
+author" list below applies unchanged, and a fresh independent source review of
+the new head is outstanding.
+
 ## Historical evidence (old head only)
 
 The r37/r39 measurements, private evidence directories and hashes recorded for

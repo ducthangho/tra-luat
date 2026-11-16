@@ -4867,7 +4867,7 @@ def _1174_adoption_record(record, admission):
                   hashlib.sha256(tombstone).hexdigest() == p["tombstone_sha256"] and tombstone == _1174_tombstone(
                   admission["packet"], p["predecessor_generation"], p["operation"]["generation"],
                   p["operation"]["adoption_id"], p["source_sha256"], p["operation"]["binding_sha256"]), "adoption source/tombstone bytes")
-    _1174_require(p == _1174_adopt_payload(admission, source), "adoption deterministic source projection")
+    _1174_require(_1174_bytes(p) == _1174_bytes(_1174_adopt_payload(admission, source)), "adoption deterministic source projection")
     _1174_require(record["phase"] != "adopted" or record["cutover_started"], "adopted requires intent")
     _1174_require(record["phase"] != "aborted" or not record["cutover_started"], "aborted forbids intent")
     return record
@@ -4911,7 +4911,8 @@ def _1315_pending_projection(state, admission, source):
     predecessor = _1174_json(source)
     _1174_require(type(predecessor) is dict and type(predecessor.get("schema_version")) is int and predecessor["schema_version"] == 3 and
         _1174_CORE <= set(predecessor) <= _1174_CORE | set(_1174_OPTIONAL) and
-        _1174_bytes(predecessor) == source and predecessor.get("generation") == lineage["predecessor_generation"] and
+        _1174_bytes(predecessor) == source and type(predecessor.get("generation")) is int and
+        predecessor["generation"] == lineage["predecessor_generation"] and
         _1174_int(predecessor.get("state_revision")) and
         predecessor.get("enrollment_id") == admission["enrollment"]["id"] and
         predecessor.get("binding_sha256") == admission["enrollment"]["binding_sha256"] and
@@ -5022,7 +5023,7 @@ def _1174_tripwire(state, g0=None):
         source_raw = p["source_snapshot"].encode("utf-8")
         predecessor = json.loads(source_raw, object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)
         _1174_require(type(predecessor) is dict and type(predecessor.get("schema_version")) is int and
-            predecessor["schema_version"] in (2, 3) and all(predecessor.get(k) == v for k, v in identity.items()),
+            predecessor["schema_version"] in (2, 3) and all(_1174_bytes(predecessor.get(k)) == _1174_bytes(v) for k, v in identity.items()),
             "retired lineage source identity/schema")
         if predecessor["schema_version"] == 3:
             _1174_require(_1174_bytes(predecessor) == source_raw and
@@ -5033,7 +5034,7 @@ def _1174_tripwire(state, g0=None):
         projection = dict(predecessor, schema_version=3, generation=current["generation"], state_revision=0,
             enrollment_id=state["enrollment_id"], binding_sha256=state["binding_sha256"], scoped_review=None, human_acceptance=None)
         projection.pop("adoption", None)
-        _1174_require(p["target_projection"] == projection, "retired lineage deterministic projection")
+        _1174_require(_1174_bytes(p["target_projection"]) == _1174_bytes(projection), "retired lineage deterministic projection")
         _1174_require(_1174_read(Path(p["source_path"])) == p["tombstone"].encode("utf-8"), "legacy_changed")
         current, path = predecessor, p["source_path"]
     if g0 is not None and current.get("schema_version") == 3:
@@ -5306,7 +5307,8 @@ def _1174_record_lease(a, directory, state, admission, facts):
         context["generation"] == admission["generation"] and
         not any(getattr(a, k, None) is not None for k in ("lease_id", "granted_by", "evidence", "expires_utc")),
         "scoped lease authority mismatch")
-    _1174_require(type(a.lease_comments) is str and _1174_read_json(a.lease_comments) == facts["comments"],
+    _1174_require(type(a.lease_comments) is str and
+        _1174_bytes(_1174_read_json(a.lease_comments)) == _1174_bytes(facts["comments"]),
         "scoped lease comments differ from API")
     _1174_require(verified["comments_sha256"] == hashlib.sha256(_1174_bytes(facts["comments"])).hexdigest(),
         "scoped lease API receipt binding")

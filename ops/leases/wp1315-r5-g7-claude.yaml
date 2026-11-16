@@ -63,7 +63,7 @@
   "reviewer_model_family": "openai",
   "reviewer_execution_surface": "codex_cli",
   "reviewer_transport": "machine",
-  "prompt_path": "ops/prompts/wp1315-r5-g7-claude-author-fix.txt",
+  "prompt_path": "ops/prompts/wp1315-r5-g7-claude-author-fix2.txt",
   "start_from_sha": "98c7389d91027e1d7eeccaea26e50332773249bf",
   "reviewed_sha_required": "98c7389d91027e1d7eeccaea26e50332773249bf",
   "reviewed_tree_required": "d963dc73799724d76251f645fb7812e7ff3c8992",
@@ -108,7 +108,7 @@
     "ruleset_or_gate_change",
     "CI_rerun"
   ],
-  "prompt_sha256_required": "62f898f185d1e39ec54b11f9ea46c247882f1e824e2df24fbce0272a52240c61",
+  "prompt_sha256_required": "1f43f777cbe6c8ecf7ae274a0bfff98ec6a5b9e70b3835ac41e3708793cd90dd",
   "model": "claude-fable-5-2",
   "reviewed_sha_required_note": "H cu chi la diem bat dau; H moi can Codex source review moi (plain stdout cho K4) va audit uy quyen moi.",
   "remediation_of": {
@@ -120,15 +120,21 @@
   "ceiling_raises": {
     "Claude_author": {
       "from": 1,
-      "to": 2
+      "to": 3,
+      "history": [
+        "46ee169a r5 author",
+        "bb1d3326 g7 fix 1 (2 comparisons)",
+        "g7 fix 2: enumerate full recovery path"
+      ]
     },
     "Codex_source_review": {
       "from": 3,
-      "to": 5,
+      "to": 6,
       "history": [
         "163b8b57 approve on 98c7389",
         "18da1726 changes_requested P2 on 98c7389",
-        "13e7cfac blocked at preflight on 4ebcbaf: coordinator prompt wrongly stated sole parent C (coordinator error, not source defect)"
+        "13e7cfac blocked at preflight on 4ebcbaf: coordinator prompt wrongly stated sole parent C (coordinator error, not source defect)",
+        "950302fa changes_requested on 4ebcbaf: same P2 class via pre-existing adoption validators (target_projection ==)"
       ]
     },
     "source_push": {

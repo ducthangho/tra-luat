@@ -100,5 +100,9 @@
   "full_M9_dispatch_limit": 1,
   "native_windows_exception_minutes": 110,
   "spec_acceptance_mode": "explicit_owner_spec_rescue_checkpoint",
-  "spec_model_verdicts": "r47/r48/r49 changes_requested; retained, not relabeled"
+  "spec_model_verdicts": "r47/r48/r49 changes_requested; retained, not relabeled",
+  "da_bi_thay_the": "wp1325-r4-g4-claude",
+  "superseded_reason": "Owner r51 successor to repair measured pre-existing harness drift; g3 writer terminal, sourceY private/unapproved",
+  "superseded_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1325#issuecomment-6905187982",
+  "superseded_recorded_utc": "2026-11-16T02:01:28.878266+00:00"
 }

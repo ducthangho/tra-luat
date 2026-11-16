@@ -1,0 +1,4 @@
+  THIẾU  K3 connector: KHÔNG ĐO ĐƯỢC: connector reviews: cần trang {`items`, `total_count`} cùng một lần lấy, id int, tập id phân biệt = total_count
+  THIẾU  K6 Windows: Windows `required`: thiếu lượt ứng viên xanh (sha = head, os Windows, tests khác rỗng, mọi ca passed) hoặc dòng miễn
+CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K3 connector; K6 Windows
+rc=12

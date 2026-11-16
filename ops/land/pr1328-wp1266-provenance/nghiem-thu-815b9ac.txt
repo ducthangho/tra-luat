@@ -1,0 +1,24 @@
+# nghiem thu tren checkout 815b9ac (phien dieu phoi #1206), 2026-11-16T01:43:13Z
+## HEAD
+815b9ac76a10fdd30516c9cef7ca93448cbbd923
+b76a912d76e911b697de235934f0362e49750d56
+## numstat 815b9ac^1..815b9ac
+41	4	.claude/dev/doc_receipt_thu_hoi.py
+68	7	.claude/dev/doc_receipt_thu_hoi_test.py
+3	2	.github/workflows/ops-thu-hoi-admission.yml
+119	5	ops/lease_publish.py
+542	9	ops/lease_publish_test.py
+TONG tep=5 them=773 xoa=27
+## diff 815b9ac^2..815b9ac (merge co lam doi gi so voi head 2acd5c7?)
+(rong = tree merge trung tree head)
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+## ruff --select F (4 tep .py) tren 815b9ac va base 997b383
+ops/lease_publish.py merge=2 base=2
+ops/lease_publish_test.py merge=9 base=9
+.claude/dev/doc_receipt_thu_hoi.py merge=0 base=0
+.claude/dev/doc_receipt_thu_hoi_test.py merge=0 base=0

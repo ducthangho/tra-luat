@@ -1,0 +1,87 @@
+Review offline #1266 r13 g1, run `280edc6b`: `openai_codex / codex_cli / machine`; sandbox `workspace-write`. Model/effort phục vụ: `KHONG_DO_DUOC`.
+
+Các neo khớp đầu–cuối:
+
+- HEAD: `802a5665df9ae512d5b2df125b8e219f496fa9f9`
+- Tree: `e31934fdfd70774abfe444604d27d4510211a037`
+- Cha duy nhất/base: `997b383f824ca63d7cee4a659bb6f9cf19bc439f`
+- SHA-256 đặc tả: `e8ba54b72abffe80f1177d406b2bbdfa63441b4826ff6b45cbd2f798cb6a7d02`
+
+Mọi hiện vật đo nằm dưới `/tmp/rv1266-evidence`; không ghi workspace được giao.
+
+**1. Bảng nghiệm thu**
+
+Quy ước: `L(n)` = `python -u ops/lease_publish_test.py --chi-ca=t<n>_`; `D` = `python -u .claude/dev/doc_receipt_thu_hoi_test.py`. Các ID `mNN` dưới đây thuộc nhóm `amb-mNN`.
+
+| Tiêu chí | Lệnh | Số đo | Đột biến đã chạy | Kết quả |
+|---|---|---|---|---|
+| B1: receipt `to_tien`, giá trị và token | L(238) | 1/1, rc 0 | m01,21,22,23,26,27,28,29 | Đạt |
+| B1b: nhánh tổ tiên không gọi hàm vùng | L(239) | 1/1, rc 0 | m13,26 | Đạt |
+| B1c: committer hỏng ở commit đọc thêm | L(240) | 1/1, rc 0 | m18 | Đạt |
+| B2: merge-base, vùng rỗng | L(241) | 1/1, rc 0 | m02,20,21,22,24,25,28 | Đạt |
+| B2b: vùng hai entry, đúng tuple | L(242) | 1/1, rc 0 | m19,25,28 | Đạt |
+| B3: policy lệch | L(243) | 1/1, rc 0 | m03,30,32 | Đạt |
+| B3b: master thêm revocation | L(244) | 1/1, rc 0 | m03,30,32 | Đạt |
+| B4: append-only qua merge-base | L(245) | 1/1, rc 0 | m04 | Đạt |
+| B5: kiểm mọi merge-base | L(246) | 1/1, rc 0 | m05,30,33 | Đạt |
+| B5b: giờ lệch, đưa lại hàng đợi | L(247) | 1/1, rc 0 | m15 | Đạt |
+| B5c: committer phía S hỏng | L(248) | 1/1, rc 0 | m16 | Đạt |
+| B5d: loại ứng viên stale | L(249) | 1/1, rc 0 | m17 | Đạt |
+| B6: không chung gốc | L(250) | 1/1, rc 0 | m06,31 | Đạt |
+| B7: ngân sách commit | L(251) | 1/1, rc 0 | m07 | Đạt |
+| B8a: bỏ qua replace | L(252) | 1/1, rc 0 | m08,30,33 | Đạt |
+| B8b: băm lại commit phía S | L(253) | 1/1, rc 0 | m14 | Đạt |
+| B9: ngân sách cạnh và hai vế âm | L(254) | 1/1, rc 0 | m09,34,35 | Đạt |
+| B10: nguyên câu mới, loại câu cũ | L(255) | 1/1, rc 0 | m10; tự kiểm các biến đổi câu | Đạt |
+| B11: validator v1/v2 | D | Suite 296/296; 24/24 mutant mới liên quan B11 bị giết | Nhóm m11 và ba mutant trường mới | Đạt |
+| B12: JSON thuần, tất định | D | `ca_tinh` đạt; 2/2 mutant bị giết | m12, m12b | Đạt |
+| B16: kích thước và write set | `git diff --numstat <base> HEAD` | Đúng 5 tệp, +771 dòng; dư 9 | Thêm tệp thứ sáu: bị bác vì ngoài write set | Đạt |
+| B17 Linux: đầu vào ghim | `python -B -u /tmp/rv1266-evidence/b17.py` | N=10/50/100: rc 0; 1,005/2,231/17,020 giây | Không áp dụng | Đạt |
+
+Runner đột biến riêng xác nhận **46/46 cặp đột biến–ca đích** đỏ bằng `TinHieuChotCa` tại đúng tiền tố assertion. m34 và m35 được kiểm riêng từng vế âm B9. Đo riêng validator xác nhận **26/26 mutant mới** có disposition `witness_killed`.
+
+Các phép kiểm bổ sung:
+
+| Lệnh/phạm vi | rc | Bằng chứng |
+|---|---:|---|
+| Full `ops/lease_publish_test.py` | 1 | **300/303**, chạy 303, bỏ qua 0 |
+| Full `doc_receipt_thu_hoi_test.py` | 0 | **296/296 ca; 344/344 đột biến** |
+| `packet_loop.py adr-song --root .` | 0 | 66 ADR, 66 dòng, khớp 1–1 |
+| `packet_loop.py doctrine-scan --root .` | 0 | 12 tệp, 0 chỗ chép doctrine |
+| Ruff `--no-cache --select F`, bốn tệp Python | 1 ở cả H/base | 11 lỗi ở mỗi phía, delta 0 |
+| `git diff --check <base> HEAD` | 0 | Sạch |
+| Diff workflow `-U0` | 0 | Chỉ chú thích dòng 22–24; không đổi bước |
+
+Full lease suite **chưa đạt N/N** trong môi trường này. Cả ba ca đỏ đều tái hiện trên mã base:
+
+- t137, t159: thiếu `shellcheck`.
+- t237: `PermissionError: Operation not permitted` khi mở socket cục bộ.
+
+B13, B14, B15 và B18: `not_run`, ngoài phạm vi lượt offline; không ghi là passed.
+
+**2. Findings**
+
+Không phát hiện finding P0–P3 trong diff: **0 lớp, 0 biểu hiện**.
+
+Đã rà phân nhánh, tô màu, lọc cực đại, ngân sách, committer, replace, vùng và validator. Kiểm bổ sung thuật toán trên 4.000 cặp DAG có giờ lệch khớp oracle reachability độc lập.
+
+**3. Đối chiếu lời tự khai của executor**
+
+| Lời khai | Kết quả đo lại |
+|---|---|
+| Numstat từng tệp, tổng +771 | Khớp cả năm tệp |
+| Lease suite 303/303 | **Không tái lập được tại đây:** 300/303; ba lỗi môi trường nêu trên đều đỏ trên base |
+| Validator 296/296, 344/344 | Khớp |
+| Catalog 83, giết 80, sống chủ đích 3, tín dụng giả 0 | Khớp |
+| Ruff H 11 = base 11 | Khớp |
+| Doctrine/ADR sạch | Khớp |
+| B17 thời gian và số commit | N=10/50/100 khớp gần số thời gian; số commit đúng **169/367/2874**. N=500 chưa đo lại |
+| Màu nền t129/t151/B9; t133/t137/B1–B8b/B10; B5d | Khớp: B5d thiếu hàm trên base, ghi không đo được; sáu ca validator được nêu đều xanh trên base |
+| Các chốt t133/t137/t138/t139 đã sửa | Khớp diff; phần consumer của t137 bị giới hạn bởi thiếu `shellcheck` |
+| Thiết kế vùng trực tiếp và lọc tổ tiên dùng chung ngân sách | Khớp mã đã đọc |
+
+Clone không tự giữ `origin/master`; đã xác minh ref ấy ở kho nguồn bằng đúng base nêu trên. Các phép đo dùng exact OID. Checkout bản sao cuối lượt sạch, HEAD/tree giữ nguyên.
+
+Bằng chứng và hash hiện vật: [evidence-manifest.json](/tmp/rv1266-evidence/evidence-manifest.json). Kết luận áp cho phạm vi review offline B1–B12 và B16; full gate local còn các giới hạn môi trường đã khai.
+
+KET_LUAN: approve

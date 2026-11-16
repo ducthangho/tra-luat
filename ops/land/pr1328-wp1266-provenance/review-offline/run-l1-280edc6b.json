@@ -1,0 +1,72 @@
+{
+  "version": "1.5.0",
+  "run_id": "280edc6bf81342f8a99c69ff2ebdb93a",
+  "short_id": "280edc6b",
+  "ten": "l1",
+  "lenh": {
+    "chuong_trinh": "codex.js",
+    "so_doi_so": 13,
+    "van_tay": "05f4c3c9db1a444f"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-11-15T10:04:39.454545+00:00",
+  "ket_thuc_utc": "2026-11-15T10:17:35.898515+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 1264,
+  "khoa_danh_tinh": "linux:16549",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/79a88adb-aaca-57d8-8d60-0e2c734dd105/scratchpad/rv1266/ws",
+  "head": "802a5665df9ae512d5b2df125b8e219f496fa9f9",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "ec7d4f523a6537b274643b76749a5b4a25191458b02e9590c3b6fa7d8a100fcf",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "provider": "local_process",
+  "execution_surface": "subprocess",
+  "transport": "machine",
+  "transport_sha256": "485cef52ebcbc7c0b12baa1b07abd91be773bf2f34b4bdce898ce91a9a2ccacb",
+  "chup_workspace": true,
+  "snapshot_gioi_han": "chi so hai moc truoc/sau; ghi roi hoan nguyen giua hai moc thi khong thay; chau tu setsid hoac sinh truoc khi gan job thi khong chung minh duoc",
+  "snapshot_truoc_sha256": "efb8c80c78e62f46c50a4e26caf258c1f0f2a8da675c217d0253350aed913d51",
+  "snapshot_sau_sha256": "efb8c80c78e62f46c50a4e26caf258c1f0f2a8da675c217d0253350aed913d51",
+  "snapshot_so_muc": {
+    "truoc": 15633,
+    "sau": 15633
+  },
+  "tep_doi_tong": 0,
+  "tep_doi_bi_cat": false,
+  "tep_doi": [],
+  "snapshot_ket_qua": "sach",
+  "snapshot_ly_do": null,
+  "checkpoint_sha256": "386f90f1009192f0dc2d9765414d17f262ae9c53a1487f213e59d9a9d8f634f7",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/79a88adb-aaca-57d8-8d60-0e2c734dd105/scratchpad/rv1266/runs/280edc6b/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 776.444,
+  "stdout_byte": 5967,
+  "stdout_sha256": "0753308684571c9e5cd56337ce571875911abcb113b89600c45f2acd74a2a61f",
+  "stderr_byte": 1156951,
+  "stderr_sha256": "68bf2817f5b018046a3e5904d05175515bbd18b9809c704e7a6793bf9890607a"
+}

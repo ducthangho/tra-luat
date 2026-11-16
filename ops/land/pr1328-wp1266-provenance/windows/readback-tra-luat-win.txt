@@ -1,0 +1,70 @@
+# Readback tep tren may tra-luat-win (device f7281f27-f79f-40a2-a2f5-b454b58a166a), thu muc C:\tl-win\session_015GtxrbDu3ubjAHY6UebEUe\
+# Doc qua Desktop Commander tu phien dieu phoi #1206 luc 2026-11-16T01:4xZ (python tren may tinh sha256 tung tep).
+# Tep tho O LAI tren may (khong chep ve kho: tap-trung-Windows.json 36 KB moi luot). Bam duoi day la bam tren dia may Windows.
+# Ban chep trong kho: ../kiem-merge/windows.json (= wp1266-uv2-out/windows-kiem-merge.json, sha256 15137c07... KHOP dong duoi),
+# runner-luot1/ va runner-luot2/ (runner_tap_trung.py 9b6f4015..., b17_runner.py 3c54110a... KHOP dong duoi).
+
+## sha256 kich_thuoc duong_dan
+756d49b8bcc2abcd7f610b604d11018a196f75e675c9c34d63916f872b163107 596 wp1266-nen-out/buoc1.txt
+f284662ffe410094ea7f882b73c621bf89ac2b69f2176b99979441601d790670 2102 wp1266-nen-out/buoc2.txt
+7627c93d803ffdc1b9739d036038cad11ec13e3882f0cc86ac0d692129687acb 2180 wp1266-nen-out/buoc3.txt
+5b3db2eac1fc1c3cf41507181a7a964d7fae9343feab133f401005832fa20538 2150 wp1266-nen-out/buoc4.txt
+30f26412347ade740633f86e662db6ba5602b31cd4f52cece181e9ba71d97d2e 2490 wp1266-nen-out/buoc5.txt
+761a4492aa78eaab460f29a0ca41a8e37c0165edcf4e5f04ead9c1ab7fdd8ded 2058 wp1266-nen-out/ket-qua.json
+0554084f989cb914a01eee9c54678d1a459d8b309a04bf8cc0e15dad44f39b76 5044 wp1266-nen-out/tien-do.log
+68a9853a1abdb493eef6afbac03156d47f5ad9443fa32c0259ccb43d0101e1fe 1338 wp1266-uv1-out/b17-runner.txt
+544cdc8474b3c4626b8525323207d9eb488a4bd6370e825851b88bc643039999 6324 wp1266-uv1-out/b17/b17-Windows.json
+45c7ae8235f564dbf8ef04acab1d79ac5f239b6c038c71bdc2f0a5efb8919f2a 1394 wp1266-uv1-out/b17/receipt-N10.json
+69c47138388132fc80818f4449bf2a53ddbdd9223dd3687f4291ce49a76f091e 1394 wp1266-uv1-out/b17/receipt-N50.json
+1b3ef2f77a740b1544df762c299091d7196148089a2ac9ffd076332e4c745048 652 wp1266-uv1-out/runner-tap-trung.txt
+daa30d2dbbd9d4733c51d38aed16ea428316421007cae94acce9da3cdb7096a4 36492 wp1266-uv1-out/tap-trung-Windows.json
+45d45ea9c07959b76a6f37192eae6a9c0f713eecf605a74f3425fee130b8de6c 3816 wp1266-uv1-out/tien-do.log
+3f2f3a8794090b58a5ec3f564d4bec1ce0fd5dc25231c54b425d1db284e9354f 1326 wp1266-uv2-out/b17-runner.txt
+f6fea8c7d5e7f1782c481bff55d0f4059dd9c7598201c4db962f5455b639eea7 6320 wp1266-uv2-out/b17/b17-Windows.json
+8ca263f5343131e6d42c95a3e729fb10f886a40ee8156e0fe37d4793df95850e 1394 wp1266-uv2-out/b17/receipt-N10.json
+89214d21822bb376b4cab2776e11a352e0443f479b2dccc0fbfeb8478ced61a8 1394 wp1266-uv2-out/b17/receipt-N50.json
+99016fa1cf9d971b30d6531b363da243cde1a5f9b24d473a8bfb68363ef2ab1b 654 wp1266-uv2-out/runner-tap-trung.txt
+da5ba75140ba39c1c98d1ad4ab20e303292da23128d46fe97b85c3c930c4013e 36310 wp1266-uv2-out/tap-trung-Windows.json
+c61a414dc41edfc6563264410dffc053486b3ba85ae2020d39a63f10cda6a0ca 3812 wp1266-uv2-out/tien-do.log
+15137c07e76e55a240bb72bdcc46d8d2f7ec33a269607cc780c67e4e8ab817e1 10054 wp1266-uv2-out/windows-kiem-merge.json
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 wp1266-uv2-out-dia-day/runner-tap-trung.txt
+d7ad3b6865e19e670ef5bc453e47f183fca78ad73eefe0a049039207cd7d00da 2090 wp1266-uv2-out-dia-day/tien-do.log
+3c54110a8084d527e3572e025238f38468df17018df4452006415622b6dc3fcd 7133 runner1266/b17_runner.py
+aeb458d9919a11302a03906b8ffdb278697947cf009b99613a3652333ce9efa8 3998 runner1266/chay-uv-1266.ps1
+9b6f40153d87ff2742d08bcd55616f1e259d7aa4ed697a4571649f25ec58f781 6884 runner1266/runner_tap_trung.py
+3c54110a8084d527e3572e025238f38468df17018df4452006415622b6dc3fcd 7133 runner1266b/b17_runner.py
+a89045b6dfe0c4e1ff2c78f14eb1a61da2c5a47cc6b437f3c0d2f86f63d93560 4037 runner1266b/chay-uv2-1266.ps1
+9b6f40153d87ff2742d08bcd55616f1e259d7aa4ed697a4571649f25ec58f781 6884 runner1266b/runner_tap_trung.py
+
+## Trich (chuoi tieng Viet bi hong ma o console Windows; chep lai phan ASCII nguyen van)
+== wp1266-nen-out/ket-qua.json (nen 997b383, chay tren ma base): 5 buoc rc 0
+  doc_receipt_thu_hoi_test (toan bo) rc 0 6139.1s: doc_receipt_thu_hoi tests: 270/270 ca QUA, 318/318 dot bien GIET
+  lease_publish_test t129 rc 0 5.1s 1/1 · t133 rc 0 55.3s 1/1 · t137 rc 0 3.5s 1/1 · t151 rc 0 28.8s 1/1
+
+== wp1266-uv1-out/runner-tap-trung.txt (H1 802a566)
+tap-trung Windows: ung_vien 203/204 QUA, chot_trang_thai={'nen_head_la_base': True, 'uv_head_la_H': True, 'uv_status_rong': True, 'nen_status_dung_hai_dong_M': True}, sha256=daa30d2d...
+  (ca do: t246_amb05_criss_cross_mot_base_lech — loi FIXTURE CRLF trong stdin mktree, xem ../windows/chan-doan-t246.py; sua o H2)
+
+== wp1266-uv1-out/b17-runner.txt (H1)
+N=10 bat_buoc=True dat=True rc=0 15.3s object=176 to_mau=169
+N=50 bat_buoc=True dat=True rc=0 31.3s object=375 to_mau=367
+N=100 bat_buoc=False dat=False rc=12 60.5s object=None (KHONG_XAC_DINH: het deadline reader, khong co receipt)
+N=500 bat_buoc=False dat=False rc=12 60.4s object=None (KHONG_XAC_DINH: het deadline reader, da kill cat-file, khong co receipt)
+B17 Windows: dat_moi_N_bat_buoc=True sha256=544cdc84...
+
+== wp1266-uv2-out-dia-day/tien-do.log (lan thu H2 dau, HONG — chua do ca nao)
+15:04:33Z kiem tai python.exe: 2 tien trinh (PID 4444, 5816 tao 13-11 — khong phai cua phien, KHONG dung toi)
+15:05:57Z M4 KHOP (H2 2acd5c7, tree b76a912d, cha 802a566, shallow=false)
+15:07:00Z LOI: Program 'python.exe' failed to run: There is not enough space on the disk.
+15:07:00Z da nha khoa
+  (phien xoa 5 clone CUA CHINH NO, giai phong ~3 GB, chay lai => wp1266-uv2-out)
+
+== wp1266-uv2-out/runner-tap-trung.txt (H2 2acd5c7)
+tap-trung Windows: ung_vien 204/204 QUA, chot_trang_thai={'nen_head_la_base': True, 'uv_head_la_H': True, 'uv_status_rong': True, 'nen_status_dung_hai_dong_M': True}, sha256=da5ba751...
+
+== wp1266-uv2-out/b17-runner.txt (H2)
+N=10 bat_buoc=True dat=True rc=0 15.8s object=176 to_mau=169
+N=50 bat_buoc=True dat=True rc=0 33.7s object=375 to_mau=367
+N=100 bat_buoc=False dat=False rc=12 60.4s object=None (KHONG_XAC_DINH: het deadline reader, da kill cat-file, khong co receipt)
+N=500 bat_buoc=False dat=False rc=12 60.5s object=None (KHONG_XAC_DINH: het deadline reader, da kill cat-file, khong co receipt)
+B17 Windows: dat_moi_N_bat_buoc=True sha256=f6fea8c7...

@@ -1,0 +1,45 @@
+/tmp/claude-0/-home-user-tra-luat/79a88adb-aaca-57d8-8d60-0e2c734dd105/scratchpad/t246rep2/ops/lease_publish_test.py:3640: SyntaxWarning: invalid escape sequence '\s'
+  2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+/tmp/claude-0/-home-user-tra-luat/79a88adb-aaca-57d8-8d60-0e2c734dd105/scratchpad/t246rep2/ops/lease_publish_test.py:5783: SyntaxWarning: invalid escape sequence '\d'
+  KHÔNG neo đầu dòng là `lease_publish: (\d+)/(\d+) đạt`, và nó đọc BẢN RIÊNG trong tệp chứ
+{
+ "t0": "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
+ "t_pol": "5a725c4a0d2fe1cf47c5faf941cca2485ced765b",
+ "B0": "53ffc06c186e6e2f331bced3ce8d6cd9101664c3",
+ "X1": "1b48fd8ce2d366433e8c03f49ead49cda2854aa9",
+ "X2": "c9fbfd1fe1115fd4db77ca1cd94ad498ea7ae884",
+ "S": "202160a0b59f6e749e3cb7156d95e876815f7f2f",
+ "H": "55553d8e105161434971ac01752a0231d88d0a0b",
+ "oracle": [
+  "1b48fd8ce2d366433e8c03f49ead49cda2854aa9",
+  "c9fbfd1fe1115fd4db77ca1cd94ad498ea7ae884"
+ ],
+ "vung_git_X1": {},
+ "vung_git_X2": {
+  ".github/coordination/change-impact.v1.json": [
+   "100644",
+   "blob",
+   "0967ef424bce6791893e9a57bb952f80fd536e93"
+  ]
+ },
+ "cat_X2": "tree 5a725c4a0d2fe1cf47c5faf941cca2485ced765b\nparent 53ffc06c186e6e2f331bced3ce8d6cd9101664c3\nauthor c <a@b> 111 +0000\ncommitter c <a@b> 111 +0000\n\nX2 0\n",
+ "ls_tree_t_pol": "100644 blob 0967ef424bce6791893e9a57bb952f80fd536e93\t.github/coordination/change-impact.v1.json\n",
+ "rc": 12,
+ "stdout": "",
+ "stderr": "CHAN [12]: KHÔNG_XÁC_ĐỊNH: VUNG_LECH: merge-base c9fbfd1fe1115fd4db77ca1cd94ad498ea7ae884 khác S ở vùng bộ kiểm đọc, đường dẫn lệch đầu tiên .github/coordination/change-impact.v1.json\n",
+ "receipt": null,
+ "to_mau_hai_phia": {
+  "ung_vien": [
+   "c9fbfd1fe1115fd4db77ca1cd94ad498ea7ae884",
+   "1b48fd8ce2d366433e8c03f49ead49cda2854aa9"
+  ],
+  "merge_bases": [
+   "1b48fd8ce2d366433e8c03f49ead49cda2854aa9",
+   "c9fbfd1fe1115fd4db77ca1cd94ad498ea7ae884"
+  ],
+  "so_commit_doc": 5
+ },
+ "co_ham_vung_tai": false,
+ "co_ham_vung_tai_S": false,
+ "co_ham__vung": false
+}

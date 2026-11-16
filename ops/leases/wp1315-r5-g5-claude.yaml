@@ -97,7 +97,7 @@
   "lease_note": "Author lease ends with phase A; it must be closed/shortened before waiting for human audit. Phase B uses separate validation generation6 lease only after actual-human exact-H audit.",
   "new_Codex_spec_review_limit": 3,
   "new_Claude_author_limit": 1,
-  "new_Codex_source_review_limit": 1,
+  "new_Codex_source_review_limit": 2,
   "genuine_connector_limit_phase_B": 1,
   "retries": 0,
   "additional_contexts": 0,
@@ -167,5 +167,21 @@
     "consumed": 2,
     "ly_do": "hai lần spec sửa sau changes_requested; mỗi lần đúng một lượt duyệt lại",
     "authority": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696"
-  }
+  },
+  "source_review_ceiling_raise": {
+    "from": 1,
+    "to": 2,
+    "consumed": 1,
+    "first_review": {
+      "run": "7cb02821",
+      "reviewed_sha": "98c7389d91027e1d7eeccaea26e50332773249bf",
+      "verdict": "blocked",
+      "findings": 0,
+      "cause": "reviewer scratch mutant runner ModuleNotFoundError launcher; 24/24 required cases passed; no source defect"
+    },
+    "ly_do": "K4 cần review model approve trên đúng H; lượt 1 bị chặn do hạ tầng runner của reviewer",
+    "authority": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696"
+  },
+  "candidate_head": "98c7389d91027e1d7eeccaea26e50332773249bf",
+  "candidate_tree": "d963dc73799724d76251f645fb7812e7ff3c8992"
 }

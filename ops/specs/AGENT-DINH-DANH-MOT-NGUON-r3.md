@@ -1,13 +1,13 @@
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
-# Đặc tả packet — `AGENT-DINH-DANH-MOT-NGUON` (revision 2)
+# Đặc tả packet — `AGENT-DINH-DANH-MOT-NGUON` (revision 3)
 
 | trường | giá trị |
 |---|---|
 | `packet_id` | `AGENT-DINH-DANH-MOT-NGUON` |
 | `packet_issue` | #1335 |
-| `revision` | 2 |
+| `revision` | 3 |
 | `nguon_cap_viec` | #379 (mở lại ở issuecomment-6906802466) và #387, các nợ D2–D4. Vòng hỏi `soan-spec` của phiên điều phối #1206 ngày 16-11-2026: Q1 (đây là P-B), Q3 = (c), Q4 = băm tệp thực thi, Q6; chủ kho trả lời "Đồng ý theo khuyến nghị". |
 | `review_class` | `sensitive` (`.claude/dev/launcher.py` là đường phóng agent và ghi định danh reviewer) |
 | `base` | nhánh mặc định lúc cấp lease; số đo lấy trên `a97a1ca` |
@@ -98,7 +98,8 @@ vỏ shell. Không sửa đoạn nào khác trong tệp.
 | N1 | Ma trận M7 xanh trên head; trên **base**, ca `bash`+`--agent claude` và ca `claude.cmd` ĐỎ (vế âm, chính phép đo ở mục 0) | đột biến tương ứng ở M8 |
 | N2 | Ca "khớp hai cửa" xanh với đủ 15 tổ hợp, đếm và in theo từng tổ hợp (L6c) | đột biến T1: tách nguồn ⇒ ca đỏ, kèm danh sách tổ hợp lệch |
 | N3 | `_dinh_danh_van_chuyen`/hàm mới với `/x/malware/codex` không khai `--agent` ⇒ `transport_sha256` bằng sha256 của tệp giả; với `--agent codex` vẫn khác băm hằng `5c77b6e9…` | đột biến T3 lùi về băm hằng ⇒ đỏ |
-| N3b | Ca "khác cwd" của M7: băm là băm của tệp trong workspace, và dấu in ra của con khớp tệp đã băm | đột biến: resolve theo `cwd` của launcher (bỏ `cwd=workspace`) ⇒ đỏ; đột biến: phóng `lenh_con` gốc thay vì đường đã băm ⇒ đỏ ở khẳng định "con chạy đúng tệp đã băm" |
+| N3b | Ca "khác cwd" của M7: băm là băm của tệp trong workspace, và dấu in ra của con khớp tệp đã băm | đột biến: resolve theo `cwd` của launcher (bỏ `cwd=workspace`) ⇒ đỏ |
+| N3c | Ca "chọn tệp thực thi" RIÊNG: `lenh[0]` là symlink trỏ tới đích X (in dấu X). Ca test dùng một điểm tiêm nằm giữa bước băm và bước phóng (ví dụ thay hàm phóng bằng một hàm bọc) để đổi đích của symlink sang Y (in dấu Y), rồi mới cho phóng. Kết quả đúng: con in dấu X và `transport_sha256` = băm X. | đột biến: phóng `lenh_con` gốc (symlink) thay vì đường tuyệt đối đã resolve ⇒ con in dấu Y ⇒ đỏ. Phạm vi của ca này chỉ là CHỌN tệp thực thi. Ca không hứa chống việc sửa NỘI DUNG của chính tệp đã băm giữa lúc băm và lúc chạy; khe ấy ghi ở `chua_do_duoc`. |
 | N4 | `python -u .claude/dev/launcher_test.py` ra N/N, hai số bằng nhau. Bảng đột biến: mọi đột biến mới bị giết đúng lý do, 0 tín dụng giả. `t117` (mỗi mẫu tìm-thay khớp đúng một chỗ) xanh, và đọc từng dòng của nó (r2 §8.1) | ca đỏ, số lệch, hoặc mutant cũ đột nhiên `giết 0/1` |
 | N5 | **Windows native** trên `tra-luat-win` (ADR-0057/58/59), Python 3.12, không `PYTHONUTF8`: ma trận M7 chạy thật với shim `claude.cmd`/`codex.cmd` giả, và ca mới không bị `BO QUA` lặng lẽ (r2 §8.2). Vế âm: ca `claude.cmd` đỏ trên base | ca đỏ hoặc bị bỏ qua không khai |
 | N6 | CI: gắn nhãn `windows` trước khi merge để `launcher-windows.yml` chạy (r2 §8.3: workflow ấy có `labeled`). Lượt `launcher (Windows that)` trên head xanh, đọc nhãn job và `runner_id` | job Windows đỏ, hoặc vắng mặt |
@@ -138,6 +139,7 @@ review, đóng 02-11 vì tụt 3425 commit và 2 xung đột). Hình dạng đ�
   do ca test dựng.
 - Với shim `.cmd`/`.ps1`, `transport_sha256` là băm của shim, không phải băm của bản Node thật sau shim.
   Đây là giới hạn đã biết, phải ghi vào docstring.
+- Khe giữa lúc băm và lúc chạy với NỘI DUNG của chính tệp đích (sửa tệp tại chỗ sau khi băm): không đóng. T3 chỉ bảo đảm tệp được phóng chính là tệp đã được chọn để băm.
 - Vỏ shell chưa có tên trong danh sách vẫn rơi vào nhánh "còn lại ⇒ `khong`", như r2 §3.3 đã nói. Packet
   không đóng được ca này.
 
@@ -151,3 +153,11 @@ rồi phóng bằng chính đường đã băm; M7 thêm ca khác `cwd`; thêm t
 
 Ghi kèm, không phải thay đổi của đặc tả: ngày 16-11 chủ kho bỏ **CI Windows**. N6 (gắn nhãn `windows` để chạy
 `launcher-windows.yml`) được ghi là `owner_waived` trong lease. Lượt native trên `tra-luat-win` (N5) giữ nguyên.
+
+## 12. Thay đổi so với r2
+
+r2: `ops/specs/AGENT-DINH-DANH-MOT-NGUON-r2.md`, sha256 `5bf87a4649a97d8c91aeb5c3207580fb23fd25e76311d6eaac210466781ec431`. r2 chưa được duyệt, chưa lease nào dùng.
+r3 đóng finding P2 4582022758 của connector trên PR #1333 (head `3f9fb47`). Trong fixture khác `cwd`, phóng
+`./agent` gốc với `cwd=B` cũng chạy đúng `B/agent`, nên đột biến "phóng `lenh_con` gốc" không đổi màu N3b.
+Thay đổi: tách đột biến ấy sang tiêu chí mới N3c, dùng fixture symlink đổi đích giữa lúc băm và lúc phóng.
+Ghi khe "sửa nội dung tệp đã băm" vào `chua_do_duoc`.

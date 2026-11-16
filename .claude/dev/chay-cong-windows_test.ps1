@@ -38,8 +38,14 @@
 #   t29 chot-dat-sau-diem-dung                    `dist` THEO DÕI (symlink sang `tools`) ⇒ rc=2 và KHÔNG gì được ghi qua nó trước khi bị
 #                                                 từ chối (thư mục nhật ký từng được tạo TRƯỚC chốt `ls-files`)
 #   t30 guong-lenh-bo-env-buoc                    `env:` của bước cổng: mọi khoá `env` (workflow/job/bước) của job `gate*` trong ci.yml và
-#                                                 của `ci-dot-bien-du.yml` có mặt trong script; MỌI khoá ấy RÒ từ phiên gọi đều bị xoá
-#                                                 trước khi tới cổng; `test registry` mang env `pull_request` (GOC/DAU đúng) khi cây
+#                                                 của `ci-dot-bien-du.yml` có mặt trong script (wp1325 r4: kể cả `CI_DANG_KY_GOP_KQ`,
+#                                                 `CONG_CU_TEST_GOP_CHE_DO`, `NHANH_DON_DUOC_DICH{,_RA,_DU}`); MỌI khoá ấy RÒ từ phiên gọi đều bị xoá
+#                                                 trước khi tới cổng (wp1325 r5: cả họ biến chọn chế độ/kênh tầng đỉnh của
+#                                                 `nhanh_don_duoc_test` — `CHI_TU_KIEM`, `KHONG_DOT_BIEN`, `TU_KIEM_CHI_CA`, `KENH`,
+#                                                 `DAU_PHIEN`, `MUTANT`, `LAN_THU`, `TU_KIEM_NONCE`, `TU_KIEM_FILE` —: đồ giả quan sát của
+#                                                 lượt `day-du` gọi ĐỘC LẬP, không đối số, phải thấy từng biến VẮNG, lượt gộp + từng biến
+#                                                 rút gọn một lượt; biến canh không bị xoá phải tới được nó — chỉ là kho GIẢ, KHÔNG phải
+#                                                 bằng chứng vòng đột biến thật đã chạy); `test registry` mang env `pull_request` (GOC/DAU đúng) khi cây
 #                                                 SẠCH + HEAD đi trước `origin/master`, vắng (ĐỦ) khi bẩn, khi có mục assume-unchanged /
 #                                                 skip-worktree bị sửa, hoặc khi không đi trước
 #   t31 env-cong-cu-phien-goi-lot-qua             `PYTHON*` lạ (`PYTHONOPTIMIZE` gỡ `assert` trần), biến git cục bộ của kho (tập lấy từ
@@ -51,6 +57,8 @@
 #                                                 BIẾN là hằng có mặt trong script — hoặc có TÊN ĐÚNG trong một hằng chuỗi `KHÔNG CHẠY…`/`THAY BẰNG…`; bước
 #                                                 không đích, bước `uses:` lạ và ghim phiên bản phải khớp danh sách CHO PHÉP / hằng của script (bước mới ⇒ ĐỎ).
 #                                                 VÀ dấu vân từng job (`$DauVanCi`: thân `run`, env, with, uses, if…) khớp bảng ghim ⇒ đổi MỘT chữ ở bước nào cũng ĐỎ
+#                                                 (wp1325 r4: gương `update-linux.sh --selftest` chỉ Linux, `nhanh_don_duoc_test` TRỌN thay mảnh +
+#                                                 `THAY BẰNG` cho gom `gate-nhanh-gop`; bảng ghim phủ cả `gate-nhanh-manh`/`gate-nhanh-gop`)
 #   t33 bo-giai-cong-cu-theo-ten-thu-tu (wrapper) `python` giả (thoát 0) ĐẦU PATH, `python3` thật sau nó ⇒ cổng lease (wrapper THẬT
 #                                                 chọn Python theo TÊN) không ĐẠT; `python` in `TLPY=` rồi thoát khác 0 ⇒ cổng lease
 #                                                 không chạy (vế `$LASTEXITCODE` của thăm dò)
@@ -183,7 +191,7 @@ $env:GIT_CONFIG_COUNT = $null; $env:GIT_CONFIG_PARAMETERS = $null
 # `git -C <kho giả> add -A` ghi đè index của kho THẬT (đo: 2144 → 34 mục, index trỏ blob không có); `GIT_DIR` cùng họ
 # (đo: `git -C <kho giả> commit` ghi vào kho mà biến trỏ tới). t13 tự đặt lại `GIT_CONFIG` qua `Chay`.
 foreach ($n in 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES',
-               'GIT_COMMON_DIR', 'GIT_CONFIG') { [Environment]::SetEnvironmentVariable($n, $null) }
+               'GIT_COMMON_DIR', 'GIT_CONFIG') { [Environment]::SetEnvironmentVariable($n, [NullString]::Value) }
 # …và KÍN với code page của console: pwsh GIẢI MÃ output lệnh ngoài bằng `[Console]::OutputEncoding` của tiến trình NÀY — trên
 # Windows mặc định là code page OEM/ANSI (437/1252; chính script khai ở `.DESCRIPTION`) — còn script và harness GHI UTF-8. Không ép
 # thì mọi regex tiếng Việt thành rác (giả lập console 437 trên Linux: 13/18, t1 t4 t11 t13 t17 ĐỎ oan, vế phủ định `tất định … rc=0`
@@ -198,13 +206,13 @@ function Dung-Kho { param([string]$Scr = $Script)
     $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
     $script:Rac += $d
     $k = Join-Path $d 'k'
-    foreach ($t in 'ops', '.claude/dev', 'scripts/tl_core', '.githooks', '.github/checks') {
+    foreach ($t in 'ops', 'ops/environment', '.claude/dev', 'scripts/tl_core', '.githooks', '.github/checks') {
         New-Item -ItemType Directory -Force -Path (Join-Path $k $t) | Out-Null
     }
     Copy-Item -LiteralPath $Scr -Destination (Join-Path $k '.claude/dev/chay-cong-windows.ps1')
     Copy-Item -LiteralPath (Join-Path $GocKho 'ops/bash_nen.py') -Destination (Join-Path $k 'ops/bash_nen.py')
     Copy-Item -LiteralPath (Join-Path $GocKho '.gitignore') -Destination (Join-Path $k '.gitignore')
-    foreach ($f in 'ops/lease_publish_test.py', 'ops/cong_cu.py', 'ops/cong_cu_test.py',
+    foreach ($f in 'ops/lease_publish_test.py', 'ops/cong_cu.py', 'ops/cong_cu_test.py', 'ops/nhanh_don_duoc_test.py',
                    '.claude/dev/packet_loop_test.py', '.claude/dev/ci_dang_ky_test.py',
                    '.claude/dev/codex_cred_test.py', 'ops/bien_nhan_v2_test.py', '.claude/dev/idiom_py_test.py',
                    '.githooks/eol_policy_test.py', '.githooks/pre_push_test.py', '.claude/dev/gate_lifecycle_test.py',
@@ -218,6 +226,7 @@ function Dung-Kho { param([string]$Scr = $Script)
     }
     Set-Content -LiteralPath (Join-Path $k 'scripts/tl.py') -Value $TlStub -Encoding utf8NoBOM
     Set-Content -LiteralPath (Join-Path $k 'ops/chay_lease_publish_test.sh') -Value "exit `${STUB_RC_LEASE:-0}" -Encoding utf8NoBOM
+    Set-Content -LiteralPath (Join-Path $k 'ops/environment/update-linux.sh') -Value "exit `${STUB_RC_UPDATE_LINUX:-0}" -Encoding utf8NoBOM
     Set-Content -LiteralPath (Join-Path $k 'scripts/don-nhanh_test.ps1') -Value 'exit 0' -Encoding utf8NoBOM
     & git -C $k init -q
     & git -C $k add -A
@@ -225,14 +234,17 @@ function Dung-Kho { param([string]$Scr = $Script)
     return $k
 }
 
+# wp1325 r6: giá trị `$null` (VẮNG — lúc đặt, hoặc lúc trả lại biến vốn không có) phải tới API là CLR null `[NullString]::Value`;
+# `$null` trần bị bộ gắn đối số đổi thành `''` và .NET 9+ để biến CÓ MẶT/RỖNG (đo Windows pwsh 7.6.10/.NET 10: `GIT_CONFIG=''`
+# sau t13 ⇒ git `empty string is not a valid path`). `''` và giá trị khác giữ nguyên. Cùng lớp: dòng xoá biến git ở trên. t31 khoá.
 function Chay {
     param([string]$Kho, [string[]]$Doi = @(), [hashtable]$Env = @{})
     $cu = @{}
-    foreach ($n in $Env.Keys) { $cu[$n] = [Environment]::GetEnvironmentVariable($n); [Environment]::SetEnvironmentVariable($n, $Env[$n]) }
+    foreach ($n in $Env.Keys) { $cu[$n] = [Environment]::GetEnvironmentVariable($n); [Environment]::SetEnvironmentVariable($n, $(if ($null -eq $Env[$n]) { [NullString]::Value } else { $Env[$n] })) }
     try {
         $ra = Doc-Utf8 { & $PwshExe -NoProfile -File (Join-Path $Kho '.claude/dev/chay-cong-windows.ps1') @Doi 2>&1 }
         $rc = $LASTEXITCODE
-    } finally { foreach ($n in $cu.Keys) { [Environment]::SetEnvironmentVariable($n, $cu[$n]) } }
+    } finally { foreach ($n in $cu.Keys) { [Environment]::SetEnvironmentVariable($n, $(if ($null -eq $cu[$n]) { [NullString]::Value } else { $cu[$n] })) } }
     $txt = (($ra | ForEach-Object { "$_" }) -join "`n") -replace "\x1b\[[0-9;]*m", ''
     return @{ rc = $rc; ra = $txt }
 }
@@ -386,17 +398,85 @@ Ca 't8 python gia thoat 0 dau PATH => cong Python khong DAT' {
 # mặc định có thể KHÔNG BAO GIỜ ra ĐẠT (đo: `test registry` > 900 s cả trên CI Windows lẫn ở đây). Đọc MỌI job `gate*`, không
 # ghim ba tên: master fc852ff đã tách cổng sang `gate-ops`/`gate-cong-cu`, và ba tên ghim cứng là danh sách sẽ trôi.
 Ca 't9 han mac dinh >= timeout-minutes cua job CI' {
+    # wp1325: `gate-packet-loop` dùng biểu thức ma trận (Windows 240, Ubuntu 150). Bộ đọc trần CHỈ nhận số nguyên
+    # dương thật (không bool/float/chuỗi số) hoặc ĐÚNG NGUYÊN VĂN biểu thức đã đóng băng (= trần Windows 240);
+    # biểu thức/kiểu lạ, 0, âm, thiếu khóa ⇒ TỪ CHỐI (rc=3). So chuỗi tuyệt đối, KHÔNG eval biểu thức.
     $ci = Join-Path $GocKho '.github/workflows/ci.yml'
     $py = Tim-PyYaml; $pd = $py.Dau
-    $ma = "import sys,yaml`nd=yaml.safe_load(open(sys.argv[1],encoding='utf-8'))`n" +
-          "print(max(int(d['jobs'][j]['timeout-minutes']) for j in d['jobs'] if j.startswith('gate')))"
-    $phut = @(& $py.Ten @pd -c $ma $ci)
-    if ($LASTEXITCODE -ne 0 -or $phut.Count -ne 1) { throw "khong doc duoc timeout-minutes (rc=$LASTEXITCODE)" }
+    $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-t9-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
+    $script:Rac += $d
+    New-Item -ItemType Directory -Force -Path $d | Out-Null
+    $kiem = Join-Path $d 'tran_phut.py'
+    Set-Content -LiteralPath $kiem -Encoding utf8NoBOM -Value @'
+import sys, yaml
+BIEU_THUC_WINDOWS_240 = "${{ matrix.os == 'windows-latest' && 240 || 150 }}"
+d = yaml.safe_load(open(sys.argv[1], encoding="utf-8"))
+tran = []
+for j, job in d["jobs"].items():
+    if not j.startswith("gate"):
+        continue
+    v = job.get("timeout-minutes") if isinstance(job, dict) else None
+    if type(v) is int and v > 0:
+        tran.append(v)
+    elif type(v) is str and v == BIEU_THUC_WINDOWS_240:
+        tran.append(240)
+    else:
+        print("TU_CHOI %s %s %r" % (j, type(v).__name__, v))
+        sys.exit(3)
+if not tran:
+    print("TU_CHOI khong co job gate*")
+    sys.exit(3)
+print(max(tran))
+'@
+    $DocTran = {
+        param([string]$tep)
+        $o = @(& $py.Ten @pd $kiem $tep | ForEach-Object { "$_" })
+        $rc = $LASTEXITCODE
+        if ($rc -eq 0 -and $o.Count -eq 1 -and $o[0] -match '^[1-9][0-9]*$') { return [int]$o[0] }
+        return "TU_CHOI rc=$rc $($o -join ' | ')"
+    }
+    $DuHan = { param([int]$han, [int]$phut) $han -ge $phut * 60 }
+
+    # Cây thật: trần ci.yml và mặc định -HanGiay đọc từ AST (không chạy script).
+    $phut = & $DocTran $ci
+    if ($phut -isnot [int]) { throw "khong doc duoc timeout-minutes cua ci.yml: $phut" }
     $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
     $p = @($ast.ParamBlock.Parameters | Where-Object { $_.Name.VariablePath.UserPath -eq 'HanGiay' })
     if ($p.Count -ne 1 -or -not $p[0].DefaultValue) { throw 'khong thay mac dinh cua -HanGiay' }
     $mac = [int]$p[0].DefaultValue.SafeGetValue()
-    if ($mac -lt [int]$phut[0] * 60) { throw "HanGiay mac dinh $mac s < $([int]$phut[0] * 60) s cua job CI" }
+    if (-not (& $DuHan $mac $phut)) { throw "HanGiay mac dinh $mac s < $($phut * 60) s cua job CI" }
+
+    # Biến thể đóng băng — CÙNG ca t9 (giữ nguyên danh mục ca cấp cao). `phut` = trần phải đọc ra; $null = phải TỪ CHỐI.
+    $bt = '${{ matrix.os == ''windows-latest'' && 240 || 150 }}'
+    $bienThe = @(
+        @{ ten = 'nguyen-150'; v = '150'; phut = 150 },
+        @{ ten = 'nguyen-240'; v = '240'; phut = 240 },
+        @{ ten = 'bieu-thuc-dong-bang'; v = $bt; phut = 240 },
+        @{ ten = 'float-240.0'; v = '240.0'; phut = $null },
+        @{ ten = 'bool-true'; v = 'true'; phut = $null },
+        @{ ten = 'chuoi-so-240'; v = '"240"'; phut = $null },
+        @{ ten = 'khong'; v = '0'; phut = $null },
+        @{ ten = 'am-1'; v = '-1'; phut = $null },
+        @{ ten = 'bieu-thuc-la-300'; v = '${{ matrix.os == ''windows-latest'' && 300 || 150 }}'; phut = $null },
+        @{ ten = 'bieu-thuc-la-khoang-trang'; v = '${{ matrix.os == ''windows-latest'' && 240 || 150  }}'; phut = $null },
+        @{ ten = 'bieu-thuc-la-don'; v = '${{ 240 }}'; phut = $null }
+    )
+    foreach ($b in $bienThe) {
+        $tep = Join-Path $d ("ci-" + $b.ten + ".yml")
+        Set-Content -LiteralPath $tep -Encoding utf8NoBOM -Value ("jobs:`n  gate-x:`n    timeout-minutes: " + $b.v + "`n  gate-y:`n    timeout-minutes: 10`n")
+        $r = & $DocTran $tep
+        if ($null -eq $b.phut) {
+            if ($r -is [int]) { throw "bien the $($b.ten) phai bi TU CHOI, lai doc ra $r phut" }
+            if ($r -notmatch '^TU_CHOI rc=3 TU_CHOI gate-x ') { throw "bien the $($b.ten) tu choi sai cho: $r" }
+        } else {
+            if ($r -isnot [int] -or $r -ne $b.phut) { throw "bien the $($b.ten) phai doc $($b.phut) phut, duoc: $r" }
+            if (-not (& $DuHan 14400 $r)) { throw "bien the $($b.ten): HanGiay 14400 phai du cho $r phut" }
+        }
+    }
+    # Trần Windows 240 của biểu thức đóng băng: HanGiay < 14400 phải bị coi là THIẾU; mặc định hiện hành phải ≥ 14400.
+    if (& $DuHan 14399 240) { throw 'HanGiay 14399 < 14400 ma van duoc coi la du cho tran Windows 240' }
+    if (& $DuHan 9000 240) { throw 'HanGiay 9000 (mac dinh cu) ma van duoc coi la du cho tran Windows 240' }
+    if (-not (& $DuHan $mac 240)) { throw "HanGiay mac dinh $mac s < 14400 s cua tran Windows 240" }
 }
 
 Ca 't10 goc kho co [ ] => bao dung nguyen nhan, khong bao "khong tim thay goc"' {
@@ -854,6 +934,12 @@ Ca 't29 dist THEO DOI => tu choi TRUOC khi ghi qua no' {
 # `cong_cu_test` rc=0 mà bỏ trọn bán kính 416 đột biến. Đo với b5a9f79: `CONG_CU_TEST_MANH=15/16` rò ⇒ `cong_cu_test` rc=0, 26/416,
 # bỏ cổng cây thật; `NHANH_DON_DUOC_MANH=7/8` rò ⇒ `nhanh_don_duoc_test` chạy MẢNH 783 s thay vì NHẸ 2 s, registry ĐỎ vì máy.
 Ca 't30 env cua buoc cong: khoa ci.yml co mat, bien ro bi xoa, registry mang env pull_request khi do duoc diff' {
+    # wp1325 r5: biến chọn chế độ / kênh bằng chứng mà `main()` của `ops/nhanh_don_duoc_test.py` đọc ở tầng đỉnh (ngoài
+    # `NHANH_DON_DUOC_MANH*`/`_DICH*` ở trên). Hai biến đầu đo được trên AST thật (chạy trong bộ nhớ, hàm nặng thay bằng đồ đứng
+    # thế — KHÔNG phải lượt trọn thật): `CHI_TU_KIEM` ⇒ chỉ tự kiểm, `KHONG_DOT_BIEN` ⇒ chỉ ca nền; cả hai rc=0, không đột biến.
+    $ndRutGon = @('NHANH_DON_DUOC_CHI_TU_KIEM', 'NHANH_DON_DUOC_KHONG_DOT_BIEN', 'NHANH_DON_DUOC_TU_KIEM_CHI_CA', 'NHANH_DON_DUOC_KENH',
+                  'NHANH_DON_DUOC_DAU_PHIEN', 'NHANH_DON_DUOC_MUTANT', 'NHANH_DON_DUOC_LAN_THU', 'NHANH_DON_DUOC_TU_KIEM_NONCE',
+                  'NHANH_DON_DUOC_TU_KIEM_FILE')
     $ci = Join-Path $GocKho '.github/workflows/ci.yml'
     $py = Tim-PyYaml; $pd = $py.Dau
     $ma = "import os,sys,yaml`ndef k(p,chon):`n d=yaml.safe_load(open(p,encoding='utf-8')); s=set(d.get('env') or {})`n" +
@@ -874,7 +960,9 @@ Ca 't30 env cua buoc cong: khoa ci.yml co mat, bien ro bi xoa, registry mang env
     # khoá trừ AL_VER và bốn khoá nó tự đặt.
     $tenRo = @(@($khoa) + @('CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA', 'CI_DANG_KY_DOT_BIEN_MANH',
                             'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CI_DUONG_NHANH_SU_KIEN',
-                            'CI_DUONG_NHANH_GOC', 'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE') |
+                            'CI_DUONG_NHANH_GOC', 'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE',
+                            'CI_DANG_KY_GOP_KQ', 'CONG_CU_TEST_GOP_CHE_DO', 'NHANH_DON_DUOC_DICH', 'NHANH_DON_DUOC_DICH_RA',
+                            'NHANH_DON_DUOC_DICH_DU') + $ndRutGon |
                Where-Object { $_ -notlike 'PYTHON*' } | Sort-Object -Unique)
     $k = Dung-Kho
     Set-Content -LiteralPath (Join-Path $k '.claude/dev/ci_dang_ky_test.py') -Encoding utf8NoBOM -Value @'
@@ -892,6 +980,20 @@ ro = [n for n in os.environ.get("STUB_KHOA_RO", "").split(",") if n and n != "AL
 print("CC_RO=" + ",".join(ro))
 sys.exit(7 if ro else 0)
 '@
+    # Đồ giả QUAN SÁT của lượt TRỌN `nhanh_don_duoc_test` (`day-du`): ghi argv, biến RÒ nó thấy (danh sách rò ∪ cả họ `NHANH_DON_DUOC_*`)
+    # và biến canh KHÔNG bị xoá (chứng minh nó thấy env của phiên gọi — vắng mới có nghĩa) ra tệp; thoát 0 CHỈ KHI gọi độc lập không
+    # đối số, không thấy biến rò nào và thấy biến canh.
+    Set-Content -LiteralPath (Join-Path $k 'ops/nhanh_don_duoc_test.py') -Encoding utf8NoBOM -Value @'
+import json, os, sys
+dat = {"AL_VER", "CI_DANG_KY_WORKERS", "CI_DANG_KY_SU_KIEN", "CI_DANG_KY_GOC", "CI_DANG_KY_DAU"}   # script tu dat (nhu do gia registry)
+ro = sorted({n for n in os.environ.get("STUB_KHOA_RO", "").split(",") if n and n not in dat and n in os.environ}
+            | {n for n in os.environ if n.upper().startswith("NHANH_DON_DUOC_")})
+qs = {"tep": os.path.basename(sys.argv[0]), "argv": sys.argv[1:], "ro": ro, "canh": os.environ.get("STUB_NDD_CANH")}
+with open(os.environ["STUB_NDD_QUAN_SAT"], "w", encoding="utf-8") as f:
+    json.dump(qs, f)
+print("NDD_QUAN_SAT=" + json.dumps(qs))
+sys.exit(0 if not ro and not qs["argv"] and qs["canh"] == "co" else 7)
+'@
     & git -C $k add -A
     & git -C $k -c user.email=t@t -c user.name=t commit -qm stub-env
     & git -C $k update-ref refs/remotes/origin/master HEAD
@@ -903,6 +1005,7 @@ sys.exit(7 if ro else 0)
     $ro = @{ STUB_KHOA_RO = ($tenRo -join ',') }
     foreach ($n in $tenRo) { $ro[$n] = 'ro' }
     $ro['CONG_CU_TEST_BAN_KINH'] = 'manh'; $ro['CI_DANG_KY_DOT_BIEN_MANH'] = 'ops/nhanh_don_duoc_test.py'; $ro['CI_DANG_KY_SU_KIEN'] = 'push'
+    $ro['NHANH_DON_DUOC_CHI_TU_KIEM'] = '1'; $ro['NHANH_DON_DUOC_KHONG_DOT_BIEN'] = '1'
     $ro['CI_DANG_KY_GOC'] = $dau; $ro['CI_DANG_KY_DAU'] = $goc
     $a = Chay $k @() ($ro + @{ STUB_REG_MONG = "2|pull_request|$goc|$dau|" })
     if ($a.ra -notmatch 'cong_cu_test\s+rc=0') { throw "bien che do ro tu phien goi toi cong_cu_test (rc_script=$($a.rc))" }
@@ -926,6 +1029,26 @@ sys.exit(7 if ro else 0)
     & git -C $k update-ref refs/remotes/origin/master HEAD
     $c = Chay $k @() ($ro + @{ STUB_REG_MONG = '2||||' })
     if ($c.ra -notmatch 'registry test\s+rc=0') { throw "HEAD khong di truoc origin/master ma registry van mang env diff (rc_script=$($c.rc))" }
+    # Lượt `day-du`: lượt TRỌN `nhanh_don_duoc_test` (thay 8 mảnh + gom) phải tới đồ giả ĐỘC LẬP, không đối số, VẮNG mọi biến rò.
+    # Lượt gộp (mọi khoá rò ở trên) rồi TỪNG biến rút gọn tầng đỉnh một lượt riêng (chỉ biến ấy rò) — bỏ một tên khỏi danh sách xoá
+    # của script thì đúng lượt / đúng tên ấy ĐỎ. Đây là kho GIẢ: chứng minh biến không tới cổng, KHÔNG chứng minh vòng đột biến thật chạy.
+    $qsTep = Join-Path (Split-Path $k) 'ndd-quan-sat.json'
+    $luot = @([pscustomobject]@{ Ten = 'gop'; Env = $ro; Mong = $tenRo })
+    foreach ($n in $ndRutGon) {
+        $luot += [pscustomobject]@{ Ten = $n; Env = @{ STUB_KHOA_RO = $n; $n = $(if ($n -in 'NHANH_DON_DUOC_CHI_TU_KIEM', 'NHANH_DON_DUOC_KHONG_DOT_BIEN') { '1' } else { 'ro' }) }; Mong = @($n) } }
+    foreach ($l in $luot) {
+        Remove-Item -LiteralPath $qsTep -Force -ErrorAction SilentlyContinue
+        $d = Chay $k @('-Muc', 'day-du') ($l.Env + @{ STUB_REG_MONG = '2||||'; STUB_BUNDLE = 'same'; STUB_NDD_QUAN_SAT = $qsTep; STUB_NDD_CANH = 'co' })
+        if (-not (Test-Path -LiteralPath $qsTep)) { throw "KHONG DO DUOC: luot day-du ($($l.Ten)) khong goi ops/nhanh_don_duoc_test.py (rc_script=$($d.rc))" }
+        $qs = Get-Content -LiteralPath $qsTep -Raw -Encoding utf8 | ConvertFrom-Json
+        if ($qs.tep -ne 'nhanh_don_duoc_test.py' -or @($qs.argv).Count -ne 0) { throw "luot TRON nhanh_don_duoc_test ($($l.Ten)) khong goi doc lap khong doi so: tep=$($qs.tep) argv=$(@($qs.argv) -join ' ')" }
+        if ($qs.canh -ne 'co') { throw "KHONG DO DUOC: do gia nhanh_don_duoc_test ($($l.Ten)) khong thay bien canh cua phien goi — vang khong co nghia" }
+        $thay = @(@($qs.ro) | Where-Object { $_ })
+        if ($thay.Count -gt 0) { throw "bien ro tu phien goi toi luot TRON nhanh_don_duoc_test (day-du, $($l.Ten)): $($thay -join ', ')" }
+        if ($d.ra -notmatch 'nhanh_don_duoc_test\s+rc=0') { throw "luot day-du ($($l.Ten)): cong nhanh_don_duoc_test khong rc=0 du do gia thay env sach (rc_script=$($d.rc))" }
+        $chua = @($l.Mong | Where-Object { -not $l.Env.ContainsKey($_) })
+        if ($chua.Count -gt 0) { throw "KHONG DO DUOC: luot $($l.Ten) khong ro $($chua -join ', ')" }
+    }
 }
 
 # Biến của TRÌNH THÔNG DỊCH / git / bash từ phiên gọi — job CI không có biến nào trong số đó, nên chúng là một phần của lệnh như `env:`
@@ -980,6 +1103,7 @@ Ca 't31 bien trinh thong dich / git / bash cua phien goi bi xoa truoc cong' {
              STUB_KHOA_RO = (@(@($gitCucBo) + 'BASH_ENV' + 'BASH_FUNC_exit%%') -join ',') }
     $ro['BASH_FUNC_exit%%'] = '() { echo nap >> ''' + $dauHam.Replace([string][char]92, '/') + '''; builtin exit "$@"; }'
     foreach ($n in $gitCucBo) { if (-not $ro.ContainsKey($n)) { $ro[$n] = if ($lanh.ContainsKey($n)) { $lanh[$n] } else { Join-Path $d "khong-co-$n" } } }
+    $vangTruoc = @($ro.Keys | Where-Object { $null -eq [Environment]::GetEnvironmentVariable($_) })
     $a = Chay $k @() $ro
     if ($a.ra -notmatch 'packet-loop selftest +rc=1' -or $a.ra -notmatch 'assert phai chay') {
         throw "PYTHON* ro tu phien goi: assert tran bi go, cong khong do gi (rc_script=$($a.rc))" }
@@ -991,6 +1115,76 @@ Ca 't31 bien trinh thong dich / git / bash cua phien goi bi xoa truoc cong' {
     if (Test-Path -LiteralPath $dauHam) { throw "BASH_FUNC_* ro tu phien goi: ham export che lenh noi tru exit ($(@(Get-Content -LiteralPath $dauHam).Count) lan)" }
     $ab = @(& git -C $khac config --local --get core.abbrev)
     if ($ab.Count -gt 0) { throw "GIT_DIR ro tu phien goi: nep git ghi vao config cua KHO KHAC (core.abbrev=$($ab -join ''))" }
+    # wp1325 r6 — lớp `dotnet-null-retains-empty-environment` (Windows pwsh 7.6.10/.NET 10.0.15: `$null` trần tới
+    # `SetEnvironmentVariable` thành `''`, biến CÓ MẶT/RỖNG thay vì VẮNG). (a) Chay trả lại biến VỐN VẮNG thành VẮNG thật.
+    if ($vangTruoc.Count -eq 0) { throw 'KHONG DO DUOC: moi bien ro deu co san trong phien goi' }
+    $conLai = @($vangTruoc | Where-Object { $null -ne [Environment]::GetEnvironmentVariable($_) })
+    if ($conLai.Count -gt 0) { throw "Chay tra lai bien VON VANG thanh CO MAT/RONG: $($conLai -join ', ')" }
+    # (b) Bộ ghi ranh giới CLR: kiểu C# tham số `string` thay `[Environment]` ở ĐÚNG các lời gọi của bản sao nguồn, ghi null/rỗng/giá
+    # trị mà bộ gắn đối số THẬT của PowerShell truyền rồi gọi API thật. Trên .NET 8 `''` cũng xoá nên hành vi không phân biệt được — bộ
+    # ghi thì phân biệt. KHÔNG phải phép đo Windows .NET 10: cặp native 7.6 vẫn là cổng riêng.
+    $recCs = @'
+public static class Wp1325Rec {
+    public static string Tep;
+    public static void SetEnvironmentVariable(string n, string v) {
+        System.IO.File.AppendAllText(Tep, n + "=" + (v == null ? "NULL" : v.Length == 0 ? "EMPTY" : "VAL") + "\n");
+        System.Environment.SetEnvironmentVariable(n, v);
+    }
+}
+'@
+    $goi = '[Environment]::SetEnvironmentVariable('
+    $gan = { param([string]$Ma)
+        if (([regex]::Matches($Ma, [regex]::Escape($goi))).Count -eq 0) { throw "KHONG DO DUOC: khong co loi goi $goi de thay" }
+        $Ma.Replace($goi, '[Wp1325Rec]::SetEnvironmentVariable(') }
+    $nap = { param([string]$Tep) "Add-Type -TypeDefinition @'`n$recCs`n'@`n[Wp1325Rec]::Tep = '$($Tep.Replace("'", "''"))'`n" }
+    # (b1) Script ĐANG ĐO (kể cả bản đột biến `-Script`), chạy TRỌN qua Chay với đúng bộ biến rò ở trên.
+    $nguon = Get-Content -LiteralPath $Script -Raw -Encoding utf8
+    $pa = [System.Management.Automation.Language.Parser]::ParseInput($nguon, [ref]$null, [ref]$null)
+    if (-not $pa.ParamBlock) { throw 'KHONG DO DUOC: script khong co khoi param de chen bo ghi' }
+    $cat = $pa.ParamBlock.Extent.EndOffset
+    $ghiS = Join-Path $d 'ghi-clr-script.txt'
+    $banGhi = Join-Path $d 'chay-cong-windows-ghi.ps1'
+    Set-Content -LiteralPath $banGhi -Encoding utf8NoBOM -NoNewline -Value ($nguon.Substring(0, $cat) + "`n" + (& $nap $ghiS) + (& $gan $nguon.Substring($cat)))
+    $k2 = Dung-Kho $banGhi
+    $null = Chay $k2 @() $ro
+    if (-not (Test-Path -LiteralPath $ghiS)) { throw 'KHONG DO DUOC: bo ghi CLR khong chay trong script' }
+    $L = @(Get-Content -LiteralPath $ghiS -Encoding utf8)
+    $rongS = @($L | Where-Object { $_ -like '*=EMPTY' } | Select-Object -Unique)
+    if ($rongS.Count -gt 0) { throw "script xoa bien bang '' thay vi CLR null (.NET 9+ giu CO MAT/RONG): $($rongS -join ', ')" }
+    $thieuNull = @(@($ro.Keys | Where-Object { $_ -ne 'STUB_KHOA_RO' }) + 'NHANH_DON_DUOC_MANH' | Where-Object { "$_=NULL" -notin $L })
+    if ($thieuNull.Count -gt 0) { throw "bien ro khong duoc xoa bang CLR null o ranh gioi: $($thieuNull -join ', ')" }
+    # (b2) Chính bộ test: `Chay` (đặt + trả lại) và vòng xoá biến git đầu tệp, tách bằng AST từ tệp đang chạy, chạy trong con riêng.
+    $tepTest = $PSCommandPath
+    if (-not $tepTest) { throw 'KHONG DO DUOC: khong biet duong dan bo test' }
+    $pt = [System.Management.Automation.Language.Parser]::ParseInput((Get-Content -LiteralPath $tepTest -Raw -Encoding utf8), [ref]$null, [ref]$null)
+    $ham = @($pt.EndBlock.Statements | Where-Object { $_ -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $_.Name -in 'Chay', 'Doc-Utf8' })
+    $don = @($pt.EndBlock.Statements | Where-Object { $_ -is [System.Management.Automation.Language.ForEachStatementAst] -and $_.Condition.Extent.Text -match "'GIT_CONFIG'" })
+    if ($ham.Count -ne 2 -or $don.Count -ne 1) { throw "KHONG DO DUOC: khong tach duoc Chay/Doc-Utf8/vong xoa git ($($ham.Count)/$($don.Count))" }
+    $ghiP = Join-Path $d 'ghi-clr-do.txt'; $ghiT = Join-Path $d 'ghi-clr-chay.txt'; $ghiD = Join-Path $d 'ghi-clr-xoa-git.txt'
+    $kc = Join-Path $d 'kho-con'
+    New-Item -ItemType Directory -Force -Path (Join-Path $kc '.claude/dev') | Out-Null
+    Set-Content -LiteralPath (Join-Path $kc '.claude/dev/chay-cong-windows.ps1') -Encoding utf8NoBOM -Value 'exit 0'
+    $q = { param([string]$s) "'" + $s.Replace("'", "''") + "'" }
+    $con = (& $nap $ghiP) + "[Wp1325Rec]::SetEnvironmentVariable('WP1325_DO', `$null)`n`$PwshExe = (Get-Process -Id `$PID).Path`n" +
+        (& $gan (($ham | ForEach-Object { $_.Extent.Text }) -join "`n")) + "`n`$env:WP1325_CO = 'giu'`n[Wp1325Rec]::Tep = $(& $q $ghiT)`n" +
+        "`$null = Chay $(& $q $kc) @() @{ WP1325_VANG = 'x'; WP1325_CO = 'moi'; WP1325_NULL = `$null; WP1325_RONG = '' }`n" +
+        "if (`$env:WP1325_CO -ne 'giu') { exit 9 }`n[Wp1325Rec]::Tep = $(& $q $ghiD)`n" + (& $gan $don[0].Extent.Text) + "`nexit 0`n"
+    $tepCon = Join-Path $d 'ghi-clr-con.ps1'
+    Set-Content -LiteralPath $tepCon -Value $con -Encoding utf8NoBOM
+    $raCon = @(& $PwshExe -NoProfile -File $tepCon 2>&1)
+    if ($LASTEXITCODE -eq 9) { throw 'Chay khong tra lai gia tri CO SAN cua bien (WP1325_CO)' }
+    if ($LASTEXITCODE -ne 0) { throw "KHONG DO DUOC: con ghi CLR rc=$LASTEXITCODE $($raCon -join ' | ')" }
+    # Đối chứng ÂM trong ca: bộ ghi PHẢI thấy `$null` trần thành rỗng — không thấy thì bộ ghi mù, ca không đo được gì.
+    $do = @(Get-Content -LiteralPath $ghiP -Encoding utf8)
+    if (($do -join ',') -ne 'WP1325_DO=EMPTY') { throw "KHONG DO DUOC: bo ghi CLR khong phan biet `$null tran ($($do -join ','))" }
+    $t = @(Get-Content -LiteralPath $ghiT -Encoding utf8)
+    $thuc = @(for ($i = 0; $i -lt $t.Count; $i++) { "$([int]($i -ge 4))|$($t[$i])" }) | Sort-Object
+    $mong = @('0|WP1325_VANG=VAL', '1|WP1325_VANG=NULL', '0|WP1325_CO=VAL', '1|WP1325_CO=VAL', '0|WP1325_NULL=NULL', '1|WP1325_NULL=NULL',
+              '0|WP1325_RONG=EMPTY', '1|WP1325_RONG=NULL') | Sort-Object
+    if (($thuc -join ',') -ne ($mong -join ',')) { throw "Chay dat/tra lai bien sai CLR null / rong / gia tri: $($t -join ',')" }
+    $dn = @(Get-Content -LiteralPath $ghiD -Encoding utf8)
+    if ('GIT_CONFIG=NULL' -notin $dn -or @($dn | Where-Object { $_ -notlike '*=NULL' }).Count -gt 0) {
+        throw "vong xoa bien git cua bo test xoa bang '' thay vi CLR null: $($dn -join ',')" }
 }
 
 # Gương CI trôi theo master: `ci.yml` thêm một bước `gate*` mà script không gương và không khai `KHÔNG CHẠY` thì không ca nào ở trên ĐỎ
@@ -1131,8 +1325,14 @@ for j, v in sorted((d.get('jobs') or {}).items()):
 # những kênh nó biết; dấu vân thấy MỌI kênh (đo trên c848fee: tiền tố `python -O`, lệnh `actionlint` thêm vào bước đã gương, `env` kiểu số, dòng
 # `git config` của bước "Force LF", `with: python-version`, job `uses:` tái dùng, `if: runner.os == 'Linux'` — t32 ĐẠT cả chín). Đổi `ci.yml` là
 # việc của packet khác: bảng này là CHỖ BUỘC người đó dừng lại một nhịp, không phải chỗ chứng minh gương đúng.
-$DauVanCi = @{ '<workflow>' = '44136fa355b3'; 'gate' = '08bfa89def0a'; 'gate-cong-cu' = '527d4291b599'; 'gate-cong-cu-gop' = '4f1198c4ace4'
-               'gate-ops' = '7bc725418208'; 'gate-packet-loop' = 'b90eef359184'; 'gate-registry' = 'b836a4f366e1' }
+# wp1325 r4 (nền Y 9aa40ac; ci.yml = canonical 815b9ac + chỉ trần `gate-packet-loop` 240/150): ghim lại SAU khi rà `git diff 8b59185 -- ci.yml`
+# (bỏ chú thích): đổi NGOÀI lệnh là điều kiện `che_do != 'duong_nhanh'` (script luôn chạy ĐỦ), mảnh `gate-cong-cu` Windows chỉ còn 0 và
+# `upload-artifact` chỉ ngoài Windows (script chạy `cong_cu_test` TRỌN), env `test registry` thêm `CI_DANG_KY_DOT_BIEN_MANH`/`CI_DANG_KY_GOP_KQ`
+# (script xoá — registry tự quyết kế hoạch), `timeout-minutes` (t9 canh). Đổi LỆNH thật đã gương trước khi ghim: `update-linux.sh --selftest`
+# (chỉ Linux, như `RUNNER_OS = Linux` của bước) và job MỚI `gate-nhanh-manh`/`gate-nhanh-gop` (`nhanh_don_duoc_test` TRỌN + dòng `THAY BẰNG`).
+$DauVanCi = @{ '<workflow>' = '44136fa355b3'; 'gate' = '63dc12af15ef'; 'gate-cong-cu' = '3d82f41a1eb5'; 'gate-cong-cu-gop' = 'ade3f0565731'
+               'gate-nhanh-gop' = '3d6daa7c4f6c'; 'gate-nhanh-manh' = 'ac39ba6c783c'
+               'gate-ops' = '3382603e4cb1'; 'gate-packet-loop' = '5546b9244930'; 'gate-registry' = '25db60055731' }
 # Trả về các hàng "tên :: đích đuôi" của ci.yml mà script KHÔNG gương và KHÔNG khai tên, cộng các job có dấu vân lệch bảng ghim
 # (`$DauVan`; $null = chỉ bộ so từng dòng — t34 dùng để đo răng riêng từng chốt). Rỗng = gương đủ.
 function Tim-ThieuGuong { param([string]$Ci, [string]$Tep, [string[]]$Nep, [hashtable]$DauVan, [switch]$ChiBoSoTungDong)
@@ -1431,20 +1631,22 @@ chmod +x "$AL_DICH/actionlint"
 # Lượt MẶC ĐỊNH chạy KHÔNG `-Muc` (đo trên d53e681: đổi `[string]$Muc = 'nhanh'` thành `'day-du'` ⇒ cả bộ 35/35, vì chỉ có lượt `-Muc nhanh` tường minh).
 # Bộ so (`Tim-CongLech`) có hàng đột biến SCRIPT riêng như t34 có cho t32 — không có hàng thì gỡ `thua`/`thieu`/lượt mặc định khỏi t35 vẫn 35/35 vì script nền sạch.
 # Giới hạn: đo TÊN cổng đã chạy, không đo đối số lúc chạy (stub bỏ qua đối số; đối số do t32 so với ci.yml). Windows: KHÔNG ĐO ĐƯỢC ở đây — bảng
-# bỏ hai cổng ci.yml cũng bỏ trên Windows (`don-nhanh selftest (ps1)`, `ci-phamvi selftest`), phần còn lại chưa chạy trên Windows thật.
+# bỏ hai cổng ci.yml cũng bỏ trên Windows (`don-nhanh selftest (ps1)`, `ci-phamvi selftest`) và `update-linux selftest` ngoài Linux (ci.yml gác
+# `RUNNER_OS = Linux`), phần còn lại chưa chạy trên Windows thật.
 $CongDayDu = @('cong_cu kiem-tra', 'cong_cu_test', 'lease-publish selftest', 'packet-loop selftest', 'registry test', 'don-nhanh selftest (ps1)',
                'py_compile', 'codex credential selftest', 'bien-nhan v2 selftest', 'idiom-ba-ten selftest', 'eol-policy selftest', 'pre-push selftest',
                'gate lifecycle selftest', 'eol-policy survey', 'bundled-fragment check', 'gen_instructions selftest', 'command-registry unit',
                'tl selftest', 'workflow-audit strict', 'golden-test', 'doc-claims-check strict', 'determinism-audit strict', 'ci-phamvi guard',
-               'ci-phamvi selftest', 'release-check full', 'release-verify strict', 'tl_boot smoke', 'release-bundle a', 'release-bundle b',
-               'release-bundle tất định')
+               'ci-phamvi selftest', 'release-check full', 'release-verify strict', 'tl_boot smoke', 'update-linux selftest', 'nhanh_don_duoc_test',
+               'release-bundle a', 'release-bundle b', 'release-bundle tất định')
 # Chạy script `$Scr` trên kho giả với đối số `$DoiMuc`; trả về cổng THIẾU so với `$Bang` và cổng THỪA (in ra mà bảng không khai).
 function Tim-CongLech { param([string]$Scr, [string[]]$DoiMuc, [string[]]$Bang)
     $k = Dung-Kho $Scr
     $a = Chay $k $DoiMuc
     $co = @(foreach ($d in ($a.ra -split "`n")) { if ($d -cmatch '^  ([^ ].*?) +rc=[^ ]* +') { $Matches[1] } })
     if ($co.Count -eq 0) { throw "KHONG DO DUOC: khong doc duoc dong cong nao trong output (rc_script=$($a.rc))" }
-    $can = @($Bang | Where-Object { -not $IsWindows -or ($_ -cne 'don-nhanh selftest (ps1)' -and $_ -cne 'ci-phamvi selftest') })
+    $can = @($Bang | Where-Object { (-not $IsWindows -or ($_ -cne 'don-nhanh selftest (ps1)' -and $_ -cne 'ci-phamvi selftest')) -and
+                                    ($IsLinux -or $_ -cne 'update-linux selftest') })
     return @{ thieu = @($can | Where-Object { $co -cnotcontains $_ }); thua = @($co | Where-Object { $can -cnotcontains $_ }) }
 }
 Ca 't35 script CHAY du cac cong (ten cong in ra khop bang ghim, khong chi co mat trong van ban)' {

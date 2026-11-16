@@ -1,0 +1,334 @@
+{
+  "schema": "wp1325_frozen_native_catalog.v1",
+  "status": "owner_spec_checkpoint_proposal_not_execution",
+  "base": "815b9ac76a10fdd30516c9cef7ca93448cbbd923",
+  "candidate": "Y determined after actual author, before any tests; bind Git OID/tree/parents",
+  "same_pair_command": "One parent command runs ALL ordered entries on S then ALL same entries on Y, same device/interpreter/deps; new OUT subdirectory per SHA. No reuse prior outputs. Both source catalogs reconciled in full.",
+  "substitution_rules": {
+    "PY": "Absolute measured CPython3.12.10 interpreter in private per-session venv; PyYAML6.0.3 and jsonschema4.26.0 required and measured; no installed tra-luat distribution, project runs from source. Same exact path and versions S/Y. Record raw receipt before pair; do not print credentials/config.",
+    "PWSH": "absolute pwsh>=7.1 path measured before pair; same for both",
+    "REPO": "isolated full GitHub clone root, imported Y bundle exact identities",
+    "OUT": "new empty evidence path outside checkout, unique per source SHA",
+    "BUNDLE_SHA256": "actual fresh common hash of bundle1 and bundle2 for that source SHA"
+  },
+  "command_count_per_SHA": 18,
+  "commands": [
+    {
+      "name": "selftest",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "positive": "Final nonempty line matches ^== tl selftest N/N ==$; N>0",
+      "test_ids": "Parse exactly final N lines immediately preceding summary: ^  [(OK|FAIL)] RAW_ID$. ID=selftest/<ordinal:04d>/<verbatim RAW_ID>; all N rows retained.",
+      "additional_checks": "Parse terminal case block only, not nested child output. Same ordered qualified ID catalog S and Y; every row passed. Qualification applies uniformly to every case, so duplicate raw display labels do not collapse. Any duplicated final qualified ID is error; no external duplicate registry claimed.",
+      "required": true
+    },
+    {
+      "name": "geninst",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/gen_instructions.py",
+        "--selftest"
+      ],
+      "positive": "Final line ^== gen_instructions selftest N/N ==$; N>0",
+      "test_ids": "Final N preceding rows ^  [(OK|FAIL)] RAW_ID$; ID=geninst/<ordinal:04d>/<RAW_ID>",
+      "additional_checks": "Retain all N, summary count equals rows, allpassed and S/Y catalog equal.",
+      "required": true
+    },
+    {
+      "name": "workflow",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "workflow-audit",
+        "--strict",
+        "--json"
+      ],
+      "positive": "Entire stdout parses JSON object with ok=true",
+      "test_ids": "gate/workflow",
+      "additional_checks": "Actual rc0; do not ignore error arrays. For relverify expected_file_count==checked_file_count and failed/extra_files/missing_from_current_manifest/required_missing all empty. Preserve full JSON raw output.",
+      "required": true
+    },
+    {
+      "name": "golden",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "golden-test",
+        "--json"
+      ],
+      "positive": "Entire stdout parses JSON object with ok=true",
+      "test_ids": "gate/golden",
+      "additional_checks": "Actual rc0; do not ignore error arrays. For relverify expected_file_count==checked_file_count and failed/extra_files/missing_from_current_manifest/required_missing all empty. Preserve full JSON raw output.",
+      "required": true
+    },
+    {
+      "name": "docclaims",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "doc-claims-check",
+        "--strict",
+        "--json"
+      ],
+      "positive": "Entire stdout parses JSON object with ok=true",
+      "test_ids": "gate/docclaims",
+      "additional_checks": "Actual rc0; do not ignore error arrays. For relverify expected_file_count==checked_file_count and failed/extra_files/missing_from_current_manifest/required_missing all empty. Preserve full JSON raw output.",
+      "required": true
+    },
+    {
+      "name": "determinism",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "determinism-audit",
+        "--strict",
+        "--json"
+      ],
+      "positive": "Entire stdout parses JSON object with ok=true",
+      "test_ids": "gate/determinism",
+      "additional_checks": "Actual rc0; do not ignore error arrays. For relverify expected_file_count==checked_file_count and failed/extra_files/missing_from_current_manifest/required_missing all empty. Preserve full JSON raw output.",
+      "required": true
+    },
+    {
+      "name": "relcheck",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "release-check",
+        "--full",
+        "--json"
+      ],
+      "positive": "Entire stdout parses JSON object with ok=true",
+      "test_ids": "gate/relcheck",
+      "additional_checks": "Actual rc0; do not ignore error arrays. For relverify expected_file_count==checked_file_count and failed/extra_files/missing_from_current_manifest/required_missing all empty. Preserve full JSON raw output.",
+      "required": true
+    },
+    {
+      "name": "relverify",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "release-verify",
+        "RELEASE_MANIFEST.json",
+        "--root",
+        "{REPO}",
+        "--strict",
+        "--json"
+      ],
+      "positive": "Entire stdout parses JSON object with ok=true",
+      "test_ids": "gate/relverify",
+      "additional_checks": "Actual rc0; do not ignore error arrays. For relverify expected_file_count==checked_file_count and failed/extra_files/missing_from_current_manifest/required_missing all empty. Preserve full JSON raw output.",
+      "required": true
+    },
+    {
+      "name": "bundle1",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "release-bundle",
+        "--root",
+        "{REPO}",
+        "--out",
+        "{OUT}/release1.zip",
+        "--json"
+      ],
+      "positive": "JSON ok=true",
+      "test_ids": "gate/bundle1",
+      "additional_checks": "rc0, fresh output exists, hash both ZIPs and require equality. No stale reused ZIP.",
+      "required": true
+    },
+    {
+      "name": "bundle2",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "release-bundle",
+        "--root",
+        "{REPO}",
+        "--out",
+        "{OUT}/release2.zip",
+        "--json"
+      ],
+      "positive": "JSON ok=true",
+      "test_ids": "gate/bundle2",
+      "additional_checks": "rc0, fresh output exists, hash both ZIPs and require equality. No stale reused ZIP.",
+      "required": true
+    },
+    {
+      "name": "archive1",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "release-verify",
+        "RELEASE_MANIFEST.json",
+        "--root",
+        "{REPO}",
+        "--strict",
+        "--archive",
+        "{OUT}/release1.zip",
+        "--expected-archive-sha256",
+        "{BUNDLE_SHA256}",
+        "--json"
+      ],
+      "positive": "JSON ok=true",
+      "test_ids": "gate/archive1",
+      "additional_checks": "rc0, actual freshly computed common ZIP hash passed; committed manifest/root verified.",
+      "required": true
+    },
+    {
+      "name": "archive2",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "release-verify",
+        "RELEASE_MANIFEST.json",
+        "--root",
+        "{REPO}",
+        "--strict",
+        "--archive",
+        "{OUT}/release2.zip",
+        "--expected-archive-sha256",
+        "{BUNDLE_SHA256}",
+        "--json"
+      ],
+      "positive": "JSON ok=true",
+      "test_ids": "gate/archive2",
+      "additional_checks": "rc0, actual freshly computed common ZIP hash passed; committed manifest/root verified.",
+      "required": true
+    },
+    {
+      "name": "bundlefragment",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        ".github/checks/bundle_fragment_check.py",
+        "--json"
+      ],
+      "positive": "JSON ok=true",
+      "test_ids": "gate/bundlefragment AND each emitted cases entry as bundlefragment/<ordinal:04d>/<verbatim test_id>",
+      "additional_checks": "rc0, load_error null, failed=[], every cases[].ok true, case wp1099_nlm_nap_lai present and true. Retain all cases and reject unknown/duplicate qualified IDs.",
+      "required": true
+    },
+    {
+      "name": "EOL",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        ".githooks/eol_policy_test.py"
+      ],
+      "positive": "Final ^N/N dat$; N>0",
+      "test_ids": "Every terminal PASS case_ID / FAIL case_ID row, EOL/<ordinal:04d>/<case_ID>",
+      "additional_checks": "All N terminal rows counted and passed, identical S/Y catalog; do not use --help. This is NOT .githooks/eol_policy.py --all or PR EOL-base step.",
+      "required": true
+    },
+    {
+      "name": "freshness",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "test-fragments-check",
+        "--json"
+      ],
+      "positive": "JSON ok=true",
+      "test_ids": "gate/freshness",
+      "additional_checks": "rc0. Run after preserving only known wholly untracked batch-generated fixtures outside source; no clean/reset tracked files.",
+      "required": true
+    },
+    {
+      "name": "manifest-regenerate",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "scripts/tl.py",
+        "release-manifest",
+        "--root",
+        "{REPO}",
+        "--out",
+        "{OUT}/regenerated-manifest.json",
+        "--json"
+      ],
+      "positive": "JSON ok=true",
+      "test_ids": "gate/manifest-regenerate",
+      "additional_checks": "rc0 and regenerated bytes equal that SHA checkout committed RELEASE_MANIFEST.json. Never rewrite committed manifest as validation.",
+      "required": true
+    },
+    {
+      "name": "powershell-harness",
+      "argv": [
+        "{PWSH}",
+        "-NoProfile",
+        "-File",
+        ".claude/dev/chay-cong-windows_test.ps1"
+      ],
+      "positive": "Final ^chay-cong-windows: N/N dat$; N>0",
+      "test_ids": "Final N harness rows DAT <verbatim case name>, ID=powershell-harness/<ordinal:04d>/<case name>",
+      "additional_checks": "All N retained; any DO/HONG/KDD/skipped/not_run means not green; ordered S/Y IDs equal. Author must put new t9 type/bound negative fixtures inside existing t9 case, retaining stable complete top-level case catalog. Required new variants: floats240.0, booltrue, numeric-string240, 0,-1,unknown expression and HanGiay<14400 reject; integer150/240 and exact known expression with matching bound pass.",
+      "required": true
+    },
+    {
+      "name": "topology-contract",
+      "argv": [
+        "{PY}",
+        "-B",
+        "-u",
+        "-c",
+        "import importlib.util,pathlib,subprocess,sys,tempfile,os,json\nroot=pathlib.Path.cwd();name=\"y13_khoa_topology_cua_ci_yml_ngoai_than_run\";cmd=[sys.executable,\"-B\",\"-u\",\"ops/ci_duong_nhanh_test.py\",\"--mot-ca\",name]\np=subprocess.run(cmd,cwd=root,capture_output=True,text=True);assert p.returncode==0,(p.returncode,p.stdout,p.stderr)\ns=importlib.util.spec_from_file_location(\"frozen_native_topology\",root/\"ops/ci_duong_nhanh_test.py\");m=importlib.util.module_from_spec(s);s.loader.exec_module(m)\nw=m.doc_wf();old=w[\"jobs\"][\"gate-packet-loop\"][\"timeout-minutes\"];text=(root/\".github/workflows/ci.yml\").read_text(encoding=\"utf-8\");start=text.index(\"  gate-packet-loop:\");before=text[:start];tail=text[start:];needle=\"    timeout-minutes: \"+str(old);assert tail.count(needle)==1\nwith tempfile.TemporaryDirectory(prefix=\"wp1325_native_topology_\") as tmp:\n t=pathlib.Path(tmp)/\".github/workflows/ci.yml\";t.parent.mkdir(parents=True);t.write_text(before+tail.replace(needle,\"    timeout-minutes: 999\",1),encoding=\"utf-8\");env=os.environ.copy();env[\"CI_DUONG_NHANH_CAY\"]=tmp;q=subprocess.run(cmd,cwd=root,env=env,capture_output=True,text=True);assert q.returncode==3 and q.stdout.startswith(\"DO:\"+name+\":\"),(q.returncode,q.stdout,q.stderr)\nprint(json.dumps({\"ok\":True,\"tests\":[{\"id\":\"canonical_y13_positive\",\"status\":\"passed\"},{\"id\":\"canonical_y13_reject_mismatch\",\"status\":\"passed\"}],\"actual_command\":cmd,\"positive_rc\":p.returncode,\"negative_rc\":q.returncode}))\n"
+      ],
+      "positive": "JSON ok=true; positive_rc0, negative_rc3 with canonical DO:<exact y13 name>: prefix",
+      "test_ids": "Each tests[].id, prefixed topology-contract/; exact two IDs canonical_y13_positive and canonical_y13_reject_mismatch",
+      "additional_checks": "This frozen inline operator orchestration invokes existing canonical --mot-ca; no new product tool or altered test function. Negative fixture only in isolated temporary copy of ci.yml; source never changed. Full y13 checks are actually executed, no positive assigned from silence alone.",
+      "required": true
+    }
+  ],
+  "ID_reconciliation": "Exact command catalog and qualified per-case IDs above. No command omitted. Required skipped/not_run/missing ID/zero cases/unknown duplicate => not green. K6 JSON retains every emitted required qualified ID; crosscheck counts/sets against raw outputs and frozen catalog. Candidate failing IDs subset of baseline failing IDs; red in write_set blocks for owner decision. No filtering.",
+  "M3_additional_to_CI": true,
+  "phase_wall_minutes_max": 110,
+  "no_completion_guarantee": true,
+  "clock_unchanged": "2026-11-16T09:39:25.208642Z",
+  "prior_history_bound_input_only": {
+    "path": "readmission-r45/run_native_t3.py",
+    "sha256": "328ce548cb9d901150f1dad82c281ccd8dd827af2568075ae6c08f74193364f7",
+    "note": "No prior result promoted as fresh evidence; list above self-contained, used only to resolve ambiguous prior wording."
+  },
+  "environment_precondition": {
+    "required_before_author_and_before_pair": true,
+    "PY_probe": "print sys.executable,sys.version,yaml.__version__,importlib.metadata.version(jsonschema); require CPython3.12.10/yaml6.0.3/jsonschema4.26.0 and no installed tra-luat distribution",
+    "PWSH_probe": "absolute pwsh>=7.1; Tim-PyYaml candidate order py -3, python, python3, exactly as canonical function; measure first TLYAML=ok and resolved sys.executable/CPython3.12.10/yaml6.0.3; jsonschema absence/presence recorded",
+    "observed": "Both actual owner-host probes pass. Own venv sourcePython3.12.10/yaml6.0.3/jsonschema4.26.0; Tim-PyYaml first usable py -3 resolves systemPython3.12.10/yaml6.0.3; jsonschema absent there is recorded optional because harness needs yaml.",
+    "failure_behavior": "Fail closed BEFORE any S/Y command, consume no pair attempt. No missing dependency or changed resolution treated as skip/pass.",
+    "private_receipt_sha256": "4b9bedc82a26b23b2a57eec118f3e8f3d436859be508722ef0bd501d0708e746"
+  },
+  "uniform_ID_qualification": "Every ordinal is 1-based decimal padded to at least4digits, format n:04d, uniformly for every command. Every raw display label retained verbatim including duplicates; reject duplicates ONLY in final qualified IDs, never raw labels. Compare complete ordered S/Y catalogs. Two derivations of same raw bytes must yield identical IDs."
+}

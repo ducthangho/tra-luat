@@ -14367,6 +14367,30 @@ def r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke():
 
 
 @ca
+def r1335_P2_windows_bo_ung_vien_khong_duoi():
+    """P2 lượt 5: Windows, tên không đuôi ⇒ chỉ thử đuôi PATHEXT (như cmd.exe, `shutil.which` 3.13), bỏ `ra` không đuôi.
+    Windows: chạy `run` THẬT. Linux: kiểm logic chọn ứng viên bằng `platform.system` giả."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        b = s / "bin"; b.mkdir(); (b / "ra").write_text("#!/bin/sh\necho DAU_SHIM\n", encoding="utf-8")
+        tep = _r1335_tep(b / "ra.CMD", "DAU_CMD")
+        if not LA_WINDOWS:
+            goc, m.platform.system = m.platform.system, lambda: "Windows"
+            try:
+                dd = m._thuc_thi("ra", str(s), str(b))
+            finally:
+                m.platform.system = goc
+            return bang(dd["thuc_thi_duong_dan"] == os.path.realpath(tep), f"chon sai ung vien: {dd}")
+        repo, rr = tao_repo(s), s / "runs"
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", "ra",
+             env=dict(os.environ, PATH=str(b) + os.pathsep + os.environ.get("PATH", "")))
+        tm = next(rr.iterdir()); d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
+        out = (tm / "stdout.log").read_text(encoding="utf-8") if (tm / "stdout.log").exists() else ""
+        bang(d["transport_sha256"] == hashlib.sha256(tep.read_bytes()).hexdigest() and "DAU_CMD" in out,
+             f"chon {d.get('thuc_thi_duong_dan')}, con in {out!r}")
+
+
+@ca
 def r1335_bang_transport_tu_choi_ten_trung():
     """D4: chốt chết thay bằng chốt đo được — tên lệnh thuộc hai provider ⇒ RuntimeError."""
     m = _tai_launcher_thu()
@@ -14419,6 +14443,8 @@ DOT_BIEN = [
     ("r1335_F4_errno_ca_sau_exec", ('"errno": e.errno if loi_exec else None}', '"errno": e.errno}'),
      ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
     ("r1335_F4_khong_giu_loi_dau", ('        dd.update(dau[0]); ds["spawn"] = dau[1]', '        pass'), ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
+    ("r1335_P2_uu_tien_khong_duoi", ('.split(";") if e] or duoi', '.split(";") if e] and duoi + [e for e in os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";") if e] or duoi'),
+     ["r1335_P2_windows_bo_ung_vien_khong_duoi"]),
     ("r1335_F4_chi_ENOENT_ENOEXEC", ('    while ds["spawn"].get("errno") is not None', '    while ds["spawn"].get("errno") in (2, 8)'),   # ENOENT, ENOEXEC
      ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
     ("r1335_D4_bo_chot_ten_trung", ("            if ten in theo_lenh:\n                raise RuntimeError", "            if False:\n                raise RuntimeError"),

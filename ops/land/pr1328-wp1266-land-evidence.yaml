@@ -136,7 +136,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1266-r13-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', ket_qua: 'not_measured — PR draft rieng tu nhanh ops/land-1266 (chua co so luc ghi).'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt.'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 (01:46Z, truoc han) rc 12 thieu D4; lan 2 (02:06:44Z, sau han) rc 0 "ĐÓNG ĐƯỢC WP wp1266".'}
   - {item: 'handoff', ket_qua: 'not_measured — packet khong khai tep handoff trong coordination_paths.'}
   - {item: 'dong Issue #1266', ket_qua: 'not_measured — viec cua phien dieu phoi sau khi PR ghi so merge.'}
 # ---- het truong chuan
@@ -176,7 +176,8 @@ lease:
     — TRUOC han moi); tep: lease-wp1266-r13-g1-claude-sau-rut-han.yaml.txt. ops-publish-lease run 43787520026 success
     (readback-run-43787520026.json; readback-jobs-43787520026.json: job 133038382595 success, runner_id khac 0, moi buoc success),
     di nhanh rc 9 (ops-publish-lease-43787520026-trich.txt: "CHAN [9]: lease 'wp1266-r13-g1-claude' đã có comment 6891544793 trên
-    issue #1266 — bỏ qua"). Sau 02:05Z: ai-dang-giu-sau-rut-han.txt. Khong bia mo (khong co lease ke nhiem).
+    issue #1266 — bỏ qua"). Sau 02:05Z: ai-dang-giu-sau-rut-han.txt (02:06:18Z, thieu 0 / thua 0 / 239 nhanh, master cuc bo = 815b9ac):
+    ca nam tep write set NGUOI_GIU 0, rc 0. Khong bia mo (khong co lease ke nhiem).
   diff_do: 'measured — nghiem-thu-815b9ac.txt numstat 815b9ac^1..815b9ac: 5 tep, +773/-27 (tran 6 tep, 780 dong).'
 
 trang_thai_packet:
@@ -184,7 +185,7 @@ trang_thai_packet:
   merged_nguon: 'measured — readback-pr-1328.json merged true, merged_at 2026-11-15T23:21:28Z, head 2acd5c7, base 997b383; readback-commit-815b9ac.json cha 997b383 + 2acd5c7, tree b76a912d.'
   landed: true
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA 815b9ac: DAT — du bon moc measured passed. (2) lease nha: xem ai-dang-giu-sau-rut-han.txt.
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 815b9ac: DAT — du bon moc measured passed. (2) lease nha: DAT (ai-dang-giu-sau-rut-han.txt: NGUOI_GIU 0 ca 5 tep).
     (3) bookkeeping: ho so nay + bien ban M8. (4) review neo 2acd5c7: DAT — offline luot 2 approve + connector sach + audit human_audited
     chu kho. (5) uy quyen: DAT theo L-6 bang audit chu kho tu dang 6896574684 neo 2acd5c7, dang TRUOC CI som nhat cua head. (6) muc tieu:
     DAT — B1–B12, B16 do boi reviewer offline; B13 CI Linux xanh; B14 Windows 204/204; B15 ci-dot-bien-du xanh; B17 Linux + Windows dat.

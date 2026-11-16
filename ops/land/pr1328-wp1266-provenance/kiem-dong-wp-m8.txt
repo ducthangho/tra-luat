@@ -3,3 +3,8 @@
   THIẾU  D4 lease: không khớp lease_cuoi/packet/generation hoặc lease_until chưa qua
 CHƯA ĐÓNG ĐƯỢC WP: thiếu D4
 rc=12
+
+# LAN 2 (sau han rut 02:05Z)
+# checkout: f307c5e3e476d20becda3f94991a8c8a62a1ec29 (+ thay doi chua commit trong ops/land) ; origin/master: 815b9ac76a10fdd30516c9cef7ca93448cbbd923 ; luc: 2026-11-16T02:06:44Z
+ĐÓNG ĐƯỢC WP wp1266 — merge 815b9ac76a10fdd30516c9cef7ca93448cbbd923
+rc=0

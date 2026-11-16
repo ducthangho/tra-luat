@@ -59,7 +59,7 @@ pre_merge_checks:
     conclusion: 'passed — 8/8 rc 0 tren head (t256/t257/t258/t259/t129 tren DESKTOP-T9R33P2; t133/t137/t151 tren tra-luat-win); ve am nen ddc027a t256/t257/t258 rc 1'
     nguon: [windows/readback-n6-bu-d893075.txt]
     ghi_chu: >-
-      measured — ca hai may Python 3.12.10, cp1252, utf8_mode 0, khong PYTHONUTF8. Desktop khong tao duoc symlink (WinError 1314) va
+      measured — windows/readback-n6-bu-d893075.txt: ca hai may Python 3.12.10, cp1252, utf8_mode 0, khong PYTHONUTF8. Desktop khong tao duoc symlink (WinError 1314) va
       thieu actionlint nen t133/t137/t151 do tren tra-luat-win (3/3 rc 0, 15:44:57Z, sau khi phien #1315 nha khoa). Chu kho duyet
       Windows 3/3 roi 4/4 qua AskUserQuestion (khong co comment).
   - name: 'Windows native N6 — may tra-luat-win (khong PYTHONUTF8, cp1252, Python 3.12)'

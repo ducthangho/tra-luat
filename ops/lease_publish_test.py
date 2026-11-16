@@ -7213,8 +7213,8 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
           f"tín dụng giả={len(ket['TIN_DUNG_GIA'])}")
     chot(not ket["TIN_DUNG_GIA"], f"mutant chết vì lỗi VÔ CAN (tín dụng giả): {ket['TIN_DUNG_GIA']}")
     chot(not ket["SAI_KY_VONG"], f"catalog lệch: {ket['SAI_KY_VONG']}")
-    chot(ket["GIET"] + ket["SONG"] == len(muts) == 101, f"mẫu số phải cố định 101 (37 A0 + 46 amb-m* ADR-0066 + 18 u8-m* #1331): {ket}")
-    chot(ket["GIET"] == 98 and ket["SONG"] == 3, f"catalog kỳ vọng 98 giết / 3 SỐNG: {ket}")
+    chot(ket["GIET"] + ket["SONG"] == len(muts) == 103, f"mẫu số phải cố định 103 (37 A0 + 46 amb-m* ADR-0066 + 20 u8-m* #1331): {ket}")
+    chot(ket["GIET"] == 100 and ket["SONG"] == 3, f"catalog kỳ vọng 100 giết / 3 SỐNG: {ket}")
 
 
 # wp488 review lượt 1: regression hints; fixture/control local, không mạng.
@@ -15448,40 +15448,66 @@ _U8_KHONG_GOI = frozenset({"PIPE", "DEVNULL", "STDOUT", "TimeoutExpired", "Calle
                            "SubprocessError"})
 
 
-def _u8_quet(nguon: str, gian_tiep: bool = True) -> tuple:
-    """Quét AST: (số lời gọi `subprocess.*`, danh sách vi phạm theo TỪNG lời gọi). `**kw`/đối số vị trí thứ hai trở đi
-    cũng là vi phạm vì không đo được chúng có mang chế độ text hay không.
+_U8_GOI_DUOC = frozenset({"run", "Popen"})   # CHO PHÉP: thứ mã sản phẩm thật sự gọi (review Codex lượt 2, R1)
+# Nguyên thuỷ lấy module/namespace một cách động — có mặt ở đâu trong tệp quét cũng là vi phạm, bất kể đối số.
+_U8_DONG = frozenset({"importlib", "__import__", "builtins", "__builtins__", "globals", "vars", "locals", "eval", "exec",
+                      "compile"})
+_U8_DUNDER_DUOC = frozenset({"__name__", "__init__", "__doc__", "__file__"})
 
-    `gian_tiep` (review Codex lượt 1 #1331, R1 P2): `getattr(subprocess, "run")`, `partial(subprocess.run, …)`,
-    alias `run = subprocess.run` đều lọt bản đầu. Nay MỌI tham chiếu tới module phải là `subprocess.<thuộc tính>`;
-    thuộc tính ngoài `_U8_KHONG_GOI` chỉ hợp lệ khi chính nó là `func` của lời gọi (và lời gọi ấy qua kiểm từ khoá);
-    chuỗi hằng `"subprocess"` (`__import__`, `import_module`, `sys.modules[...]`) cũng là vi phạm.
-    `gian_tiep=False` chỉ để t258 đo RĂNG của phần kiểm này."""
+
+def _u8_quet(nguon: str, gian_tiep: bool = True, them_goi: tuple = ()) -> tuple:
+    """Quét AST: (số lời gọi `subprocess.<X>`, vi phạm theo TỪNG chỗ). `**kw`/đối số vị trí ngoài argv là vi phạm.
+
+    Review Codex lượt 1–2 (#1331, R1 P2): cấm từng cách viết gián tiếp là thua từ thiết kế (lượt 2 lọt
+    `importlib.import_module("sub" + "process")` và `subprocess.__getattribute__("run")`). Nay toàn danh sách CHO PHÉP:
+    tên `subprocess` chỉ ở dạng `subprocess.<X>`; X ∈ `_U8_KHONG_GOI` dùng tự do, X ∈ `_U8_GOI_DUOC` chỉ ở vị trí `func`
+    của lời gọi trực tiếp, X khác là vi phạm; dunder ngoài `_U8_DUNDER_DUOC` là vi phạm; mọi tên trong `_U8_DONG`,
+    `sys.modules`, `getattr` với tên không phải hằng, và chuỗi hằng `"subprocess"` là vi phạm.
+    `gian_tiep=False` / `them_goi` chỉ để t258 đo RĂNG của từng lớp."""
     import ast
     so, vp = 0, []
+    goi_duoc = _U8_GOI_DUOC | set(them_goi)
     cay = ast.parse(nguon)
     cha = {c: n for n in ast.walk(cay) for c in ast.iter_child_nodes(n)}
     for n in ast.walk(cay):
+        d = getattr(n, "lineno", 0)
         if gian_tiep and isinstance(n, ast.Name) and n.id == "subprocess":
             p = cha.get(n)
             if not (isinstance(p, ast.Attribute) and p.value is n):
-                vp.append(f"dòng {n.lineno}: module subprocess dùng làm giá trị: {ast.unparse(p)[:60]}")
-            elif p.attr not in _U8_KHONG_GOI and not (isinstance(cha.get(p), ast.Call) and cha[p].func is p):
-                vp.append(f"dòng {n.lineno}: subprocess.{p.attr} lấy làm callable gián tiếp: {ast.unparse(cha.get(p, p))[:60]}")
-        if gian_tiep and isinstance(n, ast.Constant) and n.value == "subprocess":
-            vp.append(f"dòng {n.lineno}: nạp module subprocess qua chuỗi")
+                vp.append(f"dòng {d}: module subprocess dùng làm giá trị: {ast.unparse(p)[:60]}")
+            elif p.attr in _U8_KHONG_GOI:
+                pass
+            elif p.attr not in goi_duoc:
+                vp.append(f"dòng {d}: subprocess.{p.attr} ngoài danh sách cho phép {sorted(goi_duoc)}")
+            elif not (isinstance(cha.get(p), ast.Call) and cha[p].func is p):
+                vp.append(f"dòng {d}: subprocess.{p.attr} lấy làm callable gián tiếp: {ast.unparse(cha.get(p, p))[:60]}")
+        if gian_tiep:
+            ten = (n.id if isinstance(n, ast.Name) else   # thuộc tính `.__import__`… đã do luật dunder bắt
+                   " ".join(f"{getattr(n, 'module', None) or ''} {a.name} {a.asname or ''}" for a in n.names)
+                   if isinstance(n, (ast.Import, ast.ImportFrom)) else None)
+            if ten is not None and set(ten.replace(".", " ").split()) & _U8_DONG:
+                vp.append(f"dòng {d}: nạp/tra namespace động: {ten.strip()[:60]}")
+            if isinstance(n, ast.Attribute) and n.attr.startswith("__") and n.attr not in _U8_DUNDER_DUOC:
+                vp.append(f"dòng {d}: thuộc tính dunder ngoài danh sách cho phép: .{n.attr}")
+            if isinstance(n, ast.Attribute) and n.attr == "modules" and ast.unparse(n.value) == "sys":
+                vp.append(f"dòng {d}: sys.modules")
+            if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "getattr"
+                    and not (len(n.args) >= 2 and isinstance(n.args[1], ast.Constant))):
+                vp.append(f"dòng {d}: getattr với tên không phải hằng")
+            if isinstance(n, ast.Constant) and n.value == "subprocess":
+                vp.append(f"dòng {d}: nạp module subprocess qua chuỗi")
         if isinstance(n, ast.ImportFrom) and n.module == "subprocess":
-            vp.append(f"dòng {n.lineno}: from subprocess import …")
+            vp.append(f"dòng {d}: from subprocess import …")
         elif isinstance(n, ast.Import) and any(a.name == "subprocess" and a.asname for a in n.names):
-            vp.append(f"dòng {n.lineno}: import subprocess as …")
-        elif (isinstance(n, ast.Call) and ast.unparse(n.func).startswith("subprocess.")
-              and ast.unparse(n.func)[len("subprocess."):] not in _U8_KHONG_GOI):
+            vp.append(f"dòng {d}: import subprocess as …")
+        elif (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name)
+              and n.func.value.id == "subprocess" and n.func.attr not in _U8_KHONG_GOI):
             so += 1
             ten = ast.unparse(n.func)
-            vp += [f"dòng {n.lineno}: {ten}({'**' if k.arg is None else k.arg + '='}…)"
+            vp += [f"dòng {d}: {ten}({'**' if k.arg is None else k.arg + '='}…)"
                    for k in n.keywords if k.arg is None or k.arg in _U8_CAM]
             if len(n.args) > 1 or any(isinstance(x, ast.Starred) for x in n.args):
-                vp.append(f"dòng {n.lineno}: {ten}(đối số vị trí ngoài argv)")
+                vp.append(f"dòng {d}: {ten}(đối số vị trí ngoài argv)")
     return so, vp
 
 
@@ -15497,22 +15523,30 @@ def t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text():
     for mau, mong in (("subprocess.run(['x'], capture_output=True)\n", 0),
                       ("subprocess.run(['x'],\n    capture_output=True,\n    text=True)\n", 1),
                       ("subprocess.Popen(['x'], encoding='utf-8')\n", 1), ("subprocess.run(['x'], errors='replace')\n", 1),
-                      ("subprocess.check_output(['x'], universal_newlines=True)\n", 1), ("subprocess.run(['x'], **kw)\n", 1),
+                      ("subprocess.check_output(['x'], universal_newlines=True)\n", 2), ("subprocess.run(['x'], **kw)\n", 1),
                       ("subprocess.run(['x'], -1, None)\n", 1), ("from subprocess import run\n", 1),
                       ("subprocess.run(['x'], text=True, encoding='utf-8')\nsubprocess.run(['y'], text=True)\n", 3),
                       ("p = subprocess.Popen(['x'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)\n"
                        "try:\n    pass\nexcept (subprocess.TimeoutExpired, subprocess.SubprocessError):\n    pass\n"
                        "isinstance(p, subprocess.CompletedProcess)\nraise subprocess.CalledProcessError(1, 'x', 'o', 'e')\n", 0),
-                      ("subprocess.run.__call__(['x'], text=True)\n", 2), ("__import__('subprocess').run(['x'], text=True)\n", 1),
-                      ("import sys\nsys.modules['subprocess'].run(['x'])\n", 1)):
+                      ("subprocess.run.__call__(['x'], text=True)\n", 2), ("__import__('subprocess').run(['x'], text=True)\n", 2),
+                      ("import sys\nsys.modules['subprocess'].run(['x'])\n", 2), ("globals()['sub' + 'process'].run(['x'])\n", 1),
+                      ("subprocess.check_call(['x'])\n", 1), ("from importlib import import_module\n", 1),
+                      ("p = subprocess.Popen(['x'], stdout=subprocess.PIPE)\nre.compile('a')\ngetattr(os, 'killpg')\n"
+                       "x.__name__\nif __name__ == '__main__':\n    pass\n", 0)):
         chot(len(_u8_quet(mau)[1]) == mong, f"M3 tự kiểm vị từ {mau!r}: {_u8_quet(mau)}")
     # Răng của phần kiểm gián tiếp (R1): ba phản chứng của reviewer phải ĐỎ khi bật, và XANH khi tắt phần ấy —
     # tức chính phần kiểm mới (không phải chốt từ khoá cũ) bắt chúng.
     for mau in ("getattr(subprocess, 'run')(['x'], capture_output=True, text=True)\n",
                 "import functools\nfunctools.partial(subprocess.run, capture_output=True, text=True)(['x'])\n",
-                "run = subprocess.run\nrun(['x'], capture_output=True, text=True)\n"):
+                "run = subprocess.run\nrun(['x'], capture_output=True, text=True)\n",
+                "import importlib\nimportlib.import_module('sub' + 'process').run(['x'], capture_output=True, text=True)\n",
+                "run = subprocess.__getattribute__('run')\nrun(['x'], capture_output=True, text=True)\n"):
         chot(_u8_quet(mau)[1] and not _u8_quet(mau, gian_tiep=False)[1],
              f"M3 răng gián tiếp {mau!r}: bật={_u8_quet(mau)[1]} tắt={_u8_quet(mau, gian_tiep=False)[1]}")
+    # Răng của danh sách CHO PHÉP tên gọi được: nới tập bằng tên đang vi phạm thì vi phạm ấy phải biến mất.
+    chot(_u8_quet("subprocess.check_call(['x'])\n")[1] and not _u8_quet("subprocess.check_call(['x'])\n", them_goi=("check_call",))[1],
+         "M3 răng danh sách cho phép: nới `check_call` mà vi phạm không đổi ⇒ chốt không đo danh sách")
 
 
 @ca
@@ -15577,6 +15611,12 @@ _U8_DOT_BIEN = [
      [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
     ("u8-m16-goi-gh-alias", '    return _chay_utf8(["gh", "api", *doi_so])\n',
      f'    run = subprocess.run\n    return run(["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    ("u8-m17-goi-gh-import-module-noi-chuoi", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    import importlib\n    return importlib.import_module("sub" + "process").run(["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    ("u8-m18-goi-gh-getattribute", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    run = subprocess.__getattribute__("run")\n    return run(["gh", "api", *doi_so]{_U8_TEXT})\n',
      [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
     ("u8-m13-tls-bo-bat-chan", "    except (OSError, ValueError, UnicodeError, Chan):", "    except (OSError, ValueError, UnicodeError):",
      [("t257_wp1331_M5_byte_khong_UTF8_duong_kiem_la_12_chan_doan_la_None", "F3 _tls_tu_git_https_linux")]),

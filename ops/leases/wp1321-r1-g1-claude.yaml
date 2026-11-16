@@ -17,8 +17,8 @@ recorder_is_dispatcher: false
 recorder_ghi_chu: 'phien Claude Code do thoi gian CI (cung phien se thi cong) ghi lease theo quyet dinh truc tiep cua chu kho trong chat; tham quyen la authority_url, khong phai lease nay'
 leased_at_utc: '2026-11-15T03:36:00Z'
 heartbeat_at: '2026-11-15T03:36:00Z'
-lease_until: '2026-11-17T03:36:00Z'
-lease_expires_at_utc: '2026-11-17T03:36:00Z'
+lease_until: '2026-11-16T12:33:32Z'
+lease_expires_at_utc: '2026-11-16T12:33:32Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -78,3 +78,12 @@ prohibited_actions:
 - kill_other_session_process
 - write_outside_effective_write_set
 land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T03:36:00Z'
+  han_moi_utc: '2026-11-16T12:33:32Z'
+  luc_rut_utc: '2026-11-16T12:21:32Z'
+  nguoi_rut: 'phien Claude Code dieu phoi Mission1172, theo quyet dinh truc tiep cua chu kho'
+  chi_thi: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916257249
+  ly_do: 'Chu kho duyet r56 (WP1315 readmission) va cho thu hoi som lease nay de WP1315 ghi .claude/dev/packet_loop_test.py khong chong write set. Luc rut: chua co nhanh agent/wp1321-g1-claude tren may chu, chua co PR.'
+  vi_sao_han_moi_con_vai_phut: 'Publisher phai thay lease rut han khi lease con song; khong reset lich su. Phai quet ai-dang-giu sau han moi truoc khi cap lease WP1315.'
+  gioi_han: 'Chi rut han; write set/spec/branch/generation va lich su han goc giu nguyen. WP1321 van mo, khong dong; lam tiep phai xin lease moi sau khi WP1315 nha path.'

@@ -68,8 +68,10 @@ _BANG_LOP = (
 
 def _chay_utf8(lenh, *, env=None):
     """#1331 (đo `tra-luat-win` cp1252: JSON UTF-8 đọc qua `text=True` thành mojibake, KHÔNG ngoại lệ) — fix:
-    MỌI lời gọi đọc output dạng chữ đi qua đây: đọc BYTES, decode UTF-8 strict, rồi chuẩn hoá xuống dòng như chế
-    độ text cũ (CRLF/CR → LF). Byte không phải UTF-8 ⇒ `Chan(12)`, không bao giờ đi tiếp với chuỗi đã
+    BẢY lời gọi thuộc M1 (GOI_GH, _repo_tam_co_lap, _tls_tu_git_https_linux ×2, hoso_adapter_do, kham_pha_nguon,
+    KhoObject._git_nguon) đi qua đây: đọc BYTES, decode UTF-8 strict, rồi chuẩn hoá xuống dòng như chế độ text cũ
+    (CRLF/CR → LF). KHÔNG qua đây: `GOI_GIT` tự decode UTF-8 và giữ `stdout_bytes` (t174_GOI_GIT_…), `Popen` của
+    `KhoObject.doc` đọc bytes thô. Byte không phải UTF-8 ⇒ `Chan(12)`, không bao giờ đi tiếp với chuỗi đã
     thay ký tự. Cố ý KHÔNG nhận `**kw`: `text=`/`encoding=` không có đường lọt vào `subprocess.run` (chốt AST t258)."""
     p = subprocess.run(lenh, capture_output=True, env=env)
     try:

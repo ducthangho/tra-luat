@@ -76,23 +76,39 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
 leased_at_utc: '2026-11-16T05:00:00Z'
-heartbeat_at: '2026-11-16T05:50:00Z'
+heartbeat_at: '2026-11-16T12:50:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease); doc lai lease truoc moi lan ghi nhanh lease.'
-lease_until: '2026-11-17T05:00:00Z'
-lease_expires_at_utc: '2026-11-17T05:00:00Z'
+lease_until: '2026-11-16T13:15:00Z'
+lease_expires_at_utc: '2026-11-16T13:15:00Z'
 lease_until_ghi_chu: '24h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
 attempts_basis: '<= 2 phien executor.'
 budget:
   codex_review_calls:
-    pr_wp1331_g1: {used: 1, reserved: 0, limit: 10}
+    pr_wp1331_g1: {used: 5, reserved: 0, limit: 10}
   ci_ubuntu_runs:
-    pr_wp1331_g1: {used: 0, reserved: 0, limit: 2}
-  windows_native_runs:
     pr_wp1331_g1: {used: 1, reserved: 0, limit: 2}
+  windows_native_runs:
+    pr_wp1331_g1: {used: 2, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
 budget_ghi_chu: 'Den 05:50Z: Codex 1 (offline luot 1 run 8611d7af tren H 14aa4c0: request_changes, P2 R1 chot AST bo sot goi gian tiep; lan chay truoc do bi launcher chan rc 11 vi remote workspace, khong goi Codex); Windows 1 (N6 tren 14aa4c0 05:39-05:43Z: head t256/t257/t129/t133/t137/t151 QUA, t258 DO vi UnicodeEncodeError trong ca; harness chet o print tong ket duoi cp1252; ve am nen t256-t258 DO dung). Codex <= 10 theo dong khai ADR-0055 cua dac ta, dem TRUOC moi loi goi (ke ca connector tu chay khi bo draft); CI Ubuntu <= 2; Windows native <= 2; khong gan nhan windows, khong goi tay CI Windows (chu kho 16-11).'
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-16T12:5xZ (phien dieu phoi moi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 5/10: offline 4 luot (luot 1 8611d7af tren 14aa4c0 request_changes; luot 2, 3 request_changes R1; luot 4 f31a6cc4 tren 519e59d approve) + connector 1 (tu chay khi bo draft, tom tat 6912530747 tren d893075, sach). CI Ubuntu 1/2: gate 43832290746 pull_request tren d893075 success. Windows 2/2: N6 luot 1 tren 14aa4c0 (05:39-05:43Z) va luot 2 tren 10496d3 (06:45-06:50Z, 8/8 head rc 0, ve am nen t256-t258 rc 1). Lease truoc day van ghi Codex 1 / Windows 1 vi phien dieu phoi cu khong ghi duoc nhanh lease (dia container day). Lan ghi ngan sach nay la LOI KHAI CO NEO cua phien dieu phoi (run id offline luot 2/3 nam trong scratchpad phien cu, da mat).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T05:00:00Z'
+  han_moi_utc: '2026-11-16T13:15:00Z'
+  chi_thi: >-
+    lease_until_ghi_chu cua chinh lease (rut han ngay sau land) va ban giao phien dieu phoi #1206 cu cho phien moi
+    session_015GtxrZk6gmfQKo7g4BfMBS (issuecomment-6915428082 tren #1206).
+  ly_do: >-
+    Packet #1331 (SUBPROCESS-UTF8-LEASE-PUBLISH r1) da MERGE: PR #1338 (head d893075) merge commit
+    9c1661f76d5f4ef811aa349df102989cc2e2d53d, 2026-11-16T10:07:23Z; gate push run 43845962754 tren 9c1661f success 23/23 job.
+    Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: >-
+    Khong co lease ke nhiem. Rut han theo tien le #1266 g1 (b1e859a). Han moi dat SAU luc push de luot dang lease con thay
+    lease song, tranh rc=8 che rc=9.
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 2 duong dan write set sau 13:15Z phai ra NGUOI_GIU 0.'

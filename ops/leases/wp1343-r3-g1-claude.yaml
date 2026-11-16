@@ -81,23 +81,34 @@ thay_the_cho:
   - wp1343-r2-g1-claude
 thay_the_cho_ghi_chu: 'dac ta r3 them M7 (hai ca wp1303_target_* sang workflow dem), theo dung luat dung §6 cua executor g1 17:29Z; cung executor, nhanh, han, write set.'
 leased_at_utc: '2026-11-16T16:40:00Z'
-heartbeat_at: '2026-11-16T16:40:00Z'
+heartbeat_at: '2026-11-16T23:05:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-17T16:40:00Z'
-lease_expires_at_utc: '2026-11-17T16:40:00Z'
+lease_until: '2026-11-16T23:20:00Z'
+lease_expires_at_utc: '2026-11-16T23:20:00Z'
 lease_until_ghi_chu: '24h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
 attempts_basis: '<= 2 phien executor.'
 budget:
   codex_review_calls:
-    pr_wp1343_g1: {used: 0, reserved: 0, limit: 10}
+    pr_wp1343_g1: {used: 1, reserved: 0, limit: 10}
   ci_ubuntu_runs:
-    pr_wp1343_g1: {used: 0, reserved: 0, limit: 4}
+    pr_wp1343_g1: {used: 1, reserved: 0, limit: 4}
   windows_native_runs:
     pr_wp1343_g1: {used: 0, reserved: 0, limit: 0}
   khong_reset_theo_generation: true
 budget_ghi_chu: 'Codex <= 10 theo dong khai ADR-0055 cua dac ta, dem TRUOC moi loi goi (ke ca connector); CI Ubuntu <= 4 (N5 can do that tren CI); Windows 0 (chi dao chu kho: khong chay CI Windows).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 23:05Z 16-11 (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 1/10: connector khi bo draft tren 4b0a3d2 (6926087960, sach); khong goi Codex offline. CI Ubuntu 1/4: gate 43929227587 (pull_request, 4b0a3d2). Windows 0/0. Lan ghi ngan sach nay la LOI KHAI CO NEO cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T16:40:00Z'
+  han_moi_utc: '2026-11-16T23:20:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1343 da MERGE: PR #1344 (head 4b0a3d2) merge commit b8bc64f99f43f382ceb90aadbe57df783842a28d, 2026-11-16T22:25:22Z,
+    human audit chu kho issuecomment-6931217894. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet. Rut han theo tien le #1331 (51bfde9) va #1335 (01434fb).'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 6 duong dan write set sau 23:20Z phai ra NGUOI_GIU 0.'

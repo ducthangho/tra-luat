@@ -87,6 +87,7 @@ jobs:
       goc: ${{ steps.phan-loai.outputs.goc }}
       dau: ${{ steps.phan-loai.outputs.dau }}
       hop: ${{ steps.phan-loai.outputs.hop }}
+      packet_loop: ${{ steps.phan-loai.outputs.packet_loop }}
     steps:
       # `continue-on-error` o HAI buoc phan loai la CO CHU DICH, khong phai nuot loi: khong phan loai duoc thi phai roi
       # ve `day_du` (chay day du), khong lam `chuan-bi` do. Do 29-09 (Issue #674 comment 5889459132, 4 luot that):
@@ -1111,17 +1112,22 @@ jobs:
           CI_DANG_KY_GOP_KQ: ${{ needs.gate-nhanh-gop.result }}
         run: python .claude/dev/ci_dang_ky_test.py --chay
 
-  gate-packet-loop:
+  gate-packet-loop-manh:
     # packet #463 (GATE-TACH-JOB-CAT-CHI-PHI): tách khỏi `gate` để cắt wall-clock của job dài nhất
     # (đo 06-09-2026, run 34045664423: Windows 43,20 phút, hai bước nặng = 63,5 % tổng bước). Cùng
     # ma trận/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
     # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
     # Bước `packet-loop selftest` (22,5 % tổng bước Windows) sống ở đây.
+    # wp1343 (CI-PACKET-LOOP-NHANH r3): job này là các MẢNH, không còn là check bắt buộc (đo run 43845962754: một job 2 giờ
+    # 21 phút). 16 mảnh chạy (sổ ca − `CA_DAI`) qua `.claude/dev/packet_loop_test_manh.py`; bảng đột biến và `CA_DAI` sang
+    # `packet-loop-dot-bien.yml`. Cả job nghỉ khi `chuan-bi` xuất ĐÚNG `packet_loop=bo_qua` — độc lập với `che_do`.
     needs: chuan-bi
+    if: ${{ needs.chuan-bi.outputs.packet_loop != 'bo_qua' }}
     strategy:
       fail-fast: false
       matrix:
         os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+        manh: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     runs-on: ${{ matrix.os }}
     # WP856 (chu kho, PR #866): 60 -> 120. Run 39722546630: Ubuntu 40,4 phut (truoc 22,4) sau khi
     # #856 them ma tran T1-T6; Windows van chay o phut ~46, sat tran 60.
@@ -1150,37 +1156,66 @@ jobs:
       - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
         run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - name: cài actionlint cho G5
-        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         env:
           AL_VER: 1.7.7
         run: bash ops/cai_actionlint.sh
       - name: cài shellcheck cho G5 (cài xong đo lại)
-        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: bash ops/cai_cong_cu.sh shellcheck
       - name: cài rg cho G5 (cài xong đo lại)
-        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: bash ops/cai_cong_cu.sh rg
       - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 #637)
-        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
         shell: bash
         run: python ops/cong_cu.py kiem-tra --json
-      - name: cài Ruff 0.15.15 và in probe dương
-        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
-        run: |
-          python -m pip install --quiet ruff==0.15.15
-          ruff --version
-      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-packet-loop)
-        if: ${{ needs.chuan-bi.outputs.che_do == 'duong_nhanh' }}
-        run: |
-          echo "DUONG_NHANH: bo qua cài actionlint cho G5 vi diff chi gom ops/{land,leases,reviews,specs}/**"
-          echo "DUONG_NHANH: bo qua cài shellcheck cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"
-          echo "DUONG_NHANH: bo qua cài rg cho G5 (cài xong đo lại) vi diff chi gom ops/{land,leases,reviews,specs}/**"
-          echo "DUONG_NHANH: bo qua G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6 vi diff chi gom ops/{land,leases,reviews,specs}/**"
-          echo "DUONG_NHANH: bo qua cài Ruff 0.15.15 và in probe dương vi diff chi gom ops/{land,leases,reviews,specs}/**"
-          echo "DUONG_NHANH: bo qua packet-loop selftest vi diff chi gom ops/{land,leases,reviews,specs}/**"
       - name: packet-loop selftest
-        if: ${{ needs.chuan-bi.outputs.che_do != 'duong_nhanh' }}
-        run: python .claude/dev/packet_loop_test.py
+        shell: bash
+        env:
+          PACKET_LOOP_MANH: ${{ matrix.manh }}/16
+          PACKET_LOOP_RA: manh/manh-${{ matrix.manh }}.json
+        run: python .claude/dev/packet_loop_test_manh.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gate-packet-loop-manh-${{ matrix.os }}-${{ matrix.manh }}
+          path: manh/manh-${{ matrix.manh }}.json
+          if-no-files-found: error
+
+  # wp1343: job GOM giữ tên check bắt buộc `gate-packet-loop (ubuntu-latest)`. Dựng lại phân hoạch từ sổ ca rồi so TẬP ca
+  # từng mảnh; ĐỎ khi thiếu/đỏ mảnh, lệch tập, hay mảnh bị bỏ/huỷ lúc `packet_loop` khác `bo_qua` (khi `bo_qua`: in "KHÔNG ĐO",
+  # XANH). `!cancelled()`: `needs` mặc định cho gom `skipped` khi mảnh đỏ, mà `skipped` đọc như xanh ở check bắt buộc.
+  gate-packet-loop:
+    needs: [chuan-bi, gate-packet-loop-manh]
+    if: ${{ !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.chuan-bi.outputs.os) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Force LF checkout (hash parity với manifest)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.abbrev 7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        if: ${{ needs.chuan-bi.outputs.packet_loop != 'bo_qua' }}
+        with:
+          pattern: gate-packet-loop-manh-${{ matrix.os }}-*
+          path: manh
+          merge-multiple: true
+      - name: gom manh packet-loop (so TAP ca; wp1343)
+        shell: bash
+        env:
+          PACKET_LOOP: ${{ needs.chuan-bi.outputs.packet_loop }}
+          KQ_MANH: ${{ needs.gate-packet-loop-manh.result }}
+        run: python .claude/dev/packet_loop_test_manh.py --gom manh --n 16

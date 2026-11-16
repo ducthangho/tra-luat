@@ -130,6 +130,13 @@ MA_KIEM_HET_HAN = (
     "import sys\nsys.path.insert(0, 'ops')\nimport lease_publish as lp\n"
     "try:\n    lp.kiem(lp._doc_yaml(sys.argv[1]), sys.argv[1], '.', bo_qua_han=True)\n"
     "except lp.Chan as e:\n    print('CHAN [%s]: %s' % (e.ma, e.thong_diep))\n    raise SystemExit(8)\n")
+# wp1343 (CI-PACKET-LOOP-NHANH r3, M1/M2): output THU HAI `packet_loop`, doc lap voi `che_do`; chi DUNG chuoi `bo_qua` moi cho job
+# manh nghi. Tap TIEN TO duoi day DO 16-11-2026 tren base 9c1661f: inotify (IN_OPEN/IN_ACCESS, moi tien trinh con) tren cay lam viec
+# khi chay 1491 ca bat buoc, tru cac khoang `_snapshot1174` (bam ca cay, khong phu thuoc noi dung); cong ci.yml, CONTEXT.md va
+# ops/KE_HOACH… (duong dan tinh trong tep ca). KHONG do: doc qua object git (lich su), va hai ca `CA_DAI` (doc gan ca cay ops/).
+PL_CHAY, PL_BO_QUA = "chay", "bo_qua"
+PHU_THUOC_PACKET_LOOP = (".agents/skills/", ".claude/dev/fixtures/", ".claude/dev/launcher.py", ".claude/dev/packet_loop", ".claude/hooks/session-start.sh", ".claude/settings.json", ".claude/skills/", ".github/workflows/ci.yml", ".gitignore", ".mcp.json",
+                         "AGENTS.md", "CLAUDE.md", "CONTEXT.md", "docs/PROTOCOL_DA_PHIEN.md", "docs/adr/", "ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md", "ops/bien_nhan_v2.py", "ops/land/pr1270-wp1179-provenance/", "ops/lease_publish.py")
 MA_CHAY_CA = (
     "import runpy, sys\nm = runpy.run_path(sys.argv[1])\n"
     "for ten in sys.argv[2:]:\n    m[ten]()\n    print('DAT', ten)\n")
@@ -396,7 +403,20 @@ def phan_loai_tu_diff(doi):
                          "ops/{land,leases,reviews,specs}/** - dung duong nhanh")
 
 
-def phan_loai(env=os.environ, chay=subprocess.run, kho=ROOT, tra_env=False):
+def phan_loai_packet_loop(su_kien, doi):
+    """(`chay` | `bo_qua`, ly do). push (chi nhanh mac dinh) => bo_qua (M2). pull_request: bo_qua CHI KHI do duoc diff khac rong,
+    moi duong dan sach va khong duong dan nao khop `PHU_THUOC_PACKET_LOOP`. Con lai => chay (fail-closed)."""
+    if su_kien == "push":
+        return PL_BO_QUA, "PACKET_LOOP: bo_qua vi push nhanh mac dinh (hau merge khong chay bo ca packet-loop)"
+    if su_kien != "pull_request" or not doi or not all(type(x) is str and _duong_dan_sach(x) for x in doi):
+        return PL_CHAY, f"PACKET_LOOP: chay (su_kien={su_kien!r}, diff rong / KHONG DO DUOC / duong dan la => fail-closed)"
+    cham = sorted(x for x in doi if x.startswith(PHU_THUOC_PACKET_LOOP))
+    if cham:
+        return PL_CHAY, f"PACKET_LOOP: chay vi diff cham {len(cham)} tep phu thuoc cua bo ca: " + ", ".join(map(repr, cham[:TOI_DA_TEN_IN]))
+    return PL_BO_QUA, f"PACKET_LOOP: bo_qua vi {len(doi)} tep doi khong cham tap phu thuoc cua bo ca"
+
+
+def phan_loai(env=os.environ, chay=subprocess.run, kho=ROOT, tra_env=False, ra_doi=None):
     """(che_do, ly_do) — hoac (che_do, ly_do, env chuan hoa | None) khi `tra_env`. Su kien ngoai SU_KIEN_PHAN_LOAI, hay
     dispatch voi input `day_du`/la ⇒ `day_du` ma KHONG goi git."""
     env2, ly = chuan_hoa_cap(env, chay, kho)
@@ -405,6 +425,8 @@ def phan_loai(env=os.environ, chay=subprocess.run, kho=ROOT, tra_env=False):
     else:
         _doi, che_do, ly_do = phan_loai_day_du(env2, chay, kho)
         kq = (che_do, ly_do)
+        if ra_doi is not None:
+            ra_doi.append(_doi)
     return (*kq, env2) if tra_env else kq
 
 
@@ -775,14 +797,17 @@ def main(argv=None, env=os.environ, chay=subprocess.run, kho=ROOT, ra=None) -> i
     if argv:
         print("dung: ci_duong_nhanh.py [kiem-re]", file=sys.stderr)
         return 2
-    env2 = None
+    env2, doi = None, []
     try:
-        che_do, ly_do, env2 = phan_loai(env, chay, kho, tra_env=True)
+        che_do, ly_do, env2 = phan_loai(env, chay, kho, tra_env=True, ra_doi=doi)
+        pl, ly_do_pl = phan_loai_packet_loop(env.get(BIEN_SU_KIEN) or "", doi[0] if doi else None)
     except Exception as e:
         # Lỗi nội bộ KHÔNG được làm PR kẹt đỏ oan, cũng không được mở đường nhanh: fail-close ⇒ đầy đủ.
         che_do, ly_do = DAY_DU, f"DUONG_NHANH: LOI NOI BO ({type(e).__name__}) - fail-close ve DAY_DU"
+        pl, ly_do_pl = PL_CHAY, "PACKET_LOOP: chay (loi noi bo => fail-closed)"
     print(ly_do, file=ra)
     print(f"che_do={che_do}", file=ra)
+    print(f"{ly_do_pl}\npacket_loop={pl}", file=ra)
     # wp1113: cap (goc, dau, merge) DA DUNG de phan loai, de `kiem-re` doc lai DUNG cap ay o moi su kien. Chi xuat khi
     # duong nhanh; day du thi rong (kiem-re khong chay).
     cap = {k: (env2 or {}).get(b, "") if che_do == DUONG_NHANH else ""
@@ -791,7 +816,7 @@ def main(argv=None, env=os.environ, chay=subprocess.run, kho=ROOT, ra=None) -> i
     if tep_ra:
         try:
             with open(tep_ra, "a", encoding="utf-8", newline="\n") as f:
-                f.write(f"che_do={che_do}\n" + "".join(f"{k}={v}\n" for k, v in cap.items()))
+                f.write(f"che_do={che_do}\n" + "".join(f"{k}={v}\n" for k, v in cap.items()) + f"packet_loop={pl}\n")
         except OSError as e:
             print(f"DUONG_NHANH: khong ghi duoc GITHUB_OUTPUT ({type(e).__name__}) - DO", file=sys.stderr)
             return 1

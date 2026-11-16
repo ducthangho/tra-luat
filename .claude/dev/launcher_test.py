@@ -6551,12 +6551,6 @@ def r12_prompt_doi_ngay_sau_preflight_phai_DO():
 
 
 @ca
-def r13_PROMPT_FILE_thieu_prompt_file_phai_DO():
-    # #1079 F05: gọi HELPER chung, không gọi ca đã đăng ký khác (chốt của ca khác không phải chốt của ca này).
-    return _t70_prompt_file_chan()
-
-
-@ca
 def r14_run_json_bam_lai_dung_hai_log():
     with San() as s:
         repo = tao_repo(s); rr = s / "runs"
@@ -7722,24 +7716,39 @@ def r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO():
 
 SCHEMA_REVIEW = (Path(__file__).resolve().parents[2] / ".github" / "coordination" /
                  "schemas" / "review_verdict.v1.schema.json")
+SCHEMA_DANG_DUNG = SCHEMA_REVIEW   # #1336: đích đột biến loại "schema" của DOT_BIEN_HOOK, cùng luật con trỏ
 
 
 def _schema_hop_le(gia_tri, schema, runtime=None):
-    """Validator stdlib cho đúng tập keyword schema v1 đang dùng."""
+    """Validator stdlib cho đúng tập keyword schema v1 đang dùng.
+
+    #1336 M4: ngữ nghĩa phải KHỚP `jsonschema` (Draft 2020-12), không chặt hơn, không lỏng hơn: `pattern` khớp
+    bằng `re.search`; `const`/`enum` phân biệt bool với số; số thực nguyên (1.0) là `integer`."""
     def dung_kieu(x, ten):
         return {"object": isinstance(x, dict), "array": isinstance(x, list),
                 "string": isinstance(x, str), "null": x is None,
-                "integer": isinstance(x, int) and not isinstance(x, bool),
+                "integer": (isinstance(x, int) or (isinstance(x, float) and x.is_integer()))
+                           and not isinstance(x, bool),
                 "boolean": isinstance(x, bool)}.get(ten, False)
+    def bang_json(a, b):
+        if isinstance(a, bool) or isinstance(b, bool): return a is b
+        if isinstance(a, list) and isinstance(b, list):
+            return len(a) == len(b) and all(bang_json(u, v) for u, v in zip(a, b))
+        if isinstance(a, dict) and isinstance(b, dict):
+            return a.keys() == b.keys() and all(bang_json(a[k], b[k]) for k in a)
+        return a == b
     def do(x, s):
         kieu = s.get("type")
         if kieu and not any(dung_kieu(x, t) for t in ([kieu] if isinstance(kieu, str) else kieu)):
             return False
-        if "const" in s and x != s["const"]: return False
-        if "enum" in s and x not in s["enum"]: return False
+        if "const" in s and not bang_json(x, s["const"]): return False
+        if "enum" in s and not any(bang_json(x, v) for v in s["enum"]): return False
+        if any(not do(x, c) for c in s.get("allOf", [])): return False
+        if "if" in s and not do(x, s.get("then" if do(x, s["if"]) else "else", {})): return False
         if isinstance(x, str):
             if len(x) < s.get("minLength", 0): return False
-            if s.get("pattern") and not re.fullmatch(s["pattern"], x): return False
+            if len(x) > s.get("maxLength", len(x)): return False
+            if "pattern" in s and not re.search(s["pattern"], x): return False
         if isinstance(x, (int, float)) and not isinstance(x, bool):
             if "minimum" in s and x < s["minimum"]: return False
         if isinstance(x, dict):
@@ -7818,6 +7827,10 @@ def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
     m = json.loads(json.dumps(goc)); attack = "codex-dispatcher"
     m["properties"]["model_reviewer_identity"]["properties"]["provider"]["enum"].append(attack)
     m["x-tra-luat-runtime-bindings"]["model_reviewer_identity.provider"].append(attack)
+    # #1336 M3: từ khi `allOf` ràng provider↔identity, nới hai allowlist trên CHƯA đủ để tên tấn công lọt; đột biến
+    # phải nới cả cặp `claude` thì oracle mới còn thứ để bắt (không nới thì ca này báo "sống sót" oan).
+    m["allOf"][0]["then"]["properties"]["model_reviewer_identity"]["properties"]["provider"] = {
+        "enum": ["anthropic", attack]}
     mutants.append((m, "identity", attack))
     for schema, truong, gia_tri in mutants:
         try:
@@ -7825,6 +7838,112 @@ def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
         except AssertionError:
             continue
         bang(False, f"mutant noi allowlist SONG SOT: {truong}")
+
+
+# #1336 (REVIEW-VERDICT-SCHEMA-CHAT r2) — "oracle của test chặt hơn validator thật": bản trước khớp `pattern` bằng
+# `fullmatch` nên ca xanh trong khi `jsonschema` (khớp bằng `re.search`, `$` ăn cả vị trí trước `\n` cuối) cho QUA
+# một SHA có `\n` ở đuôi. Hai ca dưới chạy CÙNG một bảng qua oracle stdlib và qua `jsonschema` thật, và đòi cả hai
+# bằng kỳ vọng trên TỪNG dòng.
+_R1336_CUOI = r'$(?![\\s\\S])'   # đuôi pattern đúng như nằm trong TỆP schema (JSON đã thoát), neo của đột biến
+
+
+def _r1336_validator_that():
+    """Hàm `(giá trị, schema) -> bool` của `jsonschema`, hoặc None khi chưa cài. Format checker TẮT (mặc định)."""
+    try:
+        import jsonschema
+    except ImportError:
+        bang(not os.environ.get("GITHUB_ACTIONS"),
+             "CI thieu jsonschema: validator that KHONG duoc do (ci.yml ghim jsonschema==4.26.0)")
+        return None
+    return lambda gia_tri, schema: jsonschema.Draft202012Validator(schema).is_valid(gia_tri)
+
+
+def _r1336_so_bang(dong):
+    """`dong`: (nhãn, schema, giá trị, mong_nhận). Đếm dòng lệch của TỪNG validator; lệch thì ĐỎ kèm từng dòng.
+    Trả chuỗi bỏ qua khi thiếu `jsonschema` (nửa stdlib vẫn đã được đòi ở trên)."""
+    that = _r1336_validator_that()
+    lech = []
+    for nhan, schema, gia_tri, mong in dong:
+        kq = [("stdlib", _schema_hop_le(gia_tri, schema))]
+        if that:
+            kq.append(("jsonschema", that(gia_tri, schema)))
+        lech += [f"{nhan}: {ten} {'NHAN' if k else 'TU CHOI'}, mong {'NHAN' if mong else 'TU CHOI'}"
+                 for ten, k in kq if k is not mong]
+    bang(not lech, f"{len(lech)} ket qua lech tren {len(dong)} dong: {lech}")
+    return None if that else "BO QUA nua jsonschema (chua cai); nua stdlib da do"
+
+
+def _r1336_verdict(**doi):
+    d = _verdict_mau()
+    for k, v in doi.items():
+        if k == "identity": d["model_reviewer_identity"]["provider"] = v
+        elif k == "finding_id":
+            d["findings"] = [{"finding_id": v, "severity": "P2", "path": None, "line": None,
+                              "evidence": "e", "recommendation": "r"}]
+        else: d[k] = v
+    return d
+
+
+@ca
+def r1336_bang_m5_hai_validator_cung_ket_qua():
+    """M5/N1/N3: bảng verdict qua CẢ HAI validator trên schema thật; mỗi dòng phải bằng kỳ vọng ở cả hai."""
+    schema = json.loads(SCHEMA_DANG_DUNG.read_text(encoding="utf-8"))
+    sha = "a" * 40
+    dong = [(nhan, schema, _r1336_verdict(**doi), mong) for nhan, doi, mong in (
+        ("goc claude+anthropic", {}, True),
+        ("reviewed_sha + LF", {"reviewed_sha": sha + "\n"}, False),
+        ("reviewed_sha 39 ky tu", {"reviewed_sha": sha[:39]}, False),
+        ("packet_id + LF", {"packet_id": "W1-P1\n"}, False),
+        ("finding_id hop le", {"finding_id": "f-1"}, True),
+        ("finding_id + LF", {"finding_id": "f-1\n"}, False),
+        ("evidence_url khong phai uri", {"evidence_url": "khong phai uri"}, False),
+        ("evidence_url https", {"evidence_url": "https://github.com/o/r/issues/1#issuecomment-2"}, True),
+        ("evidence_url co khoang trang", {"evidence_url": "https://github.com/o r"}, False),
+        ("evidence_url + LF", {"evidence_url": "https://github.com/o/r\n"}, False),
+        ("evidence_url http tran", {"evidence_url": "http://github.com/o/r"}, False),
+        ("codex+anthropic", {"provider": "codex"}, False),
+        ("claude+openai", {"identity": "openai"}, False),
+        ("human+anthropic", {"provider": "human"}, False),
+        ("codex+openai", {"provider": "codex", "identity": "openai"}, True),
+        ("human+human", {"provider": "human", "identity": "human"}, True),
+        ("schema_version True (bool khac so)", {"schema_version": True}, False),
+        ("independent = 1 (so khac bool)", {"independent_from_executor_session": 1}, False),
+        ("generation 1.0 (so thuc nguyen)", {"generation": 1.0}, True),
+    )]
+    # Hai lớp của SHA độc lập nhau: gỡ MỘT lớp thì lớp còn lại vẫn phải chặn `\n` cuối (không phải bộ tương đương
+    # trên giấy — đo từng lớp). Chỉ có nghĩa khi cả hai lớp còn trong schema; đột biến gỡ cả hai chết ở dòng trên.
+    for bo in (("minLength", "maxLength"), ("pattern",)):
+        m = json.loads(json.dumps(schema))
+        if all(k in m["properties"]["reviewed_sha"] for k in ("minLength", "maxLength", "pattern")):
+            for k in bo: m["properties"]["reviewed_sha"].pop(k)
+            dong.append((f"SHA + LF khi go {bo}", m, _r1336_verdict(reviewed_sha=sha + "\n"), False))
+            dong.append((f"SHA dung khi go {bo}", m, _r1336_verdict(), True))
+    return _r1336_so_bang(dong)
+
+
+@ca
+def r1336_oracle_stdlib_khop_ngu_nghia_validator_that():
+    """N2: tuân thủ oracle trên schema THỬ NGHIỆM. Bảng M5 một mình không thấy `search`→`fullmatch` sau khi schema
+    đã siết (hai cách khớp cho cùng kết quả), nên phải có pattern KHÔNG neo: `abc` với `xabcx`."""
+    return _r1336_so_bang([
+        ("pattern khong neo: search khop", {"pattern": "abc"}, "xabcx", True),
+        ("pattern khong neo: khong khop", {"pattern": "abc"}, "xyz", False),
+        ("pattern $ an LF cuoi (ngu nghia re)", {"pattern": "^a$"}, "a\n", True),
+        ("pattern bo qua gia tri khong phai chuoi", {"pattern": "abc"}, 5, True),
+        ("maxLength vuot", {"maxLength": 2}, "abc", False),
+        ("maxLength vua", {"maxLength": 2}, "ab", True),
+        ("allOf mot nhanh sai", {"allOf": [{"minLength": 2}, {"maxLength": 3}]}, "abcd", False),
+        ("allOf moi nhanh dung", {"allOf": [{"minLength": 2}, {"maxLength": 3}]}, "abc", True),
+        ("if dung, then sai", {"if": {"const": 1}, "then": {"const": 2}}, 1, False),
+        ("if sai, then khong ap", {"if": {"const": 1}, "then": {"const": 2}}, 3, True),
+        ("if sai, else sai", {"if": {"const": 1}, "else": {"const": 2}}, 3, False),
+        ("const 1 khong nhan True", {"const": 1}, True, False),
+        ("const true khong nhan 1", {"const": True}, 1, False),
+        ("enum [1] khong nhan True", {"enum": [1]}, True, False),
+        ("integer nhan 1.0", {"type": "integer"}, 1.0, True),
+        ("integer khong nhan 1.5", {"type": "integer"}, 1.5, False),
+        ("integer khong nhan True", {"type": "integer"}, True, False),
+    ])
 
 
 # r338 (đo 06-09-2026) — bằng chứng dương của hook phải phủ ĐÚNG gói trong
@@ -15805,8 +15924,7 @@ DOT_BIEN = [
      ["t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so"]),
     ("PROMPT_FILE_mo_coi_di_tiep",
      ('    elif any("{PROMPT_FILE}" in x for x in lenh_con):', '    elif False:'),
-     ["t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN",
-      "r13_PROMPT_FILE_thieu_prompt_file_phai_DO"]),
+     ["t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN"]),   # #1336 M6: bỏ bí danh r13
     # Hai nửa của cùng một bảo đảm: ghi hở quyền, và để lại trên đĩa.
     ("ban_chup_de_ho_quyen",
      ("        _fd = os.open(ban_chup, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)",
@@ -16584,6 +16702,27 @@ DOT_BIEN_HOOK = [
     ("wp1079_cc_chay_suite_bo_ten_do", ("            do.add(ten_do(ca.__name__, e, ca))",
                                         "            do.add(ca.__name__)  # do.add(ten_do(ca.__name__, e, ca))"),
      ["r1079_cc_chay_suite_phai_do_hanh_vi"], "cc_test"),
+    # #1336: đột biến TỆP SCHEMA verdict (loại "schema"); mỗi chốt của schema một đột biến, đích là bảng M5.
+    ("wp1336_schema_sha_ve_pattern_cu",   # N1: trả pattern cũ VÀ bỏ ràng độ dài (hai lớp cùng lúc)
+     ('"minLength": 40, "maxLength": 40, "pattern": "^[0-9a-f]{40}' + _R1336_CUOI + '"', '"pattern": "^[0-9a-f]{40}$"'),
+     ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
+    ("wp1336_schema_packet_id_ve_dollar", ('._-]*' + _R1336_CUOI + '"', '._-]*$"'),
+     ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
+    ("wp1336_schema_finding_id_ve_dollar", ('[a-z0-9-]*' + _R1336_CUOI + '"', '[a-z0-9-]*$"'),
+     ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
+    ("wp1336_schema_evidence_url_bo_pattern", (', "pattern": "^https://' + chr(92) * 2 + 'S+' + _R1336_CUOI + '"', ''),
+     ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
+    ("wp1336_schema_vo_hieu_allOf", ('  "allOf": [', '  "x-allOf": ['),   # N3: keyword lạ ⇒ cả khối mất hiệu lực
+     ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
+    ("wp1336_schema_bo_cap_claude", ('{"if": {"required": ["provider"], "properties": {"provider": {"const": "claude"}}}',
+      '{"if": {"required": ["provider"], "properties": {"provider": {"const": "x-claude"}}}'),
+     ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
+    ("wp1336_schema_bo_cap_codex", ('{"if": {"required": ["provider"], "properties": {"provider": {"const": "codex"}}}',
+      '{"if": {"required": ["provider"], "properties": {"provider": {"const": "x-codex"}}}'),
+     ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
+    ("wp1336_schema_bo_cap_human", ('{"if": {"required": ["provider"], "properties": {"provider": {"const": "human"}}}',
+      '{"if": {"required": ["provider"], "properties": {"provider": {"const": "x-human"}}}'),
+     ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
 ]
 
 
@@ -16791,6 +16930,13 @@ DOT_BIEN_HARNESS = [
      ('        env = {k: v for k, v in cha.items() if k not in ("BASH_ENV", "ENV") and not k.startswith("BASH_FUNC_")}',
       '        env = dict(cha)'),
      ["r484_g7_hook_vang_codex_cai_cli_truoc_materialize"]),
+    # #1336 N2/M4: mỗi phần ngữ nghĩa của oracle stdlib một đột biến; đích là ca tuân thủ oracle (schema thử nghiệm).
+    ("wp1336_oracle_ve_fullmatch", ('not re.search(s["pattern"], x)', 'not re.fullmatch(s["pattern"], x)'), ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),
+    ("wp1336_oracle_bo_maxLength", ('if len(x) > s.get("maxLength", len(x)): return False', 'pass'), ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),
+    ("wp1336_oracle_bo_allOf", ('if any(not do(x, c) for c in s.get("allOf", [])): return False', 'pass'), ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),
+    ("wp1336_oracle_bo_if_then", ('if "if" in s and not do(', 'if False and not do('), ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),
+    ("wp1336_oracle_bool_bang_so", ('if isinstance(a, bool) or isinstance(b, bool): return a is b', 'pass'), ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),
+    ("wp1336_oracle_integer_bo_so_thuc", ('(isinstance(x, int) or (isinstance(x, float) and x.is_integer()))', 'isinstance(x, int)'), ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),
 ]
 
 
@@ -16895,7 +17041,7 @@ def chay_dot_bien() -> int:
             ten, (c, m), phai_chet = muc[:3]
             loai = muc[3] if muc[3:] else "hook"
             dich = {"yaml": yaml_goc, "cai_sh": cai_sh_goc, "selftest": selftest_goc,
-                    "cong_cu": cong_cu_goc, "cc_test": cc_test_goc}.get(loai, hook_goc)
+                    "cong_cu": cong_cu_goc, "cc_test": cc_test_goc, "schema": SCHEMA_REVIEW}.get(loai, hook_goc)
             goc_dich = dich.read_text(encoding="utf-8")
             if goc_dich.count(c) != 1:
                 print(f"  {ten:<28} SAI - neo hook/yaml khong khop DUNG MOT cho")
@@ -16905,7 +17051,7 @@ def chay_dot_bien() -> int:
             ban.write_text(goc_dich.replace(c, m, 1), encoding="utf-8")
             globals()[{"yaml": "YAML_DANG_DUNG", "cai_sh": "CAI_SH_DANG_DUNG",
                        "selftest": "SELFTEST_DANG_DUNG", "cong_cu": "CONG_CU_DANG_DUNG",
-                       "cc_test": "CC_TEST_DANG_DUNG"}.get(loai, "HOOK_DANG_DUNG")] = ban
+                       "cc_test": "CC_TEST_DANG_DUNG", "schema": "SCHEMA_DANG_DUNG"}.get(loai, "HOOK_DANG_DUNG")] = ban
             chet, bo_qua, loi = [], [], []
             try:
                 for fn in [f for f in CA if f.__name__ in phai_chet]:
@@ -16921,6 +17067,7 @@ def chay_dot_bien() -> int:
                 HOOK_DANG_DUNG, YAML_DANG_DUNG = hook_goc, yaml_goc
                 CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG = cai_sh_goc, selftest_goc, cong_cu_goc
                 CC_TEST_DANG_DUNG = cc_test_goc
+                globals()["SCHEMA_DANG_DUNG"] = SCHEMA_REVIEW   # #1336
             can_do = len(phai_chet) - len(bo_qua)
             if can_do == 0 and not loi:
                 khong_do += 1

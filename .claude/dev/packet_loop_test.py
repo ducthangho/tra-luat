@@ -11949,21 +11949,18 @@ def _controls1174(name, targets):
     return tuple(n for n in ("wp1174_admission_valid","wp1174_witness_valid","wp1174_status_closed") if n not in targets)[:2]
 
 
-# --- #1321 CI-PACKET-LOOP-SONG-SONG r1: chạy bộ này theo N LÀN song song trong cùng job ---------------------------
-#
-# Đo 14-11-2026 (run 43624717342, ubuntu-latest 4 vCPU): chạy tuần tự trọn bộ mất ~90–120 phút trên MỘT lõi. Làn là một
-# tiến trình con chạy `packet_loop_test.py --lan k/N --viec <tệp> --ra <tệp>`: con chạy ĐÚNG danh sách việc cha giao, qua
-# CÙNG `chay_suite` và CÙNG `_mot_dot_bien` của đường tuần tự, rồi ghi biên nhận dòng JSON. Cha tự kiểm biên nhận (thiếu
-# làn, việc lặp/vắng/sai làn, băm lệch, dòng hỏng ⇒ ĐỎ) rồi dựng lại `ket` và các dòng đột biến, để phần phán của
-# `_legacy_main` chạy KHÔNG ĐỔI. Con chỉ gửi DỮ LIỆU ĐO; cha tự kết luận (hình dạng mảnh + gom của #661, #668).
+# --- #1321 CI-PACKET-LOOP-SONG-SONG r1: N LÀN song song trong job (tuần tự ~90–120 phút trên MỘT lõi, run 43624717342) ---
+# Làn = tiến trình con `packet_loop_test.py --lan k/N --viec <tệp> --ra <tệp>`: chạy ĐÚNG việc cha giao qua CÙNG `chay_suite`
+# và `_mot_dot_bien` của đường tuần tự, ghi biên nhận dòng JSON. Cha kiểm biên nhận (thiếu làn, việc lặp/vắng/sai làn, băm
+# lệch, dòng hỏng ⇒ ĐỎ) rồi dựng lại `ket` và dòng đột biến; phần phán của `_legacy_main` KHÔNG ĐỔI (mảnh + gom #661, #668).
 
 BIEN_LAN = "PACKET_LOOP_TEST_LAN"
 PHIEN_BAN_BIEN_NHAN = 1
+CA_O_CHA = ("wp1174_profile_native_linux",)   # ca ĐẶT toàn cục mà cha đọc (`_carrier1174` ← `_WP1174_NATIVE_FACTS`) ⇒ cha chạy
 
 
 def so_lan(env=None, he=None, cpu=None) -> int:
-    """M1: vắng biến ⇒ `min(4, cpu)` trên Linux, 1 ở nền khác; có biến ⇒ ĐÚNG một chữ số ASCII 1–8, còn lại ⇒ ValueError.
-    Khớp TOÀN chuỗi với lớp ký tự liệt kê: không nhận khoảng trắng, `04`, xuống dòng cuối, hay chữ số Unicode mà `int()` nhận."""
+    """M1: vắng biến ⇒ `min(4, cpu)` trên Linux, 1 nơi khác; có biến ⇒ ĐÚNG một chữ số ASCII 1–8 khớp TOÀN chuỗi, khác ⇒ ValueError."""
     raw = (os.environ if env is None else env).get(BIEN_LAN)
     if raw is None:
         if (platform.system() if he is None else he) != "Linux":
@@ -11974,8 +11971,7 @@ def so_lan(env=None, he=None, cpu=None) -> int:
     return int(raw)
 
 
-# M2: chi phí (giây) đo ở lượt bấm giờ run 43624717342; việc vắng bảng nhận chi phí mặc định theo loại. Bảng chỉ để CÂN
-# làn: sai hay cũ thì làn lệch tải, không làm mất việc nào.
+# M2: chi phí (giây) đo ở run 43624717342, vắng bảng ⇒ mặc định theo loại. Chỉ để CÂN làn: sai/cũ thì lệch tải, không mất việc.
 CHI_PHI_MAC_DINH = {"ca": 0.31, "dot_bien": 1.06}
 CHI_PHI_UOC = {
     ("ca", "wp1303_target_human_chain"): 1470, ("ca", "wp1303_target_supported_pairs"): 348, ("ca", "kg_t6_ban_sua"): 94,
@@ -11993,8 +11989,7 @@ CHI_PHI_UOC = {
 
 
 def phan_viec(ca_ten, dot_bien_ten, n) -> list:
-    """M2: chia việc vào `n` làn, việc dài trước vào làn có tổng nhỏ nhất; hoà thì theo (loại, tên) rồi chỉ số làn.
-    Thuần, tất định, KHÔNG đụng `CASES`/`MUTANTS`. Trả `n` danh sách cặp `(loại, tên)`."""
+    """M2: `n` làn, việc dài trước vào làn tổng nhỏ nhất, hoà theo (loại, tên) rồi chỉ số làn; thuần, tất định."""
     viec = [("ca", t) for t in ca_ten] + [("dot_bien", t) for t in dot_bien_ten]
     if len(set(viec)) != len(viec):
         raise ValueError("danh sách việc có tên lặp")
@@ -12099,10 +12094,9 @@ def kiem_bien_nhan(k, n, viec, tep_ra, sha_test, sha_san_pham) -> tuple:
 
 
 def chay_cac_lan(n, tmp, viec_lan=None) -> tuple:
-    """Cha: chạy `n` làn con đồng thời, chép nguyên văn đầu ra của từng làn, kiểm biên nhận, rồi trả
-    `(ket, db, dong_do)`: `ket` theo thứ tự `CASES`, `db` theo tên đột biến, `dong_do` là các dòng `LAN…` (M5)."""
-    if viec_lan is None:
-        viec_lan = phan_viec([t for t, _ in CASES], list(MUTANTS), n)
+    """Cha: chạy `n` làn con đồng thời, chép đầu ra từng làn, kiểm biên nhận; trả `(ket theo CASES, db, dòng LAN… của M5)`."""
+    o_cha = set(CA_O_CHA) if viec_lan is None else set()   # đường mặc định: cha tự chạy CA_O_CHA SAU các làn, làn nhận phần còn lại
+    viec_lan = phan_viec([t for t, _ in CASES if t not in o_cha], list(MUTANTS), n) if viec_lan is None else viec_lan
     if len(viec_lan) != n:
         raise LoiGom(f"phân việc trả {len(viec_lan)} làn, cần {n}")
     thu = tmp / "lan"
@@ -12141,6 +12135,7 @@ def chay_cac_lan(n, tmp, viec_lan=None) -> tuple:
         loi.append(f"thư mục làn có tệp lạ hoặc thiếu tệp: {sorted(x.name for x in thu.iterdir())}")
     if loi:
         raise LoiGom("; ".join(loi))
+    ket_lan.update(chay_suite(CANONICAL, tmp / "baseline", chi_chay=o_cha) if o_cha else {})
     ket = {t: ket_lan[t] for t, _ in CASES if t in ket_lan}
     if len(ket) != len(ket_lan):
         raise LoiGom("biên nhận có ca ngoài CASES")
@@ -12148,8 +12143,7 @@ def chay_cac_lan(n, tmp, viec_lan=None) -> tuple:
 
 
 def _mot_dot_bien(ten_mut, tim, thay, phai_chet, goc, goc_test, tmp) -> tuple:
-    """Một đột biến của phần 3 `_legacy_main`, tách ra để đường tuần tự và làn con dùng CHUNG một mã.
-    Trả `(dòng in, số lỗi)`; nội dung dòng và cách đếm lỗi giữ nguyên bản trước #1321."""
+    """Một đột biến của phần 3 `_legacy_main`, dùng CHUNG cho tuần tự và làn con; `(dòng in, số lỗi)` giữ nguyên bản trước #1321."""
     dong, loi = [], 0
     cap = _cap_thay_the(tim, thay)
     than, dot_bien_test, thieu = _phan_loai_dot_bien(ten_mut, cap, goc, goc_test)
@@ -16081,9 +16075,8 @@ def _pl1321_gom_hong(c):
     assert kiem_bien_nhan(0, 2, viec, _pl1321_bien_nhan(c, "ok", [dau, ca, db]), st, ss) == ({"x1": None}, {"m1": (["  ok  m1"], 0)})
     hong = dict(thieu_ca=[dau, db], ca_lap=[dau, ca, ca, db], db_lap=[dau, ca, db, db], ca_la=[dau, ca, dict(ca, ca="x9"), db],
                 bam_test=[dict(dau, sha256_test="c" * 64), ca, db], bam_san_pham=[dict(dau, sha256_san_pham="c" * 64), ca, db],
-                bam_viec=[dict(dau, bam_danh_sach_viec="0" * 64), ca, db], sai_lan=[dict(dau, lan=1), ca, db],
-                khoa_thua=[dict(dau, them=1), ca, db], hang_la=[dau, dict(ca, hang="GIET"), db],
-                so_loi_am=[dau, ca, dict(db, so_loi=-1)], dong_hong=[dau, ca, db, ["x"]], rong=[])
+                bam_viec=[dict(dau, bam_danh_sach_viec="0" * 64), ca, db], sai_lan=[dict(dau, lan=1), ca, db], khoa_thua=[dict(dau, them=1), ca, db],
+                hang_la=[dau, dict(ca, hang="GIET"), db], so_loi_am=[dau, ca, dict(db, so_loi=-1)], dong_hong=[dau, ca, db, ["x"]], rong=[])
     lot = []
     for ten, dong in [*hong.items(), ("khong_co_tep", None)]:
         try:
@@ -16144,6 +16137,18 @@ def _pl1321_lan_that(c):
     assert dong_do[0] == "LAN: 2" and len(dong_do) == 3, dong_do
 
 
+def _pl1321_ca_o_cha(c):
+    from unittest.mock import patch   # đường mặc định: làn (con THẬT, rỗng) nhận mọi việc TRỪ `CA_O_CHA`, cha tự chạy chúng
+    assert "wp1174_profile_native_linux" in CA_O_CHA, f"ca ĐẶT `_WP1174_NATIVE_FACTS` phải chạy ở cha: {CA_O_CHA}"
+    goi, o = [], ("kg_m5_kiem_ke",)
+    pv = lambda ca, db, n: goi.append((list(ca), list(db))) or [[] for _ in range(n)]
+    sg = lambda s, t, chi_chay=None: goi.append(chi_chay) or {x: None for x in chi_chay}
+    with patch.dict(globals(), CA_O_CHA=o, phan_viec=pv, chay_suite=sg):
+        ket = chay_cac_lan(2, c.tmp)[0]
+    assert goi[0] == ([t for t, _ in CASES if t not in o], list(MUTANTS)), "làn phải nhận mọi việc TRỪ CA_O_CHA"
+    assert goi[1:] == [set(o)] and ket == {o[0]: None}, f"cha phải tự chạy CA_O_CHA và gom vào ket: {goi[1:]} {ket}"
+
+
 def _pl1321_main_mien(c):
     import contextlib, io
     from unittest.mock import patch
@@ -16158,32 +16163,28 @@ def _pl1321_main_mien(c):
     assert sai == [2, 2, 2, 2], f"đối số làn sai ⇒ rc 2: {sai}"
 
 
-CASES += [(f"pl1321_{ten}", fn) for ten, fn in (("so_lan", _pl1321_so_lan), ("phan_viec", _pl1321_phan_viec),
-          ("gom_hong", _pl1321_gom_hong), ("lan_con", _pl1321_lan_con), ("lan_that", _pl1321_lan_that), ("main_mien", _pl1321_main_mien))]
+CASES += [(f"pl1321_{ten}", fn) for ten, fn in (("so_lan", _pl1321_so_lan), ("phan_viec", _pl1321_phan_viec), ("gom_hong", _pl1321_gom_hong),
+          ("lan_con", _pl1321_lan_con), ("lan_that", _pl1321_lan_that), ("main_mien", _pl1321_main_mien), ("ca_o_cha", _pl1321_ca_o_cha))]
 _NL1321 = chr(10)
 MUTANTS.update({
     "pl1321_mien_mo": ('re.fullmatch(r"[1-' + '8]", raw)', 're.fullmatch(r" *[0-9]+ *", raw)', ["pl1321_so_lan"]),
     "pl1321_mac_dinh_moi_nen": ('if (platform.system() if he is None else he) ' + '!= "Linux":', "if False:", ["pl1321_so_lan"]),
-    "pl1321_hoa_theo_dau_vao": ("key=lambda v: (-CHI_PHI_UOC.get(v, CHI_PHI_MAC_DINH[v[0]]), " + "v)):",
-                                "key=lambda v: -CHI_PHI_UOC.get(v, CHI_PHI_MAC_DINH[v[0]])):", ["pl1321_phan_viec"]),
-    "pl1321_bo_viec_cuoi": ("        lan[k].append(v)" + _NL1321, "        lan[k].append(v) if v != viec[-1] else None" + _NL1321,
-                            ["pl1321_phan_viec"]),
+    "pl1321_hoa_theo_dau_vao": ("key=lambda v: (-CHI_PHI_UOC.get(v, CHI_PHI_MAC_DINH[v[0]]), " + "v)):", "key=lambda v: -CHI_PHI_UOC.get(v, CHI_PHI_MAC_DINH[v[0]])):", ["pl1321_phan_viec"]),
+    "pl1321_bo_viec_cuoi": ("        lan[k].append(v)" + _NL1321, "        lan[k].append(v) if v != viec[-1] else None" + _NL1321, ["pl1321_phan_viec"]),
     "pl1321_gom_bo_dau": ("lech = sorted(khoa " + "for khoa in", "lech = [] and sorted(khoa for khoa in", ["pl1321_gom_hong"]),
     "pl1321_gom_bo_ca_lap": ('if x["ca"] ' + 'in ket:', "if False:", ["pl1321_gom_hong"]),
     "pl1321_gom_bo_db_lap": ('if x["ten"] ' + 'in db:', "if False:", ["pl1321_gom_hong"]),
     "pl1321_gom_bo_phu": ("if sorted(ket) != sorted(ca_mong) " + "or sorted(db) != sorted(db_mong):", "if False:", ["pl1321_gom_hong"]),
     "pl1321_gom_bo_hang": ('and x["hang"] ' + 'in _DUNG_LAI', 'and x["hang"] in (*_DUNG_LAI, "GIET")', ["pl1321_gom_hong"]),
-    "pl1321_cha_bo_rc": ("        if rc != 0:" + _NL1321 + "            loi.append", "        if False:" + _NL1321 + "            loi.append",
-                         ["pl1321_gom_hong"]),
+    "pl1321_cha_bo_rc": ("        if rc != 0:" + _NL1321 + "            loi.append", "        if False:" + _NL1321 + "            loi.append", ["pl1321_gom_hong"]),
     "pl1321_cha_bo_tep_la": ('    if thua:' + _NL1321 + '        loi.append(f"thư mục làn', '    if False:' + _NL1321 + '        loi.append(f"thư mục làn', ["pl1321_gom_hong"]),
-    "pl1321_cha_bo_thu_tu": ("ket = {t: ket_lan[t] for t, _ " + "in CASES if t in ket_lan}", "ket = dict(sorted(ket_lan.items()))",
-                             ["pl1321_lan_that"]),
+    "pl1321_cha_bo_thu_tu": ("ket = {t: ket_lan[t] for t, _ " + "in CASES if t in ket_lan}", "ket = dict(sorted(ket_lan.items()))", ["pl1321_lan_that"]),
     "pl1321_con_bo_tap_rong": ('chi_chay=ca) ' + 'if ca else {}', "chi_chay=ca)", ["pl1321_lan_con"]),
-    "pl1321_con_bo_viec_la": ("    if la or " + "any(loai not in CHI_PHI_MAC_DINH", "    if False and any(loai not in CHI_PHI_MAC_DINH",
-                              ["pl1321_lan_con"]),
-    "pl1321_main_mien_sau": ('print(f"packet_loop_test: {e}", file=sys.stderr)' + _NL1321 + "            return 2",
-                             'print(f"packet_loop_test: {e}", file=sys.stderr)' + _NL1321 + '            globals()["_SO_LAN"] = 1',
-                             ["pl1321_main_mien"]),
+    "pl1321_con_bo_viec_la": ("    if la or " + "any(loai not in CHI_PHI_MAC_DINH", "    if False and any(loai not in CHI_PHI_MAC_DINH", ["pl1321_lan_con"]),
+    "pl1321_main_mien_sau": ('print(f"packet_loop_test: {e}", file=sys.stderr)' + _NL1321 + "            return 2", 'print(f"packet_loop_test: {e}", file=sys.stderr)' + _NL1321 + '            globals()["_SO_LAN"] = 1', ["pl1321_main_mien"]),
+    "pl1321_cha_giao_ca_cha": ("CASES if t not " + "in o_cha], list(MUTANTS), n)", "CASES], list(MUTANTS), n)", ["pl1321_ca_o_cha"]),
+    "pl1321_cha_bo_chay_cha": ("chi_chay=o_cha) " + "if o_cha else {})", "chi_chay=o_cha) if False else {})", ["pl1321_ca_o_cha"]),
+    "pl1321_cha_rong": ('CA_O_CHA = ("wp1174_profile_' + 'native_linux",)', "CA_O_CHA = ()", ["pl1321_ca_o_cha"]),
     "pl1321_main_argv_k_lon": ("if not k_n or " + "int(k_n.group(1)) >= int(k_n.group(2)):", "if not k_n:", ["pl1321_main_mien"]),
 })
 MUTANTS_NHAM_TEST = MUTANTS_NHAM_TEST | {k for k in MUTANTS if k.startswith("pl1321_")}

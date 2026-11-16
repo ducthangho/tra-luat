@@ -1,0 +1,18 @@
+# nghiem thu tren merge 7acd29e (2026-11-16T22:30:54Z), checkout sach
+HEAD 7acd29e3795497de59f0a161a3bdc252996af608 tree b9a3d32954e76a3d6bae9b012bd4ba39f303c197
+## numstat 7acd29e^1..7acd29e
+164	34	.claude/dev/launcher.py
+396	3	.claude/dev/launcher_test.py
+20	0	docs/GOI_AGENT_DA_NEN.md
+## diff 7acd29e^2..7acd29e (KHAC 0: head nhanh tu ddc027a, cha thu nhat 9c1661f co them PR #1338/#1337 — numstat cha thu nhat o tren moi la diff packet)
+ 9 files changed, 672 insertions(+), 52 deletions(-)
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+## ruff ruff 0.16.9 --select F (merge vs base 9c1661f)
+.claude/dev/launcher.py merge=0 base=0
+.claude/dev/launcher_test.py merge=5 base=5
+## spec
+388fd83b4d6d5ccc1864e3e7fca5869f13a5b8352b547850556abd1caa31ab38  -
+5382a3cdbc7f5494c7c9bbf35e33ac0b7b20794d

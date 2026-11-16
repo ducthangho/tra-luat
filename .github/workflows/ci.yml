@@ -87,7 +87,6 @@ jobs:
       goc: ${{ steps.phan-loai.outputs.goc }}
       dau: ${{ steps.phan-loai.outputs.dau }}
       hop: ${{ steps.phan-loai.outputs.hop }}
-      # wp1343: chi DUNG chuoi `bo_qua` moi cho cac manh packet-loop nghi; vang/la => chay (phia job: `!= 'bo_qua'`).
       packet_loop: ${{ steps.phan-loai.outputs.packet_loop }}
     steps:
       # `continue-on-error` o HAI buoc phan loai la CO CHU DICH, khong phai nuot loi: khong phan loai duoc thi phai roi
@@ -1119,13 +1118,9 @@ jobs:
     # ma trận/tiền tố 9 bước với `gate`, KHÔNG thêm mặt điều kiện nào; phút TÍNH
     # TIỀN tăng vì trả tiền thiết lập ba lần. Consumer `loi_ruff_ci` đọc MỌI job, không chỉ `gate`.
     # Bước `packet-loop selftest` (22,5 % tổng bước Windows) sống ở đây.
-    #
-    # wp1343 (CI-PACKET-LOOP-NHANH r1): job này là các MẢNH, không còn là check bắt buộc. Đo run 43845962754: một job
-    # chạy 2 giờ 21 phút (bộ ca 74 phút + bảng đột biến 67 phút). Nay 16 mảnh chỉ chạy BỘ CA qua bộ bọc
-    # `.claude/dev/packet_loop_test_manh.py` (bảng đột biến sang workflow riêng, không bắt buộc); check bắt buộc
-    # `gate-packet-loop (ubuntu-latest)` là job GOM ngay dưới. Cả job nghỉ khi `chuan-bi` xuất ĐÚNG `packet_loop=bo_qua`
-    # (PR không chạm tập phụ thuộc của bộ ca, hoặc push nhánh mặc định) — độc lập với `che_do`, nên không bước nào ở đây
-    # mang `if:` theo `che_do`.
+    # wp1343 (CI-PACKET-LOOP-NHANH r3): job này là các MẢNH, không còn là check bắt buộc (đo run 43845962754: một job 2 giờ
+    # 21 phút). 16 mảnh chạy (sổ ca − `CA_DAI`) qua `.claude/dev/packet_loop_test_manh.py`; bảng đột biến và `CA_DAI` sang
+    # `packet-loop-dot-bien.yml`. Cả job nghỉ khi `chuan-bi` xuất ĐÚNG `packet_loop=bo_qua` — độc lập với `che_do`.
     needs: chuan-bi
     if: ${{ needs.chuan-bi.outputs.packet_loop != 'bo_qua' }}
     strategy:
@@ -1176,7 +1171,6 @@ jobs:
         run: python ops/cong_cu.py kiem-tra --json
       - name: packet-loop selftest
         shell: bash
-        # Biểu thức chỉ nằm trong `env`, không bao giờ trong `run`; bộ bọc đọc hai biến này làm `--manh` / `--ra`.
         env:
           PACKET_LOOP_MANH: ${{ matrix.manh }}/16
           PACKET_LOOP_RA: manh/manh-${{ matrix.manh }}.json
@@ -1187,10 +1181,9 @@ jobs:
           path: manh/manh-${{ matrix.manh }}.json
           if-no-files-found: error
 
-  # wp1343: job GOM giữ tên check bắt buộc `gate-packet-loop (ubuntu-latest)`. KHÔNG tin phán quyết của mảnh: dựng lại phân
-  # hoạch từ sổ ca của chính checkout này rồi so TẬP ca từng mảnh; ĐỎ khi thiếu/đỏ mảnh, lệch tập, hay mảnh bị bỏ/huỷ trong
-  # lúc `packet_loop` khác `bo_qua`. `!cancelled()`: mảnh đỏ hay bị bỏ thì gom VẪN chạy — `needs` mặc định sẽ cho nó
-  # `skipped`, mà `skipped` đọc như xanh ở check bắt buộc. `packet_loop=bo_qua` ⇒ in "KHÔNG ĐO" kèm lý do và XANH.
+  # wp1343: job GOM giữ tên check bắt buộc `gate-packet-loop (ubuntu-latest)`. Dựng lại phân hoạch từ sổ ca rồi so TẬP ca
+  # từng mảnh; ĐỎ khi thiếu/đỏ mảnh, lệch tập, hay mảnh bị bỏ/huỷ lúc `packet_loop` khác `bo_qua` (khi `bo_qua`: in "KHÔNG ĐO",
+  # XANH). `!cancelled()`: `needs` mặc định cho gom `skipped` khi mảnh đỏ, mà `skipped` đọc như xanh ở check bắt buộc.
   gate-packet-loop:
     needs: [chuan-bi, gate-packet-loop-manh]
     if: ${{ !cancelled() }}

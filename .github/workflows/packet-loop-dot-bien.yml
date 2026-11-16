@@ -1,17 +1,14 @@
 name: packet-loop đột biến (hằng đêm)
 
-# wp1343 (CI-PACKET-LOOP-NHANH r2, M3): bảng đột biến của `.claude/dev/packet_loop_test.py` (đo run 43845962754: 67 phút
-# nối tiếp) KHÔNG còn nằm trong cổng bắt buộc `gate-packet-loop` của `ci.yml`. Workflow này chạy nó theo lịch và theo yêu
-# cầu, chia mảnh, chỉ Ubuntu, không là check bắt buộc. Mỗi mảnh: nền RỖNG + đột biến có chỉ số k % 16 == mảnh (bộ bọc
-# `.claude/dev/packet_loop_test_manh.py`; bộ ca nền do `ci.yml` chạy). ĐỎ ở đây không chặn merge: đọc kết quả lượt đêm.
+# wp1343 (CI-PACKET-LOOP-NHANH r3, M3 + M7): bảng đột biến của `.claude/dev/packet_loop_test.py` và hai ca dài `CA_DAI`
+# (ghim theo tên trong `.claude/dev/packet_loop_test_manh.py`) không còn ở cổng bắt buộc `gate-packet-loop`; chạy ở đây theo
+# lịch và theo yêu cầu, KHÔNG chặn merge. Mảnh j: đột biến chỉ số k % 16 == j; riêng mảnh 0 chạy thêm `CA_DAI` (~45 phút).
 on:
   schedule:
     - cron: "43 18 * * *"
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   dot-bien:
     strategy:
@@ -19,7 +16,7 @@ jobs:
       matrix:
         manh: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -36,11 +33,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: cài PyYAML + jsonschema
-        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
-      - name: cài rg (launcher đòi)
+      - name: cài PyYAML + jsonschema + rg
         shell: bash
-        run: bash ops/cai_cong_cu.sh rg
+        run: |
+          python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+          bash ops/cai_cong_cu.sh rg
       - name: packet-loop bảng đột biến (mảnh)
         shell: bash
         env:

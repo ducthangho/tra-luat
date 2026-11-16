@@ -35,6 +35,7 @@ import ast
 import concurrent.futures
 import contextlib
 import importlib.util
+import io
 import json
 import os
 import re
@@ -2829,10 +2830,8 @@ KHUNG_BUOC = {
         ('actions/upload-artifact@v4', {'uses': 'actions/upload-artifact@v4', 'with': {'name': 'gate-packet-loop-manh-${{ matrix.os }}-${{ matrix.manh }}', 'path': 'manh/manh-${{ matrix.manh }}.json', 'if-no-files-found': 'error'}}),
     ],
     'gate-packet-loop': [
-        ('Force LF checkout (hash parity với manifest)', {}), ('actions/checkout@v4', {'uses': 'actions/checkout@v4'}),
-        ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
-        ('actions/download-artifact@v4', {'uses': 'actions/download-artifact@v4', 'if': "${{ needs.chuan-bi.outputs.packet_loop != 'bo_qua' }}", 'with': {'pattern': 'gate-packet-loop-manh-${{ matrix.os }}-*', 'path': 'manh', 'merge-multiple': True}}),
-        ('gom manh packet-loop (so TAP ca; wp1343)', {'shell': 'bash', 'env': {'PACKET_LOOP': '${{ needs.chuan-bi.outputs.packet_loop }}', 'KQ_MANH': '${{ needs.gate-packet-loop-manh.result }}'}}),
+        ('Force LF checkout (hash parity với manifest)', {}), ('actions/checkout@v4', {'uses': 'actions/checkout@v4'}), ('actions/setup-python@v5', {'uses': 'actions/setup-python@v5', 'with': {'python-version': '3.12'}}),
+        ('actions/download-artifact@v4', {'uses': 'actions/download-artifact@v4', 'if': "${{ needs.chuan-bi.outputs.packet_loop != 'bo_qua' }}", 'with': {'pattern': 'gate-packet-loop-manh-${{ matrix.os }}-*', 'path': 'manh', 'merge-multiple': True}}), ('gom manh packet-loop (so TAP ca; wp1343)', {'shell': 'bash', 'env': {'PACKET_LOOP': '${{ needs.chuan-bi.outputs.packet_loop }}', 'KQ_MANH': '${{ needs.gate-packet-loop-manh.result }}'}}),
     ],
 }
 
@@ -3550,6 +3549,89 @@ def t99_khong_doi_kieu_ngoai_le_thanh_tin_hieu():
     bang(not xau, f"except RONG ma ném/goi TinHieuChotCa o dong {xau}")
 
 
+# ---------------------------------------------------------------- wp1343 (CI-PACKET-LOOP-NHANH r3): manh + gom + packet_loop
+PL_PHU_THUOC = (".agents/skills/", ".claude/dev/fixtures/", ".claude/dev/launcher.py", ".claude/dev/packet_loop", ".claude/hooks/session-start.sh", ".claude/settings.json", ".claude/skills/", ".github/workflows/ci.yml", ".gitignore", ".mcp.json", "AGENTS.md", "CLAUDE.md", "CONTEXT.md", "docs/PROTOCOL_DA_PHIEN.md", "docs/adr/", "ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md", "ops/bien_nhan_v2.py", "ops/land/pr1270-wp1179-provenance/", "ops/lease_publish.py")   # LUAT: tap DO DUOC (cach do: chu thich PHU_THUOC_PACKET_LOOP)
+PL_CA_DAI, PL_CA_RE = ("wp1303_target_human_chain", "wp1303_target_supported_pairs"), "kg_t_crlf_ly_do"   # M7: hai ca dai ghim theo TEN
+
+def _pl(bo={}):
+    """(bo boc nap tu CAY, mo-dun bo ca THAT cua kho, so ca `main()` goc se chay) — nap mot lan moi tien trinh."""
+    if not bo:
+        spec = importlib.util.spec_from_file_location("pl_manh_duoi_test", CAY / DUONG_MANH)
+        bo["M"] = importlib.util.module_from_spec(spec); spec.loader.exec_module(bo["M"])
+        with contextlib.redirect_stdout(io.StringIO()):
+            bo["T"] = bo["M"].nap(ROOT_THAT / ".claude/dev"); bo["ten"] = bo["M"].ca_dang_ky(bo["T"])
+    return bo["M"], bo["T"], bo["ten"]
+
+@ca
+def t100_packet_loop_chay_chi_khi_diff_cham_phu_thuoc():
+    f = nap_module().phan_loai_packet_loop
+    bang(f("pull_request", {"scripts/tl.py", "ops/land/x.yaml"})[0] == "bo_qua", "PR khong cham tap phu thuoc phai bo_qua")
+    for p in PL_PHU_THUOC:
+        bang(f("pull_request", {"scripts/tl.py", p + "x" * p.endswith("/")})[0] == "chay", f"PR cham {p!r} phai chay")
+    bang(f("push", {".claude/dev/packet_loop.py"})[0] == "bo_qua", "push nhanh mac dinh phai bo_qua ke ca khi cham bo ca (M2)")
+    for sk, doi in (("pull_request", None), ("pull_request", set()), ("pull_request", {"scripts/../x"}), ("pull_request", {b"x"}),
+                    ("workflow_dispatch", {"scripts/tl.py"}), ("schedule", {"scripts/tl.py"}), ("", {"scripts/tl.py"})):
+        bang(f(sk, doi)[0] == "chay", f"su_kien={sk!r} diff={doi!r}: phai chay (fail-closed)")
+
+@ca
+def t101_packet_loop_manh_phan_hoach_dung_tap_bat_buoc():
+    """N2 + M7: voi moi N duoi day, hop cac manh = (so ca - CA_DAI), khong trung, khong manh rong; nhom carrier o manh dau."""
+    M, _T, ten = _pl()
+    bat_buoc = [t for t in ten if t not in PL_CA_DAI]
+    bang(M.CA_DAI == PL_CA_DAI and len(bat_buoc) == len(ten) - 2 == len(set(ten)) - 2 > 1000, f"CA_DAI phai ghim DUNG hai ten co trong so ca: {M.CA_DAI}")
+    for n in (1, 4, 16):
+        manh = M.chia(ten, n)
+        bang(len(manh) == n and all(manh) and sorted(t for x in manh for t in x) == sorted(bat_buoc),
+             f"N={n}: hop cac manh khac (so ca - CA_DAI), hoac co manh rong")
+        bang(n == 1 or set(manh[0]) == {t for t in bat_buoc if t.startswith("wp1174_")}, f"N={n}: nhom carrier wp1174_* phai nam tron manh 0")
+    wf = doc_wf()
+    bang(tim_buoc(wf, "gate-packet-loop", "gom manh packet-loop (so TAP ca; wp1343)")["run"].strip() == f"python {DUONG_MANH} --gom manh --n {N_MANH_PACKET_LOOP}"
+         and tim_buoc(wf, "gate-packet-loop-manh", "packet-loop selftest")["run"].strip() == f"python {DUONG_MANH}", "lenh manh/gom trong ci.yml lech N hoac lech bo boc")
+
+@ca
+def t102_packet_loop_gom_so_tap_ca():
+    """N3: gom DO khi manh do, thieu manh, tap ca lech (thieu / trung / CA_DAI lot vao), so manh chay carrier khac MOT, hay job manh bi bo/huy."""
+    M, T, ten = _pl()
+    def tot():
+        return {i: {"manh": i, "n": 4, "rc": 0, "ca": list(x), "carrier": i == 0} for i, x in enumerate(M.chia(ten, 4))}
+    bang(M.gom(ten, 4, tot()) == [], f"ban ghi dung phai dat: {M.gom(ten, 4, tot())}")
+    for nhan, doi in (("manh do", lambda b: b[1].update(rc=1)), ("thieu manh", lambda b: b.pop(2)), ("tap thieu", lambda b: b[3]["ca"].pop()),
+                      ("ca trung", lambda b: b[3]["ca"].append(b[3]["ca"][0])), ("CA_DAI lot vao cong", lambda b: b[2]["ca"].append(PL_CA_DAI[0])),
+                      ("khong manh nao chay carrier", lambda b: b[0].update(carrier=False)),
+                      ("hai manh chay carrier", lambda b: b[1].update(carrier=True)), ("ban ghi khai sai N", lambda b: b[1].update(n=16))):
+        b = tot()
+        bang((doi(b), M.gom(ten, 4, b))[1], f"gom phai DO khi {nhan}")
+    tam = Path(tempfile.mkdtemp(prefix="cdn_pl_"))
+    try:
+        for i, b in tot().items():
+            (tam / f"manh-{i}.json").write_text(json.dumps(b), encoding="utf-8")
+        for quyet, kq, mong in (("chay", "success", 0), ("", "success", 0), ("chay", "skipped", 1), ("chay", "failure", 1),
+                                ("bo_qua", "skipped", 0), ("bo_qua", "success", 1)):
+            with contextlib.redirect_stdout(io.StringIO()):
+                rc = M.lenh_gom(T, tam, 4, {"PACKET_LOOP": quyet, "KQ_MANH": kq})
+            bang(rc == mong, f"lenh_gom packet_loop={quyet!r}, job manh={kq!r}: rc {rc} != {mong}")
+    finally:
+        shutil.rmtree(tam, ignore_errors=True)
+
+@ca
+def t103_packet_loop_bo_boc_giu_chot_main_goc():
+    """M6 tren `main()` THAT: carrier khong DO gia, khong im lang tat; `missing` tinh tren toan bo so ca; ca vang => DO."""
+    M, T, _ten = _pl()
+    def chay(manh, bo=None):
+        ra = io.StringIO()
+        with contextlib.redirect_stdout(ra), mock.patch.object(T, "CASES", [x for x in T.CASES if x[0] != bo]):
+            return M.chay(T, manh), ra.getvalue()
+    (rc, da, carrier, _), log = chay([PL_CA_RE])
+    bang(rc == 0 and da == [PL_CA_RE] and not carrier and "KHÔNG chạy ở mảnh này" in log and "TỔNG: ĐẠT" in log,
+         f"manh khong co wp1174 phai XANH va NOI RO khong chay carrier: rc={rc} {log[-300:]!r}")
+    (rc, _, carrier, _), log = chay(["wp1174_status_closed"])
+    bang(rc == 1 and not carrier and "bị XẺ" in log and "required outcomes incomplete" not in log,
+         f"nhom carrier bi xe phai DO o carrier (khong im lang tat), con phan `required` cua manh van dat: rc={rc} {log[-300:]!r}")
+    (rc, _, _, _), log = chay([PL_CA_RE], bo="wp1174_source_backup")
+    bang(rc == 1 and "WP1174 required IDs missing/duplicate" in log, f"chot missing phai tinh tren TOAN BO so ca: rc={rc}")
+    bang(chay([PL_CA_RE, "pl_khong_co_ca_nay"])[0][0] == 1, "ca cua manh khong chay (vd CA_DAI vang o workflow dem) phai DO")
+
+
 # ---------------------------------------------------------------- chạy ca và đột biến
 def phan_hoach_ca():
     """Phan hoach `CA` thanh cac nhom KHONG GIAO NHAU (nguon duy nhat cho moi bang kiem ke; `goi/kiem_ke.py` goi ham nay)."""
@@ -3599,7 +3681,7 @@ def phan_hang(rc, dau_ra, ten_dich):
     return "HONG"
 
 
-THOI_HAN_CA = {"t56_dau_do_bi_bat_tren_duong_nhanh": 400}   # worktree kho that + phan loai moi dau do: >120s tren runner CI
+THOI_HAN_CA = {"t56_dau_do_bi_bat_tren_duong_nhanh": 400, "t102_packet_loop_gom_so_tap_ca": 400, "t103_packet_loop_bo_boc_giu_chot_main_goc": 400}   # worktree kho that + phan loai moi dau do: >120s tren runner CI
 
 
 def chay_con(ten_ca, cay, thoi_han=120):
@@ -4188,6 +4270,27 @@ DOT_BIEN += [
        '("gate-ops", "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)"):\n                       {"CI_DUONG_NHANH_CHE_DO": "duong_nhanh"}'),
      ("y04_tap_buoc_mang_if_che_do_khop_dung",)),
 ]
+
+_manh = lambda cu, moi: (DUONG_MANH, lambda vb: thay_mot(vb, cu, moi))   # noqa: E731
+_T100, _T101, _T102, _T103 = (tuple(c for c in CA if c.startswith(f"t10{i}_")) for i in range(4))
+DOT_BIEN += [   # wp1343: N1 (phan loai), N2/M7 (phan hoach), N3 (gom), M6 (chot cua main goc)
+    ("pl_cham_phu_thuoc_van_bo_qua", _ma('        return PL_CHAY, f"PACKET_LOOP: chay vi', '        return PL_BO_QUA, f"PACKET_LOOP: chay vi'), _T100),
+    ("pl_khong_do_duoc_thi_bo_qua", _ma('        return PL_CHAY, f"PACKET_LOOP: chay (su', '        return PL_BO_QUA, f"PACKET_LOOP: chay (su'), _T100),
+    ("pl_push_van_chay", _ma('    if su_kien == "push":\n        return PL_BO_QUA', '    if su_kien == "pushx":\n        return PL_BO_QUA'), _T100),
+    ("pl_manh_lech_chi_so", _manh("manh[k % (n - 1) + 1 if n > 1 else 0]", "manh[k % (n - 1) if n > 1 else 0]"), _T101),
+    ("pl_manh_bo_sot_ca", _manh("enumerate(t for t in ten if n == 1 or", "enumerate(t for t in ten[1:] if n == 1 or"), _T101),
+    ("pl_ca_dai_vao_cong", _manh("    ten = [t for t in ten if t not in CA_DAI]\n", ""), _T101),
+    ("pl_yml_gom_lech_n", _yml("--gom manh --n 16", "--gom manh --n 8"), _T101),
+    ("pl_gom_khong_so_tap", _manh("        if sorted(ca) != sorted(mong):", "        if False:"), _T102),
+    ("pl_gom_bo_dem_carrier", _manh("if can_carrier and so != 1 else []", "if False else []"), _T102),
+    ("pl_gom_tha_manh_bi_bo", _manh('if kq != "success" else []', "if False else []"), _T102),
+    ("pl_gom_bo_qua_khong_doi_skipped", _manh('        return int(kq != "skipped")', "        return 0"), _T102),
+    ("pl_required_khong_thu_hep", _manh("yeu_cau & manh if cua_main else yeu_cau", "yeu_cau"), _T103),
+    ("pl_carrier_chay_moi_manh", _manh("if dem[0] != 2 or can <= manh:", "if True:"), _T103),
+    ("pl_carrier_bi_xe_van_xanh", _manh('- ĐỎ")\n            return False', '- ĐỎ")\n            return True'), _T103),
+    ("pl_lot_ca_khong_chay", _manh(" or set(da_chay) != manh:", ":"), _T103),
+] + [(f"pl_bo_phu_thuoc_{i:02d}", (MA, lambda vb, p=p: thay_regex(vb, r'(PHU_THUOC_PACKET_LOOP = \([^)]*)"' + re.escape(p) + '"', r'\1"-"')), _T100)
+     for i, p in enumerate(PL_PHU_THUOC)]
 TEN_DOT_BIEN = [d[0] for d in DOT_BIEN]
 
 

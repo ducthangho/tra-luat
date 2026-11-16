@@ -130,13 +130,13 @@ MA_KIEM_HET_HAN = (
     "import sys\nsys.path.insert(0, 'ops')\nimport lease_publish as lp\n"
     "try:\n    lp.kiem(lp._doc_yaml(sys.argv[1]), sys.argv[1], '.', bo_qua_han=True)\n"
     "except lp.Chan as e:\n    print('CHAN [%s]: %s' % (e.ma, e.thong_diep))\n    raise SystemExit(8)\n")
-# wp1343 (dac ta CI-PACKET-LOOP-NHANH r1, M1/M2): output THU HAI `packet_loop`, doc lap voi `che_do`. Chi DUNG chuoi `bo_qua` moi cho
-# job manh `gate-packet-loop-manh` nghi; moi gia tri khac (ke ca vang) la chay. TIEN TO duoi day la tap tep ma bo ca
-# `.claude/dev/packet_loop_test.py` DOC — @@CACH_DO@@
+# wp1343 (CI-PACKET-LOOP-NHANH r3, M1/M2): output THU HAI `packet_loop`, doc lap voi `che_do`; chi DUNG chuoi `bo_qua` moi cho job
+# manh nghi. Tap TIEN TO duoi day DO 16-11-2026 tren base 9c1661f: inotify (IN_OPEN/IN_ACCESS, moi tien trinh con) tren cay lam viec
+# khi chay 1491 ca bat buoc, tru cac khoang `_snapshot1174` (bam ca cay, khong phu thuoc noi dung); cong ci.yml, CONTEXT.md va
+# ops/KE_HOACH… (duong dan tinh trong tep ca). KHONG do: doc qua object git (lich su), va hai ca `CA_DAI` (doc gan ca cay ops/).
 PL_CHAY, PL_BO_QUA = "chay", "bo_qua"
-PHU_THUOC_PACKET_LOOP = (
-    ".claude/dev/packet_loop", ".claude/dev/launcher.py", "docs/PROTOCOL_DA_PHIEN.md", "docs/adr/", ".claude/skills/",
-    "AGENTS.md", "CLAUDE.md", "CONTEXT.md", ".github/workflows/ci.yml")
+PHU_THUOC_PACKET_LOOP = (".agents/skills/", ".claude/dev/fixtures/", ".claude/dev/launcher.py", ".claude/dev/packet_loop", ".claude/hooks/session-start.sh", ".claude/settings.json", ".claude/skills/", ".github/workflows/ci.yml", ".gitignore", ".mcp.json",
+                         "AGENTS.md", "CLAUDE.md", "CONTEXT.md", "docs/PROTOCOL_DA_PHIEN.md", "docs/adr/", "ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md", "ops/bien_nhan_v2.py", "ops/land/pr1270-wp1179-provenance/", "ops/lease_publish.py")
 MA_CHAY_CA = (
     "import runpy, sys\nm = runpy.run_path(sys.argv[1])\n"
     "for ten in sys.argv[2:]:\n    m[ten]()\n    print('DAT', ten)\n")
@@ -404,9 +404,8 @@ def phan_loai_tu_diff(doi):
 
 
 def phan_loai_packet_loop(su_kien, doi):
-    """(`chay` | `bo_qua`, ly do). push (chi nhanh mac dinh, theo `on:` cua ci.yml) => bo_qua (M2, chu kho #1206: hau merge khong
-    chay bo ca dai). pull_request: bo_qua CHI KHI do duoc diff khac rong, moi duong dan sach va khong duong dan nao khop
-    `PHU_THUOC_PACKET_LOOP`. Con lai (dispatch, su kien la, diff rong, KHONG DO DUOC) => chay (fail-closed)."""
+    """(`chay` | `bo_qua`, ly do). push (chi nhanh mac dinh) => bo_qua (M2). pull_request: bo_qua CHI KHI do duoc diff khac rong,
+    moi duong dan sach va khong duong dan nao khop `PHU_THUOC_PACKET_LOOP`. Con lai => chay (fail-closed)."""
     if su_kien == "push":
         return PL_BO_QUA, "PACKET_LOOP: bo_qua vi push nhanh mac dinh (hau merge khong chay bo ca packet-loop)"
     if su_kien != "pull_request" or not doi or not all(type(x) is str and _duong_dan_sach(x) for x in doi):

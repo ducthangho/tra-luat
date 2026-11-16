@@ -14241,6 +14241,19 @@ def r1335_khac_cwd_bam_va_chay_tep_trong_workspace():
         bang(d["transport_sha256"] == hashlib.sha256(tep_b.read_bytes()).hexdigest(),
              f"bam khong phai B/{ten}: {d.get('thuc_thi_duong_dan')}")
         bang("DAU_B" in out and "DAU_A" not in out, f"con khong chay B/{ten}: {out!r}")
+        # F2: PATH tương đối và phần tử PATH rỗng phải neo theo workspace của con, không theo cwd launcher.
+        _r1335_tep(a_dir / "bin" / ten, "DAU_A"); tep_b2 = _r1335_tep(repo / "bin" / ten, "DAU_B2")
+        subprocess.run(g + ["add", "-A"], capture_output=True)
+        subprocess.run(g + ["commit", "-m", "bin"], capture_output=True)
+        for pth, tep, dau in (("bin", tep_b2, "DAU_B2"), ("", tep_b, "DAU_B")):
+            rr = s / f"runs-path-{pth or 'rong'}"
+            env = dict(os.environ, PATH=pth + os.pathsep + os.environ.get("PATH", ""))
+            chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", "agent", cwd=str(a_dir), env=env)
+            tm = next(rr.iterdir())
+            d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
+            out = (tm / "stdout.log").read_text(encoding="utf-8")
+            bang(d["transport_sha256"] == hashlib.sha256(tep.read_bytes()).hexdigest() and dau in out
+                 and "DAU_A" not in out, f"PATH={pth!r}: bam/chay khong phai {tep}: {d.get('thuc_thi_duong_dan')} {out!r}")
 
 
 @ca
@@ -14264,17 +14277,47 @@ def r1335_symlink_doi_dich_giua_bam_va_phong():
             lk.unlink(); os.symlink(y, lk)
             return goc(lenh_con, **kw)
 
-        m._phong = doi_dich
+        goc_spawn, da_spawn = m._probe_spawn, []
+        m._phong, m._probe_spawn = doi_dich, lambda ct, ws: (da_spawn.append(ct), goc_spawn(ct, ws))[1]
         try:
             m.lenh_run(a)
         finally:
-            m._phong = goc
+            m._phong, m._probe_spawn = goc, goc_spawn
+        bang(da_spawn == [os.path.realpath(x)], f"probe spawn khong chay dung tep da chon X: {da_spawn}")
         tm = next(rr.iterdir())
         d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
         out = (tm / "stdout.log").read_text(encoding="utf-8")
         bang(lk.resolve() == y.resolve(), "diem tiem khong doi duoc dich symlink")
         bang("DAU_X" in out and "DAU_Y" not in out, f"con khong chay dung tep da bam X: {out!r}")
         bang(d["transport_sha256"] == hashlib.sha256(x.read_bytes()).hexdigest(), "bam khong phai bam X")
+
+
+@ca
+def r1335_hanh_vi_codex_theo_agent_da_quyet():
+    """F1: lọc stderr + đo sandbox của lượt codex đi theo `_quyet_dinh_agent` (khai > tên, cắt đuôi shim)."""
+    with San() as s:
+        repo = tao_repo(s); b = s / "bin"; b.mkdir()
+        duoi = ".exe" if LA_WINDOWS else ""
+        for ten in ("wrap", "codex"):
+            _bin_python_gia(b / (ten + duoi))
+        if LA_WINDOWS:
+            (b / "codex.bat").write_text("@echo r1335-rieng-tu 1>&2\r\n", encoding="utf-8")
+        else:
+            _bin_python_gia(b / "codex.bat")
+        env = dict(os.environ, PATH=str(b) + os.pathsep + os.environ.get("PATH", ""))
+        lech = []
+        for i, (lenh0, ag, loc) in enumerate((("wrap", "codex", True), ("codex", "khong", False),
+                                              ("codex", "claude", False), ("codex.bat", None, True))):
+            rr = s / f"runs-{i}"
+            chay("run", "--workspace", str(repo), "--run-root", str(rr), *(("--agent", ag) if ag else ()),
+                 "--bo-qua-probe", "r1335 F1", "--", lenh0, "-c",
+                 "import sys;sys.stderr.write('r1335-rieng-tu\\n')", env=env)
+            tm = next(rr.iterdir())
+            d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
+            da_loc = b"r1335-rieng-tu" not in (tm / "stderr.log").read_bytes()
+            if (da_loc, "sandbox_trang_thai" in d) != (loc, loc):
+                lech.append((lenh0, ag, da_loc, "sandbox_trang_thai" in d))
+        bang(not lech, f"hanh vi codex khong theo agent da quyet: {lech}")
 
 
 @ca
@@ -14316,6 +14359,12 @@ DOT_BIEN = [
     ("r1335_N3b_resolve_theo_cwd_launcher", ('    dinh_danh = _dinh_danh_van_chuyen(a.lenh, agent, kq["workspace"])', '    dinh_danh = _dinh_danh_van_chuyen(a.lenh, agent, None)'),
      ["r1335_khac_cwd_bam_va_chay_tep_trong_workspace"]),
     ("r1335_N3c_phong_lenh_goc", ('        lenh_con[0] = dinh_danh["thuc_thi_duong_dan"]   # wp1335 T3', '        pass   # wp1335 T3'),
+     ["r1335_symlink_doi_dich_giua_bam_va_phong"]),
+    ("r1335_F1_codex_theo_ten", ('    do_model = _la_codex(qd)\n', '    do_model = Path(a.lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd")\n'),
+     ["r1335_hanh_vi_codex_theo_agent_da_quyet"]),
+    ("r1335_F2_path_theo_cwd_launcher", ('os.path.join(cwd, d or ".", s + e)', 'os.path.join(d, s + e)'),
+     ["r1335_khac_cwd_bam_va_chay_tep_trong_workspace"]),
+    ("r1335_F3_probe_lenh_goc", ('_probe_spawn(thuc_thi or str(lenh[0]), ws)', '_probe_spawn(str(lenh[0]), ws)'),
      ["r1335_symlink_doi_dich_giua_bam_va_phong"]),
     ("r1335_D4_bo_chot_ten_trung", ("            if ten in theo_lenh:\n                raise RuntimeError", "            if False:\n                raise RuntimeError"),
      ["r1335_bang_transport_tu_choi_ten_trung"]),
@@ -14789,7 +14838,7 @@ DOT_BIEN = [
      ['r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien']),
     ('r26_rv5_lf_detection', ('        het_dong = doan.endswith(b"\\n")\n', '        het_dong = True\n'),
      ['r925_khung_cut_o_EOF_hoac_giua_doan_doc_khong_nhan_va_tinh_mat']),
-    ('r26_rv5_codex_mode_disabled', ('    do_model = _la_codex(a.lenh)\n', '    do_model = False\n'),
+    ('r26_rv5_codex_mode_disabled', ('    do_model = _la_codex(qd)\n', '    do_model = False\n'),
      ['r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat']),
     ('r26_rv5_codex_env_guard', ('    if do_model:\n        env = dict(os.environ)\n', '    if False:\n        env = dict(os.environ)\n'),
      ['r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat']),
@@ -14860,7 +14909,7 @@ DOT_BIEN = [
      ['r926_ghi_so_chup_rieng_ket_loi_dem']),
     ('r26_rv7_khong_chup_dem', ('ket_s, loi_s, dem_s = list(self.ket), list(self.loi), dict(self.dem)', 'ket_s, loi_s, dem_s = list(self.ket), list(self.loi), self.dem'),
      ['r926_ghi_so_chup_rieng_ket_loi_dem']),
-    ("r25_loc_ca_luot_khong_phai_codex", ('    do_model = _la_codex(a.lenh)\n', '    do_model = True\n'),
+    ("r25_loc_ca_luot_khong_phai_codex", ('    do_model = _la_codex(qd)\n', '    do_model = True\n'),
      ["r925_khong_phai_codex_giu_nguyen_so_va_stderr"]),
     # wp802 (N1–N4, N6): mỗi tiêu chí một đột biến gỡ đúng chốt của nó.
     ("wp802_bo_nhanh_BI_CHE", ('        if thay is not None and hong_dau is not None:', '        if False:'),

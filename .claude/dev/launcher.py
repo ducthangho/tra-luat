@@ -285,8 +285,9 @@ def _thuc_thi(lenh0: str, cwd: str, path_con: str | None) -> dict:
         duoi = [""]
         if platform.system() == "Windows" and not os.path.splitext(s)[1]:
             duoi += os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";")
-        ung_vien = [os.path.join(d, s + e) for d in (path_con or "").split(os.pathsep) if d
-                    for e in duoi]
+        # F2: MỌI phần tử PATH neo theo cwd của con; phần tử rỗng = cwd của con; PATH vắng = os.defpath.
+        ung_vien = [os.path.join(cwd, d or ".", s + e)
+                    for d in (os.defpath if path_con is None else path_con).split(os.pathsep) for e in duoi]
     for u in ung_vien:
         if os.path.isfile(u) and (platform.system() == "Windows" or os.access(u, os.X_OK)):
             that = os.path.realpath(u)
@@ -1524,11 +1525,11 @@ def _probe_cho_so(ds: dict) -> dict:
 
 
 def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None,
-                   qd: dict | None = None) -> tuple[dict, str | None]:
+                   qd: dict | None = None, thuc_thi: str | None = None) -> tuple[dict, str | None]:
     # wp1335 T1: tập probe agent lấy từ `_quyet_dinh_agent`, CÙNG nguồn với định danh `run.json`.
     qd = _quyet_dinh_agent(lenh) if qd is None else qd
     ds = {"workspace": _probe_workspace(ws), "ghi": _probe_ghi(ws),
-          "spawn": _probe_spawn(str(lenh[0]), ws)}
+          "spawn": _probe_spawn(thuc_thi or str(lenh[0]), ws)}   # F3: đúng tệp đã chọn và băm
     if "claude_trust" in qd["probe_can"]:
         ds["claude_trust"] = _probe_trust_claude(ws)
     ly_do = bo_qua.strip() if bo_qua is not None else None
@@ -1976,8 +1977,9 @@ _TRAN_DONG = 4 << 20          # trần một lần đọc (R25-ROBUST-04)
 _SU_KIEN_KHUNG = ("response.created", "response.completed")
 
 
-def _la_codex(lenh) -> bool:
-    return Path(lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd")
+def _la_codex(qd: dict) -> bool:
+    # wp1335 F1: lọc stderr/RUST_LOG/đo model-sandbox/chờ snapshot theo `_quyet_dinh_agent`, không theo tên.
+    return qd["agent_suy_ra"] == "codex"
 
 
 def _loc_stderr_codex(ong, f_err, ket: list, loi: list, dem: dict | None = None) -> None:
@@ -2608,11 +2610,12 @@ def lenh_run(a) -> int:
         snapshot = ""
         if not ket or not all(x.get("ok") for x in ket):
             raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child")
-    if _la_codex(a.lenh):
+    if _la_codex(qd):
         if _cho_snapshot_hoac_chan():
             raise Chan(MA_CHUA_XAC_THUC, "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
     try:
-        probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe, qd)
+        probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe, qd,
+                                             dinh_danh["thuc_thi_duong_dan"])
     except Chan as e:
         if e.probe is None:
             raise
@@ -2721,7 +2724,7 @@ def lenh_run(a) -> int:
                    "con se nhan chuoi nguyen van")
 
     f_out = (thu_muc / "stdout.log").open("w", encoding="utf-8")
-    do_model = _la_codex(a.lenh)
+    do_model = _la_codex(qd)
     # Lượt codex: stderr đi qua ỐNG và bộ lọc danh sách cho phép, tệp mở nhị phân để ghi đúng byte.
     # Không đệm (R26-COUNT-09 vòng 2): mỗi write là một lời gọi hệ thống, nên `_ghi_het` đếm được đúng phần chưa ghi.
     f_err = (thu_muc / "stderr.log").open("wb" if do_model else "w",

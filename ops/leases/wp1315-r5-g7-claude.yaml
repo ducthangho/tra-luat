@@ -78,8 +78,8 @@
   "leased_at_utc": "2026-11-16T14:02:30Z",
   "heartbeat_at": "2026-11-16T14:02:30Z",
   "heartbeat_required_minutes": 360,
-  "lease_until": "2026-11-17T04:36:00Z",
-  "lease_expires_at_utc": "2026-11-17T04:36:00Z",
+  "lease_until": "2026-11-16T18:21:17Z",
+  "lease_expires_at_utc": "2026-11-16T18:21:17Z",
   "source_push_limit": 1,
   "draft_PR_limit": 1,
   "genuine_connector_limit": 1,
@@ -164,5 +164,25 @@
     "stdout_sha256": "00f837809428d304aa78d44f943db40cb0020401143a1255eaf28eaf5428b41b",
     "verdict": "approve",
     "findings": 0
+  },
+  "merge": {
+    "pr": 1340,
+    "merge_commit": "aa718cb8392c1e2defd47a0259c575de16fbd5a3",
+    "parents": [
+      "5968ff06486a64244c4a306bc3eac163df0488ad",
+      "0003a5f46df6ef84866348859a161e4b8a801dbd"
+    ],
+    "tree_m": "f07b2bd5db2280d60e24cdedda07fe31697680d6",
+    "merged_at": "2026-11-16T18:16:24Z",
+    "merged_by": "ducthangho"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-17T04:36:00Z",
+    "han_moi_utc": "2026-11-16T18:21:17Z",
+    "luc_rut_utc": "2026-11-16T18:17:17Z",
+    "nguoi_rut": "Claude Code coordinator under owner delegation",
+    "chi_thi": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+    "ly_do": "PR #1340 da merge tai aa718cb (chu kho bam merge); khong con ghi source. CI master, M8 va dong WP la bookkeeping rieng.",
+    "gioi_han": "Chi rut han; lich su, so lieu va phase B clock goc giu nguyen."
   }
 }

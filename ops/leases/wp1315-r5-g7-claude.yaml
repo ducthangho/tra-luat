@@ -67,7 +67,7 @@
   "start_from_sha": "98c7389d91027e1d7eeccaea26e50332773249bf",
   "reviewed_sha_required": "98c7389d91027e1d7eeccaea26e50332773249bf",
   "reviewed_tree_required": "d963dc73799724d76251f645fb7812e7ff3c8992",
-  "candidate_head": null,
+  "candidate_head": "4ebcbaf9b8c06ae883dcbd5cf128f2f621df7ca5",
   "delegated_audit": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6917844880",
   "delegated_audit_generation": 5,
   "delegated_audit_relabelled": false,
@@ -124,7 +124,12 @@
     },
     "Codex_source_review": {
       "from": 3,
-      "to": 4
+      "to": 5,
+      "history": [
+        "163b8b57 approve on 98c7389",
+        "18da1726 changes_requested P2 on 98c7389",
+        "13e7cfac blocked at preflight on 4ebcbaf: coordinator prompt wrongly stated sole parent C (coordinator error, not source defect)"
+      ]
     },
     "source_push": {
       "from": 1,
@@ -145,5 +150,6 @@
     },
     "authority": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
     "ly_do": "P2 thật ở H 98c7389 bắt buộc vá; H mới cần đủ cổng lại."
-  }
+  },
+  "candidate_tree": "395cabb6960543f831b811cdb590d75194d0e29c"
 }

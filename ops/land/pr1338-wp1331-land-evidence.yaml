@@ -54,6 +54,14 @@ pre_merge_checks:
       loi_khai_co_neo — than PR #1338 (readback-pr-1338.json) va budget_cuoi_ghi_chu cua lease. Luot 1 run 8611d7af tren 14aa4c0
       request_changes (ghi trong lease a2eb8be). Tu 519e59d toi head d893075 chi co hai commit sua docstring theo hai P3 cua luot 4.
       prompt/run.json/verdict nam trong scratchpad phien cu, khong con: not_measured.
+  - name: 'Windows native N6 DO BU tren DUNG head d893075 (sau P1 connector 4586438581 tren PR #1339)'
+    sha: d893075b78c001cbe7b33077c29bc8fd2b2d55b7
+    conclusion: 'passed — 8/8 rc 0 tren head (t256/t257/t258/t259/t129 tren DESKTOP-T9R33P2; t133/t137/t151 tren tra-luat-win); ve am nen ddc027a t256/t257/t258 rc 1'
+    nguon: [windows/readback-n6-bu-d893075.txt]
+    ghi_chu: >-
+      measured — ca hai may Python 3.12.10, cp1252, utf8_mode 0, khong PYTHONUTF8. Desktop khong tao duoc symlink (WinError 1314) va
+      thieu actionlint nen t133/t137/t151 do tren tra-luat-win (3/3 rc 0, 15:44:57Z, sau khi phien #1315 nha khoa). Chu kho duyet
+      Windows 3/3 roi 4/4 qua AskUserQuestion (khong co comment).
   - name: 'Windows native N6 — may tra-luat-win (khong PYTHONUTF8, cp1252, Python 3.12)'
     sha: 10496d3c3f83aaead5e90b2867d28f1ee399e618
     conclusion: 'passed — head t256/t257/t258/t259/t129/t133/t137/t151 8/8 rc 0; ve am nen ddc027a t256/t257/t258 rc 1'
@@ -62,7 +70,7 @@ pre_merge_checks:
       measured — readback chi doc qua Desktop Commander 12:4xZ: tien-do.log luot 2 chep nguyen van, sha256 tung tep tinh tren may;
       do-luong.csv co dong 06:50:52Z. Luot 1 tren 14aa4c0 (05:39–05:43Z): t258 do vi UnicodeEncodeError trong ca. Gioi han: tu
       10496d3 toi head, ops/lease_publish.py chi doi docstring nhung ops/lease_publish_test.py viet lai bo quet AST t258 (+85/-27)
-      — t258 ban head CHUA chay tren Windows (chi chay tren Linux CI).
+      — da do bu tren head, xem muc tren.
   - name: 'CI PR tren head cuoi'
     sha: d893075b78c001cbe7b33077c29bc8fd2b2d55b7
     conclusion: success
@@ -141,16 +149,15 @@ trang_thai_packet:
     ca 2 tep). (3) bookkeeping: ho so nay + bien ban M8. (4) review neo d893075: DAT — connector sach dung d893075
     + audit human_audited chu kho; offline luot 4 approve tren 519e59d (loi_khai_co_neo; sau do chi docstring). (5) uy quyen: DAT
     bang audit chu kho tu dang 6913359262 neo d893075. (6) muc tieu: N1–N5, N7 do boi executor/reviewer (loi_khai_co_neo) va gate
-    hau merge (lease_publish 307/307); N6 Windows 8/8 + ve am tren 10496d3; N8 CI xanh + bon moc. (7) tran: DAT — 375/450.
+    hau merge (lease_publish 307/307); N6 Windows 8/8 + ve am tren head d893075 (do bu); N8 CI xanh + bon moc. (7) tran: DAT — 375/450.
   canh_bao_cho_chu_kho: >-
-    (i) Hien vat review offline luot 1–4 mat cung container phien cu: chi con loi khai trong than PR. (ii) t258 ban head chua chay
-    tren Windows (bo quet AST viet lai sau luot N6). (iii) No P3 test-child-stderr-codepage: 49 ca do duoi cp1252 o ca base lan head
+    (i) Hien vat review offline luot 1–4 mat cung container phien cu: chi con loi khai trong than PR. (ii) t258 ban head DA do bu tren Windows (P1 connector 4586438581; windows/readback-n6-bu-d893075.txt). (iii) No P3 test-child-stderr-codepage: 49 ca do duoi cp1252 o ca base lan head
     (than PR). (iv) Uy quyen merge (AskUserQuestion) khong co comment.
 
 review:
   so_loi_goi_codex: 'loi_khai_co_neo — 5 trong tran 10: offline 4 (container phien dieu phoi cu) + connector 1 (tu chay khi bo draft, sach).'
   ci_ubuntu: 'measured — readback-runs-head-d893075.json: 1/2, gate 43832290746 pull_request tren d893075 success.'
-  windows_native: 'measured — windows/readback-tra-luat-win-n6.txt: 2/2 luot (14aa4c0 t258 do; 10496d3 8/8 + ve am do dung).'
+  windows_native: 'measured — 4/4 (chu kho nang tu 2): tra-luat-win 14aa4c0 (t258 do), 10496d3 8/8 + ve am; do bu d893075: Desktop 5/8 (3 ca moi truong) + ve am 3/3, tra-luat-win t133/t137/t151 3/3 (windows/readback-n6-bu-d893075.txt).'
 
 nghiem_thu:
   tren_merge: >-
@@ -158,7 +165,7 @@ nghiem_thu:
     doctrine-scan "12 tệp, 0 chỗ chép doctrine"; numstat 2 tep +375; ruff 0.16.9 --select F delta 0 (lease_publish 2=2,
     lease_publish_test 9=9). Lan do ruff dau bang `python3 -m ruff` khong chay (module vang) — da bo, do lai bang binary.
   N1_N5: 'loi_khai_co_neo — than PR #1338 (executor 307/307, t139 105/102/3/0) va reviewer offline luot 4; gate hau merge lease_publish 307/307 (measured).'
-  N6: 'measured — windows/readback-tra-luat-win-n6.txt tren 10496d3; xem gioi han t258 o canh_bao.'
+  N6: 'measured — windows/readback-n6-bu-d893075.txt: 8/8 tren head d893075 + ve am nen 3/3 do.'
   N7: 'measured — nghiem-thu-9c1661f.txt.'
   N8: 'measured — readback-runs-head-d893075.json (CI PR 43832290746) + ci/provenance.yaml, danh-gia-gate-output-43845962754.txt (bon moc §10.2.2 cua 43845962754).'
   B18: 'chua_do_duoc — dac ta r1 khong khai nghia vu sau land; muc nay ghi theo khuon de khong bi doc thanh da do.'

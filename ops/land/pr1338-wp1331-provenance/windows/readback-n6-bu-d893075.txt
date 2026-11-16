@@ -1,0 +1,50 @@
+# N6 DO BU tren head d893075 sau P1 connector 4586438581 tren PR #1339 (t258 ban head chua chay Windows).
+# Chu kho duyet Windows 3/3 roi 4/4 (AskUserQuestion, phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS, ~13:42Z va ~13:47Z 16-11).
+# Readback CHI DOC qua Desktop Commander; sha256 tinh TREN MAY bang python; tep tho o lai tren may.
+#
+# == LUOT A: DESKTOP-T9R33P2 (device a5f7076e-…), Windows 11 26300, Python 3.12.10, cp1252, utf8_mode 0, khong PYTHONUTF8
+# thu muc F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1331-n6c-out\ ; script chay-n6c-1331.ps1 sha256 b7cd691db6c527cde0660ca7d68cf138cca9a7167168ddb92cb6eb811f5a5f7b
+TOM-TAT.txt 1478 b3e607bca728241a20d48c19c1e443bb59dd63f580ea9585c287bf8b3fbbc8ac
+head-t129_.txt 1197 1146edeaa1a420ba1f97f56af86aa91144b54f3b8d5b192c5c3eb2c213a9c1f3
+head-t133_.txt 1798 1ead3144ded684f2e9280477dfbe394756188405ad3dce1bcf18036ec1b92b59
+head-t137_.txt 1604 f2bd40620e9c6300a20260f38eaaeae58fd93ae30f1b3b13d80ece47e82533c5
+head-t151_.txt 1690 cd7bb0614963a9f5d9bd530d4f368007c99a6587d9cd177723198c448fbbc947
+head-t256_.txt 1215 b2d00aa43c08f3864743f3a75ff3f6d70fccfe0864f5e7af8ac7e3990a904d7d
+head-t257_.txt 1221 8e3d62564093e3c0bd17bb063e3b237abba7a5ab5b7490290c49b2235d98bfb6
+head-t258_.txt 1289 c1f7678cf41b8eca26e00639bd2b98f10646053f136b7fd071e05ae2dd67c428
+head-t259_.txt 1193 c6374bcc63b60eb4ea7647c2015f8e1e09b6d5d60058708a56fabdbb397e67cb
+nen-t256_.txt 1800 4962e087eaac1e910be77d9e1a4636cff14cf675e2880b1c08f83fb7d09de1ca
+nen-t257_.txt 1444 90414116b950b14e59aff7f2f90354e19f695a4fbeb7c3243d7f4805465f80f3
+nen-t258_.txt 2553 f1a8f78ea4df0971a85ce2c9d015ffc2d63d62294c52028800df525d0328e1bb
+# TOM-TAT (chep):
+HEAD=d893075b78c001cbe7b33077c29bc8fd2b2d55b7 tree=ad03e15af0473e33e726dc2bd3f0033b679d5e0a python=Python 3.12.10 git=git version 2.56.0.windows.4 PYTHONUTF8=[] ma_hoa=cp1252 0
+HEAD t256_ rc=0 :: lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+HEAD t257_ rc=0 :: lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+HEAD t258_ rc=0 :: lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+HEAD t259_ rc=0 :: lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+HEAD t129_ rc=0 :: lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+HEAD t133_ rc=1 :: OSError [WinError 1314] A required privilege is not held by the client (tao symlink) — MOI TRUONG may, khong phai ma
+HEAD t137_ rc=1 :: KHÔNG ĐO ĐƯỢC: thiếu `actionlint` — MOI TRUONG may
+HEAD t151_ rc=1 :: OSError [WinError 1314] (tao symlink) — MOI TRUONG may
+ve am: lease_publish.py blob=9970b98067898d8e2b621ce8f75d106d51f803b3 (= ddc027a:ops/lease_publish.py) + lease_publish_test.py cua head
+NEN t256_ rc=1 (U1 GOI_GH doc mojibake) · NEN t257_ rc=1 (F1 rc=0 None) · NEN t258_ rc=1 (7 loi goi subprocess text=…)
+sach_sau=[]
+do-luong.csv: "2026-11-16T13:44:35Z","session_015GtxrZk6gmfQKo7g4BfMBS","wp1331","d893075…","N6 do bu …","5","8","","37.5",…,"failed",…,"may=DESKTOP-T9R33P2; ve_am_do=3/3"
+#
+# == LUOT B: tra-luat-win (device f7281f27-…), Python 3.12.10, cp1252, utf8_mode 0, khong PYTHONUTF8, actionlint C:\Tools\bin\actionlint.exe
+# thu muc C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1331-n6d-out\ ; script chay-n6d-1331.ps1 sha256 e61445f81578ba6fc15ea45455325a399d76ec6db2dca71c29c503dc5dfb7b54
+# Khoa KHOA.txt: cho phien #1315 (session_015GtxrYi4s9LqPhhwAmFNS6) nha 15:45Z (nhan qua send_message), khong tiep nhan khoa song.
+TOM-TAT.txt 591 6b5b6d92034c966790ffa5b628c4859a3af1ffcfaf9ee1681ddfd03da196f94d
+head-t133_.txt 1990 be61e2235449a6f9198121cd540d76efbe993aec52c07896fa34070ec9515585
+head-t137_.txt 1229 e911edeea57162bee0114b635b190da1715e4db01e33b9881dbd120c2c402840
+head-t151_.txt 1399 e64862a4ac602b438dcc5df63b901cbc037a0e25795f8e8cd5e37efc43f95d7c
+# TOM-TAT (chep):
+HEAD=d893075b78c001cbe7b33077c29bc8fd2b2d55b7 tree=ad03e15af0473e33e726dc2bd3f0033b679d5e0a python=Python 3.12.10 git=git version 2.56.0.windows.4 PYTHONUTF8=[] ma_hoa=cp1252 0 actionlint=C:\Tools\bin\actionlint.exe
+HEAD t133_ rc=0 62.8s :: lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+HEAD t137_ rc=0 3.2s :: lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+HEAD t151_ rc=0 32.5s :: lease_publish: 1/1 đạt; đã chạy=1, bỏ qua=0
+sach_sau=[]
+TONG head rc0=3/3; 150.6s ; XONG (khoa da nha)
+do-luong.csv: 2026-11-16T15:44:57Z,session_015GtxrZk6gmfQKo7g4BfMBS,wp1331,d893075…,N6 do bu t133/t137/t151 tren head,3,3,,150.6,…,passed,khong,may=tra-luat-win
+#
+# == KET LUAN N6 tren head d893075: t256/t257/t258/t259/t129 (A) + t133/t137/t151 (B) = 8/8 rc 0; ve am nen 3/3 do (A).

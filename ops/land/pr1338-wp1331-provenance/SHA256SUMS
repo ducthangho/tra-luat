@@ -1,5 +1,5 @@
 a5aa446b7d3e024bde415a1e975eb2c5f9a0763db6c7c8aed4f2c8973fabed88  ./ai-dang-giu-sau-rut-han.txt
-c123c2420ba9a0946adeab790ba9c09070836c40039899408d0b9c8b5543eb21  ./bien-ban-m8.yaml
+148f194f9d3c55def928d46e764efb698e2c162506d894c1afb3acf101224ae0  ./bien-ban-m8.yaml
 7a81e255beb5bbce9b34701468510983d9db58f6ec11113ef6014a3c7545d90f  ./ci/jobs.json
 97ead35f1e851d7bc17b89afa5978294c051b774f67e4d8ae1c8d3d10dfd5cf6  ./ci/jobs/133226073730.trich.txt
 39ea8c763b8e0489fe76b6bba74d8a05783c23352b78a8a7f00c8ab30339f46d  ./ci/jobs/133226220543.trich.txt
@@ -28,7 +28,7 @@ a3e713798a7f660a5a170bac2d9b8f7f2ce48f711cf80065dfcc60fd06306860  ./ci/jobs/1332
 36ab7b6ae2d1ba8ad3a4f789cebda51f1c3f2272774d87ef0ea92c9e2e43152c  ./ci/run.json
 aec8a611008ebb101da703d7abb8fd15603afd93d5327fc723a3bc2f856f024d  ./danh-gia-gate-output-43845962754.txt
 b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd  ./danh_gia_gate.py
-505f12fc423493620e9fc96de0566bf1dfb4e5af2c26cf3ed2f6172f7a1ed5fc  ./kiem-dong-wp-m8.txt
+e3651326cbddcc4ca0c87a443ad106a6507727bfc816924f9fd53383b9048ab1  ./kiem-dong-wp-m8.txt
 a47b59c191eae65f9b6e371a19c8e83eee50b64c0032c0dad7ab54da4e0b78d1  ./lease-wp1331-r1-g1-claude-sau-rut-han.yaml.txt
 f324edb399dedd8f1b7ae515e616a6fb253b80e2a35beda24c382f342e6727e6  ./nghiem-thu-9c1661f.txt
 270b4e126764ffd81c7bc733faff2cd416b37ff40bf05da747df605c35f05237  ./ops-publish-lease-43869791370-trich.txt
@@ -42,4 +42,5 @@ c5c15af52b89778b42b9d5c92382f22345e7bcabcc654243ced1ddbe02cedb63  ./readback-job
 c57b566e7e9f3698907b69f4c0913fa58f6bcd2c4eee8d4bdcc78a4f5bd13577  ./readback-run-43869791370.json
 4dffd325bf7b9ad839fab2575bd23f647de2be69530f988b638530abf25f3c34  ./readback-runs-head-d893075.json
 8ef0b43bbaa5c0c263bec6e466b581ede8f748b10e56f70fcbb662cf95be65cd  ./readback-runs-merge-9c1661f.json
+edc25bbb28623c05e4ee8824b0d0768494e38656bd62d78d851c7f95c76ed40e  ./windows/readback-n6-bu-d893075.txt
 98ddf65800655e28402c4768376d361fda50abd7c027b108d85c507f01f118be  ./windows/readback-tra-luat-win-n6.txt

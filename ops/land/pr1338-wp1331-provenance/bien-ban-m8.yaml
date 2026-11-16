@@ -13,7 +13,7 @@ review:
   human_audit: 'issuecomment-6913359262 human_exact_head_audit.v1 approve tren d893075 (chu kho tu dang)'
 windows:
   phan_loai: required
-  nguon: 'dac ta r1 N6; tra-luat-win luot 2 tren 10496d3: head 8/8 rc 0, ve am nen t256-t258 rc 1 (windows/readback-tra-luat-win-n6.txt)'
+  nguon: 'dac ta r1 N6; do bu tren head d893075 8/8 + ve am 3/3 (windows/readback-n6-bu-d893075.txt); truoc do tra-luat-win 10496d3 8/8'
 duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1338#issuecomment-6913359262
 duyet_chu_kho_ghi_chu: 'audit approve tu dang 10:05:02Z 16-11 (sua 10:07:05Z, app null), truoc merge 10:07:23Z; duyet merge dung SHA qua AskUserQuestion (loi khai phien cu).'
 merge_commit: 9c1661f76d5f4ef811aa349df102989cc2e2d53d
@@ -28,7 +28,7 @@ nghiem_thu:
   N3: passed  # nhu N1
   N4: passed  # gate hau merge 43845962754: lease_publish 307/307, da chay=307, bo qua=0
   N5: passed  # executor t139 105/102/3/0 (loi_khai_co_neo)
-  N6: passed  # Windows tra-luat-win tren 10496d3: 8/8 + ve am do dung (t258 ban head chua chay tren Windows — xem land evidence)
+  N6: passed  # do bu tren head d893075: 8/8 (Desktop t256-t259/t129 + tra-luat-win t133/t137/t151) + ve am 3/3 do (windows/readback-n6-bu-d893075.txt)
   N7: passed  # nghiem-thu-9c1661f.txt: adr-song, doctrine-scan, ruff delta 0
   N8: passed  # CI PR 43832290746 + bon moc §10.2.2 cua 43845962754
 lease_cuoi: wp1331-r1-g1-claude

@@ -77,6 +77,7 @@ xung_dot_write_set_do_luc_cap:
   do_luc: '2026-11-16T16:40:00Z'
   goc_quet: 'container phien #1206, fetch +refs/heads/*:refs/remotes/origin/*; ls-remote so TAP ten: thieu 0; master cuc bo = origin/master 9c1661f'
   ket_qua: 'ca 5 duong dan write set: NGUOI_GIU 0. Ngoai write set: .claude/dev/packet_loop_test.py do wp1315-r5-g7-claude giu — packet nay KHONG sua tep do (dac ta muc 2).'
+da_bi_thay_the: wp1343-r3-g1-claude
 thay_the_cho:
   - wp1343-r1-g1-claude
 thay_the_cho_ghi_chu: 'dac ta r2 them .github/workflows/packet-loop-dot-bien.yml vao write set (M3), theo bao cao preflight cua executor g1 16:46Z; cung executor, cung nhanh, cung han.'

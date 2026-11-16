@@ -100,8 +100,8 @@ leased_at_utc: '2026-11-15T08:10:00Z'
 heartbeat_at: '2026-11-15T13:38:48Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Executor cap nhat heartbeat_at <= 6h/lan; phien dieu phoi doc lai lease truoc moi lan ghi nhanh lease (bai hoc #1288 g1).'
-lease_until: '2026-11-17T08:10:00Z'
-lease_expires_at_utc: '2026-11-17T08:10:00Z'
+lease_until: '2026-11-16T02:05:00Z'
+lease_expires_at_utc: '2026-11-16T02:05:00Z'
 lease_until_ghi_chu: '48h vi packet lon (Windows 2 luot, full mutant, B17); rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
@@ -121,3 +121,18 @@ nang_tran:
 - {ai_nang: ducthangho, tran_cu: '<= 6 tep / <= 450 dong them (ADR-0053)', tran_moi: '<= 6 tep / <= 780 dong them', nguon: 'https://github.com/ducthangho/tra-luat/issues/1266#issuecomment-6719832134'}
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T08:10:00Z'
+  han_moi_utc: '2026-11-16T02:05:00Z'
+  chi_thi: >-
+    Ke hoach phien dieu phoi #1206 session_015GtxrbDu3ubjAHY6UebEUe da bao chu kho: nha lease g1 sau khi CI hau merge xanh
+    (lease_until_ghi_chu: rut han ngay sau land).
+  ly_do: >-
+    Packet #1266 (THU-HOI-ADMISSION-MERGE-BASE-B r13) da MERGE: PR #1328 (head 2acd5c7) merge commit
+    815b9ac76a10fdd30516c9cef7ca93448cbbd923, 2026-11-15T23:21Z; gate push run 43774368802 va launcher (Windows that)
+    43774368823 tren 815b9ac deu success. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: >-
+    Khong co lease ke nhiem. Rut han theo tien le #1288 g3 (41e86ef) va #1265 g2 (d3289e6). Han moi dat SAU luc push de luot
+    dang lease con thay lease song, tranh rc=8 che rc=9.
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrbDu3ubjAHY6UebEUe'
+  nghiem_thu: 'ai-dang-giu 5 duong dan write set sau 02:05Z phai ra NGUOI_GIU 0.'

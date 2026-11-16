@@ -1,0 +1,57 @@
+Review H2 không có finding P0–P3. Bản sửa CRLF đạt phép đo độc lập; full lease suite còn ba ca đỏ do môi trường, đều tái hiện trên base.
+
+Neo đã xác minh:
+
+- HEAD: `2acd5c7cd6ccdac99011e408217ca34081ee4fb6`
+- Tree: `b76a912d76e911b697de235934f0362e49750d56`
+- Chuỗi cha duy nhất: H2 → `802a5665df9ae512d5b2df125b8e219f496fa9f9` → `997b383f824ca63d7cee4a659bb6f9cf19bc439f`
+- SHA-256 đặc tả r13: `e8ba54b72abffe80f1177d406b2bbdfa63441b4826ff6b45cbd2f798cb6a7d02`
+
+Reviewer: `openai_codex / codex_cli / machine`, phiên `6247cd9d`; model/effort phục vụ: `KHONG_DO_DUOC`. Môi trường Linux, Python 3.13.18, Git 2.43.0, sandbox `workspace-write`. Các phép thử chạy trong bản sao riêng; TMPDIR nằm ngoài checkout, bytecode bị tắt.
+
+| Kiểm tra / lệnh | RC | Kết quả |
+|---|---:|---|
+| Đọc diff H1→H2 và base→H2 | 0 | Đúng 5 tệp write set; H2 chỉ sửa fixture |
+| `python -u ops/lease_publish_test.py --chi-ca=t246_` | 0 | **1/1**, không bỏ qua |
+| Đột biến stdin thành `dong.replace("\n", "\r\n").encode("utf-8")`, chạy lại t246 | 1 | **0/1**, đỏ đúng tại `fixture B5 policy X2: {}`; đã khôi phục |
+| `python -u ops/lease_publish_test.py` | 1 | **300/303**, chạy đủ 303, bỏ qua 0 |
+| Chạy t137, t159, t237 trên base bằng `main(chon=...)` | 1 | **0/3**, cùng ba lỗi môi trường |
+| Catalog trong full lease suite | — | 83 hàng: **80 giết, 3 sống chủ ý, 0 tín dụng giả** |
+| `python -u .claude/dev/doc_receipt_thu_hoi_test.py` | 0 | **296/296 ca; 344/344 đột biến giết** |
+| `python .claude/dev/packet_loop.py adr-song --root .` | 0 | 66 ADR / 66 dòng, khớp 1–1 |
+| `python .claude/dev/packet_loop.py doctrine-scan --root .` | 0 | 12 tệp, 0 vi phạm |
+| Ruff pin/probe `loi_ruff_ci()` | 0 | 3 contract, không lỗi |
+| Ruff 0.17.5, `check --no-cache --select F --output-format json` trên bốn tệp Python thay đổi | 1 / 1 | Base và H2 cùng 11 lỗi; bản ghi khớp sau chuẩn hóa đường dẫn, **delta 0** |
+| `git diff --check BASE HEAD` | 0 | Sạch |
+| `git diff --numstat BASE HEAD` | 0 | **5 tệp, +773/−27**; còn 7 dòng dưới trần |
+
+Ba ca đỏ là t137 và t159 thiếu `shellcheck`; t237 gặp `PermissionError: [Errno 1] Operation not permitted`. Cả ba có cùng kết quả trên base. Không coi full lease gate là passed. Các ca t129, t133, t151 và toàn bộ t238–t255 đều đạt.
+
+Đối chiếu lượt trước: H1 có 0 finding. Sự cố B5 phát hiện sau đó trên Windows đã được sửa bằng stdin bytes; đột biến CRLF chứng minh chốt fixture mới bắt đúng lỗi trước khi chạy bộ kiểm sản phẩm.
+
+Kết quả rà theo lớp dưới đây dùng `LPT = ops/lease_publish_test.py`, `DRT = .claude/dev/doc_receipt_thu_hoi_test.py`:
+
+| Lời gọi đã xét | Kết luận |
+|---|---|
+| LPT:14813 `_amb_cay_rong` → `mktree` | `input` là bytes UTF-8, không text mode; stdout OID decode rồi strip. Đã sửa |
+| LPT:14828 `_amb_cm_hong` → `hash-object` | Commit truyền bytes; không đổi LF trên Windows |
+| LPT:15029 t246 → `hash-object` | `input=b"{}\n"`; binary an toàn |
+| LPT:14846 `_amb_merge_base_git` | Không stdin; `text=True`, stdout chỉ SHA hex, xử lý bằng `.split()` |
+| LPT:6054 `_g_a0`, được các helper mới gọi | Không stdin; OID dùng strip/split. Oracle `ls-tree -z` đọc các tên ASCII cố định của fixture; không băm stdout text |
+| LPT:7284 `tree_object` | Helper cũ; tree body là bytes, không text mode |
+| LPT:7520 t150 → `hash-object` | Helper cũ; stdin bytes |
+| LPT:7522 t150 → `update-index` | Helper cũ; index-info dạng bytes, phân cách NUL |
+| DRT:277 `ca_tinh` | Không stdin; JSON fixture ghi bằng `write_bytes`; stdout text được parse JSON, không so byte/hash |
+| DRT:590 `_g` | Helper cũ; stdin bytes, không text mode |
+| DRT:610 `_raw` → `Popen` | Pipe binary; ghi OID dạng bytes, đọc header/body binary |
+| `ops/lease_publish.py:1915` → `Popen` | Reader dùng pipe binary; xác minh hash trên bytes gốc |
+| Chuỗi đột biến `amb-m08`, `amb-m14` | Lần lượt đọc SHA dạng text và object dạng binary; chỉ phục vụ phản chứng, được catalog kiểm |
+| `doc_receipt_thu_hoi.py` | Không có subprocess; vẫn thuần JSON |
+
+AST scan cả bốn tệp xác nhận **7 lời gọi có `input=`; không lời gọi nào bật text mode**. Không thấy cửa hở CRLF còn lại trong phạm vi diff và các helper liên quan đã xét.
+
+Về Windows: dấu `/` mới dùng cho đường dẫn trong Git; đường dẫn filesystem dùng `Path`. B2b kế thừa yêu cầu tạo/chụp symlink của fixture t133; t151 cũng cần capability này. Mode Git là dữ liệu object hoặc được đặt qua index. Không thấy giả định POSIX mới về separator, symlink hay quyền tệp trong diff.
+
+Windows native H2, CI/full M9 và canary B18: **not_run trong lượt offline này**. Bản sao H2 sạch cuối lượt, HEAD/tree không đổi. [Bằng chứng và hash các log](/tmp/rv1266b-scratch/evidence.json).
+
+KET_LUAN: approve

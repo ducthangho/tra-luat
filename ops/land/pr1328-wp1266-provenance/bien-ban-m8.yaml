@@ -1,0 +1,56 @@
+# Bien ban M8 (ADR-0060) dong WP #1266 THU-HOI-ADMISSION-MERGE-BASE-B r13 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1328-wp1266-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6896574684 tren 2acd5c7);
+# bon moc §10.2.2 du (wd-run 43787573368). No khai M10 (bo doc dinh danh dac ta): xem land evidence no_khai.
+packet: wp1266
+revision: 13
+generation: 1
+spec_hash: e8ba54b72abffe80f1177d406b2bbdfa63441b4826ff6b45cbd2f798cb6a7d02
+head_da_review: 2acd5c7cd6ccdac99011e408217ca34081ee4fb6
+tree_h: b76a912d76e911b697de235934f0362e49750d56
+review:
+  offline: 'launcher.py run luot 1 approve tren 802a566 (run 280edc6b) va luot 2 approve tren 2acd5c7 (run 6247cd9d, sau sua fixture CRLF t246)'
+  connector: 'issuecomment-6896786294 codex-review-state:v1 completed, khong finding tren 2acd5c7; receipt 6896922493'
+  human_audit: 'issuecomment-6896574684 human_exact_head_audit.v1 approve tren 2acd5c7 (chu kho tu dang)'
+windows:
+  phan_loai: required
+  nguon: 'dac ta B r13 muc 6; tap bat buoc dong bang 6893096808; luot ung vien tren 2acd5c7: 204/204, B17 N10/N50 dat (windows/readback-tra-luat-win.txt, kiem-merge/windows.json)'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1328#issuecomment-6896574684
+duyet_chu_kho_ghi_chu: 'audit approve tu dang 15:06:04Z 15-11 (sua 15:07:52Z, app null), truoc CI som nhat cua head (15:22:12Z); duyet merge dung SHA qua AskUserQuestion (loi khai).'
+merge_commit: 815b9ac76a10fdd30516c9cef7ca93448cbbd923
+tree_m: b76a912d76e911b697de235934f0362e49750d56
+ci_master:
+  run_id: 43774368802
+  conclusion: success
+  ghi_chu: 'ci.yml push master; launcher (Windows that) 43774368823 push success tren cung SHA'
+nghiem_thu:
+  B1: passed  # reviewer offline luot 1/2
+  B2: passed  # reviewer offline luot 1/2
+  B3: passed  # reviewer offline luot 1/2
+  B4: passed  # reviewer offline luot 1/2
+  B5: passed  # reviewer offline luot 2 tren 2acd5c7 (t246 sua fixture)
+  B6: passed  # reviewer offline luot 1/2
+  B7: passed  # reviewer offline luot 1/2
+  B8: passed  # reviewer offline luot 1/2
+  B9: passed  # reviewer offline luot 1/2
+  B10: passed  # reviewer offline luot 1/2
+  B11: passed  # reviewer offline luot 1/2
+  B12: passed  # reviewer offline luot 1/2
+  B13: passed  # CI PR 43729496614 + gate hau merge 43774368802
+  B14: passed  # Windows 204/204 tren 2acd5c7
+  B15: passed  # ci-dot-bien-du 43729530386
+  B16: passed  # reviewer offline luot 1/2; adr-song/doctrine-scan/ruff delta 0 tren 815b9ac
+  B17: passed  # Windows N10/N50 + Linux (executor, reviewer luot 1)
+# B18 KHONG nam trong nghiem_thu dong WP: dac ta B r13 muc "Thi hanh B18" — B18 la nghia vu SAU land, ghi `chua_do_duoc` kem
+# phien nhan viec; KHONG duoc ghi dat hay mien. Do tren PR that dau tien co S khong to tien H; ghi comment tren #1266.
+nghia_vu_sau_land:
+  B18:
+    trang_thai: chua_do_duoc
+    nguoi_do: 'phien dieu phoi #1206 session_015GtxrbDu3ubjAHY6UebEUe (dieu phoi Mission #1264); ket thuc truoc khi do => chuyen handoff phien dieu phoi ke tiep'
+    moc: 'cac run ops-thu-hoi-admission.yml ke tu 815b9ac; PR dau tien co git merge-base --is-ancestor S H rc 1'
+lease_cuoi: wp1266-r13-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

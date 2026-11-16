@@ -1,0 +1,93 @@
+# luc 2026-11-16T02:06:18Z
+# fetch du: thieu 0 / thua 0 / 239 nhanh (ls-remote vs for-each-ref); master cuc bo dong bo origin/master 815b9ac
+## ai-dang-giu ops/lease_publish.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	bo-ghi-nguoc-exec-1-claude-20260829	refs/heads/master:ops/leases/bo-ghi-nguoc-exec-1-claude-20260829.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r30-g29-claude	refs/heads/master:ops/leases/dang-lease-dau-truoc-kiem-sau-r30-g29-claude.yaml
+HẾT_HẠN	lease-dang-exec-1-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-1-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-2-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-2-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-3-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-3-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-4-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-4-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-5-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-5-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-6-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-6-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-7-codex-20260822	refs/heads/master:ops/leases/lease-dang-exec-7-codex-20260822.yaml
+HẾT_HẠN	lease-dang-windows-exec-1-codex-20260822	refs/heads/master:ops/leases/lease-dang-windows-exec-1-codex-20260822.yaml
+HẾT_HẠN	lease-dang-windows-exec-2-codex-20260822	refs/heads/master:ops/leases/lease-dang-windows-exec-2-codex-20260822.yaml
+HẾT_HẠN	lease-dang-windows-exec-3-codex-20260822	refs/heads/master:ops/leases/lease-dang-windows-exec-3-codex-20260822.yaml
+HẾT_HẠN	lease-dang-windows-exec-4-codex-20260822	refs/heads/master:ops/leases/lease-dang-windows-exec-4-codex-20260822.yaml
+HẾT_HẠN	lease-hoi-toan-kho-exec-1-claude-20260823	refs/heads/master:ops/leases/lease-hoi-toan-kho-exec-1-claude-20260823.yaml
+HẾT_HẠN	lease-hoi-toan-kho-exec-1r2-codex-20260823	refs/heads/master:ops/leases/lease-hoi-toan-kho-exec-1r2-codex-20260823.yaml
+HẾT_HẠN	lease-hoi-toan-kho-exec-1r3-codex-20260823	refs/heads/master:ops/leases/lease-hoi-toan-kho-exec-1r3-codex-20260823.yaml
+HẾT_HẠN	lease-hoi-toan-kho-exec-1r4-codex-20260823	refs/heads/master:ops/leases/lease-hoi-toan-kho-exec-1r4-codex-20260823.yaml
+HẾT_HẠN	wp678-r17-g1-claude	refs/heads/master:ops/leases/wp678-r17-g1-claude.yaml
+HẾT_HẠN	wp1266-r13-g1-claude	refs/heads/ops/wp1266-r13-g1-lease:ops/leases/wp1266-r13-g1-claude.yaml
+HẾT_HẠN	wp564-a1a-r4-g1-codex-20261102	refs/remotes/origin/ops/wp564-a1a-r4-g1-lease:ops/leases/wp564-a1a-r4-g1-codex-20261102.yaml
+HẾT_HẠN	wp564-a1a-r6-g2-codex-20261103	refs/remotes/origin/ops/wp564-a1a-r6-g2-lease:ops/leases/wp564-a1a-r6-g2-codex-20261103.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu ops/lease_publish_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	bo-ghi-nguoc-exec-1-claude-20260829	refs/heads/master:ops/leases/bo-ghi-nguoc-exec-1-claude-20260829.yaml
+HẾT_HẠN	dang-lease-dau-truoc-kiem-sau-r30-g29-claude	refs/heads/master:ops/leases/dang-lease-dau-truoc-kiem-sau-r30-g29-claude.yaml
+HẾT_HẠN	dot-bien-l-bien-cong-khai-exec-1-claude-20260929	refs/heads/master:ops/leases/dot-bien-l-bien-cong-khai-exec-1-claude-20260929.yaml
+HẾT_HẠN	dot-bien-l-bien-cong-khai-exec-2-claude-20260929	refs/heads/master:ops/leases/dot-bien-l-bien-cong-khai-exec-2-claude-20260929.yaml
+HẾT_HẠN	dot-bien-l-bien-cong-khai-exec-3-claude-20260929	refs/heads/master:ops/leases/dot-bien-l-bien-cong-khai-exec-3-claude-20260929.yaml
+HẾT_HẠN	dot-bien-l-bien-cong-khai-exec-4-claude-20260929	refs/heads/master:ops/leases/dot-bien-l-bien-cong-khai-exec-4-claude-20260929.yaml
+HẾT_HẠN	dot-bien-l-bien-cong-khai-exec-5-claude-20260929	refs/heads/master:ops/leases/dot-bien-l-bien-cong-khai-exec-5-claude-20260929.yaml
+HẾT_HẠN	dot-bien-l-bien-cong-khai-exec-6-claude-20260930	refs/heads/master:ops/leases/dot-bien-l-bien-cong-khai-exec-6-claude-20260930.yaml
+HẾT_HẠN	lease-dang-exec-1-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-1-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-2-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-2-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-3-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-3-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-4-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-4-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-5-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-5-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-6-codex-20260821	refs/heads/master:ops/leases/lease-dang-exec-6-codex-20260821.yaml
+HẾT_HẠN	lease-dang-exec-7-codex-20260822	refs/heads/master:ops/leases/lease-dang-exec-7-codex-20260822.yaml
+HẾT_HẠN	lease-dang-windows-exec-1-codex-20260822	refs/heads/master:ops/leases/lease-dang-windows-exec-1-codex-20260822.yaml
+HẾT_HẠN	lease-dang-windows-exec-2-codex-20260822	refs/heads/master:ops/leases/lease-dang-windows-exec-2-codex-20260822.yaml
+HẾT_HẠN	lease-dang-windows-exec-3-codex-20260822	refs/heads/master:ops/leases/lease-dang-windows-exec-3-codex-20260822.yaml
+HẾT_HẠN	lease-dang-windows-exec-4-codex-20260822	refs/heads/master:ops/leases/lease-dang-windows-exec-4-codex-20260822.yaml
+HẾT_HẠN	lease-hoi-toan-kho-exec-1-claude-20260823	refs/heads/master:ops/leases/lease-hoi-toan-kho-exec-1-claude-20260823.yaml
+HẾT_HẠN	lease-hoi-toan-kho-exec-1r2-codex-20260823	refs/heads/master:ops/leases/lease-hoi-toan-kho-exec-1r2-codex-20260823.yaml
+HẾT_HẠN	lease-hoi-toan-kho-exec-1r3-codex-20260823	refs/heads/master:ops/leases/lease-hoi-toan-kho-exec-1r3-codex-20260823.yaml
+HẾT_HẠN	lease-hoi-toan-kho-exec-1r4-codex-20260823	refs/heads/master:ops/leases/lease-hoi-toan-kho-exec-1r4-codex-20260823.yaml
+HẾT_HẠN	lease-publish-windows-do-r1-g1-claude	refs/heads/master:ops/leases/lease-publish-windows-do-r1-g1-claude.yaml
+HẾT_HẠN	lease-publish-windows-do-r2-g2-claude	refs/heads/master:ops/leases/lease-publish-windows-do-r2-g2-claude.yaml
+HẾT_HẠN	lease-publish-windows-do-r3-g3-claude	refs/heads/master:ops/leases/lease-publish-windows-do-r3-g3-claude.yaml
+HẾT_HẠN	plat-x4-exec-1-claude-20260820	refs/heads/master:ops/leases/plat-x4-exec-1-claude-20260820.yaml
+HẾT_HẠN	plat-x5-exec-1-codex-20260820	refs/heads/master:ops/leases/plat-x5-exec-1-codex-20260820.yaml
+HẾT_HẠN	plat-x5-exec-1r2-codex-20260820	refs/heads/master:ops/leases/plat-x5-exec-1r2-codex-20260820.yaml
+HẾT_HẠN	plat-x5-exec-1r3-codex-20260820	refs/heads/master:ops/leases/plat-x5-exec-1r3-codex-20260820.yaml
+HẾT_HẠN	plat-x5-exec-1r4-codex-20260821	refs/heads/master:ops/leases/plat-x5-exec-1r4-codex-20260821.yaml
+HẾT_HẠN	t131-deadline-dem-spawn-exec-1-claude-20260929	refs/heads/master:ops/leases/t131-deadline-dem-spawn-exec-1-claude-20260929.yaml
+HẾT_HẠN	wp678-r17-g1-claude	refs/heads/master:ops/leases/wp678-r17-g1-claude.yaml
+HẾT_HẠN	wp1266-r13-g1-claude	refs/heads/ops/wp1266-r13-g1-lease:ops/leases/wp1266-r13-g1-claude.yaml
+HẾT_HẠN	ci-lan-luu-tru-r1-g1-claude-remote-20261101	refs/remotes/origin/ops/ci-lan-luu-tru-r1-lease:ops/leases/ci-lan-luu-tru-r1-g1-claude-remote-20261101.yaml
+HẾT_HẠN	ci-lan-luu-tru-r1-g2-claude-remote-20261101	refs/remotes/origin/ops/ci-lan-luu-tru-r1-lease:ops/leases/ci-lan-luu-tru-r1-g2-claude-remote-20261101.yaml
+HẾT_HẠN	t191-py314-interpolation-r1-g1-claude	refs/remotes/origin/ops/lease-1195-t191-g1:ops/leases/t191-py314-interpolation-r1-g1-claude.yaml
+HẾT_HẠN	wp1006-r1-g1-claude	refs/remotes/origin/ops/wp1006-r1-g1-lease:ops/leases/wp1006-r1-g1-claude.yaml
+HẾT_HẠN	wp1006-r1-g2-claude	refs/remotes/origin/ops/wp1006-r1-g1-lease:ops/leases/wp1006-r1-g2-claude.yaml
+HẾT_HẠN	wp1237-r1-g1-claude-remote-20261105	refs/remotes/origin/ops/wp1237-r1-g1-lease:ops/leases/wp1237-r1-g1-claude-remote-20261105.yaml
+HẾT_HẠN	wp564-a1a-r4-g1-codex-20261102	refs/remotes/origin/ops/wp564-a1a-r4-g1-lease:ops/leases/wp564-a1a-r4-g1-codex-20261102.yaml
+HẾT_HẠN	wp564-a1a-r6-g2-codex-20261103	refs/remotes/origin/ops/wp564-a1a-r6-g2-lease:ops/leases/wp564-a1a-r6-g2-codex-20261103.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu .github/workflows/ops-thu-hoi-admission.yml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp1266-r13-g1-claude	refs/heads/ops/wp1266-r13-g1-lease:ops/leases/wp1266-r13-g1-claude.yaml
+HẾT_HẠN	wp564-a1a-r4-g1-codex-20261102	refs/remotes/origin/ops/wp564-a1a-r4-g1-lease:ops/leases/wp564-a1a-r4-g1-codex-20261102.yaml
+HẾT_HẠN	wp564-a1a-r6-g2-codex-20261103	refs/remotes/origin/ops/wp564-a1a-r6-g2-lease:ops/leases/wp564-a1a-r6-g2-codex-20261103.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu .claude/dev/doc_receipt_thu_hoi.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	c1a1a-exec-2-claude-20260927	refs/heads/master:ops/leases/c1a1a-exec-2-claude-20260927.yaml
+HẾT_HẠN	wp1266-r13-g1-claude	refs/heads/ops/wp1266-r13-g1-lease:ops/leases/wp1266-r13-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu .claude/dev/doc_receipt_thu_hoi_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	c1a1a-exec-2-claude-20260927	refs/heads/master:ops/leases/c1a1a-exec-2-claude-20260927.yaml
+HẾT_HẠN	wp1266-r13-g1-claude	refs/heads/ops/wp1266-r13-g1-lease:ops/leases/wp1266-r13-g1-claude.yaml
+HẾT_HẠN	wp1179-r9-g1-claude-remote-20261106	refs/remotes/origin/ops/wp1179-r9-g1-lease:ops/leases/wp1179-r9-g1-claude-remote-20261106.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

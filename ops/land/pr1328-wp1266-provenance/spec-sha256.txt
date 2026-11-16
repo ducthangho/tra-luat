@@ -1,0 +1,3 @@
+# git show 815b9ac:ops/specs/THU-HOI-ADMISSION-MERGE-BASE-B-r13.md | sha256sum ; git rev-parse 815b9ac:<spec>  (2026-11-16T01:45:05Z)
+e8ba54b72abffe80f1177d406b2bbdfa63441b4826ff6b45cbd2f798cb6a7d02  -
+b89346be1b679431c41952c0c44687f6c4f97610

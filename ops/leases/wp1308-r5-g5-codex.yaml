@@ -44,5 +44,6 @@
   "spec_path": "ops/specs/wp1308-target-canary-r5.md",
   "spec_hash": "e1790abaa98c8bad62acd3d431023a06a21a55d6e796097f7996124073544fae",
   "prompt_path": "ops/prompts/wp1308-target-canary-r5.txt",
-  "prompt_sha256_required": "35a96f021077129166dd20a35d21bd3477b06bf70efccd7e08bf97e1956b75d0"
+  "prompt_sha256_required": "35a96f021077129166dd20a35d21bd3477b06bf70efccd7e08bf97e1956b75d0",
+  "publication_note": "First push creating ops/wp1308-target-r5-g5 (1e44e5e) did not run ops-publish-lease (only ops-open-PR ran, skipped); this lease-only follow-up commit triggers the publisher. Spec, admission, expiry and authority unchanged."
 }

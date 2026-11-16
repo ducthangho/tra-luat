@@ -15468,8 +15468,11 @@ def _u8_quet(nguon: str, gian_tiep: bool = True, them_goi: tuple = ()) -> tuple:
     GIỚI HẠN (review Codex lượt 3, 7 phản chứng; chủ kho chấp nhận ngày 16-11-2026, Review Rescue Checkpoint): chốt
     này là lint cho dạng trực tiếp + danh sách cho phép đã biết, KHÔNG đóng các đường phản chiếu — `sys.modules` với
     tên động qua bí danh/`from sys import modules`/`os.sys`, `inspect.getmodule(...)`, `__globals__` qua `getattr`.
-    Lớp lỗi được ĐÓNG BẰNG HÀNH VI ở ca M4 (`t256`): mọi lời gọi sản phẩm đi qua `_chay_utf8`, đọc sai codepage thì
-    `t256` đỏ (đột biến u8-m19/u8-m20 nhắm `U1 GOI_GH`). Đừng siết thêm danh sách ở đây khi chưa có quyết định mới."""
+    Lớp lỗi được ĐÓNG BẰNG HÀNH VI ở ca M4 (`t256`): BẢY lời gọi thuộc M1 đi qua `_chay_utf8`, đọc sai codepage thì
+    `t256` đỏ (đột biến u8-m19/u8-m20 nhắm `U1 GOI_GH`). Hai lời gọi `subprocess` còn lại KHÔNG đi qua `_chay_utf8`
+    mà tự đọc bytes, mỗi cái có ca phủ riêng: `GOI_GIT` (decode UTF-8 riêng, giữ `stdout_bytes`) ⇐
+    `t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text`; `Popen` của `KhoObject.doc` (cat-file, bytes) ⇐ chính t258,
+    chỉ ở dạng lời gọi trực tiếp. Đừng siết thêm danh sách ở đây khi chưa có quyết định mới."""
     import ast
     so, vp = 0, []
     goi_duoc = _U8_GOI_DUOC | set(them_goi)

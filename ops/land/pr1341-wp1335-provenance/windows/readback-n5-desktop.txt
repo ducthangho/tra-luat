@@ -1,0 +1,23 @@
+# Readback CHI DOC qua Desktop Commander, may DESKTOP-T9R33P2 (device a5f7076e-…), 2026-11-16T22:3xZ, phien dieu phoi
+# session_015GtxrZk6gmfQKo7g4BfMBS. Windows 11 26300, Python 3.12.10, cp1252, khong PYTHONUTF8. sha256 tinh TREN MAY bang python.
+# Tep tho o lai tai F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\ ; trong kho chi co bam + trich.
+#
+# LUOT 4 (N5d) tren 118a893: head 6 qua / 2 bo qua / 2 DO (transport_sha256, khac_cwd); ve am F6 tren launcher 64d600c DO dung.
+#   chan doan cung may: launcher 64d600c => 2 ca do qua; 118a893 voi TMP o C => van do 2/2 => hoi quy cua ma 118a893 (da va o 9aec797).
+# LUOT 5 (N5e) tren 9aec797: head 8 qua / 2 bo qua (F4, symlink: ca POSIX) / 0 do; ve am transport_sha256 tren launcher 118a893 DO dung.
+# do-luong.csv:
+"2026-11-16T12:38:46Z","session_015GtxrZk6gmfQKo7g4BfMBS","wp1335-r3-g1","118a8938e3b95b8a0a2112c4bc5600b5d7cb9e52","launcher_test r1335 --lap-ca tung ca + ve am F6 tren launcher 64d600c","6","10","","112","N5d Windows native (khong PYTHONUTF8)","failed","khong","may=DESKTOP-T9R33P2; bo_qua=2; ve_am_do=1/1"
+"2026-11-16T13:23:43Z","session_015GtxrZk6gmfQKo7g4BfMBS","wp1335-r3-g1","9aec797ea13606b6073a9f4f8a5ff73044f5a10f","launcher_test r1335 --lap-ca tung ca + ve am transport tren launcher 118a893","8","10","","29.2","N5e Windows native (khong PYTHONUTF8)","passed","khong","may=DESKTOP-T9R33P2; bo_qua=2; ve_am_do=1/1"
+# bam:
+wp1335-n5d-out/TOM-TAT.txt 1756 7545269bfbbedfb2a00a6c515dc5d5036d3b712bbe3a8c85ac3db46749859cc4
+wp1335-n5d-out/CHAN-DOAN.txt 712 29a0ad7662774e23f6a8dcab8a0a73320e1f7735b5fb71b917992a03bcab4413
+wp1335-n5e-out/TOM-TAT.txt 1788 572fab69f676036e7bca076272048266c80d2383805f4d2ba7ab7ec47da4db63
+wp1335-n5e-out/am-r1335_transport_sha256_la_bam_tep_that.log 443 d6cf7ee8a1c3795a8af227e8eaae70c573d63be5ca25194c81cf6d2901333b87
+wp1335-n5e-out/head-r1335_transport_sha256_la_bam_tep_that.log 237 12c068e9820e6276b48b39d9e89bcba004fba874ce54f5598d5b10387fe57bd7
+wp1335-n5e-out/head-r1335_khac_cwd_bam_va_chay_tep_trong_workspace.log 244 d1ae11ea09903315dd0872db453bf009257b25d19d80521ccd941e19dbb7dd64
+wp1335-n5e-out/head-r1335_F6_windows_chon_tep_theo_which.log 235 6c37fc8816fe0b14885fdb8ff991bcfc00b98eaa43a6afacd55274900b51ae90
+wp1335-n5e-out/head-r1335_P2_windows_bo_ung_vien_khong_duoi.log 237 26ee13d7bb6c03fa5d10c548f818db165985dcedd02725318dd50d9936f047c5
+chay-n5d-1335.ps1 1ce51bf4822c4f58bcd828dbb6cf199d5f6bce9c9a113744fe3f35d35f96bf9e
+chan-doan-n5d.ps1 d20960e1b67bde462a4e50250515e7d32ff936f8194fcac84fadd705fc94e135
+chay-n5e-1335.ps1 0b3b67f5078ce2262a20661aa4cf76df8aca264a800b8bc64e03ca1653eb90e0
+# Luot 1-3 (tra-luat-win, phien dieu phoi cu, tren cac head truoc 64d600c): thu muc tho da xoa khi don may 16-11 (chu kho duyet A+B); chi con loi khai trong ban giao.

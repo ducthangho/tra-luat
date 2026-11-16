@@ -1,0 +1,10 @@
+# phan chung danh_gia_gate.py (sha256 b87f9697) tren run 43910313483: xoa DAU HIEU mot buoc => phai not_measured (rc 0). rc doc tu chinh danh_gia_gate.py.
+## --am-buoc 'gate-packet-loop' '.claude/dev/packet_loop_test.py'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0
+## --am-buoc 'gate (ubuntu' '== tl selftest'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0
+## --am-buoc 'gate-ops' 'ops/chay_lease_publish_test.sh'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0

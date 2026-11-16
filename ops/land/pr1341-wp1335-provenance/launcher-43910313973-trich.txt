@@ -1,0 +1,272 @@
+===== job 133450120092
+2026-11-16T16:41:49.6472028Z   python-version: 3.11
+2026-11-16T16:46:16.1731778Z   r1079_a                      SAI - KHONG DO DUOC (neutral do: review_do_san)
+2026-11-16T16:46:28.7086622Z   r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+2026-11-16T16:48:08.9893669Z   r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+2026-11-16T16:48:08.9917894Z   HONG r1335_F6_windows_chon_tep_theo_which: AttributeError: module 'shutil' has no attribute '_win_path_needs_curdir'
+2026-11-16T16:48:08.9918679Z   HONG r1335_P2_windows_bo_ung_vien_khong_duoi: AttributeError: module 'shutil' has no attribute '_win_path_needs_curdir'
+2026-11-16T16:48:08.9919329Z 406/408 ca DA CHAY QUA (tong 410, bo qua 2, hong 2) - KHONG DU: 2 ca BO QUA, chua do gi
+2026-11-16T16:48:09.0373635Z ##[error]Process completed with exit code 1.
+===== job 133450119310
+2026-11-16T16:41:59.0433837Z   python-version: 3.13
+2026-11-16T16:43:18.5115176Z   BO QUA t50_stop_roi_runner_KHONG_duoc_de_len_so: bo qua tren Windows (can kiem rieng)
+2026-11-16T16:43:25.5830970Z   BO QUA t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc: bo qua tren Windows (can .exe rong)
+2026-11-16T16:43:38.3397843Z   BO QUA t72_bi_ngat_KHONG_duoc_ghi_thanh_xong: SIGINT tren Windows khong cung ngu nghia; can ca rieng
+2026-11-16T16:47:09.4012511Z   BO QUA r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC: bo qua tren Windows (chau thua ke handle stderr can fixture rieng; duong POSIX do o CI ubuntu)
+2026-11-16T16:48:04.5539461Z   BO QUA r351_co_chi_thi_thi_KHONG_duoc_dat_moc: bo qua: khoi dat moc la shell POSIX
+2026-11-16T16:48:04.5543565Z   BO QUA r351_KHONG_co_chi_thi_thi_van_phai_dat_moc: bo qua: khoi dat moc la shell POSIX
+2026-11-16T16:49:00.7392104Z   r1079_a                      SAI - KHONG DO DUOC (neutral do: review_do_san)
+2026-11-16T16:49:02.2225523Z   r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+2026-11-16T16:49:21.2686491Z   r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+2026-11-16T16:49:22.8576640Z   BO QUA r927_lenh_run_ghi_effort_va_sandbox_vao_run_json: phan sandbox can /proc cua Linux (effort va KHONG_DO_DUOC ngoai Linux da do o tren)
+2026-11-16T16:50:11.7815248Z 325/325 ca DA CHAY QUA (tong 410, bo qua 85, hong 0) - KHONG DU: 85 ca BO QUA, chua do gi
+2026-11-16T16:51:18.4825578Z   r1335_argv0_ve_realpath      KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_giu_argv0_goc_khi_ghim_tep)
+2026-11-16T16:53:14.8406798Z   r1335_F4_dung_o_ung_vien_dau KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke)
+2026-11-16T16:53:14.8408054Z   r1335_F4_chuyen_ca_khi_rc_khac_0 KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke)
+2026-11-16T16:53:14.8409288Z   r1335_F4_errno_ca_sau_exec   KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke)
+2026-11-16T16:53:14.8410202Z   r1335_F4_khong_giu_loi_dau   KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke)
+2026-11-16T16:53:14.8414716Z   r1335_F4_chi_ENOENT_ENOEXEC  KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke)
+2026-11-16T16:53:14.8418020Z   r1252_bo_truyen_fd_ghim      KHONG DO DUOC tren nen nay (ca dich bo qua: r1252_mo_thu_muc_luot_dung_mot_lan)
+2026-11-16T16:53:14.8419163Z   r1252_mo_thu_muc_theo_symlink KHONG DO DUOC tren nen nay (ca dich bo qua: r1252_ghi_qua_dir_fd)
+2026-11-16T16:53:14.8419845Z   r1252_bo_kiem_danh_tinh_thu_muc KHONG DO DUOC tren nen nay (ca dich bo qua: r1252_doi_to_tien_thu_muc_luot)
+2026-11-16T16:53:14.8420592Z   r1252_du_phong_khong_kiem_danh_tinh KHONG DO DUOC tren nen nay (ca dich bo qua: r1252_doi_to_tien_thu_muc_luot)
+2026-11-16T16:53:14.8421305Z   r1252_bam_bo_kiem_loai       KHONG DO DUOC tren nen nay (ca dich bo qua: r1252_bam_tep_khong_theo_lien_ket)
+2026-11-16T16:53:14.8421965Z   r1252_bam_theo_symlink       KHONG DO DUOC tren nen nay (ca dich bo qua: r1252_bam_tep_khong_theo_lien_ket)
+2026-11-16T16:53:14.8423145Z   r1252_ghi_theo_duong_dan_sau_con KHONG DO DUOC tren nen nay (ca dich bo qua: r1252_doi_to_tien_thu_muc_luot)
+2026-11-16T16:53:14.8424434Z   r1252_ghi_de_dich_truc_tiep  KHONG DO DUOC tren nen nay (nhanh dir_fd cua _ghi_tep_0600 khong chay tren Windows (_CO_DIR_FD False))
+2026-11-16T16:53:14.8428317Z   r1252_ghi_theo_duong_dan     KHONG DO DUOC tren nen nay (ca dich bo qua: r1252_ghi_qua_dir_fd)
+2026-11-16T16:53:14.8429027Z   r1252_chu_ky_khong_an_toan   KHONG DO DUOC tren nen nay (ca dich bo qua: r1252_status_va_chu_ky_byte_la)
+2026-11-16T16:53:14.8429697Z   r1252_status_khong_an_toan   KHONG DO DUOC tren nen nay (ca dich bo qua: r1252_status_va_chu_ky_byte_la)
+2026-11-16T16:53:14.8446165Z   r27_canh_sau_return_goc_vang KHONG DO DUOC tren nen nay (ca dich bo qua: r927_canh_cha_doi_giua_hai_luot_quet)
+2026-11-16T16:53:14.8446871Z   r27_canh_khong_doi_chieu     KHONG DO DUOC tren nen nay (ca dich bo qua: r927_canh_cha_doi_giua_hai_luot_quet)
+2026-11-16T16:53:14.8447537Z   r27_canh_khong_ghi           KHONG DO DUOC tren nen nay (ca dich bo qua: r927_canh_cha_doi_giua_hai_luot_quet)
+2026-11-16T16:53:14.8448387Z   r27_to_tien_chi_so_bd        KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot)
+2026-11-16T16:53:14.8449164Z   r27_goc_ghim_tre             KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot)
+2026-11-16T16:53:14.8449973Z   r27_cmdline_bo_doi_so_rong   KHONG DO DUOC tren nen nay (ca dich bo qua: r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that)
+2026-11-16T16:53:14.8450777Z   r27_cmdline_khong_nul_van_tin KHONG DO DUOC tren nen nay (ca dich bo qua: r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that)
+2026-11-16T16:53:14.8451562Z   r27_khong_xac_thuc_to_tien   KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot)
+2026-11-16T16:53:14.8452306Z   r27_goc_ghim_muon            KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot)
+2026-11-16T16:53:14.8458069Z   r27_cmdline_nuot_moi_loi     KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot)
+2026-11-16T16:53:14.8458887Z   r27_khong_doc_lai_stat       KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot)
+2026-11-16T16:53:14.8459645Z   r27_goc_khong_ghim           KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot)
+2026-11-16T16:53:14.8460363Z   r27_effort_khong_kiem_kieu   OK  giet 1/1: r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC
+2026-11-16T16:53:14.8461037Z   r27_effort_khong_kiem_rong   OK  giet 1/1: r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC
+2026-11-16T16:53:14.8461722Z   r27_reasoning_khong_kiem_dict OK  giet 1/1: r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC
+2026-11-16T16:53:14.8462387Z   r27_bo_dem_effort            OK  giet 1/1: r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC
+2026-11-16T16:53:45.0448697Z   r27_effort_khong_xet_thieu   OK  giet 1/1: r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC
+2026-11-16T16:53:45.0456981Z   r27_khoa_khong_gom_cmdline   KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_that_thay_sandbox_sau_exec_va_khong_doc_environ)
+2026-11-16T16:53:45.0457993Z   r27_quet_doc_environ         KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_that_thay_sandbox_sau_exec_va_khong_doc_environ)
+2026-11-16T16:53:45.0458841Z   r1105_bo_ve_ii               KHONG DO DUOC tren nen nay (ca dich bo qua: r927_canh_cha_doi_giua_hai_luot_quet)
+2026-11-16T16:53:45.0459887Z   r1105_bo_ve_iii              KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot)
+2026-11-16T16:53:45.0461193Z   r1105_bo_ve_i                KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot)
+2026-11-16T16:53:45.0462812Z   r1105_tha_to_tien_doi        KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot)
+2026-11-16T16:53:45.0466755Z   r1105_khong_tha_trong_luot   KHONG DO DUOC tren nen nay (ca dich bo qua: r1105_cha_zombie_ve_to_tien)
+2026-11-16T16:53:45.0468094Z   r1105_khong_tha_xuyen_luot   KHONG DO DUOC tren nen nay (ca dich bo qua: r1105_chuyen_cha_xuyen_luot, r1105_tien_trinh_that_ve_subreaper)
+2026-11-16T16:53:45.0469501Z   r1105_tha_khong_cap_nhat_canh KHONG DO DUOC tren nen nay (ca dich bo qua: r1105_chuyen_cha_xuyen_luot)
+2026-11-16T16:53:45.0470702Z   r1105_tha_bo_kiem_chuoi      KHONG DO DUOC tren nen nay (ca dich bo qua: r1105_tha_doc_lai_chuoi_to_tien)
+2026-11-16T16:53:45.0471879Z   r1105_tha_doi_ppid_goc       KHONG DO DUOC tren nen nay (ca dich bo qua: r1105_tha_doc_lai_chuoi_to_tien)
+2026-11-16T16:53:45.0475518Z   r1105_dem_sai_khoa           KHONG DO DUOC tren nen nay (ca dich bo qua: r1105_cha_zombie_ve_to_tien)
+2026-11-16T16:53:45.0478467Z   r27_lenh_run_khong_lay_mau   KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lenh_run_ghi_effort_va_sandbox_vao_run_json)
+2026-11-16T16:53:45.0479937Z   r27_lenh_run_khong_ghi_so    KHONG DO DUOC tren nen nay (ca dich bo qua: r927_lenh_run_ghi_effort_va_sandbox_vao_run_json)
+2026-11-16T16:53:45.0495909Z   r26_bo_dem_mat_nhieu_doan    OK  giet 3/3: r925_dong_vuot_tran_khong_parse_va_doc_co_gioi_han, r925_khung_cut_o_EOF_hoac_giua_doan_doc_khong_nhan_va_tinh_mat, r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:53:45.0502030Z   r26_bo_duoi_vat              OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:53:45.0503137Z   r26_khong_bo_khoang_trang    OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:53:45.0543643Z   r26_loai_khong_utf8_thay_the OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:53:45.0544799Z   r26_khong_ro_khong_dem       OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:53:45.0552427Z   r25_DO_DUOC_khi_ong_con_mo   OK  giet 1/1: r925_ket_luan_model_chi_DO_DUOC_khi_du_ba_dieu_kien [bo qua: r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC]
+2026-11-16T16:53:45.0555455Z   r26_DO_DUOC_khi_khong_ro     OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:53:45.0556817Z   r25_DO_DUOC_khong_khung      OK  giet 2/2: r925_ket_luan_model_chi_DO_DUOC_khi_du_ba_dieu_kien, r925_codex_khong_co_khung_thi_KHONG_DO_DUOC_khong_suy_tu_m
+2026-11-16T16:53:45.0559454Z   r25_so_khong_chuyen_mat      OK  giet 2/2: r925_ghi_ket_qua_tu_luong_that_loi_va_mat_deu_ha_trang_thai, r926_lenh_run_khung_mat_thi_run_json_KHONG_DO_DUOC
+2026-11-16T16:53:45.0561057Z   r26_so_khong_chuyen_khong_ro OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:53:45.0565485Z   r25_doc_ong_khong_han        KHONG DO DUOC tren nen nay (ca dich bo qua: r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC)
+2026-11-16T16:54:32.8563107Z   r26_dong_tep_truoc_chot      OK  giet 2/2: r926_ket_thuc_chot_luong_TRUOC_khi_dong_tep, r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC
+2026-11-16T16:54:32.8566862Z   r26_san_xuat_dong_tep_truoc  OK  giet 1/1: r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC
+2026-11-16T16:54:32.8569414Z   r26_tep_stderr_co_dem        OK  giet 1/1: r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC
+2026-11-16T16:54:32.8574212Z   r26_luong_hong_lot_ra        OK  giet 1/1: r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC
+2026-11-16T16:54:32.8574907Z   r26_luong_hong_khong_dong_ong OK  giet 1/1: r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC
+2026-11-16T16:54:32.8575567Z   r26_luong_hong_khong_ghi_loi OK  giet 1/1: r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC
+2026-11-16T16:54:32.8576205Z   r26_cho_luong_chua_chay      OK  giet 1/1: r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC
+2026-11-16T16:54:32.8576862Z   r26_khong_ro_khong_doi_json  OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:54:32.8578258Z   r26_doc_tron_khong_parse_bo_qua OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:54:32.8580854Z   r26_doc_tron_khong_ro_khong_doi_json OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:54:32.8582276Z   r26_tien_to_ung_vien_tha     OK  giet 1/1: r926_ket_dong_tien_to_ung_vien_ma_khong_token_la_KHONG_RO
+2026-11-16T16:54:32.8584231Z   r26_token_khong_dinh         OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:54:32.8591117Z   r26_ket_thuc_khong_dong_tep  OK  giet 1/1: r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC
+2026-11-16T16:54:32.8592433Z   r26_rv5_prefix_decoded       OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:54:32.8595890Z   r26_rv5_prefix_match_guard   OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:54:32.8596535Z   r26_rv5_first_chunk_capture  OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:54:32.8601990Z   r26_rv5_old_late_production_latch OK  giet 1/1: r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC
+2026-11-16T16:54:32.8603374Z   r26_rv5_retain_caller_counter OK  giet 1/1: r926_lenh_run_khung_mat_thi_run_json_KHONG_DO_DUOC
+2026-11-16T16:54:32.8604022Z   r26_rv5_candidate_search     OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:54:32.8611881Z   r26_rv6_b_bo_neo_dau         OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:54:32.8612508Z   r26_rv6_b_moc_thoi_gian      OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:54:32.8615822Z   r26_rv6_d_khoa_type          OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:54:32.8616430Z   r26_rv6_d_khong_escape       OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:54:32.8617024Z   r26_rv6_d_dong_nhay          OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:55:10.2404345Z   r26_rv6_e_bo_completed       OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:55:10.2406451Z   r26_rv6_f_chi_dau_cach       OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:55:10.2407482Z   r26_rv6_g_duoi_ngan          OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:55:10.2408470Z   r26_rv6_h_luong_khong_ansi   OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T16:55:10.2411197Z   r26_rv6_m_dau_json_bo_ngoac  OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T16:55:10.2412401Z   r26_rv7_luong_doc_khong_daemon KHONG DO DUOC tren nen nay (ca dich bo qua: r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC)
+2026-11-16T16:55:10.2423884Z   wp1077_bo_chay_lai_ENOEXEC   KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_doctor_khong_shebang_chay_duoc_khong_BI_CHE, r1077_xac_thuc_khong_shebang_chay_duoc)
+2026-11-16T16:55:10.2424983Z   wp1077_chay_lai_moi_OSError  KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_probe_khong_chay_lai_khi_khong_phai_ENOEXEC)
+2026-11-16T16:55:10.2426144Z   wp1077_xac_thuc_khong_dung_probe_chung KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_xac_thuc_khong_shebang_chay_duoc)
+2026-11-16T16:55:10.2426912Z   wp1077_chay_lai_bo_qua_rc    KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_doctor_khong_shebang_hong_van_BI_CHE)
+2026-11-16T16:55:10.2427726Z   wp1077_retry_mat_doi_so      KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_retry_giu_argv_env)
+2026-11-16T16:55:10.2430871Z   wp1077_ten_tran_khong_giai_PATH KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_llm_khong_shebang_ten_tran_giai_PATH, r1077_PATH_rong_khong_bo_qua_wrapper_dau)
+2026-11-16T16:55:10.2431802Z   wp1077_PATH_rong_khong_chuan_hoa_duong_dan KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_PATH_rong_khong_bo_qua_wrapper_dau)
+2026-11-16T16:55:10.2432824Z   wp1077_abspath_doi_nghia_symlink KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_PATH_rong_khong_bo_qua_wrapper_dau, r1077_cwd_dai_khong_keo_dai_duong_da_chay_duoc, r1077_PATH_hop_dong_glibc)
+2026-11-16T16:55:10.2433769Z   wp1077_tiep_moi_loi_exec     KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_PATH_hop_dong_glibc)
+2026-11-16T16:55:10.2434576Z   wp1077_PATH_ma_hoa_strict    KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_PATH_hop_dong_glibc)
+2026-11-16T16:55:10.2435263Z   wp1077_PATH_dai_bo_han       KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_PATH_rong_khong_bo_qua_wrapper_dau)
+2026-11-16T16:55:10.2435924Z   wp1077_mat_gach_cuoi_PATH    KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_PATH_hop_dong_glibc)
+2026-11-16T16:55:10.2436589Z   wp1077_dung_o_loi_tim_kiem   KHONG DO DUOC tren nen nay (ca dich bo qua: r1077_PATH_rong_khong_bo_qua_wrapper_dau)
+2026-11-16T16:55:10.2439083Z   g6_trust_posix_separator_folded KHONG DO DUOC tren nen nay (POSIX path semantics)
+2026-11-16T16:55:10.2447888Z   g7_bo_doc_lai_truoc_replace  KHONG DO DUOC tren nen nay (ca dich bo qua: r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi)
+2026-11-16T16:55:10.2450984Z   m3b_bo_kiem_do_tuoi_dau_vet  OK  giet 1/1: t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY
+2026-11-16T16:56:13.5519217Z   bo_kiem_rong_CA_BON_LOP      KHONG DO DUOC tren nen nay (ca dich bo qua: t03_git_gia_thoat_0_im_lang_van_bi_chan)
+2026-11-16T16:56:13.5524857Z   github_dem_CO_MAT_gh_la_da_xac_thuc OK  giet 1/1: t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec
+2026-11-16T16:56:13.5526118Z   co_chan_codex_luon_tra_KHONG_BI_CHAN OK  giet 1/1: t102_khong_go_duoc_policy_thi_phai_CHAN_codex
+2026-11-16T16:56:13.5527408Z   chot_truong_nhom_FAIL_OPEN_khi_khong_do_duoc_pgid OK  giet 1/1: t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom
+2026-11-16T16:56:13.5534197Z   bo_chot_truong_nhom_truoc_killpg OK  giet 1/1: t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom
+2026-11-16T16:56:13.5537328Z   124_khi_chau_con_song        KHONG DO DUOC tren nen nay (KHONG DUNG DUOC tren ca hai nen, va da DO chu khong doan: t62 nay dung fixture MO COI - ca kho nhat dung duoc - the ma Job Object van giet duoc chau, nen nhanh 'chau con so
+2026-11-16T16:56:13.5539066Z   khong_cat_thong_tin_dang_nhap OK  giet 1/1: t45_token_trong_URL_KHONG_duoc_lo_ra
+2026-11-16T16:56:13.5539870Z   quay_ve_so_hau_to            OK  giet 3/3: t48_host_gia_mao_KHONG_duoc_khop, t57_host_KHONG_co_dau_cham_van_phai_chan, t58_expected_repo_mot_doan_bi_TU_CHOI
+2026-11-16T16:56:13.5543328Z   de_len_quyet_dinh_cua_stop   KHONG DO DUOC tren nen nay (ca dich bo qua: t50_stop_roi_runner_KHONG_duoc_de_len_so)
+2026-11-16T16:56:13.5543938Z   so_hong_im_lang              OK  giet 1/1: t52_so_hong_KHONG_duoc_im_lang
+2026-11-16T16:56:13.5545756Z   khong_chup_prompt            OK  giet 2/2: t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con, r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO
+2026-11-16T16:56:13.5550252Z   luu_argv_nguyen_van          OK  giet 1/1: t59_so_KHONG_luu_doi_so_nguyen_van
+2026-11-16T16:56:13.5550934Z   doctor_tin_which             KHONG DO DUOC tren nen nay (ca dich bo qua: t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc)
+2026-11-16T16:56:13.5553324Z   moi_truong_tin_gh_token_giu_cho OK  giet 1/1: t107_doc_moi_truong_KHONG_duoc_chon_bien_giu_cho
+2026-11-16T16:56:13.5555888Z   github_dem_gh_auth_la_lam_duoc_viec OK  giet 1/1: t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec
+2026-11-16T16:56:13.5556590Z   tran_tong_chon_tay           OK  giet 1/1: t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong
+2026-11-16T16:56:13.5557271Z   het_ngan_sach_thanh_cong_cu_hong OK  giet 1/1: t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong
+2026-11-16T16:56:48.2338508Z   me_chet_la_coi_nhu_ca_cay_chet KHONG DO DUOC tren nen nay (ca dich bo qua: t63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi)
+2026-11-16T16:56:48.2339678Z   nhom_luon_rong               KHONG DO DUOC tren nen nay (ca dich bo qua: t67_chau_sinh_SAU_luc_chup_van_phai_bi_dem)
+2026-11-16T16:56:48.2340744Z   khong_chup_cay               KHONG DO DUOC tren nen nay (ca dich bo qua: t66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet)
+2026-11-16T16:56:48.2348340Z   ban_chup_de_ho_quyen         KHONG DO DUOC tren nen nay (t71 bo qua khang dinh quyen 0600 tren Windows)
+2026-11-16T16:56:48.2349527Z   ban_chup_de_lai_tren_dia     KHONG DO DUOC tren nen nay (tren Windows ban chup GIU LAI theo thiet ke, nen 'khong xoa' khong doi gi)
+2026-11-16T16:56:48.2350909Z   xoa_prompt_khi_wrapper_vua_thoat KHONG DO DUOC tren nen nay (ca dich bo qua: t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau)
+2026-11-16T16:56:48.2352156Z   ngat_ghi_thanh_xong          KHONG DO DUOC tren nen nay (ca dich bo qua: t72_bi_ngat_KHONG_duoc_ghi_thanh_xong)
+2026-11-16T16:56:48.2355711Z   dut_ong_nuot_ma_that         OK  giet 1/1: t74_dut_ong_KHONG_duoc_nuot_ma_that
+2026-11-16T16:56:48.2356870Z   none_nhom_thanh_cay_rong     OK  giet 2/2: t78_khong_do_duoc_nhom_KHONG_phai_cay_rong, t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung
+2026-11-16T16:56:48.2364764Z   mcp_endpoint_bo_doc_PORT     OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2366070Z   mcp_json_noi_suy_url_NGUYEN_VAN_vao_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2368183Z   mcp_endpoint_tinh_vao_LAM_DUOC_VIEC OK  giet 2/2: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec, t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2369923Z   mcp_endpoint_phan_loai_theo_MA_thay_vi_HEADER OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2371576Z   mcp_endpoint_toi_duoc_la_LAM_DUOC_VIEC OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2372903Z   mcp_endpoint_gop_khong_do_duoc_vao_chan OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2374257Z   mcp_endpoint_bo_kiem_scheme_cho_phep OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2375578Z   mcp_endpoint_bo_kiem_userinfo OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2376601Z   mcp_endpoint_userinfo_do_bang_KY_TU_thay_vi_CAU_TRUC OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2377555Z   mcp_endpoint_userinfo_chi_doc_username_theo_tinh_chan_ly OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2378454Z   mcp_endpoint_nhanh_scheme_in_lai_url_ra_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2379297Z   mcp_endpoint_tu_choi_userinfo_MA_VAN_in_url OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2380101Z   mcp_endpoint_in_token_vao_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2380890Z   mcp_endpoint_nuot_ly_do_o_chuoi_tom_tat OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2381708Z   mcp_endpoint_chua_biet_URL_bi_ke_thanh_HONG OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2382538Z   mcp_ket_xuat_gop_chua_do_duoc_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2383280Z   mcp_ten_server_khop_chuoi_con OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2384003Z   mcp_ten_server_phan_biet_hoa_thuong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2384713Z   mcp_bo_bat_loi_json_hong     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2385375Z   mcp_bo_kiem_kieu_goc         OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2386029Z   mcp_bo_kiem_kieu_bang_server OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2386713Z   mcp_bo_kiem_kieu_gia_tri_server OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2388038Z   mcp_bo_kiem_kieu_headers     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2388790Z   mcp_servers_che_khuat_mcpServers_sai_kieu OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2389546Z   mcp_chon_ten_theo_thu_tu_khoa_JSON OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2390255Z   mcp_suc_khoe_do_chuoi_con_ca_dong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2390998Z   mcp_suc_khoe_khop_TIEN_TO_thay_vi_bang_dung OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2391758Z   mcp_trang_thai_LA_bi_doan_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2392509Z   mcp_doc_Status_CUOI_thay_vi_DAU OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2393190Z   mcp_hoi_ten_dung_san_thay_vi_ten_da_khai OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2393963Z   mcp_bo_chuan_hoa_env_trong_ham OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2394609Z   env_da_chuan_tra_ve_os_environ_THO OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2395235Z   mcp_ep_env_None_o_loi_goi    OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2395881Z   rest_kho_khong_do_duoc_bi_gop_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:48.2396544Z   mcp_mat_env_da_chuan_hoa     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:52.3778656Z   antigravity_tinh_vao_LAM_DUOC_VIEC OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T16:56:52.3779429Z   wp685_a_go_ban_va            KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3780193Z   wp685_b_ban_rong             KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3781073Z   wp685_c_bo_doc_duong_moi     KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan, t157_giet_cay_khi_stat_EACCES_van_tron_ven)
+2026-11-16T16:56:52.3782656Z   wp685_d1_hoi_chi_PermissionError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3783505Z   wp685_d2_doc_chi_PermissionError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3784322Z   wp685_e1_hoi_nuot_BaseException KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3785146Z   wp685_e2_doc_nuot_KeyboardInterrupt KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3785984Z   wp685_f_hoi_exists_lan_hai   KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3786739Z   wp685_g1_doc_loi_False       KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3787485Z   wp685_g2_doc_ESRCH_False     KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3788246Z   wp685_h1_hoi_bat_Exception   KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3790057Z   wp685_h2_doc_bat_Exception   KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3790822Z   wp685_i_noi_dung_hong_False  KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3791656Z   wp685_j1_doc_lan_hai_sau_thanh_cong KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3792474Z   wp685_j2_doc_lan_hai_khi_doc_loi KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3793275Z   wp685_k1_tra_True_khong_hoi_pid KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3794063Z   wp685_k2_hoi_pid_bo_ket_qua  KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3794882Z   wp685_k3_tu_kill_PermissionError_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3795731Z   wp685_k4_tu_kill_OSError_khac_True KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3796548Z   wp685_k5_hoi_pid_hai_lan     KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3797346Z   wp685_l1_hoi_chi_ProcessLookupError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3798160Z   wp685_l2_hoi_ESRCH_chung_nhanh KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3798972Z   wp685_l3_hoi_OSError_khac_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3799842Z   wp685_l4_hoi_errno_trang_EACCES_EIO KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3800674Z   wp685_l5_hoi_EPERM_False     KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3801498Z   wp685_l6_hoi_them_IndexError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3802627Z   wp685_l7_hoi_them_ValueError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3803419Z   wp685_l8_hoi_them_UnicodeDecodeError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3804156Z   wp685_l9_hoi_boc_Exception   KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3804995Z   wp685_l10_doc_chi_bat_phan_tich KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3805732Z   wp685_l11_doc_errno_EACCES_EIO KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3806475Z   wp685_l12_doc_errno_EACCES_EIO_ESRCH KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3807188Z   wp685_l13_doc_EPERM_False    KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3807904Z   wp685_l14_doc_OSError_khac_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3808648Z   wp685_l15_doc_khong_bat_ValueError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3809385Z   wp685_l16_doc_kiem_chuoi_rong KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3810113Z   wp685_l17_doc_khong_bat_IndexError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3811169Z   wp685_l18_doc_IndexError_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3811925Z   wp685_l19_doc_chi_OSError_tach_rieng KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3812702Z   wp685_l20_doc_UnicodeDecodeError_False KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3813449Z   wp685_l21_doc_boc_ValueError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3814181Z   wp685_l22_kill_chi_PermissionError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3814950Z   wp685_l23_kill_chi_ProcessLookupError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3815700Z   wp685_l24_kill_bo_OSError    KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3816418Z   wp685_l25_kill_them_BaseException KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3817226Z   wp685_l26_kill_them_Exception KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3818016Z   wp685_l27_kill_them_IndexError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3818798Z   wp685_l28_kill_them_ValueError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3819618Z   wp685_l29_kill_them_UnicodeDecodeError KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3820483Z   wp685_m1_nhanh_cu_hop_nhat_ve_kill KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3821295Z   wp685_m2_nhanh_cu_bat_BaseException KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3822418Z   wp685_m3_tep_vang_False      KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3823154Z   wp685_m4_ESRCH_hoi_lai       KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3823892Z   wp685_m5_duong_moi_tach_ngoac_dau KHONG DO DUOC tren nen nay (ca dich bo qua: t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan)
+2026-11-16T16:56:52.3824782Z   r743_a_ve_lai_exists         KHONG DO DUOC tren nen nay (ca dich bo qua: r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban)
+2026-11-16T16:56:52.3825624Z   r743_b_ENOENT_chua_ket_luan  KHONG DO DUOC tren nen nay (ca dich bo qua: r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban)
+2026-11-16T16:56:52.3826402Z   r743_c_bo_ENOTDIR            KHONG DO DUOC tren nen nay (ca dich bo qua: r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban)
+2026-11-16T16:56:52.3827176Z   r743_d_OSError_khac_khong_tep KHONG DO DUOC tren nen nay (ca dich bo qua: r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban)
+2026-11-16T16:57:44.3427910Z   r743_e_bo_nhanh_ESRCH        KHONG DO DUOC tren nen nay (ca dich bo qua: r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban)
+2026-11-16T16:57:44.3430489Z   wp802_hook_co_thay_co_chay   KHONG DO DUOC tren nen nay (ca dich bo qua: r802_hook_linux_rg_hong_van_thu_cargo)
+2026-11-16T16:57:44.3432216Z   wp802_hook_windows_roi_vao_apt KHONG DO DUOC tren nen nay (ca dich bo qua: r802_hook_windows_khong_cai_in_dung_lenh)
+2026-11-16T16:57:44.3436335Z   wp802_hook_windows_probe_hai_lan KHONG DO DUOC tren nen nay (ca dich bo qua: r802_hook_windows_khong_cai_in_dung_lenh)
+2026-11-16T16:57:44.3437784Z   wp1078_goi_ham_python_thua   KHONG DO DUOC tren nen nay (ca dich bo qua: r1078_ham_python_khong_phai_python_khong_duoc_goi)
+2026-11-16T16:57:44.3438592Z   wp1078_chot_chi_nhanh_chon_moi KHONG DO DUOC tren nen nay (ca dich bo qua: r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4)
+2026-11-16T16:57:44.3449037Z   wp1045_sh_source_khong_don_tam KHONG DO DUOC tren nen nay (ca dich bo qua: r1045_bat_buoc_cong_cu_tuy_chon_thieu_khong_chan_cong_cu_sau)
+2026-11-16T16:57:44.3449837Z   wp1045_sh_rc_cai_mat_ma      KHONG DO DUOC tren nen nay (ca dich bo qua: r1045_bat_buoc_cong_cu_bat_buoc_hong_van_dung)
+2026-11-16T16:57:44.3450880Z   wp1045_sh_errexit_tat_sau_eval KHONG DO DUOC tren nen nay (ca dich bo qua: r1045_bat_buoc_kiem_cuoi_luot_source_hong_thi_dung_ca_loat)
+2026-11-16T16:57:44.3451772Z   wp1045_sh_kiem_cuoi_source_nuot_loi KHONG DO DUOC tren nen nay (ca dich bo qua: r1045_bat_buoc_kiem_cuoi_luot_source_hong_thi_dung_ca_loat)
+2026-11-16T16:57:44.3474274Z   wp886_cc_bo_X_OK             KHONG DO DUOC tren nen nay (ca dich bo qua: r886_n1_bo_qua_tep_khong_thuc_thi)
+2026-11-16T17:00:23.7258441Z   headline_lay_tong_lam_so_ca_da_chay OK  giet 2/2: t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua, t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua
+2026-11-16T17:00:23.7261252Z   g8_fixture_chep_nguyen_moi_truong KHONG DO DUOC tren nen nay (ca dich bo qua: r484_g8_hook_scrub_kin_voi_bash_env)
+2026-11-16T17:00:23.7271786Z   wp1079_n13_do_bash_ngoai_env_sach KHONG DO DUOC tren nen nay (ca dich bo qua: r1079_n13_do_bash_cung_phai_loc_env_cha)
+2026-11-16T17:00:23.7282716Z   wp1079_n13_bo_rg_gia         KHONG DO DUOC tren nen nay (ca dich bo qua: r484_g7_hook_vang_codex_cai_cli_truoc_materialize)
+2026-11-16T17:00:23.7283485Z   wp1079_n13_bo_shim_installer KHONG DO DUOC tren nen nay (ca dich bo qua: r484_g7_hook_vang_codex_cai_cli_truoc_materialize)
+2026-11-16T17:00:23.7284244Z   wp1079_n13_bo_loc_bash_env   KHONG DO DUOC tren nen nay (ca dich bo qua: r484_g7_hook_vang_codex_cai_cli_truoc_materialize)
+2026-11-16T17:00:23.8867764Z ##[error]Process completed with exit code 1.
+2026-11-16T16:41:59.0433837Z   python-version: 3.13
+2026-11-16T16:43:18.5115176Z   BO QUA t50_stop_roi_runner_KHONG_duoc_de_len_so: bo qua tren Windows (can kiem rieng)
+2026-11-16T16:43:25.5830970Z   BO QUA t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc: bo qua tren Windows (can .exe rong)
+2026-11-16T16:43:38.3397843Z   BO QUA t72_bi_ngat_KHONG_duoc_ghi_thanh_xong: SIGINT tren Windows khong cung ngu nghia; can ca rieng
+2026-11-16T16:47:09.4012511Z   BO QUA r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC: bo qua tren Windows (chau thua ke handle stderr can fixture rieng; duong POSIX do o CI ubuntu)
+2026-11-16T16:50:11.7815248Z 325/325 ca DA CHAY QUA (tong 410, bo qua 85, hong 0) - KHONG DU: 85 ca BO QUA, chua do gi
+2026-11-16T17:00:23.8867764Z ##[error]Process completed with exit code 1.

@@ -1,0 +1,42 @@
+# Bien ban M8 (ADR-0060) dong WP #1335 AGENT-DINH-DANH-MOT-NGUON r3 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1341-wp1335-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6921618830 tren 43aecb8);
+# bon moc §10.2.2 du (wd-run 43970575157). Hoi quy Python 3.11 (lane launcher) mo packet #1345, xem land evidence.
+packet: wp1335
+revision: 3
+generation: 1
+spec_hash: 388fd83b4d6d5ccc1864e3e7fca5869f13a5b8352b547850556abd1caa31ab38
+head_da_review: 43aecb8956a7d95809944c52ce676eaa8f4fda27
+tree_h: a8a568688f8d87212532a5bf88ac89ab970d80c8
+review:
+  offline: 'launcher.py run luot 1-7 (luot 7 run bda84a21 tren 9aec797: 0 finding ma; 2 ca bi sandbox chan chay lai ngoai sandbox qua)'
+  connector: 'issuecomment-6920074044 "Didn''t find any major issues" Reviewed commit 43aecb8956 (sau P2 4587298084 tren 9aec797 da va)'
+  human_audit: 'issuecomment-6921618830 human_exact_head_audit.v1 approve tren 43aecb8 (chu kho tu dang, app null)'
+windows:
+  phan_loai: required
+  nguon: 'N5 Desktop luot 5 tren 9aec797: 8 qua/2 bo qua/0 do + ve am do (windows/readback-n5-desktop.txt); 43aecb8 chi doi duong POSIX (argv0); N6 owner_waived'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1341#issuecomment-6921618830
+duyet_chu_kho_ghi_chu: 'audit tu dang 16:00:37Z 16-11 (app null), truoc merge 16:41:37Z; duyet merge dung SHA qua AskUserQuestion (loi khai).'
+merge_commit: 7acd29e3795497de59f0a161a3bdc252996af608
+tree_m: b9a3d32954e76a3d6bae9b012bd4ba39f303c197
+ci_master:
+  run_id: 43910313483
+  conclusion: success
+  ghi_chu: 'ci.yml push master 23/23 job success; launcher (Windows that) 43910313973 FAILURE (ubuntu 3.11: AttributeError shutil._win_path_needs_curdir) — packet #1345'
+nghiem_thu:
+  N1: passed  # executor + review offline luot 7 (ma tran 25 truong hop khop which 3.12/3.13)
+  N2: passed  # r1335_khop_hai_cua_15_to_hop qua (ngoai sandbox, dieu phoi do lai tren 9aec797)
+  N3: passed  # dot bien bat buoc 4/4 giet (review luot 7)
+  N3b: passed  # executor
+  N3c: passed  # dot bien r1335_N3c_phong_lenh_goc giet (executor tren 43aecb8)
+  N4: passed  # t117 + adr-song/doctrine-scan rc 0, ruff delta 0 (nghiem-thu-7acd29e.txt)
+  N5: passed  # Windows native Desktop luot 5 tren 9aec797
+  N6: owner_waived  # chu kho 16-11 #1335 issuecomment-6907908778; lane launcher hau merge do o ubuntu 3.11 -> #1345
+  N7: passed  # executor 407/407 tren 9aec797 (loi_khai_co_neo)
+  N8: passed  # bon moc §10.2.2 cua 43910313483
+lease_cuoi: wp1335-r3-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

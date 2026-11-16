@@ -1,0 +1,14 @@
+# ai-dang-giu sau han rut 16:58Z — 2026-11-16T22:31:48Z, container phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS
+# fetch +refs/heads/*; ls-remote so TAP ten: thieu 0 / 259 nhanh; master cuc bo = b8bc64f99
+# Luu y: wp1336 (P-C) va wp1345 (hotfix) la lease KE TIEP cap SAU khi wp1335 het han; khong thay the wp1335.
+## .claude/dev/launcher.py
+HẾT_HẠN	wp1335-r3-g1-claude	refs/remotes/origin/ops/wp1335-r3-g1-lease:ops/leases/wp1335-r3-g1-claude.yaml
+CÒN_HẠN	wp1345-r1-g1-claude	refs/remotes/origin/ops/wp1345-r1-g1-lease:ops/leases/wp1345-r1-g1-claude.yaml
+NGƯỜI_GIỮ 1: wp1345-r1-g1-claude
+## .claude/dev/launcher_test.py
+HẾT_HẠN	wp1335-r3-g1-claude	refs/remotes/origin/ops/wp1335-r3-g1-lease:ops/leases/wp1335-r3-g1-claude.yaml
+CÒN_HẠN	wp1336-r2-g1-claude	refs/remotes/origin/ops/wp1336-r2-g1-lease:ops/leases/wp1336-r2-g1-claude.yaml
+NGƯỜI_GIỮ 1: wp1336-r2-g1-claude
+## docs/GOI_AGENT_DA_NEN.md
+HẾT_HẠN	wp1335-r3-g1-claude	refs/remotes/origin/ops/wp1335-r3-g1-lease:ops/leases/wp1335-r3-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có

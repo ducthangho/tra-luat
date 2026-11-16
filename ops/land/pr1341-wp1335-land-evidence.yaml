@@ -1,0 +1,140 @@
+# HO SO LAND — packet #1335 AGENT-DINH-DANH-MOT-NGUON r3, lease g1, qua PR #1341. Khuon: ops/land/pr1338-wp1331-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (7acd29e), landed true. Bon moc §10.2.2 cua ci.yml 43910313483 DU (wd-run 43970575157).
+# UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head 43aecb8 (issuecomment-6921618830, app null).
+# CANH BAO: lane launcher (khong phai gate) tren 7acd29e DO o ubuntu Python 3.11 — hoi quy shutil._win_path_needs_curdir, packet #1345.
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
+# Readback tho: ops/land/pr1341-wp1335-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-16T22:2x–22:3xZ.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS
+input_packet_generations:
+  - packet_issue: 1335
+    packet_id: wp1335
+    revision: 3
+    generation: 1
+    lease_id: wp1335-r3-g1-claude
+    ghi_chu: 'Executor session_015GtxrbndnJN1DaSQJUfHYH (do phien dieu phoi cu mo). attempts 1/2. Rut han sau merge (lease.thu_hoi_cuoi).'
+authorized_head_sha: 43aecb8956a7d95809944c52ce676eaa8f4fda27
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1341#issuecomment-6921618830
+authorization_ghi_chu: >-
+  measured — readback-pr1341-comments.json: comment 6921618830, user ducthangho, performed_via_github_app null, created_at
+  2026-11-16T16:00:37Z; than human_exact_head_audit.v1 packet wp1335 revision 3 generation 1 pr 1341 reviewed_sha 43aecb8 (= head),
+  reviewed_tree a8a56868 (= tree head), spec_sha256 388fd83b (= lease spec_hash), verdict approve, assurance human_audited.
+  Chu kho tu dang sau khi phien dieu phoi tu choi dang ho (ADR-0063 dong 10: agent repost khong phai audit). Duyet merge dung SHA
+  43aecb8 qua AskUserQuestion: loi_khai_co_neo. CAVEAT #566: ai bam merge khong do duoc.
+land_operator: 'measured — readback-pr-1341.json: merged_at 2026-11-16T16:41:37Z, merge_commit_sha 7acd29e (thao tac boi phien dieu phoi qua MCP merge_pull_request voi expectedHeadSha).'
+merge_method: merge
+merge_commit: 7acd29e3795497de59f0a161a3bdc252996af608
+merge_commit_tree: b9a3d32954e76a3d6bae9b012bd4ba39f303c197
+merge_commit_parents: [9c1661f76d5f4ef811aa349df102989cc2e2d53d, 43aecb8956a7d95809944c52ce676eaa8f4fda27]
+merge_ghi_chu: >-
+  measured — readback-commit-7acd29e.json: cha thu nhat 9c1661f (master da tien tu base ddc027a qua #1337/#1338), cha thu hai 43aecb8.
+  nghiem-thu-7acd29e.txt: numstat 7acd29e^1..7acd29e dung 3 tep write set (+164/-34, +396/-3, +20/-0).
+pre_merge_checks:
+  - name: 'Codex reviewer offline luot 1-7 (launcher.py run --chup-workspace)'
+    sha: 9aec797ea13606b6073a9f4f8a5ff73044f5a10f
+    conclusion: 'luot 7 (run bda84a21): 0 finding ma; chu request_changes chi vi 2 ca bi /tmp/.git cua sandbox chan'
+    ghi_chu: >-
+      loi_khai_co_neo — luot 6/7 chay trong container phien dieu phoi nay (scratchpad rv1335/runs*/, khong chep vao kho); luot 1-5 o
+      phien cu (mat cung container). Hai ca r1335_khop_hai_cua_15_to_hop va r1335_hanh_vi_codex_theo_agent_da_quyet phien dieu phoi chay
+      lai ngoai sandbox tren 9aec797: 1/1 + 1/1. Tu 9aec797 toi 43aecb8: va P2 argv0 (POSIX), co ca + dot bien.
+  - name: 'Windows native N5 — DESKTOP-T9R33P2 (Python 3.12.10, cp1252, khong PYTHONUTF8)'
+    sha: 9aec797ea13606b6073a9f4f8a5ff73044f5a10f
+    conclusion: 'passed — 8 qua / 2 bo qua (ca POSIX) / 0 do; ve am tren launcher 118a893 do'
+    nguon: [windows/readback-n5-desktop.txt]
+    ghi_chu: 'measured — windows/readback-n5-desktop.txt: readback bam tung tep; luot 4 tren 118a893 bat hoi quy (da va 9aec797). 43aecb8 chi doi duong POSIX nen khong do lai Windows.'
+  - name: 'CI PR tren head cuoi'
+    sha: 43aecb8956a7d95809944c52ce676eaa8f4fda27
+    conclusion: success
+    nguon: [readback-runs-head-43aecb8.json]
+    ghi_chu: 'measured — readback-runs-head-43aecb8.json: gate 43891402371 pull_request success; thu-hoi success; launcher skipped (khong nhan windows).'
+  - name: 'Codex connector tren head cuoi'
+    sha: 43aecb8956a7d95809944c52ce676eaa8f4fda27
+    conclusion: 'sach'
+    ghi_chu: 'measured — readback-pr1341-comments.json: 6920074044 "Didn''t find any major issues", Reviewed commit 43aecb8956, theo yeu cau @codex review 6920010123.'
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 43910313483
+    run_attempt: 1
+    sha: 7acd29e3795497de59f0a161a3bdc252996af608
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-43910313483.json, readback-jobs-43910313483.json, danh-gia-gate-output-43910313483.txt, danh_gia_gate.py, phan-chung-buoc-43910313483.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha 7acd29e, run_attempt 1; 23 job ubuntu-latest.'
+    moc_checkout: 'measured — ci/provenance.yaml: 23/23 job checkout passed 7acd29e3795497de59f0a161a3bdc252996af608.'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition passed (wd-run 43970575157, dispatch ops-do-workflow-definition.yml tren master boi phien dieu phoi ~22:29Z).'
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-43910313483.txt (danh_gia_gate.py sha256 b87f9697): passed, 23/23 job co dau hieu duong.
+      phan-chung-buoc-43910313483.txt: xoa dau hieu 3 buoc => not_measured, rc 0.
+  - name: 'launcher (Windows that) push tren merge SHA'
+    run_id: 43910313973
+    sha: 7acd29e3795497de59f0a161a3bdc252996af608
+    conclusion: failure
+    nguon: [readback-run-43910313973.json, readback-jobs-43910313973.json]
+    ghi_chu: >-
+      measured — launcher-43910313973-trich.txt: job launcher (ubuntu-latest, Python 3.11.18): HONG r1335_F6_windows_chon_tep_theo_which va
+      r1335_P2_windows_bo_ung_vien_khong_duoi, AttributeError shutil._win_path_needs_curdir (chi co tu 3.12); 406/408. Job
+      launcher (windows-latest, Python 3.13): 325/325 qua, ket luan failure vi "KHONG DU: 85 ca BO QUA" (giong cac lan truoc).
+      Lane launcher KHONG phai gate. Hoi quy mo packet #1345 (LAUNCHER-PY311-WIN-CURDIR, lease wp1345-r1-g1-claude).
+bookkeeping:
+  - {item: 'rut han lease wp1335-r3-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1335.'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 (22:32:28Z, sau han) rc 0 "ĐÓNG ĐƯỢC WP wp1335".'}
+  - {item: 'dong Issue #1335', ket_qua: 'not_measured — sau khi PR ghi so merge.'}
+# ---- het truong chuan
+packet_id: wp1335
+packet_issue: 1335
+packet_ten: AGENT-DINH-DANH-MOT-NGUON
+revision: 3
+generation: 1
+pham_vi_land: 'ma + test + docs (.claude/dev/launcher.py +164/-34, .claude/dev/launcher_test.py +396/-3, docs/GOI_AGENT_DA_NEN.md +20/-0) — 580 dong them, trong tran 580 (chu kho nang 450 -> 490 -> 520 -> 580).'
+environment: cloud
+operating_system: linux
+recorded_by: claude-session — phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS.
+
+spec:
+  path: ops/specs/AGENT-DINH-DANH-MOT-NGUON-r3.md
+  blob: 5382a3cdbc7f5494c7c9bbf35e33ac0b7b20794d
+  sha256: 388fd83b4d6d5ccc1864e3e7fca5869f13a5b8352b547850556abd1caa31ab38
+  nguon: 'measured — nghiem-thu-7acd29e.txt: git show 7acd29e:<spec> | sha256sum = 388fd83b…, blob 5382a3cd.'
+
+lease:
+  lease_id: wp1335-r3-g1-claude
+  path: ops/leases/wp1335-r3-g1-claude.yaml (nhanh ops/wp1335-r3-g1-lease)
+  write_set_so_tep: 3
+  thu_hoi_cuoi: >-
+    RUT HAN sau merge: lease_until 2026-11-17T05:15:00Z -> 2026-11-16T16:58:00Z (commit 01434fb, push ~16:45Z truoc han moi), kem
+    ngan sach that (Codex 10/10, CI Ubuntu 2/2, Windows 5/5) va nang_tran; tep lease-wp1335-r3-g1-claude-sau-rut-han.yaml.txt.
+    ops-publish-lease 43910468868 success. ai-dang-giu-sau-rut-han.txt (22:31:48Z, thieu 0 / 259 nhanh): wp1335 HET_HAN tren ca 3 tep;
+    launcher.py nay do wp1345 giu, launcher_test.py do wp1336 giu (lease ke tiep cap SAU 16:58Z, khong thay the).
+  diff_do: 'measured — nghiem-thu-7acd29e.txt numstat 7acd29e^1..7acd29e: 3 tep, +580/-37.'
+
+trang_thai_packet:
+  merged: true
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren 7acd29e: DAT (bon moc measured). (2) lease nha: DAT (wp1335 HET_HAN). (3) bookkeeping: ho so nay +
+    M8. (4) review neo 43aecb8: connector sach + audit chu kho. (5) uy quyen: audit tu dang 6921618830. (6) muc tieu: N1-N5, N7, N8 dat;
+    N6 owner_waived. (7) tran: 580/580 (sau nang tran).
+  canh_bao_cho_chu_kho: >-
+    (i) Hoi quy Python 3.11: lane launcher do; dang va o #1345. (ii) Hien vat review offline luot 1-5 mat cung container phien cu.
+    (iii) Windows N5 do tren 9aec797, head cuoi 43aecb8 chi doi duong POSIX.
+
+review:
+  so_loi_goi_codex: 'loi_khai_co_neo — 10/10: offline 7 (gom luot 6 chet het dia va chay lai) + connector 3.'
+  windows_native: 'measured — 5/5 (luot 1-3 tra-luat-win phien cu; luot 4-5 Desktop, windows/readback-n5-desktop.txt).'
+
+nghiem_thu:
+  tren_merge: 'measured — nghiem-thu-7acd29e.txt: adr-song rc 0 (66/66); doctrine-scan 0 cho; ruff 0.16.9 --select F delta 0 (launcher 0=0, launcher_test 5=5).'
+
+khong_do_duoc:
+  - 'Hien vat review offline luot 1-5 (phien cu).'
+  - 'Duyet merge qua AskUserQuestion (khong co hien vat GitHub).'

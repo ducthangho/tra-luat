@@ -292,6 +292,10 @@ def _thuc_thi(lenh0: str, cwd: str, path_con: str | None) -> dict:
             thu_muc = (([cwd] if shutil._win_path_needs_curdir(s, os.F_OK | os.X_OK) else [])
                        + [os.path.join(cwd, d or ".") for d in p.split(os.pathsep)]) if p else []
         ung = [os.path.realpath(u) for d in thu_muc if (u := shutil.which(os.path.join(d, os.path.basename(s))))]
+        # N5 lượt 4 (Python 3.12.10 Windows): which bỏ khớp trực tiếp tên không đuôi; đường dẫn TƯỜNG MINH thì khớp
+        # trực tiếp, xếp sau đuôi PATHEXT (như which 3.12 cũ và như trước 118a893). Tên trần: chỉ theo which.
+        if not ung and os.path.dirname(s) and os.path.isfile(os.path.join(cwd, s)):
+            ung = [os.path.realpath(os.path.join(cwd, s))]
     else:
         # F2: MỌI phần tử PATH neo theo cwd của con; phần tử rỗng = cwd của con; PATH vắng = os.defpath.
         ung_vien = [os.path.join(cwd, s)] if os.sep in s or (os.altsep and os.altsep in s) else [

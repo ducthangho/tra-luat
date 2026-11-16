@@ -14245,13 +14245,15 @@ def r1335_khac_cwd_bam_va_chay_tep_trong_workspace():
              f"bam khong phai B/{ten}: {d.get('thuc_thi_duong_dan')}")
         bang("DAU_B" in out and "DAU_A" not in out, f"con khong chay B/{ten}: {out!r}")
         # F2: PATH tương đối và phần tử PATH rỗng phải neo theo workspace của con, không theo cwd launcher.
-        _r1335_tep(a_dir / "bin" / ten, "DAU_A"); tep_b2 = _r1335_tep(repo / "bin" / ten, "DAU_B2")
+        # Tên RIÊNG cho bin: trên Windows cwd con đứng trước PATH (F6-01), nên `agent` ở gốc workspace sẽ thắng.
+        tenp = ten.replace("agent", "agentp")
+        _r1335_tep(a_dir / "bin" / tenp, "DAU_A"); tep_b2 = _r1335_tep(repo / "bin" / tenp, "DAU_B2")
         subprocess.run(g + ["add", "-A"], capture_output=True)
         subprocess.run(g + ["commit", "-m", "bin"], capture_output=True)
-        for pth, tep, dau in (("bin", tep_b2, "DAU_B2"), ("", tep_b, "DAU_B")):
+        for pth, lenh0, tep, dau in (("bin", "agentp", tep_b2, "DAU_B2"), ("", "agent", tep_b, "DAU_B")):
             rr = s / f"runs-path-{pth or 'rong'}"
             env = dict(os.environ, PATH=pth + os.pathsep + os.environ.get("PATH", ""))
-            chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", "agent", cwd=str(a_dir), env=env)
+            chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", lenh0, cwd=str(a_dir), env=env)
             tm = next(rr.iterdir())
             d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
             out = (tm / "stdout.log").read_text(encoding="utf-8")
@@ -14387,13 +14389,14 @@ def r1335_F6_windows_chon_tep_theo_which():
     chọn `ra.CMD`, không chọn shim `ra`; (2) lệnh có thư mục `A/ra` vẫn áp PATHEXT; (3) cwd con đứng trước PATH."""
     m = _tai_launcher_thu()
     with San() as s:
-        for tep in ("b1/ra", "b1/ra.CMD", "A/ra", "A/ra.CMD", "ws/ra.EXE", "b3/ra.EXE"):
+        for tep in ("b1/ra", "b1/ra.CMD", "A/ra", "A/ra.CMD", "ws/ra.EXE", "b3/ra.EXE", "x/codex"):
             _r1335_tep(s / tep, tep)
         (s / "ws0").mkdir()
         for nhan, lenh0, cwd, pth, env, mong in (
                 ("PATHEXT_rong", "ra", s / "ws0", s / "b1", {"PATHEXT": ""}, s / "b1" / "ra.CMD"),
                 ("co_thu_muc", "A" + os.sep + "ra", s, s / "b1", {}, s / "A" / "ra.CMD"),
-                ("cwd_truoc", "ra", s / "ws", s / "b3", {}, s / "ws" / "ra.EXE")):
+                ("cwd_truoc", "ra", s / "ws", s / "b3", {}, s / "ws" / "ra.EXE"),
+                ("duong_dan_khong_duoi", str(s / "x" / "codex"), s, s / "b1", {}, s / "x" / "codex")):
             with _r1335_win(m, env):
                 dd = m._thuc_thi(lenh0, str(cwd), str(pth))
             bang(dd["thuc_thi_duong_dan"] == os.path.realpath(mong), f"F6 {nhan}: chon {dd['thuc_thi_duong_dan']}")
@@ -14476,6 +14479,8 @@ DOT_BIEN = [
     ("r1335_F6_tu_dung_ung_vien", ('if (u := shutil.which(os.path.join(d, os.path.basename(s))))]', 'if os.path.isfile(u := os.path.join(d, os.path.basename(s)))]'),
      ["r1335_F6_windows_chon_tep_theo_which", "r1335_P2_windows_bo_ung_vien_khong_duoi"]),
     ("r1335_F6_thu_muc_bo_qua", ('        if os.path.dirname(s):\n            thu_muc', '        if False:\n            thu_muc'),
+     ["r1335_F6_windows_chon_tep_theo_which"]),
+    ("r1335_F6_bo_khop_truc_tiep", ('        if not ung and os.path.dirname(s) and os.path.isfile(', '        if False and os.path.dirname(s) and os.path.isfile('),
      ["r1335_F6_windows_chon_tep_theo_which"]),
     ("r1335_F6_bo_cwd_truoc", ('([cwd] if shutil._win_path_needs_curdir(s, os.F_OK | os.X_OK) else [])', '([])'),
      ["r1335_F6_windows_chon_tep_theo_which"]),

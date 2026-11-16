@@ -15,7 +15,8 @@
     Script này gương lại LỆNH của các bước cổng trong các job `gate*` của `.github/workflows/ci.yml`
     (tên job là cách CI chia máy và trôi theo master: nền gốc d553efa có `gate`, `gate-registry`,
     `gate-packet-loop`; master fc852ff tách thêm `gate-ops`, `gate-cong-cu` (8 mảnh) và `gate-cong-cu-gop` (gom mảnh —
-    script chạy `ops/cong_cu_test.py` TRỌN một lượt thay cho mảnh + gom)), nhưng chạy TẠI MÁY. `env:` của bước do script
+    script chạy `ops/cong_cu_test.py` TRỌN một lượt thay cho mảnh + gom); master f7b76c3 thêm `gate-nhanh-manh` (8 mảnh)
+    và `gate-nhanh-gop` — mức `day-du` chạy `ops/nhanh_don_duoc_test.py` TRỌN thay cho mảnh + gom), nhưng chạy TẠI MÁY. `env:` của bước do script
     làm chủ: khoá chế độ rò từ phiên gọi bị xoá, cùng `PYTHON*` lạ, biến git trỏ kho/cây/index khác, `BASH_ENV` và hàm bash
     export `BASH_FUNC_*` (job CI không có biến nào trong số đó), `test registry` mang env như lượt `pull_request` khi đo
     được diff. Nó KHÔNG gọi
@@ -49,8 +50,10 @@
     `day-du` — gương các bước cổng của các job `gate*` của CI. Bước KHÔNG gương được thì script in `KHÔNG CHẠY` ở
                cuối mức này — năm dòng: cgroup và `ci-duong-nhanh selftest` (chỉ có trên Linux; bước sau có từ master
                7e5958e), EOL base (đòi event `pull_request`), `tl selftest` có bằng chứng exact-identity, `release-verify`
-               lane WORKER — cộng hai bước `ci.yml` bỏ trên Windows, và một dòng `THAY BẰNG` cho mảnh + gom của
-               `cong_cu_test` (master từ fc852ff). Bước chỉ chạy ở chế độ `duong_nhanh` (PR chỉ đổi hồ sơ) thì không
+               lane WORKER — cộng hai bước `ci.yml` bỏ trên Windows, `update-linux selftest` ngoài Linux (ci.yml gác
+               `RUNNER_OS = Linux` trong thân bước lease-publish), và hai dòng `THAY BẰNG`: mảnh + gom của `cong_cu_test`
+               (master từ fc852ff) và gom `nhanh_don_duoc` (master từ f7b76c3) — mức này chạy `ops/cong_cu_test.py` và
+               `ops/nhanh_don_duoc_test.py` TRỌN thay cho mảnh. Bước chỉ chạy ở chế độ `duong_nhanh` (PR chỉ đổi hồ sơ) thì không
                gương: script luôn chạy ĐỦ như lượt push/`workflow_dispatch`. t32 đòi mọi bước `gate*` còn lại có LỆNH
                trong script — mỗi (đích, MỌI đối số sau nó) của `ci.yml` BẰNG đuôi của một mảng/lệnh trong script, kể cả ghim
                phiên bản (`pkg==x.y.z`, `AL_VER`) — hoặc có TÊN ĐÚNG trong một dòng `KHÔNG CHẠY`/`THAY BẰNG`; bước không có đích
@@ -143,9 +146,17 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 # `CI_DUONG_NHANH_*`: env bước `kiem re` của `gate-ops` (master 7e5958e, packet #674) — script không chạy bước ấy (chỉ có ở chế độ
 # `duong_nhanh`), nên xoá như mọi khoá khác (đo: cây merge 7e5958e với ad4e724 ⇒ t30 vế tĩnh ĐỎ, thiếu đúng bốn khoá này).
 # CI_DUONG_NHANH_CHE_DO belongs to the Linux harness step; this Windows gate does not run that step.
+# wp1325 r4: năm khoá CI khai mà danh sách cũ thiếu (đo: bộ test trên S và Y ⇒ t30 ĐỎ, thiếu đúng năm khoá này) — `CI_DANG_KY_GOP_KQ`
+# (env bước `test registry`, kết quả job `gate-nhanh-gop`), `CONG_CU_TEST_GOP_CHE_DO` (bước gom của `gate-cong-cu-gop`),
+# `NHANH_DON_DUOC_DICH`/`NHANH_DON_DUOC_DICH_RA` (bước mảnh của `gate-nhanh-manh`) và `NHANH_DON_DUOC_DICH_DU` (lượt tuần
+# `ci-dot-bien-du.yml`). Rò `NHANH_DON_DUOC_DICH*` thì cổng `nhanh_don_duoc_test` (chạy TRỌN, xem cuối mức `day-du`) thành MỘT mảnh.
+# Xoá ở ĐÂY, trước mọi cổng; `CI_DANG_KY_*` mà script tự đặt vẫn được đặt lại ngay trước `registry test`.
 foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA',
+               'CONG_CU_TEST_GOP_CHE_DO',
                'CI_DANG_KY_WORKERS', 'CI_DANG_KY_SU_KIEN', 'CI_DANG_KY_GOC', 'CI_DANG_KY_DAU', 'CI_DANG_KY_DOT_BIEN_MANH',
-               'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA', 'CI_DUONG_NHANH_SU_KIEN', 'CI_DUONG_NHANH_GOC',
+               'CI_DANG_KY_GOP_KQ',
+               'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA', 'NHANH_DON_DUOC_DICH', 'NHANH_DON_DUOC_DICH_RA',
+               'NHANH_DON_DUOC_DICH_DU', 'CI_DUONG_NHANH_SU_KIEN', 'CI_DUONG_NHANH_GOC',
                'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE', 'CI_DUONG_NHANH_CHE_DO') {
     [Environment]::SetEnvironmentVariable($n, $null)
 }
@@ -595,6 +606,18 @@ if ($Muc -eq 'day-du') {
     Chay-Py 'release-check full'        @('scripts/tl.py', 'release-check', '--full', '--json')
     Chay-Py 'release-verify strict'     @('scripts/tl.py', 'release-verify', 'RELEASE_MANIFEST.json', '--strict', '--json')
     Chay-Py 'tl_boot smoke'             @('scripts/tl_boot.py', '--version')
+    # Bước `lease-publish selftest (đo lại setup sau G5)` của `gate-ops` (master từ 36ee6cb) chạy THÊM lệnh này sau wrapper lease, gác
+    # bằng `if test "$RUNNER_OS" = Linux` TRONG thân `run:` (không phải `if:` của bước — t6 không thấy). Gương đúng điều kiện ấy:
+    # chỉ Linux; ngoài Linux in `KHÔNG CHẠY`. Bộ selftest tự đòi Ubuntu thật — Linux khác thì ĐỎ thật, không đếm là ĐẠT.
+    if ($IsLinux) { Chay-Bash 'update-linux selftest' @('ops/environment/update-linux.sh', '--selftest') }
+    else { Noi '  KHÔNG CHẠY ngoài Linux (ci.yml gác RUNNER_OS = Linux trong bước lease-publish): "update-linux selftest" — ops/environment/update-linux.sh --selftest.' }
+    # Job `gate-nhanh-manh` (8 mảnh `targeted_mutant_gate`, env `NHANH_DON_DUOC_DICH=k/8`) + `gate-nhanh-gop` (`--gop-dich manh`)
+    # (master từ f7b76c3, WP748): script KHÔNG dựng mảnh + artifact mà chạy `ops/nhanh_don_duoc_test.py` TRỌN một lượt (không biến
+    # `NHANH_DON_DUOC_DICH*` — đã xoá ở đầu script), như `cong_cu_test` thay cho mảnh + gom của `gate-cong-cu`. Lượt trọn mạnh hơn mảnh
+    # targeted (mọi đột biến chạy đủ ca) và chậm hơn (> 540 s). Bước gom không có đầu vào ⇒ dòng `THAY BẰNG` ở cuối mức này.
+    # `registry test` của script KHÔNG mang `CI_DANG_KY_DOT_BIEN_MANH`/`CI_DANG_KY_GOP_KQ` (đã xoá): kế hoạch của nó tự quyết
+    # NHẸ/ĐỦ cho `nhanh_don_duoc_test` theo diff, nên lượt trọn ở đây là chỗ DUY NHẤT luôn chạy vòng đột biến ấy.
+    Chay-Py 'nhanh_don_duoc_test'       @('ops/nhanh_don_duoc_test.py')
 
     # release-bundle x2 phải cho CÙNG sha256 — đo tất định, không phải đo "chạy được".
     Tieu 'release-bundle x2 cùng SHA-256'
@@ -641,6 +664,7 @@ if ($Muc -eq 'day-du') {
     Noi 'KHÔNG CHẠY (đòi event KHÁC pull_request + gate_lifecycle evidence): "tl selftest (co bang chung exact-identity)".'
     Noi 'KHÔNG CHẠY (đòi ref KHÁC master): "release-verify strict (lane WORKER — manifest TẠM ngoài repo)" — script chạy lane LAND thay vào.'
     Noi 'THAY BẰNG MỘT LƯỢT (master từ fc852ff): "G5 manh ban kinh dot bien (#668)" + "G5 gom manh ban kinh dot bien (#668)" — script chạy ops/cong_cu_test.py TRỌN.'
+    Noi 'THAY BẰNG MỘT LƯỢT (master từ f7b76c3): "gộp mảnh nhanh_don_duoc (targeted_mutant_gate)" — không có mảnh để gom; cổng nhanh_don_duoc_test chạy ops/nhanh_don_duoc_test.py TRỌN thay cho 8 mảnh + gom.'
 }
 
 # ───────────────────────────── tổng kết ─────────────────────────────

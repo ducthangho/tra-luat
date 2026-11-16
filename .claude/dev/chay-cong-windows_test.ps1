@@ -38,7 +38,8 @@
 #   t29 chot-dat-sau-diem-dung                    `dist` THEO DÕI (symlink sang `tools`) ⇒ rc=2 và KHÔNG gì được ghi qua nó trước khi bị
 #                                                 từ chối (thư mục nhật ký từng được tạo TRƯỚC chốt `ls-files`)
 #   t30 guong-lenh-bo-env-buoc                    `env:` của bước cổng: mọi khoá `env` (workflow/job/bước) của job `gate*` trong ci.yml và
-#                                                 của `ci-dot-bien-du.yml` có mặt trong script; MỌI khoá ấy RÒ từ phiên gọi đều bị xoá
+#                                                 của `ci-dot-bien-du.yml` có mặt trong script (wp1325 r4: kể cả `CI_DANG_KY_GOP_KQ`,
+#                                                 `CONG_CU_TEST_GOP_CHE_DO`, `NHANH_DON_DUOC_DICH{,_RA,_DU}`); MỌI khoá ấy RÒ từ phiên gọi đều bị xoá
 #                                                 trước khi tới cổng; `test registry` mang env `pull_request` (GOC/DAU đúng) khi cây
 #                                                 SẠCH + HEAD đi trước `origin/master`, vắng (ĐỦ) khi bẩn, khi có mục assume-unchanged /
 #                                                 skip-worktree bị sửa, hoặc khi không đi trước
@@ -51,6 +52,8 @@
 #                                                 BIẾN là hằng có mặt trong script — hoặc có TÊN ĐÚNG trong một hằng chuỗi `KHÔNG CHẠY…`/`THAY BẰNG…`; bước
 #                                                 không đích, bước `uses:` lạ và ghim phiên bản phải khớp danh sách CHO PHÉP / hằng của script (bước mới ⇒ ĐỎ).
 #                                                 VÀ dấu vân từng job (`$DauVanCi`: thân `run`, env, with, uses, if…) khớp bảng ghim ⇒ đổi MỘT chữ ở bước nào cũng ĐỎ
+#                                                 (wp1325 r4: gương `update-linux.sh --selftest` chỉ Linux, `nhanh_don_duoc_test` TRỌN thay mảnh +
+#                                                 `THAY BẰNG` cho gom `gate-nhanh-gop`; bảng ghim phủ cả `gate-nhanh-manh`/`gate-nhanh-gop`)
 #   t33 bo-giai-cong-cu-theo-ten-thu-tu (wrapper) `python` giả (thoát 0) ĐẦU PATH, `python3` thật sau nó ⇒ cổng lease (wrapper THẬT
 #                                                 chọn Python theo TÊN) không ĐẠT; `python` in `TLPY=` rồi thoát khác 0 ⇒ cổng lease
 #                                                 không chạy (vế `$LASTEXITCODE` của thăm dò)
@@ -198,13 +201,13 @@ function Dung-Kho { param([string]$Scr = $Script)
     $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
     $script:Rac += $d
     $k = Join-Path $d 'k'
-    foreach ($t in 'ops', '.claude/dev', 'scripts/tl_core', '.githooks', '.github/checks') {
+    foreach ($t in 'ops', 'ops/environment', '.claude/dev', 'scripts/tl_core', '.githooks', '.github/checks') {
         New-Item -ItemType Directory -Force -Path (Join-Path $k $t) | Out-Null
     }
     Copy-Item -LiteralPath $Scr -Destination (Join-Path $k '.claude/dev/chay-cong-windows.ps1')
     Copy-Item -LiteralPath (Join-Path $GocKho 'ops/bash_nen.py') -Destination (Join-Path $k 'ops/bash_nen.py')
     Copy-Item -LiteralPath (Join-Path $GocKho '.gitignore') -Destination (Join-Path $k '.gitignore')
-    foreach ($f in 'ops/lease_publish_test.py', 'ops/cong_cu.py', 'ops/cong_cu_test.py',
+    foreach ($f in 'ops/lease_publish_test.py', 'ops/cong_cu.py', 'ops/cong_cu_test.py', 'ops/nhanh_don_duoc_test.py',
                    '.claude/dev/packet_loop_test.py', '.claude/dev/ci_dang_ky_test.py',
                    '.claude/dev/codex_cred_test.py', 'ops/bien_nhan_v2_test.py', '.claude/dev/idiom_py_test.py',
                    '.githooks/eol_policy_test.py', '.githooks/pre_push_test.py', '.claude/dev/gate_lifecycle_test.py',
@@ -218,6 +221,7 @@ function Dung-Kho { param([string]$Scr = $Script)
     }
     Set-Content -LiteralPath (Join-Path $k 'scripts/tl.py') -Value $TlStub -Encoding utf8NoBOM
     Set-Content -LiteralPath (Join-Path $k 'ops/chay_lease_publish_test.sh') -Value "exit `${STUB_RC_LEASE:-0}" -Encoding utf8NoBOM
+    Set-Content -LiteralPath (Join-Path $k 'ops/environment/update-linux.sh') -Value "exit `${STUB_RC_UPDATE_LINUX:-0}" -Encoding utf8NoBOM
     Set-Content -LiteralPath (Join-Path $k 'scripts/don-nhanh_test.ps1') -Value 'exit 0' -Encoding utf8NoBOM
     & git -C $k init -q
     & git -C $k add -A
@@ -942,7 +946,9 @@ Ca 't30 env cua buoc cong: khoa ci.yml co mat, bien ro bi xoa, registry mang env
     # khoá trừ AL_VER và bốn khoá nó tự đặt.
     $tenRo = @(@($khoa) + @('CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA', 'CI_DANG_KY_DOT_BIEN_MANH',
                             'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CI_DUONG_NHANH_SU_KIEN',
-                            'CI_DUONG_NHANH_GOC', 'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE') |
+                            'CI_DUONG_NHANH_GOC', 'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE',
+                            'CI_DANG_KY_GOP_KQ', 'CONG_CU_TEST_GOP_CHE_DO', 'NHANH_DON_DUOC_DICH', 'NHANH_DON_DUOC_DICH_RA',
+                            'NHANH_DON_DUOC_DICH_DU') |
                Where-Object { $_ -notlike 'PYTHON*' } | Sort-Object -Unique)
     $k = Dung-Kho
     Set-Content -LiteralPath (Join-Path $k '.claude/dev/ci_dang_ky_test.py') -Encoding utf8NoBOM -Value @'
@@ -1199,8 +1205,14 @@ for j, v in sorted((d.get('jobs') or {}).items()):
 # những kênh nó biết; dấu vân thấy MỌI kênh (đo trên c848fee: tiền tố `python -O`, lệnh `actionlint` thêm vào bước đã gương, `env` kiểu số, dòng
 # `git config` của bước "Force LF", `with: python-version`, job `uses:` tái dùng, `if: runner.os == 'Linux'` — t32 ĐẠT cả chín). Đổi `ci.yml` là
 # việc của packet khác: bảng này là CHỖ BUỘC người đó dừng lại một nhịp, không phải chỗ chứng minh gương đúng.
-$DauVanCi = @{ '<workflow>' = '44136fa355b3'; 'gate' = '08bfa89def0a'; 'gate-cong-cu' = '527d4291b599'; 'gate-cong-cu-gop' = '4f1198c4ace4'
-               'gate-ops' = '7bc725418208'; 'gate-packet-loop' = 'b90eef359184'; 'gate-registry' = 'b836a4f366e1' }
+# wp1325 r4 (nền Y 9aa40ac; ci.yml = canonical 815b9ac + chỉ trần `gate-packet-loop` 240/150): ghim lại SAU khi rà `git diff 8b59185 -- ci.yml`
+# (bỏ chú thích): đổi NGOÀI lệnh là điều kiện `che_do != 'duong_nhanh'` (script luôn chạy ĐỦ), mảnh `gate-cong-cu` Windows chỉ còn 0 và
+# `upload-artifact` chỉ ngoài Windows (script chạy `cong_cu_test` TRỌN), env `test registry` thêm `CI_DANG_KY_DOT_BIEN_MANH`/`CI_DANG_KY_GOP_KQ`
+# (script xoá — registry tự quyết kế hoạch), `timeout-minutes` (t9 canh). Đổi LỆNH thật đã gương trước khi ghim: `update-linux.sh --selftest`
+# (chỉ Linux, như `RUNNER_OS = Linux` của bước) và job MỚI `gate-nhanh-manh`/`gate-nhanh-gop` (`nhanh_don_duoc_test` TRỌN + dòng `THAY BẰNG`).
+$DauVanCi = @{ '<workflow>' = '44136fa355b3'; 'gate' = '63dc12af15ef'; 'gate-cong-cu' = '3d82f41a1eb5'; 'gate-cong-cu-gop' = 'ade3f0565731'
+               'gate-nhanh-gop' = '3d6daa7c4f6c'; 'gate-nhanh-manh' = 'ac39ba6c783c'
+               'gate-ops' = '3382603e4cb1'; 'gate-packet-loop' = '5546b9244930'; 'gate-registry' = '25db60055731' }
 # Trả về các hàng "tên :: đích đuôi" của ci.yml mà script KHÔNG gương và KHÔNG khai tên, cộng các job có dấu vân lệch bảng ghim
 # (`$DauVan`; $null = chỉ bộ so từng dòng — t34 dùng để đo răng riêng từng chốt). Rỗng = gương đủ.
 function Tim-ThieuGuong { param([string]$Ci, [string]$Tep, [string[]]$Nep, [hashtable]$DauVan, [switch]$ChiBoSoTungDong)
@@ -1499,20 +1511,22 @@ chmod +x "$AL_DICH/actionlint"
 # Lượt MẶC ĐỊNH chạy KHÔNG `-Muc` (đo trên d53e681: đổi `[string]$Muc = 'nhanh'` thành `'day-du'` ⇒ cả bộ 35/35, vì chỉ có lượt `-Muc nhanh` tường minh).
 # Bộ so (`Tim-CongLech`) có hàng đột biến SCRIPT riêng như t34 có cho t32 — không có hàng thì gỡ `thua`/`thieu`/lượt mặc định khỏi t35 vẫn 35/35 vì script nền sạch.
 # Giới hạn: đo TÊN cổng đã chạy, không đo đối số lúc chạy (stub bỏ qua đối số; đối số do t32 so với ci.yml). Windows: KHÔNG ĐO ĐƯỢC ở đây — bảng
-# bỏ hai cổng ci.yml cũng bỏ trên Windows (`don-nhanh selftest (ps1)`, `ci-phamvi selftest`), phần còn lại chưa chạy trên Windows thật.
+# bỏ hai cổng ci.yml cũng bỏ trên Windows (`don-nhanh selftest (ps1)`, `ci-phamvi selftest`) và `update-linux selftest` ngoài Linux (ci.yml gác
+# `RUNNER_OS = Linux`), phần còn lại chưa chạy trên Windows thật.
 $CongDayDu = @('cong_cu kiem-tra', 'cong_cu_test', 'lease-publish selftest', 'packet-loop selftest', 'registry test', 'don-nhanh selftest (ps1)',
                'py_compile', 'codex credential selftest', 'bien-nhan v2 selftest', 'idiom-ba-ten selftest', 'eol-policy selftest', 'pre-push selftest',
                'gate lifecycle selftest', 'eol-policy survey', 'bundled-fragment check', 'gen_instructions selftest', 'command-registry unit',
                'tl selftest', 'workflow-audit strict', 'golden-test', 'doc-claims-check strict', 'determinism-audit strict', 'ci-phamvi guard',
-               'ci-phamvi selftest', 'release-check full', 'release-verify strict', 'tl_boot smoke', 'release-bundle a', 'release-bundle b',
-               'release-bundle tất định')
+               'ci-phamvi selftest', 'release-check full', 'release-verify strict', 'tl_boot smoke', 'update-linux selftest', 'nhanh_don_duoc_test',
+               'release-bundle a', 'release-bundle b', 'release-bundle tất định')
 # Chạy script `$Scr` trên kho giả với đối số `$DoiMuc`; trả về cổng THIẾU so với `$Bang` và cổng THỪA (in ra mà bảng không khai).
 function Tim-CongLech { param([string]$Scr, [string[]]$DoiMuc, [string[]]$Bang)
     $k = Dung-Kho $Scr
     $a = Chay $k $DoiMuc
     $co = @(foreach ($d in ($a.ra -split "`n")) { if ($d -cmatch '^  ([^ ].*?) +rc=[^ ]* +') { $Matches[1] } })
     if ($co.Count -eq 0) { throw "KHONG DO DUOC: khong doc duoc dong cong nao trong output (rc_script=$($a.rc))" }
-    $can = @($Bang | Where-Object { -not $IsWindows -or ($_ -cne 'don-nhanh selftest (ps1)' -and $_ -cne 'ci-phamvi selftest') })
+    $can = @($Bang | Where-Object { (-not $IsWindows -or ($_ -cne 'don-nhanh selftest (ps1)' -and $_ -cne 'ci-phamvi selftest')) -and
+                                    ($IsLinux -or $_ -cne 'update-linux selftest') })
     return @{ thieu = @($can | Where-Object { $co -cnotcontains $_ }); thua = @($co | Where-Object { $can -cnotcontains $_ }) }
 }
 Ca 't35 script CHAY du cac cong (ten cong in ra khop bang ghim, khong chi co mat trong van ban)' {

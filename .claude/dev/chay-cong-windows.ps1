@@ -130,8 +130,12 @@ try {
 # `PYTHONOPTIMIZE` gỡ mọi `assert` trần (đo trên cây merge 163fd5d: `lease_publish_test.py --chi-ca=t33_` với workflow actionlint
 # ĐỎ ⇒ rc=0 `1/1 đạt`; đầu-cuối trên 34e7a9d: cổng `assert False` ⇒ ĐẠT, script rc=0). Danh sách CHO PHÉP, không danh sách CẤM:
 # xoá HẾT `PYTHON*` (không phân biệt hoa thường — Windows cũng không) rồi đặt đúng bốn biến.
+# wp1325 r6: XOÁ bằng CLR null THẬT `[NullString]::Value`, KHÔNG bằng `$null`: bộ gắn đối số của PowerShell đổi `$null` thành `''`
+# cho tham số `string` của phương thức .NET, và từ .NET 9 `SetEnvironmentVariable(n, '')` để biến CÓ MẶT/RỖNG thay vì xoá (đo trên
+# Windows pwsh 7.6.10/.NET 10.0.15: biến chọn chế độ còn đó ⇒ cổng con thấy nó; git đọc `GIT_DIR=''`). Cả bốn vòng xoá dưới đây.
+# t31 khoá bằng bộ ghi ranh giới CLR (thấy null/rỗng đúng như bộ gắn truyền, cả trên .NET 8 nơi `''` vẫn xoá).
 foreach ($n in @(Get-ChildItem Env: | Where-Object Name -like 'PYTHON*' | ForEach-Object Name)) {
-    [Environment]::SetEnvironmentVariable($n, $null)
+    [Environment]::SetEnvironmentVariable($n, [NullString]::Value)
 }
 $env:PYTHONUTF8           = '1'
 $env:PYTHONIOENCODING     = 'utf-8'
@@ -168,7 +172,7 @@ foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH',
                'NHANH_DON_DUOC_LAN_THU', 'NHANH_DON_DUOC_TU_KIEM_NONCE', 'NHANH_DON_DUOC_TU_KIEM_FILE',
                'CI_DUONG_NHANH_SU_KIEN', 'CI_DUONG_NHANH_GOC',
                'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE', 'CI_DUONG_NHANH_CHE_DO') {
-    [Environment]::SetEnvironmentVariable($n, $null)
+    [Environment]::SetEnvironmentVariable($n, [NullString]::Value)
 }
 # Biến git CỤC BỘ CỦA KHO (đúng tập `git rev-parse --local-env-vars` in ra, trừ `GIT_CONFIG*` — nếp git đọc giá trị CÓ HIỆU LỰC, t13)
 # trỏ mọi lệnh git — của script lẫn của cổng con — sang kho/cây/index KHÁC; hook `pre-commit` của `git commit -a` xuất
@@ -178,14 +182,14 @@ foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH',
 foreach ($n in 'GIT_ALTERNATE_OBJECT_DIRECTORIES', 'GIT_OBJECT_DIRECTORY', 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_IMPLICIT_WORK_TREE',
                'GIT_GRAFT_FILE', 'GIT_INDEX_FILE', 'GIT_NO_REPLACE_OBJECTS', 'GIT_REPLACE_REF_BASE', 'GIT_PREFIX', 'GIT_SHALLOW_FILE',
                'GIT_COMMON_DIR', 'BASH_ENV') {
-    [Environment]::SetEnvironmentVariable($n, $null)
+    [Environment]::SetEnvironmentVariable($n, [NullString]::Value)
 }
 # Hàm bash EXPORT (`BASH_FUNC_<tên>%%`): bash nạp chúng lúc khởi động như `BASH_ENV`, và một hàm che được cả lệnh NỘI TRÚ. Đo trên
 # ad4e724 với wrapper lease THẬT (installer giả): hàm `exec` ⇒ dòng `exec … lease_publish_test.py` cuối wrapper thành lời gọi hàm,
 # `lease-publish selftest` rc=0 ĐẠT, script rc=0, trong khi bộ test thoát 1. Xoá cả HỌ như `PYTHON*`: không workflow nào khai
 # `BASH_FUNC_*` (đo: 0 dòng ở cả ba cây nhánh / merge 163fd5d / merge 7e5958e).
 foreach ($n in @(Get-ChildItem Env: | Where-Object Name -like 'BASH_FUNC_*' | ForEach-Object Name)) {
-    [Environment]::SetEnvironmentVariable($n, $null)
+    [Environment]::SetEnvironmentVariable($n, [NullString]::Value)
 }
 
 # ───────────────────────────── gốc kho ─────────────────────────────

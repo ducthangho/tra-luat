@@ -66,8 +66,8 @@
   "leased_at_utc": "2026-11-16T06:10:41.373700+00:00",
   "heartbeat_at": "2026-11-16T06:10:41.373700+00:00",
   "heartbeat_required_minutes": 360,
-  "lease_until": "2026-11-16T14:09:25.208642+00:00",
-  "lease_expires_at_utc": "2026-11-16T14:09:25.208642+00:00",
+  "lease_until": "2026-11-16T09:13:27Z",
+  "lease_expires_at_utc": "2026-11-16T09:13:27Z",
   "max_lease_hours": 10,
   "stage_original_start": "2026-11-15T23:39:25.208642+00:00",
   "stage_original_deadline": "2026-11-16T09:39:25.208642+00:00",
@@ -115,5 +115,17 @@
   "Windows_CI_owner_waived": true,
   "conditional_owner_land_authority": "https://github.com/ducthangho/tra-luat/issues/1325#issuecomment-6908792980",
   "known_review_workloads_cumulative_limit": 6,
-  "deadline_extension_r55_minutes": 180
+  "deadline_extension_r55_minutes": 180,
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-16T14:09:25.208642+00:00",
+    "han_moi_utc": "2026-11-16T09:13:27Z",
+    "luc_rut_utc": "2026-11-16T09:08:27Z",
+    "nguoi_rut": "Codex land operator under explicit owner r55 conditional grant",
+    "chi_thi": "https://github.com/ducthangho/tra-luat/issues/1325#issuecomment-6912013819",
+    "ly_do": "PR1337 actually merged; exact parents/tree verified. No further worker source writes. PostmergeCI/bookkeeping pending under separate land authority.",
+    "merge_commit": "902b2501c02a5fec5e1e9afa4c16b2bc8ebe5106",
+    "source_head": "fcbcfd11898a7176ff9b025316d433854b83171e",
+    "vi_sao_han_moi_con_vai_phut": "Existing publisher R must observe the shortened lease while still live; no stage/CI clock reset. Holder scan after this deadline is required before claim of release.",
+    "gioi_han": "Only shorten worker lease; write set/spec/branch/generation/source and all prior expiry history unchanged."
+  }
 }

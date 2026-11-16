@@ -89,7 +89,7 @@
     "assurance": {
       "enum": ["cross_approved", "same_provider_approved", "human_audited", "review_deferred"]
     },
-    "evidence_url": {"type": ["string", "null"], "format": "uri", "pattern": "^https://\\S+$(?![\\s\\S])"}
+    "evidence_url": {"type": ["string", "null"], "format": "uri", "pattern": "^https://[^\\u0000-\\u0020\\u007f-\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]+$(?![\\s\\S])"}
   },
   "allOf": [
     {"if": {"required": ["provider"], "properties": {"provider": {"const": "claude"}}},

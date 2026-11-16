@@ -7758,7 +7758,7 @@ def _schema_hop_le(gia_tri, schema, runtime=None):
             if any(k in x and not do(x[k], v) for k, v in p.items()): return False
         if isinstance(x, list):
             if len(x) < s.get("minItems", 0) or len(x) > s.get("maxItems", len(x)): return False
-            if s.get("uniqueItems") and len({json.dumps(v, sort_keys=True) for v in x}) != len(x): return False
+            if s.get("uniqueItems") and any(bang_json(u, v) for i, u in enumerate(x) for v in x[:i]): return False
             if "items" in s and any(not do(v, s["items"]) for v in x): return False
         return True
     if not do(gia_tri, schema): return False
@@ -7845,6 +7845,10 @@ def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
 # một SHA có `\n` ở đuôi. Hai ca dưới chạy CÙNG một bảng qua oracle stdlib và qua `jsonschema` thật, và đòi cả hai
 # bằng kỳ vọng trên TỪNG dòng.
 _R1336_CUOI = r'$(?![\\s\\S])'   # đuôi pattern đúng như nằm trong TỆP schema (JSON đã thoát), neo của đột biến
+# Lớp "không phải khoảng trắng" của evidence_url, LIỆT KÊ tường minh thay cho `\S`: tập `\s` của Python và của ECMA-262
+# khác nhau (U+001C–001F, U+0085 chỉ Python; U+FEFF chỉ ECMA), nên lớp này loại HỢP của hai tập cộng ký tự điều khiển.
+_R1336_LOP = (r'[^\\u0000-\\u0020\\u007f-\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f'
+              r'\\u3000\\ufeff]')
 
 
 def _r1336_validator_that():
@@ -7858,7 +7862,7 @@ def _r1336_validator_that():
     return lambda gia_tri, schema: jsonschema.Draft202012Validator(schema).is_valid(gia_tri)
 
 
-def _r1336_so_bang(dong):
+def _r1336_so_bang(ten, dong):
     """`dong`: (nhãn, schema, giá trị, mong_nhận). Đếm dòng lệch của TỪNG validator; lệch thì ĐỎ kèm từng dòng.
     Trả chuỗi bỏ qua khi thiếu `jsonschema` (nửa stdlib vẫn đã được đòi ở trên)."""
     that = _r1336_validator_that()
@@ -7870,6 +7874,9 @@ def _r1336_so_bang(dong):
         lech += [f"{nhan}: {ten} {'NHAN' if k else 'TU CHOI'}, mong {'NHAN' if mong else 'TU CHOI'}"
                  for ten, k in kq if k is not mong]
     bang(not lech, f"{len(lech)} ket qua lech tren {len(dong)} dong: {lech}")
+    # N2 (L6c): khi XANH cũng in số dòng đã đo và số lệch của TỪNG validator, không im lặng.
+    print(f"    r1336 {ten}: {len(dong)} dong · stdlib lech 0/{len(dong)} · jsonschema "
+          + (f"lech 0/{len(dong)}" if that else "KHONG DO (chua cai)"), flush=True)
     return None if that else "BO QUA nua jsonschema (chua cai); nua stdlib da do"
 
 
@@ -7901,6 +7908,11 @@ def r1336_bang_m5_hai_validator_cung_ket_qua():
         ("evidence_url co khoang trang", {"evidence_url": "https://github.com/o r"}, False),
         ("evidence_url + LF", {"evidence_url": "https://github.com/o/r\n"}, False),
         ("evidence_url http tran", {"evidence_url": "http://github.com/o/r"}, False),
+        # Khoảng trắng mà CHỈ một engine coi là `\s`: lớp tường minh phải từ chối ở mọi engine (đo ECMA bằng node).
+        ("evidence_url + U+FEFF", {"evidence_url": "https://host/" + chr(0xFEFF)}, False),
+        ("evidence_url + U+0085", {"evidence_url": "https://host/" + chr(0x85)}, False),
+        ("evidence_url + U+001C", {"evidence_url": "https://host/" + chr(0x1C)}, False),
+        ("evidence_url Unicode khong khoang trang", {"evidence_url": "https://vi.wikipedia.org/wiki/Lu" + chr(0x1EAD) + "t"}, True),
         ("codex+anthropic", {"provider": "codex"}, False),
         ("claude+openai", {"identity": "openai"}, False),
         ("human+anthropic", {"provider": "human"}, False),
@@ -7918,14 +7930,20 @@ def r1336_bang_m5_hai_validator_cung_ket_qua():
             for k in bo: m["properties"]["reviewed_sha"].pop(k)
             dong.append((f"SHA + LF khi go {bo}", m, _r1336_verdict(reviewed_sha=sha + "\n"), False))
             dong.append((f"SHA dung khi go {bo}", m, _r1336_verdict(), True))
-    return _r1336_so_bang(dong)
+    return _r1336_so_bang("bang M5 (schema verdict)", dong)
 
 
 @ca
 def r1336_oracle_stdlib_khop_ngu_nghia_validator_that():
     """N2: tuân thủ oracle trên schema THỬ NGHIỆM. Bảng M5 một mình không thấy `search`→`fullmatch` sau khi schema
     đã siết (hai cách khớp cho cùng kết quả), nên phải có pattern KHÔNG neo: `abc` với `xabcx`."""
-    return _r1336_so_bang([
+    return _r1336_so_bang("tuan thu oracle (schema thu nghiem)", [
+        ("uniqueItems [1, 1.0] (so bang nhau)", {"uniqueItems": True}, [1, 1.0], False),
+        ("uniqueItems [0, -0.0]", {"uniqueItems": True}, [0, -0.0], False),
+        ("uniqueItems object long so", {"uniqueItems": True}, [{"x": 1}, {"x": 1.0}], False),
+        ("uniqueItems mang long so", {"uniqueItems": True}, [[1], [1.0]], False),
+        ("uniqueItems [true, 1] (bool khac so)", {"uniqueItems": True}, [True, 1], True),
+        ("uniqueItems [1, 2]", {"uniqueItems": True}, [1, 2], True),
         ("pattern khong neo: search khop", {"pattern": "abc"}, "xabcx", True),
         ("pattern khong neo: khong khop", {"pattern": "abc"}, "xyz", False),
         ("pattern $ an LF cuoi (ngu nghia re)", {"pattern": "^a$"}, "a\n", True),
@@ -16710,7 +16728,9 @@ DOT_BIEN_HOOK = [
      ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
     ("wp1336_schema_finding_id_ve_dollar", ('[a-z0-9-]*' + _R1336_CUOI + '"', '[a-z0-9-]*$"'),
      ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
-    ("wp1336_schema_evidence_url_bo_pattern", (', "pattern": "^https://' + chr(92) * 2 + 'S+' + _R1336_CUOI + '"', ''),
+    ("wp1336_schema_evidence_url_bo_pattern", (', "pattern": "^https://' + _R1336_LOP + '+' + _R1336_CUOI + '"', ''),
+     ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
+    ("wp1336_schema_evidence_url_ve_S", ('https://' + _R1336_LOP + '+', 'https://' + chr(92) * 2 + 'S+'),   # P2-1
      ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
     ("wp1336_schema_vo_hieu_allOf", ('  "allOf": [', '  "x-allOf": ['),   # N3: keyword lạ ⇒ cả khối mất hiệu lực
      ["r1336_bang_m5_hai_validator_cung_ket_qua"], "schema"),
@@ -16932,6 +16952,9 @@ DOT_BIEN_HARNESS = [
      ["r484_g7_hook_vang_codex_cai_cli_truoc_materialize"]),
     # #1336 N2/M4: mỗi phần ngữ nghĩa của oracle stdlib một đột biến; đích là ca tuân thủ oracle (schema thử nghiệm).
     ("wp1336_oracle_ve_fullmatch", ('not re.search(s["pattern"], x)', 'not re.fullmatch(s["pattern"], x)'), ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),
+    ("wp1336_oracle_uniqueItems_ve_json_dumps",   # P2-2
+     ('any(bang_json(u, v) for i, u in enumerate(x) for v in x[:i])', 'len({json.dumps(v, sort_keys=True) for v in x}) != len(x)'),
+     ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),
     ("wp1336_oracle_bo_maxLength", ('if len(x) > s.get("maxLength", len(x)): return False', 'pass'), ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),
     ("wp1336_oracle_bo_allOf", ('if any(not do(x, c) for c in s.get("allOf", [])): return False', 'pass'), ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),
     ("wp1336_oracle_bo_if_then", ('if "if" in s and not do(', 'if False and not do('), ["r1336_oracle_stdlib_khop_ngu_nghia_validator_that"]),

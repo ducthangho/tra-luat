@@ -76,7 +76,7 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
 leased_at_utc: '2026-11-16T05:00:00Z'
-heartbeat_at: '2026-11-16T05:00:00Z'
+heartbeat_at: '2026-11-16T05:50:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease); doc lai lease truoc moi lan ghi nhanh lease.'
 lease_until: '2026-11-17T05:00:00Z'
@@ -87,12 +87,12 @@ attempts_limit: 2
 attempts_basis: '<= 2 phien executor.'
 budget:
   codex_review_calls:
-    pr_wp1331_g1: {used: 0, reserved: 0, limit: 10}
+    pr_wp1331_g1: {used: 1, reserved: 0, limit: 10}
   ci_ubuntu_runs:
     pr_wp1331_g1: {used: 0, reserved: 0, limit: 2}
   windows_native_runs:
-    pr_wp1331_g1: {used: 0, reserved: 0, limit: 2}
+    pr_wp1331_g1: {used: 1, reserved: 0, limit: 2}
   khong_reset_theo_generation: true
-budget_ghi_chu: 'Codex <= 10 theo dong khai ADR-0055 cua dac ta, dem TRUOC moi loi goi (ke ca connector tu chay khi bo draft); CI Ubuntu <= 2; Windows native <= 2; khong gan nhan windows, khong goi tay CI Windows (chu kho 16-11).'
+budget_ghi_chu: 'Den 05:50Z: Codex 1 (offline luot 1 run 8611d7af tren H 14aa4c0: request_changes, P2 R1 chot AST bo sot goi gian tiep; lan chay truoc do bi launcher chan rc 11 vi remote workspace, khong goi Codex); Windows 1 (N6 tren 14aa4c0 05:39-05:43Z: head t256/t257/t129/t133/t137/t151 QUA, t258 DO vi UnicodeEncodeError trong ca; harness chet o print tong ket duoi cp1252; ve am nen t256-t258 DO dung). Codex <= 10 theo dong khai ADR-0055 cua dac ta, dem TRUOC moi loi goi (ke ca connector tu chay khi bo draft); CI Ubuntu <= 2; Windows native <= 2; khong gan nhan windows, khong goi tay CI Windows (chu kho 16-11).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

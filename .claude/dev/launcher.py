@@ -75,7 +75,6 @@ from __future__ import annotations
 import argparse
 import base64
 import contextlib
-import errno
 import hashlib
 import hmac
 import json
@@ -1534,8 +1533,9 @@ def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None,
     qd = _quyet_dinh_agent(lenh) if qd is None else qd
     ds = {"workspace": _probe_workspace(ws), "ghi": _probe_ghi(ws),
           "spawn": _probe_spawn((dd or {}).get("thuc_thi_duong_dan") or str(lenh[0]), ws)}   # F3
-    # F4: điểm CHỌN tệp duy nhất — exec hỏng ENOENT/ENOEXEC ⇒ ứng viên PATH kế, băm lại (`dd` đổi tại chỗ).
-    while ds["spawn"].get("errno") in (errno.ENOENT, errno.ENOEXEC) and (dd or {}).get("thuc_thi_ung_vien_sau"):
+    # F4: điểm CHỌN tệp duy nhất. Như Popen ở base, exec ném OSError với MỌI errno ⇒ ứng viên PATH kế, băm lại
+    # (`dd` đổi tại chỗ). Đã exec được mà rc khác 0 hoặc quá hạn thì không có `errno` ⇒ KHÔNG chuyển.
+    while ds["spawn"].get("errno") is not None and (dd or {}).get("thuc_thi_ung_vien_sau"):
         dd.update(_bam_thuc_thi(dd["thuc_thi_ung_vien_sau"][0]), thuc_thi_ung_vien_sau=dd["thuc_thi_ung_vien_sau"][1:])
         ds["spawn"] = _probe_spawn(dd["thuc_thi_duong_dan"], ws)
     if "claude_trust" in qd["probe_can"]:

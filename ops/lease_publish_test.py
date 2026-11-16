@@ -15515,6 +15515,22 @@ def t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text():
              f"M3 răng gián tiếp {mau!r}: bật={_u8_quet(mau)[1]} tắt={_u8_quet(mau, gian_tiep=False)[1]}")
 
 
+@ca
+def t259_wp1331_W1_harness_in_duoc_duoi_codepage_cp1252():
+    """W1/W2: harness chạy trong tiến trình con với `PYTHONUTF8=0 PYTHONIOENCODING=cp1252` (mô phỏng console
+    `tra-luat-win`) phải in được dòng tổng kết và ra rc 0. Ca con là t258 (có `print` tiếng Việt bên trong ca).
+    Đọc output con bằng BYTES rồi decode UTF-8 — chính luật mà packet này áp cho `lease_publish.py`."""
+    env = {k: v for k, v in os.environ.items() if k not in ("GITHUB_ACTOR", "PYTHONUTF8", "PYTHONIOENCODING")}
+    env.update(PYTHONUTF8="0", PYTHONIOENCODING="cp1252")
+    p = subprocess.run([sys.executable, "-u", str(Path(__file__).resolve()),
+                        CO_CHI_CA + "t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text"],
+                       capture_output=True, env=env, cwd=str(HERE.parent))
+    out, err = p.stdout.decode("utf-8", "replace"), p.stderr.decode("utf-8", "replace")
+    chot(p.returncode == 0 and "lease_publish: 1/1 đạt" in out and "UnicodeEncodeError" not in out + err,
+         f"W1 harness dưới cp1252: rc={p.returncode} out={out[-300:]!r} err={err[-300:]!r}")
+    chot("M3 chốt lớp AST:" in out, f"W2 print trong t258 dưới cp1252: {out[-300:]!r}")
+
+
 # Bảng đột biến u8-m* (#1331 N1–N3), đăng ký vào catalog của t139: (ID, cũ, mới, [(ca đích, tiền tố `chot`)]).
 _U8_TEXT = ", capture_output=True, text=True"
 _U8_DOT_BIEN = [
@@ -15628,7 +15644,19 @@ def main(chon=None, nen=None, so=None) -> int:
     return 1 if hong else 0
 
 
+def _ep_utf8_stdio() -> None:
+    """#1331 W1 (đo `tra-luat-win`, cp1252, không PYTHONUTF8): `print` dòng tổng kết/`  ĐỎ  …`/ca in tiếng Việt ném
+    `UnicodeEncodeError: 'charmap'` ⇒ rc 1 kể cả khi mọi ca QUA. Ép stdio sang UTF-8 TRƯỚC mọi `print`, như
+    `ops/lease_publish.py` đã làm; luồng không có `reconfigure` (StringIO của ca meta) thì để nguyên."""
+    for luong in (sys.stdout, sys.stderr):
+        try:
+            luong.reconfigure(encoding="utf-8", errors="backslashreplace")
+        except (AttributeError, ValueError):
+            pass
+
+
 if __name__ == "__main__":
+    _ep_utf8_stdio()
     if len(sys.argv) >= 2 and sys.argv[1] == A9_CO:   # wp678 A9: helper đo lease sai kiểu trước LAND
         _rc, _out, _err = _a9_bien(sys.argv[2:])
         sys.stdout.write(_out)

@@ -14350,6 +14350,20 @@ def r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke():
             out = so.read_text(encoding="utf-8") if so.exists() else ""   # probe hỏng ⇒ chưa có stdout.log
             bang(d["transport_sha256"] == hashlib.sha256(mong.read_bytes()).hexdigest() and out.strip() == dau,
                  f"ung vien {nhan}: chon {d.get('thuc_thi_duong_dan')}, con in {out!r}")
+        m = _tai_launcher_thu(); goc = m._chay_van_ban_an_toan   # P2: OSError SAU exec (EBADF) ⇒ không chuyển
+
+        def tiem(lenh, **k):
+            p = goc(lenh, **k)
+            if lenh[1:] == ["--version"] and Path(lenh[0]).parent.name == "hop_le" and m.r1335_tiem:
+                raise OSError(9, "r1335 tiem EBADF sau exec")
+            return p
+        m._chay_van_ban_an_toan = tiem
+        for nhan, pth, m.r1335_tiem, mong, loai in (("EBADF", ("hop_le", "B"), True, "hop_le", "OSError"),
+                                                    ("tat_ca_hong", ("EACCES", "ENOENT"), False, "EACCES", "PermissionError")):
+            dd = m._thuc_thi("ra", str(repo), os.pathsep.join(str(s / x) for x in pth))
+            ds, _ = m.chay_cac_probe(str(repo), ["ra"], "r1335 F4", m._quyet_dinh_agent(["ra"]), dd)
+            bang(dd["thuc_thi_duong_dan"] == os.path.realpath(s / mong / "ra") and loai in ds["spawn"]["chi_tiet"],
+                 f"{nhan}: chon {dd['thuc_thi_duong_dan']}, spawn {ds['spawn']}")
 
 
 @ca
@@ -14402,6 +14416,9 @@ DOT_BIEN = [
      ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
     ("r1335_F4_chuyen_ca_khi_rc_khac_0", ('    while ds["spawn"].get("errno") is not None', '    while ds["spawn"]["trang_thai"] != "DAT"'),
      ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
+    ("r1335_F4_errno_ca_sau_exec", ('"errno": e.errno if loi_exec else None}', '"errno": e.errno}'),
+     ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
+    ("r1335_F4_khong_giu_loi_dau", ('        dd.update(dau[0]); ds["spawn"] = dau[1]', '        pass'), ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
     ("r1335_F4_chi_ENOENT_ENOEXEC", ('    while ds["spawn"].get("errno") is not None', '    while ds["spawn"].get("errno") in (2, 8)'),   # ENOENT, ENOEXEC
      ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
     ("r1335_D4_bo_chot_ten_trung", ("            if ten in theo_lenh:\n                raise RuntimeError", "            if False:\n                raise RuntimeError"),

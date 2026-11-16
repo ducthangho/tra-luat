@@ -75,6 +75,7 @@ from __future__ import annotations
 import argparse
 import base64
 import contextlib
+import errno
 import hashlib
 import hmac
 import json
@@ -1492,7 +1493,10 @@ def _probe_spawn(chuong_trinh: str, ws: str) -> dict:
     try:
         p = _chay_van_ban_an_toan([chuong_trinh, "--version"], cwd=ws, timeout=30)
     except (OSError, subprocess.SubprocessError) as e:
-        return {"trang_thai": "DO", "chi_tiet": f"spawn --version: {type(e).__name__}", "errno": getattr(e, "errno", None)}
+        # F4 P2: CHỈ lỗi exec (CPython ném qua errpipe kèm filename = tệp exec) mang errno để chuyển ứng viên;
+        # lỗi communicate/pipe/chdir(cwd) không mang filename ấy. Windows: CreateProcess không đặt filename.
+        loi_exec = getattr(e, "filename", None) == chuong_trinh
+        return {"trang_thai": "DO", "chi_tiet": f"spawn --version: {type(e).__name__}", "errno": e.errno if loi_exec else None}
     ra = (p.stdout or "") + (p.stderr or "")
     if p.returncode == 0 and bool(ra.strip()):
         return {"trang_thai": "DAT", "chi_tiet": f"rc=0; output={len(ra.encode('utf-8'))}B"}
@@ -1535,9 +1539,14 @@ def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None,
           "spawn": _probe_spawn((dd or {}).get("thuc_thi_duong_dan") or str(lenh[0]), ws)}   # F3
     # F4: điểm CHỌN tệp duy nhất. Như Popen ở base, exec ném OSError với MỌI errno ⇒ ứng viên PATH kế, băm lại
     # (`dd` đổi tại chỗ). Đã exec được mà rc khác 0 hoặc quá hạn thì không có `errno` ⇒ KHÔNG chuyển.
+    dau = None   # F4 P3: như CPython, mọi ứng viên hỏng thì báo lỗi exec ĐẦU TIÊN khác ENOENT/ENOTDIR
     while ds["spawn"].get("errno") is not None and (dd or {}).get("thuc_thi_ung_vien_sau"):
+        if dau is None and ds["spawn"].get("errno") not in (errno.ENOENT, errno.ENOTDIR):
+            dau = (dict(dd), ds["spawn"])
         dd.update(_bam_thuc_thi(dd["thuc_thi_ung_vien_sau"][0]), thuc_thi_ung_vien_sau=dd["thuc_thi_ung_vien_sau"][1:])
         ds["spawn"] = _probe_spawn(dd["thuc_thi_duong_dan"], ws)
+    if dau and ds["spawn"].get("errno") is not None:
+        dd.update(dau[0]); ds["spawn"] = dau[1]
     if "claude_trust" in qd["probe_can"]:
         ds["claude_trust"] = _probe_trust_claude(ws)
     ly_do = bo_qua.strip() if bo_qua is not None else None

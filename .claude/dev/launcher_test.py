@@ -14173,16 +14173,19 @@ def r1335_khop_hai_cua_15_to_hop():
             (b / "claude.cmd").write_text("@exit /b 0\r\n", encoding="utf-8")
         else:
             _bin_python_gia(b / "claude.cmd")
-        env = dict(os.environ, PATH=str(b) + os.pathsep + os.environ.get("PATH", ""))
+        # W-B1: CODEX_HOME của MÁY (ACL rộng/hỏng) làm chốt chờ snapshot chặn rc=13 trước khi có run.json.
+        env = dict(os.environ, PATH=str(b) + os.pathsep + os.environ.get("PATH", ""),
+                   CODEX_HOME=str(s / "codex-home-vang"))
         mong = {"claude": "anthropic_claude", "codex": "openai_codex", "khong": "local_process"}
         lech, i = [], 0
         for ag in ("claude", "codex", "khong"):
             for lenh0 in ("claude", "codex", "bash", "claude.cmd", "git"):
                 rr = s / f"runs-{i}"; i += 1
-                chay("run", "--workspace", str(repo), "--run-root", str(rr), "--agent", ag,
-                     "--bo-qua-probe", "r1335 khop hai cua", "--", lenh0, "-c", "pass", env=env)
+                r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--agent", ag,
+                         "--bo-qua-probe", "r1335 khop hai cua", "--", lenh0, "-c", "pass", env=env)
                 tm = [p for p in rr.iterdir() if p.is_dir()] if rr.is_dir() else []
-                d = json.loads((tm[0] / "run.json").read_text(encoding="utf-8")) if tm else {}
+                bang(tm, f"--agent {ag} {lenh0}: KHONG co run.json (rc={r.returncode}): {r.stderr[-300:]}")
+                d = json.loads((tm[0] / "run.json").read_text(encoding="utf-8"))
                 ct = "claude_trust" in d.get("probe_da_chay", ())
                 ok = (d.get("provider") == mong[ag] and ct == (d.get("provider") == "anthropic_claude")
                       and d.get("agent_suy_ra") == ag and d.get("agent_da_khai") == ag
@@ -14304,7 +14307,9 @@ def r1335_hanh_vi_codex_theo_agent_da_quyet():
             (b / "codex.bat").write_text("@echo r1335-rieng-tu 1>&2\r\n", encoding="utf-8")
         else:
             _bin_python_gia(b / "codex.bat")
-        env = dict(os.environ, PATH=str(b) + os.pathsep + os.environ.get("PATH", ""))
+        # W-B1: CODEX_HOME của MÁY (ACL rộng/hỏng) làm chốt chờ snapshot chặn rc=13 trước khi có run.json.
+        env = dict(os.environ, PATH=str(b) + os.pathsep + os.environ.get("PATH", ""),
+                   CODEX_HOME=str(s / "codex-home-vang"))
         lech = []
         for i, (lenh0, ag, loc) in enumerate((("wrap", "codex", True), ("codex", "khong", False),
                                               ("codex", "claude", False), ("codex.bat", None, True))):

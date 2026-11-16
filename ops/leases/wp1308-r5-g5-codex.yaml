@@ -8,8 +8,8 @@
   "lease_id": "wp1308-r5-g5-codex",
   "granted_by": "ducthangho",
   "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1308#issuecomment-6932355367",
-  "lease_expires_at_utc": "2026-11-17T18:50:00Z",
-  "lease_until": "2026-11-17T18:50:00Z",
+  "lease_expires_at_utc": "2026-11-17T00:03:48Z",
+  "lease_until": "2026-11-17T00:03:48Z",
   "reviewed_sha_required": "e4cce23bcf975bf041d584f9d4b74327b9c03794",
   "branch": "ops/wp1308-canary-r4-g4",
   "role": "executor",
@@ -45,5 +45,20 @@
   "spec_hash": "e1790abaa98c8bad62acd3d431023a06a21a55d6e796097f7996124073544fae",
   "prompt_path": "ops/prompts/wp1308-target-canary-r5.txt",
   "prompt_sha256_required": "35a96f021077129166dd20a35d21bd3477b06bf70efccd7e08bf97e1956b75d0",
-  "publication_note": "First push creating ops/wp1308-target-r5-g5 (1e44e5e) did not run ops-publish-lease (only ops-open-PR ran, skipped); this lease-only follow-up commit triggers the publisher. Spec, admission, expiry and authority unchanged."
+  "publication_note": "First push creating ops/wp1308-target-r5-g5 (1e44e5e) did not run ops-publish-lease (only ops-open-PR ran, skipped); this lease-only follow-up commit triggers the publisher. Spec, admission, expiry and authority unchanged.",
+  "ket_qua_g5": {
+    "adopt_state": "rc0 2026-11-16T23:53:01Z (attempt1 rc8 missing journal dir, no writes)",
+    "record_lease": "rc0 2026-11-16T23:56:08Z, state leased rev3 sha 2030f1bd, witness rev11",
+    "canary_accept": "not reachable: attempts 1/1 exhausted, canonical nang-tran has no attempts axis",
+    "owner_decision": "close g5 here (chat 17/11/2026 ~07:00 VN)",
+    "checkpoint": "https://github.com/ducthangho/tra-luat/issues/1308#issuecomment-6933110053"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-17T18:50:00Z",
+    "han_moi_utc": "2026-11-17T00:03:48Z",
+    "luc_rut_utc": "2026-11-16T23:59:48Z",
+    "nguoi_rut": "Claude Code coordinator under owner decision",
+    "ly_do": "Owner chose to close g5 after adoption and recovery were proven; canary accept unreachable under current code.",
+    "gioi_han": "Only shorten; state/witness/history untouched."
+  }
 }

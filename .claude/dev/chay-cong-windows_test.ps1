@@ -386,17 +386,85 @@ Ca 't8 python gia thoat 0 dau PATH => cong Python khong DAT' {
 # mặc định có thể KHÔNG BAO GIỜ ra ĐẠT (đo: `test registry` > 900 s cả trên CI Windows lẫn ở đây). Đọc MỌI job `gate*`, không
 # ghim ba tên: master fc852ff đã tách cổng sang `gate-ops`/`gate-cong-cu`, và ba tên ghim cứng là danh sách sẽ trôi.
 Ca 't9 han mac dinh >= timeout-minutes cua job CI' {
+    # wp1325: `gate-packet-loop` dùng biểu thức ma trận (Windows 240, Ubuntu 150). Bộ đọc trần CHỈ nhận số nguyên
+    # dương thật (không bool/float/chuỗi số) hoặc ĐÚNG NGUYÊN VĂN biểu thức đã đóng băng (= trần Windows 240);
+    # biểu thức/kiểu lạ, 0, âm, thiếu khóa ⇒ TỪ CHỐI (rc=3). So chuỗi tuyệt đối, KHÔNG eval biểu thức.
     $ci = Join-Path $GocKho '.github/workflows/ci.yml'
     $py = Tim-PyYaml; $pd = $py.Dau
-    $ma = "import sys,yaml`nd=yaml.safe_load(open(sys.argv[1],encoding='utf-8'))`n" +
-          "print(max(int(d['jobs'][j]['timeout-minutes']) for j in d['jobs'] if j.startswith('gate')))"
-    $phut = @(& $py.Ten @pd -c $ma $ci)
-    if ($LASTEXITCODE -ne 0 -or $phut.Count -ne 1) { throw "khong doc duoc timeout-minutes (rc=$LASTEXITCODE)" }
+    $d = Join-Path ([IO.Path]::GetTempPath()) ('ccw-t9-' + [guid]::NewGuid().ToString('N').Substring(0, 10))
+    $script:Rac += $d
+    New-Item -ItemType Directory -Force -Path $d | Out-Null
+    $kiem = Join-Path $d 'tran_phut.py'
+    Set-Content -LiteralPath $kiem -Encoding utf8NoBOM -Value @'
+import sys, yaml
+BIEU_THUC_WINDOWS_240 = "${{ matrix.os == 'windows-latest' && 240 || 150 }}"
+d = yaml.safe_load(open(sys.argv[1], encoding="utf-8"))
+tran = []
+for j, job in d["jobs"].items():
+    if not j.startswith("gate"):
+        continue
+    v = job.get("timeout-minutes") if isinstance(job, dict) else None
+    if type(v) is int and v > 0:
+        tran.append(v)
+    elif type(v) is str and v == BIEU_THUC_WINDOWS_240:
+        tran.append(240)
+    else:
+        print("TU_CHOI %s %s %r" % (j, type(v).__name__, v))
+        sys.exit(3)
+if not tran:
+    print("TU_CHOI khong co job gate*")
+    sys.exit(3)
+print(max(tran))
+'@
+    $DocTran = {
+        param([string]$tep)
+        $o = @(& $py.Ten @pd $kiem $tep | ForEach-Object { "$_" })
+        $rc = $LASTEXITCODE
+        if ($rc -eq 0 -and $o.Count -eq 1 -and $o[0] -match '^[1-9][0-9]*$') { return [int]$o[0] }
+        return "TU_CHOI rc=$rc $($o -join ' | ')"
+    }
+    $DuHan = { param([int]$han, [int]$phut) $han -ge $phut * 60 }
+
+    # Cây thật: trần ci.yml và mặc định -HanGiay đọc từ AST (không chạy script).
+    $phut = & $DocTran $ci
+    if ($phut -isnot [int]) { throw "khong doc duoc timeout-minutes cua ci.yml: $phut" }
     $ast = [System.Management.Automation.Language.Parser]::ParseFile($Script, [ref]$null, [ref]$null)
     $p = @($ast.ParamBlock.Parameters | Where-Object { $_.Name.VariablePath.UserPath -eq 'HanGiay' })
     if ($p.Count -ne 1 -or -not $p[0].DefaultValue) { throw 'khong thay mac dinh cua -HanGiay' }
     $mac = [int]$p[0].DefaultValue.SafeGetValue()
-    if ($mac -lt [int]$phut[0] * 60) { throw "HanGiay mac dinh $mac s < $([int]$phut[0] * 60) s cua job CI" }
+    if (-not (& $DuHan $mac $phut)) { throw "HanGiay mac dinh $mac s < $($phut * 60) s cua job CI" }
+
+    # Biến thể đóng băng — CÙNG ca t9 (giữ nguyên danh mục ca cấp cao). `phut` = trần phải đọc ra; $null = phải TỪ CHỐI.
+    $bt = '${{ matrix.os == ''windows-latest'' && 240 || 150 }}'
+    $bienThe = @(
+        @{ ten = 'nguyen-150'; v = '150'; phut = 150 },
+        @{ ten = 'nguyen-240'; v = '240'; phut = 240 },
+        @{ ten = 'bieu-thuc-dong-bang'; v = $bt; phut = 240 },
+        @{ ten = 'float-240.0'; v = '240.0'; phut = $null },
+        @{ ten = 'bool-true'; v = 'true'; phut = $null },
+        @{ ten = 'chuoi-so-240'; v = '"240"'; phut = $null },
+        @{ ten = 'khong'; v = '0'; phut = $null },
+        @{ ten = 'am-1'; v = '-1'; phut = $null },
+        @{ ten = 'bieu-thuc-la-300'; v = '${{ matrix.os == ''windows-latest'' && 300 || 150 }}'; phut = $null },
+        @{ ten = 'bieu-thuc-la-khoang-trang'; v = '${{ matrix.os == ''windows-latest'' && 240 || 150  }}'; phut = $null },
+        @{ ten = 'bieu-thuc-la-don'; v = '${{ 240 }}'; phut = $null }
+    )
+    foreach ($b in $bienThe) {
+        $tep = Join-Path $d ("ci-" + $b.ten + ".yml")
+        Set-Content -LiteralPath $tep -Encoding utf8NoBOM -Value ("jobs:`n  gate-x:`n    timeout-minutes: " + $b.v + "`n  gate-y:`n    timeout-minutes: 10`n")
+        $r = & $DocTran $tep
+        if ($null -eq $b.phut) {
+            if ($r -is [int]) { throw "bien the $($b.ten) phai bi TU CHOI, lai doc ra $r phut" }
+            if ($r -notmatch '^TU_CHOI rc=3 TU_CHOI gate-x ') { throw "bien the $($b.ten) tu choi sai cho: $r" }
+        } else {
+            if ($r -isnot [int] -or $r -ne $b.phut) { throw "bien the $($b.ten) phai doc $($b.phut) phut, duoc: $r" }
+            if (-not (& $DuHan 14400 $r)) { throw "bien the $($b.ten): HanGiay 14400 phai du cho $r phut" }
+        }
+    }
+    # Trần Windows 240 của biểu thức đóng băng: HanGiay < 14400 phải bị coi là THIẾU; mặc định hiện hành phải ≥ 14400.
+    if (& $DuHan 14399 240) { throw 'HanGiay 14399 < 14400 ma van duoc coi la du cho tran Windows 240' }
+    if (& $DuHan 9000 240) { throw 'HanGiay 9000 (mac dinh cu) ma van duoc coi la du cho tran Windows 240' }
+    if (-not (& $DuHan $mac 240)) { throw "HanGiay mac dinh $mac s < 14400 s cua tran Windows 240" }
 }
 
 Ca 't10 goc kho co [ ] => bao dung nguyen nhan, khong bao "khong tim thay goc"' {

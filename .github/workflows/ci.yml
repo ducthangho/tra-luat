@@ -1125,7 +1125,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     # WP856 (chu kho, PR #866): 60 -> 120. Run 39722546630: Ubuntu 40,4 phut (truoc 22,4) sau khi
     # #856 them ma tran T1-T6; Windows van chay o phut ~46, sat tran 60.
-    timeout-minutes: 150
+    # WP1325 (owner r50): chi Windows 150 -> 240 (Ubuntu giu 150); t9 cua chay-cong-windows_test.ps1 chi
+    # nhan dung bieu thuc nay voi tran Windows 240. Tang tran KHONG phai loi hua chua hieu nang.
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 240 || 150 }}
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

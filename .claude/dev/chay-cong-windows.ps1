@@ -64,7 +64,11 @@
     In toàn bộ output của mọi cổng. Mặc định chỉ in output của cổng ĐỎ.
 
 .PARAMETER HanGiay
-    Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định 9000 = `timeout-minutes: 150` — trần LỚN NHẤT của các job
+    Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định HIỆN HÀNH 14400 = 240 phút (wp1325 r3, owner r50): job
+    `gate-packet-loop` của `ci.yml` đặt `timeout-minutes: ${{ matrix.os == 'windows-latest' && 240 || 150 }}`
+    — Windows 240, Ubuntu 150 — nên trần Windows LỚN NHẤT của các job `gate*` là 240. t9 chỉ nhận số nguyên
+    dương hoặc ĐÚNG NGUYÊN VĂN biểu thức ấy (= 240), không eval biểu thức lạ; nâng trần không hứa chữa hiệu năng.
+    Lịch sử: trước wp1325 mặc định 9000 = `timeout-minutes: 150` — trần LỚN NHẤT của các job
     `gate*` trên master 1a269f5 (`gate-cong-cu` từ #849; #910 đưa thêm `gate` `gate-ops` `gate-packet-loop`
     `gate-nhanh-manh` `gate-registry` lên 150), t9 đọc `ci.yml` của cây và đòi ≥ (wp923: 6300 → 9000, t9 ĐỎ trên
     1a269f5). Trước đó 6300 = `timeout-minutes: 105` của job `gate-registry` trên master 8b59185. Trước nữa
@@ -101,7 +105,7 @@ param(
     [switch]$CaiCongCu,
     [switch]$ChiTiet,
     [ValidateRange(1, 86400)]
-    [int]$HanGiay = 9000,
+    [int]$HanGiay = 14400,
     [string]$AlVer = '1.7.7'
 )
 

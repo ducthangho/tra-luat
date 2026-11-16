@@ -40,7 +40,12 @@
 #   t30 guong-lenh-bo-env-buoc                    `env:` của bước cổng: mọi khoá `env` (workflow/job/bước) của job `gate*` trong ci.yml và
 #                                                 của `ci-dot-bien-du.yml` có mặt trong script (wp1325 r4: kể cả `CI_DANG_KY_GOP_KQ`,
 #                                                 `CONG_CU_TEST_GOP_CHE_DO`, `NHANH_DON_DUOC_DICH{,_RA,_DU}`); MỌI khoá ấy RÒ từ phiên gọi đều bị xoá
-#                                                 trước khi tới cổng; `test registry` mang env `pull_request` (GOC/DAU đúng) khi cây
+#                                                 trước khi tới cổng (wp1325 r5: cả họ biến chọn chế độ/kênh tầng đỉnh của
+#                                                 `nhanh_don_duoc_test` — `CHI_TU_KIEM`, `KHONG_DOT_BIEN`, `TU_KIEM_CHI_CA`, `KENH`,
+#                                                 `DAU_PHIEN`, `MUTANT`, `LAN_THU`, `TU_KIEM_NONCE`, `TU_KIEM_FILE` —: đồ giả quan sát của
+#                                                 lượt `day-du` gọi ĐỘC LẬP, không đối số, phải thấy từng biến VẮNG, lượt gộp + từng biến
+#                                                 rút gọn một lượt; biến canh không bị xoá phải tới được nó — chỉ là kho GIẢ, KHÔNG phải
+#                                                 bằng chứng vòng đột biến thật đã chạy); `test registry` mang env `pull_request` (GOC/DAU đúng) khi cây
 #                                                 SẠCH + HEAD đi trước `origin/master`, vắng (ĐỦ) khi bẩn, khi có mục assume-unchanged /
 #                                                 skip-worktree bị sửa, hoặc khi không đi trước
 #   t31 env-cong-cu-phien-goi-lot-qua             `PYTHON*` lạ (`PYTHONOPTIMIZE` gỡ `assert` trần), biến git cục bộ của kho (tập lấy từ
@@ -926,6 +931,12 @@ Ca 't29 dist THEO DOI => tu choi TRUOC khi ghi qua no' {
 # `cong_cu_test` rc=0 mà bỏ trọn bán kính 416 đột biến. Đo với b5a9f79: `CONG_CU_TEST_MANH=15/16` rò ⇒ `cong_cu_test` rc=0, 26/416,
 # bỏ cổng cây thật; `NHANH_DON_DUOC_MANH=7/8` rò ⇒ `nhanh_don_duoc_test` chạy MẢNH 783 s thay vì NHẸ 2 s, registry ĐỎ vì máy.
 Ca 't30 env cua buoc cong: khoa ci.yml co mat, bien ro bi xoa, registry mang env pull_request khi do duoc diff' {
+    # wp1325 r5: biến chọn chế độ / kênh bằng chứng mà `main()` của `ops/nhanh_don_duoc_test.py` đọc ở tầng đỉnh (ngoài
+    # `NHANH_DON_DUOC_MANH*`/`_DICH*` ở trên). Hai biến đầu đo được trên AST thật (chạy trong bộ nhớ, hàm nặng thay bằng đồ đứng
+    # thế — KHÔNG phải lượt trọn thật): `CHI_TU_KIEM` ⇒ chỉ tự kiểm, `KHONG_DOT_BIEN` ⇒ chỉ ca nền; cả hai rc=0, không đột biến.
+    $ndRutGon = @('NHANH_DON_DUOC_CHI_TU_KIEM', 'NHANH_DON_DUOC_KHONG_DOT_BIEN', 'NHANH_DON_DUOC_TU_KIEM_CHI_CA', 'NHANH_DON_DUOC_KENH',
+                  'NHANH_DON_DUOC_DAU_PHIEN', 'NHANH_DON_DUOC_MUTANT', 'NHANH_DON_DUOC_LAN_THU', 'NHANH_DON_DUOC_TU_KIEM_NONCE',
+                  'NHANH_DON_DUOC_TU_KIEM_FILE')
     $ci = Join-Path $GocKho '.github/workflows/ci.yml'
     $py = Tim-PyYaml; $pd = $py.Dau
     $ma = "import os,sys,yaml`ndef k(p,chon):`n d=yaml.safe_load(open(p,encoding='utf-8')); s=set(d.get('env') or {})`n" +
@@ -948,7 +959,7 @@ Ca 't30 env cua buoc cong: khoa ci.yml co mat, bien ro bi xoa, registry mang env
                             'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CI_DUONG_NHANH_SU_KIEN',
                             'CI_DUONG_NHANH_GOC', 'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE',
                             'CI_DANG_KY_GOP_KQ', 'CONG_CU_TEST_GOP_CHE_DO', 'NHANH_DON_DUOC_DICH', 'NHANH_DON_DUOC_DICH_RA',
-                            'NHANH_DON_DUOC_DICH_DU') |
+                            'NHANH_DON_DUOC_DICH_DU') + $ndRutGon |
                Where-Object { $_ -notlike 'PYTHON*' } | Sort-Object -Unique)
     $k = Dung-Kho
     Set-Content -LiteralPath (Join-Path $k '.claude/dev/ci_dang_ky_test.py') -Encoding utf8NoBOM -Value @'
@@ -966,6 +977,20 @@ ro = [n for n in os.environ.get("STUB_KHOA_RO", "").split(",") if n and n != "AL
 print("CC_RO=" + ",".join(ro))
 sys.exit(7 if ro else 0)
 '@
+    # Đồ giả QUAN SÁT của lượt TRỌN `nhanh_don_duoc_test` (`day-du`): ghi argv, biến RÒ nó thấy (danh sách rò ∪ cả họ `NHANH_DON_DUOC_*`)
+    # và biến canh KHÔNG bị xoá (chứng minh nó thấy env của phiên gọi — vắng mới có nghĩa) ra tệp; thoát 0 CHỈ KHI gọi độc lập không
+    # đối số, không thấy biến rò nào và thấy biến canh.
+    Set-Content -LiteralPath (Join-Path $k 'ops/nhanh_don_duoc_test.py') -Encoding utf8NoBOM -Value @'
+import json, os, sys
+dat = {"AL_VER", "CI_DANG_KY_WORKERS", "CI_DANG_KY_SU_KIEN", "CI_DANG_KY_GOC", "CI_DANG_KY_DAU"}   # script tu dat (nhu do gia registry)
+ro = sorted({n for n in os.environ.get("STUB_KHOA_RO", "").split(",") if n and n not in dat and n in os.environ}
+            | {n for n in os.environ if n.upper().startswith("NHANH_DON_DUOC_")})
+qs = {"tep": os.path.basename(sys.argv[0]), "argv": sys.argv[1:], "ro": ro, "canh": os.environ.get("STUB_NDD_CANH")}
+with open(os.environ["STUB_NDD_QUAN_SAT"], "w", encoding="utf-8") as f:
+    json.dump(qs, f)
+print("NDD_QUAN_SAT=" + json.dumps(qs))
+sys.exit(0 if not ro and not qs["argv"] and qs["canh"] == "co" else 7)
+'@
     & git -C $k add -A
     & git -C $k -c user.email=t@t -c user.name=t commit -qm stub-env
     & git -C $k update-ref refs/remotes/origin/master HEAD
@@ -977,6 +1002,7 @@ sys.exit(7 if ro else 0)
     $ro = @{ STUB_KHOA_RO = ($tenRo -join ',') }
     foreach ($n in $tenRo) { $ro[$n] = 'ro' }
     $ro['CONG_CU_TEST_BAN_KINH'] = 'manh'; $ro['CI_DANG_KY_DOT_BIEN_MANH'] = 'ops/nhanh_don_duoc_test.py'; $ro['CI_DANG_KY_SU_KIEN'] = 'push'
+    $ro['NHANH_DON_DUOC_CHI_TU_KIEM'] = '1'; $ro['NHANH_DON_DUOC_KHONG_DOT_BIEN'] = '1'
     $ro['CI_DANG_KY_GOC'] = $dau; $ro['CI_DANG_KY_DAU'] = $goc
     $a = Chay $k @() ($ro + @{ STUB_REG_MONG = "2|pull_request|$goc|$dau|" })
     if ($a.ra -notmatch 'cong_cu_test\s+rc=0') { throw "bien che do ro tu phien goi toi cong_cu_test (rc_script=$($a.rc))" }
@@ -1000,6 +1026,26 @@ sys.exit(7 if ro else 0)
     & git -C $k update-ref refs/remotes/origin/master HEAD
     $c = Chay $k @() ($ro + @{ STUB_REG_MONG = '2||||' })
     if ($c.ra -notmatch 'registry test\s+rc=0') { throw "HEAD khong di truoc origin/master ma registry van mang env diff (rc_script=$($c.rc))" }
+    # Lượt `day-du`: lượt TRỌN `nhanh_don_duoc_test` (thay 8 mảnh + gom) phải tới đồ giả ĐỘC LẬP, không đối số, VẮNG mọi biến rò.
+    # Lượt gộp (mọi khoá rò ở trên) rồi TỪNG biến rút gọn tầng đỉnh một lượt riêng (chỉ biến ấy rò) — bỏ một tên khỏi danh sách xoá
+    # của script thì đúng lượt / đúng tên ấy ĐỎ. Đây là kho GIẢ: chứng minh biến không tới cổng, KHÔNG chứng minh vòng đột biến thật chạy.
+    $qsTep = Join-Path (Split-Path $k) 'ndd-quan-sat.json'
+    $luot = @([pscustomobject]@{ Ten = 'gop'; Env = $ro; Mong = $tenRo })
+    foreach ($n in $ndRutGon) {
+        $luot += [pscustomobject]@{ Ten = $n; Env = @{ STUB_KHOA_RO = $n; $n = $(if ($n -in 'NHANH_DON_DUOC_CHI_TU_KIEM', 'NHANH_DON_DUOC_KHONG_DOT_BIEN') { '1' } else { 'ro' }) }; Mong = @($n) } }
+    foreach ($l in $luot) {
+        Remove-Item -LiteralPath $qsTep -Force -ErrorAction SilentlyContinue
+        $d = Chay $k @('-Muc', 'day-du') ($l.Env + @{ STUB_REG_MONG = '2||||'; STUB_BUNDLE = 'same'; STUB_NDD_QUAN_SAT = $qsTep; STUB_NDD_CANH = 'co' })
+        if (-not (Test-Path -LiteralPath $qsTep)) { throw "KHONG DO DUOC: luot day-du ($($l.Ten)) khong goi ops/nhanh_don_duoc_test.py (rc_script=$($d.rc))" }
+        $qs = Get-Content -LiteralPath $qsTep -Raw -Encoding utf8 | ConvertFrom-Json
+        if ($qs.tep -ne 'nhanh_don_duoc_test.py' -or @($qs.argv).Count -ne 0) { throw "luot TRON nhanh_don_duoc_test ($($l.Ten)) khong goi doc lap khong doi so: tep=$($qs.tep) argv=$(@($qs.argv) -join ' ')" }
+        if ($qs.canh -ne 'co') { throw "KHONG DO DUOC: do gia nhanh_don_duoc_test ($($l.Ten)) khong thay bien canh cua phien goi — vang khong co nghia" }
+        $thay = @(@($qs.ro) | Where-Object { $_ })
+        if ($thay.Count -gt 0) { throw "bien ro tu phien goi toi luot TRON nhanh_don_duoc_test (day-du, $($l.Ten)): $($thay -join ', ')" }
+        if ($d.ra -notmatch 'nhanh_don_duoc_test\s+rc=0') { throw "luot day-du ($($l.Ten)): cong nhanh_don_duoc_test khong rc=0 du do gia thay env sach (rc_script=$($d.rc))" }
+        $chua = @($l.Mong | Where-Object { -not $l.Env.ContainsKey($_) })
+        if ($chua.Count -gt 0) { throw "KHONG DO DUOC: luot $($l.Ten) khong ro $($chua -join ', ')" }
+    }
 }
 
 # Biến của TRÌNH THÔNG DỊCH / git / bash từ phiên gọi — job CI không có biến nào trong số đó, nên chúng là một phần của lệnh như `env:`

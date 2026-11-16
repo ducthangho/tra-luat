@@ -151,12 +151,22 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 # `NHANH_DON_DUOC_DICH`/`NHANH_DON_DUOC_DICH_RA` (bước mảnh của `gate-nhanh-manh`) và `NHANH_DON_DUOC_DICH_DU` (lượt tuần
 # `ci-dot-bien-du.yml`). Rò `NHANH_DON_DUOC_DICH*` thì cổng `nhanh_don_duoc_test` (chạy TRỌN, xem cuối mức `day-du`) thành MỘT mảnh.
 # Xoá ở ĐÂY, trước mọi cổng; `CI_DANG_KY_*` mà script tự đặt vẫn được đặt lại ngay trước `registry test`.
+# wp1325 r5: MỌI biến chọn chế độ / kênh bằng chứng mà `main()` của `ops/nhanh_don_duoc_test.py` đọc ở TẦNG ĐỈNH (rà cả họ
+# `NHANH_DON_DUOC_*`): `NHANH_DON_DUOC_CHI_TU_KIEM` (chỉ tự kiểm, bỏ ca nền + đột biến, rc=0) và `NHANH_DON_DUOC_KHONG_DOT_BIEN`
+# (chỉ ca nền, bỏ đột biến, rc=0) biến lượt TRỌN ở cuối `day-du` thành lượt rút gọn mà vẫn ĐẠT; `NHANH_DON_DUOC_TU_KIEM_CHI_CA`
+# (một ca tự kiểm), `NHANH_DON_DUOC_KENH`/`_DAU_PHIEN`/`_MUTANT`/`_LAN_THU` (kênh của lượt con đột biến) và
+# `NHANH_DON_DUOC_TU_KIEM_NONCE`/`_TU_KIEM_FILE` (kênh bằng chứng tự kiểm) là đầu vào của tiến trình CON mà chính bộ test tự đặt.
+# Không workflow nào khai chúng ⇒ biến của phiên gọi, xoá ở ranh giới. Bộ test tự đặt chúng cho con SAU lúc này (env riêng của
+# lượt con) — không bị ảnh hưởng. t30 rò TỪNG biến và đòi đồ giả `nhanh_don_duoc_test` của lượt `day-du` thấy VẮNG.
 foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA',
                'CONG_CU_TEST_GOP_CHE_DO',
                'CI_DANG_KY_WORKERS', 'CI_DANG_KY_SU_KIEN', 'CI_DANG_KY_GOC', 'CI_DANG_KY_DAU', 'CI_DANG_KY_DOT_BIEN_MANH',
                'CI_DANG_KY_GOP_KQ',
                'NHANH_DON_DUOC_MANH', 'NHANH_DON_DUOC_MANH_RA', 'NHANH_DON_DUOC_DICH', 'NHANH_DON_DUOC_DICH_RA',
-               'NHANH_DON_DUOC_DICH_DU', 'CI_DUONG_NHANH_SU_KIEN', 'CI_DUONG_NHANH_GOC',
+               'NHANH_DON_DUOC_DICH_DU', 'NHANH_DON_DUOC_CHI_TU_KIEM', 'NHANH_DON_DUOC_KHONG_DOT_BIEN',
+               'NHANH_DON_DUOC_TU_KIEM_CHI_CA', 'NHANH_DON_DUOC_KENH', 'NHANH_DON_DUOC_DAU_PHIEN', 'NHANH_DON_DUOC_MUTANT',
+               'NHANH_DON_DUOC_LAN_THU', 'NHANH_DON_DUOC_TU_KIEM_NONCE', 'NHANH_DON_DUOC_TU_KIEM_FILE',
+               'CI_DUONG_NHANH_SU_KIEN', 'CI_DUONG_NHANH_GOC',
                'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE', 'CI_DUONG_NHANH_CHE_DO') {
     [Environment]::SetEnvironmentVariable($n, $null)
 }
@@ -613,7 +623,7 @@ if ($Muc -eq 'day-du') {
     else { Noi '  KHÔNG CHẠY ngoài Linux (ci.yml gác RUNNER_OS = Linux trong bước lease-publish): "update-linux selftest" — ops/environment/update-linux.sh --selftest.' }
     # Job `gate-nhanh-manh` (8 mảnh `targeted_mutant_gate`, env `NHANH_DON_DUOC_DICH=k/8`) + `gate-nhanh-gop` (`--gop-dich manh`)
     # (master từ f7b76c3, WP748): script KHÔNG dựng mảnh + artifact mà chạy `ops/nhanh_don_duoc_test.py` TRỌN một lượt (không biến
-    # `NHANH_DON_DUOC_DICH*` — đã xoá ở đầu script), như `cong_cu_test` thay cho mảnh + gom của `gate-cong-cu`. Lượt trọn mạnh hơn mảnh
+    # `NHANH_DON_DUOC_DICH*` lẫn biến rút gọn `NHANH_DON_DUOC_CHI_TU_KIEM`/`_KHONG_DOT_BIEN` — đã xoá ở đầu script), như `cong_cu_test` thay cho mảnh + gom của `gate-cong-cu`. Lượt trọn mạnh hơn mảnh
     # targeted (mọi đột biến chạy đủ ca) và chậm hơn (> 540 s). Bước gom không có đầu vào ⇒ dòng `THAY BẰNG` ở cuối mức này.
     # `registry test` của script KHÔNG mang `CI_DANG_KY_DOT_BIEN_MANH`/`CI_DANG_KY_GOP_KQ` (đã xoá): kế hoạch của nó tự quyết
     # NHẸ/ĐỦ cho `nhanh_don_duoc_test` theo diff, nên lượt trọn ở đây là chỗ DUY NHẤT luôn chạy vòng đột biến ấy.

@@ -176,6 +176,76 @@ were equal before and after every run.
 - AST parse of both Python files and `git diff --check` pass. The pre-existing
   invalid-escape `SyntaxWarning` in the test file is unchanged.
 
+## r5/g7 remediation: canonical-byte exactness
+
+Base `H`: `98c7389d91027e1d7eeccaea26e50332773249bf`. This section answers the
+single finding of the independent source review of `H`,
+`WP1315-S3-F1-type-coercing-exactness` (P2). It supersedes the statements above
+only where they say the Python bytes equal H669 and where they give the g5
+hashes and measurements; nothing else in the design changed. That review is not
+an approval of this revision.
+
+Defect: the exact adopted-projection check in `_1315_pending_projection` and the
+exact postimage check in `_1174_postimage` compared dictionaries with Python
+equality, under which `1 == True == 1.0`. A live image or a proposal whose
+historical entry changed type (for example `history[1].attempt` from `1` to
+`true`) therefore passed as "exact", and recovery persisted history whose
+canonical JSON bytes differed from the required history. Dispatch was never
+granted; this was an integrity-validator gap.
+
+Fix: both comparisons now compare `_1174_bytes(...)` of both sides. No other
+product line changed; guards, whitelists, messages and the append-only checks
+are as before. Stricter comparison rejects type-changed images that were
+previously tolerated, which the exact-history contract requires.
+
+Tests (existing frozen case IDs only; `CASES` and `MUTANTS` unchanged):
+
+- `wp1315_adopted_pending_valid` (and `_historical`, same function): the
+  history-preservation assertion compares canonical bytes of the historical
+  prefix instead of Python equality. This remains the untouched recovery
+  control.
+- `wp1315_adopted_pending_rejections`: two projection probes,
+  `history_attempt_bool` and `history_attempt_float`, change only live
+  `history[1].attempt` from `1` to `true` / `1.0`, keep the adoption snapshot and
+  tombstone, and recompute the witness `high_water`. Each must give rc 8,
+  `dispatch_allowed` false, no probe/sync/write, unchanged source/state/witness
+  bytes and the reason `pending recovery exact adopted projection required`.
+- `wp1315_pending_postimage_exact`: two postimage probes of the same names
+  change the reducer proposal's `history[1].attempt` to `true` / `1.0`, with the
+  same rejection requirements and the reason
+  `pending recovery exact postimage required`. The float postimage probe is an
+  addition beyond the requested boolean one.
+
+Hashes after this change: product
+`ca5117ea3400a926c5d20593a59646518799d0ade09676b0a531bc732bdc48ad`, tests
+`17bcd5a795cb916e3c5ba18d3f56c2b76b906e10246b9f361fab4632b3f82eaf`.
+
+Evidence (author, private synthetic Linux checks, Python 3.13.18, `python -B`,
+same selection method and seams as above; a scratch copy was used for every run
+on non-candidate bytes):
+
+- Red before: with the product at `H` and the new tests, exactly
+  `wp1315_adopted_pending_rejections` and `wp1315_pending_postimage_exact` fail
+  of the eleven groups. With each of the four probes isolated in turn, its case
+  fails on `H` because recovery returns rc 0 / `completed_no_dispatch`, and
+  passes on the fixed product.
+- Mutation: reverting only the projection comparison fails only
+  `wp1315_adopted_pending_rejections`; reverting only the postimage comparison
+  fails only `wp1315_pending_postimage_exact`. The other ten groups pass in each.
+- On the candidate: 11 of 11 groups and 13 of 13 controls passed, 0 skipped,
+  0 not_run, executed sets equal the required sets; the four registered mutants
+  are killed with unique anchors and all their controls pass.
+- Ruff F rules (ruff 0.16.9, standalone binary): 16 messages on the candidate,
+  16 on `C` and 16 on `H`, identical multisets ignoring line numbers; delta 0.
+  AST parse and `git diff --check` pass.
+
+Limits: the remaining append-only prefix checks in `_1174_postimage`
+(`history`, `reviews`, `nang_tran`) and the immutable-field check still use
+Python equality. They were outside the finding and were not changed; in the
+pending-recovery path the whole-postimage byte comparison runs before them. The
+"Not measured by this author" list below applies unchanged to this revision,
+and a fresh independent source review of the new head is outstanding.
+
 ## Historical evidence (old head only)
 
 The r37/r39 measurements, private evidence directories and hashes recorded for

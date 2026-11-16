@@ -15956,7 +15956,8 @@ def _pending_valid1315(c, historical=False):
     mutable = {"lease","ngu_canh_lease","luat_adr0054","state","reviewing_head_sha","state_revision","history",
                "pending_sha","bien_nhan_approve","mo_lai_tu","checkpoint_day","moc_connector","quyet_dinh_p3"}
     assert all(new.get(k) == adopted.get(k) for k in set(new)|set(adopted) if k not in mutable)
-    assert new["history"][:-1] == adopted["history"]
+    # Canonical bytes, not Python equality: 1 == True == 1.0 must not count as preserved history.
+    assert m._1174_bytes(new["history"][:-1]) == m._1174_bytes(adopted["history"])
     assert new["finding_counts"] == {"historic-finding":1} and all(x["da_dung"] for x in new["codex_calls"])
     assert new["attempts_used"] == new["review_rounds_used"] == new["codex_review_calls_used"] == 2
     event = new["history"][-1]
@@ -16038,6 +16039,15 @@ def _pending_rejections1315(c):
             witness.write_bytes(m._1174_bytes(water))
         elif variant=="tombstone":source.write_bytes(b"synthetic replaced predecessor\n")
         invoke(argv,rejected=True,reason=reason,label=variant)
+    # Type-coercing probes: only live history[1].attempt changes (1 -> true / 1.0); the
+    # immutable adoption snapshot and tombstone stay intact and image() keeps the witness
+    # high_water consistent. Python equality still holds; canonical bytes differ.
+    assert type(adopted["history"][1]["attempt"]) is int and adopted["history"][1]["attempt"] == 1
+    for variant,value in [("history_attempt_bool",True),("history_attempt_float",1.0)]:
+        restore();changed=copy.deepcopy(adopted);changed["history"][1]["attempt"]=value
+        assert changed == adopted and m._1174_bytes(changed) != original[1]
+        image(changed)
+        invoke(argv,rejected=True,reason="pending recovery exact adopted projection required",label=variant)
     for variant,reason in [
         ("no_i2","scoped lease authority missing"), ("context_generation","scoped lease authority mismatch"),
         ("lease_generation","scoped lease authority mismatch"), ("identity","scoped lease authority mismatch"),
@@ -16238,10 +16248,14 @@ def _pending_postimage1315(c):
         "inferred":lambda p:p.update(dem_tu_suy=True),
         "extra_history":lambda p:p["history"].append(dict(event="extra")),
         "missing_history":lambda p:p["history"].pop(),
+        # Equal under Python ==, different canonical bytes (1 -> true / 1.0).
+        "history_attempt_bool":lambda p:p["history"][1].update(attempt=True),
+        "history_attempt_float":lambda p:p["history"][1].update(attempt=1.0),
         "policy":lambda p:p.update(luat_adr0054=True),
         "context":lambda p:p["ngu_canh_lease"].update(branch="agent/other"),
         "lease":lambda p:p["lease"].update(expires_utc="2000-01-01T00:00:00Z"),
         "approval_state":lambda p:p.update(state="approved_pending")}
+    assert type(adopted["history"][1]["attempt"]) is int and adopted["history"][1]["attempt"] == 1
     for label,mutate in mutations.items():
         for path,raw in zip((source,target,witness),original):path.write_bytes(raw)
         def tampered(*args, **kwargs):

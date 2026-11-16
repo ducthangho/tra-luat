@@ -4933,7 +4933,7 @@ def _1315_pending_projection(state, admission, source):
         state_revision=state["state_revision"], enrollment_id=admission["enrollment"]["id"],
         binding_sha256=admission["enrollment"]["binding_sha256"], adoption=state.get("adoption"),
         scoped_review=None, human_acceptance=None)
-    _1174_require(state == expected, "pending recovery exact adopted projection required")
+    _1174_require(_1174_bytes(state) == _1174_bytes(expected), "pending recovery exact adopted projection required")
     return predecessor
 
 
@@ -5352,7 +5352,7 @@ def _1174_postimage(old, new, command, admission, facts=None):
         _1174_require(type(facts) is dict and "verified_i2" in facts, "pending recovery postimage requires canonical I2")
         expected = _1315_pending_recovery(old, admission, facts["verified_i2"])
         expected["state_revision"] += 1
-        _1174_require(new == expected, "pending recovery exact postimage required")
+        _1174_require(_1174_bytes(new) == _1174_bytes(expected), "pending recovery exact postimage required")
     core_extra = {"reviewing_head_sha"} if pending_recovery else set()
     optional_extra = _1315_STALE_PENDING if pending_recovery else set()
     _1174_require(changed - set(_1174_OPTIONAL) <= _1174_CORE_WRITES[command] | {"state_revision"} | core_extra, "core command whitelist")

@@ -1,0 +1,91 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1345
+packet_id: wp1345
+spec_packet_id: LAUNCHER-PY311-WIN-CURDIR
+revision: 1
+generation: 1
+lease_id: wp1345-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-fable-5-2
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: 'hotfix hoi quy #1335; executor Claude Fable 5.2, reviewer Codex connector; human_audited tren exact head truoc merge; KHONG Windows.'
+depends_on: []
+spec_path: ops/specs/LAUNCHER-PY311-WIN-CURDIR-r1.md
+spec_ref: refs/heads/ops/wp1345-r1-g1-lease
+spec_nguon: 'dac ta tren nhanh lease nay; dinh danh theo grammar ADR-0063. Ghim bang spec_hash.'
+spec_sha256_required: 07f7ff756ab0302a03809de29c0859d4e80dcbd80170755368222394dc1e093c
+spec_hash: 07f7ff756ab0302a03809de29c0859d4e80dcbd80170755368222394dc1e093c
+spec_duyet: 'hoi quy cua #1335 do phien dieu phoi phat hien; chi dao dung chu kho trien khai lien tuc (#1206 issuecomment-6918292696); chu kho xac nhan qua human audit cuoi packet.'
+prompt_path: ops/specs/LAUNCHER-PY311-WIN-CURDIR-r1.md
+prompt_sha256_required: 07f7ff756ab0302a03809de29c0859d4e80dcbd80170755368222394dc1e093c
+write_set:
+- .claude/dev/launcher.py
+write_set_hash: 44f024fdafebd23f37f9333a0cc17284e7135b28917c4c73dc34d87570e3534b
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/launcher.py
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'N1-N3 cua dac ta r1 dat tren exact head'}
+- {id: M-2, dieu_kien: 'ADR-0060: CI required xanh tren exact head; 0 P0-P2 mo; connector da review dung commit; human audit human_exact_head_audit.v1 tren H'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chi cap quyen thi cong; merge/land do chu kho duyet dung SHA.'
+branch: agent/wp1345-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: b8bc64f99f43f382ceb90aadbe57df783842a28d
+start_from_sha: b8bc64f99f43f382ceb90aadbe57df783842a28d
+start_from_ghi_chu: 'origin/master luc cap lease (merge PR #1344).'
+reviewed_sha_required: b8bc64f99f43f382ceb90aadbe57df783842a28d
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1345
+granted_on_instruction_readback: 'chu kho 16-11 ~22:3xZ: "Tiep tuc P-C va ho so land luon"; chi dao dung trien khai lien tuc.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+executor_ghi_chu: 'Executor la phien Claude Code cloud do phien dieu phoi mo (create_session, model claude-fable-5-2); phien dieu phoi khong tu thi cong.'
+recorder_ghi_chu: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS ghi lease, KHONG phai executor; phien dieu phoi chay review Codex.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-16T22:29:00Z'
+  goc_quet: 'container phien #1206, fetch +refs/heads/*; so tap ten thieu 0'
+  ket_qua: '.claude/dev/launcher.py: NGUOI_GIU 0 (wp1335-r3-g1-claude HET_HAN).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
+leased_at_utc: '2026-11-16T22:29:00Z'
+heartbeat_at: '2026-11-16T22:29:00Z'
+heartbeat_required_minutes: 360
+heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
+lease_until: '2026-11-17T10:29:00Z'
+lease_expires_at_utc: '2026-11-17T10:29:00Z'
+lease_until_ghi_chu: '12h; rut han ngay sau land.'
+attempts_used: 1
+attempts_limit: 2
+attempts_basis: '<= 2 phien executor.'
+budget:
+  codex_review_calls:
+    pr_wp1345_g1: {used: 0, reserved: 0, limit: 10}
+  ci_ubuntu_runs:
+    pr_wp1345_g1: {used: 0, reserved: 0, limit: 2}
+  windows_native_runs:
+    pr_wp1345_g1: {used: 0, reserved: 0, limit: 0}
+  khong_reset_theo_generation: true
+budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows 0 (chi dao chu kho).'
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

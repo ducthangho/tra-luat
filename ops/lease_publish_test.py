@@ -7171,6 +7171,7 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
          t151_review_codex_to_tien_non_tree_metadata_rac_va_khoa_lan_kieu, "GIET", "kiem_ban_ghi_thu_hoi"),
     ]
     muts += [(i, c, m, globals()[d], "GIET", "ADR-0066", dau, tep) for i, c, m, ds, tep in _AMB_DOT_BIEN for d, dau in ds]
+    muts += [(i, c, m, globals()[d], "GIET", "#1331", dau, None) for i, c, m, ds in _U8_DOT_BIEN for d, dau in ds]
     ket = {"GIET": 0, "SONG": 0, "TIN_DUNG_GIA": [], "SAI_KY_VONG": []}
     with San() as s:
         sys.dont_write_bytecode = True
@@ -7212,8 +7213,8 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
           f"tín dụng giả={len(ket['TIN_DUNG_GIA'])}")
     chot(not ket["TIN_DUNG_GIA"], f"mutant chết vì lỗi VÔ CAN (tín dụng giả): {ket['TIN_DUNG_GIA']}")
     chot(not ket["SAI_KY_VONG"], f"catalog lệch: {ket['SAI_KY_VONG']}")
-    chot(ket["GIET"] + ket["SONG"] == len(muts) == 83, f"mẫu số phải cố định 83 (37 A0 + 46 amb-m* ADR-0066): {ket}")
-    chot(ket["GIET"] == 80 and ket["SONG"] == 3, f"catalog kỳ vọng 80 giết / 3 SỐNG: {ket}")
+    chot(ket["GIET"] + ket["SONG"] == len(muts) == 105, f"mẫu số phải cố định 105 (37 A0 + 46 amb-m* ADR-0066 + 22 u8-m* #1331): {ket}")
+    chot(ket["GIET"] == 102 and ket["SONG"] == 3, f"catalog kỳ vọng 102 giết / 3 SỐNG: {ket}")
 
 
 # wp488 review lượt 1: regression hints; fixture/control local, không mạng.
@@ -14551,9 +14552,10 @@ def t234_a1a_recursive_yaml_duplicate_unknown_and_cli_invariance():
 def t235_a1a_audit_presence_does_not_control_discovery():
     from io import StringIO; from types import SimpleNamespace; from unittest import mock
     mod = _nap_cong(); h = mod.hoso_adapter_do(); digest = mod.bam_ho_so(h); omitted = {k: v for k, v in h.items() if k != "git_sha256"}
-    answer = SimpleNamespace(returncode=0, stdout="ref: refs/heads/master\tHEAD\n" + "a" * 40 + "\trefs/heads/master\n", stderr="")
+    # #1331: `subprocess.run` không `text=True` trả BYTES; đối tượng mới mỗi lời gọi vì `_chay_utf8` gán lại stdout/stderr.
+    answer = lambda *a, **k: SimpleNamespace(returncode=0, stdout=("ref: refs/heads/master\tHEAD\n" + "a" * 40 + "\trefs/heads/master\n").encode(), stderr=b"")
     with mock.patch.object(mod, "_git_exe_toi_thieu", return_value=h["git_path"]), mock.patch.object(mod, "_repo_tam_co_lap", return_value=HERE), \
-            mock.patch.object(mod, "_env_rong", return_value={}), mock.patch.object(mod.subprocess, "run", return_value=answer) as discovery:
+            mock.patch.object(mod, "_env_rong", return_value={}), mock.patch.object(mod.subprocess, "run", side_effect=answer) as discovery:
         def check(name, profile, approved, want_rc, warned, calls):
             discovery.reset_mock()
             with mock.patch.object(mod.sys, "stderr", StringIO()) as warning:
@@ -15305,6 +15307,338 @@ def t255_amb10_chu_thich_workflow_adr0066():
         chot(_amb_b10(van.replace(cu, moi)) == mong, f"B10 tự kiểm {mo_ta}: {_amb_b10(van.replace(cu, moi))} != {mong}")
 
 
+# =====================================================================================
+# #1331 (SUBPROCESS-UTF8-LEASE-PUBLISH): đo trên `tra-luat-win` (cp1252, không PYTHONUTF8) — output UTF-8 đọc qua
+# `subprocess(text=True)` thành mojibake, KHÔNG có ngoại lệ, so khớp ra False âm thầm. Bảy lời gọi cùng lớp nay đi qua
+# `_chay_utf8` (bytes → UTF-8 strict). Đồ giả theo kiểu `t25a` (`.claude/hooks/subagent_ghi_detect_test.py`): có
+# `text=`/`universal_newlines=` thì trả chuỗi giải mã bằng cp1252 (đúng tầng text của Windows), không thì trả bytes.
+# =====================================================================================
+_U8_P = "C:/tl-win/Quốc hội"
+_U8_JSON = '{"html_url": "https://github.com/o/r/issues/5", "body": "Tiếng Việt"}'
+
+
+def _u8_gia(tra_loi, nhat_ky=None):
+    def run(argv, **kw):
+        a = [str(x) for x in argv]
+        if nhat_ky is not None:
+            nhat_ky.append(a)
+        rc, out, err = tra_loi(a)
+        if kw.get("encoding") or kw.get("text") or kw.get("universal_newlines"):
+            ma = kw.get("encoding") or "cp1252"
+            out, err = out.decode(ma, kw.get("errors") or "strict"), err.decode(ma, kw.get("errors") or "strict")
+        return subprocess.CompletedProcess(argv, rc, out, err)
+    return run
+
+
+def _u8_ra(rc=0, out="", err=""):
+    return rc, out.encode("utf-8") if isinstance(out, str) else out, err.encode("utf-8") if isinstance(err, str) else err
+
+
+def _u8_git(s):
+    g = Path(s) / "git"
+    g.write_bytes(b"git-gia")
+    return str(g)
+
+
+@ca
+def t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252():
+    """M4: mỗi lời gọi trong bảy lời gọi có một khẳng định riêng `U<k> <hàm>` (neo đột biến u8-m01..m07 của t139)."""
+    import json
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        g = _u8_git(s)
+        with mock.patch.object(mod.subprocess, "run", _u8_gia(lambda a: _u8_ra(out=_U8_JSON))):
+            p = mod.GOI_GH("repos/o/r/issues/5")
+            d = mod._doc_gh("thử", "repos/o/r/issues/5")
+        chot(p.stdout == _U8_JSON and d.get("body") == "Tiếng Việt", f"U1 GOI_GH: {p.stdout!r} {d!r}")
+        chot(json.loads(_U8_JSON)["body"] == "Tiếng Việt", "U1 tự kiểm payload")
+
+        with mock.patch.object(mod.subprocess, "run", _u8_gia(lambda a: _u8_ra(1, err="fatal: Quốc hội\n"))):
+            rc, tb = _ma_chan(mod, mod._repo_tam_co_lap, g, s)
+        chot(rc == 12 and "fatal: Quốc hội" in tb, f"U2 _repo_tam_co_lap: rc={rc} {tb!r}")
+
+        nk, mo = [], []
+        def tls(a):
+            if a[1:] == ["--exec-path"]:
+                return _u8_ra(out=_U8_P + "/libexec\n")
+            return _u8_ra(out="\tlibcurl.so.4 => /opt/Quốc-hội/libcurl.so.4 (0x1)\n")
+        class CDLL:
+            def __init__(self, duong):
+                mo.append(duong)
+                self.curl_version = lambda: b"libcurl/8.5.0 OpenSSL/3.0.2"
+        with mock.patch.object(mod.subprocess, "run", _u8_gia(tls, nk)), mock.patch.object(mod.sys, "platform", "linux"), \
+                mock.patch("ctypes.CDLL", CDLL):
+            rc, v = _ma_chan(mod, mod._tls_tu_git_https_linux, g, {})
+        ldd = [a for a in nk if a[0] == "/usr/bin/ldd"]
+        chot(ldd == [["/usr/bin/ldd", str(Path(_U8_P + "/libexec") / "git-remote-https")]],
+             f"U3 _tls_tu_git_https_linux --exec-path: {ldd!r}")
+        chot(rc == 0 and mo == ["/opt/Quốc-hội/libcurl.so.4"] and v == "OpenSSL 3.0.2",
+             f"U4 _tls_tu_git_https_linux ldd: rc={rc} {mo!r} {v!r}")
+
+        with mock.patch.object(mod.subprocess, "run", _u8_gia(
+                lambda a: _u8_ra(out="git version 2.47.0 (Quốc hội)\nOpenSSL: OpenSSL 3.0.2\n"))):
+            rc, h = _ma_chan(mod, mod.hoso_adapter_do, g)
+        chot(rc == 0 and h["git_version"] == "git version 2.47.0 (Quốc hội)" and h["tls_thu_vien"] == "OpenSSL 3.0.2",
+             f"U5 hoso_adapter_do: rc={rc} {h!r}")
+
+        N, sha = "nhánh-Việt", "a" * 40
+        def kp(a):
+            if "ls-remote" in a:
+                return _u8_ra(out=f"ref: refs/heads/{N}\tHEAD\n{sha}\trefs/heads/{N}\n")
+            return _u8_ra()
+        with mock.patch.object(mod.subprocess, "run", _u8_gia(kp)), mock.patch.object(mod, "_git_exe_toi_thieu", return_value=g):
+            rc, kq = _ma_chan(mod, mod.kham_pha_nguon, "https://example.test", hoso=h, da_duyet=[mod.bam_ho_so(h)])
+        chot(rc == 0 and kq[:2] == (N, {N: sha}), f"U6 kham_pha_nguon: rc={rc} {kq!r}")
+
+        ko = mod.KhoObject.__new__(mod.KhoObject)
+        ko.git_exe = g
+        with mock.patch.object(mod.subprocess, "run", _u8_gia(lambda a: _u8_ra(out=_U8_P + "/.git/objects\n"))):
+            rc, v = _ma_chan(mod, ko._git_nguon, Path(_U8_P), "rev-parse", "--git-path", "objects")
+        chot(rc == 0 and v == _U8_P + "/.git/objects\n", f"U7 KhoObject._git_nguon: rc={rc} {v!r}")
+
+
+@ca
+def t257_wp1331_M5_byte_khong_UTF8_duong_kiem_la_12_chan_doan_la_None():
+    """M2/M5: byte không phải UTF-8 trên đường kiểm ⇒ 12, không đi tiếp với chuỗi đã thay ký tự; đường chẩn đoán
+    `_tls_tu_git_https_linux` giữ hành vi trả None. F0: tiến trình con THẬT in UTF-8 + CRLF/CR qua `_chay_utf8`."""
+    from unittest import mock
+    mod = _nap_cong()
+    with San() as s:
+        g = _u8_git(s)
+        tho = b'{"html_url": "https://github.com/o/r/issues/5", "title": "\xff"}'
+        with mock.patch.object(mod.subprocess, "run", _u8_gia(lambda a: (0, tho, b""))):
+            rc, tb = _ma_chan(mod, mod._kiem_loai_so_hieu, "o/r", 5)
+        chot(rc == 12 and "UTF-8" in tb and "\ufffd" not in tb, f"F1 GOI_GH/kiem_github: rc={rc} {tb!r}")
+
+        ko = mod.KhoObject.__new__(mod.KhoObject)
+        ko.git_exe = g
+        with mock.patch.object(mod.subprocess, "run", _u8_gia(lambda a: (0, b"C:/tl-win/\xff/objects\n", b""))):
+            rc, v = _ma_chan(mod, ko._git_nguon, Path(s), "rev-parse", "--git-path", "objects")
+        chot(rc == 12, f"F2 KhoObject._git_nguon: rc={rc} {v!r}")
+
+        with mock.patch.object(mod.subprocess, "run", _u8_gia(lambda a: (0, b"/x/\xff\n", b""))), \
+                mock.patch.object(mod.sys, "platform", "linux"):
+            rc, v = _ma_chan(mod, mod._tls_tu_git_https_linux, g, {})
+        chot(rc == 0 and v is None, f"F3 _tls_tu_git_https_linux: rc={rc} {v!r}")
+
+        for nhan, ham, tra_loi in (
+                ("F4 _repo_tam_co_lap", lambda: mod._repo_tam_co_lap(g, s), (0, b"", b"\xff")),
+                ("F5 hoso_adapter_do", lambda: mod.hoso_adapter_do(g), (0, b"git version \xff\nOpenSSL: OpenSSL 3\n", b"")),
+                ("F6 kham_pha_nguon", None, None)):
+            if tra_loi is None:   # F6: hồ sơ hợp lệ (đo bằng đồ giả UTF-8), rồi ls-remote trả byte hỏng
+                with mock.patch.object(mod.subprocess, "run", _u8_gia(lambda a: _u8_ra(out="git version 2\nOpenSSL: OpenSSL 3.0\n"))):
+                    h = mod.hoso_adapter_do(g)
+                ham = lambda h=h: mod.kham_pha_nguon("https://example.test", hoso=h, da_duyet=[mod.bam_ho_so(h)])
+            gia = (lambda a: (0, b"ref: refs/heads/\xff\tHEAD\n", b"") if "ls-remote" in a else (0, b"", b"")) \
+                if tra_loi is None else (lambda a, t=tra_loi: t)
+            with mock.patch.object(mod.subprocess, "run", _u8_gia(gia)), mock.patch.object(mod, "_git_exe_toi_thieu", return_value=g):
+                rc, v = _ma_chan(mod, ham)
+            chot(rc == 12 and "UTF-8" in str(v), f"{nhan}: rc={rc} {v!r}")
+
+    mau = "Tiếng Việt\r\nb\rc"
+    p = mod._chay_utf8([sys.executable, "-c", f"import sys; sys.stdout.buffer.write(bytes.fromhex({mau.encode('utf-8').hex()!r}))"])
+    chot(p.returncode == 0 and p.stdout == "Tiếng Việt\nb\nc", f"F0 _chay_utf8 tiến trình con thật: {p.returncode} {p.stdout!r}")
+
+
+_U8_CAM = frozenset({"text", "encoding", "errors", "universal_newlines"})
+# Danh sách CHO PHÉP (không phải danh sách cấm cách viết gián tiếp): thuộc tính KHÔNG gọi tiến trình con, được dùng
+# làm giá trị tự do. Mọi thuộc tính khác của `subprocess` chỉ được xuất hiện ở vị trí `func` của một lời gọi trực tiếp.
+_U8_KHONG_GOI = frozenset({"PIPE", "DEVNULL", "STDOUT", "TimeoutExpired", "CalledProcessError", "CompletedProcess",
+                           "SubprocessError"})
+
+
+_U8_GOI_DUOC = frozenset({"run", "Popen"})   # CHO PHÉP: thứ mã sản phẩm thật sự gọi (review Codex lượt 2, R1)
+# Nguyên thuỷ lấy module/namespace một cách động — có mặt ở đâu trong tệp quét cũng là vi phạm, bất kể đối số.
+_U8_DONG = frozenset({"importlib", "__import__", "builtins", "__builtins__", "globals", "vars", "locals", "eval", "exec",
+                      "compile"})
+_U8_DUNDER_DUOC = frozenset({"__name__", "__init__", "__doc__", "__file__"})
+
+
+def _u8_quet(nguon: str, gian_tiep: bool = True, them_goi: tuple = ()) -> tuple:
+    """Quét AST: (số lời gọi `subprocess.<X>`, vi phạm theo TỪNG chỗ). `**kw`/đối số vị trí ngoài argv là vi phạm.
+
+    Review Codex lượt 1–2 (#1331, R1 P2): cấm từng cách viết gián tiếp là thua từ thiết kế (lượt 2 lọt
+    `importlib.import_module("sub" + "process")` và `subprocess.__getattribute__("run")`). Nay toàn danh sách CHO PHÉP:
+    tên `subprocess` chỉ ở dạng `subprocess.<X>`; X ∈ `_U8_KHONG_GOI` dùng tự do, X ∈ `_U8_GOI_DUOC` chỉ ở vị trí `func`
+    của lời gọi trực tiếp, X khác là vi phạm; dunder ngoài `_U8_DUNDER_DUOC` là vi phạm; mọi tên trong `_U8_DONG`,
+    `sys.modules`, `getattr` với tên không phải hằng, và chuỗi hằng `"subprocess"` là vi phạm.
+    `gian_tiep=False` / `them_goi` chỉ để t258 đo RĂNG của từng lớp.
+
+    GIỚI HẠN (review Codex lượt 3, 7 phản chứng; chủ kho chấp nhận ngày 16-11-2026, Review Rescue Checkpoint): chốt
+    này là lint cho dạng trực tiếp + danh sách cho phép đã biết, KHÔNG đóng các đường phản chiếu — `sys.modules` với
+    tên động qua bí danh/`from sys import modules`/`os.sys`, `inspect.getmodule(...)`, `__globals__` qua `getattr`.
+    Lớp lỗi được ĐÓNG BẰNG HÀNH VI ở ca M4 (`t256`): BẢY lời gọi thuộc M1 đi qua `_chay_utf8`, đọc sai codepage thì
+    `t256` đỏ (đột biến u8-m19/u8-m20 nhắm `U1 GOI_GH`). Hai lời gọi `subprocess` còn lại KHÔNG đi qua `_chay_utf8`
+    mà tự đọc bytes, mỗi cái có ca phủ riêng: `GOI_GIT` (decode UTF-8 riêng, giữ `stdout_bytes`) ⇐
+    `t174_GOI_GIT_giai_ma_dong_bo_va_giu_hop_dong_text`; `Popen` của `KhoObject.doc` (cat-file, bytes) ⇐ chính t258,
+    chỉ ở dạng lời gọi trực tiếp. Đừng siết thêm danh sách ở đây khi chưa có quyết định mới."""
+    import ast
+    so, vp = 0, []
+    goi_duoc = _U8_GOI_DUOC | set(them_goi)
+    cay = ast.parse(nguon)
+    cha = {c: n for n in ast.walk(cay) for c in ast.iter_child_nodes(n)}
+    for n in ast.walk(cay):
+        d = getattr(n, "lineno", 0)
+        if gian_tiep and isinstance(n, ast.Name) and n.id == "subprocess":
+            p = cha.get(n)
+            if not (isinstance(p, ast.Attribute) and p.value is n):
+                vp.append(f"dòng {d}: module subprocess dùng làm giá trị: {ast.unparse(p)[:60]}")
+            elif p.attr in _U8_KHONG_GOI:
+                pass
+            elif p.attr not in goi_duoc:
+                vp.append(f"dòng {d}: subprocess.{p.attr} ngoài danh sách cho phép {sorted(goi_duoc)}")
+            elif not (isinstance(cha.get(p), ast.Call) and cha[p].func is p):
+                vp.append(f"dòng {d}: subprocess.{p.attr} lấy làm callable gián tiếp: {ast.unparse(cha.get(p, p))[:60]}")
+        if gian_tiep:
+            ten = (n.id if isinstance(n, ast.Name) else   # thuộc tính `.__import__`… đã do luật dunder bắt
+                   " ".join(f"{getattr(n, 'module', None) or ''} {a.name} {a.asname or ''}" for a in n.names)
+                   if isinstance(n, (ast.Import, ast.ImportFrom)) else None)
+            if ten is not None and set(ten.replace(".", " ").split()) & _U8_DONG:
+                vp.append(f"dòng {d}: nạp/tra namespace động: {ten.strip()[:60]}")
+            if isinstance(n, ast.Attribute) and n.attr.startswith("__") and n.attr not in _U8_DUNDER_DUOC:
+                vp.append(f"dòng {d}: thuộc tính dunder ngoài danh sách cho phép: .{n.attr}")
+            if isinstance(n, ast.Attribute) and n.attr == "modules" and ast.unparse(n.value) == "sys":
+                vp.append(f"dòng {d}: sys.modules")
+            if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "getattr"
+                    and not (len(n.args) >= 2 and isinstance(n.args[1], ast.Constant))):
+                vp.append(f"dòng {d}: getattr với tên không phải hằng")
+            if isinstance(n, ast.Constant) and n.value == "subprocess":
+                vp.append(f"dòng {d}: nạp module subprocess qua chuỗi")
+        if isinstance(n, ast.ImportFrom) and n.module == "subprocess":
+            vp.append(f"dòng {d}: from subprocess import …")
+        elif isinstance(n, ast.Import) and any(a.name == "subprocess" and a.asname for a in n.names):
+            vp.append(f"dòng {d}: import subprocess as …")
+        elif (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name)
+              and n.func.value.id == "subprocess" and n.func.attr not in _U8_KHONG_GOI):
+            so += 1
+            ten = ast.unparse(n.func)
+            vp += [f"dòng {d}: {ten}({'**' if k.arg is None else k.arg + '='}…)"
+                   for k in n.keywords if k.arg is None or k.arg in _U8_CAM]
+            if len(n.args) > 1 or any(isinstance(x, ast.Starred) for x in n.args):
+                vp.append(f"dòng {d}: {ten}(đối số vị trí ngoài argv)")
+    return so, vp
+
+
+@ca
+def t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text():
+    """M3/N1: không lời gọi `subprocess.*` nào trong `ops/lease_publish.py` mang `text`/`encoding`/`errors`/
+    `universal_newlines` (đếm theo AST, không grep — grep từng bỏ sót lời gọi trải nhiều dòng). Kèm tự kiểm vị từ."""
+    mod = _nap_cong()
+    so, vp = _u8_quet(Path(mod.__file__).read_text(encoding="utf-8"))
+    print(f"M3 chốt lớp AST: {so} lời gọi subprocess.*, vi phạm {len(vp)}: {vp}")
+    chot(so >= 3, f"M3 quét rỗng: chỉ thấy {so} lời gọi subprocess.* — phép quét không đo gì")
+    chot(not vp, f"M3 lời gọi subprocess ở chế độ text: {vp}")
+    for mau, mong in (("subprocess.run(['x'], capture_output=True)\n", 0),
+                      ("subprocess.run(['x'],\n    capture_output=True,\n    text=True)\n", 1),
+                      ("subprocess.Popen(['x'], encoding='utf-8')\n", 1), ("subprocess.run(['x'], errors='replace')\n", 1),
+                      ("subprocess.check_output(['x'], universal_newlines=True)\n", 2), ("subprocess.run(['x'], **kw)\n", 1),
+                      ("subprocess.run(['x'], -1, None)\n", 1), ("from subprocess import run\n", 1),
+                      ("subprocess.run(['x'], text=True, encoding='utf-8')\nsubprocess.run(['y'], text=True)\n", 3),
+                      ("p = subprocess.Popen(['x'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)\n"
+                       "try:\n    pass\nexcept (subprocess.TimeoutExpired, subprocess.SubprocessError):\n    pass\n"
+                       "isinstance(p, subprocess.CompletedProcess)\nraise subprocess.CalledProcessError(1, 'x', 'o', 'e')\n", 0),
+                      ("subprocess.run.__call__(['x'], text=True)\n", 2), ("__import__('subprocess').run(['x'], text=True)\n", 2),
+                      ("import sys\nsys.modules['subprocess'].run(['x'])\n", 2), ("globals()['sub' + 'process'].run(['x'])\n", 1),
+                      ("subprocess.check_call(['x'])\n", 1), ("from importlib import import_module\n", 1),
+                      ("p = subprocess.Popen(['x'], stdout=subprocess.PIPE)\nre.compile('a')\ngetattr(os, 'killpg')\n"
+                       "x.__name__\nif __name__ == '__main__':\n    pass\n", 0)):
+        chot(len(_u8_quet(mau)[1]) == mong, f"M3 tự kiểm vị từ {mau!r}: {_u8_quet(mau)}")
+    # Răng của phần kiểm gián tiếp (R1): ba phản chứng của reviewer phải ĐỎ khi bật, và XANH khi tắt phần ấy —
+    # tức chính phần kiểm mới (không phải chốt từ khoá cũ) bắt chúng.
+    for mau in ("getattr(subprocess, 'run')(['x'], capture_output=True, text=True)\n",
+                "import functools\nfunctools.partial(subprocess.run, capture_output=True, text=True)(['x'])\n",
+                "run = subprocess.run\nrun(['x'], capture_output=True, text=True)\n",
+                "import importlib\nimportlib.import_module('sub' + 'process').run(['x'], capture_output=True, text=True)\n",
+                "run = subprocess.__getattribute__('run')\nrun(['x'], capture_output=True, text=True)\n"):
+        chot(_u8_quet(mau)[1] and not _u8_quet(mau, gian_tiep=False)[1],
+             f"M3 răng gián tiếp {mau!r}: bật={_u8_quet(mau)[1]} tắt={_u8_quet(mau, gian_tiep=False)[1]}")
+    # Răng của danh sách CHO PHÉP tên gọi được: nới tập bằng tên đang vi phạm thì vi phạm ấy phải biến mất.
+    chot(_u8_quet("subprocess.check_call(['x'])\n")[1] and not _u8_quet("subprocess.check_call(['x'])\n", them_goi=("check_call",))[1],
+         "M3 răng danh sách cho phép: nới `check_call` mà vi phạm không đổi ⇒ chốt không đo danh sách")
+
+
+@ca
+def t259_wp1331_W1_harness_in_duoc_duoi_codepage_cp1252():
+    """W1/W2: harness chạy trong tiến trình con với `PYTHONUTF8=0 PYTHONIOENCODING=cp1252` (mô phỏng console
+    `tra-luat-win`) phải in được dòng tổng kết và ra rc 0. Ca con là t258 (có `print` tiếng Việt bên trong ca).
+    Đọc output con bằng BYTES rồi decode UTF-8 — chính luật mà packet này áp cho `lease_publish.py`."""
+    env = {k: v for k, v in os.environ.items() if k not in ("GITHUB_ACTOR", "PYTHONUTF8", "PYTHONIOENCODING")}
+    env.update(PYTHONUTF8="0", PYTHONIOENCODING="cp1252")
+    p = subprocess.run([sys.executable, "-u", str(Path(__file__).resolve()),
+                        CO_CHI_CA + "t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text"],
+                       capture_output=True, env=env, cwd=str(HERE.parent))
+    out, err = p.stdout.decode("utf-8", "replace"), p.stderr.decode("utf-8", "replace")
+    chot(p.returncode == 0 and "lease_publish: 1/1 đạt" in out and "UnicodeEncodeError" not in out + err,
+         f"W1 harness dưới cp1252: rc={p.returncode} out={out[-300:]!r} err={err[-300:]!r}")
+    chot("M3 chốt lớp AST:" in out, f"W2 print trong t258 dưới cp1252: {out[-300:]!r}")
+
+
+# Bảng đột biến u8-m* (#1331 N1–N3), đăng ký vào catalog của t139: (ID, cũ, mới, [(ca đích, tiền tố `chot`)]).
+_U8_TEXT = ", capture_output=True, text=True"
+_U8_DOT_BIEN = [
+    ("u8-m01-goi-gh-text", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    return subprocess.run(["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U1 GOI_GH"),
+      ("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    ("u8-m02-repo-tam-text", '    p = _chay_utf8([git_exe, "init", "-q", "--bare", "--template=", str(git_dir)],\n',
+     f'    p = subprocess.run([git_exe, "init", "-q", "--bare", "--template=", str(git_dir)]{_U8_TEXT},\n',
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U2 _repo_tam_co_lap")]),
+    ("u8-m03-exec-path-text", '_chay_utf8([git_exe, "--exec-path"], env=env)', f'subprocess.run([git_exe, "--exec-path"]{_U8_TEXT}, env=env)',
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U3 _tls_tu_git_https_linux --exec-path")]),
+    ("u8-m04-ldd-text", '_chay_utf8(["/usr/bin/ldd", str(helper)], env=env)', f'subprocess.run(["/usr/bin/ldd", str(helper)]{_U8_TEXT}, env=env)',
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U4 _tls_tu_git_https_linux ldd")]),
+    ("u8-m05-build-options-text", '_chay_utf8([git_exe, "version", "--build-options"], env=env)',
+     f'subprocess.run([git_exe, "version", "--build-options"]{_U8_TEXT}, env=env)',
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U5 hoso_adapter_do")]),
+    ("u8-m06-ls-remote-text", "        p = _chay_utf8(lenh, env=mt)\n", f"        p = subprocess.run(lenh{_U8_TEXT}, env=mt)\n",
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U6 kham_pha_nguon")]),
+    ("u8-m07-git-nguon-text", '_chay_utf8([self.git_exe, "-C", str(goc), *doi_so], env=',
+     f'subprocess.run([self.git_exe, "-C", str(goc), *doi_so]{_U8_TEXT}, env=',
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U7 KhoObject._git_nguon"),
+      ("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    ("u8-m08-ham-chung-encoding", "    p = subprocess.run(lenh, capture_output=True, env=env)\n",
+     '    p = subprocess.run(lenh, capture_output=True, env=env, encoding="utf-8")\n',
+     [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    ("u8-m09-goi-gh-replace", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     '    p = subprocess.run(["gh", "api", *doi_so], capture_output=True)\n'
+     '    p.stdout, p.stderr = p.stdout.decode("utf-8", "replace"), p.stderr.decode("utf-8", "replace")\n    return p\n',
+     [("t257_wp1331_M5_byte_khong_UTF8_duong_kiem_la_12_chan_doan_la_None", "F1 GOI_GH")]),
+    ("u8-m10-git-nguon-surrogateescape", '        p = _chay_utf8([self.git_exe, "-C", str(goc), *doi_so], env=_env_rong(self.git_exe, None, tempfile_home()))\n',
+     '        p = subprocess.run([self.git_exe, "-C", str(goc), *doi_so], capture_output=True, env=_env_rong(self.git_exe, None, tempfile_home()))\n'
+     '        p.stdout, p.stderr = p.stdout.decode("utf-8", "surrogateescape"), p.stderr.decode("utf-8", "surrogateescape")\n',
+     [("t257_wp1331_M5_byte_khong_UTF8_duong_kiem_la_12_chan_doan_la_None", "F2 KhoObject._git_nguon")]),
+    ("u8-m11-ham-chung-replace", '(b.decode("utf-8").replace', '(b.decode("utf-8", "replace").replace',
+     [("t257_wp1331_M5_byte_khong_UTF8_duong_kiem_la_12_chan_doan_la_None", "F1 GOI_GH")]),
+    ("u8-m12-ham-chung-bo-chuan-hoa-crlf", '.replace("\\r\\n", "\\n").replace("\\r", "\\n") for b in', ' for b in',
+     [("t257_wp1331_M5_byte_khong_UTF8_duong_kiem_la_12_chan_doan_la_None", "F0 _chay_utf8")]),
+    ("u8-m14-goi-gh-getattr", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    return getattr(subprocess, "run")(["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    ("u8-m15-goi-gh-partial", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    return __import__("functools").partial(subprocess.run{_U8_TEXT})(["gh", "api", *doi_so])\n',
+     [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    ("u8-m16-goi-gh-alias", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    run = subprocess.run\n    return run(["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    ("u8-m17-goi-gh-import-module-noi-chuoi", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    import importlib\n    return importlib.import_module("sub" + "process").run(["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    ("u8-m18-goi-gh-getattribute", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    run = subprocess.__getattribute__("run")\n    return run(["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    # Hai đường phản chiếu lọt chốt AST (giới hạn đã chấp nhận) — phải bị ca HÀNH VI t256 giết ở U1.
+    ("u8-m19-goi-gh-globals-phan-chieu", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    return getattr(subprocess.CompletedProcess.__init__, "__globals__")["run"](["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U1 GOI_GH")]),
+    ("u8-m20-goi-gh-inspect-getmodule", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    import inspect\n    return inspect.getmodule(subprocess.CompletedProcess).run(["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U1 GOI_GH")]),
+    ("u8-m13-tls-bo-bat-chan", "    except (OSError, ValueError, UnicodeError, Chan):", "    except (OSError, ValueError, UnicodeError):",
+     [("t257_wp1331_M5_byte_khong_UTF8_duong_kiem_la_12_chan_doan_la_None", "F3 _tls_tu_git_https_linux")]),
+]
+
+
 def main(chon=None, nen=None, so=None) -> int:
     """`chon`/`nen`/`so` là SEAM của ca meta (`_chay_main_meta`): danh sách ca, nền, sổ bỏ ca — không vá
     `CA`/`os.name` toàn cục. Chạy thật (`sys.exit(main())`) thì cả ba là None ⇒ argv, `os.name`, `SO_BO_QUA`."""
@@ -15366,7 +15700,19 @@ def main(chon=None, nen=None, so=None) -> int:
     return 1 if hong else 0
 
 
+def _ep_utf8_stdio() -> None:
+    """#1331 W1 (đo `tra-luat-win`, cp1252, không PYTHONUTF8): `print` dòng tổng kết/`  ĐỎ  …`/ca in tiếng Việt ném
+    `UnicodeEncodeError: 'charmap'` ⇒ rc 1 kể cả khi mọi ca QUA. Ép stdio sang UTF-8 TRƯỚC mọi `print`, như
+    `ops/lease_publish.py` đã làm; luồng không có `reconfigure` (StringIO của ca meta) thì để nguyên."""
+    for luong in (sys.stdout, sys.stderr):
+        try:
+            luong.reconfigure(encoding="utf-8", errors="backslashreplace")
+        except (AttributeError, ValueError):
+            pass
+
+
 if __name__ == "__main__":
+    _ep_utf8_stdio()
     if len(sys.argv) >= 2 and sys.argv[1] == A9_CO:   # wp678 A9: helper đo lease sai kiểu trước LAND
         _rc, _out, _err = _a9_bien(sys.argv[2:])
         sys.stdout.write(_out)

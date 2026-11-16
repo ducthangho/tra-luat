@@ -66,8 +66,24 @@ _BANG_LOP = (
     ("scripts/tl_gws.py", "sensitive"),
 )
 
+def _chay_utf8(lenh, *, env=None):
+    """#1331 (đo `tra-luat-win` cp1252: JSON UTF-8 đọc qua `text=True` thành mojibake, KHÔNG ngoại lệ) — fix:
+    BẢY lời gọi thuộc M1 (GOI_GH, _repo_tam_co_lap, _tls_tu_git_https_linux ×2, hoso_adapter_do, kham_pha_nguon,
+    KhoObject._git_nguon) đi qua đây: đọc BYTES, decode UTF-8 strict, rồi chuẩn hoá xuống dòng như chế độ text cũ
+    (CRLF/CR → LF). KHÔNG qua đây: `GOI_GIT` tự decode UTF-8 và giữ `stdout_bytes` (t174_GOI_GIT_…), `Popen` của
+    `KhoObject.doc` đọc bytes thô. Byte không phải UTF-8 ⇒ `Chan(12)`, không bao giờ đi tiếp với chuỗi đã
+    thay ký tự. Cố ý KHÔNG nhận `**kw`: `text=`/`encoding=` không có đường lọt vào `subprocess.run` (chốt AST t258)."""
+    p = subprocess.run(lenh, capture_output=True, env=env)
+    try:
+        p.stdout, p.stderr = (b.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n") for b in (p.stdout, p.stderr))
+    except UnicodeDecodeError as e:
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: output của `{Path(str(lenh[0])).name}` không phải UTF-8 "
+                                      f"({e.reason} tại byte {e.start}) — không đọc tiếp chuỗi đã thay ký tự") from None
+    return p
+
+
 def GOI_GH(*doi_so):
-    return subprocess.run(["gh", "api", *doi_so], capture_output=True, text=True)
+    return _chay_utf8(["gh", "api", *doi_so])
 
 
 def GOI_GIT(*doi_so, cwd=None):
@@ -1638,9 +1654,8 @@ _HOME_RONG = None
 def _repo_tam_co_lap(git_exe: str, thu_muc: Path) -> str:
     """Repo tạm KHÔNG ref, KHÔNG config nguồn, KHÔNG template — làm `GIT_DIR` cho mọi lời gọi adapter."""
     git_dir = thu_muc / "tam.git"
-    p = subprocess.run([git_exe, "init", "-q", "--bare", "--template=", str(git_dir)],
-                       capture_output=True, text=True,
-                       env=_env_rong(git_exe, str(git_dir), str(thu_muc)))
+    p = _chay_utf8([git_exe, "init", "-q", "--bare", "--template=", str(git_dir)],
+                   env=_env_rong(git_exe, str(git_dir), str(thu_muc)))
     if p.returncode != 0:
         raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: không dựng được repo tạm: {p.stderr[:160]}")
     return str(git_dir)
@@ -1652,11 +1667,11 @@ def _tls_tu_git_https_linux(git_exe: str, env: dict[str, str]) -> str | None:
         return None
     try:
         import ctypes
-        p = subprocess.run([git_exe, "--exec-path"], capture_output=True, text=True, env=env)
+        p = _chay_utf8([git_exe, "--exec-path"], env=env)
         if p.returncode != 0:
             return None
         helper = Path(p.stdout.strip()) / "git-remote-https"
-        linked = subprocess.run(["/usr/bin/ldd", str(helper)], capture_output=True, text=True, env=env)
+        linked = _chay_utf8(["/usr/bin/ldd", str(helper)], env=env)
         if linked.returncode != 0:
             return None
         libraries = re.findall(r"^\s*libcurl\S*\s+=>\s+(/\S+)", linked.stdout, re.MULTILINE)
@@ -1667,7 +1682,7 @@ def _tls_tu_git_https_linux(git_exe: str, env: dict[str, str]) -> str | None:
         version = curl.curl_version().decode("ascii")
         tls = re.search(r"\b(OpenSSL|GnuTLS|mbedTLS)/([^\s]+)", version)
         return f"{tls[1]} {tls[2]}" if tls else None
-    except (OSError, ValueError, UnicodeError):
+    except (OSError, ValueError, UnicodeError, Chan):   # chẩn đoán: output không phải UTF-8 ⇒ None (#1331 M2)
         return None
 
 
@@ -1676,7 +1691,7 @@ def hoso_adapter_do(git_exe: str | None = None) -> dict:
     đo rồi tự đưa vào `PROFILE_ADAPTER_DA_DUYET` là tự khai — bị cấm (ADR-0047 lớp 2)."""
     git_exe = git_exe or _git_exe_toi_thieu()
     env = {"PATH": str(Path(git_exe).parent), "LC_ALL": "C"}
-    p = subprocess.run([git_exe, "version", "--build-options"], capture_output=True, text=True, env=env)
+    p = _chay_utf8([git_exe, "version", "--build-options"], env=env)
     if p.returncode != 0:
         raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: không đo được Git build/TLS version")
     tls = next((line.split(":", 1)[1].strip() for line in p.stdout.splitlines()
@@ -1777,7 +1792,7 @@ def kham_pha_nguon(endpoint: str | None = None, *, hoso: dict | None = None, da_
             if gia_tri:
                 lenh += ["-c", f"{khoa}={gia_tri}"]
         lenh += ["ls-remote", "--symref", endpoint, "HEAD", "refs/heads/*"]
-        p = subprocess.run(lenh, capture_output=True, text=True, env=mt)
+        p = _chay_utf8(lenh, env=mt)
     if p.returncode != 0:
         raise Chan(RC_KHONG_XAC_DINH,
                    f"KHÔNG_XÁC_ĐỊNH: discovery rc={p.returncode}: {(p.stderr or '').strip()[:160]}")
@@ -1854,8 +1869,7 @@ class KhoObject:
         self.tong_bytes = 0
 
     def _git_nguon(self, goc: Path, *doi_so) -> str:
-        p = subprocess.run([self.git_exe, "-C", str(goc), *doi_so], capture_output=True, text=True,
-                           env=_env_rong(self.git_exe, None, tempfile_home()))
+        p = _chay_utf8([self.git_exe, "-C", str(goc), *doi_so], env=_env_rong(self.git_exe, None, tempfile_home()))
         if p.returncode != 0:
             raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: git {' '.join(doi_so)} rc={p.returncode}: "
                                           f"{(p.stderr or '').strip().splitlines()[:1]}")

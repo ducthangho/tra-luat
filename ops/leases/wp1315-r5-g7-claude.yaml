@@ -65,11 +65,11 @@
   "reviewer_transport": "machine",
   "prompt_path": "ops/prompts/wp1315-r5-g7-claude-author-fix2.txt",
   "start_from_sha": "98c7389d91027e1d7eeccaea26e50332773249bf",
-  "reviewed_sha_required": "98c7389d91027e1d7eeccaea26e50332773249bf",
+  "reviewed_sha_required": "0003a5f46df6ef84866348859a161e4b8a801dbd",
   "reviewed_tree_required": "d963dc73799724d76251f645fb7812e7ff3c8992",
-  "candidate_head": "4ebcbaf9b8c06ae883dcbd5cf128f2f621df7ca5",
-  "delegated_audit": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6917844880",
-  "delegated_audit_generation": 5,
+  "candidate_head": "0003a5f46df6ef84866348859a161e4b8a801dbd",
+  "delegated_audit": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6920680668",
+  "delegated_audit_generation": 7,
   "delegated_audit_relabelled": false,
   "phase": "B",
   "phase_B_activation_utc": "2026-11-16T13:36:00Z",
@@ -134,7 +134,8 @@
         "163b8b57 approve on 98c7389",
         "18da1726 changes_requested P2 on 98c7389",
         "13e7cfac blocked at preflight on 4ebcbaf: coordinator prompt wrongly stated sole parent C (coordinator error, not source defect)",
-        "950302fa changes_requested on 4ebcbaf: same P2 class via pre-existing adoption validators (target_projection ==)"
+        "950302fa changes_requested on 4ebcbaf: same P2 class via pre-existing adoption validators (target_projection ==)",
+        "9d4a8976 approve on 0003a5f, 0 findings"
       ]
     },
     "source_push": {
@@ -157,5 +158,11 @@
     "authority": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
     "ly_do": "P2 thật ở H 98c7389 bắt buộc vá; H mới cần đủ cổng lại."
   },
-  "candidate_tree": "395cabb6960543f831b811cdb590d75194d0e29c"
+  "candidate_tree": "a68c2556bfd28ef2a600389c56f82220f99b4256",
+  "source_review_approve": {
+    "run": "9d4a8976",
+    "stdout_sha256": "00f837809428d304aa78d44f943db40cb0020401143a1255eaf28eaf5428b41b",
+    "verdict": "approve",
+    "findings": 0
+  }
 }

@@ -7213,8 +7213,8 @@ def t139_A12_catalog_mutant_A0_giet_dung_ly_do_va_ghi_SONG_kem_seam():
           f"tín dụng giả={len(ket['TIN_DUNG_GIA'])}")
     chot(not ket["TIN_DUNG_GIA"], f"mutant chết vì lỗi VÔ CAN (tín dụng giả): {ket['TIN_DUNG_GIA']}")
     chot(not ket["SAI_KY_VONG"], f"catalog lệch: {ket['SAI_KY_VONG']}")
-    chot(ket["GIET"] + ket["SONG"] == len(muts) == 103, f"mẫu số phải cố định 103 (37 A0 + 46 amb-m* ADR-0066 + 20 u8-m* #1331): {ket}")
-    chot(ket["GIET"] == 100 and ket["SONG"] == 3, f"catalog kỳ vọng 100 giết / 3 SỐNG: {ket}")
+    chot(ket["GIET"] + ket["SONG"] == len(muts) == 105, f"mẫu số phải cố định 105 (37 A0 + 46 amb-m* ADR-0066 + 22 u8-m* #1331): {ket}")
+    chot(ket["GIET"] == 102 and ket["SONG"] == 3, f"catalog kỳ vọng 102 giết / 3 SỐNG: {ket}")
 
 
 # wp488 review lượt 1: regression hints; fixture/control local, không mạng.
@@ -15463,7 +15463,13 @@ def _u8_quet(nguon: str, gian_tiep: bool = True, them_goi: tuple = ()) -> tuple:
     tên `subprocess` chỉ ở dạng `subprocess.<X>`; X ∈ `_U8_KHONG_GOI` dùng tự do, X ∈ `_U8_GOI_DUOC` chỉ ở vị trí `func`
     của lời gọi trực tiếp, X khác là vi phạm; dunder ngoài `_U8_DUNDER_DUOC` là vi phạm; mọi tên trong `_U8_DONG`,
     `sys.modules`, `getattr` với tên không phải hằng, và chuỗi hằng `"subprocess"` là vi phạm.
-    `gian_tiep=False` / `them_goi` chỉ để t258 đo RĂNG của từng lớp."""
+    `gian_tiep=False` / `them_goi` chỉ để t258 đo RĂNG của từng lớp.
+
+    GIỚI HẠN (review Codex lượt 3, 7 phản chứng; chủ kho chấp nhận ngày 16-11-2026, Review Rescue Checkpoint): chốt
+    này là lint cho dạng trực tiếp + danh sách cho phép đã biết, KHÔNG đóng các đường phản chiếu — `sys.modules` với
+    tên động qua bí danh/`from sys import modules`/`os.sys`, `inspect.getmodule(...)`, `__globals__` qua `getattr`.
+    Lớp lỗi được ĐÓNG BẰNG HÀNH VI ở ca M4 (`t256`): mọi lời gọi sản phẩm đi qua `_chay_utf8`, đọc sai codepage thì
+    `t256` đỏ (đột biến u8-m19/u8-m20 nhắm `U1 GOI_GH`). Đừng siết thêm danh sách ở đây khi chưa có quyết định mới."""
     import ast
     so, vp = 0, []
     goi_duoc = _U8_GOI_DUOC | set(them_goi)
@@ -15618,6 +15624,13 @@ _U8_DOT_BIEN = [
     ("u8-m18-goi-gh-getattribute", '    return _chay_utf8(["gh", "api", *doi_so])\n',
      f'    run = subprocess.__getattribute__("run")\n    return run(["gh", "api", *doi_so]{_U8_TEXT})\n',
      [("t258_wp1331_M3_chot_lop_AST_khong_subprocess_che_do_text", "M3 lời gọi subprocess ở chế độ text")]),
+    # Hai đường phản chiếu lọt chốt AST (giới hạn đã chấp nhận) — phải bị ca HÀNH VI t256 giết ở U1.
+    ("u8-m19-goi-gh-globals-phan-chieu", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    return getattr(subprocess.CompletedProcess.__init__, "__globals__")["run"](["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U1 GOI_GH")]),
+    ("u8-m20-goi-gh-inspect-getmodule", '    return _chay_utf8(["gh", "api", *doi_so])\n',
+     f'    import inspect\n    return inspect.getmodule(subprocess.CompletedProcess).run(["gh", "api", *doi_so]{_U8_TEXT})\n',
+     [("t256_wp1331_M4_bay_loi_goi_doc_bytes_UTF8_duoi_codepage_cp1252", "U1 GOI_GH")]),
     ("u8-m13-tls-bo-bat-chan", "    except (OSError, ValueError, UnicodeError, Chan):", "    except (OSError, ValueError, UnicodeError):",
      [("t257_wp1331_M5_byte_khong_UTF8_duong_kiem_la_12_chan_doan_la_None", "F3 _tls_tu_git_https_linux")]),
 ]

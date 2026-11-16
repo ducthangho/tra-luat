@@ -305,6 +305,26 @@ python .claude/dev/launcher.py status --run-root ~/.tl-runs --id <short_id>
 python .claude/dev/launcher.py stop   --run-root ~/.tl-runs --id <short_id>
 ```
 
+### `--agent`: khai agent của lượt, đừng để launcher đoán (từ launcher 1.6.0, #1335)
+
+Launcher chọn probe (`claude_trust` cho claude) và ghi `provider`/`execution_surface`/`transport`
+vào `run.json` từ CÙNG một quyết định. Không khai `--agent` thì nó chỉ suy ra từ TÊN `lenh[0]`
+(cắt một đuôi `.exe/.cmd/.bat/.ps1`, casefold): `claude`/`codex` ⇒ agent ấy, còn lại ⇒ `khong`.
+`lenh[0]` là vỏ shell đã biết (`bash sh dash zsh ksh cmd powershell pwsh env wsl`) mà không khai
+⇒ **CHẶN, mã 2**: launcher không đọc chuỗi shell, nên không biết lệnh bên trong chạy agent nào.
+
+```bash
+# BỊ CHẶN (mã 2): đi qua vỏ shell, không khai
+python .claude/dev/launcher.py run --run-root ~/.tl-runs -- bash -c 'cd "$0" && claude -p x' /w
+# CHỮA: khai agent bên trong; lượt không chạy agent nào thì khai --agent khong
+python .claude/dev/launcher.py run --run-root ~/.tl-runs --agent claude -- bash -c 'cd "$0" && claude -p x' /w
+```
+
+`--agent` nhận đúng `claude`, `codex`, `khong` (không casefold); lặp cờ ⇒ mã 2. `run.json` ghi
+`agent_da_khai` (`null` = không khai), `agent_suy_ra`, `probe_da_chay`, `probe_bo_qua`.
+`transport_sha256` là băm tệp `lenh[0]` resolve theo `cwd` = workspace và `PATH` của con (`thuc_thi_duong_dan`),
+con được phóng bằng chính đường ấy; không resolve được ⇒ `null` + `thuc_thi_ly_do`. Shim `.cmd`/npm: băm SHIM.
+
 ### Ba thứ đã trả giá khi dựng lượt chạy thật (14-08-2026)
 
 **`--run-root` phải nằm NGOÀI kho.** Thư mục chạy không có trong bảng loại trừ của

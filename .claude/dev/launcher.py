@@ -75,6 +75,7 @@ from __future__ import annotations
 import argparse
 import base64
 import contextlib
+import errno
 import hashlib
 import hmac
 import json
@@ -98,7 +99,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.5.0"
+VERSION = "1.6.0"
 
 
 def ky_ban_ghi_luot(ban_ghi: dict, khoa_hex: str) -> str:
@@ -207,29 +208,129 @@ _BE_MAT_BI_DANH = (
 )
 
 
-def _dinh_danh_van_chuyen(lenh: list[str]) -> dict:
-    """Trả contract transport canonical và băm của chính contract ấy."""
-    theo_provider = {}
-    theo_lenh = {}
-    for provider, ten_lenh, surface, transport in _TRANSPORT_CONTRACTS:
-        contract = {"provider": provider, "execution_surface": surface,
-                    "transport": transport}
-        cu = theo_provider.setdefault(provider, contract)
-        if cu != contract:
-            raise RuntimeError(f"provider co nhieu transport: {provider}")
-        for ten in ten_lenh:
-            theo_lenh[ten] = contract
-    ten = Path(str(lenh[0])).name.casefold() if lenh else ""
-    for duoi in (".exe", ".cmd", ".bat"):
+# wp1335 (đặc tả AGENT-DINH-DANH-MOT-NGUON r3): agent của lượt `run` là KHAI BÁO, không ĐOÁN.
+# `--agent` so BẰNG NHAU (sau strip, không casefold). Tên lệnh so sau khi cắt ĐÚNG MỘT đuôi shim
+# Windows rồi casefold, nên `cmd.exe`/`pwsh.exe`/`wsl.exe` rơi về tên gốc trong `VO_SHELL`.
+# Giới hạn đã khai: vỏ shell CHƯA có tên ở đây rơi vào nhánh "còn lại ⇒ khong", như hôm nay.
+AGENT_CHO_PHEP = ("claude", "codex", "khong")
+HAU_TO_SHIM = (".exe", ".cmd", ".bat", ".ps1")
+VO_SHELL = ("bash", "sh", "dash", "zsh", "ksh", "cmd", "powershell", "pwsh", "env", "wsl")
+_PROBE_AGENT = {"claude": ("claude_trust",), "codex": (), "khong": ()}
+_PROVIDER_AGENT = {"claude": "anthropic_claude", "codex": "openai_codex"}
+
+
+def _ten_lenh_chuan(lenh0) -> str:
+    ten = Path(str(lenh0)).name.casefold()
+    for duoi in HAU_TO_SHIM:
         if ten.endswith(duoi):
-            ten = ten[:-len(duoi)]
-            break
-    contract = theo_lenh.get(ten, {
-        "provider": "local_process", "execution_surface": "subprocess",
-        "transport": "machine",
-    })
-    raw = json.dumps(contract, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    return {**contract, "transport_sha256": hashlib.sha256(raw).hexdigest()}
+            return ten[:-len(duoi)]
+    return ten
+
+
+def _kiem_bang_transport(bang=_TRANSPORT_CONTRACTS) -> dict:
+    """tên lệnh → contract. Chốt ĐO được (thay chốt chết D4): một tên lệnh thuộc hai provider,
+    hoặc một provider có hai dòng, là bảng hỏng ⇒ RuntimeError."""
+    theo_lenh, da_co = {}, set()
+    for provider, ten_lenh, surface, transport in bang:
+        if provider in da_co:
+            raise RuntimeError(f"provider co nhieu transport: {provider}")
+        da_co.add(provider)
+        for ten in ten_lenh:
+            if ten in theo_lenh:
+                raise RuntimeError(f"ten lenh {ten!r} thuoc hai provider")
+            theo_lenh[ten] = {"provider": provider, "execution_surface": surface,
+                              "transport": transport}
+    return theo_lenh
+
+
+def _quyet_dinh_agent(lenh: list[str], agent: str | None = None) -> dict:
+    """MỘT nguồn sự thật cho agent của lượt: bộ probe VÀ định danh ghi vào `run.json` đều lấy từ đây.
+
+    `--agent` thắng suy luận từ tên. Không khai: tên chuẩn hoá là `claude`/`codex` ⇒ agent ấy; là
+    vỏ shell đã biết ⇒ CHẶN (launcher không đọc chuỗi shell); còn lại ⇒ `khong`."""
+    theo_lenh = _kiem_bang_transport()
+    ten = _ten_lenh_chuan(lenh[0]) if lenh else ""
+    if agent is not None:
+        if agent.strip() not in AGENT_CHO_PHEP:
+            raise Chan(MA_THAM_SO, f"--agent {agent!r} khong hop le: chi nhan claude, codex hoac khong")
+        suy_ra = agent.strip()
+    elif ten in ("claude", "codex"):
+        suy_ra = ten
+    elif ten in VO_SHELL:
+        raise Chan(MA_THAM_SO,
+                   f"lenh di qua vo shell ({ten}) nen launcher KHONG doc duoc no se chay agent nao; "
+                   "them --agent claude|codex; neu luot nay khong chay agent thi khai --agent khong")
+    else:
+        suy_ra = "khong"
+    provider = _PROVIDER_AGENT.get(suy_ra)
+    contract = next((c for c in theo_lenh.values() if c["provider"] == provider), None) if provider else (
+        theo_lenh[ten] if ten in theo_lenh and theo_lenh[ten]["provider"] not in _PROVIDER_AGENT.values()
+        else {"provider": "local_process", "execution_surface": "subprocess", "transport": "machine"})
+    con = _PROBE_AGENT[suy_ra]
+    return {"agent_da_khai": agent.strip() if agent is not None else None, "agent_suy_ra": suy_ra,
+            "probe_can": con, "probe_bo_qua": [t for p in _PROBE_AGENT.values() for t in p if t not in con],
+            **contract}
+
+
+def _thuc_thi(lenh0: str, cwd: str, path_con: str | None) -> dict:
+    """Resolve `lenh[0]` theo ĐÚNG ngữ cảnh con (`cwd` = workspace, `PATH` của con), `realpath`, rồi
+    băm bytes. Không resolve/đọc được ⇒ băm `None` + lý do, KHÔNG lùi về băm hằng.
+
+    Giới hạn đã biết: với shim `.cmd`/`.ps1`/npm, băm là băm của SHIM, không phải bản Node sau nó; và
+    sửa NỘI DUNG chính tệp đã băm giữa lúc băm và lúc chạy không bị chặn — chỉ bảo đảm tệp được
+    phóng là tệp đã chọn để băm (`lenh_run` phóng bằng đường dẫn trả về ở đây)."""
+    s = str(lenh0)
+    if platform.system() == "Windows":
+        # F6-01 (chủ kho đổi thiết kế 16-11): chọn tệp giao cho `shutil.which`, gọi với lệnh CÓ thư mục cho TỪNG thư
+        # mục đã neo theo cwd con (F2): nhánh ấy không chèn cwd của LAUNCHER mà vẫn áp PATHEXT như native. cwd con
+        # đứng trước khi Windows đòi, PATH rỗng ⇒ không thư mục nào (như which); mỗi thư mục góp tối đa MỘT ứng viên
+        # nên thứ tự cho F4 là thứ tự thư mục (đánh đổi: bỏ ứng viên thứ hai trong cùng thư mục).
+        if os.path.dirname(s):
+            thu_muc = [os.path.dirname(os.path.join(cwd, s))]
+        else:
+            p = os.defpath if path_con is None else path_con
+            thu_muc = (([cwd] if shutil._win_path_needs_curdir(s, os.F_OK | os.X_OK) else [])
+                       + [os.path.join(cwd, d or ".") for d in p.split(os.pathsep)]) if p else []
+        ung = [os.path.realpath(u) for d in thu_muc if (u := shutil.which(os.path.join(d, os.path.basename(s))))]
+        # N5 lượt 4 (Python 3.12.10 Windows): which bỏ khớp trực tiếp tên không đuôi; đường dẫn TƯỜNG MINH thì khớp
+        # trực tiếp, xếp sau đuôi PATHEXT (như which 3.12 cũ và như trước 118a893). Tên trần: chỉ theo which.
+        if not ung and os.path.dirname(s) and os.path.isfile(os.path.join(cwd, s)):
+            ung = [os.path.realpath(os.path.join(cwd, s))]
+    else:
+        # F2: MỌI phần tử PATH neo theo cwd của con; phần tử rỗng = cwd của con; PATH vắng = os.defpath.
+        ung_vien = [os.path.join(cwd, s)] if os.sep in s or (os.altsep and os.altsep in s) else [
+            os.path.join(cwd, d or ".", s) for d in (os.defpath if path_con is None else path_con).split(os.pathsep)]
+        ung = [os.path.realpath(u) for u in ung_vien if os.path.isfile(u) and os.access(u, os.X_OK)]
+    # Giới hạn (review lượt 5 đo, chủ kho chấp nhận 16-11): ứng viên bị loại khi chọn ở trên (bộ lọc isfile/X_OK,
+    # hoặc `which` trên Windows) không góp lỗi (vd. EACCES) vào ưu tiên errno của `chay_cac_probe`.
+    if ung:   # F4: ứng viên PATH sau, cho `chay_cac_probe` khi exec ứng viên trước hỏng (như subprocess ở base)
+        return {**_bam_thuc_thi(ung[0]), "thuc_thi_ung_vien_sau": ung[1:]}
+    return {"transport_sha256": None, "thuc_thi_duong_dan": None,
+            "thuc_thi_ly_do": f"khong resolve duoc {s!r} theo cwd workspace va PATH cua con"}
+
+
+def _bam_thuc_thi(that: str) -> dict:
+    try:
+        h = hashlib.sha256()
+        with open(that, "rb") as f:
+            for khoi in iter(lambda: f.read(1 << 20), b""):
+                h.update(khoi)
+    except OSError as e:
+        return {"transport_sha256": None, "thuc_thi_duong_dan": that, "thuc_thi_ly_do": f"khong doc duoc: {type(e).__name__}"}
+    return {"transport_sha256": h.hexdigest(), "thuc_thi_duong_dan": that, "thuc_thi_ly_do": None}
+
+
+def _dinh_danh_van_chuyen(lenh: list[str], agent: str | None = None, cwd: str | None = None) -> dict:
+    """Định danh ghi `run.json`: provider/surface/transport TỪ `_quyet_dinh_agent` (không từ đường dẫn),
+    `transport_sha256` là băm tệp thực thi đã resolve (`_thuc_thi`), không phải băm contract hằng."""
+    qd = _quyet_dinh_agent(lenh, agent)
+    tt = _thuc_thi(lenh[0], cwd or os.getcwd(), os.environ.get("PATH")) if lenh else _thuc_thi("", ".", "")
+    return {k: qd[k] for k in ("provider", "execution_surface", "transport")} | tt
+
+
+def _phong(lenh_con: list[str], **kw):
+    """Điểm phóng con DUY NHẤT của `lenh_run` (điểm tiêm của ca N3c)."""
+    return subprocess.Popen(lenh_con, **kw)
 
 # Bộ đột biến dùng cùng mốc này để không thể trượt từ ~70% phép đo được xuống
 # gần 0 mà vẫn xanh. Đặt ở mã được đột biến (không đặt trong chính runner test).
@@ -1404,7 +1505,10 @@ def _probe_spawn(chuong_trinh: str, ws: str) -> dict:
     try:
         p = _chay_van_ban_an_toan([chuong_trinh, "--version"], cwd=ws, timeout=30)
     except (OSError, subprocess.SubprocessError) as e:
-        return {"trang_thai": "DO", "chi_tiet": f"spawn --version: {type(e).__name__}"}
+        # F4 P2: CHỈ lỗi exec (CPython ném qua errpipe kèm filename = tệp exec) mang errno để chuyển ứng viên;
+        # lỗi communicate/pipe/chdir(cwd) không mang filename ấy. Windows: CreateProcess không đặt filename.
+        loi_exec = getattr(e, "filename", None) == chuong_trinh
+        return {"trang_thai": "DO", "chi_tiet": f"spawn --version: {type(e).__name__}", "errno": e.errno if loi_exec else None}
     ra = (p.stdout or "") + (p.stderr or "")
     if p.returncode == 0 and bool(ra.strip()):
         return {"trang_thai": "DAT", "chi_tiet": f"rc=0; output={len(ra.encode('utf-8'))}B"}
@@ -1439,10 +1543,23 @@ def _probe_cho_so(ds: dict) -> dict:
             for ten, kq in ds.items()}
 
 
-def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None) -> tuple[dict, str | None]:
+def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None,
+                   qd: dict | None = None, dd: dict | None = None) -> tuple[dict, str | None]:
+    # wp1335 T1: tập probe agent lấy từ `_quyet_dinh_agent`, CÙNG nguồn với định danh `run.json`.
+    qd = _quyet_dinh_agent(lenh) if qd is None else qd
     ds = {"workspace": _probe_workspace(ws), "ghi": _probe_ghi(ws),
-          "spawn": _probe_spawn(str(lenh[0]), ws)}
-    if Path(str(lenh[0])).name.casefold() in ("claude", "claude.exe"):
+          "spawn": _probe_spawn((dd or {}).get("thuc_thi_duong_dan") or str(lenh[0]), ws)}   # F3
+    # F4: điểm CHỌN tệp duy nhất. Như Popen ở base, exec ném OSError với MỌI errno ⇒ ứng viên PATH kế, băm lại
+    # (`dd` đổi tại chỗ). Đã exec được mà rc khác 0 hoặc quá hạn thì không có `errno` ⇒ KHÔNG chuyển.
+    dau = None   # F4 P3: như CPython, mọi ứng viên hỏng thì báo lỗi exec ĐẦU TIÊN khác ENOENT/ENOTDIR
+    while ds["spawn"].get("errno") is not None and (dd or {}).get("thuc_thi_ung_vien_sau"):
+        if dau is None and ds["spawn"].get("errno") not in (errno.ENOENT, errno.ENOTDIR):
+            dau = (dict(dd), ds["spawn"])
+        dd.update(_bam_thuc_thi(dd["thuc_thi_ung_vien_sau"][0]), thuc_thi_ung_vien_sau=dd["thuc_thi_ung_vien_sau"][1:])
+        ds["spawn"] = _probe_spawn(dd["thuc_thi_duong_dan"], ws)
+    if dau and ds["spawn"].get("errno") is not None:
+        dd.update(dau[0]); ds["spawn"] = dau[1]
+    if "claude_trust" in qd["probe_can"]:
         ds["claude_trust"] = _probe_trust_claude(ws)
     ly_do = bo_qua.strip() if bo_qua is not None else None
     if bo_qua is not None and not ly_do:
@@ -1889,8 +2006,9 @@ _TRAN_DONG = 4 << 20          # trần một lần đọc (R25-ROBUST-04)
 _SU_KIEN_KHUNG = ("response.created", "response.completed")
 
 
-def _la_codex(lenh) -> bool:
-    return Path(lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd")
+def _la_codex(qd: dict) -> bool:
+    # wp1335 F1: lọc stderr/RUST_LOG/đo model-sandbox/chờ snapshot theo `_quyet_dinh_agent`, không theo tên.
+    return qd["agent_suy_ra"] == "codex"
 
 
 def _loc_stderr_codex(ong, f_err, ket: list, loi: list, dem: dict | None = None) -> None:
@@ -2507,18 +2625,25 @@ def lenh_run(a) -> int:
     snapshot = os.environ.pop("CODEX_AUTH_JSON", "")
     if not a.lenh:
         raise Chan(MA_THAM_SO, "thieu lenh de chay (dat sau dau --)")
+    if len(getattr(a, "agent", None) or ()) > 1:
+        raise Chan(MA_THAM_SO, "--agent bi lap; y dinh khong ro, KHONG doan")
+    agent = a.agent[0] if getattr(a, "agent", None) else None
+    qd = _quyet_dinh_agent(a.lenh, agent)   # vỏ shell không khai ⇒ chặn TRƯỚC mọi chốt
+    so_agent = {"agent_da_khai": qd["agent_da_khai"], "agent_suy_ra": qd["agent_suy_ra"],
+                "probe_bo_qua": qd["probe_bo_qua"]}
     kq = chay_cac_chot(a)
     resume_id = _kiem_checkpoint(a, kq)
+    dinh_danh = _dinh_danh_van_chuyen(a.lenh, agent, kq["workspace"])
     if snapshot:
         ket = chuan_bi_xac_thuc(that_su=True, snapshot=snapshot)
         snapshot = ""
         if not ket or not all(x.get("ok") for x in ket):
             raise Chan(MA_CHUA_XAC_THUC, "Không chuẩn bị được Codex credential; chưa chạy child")
-    if _la_codex(a.lenh):
+    if _la_codex(qd):
         if _cho_snapshot_hoac_chan():
             raise Chan(MA_CHUA_XAC_THUC, "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
     try:
-        probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe)
+        probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe, qd, dinh_danh)
     except Chan as e:
         if e.probe is None:
             raise
@@ -2530,12 +2655,13 @@ def lenh_run(a) -> int:
             "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "hong", "giai_doan": "probe",
             "bat_dau_utc": luc, "ket_thuc_utc": luc, "ma_thoat": e.ma,
             "ly_do_dung": e.thong_diep, "pid": None, "khoa_danh_tinh": None,
-            **kq, **_dinh_danh_van_chuyen(a.lenh),
+            **kq, **dinh_danh, **so_agent, "probe_da_chay": sorted(e.probe),
             "probe": _probe_cho_so(e.probe), "bo_qua_probe_ly_do": None,
             **_khoa_chup_som(getattr(a, "chup_workspace", False), None),   # Codex lượt 5 F8
         })
         raise
     kq.update(probe=_probe_cho_so(probe), bo_qua_probe_ly_do=ly_do_bo_qua)
+    kq["probe_da_chay"] = sorted(probe)
     if bool(a.attempt_state) != bool(a.void_reason):
         raise Chan(MA_THAM_SO, "--attempt-state và --void-reason phải đi cùng nhau")
     khoa_ky = None
@@ -2567,7 +2693,7 @@ def lenh_run(a) -> int:
         "ten": a.name, "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "dang_chay",
         "bat_dau_utc": _bay_gio().isoformat(), "ket_thuc_utc": None,
         "ma_thoat": None, "ly_do_dung": None, "pid": None, "khoa_danh_tinh": None,
-        **kq, **_dinh_danh_van_chuyen(a.lenh),
+        **kq, **dinh_danh, **so_agent,
         **_khoa_chup_som(bool(getattr(a, "chup_workspace", False)), None),   # F8 kiến trúc: mọi đường thoát sớm đủ khoá
     }
     if neo:
@@ -2590,6 +2716,8 @@ def lenh_run(a) -> int:
     # chạy, khép hẳn cửa sổ SAU khi sinh con. Không dùng {PROMPT_FILE} thì lớp (2)
     # không có — và điều đó được nói thẳng trong sổ, không giả vờ là đã kín.
     lenh_con = [str(x) for x in a.lenh]
+    exe = dinh_danh["thuc_thi_duong_dan"]   # T3: phóng ĐÚNG tệp đã băm; #1341 P2: POSIX giữ argv[0] gốc (venv symlink)
+    if exe and platform.system() == "Windows": lenh_con[0], exe = exe, None   # noqa: E701 — Windows thay argv[0]
     if kq.get("prompt_sha256"):
         b = Path(a.prompt_file).expanduser().read_bytes()
         if hashlib.sha256(b).hexdigest() != kq["prompt_sha256"]:
@@ -2624,7 +2752,7 @@ def lenh_run(a) -> int:
                    "con se nhan chuoi nguyen van")
 
     f_out = (thu_muc / "stdout.log").open("w", encoding="utf-8")
-    do_model = _la_codex(a.lenh)
+    do_model = _la_codex(qd)
     # Lượt codex: stderr đi qua ỐNG và bộ lọc danh sách cho phép, tệp mở nhị phân để ghi đúng byte.
     # Không đệm (R26-COUNT-09 vòng 2): mỗi write là một lời gọi hệ thống, nên `_ghi_het` đếm được đúng phần chưa ghi.
     f_err = (thu_muc / "stderr.log").open("wb" if do_model else "w",
@@ -2674,7 +2802,7 @@ def lenh_run(a) -> int:
         with contextlib.suppress(OSError):
             dfd_luot = _mo_thu_muc_luot(thu_muc)
     try:
-        p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
+        p = _phong(lenh_con, executable=exe, cwd=kq["workspace"],
                              stdout=f_out, stderr=subprocess.PIPE if do_model else f_err,
                              stdin=subprocess.DEVNULL, **them)
         if do_model:
@@ -5899,6 +6027,8 @@ def build_parser():
                         "khong_do_duoc_workspace, thoat 17 (MA_KHONG_DO_WORKSPACE)")
     r.add_argument("--bo-qua-probe", metavar="LY_DO",
                    help="cho run tiep khi probe hong; bat buoc ghi ly do vao run.json")
+    r.add_argument("--agent", metavar="TEN", action="append",
+                   help="khai agent cua luot: claude, codex hoac khong (bat buoc khi goi qua vo shell)")
     r.add_argument("lenh", nargs=argparse.REMAINDER)
     r.set_defaults(fn=lenh_run)
 

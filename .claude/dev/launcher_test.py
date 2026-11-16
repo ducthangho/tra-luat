@@ -12603,7 +12603,9 @@ def t159_chuong_trinh_ten_tieng_Viet_qua_han_phai_giet_duoc():
     with San() as s:
         ten = s / "kiểm_tra_tiến_trình"
         try:
-            os.symlink(PY, ten)
+            # wp1335 T3: launcher phóng `realpath` của lenh[0] ⇒ symlink sẽ mang tên ĐÍCH; dùng
+            # hardlink/bản sao để tên tiếng Việt chính là tệp được exec.
+            _bin_python_gia(ten)
         except (OSError, UnicodeEncodeError) as e:
             raise RuntimeError(f"dieu kien dung: khong tao duoc ten tieng Viet: {e}")
         tc, tn = s / "comm.bin", s / "nhip.txt"
@@ -14108,7 +14110,398 @@ def r1252_bam_tep_khong_theo_lien_ket():
 
 
 
+# --------------------------------------------- wp1335: agent một nguồn (đặc tả AGENT-DINH-DANH-MOT-NGUON r3)
+
+def _r1335_qd(m, lenh, agent=None):
+    """Kết quả `_quyet_dinh_agent`: ("CHAN", ma, thong_diep) hoặc dict quyết định. Chỉ bắt `Chan`."""
+    try:
+        return m._quyet_dinh_agent(lenh, agent)
+    except m.Chan as e:
+        return ("CHAN", e.ma, e.thong_diep)
+
+
+def _r1335_tep(duong: Path, dau: str) -> Path:
+    """Tệp thực thi in `dau` (sh trên POSIX, .cmd trên Windows)."""
+    duong.parent.mkdir(parents=True, exist_ok=True)
+    duong.write_text(f"@echo {dau}\r\n" if LA_WINDOWS else f"#!/bin/sh\necho {dau}\n", encoding="utf-8")
+    duong.chmod(0o755)
+    return duong
+
+
+@ca
+def r1335_ma_tran_agent_khai_bao():
+    """r2 §4 + M7: ma trận biết trước đáp án; probe đo bằng `chay_cac_probe` thật."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        ws = str(tao_repo(s))
+        probe = {}
+        for lenh0, ag in (("claude", None), ("bash", "claude"), ("bash", "khong"), ("bash", "codex"),
+                          ("git", None), ("claude.cmd", None), ("claude.ps1", None), ("CLAUDE.EXE", None)):
+            ds, _ = m.chay_cac_probe(ws, [lenh0, "x"], "r1335 ma tran", m._quyet_dinh_agent([lenh0, "x"], ag))
+            probe[(lenh0, ag)] = "claude_trust" in ds
+    mong = {("claude", None): True, ("bash", "claude"): True, ("bash", "khong"): False,
+            ("bash", "codex"): False, ("git", None): False, ("claude.cmd", None): True,
+            ("claude.ps1", None): True, ("CLAUDE.EXE", None): True}
+    lech = [f"{k}: claude_trust={probe[k]} (mong {v})" for k, v in mong.items() if probe[k] != v]
+    bang(not lech, f"ma tran probe lech: {lech}")
+    bang("claude_trust" in m._quyet_dinh_agent(["bash"], "codex")["probe_bo_qua"],
+         "bash+codex: probe_bo_qua thieu claude_trust")
+    for vo in ("bash", "sh", "pwsh", "pwsh.exe", "cmd", "cmd.exe", "powershell.exe", "env", "wsl", "wsl.exe"):
+        kq = _r1335_qd(m, [vo, "claude", "-p", "x"])
+        bang(isinstance(kq, tuple) and kq[1] == MA_THAM_SO, f"vo shell {vo} khong co --agent ma khong bi chan: {kq}")
+        bang(all(y in kq[2] for y in ("vo shell", "--agent claude|codex", "--agent khong")),
+             f"thong diep chan thieu ba y: {kq[2]!r}")
+    for sai in ("Claude", "CLAUDE", "claudex"):
+        kq = _r1335_qd(m, ["claude"], sai)
+        bang(isinstance(kq, tuple) and kq[1] == MA_THAM_SO, f"--agent {sai} phai MA_THAM_SO: {kq}")
+    a = m.build_parser().parse_args(["run", "--run-root", "x", "--agent", "claude", "--agent", "codex", "--", "git"])
+    try:
+        m.lenh_run(a)
+        bang(False, "--agent lap ma khong bi chan")
+    except m.Chan as e:
+        bang(e.ma == MA_THAM_SO, f"--agent lap sai ma {e.ma}")
+
+
+@ca
+def r1335_khop_hai_cua_15_to_hop():
+    """N2: với mọi (--agent × lenh[0]), probe đã chạy và provider trong run.json do CÙNG một hàm quyết."""
+    with San() as s:
+        repo = tao_repo(s); b = s / "bin"; b.mkdir()
+        _bin_python_gia(b / ("claude.exe" if LA_WINDOWS else "claude"))
+        _bin_python_gia(b / ("codex.exe" if LA_WINDOWS else "codex"))
+        if LA_WINDOWS:
+            (b / "claude.cmd").write_text("@exit /b 0\r\n", encoding="utf-8")
+        else:
+            _bin_python_gia(b / "claude.cmd")
+        # W-B1: CODEX_HOME của MÁY (ACL rộng/hỏng) làm chốt chờ snapshot chặn rc=13 trước khi có run.json.
+        env = dict(os.environ, PATH=str(b) + os.pathsep + os.environ.get("PATH", ""),
+                   CODEX_HOME=str(s / "codex-home-vang"))
+        mong = {"claude": "anthropic_claude", "codex": "openai_codex", "khong": "local_process"}
+        lech, i = [], 0
+        for ag in ("claude", "codex", "khong"):
+            for lenh0 in ("claude", "codex", "bash", "claude.cmd", "git"):
+                rr = s / f"runs-{i}"; i += 1
+                r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--agent", ag,
+                         "--bo-qua-probe", "r1335 khop hai cua", "--", lenh0, "-c", "pass", env=env)
+                tm = [p for p in rr.iterdir() if p.is_dir()] if rr.is_dir() else []
+                bang(tm, f"--agent {ag} {lenh0}: KHONG co run.json (rc={r.returncode}): {r.stderr[-300:]}")
+                d = json.loads((tm[0] / "run.json").read_text(encoding="utf-8"))
+                ct = "claude_trust" in d.get("probe_da_chay", ())
+                ok = (d.get("provider") == mong[ag] and ct == (d.get("provider") == "anthropic_claude")
+                      and d.get("agent_suy_ra") == ag and d.get("agent_da_khai") == ag
+                      and ("claude_trust" in d.get("probe_bo_qua", ())) != ct)
+                print(f"    r1335 to hop --agent {ag:<6} {lenh0:<11} provider={d.get('provider')} "
+                      f"claude_trust={ct} {'KHOP' if ok else 'LECH'}")
+                if not ok:
+                    lech.append((ag, lenh0, d.get("provider"), ct))
+        bang(i == 15 and not lech, f"{len(lech)}/{i} to hop LECH giua probe va dinh danh: {lech}")
+        rr = s / "runs-khong-co"
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", "git", "--version", env=env)
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(d.get("agent_da_khai", "vang") is None and d.get("agent_suy_ra") == "khong",
+             f"khong khai --agent phai ghi agent_da_khai=null (khac 'khong'): {d.get('agent_da_khai', 'vang')!r}")
+
+
+@ca
+def r1335_transport_sha256_la_bam_tep_that():
+    """N3 + D3: băm là băm tệp đã resolve, không phải băm contract hằng; không resolve được ⇒ null + lý do."""
+    m = _tai_launcher_thu()
+    hang = hashlib.sha256(json.dumps({"provider": "openai_codex", "execution_surface": "codex_cli",
+                                      "transport": "machine"}, sort_keys=True,
+                                     separators=(",", ":")).encode("utf-8")).hexdigest()
+    with San() as s:
+        gia = s / "x" / "malware" / "codex"
+        gia.parent.mkdir(parents=True)
+        gia.write_bytes(b"r1335 codex gia\n"); gia.chmod(0o755)
+        bam = hashlib.sha256(gia.read_bytes()).hexdigest()
+        for ag in (None, "codex"):
+            d = m._dinh_danh_van_chuyen([str(gia)], ag, str(s))
+            bang(d["transport_sha256"] == bam and d["transport_sha256"] != hang,
+                 f"--agent {ag}: transport_sha256={d['transport_sha256']} (mong bam tep {bam}, khong phai hang {hang[:8]})")
+            bang(d["provider"] == "openai_codex", f"provider sai: {d['provider']}")
+        d = m._dinh_danh_van_chuyen(["r1335-khong-ton-tai-xyz"], None, str(s))
+        bang(d["transport_sha256"] is None and isinstance(d.get("thuc_thi_ly_do"), str) and d["thuc_thi_ly_do"],
+             f"lenh khong resolve duoc phai null + ly do: {d}")
+
+
+@ca
+def r1335_khac_cwd_bam_va_chay_tep_trong_workspace():
+    """N3b: launcher đứng ở A, workspace B, cả hai có `./agent` khác nhau ⇒ băm và chạy B/agent."""
+    with San() as s:
+        ten = "agent.cmd" if LA_WINDOWS else "agent"
+        a_dir = s / "A"; _r1335_tep(a_dir / ten, "DAU_A")
+        repo = tao_repo(s); tep_b = _r1335_tep(repo / ten, "DAU_B")
+        g = ["git", "-C", str(repo), "-c", "user.email=t@e.invalid", "-c", "user.name=t",
+             "-c", "commit.gpgsign=false", "-c", f"core.hooksPath={s / 'hooks_rong'}"]
+        subprocess.run(g + ["add", "-A"], capture_output=True)
+        subprocess.run(g + ["commit", "-m", "agent"], capture_output=True)
+        rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", "." + os.sep + ten, cwd=str(a_dir))
+        bang(r.returncode == 0, f"launcher rc={r.returncode}: {r.stderr[-400:]}")
+        tm = next(rr.iterdir())
+        d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
+        out = (tm / "stdout.log").read_text(encoding="utf-8")
+        bang(d["transport_sha256"] == hashlib.sha256(tep_b.read_bytes()).hexdigest(),
+             f"bam khong phai B/{ten}: {d.get('thuc_thi_duong_dan')}")
+        bang("DAU_B" in out and "DAU_A" not in out, f"con khong chay B/{ten}: {out!r}")
+        # F2: PATH tương đối và phần tử PATH rỗng phải neo theo workspace của con, không theo cwd launcher.
+        # Tên RIÊNG cho bin: trên Windows cwd con đứng trước PATH (F6-01), nên `agent` ở gốc workspace sẽ thắng.
+        tenp = ten.replace("agent", "agentp")
+        _r1335_tep(a_dir / "bin" / tenp, "DAU_A"); tep_b2 = _r1335_tep(repo / "bin" / tenp, "DAU_B2")
+        subprocess.run(g + ["add", "-A"], capture_output=True)
+        subprocess.run(g + ["commit", "-m", "bin"], capture_output=True)
+        for pth, lenh0, tep, dau in (("bin", "agentp", tep_b2, "DAU_B2"), ("", "agent", tep_b, "DAU_B")):
+            rr = s / f"runs-path-{pth or 'rong'}"
+            env = dict(os.environ, PATH=pth + os.pathsep + os.environ.get("PATH", ""))
+            chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", lenh0, cwd=str(a_dir), env=env)
+            tm = next(rr.iterdir())
+            d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
+            out = (tm / "stdout.log").read_text(encoding="utf-8")
+            bang(d["transport_sha256"] == hashlib.sha256(tep.read_bytes()).hexdigest() and dau in out
+                 and "DAU_A" not in out, f"PATH={pth!r}: bam/chay khong phai {tep}: {d.get('thuc_thi_duong_dan')} {out!r}")
+
+
+@ca
+def r1335_symlink_doi_dich_giua_bam_va_phong():
+    """N3c: đổi đích symlink SAU khi băm, TRƯỚC khi phóng ⇒ con vẫn chạy X đã băm."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        duoi = ".cmd" if LA_WINDOWS else ""
+        x = _r1335_tep(s / f"X{duoi}", "DAU_X"); y = _r1335_tep(s / f"Y{duoi}", "DAU_Y")
+        lk = s / "bin" / f"lk{duoi}"; lk.parent.mkdir()
+        try:
+            os.symlink(x, lk)
+        except (OSError, NotImplementedError) as e:
+            return f"BO QUA r1335_symlink: nen nay khong tao duoc symlink ({type(e).__name__})"
+        repo = tao_repo(s); rr = s / "runs"
+        a = m.build_parser().parse_args(["run", "--json", "--workspace", str(repo), "--run-root", str(rr), "--", str(lk)])
+        a.lenh = a.lenh[1:]
+        goc = m._phong
+
+        def doi_dich(lenh_con, **kw):
+            lk.unlink(); os.symlink(y, lk)
+            return goc(lenh_con, **kw)
+
+        goc_spawn, da_spawn = m._probe_spawn, []
+        m._phong, m._probe_spawn = doi_dich, lambda ct, ws: (da_spawn.append(ct), goc_spawn(ct, ws))[1]
+        try:
+            m.lenh_run(a)
+        finally:
+            m._phong, m._probe_spawn = goc, goc_spawn
+        bang(da_spawn == [os.path.realpath(x)], f"probe spawn khong chay dung tep da chon X: {da_spawn}")
+        tm = next(rr.iterdir())
+        d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
+        out = (tm / "stdout.log").read_text(encoding="utf-8")
+        bang(lk.resolve() == y.resolve(), "diem tiem khong doi duoc dich symlink")
+        bang("DAU_X" in out and "DAU_Y" not in out, f"con khong chay dung tep da bam X: {out!r}")
+        bang(d["transport_sha256"] == hashlib.sha256(x.read_bytes()).hexdigest(), "bam khong phai bam X")
+
+
+@ca
+def r1335_giu_argv0_goc_khi_ghim_tep():
+    """PR #1341 P2: POSIX phóng tệp đã băm qua `executable`, argv[0] giữ đường gọi gốc (venv/bin/python là symlink)."""
+    if LA_WINDOWS:
+        return "BO QUA r1335_argv0: Windows van thay argv[0] bang duong da bam (venv Windows mac dinh la ban sao)"
+    with San() as s:
+        v, repo, rr = s / "venv" / "bin", tao_repo(s), s / "runs"; v.mkdir(parents=True); (v / "python").symlink_to(Path(PY).resolve())
+        (v.parent / "pyvenv.cfg").write_text(f"home = {Path(PY).resolve().parent}\n", encoding="utf-8")
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", str(v / "python"), "-c", "import sys;print(sys.prefix != sys.base_prefix)")
+        tm = next(rr.iterdir()); d, out = json.loads((tm / "run.json").read_text(encoding="utf-8")), (tm / "stdout.log").read_text(encoding="utf-8")
+        bang(out.strip() == "True" and d["thuc_thi_duong_dan"] == os.path.realpath(PY), f"mat venv hoac bam sai: {out!r} {d.get('thuc_thi_duong_dan')}")
+
+
+@ca
+def r1335_hanh_vi_codex_theo_agent_da_quyet():
+    """F1: lọc stderr + đo sandbox của lượt codex đi theo `_quyet_dinh_agent` (khai > tên, cắt đuôi shim)."""
+    with San() as s:
+        repo = tao_repo(s); b = s / "bin"; b.mkdir()
+        duoi = ".exe" if LA_WINDOWS else ""
+        for ten in ("wrap", "codex"):
+            _bin_python_gia(b / (ten + duoi))
+        if LA_WINDOWS:
+            (b / "codex.bat").write_text("@echo r1335-rieng-tu 1>&2\r\n", encoding="utf-8")
+        else:
+            _bin_python_gia(b / "codex.bat")
+        # W-B1: CODEX_HOME của MÁY (ACL rộng/hỏng) làm chốt chờ snapshot chặn rc=13 trước khi có run.json.
+        env = dict(os.environ, PATH=str(b) + os.pathsep + os.environ.get("PATH", ""),
+                   CODEX_HOME=str(s / "codex-home-vang"))
+        lech = []
+        for i, (lenh0, ag, loc) in enumerate((("wrap", "codex", True), ("codex", "khong", False),
+                                              ("codex", "claude", False), ("codex.bat", None, True))):
+            rr = s / f"runs-{i}"
+            chay("run", "--workspace", str(repo), "--run-root", str(rr), *(("--agent", ag) if ag else ()),
+                 "--bo-qua-probe", "r1335 F1", "--", lenh0, "-c",
+                 "import sys;sys.stderr.write('r1335-rieng-tu\\n')", env=env)
+            tm = next(rr.iterdir())
+            d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
+            da_loc = b"r1335-rieng-tu" not in (tm / "stderr.log").read_bytes()
+            if (da_loc, "sandbox_trang_thai" in d) != (loc, loc):
+                lech.append((lenh0, ag, da_loc, "sandbox_trang_thai" in d))
+        bang(not lech, f"hanh vi codex khong theo agent da quyet: {lech}")
+
+
+@ca
+def r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke():
+    """F4, như Popen ở base: ứng viên PATH exec hỏng với MỌI errno ⇒ ứng viên kế; ứng viên tốt, hoặc exec được mà
+    rc khác 0 ⇒ giữ ứng viên ấy (không chuyển)."""
+    if LA_WINDOWS:
+        return "BO QUA r1335_F4: shebang/errno exec la khai niem POSIX (nhanh chon ung vien dung chung, do tren Linux)"
+    with San() as s:
+        repo, tot = tao_repo(s), _r1335_tep(s / "B" / "ra", "DAU_TOT")
+        (s / "khongx").write_text("#!/bin/sh\n", encoding="utf-8"); (s / "tep").write_text("x", encoding="utf-8")
+        os.symlink("vong", s / "vong")
+        # nhãn → (nội dung A, A có được giữ không, dòng con in)
+        ky = {"ENOENT": ("#!/khong/co/trinh-dich\n", False, "DAU_TOT"), "ENOEXEC": ("khong phai tep thuc thi\n", False, "DAU_TOT"),
+              "EACCES": (f"#!{s / 'khongx'}\n", False, "DAU_TOT"), "ENOTDIR": (f"#!{s / 'tep' / 'x'}\n", False, "DAU_TOT"),
+              "ELOOP": (f"#!{s / 'vong'}\n", False, "DAU_TOT"), "ETXTBSY": (None, False, "DAU_TOT"),
+              "hop_le": (None, True, "DAU_A"), "rc_khac_0": ("#!/bin/sh\nexit 3\n", True, "")}
+        for nhan, (hong, giu_a, dau) in ky.items():
+            a, rr = _r1335_tep(s / nhan / "ra", "DAU_A"), s / f"runs-{nhan}"; _ = hong and a.write_text(hong, encoding="utf-8")
+            with (open(a, "a") if nhan == "ETXTBSY" else contextlib.nullcontext()):   # ETXTBSY: A đang mở để ghi
+                chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", "ra",
+                     env=dict(os.environ, PATH=os.pathsep.join((str(a.parent), str(tot.parent), os.environ["PATH"]))))
+            tm, mong = next(rr.iterdir()), (a if giu_a else tot)
+            d, so = json.loads((tm / "run.json").read_text(encoding="utf-8")), tm / "stdout.log"
+            out = so.read_text(encoding="utf-8") if so.exists() else ""   # probe hỏng ⇒ chưa có stdout.log
+            bang(d["transport_sha256"] == hashlib.sha256(mong.read_bytes()).hexdigest() and out.strip() == dau,
+                 f"ung vien {nhan}: chon {d.get('thuc_thi_duong_dan')}, con in {out!r}")
+        m = _tai_launcher_thu(); goc = m._chay_van_ban_an_toan   # P2: OSError SAU exec (EBADF) ⇒ không chuyển
+
+        def tiem(lenh, **k):
+            p = goc(lenh, **k)
+            if lenh[1:] == ["--version"] and Path(lenh[0]).parent.name == "hop_le" and m.r1335_tiem:
+                raise OSError(9, "r1335 tiem EBADF sau exec")
+            return p
+        m._chay_van_ban_an_toan = tiem
+        for nhan, pth, m.r1335_tiem, mong, loai in (("EBADF", ("hop_le", "B"), True, "hop_le", "OSError"),
+                                                    ("tat_ca_hong", ("EACCES", "ENOENT"), False, "EACCES", "PermissionError")):
+            dd = m._thuc_thi("ra", str(repo), os.pathsep.join(str(s / x) for x in pth))
+            ds, _ = m.chay_cac_probe(str(repo), ["ra"], "r1335 F4", m._quyet_dinh_agent(["ra"]), dd)
+            bang(dd["thuc_thi_duong_dan"] == os.path.realpath(s / mong / "ra") and loai in ds["spawn"]["chi_tiet"],
+                 f"{nhan}: chon {dd['thuc_thi_duong_dan']}, spawn {ds['spawn']}")
+
+
+@contextlib.contextmanager
+def _r1335_win(m, env):
+    """Chọn tệp kiểu Windows: trên Linux giả `platform.system`, `sys.platform`/`os.pathsep` (cho `shutil.which`), `_winapi`."""
+    cu = (m.platform.system, sys.platform, getattr(shutil, "_winapi", None), os.pathsep, dict(os.environ))
+    os.environ.update(env)
+    if not LA_WINDOWS:
+        m.platform.system, sys.platform, os.pathsep = (lambda: "Windows"), "win32", ";"
+        shutil._winapi = type("WinApiGia", (), {"NeedCurrentDirectoryForExePath": staticmethod(lambda c: True)})
+    try:
+        yield
+    finally:
+        m.platform.system, sys.platform, shutil._winapi, os.pathsep = cu[:4]
+        os.environ.clear(); os.environ.update(cu[4])
+
+
+@ca
+def r1335_F6_windows_chon_tep_theo_which():
+    """F6-01: Windows (Linux: mô phỏng) chọn tệp bằng `shutil.which` theo từng thư mục neo cwd con: (1) PATHEXT rỗng vẫn
+    chọn `ra.CMD`, không chọn shim `ra`; (2) lệnh có thư mục `A/ra` vẫn áp PATHEXT; (3) cwd con đứng trước PATH."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        for tep in ("b1/ra", "b1/ra.CMD", "A/ra", "A/ra.CMD", "ws/ra.EXE", "b3/ra.EXE", "x/codex"):
+            _r1335_tep(s / tep, tep)
+        (s / "ws0").mkdir()
+        for nhan, lenh0, cwd, pth, env, mong in (
+                ("PATHEXT_rong", "ra", s / "ws0", s / "b1", {"PATHEXT": ""}, s / "b1" / "ra.CMD"),
+                ("co_thu_muc", "A" + os.sep + "ra", s, s / "b1", {}, s / "A" / "ra.CMD"),
+                ("cwd_truoc", "ra", s / "ws", s / "b3", {}, s / "ws" / "ra.EXE"),
+                ("duong_dan_khong_duoi", str(s / "x" / "codex"), s, s / "b1", {}, s / "x" / "codex")):
+            with _r1335_win(m, env):
+                dd = m._thuc_thi(lenh0, str(cwd), str(pth))
+            bang(dd["thuc_thi_duong_dan"] == os.path.realpath(mong), f"F6 {nhan}: chon {dd['thuc_thi_duong_dan']}")
+
+
+@ca
+def r1335_P2_windows_bo_ung_vien_khong_duoi():
+    """P2 lượt 5: Windows, tên không đuôi ⇒ chỉ thử đuôi PATHEXT (như cmd.exe, `shutil.which` 3.13), bỏ `ra` không đuôi.
+    Windows: chạy `run` THẬT. Linux: kiểm logic chọn ứng viên bằng `platform.system` giả."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        b = s / "bin"; b.mkdir(); (b / "ra").write_text("#!/bin/sh\necho DAU_SHIM\n", encoding="utf-8")
+        tep = _r1335_tep(b / "ra.CMD", "DAU_CMD")
+        if not LA_WINDOWS:
+            with _r1335_win(m, {}):
+                dd = m._thuc_thi("ra", str(s), str(b))
+            return bang(dd["thuc_thi_duong_dan"] == os.path.realpath(tep), f"chon sai ung vien: {dd}")
+        repo, rr = tao_repo(s), s / "runs"
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", "ra",
+             env=dict(os.environ, PATH=str(b) + os.pathsep + os.environ.get("PATH", "")))
+        tm = next(rr.iterdir()); d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
+        out = (tm / "stdout.log").read_text(encoding="utf-8") if (tm / "stdout.log").exists() else ""
+        bang(d["transport_sha256"] == hashlib.sha256(tep.read_bytes()).hexdigest() and "DAU_CMD" in out,
+             f"chon {d.get('thuc_thi_duong_dan')}, con in {out!r}")
+
+
+@ca
+def r1335_bang_transport_tu_choi_ten_trung():
+    """D4: chốt chết thay bằng chốt đo được — tên lệnh thuộc hai provider ⇒ RuntimeError."""
+    m = _tai_launcher_thu()
+    bang(set(m._kiem_bang_transport()) == {"claude", "codex", "llm"}, "bang that phai qua chot")
+    for hong in ((("p1", ("a",), "s", "t"), ("p2", ("a",), "s", "t")),
+                 (("p1", ("a",), "s", "t"), ("p1", ("b",), "s2", "t"))):
+        try:
+            m._kiem_bang_transport(hong)
+            bang(False, f"bang hong van qua: {hong}")
+        except RuntimeError:
+            pass
+
+
 DOT_BIEN = [
+    # wp1335 (M8): mỗi chốt của đặc tả AGENT-DINH-DANH-MOT-NGUON r3 một đột biến.
+    ("r1335_bo_chan_vo_shell", ("    elif ten in VO_SHELL:\n", "    elif False:\n"), ["r1335_ma_tran_agent_khai_bao"]),
+    ("r1335_agent_khong_ghi_de_ten", ('        suy_ra = agent.strip()\n', '        suy_ra = ten if ten in AGENT_CHO_PHEP else "khong"\n'),
+     ["r1335_ma_tran_agent_khai_bao", "r1335_khop_hai_cua_15_to_hop"]),
+    ("r1335_agent_casefold", [("        if agent.strip() not in AGENT_CHO_PHEP:", "        if agent.strip().casefold() not in AGENT_CHO_PHEP:"),
+                              ('        suy_ra = agent.strip()\n', '        suy_ra = agent.strip().casefold()\n')], ["r1335_ma_tran_agent_khai_bao"]),
+    ("r1335_probe_bo_qua_rong", ('"probe_bo_qua": [t for p in _PROBE_AGENT.values()', '"probe_bo_qua": [] or [t for p in ()'),
+     ["r1335_ma_tran_agent_khai_bao", "r1335_khop_hai_cua_15_to_hop"]),
+    ("r1335_gop_null_va_khong", ('"agent_da_khai": agent.strip() if agent is not None else None', '"agent_da_khai": agent.strip() if agent is not None else "khong"'),
+     ["r1335_khop_hai_cua_15_to_hop"]),
+    ("r1335_T1_tach_hai_nguon", ("    qd = _quyet_dinh_agent(lenh, agent)\n    tt =",
+                                 '    qd = _quyet_dinh_agent(lenh, None if _ten_lenh_chuan(lenh[0]) in ("claude", "codex") else "khong")\n    tt ='),
+     ["r1335_khop_hai_cua_15_to_hop"]),
+    ("r1335_T1_probe_theo_ten", ('    if "claude_trust" in qd["probe_can"]:\n', '    if _ten_lenh_chuan(lenh[0]) == "claude":\n'),
+     ["r1335_ma_tran_agent_khai_bao", "r1335_khop_hai_cua_15_to_hop"]),
+    ("r1335_T2_bo_cat_cmd", ('HAU_TO_SHIM = (".exe", ".cmd", ".bat", ".ps1")', 'HAU_TO_SHIM = (".exe", ".bat", ".ps1")'),
+     ["r1335_ma_tran_agent_khai_bao"]),   # 15 tổ hợp đều khai --agent nên tên không quyết; không tính
+    ("r1335_T3_lui_ve_bam_hang", ('"transport_sha256": h.hexdigest(),', '"transport_sha256": hashlib.sha256(b"hang").hexdigest(),'),
+     ["r1335_transport_sha256_la_bam_tep_that", "r1335_khac_cwd_bam_va_chay_tep_trong_workspace", "r1335_symlink_doi_dich_giua_bam_va_phong"]),
+    ("r1335_T3_bo_ly_do", ('"thuc_thi_ly_do": f"khong resolve duoc {s!r} theo cwd workspace va PATH cua con"}', '"thuc_thi_ly_do": None}'),
+     ["r1335_transport_sha256_la_bam_tep_that"]),
+    ("r1335_N3b_resolve_theo_cwd_launcher", ('    dinh_danh = _dinh_danh_van_chuyen(a.lenh, agent, kq["workspace"])', '    dinh_danh = _dinh_danh_van_chuyen(a.lenh, agent, None)'),
+     ["r1335_khac_cwd_bam_va_chay_tep_trong_workspace"]),
+    ("r1335_N3c_phong_lenh_goc", ('_phong(lenh_con, executable=exe, cwd=', '_phong(lenh_con, cwd='),
+     ["r1335_symlink_doi_dich_giua_bam_va_phong"]),
+    ("r1335_argv0_ve_realpath", ('    if exe and platform.system() == "Windows": lenh_con', '    if exe: lenh_con'), ["r1335_giu_argv0_goc_khi_ghim_tep"]),
+    ("r1335_F1_codex_theo_ten", ('    do_model = _la_codex(qd)\n', '    do_model = Path(a.lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd")\n'),
+     ["r1335_hanh_vi_codex_theo_agent_da_quyet"]),
+    ("r1335_F2_path_theo_cwd_launcher", ('os.path.join(cwd, d or ".", s) for d', 'os.path.join(d, s) for d'),
+     ["r1335_khac_cwd_bam_va_chay_tep_trong_workspace"]),
+    ("r1335_F3_probe_lenh_goc", ('_probe_spawn((dd or {}).get("thuc_thi_duong_dan") or str(lenh[0]), ws)', '_probe_spawn(str(lenh[0]), ws)'),
+     ["r1335_symlink_doi_dich_giua_bam_va_phong"]),
+    ("r1335_F4_dung_o_ung_vien_dau", ('    while ds["spawn"].get("errno") is not None', '    while False and ds["spawn"].get("errno") is not None'),
+     ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
+    ("r1335_F4_chuyen_ca_khi_rc_khac_0", ('    while ds["spawn"].get("errno") is not None', '    while ds["spawn"]["trang_thai"] != "DAT"'),
+     ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
+    ("r1335_F4_errno_ca_sau_exec", ('"errno": e.errno if loi_exec else None}', '"errno": e.errno}'),
+     ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
+    ("r1335_F4_khong_giu_loi_dau", ('        dd.update(dau[0]); ds["spawn"] = dau[1]', '        pass'), ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
+    ("r1335_F6_tu_dung_ung_vien", ('if (u := shutil.which(os.path.join(d, os.path.basename(s))))]', 'if os.path.isfile(u := os.path.join(d, os.path.basename(s)))]'),
+     ["r1335_F6_windows_chon_tep_theo_which", "r1335_P2_windows_bo_ung_vien_khong_duoi"]),
+    ("r1335_F6_thu_muc_bo_qua", ('        if os.path.dirname(s):\n            thu_muc', '        if False:\n            thu_muc'),
+     ["r1335_F6_windows_chon_tep_theo_which"]),
+    ("r1335_F6_bo_khop_truc_tiep", ('        if not ung and os.path.dirname(s) and os.path.isfile(', '        if False and os.path.dirname(s) and os.path.isfile('),
+     ["r1335_F6_windows_chon_tep_theo_which"]),
+    ("r1335_F6_bo_cwd_truoc", ('([cwd] if shutil._win_path_needs_curdir(s, os.F_OK | os.X_OK) else [])', '([])'),
+     ["r1335_F6_windows_chon_tep_theo_which"]),
+    ("r1335_F4_chi_ENOENT_ENOEXEC", ('    while ds["spawn"].get("errno") is not None', '    while ds["spawn"].get("errno") in (2, 8)'),   # ENOENT, ENOEXEC
+     ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
+    ("r1335_D4_bo_chot_ten_trung", ("            if ten in theo_lenh:\n                raise RuntimeError", "            if False:\n                raise RuntimeError"),
+     ["r1335_bang_transport_tu_choi_ten_trung"]),
     ("r1252_bo_kiem_co_khi_ket_thuc_som", ('    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if bat else',
                                            '    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if True else'),
      ["r1252_ket_thuc_som_du_khoa"]),   # Codex lượt 6 F10: đúng đột biến reviewer đã đo
@@ -14579,7 +14972,7 @@ DOT_BIEN = [
      ['r925_khung_chi_nhan_tu_tungstenite_protocol_dung_vi_tri_va_dung_su_kien']),
     ('r26_rv5_lf_detection', ('        het_dong = doan.endswith(b"\\n")\n', '        het_dong = True\n'),
      ['r925_khung_cut_o_EOF_hoac_giua_doan_doc_khong_nhan_va_tinh_mat']),
-    ('r26_rv5_codex_mode_disabled', ('    do_model = _la_codex(a.lenh)\n', '    do_model = False\n'),
+    ('r26_rv5_codex_mode_disabled', ('    do_model = _la_codex(qd)\n', '    do_model = False\n'),
      ['r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat']),
     ('r26_rv5_codex_env_guard', ('    if do_model:\n        env = dict(os.environ)\n', '    if False:\n        env = dict(os.environ)\n'),
      ['r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat']),
@@ -14650,7 +15043,7 @@ DOT_BIEN = [
      ['r926_ghi_so_chup_rieng_ket_loi_dem']),
     ('r26_rv7_khong_chup_dem', ('ket_s, loi_s, dem_s = list(self.ket), list(self.loi), dict(self.dem)', 'ket_s, loi_s, dem_s = list(self.ket), list(self.loi), self.dem'),
      ['r926_ghi_so_chup_rieng_ket_loi_dem']),
-    ("r25_loc_ca_luot_khong_phai_codex", ('    do_model = _la_codex(a.lenh)\n', '    do_model = True\n'),
+    ("r25_loc_ca_luot_khong_phai_codex", ('    do_model = _la_codex(qd)\n', '    do_model = True\n'),
      ["r925_khong_phai_codex_giu_nguyen_so_va_stderr"]),
     # wp802 (N1–N4, N6): mỗi tiêu chí một đột biến gỡ đúng chốt của nó.
     ("wp802_bo_nhanh_BI_CHE", ('        if thay is not None and hong_dau is not None:', '        if False:'),

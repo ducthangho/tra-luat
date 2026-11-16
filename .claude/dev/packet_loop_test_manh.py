@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """packet_loop_test_manh — bộ chạy BỌC NGOÀI `packet_loop_test.py` (#1343 CI-PACKET-LOOP-NHANH r3).
 
-Không sửa, không chép tệp gốc: nạp nó làm mô-đun rồi gọi ĐÚNG `main()` của nó, chỉ bọc ba cửa trong lúc `main()` chạy:
+Không sửa, không chép tệp gốc: nạp nó rồi gọi ĐÚNG `main()` của nó (không đụng `CASES` ⇒ chốt `missing` vẫn tính trên TOÀN BỘ sổ), chỉ bọc ba cửa:
   · `chay_suite`    — lượt NỀN (lời gọi đầu, từ `_legacy_main`) chỉ chạy ca của mảnh; xong thì đặt `MUTANTS` = `_Pha` để chọn
                       pha đột biến. Lời gọi LỒNG của chính các ca (trong lượt nền) và lượt đột biến đi thẳng xuống bản gốc.
   · `_required1174` — lời gọi của `_legacy_main` chấm trên PHẦN ca bắt buộc nằm trong mảnh (M6); lời gọi khác giữ nguyên.
   · `_carrier1174`  — carrier Linux cần đủ kết quả `wp1174_*` trong MỘT tiến trình ⇒ `chia` dồn cả nhóm về mảnh 0; mảnh khác
                       IN RA rằng nó không chạy carrier, và `gom` đòi ĐÚNG MỘT mảnh đã chạy (không im lặng tắt).
-Chốt `missing` của `main()` vẫn tính trên TOÀN BỘ `CASES`: bộ bọc không đụng `CASES`.
 dùng:  (không cờ, không biến)   như chạy tệp gốc: đủ ca + đủ bảng đột biến
        --manh i/N [--ra TEP]    cổng bắt buộc: mảnh i của N trên (sổ ca − `CA_DAI`), KHÔNG đột biến; ghi bản ghi cho job gom
        --dot-bien j/M           workflow đêm: mảnh đột biến j của M; nền RỖNG, riêng j = 0 chạy `CA_DAI` (thiếu ca nào ⇒ ĐỎ)
@@ -21,9 +20,10 @@ import sys
 import time
 from pathlib import Path
 
-N_TOI_DA, NHOM_CARRIER = 16, "wp1174_"
-# M7 (r3): GHIM THEO TÊN, không chọn theo thời lượng động. Đo 16-11-2026 trên base 9c1661f (4 nhân, 4 tiến trình): 1820 s và
-# 429 s; 1491 ca còn lại tổng 1730 s (nhóm `wp1174_*` 199 s, ca nặng nhất 93 s). Ca MỚI vào sổ tự rơi vào cổng bắt buộc.
+# Họ ca phải chạy CHUNG một tiến trình, đúng thứ tự gốc: `wp1174_*` (carrier) và `r813_*` (chung bộ đếm `_N813`; đo trên 26090fd:
+# xẻ họ này thì `r813_cua_khep_khong_chan` đụng run-id `g1` của fixture và ĐỎ dù mã không đổi).
+N_TOI_DA, NHOM_DINH = 16, ("wp1174_", "r813_")
+# M7 (r3): GHIM THEO TÊN. Đo 16-11-2026 trên base 9c1661f (4 nhân, 4 tiến trình): 1820 s và 429 s; 1491 ca còn lại tổng 1730 s.
 CA_DAI = ("wp1303_target_human_chain", "wp1303_target_supported_pairs")
 
 def nap(thu_muc=Path(__file__).resolve().parent):
@@ -49,14 +49,15 @@ def ca_dang_ky(T):
     return ten or sys.exit("KHÔNG ĐO ĐƯỢC: main() gốc không gọi chay_suite")
 
 def chia(ten, n):
-    """n mảnh của CỔNG BẮT BUỘC trên (ten − CA_DAI). Mảnh 0 = cả nhóm `wp1174_*` (carrier); ca còn lại: chỉ số k % (n-1) + 1
-    theo thứ tự đăng ký (ca nặng đăng ký LIỀN nhau nên modulo tự rải). n == 1 ⇒ một mảnh chứa tất cả."""
+    """n mảnh của CỔNG BẮT BUỘC trên (ten − CA_DAI). Mỗi họ `NHOM_DINH` trọn một mảnh đầu (carrier ở mảnh 0); ca còn lại rải
+    modulo theo thứ tự đăng ký trên các mảnh sau (ca nặng đăng ký LIỀN nhau nên tự rải). n == 1 ⇒ một mảnh chứa tất cả."""
     if type(n) is not int or not 1 <= n <= N_TOI_DA:
         raise ValueError(f"N={n!r} ngoài 1..{N_TOI_DA}")
     ten = [t for t in ten if t not in CA_DAI]
-    manh = [[t for t in ten if n > 1 and t.startswith(NHOM_CARRIER)]] + [[] for _ in range(n - 1)]
-    for k, t in enumerate(t for t in ten if n == 1 or not t.startswith(NHOM_CARRIER)):
-        manh[k % (n - 1) + 1 if n > 1 else 0].append(t)
+    dinh = NHOM_DINH[:max(0, min(len(NHOM_DINH), n - 1))]
+    manh = [[t for t in ten if t.startswith(p)] for p in dinh] + [[] for _ in range(n - len(dinh))]
+    for k, t in enumerate(t for t in ten if not t.startswith(dinh)):
+        manh[len(dinh) + k % (n - len(dinh))].append(t)
     return manh
 
 class _Pha(dict):
@@ -97,7 +98,7 @@ def chay(T, manh, chon_dot_bien=None):
         if can & manh:
             print(f"WP1174 carrier: nhóm ca bắt buộc bị XẺ giữa các mảnh ({len(can & manh)}/{len(can)}) - ĐỎ")
             return False
-        print("WP1174 carrier: KHÔNG chạy ở mảnh này (cả nhóm wp1174_* nằm ở mảnh 0; job gom đòi đúng một mảnh đã chạy)")
+        print("WP1174 carrier: KHÔNG chạy ở mảnh này (cả nhóm wp1174_* ở mảnh 0; job gom đòi đúng một mảnh đã chạy)")
         return True
     T.chay_suite, T._required1174, T._carrier1174 = suite, required, carrier
     try:

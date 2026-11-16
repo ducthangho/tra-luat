@@ -3583,7 +3583,7 @@ def t101_packet_loop_manh_phan_hoach_dung_tap_bat_buoc():
         manh = M.chia(ten, n)
         bang(len(manh) == n and all(manh) and sorted(t for x in manh for t in x) == sorted(bat_buoc),
              f"N={n}: hop cac manh khac (so ca - CA_DAI), hoac co manh rong")
-        bang(n == 1 or set(manh[0]) == {t for t in bat_buoc if t.startswith("wp1174_")}, f"N={n}: nhom carrier wp1174_* phai nam tron manh 0")
+        bang(n == 1 or [set(x) for x in manh[:2]] == [{t for t in bat_buoc if t.startswith(p)} for p in ("wp1174_", "r813_")], f"N={n}: ho wp1174_* / r813_* phai nam tron manh 0 / 1")
     wf = doc_wf()
     bang(tim_buoc(wf, "gate-packet-loop", "gom manh packet-loop (so TAP ca; wp1343)")["run"].strip() == f"python {DUONG_MANH} --gom manh --n {N_MANH_PACKET_LOOP}"
          and tim_buoc(wf, "gate-packet-loop-manh", "packet-loop selftest")["run"].strip() == f"python {DUONG_MANH}", "lenh manh/gom trong ci.yml lech N hoac lech bo boc")
@@ -4277,8 +4277,8 @@ DOT_BIEN += [   # wp1343: N1 (phan loai), N2/M7 (phan hoach), N3 (gom), M6 (chot
     ("pl_cham_phu_thuoc_van_bo_qua", _ma('        return PL_CHAY, f"PACKET_LOOP: chay vi', '        return PL_BO_QUA, f"PACKET_LOOP: chay vi'), _T100),
     ("pl_khong_do_duoc_thi_bo_qua", _ma('        return PL_CHAY, f"PACKET_LOOP: chay (su', '        return PL_BO_QUA, f"PACKET_LOOP: chay (su'), _T100),
     ("pl_push_van_chay", _ma('    if su_kien == "push":\n        return PL_BO_QUA', '    if su_kien == "pushx":\n        return PL_BO_QUA'), _T100),
-    ("pl_manh_lech_chi_so", _manh("manh[k % (n - 1) + 1 if n > 1 else 0]", "manh[k % (n - 1) if n > 1 else 0]"), _T101),
-    ("pl_manh_bo_sot_ca", _manh("enumerate(t for t in ten if n == 1 or", "enumerate(t for t in ten[1:] if n == 1 or"), _T101),
+    ("pl_manh_lech_chi_so", _manh("manh[len(dinh) + k % (n - len(dinh))]", "manh[k % (n - len(dinh))]"), _T101),
+    ("pl_manh_bo_sot_ca", _manh("enumerate(t for t in ten if not", "enumerate(t for t in ten[1:] if not"), _T101),
     ("pl_ca_dai_vao_cong", _manh("    ten = [t for t in ten if t not in CA_DAI]\n", ""), _T101),
     ("pl_yml_gom_lech_n", _yml("--gom manh --n 16", "--gom manh --n 8"), _T101),
     ("pl_gom_khong_so_tap", _manh("        if sorted(ca) != sorted(mong):", "        if False:"), _T102),

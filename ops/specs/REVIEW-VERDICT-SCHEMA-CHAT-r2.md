@@ -1,13 +1,13 @@
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
-# Đặc tả packet — `REVIEW-VERDICT-SCHEMA-CHAT` (revision 1)
+# Đặc tả packet — `REVIEW-VERDICT-SCHEMA-CHAT` (revision 2)
 
 | trường | giá trị |
 |---|---|
 | `packet_id` | `REVIEW-VERDICT-SCHEMA-CHAT` |
 | `packet_issue` | #1336 |
-| `revision` | 1 |
+| `revision` | 2 |
 | `nguon_cap_viec` | #387, các nợ D5–D7. Vòng hỏi `soan-spec` của phiên điều phối #1206 ngày 16-11-2026 chốt: Q1 (đây là P-C, chạy SAU P-B #1335) và Q6. Chủ kho trả lời "Đồng ý theo khuyến nghị". |
 | `review_class` | `sensitive` (schema định danh reviewer và verdict) |
 | `phu_thuoc` | P-B #1335 phải land trước, vì hai packet cùng chạm `.claude/dev/launcher_test.py`. Lease của packet này lấy base là master đã chứa merge của P-B. |
@@ -63,7 +63,7 @@ Tệp schema: `.github/coordination/schemas/review_verdict.v1.schema.json`.
 | # | tiêu chí | phép đo làm nó ĐỎ |
 |---|---|---|
 | N1 | Bảng M5 xanh ở cả hai validator trên head. Trên **base**, dòng SHA + `\n` cho QUA ở `jsonschema`, nên ca ĐỎ (vế âm, chính là phép đo mục 0.1). | Đột biến: trả `pattern` SHA về `^[0-9a-f]{40}$` và bỏ ràng độ dài ⇒ ca đỏ ở dòng SHA. |
-| N2 | Ca "hai validator đồng ý": đếm và in số dòng lệch theo **từng dòng** của bảng (L6c). | Đột biến: oracle stdlib quay lại dùng `fullmatch` ⇒ lệch ⇒ đỏ. |
+| N2 | Ca "hai validator đồng ý" trên bảng M5: đếm và in số dòng lệch theo **từng dòng** (L6c). Cộng thêm một ca **tuân thủ oracle** RIÊNG chạy trên một schema thử nghiệm có pattern KHÔNG neo (ví dụ `{"pattern": "abc"}` với `"xabcx"`: `search` khớp, `fullmatch` không). Hai validator phải cho cùng kết quả trên ca ấy. | Đột biến: oracle stdlib quay lại dùng `fullmatch` ⇒ ca tuân thủ oracle đỏ. Bảng M5 một mình không phát hiện được đột biến này sau khi schema đã siết, vì cả hai cách khớp cho cùng kết quả (finding P2 4582005794 trên PR #1333). |
 | N3 | Dòng `codex`+`anthropic` bị từ chối. | Đột biến: xoá khối `allOf` ⇒ đỏ. |
 | N4 | Mọi verdict JSON mẫu trong kho mà schema cũ nhận thì schema mới vẫn nhận, trừ những mẫu thật sự vi phạm. Liệt kê số mẫu đã quét, số mẫu qua, và từng mẫu bị từ chối kèm lý do. Đo trên cây head. | Một mẫu đúng bị từ chối oan. |
 | N5 | `python -u .claude/dev/launcher_test.py` ra N/N, hai số bằng nhau. N bằng số ca nền lúc cấp lease, cộng ca mới, trừ `r13` nếu chọn bỏ. Bảng đột biến: mọi đột biến mới bị giết đúng lý do; `t117` xanh. | Ca đỏ hoặc số lệch. |
@@ -99,3 +99,10 @@ validator thật"**. Ca xanh không chứng minh validator thật từ chối, c
 - Các engine JSON Schema khác (ECMA-262, như `ajv`) không có trong kho, nên không đo. M1 yêu cầu pattern
   đúng ở cả hai engine dựa trên ngữ nghĩa đã biết của ECMA-262, chưa chạy thật.
 - Verdict do bên ngoài kho sinh ra (connector) không đi qua schema này. Ngoài phạm vi.
+
+## 10. Thay đổi so với r1
+
+r1: `ops/specs/REVIEW-VERDICT-SCHEMA-CHAT-r1.md`, sha256 `dc0d0ac59072f407c9d49af6841973ad9b8d2508ca3fa79a23c8fdbee8038bf8`. Chủ kho đã duyệt r1 nhưng chưa lease nào dùng nó.
+r2 đóng finding P2 4582005794 của connector trên PR #1333 (head `99c8ee8`): sau khi pattern đã siết, đột biến
+`search`→`fullmatch` không làm bảng M5 đổi màu. Phiên điều phối đo `re.search('abc','xabcx')` = True và
+`re.fullmatch('abc','xabcx')` = False. Thay đổi: N2 thêm một ca tuân thủ oracle trên pattern không neo.

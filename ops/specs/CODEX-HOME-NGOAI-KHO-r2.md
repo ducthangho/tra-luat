@@ -1,13 +1,13 @@
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
-# Đặc tả packet — `CODEX-HOME-NGOAI-KHO` (revision 1)
+# Đặc tả packet — `CODEX-HOME-NGOAI-KHO` (revision 2)
 
 | trường | giá trị |
 |---|---|
 | `packet_id` | `CODEX-HOME-NGOAI-KHO` |
 | `packet_issue` | #1334 |
-| `revision` | 1 |
+| `revision` | 2 |
 | `nguon_cap_viec` | #433 (finding "keep ephemeral credential destinations outside the repository"). Vòng hỏi `soan-spec` của phiên điều phối #1206 ngày 16-11-2026 đã chốt Q1 (đây là P-D), Q5 (hành vi), Q6 (executor, reviewer); chủ kho trả lời "Đồng ý theo khuyến nghị". |
 | `review_class` | `sensitive` (đường ghi credential) |
 | `base` | nhánh mặc định lúc cấp lease; số đo dưới đây lấy trên `a97a1ca` |
@@ -67,11 +67,11 @@ nếu không lane LAND trên master sẽ đỏ. `changelog.d/wp-1334.md` là fra
 
 | # | mục tiêu | tệp |
 |---|---|---|
-| M1 | `scripts/tl_gws.py` có MỘT hàm `_trong_kho_git(path) -> str \| None`. Hàm trả đường dẫn tổ tiên có `.git` nếu đích hoặc bất kỳ tổ tiên nào của nó có mục `.git` (lstat, không theo symlink, đi từ chính đích lên tới gốc), ngược lại trả `None`. Thư mục đích chưa tồn tại thì xét từ tổ tiên gần nhất đang tồn tại. Luật khớp với `_KhoCodex`. | `scripts/tl_gws.py` |
+| M1 | `scripts/tl_gws.py` có MỘT hàm `_trong_kho_git(path) -> str \| None`. Hàm trả đường dẫn tổ tiên có `.git` nếu đích hoặc bất kỳ tổ tiên nào của nó có mục `.git` (lstat, không theo symlink, đi từ chính đích lên tới gốc), ngược lại trả `None`. Thư mục đích chưa tồn tại thì xét từ tổ tiên gần nhất đang tồn tại. Hàm kiểm **hai chuỗi tổ tiên**: chuỗi từ vựng (đường như khai) và chuỗi của `os.path.realpath` (đích thật sau khi đi qua symlink). Thấy `.git` ở bất kỳ chuỗi nào thì coi là trong kho. Lý do: `_KhoCodex` mở từng thành phần bằng `O_NOFOLLOW` nên tự từ chối symlink, còn phép `lstat` từng tổ tiên theo từ vựng thì không thấy kho nằm sau một symlink ngoài kho (finding P2 4582005785 trên PR #1333). | `scripts/tl_gws.py` |
 | M2 | `_bootstrap_agent_creds`: nếu `_trong_kho_git(thư mục của auth.json)` khác `None` thì trả `("KHÔNG ĐO ĐƯỢC", "CODEX_HOME nằm trong kho git (<tổ tiên>) — không ghi auth.json")` và **không ghi tệp nào**, kể cả không tạo thư mục, không tạo tệp tạm. Chuỗi trả về không mang giá trị credential. | `scripts/tl_gws.py` |
 | M3 | `cmd_agent_creds_set --codex` (đường ĐỌC auth.json để upload) không bị chặn. Chỉ đọc thì không rò ra cây kho. Ghi thẳng điều này vào docstring để người sau không "sửa" nhầm. | `scripts/tl_gws.py` |
 | M4 | `ops/cloud_agent_creds.py`: `_ghi_dau` cũng không ghi khi `tl_gws._trong_kho_git(_codex_dir())` khác `None`. Phải gọi qua `tl_gws`, không định nghĩa lại (luật `p3a12_khong_dinh_nghia_lai_ten_tl_gws` trong test). | `ops/cloud_agent_creds.py` |
-| M5 | Ca test, đặt trong `ops/cloud_agent_creds_test.py`, dùng đồ giả như mục 0: (a) `CODEX_HOME` trong kho ⇒ `KHÔNG ĐO ĐƯỢC`, không có `auth.json`, và `git status --porcelain --untracked-files=all` của kho tạm RỖNG; (b) `CODEX_HOME` ngoài kho ⇒ `ĐÃ NẠP`, có `auth.json` 0600 (vế dương, giữ hành vi cũ); (c) `.git` là TỆP (worktree/submodule) ở tổ tiên ⇒ vẫn bị chặn; (d) `.git` là symlink ⇒ vẫn bị chặn; (e) thư mục đích chưa tồn tại, tổ tiên trong kho ⇒ bị chặn và không tạo thư mục; (f) `_ghi_dau` trong kho ⇒ không ghi tệp dấu. | `ops/cloud_agent_creds_test.py` |
+| M5 | Ca test, đặt trong `ops/cloud_agent_creds_test.py`, dùng đồ giả như mục 0: (a) `CODEX_HOME` trong kho ⇒ `KHÔNG ĐO ĐƯỢC`, không có `auth.json`, và `git status --porcelain --untracked-files=all` của kho tạm RỖNG; (b) `CODEX_HOME` ngoài kho ⇒ `ĐÃ NẠP`, có `auth.json` 0600 (vế dương, giữ hành vi cũ); (c) `.git` là TỆP (worktree/submodule) ở tổ tiên ⇒ vẫn bị chặn; (d) `.git` là symlink ⇒ vẫn bị chặn; (e) thư mục đích chưa tồn tại, tổ tiên trong kho ⇒ bị chặn và không tạo thư mục; (f) `_ghi_dau` trong kho ⇒ không ghi tệp dấu; (g) `CODEX_HOME` là một symlink nằm NGOÀI kho trỏ vào `<kho>/codexhome` ⇒ bị chặn, không có `auth.json` trong kho. | `ops/cloud_agent_creds_test.py` |
 | M6 | Đăng ký đột biến cho từng chốt vào khung đột biến sẵn có của `ops/cloud_agent_creds_test.py`, theo dạng các hàng `P3…`. Đường ra của bộ test vẫn khớp regex đăng ký ở `.claude/dev/ci_dang_ky_test.py:59` (`CA: N/N dat`, `DOT BIEN: M/M bi giet dung ly do`, `TU KIEM PHAN HANG: DAT`, `TONG: DAT`). | `ops/cloud_agent_creds_test.py` |
 | M7 | Tái sinh `RELEASE_MANIFEST.json`; thêm fragment `changelog.d/wp-1334.md`. | `RELEASE_MANIFEST.json`, `changelog.d/wp-1334.md` |
 
@@ -84,6 +84,7 @@ nếu không lane LAND trên master sẽ đỏ. `changelog.d/wp-1334.md` là fra
 | N3 | M5(c), M5(d) xanh. | Đột biến: kiểm `.git` bằng `is_dir()` ⇒ (c) đỏ. Đột biến: theo symlink (`exists()` thay cho lstat) ⇒ (d) đỏ, hoặc chỉ ra vì sao không đổi màu và giữ đột biến khác chứng minh răng. |
 | N4 | M5(e) xanh. | Đột biến: tạo thư mục (`makedirs`) trước khi kiểm ⇒ (e) đỏ ở khẳng định "không tạo thư mục". |
 | N5 | M5(f) xanh. | Đột biến: bỏ chốt trong `_ghi_dau` ⇒ (f) đỏ. |
+| N5b | M5(g) xanh. Trên base thì đỏ (vế âm). | Đột biến: bỏ chuỗi `realpath`, chỉ kiểm từ vựng ⇒ (g) đỏ. Đo 16-11 trên container: chuỗi từ vựng thấy 0 `.git`, chuỗi realpath thấy `.git` của kho. |
 | N6 | Toàn bộ `python3 -B ops/cloud_agent_creds_test.py` ra `CA: N/N dat`, đột biến `M/M bi giet dung ly do`, `TONG: DAT` (hai số bằng nhau). N lấy số ca nền đo lúc cấp lease cộng ca mới. | Bất kỳ ca nào đỏ, hoặc số lệch. |
 | N7 | `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` ra `ok=true` và `expected == checked` (lệnh của lane LAND, CLAUDE.md mục 5). `python scripts/tl.py --selftest` ra N/N. | Quên tái sinh manifest ⇒ `ok=false`. |
 | N8 | Ruff `--select F` delta 0 trên `scripts/tl_gws.py`, `ops/cloud_agent_creds.py`, `ops/cloud_agent_creds_test.py`. `doctrine-scan` và `adr-song` rc 0. | Delta lớn hơn 0 hoặc rc khác 0. |
@@ -126,3 +127,10 @@ nhưng chỉ một trong hai cửa ghi đọc chốt ấy. Đếm hình dạng: 
 - Ca `/tmp/.git` rỗng do sandbox Codex để lại (CLAUDE.md, bài học 22-10): luật mới cũng coi đó là kho, và
   fail-closed như `_KhoCodex`. Nếu `CODEX_HOME` mặc định (`~/.codex`) không nằm dưới `/tmp` thì không ảnh
   hưởng. Chưa đo trên máy có `HOME` dưới một kho.
+
+## 10. Thay đổi so với r1
+
+r1: `ops/specs/CODEX-HOME-NGOAI-KHO-r1.md`, sha256 `e77cccfa04a459a12fdd8820c989f643f75db14339367dadaaa5b0fadc0ca2c2`. Chủ kho đã duyệt r1 nhưng chưa lease nào dùng nó.
+r2 đóng finding P2 4582005785 của connector trên PR #1333 (head `99c8ee8`): CODEX_HOME đi qua một symlink ngoài
+kho thì phép kiểm từ vựng không thấy kho. Phiên điều phối đo lại và thấy đúng. Thay đổi: M1 kiểm thêm chuỗi
+`realpath`, M5 thêm ca (g), thêm tiêu chí N5b. Không đổi gì khác.

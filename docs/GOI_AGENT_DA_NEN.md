@@ -322,10 +322,8 @@ python .claude/dev/launcher.py run --run-root ~/.tl-runs --agent claude -- bash 
 
 `--agent` nhận đúng `claude`, `codex`, `khong` (không casefold); lặp cờ ⇒ mã 2. `run.json` ghi
 `agent_da_khai` (`null` = không khai), `agent_suy_ra`, `probe_da_chay`, `probe_bo_qua`.
-`transport_sha256` là băm tệp `lenh[0]` resolve theo `cwd` = workspace và `PATH` của con (ghi ở
-`thuc_thi_duong_dan`), và con được phóng bằng chính đường ấy; không resolve được ⇒ `null` +
-`thuc_thi_ly_do`. Với shim `.cmd`/npm, băm là băm SHIM. Vỏ shell chưa có tên trong danh sách vẫn
-rơi vào `khong` — khai `--agent` cho nó.
+`transport_sha256` là băm tệp `lenh[0]` resolve theo `cwd` = workspace và `PATH` của con (`thuc_thi_duong_dan`),
+con được phóng bằng chính đường ấy; không resolve được ⇒ `null` + `thuc_thi_ly_do`. Shim `.cmd`/npm: băm SHIM.
 
 ### Ba thứ đã trả giá khi dựng lượt chạy thật (14-08-2026)
 

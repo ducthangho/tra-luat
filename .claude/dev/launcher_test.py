@@ -14326,6 +14326,24 @@ def r1335_hanh_vi_codex_theo_agent_da_quyet():
 
 
 @ca
+def r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke():
+    """F4, như subprocess ở base: ứng viên PATH exec hỏng (ENOENT/ENOEXEC) ⇒ ứng viên kế; ứng viên tốt ⇒ giữ."""
+    if LA_WINDOWS:
+        return "BO QUA r1335_F4: shebang/ENOEXEC la khai niem POSIX (nhanh chon ung vien dung chung, do tren Linux)"
+    with San() as s:
+        repo, tot = tao_repo(s), _r1335_tep(s / "B" / "ra", "DAU_TOT")
+        for i, hong in enumerate(("#!/khong/co/trinh-dich\n", "khong phai tep thuc thi\n", None)):
+            a, rr = _r1335_tep(s / f"A{i}" / "ra", "DAU_A"), s / f"runs-{i}"; _ = hong and a.write_text(hong, encoding="utf-8")
+            chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", "ra",
+                 env=dict(os.environ, PATH=os.pathsep.join((str(a.parent), str(tot.parent), os.environ["PATH"]))))
+            tm, mong = next(rr.iterdir()), (tot if hong else a)
+            d, so = json.loads((tm / "run.json").read_text(encoding="utf-8")), tm / "stdout.log"
+            out = so.read_text(encoding="utf-8") if so.exists() else ""   # probe hỏng ⇒ chưa có stdout.log
+            bang(d["transport_sha256"] == hashlib.sha256(mong.read_bytes()).hexdigest() and out.strip() == ("DAU_TOT" if hong else "DAU_A"),
+                 f"ung vien A{i} ({hong!r}): chon {d.get('thuc_thi_duong_dan')}, con in {out!r}")
+
+
+@ca
 def r1335_bang_transport_tu_choi_ten_trung():
     """D4: chốt chết thay bằng chốt đo được — tên lệnh thuộc hai provider ⇒ RuntimeError."""
     m = _tai_launcher_thu()
@@ -14357,7 +14375,7 @@ DOT_BIEN = [
      ["r1335_ma_tran_agent_khai_bao", "r1335_khop_hai_cua_15_to_hop"]),
     ("r1335_T2_bo_cat_cmd", ('HAU_TO_SHIM = (".exe", ".cmd", ".bat", ".ps1")', 'HAU_TO_SHIM = (".exe", ".bat", ".ps1")'),
      ["r1335_ma_tran_agent_khai_bao"]),   # 15 tổ hợp đều khai --agent nên tên không quyết; không tính
-    ("r1335_T3_lui_ve_bam_hang", ('            return {"transport_sha256": h.hexdigest(),', '            return {"transport_sha256": hashlib.sha256(b"hang").hexdigest(),'),
+    ("r1335_T3_lui_ve_bam_hang", ('"transport_sha256": h.hexdigest(),', '"transport_sha256": hashlib.sha256(b"hang").hexdigest(),'),
      ["r1335_transport_sha256_la_bam_tep_that", "r1335_khac_cwd_bam_va_chay_tep_trong_workspace", "r1335_symlink_doi_dich_giua_bam_va_phong"]),
     ("r1335_T3_bo_ly_do", ('"thuc_thi_ly_do": f"khong resolve duoc {s!r} theo cwd workspace va PATH cua con"}', '"thuc_thi_ly_do": None}'),
      ["r1335_transport_sha256_la_bam_tep_that"]),
@@ -14369,8 +14387,10 @@ DOT_BIEN = [
      ["r1335_hanh_vi_codex_theo_agent_da_quyet"]),
     ("r1335_F2_path_theo_cwd_launcher", ('os.path.join(cwd, d or ".", s + e)', 'os.path.join(d, s + e)'),
      ["r1335_khac_cwd_bam_va_chay_tep_trong_workspace"]),
-    ("r1335_F3_probe_lenh_goc", ('_probe_spawn(thuc_thi or str(lenh[0]), ws)', '_probe_spawn(str(lenh[0]), ws)'),
+    ("r1335_F3_probe_lenh_goc", ('_probe_spawn((dd or {}).get("thuc_thi_duong_dan") or str(lenh[0]), ws)', '_probe_spawn(str(lenh[0]), ws)'),
      ["r1335_symlink_doi_dich_giua_bam_va_phong"]),
+    ("r1335_F4_dung_o_ung_vien_dau", ('    while ds["spawn"].get("errno") in', '    while False and ds["spawn"].get("errno") in'),
+     ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
     ("r1335_D4_bo_chot_ten_trung", ("            if ten in theo_lenh:\n                raise RuntimeError", "            if False:\n                raise RuntimeError"),
      ["r1335_bang_transport_tu_choi_ten_trung"]),
     ("r1252_bo_kiem_co_khi_ket_thuc_som", ('    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if bat else',

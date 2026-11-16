@@ -75,6 +75,7 @@ from __future__ import annotations
 import argparse
 import base64
 import contextlib
+import errno
 import hashlib
 import hmac
 import json
@@ -288,20 +289,23 @@ def _thuc_thi(lenh0: str, cwd: str, path_con: str | None) -> dict:
         # F2: MỌI phần tử PATH neo theo cwd của con; phần tử rỗng = cwd của con; PATH vắng = os.defpath.
         ung_vien = [os.path.join(cwd, d or ".", s + e)
                     for d in (os.defpath if path_con is None else path_con).split(os.pathsep) for e in duoi]
-    for u in ung_vien:
-        if os.path.isfile(u) and (platform.system() == "Windows" or os.access(u, os.X_OK)):
-            that = os.path.realpath(u)
-            try:
-                h = hashlib.sha256()
-                with open(that, "rb") as f:
-                    for khoi in iter(lambda: f.read(1 << 20), b""):
-                        h.update(khoi)
-            except OSError as e:
-                return {"transport_sha256": None, "thuc_thi_duong_dan": that,
-                        "thuc_thi_ly_do": f"khong doc duoc tep thuc thi: {type(e).__name__}"}
-            return {"transport_sha256": h.hexdigest(), "thuc_thi_duong_dan": that, "thuc_thi_ly_do": None}
+    ung = [os.path.realpath(u) for u in ung_vien
+           if os.path.isfile(u) and (platform.system() == "Windows" or os.access(u, os.X_OK))]
+    if ung:   # F4: ứng viên PATH sau, cho `chay_cac_probe` khi exec ứng viên trước hỏng (như subprocess ở base)
+        return {**_bam_thuc_thi(ung[0]), "thuc_thi_ung_vien_sau": ung[1:]}
     return {"transport_sha256": None, "thuc_thi_duong_dan": None,
             "thuc_thi_ly_do": f"khong resolve duoc {s!r} theo cwd workspace va PATH cua con"}
+
+
+def _bam_thuc_thi(that: str) -> dict:
+    try:
+        h = hashlib.sha256()
+        with open(that, "rb") as f:
+            for khoi in iter(lambda: f.read(1 << 20), b""):
+                h.update(khoi)
+    except OSError as e:
+        return {"transport_sha256": None, "thuc_thi_duong_dan": that, "thuc_thi_ly_do": f"khong doc duoc: {type(e).__name__}"}
+    return {"transport_sha256": h.hexdigest(), "thuc_thi_duong_dan": that, "thuc_thi_ly_do": None}
 
 
 def _dinh_danh_van_chuyen(lenh: list[str], agent: str | None = None, cwd: str | None = None) -> dict:
@@ -1489,7 +1493,7 @@ def _probe_spawn(chuong_trinh: str, ws: str) -> dict:
     try:
         p = _chay_van_ban_an_toan([chuong_trinh, "--version"], cwd=ws, timeout=30)
     except (OSError, subprocess.SubprocessError) as e:
-        return {"trang_thai": "DO", "chi_tiet": f"spawn --version: {type(e).__name__}"}
+        return {"trang_thai": "DO", "chi_tiet": f"spawn --version: {type(e).__name__}", "errno": getattr(e, "errno", None)}
     ra = (p.stdout or "") + (p.stderr or "")
     if p.returncode == 0 and bool(ra.strip()):
         return {"trang_thai": "DAT", "chi_tiet": f"rc=0; output={len(ra.encode('utf-8'))}B"}
@@ -1525,11 +1529,15 @@ def _probe_cho_so(ds: dict) -> dict:
 
 
 def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None,
-                   qd: dict | None = None, thuc_thi: str | None = None) -> tuple[dict, str | None]:
+                   qd: dict | None = None, dd: dict | None = None) -> tuple[dict, str | None]:
     # wp1335 T1: tập probe agent lấy từ `_quyet_dinh_agent`, CÙNG nguồn với định danh `run.json`.
     qd = _quyet_dinh_agent(lenh) if qd is None else qd
     ds = {"workspace": _probe_workspace(ws), "ghi": _probe_ghi(ws),
-          "spawn": _probe_spawn(thuc_thi or str(lenh[0]), ws)}   # F3: đúng tệp đã chọn và băm
+          "spawn": _probe_spawn((dd or {}).get("thuc_thi_duong_dan") or str(lenh[0]), ws)}   # F3
+    # F4: điểm CHỌN tệp duy nhất — exec hỏng ENOENT/ENOEXEC ⇒ ứng viên PATH kế, băm lại (`dd` đổi tại chỗ).
+    while ds["spawn"].get("errno") in (errno.ENOENT, errno.ENOEXEC) and (dd or {}).get("thuc_thi_ung_vien_sau"):
+        dd.update(_bam_thuc_thi(dd["thuc_thi_ung_vien_sau"][0]), thuc_thi_ung_vien_sau=dd["thuc_thi_ung_vien_sau"][1:])
+        ds["spawn"] = _probe_spawn(dd["thuc_thi_duong_dan"], ws)
     if "claude_trust" in qd["probe_can"]:
         ds["claude_trust"] = _probe_trust_claude(ws)
     ly_do = bo_qua.strip() if bo_qua is not None else None
@@ -2614,8 +2622,7 @@ def lenh_run(a) -> int:
         if _cho_snapshot_hoac_chan():
             raise Chan(MA_CHUA_XAC_THUC, "CHỜ snapshot Codex mới; không lặp credential đã thất bại")
     try:
-        probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe, qd,
-                                             dinh_danh["thuc_thi_duong_dan"])
+        probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe, qd, dinh_danh)
     except Chan as e:
         if e.probe is None:
             raise

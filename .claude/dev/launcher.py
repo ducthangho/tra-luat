@@ -272,6 +272,25 @@ def _quyet_dinh_agent(lenh: list[str], agent: str | None = None) -> dict:
             **contract}
 
 
+class _ShutilWin311:
+    """wp1345: hai thứ `_thuc_thi` cần ở `shutil` mà Python 3.11 KHÔNG có (lane launcher Ubuntu 3.11.18 đỏ 2 ca r1335_*
+    vì AttributeError). Đã đọc shutil.py 3.11.18: dòng 1504-1510 chèn `os.curdir` lên đầu PATH mà không hỏi Windows
+    (hàm riêng hỏi `NeedCurrentDirectoryForExePath` chỉ có từ 3.12); dòng 1475-1478 lệnh CÓ thư mục chỉ khớp trực
+    tiếp, KHÔNG áp PATHEXT. Lệch đã biết: 3.11 không chèn khi PATH đã có "."; ở đây cwd con vẫn đứng đầu."""
+
+    @staticmethod
+    def _win_path_needs_curdir(cmd: str, mode: int) -> bool:
+        return True
+
+    @staticmethod
+    def which(cmd: str) -> str | None:
+        # Tên trần với path "<d>;.": đã có "." nên 3.11 không chèn cwd của LAUNCHER lên đầu; chỉ nhận kết quả nằm
+        # TRONG d. Giới hạn: d chứa `os.pathsep` ⇒ không tìm thấy (fail-close).
+        d, ten = os.path.split(cmd)
+        u = shutil.which(ten, path=d + os.pathsep + os.curdir)
+        return u if u and os.path.normpath(os.path.dirname(u)) == os.path.normpath(d) else None
+
+
 def _thuc_thi(lenh0: str, cwd: str, path_con: str | None) -> dict:
     """Resolve `lenh[0]` theo ĐÚNG ngữ cảnh con (`cwd` = workspace, `PATH` của con), `realpath`, rồi
     băm bytes. Không resolve/đọc được ⇒ băm `None` + lý do, KHÔNG lùi về băm hằng.
@@ -280,6 +299,7 @@ def _thuc_thi(lenh0: str, cwd: str, path_con: str | None) -> dict:
     sửa NỘI DUNG chính tệp đã băm giữa lúc băm và lúc chạy không bị chặn — chỉ bảo đảm tệp được
     phóng là tệp đã chọn để băm (`lenh_run` phóng bằng đường dẫn trả về ở đây)."""
     s = str(lenh0)
+    shutil = globals()["shutil"] if sys.version_info >= (3, 12) else _ShutilWin311   # wp1345: 3.12+ y nguyên
     if platform.system() == "Windows":
         # F6-01 (chủ kho đổi thiết kế 16-11): chọn tệp giao cho `shutil.which`, gọi với lệnh CÓ thư mục cho TỪNG thư
         # mục đã neo theo cwd con (F2): nhánh ấy không chèn cwd của LAUNCHER mà vẫn áp PATHEXT như native. cwd con

@@ -1,0 +1,28 @@
+# Nghiem thu tren merge b8bc64f (#1344, packet #1343) — do trong container phien dieu phoi 2026-11-16T23:08:14Z, ban sao detach b8bc64f, core.abbrev 7
+## git log -1 --format='%H %T %P'
+b8bc64f99f43f382ceb90aadbe57df783842a28d a257ce426d099ce022daf48194b8990e0d58fa6e aa718cb8392c1e2defd47a0259c575de16fbd5a3 4b0a3d224ca3b298a57ca188ebce8f0d1728cc7f
+## numstat b8bc64f^1..b8bc64f
+8	5	.claude/dev/ci_dang_ky_test.py
+179	0	.claude/dev/packet_loop_test_manh.py
+56	21	.github/workflows/ci.yml
+45	0	.github/workflows/packet-loop-dot-bien.yml
+29	4	ops/ci_duong_nhanh.py
+133	36	ops/ci_duong_nhanh_test.py
+## dac ta (nhanh lease, khong co trong cay master)
+b5fedc7fd1710a18383df660b3fbd3ef6a8126df
+67c969c422b091876e3ddbb6e9498ee94262a60f87b3d201e8946ba3db79d788  -
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+## ruff ruff 0.16.9 --select F, base b8bc64f^1 vs merge b8bc64f (tep .py cua write set)
+ops/ci_duong_nhanh.py base=0 merge=0
+ops/ci_duong_nhanh_test.py base=0 merge=0
+.claude/dev/packet_loop_test_manh.py base=(tep moi) 0 merge=0
+.claude/dev/ci_dang_ky_test.py base=0 merge=0
+## actionlint ci.yml + packet-loop-dot-bien.yml
+rc=0
+## git diff --check b8bc64f^1 b8bc64f
+rc=0

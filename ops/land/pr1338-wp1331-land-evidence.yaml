@@ -67,7 +67,7 @@ pre_merge_checks:
     sha: d893075b78c001cbe7b33077c29bc8fd2b2d55b7
     conclusion: success
     nguon: [readback-runs-head-d893075.json]
-    ghi_chu: 'measured — gate 43832290746 pull_request success; thu-hoi 43832290059 va 43839807447 pull_request_target success.'
+    ghi_chu: 'measured — readback-runs-head-d893075.json: gate 43832290746 pull_request success; thu-hoi 43832290059 va 43839807447 pull_request_target success.'
   - name: 'Codex connector tren head cuoi'
     sha: d893075b78c001cbe7b33077c29bc8fd2b2d55b7
     conclusion: 'sach'
@@ -98,7 +98,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1331-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', ket_qua: 'not_measured — PR draft rieng tu nhanh ops/land-1331 (chua co so luc ghi).'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'xem provenance/bien-ban-m8.yaml va kiem-dong-wp-m8.txt'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 (12:49Z, truoc han) rc 12 thieu D4; lan 2 (13:24:18Z, sau han) rc 0 "ĐÓNG ĐƯỢC WP wp1331".'}
   - {item: 'handoff', ket_qua: 'not_measured — packet khong khai tep handoff trong coordination_paths.'}
   - {item: 'dong Issue #1331', ket_qua: 'not_measured — viec cua phien dieu phoi sau khi PR ghi so merge.'}
 # ---- het truong chuan
@@ -125,8 +125,11 @@ lease:
   write_set_so_tep: 2
   thu_hoi_cuoi: >-
     RUT HAN sau merge: lease_until 2026-11-17T05:00:00Z -> 2026-11-16T13:15:00Z (commit 51bfde9, cha a2eb8be, push 12:47Z — TRUOC
-    han moi), kem ngan sach that (Codex 5/10, CI Ubuntu 1/2, Windows 2/2). Ket qua dang lease va ai-dang-giu sau han: xem
-    provenance/ai-dang-giu-sau-rut-han.txt.
+    han moi), kem ngan sach that (Codex 5/10, CI Ubuntu 1/2, Windows 2/2); tep: lease-wp1331-r1-g1-claude-sau-rut-han.yaml.txt.
+    ops-publish-lease run 43869791370 success (readback-run-43869791370.json, readback-jobs-43869791370.json), di nhanh rc 9
+    (ops-publish-lease-43869791370-trich.txt: "CHAN [9]: lease 'wp1331-r1-g1-claude' đã có comment 6907812604 trên issue #1331 —
+    bỏ qua"). Sau 13:15Z: ai-dang-giu-sau-rut-han.txt (13:23:51Z, thieu 0 / thua 0 / 252 nhanh, master cuc bo = 9c1661f): ca hai
+    tep write set NGUOI_GIU 0, rc 0. Khong bia mo (khong co lease ke nhiem).
   diff_do: 'measured — nghiem-thu-9c1661f.txt numstat 9c1661f^1..9c1661f: 2 tep, +375/-15 (tran 6 tep, 450 dong).'
 
 trang_thai_packet:
@@ -134,8 +137,8 @@ trang_thai_packet:
   merged_nguon: 'measured — readback-pr-1338.json merged true, merged_at 2026-11-16T10:07:23Z, head d893075, base ddc027a; readback-commit-9c1661f.json cha 902b250 + d893075, tree dbd9ed99.'
   landed: true
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren merge SHA 9c1661f: DAT — du bon moc measured passed. (2) lease nha: xem
-    ai-dang-giu-sau-rut-han.txt. (3) bookkeeping: ho so nay + bien ban M8. (4) review neo d893075: DAT — connector sach dung d893075
+    PROTOCOL §10.2.4 — (1) gate tren merge SHA 9c1661f: DAT — du bon moc measured passed. (2) lease nha: DAT (ai-dang-giu-sau-rut-han.txt: NGUOI_GIU 0
+    ca 2 tep). (3) bookkeeping: ho so nay + bien ban M8. (4) review neo d893075: DAT — connector sach dung d893075
     + audit human_audited chu kho; offline luot 4 approve tren 519e59d (loi_khai_co_neo; sau do chi docstring). (5) uy quyen: DAT
     bang audit chu kho tu dang 6913359262 neo d893075. (6) muc tieu: N1–N5, N7 do boi executor/reviewer (loi_khai_co_neo) va gate
     hau merge (lease_publish 307/307); N6 Windows 8/8 + ve am tren 10496d3; N8 CI xanh + bon moc. (7) tran: DAT — 375/450.
@@ -157,7 +160,7 @@ nghiem_thu:
   N1_N5: 'loi_khai_co_neo — than PR #1338 (executor 307/307, t139 105/102/3/0) va reviewer offline luot 4; gate hau merge lease_publish 307/307 (measured).'
   N6: 'measured — windows/readback-tra-luat-win-n6.txt tren 10496d3; xem gioi han t258 o canh_bao.'
   N7: 'measured — nghiem-thu-9c1661f.txt.'
-  N8: 'measured — CI PR 43832290746 + bon moc §10.2.2 cua 43845962754.'
+  N8: 'measured — readback-runs-head-d893075.json (CI PR 43832290746) + ci/provenance.yaml, danh-gia-gate-output-43845962754.txt (bon moc §10.2.2 cua 43845962754).'
   B18: 'chua_do_duoc — dac ta r1 khong khai nghia vu sau land; muc nay ghi theo khuon de khong bi doc thanh da do.'
 
 no_khai:

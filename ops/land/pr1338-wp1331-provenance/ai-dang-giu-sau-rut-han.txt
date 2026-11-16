@@ -1,0 +1,10 @@
+# ai-dang-giu sau han rut 13:15Z — 2026-11-16T13:23:51Z, container phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS
+# fetch +refs/heads/*; ls-remote so TAP ten: thieu 0 / thua 0 / 252 nhanh; master cuc bo = 9c1661f76
+## ops/lease_publish.py
+HẾT_HẠN	wp1331-r1-g1-claude	refs/remotes/origin/ops/wp1331-r1-g1-lease:ops/leases/wp1331-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/lease_publish_test.py
+HẾT_HẠN	wp1331-r1-g1-claude	refs/remotes/origin/ops/wp1331-r1-g1-lease:ops/leases/wp1331-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

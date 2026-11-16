@@ -1,0 +1,40 @@
+# Bien ban M8 (ADR-0060) dong WP #1331 SUBPROCESS-UTF8-LEASE-PUBLISH r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1338-wp1331-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6913359262 tren d893075);
+# bon moc §10.2.2 du (wd-run 43868507791).
+packet: wp1331
+revision: 1
+generation: 1
+spec_hash: b2a9e14e773edcc7d109a6e13900e3d449159f742a3f8a7ee15ff6c1e6da19a4
+head_da_review: d893075b78c001cbe7b33077c29bc8fd2b2d55b7
+tree_h: ad03e15af0473e33e726dc2bd3f0033b679d5e0a
+review:
+  offline: 'launcher.py run luot 1–3 request_changes (R1 P2), luot 4 approve tren 519e59d (run f31a6cc4); sau do chi sua docstring (loi_khai_co_neo, hien vat mat cung container phien cu)'
+  connector: 'issuecomment-6912530747 codex-review-state:v1 completed, khong finding tren d893075'
+  human_audit: 'issuecomment-6913359262 human_exact_head_audit.v1 approve tren d893075 (chu kho tu dang)'
+windows:
+  phan_loai: required
+  nguon: 'dac ta r1 N6; tra-luat-win luot 2 tren 10496d3: head 8/8 rc 0, ve am nen t256-t258 rc 1 (windows/readback-tra-luat-win-n6.txt)'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1338#issuecomment-6913359262
+duyet_chu_kho_ghi_chu: 'audit approve tu dang 10:05:02Z 16-11 (sua 10:07:05Z, app null), truoc merge 10:07:23Z; duyet merge dung SHA qua AskUserQuestion (loi khai phien cu).'
+merge_commit: 9c1661f76d5f4ef811aa349df102989cc2e2d53d
+tree_m: dbd9ed99735c645f1c1b414fd37a5d9efde49ec7
+ci_master:
+  run_id: 43845962754
+  conclusion: success
+  ghi_chu: 'ci.yml push master 23/23 job success; bon moc §10.2.2 measured passed'
+nghiem_thu:
+  N1: passed  # executor + reviewer offline luot 4 (loi_khai_co_neo); gate hau merge lease_publish 307/307
+  N2: passed  # nhu N1
+  N3: passed  # nhu N1
+  N4: passed  # gate hau merge 43845962754: lease_publish 307/307, da chay=307, bo qua=0
+  N5: passed  # executor t139 105/102/3/0 (loi_khai_co_neo)
+  N6: passed  # Windows tra-luat-win tren 10496d3: 8/8 + ve am do dung (t258 ban head chua chay tren Windows — xem land evidence)
+  N7: passed  # nghiem-thu-9c1661f.txt: adr-song, doctrine-scan, ruff delta 0
+  N8: passed  # CI PR 43832290746 + bon moc §10.2.2 cua 43845962754
+lease_cuoi: wp1331-r1-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

@@ -1,0 +1,21 @@
+# nghiem thu tren merge 9c1661f (checkout sach, 2026-11-16T12:43:17Z)
+## HEAD 9c1661f76d5f4ef811aa349df102989cc2e2d53d tree dbd9ed99735c645f1c1b414fd37a5d9efde49ec7
+## diff 9c1661f^2..9c1661f (head d893075 -> merge): chi khac do master tien (PR #1337)
+ 7 files changed, 297 insertions(+), 37 deletions(-)
+## numstat 9c1661f^1..9c1661f (cha thu nhat 902b250)
+25	11	ops/lease_publish.py
+350	4	ops/lease_publish_test.py
+## numstat ddc027a...d893075 (base lease -> head)
+25	11	ops/lease_publish.py
+350	4	ops/lease_publish_test.py
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+## ruff --select F (ruff 0.16.9, binary /root/.local/bin/ruff; lan do truoc bang 'python3 -m ruff' KHONG CHAY — module vang — nen da bo)
+ops/lease_publish.py merge=2 (rc 1) base_ddc027a=2 (rc 1) delta=0
+ops/lease_publish_test.py merge=9 (rc 1) base_ddc027a=9 (rc 1) delta=0
+## spec
+b2a9e14e773edcc7d109a6e13900e3d449159f742a3f8a7ee15ff6c1e6da19a4  -
+2f22587a8c51255a4f65bc46d5e5d4e327890c23

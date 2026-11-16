@@ -1,0 +1,5 @@
+# LAN 1 (truoc han rut 13:15Z — D4 phai do)
+# checkout: 9c1661f76d5f4ef811aa349df102989cc2e2d53d (+ thay doi chua commit trong ops/land) ; lease: origin/ops/wp1331-r1-g1-lease 51bfde9 ; luc: 2026-11-16T12:49:24Z
+  THIẾU  D4 lease: không khớp lease_cuoi/packet/generation hoặc lease_until chưa qua
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D4
+rc=12

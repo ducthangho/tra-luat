@@ -695,6 +695,8 @@ def kiem(root=ROOT, registry=DANG_KY, workflows=None, cach_ly=CACH_LY):
             co = "python .claude/dev/ci_dang_ky_test.py --chay" in workflows
         elif x == "ops/lease_publish_test.py":
             co = "ops/chay_lease_publish_test.sh" in workflows
+        elif x == ".claude/dev/packet_loop_test.py":   # wp1343: CI goi qua bo boc chia manh (nap va chay `main()` cua chinh tep nay)
+            co = "python .claude/dev/packet_loop_test_manh.py" in workflows
         else:
             co = x in workflows
         if not co:
@@ -1197,7 +1199,7 @@ G5_SELFTEST, G5_PROBE = "python ops/cong_cu_test.py", "python ops/cong_cu.py kie
 # #668: bán kính đột biến của `cong_cu_test` chia `SO_MANH_G5` job mảnh + một job gom. Mọi giá trị dưới đây GHIM, so
 # BẰNG ĐÚNG (danh sách CHO PHÉP): `N` của env mảnh, matrix, tên/mẫu artifact và `if` của gom không được trôi lệch nhau.
 JOB_G5_MANH, JOB_G5_GOP, SO_MANH_G5 = "gate-cong-cu", "gate-cong-cu-gop", 8
-JOB_G5 = ("gate", "gate-registry", "gate-packet-loop", JOB_G5_MANH, JOB_G5_GOP)
+JOB_G5 = ("gate", "gate-registry", "gate-packet-loop-manh", JOB_G5_MANH, JOB_G5_GOP)   # wp1343: probe o job MANH, gom khong co
 G5_GOP = "python ops/cong_cu_test.py --gop manh"
 G5_LENH = {"gate": [G5_PROBE, G5_SELFTEST], JOB_G5_MANH: [G5_PROBE, G5_SELFTEST], JOB_G5_GOP: [G5_GOP]}
 G5_ENV = {"gate": {"CONG_CU_TEST_BAN_KINH": "manh"},
@@ -1236,7 +1238,7 @@ G5_OS = "${{ fromJson(needs.chuan-bi.outputs.os) }}"
 
 def _loi_thuc_thi_g5(j, v, buoc):
     """Lỗi ngữ nghĩa thực thi của job G5 `j` trên các bước `buoc` (từ đầu tới HẾT bước G5; job mới: mọi bước)."""
-    _if_duoc = {"if"} if j in (JOB_G5_GOP, JOB_G5_MANH, "gate-registry") else set()
+    _if_duoc = {"if"} if j in (JOB_G5_GOP, JOB_G5_MANH, "gate-registry", "gate-packet-loop-manh") else set()
     loi = [f"{j}: khoá job ngoài danh sách cho phép: {sorted(set(v) - G5_KHOA_JOB - _if_duoc)}"] \
         if set(v) - G5_KHOA_JOB - _if_duoc else []
     st = v.get("strategy") or {}
@@ -1305,6 +1307,7 @@ def loi_g5_workflow(data):
         elif {"if", "continue-on-error"} & ((set(buoc[cham[0]]) - ({"if"} if buoc[cham[0]].get("if") == IF_DUONG_NHANH else set()))
                                             | (set(v) - {"if"}
               if j == JOB_G5_GOP or (j == JOB_G5_MANH and v.get("if") == G5_MANH_IF)
+              or (j == "gate-packet-loop-manh" and v.get("if") == "${{ needs.chuan-bi.outputs.packet_loop != 'bo_qua' }}")   # wp1343
               or (j == "gate-registry" and v.get("if") == "${{ !cancelled() }}"
                                          and v.get("needs") == ["chuan-bi", "gate-nhanh-gop"]) else set(v))):
             loi.append(f"{j}: bước G5 có điều kiện hoặc được phép bỏ qua lỗi")
@@ -2002,9 +2005,9 @@ def phan_chung():
         return bool(loi_g5_workflow(w))
     _them("p637-A7-workflow-that-dat", not loi_g5_workflow(_wf0))
     _them("p637-A7-bo-probe", _hong_wf("gate-registry", lambda b, i: b.pop(i)))
-    _them("p637-A7-probe-co-if", _hong_wf("gate-packet-loop", lambda b, i: b[i].update({"if": "always()"})))
+    _them("p637-A7-probe-co-if", _hong_wf("gate-packet-loop-manh", lambda b, i: b[i].update({"if": "always()"})))
     _them("p637-A7-probe-sau-buoc-nang", _hong_wf("gate-registry", lambda b, i: b.append(b.pop(i))))
-    _them("p637-A7-nhan-doi-selftest", _hong_wf("gate-packet-loop", lambda b, i: b.insert(i, {"run": G5_SELFTEST})))
+    _them("p637-A7-nhan-doi-selftest", _hong_wf("gate-packet-loop-manh", lambda b, i: b.insert(i, {"run": G5_SELFTEST})))
     _them("p637-A7-probe-bi-comment", _hong_wf("gate-registry", lambda b, i: b[i].update(run="# " + b[i]["run"])))
     _them("p637-A7-hai-selftest-mot-run", _hong_wf("gate", lambda b, i: b[i].update(run=b[i]["run"] + "\n" + G5_SELFTEST)))
     _them("p637-A7-nang-truoc-probe-cung-run", _hong_wf("gate-registry", lambda b, i: b[i].update(
@@ -2012,7 +2015,7 @@ def phan_chung():
     _them("p637-A7-comment-truoc-probe-khong-la-nang", not _hong_wf("gate-registry", lambda b, i: b[i].update(run="# x\n" + b[i]["run"])))
     for _i, _r in enumerate(("python -m ops.cong_cu_test", "python ops//cong_cu_test.py", "cd ops && python cong_cu_test.py")):
         _them(f"p637-A7-goi-tuong-duong-{_i}", _hong_wf("gate-registry", lambda b, i: b.insert(i + 1, {"run": _r})))
-    _them("p637-A7-thieu-job", bool(loi_g5_workflow({"jobs": {k: v for k, v in _wf0["jobs"].items() if k != "gate-packet-loop"}})))
+    _them("p637-A7-thieu-job", bool(loi_g5_workflow({"jobs": {k: v for k, v in _wf0["jobs"].items() if k != "gate-packet-loop-manh"}})))
     _them("p637-A7-selftest-trong-echo", _hong_wf("gate", lambda b, i: b[i].update(run=b[i]["run"].replace(G5_SELFTEST, f"echo '{G5_SELFTEST}'"))))
     _them("p637-A7-probe-trong-heredoc", _hong_wf("gate-registry", lambda b, i: b[i].update(run=f"cat <<'EOF'\n{G5_PROBE}\nEOF\n")))
     _them("p637-A7-nang-doi-ten-cai-truoc-probe", _hong_wf("gate-registry", lambda b, i: b.insert(i, {"name": "cài registry", "run": "python .claude/dev/ci_dang_ky_test.py --chay"})))

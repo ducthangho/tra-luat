@@ -12603,7 +12603,9 @@ def t159_chuong_trinh_ten_tieng_Viet_qua_han_phai_giet_duoc():
     with San() as s:
         ten = s / "kiểm_tra_tiến_trình"
         try:
-            os.symlink(PY, ten)
+            # wp1335 T3: launcher phóng `realpath` của lenh[0] ⇒ symlink sẽ mang tên ĐÍCH; dùng
+            # hardlink/bản sao để tên tiếng Việt chính là tệp được exec.
+            _bin_python_gia(ten)
         except (OSError, UnicodeEncodeError) as e:
             raise RuntimeError(f"dieu kien dung: khong tao duoc ten tieng Viet: {e}")
         tc, tn = s / "comm.bin", s / "nhip.txt"

@@ -2601,8 +2601,8 @@ def lenh_run(a) -> int:
     so_agent = {"agent_da_khai": qd["agent_da_khai"], "agent_suy_ra": qd["agent_suy_ra"],
                 "probe_bo_qua": qd["probe_bo_qua"]}
     kq = chay_cac_chot(a)
-    dinh_danh = _dinh_danh_van_chuyen(a.lenh, agent, kq["workspace"])
     resume_id = _kiem_checkpoint(a, kq)
+    dinh_danh = _dinh_danh_van_chuyen(a.lenh, agent, kq["workspace"])
     if snapshot:
         ket = chuan_bi_xac_thuc(that_su=True, snapshot=snapshot)
         snapshot = ""
@@ -2629,7 +2629,8 @@ def lenh_run(a) -> int:
             **_khoa_chup_som(getattr(a, "chup_workspace", False), None),   # Codex lượt 5 F8
         })
         raise
-    kq.update(probe=_probe_cho_so(probe), bo_qua_probe_ly_do=ly_do_bo_qua, probe_da_chay=sorted(probe))
+    kq.update(probe=_probe_cho_so(probe), bo_qua_probe_ly_do=ly_do_bo_qua)
+    kq["probe_da_chay"] = sorted(probe)
     if bool(a.attempt_state) != bool(a.void_reason):
         raise Chan(MA_THAM_SO, "--attempt-state và --void-reason phải đi cùng nhau")
     khoa_ky = None

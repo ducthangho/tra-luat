@@ -37,16 +37,16 @@
     1325
   ],
   "dependency_M8": "https://github.com/ducthangho/tra-luat/issues/1325#issuecomment-6914167207",
-  "spec_ref": "refs/heads/ops/wp1315-r5-g5@7315c47598936d88d99c25e09e3936f6f56ac3e7",
+  "spec_ref": "refs/heads/ops/wp1315-r5-g5@120a35f6464c595e36fbaa9a3d26c4aefbf10b99",
   "spec_path": "ops/specs/wp1315-r5/SPEC.md",
-  "spec_hash": "5f0e4e1ea5d7b62e625c28f3298519f2346ba5c6d3935b299c28fb9f1f63e604",
-  "spec_sha256_required": "5f0e4e1ea5d7b62e625c28f3298519f2346ba5c6d3935b299c28fb9f1f63e604",
+  "spec_hash": "6f3098f7f2c8aaabf7e7d98bc3931e630b37656599822d71c261d63da4cc84be",
+  "spec_sha256_required": "6f3098f7f2c8aaabf7e7d98bc3931e630b37656599822d71c261d63da4cc84be",
   "prompt_path": "ops/prompts/wp1315-r5-g5-claude-author.txt",
-  "prompt_sha256_required": "9465110504f2c297001ddfdef8fea2b0580333253d7f65756a21af8b55b9721b",
+  "prompt_sha256_required": "0976a305628f8547e18a3cb4a903ea0f604e0cb7aac3a9b89dff84fe0788da0f",
   "spec_review_prompt_path": "ops/prompts/wp1315-r5-spec-review-codex.txt",
-  "spec_review_prompt_sha256": "46bc54e719206160e2166b9239025764379fe75a5d30d621636d6f930e449ea3",
+  "spec_review_prompt_sha256": "eb4bba7cace3e2ded5aad24547a6d0dfa6adc7a085a7190604350db29fb04029",
   "source_review_prompt_template_path": "ops/prompts/wp1315-r5-g5-codex-source-review.txt",
-  "source_review_prompt_template_sha256": "8be4bb74b1a7c54bb288067309bc03f0d6bcef4d7684a1cbeae7a2521576888b",
+  "source_review_prompt_template_sha256": "4a26020d815d58d740f9c695c8ab64b56785dd1c581c32f21c992a97d831ffc1",
   "proposal_sha256": "1cff2efdfd497a7ad15f1fc8261fd7aa9bc1a6c60cd0c11f74b4b40bde2caec2",
   "plan_sha256": "d904487b3024adb1d36817cfdbf1b2e0f4c3e5580726bd4d81ed9ccb07c06159",
   "write_set": [
@@ -95,7 +95,7 @@
   "lease_until": "2026-11-16T14:34:25Z",
   "lease_expires_at_utc": "2026-11-16T14:34:25Z",
   "lease_note": "Author lease ends with phase A; it must be closed/shortened before waiting for human audit. Phase B uses separate validation generation6 lease only after actual-human exact-H audit.",
-  "new_Codex_spec_review_limit": 2,
+  "new_Codex_spec_review_limit": 3,
   "new_Claude_author_limit": 1,
   "new_Codex_source_review_limit": 1,
   "genuine_connector_limit_phase_B": 1,
@@ -149,13 +149,23 @@
         "F3 P2 catalog not frozen",
         "F4 P2 audit binding"
       ]
+    },
+    {
+      "spec_sha256": "5f0e4e1ea5d7b62e625c28f3298519f2346ba5c6d3935b299c28fb9f1f63e604",
+      "review_run": "c86435b5",
+      "reviewer": "codex gpt-6-astra",
+      "verdict": "changes_requested",
+      "findings": [
+        "F3 P2 reader mutant oracle",
+        "F3 P2 Windows required set"
+      ]
     }
   ],
   "spec_review_ceiling_raise": {
     "from": 1,
-    "to": 2,
-    "consumed": 1,
-    "ly_do": "spec sửa sau changes_requested cần đúng một lượt duyệt lại",
+    "to": 3,
+    "consumed": 2,
+    "ly_do": "hai lần spec sửa sau changes_requested; mỗi lần đúng một lượt duyệt lại",
     "authority": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696"
   }
 }

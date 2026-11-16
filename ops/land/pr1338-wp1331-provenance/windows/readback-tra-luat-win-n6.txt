@@ -1,0 +1,54 @@
+# Readback CHI DOC qua Desktop Commander (may tra-luat-win, device f7281f27-…), 2026-11-16T12:4xZ, phien dieu phoi
+# session_015GtxrZk6gmfQKo7g4BfMBS. Tep goc o C:\tl-win\session_015GtxrbDu3ubjAHY6UebEUe\ (phien dieu phoi cu, da luu tru).
+# sha256 tinh TREN MAY bang python (C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\readback-n6-1331.py); tep tho KHONG chep vao kho.
+wp1331-n6-out/head-t129_.txt	1406	ad331ba8e0cba250ba8c85499b59d00a1cced8ecdad96ac964720a98fa859804
+wp1331-n6-out/head-t133_.txt	2189	4f54254d9351ff0bcdf3585160fb26bc5c9f502d28aff38b5cbba85c10a11fe8
+wp1331-n6-out/head-t137_.txt	1430	d13070867ecffda679dcda772c492888564cbf25df780aad3aea57ed7e678131
+wp1331-n6-out/head-t151_.txt	1597	51b369163266c63d3c73c6eb9fe15d19e19efeeecc09203c289c6fa8dfaf0386
+wp1331-n6-out/head-t256_.txt	1424	729a733146daaf75ba15708ea4cc449764e3d7863dab7985d63f6fe3cd049928
+wp1331-n6-out/head-t257_.txt	1430	016f0d28420ce33d63835896c7b29c996b4f9ccf0bb249a816c7db15f38d4f4a
+wp1331-n6-out/head-t258_.txt	1558	b33bb2973ffcf1bd45d79939c83be6219e710ec7c0b7923a3b3d6bda809cb5b6
+wp1331-n6-out/nen-t256_.txt	1616	39b9acdfef5199cd13c7b22c153ef60bc98b7c12987cc9e3ea2701dc49df035d
+wp1331-n6-out/nen-t257_.txt	1497	83c0f9366efde0a6dc8ec238b5f433adb6058b0c42144dd6a234a8958d3d3559
+wp1331-n6-out/nen-t258_.txt	1550	e43f32d6e73b3d01165f653c1a02bec9a8dcd8d9da514839f759cc54e04cd3a4
+wp1331-n6-out/tien-do.log	3482	3f007f87db6c6d9e96c479b7094de659c9c83f2a546fb2025326571635a2630f
+wp1331-n6b-out/head-t129_.txt	759	53573958f303916ef443c6cc7619b0fff3fb345d68af2e58edf1baa146de1b50
+wp1331-n6b-out/head-t133_.txt	1542	c5beedf76237cc8871a00ea4f8870236fd6d047c0d13adf92ed31d1e50384950
+wp1331-n6b-out/head-t137_.txt	783	1ed3c742bc01530603c317b87a7f599405ca6c3f446f62658454bd0bd4412504
+wp1331-n6b-out/head-t151_.txt	950	bd882b23963413e5360f3be2558e5f899546c469187351822f762abeb7ddabcf
+wp1331-n6b-out/head-t256_.txt	777	89f9be1d12d3713d2f98bc314221393141dfc877e018c3536e6560e37395465d
+wp1331-n6b-out/head-t257_.txt	783	58ed1e5661a6145c9653db9f20b9e9605ab78725e77de241239e4da111783cb1
+wp1331-n6b-out/head-t258_.txt	831	581aced3005041d31656fbfc5dac39a860358a243f8cb865f6072afe9ffce59a
+wp1331-n6b-out/head-t259_.txt	755	d95e5c932ead5b19bbf2461ff84c5f6e56f0aa430aa97e333e4a808c4d085297
+wp1331-n6b-out/nen-t256_.txt	1267	2daa7c42e54113b8b1ce5c1b65e2617430fc2c2b39bb0205ed2152e24951e4a5
+wp1331-n6b-out/nen-t257_.txt	995	37f306c62173d635d1676c1ee5489cb8b6168fb9258bae674495dccd4db1f979
+wp1331-n6b-out/nen-t258_.txt	1889	3ca1eef365325c82fee2db3e6e6ae04938ff139335e934e26f98975527f3c332
+wp1331-n6b-out/tien-do.log	2547	dc8049870eb474e0012bb2da1171365997c5847860a6957596eabc0ce3326e3b
+chay-n6-1331.ps1	4359	827882e0da7951f43584f1bcfd35c54a2c550d934c8bbbe70b45047a00c32e9f
+chay-n6b-1331.ps1	4410	300c135bcd6bd49a728b277de41150e8044bbdfbe5c48691e9e9f0112ab7e9cc
+chay-n6-1331.stdout	2185	6477607732fa686e9c36e2f5e2d21809534837fa0dd02e032745fc3453d0be62
+chay-n6b-1331.stdout	1661	b0b8a8293677e0bca06e12b1bb0d091d4623ea66cb2d0b366aa7b0430375bb22
+--- do-luong.csv (dong wp1331)
+2026-11-16T05:43:37Z,session_015GtxrbDu3ubjAHY6UebEUe,wp1331,14aa4c04ade8394e58c127d0309435982ca61b87,N6 head t256-t258+t129/t133/t137/t151 + ve am nen,,,,,,,,may=tra-luat-win; khong PYTHONUTF8
+2026-11-16T06:50:52Z,session_015GtxrbDu3ubjAHY6UebEUe,wp1331,10496d3c3f83aaead5e90b2867d28f1ee399e618,N6 head t256-t258+t129/t133/t137/t151 + ve am nen,,,,,,,,may=tra-luat-win; khong PYTHONUTF8
+--- wp1331-n6b-out/tien-do.log (chep nguyen van, luot 2 tren 10496d3)
+2026-11-16T06:45:53Z python.exe truoc khi do: 2 tien trinh (khong dung toi)
+2026-11-16T06:45:53Z python preferred/utf8_mode/PYTHONUTF8: cp1252 0 None
+2026-11-16T06:47:44Z M4: head=10496d3c3f83aaead5e90b2867d28f1ee399e618 tree=c7e134ce0c1a055d9af027b935d797e497a0dfdf
+2026-11-16T06:47:49Z head-t256_ rc=0 4.4s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:47:52Z head-t257_ rc=0 3s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:47:54Z head-t258_ rc=0 2.4s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:47:58Z head-t259_ rc=0 4s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:48:07Z head-t129_ rc=0 8.9s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:49:16Z head-t133_ rc=0 68.8s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:49:20Z head-t137_ rc=0 4.5s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:49:53Z head-t151_ rc=0 32.4s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:50:46Z ve am: nen=ddc027a5ffcd0e0c2f0873db9e1e1708a1933be2 + lease_publish_test.py cua head
+2026-11-16T06:50:49Z nen-t256_ rc=1 2.5s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:50:51Z nen-t257_ rc=1 1.8s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:50:52Z nen-t258_ rc=1 1.6s :: t; đã chạy=1, bỏ qua=0
+2026-11-16T06:50:52Z XONG
+2026-11-16T06:50:52Z da nha khoa
+--- doi chieu 10496d3 -> head d893075 (git diff --stat, do trong container 12:4xZ)
+ops/lease_publish.py      |   6 ++-   (chi docstring _chay_utf8)
+ops/lease_publish_test.py | 106 ++++++---  (viet lai bo quet AST t258 theo danh sach cho phep + catalog 101->105) — t258 ban HEAD CHUA chay tren Windows

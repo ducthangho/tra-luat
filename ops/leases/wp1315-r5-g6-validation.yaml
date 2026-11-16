@@ -78,8 +78,8 @@
   "leased_at_utc": "2026-11-16T13:36:00Z",
   "heartbeat_at": "2026-11-16T13:36:00Z",
   "heartbeat_required_minutes": 360,
-  "lease_until": "2026-11-17T04:36:00Z",
-  "lease_expires_at_utc": "2026-11-17T04:36:00Z",
+  "lease_until": "2026-11-16T14:02:23Z",
+  "lease_expires_at_utc": "2026-11-16T14:02:23Z",
   "source_push_limit": 1,
   "draft_PR_limit": 1,
   "genuine_connector_limit": 1,
@@ -117,5 +117,29 @@
     "ruleset_or_gate_change",
     "CI_rerun"
   ],
-  "prompt_sha256_required": "631acc33b1cc4fa91c621a9d56dd7e129b3bfaf0910632ca318c848dd8a0899c"
+  "prompt_sha256_required": "631acc33b1cc4fa91c621a9d56dd7e129b3bfaf0910632ca318c848dd8a0899c",
+  "checkpoint_source_review_3": {
+    "run": "18da1726",
+    "verdict": "changes_requested",
+    "finding": "WP1315-S3-F1-type-coercing-exactness P2: dict == coi 1 == True o hai phep so chinh xac (packet_loop.py:4936, :5355)",
+    "stdout_sha256": "5b5523d77b154d62861d96f99b3fc3ed838d892ea3fe7fb8a03eedd4aaf40260"
+  },
+  "consumed_in_g6": {
+    "source_push": 1,
+    "draft_PR": 1,
+    "PR_Ubuntu_CI": "43877478802 (tu dong, dang chay tren H cu)",
+    "full_M9": "43878515628 tren H cu",
+    "connector": "https://github.com/ducthangho/tra-luat/pull/1340#issuecomment-6918146560",
+    "codex_source_review": 1,
+    "windows_focused": "11 nhom loi moi truong ModuleNotFoundError yaml (python managed thieu PyYAML), khong tinh la ket qua; controls bi dung"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-17T04:36:00Z",
+    "han_moi_utc": "2026-11-16T14:02:23Z",
+    "luc_rut_utc": "2026-11-16T13:59:23Z",
+    "nguoi_rut": "Claude Code coordinator under owner delegation",
+    "chi_thi": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+    "ly_do": "Codex source review 3 tim P2 that tren H 98c7389; can sua source nen lease validation-only phai dong truoc lease writer g7.",
+    "gioi_han": "Chi rut han; lich su, so lieu va phase B clock goc giu nguyen."
+  }
 }

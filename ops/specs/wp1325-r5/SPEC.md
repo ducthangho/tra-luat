@@ -1,13 +1,13 @@
-# wp1325 r4 — Windows packet-loop timeout remediation
+# wp1325 r5 — Windows packet-loop timeout remediation
 
 packet_id: wp1325
-revision: 4
-generation: 4
+revision: 5
+generation: 5
 mission_issue: 1172
-mission_revision: 51
+mission_revision: 52
 review_class: sensitive
 canonical_base: 815b9ac76a10fdd30516c9cef7ca93448cbbd923
-input_source: 9aa40acbb64c7b854945697c1e420ad66929f2a8
+input_source: 5ccb99b2765ddffb693e1d3cf62f15adf5b72880
 immutable_acceptance_baseline: 072d45a0595f3d2ff9f0880143a237c9e0ea70c3
 
 ## Source contract

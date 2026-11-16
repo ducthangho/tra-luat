@@ -280,21 +280,25 @@ def _thuc_thi(lenh0: str, cwd: str, path_con: str | None) -> dict:
     sửa NỘI DUNG chính tệp đã băm giữa lúc băm và lúc chạy không bị chặn — chỉ bảo đảm tệp được
     phóng là tệp đã chọn để băm (`lenh_run` phóng bằng đường dẫn trả về ở đây)."""
     s = str(lenh0)
-    if os.sep in s or (os.altsep and os.altsep in s):
-        ung_vien = [os.path.join(cwd, s)]
+    if platform.system() == "Windows":
+        # F6-01 (chủ kho đổi thiết kế 16-11): chọn tệp giao cho `shutil.which`, gọi với lệnh CÓ thư mục cho TỪNG thư
+        # mục đã neo theo cwd con (F2): nhánh ấy không chèn cwd của LAUNCHER mà vẫn áp PATHEXT như native. cwd con
+        # đứng trước khi Windows đòi, PATH rỗng ⇒ không thư mục nào (như which); mỗi thư mục góp tối đa MỘT ứng viên
+        # nên thứ tự cho F4 là thứ tự thư mục (đánh đổi: bỏ ứng viên thứ hai trong cùng thư mục).
+        if os.path.dirname(s):
+            thu_muc = [os.path.dirname(os.path.join(cwd, s))]
+        else:
+            p = os.defpath if path_con is None else path_con
+            thu_muc = (([cwd] if shutil._win_path_needs_curdir(s, os.F_OK | os.X_OK) else [])
+                       + [os.path.join(cwd, d or ".") for d in p.split(os.pathsep)]) if p else []
+        ung = [os.path.realpath(u) for d in thu_muc if (u := shutil.which(os.path.join(d, os.path.basename(s))))]
     else:
-        duoi = [""]
-        if platform.system() == "Windows" and not os.path.splitext(s)[1]:
-            # P2 lượt 5: như cmd.exe/`shutil.which` 3.13 — có PATHEXT thì BỎ ứng viên không đuôi (shim bash của npm),
-            # vì CreateProcess không chạy được nó và Windows không chuyển ứng viên. PATHEXT rỗng: giữ như cũ.
-            duoi = [e for e in os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";") if e] or duoi
         # F2: MỌI phần tử PATH neo theo cwd của con; phần tử rỗng = cwd của con; PATH vắng = os.defpath.
-        ung_vien = [os.path.join(cwd, d or ".", s + e)
-                    for d in (os.defpath if path_con is None else path_con).split(os.pathsep) for e in duoi]
-    ung = [os.path.realpath(u) for u in ung_vien
-           if os.path.isfile(u) and (platform.system() == "Windows" or os.access(u, os.X_OK))]
-    # Giới hạn (review lượt 5 đo, chủ kho chấp nhận 16-11): ứng viên bị loại ở bộ lọc isfile/X_OK dưới đây không
-    # góp lỗi (vd. EACCES) vào ưu tiên errno của `chay_cac_probe`.
+        ung_vien = [os.path.join(cwd, s)] if os.sep in s or (os.altsep and os.altsep in s) else [
+            os.path.join(cwd, d or ".", s) for d in (os.defpath if path_con is None else path_con).split(os.pathsep)]
+        ung = [os.path.realpath(u) for u in ung_vien if os.path.isfile(u) and os.access(u, os.X_OK)]
+    # Giới hạn (review lượt 5 đo, chủ kho chấp nhận 16-11): ứng viên bị loại khi chọn ở trên (bộ lọc isfile/X_OK,
+    # hoặc `which` trên Windows) không góp lỗi (vd. EACCES) vào ưu tiên errno của `chay_cac_probe`.
     if ung:   # F4: ứng viên PATH sau, cho `chay_cac_probe` khi exec ứng viên trước hỏng (như subprocess ở base)
         return {**_bam_thuc_thi(ung[0]), "thuc_thi_ung_vien_sau": ung[1:]}
     return {"transport_sha256": None, "thuc_thi_duong_dan": None,

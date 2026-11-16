@@ -14366,6 +14366,39 @@ def r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke():
                  f"{nhan}: chon {dd['thuc_thi_duong_dan']}, spawn {ds['spawn']}")
 
 
+@contextlib.contextmanager
+def _r1335_win(m, env):
+    """Chọn tệp kiểu Windows: trên Linux giả `platform.system`, `sys.platform`/`os.pathsep` (cho `shutil.which`), `_winapi`."""
+    cu = (m.platform.system, sys.platform, getattr(shutil, "_winapi", None), os.pathsep, dict(os.environ))
+    os.environ.update(env)
+    if not LA_WINDOWS:
+        m.platform.system, sys.platform, os.pathsep = (lambda: "Windows"), "win32", ";"
+        shutil._winapi = type("WinApiGia", (), {"NeedCurrentDirectoryForExePath": staticmethod(lambda c: True)})
+    try:
+        yield
+    finally:
+        m.platform.system, sys.platform, shutil._winapi, os.pathsep = cu[:4]
+        os.environ.clear(); os.environ.update(cu[4])
+
+
+@ca
+def r1335_F6_windows_chon_tep_theo_which():
+    """F6-01: Windows (Linux: mô phỏng) chọn tệp bằng `shutil.which` theo từng thư mục neo cwd con: (1) PATHEXT rỗng vẫn
+    chọn `ra.CMD`, không chọn shim `ra`; (2) lệnh có thư mục `A/ra` vẫn áp PATHEXT; (3) cwd con đứng trước PATH."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        for tep in ("b1/ra", "b1/ra.CMD", "A/ra", "A/ra.CMD", "ws/ra.EXE", "b3/ra.EXE"):
+            _r1335_tep(s / tep, tep)
+        (s / "ws0").mkdir()
+        for nhan, lenh0, cwd, pth, env, mong in (
+                ("PATHEXT_rong", "ra", s / "ws0", s / "b1", {"PATHEXT": ""}, s / "b1" / "ra.CMD"),
+                ("co_thu_muc", "A" + os.sep + "ra", s, s / "b1", {}, s / "A" / "ra.CMD"),
+                ("cwd_truoc", "ra", s / "ws", s / "b3", {}, s / "ws" / "ra.EXE")):
+            with _r1335_win(m, env):
+                dd = m._thuc_thi(lenh0, str(cwd), str(pth))
+            bang(dd["thuc_thi_duong_dan"] == os.path.realpath(mong), f"F6 {nhan}: chon {dd['thuc_thi_duong_dan']}")
+
+
 @ca
 def r1335_P2_windows_bo_ung_vien_khong_duoi():
     """P2 lượt 5: Windows, tên không đuôi ⇒ chỉ thử đuôi PATHEXT (như cmd.exe, `shutil.which` 3.13), bỏ `ra` không đuôi.
@@ -14375,11 +14408,8 @@ def r1335_P2_windows_bo_ung_vien_khong_duoi():
         b = s / "bin"; b.mkdir(); (b / "ra").write_text("#!/bin/sh\necho DAU_SHIM\n", encoding="utf-8")
         tep = _r1335_tep(b / "ra.CMD", "DAU_CMD")
         if not LA_WINDOWS:
-            goc, m.platform.system = m.platform.system, lambda: "Windows"
-            try:
+            with _r1335_win(m, {}):
                 dd = m._thuc_thi("ra", str(s), str(b))
-            finally:
-                m.platform.system = goc
             return bang(dd["thuc_thi_duong_dan"] == os.path.realpath(tep), f"chon sai ung vien: {dd}")
         repo, rr = tao_repo(s), s / "runs"
         chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", "ra",
@@ -14432,7 +14462,7 @@ DOT_BIEN = [
      ["r1335_symlink_doi_dich_giua_bam_va_phong"]),
     ("r1335_F1_codex_theo_ten", ('    do_model = _la_codex(qd)\n', '    do_model = Path(a.lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd")\n'),
      ["r1335_hanh_vi_codex_theo_agent_da_quyet"]),
-    ("r1335_F2_path_theo_cwd_launcher", ('os.path.join(cwd, d or ".", s + e)', 'os.path.join(d, s + e)'),
+    ("r1335_F2_path_theo_cwd_launcher", ('os.path.join(cwd, d or ".", s) for d', 'os.path.join(d, s) for d'),
      ["r1335_khac_cwd_bam_va_chay_tep_trong_workspace"]),
     ("r1335_F3_probe_lenh_goc", ('_probe_spawn((dd or {}).get("thuc_thi_duong_dan") or str(lenh[0]), ws)', '_probe_spawn(str(lenh[0]), ws)'),
      ["r1335_symlink_doi_dich_giua_bam_va_phong"]),
@@ -14443,8 +14473,12 @@ DOT_BIEN = [
     ("r1335_F4_errno_ca_sau_exec", ('"errno": e.errno if loi_exec else None}', '"errno": e.errno}'),
      ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
     ("r1335_F4_khong_giu_loi_dau", ('        dd.update(dau[0]); ds["spawn"] = dau[1]', '        pass'), ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
-    ("r1335_P2_uu_tien_khong_duoi", ('.split(";") if e] or duoi', '.split(";") if e] and duoi + [e for e in os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";") if e] or duoi'),
-     ["r1335_P2_windows_bo_ung_vien_khong_duoi"]),
+    ("r1335_F6_tu_dung_ung_vien", ('if (u := shutil.which(os.path.join(d, os.path.basename(s))))]', 'if os.path.isfile(u := os.path.join(d, os.path.basename(s)))]'),
+     ["r1335_F6_windows_chon_tep_theo_which", "r1335_P2_windows_bo_ung_vien_khong_duoi"]),
+    ("r1335_F6_thu_muc_bo_qua", ('        if os.path.dirname(s):\n            thu_muc', '        if False:\n            thu_muc'),
+     ["r1335_F6_windows_chon_tep_theo_which"]),
+    ("r1335_F6_bo_cwd_truoc", ('([cwd] if shutil._win_path_needs_curdir(s, os.F_OK | os.X_OK) else [])', '([])'),
+     ["r1335_F6_windows_chon_tep_theo_which"]),
     ("r1335_F4_chi_ENOENT_ENOEXEC", ('    while ds["spawn"].get("errno") is not None', '    while ds["spawn"].get("errno") in (2, 8)'),   # ENOENT, ENOEXEC
      ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
     ("r1335_D4_bo_chot_ten_trung", ("            if ten in theo_lenh:\n                raise RuntimeError", "            if False:\n                raise RuntimeError"),

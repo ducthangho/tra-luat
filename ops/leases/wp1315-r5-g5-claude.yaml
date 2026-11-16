@@ -92,8 +92,8 @@
     "source_review": 25,
     "artifacts_stop": 15
   },
-  "lease_until": "2026-11-16T14:34:25Z",
-  "lease_expires_at_utc": "2026-11-16T14:34:25Z",
+  "lease_until": "2026-11-16T13:35:22Z",
+  "lease_expires_at_utc": "2026-11-16T13:35:22Z",
   "lease_note": "Author lease ends with phase A; it must be closed/shortened before waiting for human audit. Phase B uses separate validation generation6 lease only after actual-human exact-H audit.",
   "new_Codex_spec_review_limit": 3,
   "new_Claude_author_limit": 1,
@@ -171,7 +171,7 @@
   "source_review_ceiling_raise": {
     "from": 1,
     "to": 2,
-    "consumed": 1,
+    "consumed": 2,
     "first_review": {
       "run": "7cb02821",
       "reviewed_sha": "98c7389d91027e1d7eeccaea26e50332773249bf",
@@ -183,5 +183,23 @@
     "authority": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696"
   },
   "candidate_head": "98c7389d91027e1d7eeccaea26e50332773249bf",
-  "candidate_tree": "d963dc73799724d76251f645fb7812e7ff3c8992"
+  "candidate_tree": "d963dc73799724d76251f645fb7812e7ff3c8992",
+  "phase_A_result": {
+    "candidate_head": "98c7389d91027e1d7eeccaea26e50332773249bf",
+    "candidate_tree": "d963dc73799724d76251f645fb7812e7ff3c8992",
+    "spec_review": "3 Codex (changes_requested, changes_requested, approve)",
+    "author": "1 Claude, launcher 46ee169a, modelUsage claude-fable-5-2",
+    "source_review": "2 Codex (7cb02821 blocked 0 findings; 163b8b57 approve)",
+    "delegated_audit": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6917844880",
+    "selftest_H": "1777/1777 rc0"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-16T14:34:25Z",
+    "han_moi_utc": "2026-11-16T13:35:22Z",
+    "luc_rut_utc": "2026-11-16T13:31:22Z",
+    "nguoi_rut": "Claude Code coordinator under owner delegation",
+    "chi_thi": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+    "ly_do": "Pha A xong: H dong bang, audit uy quyen da dang; author lease phai dong truoc pha B (spec r5).",
+    "gioi_han": "Chi rut han; lich su va so lieu giu nguyen. Pha B dung lease validation g6 rieng."
+  }
 }

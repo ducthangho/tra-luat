@@ -115,5 +115,7 @@
   "supplemental_review_minutes_max": 20,
   "review_head_required": "036effdf4189f923ccf06f25a3b5c78476edb79b",
   "review_tree_required": "fecc1d52e2b84b43499cf1686c2119f8cd8fb63f",
-  "deadline_extension_r53_minutes": 30
+  "deadline_extension_r53_minutes": 30,
+  "da_bi_thay_the": "wp1325-r6-g6-claude",
+  "replacement_authority": "https://github.com/ducthangho/tra-luat/issues/1325#issuecomment-6908792980"
 }

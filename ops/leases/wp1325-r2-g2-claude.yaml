@@ -86,5 +86,9 @@
   "merge_allowed": false,
   "target_activation_allowed": false,
   "g5_issued": false,
-  "thay_the_cho": []
+  "thay_the_cho": [],
+  "da_bi_thay_the": "wp1325-r3-g3-claude",
+  "superseded_reason": "Owner r50 successor SPEC checkpoint; g2 writer/tests terminal and PR1329 remains draft; no source approval transfer",
+  "superseded_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1325#issuecomment-6904086402",
+  "superseded_recorded_utc": "2026-11-16T00:38:28.929694+00:00"
 }

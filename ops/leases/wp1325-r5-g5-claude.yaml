@@ -26,10 +26,10 @@
   "effective_review_class": "sensitive",
   "assurance_target": "cross_approved",
   "depends_on": [],
-  "spec_ref": "refs/heads/ops/wp1325-r5-g5@1ee9ff84c05e23223301c86e409f004eb1122ebd",
+  "spec_ref": "refs/heads/ops/wp1325-r5-g5@d4bf2ce8be8905c39ab88e3b53cf3cd1fb502530",
   "spec_path": "ops/specs/wp1325-r5/SPEC.md",
-  "spec_hash": "dd6d3137070588e214c7bb242518aa17e696c4d6afbed6beb5ca182e3257b5c4",
-  "spec_sha256_required": "dd6d3137070588e214c7bb242518aa17e696c4d6afbed6beb5ca182e3257b5c4",
+  "spec_hash": "86fbe16a84cf9cc93705ddc0c9b6e23dfb26ea7096e97ff52186ef56cd6c51ac",
+  "spec_sha256_required": "86fbe16a84cf9cc93705ddc0c9b6e23dfb26ea7096e97ff52186ef56cd6c51ac",
   "prompt_path": "ops/prompts/wp1325-r5-g5-claude.txt",
   "prompt_sha256_required": "1d3def2ef0954f52f29bf9acf6be222ee468415755a0eafc292524c7ec3f0fe2",
   "write_set": [

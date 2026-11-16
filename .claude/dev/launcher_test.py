@@ -14298,6 +14298,19 @@ def r1335_symlink_doi_dich_giua_bam_va_phong():
 
 
 @ca
+def r1335_giu_argv0_goc_khi_ghim_tep():
+    """PR #1341 P2: POSIX phóng tệp đã băm qua `executable`, argv[0] giữ đường gọi gốc (venv/bin/python là symlink)."""
+    if LA_WINDOWS:
+        return "BO QUA r1335_argv0: Windows van thay argv[0] bang duong da bam (venv Windows mac dinh la ban sao)"
+    with San() as s:
+        v, repo, rr = s / "venv" / "bin", tao_repo(s), s / "runs"; v.mkdir(parents=True); (v / "python").symlink_to(Path(PY).resolve())
+        (v.parent / "pyvenv.cfg").write_text(f"home = {Path(PY).resolve().parent}\n", encoding="utf-8")
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", str(v / "python"), "-c", "import sys;print(sys.prefix != sys.base_prefix)")
+        tm = next(rr.iterdir()); d, out = json.loads((tm / "run.json").read_text(encoding="utf-8")), (tm / "stdout.log").read_text(encoding="utf-8")
+        bang(out.strip() == "True" and d["thuc_thi_duong_dan"] == os.path.realpath(PY), f"mat venv hoac bam sai: {out!r} {d.get('thuc_thi_duong_dan')}")
+
+
+@ca
 def r1335_hanh_vi_codex_theo_agent_da_quyet():
     """F1: lọc stderr + đo sandbox của lượt codex đi theo `_quyet_dinh_agent` (khai > tên, cắt đuôi shim)."""
     with San() as s:
@@ -14461,8 +14474,9 @@ DOT_BIEN = [
      ["r1335_transport_sha256_la_bam_tep_that"]),
     ("r1335_N3b_resolve_theo_cwd_launcher", ('    dinh_danh = _dinh_danh_van_chuyen(a.lenh, agent, kq["workspace"])', '    dinh_danh = _dinh_danh_van_chuyen(a.lenh, agent, None)'),
      ["r1335_khac_cwd_bam_va_chay_tep_trong_workspace"]),
-    ("r1335_N3c_phong_lenh_goc", ('        lenh_con[0] = dinh_danh["thuc_thi_duong_dan"]   # wp1335 T3', '        pass   # wp1335 T3'),
+    ("r1335_N3c_phong_lenh_goc", ('_phong(lenh_con, executable=exe, cwd=', '_phong(lenh_con, cwd='),
      ["r1335_symlink_doi_dich_giua_bam_va_phong"]),
+    ("r1335_argv0_ve_realpath", ('    if exe and platform.system() == "Windows": lenh_con', '    if exe: lenh_con'), ["r1335_giu_argv0_goc_khi_ghim_tep"]),
     ("r1335_F1_codex_theo_ten", ('    do_model = _la_codex(qd)\n', '    do_model = Path(a.lenh[0]).name.lower() in ("codex", "codex.exe", "codex.cmd")\n'),
      ["r1335_hanh_vi_codex_theo_agent_da_quyet"]),
     ("r1335_F2_path_theo_cwd_launcher", ('os.path.join(cwd, d or ".", s) for d', 'os.path.join(d, s) for d'),

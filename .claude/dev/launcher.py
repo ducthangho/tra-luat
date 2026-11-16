@@ -2716,8 +2716,8 @@ def lenh_run(a) -> int:
     # chạy, khép hẳn cửa sổ SAU khi sinh con. Không dùng {PROMPT_FILE} thì lớp (2)
     # không có — và điều đó được nói thẳng trong sổ, không giả vờ là đã kín.
     lenh_con = [str(x) for x in a.lenh]
-    if dinh_danh["thuc_thi_duong_dan"]:
-        lenh_con[0] = dinh_danh["thuc_thi_duong_dan"]   # wp1335 T3: phóng ĐÚNG tệp đã băm
+    exe = dinh_danh["thuc_thi_duong_dan"]   # T3: phóng ĐÚNG tệp đã băm; #1341 P2: POSIX giữ argv[0] gốc (venv symlink)
+    if exe and platform.system() == "Windows": lenh_con[0], exe = exe, None   # noqa: E701 — Windows thay argv[0]
     if kq.get("prompt_sha256"):
         b = Path(a.prompt_file).expanduser().read_bytes()
         if hashlib.sha256(b).hexdigest() != kq["prompt_sha256"]:
@@ -2802,7 +2802,7 @@ def lenh_run(a) -> int:
         with contextlib.suppress(OSError):
             dfd_luot = _mo_thu_muc_luot(thu_muc)
     try:
-        p = _phong(lenh_con, cwd=kq["workspace"],
+        p = _phong(lenh_con, executable=exe, cwd=kq["workspace"],
                              stdout=f_out, stderr=subprocess.PIPE if do_model else f_err,
                              stdin=subprocess.DEVNULL, **them)
         if do_model:

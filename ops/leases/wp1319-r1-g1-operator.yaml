@@ -1,0 +1,62 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: WP1319-NGHIEM-THU-BO-SUNG
+revision: 1
+generation: 1
+lease_id: wp1319-r1-g1-operator
+role: operator
+provider: claude
+execution_surface: claude_code_web
+transport: desktop_commander
+environment: remote
+executor: none
+executor_note: 'r1 chỉ chạy harness có sẵn trên master 13bf69f6, không tạo mã sản phẩm, nên không có executor.'
+reviewer: codex
+reviewer_effort: xhigh
+reviewer_model: KHONG_do_duoc
+reviewer_model_note: 'ghi model thật từ run.json của lượt review; chưa đo thì giữ KHONG_do_duoc'
+assurance_target: cross_approved
+review_class: sensitive
+effective_review_class: sensitive
+access: native-desktop-thu-muc-rieng
+target_host: DESKTOP-T9R33P2
+target_device_id: a5f7076e-a491-4f84-829b-8d1fbcc1c767
+target_workdir: 'F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\wp1319-r1'
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt']
+target_excluded: 'VM f7281f27 (gateway mặc định, C: ~1.67 GB trống) và ASUS (offline)'
+spec_path: ops/specs/wp1319-r1.md
+spec_hash: deee1b43fffeae178733ff948847f05ac506976964823a9f33437635a9be42e3
+spec_sha256_required: deee1b43fffeae178733ff948847f05ac506976964823a9f33437635a9be42e3
+write_set:
+- ops/acceptance/wp1319/**
+- ops/leases/wp1319-r1-g1-operator.yaml
+- ops/specs/wp1319-r1.md
+write_set_hash: 021483076dbfd283d1cb2c335dabff22eeb5c450f5273082218b70a4b76c4661
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+branch_ownership: exclusive
+target_pull_request: 1378
+base_sha: 13bf69f6eb797e859619a2062e7c9577e6a9cc0b
+measured_sha: 13bf69f6eb797e859619a2062e7c9577e6a9cc0b
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho trong phiên session_015GtxrapMSm976JLC7Fp1HM, 2026-11-17: "Máy AsUs offline, hãy dùng desktop (ưu tiên) và vm thay thế"; cộng ủy quyền tiếp tục trong prompt bàn giao Mission #1238/#1319'
+granted_on_instruction_note: 'đổi máy đo, không cấp LIVE/gateway/account/endpoint/ACL/login/copy profile/cài đặt mức hệ thống'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+recorder_is_operator: true
+recorder_note: 'phiên ghi lease cũng là operator; cái đỡ: reviewer khác họ model, chỉ đọc zip đã đóng băng, context mới'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-17T16:37:16Z'
+  ket_qua: 'quét mọi ref (ls-remote so for-each-ref: thiếu cục bộ 0): không lease nào chứa wp1319 hay ops/acceptance/wp1319'
+thay_the_cho: []
+leased_at_utc: '2026-11-17T16:37:16Z'
+heartbeat_at: '2026-11-17T16:37:16Z'
+lease_until: '2026-11-17T22:37:16Z'
+lease_expires_at_utc: '2026-11-17T22:37:16Z'
+max_lease_hours: 6
+codex_review_calls_limit: 2
+codex_review_calls_used: 0
+native_runs_limit: 1
+native_step_reruns_limit: 1
+windows: native_desktop_only
+windows_note: 'không Windows CI, không full Windows mutant CI (chỉ thị chủ kho)'

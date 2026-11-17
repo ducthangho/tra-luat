@@ -1,0 +1,36 @@
+# Bien ban M8 (ADR-0060) dong WP #1356 LAUNCHER-DOT-BIEN-R1335-THEO-NEN r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1358-wp1356-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6938163641 tren a808b35).
+# Bon moc §10.2.2 run 44016470958 measured passed (wd-run 44020073104; gate output 39/39 bang danh_gia_gate.py v2).
+packet: wp1356
+revision: 1
+generation: 1
+spec_hash: dd4ba1ed81a2a5b6d255ae6367350e29d2254654463045b3a2bd8d33fbb025f6
+head_da_review: a808b35f1016ae2e2c4a02baf67f6ea179090d46
+tree_h: 3018cbafd9a3de1d46fed9a62f403987ccc6766b
+review:
+  offline: 'khong goi Codex offline (loi khai phien dieu phoi); review doc lap = connector Codex + human audit'
+  connector: 'readback-pr1358-comments.json: codex-review-state:v1 completed, has_any_findings false, commit a808b35'
+  human_audit: 'issuecomment-6938163641 human_exact_head_audit.v1 approve tren a808b35 (chu kho tu dang)'
+windows:
+  phan_loai: measured
+  nguon: 'N2: n2-windows-tra-luat-win-TOM-TAT.txt (VM tra-luat-win, head + base). N4: trich-launcher-job-133815500869.txt (launcher windows-latest hau merge, DOT BIEN 556/556 dat, khong r1335_* SAI).'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1358#issuecomment-6938163641
+duyet_chu_kho_ghi_chu: 'audit tu dang 04:18:22Z 17-11, truoc merge 04:20:14Z; duyet merge dung SHA qua AskUserQuestion (loi khai).'
+merge_commit: 0f037f75bc8d24e8004faee7565d8452e00a19a2
+tree_m: 8d2f7b2896244eb61a5d2588cb096cd2d500f535
+ci_master:
+  run_id: 44016470958
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong; gom "GOM: ĐẠT · 16 mảnh · 1506 ca bắt buộc". launcher-windows.yml 44016470880 success (ca hai nen).'
+nghiem_thu:
+  N1: passed  # trich-launcher-job-133815501326.txt (ubuntu-latest hau merge): r1335_N3c_phong_lenh_goc/r1335_F2_path_theo_cwd_launcher OK giet 1/1, hai dot bien _win_ KHONG DO DUOC; 409/409 ca qua (bo qua 2, hong 0, gom t117); DOT BIEN 697/697 dat
+  N2: passed  # n2-windows-tra-luat-win-TOM-TAT.txt: HEAD hai dot bien cu KHONG DO DUOC, hai dot bien Windows moi giet 1/1; BASE hai dot bien SAI
+  N3: passed  # nghiem-thu-0f037f7.txt: ruff F delta 0, adr-song/doctrine-scan rc 0, numstat 1 tep +13/-2
+  N4: passed  # trich-launcher-job-133815500869.txt: windows-latest khong r1335_* SAI, DOT BIEN 556/556 dat
+lease_cuoi: wp1356-r1-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

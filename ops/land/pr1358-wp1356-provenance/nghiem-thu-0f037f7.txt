@@ -1,0 +1,16 @@
+# nghiem thu tren merge 0f037f7, luc 2026-11-17T04:53:23Z, worktree origin/master f70c1581d6cd947ae05921a5891c17eb83a95d1f
+## git log -1 0f037f7 (sha tree cha)
+0f037f75bc8d24e8004faee7565d8452e00a19a2 8d2f7b2896244eb61a5d2588cb096cd2d500f535 4bdcfbe63d60d37deb27c555f3219acb6a0d0cc9 a808b35f1016ae2e2c4a02baf67f6ea179090d46
+## numstat 0f037f7^1..0f037f7
+13	2	.claude/dev/launcher_test.py
+## spec tai nhanh lease
+blob 24973b34895cc67f4e3d87b885c04bbbc1118f3f sha256 dd4ba1ed81a2a5b6d255ae6367350e29d2254654463045b3a2bd8d33fbb025f6
+## ruff --select F .claude/dev/launcher_test.py (ruff 0.16.9; cha thu nhat 4bdcfbe vs merge 0f037f7)
+4bdcfbe: 5 loi F (5 F841 unused-variable)
+0f037f7: 5 loi F (5 F841 unused-variable) => DELTA 0
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0

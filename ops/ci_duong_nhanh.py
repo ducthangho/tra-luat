@@ -404,10 +404,12 @@ def phan_loai_tu_diff(doi):
 
 
 def phan_loai_packet_loop(su_kien, doi):
-    """(`chay` | `bo_qua`, ly do). push (chi nhanh mac dinh) => bo_qua (M2). pull_request: bo_qua CHI KHI do duoc diff khac rong,
-    moi duong dan sach va khong duong dan nao khop `PHU_THUOC_PACKET_LOOP`. Con lai => chay (fail-closed)."""
+    """(`chay` | `bo_qua`, ly do). push (chi nhanh mac dinh) => chay, MOI diff ke ca rong. pull_request: bo_qua CHI KHI do duoc diff
+    khac rong, moi duong dan sach va khong duong dan nao khop `PHU_THUOC_PACKET_LOOP`. Con lai => chay (fail-closed).
+    wp1353 (#1353, chu kho chon "sua M2" 17-11-2026) go M2 cua wp1343 (push => bo_qua): job gom hau merge in `KHONG DO`, nen moc
+    gate_output (ho so land) cua moi merge commit thieu dau hieu duong. Nhanh push dung RIENG de log noi ro ly do, khong lan vao fail-closed."""
     if su_kien == "push":
-        return PL_BO_QUA, "PACKET_LOOP: bo_qua vi push nhanh mac dinh (hau merge khong chay bo ca packet-loop)"
+        return PL_CHAY, "PACKET_LOOP: chay vi push nhanh mac dinh: chay bo ca packet-loop hau merge"
     if su_kien != "pull_request" or not doi or not all(type(x) is str and _duong_dan_sach(x) for x in doi):
         return PL_CHAY, f"PACKET_LOOP: chay (su_kien={su_kien!r}, diff rong / KHONG DO DUOC / duong dan la => fail-closed)"
     cham = sorted(x for x in doi if x.startswith(PHU_THUOC_PACKET_LOOP))

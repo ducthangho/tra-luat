@@ -5550,14 +5550,20 @@ def _1174_ref_rows(rows, family):
     return rows
 
 
+_1174_NOT_COMMIT = ""   # present locally, but its peel ends at a tree or blob
+
+
 def _1174_peel(root, oids, deadline):
-    """Map each OID to its local peeled commit; None when absent or not a commit."""
+    """Map each OID to its local peeled commit.
+
+    _1174_NOT_COMMIT when the object is present but peels to a tree or blob;
+    None only when the OID (or an object its tag chain needs) is absent."""
     remaining = deadline - time.time()
     if not oids or remaining <= 0:
         return {}
     try:
         child = subprocess.run(["git", "--no-replace-objects", "-C", str(root), "cat-file", "--batch-check=%(objectname) %(objecttype)"],
-            input="".join(oid + "^{commit}\n" for oid in oids).encode("ascii"), env=_1174_git_env(), capture_output=True, timeout=min(300, remaining))
+            input="".join(oid + "^{}\n" for oid in oids).encode("ascii"), env=_1174_git_env(), capture_output=True, timeout=min(300, remaining))
     except (ValueError, OSError, subprocess.SubprocessError):
         return {}
     lines = child.stdout.decode("ascii", "replace").splitlines()
@@ -5566,7 +5572,9 @@ def _1174_peel(root, oids, deadline):
     peeled = {}
     for oid, line in zip(oids, lines):
         parts = line.split(" ")
-        peeled[oid] = parts[0] if len(parts) == 2 and parts[1] == "commit" and SHA_RE.fullmatch(parts[0]) else None
+        known = len(parts) == 2 and SHA_RE.fullmatch(parts[0]) is not None
+        peeled[oid] = (parts[0] if known and parts[1] == "commit" else
+            _1174_NOT_COMMIT if known and parts[1] in ("tree", "blob") else None)
     return peeled
 
 
@@ -5718,9 +5726,12 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
                     target = row.get("object") if type(row) is dict else None
                     tips.append(target.get("sha") if type(target) is dict else None)
         # Every non-zero feed OID must be local before any containment answer.
+        # Tip OIDs absent locally join the SAME single fetch by SHA; one that
+        # is still absent afterwards stays unmeasurable.
         wanted = sorted({oid for event in feed for oid in (event["before"], event["after"]) if oid != zero})
-        commits = _1174_peel(root, wanted, pass_end)
-        missing = [oid for oid in wanted if commits.get(oid) is None]
+        extra = sorted({oid for oid in tips if type(oid) is str and SHA_RE.fullmatch(oid)} - set(wanted))
+        commits = _1174_peel(root, wanted + extra, pass_end)
+        missing = sorted(oid for oid in wanted + extra if commits.get(oid) is None)
         if missing:
             try:
                 _1174_fetch_objects(root, missing, pass_end)
@@ -5728,15 +5739,17 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
                 pass
             commits.update(_1174_peel(root, missing, pass_end))
         objects = all(commits.get(oid) is not None for oid in wanted)
-        extra = sorted({oid for oid in tips if type(oid) is str and SHA_RE.fullmatch(oid) and oid not in commits})
-        commits.update(_1174_peel(root, extra, pass_end))
         relations = {}
 
         def contains(oid):
             # "X contains H": merge-base --is-ancestor H X on local objects only.
+            # A present object whose peel is a tree or blob cannot contain H;
+            # only an absent object is unmeasurable.
             commit = commits.get(oid)
             if commit is None:
                 return None
+            if commit == _1174_NOT_COMMIT:
+                return False
             if commit not in relations:
                 relations[commit] = _git_do(root, "merge-base", "--is-ancestor", head, commit, deadline=pass_end)[0]
             relation = relations[commit]

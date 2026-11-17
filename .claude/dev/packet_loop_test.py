@@ -12410,10 +12410,10 @@ WP1174_REQUIRED = {"wp1174_" + name for name in (
     "durability_ordinary_pair durability_fsync_readback durability_publish_noreplace durability_legacy_tombstone durability_cached_writer "
     "lifecycle_identity_advisory lifecycle_budget_replay lifecycle_human_valid lifecycle_human_negative lifecycle_first_publication lifecycle_guard_readonly lifecycle_scoped_lifecycle lifecycle_legacy_unchanged "
     "profile_native_linux profile_unsupported windows_claim_rejected status_closed gate_required_skip gate_evidence_schema").split()}
-# wp1370: the activity-collector cases are required IDs (17 new, 85 -> 102).
+# wp1370: the activity-collector cases are required IDs (18 new, 85 -> 103).
 WP1174_REQUIRED |= {"wp1174_activity_" + name for name in (
     "reduced_payload multipage_anchor older_page_fail same_timestamp_fail force_push_preimage deletion_preaudit tag_coverage "
-    "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained matching_refs_unpaginated").split()}
+    "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained matching_refs_unpaginated tip_non_commit").split()}
 WP1174_REQUIRED |= {"wp1174_" + kind + "_" + name for kind in ("writer", "race") for name in _WP1174_WRITERS}
 WP1174_BOTH = {"wp1174_" + name for name in ("admission_valid admission_wrong_scope witness_valid witness_keyset witness_int_bool witness_json_bytes "
     "witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending lifecycle_legacy_unchanged status_closed").split()}
@@ -12645,13 +12645,13 @@ def _lifecycle1174(kind):
                     d=c.tmp/("current-service" if service else "current-native");d.mkdir()
                     _current_policy1174(Ctx(c.script,d),service)
                 _static_writers1174(c,m)
-                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==102
+                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==103
                 applicable=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
                 required={n:None for n in applicable}
                 assert _required1174(required,applicable)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,applicable),"missing required ID accepted"
-                assert len(_WP1174_FULL_CASE_IDS)==102 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
+                assert len(_WP1174_FULL_CASE_IDS)==103 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -12768,7 +12768,7 @@ def _evidence_schema1174(c):
     required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
     record=dict(schema="wp1174_native_report.v1",actual_os="Linux",scope="wp1174_candidate",proof_eligible=True,source_pr=1275,repo="ducthangho/tra-luat",pr=1275,
         run_id="1",run_attempt="1",job="gate-packet-loop",checkout_sha=m,checkout_tree="c"*40,executed_sha=h,executed_tree="d"*40,expected_head=h,expected_tree="d"*40,
-        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=101,
+        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=102,
         outcomes={n:"passed" for n in required},profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},
         native_probe=dict(status="passed",checks={k:True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")}),
         native_seam=False,overall_status="passed",windows_oracle="not_run_platform; deferred_to_windows_focused")
@@ -14030,7 +14030,7 @@ def _r12_main_inventory1174(c):
     seen=[]
     def selected_driver():
         names=[name for name,_ in CASES if name in WP1174_REQUIRED]
-        assert len(names)==101 and "wp1174_windows_claim_rejected" not in names
+        assert len(names)==102 and "wp1174_windows_claim_rejected" not in names
         dict(CASES)["wp1174_lifecycle_scoped_lifecycle"](c)
         seen.append(tuple(names))
         return 0
@@ -14040,7 +14040,7 @@ def _r12_main_inventory1174(c):
             _legacy_main=selected_driver,_carrier1174=lambda *args:True,_snapshot1174=lambda *args:{}),contextlib.redirect_stdout(io.StringIO()):
         assert main()==0
     assert seen and CASES is full
-    assert len(_WP1174_FULL_CASE_IDS)==102 and len(set(_WP1174_FULL_CASE_IDS))==102
+    assert len(_WP1174_FULL_CASE_IDS)==103 and len(set(_WP1174_FULL_CASE_IDS))==103
 
 
 def _r12_accept_snapshot1174(c):
@@ -14405,6 +14405,90 @@ def _activity_case1370(kind):
                         "repos/evil/tra-luat/git/matching-refs/heads","repositories/123/git/matching-refs/heads"):
                     count=len(runs);_reject1174(m._1174_api,endpoint,link=True,repo_id=123,reason="scoped API endpoint/root",**limits);assert len(runs)==count,endpoint
                 count=len(runs);_reject1174(m._1174_api,stem+"heads",link=True,reason="scoped API endpoint/root",**limits);assert len(runs)==count
+        elif kind=="tip_non_commit":
+            # Real server (coordinator probe, 2026-11-17): the current tag
+            # refs/tags/rescue/d0-2026-08-04 points directly at a TREE that the
+            # collector repository did not have. Fetching it by SHA succeeds and
+            # the object is then a tree: present, not a commit, cannot contain H.
+            name="refs/tags/rescue/d0-2026-08-04";canonical="https://github.com/ducthangho/tra-luat.git"
+            source=c.tmp/"wp1370-source";_g(c.tmp,"clone","-q","--no-hardlinks",str(w),str(source))
+            _g(source,"config","uploadpack.allowAnySHA1InWant","true")
+            def remote_tree(text):
+                (source/"rescue.txt").write_text(text);_g(source,"add","rescue.txt");return _g(source,"write-tree")
+            T=remote_tree("rescue tree, remote only\n")
+            local=lambda oid:m._git_do(w,"cat-file","-e",oid)[0]==0
+            assert _g(source,"cat-file","-t",T)=="tree" and not local(T),"fixture: the tip tree must exist only on the remote"
+            tags=copy.deepcopy(pages["git/matching-refs/tags"])
+            def tip(*rows):
+                pages["git/matching-refs/tags"]=copy.deepcopy(tags)+[dict(ref=ref,object=dict(sha=sha,type=form)) for ref,sha,form in rows]
+            tip((name,T,"tree"))
+            real=m._git_do;real_fetch=m._1174_fetch_objects
+            def origin(root_,*argv,**kw):
+                return (0,canonical.encode()+b"\n") if argv==("remote","get-url","origin") else real(root_,*argv,**kw)
+            def remote():
+                # One pass against the real fetch; returns (receipt, fetched OID lists).
+                calls=[]
+                def counted(root_,oids,deadline):
+                    calls.append(list(oids));return real_fetch(root_,oids,deadline)
+                with patch.object(m,"_git_do",origin),patch.object(m,"_1174_fetch_objects",counted),patch.dict(os.environ,{"GIT_ALLOW_PROTOCOL":"file"}):
+                    return collect(),calls
+            # Sub-check: the same tip object cannot be fetched -> absent stays unmeasurable.
+            calls=[]
+            with patch.object(m,"_1174_fetch_objects",side_effect=lambda root_,oids,deadline:calls.append(list(oids))):receipt=collect()
+            assert calls==[[T]] and receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,("unfetchable tip object accepted",calls,receipt)
+            with patch.object(m,"_1174_fetch_objects",side_effect=OSError("offline")):receipt=collect()
+            assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,receipt
+            receipt=collect();assert receipt["status"]=="UNKNOWN" and not local(T),"fixture has no canonical origin; the real fetch must refuse"
+            # Healthy scenario: the tip is fetched by SHA in the single fetch of
+            # the pass, is a tree, and needs no introduction.
+            _g(w,"config","url."+str(source)+".insteadOf",canonical)
+            refs=_g(w,"for-each-ref");fetch_head=(w/".git"/"FETCH_HEAD").exists()
+            receipt,calls=remote()
+            assert calls==[[T]],"tip OID absent locally must be fetched by SHA, exactly one fetch per pass: %r"%(calls,)
+            assert local(T) and _g(w,"cat-file","-t",T)=="tree" and m._git_do(w,"cat-file","-e",T+"^{commit}")[0]!=0
+            assert receipt["status"]==ok and receipt["dag_coverage"] is True,"present non-commit tip treated as unmeasurable: %r"%(receipt,)
+            assert receipt["earliest"]["id"]=="12" and not any(x["after"]==T or x["before"]==T for x in pages["activity"]),"the tree tag needs no introduction"
+            assert m._1174_collector_receipt(receipt,H,audit,123) is receipt
+            assert _g(w,"for-each-ref")==refs and (w/".git"/"FETCH_HEAD").exists()==fetch_head,"fetch created or moved a ref"
+            # Now local: no fetch at all, same answer (also without any origin).
+            receipt,calls=remote();assert calls==[] and receipt["status"]==ok,(calls,receipt)
+            calls=[]
+            with patch.object(m,"_1174_fetch_objects",side_effect=lambda root_,oids,deadline:calls.append(list(oids))):receipt=collect()
+            assert calls==[] and receipt["status"]==ok and receipt["dag_coverage"] is True,(calls,receipt)
+            # Blob tip, annotated tag peeling to a tree, head and same-repository
+            # PR head on a non-commit: present, cannot contain H.
+            (w/"rescue-blob.txt").write_text("blob tip\n");B=_g(w,"hash-object","-w","rescue-blob.txt");(w/"rescue-blob.txt").unlink()
+            _g(w,"tag","-a","-m","annotated tree","wp1370-tree",T);A=_g(w,"rev-parse","refs/tags/wp1370-tree")
+            assert _g(w,"cat-file","-t",B)=="blob" and _g(w,"cat-file","-t",A)=="tag" and A!=T
+            tip((name,T,"tree"),("refs/tags/rescue/blob",B,"blob"),("refs/tags/rescue/annotated",A,"tag"))
+            heads=copy.deepcopy(pages["git/matching-refs/heads"])
+            pages["git/matching-refs/heads"]=heads+[dict(ref="refs/heads/rescue/tree",object=dict(sha=T,type="tree"))]
+            pages["pulls"]=[dict(number=7,state="closed",html_url="https://github.com/"+m._1174_REPO+"/pull/7",head=dict(sha=T,ref="topic",repo=dict(id=123,full_name=m._1174_REPO)),
+                base=dict(ref="master",repo=dict(id=123,full_name=m._1174_REPO)))]
+            receipt,calls=remote();assert calls==[] and receipt["status"]==ok and receipt["dag_coverage"] is True,(calls,receipt)
+            pages["git/matching-refs/heads"]=heads;pages["pulls"]=[]
+            # Feed before/after alike: a present non-commit side is neither an
+            # introduction nor exposure, even before the audit.
+            tip((name,T,"tree"))
+            feed(_activity1370(10,"push",name,Z,T,"2026-11-04T08:58:30Z"),_activity1370(9,"force_push","refs/tags/rescue/blob",B,T,"2026-11-04T08:57:00Z"),
+                 _activity1370(8,"branch_deletion","refs/tags/rescue/annotated",A,Z,"2026-11-04T08:56:00Z"))
+            receipt,calls=remote();assert calls==[] and receipt["status"]==ok and receipt["earliest"]["id"]=="12" and receipt["dag_coverage"] is True,(calls,receipt)
+            feed()
+            # Missing feed OIDs and missing tip OIDs share the SAME single fetch.
+            T2=remote_tree("second rescue tree, remote only\n")
+            _g(source,"reset","-q","--hard");_g(source,"checkout","-q","-b","elsewhere",root)
+            (source/"elsewhere.txt").write_text("elsewhere\n");_g(source,"add","elsewhere.txt");_g(source,"commit","-qm","object absent from the collector repository")
+            X=_g(source,"rev-parse","HEAD");assert not local(T2) and not local(X) and T2!=T
+            feed(_activity1370(7,"branch_creation","refs/heads/elsewhere",Z,X,"2026-11-04T08:20:00Z"));tip((name,T,"tree"),("refs/tags/rescue/second",T2,"tree"))
+            refs=_g(w,"for-each-ref");receipt,calls=remote()
+            assert calls==[sorted([T2,X])],"feed and tip OIDs must share one fetch per pass: %r"%(calls,)
+            assert receipt["status"]==ok and local(T2) and local(X) and _g(w,"for-each-ref")==refs and receipt["dag_coverage"] is True,receipt
+            # Absent stays unmeasurable against the real remote too: a tip that
+            # no repository has fails the one fetch and is never guessed.
+            gone="e"*40;feed();tip((name,T,"tree"),("refs/tags/rescue/gone",gone,"tree"))
+            receipt,calls=remote()
+            assert calls==[[gone]] and not local(gone) and receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,(calls,receipt)
+            tip((name,T,"tree"));receipt,calls=remote();assert calls==[] and receipt["status"]==ok,(calls,receipt)
         else:
             raise AssertionError("unknown wp1370 case "+kind)
     return case
@@ -14412,7 +14496,7 @@ def _activity_case1370(kind):
 
 _WP1370_ACTIVITY_CASES = ("reduced_payload", "multipage_anchor", "older_page_fail", "same_timestamp_fail", "force_push_preimage",
     "deletion_preaudit", "tag_coverage", "receipt_residuals", "no_anchor", "object_unfetchable", "cursor_foreign", "pr_foreign_head",
-    "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained", "matching_refs_unpaginated")
+    "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained", "matching_refs_unpaginated", "tip_non_commit")
 assert {"wp1174_activity_" + name for name in _WP1370_ACTIVITY_CASES} <= WP1174_REQUIRED
 CASES += [("wp1174_activity_" + name, _activity_case1370(name)) for name in _WP1370_ACTIVITY_CASES]
 MUTANTS.update({
@@ -14438,6 +14522,9 @@ MUTANTS.update({
     # restore page looping for the matching-refs families (they ignore paging)
     "m1174_activity_matching_refs_paged": ('            if family in _1174_UNPAGED:\n', '            if False and family in _1174_UNPAGED:\n',
         ["wp1174_activity_matching_refs_unpaginated"]),
+    # treat a present non-commit object (a ref pointing at a tree) as unmeasurable again
+    "m1174_activity_tip_non_commit_unknown": ('            if commit == _1174_NOT_COMMIT:\n                return False\n',
+        '            if commit == _1174_NOT_COMMIT:\n                return None\n', ["wp1174_activity_tip_non_commit"]),
     "m1174_activity_receipt_v1": ('receipt["schema"] == "wp1174_publication_receipt.v2" and', 'receipt["schema"].startswith("wp1174_publication_receipt.v") and', ["wp1174_activity_receipt_v1"]),
 })
 
@@ -14479,8 +14566,8 @@ MUTANTS.update({
     "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
 })
 
-MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==102 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
-    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==102,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
+MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==103 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
+    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==103,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
 MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
@@ -14691,7 +14778,7 @@ def _carrier1174(outcomes, gate_rc=0):
 
 def main():
     global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
-    assert len(WP1174_REQUIRED) == 102 and len(WP1174_BOTH) == 12
+    assert len(WP1174_REQUIRED) == 103 and len(WP1174_BOTH) == 12
     actual_os = platform.system()
     if actual_os=="Linux":
         globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())

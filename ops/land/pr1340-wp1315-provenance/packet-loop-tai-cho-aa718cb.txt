@@ -1,0 +1,58 @@
+# packet-loop 16 manh do TAI CHO tren DUNG cay aa718cb (dieu kien thay the cua waiver chu kho issuecomment-6938174089 cho job gate-packet-loop hau merge)
+# container phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS, 2026-11-17T03:1x–04:0xZ, Linux, Python 3.13.18 (CI dung 3.12), PyYAML 6.0.3
+# ban sao: git clone --no-hardlinks <kho phien> + fetch +refs/remotes/origin/* (khong nong) ; checkout --detach aa718cb ; core.abbrev 7 ; env PYTHONUTF8=1 PYTHONDONTWRITEBYTECODE=1 TMPDIR ngoai cay
+# lenh moi manh (nhu ci.yml tu #1343): PACKET_LOOP_MANH=i/16 PACKET_LOOP_RA=<tep NGOAI cay> python3 .claude/dev/packet_loop_test_manh.py ; manh 1-15 song song 3 luong, manh 0 chay rieng sau
+# lenh gom: PACKET_LOOP=chay KQ_MANH=success python3 .claude/dev/packet_loop_test_manh.py --gom <thu muc RA> --n 16
+# LUU Y: cay aa718cb CHUA co .claude/dev/packet_loop_test_manh.py (bo chia manh vao tu #1343, b8bc64f, SAU aa718cb). Tai aa718cb, ci.yml chay
+#   bo ca packet-loop trong MOT job gate-packet-loop (job ay bi huy). Lan 1 moi manh rc 2 (khong co tep). Lan 2: chep packet_loop_test_manh.py
+#   tu b8bc64f vao cay (ngoai theo doi git, .git/info/exclude); git diff aa718cb b8bc64f -- .claude/dev/packet_loop_test.py .claude/dev/packet_loop.py RONG.
+#   Tuc bo ca do la bo ca CUA aa718cb, chi bo chia manh muon tu b8bc64f — dung nhu waiver khai.
+## tom tat (nguyen van log-.../tom-tat.txt)
+checkout aa718cb8392c1e2defd47a0259c575de16fbd5a3 f07b2bd5db2280d60e24cdedda07fe31697680d6 shallow=false status=[0]
+manh 1 rc=2 0s
+manh 3 rc=2 0s
+manh 2 rc=2 0s
+manh 4 rc=2 0s
+manh 5 rc=2 0s
+manh 6 rc=2 0s
+manh 7 rc=2 0s
+manh 8 rc=2 0s
+manh 9 rc=2 0s
+manh 11 rc=2 0s
+manh 10 rc=2 0s
+manh 12 rc=2 0s
+manh 13 rc=2 0s
+manh 15 rc=2 0s
+manh 14 rc=2 0s
+manh 0 (rieng, cay sach) rc=2 0s
+status_sau=[0]
+gom rc=2
+lan2: chep packet_loop_test_manh.py tu b8bc64f (ngoai theo doi git, .git/info/exclude); packet_loop_test.py + packet_loop.py aa718cb == b8bc64f (git diff rong); RA moi ra2-
+checkout aa718cb8392c1e2defd47a0259c575de16fbd5a3 f07b2bd5db2280d60e24cdedda07fe31697680d6 status=[0]
+lan2 manh 3 rc=0 64s
+lan2 manh 2 rc=0 70s
+lan2 manh 1 rc=0 101s
+lan2 manh 5 rc=0 84s
+lan2 manh 6 rc=0 68s
+lan2 manh 4 rc=0 150s
+lan2 manh 8 rc=0 81s
+lan2 manh 7 rc=0 109s
+lan2 manh 9 rc=0 80s
+lan2 manh 10 rc=0 85s
+lan2 manh 12 rc=0 94s
+lan2 manh 11 rc=0 138s
+lan2 manh 13 rc=0 83s
+lan2 manh 14 rc=0 76s
+lan2 manh 15 rc=0 72s
+lan2 manh 0 (rieng) rc=0 179s
+lan2 status_sau=[0]
+lan2 gom rc=0
+GOM: mọi mảnh khớp phân hoạch
+GOM: ĐẠT · 16 mảnh · 1503 ca bắt buộc (sổ 1505 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)
+## gom (16 tep manh-*.json o packet-loop-tai-cho/)
+GOM: mọi mảnh khớp phân hoạch
+GOM: ĐẠT · 16 mảnh · 1503 ca bắt buộc (sổ 1505 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)
+## manh 0 (dong ket)
+
+TỔNG: ĐẠT
+MẢNH: ca 0/16 · đột biến - · 84/84 ca · 0 lượt đột biến · carrier=có · 177s · rc=0

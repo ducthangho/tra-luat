@@ -1,0 +1,94 @@
+# HO SO LAND — packet #1315 (WP1308 recovery: adopted approved_pending lease rebind) r5, lease g7, qua PR #1340. Khuon: ops/land/pr1352-wp1350-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2; waiver §10.2.3.
+#
+# TRANG THAI: merged (aa718cb), landed FALSE (giu nguyen). Bon moc §10.2.2 cua ci.yml 43927088245 attempt 1: run/checkout/workflow_definition
+#   measured passed (wd-run 44015913183); gate_output owner_waived — 22/23 job co dau hieu duong (danh_gia_gate.py v2), job gate-packet-loop
+#   (ubuntu-latest) BI HUY theo chi thi chu kho (khong chay test dai hau merge). Waiver chu kho TU DANG issuecomment-6938174089 neo dung aa718cb;
+#   dieu kien thay the: do bu 16 manh tai cho tren dung cay aa718cb, GOM ĐẠT 1503 ca (bo chia manh chep tu b8bc64f; bo ca giong het).
+# VI SAO VAN landed false: run 43927088245 conclusion CANCELLED. Waiver chi mien gate_output va tu khai "run 43927088245 vẫn ghi conclusion
+#   cancelled"; ho so KHONG doi cancelled thanh success, nen kiem-dong-wp D2 do co chu dich (kiem-dong-wp-m8.txt rc 12).
+# Ghi so lech M8 goc: M8 goc ghi "21/22 job success"; liet ke REST jobs attempt 1 (readback-jobs-43927088245-attempt1.json) la 22 success + 1
+#   cancelled (23 job khong skipped). Giu ca hai, khong xoa lich su.
+# ASSURANCE REVIEW: Codex source review + connector; owner_delegated_audit do Claude Code ghi ho, KHONG phai human audit (M8 goc tu khai).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
+# Readback tho: ops/land/pr1340-wp1315-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-17T04:1x–04:3xZ.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS
+input_packet_generations:
+  - packet_issue: 1315
+    packet_id: wp1315
+    revision: 5
+    generation: 7
+    lease_id: wp1315-r5-g7-claude
+    ghi_chu: 'Lease da het hieu luc tu truoc (nhanh ops/wp1315-r5-g7); ban sao lease-wp1315-r5-g7-claude.yaml.txt.'
+authorized_head_sha: 0003a5f46df6ef84866348859a161e4b8a801dbd
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916257249
+authorization_ghi_chu: >-
+  measured — readback-pr-1340.json: merged_by ducthangho, merged_at 2026-11-16T18:16:24Z, head 0003a5f (chu kho tu bam merge sau kiem-merge
+  K0-K7 rc 0, theo M8 goc). readback-issuecomment-6916257249.json: quyet dinh duyet r56 do phien Claude GHI HO (app claude).
+land_operator: 'measured — readback-pr-1340.json: merged_by ducthangho (chu kho tu bam merge).'
+merge_method: merge
+merge_commit: aa718cb8392c1e2defd47a0259c575de16fbd5a3
+merge_commit_tree: f07b2bd5db2280d60e24cdedda07fe31697680d6
+merge_commit_parents: [5968ff06486a64244c4a306bc3eac163df0488ad, 0003a5f46df6ef84866348859a161e4b8a801dbd]
+merge_ghi_chu: 'measured — readback-commit-aa718cb.json: hai cha 5968ff0, 0003a5f; numstat aa718cb^1..aa718cb: packet_loop.py +122/-13, packet_loop_test.py +592/-0, ops/specs/wp1315-adopted-pending-recovery-r1.md +337/-0.'
+pre_merge_checks:
+  - name: 'CI PR tren head cuoi'
+    sha: 0003a5f46df6ef84866348859a161e4b8a801dbd
+    conclusion: success
+    nguon: [readback-runs-head-0003a5f.json]
+    ghi_chu: 'measured — readback-runs-head-0003a5f.json: gate 43896045111 success; dot bien du 43896065480 success; launcher Windows skipped.'
+  - name: 'Codex connector tren head cuoi'
+    sha: 0003a5f46df6ef84866348859a161e4b8a801dbd
+    conclusion: 'sach'
+    ghi_chu: 'measured — readback-pr1340-comments.json: 6918151269 codex-review-state:v1, commit 0003a5f, has_any_findings false.'
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 43927088245
+    run_attempt: 1
+    sha: aa718cb8392c1e2defd47a0259c575de16fbd5a3
+    conclusion: cancelled
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-43927088245.json, readback-jobs-43927088245-attempt1.json, danh-gia-gate-output-43927088245.txt, danh_gia_gate.py, phan-chung-buoc-43927088245.txt, packet-loop-tai-cho-aa718cb.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha aa718cb, run_attempt 1 (run conclusion cancelled).'
+    moc_checkout: 'measured — ci/provenance.yaml: moi job checkout passed aa718cb8392c1e2defd47a0259c575de16fbd5a3.'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition passed (wd-run 44015913183, dispatch ops-do-workflow-definition.yml tren master 04:15Z 17-11).'
+    moc_gate_output: >-
+      owner_waived — danh-gia-gate-output-43927088245.txt (danh_gia_gate.py v2 sha256 539fed68): 22/23 job passed; gate-packet-loop (ubuntu-latest)
+      conclusion cancelled. Waiver readback-chu-kho-mien-gate-packet-loop-issuecomment-6938174089.json. Do bu packet-loop-tai-cho-aa718cb.txt:
+      16 manh rc 0, GOM ĐẠT 1503 ca (16 tep o packet-loop-tai-cho/); packet_loop_test.py + packet_loop.py aa718cb == b8bc64f. phan-chung-buoc-43927088245.txt:
+      xoa dau hieu 4 buoc => not_measured rc 0. ci/provenance.yaml gate_output van not_measured (bo sinh chuan) — khong viet lai.
+bookkeeping:
+  - {item: 'lease wp1315-r5-g7-claude', ket_qua: 'measured — lease-wp1315-r5-g7-claude.yaml.txt: lease_until da qua (D4 kiem-dong-wp dat).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: rc 12, chi D2 (ci_master cancelled) — co chu dich.'}
+  - {item: 'Issue #1315', ket_qua: 'measured — readback-issue-1315.json: state closed, closed_at 2026-11-16T18:43:34Z.'}
+# ---- het truong chuan
+packet_id: wp1315
+packet_issue: 1315
+revision: 5
+generation: 7
+environment: cloud
+operating_system: linux
+recorded_by: claude-session — phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS (tiep quan Mission #1172 muc 3 "No ho so hau merge").
+
+trang_thai_packet:
+  merged: true
+  landed: false
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — ba moc measured passed + gate_output owner_waived; nhung "hau-merge gate xanh" khong dat theo nghia may doc duoc: run
+    43927088245 cancelled. Muon landed true can quyet dinh rieng cua chu kho (vd. chay lai ci.yml tren aa718cb hoac waiver cho chinh ket luan
+    run); ho so nay khong tu nang.
+  canh_bao_cho_chu_kho: >-
+    (i) Review KHONG co human_exact_head_audit cua chu kho (M8 goc tu khai "not human audit"). (ii) Hai ca CA_DAI khong do tren aa718cb.
+    (iii) Lech so job M8 goc 21/22 vs REST 22+1 cancelled — ghi nhan, khong sua M8 goc.
+
+khong_do_duoc:
+  - 'Hai ca CA_DAI cua packet-loop tren aa718cb.'
+  - 'Noi dung hoi thoai chu kho ma cac comment "ghi ho" thuat lai.'

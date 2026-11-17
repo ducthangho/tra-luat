@@ -1,0 +1,7 @@
+2026-11-16T18:16:31.3665514Z Image: ubuntu-26.04
+2026-11-16T18:16:32.0491447Z ##[group]Run actions/checkout@v4
+2026-11-16T18:16:41.3752007Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-11-16T18:16:41.3752484Z aa718cb8392c1e2defd47a0259c575de16fbd5a3
+2026-11-16T18:16:42.4502529Z [command]/usr/bin/git log -1 --format=%H
+2026-11-16T18:16:42.4531680Z aa718cb8392c1e2defd47a0259c575de16fbd5a3
+2026-11-16T18:16:42.4796498Z ##[group]Run python3 ops/ci_duong_nhanh.py

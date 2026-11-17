@@ -1,0 +1,34 @@
+# packet-loop 16 manh do TAI CHO tren DUNG cay 59b3fb9 (dieu kien thay the cua waiver chu kho issuecomment-6938174089 cho job gate-packet-loop hau merge)
+# container phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS, 2026-11-17T03:1x–04:0xZ, Linux, Python 3.13.18 (CI dung 3.12), PyYAML 6.0.3
+# ban sao: git clone --no-hardlinks <kho phien> + fetch +refs/remotes/origin/* (khong nong) ; checkout --detach 59b3fb9 ; core.abbrev 7 ; env PYTHONUTF8=1 PYTHONDONTWRITEBYTECODE=1 TMPDIR ngoai cay
+# lenh moi manh (nhu ci.yml tu #1343): PACKET_LOOP_MANH=i/16 PACKET_LOOP_RA=<tep NGOAI cay> python3 .claude/dev/packet_loop_test_manh.py ; manh 1-15 song song 3 luong, manh 0 chay rieng sau
+# lenh gom: PACKET_LOOP=chay KQ_MANH=success python3 .claude/dev/packet_loop_test_manh.py --gom <thu muc RA> --n 16
+## tom tat (nguyen van log-.../tom-tat.txt)
+checkout 59b3fb93e4ecd1399460c30ea08bc5d56dc8265b 4edc80cf2d269298d9ef749b5a9dd0a16a8165de shallow=false status=[0]
+manh 3 rc=0 62s
+manh 2 rc=0 67s
+manh 1 rc=0 97s
+manh 5 rc=0 82s
+manh 6 rc=0 69s
+manh 4 rc=0 144s
+manh 8 rc=0 83s
+manh 7 rc=0 107s
+manh 9 rc=0 79s
+manh 10 rc=0 84s
+manh 12 rc=0 94s
+manh 11 rc=0 140s
+manh 13 rc=0 84s
+manh 14 rc=0 76s
+manh 15 rc=0 73s
+manh 0 (rieng, cay sach) rc=0 183s
+status_sau=[0]
+gom rc=0
+GOM: mọi mảnh khớp phân hoạch
+GOM: ĐẠT · 16 mảnh · 1506 ca bắt buộc (sổ 1508 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)
+## gom (16 tep manh-*.json o packet-loop-tai-cho/)
+GOM: mọi mảnh khớp phân hoạch
+GOM: ĐẠT · 16 mảnh · 1506 ca bắt buộc (sổ 1508 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)
+## manh 0 (dong ket)
+
+TỔNG: ĐẠT
+MẢNH: ca 0/16 · đột biến - · 84/84 ca · 0 lượt đột biến · carrier=có · 181s · rc=0

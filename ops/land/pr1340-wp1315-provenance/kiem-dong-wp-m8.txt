@@ -1,0 +1,5 @@
+# checkout: 0f037f75bc8d24e8004faee7565d8452e00a19a2 ; origin/master: 0f037f75bc8d24e8004faee7565d8452e00a19a2 ; luc: 2026-11-17T04:25:25Z
+# lenh: python3 .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban ops/land/pr1340-wp1315-provenance/bien-ban-m8.yaml --lease <git show origin/ops/wp1315-r5-g7:ops/leases/wp1315-r5-g7-claude.yaml>
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

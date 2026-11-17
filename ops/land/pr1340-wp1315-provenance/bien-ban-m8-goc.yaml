@@ -1,0 +1,73 @@
+packet: wp1315
+revision: 5
+generation: 7
+spec_hash: 6f3098f7f2c8aaabf7e7d98bc3931e630b37656599822d71c261d63da4cc84be
+head_da_review: 0003a5f46df6ef84866348859a161e4b8a801dbd
+tree_h: a68c2556bfd28ef2a600389c56f82220f99b4256
+review:
+  verdict: approve
+  findings: []
+  assurance: independent Codex source review + connector; owner_delegated_audit by Claude Code, not human audit
+  source_review_run: 9d4a8976 (stdout sha256 00f837809428d304aa78d44f943db40cb0020401143a1255eaf28eaf5428b41b)
+  delegated_audit: https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6920680668
+  connector: https://github.com/ducthangho/tra-luat/pull/1340#issuecomment-6920958274
+  history: 6 Codex source reviews (approve on 98c7389 then P2 found; P2 class fixed in two rounds; approve on 0003a5f); 3 Codex spec reviews
+windows:
+  K6: owner_waived via https://github.com/ducthangho/tra-luat/pull/1340#issuecomment-6921222644
+  native_focused: 'H3 tra-luat-win Python 3.13.17: 11 WP1315 groups stop at platform guard (unsupported native operating system); 13 controls 7 passed 6 failed, identical IDs and reasons at baseline C; not passed'
+  windows_CI_PR: skipped
+  windows_CI_postmerge: cancelled per owner instruction
+  followup: https://github.com/ducthangho/tra-luat/issues/1342
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916257249
+merge_commit: aa718cb8392c1e2defd47a0259c575de16fbd5a3
+merge_parents:
+- 5968ff06486a64244c4a306bc3eac163df0488ad
+- 0003a5f46df6ef84866348859a161e4b8a801dbd
+tree_m: f07b2bd5db2280d60e24cdedda07fe31697680d6
+merged_by: ducthangho (owner clicked merge after kiem-merge K0-K7 rc0)
+ci_master:
+  run_id: 43927088245
+  conclusion: cancelled
+  url: https://github.com/ducthangho/tra-luat/actions/runs/43927088245
+  jobs: 21/22 success; gate-packet-loop cancelled per owner instruction (long test waived post-merge)
+  selftest: 1777/1777 in master gate job log sha256 d8a556f7a397ff1dc4843227f6f8edff3ab53f99d9796d623080cc6d1d0456d7
+  attempt: 1
+  reruns: 0
+ci_PR:
+  run_id: 43896045111
+  conclusion: success
+  jobs: 23/23
+  full_mutant_audit: {run_id: 43896065480, conclusion: success, jobs: 10/10}
+  kiem_merge: 'ĐỦ ĐIỀU KIỆN MERGE trên 0003a5f46df6ef84866348859a161e4b8a801dbd (rc 0)'
+nghiem_thu:
+  independent_review: passed
+  source_CI: passed
+  full_M9: passed
+  local_selftest_H3: passed
+  connector: passed
+  native_Windows: owner_waived
+  Windows_CI: owner_waived
+  postmerge_gate_packet_loop: owner_waived
+  postmerge_short_jobs: passed
+  lease_release: passed
+  merge_identity: passed
+lease_cuoi: wp1315-r5-g7-claude
+landed: false
+land_status: 'merged into master at aa718cb; NOT recorded as landed because §10.2.2 gate_output is not_measured for 21 master jobs (canonical producer limit) and ci_master conclusion is cancelled under owner waiver; kiem-dong-wp D2 therefore expected red'
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: not_measured
+moc_10_2_2_evidence:
+  provenance_yaml_sha256: f94fb0c17cad413680387f3b06abe7a332f3df84f68e9b6ce499bbed35aeed28
+  workflow_definition_run: 43927989335
+  gate_output_supplement: 'gate job selftest 1777/1777 positive marker only; other jobs not supplemented; producer verdict not rewritten'
+owner_waivers:
+  windows_and_postmerge_long_tests: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916597687
+  postmerge_no_windows_no_packet_loop: 'chat 17/11/2026 ~01:20 VN: "Không chạy CI Windows, gate-packet-loop CI hậu merge"'
+  delegation: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696
+superseded_pr: {PR: 1318, state: closed, merged: false, note: https://github.com/ducthangho/tra-luat/pull/1318#issuecomment-6925168928}
+scope: 'source only; no installation, target G5/LIVE or Mission #1172 closure'
+history: 'r40/r55 histories, counters and costs preserved; unknown billing stays UNKNOWN; H669 audit not transferred'
+recorded_at_VN: '2026-11-17T01:43:30+07:00'

@@ -1,0 +1,96 @@
+# HO SO LAND — packet #1350 NANG-TRAN-ATTEMPTS r1, lease g1, qua PR #1352. Khuon: ops/land/pr1344-wp1343-land-evidence.yaml (waiver gate_output).
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2; waiver §10.2.3.
+#
+# TRANG THAI: merged (59b3fb9), landed true. Bon moc §10.2.2 cua ci.yml 43998186682 attempt 2: run/checkout/workflow_definition measured
+#   passed (wd-run 44015917797); gate_output owner_waived — 22/23 job co dau hieu duong (danh_gia_gate.py v2), job gom gate-packet-loop tu khai
+#   "KHÔNG ĐO" (M2 cu cua #1343, go o #1353). Waiver chu kho TU DANG issuecomment-6938174089 neo dung 59b3fb9; dieu kien thay the: do bu 16 manh
+#   tai cho tren dung cay 59b3fb9, GOM ĐẠT 1506 ca (packet-loop-tai-cho-59b3fb9.txt).
+# HO SO NAY THAY ban M8 goc (issue #1350 issuecomment-6936453698, landed false, gate_output not_measured): ban goc giu nguyen van o
+#   pr1352-wp1350-provenance/bien-ban-m8-goc.yaml; ban moi bien-ban-m8.yaml chi doi gate_output va lease_cuoi (xem lich_su_nhan trong do).
+# ASSURANCE REVIEW: review doc lap Codex source + connector; owner_delegated_audit do Claude Code ghi ho, KHONG phai human audit (M8 goc tu khai).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
+# Readback tho: ops/land/pr1352-wp1350-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-17T04:1x–04:3xZ.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS
+input_packet_generations:
+  - packet_issue: 1350
+    packet_id: wp1350
+    revision: 1
+    generation: 1
+    lease_id: wp1350-r1-g1-claude
+    ghi_chu: 'Lease da rut han tu truoc (nhanh ops/wp1350-r1-g1); ban sao lease-wp1350-r1-g1-claude.yaml.txt.'
+authorized_head_sha: 6b263f30e8596c5b0cf69da55be011476113afaf
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6933449308
+authorization_ghi_chu: >-
+  measured — readback-pr-1352.json: merged_by ducthangho, merged_at 2026-11-17T01:47:08Z, head 6b263f3 (chu kho tu bam merge sau kiem-merge
+  K0-K7 rc 0, theo M8 goc). readback-issuecomment-6933449308.json: quyet dinh lam #1350 do phien Claude GHI HO (app claude), khong phai
+  chu kho tu dang.
+land_operator: 'measured — readback-pr-1352.json: merged_by ducthangho (chu kho tu bam merge).'
+merge_method: merge
+merge_commit: 59b3fb93e4ecd1399460c30ea08bc5d56dc8265b
+merge_commit_tree: 4edc80cf2d269298d9ef749b5a9dd0a16a8165de
+merge_commit_parents: [e91aefa759b2962bad4b5642f3bf0f59c0764495, 6b263f30e8596c5b0cf69da55be011476113afaf]
+merge_ghi_chu: 'measured — readback-commit-59b3fb9.json: hai cha e91aefa, 6b263f3; numstat 59b3fb9^1..59b3fb9: .claude/dev/packet_loop.py +5/-2, .claude/dev/packet_loop_test.py +171/-0.'
+pre_merge_checks:
+  - name: 'CI PR tren head cuoi'
+    sha: 6b263f30e8596c5b0cf69da55be011476113afaf
+    conclusion: success
+    nguon: [readback-runs-head-6b263f3.json]
+    ghi_chu: 'measured — readback-runs-head-6b263f3.json: gate 43990493496 success; dot bien du 43990524880 success; launcher Windows skipped.'
+  - name: 'Codex connector tren head cuoi'
+    sha: 6b263f30e8596c5b0cf69da55be011476113afaf
+    conclusion: 'sach'
+    ghi_chu: 'measured — readback-pr1352-comments.json: 6934149293 codex-review-state:v1, commit 6b263f3, has_any_findings false.'
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 43998186682
+    run_attempt: 2
+    sha: 59b3fb93e4ecd1399460c30ea08bc5d56dc8265b
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-43998186682.json, readback-jobs-43998186682-attempt2.json, danh-gia-gate-output-43998186682.txt, danh_gia_gate.py, phan-chung-buoc-43998186682.txt, packet-loop-tai-cho-59b3fb9.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha 59b3fb9, run_attempt 2.'
+    moc_checkout: 'measured — ci/provenance.yaml: moi job checkout passed 59b3fb93e4ecd1399460c30ea08bc5d56dc8265b.'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition passed (wd-run 44015917797, dispatch ops-do-workflow-definition.yml tren master 04:15Z 17-11).'
+    moc_gate_output: >-
+      owner_waived — danh-gia-gate-output-43998186682.txt (danh_gia_gate.py v2 sha256 539fed68): 22/23 job passed; gate-packet-loop (ubuntu-latest)
+      not_measured (gom thieu "GOM: ĐẠT"). Waiver readback-chu-kho-mien-gate-packet-loop-issuecomment-6938174089.json. Do bu
+      packet-loop-tai-cho-59b3fb9.txt: 16 manh rc 0, GOM ĐẠT 1506 ca (16 tep o packet-loop-tai-cho/). phan-chung-buoc-43998186682.txt: xoa
+      dau hieu 4 buoc => not_measured rc 0. ci/provenance.yaml gate_output van not_measured (bo sinh chuan) — khong viet lai.
+    attempt_1: 'thuat_lai — M8 goc: attempt 1 gate-ops do o t131 (deadline theo thoi gian), chay lai dung mot lan; khong tinh attempt 1 la passed.'
+bookkeeping:
+  - {item: 'lease wp1350-r1-g1-claude', ket_qua: 'measured — lease-wp1350-r1-g1-claude.yaml.txt: lease_until da qua (D4 kiem-dong-wp dat).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: rc 0 "ĐÓNG ĐƯỢC WP wp1350".'}
+  - {item: 'Issue #1350', ket_qua: 'measured — readback-issue-1350.json: state closed, closed_at 2026-11-17T01:47:09Z.'}
+# ---- het truong chuan
+packet_id: wp1350
+packet_issue: 1350
+packet_ten: NANG-TRAN-ATTEMPTS
+revision: 1
+generation: 1
+environment: cloud
+operating_system: linux
+recorded_by: claude-session — phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS (tiep quan Mission #1172 muc 3 "No ho so hau merge").
+
+trang_thai_packet:
+  merged: true
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — gate tren 59b3fb9: ba moc measured passed + gate_output owner_waived co waiver ben cua chu kho neo dung SHA/context
+    (§10.2.3) va dieu kien thay the da do; lease nha; bookkeeping M8 rc 0; review: Codex source + connector sach tren 6b263f3; chu kho tu bam
+    merge.
+  canh_bao_cho_chu_kho: >-
+    (i) Review KHONG co human_exact_head_audit cua chu kho: assurance la Codex source review + connector, kem "owner_delegated_audit" do Claude
+    ghi ho (M8 goc tu khai "not human audit"). (ii) Hai ca CA_DAI khong do tren 59b3fb9 (waiver khai). (iii) Do bu chay Python 3.13.18,
+    CI dung 3.12.
+
+khong_do_duoc:
+  - 'Hai ca CA_DAI cua packet-loop tren 59b3fb9.'
+  - 'Noi dung hoi thoai chu kho ma cac comment "ghi ho" thuat lai.'

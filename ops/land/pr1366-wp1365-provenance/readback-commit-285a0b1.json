@@ -1,0 +1,106 @@
+{
+  "sha": "285a0b1c0a03c903015d48acf6d1dd5c4cebfb31",
+  "node_id": "C_kwDOTNeRjdoAKDI4NWEwYjFjMGEwM2M5MDMwMTVkNDhhY2Y2ZDFkZDVjNGNlYmZiMzE",
+  "commit": {
+    "author": {
+      "name": "ducthangho",
+      "email": "ducthangho@gmail.com",
+      "date": "2026-11-17T09:37:16Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-11-17T09:37:16Z"
+    },
+    "message": "Merge pull request #1366 from ducthangho/agent/wp1365-g1-claude\n\nwp1365: ghim đầu head của phép so N2 #1342 vào merge ded5d41 (r1)",
+    "tree": {
+      "sha": "222787947500cc5f4d4c73ef3143bbfc4e7a8032",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/222787947500cc5f4d4c73ef3143bbfc4e7a8032"
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/285a0b1c0a03c903015d48acf6d1dd5c4cebfb31",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq/CBMCRC1aQ7uu5UhlAAAwrUQAILI46BZqXLqG1BJr+CamCGe\n89Uj79P502i/o0J1KHriYxpbKzGn/68Neb2sz24EVL1Bn9rBOttdK0YYbGiHy29B\ngoFSdc2QQ9hMPESNnch5YwP0iNyWst/3kz80NP1qvamPBjpMmEw2jE9Wcf45J0Sj\nGY3MeM0fpzs3PJEvWAqwOwl9qdojHaNXSbQOntkO3yi+EbGV9tIHyFGx52oPQYva\n076yeCGcwQeWPbYcFxWSxkEFrZG7IHTaOoCjFrV4oCBJG0RIYu2p7JSXcDKjB13I\n0c68Llfn74X4OGJspbL5Es9cDNgqE2Y5qmUXis9qnZkha2/gOuHySbXUDFt6tfpn\nqhLx5I7BU609/E+jBmNgp0sMuP+yu5EyHMMB0z7WnS97oPSQeFWkz48FfTBy8aM3\n2WCkBmS3ZdnPJnTAfkSfqhr9LkknUSx//yGehJDMWY0BR1uUCVd8EH0c0j2ju6Jw\nobpOW5xaL56Iog1vUV5JTIGZprh05weUt7f+242HQvZ7wIhuiTfaiUS+naonMMYx\nnqM1Ww7+AE3RyvwyhjHZI6L2AIRednGe6gMKlM2BC7tYb6ZoL1Fbl4fYKBZQdljn\n5vW6hc+Z1bSd1ylmln/RgMaWKlh/A2Udztb+baoAeNzPdeb9kljE2C2PGSHKVodA\nmmhR+Co6SkFpAXRFptHW\n=a3vx\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 222787947500cc5f4d4c73ef3143bbfc4e7a8032\nparent 000c59a4531ccf57c58136e94e490ecd255b3db8\nparent 643519bae38cfe0f7925847d028407deb8320a77\nauthor ducthangho <ducthangho@gmail.com> 1794908236 +0700\ncommitter GitHub <noreply@github.com> 1794908236 +0700\n\nMerge pull request #1366 from ducthangho/agent/wp1365-g1-claude\n\nwp1365: ghim đầu head của phép so N2 #1342 vào merge ded5d41 (r1)",
+      "verified_at": "2026-11-17T09:37:17Z"
+    }
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/285a0b1c0a03c903015d48acf6d1dd5c4cebfb31",
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/285a0b1c0a03c903015d48acf6d1dd5c4cebfb31",
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/285a0b1c0a03c903015d48acf6d1dd5c4cebfb31/comments",
+  "author": {
+    "login": "ducthangho",
+    "id": 12748935,
+    "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+    "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/ducthangho",
+    "html_url": "https://github.com/ducthangho",
+    "followers_url": "https://api.github.com/users/ducthangho/followers",
+    "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+    "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+    "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+    "repos_url": "https://api.github.com/users/ducthangho/repos",
+    "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "000c59a4531ccf57c58136e94e490ecd255b3db8",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/000c59a4531ccf57c58136e94e490ecd255b3db8",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/000c59a4531ccf57c58136e94e490ecd255b3db8"
+    },
+    {
+      "sha": "643519bae38cfe0f7925847d028407deb8320a77",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/643519bae38cfe0f7925847d028407deb8320a77",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/643519bae38cfe0f7925847d028407deb8320a77"
+    }
+  ],
+  "stats": {
+    "total": 17,
+    "additions": 12,
+    "deletions": 5
+  },
+  "files": [
+    {
+      "sha": "9fc17f758c957ededa3de9d0fc1f34e85f012252",
+      "filename": ".claude/dev/packet_loop_test.py",
+      "status": "modified",
+      "additions": 12,
+      "deletions": 5,
+      "changes": 17,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/285a0b1c0a03c903015d48acf6d1dd5c4cebfb31/.claude%2Fdev%2Fpacket_loop_test.py",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/285a0b1c0a03c903015d48acf6d1dd5c4cebfb31/.claude%2Fdev%2Fpacket_loop_test.py",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/.claude%2Fdev%2Fpacket_loop_test.py?ref=285a0b1c0a03c903015d48acf6d1dd5c4cebfb31",
+      "patch": "@@ -16565,6 +16565,9 @@ def _rejections1350(c):\n # --- #1342 WP1174-WINDOWS-BACKEND r1: hai primitive Windows ĐỨNG RIÊNG (`_1174_win_*`), CHƯA nối vào runtime. Ca thuần chạy mọi nền;\n # ca native chỉ đo trên Windows (nền khác: BỎ QUA, không tính đạt). Không thêm vào WP1174_REQUIRED/WP1174_BOTH, không đổi MUTANTS.\n _BASE1342 = \"14f7dd3a593fc1ef225e5067e73569a702153871\"   # base_sha của lease wp1342-r1-g1-claude (N2 so byte với blob này)\n+# #1365: đầu HEAD của phép so N2 GHIM vào merge commit của PR #1363 (blob = head đã audit `675c38d`). N2 là tiêu chí PR-TIME của #1342 r1;\n+# để nó đọc cây làm việc thì sau land MỌI sửa đổi ở một định nghĩa có sẵn của `packet_loop.py` làm ca ĐỎ dù mã đúng.\n+_HEAD1342 = \"ded5d41b1754ef05d87815f20c48203e6b00e58d\"\n \n \n def _new1342(node):\n@@ -16619,13 +16622,17 @@ def _wired1342(head):\n \n def _additive_case1342(c):\n     import ast\n-    p = subprocess.run([\"git\", \"-C\", str(ROOT), \"show\", _BASE1342 + \":.claude/dev/packet_loop.py\"], capture_output=True)\n-    assert p.returncode == 0, (f\"N2 KHÔNG ĐO ĐƯỢC ⇒ ĐỎ: `git show {_BASE1342}:…` rc={p.returncode} {p.stderr[-300:]!r}; cần đúng object \"\n-                               \"base của lease (clone đủ lịch sử), không thay bằng HEAD/merge-base\")\n-    base, head = p.stdout, c.script.read_bytes()\n-    assert b\"\\r\" not in head, \"packet_loop.py có CR trong cây làm việc — trái chính sách LF của kho, không so byte được\"\n+\n+    def blob(oid):   # thiếu object ⇒ ĐỎ; KHÔNG thay bằng HEAD/merge-base/cây làm việc\n+        p = subprocess.run([\"git\", \"-C\", str(ROOT), \"show\", oid + \":.claude/dev/packet_loop.py\"], capture_output=True)\n+        assert p.returncode == 0, (f\"N2 KHÔNG ĐO ĐƯỢC ⇒ ĐỎ: `git show {oid}:…` rc={p.returncode} {p.stderr[-300:]!r}; cần đúng object \"\n+                                   \"đã ghim (clone đủ lịch sử), không thay bằng HEAD/merge-base\")\n+        return p.stdout\n+    base, head, cay = blob(_BASE1342), blob(_HEAD1342), c.script.read_bytes()   # N2 so HAI blob ghim; cây làm việc chỉ vào vế N3\n+    assert b\"\\r\" not in cay, \"packet_loop.py có CR trong cây làm việc — trái chính sách LF của kho\"\n     assert _additive1342(base, base) == [] and _wired1342(base) == [], \"base không tự khớp\"\n     assert _additive1342(base, head) == [] and _wired1342(head) == [], (_additive1342(base, head), _wired1342(head))\n+    assert _wired1342(cay) == [], (\"N3 trên CÂY LÀM VIỆC\", _wired1342(cay))\n     moi = {_new1342(s) for s in ast.parse(head).body} - {None}\n     assert {\"_1174_win_read\", \"_1174_win_volume\", \"_1174_win_platform\"} <= moi, sorted(moi)\n "
+    }
+  ]
+}

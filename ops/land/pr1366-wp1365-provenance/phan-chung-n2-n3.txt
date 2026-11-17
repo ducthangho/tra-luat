@@ -1,0 +1,19 @@
+# Phan chung N2/N3 #1365 do lai boi phien dieu phoi, luc 2026-11-17T10:12:52Z, Linux Python 3.13.18; chay_suite nham dich wp1342_additive_byte_preserved
+# script: python3 -B run1342.py <ca> (T.chay_suite(T.CANONICAL, tmp, {ca}))
+== v1365b HEAD 643519bae38cfe0f7925847d028407deb8320a77 status_sach=0
+-- (N2) them dong chu thich trong than _1174_read cua cay lam viec:
+wp1342_additive_byte_preserved DAT
+-- (N3) noi day _1174_win_read vao _1174_read cua cay lam viec:
+wp1342_additive_byte_preserved LOI AssertionError: ('N3 trên CÂY LÀM VIỆC', ['_1174_read:3893'])
+== v1365base HEAD ded5d41b1754ef05d87815f20c48203e6b00e58d status_sach=0
+-- (N2) them dong chu thich trong than _1174_read cua cay lam viec:
+wp1342_additive_byte_preserved LOI AssertionError: (['phần ngoài khối mới KHÁC byte base, từ dòng 3893 của base'], [])
+-- (N3) noi day _1174_win_read vao _1174_read cua cay lam viec:
+wp1342_additive_byte_preserved LOI AssertionError: (['phần ngoài khối mới KHÁC byte base, từ dòng 3893 của base'], ['_1174_read:3893'])
+-- (N3) v1365b _HEAD1342 -> 14f7dd3a593fc1ef225e5067e73569a702153871:
+wp1342_additive_byte_preserved LOI AssertionError: []
+-- (N3) v1365b _HEAD1342 -> deadbeefdeadbeefdeadbeefdeadbeefdeadbeef:
+wp1342_additive_byte_preserved LOI AssertionError: N2 KHÔNG ĐO ĐƯỢC ⇒ ĐỎ: `git show deadbeefdeadbeefdeadbeefdeadbeefdeadbeef:…` rc=128 b"fatal: path '.claude/dev/packet_loop.py' exists on
+-- sach: 0
+wp1342_additive_byte_preserved DAT
+wp1342_pure_platform_path DAT

@@ -1,0 +1,37 @@
+# Bien ban M8 (ADR-0060) dong WP #1375 LAUNCHER-PY311-LOC-THU-MUC r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1376-wp1375-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6949494498 tren 06a433f).
+# Bon moc §10.2.2 run 44093628962 measured passed (wd-run 44097980373; gate output 39/39 bang danh_gia_gate.py v2).
+packet: wp1375
+revision: 1
+generation: 1
+spec_hash: df83e7c39d44d8af9af16a72ff8ff5291401c5ee9ed4cbd3f77fbe8e86473746
+head_da_review: 06a433f1d736a51a868b77d56a7536f7067f81c2
+tree_h: 0313ebdeedd2825f2a0f9756f1d95b62df9b47ee
+review:
+  offline: 'khong goi Codex offline tren ma; hai luot Codex offline chi review DAC TA truoc lease (ops/reviews/wp1375-spec-r1/)'
+  connector: 'readback-pr1376-comments.json: 6948795803 codex-review-state:v1 completed, has_any_findings false, commit 06a433f'
+  human_audit: 'issuecomment-6949494498 human_exact_head_audit.v1 approve tren 06a433f (chu kho tu dang)'
+windows:
+  phan_loai: required
+  nguon: '_phan_loai_windows(39ce682, 06a433f) = required (duong .claude/dev/). Dac ta §2: khong CI Windows, khong do native.'
+  ket_qua: 'measured hau merge — launcher-windows-44093628917.trich.txt: job windows-latest 134074936792 tren d74ac1d, r1375 KHONG nam trong dong BO QUA, "327/327 ca DA CHAY QUA (hong 0)", dot bien r1375_bo_loc_thu_muc OK giet 1/1. Runner GitHub, khong phai may native; do SAU merge.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1376#issuecomment-6949494498
+duyet_chu_kho_ghi_chu: 'audit tu dang 13:31:22Z 17-11, truoc merge 13:31:47Z; chu kho chon "Merge 06a433f" trong phien dieu phoi (loi khai).'
+merge_commit: d74ac1d003b419f12e5f6a82cbbf001dfc633e73
+tree_m: 0313ebdeedd2825f2a0f9756f1d95b62df9b47ee
+ci_master:
+  run_id: 44093628962
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong; gom "GOM: ĐẠT · 16 mảnh · 1514 ca bắt buộc".'
+nghiem_thu:
+  N1: passed  # launcher-windows-44093628917.trich.txt (ubuntu + windows): r1375_bo_loc_thu_muc OK giet 1/1; ca dat (khong BO QUA, hong 0)
+  N2: passed  # cung tep: bo dot bien launcher_test giet r1375_bo_loc_thu_muc dung ca dich tren ca hai nen
+  N3: passed  # launcher-windows-44093628917.trich.txt: ubuntu 410/410 hong 0, windows 327/327 hong 0
+  N4: passed  # nghiem-thu-d74ac1d.txt: numstat 1 tep +28/-0; ruff F 5=5; diff --check rc 0; adr-song/doctrine-scan rc 0
+lease_cuoi: wp1375-r1-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

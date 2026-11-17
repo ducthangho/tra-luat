@@ -1,0 +1,100 @@
+# launcher-windows.yml run 44093628917 (push master d74ac1d): trich dong r1375 + dong tong ket tu log tung job (REST, khong mang token qua redirect)
+## JOB 134074936262 launcher (ubuntu-latest) labels=['ubuntu-latest'] runner_id=1000046165 conclusion=success head_sha=d74ac1d003b419f12e5f6a82cbbf001dfc633e73 log_sha256=c66aeaef7f50931fa3d6d4bd1fcf7f0ab495647d58062ef6775df689c2c52276
+  2026-11-17T13:32:20.4931958Z KET LUAN  : DU CONG CU BAT BUOC
+  2026-11-17T13:32:47.5585744Z   BO QUA t62_qua_han_ma_khong_giet_het_cay_phai_tra_125: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)
+  2026-11-17T13:35:34.1208088Z   BO QUA r484_g4_windows_sid_alias_identity: BO QUA native Windows SID conversion
+  2026-11-17T13:37:51.3144039Z 410/410 ca DA CHAY QUA (tong 412, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+  2026-11-17T13:39:17.3586923Z   r1375_bo_loc_thu_muc         OK  giet 1/1: r1375_shutilwin311_chi_nhan_trong_d
+  2026-11-17T13:47:45.2546398Z DOT BIEN: 698/698 dat  (6 khong do duoc tren nen nay)
+## JOB 134074936792 launcher (windows-latest) labels=['windows-latest'] runner_id=1000046166 conclusion=success head_sha=d74ac1d003b419f12e5f6a82cbbf001dfc633e73 log_sha256=d5d9dab71393db8b9e97e81c8837dd57d27dcb3d993ff29688f90fbe8ff55c34
+  2026-11-17T13:32:47.2782577Z KET LUAN  : DU CONG CU BAT BUOC
+  2026-11-17T13:32:48.6805994Z   BO QUA t03_git_gia_thoat_0_im_lang_van_bi_chan: bo qua tren Windows (can shim .cmd)
+  2026-11-17T13:33:03.9822237Z   BO QUA t28_qua_han_giet_ca_CON_CHAU: bo qua tren Windows (can kiem bang cay tien trinh that)
+  2026-11-17T13:33:06.5468539Z   BO QUA t33_stop_giet_that: bo qua tren Windows
+  2026-11-17T13:33:15.9216564Z   BO QUA t50_stop_roi_runner_KHONG_duoc_de_len_so: bo qua tren Windows (can kiem rieng)
+  2026-11-17T13:33:15.9217160Z   BO QUA t51_ma_thoat_ngoai_khoang_khong_bi_cat_cut: bo qua tren Windows (can tin hieu POSIX)
+  2026-11-17T13:33:18.3713658Z   BO QUA t55_doctor_nhan_python_khong_can_ten_python3: bo qua tren Windows (can shim khong duoi .exe)
+  2026-11-17T13:33:21.8417766Z   BO QUA t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc: bo qua tren Windows (can .exe rong)
+  2026-11-17T13:33:26.6369933Z   BO QUA t63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi: ca nay dung SIG_IGN cua POSIX; duong Windows la t62
+  2026-11-17T13:33:26.6370627Z   BO QUA t67_chau_sinh_SAU_luc_chup_van_phai_bi_dem: dua tren SIGTERM cua POSIX; duong Windows la t62
+  2026-11-17T13:33:26.6371408Z   BO QUA t66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet: setsid la khai niem POSIX; duong Windows la t62
+  2026-11-17T13:33:32.3503709Z   BO QUA t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau: ca nhom tien trinh POSIX; Windows can fixture that rieng
+  2026-11-17T13:33:33.2863249Z   BO QUA t72_bi_ngat_KHONG_duoc_ghi_thanh_xong: SIGINT tren Windows khong cung ngu nghia; can ca rieng
+  2026-11-17T13:33:38.6583117Z   BO QUA t108_hook_phai_probe_CHAY_DUOC_khong_chi_CO_MAT: bo qua tren Windows (can shim .cmd cho fixture)
+  2026-11-17T13:33:42.0064933Z   BO QUA t125_bridge_bo_bash_hong_dau_PATH_va_truyen_rc_hook_ve_nguyen_ven: bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)
+  2026-11-17T13:33:42.0065800Z   BO QUA t126_bridge_hook_vuot_han_phai_rc124_khong_phai_treo_hay_0: bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)
+  2026-11-17T13:36:20.0039620Z   BO QUA r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC: bo qua tren Windows (chau thua ke handle stderr can fixture rieng; duong POSIX do o CI ubuntu)
+  2026-11-17T13:36:56.4304403Z   BO QUA r351_co_chi_thi_thi_KHONG_duoc_dat_moc: bo qua: khoi dat moc la shell POSIX
+  2026-11-17T13:36:56.4305983Z   BO QUA r351_KHONG_co_chi_thi_thi_van_phai_dat_moc: bo qua: khoi dat moc la shell POSIX
+  2026-11-17T13:37:20.0047059Z   BO QUA r484_g2_hook_shell_scrub_truoc_probe: BO QUA shell POSIX; verified on WSL Linux
+  2026-11-17T13:37:20.0047764Z   BO QUA r484_g8_hook_scrub_kin_voi_bash_env: BO QUA shell POSIX; verified on WSL Linux
+  2026-11-17T13:37:21.0025580Z   BO QUA r484_g6_trust_posix_backslash_is_not_separator: POSIX literal backslash semantics measured on Linux
+  2026-11-17T13:37:21.7540578Z   BO QUA r484_g7_bridge_codex_co_mat_nhung_hong_van_hoan: BO QUA shim POSIX
+  2026-11-17T13:37:21.7541087Z   BO QUA r484_g7_hook_vang_codex_cai_cli_truoc_materialize: BO QUA shell POSIX
+  2026-11-17T13:37:22.3346582Z   BO QUA r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi: đo trên POSIX; nhánh Windows dùng cùng phép đọc lại trước os.replace
+  2026-11-17T13:37:23.0615348Z   BO QUA r1077_doctor_khong_shebang_chay_duoc_khong_BI_CHE: BO QUA shell POSIX
+  2026-11-17T13:37:23.0616094Z   BO QUA r1077_doctor_khong_shebang_hong_van_BI_CHE: BO QUA shell POSIX
+  2026-11-17T13:37:23.0616692Z   BO QUA r1077_probe_khong_chay_lai_khi_khong_phai_ENOEXEC: BO QUA shell POSIX
+  2026-11-17T13:37:23.0656340Z   BO QUA r1077_xac_thuc_khong_shebang_chay_duoc: BO QUA shell POSIX
+  2026-11-17T13:37:23.0656771Z   BO QUA r1077_retry_giu_argv_env: BO QUA shell POSIX
+  2026-11-17T13:37:23.0657170Z   BO QUA r1077_doctor_codex_status_khong_shebang: BO QUA shell POSIX
+  2026-11-17T13:37:23.0657624Z   BO QUA r1077_llm_khong_shebang_ten_tran_giai_PATH: BO QUA shell POSIX
+  2026-11-17T13:37:23.1373639Z   BO QUA r1077_PATH_rong_khong_bo_qua_wrapper_dau: BO QUA shell POSIX
+  2026-11-17T13:37:23.1374145Z   BO QUA r1077_cwd_dai_khong_keo_dai_duong_da_chay_duoc: BO QUA can getcwd Linux dai hon PATH_MAX
+  2026-11-17T13:37:23.1374630Z   BO QUA r1077_PATH_hop_dong_glibc: BO QUA can Linux (ETXTBSY, glibc)
+  2026-11-17T13:37:23.1375687Z   BO QUA r802_cai_rg_windows_chon_ban_chay_duoc: BO QUA shell POSIX
+  2026-11-17T13:37:23.2430206Z   BO QUA r802_hook_linux_rg_hong_van_thu_cargo: BO QUA shell POSIX
+  2026-11-17T13:37:23.2431168Z   BO QUA r802_hook_windows_khong_cai_in_dung_lenh: BO QUA shell POSIX
+  2026-11-17T13:37:23.2431812Z   BO QUA r831_cai_rg_linux_chon_ban_chay_duoc: BO QUA shell POSIX
+  2026-11-17T13:37:23.2433189Z   BO QUA r831_cai_rg_macos_chon_ban_chay_duoc: BO QUA shell POSIX
+  2026-11-17T13:37:23.2434274Z   BO QUA r831_cai_rg_linux_python_ham_ke_thua: BO QUA shell POSIX
+  2026-11-17T13:37:23.2435271Z   BO QUA r831_cai_rg_macos_python_ham_ke_thua: BO QUA shell POSIX
+  2026-11-17T13:37:23.2436325Z   BO QUA r1078_ham_python_khong_phai_python_khong_duoc_goi: BO QUA shell POSIX
+  2026-11-17T13:37:23.2441093Z   BO QUA r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4: BO QUA shell POSIX
+  2026-11-17T13:37:34.6494987Z   BO QUA r1079_n13_do_bash_cung_phai_loc_env_cha: BO QUA shell POSIX
+  2026-11-17T13:37:45.7565120Z   BO QUA r858_cai_linux_chon_ban_chay_duoc: BO QUA shell POSIX
+  2026-11-17T13:37:45.7565654Z   BO QUA r858_cai_macos_chon_ban_chay_duoc: BO QUA shell POSIX
+  2026-11-17T13:37:45.7566350Z   BO QUA r858_cai_windows_chon_ban_chay_duoc: BO QUA shell POSIX
+  2026-11-17T13:37:45.7566984Z   BO QUA r858_cai_python_khong_in_thu_muc_ban_hong: BO QUA shell POSIX
+  2026-11-17T13:37:45.9118692Z   BO QUA r886_n3_chi_python3_DAT_va_do_dung_interpreter: BO QUA shell POSIX
+  2026-11-17T13:37:45.9866499Z   BO QUA r886_n1_bo_qua_tep_khong_thuc_thi: BO QUA X_OK khong co nghia tren Windows
+  2026-11-17T13:37:45.9929098Z   BO QUA r858_bat_buoc_bash_khong_dua_rg_hong_len_dau: BO QUA shell POSIX
+  2026-11-17T13:37:46.0028153Z   BO QUA r868_kenh_rieng_khong_doc_stdout_trinh_cai: BO QUA shell POSIX
+  2026-11-17T13:37:46.0029021Z   BO QUA r868_writer_muon_khong_lam_treo: BO QUA shell POSIX
+  2026-11-17T13:37:46.0030040Z   BO QUA r868_khong_bo_chon_doc_dong_cuoi: BO QUA shell POSIX
+  2026-11-17T13:37:46.0030972Z   BO QUA r868_doc_kenh_hong_thi_dung: BO QUA shell POSIX
+  2026-11-17T13:37:46.0031945Z   BO QUA r868_ghi_kenh_hong_thi_dung: BO QUA shell POSIX
+  2026-11-17T13:37:46.0032761Z   BO QUA r868_don_kenh_khi_loi: BO QUA shell POSIX
+  2026-11-17T13:37:46.0033913Z   BO QUA r868_vong_duyet_ung_vien: BO QUA shell POSIX
+  2026-11-17T13:37:46.0039330Z   BO QUA r1045_cong_cu_tuy_chon_vang_mat_khong_duoc_nhan_giu_path: BO QUA shell POSIX
+  2026-11-17T13:37:46.0040390Z   BO QUA r1045_bat_buoc_cong_cu_tuy_chon_thieu_khong_chan_cong_cu_sau: BO QUA shell POSIX
+  2026-11-17T13:37:46.0041328Z   BO QUA r1045_bat_buoc_cong_cu_bat_buoc_hong_van_dung: BO QUA shell POSIX
+  2026-11-17T13:37:46.0042294Z   BO QUA r1045_bat_buoc_kiem_cuoi_luot_source_hong_thi_dung_ca_loat: BO QUA shell POSIX
+  2026-11-17T13:37:46.0046278Z   BO QUA t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan: bo qua: nhanh /proc chi co tren Linux
+  2026-11-17T13:37:46.0047257Z   BO QUA t157_giet_cay_khi_stat_EACCES_van_tron_ven: bo qua: nhanh /proc chi co tren Linux
+  2026-11-17T13:37:46.0048273Z   BO QUA r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban: bo qua: nhanh /proc chi co tren Linux
+  2026-11-17T13:37:46.0049286Z   BO QUA t158_comm_hong_SAU_luc_sinh_qua_han_khong_duoc_124_khi_con_song: bo qua: comm/prctl/proc chi co tren Linux
+  2026-11-17T13:37:46.0050186Z   BO QUA t159_chuong_trinh_ten_tieng_Viet_qua_han_phai_giet_duoc: bo qua: comm/proc chi co tren Linux
+  2026-11-17T13:37:46.0051150Z   BO QUA t160_giet_cay_chau_setsid_comm_hong_phot_lo_SIGTERM: bo qua: setsid/proc chi co tren Linux
+  2026-11-17T13:37:46.0052109Z   BO QUA t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong: bo qua: nhom tien trinh/proc chi co tren Linux
+  2026-11-17T13:37:46.2825988Z   BO QUA r927_lay_mau_that_thay_sandbox_sau_exec_va_khong_doc_environ: can /proc cua Linux
+  2026-11-17T13:37:46.2826628Z   BO QUA r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot: can /proc cua Linux
+  2026-11-17T13:37:46.2827079Z   BO QUA r927_canh_cha_doi_giua_hai_luot_quet: can /proc cua Linux
+  2026-11-17T13:37:46.3242102Z   BO QUA r1105_cha_zombie_ve_to_tien: can /proc cua Linux
+  2026-11-17T13:37:46.3242729Z   BO QUA r1105_chuyen_cha_xuyen_luot: can /proc cua Linux
+  2026-11-17T13:37:46.3243812Z   BO QUA r1105_tha_doc_lai_chuoi_to_tien: can /proc cua Linux
+  2026-11-17T13:37:46.3244889Z   BO QUA r1105_tien_trinh_that_ve_subreaper: can prctl(PR_SET_CHILD_SUBREAPER) cua Linux
+  2026-11-17T13:37:46.4504714Z   BO QUA r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that: phan _quet can /proc cua Linux
+  2026-11-17T13:37:47.1024855Z   BO QUA r927_lenh_run_ghi_effort_va_sandbox_vao_run_json: phan sandbox can /proc cua Linux (effort va KHONG_DO_DUOC ngoai Linux da do o tren)
+  2026-11-17T13:38:14.9092020Z   BO QUA r1252_ghi_qua_dir_fd: bo qua: nen khong co dir_fd/O_NOFOLLOW (Windows dung nhanh du phong, xem _ghi_tep_0600)
+  2026-11-17T13:38:14.9493322Z   BO QUA r1252_status_va_chu_ky_byte_la: bo qua ve status: Windows khong tao duoc ten tep byte khong phai UTF-8
+  2026-11-17T13:38:15.3890663Z   BO QUA r1252_doi_to_tien_thu_muc_luot: bo qua: nen tu choi doi ten thu muc luot dang mo tep (do A10)
+  2026-11-17T13:38:16.7139857Z   BO QUA r1252_mo_thu_muc_luot_dung_mot_lan: bo qua: nen khong co dir_fd
+  2026-11-17T13:38:16.7140556Z   BO QUA r1252_bam_tep_khong_theo_lien_ket: bo qua: nen khong co FIFO/O_NOFOLLOW
+  2026-11-17T13:38:25.7951518Z   BO QUA r1335_giu_argv0_goc_khi_ghim_tep: BO QUA r1335_argv0: Windows van thay argv[0] bang duong da bam (venv Windows mac dinh la ban sao)
+  2026-11-17T13:38:27.5628019Z   BO QUA r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke: BO QUA r1335_F4: shebang/errno exec la khai niem POSIX (nhanh chon ung vien dung chung, do tren Linux)
+  2026-11-17T13:38:28.2592234Z 327/327 ca DA CHAY QUA (tong 412, bo qua 85, hong 0) - KHONG DU: 85 ca BO QUA, chua do gi
+  2026-11-17T13:41:07.4530184Z   r1375_bo_loc_thu_muc         OK  giet 1/1: r1375_shutilwin311_chi_nhan_trong_d
+  2026-11-17T13:46:18.0483238Z DOT BIEN: 557/557 dat  (147 khong do duoc tren nen nay)
+  2026-11-17T13:46:23.7175299Z KET LUAN  : QUA HET CHOT
+  2026-11-17T13:46:23.7459163Z [36;1m        print('t62: BO QUA BAT NGO ->', kq); sys.exit(1)[0m

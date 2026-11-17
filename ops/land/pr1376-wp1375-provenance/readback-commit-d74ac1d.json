@@ -1,0 +1,106 @@
+{
+ "sha": "d74ac1d003b419f12e5f6a82cbbf001dfc633e73",
+ "node_id": "C_kwDOTNeRjdoAKGQ3NGFjMWQwMDNiNDE5ZjEyZTVmNmE4MmNiYmYwMDFkZmM2MzNlNzM",
+ "commit": {
+  "author": {
+   "name": "ducthangho",
+   "email": "ducthangho@gmail.com",
+   "date": "2026-11-17T13:31:46Z"
+  },
+  "committer": {
+   "name": "GitHub",
+   "email": "noreply@github.com",
+   "date": "2026-11-17T13:31:46Z"
+  },
+  "message": "Merge pull request #1376 from ducthangho/agent/wp1375-g1-claude\n\nlauncher_test: ca canh bộ lọc \"kết quả phải nằm trong d\" của _ShutilWin311.which (#1375)",
+  "tree": {
+   "sha": "0313ebdeedd2825f2a0f9756f1d95b62df9b47ee",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/0313ebdeedd2825f2a0f9756f1d95b62df9b47ee"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/d74ac1d003b419f12e5f6a82cbbf001dfc633e73",
+  "comment_count": 0,
+  "verification": {
+   "verified": true,
+   "reason": "valid",
+   "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq/FdCCRC1aQ7uu5UhlAAAgN0QAJonbcEFbT+PhtARrHMJND2J\nKkvWulTrl4wTHqdYTxfTXAeA5vaNOxf8QZThMsH3AhBDuGOxSt3oWJ8qjFo0OY5v\nlxqy4OBUF6AyHSpGotEKgk+KoBoO/TcyWFuTI1jndktEKzu6DbrqRy0dTwjPI8JP\nC92RhfwSBKVcmPxFvjDai/ZCUoVb/oMoDcbeQuEDtXMwZYOVQgN6/6CCw+nHZqN9\nX3YHll3YUNqK+e0CFJeUlDO7VU8f1Mxd2ZiwLQkohVV5tR4H9ZKnJuQePrTvt4jv\nkhEViepLKupAEvZq1seaFUZvXf26yzAkDTT5aR2juiMpG9t0dbmugZVFRINzWhEb\nTM5iOcm0MzxdGawsKvUF+dhpUX+AqhgPWjUpdfS+9JdDd9S578Yu9ty1N8KMm6ka\n9MlhY3vlB8YoeOp4sn1fTBA7TsR/IxdOy62u/95ODwI1aj10JuLaegtGE952sWoB\ncqmFoODhtYrvaLDUkDLXe0UDAL8R28cm8O0f9S+cJc8rRKk79bpBcU8/YWppocg6\njSb0DaD0B5KMPNMU6LjYJIIuMDEOyvTZtC1+ixMqwfk3yNVGhkqIXVr7DMpHg/9U\ntszQvTyZmb4+vEVUcGcyYj0Si9xPjMYtNH2ydXJd1hOaqWxzPYdC9V9MK0/vsC+f\npBpv9M8HDgkEn73ethon\n=dp25\n-----END PGP SIGNATURE-----\n",
+   "payload": "tree 0313ebdeedd2825f2a0f9756f1d95b62df9b47ee\nparent 39ce682b42fe82bb6a0fd66c4d81c08961598f98\nparent 06a433f1d736a51a868b77d56a7536f7067f81c2\nauthor ducthangho <ducthangho@gmail.com> 1794922306 +0700\ncommitter GitHub <noreply@github.com> 1794922306 +0700\n\nMerge pull request #1376 from ducthangho/agent/wp1375-g1-claude\n\nlauncher_test: ca canh bộ lọc \"kết quả phải nằm trong d\" của _ShutilWin311.which (#1375)",
+   "verified_at": "2026-11-17T13:31:46Z"
+  }
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/d74ac1d003b419f12e5f6a82cbbf001dfc633e73",
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/d74ac1d003b419f12e5f6a82cbbf001dfc633e73",
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/d74ac1d003b419f12e5f6a82cbbf001dfc633e73/comments",
+ "author": {
+  "login": "ducthangho",
+  "id": 12748935,
+  "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+  "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/ducthangho",
+  "html_url": "https://github.com/ducthangho",
+  "followers_url": "https://api.github.com/users/ducthangho/followers",
+  "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+  "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+  "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+  "repos_url": "https://api.github.com/users/ducthangho/repos",
+  "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "committer": {
+  "login": "web-flow",
+  "id": 19864447,
+  "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+  "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/web-flow",
+  "html_url": "https://github.com/web-flow",
+  "followers_url": "https://api.github.com/users/web-flow/followers",
+  "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+  "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+  "organizations_url": "https://api.github.com/users/web-flow/orgs",
+  "repos_url": "https://api.github.com/users/web-flow/repos",
+  "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/web-flow/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "parents": [
+  {
+   "sha": "39ce682b42fe82bb6a0fd66c4d81c08961598f98",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/39ce682b42fe82bb6a0fd66c4d81c08961598f98",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/39ce682b42fe82bb6a0fd66c4d81c08961598f98"
+  },
+  {
+   "sha": "06a433f1d736a51a868b77d56a7536f7067f81c2",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/06a433f1d736a51a868b77d56a7536f7067f81c2",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/06a433f1d736a51a868b77d56a7536f7067f81c2"
+  }
+ ],
+ "stats": {
+  "total": 28,
+  "additions": 28,
+  "deletions": 0
+ },
+ "files": [
+  {
+   "sha": "d75f6ce94391f59961decb656e00e83453d779a5",
+   "filename": ".claude/dev/launcher_test.py",
+   "status": "modified",
+   "additions": 28,
+   "deletions": 0,
+   "changes": 28,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/d74ac1d003b419f12e5f6a82cbbf001dfc633e73/.claude%2Fdev%2Flauncher_test.py",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/d74ac1d003b419f12e5f6a82cbbf001dfc633e73/.claude%2Fdev%2Flauncher_test.py",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/.claude%2Fdev%2Flauncher_test.py?ref=d74ac1d003b419f12e5f6a82cbbf001dfc633e73",
+   "patch": "@@ -14587,6 +14587,32 @@ def r1335_bang_transport_tu_choi_ten_trung():\n             pass\n \n \n+@ca\n+def r1375_shutilwin311_chi_nhan_trong_d():\n+    \"\"\"#1375 (nợ #1345): `_ShutilWin311.which` chỉ nhận kết quả nằm TRONG thư mục `d` của lệnh. Gọi thẳng lớp nên chạy\n+    mọi nền, mọi phiên bản Python. (a) `d` rỗng, cwd của tiến trình có tệp cùng tên ⇒ `None` (bỏ bộ lọc thì nhận `./foo`\n+    của cwd LAUNCHER); (b) `d` có tệp ⇒ đường dẫn trong `d`. Cuối ca so cwd trước/sau (N3).\"\"\"\n+    m = _tai_launcher_thu()\n+    cwd_truoc = os.getcwd()\n+    with San() as s:\n+        ten = \"foo.cmd\" if LA_WINDOWS else \"foo\"\n+        d, cw = s / \"d\", s / \"cwd\"\n+        d.mkdir(); tep_cwd = _r1335_tep(cw / ten, \"DAU_CWD\")\n+        try:\n+            os.chdir(cw)\n+            u = m._ShutilWin311.which(str(d / ten))\n+            bang(u is None, f\"(a) d rong ma van nhan tep ngoai d: {u!r}\")\n+            if LA_WINDOWS:   # `shutil.which` 3.12+ trên Windows LUÔN chèn cwd lên đầu ⇒ vế (b) chỉ đo được khi cwd trống\n+                tep_cwd.unlink()\n+            _r1335_tep(d / ten, \"DAU_D\")\n+            u = m._ShutilWin311.which(str(d / ten))\n+            bang(u is not None, \"(b) tep nam trong d ma tra None\")\n+            bang(os.path.normpath(os.path.dirname(u)) == os.path.normpath(str(d)), f\"(b) ket qua khong nam trong d: {u!r}\")\n+        finally:\n+            os.chdir(cwd_truoc)\n+        bang(os.getcwd() == cwd_truoc, f\"cwd ro sau ca: {os.getcwd()!r} != {cwd_truoc!r}\")\n+\n+\n DOT_BIEN = [\n     # wp1335 (M8): mỗi chốt của đặc tả AGENT-DINH-DANH-MOT-NGUON r3 một đột biến.\n     (\"r1335_bo_chan_vo_shell\", (\"    elif ten in VO_SHELL:\\n\", \"    elif False:\\n\"), [\"r1335_ma_tran_agent_khai_bao\"]),\n@@ -14650,6 +14676,8 @@ def r1335_bang_transport_tu_choi_ten_trung():\n      [\"r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke\"]),\n     (\"r1335_D4_bo_chot_ten_trung\", (\"            if ten in theo_lenh:\\n                raise RuntimeError\", \"            if False:\\n                raise RuntimeError\"),\n      [\"r1335_bang_transport_tu_choi_ten_trung\"]),\n+    (\"r1375_bo_loc_thu_muc\", (\"return u if u and os.path.normpath(os.path.dirname(u)) == os.path.normpath(d) else None\", \"return u\"),\n+     [\"r1375_shutilwin311_chi_nhan_trong_d\"]),\n     (\"r1252_bo_kiem_co_khi_ket_thuc_som\", ('    return {\"chup_workspace\": True, **_ket_qua_snapshot(chup_truoc, None, False)} if bat else',\n                                            '    return {\"chup_workspace\": True, **_ket_qua_snapshot(chup_truoc, None, False)} if True else'),\n      [\"r1252_ket_thuc_som_du_khoa\"]),   # Codex lượt 6 F10: đúng đột biến reviewer đã đo"
+  }
+ ]
+}

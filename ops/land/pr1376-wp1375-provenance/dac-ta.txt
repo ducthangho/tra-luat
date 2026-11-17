@@ -1,0 +1,3 @@
+# dac ta do luc 2026-11-17T13:59:42Z: ref origin/ops/wp1375-r1-g1-lease = 6e2e3f9d4f12c869026f26f317a1962d54c67483
+blob 8a071f67d167a7a68bb78ce94659a4fee20c6cde  ops/specs/LAUNCHER-PY311-LOC-THU-MUC-r1.md
+sha256 df83e7c39d44d8af9af16a72ff8ff5291401c5ee9ed4cbd3f77fbe8e86473746

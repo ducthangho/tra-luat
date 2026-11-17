@@ -1,0 +1,17 @@
+# nghiem thu tren merge d74ac1d003b419f12e5f6a82cbbf001dfc633e73, luc 2026-11-17T13:59:18Z
+d74ac1d003b419f12e5f6a82cbbf001dfc633e73 0313ebdeedd2825f2a0f9756f1d95b62df9b47ee 39ce682b42fe82bb6a0fd66c4d81c08961598f98 06a433f1d736a51a868b77d56a7536f7067f81c2
+## numstat d74ac1d003b419f12e5f6a82cbbf001dfc633e73^1..d74ac1d003b419f12e5f6a82cbbf001dfc633e73
+28	0	.claude/dev/launcher_test.py
+## numstat base 39ce682..head 06a433f
+28	0	.claude/dev/launcher_test.py
+## ruff --select F (ruff 0.17.5) cha thu nhat vs merge
+.claude/dev/launcher_test.py @ 39ce682b4: 5 loi F
+.claude/dev/launcher_test.py @ d74ac1d00: 5 loi F
+## git diff --check d74ac1d003b419f12e5f6a82cbbf001dfc633e73^1 d74ac1d003b419f12e5f6a82cbbf001dfc633e73
+rc=0
+## adr-song (rc la ma thoat cua chinh lenh, khong qua ong)
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan (rc la ma thoat cua chinh lenh, khong qua ong)
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0

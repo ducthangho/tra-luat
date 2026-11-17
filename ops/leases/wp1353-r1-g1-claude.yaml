@@ -1,0 +1,93 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1353
+packet_id: wp1353
+spec_packet_id: CI-PACKET-LOOP-HAU-MERGE
+revision: 1
+generation: 1
+lease_id: wp1353-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-fable-5-2
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: 'go M2 cua #1343 (push master chay lai packet-loop); executor Claude Fable 5.2, reviewer Codex offline + connector; human_audited tren exact head truoc merge; KHONG Windows.'
+depends_on: [1343]
+spec_path: ops/specs/CI-PACKET-LOOP-HAU-MERGE-r1.md
+spec_ref: refs/heads/ops/wp1353-r1-g1-lease
+spec_nguon: 'dac ta tren nhanh lease nay; dinh danh theo grammar ADR-0063. Ghim bang spec_hash.'
+spec_sha256_required: 1a742b86f656b4e1a093f494bebdbaed8df6c71b8845edf81b90afdc7ecee3d5
+spec_hash: 1a742b86f656b4e1a093f494bebdbaed8df6c71b8845edf81b90afdc7ecee3d5
+spec_duyet: 'chu kho chon "Dang waiver + sua M2" (AskUserQuestion phien dieu phoi #1206, 17-11 ~00:47Z) sau connector P1 PR #1351 r4593745939; chi dao dung trien khai lien tuc (#1206 issuecomment-6918292696); chu kho xac nhan qua human audit cuoi packet.'
+prompt_path: ops/specs/CI-PACKET-LOOP-HAU-MERGE-r1.md
+prompt_sha256_required: 1a742b86f656b4e1a093f494bebdbaed8df6c71b8845edf81b90afdc7ecee3d5
+write_set:
+- ops/ci_duong_nhanh.py
+- ops/ci_duong_nhanh_test.py
+write_set_hash: 684aa4087b65927ffda1665e7e8f2113a63ddf90cf177a97e5ca1b852eeb7428
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- ops/ci_duong_nhanh.py
+- ops/ci_duong_nhanh_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'N1-N3 cua dac ta r1 dat tren exact head'}
+- {id: M-2, dieu_kien: 'ADR-0060: CI required xanh tren exact head; 0 P0-P2 mo; connector da review dung commit; human audit human_exact_head_audit.v1 tren H'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chi cap quyen thi cong; merge/land do chu kho duyet dung SHA.'
+branch: agent/wp1353-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: e91aefa759b2962bad4b5642f3bf0f59c0764495
+start_from_sha: e91aefa759b2962bad4b5642f3bf0f59c0764495
+start_from_ghi_chu: 'origin/master luc cap lease (merge PR #1349).'
+reviewed_sha_required: e91aefa759b2962bad4b5642f3bf0f59c0764495
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1353
+granted_on_instruction_readback: 'chu kho 17-11 ~00:47Z chon "Dang waiver + sua M2" (AskUserQuestion); chi dao dung trien khai lien tuc.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+executor_ghi_chu: 'Executor la phien Claude Code cloud do phien dieu phoi mo (create_session, model claude-fable-5-2); phien dieu phoi khong tu thi cong.'
+recorder_ghi_chu: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS ghi lease, KHONG phai executor; phien dieu phoi chay review Codex.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-17T00:51:00Z'
+  goc_quet: 'container phien #1206, fetch +refs/heads/*; ls-remote 268 nhanh; master cuc bo = origin/master e91aefa75'
+  ket_qua: 'ca 2 duong dan write set: NGUOI_GIU 0 (wp1343-r3-g1-claude HET_HAN).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
+leased_at_utc: '2026-11-17T00:51:00Z'
+heartbeat_at: '2026-11-17T00:51:00Z'
+heartbeat_required_minutes: 360
+heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
+lease_until: '2026-11-17T12:51:00Z'
+lease_expires_at_utc: '2026-11-17T12:51:00Z'
+lease_until_ghi_chu: '12h; rut han ngay sau land.'
+attempts_used: 1
+attempts_limit: 2
+attempts_basis: '<= 2 phien executor.'
+budget:
+  codex_review_calls:
+    pr_wp1353_g1: {used: 0, reserved: 0, limit: 10}
+  ci_ubuntu_runs:
+    pr_wp1353_g1: {used: 0, reserved: 0, limit: 2}
+  windows_native_runs:
+    pr_wp1353_g1: {used: 0, reserved: 0, limit: 0}
+  khong_reset_theo_generation: true
+budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows 0 (chi dao chu kho).'
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

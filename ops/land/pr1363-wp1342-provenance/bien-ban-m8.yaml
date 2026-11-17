@@ -14,7 +14,7 @@ review:
   human_audit: 'issuecomment-6942513764 human_exact_head_audit.v1 approve tren 675c38d (chu kho tu dang)'
 windows:
   phan_loai: measured
-  nguon: 'Desktop DESKTOP-T9R33P2 (Windows 11 10.0.26300): windows-desktop-tom-tat.txt (N4-N7, chep tay) + desktop-dot-bien/ (N7 byte-exact: driver 1ee98b9c, dot-bien.json 09922ccb). VM tra-luat-win: windows-vm-n8.txt (N8, chep tay).'
+  nguon: 'Desktop DESKTOP-T9R33P2 (Windows 11 10.0.26300): windows-desktop-tom-tat.txt (N4-N7, chep tay) + desktop-dot-bien/ (N7: driver byte-exact 1ee98b9c; dot-bien.lf.json doi CRLF ra 09922ccb). VM tra-luat-win: windows-vm-n8.txt (N8, chep tay).'
 duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1363#issuecomment-6942513764
 duyet_chu_kho_ghi_chu: 'audit tu dang 08:13:19Z 17-11, truoc merge 08:14:22Z; duyet merge dung SHA 675c38d qua AskUserQuestion (loi khai).'
 merge_commit: ded5d41b1754ef05d87815f20c48203e6b00e58d
@@ -30,7 +30,7 @@ nghiem_thu:
   N4: passed  # windows-desktop-tom-tat.txt: wp1174_windows_claim_rejected + 12 WP1174_BOTH rc 0 ca head va base
   N5: passed  # windows-desktop-tom-tat.txt: 5 ca native + ca thuan dat, dau hieu WP1342_NATIVE_V1 executed=1 passed=1
   N6: passed  # wp1342_native_volume_junction dat tren Desktop (doi chung launcher._KhoCodex + _1174_win_volume)
-  N7: passed  # desktop-dot-bien/dot-bien.json.gz (byte-exact): 3/3 GIET dung ca dich, doi chung DAT, tu kiem z => KHONG_DO
+  N7: passed  # desktop-dot-bien/dot-bien.lf.json (doi CRLF ra 09922ccb): 3/3 GIET dung ca dich, doi chung DAT, tu kiem z => KHONG_DO
   N8: passed  # Desktop KHONG DO DUOC (WinError 1314); windows-vm-n8.txt: VM executed=1 passed=1
   N9: passed  # nghiem-thu-ded5d41.txt: ruff F 3->3, 13->13; adr-song/doctrine-scan rc 0; numstat 2 tep +428/0 (<= 450)
 lease_cuoi: wp1342-r1-g1-claude

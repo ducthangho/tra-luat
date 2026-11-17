@@ -2,3 +2,8 @@
 # checkout: ded5d41b1754ef05d87815f20c48203e6b00e58d ; origin/master: ded5d41b1754ef05d87815f20c48203e6b00e58d ; luc: 2026-11-17T09:12:57Z
 ĐÓNG ĐƯỢC WP wp1342 — merge ded5d41b1754ef05d87815f20c48203e6b00e58d
 rc=0
+
+# LAN 2 (sau khi doi dot-bien.json.gz -> dot-bien.lf.json trong bien ban; cung lease blob 41e478b0)
+# checkout: c9f937b3476be64ef9b429c640126eb398a49c1f ; luc: 2026-11-17T09:23:20Z
+ĐÓNG ĐƯỢC WP wp1342 — merge ded5d41b1754ef05d87815f20c48203e6b00e58d
+rc=0

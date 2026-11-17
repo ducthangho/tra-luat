@@ -54,9 +54,9 @@ pre_merge_checks:
   - name: 'Windows native Desktop (N4-N7, truoc merge)'
     sha: 675c38dd8aa7d8d92124503452bc80af65c2b77a
     conclusion: success
-    nguon: [windows-desktop-tom-tat.txt, desktop-dot-bien/dot-bien-1342.py, desktop-dot-bien/dot-bien.json.gz]
+    nguon: [windows-desktop-tom-tat.txt, desktop-dot-bien/dot-bien-1342.py, desktop-dot-bien/dot-bien.lf.json]
     ghi_chu: >-
-      N7 measured (byte-exact): desktop-dot-bien/dot-bien-1342.py sha256 1ee98b9c = may; dot-bien.json.gz giai nen ra sha256 09922ccb = may,
+      N7 measured (byte-exact): desktop-dot-bien/dot-bien-1342.py sha256 1ee98b9c = may; dot-bien.lf.json (ban LF; bo LF cuoi + doi LF->CRLF ra sha256 09922ccb = may),
       src_head 675c38d, Python 3.12.10 MSC AMD64; a/b/c so_lan_khop 1, ban sach dich+doi chung DAT, dot bien: dich DO_ASSERT dung assertion
       hanh vi, doi chung DAT => GIET 3/3; z tu kiem so_lan_khop 0 => KHONG_DO. Lenh chay luot 3 (loi khai): MUT_GOC=<goc>\m, python
       dot-bien-1342.py wp1342-src wp1342-out\dot-bien. N4-N6: thuat_lai co neo — windows-desktop-tom-tat.txt chep tay TOM-TAT 8068 byte.

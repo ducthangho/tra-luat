@@ -3,7 +3,8 @@
 # lan chuyen zip base64 qua cong cu cho sha256 29ef6127... khac b9c563e1... do tren may, nen bo; xem lich_su_nhan trong ho so land.
 # Bang chung byte-exact da dua vao ho so (lan 2, 17-11 ~09:1xZ, doc tung tep van ban qua Desktop Commander read_file roi doi sha256 voi may):
 #   desktop-dot-bien/dot-bien-1342.py  sha256 1ee98b9c... = may (LF, 4613 byte)
-#   desktop-dot-bien/dot-bien.json.gz  gunzip ra 09922ccb... = may (CRLF, 7581 byte; nen gzip -n de git khong chuan hoa EOL)
+#   desktop-dot-bien/dot-bien.lf.json  ban LF cua tep may; doi lai: bo '\n' cuoi, '\n'->'\r\n' => sha256 09922ccb... = may (7581 byte)
+#     python3 -c "import hashlib;b=open('dot-bien.lf.json','rb').read();print(hashlib.sha256(b.rstrip(b'\n').replace(b'\n',b'\r\n')).hexdigest())"
 #   => driver toan van, lenh con, Python/Windows, tung cap tim/thay + so_lan_khop, diff thuc te, ket qua sach/dot bien tung ca: byte-exact.
 #   TOM-TAT.txt (8068 byte, sha256 32690788f376ebcd...) va 40 tep log tung ca: van chi chep tay o duoi.
 # sha256 do tren may (Get-FileHash):

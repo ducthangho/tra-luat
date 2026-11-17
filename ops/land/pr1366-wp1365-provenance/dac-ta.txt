@@ -1,0 +1,3 @@
+# dac ta do luc 2026-11-17T10:11:45Z: ref origin/ops/wp1365-r1-g1-lease = da3895f285c36f15e4c0b2d7ce67c7949827b52b
+blob d3703ca24dfe2f88f791c3d94efc9bbaeb7f37f0  ops/specs/N2-1342-GHIM-MERGE-r1.md
+sha256 5c13b28d41cf157a33a3e8136eab281a29d3da55941e8967098aacc24a597635

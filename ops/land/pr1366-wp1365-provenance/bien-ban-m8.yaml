@@ -1,0 +1,36 @@
+# Bien ban M8 (ADR-0060) dong WP #1365 N2-1342-GHIM-MERGE r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1366-wp1365-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6944247977 tren 643519b).
+# Bon moc §10.2.2 run 44057245216 measured passed (wd-run 44062367557; gate output 39/39 bang danh_gia_gate.py v2).
+packet: wp1365
+revision: 1
+generation: 1
+spec_hash: 5c13b28d41cf157a33a3e8136eab281a29d3da55941e8967098aacc24a597635
+head_da_review: 643519bae38cfe0f7925847d028407deb8320a77
+tree_h: 8ac33412d0687b1b90e9d76484da741214c6dc62
+review:
+  offline: 'khong goi Codex offline; review doc lap = connector Codex + phep do lai cua phien dieu phoi + human audit'
+  connector: 'readback-pr1366-comments.json: 6943854312 codex-review-state:v1 completed, has_any_findings false, commit 643519b'
+  human_audit: 'issuecomment-6944247977 human_exact_head_audit.v1 approve tren 643519b (chu kho tu dang)'
+windows:
+  phan_loai: not_applicable
+  nguon: 'Dac ta: Windows native 0 (ca chi doc blob git); lease budget windows_native_runs limit 0.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1366#issuecomment-6944247977
+duyet_chu_kho_ghi_chu: 'audit tu dang 09:35:44Z 17-11, truoc merge 09:37:17Z; duyet merge dung SHA 643519b qua AskUserQuestion (loi khai).'
+merge_commit: 285a0b1c0a03c903015d48acf6d1dd5c4cebfb31
+tree_m: 222787947500cc5f4d4c73ef3143bbfc4e7a8032
+ci_master:
+  run_id: 44057245216
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong; gom "GOM: ĐẠT · 16 mảnh · 1514 ca bắt buộc".'
+nghiem_thu:
+  N1: passed  # danh-gia-gate-output-44057245216.txt: GOM ĐẠT 1514 ca (gom wp1174_* va wp1342_*); phan-chung-n2-n3.txt: 2 ca dich DAT tren head
+  N2: passed  # phan-chung-n2-n3.txt: sua than _1174_read trong cay => head DAT, base ded5d41 DO
+  N3: passed  # phan-chung-n2-n3.txt: _HEAD1342 doi OID => DO; OID khong ton tai => KHONG DO DUOC; noi day cay => DO
+  N4: passed  # nghiem-thu-285a0b1.txt: ruff F 13->13; diff --check rc 0; adr-song/doctrine-scan rc 0; numstat 1 tep +12/-5
+lease_cuoi: wp1365-r1-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

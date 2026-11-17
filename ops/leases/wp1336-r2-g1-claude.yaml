@@ -71,23 +71,34 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
 leased_at_utc: '2026-11-16T22:27:00Z'
-heartbeat_at: '2026-11-16T22:27:00Z'
+heartbeat_at: '2026-11-17T02:29:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-17T22:27:00Z'
-lease_expires_at_utc: '2026-11-17T22:27:00Z'
+lease_until: '2026-11-17T02:44:00Z'
+lease_expires_at_utc: '2026-11-17T02:44:00Z'
 lease_until_ghi_chu: '24h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
 attempts_basis: '<= 2 phien executor.'
 budget:
   codex_review_calls:
-    pr_wp1336_g1: {used: 0, reserved: 0, limit: 10}
+    pr_wp1336_g1: {used: 3, reserved: 0, limit: 10}
   ci_ubuntu_runs:
-    pr_wp1336_g1: {used: 0, reserved: 0, limit: 2}
+    pr_wp1336_g1: {used: 1, reserved: 0, limit: 2}
   windows_native_runs:
     pr_wp1336_g1: {used: 0, reserved: 0, limit: 0}
   khong_reset_theo_generation: true
 budget_ghi_chu: 'Codex <= 10 (ADR-0055), dem TRUOC moi loi goi; CI Ubuntu <= 2; Windows 0 (dac ta: khong bat buoc; chi dao chu kho).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-17T02:29:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 3/10: offline luot 1 (run 11951556, 43c1e3a, request_changes 2 P2 + 1 P3), offline luot 2 (run 0740c767, a8f45a6, approve), connector 1 (bo draft tren a8f45a6, sach). CI Ubuntu 1/2: PR #1348 tren a8f45a6. Windows 0/0. Lan ghi ngan sach nay la LOI KHAI CO NEO cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T22:27:00Z'
+  han_moi_utc: '2026-11-17T02:44:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1336 da MERGE: PR #1348 (head a8f45a6) merge commit 866e522fe6f8a3567f34c4766a017c19a4c0bc72, 2026-11-17T02:3xZ,
+    human audit chu kho issuecomment-6936134788. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet. Rut han theo tien le #1331, #1335, #1343, #1345.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 2 duong dan write set sau 2026-11-17T02:44:00Z phai ra NGUOI_GIU 0.'

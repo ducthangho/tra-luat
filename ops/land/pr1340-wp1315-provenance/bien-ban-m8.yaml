@@ -1,0 +1,72 @@
+packet: wp1315
+revision: 5
+generation: 7
+spec_hash: 6f3098f7f2c8aaabf7e7d98bc3931e630b37656599822d71c261d63da4cc84be
+head_da_review: 0003a5f46df6ef84866348859a161e4b8a801dbd
+tree_h: a68c2556bfd28ef2a600389c56f82220f99b4256
+review:
+  verdict: approve
+  findings: []
+  assurance: independent Codex source review + connector; owner_delegated_audit by Claude Code, not human audit
+  source_review_run: 9d4a8976 (stdout sha256 00f837809428d304aa78d44f943db40cb0020401143a1255eaf28eaf5428b41b)
+  delegated_audit: https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6920680668
+  connector: https://github.com/ducthangho/tra-luat/pull/1340#issuecomment-6920958274
+  history: 6 Codex source reviews (approve on 98c7389 then P2 found; P2 class fixed in two rounds; approve on 0003a5f); 3 Codex spec reviews
+windows:
+  K6: owner_waived via https://github.com/ducthangho/tra-luat/pull/1340#issuecomment-6921222644
+  native_focused: 'H3 tra-luat-win Python 3.13.17: 11 WP1315 groups stop at platform guard (unsupported native operating system); 13 controls 7 passed 6 failed, identical IDs and reasons at baseline C; not passed'
+  windows_CI_PR: skipped
+  windows_CI_postmerge: cancelled per owner instruction
+  followup: https://github.com/ducthangho/tra-luat/issues/1342
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916257249
+merge_commit: aa718cb8392c1e2defd47a0259c575de16fbd5a3
+merge_parents:
+- 5968ff06486a64244c4a306bc3eac163df0488ad
+- 0003a5f46df6ef84866348859a161e4b8a801dbd
+tree_m: f07b2bd5db2280d60e24cdedda07fe31697680d6
+merged_by: ducthangho (owner clicked merge after kiem-merge K0-K7 rc0)
+ci_master:
+  run_id: 43927088245
+  conclusion: cancelled
+  url: https://github.com/ducthangho/tra-luat/actions/runs/43927088245
+  jobs: 21/22 success; gate-packet-loop cancelled per owner instruction (long test waived post-merge)
+  selftest: 1777/1777 in master gate job log sha256 d8a556f7a397ff1dc4843227f6f8edff3ab53f99d9796d623080cc6d1d0456d7
+  attempt: 1
+  reruns: 0
+ci_PR:
+  run_id: 43896045111
+  conclusion: success
+  jobs: 23/23
+  full_mutant_audit: {run_id: 43896065480, conclusion: success, jobs: 10/10}
+  kiem_merge: 'ĐỦ ĐIỀU KIỆN MERGE trên 0003a5f46df6ef84866348859a161e4b8a801dbd (rc 0)'
+nghiem_thu:
+  independent_review: passed
+  source_CI: passed
+  full_M9: passed
+  local_selftest_H3: passed
+  connector: passed
+  native_Windows: owner_waived
+  Windows_CI: owner_waived
+  postmerge_gate_packet_loop: owner_waived
+  postmerge_short_jobs: passed
+  lease_release: passed
+  merge_identity: passed
+lease_cuoi: wp1315-r5-g7-claude
+landed: false
+land_status: 'merged into master at aa718cb; gate_output nay owner_waived (6938174089), NHUNG ci_master run 43927088245 conclusion cancelled (job gate-packet-loop bi huy theo chi thi chu kho) — KHONG doi cancelled thanh success, nen landed van false va kiem-dong-wp D2 do co chu dich.'
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: owner_waived
+moc_10_2_2_evidence:
+  provenance_yaml_sha256: d175d5e2734f6e565f22b7c9482d4ee9ce773cf7cf4f69a4e6174291eb52a411  # ci/provenance.yaml, thu lai 17-11 04:2xZ
+  workflow_definition_run: 44015913183  # dispatch ops-do-workflow-definition.yml tren master 04:15Z 17-11
+  gate_output: 'danh-gia-gate-output-43927088245.txt (danh_gia_gate.py v2 sha256 539fed68): 22/23 job co dau hieu duong; job con lai gate-packet-loop (ubuntu-latest) duoc mien'
+  gate_output_phan_chung: 'phan-chung-buoc-43927088245.txt: xoa dau hieu 4 buoc => not_measured rc 0'
+  gate_output_do_bu: 'packet-loop-tai-cho-aa718cb.txt: 16 manh tai cho GOM DAT 1503 ca'
+mien_gate_output:
+  nguon: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6938174089
+  readback: readback-chu-kho-mien-gate-packet-loop-issuecomment-6938174089.json
+  ghi_chu: 'mien_gate_packet_loop chu kho TU DANG 2026-11-17T04:19:01Z (OWNER, app null) tren #1172, neo DUNG aa718cb + 59b3fb9, context gate-packet-loop (ubuntu-latest), ly do, dieu kien thay the (do bu tai cho), pham vi hai SHA mot lan (§10.2.3).'
+lich_su_nhan: 'Ban goc M8 (bien-ban-m8-goc.yaml, nguyen van comment chu kho tren Issue) ghi gate_output not_measured + landed false. Ban nay CHI doi gate_output -> owner_waived theo waiver 6938174089, lease_cuoi ve dung lease_id, cap nhat moc_10_2_2_evidence; khong viet lai ket qua job nao.'

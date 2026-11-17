@@ -1,0 +1,188 @@
+{
+  "schema_version": 2,
+  "packet_issue": 1315,
+  "packet_id": "wp1315",
+  "mission_issue": 1172,
+  "mission_revision": 56,
+  "revision": 5,
+  "risk": "sensitive",
+  "review_class": "sensitive",
+  "effective_review_class": "sensitive",
+  "assurance_target": "cross_approved",
+  "depends_on": [
+    1325
+  ],
+  "dependency_M8": "https://github.com/ducthangho/tra-luat/issues/1325#issuecomment-6914167207",
+  "spec_ref": "refs/heads/ops/wp1315-r5-g5@120a35f6464c595e36fbaa9a3d26c4aefbf10b99",
+  "spec_path": "ops/specs/wp1315-r5/SPEC.md",
+  "spec_hash": "6f3098f7f2c8aaabf7e7d98bc3931e630b37656599822d71c261d63da4cc84be",
+  "spec_sha256_required": "6f3098f7f2c8aaabf7e7d98bc3931e630b37656599822d71c261d63da4cc84be",
+  "proposal_sha256": "1cff2efdfd497a7ad15f1fc8261fd7aa9bc1a6c60cd0c11f74b4b40bde2caec2",
+  "plan_sha256": "d904487b3024adb1d36817cfdbf1b2e0f4c3e5580726bd4d81ed9ccb07c06159",
+  "write_set": [
+    ".claude/dev/packet_loop.py",
+    ".claude/dev/packet_loop_test.py",
+    "ops/specs/wp1315-adopted-pending-recovery-r1.md"
+  ],
+  "effective_write_set": [
+    ".claude/dev/packet_loop.py",
+    ".claude/dev/packet_loop_test.py",
+    "ops/specs/wp1315-adopted-pending-recovery-r1.md"
+  ],
+  "write_set_hash": "7f74bb8e55ed02fc6f1f440a4e5c4c38b2fa860add3ff985bdabf7c88107c3c8",
+  "write_set_hash_rule": "sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF",
+  "branch": "agent/wp1315-r5-g5-claude",
+  "branch_ownership": "exclusive",
+  "target_branch_neu_land": "master",
+  "base_sha": "9c1661f76d5f4ef811aa349df102989cc2e2d53d",
+  "immutable_acceptance_baseline": "c0b8e11d7099f756e65db8bd9a81493cde789a6f",
+  "old_audited_head": "669af5f9f58dfd72324d1f5b6aaefd15745592b1",
+  "old_audited_tree": "b69be04a3fa17be04771c2bc84717b2486b9b494",
+  "old_audit_transferred": false,
+  "granted_by": "ducthangho",
+  "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916257249",
+  "authority_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916257249",
+  "owner_delegation": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+  "audit_label_if_delegated": "owner_delegated_audit (Claude Code), never human_audited",
+  "routing_exception_MCR_1172_C1_hard_expiry_utc": "2026-11-17T18:53:00Z",
+  "history": "r40 and r55 histories/costs/counters/expired clocks preserved; unknown billing kept UNKNOWN, not zero",
+  "event": "executor_lease_granted",
+  "generation": 7,
+  "lease_id": "wp1315-r5-g7-claude",
+  "role": "executor",
+  "provider": "claude",
+  "executor": "claude",
+  "model_family": "claude",
+  "execution_surface": "claude_code",
+  "transport": "machine/local",
+  "environment": "cloud",
+  "validation_only": false,
+  "product_edits_allowed": true,
+  "reviewer": "codex",
+  "reviewer_model": "gpt-6-astra",
+  "reviewer_model_family": "openai",
+  "reviewer_execution_surface": "codex_cli",
+  "reviewer_transport": "machine",
+  "prompt_path": "ops/prompts/wp1315-r5-g7-claude-author-fix2.txt",
+  "start_from_sha": "98c7389d91027e1d7eeccaea26e50332773249bf",
+  "reviewed_sha_required": "0003a5f46df6ef84866348859a161e4b8a801dbd",
+  "reviewed_tree_required": "d963dc73799724d76251f645fb7812e7ff3c8992",
+  "candidate_head": "0003a5f46df6ef84866348859a161e4b8a801dbd",
+  "delegated_audit": "https://github.com/ducthangho/tra-luat/issues/1315#issuecomment-6920680668",
+  "delegated_audit_generation": 7,
+  "delegated_audit_relabelled": false,
+  "phase": "B",
+  "phase_B_activation_utc": "2026-11-16T13:36:00Z",
+  "phase_B_max_minutes": 900,
+  "phase_B_deadline_utc": "2026-11-17T04:36:00Z",
+  "leased_at_utc": "2026-11-16T14:02:30Z",
+  "heartbeat_at": "2026-11-16T14:02:30Z",
+  "heartbeat_required_minutes": 360,
+  "lease_until": "2026-11-16T18:21:17Z",
+  "lease_expires_at_utc": "2026-11-16T18:21:17Z",
+  "source_push_limit": 1,
+  "draft_PR_limit": 1,
+  "genuine_connector_limit": 1,
+  "PR_Ubuntu_CI_limit": 1,
+  "full_M9_limit": 1,
+  "master_CI_limit": 1,
+  "CI_attempts_per_run": 1,
+  "CI_reruns": 0,
+  "Windows_CI": "owner waived https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916597687",
+  "native_windows": "24 focused IDs on tra-luat-win or DESKTOP-T9R33P2; mutants Linux only",
+  "postmerge_long_tests": "may be reduced per #issuecomment-6916597687; reduced parts recorded waived_by_owner/not_run",
+  "merge_allowed": "conditional: chỉ khi mọi gate thật đạt trên đúng H, theo r56 và uỷ quyền",
+  "target_activation_allowed": false,
+  "g5_issued": false,
+  "thay_the_cho": [],
+  "thay_the_cho_ghi_chu": "wp1315-r5-g6-validation đã rút hạn tới 2026-11-16T14:02:23Z và hết hạn trước khi cấp lease này.",
+  "recorded_by": "Claude Code coordinator session under owner delegation",
+  "recorder_is_executor": true,
+  "prohibited_actions": [
+    "LIVE",
+    "target_G5",
+    "installation",
+    "edit_real_credential",
+    "self_review",
+    "write_outside_effective_write_set",
+    "ruleset_or_gate_change",
+    "CI_rerun"
+  ],
+  "prompt_sha256_required": "1f43f777cbe6c8ecf7ae274a0bfff98ec6a5b9e70b3835ac41e3708793cd90dd",
+  "model": "claude-fable-5-2",
+  "reviewed_sha_required_note": "H cu chi la diem bat dau; H moi can Codex source review moi (plain stdout cho K4) va audit uy quyen moi.",
+  "remediation_of": {
+    "finding": "WP1315-S3-F1-type-coercing-exactness",
+    "severity": "P2",
+    "review_run": "18da1726",
+    "on_head": "98c7389d91027e1d7eeccaea26e50332773249bf"
+  },
+  "ceiling_raises": {
+    "Claude_author": {
+      "from": 1,
+      "to": 3,
+      "history": [
+        "46ee169a r5 author",
+        "bb1d3326 g7 fix 1 (2 comparisons)",
+        "g7 fix 2: enumerate full recovery path"
+      ]
+    },
+    "Codex_source_review": {
+      "from": 3,
+      "to": 6,
+      "history": [
+        "163b8b57 approve on 98c7389",
+        "18da1726 changes_requested P2 on 98c7389",
+        "13e7cfac blocked at preflight on 4ebcbaf: coordinator prompt wrongly stated sole parent C (coordinator error, not source defect)",
+        "950302fa changes_requested on 4ebcbaf: same P2 class via pre-existing adoption validators (target_projection ==)",
+        "9d4a8976 approve on 0003a5f, 0 findings"
+      ]
+    },
+    "source_push": {
+      "from": 1,
+      "to": 2
+    },
+    "PR_Ubuntu_CI": {
+      "from": 1,
+      "to": 2,
+      "note": "lượt tự động trên H mới, không phải rerun"
+    },
+    "full_M9": {
+      "from": 1,
+      "to": 2
+    },
+    "genuine_connector": {
+      "from": 1,
+      "to": 2
+    },
+    "authority": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+    "ly_do": "P2 thật ở H 98c7389 bắt buộc vá; H mới cần đủ cổng lại."
+  },
+  "candidate_tree": "a68c2556bfd28ef2a600389c56f82220f99b4256",
+  "source_review_approve": {
+    "run": "9d4a8976",
+    "stdout_sha256": "00f837809428d304aa78d44f943db40cb0020401143a1255eaf28eaf5428b41b",
+    "verdict": "approve",
+    "findings": 0
+  },
+  "merge": {
+    "pr": 1340,
+    "merge_commit": "aa718cb8392c1e2defd47a0259c575de16fbd5a3",
+    "parents": [
+      "5968ff06486a64244c4a306bc3eac163df0488ad",
+      "0003a5f46df6ef84866348859a161e4b8a801dbd"
+    ],
+    "tree_m": "f07b2bd5db2280d60e24cdedda07fe31697680d6",
+    "merged_at": "2026-11-16T18:16:24Z",
+    "merged_by": "ducthangho"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-17T04:36:00Z",
+    "han_moi_utc": "2026-11-16T18:21:17Z",
+    "luc_rut_utc": "2026-11-16T18:17:17Z",
+    "nguoi_rut": "Claude Code coordinator under owner delegation",
+    "chi_thi": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+    "ly_do": "PR #1340 da merge tai aa718cb (chu kho bam merge); khong con ghi source. CI master, M8 va dong WP la bookkeeping rieng.",
+    "gioi_han": "Chi rut han; lich su, so lieu va phase B clock goc giu nguyen."
+  }
+}

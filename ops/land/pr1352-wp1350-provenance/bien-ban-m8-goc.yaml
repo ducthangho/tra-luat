@@ -1,0 +1,73 @@
+packet: wp1350
+revision: 1
+generation: 1
+spec_hash: 990635bbbfbf7afc5efb56f96267a7910849a42dd18f0eb752b3288310d8cd0e
+head_da_review: 6b263f30e8596c5b0cf69da55be011476113afaf
+tree_h: 4edc80cf2d269298d9ef749b5a9dd0a16a8165de
+review:
+  verdict: approve
+  findings: []
+  assurance: independent Codex source review + connector; owner_delegated_audit by Claude Code, not human audit
+  source_review_run: 943f1921 (stdout sha256 742cfa68b63df75633463e1b0f5688a01e4373504321317c1c1482304d907393)
+  delegated_audit: https://github.com/ducthangho/tra-luat/issues/1350#issuecomment-6934133314
+  connector:
+    - 'luot 1: https://github.com/ducthangho/tra-luat/pull/1352#issuecomment-6934200760 (sach; marker has_any_findings null)'
+    - 'luot 2: https://github.com/ducthangho/tra-luat/pull/1352#issuecomment-6934846130 (sach; marker false/false)'
+    - 'luot 3 tu dong khi draft marked ready: marker false/false'
+  connector_ceiling_raise: https://github.com/ducthangho/tra-luat/issues/1350#issuecomment-6934792375
+  history: 2 Codex spec reviews (changes_requested 2 P2 then approve); 1 Codex source review (approve)
+windows:
+  K6: owner_waived with measured evidence https://github.com/ducthangho/tra-luat/pull/1352#issuecomment-6934741796
+  native_focused: 'H on tra-luat-win Python 3.13.17: wp1350_nang_tran_attempts_legacy passed; scoped and rejections stop at WP1174 platform guard (unsupported native operating system); 13 controls 8 passed 5 failed, identical IDs and reasons at baseline e91aefa'
+  windows_CI_PR: skipped
+  windows_CI_postmerge: 'run 43998186773 cancelled per standing owner instruction'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6933449308
+merge_commit: 59b3fb93e4ecd1399460c30ea08bc5d56dc8265b
+merge_parents:
+- e91aefa759b2962bad4b5642f3bf0f59c0764495
+- 6b263f30e8596c5b0cf69da55be011476113afaf
+tree_m: 4edc80cf2d269298d9ef749b5a9dd0a16a8165de
+merged_by: ducthangho (owner clicked merge after kiem-merge K0-K7 rc0)
+ci_master:
+  run_id: 43998186682
+  conclusion: success
+  url: https://github.com/ducthangho/tra-luat/actions/runs/43998186682
+  attempt: 2
+  reruns: 1
+  jobs: '23 success, 1 skipped (gate-packet-loop-manh skipped on push)'
+  attempt_1: 'gate-ops failure: ops/lease_publish_test.py t131_S8_tam_tran_bound_tru_1_bound_bound_cong_1_va_deadline "subprocess im lặng phải bị kill trong deadline: rc=12 sau 0.6s: hết deadline reader tại chờ pipe". Timing assertion in ops/, diff touches only .claude/dev/; same job green on PR head and on base e91aefa. One rerun of failed job (attempt 2) green, job 133764855780. Recorded as a timing failure, not as passed for attempt 1.'
+ci_PR:
+  run_id: 43990493496
+  conclusion: success
+  jobs: 39/39
+  full_mutant_audit: {run_id: 43990524880, conclusion: success, jobs: 10/10}
+  kiem_merge: 'ĐỦ ĐIỀU KIỆN MERGE trên 6b263f30e8596c5b0cf69da55be011476113afaf (rc 0, output sha256 e9dd4e6d30f3fec6c7647e9804d85d0c9235237200d0ea35a13e4afb65473d73)'
+nghiem_thu:
+  independent_review: passed
+  source_CI: passed
+  full_M9: passed
+  local_selftest_H: passed
+  connector: passed
+  native_Windows: owner_waived
+  Windows_CI: owner_waived
+  postmerge_gate_packet_loop: owner_waived
+  postmerge_short_jobs: passed
+  lease_release: passed
+  merge_identity: passed
+lease_cuoi: wp1350-r1-g1-claude (rut han tai ops/wp1350-r1-g1 f43edd421853943b1145be7c612f63dc98a9fbbb)
+landed: false
+land_status: 'merged into master at 59b3fb9; NOT recorded as landed because §10.2.2 gate_output is not_measured for 23 master jobs (canonical producer limit); kiem-dong-wp D2 therefore expected red'
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: not_measured
+moc_10_2_2_evidence:
+  provenance_yaml_sha256: 1921e44de61a5c6f3c9e5d6346101945cbc45d060d32b5b2e7bbd77e0356393e
+  workflow_definition_run: 44004206644
+  gate_output_supplement: none; producer verdict not rewritten
+owner_waivers:
+  windows_and_postmerge_long_tests: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916597687
+  delegation: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696
+scope: 'source only; no installation, target, LIVE or Mission #1172 closure. WP1308 canary only via its own new generation.'
+recorded_at_VN: '2026-11-17T09:45:37+07:00'

@@ -1,0 +1,1 @@
+# git show origin/ops/wp1315-r5-g7:ops/leases/wp1315-r5-g7-claude.yaml @ 5949507f95d3ca97d8f7ae9d03d4451d50c7375b

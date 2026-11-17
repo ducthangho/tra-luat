@@ -1,0 +1,78 @@
+# WP1319 — Ma trận nghiệm thu bổ sung Mission #1238 (khung, 2026-11-17)
+
+Trạng thái: **khung — chưa có raw**. Mọi hàng dưới đây chỉ dựa trên bản chiếu công khai.
+Không hàng nào là audit raw PASS, human audit hay product review mới.
+
+## Neo
+- master đọc: `13bf69f6eb797e859619a2062e7c9577e6a9cc0b` (tree `a4cb90571c5432ad97d62fd7409b45147acf6c2a`).
+- Nguồn add-on trên master trùng blob với merge P2 `b0b5480807dd70a367a306c158cc1df08b70fc25`:
+  `.agents/skills/proxima-control/SKILL.md` `88f0376e…` · `.agents/skills/playwright-browser/SKILL.md` `678ba2f0…` ·
+  `.agents/skills/playwright-browser/package-lock.json` `8b234cfa…`.
+- Tiêu chí: `ops/plans/PROXIMA-PLAYWRIGHT-v1.md` §11 (blob `9800531f…`); U1–U12: `docs/research/2026-11-05-proxima-playwright-p0.md` (blob `087aff05…`).
+- Bản chiếu công khai: M8 P2 [#1287 c6815845097](https://github.com/ducthangho/tra-luat/issues/1287#issuecomment-6815845097) ·
+  P3 [c6843286540](https://github.com/ducthangho/tra-luat/issues/1297#issuecomment-6843286540) ·
+  P4 [c6843288240](https://github.com/ducthangho/tra-luat/issues/1298#issuecomment-6843288240) ·
+  P5 [c6843291545](https://github.com/ducthangho/tra-luat/issues/1299#issuecomment-6843291545) ·
+  P6 [c6843293734](https://github.com/ducthangho/tra-luat/issues/1300#issuecomment-6843293734) ·
+  closeout [#1238 c6843361361](https://github.com/ducthangho/tra-luat/issues/1238#issuecomment-6843361361).
+- Gói raw cuối 13/11: **chưa có**. Xem phần Blocker.
+
+## Loại bằng chứng (cột `loai`)
+`direct_raw` — phiên này tự đọc và kiểm hash bản gốc ·
+`ci_artifact` — artifact CI có digest GitHub ·
+`carry_forward` — kế thừa tương đương byte theo quyết định owner ·
+`fixture` — controlled fixture, không phải hành vi thật ·
+`public_projection_only` — chỉ có lời khai trong comment công khai ·
+`direct_live_17_11` — phiên này đo trực tiếp ngày 17/11 (chỉ đọc) ·
+`not_run` / `not_measured`.
+
+Cột `ket_luan`: `passed` · `failed` · `skipped` · `not_run` · `cho_raw` (đã có lời khai PASS nhưng chưa đối chiếu raw) · `gioi_han` (ngoài phạm vi, đã khai là giới hạn).
+
+## A. §11 — 12 tiêu chí
+
+| # | Tiêu chí | Lời khai công khai (nguồn) | loai | ket_luan | Còn thiếu để nghiệm thu |
+|---|---|---|---|---|---|
+| 1 | Bốn lựa chọn cài hoạt động; thiếu add-on không phá core | P2 M8: `lifecycle_reuse`, `Linux_literal_flow` passed; P5: VM PS5.1/PS7 4 bước browser, status/WhatIf 4/4 | ci_artifact (P2) + public_projection_only (P5) | cho_raw | Ma trận 4 lựa chọn (không cài / chỉ Proxima / chỉ Playwright / cả hai) × host × PS5.1/PS7 với rc, marker từng ca. Chưa thấy bằng chứng tách riêng cả 4 lựa chọn ở mức host |
+| 2 | Đúng target; không fallback/retry inference | P3: "actual authorized DC target execution and 4 status/WhatIf" | public_projection_only | cho_raw | Raw log target, bằng chứng 0 lần retry/fallback |
+| 3 | WhatIf không mutation ngoài artifact dry-run | P3/P5: status/WhatIf 4/4; P1-S2 (U1/U3) | public_projection_only | cho_raw | Snapshot trước/sau của WhatIf, PS5.1 + PS7 |
+| 4 | Không secrets/profile trong repo và báo cáo | Closeout: "no profile contents or credentials published" | public_projection_only | cho_raw | Quét secrets trên chính gói raw trước khi đóng băng |
+| 5 | Profile riêng; package/browser/cache nhất quán | P4: 251 dependency/exe/installer exact pins; P2 lockfile | ci_artifact (lockfile) + public_projection_only | cho_raw | Manifest pin + cache path theo máy; U9 ASUS |
+| 6 | Artifact sai nguồn/hỏng không được kích hoạt | P4 coverage: artifact/download/cache/metadata → fault-injection | public_projection_only + fixture | cho_raw | Tách ca native thật và ca fixture; raw FAIL induced phải giữ nguyên |
+| 7 | Máy bận hoãn, updater trùng bị khóa | P4: busy/dual lock; VM `wp1298-operator-unit-20261112/verified-result.json` (helper-only) | public_projection_only + fixture | cho_raw | Ca native trên host đích; receipt VM tự nói không thay ASUS activation |
+| 8 | Desktop lỗi chặn ASUS/VM (promotion fence) | P5: "ASUS passed before VM canary" | public_projection_only | cho_raw | Owner đã đổi Desktop→ASUS làm máy đầu; cần raw chứng minh fence chặn khi máy đầu FAIL, không chỉ thứ tự đã chạy |
+| 9 | Phục hồi binary và dữ liệu được kiểm thử | P4: 7957 matching files restored; 1 fault/1 restore/1 baseline restart | public_projection_only | cho_raw | Xem U8: chưa thấy bằng chứng phiên/đăng nhập được giữ |
+| 10 | File khóa, đĩa đầy, rollback thất bại | P4 coverage: filelock/reserve/partialcopy/rollbackfailure | public_projection_only + fixture | cho_raw | Tách realOS / inert-consumer / fault-injection theo từng ca |
+| 11 | Healthcheck không inference | P3/P5 status; closeout: "No upstream model identity/quota inferred from status" | public_projection_only | cho_raw | Raw request log chứng minh 0 inference |
+| 12 | Review độc lập đúng head/tree + evidence | P2: full_H4 + delta_H6 approve (Claude), connector clean; P3–P6: reduced evidence-consistency review | ci_artifact (P2) + public_projection_only (P3–P6) | P2: passed (nguồn) · P3–P6: gioi_han | Review P3–P6 tự khai *không* phải raw/human audit. Cần reviewer độc lập đọc gói raw đóng băng |
+
+## B. U1–U12
+
+| U | Hạng mục | Lời khai công khai | loai | ket_luan | Ghi chú |
+|---|---|---|---|---|---|
+| U1 | PS5.1 endpoint | P2: ASUS PS5.1/PS7 carry-forward; P3 4 bước mỗi bản rc0 | carry_forward + public_projection_only | cho_raw | |
+| U2 | Danh tính VM f728/810 | P6 "U1–U12 per datum reconciled" | public_projection_only | cho_raw | 17/11: `f7281f27` online, `810f79bb` offline 116h (direct_live_17_11) |
+| U3 | WhatIf | như §11 #3 | public_projection_only | cho_raw | |
+| U4 | Updater thực tế | P4 post_runtime: ASAR bằng nhau, 4 mục metadata đổi | public_projection_only | cho_raw | |
+| U5 | Provenance artifact | P3 "source G1… controlled fixture only" | fixture + public_projection_only | cho_raw | G1 không phải xác minh pháp lý |
+| U6 | License fit | Owner xác nhận personal/noncommercial | owner_decision | passed | Theo chỉ thị handoff 17/11 |
+| U7 | Retention/soak/theo dõi | P4 normal 1800s/180 mẫu | public_projection_only | cho_raw | Ngưỡng/owner phải có trong raw |
+| U8 | Restore profile/đăng nhập | P4 7957 file restored | public_projection_only | **mở** | Không có bằng chứng phiên đăng nhập còn hiệu lực. Không được ghi PASS. Xem DESIGN.md §U8 |
+| U9 | Cache/ACL ổ D ASUS | — | not_measured | cho_raw | ASUS offline 17/11 |
+| U10 | Playwright CLI ghim | P2 lockfile + CI | ci_artifact | passed (nguồn) | `package-lock.json` blob `8b234cfa…` |
+| U11 | Auth remote f728 | P3 "actual authorized DC target" | public_projection_only | cho_raw | Status không chứng minh model auth/quota |
+| U12 | Binary 5.5.0 ↔ upstream | P6 daily check 5.5.0/same asset digest | public_projection_only | cho_raw | |
+
+## C. Hạng mục chéo
+
+| Hạng mục | Hiện trạng | loai | ket_luan |
+|---|---|---|---|
+| Kiểm release hằng ngày | P6: chạy tay 13/11, không scheduler. 17/11: VM không có task Proxima/Playwright; 2 task `TraLuat-CapNhatCongCu-*` 14 ngày/lần, script 0 dòng `proxima\|playwright`; Desktop không có task ngoài MS/OneDrive; ASUS không đo | direct_live_17_11 + public_projection_only | **not_present** (2/3 máy) · ASUS not_measured |
+| NSIS thực | Closeout tự khai giới hạn | not_run | gioi_han → DESIGN.md |
+| Migration khác phiên bản | Closeout tự khai giới hạn | not_run | gioi_han → DESIGN.md |
+| Runtime promotion / LIVE | Closeout: không LIVE | not_run | gioi_han → DESIGN.md |
+| Dọn dẹp / khóa | 17/11 16:26Z: KHOA.txt 0 byte trên Desktop `C:\tl-win`, `F:\tl-win`, VM `C:\tl-win`. VM: Proxima + ProximaGateway chạy từ 13/11 04:04Z | direct_live_17_11 | Lúc đo không ai giữ khóa. Chưa chứng minh dọn dẹp đã xong |
+
+## Blocker
+1. **Gói raw cuối 13/11 không tìm thấy** trên Desktop/VM (quét tên) và Google Drive. ASUS offline 28h. Phiên bridge ASUS không đọc được từ phiên Cloud.
+2. VM chỉ còn ~1,67 GB trống ở C: — chặn mọi native run trên VM cho tới khi có quyết định dọn đĩa.
+3. Chưa có spec/lease cho thi công bổ sung.

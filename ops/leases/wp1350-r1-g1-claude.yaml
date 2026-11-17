@@ -61,8 +61,8 @@
   "leased_at_utc": "2026-11-17T00:15:06Z",
   "heartbeat_at": "2026-11-17T00:15:06Z",
   "heartbeat_required_minutes": 360,
-  "lease_until": "2026-11-17T20:15:06Z",
-  "lease_expires_at_utc": "2026-11-17T20:15:06Z",
+  "lease_until": "2026-11-17T02:02:12Z",
+  "lease_expires_at_utc": "2026-11-17T02:02:12Z",
   "limits": {
     "Codex_spec_review": 2,
     "Claude_author": 2,
@@ -100,5 +100,31 @@
         "P2 negative oracle"
       ]
     }
-  ]
+  ],
+  "merge": {
+    "pr": 1352,
+    "merge_commit": "59b3fb93e4ecd1399460c30ea08bc5d56dc8265b",
+    "parents": [
+      "e91aefa759b2962bad4b5642f3bf0f59c0764495",
+      "6b263f30e8596c5b0cf69da55be011476113afaf"
+    ],
+    "merged_at": "2026-11-17T01:47:08Z",
+    "merged_by": "ducthangho"
+  },
+  "nang_tran_connector": {
+    "truc": "connector_review_calls",
+    "tran_cu": 1,
+    "tran_moi": 2,
+    "can_cu": "https://github.com/ducthangho/tra-luat/issues/1350#issuecomment-6934792375",
+    "ly_do": "luot 1 sach nhung marker has_any_findings null; luot 2 cung head ghi false/false"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-17T20:15:06Z",
+    "han_moi_utc": "2026-11-17T02:02:12Z",
+    "luc_rut_utc": "2026-11-17T01:58:12Z",
+    "nguoi_rut": "Claude Code coordinator under owner delegation",
+    "chi_thi": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+    "ly_do": "PR #1352 da merge tai 59b3fb9 (chu kho bam merge); khong con ghi source. CI master, M8 va dong WP la bookkeeping rieng.",
+    "gioi_han": "Chi rut han; lich su va so lieu giu nguyen."
+  }
 }

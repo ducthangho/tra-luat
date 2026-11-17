@@ -5603,10 +5603,13 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
     audit_time = _1174_time(audit["updated_at"])
     snapshots, coverage, introductions = {}, {}, []
     last_status,dag,earliest = "UNKNOWN",False,None
+    # Requests and bytes are budgets of the WHOLE collection: they accumulate
+    # over every pass. Only the evidence of a pass is reset below.
+    size, pages = 0, 0
     for attempt in range(3):
-        if time.time() >= end:
+        if time.time() >= end or pages >= 1000 or size >= limit:
             break
-        size, pages, complete, transient = 0, 0, True, False
+        complete, transient = True, False
         pass_end = end
         snapshots, coverage, introductions = {}, {}, []
 
@@ -5617,12 +5620,15 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
                 complete = False
                 return None
             measured = []
+            pages += 1   # counted before dispatch: a failed request spends budget too
             try:
                 value = fetch(endpoint, deadline=pass_end, max_bytes=limit - size, on_bytes=measured.append, **extra)
             except (ValueError, subprocess.TimeoutExpired, OSError):
+                size += sum(measured)   # bytes of a failed response were still read
                 complete, transient = False, True
                 return None
-            pages += 1
+            # Each response is charged once: its measured bytes, or its
+            # serialised form only when the transport measured nothing.
             size += sum(measured) if measured else len(_1174_bytes(value))
             if time.time() >= pass_end or size > limit:
                 complete = False
@@ -5809,7 +5815,8 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
         last_status = ("FAIL" if exposed else
             "RECORDED_EARLIEST_MATCH" if time.time()<pass_end and complete and boundary and dag and earliest else "UNKNOWN")
         # Only a failed transport read is worth another bounded pass; a ceiling
-        # or a measured UNKNOWN is final for this collection.
+        # or a measured UNKNOWN is final for this collection. A further pass
+        # starts only while both collection-wide budgets have room (loop head).
         if last_status != "UNKNOWN" or not transient:
             break
     return dict(schema="wp1174_publication_receipt.v2", repo_id=repo_id, repo=_1174_REPO, head=head,

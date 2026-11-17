@@ -12410,10 +12410,11 @@ WP1174_REQUIRED = {"wp1174_" + name for name in (
     "durability_ordinary_pair durability_fsync_readback durability_publish_noreplace durability_legacy_tombstone durability_cached_writer "
     "lifecycle_identity_advisory lifecycle_budget_replay lifecycle_human_valid lifecycle_human_negative lifecycle_first_publication lifecycle_guard_readonly lifecycle_scoped_lifecycle lifecycle_legacy_unchanged "
     "profile_native_linux profile_unsupported windows_claim_rejected status_closed gate_required_skip gate_evidence_schema").split()}
-# wp1370: the activity-collector cases are required IDs (18 new, 85 -> 103).
+# wp1370: the activity-collector cases are required IDs (20 new, 85 -> 105).
 WP1174_REQUIRED |= {"wp1174_activity_" + name for name in (
     "reduced_payload multipage_anchor older_page_fail same_timestamp_fail force_push_preimage deletion_preaudit tag_coverage "
-    "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained matching_refs_unpaginated tip_non_commit").split()}
+    "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained matching_refs_unpaginated tip_non_commit "
+    "budget_bytes_cumulative budget_pages_cumulative").split()}
 WP1174_REQUIRED |= {"wp1174_" + kind + "_" + name for kind in ("writer", "race") for name in _WP1174_WRITERS}
 WP1174_BOTH = {"wp1174_" + name for name in ("admission_valid admission_wrong_scope witness_valid witness_keyset witness_int_bool witness_json_bytes "
     "witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending lifecycle_legacy_unchanged status_closed").split()}
@@ -12645,13 +12646,13 @@ def _lifecycle1174(kind):
                     d=c.tmp/("current-service" if service else "current-native");d.mkdir()
                     _current_policy1174(Ctx(c.script,d),service)
                 _static_writers1174(c,m)
-                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==103
+                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==105
                 applicable=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
                 required={n:None for n in applicable}
                 assert _required1174(required,applicable)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,applicable),"missing required ID accepted"
-                assert len(_WP1174_FULL_CASE_IDS)==103 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
+                assert len(_WP1174_FULL_CASE_IDS)==105 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -12768,7 +12769,7 @@ def _evidence_schema1174(c):
     required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
     record=dict(schema="wp1174_native_report.v1",actual_os="Linux",scope="wp1174_candidate",proof_eligible=True,source_pr=1275,repo="ducthangho/tra-luat",pr=1275,
         run_id="1",run_attempt="1",job="gate-packet-loop",checkout_sha=m,checkout_tree="c"*40,executed_sha=h,executed_tree="d"*40,expected_head=h,expected_tree="d"*40,
-        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=102,
+        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=104,
         outcomes={n:"passed" for n in required},profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},
         native_probe=dict(status="passed",checks={k:True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")}),
         native_seam=False,overall_status="passed",windows_oracle="not_run_platform; deferred_to_windows_focused")
@@ -14030,7 +14031,7 @@ def _r12_main_inventory1174(c):
     seen=[]
     def selected_driver():
         names=[name for name,_ in CASES if name in WP1174_REQUIRED]
-        assert len(names)==102 and "wp1174_windows_claim_rejected" not in names
+        assert len(names)==104 and "wp1174_windows_claim_rejected" not in names
         dict(CASES)["wp1174_lifecycle_scoped_lifecycle"](c)
         seen.append(tuple(names))
         return 0
@@ -14040,7 +14041,7 @@ def _r12_main_inventory1174(c):
             _legacy_main=selected_driver,_carrier1174=lambda *args:True,_snapshot1174=lambda *args:{}),contextlib.redirect_stdout(io.StringIO()):
         assert main()==0
     assert seen and CASES is full
-    assert len(_WP1174_FULL_CASE_IDS)==103 and len(set(_WP1174_FULL_CASE_IDS))==103
+    assert len(_WP1174_FULL_CASE_IDS)==105 and len(set(_WP1174_FULL_CASE_IDS))==105
 
 
 def _r12_accept_snapshot1174(c):
@@ -14489,6 +14490,64 @@ def _activity_case1370(kind):
             receipt,calls=remote()
             assert calls==[[gone]] and not local(gone) and receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,(calls,receipt)
             tip((name,T,"tree"));receipt,calls=remote();assert calls==[] and receipt["status"]==ok,(calls,receipt)
+        elif kind in ("budget_bytes_cumulative","budget_pages_cumulative"):
+            # WP1370-F1: the 64 MiB and 1000-request ceilings belong to the whole
+            # collection. A transport failure late in the first pass buys another
+            # pass, never a fresh budget; bytes the transport reported before it
+            # raised and the failed request itself are spent.
+            MiB=1024*1024;calls=[]
+            def source(charge,fail=(),pad=0):
+                # charge(n): bytes request n reports through on_bytes (None: the
+                # transport measures nothing); fail: request numbers that raise
+                # AFTER reporting; pad: empty activity pages before the feed.
+                del calls[:]
+                def transport(endpoint,**limits):
+                    calls.append((endpoint,limits["max_bytes"]));n=len(calls)
+                    assert type(limits["max_bytes"]) is int and limits["max_bytes"]>0,("read dispatched without byte budget",n,calls[-1])
+                    size=charge(n)
+                    if size is not None:limits["on_bytes"](size)
+                    if n in fail:raise OSError("transport reset after the response was read")
+                    if "/activity" in endpoint:
+                        step=([int(x[6:]) for x in endpoint.partition("?")[2].split("&") if x.startswith("after=")] or [0])[0]
+                        if step<pad:return [],'<https://api.github.com/repositories/123/activity?per_page=100&after=%d>; rel="next"'%(step+1)
+                        return copy.deepcopy(pages["activity"]),None
+                    return served(endpoint,**limits)
+                return transport
+            budgets=lambda:[size//MiB if size%MiB==0 else size for _,size in calls]
+            if kind=="budget_bytes_cumulative":
+                # Five reads per pass. Request 5 reports 40 MiB, then raises.
+                receipt=collect(source(lambda n:(1 if n<5 else 40 if n==5 else 5)*MiB,fail={5}))
+                assert receipt["status"]=="UNKNOWN","collection byte budget not cumulative over passes (44 MiB spent, then 25 MiB more): %r %r"%(receipt["status"],budgets())
+                assert budgets()==[64,63,62,61,60,20,15,10,5],"read beyond the remaining byte budget: %r"%(budgets(),)
+                assert "pulls?state=all" not in receipt["cursor_coverage"],receipt
+                # Bytes of successful reads alone; the failed request reports nothing.
+                receipt=collect(source(lambda n:None if n==5 else (10 if n<5 else 8)*MiB,fail={5}))
+                assert receipt["status"]=="UNKNOWN","successful first-pass bytes forgotten by the retry pass: %r"%(budgets(),)
+                assert budgets()==[64,54,44,34,24,24,16,8],"read beyond the remaining byte budget: %r"%(budgets(),)
+                # Control: the same late failure, retry still inside 64 MiB.
+                receipt=collect(source(lambda n:(1 if n<5 else 20 if n==5 else 5)*MiB,fail={5}))
+                assert receipt["status"]==ok and receipt["earliest"]["id"]=="12" and receipt["dag_coverage"] is True,("under-budget retry lost",receipt,budgets())
+                assert budgets()==[64,63,62,61,60,40,35,30,25,20] and m._1174_collector_receipt(receipt,H,audit,123) is receipt,budgets()
+                # Each response is charged once: callback bytes when reported,
+                # the serialised form only when nothing was reported.
+                receipt=collect(source(lambda n:(1 if n<5 else 20)*MiB if n<=5 else None,fail={5}))
+                first=len(m._1174_bytes(served("repos/"+m._1174_REPO)))
+                assert receipt["status"]==ok and len(calls)==10 and [size for _,size in calls[5:7]]==[40*MiB,40*MiB-first],calls[5:7]
+            else:
+                tiny=lambda n:None
+                # 501 requests per pass (1 + 497 activity + 3); request 501 fails.
+                receipt=collect(source(tiny,fail={501},pad=496))
+                assert receipt["status"]=="UNKNOWN","collection request budget not cumulative over passes: %r after %d requests"%(receipt["status"],len(calls))
+                assert len(calls)==1000,"read beyond the remaining request budget: %d"%len(calls)
+                # A failed request is counted too: 334 + 334 leave 332 for a
+                # pass that needs 334, although only 1000 responses would succeed.
+                receipt=collect(source(tiny,fail={334,668},pad=329))
+                assert receipt["status"]=="UNKNOWN" and len(calls)==1000,("failed requests must spend the request budget",receipt["status"],len(calls))
+                # Controls: retries that fit, one of them exactly at 1000 requests.
+                receipt=collect(source(tiny,fail={500},pad=495))
+                assert receipt["status"]==ok and len(calls)==1000 and receipt["cursor_coverage"]["activity"]==496 and receipt["dag_coverage"] is True,("retry inside the request budget lost",receipt,len(calls))
+                receipt=collect(source(tiny,fail={105},pad=100))
+                assert receipt["status"]==ok and len(calls)==210 and receipt["earliest"]["id"]=="12" and m._1174_collector_receipt(receipt,H,audit,123) is receipt,(receipt,len(calls))
         else:
             raise AssertionError("unknown wp1370 case "+kind)
     return case
@@ -14496,7 +14555,8 @@ def _activity_case1370(kind):
 
 _WP1370_ACTIVITY_CASES = ("reduced_payload", "multipage_anchor", "older_page_fail", "same_timestamp_fail", "force_push_preimage",
     "deletion_preaudit", "tag_coverage", "receipt_residuals", "no_anchor", "object_unfetchable", "cursor_foreign", "pr_foreign_head",
-    "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained", "matching_refs_unpaginated", "tip_non_commit")
+    "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained", "matching_refs_unpaginated", "tip_non_commit",
+    "budget_bytes_cumulative", "budget_pages_cumulative")
 assert {"wp1174_activity_" + name for name in _WP1370_ACTIVITY_CASES} <= WP1174_REQUIRED
 CASES += [("wp1174_activity_" + name, _activity_case1370(name)) for name in _WP1370_ACTIVITY_CASES]
 MUTANTS.update({
@@ -14526,6 +14586,13 @@ MUTANTS.update({
     "m1174_activity_tip_non_commit_unknown": ('            if commit == _1174_NOT_COMMIT:\n                return False\n',
         '            if commit == _1174_NOT_COMMIT:\n                return None\n', ["wp1174_activity_tip_non_commit"]),
     "m1174_activity_receipt_v1": ('receipt["schema"] == "wp1174_publication_receipt.v2" and', 'receipt["schema"].startswith("wp1174_publication_receipt.v") and', ["wp1174_activity_receipt_v1"]),
+    # WP1370-F1: give every pass a fresh byte/request budget again
+    "m1174_activity_budget_reset_per_pass": ('        complete, transient = True, False\n        pass_end = end\n',
+        '        size, pages, complete, transient = 0, 0, True, False\n        pass_end = end\n',
+        ["wp1174_activity_budget_bytes_cumulative", "wp1174_activity_budget_pages_cumulative"]),
+    # WP1370-F1: forget the bytes a failed fetch reported before raising
+    "m1174_activity_budget_drop_failed_bytes": ('                size += sum(measured)   # bytes of a failed response were still read\n', '                pass\n',
+        ["wp1174_activity_budget_bytes_cumulative"]),
 })
 
 
@@ -14566,8 +14633,8 @@ MUTANTS.update({
     "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
 })
 
-MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==103 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
-    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==103,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
+MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==105 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
+    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==105,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
 MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
@@ -14778,7 +14845,7 @@ def _carrier1174(outcomes, gate_rc=0):
 
 def main():
     global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
-    assert len(WP1174_REQUIRED) == 103 and len(WP1174_BOTH) == 12
+    assert len(WP1174_REQUIRED) == 105 and len(WP1174_BOTH) == 12
     actual_os = platform.system()
     if actual_os=="Linux":
         globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())

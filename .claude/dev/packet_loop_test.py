@@ -12410,10 +12410,10 @@ WP1174_REQUIRED = {"wp1174_" + name for name in (
     "durability_ordinary_pair durability_fsync_readback durability_publish_noreplace durability_legacy_tombstone durability_cached_writer "
     "lifecycle_identity_advisory lifecycle_budget_replay lifecycle_human_valid lifecycle_human_negative lifecycle_first_publication lifecycle_guard_readonly lifecycle_scoped_lifecycle lifecycle_legacy_unchanged "
     "profile_native_linux profile_unsupported windows_claim_rejected status_closed gate_required_skip gate_evidence_schema").split()}
-# wp1370: the activity-collector cases are required IDs (16 new, 85 -> 101).
+# wp1370: the activity-collector cases are required IDs (17 new, 85 -> 102).
 WP1174_REQUIRED |= {"wp1174_activity_" + name for name in (
     "reduced_payload multipage_anchor older_page_fail same_timestamp_fail force_push_preimage deletion_preaudit tag_coverage "
-    "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained").split()}
+    "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained matching_refs_unpaginated").split()}
 WP1174_REQUIRED |= {"wp1174_" + kind + "_" + name for kind in ("writer", "race") for name in _WP1174_WRITERS}
 WP1174_BOTH = {"wp1174_" + name for name in ("admission_valid admission_wrong_scope witness_valid witness_keyset witness_int_bool witness_json_bytes "
     "witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending lifecycle_legacy_unchanged status_closed").split()}
@@ -12428,7 +12428,18 @@ def _activity1370(ident, kind, ref, before, after, when, actor="ducthangho"):
 def _fetch1370(m, pages, repo_id=123):
     """Fake transport for the wp1370 collector: repository facts, cursor-paged
     activity (Link header on the numeric-repository path, as measured), and the
-    page-numbered ref/PR families. `pages["activity"]` is newest first."""
+    page-numbered PR family. `pages["activity"]` is newest first.
+
+    The two git/matching-refs families behave as measured on the real server
+    (2026-11-17): the full list for ANY page/per_page and no Link header
+    (`pages["refs_link"]` can plant one). Rows written in the short fixture
+    form get their server fields (url, object.type, object.url) filled in."""
+    api="https://api.github.com/repos/"+m._1174_REPO+"/git/"
+    def ref_row(row):
+        if not (type(row) is dict and type(row.get("object")) is dict and type(row.get("ref")) is str):return row
+        target=dict(row["object"]);target.setdefault("type","commit")
+        if type(target.get("sha")) is str and type(target["type"]) is str:target.setdefault("url",api+target["type"]+"s/"+target["sha"])
+        full=dict(row,object=target);full.setdefault("url",api+row["ref"]);return full
     def fetch(endpoint,**limits):
         if endpoint=="repos/"+m._1174_REPO:
             return pages.get("repo",dict(id=repo_id,full_name=m._1174_REPO,default_branch="master",created_at="2026-07-05T00:00:00Z"))
@@ -12439,8 +12450,12 @@ def _fetch1370(m, pages, repo_id=123):
             width=pages.get("activity_page_size",100);rows=pages["activity"][offset:offset+width]
             more=offset+width<len(pages["activity"])
             return rows,('<https://api.github.com/repositories/%d/activity?per_page=100&after=%d>; rel="next"'%(repo_id,offset+width) if more else pages.get("activity_last_link"))
+        family=endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]
+        if family.startswith("git/matching-refs/"):
+            rows=pages[family];rows=[ref_row(row) for row in rows] if type(rows) is list else rows
+            return (rows,pages.get("refs_link",{}).get(family)) if limits.get("link") else rows
         assert not limits.get("link"),(endpoint,limits)
-        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+        return pages[family]
     return fetch
 
 
@@ -12630,13 +12645,13 @@ def _lifecycle1174(kind):
                     d=c.tmp/("current-service" if service else "current-native");d.mkdir()
                     _current_policy1174(Ctx(c.script,d),service)
                 _static_writers1174(c,m)
-                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==101
+                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==102
                 applicable=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
                 required={n:None for n in applicable}
                 assert _required1174(required,applicable)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,applicable),"missing required ID accepted"
-                assert len(_WP1174_FULL_CASE_IDS)==101 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
+                assert len(_WP1174_FULL_CASE_IDS)==102 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -12753,7 +12768,7 @@ def _evidence_schema1174(c):
     required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
     record=dict(schema="wp1174_native_report.v1",actual_os="Linux",scope="wp1174_candidate",proof_eligible=True,source_pr=1275,repo="ducthangho/tra-luat",pr=1275,
         run_id="1",run_attempt="1",job="gate-packet-loop",checkout_sha=m,checkout_tree="c"*40,executed_sha=h,executed_tree="d"*40,expected_head=h,expected_tree="d"*40,
-        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=100,
+        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=101,
         outcomes={n:"passed" for n in required},profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},
         native_probe=dict(status="passed",checks={k:True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")}),
         native_seam=False,overall_status="passed",windows_oracle="not_run_platform; deferred_to_windows_focused")
@@ -14015,7 +14030,7 @@ def _r12_main_inventory1174(c):
     seen=[]
     def selected_driver():
         names=[name for name,_ in CASES if name in WP1174_REQUIRED]
-        assert len(names)==100 and "wp1174_windows_claim_rejected" not in names
+        assert len(names)==101 and "wp1174_windows_claim_rejected" not in names
         dict(CASES)["wp1174_lifecycle_scoped_lifecycle"](c)
         seen.append(tuple(names))
         return 0
@@ -14025,7 +14040,7 @@ def _r12_main_inventory1174(c):
             _legacy_main=selected_driver,_carrier1174=lambda *args:True,_snapshot1174=lambda *args:{}),contextlib.redirect_stdout(io.StringIO()):
         assert main()==0
     assert seen and CASES is full
-    assert len(_WP1174_FULL_CASE_IDS)==101 and len(set(_WP1174_FULL_CASE_IDS))==101
+    assert len(_WP1174_FULL_CASE_IDS)==102 and len(set(_WP1174_FULL_CASE_IDS))==102
 
 
 def _r12_accept_snapshot1174(c):
@@ -14298,6 +14313,98 @@ def _activity_case1370(kind):
             # Positive control: a real post-audit introduction earlier than the deletion.
             feed(late,ghost,_activity1370(14,"branch_creation","refs/heads/ghost",Z,H,"2026-11-04T09:01:00Z"),drop=(12,));receipt=collect()
             assert receipt["status"]==ok and receipt["earliest"]["id"]=="14",receipt
+        elif kind=="matching_refs_unpaginated":
+            # Real server (coordinator probe, gh api, 2026-11-17): both
+            # git/matching-refs families ignore page/per_page, return the FULL
+            # list on every page (heads 292 rows, tags 646 rows) and send no
+            # Link header. A page loop can never see a short page.
+            api="https://api.github.com/repos/"+m._1174_REPO+"/git/";stem="repos/"+m._1174_REPO+"/git/matching-refs/"
+            def row(ref,sha,form="commit"):
+                return dict(ref=ref,node_id="REF_"+ref,url=api+ref,object=dict(sha=sha,type=form,url=api+form+"s/"+sha))
+            heads=[row("refs/heads/candidate",H)]+[row("refs/heads/topic-%03d"%i,parent) for i in range(291)]
+            tags=[row("refs/tags/v%03d"%i,root) for i in range(646)]
+            def serve(h=None,t=None,**links):
+                pages["git/matching-refs/heads"]=copy.deepcopy(heads) if h is None else h
+                pages["git/matching-refs/tags"]=copy.deepcopy(tags) if t is None else t
+                pages["refs_link"]=links;del seen[:]
+            serve();assert len(heads)==292 and len(tags)==646
+            assert all(served(stem+"heads?per_page=100&page=%d"%n)==heads and served(stem+"tags?per_page=100&page=%d"%n)==tags for n in (1,2,3)),"fixture must ignore paging"
+            receipt=collect()
+            walked=[x for x in seen if "/git/matching-refs/" in x]
+            assert walked==[stem+"heads",stem+"tags"],"matching-refs must be exactly one unpaginated fetch per family, got %d: %r"%(len(walked),walked[:6])
+            assert receipt["status"]==ok and receipt["earliest"]["id"]=="12" and receipt["dag_coverage"] is True,receipt
+            assert receipt["cursor_coverage"]=={"activity":1,"git/matching-refs/heads":1,"git/matching-refs/tags":1,"pulls?state=all":1},receipt
+            assert len(seen)==5 and m._1174_collector_receipt(receipt,H,audit,123) is receipt,seen
+            # The whole list is evidence: a tip containing H far beyond row 100
+            # and without an introduction is still seen.
+            late=copy.deepcopy(heads);late[250]=row("refs/heads/elsewhere",H);late[0]=row("refs/heads/candidate",parent)
+            feed(_activity1370(12,"push","refs/heads/elsewhere",parent,H,"2026-11-04T09:01:00Z"),drop=(12,));serve(h=late)
+            assert collect()["status"]==ok
+            _g(w,"checkout","-qb","wp1370-beyond",H);(w/"beyond.txt").write_text("beyond\n");_g(w,"add","beyond.txt");_g(w,"commit","-qm","beyond row 100")
+            late[250]=row("refs/heads/elsewhere",_g(w,"rev-parse","HEAD"));serve(h=late);receipt=collect()
+            assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,("ref beyond row 100 was not examined",receipt)
+            feed()
+            # A Link header / next cursor on these families is unmeasured
+            # behaviour: UNKNOWN, no coverage credit, and it is never followed.
+            for family in ("heads","tags"):
+                for link in ('<https://api.github.com/'+stem+family+'?page=2>; rel="next"','<https://api.github.com/'+stem+family+'?page=1>; rel="prev"',
+                        '<https://api.github.com/repositories/123/git/matching-refs/'+family+'?page=2>; rel="next", <https://api.github.com/repositories/123/git/matching-refs/'+family+'?page=9>; rel="last"',""):
+                    serve(**{"git/matching-refs/"+family:link});receipt=collect()
+                    assert receipt["status"]=="UNKNOWN" and "git/matching-refs/"+family not in receipt["cursor_coverage"],(family,link,receipt)
+                    assert [x for x in seen if "/git/matching-refs/" in x]==[stem+"heads",stem+"tags"],(family,link,seen)
+                    _reject1174(m._1174_collector_receipt,dict(receipt,status=ok),H,audit,123,reason="collector success completeness")
+                serve(**{"git/matching-refs/"+family:7});_reject1174(collect,reason="collector page type")
+            # Every row is a well-formed ref of this repository and this family.
+            foreign="https://api.github.com/repos/evil/tra-luat/git/"
+            def broken(change):
+                bad=copy.deepcopy(heads);change(bad);return bad
+            def verbatim(endpoint,**limits):
+                # Rows exactly as planted: the fixture fills in nothing here.
+                if "/git/matching-refs/" not in endpoint:return fetch(endpoint,**limits)
+                seen.append(endpoint);assert limits.get("link") is True and limits.get("repo_id")==123,(endpoint,limits)
+                return pages["git/matching-refs/"+endpoint.rsplit("/",1)[1]],None
+            serve();assert collect(verbatim)["status"]==ok
+            wrong=[("collector ref list type",dict(refs=heads)),("collector ref list type","refs/heads/candidate"),("collector ref list type",tuple(heads)),
+                ("collector ref identity",broken(lambda x:x.__setitem__(150,"refs/heads/topic-149"))),
+                ("collector ref identity",broken(lambda x:x[150].pop("object"))),
+                ("collector ref identity",broken(lambda x:x[150].pop("url"))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].pop("url"))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].pop("type"))),
+                ("collector ref identity",broken(lambda x:x[150].update(url=foreign+x[150]["ref"]))),
+                ("collector ref identity",broken(lambda x:x[150].update(url=api+"refs/tags/topic-149"))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(url=foreign+"commits/"+parent))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(url=api+"commits/"+H))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(type="tag"))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(type="release",url=api+"releases/"+parent))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(sha=parent[:39],url=api+"commits/"+parent[:39]))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(sha=None))),
+                ("collector ref identity",broken(lambda x:x[150].update(ref="refs/tags/v000",url=api+"refs/tags/v000"))),
+                ("collector ref identity",broken(lambda x:x[150].update(ref="refs/heads/",url=api+"refs/heads/"))),
+                ("collector ref identity",broken(lambda x:x[150].update(ref=5))),
+                ("collector ref duplicate",heads+heads),
+                ("collector ref duplicate",broken(lambda x:x.append(copy.deepcopy(x[0]))))]
+            for reason,value in wrong:
+                serve(h=value);_reject1174(collect,verbatim,reason=reason)
+                assert [x for x in seen if "/git/matching-refs/" in x]==[stem+"heads"],(reason,seen)
+            serve(t=heads);_reject1174(collect,verbatim,reason="collector ref identity")
+            annotated="a"*40
+            serve(t=tags+[row("refs/tags/annotated",annotated,"tag")]);receipt=collect()
+            assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,receipt   # well-formed, but not a local commit
+            serve();assert collect()["status"]==ok
+            # Transport: the Link header is read for exactly these two query-less
+            # endpoints; a paged or neighbouring form is refused before any call.
+            runs=[];limits=dict(root=w,deadline=time.time()+30)
+            def process(argv,**kw):
+                runs.append(argv);return subprocess.CompletedProcess(argv,0,b"HTTP/2.0 200 OK\r\nContent-Type: application/json\r\n\r\n"+json.dumps(heads[:2]).encode(),b"")
+            with patch.object(m,"_1174_process",side_effect=process):
+                for family in ("heads","tags"):
+                    assert m._1174_api(stem+family,link=True,repo_id=123,**limits)==(heads[:2],None)
+                    assert runs[-1]==["gh","api","--hostname","github.com","--include",stem+family],runs[-1]
+                for endpoint in (stem+"heads?per_page=100&page=2",stem+"heads?page=2",stem+"heads/",stem+"heads/topic",stem+"pull",stem[:-1],
+                        "repos/"+m._1174_REPO+"/git/refs/heads","repos/"+m._1174_REPO+"/pulls?state=all&per_page=100&page=1",
+                        "repos/evil/tra-luat/git/matching-refs/heads","repositories/123/git/matching-refs/heads"):
+                    count=len(runs);_reject1174(m._1174_api,endpoint,link=True,repo_id=123,reason="scoped API endpoint/root",**limits);assert len(runs)==count,endpoint
+                count=len(runs);_reject1174(m._1174_api,stem+"heads",link=True,reason="scoped API endpoint/root",**limits);assert len(runs)==count
         else:
             raise AssertionError("unknown wp1370 case "+kind)
     return case
@@ -14305,7 +14412,7 @@ def _activity_case1370(kind):
 
 _WP1370_ACTIVITY_CASES = ("reduced_payload", "multipage_anchor", "older_page_fail", "same_timestamp_fail", "force_push_preimage",
     "deletion_preaudit", "tag_coverage", "receipt_residuals", "no_anchor", "object_unfetchable", "cursor_foreign", "pr_foreign_head",
-    "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained")
+    "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained", "matching_refs_unpaginated")
 assert {"wp1174_activity_" + name for name in _WP1370_ACTIVITY_CASES} <= WP1174_REQUIRED
 CASES += [("wp1174_activity_" + name, _activity_case1370(name)) for name in _WP1370_ACTIVITY_CASES]
 MUTANTS.update({
@@ -14328,6 +14435,9 @@ MUTANTS.update({
     "m1174_activity_cursor_repository": ('_1174_require(owned and re.fullmatch(', '_1174_require(re.fullmatch(', ["wp1174_activity_cursor_foreign"]),
     # v2 receipt binding: residual list and schema version
     "m1174_activity_receipt_residuals": ('receipt["residual_classes"] == _1174_RESIDUALS and', 'True and', ["wp1174_activity_receipt_residuals"]),
+    # restore page looping for the matching-refs families (they ignore paging)
+    "m1174_activity_matching_refs_paged": ('            if family in _1174_UNPAGED:\n', '            if False and family in _1174_UNPAGED:\n',
+        ["wp1174_activity_matching_refs_unpaginated"]),
     "m1174_activity_receipt_v1": ('receipt["schema"] == "wp1174_publication_receipt.v2" and', 'receipt["schema"].startswith("wp1174_publication_receipt.v") and', ["wp1174_activity_receipt_v1"]),
 })
 
@@ -14369,8 +14479,8 @@ MUTANTS.update({
     "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
 })
 
-MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==101 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
-    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==101,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
+MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==102 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
+    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==102,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
 MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
@@ -14581,7 +14691,7 @@ def _carrier1174(outcomes, gate_rc=0):
 
 def main():
     global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
-    assert len(WP1174_REQUIRED) == 101 and len(WP1174_BOTH) == 12
+    assert len(WP1174_REQUIRED) == 102 and len(WP1174_BOTH) == 12
     actual_os = platform.system()
     if actual_os=="Linux":
         globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
@@ -15276,7 +15386,7 @@ def _r25_publication1174(c, reproduce=False):
         check('not-a-record','UNKNOWN','collector activity identity',activity=swapped('row'))
         pages['activity']=copy.deepcopy(original);pages['pulls']=copy.deepcopy(pulls);pages.pop('repo',None)
         def incomplete(endpoint,**limits):
-            if '/git/matching-refs/tags?' in endpoint:raise ValueError('fixture missing page')
+            if endpoint.endswith('/git/matching-refs/tags'):raise ValueError('fixture missing page')
             return fetch(endpoint,**limits)
         assert m._1174_collect(incomplete,w,args.head,audit,123)['status']=='UNKNOWN'
         (c.tmp/'r25-publication-cases.json').write_text(json.dumps(rows,indent=2)+'\n')

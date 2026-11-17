@@ -4306,9 +4306,12 @@ def _1174_link_header(raw):
 
 def _1174_api(endpoint, *, root, deadline, max_bytes=30*1024*1024, on_bytes=None, link=False, repo_id=None):
     # Only the activity cursor reads the Link header or the numeric repository
-    # path, and only for the measured repository id; no other scope is widened.
+    # path, and only for the measured repository id. The two exact, query-less
+    # git/matching-refs families also read the Link header, solely so that an
+    # advertised next page is seen (and refused); no other scope is widened.
     cursor=(link is True and type(endpoint) is str and type(repo_id) is int and repo_id>0 and
-        endpoint.startswith(("repos/"+_1174_REPO+"/activity?","repositories/"+str(repo_id)+"/activity?")))
+        (endpoint.startswith(("repos/"+_1174_REPO+"/activity?","repositories/"+str(repo_id)+"/activity?")) or
+         endpoint in tuple("repos/"+_1174_REPO+"/"+family for family in _1174_UNPAGED)))
     _1174_require(type(endpoint) is str and type(link) is bool and
         (cursor if link else endpoint=="repos/"+_1174_REPO or endpoint.startswith("repos/"+_1174_REPO+"/")) and
         ".." not in endpoint and "\\" not in endpoint and Path(root).is_absolute(),"scoped API endpoint/root")
@@ -5502,6 +5505,9 @@ def _1174_review(a, directory, admission):
 
 _1174_ACTIVITY_KINDS = ("push", "force_push", "branch_creation", "branch_deletion", "pr_merge")
 _1174_QUERY_SCOPE = ["activity", "git/matching-refs/heads", "git/matching-refs/tags", "pulls?state=all"]
+# Measured on the real server (gh api, 2026-11-17): these two families ignore
+# page/per_page, answer the full list on every page and send no Link header.
+_1174_UNPAGED = ("git/matching-refs/heads", "git/matching-refs/tags")
 # The last two classes are owner-accepted residuals of the activity anchor,
 # not relaxed checks: history before the anchor and unrecorded tag history.
 _1174_RESIDUALS = ["server_unpublished_activity", "fork_object_storage_outside_repo_scope",
@@ -5524,6 +5530,24 @@ def _1174_activity_next(link, repo_id):
         r"(?:repos/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+|repositories/[1-9][0-9]*)/activity\?[A-Za-z0-9_.~%=&:+/-]+", endpoint, re.ASCII) is not None and
         re.search(r"[?&]after=[^&]+", endpoint) is not None, "collector activity cursor repository")
     return endpoint
+
+
+def _1174_ref_rows(rows, family):
+    """One whole git/matching-refs answer: distinct, well-formed refs of this repository."""
+    prefix = "refs/" + family.rsplit("/", 1)[1] + "/"
+    api = "https://api.github.com/repos/" + _1174_REPO + "/git/"
+    _1174_require(family in _1174_UNPAGED and type(rows) is list, "collector ref list type")
+    names = set()
+    for row in rows:
+        target = row.get("object") if type(row) is dict else None
+        _1174_require(type(target) is dict and type(row.get("ref")) is str and row["ref"].startswith(prefix) and
+            len(row["ref"]) > len(prefix) and type(row.get("url")) is str and row["url"].startswith(api + prefix) and
+            type(target.get("sha")) is str and SHA_RE.fullmatch(target["sha"]) is not None and
+            type(target.get("type")) is str and target["type"] in ("commit", "tag", "tree", "blob") and
+            target.get("url") == api + target["type"] + "s/" + target["sha"], "collector ref identity")
+        _1174_require(row["ref"] not in names, "collector ref duplicate")
+        names.add(row["ref"])
+    return rows
 
 
 def _1174_peel(root, oids, deadline):
@@ -5626,6 +5650,21 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
         snapshots["activity"] = feed
         for family in scope[1:]:
             values = []
+            if family in _1174_UNPAGED:
+                # ONE request, no page/per_page: the whole list or nothing. A
+                # next cursor on this family is unmeasured behaviour, never
+                # followed and never counted as coverage.
+                reply = read(f"repos/{_1174_REPO}/{family}", link=True, repo_id=repo_id)
+                if reply is not None:
+                    _1174_require(type(reply) is tuple and len(reply) == 2 and
+                        (reply[1] is None or type(reply[1]) is str), "collector page type")
+                    values = _1174_ref_rows(reply[0], family)
+                    if reply[1] is None:
+                        coverage[family] = 1
+                    else:
+                        complete = False
+                snapshots[family] = values
+                continue
             for page in range(1, 1001):
                 separator = "&" if "?" in family else "?"
                 rows = read(f"repos/{_1174_REPO}/{family}{separator}per_page=100&page={page}")

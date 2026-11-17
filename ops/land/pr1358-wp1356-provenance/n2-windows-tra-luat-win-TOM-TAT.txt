@@ -1,0 +1,22 @@
+# N2 do tren VM tra-luat-win (Windows that, Python 3.12.10) boi phien dieu phoi; nguyen van C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1356-n2-out\TOM-TAT.txt (doc qua Desktop Commander 2026-11-17T04:5xZ, bo BOM).
+HEAD HEAD=a808b35f1016ae2e2c4a02baf67f6ea179090d46 tree=3018cbafd9a3de1d46fed9a62f403987ccc6766b python=Python 3.12.10
+HEAD ca r1335_symlink_doi_dich_giua_bam_va_phong rc=0 ::  || LAP r1335_symlink_doi_dich_giua_bam_va_phong: 1/1 qua, 0 bo qua, 0 hong
+HEAD ca r1335_khac_cwd_bam_va_chay_tep_trong_workspace rc=0 ::  || LAP r1335_khac_cwd_bam_va_chay_tep_trong_workspace: 1/1 qua, 0 bo qua, 0 hong
+HEAD dot-bien rc=1 26.4s
+  HEAD DRIVER: DOT_BIEN 545 -> 4 (['r1335_F2_path_theo_cwd_launcher', 'r1335_F2_win_path_theo_cwd_launcher', 'r1335_N3c_phong_lenh_goc', 'r1335_N3c_win_giu_argv0_goc']); thieu=[]
+  HEAD r1335_N3c_phong_lenh_goc     KHONG DO DUOC tren nen nay (Windows: lenh_run da thay argv[0] va dat exe=None truoc _phong, bo executable=exe la tuong duong)
+  HEAD r1335_N3c_win_giu_argv0_goc  OK  giet 1/1: r1335_symlink_doi_dich_giua_bam_va_phong
+  HEAD r1335_F2_path_theo_cwd_launcher KHONG DO DUOC tren nen nay (Windows: _thuc_thi di nhanh shutil.which rieng, khong chay dong PATH cua nhanh POSIX)
+  HEAD r1335_F2_win_path_theo_cwd_launcher OK  giet 1/1: r1335_khac_cwd_bam_va_chay_tep_trong_workspace
+HEAD sach_sau=[]
+BASE HEAD=5f97e1eaaf4d97bbe86d71a7f6e21d1f60fa5a0a tree=fd56b49046b4f4cbce37b7a5b8a382e11468aa91 python=Python 3.12.10
+BASE ca r1335_symlink_doi_dich_giua_bam_va_phong rc=0 ::  || LAP r1335_symlink_doi_dich_giua_bam_va_phong: 1/1 qua, 0 bo qua, 0 hong
+BASE ca r1335_khac_cwd_bam_va_chay_tep_trong_workspace rc=0 ::  || LAP r1335_khac_cwd_bam_va_chay_tep_trong_workspace: 1/1 qua, 0 bo qua, 0 hong
+BASE dot-bien rc=1 28.2s
+  BASE DRIVER: DOT_BIEN 543 -> 2 (['r1335_F2_path_theo_cwd_launcher', 'r1335_N3c_phong_lenh_goc']); thieu=['r1335_F2_win_path_theo_cwd_launcher', 'r1335_N3c_win_giu_argv0_goc']
+  BASE r1335_N3c_phong_lenh_goc     SAI  giet 0/1: (khong ca nao chet)
+  BASE r1335_F2_path_theo_cwd_launcher SAI  giet 0/1: (khong ca nao chet)
+BASE sach_sau=[]
+TONG 164.6s
+XONG (khoa da nha)
+# ghi chu: "dot-bien rc=1" la tao tac driver (chay_dot_bien tra tuple, sys.exit(tuple) => rc 1); ket qua doc o dong OK/SAI/KHONG DO DUOC.

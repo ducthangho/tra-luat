@@ -1,0 +1,33 @@
+# trich log job 133815500869 (run 44016470880 launcher (Windows that), push master 0f037f7); log day sha256 926fa2e829830eaa79df1144edd352129a49f900ba6b8cc03612cc2b57362fa8
+  BO QUA r1335_giu_argv0_goc_khi_ghim_tep: BO QUA r1335_argv0: Windows van thay argv[0] bang duong da bam (venv Windows mac dinh la ban sao)
+  BO QUA r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke: BO QUA r1335_F4: shebang/errno exec la khai niem POSIX (nhanh chon ung vien dung chung, do tren Linux)
+326/326 ca DA CHAY QUA (tong 411, bo qua 85, hong 0) - KHONG DU: 85 ca BO QUA, chua do gi
+  r1335_bo_chan_vo_shell       OK  giet 1/1: r1335_ma_tran_agent_khai_bao
+  r1335_agent_khong_ghi_de_ten OK  giet 2/2: r1335_ma_tran_agent_khai_bao, r1335_khop_hai_cua_15_to_hop
+  r1335_agent_casefold         OK  giet 1/1: r1335_ma_tran_agent_khai_bao
+  r1335_probe_bo_qua_rong      OK  giet 2/2: r1335_ma_tran_agent_khai_bao, r1335_khop_hai_cua_15_to_hop
+  r1335_gop_null_va_khong      OK  giet 1/1: r1335_khop_hai_cua_15_to_hop
+  r1335_T1_tach_hai_nguon      OK  giet 1/1: r1335_khop_hai_cua_15_to_hop
+  r1335_T1_probe_theo_ten      OK  giet 2/2: r1335_ma_tran_agent_khai_bao, r1335_khop_hai_cua_15_to_hop
+  r1335_T2_bo_cat_cmd          OK  giet 1/1: r1335_ma_tran_agent_khai_bao
+  r1335_T3_lui_ve_bam_hang     OK  giet 3/3: r1335_transport_sha256_la_bam_tep_that, r1335_khac_cwd_bam_va_chay_tep_trong_workspace, r1335_symlink_doi_dich_giua_bam_va_phong
+  r1335_T3_bo_ly_do            OK  giet 1/1: r1335_transport_sha256_la_bam_tep_that
+  r1335_N3b_resolve_theo_cwd_launcher OK  giet 1/1: r1335_khac_cwd_bam_va_chay_tep_trong_workspace
+  r1335_N3c_phong_lenh_goc     KHONG DO DUOC tren nen nay (Windows: lenh_run da thay argv[0] va dat exe=None truoc _phong, bo executable=exe la tuong duong)
+  r1335_N3c_win_giu_argv0_goc  OK  giet 1/1: r1335_symlink_doi_dich_giua_bam_va_phong
+  r1335_argv0_ve_realpath      KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_giu_argv0_goc_khi_ghim_tep)
+  r1335_F1_codex_theo_ten      OK  giet 1/1: r1335_hanh_vi_codex_theo_agent_da_quyet
+  r1335_F2_path_theo_cwd_launcher KHONG DO DUOC tren nen nay (Windows: _thuc_thi di nhanh shutil.which rieng, khong chay dong PATH cua nhanh POSIX)
+  r1335_F2_win_path_theo_cwd_launcher OK  giet 1/1: r1335_khac_cwd_bam_va_chay_tep_trong_workspace
+  r1335_F3_probe_lenh_goc      OK  giet 1/1: r1335_symlink_doi_dich_giua_bam_va_phong
+  r1335_F4_dung_o_ung_vien_dau KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke)
+  r1335_F4_chuyen_ca_khi_rc_khac_0 KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke)
+  r1335_F4_errno_ca_sau_exec   KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke)
+  r1335_F4_khong_giu_loi_dau   KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke)
+  r1335_F6_tu_dung_ung_vien    OK  giet 2/2: r1335_F6_windows_chon_tep_theo_which, r1335_P2_windows_bo_ung_vien_khong_duoi
+  r1335_F6_thu_muc_bo_qua      OK  giet 1/1: r1335_F6_windows_chon_tep_theo_which
+  r1335_F6_bo_khop_truc_tiep   OK  giet 1/1: r1335_F6_windows_chon_tep_theo_which
+  r1335_F6_bo_cwd_truoc        OK  giet 1/1: r1335_F6_windows_chon_tep_theo_which
+  r1335_F4_chi_ENOENT_ENOEXEC  KHONG DO DUOC tren nen nay (ca dich bo qua: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke)
+  r1335_D4_bo_chot_ten_trung   OK  giet 1/1: r1335_bang_transport_tu_choi_ten_trung
+DOT BIEN: 556/556 dat  (147 khong do duoc tren nen nay)

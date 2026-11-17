@@ -65,7 +65,7 @@
   "lease_expires_at_utc": "2026-11-18T10:20:09Z",
   "limits": {
     "Codex_spec_review": 3,
-    "Claude_author": 5,
+    "Claude_author": 6,
     "Codex_source_review": 3,
     "source_push": 1,
     "draft_PR": 1,
@@ -119,6 +119,15 @@
     "tran_cu": 4,
     "tran_moi": 5,
     "ly_do": "Codex source review 1 (run 03f4a9cd) on 575b6b4: changes_requested, one P2 finding WP1370-F1 (collector byte/page budget resets per retry pass; spec item 2 ceilings are collection-wide)",
+    "can_cu": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+    "ai_nang": "Claude Code coordinator under owner delegation"
+  },
+  "author_fix4_prompt_path": "ops/prompts/wp1370-r1-g1-claude-author-fix4.txt",
+  "author_fix4_prompt_sha256": "780666cae3d232ed5b917e5114202c3b756881c89134e33dcea9ef948b839b26",
+  "nang_tran_author_4": {
+    "tran_cu": 5,
+    "tran_moi": 6,
+    "ly_do": "Codex source review 2 (run 126faf5d) on 653afce: changes_requested, WP1370-F1 still open on the author-declared residual (bytes of a read that overflows the budget are not charged because _1174_process raises before on_bytes)",
     "can_cu": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
     "ai_nang": "Claude Code coordinator under owner delegation"
   }

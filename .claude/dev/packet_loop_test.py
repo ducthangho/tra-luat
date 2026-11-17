@@ -16391,5 +16391,176 @@ MUTANTS.update({
 })
 
 
+# --- WP1350 r1: trục `attempts` cho `nang-tran` (legacy v1/v2 + WP1174 scoped/target) -------------
+# Fixture phản chiếu state đo được của WP1308: lượt đã cạn (1/1) ở state còn đi tiếp được. Mỗi ca âm dựng từ ĐÚNG
+# fixture của ca dương, đổi MỘT đầu vào, đòi rc + status + chuỗi chẩn đoán + bytes nguyên; cuối ca chạy lại lệnh
+# dương trên chính các bytes ấy để chứng minh fixture hợp lệ (rc khác 0 đơn thuần không được tính).
+_URL1350 = "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6933449308"
+_BAN_GHI1350 = dict(truc="attempts", tran_cu=1, tran_moi=2, ai_nang="ducthangho", can_cu=_URL1350)
+
+
+def _co1350(tran=2, ai="ducthangho", can_cu=_URL1350):
+    return ["--truc", "attempts", "--tran-moi", str(tran), "--ai-nang", ai, "--can-cu", can_cu]
+
+
+def _doi_khac1350(truoc, sau):
+    return {k for k in set(truoc) | set(sau) if (k in truoc) != (k in sau) or truoc.get(k) != sau.get(k)}
+
+
+def _legacy_fixture1350(c):
+    sd = c.sd()
+    _doi(0, c.init(sd, extra=("--attempts-limit", 1))[0], b"", "init --attempts-limit 1")
+    c.den_reviewing(sd, 55, 1)
+    rc, _, e = c.review(sd, 55, ["loi-1350-1"])
+    _doi(0, rc, e, "review lượt 1")
+    _kiem(sd, "fixture legacy: lượt đã cạn ở state còn đi tiếp được", state="running", attempt_open=False,
+          attempts_used=1, attempts_limit=1, nang_tran=[], ly_do=None, truc=None)
+    return sd
+
+
+def _legacy_nang1350(c, sd, **doi):
+    rc, _, e = run(c.script, ["nang-tran", "--packet", 55, *_co1350(**doi)], sd)
+    return rc, e.decode("utf-8", "replace")
+
+
+def _legacy_begin1350(c, sd):
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    return rc, e.decode("utf-8", "replace")
+
+
+def _legacy_positive1350(c):
+    import shutil
+    sd = _legacy_fixture1350(c)
+    # Đối chứng trên bản sao: KHÔNG nâng ⇒ `begin-attempt` vẫn bị chặn, về blocked, KHÔNG rescue_required.
+    chan = c.sd(); shutil.copytree(sd, chan, dirs_exist_ok=True)
+    rc, err = _legacy_begin1350(c, chan)
+    assert rc == 3 and "đã dùng hết 1/1 lượt" in err, ("begin-attempt khi cạn lượt phải giữ RC_TRAN", rc, err)
+    _kiem(chan, "cạn lượt ⇒ blocked, không rescue", state="blocked", ly_do=None, truc=None, attempts_used=1, attempts_limit=1)
+    assert _st(chan)["history"][-1] == {"event": "blocked_attempts_exhausted", "at_attempt": 1}, _st(chan)["history"][-1]
+    # Nâng trần trên state blocked giữ nguyên blocked và bộ đếm (không mở lại, không rescue).
+    rc, err = _legacy_nang1350(c, chan)
+    assert rc == 0, ("nâng trần attempts trên blocked", rc, err)
+    _kiem(chan, "nâng trần KHÔNG đổi blocked", state="blocked", ly_do=None, truc=None, attempts_used=1, attempts_limit=2)
+    # Ca dương: nâng 1 → 2, bản ghi đúng, chỉ hai trường đổi.
+    truoc = _st(sd)
+    rc, err = _legacy_nang1350(c, sd)
+    assert rc == 0, ("nang-tran --truc attempts legacy", rc, err)
+    sau = _st(sd)
+    assert sau["nang_tran"] == [_BAN_GHI1350], sau["nang_tran"]
+    assert _doi_khac1350(truoc, sau) == {"attempts_limit", "nang_tran"}, _doi_khac1350(truoc, sau)
+    assert (sau["attempts_used"], sau["attempts_limit"], sau["state"]) == (1, 2, "running"), sau
+    # `begin-attempt` sau đó được phép; bộ đếm đúng.
+    c.den_reviewing(sd, 55, 2)
+    _kiem(sd, "lượt 2 sau khi nâng", attempts_used=2, attempts_limit=2, review_rounds_limit=truoc["review_rounds_limit"],
+          codex_review_calls_limit=truoc["codex_review_calls_limit"], nang_tran=[_BAN_GHI1350])
+    rc, _, e = c.review(sd, 55, ["loi-1350-2"], luot=2)
+    _doi(0, rc, e, "review lượt 2")
+    # Trần MỚI vẫn là trần: lượt 3 bị chặn đúng như cũ.
+    rc, err = _legacy_begin1350(c, sd)
+    assert rc == 3 and "đã dùng hết 2/2 lượt" in err, ("trần mới phải vẫn chặn", rc, err)
+    _kiem(sd, "chạm trần mới ⇒ blocked, không rescue", state="blocked", ly_do=None, truc=None, attempts_used=2, attempts_limit=2)
+
+
+def _scoped_fixture1350(c):
+    """Fixture scoped thật của WP1174 (`_runtime1174`): leased, state_revision 3, lượt 1/1, allowance attempts = 2."""
+    m, a, state, argv, invoke, target, witness, pair = _runtime1174(c, "begin-attempt")
+    a["allowance"]["attempts_limit"] = 2
+    state.update(attempts_used=1, attempts_limit=1, state_revision=3)
+    pair(state)
+    assert a["allowance"]["attempts_limit"] == 2 and state["attempts_limit"] == 1 and state["nang_tran"] == []
+    begin = argv[argv.index("--packet") + 2:argv.index("--root")]
+    chung = argv[argv.index("--root"):]
+    def lenh(ten, *co, rev="3"):
+        day = [*argv[:2], ten, "--packet", "55", *co, *chung]
+        day[day.index("--expected-revision") + 1] = rev
+        return day
+    return m, a, state, lenh, begin, invoke, target, witness, pair
+
+
+def _scoped_positive1350(c):
+    m, a, state, lenh, begin, invoke, target, witness, pair = _scoped_fixture1350(c)
+    goc = (target.read_bytes(), witness.read_bytes())
+    # Đối chứng: KHÔNG nâng ⇒ `begin-attempt` vẫn bị chặn (quota_exhausted, blocked, không rescue, không dispatch).
+    rc, r, err = invoke(lenh("begin-attempt", *begin))
+    chan = json.loads(target.read_bytes())
+    assert rc == 3 and r["status"] == "quota_exhausted" and r["dispatch_allowed"] is False, (rc, r, err)
+    assert chan["state"] == "blocked" and "ly_do" not in chan and "truc" not in chan and \
+        (chan["attempts_used"], chan["attempts_limit"]) == (1, 1), chan
+    pair(state)
+    assert (target.read_bytes(), witness.read_bytes()) == goc, "fixture scoped không tái lập được"
+    # Ca dương: N=2 == allowance.
+    rc, r, err = invoke(lenh("nang-tran", *_co1350(2)))
+    assert rc == 0 and r["status"] == "completed_no_dispatch" and r["dispatch_allowed"] is False, (rc, r, err)
+    raw = target.read_bytes(); new = json.loads(raw); w = json.loads(witness.read_bytes())
+    assert _doi_khac1350(state, new) == {"attempts_limit", "nang_tran", "state_revision"}, _doi_khac1350(state, new)
+    assert new["nang_tran"] == [_BAN_GHI1350], new["nang_tran"]
+    assert (new["attempts_used"], new["attempts_limit"], new["state_revision"], new["state"]) == (1, 2, 4, state["state"]), new
+    assert w["high_water"] == dict(generation=1, state_revision=4, state_sha256=hashlib.sha256(raw).hexdigest()), w["high_water"]
+    assert w["witness_revision"] == json.loads(goc[1])["witness_revision"] + 1, w
+    _call1174(m._1174_pair, a, w, raw)
+    # `begin-attempt` sau đó được phép và được dispatch; bộ đếm đúng.
+    rc, r, err = invoke(lenh("begin-attempt", *begin, rev="4"))
+    assert rc == 0 and r["status"] == "reserved_for_dispatch" and r["dispatch_allowed"] is True, (rc, r, err)
+    sau = json.loads(target.read_bytes())
+    assert (sau["attempts_used"], sau["attempts_limit"], sau["state_revision"], sau["state"], sau["attempt_open"]) == \
+        (2, 2, 5, "running", True), sau
+    assert sau["nang_tran"] == [_BAN_GHI1350] and all(sau[k] == state[k] for k in ("review_rounds_limit", "codex_review_calls_limit"))
+
+
+def _rejections1350(c):
+    from unittest.mock import patch
+    # --- legacy: mỗi hàng đổi MỘT đầu vào của lệnh dương ---
+    sd = _legacy_fixture1350(Ctx(c.script, c.tmp / "legacy"))
+    path = sd / "wp55.json"; truoc = path.read_bytes()
+    for nhan, doi, rc_doi, chuoi in (
+            ("người không có quyền", dict(ai="codex"), 7, "ngoài danh sách CHO PHÉP"),
+            ("--can-cu sai dạng", dict(can_cu=_URL1350.split("#")[0]), 2, "--can-cu phải là URL issuecomment GitHub"),
+            ("N bằng trần hiện tại", dict(tran=1), 2, "--tran-moi phải > trần 1"),
+            ("N dưới trần hiện tại", dict(tran=0), 2, "--tran-moi phải > trần 1")):
+        rc, err = _legacy_nang1350(c, sd, **doi)
+        assert rc == rc_doi and chuoi in err, ("legacy " + nhan, rc, err)
+        assert path.read_bytes() == truoc, "legacy " + nhan + ": state bị ghi"
+    rc, err = _legacy_nang1350(c, sd)
+    assert rc == 0 and _st(sd)["attempts_limit"] == 2 and _st(sd)["nang_tran"] == [_BAN_GHI1350], ("fixture legacy phải dương", rc, err)
+    # --- WP1174 scoped: limit 1, allowance 2 ---
+    m, a, state, lenh, begin, invoke, target, witness, pair = _scoped_fixture1350(Ctx(c.script, c.tmp / "scoped"))
+    truoc = (target.read_bytes(), witness.read_bytes())
+    assert state["attempts_limit"] == 1 and a["allowance"]["attempts_limit"] == 2 and 3 < 18
+    for nhan, argv, status, chuoi, chuoi_stderr in (
+            ("--expected-revision cũ", lenh("nang-tran", *_co1350(2), rev="2"), "revision_rejected", "revision_rejected", ""),
+            ("N=3 > allowance 2", lenh("nang-tran", *_co1350(3)), "UNKNOWN", "approved allowance ceiling", ""),
+            ("người không có quyền", lenh("nang-tran", *_co1350(2, ai="codex")), "UNKNOWN", "legacy predicate rejected", "ngoài danh sách CHO PHÉP"),
+            ("N bằng trần hiện tại", lenh("nang-tran", *_co1350(1)), "UNKNOWN", "legacy predicate rejected", "--tran-moi phải > trần 1")):
+        with patch.object(m, "_1174_write", wraps=m._1174_write) as ghi:
+            rc, r, err = invoke(argv)
+        assert rc == 8 and r["status"] == status and chuoi in (r["detail"] or "") and r["dispatch_allowed"] is False, ("scoped " + nhan, rc, r, err)
+        assert chuoi_stderr in err, ("scoped " + nhan + ": sai vị từ", err)
+        assert not ghi.called and (target.read_bytes(), witness.read_bytes()) == truoc, "scoped " + nhan + ": state/witness bị ghi"
+    rc, r, err = invoke(lenh("nang-tran", *_co1350(2)))
+    new = json.loads(target.read_bytes())
+    assert rc == 0 and r["status"] == "completed_no_dispatch" and new["attempts_limit"] == 2 and new["nang_tran"] == [_BAN_GHI1350], ("fixture scoped phải dương", rc, r, err)
+    # Lệnh dương vừa đạt, phát lại với revision đã cũ ⇒ vẫn bị từ chối, không ghi.
+    truoc = (target.read_bytes(), witness.read_bytes())
+    rc, r, err = invoke(lenh("nang-tran", *_co1350(2)))
+    assert rc == 8 and r["status"] == "revision_rejected" and r["dispatch_allowed"] is False and \
+        (target.read_bytes(), witness.read_bytes()) == truoc, ("phát lại revision cũ", rc, r, err)
+
+
+CASES += [("wp1350_nang_tran_attempts_legacy", _legacy_positive1350),
+          ("wp1350_nang_tran_attempts_scoped", _scoped_positive1350),
+          ("wp1350_nang_tran_attempts_rejections", _rejections1350)]
+
+MUTANTS.update({
+    "m1350_attempts_bo_tham_quyen": ('    if (a.ai_nang or "").strip() not in NGUOI_CO_THAM_QUYEN:\n',
+        '    if a.truc != "attempts" and (a.ai_nang or "").strip() not in NGUOI_CO_THAM_QUYEN:\n', ["wp1350_nang_tran_attempts_rejections"]),
+    "m1350_attempts_bo_tran_hien_tai": ('    if a.tran_moi <= st[t] or not CAN_CU_RE.match(a.can_cu):\n',
+        '    if a.truc != "attempts" and a.tran_moi <= st[t] or not CAN_CU_RE.match(a.can_cu):\n', ["wp1350_nang_tran_attempts_rejections"]),
+    "m1350_attempts_bo_tran_allowance": ('for k in ("attempts_limit", "review_rounds_limit", "codex_review_calls_limit")), "approved allowance ceiling")',
+        'for k in ("review_rounds_limit", "codex_review_calls_limit")), "approved allowance ceiling")', ["wp1350_nang_tran_attempts_rejections"]),
+    "m1350_attempts_bo_truc": ('TRUC_NANG_TRAN = {**TRUC_TRAN, "attempts": ("attempts_used", "attempts_limit")}',
+        'TRUC_NANG_TRAN = {**TRUC_TRAN}', ["wp1350_nang_tran_attempts_legacy"]),
+})
+
+
 if __name__ == "__main__":
     sys.exit(main())

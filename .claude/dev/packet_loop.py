@@ -63,6 +63,9 @@ MAC_DINH_TRAN_VONG_REVIEW = 10
 MAC_DINH_TRAN_CODEX = 2
 TRUC_TRAN = {"vong_review": ("review_rounds_used", "review_rounds_limit"),
              "codex_review_calls": ("codex_review_calls_used", "codex_review_calls_limit")}
+# WP1350: trục `nang-tran` NÂNG ĐƯỢC tách khỏi `TRUC_TRAN`. `TRUC_TRAN` vẫn là bảng DUY NHẤT của rescue/`_load`/`_xet_dung`:
+# chạm trần attempts KHÔNG vào `rescue_required`, và `begin-attempt` vẫn chặn khi đã dùng hết lượt.
+TRUC_NANG_TRAN = {**TRUC_TRAN, "attempts": ("attempts_used", "attempts_limit")}
 CAN_CU_RE = re.compile(r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/(issues|pull)/[0-9]+#issuecomment-[0-9]+\Z")
 RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 CANH_BAO_V1 = "CẢNH BÁO: bộ đếm SUY RA từ state v1, có thể THẤP hơn thật"
@@ -1356,7 +1359,7 @@ def cmd_nang_tran(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     if (a.ai_nang or "").strip() not in NGUOI_CO_THAM_QUYEN:
         _die(RC_GUARD, f"--ai-nang {a.ai_nang!r} ngoài danh sách CHO PHÉP {NGUOI_CO_THAM_QUYEN}")
-    u, t = TRUC_TRAN[a.truc]
+    u, t = TRUC_NANG_TRAN[a.truc]
     if a.tran_moi <= st[t] or not CAN_CU_RE.match(a.can_cu):
         _die(RC_ARG, f"--tran-moi phải > trần {st[t]} và --can-cu phải là URL issuecomment GitHub")
     st["nang_tran"].append(dict(truc=a.truc, tran_cu=st[t], tran_moi=a.tran_moi, ai_nang=a.ai_nang.strip(), can_cu=a.can_cu))
@@ -6136,7 +6139,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     q = sub.add_parser("nang-tran", help="nâng trần một trục (LỜI KHAI, không phải bằng chứng)")
     q.add_argument("--packet", type=int, required=True)
-    q.add_argument("--truc", required=True, choices=tuple(TRUC_TRAN))
+    q.add_argument("--truc", required=True, choices=tuple(TRUC_NANG_TRAN))
     q.add_argument("--tran-moi", type=int, required=True)
     for co in ("--ai-nang", "--can-cu"):
         q.add_argument(co, required=True)

@@ -24,7 +24,7 @@
   ],
   "properties": {
     "schema_version": {"const": 1},
-    "packet_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "packet_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$(?![\\s\\S])"},
     "generation": {"type": "integer", "minimum": 1},
     "provider": {
       "enum": ["claude", "codex", "human"]
@@ -47,7 +47,7 @@
       "type": ["string", "null"],
       "minLength": 1
     },
-    "reviewed_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "reviewed_sha": {"type": "string", "minLength": 40, "maxLength": 40, "pattern": "^[0-9a-f]{40}$(?![\\s\\S])"},
     "independent_from_executor_session": {"const": true},
     "review_axes": {
       "type": "array",
@@ -76,7 +76,7 @@
         "additionalProperties": false,
         "required": ["finding_id", "severity", "path", "line", "evidence", "recommendation"],
         "properties": {
-          "finding_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+          "finding_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$(?![\\s\\S])"},
           "severity": {"enum": ["P0", "P1", "P2", "P3"]},
           "path": {"type": ["string", "null"]},
           "line": {"type": ["integer", "null"], "minimum": 1},
@@ -89,8 +89,16 @@
     "assurance": {
       "enum": ["cross_approved", "same_provider_approved", "human_audited", "review_deferred"]
     },
-    "evidence_url": {"type": ["string", "null"], "format": "uri"}
+    "evidence_url": {"type": ["string", "null"], "format": "uri", "pattern": "^https://[^\\u0000-\\u0020\\u007f-\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000\\ufeff]+$(?![\\s\\S])"}
   },
+  "allOf": [
+    {"if": {"required": ["provider"], "properties": {"provider": {"const": "claude"}}},
+     "then": {"properties": {"model_reviewer_identity": {"properties": {"provider": {"const": "anthropic"}}}}}},
+    {"if": {"required": ["provider"], "properties": {"provider": {"const": "codex"}}},
+     "then": {"properties": {"model_reviewer_identity": {"properties": {"provider": {"const": "openai"}}}}}},
+    {"if": {"required": ["provider"], "properties": {"provider": {"const": "human"}}},
+     "then": {"properties": {"model_reviewer_identity": {"properties": {"provider": {"const": "human"}}}}}}
+  ],
   "x-tra-luat-runtime-bindings": {
     "reviewed_sha": "exact_review_head",
     "generation": "exact_packet_generation",

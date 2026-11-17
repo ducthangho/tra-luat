@@ -145,5 +145,7 @@
     "ly_do": "Codex source review 3/3 (run 5e39f7b0) on 46798a5: WP1370-F1 no longer reported; new P2 WP1370-F2 (existing mutant m1174_transport_orphan anchor broken by fix-4 re-indentation)",
     "can_cu": "https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6954528774",
     "ai_nang": "owner decision in chat, recorded by Claude Code coordinator"
-  }
+  },
+  "author_fix6_prompt_path": "ops/prompts/wp1370-r1-g1-claude-author-fix6.txt",
+  "author_fix6_prompt_sha256": "6c6b33d19ed7de9629392cd2267e83ec4bc0afedd968abc63ca7f9d83ec7ec89"
 }

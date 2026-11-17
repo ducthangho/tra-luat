@@ -398,7 +398,8 @@ Ca 't8 python gia thoat 0 dau PATH => cong Python khong DAT' {
 # mặc định có thể KHÔNG BAO GIỜ ra ĐẠT (đo: `test registry` > 900 s cả trên CI Windows lẫn ở đây). Đọc MỌI job `gate*`, không
 # ghim ba tên: master fc852ff đã tách cổng sang `gate-ops`/`gate-cong-cu`, và ba tên ghim cứng là danh sách sẽ trôi.
 Ca 't9 han mac dinh >= timeout-minutes cua job CI' {
-    # wp1325: `gate-packet-loop` dùng biểu thức ma trận (Windows 240, Ubuntu 150). Bộ đọc trần CHỈ nhận số nguyên
+    # wp1325: `gate-packet-loop` dùng biểu thức ma trận (Windows 240, Ubuntu 150). wp1361 (master a0702d0): từ 26090fd biểu thức ấy
+    # nằm ở job mảnh `gate-packet-loop-manh`; job gom `gate-packet-loop` còn `timeout-minutes: 10` — trần lớn nhất vẫn 240. Bộ đọc trần CHỈ nhận số nguyên
     # dương thật (không bool/float/chuỗi số) hoặc ĐÚNG NGUYÊN VĂN biểu thức đã đóng băng (= trần Windows 240);
     # biểu thức/kiểu lạ, 0, âm, thiếu khóa ⇒ TỪ CHỐI (rc=3). So chuỗi tuyệt đối, KHÔNG eval biểu thức.
     $ci = Join-Path $GocKho '.github/workflows/ci.yml'
@@ -1330,9 +1331,19 @@ for j, v in sorted((d.get('jobs') or {}).items()):
 # `upload-artifact` chỉ ngoài Windows (script chạy `cong_cu_test` TRỌN), env `test registry` thêm `CI_DANG_KY_DOT_BIEN_MANH`/`CI_DANG_KY_GOP_KQ`
 # (script xoá — registry tự quyết kế hoạch), `timeout-minutes` (t9 canh). Đổi LỆNH thật đã gương trước khi ghim: `update-linux.sh --selftest`
 # (chỉ Linux, như `RUNNER_OS = Linux` của bước) và job MỚI `gate-nhanh-manh`/`gate-nhanh-gop` (`nhanh_don_duoc_test` TRỌN + dòng `THAY BẰNG`).
+# wp1361 (nền a0702d0, merge PR #1360): ghim lại SAU khi rà `git diff 9aa40ac a0702d0 -- ci.yml` (bỏ chú thích) — chỉ hai job packet-loop
+# đổi (#1343 = 26090fd), dấu vân bảy job còn lại và `<workflow>` giữ nguyên. `gate-packet-loop` cũ thành job mảnh `gate-packet-loop-manh`
+# (MỚI); `gate-packet-loop` nay là job gom. Đổi NGOÀI lệnh: `if:` cấp job (mảnh `packet_loop != 'bo_qua'`, gom `!cancelled()`) và ma trận
+# `manh` 0..15 (script luôn chạy ĐỦ); bỏ `if: che_do != 'duong_nhanh'` ở năm bước và bỏ bước liệt kê `DUONG_NHANH`; bỏ bước cài Ruff ở
+# hai job (script vẫn cài bản ghim, các job `gate*` khác còn dùng); `shell: bash` + env `PACKET_LOOP_MANH`/`PACKET_LOOP_RA` ở bước mảnh,
+# `PACKET_LOOP`/`KQ_MANH` ở bước gom (script xoá cả bốn — t30); `upload-artifact`/`download-artifact` (nếp đã có trong `$NepCaiDat`);
+# job gom chỉ còn Force LF + checkout + setup-python, `timeout-minutes: 10` (t9 canh trần). Đổi LỆNH: `packet-loop selftest` chạy
+# `packet_loop_test_manh.py` (mảnh, sổ ca − `CA_DAI`, không đột biến) thay `packet_loop_test.py`; bước MỚI `gom manh packet-loop (so TAP
+# ca; wp1343)` = `packet_loop_test_manh.py --gom manh --n 16`. Gương: script giữ `packet_loop_test.py` TRỌN + dòng `THAY BẰNG` nêu tên hai bước.
 $DauVanCi = @{ '<workflow>' = '44136fa355b3'; 'gate' = '63dc12af15ef'; 'gate-cong-cu' = '3d82f41a1eb5'; 'gate-cong-cu-gop' = 'ade3f0565731'
                'gate-nhanh-gop' = '3d6daa7c4f6c'; 'gate-nhanh-manh' = 'ac39ba6c783c'
-               'gate-ops' = '3382603e4cb1'; 'gate-packet-loop' = '5546b9244930'; 'gate-registry' = '25db60055731' }
+               'gate-ops' = '3382603e4cb1'; 'gate-packet-loop' = '67a508fb841f'; 'gate-packet-loop-manh' = 'c386d4cf83f3'
+               'gate-registry' = '25db60055731' }
 # Trả về các hàng "tên :: đích đuôi" của ci.yml mà script KHÔNG gương và KHÔNG khai tên, cộng các job có dấu vân lệch bảng ghim
 # (`$DauVan`; $null = chỉ bộ so từng dòng — t34 dùng để đo răng riêng từng chốt). Rỗng = gương đủ.
 function Tim-ThieuGuong { param([string]$Ci, [string]$Tep, [string[]]$Nep, [hashtable]$DauVan, [switch]$ChiBoSoTungDong)

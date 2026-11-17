@@ -16,7 +16,9 @@
     (tên job là cách CI chia máy và trôi theo master: nền gốc d553efa có `gate`, `gate-registry`,
     `gate-packet-loop`; master fc852ff tách thêm `gate-ops`, `gate-cong-cu` (8 mảnh) và `gate-cong-cu-gop` (gom mảnh —
     script chạy `ops/cong_cu_test.py` TRỌN một lượt thay cho mảnh + gom); master f7b76c3 thêm `gate-nhanh-manh` (8 mảnh)
-    và `gate-nhanh-gop` — mức `day-du` chạy `ops/nhanh_don_duoc_test.py` TRỌN thay cho mảnh + gom), nhưng chạy TẠI MÁY. `env:` của bước do script
+    và `gate-nhanh-gop` — mức `day-du` chạy `ops/nhanh_don_duoc_test.py` TRỌN thay cho mảnh + gom; master 26090fd tách
+    `gate-packet-loop` thành `gate-packet-loop-manh` (16 mảnh) + job gom `gate-packet-loop` — script vẫn chạy
+    `.claude/dev/packet_loop_test.py` TRỌN thay cho mảnh + gom), nhưng chạy TẠI MÁY. `env:` của bước do script
     làm chủ: khoá chế độ rò từ phiên gọi bị xoá, cùng `PYTHON*` lạ, biến git trỏ kho/cây/index khác, `BASH_ENV` và hàm bash
     export `BASH_FUNC_*` (job CI không có biến nào trong số đó), `test registry` mang env như lượt `pull_request` khi đo
     được diff. Nó KHÔNG gọi
@@ -51,9 +53,10 @@
                cuối mức này — năm dòng: cgroup và `ci-duong-nhanh selftest` (chỉ có trên Linux; bước sau có từ master
                7e5958e), EOL base (đòi event `pull_request`), `tl selftest` có bằng chứng exact-identity, `release-verify`
                lane WORKER — cộng hai bước `ci.yml` bỏ trên Windows, `update-linux selftest` ngoài Linux (ci.yml gác
-               `RUNNER_OS = Linux` trong thân bước lease-publish), và hai dòng `THAY BẰNG`: mảnh + gom của `cong_cu_test`
-               (master từ fc852ff) và gom `nhanh_don_duoc` (master từ f7b76c3) — mức này chạy `ops/cong_cu_test.py` và
-               `ops/nhanh_don_duoc_test.py` TRỌN thay cho mảnh. Bước chỉ chạy ở chế độ `duong_nhanh` (PR chỉ đổi hồ sơ) thì không
+               `RUNNER_OS = Linux` trong thân bước lease-publish), và ba dòng `THAY BẰNG`: mảnh + gom của `cong_cu_test`
+               (master từ fc852ff), gom `nhanh_don_duoc` (master từ f7b76c3) và mảnh + gom của packet-loop (master từ
+               26090fd) — mức này chạy `ops/cong_cu_test.py` và `ops/nhanh_don_duoc_test.py` TRỌN thay cho mảnh; packet-loop
+               chạy TRỌN ở CẢ HAI mức. Bước chỉ chạy ở chế độ `duong_nhanh` (PR chỉ đổi hồ sơ) thì không
                gương: script luôn chạy ĐỦ như lượt push/`workflow_dispatch`. t32 đòi mọi bước `gate*` còn lại có LỆNH
                trong script — mỗi (đích, MỌI đối số sau nó) của `ci.yml` BẰNG đuôi của một mảng/lệnh trong script, kể cả ghim
                phiên bản (`pkg==x.y.z`, `AL_VER`) — hoặc có TÊN ĐÚNG trong một dòng `KHÔNG CHẠY`/`THAY BẰNG`; bước không có đích
@@ -68,7 +71,7 @@
 
 .PARAMETER HanGiay
     Hạn giờ cho MỘT cổng, tính bằng giây. Mặc định HIỆN HÀNH 14400 = 240 phút (wp1325 r3, owner r50): job
-    `gate-packet-loop` của `ci.yml` đặt `timeout-minutes: ${{ matrix.os == 'windows-latest' && 240 || 150 }}`
+    `gate-packet-loop` (từ master 26090fd là job mảnh `gate-packet-loop-manh`; job gom `gate-packet-loop` còn 10 phút) của `ci.yml` đặt `timeout-minutes: ${{ matrix.os == 'windows-latest' && 240 || 150 }}`
     — Windows 240, Ubuntu 150 — nên trần Windows LỚN NHẤT của các job `gate*` là 240. t9 chỉ nhận số nguyên
     dương hoặc ĐÚNG NGUYÊN VĂN biểu thức ấy (= 240), không eval biểu thức lạ; nâng trần không hứa chữa hiệu năng.
     Lịch sử: trước wp1325 mặc định 9000 = `timeout-minutes: 150` — trần LỚN NHẤT của các job
@@ -162,6 +165,10 @@ $env:PYTHONDONTWRITEBYTECODE = '1'
 # `NHANH_DON_DUOC_TU_KIEM_NONCE`/`_TU_KIEM_FILE` (kênh bằng chứng tự kiểm) là đầu vào của tiến trình CON mà chính bộ test tự đặt.
 # Không workflow nào khai chúng ⇒ biến của phiên gọi, xoá ở ranh giới. Bộ test tự đặt chúng cho con SAU lúc này (env riêng của
 # lượt con) — không bị ảnh hưởng. t30 rò TỪNG biến và đòi đồ giả `nhanh_don_duoc_test` của lượt `day-du` thấy VẮNG.
+# wp1361 (master a0702d0; #1343 = 26090fd chia mảnh packet-loop): bốn khoá env mới của hai job packet-loop (đo: bộ test trên a0702d0
+# ⇒ t30 ĐỎ, thiếu đúng bốn khoá này) — `PACKET_LOOP_MANH`/`PACKET_LOOP_RA` (bước mảnh của `gate-packet-loop-manh`) và
+# `PACKET_LOOP`/`KQ_MANH` (bước gom của `gate-packet-loop`). Chỉ `.claude/dev/packet_loop_test_manh.py` đọc chúng; script chạy
+# `.claude/dev/packet_loop_test.py` TRỌN (không qua bộ bọc mảnh) nên xoá như mọi khoá CI khai mà script không đặt.
 foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH', 'CONG_CU_TEST_MANH', 'CONG_CU_TEST_MANH_RA',
                'CONG_CU_TEST_GOP_CHE_DO',
                'CI_DANG_KY_WORKERS', 'CI_DANG_KY_SU_KIEN', 'CI_DANG_KY_GOC', 'CI_DANG_KY_DAU', 'CI_DANG_KY_DOT_BIEN_MANH',
@@ -171,7 +178,8 @@ foreach ($n in 'AL_VER', 'PR_HEAD_SHA', 'EOL_BASE_SHA', 'CONG_CU_TEST_BAN_KINH',
                'NHANH_DON_DUOC_TU_KIEM_CHI_CA', 'NHANH_DON_DUOC_KENH', 'NHANH_DON_DUOC_DAU_PHIEN', 'NHANH_DON_DUOC_MUTANT',
                'NHANH_DON_DUOC_LAN_THU', 'NHANH_DON_DUOC_TU_KIEM_NONCE', 'NHANH_DON_DUOC_TU_KIEM_FILE',
                'CI_DUONG_NHANH_SU_KIEN', 'CI_DUONG_NHANH_GOC',
-               'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE', 'CI_DUONG_NHANH_CHE_DO') {
+               'CI_DUONG_NHANH_DAU', 'CI_DUONG_NHANH_MERGE', 'CI_DUONG_NHANH_CHE_DO',
+               'PACKET_LOOP_MANH', 'PACKET_LOOP_RA', 'PACKET_LOOP', 'KQ_MANH') {
     [Environment]::SetEnvironmentVariable($n, [NullString]::Value)
 }
 # Biến git CỤC BỘ CỦA KHO (đúng tập `git rev-parse --local-env-vars` in ra, trừ `GIT_CONFIG*` — nếp git đọc giá trị CÓ HIỆU LỰC, t13)
@@ -679,6 +687,7 @@ if ($Muc -eq 'day-du') {
     Noi 'KHÔNG CHẠY (đòi ref KHÁC master): "release-verify strict (lane WORKER — manifest TẠM ngoài repo)" — script chạy lane LAND thay vào.'
     Noi 'THAY BẰNG MỘT LƯỢT (master từ fc852ff): "G5 manh ban kinh dot bien (#668)" + "G5 gom manh ban kinh dot bien (#668)" — script chạy ops/cong_cu_test.py TRỌN.'
     Noi 'THAY BẰNG MỘT LƯỢT (master từ f7b76c3): "gộp mảnh nhanh_don_duoc (targeted_mutant_gate)" — không có mảnh để gom; cổng nhanh_don_duoc_test chạy ops/nhanh_don_duoc_test.py TRỌN thay cho 8 mảnh + gom.'
+    Noi 'THAY BẰNG MỘT LƯỢT (master từ 26090fd): "packet-loop selftest" (mảnh) + "gom manh packet-loop (so TAP ca; wp1343)" — không có mảnh để gom; cổng packet-loop selftest chạy .claude/dev/packet_loop_test.py TRỌN (đủ ca, gồm cả CA_DAI và bảng đột biến mà CI đẩy sang workflow đêm packet-loop-dot-bien) thay cho 16 mảnh + gom.'
 }
 
 # ───────────────────────────── tổng kết ─────────────────────────────

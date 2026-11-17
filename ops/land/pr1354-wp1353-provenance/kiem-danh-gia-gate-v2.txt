@@ -1,0 +1,28 @@
+# Kiem danh_gia_gate.py v2 (sha256 539fed68) tren run PR 43929227587 (#1344, packet_loop=chay) — ve duong + phan chung
+## ve duong: 16 job manh + gom
+JOB 133519843687 gate-packet-loop (ubuntu-latest) [ubuntu-latest] conclusion=success -> passed: [packet_loop_test_manh.py --gom] GOM: ĐẠT · 16 mảnh · 1503 ca bắt buộc (sổ 1505 − CA_DAI; CA_DAI chạy ở workflow packet-loo
+JOB 133517053830 gate-packet-loop-manh (ubuntu-latest, 0) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 0/16 · đột biến - · 84/84 ca · 0 lượt đột biến · carrier=có · 199s · rc=0
+JOB 133517053889 gate-packet-loop-manh (ubuntu-latest, 1) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 1/16 · đột biến - · 43/43 ca · 0 lượt đột biến · carrier=không · 112s · rc=0
+JOB 133517054147 gate-packet-loop-manh (ubuntu-latest, 10) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 10/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 80s · rc=0
+JOB 133517054153 gate-packet-loop-manh (ubuntu-latest, 11) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 11/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 132s · rc=0
+JOB 133517054338 gate-packet-loop-manh (ubuntu-latest, 12) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 12/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 134s · rc=0
+JOB 133517054193 gate-packet-loop-manh (ubuntu-latest, 13) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 13/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 94s · rc=0
+JOB 133517055399 gate-packet-loop-manh (ubuntu-latest, 14) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 14/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 98s · rc=0
+JOB 133517054380 gate-packet-loop-manh (ubuntu-latest, 15) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 15/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 96s · rc=0
+JOB 133517053904 gate-packet-loop-manh (ubuntu-latest, 2) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 2/16 · đột biến - · 99/99 ca · 0 lượt đột biến · carrier=không · 81s · rc=0
+JOB 133517053703 gate-packet-loop-manh (ubuntu-latest, 3) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 3/16 · đột biến - · 99/99 ca · 0 lượt đột biến · carrier=không · 70s · rc=0
+JOB 133517054246 gate-packet-loop-manh (ubuntu-latest, 4) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 4/16 · đột biến - · 99/99 ca · 0 lượt đột biến · carrier=không · 175s · rc=0
+JOB 133517053559 gate-packet-loop-manh (ubuntu-latest, 5) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 5/16 · đột biến - · 99/99 ca · 0 lượt đột biến · carrier=không · 110s · rc=0
+JOB 133517054019 gate-packet-loop-manh (ubuntu-latest, 6) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 6/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 70s · rc=0
+JOB 133517053918 gate-packet-loop-manh (ubuntu-latest, 7) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 7/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 98s · rc=0
+JOB 133517054242 gate-packet-loop-manh (ubuntu-latest, 8) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 8/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 96s · rc=0
+JOB 133517054452 gate-packet-loop-manh (ubuntu-latest, 9) [ubuntu-latest] conclusion=success -> passed: [.claude/dev/packet_loop_test_manh.py] TỔNG: ĐẠT | [.claude/dev/packet_loop_test_manh.py] MẢNH: ca 9/16 · đột biến - · 98/98 ca · 0 lượt đột biến · carrier=không · 86s · rc=0
+## job duy nhat not_measured (khong lien quan v2): gate (ubuntu-latest) tren luot PR khong sinh JSON tl-selftest — nhu moi lan
+JOB 133517052526 gate (ubuntu-latest) [ubuntu-latest] conclusion=success -> not_measured: buoc [== tl selftest] thieu dau hieu duong /^\{"ok": true, "status": "pass", "name": "tl-selftest", "returncode": 0/
+## phan chung --am-buoc (phai not_measured, rc 0)
+## --am-buoc 'gate-packet-loop (' 'packet_loop_test_manh.py --gom'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0
+## --am-buoc 'gate-packet-loop-manh (ubuntu-latest, 3)' '.claude/dev/packet_loop_test_manh.py'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0

@@ -1,0 +1,39 @@
+# Bien ban M8 (ADR-0060) dong WP #1343 CI-PACKET-LOOP-NHANH r3 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1344-wp1343-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6931217894 tren 4b0a3d2).
+# Moc gate_output owner_waived: job gom gate-packet-loop tren push master in "KHONG DO" theo M2 (chi dao chu kho #1206 issuecomment-6918292696:
+# CI hau merge khong chay test dai); 22/23 job con lai co dau hieu duong; bo ca packet-loop do bu TAI CHO tren b8bc64f: GOM DAT 1503 ca.
+packet: wp1343
+revision: 3
+generation: 1
+spec_hash: 67c969c422b091876e3ddbb6e9498ee94262a60f87b3d201e8946ba3db79d788
+head_da_review: 4b0a3d224ca3b298a57ca188ebce8f0d1728cc7f
+tree_h: 09d3677fd42b62bfb8ac23cb9944176f5072523b
+review:
+  offline: 'khong goi Codex offline (loi khai phien dieu phoi); review doc lap = connector Codex + human audit'
+  connector: 'issuecomment-6926087960 codex-review-state:v1 completed, has_any_findings false, commit 4b0a3d2'
+  human_audit: 'issuecomment-6931217894 human_exact_head_audit.v1 approve tren 4b0a3d2 (chu kho tu dang)'
+windows:
+  phan_loai: not_required
+  nguon: 'dac ta r3: Windows 0; chi dao chu kho 16-11 khong chay CI Windows. No: chay-cong-windows_test.ps1 ghim dau van gate-packet-loop cu (GHIM-LAI-CHAY-CONG-WINDOWS-SAU-1343).'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1344#issuecomment-6931217894
+duyet_chu_kho_ghi_chu: 'audit tu dang 22:25:00Z 16-11, truoc merge 22:25:22Z; duyet merge dung SHA qua AskUserQuestion (loi khai).'
+merge_commit: b8bc64f99f43f382ceb90aadbe57df783842a28d
+tree_m: a257ce426d099ce022daf48194b8990e0d58fa6e
+ci_master:
+  run_id: 43969906464
+  conclusion: success
+  ghi_chu: 'ci.yml push master success; gate-packet-loop-manh skipped, gom gate-packet-loop success "KHONG DO" (M2). Workflow dem 43969913298 tren b8bc64f success 16/16 (CA_DAI 2/2).'
+nghiem_thu:
+  N1: passed  # executor ci_duong_nhanh_test 122/122, dot bien nham dich 38/38 (loi_khai_co_neo); gate-ops hau merge passed
+  N2: passed  # CI PR 43929227587 GOM DAT 1503 ca; do tai cho tren b8bc64f GOM DAT 1503 ca
+  N3: passed  # executor (loi_khai_co_neo); ca gom trong ci_duong_nhanh_test chay o gate-ops hau merge
+  N4: passed  # actionlint rc 0 (nghiem-thu-b8bc64f.txt); gate-ops/gate-registry passed
+  N5: passed  # CI PR: manh cham nhat 234 s; workflow dem: CA_DAI 2/2
+  N6: passed  # adr-song/doctrine-scan rc 0; ruff delta 0
+lease_cuoi: wp1343-r3-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: owner_waived

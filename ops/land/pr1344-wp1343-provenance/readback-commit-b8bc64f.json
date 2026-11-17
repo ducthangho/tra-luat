@@ -1,0 +1,92 @@
+{
+ "sha": "b8bc64f99f43f382ceb90aadbe57df783842a28d",
+ "node_id": "C_kwDOTNeRjdoAKGI4YmM2NGY5OWY0M2YzODJjZWI5MGFhZGJlNTdkZjc4Mzg0MmEyOGQ",
+ "commit": {
+  "author": {
+   "name": "ducthangho",
+   "email": "ducthangho@gmail.com",
+   "date": "2026-11-16T22:25:22Z"
+  },
+  "committer": {
+   "name": "GitHub",
+   "email": "noreply@github.com",
+   "date": "2026-11-16T22:25:22Z"
+  },
+  "message": "Merge pull request #1344: CI-PACKET-LOOP-NHANH r3 (#1343)\n\nci: gate-packet-loop chia 16 mảnh + job gom so tập; ca dài và bảng đột biến sang workflow đêm (#1343)",
+  "tree": {
+   "sha": "a257ce426d099ce022daf48194b8990e0d58fa6e",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/a257ce426d099ce022daf48194b8990e0d58fa6e"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/b8bc64f99f43f382ceb90aadbe57df783842a28d",
+  "comment_count": 0,
+  "verification": {
+   "verified": true,
+   "reason": "valid",
+   "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq+4LSCRC1aQ7uu5UhlAAAwBIQAJcCvwAtow0Y2CnSePwu5lsb\nFsTAL3raHhDTp5rqjwVbY5bv4nyy5yi3LKrSex0NcUXxvKlK9B2AwY30RiA8H4yQ\nnP4Fa5ZzPis2Fc12DOHK5no+aekUzBVPCH2eeco3SeIObnRb1+U5NDNXKywZBXy9\nUa3VhOoP+z4zs3/jtqusPwUntNRklR3xe8ZBrw75JpZn/yz8ILie9XUop/3hGHxJ\nB2CUl6YG70SLBgfp+e8Msk39+BCb32PJFBRJ0p8TuYTwI+qSPsKCWd7DGUKjqrO/\ne3uZOPf8z2wXlqY1uLpmK2veuQOwP1K7wgS7dS5KBta+PjZ/0Fmi83ns6GKQgUFG\ngqS+vXjdszQfcnEXHlf5PQkLDk9qrEPyA9c2LOr3zxnipaJZqcl7VYFTMo9fEbys\nsIU+fcjXeDb8pro+dDiP+dNACUd+3RfxiAdmbbEtdkFkyCbQvUYjF5jz0P20tyUZ\nJftRVKe4V07bhqZnKjYfSyE+5UlPdDjHbjUdcJn2rpqa1yHbfOLz8NvCT2VSmL4l\nmTxoZzTuCJ9zyWyTcKnbwfQJVRjgcjMgMkoWARXX+fJ5HzWRXicShjKBQMoz6bNT\nuqujhB5DvzPRkHb59X/1lbaPfd5YQQUGEZSrCWr3KTwUbjiiOscoRYxDWk4VLbT4\n4/B6SO/M2G0BvBgkLjXZ\n=2QiN\n-----END PGP SIGNATURE-----\n",
+   "payload": "tree a257ce426d099ce022daf48194b8990e0d58fa6e\nparent aa718cb8392c1e2defd47a0259c575de16fbd5a3\nparent 4b0a3d224ca3b298a57ca188ebce8f0d1728cc7f\nauthor ducthangho <ducthangho@gmail.com> 1794867922 +0700\ncommitter GitHub <noreply@github.com> 1794867922 +0700\n\nMerge pull request #1344: CI-PACKET-LOOP-NHANH r3 (#1343)\n\nci: gate-packet-loop chia 16 mảnh + job gom so tập; ca dài và bảng đột biến sang workflow đêm (#1343)",
+   "verified_at": "2026-11-16T22:25:22Z"
+  }
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/b8bc64f99f43f382ceb90aadbe57df783842a28d",
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/b8bc64f99f43f382ceb90aadbe57df783842a28d",
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/b8bc64f99f43f382ceb90aadbe57df783842a28d/comments",
+ "author": {
+  "login": "ducthangho",
+  "id": 12748935,
+  "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+  "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/ducthangho",
+  "html_url": "https://github.com/ducthangho",
+  "followers_url": "https://api.github.com/users/ducthangho/followers",
+  "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+  "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+  "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+  "repos_url": "https://api.github.com/users/ducthangho/repos",
+  "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "committer": {
+  "login": "web-flow",
+  "id": 19864447,
+  "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+  "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/web-flow",
+  "html_url": "https://github.com/web-flow",
+  "followers_url": "https://api.github.com/users/web-flow/followers",
+  "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+  "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+  "organizations_url": "https://api.github.com/users/web-flow/orgs",
+  "repos_url": "https://api.github.com/users/web-flow/repos",
+  "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/web-flow/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "parents": [
+  {
+   "sha": "aa718cb8392c1e2defd47a0259c575de16fbd5a3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/aa718cb8392c1e2defd47a0259c575de16fbd5a3",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/aa718cb8392c1e2defd47a0259c575de16fbd5a3"
+  },
+  {
+   "sha": "4b0a3d224ca3b298a57ca188ebce8f0d1728cc7f",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4b0a3d224ca3b298a57ca188ebce8f0d1728cc7f",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/4b0a3d224ca3b298a57ca188ebce8f0d1728cc7f"
+  }
+ ],
+ "stats": {
+  "total": 516,
+  "additions": 450,
+  "deletions": 66
+ }
+}

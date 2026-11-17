@@ -1,0 +1,37 @@
+# Bien ban M8 (ADR-0060) dong WP #1345 LAUNCHER-PY311-WIN-CURDIR r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1347-wp1345-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6932013311 tren a97236c).
+# Moc gate_output owner_waived: job gom gate-packet-loop tren push master in "KHONG DO" theo M2 (#1343); cay e4cce23 khac cay head a97236c
+# chi o ops/land/pr1341-* (ngoai tap phu thuoc), va CI PR 43971582168 tren a97236c: GOM DAT 1503 ca. N4: lane launcher ubuntu 3.11 408/408.
+packet: wp1345
+revision: 1
+generation: 1
+spec_hash: 07f7ff756ab0302a03809de29c0859d4e80dcbd80170755368222394dc1e093c
+head_da_review: a97236c785e7060641216719caceb10fbdaf801b
+tree_h: a8a70eecb640293143da50c692eb7600432520a8
+review:
+  offline: 'khong goi Codex offline (loi khai phien dieu phoi); review doc lap = connector Codex + human audit'
+  connector: 'issuecomment-6931456278 codex-review-state:v1 completed, has_any_findings false, commit a97236c'
+  human_audit: 'issuecomment-6932013311 human_exact_head_audit.v1 approve tren a97236c (chu kho tu dang)'
+windows:
+  phan_loai: not_required
+  nguon: 'dac ta r1 muc 4/6: khong chay Windows (chi dao chu kho); do bang mo phong _r1335_win tren Linux 3.11. Lane launcher windows-latest hau merge tu chay (paths): 325/325 qua, ket luan failure vi 85 ca BO QUA nhu cac lan truoc.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1347#issuecomment-6932013311
+duyet_chu_kho_ghi_chu: 'audit tu dang 23:03:06Z 16-11, truoc merge 23:03:19Z; duyet merge dung SHA qua AskUserQuestion (loi khai).'
+merge_commit: e4cce23bcf975bf041d584f9d4b74327b9c03794
+tree_m: d43fc9a3b3995552202e1d7f876289c59a92c307
+ci_master:
+  run_id: 43975814762
+  conclusion: success
+  ghi_chu: 'ci.yml push master success; gom gate-packet-loop "KHONG DO" (M2). Lane launcher 43975814821: ubuntu (Python 3.11.18) 408/408 success; windows failure (85 BO QUA, khong phai gate).'
+nghiem_thu:
+  N1: passed  # executor --lap-ca hai ca r1335 tren 3.11 + ve am base do (loi_khai_co_neo); hau merge lane launcher 3.11 408/408 gom hai ca
+  N2: passed  # executor 11 ca r1335 + t117 tren 3.12/3.13 (loi_khai_co_neo); CI PR gate a97236c success
+  N3: passed  # nghiem-thu-e4cce23.txt: ruff delta 0, adr-song/doctrine-scan rc 0
+  N4: passed  # launcher-ubuntu-133679363427-trich.txt: Python 3.11.18, 408/408, hong 0
+lease_cuoi: wp1345-r1-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: owner_waived

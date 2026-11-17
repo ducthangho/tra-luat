@@ -1,0 +1,4 @@
+# trich log job 133668066085 gate-packet-loop (gom) run 43971582168 pull_request head a97236c, conclusion=success
+2026-11-16T22:42:03.4702778Z   PACKET_LOOP: chay
+2026-11-16T22:42:06.4277231Z GOM: mọi mảnh khớp phân hoạch
+2026-11-16T22:42:06.4278129Z GOM: ĐẠT · 16 mảnh · 1503 ca bắt buộc (sổ 1505 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)

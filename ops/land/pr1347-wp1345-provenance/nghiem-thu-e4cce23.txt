@@ -1,0 +1,23 @@
+# Nghiem thu tren merge e4cce23 (#1347, packet #1345) — 2026-11-17T00:29:54Z, kho phien (unshallow), core.abbrev 7
+## git log -1 e4cce23 --format='%H %T %P'
+e4cce23bcf975bf041d584f9d4b74327b9c03794 d43fc9a3b3995552202e1d7f876289c59a92c307 822a59ec7186551296c0addf5d027a710678509c a97236c785e7060641216719caceb10fbdaf801b
+## numstat e4cce23^1..e4cce23
+20	0	.claude/dev/launcher.py
+## diff ten tep a97236c..e4cce23 ngoai ops/land/** (cay merge so cay head da do tren CI PR)
+(het; rong = khong khac)
+## dac ta (nhanh lease)
+b4f16d31ce8cf048f73135ff5610741056585f61
+07f7ff756ab0302a03809de29c0859d4e80dcbd80170755368222394dc1e093c  -
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+## ruff ruff 0.16.9 --select F .claude/dev/launcher.py base e4cce23^1 vs merge
+base=0 merge=0
+## git diff --check e4cce23^1 e4cce23
+rc=0
+## tap phu thuoc packet-loop co dong ops/**: ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md ops/bien_nhan_v2.py ops/land/pr1270-wp1179-provenance/ ops/lease_publish.py; diff a97236c..e4cce23 chi cham:
+ops/land/pr1341-wp1335-land-evidence.yaml
+ops/land/pr1341-wp1335-provenance/

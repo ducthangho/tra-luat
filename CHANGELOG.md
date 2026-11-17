@@ -1,3 +1,20 @@
+# ★ v1.36.70 — r377: phát hành gom 8 packet từ sau v1.36.69 (#1371) (2026-11-17)
+
+Packet phát hành `RELEASE-1.36.70` r1 (Issue #1371). Bump ba chỗ (`VERSION`, `tl.py`, `SKILL.md`), tái sinh manifest.
+Nội dung chi tiết từng packet nằm ở `changelog.d/wp-<issue>.md` (dev-side, không vào gói); mục này chỉ gom lại:
+
+- **#1009** `tl_agent_creds.enc`: tệp credential agent riêng (Codex `auth.json`, token Claude, khoá Gemini cho `agy`);
+  lệnh mới `agent-creds-set`, `secrets-keygen`; khoá master dưới 32 ký tự hoặc dưới 12 ký tự khác nhau bị từ chối ở đường ghi.
+- **#1030** (dev-side) bộ quét bí mật của gói không còn bỏ qua tệp có đuôi lạ (`.log`, `.patch`, `.csv`…).
+- **#1038** lệnh mới `agent-creds-exec [--claude] [--gemini] -- <lệnh>`: chạy một lệnh với credential chỉ đặt trong
+  môi trường của tiến trình con; không xuất, không ghi đĩa.
+- **#1052** tham chiếu mới `references/windows-testing.md` (dựng và test trên Windows qua Desktop Commander).
+- **#1099** phiên cloud: `nlm` gặp lỗi xác thực thì nạp lại cookie jar một lần (sau canary), chỉ thử lại lệnh đọc.
+- **#1223** hợp đồng client lên webapp `2.21.2q` (`EXPECT_VERSION`), thêm `agent_creds_put` vào `API_CONTRACT.md`.
+- **#1224** tài liệu: snapshot webapp hiện hành `Code.2.21.2q.gs`; `CODEX_AUTH_JSON` là đường cũ.
+- **#1334** `tl bootstrap` không ghi Codex `auth.json` khi `CODEX_HOME` nằm trong kho git (chốt `_trong_kho_git`
+  trên hai chuỗi: đường như khai và `realpath`, kể cả symlink kèm `..`).
+
 # ★ v1.36.69 — r376: backup config không bao giờ rơi vào cây skill (#972) (2026-10-27)
 
 `r202_profile_delete_backup_ngoai_cay` đỏ trên máy chủ kho (`HOME=/home/agent`): `_config_backup_dir()` lùi về

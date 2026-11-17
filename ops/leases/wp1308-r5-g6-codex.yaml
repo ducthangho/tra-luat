@@ -8,8 +8,8 @@
   "lease_id": "wp1308-r5-g6-codex",
   "granted_by": "ducthangho",
   "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1308#issuecomment-6937129597",
-  "lease_expires_at_utc": "2026-11-17T09:22:00Z",
-  "lease_until": "2026-11-17T09:22:00Z",
+  "lease_expires_at_utc": "2026-11-17T06:33:43Z",
+  "lease_until": "2026-11-17T06:33:43Z",
   "reviewed_sha_required": "5f97e1eaaf4d97bbe86d71a7f6e21d1f60fa5a0a",
   "branch": "ops/wp1308-target-r5-g6",
   "role": "executor",
@@ -45,5 +45,24 @@
   "spec_hash": "aa78e66c9631dc28920106f0a73b58b348bb64d681d4727d7ba7755194780ad4",
   "prompt_path": "ops/prompts/wp1308-target-canary-r5-g6.txt",
   "prompt_sha256_required": "4b55f20104fb5a3d1098a411872735e47be33de2738bc3a86fb57a20f86de47a",
-  "thay_the_cho_note": "g5 lease wp1308-r5-g5-codex already expired 2026-11-17T00:03:48Z; no tombstone into an expired lease."
+  "thay_the_cho_note": "g5 lease wp1308-r5-g5-codex already expired 2026-11-17T00:03:48Z; no tombstone into an expired lease.",
+  "ket_qua_g6": {
+    "adopt_state": "rc0 03:33Z leased rev2 witness14",
+    "record_lease": "rc0 03:41Z rev3 witness15",
+    "nang_tran": "attempts/vong_review/codex_review_calls 1->2 rc0 (two rc8 UNKNOWN attempts without writes retained)",
+    "begin_attempt": "rc0 05:22Z reserved_for_dispatch running rev7 witness19 attempts 2/2",
+    "local_H": "984858478d35197d195bb715dc02b528775f1b98 tree 8759d52f3ed1b956caa14c9e8eaa2e4cd22007a0 (never published)",
+    "review": "Codex service run 0e979dd6ed1b48ba897dde7a0190cb27 verdict blocked, P2 inherited-raw-hmac-literals-in-reviewed-tree (inherited WP1179 test logs, baseline-identical)",
+    "record_review": "rc3 quota_exhausted 06:11Z; state blocked rev11 sha 6da87c0e, witness rev23 sha 98065032",
+    "owner_decision": "record blocked and close g6 (chat 17/11/2026 ~13:10 VN)",
+    "checkpoint": "https://github.com/ducthangho/tra-luat/issues/1308#issuecomment-6940160079"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-17T09:22:00Z",
+    "han_moi_utc": "2026-11-17T06:33:43Z",
+    "luc_rut_utc": "2026-11-17T06:29:43Z",
+    "nguoi_rut": "Claude Code coordinator under owner decision",
+    "ly_do": "Owner chose to record the blocked review verdict and close g6; canary accept unreachable in g6.",
+    "gioi_han": "Only shorten; state/witness/history untouched."
+  }
 }

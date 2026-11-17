@@ -16565,6 +16565,9 @@ MUTANTS.update({
 # --- #1342 WP1174-WINDOWS-BACKEND r1: hai primitive Windows ĐỨNG RIÊNG (`_1174_win_*`), CHƯA nối vào runtime. Ca thuần chạy mọi nền;
 # ca native chỉ đo trên Windows (nền khác: BỎ QUA, không tính đạt). Không thêm vào WP1174_REQUIRED/WP1174_BOTH, không đổi MUTANTS.
 _BASE1342 = "14f7dd3a593fc1ef225e5067e73569a702153871"   # base_sha của lease wp1342-r1-g1-claude (N2 so byte với blob này)
+# #1365: đầu HEAD của phép so N2 GHIM vào merge commit của PR #1363 (blob = head đã audit `675c38d`). N2 là tiêu chí PR-TIME của #1342 r1;
+# để nó đọc cây làm việc thì sau land MỌI sửa đổi ở một định nghĩa có sẵn của `packet_loop.py` làm ca ĐỎ dù mã đúng.
+_HEAD1342 = "ded5d41b1754ef05d87815f20c48203e6b00e58d"
 
 
 def _new1342(node):
@@ -16619,13 +16622,17 @@ def _wired1342(head):
 
 def _additive_case1342(c):
     import ast
-    p = subprocess.run(["git", "-C", str(ROOT), "show", _BASE1342 + ":.claude/dev/packet_loop.py"], capture_output=True)
-    assert p.returncode == 0, (f"N2 KHÔNG ĐO ĐƯỢC ⇒ ĐỎ: `git show {_BASE1342}:…` rc={p.returncode} {p.stderr[-300:]!r}; cần đúng object "
-                               "base của lease (clone đủ lịch sử), không thay bằng HEAD/merge-base")
-    base, head = p.stdout, c.script.read_bytes()
-    assert b"\r" not in head, "packet_loop.py có CR trong cây làm việc — trái chính sách LF của kho, không so byte được"
+
+    def blob(oid):   # thiếu object ⇒ ĐỎ; KHÔNG thay bằng HEAD/merge-base/cây làm việc
+        p = subprocess.run(["git", "-C", str(ROOT), "show", oid + ":.claude/dev/packet_loop.py"], capture_output=True)
+        assert p.returncode == 0, (f"N2 KHÔNG ĐO ĐƯỢC ⇒ ĐỎ: `git show {oid}:…` rc={p.returncode} {p.stderr[-300:]!r}; cần đúng object "
+                                   "đã ghim (clone đủ lịch sử), không thay bằng HEAD/merge-base")
+        return p.stdout
+    base, head, cay = blob(_BASE1342), blob(_HEAD1342), c.script.read_bytes()   # N2 so HAI blob ghim; cây làm việc chỉ vào vế N3
+    assert b"\r" not in cay, "packet_loop.py có CR trong cây làm việc — trái chính sách LF của kho"
     assert _additive1342(base, base) == [] and _wired1342(base) == [], "base không tự khớp"
     assert _additive1342(base, head) == [] and _wired1342(head) == [], (_additive1342(base, head), _wired1342(head))
+    assert _wired1342(cay) == [], ("N3 trên CÂY LÀM VIỆC", _wired1342(cay))
     moi = {_new1342(s) for s in ast.parse(head).body} - {None}
     assert {"_1174_win_read", "_1174_win_volume", "_1174_win_platform"} <= moi, sorted(moi)
 

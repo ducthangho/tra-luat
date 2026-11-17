@@ -1,0 +1,5210 @@
+{
+ "total_count": 39,
+ "jobs": [
+  {
+   "id": 133982006951,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfMupw",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982006951",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982006951",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:20Z",
+   "started_at": "2026-11-17T10:38:22Z",
+   "completed_at": "2026-11-17T10:38:35Z",
+   "name": "chuan-bi",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:22Z",
+     "completed_at": "2026-11-17T10:38:23Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:23Z",
+     "completed_at": "2026-11-17T10:38:32Z"
+    },
+    {
+     "name": "phan loai diff (duong nhanh ho so)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:32Z",
+     "completed_at": "2026-11-17T10:38:32Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:32Z",
+     "completed_at": "2026-11-17T10:38:33Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:33Z",
+     "completed_at": "2026-11-17T10:38:33Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982006951",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045931,
+   "runner_name": "GitHub Actions 1000045931",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982136725,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUplQ",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982136725",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982136725",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T11:02:52Z",
+   "name": "gate-ops (ubuntu-latest)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:51Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:51Z",
+     "completed_at": "2026-11-17T10:38:55Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-ops)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:55Z",
+     "completed_at": "2026-11-17T10:38:55Z"
+    },
+    {
+     "name": "DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff --check, lease check)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:55Z",
+     "completed_at": "2026-11-17T10:38:55Z"
+    },
+    {
+     "name": "ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:55Z",
+     "completed_at": "2026-11-17T10:48:45Z"
+    },
+    {
+     "name": "bien-nhan v2 selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:48:45Z",
+     "completed_at": "2026-11-17T10:53:28Z"
+    },
+    {
+     "name": "lease-publish selftest (đo lại setup sau G5)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 12,
+     "started_at": "2026-11-17T10:53:28Z",
+     "completed_at": "2026-11-17T11:01:11Z"
+    },
+    {
+     "name": "don-nhanh selftest (chốt xoá nhánh)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T11:01:11Z",
+     "completed_at": "2026-11-17T11:01:28Z"
+    },
+    {
+     "name": "bo ca gate chay TRONG cgroup duoc uy quyen (Linux)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T11:01:28Z",
+     "completed_at": "2026-11-17T11:02:49Z"
+    },
+    {
+     "name": "gate lifecycle selftest (nen khong co cgroup)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 15,
+     "started_at": "2026-11-17T11:02:49Z",
+     "completed_at": "2026-11-17T11:02:49Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 29,
+     "started_at": "2026-11-17T11:02:49Z",
+     "completed_at": "2026-11-17T11:02:49Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 30,
+     "started_at": "2026-11-17T11:02:49Z",
+     "completed_at": "2026-11-17T11:02:49Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 31,
+     "started_at": "2026-11-17T11:02:49Z",
+     "completed_at": "2026-11-17T11:02:49Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982136725",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045935,
+   "runner_name": "GitHub Actions 1000045935",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982136806,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUp5g",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982136806",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982136806",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:47:50Z",
+   "name": "gate (ubuntu-latest)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:54Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:54Z",
+     "completed_at": "2026-11-17T10:39:01Z"
+    },
+    {
+     "name": "G5 kiem ban ke cong cu + T1..T8 (packet",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:39:01Z",
+     "completed_at": "2026-11-17T10:42:37Z"
+    },
+    {
+     "name": "cài Ruff 0.15.15 và in probe dương",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:42:37Z",
+     "completed_at": "2026-11-17T10:42:38Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 11,
+     "started_at": "2026-11-17T10:42:38Z",
+     "completed_at": "2026-11-17T10:42:38Z"
+    },
+    {
+     "name": "PR head contains required EOL base",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 12,
+     "started_at": "2026-11-17T10:42:38Z",
+     "completed_at": "2026-11-17T10:42:38Z"
+    },
+    {
+     "name": "py_compile",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:42:38Z",
+     "completed_at": "2026-11-17T10:42:38Z"
+    },
+    {
+     "name": "codex credential selftest (packet #300)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T10:42:38Z",
+     "completed_at": "2026-11-17T10:42:40Z"
+    },
+    {
+     "name": "idiom-ba-ten selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:42:40Z",
+     "completed_at": "2026-11-17T10:42:47Z"
+    },
+    {
+     "name": "eol-policy selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 16,
+     "started_at": "2026-11-17T10:42:47Z",
+     "completed_at": "2026-11-17T10:43:28Z"
+    },
+    {
+     "name": "pre-push selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 17,
+     "started_at": "2026-11-17T10:43:28Z",
+     "completed_at": "2026-11-17T10:43:33Z"
+    },
+    {
+     "name": "eol-policy survey",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 18,
+     "started_at": "2026-11-17T10:43:33Z",
+     "completed_at": "2026-11-17T10:43:34Z"
+    },
+    {
+     "name": "bundled-fragment check (topology gói)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 19,
+     "started_at": "2026-11-17T10:43:34Z",
+     "completed_at": "2026-11-17T10:43:44Z"
+    },
+    {
+     "name": "gen_instructions selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 20,
+     "started_at": "2026-11-17T10:43:44Z",
+     "completed_at": "2026-11-17T10:43:44Z"
+    },
+    {
+     "name": "command-registry unit test (AG-T0-03)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:43:44Z",
+     "completed_at": "2026-11-17T10:43:45Z"
+    },
+    {
+     "name": "tl selftest (luot PR — khong sinh bang chung)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 22,
+     "started_at": "2026-11-17T10:43:45Z",
+     "completed_at": "2026-11-17T10:43:45Z"
+    },
+    {
+     "name": "tl selftest (co bang chung exact-identity)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:43:45Z",
+     "completed_at": "2026-11-17T10:46:40Z"
+    },
+    {
+     "name": "tai len gate-evidence",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 24,
+     "started_at": "2026-11-17T10:46:40Z",
+     "completed_at": "2026-11-17T10:46:41Z"
+    },
+    {
+     "name": "workflow-audit strict",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 25,
+     "started_at": "2026-11-17T10:46:41Z",
+     "completed_at": "2026-11-17T10:46:42Z"
+    },
+    {
+     "name": "golden-test",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 26,
+     "started_at": "2026-11-17T10:46:42Z",
+     "completed_at": "2026-11-17T10:46:57Z"
+    },
+    {
+     "name": "doc-claims-check strict",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 27,
+     "started_at": "2026-11-17T10:46:57Z",
+     "completed_at": "2026-11-17T10:47:00Z"
+    },
+    {
+     "name": "determinism-audit strict",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 28,
+     "started_at": "2026-11-17T10:47:00Z",
+     "completed_at": "2026-11-17T10:47:24Z"
+    },
+    {
+     "name": "ci-phamvi guard (bang phu thuoc khop ma)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 29,
+     "started_at": "2026-11-17T10:47:24Z",
+     "completed_at": "2026-11-17T10:47:25Z"
+    },
+    {
+     "name": "ci-phamvi selftest (phan chung — cong co rang)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 30,
+     "started_at": "2026-11-17T10:47:25Z",
+     "completed_at": "2026-11-17T10:47:40Z"
+    },
+    {
+     "name": "release-check full",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 31,
+     "started_at": "2026-11-17T10:47:40Z",
+     "completed_at": "2026-11-17T10:47:42Z"
+    },
+    {
+     "name": "release-verify strict (lane LAND — manifest committed)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 32,
+     "started_at": "2026-11-17T10:47:42Z",
+     "completed_at": "2026-11-17T10:47:43Z"
+    },
+    {
+     "name": "release-verify strict (lane WORKER — manifest TẠM ngoài repo)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 33,
+     "started_at": "2026-11-17T10:47:43Z",
+     "completed_at": "2026-11-17T10:47:43Z"
+    },
+    {
+     "name": "release-bundle x2 cùng SHA-256",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 34,
+     "started_at": "2026-11-17T10:47:43Z",
+     "completed_at": "2026-11-17T10:47:47Z"
+    },
+    {
+     "name": "tl_boot smoke",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 35,
+     "started_at": "2026-11-17T10:47:47Z",
+     "completed_at": "2026-11-17T10:47:48Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 69,
+     "started_at": "2026-11-17T10:47:48Z",
+     "completed_at": "2026-11-17T10:47:48Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 70,
+     "started_at": "2026-11-17T10:47:48Z",
+     "completed_at": "2026-11-17T10:47:48Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 71,
+     "started_at": "2026-11-17T10:47:48Z",
+     "completed_at": "2026-11-17T10:47:48Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982136806",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045938,
+   "runner_name": "GitHub Actions 1000045938",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982136896,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqQA",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982136896",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982136896",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:39:28Z",
+   "name": "gate-nhanh-manh (ubuntu-latest, 5)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:39:25Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:39:25Z",
+     "completed_at": "2026-11-17T10:39:26Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:39:26Z",
+     "completed_at": "2026-11-17T10:39:26Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T10:39:26Z",
+     "completed_at": "2026-11-17T10:39:26Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:39:26Z",
+     "completed_at": "2026-11-17T10:39:26Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982136896",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045937,
+   "runner_name": "GitHub Actions 1000045937",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982136910,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqTg",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982136910",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982136910",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:39:55Z",
+   "name": "gate-nhanh-manh (ubuntu-latest, 6)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:41Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:41Z",
+     "completed_at": "2026-11-17T10:38:41Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:41Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:39:51Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:39:51Z",
+     "completed_at": "2026-11-17T10:39:52Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:39:52Z",
+     "completed_at": "2026-11-17T10:39:52Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T10:39:52Z",
+     "completed_at": "2026-11-17T10:39:52Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:39:52Z",
+     "completed_at": "2026-11-17T10:39:53Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982136910",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045933,
+   "runner_name": "GitHub Actions 1000045933",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982136966,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqhg",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982136966",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982136966",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:39:52Z",
+   "name": "gate-nhanh-manh (ubuntu-latest, 4)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:39:49Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:39:49Z",
+     "completed_at": "2026-11-17T10:39:50Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:39:50Z",
+     "completed_at": "2026-11-17T10:39:50Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T10:39:50Z",
+     "completed_at": "2026-11-17T10:39:50Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:39:50Z",
+     "completed_at": "2026-11-17T10:39:50Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982136966",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045940,
+   "runner_name": "GitHub Actions 1000045940",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982136975,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqjw",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982136975",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982136975",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:36Z",
+   "completed_at": "2026-11-17T10:39:33Z",
+   "name": "gate-nhanh-manh (ubuntu-latest, 0)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:39:30Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:39:30Z",
+     "completed_at": "2026-11-17T10:39:31Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:39:31Z",
+     "completed_at": "2026-11-17T10:39:31Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T10:39:31Z",
+     "completed_at": "2026-11-17T10:39:31Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:39:31Z",
+     "completed_at": "2026-11-17T10:39:31Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982136975",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045934,
+   "runner_name": "GitHub Actions 1000045934",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982136977,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqkQ",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982136977",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982136977",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:36Z",
+   "completed_at": "2026-11-17T10:52:19Z",
+   "name": "gate-cong-cu (ubuntu-latest, 7)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:52Z"
+    },
+    {
+     "name": "G5 manh ban kinh dot bien (#668)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:52Z",
+     "completed_at": "2026-11-17T10:52:16Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:52:16Z",
+     "completed_at": "2026-11-17T10:52:17Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 19,
+     "started_at": "2026-11-17T10:52:17Z",
+     "completed_at": "2026-11-17T10:52:17Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 20,
+     "started_at": "2026-11-17T10:52:17Z",
+     "completed_at": "2026-11-17T10:52:17Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:52:17Z",
+     "completed_at": "2026-11-17T10:52:17Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982136977",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045932,
+   "runner_name": "GitHub Actions 1000045932",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982136985,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqmQ",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982136985",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982136985",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:36Z",
+   "completed_at": "2026-11-17T10:39:21Z",
+   "name": "gate-nhanh-manh (ubuntu-latest, 2)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:39:18Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:39:18Z",
+     "completed_at": "2026-11-17T10:39:19Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:39:19Z",
+     "completed_at": "2026-11-17T10:39:19Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T10:39:19Z",
+     "completed_at": "2026-11-17T10:39:19Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:39:19Z",
+     "completed_at": "2026-11-17T10:39:19Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982136985",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045936,
+   "runner_name": "GitHub Actions 1000045936",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982136987,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqmw",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982136987",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982136987",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:56:55Z",
+   "name": "gate-cong-cu (ubuntu-latest, 5)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:51Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:51Z",
+     "completed_at": "2026-11-17T10:38:51Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:51Z",
+     "completed_at": "2026-11-17T10:38:57Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:57Z",
+     "completed_at": "2026-11-17T10:39:06Z"
+    },
+    {
+     "name": "G5 manh ban kinh dot bien (#668)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:39:06Z",
+     "completed_at": "2026-11-17T10:56:51Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:56:51Z",
+     "completed_at": "2026-11-17T10:56:52Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 19,
+     "started_at": "2026-11-17T10:56:52Z",
+     "completed_at": "2026-11-17T10:56:52Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 20,
+     "started_at": "2026-11-17T10:56:52Z",
+     "completed_at": "2026-11-17T10:56:52Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:56:52Z",
+     "completed_at": "2026-11-17T10:56:52Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982136987",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045942,
+   "runner_name": "GitHub Actions 1000045942",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137007,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqrw",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137007",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137007",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:55:36Z",
+   "name": "gate-cong-cu (ubuntu-latest, 1)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:51Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:51Z",
+     "completed_at": "2026-11-17T10:38:56Z"
+    },
+    {
+     "name": "G5 manh ban kinh dot bien (#668)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:56Z",
+     "completed_at": "2026-11-17T10:55:32Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:55:32Z",
+     "completed_at": "2026-11-17T10:55:33Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 19,
+     "started_at": "2026-11-17T10:55:33Z",
+     "completed_at": "2026-11-17T10:55:33Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 20,
+     "started_at": "2026-11-17T10:55:33Z",
+     "completed_at": "2026-11-17T10:55:33Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:55:33Z",
+     "completed_at": "2026-11-17T10:55:33Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137007",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045944,
+   "runner_name": "GitHub Actions 1000045944",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137011,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqsw",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137011",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137011",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:53:08Z",
+   "name": "gate-cong-cu (ubuntu-latest, 4)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:42Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:42Z",
+     "completed_at": "2026-11-17T10:38:42Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:42Z",
+     "completed_at": "2026-11-17T10:38:54Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:54Z",
+     "completed_at": "2026-11-17T10:38:55Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:55Z",
+     "completed_at": "2026-11-17T10:39:02Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:39:02Z",
+     "completed_at": "2026-11-17T10:39:02Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:39:02Z",
+     "completed_at": "2026-11-17T10:39:17Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:39:17Z",
+     "completed_at": "2026-11-17T10:39:31Z"
+    },
+    {
+     "name": "G5 manh ban kinh dot bien (#668)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:39:31Z",
+     "completed_at": "2026-11-17T10:53:03Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:53:03Z",
+     "completed_at": "2026-11-17T10:53:05Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 19,
+     "started_at": "2026-11-17T10:53:05Z",
+     "completed_at": "2026-11-17T10:53:05Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 20,
+     "started_at": "2026-11-17T10:53:05Z",
+     "completed_at": "2026-11-17T10:53:05Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:53:05Z",
+     "completed_at": "2026-11-17T10:53:05Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137011",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045945,
+   "runner_name": "GitHub Actions 1000045945",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137021,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqvQ",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137021",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137021",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:52:37Z",
+   "name": "gate-cong-cu (ubuntu-latest, 2)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:52Z"
+    },
+    {
+     "name": "G5 manh ban kinh dot bien (#668)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:52Z",
+     "completed_at": "2026-11-17T10:52:34Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:52:34Z",
+     "completed_at": "2026-11-17T10:52:35Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 19,
+     "started_at": "2026-11-17T10:52:35Z",
+     "completed_at": "2026-11-17T10:52:35Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 20,
+     "started_at": "2026-11-17T10:52:35Z",
+     "completed_at": "2026-11-17T10:52:35Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:52:35Z",
+     "completed_at": "2026-11-17T10:52:35Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137021",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045948,
+   "runner_name": "GitHub Actions 1000045948",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137022,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUqvg",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137022",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137022",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:56:02Z",
+   "name": "gate-cong-cu (ubuntu-latest, 3)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:52Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:52Z",
+     "completed_at": "2026-11-17T10:38:52Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:52Z",
+     "completed_at": "2026-11-17T10:38:56Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:56Z",
+     "completed_at": "2026-11-17T10:39:04Z"
+    },
+    {
+     "name": "G5 manh ban kinh dot bien (#668)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:39:04Z",
+     "completed_at": "2026-11-17T10:55:58Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:55:58Z",
+     "completed_at": "2026-11-17T10:55:59Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 19,
+     "started_at": "2026-11-17T10:55:59Z",
+     "completed_at": "2026-11-17T10:55:59Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 20,
+     "started_at": "2026-11-17T10:55:59Z",
+     "completed_at": "2026-11-17T10:56:00Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:56:00Z",
+     "completed_at": "2026-11-17T10:56:00Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137022",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045949,
+   "runner_name": "GitHub Actions 1000045949",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137045,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUq1Q",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137045",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137045",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:39:30Z",
+   "name": "gate-nhanh-manh (ubuntu-latest, 1)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:39:27Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:39:27Z",
+     "completed_at": "2026-11-17T10:39:28Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:39:28Z",
+     "completed_at": "2026-11-17T10:39:28Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T10:39:28Z",
+     "completed_at": "2026-11-17T10:39:29Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:39:29Z",
+     "completed_at": "2026-11-17T10:39:29Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137045",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045955,
+   "runner_name": "GitHub Actions 1000045955",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137047,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUq1w",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137047",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137047",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:56:01Z",
+   "name": "gate-cong-cu (ubuntu-latest, 6)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:55Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:55Z",
+     "completed_at": "2026-11-17T10:39:04Z"
+    },
+    {
+     "name": "G5 manh ban kinh dot bien (#668)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:39:04Z",
+     "completed_at": "2026-11-17T10:55:57Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:55:57Z",
+     "completed_at": "2026-11-17T10:55:58Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 19,
+     "started_at": "2026-11-17T10:55:58Z",
+     "completed_at": "2026-11-17T10:55:58Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 20,
+     "started_at": "2026-11-17T10:55:58Z",
+     "completed_at": "2026-11-17T10:55:59Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:55:59Z",
+     "completed_at": "2026-11-17T10:55:59Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137047",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045943,
+   "runner_name": "GitHub Actions 1000045943",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137063,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUq5w",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137063",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137063",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:00Z",
+   "name": "gate-nhanh-manh (ubuntu-latest, 3)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:39:57Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:39:57Z",
+     "completed_at": "2026-11-17T10:39:58Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:39:58Z",
+     "completed_at": "2026-11-17T10:39:58Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T10:39:58Z",
+     "completed_at": "2026-11-17T10:39:58Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:39:58Z",
+     "completed_at": "2026-11-17T10:39:58Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137063",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045941,
+   "runner_name": "GitHub Actions 1000045941",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137086,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUq_g",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137086",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137086",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:30Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 6)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:41Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:41Z",
+     "completed_at": "2026-11-17T10:38:41Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:41Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:38:59Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:59Z",
+     "completed_at": "2026-11-17T10:38:59Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:59Z",
+     "completed_at": "2026-11-17T10:39:08Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:39:08Z",
+     "completed_at": "2026-11-17T10:39:19Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:39:19Z",
+     "completed_at": "2026-11-17T10:39:19Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:39:19Z",
+     "completed_at": "2026-11-17T10:40:25Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:25Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:27Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:27Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:27Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137086",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045939,
+   "runner_name": "GitHub Actions 1000045939",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137089,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrAQ",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137089",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137089",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:56:33Z",
+   "name": "gate-cong-cu (ubuntu-latest, 0)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:52Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:52Z",
+     "completed_at": "2026-11-17T10:38:57Z"
+    },
+    {
+     "name": "G5 manh ban kinh dot bien (#668)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:57Z",
+     "completed_at": "2026-11-17T10:56:28Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:56:28Z",
+     "completed_at": "2026-11-17T10:56:30Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 19,
+     "started_at": "2026-11-17T10:56:30Z",
+     "completed_at": "2026-11-17T10:56:30Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 20,
+     "started_at": "2026-11-17T10:56:30Z",
+     "completed_at": "2026-11-17T10:56:30Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:56:30Z",
+     "completed_at": "2026-11-17T10:56:30Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137089",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045961,
+   "runner_name": "GitHub Actions 1000045961",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137101,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrDQ",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137101",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137101",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:15Z",
+   "name": "gate-nhanh-manh (ubuntu-latest, 7)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "chạy mảnh nhanh_don_duoc (targeted_mutant_gate)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:40:11Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:40:11Z",
+     "completed_at": "2026-11-17T10:40:13Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:40:13Z",
+     "completed_at": "2026-11-17T10:40:13Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T10:40:13Z",
+     "completed_at": "2026-11-17T10:40:13Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:40:13Z",
+     "completed_at": "2026-11-17T10:40:13Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137101",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045953,
+   "runner_name": "GitHub Actions 1000045953",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137125,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrJQ",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137125",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137125",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:36Z",
+   "completed_at": "2026-11-17T10:40:16Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 10)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:40:13Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:13Z",
+     "completed_at": "2026-11-17T10:40:14Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:14Z",
+     "completed_at": "2026-11-17T10:40:14Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:14Z",
+     "completed_at": "2026-11-17T10:40:14Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:14Z",
+     "completed_at": "2026-11-17T10:40:14Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137125",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045946,
+   "runner_name": "GitHub Actions 1000045946",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137130,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrKg",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137130",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137130",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:41:04Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 1)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:42Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:42Z",
+     "completed_at": "2026-11-17T10:38:42Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:42Z",
+     "completed_at": "2026-11-17T10:38:54Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:54Z",
+     "completed_at": "2026-11-17T10:38:55Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:55Z",
+     "completed_at": "2026-11-17T10:39:02Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:39:02Z",
+     "completed_at": "2026-11-17T10:39:02Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:39:02Z",
+     "completed_at": "2026-11-17T10:39:13Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:39:13Z",
+     "completed_at": "2026-11-17T10:39:27Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:39:27Z",
+     "completed_at": "2026-11-17T10:39:27Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:39:27Z",
+     "completed_at": "2026-11-17T10:40:59Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:59Z",
+     "completed_at": "2026-11-17T10:41:00Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:41:00Z",
+     "completed_at": "2026-11-17T10:41:00Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:41:00Z",
+     "completed_at": "2026-11-17T10:41:01Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:41:01Z",
+     "completed_at": "2026-11-17T10:41:01Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137130",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045957,
+   "runner_name": "GitHub Actions 1000045957",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137166,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrTg",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137166",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137166",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:11Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 8)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:38:54Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:54Z",
+     "completed_at": "2026-11-17T10:40:07Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:07Z",
+     "completed_at": "2026-11-17T10:40:09Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:09Z",
+     "completed_at": "2026-11-17T10:40:09Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:09Z",
+     "completed_at": "2026-11-17T10:40:09Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:09Z",
+     "completed_at": "2026-11-17T10:40:09Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137166",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045947,
+   "runner_name": "GitHub Actions 1000045947",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137182,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrXg",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137182",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137182",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:45Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 5)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:51Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:51Z",
+     "completed_at": "2026-11-17T10:38:51Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:51Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:38:57Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:57Z",
+     "completed_at": "2026-11-17T10:38:58Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:58Z",
+     "completed_at": "2026-11-17T10:40:42Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:42Z",
+     "completed_at": "2026-11-17T10:40:43Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:43Z",
+     "completed_at": "2026-11-17T10:40:43Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:43Z",
+     "completed_at": "2026-11-17T10:40:43Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:43Z",
+     "completed_at": "2026-11-17T10:40:43Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137182",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045951,
+   "runner_name": "GitHub Actions 1000045951",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137195,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUraw",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137195",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137195",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:34Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 2)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:51Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:51Z",
+     "completed_at": "2026-11-17T10:38:51Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:51Z",
+     "completed_at": "2026-11-17T10:38:55Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:55Z",
+     "completed_at": "2026-11-17T10:39:03Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:39:03Z",
+     "completed_at": "2026-11-17T10:39:04Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:39:04Z",
+     "completed_at": "2026-11-17T10:40:31Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:31Z",
+     "completed_at": "2026-11-17T10:40:32Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:32Z",
+     "completed_at": "2026-11-17T10:40:32Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:32Z",
+     "completed_at": "2026-11-17T10:40:32Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:32Z",
+     "completed_at": "2026-11-17T10:40:32Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137195",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045952,
+   "runner_name": "GitHub Actions 1000045952",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137200,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrcA",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137200",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137200",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:41:20Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 4)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:38:54Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:54Z",
+     "completed_at": "2026-11-17T10:41:16Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:41:16Z",
+     "completed_at": "2026-11-17T10:41:17Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:41:17Z",
+     "completed_at": "2026-11-17T10:41:17Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:41:17Z",
+     "completed_at": "2026-11-17T10:41:18Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:41:18Z",
+     "completed_at": "2026-11-17T10:41:18Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137200",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045954,
+   "runner_name": "GitHub Actions 1000045954",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137211,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrew",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137211",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137211",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:29Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 14)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:51Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:51Z",
+     "completed_at": "2026-11-17T10:38:55Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:55Z",
+     "completed_at": "2026-11-17T10:38:56Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:56Z",
+     "completed_at": "2026-11-17T10:40:25Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:25Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:27Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:27Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:27Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137211",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045950,
+   "runner_name": "GitHub Actions 1000045950",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137213,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrfQ",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137213",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137213",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:42:45Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 0)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:54Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:54Z",
+     "completed_at": "2026-11-17T10:38:54Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:54Z",
+     "completed_at": "2026-11-17T10:39:01Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:39:01Z",
+     "completed_at": "2026-11-17T10:39:06Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:39:06Z",
+     "completed_at": "2026-11-17T10:39:07Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:39:07Z",
+     "completed_at": "2026-11-17T10:42:40Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:42:40Z",
+     "completed_at": "2026-11-17T10:42:42Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:42:42Z",
+     "completed_at": "2026-11-17T10:42:42Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:42:42Z",
+     "completed_at": "2026-11-17T10:42:42Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:42:42Z",
+     "completed_at": "2026-11-17T10:42:42Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137213",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045956,
+   "runner_name": "GitHub Actions 1000045956",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137227,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUriw",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137227",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137227",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:29Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 13)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:40:26Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:26Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:27Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:27Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:27Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137227",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045960,
+   "runner_name": "GitHub Actions 1000045960",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137234,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrkg",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137234",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137234",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:09Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 9)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:38:45Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:45Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:51Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:51Z",
+     "completed_at": "2026-11-17T10:38:52Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:52Z",
+     "completed_at": "2026-11-17T10:40:02Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:02Z",
+     "completed_at": "2026-11-17T10:40:06Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:06Z",
+     "completed_at": "2026-11-17T10:40:06Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:06Z",
+     "completed_at": "2026-11-17T10:40:06Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:06Z",
+     "completed_at": "2026-11-17T10:40:06Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137234",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045959,
+   "runner_name": "GitHub Actions 1000045959",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137244,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrnA",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137244",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137244",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:41:11Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 12)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:52Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:52Z",
+     "completed_at": "2026-11-17T10:38:57Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:57Z",
+     "completed_at": "2026-11-17T10:38:58Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:58Z",
+     "completed_at": "2026-11-17T10:41:08Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:41:08Z",
+     "completed_at": "2026-11-17T10:41:09Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:41:09Z",
+     "completed_at": "2026-11-17T10:41:09Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:41:09Z",
+     "completed_at": "2026-11-17T10:41:09Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:41:09Z",
+     "completed_at": "2026-11-17T10:41:09Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137244",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045958,
+   "runner_name": "GitHub Actions 1000045958",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137285,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUrxQ",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137285",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137285",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:41:57Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 11)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:52Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:52Z",
+     "completed_at": "2026-11-17T10:38:52Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:52Z",
+     "completed_at": "2026-11-17T10:38:54Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:54Z",
+     "completed_at": "2026-11-17T10:38:59Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:59Z",
+     "completed_at": "2026-11-17T10:38:59Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:59Z",
+     "completed_at": "2026-11-17T10:41:53Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:41:53Z",
+     "completed_at": "2026-11-17T10:41:54Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:41:54Z",
+     "completed_at": "2026-11-17T10:41:54Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:41:54Z",
+     "completed_at": "2026-11-17T10:41:54Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:41:54Z",
+     "completed_at": "2026-11-17T10:41:54Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137285",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045965,
+   "runner_name": "GitHub Actions 1000045965",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137311,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUr3w",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137311",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137311",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:18Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 15)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:38Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:53Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:53Z",
+     "completed_at": "2026-11-17T10:38:54Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:54Z",
+     "completed_at": "2026-11-17T10:40:15Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:15Z",
+     "completed_at": "2026-11-17T10:40:16Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:16Z",
+     "completed_at": "2026-11-17T10:40:16Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:16Z",
+     "completed_at": "2026-11-17T10:40:17Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:17Z",
+     "completed_at": "2026-11-17T10:40:17Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137311",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045964,
+   "runner_name": "GitHub Actions 1000045964",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137317,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUr5Q",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137317",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137317",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:42Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 7)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:38Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:46Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:46Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:54Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:54Z",
+     "completed_at": "2026-11-17T10:38:55Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:55Z",
+     "completed_at": "2026-11-17T10:40:38Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:38Z",
+     "completed_at": "2026-11-17T10:40:39Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:39Z",
+     "completed_at": "2026-11-17T10:40:39Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:39Z",
+     "completed_at": "2026-11-17T10:40:40Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:40Z",
+     "completed_at": "2026-11-17T10:40:40Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137317",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045962,
+   "runner_name": "GitHub Actions 1000045962",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133982137396,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMfUsNA",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133982137396",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133982137396",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:38:35Z",
+   "started_at": "2026-11-17T10:38:37Z",
+   "completed_at": "2026-11-17T10:40:20Z",
+   "name": "gate-packet-loop-manh (ubuntu-latest, 3)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:38:37Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:39Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:38:39Z",
+     "completed_at": "2026-11-17T10:38:47Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:38:47Z",
+     "completed_at": "2026-11-17T10:38:48Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:38:48Z",
+     "completed_at": "2026-11-17T10:38:49Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:38:49Z",
+     "completed_at": "2026-11-17T10:38:50Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:38:50Z",
+     "completed_at": "2026-11-17T10:38:52Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:38:52Z",
+     "completed_at": "2026-11-17T10:38:56Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:38:56Z",
+     "completed_at": "2026-11-17T10:38:57Z"
+    },
+    {
+     "name": "packet-loop selftest",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:38:57Z",
+     "completed_at": "2026-11-17T10:40:17Z"
+    },
+    {
+     "name": "Run actions/upload-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:17Z",
+     "completed_at": "2026-11-17T10:40:18Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 21,
+     "started_at": "2026-11-17T10:40:18Z",
+     "completed_at": "2026-11-17T10:40:18Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 22,
+     "started_at": "2026-11-17T10:40:18Z",
+     "completed_at": "2026-11-17T10:40:18Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T10:40:18Z",
+     "completed_at": "2026-11-17T10:40:18Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133982137396",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045963,
+   "runner_name": "GitHub Actions 1000045963",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133983019287,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMgKhFw",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133983019287",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133983019287",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:40:16Z",
+   "started_at": "2026-11-17T10:40:17Z",
+   "completed_at": "2026-11-17T10:40:31Z",
+   "name": "gate-nhanh-gop (ubuntu-latest)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:40:18Z",
+     "completed_at": "2026-11-17T10:40:19Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:40:19Z",
+     "completed_at": "2026-11-17T10:40:19Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:40:19Z",
+     "completed_at": "2026-11-17T10:40:26Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:40:26Z",
+     "completed_at": "2026-11-17T10:40:26Z"
+    },
+    {
+     "name": "DUONG_NHANH - gom KHONG DO (job gate-nhanh-gop)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 5,
+     "started_at": "2026-11-17T10:40:26Z",
+     "completed_at": "2026-11-17T10:40:26Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-gop)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 6,
+     "started_at": "2026-11-17T10:40:26Z",
+     "completed_at": "2026-11-17T10:40:26Z"
+    },
+    {
+     "name": "Run actions/download-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:40:26Z",
+     "completed_at": "2026-11-17T10:40:27Z"
+    },
+    {
+     "name": "gộp mảnh nhanh_don_duoc (targeted_mutant_gate)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:40:27Z",
+     "completed_at": "2026-11-17T10:40:28Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:40:28Z",
+     "completed_at": "2026-11-17T10:40:28Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 16,
+     "started_at": "2026-11-17T10:40:28Z",
+     "completed_at": "2026-11-17T10:40:28Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 17,
+     "started_at": "2026-11-17T10:40:28Z",
+     "completed_at": "2026-11-17T10:40:28Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133983019287",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045967,
+   "runner_name": "GitHub Actions 1000045967",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133983153237,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMgSsVQ",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133983153237",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133983153237",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:40:31Z",
+   "started_at": "2026-11-17T10:40:33Z",
+   "completed_at": "2026-11-17T11:11:36Z",
+   "name": "gate-registry (ubuntu-latest)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:40:33Z",
+     "completed_at": "2026-11-17T10:40:34Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:40:34Z",
+     "completed_at": "2026-11-17T10:40:34Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:40:34Z",
+     "completed_at": "2026-11-17T10:40:43Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:40:43Z",
+     "completed_at": "2026-11-17T10:40:43Z"
+    },
+    {
+     "name": "DUONG_NHANH - liet ke buoc bo qua (job gate-registry)",
+     "status": "completed",
+     "conclusion": "skipped",
+     "number": 5,
+     "started_at": "2026-11-17T10:40:43Z",
+     "completed_at": "2026-11-17T10:40:43Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:40:43Z",
+     "completed_at": "2026-11-17T10:40:45Z"
+    },
+    {
+     "name": "cài actionlint cho G5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:40:45Z",
+     "completed_at": "2026-11-17T10:40:45Z"
+    },
+    {
+     "name": "cài shellcheck cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 8,
+     "started_at": "2026-11-17T10:40:45Z",
+     "completed_at": "2026-11-17T10:40:47Z"
+    },
+    {
+     "name": "cài rg cho G5 (cài xong đo lại)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 9,
+     "started_at": "2026-11-17T10:40:47Z",
+     "completed_at": "2026-11-17T10:40:51Z"
+    },
+    {
+     "name": "G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot M6",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 10,
+     "started_at": "2026-11-17T10:40:51Z",
+     "completed_at": "2026-11-17T10:40:52Z"
+    },
+    {
+     "name": "cài Ruff 0.15.15 và in probe dương",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:40:52Z",
+     "completed_at": "2026-11-17T10:40:53Z"
+    },
+    {
+     "name": "test registry (phạm vi + các bộ chưa được nối)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 12,
+     "started_at": "2026-11-17T10:40:53Z",
+     "completed_at": "2026-11-17T11:11:34Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 23,
+     "started_at": "2026-11-17T11:11:34Z",
+     "completed_at": "2026-11-17T11:11:34Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 24,
+     "started_at": "2026-11-17T11:11:34Z",
+     "completed_at": "2026-11-17T11:11:35Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 25,
+     "started_at": "2026-11-17T11:11:35Z",
+     "completed_at": "2026-11-17T11:11:35Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133983153237",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045968,
+   "runner_name": "GitHub Actions 1000045968",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133984341808,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMhbPMA",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133984341808",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133984341808",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:42:45Z",
+   "started_at": "2026-11-17T10:42:47Z",
+   "completed_at": "2026-11-17T10:43:07Z",
+   "name": "gate-packet-loop (ubuntu-latest)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:42:48Z",
+     "completed_at": "2026-11-17T10:42:50Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:42:50Z",
+     "completed_at": "2026-11-17T10:42:51Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:42:51Z",
+     "completed_at": "2026-11-17T10:42:58Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:42:58Z",
+     "completed_at": "2026-11-17T10:42:59Z"
+    },
+    {
+     "name": "Run actions/download-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:42:59Z",
+     "completed_at": "2026-11-17T10:43:00Z"
+    },
+    {
+     "name": "gom manh packet-loop (so TAP ca; wp1343)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:43:00Z",
+     "completed_at": "2026-11-17T10:43:06Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 11,
+     "started_at": "2026-11-17T10:43:06Z",
+     "completed_at": "2026-11-17T10:43:06Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 12,
+     "started_at": "2026-11-17T10:43:06Z",
+     "completed_at": "2026-11-17T10:43:06Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:43:06Z",
+     "completed_at": "2026-11-17T10:43:06Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133984341808",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045969,
+   "runner_name": "GitHub Actions 1000045969",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  },
+  {
+   "id": 133991759790,
+   "run_id": 44066674523,
+   "workflow_name": "gate",
+   "head_branch": "master",
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44066674523",
+   "run_attempt": 1,
+   "node_id": "CR_kwDOTNeRjc8AAAAfMof_rg",
+   "head_sha": "11eb100380f4c9da7ca36273ba0e03ed6b8b68d3",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/133991759790",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44066674523/job/133991759790",
+   "status": "completed",
+   "conclusion": "success",
+   "created_at": "2026-11-17T10:56:55Z",
+   "started_at": "2026-11-17T10:56:57Z",
+   "completed_at": "2026-11-17T10:57:07Z",
+   "name": "gate-cong-cu-gop (ubuntu-latest)",
+   "steps": [
+    {
+     "name": "Set up job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 1,
+     "started_at": "2026-11-17T10:56:57Z",
+     "completed_at": "2026-11-17T10:56:58Z"
+    },
+    {
+     "name": "Force LF checkout (hash parity với manifest)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 2,
+     "started_at": "2026-11-17T10:56:58Z",
+     "completed_at": "2026-11-17T10:56:58Z"
+    },
+    {
+     "name": "Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 3,
+     "started_at": "2026-11-17T10:56:58Z",
+     "completed_at": "2026-11-17T10:57:02Z"
+    },
+    {
+     "name": "Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 4,
+     "started_at": "2026-11-17T10:57:02Z",
+     "completed_at": "2026-11-17T10:57:02Z"
+    },
+    {
+     "name": "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 5,
+     "started_at": "2026-11-17T10:57:02Z",
+     "completed_at": "2026-11-17T10:57:04Z"
+    },
+    {
+     "name": "Run actions/download-artifact@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 6,
+     "started_at": "2026-11-17T10:57:04Z",
+     "completed_at": "2026-11-17T10:57:05Z"
+    },
+    {
+     "name": "G5 gom manh ban kinh dot bien (#668)",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 7,
+     "started_at": "2026-11-17T10:57:05Z",
+     "completed_at": "2026-11-17T10:57:05Z"
+    },
+    {
+     "name": "Post Run actions/setup-python@v5",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 13,
+     "started_at": "2026-11-17T10:57:05Z",
+     "completed_at": "2026-11-17T10:57:05Z"
+    },
+    {
+     "name": "Post Run actions/checkout@v4",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 14,
+     "started_at": "2026-11-17T10:57:05Z",
+     "completed_at": "2026-11-17T10:57:05Z"
+    },
+    {
+     "name": "Complete job",
+     "status": "completed",
+     "conclusion": "success",
+     "number": 15,
+     "started_at": "2026-11-17T10:57:05Z",
+     "completed_at": "2026-11-17T10:57:05Z"
+    }
+   ],
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/133991759790",
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "runner_id": 1000045972,
+   "runner_name": "GitHub Actions 1000045972",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions"
+  }
+ ],
+ "du": true
+}

@@ -1,0 +1,25 @@
+# nghiem thu tren merge 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3, luc 2026-11-17T11:10:41Z
+11eb100380f4c9da7ca36273ba0e03ed6b8b68d3 271f99ff13ac029f39c3fc43c3fcb116739556bb 8a7f715494d391310894638dfcc7a7366f758f3c 3b234223327e6527ee51990cdfdfabba0d02ed88
+## numstat 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3^1..11eb100380f4c9da7ca36273ba0e03ed6b8b68d3
+5	5	RELEASE_MANIFEST.json
+8	0	changelog.d/wp-1334.md
+8	0	ops/cloud_agent_creds.py
+125	2	ops/cloud_agent_creds_test.py
+27	1	scripts/tl_gws.py
+## ruff --select F (ruff 0.16.9) cha thu nhat vs merge
+scripts/tl_gws.py @ 8a7f71549: 97 loi F
+scripts/tl_gws.py @ 11eb10038: 97 loi F
+ops/cloud_agent_creds.py @ 8a7f71549: 0 loi F
+ops/cloud_agent_creds.py @ 11eb10038: 0 loi F
+ops/cloud_agent_creds_test.py @ 8a7f71549: 0 loi F
+ops/cloud_agent_creds_test.py @ 11eb10038: 0 loi F
+## git diff --check 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3^1 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3
+rc=0
+## release-verify --strict tai 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3
+{'ok': True, 'expected_file_count': 185, 'checked_file_count': 185, 'package_hash_match': True}
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0

@@ -1,0 +1,125 @@
+{
+  "sha": "3b234223327e6527ee51990cdfdfabba0d02ed88",
+  "node_id": "C_kwDOTNeRjdoAKDNiMjM0MjIzMzI3ZTY1MjdlZTUxOTkwY2RmZGZhYmJhMGQwMmVkODg",
+  "commit": {
+    "author": {
+      "name": "Claude",
+      "email": "noreply@anthropic.com",
+      "date": "2026-11-17T10:00:02Z"
+    },
+    "committer": {
+      "name": "Claude",
+      "email": "noreply@anthropic.com",
+      "date": "2026-11-17T10:00:02Z"
+    },
+    "message": "wp1334: chuoi realpath tinh tu duong goc, khong tu ban da abspath\n\nReview PR #1367 (comment 4597850151): _trong_kho_git goi abspath truoc\nrealpath nen `..` dung sau symlink bi gop theo tu vung. Voi\n<ngoai>/lk/../codexhome (lk -> <kho>/con) chot tra None trong khi kernel\nghi vao <kho>/codexhome. Tai lap tren 8ed3503: auth.json va tep dau deu\nlot vao kho.\n\n- scripts/tl_gws.py: hai chuoi la abspath(path) va realpath(path).\n- ops/cloud_agent_creds_test.py: ca pd8 (bon bien the + ve duong ngoai\n  kho), dot bien PD8_realpath_sau_abspath.\n- RELEASE_MANIFEST.json tai sinh.\n\nBo test: 60/60, 91/91. selftest 1777/1777.\n\nClaude-Session: https://claude.ai/code/session_015GtxrZ6bCzNXoqjwqyrJTq",
+    "tree": {
+      "sha": "420b6a69fbbd1526855f0a8a7b2e1848b51f5fe7",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/420b6a69fbbd1526855f0a8a7b2e1848b51f5fe7"
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/3b234223327e6527ee51990cdfdfabba0d02ed88",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQATJgs7H\nmQbWA00psCNVJ3I+IBMQZ9zWhBPLxY8hddph7G7GLN0J4Zm7mhALq2PShWipDEoIxPEE3k65jSGw\n/Qw=\n-----END SSH SIGNATURE-----",
+      "payload": "tree 420b6a69fbbd1526855f0a8a7b2e1848b51f5fe7\nparent 8ed35031549106c4030907cea3631e3a38d69a12\nauthor Claude <noreply@anthropic.com> 1794909602 +0000\ncommitter Claude <noreply@anthropic.com> 1794909602 +0000\n\nwp1334: chuoi realpath tinh tu duong goc, khong tu ban da abspath\n\nReview PR #1367 (comment 4597850151): _trong_kho_git goi abspath truoc\nrealpath nen `..` dung sau symlink bi gop theo tu vung. Voi\n<ngoai>/lk/../codexhome (lk -> <kho>/con) chot tra None trong khi kernel\nghi vao <kho>/codexhome. Tai lap tren 8ed3503: auth.json va tep dau deu\nlot vao kho.\n\n- scripts/tl_gws.py: hai chuoi la abspath(path) va realpath(path).\n- ops/cloud_agent_creds_test.py: ca pd8 (bon bien the + ve duong ngoai\n  kho), dot bien PD8_realpath_sau_abspath.\n- RELEASE_MANIFEST.json tai sinh.\n\nBo test: 60/60, 91/91. selftest 1777/1777.\n\nClaude-Session: https://claude.ai/code/session_015GtxrZ6bCzNXoqjwqyrJTq\n",
+      "verified_at": "2026-11-17T10:00:06Z"
+    }
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/3b234223327e6527ee51990cdfdfabba0d02ed88",
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/3b234223327e6527ee51990cdfdfabba0d02ed88",
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/3b234223327e6527ee51990cdfdfabba0d02ed88/comments",
+  "author": {
+    "login": "claude",
+    "id": 81847,
+    "node_id": "MDQ6VXNlcjgxODQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/claude",
+    "html_url": "https://github.com/claude",
+    "followers_url": "https://api.github.com/users/claude/followers",
+    "following_url": "https://api.github.com/users/claude/following{/other_user}",
+    "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+    "organizations_url": "https://api.github.com/users/claude/orgs",
+    "repos_url": "https://api.github.com/users/claude/repos",
+    "events_url": "https://api.github.com/users/claude/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/claude/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "claude",
+    "id": 81847,
+    "node_id": "MDQ6VXNlcjgxODQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/claude",
+    "html_url": "https://github.com/claude",
+    "followers_url": "https://api.github.com/users/claude/followers",
+    "following_url": "https://api.github.com/users/claude/following{/other_user}",
+    "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+    "organizations_url": "https://api.github.com/users/claude/orgs",
+    "repos_url": "https://api.github.com/users/claude/repos",
+    "events_url": "https://api.github.com/users/claude/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/claude/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "8ed35031549106c4030907cea3631e3a38d69a12",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/8ed35031549106c4030907cea3631e3a38d69a12",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/8ed35031549106c4030907cea3631e3a38d69a12"
+    }
+  ],
+  "stats": {
+    "total": 38,
+    "additions": 28,
+    "deletions": 10
+  },
+  "files": [
+    {
+      "sha": "d55ddac5eb8d74e0a467742ca29e208e65971b13",
+      "filename": "RELEASE_MANIFEST.json",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 5,
+      "changes": 10,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/3b234223327e6527ee51990cdfdfabba0d02ed88/RELEASE_MANIFEST.json",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/3b234223327e6527ee51990cdfdfabba0d02ed88/RELEASE_MANIFEST.json",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/RELEASE_MANIFEST.json?ref=3b234223327e6527ee51990cdfdfabba0d02ed88",
+      "patch": "@@ -6,9 +6,9 @@\n   \"webapp_target\": \"2.21.2q\",\n   \"root_name\": \"tra-luat\",\n   \"file_count\": 185,\n-  \"total_bytes\": 9142763,\n-  \"package_hash\": \"932ef8acde8d74bff31835f87d3753d439eed871eb00710557742409f18a169c\",\n-  \"content_hash\": \"932ef8acde8d74bff31835f87d3753d439eed871eb00710557742409f18a169c\",\n+  \"total_bytes\": 9143023,\n+  \"package_hash\": \"6c395fba506f44f31c2e37e97b2b23276f455d8899a49248c4fa249635b375dc\",\n+  \"content_hash\": \"6c395fba506f44f31c2e37e97b2b23276f455d8899a49248c4fa249635b375dc\",\n   \"required_missing\": [],\n   \"files\": [\n     {\n@@ -878,8 +878,8 @@\n     },\n     {\n       \"path\": \"scripts/tl_gws.py\",\n-      \"size\": 154942,\n-      \"sha256\": \"0655c2395268257cbb3fc2f40a814c7d4c309b8c89fee596004dba736167f2b1\"\n+      \"size\": 155202,\n+      \"sha256\": \"1ca18373768fa6618091bb223ed547b7ea1da6cb4fa793a63dd639bd6c526b9f\"\n     },\n     {\n       \"path\": \"scripts/tl_selftest.py\","
+    },
+    {
+      "sha": "974efe2c874b7b2e89847c16b63d4d13d3dca2d3",
+      "filename": "ops/cloud_agent_creds_test.py",
+      "status": "modified",
+      "additions": 20,
+      "deletions": 3,
+      "changes": 23,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/3b234223327e6527ee51990cdfdfabba0d02ed88/ops%2Fcloud_agent_creds_test.py",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/3b234223327e6527ee51990cdfdfabba0d02ed88/ops%2Fcloud_agent_creds_test.py",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fcloud_agent_creds_test.py?ref=3b234223327e6527ee51990cdfdfabba0d02ed88",
+      "patch": "@@ -687,6 +687,22 @@ def pd7_symlink_ngoai_kho_tro_vao_kho():   # M5(g) + vế âm N5b trên base\n         (ngoai := _tam_pd(t) / \"ngoai\").mkdir(), _lien_ket(lk := _kho_pd(t) / \"lk\", ngoai, True)\n         kq = chay_bs(lk)\n         bang(os.listdir(ngoai) == [] and kq[0] == \"KHÔNG ĐO ĐƯỢC\", f\"đường khai nằm trong kho (symlink ra ngoài) mà không chặn: {kq[0]}\")\n+def pd8_symlink_roi_hai_cham_vao_kho():   # review PR #1367: `..` đứng SAU symlink — kernel đi lên từ ĐÍCH của symlink, `abspath` thì không\n+    for duoi in (\"lk/../codexhome\", \"lk2/../codexhome\", \"lk/../chua/co\", \"lk/..\"):   # giữa · symlink lồng · đích chưa tồn tại · `..` ở cuối\n+        with tempfile.TemporaryDirectory(prefix=\"cac_pd_\") as t:\n+            (kho := _kho_pd(t)).joinpath(\"con\").mkdir(), (kho / \"codexhome\").mkdir(), (ngoai := _tam_pd(t) / \"ngoai\" / \"codexhome\").mkdir(parents=True)\n+            _lien_ket(ngoai.parent / \"lk\", kho / \"con\", True), _lien_ket(ngoai.parent / \"lk2\", ngoai.parent / \"lk\", True)\n+            kq = chay_bs(ch := str(ngoai.parent) + os.sep + duoi.replace(\"/\", os.sep))   # thư mục từ vựng CÓ tồn tại ⇒ bản cũ ghi trọn vào kho\n+            bang(not list(kho.rglob(\"auth.json\")) and not (kho / \"chua\").exists(), f\"{duoi}: auth.json/thư mục lọt vào kho: {kq[0]}\")\n+            bang(kq[0] == \"KHÔNG ĐO ĐƯỢC\" and \"nằm trong kho git\" in kq[1] and os.listdir(ngoai) == [], f\"{duoi}: kết luận {kq}\")\n+            with mock.patch.dict(os.environ, {\"CODEX_HOME\": ch}):\n+                nap_mod()._ghi_dau(LR_PD, None)\n+            bang(not list(kho.rglob(TEN_DAU)) and not (kho / \"chua\").exists(), f\"{duoi}: tệp dấu lọt vào kho\")\n+            _sach_pd(kho)\n+    with tempfile.TemporaryDirectory(prefix=\"cac_pd_\") as t:   # vế dương: symlink + `..` mà đích thật vẫn NGOÀI kho ⇒ không chặn nhầm\n+        (that := _tam_pd(t) / \"that\" / \"con\").mkdir(parents=True), (_tam_pd(t) / \"codexhome\").mkdir(), _lien_ket(lk := _tam_pd(t) / \"lk\", that, True)\n+        kq = chay_bs(f\"{lk}{os.sep}..{os.sep}codexhome\")\n+        bang(kq[0] == \"ĐÃ NẠP\" and (that.parent / \"codexhome\" / \"auth.json\").exists(), f\"ngoài kho (symlink + ..) mà bị chặn: {kq}\")\n CA = {k: v for k, v in dict(globals()).items() if re.fullmatch(r\"(?:[a-h]|p3[abcs]|pd)\\d+_\\w+\", k) and callable(v)}\n # ---------- đột biến: (tên, tệp, chuỗi gốc | None, thay (chuỗi | hàm), ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần ----------\n def _doi_khoi_len_tieu_de(s):   # đặt khối ngay sau dòng tiêu đề pip, TRƯỚC lệnh pip thật\n@@ -778,15 +794,16 @@ def _doi_khoi_ra_sau(s):\n     (\"P3B7_xoa_case\", \"gs\", \"    case 'agent_creds_put': return doAgentCredsPut_(p);\", \"   \", \"p3b7_ban_va_nhanh_case\"),\n     (\"P3S1_doi_lenh_subagentstop\", \"settings\", '\\\\\"$D/.claude/hooks/subagent_ghi_detect.py\\\\\"\\'\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"Stop\"', '\\\\\"$D/.claude/hooks/subagent_ghi_detect.py\\\\\" --x\\'\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"Stop\"', \"p3s1_settings_co_stop\"),\n     (\"PD1_bo_chot_bootstrap\", \"tlgws\", \"        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:\", \"        if (kho := None) is not None:\", \"pd1_codex_home_trong_kho_khong_ghi\"),\n-    (\"PD2_luon_tra_duong_dan\", \"tlgws\", \"    return None   # không tổ tiên nào có `.git`\", \"    return p\", \"pd2_codex_home_ngoai_kho_van_nap\"),\n+    (\"PD2_luon_tra_duong_dan\", \"tlgws\", \"    return None   # không tổ tiên nào có `.git`\", \"    return os.path.abspath(path)\", \"pd2_codex_home_ngoai_kho_van_nap\"),\n     (\"PD3_git_phai_la_thu_muc\", \"tlgws\", \"                os.lstat(g)\\n\", \"                if not os.path.isdir(g): raise FileNotFoundError(g)\\n\", \"pd3_git_la_tep_van_chan\"),\n     (\"PD4_theo_symlink\", \"tlgws\", \"                os.lstat(g)\\n\", \"                os.stat(g)\\n\", \"pd4_git_la_symlink_van_chan\"),\n     (\"PD5_makedirs_truoc_khi_kiem\", \"tlgws\", \"        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:\", \"        os.makedirs(os.path.dirname(dst), exist_ok=True)\\n        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:\", \"pd5_dich_chua_ton_tai_khong_tao_thu_muc\"),\n     (\"PD5_khong_len_to_tien\", \"tlgws\", \"            if os.path.dirname(d) == d:\\n                break\\n\", \"            break\\n\", \"pd5_dich_chua_ton_tai_khong_tao_thu_muc\"),\n     (\"PD6_bo_chot_ghi_dau\", \"ma\", \"        if tl_gws._trong_kho_git(str(_codex_dir())) is not None:\\n            return\\n\", \"\", \"pd6_ghi_dau_trong_kho_khong_ghi\"),\n     (\"PD6_khong_nap_duoc_chot_van_ghi\", \"ma\", \"    except Exception:  # noqa: BLE001\\n        return\\n    _ghi_nguyen_tu(_codex_dir() / TEN_DAU\", \"    except Exception:  # noqa: BLE001\\n        pass\\n    _ghi_nguyen_tu(_codex_dir() / TEN_DAU\", \"pd6_ghi_dau_trong_kho_khong_ghi\"),\n-    (\"PD7_bo_chuoi_realpath\", \"tlgws\", \"    for d in dict.fromkeys((p, os.path.realpath(p))):\", \"    for d in (p,):\", \"pd7_symlink_ngoai_kho_tro_vao_kho\"),\n-    (\"PD7_bo_chuoi_tu_vung\", \"tlgws\", \"    for d in dict.fromkeys((p, os.path.realpath(p))):\", \"    for d in (os.path.realpath(p),):\", \"pd7_symlink_ngoai_kho_tro_vao_kho\"),\n+    (\"PD7_bo_chuoi_realpath\", \"tlgws\", \"    for d in dict.fromkeys((os.path.abspath(path), os.path.realpath(path))):\", \"    for d in (os.path.abspath(path),):\", \"pd7_symlink_ngoai_kho_tro_vao_kho\"),\n+    (\"PD7_bo_chuoi_tu_vung\", \"tlgws\", \"    for d in dict.fromkeys((os.path.abspath(path), os.path.realpath(path))):\", \"    for d in (os.path.realpath(path),):\", \"pd7_symlink_ngoai_kho_tro_vao_kho\"),\n+    (\"PD8_realpath_sau_abspath\", \"tlgws\", \"os.path.abspath(path), os.path.realpath(path))):\", \"os.path.abspath(path), os.path.realpath(os.path.abspath(path)))):\", \"pd8_symlink_roi_hai_cham_vao_kho\"),\n     (\"P3S2_bo_or_true\", \"settings\", \"ghi-nguoc --neu-doi || true'\", \"ghi-nguoc --neu-doi'\", \"p3s2_stop_chay_that\"),\n )\n TU_KIEM = (   # F2 — (tên, tệp, gốc, thay, ca đích, hạng mong đợi)"
+    },
+    {
+      "sha": "cddf7d35f6d727214a88d30a51f790001f881cc6",
+      "filename": "scripts/tl_gws.py",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 2,
+      "changes": 5,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/3b234223327e6527ee51990cdfdfabba0d02ed88/scripts%2Ftl_gws.py",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/3b234223327e6527ee51990cdfdfabba0d02ed88/scripts%2Ftl_gws.py",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/scripts%2Ftl_gws.py?ref=3b234223327e6527ee51990cdfdfabba0d02ed88",
+      "patch": "@@ -1122,8 +1122,9 @@ def _trong_kho_git(path: str) -> str | None:\n     Đi từ chính `path` lên gốc trên HAI chuỗi: từ vựng (đường như khai) và `os.path.realpath` (đích thật sau symlink —\n     kho nằm sau một symlink NGOÀI kho thì chuỗi từ vựng không thấy). `lstat`, không theo symlink ở `.git`: tệp\n     (worktree/submodule), thư mục, symlink treo đều tính. Thành phần chưa tồn tại thì `lstat` hụt và đi tiếp lên tổ tiên.\"\"\"\n-    p = os.path.abspath(path)\n-    for d in dict.fromkeys((p, os.path.realpath(p))):\n+    # Chuỗi thật giải từ đường GỐC, không từ bản đã `abspath`: `abspath` gộp `..` theo từ vựng nên `<ngoài>/lk/../x`\n+    # (lk → <kho>/con) thành `<ngoài>/x`, trong khi kernel ghi vào `<kho>/x` (review PR #1367, comment 4597850151).\n+    for d in dict.fromkeys((os.path.abspath(path), os.path.realpath(path))):\n         while True:\n             g = os.path.join(d, \".git\")\n             try:"
+    }
+  ]
+}

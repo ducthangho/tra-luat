@@ -16562,5 +16562,303 @@ MUTANTS.update({
 })
 
 
+# --- #1342 WP1174-WINDOWS-BACKEND r1: hai primitive Windows ĐỨNG RIÊNG (`_1174_win_*`), CHƯA nối vào runtime. Ca thuần chạy mọi nền;
+# ca native chỉ đo trên Windows (nền khác: BỎ QUA, không tính đạt). Không thêm vào WP1174_REQUIRED/WP1174_BOTH, không đổi MUTANTS.
+_BASE1342 = "14f7dd3a593fc1ef225e5067e73569a702153871"   # base_sha của lease wp1342-r1-g1-claude (N2 so byte với blob này)
+
+
+def _new1342(node):
+    """Tên của một khối MỚI hợp lệ (None nếu không phải): `def _1174_win_*` không decorator, default chỉ là hằng; hoặc phép gán
+    một hằng literal cho `_1174_WIN_*`. Mọi hình dạng khác ở cấp module KHÔNG được loại khỏi phép so byte."""
+    import ast
+    if isinstance(node, ast.FunctionDef):
+        mac_dinh = node.args.defaults + [x for x in node.args.kw_defaults if x is not None]
+        return node.name if (node.name.startswith("_1174_win_") and not node.decorator_list and
+                             all(isinstance(x, ast.Constant) for x in mac_dinh)) else None
+    if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+        try:
+            ast.literal_eval(node.value)
+        except ValueError:
+            return None
+        return node.targets[0].id if node.targets[0].id.startswith("_1174_WIN_") else None
+    return None
+
+
+def _additive1342(base, head):
+    """N2 — [] ⇔ head (bytes) = base + các khối mới hợp lệ. AST chỉ ĐỊNH VỊ khối mới; loại đúng các khối ấy (cùng dòng trắng liền
+    sau) thì phần còn lại phải bằng NGUYÊN BYTE base. Tên khối mới không được trùng base, không trùng nhau."""
+    import ast
+    try:
+        cu, moi = ast.parse(base), ast.parse(head)
+    except (SyntaxError, ValueError) as ex:
+        return [f"không parse được: {ex}"]
+    da_co = {n.id for n in ast.walk(cu) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)} | {
+        n.name for n in ast.walk(cu) if hasattr(n, "name")}
+    dong, bo, ten = head.split(b"\n"), set(), []
+    for s in moi.body:
+        if _new1342(s):
+            ten.append(_new1342(s))
+            cuoi = s.end_lineno
+            while cuoi < len(dong) - 1 and not dong[cuoi].strip():
+                cuoi += 1
+            bo |= set(range(s.lineno - 1, cuoi))
+    loi = [f"tên khối mới trùng: {n}" for n in sorted(set(ten)) if ten.count(n) > 1 or n in da_co]
+    con, goc = [d for i, d in enumerate(dong) if i not in bo], base.split(b"\n")
+    lech = next((i + 1 for i, (a, b) in enumerate(zip(con, goc)) if a != b), min(len(con), len(goc)) + 1)
+    return loi + ([f"phần ngoài khối mới KHÁC byte base, từ dòng {lech} của base"] if con != goc else [])
+
+
+def _wired1342(head):
+    """N3 — mọi chỗ NGOÀI các khối mới nhắc tới `_1174_win_*`/`_1174_WIN_*` (tên, thuộc tính, hằng chuỗi). [] ⇔ không nối dây."""
+    import ast
+    return sorted({f"{getattr(s, 'name', type(s).__name__)}:{getattr(n, 'lineno', 0)}" for s in ast.parse(head).body
+                   if not _new1342(s) for n in ast.walk(s)
+                   for v in (getattr(n, "id", None), getattr(n, "attr", None), getattr(n, "value", None), getattr(n, "name", None))
+                   if type(v) is str and "_1174_win_" in v.lower()})
+
+
+def _additive_case1342(c):
+    import ast
+    p = subprocess.run(["git", "-C", str(ROOT), "show", _BASE1342 + ":.claude/dev/packet_loop.py"], capture_output=True)
+    assert p.returncode == 0, (f"N2 KHÔNG ĐO ĐƯỢC ⇒ ĐỎ: `git show {_BASE1342}:…` rc={p.returncode} {p.stderr[-300:]!r}; cần đúng object "
+                               "base của lease (clone đủ lịch sử), không thay bằng HEAD/merge-base")
+    base, head = p.stdout, c.script.read_bytes()
+    assert b"\r" not in head, "packet_loop.py có CR trong cây làm việc — trái chính sách LF của kho, không so byte được"
+    assert _additive1342(base, base) == [] and _wired1342(base) == [], "base không tự khớp"
+    assert _additive1342(base, head) == [] and _wired1342(head) == [], (_additive1342(base, head), _wired1342(head))
+    moi = {_new1342(s) for s in ast.parse(head).body} - {None}
+    assert {"_1174_win_read", "_1174_win_volume", "_1174_win_platform"} <= moi, sorted(moi)
+
+    def doi(tim, thay):
+        assert head.count(tim) == 1, tim
+        return head.replace(tim, thay)
+    neo, doc = b"def build_parser() -> argparse.ArgumentParser:\n", b'    _1174_require(hasattr(os, "O_NOFOLLOW"), "O_NOFOLLOW unavailable")\n'
+    do = {  # phản chứng N2: mỗi biến thể đổi MỘT thứ và phải ĐỎ
+        "chú thích hàm cũ": doi(b"# WP1174 r7: pure lineage grammar.", b"# WP1174 r7: pure lineage  grammar."),
+        "khoảng trắng hàm cũ": doi(doc, doc + b"\n"),
+        "decorator vào hàm cũ": doi(b"\ndef _1174_read(path):\n", b"\n@functools.lru_cache\ndef _1174_read(path):\n"),
+        "định nghĩa trùng tên": doi(neo, b"def _1174_win_path(text):\n    return True\n\n\n" + neo),
+        "alias cuối module": head + b"_1174_read = _1174_win_read\n",
+        "import mới": doi(neo, b"import ctypes\n\n\n" + neo),
+        "default nối dây": doi(neo, b"def _1174_win_y(f=_1174_read):\n    return f\n\n\n" + neo),
+        "decorator ở khối mới": doi(neo, b"@functools.lru_cache\ndef _1174_win_y():\n    return 1\n\n\n" + neo),
+        "hằng không literal": doi(neo, b"_1174_WIN_Y = _1174_read\n\n\n" + neo),
+        "lệnh thực thi cấp module": doi(neo, b"_1174_win_api()\n\n\n" + neo)}
+    for ten, bien_the in do.items():
+        assert _additive1342(base, bien_the), "N2 không bắt: " + ten
+    xanh = doi(neo, b"_1174_WIN_Y = 7\n\n\ndef _1174_win_x(a=1, *, b=None):\n    return _1174_WIN_Y\n\n\n" + neo)
+    assert _additive1342(base, xanh) == [] and _wired1342(xanh) == [], (_additive1342(base, xanh), _wired1342(xanh))
+    for ten, chen in (("gọi thẳng", b"    _1174_win_read(path)\n"), ("qua globals()", b'    globals()["_1174_win_read"](path)\n'),
+                      ("qua thuộc tính", b"    sys.modules[__name__]._1174_win_read(path)\n")):   # phản chứng N3
+        assert _wired1342(doi(doc, chen + doc)), "N3 không bắt nối dây " + ten
+    assert _wired1342(do["alias cuối module"]) and _wired1342(do["default nối dây"])
+
+
+def _pure1342(c):
+    m = _module1174(c)
+    nhan, loai = ("C:\\state", "z:\\a b\\wp55.json", "C:\\"), (
+        "\\\\server\\share\\f", "\\\\?\\C:\\f", "\\\\.\\NUL", "\\\\.\\C:\\f", "\\??\\C:\\f", "C:\\f:stream", "C:\\f::$DATA", "C:\\d:\\f",
+        "C:f", "C:/f", "C:", "\\f", "f", "", "/c/f", "CC:\\f", "1:\\f", "C:\\a\x00b", b"C:\\f", None, Path("C:\\f"))
+    for text in nhan:
+        assert _call1174(m._1174_win_path, text) is True and _call1174(m._1174_win_platform, "NTFS", 3, text) is True, text
+    for text in loai:
+        assert _call1174(m._1174_win_path, text) is False and _call1174(m._1174_win_platform, "NTFS", 3, text) is False, text
+        if type(text) is str:   # từ chối theo TÊN, trước mọi lời gọi Win32 ⇒ đo được trên mọi nền
+            _reject1174(m._1174_win_read, text, reason="Windows drive path required")
+            _reject1174(m._1174_win_volume, text, reason="Windows drive path required")
+    for fs, drive in (("ntfs", 3), ("FAT32", 3), ("exFAT", 3), ("ReFS", 3), ("", 3), (None, 3), ("NTFS", 0), ("NTFS", 1), ("NTFS", 2),
+                      ("NTFS", 4), ("NTFS", 5), ("NTFS", 6), ("NTFS", None), ("NTFS", "3")):
+        assert _call1174(m._1174_win_platform, fs, drive, "C:\\state") is False, (fs, drive)
+    if os.name != "nt":
+        for fn in (m._1174_win_read, m._1174_win_volume, m._1174_win_api):
+            _reject1174(fn, *(["C:\\state"] if fn is not m._1174_win_api else []), reason="native Windows required")
+
+
+def _refuse1342(fn, *args, reason=None, kinds=(ValueError,)):
+    try:
+        value = fn(*args)
+    except kinds as ex:
+        assert reason is None or reason in str(ex), (reason, str(ex))
+        return f"{type(ex).__name__}: {ex}"
+    raise AssertionError(f"phải từ chối mà lại nhận: {value!r}")
+
+
+def _junction1342(link, target):
+    p = subprocess.run(["cmd", "/d", "/c", "mklink", "/J", str(link), str(target)], capture_output=True, text=True, timeout=20)
+    if p.returncode:
+        raise BoQua("KHÔNG ĐO ĐƯỢC: không dựng được junction") from OSError(p.returncode, p.stderr.strip())
+
+
+def _exclusive1342(m, c, k, path):
+    """Mở với share=0: chỉ thành công khi KHÔNG tiến trình nào còn giữ handle đọc/ghi tới tệp."""
+    for _ in range(10):
+        try:
+            k.CloseHandle(m._1174_win_open(c, k, str(path), 0x80000000, 0, 0))
+            return True
+        except OSError:
+            time.sleep(0.1)
+    return False
+
+
+def _n_read1342(m, d, c, w, k):
+    import threading
+    ghi = []
+    for ten, raw in (("empty", b""), ("small", b"wp1342\r\n\x00\xff"), ("large", os.urandom(200001))):
+        (d / ten).write_bytes(raw)
+        assert m._1174_win_read(str(d / ten)) == raw == m._1174_win_read(d / ten), ten
+    (d / "dir").mkdir()
+    _junction1342(d / "junction", d / "dir")
+    try:
+        for ten in ("dir", "junction", "NUL", "missing"):   # thư mục · junction làm tệp · tên thiết bị DOS · tên không tồn tại
+            hop = []   # có hạn chờ: một tên thiết bị không được làm ca treo
+            luong = threading.Thread(daemon=True, target=lambda: hop.append(
+                _refuse1342(m._1174_win_read, str(d / ten), kinds=(OSError, ValueError))))
+            luong.start(), luong.join(30)
+            assert hop, f"{ten}: không từ chối, hoặc không trả lời trong 30 s"
+            ghi.append((ten, hop[0]))
+    finally:
+        os.rmdir(d / "junction")
+    return ghi
+
+
+def _n_volume1342(m, d, c, w, k):
+    import launcher
+    target, link = d / "target", d / "redirect"
+    try:   # ĐỐI CHỨNG N6: mở TRỰC TIẾP đích phải thành công ở cả hai phía
+        with launcher._KhoCodex(target, create=True):
+            pass
+        with launcher._KhoCodex(target):
+            pass
+        (target / "sentinel").write_bytes(b"sentinel")
+        facts = m._1174_win_volume(str(target))
+    except (OSError, ValueError) as ex:
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: đối chứng mở trực tiếp đích thất bại: {ex}") from (ex if isinstance(ex, OSError) else OSError(str(ex)))
+    assert sorted(facts) == ["drive_type", "filesystem", "serial", "volume_root"] and (facts["filesystem"], facts["drive_type"]) == ("NTFS", 3), facts
+    assert str(target).upper().startswith(facts["volume_root"].upper()) and type(facts["serial"]) is int, facts
+    ghi = [("tệp làm thư mục", _refuse1342(m._1174_win_volume, str(target / "sentinel"), reason="directory required"))]
+    _junction1342(link, target)
+    try:
+        try:
+            with launcher._KhoCodex(link):
+                raise AssertionError("launcher._KhoCodex nhận junction")
+        except OSError as ex:
+            assert "reparse point" in str(ex), f"launcher từ chối junction ở lớp KHÁC kiểm reparse: {ex}"
+        ghi.append(("junction", _refuse1342(m._1174_win_volume, str(link), reason="reparse point")))
+    finally:
+        os.rmdir(link)
+    assert (target / "sentinel").read_bytes() == b"sentinel"
+    return ghi + [("facts", facts)]
+
+
+def _n_swap1342(m, d, c, w, k):
+    parent, moved, thay = d / "parent", d / "moved", []
+    parent.mkdir()
+    (parent / "f").write_bytes(b"old-bytes")
+
+    def between():
+        assert _exclusive1342(m, c, k, parent / "f"), "handle đọc đầu CHƯA đóng lúc hook chạy"
+        try:
+            os.rename(parent, moved)
+            parent.mkdir()
+            (parent / "f").write_bytes(b"new-bytes")
+        except OSError as ex:
+            raise BoQua(f"KHÔNG ĐO ĐƯỢC: không tráo được tên qua thư mục cha: {ex}") from ex
+        a, b = os.stat(moved / "f"), os.stat(parent / "f")
+        thay.append((a.st_dev == b.st_dev, a.st_ino != b.st_ino, (moved / "f").read_bytes(), (parent / "f").read_bytes()))
+    try:
+        raw = m._1174_win_read(str(parent / "f"), between)
+    except ValueError as ex:
+        assert "file identity at reopen" in str(ex), ex
+    else:
+        raise AssertionError(f"tráo tên qua tổ tiên mà vẫn trả bytes đã đọc: {raw!r}")
+    assert thay == [(True, True, b"old-bytes", b"new-bytes")], thay   # hook ĐÃ chạy, tráo THÀNH CÔNG, hai tệp khác định danh
+    return thay
+
+
+def _n_metadata1342(m, d, c, w, k):
+    from unittest.mock import patch
+    k2 = c.WinDLL("kernel32", use_last_error=True)
+    k2.SetFileTime.argtypes, k2.SetFileTime.restype = [w.HANDLE, c.c_void_p, c.c_void_p, c.POINTER(w.FILETIME)], w.BOOL
+    (d / "f").write_bytes(b"metadata")
+    text, goc, goi, thay = str(d / "f"), m._1174_win_identity, [], []
+
+    def identity(c_, w_, k_, handle, text_):
+        goi.append(handle)
+        if len(goi) == 2:   # phép lấy định danh SAU đọc: handle đọc VẪN mở
+            truoc = os.stat(text).st_mtime_ns
+            try:
+                h2 = m._1174_win_open(c, k, text, 0x100, 7, 0)   # đúng FILE_WRITE_ATTRIBUTES, share READ|WRITE|DELETE
+            except OSError as ex:
+                raise BoQua(f"KHÔNG ĐO ĐƯỢC: không mở được handle FILE_WRITE_ATTRIBUTES: {ex}") from ex
+            try:
+                if not k2.SetFileTime(h2, None, None, c.byref(w.FILETIME(126227808000000000 & 0xFFFFFFFF, 126227808000000000 >> 32))):
+                    raise BoQua("KHÔNG ĐO ĐƯỢC: SetFileTime thất bại") from c.WinError(c.get_last_error())
+                thay.append(os.stat(text).st_mtime_ns != truoc)   # truy vấn lại khi handle thứ hai CÒN mở
+            finally:
+                k.CloseHandle(h2)
+        return goc(c_, w_, k_, handle, text_)
+    with patch.object(m, "_1174_win_identity", identity):
+        ly_do = _refuse1342(m._1174_win_read, text, reason="file identity after read")
+    assert thay == [True] and len(goi) == 2, (thay, goi)
+    return ly_do
+
+
+def _n_noinherit1342(m, d, c, w, k):
+    from unittest.mock import patch
+    k2 = c.WinDLL("kernel32", use_last_error=True)
+    k2.GetHandleInformation.argtypes, k2.GetHandleInformation.restype = [w.HANDLE, c.POINTER(w.DWORD)], w.BOOL
+    (d / "f").write_bytes(b"inherit"), (d / "control").write_bytes(b"control")
+    goc, co, con = m._1174_win_identity, [], []
+
+    def identity(c_, w_, k_, handle, text_):
+        if not co:   # handle đọc đang mở: đo cờ kế thừa, rồi sinh tiến trình con ĐƯỢC PHÉP kế thừa mọi handle kế thừa được
+            flags = w.DWORD(0xFFFFFFFF)
+            assert k2.GetHandleInformation(handle, c.byref(flags)), c.get_last_error()
+            co.append(flags.value & 1)
+            doi_chung = m._1174_win_open(c, k, str(d / "control"), 0x80000000, 1, 0)
+            os.set_handle_inheritable(doi_chung, True)
+            con.append(subprocess.Popen([sys.executable, "-c", "import time; time.sleep(120)"], close_fds=False))
+            k.CloseHandle(doi_chung)
+        return goc(c_, w_, k_, handle, text_)
+    try:
+        with patch.object(m, "_1174_win_identity", identity):
+            assert m._1174_win_read(str(d / "f")) == b"inherit"
+        assert co == [0], f"HANDLE_FLAG_INHERIT đang bật trên handle đọc: {co}"
+        if _exclusive1342(m, c, k, d / "control"):
+            raise BoQua("KHÔNG ĐO ĐƯỢC: đối chứng — tiến trình con không giữ handle kế thừa được") from OSError("control not inherited")
+        assert _exclusive1342(m, c, k, d / "f"), "tiến trình con còn giữ handle đọc ⇒ handle đã bị kế thừa"
+    finally:
+        for p in con:
+            p.kill(), p.wait()
+    return co
+
+
+def _n_symlink1342(m, d, c, w, k):
+    (d / "target").write_bytes(b"symlink-target")
+    try:
+        os.symlink(d / "target", d / "link")
+    except OSError as ex:
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: nền không tạo được symlink tệp (thiếu quyền): {ex}") from ex
+    assert m._1174_win_read(str(d / "target")) == b"symlink-target"
+    return _refuse1342(m._1174_win_read, str(d / "link"), reason="reparse point")
+
+
+def _native1342(ten, fn):
+    def ca(c):
+        if os.name != "nt":
+            raise BoQua(f"ca native Windows (kernel32) — nền {platform.system()} không đo, KHÔNG tính đạt") from OSError("kernel32 unavailable")
+        m = _module1174(c)
+        ghi = fn(m, c.tmp.resolve(), *m._1174_win_api())
+        print("WP1342_NATIVE_V1 " + json.dumps(dict(id=ten, executed=1, passed=1, os=platform.platform(),
+              python=platform.python_version(), observed=repr(ghi)), sort_keys=True, ensure_ascii=True), flush=True)
+    return ca
+
+
+CASES += [("wp1342_additive_byte_preserved", _additive_case1342), ("wp1342_pure_platform_path", _pure1342)]
+CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for ten, fn in (
+    ("read", _n_read1342), ("volume_junction", _n_volume1342), ("swap_ancestor", _n_swap1342), ("metadata_drift", _n_metadata1342),
+    ("noinherit", _n_noinherit1342), ("symlink_file", _n_symlink1342))]
+
+
 if __name__ == "__main__":
     sys.exit(main())

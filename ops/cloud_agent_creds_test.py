@@ -687,6 +687,22 @@ def pd7_symlink_ngoai_kho_tro_vao_kho():   # M5(g) + vế âm N5b trên base
         (ngoai := _tam_pd(t) / "ngoai").mkdir(), _lien_ket(lk := _kho_pd(t) / "lk", ngoai, True)
         kq = chay_bs(lk)
         bang(os.listdir(ngoai) == [] and kq[0] == "KHÔNG ĐO ĐƯỢC", f"đường khai nằm trong kho (symlink ra ngoài) mà không chặn: {kq[0]}")
+def pd8_symlink_roi_hai_cham_vao_kho():   # review PR #1367: `..` đứng SAU symlink — kernel đi lên từ ĐÍCH của symlink, `abspath` thì không
+    for duoi in ("lk/../codexhome", "lk2/../codexhome", "lk/../chua/co", "lk/.."):   # giữa · symlink lồng · đích chưa tồn tại · `..` ở cuối
+        with tempfile.TemporaryDirectory(prefix="cac_pd_") as t:
+            (kho := _kho_pd(t)).joinpath("con").mkdir(), (kho / "codexhome").mkdir(), (ngoai := _tam_pd(t) / "ngoai" / "codexhome").mkdir(parents=True)
+            _lien_ket(ngoai.parent / "lk", kho / "con", True), _lien_ket(ngoai.parent / "lk2", ngoai.parent / "lk", True)
+            kq = chay_bs(ch := str(ngoai.parent) + os.sep + duoi.replace("/", os.sep))   # thư mục từ vựng CÓ tồn tại ⇒ bản cũ ghi trọn vào kho
+            bang(not list(kho.rglob("auth.json")) and not (kho / "chua").exists(), f"{duoi}: auth.json/thư mục lọt vào kho: {kq[0]}")
+            bang(kq[0] == "KHÔNG ĐO ĐƯỢC" and "nằm trong kho git" in kq[1] and os.listdir(ngoai) == [], f"{duoi}: kết luận {kq}")
+            with mock.patch.dict(os.environ, {"CODEX_HOME": ch}):
+                nap_mod()._ghi_dau(LR_PD, None)
+            bang(not list(kho.rglob(TEN_DAU)) and not (kho / "chua").exists(), f"{duoi}: tệp dấu lọt vào kho")
+            _sach_pd(kho)
+    with tempfile.TemporaryDirectory(prefix="cac_pd_") as t:   # vế dương: symlink + `..` mà đích thật vẫn NGOÀI kho ⇒ không chặn nhầm
+        (that := _tam_pd(t) / "that" / "con").mkdir(parents=True), (_tam_pd(t) / "codexhome").mkdir(), _lien_ket(lk := _tam_pd(t) / "lk", that, True)
+        kq = chay_bs(f"{lk}{os.sep}..{os.sep}codexhome")
+        bang(kq[0] == "ĐÃ NẠP" and (that.parent / "codexhome" / "auth.json").exists(), f"ngoài kho (symlink + ..) mà bị chặn: {kq}")
 CA = {k: v for k, v in dict(globals()).items() if re.fullmatch(r"(?:[a-h]|p3[abcs]|pd)\d+_\w+", k) and callable(v)}
 # ---------- đột biến: (tên, tệp, chuỗi gốc | None, thay (chuỗi | hàm), ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần ----------
 def _doi_khoi_len_tieu_de(s):   # đặt khối ngay sau dòng tiêu đề pip, TRƯỚC lệnh pip thật
@@ -778,15 +794,16 @@ DOT_BIEN = (
     ("P3B7_xoa_case", "gs", "    case 'agent_creds_put': return doAgentCredsPut_(p);", "   ", "p3b7_ban_va_nhanh_case"),
     ("P3S1_doi_lenh_subagentstop", "settings", '\\"$D/.claude/hooks/subagent_ghi_detect.py\\"\'"\n          }\n        ]\n      }\n    ],\n    "Stop"', '\\"$D/.claude/hooks/subagent_ghi_detect.py\\" --x\'"\n          }\n        ]\n      }\n    ],\n    "Stop"', "p3s1_settings_co_stop"),
     ("PD1_bo_chot_bootstrap", "tlgws", "        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:", "        if (kho := None) is not None:", "pd1_codex_home_trong_kho_khong_ghi"),
-    ("PD2_luon_tra_duong_dan", "tlgws", "    return None   # không tổ tiên nào có `.git`", "    return p", "pd2_codex_home_ngoai_kho_van_nap"),
+    ("PD2_luon_tra_duong_dan", "tlgws", "    return None   # không tổ tiên nào có `.git`", "    return os.path.abspath(path)", "pd2_codex_home_ngoai_kho_van_nap"),
     ("PD3_git_phai_la_thu_muc", "tlgws", "                os.lstat(g)\n", "                if not os.path.isdir(g): raise FileNotFoundError(g)\n", "pd3_git_la_tep_van_chan"),
     ("PD4_theo_symlink", "tlgws", "                os.lstat(g)\n", "                os.stat(g)\n", "pd4_git_la_symlink_van_chan"),
     ("PD5_makedirs_truoc_khi_kiem", "tlgws", "        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:", "        os.makedirs(os.path.dirname(dst), exist_ok=True)\n        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:", "pd5_dich_chua_ton_tai_khong_tao_thu_muc"),
     ("PD5_khong_len_to_tien", "tlgws", "            if os.path.dirname(d) == d:\n                break\n", "            break\n", "pd5_dich_chua_ton_tai_khong_tao_thu_muc"),
     ("PD6_bo_chot_ghi_dau", "ma", "        if tl_gws._trong_kho_git(str(_codex_dir())) is not None:\n            return\n", "", "pd6_ghi_dau_trong_kho_khong_ghi"),
     ("PD6_khong_nap_duoc_chot_van_ghi", "ma", "    except Exception:  # noqa: BLE001\n        return\n    _ghi_nguyen_tu(_codex_dir() / TEN_DAU", "    except Exception:  # noqa: BLE001\n        pass\n    _ghi_nguyen_tu(_codex_dir() / TEN_DAU", "pd6_ghi_dau_trong_kho_khong_ghi"),
-    ("PD7_bo_chuoi_realpath", "tlgws", "    for d in dict.fromkeys((p, os.path.realpath(p))):", "    for d in (p,):", "pd7_symlink_ngoai_kho_tro_vao_kho"),
-    ("PD7_bo_chuoi_tu_vung", "tlgws", "    for d in dict.fromkeys((p, os.path.realpath(p))):", "    for d in (os.path.realpath(p),):", "pd7_symlink_ngoai_kho_tro_vao_kho"),
+    ("PD7_bo_chuoi_realpath", "tlgws", "    for d in dict.fromkeys((os.path.abspath(path), os.path.realpath(path))):", "    for d in (os.path.abspath(path),):", "pd7_symlink_ngoai_kho_tro_vao_kho"),
+    ("PD7_bo_chuoi_tu_vung", "tlgws", "    for d in dict.fromkeys((os.path.abspath(path), os.path.realpath(path))):", "    for d in (os.path.realpath(path),):", "pd7_symlink_ngoai_kho_tro_vao_kho"),
+    ("PD8_realpath_sau_abspath", "tlgws", "os.path.abspath(path), os.path.realpath(path))):", "os.path.abspath(path), os.path.realpath(os.path.abspath(path)))):", "pd8_symlink_roi_hai_cham_vao_kho"),
     ("P3S2_bo_or_true", "settings", "ghi-nguoc --neu-doi || true'", "ghi-nguoc --neu-doi'", "p3s2_stop_chay_that"),
 )
 TU_KIEM = (   # F2 — (tên, tệp, gốc, thay, ca đích, hạng mong đợi)

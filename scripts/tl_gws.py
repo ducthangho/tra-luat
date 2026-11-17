@@ -1122,8 +1122,9 @@ def _trong_kho_git(path: str) -> str | None:
     Đi từ chính `path` lên gốc trên HAI chuỗi: từ vựng (đường như khai) và `os.path.realpath` (đích thật sau symlink —
     kho nằm sau một symlink NGOÀI kho thì chuỗi từ vựng không thấy). `lstat`, không theo symlink ở `.git`: tệp
     (worktree/submodule), thư mục, symlink treo đều tính. Thành phần chưa tồn tại thì `lstat` hụt và đi tiếp lên tổ tiên."""
-    p = os.path.abspath(path)
-    for d in dict.fromkeys((p, os.path.realpath(p))):
+    # Chuỗi thật giải từ đường GỐC, không từ bản đã `abspath`: `abspath` gộp `..` theo từ vựng nên `<ngoài>/lk/../x`
+    # (lk → <kho>/con) thành `<ngoài>/x`, trong khi kernel ghi vào `<kho>/x` (review PR #1367, comment 4597850151).
+    for d in dict.fromkeys((os.path.abspath(path), os.path.realpath(path))):
         while True:
             g = os.path.join(d, ".git")
             try:

@@ -1,0 +1,19 @@
+# Nghiem thu tren merge 866e522fe6f8a3567f34c4766a017c19a4c0bc72 — 2026-11-17T02:38:39Z, kho phien (unshallow), core.abbrev 7
+## git log -1 --format='%H %T %P'
+866e522fe6f8a3567f34c4766a017c19a4c0bc72 e8b6491561d49f3db99ba82b4076ff1fe0fe235a 25346df65f87a752b493b3bfc78e2b572e0ac6dd a8f45a6af32a844e170d84a49be142693ccfa96c
+## numstat 866e522fe6f8a3567f34c4766a017c19a4c0bc72^2..866e522fe6f8a3567f34c4766a017c19a4c0bc72 khong dung; numstat 866e522fe6f8a3567f34c4766a017c19a4c0bc72^1..866e522fe6f8a3567f34c4766a017c19a4c0bc72
+186	16	.claude/dev/launcher_test.py
+12	4	.github/coordination/schemas/review_verdict.v1.schema.json
+## dac ta
+f71874bcc1c761a6e6978a652f60255bbece100b
+ccbfdca2cc906eec9b595748d6f72191c771b9e5a89a381286ae3cae6f8c361f  -
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+## ruff ruff 0.16.9 --select F base 866e522fe6f8a3567f34c4766a017c19a4c0bc72^1 vs merge
+.claude/dev/launcher_test.py base=5 merge=5
+## git diff --check 866e522fe6f8a3567f34c4766a017c19a4c0bc72^1 866e522fe6f8a3567f34c4766a017c19a4c0bc72
+rc=0

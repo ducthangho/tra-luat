@@ -1,0 +1,41 @@
+# deploy-package.sh --push tu 06caed2b21170a512a3c0aa9c76ea918dba1a1ed (origin/master 06caed2b21170a512a3c0aa9c76ea918dba1a1ed), bat dau 2026-11-17T11:31:46Z
+
+== 0. VERSION khớp 3 chỗ ==
+  VERSION=1.36.70 · tl.py=1.36.70 · SKILL.md=1.36.70
+  [OK]   khớp v1.36.70
+  [OK]   core.abbrev=7 (khớp CI)
+
+== 1. Gate offline 8 bước ==
+  [OK]   selftest     rc=0 == tl selftest 1777/1777 ==
+  [OK]   gen_inst     rc=0 == gen_instructions selftest 44/44 ==
+  [OK]   workflow     rc=0 "ok": true
+  [OK]   golden       rc=0 "ok": true
+  [OK]   docclaims    rc=0 "ok": true
+  [OK]   determinism  rc=0 "ok": true
+  [OK]   relcheck     rc=0 "ok": true
+  [OK]   relverify    rc=0 "ok": true
+  [OK]   gate xanh
+
+== 2. Build bundle ×2 (đòi tất định same-SHA) ==
+  [OK]   same-SHA ✓ sha256=aff6537109ae2dcc… · 2945754 byte · tra-luat-skill-v1.36.70-gws3env.zip
+
+== 3. Verify nội dung gói ==
+  [OK]   VERSION trong gói = 1.36.70
+  [OK]   không có tệp dev-side/secrets trong gói
+  [OK]   quét token: sạch
+  [OK]   release-verify TRONG gói: ok
+  [OK]   gói: 186 tệp · top-level 'tra-luat'
+
+== 4. Đẩy lên Drive/Package ==
+  Package HIỆN TẠI: tra-luat-skill-v1.36.69-working-method-r2.zip
+  [OK]   Drive đang v1.36.69 < v1.36.70 sắp đẩy — không thụt lùi
+[drive-push] ✓ [gws] Drive id=1H5kAt3SRVP7_xmLMIzcqyFtFc4VSDH0P ← tra-luat-skill-v1.36.70-gws3env.zip (2945754B) · đổi tên → 'tra-luat-skill-v1.36.70-gws3env.zip'. fileId GIỮ NGUYÊN; tl_fetch.sh sẽ tải bản mới này.
+  [OK]   đã đẩy
+
+== 5. Verify sau đẩy — tải về đối chiếu byte ==
+  [OK]   BYTE-MATCH ✓ sha256 Drive = local (aff6537109ae2dcc…)
+  [OK]   VERSION trên Drive = 1.36.70
+
+== DEPLOY XONG — Package = v1.36.70 ==
+  Phiên Cowork mới bootstrap từ zip này sẽ nhận v1.36.70.
+rc=0 xong 2026-11-17T11:35:33Z

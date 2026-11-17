@@ -1,0 +1,7 @@
+# selftest tren cay ops/release-1.36.70 (head 7510b6f: base 11eb100 + bump; chay truoc commit, cay = tree ed28bf28), bat dau 2026-11-17T10:56:30Z
+  [OK] wp44_release_bundle_topology_under_200
+  [OK] wp44_missing_bundled_module_named
+  [OK] r332_registry_coverage_duong_san_xuat
+  [OK] wp42_complete_runtime_test_ids_unique
+== tl selftest 1777/1777 ==
+rc=0 xong 2026-11-17T10:59:37Z

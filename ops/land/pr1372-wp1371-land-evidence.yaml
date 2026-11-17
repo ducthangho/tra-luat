@@ -1,0 +1,141 @@
+# HO SO LAND — packet #1371 RELEASE-1.36.70 r1 (phat hanh + deploy), lease g1, qua PR #1372. Khuon: ops/land/pr1366-wp1365-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (06caed2), landed true, DEPLOYED. Bon moc §10.2.2 cua ci.yml 44074772332 DU, measured passed (wd-run 44079488418;
+#   gate output 39/39 bang danh_gia_gate.py v2, gom "GOM: ĐẠT · 16 mảnh · 1514 ca bắt buộc").
+# DEPLOY: deploy-package.sh --push tu checkout dung 06caed2 (11:32–11:35Z): gate xanh (selftest 1777/1777 ...), build 186 tep, chot chong
+#   thut lui (Drive v1.36.69 < v1.36.70), day giu fileId, tai lai BYTE-MATCH sha256 aff6537109ae2dcc..., VERSION tren Drive 1.36.70.
+# UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head 7510b6f (issuecomment-6946224306, app null); chi thi deploy
+#   "Dong y, land xong thi deploy luon" va "CI xanh thi merge 1372 luon".
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
+# Readback tho: ops/land/pr1372-wp1371-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-17T11:3x–12:0xZ.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS
+input_packet_generations:
+  - packet_issue: 1371
+    packet_id: wp1371
+    revision: 1
+    generation: 1
+    lease_id: release-1.36.70-r1-g1-claude
+    ghi_chu: 'Land operator tu thi cong (PROTOCOL §9: phien land gan release). attempts 1/2. Rut han sau merge + deploy (lease.thu_hoi_cuoi).'
+authorized_head_sha: 7510b6f7fb4271c9e467d67fcb76f27c938995a7
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1372#issuecomment-6946224306
+authorization_ghi_chu: >-
+  measured — readback-pr1372-comments.json: comment 6946224306, user ducthangho, created_at 2026-11-17T11:04:22Z; than
+  human_exact_head_audit.v1 packet wp1371 revision 1 generation 1 pr 1372 reviewed_sha 7510b6f (= head), reviewed_tree ed28bf28 (= tree
+  head), spec_sha256 80c374ed (= lease spec_hash), verdict approve. Merged_at 11:31:22Z.
+  Chi thi "CI xanh thi merge 1372 luon" va duyet deploy: loi_khai_co_neo. CAVEAT #566: ai bam merge khong do duoc.
+land_operator: 'measured — readback-pr-1372.json: merged_at 2026-11-17T11:31:22Z, merge_commit_sha 06caed2 (phien dieu phoi qua MCP merge_pull_request voi expectedHeadSha).'
+merge_method: merge
+merge_commit: 06caed2b21170a512a3c0aa9c76ea918dba1a1ed
+merge_commit_tree: ed28bf287fb18f38f24d8b24da5d29dd7723340e
+merge_commit_parents: [11eb100380f4c9da7ca36273ba0e03ed6b8b68d3, 7510b6f7fb4271c9e467d67fcb76f27c938995a7]
+merge_ghi_chu: >-
+  measured — readback-commit-06caed2.json: cha thu nhat 11eb100 (= base lease), cha thu hai 7510b6f; tree merge = tree head ed28bf28.
+  nghiem-thu-06caed2.txt: numstat dung 5 tep write set (+29/-12).
+pre_merge_checks:
+  - name: 'CI PR tren head cuoi'
+    sha: 7510b6f7fb4271c9e467d67fcb76f27c938995a7
+    conclusion: success
+    nguon: [readback-runs-head-7510b6f.json]
+    ghi_chu: 'measured — readback-runs-head-7510b6f.json: gate 44070029731 pull_request success; thu-hoi success.'
+  - name: 'Codex connector tren head cuoi'
+    sha: 7510b6f7fb4271c9e467d67fcb76f27c938995a7
+    conclusion: 'sach'
+    ghi_chu: 'measured — readback-pr1372-comments.json: 6946157013 codex-review-state:v1 completed, has_any_findings false, commit 7510b6f.'
+  - name: 'Selftest tren cay head'
+    sha: 7510b6f7fb4271c9e467d67fcb76f27c938995a7
+    conclusion: success
+    nguon: [selftest-head-7510b6f.txt]
+    ghi_chu: 'measured — selftest-head-7510b6f.txt: == tl selftest 1777/1777 == rc 0 (tree ed28bf28).'
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 44074772332
+    run_attempt: 1
+    sha: 06caed2b21170a512a3c0aa9c76ea918dba1a1ed
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44074772332.json, readback-jobs-44074772332.json, danh-gia-gate-output-44074772332.txt, danh_gia_gate.py, phan-chung-buoc-44074772332.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha 06caed2, run_attempt 1.'
+    moc_checkout: 'measured — ci/provenance.yaml: 39/39 job checkout passed 06caed2, tree ed28bf28.'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition passed (wd-run 44079488418, blob ci.yml a1db88d9).'
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-44074772332.txt (danh_gia_gate.py v2 sha256 539fed68): passed 39/39; gom "GOM: ĐẠT · 16 mảnh · 1514 ca
+      bắt buộc". phan-chung-buoc-44074772332.txt: xoa dau hieu 4 buoc => not_measured, rc 0.
+  - name: 'Deploy Package v1.36.70'
+    sha: 06caed2b21170a512a3c0aa9c76ea918dba1a1ed
+    conclusion: success
+    nguon: [deploy-package-push-1.36.70.log, readback-drive-package.json]
+    ghi_chu: >-
+      measured — deploy-package-push-1.36.70.log (scripts/deploy-package.sh --push, checkout 06caed2, rc 0): ba cho VERSION 1.36.70;
+      gate selftest 1777/1777, gen_instructions 44/44, workflow/golden/docclaims/determinism/relcheck/relverify ok; build same-SHA
+      aff6537109ae2dcc 2945754 byte, 186 tep, khong tep dev-side/secrets, quet token sach; chot chong thut lui "Drive dang v1.36.69 <
+      v1.36.70"; day giu fileId; BYTE-MATCH sha256 Drive = local; VERSION tren Drive = 1.36.70. readback-drive-package.json (gws, 11:3xZ):
+      name tra-luat-skill-v1.36.70-gws3env.zip, size 2945754, md5 e0f1f9c3399a587a93e30703b466a681, modifiedTime 11:35:28Z.
+bookkeeping:
+  - {item: 'rut han lease release-1.36.70-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1371.'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 0 "ĐÓNG ĐƯỢC WP wp1371".'}
+  - {item: 'dong Issue #1371', ket_qua: 'not_measured — readback-issue-1371.json con open; dong sau khi PR ghi so merge.'}
+# ---- het truong chuan
+packet_id: wp1371
+packet_issue: 1371
+packet_ten: RELEASE-1.36.70
+revision: 1
+generation: 1
+pham_vi_land: 'phat hanh v1.36.70: VERSION, tl.py (hang VERSION), SKILL.md (tieu de), CHANGELOG.md (+17, muc r377 gom 8 manh changelog.d), RELEASE_MANIFEST.json (tai sinh); deploy Package.'
+environment: cloud
+operating_system: linux
+recorded_by: claude-session — phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS.
+
+spec:
+  path: ops/specs/RELEASE-1.36.70-r1.md (nhanh ops/release-1.36.70-lease; KHONG co trong cay master)
+  blob: 4ecc371a3942536c1e5d46a55b52cbdff6138b28
+  sha256: 80c374ed6f36de5fc1740fe998f0c0b7d19fb08fa6f93ff8759d5604b10add0b
+  duyet: 'chu kho duyet bam 80c374ed qua AskUserQuestion (ADR-0067).'
+  nguon: 'measured — dac-ta.txt: git rev-parse origin/ops/release-1.36.70-lease:<spec> = 4ecc371a; sha256 = lease spec_hash.'
+
+lease:
+  lease_id: release-1.36.70-r1-g1-claude
+  path: ops/leases/release-1.36.70-r1-g1-claude.yaml (nhanh ops/release-1.36.70-lease)
+  write_set_so_tep: 5
+  thu_hoi_cuoi: >-
+    RUT HAN sau merge + deploy: lease_until 2026-11-17T18:55:00Z -> 2026-11-17T11:50:00Z (commit 0f427c8), kem ngan sach that (Codex 1/2,
+    CI Ubuntu 1/2, Windows 0/0, deploy 1/1); tep lease-release-1.36.70-r1-g1-claude-sau-rut-han.yaml.txt. ai-dang-giu-sau-rut-han.txt: 5 tep
+    NGUOI_GIU 0.
+  diff_do: 'measured — nghiem-thu-06caed2.txt numstat 06caed2^1..06caed2: 5 tep, +29/-12.'
+
+trang_thai_packet:
+  merged: true
+  landed: true
+  deployed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren 06caed2: DAT, du bon moc measured passed. (2) lease nha: DAT. (3) bookkeeping: ho so nay + M8 rc 0.
+    (4) review neo 7510b6f: connector sach + audit chu kho. (5) uy quyen: audit tu dang 6946224306. (6) muc tieu N1-N6 measured (gom
+    deploy byte-match). (7) tran: khong vuot.
+  canh_bao_cho_chu_kho: >-
+    (i) Lop cong tinh duoc la sensitive (vi scripts/tl.py) du thay doi chi la hang VERSION; lease ban dau khai standard, lease_publish
+    check bat va da sua truoc khi day. (ii) Manh changelog.d giu nguyen (theo tien le); lan phat hanh sau can biet manh nao da gom
+    (muc r377 liet ke 8 manh).
+
+review:
+  so_loi_goi_codex: 'loi_khai_co_neo — 1/2: connector 7510b6f (sach).'
+  windows_native: 'not_applicable — 0/0.'
+
+nghiem_thu:
+  N1: 'measured — selftest-head-7510b6f.txt 1777/1777 (tree = tree merge) va deploy-package-push-1.36.70.log buoc 1 selftest 1777/1777 tai 06caed2.'
+  N2: 'measured — nghiem-thu-06caed2.txt: release-verify --strict ok, 185 = 185, package_hash_match true.'
+  N3: 'measured — nghiem-thu-06caed2.txt: 5 tep; VERSION/tl.py/SKILL.md moi tep +1/-1; ba cho deu 1.36.70.'
+  N4: 'measured — nghiem-thu-06caed2.txt: ruff 0.16.9 --select F tl.py 12 vs 12; diff --check rc 0; adr-song, doctrine-scan rc 0.'
+  N5: 'measured — readback-runs-head-7510b6f.json (gate success) + bon moc §10.2.2 tren 44074772332.'
+  N6: 'measured — deploy-package-push-1.36.70.log + readback-drive-package.json: Drive tra ten v1.36.70, BYTE-MATCH, VERSION 1.36.70.'
+
+khong_do_duoc:
+  - 'Chi thi merge/deploy cua chu kho trong chat (khong co hien vat GitHub).'

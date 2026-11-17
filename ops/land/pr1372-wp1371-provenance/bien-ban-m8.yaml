@@ -1,0 +1,38 @@
+# Bien ban M8 (ADR-0060) dong WP #1371 RELEASE-1.36.70 r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1372-wp1371-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6946224306 tren 7510b6f).
+# Bon moc §10.2.2 run 44074772332 measured passed (wd-run 44079488418; gate output 39/39 bang danh_gia_gate.py v2). Deploy v1.36.70 BYTE-MATCH.
+packet: wp1371
+revision: 1
+generation: 1
+spec_hash: 80c374ed6f36de5fc1740fe998f0c0b7d19fb08fa6f93ff8759d5604b10add0b
+head_da_review: 7510b6f7fb4271c9e467d67fcb76f27c938995a7
+tree_h: ed28bf287fb18f38f24d8b24da5d29dd7723340e
+review:
+  offline: 'khong goi Codex offline; review doc lap = connector Codex + human audit'
+  connector: 'readback-pr1372-comments.json: 6946157013 codex-review-state:v1 completed, has_any_findings false, commit 7510b6f'
+  human_audit: 'issuecomment-6946224306 human_exact_head_audit.v1 approve tren 7510b6f (chu kho tu dang)'
+windows:
+  phan_loai: not_applicable
+  nguon: 'Dac ta §4: Windows native 0; packet chi bump phien ban + manifest.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1372#issuecomment-6946224306
+duyet_chu_kho_ghi_chu: 'audit tu dang 11:04:22Z 17-11, truoc merge 11:31:22Z; chu kho "CI xanh thi merge 1372 luon" (loi khai).'
+merge_commit: 06caed2b21170a512a3c0aa9c76ea918dba1a1ed
+tree_m: ed28bf287fb18f38f24d8b24da5d29dd7723340e
+ci_master:
+  run_id: 44074772332
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong; gom "GOM: ĐẠT · 16 mảnh · 1514 ca bắt buộc".'
+nghiem_thu:
+  N1: passed  # selftest-head-7510b6f.txt: 1777/1777 tren tree ed28bf28 (= tree merge); deploy-package-push-1.36.70.log buoc 1 selftest 1777/1777 tai 06caed2
+  N2: passed  # nghiem-thu-06caed2.txt: release-verify --strict ok 185/185
+  N3: passed  # nghiem-thu-06caed2.txt: numstat dung 5 tep; tl.py +1/-1; SKILL.md +1/-1
+  N4: passed  # nghiem-thu-06caed2.txt: ruff F 12=12; diff --check rc 0; adr-song/doctrine-scan rc 0
+  N5: passed  # readback-runs-head-7510b6f.json gate success + bon moc 44074772332
+  N6: passed  # deploy-package-push-1.36.70.log: Drive v1.36.69 -> v1.36.70, BYTE-MATCH sha256 aff65371; readback-drive-package.json
+lease_cuoi: release-1.36.70-r1-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

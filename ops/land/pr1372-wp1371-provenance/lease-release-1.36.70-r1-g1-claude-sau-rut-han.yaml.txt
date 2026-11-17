@@ -1,0 +1,112 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1371
+packet_id: wp1371
+spec_packet_id: RELEASE-1.36.70
+revision: 1
+generation: 1
+lease_id: release-1.36.70-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: 'packet phat hanh cua land operator (PROTOCOL §9): bump ba cho, hop nhat changelog, tai sinh manifest, deploy. Lop cong tinh duoc = sensitive (scripts/tl.py) => human_exact_head_audit.v1 cua chu kho tren exact head + connector Codex.'
+depends_on: [1334]
+spec_path: ops/specs/RELEASE-1.36.70-r1.md
+spec_ref: refs/heads/ops/release-1.36.70-lease
+spec_nguon: 'dac ta tren nhanh lease nay; dinh danh theo grammar ADR-0063. Ghim bang spec_hash.'
+spec_sha256_required: 80c374ed6f36de5fc1740fe998f0c0b7d19fb08fa6f93ff8759d5604b10add0b
+spec_hash: 80c374ed6f36de5fc1740fe998f0c0b7d19fb08fa6f93ff8759d5604b10add0b
+spec_duyet: 'chu kho duyet bam dac ta 80c374ed qua AskUserQuestion 17-11 ~10:41Z (packet khong thuoc Mission, ADR-0067), sau chi thi "Dong y, land xong thi deploy luon".'
+prompt_path: ops/specs/RELEASE-1.36.70-r1.md
+prompt_sha256_required: 80c374ed6f36de5fc1740fe998f0c0b7d19fb08fa6f93ff8759d5604b10add0b
+write_set:
+- VERSION
+- scripts/tl.py
+- SKILL.md
+- CHANGELOG.md
+- RELEASE_MANIFEST.json
+write_set_hash: bbbaebe43100338a4bad06af860c13e867e44786a726b0fb3ce0e9f995aac70f
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- VERSION
+- scripts/tl.py
+- SKILL.md
+- CHANGELOG.md
+- RELEASE_MANIFEST.json
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'N1-N4 cua dac ta r1 dat tren exact head'}
+- {id: M-2, dieu_kien: 'ADR-0060: CI required xanh tren exact head; 0 P0-P2 mo; connector da review dung commit; human audit human_exact_head_audit.v1 tren H; chu kho duyet merge dung SHA'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chi cap quyen thi cong; merge do chu kho duyet dung SHA; deploy theo chi thi chu kho 17-11.'
+branch: ops/release-1.36.70
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3
+start_from_sha: 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3
+start_from_ghi_chu: 'origin/master luc cap lease.'
+reviewed_sha_required: 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1371
+granted_on_instruction_readback: 'chu kho 17-11 ~10:39Z: "Dong y, land xong thi deploy luon" + duyet bam dac ta.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: true
+executor_ghi_chu: 'Land operator (phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS) tu thi cong theo PROTOCOL §9 (phien land gan release); khong phai packet worker.'
+recorder_ghi_chu: 'phien dieu phoi #1206 ghi lease va tu thi cong; review doc lap = connector Codex, uy quyen = chu kho.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-17T10:55:00Z'
+  goc_quet: 'container phien #1206, fetch +refs/heads/*; ls-remote so TAP ten; master cuc bo = origin/master'
+  ket_qua: '5 tep write set deu NGUOI_GIU 0 (wp1334-r2-g1-claude HET_HAN 10:53Z); ls-remote 288 nhanh, cuc bo thieu 0; base 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
+leased_at_utc: '2026-11-17T10:55:00Z'
+heartbeat_at: '2026-11-17T11:35:00Z'
+heartbeat_required_minutes: 360
+heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat.'
+lease_until: '2026-11-17T11:50:00Z'
+lease_expires_at_utc: '2026-11-17T11:50:00Z'
+lease_until_ghi_chu: '8h; rut han ngay sau land va deploy.'
+attempts_used: 1
+attempts_limit: 2
+attempts_basis: '<= 2 lan thi cong.'
+budget:
+  codex_review_calls:
+    pr_wp1371_g1: {used: 1, reserved: 0, limit: 2}
+  ci_ubuntu_runs:
+    pr_wp1371_g1: {used: 1, reserved: 0, limit: 2}
+  windows_native_runs:
+    pr_wp1371_g1: {used: 0, reserved: 0, limit: 0}
+  deploy_push:
+    pr_wp1371_g1: {used: 1, reserved: 0, limit: 1}
+  khong_reset_theo_generation: true
+budget_ghi_chu: 'Codex <= 2 (connector); CI Ubuntu <= 2; Windows native 0; deploy push <= 1 (dac ta §4).'
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-17T11:35:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 1/2: connector tren 7510b6f (sach). CI Ubuntu 1/2: PR #1372 tren 7510b6f. Windows native 0/0. Deploy push 1/1: deploy-package.sh --push tu 06caed2, Drive v1.36.69 -> v1.36.70, BYTE-MATCH sha256 aff65371..., VERSION tren Drive 1.36.70. Lan ghi ngan sach nay la LOI KHAI CO NEO cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T18:55:00Z'
+  han_moi_utc: '2026-11-17T11:50:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land va deploy).'
+  ly_do: >-
+    Packet #1371 da MERGE: PR #1372 (head 7510b6f7fb4271c9e467d67fcb76f27c938995a7) merge commit 06caed2b21170a512a3c0aa9c76ea918dba1a1ed,
+    human audit chu kho issuecomment-6946224306; deploy xong 11:35Z. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 5 duong dan write set sau 2026-11-17T11:50:00Z phai ra NGUOI_GIU 0.'
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

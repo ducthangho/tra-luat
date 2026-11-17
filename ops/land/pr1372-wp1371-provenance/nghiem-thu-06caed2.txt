@@ -1,0 +1,23 @@
+# nghiem thu tren merge 06caed2b21170a512a3c0aa9c76ea918dba1a1ed, luc 2026-11-17T11:38:03Z
+06caed2b21170a512a3c0aa9c76ea918dba1a1ed ed28bf287fb18f38f24d8b24da5d29dd7723340e 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3 7510b6f7fb4271c9e467d67fcb76f27c938995a7
+## numstat 06caed2b21170a512a3c0aa9c76ea918dba1a1ed^1..06caed2b21170a512a3c0aa9c76ea918dba1a1ed
+17	0	CHANGELOG.md
+9	9	RELEASE_MANIFEST.json
+1	1	SKILL.md
+1	1	VERSION
+1	1	scripts/tl.py
+## ruff --select F (ruff 0.16.9) cha thu nhat vs merge
+scripts/tl.py @ 11eb10038: 12 loi F
+scripts/tl.py @ 06caed2b2: 12 loi F
+## git diff --check
+rc=0
+## ba cho VERSION tai 06caed2b21170a512a3c0aa9c76ea918dba1a1ed
+VERSION=1.36.70 tl.py=VERSION = "1.36.70" SKILL.md=v1.36.70 — KERNEL
+## release-verify --strict tai 06caed2b21170a512a3c0aa9c76ea918dba1a1ed
+{'ok': True, 'expected_file_count': 185, 'checked_file_count': 185, 'package_hash_match': True}
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0

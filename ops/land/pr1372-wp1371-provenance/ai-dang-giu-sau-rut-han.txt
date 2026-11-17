@@ -1,0 +1,16 @@
+# ai-dang-giu sau rut han (han moi 11:50Z), luc 2026-11-17T12:03:35Z; fetch +refs/heads/*; may chu 291 ref, cuc bo thieu 0
+## VERSION
+HẾT_HẠN	release-1.36.70-r1-g1-claude	refs/heads/ops/release-1.36.70-lease:ops/leases/release-1.36.70-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+## scripts/tl.py
+HẾT_HẠN	release-1.36.70-r1-g1-claude	refs/heads/ops/release-1.36.70-lease:ops/leases/release-1.36.70-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+## SKILL.md
+HẾT_HẠN	release-1.36.70-r1-g1-claude	refs/heads/ops/release-1.36.70-lease:ops/leases/release-1.36.70-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+## CHANGELOG.md
+HẾT_HẠN	release-1.36.70-r1-g1-claude	refs/heads/ops/release-1.36.70-lease:ops/leases/release-1.36.70-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+## RELEASE_MANIFEST.json
+HẾT_HẠN	release-1.36.70-r1-g1-claude	refs/heads/ops/release-1.36.70-lease:ops/leases/release-1.36.70-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có

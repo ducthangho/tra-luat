@@ -1,0 +1,6 @@
+# N8 #1342 r1 tren VM tra-luat-win (Windows Server 2022 10.0.20348, Python 3.12.10, co quyen tao symlink) boi phien dieu phoi #1206.
+# CHEP TAY tu C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1342-n8-out\TOM-TAT.txt (930 byte) — khong phai ban byte-exact.
+HEAD=675c38dd8aa7d8d92124503452bc80af65c2b77a tree=013659e6388e1bd830f5feaa8c381182390613dc
+wp1342_native_symlink_file rc=0 :: KQ null ; WP1342_NATIVE_V1 executed=1 passed=1 observed='_1174Error: WP1174 UNKNOWN: reparse point' os=Windows-2022Server-10.0.20348-SP0
+wp1342_native_read rc=0 :: KQ null ; WP1342_NATIVE_V1 executed=1 passed=1 (cung observed nhu Desktop)
+sach_sau=[]

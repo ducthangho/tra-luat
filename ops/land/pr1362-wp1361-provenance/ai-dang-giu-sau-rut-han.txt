@@ -1,0 +1,9 @@
+# ai-dang-giu sau rut han, luc 2026-11-17T09:05:42Z; fetch +refs/heads/*
+## .claude/dev/chay-cong-windows.ps1
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+HẾT_HẠN	wp1361-r1-g1-claude	refs/heads/ops/wp1361-r1-g1-lease:ops/leases/wp1361-r1-g1-claude.yaml
+## .claude/dev/chay-cong-windows_test.ps1
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+HẾT_HẠN	wp1361-r1-g1-claude	refs/heads/ops/wp1361-r1-g1-lease:ops/leases/wp1361-r1-g1-claude.yaml

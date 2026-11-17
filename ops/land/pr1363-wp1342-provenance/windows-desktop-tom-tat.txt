@@ -1,0 +1,35 @@
+# Do native #1342 r1 tren DESKTOP-T9R33P2 (Windows 11 10.0.26300, Python 3.12.10, F: NTFS co dinh) boi phien dieu phoi #1206.
+# CHEP TAY tu F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1342-out\TOM-TAT.txt (8068 byte) — KHONG phai ban byte-exact:
+# lan chuyen zip base64 qua cong cu cho sha256 29ef6127... khac b9c563e1... do tren may, nen bo; xem lich_su_nhan trong ho so land.
+# Bang chung byte-exact da dua vao ho so (lan 2, 17-11 ~09:1xZ, doc tung tep van ban qua Desktop Commander read_file roi doi sha256 voi may):
+#   desktop-dot-bien/dot-bien-1342.py  sha256 1ee98b9c... = may (LF, 4613 byte)
+#   desktop-dot-bien/dot-bien.json.gz  gunzip ra 09922ccb... = may (CRLF, 7581 byte; nen gzip -n de git khong chuan hoa EOL)
+#   => driver toan van, lenh con, Python/Windows, tung cap tim/thay + so_lan_khop, diff thuc te, ket qua sach/dot bien tung ca: byte-exact.
+#   TOM-TAT.txt (8068 byte, sha256 32690788f376ebcd...) va 40 tep log tung ca: van chi chep tay o duoi.
+# sha256 do tren may (Get-FileHash):
+#   wp1342-out\dot-bien\dot-bien.json  09922ccb48970ee7ab91b17dd230763949d0faf65d39c8926edf0628e0d8f62a (7581 byte)
+#   dot-bien-1342.py (driver)          1ee98b9c363e3c40c76f11c948dea21c1050476484f7ba7f0bc1e77f640f624f (= driver_sha256 ghi trong dot-bien.json)
+#   hs1342.zip (40 tep bang chung)     b9c563e1024f526097dae7a7805b0772c2be460b3cbfd51bc5775084b11bf666 (25663 byte)
+HEAD 675c38dd8aa7d8d92124503452bc80af65c2b77a tree 013659e6388e1bd830f5feaa8c381182390613dc
+HEAD wp1342_native_read            rc=0 :: KQ null ; WP1342_NATIVE_V1 executed=1 passed=1 observed=[dir: PermissionError WinError 5; junction: PermissionError WinError 5; NUL: _1174Error nondisk handle; missing: FileNotFoundError WinError 2]
+HEAD wp1342_native_volume_junction rc=0 :: KQ null ; WP1342_NATIVE_V1 executed=1 passed=1 observed=[tep lam thu muc: directory required; junction: reparse point; facts NTFS serial 2082241159 drive_type 3 root F:\]
+HEAD wp1342_native_swap_ancestor   rc=0 :: KQ null ; WP1342_NATIVE_V1 executed=1 passed=1 observed=[(True, True, b'old-bytes', b'new-bytes')]
+HEAD wp1342_native_metadata_drift  rc=0 :: KQ null ; WP1342_NATIVE_V1 executed=1 passed=1 observed='file identity after read'
+HEAD wp1342_native_noinherit       rc=0 :: KQ null ; WP1342_NATIVE_V1 executed=1 passed=1 observed=[0]
+HEAD wp1342_native_symlink_file    rc=1 :: BoQua "KHONG DO DUOC: nen khong tao duoc symlink tep (thieu quyen): WinError 1314"
+HEAD wp1342_pure_platform_path     rc=0 :: KQ null
+HEAD wp1342_additive_byte_preserved rc=0 :: KQ null
+HEAD wp1174_windows_claim_rejected + 12 ca WP1174_BOTH: rc=0 ca 13
+BASE 14f7dd3a593fc1ef225e5067e73569a702153871 tree 99eec0043abaff86c0c91f411007f96154cacdcc
+BASE wp1174_windows_claim_rejected + 12 ca WP1174_BOTH: rc=0 ca 13
+HEAD/BASE sach_sau=[] (cay sach sau do)
+## Dot bien M6 (luot 3, sau khi sua driver; dot-bien.json):
+a_volume_bo_open_reparse  khop=1 GIET  (dich wp1342_native_volume_junction: AssertionError "phai tu choi ma lai nhan: {NTFS...}"; doi chung wp1342_native_read DAT; ban sach ca hai DAT)
+b_read_bo_mo_lai          khop=1 GIET  (dich wp1342_native_swap_ancestor: AssertionError "trao ten qua to tien ma van tra bytes da doc: b'old-bytes'"; doi chung metadata_drift DAT)
+c_platform_bo_ntfs        khop=1 GIET  (dich wp1342_pure_platform_path: AssertionError "('ntfs', 3)"; doi chung native_read DAT)
+z_tu_kiem_khong_khop      khop=0 KHONG_DO (driver tu kiem: chuoi tim khong khop => khong tinh giet)
+## Lich su luot (Windows native 4/3, vuot 1 — ghi o lease):
+luot 1: day du; phan dot bien chet vi git clone duong dan qua dai (Filename too long) => khong co ket qua dot bien.
+luot 2: chi dot bien; bo phan loai cua driver doc sai kieu loi (chay_suite tra chuoi "<Lop>: ...") => ca 3 ghi KHONG_DO du ca dich do dung assertion.
+luot 3: chi dot bien sau khi sua driver: 3/3 GIET (ket qua tren).
+VM tra-luat-win (Windows Server 2022 10.0.20348, Python 3.12.10) — N8: xem windows-vm-n8.txt.

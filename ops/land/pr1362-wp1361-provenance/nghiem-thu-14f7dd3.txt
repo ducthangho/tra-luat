@@ -1,0 +1,12 @@
+# nghiem thu tren merge 14f7dd3a593fc1ef225e5067e73569a702153871, luc 2026-11-17T09:06:03Z
+14f7dd3a593fc1ef225e5067e73569a702153871 99eec0043abaff86c0c91f411007f96154cacdcc a0702d06b7d3956fb91b951766c7a5d6a77a7f5b f516fe3aa0e8d4310ee95030a0a0957dfb4ca52f
+## numstat 14f7dd3a593fc1ef225e5067e73569a702153871^1..14f7dd3a593fc1ef225e5067e73569a702153871
+15	6	.claude/dev/chay-cong-windows.ps1
+13	2	.claude/dev/chay-cong-windows_test.ps1
+## ruff --select F (ruff 0.16.9) cha thu nhat vs merge
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0

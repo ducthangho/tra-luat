@@ -69,23 +69,34 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
 leased_at_utc: '2026-11-17T08:29:00Z'
-heartbeat_at: '2026-11-17T08:29:00Z'
+heartbeat_at: '2026-11-17T09:37:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-17T20:29:00Z'
-lease_expires_at_utc: '2026-11-17T20:29:00Z'
+lease_until: '2026-11-17T09:52:00Z'
+lease_expires_at_utc: '2026-11-17T09:52:00Z'
 lease_until_ghi_chu: '12h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
 attempts_basis: '<= 2 phien executor.'
 budget:
   codex_review_calls:
-    pr_wp1365_g1: {used: 0, reserved: 0, limit: 10}
+    pr_wp1365_g1: {used: 1, reserved: 0, limit: 10}
   ci_ubuntu_runs:
-    pr_wp1365_g1: {used: 0, reserved: 0, limit: 2}
+    pr_wp1365_g1: {used: 1, reserved: 0, limit: 2}
   windows_native_runs:
     pr_wp1365_g1: {used: 0, reserved: 0, limit: 0}
   khong_reset_theo_generation: true
 budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native 0 (ca chi doc blob git; khong CI Windows).'
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-17T09:37:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 1/10: connector khi bo draft tren 643519b (sach); khong goi Codex offline. CI Ubuntu 1/2: run 44048471002 tren 643519b. Windows native 0/0. Lan ghi ngan sach nay la LOI KHAI CO NEO cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T20:29:00Z'
+  han_moi_utc: '2026-11-17T09:52:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1365 da MERGE: PR #1366 (head 643519bae38cfe0f7925847d028407deb8320a77) merge commit 285a0b1c0a03c903015d48acf6d1dd5c4cebfb31,
+    human audit chu kho issuecomment-6944247977. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet. Rut han theo tien le #1356, #1361, #1342.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu .claude/dev/packet_loop_test.py sau 2026-11-17T09:52:00Z phai ra NGUOI_GIU 0.'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

@@ -77,25 +77,36 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
 leased_at_utc: '2026-11-17T10:55:00Z'
-heartbeat_at: '2026-11-17T10:55:00Z'
+heartbeat_at: '2026-11-17T11:35:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat.'
-lease_until: '2026-11-17T18:55:00Z'
-lease_expires_at_utc: '2026-11-17T18:55:00Z'
+lease_until: '2026-11-17T11:50:00Z'
+lease_expires_at_utc: '2026-11-17T11:50:00Z'
 lease_until_ghi_chu: '8h; rut han ngay sau land va deploy.'
 attempts_used: 1
 attempts_limit: 2
 attempts_basis: '<= 2 lan thi cong.'
 budget:
   codex_review_calls:
-    pr_wp1371_g1: {used: 0, reserved: 0, limit: 2}
+    pr_wp1371_g1: {used: 1, reserved: 0, limit: 2}
   ci_ubuntu_runs:
-    pr_wp1371_g1: {used: 0, reserved: 0, limit: 2}
+    pr_wp1371_g1: {used: 1, reserved: 0, limit: 2}
   windows_native_runs:
     pr_wp1371_g1: {used: 0, reserved: 0, limit: 0}
   deploy_push:
-    pr_wp1371_g1: {used: 0, reserved: 0, limit: 1}
+    pr_wp1371_g1: {used: 1, reserved: 0, limit: 1}
   khong_reset_theo_generation: true
 budget_ghi_chu: 'Codex <= 2 (connector); CI Ubuntu <= 2; Windows native 0; deploy push <= 1 (dac ta §4).'
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-17T11:35:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 1/2: connector tren 7510b6f (sach). CI Ubuntu 1/2: PR #1372 tren 7510b6f. Windows native 0/0. Deploy push 1/1: deploy-package.sh --push tu 06caed2, Drive v1.36.69 -> v1.36.70, BYTE-MATCH sha256 aff65371..., VERSION tren Drive 1.36.70. Lan ghi ngan sach nay la LOI KHAI CO NEO cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T18:55:00Z'
+  han_moi_utc: '2026-11-17T11:50:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land va deploy).'
+  ly_do: >-
+    Packet #1371 da MERGE: PR #1372 (head 7510b6f7fb4271c9e467d67fcb76f27c938995a7) merge commit 06caed2b21170a512a3c0aa9c76ea918dba1a1ed,
+    human audit chu kho issuecomment-6946224306; deploy xong 11:35Z. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 5 duong dan write set sau 2026-11-17T11:50:00Z phai ra NGUOI_GIU 0.'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

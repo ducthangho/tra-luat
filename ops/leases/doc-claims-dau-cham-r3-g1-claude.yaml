@@ -67,10 +67,10 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_note: lease đầu tiên của packet; không có lease cũ để khai bia mộ
 leased_at_utc: '2026-11-16T11:43:10Z'
-heartbeat_at: '2026-11-16T11:43:10Z'
+heartbeat_at: '2026-11-17T08:39:00Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-17T11:43:10Z'
-lease_expires_at_utc: '2026-11-17T11:43:10Z'
+lease_until: '2026-11-17T08:54:00Z'
+lease_expires_at_utc: '2026-11-17T08:54:00Z'
 max_lease_hours: 24
 codex_review_calls_limit: 10
 codex_review_calls_used: 3
@@ -81,3 +81,13 @@ full_mutant_audit: not_required
 uy_quyen_merge: false
 merge_approval: 'ADR-0060 M7: chủ kho duyệt merge một lần neo SHA H sau CI và connector (E2). Không deploy Package.'
 push_policy: 'ADR-0060 M5 (đặc tả mục 6); executor không push, phiên điều phối đẩy sau review.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T11:43:10Z'
+  han_moi_utc: '2026-11-17T08:54:00Z'
+  chi_thi: 'chu kho 17-11-2026 ~08:4xZ qua AskUserQuestion trong phien dieu phoi #1206 (session_015GtxrZk6gmfQKo7g4BfMBS): "Withdraw #1326, run P-D now".'
+  ly_do: >-
+    Lease giu RELEASE_MANIFEST.json tu 2026-11-16T11:51Z nhung KHONG co cong viec: nhanh thi cong agent/doc-claims-dau-cham-g1-claude
+    chua tung duoc tao (ls-remote 2026-11-17T08:39:00Z), #1326 khong co PR. P-D #1334 can RELEASE_MANIFEST.json. Mo lai #1326 can lease moi (g2).
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet; rut han theo tien le cac packet cua phien #1206.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS, theo chi thi chu kho (khong phai phien ghi lease goc).'
+  nghiem_thu: 'ai-dang-giu RELEASE_MANIFEST.json sau 2026-11-17T08:54:00Z phai ra NGUOI_GIU 0.'

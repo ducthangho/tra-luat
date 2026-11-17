@@ -65,8 +65,8 @@
   "lease_expires_at_utc": "2026-11-18T10:20:09Z",
   "limits": {
     "Codex_spec_review": 3,
-    "Claude_author": 6,
-    "Codex_source_review": 3,
+    "Claude_author": 8,
+    "Codex_source_review": 5,
     "source_push": 1,
     "draft_PR": 1,
     "connector": 1,
@@ -130,5 +130,20 @@
     "ly_do": "Codex source review 2 (run 126faf5d) on 653afce: changes_requested, WP1370-F1 still open on the author-declared residual (bytes of a read that overflows the budget are not charged because _1174_process raises before on_bytes)",
     "can_cu": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
     "ai_nang": "Claude Code coordinator under owner delegation"
+  },
+  "author_fix5_prompt_path": "ops/prompts/wp1370-r1-g1-claude-author-fix5.txt",
+  "author_fix5_prompt_sha256": "e175214fcaed1e1371d38da3e1b79fbcfa4980cca554cf44fb1613246a2ba382",
+  "nang_tran_owner_20261117": {
+    "Claude_author": [
+      6,
+      8
+    ],
+    "Codex_source_review": [
+      3,
+      5
+    ],
+    "ly_do": "Codex source review 3/3 (run 5e39f7b0) on 46798a5: WP1370-F1 no longer reported; new P2 WP1370-F2 (existing mutant m1174_transport_orphan anchor broken by fix-4 re-indentation)",
+    "can_cu": "https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6954528774",
+    "ai_nang": "owner decision in chat, recorded by Claude Code coordinator"
   }
 }

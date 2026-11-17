@@ -1,0 +1,92 @@
+{
+ "sha": "e4cce23bcf975bf041d584f9d4b74327b9c03794",
+ "node_id": "C_kwDOTNeRjdoAKGU0Y2NlMjNiY2Y5NzViZjA0MWQ1ODRmOWQ0Yjc0MzI3YjljMDM3OTQ",
+ "commit": {
+  "author": {
+   "name": "ducthangho",
+   "email": "ducthangho@gmail.com",
+   "date": "2026-11-16T23:03:18Z"
+  },
+  "committer": {
+   "name": "GitHub",
+   "email": "noreply@github.com",
+   "date": "2026-11-16T23:03:18Z"
+  },
+  "message": "Merge pull request #1347 from ducthangho/agent/wp1345-g1-claude\n\nlauncher: chọn tệp Windows tương thích Python 3.11 (không gọi shutil._win_path_needs_curdir) (#1345)",
+  "tree": {
+   "sha": "d43fc9a3b3995552202e1d7f876289c59a92c307",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/d43fc9a3b3995552202e1d7f876289c59a92c307"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/e4cce23bcf975bf041d584f9d4b74327b9c03794",
+  "comment_count": 0,
+  "verification": {
+   "verified": true,
+   "reason": "valid",
+   "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq+4u2CRC1aQ7uu5UhlAAAwM4QAG+zG5qcwxLWIYHOyYD4zDj1\nF7mEpaaZCInMNmqn6RFTo9yrMjL1rfjpoSygGC5RMz+b972DX/pAUPFR1UENylub\nrZxmY+Q3j1Q8YxWoF27yK9Ny1peJ0fbiiV+loZeLziTKk01NLh8W2Q6X3sEuXXdH\ndgAyznWN3KQYADydqTmV5O/jWSlHP49FafHebRC6jVLowOeo4bCoKR4OmeSQ8gIg\nfUoq9pQEd+JMTgkX8x2B8D2SBUCVl/7tKIgXV/jS47Yf8feYxE2+u6v3DEvCtmEv\nNfEc+SFpUJrpyaGApbwNvJFDqutvKS0T/4rIIG6dT3OGeA1LP0mbq8a9zpzY5aUe\nxHsvbXAKYKhLGEERDc6Xd+hamRMeO1mFbFw9cM5MVWV1YSseyzOWUBP795zBGUt/\nbDiBfb+qmt0G5TuaEtG8xgwITFZtuFgmy6vkZCg2r3WM4CYWZfAnSL+BPJjMpvTg\ncGGYmKq09/Lp6foVDi5cqDxUxjE//VVSEQM+g45Yfmr6OnA3i5FkdG4+FoZXf5oa\nCYcN5EwSfbRSN1dhxwUOKWQrbuzQIHeGPVVsZ2NVjcr/sRiSJvhXnjTqAiKVhSUp\nWJN4Z0KTnTyb7TtozDscwxw4ZW5SAowH8I0UHyQoxDEgBVnX0q9vbHHB7BCG7iCB\neRLSegjhu2rvK8GC2H8R\n=+0Wl\n-----END PGP SIGNATURE-----\n",
+   "payload": "tree d43fc9a3b3995552202e1d7f876289c59a92c307\nparent 822a59ec7186551296c0addf5d027a710678509c\nparent a97236c785e7060641216719caceb10fbdaf801b\nauthor ducthangho <ducthangho@gmail.com> 1794870198 +0700\ncommitter GitHub <noreply@github.com> 1794870198 +0700\n\nMerge pull request #1347 from ducthangho/agent/wp1345-g1-claude\n\nlauncher: chọn tệp Windows tương thích Python 3.11 (không gọi shutil._win_path_needs_curdir) (#1345)",
+   "verified_at": "2026-11-16T23:03:19Z"
+  }
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/e4cce23bcf975bf041d584f9d4b74327b9c03794",
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/e4cce23bcf975bf041d584f9d4b74327b9c03794",
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/e4cce23bcf975bf041d584f9d4b74327b9c03794/comments",
+ "author": {
+  "login": "ducthangho",
+  "id": 12748935,
+  "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+  "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/ducthangho",
+  "html_url": "https://github.com/ducthangho",
+  "followers_url": "https://api.github.com/users/ducthangho/followers",
+  "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+  "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+  "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+  "repos_url": "https://api.github.com/users/ducthangho/repos",
+  "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "committer": {
+  "login": "web-flow",
+  "id": 19864447,
+  "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+  "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/web-flow",
+  "html_url": "https://github.com/web-flow",
+  "followers_url": "https://api.github.com/users/web-flow/followers",
+  "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+  "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+  "organizations_url": "https://api.github.com/users/web-flow/orgs",
+  "repos_url": "https://api.github.com/users/web-flow/repos",
+  "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/web-flow/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "parents": [
+  {
+   "sha": "822a59ec7186551296c0addf5d027a710678509c",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/822a59ec7186551296c0addf5d027a710678509c",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/822a59ec7186551296c0addf5d027a710678509c"
+  },
+  {
+   "sha": "a97236c785e7060641216719caceb10fbdaf801b",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/a97236c785e7060641216719caceb10fbdaf801b",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/a97236c785e7060641216719caceb10fbdaf801b"
+  }
+ ],
+ "stats": {
+  "total": 20,
+  "additions": 20,
+  "deletions": 0
+ }
+}

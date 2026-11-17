@@ -1,0 +1,39 @@
+# ai-dang-giu sau han rut 23:27Z — 2026-11-17T00:30:13Z, container phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS
+# fetch +refs/heads/*; ls-remote so TAP ten: thieu 0 / 266 nhanh; master cuc bo = e91aefa75; rc = ma thoat cua lease_publish.py
+## .claude/dev/launcher.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ag-t0-01b-exec-1-antigravity-20260821	refs/heads/master:ops/leases/ag-t0-01b-exec-1-antigravity-20260821.yaml
+HẾT_HẠN	ag-t0-01b-exec-1r2-antigravity-20260822	refs/heads/master:ops/leases/ag-t0-01b-exec-1r2-antigravity-20260822.yaml
+HẾT_HẠN	plat-m4-exec-2-claude-20260821	refs/heads/master:ops/leases/plat-m4-exec-2-claude-20260821.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/heads/master:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/heads/master:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/heads/master:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g6	refs/heads/master:ops/leases/wp-codex-credential-refresh-exec-g6.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907	refs/heads/master:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907	refs/heads/master:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924	refs/heads/master:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907	refs/heads/master:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907.yaml
+HẾT_HẠN	wp685-r18-g1-antigravity-20261007	refs/heads/master:ops/leases/wp685-r18-g1-antigravity-20261007.yaml
+HẾT_HẠN	wp685-r19-g2-codex-20261007	refs/heads/master:ops/leases/wp685-r19-g2-codex-20261007.yaml
+HẾT_HẠN	wp685-r19-g2b-codex-20261007	refs/heads/master:ops/leases/wp685-r19-g2b-codex-20261007.yaml
+HẾT_HẠN	wp685-r20-g3-codex-20261007	refs/heads/master:ops/leases/wp685-r20-g3-codex-20261007.yaml
+HẾT_HẠN	wp685-r23-g4-codex-20261007	refs/heads/master:ops/leases/wp685-r23-g4-codex-20261007.yaml
+HẾT_HẠN	wp685-r23-g4b-codex-20261007	refs/heads/master:ops/leases/wp685-r23-g4b-codex-20261007.yaml
+HẾT_HẠN	wp685-r28-g5-claude-20261009	refs/heads/master:ops/leases/wp685-r28-g5-claude-20261009.yaml
+HẾT_HẠN	wp743-r1-g1-claude-20261016	refs/heads/master:ops/leases/wp743-r1-g1-claude-20261016.yaml
+HẾT_HẠN	wp1345-r1-g1-claude	refs/heads/ops/wp1345-r1-g1-lease:ops/leases/wp1345-r1-g1-claude.yaml
+HẾT_HẠN	wp1105-r2-g1-claude	refs/remotes/origin/ops/cap-lease-1105-g1:ops/leases/wp1105-r2-g1-claude.yaml
+HẾT_HẠN	wp1105-r2-g2-claude	refs/remotes/origin/ops/cap-lease-1105-g1:ops/leases/wp1105-r2-g2-claude.yaml
+HẾT_HẠN	wp1105-r3-g3-claude	refs/remotes/origin/ops/cap-lease-1105-g1:ops/leases/wp1105-r3-g3-claude.yaml
+HẾT_HẠN	wp1077-r1-g1-claude	refs/remotes/origin/ops/wp1077-r1-g1-lease:ops/leases/wp1077-r1-g1-claude.yaml
+HẾT_HẠN	wp1077-r1-g2-claude	refs/remotes/origin/ops/wp1077-r1-g1-lease:ops/leases/wp1077-r1-g2-claude.yaml
+HẾT_HẠN	wp1077-r1-g3-claude	refs/remotes/origin/ops/wp1077-r1-g1-lease:ops/leases/wp1077-r1-g3-claude.yaml
+HẾT_HẠN	wp1077-r1-g4-claude	refs/remotes/origin/ops/wp1077-r1-g1-lease:ops/leases/wp1077-r1-g4-claude.yaml
+HẾT_HẠN	wp1077-r1-g5-claude	refs/remotes/origin/ops/wp1077-r1-g1-lease:ops/leases/wp1077-r1-g5-claude.yaml
+HẾT_HẠN	wp1077-r1-g6-claude	refs/remotes/origin/ops/wp1077-r1-g1-lease:ops/leases/wp1077-r1-g6-claude.yaml
+HẾT_HẠN	wp1252-r1-g1-claude	refs/remotes/origin/ops/wp1252-r1-g1-lease:ops/leases/wp1252-r1-g1-claude.yaml
+HẾT_HẠN	wp1335-r3-g1-claude	refs/remotes/origin/ops/wp1335-r3-g1-lease:ops/leases/wp1335-r3-g1-claude.yaml
+HẾT_HẠN	wp748-r27-g27-claude-remote-20261026	refs/remotes/origin/ops/wp748-r27-g27-lease:ops/leases/wp748-r27-g27-claude-remote-20261026.yaml
+HẾT_HẠN	wp748-r27-g28-claude-remote-20261027	refs/remotes/origin/ops/wp748-r27-g27-lease:ops/leases/wp748-r27-g28-claude-remote-20261027.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

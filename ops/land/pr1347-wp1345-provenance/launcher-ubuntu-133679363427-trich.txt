@@ -1,0 +1,141 @@
+# trich log job launcher (ubuntu-latest) run 43975814821 tren e4cce23 — loc dong Python/tong ket/r1335/HONG/BO QUA
+2026-11-16T23:03:52.5553756Z   co       python   Python 3.11.18
+2026-11-16T23:04:19.5863383Z   BO QUA t62_qua_han_ma_khong_giet_het_cay_phai_tra_125: fixture nay danh cho Windows; ban POSIX la t63 (chay duoc, khong bo qua)
+2026-11-16T23:07:00.3619933Z   BO QUA r484_g4_windows_sid_alias_identity: BO QUA native Windows SID conversion
+2026-11-16T23:07:31.9164489Z   r1079_a                      SAI - KHONG DO DUOC (neutral do: review_do_san)
+2026-11-16T23:07:42.5424831Z   r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+2026-11-16T23:09:09.6252479Z   r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+2026-11-16T23:09:09.6279095Z 408/408 ca DA CHAY QUA (tong 410, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+2026-11-16T23:09:21.9865565Z   r1335_bo_chan_vo_shell       OK  giet 1/1: r1335_ma_tran_agent_khai_bao
+2026-11-16T23:09:21.9881375Z   r1335_agent_khong_ghi_de_ten OK  giet 2/2: r1335_ma_tran_agent_khai_bao, r1335_khop_hai_cua_15_to_hop
+2026-11-16T23:09:21.9881806Z   r1335_agent_casefold         OK  giet 1/1: r1335_ma_tran_agent_khai_bao
+2026-11-16T23:09:21.9888691Z   r1335_probe_bo_qua_rong      OK  giet 2/2: r1335_ma_tran_agent_khai_bao, r1335_khop_hai_cua_15_to_hop
+2026-11-16T23:09:21.9895518Z   r1335_gop_null_va_khong      OK  giet 1/1: r1335_khop_hai_cua_15_to_hop
+2026-11-16T23:09:21.9902907Z   r1335_T1_tach_hai_nguon      OK  giet 1/1: r1335_khop_hai_cua_15_to_hop
+2026-11-16T23:09:30.1143509Z   r1335_T1_probe_theo_ten      OK  giet 2/2: r1335_ma_tran_agent_khai_bao, r1335_khop_hai_cua_15_to_hop
+2026-11-16T23:09:30.1143915Z   r1335_T2_bo_cat_cmd          OK  giet 1/1: r1335_ma_tran_agent_khai_bao
+2026-11-16T23:09:30.1159183Z   r1335_T3_lui_ve_bam_hang     OK  giet 3/3: r1335_transport_sha256_la_bam_tep_that, r1335_khac_cwd_bam_va_chay_tep_trong_workspace, r1335_symlink_doi_dich_giua_bam_va_phong
+2026-11-16T23:09:30.1159985Z   r1335_T3_bo_ly_do            OK  giet 1/1: r1335_transport_sha256_la_bam_tep_that
+2026-11-16T23:09:30.1160423Z   r1335_N3b_resolve_theo_cwd_launcher OK  giet 1/1: r1335_khac_cwd_bam_va_chay_tep_trong_workspace
+2026-11-16T23:09:30.1167689Z   r1335_N3c_phong_lenh_goc     OK  giet 1/1: r1335_symlink_doi_dich_giua_bam_va_phong
+2026-11-16T23:09:30.1168082Z   r1335_argv0_ve_realpath      OK  giet 1/1: r1335_giu_argv0_goc_khi_ghim_tep
+2026-11-16T23:09:30.1168568Z   r1335_F1_codex_theo_ten      OK  giet 1/1: r1335_hanh_vi_codex_theo_agent_da_quyet
+2026-11-16T23:09:30.1168979Z   r1335_F2_path_theo_cwd_launcher OK  giet 1/1: r1335_khac_cwd_bam_va_chay_tep_trong_workspace
+2026-11-16T23:09:30.1176426Z   r1335_F3_probe_lenh_goc      OK  giet 1/1: r1335_symlink_doi_dich_giua_bam_va_phong
+2026-11-16T23:09:30.1176839Z   r1335_F4_dung_o_ung_vien_dau OK  giet 1/1: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke
+2026-11-16T23:09:30.1177354Z   r1335_F4_chuyen_ca_khi_rc_khac_0 OK  giet 1/1: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke
+2026-11-16T23:09:30.1177767Z   r1335_F4_errno_ca_sau_exec   OK  giet 1/1: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke
+2026-11-16T23:09:30.1178243Z   r1335_F4_khong_giu_loi_dau   OK  giet 1/1: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke
+2026-11-16T23:09:30.1178719Z   r1335_F6_tu_dung_ung_vien    OK  giet 2/2: r1335_F6_windows_chon_tep_theo_which, r1335_P2_windows_bo_ung_vien_khong_duoi
+2026-11-16T23:10:35.5972042Z   r1335_F6_thu_muc_bo_qua      OK  giet 1/1: r1335_F6_windows_chon_tep_theo_which
+2026-11-16T23:10:35.5972723Z   r1335_F6_bo_khop_truc_tiep   OK  giet 1/1: r1335_F6_windows_chon_tep_theo_which
+2026-11-16T23:10:35.5973266Z   r1335_F6_bo_cwd_truoc        OK  giet 1/1: r1335_F6_windows_chon_tep_theo_which
+2026-11-16T23:10:35.5973827Z   r1335_F4_chi_ENOENT_ENOEXEC  OK  giet 1/1: r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke
+2026-11-16T23:10:35.5974533Z   r1335_D4_bo_chot_ten_trung   OK  giet 1/1: r1335_bang_transport_tu_choi_ten_trung
+2026-11-16T23:10:35.6019732Z   r27_effort_khong_kiem_kieu   OK  giet 1/1: r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC
+2026-11-16T23:10:35.6020562Z   r27_effort_khong_kiem_rong   OK  giet 1/1: r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC
+2026-11-16T23:10:35.6021381Z   r27_reasoning_khong_kiem_dict OK  giet 1/1: r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC
+2026-11-16T23:10:35.6022165Z   r27_bo_dem_effort            OK  giet 1/1: r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC
+2026-11-16T23:10:35.6024849Z   r27_effort_khong_xet_thieu   OK  giet 1/1: r927_effort_thieu_hoac_sai_kieu_o_mot_khung_thi_KHONG_DO_DUOC
+2026-11-16T23:12:10.0723247Z   r26_bo_dem_mat_nhieu_doan    OK  giet 3/3: r925_dong_vuot_tran_khong_parse_va_doc_co_gioi_han, r925_khung_cut_o_EOF_hoac_giua_doan_doc_khong_nhan_va_tinh_mat, r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:12:10.0725671Z   r26_bo_duoi_vat              OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:12:10.0726128Z   r26_khong_bo_khoang_trang    OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:12:10.0727594Z   r26_loai_khong_utf8_thay_the OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:12:10.0728034Z   r26_khong_ro_khong_dem       OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:12:10.0731151Z   r25_DO_DUOC_khi_ong_con_mo   OK  giet 2/2: r925_ket_luan_model_chi_DO_DUOC_khi_du_ba_dieu_kien, r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC
+2026-11-16T23:12:10.0732359Z   r26_DO_DUOC_khi_khong_ro     OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:12:10.0732943Z   r25_DO_DUOC_khong_khung      OK  giet 2/2: r925_ket_luan_model_chi_DO_DUOC_khi_du_ba_dieu_kien, r925_codex_khong_co_khung_thi_KHONG_DO_DUOC_khong_suy_tu_m
+2026-11-16T23:12:10.0734076Z   r25_so_khong_chuyen_mat      OK  giet 2/2: r925_ghi_ket_qua_tu_luong_that_loi_va_mat_deu_ha_trang_thai, r926_lenh_run_khung_mat_thi_run_json_KHONG_DO_DUOC
+2026-11-16T23:12:10.0734634Z   r26_so_khong_chuyen_khong_ro OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:12:10.0736343Z   r25_doc_ong_khong_han        OK  giet 1/1: r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC
+2026-11-16T23:12:10.0739271Z   r26_dong_tep_truoc_chot      OK  giet 2/2: r926_ket_thuc_chot_luong_TRUOC_khi_dong_tep, r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC
+2026-11-16T23:12:10.0740838Z   r26_san_xuat_dong_tep_truoc  OK  giet 1/1: r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC
+2026-11-16T23:12:10.0742439Z   r26_tep_stderr_co_dem        OK  giet 1/1: r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC
+2026-11-16T23:12:10.0745691Z   r26_luong_hong_lot_ra        OK  giet 1/1: r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC
+2026-11-16T23:12:10.0746161Z   r26_luong_hong_khong_dong_ong OK  giet 1/1: r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC
+2026-11-16T23:12:10.0746626Z   r26_luong_hong_khong_ghi_loi OK  giet 1/1: r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC
+2026-11-16T23:12:10.0747078Z   r26_cho_luong_chua_chay      OK  giet 1/1: r926_khong_sinh_duoc_luong_doc_thi_dong_ong_va_KHONG_DO_DUOC
+2026-11-16T23:12:10.0747526Z   r26_khong_ro_khong_doi_json  OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:12:10.0747989Z   r26_doc_tron_khong_parse_bo_qua OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:13:19.8079658Z   r26_doc_tron_khong_ro_khong_doi_json OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:13:19.8081409Z   r26_tien_to_ung_vien_tha     OK  giet 1/1: r926_ket_dong_tien_to_ung_vien_ma_khong_token_la_KHONG_RO
+2026-11-16T23:13:19.8083747Z   r26_token_khong_dinh         OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:13:19.8091861Z   r26_ket_thuc_khong_dong_tep  OK  giet 1/1: r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC
+2026-11-16T23:13:19.8093357Z   r26_rv5_prefix_decoded       OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:13:19.8097459Z   r26_rv5_prefix_match_guard   OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:13:19.8098316Z   r26_rv5_first_chunk_capture  OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:13:19.8103590Z   r26_rv5_old_late_production_latch OK  giet 1/1: r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC
+2026-11-16T23:13:19.8105201Z   r26_rv5_retain_caller_counter OK  giet 1/1: r926_lenh_run_khung_mat_thi_run_json_KHONG_DO_DUOC
+2026-11-16T23:13:19.8105959Z   r26_rv5_candidate_search     OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:13:19.8115360Z   r26_rv6_b_bo_neo_dau         OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:13:19.8116099Z   r26_rv6_b_moc_thoi_gian      OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:13:19.8120095Z   r26_rv6_d_khoa_type          OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:13:19.8120804Z   r26_rv6_d_khong_escape       OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:13:19.8121508Z   r26_rv6_d_dong_nhay          OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:13:19.8123648Z   r26_rv6_e_bo_completed       OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:13:19.8124965Z   r26_rv6_f_chi_dau_cach       OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:13:19.8125695Z   r26_rv6_g_duoi_ngan          OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:13:19.8126439Z   r26_rv6_h_luong_khong_ansi   OK  giet 1/1: r926_quet_moi_tran_doc_khung_vat_cho_cat_luon_KHONG_DO_DUOC
+2026-11-16T23:13:19.8129283Z   r26_rv6_m_dau_json_bo_ngoac  OK  giet 1/1: r926_dong_NHAN_dai_khong_xac_nhan_duoc_loai_la_KHONG_RO
+2026-11-16T23:13:19.8130044Z   r26_rv7_luong_doc_khong_daemon OK  giet 1/1: r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC
+2026-11-16T23:13:41.4222035Z   g4_windows_sid_alias_not_normalized KHONG DO DUOC tren nen nay (native SID conversion)
+2026-11-16T23:13:41.4222453Z   g4_windows_LA_not_current_owner KHONG DO DUOC tren nen nay (native SID conversion)
+2026-11-16T23:13:41.4222892Z   g2_windows_directory_pin_access KHONG DO DUOC tren nen nay (native Windows share-delete pin)
+2026-11-16T23:13:41.4229287Z   m3b_bo_kiem_do_tuoi_dau_vet  OK  giet 1/1: t154_m3_dau_vet_CU_KHONG_con_la_DA_CHAY
+2026-11-16T23:13:41.4237986Z   github_dem_CO_MAT_gh_la_da_xac_thuc OK  giet 1/1: t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec
+2026-11-16T23:13:41.4239207Z   co_chan_codex_luon_tra_KHONG_BI_CHAN OK  giet 1/1: t102_khong_go_duoc_policy_thi_phai_CHAN_codex
+2026-11-16T23:13:41.4240124Z   chot_truong_nhom_FAIL_OPEN_khi_khong_do_duoc_pgid OK  giet 1/1: t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom
+2026-11-16T23:13:41.4244611Z   bo_chot_truong_nhom_truoc_killpg OK  giet 1/1: t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom
+2026-11-16T23:13:41.4246232Z   124_khi_chau_con_song        KHONG DO DUOC tren nen nay (ca dich bo qua: t62_qua_han_ma_khong_giet_het_cay_phai_tra_125)
+2026-11-16T23:13:41.4246780Z   khong_cat_thong_tin_dang_nhap OK  giet 1/1: t45_token_trong_URL_KHONG_duoc_lo_ra
+2026-11-16T23:13:41.4247328Z   quay_ve_so_hau_to            OK  giet 3/3: t48_host_gia_mao_KHONG_duoc_khop, t57_host_KHONG_co_dau_cham_van_phai_chan, t58_expected_repo_mot_doan_bi_TU_CHOI
+2026-11-16T23:13:41.4249915Z   de_len_quyet_dinh_cua_stop   OK  giet 1/1: t50_stop_roi_runner_KHONG_duoc_de_len_so
+2026-11-16T23:14:32.6032010Z   so_hong_im_lang              OK  giet 1/1: t52_so_hong_KHONG_duoc_im_lang
+2026-11-16T23:14:32.6033910Z   khong_chup_prompt            OK  giet 2/2: t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con, r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO
+2026-11-16T23:14:32.6037646Z   luu_argv_nguyen_van          OK  giet 1/1: t59_so_KHONG_luu_doi_so_nguyen_van
+2026-11-16T23:14:32.6038042Z   doctor_tin_which             OK  giet 1/1: t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc
+2026-11-16T23:14:32.6039228Z   moi_truong_tin_gh_token_giu_cho OK  giet 1/1: t107_doc_moi_truong_KHONG_duoc_chon_bien_giu_cho
+2026-11-16T23:14:32.6041107Z   github_dem_gh_auth_la_lam_duoc_viec OK  giet 1/1: t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec
+2026-11-16T23:14:32.6041588Z   tran_tong_chon_tay           OK  giet 1/1: t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong
+2026-11-16T23:14:32.6042068Z   het_ngan_sach_thanh_cong_cu_hong OK  giet 1/1: t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong
+2026-11-16T23:14:32.6064072Z   ngat_ghi_thanh_xong          OK  giet 1/1: t72_bi_ngat_KHONG_duoc_ghi_thanh_xong
+2026-11-16T23:14:32.6065541Z   dut_ong_nuot_ma_that         OK  giet 1/1: t74_dut_ong_KHONG_duoc_nuot_ma_that
+2026-11-16T23:14:32.6066154Z   none_nhom_thanh_cay_rong     OK  giet 2/2: t78_khong_do_duoc_nhom_KHONG_phai_cay_rong, t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung
+2026-11-16T23:14:32.6069611Z   mcp_endpoint_bo_doc_PORT     OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:32.6070169Z   mcp_json_noi_suy_url_NGUYEN_VAN_vao_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:32.6070892Z   mcp_endpoint_tinh_vao_LAM_DUOC_VIEC OK  giet 2/2: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec, t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:32.6071619Z   mcp_endpoint_phan_loai_theo_MA_thay_vi_HEADER OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3563041Z   mcp_endpoint_toi_duoc_la_LAM_DUOC_VIEC OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3564130Z   mcp_endpoint_gop_khong_do_duoc_vao_chan OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3565210Z   mcp_endpoint_bo_kiem_scheme_cho_phep OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3566240Z   mcp_endpoint_bo_kiem_userinfo OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3567305Z   mcp_endpoint_userinfo_do_bang_KY_TU_thay_vi_CAU_TRUC OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3568690Z   mcp_endpoint_userinfo_chi_doc_username_theo_tinh_chan_ly OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3569789Z   mcp_endpoint_nhanh_scheme_in_lai_url_ra_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3570883Z   mcp_endpoint_tu_choi_userinfo_MA_VAN_in_url OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3571909Z   mcp_endpoint_in_token_vao_mo_ta OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3573188Z   mcp_endpoint_nuot_ly_do_o_chuoi_tom_tat OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3574247Z   mcp_endpoint_chua_biet_URL_bi_ke_thanh_HONG OK  giet 1/1: t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3575303Z   mcp_ket_xuat_gop_chua_do_duoc_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3576230Z   mcp_ten_server_khop_chuoi_con OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3577117Z   mcp_ten_server_phan_biet_hoa_thuong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3577978Z   mcp_bo_bat_loi_json_hong     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3578970Z   mcp_bo_kiem_kieu_goc         OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3579963Z   mcp_bo_kiem_kieu_bang_server OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3580770Z   mcp_bo_kiem_kieu_gia_tri_server OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3581596Z   mcp_bo_kiem_kieu_headers     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3582479Z   mcp_servers_che_khuat_mcpServers_sai_kieu OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3583397Z   mcp_chon_ten_theo_thu_tu_khoa_JSON OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3584253Z   mcp_suc_khoe_do_chuoi_con_ca_dong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3585147Z   mcp_suc_khoe_khop_TIEN_TO_thay_vi_bang_dung OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3586075Z   mcp_trang_thai_LA_bi_doan_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3586946Z   mcp_doc_Status_CUOI_thay_vi_DAU OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3587834Z   mcp_hoi_ten_dung_san_thay_vi_ten_da_khai OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3588850Z   mcp_bo_chuan_hoa_env_trong_ham OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3589716Z   env_da_chuan_tra_ve_os_environ_THO OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3590556Z   mcp_ep_env_None_o_loi_goi    OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3591419Z   rest_kho_khong_do_duoc_bi_gop_thanh_hong OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3592290Z   mcp_mat_env_da_chuan_hoa     OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:14:42.3603187Z   antigravity_tinh_vao_LAM_DUOC_VIEC OK  giet 1/1: t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec
+2026-11-16T23:18:01.5418475Z   headline_lay_tong_lam_so_ca_da_chay OK  giet 2/2: t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua, t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua
+2026-11-16T23:18:27.1520427Z DOT BIEN: 681/681 dat  (4 khong do duoc tren nen nay)

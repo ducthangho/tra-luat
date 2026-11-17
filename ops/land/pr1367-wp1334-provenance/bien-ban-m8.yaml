@@ -1,0 +1,42 @@
+# Bien ban M8 (ADR-0060) dong WP #1334 CODEX-HOME-NGOAI-KHO r2 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1367-wp1334-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6945638470 tren 3b23422).
+# Bon moc §10.2.2 run 44066674523 measured passed (wd-run 44073557734; gate output 39/39 bang danh_gia_gate.py v2).
+packet: wp1334
+revision: 2
+generation: 1
+spec_hash: 48b201ed1d4e4d8149b940cb3bda6a848dc4ee93e138c9a0a69be8f76bc57e89
+head_da_review: 3b234223327e6527ee51990cdfdfabba0d02ed88
+tree_h: 420b6a69fbbd1526855f0a8a7b2e1848b51f5fe7
+review:
+  offline: 'khong goi Codex offline; review doc lap = connector Codex (2 luot) + phep do lai cua phien dieu phoi + human audit'
+  connector: 'readback-pr1367-comments.json 6944343749 + readback-pr1367-reviews.json: 8ed3503 mot P2 (symlink + ..) da va o 3b23422; 3b23422 completed, has_any_findings false'
+  human_audit: 'issuecomment-6945638470 human_exact_head_audit.v1 approve tren 3b23422 (chu kho tu dang)'
+windows:
+  phan_loai: not_applicable
+  nguon: 'Dac ta: khong bat buoc Windows; lease budget windows_native_runs limit 0. pd4/pd7 bo qua ma 5 tren nen khong tao duoc symlink.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1367#issuecomment-6945638470
+duyet_chu_kho_ghi_chu: 'audit tu dang 10:37:25Z 17-11, truoc merge 10:38:16Z; chu kho chon "Merge thuong 3b23422" qua AskUserQuestion (loi khai).'
+merge_commit: 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3
+tree_m: 271f99ff13ac029f39c3fc43c3fcb116739556bb
+ci_master:
+  run_id: 44066674523
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong; gom "GOM: ĐẠT · 16 mảnh · 1514 ca bắt buộc".'
+nghiem_thu:
+  N1: passed  # n6-cloud-agent-creds-test-3b23422.txt (pd1 trong 60/60); ve am tren base: loi_khai_co_neo than PR (do tren ded5d41, khong a97a1ca)
+  N2: passed  # n6-...: pd2 trong 60/60; dot bien PD2 trong 91/91
+  N3: passed  # n6-...: pd3, pd4; dot bien PD3, PD4
+  N4: passed  # n6-...: pd5; dot bien PD5
+  N5: passed  # n6-...: pd6; dot bien PD6
+  N5b: passed  # n6-... pd7, pd8 + tai-lap-p2-symlink.txt (8ed3503 lot, 3b23422 chan, ngoai kho van None)
+  N6: passed  # n6-cloud-agent-creds-test-3b23422.txt: CA 60/60, DOT BIEN 91/91, TU KIEM DAT, TONG DAT, rc 0
+  N7: passed  # nghiem-thu-11eb100.txt: release-verify --strict ok 185/185 tai merge
+  N8: passed  # nghiem-thu-11eb100.txt: ruff F 97/0/0 = 97/0/0; adr-song/doctrine-scan rc 0
+  N9: passed  # readback-runs-head-3b23422.json gate success + bon moc 44066674523
+lease_cuoi: wp1334-r2-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

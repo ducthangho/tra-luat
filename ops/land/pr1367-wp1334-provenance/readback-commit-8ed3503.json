@@ -1,0 +1,149 @@
+{
+  "sha": "8ed35031549106c4030907cea3631e3a38d69a12",
+  "node_id": "C_kwDOTNeRjdoAKDhlZDM1MDMxNTQ5MTA2YzQwMzA5MDdjZWEzNjMxZTNhMzhkNjlhMTI",
+  "commit": {
+    "author": {
+      "name": "Claude",
+      "email": "noreply@anthropic.com",
+      "date": "2026-11-17T09:08:05Z"
+    },
+    "committer": {
+      "name": "Claude",
+      "email": "noreply@anthropic.com",
+      "date": "2026-11-17T09:08:05Z"
+    },
+    "message": "wp1334: khong ghi credential Codex vao CODEX_HOME nam trong kho git (r2)\n\n- scripts/tl_gws.py: them _trong_kho_git(path), di tu dich len goc tren hai\n  chuoi (tu vung va realpath), lstat muc .git. _bootstrap_agent_creds tra\n  KHONG DO DUOC va khong tao tep/thu muc nao khi dich nam trong kho.\n  cmd_agent_creds_set --codex chi doc, co y khong qua chot (ghi trong docstring).\n- ops/cloud_agent_creds.py: _ghi_dau hoi cung chot qua tl_gws; khong nap duoc\n  tl_gws thi cung khong ghi.\n- ops/cloud_agent_creds_test.py: 7 ca pd1..pd7 (M5 a-g, du lieu gia), 10 dot\n  bien PD*, loai tep dot bien \"tlgws\" chay tren ban sao tam.\n- RELEASE_MANIFEST.json tai sinh; changelog.d/wp-1334.md.\n\nDo tren base ded5d41: bo test 52/52, 80/80; tren head 59/59, 90/90.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZ6bCzNXoqjwqyrJTq",
+    "tree": {
+      "sha": "e76479ce1fc83682f6cecbc601839a88deb51c29",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/e76479ce1fc83682f6cecbc601839a88deb51c29"
+    },
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/8ed35031549106c4030907cea3631e3a38d69a12",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQKi90Hqs\nksIQ3Uw/OlW05M0o403mNM55lEKeKuqVelkgde/Ftk1cl5eucw7VJfc5mqQsw49R22Aq9mxbDaY+\nDg4=\n-----END SSH SIGNATURE-----",
+      "payload": "tree e76479ce1fc83682f6cecbc601839a88deb51c29\nparent ded5d41b1754ef05d87815f20c48203e6b00e58d\nauthor Claude <noreply@anthropic.com> 1794906485 +0000\ncommitter Claude <noreply@anthropic.com> 1794906485 +0000\n\nwp1334: khong ghi credential Codex vao CODEX_HOME nam trong kho git (r2)\n\n- scripts/tl_gws.py: them _trong_kho_git(path), di tu dich len goc tren hai\n  chuoi (tu vung va realpath), lstat muc .git. _bootstrap_agent_creds tra\n  KHONG DO DUOC va khong tao tep/thu muc nao khi dich nam trong kho.\n  cmd_agent_creds_set --codex chi doc, co y khong qua chot (ghi trong docstring).\n- ops/cloud_agent_creds.py: _ghi_dau hoi cung chot qua tl_gws; khong nap duoc\n  tl_gws thi cung khong ghi.\n- ops/cloud_agent_creds_test.py: 7 ca pd1..pd7 (M5 a-g, du lieu gia), 10 dot\n  bien PD*, loai tep dot bien \"tlgws\" chay tren ban sao tam.\n- RELEASE_MANIFEST.json tai sinh; changelog.d/wp-1334.md.\n\nDo tren base ded5d41: bo test 52/52, 80/80; tren head 59/59, 90/90.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZ6bCzNXoqjwqyrJTq\n",
+      "verified_at": "2026-11-17T09:08:09Z"
+    }
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/8ed35031549106c4030907cea3631e3a38d69a12",
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/8ed35031549106c4030907cea3631e3a38d69a12",
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/8ed35031549106c4030907cea3631e3a38d69a12/comments",
+  "author": {
+    "login": "claude",
+    "id": 81847,
+    "node_id": "MDQ6VXNlcjgxODQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/claude",
+    "html_url": "https://github.com/claude",
+    "followers_url": "https://api.github.com/users/claude/followers",
+    "following_url": "https://api.github.com/users/claude/following{/other_user}",
+    "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+    "organizations_url": "https://api.github.com/users/claude/orgs",
+    "repos_url": "https://api.github.com/users/claude/repos",
+    "events_url": "https://api.github.com/users/claude/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/claude/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "claude",
+    "id": 81847,
+    "node_id": "MDQ6VXNlcjgxODQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/claude",
+    "html_url": "https://github.com/claude",
+    "followers_url": "https://api.github.com/users/claude/followers",
+    "following_url": "https://api.github.com/users/claude/following{/other_user}",
+    "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+    "organizations_url": "https://api.github.com/users/claude/orgs",
+    "repos_url": "https://api.github.com/users/claude/repos",
+    "events_url": "https://api.github.com/users/claude/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/claude/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "ded5d41b1754ef05d87815f20c48203e6b00e58d",
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ded5d41b1754ef05d87815f20c48203e6b00e58d",
+      "html_url": "https://github.com/ducthangho/tra-luat/commit/ded5d41b1754ef05d87815f20c48203e6b00e58d"
+    }
+  ],
+  "stats": {
+    "total": 163,
+    "additions": 155,
+    "deletions": 8
+  },
+  "files": [
+    {
+      "sha": "537be42e640dc4715d9ca2357d2b77e4182d75d0",
+      "filename": "RELEASE_MANIFEST.json",
+      "status": "modified",
+      "additions": 5,
+      "deletions": 5,
+      "changes": 10,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/8ed35031549106c4030907cea3631e3a38d69a12/RELEASE_MANIFEST.json",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/8ed35031549106c4030907cea3631e3a38d69a12/RELEASE_MANIFEST.json",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/RELEASE_MANIFEST.json?ref=8ed35031549106c4030907cea3631e3a38d69a12",
+      "patch": "@@ -6,9 +6,9 @@\n   \"webapp_target\": \"2.21.2q\",\n   \"root_name\": \"tra-luat\",\n   \"file_count\": 185,\n-  \"total_bytes\": 9141085,\n-  \"package_hash\": \"29b857b590f4e4f46d0d41d695f1b5d71a5fa15854dd1ff55fd48e14a55cb0a0\",\n-  \"content_hash\": \"29b857b590f4e4f46d0d41d695f1b5d71a5fa15854dd1ff55fd48e14a55cb0a0\",\n+  \"total_bytes\": 9142763,\n+  \"package_hash\": \"932ef8acde8d74bff31835f87d3753d439eed871eb00710557742409f18a169c\",\n+  \"content_hash\": \"932ef8acde8d74bff31835f87d3753d439eed871eb00710557742409f18a169c\",\n   \"required_missing\": [],\n   \"files\": [\n     {\n@@ -878,8 +878,8 @@\n     },\n     {\n       \"path\": \"scripts/tl_gws.py\",\n-      \"size\": 153264,\n-      \"sha256\": \"cf9d129a4f688d3019326b06c41f28911ce792625a466fe666b4770d5f880c0b\"\n+      \"size\": 154942,\n+      \"sha256\": \"0655c2395268257cbb3fc2f40a814c7d4c309b8c89fee596004dba736167f2b1\"\n     },\n     {\n       \"path\": \"scripts/tl_selftest.py\","
+    },
+    {
+      "sha": "0bb85f0fbc1c990762cdb612b3aea15cea3b6fe6",
+      "filename": "changelog.d/wp-1334.md",
+      "status": "added",
+      "additions": 8,
+      "deletions": 0,
+      "changes": 8,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/8ed35031549106c4030907cea3631e3a38d69a12/changelog.d%2Fwp-1334.md",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/8ed35031549106c4030907cea3631e3a38d69a12/changelog.d%2Fwp-1334.md",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/changelog.d%2Fwp-1334.md?ref=8ed35031549106c4030907cea3631e3a38d69a12",
+      "patch": "@@ -0,0 +1,8 @@\n+WP1334 (CODEX-HOME-NGOAI-KHO r2): `tl bootstrap` no longer writes Codex `auth.json` when `CODEX_HOME` is inside a git\n+repository. New `tl_gws._trong_kho_git(path)` walks from the destination up to the filesystem root on two chains, the path\n+as given and its `os.path.realpath`, and reports the first ancestor that has a `.git` entry (`lstat`: a directory, a file as\n+in a worktree or submodule, or a dangling symlink all count). `_bootstrap_agent_creds` then returns `KHÔNG ĐO ĐƯỢC` with\n+that ancestor and creates no file, no temp file and no directory. The marker file written by `ops/cloud_agent_creds.py`\n+(`_ghi_dau`) goes through the same check and is also skipped when `tl_gws` cannot be imported. `agent-creds-set --codex`\n+only reads `auth.json` and is deliberately not gated. Before this change a `CODEX_HOME` under a repository left\n+`auth.json` as an untracked file one `git add -A` away from a commit (measured 16-11-2026 with fake data)."
+    },
+    {
+      "sha": "f99965cbf564eecbafab5a43e08866f4012b5215",
+      "filename": "ops/cloud_agent_creds.py",
+      "status": "modified",
+      "additions": 8,
+      "deletions": 0,
+      "changes": 8,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/8ed35031549106c4030907cea3631e3a38d69a12/ops%2Fcloud_agent_creds.py",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/8ed35031549106c4030907cea3631e3a38d69a12/ops%2Fcloud_agent_creds.py",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fcloud_agent_creds.py?ref=8ed35031549106c4030907cea3631e3a38d69a12",
+      "patch": "@@ -197,6 +197,14 @@ def _doc_json(p):\n     except (OSError, ValueError):\n         return None\n def _ghi_dau(last_refresh, md5):   # chỉ hai khoá; 0600; nguyên tử — không bao giờ chứa token\n+    if str(GOC / \"scripts\") not in sys.path:\n+        sys.path.insert(0, str(GOC / \"scripts\"))\n+    try:   # WP1334: CODEX_HOME trong kho git, hoặc không nạp được chốt của tl_gws ⇒ KHÔNG ghi dấu (fail-closed)\n+        import tl_gws\n+        if tl_gws._trong_kho_git(str(_codex_dir())) is not None:\n+            return\n+    except Exception:  # noqa: BLE001\n+        return\n     _ghi_nguyen_tu(_codex_dir() / TEN_DAU, (json.dumps({\"last_refresh\": last_refresh, \"md5\": md5}) + \"\\n\").encode(\"utf-8\"), 0o600)\n def _dau_sau_nap(kl):\n     \"\"\"Mục tiêu 3: ghi dấu CHỈ KHI bootstrap đã đè auth.json bằng bản bundle (đĩa == bundle); mọi kết luận khác ⇒ xoá dấu.\"\"\""
+    },
+    {
+      "sha": "b7964ccc18cf7dd263451f851d4ff93da6cd866a",
+      "filename": "ops/cloud_agent_creds_test.py",
+      "status": "modified",
+      "additions": 108,
+      "deletions": 2,
+      "changes": 110,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/8ed35031549106c4030907cea3631e3a38d69a12/ops%2Fcloud_agent_creds_test.py",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/8ed35031549106c4030907cea3631e3a38d69a12/ops%2Fcloud_agent_creds_test.py",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/ops%2Fcloud_agent_creds_test.py?ref=8ed35031549106c4030907cea3631e3a38d69a12",
+      "patch": "@@ -16,6 +16,9 @@\n sys.path.insert(0, str(HERE))\n import bash_nen  # noqa: E402 — bộ giải `bash` dùng chung (#570)\n sys.path.insert(0, str(HERE.parent / \"scripts\"))\n+TLGWS = Path(os.environ.get(\"CAC_TLGWS\") or HERE.parent / \"scripts\" / \"tl_gws.py\")\n+if os.environ.get(\"CAC_TLGWS\"):   # WP1334: đột biến tl_gws chạy trên BẢN SAO TẠM, nạp dưới đúng tên `tl_gws` trước mọi import khác\n+    (_sp := importlib.util.spec_from_file_location(\"tl_gws\", TLGWS)).loader.exec_module(sys.modules.setdefault(\"tl_gws\", importlib.util.module_from_spec(_sp)))\n import gas, gws_cred_store, tl_gws  # noqa: E401,E402 — CHÍNH các module helper import (sys.modules dùng chung ⇒ vá được)\n _CODEX_TAM = tempfile.mkdtemp(prefix=\"cac_codex_home_\")   # nap/ghi-nguoc ghi/xoá DẤU ở CODEX_HOME: không bao giờ đụng ~/.codex thật\n os.environ[\"CODEX_HOME\"] = _CODEX_TAM\n@@ -27,6 +30,7 @@\n SETTINGS = Path(os.environ.get(\"CAC_SETTINGS\") or HERE.parent / \".claude/settings.json\")\n BASE_P3 = \"8f123b27b338e5e173a668209eb4904f49dd611b\"   # base của lease wp1089 — vế âm S1\n BASE = \"97120d3c76ebb7c3eda4b585ff46f1c51e30c91b\"   # base của lease wp1039 — vế âm L6a\n+BASE_PD = \"ded5d41b1754ef05d87815f20c48203e6b00e58d\"   # base của lease wp1334 — vế âm N1/N5b\n LA_WINDOWS = os.name == \"nt\"\n SPEC = HERE / \"specs\" / \"cloud-setup-p2b-wire-r1.md\"   # B8 so với CHÍNH bảng \"Hằng ghim agy\" của spec đóng băng, không chép lại\n SPEC_SHA256 = \"67b448acc825fdd29f118c3b9082583773b4ad218a7c83ab4db496daa8f26d81\"\n@@ -66,6 +70,7 @@ def chay_nap(kb=None, khoa=\"khoa-thu\", them=None, xoa_tl=False, argv=(\"nap\",)):\n     with tempfile.TemporaryDirectory(prefix=\"cac_nap_\") as t:\n         t, bo = Path(t), (\"TL_MASTER_KEY\", \"TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY\")\n         (t / \"ops\").mkdir(), (t / \"scripts\").mkdir(), shutil.copy(MA, t / \"ops\" / \"cloud_agent_creds.py\")\n+        shutil.copy(TLGWS, t / \"scripts\" / \"tl_gws.py\")   # WP1334: `_ghi_dau` hỏi chốt `_trong_kho_git` của tl_gws\n         xoa_tl or (t / \"scripts\" / \"tl.py\").write_text(TL_GIA, encoding=\"utf-8\")\n         nk, env = t / \"nk.jsonl\", {k: v for k, v in os.environ.items() if k not in bo}\n         env.update(CAC_NHAT_KY=str(nk), CAC_KICH_BAN=json.dumps(kb or {}), **(them or {}), **({} if khoa is None else {\"TL_MASTER_KEY\": khoa}))\n@@ -591,7 +596,98 @@ def p3s2_stop_chay_that():\n         r = subprocess.run([bash, \"-c\", _lenh_stop()[\"command\"]], capture_output=True, text=True, timeout=60, env=dict(os.environ, CLAUDE_PROJECT_DIR=t))\n         goi = Path(t, \"argv\").read_text(encoding=\"utf-8\").splitlines() if Path(t, \"argv\").exists() else []\n     bang(r.returncode == 0 and [json.loads(x) for x in goi] == [[\"ghi-nguoc\", \"--neu-doi\"]], f\"rc={r.returncode} argv={goi} {r.stderr[-200:]!r}\")\n-CA = {k: v for k, v in dict(globals()).items() if re.fullmatch(r\"(?:[a-h]|p3[abcs])\\d+_\\w+\", k) and callable(v)}\n+# ---------- PD (#1334, spec CODEX-HOME-NGOAI-KHO r2 M5): chốt \"không ghi credential vào trong kho git\" — dữ liệu GIẢ ----------\n+SEN_PD, LR_PD = \"SENTINEL-token-pd-GIA-1334\", \"2099-01-01T00:00:00Z\"\n+def _tam_pd(t):   # tiền đề của vế dương, đo ĐỘC LẬP với mã đang thử: thư mục tạm không được nằm dưới một kho\n+    d = os.path.realpath(t)\n+    while os.path.dirname(d) != d:\n+        if os.path.lexists(os.path.join(d, \".git\")):\n+            raise RuntimeError(f\"thư mục tạm nằm dưới {d}/.git — dọn rồi đo lại\")\n+        d = os.path.dirname(d)\n+    return Path(os.path.realpath(t))\n+def _kho_pd(t):\n+    r = subprocess.run([\"git\", \"init\", \"-q\", str(kho := _tam_pd(t) / \"kho\")], capture_output=True, timeout=60)\n+    if r.returncode != 0:\n+        raise RuntimeError(f\"git init rc={r.returncode}\")\n+    return kho\n+def _sach_pd(kho):   # không tệp nào lọt vào cây kho, kể cả tệp tạm\n+    r = subprocess.run([\"git\", \"-C\", str(kho), \"status\", \"--porcelain\", \"--untracked-files=all\"], capture_output=True, text=True, timeout=60)\n+    bang(r.returncode == 0 and r.stdout == \"\" and not list(kho.rglob(\"*auth.json*\")), f\"cây kho có tệp mới: rc={r.returncode} {r.stdout!r}\")\n+def _lien_ket(lk, dich, la_thu_muc=False):\n+    try:\n+        os.symlink(dich, lk, target_is_directory=la_thu_muc)\n+    except (OSError, NotImplementedError) as e:\n+        if LA_WINDOWS:\n+            raise BoQua(f\"Windows không tạo được symlink ({type(e).__name__})\")\n+        raise\n+def chay_bs(codex_home, mod=None):   # đồ giả ở cùng ranh giới với mục 0 của spec: tải + giải mã; không bundle, không khoá thật\n+    mod, goi = mod or tl_gws, json.dumps({\"schema\": 1, \"rev\": 9, \"codex_auth\": {\"tokens\": {\"refresh_token\": SEN_PD}, \"last_refresh\": LR_PD}}).encode(\"utf-8\")\n+    with mock.patch.dict(os.environ, {\"CODEX_HOME\": str(codex_home)}), mock.patch.object(mod, \"_public_curl_bytes\", lambda *a, **k: b\"gia\"), \\\n+         mock.patch.object(gws_cred_store, \"decrypt\", lambda b, k: goi), mock.patch.object(mod, \"_imp\", importlib.import_module, create=True):\n+        return mod._bootstrap_agent_creds(\"x\" * 40)\n+def _chan_pd(kq, kho, auth):\n+    bang(not auth.exists(), f\"auth.json bị ghi vào trong kho: {kq[0]}\")\n+    bang(kq[0] == \"KHÔNG ĐO ĐƯỢC\" and \"nằm trong kho git\" in kq[1] and \"không ghi auth.json\" in kq[1] and SEN_PD not in kq[1], f\"kết luận {kq}\")\n+    _sach_pd(kho)\n+def _tl_gws_base():\n+    (m := importlib.util.module_from_spec(importlib.util.spec_from_loader(\"tl_gws_base_pd\", loader=None))).__dict__[\"__file__\"] = str(TLGWS)\n+    exec(compile(_git_base(\"scripts/tl_gws.py\", BASE_PD), \"tl_gws@base\", \"exec\"), m.__dict__)\n+    return m\n+def pd1_codex_home_trong_kho_khong_ghi():   # M5(a) + vế âm N1 trên base\n+    with tempfile.TemporaryDirectory(prefix=\"cac_pd_\") as t:\n+        (ch := (kho := _kho_pd(t)) / \"codexhome\").mkdir()\n+        _chan_pd(chay_bs(ch), kho, ch / \"auth.json\")\n+        bang(os.listdir(ch) == [], f\"thư mục đích có tệp: {os.listdir(ch)}\")\n+        cu = chay_bs(ch, _tl_gws_base())\n+        bang(cu[0] == \"ĐÃ NẠP\" and (ch / \"auth.json\").exists(), f\"vế âm: base {BASE_PD[:7]} không ghi vào kho ({cu[0]})\")\n+def pd2_codex_home_ngoai_kho_van_nap():   # M5(b): vế dương, hành vi cũ\n+    with tempfile.TemporaryDirectory(prefix=\"cac_pd_\") as t:\n+        kq, f = chay_bs(ch := _tam_pd(t) / \"ngoai\" / \"codexhome\"), ch / \"auth.json\"\n+        bang(kq[0] == \"ĐÃ NẠP\" and f.exists() and SEN_PD not in kq[1], f\"ngoài kho mà không nạp: {kq}\")\n+        bang(json.loads(f.read_text(encoding=\"utf-8\"))[\"tokens\"] == {\"refresh_token\": SEN_PD} and (LA_WINDOWS or f.stat().st_mode & 0o777 == 0o600), \"auth.json sai nội dung/quyền\")\n+def pd3_git_la_tep_van_chan():   # M5(c): worktree/submodule\n+    with tempfile.TemporaryDirectory(prefix=\"cac_pd_\") as t:\n+        (ch := (wt := _tam_pd(t) / \"wt\") / \"con\" / \"codexhome\").mkdir(parents=True), (wt / \".git\").write_text(\"gitdir: /khong/co\\n\", encoding=\"utf-8\")\n+        kq = chay_bs(ch)\n+        bang(not (ch / \"auth.json\").exists() and kq[0] == \"KHÔNG ĐO ĐƯỢC\" and str(wt) in kq[1] and os.listdir(ch) == [], f\".git là TỆP mà không chặn: {kq}\")\n+def pd4_git_la_symlink_van_chan():   # M5(d): symlink TREO (stat hụt, lstat thấy) và symlink tới thư mục thật\n+    for dich in (\"khong-ton-tai\", \"that\"):\n+        with tempfile.TemporaryDirectory(prefix=\"cac_pd_\") as t:\n+            (ch := (goc := _tam_pd(t) / \"g\") / \"codexhome\").mkdir(parents=True), (goc / \"that\").mkdir()\n+            _lien_ket(goc / \".git\", dich, dich == \"that\")\n+            kq = chay_bs(ch)\n+            bang(not (ch / \"auth.json\").exists() and kq[0] == \"KHÔNG ĐO ĐƯỢC\" and os.listdir(ch) == [], f\".git là symlink → {dich} mà không chặn: {kq}\")\n+def pd5_dich_chua_ton_tai_khong_tao_thu_muc():   # M5(e)\n+    with tempfile.TemporaryDirectory(prefix=\"cac_pd_\") as t:\n+        kq = chay_bs(ch := (kho := _kho_pd(t)) / \"a\" / \"b\" / \"codexhome\")\n+        bang(not (kho / \"a\").exists(), f\"đã tạo thư mục trong kho trước khi kiểm: {kq[0]}\")\n+        _chan_pd(kq, kho, ch / \"auth.json\")\n+def pd6_ghi_dau_trong_kho_khong_ghi():   # M5(f) + vế dương của `_ghi_dau`\n+    m = nap_mod()\n+    with tempfile.TemporaryDirectory(prefix=\"cac_pd_\") as t:\n+        (trong := (kho := _kho_pd(t)) / \"codexhome\").mkdir(), (ngoai := _tam_pd(t) / \"ngoai\").mkdir()\n+        for ch, co in ((trong, False), (kho / \"chua\" / \"co\", False), (ngoai, True)):\n+            with mock.patch.dict(os.environ, {\"CODEX_HOME\": str(ch)}):\n+                m._ghi_dau(LR_PD, None)\n+            bang((ch / TEN_DAU).exists() == co, f\"tệp dấu ở {ch.name}: mong {co}\")\n+        (ngoai / TEN_DAU).unlink()\n+        with mock.patch.dict(os.environ, {\"CODEX_HOME\": str(ngoai)}), mock.patch.dict(sys.modules, {\"tl_gws\": None}):\n+            m._ghi_dau(LR_PD, None)   # không nạp được chốt ⇒ không đo được đích ⇒ không ghi\n+        bang(not (ngoai / TEN_DAU).exists(), \"không nạp được tl_gws mà vẫn ghi tệp dấu\")\n+        bang(os.listdir(trong) == [] and not (kho / \"chua\").exists(), \"`_ghi_dau` để lại tệp/thư mục trong kho\")\n+        _sach_pd(kho)\n+def pd7_symlink_ngoai_kho_tro_vao_kho():   # M5(g) + vế âm N5b trên base\n+    with tempfile.TemporaryDirectory(prefix=\"cac_pd_\") as t:\n+        (ch := (kho := _kho_pd(t)) / \"codexhome\").mkdir()\n+        _lien_ket(lk := _tam_pd(t) / \"lk\", ch, True)\n+        _chan_pd(chay_bs(lk), kho, ch / \"auth.json\")\n+        cu = chay_bs(lk, _tl_gws_base())\n+        bang(cu[0] == \"ĐÃ NẠP\" and (ch / \"auth.json\").exists(), f\"vế âm: base {BASE_PD[:7]} không ghi qua symlink ({cu[0]})\")\n+    with tempfile.TemporaryDirectory(prefix=\"cac_pd_\") as t:   # chiều ngược: symlink TRONG kho trỏ ra ngoài ⇒ chuỗi từ vựng vẫn chặn\n+        (ngoai := _tam_pd(t) / \"ngoai\").mkdir(), _lien_ket(lk := _kho_pd(t) / \"lk\", ngoai, True)\n+        kq = chay_bs(lk)\n+        bang(os.listdir(ngoai) == [] and kq[0] == \"KHÔNG ĐO ĐƯỢC\", f\"đường khai nằm trong kho (symlink ra ngoài) mà không chặn: {kq[0]}\")\n+CA = {k: v for k, v in dict(globals()).items() if re.fullmatch(r\"(?:[a-h]|p3[abcs]|pd)\\d+_\\w+\", k) and callable(v)}\n # ---------- đột biến: (tên, tệp, chuỗi gốc | None, thay (chuỗi | hàm), ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần ----------\n def _doi_khoi_len_tieu_de(s):   # đặt khối ngay sau dòng tiêu đề pip, TRƯỚC lệnh pip thật\n     i, j = s.index(MO), s.index(DONG) + len(DONG) + 1\n@@ -681,6 +777,16 @@ def _doi_khoi_ra_sau(s):\n     (\"P3B6_bo_finally\", \"gs\", \"  } finally {\\n    lock.releaseLock();\\n  }\\n}\\n/* ============ /AGENT CREDS\", \"  } catch (e) { throw e; }\\n}\\n/* ============ /AGENT CREDS\", \"p3b6_thu_tu_va_finally\"),\n     (\"P3B7_xoa_case\", \"gs\", \"    case 'agent_creds_put': return doAgentCredsPut_(p);\", \"   \", \"p3b7_ban_va_nhanh_case\"),\n     (\"P3S1_doi_lenh_subagentstop\", \"settings\", '\\\\\"$D/.claude/hooks/subagent_ghi_detect.py\\\\\"\\'\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"Stop\"', '\\\\\"$D/.claude/hooks/subagent_ghi_detect.py\\\\\" --x\\'\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"Stop\"', \"p3s1_settings_co_stop\"),\n+    (\"PD1_bo_chot_bootstrap\", \"tlgws\", \"        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:\", \"        if (kho := None) is not None:\", \"pd1_codex_home_trong_kho_khong_ghi\"),\n+    (\"PD2_luon_tra_duong_dan\", \"tlgws\", \"    return None   # không tổ tiên nào có `.git`\", \"    return p\", \"pd2_codex_home_ngoai_kho_van_nap\"),\n+    (\"PD3_git_phai_la_thu_muc\", \"tlgws\", \"                os.lstat(g)\\n\", \"                if not os.path.isdir(g): raise FileNotFoundError(g)\\n\", \"pd3_git_la_tep_van_chan\"),\n+    (\"PD4_theo_symlink\", \"tlgws\", \"                os.lstat(g)\\n\", \"                os.stat(g)\\n\", \"pd4_git_la_symlink_van_chan\"),\n+    (\"PD5_makedirs_truoc_khi_kiem\", \"tlgws\", \"        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:\", \"        os.makedirs(os.path.dirname(dst), exist_ok=True)\\n        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:\", \"pd5_dich_chua_ton_tai_khong_tao_thu_muc\"),\n+    (\"PD5_khong_len_to_tien\", \"tlgws\", \"            if os.path.dirname(d) == d:\\n                break\\n\", \"            break\\n\", \"pd5_dich_chua_ton_tai_khong_tao_thu_muc\"),\n+    (\"PD6_bo_chot_ghi_dau\", \"ma\", \"        if tl_gws._trong_kho_git(str(_codex_dir())) is not None:\\n            return\\n\", \"\", \"pd6_ghi_dau_trong_kho_khong_ghi\"),\n+    (\"PD6_khong_nap_duoc_chot_van_ghi\", \"ma\", \"    except Exception:  # noqa: BLE001\\n        return\\n    _ghi_nguyen_tu(_codex_dir() / TEN_DAU\", \"    except Exception:  # noqa: BLE001\\n        pass\\n    _ghi_nguyen_tu(_codex_dir() / TEN_DAU\", \"pd6_ghi_dau_trong_kho_khong_ghi\"),\n+    (\"PD7_bo_chuoi_realpath\", \"tlgws\", \"    for d in dict.fromkeys((p, os.path.realpath(p))):\", \"    for d in (p,):\", \"pd7_symlink_ngoai_kho_tro_vao_kho\"),\n+    (\"PD7_bo_chuoi_tu_vung\", \"tlgws\", \"    for d in dict.fromkeys((p, os.path.realpath(p))):\", \"    for d in (os.path.realpath(p),):\", \"pd7_symlink_ngoai_kho_tro_vao_kho\"),\n     (\"P3S2_bo_or_true\", \"settings\", \"ghi-nguoc --neu-doi || true'\", \"ghi-nguoc --neu-doi'\", \"p3s2_stop_chay_that\"),\n )\n TU_KIEM = (   # F2 — (tên, tệp, gốc, thay, ca đích, hạng mong đợi)\n@@ -693,7 +799,7 @@ def phan_hang(rc, ra, ten_ca):\n         return \"GIET\" if re.search(rf\"^DO:{re.escape(ten_ca)}:\", ra, re.M) else \"TIN_DUNG_GIA\"\n     return {0: \"SONG_SOT\", 5: \"BO_QUA\", 4: \"TIN_DUNG_GIA\"}.get(rc, \"HONG\")\n def chay_dot_bien(ten, tep, cu, moi, ten_ca):\n-    nguon, bien = {\"ma\": (MA, \"CAC_MA\"), \"hook\": (HOOK, \"CAC_HOOK\"), \"gs\": (GS, \"CAC_GS\"), \"settings\": (SETTINGS, \"CAC_SETTINGS\")}[tep]\n+    nguon, bien = {\"ma\": (MA, \"CAC_MA\"), \"hook\": (HOOK, \"CAC_HOOK\"), \"gs\": (GS, \"CAC_GS\"), \"settings\": (SETTINGS, \"CAC_SETTINGS\"), \"tlgws\": (TLGWS, \"CAC_TLGWS\")}[tep]\n     goc = nguon.read_text(encoding=\"utf-8\")\n     if cu is not None and (goc.count(cu) != 1 or cu == moi):\n         return \"HONG\", f\"neo phải xuất hiện đúng 1 lần (thấy {goc.count(cu)})\""
+    },
+    {
+      "sha": "28f880fd3b0836421e31c782c8348bbc7af2320e",
+      "filename": "scripts/tl_gws.py",
+      "status": "modified",
+      "additions": 26,
+      "deletions": 1,
+      "changes": 27,
+      "blob_url": "https://github.com/ducthangho/tra-luat/blob/8ed35031549106c4030907cea3631e3a38d69a12/scripts%2Ftl_gws.py",
+      "raw_url": "https://github.com/ducthangho/tra-luat/raw/8ed35031549106c4030907cea3631e3a38d69a12/scripts%2Ftl_gws.py",
+      "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/scripts%2Ftl_gws.py?ref=8ed35031549106c4030907cea3631e3a38d69a12",
+      "patch": "@@ -1116,6 +1116,27 @@ def _codex_auth_path() -> str:\n     return os.path.join(os.environ.get(\"CODEX_HOME\") or os.path.expanduser(\"~/.codex\"), \"auth.json\")\n \n \n+def _trong_kho_git(path: str) -> str | None:\n+    \"\"\"WP1334 (đo 16-11-2026: bootstrap ghi auth.json vào CODEX_HOME nằm TRONG một kho git ⇒ `git status` thấy\n+    `?? codexhome/auth.json`) — trả tổ tiên có mục `.git` nếu `path` hoặc bất kỳ tổ tiên nào của nó có, ngược lại None.\n+    Đi từ chính `path` lên gốc trên HAI chuỗi: từ vựng (đường như khai) và `os.path.realpath` (đích thật sau symlink —\n+    kho nằm sau một symlink NGOÀI kho thì chuỗi từ vựng không thấy). `lstat`, không theo symlink ở `.git`: tệp\n+    (worktree/submodule), thư mục, symlink treo đều tính. Thành phần chưa tồn tại thì `lstat` hụt và đi tiếp lên tổ tiên.\"\"\"\n+    p = os.path.abspath(path)\n+    for d in dict.fromkeys((p, os.path.realpath(p))):\n+        while True:\n+            g = os.path.join(d, \".git\")\n+            try:\n+                os.lstat(g)\n+                return d\n+            except OSError:\n+                pass\n+            if os.path.dirname(d) == d:\n+                break\n+            d = os.path.dirname(d)\n+    return None   # không tổ tiên nào có `.git`\n+\n+\n def _last_refresh_key(d):\n     \"\"\"`last_refresh` ISO-8601 → (giây epoch, nano) — so được chuỗi có số chữ số phần giây khác nhau (container đo\n     9 chữ số). Thiếu/không đọc được ⇒ (-inf, 0): CŨ HƠN mọi bản có (spec mục chua_do_duoc).\"\"\"\n@@ -1150,7 +1171,9 @@ def _ghi_nguyen_tu_0600(path: str, data: bytes) -> None:\n \n def cmd_agent_creds_set(a) -> int:\n     \"\"\"WP1009: ghi credential AGENT (Codex auth.json · token Claude · khoá Gemini cho `agy`) vào tl_agent_creds.enc.\n-    Giá trị chỉ đọc từ TỆP/BIẾN, không bao giờ từ argv; không in giá trị ở bất kỳ nhánh nào — chỉ TÊN khoá.\"\"\"\n+    Giá trị chỉ đọc từ TỆP/BIẾN, không bao giờ từ argv; không in giá trị ở bất kỳ nhánh nào — chỉ TÊN khoá.\n+    WP1334: `--codex` chỉ ĐỌC auth.json để upload nên CỐ Ý không qua chốt `_trong_kho_git` — đọc không rò gì ra cây\n+    kho; chốt chỉ đứng ở đường GHI (`_bootstrap_agent_creds`, `_ghi_dau`). Đừng \"sửa\" bằng cách thêm chốt vào đây.\"\"\"\n     tag = \"agent-creds-set\"\n     master = _master_key_ghi(tag)\n     if master is None:\n@@ -1233,6 +1256,8 @@ def _bootstrap_agent_creds(master: str) -> tuple[str, str]:\n     phan = [f\"rev={p.get('rev')}\"]\n     if ca is not None:\n         dst = _codex_auth_path()\n+        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:   # WP1334: chốt TRƯỚC mọi thao tác trên đích\n+            return \"KHÔNG ĐO ĐƯỢC\", f\"CODEX_HOME nằm trong kho git ({kho}) — không ghi auth.json\"\n         try:\n             with open(dst, encoding=\"utf-8\") as f:\n                 cu = json.load(f)"
+    }
+  ]
+}

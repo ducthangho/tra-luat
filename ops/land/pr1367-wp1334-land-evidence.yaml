@@ -1,0 +1,144 @@
+# HO SO LAND — packet #1334 CODEX-HOME-NGOAI-KHO r2 (P-D), lease g1, qua PR #1367. Khuon: ops/land/pr1366-wp1365-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (11eb100), landed true. Bon moc §10.2.2 cua ci.yml 44066674523 DU, measured passed (wd-run 44073557734; gate output
+#   39/39 bang danh_gia_gate.py v2, gom "GOM: ĐẠT · 16 mảnh · 1514 ca bắt buộc").
+# MUC TIEU: `tl bootstrap` khong ghi Codex auth.json (va _ghi_dau khong ghi tep dau) khi CODEX_HOME nam trong kho git.
+# REVIEW: connector Codex luot 1 tren 8ed3503 bat mot P2 that (symlink + `..` lot chot); phien dieu phoi tai lap, executor va o 3b23422,
+#   connector luot 2 sach. Do lai: tai-lap-p2-symlink.txt, n6-cloud-agent-creds-test-3b23422.txt.
+# VI PHAM DA KHAI: commit 8ed3503 mang ten model o dong Co-Authored-By (executor tu khai; khong amend/force-push). Chu kho chon merge
+#   thuong de giu dung lich su da audit => dong ay nam trong lich su master. Commit 3b23422 sach.
+# UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head 3b23422 (issuecomment-6945638470, app null).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
+# Readback tho: ops/land/pr1367-wp1334-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-17T10:4x–11:2xZ.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS
+input_packet_generations:
+  - packet_issue: 1334
+    packet_id: wp1334
+    revision: 2
+    generation: 1
+    lease_id: wp1334-r2-g1-claude
+    ghi_chu: 'Executor do phien dieu phoi nay mo. attempts 1/2 (hai commit trong cung mot lan thi cong). Rut han sau merge (lease.thu_hoi_cuoi).'
+authorized_head_sha: 3b234223327e6527ee51990cdfdfabba0d02ed88
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1367#issuecomment-6945638470
+authorization_ghi_chu: >-
+  measured — readback-pr1367-comments.json: comment 6945638470, user ducthangho, created_at 2026-11-17T10:37:25Z; than
+  human_exact_head_audit.v1 packet wp1334 revision 2 generation 1 pr 1367 reviewed_sha 3b23422 (= head), reviewed_tree 420b6a69 (= tree
+  head), spec_sha256 48b201ed (= lease spec_hash), verdict approve. Merged_at 10:38:16Z.
+  Lua chon "Merge thuong 3b23422" qua AskUserQuestion: loi_khai_co_neo. CAVEAT #566: ai bam merge khong do duoc.
+land_operator: 'measured — readback-pr-1367.json: merged_at 2026-11-17T10:38:16Z, merge_commit_sha 11eb100 (phien dieu phoi qua MCP merge_pull_request voi expectedHeadSha).'
+merge_method: merge
+merge_commit: 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3
+merge_commit_tree: 271f99ff13ac029f39c3fc43c3fcb116739556bb
+merge_commit_parents: [8a7f715494d391310894638dfcc7a7366f758f3c, 3b234223327e6527ee51990cdfdfabba0d02ed88]
+merge_ghi_chu: >-
+  measured — readback-commit-11eb100.json: cha thu nhat 8a7f715 (master sau #1369), cha thu hai 3b23422. Base lease ded5d41; giua base va
+  merge chi co cac PR ho so (ops/land/) va #1366 (.claude/dev/packet_loop_test.py), khong cham write set.
+  nghiem-thu-11eb100.txt: numstat dung 5 tep write set (+173/-8). readback-commit-8ed3503.json: dong Co-Authored-By mang ten model (vi pham da khai).
+pre_merge_checks:
+  - name: 'CI PR tren head cuoi'
+    sha: 3b234223327e6527ee51990cdfdfabba0d02ed88
+    conclusion: success
+    nguon: [readback-runs-head-3b23422.json, readback-runs-head-8ed3503.json]
+    ghi_chu: 'measured — readback-runs-head-3b23422.json: gate 44060730259 pull_request success; thu-hoi success. Luot 1 tren 8ed3503 (44052857404) success. CI Ubuntu 2/2 (cham tran).'
+  - name: 'Codex connector tren head cuoi'
+    sha: 3b234223327e6527ee51990cdfdfabba0d02ed88
+    conclusion: 'sach'
+    nguon: [readback-pr1367-comments.json, readback-pr1367-reviews.json, readback-pr1367-review-comments.json]
+    ghi_chu: >-
+      measured — readback-pr1367-reviews.json: review 5936200214 tren 8ed3503 (mot P2, thread 4597850151), readback-pr1367-comments.json:
+      6944343749 codex-review-state:v1 cuoi cung commit 3b23422 completed, has_any_findings false (kich lai bang draft->ready).
+  - name: 'Do lai cua phien dieu phoi'
+    sha: 3b234223327e6527ee51990cdfdfabba0d02ed88
+    conclusion: success
+    nguon: [n6-cloud-agent-creds-test-3b23422.txt, tai-lap-p2-symlink.txt]
+    ghi_chu: >-
+      measured — n6-cloud-agent-creds-test-3b23422.txt: CA 60/60, DOT BIEN 91/91, TU KIEM DAT, TONG DAT, rc 0 tren 3b23422.
+      tai-lap-p2-symlink.txt: <ngoai>/link/../codexhome -> None tren 8ed3503 (lot), -> <repo> tren 3b23422 (chan); duong ngoai kho van None.
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 44066674523
+    run_attempt: 1
+    sha: 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44066674523.json, readback-jobs-44066674523.json, danh-gia-gate-output-44066674523.txt, danh_gia_gate.py, phan-chung-buoc-44066674523.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha 11eb100, run_attempt 1.'
+    moc_checkout: 'measured — ci/provenance.yaml: 39/39 job checkout passed 11eb100, tree 271f99ff.'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition passed (wd-run 44073557734, blob ci.yml a1db88d9).'
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-44066674523.txt (danh_gia_gate.py v2 sha256 539fed68): passed 39/39; gom "GOM: ĐẠT · 16 mảnh · 1514 ca
+      bắt buộc". phan-chung-buoc-44066674523.txt: xoa dau hieu 4 buoc => not_measured, rc 0.
+bookkeeping:
+  - {item: 'rut han lease wp1334-r2-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1334.'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 0 "ĐÓNG ĐƯỢC WP wp1334".'}
+  - {item: 'dong Issue #1334', ket_qua: 'not_measured — readback-issue-1334.json con open; dong sau khi PR ghi so merge.'}
+  - {item: 'phat hanh', ket_qua: 'not_measured — vao goi qua packet #1371 (v1.36.70), deploy rieng.'}
+# ---- het truong chuan
+packet_id: wp1334
+packet_issue: 1334
+packet_ten: CODEX-HOME-NGOAI-KHO
+revision: 2
+generation: 1
+pham_vi_land: 'scripts/tl_gws.py +27/-1 (_trong_kho_git), ops/cloud_agent_creds.py +8 (_ghi_dau), ops/cloud_agent_creds_test.py +125/-2 (pd1-pd8, 11 dot bien), RELEASE_MANIFEST.json, changelog.d/wp-1334.md.'
+environment: cloud
+operating_system: linux
+recorded_by: claude-session — phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS.
+
+spec:
+  path: ops/specs/CODEX-HOME-NGOAI-KHO-r2.md
+  blob: 6b54c99a6856292f17da22a7c833997381f2daec
+  sha256: 48b201ed1d4e4d8149b940cb3bda6a848dc4ee93e138c9a0a69be8f76bc57e89
+  nguon: 'measured — dac-ta.txt: git rev-parse origin/ops/wp1334-r2-g1-lease:<spec> = 6b54c99a; sha256 = lease spec_hash.'
+
+lease:
+  lease_id: wp1334-r2-g1-claude
+  path: ops/leases/wp1334-r2-g1-claude.yaml (nhanh ops/wp1334-r2-g1-lease)
+  write_set_so_tep: 5
+  thu_hoi_cuoi: >-
+    RUT HAN sau merge: lease_until 2026-11-18T08:55:00Z -> 2026-11-17T10:53:00Z (commit de54597), kem ngan sach that (Codex 2/10, CI Ubuntu
+    2/2 cham tran, Windows 0/0); tep lease-wp1334-r2-g1-claude-sau-rut-han.yaml.txt. ai-dang-giu-sau-rut-han.txt: 4 tep NGUOI_GIU 0;
+    RELEASE_MANIFEST.json NGUOI_GIU 1 = release-1.36.70-r1-g1-claude (packet #1371 MOI, cap sau 10:53Z, dung du kien).
+  diff_do: 'measured — nghiem-thu-11eb100.txt numstat 11eb100^1..11eb100: 5 tep, +173/-8 (<= 6 tep, <= 450 dong, ADR-0053).'
+
+trang_thai_packet:
+  merged: true
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren 11eb100: DAT, du bon moc measured passed. (2) lease nha: DAT. (3) bookkeeping: ho so nay + M8 rc 0.
+    (4) review neo 3b23422: connector sach (sau khi va P2) + do lai cua phien dieu phoi + audit chu kho. (5) uy quyen: audit tu dang
+    6945638470. (6) muc tieu: N1-N9 (N6, N7, N8, N9, N5b measured; ve am N1-N5 tren base la loi khai than PR). (7) tran: CI 2/2 cham tran.
+  canh_bao_cho_chu_kho: >-
+    (i) Commit 8ed3503 mang ten model (vi pham luat commit), nam trong lich su master theo lua chon merge thuong cua chu kho. (ii) Ve am
+    tren base do tren ded5d41 thay vi a97a1ca nhu dac ta neu (executor khai). (iii) Chua do: Windows; bundle that; duong tuong doi khi cwd
+    la symlink. (iv) CI Ubuntu da dung 2/2 — khong con luot cho packet nay.
+
+review:
+  so_loi_goi_codex: 'loi_khai_co_neo — 2/10: connector 8ed3503 (1 P2) + 3b23422 (sach); khong goi Codex offline.'
+  windows_native: 'not_applicable — 0/0.'
+
+nghiem_thu:
+  N1: 'measured — n6-cloud-agent-creds-test-3b23422.txt (pd1 trong 60/60). Ve am tren base: loi_khai_co_neo than PR #1367 (ded5d41, pd1 rc=3).'
+  N2: 'measured — n6-cloud-agent-creds-test-3b23422.txt: pd2 dat; dot bien PD2 trong 91/91 bi giet.'
+  N3: 'measured — n6-cloud-agent-creds-test-3b23422.txt: pd3, pd4 dat; dot bien PD3, PD4 bi giet.'
+  N4: 'measured — n6-cloud-agent-creds-test-3b23422.txt: pd5 dat; dot bien PD5 bi giet.'
+  N5: 'measured — n6-cloud-agent-creds-test-3b23422.txt: pd6 dat; dot bien PD6 bi giet.'
+  N5b: 'measured — n6-cloud-agent-creds-test-3b23422.txt (pd7, pd8) + tai-lap-p2-symlink.txt: symlink + .. chan tren 3b23422, lot tren 8ed3503.'
+  N6: 'measured — n6-cloud-agent-creds-test-3b23422.txt: CA 60/60, DOT BIEN 91/91, TU KIEM DAT, TONG DAT, rc 0.'
+  N7: 'measured — nghiem-thu-11eb100.txt: release-verify --strict ok, 185 = 185, package_hash_match true tai merge.'
+  N8: 'measured — nghiem-thu-11eb100.txt: ruff 0.16.9 --select F tl_gws.py 97 vs 97, hai tep ops 0 vs 0; diff --check rc 0; adr-song, doctrine-scan rc 0.'
+  N9: 'measured — readback-runs-head-3b23422.json (gate success) + bon moc §10.2.2 tren 44066674523.'
+
+khong_do_duoc:
+  - 'Lua chon cach merge qua AskUserQuestion (khong co hien vat GitHub).'
+  - 'Ve am N1-N5 tren base (chi co loi khai than PR).'
+  - 'Windows; bundle credential that.'

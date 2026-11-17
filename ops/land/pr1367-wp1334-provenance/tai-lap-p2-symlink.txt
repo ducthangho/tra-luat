@@ -1,0 +1,9 @@
+# Tai lap P2 4597850151 va do ban va, luc 2026-11-17T10:50:43Z; repo=<T>/repo (co .git), <T>/outside/link -> <T>/repo/child
+== tl_gws.py @ 8ed35031549106c4030907cea3631e3a38d69a12
+<T>/outside/link/../codexhome -> None
+<T>/outside/codexhome -> None
+<T>/repo/codexhome -> <T>/repo
+== tl_gws.py @ 3b234223327e6527ee51990cdfdfabba0d02ed88
+<T>/outside/link/../codexhome -> <T>/repo
+<T>/outside/codexhome -> None
+<T>/repo/codexhome -> <T>/repo

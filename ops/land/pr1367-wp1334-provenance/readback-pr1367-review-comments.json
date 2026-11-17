@@ -1,0 +1,149 @@
+[
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4597850151",
+    "pull_request_review_id": 5936200214,
+    "id": 4597850151,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABEg2gJw",
+    "diff_hunk": "@@ -1116,6 +1116,27 @@ def _codex_auth_path() -> str:\n     return os.path.join(os.environ.get(\"CODEX_HOME\") or os.path.expanduser(\"~/.codex\"), \"auth.json\")\n \n \n+def _trong_kho_git(path: str) -> str | None:\n+    \"\"\"WP1334 (đo 16-11-2026: bootstrap ghi auth.json vào CODEX_HOME nằm TRONG một kho git ⇒ `git status` thấy\n+    `?? codexhome/auth.json`) — trả tổ tiên có mục `.git` nếu `path` hoặc bất kỳ tổ tiên nào của nó có, ngược lại None.\n+    Đi từ chính `path` lên gốc trên HAI chuỗi: từ vựng (đường như khai) và `os.path.realpath` (đích thật sau symlink —\n+    kho nằm sau một symlink NGOÀI kho thì chuỗi từ vựng không thấy). `lstat`, không theo symlink ở `.git`: tệp\n+    (worktree/submodule), thư mục, symlink treo đều tính. Thành phần chưa tồn tại thì `lstat` hụt và đi tiếp lên tổ tiên.\"\"\"\n+    p = os.path.abspath(path)\n+    for d in dict.fromkeys((p, os.path.realpath(p))):",
+    "path": "scripts/tl_gws.py",
+    "commit_id": "8ed35031549106c4030907cea3631e3a38d69a12",
+    "original_commit_id": "8ed35031549106c4030907cea3631e3a38d69a12",
+    "user": {
+      "login": "chatgpt-codex-connector[bot]",
+      "id": 199175422,
+      "node_id": "BOT_kgDOC98s_g",
+      "avatar_url": "https://avatars.githubusercontent.com/in/1144995?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D",
+      "html_url": "https://github.com/apps/chatgpt-codex-connector",
+      "followers_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/chatgpt-codex-connector%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Resolve symlinks before collapsing parent-directory components**\n\nWhen `CODEX_HOME` contains a symlink followed by `..`, `abspath()` collapses that component before `realpath()` can resolve the symlink, so both checks can inspect the wrong directory. On Linux, I reproduced this with `/outside/link -> /repo/child`, `CODEX_HOME=/outside/link/../codexhome`, and an existing `/outside/codexhome`: the guard returned `None`, while bootstrap with fake credentials returned `ĐÃ NẠP` and wrote `/repo/codexhome/auth.json`. Thus the new guard still permits the credential exposure it is intended to prevent. Compute the resolved ancestor chain from the original path rather than the normalized `p`, retaining the lexical check separately. Add this symlink-plus-`..` case alongside `pd7`, with the outside directory present so the test exercises a successful write; retain the existing outside-repository positive test to catch accidental overblocking.\n\nUseful? React with 👍 / 👎.\n\n<!-- codex-code-review-finding:v1 -->",
+    "created_at": "2026-11-17T09:48:53Z",
+    "updated_at": "2026-11-17T09:48:53Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1367#discussion_r4597850151",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1367",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4597850151"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1367#discussion_r4597850151"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1367"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4597850151/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 1125,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 1126,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 11,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  },
+  {
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4597972383",
+    "pull_request_review_id": 5936361855,
+    "id": 4597972383,
+    "node_id": "PRRC_kwDOTNeRjc8AAAABEg99nw",
+    "diff_hunk": "@@ -1116,6 +1116,27 @@ def _codex_auth_path() -> str:\n     return os.path.join(os.environ.get(\"CODEX_HOME\") or os.path.expanduser(\"~/.codex\"), \"auth.json\")\n \n \n+def _trong_kho_git(path: str) -> str | None:\n+    \"\"\"WP1334 (đo 16-11-2026: bootstrap ghi auth.json vào CODEX_HOME nằm TRONG một kho git ⇒ `git status` thấy\n+    `?? codexhome/auth.json`) — trả tổ tiên có mục `.git` nếu `path` hoặc bất kỳ tổ tiên nào của nó có, ngược lại None.\n+    Đi từ chính `path` lên gốc trên HAI chuỗi: từ vựng (đường như khai) và `os.path.realpath` (đích thật sau symlink —\n+    kho nằm sau một symlink NGOÀI kho thì chuỗi từ vựng không thấy). `lstat`, không theo symlink ở `.git`: tệp\n+    (worktree/submodule), thư mục, symlink treo đều tính. Thành phần chưa tồn tại thì `lstat` hụt và đi tiếp lên tổ tiên.\"\"\"\n+    p = os.path.abspath(path)\n+    for d in dict.fromkeys((p, os.path.realpath(p))):",
+    "path": "scripts/tl_gws.py",
+    "commit_id": "8ed35031549106c4030907cea3631e3a38d69a12",
+    "original_commit_id": "8ed35031549106c4030907cea3631e3a38d69a12",
+    "user": {
+      "login": "ducthangho",
+      "id": 12748935,
+      "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ducthangho",
+      "html_url": "https://github.com/ducthangho",
+      "followers_url": "https://api.github.com/users/ducthangho/followers",
+      "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+      "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+      "repos_url": "https://api.github.com/users/ducthangho/repos",
+      "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "Finding đúng, đã vá ở `3b234223327e6527ee51990cdfdfabba0d02ed88`.\n\n**Tái lập trên `8ed3503`** (dữ liệu giả, `lk -> <kho>/con`, `<kho>/.git` có, thư mục từ vựng `<ngoài>/codexhome` tồn tại):\n\n| `CODEX_HOME` | kết quả cũ | tệp lọt vào kho |\n|---|---|---|\n| `<ngoài>/lk/../codexhome` | `ĐÃ NẠP` | `codexhome/auth.json`, và tệp dấu sau `_ghi_dau` |\n| `<ngoài>/lk2/../codexhome` (`lk2 -> lk`) | `ĐÃ NẠP` | như trên |\n\n**Bản vá:** chuỗi thật nay là `os.path.realpath(path)` tính từ đường gốc; chuỗi từ vựng vẫn là `os.path.abspath(path)`. Cả hai cửa ghi (`_bootstrap_agent_creds` và `_ghi_dau`) truyền đường chưa thu gọn vào chốt, nên một chỗ sửa phủ cả hai.\n\n**Phép đo trên `3b23422`:**\n- Ca mới `pd8_symlink_roi_hai_cham_vao_kho`: bốn biến thể bị chặn (`..` ở giữa, symlink lồng, đích chưa tồn tại, `..` ở cuối), kiểm cả `auth.json` lẫn tệp dấu, cộng một vế dương (symlink + `..` mà đích thật ngoài kho vẫn `ĐÃ NẠP`). Ca này đỏ khi chạy với `tl_gws.py` của `8ed3503` (`rc=3`, \"auth.json/thư mục lọt vào kho\").\n- Đột biến `PD8_realpath_sau_abspath` (quay về `realpath(abspath(path))`) bị giết ở đúng khẳng định đó.\n- Bộ test: `CA: 60/60 dat`, `DOT BIEN: 91/91 bi giet dung ly do`, `TONG: DAT`. `release-verify --strict`: `ok=true`, 185 = 185. selftest `1777/1777`. ruff F 97 = 97.\n\n**Chưa đo:** đường tương đối khi cwd là symlink không có ca riêng (`realpath` và kernel cùng tính từ `os.getcwd()` vật lý). Trên `8ed3503`, biến thể \"đích chưa tồn tại\" và \"`..` ở cuối\" chưa đo riêng từng cái, vì script đo tay dừng ở biến thể thứ ba.\n\n---\n_Generated by [Claude Code](https://claude.ai/code)_",
+    "created_at": "2026-11-17T10:00:18Z",
+    "updated_at": "2026-11-17T10:00:18Z",
+    "html_url": "https://github.com/ducthangho/tra-luat/pull/1367#discussion_r4597972383",
+    "pull_request_url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1367",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4597972383"
+      },
+      "html": {
+        "href": "https://github.com/ducthangho/tra-luat/pull/1367#discussion_r4597972383"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/ducthangho/tra-luat/pulls/1367"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/ducthangho/tra-luat/pulls/comments/4597972383/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 1125,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 1126,
+    "side": "RIGHT",
+    "in_reply_to_id": 4597850151,
+    "author_association": "OWNER",
+    "original_position": 11,
+    "position": 1,
+    "subject_type": "line",
+    "is_copilot_code_review": false,
+    "copilot_code_review_sources": [
+
+    ]
+  }
+]

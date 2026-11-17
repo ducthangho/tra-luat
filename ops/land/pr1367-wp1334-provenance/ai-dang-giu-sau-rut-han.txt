@@ -1,0 +1,17 @@
+# ai-dang-giu sau rut han (han moi 10:53Z), luc 2026-11-17T11:10:54Z; fetch +refs/heads/*; may chu 290 ref, cuc bo thieu 0
+## scripts/tl_gws.py
+HẾT_HẠN	wp1334-r2-g1-claude	refs/heads/ops/wp1334-r2-g1-lease:ops/leases/wp1334-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+## ops/cloud_agent_creds.py
+HẾT_HẠN	wp1334-r2-g1-claude	refs/heads/ops/wp1334-r2-g1-lease:ops/leases/wp1334-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+## ops/cloud_agent_creds_test.py
+HẾT_HẠN	wp1334-r2-g1-claude	refs/heads/ops/wp1334-r2-g1-lease:ops/leases/wp1334-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+## RELEASE_MANIFEST.json
+CÒN_HẠN	release-1.36.70-r1-g1-claude	refs/heads/ops/release-1.36.70-lease:ops/leases/release-1.36.70-r1-g1-claude.yaml
+HẾT_HẠN	wp1334-r2-g1-claude	refs/heads/ops/wp1334-r2-g1-lease:ops/leases/wp1334-r2-g1-claude.yaml
+NGƯỜI_GIỮ 1: release-1.36.70-r1-g1-claude
+## changelog.d/wp-1334.md
+HẾT_HẠN	wp1334-r2-g1-claude	refs/heads/ops/wp1334-r2-g1-lease:ops/leases/wp1334-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có

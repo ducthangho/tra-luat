@@ -71,23 +71,34 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
 leased_at_utc: '2026-11-17T06:18:00Z'
-heartbeat_at: '2026-11-17T06:18:00Z'
+heartbeat_at: '2026-11-17T08:14:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-18T06:18:00Z'
-lease_expires_at_utc: '2026-11-18T06:18:00Z'
+lease_until: '2026-11-17T08:29:00Z'
+lease_expires_at_utc: '2026-11-17T08:29:00Z'
 lease_until_ghi_chu: '24h (packet lon, do native Windows); rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
 attempts_basis: '<= 2 phien executor.'
 budget:
   codex_review_calls:
-    pr_wp1342_g1: {used: 0, reserved: 0, limit: 10}
+    pr_wp1342_g1: {used: 1, reserved: 0, limit: 10}
   ci_ubuntu_runs:
-    pr_wp1342_g1: {used: 0, reserved: 0, limit: 2}
+    pr_wp1342_g1: {used: 1, reserved: 0, limit: 2}
   windows_native_runs:
-    pr_wp1342_g1: {used: 0, reserved: 0, limit: 3}
+    pr_wp1342_g1: {used: 4, reserved: 0, limit: 3}
   khong_reset_theo_generation: true
 budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 3 (Desktop uu tien, VM du phong va cho N8; khong CI Windows). Ngoai ngan sach PR: 4 loi goi Codex offline cho review dac ta TRUOC khi cap lease (ops/reviews/wp1342-spec-r1/, luot 1-4).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-17T08:14:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 1/10: connector khi bo draft tren 675c38d (sach); khong goi Codex offline cho PR (4 loi goi review dac ta truoc lease ghi o budget_ghi_chu). CI Ubuntu 1/2: run 44032372399 tren 675c38d. Windows native 4/3 — VUOT TRAN 1 luot, khong co nang_tran: (1) Desktop luot day du (8 ca wp1342 + N4 head/base; phan dot bien chet vi duong dan qua dai khi clone), (2) Desktop chi dot bien (driver phan loai sai kieu loi, ca 3 bi ghi KHONG_DO du ca dich do dung assertion), (3) Desktop chi dot bien sau khi sua driver: 3/3 GIET, (4) VM tra-luat-win N8 symlink tep. Luot 2-3 la lam lai do loi DRIVER ngoai kho cua phien dieu phoi, khong do ma packet. Ghi that, khong lam tron.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-18T06:18:00Z'
+  han_moi_utc: '2026-11-17T08:29:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1342 r1 da MERGE: PR #1363 (head 675c38dd8aa7d8d92124503452bc80af65c2b77a) merge commit ded5d41b1754ef05d87815f20c48203e6b00e58d,
+    human audit chu kho issuecomment-6942513764. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet (r1b se co dac ta va lease rieng). Rut han theo tien le #1353, #1356, #1361.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 2 duong dan write set sau 2026-11-17T08:29:00Z phai ra NGUOI_GIU 0.'

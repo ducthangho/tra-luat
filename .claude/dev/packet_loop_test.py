@@ -12410,11 +12410,11 @@ WP1174_REQUIRED = {"wp1174_" + name for name in (
     "durability_ordinary_pair durability_fsync_readback durability_publish_noreplace durability_legacy_tombstone durability_cached_writer "
     "lifecycle_identity_advisory lifecycle_budget_replay lifecycle_human_valid lifecycle_human_negative lifecycle_first_publication lifecycle_guard_readonly lifecycle_scoped_lifecycle lifecycle_legacy_unchanged "
     "profile_native_linux profile_unsupported windows_claim_rejected status_closed gate_required_skip gate_evidence_schema").split()}
-# wp1370: the activity-collector cases are required IDs (20 new, 85 -> 105).
+# wp1370: the activity-collector cases are required IDs (21 new, 85 -> 106).
 WP1174_REQUIRED |= {"wp1174_activity_" + name for name in (
     "reduced_payload multipage_anchor older_page_fail same_timestamp_fail force_push_preimage deletion_preaudit tag_coverage "
     "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained matching_refs_unpaginated tip_non_commit "
-    "budget_bytes_cumulative budget_pages_cumulative").split()}
+    "budget_bytes_cumulative budget_pages_cumulative budget_overflow_unreported").split()}
 WP1174_REQUIRED |= {"wp1174_" + kind + "_" + name for kind in ("writer", "race") for name in _WP1174_WRITERS}
 WP1174_BOTH = {"wp1174_" + name for name in ("admission_valid admission_wrong_scope witness_valid witness_keyset witness_int_bool witness_json_bytes "
     "witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending lifecycle_legacy_unchanged status_closed").split()}
@@ -12646,13 +12646,13 @@ def _lifecycle1174(kind):
                     d=c.tmp/("current-service" if service else "current-native");d.mkdir()
                     _current_policy1174(Ctx(c.script,d),service)
                 _static_writers1174(c,m)
-                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==105
+                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==106
                 applicable=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
                 required={n:None for n in applicable}
                 assert _required1174(required,applicable)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,applicable),"missing required ID accepted"
-                assert len(_WP1174_FULL_CASE_IDS)==105 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
+                assert len(_WP1174_FULL_CASE_IDS)==106 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -12769,7 +12769,7 @@ def _evidence_schema1174(c):
     required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
     record=dict(schema="wp1174_native_report.v1",actual_os="Linux",scope="wp1174_candidate",proof_eligible=True,source_pr=1275,repo="ducthangho/tra-luat",pr=1275,
         run_id="1",run_attempt="1",job="gate-packet-loop",checkout_sha=m,checkout_tree="c"*40,executed_sha=h,executed_tree="d"*40,expected_head=h,expected_tree="d"*40,
-        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=104,
+        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=105,
         outcomes={n:"passed" for n in required},profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},
         native_probe=dict(status="passed",checks={k:True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")}),
         native_seam=False,overall_status="passed",windows_oracle="not_run_platform; deferred_to_windows_focused")
@@ -14031,7 +14031,7 @@ def _r12_main_inventory1174(c):
     seen=[]
     def selected_driver():
         names=[name for name,_ in CASES if name in WP1174_REQUIRED]
-        assert len(names)==104 and "wp1174_windows_claim_rejected" not in names
+        assert len(names)==105 and "wp1174_windows_claim_rejected" not in names
         dict(CASES)["wp1174_lifecycle_scoped_lifecycle"](c)
         seen.append(tuple(names))
         return 0
@@ -14041,7 +14041,7 @@ def _r12_main_inventory1174(c):
             _legacy_main=selected_driver,_carrier1174=lambda *args:True,_snapshot1174=lambda *args:{}),contextlib.redirect_stdout(io.StringIO()):
         assert main()==0
     assert seen and CASES is full
-    assert len(_WP1174_FULL_CASE_IDS)==105 and len(set(_WP1174_FULL_CASE_IDS))==105
+    assert len(_WP1174_FULL_CASE_IDS)==106 and len(set(_WP1174_FULL_CASE_IDS))==106
 
 
 def _r12_accept_snapshot1174(c):
@@ -14506,7 +14506,11 @@ def _activity_case1370(kind):
                     assert type(limits["max_bytes"]) is int and limits["max_bytes"]>0,("read dispatched without byte budget",n,calls[-1])
                     size=charge(n)
                     if size is not None:limits["on_bytes"](size)
-                    if n in fail:raise OSError("transport reset after the response was read")
+                    if n in fail:
+                        # Like the real transport, a failed read always reports
+                        # what it consumed (here: nothing) before raising.
+                        if size is None:limits["on_bytes"](0)
+                        raise OSError("transport reset after the response was read")
                     if "/activity" in endpoint:
                         step=([int(x[6:]) for x in endpoint.partition("?")[2].split("&") if x.startswith("after=")] or [0])[0]
                         if step<pad:return [],'<https://api.github.com/repositories/123/activity?per_page=100&after=%d>; rel="next"'%(step+1)
@@ -14520,7 +14524,7 @@ def _activity_case1370(kind):
                 assert receipt["status"]=="UNKNOWN","collection byte budget not cumulative over passes (44 MiB spent, then 25 MiB more): %r %r"%(receipt["status"],budgets())
                 assert budgets()==[64,63,62,61,60,20,15,10,5],"read beyond the remaining byte budget: %r"%(budgets(),)
                 assert "pulls?state=all" not in receipt["cursor_coverage"],receipt
-                # Bytes of successful reads alone; the failed request reports nothing.
+                # Bytes of successful reads alone; the failed request reports zero bytes.
                 receipt=collect(source(lambda n:None if n==5 else (10 if n<5 else 8)*MiB,fail={5}))
                 assert receipt["status"]=="UNKNOWN","successful first-pass bytes forgotten by the retry pass: %r"%(budgets(),)
                 assert budgets()==[64,54,44,34,24,24,16,8],"read beyond the remaining byte budget: %r"%(budgets(),)
@@ -14548,6 +14552,99 @@ def _activity_case1370(kind):
                 assert receipt["status"]==ok and len(calls)==1000 and receipt["cursor_coverage"]["activity"]==496 and receipt["dag_coverage"] is True,("retry inside the request budget lost",receipt,len(calls))
                 receipt=collect(source(tiny,fail={105},pad=100))
                 assert receipt["status"]==ok and len(calls)==210 and receipt["earliest"]["id"]=="12" and m._1174_collector_receipt(receipt,H,audit,123) is receipt,(receipt,len(calls))
+        elif kind=="budget_overflow_unreported":
+            # WP1370-F1 (source review 2): every byte the transport consumed is
+            # charged exactly once, also when the read raises. The REAL
+            # _1174_process pipe reader runs here; only the gh invocation is
+            # replaced by a local child that emits the fixture response.
+            MiB=1024*1024;limit=64*MiB;real=m._1174_process;runs=[];reported=[]
+            child=("import sys,time\no=sys.stdout.buffer\no.write(open(sys.argv[1],'rb').read())\nn=int(sys.argv[2])\n"
+                "while n>0:\n    k=min(n,1<<20);o.write(b' '*k);n-=k\no.flush()\ntime.sleep(float(sys.argv[4]))\nsys.exit(int(sys.argv[3]))\n")
+            def pipe(plan,report=True,**options):
+                # plan(n) -> dict(pad=trailing JSON whitespace bytes, rc=exit
+                # code, garbage=invalid body, sleep=seconds before exit).
+                del runs[:];del reported[:]
+                def process(argv,**kw):
+                    assert argv[:4]==["gh","api","--hostname","github.com"] and type(kw["max_bytes"]) is int and kw["max_bytes"]>0,(argv,kw)
+                    link="--include" in argv;endpoint=argv[-1];n=len(runs)+1;step=plan(n)
+                    value=served(endpoint,link=True,repo_id=123) if link else served(endpoint)
+                    raw=b"{" if step.get("garbage") else json.dumps(value[0] if link else value).encode("utf-8")
+                    if link:raw=b"HTTP/2.0 200 OK\r\nContent-Type: application/json\r\n"+(b"Link: "+value[1].encode()+b"\r\n" if value[1] else b"")+b"\r\n"+raw
+                    blob=c.tmp/"wp1370-pipe.bin";blob.write_bytes(raw)
+                    runs.append(dict(endpoint=endpoint,max_bytes=kw["max_bytes"],emitted=len(raw)+step.get("pad",0)))
+                    return real([sys.executable,"-B","-c",child,str(blob),str(step.get("pad",0)),str(step.get("rc",0)),str(step.get("sleep",0))],**kw)
+                def transport(endpoint,**limits):
+                    charge=limits.pop("on_bytes")
+                    def note(size):
+                        reported.append((len(runs),size));charge(size)
+                    if report:limits["on_bytes"]=note
+                    return m._1174_api(endpoint,root=w.resolve(),**limits)
+                with patch.object(m,"_1174_process",side_effect=process):
+                    return m._1174_collect(transport,w,H,audit,123,**options)
+            def once():
+                # One report per dispatched request, equal to the bytes the pipe
+                # reader consumed; the next request gets exactly what is left.
+                assert [n for n,_ in reported]==list(range(1,len(runs)+1)),("response not charged exactly once",reported,len(runs))
+                spent=0
+                for run,(_,size) in zip(runs,reported):
+                    assert run["max_bytes"]==limit-spent,("byte budget handed out is not the unspent remainder",runs,reported)
+                    assert size==min(run["emitted"],run["max_bytes"]+1),("reported bytes differ from the bytes read",run,size)
+                    spent+=size
+                return spent
+            def refused(receipt):
+                assert receipt["earliest"] is None or receipt["status"]!=ok
+                _reject1174(m._1174_collector_receipt,dict(receipt,status=ok),H,audit,123,reason="collector success completeness")
+            # The pipe reader itself: consumption is observable on every exit,
+            # and nothing changes for a caller without on_bytes.
+            got=[];_reject1174(real,[sys.executable,"-B","-c","print('x'*4096)"],cwd=w,deadline=time.time()+30,max_bytes=128,on_bytes=got.append,reason="transport byte budget")
+            assert got==[129],"overflowing read not reported by the pipe reader: %r"%(got,)
+            got=[];done=real([sys.executable,"-B","-c","import sys;print('x'*10);sys.stderr.write('yy')"],cwd=w,deadline=time.time()+30,max_bytes=128,on_bytes=got.append)
+            plain=real([sys.executable,"-B","-c","import sys;print('x'*10);sys.stderr.write('yy')"],cwd=w,deadline=time.time()+30,max_bytes=128)
+            assert got==[13] and (done.returncode,done.stdout,done.stderr)==(plain.returncode,plain.stdout,plain.stderr)==(0,b"x"*10+b"\n",b"yy"),(got,done,plain)
+            got=[];_reject1174(real,[sys.executable,"-B","-c","pass"],cwd=w,deadline=time.time()-1,max_bytes=128,on_bytes=got.append,reason="transport deadline/byte budget")
+            assert got==[0],got
+            # Healthy baseline through the real pipe: five requests, one pass.
+            receipt=pipe(lambda n:{})
+            assert receipt["status"]==ok and len(runs)==5 and receipt["earliest"]["id"]=="12" and m._1174_collector_receipt(receipt,H,audit,123) is receipt,(receipt,runs)
+            small=once();assert 0<small<MiB,small
+            # Target (the reviewer's reproduction): request 5 overflows what is
+            # left of the budget; every later response would be valid.
+            receipt=pipe(lambda n:dict(pad=limit) if n==5 else {})
+            assert receipt["status"]=="UNKNOWN","byte-budget overflow of a real pipe read was not charged: %r after %d requests, reported %r"%(receipt["status"],len(runs),reported)
+            assert len(runs)==5,"request dispatched after the byte-budget overflow: %r"%([x["endpoint"] for x in runs],)
+            assert once()==limit+1 and reported[-1][1]==runs[-1]["max_bytes"]+1 and runs[-1]["emitted"]>runs[-1]["max_bytes"],(runs,reported)
+            refused(receipt)
+            # Overflow in the middle of a pass: nothing more in that pass either.
+            receipt=pipe(lambda n:dict(pad=limit) if n==2 else {})
+            assert receipt["status"]=="UNKNOWN" and len(runs)==2 and once()==limit+1,("dispatch after overflow inside the pass",receipt["status"],runs,reported)
+            assert receipt["cursor_coverage"]=={} or "activity" not in receipt["cursor_coverage"],receipt
+            refused(receipt)
+            # A transport that reports nothing for the failed read: its
+            # consumption cannot be measured, so the whole allowance is spent.
+            receipt=pipe(lambda n:dict(pad=limit) if n==5 else {},report=False)
+            assert receipt["status"]=="UNKNOWN" and len(runs)==5 and reported==[],"unreported failed read charged zero bytes: %r after %d requests"%(receipt["status"],len(runs))
+            refused(receipt)
+            receipt=pipe(lambda n:dict(rc=1) if n==5 else {},report=False)
+            assert receipt["status"]=="UNKNOWN" and len(runs)==5,"unreported failed read charged zero bytes: %r after %d requests"%(receipt["status"],len(runs))
+            refused(receipt)
+            # Controls: under-budget transient failures (non-zero exit after a
+            # 2 MiB body, then an unparsable body) are charged what was read
+            # and the retry passes still succeed.
+            receipt=pipe(lambda n:dict(rc=1,pad=2*MiB) if n==5 else dict(garbage=True) if n==8 else {})
+            assert receipt["status"]==ok and len(runs)==15 and receipt["earliest"]["id"]=="12" and receipt["dag_coverage"] is True,("under-budget transient failure lost",receipt["status"],runs,reported)
+            assert m._1174_collector_receipt(receipt,H,audit,123) is receipt
+            spent=once();assert 2*MiB<spent<3*MiB and reported[4][1]==runs[4]["emitted"]>2*MiB,(spent,reported)
+            # A failed read that stays inside the budget is charged, and the
+            # retry pass overflows what is left: terminal again.
+            receipt=pipe(lambda n:dict(rc=1,pad=40*MiB) if n==5 else dict(pad=30*MiB) if n==7 else {})
+            assert receipt["status"]=="UNKNOWN" and len(runs)==7,("bytes of a failed real read were not charged",receipt["status"],len(runs),reported)
+            assert once()==limit+1 and runs[6]["max_bytes"]<24*MiB,(runs,reported)
+            refused(receipt)
+            # Deadline: the bytes read before the absolute deadline cut the
+            # request are reported once; nothing is dispatched afterwards.
+            receipt=pipe(lambda n:dict(sleep=30) if n==3 else {},deadline=time.time()+4)
+            assert receipt["status"]=="UNKNOWN" and len(runs)==3 and once()==sum(x["emitted"] for x in runs),(receipt["status"],runs,reported)
+            refused(receipt)
         else:
             raise AssertionError("unknown wp1370 case "+kind)
     return case
@@ -14556,7 +14653,7 @@ def _activity_case1370(kind):
 _WP1370_ACTIVITY_CASES = ("reduced_payload", "multipage_anchor", "older_page_fail", "same_timestamp_fail", "force_push_preimage",
     "deletion_preaudit", "tag_coverage", "receipt_residuals", "no_anchor", "object_unfetchable", "cursor_foreign", "pr_foreign_head",
     "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained", "matching_refs_unpaginated", "tip_non_commit",
-    "budget_bytes_cumulative", "budget_pages_cumulative")
+    "budget_bytes_cumulative", "budget_pages_cumulative", "budget_overflow_unreported")
 assert {"wp1174_activity_" + name for name in _WP1370_ACTIVITY_CASES} <= WP1174_REQUIRED
 CASES += [("wp1174_activity_" + name, _activity_case1370(name)) for name in _WP1370_ACTIVITY_CASES]
 MUTANTS.update({
@@ -14591,8 +14688,11 @@ MUTANTS.update({
         '        size, pages, complete, transient = 0, 0, True, False\n        pass_end = end\n',
         ["wp1174_activity_budget_bytes_cumulative", "wp1174_activity_budget_pages_cumulative"]),
     # WP1370-F1: forget the bytes a failed fetch reported before raising
-    "m1174_activity_budget_drop_failed_bytes": ('                size += sum(measured)   # bytes of a failed response were still read\n', '                pass\n',
+    "m1174_activity_budget_drop_failed_bytes": ('                size += sum(measured) if measured else limit - size\n', '                size += 0 if measured else limit - size\n',
         ["wp1174_activity_budget_bytes_cumulative"]),
+    # WP1370-F1 (review 2): charge zero again for a failed read that reported nothing
+    "m1174_activity_budget_overflow_uncharged": ('                size += sum(measured) if measured else limit - size\n', '                size += sum(measured)\n',
+        ["wp1174_activity_budget_overflow_unreported"]),
 })
 
 
@@ -14633,8 +14733,8 @@ MUTANTS.update({
     "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
 })
 
-MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==105 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
-    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==105,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
+MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==106 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
+    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==106,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
 MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
@@ -14845,7 +14945,7 @@ def _carrier1174(outcomes, gate_rc=0):
 
 def main():
     global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
-    assert len(WP1174_REQUIRED) == 105 and len(WP1174_BOTH) == 12
+    assert len(WP1174_REQUIRED) == 106 and len(WP1174_BOTH) == 12
     actual_os = platform.system()
     if actual_os=="Linux":
         globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())

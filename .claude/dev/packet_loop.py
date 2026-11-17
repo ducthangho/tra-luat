@@ -4256,39 +4256,47 @@ def _1174_api_env():
     return env
 
 
-def _1174_process(argv, *, cwd, deadline, max_bytes, env=None):
-    """Read bounded pipes and kill only this process group on timeout/overflow."""
+def _1174_process(argv, *, cwd, deadline, max_bytes, env=None, on_bytes=None):
+    """Read bounded pipes and kill only this process group on timeout/overflow.
+
+    on_bytes, when given, is called exactly once with the bytes actually read
+    from the pipes, whether the call returns or raises."""
     import selectors
     import signal
-    _1174_require(time.time()<deadline and type(max_bytes) is int and max_bytes>0,"transport deadline/byte budget")
-    child=subprocess.Popen(argv,cwd=str(cwd),env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
-        close_fds=True,start_new_session=True)
-    streams={child.stdout:bytearray(),child.stderr:bytearray()}
+    size=0
     try:
-        with selectors.DefaultSelector() as selector:
-            for pipe in streams:
-                os.set_blocking(pipe.fileno(),False);selector.register(pipe,selectors.EVENT_READ)
-            size=0
-            while selector.get_map():
-                remaining=deadline-time.time()
-                _1174_require(remaining>0,"transport deadline")
-                for key,_ in selector.select(min(remaining,0.1)):
-                    raw=os.read(key.fileobj.fileno(),min(65536,max_bytes-size+1))
-                    if not raw:selector.unregister(key.fileobj)
-                    else:
-                        size+=len(raw)
-                        _1174_require(size<=max_bytes,"transport byte budget")
-                        streams[key.fileobj].extend(raw)
-            _1174_require(time.time()<deadline,"transport deadline")
-            child.wait(timeout=max(0.001,deadline-time.time()))
-        return subprocess.CompletedProcess(argv,child.returncode,bytes(streams[child.stdout]),bytes(streams[child.stderr]))
+        _1174_require(time.time()<deadline and type(max_bytes) is int and max_bytes>0,"transport deadline/byte budget")
+        child=subprocess.Popen(argv,cwd=str(cwd),env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+            close_fds=True,start_new_session=True)
+        streams={child.stdout:bytearray(),child.stderr:bytearray()}
+        try:
+            with selectors.DefaultSelector() as selector:
+                for pipe in streams:
+                    os.set_blocking(pipe.fileno(),False);selector.register(pipe,selectors.EVENT_READ)
+                while selector.get_map():
+                    remaining=deadline-time.time()
+                    _1174_require(remaining>0,"transport deadline")
+                    for key,_ in selector.select(min(remaining,0.1)):
+                        raw=os.read(key.fileobj.fileno(),min(65536,max_bytes-size+1))
+                        if not raw:selector.unregister(key.fileobj)
+                        else:
+                            size+=len(raw)
+                            _1174_require(size<=max_bytes,"transport byte budget")
+                            streams[key.fileobj].extend(raw)
+                _1174_require(time.time()<deadline,"transport deadline")
+                child.wait(timeout=max(0.001,deadline-time.time()))
+            return subprocess.CompletedProcess(argv,child.returncode,bytes(streams[child.stdout]),bytes(streams[child.stderr]))
+        finally:
+            # The leader may already have exited while a descendant owns a pipe.
+            # This session/group belongs only to this invocation, including cleanup.
+            try:os.killpg(child.pid,signal.SIGKILL)
+            except ProcessLookupError:pass
+            if child.poll() is None:child.wait(timeout=5)
+            for pipe in streams:pipe.close()
     finally:
-        # The leader may already have exited while a descendant owns a pipe.
-        # This session/group belongs only to this invocation, including cleanup.
-        try:os.killpg(child.pid,signal.SIGKILL)
-        except ProcessLookupError:pass
-        if child.poll() is None:child.wait(timeout=5)
-        for pipe in streams:pipe.close()
+        # Consumption is observable on every exit: an overflow reports
+        # max_bytes+1, a failure before any read reports 0.
+        if on_bytes is not None:on_bytes(size)
 
 
 def _1174_link_header(raw):
@@ -4317,8 +4325,15 @@ def _1174_api(endpoint, *, root, deadline, max_bytes=30*1024*1024, on_bytes=None
         ".." not in endpoint and "\\" not in endpoint and Path(root).is_absolute(),"scoped API endpoint/root")
     argv=["gh","api","--hostname","github.com",endpoint]
     if link:argv.insert(4,"--include")
-    result=_1174_process(argv,cwd=Path(root),deadline=deadline,max_bytes=max_bytes,env=_1174_api_env())
-    if on_bytes is not None:on_bytes(len(result.stdout)+len(result.stderr))
+    # on_bytes receives the bytes the transport read exactly once, also when
+    # the read raises (overflow, deadline). A failed read whose consumption
+    # the transport did not measure reports nothing; the caller decides.
+    consumed=[]
+    try:result=_1174_process(argv,cwd=Path(root),deadline=deadline,max_bytes=max_bytes,env=_1174_api_env(),on_bytes=consumed.append)
+    except BaseException:
+        if on_bytes is not None and consumed:on_bytes(sum(consumed))
+        raise
+    if on_bytes is not None:on_bytes(sum(consumed) if consumed else len(result.stdout)+len(result.stderr))
     _1174_require(time.time()<deadline and result.returncode==0,"scoped API unavailable/deadline")
     body,header=_1174_link_header(result.stdout) if link else (result.stdout,None)
     try:value=json.loads(body.decode("utf-8"),object_pairs_hook=_cam_khoa_trung,parse_constant=_cam_hang_ngoai_json)
@@ -5624,7 +5639,11 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
             try:
                 value = fetch(endpoint, deadline=pass_end, max_bytes=limit - size, on_bytes=measured.append, **extra)
             except (ValueError, subprocess.TimeoutExpired, OSError):
-                size += sum(measured)   # bytes of a failed response were still read
+                # Bytes of a failed response were still read: charge what the
+                # transport reported. A failure that reported nothing cannot
+                # be measured; it spends everything this request was allowed
+                # (max_bytes), which ends the collection as UNKNOWN.
+                size += sum(measured) if measured else limit - size
                 complete, transient = False, True
                 return None
             # Each response is charged once: its measured bytes, or its

@@ -37,3 +37,7 @@ moc_10_2_2:
   checkout: passed
   workflow_definition: passed
   gate_output: owner_waived
+mien_gate_output:
+  nguon: https://github.com/ducthangho/tra-luat/pull/1351#issuecomment-6936143991
+  readback: readback-chu-kho-mien-gate-packet-loop-issuecomment-6936143991.json
+  ghi_chu: 'mien_gate_packet_loop chu kho TU DANG 2026-11-17T02:29:12Z (OWNER, app null) tren PR #1351, neo DUNG b8bc64f + context gate-packet-loop (ubuntu-latest) + ly do + dieu kien thay the + pham vi hai SHA, mot lan (protocol §10.2.3; connector P1 PR #1351 r4593745939).'

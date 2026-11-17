@@ -66,7 +66,7 @@ post_merge_checks:
       measured — danh-gia-gate-output-43975814762.txt (danh_gia_gate.py sha256 b87f9697): not_measured 22/23; job gom gate-packet-loop
       thieu buoc [.claude/dev/packet_loop_test.py] vi in "KHONG DO" theo M2 (#1343). nghiem-thu-e4cce23.txt: cay e4cce23 khac cay head a97236c
       chi o ops/land/pr1341-* — khong cham tap phu thuoc packet-loop — nen phep do GOM DAT tren CI PR (gom-pr-43971582168-trich.txt) ap cho
-      cung bo ca. phan-chung-buoc-43975814762.txt: xoa dau hieu 3 buoc => not_measured, rc 0. M8: owner_waived.
+      cung bo ca. phan-chung-buoc-43975814762.txt: xoa dau hieu 3 buoc => not_measured, rc 0. M8: owner_waived theo waiver chu kho tu dang issuecomment-6936143991 (readback-chu-kho-mien-gate-packet-loop-issuecomment-6936143991.json).
   - name: 'launcher (Windows that) push tren merge SHA — N4'
     run_id: 43975814821
     sha: e4cce23bcf975bf041d584f9d4b74327b9c03794
@@ -112,7 +112,7 @@ trang_thai_packet:
   merged: true
   landed: true
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren e4cce23: run/checkout/workflow_definition passed; gate_output owner_waived cho DUNG MOT job (gom
+    PROTOCOL §10.2.4 — (1) gate tren e4cce23: run/checkout/workflow_definition passed; gate_output owner_waived (waiver chu kho tu dang issuecomment-6936143991, readback-chu-kho-mien-gate-packet-loop-issuecomment-6936143991.json) cho DUNG MOT job (gom
     gate-packet-loop "KHONG DO" theo M2), 22/23 job con lai co dau hieu duong, cay merge = cay head ngoai ops/land/pr1341-* (head GOM DAT tren
     CI PR). (2) lease nha: DAT. (3) bookkeeping: ho so nay + M8 rc 0. (4) review neo a97236c: connector sach + audit chu kho. (5) uy quyen:
     audit tu dang 6932013311. (6) muc tieu: N1-N4 dat (N4 do hau merge). (7) tran: 20 dong.
@@ -133,3 +133,10 @@ nghiem_thu:
 khong_do_duoc:
   - 'Duyet merge qua AskUserQuestion (khong co hien vat GitHub).'
   - 'Bo ca packet-loop tren CI hau merge (M2) — dung phep do CI PR tren cay head trung cay merge ngoai ops/land.'
+
+lich_su_nhan: >-
+  Ban dau gate_output owner_waived chi dua tren M2 + chi dao chung #1206 issuecomment-6918292696. Connector P1 PR #1351 r4593745939:
+  §10.2.3 doi waiver BEN cua chu kho neo dung SHA/context — chi dao chung khong du. Chu kho chon "Dang waiver + sua M2"; tu dang
+  mien_gate_packet_loop issuecomment-6936143991 (2026-11-17T02:29:12Z, OWNER, app null) cho b8bc64f va e4cce23, va mo #1353 (PR #1354,
+  merge 25346df) de push master chay lai packet-loop. Phien dieu phoi gan waiver vao bien-ban-m8.yaml (mien_gate_output) va chay lai
+  kiem-dong-wp (kiem-dong-wp-m8.txt LAN 2).

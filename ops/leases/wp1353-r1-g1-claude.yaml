@@ -71,23 +71,34 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
 leased_at_utc: '2026-11-17T00:51:00Z'
-heartbeat_at: '2026-11-17T00:51:00Z'
+heartbeat_at: '2026-11-17T02:38:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-17T12:51:00Z'
-lease_expires_at_utc: '2026-11-17T12:51:00Z'
+lease_until: '2026-11-17T02:53:00Z'
+lease_expires_at_utc: '2026-11-17T02:53:00Z'
 lease_until_ghi_chu: '12h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
 attempts_basis: '<= 2 phien executor.'
 budget:
   codex_review_calls:
-    pr_wp1353_g1: {used: 0, reserved: 0, limit: 10}
+    pr_wp1353_g1: {used: 1, reserved: 0, limit: 10}
   ci_ubuntu_runs:
-    pr_wp1353_g1: {used: 0, reserved: 0, limit: 2}
+    pr_wp1353_g1: {used: 1, reserved: 0, limit: 2}
   windows_native_runs:
     pr_wp1353_g1: {used: 0, reserved: 0, limit: 0}
   khong_reset_theo_generation: true
 budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows 0 (chi dao chu kho).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-17T02:38:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 1/10: connector khi bo draft tren d3bd4e6 (sach); khong goi Codex offline. CI Ubuntu 1/2: PR #1354 tren d3bd4e6. Windows 0/0. Lan ghi ngan sach nay la LOI KHAI CO NEO cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T12:51:00Z'
+  han_moi_utc: '2026-11-17T02:53:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1353 da MERGE: PR #1354 (head d3bd4e6) merge commit 25346df65f87a752b493b3bfc78e2b572e0ac6dd, 2026-11-17T02:24Z,
+    human audit chu kho issuecomment-6935841772. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet. Rut han theo tien le #1331, #1335, #1343, #1345, #1336.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 2 duong dan write set sau 2026-11-17T02:53:00Z phai ra NGUOI_GIU 0.'

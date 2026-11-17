@@ -1132,6 +1132,26 @@ _DOC_CLAIMS_PYLOC_RE = re.compile(
     r"(?<![A-Za-z0-9_./\-])([A-Za-z0-9_.][A-Za-z0-9_./\-]*\.py):(\d+)\b"
 )
 _DOC_CLAIMS_TRIM = ".,;:!?)]}»›\"'(«‹[{"
+# wp1326 (#1326) — ĐẦU token L1 cắt bằng tập này (bỏ dấu chấm): `.claude/…`, `.github/…`, `.agents/…` giữ đoạn đầu
+# `.ten`. Đo base r3 `815b9ac`: 189 lần token dạng ấy, L1 cũ kiểm đúng 0 (dấu chấm bị cắt ⇒ đoạn đầu trượt mục gốc,
+# riêng `.agents/…` bị kiểm nhầm dưới tên `agents/…`). CUỐI token vẫn cắt bằng `_DOC_CLAIMS_TRIM` (dấu chấm cuối câu).
+_DOC_CLAIMS_TRIM_DAU = _DOC_CLAIMS_TRIM.replace(".", "")
+# wp1326 (#1326) — miễn trừ L1 ĐÚNG 9 cặp (tài liệu tương đối, đường dẫn): con trỏ tới tệp policy change-impact mà
+# `ADR-0032` (Accepted) mô tả và `ADR-0066` trỏ có chủ đích (admission coi mục ấy là vắng hoặc có mode, kiểu, OID);
+# hai tệp đích chưa land. Ở ĐÚNG tài liệu ấy `PATH_MISSING` hạ xuống advisory `PATH_MISSING_MIEN_TRU`; tài liệu khác
+# trỏ cùng đường dẫn vẫn là cờ. Packet thi công policy (hay sửa chữ các chỗ này) xoá cặp tương ứng.
+_DOC_CLAIMS_MIEN_TRU_L1 = frozenset((
+    ("docs/PROTOCOL_DA_PHIEN.md", ".github/coordination/change-impact.v1.json"),
+    ("docs/PROTOCOL_DA_PHIEN.md", ".github/coordination/schemas/change-impact.v1.schema.json"),
+    ("docs/adr/0032-change-impact-rule-co-huong.md", ".github/coordination/change-impact.v1.json"),
+    ("docs/adr/0032-change-impact-rule-co-huong.md", ".github/coordination/schemas/change-impact.v1.schema.json"),
+    ("docs/adr/0056-lease-no-progress-six-hours.md", ".github/coordination/change-impact.v1.json"),
+    ("docs/research/2026-08-03-danh-gia-gop-y-adr-0017-0032-cuoi.md", ".github/coordination/change-impact.v1.json"),
+    ("docs/research/2026-08-03-danh-gia-gop-y-adr-0017-0032-cuoi.md",
+     ".github/coordination/schemas/change-impact.v1.schema.json"),
+    ("docs/research/2026-08-15-chien-luoc-gate-nang-theo-vong-doi.md", ".github/coordination/change-impact.v1.json"),
+    ("docs/adr/0066-admission-thu-hoi-theo-merge-base.md", ".github/coordination/change-impact.v1.json"),
+))
 
 
 def _doc_claims_git(root: Path, args: list) -> tuple:
@@ -1154,6 +1174,17 @@ def _doc_claims_deleted_set(ctx: dict) -> set:
                                                 "--pretty=format:"])
         ctx["_deleted"] = {ln.strip() for ln in out.split("\n") if ln.strip()} if rc == 0 else set()
     return ctx["_deleted"]
+
+
+def _doc_claims_ignored(ctx: dict, q: str) -> bool:
+    """wp1326 (#1326) — `q` khớp `.gitignore` ⇒ đường runtime, không phải khẳng định về cây. `q` GIỮ dấu `/` cuối của
+    token: mẫu thư mục (`.claude/.packet_state/`) chỉ khớp khi chuỗi hỏi có `/` cuối hoặc là đường bên trong, nên `x`
+    và `x/` là hai câu hỏi khác nhau và là hai khoá cache khác nhau. rc khác 0 (1, 128, thiếu git 127) ⇒ không khớp."""
+    cache = ctx.setdefault("_ignore_cache", {})
+    if q not in cache:
+        rc, _ = _doc_claims_git(ctx["root"], ["check-ignore", "-q", "--no-index", "--", q])
+        cache[q] = rc == 0
+    return cache[q]
 
 
 def _doc_claims_sha_state(ctx: dict, sha: str) -> str:
@@ -1191,28 +1222,32 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
     # xét nguyên span thì token nhiễu `<id>` sẽ nuốt luôn đường dẫn thật đứng cạnh.
     for sp in _DOC_CLAIMS_SPAN_RE.finditer(nofence):
         for tk in re.finditer(r"\S+", sp.group(1)):
-            tok = tk.group(0).strip(_DOC_CLAIMS_TRIM)
+            # wp1326 (#1326): đầu token GIỮ dấu chấm (xem `_DOC_CLAIMS_TRIM_DAU`); `claim` là token này.
+            tok = tk.group(0).lstrip(_DOC_CLAIMS_TRIM_DAU).rstrip(_DOC_CLAIMS_TRIM)
             if not tok or "/" not in tok or _doc_claims_noisy(tok):
                 continue
+            # wp1326 (Q1): `./`, `../` giữ hành vi cũ là KHÔNG kiểm (trước đây dấu chấm bị cắt nên nhánh kiểm tương
+            # đối không bao giờ chạy; đo 13 lần, 3 sẽ hô sai ở tài liệu sống). Chốt tường minh; kiểm chúng là packet khác.
+            if tok.startswith(("./", "../")):
+                continue
             off = sp.start() + 1 + tk.start()
-            m = _DOC_CLAIMS_PATH_RE.match(tok) or _DOC_CLAIMS_RELPATH_RE.match(tok)
+            m = _DOC_CLAIMS_PATH_RE.match(tok)
             if not m:
                 continue
             body, slash = m.group(1), m.group(2)
             if not slash and not _DOC_CLAIMS_EXT_RE.search(body.rsplit("/", 1)[-1]):
                 continue     # không phần mở rộng và không kết bằng '/' ⇒ chưa chắc là đường dẫn
             docrel = (doc.parent / body)
-            if body.startswith("."):
-                if docrel.exists():
-                    continue
-                _add("L1", off, tok, "PATH_MISSING")
-                continue
             # CHỈ xét khẳng định VỀ CÂY NÀY: đoạn đầu phải là một mục top-level có thật. `word/document.xml`
             # (đường dẫn BÊN TRONG file .docx), `~/.tra_luat_cache/…`, `12_Lao_dong_BHXH/…` không phải
             # khẳng định về repo ⇒ im lặng, chứ không hô sai.
             if body.split("/", 1)[0] not in ctx["toplevel"]:
                 continue
             if (root / body).exists() or docrel.exists():
+                continue
+            # wp1326 (#1326): hụt mà khớp `.gitignore` ⇒ im lặng, áp cho MỌI token L1 (đo checkout sạch: mất đúng 2
+            # advisory trỏ thư mục fixture sinh tại chỗ `references/golden/fixtures/`, có chủ ý).
+            if _doc_claims_ignored(ctx, body + slash):
                 continue
             # wp1121 (#1121, lỗ DO6: xoá tệp còn được trích mà đã COMMIT thì rc=0) — tệp từng bị xoá chỉ được
             # miễn ở TÀI LIỆU LỊCH SỬ (§2.2: sổ được phép dẫn tệp đã chết). Tài liệu sống trích nó là con trỏ
@@ -1224,6 +1259,8 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
                     _add("L1", off, tok, "PATH_DELETED")
             elif historical:
                 _add("L1", off, tok, "PATH_MISSING_IN_HISTORICAL_DOC", advisory=True)
+            elif (rel, body) in _DOC_CLAIMS_MIEN_TRU_L1:
+                _add("L1", off, tok, "PATH_MISSING_MIEN_TRU", advisory=True)
             else:
                 _add("L1", off, tok, "PATH_MISSING")
 

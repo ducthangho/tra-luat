@@ -4291,14 +4291,36 @@ def _1174_process(argv, *, cwd, deadline, max_bytes, env=None):
         for pipe in streams:pipe.close()
 
 
-def _1174_api(endpoint, *, root, deadline, max_bytes=30*1024*1024, on_bytes=None):
-    _1174_require(type(endpoint) is str and (endpoint=="repos/"+_1174_REPO or endpoint.startswith("repos/"+_1174_REPO+"/")) and
+def _1174_link_header(raw):
+    """Split `gh api --include` output into (body, Link header value or None)."""
+    cuts=[(i,len(mark)) for mark in (b"\r\n\r\n",b"\n\n") for i in (raw.find(mark),) if i>=0]
+    _1174_require(bool(cuts) and raw.startswith(b"HTTP/"),"scoped API header block")
+    cut,width=min(cuts)
+    lines=raw[:cut].decode("latin-1").splitlines()
+    status=lines[0].split()
+    _1174_require(len(status)>=2 and status[1]=="200","scoped API header status")
+    links=[line.split(":",1)[1].strip() for line in lines[1:] if ":" in line and line.split(":",1)[0].strip().lower()=="link"]
+    _1174_require(len(links)<=1,"scoped API duplicate Link header")
+    return raw[cut+width:],links[0] if links else None
+
+
+def _1174_api(endpoint, *, root, deadline, max_bytes=30*1024*1024, on_bytes=None, link=False, repo_id=None):
+    # Only the activity cursor reads the Link header or the numeric repository
+    # path, and only for the measured repository id; no other scope is widened.
+    cursor=(link is True and type(endpoint) is str and type(repo_id) is int and repo_id>0 and
+        endpoint.startswith(("repos/"+_1174_REPO+"/activity?","repositories/"+str(repo_id)+"/activity?")))
+    _1174_require(type(endpoint) is str and type(link) is bool and
+        (cursor if link else endpoint=="repos/"+_1174_REPO or endpoint.startswith("repos/"+_1174_REPO+"/")) and
         ".." not in endpoint and "\\" not in endpoint and Path(root).is_absolute(),"scoped API endpoint/root")
-    result=_1174_process(["gh","api","--hostname","github.com",endpoint],cwd=Path(root),deadline=deadline,max_bytes=max_bytes,env=_1174_api_env())
+    argv=["gh","api","--hostname","github.com",endpoint]
+    if link:argv.insert(4,"--include")
+    result=_1174_process(argv,cwd=Path(root),deadline=deadline,max_bytes=max_bytes,env=_1174_api_env())
     if on_bytes is not None:on_bytes(len(result.stdout)+len(result.stderr))
     _1174_require(time.time()<deadline and result.returncode==0,"scoped API unavailable/deadline")
-    try:return json.loads(result.stdout.decode("utf-8"),object_pairs_hook=_cam_khoa_trung,parse_constant=_cam_hang_ngoai_json)
+    body,header=_1174_link_header(result.stdout) if link else (result.stdout,None)
+    try:value=json.loads(body.decode("utf-8"),object_pairs_hook=_cam_khoa_trung,parse_constant=_cam_hang_ngoai_json)
     except (UnicodeError,ValueError) as ex:raise ValueError("WP1174 UNKNOWN: scoped API JSON") from ex
+    return (value,header) if link else value
 
 
 def _1174_comments(packet, root):
@@ -5478,41 +5500,138 @@ def _1174_review(a, directory, admission):
     return rc
 
 
+_1174_ACTIVITY_KINDS = ("push", "force_push", "branch_creation", "branch_deletion", "pr_merge")
+_1174_QUERY_SCOPE = ["activity", "git/matching-refs/heads", "git/matching-refs/tags", "pulls?state=all"]
+# The last two classes are owner-accepted residuals of the activity anchor,
+# not relaxed checks: history before the anchor and unrecorded tag history.
+_1174_RESIDUALS = ["server_unpublished_activity", "fork_object_storage_outside_repo_scope",
+    "pre_boundary_history_unattested", "tag_history_unattested"]
+
+
+def _1174_activity_next(link, repo_id):
+    """Next activity endpoint from a Link header; None only when no next page is advertised."""
+    if link is None:
+        return None
+    _1174_require(type(link) is str, "collector activity cursor type")
+    targets = re.findall(r'<([^<>]*)>\s*;\s*rel="next"', link)
+    if not targets:
+        _1174_require(re.search(r'rel\s*=\s*"?next', link, re.IGNORECASE) is None, "collector activity cursor syntax")
+        return None
+    _1174_require(len(targets) == 1 and targets[0].startswith("https://api.github.com/"), "collector activity cursor ambiguous/host")
+    endpoint = targets[0][len("https://api.github.com/"):]
+    owned = endpoint.startswith(("repos/" + _1174_REPO + "/activity?", "repositories/" + str(repo_id) + "/activity?"))
+    _1174_require(owned and re.fullmatch(
+        r"(?:repos/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+|repositories/[1-9][0-9]*)/activity\?[A-Za-z0-9_.~%=&:+/-]+", endpoint, re.ASCII) is not None and
+        re.search(r"[?&]after=[^&]+", endpoint) is not None, "collector activity cursor repository")
+    return endpoint
+
+
+def _1174_peel(root, oids, deadline):
+    """Map each OID to its local peeled commit; None when absent or not a commit."""
+    remaining = deadline - time.time()
+    if not oids or remaining <= 0:
+        return {}
+    try:
+        child = subprocess.run(["git", "--no-replace-objects", "-C", str(root), "cat-file", "--batch-check=%(objectname) %(objecttype)"],
+            input="".join(oid + "^{commit}\n" for oid in oids).encode("ascii"), env=_1174_git_env(), capture_output=True, timeout=min(300, remaining))
+    except (ValueError, OSError, subprocess.SubprocessError):
+        return {}
+    lines = child.stdout.decode("ascii", "replace").splitlines()
+    if child.returncode != 0 or len(lines) != len(oids) or time.time() >= deadline:
+        return {}
+    peeled = {}
+    for oid, line in zip(oids, lines):
+        parts = line.split(" ")
+        peeled[oid] = parts[0] if len(parts) == 2 and parts[1] == "commit" and SHA_RE.fullmatch(parts[0]) else None
+    return peeled
+
+
+def _1174_fetch_objects(root, oids, deadline):
+    """One fetch by SHA into the collector repository; creates or moves no ref."""
+    rc, endpoint = _git_do(root, "remote", "get-url", "origin", deadline=deadline)
+    _1174_require(rc == 0 and endpoint.strip() in (b"https://github.com/ducthangho/tra-luat.git",
+                  b"https://github.com/ducthangho/tra-luat", b"git@github.com:ducthangho/tra-luat.git"), "canonical endpoint")
+    remaining = deadline - time.time()
+    _1174_require(remaining > 0 and bool(oids) and all(type(oid) is str and SHA_RE.fullmatch(oid) for oid in oids), "collector object fetch input")
+    child = subprocess.run(["git", "--no-replace-objects", "-C", str(root), "fetch", "--quiet", "--no-tags", "--no-write-fetch-head",
+        "--no-recurse-submodules", "--no-auto-maintenance", "--stdin", endpoint.decode().strip()],
+        input="".join(oid + "\n" for oid in oids).encode("ascii"), env=_1174_git_env(), capture_output=True, timeout=remaining)
+    return child.returncode
+
+
 def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
-    """Bounded re-collection; incomplete retained history never becomes residual."""
+    """Bounded re-collection over the complete repository activity feed.
+
+    Incomplete history, objects or identity never become a residual."""
     start = datetime.now(timezone.utc)
-    end = min(start.timestamp() + 180, deadline if deadline is not None else start.timestamp() + 180)
-    scope = ("events", "git/matching-refs/heads", "git/matching-refs/tags", "pulls?state=all")
+    end = min(start.timestamp() + 900, deadline if deadline is not None else start.timestamp() + 900)
+    scope = tuple(_1174_QUERY_SCOPE)
+    zero, limit = "0" * 40, 64 * 1024 * 1024
+    _1174_require(type(repo_id) is int and repo_id > 0, "collector repository id")
+    audit_time = _1174_time(audit["updated_at"])
     snapshots, coverage, introductions = {}, {}, []
     last_status,dag,earliest = "UNKNOWN",False,None
     for attempt in range(3):
         if time.time() >= end:
             break
-        began, size, pages, complete = time.monotonic(), 0, 0, True
-        pass_end=min(end,time.time()+120)
+        size, pages, complete, transient = 0, 0, True, False
+        pass_end = end
         snapshots, coverage, introductions = {}, {}, []
-        for family in scope:
+
+        def read(endpoint, **extra):
+            # One page of any family; every ceiling and failure is incompleteness.
+            nonlocal size, pages, complete, transient
+            if pages >= 1000 or size >= limit or time.time() >= pass_end:
+                complete = False
+                return None
+            measured = []
+            try:
+                value = fetch(endpoint, deadline=pass_end, max_bytes=limit - size, on_bytes=measured.append, **extra)
+            except (ValueError, subprocess.TimeoutExpired, OSError):
+                complete, transient = False, True
+                return None
+            pages += 1
+            size += sum(measured) if measured else len(_1174_bytes(value))
+            if time.time() >= pass_end or size > limit:
+                complete = False
+                return None
+            return value
+
+        repo = read("repos/" + _1174_REPO)
+        if repo is not None:
+            _1174_require(type(repo) is dict and type(repo.get("id")) is int and repo["id"] == repo_id and
+                repo.get("full_name") == _1174_REPO and type(repo.get("default_branch")) is str and bool(repo["default_branch"]) and
+                _1174_time(repo.get("created_at")) <= start, "collector repository identity")
+            snapshots["repo"] = dict(id=repo["id"], default_branch=repo["default_branch"], created_at=repo["created_at"])
+        # The whole feed is read newest to oldest. No record, including one at
+        # or before the audit, is a stopping point; only the absent cursor is.
+        feed, endpoint, cursors = [], f"repos/{_1174_REPO}/activity?per_page=100", set()
+        while endpoint is not None:
+            reply = read(endpoint, link=True, repo_id=repo_id)
+            if reply is None:
+                break
+            _1174_require(type(reply) is tuple and len(reply) == 2 and type(reply[0]) is list and len(reply[0]) <= 100, "collector page type")
+            feed.extend(reply[0])
+            cursors.add(endpoint)
+            try:
+                endpoint = _1174_activity_next(reply[1], repo_id)
+            except _1174Error:
+                complete = False
+                break
+            if endpoint is None:
+                coverage["activity"] = len(cursors)
+            elif endpoint in cursors:
+                complete = False
+                break
+        snapshots["activity"] = feed
+        for family in scope[1:]:
             values = []
-            for page in range(1, 101):
-                if pages >= 100 or time.monotonic() - began > 120 or time.time() >= end:
-                    complete = False
-                    break
+            for page in range(1, 1001):
                 separator = "&" if "?" in family else "?"
-                measured=[]
-                try:
-                    rows = fetch(f"repos/{_1174_REPO}/{family}{separator}per_page=100&page={page}",deadline=pass_end,max_bytes=30*1024*1024-size,on_bytes=measured.append)
-                except (ValueError,subprocess.TimeoutExpired,OSError):
-                    complete=False
+                rows = read(f"repos/{_1174_REPO}/{family}{separator}per_page=100&page={page}")
+                if rows is None:
                     break
-                if time.time()>=pass_end or time.monotonic()-began>=120:
-                    complete=False
-                    break
-                pages += 1
                 _1174_require(type(rows) is list, "collector page type")
-                size += sum(measured) if measured else len(_1174_bytes(rows))
-                if size > 30 * 1024 * 1024:
-                    complete = False
-                    break
                 values.extend(rows)
                 if len(rows) < 100:
                     coverage[family] = page
@@ -5520,132 +5639,149 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
             else:
                 complete = False
             snapshots[family] = values
-        # Events must cover the complete interval since the immutable audit. API
-        # retention without an earlier boundary is UNKNOWN, even with empty pages.
-        events = snapshots.get("events", [])
-        boundary = any(type(x) is dict and _1174_time(x.get("created_at")) <= _1174_time(audit["updated_at"]) for x in events)
-        dag = True
-        preimages = []
-        for event in events:
-            if time.time()>=pass_end:dag=False;complete=False;break
-            _1174_require(type(event) is dict and type(event.get("id")) is str and
-                event["id"].isascii() and event["id"].isdecimal() and not event["id"].startswith("0") and
-                type(event.get("type")) is str and bool(event["type"]) and type(event.get("repo")) is dict and
-                event["repo"].get("name") == _1174_REPO and
-                ("id" not in event["repo"] or type(event["repo"]["id"]) is int and event["repo"]["id"] == repo_id),
-                "collector event identity")
-            _1174_require(_1174_time(event.get("created_at")) <= start, "collector event time")
-            if event.get("type") == "PullRequestEvent":
-                payload = event.get("payload")
-                actions = {"opened", "reopened", "closed", "edited", "assigned", "unassigned", "labeled", "unlabeled",
-                    "review_requested", "review_request_removed", "synchronize", "ready_for_review", "converted_to_draft",
-                    "locked", "unlocked", "auto_merge_enabled", "auto_merge_disabled", "enqueued", "dequeued"}
-                if type(payload) is not dict or type(payload.get("action")) is not str or payload["action"] not in actions:
-                    dag = False
-                    continue
-                pr, number = payload.get("pull_request"), payload.get("number")
-                _1174_require(type(pr) is dict and type(number) is int and number > 0 and
-                    type(pr.get("number")) is int and pr["number"] == number and
-                    pr.get("html_url") == f"https://github.com/{_1174_REPO}/pull/{number}" and
-                    type(pr.get("base")) is dict and type(pr["base"].get("repo")) is dict and
-                    pr["base"]["repo"].get("full_name") == _1174_REPO,
-                    "collector PR event identity")
-                tip = pr.get("head")
-                if not (type(tip) is dict and type(tip.get("sha")) is str and SHA_RE.fullmatch(tip["sha"]) and
-                        tip["sha"] != "0" * 40 and type(tip.get("ref")) is str and tip["ref"]):
-                    dag = False
-                    continue
-                ref, oid = "refs/heads/" + tip["ref"], tip["sha"]
-                rc, _ = _git_do(root, "check-ref-format", ref, deadline=pass_end)
-                exists, _ = _git_do(root, "cat-file", "-e", oid + "^{commit}", deadline=pass_end)
-                relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, oid, deadline=pass_end) if exists == 0 else (-1, b"")
-                if rc != 0 or relation not in (0, 1) or time.time() >= pass_end:
-                    dag = False
-                elif relation == 0:
-                    if _1174_time(event["created_at"]) <= _1174_time(audit["updated_at"]):
-                        introductions.append(dict(id=event["id"], time=event["created_at"], ref=ref,
-                            actor=event.get("actor", {}).get("login"), before="0" * 40, after=oid))
-                    else:
-                        # An observation cannot date first publication. Require an
-                        # earlier supported introduction of this exact event tip.
-                        preimages.append((oid, event["created_at"]))
-                continue
-            if event.get("type") != "PushEvent":
-                # CreateEvent lacks an immutable event-time tip; current refs
-                # cannot resolve the historical introduction of a branch/tag.
-                if event.get("type") == "CreateEvent":
-                    dag = False
-                continue
-            payload = event.get("payload", {})
-            after, before = payload.get("head"), payload.get("before")
-            if not (type(after) is str and SHA_RE.fullmatch(after) and type(before) is str and SHA_RE.fullmatch(before)):
-                dag = False
-                continue
-            # Zero is the absence of a ref at creation/deletion, never a commit.
-            # A preimage proves publication no later than this event, so it can
-            # reject an earlier audit but cannot establish a first-push timestamp.
+        # Record identity is closed: a malformed or unknown record is an error,
+        # never a silently skipped row.
+        refs, seen = {}, set()
+        for event in feed:
+            _1174_require(type(event) is dict and type(event.get("id")) is int and event["id"] > 0 and
+                type(event.get("activity_type")) is str and event["activity_type"] in _1174_ACTIVITY_KINDS and
+                type(event.get("ref")) is str and event["ref"].startswith(("refs/heads/", "refs/tags/")) and
+                all(type(event.get(k)) is str and SHA_RE.fullmatch(event[k]) for k in ("before", "after")),
+                "collector activity identity")
+            stamp = _1174_time(event.get("timestamp"))
+            _1174_require(stamp <= start, "collector activity time")
+            if event["ref"] not in refs:
+                refs[event["ref"]] = _git_do(root, "check-ref-format", event["ref"], deadline=pass_end)[0]
+            _1174_require(refs[event["ref"]] != 1, "collector activity ref")
+            if refs[event["ref"]] != 0 or event["id"] in seen:
+                complete = False
+            seen.add(event["id"])
+        # A PR whose head repository is absent or foreign has an undatable head
+        # history. Same-repository head changes are branch activity above; the
+        # PR creation time is never used to date a head.
+        tips = []
+        for family in scope[1:]:
+            for row in snapshots.get(family, []):
+                if family.startswith("pulls"):
+                    pr = row
+                    number = pr.get("number") if type(pr) is dict else None
+                    _1174_require(type(pr) is dict and type(number) is int and number > 0 and
+                        pr.get("html_url") == f"https://github.com/{_1174_REPO}/pull/{number}" and
+                        type(pr.get("base")) is dict and type(pr["base"].get("repo")) is dict and
+                        pr["base"]["repo"].get("full_name") == _1174_REPO,
+                        "collector PR identity")
+                    tip = pr.get("head") if type(pr.get("head")) is dict else {}
+                    source = tip.get("repo")
+                    if not (type(source) is dict and source.get("full_name") == _1174_REPO and type(source.get("id")) is int and source["id"] == repo_id):
+                        tips.append(None)
+                    tips.append(tip.get("sha"))
+                else:
+                    target = row.get("object") if type(row) is dict else None
+                    tips.append(target.get("sha") if type(target) is dict else None)
+        # Every non-zero feed OID must be local before any containment answer.
+        wanted = sorted({oid for event in feed for oid in (event["before"], event["after"]) if oid != zero})
+        commits = _1174_peel(root, wanted, pass_end)
+        missing = [oid for oid in wanted if commits.get(oid) is None]
+        if missing:
+            try:
+                _1174_fetch_objects(root, missing, pass_end)
+            except (ValueError, subprocess.SubprocessError, OSError):
+                pass
+            commits.update(_1174_peel(root, missing, pass_end))
+        objects = all(commits.get(oid) is not None for oid in wanted)
+        extra = sorted({oid for oid in tips if type(oid) is str and SHA_RE.fullmatch(oid) and oid not in commits})
+        commits.update(_1174_peel(root, extra, pass_end))
+        relations = {}
+
+        def contains(oid):
+            # "X contains H": merge-base --is-ancestor H X on local objects only.
+            commit = commits.get(oid)
+            if commit is None:
+                return None
+            if commit not in relations:
+                relations[commit] = _git_do(root, "merge-base", "--is-ancestor", head, commit, deadline=pass_end)[0]
+            relation = relations[commit]
+            return relation == 0 if relation in (0, 1) else None
+
+        dag = objects
+        observations = []
+        for event in feed:
+            kind, ref, before, after, stamp = (event[k] for k in ("activity_type", "ref", "before", "after", "timestamp"))
             matches = {}
             for side, oid in (("before", before), ("after", after)):
-                if oid == "0" * 40:
-                    matches[side] = False
-                    continue
-                rc, _ = _git_do(root, "cat-file", "-e", oid + "^{commit}", deadline=pass_end)
-                relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, oid, deadline=pass_end) if rc == 0 else (-1, b"")
-                if time.time() >= pass_end:
-                    dag = False; complete = False; break
-                if relation not in (0, 1):
+                matches[side] = False if oid == zero else contains(oid)
+                if matches[side] is None:
                     dag = False
-                matches[side] = relation == 0
-            preaudit = _1174_time(event["created_at"]) <= _1174_time(audit["updated_at"])
-            if matches.get("after") or matches.get("before") and preaudit:
-                introductions.append(dict(id=event["id"], time=event["created_at"], ref=payload.get("ref"),
-                    actor=event.get("actor", {}).get("login"), before=before, after=after))
-            if matches.get("before") and not preaudit:
-                preimages.append((before, event["created_at"]))
-        for oid, observed_at in preimages:
+            actor = event.get("actor")
+            # Zero is the absence of a ref, never a commit. A deletion is never
+            # an introduction; any side it exposes is only an observation.
+            if matches["after"] and kind != "branch_deletion":
+                introductions.append(dict(id=str(event["id"]), time=stamp, ref=ref,
+                    actor=actor.get("login") if type(actor) is dict else None, before=before, after=after))
+            elif matches["after"]:
+                observations.append((after, stamp))
+            if matches["before"]:
+                observations.append((before, stamp))
+        # An observation at or before the audit proves earlier exposure. A later
+        # one cannot date first publication: it needs a strictly earlier
+        # introduction of that exact OID.
+        exposed = (any(_1174_time(x["time"]) <= audit_time for x in introductions) or
+            any(_1174_time(observed_at) <= audit_time for _, observed_at in observations))
+        for oid, observed_at in observations:
+            if _1174_time(observed_at) <= audit_time:
+                continue
             if not any(x["after"] == oid and _1174_time(x["time"]) < _1174_time(observed_at) for x in introductions):
                 dag = False
         # Every currently observable ref/PR must be accounted for by the DAG;
         # unsupported introductions cannot silently be called server residuals.
-        for family in scope[1:]:
-            for row in snapshots.get(family, []):
-                if time.time()>=pass_end:dag=False;complete=False;break
-                oid = row.get("head", {}).get("sha") if family.startswith("pulls") else row.get("object", {}).get("sha")
-                if not (type(oid) is str and SHA_RE.fullmatch(oid)):
-                    dag = False
-                    continue
-                relation, _ = _git_do(root, "merge-base", "--is-ancestor", head, oid,deadline=pass_end)
-                if time.time()>=pass_end:dag=False;complete=False;break
-                if relation not in (0, 1) or relation == 0 and not any(x["after"] == oid for x in introductions):
-                    dag = False
-        earliest = min(introductions, key=lambda x: (x["time"], x["id"])) if introductions else None
-        if time.time()>=pass_end or time.monotonic()-began>=120:complete=False;dag=False
-        last_status = ("FAIL" if earliest and _1174_time(earliest["time"]) <= _1174_time(audit["updated_at"]) else
+        for oid in tips:
+            if not (type(oid) is str and SHA_RE.fullmatch(oid)):
+                dag = False
+                continue
+            tip_relation = contains(oid)
+            if tip_relation is None:
+                dag = False
+            elif tip_relation and not any(x["after"] == oid for x in introductions):
+                dag = False
+        # Coverage anchor: the oldest record is the creation of the default
+        # branch, not earlier than the repository itself. History before it is
+        # the owner-accepted residual pre_boundary_history_unattested.
+        boundary = False
+        if feed and repo is not None:
+            oldest = feed[-1]
+            boundary = (oldest["activity_type"] == "branch_creation" and oldest["ref"] == "refs/heads/" + repo["default_branch"] and
+                oldest["before"] == zero and _1174_time(oldest["timestamp"]) >= _1174_time(repo["created_at"]) and
+                all(_1174_time(x["timestamp"]) >= _1174_time(oldest["timestamp"]) for x in feed))
+        earliest = min(introductions, key=lambda x: (_1174_time(x["time"]), int(x["id"]))) if introductions else None
+        if time.time()>=pass_end:complete=False;dag=False
+        last_status = ("FAIL" if exposed else
             "RECORDED_EARLIEST_MATCH" if time.time()<pass_end and complete and boundary and dag and earliest else "UNKNOWN")
-        if last_status != "UNKNOWN":
+        # Only a failed transport read is worth another bounded pass; a ceiling
+        # or a measured UNKNOWN is final for this collection.
+        if last_status != "UNKNOWN" or not transient:
             break
-    return dict(schema="wp1174_publication_receipt.v1", repo_id=repo_id, repo=_1174_REPO, head=head,
+    return dict(schema="wp1174_publication_receipt.v2", repo_id=repo_id, repo=_1174_REPO, head=head,
         audit_comment_id=audit["id"], audit_updated_at=audit["updated_at"], audit_sha256=hashlib.sha256(_1174_bytes(audit)).hexdigest(),
         started_utc=start.strftime("%Y-%m-%dT%H:%M:%SZ"), ended_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), query_scope=list(scope),
-        ref_scope=["refs/heads/*", "refs/tags/*"], event_scope="repository_publication", raw_snapshot_sha256=hashlib.sha256(_1174_bytes(snapshots)).hexdigest(),
+        ref_scope=["refs/heads/*", "refs/tags/*"], event_scope="repository_activity", raw_snapshot_sha256=hashlib.sha256(_1174_bytes(snapshots)).hexdigest(),
         cursor_coverage=coverage, dag_coverage=bool(dag), earliest=earliest,
-        residual_classes=["server_unpublished_activity", "fork_object_storage_outside_repo_scope"], status=last_status)
+        residual_classes=list(_1174_RESIDUALS), status=last_status)
 
 
 def _1174_collector_receipt(receipt, head, audit, repo_id):
     _1174_require(type(receipt) is dict and set(receipt) == _1174_COLLECTOR_KEYS and
-        receipt["schema"] == "wp1174_publication_receipt.v1" and receipt["repo"] == _1174_REPO and
+        receipt["schema"] == "wp1174_publication_receipt.v2" and receipt["repo"] == _1174_REPO and
         type(receipt["repo_id"]) is int and receipt["repo_id"] == repo_id and receipt["head"] == head and
         receipt["audit_comment_id"] == audit["id"] and receipt["audit_updated_at"] == audit["updated_at"] and
         receipt["audit_sha256"] == hashlib.sha256(_1174_bytes(audit)).hexdigest() and
-        receipt["query_scope"] == ["events", "git/matching-refs/heads", "git/matching-refs/tags", "pulls?state=all"] and
-        receipt["ref_scope"] == ["refs/heads/*", "refs/tags/*"] and receipt["event_scope"] == "repository_publication" and
-        receipt["residual_classes"] == ["server_unpublished_activity", "fork_object_storage_outside_repo_scope"] and
+        receipt["query_scope"] == _1174_QUERY_SCOPE and
+        receipt["ref_scope"] == ["refs/heads/*", "refs/tags/*"] and receipt["event_scope"] == "repository_activity" and
+        receipt["residual_classes"] == _1174_RESIDUALS and
         _1174_hash(receipt["raw_snapshot_sha256"]) and type(receipt["dag_coverage"]) is bool and
         type(receipt["cursor_coverage"]) is dict and receipt["status"] in ("RECORDED_EARLIEST_MATCH", "FAIL", "UNKNOWN") and
         _1174_time(receipt["started_utc"]) <= _1174_time(receipt["ended_utc"]), "collector receipt closed bindings")
     _1174_require(set(receipt["cursor_coverage"]) <= set(receipt["query_scope"]) and
-        all(type(v) is int and 1<=v<=100 for v in receipt["cursor_coverage"].values()),"collector cursor schema")
+        all(type(v) is int and 1<=v<=1000 for v in receipt["cursor_coverage"].values()),"collector cursor schema")
     earliest=receipt["earliest"]
     _1174_require(earliest is None or (type(earliest) is dict and set(earliest)=={"id","time","ref","actor","before","after"} and
         all(type(earliest[k]) is str and earliest[k] for k in earliest) and
@@ -5709,7 +5845,7 @@ def _1174_human_evidence(a, admission, head):
         all(type(facts["lease"].get(k)) is int and facts["lease"][k] == admission[k] for k in ("revision", "generation")), "human canonical scope")
     _1174_require(_git_do(Path(a.root),"rev-parse","refs/remotes/origin/master") ==
         (0,(facts["canonical_oid"]+"\n").encode()),"human canonical Git snapshot stale")
-    collection_end = min(time.time()+180, _1174_time(admission["expires_utc"]).timestamp())
+    collection_end = min(time.time()+900, _1174_time(admission["expires_utc"]).timestamp())
     run, runs = _1174_human_runs(args, head, min(collection_end, time.time()+120))
     receipt_path = getattr(a, "publication_receipt", None) or getattr(a, "receipt", None)
     receipt_raw = Path(receipt_path).read_bytes()

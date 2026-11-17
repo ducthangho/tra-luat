@@ -12410,10 +12410,38 @@ WP1174_REQUIRED = {"wp1174_" + name for name in (
     "durability_ordinary_pair durability_fsync_readback durability_publish_noreplace durability_legacy_tombstone durability_cached_writer "
     "lifecycle_identity_advisory lifecycle_budget_replay lifecycle_human_valid lifecycle_human_negative lifecycle_first_publication lifecycle_guard_readonly lifecycle_scoped_lifecycle lifecycle_legacy_unchanged "
     "profile_native_linux profile_unsupported windows_claim_rejected status_closed gate_required_skip gate_evidence_schema").split()}
+# wp1370: the activity-collector cases are required IDs (16 new, 85 -> 101).
+WP1174_REQUIRED |= {"wp1174_activity_" + name for name in (
+    "reduced_payload multipage_anchor older_page_fail same_timestamp_fail force_push_preimage deletion_preaudit tag_coverage "
+    "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained").split()}
 WP1174_REQUIRED |= {"wp1174_" + kind + "_" + name for kind in ("writer", "race") for name in _WP1174_WRITERS}
 WP1174_BOTH = {"wp1174_" + name for name in ("admission_valid admission_wrong_scope witness_valid witness_keyset witness_int_bool witness_json_bytes "
     "witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending lifecycle_legacy_unchanged status_closed").split()}
 
+
+
+def _activity1370(ident, kind, ref, before, after, when, actor="ducthangho"):
+    """One Repository activities API record with exactly the measured key set."""
+    return dict(id=ident,node_id="RA_"+str(ident),activity_type=kind,ref=ref,before=before,after=after,timestamp=when,actor=dict(login=actor))
+
+
+def _fetch1370(m, pages, repo_id=123):
+    """Fake transport for the wp1370 collector: repository facts, cursor-paged
+    activity (Link header on the numeric-repository path, as measured), and the
+    page-numbered ref/PR families. `pages["activity"]` is newest first."""
+    def fetch(endpoint,**limits):
+        if endpoint=="repos/"+m._1174_REPO:
+            return pages.get("repo",dict(id=repo_id,full_name=m._1174_REPO,default_branch="master",created_at="2026-07-05T00:00:00Z"))
+        path,_,query=endpoint.partition("?")
+        if path in ("repos/"+m._1174_REPO+"/activity","repositories/"+str(repo_id)+"/activity"):
+            assert limits.get("link") is True and limits.get("repo_id")==repo_id,(endpoint,limits)
+            offset=([int(x[6:]) for x in query.split("&") if x.startswith("after=")] or [0])[0]
+            width=pages.get("activity_page_size",100);rows=pages["activity"][offset:offset+width]
+            more=offset+width<len(pages["activity"])
+            return rows,('<https://api.github.com/repositories/%d/activity?per_page=100&after=%d>; rel="next"'%(repo_id,offset+width) if more else pages.get("activity_last_link"))
+        assert not limits.get("link"),(endpoint,limits)
+        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+    return fetch
 
 
 def _human_fixture1174(c, change=None):
@@ -12430,21 +12458,25 @@ def _human_fixture1174(c, change=None):
     args.packet,args.revision,args.generation,args.root,args.admission=1187,1,1,str(w.resolve()),"fixture"
     audit=json.loads(Path(args.human_audit_comment).read_bytes())
     before=_g(w,"rev-parse",args.head+"^1")
-    events=[dict(id="12",type="PushEvent",created_at="2026-11-04T09:01:00Z",repo=dict(name=m._1174_REPO),actor=dict(login="ducthangho"),payload=dict(head=args.head,before=before,ref="refs/heads/candidate")),
-            dict(id="11",type="PushEvent",created_at="2026-11-04T08:59:00Z",repo=dict(name=m._1174_REPO),actor=dict(login="ducthangho"),payload=dict(head=before,before=before,ref="refs/heads/master"))]
-    pages={"events":events,"git/matching-refs/heads":[dict(ref="refs/heads/candidate",object=dict(sha=args.head))],"git/matching-refs/tags":[],"pulls":[]}
+    # wp1370 fixture migration (events -> activity), newest first:
+    #   PushEvent 12 (post-audit push of H)      -> activity 12 `push` before->H on candidate;
+    #   PushEvent 11 (pre-audit boundary event)  -> activity 11 `push` on master, unrelated to H;
+    #   "an earlier retained boundary exists"    -> activity 1, the default-branch
+    #   `branch_creation` anchor (before all zero), which is now the coverage boundary.
+    root_oid=_g(w,"rev-list","--max-parents=0",args.head)
+    activity=[_activity1370(12,"push","refs/heads/candidate",before,args.head,"2026-11-04T09:01:00Z"),
+            _activity1370(11,"push","refs/heads/master",root_oid,before,"2026-11-04T08:59:00Z"),
+            _activity1370(1,"branch_creation","refs/heads/master","0"*40,root_oid,"2026-07-05T00:00:01Z")]
+    pages={"activity":activity,"git/matching-refs/heads":[dict(ref="refs/heads/candidate",object=dict(sha=args.head))],"git/matching-refs/tags":[],"pulls":[]}
     server_transition=json.loads(Path(args.human_transition_comment).read_bytes()) if args.human_transition_comment else None
     server_run=json.loads(Path(args.human_remote_run).read_bytes())
     server_runs=json.loads(Path(args.workflow_runs).read_bytes())
     def fetch(endpoint,**limits):
-        if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
         if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
         if endpoint.endswith("/actions/runs/"+str(server_run["id"])):return server_run
         if "/actions/runs?" in endpoint:return server_runs
         if server_transition and endpoint.endswith("/issues/comments/"+str(server_transition["id"])):return server_transition
-        family=endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]
-        assert family in pages,endpoint
-        return pages[family]
+        return _fetch1370(m,pages)(endpoint,**limits)
     facts=dict(lease=lease,spec=spec,spec_sha256=hashlib.sha256(spec).hexdigest(),canonical_oid=_g(w,"rev-parse","refs/remotes/origin/master"))
     @contextlib.contextmanager
     def canonical(_):yield w
@@ -12598,13 +12630,13 @@ def _lifecycle1174(kind):
                     d=c.tmp/("current-service" if service else "current-native");d.mkdir()
                     _current_policy1174(Ctx(c.script,d),service)
                 _static_writers1174(c,m)
-                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==85
+                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==101
                 applicable=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
                 required={n:None for n in applicable}
                 assert _required1174(required,applicable)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,applicable),"missing required ID accepted"
-                assert len(_WP1174_FULL_CASE_IDS)==85 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
+                assert len(_WP1174_FULL_CASE_IDS)==101 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -12635,27 +12667,36 @@ def _lifecycle1174(kind):
             Path(args.human_audit_comment).write_bytes(original)
         elif kind=="first_publication":
             _collector_limits1174(c,m,w,args,audit,pages)
-            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
-            assert receipt["status"]=="RECORDED_EARLIEST_MATCH" and receipt["earliest"]["id"]=="12"
+            # wp1370 mapping of the original sub-checks (same order, same intent):
+            #   healthy PushEvent chain -> RECORDED          => healthy activity chain to the anchor -> RECORDED;
+            #   pre-audit PushEvent whose `before` is H -> FAIL => pre-audit `force_push` whose before is H -> FAIL;
+            #   no retained pre-audit boundary event -> UNKNOWN => no default-branch creation anchor -> UNKNOWN;
+            #   pre-audit PushEvent of H -> FAIL             => pre-audit `push` of H -> FAIL;
+            #   empty events -> UNKNOWN                      => empty activity feed -> UNKNOWN.
+            fetch=_fetch1370(m,pages)
+            receipt=m._1174_collect(fetch,w,args.head,audit,123)
+            assert receipt["status"]=="RECORDED_EARLIEST_MATCH" and receipt["earliest"]["id"]=="12",receipt
+            assert receipt["schema"]=="wp1174_publication_receipt.v2" and receipt["query_scope"][0]=="activity" and receipt["event_scope"]=="repository_activity"
+            assert receipt["cursor_coverage"]=={"activity":1,"git/matching-refs/heads":1,"git/matching-refs/tags":1,"pulls?state=all":1}
             # A force-removal before the audit is still prior publication:
-            # PushEvent.before is the old ref value even though after no
-            # longer contains H.  Republishing H later cannot launder it.
-            removal=copy.deepcopy(pages["events"][0])
-            removal.update(id="10",created_at="2026-11-04T08:58:30Z")
-            removal["payload"].update(before=args.head,head=_g(w,"rev-parse",args.head+"^1"))
-            pages["events"].insert(1,removal)
-            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
-            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="10","PushEvent preimage publication missed"
-            pages["events"].pop(1)
-            old_boundary=pages["events"].pop()
-            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            # the activity `before` is the old ref value even though `after`
+            # no longer contains H.  Republishing H later cannot launder it.
+            # v2 `earliest` is the earliest introduction (id 12), not the
+            # preimage record; the pre-audit exposure itself decides FAIL.
+            removal=_activity1370(10,"force_push","refs/heads/candidate",args.head,_g(w,"rev-parse",args.head+"^1"),"2026-11-04T08:58:30Z")
+            pages["activity"].insert(2,removal)
+            receipt=m._1174_collect(fetch,w,args.head,audit,123)
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12","activity preimage publication missed"
+            pages["activity"].pop(2)
+            old_boundary=pages["activity"].pop()
+            receipt=m._1174_collect(fetch,w,args.head,audit,123)
             assert receipt["status"]=="UNKNOWN","retained history boundary required"
-            pages["events"].append(old_boundary)
-            pages["events"][0]["created_at"]="2026-11-04T08:58:00Z"
-            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
-            assert receipt["status"]=="FAIL"
-            pages["events"]=[]
-            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            pages["activity"].append(old_boundary)
+            pages["activity"][0]["timestamp"]="2026-11-04T08:58:00Z"
+            receipt=m._1174_collect(fetch,w,args.head,audit,123)
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12"
+            pages["activity"]=[]
+            receipt=m._1174_collect(fetch,w,args.head,audit,123)
             assert receipt["status"]=="UNKNOWN","retention must not become residual"
         elif kind=="guard_readonly":
             argv=["guard-first-publication","--packet",str(args.packet),"--revision","1","--generation","1","--admission","fixture","--root",args.root,
@@ -12712,7 +12753,7 @@ def _evidence_schema1174(c):
     required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
     record=dict(schema="wp1174_native_report.v1",actual_os="Linux",scope="wp1174_candidate",proof_eligible=True,source_pr=1275,repo="ducthangho/tra-luat",pr=1275,
         run_id="1",run_attempt="1",job="gate-packet-loop",checkout_sha=m,checkout_tree="c"*40,executed_sha=h,executed_tree="d"*40,expected_head=h,expected_tree="d"*40,
-        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=84,
+        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=100,
         outcomes={n:"passed" for n in required},profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},
         native_probe=dict(status="passed",checks={k:True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")}),
         native_seam=False,overall_status="passed",windows_oracle="not_run_platform; deferred_to_windows_focused")
@@ -12883,13 +12924,12 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
     if target_facts is not None:
         facts["target_authority"]=target_facts["target_authority"]
     def fetch(endpoint,**limits):
-        if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
         if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
         if endpoint.endswith("/actions/runs/2"):return json.loads(Path(hargs.human_remote_run).read_bytes())
         if "/actions/runs?" in endpoint:
             if workflow_case=="api_swap":Path(hargs.workflow_runs).write_bytes(b"{}\n")
             return files["workflow_runs"]
-        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+        return _fetch1370(m,pages)(endpoint,**limits)
     workflow_path=Path(hargs.workflow_runs)
     original_workflow=workflow_path.read_bytes()
     if workflow_case=="bytes":
@@ -13578,21 +13618,37 @@ def _collector_limits1174(c,m,w,args,audit,pages):
     expired=m._1174_collect(lambda *args,**kwargs:(_ for _ in ()).throw(AssertionError("expired collector fetched")),w,args.head,audit,123,deadline=time.time()-1)
     assert expired["status"]=="UNKNOWN" and expired["earliest"] is None and expired["dag_coverage"] is False
     clock=[1000.0];calls=[]
+    served=_fetch1370(m,pages)
     def late_fetch(endpoint,**limits):
         calls.append(limits);clock[0]=limits["deadline"]+0.01
-        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+        return served(endpoint,**limits)
     with patch.object(m.time,"time",side_effect=lambda:clock[0]):
         result=m._1174_collect(late_fetch,w,args.head,audit,123,deadline=1000.05)
     assert result["status"]=="UNKNOWN" and calls and calls[0]["deadline"]<=1000.05
-    assert 0<calls[0]["max_bytes"]<=30*1024*1024
+    assert 0<calls[0]["max_bytes"]<=64*1024*1024 and len(calls)==1
     # A final empty page that arrives after the deadline is not completeness.
+    # wp1370: five reads per pass (repository, one activity page, heads, tags, PRs).
     clock[0]=1000;count=[0]
     def final_late(endpoint,**limits):
         count[0]+=1
-        if count[0]==4:clock[0]=limits["deadline"]+1
-        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+        if count[0]==5:clock[0]=limits["deadline"]+1
+        return served(endpoint,**limits)
     with patch.object(m.time,"time",side_effect=lambda:clock[0]):result=m._1174_collect(final_late,w,args.head,audit,123,deadline=1000.05)
-    assert count[0]==4 and result["status"]=="UNKNOWN"
+    assert count[0]==5 and result["status"]=="UNKNOWN"
+    # wp1370 ceilings: the byte budget (64 MB) and the page budget (1000 pages
+    # over all families) end in UNKNOWN, never in a truncated success.
+    sizes=[]
+    def heavy(endpoint,**limits):
+        sizes.append(limits["max_bytes"]);limits["on_bytes"](40*1024*1024);return served(endpoint,**limits)
+    result=m._1174_collect(heavy,w,args.head,audit,123)
+    assert result["status"]=="UNKNOWN" and sizes[:2]==[64*1024*1024,24*1024*1024] and all(x>0 for x in sizes),(result,sizes[:4])
+    endless=[0]
+    def unbounded(endpoint,**limits):
+        if "/activity" not in endpoint:return served(endpoint,**limits)
+        endless[0]+=1
+        return [],'<https://api.github.com/repositories/123/activity?per_page=100&after=%d>; rel="next"'%endless[0]
+    result=m._1174_collect(unbounded,w,args.head,audit,123)
+    assert result["status"]=="UNKNOWN" and endless[0]==999 and "activity" not in result["cursor_coverage"],(result,endless)
     # A DAG answer returning after its supplied deadline also loses all credit.
     clock[0]=1000;deadlines=[]
     def slow_git(root,*argv,deadline=None):
@@ -13600,7 +13656,7 @@ def _collector_limits1174(c,m,w,args,audit,pages):
         clock[0]=deadline+1
         return 0,b""
     with patch.object(m.time,"time",side_effect=lambda:clock[0]),patch.object(m,"_git_do",slow_git):
-        result=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123,deadline=1000.05)
+        result=m._1174_collect(served,w,args.head,audit,123,deadline=1000.05)
     assert deadlines and all(d<=1000.05 for d in deadlines) and result["status"]=="UNKNOWN"
     clock[0]=1000;timeouts=[]
     def late_run(*argv,**kwargs):
@@ -13685,13 +13741,18 @@ def _r12_publication1174(c):
     import copy, contextlib, io
     from unittest.mock import patch
     m,w,args,a,audit,pages,seams=_human_fixture1174(c)
-    original=copy.deepcopy(pages["events"])
+    # wp1370 mapping: every PushEvent(before, head) stimulus below is the same
+    # (before, after) pair as one activity record on refs/heads/candidate. The
+    # activity type is the one the server would record for that pair: zero
+    # after -> `branch_deletion`, zero before -> `branch_creation`, a rewind ->
+    # `force_push`, otherwise `push`. Oracles are unchanged.
+    original=copy.deepcopy(pages["activity"])
     parent=_g(w,"rev-parse",args.head+"^1")
     _g(w,"checkout","-qb","publication-descendant",args.head)
     (w/"descendant.txt").write_text("descendant\n")
     _g(w,"add","descendant.txt");_g(w,"commit","-qm","descendant control")
     descendant=_g(w,"rev-parse","HEAD")
-    fetch=lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+    fetch=_fetch1370(m,pages)
     argv=["guard-first-publication","--packet",str(args.packet),"--revision","1","--generation","1","--admission","fixture","--root",args.root,
         "--head",args.head,"--pr",str(args.pr),"--coordinator-id","coordinator-1","--receipt",args.receipt,
         "--human-audit-comment",args.human_audit_comment,"--human-remote-run",args.human_remote_run,"--workflow-runs",args.workflow_runs]
@@ -13699,12 +13760,12 @@ def _r12_publication1174(c):
             (args.head,"0"*40,"08:59:30","FAIL"),("f"*40,parent,"08:59:30","UNKNOWN"),
             (parent,"f"*40,"08:59:30","UNKNOWN"),("0"*40,args.head,"09:01:00","RECORDED_EARLIEST_MATCH"),
             (parent,descendant,"09:01:00","RECORDED_EARLIEST_MATCH")):
-        pages["events"]=copy.deepcopy(original)
+        pages["activity"]=copy.deepcopy(original)
         pages["git/matching-refs/heads"][0]["object"]["sha"]=after if status=="RECORDED_EARLIEST_MATCH" else args.head
-        event=dict(id="13",type="PushEvent",created_at="2026-11-04T"+when+"Z",repo=dict(name=m._1174_REPO),
-            actor=dict(login="ducthangho"),payload=dict(before=before,head=after,ref="refs/heads/candidate"))
-        if status=="RECORDED_EARLIEST_MATCH":pages["events"][0]=event
-        else:pages["events"].append(event)
+        kind=("branch_deletion" if after=="0"*40 else "branch_creation" if before=="0"*40 else "force_push" if after==parent else "push")
+        event=_activity1370(13,kind,"refs/heads/candidate",before,after,"2026-11-04T"+when+"Z")
+        if status=="RECORDED_EARLIEST_MATCH":pages["activity"][0]=event
+        else:pages["activity"].insert(1,event)
         receipt=m._1174_collect(fetch,w,args.head,audit,123)
         assert receipt["status"]==status,(before,after,status,receipt)
         Path(args.receipt).write_bytes(m._1174_bytes(receipt))
@@ -13716,14 +13777,13 @@ def _r12_publication1174(c):
     pages["git/matching-refs/heads"][0]["object"]["sha"]=descendant
     # A post-audit preimage without an earlier observed introduction cannot
     # establish first publication, even when its postimage is a descendant.
-    pages["events"]=copy.deepcopy(original)
-    pages["events"][0]["payload"].update(before=args.head,head=descendant)
+    pages["activity"]=copy.deepcopy(original)
+    pages["activity"][0].update(before=args.head,after=descendant)
     assert m._1174_collect(fetch,w,args.head,audit,123)["status"]=="UNKNOWN"
     # A fully observed chain provides the earlier after-image evidence.
-    pages["events"]=copy.deepcopy(original)
-    later=copy.deepcopy(original[0]);later.update(id="14",created_at="2026-11-04T09:02:00Z")
-    later["payload"].update(before=args.head,head=descendant)
-    pages["events"].append(later)
+    pages["activity"]=copy.deepcopy(original)
+    later=copy.deepcopy(original[0]);later.update(id=14,timestamp="2026-11-04T09:02:00Z",before=args.head,after=descendant)
+    pages["activity"].insert(0,later)
     assert m._1174_collect(fetch,w,args.head,audit,123)["status"]=="RECORDED_EARLIEST_MATCH"
 
 
@@ -13955,7 +14015,7 @@ def _r12_main_inventory1174(c):
     seen=[]
     def selected_driver():
         names=[name for name,_ in CASES if name in WP1174_REQUIRED]
-        assert len(names)==84 and "wp1174_windows_claim_rejected" not in names
+        assert len(names)==100 and "wp1174_windows_claim_rejected" not in names
         dict(CASES)["wp1174_lifecycle_scoped_lifecycle"](c)
         seen.append(tuple(names))
         return 0
@@ -13965,11 +14025,311 @@ def _r12_main_inventory1174(c):
             _legacy_main=selected_driver,_carrier1174=lambda *args:True,_snapshot1174=lambda *args:{}),contextlib.redirect_stdout(io.StringIO()):
         assert main()==0
     assert seen and CASES is full
-    assert len(_WP1174_FULL_CASE_IDS)==85 and len(set(_WP1174_FULL_CASE_IDS))==85
+    assert len(_WP1174_FULL_CASE_IDS)==101 and len(set(_WP1174_FULL_CASE_IDS))==101
 
 
 def _r12_accept_snapshot1174(c):
     _accept_entry1174(c,snapshot=True)
+
+
+# --- wp1370: publication evidence from the Repository activities API ------------
+# New required IDs are `wp1174_activity_*` so the existing fail-closed harness
+# (required inventory, skip-is-red, mutant target/control checks) covers them.
+def _activity_case1370(kind):
+    def case(c):
+        import contextlib, copy, io
+        from unittest.mock import patch
+        m,w,args,a,audit,pages,seams=_human_fixture1174(c)
+        H,Z=args.head,"0"*40
+        parent=_g(w,"rev-parse",H+"^1");root=_g(w,"rev-list","--max-parents=0",H)
+        seen=[]
+        served=_fetch1370(m,pages)
+        def fetch(endpoint,**limits):
+            seen.append(endpoint);return served(endpoint,**limits)
+        collect=lambda source=fetch:m._1174_collect(source,w,H,audit,123)
+        base=copy.deepcopy(pages["activity"])   # [12 push ->H 09:01, 11 master push 08:59, 1 anchor]
+        ok="RECORDED_EARLIEST_MATCH"
+        def feed(*extra,drop=()):
+            rows=[copy.deepcopy(x) for x in base if x["id"] not in drop]+[copy.deepcopy(x) for x in extra]
+            anchor=[x for x in rows if x["id"]==1];rest=[x for x in rows if x["id"]!=1]
+            pages["activity"]=sorted(rest,key=lambda x:(x["timestamp"],x["id"]),reverse=True)+anchor
+        positive=collect()
+        assert positive["status"]==ok and positive["earliest"]["id"]=="12" and positive["dag_coverage"] is True,positive
+        if kind=="reduced_payload":
+            # Exactly the measured key set of one activity record, including the two
+            # measured rows (branch_creation 06:37:08Z, push 09:32:46Z) on fixture OIDs.
+            keys={"id","node_id","activity_type","ref","before","after","timestamp","actor"}
+            measured=[json.loads(json.dumps(dict(id=3381,node_id="RA_kwDOfixture3381",activity_type="push",ref="refs/heads/ops/wp1308-target-r5-g7",
+                    before=parent,after=H,timestamp="2026-11-04T09:32:46Z",actor=dict(login="ducthangho",id=7,type="User",site_admin=False)))),
+                json.loads(json.dumps(dict(id=3377,node_id="RA_kwDOfixture3377",activity_type="branch_creation",ref="refs/heads/ops/wp1308-target-r5-g7",
+                    before=Z,after=parent,timestamp="2026-11-04T06:37:08Z",actor=dict(login="ducthangho",id=7,type="User",site_admin=False))))]
+            assert all(set(row)==keys for row in measured+base)
+            feed(*measured,drop=(12,));pages["git/matching-refs/heads"][0]["object"]["sha"]=H
+            del seen[:];receipt=collect()
+            assert receipt["status"]==ok,receipt
+            assert receipt["earliest"]==dict(id="3381",time="2026-11-04T09:32:46Z",ref="refs/heads/ops/wp1308-target-r5-g7",actor="ducthangho",before=parent,after=H),receipt
+            assert type(receipt["earliest"]["id"]) is str and m._1174_collector_receipt(receipt,H,audit,123) is receipt
+            assert seen and not any("/events" in endpoint for endpoint in seen),"collector still reads the Events API"
+            assert seen[0]=="repos/"+m._1174_REPO and seen[1]=="repos/"+m._1174_REPO+"/activity?per_page=100",seen
+        elif kind=="multipage_anchor":
+            extra=[_activity1370(20+i,"push","refs/heads/topic-%d"%i,root,parent,"2026-11-04T08:%02d:00Z"%(10+i)) for i in range(4)]
+            feed(*extra);pages["activity_page_size"]=2;del seen[:]
+            receipt=collect()
+            assert len(pages["activity"])==7 and receipt["status"]==ok and receipt["cursor_coverage"]["activity"]==4,receipt
+            walked=[x for x in seen if "/activity" in x]
+            assert walked==["repos/"+m._1174_REPO+"/activity?per_page=100"]+["repositories/123/activity?per_page=100&after=%d"%n for n in (2,4,6)],walked
+            assert m._1174_collector_receipt(receipt,H,audit,123) is receipt
+        elif kind in ("older_page_fail","same_timestamp_fail"):
+            # Page 1 ends with an unrelated pre-audit record; the older publish
+            # of H only exists on page 2. Reading must not stop at the boundary.
+            when="2026-11-04T08:30:00Z" if kind=="older_page_fail" else audit["updated_at"]
+            leak=_activity1370(9,"branch_creation","refs/heads/leak",Z,H,when)
+            boundary=_activity1370(11,"push","refs/heads/master",root,parent,"2026-11-04T08:59:00Z" if kind=="older_page_fail" else audit["updated_at"])
+            pages["activity"]=[copy.deepcopy(base[0]),boundary,leak,copy.deepcopy(base[2])];pages["activity_page_size"]=2
+            assert kind=="older_page_fail" or boundary["timestamp"]==leak["timestamp"]==audit["updated_at"]
+            del seen[:];receipt=collect()
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="9","older publish of H behind the audit boundary was missed: %r"%(receipt,)
+            assert len([x for x in seen if "/activity" in x])==2,seen
+        elif kind=="force_push_preimage":
+            feed(_activity1370(10,"force_push","refs/heads/candidate",H,parent,"2026-11-04T08:58:30Z"))
+            receipt=collect()
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12","pre-audit force-push preimage was laundered by a later publish: %r"%(receipt,)
+        elif kind=="deletion_preaudit":
+            feed(_activity1370(10,"branch_deletion","refs/heads/old",H,Z,"2026-11-04T08:58:30Z"))
+            receipt=collect()
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12",receipt
+            # Control: deleting another, fully explained branch stays a success.
+            feed(_activity1370(14,"branch_creation","refs/heads/topic",Z,H,"2026-11-04T09:02:00Z"),
+                 _activity1370(16,"branch_deletion","refs/heads/topic",H,Z,"2026-11-04T09:03:00Z"),
+                 _activity1370(8,"branch_deletion","refs/heads/stale",parent,Z,"2026-11-04T08:40:00Z"))
+            receipt=collect()
+            assert receipt["status"]==ok and receipt["earliest"]["id"]=="12",receipt
+        elif kind=="tag_coverage":
+            _g(w,"tag","-a","-m","annotated","wp1370-annotated",H);T=_g(w,"rev-parse","refs/tags/wp1370-annotated")
+            assert T!=H and _g(w,"cat-file","-t",T)=="tag"
+            _g(w,"checkout","-qb","wp1370-tagged",H);(w/"tagged.txt").write_text("tagged\n");_g(w,"add","tagged.txt");_g(w,"commit","-qm","tagged descendant")
+            D=_g(w,"rev-parse","HEAD")
+            # Item 7 is by exact tip: a lightweight tag sitting exactly on an
+            # introduced OID is explained; a tag on a descendant or an annotated
+            # tag object (peeled to a commit containing H) is not.
+            feed();pages["git/matching-refs/tags"]=[dict(ref="refs/tags/v0",object=dict(sha=H,type="commit"))];assert collect()["status"]==ok
+            for tip in (D,T):
+                feed();pages["git/matching-refs/tags"]=[dict(ref="refs/tags/v1",object=dict(sha=tip,type="tag" if tip==T else "commit"))]
+                receipt=collect()
+                assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,("existing tag containing H has no introduction",tip,receipt)
+            feed(_activity1370(15,"push","refs/tags/v1",Z,T,"2026-11-04T09:02:00Z"))
+            receipt=collect();assert receipt["status"]==ok,receipt
+            # A tag record in the feed is handled like a branch: its pre-audit
+            # preimage (annotated, peeled to the commit) is prior exposure.
+            pages["git/matching-refs/tags"]=[]
+            feed(_activity1370(10,"branch_deletion","refs/tags/old",T,Z,"2026-11-04T08:58:30Z"))
+            receipt=collect();assert receipt["status"]=="FAIL",receipt
+            feed(_activity1370(10,"push","refs/tags/old",Z,T,"2026-11-04T08:58:30Z"))
+            receipt=collect();assert receipt["status"]=="FAIL" and receipt["earliest"]["ref"]=="refs/tags/old",receipt
+        elif kind in ("receipt_residuals","receipt_v1"):
+            good=m._1174_collector_receipt(copy.deepcopy(positive),H,audit,123)
+            expected=["server_unpublished_activity","fork_object_storage_outside_repo_scope","pre_boundary_history_unattested","tag_history_unattested"]
+            assert good["schema"]=="wp1174_publication_receipt.v2" and good["residual_classes"]==expected
+            assert good["query_scope"]==["activity","git/matching-refs/heads","git/matching-refs/tags","pulls?state=all"] and good["event_scope"]=="repository_activity"
+            assert set(good)==set(m._1174_COLLECTOR_KEYS)
+            if kind=="receipt_residuals":
+                wrong=[expected[:2],expected[:3],expected[:2]+expected[3:],list(reversed(expected)),expected+["extra"],[],None,tuple(expected),expected[:3]+["tag_history"]]
+            else:
+                v1=dict(schema="wp1174_publication_receipt.v1",query_scope=["events"]+expected[:0]+good["query_scope"][1:],event_scope="repository_publication",residual_classes=expected[:2])
+                wrong=[v1,dict(schema=v1["schema"]),dict(query_scope=v1["query_scope"]),dict(event_scope=v1["event_scope"]),
+                    dict(schema=v1["schema"],residual_classes=v1["residual_classes"]),dict(schema="wp1174_publication_receipt.v3")]
+            for change in wrong:
+                bad=copy.deepcopy(good);bad.update(change if kind=="receipt_v1" else dict(residual_classes=change))
+                _reject1174(m._1174_collector_receipt,bad,H,audit,123,reason="collector receipt closed bindings")
+            assert m._1174_collector_receipt(copy.deepcopy(good),H,audit,123)==good
+        elif kind=="no_anchor":
+            anchor=base[2]
+            def without(**change):
+                pages["activity"]=copy.deepcopy(base[:2])+([dict(copy.deepcopy(anchor),**change)] if change else [])
+                return collect()
+            receipt=without();assert receipt["status"]=="UNKNOWN" and receipt["earliest"]["id"]=="12","missing default-branch creation anchor accepted: %r"%(receipt,)
+            for change in (dict(ref="refs/heads/main"),dict(before=root),dict(activity_type="push"),dict(ref="refs/tags/master"),dict(timestamp="2026-07-04T23:59:59Z")):
+                receipt=without(**change);assert receipt["status"]=="UNKNOWN",(change,receipt)
+            # A record older than the anchor means the anchor is not the oldest.
+            pages["activity"]=copy.deepcopy(base[:2])+[_activity1370(2,"push","refs/heads/master",root,parent,"2026-07-05T00:00:00Z"),copy.deepcopy(anchor)]
+            assert collect()["status"]=="UNKNOWN"
+            pages["activity"]=copy.deepcopy(base)
+            pages["repo"]=dict(id=123,full_name=m._1174_REPO,default_branch="main",created_at="2026-07-05T00:00:00Z");assert collect()["status"]=="UNKNOWN"
+            pages["repo"]=dict(id=123,full_name=m._1174_REPO,default_branch="master",created_at="2026-07-05T00:00:02Z");assert collect()["status"]=="UNKNOWN"
+            pages.pop("repo");assert collect()["status"]==ok
+        elif kind=="object_unfetchable":
+            gone="e"*40
+            feed(_activity1370(7,"force_push","refs/heads/gone",gone,parent,"2026-11-04T08:20:00Z"))
+            calls=[]
+            with patch.object(m,"_1174_fetch_objects",side_effect=lambda root_,oids,deadline:calls.append(list(oids))):receipt=collect()
+            assert calls==[[gone]] and receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,(calls,receipt)
+            with patch.object(m,"_1174_fetch_objects",side_effect=OSError("offline")):assert collect()["status"]=="UNKNOWN"
+            assert collect()["status"]=="UNKNOWN","fixture has no canonical origin; the real fetch must refuse"
+            # Positive: the real single fetch-by-SHA obtains a missing OID and
+            # creates or moves no ref. The canonical URL is rewritten to a local
+            # source by insteadOf; only the file transport is allowed.
+            source=c.tmp/"wp1370-source";_g(c.tmp,"clone","-q","--no-hardlinks",str(w),str(source))
+            _g(source,"config","uploadpack.allowAnySHA1InWant","true");_g(source,"checkout","-q","-b","elsewhere",root)
+            (source/"elsewhere.txt").write_text("elsewhere\n");_g(source,"add","elsewhere.txt");_g(source,"commit","-qm","object absent from the collector repository")
+            X=_g(source,"rev-parse","HEAD")
+            assert m._git_do(w,"cat-file","-e",X+"^{commit}")[0]!=0
+            canonical="https://github.com/ducthangho/tra-luat.git";_g(w,"config","url."+str(source)+".insteadOf",canonical)
+            feed(_activity1370(7,"branch_creation","refs/heads/elsewhere",Z,X,"2026-11-04T08:20:00Z"))
+            real=m._git_do
+            def origin(root_,*argv,**kw):
+                return (0,canonical.encode()+b"\n") if argv==("remote","get-url","origin") else real(root_,*argv,**kw)
+            refs=_g(w,"for-each-ref");fetch_head=(w/".git"/"FETCH_HEAD").exists()
+            with patch.object(m,"_git_do",origin),patch.dict(os.environ,{"GIT_ALLOW_PROTOCOL":"file"}):receipt=collect()
+            assert receipt["status"]==ok,receipt
+            assert m._git_do(w,"cat-file","-e",X+"^{commit}")[0]==0 and _g(w,"for-each-ref")==refs and (w/".git"/"FETCH_HEAD").exists()==fetch_head
+        elif kind=="cursor_foreign":
+            good_link='<https://api.github.com/repositories/123/activity?per_page=100&after=2>; rel="next"'
+            def cursor(link):
+                followed=[]
+                def source(endpoint,**limits):
+                    if "/activity" not in endpoint:return served(endpoint,**limits)
+                    followed.append(endpoint)
+                    if len(followed)==1:return copy.deepcopy(base[:2]),link
+                    return copy.deepcopy(base[2:]),None
+                return collect(source),followed
+            receipt,followed=cursor(good_link);assert receipt["status"]==ok and len(followed)==2 and receipt["cursor_coverage"]["activity"]==2,(receipt,followed)
+            receipt,followed=cursor('<https://api.github.com/repos/'+m._1174_REPO+'/activity?per_page=100&after=2>; rel="next", <https://api.github.com/repositories/123/activity?per_page=100&before=2>; rel="prev"')
+            assert receipt["status"]==ok and followed[1]=="repos/"+m._1174_REPO+"/activity?per_page=100&after=2",(receipt,followed)
+            for link in ('<https://api.github.com/repositories/999/activity?per_page=100&after=2>; rel="next"',
+                    '<https://api.github.com/repos/evil/tra-luat/activity?per_page=100&after=2>; rel="next"'):
+                receipt,followed=cursor(link)
+                assert receipt["status"]=="UNKNOWN","cursor of another repository was followed: %r"%((link,receipt,followed),)
+                assert len(followed)==1 and "activity" not in receipt["cursor_coverage"],(link,followed,receipt)
+            for link in ('<https://evil.example/repositories/123/activity?per_page=100&after=2>; rel="next"',
+                    '<https://api.github.com/repositories/123/events?per_page=100&after=2>; rel="next"',
+                    '<https://api.github.com/repositories/123/activity?per_page=100>; rel="next"',
+                    '<https://api.github.com/repositories/123/activity/../../999/activity?after=2>; rel="next"',
+                    '<https://api.github.com/repos/'+m._1174_REPO+'/activity?per_page=100>; rel="next"',
+                    good_link+", "+good_link,'<https://api.github.com/repositories/123/activity?after=2>; rel=next',7):
+                receipt,followed=cursor(link)
+                assert receipt["status"]=="UNKNOWN" and len(followed)==1 and "activity" not in receipt["cursor_coverage"],(link,followed,receipt)
+            # The transport extension is exactly the two activity forms.
+            reply=b'HTTP/2.0 200 OK\r\nContent-Type: application/json\r\nLink: '+good_link.encode()+b'\r\n\r\n[{"id": 1}]'
+            runs=[]
+            def process(argv,**kw):
+                runs.append(argv);return subprocess.CompletedProcess(argv,0,reply if "--include" in argv else b'{"id": 123}',b"")
+            limits=dict(root=w,deadline=time.time()+30)
+            with patch.object(m,"_1174_process",side_effect=process):
+                for endpoint in ("repos/"+m._1174_REPO+"/activity?per_page=100","repositories/123/activity?per_page=100&after=2"):
+                    assert m._1174_api(endpoint,link=True,repo_id=123,**limits)==([dict(id=1)],good_link)
+                assert all(argv==["gh","api","--hostname","github.com","--include",argv[-1]] for argv in runs) and len(runs)==2
+                assert m._1174_api("repos/"+m._1174_REPO,**limits)==dict(id=123) and "--include" not in runs[-1]
+                for endpoint,extra in (("repositories/999/activity?after=2",dict(link=True,repo_id=123)),("repositories/123/activity?after=2",dict()),
+                        ("repositories/123/activity?after=2",dict(link=True)),("repositories/123/activity?after=2",dict(link=True,repo_id=True)),
+                        ("repositories/123/events?after=2",dict(link=True,repo_id=123)),("repositories/123",dict(link=True,repo_id=123)),
+                        ("repos/"+m._1174_REPO+"/events?per_page=100",dict(link=True,repo_id=123)),("repos/"+m._1174_REPO+"/activity?per_page=100",dict(link=1,repo_id=123)),
+                        ("repos/evil/tra-luat/activity?after=2",dict(link=True,repo_id=123))):
+                    count=len(runs);_reject1174(m._1174_api,endpoint,reason="scoped API endpoint/root",**limits,**extra);assert len(runs)==count,endpoint
+            assert m._1174_link_header(reply)==(b'[{"id": 1}]',good_link) and m._1174_link_header(b"HTTP/1.1 200 OK\nETag: x\n\n[]")==(b"[]",None)
+            for raw in (b"[]",b"HTTP/2.0 404 Not Found\r\n\r\n[]",b"HTTP/2.0 200 OK\r\nLink: a\r\nlink: b\r\n\r\n[]"):
+                _reject1174(m._1174_link_header,raw,reason="scoped API")
+        elif kind=="pr_foreign_head":
+            def pull(source,**extra):
+                row=dict(number=7,state="closed",html_url="https://github.com/"+m._1174_REPO+"/pull/7",head=dict(sha=parent,ref="topic",repo=source),
+                    base=dict(ref="master",repo=dict(id=123,full_name=m._1174_REPO)));row.update(extra);return row
+            pages["pulls"]=[pull(dict(id=123,full_name=m._1174_REPO))];assert collect()["status"]==ok
+            for source in (None,dict(id=456,full_name="fork/tra-luat"),dict(id=456,full_name=m._1174_REPO),dict(id=123,full_name="fork/tra-luat"),dict(full_name=m._1174_REPO),"repo"):
+                pages["pulls"]=[pull(source)];receipt=collect()
+                assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,("PR head repository is absent/foreign",source,receipt)
+            pages["pulls"]=[pull(dict(id=123,full_name=m._1174_REPO),head=None)];assert collect()["status"]=="UNKNOWN"
+            pages["pulls"]=[pull(dict(id=123,full_name=m._1174_REPO))];assert collect()["status"]==ok
+        elif kind=="intro_kinds":
+            for introduction in ("force_push","pr_merge","branch_creation","push"):
+                first=_activity1370(12,introduction,"refs/heads/candidate",Z if introduction=="branch_creation" else parent,H,"2026-11-04T09:01:00Z")
+                feed(first,drop=(12,));receipt=collect()
+                assert receipt["status"]==ok and receipt["earliest"]==dict(id="12",time="2026-11-04T09:01:00Z",ref="refs/heads/candidate",actor="ducthangho",before=first["before"],after=H),(introduction,receipt)
+            # Earliest is by timestamp, then numeric id.
+            feed(_activity1370(100,"push","refs/heads/mirror",parent,H,"2026-11-04T09:01:00Z"),_activity1370(9,"push","refs/heads/late",parent,H,"2026-11-04T09:04:00Z"))
+            receipt=collect();assert receipt["status"]==ok and receipt["earliest"]["id"]=="12",receipt
+            # A deletion is never an introduction, whatever its sides say.
+            feed(_activity1370(12,"branch_deletion","refs/heads/candidate",parent,H,"2026-11-04T09:01:00Z"),drop=(12,))
+            receipt=collect();assert receipt["status"]=="UNKNOWN" and receipt["earliest"] is None,receipt
+        elif kind=="accept_roundtrip":
+            argv=["guard-first-publication","--packet",str(args.packet),"--revision","1","--generation","1","--admission","fixture","--root",args.root,
+                "--head",H,"--pr",str(args.pr),"--coordinator-id","coordinator-1","--receipt",args.receipt,"--human-audit-comment",args.human_audit_comment,
+                "--human-remote-run",args.human_remote_run,"--workflow-runs",args.workflow_runs]
+            def guard():
+                out=io.StringIO()
+                with seams(),contextlib.redirect_stdout(out):rc=m.main(argv)
+                return rc,json.loads(out.getvalue())
+            path=Path(args.receipt);supplied=json.loads(path.read_bytes())
+            assert supplied["schema"]=="wp1174_publication_receipt.v2" and supplied["status"]==ok
+            rc,result=guard();assert rc==0 and result["status"]=="PASS",(rc,result)
+            with seams():record=_call1174(m._1174_human_evidence,args,a,H)
+            recollected=collect()
+            assert record["assurance"]=="human_audited" and record["head"]==H and record["audit_sha256"]==supplied["audit_sha256"]
+            assert all(recollected[k]==supplied[k] for k in set(supplied)-{"started_utc","ended_utc"})
+            # Observation timestamps are the only keys allowed to differ.
+            moved=dict(supplied,started_utc="2026-11-04T09:30:00Z",ended_utc="2026-11-04T09:31:00Z");path.write_bytes(m._1174_bytes(moved))
+            rc,result=guard();assert rc==0 and result["status"]=="PASS",(rc,result)
+            changes=[("raw_snapshot_sha256","0"*64),("cursor_coverage",dict(supplied["cursor_coverage"],activity=2)),
+                ("earliest",dict(supplied["earliest"],id="13")),("earliest",dict(supplied["earliest"],time="2026-11-04T09:01:01Z")),
+                ("earliest",dict(supplied["earliest"],after=parent)),("earliest",dict(supplied["earliest"],ref="refs/heads/other"))]
+            for key,value in changes:
+                path.write_bytes(m._1174_bytes(dict(supplied,**{key:value})))
+                rc,result=guard()
+                assert rc==12 and result["status"]=="UNKNOWN" and "publication evidence UNKNOWN/FAIL" in result["detail"],("changed immutable key accepted",key,rc,result)
+                with seams():_reject1174(m._1174_human_evidence,args,a,H,reason="publication evidence UNKNOWN/FAIL")
+            for key,value in (("schema","wp1174_publication_receipt.v1"),("residual_classes",supplied["residual_classes"][:2]),("repo_id",124),("head",parent),("dag_coverage",False),("status","UNKNOWN")):
+                path.write_bytes(m._1174_bytes(dict(supplied,**{key:value})))
+                rc,result=guard();assert rc==12 and result["status"]=="UNKNOWN",(key,rc,result)
+            path.write_bytes(m._1174_bytes(supplied));rc,result=guard();assert rc==0 and result["status"]=="PASS",(rc,result)
+            # Server evidence that turns into FAIL is FAIL even with a matching receipt.
+            feed(_activity1370(10,"force_push","refs/heads/candidate",H,parent,"2026-11-04T08:58:30Z"))
+            path.write_bytes(m._1174_bytes(collect()));rc,result=guard()
+            assert rc==12 and result["status"]=="FAIL" and "publication evidence FAIL" in result["detail"],(rc,result)
+        elif kind=="deletion_unexplained":
+            # Counterexample for "deletion preimage handled as an introduction":
+            # a post-audit deletion whose `before` contains H, with no strictly
+            # earlier introduction, then a valid later publish of H.
+            late=_activity1370(20,"push","refs/heads/candidate",parent,H,"2026-11-04T09:05:00Z")
+            ghost=_activity1370(15,"branch_deletion","refs/heads/ghost",H,Z,"2026-11-04T09:02:00Z")
+            feed(late,ghost,drop=(12,));receipt=collect()
+            assert receipt["status"]=="UNKNOWN","unexplained post-audit deletion preimage accepted: %r"%(receipt,)
+            assert receipt["earliest"]["id"]=="20" and receipt["dag_coverage"] is False,receipt
+            # Same timestamp is not "strictly earlier".
+            feed(late,ghost,_activity1370(14,"branch_creation","refs/heads/ghost",Z,H,"2026-11-04T09:02:00Z"),drop=(12,))
+            assert collect()["status"]=="UNKNOWN"
+            # Positive control: a real post-audit introduction earlier than the deletion.
+            feed(late,ghost,_activity1370(14,"branch_creation","refs/heads/ghost",Z,H,"2026-11-04T09:01:00Z"),drop=(12,));receipt=collect()
+            assert receipt["status"]==ok and receipt["earliest"]["id"]=="14",receipt
+        else:
+            raise AssertionError("unknown wp1370 case "+kind)
+    return case
+
+
+_WP1370_ACTIVITY_CASES = ("reduced_payload", "multipage_anchor", "older_page_fail", "same_timestamp_fail", "force_push_preimage",
+    "deletion_preaudit", "tag_coverage", "receipt_residuals", "no_anchor", "object_unfetchable", "cursor_foreign", "pr_foreign_head",
+    "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained")
+assert {"wp1174_activity_" + name for name in _WP1370_ACTIVITY_CASES} <= WP1174_REQUIRED
+CASES += [("wp1174_activity_" + name, _activity_case1370(name)) for name in _WP1370_ACTIVITY_CASES]
+MUTANTS.update({
+    # stop reading at the first audit-boundary record
+    "m1174_activity_stop_at_boundary": ('            if endpoint is None:\n                coverage["activity"] = len(cursors)\n',
+        '            if endpoint is None or any(type(x) is dict and str(x.get("timestamp")) <= audit["updated_at"] for x in reply[0]):\n                coverage["activity"] = len(cursors)\n                break\n',
+        ["wp1174_activity_older_page_fail", "wp1174_activity_same_timestamp_fail"]),
+    # drop the default-branch creation anchor
+    "m1174_activity_drop_anchor": ('boundary = (oldest["activity_type"] == "branch_creation" and', 'boundary = (True or oldest["activity_type"] == "branch_creation" and',
+        ["wp1174_activity_no_anchor"]),
+    # drop the preimage examination
+    "m1174_activity_drop_preimage": ('            if matches["before"]:\n                observations.append((before, stamp))\n',
+        '            if False:\n                observations.append((before, stamp))\n', ["wp1174_activity_force_push_preimage"]),
+    # treat a deletion preimage as an introduction
+    "m1174_activity_deletion_as_introduction": ('            if matches["before"]:\n                observations.append((before, stamp))\n',
+        '            if matches["before"] and kind == "branch_deletion":\n                introductions.append(dict(id=str(event["id"]), time=stamp, ref=ref,\n'
+        '                    actor=actor.get("login") if type(actor) is dict else None, before=after, after=before))\n'
+        '            elif matches["before"]:\n                observations.append((before, stamp))\n', ["wp1174_activity_deletion_unexplained"]),
+    # drop the repository check of the cursor
+    "m1174_activity_cursor_repository": ('_1174_require(owned and re.fullmatch(', '_1174_require(re.fullmatch(', ["wp1174_activity_cursor_foreign"]),
+    # v2 receipt binding: residual list and schema version
+    "m1174_activity_receipt_residuals": ('receipt["residual_classes"] == _1174_RESIDUALS and', 'True and', ["wp1174_activity_receipt_residuals"]),
+    "m1174_activity_receipt_v1": ('receipt["schema"] == "wp1174_publication_receipt.v2" and', 'receipt["schema"].startswith("wp1174_publication_receipt.v") and', ["wp1174_activity_receipt_v1"]),
+})
 
 
 # R12 adds adversarial stimuli to the frozen IDs without changing the inventory.
@@ -13987,7 +14347,7 @@ def _r12_extend1174(original,additional):
     return case
 CASES=[(name,_r12_extend1174(case,_r12_hosts[name]) if name in _r12_hosts else case) for name,case in CASES]
 MUTANTS.update({
-    "m1174_r12_push_preimage":('matches.get("after") or matches.get("before") and preaudit','matches.get("after")',["wp1174_lifecycle_first_publication"]),
+    "m1174_r12_push_preimage":('any(_1174_time(observed_at) <= audit_time for _, observed_at in observations))','False) # omit pre-audit preimage publication evidence',["wp1174_lifecycle_first_publication"]),
     "m1174_r12_postaudit_preimage":('if not any(x["after"] == oid and _1174_time(x["time"]) < _1174_time(observed_at) for x in introductions):','if False:',["wp1174_lifecycle_first_publication"]),
     "m1174_r12_reused_source_sync":('_1174_recheck_durable(source, source_now)','pass # omit recovery source durability',["wp1174_durability_fsync_readback"]),
     "m1174_r12_reused_target_sync":('_1174_recheck_durable(target, target_raw)\n        _1174_recheck_durable(wp, witness_raw)','pass # omit recovery target durability\n        _1174_recheck_durable(wp, witness_raw)',["wp1174_durability_fsync_readback"]),
@@ -14009,8 +14369,8 @@ MUTANTS.update({
     "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
 })
 
-MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==85 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
-    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==85,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
+MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==101 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
+    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==101,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
 MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
@@ -14221,7 +14581,7 @@ def _carrier1174(outcomes, gate_rc=0):
 
 def main():
     global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
-    assert len(WP1174_REQUIRED) == 85 and len(WP1174_BOTH) == 12
+    assert len(WP1174_REQUIRED) == 101 and len(WP1174_BOTH) == 12
     actual_os = platform.system()
     if actual_os=="Linux":
         globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
@@ -14812,23 +15172,63 @@ def _r25_adopt_lease1174(c, reproduce=False):
 
 
 def _r25_publication1174(c, reproduce=False):
+    # wp1370 migration. The Events API PullRequestEvent stimuli have no
+    # activity record of their own: for a same-repository PR every head change
+    # IS an activity on the head branch, and PR state lives in `pulls?state=all`.
+    # Explicit mapping of each original sub-check (nothing maps "opened" to "merged"):
+    #   PR opened pre-audit on the predecessor -> RECORDED
+    #       => pre-audit `branch_creation` of the PR head branch at the predecessor
+    #          plus the PR row whose head is the predecessor -> RECORDED;
+    #   PR event pre-audit whose head is H / a descendant -> FAIL
+    #       => that head-branch activity pre-audit with `after` = H / descendant -> FAIL;
+    #   opened/closed/reopened/synchronize/edited on the predecessor -> RECORDED
+    #       => PR rows open/closed/merged/draft on the predecessor, and a pre-audit
+    #          `push` (synchronize) of the head branch to the predecessor -> RECORDED;
+    #   PR observation of H after its introduction -> RECORDED
+    #       => PR row whose head is H, and a later activity whose `before` is H -> RECORDED;
+    #   PR observation of H post-audit but before any introduction -> UNKNOWN
+    #       => post-audit activity whose `before` is H before the introduction, and a
+    #          PR row whose head contains H with no exact-tip introduction -> UNKNOWN;
+    #   PR head object missing -> UNKNOWN => activity OID / PR head OID not local -> UNKNOWN;
+    #   malformed PR number/html_url/base -> "collector PR event identity"
+    #       => same fields of the `pulls` row -> "collector PR identity";
+    #   event.repo name/id wrong -> "collector event identity"
+    #       => `repos/<repo>` identity wrong -> "collector repository identity";
+    #   bad/future created_at, bad id/type -> identity/time errors
+    #       => bad/future `timestamp`, bad `id`/`activity_type` -> activity identity/time errors;
+    #   unknown action, non-string action, head without sha, invalid ref -> UNKNOWN
+    #       => unknown / non-string `activity_type`, record without `after`, invalid `ref` -> UNKNOWN error;
+    #   CreateEvent (no immutable tip) -> UNKNOWN
+    #       => intentionally changed by the spec: `branch_creation` carries an immutable
+    #          `after`, so an unrelated creation is RECORDED (the first row above) and a
+    #          creation without `after` is an identity error;
+    #   a family page that cannot be fetched -> UNKNOWN => unchanged.
     import copy, contextlib, io
     m,w,args,a,audit,pages,seams=_human_fixture1174(c)
-    fetch=lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+'/',1)[1].split('?',1)[0]]
+    fetch=_fetch1370(m,pages)
     healthy=m._1174_collect(fetch,w,args.head,audit,123)
     assert healthy['status']=='RECORDED_EARLIEST_MATCH',healthy
-    parent=_g(w,'rev-parse',args.head+'^1')
-    pages['events'].append(dict(id='13',type='PullRequestEvent',created_at='2026-11-04T08:58:00Z',repo=dict(name=m._1174_REPO),actor=dict(login='ducthangho'),payload=dict(action='opened',number=1187,pull_request=dict(number=1187,html_url='https://github.com/'+m._1174_REPO+'/pull/1187',head=dict(sha=parent,ref='candidate'),base=dict(repo=dict(full_name=m._1174_REPO))))))
+    parent=_g(w,'rev-parse',args.head+'^1');zero='0'*40
+    def pull(oid,**extra):
+        row=dict(number=1187,state='open',html_url='https://github.com/'+m._1174_REPO+'/pull/1187',
+            head=dict(sha=oid,ref='candidate',repo=dict(id=123,full_name=m._1174_REPO)),base=dict(ref='master',repo=dict(id=123,full_name=m._1174_REPO)))
+        row.update(extra);return row
+    pages['activity'].insert(2,_activity1370(13,'branch_creation','refs/heads/candidate',zero,parent,'2026-11-04T08:58:00Z'))
+    pages['pulls']=[pull(parent)]
     receipt=m._1174_collect(fetch,w,args.head,audit,123)
     assert receipt['status']==('UNKNOWN' if reproduce else 'RECORDED_EARLIEST_MATCH'),receipt
     print('R25_PUBLICATION',healthy['status'],receipt['status'])
     if not reproduce:
-        original=copy.deepcopy(pages['events']);event=copy.deepcopy(original[-1]);rows=[]
+        original=copy.deepcopy(pages['activity']);pulls=copy.deepcopy(pages['pulls']);event=copy.deepcopy(original[2]);rows=[]
         _g(w,'checkout','-qb','r25-descendant',args.head);(w/'r25.txt').write_text('descendant\n');_g(w,'add','r25.txt');_g(w,'commit','-qm','r25 descendant')
         descendant=_g(w,'rev-parse','HEAD')
         argv=['guard-first-publication','--packet',str(args.packet),'--revision','1','--generation','1','--admission','fixture','--root',args.root,'--head',args.head,'--pr',str(args.pr),'--receipt',args.receipt,'--human-audit-comment',args.human_audit_comment,'--human-remote-run',args.human_remote_run,'--workflow-runs',args.workflow_runs]
-        def check(label,changed,status,reason=None):
-            pages['events']=copy.deepcopy(original[:-1])+[changed]
+        def swapped(changed):return copy.deepcopy(original[:2])+[changed]+copy.deepcopy(original[3:])
+        def check(label,status,reason=None,activity=None,pr=None,repo=None):
+            pages['activity']=copy.deepcopy(original) if activity is None else activity
+            pages['pulls']=copy.deepcopy(pulls) if pr is None else pr
+            pages.pop('repo',None)
+            if repo is not None:pages['repo']=repo
             if reason is None or reason=='publication evidence FAIL':
                 collected=m._1174_collect(fetch,w,args.head,audit,123)
                 assert collected['status']==status,(label,status,collected)
@@ -14839,34 +15239,42 @@ def _r25_publication1174(c, reproduce=False):
             result=json.loads(out.getvalue());rows.append(dict(case=label,rc=rc,**result))
             assert rc==(0 if status=='RECORDED_EARLIEST_MATCH' else 12) and result['status']==('PASS' if rc==0 else status) and not result['dispatch_allowed'],(label,rc,result)
             if reason:assert reason in result['detail'],(label,reason,result)
-        check('predecessor-open',copy.deepcopy(event),'RECORDED_EARLIEST_MATCH')
+        check('predecessor-open','RECORDED_EARLIEST_MATCH')
         for oid in (args.head,descendant):
-            bad=copy.deepcopy(event);bad['payload']['pull_request']['head']['sha']=oid
-            check('preaudit-'+oid,bad,'FAIL','publication evidence FAIL')
-        for action in ('opened','closed','reopened','synchronize','edited'):
-            unrelated=copy.deepcopy(event);unrelated['payload']['action']=action
-            check('predecessor-'+action,unrelated,'RECORDED_EARLIEST_MATCH')
-        for oid,when,status in [(args.head,'09:02:00','RECORDED_EARLIEST_MATCH'),(args.head,'09:00:30','UNKNOWN'),('f'*40,'08:58:00','UNKNOWN')]:
-            changed=copy.deepcopy(event);changed['payload']['pull_request']['head']['sha']=oid;changed['created_at']='2026-11-04T'+when+'Z'
-            check('observation-'+oid+when,changed,status)
-        for field,value,reason in [('number',True,'collector PR event identity'),('html_url','https://github.com/wrong/repo/pull/1187','collector PR event identity'),('base',None,'collector PR event identity')]:
-            bad=copy.deepcopy(event);bad['payload']['pull_request'][field]=value
-            check('malformed-'+field,bad,'UNKNOWN',reason)
-        wrong=copy.deepcopy(event);wrong['repo']['name']='wrong/repo';check('wrong-repo',wrong,'UNKNOWN','collector event identity')
-        invalid=copy.deepcopy(event);invalid['created_at']='bad-time';check('malformed-time',invalid,'UNKNOWN','UTC')
-        future=copy.deepcopy(event);future['created_at']='2099-01-01T00:00:00Z';check('future-event',future,'UNKNOWN','collector event time')
-        for field,value in [('id',''),('type','')]:
-            invalid=copy.deepcopy(event);invalid[field]=value;check('invalid-'+field,invalid,'UNKNOWN','collector event identity')
-        wrong=copy.deepcopy(event);wrong['repo']['id']=124;check('wrong-repo-id',wrong,'UNKNOWN','collector event identity')
-        for variant in ('unknown-action','bad-action-type','no-head','bad-ref','create'):
-            unknown=copy.deepcopy(event)
-            if variant=='unknown-action':unknown['payload']['action']='future-unsupported-action'
-            elif variant=='bad-action-type':unknown['payload']['action']=[]
-            elif variant=='no-head':unknown['payload']['pull_request']['head'].pop('sha')
-            elif variant=='bad-ref':unknown['payload']['pull_request']['head']['ref']='../invalid'
-            else:unknown.update(type='CreateEvent',payload=dict(ref_type='branch',ref='candidate',master_branch='master'))
-            check(variant,unknown,'UNKNOWN')
-        pages['events']=copy.deepcopy(original)
+            bad=copy.deepcopy(event);bad['after']=oid
+            check('preaudit-'+oid,'FAIL','publication evidence FAIL',activity=swapped(bad),pr=[pull(oid)])
+        for label,extra in (('open',{}),('closed',dict(state='closed')),('merged',dict(state='closed',merged_at='2026-11-04T08:59:30Z')),('draft',dict(draft=True))):
+            check('predecessor-'+label,'RECORDED_EARLIEST_MATCH',pr=[pull(parent,**extra)])
+        root=_g(w,'rev-list','--max-parents=0',args.head)
+        check('predecessor-synchronize','RECORDED_EARLIEST_MATCH',activity=copy.deepcopy(original[:2])+[
+            _activity1370(14,'push','refs/heads/candidate',root,parent,'2026-11-04T08:58:30Z'),
+            _activity1370(13,'branch_creation','refs/heads/candidate',zero,root,'2026-11-04T08:58:00Z')]+copy.deepcopy(original[3:]))
+        later=_activity1370(15,'push','refs/heads/pr-copy',args.head,descendant,'2026-11-04T09:02:00Z')
+        check('observation-explained','RECORDED_EARLIEST_MATCH',activity=[later]+copy.deepcopy(original),pr=[pull(args.head)])
+        early=_activity1370(15,'force_push','refs/heads/pr-copy',args.head,parent,'2026-11-04T09:00:30Z')
+        check('observation-unexplained','UNKNOWN',activity=copy.deepcopy(original[:1])+[early]+copy.deepcopy(original[1:]))
+        check('pr-head-unexplained','UNKNOWN',pr=[pull(descendant)])
+        missing=copy.deepcopy(event);missing['after']='f'*40
+        check('activity-missing-object','UNKNOWN',activity=swapped(missing))
+        check('pr-head-missing-object','UNKNOWN',pr=[pull('f'*40)])
+        for field,value,reason in [('number',True,'collector PR identity'),('html_url','https://github.com/wrong/repo/pull/1187','collector PR identity'),('base',None,'collector PR identity')]:
+            check('malformed-'+field,'UNKNOWN',reason,pr=[pull(parent,**{field:value})])
+        for label,source in (('absent',None),('foreign-name',dict(id=123,full_name='fork/tra-luat')),('foreign-id',dict(id=124,full_name=m._1174_REPO))):
+            foreign=pull(parent);foreign['head']['repo']=source
+            check('pr-head-repo-'+label,'UNKNOWN',pr=[foreign])
+        check('wrong-repo','UNKNOWN','collector repository',repo=dict(id=123,full_name='wrong/repo',default_branch='master',created_at='2026-07-05T00:00:00Z'))
+        pages['activity']=copy.deepcopy(original);pages['pulls']=copy.deepcopy(pulls)
+        pages['repo']=dict(id=124,full_name=m._1174_REPO,default_branch='master',created_at='2026-07-05T00:00:00Z')
+        _reject1174(m._1174_collect,fetch,w,args.head,audit,123,reason='collector repository identity')
+        invalid=copy.deepcopy(event);invalid['timestamp']='bad-time';check('malformed-time','UNKNOWN','UTC',activity=swapped(invalid))
+        future=copy.deepcopy(event);future['timestamp']='2099-01-01T00:00:00Z';check('future-event','UNKNOWN','collector activity time',activity=swapped(future))
+        for field,value in [('id',''),('id','13'),('id',True),('id',0),('activity_type',''),('activity_type','future_unsupported'),('activity_type',[]),
+                ('ref','refs/pull/1187/head'),('ref',None),('before','0'*39),('after','F'*40)]:
+            invalid=copy.deepcopy(event);invalid[field]=value;check('invalid-%s-%r'%(field,value),'UNKNOWN','collector activity identity',activity=swapped(invalid))
+        headless=copy.deepcopy(event);headless.pop('after');check('no-after','UNKNOWN','collector activity identity',activity=swapped(headless))
+        badref=copy.deepcopy(event);badref['ref']='refs/heads/../invalid';check('bad-ref','UNKNOWN','collector activity ref',activity=swapped(badref))
+        check('not-a-record','UNKNOWN','collector activity identity',activity=swapped('row'))
+        pages['activity']=copy.deepcopy(original);pages['pulls']=copy.deepcopy(pulls);pages.pop('repo',None)
         def incomplete(endpoint,**limits):
             if '/git/matching-refs/tags?' in endpoint:raise ValueError('fixture missing page')
             return fetch(endpoint,**limits)
@@ -14889,11 +15297,12 @@ MUTANTS.update({
     "m1174_r25_rebind_lifecycle": ('state.update(lease=verified["lease"], ngu_canh_lease=context, luat_adr0054=verified["mode"])', 'state.update(lease=verified["lease"], ngu_canh_lease=context, luat_adr0054=verified["mode"], state="leased")', ["wp1174_lifecycle_scoped_lifecycle"]),
     "m1174_r25_rebind_context_generation": ('context["generation"] == admission["generation"] and', 'True and', ["wp1174_lifecycle_scoped_lifecycle"]),
     "m1174_r25_rebind_identity": ('all(value is None or context[role][key] == value\n            for role in ("executor", "reviewer") for key, value in state[role + "_identity"].items())', 'True', ["wp1174_lifecycle_scoped_lifecycle"]),
-    "m1174_r25_pr_relevance": ('elif relation == 0:\n                    if _1174_time(event["created_at"])', 'elif relation in (0, 1):\n                    if _1174_time(event["created_at"])', ["wp1174_lifecycle_first_publication"]),
-    "m1174_r25_pr_ignore": ('if event.get("type") == "PullRequestEvent":', 'if False:', ["wp1174_lifecycle_first_publication"]),
-    "m1174_r25_pr_missing_object": ('if rc != 0 or relation not in (0, 1) or time.time() >= pass_end:', 'if time.time() >= pass_end:', ["wp1174_lifecycle_first_publication"]),
-    "m1174_r25_pr_observation": ('preimages.append((oid, event["created_at"]))', 'pass # omit unresolved PR observation', ["wp1174_lifecycle_first_publication"]),
-    "m1174_r25_event_time": ('_1174_require(_1174_time(event.get("created_at")) <= start, "collector event time")', 'pass # omit event timestamp validation', ["wp1174_lifecycle_first_publication"]),
+    # wp1370: the same six properties, re-anchored on the activity collector.
+    "m1174_r25_pr_relevance": ('return relation == 0 if relation in (0, 1) else None', 'return True if relation in (0, 1) else None', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_ignore": ('if not (type(source) is dict and source.get("full_name") == _1174_REPO and type(source.get("id")) is int and source["id"] == repo_id):', 'if False:', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_missing_object": ('if tip_relation is None:', 'if False:', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_observation": ('elif tip_relation and not any(x["after"] == oid for x in introductions):', 'elif False: # omit unresolved PR observation', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_event_time": ('_1174_require(stamp <= start, "collector activity time")', 'pass # omit event timestamp validation', ["wp1174_lifecycle_first_publication"]),
     "m1174_r25_pr_identity": ('pr.get("html_url") == f"https://github.com/{_1174_REPO}/pull/{number}" and', 'True and', ["wp1174_lifecycle_first_publication"]),
 })
 

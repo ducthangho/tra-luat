@@ -1,0 +1,16 @@
+# nghiem thu tren merge ded5d41b1754ef05d87815f20c48203e6b00e58d, luc 2026-11-17T09:06:25Z
+ded5d41b1754ef05d87815f20c48203e6b00e58d 013659e6388e1bd830f5feaa8c381182390613dc 14f7dd3a593fc1ef225e5067e73569a702153871 675c38dd8aa7d8d92124503452bc80af65c2b77a
+## numstat ded5d41b1754ef05d87815f20c48203e6b00e58d^1..ded5d41b1754ef05d87815f20c48203e6b00e58d
+130	0	.claude/dev/packet_loop.py
+298	0	.claude/dev/packet_loop_test.py
+## ruff --select F (ruff 0.16.9) cha thu nhat vs merge
+.claude/dev/packet_loop.py @ 14f7dd3a5: 3 loi F
+.claude/dev/packet_loop.py @ ded5d41b1: 3 loi F
+.claude/dev/packet_loop_test.py @ 14f7dd3a5: 13 loi F
+.claude/dev/packet_loop_test.py @ ded5d41b1: 13 loi F
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0

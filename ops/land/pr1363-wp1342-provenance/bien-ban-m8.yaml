@@ -1,0 +1,42 @@
+# Bien ban M8 (ADR-0060) dong WP #1342 WP1174-WINDOWS-BACKEND r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1363-wp1342-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6942513764 tren 675c38d).
+# Bon moc §10.2.2 run 44045034569 measured passed (wd-run 44050197698; gate output 39/39 bang danh_gia_gate.py v2).
+# r1 chi dong phan primitive Windows; Issue #1342 van mo cho r1b (noi day) — dong WP o day la dong REVISION 1.
+packet: wp1342
+revision: 1
+generation: 1
+spec_hash: bcae8d153770ff396d3c6be13526a8d148b19716b5841aff2b1e61b6b4e995ee
+head_da_review: 675c38dd8aa7d8d92124503452bc80af65c2b77a
+tree_h: 013659e6388e1bd830f5feaa8c381182390613dc
+review:
+  offline: 'khong goi Codex offline cho PR (4 luot review dac ta truoc lease: ops/reviews/wp1342-spec-r1/); review doc lap = connector Codex + human audit'
+  connector: 'readback-pr1363-comments.json: 6941761971 codex-review-state:v1 completed, has_any_findings false, commit 675c38d'
+  human_audit: 'issuecomment-6942513764 human_exact_head_audit.v1 approve tren 675c38d (chu kho tu dang)'
+windows:
+  phan_loai: measured
+  nguon: 'Desktop DESKTOP-T9R33P2 (Windows 11 10.0.26300): windows-desktop-tom-tat.txt (N4-N7, chep tay) + desktop-dot-bien/ (N7: driver byte-exact 1ee98b9c; dot-bien.lf.json doi CRLF ra 09922ccb). VM tra-luat-win: windows-vm-n8.txt (N8, chep tay).'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1363#issuecomment-6942513764
+duyet_chu_kho_ghi_chu: 'audit tu dang 08:13:19Z 17-11, truoc merge 08:14:22Z; duyet merge dung SHA 675c38d qua AskUserQuestion (loi khai).'
+merge_commit: ded5d41b1754ef05d87815f20c48203e6b00e58d
+tree_m: 013659e6388e1bd830f5feaa8c381182390613dc
+ci_master:
+  run_id: 44045034569
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong; gom "GOM: ĐẠT · 16 mảnh · 1514 ca bắt buộc".'
+nghiem_thu:
+  N1: passed  # gate output: GOM ĐẠT 1514 ca; MUTANTS head==base 1837 khoa: loi_khai_co_neo than PR #1363
+  N2: passed  # wp1342_additive_byte_preserved dat tren Desktop + trong GOM CI; 10 phan chung: loi_khai_co_neo than PR
+  N3: passed  # cung ca N2 (quet AST khong noi day); 3 phan chung noi day: loi_khai_co_neo than PR
+  N4: passed  # windows-desktop-tom-tat.txt: wp1174_windows_claim_rejected + 12 WP1174_BOTH rc 0 ca head va base
+  N5: passed  # windows-desktop-tom-tat.txt: 5 ca native + ca thuan dat, dau hieu WP1342_NATIVE_V1 executed=1 passed=1
+  N6: passed  # wp1342_native_volume_junction dat tren Desktop (doi chung launcher._KhoCodex + _1174_win_volume)
+  N7: passed  # desktop-dot-bien/dot-bien.lf.json (doi CRLF ra 09922ccb): 3/3 GIET dung ca dich, doi chung DAT, tu kiem z => KHONG_DO
+  N8: passed  # Desktop KHONG DO DUOC (WinError 1314); windows-vm-n8.txt: VM executed=1 passed=1
+  N9: passed  # nghiem-thu-ded5d41.txt: ruff F 3->3, 13->13; adr-song/doctrine-scan rc 0; numstat 2 tep +428/0 (<= 450)
+lease_cuoi: wp1342-r1-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

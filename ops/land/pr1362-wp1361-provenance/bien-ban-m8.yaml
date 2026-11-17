@@ -1,0 +1,35 @@
+# Bien ban M8 (ADR-0060) dong WP #1361 GHIM-LAI-CHAY-CONG-WINDOWS-SAU-1343 r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1362-wp1361-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6939768210 tren f516fe3).
+# Bon moc §10.2.2 run 44027998406 measured passed (wd-run 44050192531; gate output 39/39 bang danh_gia_gate.py v2).
+packet: wp1361
+revision: 1
+generation: 1
+spec_hash: fc145845748fc6db4bf9027807c669249f5bfaba259c87138b98dd040b3716b2
+head_da_review: f516fe3aa0e8d4310ee95030a0a0957dfb4ca52f
+tree_h: 99eec0043abaff86c0c91f411007f96154cacdcc
+review:
+  offline: 'khong goi Codex offline (loi khai phien dieu phoi); review doc lap = connector Codex + human audit'
+  connector: 'readback-pr1362-comments.json: 6939693369 codex-review-state:v1 completed, has_any_findings false, commit f516fe3'
+  human_audit: 'issuecomment-6939768210 human_exact_head_audit.v1 approve tren f516fe3 (chu kho tu dang)'
+windows:
+  phan_loai: measured
+  nguon: 'N2: windows-vm-n2.txt (VM tra-luat-win, pwsh 7.6.9; head 36/36 rc 0, base 34/36 rc 1 do dung t30+t32; chep tay tu TOM-TAT tren VM).'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1362#issuecomment-6939768210
+duyet_chu_kho_ghi_chu: 'audit tu dang 05:40:59Z 17-11, truoc merge 06:00:10Z; duyet merge "CI xanh thi merge 1362 luon" (loi khai).'
+merge_commit: 14f7dd3a593fc1ef225e5067e73569a702153871
+tree_m: 99eec0043abaff86c0c91f411007f96154cacdcc
+ci_master:
+  run_id: 44027998406
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong; gom "GOM: ĐẠT · 16 mảnh · 1506 ca bắt buộc".'
+nghiem_thu:
+  N1: passed  # loi_khai_co_neo — than PR #1362 (readback-pr-1362.json): pwsh 7.4.6 Linux base 34/36 (t30, t32 DO) vs head 36/36; hai dot bien t32 DO
+  N2: passed  # windows-vm-n2.txt: head 36/36, base 34/36 chi t30+t32 DO vi ghim; delta 0 ca DO moi
+  N3: passed  # nghiem-thu-14f7dd3.txt: khong tep .py (ruff khong ap), adr-song/doctrine-scan rc 0, numstat 2 tep +15/-6 +13/-2
+lease_cuoi: wp1361-r1-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

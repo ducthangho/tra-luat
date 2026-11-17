@@ -1,0 +1,13 @@
+# N2 #1361 tren VM tra-luat-win (pwsh 7.6.9, Python 3.12.10) boi phien dieu phoi #1206: toan bo .claude/dev/chay-cong-windows_test.ps1, head va base.
+# CHEP TAY tu C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1361-n2-out\TOM-TAT.txt — khong phai ban byte-exact.
+HEAD HEAD=f516fe3aa0e8d4310ee95030a0a0957dfb4ca52f tree=99eec0043abaff86c0c91f411007f96154cacdcc
+HEAD rc=0 663.7s
+  HEAD chay-cong-windows: 36/36 dat
+HEAD sach_sau=[]
+BASE HEAD=a0702d06b7d3956fb91b951766c7a5d6a77a7f5b tree=95a5242ad77f209efbee0d1dbdf789d874f66886
+BASE rc=1 488.5s
+  BASE DO   t30 ... khoa env cua job gate* / luot tuan khong co trong script: KQ_MANH, PACKET_LOOP, PACKET_LOOP_MANH, PACKET_LOOP_RA
+  BASE DO   t32 ... ci.yml lech guong / dau van: packet-loop selftest :: .claude/dev/packet_loop_test_manh.py | gom manh packet-loop (so TAP ca; wp1343) :: ... --gom manh --n 16 | job gate-packet-loop :: <DAU-VAN> da DOI (5546b9244930 -> 67a508fb841f) | job gate-packet-loop-manh :: <DAU-VAN> job MOI chua ghim (c386d4cf83f3)
+  BASE chay-cong-windows: 34/36 dat
+BASE sach_sau=[]
+TONG 1237.7s

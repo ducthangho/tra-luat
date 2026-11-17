@@ -1,0 +1,10 @@
+# ai-dang-giu sau rut han, luc 2026-11-17T09:06:04Z; fetch +refs/heads/*
+## .claude/dev/packet_loop.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+HẾT_HẠN	wp1342-r1-g1-claude	refs/heads/ops/wp1342-r1-g1-lease:ops/leases/wp1342-r1-g1-claude.yaml
+## .claude/dev/packet_loop_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN	wp1365-r1-g1-claude	refs/heads/ops/wp1365-r1-g1-lease:ops/leases/wp1365-r1-g1-claude.yaml
+NGƯỜI_GIỮ 1: wp1365-r1-g1-claude
+HẾT_HẠN	wp1342-r1-g1-claude	refs/heads/ops/wp1342-r1-g1-lease:ops/leases/wp1342-r1-g1-claude.yaml

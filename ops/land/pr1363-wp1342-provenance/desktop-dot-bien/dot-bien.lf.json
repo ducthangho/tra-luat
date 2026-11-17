@@ -1,0 +1,123 @@
+{
+ "src_head": "675c38dd8aa7d8d92124503452bc80af65c2b77a",
+ "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+ "driver_sha256": "1ee98b9c363e3c40c76f11c948dea21c1050476484f7ba7f0bc1e77f640f624f",
+ "dot_bien": [
+  {
+   "ten": "a_volume_bo_open_reparse",
+   "dich": "wp1342_native_volume_junction",
+   "doi_chung": "wp1342_native_read",
+   "sach_wp1342_native_volume_junction": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_read": [
+    0,
+    null,
+    "DAT"
+   ],
+   "so_lan_khop": 1,
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex 7c96eedee..845167fd7 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6117,7 +6117,7 @@ def _1174_win_volume(path):\n     text = os.fspath(path)\n     _1174_require(_1174_win_path(text), \"Windows drive path required\")\n     c, w, k = _1174_win_api()\n-    handle = _1174_win_open(c, k, text, 0x80, 3, 0x02000000 | 0x00200000)\n+    handle = _1174_win_open(c, k, text, 0x80, 3, 0x02000000)\n     try:\n         tag = (w.DWORD * 2)()\n         if not k.GetFileInformationByHandleEx(handle, 9, tag, 8):\n",
+   "dot_bien_wp1342_native_volume_junction": [
+    1,
+    [
+     "str",
+     "AssertionError: phải từ chối mà lại nhận: {'filesystem': 'NTFS', 'serial': 2082241159, 'drive_type': 3, 'volume_root': 'F:\\\\'}"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_volume_junction": "KQ_JSON {\"wp1342_native_volume_junction\": [\"str\", \"AssertionError: ph\\u1ea3i t\\u1eeb ch\\u1ed1i m\\u00e0 l\\u1ea1i nh\\u1eadn: {'filesystem': 'NTFS', 'serial': 2082241159, 'drive_type': 3, 'volume_root': 'F:\\\\\\\\'}\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m\\a\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_read": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_read": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_read\", \"observed\": \"[('dir', 'PermissionError: [WinError 5] Access is denied.'), ('junction', 'PermissionError: [WinError 5] Access is denied.'), ('NUL', '_1174Error: WP1174 UNKNOWN: nondisk handle'), ('missing', 'FileNotFoundError: [WinError 2] The system cannot find the file specified.')]\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_read\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m\\a\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "b_read_bo_mo_lai",
+   "dich": "wp1342_native_swap_ancestor",
+   "doi_chung": "wp1342_native_metadata_drift",
+   "sach_wp1342_native_swap_ancestor": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_metadata_drift": [
+    0,
+    null,
+    "DAT"
+   ],
+   "so_lan_khop": 1,
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex 7c96eedee..c92f030ca 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6156,6 +6156,7 @@ def _1174_win_read(path, between=None):\n         k.CloseHandle(handle)\n     if between is not None:\n         between()\n+    return b\"\".join(raw)\n     handle = _1174_win_open(c, k, text, 0x80000000, 1, 0x00200000)\n     try:\n         _1174_require(opened == _1174_win_identity(c, w, k, handle, text), \"file identity at reopen\")\n",
+   "dot_bien_wp1342_native_swap_ancestor": [
+    1,
+    [
+     "str",
+     "AssertionError: tráo tên qua tổ tiên mà vẫn trả bytes đã đọc: b'old-bytes'"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_swap_ancestor": "KQ_JSON {\"wp1342_native_swap_ancestor\": [\"str\", \"AssertionError: tr\\u00e1o t\\u00ean qua t\\u1ed5 ti\\u00ean m\\u00e0 v\\u1eabn tr\\u1ea3 bytes \\u0111\\u00e3 \\u0111\\u1ecdc: b'old-bytes'\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m\\b\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_metadata_drift": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_metadata_drift": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_metadata_drift\", \"observed\": \"'_1174Error: WP1174 UNKNOWN: file identity after read'\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_metadata_drift\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m\\b\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "c_platform_bo_ntfs",
+   "dich": "wp1342_pure_platform_path",
+   "doi_chung": "wp1342_native_read",
+   "sach_wp1342_pure_platform_path": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_read": [
+    0,
+    null,
+    "DAT"
+   ],
+   "so_lan_khop": 1,
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex 7c96eedee..6433cd13b 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6044,7 +6044,7 @@ def _1174_win_path(text):\n \n def _1174_win_platform(fs_name, drive_type, path_text):\n     \"\"\"Pure profile predicate: local fixed NTFS volume addressed by an absolute drive path.\"\"\"\n-    return fs_name == \"NTFS\" and drive_type == _1174_WIN_FIXED and _1174_win_path(path_text)\n+    return drive_type == _1174_WIN_FIXED and _1174_win_path(path_text)\n \n \n def _1174_win_api():\n",
+   "dot_bien_wp1342_pure_platform_path": [
+    1,
+    [
+     "str",
+     "AssertionError: ('ntfs', 3)"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_pure_platform_path": "KQ_JSON {\"wp1342_pure_platform_path\": [\"str\", \"AssertionError: ('ntfs', 3)\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m\\c\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_read": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_read": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_read\", \"observed\": \"[('dir', 'PermissionError: [WinError 5] Access is denied.'), ('junction', 'PermissionError: [WinError 5] Access is denied.'), ('NUL', '_1174Error: WP1174 UNKNOWN: nondisk handle'), ('missing', 'FileNotFoundError: [WinError 2] The system cannot find the file specified.')]\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_read\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m\\c\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "z_tu_kiem_khong_khop",
+   "dich": "wp1342_pure_platform_path",
+   "doi_chung": "wp1342_native_read",
+   "sach_wp1342_pure_platform_path": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_read": [
+    0,
+    null,
+    "DAT"
+   ],
+   "so_lan_khop": 0,
+   "ket_luan": "KHONG_DO (chuoi tim khong khop dung 1 lan)"
+  }
+ ]
+}

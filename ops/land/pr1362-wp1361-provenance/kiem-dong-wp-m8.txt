@@ -1,0 +1,4 @@
+# LAN 1 (sau rut han); lease = git show 236b032b6682c6ef04755af2f48234922ff95df5:ops/leases/wp1361-r1-g1-claude.yaml (blob fd5b5872df63cc13aefaff8ddf13e11bc3bbfeb9)
+# checkout: ded5d41b1754ef05d87815f20c48203e6b00e58d ; origin/master: ded5d41b1754ef05d87815f20c48203e6b00e58d ; luc: 2026-11-17T09:12:57Z
+ĐÓNG ĐƯỢC WP wp1361 — merge 14f7dd3a593fc1ef225e5067e73569a702153871
+rc=0

@@ -23,7 +23,9 @@ Ký hiệu: A = `audit.updated_at`; "X chứa H" nghĩa là `git merge-base --is
 1. **Nguồn bằng chứng.** Họ `events` trong phạm vi thu thập được thay bằng Repository activities API của đúng kho `_1174_REPO`. Các họ `git/matching-refs/heads`, `git/matching-refs/tags`, `pulls?state=all` giữ nguyên vai trò. `_1174_collect` không còn đọc Events API.
 2. **Phủ toàn bộ lịch sử, có mốc neo độc lập** (sửa F1 của spec review lượt 1).
    - Đọc **toàn bộ** feed activity theo cursor tới khi hết trang; không dừng sớm ở mốc audit.
-   - Chỉ coi là phủ đủ khi đồng thời: (a) không còn cursor trang sau; (b) bản ghi cũ nhất là `branch_creation` của nhánh mặc định (`default_branch` đọc từ `GET repos/<kho>`) với `before` toàn số 0; (c) `timestamp` của bản ghi đó không sớm hơn `created_at` của kho; (d) không bản ghi nào trước nó. Thiếu bất kỳ điều kiện nào thì `UNKNOWN`. Feed hết trang **không** tự nó chứng minh lịch sử đầy đủ.
+   - Chỉ coi là phủ đủ khi đồng thời: (a) không còn cursor trang sau; (b) bản ghi cũ nhất của feed là `branch_creation` của nhánh mặc định (`default_branch` đọc từ `GET repos/<kho>`) với `before` toàn số 0; (c) `timestamp` của bản ghi đó không sớm hơn `created_at` của kho. Thiếu bất kỳ điều kiện nào thì `UNKNOWN`.
+   - **Khe dư được chủ kho chấp nhận tường minh** (https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6945772046): mốc neo trên không phải ranh giới lịch sử bất biến độc lập. Lịch sử trước mốc neo, gồm cả khả năng nhánh mặc định từng được tạo lại hoặc đổi tên, là khe dư `pre_boundary_history_unattested`. Lịch sử tag mà API không ghi (mục 2b) là khe dư `tag_history_unattested`. Hai lớp này được thêm vào `residual_classes` của biên nhận (mục 9). Đây là quyết định của chủ kho, không phải chốt bị nới. Mọi chốt khác giữ nguyên fail-closed.
+   - **2b. Tag.** Bản ghi `refs/tags/…` trong feed, nếu có, được xử lý y như nhánh (introduction và ảnh trước). Tag **hiện có** chứa H phải được giải thích bằng một introduction có `after` đúng bằng tip của nó (mục 7); nếu không thì `UNKNOWN`. Annotated tag được bóc tới commit trước khi xét chứa H.
    - Thứ tự: dữ liệu từ mới tới cũ. Bản ghi cùng `timestamp` xét như nhau, không bản ghi nào được dùng làm điểm dừng.
    - Cursor phải neo đúng kho: chỉ nhận trang sau thuộc `repos/<kho>/activity` hoặc `repositories/<repo_id>/activity` với đúng `repo_id` đã đo. Nếu mã cần đọc header `Link` hoặc dùng đường `repositories/<repo_id>`, chỉ mở rộng tối thiểu đúng hai dạng ấy, có kiểm danh tính; không nới phạm vi endpoint nào khác của `_1174_api`.
    - Trần mới cho riêng bộ thu thập: ≤1000 trang tổng mọi họ, ≤64 MB, ≤900 s tổng, cộng deadline của người gọi. Trần ở `_1174_human_evidence` (`collection_end`) được nâng tương ứng, vẫn bị chặn bởi hạn của admission. Chạm trần thì `UNKNOWN`, không bao giờ cho ra kết quả rút gọn.
@@ -48,7 +50,8 @@ Ký hiệu: A = `audit.updated_at`; "X chứa H" nghĩa là `git merge-base --is
 9. **Biên nhận.** Schema `wp1174_publication_receipt.v2`, cùng tập khoá với v1, chỉ khác giá trị:
    - `query_scope` = `["activity", "git/matching-refs/heads", "git/matching-refs/tags", "pulls?state=all"]`;
    - `event_scope` = `"repository_activity"`.
-   `_1174_collector_receipt` chỉ nhận v2. Phép so khi `accept` (thu thập lại rồi so mọi khoá trừ `started_utc`, `ended_utc`) giữ nguyên. `residual_classes` giữ nguyên.
+   - `residual_classes` = `["server_unpublished_activity", "fork_object_storage_outside_repo_scope", "pre_boundary_history_unattested", "tag_history_unattested"]`.
+   `_1174_collector_receipt` chỉ nhận v2 với đúng danh sách này. Phép so khi `accept` (thu thập lại rồi so mọi khoá trừ `started_utc`, `ended_utc`) giữ nguyên.
 10. **Không đổi:** các chốt khác của `accept` và `_1174_human_evidence` (trừ trần thời gian ở mục 2); `_owner_record`; `kiem-merge`; mọi cổng; danh sách thẩm quyền.
 
 ## Bằng chứng bắt buộc (`.claude/dev/packet_loop_test.py`) — sửa F4
@@ -62,6 +65,8 @@ Ký hiệu: A = `audit.updated_at`; "X chứa H" nghĩa là `git merge-base --is
   - như trên nhưng bản ghi biên cùng `timestamp`, cũng cho `FAIL`;
   - force-push trước audit có `before` chứa H, rồi publish lại sau audit, cho `FAIL`;
   - `branch_deletion` có `before` chứa H trước audit, cho `FAIL`; xoá nhánh khác đã được giải thích đầy đủ vẫn cho `RECORDED_EARLIEST_MATCH` (đối chứng);
+  - tag hiện có chứa H mà không có introduction, cho `UNKNOWN`; tag có `refs/tags/…` trong feed với ảnh trước chứa H trước audit, cho `FAIL`;
+  - biên nhận v2 có `residual_classes` sai danh sách bị từ chối;
   - không có mốc neo `branch_creation` của nhánh mặc định, cho `UNKNOWN`;
   - OID không tải được, cho `UNKNOWN`;
   - cursor trỏ sang kho khác, cho `UNKNOWN`;
@@ -73,7 +78,7 @@ Ký hiệu: A = `audit.updated_at`; "X chứa H" nghĩa là `git merge-base --is
   - dừng đọc ở bản ghi biên audit đầu tiên;
   - bỏ yêu cầu mốc neo của mục 2;
   - bỏ xét ảnh trước của mục 5;
-  - coi ảnh trước của `branch_deletion` như introduction hợp lệ, với counterexample chuyên dụng: một nhánh chứa H bị xoá trước audit vẫn ra pass;
+  - thay cách xử lý ảnh trước của `branch_deletion` bằng cách xử lý introduction. Counterexample chuyên dụng: một `branch_deletion` **sau** audit có `before` chứa H mà không có introduction nào sớm hơn hẳn giải thích nó, rồi một lần publish hợp lệ muộn hơn. Bản chưa đột biến phải ra `UNKNOWN`; mutant ra `RECORDED_EARLIEST_MATCH` sai và phải làm assertion của ca đích đỏ. Đối chứng dương: cùng kịch bản nhưng có introduction thật sau audit và sớm hơn lần xoá, ra `RECORDED_EARLIEST_MATCH`. Ca riêng "xoá trước audit thì `FAIL`" vẫn giữ;
   - bỏ kiểm kho của cursor.
   Mỗi mutant phải làm ca đích đỏ vì assertion của chính ca đó, còn ca dương trên bytes chưa đột biến thì xanh.
 - Ruff F delta so với master = 0. `tl.py --selftest` N/N trước push.

@@ -64,7 +64,7 @@
   "lease_until": "2026-11-18T10:20:09Z",
   "lease_expires_at_utc": "2026-11-18T10:20:09Z",
   "limits": {
-    "Codex_spec_review": 2,
+    "Codex_spec_review": 3,
     "Claude_author": 2,
     "Codex_source_review": 3,
     "source_push": 1,
@@ -88,5 +88,11 @@
     "write_outside_effective_write_set",
     "ruleset_or_gate_change",
     "CI_rerun"
-  ]
+  ],
+  "nang_tran_spec_review": {
+    "tran_cu": 2,
+    "tran_moi": 3,
+    "can_cu": "https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6945772046",
+    "ai_nang": "Claude Code coordinator under owner delegation"
+  }
 }

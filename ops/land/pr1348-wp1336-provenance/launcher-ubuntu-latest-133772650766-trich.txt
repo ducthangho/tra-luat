@@ -1,0 +1,26 @@
+# trich log job launcher (ubuntu-latest) run 44003367352 tren 866e522, conclusion=success — loc dong Python / tong ket ca / DOT BIEN / r1336_ / SAI / error
+2026-11-17T02:29:56.5278383Z   co       python   Python 3.11.18
+2026-11-17T02:32:52.7396163Z   r1079_a                      SAI - KHONG DO DUOC (neutral do: review_do_san)
+2026-11-17T02:32:52.7708088Z   r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+2026-11-17T02:32:59.7478247Z   r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+2026-11-17T02:33:00.3371436Z   review_missing               SAI - ca dich khong tim thay/trung: ['review_missing_case']
+2026-11-17T02:33:00.3963520Z   r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+2026-11-17T02:34:12.5091991Z   r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+2026-11-17T02:34:12.5105473Z 409/409 ca DA CHAY QUA (tong 411, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+2026-11-17T02:41:33.3673199Z   wp1336_schema_sha_ve_pattern_cu OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:41:33.3673695Z   wp1336_schema_packet_id_ve_dollar OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:41:33.3674203Z   wp1336_schema_finding_id_ve_dollar OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:41:33.3674730Z   wp1336_schema_evidence_url_bo_pattern OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:41:33.3675232Z   wp1336_schema_evidence_url_ve_S OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:41:33.3675711Z   wp1336_schema_vo_hieu_allOf  OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:41:33.3676326Z   wp1336_schema_bo_cap_claude  OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:41:33.3676789Z   wp1336_schema_bo_cap_codex   OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:41:33.3677244Z   wp1336_schema_bo_cap_human   OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:42:07.9666976Z   wp1336_oracle_ve_fullmatch   OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:42:07.9667299Z   wp1336_oracle_uniqueItems_ve_json_dumps OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:42:07.9667616Z   wp1336_oracle_bo_maxLength   OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:42:07.9667904Z   wp1336_oracle_bo_allOf       OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:42:07.9668186Z   wp1336_oracle_bo_if_then     OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:42:07.9668477Z   wp1336_oracle_bool_bang_so   OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:42:07.9668780Z   wp1336_oracle_integer_bo_so_thuc OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:42:07.9669055Z DOT BIEN: 697/697 dat  (4 khong do duoc tren nen nay)

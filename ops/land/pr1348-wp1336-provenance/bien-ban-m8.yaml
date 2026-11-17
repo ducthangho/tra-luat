@@ -1,0 +1,39 @@
+# Bien ban M8 (ADR-0060) dong WP #1336 REVIEW-VERDICT-SCHEMA-CHAT r2 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1348-wp1336-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6936134788 tren a8f45a6).
+# Bon moc §10.2.2 run 44003367335 measured passed (wd-run 44007190454; gate output 39/39, danh_gia_gate.py v2). N5 hau merge: lane launcher
+# ubuntu 409/409, DOT BIEN 697/697.
+packet: wp1336
+revision: 2
+generation: 1
+spec_hash: ccbfdca2cc906eec9b595748d6f72191c771b9e5a89a381286ae3cae6f8c361f
+head_da_review: a8f45a6af32a844e170d84a49be142693ccfa96c
+tree_h: b7b72684eef4c81870814bb2227e3b1b0bb93c07
+review:
+  offline: 'launcher.py run luot 1 (run 11951556 tren 43c1e3a: request_changes 2 P2 + 1 P3) va luot 2 (run 0740c767 tren a8f45a6: approve, 0 finding) — loi_khai_co_neo (hien vat o scratchpad phien dieu phoi)'
+  connector: 'issuecomment-6933418852 codex-review-state:v1 completed, has_any_findings false, commit a8f45a6'
+  human_audit: 'issuecomment-6936134788 human_exact_head_audit.v1 approve tren a8f45a6 (chu kho tu dang)'
+windows:
+  phan_loai: not_required
+  nguon: 'dac ta r2 muc 4: Windows khong bat buoc. Lane launcher windows-latest hau merge tu chay: 326/326 ca qua, 16 dot bien wp1336 giet; ket luan failure vi 85 BO QUA + 2 dot bien r1335 song SAN tu 7acd29e (doi-chieu-windows-dot-bien-r1335.txt, delta 0).'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1348#issuecomment-6936134788
+duyet_chu_kho_ghi_chu: 'audit tu dang 02:28:42Z 17-11, truoc merge 02:29:30Z; duyet merge dung SHA qua AskUserQuestion (loi khai).'
+merge_commit: 866e522fe6f8a3567f34c4766a017c19a4c0bc72
+tree_m: e8b6491561d49f3db99ba82b4076ff1fe0fe235a
+ci_master:
+  run_id: 44003367335
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (gom packet-loop "GOM: ĐẠT"). Lane launcher 44003367352: ubuntu 409/409 + DOT BIEN 697/697; windows failure (khong phai gate).'
+nghiem_thu:
+  N1: passed  # review offline luot 1 (ve am base) + luot 2; hau merge launcher ubuntu: r1336_bang_m5 qua trong 409/409
+  N2: passed  # review offline luot 2: 1.574.400 so sanh parity, oracle 576 cap; hau merge 17 dot bien wp1336 giet
+  N3: passed  # dot bien wp1336_schema_bo_cap_codex giet (launcher-ubuntu trich)
+  N4: passed  # executor quet 317 doi tuong, 0 hoi quy (loi_khai_co_neo), reviewer luot 1 tai lap
+  N5: passed  # launcher-ubuntu-latest-133772650766-trich.txt: 409/409 (tong 411), DOT BIEN 697/697
+  N6: passed  # nghiem-thu-866e522.txt + bon moc §10.2.2 run 44003367335
+lease_cuoi: wp1336-r2-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

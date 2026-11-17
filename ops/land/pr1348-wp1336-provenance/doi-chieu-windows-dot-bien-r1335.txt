@@ -1,0 +1,7 @@
+# Doi chieu lane launcher (windows-latest): hai dot bien r1335 SONG da co tu truoc #1336 (delta 0)
+# Do 2026-11-17T03:0xZ, phien dieu phoi, REST GET log job (danh_gia_gate.py raw), dong loc theo ten dot bien + dong DOT BIEN.
+43910313973 7acd29e (merge #1341, #1335): r1335_N3c_phong_lenh_goc SAI giet 0/1 · r1335_F2_path_theo_cwd_launcher SAI giet 0/1 · DOT BIEN: 538/540 dat (145 khong do duoc)
+43975814821 e4cce23 (merge #1347, #1345): r1335_N3c_phong_lenh_goc SAI giet 0/1 · r1335_F2_path_theo_cwd_launcher SAI giet 0/1 · DOT BIEN: 538/540 dat (145 khong do duoc)
+44003367352 866e522 (merge #1348, #1336): r1335_N3c_phong_lenh_goc SAI giet 0/1 · r1335_F2_path_theo_cwd_launcher SAI giet 0/1 · DOT BIEN: 554/556 dat (145 khong do duoc)
+# Ket luan: cung hai dot bien song, cung so khong do duoc; #1336 them 16 dot bien wp1336 (+1 PROMPT_FILE doi dich) deu giet tren Windows.
+# Hai dot bien r1335 song tren Windows la NO cua #1335 (ho so land pr1341 chi ghi "85 ca BO QUA", bo sot dong nay) — can packet rieng.

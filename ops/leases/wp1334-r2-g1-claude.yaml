@@ -77,23 +77,34 @@ xung_dot_write_set_do_luc_cap:
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 dau tien cua packet; khong co lease truoc.'
 leased_at_utc: '2026-11-17T08:55:00Z'
-heartbeat_at: '2026-11-17T08:55:00Z'
+heartbeat_at: '2026-11-17T10:38:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-18T08:55:00Z'
-lease_expires_at_utc: '2026-11-18T08:55:00Z'
+lease_until: '2026-11-17T10:53:00Z'
+lease_expires_at_utc: '2026-11-17T10:53:00Z'
 lease_until_ghi_chu: '12h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
 attempts_basis: '<= 2 phien executor.'
 budget:
   codex_review_calls:
-    pr_wp1334_g1: {used: 0, reserved: 0, limit: 10}
+    pr_wp1334_g1: {used: 2, reserved: 0, limit: 10}
   ci_ubuntu_runs:
-    pr_wp1334_g1: {used: 0, reserved: 0, limit: 2}
+    pr_wp1334_g1: {used: 2, reserved: 0, limit: 2}
   windows_native_runs:
     pr_wp1334_g1: {used: 0, reserved: 0, limit: 0}
   khong_reset_theo_generation: true
 budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native 0 (dac ta: khong bat buoc Windows; khong CI Windows).'
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-17T10:38:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 2/10: connector tren 8ed3503 (1 P2 symlink + ..) va tren 3b23422 (sach, kich bang draft->ready); khong goi Codex offline. CI Ubuntu 2/2 (CHAM TRAN): PR #1367 tren 8ed3503 va 3b23422. Windows native 0/0. Commit 8ed3503 mang ten model o dong Co-Authored-By (vi pham luat, executor tu khai); chu kho chon merge thuong, giu lich su da audit. Lan ghi ngan sach nay la LOI KHAI CO NEO cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-18T08:55:00Z'
+  han_moi_utc: '2026-11-17T10:53:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1334 r2 da MERGE: PR #1367 (head 3b234223327e6527ee51990cdfdfabba0d02ed88) merge commit 11eb100380f4c9da7ca36273ba0e03ed6b8b68d3,
+    human audit chu kho issuecomment-6945638470. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet. Rut han theo tien le #1356, #1361, #1342, #1365.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 5 duong dan write set sau 2026-11-17T10:53:00Z phai ra NGUOI_GIU 0.'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

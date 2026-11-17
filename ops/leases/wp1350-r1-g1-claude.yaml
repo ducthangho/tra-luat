@@ -25,14 +25,14 @@
   "review_class": "sensitive",
   "effective_review_class": "sensitive",
   "assurance_target": "cross_approved",
-  "spec_ref": "refs/heads/ops/wp1350-r1-g1@bbdba0d2e2b3a130e8d02daea6957a4f5ffca94e",
+  "spec_ref": "refs/heads/ops/wp1350-r1-g1@55840bb2c9d41d190cf282d24b756160a92d5c1a",
   "spec_path": "ops/specs/wp1350-r1/SPEC.md",
-  "spec_hash": "7dc5b581290ecb157a9838265440370c299b5431180400b8b7fac1f1383d9937",
-  "spec_sha256_required": "7dc5b581290ecb157a9838265440370c299b5431180400b8b7fac1f1383d9937",
+  "spec_hash": "990635bbbfbf7afc5efb56f96267a7910849a42dd18f0eb752b3288310d8cd0e",
+  "spec_sha256_required": "990635bbbfbf7afc5efb56f96267a7910849a42dd18f0eb752b3288310d8cd0e",
   "prompt_path": "ops/prompts/wp1350-r1-g1-claude-author.txt",
   "prompt_sha256_required": "1ea36d448e2bbf3dcacc26d1403a107d213a937b03a47a99abb241dcd8044a4a",
   "spec_review_prompt_path": "ops/prompts/wp1350-r1-spec-review-codex.txt",
-  "spec_review_prompt_sha256": "bb3c2766f279b5019bd43257c56cc876551b01946406c1a4ae6db3af1a37cfaa",
+  "spec_review_prompt_sha256": "f086f00453441afde1d0cae7cc1a2f992ca7c9cd45628e74d86944b1a249c698",
   "source_review_prompt_template_path": "ops/prompts/wp1350-r1-g1-codex-source-review.txt",
   "source_review_prompt_template_sha256": "f537cdbed0e901464452e8b04b6ef431435fa5fda41152d49b0c9b8b01678c12",
   "write_set": [
@@ -89,5 +89,16 @@
     "write_outside_effective_write_set",
     "ruleset_or_gate_change",
     "CI_rerun"
+  ],
+  "spec_history": [
+    {
+      "spec_sha256": "7dc5b581290ecb157a9838265440370c299b5431180400b8b7fac1f1383d9937",
+      "review_run": "c43d7316",
+      "verdict": "changes_requested",
+      "findings": [
+        "P2 target allowance ceiling",
+        "P2 negative oracle"
+      ]
+    }
   ]
 }

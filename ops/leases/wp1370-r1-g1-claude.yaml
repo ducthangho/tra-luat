@@ -65,7 +65,7 @@
   "lease_expires_at_utc": "2026-11-18T10:20:09Z",
   "limits": {
     "Codex_spec_review": 3,
-    "Claude_author": 2,
+    "Claude_author": 3,
     "Codex_source_review": 3,
     "source_push": 1,
     "draft_PR": 1,
@@ -93,6 +93,15 @@
     "tran_cu": 2,
     "tran_moi": 3,
     "can_cu": "https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6945772046",
+    "ai_nang": "Claude Code coordinator under owner delegation"
+  },
+  "author_fix1_prompt_path": "ops/prompts/wp1370-r1-g1-claude-author-fix1.txt",
+  "author_fix1_prompt_sha256": "56551915b87e824511ee892b6b8a5d031555bec9c4ad6e71e1bfddaf377502fe",
+  "nang_tran_author": {
+    "tran_cu": 2,
+    "tran_moi": 3,
+    "ly_do": "author run 1 killed by coordinator harness 30-min background limit (no handoff, discarded); real-server probe found matching-refs pagination defect needing a fix round",
+    "can_cu": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
     "ai_nang": "Claude Code coordinator under owner delegation"
   }
 }

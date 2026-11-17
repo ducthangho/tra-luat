@@ -72,8 +72,8 @@ leased_at_utc: '2026-11-17T12:55:00Z'
 heartbeat_at: '2026-11-17T12:55:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-18T00:55:00Z'
-lease_expires_at_utc: '2026-11-18T00:55:00Z'
+lease_until: '2026-11-17T13:50:00Z'
+lease_expires_at_utc: '2026-11-17T13:50:00Z'
 lease_until_ghi_chu: '12h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
@@ -87,5 +87,16 @@ budget:
     pr_wp1375_g1: {used: 0, reserved: 0, limit: 0}
   khong_reset_theo_generation: true
 budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native 0 (ca thuan chay moi nen; khong CI Windows). Ngoai ngan sach PR: 2 loi goi Codex offline review dac ta truoc lease (ops/reviews/wp1375-spec-r1/).'
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-17T13:32:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 1/10: connector tren 06a433f (sach, khong phat hien). CI Ubuntu 1/2: PR #1376 tren 06a433f (25 success, 2 skipped). Windows native 0/0. Lan ghi ngan sach nay la LOI KHAI CO NEO cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-18T00:55:00Z'
+  han_moi_utc: '2026-11-17T13:50:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1375 da MERGE: PR #1376 (head 06a433f1d736a51a868b77d56a7536f7067f81c2) merge commit d74ac1d003b419f12e5f6a82cbbf001dfc633e73,
+    human audit chu kho issuecomment-6949494498. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu .claude/dev/launcher_test.py sau 2026-11-17T13:50:00Z khong con lease wp1375-r1-g1-claude.'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

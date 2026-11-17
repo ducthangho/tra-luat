@@ -14587,6 +14587,32 @@ def r1335_bang_transport_tu_choi_ten_trung():
             pass
 
 
+@ca
+def r1375_shutilwin311_chi_nhan_trong_d():
+    """#1375 (nợ #1345): `_ShutilWin311.which` chỉ nhận kết quả nằm TRONG thư mục `d` của lệnh. Gọi thẳng lớp nên chạy
+    mọi nền, mọi phiên bản Python. (a) `d` rỗng, cwd của tiến trình có tệp cùng tên ⇒ `None` (bỏ bộ lọc thì nhận `./foo`
+    của cwd LAUNCHER); (b) `d` có tệp ⇒ đường dẫn trong `d`. Cuối ca so cwd trước/sau (N3)."""
+    m = _tai_launcher_thu()
+    cwd_truoc = os.getcwd()
+    with San() as s:
+        ten = "foo.cmd" if LA_WINDOWS else "foo"
+        d, cw = s / "d", s / "cwd"
+        d.mkdir(); tep_cwd = _r1335_tep(cw / ten, "DAU_CWD")
+        try:
+            os.chdir(cw)
+            u = m._ShutilWin311.which(str(d / ten))
+            bang(u is None, f"(a) d rong ma van nhan tep ngoai d: {u!r}")
+            if LA_WINDOWS:   # `shutil.which` 3.12+ trên Windows LUÔN chèn cwd lên đầu ⇒ vế (b) chỉ đo được khi cwd trống
+                tep_cwd.unlink()
+            _r1335_tep(d / ten, "DAU_D")
+            u = m._ShutilWin311.which(str(d / ten))
+            bang(u is not None, "(b) tep nam trong d ma tra None")
+            bang(os.path.normpath(os.path.dirname(u)) == os.path.normpath(str(d)), f"(b) ket qua khong nam trong d: {u!r}")
+        finally:
+            os.chdir(cwd_truoc)
+        bang(os.getcwd() == cwd_truoc, f"cwd ro sau ca: {os.getcwd()!r} != {cwd_truoc!r}")
+
+
 DOT_BIEN = [
     # wp1335 (M8): mỗi chốt của đặc tả AGENT-DINH-DANH-MOT-NGUON r3 một đột biến.
     ("r1335_bo_chan_vo_shell", ("    elif ten in VO_SHELL:\n", "    elif False:\n"), ["r1335_ma_tran_agent_khai_bao"]),
@@ -14650,6 +14676,8 @@ DOT_BIEN = [
      ["r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke"]),
     ("r1335_D4_bo_chot_ten_trung", ("            if ten in theo_lenh:\n                raise RuntimeError", "            if False:\n                raise RuntimeError"),
      ["r1335_bang_transport_tu_choi_ten_trung"]),
+    ("r1375_bo_loc_thu_muc", ("return u if u and os.path.normpath(os.path.dirname(u)) == os.path.normpath(d) else None", "return u"),
+     ["r1375_shutilwin311_chi_nhan_trong_d"]),
     ("r1252_bo_kiem_co_khi_ket_thuc_som", ('    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if bat else',
                                            '    return {"chup_workspace": True, **_ket_qua_snapshot(chup_truoc, None, False)} if True else'),
      ["r1252_ket_thuc_som_du_khoa"]),   # Codex lượt 6 F10: đúng đột biến reviewer đã đo

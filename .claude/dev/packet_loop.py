@@ -5618,6 +5618,7 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
     audit_time = _1174_time(audit["updated_at"])
     snapshots, coverage, introductions = {}, {}, []
     last_status,dag,earliest = "UNKNOWN",False,None
+    snapshot_sha256 = hashlib.sha256(_1174_bytes(snapshots)).hexdigest()
     # Requests and bytes are budgets of the WHOLE collection: they accumulate
     # over every pass. Only the evidence of a pass is reset below.
     size, pages = 0, 0
@@ -5653,6 +5654,19 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
                 complete = False
                 return None
             return value
+
+        # The absolute pass deadline bounds the processing too, not only the
+        # reads: every loop whose length the server decides asks it per item,
+        # and an expired pass stops right there, incomplete (UNKNOWN).
+        expired = False
+
+        def alive():
+            nonlocal complete, expired
+            if expired:
+                return False
+            if time.time() >= pass_end:
+                complete, expired = False, True
+            return not expired
 
         repo = read("repos/" + _1174_REPO)
         if repo is not None:
@@ -5691,8 +5705,15 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
                 if reply is not None:
                     _1174_require(type(reply) is tuple and len(reply) == 2 and
                         (reply[1] is None or type(reply[1]) is str), "collector page type")
-                    values = _1174_ref_rows(reply[0], family)
-                    if reply[1] is None:
+                    values, names = reply[0], set()
+                    _1174_require(type(values) is list, "collector ref list type")
+                    for at in range(0, len(values), 1024):
+                        if not alive():
+                            break
+                        for row in _1174_ref_rows(values[at:at + 1024], family):
+                            _1174_require(row["ref"] not in names, "collector ref duplicate")
+                            names.add(row["ref"])
+                    if reply[1] is None and not expired:
                         coverage[family] = 1
                     else:
                         complete = False
@@ -5712,16 +5733,24 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
                 complete = False
             snapshots[family] = values
         # Record identity is closed: a malformed or unknown record is an error,
-        # never a silently skipped row.
-        refs, seen = {}, set()
+        # never a silently skipped row. Each distinct timestamp is parsed once,
+        # here; every later stage looks the parsed value up.
+        refs, seen, parsed, lowest = {}, set(), {}, None
         for event in feed:
+            if not alive():
+                break
             _1174_require(type(event) is dict and type(event.get("id")) is int and event["id"] > 0 and
                 type(event.get("activity_type")) is str and event["activity_type"] in _1174_ACTIVITY_KINDS and
                 type(event.get("ref")) is str and event["ref"].startswith(("refs/heads/", "refs/tags/")) and
                 all(type(event.get(k)) is str and SHA_RE.fullmatch(event[k]) for k in ("before", "after")),
                 "collector activity identity")
-            stamp = _1174_time(event.get("timestamp"))
+            written = event.get("timestamp")
+            stamp = parsed.get(written) if type(written) is str else None
+            if stamp is None:
+                stamp = _1174_time(written)
             _1174_require(stamp <= start, "collector activity time")
+            parsed[written] = stamp
+            lowest = stamp if lowest is None or stamp < lowest else lowest
             if event["ref"] not in refs:
                 refs[event["ref"]] = _git_do(root, "check-ref-format", event["ref"], deadline=pass_end)[0]
             _1174_require(refs[event["ref"]] != 1, "collector activity ref")
@@ -5734,6 +5763,8 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
         tips = []
         for family in scope[1:]:
             for row in snapshots.get(family, []):
+                if not alive():
+                    break
                 if family.startswith("pulls"):
                     pr = row
                     number = pr.get("number") if type(pr) is dict else None
@@ -5753,17 +5784,43 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
         # Every non-zero feed OID must be local before any containment answer.
         # Tip OIDs absent locally join the SAME single fetch by SHA; one that
         # is still absent afterwards stays unmeasurable.
-        wanted = sorted({oid for event in feed for oid in (event["before"], event["after"]) if oid != zero})
-        extra = sorted({oid for oid in tips if type(oid) is str and SHA_RE.fullmatch(oid)} - set(wanted))
-        commits = _1174_peel(root, wanted + extra, pass_end)
-        missing = sorted(oid for oid in wanted + extra if commits.get(oid) is None)
-        if missing:
+        wanted, extra = set(), set()
+        for event in feed:
+            if not alive():
+                break
+            wanted.update(oid for oid in (event["before"], event["after"]) if oid != zero)
+        for oid in tips:
+            if not alive():
+                break
+            if type(oid) is str and SHA_RE.fullmatch(oid) and oid not in wanted:
+                extra.add(oid)
+        wanted, extra = sorted(wanted), sorted(extra)
+        commits, missing = {}, []
+
+        def peel(oids):
+            # Bounded batches, so the deadline is asked between them.
+            for at in range(0, len(oids), 4096):
+                if not alive():
+                    break
+                commits.update(_1174_peel(root, oids[at:at + 4096], pass_end))
+
+        peel(wanted + extra)
+        for oid in wanted + extra:
+            if not alive():
+                break
+            if commits.get(oid) is None:
+                missing.append(oid)
+        if missing and alive():
             try:
                 _1174_fetch_objects(root, missing, pass_end)
             except (ValueError, subprocess.SubprocessError, OSError):
                 pass
-            commits.update(_1174_peel(root, missing, pass_end))
-        objects = all(commits.get(oid) is not None for oid in wanted)
+            peel(missing)
+        objects = True
+        for oid in wanted:
+            if not alive() or commits.get(oid) is None:
+                objects = False
+                break
         relations = {}
 
         def contains(oid):
@@ -5780,10 +5837,17 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
             relation = relations[commit]
             return relation == 0 if relation in (0, 1) else None
 
+        # `first` indexes the introductions by exact after OID: the earliest
+        # (time, then numeric id) of each. An observation or introduction at or
+        # before the audit proves earlier exposure the moment it is seen, so a
+        # pass that stops later keeps it.
         dag = objects
-        observations = []
+        observations, first, lead, exposed = [], {}, None, False
         for event in feed:
+            if not alive():
+                break
             kind, ref, before, after, stamp = (event[k] for k in ("activity_type", "ref", "before", "after", "timestamp"))
+            moment, mark = parsed[stamp], len(observations)
             matches = {}
             for side, oid in (("before", before), ("after", after)):
                 matches[side] = False if oid == zero else contains(oid)
@@ -5792,45 +5856,72 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
             actor = event.get("actor")
             # Zero is the absence of a ref, never a commit. A deletion is never
             # an introduction; any side it exposes is only an observation.
+            introduced = bool(matches["after"]) and kind != "branch_deletion"
             if matches["after"] and kind != "branch_deletion":
                 introductions.append(dict(id=str(event["id"]), time=stamp, ref=ref,
                     actor=actor.get("login") if type(actor) is dict else None, before=before, after=after))
+                if after not in first or (moment, event["id"]) < first[after]:
+                    first[after] = (moment, event["id"])
+                if lead is None or (moment, event["id"]) < lead[0]:
+                    lead = ((moment, event["id"]), introductions[-1])
             elif matches["after"]:
                 observations.append((after, stamp))
             if matches["before"]:
                 observations.append((before, stamp))
-        # An observation at or before the audit proves earlier exposure. A later
-        # one cannot date first publication: it needs a strictly earlier
-        # introduction of that exact OID.
-        exposed = (any(_1174_time(x["time"]) <= audit_time for x in introductions) or
-            any(_1174_time(observed_at) <= audit_time for _, observed_at in observations))
+            exposed = (exposed or introduced and moment <= audit_time or
+                any(parsed[observed_at] <= audit_time for _, observed_at in observations[mark:]))
+        # A later observation cannot date first publication: it needs a
+        # strictly earlier introduction of that exact OID.
         for oid, observed_at in observations:
-            if _1174_time(observed_at) <= audit_time:
+            if not alive():
+                break
+            if parsed[observed_at] <= audit_time:
                 continue
-            if not any(x["after"] == oid and _1174_time(x["time"]) < _1174_time(observed_at) for x in introductions):
+            if not (oid in first and first[oid][0] < parsed[observed_at]):
                 dag = False
         # Every currently observable ref/PR must be accounted for by the DAG;
         # unsupported introductions cannot silently be called server residuals.
         for oid in tips:
+            if not alive():
+                break
             if not (type(oid) is str and SHA_RE.fullmatch(oid)):
                 dag = False
                 continue
             tip_relation = contains(oid)
             if tip_relation is None:
                 dag = False
-            elif tip_relation and not any(x["after"] == oid for x in introductions):
+            elif tip_relation and oid not in first:
                 dag = False
         # Coverage anchor: the oldest record is the creation of the default
         # branch, not earlier than the repository itself. History before it is
         # the owner-accepted residual pre_boundary_history_unattested.
         boundary = False
-        if feed and repo is not None:
+        if feed and repo is not None and alive():
             oldest = feed[-1]
             boundary = (oldest["activity_type"] == "branch_creation" and oldest["ref"] == "refs/heads/" + repo["default_branch"] and
-                oldest["before"] == zero and _1174_time(oldest["timestamp"]) >= _1174_time(repo["created_at"]) and
-                all(_1174_time(x["timestamp"]) >= _1174_time(oldest["timestamp"]) for x in feed))
-        earliest = min(introductions, key=lambda x: (_1174_time(x["time"]), int(x["id"]))) if introductions else None
+                oldest["before"] == zero and parsed[oldest["timestamp"]] >= _1174_time(repo["created_at"]) and
+                lowest >= parsed[oldest["timestamp"]])
+        earliest = lead[1] if lead else None
+        # The snapshot digest is sha256(_1174_bytes(snapshots)), fed row by row
+        # so that the deadline is asked here too; an expired pass keeps the
+        # digest of the prefix it reached.
+        digest = hashlib.sha256(b"{")
+        for position, family in enumerate(sorted(snapshots)):
+            rows = snapshots[family]
+            digest.update((b"," if position else b"") + _1174_bytes(family)[:-1] + b":")
+            if type(rows) is not list:
+                digest.update(_1174_bytes(rows)[:-1])
+                continue
+            digest.update(b"[")
+            for index, row in enumerate(rows):
+                if not alive():
+                    break
+                digest.update((b"," if index else b"") + _1174_bytes(row)[:-1])
+            digest.update(b"]")
+        digest.update(b"}\n")
+        snapshot_sha256 = digest.hexdigest()
         if time.time()>=pass_end:complete=False;dag=False
+        if expired:dag=False
         last_status = ("FAIL" if exposed else
             "RECORDED_EARLIEST_MATCH" if time.time()<pass_end and complete and boundary and dag and earliest else "UNKNOWN")
         # Only a failed transport read is worth another bounded pass; a ceiling
@@ -5841,7 +5932,7 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
     return dict(schema="wp1174_publication_receipt.v2", repo_id=repo_id, repo=_1174_REPO, head=head,
         audit_comment_id=audit["id"], audit_updated_at=audit["updated_at"], audit_sha256=hashlib.sha256(_1174_bytes(audit)).hexdigest(),
         started_utc=start.strftime("%Y-%m-%dT%H:%M:%SZ"), ended_utc=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), query_scope=list(scope),
-        ref_scope=["refs/heads/*", "refs/tags/*"], event_scope="repository_activity", raw_snapshot_sha256=hashlib.sha256(_1174_bytes(snapshots)).hexdigest(),
+        ref_scope=["refs/heads/*", "refs/tags/*"], event_scope="repository_activity", raw_snapshot_sha256=snapshot_sha256,
         cursor_coverage=coverage, dag_coverage=bool(dag), earliest=earliest,
         residual_classes=list(_1174_RESIDUALS), status=last_status)
 

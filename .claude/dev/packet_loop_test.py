@@ -12410,11 +12410,11 @@ WP1174_REQUIRED = {"wp1174_" + name for name in (
     "durability_ordinary_pair durability_fsync_readback durability_publish_noreplace durability_legacy_tombstone durability_cached_writer "
     "lifecycle_identity_advisory lifecycle_budget_replay lifecycle_human_valid lifecycle_human_negative lifecycle_first_publication lifecycle_guard_readonly lifecycle_scoped_lifecycle lifecycle_legacy_unchanged "
     "profile_native_linux profile_unsupported windows_claim_rejected status_closed gate_required_skip gate_evidence_schema").split()}
-# wp1370: the activity-collector cases are required IDs (21 new, 85 -> 106).
+# wp1370: the activity-collector cases are required IDs (22 new, 85 -> 107).
 WP1174_REQUIRED |= {"wp1174_activity_" + name for name in (
     "reduced_payload multipage_anchor older_page_fail same_timestamp_fail force_push_preimage deletion_preaudit tag_coverage "
     "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained matching_refs_unpaginated tip_non_commit "
-    "budget_bytes_cumulative budget_pages_cumulative budget_overflow_unreported").split()}
+    "budget_bytes_cumulative budget_pages_cumulative budget_overflow_unreported deadline_processing").split()}
 WP1174_REQUIRED |= {"wp1174_" + kind + "_" + name for kind in ("writer", "race") for name in _WP1174_WRITERS}
 WP1174_BOTH = {"wp1174_" + name for name in ("admission_valid admission_wrong_scope witness_valid witness_keyset witness_int_bool witness_json_bytes "
     "witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending lifecycle_legacy_unchanged status_closed").split()}
@@ -12646,13 +12646,13 @@ def _lifecycle1174(kind):
                     d=c.tmp/("current-service" if service else "current-native");d.mkdir()
                     _current_policy1174(Ctx(c.script,d),service)
                 _static_writers1174(c,m)
-                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==106
+                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==107
                 applicable=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
                 required={n:None for n in applicable}
                 assert _required1174(required,applicable)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,applicable),"missing required ID accepted"
-                assert len(_WP1174_FULL_CASE_IDS)==106 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
+                assert len(_WP1174_FULL_CASE_IDS)==107 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -12769,7 +12769,7 @@ def _evidence_schema1174(c):
     required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
     record=dict(schema="wp1174_native_report.v1",actual_os="Linux",scope="wp1174_candidate",proof_eligible=True,source_pr=1275,repo="ducthangho/tra-luat",pr=1275,
         run_id="1",run_attempt="1",job="gate-packet-loop",checkout_sha=m,checkout_tree="c"*40,executed_sha=h,executed_tree="d"*40,expected_head=h,expected_tree="d"*40,
-        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=105,
+        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=106,
         outcomes={n:"passed" for n in required},profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},
         native_probe=dict(status="passed",checks={k:True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")}),
         native_seam=False,overall_status="passed",windows_oracle="not_run_platform; deferred_to_windows_focused")
@@ -14031,7 +14031,7 @@ def _r12_main_inventory1174(c):
     seen=[]
     def selected_driver():
         names=[name for name,_ in CASES if name in WP1174_REQUIRED]
-        assert len(names)==105 and "wp1174_windows_claim_rejected" not in names
+        assert len(names)==106 and "wp1174_windows_claim_rejected" not in names
         dict(CASES)["wp1174_lifecycle_scoped_lifecycle"](c)
         seen.append(tuple(names))
         return 0
@@ -14041,7 +14041,7 @@ def _r12_main_inventory1174(c):
             _legacy_main=selected_driver,_carrier1174=lambda *args:True,_snapshot1174=lambda *args:{}),contextlib.redirect_stdout(io.StringIO()):
         assert main()==0
     assert seen and CASES is full
-    assert len(_WP1174_FULL_CASE_IDS)==106 and len(set(_WP1174_FULL_CASE_IDS))==106
+    assert len(_WP1174_FULL_CASE_IDS)==107 and len(set(_WP1174_FULL_CASE_IDS))==107
 
 
 def _r12_accept_snapshot1174(c):
@@ -14645,6 +14645,99 @@ def _activity_case1370(kind):
             receipt=pipe(lambda n:dict(sleep=30) if n==3 else {},deadline=time.time()+4)
             assert receipt["status"]=="UNKNOWN" and len(runs)==3 and once()==sum(x["emitted"] for x in runs),(receipt["status"],runs,reported)
             refused(receipt)
+        elif kind=="deadline_processing":
+            # WP1370-F1 (review 4): the absolute deadline bounds the PROCESSING
+            # of what was read, not only the reads.
+            import types
+            D=_g(w,"commit-tree",_g(w,"rev-parse",H+"^{tree}"),"-p",H,"-m","wp1370 descendant of H")
+            assert D!=H and _g(w,"merge-base","--is-ancestor",H,D)==""
+            late=lambda ident,oid,when:_activity1370(ident,"force_push","refs/heads/candidate",oid,parent,when)
+            def status(*extra,drop=()):
+                feed(*extra,drop=drop);receipt=collect();return receipt["status"],(receipt["earliest"] or {}).get("id"),receipt["dag_coverage"]
+            # Index semantics on small feeds. Introduction 12 publishes H at 09:01:00.
+            assert status(late(13,H,"2026-11-04T09:05:00Z"))==(ok,"12",True),"observation after a strictly earlier introduction refused"
+            assert status(late(13,H,"2026-11-04T09:01:00Z"))==("UNKNOWN","12",False),"introduction at the SAME time explained an observation"
+            again=_activity1370(14,"branch_creation","refs/heads/topic",Z,H,"2026-11-04T09:10:00Z")
+            assert status(again,late(13,H,"2026-11-04T09:05:00Z"))==(ok,"12",True),"index lost the earliest introduction of an OID"
+            assert status(_activity1370(12,"push","refs/heads/candidate",parent,H,"2026-11-04T09:10:00Z"),late(13,H,"2026-11-04T09:05:00Z"),drop=(12,))==("UNKNOWN","12",False),"later introduction explained an earlier observation"
+            assert status(_activity1370(100,"push","refs/heads/other",parent,H,"2026-11-04T09:01:00Z"))==(ok,"12",True),"earliest is not timestamp-then-numeric-id"
+            assert status(_activity1370(7,"push","refs/heads/other",parent,H,"2026-11-04T09:01:00Z"))==(ok,"7",True),"earliest is not timestamp-then-numeric-id"
+            assert status(late(13,D,"2026-11-04T09:05:00Z"))==("UNKNOWN","12",False),"introduction of another OID explained an observation"
+            grown=lambda when:_activity1370(15,"push","refs/heads/topic",H,D,when)
+            assert status(grown("2026-11-04T09:03:00Z"),late(16,D,"2026-11-04T09:05:00Z"))==(ok,"12",True)
+            assert status(grown("2026-11-04T09:05:00Z"),late(16,D,"2026-11-04T09:05:00Z"))==("UNKNOWN","12",False),"equal-time introduction of the exact OID explained an observation"
+            assert status(late(10,H,"2026-11-04T08:58:30Z"))==("FAIL","12",True)
+            # Large populated feed: 240 pre-audit pushes over 60 refs with 240
+            # distinct timestamps, and 60 post-audit pushes with before=after=H
+            # (each an introduction and an observation explained by record 12).
+            big=[_activity1370(1000+i,"push","refs/heads/wp1370-%02d"%(i%60),root,parent,"2026-10-01T%02d:%02d:00Z"%(i//60,i%60)) for i in range(240)]
+            big+=[_activity1370(2000+i,"push","refs/heads/candidate",H,H,"2026-11-04T09:02:%02dZ"%i) for i in range(60)]
+            leak=late(10,H,"2026-11-04T08:58:30Z")
+            got=[]
+            def recording(endpoint,**limits):
+                value=served(endpoint,**limits);got.append((endpoint,value));return value
+            feed(*big);healthy=collect(recording)
+            assert healthy["status"]==ok and healthy["earliest"]["id"]=="12" and healthy["dag_coverage"] is True and len(pages["activity"])==303,healthy
+            assert m._1174_collector_receipt(healthy,H,audit,123) is healthy
+            # Receipt v2 keeps its definition: sha256 over the whole raw snapshot.
+            answer=dict(got);repo=answer["repos/"+m._1174_REPO]
+            raw=dict(repo=dict(id=repo["id"],default_branch=repo["default_branch"],created_at=repo["created_at"]),
+                activity=[row for endpoint,value in got if "/activity?" in endpoint for row in value[0]])
+            for family in healthy["query_scope"][1:]:
+                value=[v for endpoint,v in got if endpoint.split(m._1174_REPO+"/",1)[-1].split("&")[0].split("?per_page")[0]==family];assert len(value)==1,(family,[e for e,_ in got])
+                raw[family]=value[0][0] if type(value[0]) is tuple else value[0]
+            assert len(raw["activity"])==303 and healthy["raw_snapshot_sha256"]==hashlib.sha256(m._1174_bytes(raw)).hexdigest(),"raw snapshot digest changed its definition"
+            # Deterministic oracle: a clock that only advances with WORK done by
+            # the collector (one unit per timestamp parse and per git call).
+            # The caller deadline is K units; nothing after the last read is
+            # allowed to do more than a constant amount of work past it.
+            clock_module,parse_real,git_real=m.time,m._1174_time,m._git_do
+            def run(K):
+                units=[0];last=[0];t0=clock_module.time()
+                clock=types.SimpleNamespace(**{k:getattr(clock_module,k) for k in dir(clock_module) if not k.startswith("__")});clock.time=lambda:t0+units[0]
+                def parse(value):
+                    units[0]+=1;return parse_real(value)
+                def git(*argv,**kw):
+                    units[0]+=1;return git_real(*argv,**kw)
+                def counted(endpoint,**limits):
+                    value=served(endpoint,**limits);last[0]=units[0];return value
+                began=clock_module.time()
+                with patch.object(m,"time",clock),patch.object(m,"_1174_time",side_effect=parse),patch.object(m,"_git_do",side_effect=git):
+                    receipt=m._1174_collect(counted,w,H,audit,123,deadline=None if K is None else t0+K)
+                return receipt,units[0],last[0],clock_module.time()-began
+            receipt,U,read_at,_=run(None)
+            assert receipt["status"]==ok and receipt["raw_snapshot_sha256"]==healthy["raw_snapshot_sha256"] and U>360 and read_at<=3,(receipt["status"],U,read_at)
+            receipt,units,_,_=run(U+1)
+            assert receipt["status"]==ok and units==U,("deadline that is never reached changed the result",receipt["status"],units,U)
+            for K in sorted({4,5,6,17,U//4,U//2,3*U//4}|set(range(U-12,U+1))):
+                receipt,units,read_at,wall=run(K)
+                assert read_at<K,("fixture: the last read must finish before the deadline",read_at,K)
+                assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,("processing that crossed the caller deadline is not UNKNOWN",K,U,receipt["status"])
+                assert units<=K+2,"processing continued past the caller deadline: %d work units done, deadline at unit %d of %d"%(units,K,U)
+                assert wall<20,("wall clock",K,wall)
+                _reject1174(m._1174_collector_receipt,dict(receipt,status=ok),H,audit,123,reason="collector success completeness")
+            # Exposure established at or before the audit keeps FAIL precedence
+            # when the deadline is crossed after it was seen; before that the
+            # stopped pass is UNKNOWN, and stops as promptly.
+            feed(*(big+[leak]));receipt,UL,_,_=run(None)
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12",receipt
+            receipt,units,_,_=run(UL)
+            assert receipt["status"]=="FAIL" and units==UL,("pre-audit exposure lost at the deadline",receipt["status"],units,UL)
+            for K in (5,UL//2):
+                receipt,units,_,_=run(K)
+                assert receipt["status"]=="UNKNOWN" and units<=K+2,"processing continued past the caller deadline: %d work units done, deadline at unit %d of %d (%s)"%(units,K,UL,receipt["status"])
+            # Wall-clock smoke on the real clock: the reviewer's population (600
+            # same-timestamp pushes with before=after=H); the last read returns
+            # just before the caller deadline, processing then crosses it.
+            feed(*(big[:240]+[_activity1370(3000+i,"push","refs/heads/candidate",H,H,"2026-11-04T09:02:00Z") for i in range(600)]))
+            limit=[0.0]
+            def slow(endpoint,**limits):
+                value=served(endpoint,**limits)
+                if "/pulls" in endpoint:time.sleep(max(0.0,limit[0]-0.02-time.time()))
+                return value
+            began=time.time();limit[0]=began+0.5
+            receipt=m._1174_collect(slow,w,H,audit,123,deadline=limit[0]);took=time.time()-began
+            assert receipt["status"]=="UNKNOWN" and took<0.5+3.0,("collector overran the caller deadline",receipt["status"],took)
         else:
             raise AssertionError("unknown wp1370 case "+kind)
     return case
@@ -14653,7 +14746,7 @@ def _activity_case1370(kind):
 _WP1370_ACTIVITY_CASES = ("reduced_payload", "multipage_anchor", "older_page_fail", "same_timestamp_fail", "force_push_preimage",
     "deletion_preaudit", "tag_coverage", "receipt_residuals", "no_anchor", "object_unfetchable", "cursor_foreign", "pr_foreign_head",
     "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained", "matching_refs_unpaginated", "tip_non_commit",
-    "budget_bytes_cumulative", "budget_pages_cumulative", "budget_overflow_unreported")
+    "budget_bytes_cumulative", "budget_pages_cumulative", "budget_overflow_unreported", "deadline_processing")
 assert {"wp1174_activity_" + name for name in _WP1370_ACTIVITY_CASES} <= WP1174_REQUIRED
 CASES += [("wp1174_activity_" + name, _activity_case1370(name)) for name in _WP1370_ACTIVITY_CASES]
 MUTANTS.update({
@@ -14693,6 +14786,9 @@ MUTANTS.update({
     # WP1370-F1 (review 2): charge zero again for a failed read that reported nothing
     "m1174_activity_budget_overflow_uncharged": ('                size += sum(measured) if measured else limit - size\n', '                size += sum(measured)\n',
         ["wp1174_activity_budget_overflow_unreported"]),
+    # WP1370-F1 (review 4): never ask the deadline inside the processing loops
+    "m1174_activity_deadline_unchecked": ('            if time.time() >= pass_end:\n                complete, expired = False, True\n',
+        '            if False:\n                complete, expired = False, True\n', ["wp1174_activity_deadline_processing"]),
 })
 
 
@@ -14711,8 +14807,8 @@ def _r12_extend1174(original,additional):
     return case
 CASES=[(name,_r12_extend1174(case,_r12_hosts[name]) if name in _r12_hosts else case) for name,case in CASES]
 MUTANTS.update({
-    "m1174_r12_push_preimage":('any(_1174_time(observed_at) <= audit_time for _, observed_at in observations))','False) # omit pre-audit preimage publication evidence',["wp1174_lifecycle_first_publication"]),
-    "m1174_r12_postaudit_preimage":('if not any(x["after"] == oid and _1174_time(x["time"]) < _1174_time(observed_at) for x in introductions):','if False:',["wp1174_lifecycle_first_publication"]),
+    "m1174_r12_push_preimage":('any(parsed[observed_at] <= audit_time for _, observed_at in observations[mark:]))','False) # omit pre-audit preimage publication evidence',["wp1174_lifecycle_first_publication"]),
+    "m1174_r12_postaudit_preimage":('if not (oid in first and first[oid][0] < parsed[observed_at]):','if False:',["wp1174_lifecycle_first_publication"]),
     "m1174_r12_reused_source_sync":('_1174_recheck_durable(source, source_now)','pass # omit recovery source durability',["wp1174_durability_fsync_readback"]),
     "m1174_r12_reused_target_sync":('_1174_recheck_durable(target, target_raw)\n        _1174_recheck_durable(wp, witness_raw)','pass # omit recovery target durability\n        _1174_recheck_durable(wp, witness_raw)',["wp1174_durability_fsync_readback"]),
     "m1174_r12_reused_witness_sync":('_1174_recheck_durable(wp, witness_raw)\n    _1174_probe','pass # omit recovery witness durability\n    _1174_probe',["wp1174_durability_fsync_readback"]),
@@ -14733,8 +14829,8 @@ MUTANTS.update({
     "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
 })
 
-MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==106 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
-    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==106,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
+MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==107 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
+    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==107,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
 MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
@@ -14945,7 +15041,7 @@ def _carrier1174(outcomes, gate_rc=0):
 
 def main():
     global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
-    assert len(WP1174_REQUIRED) == 106 and len(WP1174_BOTH) == 12
+    assert len(WP1174_REQUIRED) == 107 and len(WP1174_BOTH) == 12
     actual_os = platform.system()
     if actual_os=="Linux":
         globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
@@ -15665,7 +15761,7 @@ MUTANTS.update({
     "m1174_r25_pr_relevance": ('return relation == 0 if relation in (0, 1) else None', 'return True if relation in (0, 1) else None', ["wp1174_lifecycle_first_publication"]),
     "m1174_r25_pr_ignore": ('if not (type(source) is dict and source.get("full_name") == _1174_REPO and type(source.get("id")) is int and source["id"] == repo_id):', 'if False:', ["wp1174_lifecycle_first_publication"]),
     "m1174_r25_pr_missing_object": ('if tip_relation is None:', 'if False:', ["wp1174_lifecycle_first_publication"]),
-    "m1174_r25_pr_observation": ('elif tip_relation and not any(x["after"] == oid for x in introductions):', 'elif False: # omit unresolved PR observation', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_observation": ('elif tip_relation and oid not in first:', 'elif False: # omit unresolved PR observation', ["wp1174_lifecycle_first_publication"]),
     "m1174_r25_event_time": ('_1174_require(stamp <= start, "collector activity time")', 'pass # omit event timestamp validation', ["wp1174_lifecycle_first_publication"]),
     "m1174_r25_pr_identity": ('pr.get("html_url") == f"https://github.com/{_1174_REPO}/pull/{number}" and', 'True and', ["wp1174_lifecycle_first_publication"]),
 })

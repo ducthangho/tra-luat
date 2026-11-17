@@ -1,0 +1,20 @@
+# Nghiem thu tren merge 25346df65f87a752b493b3bfc78e2b572e0ac6dd — 2026-11-17T02:38:37Z, kho phien (unshallow), core.abbrev 7
+## git log -1 --format='%H %T %P'
+25346df65f87a752b493b3bfc78e2b572e0ac6dd ddb86dfddc43439672903754536f8d324ec0909c 59b3fb93e4ecd1399460c30ea08bc5d56dc8265b d3bd4e6a4e94b2bca08263c64aef2f2eacf80c82
+## numstat 25346df65f87a752b493b3bfc78e2b572e0ac6dd^2..25346df65f87a752b493b3bfc78e2b572e0ac6dd khong dung; numstat 25346df65f87a752b493b3bfc78e2b572e0ac6dd^1..25346df65f87a752b493b3bfc78e2b572e0ac6dd
+5	3	ops/ci_duong_nhanh.py
+8	2	ops/ci_duong_nhanh_test.py
+## dac ta
+7d6863a04ff60bd306b730ecb32d65c5f92afa9e
+1a742b86f656b4e1a093f494bebdbaed8df6c71b8845edf81b90afdc7ecee3d5  -
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+## ruff ruff 0.16.9 --select F base 25346df65f87a752b493b3bfc78e2b572e0ac6dd^1 vs merge
+ops/ci_duong_nhanh.py base=0 merge=0
+ops/ci_duong_nhanh_test.py base=0 merge=0
+## git diff --check 25346df65f87a752b493b3bfc78e2b572e0ac6dd^1 25346df65f87a752b493b3bfc78e2b572e0ac6dd
+rc=0

@@ -1,0 +1,120 @@
+# HO SO LAND — packet #1353 CI-PACKET-LOOP-HAU-MERGE r1, lease g1, qua PR #1354. Khuon: ops/land/pr1347-wp1345-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (25346df), landed true. Bon moc §10.2.2 cua ci.yml 44002725132 DU, measured passed (wd-run 44007185825; gate output
+#   39/39 bang danh_gia_gate.py v2 — ban moi biet job gom/manh cua #1343, kiem hai chieu o kiem-danh-gia-gate-v2.txt).
+# MUC TIEU CUA PACKET (N4) DAT tren chinh merge commit: gate-packet-loop-manh 16/16 chay, gom "GOM: ĐẠT · 16 mảnh · 1506 ca bắt buộc".
+# UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head d3bd4e6 (issuecomment-6935841772).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
+# Readback tho: ops/land/pr1354-wp1353-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-17T02:3x–03:1xZ.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS
+input_packet_generations:
+  - packet_issue: 1353
+    packet_id: wp1353
+    revision: 1
+    generation: 1
+    lease_id: wp1353-r1-g1-claude
+    ghi_chu: 'Executor session_015GtxrbpacQd79CBgXz4hsj (Fable 5.2, do phien dieu phoi nay mo). attempts 1/2. Rut han sau merge (lease.thu_hoi_cuoi).'
+authorized_head_sha: d3bd4e6a4e94b2bca08263c64aef2f2eacf80c82
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1354#issuecomment-6935841772
+authorization_ghi_chu: >-
+  measured — readback-pr1354-comments.json: comment 6935841772, user ducthangho, created_at 2026-11-17T02:13:58Z; than
+  human_exact_head_audit.v1 packet wp1353 revision 1 generation 1 pr 1354 reviewed_sha d3bd4e6 (= head), reviewed_tree 6ee40d43 (= tree
+  head), spec_sha256 1a742b86 (= lease spec_hash), verdict approve, assurance human_audited. Merged_at 02:24:16Z.
+  Duyet merge dung SHA d3bd4e6 qua AskUserQuestion: loi_khai_co_neo. CAVEAT #566: ai bam merge khong do duoc.
+land_operator: 'measured — readback-pr-1354.json: merged_at 2026-11-17T02:24:16Z, merge_commit_sha 25346df (thao tac boi phien dieu phoi qua MCP merge_pull_request voi expectedHeadSha).'
+merge_method: merge
+merge_commit: 25346df65f87a752b493b3bfc78e2b572e0ac6dd
+merge_commit_tree: ddb86dfddc43439672903754536f8d324ec0909c
+merge_commit_parents: [59b3fb93e4ecd1399460c30ea08bc5d56dc8265b, d3bd4e6a4e94b2bca08263c64aef2f2eacf80c82]
+merge_ghi_chu: >-
+  measured — readback-commit-25346df.json: cha thu nhat 59b3fb9 (master sau #1352 cua phien khac), cha thu hai d3bd4e6.
+  nghiem-thu-25346df.txt: numstat 25346df^1..25346df dung 2 tep write set (+5/-3, +8/-2).
+pre_merge_checks:
+  - name: 'CI PR tren head cuoi'
+    sha: d3bd4e6a4e94b2bca08263c64aef2f2eacf80c82
+    conclusion: success
+    nguon: [readback-runs-head-d3bd4e6.json]
+    ghi_chu: 'measured — readback-runs-head-d3bd4e6.json: gate 43992824714 pull_request success; thu-hoi success.'
+  - name: 'Codex connector tren head cuoi'
+    sha: d3bd4e6a4e94b2bca08263c64aef2f2eacf80c82
+    conclusion: 'sach'
+    ghi_chu: 'measured — readback-pr1354-comments.json: 6935142183 codex-review-state:v1 completed, has_any_findings false, commit d3bd4e6.'
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 44002725132
+    run_attempt: 1
+    sha: 25346df65f87a752b493b3bfc78e2b572e0ac6dd
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44002725132.json, readback-jobs-44002725132.json, danh-gia-gate-output-44002725132.txt, danh_gia_gate.py, phan-chung-buoc-44002725132.txt, kiem-danh-gia-gate-v2.txt]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha 25346df, run_attempt 1.'
+    moc_checkout: 'measured — ci/provenance.yaml: moi job checkout passed 25346df65f87a752b493b3bfc78e2b572e0ac6dd.'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition passed (wd-run 44007185825, dispatch ops-do-workflow-definition.yml tren master boi phien dieu phoi 03:01Z 17-11).'
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-44002725132.txt (danh_gia_gate.py v2 sha256 539fed68): passed 39/39; 16 job gate-packet-loop-manh
+      "TỔNG: ĐẠT" + dong MẢNH rc=0, gom "GOM: ĐẠT · 16 mảnh · 1506 ca bắt buộc". phan-chung-buoc-44002725132.txt: xoa dau hieu 4 buoc
+      (tl selftest, lease_publish, gom, manh 0) => not_measured, rc 0. v2 kiem hai chieu tren run PR 43929227587 (kiem-danh-gia-gate-v2.txt).
+bookkeeping:
+  - {item: 'rut han lease wp1353-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1353-1336.'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 0 "ĐÓNG ĐƯỢC WP wp1353".'}
+  - {item: 'dong Issue #1353', ket_qua: 'not_measured — sau khi PR ghi so merge.'}
+# ---- het truong chuan
+packet_id: wp1353
+packet_issue: 1353
+packet_ten: CI-PACKET-LOOP-HAU-MERGE
+revision: 1
+generation: 1
+pham_vi_land: 'CI (ops/ci_duong_nhanh.py +5/-3, ops/ci_duong_nhanh_test.py +8/-2): push nhanh mac dinh => packet_loop=chay (go M2 cua #1343).'
+environment: cloud
+operating_system: linux
+recorded_by: claude-session — phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS.
+
+spec:
+  path: ops/specs/CI-PACKET-LOOP-HAU-MERGE-r1.md (nhanh ops/wp1353-r1-g1-lease; KHONG co trong cay master)
+  blob: 7d6863a04ff60bd306b730ecb32d65c5f92afa9e
+  sha256: 1a742b86f656b4e1a093f494bebdbaed8df6c71b8845edf81b90afdc7ecee3d5
+  nguon: 'measured — nghiem-thu-25346df.txt: git rev-parse origin/ops/wp1353-r1-g1-lease:<spec> = 7d6863a0, sha256 1a742b86.'
+
+lease:
+  lease_id: wp1353-r1-g1-claude
+  path: ops/leases/wp1353-r1-g1-claude.yaml (nhanh ops/wp1353-r1-g1-lease)
+  write_set_so_tep: 2
+  thu_hoi_cuoi: >-
+    RUT HAN sau merge: lease_until 2026-11-17T12:51:00Z -> 2026-11-17T02:53:00Z (commit 277fac6, push 02:38Z truoc han moi), kem ngan sach
+    that (Codex 1/10, CI Ubuntu 1/2, Windows 0/0); tep lease-wp1353-r1-g1-claude-sau-rut-han.yaml.txt. ai-dang-giu-sau-rut-han.txt: ca 2 tep
+    write set NGUOI_GIU 0, wp1353-r1 HET_HAN.
+  diff_do: 'measured — nghiem-thu-25346df.txt numstat 25346df^1..25346df: 2 tep, +13/-5.'
+
+trang_thai_packet:
+  merged: true
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren 25346df: DAT, du bon moc measured passed (gate output 39/39). (2) lease nha: DAT. (3) bookkeeping: ho
+    so nay + M8 rc 0. (4) review neo d3bd4e6: connector sach + audit chu kho. (5) uy quyen: audit tu dang 6935841772. (6) muc tieu: N1-N4 dat
+    (N4 do tren chinh merge commit). (7) tran: 13 dong.
+  canh_bao_cho_chu_kho: >-
+    (i) Chi phi: moi push master nay chay 16 manh packet-loop (manh cham nhat <= 5 phut tren CI PR #1344). (ii) danh_gia_gate.py v2 nam trong
+    provenance nay; ho so land sau nen chep ban v2, khong chep b87f9697. (iii) Waiver mien_gate_packet_loop (6936143991) het hieu luc tu day.
+
+review:
+  so_loi_goi_codex: 'loi_khai_co_neo — 1/10: connector 1 (d3bd4e6, sach); khong goi Codex offline.'
+  windows_native: 'not_measured — 0/0 theo chi dao chu kho.'
+
+nghiem_thu:
+  N1: 'loi_khai_co_neo — executor: ci_duong_nhanh_test 122/122 TONG DAT. Hau merge: gate-ops passed trong danh-gia-gate-output-44002725132.txt.'
+  N2: 'loi_khai_co_neo — executor: 465/465 dot bien giet dung ly do; pl_push_lai_bo_qua va pl_push_mat_ly_do_rieng giet t100.'
+  N3: 'measured — nghiem-thu-25346df.txt: ruff 0.16.9 --select F base 0 merge 0 ca hai tep; adr-song rc 0; doctrine-scan rc 0.'
+  N4: 'measured — danh-gia-gate-output-44002725132.txt: 16 job manh passed, gom "GOM: ĐẠT · 16 mảnh · 1506 ca bắt buộc" tren 25346df.'
+
+khong_do_duoc:
+  - 'Duyet merge qua AskUserQuestion (khong co hien vat GitHub).'

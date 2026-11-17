@@ -1,0 +1,29 @@
+# trich log job launcher (windows-latest) run 44003367352 tren 866e522, conclusion=failure — loc dong Python / tong ket ca / DOT BIEN / r1336_ / SAI / error
+2026-11-17T02:30:35.5067010Z   co       python   Python 3.13.17
+2026-11-17T02:36:41.6421633Z   r1079_a                      SAI - KHONG DO DUOC (neutral do: review_do_san)
+2026-11-17T02:36:41.7000157Z   r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+2026-11-17T02:36:43.1179154Z   r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+2026-11-17T02:36:57.5888976Z   review_missing               SAI - ca dich khong tim thay/trung: ['review_missing_case']
+2026-11-17T02:36:57.7107604Z   r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+2026-11-17T02:37:01.7414122Z   r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+2026-11-17T02:37:53.4287907Z 326/326 ca DA CHAY QUA (tong 411, bo qua 85, hong 0) - KHONG DU: 85 ca BO QUA, chua do gi
+2026-11-17T02:38:59.1204947Z   r1335_N3c_phong_lenh_goc     SAI  giet 0/1: (khong ca nao chet)
+2026-11-17T02:38:59.1206692Z   r1335_F2_path_theo_cwd_launcher SAI  giet 0/1: (khong ca nao chet)
+2026-11-17T02:44:54.5901776Z   wp1336_schema_sha_ve_pattern_cu OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:44:54.5902382Z   wp1336_schema_packet_id_ve_dollar OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:44:54.5902995Z   wp1336_schema_finding_id_ve_dollar OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:44:54.5903614Z   wp1336_schema_evidence_url_bo_pattern OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:44:54.5904222Z   wp1336_schema_evidence_url_ve_S OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:44:54.5904788Z   wp1336_schema_vo_hieu_allOf  OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:44:54.5905342Z   wp1336_schema_bo_cap_claude  OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:44:54.5905887Z   wp1336_schema_bo_cap_codex   OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:44:54.5906442Z   wp1336_schema_bo_cap_human   OK  giet 1/1: r1336_bang_m5_hai_validator_cung_ket_qua
+2026-11-17T02:48:08.6676204Z   wp1336_oracle_ve_fullmatch   OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:48:08.6676863Z   wp1336_oracle_uniqueItems_ve_json_dumps OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:48:08.6677519Z   wp1336_oracle_bo_maxLength   OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:48:08.6678109Z   wp1336_oracle_bo_allOf       OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:48:08.6678692Z   wp1336_oracle_bo_if_then     OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:48:08.6679271Z   wp1336_oracle_bool_bang_so   OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:48:08.6679892Z   wp1336_oracle_integer_bo_so_thuc OK  giet 1/1: r1336_oracle_stdlib_khop_ngu_nghia_validator_that
+2026-11-17T02:48:08.6680476Z DOT BIEN: 554/556 dat  (145 khong do duoc tren nen nay)
+2026-11-17T02:48:08.8170494Z ##[error]Process completed with exit code 1.

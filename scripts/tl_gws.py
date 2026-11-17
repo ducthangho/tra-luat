@@ -1116,6 +1116,28 @@ def _codex_auth_path() -> str:
     return os.path.join(os.environ.get("CODEX_HOME") or os.path.expanduser("~/.codex"), "auth.json")
 
 
+def _trong_kho_git(path: str) -> str | None:
+    """WP1334 (đo 16-11-2026: bootstrap ghi auth.json vào CODEX_HOME nằm TRONG một kho git ⇒ `git status` thấy
+    `?? codexhome/auth.json`) — trả tổ tiên có mục `.git` nếu `path` hoặc bất kỳ tổ tiên nào của nó có, ngược lại None.
+    Đi từ chính `path` lên gốc trên HAI chuỗi: từ vựng (đường như khai) và `os.path.realpath` (đích thật sau symlink —
+    kho nằm sau một symlink NGOÀI kho thì chuỗi từ vựng không thấy). `lstat`, không theo symlink ở `.git`: tệp
+    (worktree/submodule), thư mục, symlink treo đều tính. Thành phần chưa tồn tại thì `lstat` hụt và đi tiếp lên tổ tiên."""
+    # Chuỗi thật giải từ đường GỐC, không từ bản đã `abspath`: `abspath` gộp `..` theo từ vựng nên `<ngoài>/lk/../x`
+    # (lk → <kho>/con) thành `<ngoài>/x`, trong khi kernel ghi vào `<kho>/x` (review PR #1367, comment 4597850151).
+    for d in dict.fromkeys((os.path.abspath(path), os.path.realpath(path))):
+        while True:
+            g = os.path.join(d, ".git")
+            try:
+                os.lstat(g)
+                return d
+            except OSError:
+                pass
+            if os.path.dirname(d) == d:
+                break
+            d = os.path.dirname(d)
+    return None   # không tổ tiên nào có `.git`
+
+
 def _last_refresh_key(d):
     """`last_refresh` ISO-8601 → (giây epoch, nano) — so được chuỗi có số chữ số phần giây khác nhau (container đo
     9 chữ số). Thiếu/không đọc được ⇒ (-inf, 0): CŨ HƠN mọi bản có (spec mục chua_do_duoc)."""
@@ -1150,7 +1172,9 @@ def _ghi_nguyen_tu_0600(path: str, data: bytes) -> None:
 
 def cmd_agent_creds_set(a) -> int:
     """WP1009: ghi credential AGENT (Codex auth.json · token Claude · khoá Gemini cho `agy`) vào tl_agent_creds.enc.
-    Giá trị chỉ đọc từ TỆP/BIẾN, không bao giờ từ argv; không in giá trị ở bất kỳ nhánh nào — chỉ TÊN khoá."""
+    Giá trị chỉ đọc từ TỆP/BIẾN, không bao giờ từ argv; không in giá trị ở bất kỳ nhánh nào — chỉ TÊN khoá.
+    WP1334: `--codex` chỉ ĐỌC auth.json để upload nên CỐ Ý không qua chốt `_trong_kho_git` — đọc không rò gì ra cây
+    kho; chốt chỉ đứng ở đường GHI (`_bootstrap_agent_creds`, `_ghi_dau`). Đừng "sửa" bằng cách thêm chốt vào đây."""
     tag = "agent-creds-set"
     master = _master_key_ghi(tag)
     if master is None:
@@ -1233,6 +1257,8 @@ def _bootstrap_agent_creds(master: str) -> tuple[str, str]:
     phan = [f"rev={p.get('rev')}"]
     if ca is not None:
         dst = _codex_auth_path()
+        if (kho := _trong_kho_git(os.path.dirname(dst))) is not None:   # WP1334: chốt TRƯỚC mọi thao tác trên đích
+            return "KHÔNG ĐO ĐƯỢC", f"CODEX_HOME nằm trong kho git ({kho}) — không ghi auth.json"
         try:
             with open(dst, encoding="utf-8") as f:
                 cu = json.load(f)

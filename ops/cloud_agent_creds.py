@@ -197,6 +197,14 @@ def _doc_json(p):
     except (OSError, ValueError):
         return None
 def _ghi_dau(last_refresh, md5):   # chỉ hai khoá; 0600; nguyên tử — không bao giờ chứa token
+    if str(GOC / "scripts") not in sys.path:
+        sys.path.insert(0, str(GOC / "scripts"))
+    try:   # WP1334: CODEX_HOME trong kho git, hoặc không nạp được chốt của tl_gws ⇒ KHÔNG ghi dấu (fail-closed)
+        import tl_gws
+        if tl_gws._trong_kho_git(str(_codex_dir())) is not None:
+            return
+    except Exception:  # noqa: BLE001
+        return
     _ghi_nguyen_tu(_codex_dir() / TEN_DAU, (json.dumps({"last_refresh": last_refresh, "md5": md5}) + "\n").encode("utf-8"), 0o600)
 def _dau_sau_nap(kl):
     """Mục tiêu 3: ghi dấu CHỈ KHI bootstrap đã đè auth.json bằng bản bundle (đĩa == bundle); mọi kết luận khác ⇒ xoá dấu."""

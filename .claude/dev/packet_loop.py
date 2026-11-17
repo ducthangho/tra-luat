@@ -6034,6 +6034,136 @@ def _1174_source_command(a, directory):
         _1174_OWNER_POLICY.reset(policy_token)
 
 
+_1174_WIN_FIXED = 3
+
+
+def _1174_win_path(text):
+    """Pure M2(a): absolute drive path only; UNC, device/Win32 namespaces and alternate data streams never match."""
+    return type(text) is str and re.fullmatch(r"[A-Za-z]:\\[^:\x00]*", text) is not None
+
+
+def _1174_win_platform(fs_name, drive_type, path_text):
+    """Pure profile predicate: local fixed NTFS volume addressed by an absolute drive path."""
+    return fs_name == "NTFS" and drive_type == _1174_WIN_FIXED and _1174_win_path(path_text)
+
+
+def _1174_win_api():
+    """Lazy kernel32 bindings with explicit argtypes/restype; ctypes only, loaded on native Windows only."""
+    _1174_require(os.name == "nt", "native Windows required")
+    import ctypes as c
+    from ctypes import wintypes as w
+    k = c.WinDLL("kernel32", use_last_error=True)
+    V, D, H, B, S, T, P = c.c_void_p, w.DWORD, w.HANDLE, w.BOOL, w.LPCWSTR, w.LPWSTR, c.POINTER(w.DWORD)
+    for name, args, result in (
+            ("CreateFileW", [S, D, D, V, D, D, H], H), ("CloseHandle", [H], B), ("GetFileType", [H], D),
+            ("GetFileInformationByHandle", [H, V], B), ("GetFileInformationByHandleEx", [H, c.c_int, V, D], B),
+            ("ReadFile", [H, V, D, P, V], B), ("GetVolumeInformationByHandleW", [H, T, D, P, P, P, T, D], B),
+            ("GetVolumeInformationW", [S, T, D, P, P, P, T, D], B), ("GetVolumePathNameW", [S, T, D], B),
+            ("GetDriveTypeW", [S], w.UINT)):
+        fn = getattr(k, name)
+        fn.argtypes, fn.restype = args, result
+    return c, w, k
+
+
+def _1174_win_open(c, k, text, access, share, flags):
+    """OPEN_EXISTING, default security attributes (handle not inheritable); a Win32 failure is an OSError with its code."""
+    handle = k.CreateFileW(text, access, share, None, 3, flags, None)
+    if handle is None or handle == c.c_void_p(-1).value:
+        raise c.WinError(c.get_last_error())
+    return handle
+
+
+def _1174_win_profile(c, w, k, handle, text):
+    """Volume facts measured on the handle itself, cross-checked against its DRIVE_FIXED volume root.
+
+    The serial comparison is a consistency check, not a cryptographic volume identity.
+    """
+    serial, root_serial = w.DWORD(), w.DWORD()
+    fs, root, root_fs = (c.create_unicode_buffer(261) for _ in range(3))
+    _1174_require(k.GetFileType(handle) == 1, "nondisk handle")
+    if not (k.GetVolumeInformationByHandleW(handle, None, 0, c.byref(serial), None, None, fs, 261) and
+            k.GetVolumePathNameW(text, root, 261) and
+            k.GetVolumeInformationW(root.value, None, 0, c.byref(root_serial), None, None, root_fs, 261)):
+        raise c.WinError(c.get_last_error())
+    drive_type = k.GetDriveTypeW(root.value)
+    _1174_require(_1174_win_platform(fs.value, drive_type, text) and root_fs.value == fs.value and
+                  serial.value == root_serial.value, "unsupported Windows volume: " + fs.value)
+    return dict(filesystem=fs.value, serial=serial.value, drive_type=drive_type, volume_root=root.value)
+
+
+def _1174_win_identity(c, w, k, handle, text):
+    """Profile M2(c) then identity M2(d), both on the handle: (serial, FileIndex64, size, LastWriteTime, ChangeTime).
+
+    FileIndex64 identifies a file only inside this NTFS profile (ReFS needs the 128-bit FILE_ID_INFO).
+    """
+    # FILE_ATTRIBUTE_TAG_INFO = 2 DWORD; FILE_BASIC_INFO = 4 LARGE_INTEGER + DWORD (40 bytes, [3] = ChangeTime);
+    # BY_HANDLE_FILE_INFORMATION = 13 DWORD: [5:7] LastWriteTime, [7] serial, [8:10] size, [11:13] FileIndex.
+    tag, basic, info = (w.DWORD * 2)(), (c.c_longlong * 5)(), (w.DWORD * 13)()
+    _1174_require(k.GetFileType(handle) == 1, "nondisk handle")
+    if not (k.GetFileInformationByHandleEx(handle, 9, tag, 8) and k.GetFileInformationByHandleEx(handle, 0, basic, 40) and
+            k.GetFileInformationByHandle(handle, info)):
+        raise c.WinError(c.get_last_error())
+    _1174_require(not tag[0] & 0x400, "reparse point")
+    _1174_require(not tag[0] & 0x10, "nonregular file")
+    _1174_require(_1174_win_profile(c, w, k, handle, text)["serial"] == info[7], "volume serial of handle")
+    return (info[7], info[11] << 32 | info[12], info[8] << 32 | info[9], info[6] << 32 | info[5], basic[3])
+
+
+def _1174_win_volume(path):
+    """Windows counterpart of _1174_mount: measured facts of one directory on a local fixed NTFS volume.
+
+    FILE_READ_ATTRIBUTES, share READ|WRITE (no DELETE); the reparse point itself is opened and refused.
+    """
+    text = os.fspath(path)
+    _1174_require(_1174_win_path(text), "Windows drive path required")
+    c, w, k = _1174_win_api()
+    handle = _1174_win_open(c, k, text, 0x80, 3, 0x02000000 | 0x00200000)
+    try:
+        tag = (w.DWORD * 2)()
+        if not k.GetFileInformationByHandleEx(handle, 9, tag, 8):
+            raise c.WinError(c.get_last_error())
+        _1174_require(not tag[0] & 0x400, "reparse point")
+        _1174_require(bool(tag[0] & 0x10), "directory required")
+        return _1174_win_profile(c, w, k, handle, text)
+    finally:
+        k.CloseHandle(handle)
+
+
+def _1174_win_read(path, between=None):
+    """Windows counterpart of _1174_read; standalone in r1, no runtime caller.
+
+    Model: launcher.py _KhoCodex (3826; CreateFileW on the reparse point itself 4020-4023, reparse refusal 4041).
+    GENERIC_READ, share READ only, FILE_FLAG_OPEN_REPARSE_POINT. Identity is compared at open and after the read on
+    one handle; that handle is closed, the name is reopened and must still be the same file before bytes are
+    returned. These are point-in-time checks, not a continuous lock on the name. `between` is the test seam that
+    runs after the first handle is closed and before the name is reopened.
+    """
+    text = os.fspath(path)
+    _1174_require(_1174_win_path(text), "Windows drive path required")
+    c, w, k = _1174_win_api()
+    handle = _1174_win_open(c, k, text, 0x80000000, 1, 0x00200000)
+    try:
+        opened = _1174_win_identity(c, w, k, handle, text)
+        raw, chunk, count = [], c.create_string_buffer(1 << 16), w.DWORD()
+        while True:
+            if not k.ReadFile(handle, chunk, len(chunk), c.byref(count), None):
+                raise c.WinError(c.get_last_error())
+            if not count.value:
+                break
+            raw.append(chunk.raw[:count.value])
+        _1174_require(opened == _1174_win_identity(c, w, k, handle, text), "file identity after read")
+    finally:
+        k.CloseHandle(handle)
+    if between is not None:
+        between()
+    handle = _1174_win_open(c, k, text, 0x80000000, 1, 0x00200000)
+    try:
+        _1174_require(opened == _1174_win_identity(c, w, k, handle, text), "file identity at reopen")
+    finally:
+        k.CloseHandle(handle)
+    return b"".join(raw)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="packet_loop.py",

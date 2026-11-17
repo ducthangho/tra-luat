@@ -1,0 +1,142 @@
+Review độc lập lượt 2, họ OpenAI; chỉ đọc cục bộ, không gọi mạng, không ghi tệp. **Còn P2, chưa đủ điều kiện approve.**
+
+Neo review:
+
+- HEAD/base: `a0702d06b7d3956fb91b951766c7a5d6a77a7f5b`.
+- Tree: `95a5242ad77f209efbee0d1dbdf789d874f66886`.
+- SHA-256 đặc tả untracked: `f5ab770f82fdb0f637b76d17c5882654687fdf1e356fd10731b5727246ef2fca`.
+- Surface: phiên Codex có shell cục bộ; không phải ChatGPT Web human-mediated. Không đo Windows trong lượt này.
+
+**Đóng finding lượt 1**
+
+| Finding cũ | Trạng thái | Căn cứ trong đặc tả mới |
+|---|---|---|
+| P2 — rẽ nhánh contextmanager | Không còn áp dụng | §1, §3: lock sang r1b; không sửa hàm cũ |
+| P2 — AST mù byte | **Chưa đóng hoàn toàn** | N2 đã so byte, nhưng chỉ trong biên định nghĩa; còn lỗ ngoài biên, decorator và trùng tên |
+| P2 — runner `MUTANTS` bộ ba | Đóng | §0, M6: bảng riêng, giữ schema ba phần tử |
+| P2 — junction không chứng minh cờ reparse | Đóng ở thiết kế | M3, N6: dùng directory-open; bỏ cờ có thể mở đích NTFS hợp lệ. Cần fixture và dấu hiệu lỗi cụ thể |
+| P2 — N3 chốt OS xanh vì tầng khác | Không còn áp dụng cho thay đổi r1 | N4, §10 khai rõ không đo riêng chốt OS; r1 không nối runtime |
+| P2 — handle/định danh | **Chưa đóng** | M2 thêm share mode, ChangeTime, mở lại tên; M5/M6 còn phản chứng không dựng được như mô tả |
+| P2 — publication/volume | Publication không còn áp dụng; volume đóng một phần | Publish sang r1b; M3 thêm handle FS, drive root, serial. Profile của hàm đọc chưa được cưỡng chế |
+| P2 — probe khai sẵn | Không còn áp dụng | §1, §3, §9 chuyển sang r1b |
+| P2 — dự toán vượt trần | **Chưa đủ căn cứ đóng** | Phạm vi đã giảm, nhưng 280–420 chưa có phân rã chi phí; xem dự toán dưới |
+| P3 — trục vòng ADR-0048 | Đóng | §7 tách trần lời gọi và trần vòng |
+| P3 — timestamp/base/nguồn quyết định | Đóng phần hồ sơ cục bộ | §0 có timestamp/OID; bảng đầu và §9 ghi nguồn. Chưa xác minh được nguồn Issue do cấm mạng |
+
+**Đối chiếu lời khai với mã**
+
+| Lời khai | Kết quả |
+|---|---|
+| `packet_loop.py` 6.359 dòng; test 16.566 dòng | Khớp `wc -l` |
+| Hook schema 3 gọi `_1174_read` tại 1419 | Đúng; nằm trong `_reader_state`, ngoài lệnh WP1174 |
+| `_1174_command` từ chối Windows trước resolver | Đúng tại 5906; lưu ý `_1174_input(a)` chạy trước chốt OS |
+| 85 `WP1174_REQUIRED`, 12 `WP1174_BOTH`, 279 khóa chứa `1174` | Khớp kiểm kê khi nạp module, không chạy suite |
+| `MUTANTS` có giá trị bộ ba | Khớp; các vòng 12021/12095/12105 unpack bộ ba |
+| Launcher mở reparse tại 4020–4023, kiểm reparse tại 4041 | Đúng về cơ chế; còn có `BACKUP_SEMANTICS`, kiểm loại đối tượng và ghim tổ tiên |
+| `_KhoCodex` tại 3825 | Sai lệch nhỏ: dòng 3825 trống, khai báo class ở **3826** |
+
+Lệnh kiểm kê ban đầu thiếu đường dẫn import `launcher`, rc=1; chạy lại với `.claude/dev` trong `sys.path`, rc=0. Đây là kiểm kê, **không phải bằng chứng suite hay native Windows đạt**.
+
+**Finding còn lại và câu thay thế**
+
+**P2-R2-01 — N2 chưa chứng minh “chỉ thêm, giữ nguyên byte và hành vi”.**
+
+AST chỉ lấy biên định nghĩa có thể bỏ sót decorator, chú thích ngoài định nghĩa, import, câu lệnh module và assignment. So “theo tên” cũng chưa xử lý hai định nghĩa trùng tên. Ví dụ thêm cuối module:
+
+```python
+_1174_read = _1174_win_read
+```
+
+không sửa byte thân hàm cũ, không phải lời gọi mà N3 đang tìm, nhưng đổi runtime. Thêm decorator vào hàm cũ cũng có thể lọt nếu lấy đoạn từ `FunctionDef.lineno`.
+
+Thay N2 bằng:
+
+> “Dùng AST chỉ để xác định các khối mới hợp lệ, gồm decorator; kiểm tên không trùng với base và không trùng nhau. Loại đúng các khối thêm `_1174_win_*` và hằng `_1174_WIN_*` khỏi byte head thì phần còn lại phải bằng nguyên byte base. Không chấp nhận assignment lại tên cũ, import mới hoặc câu lệnh thực thi cấp module. Phản chứng gồm đổi chú thích/khoảng trắng, thêm decorator, định nghĩa trùng tên và gán lại `_1174_read`: đều đỏ; thêm hàm mới hợp lệ: xanh.”
+
+Điều này cũng đóng lỗ N3 đối với alias/module wiring.
+
+**P2-R2-02 — M5/M6 chưa có phản chứng khả thi cho mở lại tên.**
+
+M2 giữ handle `GENERIC_READ`, share chỉ `READ`, không `DELETE`. Vì vậy thao tác đổi tên/thay **chính entry đang mở** thường bị sharing violation; nó không tạo được drift như M5 mô tả. Nếu test chết ngay khi dựng fixture thì không giết được mutant bỏ mở lại tên. Đổi metadata qua writer thông thường cũng vướng share không `WRITE`.
+
+Thay đoạn tương ứng M5 bằng:
+
+> “Giữ nguyên share mode của M2. Ca tráo tên dùng một thành phần tổ tiên không được ghim: sau lần đọc, đổi tên thư mục cha rồi dựng lại tên cha chứa tệp khác. Fixture phải xác nhận thao tác thành công, hai tệp có định danh khác nhau, và mã gốc từ chối tại bước so định danh mở lại; mutant bỏ mở lại phải nhận sai bytes và làm assertion đích đỏ. Ca metadata dùng handle chỉ có `FILE_WRITE_ATTRIBUTES`, chứng minh mở và cập nhật thành công, rồi xác nhận từ chối đúng vì ChangeTime/LastWriteTime đổi. Không tạo được điều kiện thì là không đo được.”
+
+Đây là phương án thiết kế cần kiểm thực trên Windows; chưa được coi là đã đo.
+
+**P2-R2-03 — `_1174_win_read` chưa cưỡng chế profile NTFS và tệp thường.**
+
+§3 nói FileIndex64 chỉ dùng trong profile NTFS, nhưng M2 không kiểm FS trên handle, không gọi M3, cũng không khai tiền điều kiện đã kiểm volume. Vì primitive đứng riêng, người gọi có thể đưa đường dẫn trên FS ngoài profile.
+
+Ngoài ra, chỉ loại `DIRECTORY|REPARSE_POINT` chưa đủ diễn đạt “tệp thường”: đường dẫn thiết bị/named pipe có thể đi tới `CreateFileW`/`ReadFile` và gây hành vi ngoài hợp đồng. M1 chưa có `GetFileType`.
+
+Bổ sung M1/M2:
+
+> “Thêm binding `GetFileType`. `_1174_win_read` chỉ nhận đường dẫn tuyệt đối dạng ổ đĩa, loại UNC, namespace thiết bị và alternate data stream; trước ReadFile phải xác nhận handle là `FILE_TYPE_DISK`, không directory/reparse, và filesystem đo trên chính handle là NTFS. Nếu profile còn đòi DRIVE_FIXED, đối chiếu root/serial như M3. Không coi tên đường dẫn hoặc tiền kiểm rời handle là đủ.”
+
+Bổ sung ca thuần cho các dạng tên bị loại và ca native có timeout cho đường thiết bị. Nếu muốn `_1174_win_read` là primitive không kiểm profile, phải đổi rõ hợp đồng và không tiếp tục tuyên bố định danh của nó đã nằm trong profile NTFS.
+
+**P2-R2-04 — N1 so số lượng khóa không chứng minh giữ nguyên khóa.**
+
+Xóa một khóa cũ và thêm khóa khác thì số lượng bằng nhau, N1 vẫn xanh. Đây là lỗ L3/L6 trực tiếp.
+
+Thay câu N1:
+
+> “Đòi tập khóa `MUTANTS` ở head bằng chính xác tập khóa ở base; `MUTANTS_WIN1342` kiểm riêng. Phản chứng đổi tên một khóa nhưng giữ nguyên số lượng phải đỏ.”
+
+Nếu ý định còn là giữ nguyên toàn bộ bảng cũ, phải so cả giá trị từng khóa, không chỉ tập khóa.
+
+**P3-R2-05 — N6 cần loại từ chối sai nguyên nhân.**
+
+`_KhoCodex` còn kiểm đường dẫn, repository và ACL. Chỉ “cả hai từ chối” có thể xanh vì launcher từ chối bởi lớp khác. “Đích không bị đọc” cũng chưa định nghĩa là đọc nội dung hay truy vấn metadata.
+
+Thay N6:
+
+> “Dựng đích NTFS và ACL hợp lệ; ca đối chứng gọi trực tiếp trên đích phải mở thành công. Khi gọi qua junction, cả hai từ chối tại kiểm reparse. Mutant bỏ cờ của volume phải qua bước kiểm reparse và được nhận trên cùng fixture. ‘Không đọc đích’ nghĩa là không đọc nội dung tệp; truy vấn metadata được ghi riêng.”
+
+**Kiểm L1–L7 và N1–N9**
+
+| Luật | Đánh giá |
+|---|---|
+| L1 | Đơn vị ca/khóa/tệp/dòng khá rõ; “ba đột biến” xác định được |
+| L2 | Hai tệp đủ chứa code và test; cần nói script N2 nằm trong test hay artifact ngoài repo |
+| L3 | Chưa đạt vì phản chứng mở lại tên và phép so khóa |
+| L4 | `khong_ap_dung` hợp lý: đây là sửa draft sau review, chưa thấy packet khắc phục tiền nhiệm |
+| L5 | §0 neo thời điểm/base tốt; số đo Desktop và quyết định Issue chưa xác minh độc lập; dự toán phải gắn là ước lượng |
+| L6 | N1 mù thay khóa giữ tổng; N2 chưa phủ toàn byte; các dòng output phải kiểm từng ID và đúng exit code |
+| L7 | §7 đã dùng con trỏ ADR và mã E; không thấy tự đặt ngân sách mềm |
+
+| Tiêu chí | Khả năng đỏ đúng nguyên nhân |
+|---|---|
+| N1 | Suite có thể đỏ thật; so khóa hiện chưa đủ |
+| N2 | Đỏ được với ví dụ đã nêu, nhưng lọt thay đổi ngoài biên |
+| N3 | Bắt lời gọi trực tiếp; không đủ bắt alias/module wiring |
+| N4 | Hợp lý như kiểm hồi quy; không chứng minh riêng chốt OS, và đặc tả đã khai giới hạn |
+| N5 | Đọc bytes có răng; các ca drift cần sửa fixture theo P2-R2-02 |
+| N6 | Mutant directory-junction khả thi về thiết kế; cần đối chứng và lý do từ chối |
+| N7 | Phân loại import/fixture đúng hướng; mutant mở lại tên chưa có ca đích khả thi như viết |
+| N8 | Phân biệt không đo/đạt tốt; phải gắn bằng chứng với ID ca và exact head |
+| N9 | Các gate và trần đỏ được; “Vượt” nên ghi rõ mọi gate thất bại cũng làm tiêu chí đỏ |
+
+Về M2/M3, các lựa chọn `OPEN_EXISTING`, mở chính reparse point, không kế thừa, share READ, so FileIndex/serial/size/write/change time và đo FS trên directory handle đều hợp lý. `GetVolumePathNameW` + `GetDriveTypeW` + đối chiếu serial là kiểm nhất quán hữu ích, nhưng serial không phải định danh volume duy nhất mang tính mật mã; không nên khai mạnh hơn. M3 cũng cần ghi rõ quyền truy cập/share mode của directory handle và cách lấy serial root bằng API đã khai.
+
+**Dự toán r1**
+
+Ước lượng review tĩnh, không phải `numstat` đã triển khai:
+
+| Phần | Dòng thêm |
+|---|---:|
+| Bindings, structures, lỗi và cleanup | 75–105 |
+| Read, định danh, mở lại và kiểm profile | 65–95 |
+| Platform/volume/root/serial | 45–65 |
+| Test thuần, byte preservation, không nối dây | 40–65 |
+| Fixture và test native, đối chiếu, inheritance | 95–140 |
+| Bảng và runner mutation riêng | 45–70 |
+| **Tổng** | **365–540** |
+
+Hai tệp nằm trong trần số tệp ADR-0053. **450 dòng có thể đạt nhưng chưa có dư địa chắc chắn**; khoảng 280–420 hiện hơi lạc quan, nhất là runner riêng và fixture native. Không nên nâng thành finding “chắc chắn vượt”, cũng chưa thể đóng bằng một tổng dự đoán.
+
+Hiệu lực trần 450 còn cần đủ phép kiểm OID LAND theo ADR-0053. Tôi xác nhận blob ADR tại OID khai báo tồn tại; điều kiện ref vừa fetch không thể xác minh trong lượt cấm mạng. Trước đóng băng/cấp lease phải hoàn tất bằng chứng đó; nếu không đo được thì ADR quy định fallback 300 dòng.
+
+KET_LUAN: request_changes

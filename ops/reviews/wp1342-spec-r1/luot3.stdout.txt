@@ -1,0 +1,71 @@
+Còn **một P2 chưa đóng**: fixture tráo tên M5 chưa khả thi nếu handle đọc vẫn mở.
+
+Review chỉ đọc, không mạng; áp dụng adapter `cross-review`. Neo kiểm tra:
+
+- HEAD: `a0702d06b7d3956fb91b951766c7a5d6a77a7f5b`
+- Tree: `95a5242ad77f209efbee0d1dbdf789d874f66886`
+- SHA-256 đặc tả untracked: `b37cdae547db3c3aad0384b96773fb50398dcde2a502cc08985ebbee2ede4a39`
+- Identity: `openai_codex / codex_cli / machine`; không có phép đo model cụ thể.
+- Các lệnh đọc trả rc 0; snapshot cuối không đổi. **Không chạy test Windows hay gate triển khai.**
+
+| Finding lượt 2 | Trạng thái | Căn cứ trong đặc tả |
+|---|---|---|
+| P2-R2-01 — N2 bảo toàn byte | **Đóng ở mức đặc tả** | N2, dòng 79: loại đúng khối mới rồi so nguyên byte; có phản chứng chú thích, khoảng trắng, decorator, trùng tên và alias. |
+| P2-R2-02 — fixture tên/metadata | **Chưa đóng phần tráo tên; đóng phần metadata** | M5, dòng 71: đổi thư mục cha vẫn vướng handle con đang mở; `FILE_WRITE_ATTRIBUTES` là hướng hợp lệ, cần khai share mode của handle thứ hai. |
+| P2-R2-03 — profile `_1174_win_read` | **Đóng ở mức đặc tả** | M2(a–c), dòng 68: dạng tên, ADS, loại tệp, reparse/directory, NTFS và fixed volume đều được kiểm. |
+| P2-R2-04 — N1 so số khóa | **Đóng** | N1, dòng 78: so chính xác tập khóa và giá trị; có phản chứng đổi tên khóa giữ nguyên số lượng. |
+| P3-R2-05 — N6 thiếu đối chứng | **Đóng** | N6, dòng 83: mở trực tiếp đích phải thành công; qua junction phải bị từ chối đúng tại kiểm reparse. |
+
+**P2-R3-01 — M2(e)/M5 chưa chốt vòng đời handle để dựng được tráo tên.**
+
+Trên Windows/NTFS thông thường, không thể dựa vào việc đổi tên thư mục cha khi tệp con còn mở với handle không share DELETE. Đây cũng là giới hạn đã được ghi trong kho tại `.claude/dev/launcher_test.py:14165`, ca `r1252_doi_to_tien_thu_muc_luot`. Không ghim handle thư mục cha không đồng nghĩa thư mục ấy đổi tên được.
+
+M2(e) hiện không nói đóng handle đầu trước mở lại; M5 vì vậy có thể chỉ trả `KHÔNG ĐO ĐƯỢC`, khiến N5/N7 không đạt. Đề nghị thay M2(e) bằng:
+
+> “So định danh lúc mở và sau đọc trên cùng handle; lưu định danh và bytes, đóng handle đọc trong `finally`, rồi mở lại tên bằng cùng quyền/cờ, kiểm lại profile M2(c) và đòi định danh khớp trước khi trả bytes; luôn đóng handle mở lại.”
+
+Thay đoạn tráo tên M5 bằng:
+
+> “Hook kiểm thử chạy sau khi handle đọc đầu đã đóng và trước lần mở lại tên. Đổi tên thư mục cha, dựng lại tên cha chứa tệp khác; xác nhận mọi thao tác thành công và định danh hai tệp khác nhau. Bản gốc phải từ chối đúng vì định danh mở lại không khớp; mutant bỏ mở lại phải trả bytes cũ và làm ca thất bại.”
+
+Ca khóa finding phải xác nhận hook thực sự được gọi và handle đầu đã đóng. Rủi ro của thay đổi này là khoảng trống giữa hai lần mở; phải xử lý mất tên/lỗi mở lại theo hướng từ chối, không trả bytes đã đọc. Phép so định danh vẫn chỉ là kiểm tra tại các thời điểm, không phải khóa tên liên tục.
+
+**Handle metadata M5: mở được, nhưng cần ghi đầy đủ tham số.**
+
+`FILE_WRITE_ATTRIBUTES` không phải quyền ghi dữ liệu bị chặn bởi thiếu `FILE_SHARE_WRITE`. Tuy nhiên, kiểm tương thích share có hai chiều: handle thứ hai phải cho share READ để tương thích với `GENERIC_READ` của handle đầu.
+
+Câu thay thế đề nghị:
+
+> “Mở handle thứ hai với đúng `FILE_WRITE_ATTRIBUTES`, share `READ|WRITE|DELETE`, `OPEN_EXISTING`, không xin `GENERIC_WRITE`/`FILE_WRITE_DATA`; dùng `SetFileTime` đổi `LastWriteTime` trước phép lấy định danh sau đọc, truy vấn lại để xác nhận giá trị đã đổi ngay khi handle thứ hai còn mở, rồi đòi từ chối đúng vì định danh thay đổi.”
+
+Không cần đóng handle đọc cho fixture metadata. Cần tránh dùng cơ chế cập nhật timestamp chỉ quan sát được sau khi handle writer đóng.
+
+**P3-R3-02 — M6/N7 cần hợp đồng tái lập đầy đủ hơn cho driver ngoài kho.**
+
+Đưa driver ra ngoài kho **không tự làm N7 mất hiệu lực**: M6 đã yêu cầu thay đúng một chỗ, đúng ca đích và không tính lỗi fixture/import là giết. Nhưng “driver và đầu ra lưu vào hồ sơ land” chưa chốt rõ đầu vào bất biến và phép chạy sạch trước đột biến.
+
+Đề nghị bổ sung:
+
+> “Hồ sơ N7 phải có exact head/tree, hash driver, toàn bộ driver và lệnh chạy, phiên bản Python/Windows, từng cặp tìm/thay và số lần khớp bằng 1. Với mỗi mutant, chạy ca đích và đối chứng trên bản sạch đều đạt; áp mutant trên bản sao mới, lưu diff thực tế, rồi chạy lại hai ca. Chỉ tính giết khi đúng assertion hành vi của ca đích thất bại, đối chứng đạt và fixture hoàn tất. Hồ sơ phải đủ để chạy lại không cần nội dung PR có thể sửa.”
+
+Ca kiểm driver: thay chuỗi không khớp hoặc cố ý làm fixture hỏng phải ra `KHÔNG ĐO`, không ra “killed”. Chi phí phát sinh chủ yếu ở hồ sơ ngoài kho; không cần đưa runner trở lại write set.
+
+**N2 và CI:** chưa thấy blocker clone nông trên đường chạy hiện tại. Job `gate-packet-loop-manh` dùng `fetch-depth: 0` tại `.github/workflows/ci.yml:1151`; job gom chỉ tổng hợp kết quả nên checkout nông của nó không cản test N2. Nên chốt thêm:
+
+> “`<base>` là OID đầy đủ trong lease đã đóng băng; thiếu object hoặc `git show` lỗi thì fail với chẩn đoán rõ, không skip và không thay bằng HEAD/merge-base.”
+
+Đây là điều kiện môi trường cần công bố cho clone nông/bản sao không có `.git`, chưa phải P2 của CI hiện hành. Cũng cần giữ chính sách LF hiện tại khi so byte trên Windows.
+
+| Kiểm nhanh | Kết quả |
+|---|---|
+| L1 — số đếm có đơn vị | Đạt: ca, khóa, tệp, dòng thêm được phân biệt. |
+| L2 — mục tiêu chiếu write set | Đạt; M6 là phép đo ngoài kho, ca đích vẫn thuộc tệp test. |
+| L3 — tiêu chí có phép làm đỏ | **Chưa trọn vẹn:** fixture tráo tên chưa dựng được như đã viết. |
+| L4 — hình dạng lỗi kế thừa | `khong_ap_dung` phù hợp packet tính năng. |
+| L5 — số đo có thời điểm | Có ở §0/N9; bằng chứng ba phép ADR là lời khai trong spec, chưa được tôi đo lại. |
+| L6 — thước đo được phản chứng | N1/N2/N6 đã cải thiện; M6 cần hồ sơ tái lập như trên. |
+| L7 — điểm hỏi theo authority | §6–§7 dẫn E1/E2 và protocol/ADR; không thấy điểm hỏi tự đặt mới. |
+
+Dự toán sau bỏ runner vẫn hợp lý ở **320–470 dòng thêm, hai tệp**. Đây là ước lượng tĩnh, chưa chứng minh nằm dưới 450; phía trên khoảng vẫn vượt **20 dòng**. Sửa vòng đời handle và khai share mode không làm đổi bậc dự toán, còn hồ sơ driver nằm ngoài kho. Giữ điểm dừng §7; không bỏ fixture hay phản chứng để ép vừa trần.
+
+KET_LUAN: request_changes

@@ -1,0 +1,178 @@
+Review độc lập, provider `openai_codex`, execution surface `codex_service`, transport `machine`. Chỉ đọc, không gọi mạng, không ghi tệp.
+
+Neo review:
+
+- HEAD: `a0702d06b7d3956fb91b951766c7a5d6a77a7f5b`
+- Tree: `95a5242ad77f209efbee0d1dbdf789d874f66886`
+- Branch: `ops/wp1342-r1-g1-lease`
+- SHA-256 đặc tả: `4a6fe6e12b667bb246247ee5823f89513dae33130655ae5dc24a9821a5342914`
+
+Đặc tả là tệp untracked duy nhất. Các phép kiểm chỉ đọc cuối lượt xác nhận tracked files không đổi. Chưa chạy native Windows; các nhận định API dưới đây là phân tích kỹ thuật, không phải bằng chứng thực nghiệm Windows.
+
+**(1) Bảng kiểm sự thật**
+
+Các đường dẫn rút gọn: `P` = `.claude/dev/packet_loop.py`; `T` = `.claude/dev/packet_loop_test.py`; `L` = `.claude/dev/launcher.py`; `S` = `ops/specs/WP1174-WINDOWS-BACKEND-r1.md`.
+
+| Lời khai | Kết quả | Bằng chứng / giới hạn |
+|---|---|---|
+| §0: vùng 3659–6036 là 2.378 dòng; P có 6.359 dòng | Khớp số học và số dòng | `P:3659` bắt đầu khối WP1174; `P:6039` sang `build_parser`. Tuy nhiên có helper WP1174 ngoài vùng này, ví dụ `P:2496`, `P:3220`. |
+| `_1174_read` tại 3892 và cơ chế định danh | Khớp | `P:3892`: lstat, regular file, NOFOLLOW/CLOEXEC, so định danh trước mở và sau đọc, gồm đối chiếu lại đường dẫn. |
+| `_1174_lock` tại 3989 | Khớp, có điều kiện | `P:3989`: `flock(LOCK_EX)`, kiểm inode/device sau lấy khoá; bảo đảm cho các writer cùng tuân thủ tệp khoá cố định. |
+| Persist/fsync/readback tại 3945/3912/3921 | Khớp cơ chế | `P:3945` còn fsync thư mục **trước** publication và sau xoá tên tạm. “Bền khi mất điện” phụ thuộc profile và việc barrier thành công, không phải bảo đảm vô điều kiện. |
+| mountinfo/statfs, chỉ ext4/XFS | Khớp | `P:4003`, `P:4007`, `P:4037`; cả tên FS và magic được kiểm. |
+| Seed 0600 + uid + nlink=1 | Khớp | `P:4712`; còn kiểm 32 byte, fingerprint và metadata sau đọc. |
+| Boot ID trong runtime | Khớp | `P:4801`; kiểm cả coordinator ID và topology. |
+| Process session/group cleanup | Khớp cơ chế | `P:4259`: `start_new_session=True`, `killpg(SIGKILL)` trong `finally`. “Dọn sạch tiến trình con” không bao gồm hậu duệ tự thoát khỏi process group. |
+| `_1174_command` từ chối non-Linux | Khớp | `P:5899`, chốt tại `P:5906`, trước resolver. |
+| T có 16.566 dòng; 85/84/12 ca; 279 khoá chứa `1174` | Khớp, đã đếm lại | Nạp module bằng `python -B`, không gọi `main`: REQUIRED=85, Linux=84, BOTH=12, ca đăng ký `wp1174_*`=85, mutant keys chứa `1174`=279. Định nghĩa tại `T:12404`, `T:12414`. |
+| Tiền lệ `_KhoCodex`, reparse, DACL | Khớp | `L:3825`; ghim từng tổ tiên; mở tại `L:4020`; từ chối reparse tại `L:4041`; `GetSecurityInfo` tại `L:4063`. |
+| Job Object và junction fixture | Khớp | `L:892`; `.claude/dev/launcher_test.py:8748` dùng `mklink /J`. |
+| Profile hiện hành chỉ Linux | Khớp | `docs/PROTOCOL_DA_PHIEN.md:941`, `:1591`, `:1623`; `ops/specs/wp1174-c5-adapter-design.md:216`, `:220`. |
+| M8: metadata `('windows', lý do)` là cơ chế runner sẵn có | **Lệch** | Mọi giá trị `MUTANTS` hiện có dài 3. `T:12021`, `T:12095`, `T:12105` unpack bộ ba. Không thấy cơ chế metadata nền được khai. |
+| N3: ca hiện hữu giết việc bỏ chốt OS trong `_1174_command` | **Không được chứng minh** | `_windows1174`, `T:11785`, đột biến `_1174_platform`, không đột biến `_1174_command`. CLI dùng admission cố ý không hợp lệ và chỉ kiểm UNKNOWN/rc8/no-write tại `T:11812`. |
+| §4: “Windows không có fsync thư mục” | Cần thu hẹp câu | Điều cần khai là packet chưa có barrier thư mục Windows được chứng minh tương đương POSIX; không nên biến giới hạn của thiết kế thành khẳng định tuyệt đối về mọi API Windows. |
+
+**(2) Findings**
+
+Không có P0. Còn các P2 sau, đủ để yêu cầu sửa đặc tả.
+
+1. **P2 — M1/N2 mâu thuẫn vị trí rẽ nhánh và sai với contextmanager.**  
+   Vị trí: `S:59`, `S:73`.
+
+   M1 nói sửa “tại chỗ gọi”, N2 lại chỉ cho thêm dòng trong các hàm được liệt kê. Đặc biệt `_1174_lock` là generator được trang trí `@contextmanager`: `return _1174_win_lock(...)` không chuyển giao context. Phản chứng trong bộ nhớ đã chạy, rc0, thu được `RuntimeError: generator didn't yield`.
+
+   `_1174_persist` gọi `_1174_fsyncdir` và `os.link` bên trong (`P:3945`); chỉ rẽ nhánh fsync không đủ để biến toàn bộ persist thành native Windows. Rẽ nhánh ngay đầu persist sang **toàn bộ** implementation Windows thì khả thi.
+
+   **Thay M1/N2 bằng:**  
+   > “Rẽ nhánh tại đầu các primitive được liệt kê, trước thao tác Linux. Hàm thường trả về backend Windows; `_1174_lock` dùng `with _1174_win_lock(path) as handle: yield handle; return`. Giữ nguyên phần nguồn Linux còn lại. `_1174_persist` chuyển giao toàn bộ thao tác publication sang backend Windows.”
+
+2. **P2 — AST chưa bảo đảm lời khai ‘giữ nguyên byte’.**  
+   Vị trí: `S:73`.
+
+   AST có thể dùng tìm biên hàm, nhưng so cây AST bỏ qua comment và khoảng trắng. Phản chứng trong bộ nhớ đã chạy: đổi khoảng trắng trong comment hoặc câu gán làm byte khác nhưng `ast.dump` vẫn bằng nhau.
+
+   **Thay phép đo N2 bằng:**  
+   > “Dùng AST chỉ xác định biên nguồn; loại đúng khối dispatch được cho phép rồi so byte phần nguồn còn lại với base. Đột biến đổi comment, khoảng trắng và biểu thức đều phải đỏ; thêm dispatch hợp lệ phải xanh.”
+
+3. **P2 — M8/N5 khai một hợp đồng runner chưa tồn tại.**  
+   Vị trí: `S:66`, `S:76`.
+
+   Thêm phần tử thứ tư sẽ làm các vòng unpack bộ ba lỗi trước khi đo mutant. Ngoài ra chưa quy định cách chạy focused Windows, cách loại native mutants khỏi Linux full audit, và đối chứng để lỗi import/API không được tính là giết đúng chốt.
+
+   **Thay M8 bằng:**  
+   > “Giữ schema MUTANTS bộ ba. Thêm bảng nền riêng trong `packet_loop_test.py`; lọc trước mọi vòng unpack/kiểm kê. Focused Windows chạy đúng bốn mutant cùng ca đích và healthy controls; Linux ghi rõ không đo native mutants. Lỗi dựng fixture/import không được tính là mutant bị giết.”
+
+   Việc này vẫn chiếu được vào write set hiện tại, nhưng phải tính thêm kích thước.
+
+4. **P2 — Junction không tự chứng minh mutant bỏ OPEN_REPARSE_POINT bị giết.**  
+   Vị trí: `S:65–66`, `S:77`.
+
+   Nếu `_1174_win_open` mở junction ở chế độ tệp, bỏ cờ sẽ theo junction tới **thư mục**, rồi vẫn bị từ chối vì không phải tệp thường. Ca còn xanh dù chốt reparse đã mất. Nếu dùng ancestor junction thì OPEN_REPARSE_POINT trên leaf cũng không bảo vệ ancestor.
+
+   **Thay N6 bằng:**  
+   > “Ca junction gọi chế độ mở thư mục trên chính junction: bản gốc phải từ chối vì thuộc tính REPARSE_POINT; mutant bỏ cờ phải mở được thư mục đích và làm assertion đỏ. Ca ancestor junction đo riêng việc ghim từng tổ tiên. Ca symlink tệp được đo trên VM có quyền.”
+
+   Ghi rõ import `launcher.py` **chỉ được phép trong test**; hiện `S:50` cấm import nhưng M7 lại yêu cầu gọi lớp của launcher.
+
+5. **P2 — N3 có thể xanh vì bị chặn ở tầng khác.**  
+   Vị trí: `S:74`.
+
+   Admission cố ý hỏng trong `_windows1174` có thể tiếp tục tạo UNKNOWN/rc8 sau khi bỏ chốt OS. Oracle hiện hữu chỉ giết mutant pure-platform; không chứng minh chốt command vẫn tồn tại.
+
+   **Thay phép đo N3 bằng:**  
+   > “Thêm ca gọi command với resolver gắn sentinel: bản gốc phải trả đúng lý do unsupported native operating system và không gọi resolver. Bỏ chốt OS phải chạm sentinel, khiến ca đỏ. Giữ ca CLI hiện hữu làm đối chứng rc8/no-write.”
+
+6. **P2 — M2/M3 thiếu hợp đồng handle và định danh để đạt bất biến đã khai.**  
+   Vị trí: `S:60–61`.
+
+   Các API nêu có thể xây backend NTFS phù hợp, nhưng chưa đủ nếu chỉ gọi theo tên:
+
+   - `BY_HANDLE_FILE_INFORMATION` không có ChangeTime; phải lấy `FILE_BASIC_INFO` qua `GetFileInformationByHandleEx`.
+   - So metadata hai lần trên **cùng handle** không phát hiện đường dẫn đã bị đổi sang đối tượng khác; Linux còn đối chiếu `path.lstat()`.
+   - Lock handle cần quyền đọc/ghi và share mode cho phép contender mở cùng tệp; chép file share mode của `_KhoCodex` có thể làm contender thất bại khi mở, trước `LockFileEx`.
+   - Phải chốt vùng byte được khoá, thời gian giữ handle, giải phóng và cách chứng minh contender thực sự bị khoá.
+   - FileIndex 64-bit chỉ nên khai trong profile NTFS này. Không suy thành định danh 128-bit phù hợp ReFS; ReFS hiện bị loại là đúng.
+
+   **Bổ sung:**  
+   > “Định danh dùng volume serial + FileIndex64 trong profile NTFS; size/LastWriteTime từ thông tin handle, ChangeTime từ FileBasicInfo. Mở lại tên bằng no-follow để đối chiếu với handle đang đọc. Lock dùng handle đọc/ghi, share READ|WRITE, không SHARE_DELETE; mọi contender khoá cùng vùng byte và giữ handle suốt giao dịch.”
+
+   Thêm ca đổi tên/đổi entry, biến động metadata, noninheritance và contention giữa **hai process**; ca phải phân biệt lỗi mở handle với lỗi lấy khoá.
+
+7. **P2 — M4/M5 chưa đóng điều kiện publication và volume.**  
+   Vị trí: `S:62–63`.
+
+   `CreateHardLinkW` cần cùng volume. “Cùng thư mục” chưa đủ nếu topology có thể trôi qua reparse/mount. `GetDriveTypeW` cần volume root phù hợp với volume của handle, không chỉ ổ ký tự đầu vào. `MoveFileExW` không mặc nhiên thành công trên tệp đang mở; share-delete và thời điểm đóng handle quyết định hành vi.
+
+   `WRITE_THROUGH` cũng không tự chứng minh chuỗi hard-link/unlink có độ bền thư mục như Linux.
+
+   **Bổ sung:**  
+   > “Ghim topology; xác nhận temp, target parent và lock cùng volume NTFS đã đo. Đóng handle tạm trước publication; không giữ handle đích cản rename. Sharing violation/API failure phải fail-closed, không dispatch và không tự retry. Probe khai riêng atomic visibility/readback và durability_unknown; WRITE_THROUGH không được báo là bằng chứng power-loss.”
+
+   Thêm ca target tồn tại giữ nguyên byte, update khi có handle cản rename, lỗi publication và cleanup không che lỗi gốc.
+
+8. **P2 — N4 có thể đạt bằng bảng năng lực khai sẵn; M2–M4 chưa có acceptance đủ cụ thể.**  
+   Vị trí: `S:64`, `S:75`.
+
+   “Bốn mục dat” chưa định nghĩa phép đo của từng mục. Backend trả hằng bốn `dat` có thể qua các assertion được mô tả; bốn mutant cũng chưa phủ drift/readback/cleanup/handle lifetime.
+
+   **Thay N4 bằng:**  
+   > “Mỗi mục `dat` phải có kết quả thao tác thật: đọc và đối chiếu entry identity; contention hai process; create-no-replace và update exact readback; volume identity cùng allowlist. Tắt từng phép đo hoặc thay kết quả bằng hằng phải làm ca tương ứng đỏ. Durability thư mục luôn khai chưa đo được.”
+
+   N7 cần yêu cầu bằng chứng dương trên VM: ID từng ca, executed/passed và không skip. Chỉ kiểm Desktop in đúng “không đo được” chưa chứng minh đã đo bù.
+
+9. **P2 — Chưa có dự toán r1 đủ cơ sở để đóng băng dưới trần.**  
+   Vị trí: `S:35`, `S:105`.
+
+   Có ước lượng cho phạm vi bảy primitive, nhưng không có dự toán r1 theo hạng mục hay số đo phạm vi tương đương như soan-spec §3 yêu cầu. Những phần thiếu ở findings trên còn làm tăng lượng mã.
+
+   **Thay §1 bằng dự toán và cắt scope trước thi công**, theo đề xuất kích thước bên dưới; không dùng “vượt rồi hỏi” thay cho xử lý tính khả thi lúc soạn.
+
+Các P3:
+
+10. **P3 — Dòng luật dừng gộp sai hai trục ngân sách.**  
+    Vị trí: `S:89`.
+
+    ADR-0055 đổi trần **lời gọi**, không đổi trần vòng; ADR-0048 giữ trục vòng.
+
+    **Thay bằng:**  
+    > “Trần lời gọi theo dòng khai ADR-0055; trần vòng theo ADR-0048 và protocol. Chạm trần thực hiện Review Rescue Checkpoint; xin tăng quyền mang E2.”
+
+11. **P3 — Nguồn cấp việc và thời điểm đo chưa đủ chính xác.**  
+    Vị trí: `S:11`, `S:13`, `S:15`.
+
+    `05:5xZ` không phải timestamp xác định; `base` là mô tả động. Q1–Q15 và lời chủ kho không thể xác minh từ mã local, và không có URL receipt cụ thể trong đặc tả.
+
+    **Sửa:** ghi full base OID, timestamp UTC thật của lần đo lại và con trỏ receipt/comment bền cho quyết định; không trình lời trích chưa kiểm như authority đã được xác minh.
+
+Đánh giá L1–L7 và mục 4:
+
+| Luật | Đánh giá |
+|---|---|
+| L1 | Các đơn vị ca, khoá mutant, dòng thêm và tệp khá rõ. |
+| L2 | M1–M8 đều chiếu vào hai đường dẫn được phép; ngoại lệ import test cần viết rõ. |
+| L3 | Chưa đạt: N3, N6 có phép đỏ không bảo đảm phân biệt; N4 thiếu phép đo thao tác thật. |
+| L4 | `khong_ap_dung` phù hợp với packet mới. |
+| L5 | Số đếm khớp lần đo lại; timestamp gốc và base cần neo chính xác. |
+| L6 | Chưa đạt: AST có thể mù byte; mutant junction và chốt OS chưa chứng minh đổi màu đúng nguyên nhân. |
+| L7 | Không thấy ngân sách mềm hoặc câu yêu cầu hỏi/báo/chờ chủ kho thiếu mã E. Cần sửa tham chiếu trục vòng. |
+| Mục 4 | Có đủ các mục hình thức; nội dung nghiệm thu và dự toán còn thiếu như trên. |
+
+**(3) Ước lượng kích thước**
+
+Đây là dự toán reviewer, chưa có implementation nên không phải `numstat` thực đo:
+
+| Hạng mục | Dòng thêm ước lượng |
+|---|---:|
+| ctypes declarations, structures, handle lifecycle, open/read/identity | 110–170 |
+| Lock và publication | 90–140 |
+| Volume/platform/probe và dispatch | 90–140 |
+| Native/pure tests, controls, junction và đối chiếu launcher | 180–260 |
+| Bốn mutant, chọn nền, focused runner và kiểm N2 | 60–100 |
+| **Tổng** | **530–810** |
+
+Hai tệp nằm trong trần số tệp ADR-0053; phạm vi đầy đủ có rủi ro cao vượt **450 dòng thêm**. Không nên khẳng định r1 hiện tại vừa trần.
+
+Đề xuất cắt cụ thể: r1 chỉ gồm **bindings + open/read + nhận diện volume NTFS + dispatch tương ứng + focused tests**; dự toán khoảng **280–420 dòng thêm**. Chuyển lock, persist và probe giao dịch bốn primitive sang packet nối tiếp sau r1. Windows tiếp tục bị từ chối ở mọi command. Cách cắt này tạo một slice kiểm được độc lập và tránh phải nén mã kiểm soát handle để đạt trần.
+
+KET_LUAN: request_changes
+rc=0

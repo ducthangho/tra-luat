@@ -1,0 +1,33 @@
+Review đặc tả untracked trên base `a0702d06b7d3956fb91b951766c7a5d6a77a7f5b`; SHA-256 đặc tả `bf21cf4694ef2eae271517fe446ce1a2c9c9028b32430aecdcc909425844837e`. Chỉ đọc, không mạng, không chạy Windows/test runtime. Provider: `openai_codex`; transport: `machine`. Kết luận dưới đây áp dụng cho **đặc tả**, không xác nhận triển khai.
+
+| Điểm lượt 3 | Kết quả | Bằng chứng dòng |
+|---|---|---|
+| P2-R3-01 — vòng đời handle/fixture tráo tên | **Đóng về thiết kế** | M2(e), dòng 68: đóng handle đầu trước mở lại, kiểm profile/identity và đóng handle thứ hai. M5, dòng 71: hook nằm giữa hai lần mở, xác nhận handle đã đóng, thao tác tráo thành công và identity khác nhau. |
+| P3-R3-02 — tái lập driver ngoài kho | **Đóng** | N7, dòng 84: toàn văn/băm driver, head/tree, môi trường, cặp tìm/thay, diff, bản sao mới, đối chứng và phân loại đúng assertion/fixture. §10 dòng 114 giữ rõ phụ thuộc hồ sơ land. |
+| Đề xuất khai handle metadata | **Đã bổ sung** | M5, dòng 71: `FILE_WRITE_ATTRIBUTES`, share `READ|WRITE|DELETE`, `OPEN_EXISTING`; truy vấn xác nhận metadata thực sự đổi. |
+| Đề xuất base OID đầy đủ cho N2 | **Đã bổ sung** | N2, dòng 79: dùng OID đầy đủ từ lease; thiếu object/lỗi `git show` phải đỏ, không fallback. |
+
+Không thấy P0–P2 mới. Có **một finding P3** thuộc lớp câu cũ sót sau sửa hợp đồng:
+
+**P3-R4-01 — §10 mô tả sai thời điểm fixture tráo tên (dòng 115).**  
+Cụm “đổi tên thư mục cha khi tệp con đang mở” trái với M2(e)/M5: handle đầu phải đóng trước hook. Câu này có thể khiến người triển khai dựng lại fixture đã bị loại.
+
+Câu thay thế:
+
+> Các fixture M5 (đổi tên thư mục cha sau khi handle đọc đầu đã đóng và trước lần mở lại tên; đổi metadata bằng handle `FILE_WRITE_ATTRIBUTES` trong khi handle đọc vẫn mở) là thiết kế chưa kiểm thực trên Windows; không dựng được ⇒ ca ghi KHÔNG ĐO ĐƯỢC và tiêu chí liên quan chưa đạt.
+
+Đối chiếu nhanh L1–L7:
+
+| Luật | Kết quả |
+|---|---|
+| L1 | Đơn vị đếm rõ: ca, khóa đột biến, tệp và dòng thêm. |
+| L2 | M1–M6 chiếu vào hai tệp write set; driver được tách ngoài kho. |
+| L3 | N1–N9 có điều kiện làm đỏ; thiếu bằng chứng không được tính đạt. |
+| L4 | `khong_ap_dung` phù hợp với packet không phải khắc phục. |
+| L5 | Có mốc đo/base; đo lại khớp 6.359/16.566 dòng và tập REQUIRED/BOTH 85/12. Chưa xác minh lại toàn bộ số liệu/gate lịch sử. |
+| L6 | N2 có phản chứng âm/dương; N7 kiểm số khớp và lỗi fixture. |
+| L7 | §7 dẫn ADR/protocol và mã E; không thêm ngân sách mềm. |
+
+§1/§3 nhất quán với primitive đứng riêng và N2/N3; N7 giữ yêu cầu tái lập; N8 quy định phép đo bù symlink trên VM. Không mở lại điểm đã đóng ở lượt trước.
+
+KET_LUAN: approve

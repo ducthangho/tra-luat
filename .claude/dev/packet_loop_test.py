@@ -13692,8 +13692,8 @@ MUTANTS["m1174_api_repo_env"] = ('env.pop("GH_REPO",None)','pass # retain caller
 MUTANTS["m1174_transport_timeout"] = ('remaining>0,"transport deadline"','True,"transport deadline"',["wp1174_admission_candidate_root"])
 
 
-MUTANTS["m1174_transport_orphan"] = ('try:os.killpg(child.pid,signal.SIGKILL)\n        except ProcessLookupError:pass',
-    'try:\n            if child.poll() is None:os.killpg(child.pid,signal.SIGKILL)\n        except ProcessLookupError:pass',["wp1174_admission_candidate_root"])
+MUTANTS["m1174_transport_orphan"] = ('try:os.killpg(child.pid,signal.SIGKILL)\n            except ProcessLookupError:pass',
+    'try:\n                if child.poll() is None:os.killpg(child.pid,signal.SIGKILL)\n            except ProcessLookupError:pass',["wp1174_admission_candidate_root"])
 MUTANTS["m1174_collector_expired_entry"] = ('last_status,dag,earliest = "UNKNOWN",False,None','last_status,dag,earliest = "RECORDED_EARLIEST_MATCH",False,None',["wp1174_lifecycle_first_publication"])
 MUTANTS["m1174_git_late_result"] = ('if deadline is not None and time.time()>=deadline:return -1,b""','if False:return -1,b""',["wp1174_lifecycle_first_publication"])
 MUTANTS["m1174_publication_preimage"] = ('candidates = [("after", after)] + ([] if before == zero else [("before", before)])',

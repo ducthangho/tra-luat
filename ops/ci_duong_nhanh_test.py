@@ -3568,7 +3568,10 @@ def t100_packet_loop_chay_chi_khi_diff_cham_phu_thuoc():
     bang(f("pull_request", {"scripts/tl.py", "ops/land/x.yaml"})[0] == "bo_qua", "PR khong cham tap phu thuoc phai bo_qua")
     for p in PL_PHU_THUOC:
         bang(f("pull_request", {"scripts/tl.py", p + "x" * p.endswith("/")})[0] == "chay", f"PR cham {p!r} phai chay")
-    bang(f("push", {".claude/dev/packet_loop.py"})[0] == "bo_qua", "push nhanh mac dinh phai bo_qua ke ca khi cham bo ca (M2)")
+    for doi in ({".claude/dev/packet_loop.py"}, {"scripts/tl.py", "ops/land/x.yaml"}, set(), None):   # wp1353 M3: push => chay, moi diff
+        kq, ly_do = f("push", doi)
+        bang(kq == "chay", f"push nhanh mac dinh diff={doi!r}: phai chay (wp1353 go M2 cua wp1343), duoc {kq!r}")
+        bang("push nhanh mac dinh: chay bo ca packet-loop hau merge" in ly_do, f"push diff={doi!r}: ly do phai noi ro hau merge: {ly_do!r}")
     for sk, doi in (("pull_request", None), ("pull_request", set()), ("pull_request", {"scripts/../x"}), ("pull_request", {b"x"}),
                     ("workflow_dispatch", {"scripts/tl.py"}), ("schedule", {"scripts/tl.py"}), ("", {"scripts/tl.py"})):
         bang(f(sk, doi)[0] == "chay", f"su_kien={sk!r} diff={doi!r}: phai chay (fail-closed)")
@@ -4276,7 +4279,10 @@ _T100, _T101, _T102, _T103 = (tuple(c for c in CA if c.startswith(f"t10{i}_")) f
 DOT_BIEN += [   # wp1343: N1 (phan loai), N2/M7 (phan hoach), N3 (gom), M6 (chot cua main goc)
     ("pl_cham_phu_thuoc_van_bo_qua", _ma('        return PL_CHAY, f"PACKET_LOOP: chay vi', '        return PL_BO_QUA, f"PACKET_LOOP: chay vi'), _T100),
     ("pl_khong_do_duoc_thi_bo_qua", _ma('        return PL_CHAY, f"PACKET_LOOP: chay (su', '        return PL_BO_QUA, f"PACKET_LOOP: chay (su'), _T100),
-    ("pl_push_van_chay", _ma('    if su_kien == "push":\n        return PL_BO_QUA', '    if su_kien == "pushx":\n        return PL_BO_QUA'), _T100),
+    # wp1353: `pl_push_van_chay` (wp1343) mat van ban dich. Hai dot bien thay: khoi phuc push => bo_qua; va bo nhanh push (ket qua van
+    # `chay` nho fail-closed, chi LY DO doi) de khoa dong log M1.
+    ("pl_push_lai_bo_qua", _ma('        return PL_CHAY, "PACKET_LOOP: chay vi push', '        return PL_BO_QUA, "PACKET_LOOP: chay vi push'), _T100),
+    ("pl_push_mat_ly_do_rieng", _ma('    if su_kien == "push":\n        return PL_CHAY', '    if su_kien == "pushx":\n        return PL_CHAY'), _T100),
     ("pl_manh_lech_chi_so", _manh("manh[len(dinh) + k % (n - len(dinh))]", "manh[k % (n - len(dinh))]"), _T101),
     ("pl_manh_bo_sot_ca", _manh("enumerate(t for t in ten if not", "enumerate(t for t in ten[1:] if not"), _T101),
     ("pl_ca_dai_vao_cong", _manh("    ten = [t for t in ten if t not in CA_DAI]\n", ""), _T101),

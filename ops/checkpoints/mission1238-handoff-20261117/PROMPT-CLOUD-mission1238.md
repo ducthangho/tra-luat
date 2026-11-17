@@ -1,0 +1,21 @@
+Bạn là dispatcher kế nhiệm trên Cloud cho repo ducthangho/tra-luat, Mission #1238 Proxima + Playwright tùy chọn; công việc hiện hành là Packet nghiệm thu bổ sung #1319.
+
+Đọc START-HERE.md, HANDOFF.md, PLAN.md, SOURCES.json và MANIFEST.json trong ZIP đính kèm. Kiểm SHA256 mọi tệp trước khi dùng. Đọc GitHub trực tiếp để lấy sự thật mới: #1238, #1319, #1287, #1297–#1300 và PR #1306. Không khởi chạy lại P2–P6 từ gói lịch sử09/11.
+
+Mục tiêu của chủ kho: "Nghiệm thu đủ đi". Mission #1238 đã closed theo phạm vi vận hành/canary được giao; #1319 bổ sung audit raw evidence và các phần chưa chứng minh. Không coi closeout công khai hoặc review aggregate là raw audit/human audit mới.
+
+Đọc AGENTS.md → CONTEXT.md → docs/PROTOCOL_DA_PHIEN.md → CLAUDE.md → spec/authority hiện hành → ops/KE_HOACH_THI_CONG_DA_PROVIDER.md từ canonical hiện tại; đọc SKILL.md nếu chạm runtime/pháp luật. Xác minh remote, exact master/head/tree, revision/spec hash, write-set, Review Class, provider/surface và ownership. Công bố takeover duy nhất cho #1319 sau khi kiểm dispatcher/lease hiện hữu; không tự giành vai từ phiên đang hoạt động.
+
+Làm ngay các việc đọc/chuẩn bị không bị chặn:
+1. Lấy gói nghiệm thu riêng cuối13/11 từ phiên/host giữ bằng chứng: ma trận case/U1–U12, raw normal+induced, operator cuối+manifest, exact-artifact reviews, quyết định owner về source-policy/target, runbook/uninstall/retention/rollback. ZIP này KHÔNG chứa gói raw đó. Tìm qua durable references/công cụ kết nối trước khi hỏi người dùng. Giữ dữ liệu riêng ngoài public repo.
+2. Lập ma trận đủ12tiêu chí §11 kế hoạch, U1–U12 và4lựa chọn add-on/core độc lập; mỗi hàng ghi source/hash/exact code/host/command/rc/positive evidence/giới hạn. Tách passed/failed/skipped/not_run; phân biệt fixture/carry-forward/direct raw verification.
+3. U8: đối chiếu matching binary+test-data restore với bằng chứng profile/phiên đã thực sự phục hồi; không hứa giữ đăng nhập. Kiểm release hằng ngày: phân biệt manual check với scheduler thật.
+4. NSIS thực/migration khác phiên bản/runtime promotion chưa được nghiệm thu trước: lập bounded design với đúng version/artifact/account/target/path/test-profile/rollback và tác động. Không tự coi chúng là yêu cầu hồi tố bắt buộc của mọi canary cũ; phân loại theo spec/owner authority.
+5. Refresh trạng thái thiết bị/identity/khóa/process/ACL/disk/auth hiện tại. Snapshot14/11 ASUS offline, Desktop+VM bị #1315 giữ khóa chỉ là LỊCH SỬ. Không xóa khóa, đổi target tự động, chạy chồng hoặc suy lease expired nghĩa đã cleanup.
+6. Chốt spec/write-set/budget/generation/lease hợp lệ trước thi công mới; dùng Executor độc lập và Reviewer đọc-only/context độc lập. Ưu tiên theo chỉ thị gần nhất: Codex Executor; Reviewer model hoặc effort cao hơn. Nếu môi trường không đo được model/effort, khai đúng KHONG_do_duoc. Claude có thể làm cross-review khi khả dụng theo spec; không mặc định yêu cầu quota Claude.
+7. Chỉ chạy bounded native tests còn thiếu sau khi đủ artifact/ownership/target rảnh. Không Windows CI hoặc full Windows mutant CI; test Windows tập trung được phép. Không chạy lại gate đã đạt nếu không có thay đổi/rủi ro mới.
+8. Freeze evidence bundle và review độc lập đúng artifact; ghi verdict/raw hashes/readback, hoàn tất #1319 chỉ khi đủ yêu cầu. Không tự đóng từ bản tổng hợp thiếu raw evidence. Khi thiếu nguyên liệu thật, ghi blocker cụ thể và làm tiếp phần độc lập.
+
+Ủy quyền tiếp tục thực hiện/merge/land/ghi sổ trong phạm vi đã cấp được giữ, không hỏi lại chung chung. Không reset budget/counters, không tái dùng lease đã đóng hoặc trust khác thư mục. U6 personal/noncommercial đã xác nhận. Không gửi inference để healthcheck; không retry/fallback model/gateway, không tự login/2FA/copy profile, đổi endpoint/service/account/ACL hoặc deploy LIVE từ câu lệnh nghiệm thu chung. Không gửi message ngoài repo nếu chưa được cho phép.
+
+Bắt đầu bằng báo cáo ngắn: GitHub facts mới, nguồn raw đã tìm được/thiếu, ai đang giữ việc, ba bước tiếp theo; sau đó tiếp tục làm trong phạm vi có thể. Trả lời bằng tiếng Việt.

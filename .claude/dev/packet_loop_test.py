@@ -14476,37 +14476,78 @@ def _activity_case1370(kind):
             receipt,calls=remote();assert calls==[] and receipt["status"]==ok and receipt["earliest"]["id"]=="12" and receipt["dag_coverage"] is True,(calls,receipt)
             feed()
             # Missing feed OIDs and missing tip OIDs share the SAME single fetch.
-            # The fetch receives ONE globally sorted, duplicate-free list. A
-            # commit SHA differs from run to run, so BOTH lexical orders are
-            # built on purpose: a tip OID that sorts before the missing feed
-            # OID and one that sorts after it (fixture content is retried until
-            # the wanted order holds).
-            _g(source,"reset","-q","--hard")
-            def remote_commit(branch):
-                _g(source,"reset","-q","--hard");_g(source,"checkout","-q","-b",branch,root)
-                (source/(branch+".txt")).write_text(branch+"\n");_g(source,"add",branch+".txt");_g(source,"commit","-qm","object absent from the collector repository: "+branch)
-                return _g(source,"rev-parse","HEAD")
-            def ordered_tree(label,holds):
-                for attempt in range(400):
-                    oid=remote_tree("%s rescue tree, remote only, attempt %d\n"%(label,attempt))
-                    if holds(oid) and oid!=T and not local(oid):return oid
-                raise AssertionError("fixture: no remote-only tree with the wanted lexical order ("+label+")")
-            X1,X2=remote_commit("elsewhere"),remote_commit("elsewhere2")
-            for label,X,holds in (("tip-before-feed",X1,lambda oid:oid<X1),("tip-after-feed",X2,lambda oid:oid>X2)):
-                T2=ordered_tree(label,holds)
-                assert not local(T2) and not local(X) and len({T,T2,X})==3 and (T2<X)==(label=="tip-before-feed"),"fixture: "+label
+            # The fetch receives ONE globally sorted, duplicate-free list. BOTH
+            # lexical orders are built on purpose (a tip OID that sorts before
+            # the missing feed OID, and one that sorts after it) from
+            # DETERMINISTIC real Git objects: fixed blob and tree contents,
+            # fixed parentage and explicit author/committer name, email, date
+            # and timezone. Their OIDs are the constants below on every run and
+            # machine; nothing is searched for and no clock is read.
+            fixed_env=dict(GIT_AUTHOR_NAME="WP1370 Fixture",GIT_AUTHOR_EMAIL="wp1370-fixture@example.invalid",GIT_AUTHOR_DATE="1700000000 +0700",
+                GIT_COMMITTER_NAME="WP1370 Fixture",GIT_COMMITTER_EMAIL="wp1370-fixture@example.invalid",GIT_COMMITTER_DATE="1700000100 +0700",TZ="UTC")
+            # label -> (pick of the tip tree text, tip tree OID, feed commit OID)
+            fixed_base="dd736288db13b3defe7de9b93477890e9a4cb3a7"
+            fixed_pairs={"tip-before-feed":(0,"55ea52907c87467bdaccca8aeb6e8249b68c1581","6cc64688490813109f5c982248d2d740dab2b5fc"),
+                "tip-after-feed":(5,"f7dc09c44fc2421aaf9cffd6d1e0888560532030","c1b99073af845dc5e74f2a37de78d6eafa7a97be"),
+                "tip-shared":(0,"46655910bba969a1f9c2becee0de58dfc5e8233f","8b20d65499d37eed44d9006249d5f63277654a3b")}
+            fixed_want=dict({"base":fixed_base},**{label+kind_:oid for label,(_,tree,commit) in fixed_pairs.items() for kind_,oid in (("/tree",tree),("/commit",commit))})
+            def plumb(repo,*argv,data=None):
+                done=subprocess.run(["git","-c","i18n.commitEncoding=UTF-8",*argv],cwd=repo,input=data,capture_output=True,env={**os.environ,**fixed_env})
+                assert done.returncode==0,("fixture: git "+argv[0]+" failed",done.stderr)
+                return done.stdout.decode("ascii").strip()
+            def fixed_tree(repo,path,text):
+                blob=plumb(repo,"hash-object","-w","-t","blob","--stdin",data=text.encode("ascii"))
+                return plumb(repo,"mktree",data=("100644 blob %s\t%s\n"%(blob,path)).encode("ascii"))
+            def fixed_objects(repo):
+                made={"base":plumb(repo,"commit-tree",fixed_tree(repo,"base.txt","wp1370 fixed base\n"),"-m","wp1370 fixed base")}
+                for label,(pick,_,_) in fixed_pairs.items():
+                    made[label+"/commit"]=plumb(repo,"commit-tree",fixed_tree(repo,label+".txt",label+"\n"),"-p",made["base"],
+                        "-m","wp1370 object absent from the collector repository: "+label)
+                    made[label+"/tree"]=fixed_tree(repo,"rescue.txt","wp1370 %s rescue tree, remote only, pick %d\n"%(label,pick))
+                return made
+            # Preselected pairs, checked before anything is built: the wanted
+            # lexical order per scenario and seven distinct OIDs besides T.
+            assert fixed_pairs["tip-before-feed"][1]<fixed_pairs["tip-before-feed"][2],"fixture: preselected tip-before-feed pair must have tip OID < feed OID"
+            assert fixed_pairs["tip-after-feed"][1]>fixed_pairs["tip-after-feed"][2],"fixture: preselected tip-after-feed pair must have tip OID > feed OID"
+            assert fixed_pairs["tip-shared"][1]<fixed_pairs["tip-shared"][2],"fixture: preselected tip-shared pair must have tip OID < feed OID"
+            assert len(set(fixed_want.values())|{T})==8 and all(re.fullmatch("[0-9a-f]{40}",oid) for oid in fixed_want.values()),"fixture: preselected OIDs must be distinct full SHA-1 names"
+            # Surrounding clock and Git date environment vary on purpose (one
+            # variant per scenario, set in THIS process and inherited by every
+            # child): the objects must not depend on them. The first variant is
+            # the one that broke the former searched fixture (Codex review 6).
+            ambient=(dict(GIT_AUTHOR_DATE="1700000531 +0000",GIT_COMMITTER_DATE="1700000531 +0000",TZ="Asia/Ho_Chi_Minh"),
+                dict(GIT_AUTHOR_DATE="2001-02-03T04:05:06-0800",GIT_COMMITTER_DATE="2037-12-31T23:59:59+1400",TZ="America/St_Johns",
+                     GIT_AUTHOR_NAME="Ambient Author",GIT_AUTHOR_EMAIL="ambient-author@example.invalid"),
+                dict(GIT_AUTHOR_DATE="@86400 -1200",GIT_COMMITTER_DATE="@4102444800 +0545",TZ="Pacific/Kiritimati",
+                     GIT_COMMITTER_NAME="Ambient Committer",GIT_COMMITTER_EMAIL="ambient-committer@example.invalid"))
+            message="fixture: deterministic Git objects must have the preselected OIDs in every clock/date environment (%s): built %r, preselected %r"
+            for n,variant in enumerate(ambient):
+                probe=c.tmp/("wp1370-fixed-%d"%n);_g(c.tmp,"init","-q","--bare",str(probe))
+                with patch.dict(os.environ,variant):made=fixed_objects(probe)
+                assert made==fixed_want,message%("probe %d"%n,made,fixed_want)
+            with patch.dict(os.environ,ambient[-1]):made=fixed_objects(source)
+            assert made==fixed_want,message%("remote",made,fixed_want)
+            assert _g(source,"rev-parse",fixed_base+"^@")=="" and all(_g(source,"rev-parse",commit+"^@")==fixed_base for _,_,commit in fixed_pairs.values()),"fixture: fixed parentage"
+            assert not any(local(oid) for oid in fixed_want.values()),"fixture: the deterministic objects must exist only on the remote before their pass"
+            for variant,label in zip(ambient,("tip-before-feed","tip-after-feed")):
+                _,T2,X=fixed_pairs[label]
+                assert _g(source,"cat-file","-t",T2)=="tree" and _g(source,"cat-file","-t",X)=="commit" and not local(T2) and not local(X),"fixture: remote-only pair ("+label+")"
+                assert len({T,T2,X})==3 and (T2<X)==(label=="tip-before-feed"),"fixture: "+label
                 feed(_activity1370(7,"branch_creation","refs/heads/"+label,Z,X,"2026-11-04T08:20:00Z"));tip((name,T,"tree"),("refs/tags/rescue/"+label,T2,"tree"))
-                refs=_g(w,"for-each-ref");receipt,calls=remote();expected=sorted({T2,X})
+                refs=_g(w,"for-each-ref");expected=sorted({T2,X})
+                with patch.dict(os.environ,variant):receipt,calls=remote()
                 assert len(calls)==1 and calls[0]==expected and len(set(calls[0]))==len(calls[0]),(
                     "feed and tip OIDs must share one fetch per pass, as one globally sorted duplicate-free list (%s): %r, expected %r"%(label,calls,[expected]))
                 assert receipt["status"]==ok and local(T2) and local(X) and _g(w,"for-each-ref")==refs and receipt["dag_coverage"] is True,(label,receipt)
             # The same tip OID named by several refs and by the feed is asked once.
-            X3=remote_commit("elsewhere3");T3=ordered_tree("tip-shared",lambda oid:oid<X3)
+            _,T3,X3=fixed_pairs["tip-shared"]
+            assert _g(source,"cat-file","-t",T3)=="tree" and _g(source,"cat-file","-t",X3)=="commit" and not local(T3) and not local(X3),"fixture: remote-only pair (tip-shared)"
             feed(_activity1370(7,"branch_creation","refs/heads/elsewhere3",Z,X3,"2026-11-04T08:20:00Z"),_activity1370(6,"branch_creation","refs/tags/rescue/shared",Z,T3,"2026-11-04T08:19:00Z"))
             tip((name,T,"tree"),("refs/tags/rescue/shared",T3,"tree"),("refs/tags/rescue/shared-again",T3,"tree"),("refs/tags/rescue/shared-commit",X3,"commit"))
-            receipt,calls=remote();expected=sorted({T3,X3})
+            refs=_g(w,"for-each-ref");expected=sorted({T3,X3})
+            with patch.dict(os.environ,ambient[2]):receipt,calls=remote()
             assert len(calls)==1 and calls[0]==expected and len(set(calls[0]))==len(calls[0]),"repeated OIDs must be fetched once, sorted: %r, expected %r"%(calls,[expected])
-            assert local(T3) and local(X3),receipt
+            assert local(T3) and local(X3) and _g(w,"for-each-ref")==refs,receipt
             # Absent stays unmeasurable against the real remote too: a tip that
             # no repository has fails the one fetch and is never guessed.
             gone="e"*40;feed();tip((name,T,"tree"),("refs/tags/rescue/gone",gone,"tree"))

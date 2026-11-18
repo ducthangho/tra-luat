@@ -65,7 +65,7 @@
   "lease_expires_at_utc": "2026-11-18T10:20:09Z",
   "limits": {
     "Codex_spec_review": 3,
-    "Claude_author": 9,
+    "Claude_author": 10,
     "Codex_source_review": 6,
     "source_push": 2,
     "draft_PR": 1,
@@ -169,6 +169,20 @@
     ],
     "ly_do": "PR #1380 CI run 44207104342: 1/106 red (wp1174_activity_tip_non_commit), fix 6 dropped the global sort of the fetch OID list",
     "can_cu": "https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6965198663",
+    "ai_nang": "owner decision in chat, recorded by Claude Code coordinator"
+  },
+  "author_fix7b_prompt_path": "ops/prompts/wp1370-r1-g1-claude-author-fix7b.txt",
+  "author_fix7b_prompt_sha256": "61339917421507ae5eaba0fa48677b640e0abe1a207fef51df6682fa98bb6766",
+  "author_fix7_aborted": {
+    "ly_do": "owner chose to stop fix 7 (~3 min, no handoff) and rerun combined with connector P2 (fetch timeout orphans transport descendant)",
+    "partial_diff_discarded": true
+  },
+  "nang_tran_owner_20261118b": {
+    "Claude_author": [
+      9,
+      10
+    ],
+    "can_cu": "https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6965256096",
     "ai_nang": "owner decision in chat, recorded by Claude Code coordinator"
   }
 }

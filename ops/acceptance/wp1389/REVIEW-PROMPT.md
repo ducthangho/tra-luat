@@ -143,3 +143,20 @@ là prompt, KHÔNG phải lease. Thứ định danh mã là **băm commit**, kh�
   2. Tìm lỗi MỚI do bản sửa đưa vào, đặc biệt ở các phép so `"$(…; echo .)"` và khối Gỡ PowerShell.
   3. Chạy N1 đúng một lần, như lượt 3. Báo dòng `SOURCE` và dòng `TONG`.
   4. Ghi verdict vào `scratch/VERDICT.md`. Tách riêng finding chặn merge và giới hạn đã khai.
+
+## Lượt 7 (delta; chủ kho nâng trần Codex 6 → 7, ghi ở lease `budget_nang_tran_4`)
+
+- Lượt 6 ở `d0d4879`: `request_changes` (1 P1 + 2 P2 chặn merge), nguyên văn trong `VERDICT.md`.
+- Sửa ở `8be8070`, chi tiết trong `RESULTS.md` §10:
+  - P1: PowerShell so đường dẫn đích và thư mục hash bằng `[string]::Equals(…, [StringComparison]::Ordinal)`, không dùng `-ceq`.
+  - P2: đầu Cleanup và Gỡ so TỪNG BYTE `00-sophien.txt`/`11-daemon-path.txt` với nội dung mà Capture/Cleanup tạo: bash
+    `printf … | cmp -s -- - <tệp>`, PowerShell `ReadAllBytes` → base64 → so ordinal.
+  - P3 (gợi ý): sentinel `realpath` chỉ in khi lệnh thành công (`&& echo .`).
+  - Ca mới: N26 (tên có U+00AD), D12/G13/G14 (byte NUL ở bash, BOM ở PS), kèm đột biến trở về so chuỗi. Đột biến PS
+    `ceq-path` ĐO hành vi runtime: lọt ⇒ P1 tái hiện trên shell đó; không lọt ⇒ ghi SKIP "KHÔNG TÁI HIỆN".
+- Việc lượt 7:
+  1. Với TỪNG finding chặn merge của lượt 6, xác minh trên mã ở H: đã sửa, sửa một phần, hay chưa. Căn cứ là dòng mã.
+  2. Tìm lỗi MỚI do bản sửa đưa vào: pipeline `printf | cmp` trong chuỗi `&&`/`||` (không có `pipefail`), cách PowerShell
+    mở dòng tiếp sau dấu phẩy có chú thích, mã hoá UTF-8 không BOM ở cả hai phía phép so.
+  3. Chạy N1 đúng một lần, như lượt 3. Báo dòng `SOURCE` và dòng `TONG`.
+  4. Ghi verdict vào `scratch/VERDICT.md`. Tách riêng finding chặn merge và giới hạn đã khai.

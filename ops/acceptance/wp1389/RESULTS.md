@@ -3,14 +3,14 @@
 Spec: `ops/specs/wp1389-r1.md` (sha256 `12257fa8…10bc`). Lease: `ops/leases/wp1389-r1-g1-claude.yaml`.
 Base `eca1d125b8`. SKILL tại base: blob `678ba2f0`, sha256 `1799c2bd…faadb`.
 
-**Head mã đã đo (lượt 6): `1d7b9f4e957ea0ba9c93a080c439a7a4e3d582a8`** (tree `ec27cc26…`).
-- SKILL: sha256 `a435d08248f38e609ad953149ff2f832305a1b71610fae39ca1a34b8190ccadf`.
-- `residue_matrix.sh` `b76adab6…`, `residue_matrix.ps1` `852494ba…`.
-- Lượt 5 (`d7960ee`, SKILL `75e9be5f…`) giữ nguyên số đo ở các bảng dưới để đối chiếu.
+**Head mã đã đo (lượt 7): `8be80701291ece7026fb3c695d8792bbe205d06d`** (tree `1ff0f12b…`).
+- SKILL: sha256 `01b08e953c5f012fdb7ab2f2c0c62a913d670536da47360d30c6469e66f1a776`.
+- `residue_matrix.sh` `37f72ee3…`, `residue_matrix.ps1` `5b6ebe43…`.
+- Số đo các lượt trước (lượt 5 `d7960ee`, lượt 6 `1d7b9f4`) giữ nguyên ở §2–§5, §9 để đối chiếu.
 - Commit sau head này chỉ đổi tệp này, `REVIEW-PROMPT.md`, `VERDICT.md` và lease. **Chủ kho chấp nhận** (AskUserQuestion
   18-11-2026 ~14:05Z, ghi ở lease `exact_head_chap_nhan`) dùng phép đo N1–N4 trên head mã đã đo cho head cuối khi
-  `git diff --exit-code 1d7b9f4 <head> -- .agents ops/acceptance/wp1389/residue_matrix.sh ops/acceptance/wp1389/residue_matrix.ps1`
-  trả 0 (lượt 5 áp với `d7960ee`). Đây là quyết định của chủ kho cho finding P2 "exact H" của Codex lượt 4, không phải phép đo trên head cuối.
+  `git diff --exit-code 8be8070 <head> -- .agents ops/acceptance/wp1389/residue_matrix.sh ops/acceptance/wp1389/residue_matrix.ps1`
+  trả 0 (lượt 5 áp với `d7960ee`, lượt 6 với `1d7b9f4`). Đây là quyết định của chủ kho cho finding P2 "exact H" của Codex lượt 4, không phải phép đo trên head cuối.
 
 ## Lịch sử (rút gọn; chi tiết từng lượt trong git log và `VERDICT.md`)
 
@@ -23,7 +23,8 @@ Base `eca1d125b8`. SKILL tại base: blob `678ba2f0`, sha256 `1799c2bd…faadb`.
 | `429fb5b` | chủ kho nâng trần Codex 3 → 4. Bản vá: neo nonce, kiểm liên kết trước `close`, kênh base64 UTF-8, ma trận TOÀN LUỒNG | Codex lượt 4 ở `999f5fc`: `request_changes` (1 P1 + 4 P2 chặn merge) |
 | `ff34b2c` | sửa theo lượt 4 (§8) | local Windows bắt một lỗi đột biến PS (W7) |
 | `d7960ee` | vá W7 | đo lượt 5 (§2–§5, §8). Codex lượt 5 ở `376e9c2` (mã trùng byte): `request_changes` (1 P1 + 2 P2 chặn merge) |
-| **`1d7b9f4`** | chủ kho nâng trần Codex 5 → 6; sửa theo lượt 5 (§9) | **đo cuối** (§9). Codex lượt 6 ở `d0d4879` (mã trùng byte): `request_changes` (1 P1 + 2 P2 chặn merge) — trần Codex 6/6 đã dùng hết |
+| `1d7b9f4` | chủ kho nâng trần Codex 5 → 6; sửa theo lượt 5 (§9) | đo lượt 6 (§9). Codex lượt 6 ở `d0d4879` (mã trùng byte): `request_changes` (1 P1 + 2 P2 chặn merge) |
+| **`8be8070`** | chủ kho nâng trần Codex 6 → 7; sửa theo lượt 6 (§10) | **đo cuối** (§10) |
 
 ## 0. Thiết kế (vì sao (b), và cách lấy sổ phiên)
 
@@ -216,3 +217,25 @@ trích giữa hai nền.
 
 - KHÔNG ĐO ĐƯỢC trên Windows (không tạo được symlink tệp): N5, D10, G9, G10 và các đột biến record-reparse, go-record-reparse.
 - Khoá Windows: lấy 14:18:59Z (cả hai rỗng), nhả 14:27:39Z (0 byte); thêm 3 dòng `do-luong.csv` (tổng 23).
+
+## 10. Lượt 7 — sửa theo Codex lượt 6, đo trên `8be8070`
+
+| finding lượt 6 | sửa ở SKILL | ca đo (+ đột biến) |
+|---|---|---|
+| P1 PowerShell `-ceq` so theo văn hoá, có thể bỏ qua U+00AD ⇒ xoá tệp sai tên | đường dẫn đích (bước dọn) và thư mục hash (trước `open`) so bằng `[string]::Equals(…, Ordinal)` | N26 (`<nonce>` + U+00AD + `.err`) ⇒ dừng, tệp nguyên. **Đột biến `ceq-path` trở về `-ceq` ⇒ LỌT trên CẢ PS 5.1 LẪN pwsh 7: bản cũ CHÉP rồi XOÁ tệp sai tên. P1 là lỗi THẬT, tái hiện trên Windows.** |
+| P2 so biên nhận qua chuỗi (bash `$(…)` bỏ NUL, PS `ReadAllText` bỏ BOM) | đầu Cleanup và Gỡ so TỪNG BYTE: bash `printf … \| cmp -s -- - <tệp>`, PS `ReadAllBytes` → base64 → ordinal | D12 (00 thêm NUL/BOM ⇒ dừng trước `close`), G13 (00), G14 (11) ⇒ GIỮ; đột biến trở về so chuỗi: record-bytes→D12, go-record-bytes→G13, go-receipt-bytes→G14, đều lọt trên cả bash lẫn PS |
+| P3 (gợi ý) `echo .` che rc của `realpath` | `realpath … && echo .` | các ca liên kết cũ vẫn đạt |
+
+- N22 (giả `cmp` lỗi) chuyển sang chạy riêng đoạn dọn: đầu Cleanup nay cũng dùng `cmp`, nên `cmp` giả dừng nó trước; ca
+  đòi thông báo đúng bước so bản sao.
+
+| phép đo | kết quả |
+|---|---|
+| N1 bash (Linux, node v24.19.0) | `TONG: 123 dat / 123`, 43 đột biến; `SOURCE 01b08e95… pre_frag 79d485ba… dau_frag 84a893f5…` |
+| N2 PS 5.1 | `TONG: 122 dat / 122 (bỏ qua 6)`, out `dad6670c…` |
+| N2 pwsh 7.6.10 | `TONG: 122 dat / 122 (bỏ qua 6)`, out `0bed7e20…` |
+| N3 Linux native | `tl-pw-6f15921bd285`, hash `049d9731e692b377`: Setup/Pin/Cleanup OK, `deleted: false`; khối Gỡ: `GO_DH` đúng, `con_ton_tai=khong`; `~/.cache/ms-playwright` trước = sau **trùng byte** `8c247ab0…` |
+| N4 Windows native (pwsh 7) | `tl-pw-bc2e29b9f19d`, hash `3a0502c1880c81ec`: `CLEANUP OK`, `deleted: false`; khối Gỡ: `GODH` đúng, `exists_after=False`; `ms-playwright` trước = sau **trùng byte** `a36424f6…`; 15 `.err` cũ nguyên. Out Cleanup `3208135d…`, Gỡ `e1735e64…` |
+
+- KHÔNG ĐO ĐƯỢC trên Windows (không tạo được symlink tệp): N5, D10, G9, G10 và đột biến record-reparse, go-record-reparse.
+- Khoá Windows: lấy 14:42:01Z (cả hai rỗng), nhả 14:48:14Z (0 byte); thêm 3 dòng `do-luong.csv` (tổng 26).

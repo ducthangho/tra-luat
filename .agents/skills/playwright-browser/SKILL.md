@@ -199,7 +199,7 @@ chay_ghi() { local ten=$1 rc; shift
     D=$(printf %s "${so%%$'\n'*}" | base64 -d) && DH=$(printf %s "${so#*$'\n'}" | base64 -d) &&
     case "$D$DH" in *$'\n'*) false;; esac && case "$D" in /*) ;; *) false;; esac &&
     [ "$DH" = "$D/${DH##*/}" ] && [[ "${DH##*/}" =~ ^[0-9a-f]{16}$ ]] &&
-    [ "$(realpath -m -- "$DH"; echo .)" = "$DH"$'\n.' ] &&   # không thành phần nào là liên kết; `echo .` giữ LF cuối mà $(…) cắt
+    [ "$(realpath -m -- "$DH" && echo .)" = "$DH"$'\n.' ] &&   # không thành phần nào là liên kết; `echo .` giữ LF cuối mà $(…) cắt
     pre=$([ ! -e "$D" ] || find "$D" -mindepth 2 -maxdepth 2 -name "*$TL_PW_SESSION*" -print) && [ -z "$pre" ] &&
     [ ! -e "$TL_PW_RUN/00-sophien.txt" ] && [ ! -L "$TL_PW_RUN/00-sophien.txt" ] &&   # mọi mục có sẵn (cả FIFO) ⇒ dừng
     ( set -C; printf '%s\n%s\n%s\n' "$D" "$DH" "$TL_PW_SESSION" > "$TL_PW_RUN/00-sophien.txt" ) ) ||
@@ -250,7 +250,7 @@ function Invoke-PwGhi([string]$Ten, [string[]]$Argv, [switch]$PhaiLoi) {
     $so = @($raw | ForEach-Object { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) })
     $reparse = [IO.FileAttributes]::ReparsePoint
     Need ($soRc -eq 0 -and $so.Count -eq 2 -and $so[0] -match '^([A-Za-z]:\\|\\\\[^\\]+\\[^\\]+\\)' -and
-      $so[1] -ceq "$($so[0])\$(Split-Path -Leaf $so[1])" -and (Split-Path -Leaf $so[1]) -cmatch '\A[0-9a-f]{16}\z') "sổ phiên CLI không hợp lệ: $so"
+      [string]::Equals($so[1], "$($so[0])\$(Split-Path -Leaf $so[1])", [StringComparison]::Ordinal) -and (Split-Path -Leaf $so[1]) -cmatch '\A[0-9a-f]{16}\z') "sổ phiên CLI không hợp lệ: $so"
     $q = $so[1]; while ($q) { if (Test-Path -LiteralPath $q) {   # không thành phần nào của đường dẫn (kể cả sổ phiên, thư mục hash) là liên kết
         Need (-not ((Get-Item -Force -LiteralPath $q).Attributes -band $reparse)) "đường dẫn sổ phiên có liên kết: $q" }
       $q = Split-Path -Parent $q }
@@ -324,7 +324,7 @@ không tự đổi mẫu/nhận mọi lỗi là đóng phiên. Giữ nguyên JSO
 Tên output Cleanup phải chưa tồn tại; không ghi đè bằng chứng cũ hoặc lấy output cũ làm kết quả lệnh mới.
 Nếu dừng sớm, operator lưu hash các output mới và `commands.tsv` vào biên nhận thất bại, không chạy lại để ghi đè.
 Daemon CLI ghi stderr vào `<sổ phiên>/<16 hex>/<nonce>.err`, NGOÀI `TL_PW_ROOT`, và `delete-data` không xoá tệp đó (Limits).
-TRƯỚC `close`, Cleanup hỏi lại sổ phiên từ mã CLI (như Capture), đòi sổ phiên + thư mục hash + nonce TRÙNG `00-sophien.txt`
+TRƯỚC `close`, Cleanup hỏi lại sổ phiên từ mã CLI (như Capture), đòi sổ phiên + thư mục hash + nonce TRÙNG TỪNG BYTE `00-sophien.txt`
 và không thành phần nào của đường dẫn tới thư mục hash là liên kết; thiếu/khác/liên kết ⇒ THẤT BẠI, không đóng, không dọn. Sau `10-verify`, nó đòi ĐÚNG MỘT mục mang nonce trong sổ phiên và mục đó phải là tệp thường
 `<thư mục hash của bản cài>/<nonce>.err` (dòng 2 của `00-sophien.txt`), không symlink/reparse point, không còn
 `<nonce>.session`/`ud-<nonce>-*`, phép quét không lỗi. Nó ghi `11-daemon-path.txt`, chép tệp vào run (`11-daemon.err`, so
@@ -339,10 +339,10 @@ byte), rồi xoá tệp gốc. 0 hoặc nhiều mục, sai chỗ, quét lỗi, o
       "$TL_PW_INSTALL/node_modules/playwright-core/lib/tools/cli-client/registry.js") &&
     D=$(printf %s "${so%%$'\n'*}" | base64 -d) && DH=$(printf %s "${so#*$'\n'}" | base64 -d) &&
     [ -f "$TL_PW_RUN/00-sophien.txt" ] && [ ! -L "$TL_PW_RUN/00-sophien.txt" ] &&
-    [ "$(cat "$TL_PW_RUN/00-sophien.txt")" = "$D"$'\n'"$DH"$'\n'"$TL_PW_SESSION" ] ||
+    printf '%s\n%s\n%s\n' "$D" "$DH" "$TL_PW_SESSION" | cmp -s -- - "$TL_PW_RUN/00-sophien.txt" ||   # so BYTE
     { echo 'STOP: thiếu/khác sổ phiên + nonce ghi lúc Capture (00-sophien.txt) — không đóng phiên, không dọn' >&2; exit 1; }
   [ -z "${PWTEST_DAEMON_SESSION_DIR+x}" ] && [ -d "$D" ] && [ -d "$DH" ] &&
-    [ "$(realpath -e -- "$DH"; echo .)" = "$DH"$'\n.' ] ||
+    [ "$(realpath -e -- "$DH" && echo .)" = "$DH"$'\n.' ] ||
     { echo 'STOP: sổ phiên/thư mục hash không phải thư mục thường, đường dẫn có liên kết, hoặc có hook test — không đóng phiên, không dọn' >&2; exit 1; }
   # --- du-luong-daemon-dau-cleanup: het
   for ten in 08-close 09-delete-data 10-verify; do
@@ -371,7 +371,7 @@ byte), rồi xoá tệp gốc. 0 hoặc nhiều mục, sai chỗ, quét lỗi, o
   # --- du-luong-daemon: bat dau
   [ -z "${PWTEST_DAEMON_SESSION_DIR+x}" ] || { echo 'STOP: PWTEST_DAEMON_SESSION_DIR' >&2; exit 1; }
   case "$D" in /*) ;; *) echo 'STOP: sổ phiên không tuyệt đối' >&2; exit 1;; esac
-  [ -d "$D" ] && [ -d "$DH" ] && [ "$(realpath -e -- "$DH"; echo .)" = "$DH"$'\n.' ] ||
+  [ -d "$D" ] && [ -d "$DH" ] && [ "$(realpath -e -- "$DH" && echo .)" = "$DH"$'\n.' ] ||
     { echo 'STOP: sổ phiên không phải thư mục thường hoặc đường dẫn có liên kết' >&2; exit 1; }
   for ten in 11-daemon.err 11-daemon-path.txt; do
     [ ! -e "$TL_PW_RUN/$ten" ] && [ ! -L "$TL_PW_RUN/$ten" ] || { echo "STOP: output cũ $ten, không ghi đè" >&2; exit 1; }
@@ -402,7 +402,8 @@ byte), rồi xoá tệp gốc. 0 hoặc nhiều mục, sai chỗ, quét lỗi, o
   $rec = "$env:TL_PW_RUN\00-sophien.txt"; $reparse = [IO.FileAttributes]::ReparsePoint
   Need ($soRc -eq 0 -and $so.Count -eq 2 -and (Test-Path -LiteralPath $rec -PathType Leaf) -and
     -not ((Get-Item -Force -LiteralPath $rec).Attributes -band $reparse) -and
-    ([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n$session`n")) 'thiếu/khác sổ phiên + nonce ghi lúc Capture (00-sophien.txt) — không đóng phiên, không dọn'
+    [string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($rec)),   # so BYTE (ReadAllText bỏ BOM; -ceq so theo văn hoá)
+      [Convert]::ToBase64String((New-Object Text.UTF8Encoding($false)).GetBytes("$($so[0])`n$($so[1])`n$session`n")), [StringComparison]::Ordinal)) 'thiếu/khác sổ phiên + nonce ghi lúc Capture (00-sophien.txt) — không đóng phiên, không dọn'
   Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR)) 'PWTEST_DAEMON_SESSION_DIR — không đóng phiên'
   foreach ($d in $so) { Need (Test-Path -LiteralPath $d -PathType Container) "không có sổ phiên: $d — không đóng phiên" }
   $q = $so[1]; while ($q) { Need (-not ((Get-Item -Force -LiteralPath $q).Attributes -band $reparse)) "đường dẫn sổ phiên có liên kết: $q — không đóng phiên"
@@ -448,7 +449,7 @@ byte), rồi xoá tệp gốc. 0 hoặc nhiều mục, sai chỗ, quét lỗi, o
       ForEach-Object { Get-Item -Force -LiteralPath $_ -ErrorAction Stop })
   } catch { Need $false "quét sổ phiên lỗi/thiếu, không xoá gì: $($_.Exception.Message)" }
   $f = $hits | Select-Object -First 1
-  Need ($hits.Count -eq 1 -and -not $f.PSIsContainer -and $f.FullName -ceq "$hashDir\$session.err" -and
+  Need ($hits.Count -eq 1 -and -not $f.PSIsContainer -and [string]::Equals($f.FullName, "$hashDir\$session.err", [StringComparison]::Ordinal) -and
     -not ($f.Attributes -band $reparse)) "cần đúng 1 tệp $hashDir\$session.err trong sổ phiên, thấy $($hits.Count) mục"
   [IO.File]::WriteAllText("$env:TL_PW_RUN\11-daemon-path.txt", "$($f.FullName)`n")
   $copied = $false   # daemon còn sống thì khoá cả ĐỌC .err (đo trên Desktop), nên chờ nó nhả handle
@@ -472,7 +473,7 @@ CommandLine -like "*$env:TL_PW_ROOT*"`; chỉ đọc, không giết), rồi xoá
 bị loại; GIỮ revision trước và `runs/`; không `npm uninstall -g`, không đụng lõi. Sổ phiên của bản cài bị loại là thư mục
 cha trong `11-daemon-path.txt` của các run dùng nó (chưa có tệp này ⇒ không xoá sổ phiên). TRƯỚC khi xoá `install/<rev>`,
 hỏi sổ phiên bằng đúng lệnh `node -e` của Capture (với `TL_PW_INSTALL` của revision ấy, từ `work`) và đòi: `00-sophien.txt`,
-`11-daemon-path.txt` là tệp thường (không liên kết), không hook; `00` trùng nguyên câu trả lời + nonce; `11` = `<dòng 2>/<nonce>.err`;
+`11-daemon-path.txt` là tệp thường (không liên kết), không hook; `00` trùng TỪNG BYTE câu trả lời + nonce; `11` = `<dòng 2>/<nonce>.err` (từng byte);
 thư mục là thư mục thường, không thành phần nào của đường dẫn là liên kết; khác/thiếu/liên kết ⇒ không xoá sổ phiên, ghi biên nhận. Sau khi xoá `install/<rev>` + `browsers/<rev>`, xoá thư mục ấy CHỈ khi rỗng,
 bằng thao tác không đệ quy tự từ chối khi còn mục (`rmdir -- <thư mục>`; PowerShell:
 `[IO.Directory]::Delete('<thư mục>', $false)`); bị từ chối ⇒ giữ nguyên, ghi biên nhận. Mã dưới chạy cho MỘT run
@@ -487,9 +488,9 @@ bằng thao tác không đệ quy tự từ chối khi còn mục (`rmdir -- <th
       'const r=require(process.argv[1]),c=r.createClientInfo(),b=s=>Buffer.from(s).toString(`base64`);if(c.workspaceDir)process.exit(3);console.log(b(r.baseDaemonDir()));console.log(b(c.daemonProfilesDir))' \
       "$TL_PW_INSTALL/node_modules/playwright-core/lib/tools/cli-client/registry.js") &&
     D=$(printf %s "${so%%$'\n'*}" | base64 -d) && DH=$(printf %s "${so#*$'\n'}" | base64 -d) && n=$(sed -n 3p "$r") &&
-    [[ "$n" =~ ^tl-pw-[0-9a-f]{12}$ ]] && [ "$(cat "$r"; echo .)" = "$D"$'\n'"$DH"$'\n'"$n"$'\n.' ] &&
-    [ "$(cat "$g"; echo .)" = "$DH/$n.err"$'\n.' ] &&
-    [ -d "$DH" ] && [ "$(realpath -e -- "$DH"; echo .)" = "$DH"$'\n.' ] && printf %s "$DH" ) ||
+    [[ "$n" =~ ^tl-pw-[0-9a-f]{12}$ ]] && printf '%s\n%s\n%s\n' "$D" "$DH" "$n" | cmp -s -- - "$r" &&   # so BYTE
+    printf '%s\n' "$DH/$n.err" | cmp -s -- - "$g" &&
+    [ -d "$DH" ] && [ "$(realpath -e -- "$DH" && echo .)" = "$DH"$'\n.' ] && printf %s "$DH" ) ||
     { GO_DH=; echo 'GIỮ sổ phiên: thiếu/khác/liên kết 11-daemon-path.txt hoặc 00-sophien.txt, CLI trả khác, có hook, hoặc đường dẫn có liên kết' >&2; }
   # --- du-luong-daemon-go-truoc: het
 # (2) xoá install/<rev> + browsers/<rev> như trên, rồi:
@@ -509,10 +510,11 @@ bằng thao tác không đệ quy tự từ chối khi còn mục (`rmdir -- <th
     Push-Location "$env:TL_PW_ROOT\work"
     try { $raw = @(& $env:TL_PW_NODE -e $js "$env:TL_PW_INSTALL\node_modules\playwright-core\lib\tools\cli-client\registry.js"); $soRc = $LASTEXITCODE } finally { Pop-Location }
     $so = @($raw | ForEach-Object { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) })
-    $rec = [IO.File]::ReadAllText($r0) -split "`n"
-    $ok = ($soRc -eq 0 -and $so.Count -eq 2 -and $rec.Count -eq 4 -and $rec[2] -cmatch '\Atl-pw-[0-9a-f]{12}\z' -and
-      $rec[0] -ceq $so[0] -and $rec[1] -ceq $so[1] -and $rec[3] -ceq '' -and
-      [IO.File]::ReadAllText($g) -ceq "$($so[1])\$($rec[2]).err`n" -and (Test-Path -LiteralPath $so[1] -PathType Container))
+    $u8 = New-Object Text.UTF8Encoding($false); $rec = [IO.File]::ReadAllText($r0) -split "`n"; $n = if ($rec.Count -eq 4) { $rec[2] } else { '' }
+    $ok = ($soRc -eq 0 -and $so.Count -eq 2 -and $n -cmatch '\Atl-pw-[0-9a-f]{12}\z' -and   # so BYTE, ordinal
+      [string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($r0)), [Convert]::ToBase64String($u8.GetBytes("$($so[0])`n$($so[1])`n$n`n")), [StringComparison]::Ordinal) -and
+      [string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($g)), [Convert]::ToBase64String($u8.GetBytes("$($so[1])\$n.err`n")), [StringComparison]::Ordinal) -and
+      (Test-Path -LiteralPath $so[1] -PathType Container))
     $q = $so[1]; while ($ok -and $q) {
       $ok = -not ((Get-Item -Force -LiteralPath $q).Attributes -band $rp); $q = Split-Path -Parent $q }
     if ($ok) { $goDh = $so[1] }

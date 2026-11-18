@@ -175,6 +175,9 @@ $r = Run-Frag $FileClean; Expect-Stop N18-err-in-other-install-dir $r $d0 $s0
 New-Case N19; Move-Item -LiteralPath "$(Dm)\$H" -Destination "$script:C\real-hash"
 if (Try-Link Junction "$(Dm)\$H" "$script:C\real-hash") { $d0 = Decoys; $s0 = Snap @("$script:C\real-hash\$NONCE.err")
   $r = Run-Frag $FileClean; Expect-Stop N19-own-hashdir-junction $r $d0 $s0 } else { $script:FAIL++; 'FAIL N19: khong tao duoc junction' }
+# N26: ten co U+00AD (soft hyphen) giua nonce va ".err": phep so ORDINAL phai dung (P1 Codex luot 6)
+New-Case N26; $w26 = "$(Dm)\$H\$NONCE$([char]0xAD).err"; Move-Item -LiteralPath (Own) -Destination $w26; $d0 = Decoys; $s0 = Snap @($w26)
+$r = Run-Frag $FileClean; Expect-Stop N26-soft-hyphen-before-suffix $r $d0 $s0
 New-Case N20; if (Anc-Link) { $d0 = Decoys; $s0 = Snap @("$script:C\real-mp\daemon\$H\$NONCE.err"); $r = Run-Frag $FileClean
   Expect-Stop N20-ancestor-junction $r $d0 $s0 } else { $script:FAIL++; 'FAIL N20: junction' }
 New-Case N20R; if (Anc-Link) { $d0 = Decoys; $s0 = Snap @("$script:C\real-mp\daemon\$H\$NONCE.err"); $r = Run-Frag $FileRes
@@ -205,6 +208,7 @@ if (Try-Link Junction "$(Dm)\$H" "$script:C\real-hash") { $d0 = Decoys; $s0 = Sn
 New-Case D7; [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H`n$OTHER`n", $utf8); $d0 = Decoys; $s0 = Snap @((Own))
 $r = Run-Frag $FileDau; Expect-Stop D7-record-of-other-nonce $r $d0 $s0
 New-Case D8; $d0 = Decoys; $s0 = Snap @((Own)); $r = Run-Frag $FileDau @{ PWTEST_DAEMON_SESSION_DIR = 'x' }; Expect-Stop D8-pwtest-hook-at-cleanup-start $r $d0 $s0
+New-Case D12; [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H`n$NONCE`n", $bom); $d0 = Decoys; $s0 = Snap @((Own)); $r = Run-Frag $FileDau; Expect-Stop D12-record-with-BOM $r $d0 $s0
 New-Case D9; if (Anc-Link) { $d0 = Decoys; $s0 = Snap @("$script:C\real-mp\daemon\$H\$NONCE.err"); $r = Run-Frag $FileDau
   Expect-Stop D9-ancestor-junction-at-cleanup-start $r $d0 $s0 } else { $script:FAIL++; 'FAIL D9: junction' }
 # D10: 00-sophien.txt la symlink toi ban ghi hop le cua run khac => dung truoc close
@@ -263,6 +267,8 @@ function Go-LinkReceipt([string]$Leaf) { New-Item -ItemType Directory -Path "$sc
 foreach ($pair in @(@('G9', '11-daemon-path.txt'), @('G10', '00-sophien.txt'))) { New-GoCase $pair[0]
   if (Go-LinkReceipt $pair[1]) { $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept "$($pair[0])-uninstall-$($pair[1])-is-symlink" $r $s0 }
   else { $script:SKIP++; "SKIP $($pair[0])-uninstall-$($pair[1])-is-symlink: khong tao duoc symlink tep - KHONG DO DUOC, khong tinh dat" } }
+New-GoCase G13; [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H`n$NONCE`n", $bom); $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept G13-uninstall-record-with-BOM $r $s0
+New-GoCase G14; [IO.File]::WriteAllText("$script:C\run\11-daemon-path.txt", "$(Own)`n", $bom); $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept G14-uninstall-receipt-with-BOM $r $s0
 New-GoCase G11; $s0 = TreeSnap; $r = Run-Frag $FileGo @{ PWTEST_DAEMON_SESSION_DIR = 'x' }; Expect-GoKept G11-uninstall-pwtest-hook $r $s0
 New-GoCase G12; [IO.File]::WriteAllText((Rec0), "$script:C\khac`n$(Dm)\$H`n$NONCE`n", $utf8); $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept G12-uninstall-record-line1-differs $r $s0
 
@@ -399,6 +405,7 @@ function Mut([string]$Name, [string]$Target, [string]$Src, [string]$Old, [string
             $extra = @{ FX_BASE = 'rel\cache\ms-playwright\daemon'; FX_DIR = "rel\cache\ms-playwright\daemon\$H" } }
     'N18' { Move-Item -LiteralPath (Own) -Destination "$(Dm)\$H2\" }
     'N20' { if (-not (Anc-Link)) { $script:FAIL++; "FAIL MUT ${Name}: junction"; return } }
+    'D12' { [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H`n$NONCE`n", $bom) }
     'D9' { if (-not (Anc-Link)) { $script:FAIL++; "FAIL MUT ${Name}: junction"; return } }
     'D10' { $recB = "$script:C\runB-00-sophien.txt"; Move-Item -LiteralPath (Rec0) -Destination $recB
             if (-not (Try-Link SymbolicLink (Rec0) $recB)) { $script:SKIP++; "SKIP MUT ${Name}: khong tao duoc symlink tep - KHONG DO DUOC"; return } }
@@ -441,18 +448,19 @@ Mut residue-ancestor N20 $FileRes '$q = $hashDir; while ($q) {' '$q = $hashDir; 
 Mut no-delete-check L4 $FileClean 'Need (-not (Test-Path -LiteralPath $f.FullName)) "' 'Need ($true) "'
 Mut stale-output N8 $FileClean 'Need (-not (Test-Path -LiteralPath "$env:TL_PW_RUN\$ten"))' 'Need $true'
 Mut pwtest-hook N10 $FileRes 'Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR))' 'Need $true'
-Mut exact-path N14 $FileClean '$f.FullName -ceq "$hashDir\$session.err"' '$f.Name -like "$session*err"'
+Mut exact-path N14 $FileClean '[string]::Equals($f.FullName, "$hashDir\$session.err", [StringComparison]::Ordinal)' '$f.Name -like "$session*err"'
 Mut scan-silent N15 $FileClean '[IO.Directory]::GetFileSystemEntries($_, "*$session*")' '@(Get-ChildItem -Force -LiteralPath $_ -Filter "*$session*" -ErrorAction SilentlyContinue | ForEach-Object FullName)'
 # N17 trong PS duoc chan HAI lop: chot tuyet doi, va FullName (Get-Item tra duong dan tuyet doi) khong bao gio bang
 # "$hashDir\..." tuong doi. Dot bien go MOT lop khong lam ca lot (do 2875afc), nen dot bien nay go CA HAI.
 $preMutRel = "$Scratch\pre-mut-relative.ps1"
-[IO.File]::WriteAllText($preMutRel, ([IO.File]::ReadAllText($FileClean, [Text.Encoding]::UTF8)).Replace('$f.FullName -ceq "$hashDir\$session.err"', '$f.Name -ceq "$session.err"'), $bom)
+[IO.File]::WriteAllText($preMutRel, ([IO.File]::ReadAllText($FileClean, [Text.Encoding]::UTF8)).Replace('[string]::Equals($f.FullName, "$hashDir\$session.err", [StringComparison]::Ordinal)', '$f.Name -ceq "$session.err"'), $bom)
 Mut relative-cache-and-path N17 $preMutRel 'Need ($daemonDir -match ''^([A-Za-z]:\\|\\\\)'')' 'Need ($true)'
-Mut install-dir-binding N18 $FileClean '$f.FullName -ceq "$hashDir\$session.err"' '$f.Name -ceq "$session.err"'
+Mut install-dir-binding N18 $FileClean '[string]::Equals($f.FullName, "$hashDir\$session.err", [StringComparison]::Ordinal)' '$f.Name -ceq "$session.err"'
 # go CA CUM chot ban ghi (ton tai + khong reparse + noi dung): '-or' khong ngat duoc chuoi '-and' phia sau (do r5, ff34b2c)
-Mut no-capture-record D1 $FileDau ('(Test-Path -LiteralPath $rec -PathType Leaf) -and' + "`n" + '    -not ((Get-Item -Force -LiteralPath $rec).Attributes -band $reparse) -and' + "`n" + '    ([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n$session`n")') '$true'
-Mut no-registry-compare D2 $FileDau '([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n$session`n")' '$true'
-Mut no-nonce-binding D7 $FileDau '([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n$session`n")' '([IO.File]::ReadAllText($rec).StartsWith("$($so[0])`n$($so[1])`n"))'
+Mut no-capture-record D1 $FileDau ('(Test-Path -LiteralPath $rec -PathType Leaf) -and' + "`n" + '    -not ((Get-Item -Force -LiteralPath $rec).Attributes -band $reparse) -and' + "`n" + '    [string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($rec)),') ('$true -or' + "`n" + '    [string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($rec)),')
+Mut no-registry-compare D2 $FileDau '[Convert]::ToBase64String((New-Object Text.UTF8Encoding($false)).GetBytes("$($so[0])`n$($so[1])`n$session`n"))' '[Convert]::ToBase64String([IO.File]::ReadAllBytes($rec))'
+Mut no-nonce-binding D7 $FileDau 'GetBytes("$($so[0])`n$($so[1])`n$session`n")' 'GetBytes("$($so[0])`n$($so[1])`n$(([IO.File]::ReadAllText($rec) -split "`n")[2])`n")'
+Mut record-bytes D12 $FileDau '[string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($rec)),' '([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n$session`n") -or [string]::Equals("x",'
 Mut dau-link D5 $FileDau 'while ($q) { Need (-not' 'while ($false) { Need (-not'
 Mut dau-ancestor D9 $FileDau 'while ($q) { Need (-not' 'while ($false) { Need (-not'
 Mut record-reparse D10 $FileDau '-not ((Get-Item -Force -LiteralPath $rec).Attributes -band $reparse) -and' '$true -and'
@@ -466,6 +474,12 @@ Mut pre-createnew C15 $FilePre '[IO.FileMode]::CreateNew' '[IO.FileMode]::Create
 Mut pre-shape C11 $FilePre '(Split-Path -Leaf $so[1]) -cmatch ''\A[0-9a-f]{16}\z''' '$true'
 Mut no-copy-retry L1 $FileClean '$i -lt 5 -and -not $copied' '$i -lt 1 -and -not $copied'
 Mut no-delete-retry L3 $FileClean '$i -lt 5 -and (Test-Path -LiteralPath $f.FullName)' '$i -lt 1 -and (Test-Path -LiteralPath $f.FullName)'
+$b26 = [IO.File]::ReadAllText($FileClean, [Text.Encoding]::UTF8)
+if ($b26.Contains('[string]::Equals($f.FullName, "$hashDir\$session.err", [StringComparison]::Ordinal)')) { [IO.File]::WriteAllText("$Scratch\mut-ceq-path.ps1", $b26.Replace('[string]::Equals($f.FullName, "$hashDir\$session.err", [StringComparison]::Ordinal)', '$f.FullName -ceq "$hashDir\$session.err"'), $bom)
+  New-Case M-ceq-path; $w26 = "$(Dm)\$H\$NONCE$([char]0xAD).err"; Move-Item -LiteralPath (Own) -Destination $w26; $r = Run-Frag "$Scratch\mut-ceq-path.ps1"
+  if (IsOk $r) { $script:PASS++; "PASS MUT ceq-path -> N26 lot: -ceq BO QUA U+00AD tren shell nay (P1 Codex luot 6 TAI HIEN; chot ordinal co rang)" }
+  else { $script:SKIP++; "SKIP MUT ceq-path -> N26 van dung: -ceq KHONG bo qua U+00AD tren shell nay - P1 KHONG TAI HIEN, chot ordinal khong do duoc o day" } }
+else { $script:FAIL++; 'FAIL MUT ceq-path: khong tim thay chuoi goc' }
 function GoMut([string]$Name, [string]$Target, [string]$Old, [string]$New, [string]$Old2 = '', [string]$New2 = '') { # Go ban dot bien phai XOA so phien o ca dich
   $body = [IO.File]::ReadAllText($FileGo, [Text.Encoding]::UTF8)
   if (-not $body.Contains($Old) -or ($Old2 -and -not $body.Contains($Old2))) { $script:FAIL++; "FAIL MUT go-${Name}: khong tim thay chuoi goc"; return }
@@ -479,16 +493,20 @@ function GoMut([string]$Name, [string]$Target, [string]$Old, [string]$New, [stri
     'G6' { [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H2`n$NONCE`n", $utf8) }
     'G10' { if (-not (Go-LinkReceipt '00-sophien.txt')) { $script:SKIP++; "SKIP MUT go-${Name}: khong tao duoc symlink tep - KHONG DO DUOC"; return } }
     'G11' { $extra = @{ PWTEST_DAEMON_SESSION_DIR = 'x' } }
+    'G13' { [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H`n$NONCE`n", $bom) }
+    'G14' { [IO.File]::WriteAllText("$script:C\run\11-daemon-path.txt", "$(Own)`n", $bom) }
     'G12' { [IO.File]::WriteAllText((Rec0), "$script:C\khac`n$(Dm)\$H`n$NONCE`n", $utf8) } }
   $r = Run-Frag $m $extra
   if ((IsOk $r) -and -not (Test-Path -LiteralPath "$(Dm)\$H") -and -not (Test-Path -LiteralPath "$script:C\real-mp\daemon\$H")) { $script:PASS++; "PASS MUT go-$Name -> $Target xoa (chot co rang)" }
   else { $script:FAIL++; "FAIL MUT go-$Name -> $Target van giu (chot khong do duoc)"; Get-Content -LiteralPath "$script:C\out" | ForEach-Object { "    $_" } } }
-GoMut no-receipt G2 '[IO.File]::ReadAllText($g) -ceq "$($so[1])\$($rec[2]).err`n" -and' '$true -and' 'foreach ($t in $r0, $g) {' 'foreach ($t in $r0) {'
-GoMut receipt-parent G3 '[IO.File]::ReadAllText($g) -ceq "$($so[1])\$($rec[2]).err`n" -and' '$true -and'
+GoMut no-receipt G2 '[string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($g)), [Convert]::ToBase64String($u8.GetBytes("$($so[1])\$n.err`n")), [StringComparison]::Ordinal) -and' '$true -and' 'foreach ($t in $r0, $g) {' 'foreach ($t in $r0) {'
+GoMut receipt-parent G3 '[string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($g)), [Convert]::ToBase64String($u8.GetBytes("$($so[1])\$n.err`n")), [StringComparison]::Ordinal) -and' '$true -and'
+GoMut receipt-bytes G14 '[string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($g)), [Convert]::ToBase64String($u8.GetBytes("$($so[1])\$n.err`n")), [StringComparison]::Ordinal) -and' '([IO.File]::ReadAllText($g) -ceq "$($so[1])\$n.err`n") -and'
 GoMut record-reparse G10 'foreach ($t in $r0, $g) {' 'foreach ($t in $g) {'
 GoMut hook G11 "if (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR) { throw 'PWTEST_DAEMON_SESSION_DIR' }" ''
-GoMut record-line1 G12 '$rec[0] -ceq $so[0] -and' '$true -and'
+GoMut record-line1 G12 '[string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($r0)), [Convert]::ToBase64String($u8.GetBytes("$($so[0])`n$($so[1])`n$n`n")), [StringComparison]::Ordinal) -and' '$true -and'
+GoMut record-bytes G13 '[string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($r0)), [Convert]::ToBase64String($u8.GetBytes("$($so[0])`n$($so[1])`n$n`n")), [StringComparison]::Ordinal) -and' '([IO.File]::ReadAllText($r0) -ceq "$($so[0])`n$($so[1])`n$n`n") -and'
 GoMut link G5 'while ($ok -and $q) {' 'while ($false) {'
-GoMut record G6 '$rec[1] -ceq $so[1] -and' '$true -and'
+GoMut record G6 '[string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($r0)), [Convert]::ToBase64String($u8.GetBytes("$($so[0])`n$($so[1])`n$n`n")), [StringComparison]::Ordinal) -and' '$true -and'
 "TONG: $script:PASS dat / $($script:PASS + $script:FAIL) (bo qua khong do duoc: $script:SKIP)"
 if ($script:FAIL -ne 0) { exit 1 } else { exit 0 }

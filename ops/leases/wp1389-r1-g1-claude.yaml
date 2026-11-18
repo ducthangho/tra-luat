@@ -71,7 +71,7 @@ lease_until_ghi_chu: '6h; rút hạn sau land.'
 attempts_used: 1
 attempts_limit: 2
 budget:
-  codex_review_calls: {used: 6, reserved: 0, limit: 6}
+  codex_review_calls: {used: 6, reserved: 1, limit: 7}
   native_runs: {linux: 1, windows_desktop: 1, rerun_per_step_on_build_error: 1}
 budget_nang_tran:
   codex_review_calls: {tu: 3, len: 4}
@@ -82,6 +82,9 @@ budget_nang_tran_2:
 budget_nang_tran_3:
   codex_review_calls: {tu: 5, len: 6}
   chi_thi: 'chủ kho chọn "Sửa + nâng trần Codex lên 6 (Recommended)" qua AskUserQuestion 18-11-2026 ~14:13Z, sau verdict Codex lượt 5 (request_changes: 1 P1 + 2 P2) — Review Rescue Checkpoint.'
+budget_nang_tran_4:
+  codex_review_calls: {tu: 6, len: 7}
+  chi_thi: 'chủ kho chọn "Sửa + nâng trần Codex lên 7 (Recommended)" qua AskUserQuestion 18-11-2026 ~14:34Z, sau verdict Codex lượt 6 (request_changes: 1 P1 + 2 P2); cùng lựa chọn cho phép gia hạn lease nếu không kịp trước 16:02Z, có ghi lý do.'
 exact_head_chap_nhan: 'chủ kho chọn "Chấp nhận, ghi quyết định (Recommended)" qua AskUserQuestion 18-11-2026 ~14:05Z: phép đo N1–N4 trên d7960ee được dùng cho head cuối khi mã thực thi (SKILL + 2 harness) trùng byte, kiểm bằng git diff --exit-code.'
 native_runs_ghi_chu: 'Mỗi lần vá sản phẩm sau lỗi local/review được đo lại trên head mới theo spec §8 ("sửa rồi đo lại trên head mới"); số lượt thực tế ghi trong RESULTS.md.'
 requires_live: false

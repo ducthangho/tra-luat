@@ -95,6 +95,16 @@ lfsnap() { (cd "$(BASE)/$H"$'\n' && find . -type f -print0 | LC_ALL=C sort -z | 
 expect_stop_lf() { local bad=; is_stop "$2" || bad="khong dung dung cach"; [ "$3" = "$(lfsnap)" ] || bad="$bad; tep o dich bi doi"
   no_new_outputs || bad="$bad; co output 11 moi"; [ -L "$(BASE)/$H" ] || bad="$bad; lien ket mat"
   if [ -z "$bad" ]; then ok "$1 rc=$2"; else ko "$1 rc=$2 ($bad)"; fi; }
+# dot bien "tro lai so CHUOI" cho cac phep so BYTE (tep sed rieng de khoi long dau nhay)
+cat > "$SCRATCH/sed-d12.txt" <<'SED'
+s#printf .* \| cmp -s -- - "\$TL_PW_RUN/00-sophien\.txt" \|\|#[ "$(cat "$TL_PW_RUN/00-sophien.txt")" = "$D"$'\\n'"$DH"$'\\n'"$TL_PW_SESSION" ] ||#
+SED
+cat > "$SCRATCH/sed-g13.txt" <<'SED'
+s#printf '%s\\n%s\\n%s\\n' "\$D" "\$DH" "\$n" \| cmp -s -- - "\$r"#[ "$(cat "$r"; echo .)" = "$D"$'\\n'"$DH"$'\\n'"$n"$'\\n.' ]#
+SED
+cat > "$SCRATCH/sed-g14.txt" <<'SED'
+s#printf '%s\\n' "\$DH/\$n\.err" \| cmp -s -- - "\$g"#[ "$(cat "$g"; echo .)" = "$DH/$n.err"$'\\n.' ]#
+SED
 P=$SCRATCH/frag_pre.sh; DAU=$SCRATCH/frag_dau.sh; F=$SCRATCH/frag_dau_cleanup.sh; R=$SCRATCH/frag_res_only.sh
 
 # ===== Cleanup (dau-cleanup + don du luong) =====
@@ -127,12 +137,15 @@ rc=$(run_frag "$F" FX_BASE=rel/cache/ms-playwright/daemon FX_DIR=rel/cache/ms-pl
 new_case N18; mv "$(OWN)" "$(BASE)/$H2/"; d0=$(decoys); s0=$(snap "$(BASE)/$H2/$NONCE.err"); rc=$(run_frag "$F"); expect_stop N18-err-in-other-install-dir "$rc" "$d0" "$s0"
 new_case N19; mv "$(BASE)/$H" "$CASE_DIR/real-hash"; ln -s "$CASE_DIR/real-hash" "$(BASE)/$H"; d0=$(decoys); s0=$(snap "$CASE_DIR/real-hash/$NONCE.err")
 rc=$(run_frag "$F"); expect_stop N19-own-hashdir-symlink "$rc" "$d0" "$s0"
+new_case N26; W26="$(BASE)/$H/$NONCE"$'\xc2\xad'".err"; mv "$(OWN)" "$W26"; d0=$(decoys); s0=$(snap "$W26"); rc=$(run_frag "$F"); expect_stop N26-soft-hyphen-before-suffix "$rc" "$d0" "$s0"
 new_case N25; lf_link; s0=$(lfsnap); rc=$(run_frag "$F"); expect_stop_lf N25-hashdir-link-to-name-plus-LF "$rc" "$s0"
 new_case N20; anc_link; d0=$(decoys); s0=$(snap "$CASE_DIR/real-mp/daemon/$H/$NONCE.err"); rc=$(run_frag "$F"); expect_stop N20-ancestor-symlink "$rc" "$d0" "$s0"
 new_case N20R; anc_link; d0=$(decoys); s0=$(snap "$CASE_DIR/real-mp/daemon/$H/$NONCE.err"); rc=$(run_frag "$R"); expect_stop N20R-ancestor-symlink-residue-only "$rc" "$d0" "$s0"
 # loi tung buoc ghi -> chep -> so -> xoa: STOP, goc nguyen (11-daemon-path.txt duoc phep da ghi)
 new_case N21; fake_bin cp; d0=$(decoys); s0=$(snap "$(OWN)"); rc=$(run_frag "$F"); expect_stop N21-copy-fails "$rc" "$d0" "$s0" --outputs
-new_case N22; fake_bin cmp; d0=$(decoys); s0=$(snap "$(OWN)"); rc=$(run_frag "$F"); expect_stop N22-compare-fails "$rc" "$d0" "$s0" --outputs
+# N22 chay RIENG doan don: chot dau Cleanup cung dung `cmp` (so byte 00), nen cmp gia se dung no truoc
+new_case N22; fake_bin cmp; d0=$(decoys); s0=$(snap "$(OWN)"); rc=$(run_frag "$R"); expect_stop N22-compare-fails "$rc" "$d0" "$s0" --outputs
+grep -q 'chưa chép được' "$CASE_DIR/out" || ko "N22 dung sai cho (khong phai buoc so ban sao)"
 new_case N23; fake_bin rm; d0=$(decoys); s0=$(snap "$(OWN)"); rc=$(run_frag "$F"); expect_stop N23-delete-fails "$rc" "$d0" "$s0" --outputs
 new_case N24; d0=$(decoys); s0=$(snap "$(OWN)"); rc=$(run_frag "$R" "$PRINTF_HONG"); expect_stop N24-path-write-fails "$rc" "$d0" "$s0" --outputs
 [ ! -e "$CASE_DIR/run/11-daemon.err" ] || ko "N24 da chep truoc khi ghi duong dan (B4)"
@@ -149,6 +162,7 @@ new_case D7; printf '%s\n%s\n%s\n' "$(BASE)" "$(BASE)/$H" "$OTHER" > "$CASE_DIR/
 rc=$(run_frag "$DAU"); expect_stop D7-record-of-other-nonce "$rc" "$d0" "$s0"
 new_case D8; d0=$(decoys); s0=$(snap "$(OWN)"); rc=$(run_frag "$DAU" PWTEST_DAEMON_SESSION_DIR=x); expect_stop D8-pwtest-hook-at-cleanup-start "$rc" "$d0" "$s0"
 new_case D11; lf_link; s0=$(lfsnap); rc=$(run_frag "$DAU"); expect_stop_lf D11-hashdir-link-to-name-plus-LF-at-cleanup-start "$rc" "$s0"
+new_case D12; printf '%s\n%s\n%s\n\0' "$(BASE)" "$(BASE)/$H" "$NONCE" > "$CASE_DIR/run/00-sophien.txt"; d0=$(decoys); s0=$(snap "$(OWN)"); rc=$(run_frag "$DAU"); expect_stop D12-record-extra-NUL "$rc" "$d0" "$s0"
 new_case D9; anc_link; d0=$(decoys); s0=$(snap "$CASE_DIR/real-mp/daemon/$H/$NONCE.err"); rc=$(run_frag "$DAU"); expect_stop D9-ancestor-link-at-cleanup-start "$rc" "$d0" "$s0"
 
 # ===== truoc open =====
@@ -210,6 +224,8 @@ go_link_receipt() { mkdir "$CASE_DIR/run2"; mv "$CASE_DIR/run/$1" "$CASE_DIR/run
 newg G9; go_link_receipt 11-daemon-path.txt; s0=$(treesnap); rc=$(run_go "$G1"); expect_go_kept G9-uninstall-receipt-11-is-symlink "$rc" "$s0"
 newg G10; go_link_receipt 00-sophien.txt; s0=$(treesnap); rc=$(run_go "$G1"); expect_go_kept G10-uninstall-record-00-is-symlink "$rc" "$s0"
 newg G11; s0=$(treesnap); rc=$(run_go "$G1" PWTEST_DAEMON_SESSION_DIR=x); expect_go_kept G11-uninstall-pwtest-hook "$rc" "$s0"
+newg G13; printf '%s\n%s\n%s\n\0' "$(BASE)" "$(BASE)/$H" "$NONCE" > "$CASE_DIR/run/00-sophien.txt"; s0=$(treesnap); rc=$(run_go "$G1"); expect_go_kept G13-uninstall-record-extra-NUL "$rc" "$s0"
+newg G14; printf '%s\n\0' "$(OWN)" > "$CASE_DIR/run/11-daemon-path.txt"; s0=$(treesnap); rc=$(run_go "$G1"); expect_go_kept G14-uninstall-receipt-extra-NUL "$rc" "$s0"
 newg G12; printf '%s\n%s\n%s\n' "$CASE_DIR/khac" "$(BASE)/$H" "$NONCE" > "$CASE_DIR/run/00-sophien.txt"; s0=$(treesnap); rc=$(run_go "$G1"); expect_go_kept G12-uninstall-record-line1-differs "$rc" "$s0"
 
 # ===== TOAN LUONG: chinh khoi bash Capture (khoi 3) + Cleanup (khoi 5) cua SKILL, voi CLI GIA co nhat ky va trang thai =====
@@ -355,6 +371,7 @@ mut() { # name target file sed_expr
     C15) runner=run_pre; rm "$(OWN)"; printf 'old\n' > "$CASE_DIR/run/00-sophien.txt";;
     C18) runner=run_pre; rm "$CASE_DIR/run/00-sophien.txt" "$(OWN)"; lf_link;;
     D11) lf_link;;
+    D12) printf '%s\n%s\n%s\n\0' "$(BASE)" "$(BASE)/$H" "$NONCE" > "$CASE_DIR/run/00-sophien.txt";;
   esac
   rc=$($runner "$m" "${extra[@]}")
   if is_ok "$rc"; then ok "MUT $name -> $target lot (chot co rang)"; else ko "MUT $name -> $target van chan (chot khong do duoc)"; fi; }
@@ -367,9 +384,9 @@ if cmp -s "$SCRATCH/mut-exact-one.sh" "$F"; then ko "MUT exact-one: sed khong do
   [ $lot = 1 ] && ok "MUT exact-one -> N3 (mot trong hai thu tu) lot (chot co rang)" || ko "MUT exact-one -> N3 van chan o ca hai thu tu"; fi
 mut name-glob N3 "$F" 's/-name "\*\$TL_PW_SESSION\*" -print0/-name "$TL_PW_SESSION.err" -print0/'
 mut no-symlink-check N5 "$F" 's/\[ -f "\$f" \] && \[ ! -L "\$f" \]/[ -e "$f" ]/'
-mut daemon-symlink N7 "$R" 's/ && \[ "\$\(realpath -e -- "\$DH"; echo \.\)" = "\$DH"\$.\\n\.. \] \|\|/ ||/; s/find "\$D" /find -L "$D" /'
-mut residue-ancestor N20 "$R" 's/ && \[ "\$\(realpath -e -- "\$DH"; echo \.\)" = "\$DH"\$.\\n\.. \] \|\|/ ||/'
-mut no-cmp N22 "$F" 's/cmp -s -- "\$f" "\$TL_PW_RUN\/11-daemon.err"/true/'
+mut daemon-symlink N7 "$R" 's/ && \[ "\$\(realpath -e -- "\$DH" && echo \.\)" = "\$DH"\$.\\n\.. \] \|\|/ ||/; s/find "\$D" /find -L "$D" /'
+mut residue-ancestor N20 "$R" 's/ && \[ "\$\(realpath -e -- "\$DH" && echo \.\)" = "\$DH"\$.\\n\.. \] \|\|/ ||/'
+mut no-cmp N22 "$R" 's/cmp -s -- "\$f" "\$TL_PW_RUN\/11-daemon.err"/true/'
 mut no-rm-check N23 "$F" 's/rm -- "\$f" && \[ ! -e "\$f" \] && \[ ! -L "\$f" \]/{ rm -- "$f" || true; }/'
 mut no-write-check N24 "$R" 's/(printf .* > "\$TL_PW_RUN\/11-daemon-path\.txt") &&/{ \1 || true; } \&\&/'
 mut stale-output N8 "$F" 's/\[ ! -e "\$TL_PW_RUN\/\$ten" \] && \[ ! -L "\$TL_PW_RUN\/\$ten" \]/true/'
@@ -377,21 +394,22 @@ mut pwtest-hook N10 "$R" 's/\[ -z "\$\{PWTEST_DAEMON_SESSION_DIR\+x\}" \] \|\|/t
 mut exact-path N14 "$F" 's/\[ "\$f" = "\$DH\/\$TL_PW_SESSION\.err" \]/[[ "${f##*\/}" =~ ^"$TL_PW_SESSION".err$ ]]/'
 mut no-scan-rc N15 "$F" 's/wait "\$!" \|\|/true ||/'
 # realpath cung tu choi duong dan tuong doi (lop thu hai), nen dot bien go CA HAI lop
-mut relative-cache N17 "$R" 's/case "\$D" in \/\*\) ;; \*\) echo/case "$D" in *) ;; \/*) echo/; s/ && \[ "\$\(realpath -e -- "\$DH"; echo \.\)" = "\$DH"\$.\\n\.. \] \|\|/ ||/'
+mut relative-cache N17 "$R" 's/case "\$D" in \/\*\) ;; \*\) echo/case "$D" in *) ;; \/*) echo/; s/ && \[ "\$\(realpath -e -- "\$DH" && echo \.\)" = "\$DH"\$.\\n\.. \] \|\|/ ||/'
 mut install-dir-binding N18 "$F" 's/\[ "\$f" = "\$DH\/\$TL_PW_SESSION\.err" \]/[ "${f##*\/}" = "$TL_PW_SESSION.err" ]/'
-mut no-capture-record D1 "$DAU" 's/\[ -f "\$TL_PW_RUN\/00-sophien\.txt" \] && \[ ! -L "\$TL_PW_RUN\/00-sophien\.txt" \] &&/true \&\&/; s/\[ "\$\(cat "\$TL_PW_RUN\/00-sophien\.txt"\)" = "\$D"\$.\\n."\$DH"\$.\\n."\$TL_PW_SESSION" \]/true/'
-mut no-registry-compare D2 "$DAU" 's/\[ "\$\(cat "\$TL_PW_RUN\/00-sophien\.txt"\)" = "\$D"\$.\\n."\$DH"\$.\\n."\$TL_PW_SESSION" \]/true/'
-mut no-nonce-binding D7 "$DAU" 's/\[ "\$\(cat "\$TL_PW_RUN\/00-sophien\.txt"\)" = "\$D"\$.\\n."\$DH"\$.\\n."\$TL_PW_SESSION" \]/[ "$(head -n 2 "$TL_PW_RUN\/00-sophien.txt")" = "$D"$'"'"'\\n'"'"'"$DH" ]/'
-mut dau-link D5 "$DAU" 's/\[ "\$\(realpath -e -- "\$DH"; echo \.\)" = "\$DH"\$.\\n\.. \] \|\|/true ||/'
-mut dau-ancestor D9 "$DAU" 's/\[ "\$\(realpath -e -- "\$DH"; echo \.\)" = "\$DH"\$.\\n\.. \] \|\|/true ||/'
-mut pre-relative C4 "$P" 's/case "\$D" in \/\*\) ;; \*\) false;; esac/true/; s/\[ "\$\(realpath -m -- "\$DH"; echo \.\)" = "\$DH"\$.\\n\.. \] &&/true \&\&/'
+mut no-capture-record D1 "$DAU" 's/\[ -f "\$TL_PW_RUN\/00-sophien\.txt" \] && \[ ! -L "\$TL_PW_RUN\/00-sophien\.txt" \] &&/true \&\&/; s/printf .* \| cmp -s -- - "\$TL_PW_RUN\/00-sophien\.txt" \|\|/true ||/' 
+mut no-registry-compare D2 "$DAU" 's/printf .* \| cmp -s -- - "\$TL_PW_RUN\/00-sophien\.txt" \|\|/true ||/' 
+mut no-nonce-binding D7 "$DAU" 's/"\$TL_PW_SESSION" \| cmp -s/"$(sed -n 3p "$TL_PW_RUN\/00-sophien.txt")" | cmp -s/'
+mut record-bytes D12 "$DAU" "$(cat "$SCRATCH/sed-d12.txt")"
+mut dau-link D5 "$DAU" 's/\[ "\$\(realpath -e -- "\$DH" && echo \.\)" = "\$DH"\$.\\n\.. \] \|\|/true ||/'
+mut dau-ancestor D9 "$DAU" 's/\[ "\$\(realpath -e -- "\$DH" && echo \.\)" = "\$DH"\$.\\n\.. \] \|\|/true ||/'
+mut pre-relative C4 "$P" 's/case "\$D" in \/\*\) ;; \*\) false;; esac/true/; s/\[ "\$\(realpath -m -- "\$DH" && echo \.\)" = "\$DH"\$.\\n\.. \] &&/true \&\&/'
 mut pre-hook C5 "$P" 's/\[ -z "\$\{PWTEST_DAEMON_SESSION_DIR\+x\}" \] &&/true \&\&/'
 mut pre-scan-rc C7 "$P" 's/pre=\$\(\[ ! -e "\$D" \] \|\| find (.*) -print\)/pre=$([ ! -e "$D" ] || find \1 -print || true)/'
-mut pre-link C9 "$P" 's/\[ "\$\(realpath -m -- "\$DH"; echo \.\)" = "\$DH"\$.\\n\.. \] &&/true \&\&/'
-mut pre-ancestor C14 "$P" 's/\[ "\$\(realpath -m -- "\$DH"; echo \.\)" = "\$DH"\$.\\n\.. \] &&/true \&\&/'
+mut pre-link C9 "$P" 's/\[ "\$\(realpath -m -- "\$DH" && echo \.\)" = "\$DH"\$.\\n\.. \] &&/true \&\&/'
+mut pre-ancestor C14 "$P" 's/\[ "\$\(realpath -m -- "\$DH" && echo \.\)" = "\$DH"\$.\\n\.. \] &&/true \&\&/'
 mut pre-noclobber C15 "$P" 's/\[ ! -e "\$TL_PW_RUN\/00-sophien\.txt" \] && \[ ! -L "\$TL_PW_RUN\/00-sophien\.txt" \] &&/true \&\&/; s/\( set -C; printf/( printf/'
-mut pre-lf C18 "$P" 's/; echo \.\)" = "\$DH"\$.\\n\.. \]/)" = "$DH" ]/'
-mut dau-lf D11 "$DAU" 's/; echo \.\)" = "\$DH"\$.\\n\.. \]/)" = "$DH" ]/'
+mut pre-lf C18 "$P" 's/ && echo \.\)" = "\$DH"\$.\\n\.. \]/)" = "$DH" ]/'
+mut dau-lf D11 "$DAU" 's/ && echo \.\)" = "\$DH"\$.\\n\.. \]/)" = "$DH" ]/'
 # FIFO: go chot muc-co-san => Capture TREO o FIFO (timeout 124), khong dung ngay
 sed -E 's/\[ ! -e "\$TL_PW_RUN\/00-sophien\.txt" \] && \[ ! -L "\$TL_PW_RUN\/00-sophien\.txt" \] &&/true \&\&/' "$P" > "$SCRATCH/mut-pre-fifo.sh"
 if cmp -s "$SCRATCH/mut-pre-fifo.sh" "$P"; then ko "MUT pre-fifo: sed khong doi gi"; else newp M-pre-fifo; rm "$(OWN)"; mkfifo "$CASE_DIR/run/00-sophien.txt"
@@ -408,20 +426,24 @@ gmut() { # name target sed: go ban dot bien phai XOA so phien o ca dich
     G5) anc_link;;
     G6) printf '%s\n%s\n%s\n' "$(BASE)" "$(BASE)/$H2" "$NONCE" > "$CASE_DIR/run/00-sophien.txt";;
     G9) go_link_receipt 11-daemon-path.txt;;
+    G13) printf '%s\n%s\n%s\n\0' "$(BASE)" "$(BASE)/$H" "$NONCE" > "$CASE_DIR/run/00-sophien.txt";;
+    G14) printf '%s\n\0' "$(OWN)" > "$CASE_DIR/run/11-daemon-path.txt";;
     G10) go_link_receipt 00-sophien.txt;;
     G11) extra=(PWTEST_DAEMON_SESSION_DIR=x);;
     G12) printf '%s\n%s\n%s\n' "$CASE_DIR/khac" "$(BASE)/$H" "$NONCE" > "$CASE_DIR/run/00-sophien.txt";;
   esac
   rc=$(run_go "$m" "${extra[@]}"); if [ "$rc" = 0 ] && grep -qx GO_DONE "$CASE_DIR/out" && [ ! -e "$CASE_DIR/cache/ms-playwright/daemon/$H" ] && [ ! -e "$CASE_DIR/real-mp/daemon/$H" ]
   then ok "MUT go-$name -> $target xoa (chot co rang)"; else ko "MUT go-$name -> $target van giu (chot khong do duoc)"; fi; }
-gmut no-receipt G2 's/\[ -f "\$g" \] && \[ ! -L "\$g" \] &&/true \&\&/; s/\[ "\$\(cat "\$g"; echo \.\)" = "\$DH\/\$n\.err"\$.\\n\.. \] &&/true \&\&/'
-gmut receipt-parent G3 's/\[ "\$\(cat "\$g"; echo \.\)" = "\$DH\/\$n\.err"\$.\\n\.. \] &&/true \&\&/'
+gmut no-receipt G2 's/\[ -f "\$g" \] && \[ ! -L "\$g" \] &&/true \&\&/; s/printf .* \| cmp -s -- - "\$g" &&/true \&\&/' 
+gmut receipt-parent G3 's/printf .* \| cmp -s -- - "\$g" &&/true \&\&/'
+gmut receipt-bytes G14 "$(cat "$SCRATCH/sed-g14.txt")"
 gmut receipt-link G9 's/\[ -f "\$g" \] && \[ ! -L "\$g" \] &&/true \&\&/'
 gmut record-link G10 's/\[ -f "\$r" \] && \[ ! -L "\$r" \] &&/true \&\&/'
 gmut hook G11 's/\[ -z "\$\{PWTEST_DAEMON_SESSION_DIR\+x\}" \] &&/true \&\&/'
-gmut record-line1 G12 's/\[ "\$\(cat "\$r"; echo \.\)" = .*\] &&$/true \&\&/'
-gmut link G5 's/\[ "\$\(realpath -e -- "\$DH"; echo \.\)" = "\$DH"\$.\\n\.. \] &&/true \&\&/'
-gmut record G6 's/\[ "\$\(cat "\$r"; echo \.\)" = .*\] &&$/true \&\&/'
+gmut record-line1 G12 's/printf .* \| cmp -s -- - "\$r" &&/true \&\&/'
+gmut record-bytes G13 "$(cat "$SCRATCH/sed-g13.txt")"
+gmut link G5 's/\[ "\$\(realpath -e -- "\$DH" && echo \.\)" = "\$DH"\$.\\n\.. \] &&/true \&\&/'
+gmut record G6 's/printf .* \| cmp -s -- - "\$r" &&/true \&\&/' 
 
 echo "TONG: $PASS dat / $((PASS+FAIL))"
 [ "$FAIL" -eq 0 ]

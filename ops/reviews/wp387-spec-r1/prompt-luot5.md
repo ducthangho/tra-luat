@@ -1,0 +1,7 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 5, cho đặc tả `ops/specs/LAUNCHER-BAM-LOG-SAU-CAY-CHET-r1.md` (Issue #387), chưa có mã. CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng. Chạy thử trong bản sao dưới /tmp (git archive). Không chạy toàn bộ launcher_test; ưu tiên `--lap-ca ... --lan 1`.
+
+Worktree master 641108c. `ops/specs/LAUNCHER-BAM-LOG-SAU-CAY-CHET-r1-ban4.md` là bản bạn review lượt 4 (request_changes: P2 dọn cháu theo PID còn hai khe tái cấp PID; P2 N5 L2 cách B yếu hơn cách A; P3 ca (e) không giết sleep theo mốc cũ; ghi chú L1–L7/§9). Bản hiện tại ĐỔI THIẾT KẾ dọn cháu: fixture không gửi tín hiệu nào; cháu tự thoát sau hạn cố định; fixture chỉ chờ cây rỗng qua tham chiếu nó sở hữu (nhóm của con POSIX / job Windows); ca có cháu bọc os.kill/os.killpg và đòi 0 lời gọi mang PID cháu. §9 liệt kê thay đổi.
+
+Việc: (1) `diff` hai bản; kiểm ba finding lượt 4 đã đóng thật. (2) Thiết kế dọn cháu mới: còn đường nào fixture/launcher gửi tín hiệu tới PID không sở hữu? Ca đỏ giữa chừng để cháu sống tới 4 s — có gây ca sau đỏ oan/ô nhiễm không? Trên Windows job handle có đóng đúng? (3) N5 cách A/B nay cùng bằng chứng. (4) Ca (e4) đồng hồ giả + đột biến `r387_ngu_khong_tru_lan_do`. (5) Rà L1–L7 (`.claude/skills/soan-spec/SKILL.md`) theo §9. Chỉ nêu finding mới nếu là lỗi thật có phản chứng chạy được hoặc mâu thuẫn trích dẫn được.
+
+Đầu ra stdout: bảng finding lượt 4 (đóng/chưa), finding mới P0–P3. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2.

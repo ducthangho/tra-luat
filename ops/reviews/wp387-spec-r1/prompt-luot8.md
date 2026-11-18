@@ -1,0 +1,7 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 8, cho đặc tả packet A `ops/specs/LAUNCHER-BAM-LOG-SAU-CAY-CHET-r1.md` (Issue #387), chưa có mã. Packet B `ops/specs/LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS-r1.md` chỉ đọc để kiểm ranh giới (B review riêng sau khi A land; finding chỉ của B không chặn). CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng. Chạy thử trong RAM hoặc bản sao (nếu /tmp chỉ đọc, dùng /dev/shm). Không chạy toàn bộ launcher_test; ưu tiên `--lap-ca ... --lan 1`.
+
+Worktree master 641108c. `-r1-ban7.md` là bản A bạn review lượt 7 (A: P2 ca (i) trên Windows bị teardown báo cây không đo được; P3 ca (i) bỏ lọt đột biến lấy mốc trước khối unlink) bỏ lọt chờ thừa). Bản hiện tại: `_nen_do_cay_truoc_bam()` là chỗ duy nhất quyết nền đo; nền ngoài Linux lấy lại `ket_thuc` đúng vị trí base; ca (i) + đột biến `r387_a_nen_khac_doi_moc`; fixture dùng getattr và N1 đòi đỏ đúng vế khoá sau vế băm; (e5) đòi 0 lời ngủ + đột biến `r387_a_nen_khac_ngu_thua`. Vá thử A đo 400 dòng thêm (trần 450). §9 liệt kê thay đổi.
+
+Việc: (1) Kiểm hai finding lượt 7 của A đã đóng thật. (2) Tìm lỗ mới do sửa này gây ra (ca nào của A còn phụ thuộc nền; đột biến hai thay thế theo thứ tự có đo đúng). (3) Trần 410 ≤ 450 và luật dừng. (4) Rà L1–L7. Chỉ nêu finding mới nếu là lỗi thật có phản chứng chạy được hoặc mâu thuẫn trích dẫn được.
+
+Đầu ra stdout: bảng finding lượt 7 (đóng/chưa), finding mới P0–P3 (ghi A hay B). Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Approve khi packet A không còn P0–P2.

@@ -1,0 +1,7 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 3, cho đặc tả `ops/specs/LAUNCHER-BAM-LOG-SAU-CAY-CHET-r1.md` (Issue #387), chưa có mã. CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng. Chạy thử trong bản sao dưới /tmp (git archive). Không chạy toàn bộ launcher_test quá một lần; ưu tiên `--lap-ca`.
+
+Worktree master 641108c. `ops/specs/LAUNCHER-BAM-LOG-SAU-CAY-CHET-r1-ban2.md` là bản bạn review lượt 2 (request_changes: P1 fixture Windows con `pass` thoát trước khi gán job; P2 kết quả dò `[]` sau deadline vẫn thành true + đột biến timeout=15 có thể sống; P2 Ctrl-C ghi đè ma_that / che kq_chup; P2 hai cách chạy N5 native đòi bằng chứng khác nhau; P3 giờ `xZ`, mốc 400, §8 số đột biến). `ops/specs/LAUNCHER-BAM-LOG-SAU-CAY-CHET-r1.md` là bản sửa; §9 liệt kê thay đổi. Ràng buộc: không CI Windows; Windows đo native trên máy chủ kho.
+
+Việc: (1) `diff` hai bản; kiểm từng finding lượt 2 đã đóng thật, đối chiếu mã thật (`.claude/dev/launcher.py` lenh_run ~2916–2978, `_thanh_vien_nhom` ~583, `_job_windows`, `_pid_trong_job`, t76 ~1759). (2) Tìm lỗ mới trong thứ tự xét kết quả M2 (None / quá hạn / [] ), cờ `ngat_khi_cho`, bắt tay `job-da-gan`. (3) Mỗi mẫu đột biến khớp đúng 1 chỗ (t117). (4) Ước lượng 320–440 so trần 450 và phương án tách §8. (5) Rà L1–L7.
+
+Đầu ra stdout: bảng finding lượt 2 (đóng/chưa), finding mới P0–P3. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2.

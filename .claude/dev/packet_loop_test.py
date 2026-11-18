@@ -12415,6 +12415,8 @@ WP1174_REQUIRED |= {"wp1174_activity_" + name for name in (
     "reduced_payload multipage_anchor older_page_fail same_timestamp_fail force_push_preimage deletion_preaudit tag_coverage "
     "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained matching_refs_unpaginated tip_non_commit "
     "budget_bytes_cumulative budget_pages_cumulative budget_overflow_unreported deadline_processing fetch_timeout_group").split()}
+# wp1393: the accept comparison layer adds two required IDs (108 -> 110).
+WP1174_REQUIRED |= {"wp1174_activity_accept_snapshot_drift", "wp1174_receipt_agree_unit"}
 WP1174_REQUIRED |= {"wp1174_" + kind + "_" + name for kind in ("writer", "race") for name in _WP1174_WRITERS}
 WP1174_BOTH = {"wp1174_" + name for name in ("admission_valid admission_wrong_scope witness_valid witness_keyset witness_int_bool witness_json_bytes "
     "witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending lifecycle_legacy_unchanged status_closed").split()}
@@ -12646,13 +12648,13 @@ def _lifecycle1174(kind):
                     d=c.tmp/("current-service" if service else "current-native");d.mkdir()
                     _current_policy1174(Ctx(c.script,d),service)
                 _static_writers1174(c,m)
-                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==108
+                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==110
                 applicable=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
                 required={n:None for n in applicable}
                 assert _required1174(required,applicable)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,applicable),"missing required ID accepted"
-                assert len(_WP1174_FULL_CASE_IDS)==108 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
+                assert len(_WP1174_FULL_CASE_IDS)==110 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -12769,7 +12771,7 @@ def _evidence_schema1174(c):
     required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
     record=dict(schema="wp1174_native_report.v1",actual_os="Linux",scope="wp1174_candidate",proof_eligible=True,source_pr=1275,repo="ducthangho/tra-luat",pr=1275,
         run_id="1",run_attempt="1",job="gate-packet-loop",checkout_sha=m,checkout_tree="c"*40,executed_sha=h,executed_tree="d"*40,expected_head=h,expected_tree="d"*40,
-        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=107,
+        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=109,
         outcomes={n:"passed" for n in required},profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},
         native_probe=dict(status="passed",checks={k:True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")}),
         native_seam=False,overall_status="passed",windows_oracle="not_run_platform; deferred_to_windows_focused")
@@ -12866,7 +12868,7 @@ def _management_race1174(c,name):
     assert state["state_revision"]==(0 if name=="init" else 2) and not state["codex_calls"]
 
 
-def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,target_facts=None):
+def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,target_facts=None,publication=None):
     import contextlib,io,copy,multiprocessing
     from unittest.mock import patch
     from types import SimpleNamespace
@@ -12986,7 +12988,7 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
         with patch.object(m,"_1174_IMPLEMENTATION_COMPLETE",True),patch.object(m,"_1174_resolve",side_effect=resolved),patch.object(m,"_1174_runtime",return_value={}),patch.object(m,"_1174_probe",return_value={}),patch.object(m,"_canon",canonical),patch.object(m,"_1174_api",side_effect=fetch),patch.object(m,"_nap",return_value=SimpleNamespace(_doc_gh=lambda label,endpoint:fetch(endpoint))),workflow_seams(),contextlib.redirect_stdout(out),contextlib.redirect_stderr(err):
             rc=m.main(argv)
         assert len(out.getvalue().splitlines())==1,(rc,out.getvalue(),err.getvalue())
-        if workflow_case or target_facts is not None:flow["errors"].append(err.getvalue())
+        if workflow_case or target_facts is not None or publication is not None:flow["errors"].append(err.getvalue())
         return rc,json.loads(out.getvalue())
     pair(state)
     if race:
@@ -13075,6 +13077,11 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
                 assert event[key+"_sha256"]==hashlib.sha256(inputs[str(hc.tmp/(key+".json"))]).hexdigest(),key
             assert event["workflow_jobs_sha256"]==[hashlib.sha256(inputs[str(hc.tmp/"workflow_jobs.json")]).hexdigest()]
         else:
+            if publication is not None:
+                # wp1393: the caller rewrites the supplied receipt (and may probe
+                # rejections) on this exact fixture; the accept below is the real one.
+                publication(SimpleNamespace(m=m,path=Path(hargs.publication_receipt),invoke=invoke,target=target,witness=witness,
+                    audit=audit,head=head,flow=flow,collect=lambda:m._1174_collect(fetch,w,head,audit,123)))
             rc,result=invoke();assert rc==0,(workflow_case,rc,result,flow)
     token=m._1174_TARGET_AUTHORITY.set(target_facts["target_authority"]) if target_facts is not None else None
     try:
@@ -14031,7 +14038,7 @@ def _r12_main_inventory1174(c):
     seen=[]
     def selected_driver():
         names=[name for name,_ in CASES if name in WP1174_REQUIRED]
-        assert len(names)==107 and "wp1174_windows_claim_rejected" not in names
+        assert len(names)==109 and "wp1174_windows_claim_rejected" not in names
         dict(CASES)["wp1174_lifecycle_scoped_lifecycle"](c)
         seen.append(tuple(names))
         return 0
@@ -14041,7 +14048,7 @@ def _r12_main_inventory1174(c):
             _legacy_main=selected_driver,_carrier1174=lambda *args:True,_snapshot1174=lambda *args:{}),contextlib.redirect_stdout(io.StringIO()):
         assert main()==0
     assert seen and CASES is full
-    assert len(_WP1174_FULL_CASE_IDS)==108 and len(set(_WP1174_FULL_CASE_IDS))==108
+    assert len(_WP1174_FULL_CASE_IDS)==110 and len(set(_WP1174_FULL_CASE_IDS))==110
 
 
 def _r12_accept_snapshot1174(c):
@@ -14283,8 +14290,13 @@ def _activity_case1370(kind):
             # Observation timestamps are the only keys allowed to differ.
             moved=dict(supplied,started_utc="2026-11-04T09:30:00Z",ended_utc="2026-11-04T09:31:00Z");path.write_bytes(m._1174_bytes(moved))
             rc,result=guard();assert rc==0 and result["status"]=="PASS",(rc,result)
-            changes=[("raw_snapshot_sha256","0"*64),("cursor_coverage",dict(supplied["cursor_coverage"],activity=2)),
-                ("earliest",dict(supplied["earliest"],id="13")),("earliest",dict(supplied["earliest"],time="2026-11-04T09:01:01Z")),
+            # wp1393: the raw feed digest and the page counts grow with unrelated
+            # repository traffic between two collections; they are not compared.
+            for key,value in (("raw_snapshot_sha256","0"*64),("cursor_coverage",dict(supplied["cursor_coverage"],activity=2))):
+                assert value!=supplied[key]
+                path.write_bytes(m._1174_bytes(dict(supplied,**{key:value})))
+                rc,result=guard();assert rc==0 and result["status"]=="PASS",("volatile key rejected",key,rc,result)
+            changes=[("earliest",dict(supplied["earliest"],id="13")),("earliest",dict(supplied["earliest"],time="2026-11-04T09:01:01Z")),
                 ("earliest",dict(supplied["earliest"],after=parent)),("earliest",dict(supplied["earliest"],ref="refs/heads/other"))]
             for key,value in changes:
                 path.write_bytes(m._1174_bytes(dict(supplied,**{key:value})))
@@ -14944,6 +14956,279 @@ MUTANTS.update({
 })
 
 
+# --- wp1393: accept compares the immutable part of two publication receipts -----
+# Validity layer = `_1174_collector_receipt` (unchanged, now applied to both
+# receipts); comparison layer = `_1174_receipts_agree`. The cases below keep the
+# two apart: every rejection names the layer that produced it.
+_WP1393_IMMUTABLE = ("schema", "repo_id", "repo", "head", "audit_comment_id", "audit_updated_at", "audit_sha256", "query_scope",
+    "ref_scope", "event_scope", "dag_coverage", "earliest", "residual_classes", "status")
+_WP1393_VOLATILE = ("cursor_coverage", "raw_snapshot_sha256", "started_utc", "ended_utc")
+
+
+def _snapshot_drift1393(c):
+    """Real `accept` with a supplied receipt that drifted from the fresh collection."""
+    import copy
+    from unittest.mock import patch
+    ok="RECORDED_EARLIEST_MATCH"
+    def drifted(receipt,kind):
+        moved=copy.deepcopy(receipt)
+        if kind in ("digest_only","both"):
+            moved["raw_snapshot_sha256"]=("0" if receipt["raw_snapshot_sha256"]!="0"*64 else "1")*64
+        if kind in ("count_only","both"):
+            moved["cursor_coverage"]["activity"]=receipt["cursor_coverage"]["activity"]+1
+        return moved
+    def difference(left,right):
+        return {k for k in set(left)|set(right) if left.get(k)!=right.get(k)}-{"started_utc","ended_utc"}
+    def accepted_on(name,publication):
+        directory=c.tmp/name;directory.mkdir()
+        seen={}
+        def hook(env):
+            seen["env"]=env;seen["genuine"]=json.loads(env.path.read_bytes())
+            assert seen["genuine"]["status"]==ok and not difference(seen["genuine"],env.collect()),"fixture receipt is not the fresh collection"
+            seen["before"]=json.loads(env.target.read_bytes())
+            publication(env,seen["genuine"])
+            seen["supplied"]=env.path.read_bytes()
+        accepted=_accept_entry1174(Ctx(c.script,directory),publication=hook)
+        env=seen["env"];m=env.m
+        assert seen["before"]["state"]=="approved_pending" and seen["before"]["accepted_sha"] is None,seen["before"]["state"]
+        assert accepted["state"]=="accepted" and accepted["accepted_sha"]==env.head and accepted["state_revision"]==seen["before"]["state_revision"]+1,(name,accepted["state"],accepted["accepted_sha"])
+        human=accepted["human_acceptance"]
+        assert human["assurance"]=="human_audited" and human["head"]==env.head and human["audit_comment_id"]==env.audit["id"] and \
+            human["audit_updated_at"]==env.audit["updated_at"] and human["audit_sha256"]==hashlib.sha256(m._1174_bytes(env.audit)).hexdigest(),(name,human)
+        assert env.path.read_bytes()==seen["supplied"],"accept rewrote the supplied receipt"
+        return seen
+    # Three independent positive variants: the supplied receipt differs from the
+    # fresh collection in exactly the stated volatile key(s) and accept succeeds.
+    for kind,expected in (("digest_only",{"raw_snapshot_sha256"}),("count_only",{"cursor_coverage"}),("both",{"raw_snapshot_sha256","cursor_coverage"})):
+        def publication(env,genuine,kind=kind,expected=expected):
+            moved=drifted(genuine,kind)
+            assert difference(moved,env.collect())==expected,(kind,difference(moved,env.collect()))
+            assert set(moved["cursor_coverage"])==set(genuine["cursor_coverage"]) and all(type(v) is int and 1<=v<=1000 for v in moved["cursor_coverage"].values())
+            assert sum(moved["cursor_coverage"][k]!=genuine["cursor_coverage"][k] for k in genuine["cursor_coverage"])==int(kind!="digest_only")
+            assert env.m._1174_hash(moved["raw_snapshot_sha256"]) and env.m._1174_collector_receipt(copy.deepcopy(moved),env.head,env.audit,123)
+            env.path.write_bytes(env.m._1174_bytes(moved));env.flow["wp1393_variant"]=kind   # named in the accept assertion
+        seen=accepted_on(kind,publication)
+        assert difference(json.loads(seen["supplied"]),seen["genuine"])==expected,kind
+    # Rejections on the same real path; each leaves target and witness untouched.
+    def rejections(env,genuine):
+        m=env.m
+        def rejected(label,reason,receipt=None,collected=None):
+            env.path.write_bytes(m._1174_bytes(genuine if receipt is None else receipt))
+            before=(env.target.read_bytes(),env.witness.read_bytes());state=json.loads(before[0])
+            real=m._1174_collect;served=[]
+            def collect(*values,**kw):
+                fresh=real(*values,**kw);served.append(fresh);return collected(fresh) if collected else fresh
+            with patch.object(m,"_1174_collect",side_effect=collect),patch.object(m,"_1174_write",wraps=m._1174_write) as writes:
+                rc,result=env.invoke()
+            after=json.loads(env.target.read_bytes())
+            assert rc==8 and not result["dispatch_allowed"],("wp1393 "+label+": accepted",rc,result)
+            assert not writes.called and before==(env.target.read_bytes(),env.witness.read_bytes()) and \
+                after["state"]=="approved_pending" and after["state_revision"]==state["state_revision"] and after["accepted_sha"]==state["accepted_sha"] is None,("wp1393 "+label+": state changed",after["state"])
+            assert len(served)==1 and served[0]["status"]==ok,("wp1393 "+label+": fresh collection not reached",len(served))
+            detail=str(result.get("detail"))+env.flow["errors"][-1]
+            assert reason in detail,("wp1393 "+label+": wrong rejection",reason,result,env.flow["errors"][-1])
+            other={"publication evidence UNKNOWN/FAIL","publication evidence FAIL","collector receipt closed bindings","collector cursor schema","collector earliest schema","collector success completeness"}-{reason}
+            assert not any(x in detail for x in other),("wp1393 "+label+": second rejection reason",detail)
+        # Comparison layer (5b): both receipts valid, earliest differs.
+        moved=dict(genuine,earliest=dict(genuine["earliest"],id=genuine["earliest"]["id"]+"3"))
+        assert m._1174_collector_receipt(copy.deepcopy(moved),env.head,env.audit,123)
+        rejected("earliest id drift","publication evidence UNKNOWN/FAIL",moved)
+        # Validity layer still first on the supplied receipt (5d) — these do not measure the comparison.
+        rejected("supplied RECORDED without dag coverage","collector success completeness",dict(genuine,dag_coverage=False))
+        rejected("supplied zero page count","collector cursor schema",dict(genuine,cursor_coverage=dict(genuine["cursor_coverage"],activity=0)))
+        rejected("supplied residual classes","collector receipt closed bindings",dict(genuine,residual_classes=genuine["residual_classes"][:2]))
+        # Validity layer on the fresh collection (5f): the collector seam returns a
+        # RECORDED receipt that the validator rejects; the supplied one is genuine.
+        # Without that call the first one would be ACCEPTED (the comparison ignores
+        # counts) and the second would be blamed on the comparison layer.
+        rejected("collected page count out of range","collector cursor schema",collected=lambda fresh:dict(fresh,cursor_coverage=dict(fresh["cursor_coverage"],activity=1001)))
+        rejected("collected residual classes","collector receipt closed bindings",collected=lambda fresh:dict(fresh,residual_classes=fresh["residual_classes"][:2]))
+        env.path.write_bytes(m._1174_bytes(genuine))
+    seen=accepted_on("rejections",rejections)   # control: the same fixture is accepted once the genuine receipt is back
+    assert json.loads(seen["supplied"])==seen["genuine"]
+
+
+def _receipt_agree_unit1393(c):
+    """`_1174_receipts_agree` alone, on two valid receipts built from the fixture."""
+    import copy
+    m,w,args,a,audit,pages,seams=_human_fixture1174(c)
+    H=args.head;parent=_g(w,"rev-parse",H+"^1");root=_g(w,"rev-list","--max-parents=0",H)
+    agree=m._1174_receipts_agree
+    supplied=json.loads(Path(args.receipt).read_bytes())
+    collected=m._1174_collect(_fetch1370(m,pages),w,H,audit,123)
+    for receipt in (supplied,collected):
+        assert m._1174_collector_receipt(copy.deepcopy(receipt),H,audit,123)["status"]=="RECORDED_EARLIEST_MATCH",receipt
+    assert set(supplied)==set(_WP1393_IMMUTABLE)|set(_WP1393_VOLATILE) and len(_WP1393_IMMUTABLE)==14
+    scope=supplied["query_scope"];assert len(scope)==4 and set(supplied["cursor_coverage"])==set(scope)
+    def verdict(left=None,right=None):
+        one,two=copy.deepcopy(supplied),copy.deepcopy(collected)
+        for change,receipt in ((left,one),(right,two)):
+            if change is not None:change(receipt)
+        return agree(one,two)
+    put=lambda key,value:lambda receipt:receipt.__setitem__(key,value)
+    count=lambda family,value:lambda receipt:receipt["cursor_coverage"].__setitem__(family,value)
+    drop=lambda family:lambda receipt:receipt["cursor_coverage"].pop(family)
+    def each(*changes):
+        def apply(receipt):
+            for change in changes:change(receipt)
+        return apply
+    digest=put("raw_snapshot_sha256","0"*64);assert supplied["raw_snapshot_sha256"]!="0"*64!=collected["raw_snapshot_sha256"]
+    more=count("activity",supplied["cursor_coverage"]["activity"]+1)
+    stamps=each(put("started_utc","2026-11-04T09:30:00Z"),put("ended_utc","2026-11-04T09:31:00Z"))
+    assert supplied["started_utc"]!="2026-11-04T09:30:00Z"
+    # --- True: nothing but the feed digest, page counts and observation times may differ.
+    for label,left,right in (("identical",None,None),
+            ("digest only (supplied)",digest,None),("digest only (collected)",None,digest),
+            ("page count only (supplied)",more,None),("page count only (collected)",None,more),
+            ("page count only (largest valid vs smallest)",count("pulls?state=all",1000),count("pulls?state=all",1)),
+            ("digest and page count",each(digest,more),None),("digest one side, page count the other",digest,more),
+            ("observation times only",stamps,None),("observation times only (collected)",None,stamps),
+            ("every volatile key at once",each(digest,more,stamps),None)):
+        got=verdict(left,right)
+        assert got is True,("wp1393 agree rejected volatile drift: "+label,got)
+    # --- False: each of the 14 immutable keys, one type-valid different value, either side.
+    changed={"schema":"wp1174_publication_receipt.v1","repo_id":supplied["repo_id"]+1,"repo":supplied["repo"]+"-fork","head":parent,
+        "audit_comment_id":supplied["audit_comment_id"]+1,"audit_updated_at":"2026-11-04T09:00:01Z","audit_sha256":"0"*64,
+        "query_scope":list(reversed(scope)),"ref_scope":list(reversed(supplied["ref_scope"])),"event_scope":"events",
+        "dag_coverage":False,"earliest":dict(supplied["earliest"],id="13"),"residual_classes":supplied["residual_classes"][:2],"status":"UNKNOWN"}
+    assert tuple(changed)==_WP1393_IMMUTABLE
+    for key,value in changed.items():
+        assert type(value) is type(supplied[key]) and value!=supplied[key] and supplied[key]==collected[key],key
+        for side,got in (("supplied",verdict(put(key,value),None)),("collected",verdict(None,put(key,value)))):
+            assert got is False,("wp1393 agree ignored immutable key: "+key+" ("+side+")",got)
+    # All six earliest fields stay compared, and a missing earliest never matches.
+    fields=dict(id="13",time="2026-11-04T09:01:01Z",ref="refs/heads/other",actor="someone-else",before=root,after=parent)
+    assert set(fields)==set(supplied["earliest"])
+    for field,value in fields.items():
+        assert value!=supplied["earliest"][field],field
+        got=verdict(put("earliest",dict(supplied["earliest"],**{field:value})),None)
+        assert got is False,("wp1393 agree ignored earliest field: "+field,got)
+    assert verdict(put("earliest",None),None) is False and verdict(None,put("earliest",None)) is False,"wp1393 agree ignored missing earliest"
+    # --- False: page-count families and value types (the counts themselves are free).
+    extra=count("events",1);assert "events" not in scope
+    for label,left,right in (("family missing in supplied",drop("activity"),None),("family missing in collected",None,drop("activity")),
+            ("family outside query_scope in both",extra,extra),
+            ("family outside query_scope replaces one in both",each(drop("pulls?state=all"),extra),each(drop("pulls?state=all"),extra)),
+            ("same family missing in both",drop("activity"),drop("activity")),
+            ("value 0 (supplied)",count("activity",0),None),("value 0 (collected)",None,count("activity",0)),("value 0 (both)",count("activity",0),count("activity",0)),
+            ("negative value",count("activity",-1),count("activity",-1)),
+            ("bool value (supplied)",count("activity",True),None),("bool value (both)",count("activity",True),count("activity",True)),
+            ("string value (supplied)",count("activity","1"),None),("string value (both)",count("activity","1"),count("activity","1")),
+            ("float value (both)",count("activity",1.0),count("activity",1.0)),
+            ("cursor_coverage is a list (supplied)",put("cursor_coverage",[[k,1] for k in scope]),None),
+            ("cursor_coverage is a list (collected)",None,put("cursor_coverage",[[k,1] for k in scope])),
+            ("cursor_coverage is null (both)",put("cursor_coverage",None),put("cursor_coverage",None)),
+            ("cursor_coverage key absent (supplied)",lambda receipt:receipt.pop("cursor_coverage"),None),
+            ("cursor_coverage key absent (collected)",None,lambda receipt:receipt.pop("cursor_coverage")),
+            ("cursor_coverage key absent (both)",lambda receipt:receipt.pop("cursor_coverage"),lambda receipt:receipt.pop("cursor_coverage"))):
+        got=verdict(left,right)
+        assert got is False,("wp1393 agree accepted bad page coverage: "+label,got)
+    # No exception for missing keys or wrong types: the answer is False.
+    for label,one,two in (("immutable key absent",{k:v for k,v in supplied.items() if k!="status"},{k:v for k,v in collected.items() if k!="status"}),
+            ("empty dicts",{},{}),("non-dict supplied",None,collected),("non-dict collected",supplied,[]),
+            ("unhashable query_scope",dict(supplied,query_scope=[[]]),dict(collected,query_scope=[[]])),
+            ("query_scope not iterable",dict(supplied,query_scope=4),dict(collected,query_scope=4))):
+        got=agree(copy.deepcopy(one),copy.deepcopy(two))
+        assert got is False,("wp1393 agree accepted malformed input: "+label,got)
+    # --- False (wp1393 F1): shape gate. Every receipt key must be present in both operands.
+    assert set(supplied)==set(collected)==set(m._1174_COLLECTOR_KEYS) and len(m._1174_COLLECTOR_KEYS)==18
+    gone=lambda key:lambda receipt:receipt.pop(key)
+    for key in sorted(m._1174_COLLECTOR_KEYS):
+        for side,left,right in (("supplied",gone(key),None),("collected",None,gone(key)),("both",gone(key),gone(key))):
+            got=verdict(left,right)
+            assert got is False,("wp1393 agree accepted a receipt without key: "+key+" ("+side+")",got)
+    surplus=put("extra",1)
+    for side,left,right in (("supplied",surplus,None),("collected",None,surplus),("both",surplus,surplus)):
+        got=verdict(left,right)
+        assert got is False,("wp1393 agree accepted a receipt with a foreign key ("+side+")",got)
+    # Uncompared keys keep their type: a digest and two UTC timestamps, in both operands.
+    for key,values in (("raw_snapshot_sha256",(None,"g"*64,"0"*63,"0"*65,"A"*64,0,["0"*64])),
+            ("started_utc",(None,"","2026-11-04 09:30:00Z","2026-11-04T09:30:00+00:00","2026-13-40T09:30:00Z",1793784600,["2026-11-04T09:30:00Z"])),
+            ("ended_utc",(None,"","2026-11-04 09:31:00Z","2026-11-04T09:31:00.000Z","2026-02-30T09:31:00Z",1793784660.0,{"t":"2026-11-04T09:31:00Z"}))):
+        for value in values:
+            for side,left,right in (("supplied",put(key,value),None),("collected",None,put(key,value)),("both",put(key,value),put(key,value))):
+                got=verdict(left,right)
+                assert got is False,("wp1393 agree accepted wrong type: "+key+"="+repr(value)+" ("+side+")",got)
+    # Compared keys are compared by canonical bytes: a value of another type that is == does not agree.
+    assert supplied["dag_coverage"] is True and supplied["repo_id"]==123 and type(supplied["repo_id"]) is int
+    for key,value in (("dag_coverage",1),("repo_id",123.0),("repo_id",True),("audit_comment_id",float(supplied["audit_comment_id"])),
+            ("status",1),("status",None),("status",["RECORDED_EARLIEST_MATCH"]),("schema",2),("earliest",[]),("query_scope",tuple(scope)+("x",)),
+            ("residual_classes",None),("head",None)):
+        for side,left,right in (("supplied",put(key,value),None),("collected",None,put(key,value))):
+            got=verdict(left,right)
+            assert got is False,("wp1393 agree accepted wrong type: "+key+"="+repr(value)+" ("+side+")",got)
+    assert verdict(put("repo_id",float("nan")),put("repo_id",float("nan"))) is False,"wp1393 agree accepted a non-JSON number"
+    # --- False (wp1393 fix 2): a wrong-typed value of a compared key agrees with itself byte for byte,
+    # so the per-key type check is what answers when BOTH operands carry it.
+    early=supplied["earliest"];assert type(early) is dict and len(early)==6 and type(supplied["audit_comment_id"]) is int
+    both_wrong=(("status",1),("dag_coverage",1),("repo_id",True),("repo_id",123.0),("head",None),
+        ("audit_comment_id",str(supplied["audit_comment_id"])),("query_scope","x"),("earliest",[]),("earliest",dict(early,id=13)),
+        ("residual_classes",[1]),
+        ("schema",2),("schema",None),("repo_id","123"),("repo_id",None),("repo",1),("repo",None),
+        ("head",H[:39]),("head",H+"0"),("head","A"*40),("head","g"*40),("head",int(H[:8],16)),
+        ("audit_comment_id",True),("audit_comment_id",float(supplied["audit_comment_id"])),("audit_comment_id",None),
+        ("audit_updated_at",1793784600),("audit_updated_at",None),("audit_sha256",None),("audit_sha256","0"*63),("audit_sha256","A"*64),("audit_sha256",0),
+        ("query_scope",tuple(scope)),("query_scope",None),("query_scope",{k:1 for k in scope}),
+        ("ref_scope","refs/heads/*"),("ref_scope",[1]),("ref_scope",None),("ref_scope",tuple(supplied["ref_scope"])),
+        ("event_scope",1),("event_scope",None),("event_scope",["repository_activity"]),
+        ("dag_coverage",0),("dag_coverage",None),("dag_coverage","true"),
+        ("earliest","x"),("earliest",0),("earliest",dict(early,actor=None)),("earliest",{k:v for k,v in early.items() if k!="actor"}),
+        ("earliest",dict(early,extra="x")),("earliest",sorted(early.items())),
+        ("residual_classes",None),("residual_classes","x"),("residual_classes",tuple(supplied["residual_classes"])),
+        ("residual_classes",supplied["residual_classes"]+[None]),
+        ("status",None),("status",True),("status","RECORDED"),("status","recorded_earliest_match"),("status",["RECORDED_EARLIEST_MATCH"]))
+    assert {key for key,_ in both_wrong}==set(_WP1393_IMMUTABLE)==set(m._1174_RECEIPT_IMMUTABLE_KEYS)
+    for key,value in both_wrong:
+        got=verdict(put(key,value),put(key,value))
+        assert got is False,("wp1393 agree accepted wrong type in both operands: "+key+"="+repr(value),got)
+        for side,left,right in (("supplied",put(key,value),None),("collected",None,put(key,value))):
+            got=verdict(left,right)
+            assert got is False,("wp1393 agree accepted wrong type: "+key+"="+repr(value)+" ("+side+")",got)
+    # Operands that are not dicts at all.
+    for label,one,two in (("string supplied",m._1174_bytes(supplied).decode(),collected),("pair list collected",supplied,sorted(collected.items())),
+            ("tuple supplied",(supplied,),collected),("both None",None,None),("int collected",supplied,0),
+            ("all-null receipt supplied",dict.fromkeys(supplied),collected)):
+        got=agree(copy.deepcopy(one),copy.deepcopy(two))
+        assert got is False,("wp1393 agree accepted malformed operand: "+label,got)
+    # Pure: inputs are not modified.
+    one,two=copy.deepcopy(supplied),copy.deepcopy(collected)
+    assert agree(one,two) is True and one==supplied and two==collected
+    # Key partition (after the behaviour above, so a dropped key fails on its own
+    # vector first): a receipt key added without classifying it is RED here.
+    assert m._1174_RECEIPT_IMMUTABLE_KEYS==frozenset(_WP1393_IMMUTABLE) and len(m._1174_RECEIPT_IMMUTABLE_KEYS)==14,"wp1393 immutable key set changed"
+    assert not m._1174_RECEIPT_IMMUTABLE_KEYS&set(_WP1393_VOLATILE) and \
+        m._1174_RECEIPT_IMMUTABLE_KEYS|{"cursor_coverage","raw_snapshot_sha256","started_utc","ended_utc"}==m._1174_COLLECTOR_KEYS,"wp1393 receipt key left unclassified"
+
+
+assert {"wp1174_activity_accept_snapshot_drift", "wp1174_receipt_agree_unit"} <= WP1174_REQUIRED
+CASES += [("wp1174_activity_accept_snapshot_drift", _snapshot_drift1393), ("wp1174_receipt_agree_unit", _receipt_agree_unit1393)]
+MUTANTS.update({
+    # compare the whole-feed digest again
+    "m1393_compare_raw_snapshot": ('for k in _1174_RECEIPT_IMMUTABLE_KEYS):', 'for k in _1174_RECEIPT_IMMUTABLE_KEYS | {"raw_snapshot_sha256"}):',
+        ["wp1174_activity_accept_snapshot_drift", "wp1174_receipt_agree_unit"]),
+    # compare the page counts again
+    "m1393_compare_cursor_counts": ('        return all(type(v) is int and v >= 1 for p in pages for v in p.values())\n',
+        '        return pages[0] == pages[1] and all(type(v) is int and v >= 1 for p in pages for v in p.values())\n',
+        ["wp1174_activity_accept_snapshot_drift", "wp1174_receipt_agree_unit"]),
+    # stop comparing the earliest publication record
+    "m1393_drop_earliest": ('event_scope dag_coverage earliest residual_classes status".split())', 'event_scope dag_coverage residual_classes status".split())',
+        ["wp1174_activity_accept_snapshot_drift", "wp1174_receipt_agree_unit"]),
+    # stop comparing the page-count families (the validator masks this on accept; the unit case is the target)
+    "m1393_cursor_family_unchecked": ('        if not (set(pages[0]) == set(pages[1]) == set(supplied["query_scope"])):\n', '        if False:\n',
+        ["wp1174_receipt_agree_unit"]),
+    # compare without the shape/type gate on the two operands (the validator masks this on accept; the unit case is the target)
+    "m1393_comparator_shape_unchecked": ('        if not all(type(r) is dict and set(r) == _1174_COLLECTOR_KEYS and _1174_hash(r["raw_snapshot_sha256"]) and\n'
+        '                   all(_1174_time(r[k]) is not None for k in ("started_utc", "ended_utc")) for r in (supplied, collected)):\n', '        if False:\n',
+        ["wp1174_receipt_agree_unit"]),
+    # compare without the per-key value types of the 14 compared keys (identical wrong-typed values on both sides then agree)
+    "m1393_comparator_value_types_unchecked": ('        if not all(_1174_receipt_value_types(r) for r in (supplied, collected)):\n', '        if False:\n',
+        ["wp1174_receipt_agree_unit"]),
+    # trust the fresh collection without the validity layer
+    "m1393_collected_unvalidated": ('    collected = _1174_collector_receipt(collected, head, audit, repo["id"])\n', '    pass # omit validation of the fresh collection\n',
+        ["wp1174_activity_accept_snapshot_drift"]),
+})
+
+
 # R12 adds adversarial stimuli to the frozen IDs without changing the inventory.
 _r12_hosts={"wp1174_lifecycle_first_publication":_r12_publication1174,
     "wp1174_durability_fsync_readback":_r12_durability1174,
@@ -14981,8 +15266,8 @@ MUTANTS.update({
     "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
 })
 
-MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==108 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
-    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==108,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
+MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==110 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
+    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==110,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
 MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
@@ -15193,7 +15478,7 @@ def _carrier1174(outcomes, gate_rc=0):
 
 def main():
     global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
-    assert len(WP1174_REQUIRED) == 108 and len(WP1174_BOTH) == 12
+    assert len(WP1174_REQUIRED) == 110 and len(WP1174_BOTH) == 12
     actual_os = platform.system()
     if actual_os=="Linux":
         globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
@@ -15205,7 +15490,7 @@ def main():
     missing = sorted(name for name in applicable if available.count(name) != 1)
     CASES = [(name, fn) for name, fn in cases if (not name.startswith("wp1174_") or name in applicable)
         and (actual_os == "Linux" or name not in _WP1303_LINUX_CASES)]
-    MUTANTS = {name: value for name, value in mutants.items() if (not name.startswith("m1174_") or actual_os == "Linux")
+    MUTANTS = {name: value for name, value in mutants.items() if (not name.startswith(("m1174_", "m1393_")) or actual_os == "Linux")
         and (actual_os == "Linux" or name not in _WP1303_R4_MUTANTS and not any(t in _WP1303_LINUX_CASES for t in value[2]))}
     try:
         if missing:

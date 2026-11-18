@@ -32,12 +32,14 @@ granted_on_instruction_note: 'không mở app đã cài, không inference, khôn
 recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-18T16:50:39Z'
-heartbeat_at: '2026-11-18T16:50:39Z'
-lease_until: '2026-11-18T22:50:39Z'
-lease_expires_at_utc: '2026-11-18T22:50:39Z'
+heartbeat_at: '2026-11-18T23:29:49Z'
+lease_until: '2026-11-18T23:29:49Z'
+lease_expires_at_utc: '2026-11-18T23:29:49Z'
 max_lease_hours: 6
 review_calls_limit: 1
 review_calls_used: 0
 native_runs_limit: 1
 native_step_reruns_limit: 1
 windows: native_desktop_only
+withdrawn_at_utc: '2026-11-18T23:29:49Z'
+withdrawn_reason: 'N1 + N1b (chay lai) da dung; S3/S4b khong ket luan do go bat dong bo; thay bang g2 voi 1 luot do moi'

@@ -193,3 +193,65 @@ TONG: 55 dat / 55
 - `ls pwsrc`, các nhóm đọc `rg`, `find`, `nl -ba`, `sed`, `head`, `tail`, `cat` trên lockfile, SKILL, harness, RESULTS và nguồn/tài liệu ghim — rc 0. `python -` kiểm SRI và byte giải nén — rc 0.
 - `mkdir scratch/work-probe` và hai probe `node -e` đọc registry ghim với XDG có slash cuối và XDG rỗng — nhóm rc 0, không gọi CLI. `bash --version | head -1` — rc 0. `command -v pwsh` — rc 1.
 - `bash -c` nạp duy nhất fragment đầu Cleanup từ `scratch/n1/frag_dau.sh` với bản ghi fixture D4 và nonce mồi của cùng bản cài — rc 0, chốt chấp nhận nonce sai; không gọi 08–10.
+
+## Lượt 4 (Codex CLI, 2026-11-18T12:08:26Z → 12:11:58Z, rc 0; chép nguyên văn `scratch/VERDICT.md`)
+
+# WP1389 r1 — review độc lập lượt 4
+
+reviewed_sha: 999f5fcb1a8d4bad3d280d87aa3bfcf3ba9897da
+verdict: request_changes
+reviewer: codex (OpenAI), codex_cli, read-only
+
+## Findings chặn merge
+
+- **P1 — Bản ghi neo đường dẫn dạng chuỗi, chưa neo đích qua thư mục cha.** `.agents/skills/playwright-browser/SKILL.md:196–203,247–259,332–340,393–402,464–468,483–485`. Nếu một liên kết cha được đổi đích hoàn toàn giữa hai bước, lần hỏi CLI trả cùng hai chuỗi. Hai thư mục cuối ở đích mới đều có thể là thư mục thường. Chốt đầu chấp nhận, rồi 08/09 đi vào cây mới trước phép đếm; nếu cây đích có phiên cùng nonce, Cleanup có thể đóng phiên đó và xoá stderr của nó. Gỡ cũng chỉ đối chiếu chuỗi và loại ở thư mục cuối. Chấp nhận liên kết cha tĩnh và chấp nhận cửa sổ tráo đồng thời đã khai, nhưng cần phân biệt chúng với thay đổi đích đã xảy ra trước lần gọi Cleanup/Gỡ. Lưu và so đích vật lý trước các thao tác, hoặc từ chối thành phần cha là liên kết. Ca executor dựng bằng lời: liên kết cha ổn định qua hai bước là đối chứng; đổi đích giữa hai bước phải STOP trước 08 và Gỡ giữ nguyên thư mục ở đích mới. Reviewer không dựng đường dẫn thoát cây.
+
+- **P2 — PowerShell chấp nhận bản ghi của run khác qua reparse point.** `.agents/skills/playwright-browser/SKILL.md:336–337,396–401`. Bash loại symlink của `00-sophien.txt`; PS chỉ yêu cầu leaf, rồi đọc qua đường dẫn. Nếu bản ghi của A được thay bằng liên kết tới bản ghi của B đang mở trên cùng bản cài, và biến session bị ghép với B, phép so ba dòng thành công. Cleanup có thể đóng B và ghi chứng cứ vào A. Kiểm thuộc tính bản ghi trước khi đọc, từ chối reparse point và ghi bản ghi với chế độ tạo mới. Ca executor: chạy E2 với bản ghi A chuyển hướng sang bản ghi B, yêu cầu STOP trước 08 và so snapshot B. Reviewer chỉ mô tả tình huống liên kết.
+
+- **P2 — Gỡ dùng bản ghi Capture thay cho chứng cứ Cleanup theo B7.** `.agents/skills/playwright-browser/SKILL.md:461–468`, `ops/specs/wp1389-r1.md:54–55`. Bản ghi Capture có thể tồn tại dù launcher lỗi và chưa có `11-daemon-path.txt`. Hướng dẫn hiện tại vẫn cho dùng nó để chọn một thư mục hash rỗng để xoá. B7 yêu cầu lấy thư mục cha từ biên nhận 11. Dùng biên nhận đó và đối chiếu thêm với probe/bản ghi 00, hoặc ghi phê duyệt thay đổi B7. Ca Gỡ chỉ có 00, có 11 sai cha, và 11 hợp lệ nhưng thư mục còn mục; cả ba giữ thư mục và ghi biên nhận.
+
+- **P2 — Ma trận toàn luồng chưa chứng minh hết các chốt nó báo đạt.** `ops/acceptance/wp1389/residue_matrix.sh:166–173,189–215`, `ops/acceptance/wp1389/residue_matrix.ps1:233–240,270–286`. CLI giả có byte JSON/LF đúng cho close, verify và nhánh `deleted:false`. Tuy nhiên nó xoá descriptor còn tồn tại rồi vẫn báo false. CLI thật trả `deleted:result.existed` (output.js:259–260, session.js:73–97). Biến thể chỉ chấp nhận false vẫn qua E1. PS E1 cũng không đọc bảng hash; Bash chỉ kiểm bảng có tên 00 và 11-daemon.err, thiếu kiểm 11-daemon-path và thứ tự dọn trước hash. E2/E3 chỉ cấm `close` và kiểm một số tệp còn tồn tại, nên không đo độc lập việc cấm 09/10 hoặc bảo toàn byte. Để fixture phân biệt close dọn descriptor và descriptor còn sót, chạy cả true/false, thêm phản chứng byte/rc/stderr sai và lỗi ghi/copy/so/xoá. So bảng hash với ba tệp thật, kiểm nhật ký theo nonce và snapshot phiên bên kia. Các mutant bỏ nhánh true, chuyển hash lên sớm và gọi delete-data trước chốt phải làm ca đích đỏ.
+
+- **P2 — N2–N4 vẫn chưa có chứng cứ trên exact H.** `ops/acceptance/wp1389/RESULTS.md:6–9,87–125`, `ops/specs/wp1389-r1.md:71–90`. Executor đo ở `429fb5b0d43b5298734142c8eafafb9a0804c40e`. Tôi xác nhận ba tệp thực thi trùng byte H, và diff chỉ có RESULTS, REVIEW-PROMPT và lease. Điều đó xác nhận nội dung phép đo, còn đặc tả yêu cầu commit H. Gắn bằng chứng N2–N4 và các gate với exact H, hoặc chủ kho ghi quyết định chấp nhận phép đo trên nội dung thực thi trùng byte. Ca kiểm nghiệm thu đối chiếu SHA của các receipt với SHA ứng viên khi chuẩn bị merge.
+
+## Đối chiếu từng lỗi chặn lượt 3
+
+| Finding lượt 3 | Trạng thái tại H |
+|---|---|
+| P1 ghép run A/nonce B | **Sửa một phần.** SKILL:203,259 ghi nonce; :336–338 và :396–398 so trước 08. E2 và mutant xác nhận thứ tự trên Bash. PS vẫn nhận bản ghi chuyển hướng. Cả hai ghi 00 trước phần ghi nhật ký và khởi chạy trong wrapper (:180–186,206,214–235,262). Lỗi ở ghi nhật ký, redirect hoặc start có thể để lại 00 dù chưa gọi native. E4 chỉ đo dừng ở preflight. Cần ca launcher không chạy và ca native đã thử nhưng lỗi, để phân biệt bằng dấu mốc launch. |
+| P1 loại daemon/hash chỉ kiểm sau CLI | **Sửa một phần.** SKILL:339–340 và :399–402 chặn link/reparse ở đúng daemon/hash trước 08; :368–369 và :432–433 kiểm lại trước dọn. :464–468 thêm kiểm loại trước Gỡ. Trường hợp cha đổi đích vẫn qua phép so chuỗi như finding P1 trên. |
+| P2 stdout PowerShell làm sai Unicode | **Đã sửa cơ chế.** SKILL:244–248 và :391–395 truyền base64 ASCII rồi giải mã UTF-8; Bash :196–200 và :332–335 giải mã bằng `base64 -d`. Chuỗi JS truyền bằng một argv, không có dấu nháy kép nội bộ; đường dẫn mô-đun là argv riêng và không kết thúc bằng dấu phân cách. Theo executor, U1 đạt trên 5.1/7; mutant đổi UTF-8 sang ASCII làm ca đỏ. U1-Cleanup dùng đoạn trích và không đo lại kênh probe đầu Cleanup trong toàn luồng Unicode. |
+| P2 exact H và độ phủ toàn luồng | **Sửa một phần.** Harness Bash:155–215 và PS:225–286 chạy khối vận hành và có mutant đặt chốt đầu sau verify. Nhật ký mutant Bash thực sự có close, delete-data và tab-list của B. Còn thiếu các khẳng định độc lập, nhánh lỗi và chứng cứ exact H như hai finding P2 trên. |
+
+## B1–B8 và đối chiếu nguồn
+
+- HEAD khớp HEAD_SHA.txt, cây sạch. SHA-256 đặc tả khớp `12257fa8d659ff5c013af4bc31de700de4a53b085a99ec8c47cbd403d66610bc`. Base có blob SKILL `678ba2f0209690c535d9827ae8badbe7fff85748`. Ba tarball khớp SRI SHA-512 trong lockfile; 16 tệp CLI và 116 tệp core trong cây giải nén trùng tarball.
+- registry.js:119–165 dùng hook test, Linux `XDG_CACHE_HOME || ~/.cache`, Windows `LOCALAPPDATA || ~/AppData/Local`, và macOS ngoài phạm vi skill. Hash là 16 hex đầu SHA-1 của `workspaceDir || packageRoot`; đường dẫn Linux trong spec cho `3815e4e10d63867a`. session.js:73–97,121–126 xác nhận mở .err với `w` và delete-data chỉ chọn descriptor/userdata. serverRegistry.js khai hook test và thao tác unlink descriptor có bỏ lỗi. README, session-management và client ghim không có tuỳ chọn được hỗ trợ để dời sổ phiên. `--profile` chọn dữ liệu trình duyệt; phương án (a) vẫn không khả dụng.
+- B1/B2: Bash probe và wrapper cùng Node, subshell `cd work` và môi trường export. PS dùng `Push-Location` cho native probe và `-WorkingDirectory` cho CLI với cùng môi trường tiến trình trong điều kiện FileSystem của Setup. Cả hai từ chối workspace mode. Node chuẩn hoá dấu slash cuối và tự dùng fallback khi biến cache rỗng. Cache thiếu hoặc rỗng cho qua preflight nếu không có mục trùng; Cleanup từ chối thiếu thư mục hoặc zero match. Guard Bash 4.4 hiện có trước open và 08; N1 chạy trên 5.2.21.
+- B3/B4: đường dẫn xoá phải đúng `DH/<nonce>.err`, so literal và phân biệt hoa thường ở đích. Quét Bash phân biệt hoa thường, dùng NUL và kiểm rc scanner. PS bỏ thư mục con reparse, đối sánh wildcard theo .NET/filesystem có thể đếm thêm biến thể hoa rồi từ chối. Tên ngắn 8.3 không chứa được nonce 18 ký tự. UNC thông thường qua điều kiện hình dạng, chưa có phép đo provider trả cùng chuỗi FullName. Hai shell ghi đường dẫn → chép → so → xoá → kiểm mất. Trong cache ổn định và với bản ghi run thường, không thấy đường xoá basename thiếu nonce. Phạm vi phép đếm là độ sâu 2 và không đi xuyên các hash liên kết khác theo B3.
+- B5/B6/B8: mã đặt dọn sau 08–10, trước hash và CLEANUP OK; lệnh và mẫu byte 08–10 giữ nguyên. Harness băm byte giữa marker. Evidence liệt kê cả hai output 11; Limits khai thư mục dùng chung, descriptor trình duyệt được cố gắng xoá, .err cũ giữ nguyên. Nên ghi fallback Windows còn thiếu trong Limits. B7 dùng thao tác xoá thư mục không đệ quy, với sai khác nguồn biên nhận đã nêu.
+
+## Giới hạn đã khai, không tự chặn merge
+
+- **P3 — Phụ thuộc mô-đun nội bộ và giả định cache ổn định.** SKILL:474–485. Bản ghim thực tế dùng cùng `createClientInfo()` tại program.js:61. Đổi pin cần kiểm lại API và hợp đồng stdout. Cửa sổ giữa lần kiểm cuối và thao tác qua đường dẫn vẫn phụ thuộc cache tin cậy. Ca phân biệt giới hạn này với finding P1: đích cha ổn định qua các entry point, và đối chứng do executor dựng đổi thư mục sau chốt cuối. N1 không đo bảo đảm trước thao tác đồng thời.
+
+## Độ phủ ma trận và phần KHÔNG đo được
+
+- Ca chưa có mutant đích riêng trên cả hai shell gồm P1/P2, N1/N2/N4/N6/N9/N11/N12/N19, nhánh N8-path, D3/D4/D6/D8, C1–C3/C6/C8/C10/C12/C13 và E1/E3/E4. PS còn N13 và L2; U1 có mutant ở đoạn dọn nhưng không cô lập hai probe. N3 có mutant đếm/lọc; C9/D5 gộp guard daemon/hash; E2 có mutant thứ tự; D7 có mutant nonce. Các chốt B4 về lỗi ghi/so và hash/thông báo cuối chưa có mutant riêng. L1/L3 PS đo retry; L2 đo biên nhận có trước copy và timeout đọc.
+- D2 đổi đầu ra module giả, chưa đo đổi môi trường thật hoặc CWD của probe so với CLI vì fake registry không dùng CWD. C3 đo cache thiếu, chưa đo cache tồn tại nhưng rỗng thật sự. E4 đo workspace mode trước open, chưa đo launcher lỗi sau khi ghi 00. E2/E3 có dữ liệu phiên nhưng chỉ kiểm tồn tại một số mục. E1 có ghi hash trên PS theo mã, harness không kiểm nội dung đó. Gỡ không nằm trong E1–E4.
+- **N5-err-symlink trên Windows: KHÔNG ĐO ĐƯỢC.** Executor báo SKIP trên cả PS 5.1 và pwsh 7, mỗi shell 80/80 các phép đo tính điểm, rc 0. N4 khai snapshot trước/sau trùng byte, 15 .err cũ giữ nguyên gồm 13 tệp chỉ định; N3 khai snapshot trùng và hash-dir của bản cài đã gỡ. Đây là lời khai executor tại `429fb5b`. Không tự chạy Windows hoặc native N3/N4. Chưa đo độc lập UNC, Windows Unicode dưới OEM console, Bash 4.4, cache mới tinh, cache env rỗng/thiếu trên Windows, thời gian nhả handle thật hoặc CI/doctrine-scan trên H.
+
+## N1 độc lập
+
+```text
+SOURCE 2dcbb5d4fa8362df603999b299c481ba099a6b3e6e47763cb925d7f48c84e0e5 pre_frag 4b8bb645114af21f66422222cab295c1773fda0a25820c3790648f2f99dac488 dau_frag 6b163824fd0e886d4ae1fe921a7a2e65a2912d257c0fd0ab358b9e105d4f5640 cleanup_frag 52328848e4da336eef8c35aa539a728ed6118cc41b943c0ef46e0e79b666fdbd node v22.23.5
+TONG: 66 dat / 66
+```
+
+## Lệnh và mã thoát
+
+- `ls -la`, `ls -la scratch`, `cat HEAD_SHA.txt`, `git -C repo rev-parse HEAD`, `git -C repo status --porcelain` và `--porcelain=v1 --untracked-files=all`, `sha256sum repo/ops/specs/wp1389-r1.md`, `ls pwsrc`, tìm AGENTS bằng `rg --files` — rc 0.
+- `mkdir scratch/n1 && bash repo/ops/acceptance/wp1389/residue_matrix.sh repo/.agents/skills/playwright-browser/SKILL.md scratch/n1 "$(command -v node)"` — rc 0, đúng một lần, stdout/stderr lưu tại `scratch/n1.log`.
+- `git -C repo diff eca1d125b8..HEAD -- .agents/skills/playwright-browser/SKILL.md`, `git -C repo log -8 --oneline`, `git -C repo diff --name-status 429fb5b..HEAD`, `git -C repo diff --exit-code 429fb5b..HEAD --` SKILL và hai harness, `git -C repo diff --check eca1d125b8..HEAD --` SKILL, hai harness và RESULTS, `git -C repo rev-parse eca1d125b8:.agents/skills/playwright-browser/SKILL.md` — rc 0.
+- Các nhóm `cat`, `nl -ba`, `sed`, `rg`, `head`, `cut` đọc chỉ dẫn kho, lease, spec, verdict cũ, lockfile, SKILL, hai harness, RESULTS, nguồn ghim và nhật ký fixture — rc nhóm 0. `bash --version | head -1` và `printf %s /tmp/claude-0/tlpw-base/install/0.1.0/node_modules/playwright-core | sha1sum` — rc 0. `command -v pwsh` — rc 1.
+- `python -` kiểm SRI lần đầu tìm nhầm tên tarball CLI — rc 1. Lần sửa tên tarball, kiểm cả ba SRI và byte hai cây nguồn giải nén — rc 0.

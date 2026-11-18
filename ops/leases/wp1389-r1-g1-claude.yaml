@@ -64,10 +64,10 @@ recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị 
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
 leased_at_utc: '2026-11-18T10:02:07Z'
-heartbeat_at: '2026-11-18T15:11:00Z'
-lease_until: '2026-11-18T16:02:07Z'
-lease_expires_at_utc: '2026-11-18T16:02:07Z'
-lease_until_ghi_chu: '6h; rút hạn sau land.'
+heartbeat_at: '2026-11-18T15:57:00Z'
+lease_until: '2026-11-18T20:02:07Z'
+lease_expires_at_utc: '2026-11-18T20:02:07Z'
+lease_until_ghi_chu: '6h; gia hạn +4h (16:02Z → 20:02Z) theo chỉ thị chủ kho 18-11 ~15:54Z "Tiếp tục xử lý các vấn đề đang chạy" (bật Developer Mode trên Desktop để đo các ca symlink KHÔNG ĐO ĐƯỢC); rút hạn sau land.'
 attempts_used: 1
 attempts_limit: 2
 budget:

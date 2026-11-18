@@ -1,15 +1,15 @@
-# wp1308 r5 — Desktop g9 accept-after-1393 continuation and canary completion, Mission64
+# wp1308 r5 — Desktop g9 accept-after-1393 continuation and canary completion, Mission65
 packet_id: wp1308
 revision: 5
 generation: 9
 mission_issue: 1172
-mission_revision: 64
-mission_plan_sha256: ebc57765060256fc77614e723c533847d41c845b6a0874349448fd802141a68f
+mission_revision: 65
+mission_plan_sha256: 4ffa95ce252faa793883ea6f8956d6ce27d0443d6e37368d720e4c4c48158215
 contract_id: WP1308-r5-g9-desktop-accept-after-1393
 immutable_acceptance_baseline: d39313eceb71c185deca65878383a94284be3f54
-admission_ref: refs/heads/ops/wp1308-target-r5-g9@bff4f374fdb12077fa2121213db1ab3be634bd22
+admission_ref: refs/heads/ops/wp1308-target-r5-g9@6804e047069606c3188ab7f46902cc0d89cf6e3f
 admission_path: ops/admissions/wp1308-r5-g9.json
-admission_sha256: 3bd48084e389eaa7f540540a8785d97bde345bb43fa1dfe4d4355ff9160acb66
+admission_sha256: aa6c7db7b2096d332542931de0f3e42f39a01eb01ffcb21cfe5b64536bd67056
 executor: codex
 environment: local
 risk: sensitive
@@ -18,7 +18,7 @@ effective_review_class: sensitive
 assurance_target: human_audited
 
 ## Authority and history
-Owner decision r63: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6975912237 (open #1393, then g9). Owner decision on g9 limits: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6978536145 (attempts/review/Codex 4 -> 6; owner audits canary exact H personally). Installed Mission64: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6979218857 .
+Owner decision r63: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6975912237 (open #1393, then g9). Owner decision on g9 limits: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6978536145 (attempts/review/Codex 4 -> 6; owner audits canary exact H personally). Installed Mission64: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6979218857 ; corrected by Installed Mission65 (Packet1308 registration row only): https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6979844522 .
 G8 (r62/r63, lease wp1308-r5-g8-codex) ended approved_pending at rev8 (sha cea8bf86) with H 6886ebe reviewed, owner-audited, CI-green and connector-clean; accept failed because publication receipts were compared on raw_snapshot_sha256 and page counts. Its allowance ended 2026-11-18T10:45:00Z. Closure: https://github.com/ducthangho/tra-luat/issues/1308#issuecomment-6979228525 . #1393 fixed the comparison (PR #1397, merged d39313e). History, counters (attempts 4/4, review 4/4, Codex calls 4/4), findings, costs and failures are preserved; nothing is replayed or refunded.
 Canonical product: master d39313e (packet_loop.py sha256 bd10b4df320d3278485063067a035a3a800c550db9dae37e7d697da6a5f21698).
 Same WSL boot as g8 (2f7fa68a), keeper still holding. g9 adopts the g8 state through canonical adopt-state (pending recovery) into journals-g9 with the same enrollment id and binding. Root/mount/magic/seed fingerprint unchanged; no seed creation/copy/export, reset, delete or fresh init.

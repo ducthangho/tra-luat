@@ -214,3 +214,62 @@ delta"**. Lease ghi `nang_tran` 3→4.
 |---|---|---|
 | P3 hàm làm mất tham số vị trí | Thật. Ca (i) với công thức `test "${1-}" = rg && apt-get install -y ripgrep && chon_thu_muc_chay_duoc …`: script `6b0e375` ĐỎ (cài được ngay ⇒ rc 1, nhật ký chỉ `update`). | `_wp1404_chay_cong_thuc "$@"` ở cả hai lời gọi. Hai đột biến `wp1404_sh_mat_tham_so_lan_dau` / `_cai_lai` làm (i) đỏ ở đúng hai nhánh (cài được ngay / cần update). Bảng `cai_sh` 67/67. |
 | Ghi chú (không phải finding): bảng N2 gọi tắt (c) cho `wp1404_sh_nhanh_tran_dung_sudo` | Đúng, ca thực đỏ ở (c1). | Sửa RESULTS.md §4. |
+
+## Lượt 4 — Codex (OpenAI), `codex_cli`, read-only · lời gọi 4/4 (trần sau `nang_tran` lần hai) · chỉ xét delta
+
+- Exact head được review: `0bd8edc3e634d498f7958ba90069d8d9a81e4d01` (mã trùng `b0e9866`). Chạy 2026-11-18T23:38:46Z → 23:44:52Z, rc 0.
+- sha256 `scratch/VERDICT.md`: `6b9706967ddcd740933d299d8330ae382d1b4c567a2f39e1e3766814ed78b248`.
+- Kết luận: **`approve`**, 0 finding. Liên kết tương đối trong nguyên văn trỏ tới tệp trong sandbox review, không có trong kho.
+- Phạm vi: lượt này chỉ xét delta `0b3cda8..0bd8edc` theo quyết định của chủ kho; các phần khác dựa vào lượt 1–3.
+
+### Nguyên văn
+
+> reviewed_sha: 0bd8edc3e634d498f7958ba90069d8d9a81e4d01
+> verdict: approve
+> reviewer: codex (OpenAI), codex_cli, read-only
+> 
+> ## Findings P0–P3
+> 
+> Không phát hiện finding mới trong delta lượt 4. P3 lượt 3 đã đóng. Hai lời gọi ở `ops/cai_cong_cu.sh:172` và `:185` đều truyền `"$@"` dưới dạng câu lệnh độc lập. Công thức nhận tham số của script hoặc của lượt `source`. Thân hàm, ngữ cảnh errexit và dòng neo `eval` giữ nguyên.
+> 
+> HEAD khớp `HEAD_SHA.txt`, cây nguồn sạch, SHA-256 đặc tả khớp `1eb8f4428e0da7c2074b94938e89990c3f3bd681b254bcacccb2336a76a5314d`. Hai tệp mã trùng `b0e9866`. Từ commit đó đến HEAD chỉ đổi RESULTS và VERDICT. Mọi phép chạy dùng bản clone và tệp tạm trong `scratch/`.
+> 
+> ## Probe và hồi quy
+> 
+> Probe lượt 3 được dựng lại từ mô tả trong VERDICT. Mỗi probe chốt số và giá trị tham số vị trí, trạng thái `DAT`, đường dẫn tốt và thứ tự gọi apt.
+> 
+> | Probe | HEAD, rc probe / wrapper | Script lượt 3, rc probe / wrapper | Nhật ký apt trên HEAD |
+> |---|---|---|---|
+> | `positions` | 0 / 0 | 1 / 1 | `install` |
+> | `positions_retry` | 0 / 0 | 1 / 1 | `install update install` |
+> | `positions_source` | 0 / 0 | 1 / 1 | `install update install install update install` |
+> 
+> Cả ba phản chứng chỉ ghi `update`. Probe `source` đặt `CAI_CONG_CU_PY_CUA=$$`, ghim mảng `PY` và gọi `. "$script" rg` hai lần trong cùng shell. Sau mỗi lượt, shell gọi vẫn có hai đối số ban đầu, và giá trị readonly `LAN_CAI=42` được kiểm sau lượt đầu. Các ca r1045 cũng chạy đường `--bat-buoc` thật, gồm trường hợp tiếp tục sau công cụ tùy chọn và dừng khi công cụ bắt buộc lỗi.
+> 
+> Hai ca r1404 đạt 3/3 mỗi ca. Tám ca r868 và năm ca r1045 đạt 1/1 mỗi ca, gồm cả hai ca hình dạng. Từng lệnh trả rc 0.
+> 
+> ## Ca (i) và đối chiếu RESULTS.md tại b0e9866
+> 
+> - Fixture (i) thực thi công thức YAML với `${1-}` và chốt rc 0, `DAT`, nội dung `GITHUB_PATH` bằng thư mục ứng viên tốt, và nhật ký `install` hoặc `install update install`. Với script `0b3cda8` (cùng nội dung tại `6b0e375`), ca chi tiết đỏ bằng `TinHieuChotCa` ở (i) cài được ngay, wrapper rc 1, nhật ký chỉ `update`. Hai ca r1404 đạt 3/3 so với 2/2 ghi trong RESULTS.
+> - Registry có 428 ca và 745 đột biến. Base có 426 ca và 726 đột biến. Mức tăng +2 ca và +19 đột biến khớp hồ sơ. Riêng delta lượt 4 thêm 2 đột biến và giữ nguyên số ca.
+> - Cả 67/67 hook `cai_sh` đều bị giết, gồm 19/19 hook wp1404, khớp RESULTS. Mỗi neo khớp đúng một vị trí. Hai hook mới bỏ chuyển tiếp đối số ở từng lời gọi riêng. `wp1404_sh_mat_tham_so_lan_dau` đỏ ở (i) cài được ngay. Wrapper vẫn trả rc 0 nhờ lần thử lại nhận đối số, nhưng nhật ký là `update install` thay vì chỉ `install`. `wp1404_sh_mat_tham_so_cai_lai` vượt qua kịch bản cài được ngay rồi đỏ ở (i) cần update, rc 1, nhật ký `install update`. Cả hai là `TinHieuChotCa`.
+> 
+> ## Lệnh và mã thoát
+> 
+> - `git clone --no-local repo scratch/head` và `git -C scratch/head checkout --detach "$(cat HEAD_SHA.txt)"` hoàn tất, rc 0. `bash scratch/preflight.sh` rc 0, gồm kiểm HEAD, cây sạch, SHA-256, `git diff --check`, đồng nhất mã với `b0e9866` và `bash -n`. [preflight.log](preflight.log)
+> - `git -C repo diff --exit-code 6b0e375..0b3cda8 -- ops/cai_cong_cu.sh` rc 0. `git -C repo show 0b3cda8:ops/cai_cong_cu.sh > scratch/round3.sh` tạo script phản chứng.
+> - Từ clone, `python .claude/dev/launcher_test.py --lap-ca TEN --lan N` rc 0 ở cả 15 lệnh. [targeted.log](targeted.log)
+> - Từ clone, `python ../probe.py TEN SCRIPT` trả các mã trong bảng trên. [probes.log](probes.log)
+> - Từ clone, `python ../claims.py` rc 1 theo chủ ý do phản chứng (i). Bốn lệnh `git show` dùng đếm registry trong script đều rc 0. [claims.log](claims.log)
+> - Từ clone, `python ../mutations.py` với runner chỉ chọn `cai_sh` rc 0. Sau phần runner, script chạy riêng hai hook mới để in assertion. [mutations-final.log](mutations-final.log)
+> - Lần gọi runner đầu còn giữ bảng đột biến harness, nên tôi dừng lượt đó bằng Ctrl-C (phiên trả rc 130) và chạy lại với bộ lọc đầy đủ. Lượt lọc đầu trả bộ đếm `(0, 0)` và in đúng hai assertion, nhưng wrapper dùng tuple làm mã thoát nên tiến trình trả rc 1. Tôi sửa wrapper để đổi hai bộ đếm thành mã thoát và chạy lại. [mutations-filtered.log](mutations-filtered.log)
+> 
+> ## Chưa đo trong lượt 4
+> 
+> Chưa tái lập 426/426 và hai ca bỏ qua của bộ đầy đủ, hay 739/739 và sáu đột biến không đo được. Probe dùng apt giả. Kết luận hồi quy áp dụng cho delta và các phép đo liệt kê trên.
+
+### Trạng thái
+
+Review độc lập đạt `approve` trên `0bd8edc`. Còn mở: nợ `WP1404-GITHUB-PATH-LAN-LOI` (chủ kho chọn ghi nợ ở checkpoint lần
+một); N4 (CI xanh) chưa đạt vì `gate (ubuntu-latest)` đỏ do lỗi có sẵn trên master (RESULTS.md §6). Merge do chủ kho
+duyệt trên đúng SHA.

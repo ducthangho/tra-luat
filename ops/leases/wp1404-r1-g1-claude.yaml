@@ -57,15 +57,15 @@ recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị 
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
 leased_at_utc: '2026-11-18T16:51:13Z'
-heartbeat_at: '2026-11-18T23:23:03Z'
+heartbeat_at: '2026-11-18T23:45:07Z'
 lease_until: '2026-11-19T04:51:13Z'
 lease_expires_at_utc: '2026-11-19T04:51:13Z'
 lease_until_ghi_chu: '6h; rút hạn sau land.'
 attempts_used: 1
 attempts_limit: 2
 budget:
-  codex_review_calls: {used: 3, reserved: 1, limit: 4}
-  codex_review_calls_ghi_chu: 'lượt 1 ở 141a3a7, lượt 2 ở f9eba6e, lượt 3 ở 0b3cda8: request_changes (lượt 3 chỉ còn 1 P3). Hết trần sau nâng: Review Rescue Checkpoint lần hai.'
+  codex_review_calls: {used: 4, reserved: 0, limit: 4}
+  codex_review_calls_ghi_chu: 'lượt 1–3 request_changes (141a3a7, f9eba6e, 0b3cda8); lượt 4 ở 0bd8edc: approve (delta). Hết trần.'
 nang_tran:
   truc: codex_review_calls
   tran_cu: 3

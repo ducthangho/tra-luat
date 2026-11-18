@@ -1,0 +1,25 @@
+# do 2026-11-18T10:27:40Z, Linux, Python 3.13.18, git version 2.43.0
+merge e4fdf09e56db55bcdec494db49fb589307b47688 parents: eca1d125b82783a6a736c7023751ba53cc9a49c8 5bcea6cdf56ae6b4ba76345837927870af2ef86e  tree 83d85149b52f0ad2ca7458a54652df3d4ee4bb36
+== numstat e4fdf09e56db55bcdec494db49fb589307b47688^1..e4fdf09e56db55bcdec494db49fb589307b47688
+55	3	.claude/dev/launcher.py
+395	2	.claude/dev/launcher_test.py
+== numstat base d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a..head 5bcea6cdf56ae6b4ba76345837927870af2ef86e
+55	3	.claude/dev/launcher.py
+395	2	.claude/dev/launcher_test.py
+== blob write set: head vs merge
+.claude/dev/launcher.py head=ad9b1af8499554924902799a8765b6e7fb56c26c merge=ad9b1af8499554924902799a8765b6e7fb56c26c
+.claude/dev/launcher_test.py head=d45aed0a56879cd2ef25543dddb3f7dd28f3503a merge=d45aed0a56879cd2ef25543dddb3f7dd28f3503a
+== tep khac ngoai write set giua e4fdf09e56db55bcdec494db49fb589307b47688^1 va e4fdf09e56db55bcdec494db49fb589307b47688:
+0
+== write set: base d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a vs e4fdf09e56db55bcdec494db49fb589307b47688^1 (master tien giua lease va merge)
+0
+== git diff --check e4fdf09e56db55bcdec494db49fb589307b47688^1 e4fdf09e56db55bcdec494db49fb589307b47688
+rc=0
+== adr-song (merge)
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+== doctrine-scan (merge)
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+== VERSION launcher (merge)
+102:VERSION = "1.6.1"

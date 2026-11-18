@@ -1,0 +1,49 @@
+{
+ "B": "641108cb997872b0ef2a277ea9c8faf8b82532bb",
+ "H": "c10d0710735e3532035a5219d469704d8a7592bb",
+ "P": "641108cb997872b0ef2a277ea9c8faf8b82532bb",
+ "M": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+ "helper_tu": "c10d0710735e3532035a5219d469704d8a7592bb:.claude/dev/packet_loop_test.py",
+ "doi_chung": {
+  "B_H": [],
+  "P_M": [],
+  "helper_r1__additive1342_B_B": [
+   "tên khối mới trùng: _1174_WIN_FIXED",
+   "tên khối mới trùng: _1174_win_api",
+   "tên khối mới trùng: _1174_win_identity",
+   "tên khối mới trùng: _1174_win_open",
+   "tên khối mới trùng: _1174_win_path",
+   "tên khối mới trùng: _1174_win_platform",
+   "tên khối mới trùng: _1174_win_profile",
+   "tên khối mới trùng: _1174_win_read",
+   "tên khối mới trùng: _1174_win_volume",
+   "phần ngoài khối mới KHÁC byte base, từ dòng 6359 của base"
+  ]
+ },
+ "tu_kiem": {
+  "B_B": [],
+  "B_cong_ham_1174_win_x": [],
+  "H_H": []
+ },
+ "phan_chung": {
+  "n2a_mot_byte_than__1174_win_api": {
+   "additive": [
+    "phần ngoài khối mới KHÁC byte base, từ dòng 6377 của base"
+   ],
+   "ket_qua": "DO_DUNG"
+  },
+  "n2b_mot_byte_than__1174_lock": {
+   "additive": [
+    "phần ngoài khối mới KHÁC byte base, từ dòng 3995 của base"
+   ],
+   "ket_qua": "DO_DUNG"
+  },
+  "n2c_contextmanager_vao__1174_win_lock": {
+   "additive": [
+    "phần ngoài khối mới KHÁC byte base, từ dòng 6489 của base"
+   ],
+   "ket_qua": "DO_DUNG"
+  }
+ },
+ "TONG": "DAT"
+}

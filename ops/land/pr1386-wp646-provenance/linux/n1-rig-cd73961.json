@@ -1,0 +1,97 @@
+{
+ "B": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+ "H": "cd739618e80ba1163758900673da69f732ae0f61",
+ "ca": {
+  "doi_chung_H_that": {
+   "rc": 0,
+   "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+   "ky_vong": 0,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "cd739618e80ba1163758900673da69f732ae0f61"
+  },
+  "doi_chung_commit_moi_B_cong_blob_H": {
+   "rc": 0,
+   "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+   "ky_vong": 0,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "0e58d87c72b2569b39d0d0f74590e8d0a7a363fc"
+  },
+  "H_bang_B": {
+   "rc": 1,
+   "out": "N1 DO: diff-tree khac dung mot dong M 100644->100644 cho docs/PROTOCOL_DA_PHIEN.md:",
+   "ky_vong": 1,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a"
+  },
+  "chmod_x": {
+   "rc": 1,
+   "out": "N1 DO: diff-tree khac dung mot dong M 100644->100644 cho docs/PROTOCOL_DA_PHIEN.md: :100644 100755 7aebad643e2f6176515882d8331606f04c63c51f edcb6a154cc8b03a0553f955621e4332168809af M docs/PROTOCOL_DA_PHIEN.md",
+   "ky_vong": 1,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "8a8cdbb1319cbbc6f25abb17764c1cc7329e0573"
+  },
+  "them_tep_thu_hai": {
+   "rc": 1,
+   "out": "c dung mot dong M 100644->100644 cho docs/PROTOCOL_DA_PHIEN.md: :100644 100644 7aebad643e2f6176515882d8331606f04c63c51f edcb6a154cc8b03a0553f955621e4332168809af M docs/PROTOCOL_DA_PHIEN.md|:000000 100644 0000000000000000000000000000000000000000 587be6b4c3f93f93c489c0111bba5596147a26cb A docs/them.md",
+   "ky_vong": 1,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "7e174d11f15a0aed85782411d45580715d11eb8e"
+  },
+  "them_dong_o_muc_5": {
+   "rc": 1,
+   "out": "N1 DO: dong them/xoa = 15 0, can 14 0",
+   "ky_vong": 1,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "383faaecd6de343884cb91739153426a2c3c21cf"
+  },
+  "sua_mot_dong_khac": {
+   "rc": 1,
+   "out": "N1 DO: dong them/xoa = 15 1, can 14 0",
+   "ky_vong": 1,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "ae82ab2e5cdf6d43a57029de02fa297fff3d1cbf"
+  },
+  "crlf_toan_tep": {
+   "rc": 1,
+   "out": "N1 DO: dong them/xoa = 1751 1737, can 14 0",
+   "ky_vong": 1,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "932107efa2a6b60f498f71ef5d78b0789e16256d"
+  },
+  "H_la_tree": {
+   "rc": 1,
+   "out": "N1 DO: ba0bbc46c90f19c26ce569129f319fb844f23513 la tree, khong phai commit",
+   "ky_vong": 1,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "ba0bbc46c90f19c26ce569129f319fb844f23513"
+  },
+  "kho_khong_ton_tai": {
+   "rc": 2,
+   "out": "N1 MOI_TRUONG: khong mo duoc kho /tmp/tmp0b17iaf5/khong-co: fatal: cannot change to '/tmp/tmp0b17iaf5/khong-co': No such file or directory",
+   "ky_vong": 2,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "cd739618e80ba1163758900673da69f732ae0f61"
+  },
+  "oid_khong_co": {
+   "rc": 2,
+   "out": "N1 MOI_TRUONG: khong doc duoc object 0123456789abcdef0123456789abcdef01234567: fatal: git cat-file: could not get object info",
+   "ky_vong": 2,
+   "dung": true,
+   "b": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "h": "0123456789abcdef0123456789abcdef01234567"
+  }
+ },
+ "so_ca": 11,
+ "so_dung": 11,
+ "TONG": "DAT"
+}

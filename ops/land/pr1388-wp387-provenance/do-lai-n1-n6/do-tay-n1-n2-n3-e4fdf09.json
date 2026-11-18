@@ -1,0 +1,184 @@
+{
+  "bat_dau_utc": "2026-11-18T16:15:52+00:00",
+  "cay": "/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/flip1388/h2",
+  "python": "3.13.18",
+  "do": [
+    {
+      "ca": "r387_m1_chau_ghi_muon_khai_pham_vi_bam",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m1_chau_ghi_muon_khai_pham_vi_bam --lan 1",
+      "rc": 0,
+      "wall_giay": 5.12,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_m1_chau_ghi_muon_khai_pham_vi_bam: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach",
+      "ky_vong": "rc 0",
+      "dat": true
+    },
+    {
+      "ca": "r387_m1_doi_chung_ghi_som_lam_ve_bam_do",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m1_doi_chung_ghi_som_lam_ve_bam_do --lan 1",
+      "rc": 0,
+      "wall_giay": 1.11,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_m1_doi_chung_ghi_som_lam_ve_bam_do: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach",
+      "ky_vong": "rc 0",
+      "dat": true
+    },
+    {
+      "ca": "r387_m1_con_thuong_chung_minh_cay_chet",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m1_con_thuong_chung_minh_cay_chet --lan 1",
+      "rc": 0,
+      "wall_giay": 1.04,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_m1_con_thuong_chung_minh_cay_chet: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach",
+      "ky_vong": "rc 0",
+      "dat": true
+    },
+    {
+      "ca": "r387_m1_doi_chung_ghi_som_lam_ve_bam_do",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m1_doi_chung_ghi_som_lam_ve_bam_do --lan 1",
+      "rc": 1,
+      "wall_giay": 1.22,
+      "dong_hong": [
+        "HONG r387_m1_doi_chung_ghi_som_lam_ve_bam_do: TinHieuChotCa: r387(a') than (a) do o ve khac, khong phai ve bam: r387(a) PID chau 10301 khong co trong phep do nao: [[]]"
+      ],
+      "dong_lap": [
+        "LAP r387_m1_doi_chung_ghi_som_lam_ve_bam_do: 0/1 qua, 0 bo qua, 1 hong"
+      ],
+      "bien_the": "N1 tay: xoa ve bam khoi than (a)",
+      "ky_vong": "rc != 0, HONG (a')",
+      "dat": true
+    },
+    {
+      "ca": "r387_m1_con_thuong_chung_minh_cay_chet",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m1_con_thuong_chung_minh_cay_chet --lan 1",
+      "rc": 1,
+      "wall_giay": 1.09,
+      "dong_hong": [
+        "HONG r387_m1_con_thuong_chung_minh_cay_chet: TinHieuChotCa: r387(b) log_bam_luc_utc=None phai co va khong truoc ket_thuc_utc='2026-11-18T16:16:11.931573+00:00'"
+      ],
+      "dong_lap": [
+        "LAP r387_m1_con_thuong_chung_minh_cay_chet: 0/1 qua, 0 bo qua, 1 hong"
+      ],
+      "bien_the": "N2 tay: xoa dong gan log_bam_luc_utc",
+      "ky_vong": "rc != 0, HONG (b) bang TinHieuChotCa, khong KeyError",
+      "dat": true
+    },
+    {
+      "ca": "r387_fixture_teardown_bao_loi_giu_loi_goc",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_fixture_teardown_bao_loi_giu_loi_goc --lan 1",
+      "rc": 0,
+      "wall_giay": 1.52,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_fixture_teardown_bao_loi_giu_loi_goc: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach (N3)",
+      "ky_vong": "rc 0",
+      "dat": true
+    },
+    {
+      "ca": "r387_m2_chau_ghi_trong_han_thi_bam_du",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m2_chau_ghi_trong_han_thi_bam_du --lan 1",
+      "rc": 0,
+      "wall_giay": 2.09,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_m2_chau_ghi_trong_han_thi_bam_du: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach (N3)",
+      "ky_vong": "rc 0",
+      "dat": true
+    },
+    {
+      "ca": "r387_m2_khong_do_duoc_thi_khong_cho",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m2_khong_do_duoc_thi_khong_cho --lan 1",
+      "rc": 0,
+      "wall_giay": 1.08,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_m2_khong_do_duoc_thi_khong_cho: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach (N3)",
+      "ky_vong": "rc 0",
+      "dat": true
+    },
+    {
+      "ca": "r387_m2_han_chung_cho_moi_lan_do",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m2_han_chung_cho_moi_lan_do --lan 1",
+      "rc": 0,
+      "wall_giay": 2.16,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_m2_han_chung_cho_moi_lan_do: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach (N3)",
+      "ky_vong": "rc 0",
+      "dat": true
+    },
+    {
+      "ca": "r387_a_nen_khac_giu_moc_ket_thuc_base",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_a_nen_khac_giu_moc_ket_thuc_base --lan 1",
+      "rc": 0,
+      "wall_giay": 1.51,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_a_nen_khac_giu_moc_ket_thuc_base: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach (N3)",
+      "ky_vong": "rc 0",
+      "dat": true
+    },
+    {
+      "ca": "r387_m1_stop_trong_luc_cho_khong_bi_de",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m1_stop_trong_luc_cho_khong_bi_de --lan 1",
+      "rc": 0,
+      "wall_giay": 1.23,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_m1_stop_trong_luc_cho_khong_bi_de: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach (N3)",
+      "ky_vong": "rc 0",
+      "dat": true
+    },
+    {
+      "ca": "r387_m1_prompt_linux_xoa_khi_cay_chet",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m1_prompt_linux_xoa_khi_cay_chet --lan 1",
+      "rc": 0,
+      "wall_giay": 1.05,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_m1_prompt_linux_xoa_khi_cay_chet: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach (N3)",
+      "ky_vong": "rc 0",
+      "dat": true
+    },
+    {
+      "ca": "r387_m2_ngat_trong_luc_doi_ghi_bi_ngat",
+      "lenh": ".claude/dev/launcher_test.py --lap-ca r387_m2_ngat_trong_luc_doi_ghi_bi_ngat --lan 1",
+      "rc": 0,
+      "wall_giay": 1.23,
+      "dong_hong": [],
+      "dong_lap": [
+        "LAP r387_m2_ngat_trong_luc_doi_ghi_bi_ngat: 1/1 qua, 0 bo qua, 0 hong"
+      ],
+      "bien_the": "sach (N3)",
+      "ky_vong": "rc 0",
+      "dat": true
+    }
+  ],
+  "n3_tong_wall_11_ca_giay": 19.14,
+  "n3_ghi_chu": "wall do theo tung tien trinh --lap-ca (gom khoi dong interpreter); tieu chi < 25 s",
+  "ket_thuc_utc": "2026-11-18T16:16:24+00:00",
+  "tat_ca_dat": true
+}

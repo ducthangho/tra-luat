@@ -1,0 +1,6 @@
+r1335_N3c_win_giu_argv0_goc base=1 head=1
+r1335_F2_win_path_theo_cwd_launcher base=1 head=1
+g4_windows_sid_alias_not_normalized base=1 head=1
+g4_windows_LA_not_current_owner base=1 head=1
+g2_windows_directory_pin_access base=1 head=1
+124_khi_chau_con_song base=1 head=1

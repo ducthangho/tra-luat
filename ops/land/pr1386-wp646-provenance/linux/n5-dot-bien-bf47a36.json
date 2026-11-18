@@ -1,0 +1,72 @@
+{
+ "M": "bf47a369fa4872b0bc2032ddef1024fc79377cca",
+ "n5_sha256_sach": "b8ebeb4ad417a14b3b3c01c1982dd2fbab890f40ed021de780f611a73ea021c4",
+ "doi_chung": {
+  "sach": {
+   "rc": 0,
+   "out": "vung_dich_khop_khoi_chot 6c4ec88cb1e15fd43556f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68"
+  },
+  "noi": {
+   "rc": 0,
+   "out": "vung_dich_khop_khoi_chot 6c4ec88cb1e15fd43556f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68"
+  }
+ },
+ "ca_am": {
+  "boc_rao": {
+   "sach": {
+    "rc": 1,
+    "out": "DO: vung dich lech khoi da chot: 1305 byte, sha256 d264012770e79bfcbfa1e057c0a5afc047ab9a01dfb9e636449225d52f8664c8"
+   },
+   "noi": {
+    "rc": 0,
+    "out": "vung_dich_khop_khoi_chot 6c4ec88cb1e15fd43556f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68"
+   },
+   "ket_qua": "DOT_BIEN_LO_RANG"
+  },
+  "them_cau_khong_ten_truong": {
+   "sach": {
+    "rc": 1,
+    "out": "DO: vung dich lech khoi da chot: 1344 byte, sha256 720b09498f78398853fa29bd8a1d7a3418ee5ac958551a0606c4260083e2f9e7"
+   },
+   "noi": {
+    "rc": 0,
+    "out": "vung_dich_khop_khoi_chot 6c4ec88cb1e15fd43556f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68"
+   },
+   "ket_qua": "DOT_BIEN_LO_RANG"
+  },
+  "them_cau_dao_nghia": {
+   "sach": {
+    "rc": 1,
+    "out": "DO: vung dich lech khoi da chot: 1361 byte, sha256 80177d2f31d03cce92387998bdb6c543b65681424993fd39e968bcd330432573"
+   },
+   "noi": {
+    "rc": 0,
+    "out": "vung_dich_khop_khoi_chot 6c4ec88cb1e15fd43556f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68"
+   },
+   "ket_qua": "DOT_BIEN_LO_RANG"
+  },
+  "dong_trong_thua": {
+   "sach": {
+    "rc": 1,
+    "out": "DO: vung dich lech khoi da chot: 1298 byte, sha256 0d5fa54adb462725908f8e8fcd39242d5e7c46257f3c85090f47ee1db8986efc"
+   },
+   "noi": {
+    "rc": 0,
+    "out": "vung_dich_khop_khoi_chot 6c4ec88cb1e15fd43556f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68"
+   },
+   "ket_qua": "DOT_BIEN_LO_RANG"
+  },
+  "cau_sat_truoc_role_reviewer": {
+   "sach": {
+    "rc": 1,
+    "out": "DO: vung dich lech khoi da chot: 1324 byte, sha256 e249d7b787950c958a976b82c2656c4e955c3a17d5c7ffff7a1000c9a4d9d194"
+   },
+   "noi": {
+    "rc": 0,
+    "out": "vung_dich_khop_khoi_chot 6c4ec88cb1e15fd43556f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68"
+   },
+   "ket_qua": "DOT_BIEN_LO_RANG"
+  }
+ },
+ "TONG": "DAT"
+}

@@ -1,0 +1,48 @@
+{
+ "B": "eca1d12",
+ "H": "972089eb4acd5e83f7b58b757f02a69590b26e4b",
+ "P": "d39313e",
+ "M": "aeb5cae0af01538c88ab2b50c27902dfaf7a7382",
+ "n2": {
+  "doi_chung_B_H": [],
+  "doi_chung_P_M": [],
+  "n2a_mot_byte_than_ham_r1__1174_win_read": {
+   "additive": [
+    "phần ngoài khối mới KHÁC byte base, từ dòng 6466 của base"
+   ],
+   "ket_qua": "DO_DUNG"
+  },
+  "n2b_mot_byte_than_ham_r2__1174_win_lock": {
+   "additive": [
+    "phần ngoài khối mới KHÁC byte base, từ dòng 6509 của base"
+   ],
+   "ket_qua": "DO_DUNG"
+  },
+  "n2c_decorator_vao_ham_moi_r3__1174_win_seed_acl": {
+   "additive": [
+    "phần ngoài khối mới KHÁC byte base, từ dòng 6586 của base"
+   ],
+   "ket_qua": "DO_DUNG"
+  }
+ },
+ "n3": {
+  "doi_chung_sach": {
+   "rc": 0,
+   "kq": {
+    "wp1342_additive_byte_preserved": null
+   },
+   "stderr_cuoi": "/tmp/tmpij8auqi1/m/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n"
+  },
+  "n3_chen_goi__1174_win_seed_trong__1174_seed": {
+   "rc": 0,
+   "kq": {
+    "wp1342_additive_byte_preserved": [
+     "str",
+     "AssertionError: ('N3 trên CÂY LÀM VIỆC', ['_1174_seed:4763'])"
+    ]
+   },
+   "stderr_cuoi": "/tmp/tmpij8auqi1/m/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_qua": "DO_DUNG"
+  }
+ }
+}

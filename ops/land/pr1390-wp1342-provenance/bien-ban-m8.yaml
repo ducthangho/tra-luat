@@ -1,7 +1,7 @@
 # Bien ban M8 (ADR-0060) dong WP #1342 WP1174-WINDOWS-BACKEND r3 (bac r1c) — kiem bang packet_loop.py kiem-dong-wp
 # Nhan nguon tung muc: ops/land/pr1390-wp1342-land-evidence.yaml. Audit human_audited chu kho tu dang 6981763980 tren 972089e.
 # Moc §10.2.2 run 44326753737 (ci.yml push master tren aeb5cae): run/checkout/gate_output measured passed; workflow_definition
-# not_measured (GraphQL 403 trong phien, chua co wd-run). Issue #1342 con bac r1d (Job Object + probe) => khong dong Issue.
+# measured passed (wd-run 44339158716, 2026-11-18). Issue #1342 con bac r1d (Job Object + probe) => khong dong Issue.
 packet: wp1342
 revision: 3
 generation: 1
@@ -26,8 +26,8 @@ ci_master:
   ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44326753737.txt); gate-packet-loop "GOM: ĐẠT · 16 mảnh · 1559 ca bắt buộc".'
 nghiem_thu:
   N1: passed  # danh-gia-gate-output-44326753737.txt: gate-packet-loop GOM DAT 16 manh tren aeb5cae; linux/nghiem-thu-aeb5cae.txt: MUTANTS 972089e = eca1d12 (1852, cung bam repr sap xep 3dfc650f), merge = cha1 (1859, 363c37fb); linux/suite-wp1342-wp1174.txt: 138 ca wp1342_/wp1174_ tren merge, 115 dat, 23 BO QUA (deu wp1342_native_*), 0 do
-  N2: passed  # linux/nghiem-thu-aeb5cae.txt: _additive1342r2(eca1d12, 972089e) = [] va _additive1342r2(cha1 d39313e, merge aeb5cae) = []
-  N3: passed  # linux/suite-wp1342-wp1174.txt: wp1342_additive_byte_preserved DAT tren merge; _wired1342(merge) = []; windows-native TOM-TAT: HEAD wp1342_additive_byte_preserved rc=0
+  N2: passed  # linux/nghiem-thu-aeb5cae.txt: _additive1342r2(eca1d12, 972089e) = [] va _additive1342r2(cha1 d39313e, merge aeb5cae) = [] + linux/n23-phan-chung-aeb5cae.json: phan chung n2a/n2b/n2c DO_DUNG
+  N3: passed  # linux/suite-wp1342-wp1174.txt: wp1342_additive_byte_preserved DAT tren merge; _wired1342(merge) = []; windows-native TOM-TAT: HEAD wp1342_additive_byte_preserved rc=0 + linux/n23-phan-chung-aeb5cae.json: phan chung chen _1174_win_seed DO_DUNG, doi chung DAT
   N4: passed  # linux/suite-wp1342-wp1174.txt (Linux, merge) + windows-native TOM-TAT (Desktop, HEAD): wp1342_pure_seed_acl_bang dat; linux/dot-bien-linux.json: (d)(e)(g) GIET dung dong bang, doi chung dat
   N5: passed  # windows-native TOM-TAT: wp1174_windows_claim_rejected + 12 ca WP1174_BOTH rc=0 base va HEAD; ca native r1/r2 cung ket qua base va HEAD (symlink_file, persist_update_symlink BO QUA ca hai ve tren Desktop, dat tren VM: windows-native/vm/wp1342r3-vm-out/TOM-TAT.txt)
   N6: passed  # windows-native TOM-TAT: seed_ok, seed_hardlink, seed_acl (S3+S4), seed_fingerprint (S5+S6), seed_nonfile, seed_drift, boot_stable, boot_failclosed deu WP1342_NATIVE_V1 passed:1
@@ -35,9 +35,9 @@ nghiem_thu:
   N8: passed  # dot-bien.json (Desktop): a/b/c/f/h GIET dung ca dich, doi chung dat; linux/dot-bien-linux.json: d/e/g GIET
   N9: passed  # linux/nghiem-thu-aeb5cae.txt: ruff F 3/13 = 3/13 (base, head, cha1, merge); adr-song, doctrine-scan rc 0; diff --check rc 0; numstat 2 tep +300; linux/eol-policy-all-aeb5cae.json ok true, 0 vi pham
 lease_cuoi: wp1342-r3-g1-claude
-landed: false
+landed: true
 moc_10_2_2:
   run: passed
   checkout: passed
-  workflow_definition: not_measured
+  workflow_definition: passed   # wd/wd-44339158716.json + ci/provenance.yaml (thu --wd-run 44339158716)
   gate_output: passed

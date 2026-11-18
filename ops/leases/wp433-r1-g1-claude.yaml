@@ -78,8 +78,8 @@ leased_at_utc: '2026-11-18T10:05:00Z'
 heartbeat_at: '2026-11-18T10:05:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-19T10:05:00Z'
-lease_expires_at_utc: '2026-11-19T10:05:00Z'
+lease_until: '2026-11-18T11:50:00Z'
+lease_expires_at_utc: '2026-11-18T11:50:00Z'
 lease_until_ghi_chu: '24h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
@@ -93,3 +93,14 @@ budget:
 budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; khong Windows (junction thuoc packet 2). Ngoai ngan sach PR: 13 loi goi Codex offline review dac ta truoc lease (ops/reviews/wp433-spec-r1/).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-18T11:32:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex PR 2/10: connector tren 80f926c (goi tay, sach) va luc bo draft. CI Ubuntu 1/2: PR #1394 tren 80f926c (24 success, 1 skipped). Windows 0. Ngoai ngan sach PR: 13 loi goi review dac ta. Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-19T10:05:00Z'
+  han_moi_utc: '2026-11-18T11:50:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #433 packet 1 da MERGE: PR #1394 (head 80f926c9866e4ab2c32a4253359b72c4de511962) merge commit 700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef,
+    human audit chu kho issuecomment-6977263194. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Packet 2 (GWS-CRED-DICH-NGOAI-KHO) se cap lease moi sau revision dac ta tren base moi; chua co lease ke nhiem luc rut.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu ba duong dan write set sau 2026-11-18T11:50:00Z phai ra NGUOI_GIU 0.'

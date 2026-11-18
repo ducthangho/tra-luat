@@ -65,12 +65,12 @@
   "lease_expires_at_utc": "2026-11-18T10:20:09Z",
   "limits": {
     "Codex_spec_review": 3,
-    "Claude_author": 8,
-    "Codex_source_review": 5,
-    "source_push": 1,
+    "Claude_author": 9,
+    "Codex_source_review": 6,
+    "source_push": 2,
     "draft_PR": 1,
     "connector": 1,
-    "PR_Ubuntu_CI": 1,
+    "PR_Ubuntu_CI": 2,
     "full_M9": 1,
     "CI_reruns": 0
   },
@@ -147,5 +147,28 @@
     "ai_nang": "owner decision in chat, recorded by Claude Code coordinator"
   },
   "author_fix6_prompt_path": "ops/prompts/wp1370-r1-g1-claude-author-fix6.txt",
-  "author_fix6_prompt_sha256": "6c6b33d19ed7de9629392cd2267e83ec4bc0afedd968abc63ca7f9d83ec7ec89"
+  "author_fix6_prompt_sha256": "6c6b33d19ed7de9629392cd2267e83ec4bc0afedd968abc63ca7f9d83ec7ec89",
+  "author_fix7_prompt_path": "ops/prompts/wp1370-r1-g1-claude-author-fix7.txt",
+  "author_fix7_prompt_sha256": "f54fbb0800294a850de24f520b72475b2a6553c86d095a06b72ed5c1555b8c15",
+  "nang_tran_owner_20261118": {
+    "Claude_author": [
+      8,
+      9
+    ],
+    "Codex_source_review": [
+      5,
+      6
+    ],
+    "source_push": [
+      1,
+      2
+    ],
+    "PR_Ubuntu_CI": [
+      1,
+      2
+    ],
+    "ly_do": "PR #1380 CI run 44207104342: 1/106 red (wp1174_activity_tip_non_commit), fix 6 dropped the global sort of the fetch OID list",
+    "can_cu": "https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6965198663",
+    "ai_nang": "owner decision in chat, recorded by Claude Code coordinator"
+  }
 }

@@ -1,0 +1,6 @@
+# do 2026-11-18T14:52:59Z, git version 2.43.0
+spec_path ops/specs/WP1174-WINDOWS-BACKEND-r3.md (nhanh ops/wp1342-r3-spec, commit lease bac2be7)
+blob 31736057cf88f4d8eb14e20d4a2ae2b757097f7a
+sha256 f93b9a6ea2192f6ef1832bfb8467c781340a4479b9c5910e2d469ddc9d666d4c
+lease spec_hash: f93b9a6ea2192f6ef1832bfb8467c781340a4479b9c5910e2d469ddc9d666d4c
+lease rut han e889084: lease_until: '2026-11-18T15:10:00Z'

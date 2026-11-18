@@ -1,0 +1,157 @@
+2026-11-18T14:46:48Z
+/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/c1390/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+source same-family policy required before load
+R25_PUBLICATION RECORDED_EARLIEST_MATCH RECORDED_EARLIEST_MATCH
+R25_ADOPTION False False False {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": false, "rc": 0, "running": false, "status": "completed_no_dispatch"}
+R25_ADOPTION False False True {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": false, "rc": 0, "running": false, "status": "completed_no_dispatch"}
+R25_ADOPTION False True False {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": false, "rc": 0, "running": true, "status": "completed_no_dispatch"}
+R25_ADOPTION False True True {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": false, "rc": 0, "running": true, "status": "completed_no_dispatch"}
+R25_ADOPTION True False False {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": true, "rc": 0, "running": false, "status": "completed_no_dispatch"}
+R25_ADOPTION True False True {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": true, "rc": 0, "running": false, "status": "completed_no_dispatch"}
+R25_ADOPTION True True False {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": true, "rc": 0, "running": true, "status": "completed_no_dispatch"}
+R25_ADOPTION True True True {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": true, "rc": 0, "running": true, "status": "completed_no_dispatch"}
+R25_ADOPTION manual False False {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": "manual", "rc": 0, "running": false, "status": "completed_no_dispatch"}
+R25_ADOPTION manual False True {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": "manual", "rc": 0, "running": false, "status": "completed_no_dispatch"}
+R25_ADOPTION manual True False {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": "manual", "rc": 0, "running": true, "status": "completed_no_dispatch"}
+R25_ADOPTION manual True True {"command": "record-review", "detail": null, "dispatch_allowed": false, "legacy": "manual", "rc": 0, "running": true, "status": "completed_no_dispatch"}
+so_ca_chon 138 so_ket_qua 138 {'DAT': 115, 'BO_QUA': 23}
+DAT wp1174_activity_accept_roundtrip
+DAT wp1174_activity_accept_snapshot_drift
+DAT wp1174_activity_budget_bytes_cumulative
+DAT wp1174_activity_budget_overflow_unreported
+DAT wp1174_activity_budget_pages_cumulative
+DAT wp1174_activity_cursor_foreign
+DAT wp1174_activity_deadline_processing
+DAT wp1174_activity_deletion_preaudit
+DAT wp1174_activity_deletion_unexplained
+DAT wp1174_activity_fetch_timeout_group
+DAT wp1174_activity_force_push_preimage
+DAT wp1174_activity_intro_kinds
+DAT wp1174_activity_matching_refs_unpaginated
+DAT wp1174_activity_multipage_anchor
+DAT wp1174_activity_no_anchor
+DAT wp1174_activity_object_unfetchable
+DAT wp1174_activity_older_page_fail
+DAT wp1174_activity_pr_foreign_head
+DAT wp1174_activity_receipt_residuals
+DAT wp1174_activity_receipt_v1
+DAT wp1174_activity_reduced_payload
+DAT wp1174_activity_same_timestamp_fail
+DAT wp1174_activity_tag_coverage
+DAT wp1174_activity_tip_non_commit
+DAT wp1174_admission_candidate_root
+DAT wp1174_admission_expired_revoked
+DAT wp1174_admission_file_bytes
+DAT wp1174_admission_oid_path_hash
+DAT wp1174_admission_unresolved
+DAT wp1174_admission_valid
+DAT wp1174_admission_wrong_scope
+DAT wp1174_adopt_abandon_cutover
+DAT wp1174_adopt_abandon_prepare
+DAT wp1174_adopt_entry_preflight
+DAT wp1174_adopt_finalize_replay
+DAT wp1174_adopt_fresh_reserved_adopt
+DAT wp1174_adopt_import_first
+DAT wp1174_adopt_intent_cutover
+DAT wp1174_adopt_postimage_all
+DAT wp1174_adopt_resume_no_target
+DAT wp1174_adopt_retry
+DAT wp1174_durability_cached_writer
+DAT wp1174_durability_fsync_readback
+DAT wp1174_durability_legacy_tombstone
+DAT wp1174_durability_ordinary_pair
+DAT wp1174_durability_publish_noreplace
+DAT wp1174_gate_evidence_schema
+DAT wp1174_gate_required_skip
+DAT wp1174_init_fresh
+DAT wp1174_init_preflight
+DAT wp1174_init_resume_absent
+DAT wp1174_init_resume_full
+DAT wp1174_init_resume_mismatch
+DAT wp1174_lifecycle_budget_replay
+DAT wp1174_lifecycle_first_publication
+DAT wp1174_lifecycle_guard_readonly
+DAT wp1174_lifecycle_human_negative
+DAT wp1174_lifecycle_human_valid
+DAT wp1174_lifecycle_identity_advisory
+DAT wp1174_lifecycle_legacy_unchanged
+DAT wp1174_lifecycle_scoped_lifecycle
+DAT wp1174_profile_native_linux
+DAT wp1174_profile_unsupported
+DAT wp1174_race_accept
+DAT wp1174_race_adopt_state
+DAT wp1174_race_begin_attempt
+DAT wp1174_race_chu_kho_duyet
+DAT wp1174_race_init
+DAT wp1174_race_mo_lai
+DAT wp1174_race_nang_tran
+DAT wp1174_race_record_codex_call
+DAT wp1174_race_record_lease
+DAT wp1174_race_record_post
+DAT wp1174_race_record_rescue
+DAT wp1174_race_record_review
+DAT wp1174_race_transition
+DAT wp1174_race_void_attempt
+DAT wp1174_receipt_agree_unit
+DAT wp1174_source_active_positive
+DAT wp1174_source_ahead
+DAT wp1174_source_backup
+DAT wp1174_source_foreign_path
+DAT wp1174_source_generation_revision
+DAT wp1174_source_legacy_branch
+DAT wp1174_source_recovery_snapshot
+DAT wp1174_status_closed
+DAT wp1174_windows_claim_rejected
+DAT wp1174_witness_active_pending
+DAT wp1174_witness_enum_hash
+DAT wp1174_witness_fresh_reserved
+DAT wp1174_witness_import_retry
+DAT wp1174_witness_int_bool
+DAT wp1174_witness_json_bytes
+DAT wp1174_witness_keyset
+DAT wp1174_witness_suspended
+DAT wp1174_witness_valid
+DAT wp1174_writer_accept
+DAT wp1174_writer_adopt_state
+DAT wp1174_writer_begin_attempt
+DAT wp1174_writer_chu_kho_duyet
+DAT wp1174_writer_init
+DAT wp1174_writer_mo_lai
+DAT wp1174_writer_nang_tran
+DAT wp1174_writer_record_codex_call
+DAT wp1174_writer_record_lease
+DAT wp1174_writer_record_post
+DAT wp1174_writer_record_rescue
+DAT wp1174_writer_record_review
+DAT wp1174_writer_transition
+DAT wp1174_writer_void_attempt
+DAT wp1342_additive_byte_preserved
+BO_QUA wp1342_native_boot_failclosed ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_boot_stable ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_lock_exclusive ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_lock_names ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_lock_noinherit ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_metadata_drift ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_noinherit ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_persist_bindings ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_persist_create ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_persist_update ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_persist_update_held ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_persist_update_refuse ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_persist_update_symlink ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_read ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_seed_acl ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_seed_drift ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_seed_fingerprint ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_seed_hardlink ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_seed_nonfile ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_seed_ok ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_swap_ancestor ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_symlink_file ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+BO_QUA wp1342_native_volume_junction ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+DAT wp1342_pure_lock_persist_refuse
+DAT wp1342_pure_platform_path
+DAT wp1342_pure_seed_acl_bang
+DAT wp1342_pure_seed_boot_refuse
+rc=0

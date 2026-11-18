@@ -1,0 +1,8 @@
+﻿pha=truoc utc=2026-11-18T10:23:59.7972571Z LastBootUpTime=2026-11-12T21:02:29.5000000Z
+HEAD=972089eb4acd5e83f7b58b757f02a69590b26e4b tree=bda52ba50cd764758429d4f5dc8c2d5f8b50afb8 sach=[]
+python_rc=0
+N7_BOOTID {"v1": "36", "v2": "36", "utc": "2026-11-18T10:24:03.713729+00:00"}
+reg= | HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters |     BootId    REG_DWORD    0x24 | 
+shutdown_goi_utc=2026-11-18T10:24:03.8572371Z
+shutdown_rc=5 out=Access is denied.(5)
+KHOA DA NHA (shutdown that bai)

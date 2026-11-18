@@ -1,0 +1,213 @@
+{
+ "src_head": "972089eb4acd5e83f7b58b757f02a69590b26e4b",
+ "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+ "driver_sha256": "0c496173ad2d1b16c0bc09cb5f032a2feb195cd4540493b85c2f96dd8d8ca386",
+ "dot_bien": [
+  {
+   "ten": "a_bo_nlink",
+   "dich": "wp1342_native_seed_hardlink",
+   "doi_chung": "wp1342_native_seed_ok",
+   "nhan_assert_mong_doi": "phải từ chối mà lại nhận",
+   "sach_wp1342_native_seed_hardlink": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_seed_ok": [
+    0,
+    null,
+    "DAT"
+   ],
+   "clone_shallow": "false",
+   "so_lan_khop": [
+    1
+   ],
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex 9ac9ea5..a7181ed 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6648,7 +6648,7 @@ def _1174_win_seed(e, between=None):\n             sddl = text_of(a.ConvertSecurityDescriptorToStringSecurityDescriptorW(sd, 1, 5, c.byref(out), None), out)\n         finally:\n             k.LocalFree(sd)\n-        _1174_require(links[4] == 1 and _1174_win_seed_acl(sddl, sid), \"private seed owner/DACL/links\")\n+        _1174_require(_1174_win_seed_acl(sddl, sid), \"private seed owner/DACL/links\")\n         return identity, links[4], sddl\n     try:\n         token, user, size, out = w.HANDLE(), c.create_string_buffer(256), w.DWORD(), w.LPWSTR()\n",
+   "dot_bien_wp1342_native_seed_hardlink": [
+    1,
+    [
+     "str",
+     "AssertionError: phải từ chối mà lại nhận: b'm\\xaa\\xbf\\x87\\xcc\\x9b\\xd4\\n?\\xdd\\xbe\\xe8\\x18\\xdaV\\xe7K\\x94c\\x86o\\xac\\xabjX\\x96\\t\\xd6<%Fx'"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_seed_hardlink": "KQ_JSON {\"wp1342_native_seed_hardlink\": [\"str\", \"AssertionError: ph\\u1ea3i t\\u1eeb ch\\u1ed1i m\\u00e0 l\\u1ea1i nh\\u1eadn: b'm\\\\xaa\\\\xbf\\\\x87\\\\xcc\\\\x9b\\\\xd4\\\\n?\\\\xdd\\\\xbe\\\\xe8\\\\x18\\\\xdaV\\\\xe7K\\\\x94c\\\\x86o\\\\xac\\\\xabjX\\\\x96\\\\t\\\\xd6<%Fx'\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m4\\a\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_seed_ok": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_seed_ok": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_seed_ok\", \"observed\": \"('S-1-5-21-3557025573-3225223210-839716364-1002', 'O:S-1-5-21-3557025573-3225223210-839716364-1002D:P(A;;FA;;;S-1-5-21-3557025573-3225223210-839716364-1002)(A;;FA;;;SY)')\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_seed_ok\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m4\\a\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "b_bo_sha256",
+   "dich": "wp1342_native_seed_fingerprint",
+   "doi_chung": "wp1342_native_seed_ok",
+   "nhan_assert_mong_doi": "phải từ chối mà lại nhận",
+   "sach_wp1342_native_seed_fingerprint": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_seed_ok": [
+    0,
+    null,
+    "DAT"
+   ],
+   "clone_shallow": "false",
+   "so_lan_khop": [
+    1
+   ],
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex 9ac9ea5..14c3fc1 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6673,7 +6673,7 @@ def _1174_win_seed(e, between=None):\n             k.CloseHandle(handle)\n     except OSError as error:\n         raise ValueError(\"WP1174 UNKNOWN: private seed read/lstat\") from error\n-    _1174_require(len(seed) == 32 and hashlib.sha256(seed).hexdigest() == e[\"private_seed_sha256\"], \"private seed fingerprint\")\n+    _1174_require(len(seed) == 32, \"private seed fingerprint\")\n     return seed\n \n \n",
+   "dot_bien_wp1342_native_seed_fingerprint": [
+    1,
+    [
+     "str",
+     "AssertionError: phải từ chối mà lại nhận: b',\\xd3\\xf0\\x02\\xdc\\x9b)\\xfc-\\x7f\\xfe\\xe4/0\\x8apd\\xd0\\xd8Lz\\xca\\x87\\x15\\xc9\\x01\\x0b\\xeb\\xaby~\\x00'"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_seed_fingerprint": "KQ_JSON {\"wp1342_native_seed_fingerprint\": [\"str\", \"AssertionError: ph\\u1ea3i t\\u1eeb ch\\u1ed1i m\\u00e0 l\\u1ea1i nh\\u1eadn: b',\\\\xd3\\\\xf0\\\\x02\\\\xdc\\\\x9b)\\\\xfc-\\\\x7f\\\\xfe\\\\xe4/0\\\\x8apd\\\\xd0\\\\xd8Lz\\\\xca\\\\x87\\\\x15\\\\xc9\\\\x01\\\\x0b\\\\xeb\\\\xaby~\\\\x00'\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m4\\b\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_seed_ok": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_seed_ok": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_seed_ok\", \"observed\": \"('S-1-5-21-3557025573-3225223210-839716364-1002', 'O:S-1-5-21-3557025573-3225223210-839716364-1002D:P(A;;FA;;;S-1-5-21-3557025573-3225223210-839716364-1002)(A;;FA;;;SY)')\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_seed_ok\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m4\\b\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "c_bo_kiem_hau_doc",
+   "dich": "wp1342_native_seed_drift",
+   "doi_chung": "wp1342_native_seed_ok",
+   "nhan_assert_mong_doi": "S8: đã trả bytes dù metadata đổi",
+   "sach_wp1342_native_seed_drift": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_seed_ok": [
+    0,
+    null,
+    "DAT"
+   ],
+   "clone_shallow": "false",
+   "so_lan_khop": [
+    1
+   ],
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex 9ac9ea5..319d460 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6668,7 +6668,6 @@ def _1174_win_seed(e, between=None):\n             seed = chunk.raw[:count.value]\n             if between is not None:\n                 between()\n-            _1174_require(first == observed(handle, sid), \"private seed metadata drift\")\n         finally:\n             k.CloseHandle(handle)\n     except OSError as error:\n",
+   "dot_bien_wp1342_native_seed_drift": [
+    1,
+    [
+     "str",
+     "AssertionError: S8: đã trả bytes dù metadata đổi: b'`\\xa6K\\xcb\\xd4\\xfdl!\\xf4g\\xa4\\xc1\\x9d\\xf3\\xfe\\x8c\\x86\\\\r\\xa7\\xd8ts\\xc29FL\\xd5\\x9eB`\\x9f'"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_seed_drift": "KQ_JSON {\"wp1342_native_seed_drift\": [\"str\", \"AssertionError: S8: \\u0111\\u00e3 tr\\u1ea3 bytes d\\u00f9 metadata \\u0111\\u1ed5i: b'`\\\\xa6K\\\\xcb\\\\xd4\\\\xfdl!\\\\xf4g\\\\xa4\\\\xc1\\\\x9d\\\\xf3\\\\xfe\\\\x8c\\\\x86\\\\\\\\r\\\\xa7\\\\xd8ts\\\\xc29FL\\\\xd5\\\\x9eB`\\\\x9f'\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m4\\c\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_seed_ok": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_seed_ok": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_seed_ok\", \"observed\": \"('S-1-5-21-3557025573-3225223210-839716364-1002', 'O:S-1-5-21-3557025573-3225223210-839716364-1002D:P(A;;FA;;;S-1-5-21-3557025573-3225223210-839716364-1002)(A;;FA;;;SY)')\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_seed_ok\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m4\\c\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "f_bo_kiem_reg_dword",
+   "dich": "wp1342_native_boot_failclosed",
+   "doi_chung": "wp1342_native_boot_stable",
+   "nhan_assert_mong_doi": "B2 dòng 'REG_SZ'",
+   "sach_wp1342_native_boot_failclosed": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_boot_stable": [
+    0,
+    null,
+    "DAT"
+   ],
+   "clone_shallow": "false",
+   "so_lan_khop": [
+    1
+   ],
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex 9ac9ea5..3f272b7 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6691,7 +6691,6 @@ def _1174_win_boot_id():\n             value, kind = winreg.QueryValueEx(key, \"BootId\")\n     except OSError as error:\n         raise _1174Error(\"Windows BootId registry read\") from error\n-    _1174_require(kind == winreg.REG_DWORD, \"Windows BootId type\")\n     return str(int(value))\n \n \n",
+   "dot_bien_wp1342_native_boot_failclosed": [
+    1,
+    [
+     "str",
+     "AssertionError: B2 dòng 'REG_SZ': phải từ chối (fail-closed) mà lại trả '5'"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_boot_failclosed": "KQ_JSON {\"wp1342_native_boot_failclosed\": [\"str\", \"AssertionError: B2 d\\u00f2ng 'REG_SZ': ph\\u1ea3i t\\u1eeb ch\\u1ed1i (fail-closed) m\\u00e0 l\\u1ea1i tr\\u1ea3 '5'\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m4\\f\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_boot_stable": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_boot_stable": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_boot_stable\", \"observed\": \"'15'\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_boot_stable\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m4\\f\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "h_fallback_registry",
+   "dich": "wp1342_native_boot_failclosed",
+   "doi_chung": "wp1342_native_boot_stable",
+   "nhan_assert_mong_doi": "B2 dòng 'thiếu khoá'",
+   "sach_wp1342_native_boot_failclosed": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_boot_stable": [
+    0,
+    null,
+    "DAT"
+   ],
+   "clone_shallow": "false",
+   "so_lan_khop": [
+    1
+   ],
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex 9ac9ea5..0bb37b1 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6690,7 +6690,7 @@ def _1174_win_boot_id():\n                               \"\\\\PrefetchParameters\", 0, winreg.KEY_READ | winreg.KEY_WOW64_64KEY) as key:\n             value, kind = winreg.QueryValueEx(key, \"BootId\")\n     except OSError as error:\n-        raise _1174Error(\"Windows BootId registry read\") from error\n+        return \"5\"\n     _1174_require(kind == winreg.REG_DWORD, \"Windows BootId type\")\n     return str(int(value))\n \n",
+   "dot_bien_wp1342_native_boot_failclosed": [
+    1,
+    [
+     "str",
+     "AssertionError: B2 dòng 'thiếu khoá': phải từ chối (fail-closed) mà lại trả '5'"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_boot_failclosed": "KQ_JSON {\"wp1342_native_boot_failclosed\": [\"str\", \"AssertionError: B2 d\\u00f2ng 'thi\\u1ebfu kho\\u00e1': ph\\u1ea3i t\\u1eeb ch\\u1ed1i (fail-closed) m\\u00e0 l\\u1ea1i tr\\u1ea3 '5'\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m4\\h\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_boot_stable": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_boot_stable": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_boot_stable\", \"observed\": \"'15'\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_boot_stable\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m4\\h\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "z_tu_kiem_khong_khop",
+   "dich": "wp1342_native_seed_ok",
+   "doi_chung": "wp1342_native_boot_stable",
+   "nhan_assert_mong_doi": "",
+   "sach_wp1342_native_seed_ok": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_boot_stable": [
+    0,
+    null,
+    "DAT"
+   ],
+   "clone_shallow": "false",
+   "so_lan_khop": [
+    0
+   ],
+   "ket_luan": "KHONG_DO (chuoi tim khong khop dung 1 lan)"
+  }
+ ]
+}

@@ -1,0 +1,51 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1319
+packet_id: WP1319-NGHIEM-THU-BO-SUNG
+revision: 4
+generation: 1
+lease_id: wp1319-r4-g1-operator
+role: operator_dispatcher
+executor: codex
+executor_surface: codex_cli
+executor_model: KHONG_do_duoc
+executor_note: 'Codex viết harness r4_native.py ngoài kho; phiên điều phối chạy harness trên ASUS'
+reviewer: independent_readonly
+reviewer_model: KHONG_do_duoc
+review_class: sensitive
+target_host: ASUS-LAPTOP
+target_device_id: 7404cfba-9034-4787-b46b-7c358126a411
+target_workdir: 'C:\Users\admin\tl-work\wp1319-r4'
+target_lock: 'D:\tl-win\KHOA.txt'
+spec_path: ops/specs/wp1319-r4.md
+spec_hash: 0e8442ee9f698b5f4929252f7f2e7a4bbd636184673b1fe94bb78d603e0fe0a4
+spec_sha256_required: 0e8442ee9f698b5f4929252f7f2e7a4bbd636184673b1fe94bb78d603e0fe0a4
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r4/RESULTS.md
+- ops/acceptance/wp1319/r4/VERDICT-code.md
+- ops/acceptance/wp1319/r4/VERDICT-run.md
+- ops/leases/wp1319-r4-g1-operator.yaml
+- ops/specs/wp1319-r4.md
+write_set_hash: 3d730371a28e98283d4c4f115f2694844b352aeb3b9a9af1f6796760c1426766
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: 13bf69f6eb797e859619a2062e7c9577e6a9cc0b
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 18/11 qua AskUserQuestion trong phiên session_015GtxrapMSm976JLC7Fp1HM: duyệt "R4-A..D đủ" và "Chấp nhận dừng" cho §11 #7'
+granted_on_instruction_note: 'không cấp LIVE, gateway/account/endpoint/ACL, đăng nhập, copy profile thật, NSIS, sửa raw P4'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-18T09:51:02Z'
+heartbeat_at: '2026-11-18T09:51:02Z'
+lease_until: '2026-11-18T15:51:02Z'
+lease_expires_at_utc: '2026-11-18T15:51:02Z'
+max_lease_hours: 6
+codex_executor_calls_limit: 3
+codex_executor_calls_used: 0
+review_calls_limit: 2
+review_calls_used: 0
+native_runs_limit: 1
+native_step_reruns_limit: 1
+windows: native_asus_only

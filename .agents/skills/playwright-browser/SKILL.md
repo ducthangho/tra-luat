@@ -186,8 +186,11 @@ chay_ghi() { local ten=$1 rc; shift
   [ "$(tail -n 1 "$TL_PW_RUN/00-pins.log")" = 'PIN OK' ]; case "$TL_PW_URL" in http://*|https://*) ;; *) false;; esac
   printf '{"browser":{"browserName":"chromium","isolated":true,"launchOptions":{"channel":"chromium","headless":true,"timeout":30000}},"timeouts":{"action":10000},"outputDir":"%s","outputMode":"file"}\n' \
     "$TL_PW_RUN" > "$TL_PW_RUN/browser.json"
-  D="${XDG_CACHE_HOME:-$HOME/.cache}/ms-playwright/daemon"   # sổ phiên CLI, xem Limits
+  # --- du-luong-daemon-truoc-open: bat dau
+  [ -z "${PWTEST_DAEMON_SESSION_DIR+x}" ]; D="${XDG_CACHE_HOME:-$HOME/.cache}/ms-playwright/daemon"   # sổ phiên CLI
+  case "$D" in /*) ;; *) false;; esac   # cache tương đối: CLI giải theo CWD `work`, khác shell ⇒ DỪNG
   if [ -e "$D" ]; then pre=$(find "$D" -mindepth 2 -maxdepth 2 -name "*$TL_PW_SESSION*" -print); [ -z "$pre" ]; fi
+  # --- du-luong-daemon-truoc-open: het
   chay_ghi 01-open open about:blank --config "$TL_PW_RUN/browser.json"
   chay_ghi 02-goto goto "$TL_PW_URL"; chay_ghi 03-tab-list tab-list; chay_ghi 04-requests requests --static
   cat "$TL_PW_RUN/03-tab-list.json" "$TL_PW_RUN/04-requests.json" )
@@ -225,10 +228,15 @@ function Invoke-PwGhi([string]$Ten, [string[]]$Argv, [switch]$PhaiLoi) {
   $cfg = [ordered]@{ browser = [ordered]@{ browserName = 'chromium'; isolated = $true; launchOptions = [ordered]@{
       channel = 'chromium'; headless = $true; timeout = 30000 } }; timeouts = @{ action = 10000 }; outputDir = $env:TL_PW_RUN; outputMode = 'file' }
   [IO.File]::WriteAllText("$env:TL_PW_RUN\browser.json", ($cfg | ConvertTo-Json -Depth 5))
+  # --- du-luong-daemon-truoc-open: bat dau
+  Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR)) 'PWTEST_DAEMON_SESSION_DIR'
   $cacheRoot = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA } else { "$env:USERPROFILE\AppData\Local" }
-  $daemonDir = "$cacheRoot\ms-playwright\daemon"   # sổ phiên CLI, xem Limits
-  Need (-not (Test-Path -LiteralPath $daemonDir) -or -not @(Get-ChildItem -Force -Recurse -Depth 1 -LiteralPath $daemonDir `
-    -Filter "*$env:TL_PW_SESSION*")) 'nonce đã có trong sổ phiên CLI'
+  $daemonDir = "$cacheRoot\ms-playwright\daemon"; $reparse = [IO.FileAttributes]::ReparsePoint   # sổ phiên CLI
+  Need ($daemonDir -match '^([A-Za-z]:\\|\\\\)') 'sổ phiên không tuyệt đối'
+  Need (-not (Test-Path -LiteralPath $daemonDir) -or -not @(Get-ChildItem -Force -Directory -LiteralPath $daemonDir |
+    Where-Object { -not ($_.Attributes -band $reparse) } | ForEach-Object {
+      Get-ChildItem -Force -LiteralPath $_.FullName -Filter "*$env:TL_PW_SESSION*" })) 'nonce đã có trong sổ phiên CLI'
+  # --- du-luong-daemon-truoc-open: het
   Invoke-PwGhi 01-open @('open', 'about:blank', '--config', "$env:TL_PW_RUN\browser.json")
   Invoke-PwGhi 02-goto @('goto', $env:TL_PW_URL); Invoke-PwGhi 03-tab-list @('tab-list'); Invoke-PwGhi 04-requests @('requests', '--static')
   Get-Content -LiteralPath "$env:TL_PW_RUN\03-tab-list.json", "$env:TL_PW_RUN\04-requests.json" }
@@ -290,8 +298,9 @@ Tên output Cleanup phải chưa tồn tại; không ghi đè bằng chứng cũ
 Nếu dừng sớm, operator lưu hash các output mới và `commands.tsv` vào biên nhận thất bại, không chạy lại để ghi đè.
 Daemon CLI ghi stderr vào `<sổ phiên>/<16 hex>/<nonce>.err`, NGOÀI `TL_PW_ROOT`, và `delete-data` không xoá tệp đó (Limits).
 Sau `10-verify`, Cleanup đòi ĐÚNG MỘT mục mang nonce trong sổ phiên: tệp thường `<16 hex>/<nonce>.err`, không symlink/
-reparse point, không còn `<nonce>.session`/`ud-<nonce>-*`. Nó chép tệp vào run (`11-daemon.err`, so byte) rồi xoá tệp gốc.
-0 hoặc nhiều mục, sai dạng, output cũ ⇒ THẤT BẠI, không xoá gì. Chỉ xoá tệp mang nonce của Capture hiện tại.
+reparse point, không còn `<nonce>.session`/`ud-<nonce>-*`, và phép quét không lỗi. Nó chép tệp vào run (`11-daemon.err`, so
+byte), ghi `11-daemon-path.txt`, rồi xoá tệp gốc. 0 hoặc nhiều mục, sai dạng, quét lỗi, output cũ ⇒ THẤT BẠI, không xoá gì.
+Chỉ xoá tệp mang nonce của Capture hiện tại; Capture đã kiểm nonce chưa có trong sổ phiên trước `open`.
 ```bash
 ( set -u
   [[ "$TL_PW_SESSION" =~ ^tl-pw-[0-9a-f]{12}$ ]] || { echo 'STOP: nonce không hợp lệ' >&2; exit 1; }
@@ -326,13 +335,14 @@ reparse point, không còn `<nonce>.session`/`ud-<nonce>-*`. Nó chép tệp và
   for ten in 11-daemon.err 11-daemon-path.txt; do
     [ ! -e "$TL_PW_RUN/$ten" ] && [ ! -L "$TL_PW_RUN/$ten" ] || { echo "STOP: output cũ $ten, không ghi đè" >&2; exit 1; }
   done
-  mapfile -t hit < <(find "$D" -mindepth 2 -maxdepth 2 -name "*$TL_PW_SESSION*" -print)
-  f=${hit[0]:-}
-  [ "${#hit[@]}" -eq 1 ] && [[ "$f" =~ ^"$D"/[0-9a-f]{16}/"$TL_PW_SESSION".err$ ]] &&
-    [ -f "$f" ] && [ ! -L "$f" ] && [ ! -L "${f%/*}" ] ||
+  mapfile -d '' -t hit < <(find "$D" -mindepth 2 -maxdepth 2 -name "*$TL_PW_SESSION*" -print0)   # bash >= 4.4
+  wait "$!" || { echo 'STOP: quét sổ phiên lỗi/thiếu, không xoá gì' >&2; exit 1; }
+  f=${hit[0]:-}; h=${f%/*}
+  [ "${#hit[@]}" -eq 1 ] && [ "${f##*/}" = "$TL_PW_SESSION.err" ] && [ "${h%/*}" = "$D" ] &&
+    [[ "${h##*/}" =~ ^[0-9a-f]{16}$ ]] && [ -f "$f" ] && [ ! -L "$f" ] && [ ! -L "$h" ] ||
     { echo "STOP: cần đúng 1 tệp <16 hex>/$TL_PW_SESSION.err trong sổ phiên, thấy ${#hit[@]} mục" >&2; exit 1; }
-  printf '%s\n' "$f" > "$TL_PW_RUN/11-daemon-path.txt" && cp -- "$f" "$TL_PW_RUN/11-daemon.err" &&
-    cmp -s -- "$f" "$TL_PW_RUN/11-daemon.err" || { echo 'STOP: chưa chép được .err daemon' >&2; exit 1; }
+  cp -- "$f" "$TL_PW_RUN/11-daemon.err" && cmp -s -- "$f" "$TL_PW_RUN/11-daemon.err" &&
+    printf '%s\n' "$f" > "$TL_PW_RUN/11-daemon-path.txt" || { echo 'STOP: chưa chép được .err daemon' >&2; exit 1; }
   rm -- "$f" && [ ! -e "$f" ] && [ ! -L "$f" ] || { echo "STOP: chưa xoá được $f" >&2; exit 1; }
   # --- du-luong-daemon: het
   find "$TL_PW_RUN" -type f ! -name SHA256SUMS -exec sha256sum {} + > "$TL_PW_RUN/SHA256SUMS" ||
@@ -371,19 +381,20 @@ reparse point, không còn `<nonce>.session`/`ud-<nonce>-*`. Nó chép tệp và
   Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR)) 'PWTEST_DAEMON_SESSION_DIR'
   $cacheRoot = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA } else { "$env:USERPROFILE\AppData\Local" }
   $daemonDir = "$cacheRoot\ms-playwright\daemon"; $reparse = [IO.FileAttributes]::ReparsePoint
+  Need ($daemonDir -match '^([A-Za-z]:\\|\\\\)') 'sổ phiên không tuyệt đối'
   Need (Test-Path -LiteralPath $daemonDir -PathType Container) 'không có sổ phiên CLI'
   $dd = Get-Item -Force -LiteralPath $daemonDir -ErrorAction Stop
   Need ($dd.PSIsContainer -and -not ($dd.Attributes -band $reparse)) 'sổ phiên không phải thư mục thường'
   foreach ($ten in '11-daemon.err', '11-daemon-path.txt') {
     Need (-not (Test-Path -LiteralPath "$env:TL_PW_RUN\$ten")) "output cũ $ten, không ghi đè" }
-  $hits = @(Get-ChildItem -Force -Directory -LiteralPath $daemonDir -ErrorAction Stop |
-    Where-Object { -not ($_.Attributes -band $reparse) } | ForEach-Object {
-      Get-ChildItem -Force -LiteralPath $_.FullName -Filter "*$session*" -ErrorAction Stop })
+  try { $hits = @(Get-ChildItem -Force -Directory -LiteralPath $daemonDir -ErrorAction Stop |
+      Where-Object { -not ($_.Attributes -band $reparse) } | ForEach-Object {
+        Get-ChildItem -Force -LiteralPath $_.FullName -Filter "*$session*" -ErrorAction Stop })
+  } catch { Need $false "quét sổ phiên lỗi/thiếu, không xoá gì: $($_.Exception.Message)" }
   $f = $hits | Select-Object -First 1
   Need ($hits.Count -eq 1 -and -not $f.PSIsContainer -and $f.Name -ceq "$session.err" -and
     $f.Directory.Name -cmatch '\A[0-9a-f]{16}\z' -and -not ($f.Attributes -band $reparse)) `
     "cần đúng 1 tệp <16 hex>\$session.err trong sổ phiên, thấy $($hits.Count) mục"
-  [IO.File]::WriteAllText("$env:TL_PW_RUN\11-daemon-path.txt", "$($f.FullName)`n")
   $copied = $false   # daemon còn sống thì khoá cả ĐỌC .err (đo trên Desktop), nên chờ nó nhả handle
   for ($i = 0; $i -lt 5 -and -not $copied; $i++) {
     try { Copy-Item -LiteralPath $f.FullName -Destination "$env:TL_PW_RUN\11-daemon.err" -ErrorAction Stop; $copied = $true }
@@ -391,6 +402,7 @@ reparse point, không còn `<nonce>.session`/`ud-<nonce>-*`. Nó chép tệp và
   Need $copied "chưa chép được $($f.FullName)"
   Need ((Get-FileHash -LiteralPath $f.FullName).Hash -ceq (Get-FileHash -LiteralPath "$env:TL_PW_RUN\11-daemon.err").Hash) `
     'bản sao .err daemon lệch'
+  [IO.File]::WriteAllText("$env:TL_PW_RUN\11-daemon-path.txt", "$($f.FullName)`n")
   for ($i = 0; $i -lt 5 -and (Test-Path -LiteralPath $f.FullName); $i++) {   # daemon có thể chưa nhả handle
     try { Remove-Item -LiteralPath $f.FullName -Force -ErrorAction Stop } catch { Start-Sleep -Seconds 1 } }
   Need (-not (Test-Path -LiteralPath $f.FullName)) "chưa xoá được $($f.FullName)"
@@ -403,9 +415,9 @@ reparse point, không còn `<nonce>.session`/`ud-<nonce>-*`. Nó chép tệp và
 Gỡ bản cài: kiểm không còn tiến trình dùng nó (`pgrep -af "$TL_PW_ROOT"`; `Get-CimInstance Win32_Process | Where-Object
 CommandLine -like "*$env:TL_PW_ROOT*"`; chỉ đọc, không giết), rồi xoá đúng `install/<rev>` + `browsers/<rev>` của revision
 bị loại; GIỮ revision trước và `runs/`; không `npm uninstall -g`, không đụng lõi. Sổ phiên của bản cài bị loại là thư
-mục cha trong `11-daemon-path.txt` của các run dùng nó: chỉ xoá khi RỖNG, không đệ quy (`rmdir -- <thư mục>`;
-PowerShell: `Need (@(Get-ChildItem -Force -LiteralPath <thư mục>).Count -eq 0) 'còn mục'` rồi
-`Remove-Item -LiteralPath <thư mục>`); còn mục ⇒ giữ nguyên, ghi vào biên nhận. Rollback = trỏ `TL_PW_INSTALL`/
+mục cha trong `11-daemon-path.txt` của các run dùng nó (tên đúng 16 hex, nằm ngay dưới sổ phiên): chỉ xoá khi RỖNG, bằng
+thao tác xoá thư mục không đệ quy, tự từ chối khi còn mục (`rmdir -- <thư mục>`; PowerShell:
+`[IO.Directory]::Delete('<thư mục>', $false)`); bị từ chối ⇒ giữ nguyên, ghi vào biên nhận. Rollback = trỏ `TL_PW_INSTALL`/
 `PLAYWRIGHT_BROWSERS_PATH` về revision cũ (lock + browser cache bất biến) rồi Kiểm pin theo metadata của nó; không tự
 cập nhật/nâng bản. Không có đăng nhập, nên không hứa cookie/phiên còn sau khôi phục.
 ## Limits
@@ -418,4 +430,8 @@ cập nhật/nâng bản. Không có đăng nhập, nên không hứa cookie/phi
   của mình; `<nonce>.session`/`ud-<nonce>-*` do `delete-data` xoá. DƯ LƯỢNG CÒN LẠI (đã biết, không phải dữ liệu
   phiên): các thư mục `ms-playwright/daemon`, `daemon/<16 hex>` (xoá khi gỡ bản cài nếu rỗng) và `ms-playwright/b` (sổ
   trình duyệt dùng chung của Playwright, tệp từng trình duyệt bị xoá khi `close`); skill không xoá thư mục dùng chung.
-  `.err` của lượt chạy trước bản này KHÔNG tự dọn. CWD `work` không được nằm dưới thư mục có `.playwright`.
+  `.err` của lượt chạy trước bản này KHÔNG tự dọn. Cache tương đối ⇒ DỪNG; Windows thiếu `LOCALAPPDATA` thì dùng
+  `%USERPROFILE%\AppData\Local` như Node. Bước dọn chỉ chặn liên kết ở sổ phiên, thư mục hash và tệp; thư mục cha
+  phía trên `daemon` có thể là liên kết (CLI cũng đi theo nó). Không chống được một tiến trình cùng người dùng tráo
+  thư mục giữa lúc kiểm và lúc xoá; thứ neo quyền sở hữu là tên mang nonce ngẫu nhiên, đã kiểm vắng mặt trước `open`.
+  CWD `work` không được nằm dưới thư mục có `.playwright`.

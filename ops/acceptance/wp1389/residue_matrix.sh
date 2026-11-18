@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Ma tran phan chung cho buoc don du luong daemon cua playwright-browser SKILL.md (packet #1389).
-# Chay TREN BYTE CUA SKILL: trich doan giua hai dong danh dau trong khoi Cleanup bash, va hai dong kiem
-# truoc `open` trong khoi Capture bash. Khong goi CLI, khong mang, khong trinh duyet; moi tep nam trong $SCRATCH.
+# Chay TREN BYTE CUA SKILL: trich NOI DUNG giua cap dong danh dau (khong gom dong danh dau) trong khoi bash:
+#   "  # --- du-luong-daemon: bat dau|het"              (Cleanup)
+#   "  # --- du-luong-daemon-truoc-open: bat dau|het"   (Capture, truoc open)
+# Moi cap phai xuat hien DUNG 2 lan (bash + PowerShell); lay lan thu nhat. Khong goi CLI, khong mang, khong trinh duyet.
 # Dung: bash residue_matrix.sh <SKILL.md> <SCRATCH (thu muc rong, ngoai Git)>
 set -euo pipefail
 SKILL=$1; SCRATCH=$2
@@ -9,125 +11,139 @@ SKILL=$1; SCRATCH=$2
 SCRATCH=$(cd "$SCRATCH" && pwd -P)
 NONCE=tl-pw-0123456789ab; OTHER=tl-pw-ba9876543210; H=aaaaaaaaaaaaaaaa; H2=bbbbbbbbbbbbbbbb
 
-frag_cleanup=$(awk '/^  # --- du-luong-daemon: bat dau$/{f=1} f{print} /^  # --- du-luong-daemon: het$/{f=0}' "$SKILL" |
-  awk 'BEGIN{n=0} /^  # --- du-luong-daemon: bat dau$/{n++} n==1{print}')
-n_markers=$(grep -c '^  # --- du-luong-daemon: bat dau$' "$SKILL" || true)
-[ "$n_markers" -eq 2 ] || { echo "FAIL: can 2 cap danh dau (bash+ps), thay $n_markers" >&2; exit 1; }
-frag_cleanup=$(printf '%s\n' "$frag_cleanup" | awk '/^  # --- du-luong-daemon: het$/{print; exit} {print}')
-grep -q 'mapfile -t hit' <<<"$frag_cleanup" || { echo "FAIL: khong trich duoc doan bash" >&2; exit 1; }
-frag_pre=$(grep -E '^  (D="\$\{XDG_CACHE_HOME:-\$HOME/\.cache\}/ms-playwright/daemon"   # |if \[ -e "\$D" \]; then pre=)' "$SKILL")
-[ "$(printf '%s\n' "$frag_pre" | wc -l)" -eq 2 ] || { echo "FAIL: khong trich duoc 2 dong kiem truoc open" >&2; exit 1; }
-printf '%s\n' "$frag_cleanup" > "$SCRATCH/frag_cleanup.sh"; printf '%s\n' "$frag_pre" > "$SCRATCH/frag_pre.sh"
+extract() { # $1 = ten cap danh dau, $2 = tep ra. In noi dung giua cap THU NHAT, kiem du 2 cap va khong long nhau.
+  awk -v B="  # --- $1: bat dau" -v E="  # --- $1: het" -v OUT="$2" '
+    $0 == B { if (open) { bad = 1 } open = 1; nb++; next }
+    $0 == E { if (!open) { bad = 1 } open = 0; ne++; next }
+    open && nb == 1 { print > OUT }
+    END { if (bad || open || nb != 2 || ne != 2) { printf "FAIL: cap danh dau %s sai (bat dau=%d het=%d)\n", B, nb, ne > "/dev/stderr"; exit 1 } }' "$SKILL"; }
+extract du-luong-daemon "$SCRATCH/frag_cleanup.sh"
+extract du-luong-daemon-truoc-open "$SCRATCH/frag_pre.sh"
+grep -q 'mapfile -d' "$SCRATCH/frag_cleanup.sh" || { echo "FAIL: doan cleanup khong phai ban bash" >&2; exit 1; }
+grep -q 'find "\$D"' "$SCRATCH/frag_pre.sh" || { echo "FAIL: doan truoc-open khong phai ban bash" >&2; exit 1; }
 echo "SOURCE $(sha256sum < "$SKILL" | cut -c1-64) cleanup_frag $(sha256sum < "$SCRATCH/frag_cleanup.sh" | cut -c1-64) pre_frag $(sha256sum < "$SCRATCH/frag_pre.sh" | cut -c1-64)"
 
 PASS=0; FAIL=0; CASE_DIR=
-new_case() { CASE_DIR="$SCRATCH/case-$1"; mkdir -p "$CASE_DIR/cache/ms-playwright/daemon/$H" "$CASE_DIR/run"
-  printf 'own stderr %s\n' "$1" > "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err"
-  # mo coi cua phien khac va mot .err cu: KHONG BAO GIO duoc dung toi
-  printf 'other\n' > "$CASE_DIR/cache/ms-playwright/daemon/$H/$OTHER.err"
-  printf '{}\n' > "$CASE_DIR/cache/ms-playwright/daemon/$H/$OTHER.session"
-  mkdir -p "$CASE_DIR/cache/ms-playwright/daemon/$H2"; printf 'legacy\n' > "$CASE_DIR/cache/ms-playwright/daemon/$H2/tl-pw-111111111111.err"; }
-decoys() { (cd "$CASE_DIR/cache" && find . -path "*$NONCE*" -prune -o -type f -printf '%p %s %T@\n' | LC_ALL=C sort | sha256sum | cut -c1-64); }
-run_frag() { # $1 = fragment file; extra env via env
-  env -i HOME="$CASE_DIR/home" PATH=/usr/bin:/bin XDG_CACHE_HOME="$CASE_DIR/cache" TL_PW_SESSION=$NONCE \
-    TL_PW_RUN="$CASE_DIR/run" "${@:2}" bash -c "( set -u
-$(cat "$1")
-echo RESIDUE_OK )" > "$CASE_DIR/out" 2>&1 && echo 0 || echo $?; }
-expect() { # name want(ok|stop) rc [own_must_remain yes|no] decoy_before
-  local name=$1 want=$2 rc=$3 own=$4 d0=$5 ok=1 d1; d1=$(decoys)
-  [ "$d0" = "$d1" ] || { ok=0; echo "  decoys changed"; }
-  if [ "$want" = ok ]; then [ "$rc" = 0 ] && grep -qx RESIDUE_OK "$CASE_DIR/out" || ok=0
-  else [ "$rc" != 0 ] && ! grep -qx RESIDUE_OK "$CASE_DIR/out" && grep -q STOP "$CASE_DIR/out" || ok=0; fi
-  if [ "$own" = yes ]; then [ -e "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err" ] || [ -L "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err" ] || { ok=0; echo "  own .err missing"; }; fi
-  if [ $ok = 1 ]; then PASS=$((PASS+1)); echo "PASS $name rc=$rc"; else FAIL=$((FAIL+1)); echo "FAIL $name rc=$rc"; sed 's/^/    /' "$CASE_DIR/out"; fi; }
+ok() { PASS=$((PASS+1)); echo "PASS $*"; }
+ko() { FAIL=$((FAIL+1)); echo "FAIL $*"; [ -f "$CASE_DIR/out" ] && sed 's/^/    /' "$CASE_DIR/out"; return 0; }
+OWN() { echo "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err"; }
+new_case() { CASE_DIR="$SCRATCH/case-$1"; local d="$CASE_DIR/cache/ms-playwright/daemon"
+  mkdir -p "$d/$H" "$d/$H2" "$CASE_DIR/run" "$CASE_DIR/home" "$CASE_DIR/bin"
+  printf 'own stderr %s\n' "$1" > "$d/$H/$NONCE.err"
+  # moi cua phien khac va mot .err cu: KHONG BAO GIO duoc dung toi
+  printf 'other\n' > "$d/$H/$OTHER.err"; printf '{}\n' > "$d/$H/$OTHER.session"
+  printf 'legacy\n' > "$d/$H2/tl-pw-111111111111.err"; }
+# Anh chup tung tep KHONG mang nonce: duong dan, loai, kich thuoc, mtime, sha256 noi dung.
+decoys() { (cd "$CASE_DIR" && find cache -path "*$NONCE*" -prune -o -type f -printf '%p\t%s\t%T@\n' | LC_ALL=C sort |
+  while IFS=$'\t' read -r p s t; do printf '%s\t%s\t%s\t%s\n' "$p" "$s" "$t" "$(sha256sum < "$p" | cut -c1-64)"; done | sha256sum | cut -c1-64); }
+no_new_outputs() { [ ! -e "$CASE_DIR/run/11-daemon.err" ] && [ ! -e "$CASE_DIR/run/11-daemon-path.txt" ]; }
+run_frag() { # $1 = tep doan; con lai: bien moi truong them (KEY=VAL)
+  local body=$1; shift
+  ( cd "$CASE_DIR/home" && env -i HOME="$CASE_DIR/home" PATH="$CASE_DIR/bin:/usr/bin:/bin" XDG_CACHE_HOME="$CASE_DIR/cache" \
+    TL_PW_SESSION=$NONCE TL_PW_RUN="$CASE_DIR/run" "$@" bash -c "( set -u
+$(cat "$body")
+echo RESIDUE_OK )" ) > "$CASE_DIR/out" 2>&1 && echo 0 || echo $?; }
+run_pre() { local body=$1; shift
+  ( cd "$CASE_DIR/home" && env -i HOME="$CASE_DIR/home" PATH="$CASE_DIR/bin:/usr/bin:/bin" XDG_CACHE_HOME="$CASE_DIR/cache" \
+    TL_PW_SESSION=$NONCE "$@" bash -c "( set -Eeuo pipefail; trap 'echo \"STOP: \$BASH_COMMAND\" >&2' ERR
+$(cat "$body")
+echo RESIDUE_OK )" ) > "$CASE_DIR/out" 2>&1 && echo 0 || echo $?; }
+is_ok() { [ "$1" = 0 ] && grep -qx RESIDUE_OK "$CASE_DIR/out"; }
+is_stop() { [ "$1" != 0 ] && ! grep -qx RESIDUE_OK "$CASE_DIR/out" && grep -q STOP "$CASE_DIR/out"; }
+# expect_stop NAME RC D0 [tep phai con, nguyen sha:...]
+expect_stop() { local n=$1 rc=$2 d0=$3 bad=; shift 3
+  is_stop "$rc" || bad="khong dung dung cach"
+  [ "$d0" = "$(decoys)" ] || bad="$bad; moi bi doi"
+  for spec in "$@"; do local p=${spec%%=*} h=${spec#*=}; [ -e "$p" ] && [ "$(sha256sum < "$p" | cut -c1-64)" = "$h" ] || bad="$bad; $p doi/mat"; done
+  if [ -z "$bad" ]; then ok "$n rc=$rc"; else ko "$n rc=$rc ($bad)"; fi; }
+sha() { sha256sum < "$1" | cut -c1-64; }
+F=$SCRATCH/frag_cleanup.sh; P=$SCRATCH/frag_pre.sh
 
-# P1: duong dung
-new_case P1; d0=$(decoys); own_sha=$(sha256sum < "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err")
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect P1-positive ok "$rc" no "$d0"
-if [ -e "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err" ] || [ "$(sha256sum < "$CASE_DIR/run/11-daemon.err")" != "$own_sha" ] ||
-   [ "$(cat "$CASE_DIR/run/11-daemon-path.txt")" != "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err" ]; then
-  FAIL=$((FAIL+1)); echo "FAIL P1-artefacts"; else PASS=$((PASS+1)); echo "PASS P1-artefacts (goc da xoa, ban sao trung byte, duong dan dung)"; fi
-# P2: .err rong (0 byte) nhu do that tren Linux/Desktop
-new_case P2; : > "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect P2-empty-err ok "$rc" no "$d0"
-# N1: khong co muc nao
-new_case N1; rm "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N1-zero-match stop "$rc" no "$d0"
-# N2: cung nonce o hai thu muc hash
-new_case N2; printf 'dup\n' > "$CASE_DIR/cache/ms-playwright/daemon/$H2/$NONCE.err"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N2-two-hash-dirs stop "$rc" yes "$d0"
-[ -e "$CASE_DIR/cache/ms-playwright/daemon/$H2/$NONCE.err" ] && { PASS=$((PASS+1)); echo "PASS N2-dup-kept"; } || { FAIL=$((FAIL+1)); echo "FAIL N2-dup-kept"; }
-# N3: .session con sot (delete-data chua xoa)
-new_case N3; printf '{}\n' > "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.session"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N3-session-left stop "$rc" yes "$d0"
-# N4: ud-<nonce>-* con sot
-new_case N4; mkdir "$CASE_DIR/cache/ms-playwright/daemon/$H/ud-$NONCE-chromium"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N4-userdata-left stop "$rc" yes "$d0"
-# N5: .err la symlink toi tep cua phien khac
-new_case N5; rm "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err"
-ln -s "$CASE_DIR/cache/ms-playwright/daemon/$H/$OTHER.err" "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N5-err-symlink stop "$rc" yes "$d0"
-# N6: thu muc hash la symlink
-new_case N6; mkdir -p "$CASE_DIR/elsewhere"; mv "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err" "$CASE_DIR/elsewhere/"
-ln -s "$CASE_DIR/elsewhere" "$CASE_DIR/cache/ms-playwright/daemon/cccccccccccccccc"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N6-hashdir-symlink stop "$rc" no "$d0"
-[ -e "$CASE_DIR/elsewhere/$NONCE.err" ] && { PASS=$((PASS+1)); echo "PASS N6-target-kept"; } || { FAIL=$((FAIL+1)); echo "FAIL N6-target-kept"; }
-# N7: so phien la symlink
+# ---- duong dung
+for c in P1 P2; do new_case $c; [ $c = P2 ] && : > "$(OWN)"; d0=$(decoys); own=$(sha "$(OWN)"); rc=$(run_frag "$F")
+  if is_ok "$rc" && [ "$d0" = "$(decoys)" ] && [ ! -e "$(OWN)" ] && [ "$(sha "$CASE_DIR/run/11-daemon.err")" = "$own" ] &&
+     [ "$(cat "$CASE_DIR/run/11-daemon-path.txt")" = "$(OWN)" ]; then ok "$c-positive (goc da xoa, ban sao trung byte, duong dan dung, moi nguyen)"
+  else ko "$c-positive rc=$rc"; fi; done
+# ---- phan chung (moi ca: STOP, moi nguyen noi dung/mtime, tep mang nonce con nguyen, KHONG tao output 11)
+new_case N1; rm "$(OWN)"; d0=$(decoys); rc=$(run_frag "$F"); expect_stop N1-zero-match "$rc" "$d0"; no_new_outputs || ko "N1 output 11"
+new_case N2; printf 'dup\n' > "$CASE_DIR/cache/ms-playwright/daemon/$H2/$NONCE.err"; d0=$(decoys); rc=$(run_frag "$F")
+expect_stop N2-two-hash-dirs "$rc" "$d0" "$(OWN)=$(sha "$(OWN)")" "$CASE_DIR/cache/ms-playwright/daemon/$H2/$NONCE.err=$(sha "$CASE_DIR/cache/ms-playwright/daemon/$H2/$NONCE.err")"; no_new_outputs || ko "N2 output 11"
+new_case N3; S=$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.session; printf '{}\n' > "$S"; d0=$(decoys); rc=$(run_frag "$F")
+expect_stop N3-session-left "$rc" "$d0" "$(OWN)=$(sha "$(OWN)")" "$S=$(sha "$S")"; no_new_outputs || ko "N3 output 11"
+new_case N4; U=$CASE_DIR/cache/ms-playwright/daemon/$H/ud-$NONCE-chromium; mkdir "$U"; printf 'x\n' > "$U/Prefs"; d0=$(decoys); rc=$(run_frag "$F")
+expect_stop N4-userdata-left "$rc" "$d0" "$(OWN)=$(sha "$(OWN)")" "$U/Prefs=$(sha "$U/Prefs")"; no_new_outputs || ko "N4 output 11"
+new_case N5; rm "$(OWN)"; ln -s "$CASE_DIR/cache/ms-playwright/daemon/$H/$OTHER.err" "$(OWN)"; d0=$(decoys); rc=$(run_frag "$F")
+expect_stop N5-err-symlink "$rc" "$d0"; [ -L "$(OWN)" ] && no_new_outputs || ko "N5 link mat/output 11"
+new_case N6; mkdir -p "$CASE_DIR/elsewhere"; mv "$(OWN)" "$CASE_DIR/elsewhere/"; ln -s "$CASE_DIR/elsewhere" "$CASE_DIR/cache/ms-playwright/daemon/cccccccccccccccc"; d0=$(decoys)
+rc=$(run_frag "$F"); expect_stop N6-hashdir-symlink "$rc" "$d0" "$CASE_DIR/elsewhere/$NONCE.err=$(sha "$CASE_DIR/elsewhere/$NONCE.err")"; no_new_outputs || ko "N6 output 11"
 new_case N7; mv "$CASE_DIR/cache/ms-playwright/daemon" "$CASE_DIR/real-daemon"; ln -s "$CASE_DIR/real-daemon" "$CASE_DIR/cache/ms-playwright/daemon"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N7-daemon-symlink stop "$rc" no "$d0"
-[ -e "$CASE_DIR/real-daemon/$H/$NONCE.err" ] && { PASS=$((PASS+1)); echo "PASS N7-target-kept"; } || { FAIL=$((FAIL+1)); echo "FAIL N7-target-kept"; }
-# N8: output cu trong run
-new_case N8; printf 'old\n' > "$CASE_DIR/run/11-daemon.err"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N8-stale-output stop "$rc" yes "$d0"
-[ "$(cat "$CASE_DIR/run/11-daemon.err")" = old ] && { PASS=$((PASS+1)); echo "PASS N8-old-kept"; } || { FAIL=$((FAIL+1)); echo "FAIL N8-old-kept"; }
-# N9: ten thu muc hash sai dang
-new_case N9; mkdir "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash"; mv "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err" "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash/"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N9-bad-hash-name stop "$rc" no "$d0"
-[ -e "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash/$NONCE.err" ] && { PASS=$((PASS+1)); echo "PASS N9-kept"; } || { FAIL=$((FAIL+1)); echo "FAIL N9-kept"; }
-# N10: hook test PWTEST_DAEMON_SESSION_DIR dat
-new_case N10; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh" PWTEST_DAEMON_SESSION_DIR="$CASE_DIR/x"); expect N10-pwtest-hook stop "$rc" yes "$d0"
-# N11: .err la thu muc
-new_case N11; rm "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err"; mkdir "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N11-err-is-dir stop "$rc" yes "$d0"
-# N12: chua co so phien
-new_case N12; rm -r "$CASE_DIR/cache/ms-playwright/daemon"; mkdir -p "$CASE_DIR/cache/ms-playwright"; d0=$(decoys)
-rc=$(run_frag "$SCRATCH/frag_cleanup.sh"); expect N12-no-registry stop "$rc" no "$d0"
-# C1/C2/C3: kiem truoc open (chay duoi set -Eeuo pipefail nhu khoi Capture)
-run_pre() { env -i HOME="$CASE_DIR/home" PATH=/usr/bin:/bin XDG_CACHE_HOME="$CASE_DIR/cache" TL_PW_SESSION=$NONCE bash -c "( set -Eeuo pipefail
-$(cat "$SCRATCH/frag_pre.sh")
-echo RESIDUE_OK )" > "$CASE_DIR/out" 2>&1 && echo 0 || echo $?; }
-new_case C1; rm "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err"; d0=$(decoys); rc=$(run_pre)
-[ "$rc" = 0 ] && grep -qx RESIDUE_OK "$CASE_DIR/out" && [ "$d0" = "$(decoys)" ] && { PASS=$((PASS+1)); echo "PASS C1-pre-clean rc=$rc"; } || { FAIL=$((FAIL+1)); echo "FAIL C1-pre-clean rc=$rc"; }
-new_case C2; d0=$(decoys); rc=$(run_pre)
-[ "$rc" != 0 ] && ! grep -qx RESIDUE_OK "$CASE_DIR/out" && [ -e "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err" ] && { PASS=$((PASS+1)); echo "PASS C2-pre-nonce-present rc=$rc"; } || { FAIL=$((FAIL+1)); echo "FAIL C2-pre-nonce-present rc=$rc"; }
-new_case C3; rm -r "$CASE_DIR/cache/ms-playwright"; rc=$(run_pre)
-[ "$rc" = 0 ] && grep -qx RESIDUE_OK "$CASE_DIR/out" && { PASS=$((PASS+1)); echo "PASS C3-pre-no-registry rc=$rc"; } || { FAIL=$((FAIL+1)); echo "FAIL C3-pre-no-registry rc=$rc"; }
+rc=$(run_frag "$F"); expect_stop N7-daemon-symlink "$rc" "$d0" "$CASE_DIR/real-daemon/$H/$NONCE.err=$(sha "$CASE_DIR/real-daemon/$H/$NONCE.err")"; no_new_outputs || ko "N7 output 11"
+for v in err path; do new_case N8-$v; [ $v = err ] && o=11-daemon.err || o=11-daemon-path.txt; printf 'old\n' > "$CASE_DIR/run/$o"; d0=$(decoys); rc=$(run_frag "$F")
+  expect_stop N8-stale-$o "$rc" "$d0" "$(OWN)=$(sha "$(OWN)")" "$CASE_DIR/run/$o=$(printf 'old\n' | sha256sum | cut -c1-64)"; done
+new_case N9; mkdir "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash"; mv "$(OWN)" "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash/"; d0=$(decoys)
+rc=$(run_frag "$F"); expect_stop N9-bad-hash-name "$rc" "$d0" "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash/$NONCE.err=$(sha "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash/$NONCE.err")"; no_new_outputs || ko "N9 output 11"
+new_case N10; d0=$(decoys); rc=$(run_frag "$F" PWTEST_DAEMON_SESSION_DIR="$CASE_DIR/x"); expect_stop N10-pwtest-hook "$rc" "$d0" "$(OWN)=$(sha "$(OWN)")"; no_new_outputs || ko "N10 output 11"
+new_case N11; rm "$(OWN)"; mkdir "$(OWN)"; d0=$(decoys); rc=$(run_frag "$F"); expect_stop N11-err-is-dir "$rc" "$d0"; [ -d "$(OWN)" ] && no_new_outputs || ko "N11"
+new_case N12; rm -r "$CASE_DIR/cache/ms-playwright/daemon"; d0=$(decoys); rc=$(run_frag "$F"); expect_stop N12-no-registry "$rc" "$d0"; no_new_outputs || ko "N12 output 11"
+new_case N14; W=$CASE_DIR/cache/ms-playwright/daemon/$H/${NONCE}Xerr; mv "$(OWN)" "$W"; d0=$(decoys); rc=$(run_frag "$F")
+expect_stop N14-wrong-suffix "$rc" "$d0" "$W=$(sha "$W")"; no_new_outputs || ko "N14 output 11"
+# N15: phep quet tra MOT muc hop le roi loi (gia lap thu muc khong liet ke duoc; may nay chay root nen khong dung chmod duoc)
+fake_find() { cat > "$CASE_DIR/bin/find" <<EOF
+#!/bin/bash
+printf '%s\0' "$(OWN)"; echo "find: '\$1/dddddddddddddddd': Permission denied" >&2; exit 1
+EOF
+  chmod +x "$CASE_DIR/bin/find"; }
+new_case N15; fake_find; d0=$(decoys); rc=$(run_frag "$F"); expect_stop N15-scan-error "$rc" "$d0" "$(OWN)=$(sha "$(OWN)")"; no_new_outputs || ko "N15 output 11"
+new_case N16; NL="$CASE_DIR/cache/ms-playwright/daemon/$H2/x
+$NONCE.err"; printf 'nl\n' > "$NL"; d0=$(decoys); rc=$(run_frag "$F")
+expect_stop N16-newline-name "$rc" "$d0" "$(OWN)=$(sha "$(OWN)")" "$NL=$(sha "$NL")"; no_new_outputs || ko "N16 output 11"
+new_case N17; mkdir -p "$CASE_DIR/home/rel"; cp -a "$CASE_DIR/cache" "$CASE_DIR/home/rel/"; R17=$CASE_DIR/home/rel/cache/ms-playwright/daemon/$H/$NONCE.err
+d0=$(decoys); rc=$(run_frag "$F" XDG_CACHE_HOME=rel/cache); [ -e "$R17" ] || ko "N17 tep trong cache tuong doi mat"; expect_stop N17-relative-cache "$rc" "$d0" "$(OWN)=$(sha "$(OWN)")"; no_new_outputs || ko "N17 output 11"
+# ---- kiem truoc open (chay duoi set -Eeuo pipefail nhu khoi Capture)
+new_case C1; rm "$(OWN)"; d0=$(decoys); rc=$(run_pre "$P"); { is_ok "$rc" && [ "$d0" = "$(decoys)" ]; } && ok "C1-pre-clean rc=$rc" || ko "C1-pre-clean rc=$rc"
+new_case C2; d0=$(decoys); rc=$(run_pre "$P"); expect_stop C2-pre-nonce-present "$rc" "$d0" "$(OWN)=$(sha "$(OWN)")"
+new_case C3; rm -r "$CASE_DIR/cache/ms-playwright"; rc=$(run_pre "$P"); is_ok "$rc" && ok "C3-pre-no-registry rc=$rc" || ko "C3-pre-no-registry rc=$rc"
+# C4: cache tuong doi, va sổ CLI (nhin tu work) da co .err cung nonce: phai dung truoc open
+new_case C4; mkdir -p "$CASE_DIR/home/rel"; mv "$CASE_DIR/cache" "$CASE_DIR/home/rel/"; rc=$(run_pre "$P" XDG_CACHE_HOME=rel/cache)
+is_stop "$rc" && ok "C4-pre-relative-cache rc=$rc" || ko "C4-pre-relative-cache rc=$rc"
+new_case C5; rm "$(OWN)"; rc=$(run_pre "$P" PWTEST_DAEMON_SESSION_DIR="$CASE_DIR/x"); is_stop "$rc" && ok "C5-pre-pwtest-hook rc=$rc" || ko "C5-pre-pwtest-hook rc=$rc"
+new_case C6; mv "$(OWN)" "$CASE_DIR/cache/ms-playwright/daemon/$NONCE.err"; rc=$(run_pre "$P")
+is_ok "$rc" && ok "C6-pre-depth1-ignored (chi do do sau 2, nhu CLI) rc=$rc" || ko "C6-pre-depth1-ignored rc=$rc"
 
-# Dot bien: moi ban vá yeu di phai lam DO it nhat mot ca (ca dich ghi ro).
-mut() { # name target_case sed_expr
-  local name=$1 target=$2 expr=$3 m="$SCRATCH/mut-$1.sh" rc
-  sed -E "$expr" "$SCRATCH/frag_cleanup.sh" > "$m"
-  cmp -s "$m" "$SCRATCH/frag_cleanup.sh" && { FAIL=$((FAIL+1)); echo "FAIL MUT $name: sed khong doi gi"; return; }
+# ---- dot bien: moi ban vá yeu di phai lam ca dich LOT (RESIDUE_OK)
+mut() { # name target file sed_expr
+  local name=$1 target=$2 src=$3 expr=$4 m="$SCRATCH/mut-$1.sh" rc
+  sed -E "$expr" "$src" > "$m"
+  cmp -s "$m" "$src" && { ko "MUT $name: sed khong doi gi"; return; }
+  new_case "M-$name"; local extra=() runner=run_frag
   case "$target" in
-    N2) new_case "M-$name"; printf 'dup\n' > "$CASE_DIR/cache/ms-playwright/daemon/$H2/$NONCE.err";;
-    N3) new_case "M-$name"; printf '{}\n' > "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.session";;
-    N5) new_case "M-$name"; rm "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err"; ln -s "$CASE_DIR/cache/ms-playwright/daemon/$H/$OTHER.err" "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err";;
-    N7) new_case "M-$name"; mv "$CASE_DIR/cache/ms-playwright/daemon" "$CASE_DIR/real-daemon"; ln -s "$CASE_DIR/real-daemon" "$CASE_DIR/cache/ms-playwright/daemon";;
-    N8) new_case "M-$name"; printf 'old\n' > "$CASE_DIR/run/11-daemon.err";;
-    N9) new_case "M-$name"; mkdir "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash"; mv "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.err" "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash/";;
-    N10) new_case "M-$name";;
+    N2) printf 'dup\n' > "$CASE_DIR/cache/ms-playwright/daemon/$H2/$NONCE.err";;
+    N3) printf '{}\n' > "$CASE_DIR/cache/ms-playwright/daemon/$H/$NONCE.session";;
+    N5) rm "$(OWN)"; ln -s "$CASE_DIR/cache/ms-playwright/daemon/$H/$OTHER.err" "$(OWN)";;
+    N7) mv "$CASE_DIR/cache/ms-playwright/daemon" "$CASE_DIR/real-daemon"; ln -s "$CASE_DIR/real-daemon" "$CASE_DIR/cache/ms-playwright/daemon";;
+    N8) printf 'old\n' > "$CASE_DIR/run/11-daemon.err";;
+    N9) mkdir "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash"; mv "$(OWN)" "$CASE_DIR/cache/ms-playwright/daemon/not-a-hash/";;
+    N10) extra=(PWTEST_DAEMON_SESSION_DIR=x);;
+    N14) mv "$(OWN)" "$CASE_DIR/cache/ms-playwright/daemon/$H/${NONCE}Xerr";;
+    N15) fake_find;;
+    N17) mkdir -p "$CASE_DIR/home/rel"; cp -a "$CASE_DIR/cache" "$CASE_DIR/home/rel/"; extra=(XDG_CACHE_HOME=rel/cache);;
+    C4) runner=run_pre; rm "$(OWN)"; mkdir -p "$CASE_DIR/home/rel"; mv "$CASE_DIR/cache" "$CASE_DIR/home/rel/"; extra=(XDG_CACHE_HOME=rel/cache);;
+    C5) runner=run_pre; rm "$(OWN)"; extra=(PWTEST_DAEMON_SESSION_DIR=x);;
   esac
-  if [ "$target" = N10 ]; then rc=$(run_frag "$m" PWTEST_DAEMON_SESSION_DIR=x); else rc=$(run_frag "$m"); fi
-  if [ "$rc" = 0 ] && grep -qx RESIDUE_OK "$CASE_DIR/out"; then PASS=$((PASS+1)); echo "PASS MUT $name -> $target lot (chot co rang)"
-  else FAIL=$((FAIL+1)); echo "FAIL MUT $name -> $target van chan (chot khong do duoc)"; fi; }
-mut exact-one N2 's/\[ "\$\{#hit\[@\]\}" -eq 1 \]/[ "${#hit[@]}" -ge 1 ]/'
-mut name-glob N3 's/-name "\*\$TL_PW_SESSION\*"/-name "$TL_PW_SESSION.err"/'
-mut no-symlink-check N5 's/\[ -f "\$f" \] && \[ ! -L "\$f" \]/[ -e "$f" ]/'
-mut daemon-symlink N7 's/\[ -d "\$D" \] && \[ ! -L "\$D" \]/[ -d "$D" ]/; s/find "\$D" /find -L "$D" /'
-mut stale-output N8 's/\[ ! -e "\$TL_PW_RUN\/\$ten" \] && \[ ! -L "\$TL_PW_RUN\/\$ten" \]/true/; s/cp -- /cp -f -- /'
-mut hash-shape N9 's/\[0-9a-f\]\{16\}/[^\/]+/'
-mut pwtest-hook N10 's/\[ -z "\$\{PWTEST_DAEMON_SESSION_DIR\+x\}" \]/true/'
+  rc=$($runner "$m" "${extra[@]}")
+  if is_ok "$rc"; then ok "MUT $name -> $target lot (chot co rang)"; else ko "MUT $name -> $target van chan (chot khong do duoc)"; fi; }
+mut exact-one N2 "$F" 's/\[ "\$\{#hit\[@\]\}" -eq 1 \]/[ "${#hit[@]}" -ge 1 ]/'
+mut name-glob N3 "$F" 's/-name "\*\$TL_PW_SESSION\*"/-name "$TL_PW_SESSION.err"/'
+mut no-symlink-check N5 "$F" 's/\[ -f "\$f" \] && \[ ! -L "\$f" \]/[ -e "$f" ]/'
+mut daemon-symlink N7 "$F" 's/\[ -d "\$D" \] && \[ ! -L "\$D" \]/[ -d "$D" ]/; s/find "\$D" /find -L "$D" /'
+mut stale-output N8 "$F" 's/\[ ! -e "\$TL_PW_RUN\/\$ten" \] && \[ ! -L "\$TL_PW_RUN\/\$ten" \]/true/'
+mut hash-shape N9 "$F" 's/\^\[0-9a-f\]\{16\}\$/^[^\/]+$/'
+mut pwtest-hook N10 "$F" 's/\[ -z "\$\{PWTEST_DAEMON_SESSION_DIR\+x\}" \]/true/'
+mut dot-wildcard N14 "$F" 's/\[ "\$\{f##\*\/\}" = "\$TL_PW_SESSION\.err" \]/[[ "${f##*\/}" =~ ^"$TL_PW_SESSION".err$ ]]/'
+mut no-scan-rc N15 "$F" 's/wait "\$!" \|\|/true ||/'
+mut relative-cache N17 "$F" 's/case "\$D" in \/\*\) ;; \*\) echo/case "$D" in *) ;; \/*) echo/'
+mut pre-relative C4 "$P" 's/case "\$D" in \/\*\) ;; \*\) false;; esac/true/'
+mut pre-hook C5 "$P" 's/\[ -z "\$\{PWTEST_DAEMON_SESSION_DIR\+x\}" \];/true;/'
 
 echo "TONG: $PASS dat / $((PASS+FAIL))"
 [ "$FAIL" -eq 0 ]

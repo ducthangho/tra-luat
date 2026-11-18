@@ -31,6 +31,7 @@ import contextlib
 import contextvars
 import functools
 import hashlib
+import heapq
 import hmac
 import html
 import importlib.util
@@ -4256,18 +4257,26 @@ def _1174_api_env():
     return env
 
 
-def _1174_process(argv, *, cwd, deadline, max_bytes, env=None, on_bytes=None):
+def _1174_process(argv, *, cwd, deadline, max_bytes, env=None, on_bytes=None, stdin=None):
     """Read bounded pipes and kill only this process group on timeout/overflow.
 
     on_bytes, when given, is called exactly once with the bytes actually read
-    from the pipes, whether the call returns or raises."""
+    from the pipes, whether the call returns or raises. stdin, when given, is
+    the complete standard input of the child (bytes), served from an unlinked
+    temporary file so that a child which never reads it cannot block us."""
     import selectors
     import signal
     size=0
     try:
-        _1174_require(time.time()<deadline and type(max_bytes) is int and max_bytes>0,"transport deadline/byte budget")
-        child=subprocess.Popen(argv,cwd=str(cwd),env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
-            close_fds=True,start_new_session=True)
+        _1174_require(time.time()<deadline and type(max_bytes) is int and max_bytes>0 and
+            (stdin is None or type(stdin) is bytes),"transport deadline/byte budget")
+        with contextlib.ExitStack() as held:
+            source=None
+            if stdin is not None:
+                source=held.enter_context(tempfile.TemporaryFile())
+                source.write(stdin);source.flush();source.seek(0)
+            child=subprocess.Popen(argv,cwd=str(cwd),env=env,stdin=source,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+                close_fds=True,start_new_session=True)
         streams={child.stdout:bytearray(),child.stderr:bytearray()}
         try:
             with selectors.DefaultSelector() as selector:
@@ -5600,9 +5609,14 @@ def _1174_fetch_objects(root, oids, deadline):
                   b"https://github.com/ducthangho/tra-luat", b"git@github.com:ducthangho/tra-luat.git"), "canonical endpoint")
     remaining = deadline - time.time()
     _1174_require(remaining > 0 and bool(oids) and all(type(oid) is str and SHA_RE.fullmatch(oid) for oid in oids), "collector object fetch input")
-    child = subprocess.run(["git", "--no-replace-objects", "-C", str(root), "fetch", "--quiet", "--no-tags", "--no-write-fetch-head",
-        "--no-recurse-submodules", "--no-auto-maintenance", "--stdin", endpoint.decode().strip()],
-        input="".join(oid + "\n" for oid in oids).encode("ascii"), env=_1174_git_env(), capture_output=True, timeout=remaining)
+    argv = ["git", "--no-replace-objects", "-C", str(root), "fetch", "--quiet", "--no-tags", "--no-write-fetch-head",
+        "--no-recurse-submodules", "--no-auto-maintenance", "--stdin", endpoint.decode().strip()]
+    wants = "".join(oid + "\n" for oid in oids).encode("ascii")
+    # The fetch runs in its own session/process group. A stalled transport
+    # helper (ssh, GIT_SSH_COMMAND, a credential or proxy helper) is a
+    # descendant of git: on the deadline, and on every other exit, the whole
+    # group of THIS invocation is killed and git is reaped, never only git.
+    child = _1174_process(argv, cwd=Path(root), deadline=deadline, max_bytes=1024 * 1024, env=_1174_git_env(), stdin=wants)
     return child.returncode
 
 
@@ -5805,10 +5819,13 @@ def _1174_collect(fetch, root, head, audit, repo_id, *, deadline=None):
                 commits.update(_1174_peel(root, oids[at:at + 4096], pass_end))
 
         peel(wanted + extra)
-        for oid in wanted + extra:
+        # ONE globally sorted, duplicate-free list for the single fetch: the
+        # two sorted, disjoint groups are merged lazily, so the deadline is
+        # still asked per OID and no unbounded sort runs between checks.
+        for oid in heapq.merge(wanted, extra):
             if not alive():
                 break
-            if commits.get(oid) is None:
+            if commits.get(oid) is None and oid not in missing[-1:]:
                 missing.append(oid)
         if missing and alive():
             try:

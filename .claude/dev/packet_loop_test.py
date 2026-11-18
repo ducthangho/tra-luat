@@ -12410,11 +12410,11 @@ WP1174_REQUIRED = {"wp1174_" + name for name in (
     "durability_ordinary_pair durability_fsync_readback durability_publish_noreplace durability_legacy_tombstone durability_cached_writer "
     "lifecycle_identity_advisory lifecycle_budget_replay lifecycle_human_valid lifecycle_human_negative lifecycle_first_publication lifecycle_guard_readonly lifecycle_scoped_lifecycle lifecycle_legacy_unchanged "
     "profile_native_linux profile_unsupported windows_claim_rejected status_closed gate_required_skip gate_evidence_schema").split()}
-# wp1370: the activity-collector cases are required IDs (22 new, 85 -> 107).
+# wp1370: the activity-collector cases are required IDs (23 new, 85 -> 108).
 WP1174_REQUIRED |= {"wp1174_activity_" + name for name in (
     "reduced_payload multipage_anchor older_page_fail same_timestamp_fail force_push_preimage deletion_preaudit tag_coverage "
     "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained matching_refs_unpaginated tip_non_commit "
-    "budget_bytes_cumulative budget_pages_cumulative budget_overflow_unreported deadline_processing").split()}
+    "budget_bytes_cumulative budget_pages_cumulative budget_overflow_unreported deadline_processing fetch_timeout_group").split()}
 WP1174_REQUIRED |= {"wp1174_" + kind + "_" + name for kind in ("writer", "race") for name in _WP1174_WRITERS}
 WP1174_BOTH = {"wp1174_" + name for name in ("admission_valid admission_wrong_scope witness_valid witness_keyset witness_int_bool witness_json_bytes "
     "witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending lifecycle_legacy_unchanged status_closed").split()}
@@ -12646,13 +12646,13 @@ def _lifecycle1174(kind):
                     d=c.tmp/("current-service" if service else "current-native");d.mkdir()
                     _current_policy1174(Ctx(c.script,d),service)
                 _static_writers1174(c,m)
-                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==107
+                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==108
                 applicable=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
                 required={n:None for n in applicable}
                 assert _required1174(required,applicable)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,applicable),"missing required ID accepted"
-                assert len(_WP1174_FULL_CASE_IDS)==107 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
+                assert len(_WP1174_FULL_CASE_IDS)==108 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -12769,7 +12769,7 @@ def _evidence_schema1174(c):
     required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
     record=dict(schema="wp1174_native_report.v1",actual_os="Linux",scope="wp1174_candidate",proof_eligible=True,source_pr=1275,repo="ducthangho/tra-luat",pr=1275,
         run_id="1",run_attempt="1",job="gate-packet-loop",checkout_sha=m,checkout_tree="c"*40,executed_sha=h,executed_tree="d"*40,expected_head=h,expected_tree="d"*40,
-        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=106,
+        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=107,
         outcomes={n:"passed" for n in required},profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},
         native_probe=dict(status="passed",checks={k:True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")}),
         native_seam=False,overall_status="passed",windows_oracle="not_run_platform; deferred_to_windows_focused")
@@ -14031,7 +14031,7 @@ def _r12_main_inventory1174(c):
     seen=[]
     def selected_driver():
         names=[name for name,_ in CASES if name in WP1174_REQUIRED]
-        assert len(names)==106 and "wp1174_windows_claim_rejected" not in names
+        assert len(names)==107 and "wp1174_windows_claim_rejected" not in names
         dict(CASES)["wp1174_lifecycle_scoped_lifecycle"](c)
         seen.append(tuple(names))
         return 0
@@ -14041,7 +14041,7 @@ def _r12_main_inventory1174(c):
             _legacy_main=selected_driver,_carrier1174=lambda *args:True,_snapshot1174=lambda *args:{}),contextlib.redirect_stdout(io.StringIO()):
         assert main()==0
     assert seen and CASES is full
-    assert len(_WP1174_FULL_CASE_IDS)==107 and len(set(_WP1174_FULL_CASE_IDS))==107
+    assert len(_WP1174_FULL_CASE_IDS)==108 and len(set(_WP1174_FULL_CASE_IDS))==108
 
 
 def _r12_accept_snapshot1174(c):
@@ -14476,20 +14476,124 @@ def _activity_case1370(kind):
             receipt,calls=remote();assert calls==[] and receipt["status"]==ok and receipt["earliest"]["id"]=="12" and receipt["dag_coverage"] is True,(calls,receipt)
             feed()
             # Missing feed OIDs and missing tip OIDs share the SAME single fetch.
-            T2=remote_tree("second rescue tree, remote only\n")
-            _g(source,"reset","-q","--hard");_g(source,"checkout","-q","-b","elsewhere",root)
-            (source/"elsewhere.txt").write_text("elsewhere\n");_g(source,"add","elsewhere.txt");_g(source,"commit","-qm","object absent from the collector repository")
-            X=_g(source,"rev-parse","HEAD");assert not local(T2) and not local(X) and T2!=T
-            feed(_activity1370(7,"branch_creation","refs/heads/elsewhere",Z,X,"2026-11-04T08:20:00Z"));tip((name,T,"tree"),("refs/tags/rescue/second",T2,"tree"))
-            refs=_g(w,"for-each-ref");receipt,calls=remote()
-            assert calls==[sorted([T2,X])],"feed and tip OIDs must share one fetch per pass: %r"%(calls,)
-            assert receipt["status"]==ok and local(T2) and local(X) and _g(w,"for-each-ref")==refs and receipt["dag_coverage"] is True,receipt
+            # The fetch receives ONE globally sorted, duplicate-free list. A
+            # commit SHA differs from run to run, so BOTH lexical orders are
+            # built on purpose: a tip OID that sorts before the missing feed
+            # OID and one that sorts after it (fixture content is retried until
+            # the wanted order holds).
+            _g(source,"reset","-q","--hard")
+            def remote_commit(branch):
+                _g(source,"reset","-q","--hard");_g(source,"checkout","-q","-b",branch,root)
+                (source/(branch+".txt")).write_text(branch+"\n");_g(source,"add",branch+".txt");_g(source,"commit","-qm","object absent from the collector repository: "+branch)
+                return _g(source,"rev-parse","HEAD")
+            def ordered_tree(label,holds):
+                for attempt in range(400):
+                    oid=remote_tree("%s rescue tree, remote only, attempt %d\n"%(label,attempt))
+                    if holds(oid) and oid!=T and not local(oid):return oid
+                raise AssertionError("fixture: no remote-only tree with the wanted lexical order ("+label+")")
+            X1,X2=remote_commit("elsewhere"),remote_commit("elsewhere2")
+            for label,X,holds in (("tip-before-feed",X1,lambda oid:oid<X1),("tip-after-feed",X2,lambda oid:oid>X2)):
+                T2=ordered_tree(label,holds)
+                assert not local(T2) and not local(X) and len({T,T2,X})==3 and (T2<X)==(label=="tip-before-feed"),"fixture: "+label
+                feed(_activity1370(7,"branch_creation","refs/heads/"+label,Z,X,"2026-11-04T08:20:00Z"));tip((name,T,"tree"),("refs/tags/rescue/"+label,T2,"tree"))
+                refs=_g(w,"for-each-ref");receipt,calls=remote();expected=sorted({T2,X})
+                assert len(calls)==1 and calls[0]==expected and len(set(calls[0]))==len(calls[0]),(
+                    "feed and tip OIDs must share one fetch per pass, as one globally sorted duplicate-free list (%s): %r, expected %r"%(label,calls,[expected]))
+                assert receipt["status"]==ok and local(T2) and local(X) and _g(w,"for-each-ref")==refs and receipt["dag_coverage"] is True,(label,receipt)
+            # The same tip OID named by several refs and by the feed is asked once.
+            X3=remote_commit("elsewhere3");T3=ordered_tree("tip-shared",lambda oid:oid<X3)
+            feed(_activity1370(7,"branch_creation","refs/heads/elsewhere3",Z,X3,"2026-11-04T08:20:00Z"),_activity1370(6,"branch_creation","refs/tags/rescue/shared",Z,T3,"2026-11-04T08:19:00Z"))
+            tip((name,T,"tree"),("refs/tags/rescue/shared",T3,"tree"),("refs/tags/rescue/shared-again",T3,"tree"),("refs/tags/rescue/shared-commit",X3,"commit"))
+            receipt,calls=remote();expected=sorted({T3,X3})
+            assert len(calls)==1 and calls[0]==expected and len(set(calls[0]))==len(calls[0]),"repeated OIDs must be fetched once, sorted: %r, expected %r"%(calls,[expected])
+            assert local(T3) and local(X3),receipt
             # Absent stays unmeasurable against the real remote too: a tip that
             # no repository has fails the one fetch and is never guessed.
             gone="e"*40;feed();tip((name,T,"tree"),("refs/tags/rescue/gone",gone,"tree"))
             receipt,calls=remote()
             assert calls==[[gone]] and not local(gone) and receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,(calls,receipt)
             tip((name,T,"tree"));receipt,calls=remote();assert calls==[] and receipt["status"]==ok,(calls,receipt)
+        elif kind=="fetch_timeout_group":
+            # Codex P2 (packet_loop.py, missing-object fetch): an SSH origin is a
+            # canonical endpoint. When its transport stalls, killing only git
+            # leaves the transport helper and its children running after the
+            # collector answered UNKNOWN. The fetch owns a process group; the
+            # whole group, and nothing outside it, dies on the deadline.
+            import shlex, signal
+            assert Path("/proc/self/stat").is_file(),"fixture needs /proc to observe process state"
+            ssh_origin=b"git@github.com:ducthangho/tra-luat.git\n";absent="e"*40
+            pidfile=c.tmp/"transport-helper.pids";helper=c.tmp/"transport-helper.sh";home=c.tmp/"empty-home";home.mkdir()
+            # Local stand-in for ssh: no network. It starts a sleeping descendant,
+            # records both PIDs atomically and then stalls without ever answering.
+            helper.write_text("#!/bin/sh\nsleep 300 &\necho \"$$ $!\" > %s && mv %s %s\nexec sleep 300\n"%(
+                shlex.quote(str(pidfile)+".part"),shlex.quote(str(pidfile)+".part"),shlex.quote(str(pidfile))))
+            helper.chmod(0o755)
+            def state(pid):
+                # None: no such process; "Z": dead, waiting for its reaper.
+                try:return Path("/proc/%d/stat"%pid).read_text().split(")",1)[1].split()[0]
+                except (FileNotFoundError,ProcessLookupError):return None
+            def gone(pid,wait=5.0):
+                stop=time.monotonic()+wait
+                while state(pid) not in (None,"Z"):
+                    if time.monotonic()>=stop:return False
+                    time.sleep(0.02)
+                return True
+            real=m._git_do;real_fetch=m._1174_fetch_objects;spawned=[]
+            def origin(root_,*argv,**kw):
+                return (0,ssh_origin) if argv==("remote","get-url","origin") else real(root_,*argv,**kw)
+            # Unrelated processes of the test itself: one in the test's own
+            # process group, one leading a session of its own.
+            bystanders=[subprocess.Popen([sys.executable,"-B","-c","import time;time.sleep(300)"],stdin=subprocess.DEVNULL,start_new_session=apart) for apart in (False,True)]
+            def stalled(run,label):
+                # Runs one stalled fetch; returns what `run` returned plus the
+                # (helper, descendant) PIDs, after the verdict on the processes.
+                if pidfile.exists():pidfile.unlink()
+                refs=_g(w,"for-each-ref");began=time.monotonic()
+                with patch.object(m,"_git_do",origin),patch.dict(os.environ,{"GIT_SSH_COMMAND":shlex.quote(str(helper)),"GIT_ALLOW_PROTOCOL":"ssh","HOME":str(home),"XDG_CONFIG_HOME":str(home)}):
+                    result=run()
+                spent=time.monotonic()-began
+                assert pidfile.is_file(),"fixture: the stalled transport helper was not reached (%s): %r"%(label,result)
+                pids=[int(x) for x in pidfile.read_text().split()];assert len(pids)==2 and len(set(pids))==2,pids
+                spawned.extend(pids);leader,descendant=pids
+                assert spent<12,"stalled fetch outlived its deadline (%s): %.1fs"%(label,spent)
+                assert gone(descendant),"timed-out fetch left the descendant of its transport helper running (%s): pid %d state %r"%(label,descendant,state(descendant))
+                assert gone(leader),"timed-out fetch left its transport helper running (%s): pid %d state %r"%(label,leader,state(leader))
+                assert all(p.poll() is None and state(p.pid) not in (None,"Z") for p in bystanders),"an unrelated process was signalled (%s)"%label
+                assert _g(w,"for-each-ref")==refs,"stalled fetch created or moved a ref (%s)"%label
+                return result
+            try:
+                # Direct: the deadline is reported as the transport deadline (or
+                # TimeoutExpired), never as a completed fetch.
+                def direct():
+                    try:return ("returned",real_fetch(w,[absent],time.time()+2.5))
+                    except subprocess.TimeoutExpired as ex:return ("timeout",str(ex))
+                    except ValueError as ex:return ("unknown",str(ex))
+                outcome=stalled(direct,"direct")
+                assert outcome[0]=="timeout" or (outcome[0]=="unknown" and outcome[1].startswith("WP1174 UNKNOWN:") and "transport deadline" in outcome[1]),outcome
+                assert m._git_do(w,"cat-file","-e",absent)[0]!=0
+                # Collector: the same stall on the single fetch of the pass is
+                # UNKNOWN, with exactly one fetch and no later pass.
+                tags=copy.deepcopy(pages["git/matching-refs/tags"])
+                pages["git/matching-refs/tags"]=tags+[dict(ref="refs/tags/rescue/stalled",object=dict(sha=absent,type="tree"))]
+                calls=[]
+                def counted(root_,oids,deadline):
+                    calls.append(list(oids));return real_fetch(root_,oids,deadline)
+                def collector():
+                    with patch.object(m,"_1174_fetch_objects",counted):return m._1174_collect(fetch,w,H,audit,123,deadline=time.time()+4)
+                receipt=stalled(collector,"collector")
+                assert calls==[[absent]],"exactly one fetch for the stalled pass: %r"%(calls,)
+                assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,receipt
+                _reject1174(m._1174_collector_receipt,dict(receipt,status=ok),H,audit,123,reason="collector success completeness")
+                pages["git/matching-refs/tags"]=tags
+                receipt=collect();assert receipt["status"]==ok and receipt["dag_coverage"] is True,receipt
+            finally:
+                # Fixture hygiene only, by exact PID: never part of the verdict.
+                for pid in spawned:
+                    if state(pid) not in (None,"Z"):
+                        try:os.kill(pid,signal.SIGKILL)
+                        except ProcessLookupError:pass
+                for p in bystanders:
+                    p.kill();p.wait(timeout=5)
         elif kind in ("budget_bytes_cumulative","budget_pages_cumulative"):
             # WP1370-F1: the 64 MiB and 1000-request ceilings belong to the whole
             # collection. A transport failure late in the first pass buys another
@@ -14746,7 +14850,7 @@ def _activity_case1370(kind):
 _WP1370_ACTIVITY_CASES = ("reduced_payload", "multipage_anchor", "older_page_fail", "same_timestamp_fail", "force_push_preimage",
     "deletion_preaudit", "tag_coverage", "receipt_residuals", "no_anchor", "object_unfetchable", "cursor_foreign", "pr_foreign_head",
     "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained", "matching_refs_unpaginated", "tip_non_commit",
-    "budget_bytes_cumulative", "budget_pages_cumulative", "budget_overflow_unreported", "deadline_processing")
+    "budget_bytes_cumulative", "budget_pages_cumulative", "budget_overflow_unreported", "deadline_processing", "fetch_timeout_group")
 assert {"wp1174_activity_" + name for name in _WP1370_ACTIVITY_CASES} <= WP1174_REQUIRED
 CASES += [("wp1174_activity_" + name, _activity_case1370(name)) for name in _WP1370_ACTIVITY_CASES]
 MUTANTS.update({
@@ -14789,6 +14893,13 @@ MUTANTS.update({
     # WP1370-F1 (review 4): never ask the deadline inside the processing loops
     "m1174_activity_deadline_unchecked": ('            if time.time() >= pass_end:\n                complete, expired = False, True\n',
         '            if False:\n                complete, expired = False, True\n', ["wp1174_activity_deadline_processing"]),
+    # fix 7: hand the single fetch the concatenated feed-then-tip order again
+    "m1174_activity_fetch_unsorted": ('        for oid in heapq.merge(wanted, extra):\n', '        for oid in wanted + extra:\n', ["wp1174_activity_tip_non_commit"]),
+    # fix 7: on the deadline kill only git again, not the process group of the fetch
+    "m1174_activity_fetch_timeout_orphan": (
+        '    child = _1174_process(argv, cwd=Path(root), deadline=deadline, max_bytes=1024 * 1024, env=_1174_git_env(), stdin=wants)\n',
+        '    child = subprocess.run(argv, input=wants, env=_1174_git_env(), capture_output=True, timeout=remaining)\n',
+        ["wp1174_activity_fetch_timeout_group"]),
 })
 
 
@@ -14829,8 +14940,8 @@ MUTANTS.update({
     "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
 })
 
-MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==107 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
-    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==107,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
+MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==108 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
+    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==108,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
 MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
@@ -15041,7 +15152,7 @@ def _carrier1174(outcomes, gate_rc=0):
 
 def main():
     global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
-    assert len(WP1174_REQUIRED) == 107 and len(WP1174_BOTH) == 12
+    assert len(WP1174_REQUIRED) == 108 and len(WP1174_BOTH) == 12
     actual_os = platform.system()
     if actual_os=="Linux":
         globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())

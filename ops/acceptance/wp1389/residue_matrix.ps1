@@ -1,7 +1,7 @@
 # Ma tran phan chung PowerShell cho buoc don du luong daemon cua playwright-browser SKILL.md (packet #1389).
 # Chay TREN BYTE CUA SKILL: trich NOI DUNG giua cap dong danh dau (khong gom dong danh dau), lan xuat hien THU HAI
 # (khoi PowerShell) cua moi cap: "du-luong-daemon-truoc-open" (Capture), "du-luong-daemon-dau-cleanup" (truoc close),
-# "du-luong-daemon" (sau 10-verify). SOURCE/frag bam tren byte goc (LF, khong BOM); ban chay cho PS 5.1 co BOM.
+# "du-luong-daemon" (sau 10-verify), "du-luong-daemon-go-truoc"/"-go-sau" (Go ban cai). SOURCE/frag bam tren byte goc (LF, khong BOM); ban chay cho PS 5.1 co BOM.
 # Dong `node -e` cua SKILL chay THAT bang node, tren registry.js GIA (FX_*); registry.js that do o luot native.
 # Moi ca chay trong TIEN TRINH CON cua chinh shell dang do ($Shell), CWD = <ca>\home. Khong goi CLI/mang/trinh duyet.
 # Dung: <shell> -NoProfile -File residue_matrix.ps1 -Skill <SKILL.md> -Scratch <thu muc rong> -Shell <exe> -Node <node.exe>
@@ -26,6 +26,8 @@ function Extract([string]$Name) {
   $p = $pairs[1]; if ($p[1] - $p[0] -lt 2) { throw "doan rong: $Name" }
   (($lines[($p[0] + 1)..($p[1] - 1)]) -join "`n") + "`n" }
 $pre = Extract 'du-luong-daemon-truoc-open'; $dau = Extract 'du-luong-daemon-dau-cleanup'; $frag = Extract 'du-luong-daemon'
+$goTruoc = Extract 'du-luong-daemon-go-truoc'; $goSau = Extract 'du-luong-daemon-go-sau'
+if (-not ($goTruoc.Contains('$goDh = $so[1]') -and $goSau.Contains('[IO.Directory]::Delete($goDh, $false)'))) { throw 'doan Go khong phai ban PowerShell' }
 if (-not ($pre.Contains('$env:TL_PW_NODE') -and $dau.Contains('$hashDir = $so[1]') -and $frag.Contains('[IO.Directory]::GetDirectories('))) { throw 'doan trich khong phai ban PowerShell' }
 function ShaText([string]$t) { $h = [Security.Cryptography.SHA256]::Create(); (($h.ComputeHash($utf8.GetBytes($t)) | ForEach-Object { $_.ToString('x2') }) -join '') }
 function Sha([string]$p) { (Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash.ToLower() }
@@ -34,7 +36,10 @@ $FileClean = "$Scratch\frag_dau_cleanup.ps1"; $FileDau = "$Scratch\frag_dau.ps1"
 [IO.File]::WriteAllText($FilePre, $pre, $bom); [IO.File]::WriteAllText($FileDau, $dau, $bom); [IO.File]::WriteAllText($FileClean, $dau + $frag, $bom)
 # chi doan don (dat san tu FX_*): do rieng chot cua doan don ma doan dau-cleanup cung kiem
 $FileRes = "$Scratch\frag_res_only.ps1"; [IO.File]::WriteAllText($FileRes, '$daemonDir = $env:FX_BASE; $hashDir = $env:FX_DIR' + "`n" + $frag, $bom)
-"SOURCE $(Sha $Skill) pre_frag $(ShaText $pre) dau_frag $(ShaText $dau) cleanup_frag $(ShaText $frag) shell $Shell node $(& $Node --version)"
+# Go: (1) + xoa install + (2), in GODH de ca doc trang thai
+$FileGo = "$Scratch\frag_go.ps1"
+[IO.File]::WriteAllText($FileGo, $goTruoc + "Remove-Item -LiteralPath `$env:TL_PW_INSTALL -Recurse -Force`n" + $goSau + "`"GODH=[`$goDh]`"`n", $bom)
+"SOURCE $(Sha $Skill) pre_frag $(ShaText $pre) dau_frag $(ShaText $dau) cleanup_frag $(ShaText $frag) go_frag $(ShaText ($goTruoc + $goSau)) shell $Shell node $(& $Node --version)"
 $runner = @'
 param([string]$Body)
 $ErrorActionPreference = 'Stop'
@@ -117,6 +122,9 @@ function Run-Locked([string]$Body, [int]$Seconds, [string]$Share) {
 $me = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 function Deny-List([string]$Dir) { & icacls $Dir /deny "*${me}:(RD)" | Out-Null; $LASTEXITCODE -eq 0 }
 function Undeny([string]$Dir) { & icacls $Dir /remove:d "*$me" | Out-Null }
+function Deny-Write([string]$Dir) { & icacls $Dir /deny "*${me}:(WD,AD)" | Out-Null; $LASTEXITCODE -eq 0 }
+function Anc-Link { Move-Item -LiteralPath "$script:C\cache\ms-playwright" -Destination "$script:C\real-mp"
+  Try-Link Junction "$script:C\cache\ms-playwright" "$script:C\real-mp" }
 
 # ===== Cleanup (dau-cleanup + don du luong) =====
 # Bien vong KHONG duoc ten $c: PowerShell khong phan biet hoa thuong nen $c chinh la $script:C ma New-Case ghi de.
@@ -167,11 +175,22 @@ $r = Run-Frag $FileClean; Expect-Stop N18-err-in-other-install-dir $r $d0 $s0
 New-Case N19; Move-Item -LiteralPath "$(Dm)\$H" -Destination "$script:C\real-hash"
 if (Try-Link Junction "$(Dm)\$H" "$script:C\real-hash") { $d0 = Decoys; $s0 = Snap @("$script:C\real-hash\$NONCE.err")
   $r = Run-Frag $FileClean; Expect-Stop N19-own-hashdir-junction $r $d0 $s0 } else { $script:FAIL++; 'FAIL N19: khong tao duoc junction' }
+New-Case N20; if (Anc-Link) { $d0 = Decoys; $s0 = Snap @("$script:C\real-mp\daemon\$H\$NONCE.err"); $r = Run-Frag $FileClean
+  Expect-Stop N20-ancestor-junction $r $d0 $s0 } else { $script:FAIL++; 'FAIL N20: junction' }
+New-Case N20R; if (Anc-Link) { $d0 = Decoys; $s0 = Snap @("$script:C\real-mp\daemon\$H\$NONCE.err"); $r = Run-Frag $FileRes
+  Expect-Stop N20R-ancestor-junction-residue-only $r $d0 $s0 } else { $script:FAIL++; 'FAIL N20R: junction' }
+# W1: khong ghi duoc 11-daemon-path.txt (run tu choi ghi) => khong chep, khong xoa (ngoai le .NET, khong in CLEANUP/RESIDUE OK)
+New-Case W1; $d0 = Decoys; $s0 = Snap @((Own))
+if (Deny-Write "$script:C\run") { $r = Run-Frag $FileClean; Undeny "$script:C\run"
+  Rec ((-not (IsOk $r)) -and $r.rc -ne 0 -and ($d0 -ceq (Decoys)) -and ($s0 -ceq (Snap @((Own)))) -and (NoNewOutputs)) W1-path-write-denied $r }
+else { $script:FAIL++; 'FAIL W1: icacls /deny ghi khong dat' }
 # L1/L2: tien trinh khac giu .err khong cho DOC (FileShare.None). L3: cho doc nhung khong cho XOA (FileShare.Read).
 New-Case L1; $d0 = Decoys; $os = Sha (Own); $r = Run-Locked $FileClean 2 'None'; Expect-Ok L1-read-locked-2s $r $d0 $os
 New-Case L2; $d0 = Decoys; $s0 = Snap @((Own)); $r = Run-Locked $FileClean 12 'None'; Expect-Stop L2-read-locked-12s $r $d0 $s0 -AllowOutputs
 Rec ([IO.File]::ReadAllText("$script:C\run\11-daemon-path.txt") -ceq "$(Own)`n") 'L2-path-recorded-before-copy (B4)' $r
 New-Case L3; $d0 = Decoys; $os = Sha (Own); $r = Run-Locked $FileClean 2 'Read'; Expect-Ok L3-delete-locked-2s $r $d0 $os
+New-Case L4; $d0 = Decoys; $s0 = Snap @((Own)); $os = Sha (Own); $r = Run-Locked $FileClean 12 'Read'; Expect-Stop L4-delete-locked-12s $r $d0 $s0 -AllowOutputs
+Rec ((Test-Path -LiteralPath "$script:C\run\11-daemon.err") -and ((Sha "$script:C\run\11-daemon.err") -eq $os)) 'L4-copy-kept-original-kept' $r
 # dau-cleanup: dung TRUOC close
 New-Case D1 -NoRecord; $d0 = Decoys; $s0 = Snap @((Own)); $r = Run-Frag $FileDau; Expect-Stop D1-no-capture-record $r $d0 $s0
 New-Case D2; $d0 = Decoys; $s0 = Snap @((Own)); $r = Run-Frag $FileDau @{ FX_DIR = "$(Dm)\$H2" }; Expect-Stop D2-registry-changed $r $d0 $s0
@@ -186,6 +205,12 @@ if (Try-Link Junction "$(Dm)\$H" "$script:C\real-hash") { $d0 = Decoys; $s0 = Sn
 New-Case D7; [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H`n$OTHER`n", $utf8); $d0 = Decoys; $s0 = Snap @((Own))
 $r = Run-Frag $FileDau; Expect-Stop D7-record-of-other-nonce $r $d0 $s0
 New-Case D8; $d0 = Decoys; $s0 = Snap @((Own)); $r = Run-Frag $FileDau @{ PWTEST_DAEMON_SESSION_DIR = 'x' }; Expect-Stop D8-pwtest-hook-at-cleanup-start $r $d0 $s0
+New-Case D9; if (Anc-Link) { $d0 = Decoys; $s0 = Snap @("$script:C\real-mp\daemon\$H\$NONCE.err"); $r = Run-Frag $FileDau
+  Expect-Stop D9-ancestor-junction-at-cleanup-start $r $d0 $s0 } else { $script:FAIL++; 'FAIL D9: junction' }
+# D10: 00-sophien.txt la symlink toi ban ghi hop le cua run khac => dung truoc close
+New-Case D10; $recB = "$script:C\runB-00-sophien.txt"; Move-Item -LiteralPath (Rec0) -Destination $recB
+if (Try-Link SymbolicLink (Rec0) $recB) { $d0 = Decoys; $s0 = Snap @((Own)); $r = Run-Frag $FileDau; Expect-Stop D10-record-symlink $r $d0 $s0 }
+else { $script:SKIP++; 'SKIP D10-record-symlink: khong tao duoc symlink tep - KHONG DO DUOC, khong tinh dat' }
 # U1: so phien co dau cach va ky tu Unicode (o + dau nang); kenh base64 UTF-8 phai giu dung duong dan tren ca 5.1 va 7
 $uni = "cache $([char]0x1ED9)$([char]0x00EA)"
 function New-UniCase([string]$Name) { New-Case $Name -NoRecord; $u = "$script:C\$uni\ms-playwright\daemon"
@@ -213,10 +238,30 @@ if (Try-Link Junction "$(Dm)\$H" "$script:C\real-hash") { $r = Run-Frag $FilePre
 New-Case C11 -NoRecord; Remove-Item -LiteralPath (Own); $r = Run-Frag $FilePre @{ FX_DIR = "$(Dm)\not-a-hash" }; Pre-Stop C11-pre-bad-hash-shape $r
 New-Case C12 -NoRecord; Remove-Item -LiteralPath (Own); $r = Run-Frag $FilePre @{ FX_DIR = "$script:C\elsewhere\$H" }; Pre-Stop C12-pre-hash-not-under-base $r
 New-Case C13 -NoRecord; Remove-Item -LiteralPath (Own); $r = Run-Frag $FilePre @{ TL_PW_NODE = "$script:C\no-such-node.exe" }; Pre-Stop C13-pre-node-missing $r
+New-Case C14 -NoRecord; Remove-Item -LiteralPath (Own); if (Anc-Link) { $r = Run-Frag $FilePre; Pre-Stop C14-pre-ancestor-junction $r } else { $script:FAIL++; 'FAIL C14: junction' }
+New-Case C15 -NoRecord; Remove-Item -LiteralPath (Own); [IO.File]::WriteAllText((Rec0), "old`n", $utf8); $r = Run-Frag $FilePre
+Rec ((IsStop $r) -and $r.text.Contains($KHONG) -and ([IO.File]::ReadAllText((Rec0)) -ceq "old`n")) C15-pre-record-exists-not-overwritten $r
+
+# ===== Go ban cai =====
+function New-GoCase([string]$Name) { New-Case $Name; Get-ChildItem -Force -LiteralPath "$(Dm)\$H" | Remove-Item -Force
+  [IO.File]::WriteAllText("$script:C\run\11-daemon-path.txt", "$(Own)`n", $utf8) }
+function TreeSnap { ((@(Get-ChildItem -Force -Recurse -LiteralPath "$script:C\cache" -ErrorAction SilentlyContinue | Sort-Object FullName |
+    ForEach-Object { "$($_.FullName)|$($_.PSIsContainer)|$(if (-not $_.PSIsContainer) { $_.Length })" })) -join "`n") }
+function Go-Removed($R) { (IsOk $R) -and -not (Test-Path -LiteralPath "$(Dm)\$H") -and (Test-Path -LiteralPath "$(Dm)\$H2") -and -not (Test-Path -LiteralPath "$script:C\install") }
+function Expect-GoKept([string]$Name, $R, [string]$S0) {
+  Rec ((IsOk $R) -and $S0 -ceq (TreeSnap) -and (Test-Path -LiteralPath "$(Dm)\$H") -and -not (Test-Path -LiteralPath "$script:C\install")) $Name $R }
+New-GoCase G1; $r = Run-Frag $FileGo; Rec (Go-Removed $r) G1-uninstall-empty-hashdir-removed $r
+New-GoCase G2; Remove-Item -LiteralPath "$script:C\run\11-daemon-path.txt"; $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept G2-uninstall-no-receipt-11 $r $s0
+New-GoCase G3; [IO.File]::WriteAllText("$script:C\run\11-daemon-path.txt", "$(Dm)\$H2\$NONCE.err`n", $utf8); $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept G3-uninstall-11-wrong-parent $r $s0
+New-GoCase G4; [IO.File]::WriteAllText("$(Dm)\$H\$OTHER.err", "x`n"); $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept G4-uninstall-hashdir-not-empty $r $s0
+New-GoCase G5; if (Anc-Link) { $s0 = TreeSnap; $r = Run-Frag $FileGo
+  Rec ((IsOk $r) -and $s0 -ceq (TreeSnap) -and (Test-Path -LiteralPath "$script:C\real-mp\daemon\$H")) G5-uninstall-ancestor-junction $r } else { $script:FAIL++; 'FAIL G5: junction' }
+New-GoCase G6; [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H2`n$NONCE`n", $utf8); $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept G6-uninstall-record-differs $r $s0
+New-GoCase G7; $s0 = TreeSnap; $r = Run-Frag $FileGo @{ FX_DIR = "$(Dm)\$H2" }; Expect-GoKept G7-uninstall-cli-differs $r $s0
 
 # ===== TOAN LUONG: chinh khoi PowerShell Capture (khoi 3) + Cleanup (khoi 5) cua SKILL, CLI GIA co nhat ky va trang thai =====
 $psBlocks = @([regex]::Matches(($lines -join "`n"), '(?ms)^```powershell\n(.*?)^```\n') | ForEach-Object { $_.Groups[1].Value })
-if ($psBlocks.Count -ne 5) { throw "can 5 khoi powershell, thay $($psBlocks.Count)" }
+if ($psBlocks.Count -ne 6) { throw "can 6 khoi powershell, thay $($psBlocks.Count)" }
 $b1 = $psBlocks[0]; $fi = $b1.IndexOf('function Need'); $fe = $b1.IndexOf("`n& { `$ErrorActionPreference = 'Stop'")
 if ($fi -lt 0 -or $fe -lt $fi) { throw 'khong tach duoc ham khoi Setup' }
 $funcs = $b1.Substring($fi, $fe - $fi + 1)
@@ -231,10 +276,14 @@ const cmd = a.find(x => !x.startsWith('--')); const root = process.env.TL_PW_ROO
 fs.appendFileSync(path.join(root, 'fakecli.log'), cmd + ' ' + ses + '\n');
 const st = path.join(root, 'fakestate'); fs.mkdirSync(st, { recursive: true }); const sf = path.join(st, ses);
 const state = fs.existsSync(sf) ? fs.readFileSync(sf, 'utf8') : 'none'; const out = o => process.stdout.write(JSON.stringify(o, null, 2) + '\n');
+const desc = path.join(dir, ses + '.session'), of = process.env.FX_OPENFAIL;
+if (cmd === 'open' && of === 'before') { process.stderr.write('open failed\n'); process.exit(1); }
 if (cmd === 'open') { fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(path.join(dir, ses + '.err'), '');
-  fs.writeFileSync(path.join(dir, ses + '.session'), '{}'); fs.writeFileSync(sf, 'open'); out({}); }
-else if (cmd === 'close') { if (state === 'open') { fs.writeFileSync(sf, 'closed'); out({ session: ses, status: 'closed' }); } else out({ session: ses, status: 'not-open' }); }
-else if (cmd === 'delete-data') { try { fs.unlinkSync(path.join(dir, ses + '.session')); } catch (e) {} out({ session: ses, deleted: false }); }
+  if (of === 'after') { process.stderr.write('daemon failed\n'); process.exit(1); }
+  fs.writeFileSync(desc, '{}'); fs.writeFileSync(sf, 'open'); out({}); }
+else if (cmd === 'close') { if (state === 'open') { fs.writeFileSync(sf, 'closed'); if (!process.env.FX_KEEPSES) fs.unlinkSync(desc);
+  out({ session: ses, status: 'closed' }); } else out({ session: ses, status: 'not-open' }); }
+else if (cmd === 'delete-data') { const existed = fs.existsSync(desc); if (existed) fs.unlinkSync(desc); out({ session: ses, deleted: existed }); }
 else if (cmd === 'tab-list' && state !== 'open') { out({ isError: true, error: "The browser '" + ses + "' is not open, please run open first" }); process.exit(1); }
 else if (cmd === 'tab-list') out({ result: '- 0: (current) [Example Domain](https://example.com/)' });
 else if (cmd === 'requests') out({ result: '1. [GET] https://example.com/ => [200] ' });
@@ -265,17 +314,38 @@ function Flow([string]$Name, [string]$Cleanup, [string]$Between, [hashtable]$Ext
   [IO.File]::WriteAllText("$script:C\out", $o.Result + $e, $utf8)
   $log = if (Test-Path -LiteralPath "$script:C\fakecli.log") { @(Get-Content -LiteralPath "$script:C\fakecli.log" | ForEach-Object { ($_ -split ' ')[0] }) -join ' ' } else { '' }
   $n = if (Test-Path -LiteralPath "$script:C\nonce.txt") { [IO.File]::ReadAllText("$script:C\nonce.txt") } else { '' }
-  @{ rc = $p.ExitCode; ok = (($o.Result -split "`r?`n") -ccontains 'CLEANUP OK'); text = ($o.Result + $e); log = $log; nonce = $n } }
+  $full = if (Test-Path -LiteralPath "$script:C\fakecli.log") { @(Get-Content -LiteralPath "$script:C\fakecli.log") } else { @() }
+  @{ rc = $p.ExitCode; ok = (($o.Result -split "`r?`n") -ccontains 'CLEANUP OK'); text = ($o.Result + $e); log = $log; nonce = $n; full = $full } }
 $betweenOther = "& `$env:TL_PW_NODE `$env:TL_PW_CLI --session=$OTHERN open about:blank --json | Out-Null; `$env:TL_PW_SESSION = '$OTHERN'"
-$r = Flow E1 $psBlocks[4] '' $null
-$recLines = @(Get-ChildItem -LiteralPath "$script:C\runs" -Directory | ForEach-Object { Get-Content -LiteralPath "$($_.FullName)\00-sophien.txt" -ErrorAction SilentlyContinue })
-Rec ($r.ok -and $r.log -ceq 'open goto tab-list requests close delete-data tab-list' -and -not (Test-Path -LiteralPath "$(Dm)\$H\$($r.nonce).err") -and
-  $recLines.Count -eq 3 -and $recLines[2] -ceq $r.nonce) "E1-full-flow (log=[$($r.log)])" $r
-$r = Flow E2 $psBlocks[4] $betweenOther $null
-Rec (-not $r.ok -and $r.log -notmatch '\bclose\b' -and (Test-Path -LiteralPath "$(Dm)\$H\$OTHERN.err") -and (Test-Path -LiteralPath "$(Dm)\$H\$OTHERN.session")) "E2-run-A-nonce-B (log=[$($r.log)])" $r
+function E-Ok($R, [string]$Deleted) { # SHA256SUMS.csv khop hash that cua 4 tep; 11-path dung; deleted mong doi
+  if (-not ($R.ok -and $R.log -ceq 'open goto tab-list requests close delete-data tab-list')) { return $false }
+  $run = @(Get-ChildItem -LiteralPath "$script:C\runs" -Directory)[0].FullName
+  $rows = @(Import-Csv -LiteralPath "$run\SHA256SUMS.csv")
+  foreach ($t in '00-sophien.txt', '11-daemon.err', '11-daemon-path.txt', '09-delete-data.json') {
+    $row = @($rows | Where-Object { $_.FullName -ceq "$run\$t" }); if ($row.Count -ne 1 -or $row[0].SHA256 -ne (Sha "$run\$t")) { return $false } }
+  $rec = [IO.File]::ReadAllText("$run\00-sophien.txt") -split "`n"
+  (-not (Test-Path -LiteralPath "$(Dm)\$H\$($R.nonce).err")) -and $rec[2] -ceq $R.nonce -and
+    [IO.File]::ReadAllText("$run\11-daemon-path.txt") -ceq "$(Dm)\$H\$($R.nonce).err`n" -and (Get-Item -LiteralPath "$run\11-daemon.err").Length -eq 0 -and
+    ([IO.File]::ReadAllText("$run\09-delete-data.json")).Contains("`"deleted`": $Deleted") -and
+    [IO.File]::ReadAllText("$(Dm)\$H2\tl-pw-111111111111.err") -ceq "legacy`n" }
+function No-CleanupOutputs { -not @(Get-ChildItem -LiteralPath "$script:C\runs" -Recurse -File | Where-Object { $_.Name -match '^(0[89]|1[01])-' }).Count }
+function Stop-BeforeClose($R, [string]$Dir) {
+  (-not $R.ok) -and $R.log -ceq 'open goto tab-list requests' -and (Get-Item -LiteralPath "$Dir\$($R.nonce).err").Length -eq 0 -and
+    [IO.File]::ReadAllText("$Dir\$($R.nonce).session") -ceq '{}' -and (No-CleanupOutputs) }
+function E2-Ok($R) { (-not $R.ok) -and $R.log -ceq 'open goto tab-list requests open' -and $R.full[-1] -ceq "open $OTHERN" -and
+  (Get-Item -LiteralPath "$(Dm)\$H\$OTHERN.err").Length -eq 0 -and [IO.File]::ReadAllText("$(Dm)\$H\$OTHERN.session") -ceq '{}' -and
+  [IO.File]::ReadAllText("$script:C\fakestate\$OTHERN") -ceq 'open' -and (No-CleanupOutputs) }
+$r = Flow E1 $psBlocks[4] '' $null; Rec (E-Ok $r 'false') "E1-full-flow (log=[$($r.log)], SHA256SUMS khop 4 tep, deleted false)" $r
+$r = Flow E6 $psBlocks[4] '' @{ FX_KEEPSES = '1' }; Rec (E-Ok $r 'true') "E6-full-flow-deleted-true (log=[$($r.log)])" $r
+$r = Flow E2 $psBlocks[4] $betweenOther $null; Rec (E2-Ok $r) "E2-run-A-nonce-B (log=[$($r.log)])" $r
 $between3 = "Move-Item -LiteralPath `$env:FX_DIR -Destination ""`$env:TL_PW_ROOT\real-hash""; New-Item -ItemType Junction -Path `$env:FX_DIR -Target ""`$env:TL_PW_ROOT\real-hash"" | Out-Null"
-$r = Flow E3 $psBlocks[4] $between3 $null
-Rec (-not $r.ok -and $r.log -notmatch '\bclose\b' -and (Test-Path -LiteralPath "$script:C\real-hash\$($r.nonce).err")) "E3-hash-junction-between-steps (log=[$($r.log)])" $r
+$r = Flow E3 $psBlocks[4] $between3 $null; Rec (Stop-BeforeClose $r "$script:C\real-hash") "E3-hash-junction-between-steps (log=[$($r.log)])" $r
+$between5 = "Move-Item -LiteralPath ""`$env:TL_PW_ROOT\cache\ms-playwright"" -Destination ""`$env:TL_PW_ROOT\real-mp""; New-Item -ItemType Junction -Path ""`$env:TL_PW_ROOT\cache\ms-playwright"" -Target ""`$env:TL_PW_ROOT\real-mp"" | Out-Null"
+$r = Flow E5 $psBlocks[4] $between5 $null; Rec (Stop-BeforeClose $r "$script:C\real-mp\daemon\$H") "E5-ancestor-junction-between-steps (log=[$($r.log)])" $r
+$r = Flow E7 $psBlocks[4] '' @{ FX_OPENFAIL = 'before' }
+Rec ((-not $r.ok) -and $r.log -ceq 'open' -and $r.text.Contains('STOP') -and [IO.File]::ReadAllText("$(Dm)\$H2\tl-pw-111111111111.err") -ceq "legacy`n") "E7-open-fails-before-daemon (log=[$($r.log)])" $r
+$r = Flow E8 $psBlocks[4] '' @{ FX_OPENFAIL = 'after' }
+Rec ((-not $r.ok) -and $r.log -ceq 'open close' -and (Test-Path -LiteralPath "$(Dm)\$H\$($r.nonce).err")) "E8-open-fails-after-err (log=[$($r.log)])" $r
 $r = Flow E4 $psBlocks[4] '' @{ FX_WS = 'C:\somewhere' }
 Rec (-not $r.ok -and $r.log -eq '' -and $r.text.Contains($KHONG) -and -not (Get-ChildItem -LiteralPath "$script:C\runs" -Recurse -Filter 00-sophien.txt)) "E4-preflight-stop (log=[$($r.log)])" $r
 # Dot bien toan luong: dua doan dau-cleanup ra SAU 10-verify => E2 phai goi close
@@ -283,7 +353,21 @@ $b5 = $psBlocks[4] -split "`n"; $di = [array]::IndexOf($b5, '  # --- du-luong-da
 $rest = @($b5[0..($di - 1)] + $b5[($dj + 1)..($b5.Count - 1)]); $ri = [array]::IndexOf($rest, '  # --- du-luong-daemon: bat dau')
 $late = (@($rest[0..($ri - 1)] + $b5[$di..$dj] + $rest[$ri..($rest.Count - 1)])) -join "`n"
 $r = Flow M-E2 $late $betweenOther $null
-if ($r.log -match '\bclose\b') { $script:PASS++; "PASS MUT dau-after-close -> E2 goi close (chot truoc close co rang)" } else { $script:FAIL++; "FAIL MUT dau-after-close -> E2 van khong goi close (log=[$($r.log)])" }
+if ($r.log -match '\bclose\b' -and -not (E2-Ok $r)) { $script:PASS++; "PASS MUT dau-after-close -> E2 goi close (chot truoc close co rang)" } else { $script:FAIL++; "FAIL MUT dau-after-close -> E2 van khong goi close (log=[$($r.log)])" }
+# Dot bien: chi chap nhan deleted false => E6 phai do
+$ti = -1; for ($k = 0; $k -lt $b5.Count; $k++) { if ($b5[$k].Contains('`"deleted`": true')) { $ti = $k } }
+if ($ti -gt 0 -and $b5[$ti - 1].EndsWith('`n}`n",')) {
+  $onlyFalse = @($b5[0..($ti - 2)] + ($b5[$ti - 1].Substring(0, $b5[$ti - 1].Length - 1) + ')') + $b5[($ti + 1)..($b5.Count - 1)]) -join "`n"
+  $r = Flow M-E6 $onlyFalse '' @{ FX_KEEPSES = '1' }
+  if (-not (E-Ok $r 'true')) { $script:PASS++; 'PASS MUT only-false -> E6 do (nhanh deleted true co rang)' } else { $script:FAIL++; 'FAIL MUT only-false -> E6 van dat' }
+} else { $script:FAIL++; 'FAIL MUT only-false: khong tim thay dong deleted true' }
+# Dot bien: chuyen buoc don ra SAU khi bam SHA256SUMS.csv => E1 phai do
+$ri2 = [array]::IndexOf($b5, '  # --- du-luong-daemon: bat dau'); $rj2 = [array]::IndexOf($b5, '  # --- du-luong-daemon: het'); $ci = [array]::IndexOf($b5, "  'CLEANUP OK' }")
+if ($ri2 -gt 0 -and $rj2 -gt $ri2 -and $ci -gt $rj2) {
+  $early = @($b5[0..($ri2 - 1)] + $b5[($rj2 + 1)..($ci - 1)] + $b5[$ri2..$rj2] + $b5[$ci..($b5.Count - 1)]) -join "`n"
+  $r = Flow M-E1 $early '' $null
+  if (-not (E-Ok $r 'false')) { $script:PASS++; 'PASS MUT hash-early -> E1 do (thu tu don truoc bam co rang)' } else { $script:FAIL++; 'FAIL MUT hash-early -> E1 van dat' }
+} else { $script:FAIL++; 'FAIL MUT hash-early: khong tim thay moc' }
 
 # ===== dot bien =====
 function Mut([string]$Name, [string]$Target, [string]$Src, [string]$Old, [string]$New) {
@@ -307,6 +391,11 @@ function Mut([string]$Name, [string]$Target, [string]$Src, [string]$Old, [string
             [IO.File]::WriteAllText((Rec0), "rel\cache\ms-playwright\daemon`nrel\cache\ms-playwright\daemon\$H`n$NONCE`n", $utf8)
             $extra = @{ FX_BASE = 'rel\cache\ms-playwright\daemon'; FX_DIR = "rel\cache\ms-playwright\daemon\$H" } }
     'N18' { Move-Item -LiteralPath (Own) -Destination "$(Dm)\$H2\" }
+    'N20' { if (-not (Anc-Link)) { $script:FAIL++; "FAIL MUT ${Name}: junction"; return } }
+    'D9' { if (-not (Anc-Link)) { $script:FAIL++; "FAIL MUT ${Name}: junction"; return } }
+    'D10' { $recB = "$script:C\runB-00-sophien.txt"; Move-Item -LiteralPath (Rec0) -Destination $recB
+            if (-not (Try-Link SymbolicLink (Rec0) $recB)) { $script:SKIP++; "SKIP MUT ${Name}: khong tao duoc symlink tep - KHONG DO DUOC"; return } }
+    'L4' { $expectStop = $false }
     'D2' { $extra = @{ FX_DIR = "$(Dm)\$H2" } }
     'D5' { Move-Item -LiteralPath (Dm) -Destination "$script:C\real-daemon"
            if (-not (Try-Link Junction (Dm) "$script:C\real-daemon")) { $script:FAIL++; "FAIL MUT ${Name}: junction"; return } }
@@ -321,10 +410,12 @@ function Mut([string]$Name, [string]$Target, [string]$Src, [string]$Old, [string
     'C9' { Move-Item -LiteralPath (Dm) -Destination "$script:C\real-daemon"
            if (-not (Try-Link Junction (Dm) "$script:C\real-daemon")) { $script:FAIL++; "FAIL MUT ${Name}: junction"; return } }
     'C11' { $extra = @{ FX_DIR = "$(Dm)\not-a-hash" } }
+    'C14' { if (-not (Anc-Link)) { $script:FAIL++; "FAIL MUT ${Name}: junction"; return } }
+    'C15' { [IO.File]::WriteAllText((Rec0), "old`n", $utf8) }
     'L1' { $expectStop = $true }
     'L3' { $expectStop = $true }
   }
-  if ($Target -eq 'L1') { $r = Run-Locked $m 2 'None' } elseif ($Target -eq 'L3') { $r = Run-Locked $m 2 'Read' } else { $r = Run-Frag $m $extra }
+  if ($Target -eq 'L1') { $r = Run-Locked $m 2 'None' } elseif ($Target -eq 'L3') { $r = Run-Locked $m 2 'Read' } elseif ($Target -eq 'L4') { $r = Run-Locked $m 12 'Read' } else { $r = Run-Frag $m $extra }
   if ($Target -eq 'N15' -or $Target -eq 'C7') { Undeny "$(Dm)\dddddddddddddddd" }
   $caught = if ($expectStop) { -not (IsOk $r) } else { IsOk $r }
   if ($caught) { $script:PASS++; "PASS MUT $Name -> $Target $(if ($expectStop) { 'do' } else { 'lot' }) (chot co rang)" }
@@ -338,7 +429,9 @@ if ($body1.Contains('$hits.Count -eq 1 -and')) { [IO.File]::WriteAllText("$Scrat
   if ($lot) { $script:PASS++; 'PASS MUT exact-one -> N3 (mot trong hai thu tu) lot (chot co rang)' } else { $script:FAIL++; 'FAIL MUT exact-one -> N3 van chan o ca hai thu tu' }
 } else { $script:FAIL++; 'FAIL MUT exact-one: khong tim thay chuoi goc' }
 Mut name-filter N3 $FileClean 'GetFileSystemEntries($_, "*$session*")' 'GetFileSystemEntries($_, "$session.err")'
-Mut daemon-reparse N7 $FileRes 'foreach ($d in $daemonDir, $hashDir) { Need (Test-Path' 'foreach ($d in @()) { Need (Test-Path'
+Mut daemon-reparse N7 $FileRes '$q = $hashDir; while ($q) {' '$q = $hashDir; while ($false) {'
+Mut residue-ancestor N20 $FileRes '$q = $hashDir; while ($q) {' '$q = $hashDir; while ($false) {'
+Mut no-delete-check L4 $FileClean 'Need (-not (Test-Path -LiteralPath $f.FullName)) "' 'Need ($true) "'
 Mut stale-output N8 $FileClean 'Need (-not (Test-Path -LiteralPath "$env:TL_PW_RUN\$ten"))' 'Need $true'
 Mut pwtest-hook N10 $FileRes 'Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR))' 'Need $true'
 Mut exact-path N14 $FileClean '$f.FullName -ceq "$hashDir\$session.err"' '$f.Name -like "$session*err"'
@@ -352,14 +445,34 @@ Mut install-dir-binding N18 $FileClean '$f.FullName -ceq "$hashDir\$session.err"
 Mut no-capture-record D1 $FileDau '(Test-Path -LiteralPath $rec -PathType Leaf) -and' '$true -or'
 Mut no-registry-compare D2 $FileDau '([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n$session`n")' '$true'
 Mut no-nonce-binding D7 $FileDau '([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n$session`n")' '([IO.File]::ReadAllText($rec).StartsWith("$($so[0])`n$($so[1])`n"))'
-Mut dau-link D5 $FileDau 'foreach ($d in $so) { Need ((Test-Path' 'foreach ($d in @()) { Need ((Test-Path'
+Mut dau-link D5 $FileDau 'while ($q) { Need (-not' 'while ($false) { Need (-not'
+Mut dau-ancestor D9 $FileDau 'while ($q) { Need (-not' 'while ($false) { Need (-not'
+Mut record-reparse D10 $FileDau '-not ((Get-Item -Force -LiteralPath $rec).Attributes -band $reparse) -and' '$true -and'
 Mut utf8-decode U1 $FileClean '[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_))' '[Text.Encoding]::ASCII.GetString([Convert]::FromBase64String($_))'
 Mut pre-relative C4 $FilePre '$so[0] -match ''^([A-Za-z]:\\|\\\\[^\\]+\\[^\\]+\\)'' -and' '$true -and'
 Mut pre-hook C5 $FilePre 'Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR))' 'Need $true'
 Mut pre-scan-silent C7 $FilePre '[IO.Directory]::GetFileSystemEntries($_, "*$env:TL_PW_SESSION*")' '@(Get-ChildItem -Force -LiteralPath $_ -Filter "*$env:TL_PW_SESSION*" -ErrorAction SilentlyContinue | ForEach-Object FullName)'
-Mut pre-link C9 $FilePre 'Need (-not ((Get-Item -Force -LiteralPath $d).Attributes -band $reparse)) "' 'Need ($true) "'
+Mut pre-link C9 $FilePre 'while ($q) { if (Test-Path' 'while ($false) { if (Test-Path'
+Mut pre-ancestor C14 $FilePre 'while ($q) { if (Test-Path' 'while ($false) { if (Test-Path'
+Mut pre-createnew C15 $FilePre '[IO.FileMode]::CreateNew' '[IO.FileMode]::Create'
 Mut pre-shape C11 $FilePre '(Split-Path -Leaf $so[1]) -cmatch ''\A[0-9a-f]{16}\z''' '$true'
 Mut no-copy-retry L1 $FileClean '$i -lt 5 -and -not $copied' '$i -lt 1 -and -not $copied'
 Mut no-delete-retry L3 $FileClean '$i -lt 5 -and (Test-Path -LiteralPath $f.FullName)' '$i -lt 1 -and (Test-Path -LiteralPath $f.FullName)'
+function GoMut([string]$Name, [string]$Target, [string]$Old, [string]$New) { # Go ban dot bien phai XOA so phien o ca dich
+  $body = [IO.File]::ReadAllText($FileGo, [Text.Encoding]::UTF8)
+  if (-not $body.Contains($Old)) { $script:FAIL++; "FAIL MUT go-${Name}: khong tim thay chuoi goc"; return }
+  $m = "$Scratch\mut-go-$Name.ps1"; [IO.File]::WriteAllText($m, $body.Replace($Old, $New), $bom); New-GoCase "M-go-$Name"
+  switch ($Target) {
+    'G2' { Remove-Item -LiteralPath "$script:C\run\11-daemon-path.txt" }
+    'G3' { [IO.File]::WriteAllText("$script:C\run\11-daemon-path.txt", "$(Dm)\$H2\$NONCE.err`n", $utf8) }
+    'G5' { if (-not (Anc-Link)) { $script:FAIL++; "FAIL MUT go-${Name}: junction"; return } }
+    'G6' { [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H2`n$NONCE`n", $utf8) } }
+  $r = Run-Frag $m
+  if ((IsOk $r) -and -not (Test-Path -LiteralPath "$(Dm)\$H") -and -not (Test-Path -LiteralPath "$script:C\real-mp\daemon\$H")) { $script:PASS++; "PASS MUT go-$Name -> $Target xoa (chot co rang)" }
+  else { $script:FAIL++; "FAIL MUT go-$Name -> $Target van giu (chot khong do duoc)"; Get-Content -LiteralPath "$script:C\out" | ForEach-Object { "    $_" } } }
+GoMut no-receipt G2 '[IO.File]::ReadAllText("$env:TL_PW_RUN\11-daemon-path.txt") -ceq "$($so[1])\$($rec[2]).err`n" -and' '$true -and'
+GoMut receipt-parent G3 '[IO.File]::ReadAllText("$env:TL_PW_RUN\11-daemon-path.txt") -ceq "$($so[1])\$($rec[2]).err`n" -and' '$true -and'
+GoMut link G5 'while ($ok -and $q) {' 'while ($false) {'
+GoMut record G6 '$rec[1] -ceq $so[1] -and' '$true -and'
 "TONG: $script:PASS dat / $($script:PASS + $script:FAIL) (bo qua khong do duoc: $script:SKIP)"
 if ($script:FAIL -ne 0) { exit 1 } else { exit 0 }

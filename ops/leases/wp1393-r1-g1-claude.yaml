@@ -61,8 +61,8 @@
   "leased_at_utc": "2026-11-18T10:36:49Z",
   "heartbeat_at": "2026-11-18T10:36:49Z",
   "heartbeat_required_minutes": 360,
-  "lease_until": "2026-11-19T10:36:49Z",
-  "lease_expires_at_utc": "2026-11-19T10:36:49Z",
+  "lease_until": "2026-11-18T13:00:47Z",
+  "lease_expires_at_utc": "2026-11-18T13:00:47Z",
   "limits": {
     "Codex_spec_review": 3,
     "Claude_author": 3,
@@ -141,5 +141,40 @@
   },
   "draft_PR": 1397,
   "delegated_audit": "https://github.com/ducthangho/tra-luat/issues/1393#issuecomment-6977362861",
-  "windows_waiver": "https://github.com/ducthangho/tra-luat/pull/1397#issuecomment-6977366752"
+  "windows_waiver": "https://github.com/ducthangho/tra-luat/pull/1397#issuecomment-6977366752",
+  "connector": {
+    "comment": "https://github.com/ducthangho/tra-luat/pull/1397#issuecomment-6978182230",
+    "reviewed_commit": "9fcf64d01d",
+    "result": "no major issues; second run on ready_for_review also has_any_findings false"
+  },
+  "PR_Ubuntu_CI": {
+    "run": 44295784307,
+    "conclusion": "success",
+    "jobs": "39/39"
+  },
+  "kiem_merge": {
+    "head": "9fcf64d01d43f528b91263597e7366142cef7459",
+    "result": "ĐỦ ĐIỀU KIỆN MERGE",
+    "rc": 0,
+    "output_sha256": "e61ba8ce217f6515f9b9c55aa1c59296f042b8577d0e236c0c937034de0fe1c8"
+  },
+  "merge": {
+    "pr": 1397,
+    "merge_commit": "d39313eceb71c185deca65878383a94284be3f54",
+    "parents": [
+      "e4a7e5778e2c35f9e142ab773665a3602edb0d1d",
+      "9fcf64d01d43f528b91263597e7366142cef7459"
+    ],
+    "merged_at": "2026-11-18T12:24:46Z",
+    "merged_by": "ducthangho"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-19T10:36:49Z",
+    "han_moi_utc": "2026-11-18T13:00:47Z",
+    "luc_rut_utc": "2026-11-18T12:56:47Z",
+    "nguoi_rut": "Claude Code coordinator under owner delegation",
+    "chi_thi": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+    "ly_do": "PR #1397 da merge tai d39313e (chu kho bam merge); khong con ghi source. CI master 44303671911 39/39 success.",
+    "gioi_han": "Chi rut han; lich su va so lieu giu nguyen."
+  }
 }

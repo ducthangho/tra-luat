@@ -384,7 +384,11 @@ reparse point, không còn `<nonce>.session`/`ud-<nonce>-*`. Nó chép tệp và
     $f.Directory.Name -cmatch '\A[0-9a-f]{16}\z' -and -not ($f.Attributes -band $reparse)) `
     "cần đúng 1 tệp <16 hex>\$session.err trong sổ phiên, thấy $($hits.Count) mục"
   [IO.File]::WriteAllText("$env:TL_PW_RUN\11-daemon-path.txt", "$($f.FullName)`n")
-  Copy-Item -LiteralPath $f.FullName -Destination "$env:TL_PW_RUN\11-daemon.err" -ErrorAction Stop
+  $copied = $false   # daemon còn sống thì khoá cả ĐỌC .err (đo trên Desktop), nên chờ nó nhả handle
+  for ($i = 0; $i -lt 5 -and -not $copied; $i++) {
+    try { Copy-Item -LiteralPath $f.FullName -Destination "$env:TL_PW_RUN\11-daemon.err" -ErrorAction Stop; $copied = $true }
+    catch { Start-Sleep -Seconds 1 } }
+  Need $copied "chưa chép được $($f.FullName)"
   Need ((Get-FileHash -LiteralPath $f.FullName).Hash -ceq (Get-FileHash -LiteralPath "$env:TL_PW_RUN\11-daemon.err").Hash) `
     'bản sao .err daemon lệch'
   for ($i = 0; $i -lt 5 -and (Test-Path -LiteralPath $f.FullName); $i++) {   # daemon có thể chưa nhả handle

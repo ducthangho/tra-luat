@@ -114,6 +114,27 @@ $r = Run-Frag $F; Expect N12-no-registry stop $r $false $d0
 New-Case N13; [IO.File]::WriteAllText("$script:C\cache\ms-playwright\daemon\$H2\$($NONCE.ToUpper()).ERR", "case`n")
 # NTFS khong phan biet hoa thuong: ban viet hoa o thu muc hash khac la muc thu hai => phai dung
 $d0 = Decoys; $r = Run-Frag $F; Expect N13-case-variant stop $r $true $d0
+# L1/L2: tien trinh khac giu .err voi FileShare.None (nhu daemon con song). L1 nha sau 2 s => phai qua; L2 giu 12 s => phai dung.
+$holder = @'
+param([string]$Path, [int]$Seconds, [string]$Ready)
+$fs = [IO.File]::Open($Path, 'Open', 'Read', 'None'); [IO.File]::WriteAllText($Ready, 'x'); Start-Sleep -Seconds $Seconds; $fs.Dispose()
+'@
+[IO.File]::WriteAllText("$Scratch\holder.ps1", $holder, $utf8)
+function Run-Locked([string]$Body, [int]$Seconds) {
+  $ready = "$script:C\ready"
+  $h = Start-Process -FilePath $Shell -PassThru -WindowStyle Hidden -ArgumentList "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$Scratch\holder.ps1`" -Path `"$(Own)`" -Seconds $Seconds -Ready `"$ready`""
+  for ($i = 0; $i -lt 100 -and -not (Test-Path -LiteralPath $ready); $i++) { Start-Sleep -Milliseconds 100 }
+  if (-not (Test-Path -LiteralPath $ready)) { throw 'holder khong san sang' }
+  $r = Run-Frag $Body; $null = $h.Handle; $h.WaitForExit(); $r }
+New-Case L1; $d0 = Decoys; $ownSha = Sha (Own); $r = Run-Locked $F 2; Expect L1-locked-2s ok $r $false $d0
+Rec ((Sha "$script:C\run\11-daemon.err") -eq $ownSha) 'L1-copy-matches' $r
+New-Case L2; $d0 = Decoys; $r = Run-Locked $F 12; Expect L2-locked-12s stop $r $true $d0
+$body = [IO.File]::ReadAllText($F, [Text.Encoding]::UTF8); $old = '$i -lt 5 -and -not $copied'
+if ($body.Contains($old)) {
+  [IO.File]::WriteAllText("$Scratch\mut-no-copy-retry.ps1", $body.Replace($old, '$i -lt 1 -and -not $copied'), $utf8)
+  New-Case M-no-copy-retry; $r = Run-Locked "$Scratch\mut-no-copy-retry.ps1" 2
+  if ($r.rc -ne 0 -and -not $r.ok) { $script:PASS++; 'PASS MUT no-copy-retry -> L1 do (vong cho co rang)' } else { $script:FAIL++; 'FAIL MUT no-copy-retry -> L1 van qua' }
+} else { $script:FAIL++; 'FAIL MUT no-copy-retry: khong tim thay chuoi goc' }
 $P = "$Scratch\frag_pre.ps1"
 New-Case C1; Remove-Item -LiteralPath (Own); $d0 = Decoys; $r = Run-Frag $P; Expect C1-pre-clean ok $r $false $d0
 New-Case C2; $d0 = Decoys; $r = Run-Frag $P; Expect C2-pre-nonce-present stop $r $true $d0

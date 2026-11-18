@@ -142,3 +142,8 @@ Zip `ad9a8a6e…`. Bốn finding chính của review r1 (N3, raw N5, N6, N7) **�
 
 Không đổi: §11 #2 (gateway thật / không fallback chưa đo), §11 #6–#10, U2, U4, U7, U8, U11, U12 (xem mục D, E, F).
 
+
+## H. Quyết định của chủ kho 18/11 và r4 (đang thi công)
+
+- **§11 #7, vế "máy bận"**: chủ kho **chấp nhận "dừng"** (`HOST_BUSY`: dừng, chờ người chạy lại) thay cho "tự hoãn". Lấy qua AskUserQuestion trong phiên `session_015GtxrapMSm976JLC7Fp1HM`. Vế này đọc theo nghĩa mới: mã P4 dừng đúng như vậy (`run_activation.py` dòng 23), và r2 đã có raw cho khoá trùng ở mức fixture. Vế "updater chạy trùng bị khoá" vẫn chờ R4-D.
+- **r4** (đặc tả `ops/specs/wp1319-r4.md`, lease `ops/leases/wp1319-r4-g1-operator.yaml`): R4-A/B (§11 #6 vế âm), R4-C (U4), R4-D (§11 #7 vế updater trùng). Chủ kho duyệt "R4-A..D đủ". Kết quả sẽ ghi ở `r4/RESULTS.md`.

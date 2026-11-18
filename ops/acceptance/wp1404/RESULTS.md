@@ -1,8 +1,8 @@
 # WP1404 r1 — kết quả đo (executor: phiên `session_015GtxrazyAyLwN5BiEB52Sq`, Linux, 18-11-2026)
 
 Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`. Đặc tả `ops/specs/wp1404-r1.md` sha256 `1eb8f442…314d`.
-Mã đo lượt 1: `3d2035b`. Sau Codex lượt 1: `921cbb6`. Sau Codex lượt 2: `6b0e3751132c8a30ad3f838d24875a82be4c6640`; các
-commit sau nó chỉ đổi tệp hồ sơ (RESULTS, VERDICT, lease).
+Mã đo lượt 1: `3d2035b`. Sau Codex lượt 1: `921cbb6`. Sau Codex lượt 2: `6b0e375`. Sau Codex lượt 3:
+`b0e9866a8e20924f380e602719165140fdbc41eb`; các commit sau nó chỉ đổi tệp hồ sơ (RESULTS, VERDICT, lease).
 
 ## 1. Căn cứ (spec §1, nhắc lại để đối chiếu)
 - Run 44347295196, job `gate-packet-loop-manh (ubuntu-latest, 2)`: `bash ops/cai_cong_cu.sh rg` ⇒
@@ -13,12 +13,13 @@ commit sau nó chỉ đổi tệp hồ sơ (RESULTS, VERDICT, lease).
 - `ops/cai_cong_cu.sh`: lần chạy công thức nằm trong hàm `_wp1404_chay_cong_thuc` (dòng `eval` duy nhất, thân không thụt
   lề); lần đầu lỗi **và** `LENH` có `apt-get install` ⇒ `apt-get update -qq` (thêm `sudo` khi `LENH` bắt đầu
   `sudo apt-get`), chuyển sang kênh MỚI `$TAM_CAI/kq-thu-lai` (`export -n`), xoá `$TAM_CAI/stdout` để lần sau mở inode
-  mới, rồi gọi hàm đúng một lần nữa. Không có biến đếm. Stdout của `update` đi sang stderr (stdout
+  mới, rồi gọi hàm đúng một lần nữa. Cả hai lời gọi truyền `"$@"` (công thức thấy tham số vị trí như khi `eval` nằm ngoài
+  hàm). Không có biến đếm. Stdout của `update` đi sang stderr (stdout
   của script là JSON của `kiem-tra`). Update lỗi chỉ in cảnh báo. Mọi xử lý sau vòng (cờ `bat_buoc: false`,
   `exit "$RC_CAI"`, đọc kênh) không đổi.
 - `.claude/dev/launcher_test.py`: `_wp831_chay_cai_rg` nhận thêm `apt_get=`/`brew=` để thay thân lệnh giả; ca
   `r1404_cai_apt_update_roi_thu_lai` và `r1404_thu_lai_chot_chi_tiet` (thêm sau Codex lượt 1, qua `_wp868_chay`);
-  17 đột biến `cai_sh` trong `DOT_BIEN_HOOK`.
+  19 đột biến `cai_sh` trong `DOT_BIEN_HOOK`.
 
 ## 3. Ca `r1404_cai_apt_update_roi_thu_lai` (N1)
 Chạy nguyên công thức `rg.cai.<nen>` đọc từ `ops/cong_cu.yaml`. `apt-get` giả ghi đối số ĐẦU (`$1`) vào nhật ký; `brew` giả
@@ -46,9 +47,11 @@ không ghi gì (ca chỉ kiểm rc và nhật ký apt rỗng). Nhật ký toàn 
 | (f) probe `late_channel` của Codex lượt 2: tiến trình nền của lần đầu gọi bộ chọn, ghi KÊNH cũ sau khi lần cài lại xong | fixture chốt bộ chọn nền ĐÃ ghi; `DAT` |
 | (g) probe `readonly` của Codex lượt 2: shell gọi có `readonly LAN_CAI=42`, `source` hai lượt, mỗi lượt buộc cài lại | rc 0; cả hai lượt vòng ngoài in `LAN_CAI=42`; đúng hai dòng báo thử lại |
 | (h) `bash -a` (allexport), cài lại | trình cài thấy `KENH_KQ` và `TAM_CAI` VẮNG ở cả ba lời gọi |
+| (i) Codex lượt 3: công thức `test "${1-}" = rg && apt-get install …`, hai stub (cài được ngay · cần update) | rc 0, `DAT`, `GITHUB_PATH` là thư mục tốt; nhật ký đúng `install` / `install update install` |
 
 `--lap-ca r1404_thu_lai_chot_chi_tiet --lan 2`: 2/2. Phản chứng: với `ops/cai_cong_cu.sh` của `3d2035b` ca ĐỎ ở (a)
-(`stdout khong con la MOT tai lieu JSON … 'update-…'`); với script của `921cbb6` ĐỎ ở (f) (rc 3).
+(`stdout khong con la MOT tai lieu JSON … 'update-…'`); với script của `921cbb6` ĐỎ ở (f) (rc 3); với script của `6b0e375` ĐỎ ở (i) (cài được ngay ⇒ rc 1, nhật ký
+chỉ `update`).
 
 ## 4. Đột biến (N2)
 
@@ -60,7 +63,7 @@ không ghi gì (ca chỉ kiểm rc và nhật ký apt rỗng). Nhật ký toàn 
 | `wp1404_sh_thu_lai_hai_lan` | gọi hàm hai lần ở nhánh thử lại | r1404_cai… | giết 1/1 |
 | `wp1404_sh_update_vao_stdout` | bỏ `>&2` ở nhánh sudo | r1404_thu_lai… | giết 1/1, (a) JSON |
 | `wp1404_sh_bo_sudo_update` | nhánh sudo gọi `apt-get update` trần | r1404_thu_lai… | giết 1/1, (a) nhật ký argv |
-| `wp1404_sh_nhanh_tran_dung_sudo` | nhánh không sudo gọi `sudo` | r1404_thu_lai… | giết 1/1, (c) |
+| `wp1404_sh_nhanh_tran_dung_sudo` | nhánh không sudo gọi `sudo` | r1404_thu_lai… | giết 1/1, (c1) |
 | `wp1404_sh_update_loi_dung` | bỏ `\|\| echo …` ở nhánh sudo | r1404_thu_lai… | giết 1/1, (b) rc 78 |
 | `wp1404_sh_bo_ten_rc_dong_bao` | dòng báo bỏ tên và rc | r1404_thu_lai… | giết 1/1, (a) |
 | `wp1404_sh_giu_kenh_lan_dau` | giữ đường dẫn kênh cũ (chỉ làm rỗng) | r1404_thu_lai… | giết 1/1, (f) rc 3 |
@@ -71,20 +74,22 @@ không ghi gì (ca chỉ kiểm rc và nhật ký apt rỗng). Nhật ký toàn 
 | `wp1404_sh_tran_update_vao_stdout` | nhánh gọi thẳng bỏ `>&2` | r1404_thu_lai… | giết 1/1, (c1) JSON |
 | `wp1404_sh_tran_bo_qq` | nhánh gọi thẳng bỏ `-qq` | r1404_thu_lai… | giết 1/1, (c1) argv |
 | `wp1404_sh_tran_update_loi_dung` | nhánh gọi thẳng bỏ `\|\| echo …` | r1404_thu_lai… | giết 1/1, (c2) rc 78 |
+| `wp1404_sh_mat_tham_so_lan_dau` | lời gọi đầu bỏ `"$@"` | r1404_thu_lai… | giết 1/1, (i) cài được ngay |
+| `wp1404_sh_mat_tham_so_cai_lai` | lời gọi lại bỏ `"$@"` | r1404_thu_lai… | giết 1/1, (i) cần update, rc 1 |
 
 Mỗi đột biến của ca `r1404_thu_lai…` được chạy riêng để đọc assertion. Từng đột biến chết đúng kịch bản ghi ở cột cuối,
-bằng `TinHieuChotCa`, không phải lỗi giàn. Riêng bảng `cai_sh` (65 đột biến, mọi packet) chạy lại trên `6b0e375`: 65/65.
+bằng `TinHieuChotCa`, không phải lỗi giàn. Riêng bảng `cai_sh` (mọi packet) chạy lại: `6b0e375` 65/65 · `b0e9866` 67/67.
 
 ## 5. Hồi quy (N3) — các vế dựng cùng cách (clone + checkout + `core.abbrev 7`)
 `/tmp/.git` không tồn tại lúc đo.
 
 | Phép đo | base `e2c3b82` | head |
 |---|---|---|
-| `launcher_test.py` | 424/424 (tổng 426, bỏ qua 2) | `6d52f57`, `3d2035b`: 425/425 (tổng 427) · `921cbb6`, `6b0e375`: 426/426 (tổng 428, bỏ qua 2) |
-| `launcher_test.py --dot-bien` | 720/720 (6 không đo được trên nền này) | `6d52f57`: **721/723** · `3d2035b`: 723/723 · `921cbb6`: 731/731 · `6b0e375`: 737/737 (cùng 6) |
+| `launcher_test.py` | 424/424 (tổng 426, bỏ qua 2) | `6d52f57`, `3d2035b`: 425/425 (tổng 427) · `921cbb6`, `6b0e375`, `b0e9866`: 426/426 (tổng 428, bỏ qua 2) |
+| `launcher_test.py --dot-bien` | 720/720 (6 không đo được trên nền này) | `6d52f57`: **721/723** · `3d2035b`: 723/723 · `921cbb6`: 731/731 · `6b0e375`: 737/737 · `b0e9866`: 739/739 (cùng 6) |
 
 Hai ca bỏ qua (`t62_…`, `r484_g4_windows_sid_alias_identity`) và sáu đột biến không đo được (nhánh Windows) giống hệt
-nhau ở mọi vế. Delta trên `6b0e375` = +2 ca, +17 đột biến, 0 hồi quy.
+nhau ở mọi vế. Delta trên `b0e9866` = +2 ca, +19 đột biến, 0 hồi quy.
 
 **Lỗi do chính bản vá, đã sửa:** ở `6d52f57` nhánh thử lại chép lại dòng `( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"`,
 nên neo của `wp868_sh_cho_eof_stdout` và `wp868_sh_go_trap_sau_eval` khớp hai chỗ và `--dot-bien` báo `SAI` (721/723).

@@ -58,3 +58,70 @@ là băm của tệp gốc trong sandbox review.
 | P3 `LAN_CAI` ở shell gọi khi `source` | Đúng là biến toàn cục. Nhưng trong chế độ `source`, script vốn đã gán `TEN` `LENH` `RC_CAI` `TAM_CAI` `KENH_KQ` `KQ` `DICH` `KET_QUA_CAI` ở shell gọi, và shell gọi là chính vòng `--bat-buoc` của script. `LAN_CAI=0` đặt lại ở mỗi lượt (probe `batch` của reviewer: hai thứ tự, mỗi thứ tự đúng một update). Một biến readonly cùng tên ở shell gọi cũng làm hỏng `RC_CAI` như vậy. | Không đổi. Đã thử thêm `unset LAN_CAI` rồi bỏ, vì dòng ấy không có phép đo nào phân biệt được. Không thêm hàm `local`, vì đặt lần chạy công thức vào hàm là đổi ngữ cảnh errexit mà wp1045 P3 đã chốt. |
 | P3 ca test thiếu chốt | Thật. | Ca mới `r1404_thu_lai_chot_chi_tiet` gồm (a)–(e), cộng 8 đột biến (gồm `-eq 1`→`-le 2` của reviewer). Mỗi đột biến chết đúng kịch bản nhắm tới (RESULTS.md §4). Dòng làm rỗng kênh nay có răng nhờ (d): bộ chọn ghi kênh rồi một bước sau lỗi. |
 | RESULTS.md N2: "rc 100 sau update" sai thứ tự | Thật: đột biến `bo_thu_lai_apt` không chạy update. | Sửa câu ở RESULTS.md §4. |
+
+## Lượt 2 — Codex (OpenAI), `codex_cli`, read-only · lời gọi 2/2 (hết ngân sách lease)
+
+- Exact head được review: `f9eba6e8b346c274b7f9342e5b53d844089298be` (mã trùng `921cbb6`). Chạy 2026-11-18T17:45:31Z → 17:54:12Z, rc 0.
+- sha256 `scratch/VERDICT.md`: `4dcd255881706bb8893231c8b182184ffa99d708c6948f39e4378faa86815fa4`.
+- Kết luận: `request_changes` (1 P2, 3 P3). Hai P2 của lượt 1 reviewer xác nhận ĐÃ ĐÓNG.
+- Ghi chú về `git diff --check` mà reviewer nêu: khoảng trắng cuối dòng trong phần nguyên văn là của chính tệp gốc
+  (ngắt dòng Markdown); giữ nguyên để băm khớp.
+
+### Nguyên văn
+
+> reviewed_sha: f9eba6e8b346c274b7f9342e5b53d844089298be
+> verdict: request_changes
+> reviewer: codex (OpenAI), codex_cli, read-only
+> 
+> Tree `8c64eeb110e01a9622ff5bfc6cd21ed3aac385bd`. Linux, Python 3.13.18, Bash 5.2.21, transport machine/local. Head khớp `HEAD_SHA.txt`, cây sạch, SHA-256 đặc tả khớp `1eb8f4428e0da7c2074b94938e89990c3f3bd681b254bcacccb2336a76a5314d`. Diff base → head nằm trong write set. Hai tệp mã trùng với `921cbb6`.
+> 
+> ## Findings
+> 
+> - **P2 · Writer muộn có thể ghi lại kênh kết quả lần đầu sau khi kênh đã được làm rỗng** — `ops/cai_cong_cu.sh:80,144,179,195`. Công thức của probe `late_channel` để một subshell nền giữ giá trị `KENH_KQ`, rồi trả 100 từ install. Retry in đường dẫn tốt ra stdout và báo hiệu cho subshell nền gọi bộ chọn, mở lại kênh bằng đường dẫn cũ và ghi thư mục khác. Probe chốt writer đã ghi và làm thư mục đó hỏng sau khi ghi. Trình cài đọc lại kênh, chọn thư mục hỏng và trả 3 dù lần retry trả 0. Cấp **đường dẫn mới** cho kênh lần hai, giữ thuộc tính không export, rồi dọn cùng thư mục tạm. Unlink và tạo lại cùng tên vẫn cho phép writer mở lại đường dẫn. Thêm biến thể của (e) gọi bộ chọn trong subshell nền và chốt dấu writer cùng kết quả `DAT`. Cùng probe trên bản sao cấp đường dẫn mới trả 0.
+> 
+> - **P3 · Bước CI kế tiếp có thể nhận đường dẫn từ lần cài thất bại** — `ops/cai_cong_cu.sh:73–80,179` và `.claude/dev/launcher_test.py:11402–11410`. Ngay fixture (d) ghi `tot2` vào `GITHUB_PATH` trước `false`. Sau update, `tot2/rg` hỏng. Retry qua stdout làm checker hiện tại báo `DAT`, nhưng tệp dùng để cấp PATH cho bước kế tiếp vẫn chỉ có `tot2`. Probe `channel` đo wrapper rc 0, `DAT` và dòng `tot2`. Khi mô phỏng bước CI kế tiếp bằng cách đưa dòng này lên đầu PATH, `rg --version` trả 1 dù thư mục tốt cũng có trong PATH. Các công thức apt hiện hành đều kết thúc bằng bộ chọn, nên tôi tái hiện bằng công thức của (d). Hoãn ghi đường dẫn ra `GITHUB_PATH` tới khi công thức thành công, hoặc giữ phần ghi theo từng lần cài và chỉ chuyển phần thành công vào tệp CI. Mở rộng (d) để chốt update đã chạy, `tot2` vắng khỏi tệp và mô phỏng PATH của bước kế tiếp.
+> 
+> - **P3 · Xung đột `LAN_CAI` khi source vẫn còn** — `ops/cai_cong_cu.sh:164–171`. Probe source hai lượt trong vòng ngoài ghi nhận `LAN_CAI` của caller đổi từ 42 thành 2, rồi 1. Cả hai lượt vòng ngoài vẫn chạy. Khi caller khai readonly, script dừng ở dòng 164 với rc 1 trước khi cài. Lý do của executor giải thích vì sao batch nội bộ hiện an toàn: vòng cha dùng `cong_cu`, không dùng `LAN_CAI`, và bộ đếm luôn được khởi tạo lại. Những biến toàn cục có từ base không loại bỏ xung đột mới. Gọi một hàm ở vị trí câu lệnh độc lập với bộ đếm `local` tên có tiền tố riêng có thể giữ nguyên ngữ cảnh errexit. Chốt bằng ca gọi source trong vòng của caller, kiểm giá trị caller và hai lượt, kèm probe công thức tự bật `set -e`.
+> 
+> - **P3 · Còn ba lỗ đo ở nhánh update gọi thẳng** — `.claude/dev/launcher_test.py:11393–11401,17270`. (c) ghi `$1`, update im lặng và trả 0. Bỏ `-qq`, bỏ chuyển stdout hoặc bỏ nhánh xử lý lỗi update ở nhánh gọi thẳng đều sống qua ca chi tiết. Ví dụ lệnh update trần trả 78 sẽ chặn hẳn lần cài lại nếu bỏ `||`; (b) chỉ phát hiện lỗi này ở nhánh sudo. Mở rộng (c) để ghi toàn argv, in một dòng rác, cho update trả 78 và chốt JSON cùng mã lần cài lại. Ca brew cũ chốt rc và apt log rỗng, còn lời gọi và argv brew chỉ có trong fixture. Có thể ghi nhật ký brew riêng nếu muốn chốt nó trực tiếp.
+> 
+> ## Đóng findings lượt 1
+> 
+> | Finding | Lượt 2 |
+> |---|---|
+> | P2 inode stdout dùng lại | Đã đóng. `writer` trên `3d2035b` probe rc 1, wrapper rc 3. Trên head probe rc 0, wrapper rc 0, marker writer có mặt. Ca (e) và đột biến bỏ unlink đo đúng lỗi này. |
+> | P2 stdout update phá JSON | Đã đóng. `update_stdout` trên `3d2035b` probe rc 1, wrapper rc 0 với JSON nhiễu. Trên head probe và wrapper đều rc 0, parse toàn bộ JSON thành công, dòng nhiễu có trong stderr. |
+> | P3 `LAN_CAI` | Còn mở khi source từ caller có biến cùng tên. Batch nội bộ đã được chạy lại theo cả hai thứ tự, từng thứ tự đúng bốn lệnh apt, đúng một update và wrapper rc 0. |
+> | P3 thiếu chốt | Đóng các thiếu sót chính ở nhánh sudo, mã lỗi cuối, dòng stderr, kênh ghi sớm và stdout writer. Còn các lỗ đo nêu trên. |
+> 
+> ## Đọc B1–B5 và ca (a)–(e)
+> 
+> - B1/B3. Điều kiện retry đòi rc khác 0, lượt 1 và chuỗi chứa `apt-get install`, kể cả khi ở giữa công thức. Mẫu sudo xét đầu chuỗi theo đúng đặc tả. Lượt 2 luôn rời vòng. Ca cài được ngay chỉ ghi install. Ca brew lỗi không gọi apt. Bootstrap PyYAML của batch có update riêng tại dòng 90–95, kế thừa từ base.
+> - `while :` chỉ đặt `:` vào điều kiện. Dòng eval nằm trong thân vòng, chạy độc lập và thu `$?` trước khi bật lại errexit. Probe công thức chứa lệnh apt ở giữa, tự bật `set -e` rồi `false`, đo rc lần đầu 1 và retry thành công. Phép gán số học của bộ đếm hợp lệ trả 0. `continue` tiếp tục vòng retry trong cùng lượt source. Ba ca r1045 về batch và cờ `CAI_CONG_CU_PY_CUA` đều qua.
+> - B2/B4. Update trả 78 vẫn chạy install lần hai và trả rc 42. PATH giới hạn thiếu sudo hoặc apt-get cho ba lỗi tìm lệnh và rc cuối 127. Stub sudo từ chối quyền ghi ba lời gọi và rc cuối 126. Không có fallback nâng quyền. Thông báo thử lại có tên và rc đầu. B5 được xác nhận bằng diff.
+> - (a) Đo đúng chuỗi argv của apt và sudo, đầu ra là một tài liệu JSON và đúng một thông báo thử lại có tên và rc. (b) Đo đúng update lỗi và lấy rc mới. (c) Đo lệnh gọi thẳng và không có sudo qua nhật ký, với giới hạn nêu trong finding.
+> - (d) Có đi qua retry. Ban đầu marker chưa có, apt trả 0, bộ chọn ghi kênh và `false` làm nhánh `else` và toàn công thức trả 1. Update tạo marker, khiến lượt hai đi vào `then`, in đường dẫn tốt và trả 0. Bỏ làm rỗng kênh khiến đúng (d) đỏ với wrapper rc 3. (d) không kiểm tệp `GITHUB_PATH` hoặc writer tới muộn.
+> - (e) Đo đúng writer giữ FD stdout, có marker hoàn thành và phép thử bỏ unlink đỏ. Vòng chờ bên writer có giới hạn, nhưng để fixture chặt hơn nên yêu cầu marker cho phép tồn tại trước khi ghi, kể cả khi hết thời gian chờ.
+> - Ba hook ban đầu đo bỏ nhánh retry, retry lỗi ngoài apt và update mà bỏ cài lại. Tám hook bổ sung đo giới hạn số lần, stderr/JSON, hai nhánh chọn sudo, B2 trên nhánh sudo, tên/rc đầu, kênh ghi sớm và inode stdout. Ca cài thành công ngay có phép đo B3 nhưng thiếu hook chính thức nhắm riêng điều kiện rc khác 0. Đột biến riêng bỏ điều kiện đó đã đỏ.
+> 
+> ## Lệnh và mã thoát
+> 
+> - `git clone --no-local repo scratch/head`, tương tự cho `scratch/base`, checkout base detached và đặt `core.abbrev 7` cho hai bản sao. Chuỗi clone/checkout rc 0. Kiểm SHA, cây sạch và `sha256sum -c` từng lệnh rc 0. `git diff --exit-code 921cbb6..HEAD -- ops/cai_cong_cu.sh .claude/dev/launcher_test.py`, `bash -n repo/ops/cai_cong_cu.sh` và diff check cho hai tệp mã rc 0. Diff check toàn packet rc 2 do khoảng trắng cuối dòng trong trích dẫn verdict ở `ops/acceptance/wp1404/VERDICT.md:14–47`. Xem `diff-check.log`.
+> - Trong `scratch/head`, `python .claude/dev/launcher_test.py --lap-ca r1404_cai_apt_update_roi_thu_lai --lan 3` và tương tự cho `r1404_thu_lai_chot_chi_tiet` đều rc 0, 3/3. Cùng lệnh `--lan 1` cho 19 ca r831/r858/r868 liên quan script và 3 ca r1045 về batch đều rc 0, 1/1. Ca môi trường `r858_goc_tam_tranh_to_tien_co_git` rc 1 do tự chọn `/var/tmp` chỉ đọc khi thấy `/tmp/.git`. Từng tên ca và rc nằm trong `targeted.log`.
+> - `python ../probe.py hooks` rc 0. Chạy từng hook bằng harness gốc, giết **3/3 cũ và 8/8 mới**, từng hook 1/1, bỏ qua 0. Xem `probes.log`.
+> - `python ../mutate.py` với từng đối số `success`, `direct_args`, `direct_stdout`, `direct_abort`, `clear` lần lượt rc **1, 0, 0, 0, 1**. Hai ca đỏ ném `TinHieuChotCa`. Xem `mutants.log`.
+> - `python ../probe.py` với `writer`, `update_stdout`, `channel`, `late_channel`, `source`, `readonly` lần lượt probe rc **0, 0, 1, 1, 1, 1**, wrapper rc **0, 0, 0, 3, 0, 1**. `late_channel ../cai-new-channel.sh` probe và wrapper rc 0. `no_sudo`, `no_apt`, `sudo_denied`, `errexit`, `batch` mỗi probe rc 0. Hai lần dựng probe ban đầu đã sửa fixture trước khi lấy kết quả: công thức nhiều dòng không hợp giao thức YAML của `cai-lenh`, và mẫu argv của stub batch thiếu đối số thứ ba.
+> - `python .claude/dev/packet_loop.py doctrine-scan --root .` rc 0, 12 tệp, 0 vị trí. `python ops/bash_nen.py quet --root .` rc **2 trên cả base và head**. `diff -u scratch/bash-base.log scratch/bash-head.log` rc 0. Hai lỗi y hệt nhau tại `ops/land/pr1386-wp646-provenance/linux/n1env_1386.py:30` và `n1rig_1386.py:25`, và diff hai tệp đó rc 0.
+> 
+> ## Đối chiếu RESULTS.md
+> 
+> - §1. Log GitHub của job `134953391585` xác nhận bước cài rg dừng với `Unable to locate package ripgrep`, rc 100, trước các bước probe và selftest. Chưa kiểm đếm lại 19 lượt gate, 343 bước và tổng số lỗi trong cả mẫu. [Job gốc](https://github.com/ducthangho/tra-luat/actions/runs/44347295196/job/134953391585)
+> - §2–§4. Diff khớp mô tả thay đổi. Hai ca lặp 3/3 thay cho 2/2 của executor, đủ bốn kịch bản N1 và năm kịch bản chi tiết với giới hạn đã nêu. Cả 11 hook wp1404 giết 1/1. Phản chứng bằng script cũ tái hiện JSON nhiễu và writer stdout. Không xác nhận tuyên bố fixture (d) như một phép đo cách ly toàn bộ đầu ra, vì nó chỉ kiểm trạng thái hiện tại.
+> - §5. Đếm trực tiếp registry bằng `python ../probe.py counts`, rc 0 trên cả hai bản sao: base 426 ca/726 hook và đột biến tổng cộng, head 428/737. Khớp delta +2 ca, +11 đột biến. Tôi chạy đầy đủ `TMPDIR="$PWD/../tmp" python .claude/dev/launcher_test.py` trong từng bản clone. Base rc 1, **401/416 qua, 10 bỏ qua, 15 hỏng**. Head rc 1, **403/418 qua, 10 bỏ qua, 15 hỏng**. So danh sách ca hỏng/bỏ qua bằng `diff -u scratch/suite-names-base.log scratch/suite-names-head.log` rc 0. Delta +2 ca qua, 0 ca hỏng hoặc bỏ qua mới trong sandbox. Các lỗi chung gồm `/var/tmp` chỉ đọc và fixture xác thực nằm dưới cây có `.git`. Tám skip thêm so với executor đều báo không dựng được venv/pip. Vì vậy chưa tái lập các số tuyệt đối 424/424, 425/425, 426/426 và hai skip của executor. Xem `suite-base.log` và `suite-head.log`. Đếm đăng ký không xác minh số đo được. Diff lịch sử xác nhận `6d52f57` có hai dòng eval và `3d2035b` trở đi còn một. Các số toàn `--dot-bien` 720/720, 721/723, 723/723, 731/731 và sáu ca không đo được là lời khai executor. Lượt này chạy riêng wp1404 nên không có dòng tổng `DOT BIEN:`.
+> - §6. Doctrine scan khớp. Đọc trực tiếp ba job CI xác nhận cả ba đỏ ở G5 và log nêu đúng hai tệp. Quét local base/head xác nhận delta 0 của báo cáo. Chưa xác minh tuyên bố lượt push trên master không chạy `cong_cu_test`. Trên exact head, job gate `135006578500` đã kết thúc đỏ ở G5 và log nêu đúng hai tệp trên. Workflow Windows bỏ qua. N4 chưa đạt. [CI 3d2035b](https://github.com/ducthangho/tra-luat/actions/runs/44356207824/job/134985225080), [CI 141a3a7](https://github.com/ducthangho/tra-luat/actions/runs/44358498604/job/134993417970), [CI 5505f7a](https://github.com/ducthangho/tra-luat/actions/runs/44359968089/job/134998669752), [gate exact head](https://github.com/ducthangho/tra-luat/actions/runs/44362172770/job/135006578500).
+> - §7. Đã đo xung đột `LAN_CAI`. Kiểm thử hành vi cài dùng stub, không chạy apt thật trên runner thiếu danh sách gói, không chạy trên macOS/Windows thật.
+
+### Trạng thái sau lượt 2
+
+Ngân sách Codex trong lease đã hết (2/2). Theo protocol, executor DỪNG ở Review Rescue Checkpoint và chờ chủ kho quyết
+trước khi sửa tiếp hoặc gọi thêm review.

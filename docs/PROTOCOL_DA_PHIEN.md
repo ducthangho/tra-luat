@@ -275,6 +275,20 @@ lease_until: <timestamp>
 heartbeat_required_minutes: 360   # lease MỚI cấp sau khi ADR-0056 kích hoạt; lease đã cấp giữ số đã đóng dấu
 ```
 
+`heartbeat_at` là lời khai: trong kho không có cổng nào đọc trực tiếp trường này.
+
+Ngưỡng thu hồi 360 phút cho lease mới thuộc hiệu lực `ADR-0056` do phiên điều phối áp tay, theo bảng §20.
+
+Theo protocol, `lease_until` là hạn tuyệt đối; trong mã, chỉ `kiem-dong-wp` của `.claude/dev/packet_loop.py` đọc trường này, ở điều kiện D4: `lease_until` phải đã qua thì mới đóng được WP.
+
+Khi kiểm lease để công bố với chốt hạn bật, `kiem()` của `ops/lease_publish.py` dùng `lease_expires_at_utc` để từ chối lease đã hết hạn; `ai-dang-giu` dùng cùng trường để phân loại hạn.
+
+Đường kiểm idempotent (`kiem_github`) và đường kiểm lease lịch sử trong CI (`ops/ci_duong_nhanh.py`) bỏ riêng phép chặn hết hạn.
+
+`reviewed_sha_required` là mỏ neo xuất phát, được phép bằng `base_sha` khi chưa có head ứng viên; `kiem()` chỉ đòi trường có mặt và đúng dạng 40 hex thường.
+
+Exact head không đọc từ lease: `kiem-merge` neo head PR ở K0, kiểm review connector ở K3, và kiểm review offline hoặc human audit trên cùng head ở K4; `record-review` so `--reviewed-sha` với head đã ghi khi vào `reviewing`.
+
 Lease `role: reviewer` khai `provider: claude | codex | google_antigravity | human`
 và `executor` là provider đã viết code. Reviewer AG khai `model_family`,
 `execution_surface: antigravity`, `transport: machine/local` của chính lượt review;

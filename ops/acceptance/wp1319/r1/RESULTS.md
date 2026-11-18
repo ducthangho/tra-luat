@@ -1,6 +1,29 @@
-# WP1319 r1 — Kết quả kiểm native trên Desktop (operator, CHƯA review độc lập)
+# WP1319 r1 — Kết quả kiểm native trên Desktop
 
-Trạng thái: **raw đã đóng băng, chờ reviewer độc lập**. Đây là lời khai của operator. Nó không phải verdict.
+Trạng thái: **review độc lập `request_changes`**. Xem [`VERDICT-claude-xhigh.md`](VERDICT-claude-xhigh.md): Claude, context mới, chỉ đọc gói đóng băng ngay trên Desktop. Reviewer không phải Codex như đặc tả §4 ghi, vì Codex không truy cập được Desktop; số lời gọi Codex vẫn là 0.
+
+Bảng "đã sửa theo review" ở dưới thay cho lời khai đầu tiên của operator. Lời khai đầu tiên còn giữ trong lịch sử git, commit `ed79a6e`.
+
+## Kết luận sau review (thay bảng cũ)
+
+| Bước | Kết luận | Lý do |
+|---|---|---|
+| N1 | passed | |
+| N2 | passed | 1777/1777 ×4 |
+| N3 | **failed** | Config (O3, có counterexamples, `en-US`) ra 45/46 rc 1 trên cả hai edition. Theo chú thích ở dòng 575 của harness, đặc tả như đang viết không thể đạt dưới `en-US`: đây là **lỗi đặc tả**, chưa phải bằng chứng lỗi sản phẩm. Ngoài ra, O1 chạy **không** có `-Counterexamples`, trái đặc tả và không được khai trong NOTE nào (lỗi của operator) |
+| N3D | passed, **ngoài đặc tả** | `tr-TR` cho 46/46. Lượt này chạy sau một rc 1 và nằm ngoài ngân sách chạy lại |
+| N4 | passed | Chỉ trong phạm vi cấu hình mẫu |
+| N5 | passed với O2. Phần "O3 chỉ kiểm pin" là **not_run** | So bằng băm lock không phải là chạy khối Kiểm pin. Lời khai "npm 3/3 chữ ký + attestation" **không có trong raw đã đóng băng**: chỉ thấy trên console của operator, vì transcript PS7 không bắt output native |
+| N6 | **failed** | Tiêu chí đặc tả không đạt: `ms-playwright` đổi (11 thành 12 mục) và `W\pw` chưa xoá (còn npm-cache, `runs/`) |
+| N7 | **failed** (về bằng chứng) | rc của lượt quét secret không được lưu vào tệp; `.out`/`.err` đều 0 byte. Reviewer tự quét lại và không tìm thấy secret |
+
+Các bổ chính khác theo review:
+- Số tệp `.err` có sẵn là **13**, không phải 11.
+- NOTE của N2 lượt 2 ghi "cmd /c", nhưng thực tế lượt ấy dùng `Start-Process`.
+- PID 3976 là tiến trình bao `powershell`; pwsh con có PID khác.
+- `upload-drive.ps1` **đã chạy** lúc 00:4xZ ngày 18/11, theo duyệt của chủ kho trong phiên. Lần chạy đó thất bại vì `gws` trên Desktop thiếu module (`MODULE_NOT_FOUND`), nên **không có gì được tải lên**.
+
+## Lời khai ban đầu của operator (giữ để đối chiếu, KHÔNG phải kết luận)
 
 - Máy: Desktop `a5f7076e` (Windows, PS 5.1.26100 + pwsh 7.6.10, Python 3.12.10, Node v26.13.0 / npm 11.20.0).
 - Mã đo: `13bf69f6eb797e859619a2062e7c9577e6a9cc0b` (tree `a4cb9057…`).

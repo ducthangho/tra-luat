@@ -17888,5 +17888,201 @@ CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for 
     ("noinherit", _n_noinherit1342), ("symlink_file", _n_symlink1342))]
 
 
+# --- #1342 r2 (bậc r1b): khoá + publish Windows ĐỨNG RIÊNG (`_1174_win_api_ghi`, `_1174_win_lock`, `_1174_win_persist`), CHƯA nối dây.
+# Không-nối-dây do `_wired1342` (ca `wp1342_additive_byte_preserved`) phủ sẵn; không đổi MUTANTS, không vào WP1174_REQUIRED/WP1174_BOTH.
+def _additive1342r2(base, head):
+    """N2 của r2 — HÀM đo MỘT LẦN lúc PR, KHÔNG đăng ký vào CASES. [] ⇔ head (bytes) = base + các khối mới `_new1342` nhận có tên CHƯA
+    có trong base. Khối `_1174_win_*` ĐÃ có trong base (r1) không bị loại: như mọi định nghĩa cũ, nó phải bằng NGUYÊN BYTE base."""
+    import ast
+    try:
+        cu, moi = ast.parse(base), ast.parse(head)
+    except (SyntaxError, ValueError) as ex:
+        return [f"không parse được: {ex}"]
+    da_co = {n.id for n in ast.walk(cu) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)} | {
+        n.name for n in ast.walk(cu) if hasattr(n, "name")}
+    dong, bo, ten = head.split(b"\n"), set(), []
+    for s in moi.body:
+        if _new1342(s) and _new1342(s) not in da_co:
+            ten.append(_new1342(s))
+            cuoi = s.end_lineno
+            while cuoi < len(dong) - 1 and not dong[cuoi].strip():
+                cuoi += 1
+            bo |= set(range(s.lineno - 1, cuoi))
+    loi = [f"tên khối mới trùng nhau: {n}" for n in sorted(set(ten)) if ten.count(n) > 1]
+    con, goc = [d for i, d in enumerate(dong) if i not in bo], base.split(b"\n")
+    lech = next((i + 1 for i, (a, b) in enumerate(zip(con, goc)) if a != b), min(len(con), len(goc)) + 1)
+    return loi + ([f"phần ngoài khối mới KHÁC byte base, từ dòng {lech} của base"] if con != goc else [])
+
+
+def _pure_r2_1342(c):
+    m, d, o_dia = _module1174(c), c.tmp / "r2", "C:\\wp1342-r2\\state.json"
+    d.mkdir()
+
+    def khoa(text):   # ĐI VÀO context manager: chỉ gọi hàm thì chưa chạy dòng nào của khoá
+        with m._1174_win_lock(text) as handle:
+            return handle
+    for fn, args, kw in ((khoa, (), {}), (m._1174_win_persist, (b"x",), dict(create=True)), (m._1174_win_persist, (b"x",), dict(create=False))):
+        _reject1174(fn, (d / "state.json").as_posix(), *args, reason="Windows drive path required", **kw)
+        if os.name != "nt":
+            _reject1174(fn, o_dia, *args, reason="native Windows required", **kw)
+    if os.name != "nt":
+        _reject1174(m._1174_win_api_ghi, reason="native Windows required")
+    for raw, create in (("x", True), ("x", False), (bytearray(b"x"), True), (None, False), (b"x", 1), (b"x", None)):
+        _reject1174(m._1174_win_persist, o_dia, raw, create=create, reason="persist bytes/mode")   # kiểu đứng TRƯỚC đường dẫn và nền
+    assert list(d.iterdir()) == [], ("từ chối mà vẫn tạo tệp", sorted(p.name for p in d.iterdir()))
+
+
+def _tam1342(d):
+    return sorted(p.name for p in d.iterdir() if p.name.startswith(".wp1174-"))
+
+
+def _vao_khoa1342(m, path):
+    with m._1174_win_lock(str(path)) as handle:
+        return handle
+
+
+_CON1342 = (   # tiến trình con của L1: xin khoá CHIA SẺ, LOCKFILE_FAIL_IMMEDIATELY, trên cùng tệp; in `lock <mã lỗi, 0 = được>`
+    "import ctypes as c, sys\nfrom ctypes import wintypes as w\nk = c.WinDLL('kernel32', use_last_error=True)\n"
+    "k.CreateFileW.argtypes, k.CreateFileW.restype = [w.LPCWSTR, w.DWORD, w.DWORD, c.c_void_p, w.DWORD, w.DWORD, w.HANDLE], w.HANDLE\n"
+    "k.LockFileEx.argtypes, k.LockFileEx.restype = [w.HANDLE, w.DWORD, w.DWORD, w.DWORD, w.DWORD, c.c_void_p], w.BOOL\n"
+    "h = k.CreateFileW(sys.argv[1], 0xC0000000, 3, None, 3, 0, None)\n"
+    "if h is None or h == c.c_void_p(-1).value:\n    print('open', c.get_last_error())\n    sys.exit(0)\n"
+    "print('lock', 0 if k.LockFileEx(h, 1, 0, 0xFFFFFFFF, 0xFFFFFFFF, c.create_string_buffer(64)) else c.get_last_error())\n")
+
+
+def _n_lock1342(m, d, c, w, k):   # L1
+    lock = d / "fixed.lock"
+
+    def con():
+        p = subprocess.run([sys.executable, "-c", _CON1342, str(lock)], capture_output=True, text=True, timeout=120)
+        if p.returncode or not p.stdout.startswith("lock "):
+            raise BoQua(f"KHÔNG ĐO ĐƯỢC: tiến trình con không tới được LockFileEx: rc={p.returncode} {p.stdout!r} {p.stderr[-300:]!r}") from OSError(p.returncode)
+        return p.stdout.strip()
+    with m._1174_win_lock(str(lock)):
+        giu = con()
+    nha = con()
+    assert nha == "lock 0", f"đối chứng: sau khi nhả, tiến trình con phải lấy được khoá: {nha}"
+    assert giu == "lock 33", f"L1: tiến trình con phải thất bại 33 (ERROR_LOCK_VIOLATION) khi khoá đang giữ: {giu}"
+    return giu, nha
+
+
+def _n_lock_noinherit1342(m, d, c, w, k):   # L2
+    _, _, k2, _ = m._1174_win_api_ghi()
+    co, doi_chung = w.DWORD(0xFFFFFFFF), w.DWORD(0xFFFFFFFF)
+    with m._1174_win_lock(str(d / "fixed.lock")) as handle:
+        assert k2.GetHandleInformation(handle, c.byref(co)), c.get_last_error()
+        os.set_handle_inheritable(handle, True)   # đối chứng: phép đo PHẢI thấy cờ khi cờ bật
+        assert k2.GetHandleInformation(handle, c.byref(doi_chung)), c.get_last_error()
+    if not doi_chung.value & 1:
+        raise BoQua("KHÔNG ĐO ĐƯỢC: đối chứng — GetHandleInformation không thấy cờ vừa bật") from OSError(doi_chung.value)
+    assert co.value & 1 == 0, f"L2: HANDLE_FLAG_INHERIT đang bật trên handle khoá: {co.value}"
+    return co.value, doi_chung.value
+
+
+def _n_lock_names1342(m, d, c, w, k):   # L3
+    (d / "dir").mkdir()
+    _junction1342(d / "junction", d / "dir")
+    try:
+        ghi = [(ten, _refuse1342(_vao_khoa1342, m, d / ten, kinds=(OSError, ValueError))) for ten in ("dir", "junction")]
+    finally:
+        os.rmdir(d / "junction")
+    assert (d / "dir").is_dir() and list((d / "dir").iterdir()) == [], "L3: thư mục bị đụng tới"
+    assert not (d / "new.lock").exists() and _vao_khoa1342(m, d / "new.lock") and (d / "new.lock").is_file(), "L3: tên chưa có phải được tạo và GIỮ LẠI"
+    assert _vao_khoa1342(m, d / "new.lock") and (d / "new.lock").read_bytes() == b"", "L3: khoá lại trên tệp đã có"
+    return ghi
+
+
+def _n_create1342(m, d, c, w, k):   # P1 + P2
+    from unittest.mock import patch
+    f, raw = d / "state.json", b"wp1342 r2\r\n\x00\xff"
+    m._1174_win_persist(str(f), raw, create=True)
+    assert f.read_bytes() == raw, "P1: sai bytes"
+    assert _tam1342(d) == [], f"P1: còn tên `.wp1174-*` sau create: {_tam1342(d)}"
+    assert os.stat(f).st_nlink == 1, os.stat(f).st_nlink
+    ghi = [_refuse1342(lambda: m._1174_win_persist(str(f), b"other", create=True), kinds=(FileExistsError,))]
+    with patch.object(m.os.path, "lexists", return_value=False):   # tên xuất hiện SAU vế kiểm tồn tại ⇒ CreateHardLinkW phải tự chặn
+        ghi.append(_refuse1342(lambda: m._1174_win_persist(str(f), b"other", create=True), kinds=(FileExistsError,)))
+    assert f.read_bytes() == raw and _tam1342(d) == [], ("P2: nội dung cũ đổi hoặc còn tệp tạm", f.read_bytes(), _tam1342(d))
+    return ghi
+
+
+def _n_update1342(m, d, c, w, k):   # P3
+    f, cu = d / "state.json", d / "old-image"
+    f.write_bytes(b"old")
+    os.link(f, cu)
+    try:
+        m._1174_win_persist(str(f), b"new", create=False)
+    except OSError as ex:
+        raise AssertionError(f"P3: update không thay được đích đang có: {ex!r}") from ex
+    assert (f.read_bytes(), cu.read_bytes()) == (b"new", b"old"), ("P3: đích/ảnh cũ sai bytes", f.read_bytes(), cu.read_bytes())
+    assert _tam1342(d) == [], f"P3: còn tên `.wp1174-*` sau update: {_tam1342(d)}"
+    return os.stat(f).st_nlink, os.stat(cu).st_nlink
+
+
+def _n_update_refuse1342(m, d, c, w, k):   # P4
+    (d / "dir").mkdir()
+    (d / "dir" / "sentinel").write_bytes(b"sentinel")
+    _junction1342(d / "junction", d / "dir")
+    try:
+        ghi = [(ten, _refuse1342(lambda: m._1174_win_persist(str(d / ten), b"new", create=False), kinds=(OSError, ValueError)))
+               for ten in ("dir", "junction", "missing")]
+        assert os.path.isdir(d / "junction") and os.listdir(d / "junction") == ["sentinel"], "P4: junction bị đổi"
+    finally:
+        os.rmdir(d / "junction")
+    assert (d / "dir" / "sentinel").read_bytes() == b"sentinel" and not os.path.lexists(d / "missing") and _tam1342(d) == [], "P4: đích bị đổi"
+    return ghi
+
+
+def _n_update_symlink1342(m, d, c, w, k):   # P5 — cần quyền tạo symlink (VM); thiếu quyền ⇒ KHÔNG ĐO ĐƯỢC
+    (d / "target").write_bytes(b"symlink-target")
+    try:
+        os.symlink(d / "target", d / "link")
+    except OSError as ex:
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: nền không tạo được symlink tệp (thiếu quyền): {ex}") from ex
+    truoc = os.readlink(d / "link")
+    ly_do = _refuse1342(lambda: m._1174_win_persist(str(d / "link"), b"new", create=False), reason="reparse point")
+    assert os.path.islink(d / "link") and os.readlink(d / "link") == truoc and (d / "target").read_bytes() == b"symlink-target", "P5: đổi"
+    assert _tam1342(d) == [], _tam1342(d)
+    return ly_do
+
+
+def _n_update_held1342(m, d, c, w, k):   # P6
+    f = d / "state.json"
+    f.write_bytes(b"old")
+    giu = m._1174_win_open(c, k, str(f), 0x80000000, 3, 0)   # GENERIC_READ, share READ|WRITE — KHÔNG share DELETE
+    try:
+        ly_do = _refuse1342(lambda: m._1174_win_persist(str(f), b"new", create=False), kinds=(OSError,))
+        assert f.read_bytes() == b"old", "P6: đích đổi bytes dù update báo lỗi"
+        assert _tam1342(d) == [], f"P6: còn tên `.wp1174-*` sau update lỗi: {_tam1342(d)}"
+    finally:
+        k.CloseHandle(giu)
+    m._1174_win_persist(str(f), b"new", create=False)
+    assert f.read_bytes() == b"new" and _tam1342(d) == [], "P6: đóng handle rồi update lại phải đạt"
+    return ly_do
+
+
+def _n_bindings1342(m, d, c, w, k):   # B1 — bảng dưới là HỢP ĐỒNG của ca, không đọc từ sản phẩm
+    _, _, k2, O = m._1174_win_api_ghi()
+    D, H, B, S, P, n = w.DWORD, w.HANDLE, w.BOOL, w.LPCWSTR, c.POINTER(O), c.sizeof(c.c_void_p)
+    bang = dict(LockFileEx=([H, D, D, D, D, P], B), UnlockFileEx=([H, D, D, D, P], B), CreateHardLinkW=([S, S, c.c_void_p], B),
+                MoveFileExW=([S, S, D], B), DeleteFileW=([S], B), GetHandleInformation=([H, c.POINTER(D)], B))
+    for ten, (args, kq) in bang.items():
+        fn = getattr(k2, ten)
+        assert list(fn.argtypes or ()) == args and fn.restype is kq, ("B1 signature " + ten, fn.argtypes, fn.restype)
+    bo_cuc = [(ten, getattr(O, ten).offset, getattr(O, ten).size) for ten, _ in O._fields_]
+    assert bo_cuc == [("Internal", 0, n), ("InternalHigh", n, n), ("Offset", 2 * n, 4), ("OffsetHigh", 2 * n + 4, 4),
+                      ("hEvent", 2 * n + 8, n)] and c.sizeof(O) == 3 * n + 8 and issubclass(O, c.Structure), ("B1 OVERLAPPED", bo_cuc, c.sizeof(O))
+    them = sorted({t for t in vars(k2) if not t.startswith("_")} - {t for t in vars(k) if not t.startswith("_")})
+    assert them == sorted(bang), ("B1: tập API bind thêm khác đúng sáu API của M1", them)
+    return bo_cuc, them
+
+
+CASES += [("wp1342_pure_lock_persist_refuse", _pure_r2_1342)]
+CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for ten, fn in (
+    ("lock_exclusive", _n_lock1342), ("lock_noinherit", _n_lock_noinherit1342), ("lock_names", _n_lock_names1342),
+    ("persist_create", _n_create1342), ("persist_update", _n_update1342), ("persist_update_refuse", _n_update_refuse1342),
+    ("persist_update_symlink", _n_update_symlink1342), ("persist_update_held", _n_update_held1342), ("persist_bindings", _n_bindings1342))]
+
+
 if __name__ == "__main__":
     sys.exit(main())

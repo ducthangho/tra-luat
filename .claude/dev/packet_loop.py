@@ -6486,6 +6486,103 @@ def _1174_win_read(path, between=None):
     return b"".join(raw)
 
 
+def _1174_win_api_ghi():
+    """r2 write bindings on the kernel32 object of _1174_win_api: exactly six more APIs plus OVERLAPPED, nothing else."""
+    c, w, k = _1174_win_api()
+
+    class OVERLAPPED(c.Structure):
+        _fields_ = [("Internal", c.c_size_t), ("InternalHigh", c.c_size_t), ("Offset", w.DWORD), ("OffsetHigh", w.DWORD),
+                    ("hEvent", w.HANDLE)]
+    D, H, B, S, O = w.DWORD, w.HANDLE, w.BOOL, w.LPCWSTR, c.POINTER(OVERLAPPED)
+    for name, args, result in (
+            ("LockFileEx", [H, D, D, D, D, O], B), ("UnlockFileEx", [H, D, D, D, O], B),
+            ("CreateHardLinkW", [S, S, c.c_void_p], B), ("MoveFileExW", [S, S, D], B), ("DeleteFileW", [S], B),
+            ("GetHandleInformation", [H, c.POINTER(D)], B)):
+        fn = getattr(k, name)
+        fn.argtypes, fn.restype = args, result
+    return c, w, k, OVERLAPPED
+
+
+def _1174_win_lock(path):
+    """Windows counterpart of _1174_lock; standalone in r2, no runtime caller. Returns the context manager (built inside).
+
+    GENERIC_READ|GENERIC_WRITE, share READ|WRITE (no DELETE), OPEN_ALWAYS on the reparse point itself, handle not
+    inheritable. LockFileEx blocks without timeout like flock(LOCK_EX); the lock file stays after release.
+    """
+    @contextlib.contextmanager
+    def held():
+        import ntpath
+        text = os.fspath(path)
+        _1174_require(_1174_win_path(text), "Windows drive path required")
+        _1174_win_volume(ntpath.dirname(text))
+        c, w, k, overlapped = _1174_win_api_ghi()
+        handle = k.CreateFileW(text, 0xC0000000, 3, None, 4, 0x00200000, None)
+        if handle is None or handle == c.c_void_p(-1).value:
+            raise c.WinError(c.get_last_error())
+        region, locked = overlapped(), False   # one OVERLAPPED (offset 0) lives for the whole context: lock and unlock
+        try:
+            identity = _1174_win_identity(c, w, k, handle, text)
+            if not k.LockFileEx(handle, 2, 0, 0xFFFFFFFF, 0xFFFFFFFF, c.byref(region)):
+                raise c.WinError(c.get_last_error())
+            locked = True
+            named = _1174_win_open(c, k, text, 0x80, 7, 0x00200000)   # the NAME must still be the locked file
+            try:
+                _1174_require(_1174_win_identity(c, w, k, named, text)[:2] == identity[:2], "fixed lock identity")
+            finally:
+                k.CloseHandle(named)
+            yield handle
+        finally:
+            if locked:
+                k.UnlockFileEx(handle, 0, 0xFFFFFFFF, 0xFFFFFFFF, c.byref(region))
+            k.CloseHandle(handle)
+    return held()
+
+
+def _1174_win_persist(path, raw, *, create):
+    """Windows counterpart of _1174_persist; standalone in r2, no runtime caller. The transaction must hold its lock.
+
+    No directory fsync exists on Windows: durability rests on os.fsync of the temporary (FlushFileBuffers) plus
+    MOVEFILE_WRITE_THROUGH and is declared, NOT measured (Q13). Create is hard-link no-replace; update replaces and
+    fails, leaving the target bytes, while another handle keeps the target open without sharing DELETE.
+    """
+    import ntpath
+    _1174_require(type(raw) is bytes and type(create) is bool, "persist bytes/mode")
+    text = os.fspath(path)
+    _1174_require(_1174_win_path(text), "Windows drive path required")
+    _1174_win_volume(ntpath.dirname(text))
+    c, w, k, _ = _1174_win_api_ghi()
+    if create:
+        if os.path.lexists(text):
+            raise FileExistsError(text)
+    else:
+        handle = _1174_win_open(c, k, text, 0x80, 7, 0x00200000)   # closed before publication
+        try:
+            _1174_win_identity(c, w, k, handle, text)
+        finally:
+            k.CloseHandle(handle)
+    temporary = None
+    try:
+        fd, temporary = tempfile.mkstemp(prefix=".wp1174-", dir=ntpath.dirname(text))
+        with os.fdopen(fd, "wb") as stream:
+            stream.write(raw)
+            stream.flush()
+            os.fsync(stream.fileno())
+        if create:
+            if not k.CreateHardLinkW(text, temporary, None):
+                error = c.get_last_error()
+                raise FileExistsError(text) if error == 183 else c.WinError(error)
+            if not k.DeleteFileW(temporary):
+                raise c.WinError(c.get_last_error())
+        elif not k.MoveFileExW(temporary, text, 1 | 8):
+            raise c.WinError(c.get_last_error())
+        temporary = None
+        _1174_require(_1174_win_read(text) == raw, "persist exact readback")
+    finally:
+        if temporary is not None:
+            # Only our own temporary image is removed, never a published final image.
+            os.unlink(temporary)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="packet_loop.py",

@@ -258,6 +258,13 @@ New-GoCase G5; if (Anc-Link) { $s0 = TreeSnap; $r = Run-Frag $FileGo
   Rec ((IsOk $r) -and $s0 -ceq (TreeSnap) -and (Test-Path -LiteralPath "$script:C\real-mp\daemon\$H")) G5-uninstall-ancestor-junction $r } else { $script:FAIL++; 'FAIL G5: junction' }
 New-GoCase G6; [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H2`n$NONCE`n", $utf8); $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept G6-uninstall-record-differs $r $s0
 New-GoCase G7; $s0 = TreeSnap; $r = Run-Frag $FileGo @{ FX_DIR = "$(Dm)\$H2" }; Expect-GoKept G7-uninstall-cli-differs $r $s0
+function Go-LinkReceipt([string]$Leaf) { New-Item -ItemType Directory -Path "$script:C\run2" | Out-Null
+  Move-Item -LiteralPath "$script:C\run\$Leaf" -Destination "$script:C\run2\$Leaf"; Try-Link SymbolicLink "$script:C\run\$Leaf" "$script:C\run2\$Leaf" }
+foreach ($pair in @(@('G9', '11-daemon-path.txt'), @('G10', '00-sophien.txt'))) { New-GoCase $pair[0]
+  if (Go-LinkReceipt $pair[1]) { $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept "$($pair[0])-uninstall-$($pair[1])-is-symlink" $r $s0 }
+  else { $script:SKIP++; "SKIP $($pair[0])-uninstall-$($pair[1])-is-symlink: khong tao duoc symlink tep - KHONG DO DUOC, khong tinh dat" } }
+New-GoCase G11; $s0 = TreeSnap; $r = Run-Frag $FileGo @{ PWTEST_DAEMON_SESSION_DIR = 'x' }; Expect-GoKept G11-uninstall-pwtest-hook $r $s0
+New-GoCase G12; [IO.File]::WriteAllText((Rec0), "$script:C\khac`n$(Dm)\$H`n$NONCE`n", $utf8); $s0 = TreeSnap; $r = Run-Frag $FileGo; Expect-GoKept G12-uninstall-record-line1-differs $r $s0
 
 # ===== TOAN LUONG: chinh khoi PowerShell Capture (khoi 3) + Cleanup (khoi 5) cua SKILL, CLI GIA co nhat ky va trang thai =====
 $psBlocks = @([regex]::Matches(($lines -join "`n"), '(?ms)^```powershell\n(.*?)^```\n') | ForEach-Object { $_.Groups[1].Value })
@@ -459,20 +466,28 @@ Mut pre-createnew C15 $FilePre '[IO.FileMode]::CreateNew' '[IO.FileMode]::Create
 Mut pre-shape C11 $FilePre '(Split-Path -Leaf $so[1]) -cmatch ''\A[0-9a-f]{16}\z''' '$true'
 Mut no-copy-retry L1 $FileClean '$i -lt 5 -and -not $copied' '$i -lt 1 -and -not $copied'
 Mut no-delete-retry L3 $FileClean '$i -lt 5 -and (Test-Path -LiteralPath $f.FullName)' '$i -lt 1 -and (Test-Path -LiteralPath $f.FullName)'
-function GoMut([string]$Name, [string]$Target, [string]$Old, [string]$New) { # Go ban dot bien phai XOA so phien o ca dich
+function GoMut([string]$Name, [string]$Target, [string]$Old, [string]$New, [string]$Old2 = '', [string]$New2 = '') { # Go ban dot bien phai XOA so phien o ca dich
   $body = [IO.File]::ReadAllText($FileGo, [Text.Encoding]::UTF8)
-  if (-not $body.Contains($Old)) { $script:FAIL++; "FAIL MUT go-${Name}: khong tim thay chuoi goc"; return }
-  $m = "$Scratch\mut-go-$Name.ps1"; [IO.File]::WriteAllText($m, $body.Replace($Old, $New), $bom); New-GoCase "M-go-$Name"
+  if (-not $body.Contains($Old) -or ($Old2 -and -not $body.Contains($Old2))) { $script:FAIL++; "FAIL MUT go-${Name}: khong tim thay chuoi goc"; return }
+  $body = $body.Replace($Old, $New); if ($Old2) { $body = $body.Replace($Old2, $New2) }
+  $m = "$Scratch\mut-go-$Name.ps1"; [IO.File]::WriteAllText($m, $body, $bom); New-GoCase "M-go-$Name"
+  $extra = $null
   switch ($Target) {
     'G2' { Remove-Item -LiteralPath "$script:C\run\11-daemon-path.txt" }
     'G3' { [IO.File]::WriteAllText("$script:C\run\11-daemon-path.txt", "$(Dm)\$H2\$NONCE.err`n", $utf8) }
     'G5' { if (-not (Anc-Link)) { $script:FAIL++; "FAIL MUT go-${Name}: junction"; return } }
-    'G6' { [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H2`n$NONCE`n", $utf8) } }
-  $r = Run-Frag $m
+    'G6' { [IO.File]::WriteAllText((Rec0), "$(Dm)`n$(Dm)\$H2`n$NONCE`n", $utf8) }
+    'G10' { if (-not (Go-LinkReceipt '00-sophien.txt')) { $script:SKIP++; "SKIP MUT go-${Name}: khong tao duoc symlink tep - KHONG DO DUOC"; return } }
+    'G11' { $extra = @{ PWTEST_DAEMON_SESSION_DIR = 'x' } }
+    'G12' { [IO.File]::WriteAllText((Rec0), "$script:C\khac`n$(Dm)\$H`n$NONCE`n", $utf8) } }
+  $r = Run-Frag $m $extra
   if ((IsOk $r) -and -not (Test-Path -LiteralPath "$(Dm)\$H") -and -not (Test-Path -LiteralPath "$script:C\real-mp\daemon\$H")) { $script:PASS++; "PASS MUT go-$Name -> $Target xoa (chot co rang)" }
   else { $script:FAIL++; "FAIL MUT go-$Name -> $Target van giu (chot khong do duoc)"; Get-Content -LiteralPath "$script:C\out" | ForEach-Object { "    $_" } } }
-GoMut no-receipt G2 '[IO.File]::ReadAllText("$env:TL_PW_RUN\11-daemon-path.txt") -ceq "$($so[1])\$($rec[2]).err`n" -and' '$true -and'
-GoMut receipt-parent G3 '[IO.File]::ReadAllText("$env:TL_PW_RUN\11-daemon-path.txt") -ceq "$($so[1])\$($rec[2]).err`n" -and' '$true -and'
+GoMut no-receipt G2 '[IO.File]::ReadAllText($g) -ceq "$($so[1])\$($rec[2]).err`n" -and' '$true -and' 'foreach ($t in $r0, $g) {' 'foreach ($t in $r0) {'
+GoMut receipt-parent G3 '[IO.File]::ReadAllText($g) -ceq "$($so[1])\$($rec[2]).err`n" -and' '$true -and'
+GoMut record-reparse G10 'foreach ($t in $r0, $g) {' 'foreach ($t in $g) {'
+GoMut hook G11 "if (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR) { throw 'PWTEST_DAEMON_SESSION_DIR' }" ''
+GoMut record-line1 G12 '$rec[0] -ceq $so[0] -and' '$true -and'
 GoMut link G5 'while ($ok -and $q) {' 'while ($false) {'
 GoMut record G6 '$rec[1] -ceq $so[1] -and' '$true -and'
 "TONG: $script:PASS dat / $($script:PASS + $script:FAIL) (bo qua khong do duoc: $script:SKIP)"

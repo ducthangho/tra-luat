@@ -199,8 +199,9 @@ chay_ghi() { local ten=$1 rc; shift
     D=$(printf %s "${so%%$'\n'*}" | base64 -d) && DH=$(printf %s "${so#*$'\n'}" | base64 -d) &&
     case "$D$DH" in *$'\n'*) false;; esac && case "$D" in /*) ;; *) false;; esac &&
     [ "$DH" = "$D/${DH##*/}" ] && [[ "${DH##*/}" =~ ^[0-9a-f]{16}$ ]] &&
-    [ "$(realpath -m -- "$DH")" = "$DH" ] &&   # không thành phần nào của đường dẫn (kể cả sổ phiên, thư mục hash) là liên kết
+    [ "$(realpath -m -- "$DH"; echo .)" = "$DH"$'\n.' ] &&   # không thành phần nào là liên kết; `echo .` giữ LF cuối mà $(…) cắt
     pre=$([ ! -e "$D" ] || find "$D" -mindepth 2 -maxdepth 2 -name "*$TL_PW_SESSION*" -print) && [ -z "$pre" ] &&
+    [ ! -e "$TL_PW_RUN/00-sophien.txt" ] && [ ! -L "$TL_PW_RUN/00-sophien.txt" ] &&   # mọi mục có sẵn (cả FIFO) ⇒ dừng
     ( set -C; printf '%s\n%s\n%s\n' "$D" "$DH" "$TL_PW_SESSION" > "$TL_PW_RUN/00-sophien.txt" ) ) ||
     { echo 'STOP trước open: phiên CHƯA tạo — KHÔNG chạy Cleanup' >&2; exit 1; }
   # --- du-luong-daemon-truoc-open: het
@@ -341,7 +342,7 @@ byte), rồi xoá tệp gốc. 0 hoặc nhiều mục, sai chỗ, quét lỗi, o
     [ "$(cat "$TL_PW_RUN/00-sophien.txt")" = "$D"$'\n'"$DH"$'\n'"$TL_PW_SESSION" ] ||
     { echo 'STOP: thiếu/khác sổ phiên + nonce ghi lúc Capture (00-sophien.txt) — không đóng phiên, không dọn' >&2; exit 1; }
   [ -z "${PWTEST_DAEMON_SESSION_DIR+x}" ] && [ -d "$D" ] && [ -d "$DH" ] &&
-    [ "$(realpath -e -- "$DH")" = "$DH" ] ||
+    [ "$(realpath -e -- "$DH"; echo .)" = "$DH"$'\n.' ] ||
     { echo 'STOP: sổ phiên/thư mục hash không phải thư mục thường, đường dẫn có liên kết, hoặc có hook test — không đóng phiên, không dọn' >&2; exit 1; }
   # --- du-luong-daemon-dau-cleanup: het
   for ten in 08-close 09-delete-data 10-verify; do
@@ -370,7 +371,7 @@ byte), rồi xoá tệp gốc. 0 hoặc nhiều mục, sai chỗ, quét lỗi, o
   # --- du-luong-daemon: bat dau
   [ -z "${PWTEST_DAEMON_SESSION_DIR+x}" ] || { echo 'STOP: PWTEST_DAEMON_SESSION_DIR' >&2; exit 1; }
   case "$D" in /*) ;; *) echo 'STOP: sổ phiên không tuyệt đối' >&2; exit 1;; esac
-  [ -d "$D" ] && [ -d "$DH" ] && [ "$(realpath -e -- "$DH")" = "$DH" ] ||
+  [ -d "$D" ] && [ -d "$DH" ] && [ "$(realpath -e -- "$DH"; echo .)" = "$DH"$'\n.' ] ||
     { echo 'STOP: sổ phiên không phải thư mục thường hoặc đường dẫn có liên kết' >&2; exit 1; }
   for ten in 11-daemon.err 11-daemon-path.txt; do
     [ ! -e "$TL_PW_RUN/$ten" ] && [ ! -L "$TL_PW_RUN/$ten" ] || { echo "STOP: output cũ $ten, không ghi đè" >&2; exit 1; }
@@ -470,9 +471,9 @@ Gỡ bản cài: kiểm không còn tiến trình dùng nó (`pgrep -af "$TL_PW_
 CommandLine -like "*$env:TL_PW_ROOT*"`; chỉ đọc, không giết), rồi xoá đúng `install/<rev>` + `browsers/<rev>` của revision
 bị loại; GIỮ revision trước và `runs/`; không `npm uninstall -g`, không đụng lõi. Sổ phiên của bản cài bị loại là thư mục
 cha trong `11-daemon-path.txt` của các run dùng nó (chưa có tệp này ⇒ không xoá sổ phiên). TRƯỚC khi xoá `install/<rev>`,
-hỏi sổ phiên bằng đúng lệnh `node -e` của Capture (với `TL_PW_INSTALL` của revision ấy, từ `work`) và đòi: thư mục cha ấy =
-dòng 2 câu trả lời = dòng 2 `00-sophien.txt`, là thư mục thường, không thành phần nào của đường dẫn là liên kết; khác/thiếu/
-liên kết ⇒ không xoá sổ phiên, ghi biên nhận. Sau khi xoá `install/<rev>` + `browsers/<rev>`, xoá thư mục ấy CHỈ khi rỗng,
+hỏi sổ phiên bằng đúng lệnh `node -e` của Capture (với `TL_PW_INSTALL` của revision ấy, từ `work`) và đòi: `00-sophien.txt`,
+`11-daemon-path.txt` là tệp thường (không liên kết), không hook; `00` trùng nguyên câu trả lời + nonce; `11` = `<dòng 2>/<nonce>.err`;
+thư mục là thư mục thường, không thành phần nào của đường dẫn là liên kết; khác/thiếu/liên kết ⇒ không xoá sổ phiên, ghi biên nhận. Sau khi xoá `install/<rev>` + `browsers/<rev>`, xoá thư mục ấy CHỈ khi rỗng,
 bằng thao tác không đệ quy tự từ chối khi còn mục (`rmdir -- <thư mục>`; PowerShell:
 `[IO.Directory]::Delete('<thư mục>', $false)`); bị từ chối ⇒ giữ nguyên, ghi biên nhận. Mã dưới chạy cho MỘT run
 (`TL_PW_RUN`) với `TL_PW_INSTALL` = bản cài bị loại; phần (1) chạy TRƯỚC khi xoá `install/<rev>`, phần (2) SAU đó.
@@ -480,14 +481,16 @@ bằng thao tác không đệ quy tự từ chối khi còn mục (`rmdir -- <th
 # (1) TRƯỚC khi xoá install/<rev>
   # --- du-luong-daemon-go-truoc: bat dau
   GO_DH=$( trap - ERR; set +eE
+    r=$TL_PW_RUN/00-sophien.txt g=$TL_PW_RUN/11-daemon-path.txt
+    [ -z "${PWTEST_DAEMON_SESSION_DIR+x}" ] && [ -f "$r" ] && [ ! -L "$r" ] && [ -f "$g" ] && [ ! -L "$g" ] &&
     so=$(cd "$TL_PW_ROOT/work" && "$TL_PW_NODE" -e \
       'const r=require(process.argv[1]),c=r.createClientInfo(),b=s=>Buffer.from(s).toString(`base64`);if(c.workspaceDir)process.exit(3);console.log(b(r.baseDaemonDir()));console.log(b(c.daemonProfilesDir))' \
       "$TL_PW_INSTALL/node_modules/playwright-core/lib/tools/cli-client/registry.js") &&
-    DH=$(printf %s "${so#*$'\n'}" | base64 -d) && n=$(sed -n 3p "$TL_PW_RUN/00-sophien.txt") &&
-    [[ "$n" =~ ^tl-pw-[0-9a-f]{12}$ ]] && [ -f "$TL_PW_RUN/11-daemon-path.txt" ] &&
-    [ "$(cat "$TL_PW_RUN/11-daemon-path.txt")" = "$DH/$n.err" ] && [ "$(sed -n 2p "$TL_PW_RUN/00-sophien.txt")" = "$DH" ] &&
-    [ -d "$DH" ] && [ "$(realpath -e -- "$DH")" = "$DH" ] && printf %s "$DH" ) ||
-    { GO_DH=; echo 'GIỮ sổ phiên: thiếu/khác 11-daemon-path.txt, 00-sophien.txt hoặc câu trả lời CLI, hoặc có liên kết' >&2; }
+    D=$(printf %s "${so%%$'\n'*}" | base64 -d) && DH=$(printf %s "${so#*$'\n'}" | base64 -d) && n=$(sed -n 3p "$r") &&
+    [[ "$n" =~ ^tl-pw-[0-9a-f]{12}$ ]] && [ "$(cat "$r"; echo .)" = "$D"$'\n'"$DH"$'\n'"$n"$'\n.' ] &&
+    [ "$(cat "$g"; echo .)" = "$DH/$n.err"$'\n.' ] &&
+    [ -d "$DH" ] && [ "$(realpath -e -- "$DH"; echo .)" = "$DH"$'\n.' ] && printf %s "$DH" ) ||
+    { GO_DH=; echo 'GIỮ sổ phiên: thiếu/khác/liên kết 11-daemon-path.txt hoặc 00-sophien.txt, CLI trả khác, có hook, hoặc đường dẫn có liên kết' >&2; }
   # --- du-luong-daemon-go-truoc: het
 # (2) xoá install/<rev> + browsers/<rev> như trên, rồi:
   # --- du-luong-daemon-go-sau: bat dau
@@ -497,20 +500,24 @@ bằng thao tác không đệ quy tự từ chối khi còn mục (`rmdir -- <th
 ```powershell
 # (1) TRƯỚC khi xoá install\<rev>
   # --- du-luong-daemon-go-truoc: bat dau
-  $goDh = $null
-  try { $js = 'const r=require(process.argv[1]),c=r.createClientInfo(),b=s=>Buffer.from(s).toString(`base64`);if(c.workspaceDir)process.exit(3);console.log(b(r.baseDaemonDir()));console.log(b(c.daemonProfilesDir))'
+  $goDh = $null; $rp = [IO.FileAttributes]::ReparsePoint
+  try { $r0 = "$env:TL_PW_RUN\00-sophien.txt"; $g = "$env:TL_PW_RUN\11-daemon-path.txt"
+    foreach ($t in $r0, $g) {   # tệp thường, không reparse, TRƯỚC khi đọc
+      if (-not (Test-Path -LiteralPath $t -PathType Leaf) -or ((Get-Item -Force -LiteralPath $t).Attributes -band $rp)) { throw "biên nhận: $t" } }
+    if (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR) { throw 'PWTEST_DAEMON_SESSION_DIR' }
+    $js = 'const r=require(process.argv[1]),c=r.createClientInfo(),b=s=>Buffer.from(s).toString(`base64`);if(c.workspaceDir)process.exit(3);console.log(b(r.baseDaemonDir()));console.log(b(c.daemonProfilesDir))'
     Push-Location "$env:TL_PW_ROOT\work"
     try { $raw = @(& $env:TL_PW_NODE -e $js "$env:TL_PW_INSTALL\node_modules\playwright-core\lib\tools\cli-client\registry.js"); $soRc = $LASTEXITCODE } finally { Pop-Location }
     $so = @($raw | ForEach-Object { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) })
-    $rec = [IO.File]::ReadAllText("$env:TL_PW_RUN\00-sophien.txt") -split "`n"
+    $rec = [IO.File]::ReadAllText($r0) -split "`n"
     $ok = ($soRc -eq 0 -and $so.Count -eq 2 -and $rec.Count -eq 4 -and $rec[2] -cmatch '\Atl-pw-[0-9a-f]{12}\z' -and
-      [IO.File]::ReadAllText("$env:TL_PW_RUN\11-daemon-path.txt") -ceq "$($so[1])\$($rec[2]).err`n" -and $rec[1] -ceq $so[1] -and
-      (Test-Path -LiteralPath $so[1] -PathType Container))
+      $rec[0] -ceq $so[0] -and $rec[1] -ceq $so[1] -and $rec[3] -ceq '' -and
+      [IO.File]::ReadAllText($g) -ceq "$($so[1])\$($rec[2]).err`n" -and (Test-Path -LiteralPath $so[1] -PathType Container))
     $q = $so[1]; while ($ok -and $q) {
-      $ok = -not ((Get-Item -Force -LiteralPath $q).Attributes -band [IO.FileAttributes]::ReparsePoint); $q = Split-Path -Parent $q }
+      $ok = -not ((Get-Item -Force -LiteralPath $q).Attributes -band $rp); $q = Split-Path -Parent $q }
     if ($ok) { $goDh = $so[1] }
   } catch { $goDh = $null }
-  if (-not $goDh) { Write-Warning 'GIỮ sổ phiên: thiếu/khác 11-daemon-path.txt, 00-sophien.txt hoặc câu trả lời CLI, hoặc có liên kết' }
+  if (-not $goDh) { Write-Warning 'GIỮ sổ phiên: thiếu/khác/liên kết 11-daemon-path.txt hoặc 00-sophien.txt, CLI trả khác, có hook, hoặc đường dẫn có liên kết' }
   # --- du-luong-daemon-go-truoc: het
 # (2) xoá install\<rev> + browsers\<rev> như trên, rồi:
   # --- du-luong-daemon-go-sau: bat dau

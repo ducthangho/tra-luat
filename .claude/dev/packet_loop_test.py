@@ -12410,10 +12410,54 @@ WP1174_REQUIRED = {"wp1174_" + name for name in (
     "durability_ordinary_pair durability_fsync_readback durability_publish_noreplace durability_legacy_tombstone durability_cached_writer "
     "lifecycle_identity_advisory lifecycle_budget_replay lifecycle_human_valid lifecycle_human_negative lifecycle_first_publication lifecycle_guard_readonly lifecycle_scoped_lifecycle lifecycle_legacy_unchanged "
     "profile_native_linux profile_unsupported windows_claim_rejected status_closed gate_required_skip gate_evidence_schema").split()}
+# wp1370: the activity-collector cases are required IDs (23 new, 85 -> 108).
+WP1174_REQUIRED |= {"wp1174_activity_" + name for name in (
+    "reduced_payload multipage_anchor older_page_fail same_timestamp_fail force_push_preimage deletion_preaudit tag_coverage "
+    "receipt_residuals no_anchor object_unfetchable cursor_foreign pr_foreign_head intro_kinds receipt_v1 accept_roundtrip deletion_unexplained matching_refs_unpaginated tip_non_commit "
+    "budget_bytes_cumulative budget_pages_cumulative budget_overflow_unreported deadline_processing fetch_timeout_group").split()}
 WP1174_REQUIRED |= {"wp1174_" + kind + "_" + name for kind in ("writer", "race") for name in _WP1174_WRITERS}
 WP1174_BOTH = {"wp1174_" + name for name in ("admission_valid admission_wrong_scope witness_valid witness_keyset witness_int_bool witness_json_bytes "
     "witness_fresh_reserved witness_import_retry witness_suspended witness_active_pending lifecycle_legacy_unchanged status_closed").split()}
 
+
+
+def _activity1370(ident, kind, ref, before, after, when, actor="ducthangho"):
+    """One Repository activities API record with exactly the measured key set."""
+    return dict(id=ident,node_id="RA_"+str(ident),activity_type=kind,ref=ref,before=before,after=after,timestamp=when,actor=dict(login=actor))
+
+
+def _fetch1370(m, pages, repo_id=123):
+    """Fake transport for the wp1370 collector: repository facts, cursor-paged
+    activity (Link header on the numeric-repository path, as measured), and the
+    page-numbered PR family. `pages["activity"]` is newest first.
+
+    The two git/matching-refs families behave as measured on the real server
+    (2026-11-17): the full list for ANY page/per_page and no Link header
+    (`pages["refs_link"]` can plant one). Rows written in the short fixture
+    form get their server fields (url, object.type, object.url) filled in."""
+    api="https://api.github.com/repos/"+m._1174_REPO+"/git/"
+    def ref_row(row):
+        if not (type(row) is dict and type(row.get("object")) is dict and type(row.get("ref")) is str):return row
+        target=dict(row["object"]);target.setdefault("type","commit")
+        if type(target.get("sha")) is str and type(target["type"]) is str:target.setdefault("url",api+target["type"]+"s/"+target["sha"])
+        full=dict(row,object=target);full.setdefault("url",api+row["ref"]);return full
+    def fetch(endpoint,**limits):
+        if endpoint=="repos/"+m._1174_REPO:
+            return pages.get("repo",dict(id=repo_id,full_name=m._1174_REPO,default_branch="master",created_at="2026-07-05T00:00:00Z"))
+        path,_,query=endpoint.partition("?")
+        if path in ("repos/"+m._1174_REPO+"/activity","repositories/"+str(repo_id)+"/activity"):
+            assert limits.get("link") is True and limits.get("repo_id")==repo_id,(endpoint,limits)
+            offset=([int(x[6:]) for x in query.split("&") if x.startswith("after=")] or [0])[0]
+            width=pages.get("activity_page_size",100);rows=pages["activity"][offset:offset+width]
+            more=offset+width<len(pages["activity"])
+            return rows,('<https://api.github.com/repositories/%d/activity?per_page=100&after=%d>; rel="next"'%(repo_id,offset+width) if more else pages.get("activity_last_link"))
+        family=endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]
+        if family.startswith("git/matching-refs/"):
+            rows=pages[family];rows=[ref_row(row) for row in rows] if type(rows) is list else rows
+            return (rows,pages.get("refs_link",{}).get(family)) if limits.get("link") else rows
+        assert not limits.get("link"),(endpoint,limits)
+        return pages[family]
+    return fetch
 
 
 def _human_fixture1174(c, change=None):
@@ -12430,21 +12474,25 @@ def _human_fixture1174(c, change=None):
     args.packet,args.revision,args.generation,args.root,args.admission=1187,1,1,str(w.resolve()),"fixture"
     audit=json.loads(Path(args.human_audit_comment).read_bytes())
     before=_g(w,"rev-parse",args.head+"^1")
-    events=[dict(id="12",type="PushEvent",created_at="2026-11-04T09:01:00Z",repo=dict(name=m._1174_REPO),actor=dict(login="ducthangho"),payload=dict(head=args.head,before=before,ref="refs/heads/candidate")),
-            dict(id="11",type="PushEvent",created_at="2026-11-04T08:59:00Z",repo=dict(name=m._1174_REPO),actor=dict(login="ducthangho"),payload=dict(head=before,before=before,ref="refs/heads/master"))]
-    pages={"events":events,"git/matching-refs/heads":[dict(ref="refs/heads/candidate",object=dict(sha=args.head))],"git/matching-refs/tags":[],"pulls":[]}
+    # wp1370 fixture migration (events -> activity), newest first:
+    #   PushEvent 12 (post-audit push of H)      -> activity 12 `push` before->H on candidate;
+    #   PushEvent 11 (pre-audit boundary event)  -> activity 11 `push` on master, unrelated to H;
+    #   "an earlier retained boundary exists"    -> activity 1, the default-branch
+    #   `branch_creation` anchor (before all zero), which is now the coverage boundary.
+    root_oid=_g(w,"rev-list","--max-parents=0",args.head)
+    activity=[_activity1370(12,"push","refs/heads/candidate",before,args.head,"2026-11-04T09:01:00Z"),
+            _activity1370(11,"push","refs/heads/master",root_oid,before,"2026-11-04T08:59:00Z"),
+            _activity1370(1,"branch_creation","refs/heads/master","0"*40,root_oid,"2026-07-05T00:00:01Z")]
+    pages={"activity":activity,"git/matching-refs/heads":[dict(ref="refs/heads/candidate",object=dict(sha=args.head))],"git/matching-refs/tags":[],"pulls":[]}
     server_transition=json.loads(Path(args.human_transition_comment).read_bytes()) if args.human_transition_comment else None
     server_run=json.loads(Path(args.human_remote_run).read_bytes())
     server_runs=json.loads(Path(args.workflow_runs).read_bytes())
     def fetch(endpoint,**limits):
-        if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
         if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
         if endpoint.endswith("/actions/runs/"+str(server_run["id"])):return server_run
         if "/actions/runs?" in endpoint:return server_runs
         if server_transition and endpoint.endswith("/issues/comments/"+str(server_transition["id"])):return server_transition
-        family=endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]
-        assert family in pages,endpoint
-        return pages[family]
+        return _fetch1370(m,pages)(endpoint,**limits)
     facts=dict(lease=lease,spec=spec,spec_sha256=hashlib.sha256(spec).hexdigest(),canonical_oid=_g(w,"rev-parse","refs/remotes/origin/master"))
     @contextlib.contextmanager
     def canonical(_):yield w
@@ -12598,13 +12646,13 @@ def _lifecycle1174(kind):
                     d=c.tmp/("current-service" if service else "current-native");d.mkdir()
                     _current_policy1174(Ctx(c.script,d),service)
                 _static_writers1174(c,m)
-                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==85
+                assert len(_WP1174_WRITERS)==14 and len(WP1174_REQUIRED)==108
                 applicable=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
                 required={n:None for n in applicable}
                 assert _required1174(required,applicable)
                 required.pop("wp1174_init_fresh")
                 assert not _required1174(required,applicable),"missing required ID accepted"
-                assert len(_WP1174_FULL_CASE_IDS)==85 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
+                assert len(_WP1174_FULL_CASE_IDS)==108 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"
                 assert m._1174_IMPLEMENTATION_COMPLETE is True,"implementation marker does not match completed inventory"
             return
         if kind=="human_negative":
@@ -12635,27 +12683,36 @@ def _lifecycle1174(kind):
             Path(args.human_audit_comment).write_bytes(original)
         elif kind=="first_publication":
             _collector_limits1174(c,m,w,args,audit,pages)
-            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
-            assert receipt["status"]=="RECORDED_EARLIEST_MATCH" and receipt["earliest"]["id"]=="12"
+            # wp1370 mapping of the original sub-checks (same order, same intent):
+            #   healthy PushEvent chain -> RECORDED          => healthy activity chain to the anchor -> RECORDED;
+            #   pre-audit PushEvent whose `before` is H -> FAIL => pre-audit `force_push` whose before is H -> FAIL;
+            #   no retained pre-audit boundary event -> UNKNOWN => no default-branch creation anchor -> UNKNOWN;
+            #   pre-audit PushEvent of H -> FAIL             => pre-audit `push` of H -> FAIL;
+            #   empty events -> UNKNOWN                      => empty activity feed -> UNKNOWN.
+            fetch=_fetch1370(m,pages)
+            receipt=m._1174_collect(fetch,w,args.head,audit,123)
+            assert receipt["status"]=="RECORDED_EARLIEST_MATCH" and receipt["earliest"]["id"]=="12",receipt
+            assert receipt["schema"]=="wp1174_publication_receipt.v2" and receipt["query_scope"][0]=="activity" and receipt["event_scope"]=="repository_activity"
+            assert receipt["cursor_coverage"]=={"activity":1,"git/matching-refs/heads":1,"git/matching-refs/tags":1,"pulls?state=all":1}
             # A force-removal before the audit is still prior publication:
-            # PushEvent.before is the old ref value even though after no
-            # longer contains H.  Republishing H later cannot launder it.
-            removal=copy.deepcopy(pages["events"][0])
-            removal.update(id="10",created_at="2026-11-04T08:58:30Z")
-            removal["payload"].update(before=args.head,head=_g(w,"rev-parse",args.head+"^1"))
-            pages["events"].insert(1,removal)
-            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
-            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="10","PushEvent preimage publication missed"
-            pages["events"].pop(1)
-            old_boundary=pages["events"].pop()
-            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            # the activity `before` is the old ref value even though `after`
+            # no longer contains H.  Republishing H later cannot launder it.
+            # v2 `earliest` is the earliest introduction (id 12), not the
+            # preimage record; the pre-audit exposure itself decides FAIL.
+            removal=_activity1370(10,"force_push","refs/heads/candidate",args.head,_g(w,"rev-parse",args.head+"^1"),"2026-11-04T08:58:30Z")
+            pages["activity"].insert(2,removal)
+            receipt=m._1174_collect(fetch,w,args.head,audit,123)
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12","activity preimage publication missed"
+            pages["activity"].pop(2)
+            old_boundary=pages["activity"].pop()
+            receipt=m._1174_collect(fetch,w,args.head,audit,123)
             assert receipt["status"]=="UNKNOWN","retained history boundary required"
-            pages["events"].append(old_boundary)
-            pages["events"][0]["created_at"]="2026-11-04T08:58:00Z"
-            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
-            assert receipt["status"]=="FAIL"
-            pages["events"]=[]
-            receipt=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123)
+            pages["activity"].append(old_boundary)
+            pages["activity"][0]["timestamp"]="2026-11-04T08:58:00Z"
+            receipt=m._1174_collect(fetch,w,args.head,audit,123)
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12"
+            pages["activity"]=[]
+            receipt=m._1174_collect(fetch,w,args.head,audit,123)
             assert receipt["status"]=="UNKNOWN","retention must not become residual"
         elif kind=="guard_readonly":
             argv=["guard-first-publication","--packet",str(args.packet),"--revision","1","--generation","1","--admission","fixture","--root",args.root,
@@ -12712,7 +12769,7 @@ def _evidence_schema1174(c):
     required=WP1174_REQUIRED-{"wp1174_windows_claim_rejected"}
     record=dict(schema="wp1174_native_report.v1",actual_os="Linux",scope="wp1174_candidate",proof_eligible=True,source_pr=1275,repo="ducthangho/tra-luat",pr=1275,
         run_id="1",run_attempt="1",job="gate-packet-loop",checkout_sha=m,checkout_tree="c"*40,executed_sha=h,executed_tree="d"*40,expected_head=h,expected_tree="d"*40,
-        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=84,
+        path_hashes={p:dict(M="e"*64,H="e"*64,clone="e"*64) for p in _WP1174_PATHS},producer_digests=dict(product="f"*64,test="0"*64),required_ids=sorted(required),required_count=107,
         outcomes={n:"passed" for n in required},profiles={n:"native_required" if n=="wp1174_profile_native_linux" else "fixture_or_pure" for n in required},
         native_probe=dict(status="passed",checks={k:True for k in ("mount","statfs","same_mount","lock_process","cloexec","link_noreplace","replace","fsync_file","fsync_dir","readback","tripwire")}),
         native_seam=False,overall_status="passed",windows_oracle="not_run_platform; deferred_to_windows_focused")
@@ -12883,13 +12940,12 @@ def _accept_entry1174(c,race=False,snapshot=False,chain=None,workflow_case=None,
     if target_facts is not None:
         facts["target_authority"]=target_facts["target_authority"]
     def fetch(endpoint,**limits):
-        if endpoint=="repos/"+m._1174_REPO:return dict(id=123,full_name=m._1174_REPO)
         if endpoint==f"repos/{m._1174_REPO}/issues/comments/{audit['id']}":return audit
         if endpoint.endswith("/actions/runs/2"):return json.loads(Path(hargs.human_remote_run).read_bytes())
         if "/actions/runs?" in endpoint:
             if workflow_case=="api_swap":Path(hargs.workflow_runs).write_bytes(b"{}\n")
             return files["workflow_runs"]
-        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+        return _fetch1370(m,pages)(endpoint,**limits)
     workflow_path=Path(hargs.workflow_runs)
     original_workflow=workflow_path.read_bytes()
     if workflow_case=="bytes":
@@ -13578,21 +13634,37 @@ def _collector_limits1174(c,m,w,args,audit,pages):
     expired=m._1174_collect(lambda *args,**kwargs:(_ for _ in ()).throw(AssertionError("expired collector fetched")),w,args.head,audit,123,deadline=time.time()-1)
     assert expired["status"]=="UNKNOWN" and expired["earliest"] is None and expired["dag_coverage"] is False
     clock=[1000.0];calls=[]
+    served=_fetch1370(m,pages)
     def late_fetch(endpoint,**limits):
         calls.append(limits);clock[0]=limits["deadline"]+0.01
-        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+        return served(endpoint,**limits)
     with patch.object(m.time,"time",side_effect=lambda:clock[0]):
         result=m._1174_collect(late_fetch,w,args.head,audit,123,deadline=1000.05)
     assert result["status"]=="UNKNOWN" and calls and calls[0]["deadline"]<=1000.05
-    assert 0<calls[0]["max_bytes"]<=30*1024*1024
+    assert 0<calls[0]["max_bytes"]<=64*1024*1024 and len(calls)==1
     # A final empty page that arrives after the deadline is not completeness.
+    # wp1370: five reads per pass (repository, one activity page, heads, tags, PRs).
     clock[0]=1000;count=[0]
     def final_late(endpoint,**limits):
         count[0]+=1
-        if count[0]==4:clock[0]=limits["deadline"]+1
-        return pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+        if count[0]==5:clock[0]=limits["deadline"]+1
+        return served(endpoint,**limits)
     with patch.object(m.time,"time",side_effect=lambda:clock[0]):result=m._1174_collect(final_late,w,args.head,audit,123,deadline=1000.05)
-    assert count[0]==4 and result["status"]=="UNKNOWN"
+    assert count[0]==5 and result["status"]=="UNKNOWN"
+    # wp1370 ceilings: the byte budget (64 MB) and the page budget (1000 pages
+    # over all families) end in UNKNOWN, never in a truncated success.
+    sizes=[]
+    def heavy(endpoint,**limits):
+        sizes.append(limits["max_bytes"]);limits["on_bytes"](40*1024*1024);return served(endpoint,**limits)
+    result=m._1174_collect(heavy,w,args.head,audit,123)
+    assert result["status"]=="UNKNOWN" and sizes[:2]==[64*1024*1024,24*1024*1024] and all(x>0 for x in sizes),(result,sizes[:4])
+    endless=[0]
+    def unbounded(endpoint,**limits):
+        if "/activity" not in endpoint:return served(endpoint,**limits)
+        endless[0]+=1
+        return [],'<https://api.github.com/repositories/123/activity?per_page=100&after=%d>; rel="next"'%endless[0]
+    result=m._1174_collect(unbounded,w,args.head,audit,123)
+    assert result["status"]=="UNKNOWN" and endless[0]==999 and "activity" not in result["cursor_coverage"],(result,endless)
     # A DAG answer returning after its supplied deadline also loses all credit.
     clock[0]=1000;deadlines=[]
     def slow_git(root,*argv,deadline=None):
@@ -13600,7 +13672,7 @@ def _collector_limits1174(c,m,w,args,audit,pages):
         clock[0]=deadline+1
         return 0,b""
     with patch.object(m.time,"time",side_effect=lambda:clock[0]),patch.object(m,"_git_do",slow_git):
-        result=m._1174_collect(lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]],w,args.head,audit,123,deadline=1000.05)
+        result=m._1174_collect(served,w,args.head,audit,123,deadline=1000.05)
     assert deadlines and all(d<=1000.05 for d in deadlines) and result["status"]=="UNKNOWN"
     clock[0]=1000;timeouts=[]
     def late_run(*argv,**kwargs):
@@ -13620,8 +13692,8 @@ MUTANTS["m1174_api_repo_env"] = ('env.pop("GH_REPO",None)','pass # retain caller
 MUTANTS["m1174_transport_timeout"] = ('remaining>0,"transport deadline"','True,"transport deadline"',["wp1174_admission_candidate_root"])
 
 
-MUTANTS["m1174_transport_orphan"] = ('try:os.killpg(child.pid,signal.SIGKILL)\n        except ProcessLookupError:pass',
-    'try:\n            if child.poll() is None:os.killpg(child.pid,signal.SIGKILL)\n        except ProcessLookupError:pass',["wp1174_admission_candidate_root"])
+MUTANTS["m1174_transport_orphan"] = ('try:os.killpg(child.pid,signal.SIGKILL)\n            except ProcessLookupError:pass',
+    'try:\n                if child.poll() is None:os.killpg(child.pid,signal.SIGKILL)\n            except ProcessLookupError:pass',["wp1174_admission_candidate_root"])
 MUTANTS["m1174_collector_expired_entry"] = ('last_status,dag,earliest = "UNKNOWN",False,None','last_status,dag,earliest = "RECORDED_EARLIEST_MATCH",False,None',["wp1174_lifecycle_first_publication"])
 MUTANTS["m1174_git_late_result"] = ('if deadline is not None and time.time()>=deadline:return -1,b""','if False:return -1,b""',["wp1174_lifecycle_first_publication"])
 MUTANTS["m1174_publication_preimage"] = ('candidates = [("after", after)] + ([] if before == zero else [("before", before)])',
@@ -13685,13 +13757,18 @@ def _r12_publication1174(c):
     import copy, contextlib, io
     from unittest.mock import patch
     m,w,args,a,audit,pages,seams=_human_fixture1174(c)
-    original=copy.deepcopy(pages["events"])
+    # wp1370 mapping: every PushEvent(before, head) stimulus below is the same
+    # (before, after) pair as one activity record on refs/heads/candidate. The
+    # activity type is the one the server would record for that pair: zero
+    # after -> `branch_deletion`, zero before -> `branch_creation`, a rewind ->
+    # `force_push`, otherwise `push`. Oracles are unchanged.
+    original=copy.deepcopy(pages["activity"])
     parent=_g(w,"rev-parse",args.head+"^1")
     _g(w,"checkout","-qb","publication-descendant",args.head)
     (w/"descendant.txt").write_text("descendant\n")
     _g(w,"add","descendant.txt");_g(w,"commit","-qm","descendant control")
     descendant=_g(w,"rev-parse","HEAD")
-    fetch=lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+"/",1)[1].split("?",1)[0]]
+    fetch=_fetch1370(m,pages)
     argv=["guard-first-publication","--packet",str(args.packet),"--revision","1","--generation","1","--admission","fixture","--root",args.root,
         "--head",args.head,"--pr",str(args.pr),"--coordinator-id","coordinator-1","--receipt",args.receipt,
         "--human-audit-comment",args.human_audit_comment,"--human-remote-run",args.human_remote_run,"--workflow-runs",args.workflow_runs]
@@ -13699,12 +13776,12 @@ def _r12_publication1174(c):
             (args.head,"0"*40,"08:59:30","FAIL"),("f"*40,parent,"08:59:30","UNKNOWN"),
             (parent,"f"*40,"08:59:30","UNKNOWN"),("0"*40,args.head,"09:01:00","RECORDED_EARLIEST_MATCH"),
             (parent,descendant,"09:01:00","RECORDED_EARLIEST_MATCH")):
-        pages["events"]=copy.deepcopy(original)
+        pages["activity"]=copy.deepcopy(original)
         pages["git/matching-refs/heads"][0]["object"]["sha"]=after if status=="RECORDED_EARLIEST_MATCH" else args.head
-        event=dict(id="13",type="PushEvent",created_at="2026-11-04T"+when+"Z",repo=dict(name=m._1174_REPO),
-            actor=dict(login="ducthangho"),payload=dict(before=before,head=after,ref="refs/heads/candidate"))
-        if status=="RECORDED_EARLIEST_MATCH":pages["events"][0]=event
-        else:pages["events"].append(event)
+        kind=("branch_deletion" if after=="0"*40 else "branch_creation" if before=="0"*40 else "force_push" if after==parent else "push")
+        event=_activity1370(13,kind,"refs/heads/candidate",before,after,"2026-11-04T"+when+"Z")
+        if status=="RECORDED_EARLIEST_MATCH":pages["activity"][0]=event
+        else:pages["activity"].insert(1,event)
         receipt=m._1174_collect(fetch,w,args.head,audit,123)
         assert receipt["status"]==status,(before,after,status,receipt)
         Path(args.receipt).write_bytes(m._1174_bytes(receipt))
@@ -13716,14 +13793,13 @@ def _r12_publication1174(c):
     pages["git/matching-refs/heads"][0]["object"]["sha"]=descendant
     # A post-audit preimage without an earlier observed introduction cannot
     # establish first publication, even when its postimage is a descendant.
-    pages["events"]=copy.deepcopy(original)
-    pages["events"][0]["payload"].update(before=args.head,head=descendant)
+    pages["activity"]=copy.deepcopy(original)
+    pages["activity"][0].update(before=args.head,after=descendant)
     assert m._1174_collect(fetch,w,args.head,audit,123)["status"]=="UNKNOWN"
     # A fully observed chain provides the earlier after-image evidence.
-    pages["events"]=copy.deepcopy(original)
-    later=copy.deepcopy(original[0]);later.update(id="14",created_at="2026-11-04T09:02:00Z")
-    later["payload"].update(before=args.head,head=descendant)
-    pages["events"].append(later)
+    pages["activity"]=copy.deepcopy(original)
+    later=copy.deepcopy(original[0]);later.update(id=14,timestamp="2026-11-04T09:02:00Z",before=args.head,after=descendant)
+    pages["activity"].insert(0,later)
     assert m._1174_collect(fetch,w,args.head,audit,123)["status"]=="RECORDED_EARLIEST_MATCH"
 
 
@@ -13955,7 +14031,7 @@ def _r12_main_inventory1174(c):
     seen=[]
     def selected_driver():
         names=[name for name,_ in CASES if name in WP1174_REQUIRED]
-        assert len(names)==84 and "wp1174_windows_claim_rejected" not in names
+        assert len(names)==107 and "wp1174_windows_claim_rejected" not in names
         dict(CASES)["wp1174_lifecycle_scoped_lifecycle"](c)
         seen.append(tuple(names))
         return 0
@@ -13965,11 +14041,907 @@ def _r12_main_inventory1174(c):
             _legacy_main=selected_driver,_carrier1174=lambda *args:True,_snapshot1174=lambda *args:{}),contextlib.redirect_stdout(io.StringIO()):
         assert main()==0
     assert seen and CASES is full
-    assert len(_WP1174_FULL_CASE_IDS)==85 and len(set(_WP1174_FULL_CASE_IDS))==85
+    assert len(_WP1174_FULL_CASE_IDS)==108 and len(set(_WP1174_FULL_CASE_IDS))==108
 
 
 def _r12_accept_snapshot1174(c):
     _accept_entry1174(c,snapshot=True)
+
+
+# --- wp1370: publication evidence from the Repository activities API ------------
+# New required IDs are `wp1174_activity_*` so the existing fail-closed harness
+# (required inventory, skip-is-red, mutant target/control checks) covers them.
+def _activity_case1370(kind):
+    def case(c):
+        import contextlib, copy, io
+        from unittest.mock import patch
+        m,w,args,a,audit,pages,seams=_human_fixture1174(c)
+        H,Z=args.head,"0"*40
+        parent=_g(w,"rev-parse",H+"^1");root=_g(w,"rev-list","--max-parents=0",H)
+        seen=[]
+        served=_fetch1370(m,pages)
+        def fetch(endpoint,**limits):
+            seen.append(endpoint);return served(endpoint,**limits)
+        collect=lambda source=fetch:m._1174_collect(source,w,H,audit,123)
+        base=copy.deepcopy(pages["activity"])   # [12 push ->H 09:01, 11 master push 08:59, 1 anchor]
+        ok="RECORDED_EARLIEST_MATCH"
+        def feed(*extra,drop=()):
+            rows=[copy.deepcopy(x) for x in base if x["id"] not in drop]+[copy.deepcopy(x) for x in extra]
+            anchor=[x for x in rows if x["id"]==1];rest=[x for x in rows if x["id"]!=1]
+            pages["activity"]=sorted(rest,key=lambda x:(x["timestamp"],x["id"]),reverse=True)+anchor
+        positive=collect()
+        assert positive["status"]==ok and positive["earliest"]["id"]=="12" and positive["dag_coverage"] is True,positive
+        if kind=="reduced_payload":
+            # Exactly the measured key set of one activity record, including the two
+            # measured rows (branch_creation 06:37:08Z, push 09:32:46Z) on fixture OIDs.
+            keys={"id","node_id","activity_type","ref","before","after","timestamp","actor"}
+            measured=[json.loads(json.dumps(dict(id=3381,node_id="RA_kwDOfixture3381",activity_type="push",ref="refs/heads/ops/wp1308-target-r5-g7",
+                    before=parent,after=H,timestamp="2026-11-04T09:32:46Z",actor=dict(login="ducthangho",id=7,type="User",site_admin=False)))),
+                json.loads(json.dumps(dict(id=3377,node_id="RA_kwDOfixture3377",activity_type="branch_creation",ref="refs/heads/ops/wp1308-target-r5-g7",
+                    before=Z,after=parent,timestamp="2026-11-04T06:37:08Z",actor=dict(login="ducthangho",id=7,type="User",site_admin=False))))]
+            assert all(set(row)==keys for row in measured+base)
+            feed(*measured,drop=(12,));pages["git/matching-refs/heads"][0]["object"]["sha"]=H
+            del seen[:];receipt=collect()
+            assert receipt["status"]==ok,receipt
+            assert receipt["earliest"]==dict(id="3381",time="2026-11-04T09:32:46Z",ref="refs/heads/ops/wp1308-target-r5-g7",actor="ducthangho",before=parent,after=H),receipt
+            assert type(receipt["earliest"]["id"]) is str and m._1174_collector_receipt(receipt,H,audit,123) is receipt
+            assert seen and not any("/events" in endpoint for endpoint in seen),"collector still reads the Events API"
+            assert seen[0]=="repos/"+m._1174_REPO and seen[1]=="repos/"+m._1174_REPO+"/activity?per_page=100",seen
+        elif kind=="multipage_anchor":
+            extra=[_activity1370(20+i,"push","refs/heads/topic-%d"%i,root,parent,"2026-11-04T08:%02d:00Z"%(10+i)) for i in range(4)]
+            feed(*extra);pages["activity_page_size"]=2;del seen[:]
+            receipt=collect()
+            assert len(pages["activity"])==7 and receipt["status"]==ok and receipt["cursor_coverage"]["activity"]==4,receipt
+            walked=[x for x in seen if "/activity" in x]
+            assert walked==["repos/"+m._1174_REPO+"/activity?per_page=100"]+["repositories/123/activity?per_page=100&after=%d"%n for n in (2,4,6)],walked
+            assert m._1174_collector_receipt(receipt,H,audit,123) is receipt
+        elif kind in ("older_page_fail","same_timestamp_fail"):
+            # Page 1 ends with an unrelated pre-audit record; the older publish
+            # of H only exists on page 2. Reading must not stop at the boundary.
+            when="2026-11-04T08:30:00Z" if kind=="older_page_fail" else audit["updated_at"]
+            leak=_activity1370(9,"branch_creation","refs/heads/leak",Z,H,when)
+            boundary=_activity1370(11,"push","refs/heads/master",root,parent,"2026-11-04T08:59:00Z" if kind=="older_page_fail" else audit["updated_at"])
+            pages["activity"]=[copy.deepcopy(base[0]),boundary,leak,copy.deepcopy(base[2])];pages["activity_page_size"]=2
+            assert kind=="older_page_fail" or boundary["timestamp"]==leak["timestamp"]==audit["updated_at"]
+            del seen[:];receipt=collect()
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="9","older publish of H behind the audit boundary was missed: %r"%(receipt,)
+            assert len([x for x in seen if "/activity" in x])==2,seen
+        elif kind=="force_push_preimage":
+            feed(_activity1370(10,"force_push","refs/heads/candidate",H,parent,"2026-11-04T08:58:30Z"))
+            receipt=collect()
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12","pre-audit force-push preimage was laundered by a later publish: %r"%(receipt,)
+        elif kind=="deletion_preaudit":
+            feed(_activity1370(10,"branch_deletion","refs/heads/old",H,Z,"2026-11-04T08:58:30Z"))
+            receipt=collect()
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12",receipt
+            # Control: deleting another, fully explained branch stays a success.
+            feed(_activity1370(14,"branch_creation","refs/heads/topic",Z,H,"2026-11-04T09:02:00Z"),
+                 _activity1370(16,"branch_deletion","refs/heads/topic",H,Z,"2026-11-04T09:03:00Z"),
+                 _activity1370(8,"branch_deletion","refs/heads/stale",parent,Z,"2026-11-04T08:40:00Z"))
+            receipt=collect()
+            assert receipt["status"]==ok and receipt["earliest"]["id"]=="12",receipt
+        elif kind=="tag_coverage":
+            _g(w,"tag","-a","-m","annotated","wp1370-annotated",H);T=_g(w,"rev-parse","refs/tags/wp1370-annotated")
+            assert T!=H and _g(w,"cat-file","-t",T)=="tag"
+            _g(w,"checkout","-qb","wp1370-tagged",H);(w/"tagged.txt").write_text("tagged\n");_g(w,"add","tagged.txt");_g(w,"commit","-qm","tagged descendant")
+            D=_g(w,"rev-parse","HEAD")
+            # Item 7 is by exact tip: a lightweight tag sitting exactly on an
+            # introduced OID is explained; a tag on a descendant or an annotated
+            # tag object (peeled to a commit containing H) is not.
+            feed();pages["git/matching-refs/tags"]=[dict(ref="refs/tags/v0",object=dict(sha=H,type="commit"))];assert collect()["status"]==ok
+            for tip in (D,T):
+                feed();pages["git/matching-refs/tags"]=[dict(ref="refs/tags/v1",object=dict(sha=tip,type="tag" if tip==T else "commit"))]
+                receipt=collect()
+                assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,("existing tag containing H has no introduction",tip,receipt)
+            feed(_activity1370(15,"push","refs/tags/v1",Z,T,"2026-11-04T09:02:00Z"))
+            receipt=collect();assert receipt["status"]==ok,receipt
+            # A tag record in the feed is handled like a branch: its pre-audit
+            # preimage (annotated, peeled to the commit) is prior exposure.
+            pages["git/matching-refs/tags"]=[]
+            feed(_activity1370(10,"branch_deletion","refs/tags/old",T,Z,"2026-11-04T08:58:30Z"))
+            receipt=collect();assert receipt["status"]=="FAIL",receipt
+            feed(_activity1370(10,"push","refs/tags/old",Z,T,"2026-11-04T08:58:30Z"))
+            receipt=collect();assert receipt["status"]=="FAIL" and receipt["earliest"]["ref"]=="refs/tags/old",receipt
+        elif kind in ("receipt_residuals","receipt_v1"):
+            good=m._1174_collector_receipt(copy.deepcopy(positive),H,audit,123)
+            expected=["server_unpublished_activity","fork_object_storage_outside_repo_scope","pre_boundary_history_unattested","tag_history_unattested"]
+            assert good["schema"]=="wp1174_publication_receipt.v2" and good["residual_classes"]==expected
+            assert good["query_scope"]==["activity","git/matching-refs/heads","git/matching-refs/tags","pulls?state=all"] and good["event_scope"]=="repository_activity"
+            assert set(good)==set(m._1174_COLLECTOR_KEYS)
+            if kind=="receipt_residuals":
+                wrong=[expected[:2],expected[:3],expected[:2]+expected[3:],list(reversed(expected)),expected+["extra"],[],None,tuple(expected),expected[:3]+["tag_history"]]
+            else:
+                v1=dict(schema="wp1174_publication_receipt.v1",query_scope=["events"]+expected[:0]+good["query_scope"][1:],event_scope="repository_publication",residual_classes=expected[:2])
+                wrong=[v1,dict(schema=v1["schema"]),dict(query_scope=v1["query_scope"]),dict(event_scope=v1["event_scope"]),
+                    dict(schema=v1["schema"],residual_classes=v1["residual_classes"]),dict(schema="wp1174_publication_receipt.v3")]
+            for change in wrong:
+                bad=copy.deepcopy(good);bad.update(change if kind=="receipt_v1" else dict(residual_classes=change))
+                _reject1174(m._1174_collector_receipt,bad,H,audit,123,reason="collector receipt closed bindings")
+            assert m._1174_collector_receipt(copy.deepcopy(good),H,audit,123)==good
+        elif kind=="no_anchor":
+            anchor=base[2]
+            def without(**change):
+                pages["activity"]=copy.deepcopy(base[:2])+([dict(copy.deepcopy(anchor),**change)] if change else [])
+                return collect()
+            receipt=without();assert receipt["status"]=="UNKNOWN" and receipt["earliest"]["id"]=="12","missing default-branch creation anchor accepted: %r"%(receipt,)
+            for change in (dict(ref="refs/heads/main"),dict(before=root),dict(activity_type="push"),dict(ref="refs/tags/master"),dict(timestamp="2026-07-04T23:59:59Z")):
+                receipt=without(**change);assert receipt["status"]=="UNKNOWN",(change,receipt)
+            # A record older than the anchor means the anchor is not the oldest.
+            pages["activity"]=copy.deepcopy(base[:2])+[_activity1370(2,"push","refs/heads/master",root,parent,"2026-07-05T00:00:00Z"),copy.deepcopy(anchor)]
+            assert collect()["status"]=="UNKNOWN"
+            pages["activity"]=copy.deepcopy(base)
+            pages["repo"]=dict(id=123,full_name=m._1174_REPO,default_branch="main",created_at="2026-07-05T00:00:00Z");assert collect()["status"]=="UNKNOWN"
+            pages["repo"]=dict(id=123,full_name=m._1174_REPO,default_branch="master",created_at="2026-07-05T00:00:02Z");assert collect()["status"]=="UNKNOWN"
+            pages.pop("repo");assert collect()["status"]==ok
+        elif kind=="object_unfetchable":
+            gone="e"*40
+            feed(_activity1370(7,"force_push","refs/heads/gone",gone,parent,"2026-11-04T08:20:00Z"))
+            calls=[]
+            with patch.object(m,"_1174_fetch_objects",side_effect=lambda root_,oids,deadline:calls.append(list(oids))):receipt=collect()
+            assert calls==[[gone]] and receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,(calls,receipt)
+            with patch.object(m,"_1174_fetch_objects",side_effect=OSError("offline")):assert collect()["status"]=="UNKNOWN"
+            assert collect()["status"]=="UNKNOWN","fixture has no canonical origin; the real fetch must refuse"
+            # Positive: the real single fetch-by-SHA obtains a missing OID and
+            # creates or moves no ref. The canonical URL is rewritten to a local
+            # source by insteadOf; only the file transport is allowed.
+            source=c.tmp/"wp1370-source";_g(c.tmp,"clone","-q","--no-hardlinks",str(w),str(source))
+            _g(source,"config","uploadpack.allowAnySHA1InWant","true");_g(source,"checkout","-q","-b","elsewhere",root)
+            (source/"elsewhere.txt").write_text("elsewhere\n");_g(source,"add","elsewhere.txt");_g(source,"commit","-qm","object absent from the collector repository")
+            X=_g(source,"rev-parse","HEAD")
+            assert m._git_do(w,"cat-file","-e",X+"^{commit}")[0]!=0
+            canonical="https://github.com/ducthangho/tra-luat.git";_g(w,"config","url."+str(source)+".insteadOf",canonical)
+            feed(_activity1370(7,"branch_creation","refs/heads/elsewhere",Z,X,"2026-11-04T08:20:00Z"))
+            real=m._git_do
+            def origin(root_,*argv,**kw):
+                return (0,canonical.encode()+b"\n") if argv==("remote","get-url","origin") else real(root_,*argv,**kw)
+            refs=_g(w,"for-each-ref");fetch_head=(w/".git"/"FETCH_HEAD").exists()
+            with patch.object(m,"_git_do",origin),patch.dict(os.environ,{"GIT_ALLOW_PROTOCOL":"file"}):receipt=collect()
+            assert receipt["status"]==ok,receipt
+            assert m._git_do(w,"cat-file","-e",X+"^{commit}")[0]==0 and _g(w,"for-each-ref")==refs and (w/".git"/"FETCH_HEAD").exists()==fetch_head
+        elif kind=="cursor_foreign":
+            good_link='<https://api.github.com/repositories/123/activity?per_page=100&after=2>; rel="next"'
+            def cursor(link):
+                followed=[]
+                def source(endpoint,**limits):
+                    if "/activity" not in endpoint:return served(endpoint,**limits)
+                    followed.append(endpoint)
+                    if len(followed)==1:return copy.deepcopy(base[:2]),link
+                    return copy.deepcopy(base[2:]),None
+                return collect(source),followed
+            receipt,followed=cursor(good_link);assert receipt["status"]==ok and len(followed)==2 and receipt["cursor_coverage"]["activity"]==2,(receipt,followed)
+            receipt,followed=cursor('<https://api.github.com/repos/'+m._1174_REPO+'/activity?per_page=100&after=2>; rel="next", <https://api.github.com/repositories/123/activity?per_page=100&before=2>; rel="prev"')
+            assert receipt["status"]==ok and followed[1]=="repos/"+m._1174_REPO+"/activity?per_page=100&after=2",(receipt,followed)
+            for link in ('<https://api.github.com/repositories/999/activity?per_page=100&after=2>; rel="next"',
+                    '<https://api.github.com/repos/evil/tra-luat/activity?per_page=100&after=2>; rel="next"'):
+                receipt,followed=cursor(link)
+                assert receipt["status"]=="UNKNOWN","cursor of another repository was followed: %r"%((link,receipt,followed),)
+                assert len(followed)==1 and "activity" not in receipt["cursor_coverage"],(link,followed,receipt)
+            for link in ('<https://evil.example/repositories/123/activity?per_page=100&after=2>; rel="next"',
+                    '<https://api.github.com/repositories/123/events?per_page=100&after=2>; rel="next"',
+                    '<https://api.github.com/repositories/123/activity?per_page=100>; rel="next"',
+                    '<https://api.github.com/repositories/123/activity/../../999/activity?after=2>; rel="next"',
+                    '<https://api.github.com/repos/'+m._1174_REPO+'/activity?per_page=100>; rel="next"',
+                    good_link+", "+good_link,'<https://api.github.com/repositories/123/activity?after=2>; rel=next',7):
+                receipt,followed=cursor(link)
+                assert receipt["status"]=="UNKNOWN" and len(followed)==1 and "activity" not in receipt["cursor_coverage"],(link,followed,receipt)
+            # The transport extension is exactly the two activity forms.
+            reply=b'HTTP/2.0 200 OK\r\nContent-Type: application/json\r\nLink: '+good_link.encode()+b'\r\n\r\n[{"id": 1}]'
+            runs=[]
+            def process(argv,**kw):
+                runs.append(argv);return subprocess.CompletedProcess(argv,0,reply if "--include" in argv else b'{"id": 123}',b"")
+            limits=dict(root=w,deadline=time.time()+30)
+            with patch.object(m,"_1174_process",side_effect=process):
+                for endpoint in ("repos/"+m._1174_REPO+"/activity?per_page=100","repositories/123/activity?per_page=100&after=2"):
+                    assert m._1174_api(endpoint,link=True,repo_id=123,**limits)==([dict(id=1)],good_link)
+                assert all(argv==["gh","api","--hostname","github.com","--include",argv[-1]] for argv in runs) and len(runs)==2
+                assert m._1174_api("repos/"+m._1174_REPO,**limits)==dict(id=123) and "--include" not in runs[-1]
+                for endpoint,extra in (("repositories/999/activity?after=2",dict(link=True,repo_id=123)),("repositories/123/activity?after=2",dict()),
+                        ("repositories/123/activity?after=2",dict(link=True)),("repositories/123/activity?after=2",dict(link=True,repo_id=True)),
+                        ("repositories/123/events?after=2",dict(link=True,repo_id=123)),("repositories/123",dict(link=True,repo_id=123)),
+                        ("repos/"+m._1174_REPO+"/events?per_page=100",dict(link=True,repo_id=123)),("repos/"+m._1174_REPO+"/activity?per_page=100",dict(link=1,repo_id=123)),
+                        ("repos/evil/tra-luat/activity?after=2",dict(link=True,repo_id=123))):
+                    count=len(runs);_reject1174(m._1174_api,endpoint,reason="scoped API endpoint/root",**limits,**extra);assert len(runs)==count,endpoint
+            assert m._1174_link_header(reply)==(b'[{"id": 1}]',good_link) and m._1174_link_header(b"HTTP/1.1 200 OK\nETag: x\n\n[]")==(b"[]",None)
+            for raw in (b"[]",b"HTTP/2.0 404 Not Found\r\n\r\n[]",b"HTTP/2.0 200 OK\r\nLink: a\r\nlink: b\r\n\r\n[]"):
+                _reject1174(m._1174_link_header,raw,reason="scoped API")
+        elif kind=="pr_foreign_head":
+            def pull(source,**extra):
+                row=dict(number=7,state="closed",html_url="https://github.com/"+m._1174_REPO+"/pull/7",head=dict(sha=parent,ref="topic",repo=source),
+                    base=dict(ref="master",repo=dict(id=123,full_name=m._1174_REPO)));row.update(extra);return row
+            pages["pulls"]=[pull(dict(id=123,full_name=m._1174_REPO))];assert collect()["status"]==ok
+            for source in (None,dict(id=456,full_name="fork/tra-luat"),dict(id=456,full_name=m._1174_REPO),dict(id=123,full_name="fork/tra-luat"),dict(full_name=m._1174_REPO),"repo"):
+                pages["pulls"]=[pull(source)];receipt=collect()
+                assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,("PR head repository is absent/foreign",source,receipt)
+            pages["pulls"]=[pull(dict(id=123,full_name=m._1174_REPO),head=None)];assert collect()["status"]=="UNKNOWN"
+            pages["pulls"]=[pull(dict(id=123,full_name=m._1174_REPO))];assert collect()["status"]==ok
+        elif kind=="intro_kinds":
+            for introduction in ("force_push","pr_merge","branch_creation","push"):
+                first=_activity1370(12,introduction,"refs/heads/candidate",Z if introduction=="branch_creation" else parent,H,"2026-11-04T09:01:00Z")
+                feed(first,drop=(12,));receipt=collect()
+                assert receipt["status"]==ok and receipt["earliest"]==dict(id="12",time="2026-11-04T09:01:00Z",ref="refs/heads/candidate",actor="ducthangho",before=first["before"],after=H),(introduction,receipt)
+            # Earliest is by timestamp, then numeric id.
+            feed(_activity1370(100,"push","refs/heads/mirror",parent,H,"2026-11-04T09:01:00Z"),_activity1370(9,"push","refs/heads/late",parent,H,"2026-11-04T09:04:00Z"))
+            receipt=collect();assert receipt["status"]==ok and receipt["earliest"]["id"]=="12",receipt
+            # A deletion is never an introduction, whatever its sides say.
+            feed(_activity1370(12,"branch_deletion","refs/heads/candidate",parent,H,"2026-11-04T09:01:00Z"),drop=(12,))
+            receipt=collect();assert receipt["status"]=="UNKNOWN" and receipt["earliest"] is None,receipt
+        elif kind=="accept_roundtrip":
+            argv=["guard-first-publication","--packet",str(args.packet),"--revision","1","--generation","1","--admission","fixture","--root",args.root,
+                "--head",H,"--pr",str(args.pr),"--coordinator-id","coordinator-1","--receipt",args.receipt,"--human-audit-comment",args.human_audit_comment,
+                "--human-remote-run",args.human_remote_run,"--workflow-runs",args.workflow_runs]
+            def guard():
+                out=io.StringIO()
+                with seams(),contextlib.redirect_stdout(out):rc=m.main(argv)
+                return rc,json.loads(out.getvalue())
+            path=Path(args.receipt);supplied=json.loads(path.read_bytes())
+            assert supplied["schema"]=="wp1174_publication_receipt.v2" and supplied["status"]==ok
+            rc,result=guard();assert rc==0 and result["status"]=="PASS",(rc,result)
+            with seams():record=_call1174(m._1174_human_evidence,args,a,H)
+            recollected=collect()
+            assert record["assurance"]=="human_audited" and record["head"]==H and record["audit_sha256"]==supplied["audit_sha256"]
+            assert all(recollected[k]==supplied[k] for k in set(supplied)-{"started_utc","ended_utc"})
+            # Observation timestamps are the only keys allowed to differ.
+            moved=dict(supplied,started_utc="2026-11-04T09:30:00Z",ended_utc="2026-11-04T09:31:00Z");path.write_bytes(m._1174_bytes(moved))
+            rc,result=guard();assert rc==0 and result["status"]=="PASS",(rc,result)
+            changes=[("raw_snapshot_sha256","0"*64),("cursor_coverage",dict(supplied["cursor_coverage"],activity=2)),
+                ("earliest",dict(supplied["earliest"],id="13")),("earliest",dict(supplied["earliest"],time="2026-11-04T09:01:01Z")),
+                ("earliest",dict(supplied["earliest"],after=parent)),("earliest",dict(supplied["earliest"],ref="refs/heads/other"))]
+            for key,value in changes:
+                path.write_bytes(m._1174_bytes(dict(supplied,**{key:value})))
+                rc,result=guard()
+                assert rc==12 and result["status"]=="UNKNOWN" and "publication evidence UNKNOWN/FAIL" in result["detail"],("changed immutable key accepted",key,rc,result)
+                with seams():_reject1174(m._1174_human_evidence,args,a,H,reason="publication evidence UNKNOWN/FAIL")
+            for key,value in (("schema","wp1174_publication_receipt.v1"),("residual_classes",supplied["residual_classes"][:2]),("repo_id",124),("head",parent),("dag_coverage",False),("status","UNKNOWN")):
+                path.write_bytes(m._1174_bytes(dict(supplied,**{key:value})))
+                rc,result=guard();assert rc==12 and result["status"]=="UNKNOWN",(key,rc,result)
+            path.write_bytes(m._1174_bytes(supplied));rc,result=guard();assert rc==0 and result["status"]=="PASS",(rc,result)
+            # Server evidence that turns into FAIL is FAIL even with a matching receipt.
+            feed(_activity1370(10,"force_push","refs/heads/candidate",H,parent,"2026-11-04T08:58:30Z"))
+            path.write_bytes(m._1174_bytes(collect()));rc,result=guard()
+            assert rc==12 and result["status"]=="FAIL" and "publication evidence FAIL" in result["detail"],(rc,result)
+        elif kind=="deletion_unexplained":
+            # Counterexample for "deletion preimage handled as an introduction":
+            # a post-audit deletion whose `before` contains H, with no strictly
+            # earlier introduction, then a valid later publish of H.
+            late=_activity1370(20,"push","refs/heads/candidate",parent,H,"2026-11-04T09:05:00Z")
+            ghost=_activity1370(15,"branch_deletion","refs/heads/ghost",H,Z,"2026-11-04T09:02:00Z")
+            feed(late,ghost,drop=(12,));receipt=collect()
+            assert receipt["status"]=="UNKNOWN","unexplained post-audit deletion preimage accepted: %r"%(receipt,)
+            assert receipt["earliest"]["id"]=="20" and receipt["dag_coverage"] is False,receipt
+            # Same timestamp is not "strictly earlier".
+            feed(late,ghost,_activity1370(14,"branch_creation","refs/heads/ghost",Z,H,"2026-11-04T09:02:00Z"),drop=(12,))
+            assert collect()["status"]=="UNKNOWN"
+            # Positive control: a real post-audit introduction earlier than the deletion.
+            feed(late,ghost,_activity1370(14,"branch_creation","refs/heads/ghost",Z,H,"2026-11-04T09:01:00Z"),drop=(12,));receipt=collect()
+            assert receipt["status"]==ok and receipt["earliest"]["id"]=="14",receipt
+        elif kind=="matching_refs_unpaginated":
+            # Real server (coordinator probe, gh api, 2026-11-17): both
+            # git/matching-refs families ignore page/per_page, return the FULL
+            # list on every page (heads 292 rows, tags 646 rows) and send no
+            # Link header. A page loop can never see a short page.
+            api="https://api.github.com/repos/"+m._1174_REPO+"/git/";stem="repos/"+m._1174_REPO+"/git/matching-refs/"
+            def row(ref,sha,form="commit"):
+                return dict(ref=ref,node_id="REF_"+ref,url=api+ref,object=dict(sha=sha,type=form,url=api+form+"s/"+sha))
+            heads=[row("refs/heads/candidate",H)]+[row("refs/heads/topic-%03d"%i,parent) for i in range(291)]
+            tags=[row("refs/tags/v%03d"%i,root) for i in range(646)]
+            def serve(h=None,t=None,**links):
+                pages["git/matching-refs/heads"]=copy.deepcopy(heads) if h is None else h
+                pages["git/matching-refs/tags"]=copy.deepcopy(tags) if t is None else t
+                pages["refs_link"]=links;del seen[:]
+            serve();assert len(heads)==292 and len(tags)==646
+            assert all(served(stem+"heads?per_page=100&page=%d"%n)==heads and served(stem+"tags?per_page=100&page=%d"%n)==tags for n in (1,2,3)),"fixture must ignore paging"
+            receipt=collect()
+            walked=[x for x in seen if "/git/matching-refs/" in x]
+            assert walked==[stem+"heads",stem+"tags"],"matching-refs must be exactly one unpaginated fetch per family, got %d: %r"%(len(walked),walked[:6])
+            assert receipt["status"]==ok and receipt["earliest"]["id"]=="12" and receipt["dag_coverage"] is True,receipt
+            assert receipt["cursor_coverage"]=={"activity":1,"git/matching-refs/heads":1,"git/matching-refs/tags":1,"pulls?state=all":1},receipt
+            assert len(seen)==5 and m._1174_collector_receipt(receipt,H,audit,123) is receipt,seen
+            # The whole list is evidence: a tip containing H far beyond row 100
+            # and without an introduction is still seen.
+            late=copy.deepcopy(heads);late[250]=row("refs/heads/elsewhere",H);late[0]=row("refs/heads/candidate",parent)
+            feed(_activity1370(12,"push","refs/heads/elsewhere",parent,H,"2026-11-04T09:01:00Z"),drop=(12,));serve(h=late)
+            assert collect()["status"]==ok
+            _g(w,"checkout","-qb","wp1370-beyond",H);(w/"beyond.txt").write_text("beyond\n");_g(w,"add","beyond.txt");_g(w,"commit","-qm","beyond row 100")
+            late[250]=row("refs/heads/elsewhere",_g(w,"rev-parse","HEAD"));serve(h=late);receipt=collect()
+            assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,("ref beyond row 100 was not examined",receipt)
+            feed()
+            # A Link header / next cursor on these families is unmeasured
+            # behaviour: UNKNOWN, no coverage credit, and it is never followed.
+            for family in ("heads","tags"):
+                for link in ('<https://api.github.com/'+stem+family+'?page=2>; rel="next"','<https://api.github.com/'+stem+family+'?page=1>; rel="prev"',
+                        '<https://api.github.com/repositories/123/git/matching-refs/'+family+'?page=2>; rel="next", <https://api.github.com/repositories/123/git/matching-refs/'+family+'?page=9>; rel="last"',""):
+                    serve(**{"git/matching-refs/"+family:link});receipt=collect()
+                    assert receipt["status"]=="UNKNOWN" and "git/matching-refs/"+family not in receipt["cursor_coverage"],(family,link,receipt)
+                    assert [x for x in seen if "/git/matching-refs/" in x]==[stem+"heads",stem+"tags"],(family,link,seen)
+                    _reject1174(m._1174_collector_receipt,dict(receipt,status=ok),H,audit,123,reason="collector success completeness")
+                serve(**{"git/matching-refs/"+family:7});_reject1174(collect,reason="collector page type")
+            # Every row is a well-formed ref of this repository and this family.
+            foreign="https://api.github.com/repos/evil/tra-luat/git/"
+            def broken(change):
+                bad=copy.deepcopy(heads);change(bad);return bad
+            def verbatim(endpoint,**limits):
+                # Rows exactly as planted: the fixture fills in nothing here.
+                if "/git/matching-refs/" not in endpoint:return fetch(endpoint,**limits)
+                seen.append(endpoint);assert limits.get("link") is True and limits.get("repo_id")==123,(endpoint,limits)
+                return pages["git/matching-refs/"+endpoint.rsplit("/",1)[1]],None
+            serve();assert collect(verbatim)["status"]==ok
+            wrong=[("collector ref list type",dict(refs=heads)),("collector ref list type","refs/heads/candidate"),("collector ref list type",tuple(heads)),
+                ("collector ref identity",broken(lambda x:x.__setitem__(150,"refs/heads/topic-149"))),
+                ("collector ref identity",broken(lambda x:x[150].pop("object"))),
+                ("collector ref identity",broken(lambda x:x[150].pop("url"))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].pop("url"))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].pop("type"))),
+                ("collector ref identity",broken(lambda x:x[150].update(url=foreign+x[150]["ref"]))),
+                ("collector ref identity",broken(lambda x:x[150].update(url=api+"refs/tags/topic-149"))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(url=foreign+"commits/"+parent))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(url=api+"commits/"+H))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(type="tag"))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(type="release",url=api+"releases/"+parent))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(sha=parent[:39],url=api+"commits/"+parent[:39]))),
+                ("collector ref identity",broken(lambda x:x[150]["object"].update(sha=None))),
+                ("collector ref identity",broken(lambda x:x[150].update(ref="refs/tags/v000",url=api+"refs/tags/v000"))),
+                ("collector ref identity",broken(lambda x:x[150].update(ref="refs/heads/",url=api+"refs/heads/"))),
+                ("collector ref identity",broken(lambda x:x[150].update(ref=5))),
+                ("collector ref duplicate",heads+heads),
+                ("collector ref duplicate",broken(lambda x:x.append(copy.deepcopy(x[0]))))]
+            for reason,value in wrong:
+                serve(h=value);_reject1174(collect,verbatim,reason=reason)
+                assert [x for x in seen if "/git/matching-refs/" in x]==[stem+"heads"],(reason,seen)
+            serve(t=heads);_reject1174(collect,verbatim,reason="collector ref identity")
+            annotated="a"*40
+            serve(t=tags+[row("refs/tags/annotated",annotated,"tag")]);receipt=collect()
+            assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,receipt   # well-formed, but not a local commit
+            serve();assert collect()["status"]==ok
+            # Transport: the Link header is read for exactly these two query-less
+            # endpoints; a paged or neighbouring form is refused before any call.
+            runs=[];limits=dict(root=w,deadline=time.time()+30)
+            def process(argv,**kw):
+                runs.append(argv);return subprocess.CompletedProcess(argv,0,b"HTTP/2.0 200 OK\r\nContent-Type: application/json\r\n\r\n"+json.dumps(heads[:2]).encode(),b"")
+            with patch.object(m,"_1174_process",side_effect=process):
+                for family in ("heads","tags"):
+                    assert m._1174_api(stem+family,link=True,repo_id=123,**limits)==(heads[:2],None)
+                    assert runs[-1]==["gh","api","--hostname","github.com","--include",stem+family],runs[-1]
+                for endpoint in (stem+"heads?per_page=100&page=2",stem+"heads?page=2",stem+"heads/",stem+"heads/topic",stem+"pull",stem[:-1],
+                        "repos/"+m._1174_REPO+"/git/refs/heads","repos/"+m._1174_REPO+"/pulls?state=all&per_page=100&page=1",
+                        "repos/evil/tra-luat/git/matching-refs/heads","repositories/123/git/matching-refs/heads"):
+                    count=len(runs);_reject1174(m._1174_api,endpoint,link=True,repo_id=123,reason="scoped API endpoint/root",**limits);assert len(runs)==count,endpoint
+                count=len(runs);_reject1174(m._1174_api,stem+"heads",link=True,reason="scoped API endpoint/root",**limits);assert len(runs)==count
+        elif kind=="tip_non_commit":
+            # Real server (coordinator probe, 2026-11-17): the current tag
+            # refs/tags/rescue/d0-2026-08-04 points directly at a TREE that the
+            # collector repository did not have. Fetching it by SHA succeeds and
+            # the object is then a tree: present, not a commit, cannot contain H.
+            name="refs/tags/rescue/d0-2026-08-04";canonical="https://github.com/ducthangho/tra-luat.git"
+            source=c.tmp/"wp1370-source";_g(c.tmp,"clone","-q","--no-hardlinks",str(w),str(source))
+            _g(source,"config","uploadpack.allowAnySHA1InWant","true")
+            def remote_tree(text):
+                (source/"rescue.txt").write_text(text);_g(source,"add","rescue.txt");return _g(source,"write-tree")
+            T=remote_tree("rescue tree, remote only\n")
+            local=lambda oid:m._git_do(w,"cat-file","-e",oid)[0]==0
+            assert _g(source,"cat-file","-t",T)=="tree" and not local(T),"fixture: the tip tree must exist only on the remote"
+            tags=copy.deepcopy(pages["git/matching-refs/tags"])
+            def tip(*rows):
+                pages["git/matching-refs/tags"]=copy.deepcopy(tags)+[dict(ref=ref,object=dict(sha=sha,type=form)) for ref,sha,form in rows]
+            tip((name,T,"tree"))
+            real=m._git_do;real_fetch=m._1174_fetch_objects
+            def origin(root_,*argv,**kw):
+                return (0,canonical.encode()+b"\n") if argv==("remote","get-url","origin") else real(root_,*argv,**kw)
+            def remote():
+                # One pass against the real fetch; returns (receipt, fetched OID lists).
+                calls=[]
+                def counted(root_,oids,deadline):
+                    calls.append(list(oids));return real_fetch(root_,oids,deadline)
+                with patch.object(m,"_git_do",origin),patch.object(m,"_1174_fetch_objects",counted),patch.dict(os.environ,{"GIT_ALLOW_PROTOCOL":"file"}):
+                    return collect(),calls
+            # Sub-check: the same tip object cannot be fetched -> absent stays unmeasurable.
+            calls=[]
+            with patch.object(m,"_1174_fetch_objects",side_effect=lambda root_,oids,deadline:calls.append(list(oids))):receipt=collect()
+            assert calls==[[T]] and receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,("unfetchable tip object accepted",calls,receipt)
+            with patch.object(m,"_1174_fetch_objects",side_effect=OSError("offline")):receipt=collect()
+            assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,receipt
+            receipt=collect();assert receipt["status"]=="UNKNOWN" and not local(T),"fixture has no canonical origin; the real fetch must refuse"
+            # Healthy scenario: the tip is fetched by SHA in the single fetch of
+            # the pass, is a tree, and needs no introduction.
+            _g(w,"config","url."+str(source)+".insteadOf",canonical)
+            refs=_g(w,"for-each-ref");fetch_head=(w/".git"/"FETCH_HEAD").exists()
+            receipt,calls=remote()
+            assert calls==[[T]],"tip OID absent locally must be fetched by SHA, exactly one fetch per pass: %r"%(calls,)
+            assert local(T) and _g(w,"cat-file","-t",T)=="tree" and m._git_do(w,"cat-file","-e",T+"^{commit}")[0]!=0
+            assert receipt["status"]==ok and receipt["dag_coverage"] is True,"present non-commit tip treated as unmeasurable: %r"%(receipt,)
+            assert receipt["earliest"]["id"]=="12" and not any(x["after"]==T or x["before"]==T for x in pages["activity"]),"the tree tag needs no introduction"
+            assert m._1174_collector_receipt(receipt,H,audit,123) is receipt
+            assert _g(w,"for-each-ref")==refs and (w/".git"/"FETCH_HEAD").exists()==fetch_head,"fetch created or moved a ref"
+            # Now local: no fetch at all, same answer (also without any origin).
+            receipt,calls=remote();assert calls==[] and receipt["status"]==ok,(calls,receipt)
+            calls=[]
+            with patch.object(m,"_1174_fetch_objects",side_effect=lambda root_,oids,deadline:calls.append(list(oids))):receipt=collect()
+            assert calls==[] and receipt["status"]==ok and receipt["dag_coverage"] is True,(calls,receipt)
+            # Blob tip, annotated tag peeling to a tree, head and same-repository
+            # PR head on a non-commit: present, cannot contain H.
+            (w/"rescue-blob.txt").write_text("blob tip\n");B=_g(w,"hash-object","-w","rescue-blob.txt");(w/"rescue-blob.txt").unlink()
+            _g(w,"tag","-a","-m","annotated tree","wp1370-tree",T);A=_g(w,"rev-parse","refs/tags/wp1370-tree")
+            assert _g(w,"cat-file","-t",B)=="blob" and _g(w,"cat-file","-t",A)=="tag" and A!=T
+            tip((name,T,"tree"),("refs/tags/rescue/blob",B,"blob"),("refs/tags/rescue/annotated",A,"tag"))
+            heads=copy.deepcopy(pages["git/matching-refs/heads"])
+            pages["git/matching-refs/heads"]=heads+[dict(ref="refs/heads/rescue/tree",object=dict(sha=T,type="tree"))]
+            pages["pulls"]=[dict(number=7,state="closed",html_url="https://github.com/"+m._1174_REPO+"/pull/7",head=dict(sha=T,ref="topic",repo=dict(id=123,full_name=m._1174_REPO)),
+                base=dict(ref="master",repo=dict(id=123,full_name=m._1174_REPO)))]
+            receipt,calls=remote();assert calls==[] and receipt["status"]==ok and receipt["dag_coverage"] is True,(calls,receipt)
+            pages["git/matching-refs/heads"]=heads;pages["pulls"]=[]
+            # Feed before/after alike: a present non-commit side is neither an
+            # introduction nor exposure, even before the audit.
+            tip((name,T,"tree"))
+            feed(_activity1370(10,"push",name,Z,T,"2026-11-04T08:58:30Z"),_activity1370(9,"force_push","refs/tags/rescue/blob",B,T,"2026-11-04T08:57:00Z"),
+                 _activity1370(8,"branch_deletion","refs/tags/rescue/annotated",A,Z,"2026-11-04T08:56:00Z"))
+            receipt,calls=remote();assert calls==[] and receipt["status"]==ok and receipt["earliest"]["id"]=="12" and receipt["dag_coverage"] is True,(calls,receipt)
+            feed()
+            # Missing feed OIDs and missing tip OIDs share the SAME single fetch.
+            # The fetch receives ONE globally sorted, duplicate-free list. BOTH
+            # lexical orders are built on purpose (a tip OID that sorts before
+            # the missing feed OID, and one that sorts after it) from
+            # DETERMINISTIC real Git objects: fixed blob and tree contents,
+            # fixed parentage and explicit author/committer name, email, date
+            # and timezone. Their OIDs are the constants below on every run and
+            # machine; nothing is searched for and no clock is read.
+            fixed_env=dict(GIT_AUTHOR_NAME="WP1370 Fixture",GIT_AUTHOR_EMAIL="wp1370-fixture@example.invalid",GIT_AUTHOR_DATE="1700000000 +0700",
+                GIT_COMMITTER_NAME="WP1370 Fixture",GIT_COMMITTER_EMAIL="wp1370-fixture@example.invalid",GIT_COMMITTER_DATE="1700000100 +0700",TZ="UTC")
+            # label -> (pick of the tip tree text, tip tree OID, feed commit OID)
+            fixed_base="dd736288db13b3defe7de9b93477890e9a4cb3a7"
+            fixed_pairs={"tip-before-feed":(0,"55ea52907c87467bdaccca8aeb6e8249b68c1581","6cc64688490813109f5c982248d2d740dab2b5fc"),
+                "tip-after-feed":(5,"f7dc09c44fc2421aaf9cffd6d1e0888560532030","c1b99073af845dc5e74f2a37de78d6eafa7a97be"),
+                "tip-shared":(0,"46655910bba969a1f9c2becee0de58dfc5e8233f","8b20d65499d37eed44d9006249d5f63277654a3b")}
+            fixed_want=dict({"base":fixed_base},**{label+kind_:oid for label,(_,tree,commit) in fixed_pairs.items() for kind_,oid in (("/tree",tree),("/commit",commit))})
+            def plumb(repo,*argv,data=None):
+                done=subprocess.run(["git","-c","i18n.commitEncoding=UTF-8",*argv],cwd=repo,input=data,capture_output=True,env={**os.environ,**fixed_env})
+                assert done.returncode==0,("fixture: git "+argv[0]+" failed",done.stderr)
+                return done.stdout.decode("ascii").strip()
+            def fixed_tree(repo,path,text):
+                blob=plumb(repo,"hash-object","-w","-t","blob","--stdin",data=text.encode("ascii"))
+                return plumb(repo,"mktree",data=("100644 blob %s\t%s\n"%(blob,path)).encode("ascii"))
+            def fixed_objects(repo):
+                made={"base":plumb(repo,"commit-tree",fixed_tree(repo,"base.txt","wp1370 fixed base\n"),"-m","wp1370 fixed base")}
+                for label,(pick,_,_) in fixed_pairs.items():
+                    made[label+"/commit"]=plumb(repo,"commit-tree",fixed_tree(repo,label+".txt",label+"\n"),"-p",made["base"],
+                        "-m","wp1370 object absent from the collector repository: "+label)
+                    made[label+"/tree"]=fixed_tree(repo,"rescue.txt","wp1370 %s rescue tree, remote only, pick %d\n"%(label,pick))
+                return made
+            # Preselected pairs, checked before anything is built: the wanted
+            # lexical order per scenario and seven distinct OIDs besides T.
+            assert fixed_pairs["tip-before-feed"][1]<fixed_pairs["tip-before-feed"][2],"fixture: preselected tip-before-feed pair must have tip OID < feed OID"
+            assert fixed_pairs["tip-after-feed"][1]>fixed_pairs["tip-after-feed"][2],"fixture: preselected tip-after-feed pair must have tip OID > feed OID"
+            assert fixed_pairs["tip-shared"][1]<fixed_pairs["tip-shared"][2],"fixture: preselected tip-shared pair must have tip OID < feed OID"
+            assert len(set(fixed_want.values())|{T})==8 and all(re.fullmatch("[0-9a-f]{40}",oid) for oid in fixed_want.values()),"fixture: preselected OIDs must be distinct full SHA-1 names"
+            # Surrounding clock and Git date environment vary on purpose (one
+            # variant per scenario, set in THIS process and inherited by every
+            # child): the objects must not depend on them. The first variant is
+            # the one that broke the former searched fixture (Codex review 6).
+            ambient=(dict(GIT_AUTHOR_DATE="1700000531 +0000",GIT_COMMITTER_DATE="1700000531 +0000",TZ="Asia/Ho_Chi_Minh"),
+                dict(GIT_AUTHOR_DATE="2001-02-03T04:05:06-0800",GIT_COMMITTER_DATE="2037-12-31T23:59:59+1400",TZ="America/St_Johns",
+                     GIT_AUTHOR_NAME="Ambient Author",GIT_AUTHOR_EMAIL="ambient-author@example.invalid"),
+                dict(GIT_AUTHOR_DATE="@86400 -1200",GIT_COMMITTER_DATE="@4102444800 +0545",TZ="Pacific/Kiritimati",
+                     GIT_COMMITTER_NAME="Ambient Committer",GIT_COMMITTER_EMAIL="ambient-committer@example.invalid"))
+            message="fixture: deterministic Git objects must have the preselected OIDs in every clock/date environment (%s): built %r, preselected %r"
+            for n,variant in enumerate(ambient):
+                probe=c.tmp/("wp1370-fixed-%d"%n);_g(c.tmp,"init","-q","--bare",str(probe))
+                with patch.dict(os.environ,variant):made=fixed_objects(probe)
+                assert made==fixed_want,message%("probe %d"%n,made,fixed_want)
+            with patch.dict(os.environ,ambient[-1]):made=fixed_objects(source)
+            assert made==fixed_want,message%("remote",made,fixed_want)
+            assert _g(source,"rev-parse",fixed_base+"^@")=="" and all(_g(source,"rev-parse",commit+"^@")==fixed_base for _,_,commit in fixed_pairs.values()),"fixture: fixed parentage"
+            assert not any(local(oid) for oid in fixed_want.values()),"fixture: the deterministic objects must exist only on the remote before their pass"
+            for variant,label in zip(ambient,("tip-before-feed","tip-after-feed")):
+                _,T2,X=fixed_pairs[label]
+                assert _g(source,"cat-file","-t",T2)=="tree" and _g(source,"cat-file","-t",X)=="commit" and not local(T2) and not local(X),"fixture: remote-only pair ("+label+")"
+                assert len({T,T2,X})==3 and (T2<X)==(label=="tip-before-feed"),"fixture: "+label
+                feed(_activity1370(7,"branch_creation","refs/heads/"+label,Z,X,"2026-11-04T08:20:00Z"));tip((name,T,"tree"),("refs/tags/rescue/"+label,T2,"tree"))
+                refs=_g(w,"for-each-ref");expected=sorted({T2,X})
+                with patch.dict(os.environ,variant):receipt,calls=remote()
+                assert len(calls)==1 and calls[0]==expected and len(set(calls[0]))==len(calls[0]),(
+                    "feed and tip OIDs must share one fetch per pass, as one globally sorted duplicate-free list (%s): %r, expected %r"%(label,calls,[expected]))
+                assert receipt["status"]==ok and local(T2) and local(X) and _g(w,"for-each-ref")==refs and receipt["dag_coverage"] is True,(label,receipt)
+            # The same tip OID named by several refs and by the feed is asked once.
+            _,T3,X3=fixed_pairs["tip-shared"]
+            assert _g(source,"cat-file","-t",T3)=="tree" and _g(source,"cat-file","-t",X3)=="commit" and not local(T3) and not local(X3),"fixture: remote-only pair (tip-shared)"
+            feed(_activity1370(7,"branch_creation","refs/heads/elsewhere3",Z,X3,"2026-11-04T08:20:00Z"),_activity1370(6,"branch_creation","refs/tags/rescue/shared",Z,T3,"2026-11-04T08:19:00Z"))
+            tip((name,T,"tree"),("refs/tags/rescue/shared",T3,"tree"),("refs/tags/rescue/shared-again",T3,"tree"),("refs/tags/rescue/shared-commit",X3,"commit"))
+            refs=_g(w,"for-each-ref");expected=sorted({T3,X3})
+            with patch.dict(os.environ,ambient[2]):receipt,calls=remote()
+            assert len(calls)==1 and calls[0]==expected and len(set(calls[0]))==len(calls[0]),"repeated OIDs must be fetched once, sorted: %r, expected %r"%(calls,[expected])
+            assert local(T3) and local(X3) and _g(w,"for-each-ref")==refs,receipt
+            # Absent stays unmeasurable against the real remote too: a tip that
+            # no repository has fails the one fetch and is never guessed.
+            gone="e"*40;feed();tip((name,T,"tree"),("refs/tags/rescue/gone",gone,"tree"))
+            receipt,calls=remote()
+            assert calls==[[gone]] and not local(gone) and receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,(calls,receipt)
+            tip((name,T,"tree"));receipt,calls=remote();assert calls==[] and receipt["status"]==ok,(calls,receipt)
+        elif kind=="fetch_timeout_group":
+            # Codex P2 (packet_loop.py, missing-object fetch): an SSH origin is a
+            # canonical endpoint. When its transport stalls, killing only git
+            # leaves the transport helper and its children running after the
+            # collector answered UNKNOWN. The fetch owns a process group; the
+            # whole group, and nothing outside it, dies on the deadline.
+            import shlex, signal
+            assert Path("/proc/self/stat").is_file(),"fixture needs /proc to observe process state"
+            ssh_origin=b"git@github.com:ducthangho/tra-luat.git\n";absent="e"*40
+            pidfile=c.tmp/"transport-helper.pids";helper=c.tmp/"transport-helper.sh";home=c.tmp/"empty-home";home.mkdir()
+            # Local stand-in for ssh: no network. It starts a sleeping descendant,
+            # records both PIDs atomically and then stalls without ever answering.
+            helper.write_text("#!/bin/sh\nsleep 300 &\necho \"$$ $!\" > %s && mv %s %s\nexec sleep 300\n"%(
+                shlex.quote(str(pidfile)+".part"),shlex.quote(str(pidfile)+".part"),shlex.quote(str(pidfile))))
+            helper.chmod(0o755)
+            def state(pid):
+                # None: no such process; "Z": dead, waiting for its reaper.
+                try:return Path("/proc/%d/stat"%pid).read_text().split(")",1)[1].split()[0]
+                except (FileNotFoundError,ProcessLookupError):return None
+            def gone(pid,wait=5.0):
+                stop=time.monotonic()+wait
+                while state(pid) not in (None,"Z"):
+                    if time.monotonic()>=stop:return False
+                    time.sleep(0.02)
+                return True
+            real=m._git_do;real_fetch=m._1174_fetch_objects;spawned=[]
+            def origin(root_,*argv,**kw):
+                return (0,ssh_origin) if argv==("remote","get-url","origin") else real(root_,*argv,**kw)
+            # Unrelated processes of the test itself: one in the test's own
+            # process group, one leading a session of its own.
+            bystanders=[subprocess.Popen([sys.executable,"-B","-c","import time;time.sleep(300)"],stdin=subprocess.DEVNULL,start_new_session=apart) for apart in (False,True)]
+            def stalled(run,label):
+                # Runs one stalled fetch; returns what `run` returned plus the
+                # (helper, descendant) PIDs, after the verdict on the processes.
+                if pidfile.exists():pidfile.unlink()
+                refs=_g(w,"for-each-ref");began=time.monotonic()
+                with patch.object(m,"_git_do",origin),patch.dict(os.environ,{"GIT_SSH_COMMAND":shlex.quote(str(helper)),"GIT_ALLOW_PROTOCOL":"ssh","HOME":str(home),"XDG_CONFIG_HOME":str(home)}):
+                    result=run()
+                spent=time.monotonic()-began
+                assert pidfile.is_file(),"fixture: the stalled transport helper was not reached (%s): %r"%(label,result)
+                pids=[int(x) for x in pidfile.read_text().split()];assert len(pids)==2 and len(set(pids))==2,pids
+                spawned.extend(pids);leader,descendant=pids
+                assert spent<12,"stalled fetch outlived its deadline (%s): %.1fs"%(label,spent)
+                assert gone(descendant),"timed-out fetch left the descendant of its transport helper running (%s): pid %d state %r"%(label,descendant,state(descendant))
+                assert gone(leader),"timed-out fetch left its transport helper running (%s): pid %d state %r"%(label,leader,state(leader))
+                assert all(p.poll() is None and state(p.pid) not in (None,"Z") for p in bystanders),"an unrelated process was signalled (%s)"%label
+                assert _g(w,"for-each-ref")==refs,"stalled fetch created or moved a ref (%s)"%label
+                return result
+            try:
+                # Direct: the deadline is reported as the transport deadline (or
+                # TimeoutExpired), never as a completed fetch.
+                def direct():
+                    try:return ("returned",real_fetch(w,[absent],time.time()+2.5))
+                    except subprocess.TimeoutExpired as ex:return ("timeout",str(ex))
+                    except ValueError as ex:return ("unknown",str(ex))
+                outcome=stalled(direct,"direct")
+                assert outcome[0]=="timeout" or (outcome[0]=="unknown" and outcome[1].startswith("WP1174 UNKNOWN:") and "transport deadline" in outcome[1]),outcome
+                assert m._git_do(w,"cat-file","-e",absent)[0]!=0
+                # Collector: the same stall on the single fetch of the pass is
+                # UNKNOWN, with exactly one fetch and no later pass.
+                tags=copy.deepcopy(pages["git/matching-refs/tags"])
+                pages["git/matching-refs/tags"]=tags+[dict(ref="refs/tags/rescue/stalled",object=dict(sha=absent,type="tree"))]
+                calls=[]
+                def counted(root_,oids,deadline):
+                    calls.append(list(oids));return real_fetch(root_,oids,deadline)
+                def collector():
+                    with patch.object(m,"_1174_fetch_objects",counted):return m._1174_collect(fetch,w,H,audit,123,deadline=time.time()+4)
+                receipt=stalled(collector,"collector")
+                assert calls==[[absent]],"exactly one fetch for the stalled pass: %r"%(calls,)
+                assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,receipt
+                _reject1174(m._1174_collector_receipt,dict(receipt,status=ok),H,audit,123,reason="collector success completeness")
+                pages["git/matching-refs/tags"]=tags
+                receipt=collect();assert receipt["status"]==ok and receipt["dag_coverage"] is True,receipt
+            finally:
+                # Fixture hygiene only, by exact PID: never part of the verdict.
+                for pid in spawned:
+                    if state(pid) not in (None,"Z"):
+                        try:os.kill(pid,signal.SIGKILL)
+                        except ProcessLookupError:pass
+                for p in bystanders:
+                    p.kill();p.wait(timeout=5)
+        elif kind in ("budget_bytes_cumulative","budget_pages_cumulative"):
+            # WP1370-F1: the 64 MiB and 1000-request ceilings belong to the whole
+            # collection. A transport failure late in the first pass buys another
+            # pass, never a fresh budget; bytes the transport reported before it
+            # raised and the failed request itself are spent.
+            MiB=1024*1024;calls=[]
+            def source(charge,fail=(),pad=0):
+                # charge(n): bytes request n reports through on_bytes (None: the
+                # transport measures nothing); fail: request numbers that raise
+                # AFTER reporting; pad: empty activity pages before the feed.
+                del calls[:]
+                def transport(endpoint,**limits):
+                    calls.append((endpoint,limits["max_bytes"]));n=len(calls)
+                    assert type(limits["max_bytes"]) is int and limits["max_bytes"]>0,("read dispatched without byte budget",n,calls[-1])
+                    size=charge(n)
+                    if size is not None:limits["on_bytes"](size)
+                    if n in fail:
+                        # Like the real transport, a failed read always reports
+                        # what it consumed (here: nothing) before raising.
+                        if size is None:limits["on_bytes"](0)
+                        raise OSError("transport reset after the response was read")
+                    if "/activity" in endpoint:
+                        step=([int(x[6:]) for x in endpoint.partition("?")[2].split("&") if x.startswith("after=")] or [0])[0]
+                        if step<pad:return [],'<https://api.github.com/repositories/123/activity?per_page=100&after=%d>; rel="next"'%(step+1)
+                        return copy.deepcopy(pages["activity"]),None
+                    return served(endpoint,**limits)
+                return transport
+            budgets=lambda:[size//MiB if size%MiB==0 else size for _,size in calls]
+            if kind=="budget_bytes_cumulative":
+                # Five reads per pass. Request 5 reports 40 MiB, then raises.
+                receipt=collect(source(lambda n:(1 if n<5 else 40 if n==5 else 5)*MiB,fail={5}))
+                assert receipt["status"]=="UNKNOWN","collection byte budget not cumulative over passes (44 MiB spent, then 25 MiB more): %r %r"%(receipt["status"],budgets())
+                assert budgets()==[64,63,62,61,60,20,15,10,5],"read beyond the remaining byte budget: %r"%(budgets(),)
+                assert "pulls?state=all" not in receipt["cursor_coverage"],receipt
+                # Bytes of successful reads alone; the failed request reports zero bytes.
+                receipt=collect(source(lambda n:None if n==5 else (10 if n<5 else 8)*MiB,fail={5}))
+                assert receipt["status"]=="UNKNOWN","successful first-pass bytes forgotten by the retry pass: %r"%(budgets(),)
+                assert budgets()==[64,54,44,34,24,24,16,8],"read beyond the remaining byte budget: %r"%(budgets(),)
+                # Control: the same late failure, retry still inside 64 MiB.
+                receipt=collect(source(lambda n:(1 if n<5 else 20 if n==5 else 5)*MiB,fail={5}))
+                assert receipt["status"]==ok and receipt["earliest"]["id"]=="12" and receipt["dag_coverage"] is True,("under-budget retry lost",receipt,budgets())
+                assert budgets()==[64,63,62,61,60,40,35,30,25,20] and m._1174_collector_receipt(receipt,H,audit,123) is receipt,budgets()
+                # Each response is charged once: callback bytes when reported,
+                # the serialised form only when nothing was reported.
+                receipt=collect(source(lambda n:(1 if n<5 else 20)*MiB if n<=5 else None,fail={5}))
+                first=len(m._1174_bytes(served("repos/"+m._1174_REPO)))
+                assert receipt["status"]==ok and len(calls)==10 and [size for _,size in calls[5:7]]==[40*MiB,40*MiB-first],calls[5:7]
+            else:
+                tiny=lambda n:None
+                # 501 requests per pass (1 + 497 activity + 3); request 501 fails.
+                receipt=collect(source(tiny,fail={501},pad=496))
+                assert receipt["status"]=="UNKNOWN","collection request budget not cumulative over passes: %r after %d requests"%(receipt["status"],len(calls))
+                assert len(calls)==1000,"read beyond the remaining request budget: %d"%len(calls)
+                # A failed request is counted too: 334 + 334 leave 332 for a
+                # pass that needs 334, although only 1000 responses would succeed.
+                receipt=collect(source(tiny,fail={334,668},pad=329))
+                assert receipt["status"]=="UNKNOWN" and len(calls)==1000,("failed requests must spend the request budget",receipt["status"],len(calls))
+                # Controls: retries that fit, one of them exactly at 1000 requests.
+                receipt=collect(source(tiny,fail={500},pad=495))
+                assert receipt["status"]==ok and len(calls)==1000 and receipt["cursor_coverage"]["activity"]==496 and receipt["dag_coverage"] is True,("retry inside the request budget lost",receipt,len(calls))
+                receipt=collect(source(tiny,fail={105},pad=100))
+                assert receipt["status"]==ok and len(calls)==210 and receipt["earliest"]["id"]=="12" and m._1174_collector_receipt(receipt,H,audit,123) is receipt,(receipt,len(calls))
+        elif kind=="budget_overflow_unreported":
+            # WP1370-F1 (source review 2): every byte the transport consumed is
+            # charged exactly once, also when the read raises. The REAL
+            # _1174_process pipe reader runs here; only the gh invocation is
+            # replaced by a local child that emits the fixture response.
+            MiB=1024*1024;limit=64*MiB;real=m._1174_process;runs=[];reported=[]
+            child=("import sys,time\no=sys.stdout.buffer\no.write(open(sys.argv[1],'rb').read())\nn=int(sys.argv[2])\n"
+                "while n>0:\n    k=min(n,1<<20);o.write(b' '*k);n-=k\no.flush()\ntime.sleep(float(sys.argv[4]))\nsys.exit(int(sys.argv[3]))\n")
+            def pipe(plan,report=True,**options):
+                # plan(n) -> dict(pad=trailing JSON whitespace bytes, rc=exit
+                # code, garbage=invalid body, sleep=seconds before exit).
+                del runs[:];del reported[:]
+                def process(argv,**kw):
+                    assert argv[:4]==["gh","api","--hostname","github.com"] and type(kw["max_bytes"]) is int and kw["max_bytes"]>0,(argv,kw)
+                    link="--include" in argv;endpoint=argv[-1];n=len(runs)+1;step=plan(n)
+                    value=served(endpoint,link=True,repo_id=123) if link else served(endpoint)
+                    raw=b"{" if step.get("garbage") else json.dumps(value[0] if link else value).encode("utf-8")
+                    if link:raw=b"HTTP/2.0 200 OK\r\nContent-Type: application/json\r\n"+(b"Link: "+value[1].encode()+b"\r\n" if value[1] else b"")+b"\r\n"+raw
+                    blob=c.tmp/"wp1370-pipe.bin";blob.write_bytes(raw)
+                    runs.append(dict(endpoint=endpoint,max_bytes=kw["max_bytes"],emitted=len(raw)+step.get("pad",0)))
+                    return real([sys.executable,"-B","-c",child,str(blob),str(step.get("pad",0)),str(step.get("rc",0)),str(step.get("sleep",0))],**kw)
+                def transport(endpoint,**limits):
+                    charge=limits.pop("on_bytes")
+                    def note(size):
+                        reported.append((len(runs),size));charge(size)
+                    if report:limits["on_bytes"]=note
+                    return m._1174_api(endpoint,root=w.resolve(),**limits)
+                with patch.object(m,"_1174_process",side_effect=process):
+                    return m._1174_collect(transport,w,H,audit,123,**options)
+            def once():
+                # One report per dispatched request, equal to the bytes the pipe
+                # reader consumed; the next request gets exactly what is left.
+                assert [n for n,_ in reported]==list(range(1,len(runs)+1)),("response not charged exactly once",reported,len(runs))
+                spent=0
+                for run,(_,size) in zip(runs,reported):
+                    assert run["max_bytes"]==limit-spent,("byte budget handed out is not the unspent remainder",runs,reported)
+                    assert size==min(run["emitted"],run["max_bytes"]+1),("reported bytes differ from the bytes read",run,size)
+                    spent+=size
+                return spent
+            def refused(receipt):
+                assert receipt["earliest"] is None or receipt["status"]!=ok
+                _reject1174(m._1174_collector_receipt,dict(receipt,status=ok),H,audit,123,reason="collector success completeness")
+            # The pipe reader itself: consumption is observable on every exit,
+            # and nothing changes for a caller without on_bytes.
+            got=[];_reject1174(real,[sys.executable,"-B","-c","print('x'*4096)"],cwd=w,deadline=time.time()+30,max_bytes=128,on_bytes=got.append,reason="transport byte budget")
+            assert got==[129],"overflowing read not reported by the pipe reader: %r"%(got,)
+            got=[];done=real([sys.executable,"-B","-c","import sys;print('x'*10);sys.stderr.write('yy')"],cwd=w,deadline=time.time()+30,max_bytes=128,on_bytes=got.append)
+            plain=real([sys.executable,"-B","-c","import sys;print('x'*10);sys.stderr.write('yy')"],cwd=w,deadline=time.time()+30,max_bytes=128)
+            assert got==[13] and (done.returncode,done.stdout,done.stderr)==(plain.returncode,plain.stdout,plain.stderr)==(0,b"x"*10+b"\n",b"yy"),(got,done,plain)
+            got=[];_reject1174(real,[sys.executable,"-B","-c","pass"],cwd=w,deadline=time.time()-1,max_bytes=128,on_bytes=got.append,reason="transport deadline/byte budget")
+            assert got==[0],got
+            # Healthy baseline through the real pipe: five requests, one pass.
+            receipt=pipe(lambda n:{})
+            assert receipt["status"]==ok and len(runs)==5 and receipt["earliest"]["id"]=="12" and m._1174_collector_receipt(receipt,H,audit,123) is receipt,(receipt,runs)
+            small=once();assert 0<small<MiB,small
+            # Target (the reviewer's reproduction): request 5 overflows what is
+            # left of the budget; every later response would be valid.
+            receipt=pipe(lambda n:dict(pad=limit) if n==5 else {})
+            assert receipt["status"]=="UNKNOWN","byte-budget overflow of a real pipe read was not charged: %r after %d requests, reported %r"%(receipt["status"],len(runs),reported)
+            assert len(runs)==5,"request dispatched after the byte-budget overflow: %r"%([x["endpoint"] for x in runs],)
+            assert once()==limit+1 and reported[-1][1]==runs[-1]["max_bytes"]+1 and runs[-1]["emitted"]>runs[-1]["max_bytes"],(runs,reported)
+            refused(receipt)
+            # Overflow in the middle of a pass: nothing more in that pass either.
+            receipt=pipe(lambda n:dict(pad=limit) if n==2 else {})
+            assert receipt["status"]=="UNKNOWN" and len(runs)==2 and once()==limit+1,("dispatch after overflow inside the pass",receipt["status"],runs,reported)
+            assert receipt["cursor_coverage"]=={} or "activity" not in receipt["cursor_coverage"],receipt
+            refused(receipt)
+            # A transport that reports nothing for the failed read: its
+            # consumption cannot be measured, so the whole allowance is spent.
+            receipt=pipe(lambda n:dict(pad=limit) if n==5 else {},report=False)
+            assert receipt["status"]=="UNKNOWN" and len(runs)==5 and reported==[],"unreported failed read charged zero bytes: %r after %d requests"%(receipt["status"],len(runs))
+            refused(receipt)
+            receipt=pipe(lambda n:dict(rc=1) if n==5 else {},report=False)
+            assert receipt["status"]=="UNKNOWN" and len(runs)==5,"unreported failed read charged zero bytes: %r after %d requests"%(receipt["status"],len(runs))
+            refused(receipt)
+            # Controls: under-budget transient failures (non-zero exit after a
+            # 2 MiB body, then an unparsable body) are charged what was read
+            # and the retry passes still succeed.
+            receipt=pipe(lambda n:dict(rc=1,pad=2*MiB) if n==5 else dict(garbage=True) if n==8 else {})
+            assert receipt["status"]==ok and len(runs)==15 and receipt["earliest"]["id"]=="12" and receipt["dag_coverage"] is True,("under-budget transient failure lost",receipt["status"],runs,reported)
+            assert m._1174_collector_receipt(receipt,H,audit,123) is receipt
+            spent=once();assert 2*MiB<spent<3*MiB and reported[4][1]==runs[4]["emitted"]>2*MiB,(spent,reported)
+            # A failed read that stays inside the budget is charged, and the
+            # retry pass overflows what is left: terminal again.
+            receipt=pipe(lambda n:dict(rc=1,pad=40*MiB) if n==5 else dict(pad=30*MiB) if n==7 else {})
+            assert receipt["status"]=="UNKNOWN" and len(runs)==7,("bytes of a failed real read were not charged",receipt["status"],len(runs),reported)
+            assert once()==limit+1 and runs[6]["max_bytes"]<24*MiB,(runs,reported)
+            refused(receipt)
+            # Deadline: the bytes read before the absolute deadline cut the
+            # request are reported once; nothing is dispatched afterwards.
+            receipt=pipe(lambda n:dict(sleep=30) if n==3 else {},deadline=time.time()+4)
+            assert receipt["status"]=="UNKNOWN" and len(runs)==3 and once()==sum(x["emitted"] for x in runs),(receipt["status"],runs,reported)
+            refused(receipt)
+        elif kind=="deadline_processing":
+            # WP1370-F1 (review 4): the absolute deadline bounds the PROCESSING
+            # of what was read, not only the reads.
+            import types
+            D=_g(w,"commit-tree",_g(w,"rev-parse",H+"^{tree}"),"-p",H,"-m","wp1370 descendant of H")
+            assert D!=H and _g(w,"merge-base","--is-ancestor",H,D)==""
+            late=lambda ident,oid,when:_activity1370(ident,"force_push","refs/heads/candidate",oid,parent,when)
+            def status(*extra,drop=()):
+                feed(*extra,drop=drop);receipt=collect();return receipt["status"],(receipt["earliest"] or {}).get("id"),receipt["dag_coverage"]
+            # Index semantics on small feeds. Introduction 12 publishes H at 09:01:00.
+            assert status(late(13,H,"2026-11-04T09:05:00Z"))==(ok,"12",True),"observation after a strictly earlier introduction refused"
+            assert status(late(13,H,"2026-11-04T09:01:00Z"))==("UNKNOWN","12",False),"introduction at the SAME time explained an observation"
+            again=_activity1370(14,"branch_creation","refs/heads/topic",Z,H,"2026-11-04T09:10:00Z")
+            assert status(again,late(13,H,"2026-11-04T09:05:00Z"))==(ok,"12",True),"index lost the earliest introduction of an OID"
+            assert status(_activity1370(12,"push","refs/heads/candidate",parent,H,"2026-11-04T09:10:00Z"),late(13,H,"2026-11-04T09:05:00Z"),drop=(12,))==("UNKNOWN","12",False),"later introduction explained an earlier observation"
+            assert status(_activity1370(100,"push","refs/heads/other",parent,H,"2026-11-04T09:01:00Z"))==(ok,"12",True),"earliest is not timestamp-then-numeric-id"
+            assert status(_activity1370(7,"push","refs/heads/other",parent,H,"2026-11-04T09:01:00Z"))==(ok,"7",True),"earliest is not timestamp-then-numeric-id"
+            assert status(late(13,D,"2026-11-04T09:05:00Z"))==("UNKNOWN","12",False),"introduction of another OID explained an observation"
+            grown=lambda when:_activity1370(15,"push","refs/heads/topic",H,D,when)
+            assert status(grown("2026-11-04T09:03:00Z"),late(16,D,"2026-11-04T09:05:00Z"))==(ok,"12",True)
+            assert status(grown("2026-11-04T09:05:00Z"),late(16,D,"2026-11-04T09:05:00Z"))==("UNKNOWN","12",False),"equal-time introduction of the exact OID explained an observation"
+            assert status(late(10,H,"2026-11-04T08:58:30Z"))==("FAIL","12",True)
+            # Large populated feed: 240 pre-audit pushes over 60 refs with 240
+            # distinct timestamps, and 60 post-audit pushes with before=after=H
+            # (each an introduction and an observation explained by record 12).
+            big=[_activity1370(1000+i,"push","refs/heads/wp1370-%02d"%(i%60),root,parent,"2026-10-01T%02d:%02d:00Z"%(i//60,i%60)) for i in range(240)]
+            big+=[_activity1370(2000+i,"push","refs/heads/candidate",H,H,"2026-11-04T09:02:%02dZ"%i) for i in range(60)]
+            leak=late(10,H,"2026-11-04T08:58:30Z")
+            got=[]
+            def recording(endpoint,**limits):
+                value=served(endpoint,**limits);got.append((endpoint,value));return value
+            feed(*big);healthy=collect(recording)
+            assert healthy["status"]==ok and healthy["earliest"]["id"]=="12" and healthy["dag_coverage"] is True and len(pages["activity"])==303,healthy
+            assert m._1174_collector_receipt(healthy,H,audit,123) is healthy
+            # Receipt v2 keeps its definition: sha256 over the whole raw snapshot.
+            answer=dict(got);repo=answer["repos/"+m._1174_REPO]
+            raw=dict(repo=dict(id=repo["id"],default_branch=repo["default_branch"],created_at=repo["created_at"]),
+                activity=[row for endpoint,value in got if "/activity?" in endpoint for row in value[0]])
+            for family in healthy["query_scope"][1:]:
+                value=[v for endpoint,v in got if endpoint.split(m._1174_REPO+"/",1)[-1].split("&")[0].split("?per_page")[0]==family];assert len(value)==1,(family,[e for e,_ in got])
+                raw[family]=value[0][0] if type(value[0]) is tuple else value[0]
+            assert len(raw["activity"])==303 and healthy["raw_snapshot_sha256"]==hashlib.sha256(m._1174_bytes(raw)).hexdigest(),"raw snapshot digest changed its definition"
+            # Deterministic oracle: a clock that only advances with WORK done by
+            # the collector (one unit per timestamp parse and per git call).
+            # The caller deadline is K units; nothing after the last read is
+            # allowed to do more than a constant amount of work past it.
+            clock_module,parse_real,git_real=m.time,m._1174_time,m._git_do
+            def run(K):
+                units=[0];last=[0];t0=clock_module.time()
+                clock=types.SimpleNamespace(**{k:getattr(clock_module,k) for k in dir(clock_module) if not k.startswith("__")});clock.time=lambda:t0+units[0]
+                def parse(value):
+                    units[0]+=1;return parse_real(value)
+                def git(*argv,**kw):
+                    units[0]+=1;return git_real(*argv,**kw)
+                def counted(endpoint,**limits):
+                    value=served(endpoint,**limits);last[0]=units[0];return value
+                began=clock_module.time()
+                with patch.object(m,"time",clock),patch.object(m,"_1174_time",side_effect=parse),patch.object(m,"_git_do",side_effect=git):
+                    receipt=m._1174_collect(counted,w,H,audit,123,deadline=None if K is None else t0+K)
+                return receipt,units[0],last[0],clock_module.time()-began
+            receipt,U,read_at,_=run(None)
+            assert receipt["status"]==ok and receipt["raw_snapshot_sha256"]==healthy["raw_snapshot_sha256"] and U>360 and read_at<=3,(receipt["status"],U,read_at)
+            receipt,units,_,_=run(U+1)
+            assert receipt["status"]==ok and units==U,("deadline that is never reached changed the result",receipt["status"],units,U)
+            for K in sorted({4,5,6,17,U//4,U//2,3*U//4}|set(range(U-12,U+1))):
+                receipt,units,read_at,wall=run(K)
+                assert read_at<K,("fixture: the last read must finish before the deadline",read_at,K)
+                assert receipt["status"]=="UNKNOWN" and receipt["dag_coverage"] is False,("processing that crossed the caller deadline is not UNKNOWN",K,U,receipt["status"])
+                assert units<=K+2,"processing continued past the caller deadline: %d work units done, deadline at unit %d of %d"%(units,K,U)
+                assert wall<20,("wall clock",K,wall)
+                _reject1174(m._1174_collector_receipt,dict(receipt,status=ok),H,audit,123,reason="collector success completeness")
+            # Exposure established at or before the audit keeps FAIL precedence
+            # when the deadline is crossed after it was seen; before that the
+            # stopped pass is UNKNOWN, and stops as promptly.
+            feed(*(big+[leak]));receipt,UL,_,_=run(None)
+            assert receipt["status"]=="FAIL" and receipt["earliest"]["id"]=="12",receipt
+            receipt,units,_,_=run(UL)
+            assert receipt["status"]=="FAIL" and units==UL,("pre-audit exposure lost at the deadline",receipt["status"],units,UL)
+            for K in (5,UL//2):
+                receipt,units,_,_=run(K)
+                assert receipt["status"]=="UNKNOWN" and units<=K+2,"processing continued past the caller deadline: %d work units done, deadline at unit %d of %d (%s)"%(units,K,UL,receipt["status"])
+            # Wall-clock smoke on the real clock: the reviewer's population (600
+            # same-timestamp pushes with before=after=H); the last read returns
+            # just before the caller deadline, processing then crosses it.
+            feed(*(big[:240]+[_activity1370(3000+i,"push","refs/heads/candidate",H,H,"2026-11-04T09:02:00Z") for i in range(600)]))
+            limit=[0.0]
+            def slow(endpoint,**limits):
+                value=served(endpoint,**limits)
+                if "/pulls" in endpoint:time.sleep(max(0.0,limit[0]-0.02-time.time()))
+                return value
+            began=time.time();limit[0]=began+0.5
+            receipt=m._1174_collect(slow,w,H,audit,123,deadline=limit[0]);took=time.time()-began
+            assert receipt["status"]=="UNKNOWN" and took<0.5+3.0,("collector overran the caller deadline",receipt["status"],took)
+        else:
+            raise AssertionError("unknown wp1370 case "+kind)
+    return case
+
+
+_WP1370_ACTIVITY_CASES = ("reduced_payload", "multipage_anchor", "older_page_fail", "same_timestamp_fail", "force_push_preimage",
+    "deletion_preaudit", "tag_coverage", "receipt_residuals", "no_anchor", "object_unfetchable", "cursor_foreign", "pr_foreign_head",
+    "intro_kinds", "receipt_v1", "accept_roundtrip", "deletion_unexplained", "matching_refs_unpaginated", "tip_non_commit",
+    "budget_bytes_cumulative", "budget_pages_cumulative", "budget_overflow_unreported", "deadline_processing", "fetch_timeout_group")
+assert {"wp1174_activity_" + name for name in _WP1370_ACTIVITY_CASES} <= WP1174_REQUIRED
+CASES += [("wp1174_activity_" + name, _activity_case1370(name)) for name in _WP1370_ACTIVITY_CASES]
+MUTANTS.update({
+    # stop reading at the first audit-boundary record
+    "m1174_activity_stop_at_boundary": ('            if endpoint is None:\n                coverage["activity"] = len(cursors)\n',
+        '            if endpoint is None or any(type(x) is dict and str(x.get("timestamp")) <= audit["updated_at"] for x in reply[0]):\n                coverage["activity"] = len(cursors)\n                break\n',
+        ["wp1174_activity_older_page_fail", "wp1174_activity_same_timestamp_fail"]),
+    # drop the default-branch creation anchor
+    "m1174_activity_drop_anchor": ('boundary = (oldest["activity_type"] == "branch_creation" and', 'boundary = (True or oldest["activity_type"] == "branch_creation" and',
+        ["wp1174_activity_no_anchor"]),
+    # drop the preimage examination
+    "m1174_activity_drop_preimage": ('            if matches["before"]:\n                observations.append((before, stamp))\n',
+        '            if False:\n                observations.append((before, stamp))\n', ["wp1174_activity_force_push_preimage"]),
+    # treat a deletion preimage as an introduction
+    "m1174_activity_deletion_as_introduction": ('            if matches["before"]:\n                observations.append((before, stamp))\n',
+        '            if matches["before"] and kind == "branch_deletion":\n                introductions.append(dict(id=str(event["id"]), time=stamp, ref=ref,\n'
+        '                    actor=actor.get("login") if type(actor) is dict else None, before=after, after=before))\n'
+        '            elif matches["before"]:\n                observations.append((before, stamp))\n', ["wp1174_activity_deletion_unexplained"]),
+    # drop the repository check of the cursor
+    "m1174_activity_cursor_repository": ('_1174_require(owned and re.fullmatch(', '_1174_require(re.fullmatch(', ["wp1174_activity_cursor_foreign"]),
+    # v2 receipt binding: residual list and schema version
+    "m1174_activity_receipt_residuals": ('receipt["residual_classes"] == _1174_RESIDUALS and', 'True and', ["wp1174_activity_receipt_residuals"]),
+    # restore page looping for the matching-refs families (they ignore paging)
+    "m1174_activity_matching_refs_paged": ('            if family in _1174_UNPAGED:\n', '            if False and family in _1174_UNPAGED:\n',
+        ["wp1174_activity_matching_refs_unpaginated"]),
+    # treat a present non-commit object (a ref pointing at a tree) as unmeasurable again
+    "m1174_activity_tip_non_commit_unknown": ('            if commit == _1174_NOT_COMMIT:\n                return False\n',
+        '            if commit == _1174_NOT_COMMIT:\n                return None\n', ["wp1174_activity_tip_non_commit"]),
+    "m1174_activity_receipt_v1": ('receipt["schema"] == "wp1174_publication_receipt.v2" and', 'receipt["schema"].startswith("wp1174_publication_receipt.v") and', ["wp1174_activity_receipt_v1"]),
+    # WP1370-F1: give every pass a fresh byte/request budget again
+    "m1174_activity_budget_reset_per_pass": ('        complete, transient = True, False\n        pass_end = end\n',
+        '        size, pages, complete, transient = 0, 0, True, False\n        pass_end = end\n',
+        ["wp1174_activity_budget_bytes_cumulative", "wp1174_activity_budget_pages_cumulative"]),
+    # WP1370-F1: forget the bytes a failed fetch reported before raising
+    "m1174_activity_budget_drop_failed_bytes": ('                size += sum(measured) if measured else limit - size\n', '                size += 0 if measured else limit - size\n',
+        ["wp1174_activity_budget_bytes_cumulative"]),
+    # WP1370-F1 (review 2): charge zero again for a failed read that reported nothing
+    "m1174_activity_budget_overflow_uncharged": ('                size += sum(measured) if measured else limit - size\n', '                size += sum(measured)\n',
+        ["wp1174_activity_budget_overflow_unreported"]),
+    # WP1370-F1 (review 4): never ask the deadline inside the processing loops
+    "m1174_activity_deadline_unchecked": ('            if time.time() >= pass_end:\n                complete, expired = False, True\n',
+        '            if False:\n                complete, expired = False, True\n', ["wp1174_activity_deadline_processing"]),
+    # fix 7: hand the single fetch the concatenated feed-then-tip order again
+    "m1174_activity_fetch_unsorted": ('        for oid in heapq.merge(wanted, extra):\n', '        for oid in wanted + extra:\n', ["wp1174_activity_tip_non_commit"]),
+    # fix 7: on the deadline kill only git again, not the process group of the fetch
+    "m1174_activity_fetch_timeout_orphan": (
+        '    child = _1174_process(argv, cwd=Path(root), deadline=deadline, max_bytes=1024 * 1024, env=_1174_git_env(), stdin=wants)\n',
+        '    child = subprocess.run(argv, input=wants, env=_1174_git_env(), capture_output=True, timeout=remaining)\n',
+        ["wp1174_activity_fetch_timeout_group"]),
+})
 
 
 # R12 adds adversarial stimuli to the frozen IDs without changing the inventory.
@@ -13987,8 +14959,8 @@ def _r12_extend1174(original,additional):
     return case
 CASES=[(name,_r12_extend1174(case,_r12_hosts[name]) if name in _r12_hosts else case) for name,case in CASES]
 MUTANTS.update({
-    "m1174_r12_push_preimage":('matches.get("after") or matches.get("before") and preaudit','matches.get("after")',["wp1174_lifecycle_first_publication"]),
-    "m1174_r12_postaudit_preimage":('if not any(x["after"] == oid and _1174_time(x["time"]) < _1174_time(observed_at) for x in introductions):','if False:',["wp1174_lifecycle_first_publication"]),
+    "m1174_r12_push_preimage":('any(parsed[observed_at] <= audit_time for _, observed_at in observations[mark:]))','False) # omit pre-audit preimage publication evidence',["wp1174_lifecycle_first_publication"]),
+    "m1174_r12_postaudit_preimage":('if not (oid in first and first[oid][0] < parsed[observed_at]):','if False:',["wp1174_lifecycle_first_publication"]),
     "m1174_r12_reused_source_sync":('_1174_recheck_durable(source, source_now)','pass # omit recovery source durability',["wp1174_durability_fsync_readback"]),
     "m1174_r12_reused_target_sync":('_1174_recheck_durable(target, target_raw)\n        _1174_recheck_durable(wp, witness_raw)','pass # omit recovery target durability\n        _1174_recheck_durable(wp, witness_raw)',["wp1174_durability_fsync_readback"]),
     "m1174_r12_reused_witness_sync":('_1174_recheck_durable(wp, witness_raw)\n    _1174_probe','pass # omit recovery witness durability\n    _1174_probe',["wp1174_durability_fsync_readback"]),
@@ -14009,8 +14981,8 @@ MUTANTS.update({
     "m1174_r12_ordinary_source_sync":('_1174_recheck_durable(Path(payload["source_path"]), payload["tombstone"].encode("utf-8"))','pass # omit reservation source durability',["wp1174_durability_fsync_readback"]),
 })
 
-MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==85 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
-    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==85,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
+MUTANTS["m1174_r12_platform_inventory"] = ('assert len(_WP1174_FULL_CASE_IDS)==108 and set(_WP1174_FULL_CASE_IDS)==WP1174_REQUIRED,"incomplete acceptance inventory"\n',
+    'assert len({n for n,_ in CASES if n in WP1174_REQUIRED})==108,"incomplete acceptance inventory"\n',["wp1174_gate_required_skip"])
 MUTANTS_NHAM_TEST |= {"m1174_r12_platform_inventory"}
 
 _WP1174_FULL_CASE_IDS = tuple(name for name,_ in CASES if name in WP1174_REQUIRED)
@@ -14221,7 +15193,7 @@ def _carrier1174(outcomes, gate_rc=0):
 
 def main():
     global CASES, MUTANTS, _WP1174_MAIN_REQUIRED
-    assert len(WP1174_REQUIRED) == 85 and len(WP1174_BOTH) == 12
+    assert len(WP1174_REQUIRED) == 108 and len(WP1174_BOTH) == 12
     actual_os = platform.system()
     if actual_os=="Linux":
         globals()["_WP1174_MAIN_PRODUCER_START"]=dict(product=hashlib.sha256(CANONICAL.read_bytes()).hexdigest(),test=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
@@ -14812,23 +15784,63 @@ def _r25_adopt_lease1174(c, reproduce=False):
 
 
 def _r25_publication1174(c, reproduce=False):
+    # wp1370 migration. The Events API PullRequestEvent stimuli have no
+    # activity record of their own: for a same-repository PR every head change
+    # IS an activity on the head branch, and PR state lives in `pulls?state=all`.
+    # Explicit mapping of each original sub-check (nothing maps "opened" to "merged"):
+    #   PR opened pre-audit on the predecessor -> RECORDED
+    #       => pre-audit `branch_creation` of the PR head branch at the predecessor
+    #          plus the PR row whose head is the predecessor -> RECORDED;
+    #   PR event pre-audit whose head is H / a descendant -> FAIL
+    #       => that head-branch activity pre-audit with `after` = H / descendant -> FAIL;
+    #   opened/closed/reopened/synchronize/edited on the predecessor -> RECORDED
+    #       => PR rows open/closed/merged/draft on the predecessor, and a pre-audit
+    #          `push` (synchronize) of the head branch to the predecessor -> RECORDED;
+    #   PR observation of H after its introduction -> RECORDED
+    #       => PR row whose head is H, and a later activity whose `before` is H -> RECORDED;
+    #   PR observation of H post-audit but before any introduction -> UNKNOWN
+    #       => post-audit activity whose `before` is H before the introduction, and a
+    #          PR row whose head contains H with no exact-tip introduction -> UNKNOWN;
+    #   PR head object missing -> UNKNOWN => activity OID / PR head OID not local -> UNKNOWN;
+    #   malformed PR number/html_url/base -> "collector PR event identity"
+    #       => same fields of the `pulls` row -> "collector PR identity";
+    #   event.repo name/id wrong -> "collector event identity"
+    #       => `repos/<repo>` identity wrong -> "collector repository identity";
+    #   bad/future created_at, bad id/type -> identity/time errors
+    #       => bad/future `timestamp`, bad `id`/`activity_type` -> activity identity/time errors;
+    #   unknown action, non-string action, head without sha, invalid ref -> UNKNOWN
+    #       => unknown / non-string `activity_type`, record without `after`, invalid `ref` -> UNKNOWN error;
+    #   CreateEvent (no immutable tip) -> UNKNOWN
+    #       => intentionally changed by the spec: `branch_creation` carries an immutable
+    #          `after`, so an unrelated creation is RECORDED (the first row above) and a
+    #          creation without `after` is an identity error;
+    #   a family page that cannot be fetched -> UNKNOWN => unchanged.
     import copy, contextlib, io
     m,w,args,a,audit,pages,seams=_human_fixture1174(c)
-    fetch=lambda endpoint,**limits:pages[endpoint.split(m._1174_REPO+'/',1)[1].split('?',1)[0]]
+    fetch=_fetch1370(m,pages)
     healthy=m._1174_collect(fetch,w,args.head,audit,123)
     assert healthy['status']=='RECORDED_EARLIEST_MATCH',healthy
-    parent=_g(w,'rev-parse',args.head+'^1')
-    pages['events'].append(dict(id='13',type='PullRequestEvent',created_at='2026-11-04T08:58:00Z',repo=dict(name=m._1174_REPO),actor=dict(login='ducthangho'),payload=dict(action='opened',number=1187,pull_request=dict(number=1187,html_url='https://github.com/'+m._1174_REPO+'/pull/1187',head=dict(sha=parent,ref='candidate'),base=dict(repo=dict(full_name=m._1174_REPO))))))
+    parent=_g(w,'rev-parse',args.head+'^1');zero='0'*40
+    def pull(oid,**extra):
+        row=dict(number=1187,state='open',html_url='https://github.com/'+m._1174_REPO+'/pull/1187',
+            head=dict(sha=oid,ref='candidate',repo=dict(id=123,full_name=m._1174_REPO)),base=dict(ref='master',repo=dict(id=123,full_name=m._1174_REPO)))
+        row.update(extra);return row
+    pages['activity'].insert(2,_activity1370(13,'branch_creation','refs/heads/candidate',zero,parent,'2026-11-04T08:58:00Z'))
+    pages['pulls']=[pull(parent)]
     receipt=m._1174_collect(fetch,w,args.head,audit,123)
     assert receipt['status']==('UNKNOWN' if reproduce else 'RECORDED_EARLIEST_MATCH'),receipt
     print('R25_PUBLICATION',healthy['status'],receipt['status'])
     if not reproduce:
-        original=copy.deepcopy(pages['events']);event=copy.deepcopy(original[-1]);rows=[]
+        original=copy.deepcopy(pages['activity']);pulls=copy.deepcopy(pages['pulls']);event=copy.deepcopy(original[2]);rows=[]
         _g(w,'checkout','-qb','r25-descendant',args.head);(w/'r25.txt').write_text('descendant\n');_g(w,'add','r25.txt');_g(w,'commit','-qm','r25 descendant')
         descendant=_g(w,'rev-parse','HEAD')
         argv=['guard-first-publication','--packet',str(args.packet),'--revision','1','--generation','1','--admission','fixture','--root',args.root,'--head',args.head,'--pr',str(args.pr),'--receipt',args.receipt,'--human-audit-comment',args.human_audit_comment,'--human-remote-run',args.human_remote_run,'--workflow-runs',args.workflow_runs]
-        def check(label,changed,status,reason=None):
-            pages['events']=copy.deepcopy(original[:-1])+[changed]
+        def swapped(changed):return copy.deepcopy(original[:2])+[changed]+copy.deepcopy(original[3:])
+        def check(label,status,reason=None,activity=None,pr=None,repo=None):
+            pages['activity']=copy.deepcopy(original) if activity is None else activity
+            pages['pulls']=copy.deepcopy(pulls) if pr is None else pr
+            pages.pop('repo',None)
+            if repo is not None:pages['repo']=repo
             if reason is None or reason=='publication evidence FAIL':
                 collected=m._1174_collect(fetch,w,args.head,audit,123)
                 assert collected['status']==status,(label,status,collected)
@@ -14839,36 +15851,44 @@ def _r25_publication1174(c, reproduce=False):
             result=json.loads(out.getvalue());rows.append(dict(case=label,rc=rc,**result))
             assert rc==(0 if status=='RECORDED_EARLIEST_MATCH' else 12) and result['status']==('PASS' if rc==0 else status) and not result['dispatch_allowed'],(label,rc,result)
             if reason:assert reason in result['detail'],(label,reason,result)
-        check('predecessor-open',copy.deepcopy(event),'RECORDED_EARLIEST_MATCH')
+        check('predecessor-open','RECORDED_EARLIEST_MATCH')
         for oid in (args.head,descendant):
-            bad=copy.deepcopy(event);bad['payload']['pull_request']['head']['sha']=oid
-            check('preaudit-'+oid,bad,'FAIL','publication evidence FAIL')
-        for action in ('opened','closed','reopened','synchronize','edited'):
-            unrelated=copy.deepcopy(event);unrelated['payload']['action']=action
-            check('predecessor-'+action,unrelated,'RECORDED_EARLIEST_MATCH')
-        for oid,when,status in [(args.head,'09:02:00','RECORDED_EARLIEST_MATCH'),(args.head,'09:00:30','UNKNOWN'),('f'*40,'08:58:00','UNKNOWN')]:
-            changed=copy.deepcopy(event);changed['payload']['pull_request']['head']['sha']=oid;changed['created_at']='2026-11-04T'+when+'Z'
-            check('observation-'+oid+when,changed,status)
-        for field,value,reason in [('number',True,'collector PR event identity'),('html_url','https://github.com/wrong/repo/pull/1187','collector PR event identity'),('base',None,'collector PR event identity')]:
-            bad=copy.deepcopy(event);bad['payload']['pull_request'][field]=value
-            check('malformed-'+field,bad,'UNKNOWN',reason)
-        wrong=copy.deepcopy(event);wrong['repo']['name']='wrong/repo';check('wrong-repo',wrong,'UNKNOWN','collector event identity')
-        invalid=copy.deepcopy(event);invalid['created_at']='bad-time';check('malformed-time',invalid,'UNKNOWN','UTC')
-        future=copy.deepcopy(event);future['created_at']='2099-01-01T00:00:00Z';check('future-event',future,'UNKNOWN','collector event time')
-        for field,value in [('id',''),('type','')]:
-            invalid=copy.deepcopy(event);invalid[field]=value;check('invalid-'+field,invalid,'UNKNOWN','collector event identity')
-        wrong=copy.deepcopy(event);wrong['repo']['id']=124;check('wrong-repo-id',wrong,'UNKNOWN','collector event identity')
-        for variant in ('unknown-action','bad-action-type','no-head','bad-ref','create'):
-            unknown=copy.deepcopy(event)
-            if variant=='unknown-action':unknown['payload']['action']='future-unsupported-action'
-            elif variant=='bad-action-type':unknown['payload']['action']=[]
-            elif variant=='no-head':unknown['payload']['pull_request']['head'].pop('sha')
-            elif variant=='bad-ref':unknown['payload']['pull_request']['head']['ref']='../invalid'
-            else:unknown.update(type='CreateEvent',payload=dict(ref_type='branch',ref='candidate',master_branch='master'))
-            check(variant,unknown,'UNKNOWN')
-        pages['events']=copy.deepcopy(original)
+            bad=copy.deepcopy(event);bad['after']=oid
+            check('preaudit-'+oid,'FAIL','publication evidence FAIL',activity=swapped(bad),pr=[pull(oid)])
+        for label,extra in (('open',{}),('closed',dict(state='closed')),('merged',dict(state='closed',merged_at='2026-11-04T08:59:30Z')),('draft',dict(draft=True))):
+            check('predecessor-'+label,'RECORDED_EARLIEST_MATCH',pr=[pull(parent,**extra)])
+        root=_g(w,'rev-list','--max-parents=0',args.head)
+        check('predecessor-synchronize','RECORDED_EARLIEST_MATCH',activity=copy.deepcopy(original[:2])+[
+            _activity1370(14,'push','refs/heads/candidate',root,parent,'2026-11-04T08:58:30Z'),
+            _activity1370(13,'branch_creation','refs/heads/candidate',zero,root,'2026-11-04T08:58:00Z')]+copy.deepcopy(original[3:]))
+        later=_activity1370(15,'push','refs/heads/pr-copy',args.head,descendant,'2026-11-04T09:02:00Z')
+        check('observation-explained','RECORDED_EARLIEST_MATCH',activity=[later]+copy.deepcopy(original),pr=[pull(args.head)])
+        early=_activity1370(15,'force_push','refs/heads/pr-copy',args.head,parent,'2026-11-04T09:00:30Z')
+        check('observation-unexplained','UNKNOWN',activity=copy.deepcopy(original[:1])+[early]+copy.deepcopy(original[1:]))
+        check('pr-head-unexplained','UNKNOWN',pr=[pull(descendant)])
+        missing=copy.deepcopy(event);missing['after']='f'*40
+        check('activity-missing-object','UNKNOWN',activity=swapped(missing))
+        check('pr-head-missing-object','UNKNOWN',pr=[pull('f'*40)])
+        for field,value,reason in [('number',True,'collector PR identity'),('html_url','https://github.com/wrong/repo/pull/1187','collector PR identity'),('base',None,'collector PR identity')]:
+            check('malformed-'+field,'UNKNOWN',reason,pr=[pull(parent,**{field:value})])
+        for label,source in (('absent',None),('foreign-name',dict(id=123,full_name='fork/tra-luat')),('foreign-id',dict(id=124,full_name=m._1174_REPO))):
+            foreign=pull(parent);foreign['head']['repo']=source
+            check('pr-head-repo-'+label,'UNKNOWN',pr=[foreign])
+        check('wrong-repo','UNKNOWN','collector repository',repo=dict(id=123,full_name='wrong/repo',default_branch='master',created_at='2026-07-05T00:00:00Z'))
+        pages['activity']=copy.deepcopy(original);pages['pulls']=copy.deepcopy(pulls)
+        pages['repo']=dict(id=124,full_name=m._1174_REPO,default_branch='master',created_at='2026-07-05T00:00:00Z')
+        _reject1174(m._1174_collect,fetch,w,args.head,audit,123,reason='collector repository identity')
+        invalid=copy.deepcopy(event);invalid['timestamp']='bad-time';check('malformed-time','UNKNOWN','UTC',activity=swapped(invalid))
+        future=copy.deepcopy(event);future['timestamp']='2099-01-01T00:00:00Z';check('future-event','UNKNOWN','collector activity time',activity=swapped(future))
+        for field,value in [('id',''),('id','13'),('id',True),('id',0),('activity_type',''),('activity_type','future_unsupported'),('activity_type',[]),
+                ('ref','refs/pull/1187/head'),('ref',None),('before','0'*39),('after','F'*40)]:
+            invalid=copy.deepcopy(event);invalid[field]=value;check('invalid-%s-%r'%(field,value),'UNKNOWN','collector activity identity',activity=swapped(invalid))
+        headless=copy.deepcopy(event);headless.pop('after');check('no-after','UNKNOWN','collector activity identity',activity=swapped(headless))
+        badref=copy.deepcopy(event);badref['ref']='refs/heads/../invalid';check('bad-ref','UNKNOWN','collector activity ref',activity=swapped(badref))
+        check('not-a-record','UNKNOWN','collector activity identity',activity=swapped('row'))
+        pages['activity']=copy.deepcopy(original);pages['pulls']=copy.deepcopy(pulls);pages.pop('repo',None)
         def incomplete(endpoint,**limits):
-            if '/git/matching-refs/tags?' in endpoint:raise ValueError('fixture missing page')
+            if endpoint.endswith('/git/matching-refs/tags'):raise ValueError('fixture missing page')
             return fetch(endpoint,**limits)
         assert m._1174_collect(incomplete,w,args.head,audit,123)['status']=='UNKNOWN'
         (c.tmp/'r25-publication-cases.json').write_text(json.dumps(rows,indent=2)+'\n')
@@ -14889,11 +15909,12 @@ MUTANTS.update({
     "m1174_r25_rebind_lifecycle": ('state.update(lease=verified["lease"], ngu_canh_lease=context, luat_adr0054=verified["mode"])', 'state.update(lease=verified["lease"], ngu_canh_lease=context, luat_adr0054=verified["mode"], state="leased")', ["wp1174_lifecycle_scoped_lifecycle"]),
     "m1174_r25_rebind_context_generation": ('context["generation"] == admission["generation"] and', 'True and', ["wp1174_lifecycle_scoped_lifecycle"]),
     "m1174_r25_rebind_identity": ('all(value is None or context[role][key] == value\n            for role in ("executor", "reviewer") for key, value in state[role + "_identity"].items())', 'True', ["wp1174_lifecycle_scoped_lifecycle"]),
-    "m1174_r25_pr_relevance": ('elif relation == 0:\n                    if _1174_time(event["created_at"])', 'elif relation in (0, 1):\n                    if _1174_time(event["created_at"])', ["wp1174_lifecycle_first_publication"]),
-    "m1174_r25_pr_ignore": ('if event.get("type") == "PullRequestEvent":', 'if False:', ["wp1174_lifecycle_first_publication"]),
-    "m1174_r25_pr_missing_object": ('if rc != 0 or relation not in (0, 1) or time.time() >= pass_end:', 'if time.time() >= pass_end:', ["wp1174_lifecycle_first_publication"]),
-    "m1174_r25_pr_observation": ('preimages.append((oid, event["created_at"]))', 'pass # omit unresolved PR observation', ["wp1174_lifecycle_first_publication"]),
-    "m1174_r25_event_time": ('_1174_require(_1174_time(event.get("created_at")) <= start, "collector event time")', 'pass # omit event timestamp validation', ["wp1174_lifecycle_first_publication"]),
+    # wp1370: the same six properties, re-anchored on the activity collector.
+    "m1174_r25_pr_relevance": ('return relation == 0 if relation in (0, 1) else None', 'return True if relation in (0, 1) else None', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_ignore": ('if not (type(source) is dict and source.get("full_name") == _1174_REPO and type(source.get("id")) is int and source["id"] == repo_id):', 'if False:', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_missing_object": ('if tip_relation is None:', 'if False:', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_pr_observation": ('elif tip_relation and oid not in first:', 'elif False: # omit unresolved PR observation', ["wp1174_lifecycle_first_publication"]),
+    "m1174_r25_event_time": ('_1174_require(stamp <= start, "collector activity time")', 'pass # omit event timestamp validation', ["wp1174_lifecycle_first_publication"]),
     "m1174_r25_pr_identity": ('pr.get("html_url") == f"https://github.com/{_1174_REPO}/pull/{number}" and', 'True and', ["wp1174_lifecycle_first_publication"]),
 })
 

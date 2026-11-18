@@ -1,0 +1,47 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: WP1319-NGHIEM-THU-BO-SUNG
+revision: 2
+generation: 1
+lease_id: wp1319-r2-g1-operator
+role: operator
+provider: claude
+execution_surface: claude_code_web
+transport: desktop_commander
+executor: none
+executor_note: 'r2 chỉ chạy bộ test operator P4 đã đóng băng (băm trong zip 97e9b78f), không tạo mã sản phẩm'
+reviewer: independent_readonly
+reviewer_model: KHONG_do_duoc
+review_class: sensitive
+target_host: ASUS-LAPTOP
+target_device_id: 7404cfba-9034-4787-b46b-7c358126a411
+target_workdir: 'D:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\wp1319-r2'
+target_lock: 'D:\tl-win\KHOA.txt'
+spec_path: ops/specs/wp1319-r2.md
+spec_hash: d1c594aa9034b884e8f521c75ea31ae456a2d0f828e554dd11518706efd2cb9d
+spec_sha256_required: d1c594aa9034b884e8f521c75ea31ae456a2d0f828e554dd11518706efd2cb9d
+write_set:
+- ops/acceptance/wp1319/**
+- ops/leases/wp1319-r2-g1-operator.yaml
+- ops/specs/wp1319-r2.md
+write_set_hash: 3992c27bc96273fa6e49bac2ae3edce43713fca78bfd12b0839932a12478623a
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: 13bf69f6eb797e859619a2062e7c9577e6a9cc0b
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 18/11 trong phiên session_015GtxrapMSm976JLC7Fp1HM: "ASUS đã bật" rồi "Làm tiếp đi, báo cáo tiến độ"; cộng ủy quyền tiếp tục trong prompt bàn giao #1319'
+granted_on_instruction_note: 'không cấp cài/kích hoạt Proxima, LIVE, gateway/account/endpoint/ACL, đăng nhập, copy profile'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+recorder_is_operator: true
+thay_the_cho: []
+leased_at_utc: '2026-11-18T08:21:29Z'
+heartbeat_at: '2026-11-18T08:21:29Z'
+lease_until: '2026-11-18T12:21:29Z'
+lease_expires_at_utc: '2026-11-18T12:21:29Z'
+max_lease_hours: 4
+native_runs_limit: 1
+native_step_reruns_limit: 1
+codex_review_calls_limit: 2
+codex_review_calls_used: 0
+windows: native_asus_only

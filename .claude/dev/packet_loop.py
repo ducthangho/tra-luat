@@ -5978,6 +5978,51 @@ def _1174_collector_receipt(receipt, head, audit, repo_id):
     return receipt
 
 
+# wp1393 (WP1308 g8: four collections, same earliest, four different raw digests)
+# — two independent collections of one publication agree on evidence, not on
+# the feed size. `raw_snapshot_sha256` hashes the whole activity/ref/tag/PR
+# feed and the page counts grow with it, so any unrelated push or PR between
+# the two collections changes both. Everything else must be equal.
+_1174_RECEIPT_IMMUTABLE_KEYS = frozenset("schema repo_id repo head audit_comment_id audit_updated_at audit_sha256 query_scope ref_scope event_scope dag_coverage earliest residual_classes status".split())
+
+
+def _1174_receipt_value_types(r):
+    """Per-key value types of the 14 compared keys (values only, no binding to head/audit/repo)."""
+    strings = lambda v: type(v) is list and all(type(x) is str for x in v)
+    return (all(type(r[k]) is str for k in ("schema", "repo", "audit_updated_at", "event_scope")) and
+            type(r["repo_id"]) is int and type(r["audit_comment_id"]) is int and
+            type(r["head"]) is str and SHA_RE.fullmatch(r["head"]) is not None and _1174_hash(r["audit_sha256"]) and
+            all(strings(r[k]) for k in ("query_scope", "ref_scope", "residual_classes")) and
+            type(r["dag_coverage"]) is bool and
+            type(r["status"]) is str and r["status"] in ("RECORDED_EARLIEST_MATCH", "FAIL", "UNKNOWN") and
+            (r["earliest"] is None or type(r["earliest"]) is dict and
+             set(r["earliest"]) == {"id", "time", "ref", "actor", "before", "after"} and
+             all(type(v) is str for v in r["earliest"].values())))
+
+
+def _1174_receipts_agree(supplied, collected):
+    """Pure comparison layer; validity is `_1174_collector_receipt`'s job."""
+    try:
+        # Shape gate: two dicts with exactly the receipt keys; the keys that are
+        # not compared still have to be a digest and two UTC timestamps.
+        if not all(type(r) is dict and set(r) == _1174_COLLECTOR_KEYS and _1174_hash(r["raw_snapshot_sha256"]) and
+                   all(_1174_time(r[k]) is not None for k in ("started_utc", "ended_utc")) for r in (supplied, collected)):
+            return False
+        if not all(_1174_receipt_value_types(r) for r in (supplied, collected)):
+            return False
+        # Canonical bytes, not ==: True is not 1 and 123 is not 123.0.
+        if not all(_1174_bytes(supplied[k]) == _1174_bytes(collected[k]) for k in _1174_RECEIPT_IMMUTABLE_KEYS):
+            return False
+        pages = (supplied["cursor_coverage"], collected["cursor_coverage"])
+        if not all(type(p) is dict for p in pages):
+            return False
+        if not (set(pages[0]) == set(pages[1]) == set(supplied["query_scope"])):
+            return False
+        return all(type(v) is int and v >= 1 for p in pages for v in p.values())
+    except Exception:
+        return False
+
+
 def _1174_read_json(path):
     return json.loads(Path(path).read_bytes().decode("utf-8"), object_pairs_hook=_cam_khoa_trung,
         parse_constant=_cam_hang_ngoai_json)
@@ -6104,11 +6149,13 @@ def _1174_human_evidence(a, admission, head):
     for verified_raw, ident in snapshots.values():
         _1174_require(comment_readback(ident) == verified_raw, "human comment changed during validation")
     supplied = _1174_collector_receipt(_1174_json(receipt_raw), head, audit, repo["id"])
-    # Observation timestamps can differ across two collections. All immutable
-    # evidence/coverage must agree; neither caller status nor hash grants trust.
-    keys = _1174_COLLECTOR_KEYS - {"started_utc", "ended_utc"}
+    # wp1393: the fresh collection passes the same validity layer as the caller's.
+    collected = _1174_collector_receipt(collected, head, audit, repo["id"])
+    # Observation timestamps, the raw feed digest and page counts can differ
+    # across two collections. All immutable evidence and the family coverage
+    # must agree; neither caller status nor hash grants trust.
     _1174_require(collected["status"] != "FAIL", "publication evidence FAIL")
-    _1174_require(all(supplied[k] == collected[k] for k in keys) and collected["status"] == "RECORDED_EARLIEST_MATCH" and
+    _1174_require(_1174_receipts_agree(supplied, collected) and collected["status"] == "RECORDED_EARLIEST_MATCH" and
         collected["dag_coverage"] is True and collected["earliest"] is not None, "publication evidence UNKNOWN/FAIL")
     rc, tree = _git_do(Path(a.root), "rev-parse", head + "^{tree}")
     _1174_require(rc == 0, "human tree unavailable")

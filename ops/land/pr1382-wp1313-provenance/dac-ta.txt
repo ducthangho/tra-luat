@@ -1,0 +1,5 @@
+# dac ta do luc 2026-11-18T02:21:03Z: ref origin/ops/wp1313-r2-g1-lease = 760179a79ba9f27225fd3eca5e2c87788fb6c8d4
+blob 5dce298b1e5629b9239d5a053f43d967cf8adfbb  ops/specs/LAUNCHER-5XX-KHONG-PHAI-CHAN-r3.md
+sha256 1bca349acd50d018147907686e29b2db700d1d2cf216961b36b6b6de70d4a23d
+lease r3 spec_hash: spec_hash: 1bca349acd50d018147907686e29b2db700d1d2cf216961b36b6b6de70d4a23d
+lease r2 (bi thay) spec_hash: spec_hash: 0fdd449c01dcac7389da4bda4fd5efea2799989f91aff055ac54ee5f7d6a2628

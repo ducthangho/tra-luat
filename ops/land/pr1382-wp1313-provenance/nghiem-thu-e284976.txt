@@ -1,0 +1,29 @@
+# nghiem thu tren merge e2849760a5c2c00c679b02ca559de69c7d5e48ef, luc 2026-11-18T02:22:03Z
+e2849760a5c2c00c679b02ca559de69c7d5e48ef 64d0155cbc5976d84e115cffeaa543ac55bbb8b9 5f9bf6b3b499ac8d137328b4ae0c0550395d2c53 eb6a4ce14e7287ef94bca15c948bbe28762507b0
+## numstat e2849760a5c2c00c679b02ca559de69c7d5e48ef^1..e2849760a5c2c00c679b02ca559de69c7d5e48ef
+24	1	.claude/dev/launcher.py
+114	0	.claude/dev/launcher_test.py
+7	0	.claude/dev/mcp_github_doc.py
+36	1	.claude/dev/mcp_github_doc_test.py
+## numstat base 3d6bfa5..head eb6a4ce
+24	1	.claude/dev/launcher.py
+114	0	.claude/dev/launcher_test.py
+7	0	.claude/dev/mcp_github_doc.py
+36	1	.claude/dev/mcp_github_doc_test.py
+## ruff --select F (ruff 0.17.5) cha thu nhat vs merge
+.claude/dev/launcher.py @ 5f9bf6b3b: 0 loi F
+.claude/dev/launcher.py @ e2849760a: 0 loi F
+.claude/dev/launcher_test.py @ 5f9bf6b3b: 5 loi F
+.claude/dev/launcher_test.py @ e2849760a: 5 loi F
+.claude/dev/mcp_github_doc.py @ 5f9bf6b3b: 1 loi F
+.claude/dev/mcp_github_doc.py @ e2849760a: 1 loi F
+.claude/dev/mcp_github_doc_test.py @ 5f9bf6b3b: 0 loi F
+.claude/dev/mcp_github_doc_test.py @ e2849760a: 0 loi F
+## git diff --check e2849760a5c2c00c679b02ca559de69c7d5e48ef^1 e2849760a5c2c00c679b02ca559de69c7d5e48ef
+rc=0
+## adr-song (rc la ma thoat cua chinh lenh, khong qua ong)
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## doctrine-scan (rc la ma thoat cua chinh lenh, khong qua ong)
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0

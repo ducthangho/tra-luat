@@ -64,14 +64,22 @@ Ba miền danh tính tách biệt, không suy miền này từ miền kia:
   (S1). Một lượt xanh không chứng minh bản đã triển khai trên máy nào.
 
 ## Kích hoạt (Activation guard)
-Nạp riêng `scripts/ProximaActivation.psm1` khi kiểm tra kích hoạt.
+Nạp riêng `scripts/ProximaActivation.psm1` khi kiểm tra kích hoạt. Mọi đường dẫn truyền vào phải là đường dẫn tuyệt đối đầy đủ;
+đường dẫn tương đối, tham số thiếu hoặc sai kiểu đều trả `NOT_MEASURED` chứ không ném lỗi.
 - `Test-ProximaArtifactTree` đối chiếu cây tệp với manifest và giá trị ghi đè. Thành công trả `OK`. Lỗi trả
-  `REPARSE_POINT`, `DUPLICATE_CASE`, `ARTIFACT_EXTRA`, `ARTIFACT_MISSING` hoặc `ARTIFACT_CHANGED`.
-- `Enter-ProximaProfileGuard` trả `PROFILE_BUSY` nếu phát hiện Proxima đang dùng profile, `PROFILE_LOCKED` nếu
-  khoá đang được giữ, hoặc `ACQUIRED` kèm guard. Giữ guard suốt thời gian ứng dụng chạy rồi gọi
-  `Exit-ProximaProfileGuard` để đóng khoá (`RELEASED`). Tệp khoá được giữ lại. Chốt chỉ phối hợp những
-  bên gọi guard và không chặn người tự mở Proxima bằng tay.
+  `REPARSE_POINT`, `DUPLICATE_CASE`, `ARTIFACT_EXTRA`, `ARTIFACT_MISSING` hoặc `ARTIFACT_CHANGED`. Kết quả là ảnh chụp tại
+  lúc gọi: chạy ngay trước khi khởi động ứng dụng, vì tệp đổi sau đó thì không được phát hiện. Tên khai là mutable phải có
+  trong manifest hoặc giá trị ghi đè, nếu không hàm trả `NOT_MEASURED`.
+- `Enter-ProximaProfileGuard` cần thư mục profile đã tồn tại sẵn (hàm không tạo) và không phải liên kết. Hàm trả
+  `PROFILE_BUSY` kèm `pid` và `rule` nếu phát hiện Proxima đang dùng profile, `PROFILE_LOCKED` nếu khoá đang được giữ, hoặc
+  `ACQUIRED` kèm guard. Giữ guard suốt thời gian ứng dụng chạy rồi gọi `Exit-ProximaProfileGuard` để đóng khoá
+  (`RELEASED`). Tệp khoá được giữ lại; tệp khoá có nội dung lạ thì hàm từ chối chứ không ghi đè.
+- Giới hạn của chốt profile: tiến trình Proxima chạy quyền cao hơn hoặc của người dùng khác không lộ dòng lệnh, khi đó
+  hàm trả `NOT_MEASURED` kèm `pid` chứ không coi là profile rảnh; danh sách tiến trình không chứa chính tiến trình gọi
+  cũng vậy. Danh sách tiến trình là ảnh chụp, được lấy lại một lần sau khi giữ khoá; Proxima khởi động sau lần lấy thứ
+  hai, hoặc do người tự mở bằng tay không qua guard, vẫn lọt. Đó là race còn lại và chốt chỉ phối hợp những bên gọi guard.
 - `Test-ProximaPromotionFence` trả `ALLOWED` nếu được chuyển tiếp theo thứ tự host. Khi bị chặn, hàm trả
   `FENCE_TARGET_UNKNOWN`, `FENCE_PRIOR_MISSING`, `FENCE_RECEIPT_INVALID`, `FENCE_PRIOR_FAILED` hoặc
-  `FENCE_ARTIFACT_MISMATCH`.
-- Lỗi ngoài dự kiến trả `NOT_MEASURED` kèm thông tin lỗi.
+  `FENCE_ARTIFACT_MISMATCH`. Băm artifact phải đủ 64 ký tự hex và kế hoạch không được lặp host, nếu không hàm trả
+  `NOT_MEASURED`.
+- Lỗi ngoài dự kiến trả `NOT_MEASURED` kèm thông tin lỗi. Kiểm thử: `tests/ProximaActivation.Tests.ps1`.

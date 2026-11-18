@@ -92,10 +92,14 @@ function Test-ActivationInteger($Value) {
     return ($Value -is [int] -or $Value -is [long])
 }
 
-function Read-ArtifactEntry([string]$Relative, $Entry) {
+function Assert-ArtifactRelative([string]$Relative) {
     if ($Relative -cmatch '(^|/)\.{1,2}(/|$)|^/|/$|//|[\\:\x00]' -or $Relative.Length -eq 0) {
         throw "Invalid manifest path: $Relative"
     }
+}
+
+function Read-ArtifactEntry([string]$Relative, $Entry) {
+    Assert-ArtifactRelative $Relative
     $size = Get-ActivationField $Entry 'bytes'
     $sha = Get-ActivationField $Entry 'sha256'
     if (-not (Test-ActivationInteger $size) -or $size -lt 0 -or
@@ -116,13 +120,43 @@ function Test-ArtifactEntry($File, $Expected) {
     } finally { $stream.Dispose() }
 }
 
+function Test-ActivationRootedPath($Path) {
+    # Fully qualified only: C:\x or \\server\share on Windows, /x elsewhere.
+    # Drive-relative (C:foo) and current-drive-relative (\foo) spellings depend on process state.
+    if ($Path -isnot [string] -or [string]::IsNullOrWhiteSpace($Path)) { return $false }
+    try { if (-not [IO.Path]::IsPathRooted($Path)) { return $false } } catch { return $false }
+    if ([IO.Path]::DirectorySeparatorChar -eq [char]'\') {
+        return ($Path -cmatch '^(?:[A-Za-z]:[\\/]|[\\/]{2}[^\\/])')
+    }
+    return $Path.StartsWith('/', [StringComparison]::Ordinal)
+}
+
+function ConvertTo-ActivationFullPath([string]$Path) {
+    $full = [IO.Path]::GetFullPath($Path)
+    if ($full.Length -gt [IO.Path]::GetPathRoot($full).Length) {
+        $full = $full.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
+    }
+    return $full
+}
+
+function Resolve-ActivationPath($Value, [string]$Name) {
+    if (-not (Test-ActivationRootedPath $Value)) { throw "$Name must be a fully qualified path." }
+    return (ConvertTo-ActivationFullPath $Value)
+}
+
+function Test-ActivationReparsePoint([string]$Path) {
+    try { $attributes = [IO.File]::GetAttributes($Path) }
+    catch [IO.FileNotFoundException], [IO.DirectoryNotFoundException] { return $false }
+    return (($attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0)
+}
+
 function Test-ProximaArtifactTree {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true)][string]$Root,
-        [Parameter(Mandatory = $true)][string]$ManifestPath,
-        [string[]]$MutableRelative = @(),
-        [hashtable]$Override = @{}
+        [Parameter()][AllowNull()]$Root,
+        [Parameter()][AllowNull()]$ManifestPath,
+        [Parameter()][AllowNull()]$MutableRelative,
+        [Parameter()][AllowNull()]$Override
     )
     $ErrorActionPreference = 'Stop'
     $extra = [Collections.Generic.List[string]]::new()
@@ -131,12 +165,23 @@ function Test-ProximaArtifactTree {
     $extraDirs = [Collections.Generic.List[string]]::new()
     $verified = 0
     $errorText = $null
+    $rootText = $null
+    if ($Root -is [string]) { $rootText = $Root }
     try {
-        $Root = [IO.Path]::GetFullPath($Root)
-        if ($Root.Length -gt [IO.Path]::GetPathRoot($Root).Length) {
-            $Root = $Root.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
+        $rootText = Resolve-ActivationPath $Root 'Root'
+        $manifestFile = Resolve-ActivationPath $ManifestPath 'ManifestPath'
+        if ($null -eq $Override) { $Override = @{} }
+        if ($Override -isnot [hashtable]) { throw 'Override must be a hashtable.' }
+        $mutableNames = [Collections.Generic.List[string]]::new()
+        if ($null -ne $MutableRelative) {
+            foreach ($name in @($MutableRelative)) {
+                if ($name -isnot [string]) { throw 'MutableRelative entries must be strings.' }
+                $name = $name.Replace('\', '/')
+                Assert-ArtifactRelative $name
+                $mutableNames.Add($name)
+            }
         }
-        $rootDir = [IO.DirectoryInfo]::new($Root)
+        $rootDir = [IO.DirectoryInfo]::new($rootText)
         $comparer = [StringComparer]::OrdinalIgnoreCase
         $files = [Collections.Generic.Dictionary[string, IO.FileInfo]]::new($comparer)
         $seen = [Collections.Generic.HashSet[string]]::new($comparer)
@@ -170,7 +215,7 @@ function Test-ProximaArtifactTree {
         }
 
         $expected = [Collections.Generic.Dictionary[string, object]]::new($comparer)
-        $manifest = Read-ActivationJson $ManifestPath
+        $manifest = Read-ActivationJson $manifestFile
         # A bare manifest can also contain a file literally named "files".
         if ($manifest.PSBase.Count -eq 1 -and $manifest.ContainsKey('files') -and $manifest['files'].K -ceq 'object') {
             $wrapped = $manifest['files'].V
@@ -182,9 +227,15 @@ function Test-ProximaArtifactTree {
             $expected[$relative] = $entry
         }
         foreach ($relative in $Override.PSBase.Keys) {
+            if ($relative -isnot [string]) { throw 'Override keys must be strings.' }
             $expected[$relative] = Read-ArtifactEntry $relative $Override[$relative]
         }
-        $mutable = [Collections.Generic.HashSet[string]]::new($MutableRelative, $comparer)
+        $mutable = [Collections.Generic.HashSet[string]]::new($comparer)
+        foreach ($name in $mutableNames) {
+            # A mutable name that matches nothing is a configuration error, not an extra file.
+            if (-not $expected.ContainsKey($name)) { throw "MutableRelative entry is not in the manifest or override: $name" }
+            $null = $mutable.Add($name)
+        }
         $unlistedDirs = [Collections.Generic.List[string]]::new()
         foreach ($relative in $extraDirs) {
             if (-not $expected.ContainsKey($relative)) { $unlistedDirs.Add($relative) }
@@ -192,7 +243,7 @@ function Test-ProximaArtifactTree {
         $unlistedDirs.Sort($comparer)
         $extraDirs = $unlistedDirs
 
-        $actualPaths = [Collections.Generic.List[string]]::new($files.Keys)
+        $actualPaths = [Collections.Generic.List[string]]::new($files.PSBase.Keys)
         $actualPaths.Sort($comparer)
         foreach ($relative in $actualPaths) {
             if (-not $expected.ContainsKey($relative)) {
@@ -200,7 +251,7 @@ function Test-ProximaArtifactTree {
             }
         }
 
-        $expectedPaths = [Collections.Generic.List[string]]::new($expected.Keys)
+        $expectedPaths = [Collections.Generic.List[string]]::new($expected.PSBase.Keys)
         $expectedPaths.Sort($comparer)
         foreach ($relative in $expectedPaths) {
             if ($mutable.Contains($relative)) { continue }
@@ -222,62 +273,133 @@ function Test-ProximaArtifactTree {
         $code = 'NOT_MEASURED'
         $errorText = $_.Exception.Message
     }
-    $details = @{ root = $Root; verified_files = $verified; extra = $extra.ToArray()
+    $details = @{ root = $rootText; verified_files = $verified; extra = $extra.ToArray()
         missing = $missing.ToArray(); changed = $changed.ToArray(); extra_dirs = $extraDirs.ToArray() }
     if ($null -ne $errorText) { $details.error = $errorText }
     return (New-ActivationResult $code ($code -ceq 'OK') $details)
 }
 
-function ConvertTo-ProfilePath([string]$Path) {
-    return [IO.Path]::GetFullPath($Path).TrimEnd([char]'\')
+$script:ReArgument = [regex]'(?:[^\s"]|"[^"]*"?)+'
+$script:ReUserDataDir = [regex]::new('^(?:--|-|/)user-data-dir(?:=(.*))?\z',
+    [Text.RegularExpressions.RegexOptions]'IgnoreCase, CultureInvariant, Singleline')
+$script:ReLockLine = [regex]'\A[0-9]+\t[^\t\r\n]+\t[^\t\r\n]+\r?\n?\z'
+$script:LockName = '.proxima-activation.lock'
+$script:LockMaxBytes = 512
+
+function Test-ProximaProcessName($Name, [bool]$RequireExe) {
+    if ($Name -isnot [string]) { return $false }
+    if (-not $Name.StartsWith('Proxima', [StringComparison]::OrdinalIgnoreCase)) { return $false }
+    return (-not $RequireExe -or $Name.EndsWith('.exe', [StringComparison]::OrdinalIgnoreCase))
 }
 
-function Test-ProfileCommandLine([string]$CommandLine, [string]$ProfilePath) {
-    # Consume complete quoted arguments so a switch inside an unrelated value is ignored.
-    $argument = [regex]::new('(?:^|\s)(?:--user-data-dir(?:=|\s+)(?:"([^"]*)"|([^\s"]+))(?=\s|$)|(?:[^\s"]|"[^"]*")+)',
-        [Text.RegularExpressions.RegexOptions]'IgnoreCase, CultureInvariant')
-    foreach ($match in $argument.Matches($CommandLine)) {
-        $value = $match.Groups[1].Value + $match.Groups[2].Value
-        if ($value -and [string]::Equals((ConvertTo-ProfilePath $value), $ProfilePath, [StringComparison]::OrdinalIgnoreCase)) {
-            return $true
+function Get-ProfileCommandLineState([string]$CommandLine, [string]$ProfilePath) {
+    # 'match': a user-data-dir switch names this profile. 'unknown': a switch value cannot be
+    # resolved without the other process's working directory. 'other': neither.
+    # Quotes are removed per token, so "--user-data-dir=C:\a b" and --user-data-dir="C:\a b" agree.
+    $tokens = [Collections.Generic.List[string]]::new()
+    foreach ($match in $script:ReArgument.Matches($CommandLine)) { $tokens.Add($match.Value.Replace('"', '')) }
+    $state = 'other'
+    for ($index = 0; $index -lt $tokens.Count; $index++) {
+        $flag = $script:ReUserDataDir.Match($tokens[$index])
+        if (-not $flag.Success) { continue }
+        $value = ''
+        if ($flag.Groups[1].Success) {
+            $value = $flag.Groups[1].Value
+        } elseif ($index + 1 -lt $tokens.Count) {
+            $index++
+            $value = $tokens[$index]
+        }
+        $candidate = $null
+        if (Test-ActivationRootedPath $value) {
+            try { $candidate = ConvertTo-ActivationFullPath $value } catch { $candidate = $null }
+        }
+        if ($null -eq $candidate) {
+            $state = 'unknown'
+            continue
+        }
+        # Whole-path equality only; a prefix test would confuse prof with prof2 or prof\sub.
+        if ([string]::Equals($candidate, $ProfilePath, [StringComparison]::OrdinalIgnoreCase)) { return 'match' }
+    }
+    return $state
+}
+
+function Get-ProfileBusyState([scriptblock]$ProcessProvider, [string]$ProfilePath) {
+    # One snapshot: 'busy' (pid, rule), 'unknown' (pid, error) or 'clear'. A definite busy
+    # finding wins over an unreadable process; an unreadable process is never read as clear.
+    $processes = @(& $ProcessProvider)
+    $self = $false
+    foreach ($process in $processes) {
+        if ($null -eq $process) { throw 'Process snapshot contains an empty entry.' }
+        if ($process.ProcessId -eq $PID) { $self = $true }
+    }
+    # An empty or filtered snapshot is not evidence that the profile is unused.
+    if (-not $self) { throw "Process snapshot does not contain the current process (pid $PID)." }
+    $unknown = $null
+    foreach ($process in $processes) {
+        if (-not (Test-ProximaProcessName $process.Name $true)) { continue }
+        $commandLine = $process.CommandLine
+        $state = 'unknown'
+        $reason = 'has no readable command line (elevated or owned by another user)'
+        if ($commandLine -is [string] -and -not [string]::IsNullOrWhiteSpace($commandLine)) {
+            $state = Get-ProfileCommandLineState $commandLine $ProfilePath
+            $reason = 'has a user-data-dir value that is not a fully qualified path'
+        }
+        if ($state -ceq 'match') {
+            return @{ state = 'busy'; pid = $process.ProcessId; rule = 'command_line' }
+        }
+        if ($state -ceq 'unknown' -and $null -eq $unknown) {
+            $unknown = @{ state = 'unknown'; pid = $process.ProcessId
+                error = "Proxima process pid $($process.ProcessId) $reason; profile use was not measured." }
         }
     }
-    return $false
+    foreach ($name in 'rest-port.json', 'ipc-port.json') {
+        $path = [IO.Path]::Combine($ProfilePath, $name)
+        try { $data = Read-ActivationJson $path }
+        catch [IO.FileNotFoundException] { continue }
+        $discoveryPid = Get-ActivationField $data 'pid'
+        if (-not (Test-ActivationInteger $discoveryPid) -or $discoveryPid -le 0) {
+            throw "Invalid pid in $name."
+        }
+        foreach ($process in $processes) {
+            if ($process.ProcessId -eq $discoveryPid -and (Test-ProximaProcessName $process.Name $false)) {
+                return @{ state = 'busy'; pid = $process.ProcessId; rule = "discovery:$name" }
+            }
+        }
+    }
+    if ($null -ne $unknown) { return $unknown }
+    return @{ state = 'clear' }
+}
+
+function Assert-ProfileLockTarget([string]$ProfilePath, [string]$LockPath) {
+    # Opening through a link would lock, and later truncate, a file outside the profile.
+    if (Test-ActivationReparsePoint $ProfilePath) { throw 'ProfileDir is a reparse point.' }
+    if (Test-ActivationReparsePoint $LockPath) { throw 'The profile lock file is a reparse point.' }
 }
 
 function Enter-ProximaProfileGuard {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true)][string]$ProfileDir,
-        [scriptblock]$ProcessProvider = { Get-CimInstance -ClassName Win32_Process -ErrorAction Stop }
+        [Parameter()][AllowNull()]$ProfileDir,
+        [Parameter()][AllowNull()]$ProcessProvider = { Get-CimInstance -ClassName Win32_Process -ErrorAction Stop }
     )
     $ErrorActionPreference = 'Stop'
     $stream = $null
+    $keep = $false
     try {
-        $processes = @(& $ProcessProvider)
-        $profilePath = ConvertTo-ProfilePath $ProfileDir
-        $dir = [IO.Path]::GetFullPath($ProfileDir)
-        foreach ($process in $processes) {
-            if ($process.Name -ilike 'Proxima*.exe' -and
-                (Test-ProfileCommandLine $process.CommandLine $profilePath)) {
-                return (New-ActivationResult 'PROFILE_BUSY')
-            }
+        if ($ProcessProvider -isnot [scriptblock]) { throw 'ProcessProvider must be a script block.' }
+        $profilePath = Resolve-ActivationPath $ProfileDir 'ProfileDir'
+        if (-not [IO.Directory]::Exists($profilePath)) { throw 'ProfileDir must be an existing directory.' }
+        $lockPath = [IO.Path]::Combine($profilePath, $script:LockName)
+        Assert-ProfileLockTarget $profilePath $lockPath
+
+        $before = Get-ProfileBusyState $ProcessProvider $profilePath
+        if ($before.state -ceq 'busy') {
+            return (New-ActivationResult 'PROFILE_BUSY' $false @{ pid = $before.pid; rule = $before.rule })
         }
-        foreach ($name in 'rest-port.json', 'ipc-port.json') {
-            $path = [IO.Path]::Combine($dir, $name)
-            try { $data = Read-ActivationJson $path }
-            catch [IO.FileNotFoundException] { continue }
-            $discoveryPid = Get-ActivationField $data 'pid'
-            if (-not (Test-ActivationInteger $discoveryPid) -or $discoveryPid -le 0) {
-                throw "Invalid pid in $name."
-            }
-            foreach ($process in $processes) {
-                if ($process.ProcessId -eq $discoveryPid -and $process.Name -ilike 'Proxima*') {
-                    return (New-ActivationResult 'PROFILE_BUSY')
-                }
-            }
+        if ($before.state -cne 'clear') {
+            return (New-ActivationResult 'NOT_MEASURED' $false @{ pid = $before.pid; error = $before.error })
         }
-        $lockPath = [IO.Path]::Combine($dir, '.proxima-activation.lock')
+
         try {
             $stream = [IO.File]::Open($lockPath, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
         } catch [IO.IOException] {
@@ -292,27 +414,59 @@ function Enter-ProximaProfileGuard {
             }
             throw
         }
+        # Re-check now that the handle is held, then refuse to overwrite anything that is not our own record.
+        Assert-ProfileLockTarget $profilePath $lockPath
+        $length = $stream.Length
+        if ($length -gt $script:LockMaxBytes) { throw "The profile lock file is larger than $($script:LockMaxBytes) bytes; not truncating it." }
+        $existing = [byte[]]::new([int]$length)
+        $read = 0
+        while ($read -lt $existing.Length) {
+            $count = $stream.Read($existing, $read, $existing.Length - $read)
+            if ($count -le 0) { throw 'The profile lock file changed while it was read.' }
+            $read += $count
+        }
+        if ($existing.Length -gt 0) {
+            $shaped = $false
+            try { $shaped = $script:ReLockLine.IsMatch([Text.UTF8Encoding]::new($false, $true).GetString($existing)) }
+            catch { $shaped = $false }
+            if (-not $shaped) { throw 'The profile lock file does not hold a pid/utc/host record; not truncating it.' }
+        }
+
+        # The first snapshot predates the lock; a second one closes that window for other guard callers.
+        $after = Get-ProfileBusyState $ProcessProvider $profilePath
+        if ($after.state -ceq 'busy') {
+            return (New-ActivationResult 'PROFILE_BUSY' $false @{ pid = $after.pid; rule = 'recheck_after_lock'; recheck_rule = $after.rule })
+        }
+        if ($after.state -cne 'clear') {
+            return (New-ActivationResult 'NOT_MEASURED' $false @{ pid = $after.pid; error = $after.error })
+        }
+
         $utc = [DateTime]::UtcNow.ToString('o', [Globalization.CultureInfo]::InvariantCulture)
         $line = "$PID`t$utc`t$([Environment]::MachineName)`n"
         $bytes = [Text.UTF8Encoding]::new($false).GetBytes($line)
+        $stream.Position = 0
         $stream.SetLength(0)
         $stream.Write($bytes, 0, $bytes.Length)
         $stream.Flush()
+        $keep = $true
         return (New-ActivationResult 'ACQUIRED' $true @{ guard = [pscustomobject]@{ stream = $stream } })
     } catch {
-        $message = $_.Exception.Message
-        if ($null -ne $stream) {
-            try { $stream.Dispose() } catch { $message += ' ' + $_.Exception.Message }
+        return (New-ActivationResult 'NOT_MEASURED' $false @{ error = $_.Exception.Message })
+    } finally {
+        if (-not $keep -and $null -ne $stream) {
+            try { $stream.Dispose() } catch { $null = $_ }
         }
-        return (New-ActivationResult 'NOT_MEASURED' $false @{ error = $message })
     }
 }
 
 function Exit-ProximaProfileGuard {
     [CmdletBinding()]
-    param([Parameter(Mandatory = $true)]$Guard)
+    param([Parameter()][AllowNull()]$Guard)
     try {
-        $Guard.stream.Dispose()
+        if ($null -eq $Guard) { throw 'Guard is required.' }
+        $stream = $Guard.stream
+        if ($stream -isnot [IO.Stream]) { throw 'Guard does not hold a lock stream.' }
+        $stream.Dispose()
         return (New-ActivationResult 'RELEASED' $true)
     } catch {
         return (New-ActivationResult 'NOT_MEASURED' $false @{ error = $_.Exception.Message })
@@ -322,22 +476,37 @@ function Exit-ProximaProfileGuard {
 function Test-ProximaPromotionFence {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$Plan,
-        [Parameter(Mandatory = $true)][string]$TargetHost,
-        [Parameter(Mandatory = $true)][string]$ArtifactSha256,
-        [Parameter(Mandatory = $true)][string]$ReceiptDir
+        [Parameter()][AllowNull()]$Plan,
+        [Parameter()][AllowNull()]$TargetHost,
+        [Parameter()][AllowNull()]$ArtifactSha256,
+        [Parameter()][AllowNull()]$ReceiptDir
     )
     $ErrorActionPreference = 'Stop'
     $details = @{ blocking_host = $null }
     try {
-        $targetIndex = [Array]::IndexOf($Plan, $TargetHost)
+        if ($TargetHost -isnot [string] -or $TargetHost.Length -eq 0) { throw 'TargetHost must be a non-empty string.' }
+        if ($ArtifactSha256 -isnot [string] -or $ArtifactSha256 -cnotmatch '^[0-9a-fA-F]{64}\z') {
+            throw 'ArtifactSha256 must be 64 hexadecimal characters.'
+        }
+        $receiptRoot = Resolve-ActivationPath $ReceiptDir 'ReceiptDir'
+        $planIds = [Collections.Generic.List[string]]::new()
+        $planSeen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+        if ($null -ne $Plan) {
+            foreach ($id in @($Plan)) {
+                if ($id -isnot [string]) { throw 'Plan entries must be strings.' }
+                # Receipt files are named after hosts, and file names on Windows ignore case.
+                if (-not $planSeen.Add($id)) { throw "Plan lists a host more than once: $id" }
+                $planIds.Add($id)
+            }
+        }
+        $targetIndex = $planIds.IndexOf($TargetHost)
         if ($targetIndex -lt 0) { return (New-ActivationResult 'FENCE_TARGET_UNKNOWN' $false $details) }
         for ($index = 0; $index -lt $targetIndex; $index++) {
-            $prior = $Plan[$index]
+            $prior = $planIds[$index]
             $details.blocking_host = $prior
             if ([string]::IsNullOrWhiteSpace($prior) -or $prior.IndexOfAny([IO.Path]::GetInvalidFileNameChars()) -ge 0 -or
                 $prior -cmatch '[\\/:]') { throw 'Invalid receipt host identifier.' }
-            $path = [IO.Path]::Combine($ReceiptDir, "$prior.json")
+            $path = [IO.Path]::Combine($receiptRoot, "$prior.json")
             try {
                 $receipt = Read-ActivationJson $path
                 $schema = Get-ActivationField $receipt 'schema'

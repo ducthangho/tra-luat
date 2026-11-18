@@ -18,10 +18,14 @@ $report = [ordered]@{
     ps_edition = $PSVersionTable.PSEdition; culture = [Globalization.CultureInfo]::CurrentCulture.Name
     addon_root = $AddonRoot; scratch_run = $null; setup_error = $null
     total = 0; passed = 0; failed_ids = @(); skipped_ids = @(); setup_error_ids = @()
+    required_ids = @(); id_errors = @(); child_timeout_sec = 300
     harness_sha256 = $null; source_hashes = [ordered]@{}
     cases = $null; counterexamples = $null
 }
 $reportWritable = $false
+$requiredIds = @(1..28 | ForEach-Object { 'PA{0:d2}' -f $_ })
+if ($Counterexamples) { $requiredIds += @(1..5 | ForEach-Object { 'CX{0:d2}' -f $_ }) }
+$report.required_ids = $requiredIds
 
 function Get-FileSha([string]$Path) {
     $stream = [IO.File]::OpenRead($Path)
@@ -48,11 +52,50 @@ function Assert-NoReparsePath([string]$Path) {
 function Assert-SafeOutputPath([string]$Path, [string]$SourceDir) {
     $separator = [IO.Path]::DirectorySeparatorChar
     $prefix = $SourceDir.TrimEnd($separator) + $separator
-    if ([string]::Equals($Path, $SourceDir, [StringComparison]::OrdinalIgnoreCase) -or
-        $Path.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) {
-        throw 'Output paths must be outside the add-on.'
+    if (($Path.TrimEnd($separator) + $separator).StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Output path is inside the add-on or its repository: $Path"
     }
     Assert-NoReparsePath $Path
+}
+
+function Find-RepositoryTop([string]$Start) {
+    # Same rule as ProximaManifest.Tests.ps1: the nearest ancestor holding a .git directory or file.
+    $probe = [IO.DirectoryInfo]::new($Start)
+    while ($null -ne $probe) {
+        $marker = [IO.Path]::Combine($probe.FullName, '.git')
+        if ([IO.Directory]::Exists($marker) -or [IO.File]::Exists($marker)) { return $probe.FullName }
+        $probe = $probe.Parent
+    }
+}
+
+function ConvertTo-ArgText([string]$Value) {
+    if ($Value.Length -gt 0 -and $Value -cnotmatch '[\s"]') { return $Value }
+    $escaped = [regex]::Replace($Value, '(\\*)"', '$1$1\"')
+    $escaped = [regex]::Replace($escaped, '(\\+)\z', '$1$1')
+    return '"' + $escaped + '"'
+}
+
+function Get-ResultField($Result, [string]$Name) {
+    if ($null -eq $Result) { return }
+    $property = $Result.PSObject.Properties[$Name]
+    if ($null -ne $property) { return $property.Value }
+}
+
+function New-ProcessEntry([int]$Id, [string]$Name, $CommandLine) {
+    return [pscustomobject]@{ ProcessId = $Id; Name = $Name; ExecutablePath = $Name; CommandLine = $CommandLine }
+}
+
+function New-Snapshot([object[]]$Extra = @()) {
+    # The guard only trusts a snapshot that shows the calling process.
+    $entries = @(New-ProcessEntry $PID 'activation-harness-host' 'activation-harness-host') + @($Extra)
+    return { $entries }.GetNewClosure()
+}
+
+function Enter-Guard([string]$ProfileDir, $Provider) {
+    # Never leave a lock behind when a case expects a refusal.
+    $actual = Enter-ProximaProfileGuard -ProfileDir $ProfileDir -ProcessProvider $Provider
+    if ($actual.ok) { $null = Exit-ProximaProfileGuard -Guard $actual.guard }
+    return $actual
 }
 
 function Stop-Case([string]$Reason, [string]$Outcome = 'failed') {
@@ -117,8 +160,9 @@ function Assert-Unlocked([string]$Profile) {
     }
 }
 
-function Write-Receipt([string]$Dir, [bool]$Passed, [string]$Sha, [string]$Schema = 'proxima_activation_receipt.v1') {
-    $receipt = @{ schema = $Schema; host = 'first'; artifact_sha256 = $Sha; passed = $Passed; completed_at = '2026-11-18T12:00:00Z' }
+function Write-Receipt([string]$Dir, [bool]$Passed, [string]$Sha, [string]$Schema = 'proxima_activation_receipt.v1',
+    [string]$ReceiptHost = 'first') {
+    $receipt = @{ schema = $Schema; host = $ReceiptHost; artifact_sha256 = $Sha; passed = $Passed; completed_at = '2026-11-18T12:00:00Z' }
     [IO.File]::WriteAllText([IO.Path]::Combine($Dir, 'first.json'), ($receipt | ConvertTo-Json), $utf8)
 }
 
@@ -132,7 +176,8 @@ function Invoke-Counterexample($Mutation) {
     $record = [ordered]@{
         id = $Mutation.id; target_case = $Mutation.target; anchor = $Mutation.anchor
         replacement = $Mutation.replacement; source_sha256 = $report.source_hashes['scripts/ProximaActivation.psm1']
-        mutated_sha256 = $null; rc = $null; report_path = $null; stdout_path = $null
+        mutated_sha256 = $null; rc = $null; report_path = $null; stdout_path = $null; stderr_path = $null
+        timed_out = $false
         verdict = $null; reason = $null
     }
     $mutations.Add($record)
@@ -154,20 +199,49 @@ function Invoke-Counterexample($Mutation) {
         $exeName = if ($PSVersionTable.PSEdition -ceq 'Desktop') { 'powershell.exe' }
             elseif ($windows) { 'pwsh.exe' } else { 'pwsh' }
         $exe = [IO.Path]::Combine($PSHOME, $exeName)
-        # Expected rc 1 from a killed mutant must remain an exit code in newer hosts.
-        $PSNativeCommandUseErrorActionPreference = $false
-        $output = & $exe -NoProfile -NonInteractive -File $PSCommandPath -AddonRoot $addon -ScratchRoot $dir -ReportPath $record.report_path
-        $record.rc = $LASTEXITCODE
-        [IO.File]::WriteAllLines($record.stdout_path, [string[]]@($output), $utf8)
+        $record.stderr_path = [IO.Path]::Combine($dir, 'stderr.txt')
+        $arguments = @('-NoProfile', '-NonInteractive', '-File', $PSCommandPath, '-AddonRoot', $addon,
+            '-ScratchRoot', $dir, '-ReportPath', $record.report_path)
+        $start = [Diagnostics.ProcessStartInfo]::new($exe)
+        $start.Arguments = @($arguments | ForEach-Object { ConvertTo-ArgText $_ }) -join ' '
+        $start.UseShellExecute = $false
+        $start.CreateNoWindow = $true
+        $start.WorkingDirectory = $dir
+        $start.RedirectStandardInput = $true
+        $start.RedirectStandardOutput = $true
+        $start.RedirectStandardError = $true
+        $stdout = [IO.MemoryStream]::new()
+        $stderr = [IO.MemoryStream]::new()
+        $child = [Diagnostics.Process]::Start($start)
+        try {
+            $child.StandardInput.Close()
+            $copyOut = $child.StandardOutput.BaseStream.CopyToAsync($stdout)
+            $copyErr = $child.StandardError.BaseStream.CopyToAsync($stderr)
+            # Bounded wait; only the child started here is ever killed.
+            if (-not $child.WaitForExit($report.child_timeout_sec * 1000)) {
+                $record.timed_out = $true
+                try { $child.Kill() } catch { $null = $_ }
+                $null = $child.WaitForExit(30000)
+            }
+            foreach ($task in $copyOut, $copyErr) { try { $null = $task.Wait(30000) } catch { $null = $_ } }
+            if ($child.HasExited) { $record.rc = $child.ExitCode }
+        } finally {
+            $child.Dispose()
+            [IO.File]::WriteAllBytes($record.stdout_path, $stdout.ToArray())
+            [IO.File]::WriteAllBytes($record.stderr_path, $stderr.ToArray())
+        }
+        if ($record.timed_out) {
+            Stop-Case "Counterexample child timed out after $($report.child_timeout_sec) s and was killed"
+        }
         if ($record.rc -notin 0, 1 -or -not [IO.File]::Exists($record.report_path)) {
             throw "Counterexample child did not complete (rc=$($record.rc))"
         }
-        $child = ConvertFrom-Json -InputObject ([IO.File]::ReadAllText($record.report_path, $utf8))
-        $hit = @($child.cases | Where-Object { $_.id -ceq $Mutation.target -and $_.outcome -ceq 'failed' })
-        $moduleSha = $child.source_hashes.PSObject.Properties['scripts/ProximaActivation.psm1'].Value
-        if ($moduleSha -cne $record.mutated_sha256 -or $child.harness_sha256 -cne $report.harness_sha256 -or
-            $child.ps_edition -cne $report.ps_edition) { throw 'Counterexample child provenance mismatch' }
-        if ($record.rc -ne 1 -or @($child.failed_ids).Count -ne 1 -or $hit.Count -ne 1 -or
+        $childReport = ConvertFrom-Json -InputObject ([IO.File]::ReadAllText($record.report_path, $utf8))
+        $hit = @($childReport.cases | Where-Object { $_.id -ceq $Mutation.target -and $_.outcome -ceq 'failed' })
+        $moduleSha = $childReport.source_hashes.PSObject.Properties['scripts/ProximaActivation.psm1'].Value
+        if ($moduleSha -cne $record.mutated_sha256 -or $childReport.harness_sha256 -cne $report.harness_sha256 -or
+            $childReport.ps_edition -cne $report.ps_edition) { throw 'Counterexample child provenance mismatch' }
+        if ($record.rc -ne 1 -or @($childReport.failed_ids).Count -ne 1 -or $hit.Count -ne 1 -or
             -not $hit[0].reason.StartsWith($Mutation.reason, [StringComparison]::Ordinal)) {
             Stop-Case "Expected only $($Mutation.target) to fail with '$($Mutation.reason)'"
         }
@@ -189,11 +263,17 @@ try {
     $ReportPath = [IO.Path]::GetFullPath($ReportPath)
     # Check both the spelled add-on root and its ancestors before permitting output.
     Assert-NoReparsePath $root
-    Assert-SafeOutputPath $ReportPath $root
-    Assert-SafeOutputPath $ReportPath ([IO.Path]::GetDirectoryName($PSCommandPath))
+    # Evidence must stay outside the add-on under test, this harness's directory and their repositories.
+    $harnessDir = [IO.Path]::GetDirectoryName($PSCommandPath)
+    $protected = [Collections.Generic.List[string]]::new()
+    foreach ($source in $root, $harnessDir) {
+        $protected.Add($source)
+        $top = Find-RepositoryTop $source
+        if ($top) { $protected.Add($top) }
+    }
+    foreach ($source in $protected) { Assert-SafeOutputPath $ReportPath $source }
     $reportWritable = $true
-    Assert-SafeOutputPath $scratch $root
-    Assert-SafeOutputPath $scratch ([IO.Path]::GetDirectoryName($PSCommandPath))
+    foreach ($source in $protected) { Assert-SafeOutputPath $scratch $source }
     if (-not [IO.Directory]::Exists($scratch)) { throw 'ScratchRoot must be an existing directory' }
     $run = [IO.Directory]::CreateDirectory([IO.Path]::Combine($scratch, 'activation-' + [guid]::NewGuid().ToString('N'))).FullName
     $report.scratch_run = $run
@@ -201,7 +281,8 @@ try {
     $report.harness_sha256 = Get-FileSha $PSCommandPath
     $report.source_hashes['scripts/ProximaActivation.psm1'] = Get-FileSha $modulePath
     $null = Import-Module -Name $modulePath -Force -DisableNameChecking -ErrorAction Stop
-    $noProcesses = { }
+    $noProcesses = New-Snapshot
+    $lockName = '.proxima-activation.lock'
     $artifactSha = 'ab' * 32
     $receipts = [IO.Directory]::CreateDirectory([IO.Path]::Combine($run, 'receipts')).FullName
 
@@ -296,28 +377,34 @@ try {
             @{ path = $profile; arg = ('--user-data-dir="{0}{1}"' -f $profile.ToUpperInvariant(), $suffix) }
             @{ path = $profile; arg = ('--user-data-dir "{0}"' -f $profile) }
             @{ path = $plain; arg = ('--user-data-dir={0}' -f $plain) }
+            # Whole-argument quoting: what list2cmdline, .NET and PowerShell 7 emit for a path with a space.
+            @{ path = $profile; arg = ('"--user-data-dir={0}"' -f $profile) }
+            @{ path = $profile; arg = ('"--user-data-dir" "{0}"' -f $profile) }
+            @{ path = $profile; arg = ('-user-data-dir="{0}"' -f $profile) }
+            @{ path = $profile; arg = ('/USER-DATA-DIR="{0}"' -f $profile) }
         )
+        if ($profile -notmatch '\s') { Stop-Case 'PA10 needs a profile path that contains a space' 'setup_error' }
         foreach ($form in $forms) {
             # An unquoted path containing whitespace is not a single argument.
             if ($form.path -ceq $plain -and $plain -match '\s') { continue }
-            $process = [pscustomobject]@{
-                ProcessId = 23456; Name = 'Proxima.exe'; ExecutablePath = 'Proxima.exe'
-                CommandLine = "Proxima.exe $($form.arg) --other"
-            }
-            $provider = { $process }.GetNewClosure()
-            $actual = Enter-ProximaProfileGuard -ProfileDir $form.path -ProcessProvider $provider
-            if ($actual.ok) { $null = Exit-ProximaProfileGuard -Guard $actual.guard }
+            $process = New-ProcessEntry 23456 'Proxima.exe' "Proxima.exe $($form.arg) --other"
+            $actual = Enter-Guard $form.path (New-Snapshot @($process))
             Assert-Result $actual 'PROFILE_BUSY'
+            if ((Get-ResultField $actual 'rule') -cne 'command_line' -or (Get-ResultField $actual 'pid') -ne 23456) {
+                Stop-Case "Expected rule command_line and pid 23456 for $($form.arg)"
+            }
             Assert-Unlocked $form.path
         }
     }
     Invoke-Case 'PA11' {
         $profile = New-Profile 'PA11'
         [IO.File]::WriteAllText([IO.Path]::Combine($profile, 'rest-port.json'), '{"pid":23456}', $utf8)
-        $provider = { [pscustomobject]@{ ProcessId = 23456; Name = 'Proxima.exe'; ExecutablePath = 'Proxima.exe'; CommandLine = '' } }
-        $actual = Enter-ProximaProfileGuard -ProfileDir $profile -ProcessProvider $provider
-        if ($actual.ok) { $null = Exit-ProximaProfileGuard -Guard $actual.guard }
+        # The discovery file is a definite finding, so it wins over the unreadable command line.
+        $actual = Enter-Guard $profile (New-Snapshot @(New-ProcessEntry 23456 'Proxima.exe' ''))
         Assert-Result $actual 'PROFILE_BUSY'
+        if ((Get-ResultField $actual 'rule') -cne 'discovery:rest-port.json' -or (Get-ResultField $actual 'pid') -ne 23456) {
+            Stop-Case 'Expected rule discovery:rest-port.json and pid 23456'
+        }
         Assert-Unlocked $profile
     }
     Invoke-Case 'PA12' {
@@ -356,17 +443,203 @@ try {
         Assert-Fence $receipts 'unknown' 'FENCE_TARGET_UNKNOWN'
     }
 
+    Invoke-Case 'PA19' {
+        # Neighbours that merely share a prefix with the profile are different profiles.
+        $profile = New-Profile 'PA19'
+        $others = @(($profile + '2'), ($profile + [IO.Path]::DirectorySeparatorChar + 'sub'))
+        foreach ($other in $others) {
+            foreach ($arg in ('--user-data-dir="{0}"' -f $other), ('"--user-data-dir={0}"' -f $other)) {
+                $process = New-ProcessEntry 23456 'Proxima.exe' "Proxima.exe $arg --other"
+                Assert-Result (Enter-Guard $profile (New-Snapshot @($process))) 'ACQUIRED' $true
+            }
+        }
+    }
+    Invoke-Case 'PA20' {
+        # Elevated or other-user processes expose no command line; that is not evidence of a free profile.
+        $profile = New-Profile 'PA20'
+        foreach ($commandLine in $null, '', '   ', 'Proxima.exe --user-data-dir=relative-profile', 'Proxima.exe --user-data-dir') {
+            $process = New-ProcessEntry 34567 'Proxima Helper.exe' $commandLine
+            $actual = Enter-Guard $profile (New-Snapshot @($process))
+            Assert-Result $actual 'NOT_MEASURED'
+            if ([string](Get-ResultField $actual 'error') -notmatch '\b34567\b' -or (Get-ResultField $actual 'pid') -ne 34567) {
+                Stop-Case "Expected pid 34567 in the result for command line '$commandLine'"
+            }
+            Assert-Unlocked $profile
+        }
+    }
+    Invoke-Case 'PA21' {
+        # A snapshot that cannot even show the caller is filtered or empty.
+        $profile = New-Profile 'PA21'
+        $foreign = New-ProcessEntry 0 'Idle' $null
+        foreach ($provider in { }, { $foreign }.GetNewClosure()) {
+            $actual = Enter-Guard $profile $provider
+            Assert-Result $actual 'NOT_MEASURED'
+            if ([string](Get-ResultField $actual 'error') -notmatch 'current process') { Stop-Case 'Expected the missing-self reason' }
+            Assert-Unlocked $profile
+        }
+    }
+    Invoke-Case 'PA22' {
+        # Relative spellings resolve from this directory, so only the rooted-path rule can refuse them.
+        $f = New-ArtifactFixture 'PA22'
+        $null = [IO.Directory]::CreateDirectory([IO.Path]::Combine($f.dir, 'prof'))
+        $null = [IO.Directory]::CreateDirectory([IO.Path]::Combine($f.dir, 'receipts'))
+        $prefixes = [Collections.Generic.List[string]]::new()
+        $prefixes.Add('')
+        $prefixes.Add('.' + [IO.Path]::DirectorySeparatorChar)
+        if ($windows -and $f.dir -cmatch '^[A-Za-z]:') { $prefixes.Add($f.dir.Substring(0, 2)) }
+        $previous = [Environment]::CurrentDirectory
+        try {
+            [Environment]::CurrentDirectory = $f.dir
+            foreach ($prefix in $prefixes) {
+                Assert-Result (Test-ProximaArtifactTree -Root ($prefix + 'tree') -ManifestPath $f.manifest) 'NOT_MEASURED'
+                Assert-Result (Test-ProximaArtifactTree -Root $f.root -ManifestPath ($prefix + 'manifest.json')) 'NOT_MEASURED'
+                Assert-Result (Enter-Guard ($prefix + 'prof') $noProcesses) 'NOT_MEASURED'
+                Assert-Result (Test-ProximaPromotionFence -Plan @('first', 'second') -TargetHost 'first' -ArtifactSha256 $artifactSha -ReceiptDir ($prefix + 'receipts')) 'NOT_MEASURED'
+            }
+            Assert-Unlocked ([IO.Path]::Combine($f.dir, 'prof'))
+            Assert-Result (Measure-Artifact $f) 'OK' $true
+        } finally { [Environment]::CurrentDirectory = $previous }
+    }
+    Invoke-Case 'PA23' {
+        $profile = New-Profile 'PA23'
+        $lockPath = [IO.Path]::Combine($profile, $lockName)
+        foreach ($content in ('x' * 600), 'not a lock record', "1`t2", ("12`tutc`thost`n" + 'trailing')) {
+            [IO.File]::WriteAllText($lockPath, $content, $utf8)
+            Assert-Result (Enter-Guard $profile $noProcesses) 'NOT_MEASURED'
+            if ([IO.File]::ReadAllText($lockPath, $utf8) -cne $content) { Stop-Case 'A file that is not a lock record was modified' }
+        }
+        [IO.File]::WriteAllText($lockPath, '', $utf8)
+        Assert-Result (Enter-Guard $profile $noProcesses) 'ACQUIRED' $true
+        $target = New-Profile 'PA23 target'
+        $link = [IO.Path]::Combine($run, 'PA23 link')
+        $linkType = if ($windows) { 'Junction' } else { 'SymbolicLink' }
+        $null = New-Item -Path $link -ItemType $linkType -Target $target -ErrorAction Stop
+        Assert-Result (Enter-Guard $link $noProcesses) 'NOT_MEASURED'
+        Assert-Unlocked $target
+        if (-not $windows) {
+            # File links need a privilege on Windows; the directory junction above covers that platform.
+            $linked = New-Profile 'PA23 linked'
+            $victim = [IO.Path]::Combine($run, 'PA23-victim.txt')
+            [IO.File]::WriteAllText($victim, '', $utf8)
+            $null = New-Item -Path ([IO.Path]::Combine($linked, $lockName)) -ItemType SymbolicLink -Target $victim -ErrorAction Stop
+            Assert-Result (Enter-Guard $linked $noProcesses) 'NOT_MEASURED'
+            if ([IO.FileInfo]::new($victim).Length -ne 0) { Stop-Case 'The link target was written' }
+        }
+    }
+    Invoke-Case 'PA24' {
+        # Proxima appears between the first snapshot and the lock: the second snapshot must see it.
+        $profile = New-Profile 'PA24'
+        $discovery = [IO.Path]::Combine($profile, 'rest-port.json')
+        [IO.File]::WriteAllText($discovery, '{"pid":23456}', $utf8)
+        $state = @{ calls = 0 }
+        $own = New-ProcessEntry $PID 'activation-harness-host' 'activation-harness-host'
+        $late = New-ProcessEntry 23456 'Proxima.exe' 'Proxima.exe --type=renderer'
+        $provider = {
+            $state.calls++
+            $own
+            if ($state.calls -ge 2) { $late }
+        }.GetNewClosure()
+        $actual = Enter-Guard $profile $provider
+        Assert-Result $actual 'PROFILE_BUSY'
+        if ((Get-ResultField $actual 'rule') -cne 'recheck_after_lock' -or (Get-ResultField $actual 'pid') -ne 23456 -or
+            $state.calls -ne 2) { Stop-Case 'Expected rule recheck_after_lock with pid 23456 after two snapshots' }
+        [IO.File]::Delete($discovery)
+        Assert-Result (Enter-Guard $profile $noProcesses) 'ACQUIRED' $true
+    }
+    Invoke-Case 'PA25' {
+        # Bad arguments are results, not exceptions.
+        $f = New-ArtifactFixture 'PA25'
+        $profile = New-Profile 'PA25'
+        $calls = [ordered]@{
+            'Exit null guard' = { Exit-ProximaProfileGuard -Guard $null }
+            'Exit foreign guard' = { Exit-ProximaProfileGuard -Guard 'not a guard' }
+            'Exit without arguments' = { Exit-ProximaProfileGuard }
+            'Enter null profile' = { Enter-ProximaProfileGuard -ProfileDir $null -ProcessProvider $noProcesses }
+            'Enter empty profile' = { Enter-ProximaProfileGuard -ProfileDir '' -ProcessProvider $noProcesses }
+            'Enter array profile' = { Enter-ProximaProfileGuard -ProfileDir @($profile, $profile) -ProcessProvider $noProcesses }
+            'Enter null provider' = { Enter-ProximaProfileGuard -ProfileDir $profile -ProcessProvider $null }
+            'Enter text provider' = { Enter-ProximaProfileGuard -ProfileDir $profile -ProcessProvider 'Get-Process' }
+            'Tree null root' = { Test-ProximaArtifactTree -Root $null -ManifestPath '' }
+            'Tree without arguments' = { Test-ProximaArtifactTree }
+            'Tree text override' = { Test-ProximaArtifactTree -Root $f.root -ManifestPath $f.manifest -Override 'providers.json' }
+            'Tree numeric mutable' = { Test-ProximaArtifactTree -Root $f.root -ManifestPath $f.manifest -MutableRelative @(1) }
+            'Fence null arguments' = { Test-ProximaPromotionFence -Plan $null -TargetHost $null -ArtifactSha256 $null -ReceiptDir $null }
+            'Fence without arguments' = { Test-ProximaPromotionFence }
+        }
+        foreach ($name in $calls.PSBase.Keys) {
+            $actual = $null
+            $thrown = $null
+            try { $actual = & $calls[$name] } catch { $thrown = $_.Exception.Message }
+            if ($null -ne $thrown) { Stop-Case "$name threw: $thrown" }
+            if ($null -ne $actual -and $actual.ok -is [bool] -and $actual.ok -and $name.StartsWith('Enter', [StringComparison]::Ordinal)) {
+                $null = Exit-ProximaProfileGuard -Guard $actual.guard
+            }
+            if ($null -eq $actual -or $actual.code -cne 'NOT_MEASURED' -or $actual.ok -ne $false) { Stop-Case "$name did not return NOT_MEASURED" }
+        }
+        Assert-Unlocked $profile
+    }
+    Invoke-Case 'PA26' {
+        # Target 'first' would be ALLOWED, so only input validation can refuse these.
+        foreach ($sha in $artifactSha.Substring(1), ($artifactSha + '0'), ('zz' * 32), ($artifactSha + "`n")) {
+            $actual = Test-ProximaPromotionFence -Plan @('first', 'second') -TargetHost 'first' -ArtifactSha256 $sha -ReceiptDir $receipts
+            Assert-Result $actual 'NOT_MEASURED'
+        }
+        foreach ($plan in @('first', 'second', 'FIRST'), @('first', 'second', 'second')) {
+            $actual = Test-ProximaPromotionFence -Plan $plan -TargetHost 'first' -ArtifactSha256 $artifactSha -ReceiptDir $receipts
+            Assert-Result $actual 'NOT_MEASURED'
+        }
+    }
+    Invoke-Case 'PA27' {
+        $dir = [IO.Directory]::CreateDirectory([IO.Path]::Combine($run, 'PA27-receipts')).FullName
+        # first.json that names another host is a misfiled receipt.
+        Write-Receipt $dir $true $artifactSha -ReceiptHost 'other'
+        Assert-Fence $dir 'second' 'FENCE_RECEIPT_INVALID' 'first'
+        Write-Receipt $dir $true $artifactSha -ReceiptHost 'FIRST'
+        Assert-Fence $dir 'second' 'FENCE_RECEIPT_INVALID' 'first'
+        $text = '{"schema":"proxima_activation_receipt.v1","host":"first","artifact_sha256":"' + $artifactSha +
+            '","passed":"true","completed_at":"2026-11-18T12:00:00Z"}'
+        [IO.File]::WriteAllText([IO.Path]::Combine($dir, 'first.json'), $text, $utf8)
+        Assert-Fence $dir 'second' 'FENCE_RECEIPT_INVALID' 'first'
+        Write-Receipt $dir $true $artifactSha
+        Assert-Fence $dir 'second' 'ALLOWED'
+    }
+    Invoke-Case 'PA28' {
+        $f = New-ArtifactFixture 'PA28'
+        $sub = [IO.Directory]::CreateDirectory([IO.Path]::Combine($f.root, 'sub')).FullName
+        $data = [IO.Path]::Combine($sub, 'data.json')
+        [IO.File]::WriteAllText($data, '{}', $utf8)
+        $override = @{ 'sub/data.json' = @{ bytes = 2; sha256 = (Get-FileSha $data) } }
+        [IO.File]::WriteAllText($data, 'changed', $utf8)
+        Assert-Result (Measure-Artifact $f -Override $override) 'ARTIFACT_CHANGED'
+        Assert-Result (Measure-Artifact $f -Mutable @('sub\data.json') -Override $override) 'OK' $true
+        # A mutable name that matches nothing is a configuration error, with or without such a file on disk.
+        Assert-Result (Measure-Artifact $f -Mutable @('notes.txt') -Override $override) 'NOT_MEASURED'
+        [IO.File]::WriteAllText([IO.Path]::Combine($f.root, 'notes.txt'), 'note', $utf8)
+        $actual = Measure-Artifact $f -Mutable @('notes.txt', 'sub/data.json') -Override $override
+        Assert-Result $actual 'NOT_MEASURED'
+        if ([string](Get-ResultField $actual 'error') -notmatch 'notes\.txt') { Stop-Case 'Expected the unknown mutable name in the error' }
+        Assert-Result (Measure-Artifact $f -Mutable @('../providers.json') -Override $override) 'NOT_MEASURED'
+    }
+
     if ($Counterexamples) {
         $counterexampleCases = @(
             @{ id = 'CX01'; target = 'PA04'; anchor = 'foreach ($relative in $actualPaths) {'
                 replacement = 'foreach ($relative in @()) {'
                 reason = 'Expected ARTIFACT_EXTRA (ok=False), got OK (ok=True)' }
-            @{ id = 'CX02'; target = 'PA10'; anchor = '(Test-ProfileCommandLine $process.CommandLine $profilePath)) {'
-                replacement = '$false) {'
+            @{ id = 'CX02'; target = 'PA10'; anchor = 'if ($state -ceq ''match'') {'
+                replacement = 'if ($false) {'
                 reason = 'Expected PROFILE_BUSY (ok=False), got ACQUIRED (ok=True)' }
             @{ id = 'CX03'; target = 'PA16'; anchor = 'if (-not $passed) {'
                 replacement = 'if ($false) {'
                 reason = 'Expected FENCE_PRIOR_FAILED (ok=False), got ALLOWED (ok=True)' }
+            @{ id = 'CX04'; target = 'PA19'
+                anchor = '[string]::Equals($candidate, $ProfilePath, [StringComparison]::OrdinalIgnoreCase)'
+                replacement = '$candidate.StartsWith($ProfilePath, [StringComparison]::OrdinalIgnoreCase)'
+                reason = 'Expected ACQUIRED (ok=True), got PROFILE_BUSY (ok=False)' }
+            @{ id = 'CX05'; target = 'PA27'
+                anchor = '-not [string]::Equals($receiptHost, $prior, [StringComparison]::Ordinal) -or'
+                replacement = '$false -or'
+                reason = 'Expected FENCE_RECEIPT_INVALID (ok=False), got ALLOWED (ok=True)' }
         )
         foreach ($mutation in $counterexampleCases) {
             Invoke-Case $mutation.id { Invoke-Counterexample $mutation }
@@ -385,13 +658,23 @@ $report.passed = @($report.cases | Where-Object { $_.outcome -ceq 'passed' }).Co
 foreach ($outcome in 'failed', 'skipped', 'setup_error') {
     $report["${outcome}_ids"] = @($report.cases | Where-Object { $_.outcome -ceq $outcome } | ForEach-Object { $_.id })
 }
+# Every required ID must have run exactly once; a silently missing case is a failure, not a pass.
+$idErrors = [Collections.Generic.List[string]]::new()
+foreach ($id in $requiredIds) {
+    $count = @($report.cases | Where-Object { $_.id -ceq $id }).Count
+    if ($count -eq 0) { $idErrors.Add("missing:$id") } elseif ($count -gt 1) { $idErrors.Add("duplicate:$id x$count") }
+}
+foreach ($case in $report.cases) {
+    if ($requiredIds -cnotcontains $case.id) { $idErrors.Add("unexpected:$($case.id)") }
+}
+$report.id_errors = $idErrors.ToArray()
 $rc = if ($report.setup_error -or $report.setup_error_ids.Count) { 2 }
-    elseif ($report.failed_ids.Count) { 1 } else { 0 }
+    elseif ($report.failed_ids.Count -or $idErrors.Count) { 1 } else { 0 }
 if ($reportWritable) {
     try { [IO.File]::WriteAllText($ReportPath, ($report | ConvertTo-Json -Depth 8), $utf8) }
     catch { $report.setup_error = $_.Exception.Message; $rc = 2 }
 }
-Write-Host ('RESULT {0}/{1} passed; failed_ids=[{2}]; skipped_ids=[{3}]; setup_error_ids=[{4}]; setup_error={5}; rc={6}' -f
+Write-Host ('RESULT {0}/{1} passed; failed_ids=[{2}]; skipped_ids=[{3}]; setup_error_ids=[{4}]; id_errors=[{5}]; setup_error={6}; rc={7}' -f
     $report.passed, $report.total, ($report.failed_ids -join ','), ($report.skipped_ids -join ','),
-    ($report.setup_error_ids -join ','), $report.setup_error, $rc)
+    ($report.setup_error_ids -join ','), ($report.id_errors -join ','), $report.setup_error, $rc)
 exit $rc

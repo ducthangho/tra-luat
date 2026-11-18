@@ -116,5 +116,11 @@
     ]
   },
   "author_fix1_prompt_path": "ops/prompts/wp1393-r1-g1-claude-author-fix1.txt",
-  "author_fix1_prompt_sha256": "acbc802f08b8d52ced1a41c15c330a57ddf813afcb147f4c02c5bc5ae9488d2e"
+  "author_fix1_prompt_sha256": "acbc802f08b8d52ced1a41c15c330a57ddf813afcb147f4c02c5bc5ae9488d2e",
+  "author_fix1": {
+    "run": "4af6291e",
+    "result": "edits uncommitted on H1; residual same-type-both-sides declared"
+  },
+  "author_fix2_prompt_path": "ops/prompts/wp1393-r1-g1-claude-author-fix2.txt",
+  "author_fix2_prompt_sha256": "4e4c7e0305eaf16c72e1408929cc596bccfbff7e91d30ef975b25604399a0b1e"
 }

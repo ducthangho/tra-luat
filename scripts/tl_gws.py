@@ -1170,6 +1170,54 @@ def _ghi_nguyen_tu_0600(path: str, data: bytes) -> None:
         raise
 
 
+def _kiem_dich_ghi(dich: str, goc: str, thanh_phan: tuple) -> str | None:
+    """WP433: None (được ghi) hoặc lý do `<cụm>: <chi tiết repr>`; KHÔNG tạo/ghi gì. (a) cha của `dich` không nằm trong kho git;
+    (b) `goc` và mọi tiền tố `goc/thanh_phan[:i]` tới chính `dich`, nếu ĐANG TỒN TẠI, không phải symlink (S_ISLNK; junction/reparse
+    Windows chưa chặn). Người gọi bảo đảm: `goc` `lstat` trực tiếp được (không hậu tố `/`, `/.`), `dich == join(goc, *thanh_phan)`,
+    mỗi phần tử là MỘT tên thành phần. Lỗi `lstat` ngoài "chưa tồn tại" lan ra dạng OSError (người gọi báo `ghi lỗi`)."""
+    if (kho_dich := _trong_kho_git(os.path.dirname(dich))) is not None:
+        return f"nằm trong kho git: {repr(kho_dich)[:200]}"
+    for i in range(len(thanh_phan) + 1):
+        tien_to = os.path.join(goc, *thanh_phan[:i])
+        try:
+            if stat.S_ISLNK(os.lstat(tien_to).st_mode):
+                return f"là liên kết tượng trưng: {repr(tien_to)[:200]}"
+        except (FileNotFoundError, NotADirectoryError):
+            pass
+    return None
+
+
+def _kiem_jar_nlm(nlm) -> str | None:
+    """WP433: None hoặc lý do. Dict khác rỗng; khoá BẰNG NGUYÊN VĂN một phần tử `_NLM_AUTH_RELS`; giá trị là str encode UTF-8 được."""
+    if not isinstance(nlm, dict) or not nlm:
+        return "dữ liệu không hợp lệ: nlm_auth phải là dict khác rỗng"
+    for rel, noi_dung in nlm.items():
+        if not isinstance(rel, str) or rel not in _NLM_AUTH_RELS:
+            return f"ngoài danh sách cho phép: {repr(rel)[:80]}"
+        try:
+            if not isinstance(noi_dung, str):
+                raise ValueError("kiểu")
+            noi_dung.encode("utf-8")
+        except ValueError:   # UnicodeEncodeError (surrogate đơn từ JSON) là lớp con của ValueError
+            return f"dữ liệu không hợp lệ: giá trị của {repr(rel)[:80]}"
+    return None
+
+
+def _dich_jar_nlm(nbase: str, nlm: dict) -> str | None:
+    """WP433: kiểm đích của TOÀN BỘ khoá (đã qua `_kiem_jar_nlm`) trước mọi makedirs/ghi."""
+    for rel in nlm:
+        tp = tuple(rel.split("/"))
+        if (ly_do := _kiem_dich_ghi(os.path.join(nbase, *tp), nbase, tp)) is not None:
+            return ly_do
+    return None
+
+
+def _ghi_jar_nlm(nbase: str, nlm: dict) -> None:
+    """WP433: thay nguyên tử TỪNG tệp (không cả lượt), 0600 — không ghi xuyên symlink/hardlink ở tệp cuối."""
+    for rel, noi_dung in nlm.items():
+        _ghi_nguyen_tu_0600(os.path.join(nbase, *rel.split("/")), noi_dung.encode("utf-8"))
+
+
 def cmd_agent_creds_set(a) -> int:
     """WP1009: ghi credential AGENT (Codex auth.json · token Claude · khoá Gemini cho `agy`) vào tl_agent_creds.enc.
     Giá trị chỉ đọc từ TỆP/BIẾN, không bao giờ từ argv; không in giá trị ở bất kỳ nhánh nào — chỉ TÊN khoá.
@@ -1652,15 +1700,13 @@ def cmd_nlm_auth_pull(a) -> int:
         print("[nlm-auth-pull] ⚠ bundle chưa có nlm_auth — ở Code chạy `tl secrets-set --nlm` trước.", file=sys.stderr)
         return 1
     nbase = os.path.expanduser("~/.notebooklm-mcp-cli")
-    for rel, content in nlm.items():
-        dst = os.path.join(nbase, *str(rel).split("/"))
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
-        with open(dst, "w", encoding="utf-8") as f:
-            f.write(content)
-        try:
-            os.chmod(dst, 0o600)
-        except OSError:
-            pass
+    try:   # WP433: kiểm jar + đích của mọi khoá TRƯỚC khi ghi
+        ly_do = _kiem_jar_nlm(nlm) or _dich_jar_nlm(nbase, nlm) or _ghi_jar_nlm(nbase, nlm)
+    except OSError as e:
+        ly_do = f"ghi lỗi: {_safe_exc(e)}"
+    if ly_do:
+        print(f"[nlm-auth-pull] ✗ {ly_do}", file=sys.stderr)
+        return 1
     age = _nlm_auth_age_days(nlm)
     agestr = f" (~{age:.0f} ngày tuổi)" if age is not None else ""
     print(f"[nlm-auth-pull] ✓ nlm auth {len(nlm)} file → ~/.notebooklm-mcp-cli{agestr} [nguồn {src}]. Kiểm bằng probe LIVE (`tl nlm-auth-status`), KHÔNG bằng `nlm login --check`"
@@ -1699,6 +1745,11 @@ def cmd_bootstrap(a) -> int:
         print(f"[bootstrap] ✗ giải mã lỗi: {e} (TL_MASTER_KEY khác lúc stage?)", file=sys.stderr)
         return 3
     print(f"[bootstrap] env={env} · bundle giải mã OK (nguồn .enc: {src})")
+    degraded = False                       # B8: theo dõi để exit code phản ánh đúng (không "nuốt" lỗi → trả 0)
+    jar = bundle.get("nlm_auth")           # WP433: kiểm jar MỘT lần, mọi env; bị từ chối ⇒ không ghi jar, không lưu vào config
+    ly_jar = _kiem_jar_nlm(jar) if jar else None
+    if ly_jar:
+        print(f"[bootstrap] ✗ {ly_jar}", file=sys.stderr); degraded = True
     # 1) FULL config (token + rootFolderId/categories/…) → env + MERGE vào ~/.tra_luat_config.json
     if bundle.get("token"):
         os.environ["TL_TOKEN"] = bundle["token"]
@@ -1706,23 +1757,24 @@ def cmd_bootstrap(a) -> int:
             os.environ["TL_WEBAPP"] = bundle["webappUrl"]
         cfgp = os.path.expanduser("~/.tra_luat_config.json")
         existing = {}
-        if os.path.exists(cfgp):
-            try:
-                existing = json.load(open(cfgp, encoding="utf-8"))
-            except Exception:
-                existing = {}
-        existing.update({k: v for k, v in bundle.items() if k != "gws_cred"})   # MERGE, không clobber
-        try:
-            with open(cfgp, "w", encoding="utf-8") as f:
-                json.dump(existing, f, ensure_ascii=False)
-            os.chmod(cfgp, 0o600)
-            print(f"[bootstrap] ✓ config (token + {len([k for k in bundle if k!='gws_cred'])} khoá) → env + {cfgp} (chmod 600)")
+        try:   # WP433: chốt đích TRƯỚC lần đọc phục vụ merge; ghi nguyên tử (dữ liệu dựng xong mới gọi writer)
+            ly_cfg = _kiem_dich_ghi(cfgp, cfgp, ())
+            if ly_cfg is None and os.path.exists(cfgp):
+                try:
+                    existing = json.load(open(cfgp, encoding="utf-8"))
+                except Exception:
+                    existing = {}
+            if ly_cfg is None:
+                existing.update({k: v for k, v in bundle.items() if k != "gws_cred" and not (k == "nlm_auth" and ly_jar)})
+                _ghi_nguyen_tu_0600(cfgp, json.dumps(existing, ensure_ascii=False).encode("utf-8"))
+                print(f"[bootstrap] ✓ config (token + {len([k for k in bundle if k!='gws_cred'])} khoá) → env + {cfgp} (chmod 600)")
         except OSError as e:
-            print(f"[bootstrap] ✓ token nạp env (ghi config lỗi: {e})")
+            ly_cfg = f"ghi lỗi: {_safe_exc(e)}"
+        if ly_cfg:
+            print(f"[bootstrap] ✗ {ly_cfg}", file=sys.stderr); degraded = True
     else:
         print("[bootstrap] ⚠ bundle thiếu GAS token.", file=sys.stderr)
     # 2) gws (Code/Cowork): binary nếu thiếu + cred từ bundle
-    degraded = False                       # B8: theo dõi để exit code phản ánh đúng (không "nuốt" lỗi → trả 0)
     if env in ("code", "cowork"):
         # Ghi gws cred TRƯỚC (để cài binary dùng được direct-media raw thay vì webapp b64).
         if bundle.get("gws_cred"):
@@ -1739,17 +1791,16 @@ def cmd_bootstrap(a) -> int:
         else:
             print("[bootstrap] ⚠ bundle thiếu gws_cred — gws sẽ chưa auth (op vẫn fallback GAS).", file=sys.stderr)
             degraded = True
-        if bundle.get("nlm_auth"):                     # nạp auth nlm (cookies) → nlm chạy headless, khỏi `nlm login`
+        ly_nlm = None
+        if jar and not ly_jar:                         # nạp auth nlm (cookies) → nlm chạy headless, khỏi `nlm login`
             nbase = os.path.expanduser("~/.notebooklm-mcp-cli")
-            for rel, content in bundle["nlm_auth"].items():
-                dst = os.path.join(nbase, *str(rel).split("/"))
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
-                with open(dst, "w", encoding="utf-8") as f:
-                    f.write(content)
-                try:
-                    os.chmod(dst, 0o600)
-                except OSError:
-                    pass
+            try:   # WP433: jar đã kiểm ở trên; ở đây chỉ kiểm đích rồi ghi nguyên tử
+                ly_nlm = _dich_jar_nlm(nbase, jar) or _ghi_jar_nlm(nbase, jar)
+            except OSError as e:
+                ly_nlm = f"ghi lỗi: {_safe_exc(e)}"
+        if ly_nlm:
+            print(f"[bootstrap] ✗ {ly_nlm}", file=sys.stderr); degraded = True
+        elif jar and not ly_jar:
             age = _nlm_auth_age_days(bundle["nlm_auth"])
             agestr = f" · cookie ~{age:.0f} ngày tuổi" if age is not None else ""
             print(f"[bootstrap] ✓ nlm auth ({len(bundle['nlm_auth'])} file) → ~/.notebooklm-mcp-cli (nlm headless){agestr}")
@@ -1954,6 +2005,13 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
         return False, f"giải mã lỗi (token sai/dữ liệu hỏng): {e}"
     if not isinstance(nlm, dict) or not nlm:
         return False, "nlm_cred rỗng/sai định dạng."
+    nbase = os.path.expanduser("~/.notebooklm-mcp-cli")
+    try:   # WP433: kiểm jar + đích TRƯỚC chốt chống hạ cấp
+        ly_do = _kiem_jar_nlm(nlm) or _dich_jar_nlm(nbase, nlm)
+    except OSError as e:
+        ly_do = f"ghi lỗi: {_safe_exc(e)}"
+    if ly_do:
+        return False, ly_do
     # r208c 3.1: CHỐNG HẠ CẤP. Lệnh này GHI ĐÈ jar cục bộ bằng bản bundle — đo tươi 25-07: bản
     # `auth.json` đem đi stage trễ hơn profile sống 127', `extracted_at` 415', token xoay trong đó
     # hết hạn từ 7,2 GIỜ trước. Nạp bản như vậy đè lên phiên đang sống = TỰ GIẾT cookie tươi. Đây
@@ -1963,16 +2021,10 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
         return False, ("TỪ CHỐI HẠ CẤP — " + _why_dg + ". Bản trên Drive CŨ HƠN bản cục bộ: ghi đè sẽ "
                        "LÀM MẤT cookie tươi hơn đang có. Muốn cố ý: `--force`. Đường đúng khi cookie "
                        "chết hẳn: đăng nhập lại trên máy giữ hồ sơ gốc rồi chạy `pwsh -NoProfile -File scripts/nlm-credential-refresh.ps1 -ConfigPath <config>` (refresh → canary → stage).")
-    nbase = os.path.expanduser("~/.notebooklm-mcp-cli")
-    for rel, content in nlm.items():
-        dst = os.path.join(nbase, *str(rel).split("/"))
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
-        with open(dst, "w", encoding="utf-8") as f:
-            f.write(content)
-        try:
-            os.chmod(dst, 0o600)
-        except OSError:
-            pass
+    try:
+        _ghi_jar_nlm(nbase, nlm)
+    except OSError as e:
+        return False, f"ghi lỗi: {_safe_exc(e)}"
     age = _nlm_auth_age_days(nlm)
     # r208c 3.1: bundle có thể mang sẵn PHIÊN ĐÃ CHẾT — đo tươi 25-07: bản trên Drive chứa đúng token
     # xoay hết hạn −129' y như jar cục bộ, nạp về KHÔNG hồi sinh được gì. Đây chính là lý do vòng lặp

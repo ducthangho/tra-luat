@@ -42,3 +42,22 @@ là prompt, KHÔNG phải lease. Thứ định danh mã là **băm commit**, kh�
 - `reviewed_sha: <40 hex>`, `verdict: approve | request_changes`, `reviewer: codex (OpenAI), codex_cli, read-only`.
 - Findings P0–P3. Mỗi finding gồm: tệp:dòng, kịch bản hỏng cụ thể, đề xuất sửa, và ca test sẽ bắt được nó.
 - Các lệnh đã chạy kèm mã thoát thật. Phần KHÔNG đo được.
+
+## Lượt 2 (delta) — dùng thêm phần này khi đã có `VERDICT.md` lượt 1
+
+- Lượt 1 ở `4aae991` ra `request_changes`: 4 P1, 3 P2, 1 P3. Nguyên văn ở `repo/ops/acceptance/wp1389/VERDICT.md`.
+- Executor sửa ở `5c01f39` và `6896f16`. Từng sửa đổi và lỗi mới do local Windows bắt (W3, W4) ghi trong
+  `repo/ops/acceptance/wp1389/RESULTS.md` §6.
+- Việc lượt 2:
+  1. Với TỪNG finding lượt 1, xác minh trên mã ở H: đã sửa, sửa một phần, hay chưa. Phải có căn cứ là dòng mã, không
+     dựa vào lời khai trong `RESULTS.md`.
+     - Riêng P1 thứ ba (liên kết ở thư mục cha, tráo thư mục): executor KHÔNG sửa bằng mã, chỉ khai trong Limits.
+       Đánh giá lựa chọn đó: chấp nhận được hay vẫn là chặn merge, và vì sao.
+  2. Chạy lại đúng một lần lệnh N1 vào `scratch/n1` rỗng. Báo dòng `SOURCE` và dòng `TONG`.
+  3. Tìm lỗi MỚI do các bản sửa đưa vào. Chú ý:
+     - `mapfile -d ''` + `wait "$!"` (bash ≥ 4.4);
+     - so `${f##*/}`;
+     - kiểm `${h%/*} = $D` khi `XDG_CACHE_HOME` có `/` ở cuối;
+     - quét bằng `[IO.Directory]` của PowerShell: thư mục là junction, mẫu `*nonce*` khớp tên 8.3, đường dẫn UNC;
+     - thứ tự chép → so → ghi `11-daemon-path.txt` → xoá.
+  4. Ghi verdict theo đúng khuôn đầu ra ở trên vào `scratch/VERDICT.md`.

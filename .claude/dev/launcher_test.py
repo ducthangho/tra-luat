@@ -11356,7 +11356,9 @@ def r1404_thu_lai_chot_chi_tiet():
     (b) `update` lỗi rc 78, hai lần install rc 100 rồi 42 ⇒ script thoát 42 (B2 + mã của lần cài lại).
     (c) công thức gọi `apt-get` thẳng (không `sudo`) ⇒ `update` cũng không qua `sudo`.
     (d) lần đầu: bộ chọn GHI KÊNH rồi một bước sau lỗi; lần cài lại thành công qua stdout ⇒ kênh cũ không được dùng.
-    (e) lần đầu để tiến trình con giữ stdout và ghi thư mục hỏng SAU khi lần cài lại in thư mục tốt ⇒ vẫn chọn thư mục tốt."""
+    (e) lần đầu để tiến trình con giữ stdout và ghi thư mục hỏng SAU khi lần cài lại in thư mục tốt ⇒ vẫn chọn thư mục tốt.
+    Codex lượt 2–3: (f) tiến trình nền của lần đầu ghi KÊNH cũ · (g) `source` từ shell gọi có `readonly LAN_CAI` ·
+    (h) allexport với kênh mới · (i) công thức dùng tham số vị trí của script (`${1-}`), cài được ngay và cần update."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
@@ -11478,6 +11480,17 @@ esac
         bang(p.returncode == 0 and all(f"ngoai={n} LAN_CAI=42" in p.stderr for n in (1, 2))
              and p.stderr.count("apt-get update roi thu lai mot lan") == 2,
              f"(g) source tu shell goi: bien cua shell goi bi dung toi / vong ngoai dung: rc={p.returncode} {p.stderr[-400:]}")
+    for kieu in ("duoc_ngay", "can_update"):   # (i) — Codex lượt 3 (P3): công thức dùng tham số vị trí của script
+        with San() as s:
+            log, co = s / "apt.log", s / "da-update"
+            cai = "exit 0" if kieu == "duoc_ngay" else f"[ -f {q(str(co))} ] && exit 0; exit 100"
+            apt = f'echo "$1" >> {q(str(log))}; case "$1" in update) : > {q(str(co))}; exit 0;; install) {cai};; esac; exit 99'
+            lenh = 'test "${1-}" = rg && apt-get install -y ripgrep && chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin"'
+            p, gp, uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh)
+            mong = ["install"] if kieu == "duoc_ngay" else ["install", "update", "install"]
+            bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv) and doc(log) == mong,
+                 f"(i) {kieu}: cong thuc khong thay tham so vi tri cua script: rc={p.returncode} nhat ky={doc(log)} "
+                 f"{p.stderr[-200:]}")
     with San() as s:   # (h) allexport: kênh MỚI của lần cài lại vẫn không lộ cho trình cài
         log, co = s / "apt.log", s / "da-update"
         apt = (f'echo "$1 ${{KENH_KQ:-VANG}} ${{TAM_CAI:-VANG}}" >> {q(str(log))}; case "$1" in update) : > {q(str(co))}; exit 0;; '
@@ -17322,10 +17335,11 @@ DOT_BIEN_HOOK = [
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
     ("wp1404_sh_thu_lai_moi_loi", ('    *"apt-get install"*)\n', '    *)\n'),
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
-    ("wp1404_sh_bo_cai_lai", ('      _wp1404_chay_cong_thuc ;;\n', '      ;;\n'),
+    ("wp1404_sh_bo_cai_lai", ('      _wp1404_chay_cong_thuc "$@" ;;\n', '      ;;\n'),
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
     # Codex wp1404 lượt 1: đột biến cho từng chốt của nhánh thử lại.
-    ("wp1404_sh_thu_lai_hai_lan", ('      _wp1404_chay_cong_thuc ;;\n', '      _wp1404_chay_cong_thuc; _wp1404_chay_cong_thuc ;;\n'),
+    ("wp1404_sh_thu_lai_hai_lan", ('      _wp1404_chay_cong_thuc "$@" ;;\n',
+                                   '      _wp1404_chay_cong_thuc "$@"; _wp1404_chay_cong_thuc "$@" ;;\n'),
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
     ("wp1404_sh_update_vao_stdout", ('sudo apt-get update -qq >&2 ||', 'sudo apt-get update -qq ||'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
@@ -17348,12 +17362,18 @@ DOT_BIEN_HOOK = [
     ("wp1404_sh_kenh_moi_lo_export", ('      KENH_KQ="$TAM_CAI/kq-thu-lai"\n      export -n KENH_KQ\n',
                                       '      KENH_KQ="$TAM_CAI/kq-thu-lai"\n'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
-    ("wp1404_sh_bien_dem_toan_cuc", ('_wp1404_chay_cong_thuc\nif [ "$RC_CAI" -ne 0 ]; then\n  case',
-                                     'LAN_CAI=0\n_wp1404_chay_cong_thuc\nif [ "$RC_CAI" -ne 0 ]; then\n  case'),
+    ("wp1404_sh_bien_dem_toan_cuc", ('_wp1404_chay_cong_thuc "$@"\nif [ "$RC_CAI" -ne 0 ]; then\n  case',
+                                     'LAN_CAI=0\n_wp1404_chay_cong_thuc "$@"\nif [ "$RC_CAI" -ne 0 ]; then\n  case'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
     ("wp1404_sh_tran_update_vao_stdout", ('        *) apt-get update -qq >&2 ||', '        *) apt-get update -qq ||'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
     ("wp1404_sh_tran_bo_qq", ('        *) apt-get update -qq >&2 ||', '        *) apt-get update >&2 ||'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    # Codex wp1404 lượt 3 (P3): hàm phải nhận "$@" ở CẢ HAI lời gọi.
+    ("wp1404_sh_mat_tham_so_lan_dau", ('_wp1404_chay_cong_thuc "$@"\nif [ "$RC_CAI" -ne 0 ]; then\n  case',
+                                       '_wp1404_chay_cong_thuc\nif [ "$RC_CAI" -ne 0 ]; then\n  case'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_mat_tham_so_cai_lai", ('      _wp1404_chay_cong_thuc "$@" ;;\n', '      _wp1404_chay_cong_thuc ;;\n'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
     ("wp1404_sh_tran_update_loi_dung", ('*) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;',
                                         '*) apt-get update -qq >&2 ;;'),

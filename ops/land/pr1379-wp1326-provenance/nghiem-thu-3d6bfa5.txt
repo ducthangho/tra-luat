@@ -1,0 +1,29 @@
+# nghiem thu merge 3d6bfa5 (do 2026-11-18T00:33:07Z, clone rieng, core.abbrev 7)
+## git rev-parse
+3d6bfa5361dc30caf1caea9ae2c3ffe1a563902f
+84adb4ba705749f26c475b852f71dcb55257954b
+13bf69f6eb797e859619a2062e7c9577e6a9cc0b
+c46f7287039d207b1d377d9a10c6e77191778404
+84adb4ba705749f26c475b852f71dcb55257954b
+## numstat 3d6bfa5^1..3d6bfa5
+7	7	RELEASE_MANIFEST.json
+179	0	scripts/test_fragments/wp1326_doc_claims_dau_cham.py
+44	7	scripts/tl_core/workflow.py
+1	0	scripts/tl_test_fragments_bundled.py
+## numstat 13bf69f..c46f728
+7	7	RELEASE_MANIFEST.json
+179	0	scripts/test_fragments/wp1326_doc_claims_dau_cham.py
+44	7	scripts/tl_core/workflow.py
+1	0	scripts/tl_test_fragments_bundled.py
+## git diff --check 13bf69f c46f728
+rc=0
+## doctrine-scan
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+## adr-song
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+## release-verify --strict
+ok True expected 185 checked 185
+## doc-claims-check --strict
+ok True flags 0 advisory 392

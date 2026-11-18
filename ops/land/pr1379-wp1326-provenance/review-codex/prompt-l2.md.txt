@@ -1,0 +1,14 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI, Codex) của packet DOC-CLAIMS-DAU-CHAM r3 g2 (Issue #1326), lượt 2, CÙNG ứng viên H = c46f7287039d207b1d377d9a10c6e77191778404 (tree 84adb4ba705749f26c475b852f71dcb55257954b), base 13bf69f6eb797e859619a2062e7c9577e6a9cc0b. Đặc tả: `git show refs/remotes/origin/ops/spec-doc-claims-dau-cham:ops/specs/DOC-CLAIMS-DAU-CHAM-r3.md` (sha256 phải là 0712647206e62eaca32701ddc05dd4aa0930f43174722aa016883d645be84864). Không push, không sửa tệp đã theo dõi; thử nghiệm làm trong /tmp. Không đọc/ghi secrets.
+
+Lượt 1 của bạn (session 2012c303) KHÔNG tìm ra lỗi triển khai P0–P3, đánh giá hai điểm executor tự khai là không phải lỗi phải sửa trong r3, và ra request_changes CHỈ vì thiếu bằng chứng: (i) selftest 1769/1778 trong sandbox của bạn (9 ca đỏ y hệt trên base: bảy ca gặp /tmp/.git của sandbox, hai ca gặp cấu hình ký commit SSH của sandbox); (ii) ruff không có trong sandbox; (iii) N6 Windows, N7 CI chưa chạy.
+
+Phiên điều phối đã đo NGOÀI sandbox; bằng chứng trong thư mục /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1326/bang-chung (sha256 kèm theo):
+- selftest-base.log (01f85a34…): clone sạch base, `python3 -B scripts/tl.py --selftest` rc=0, "== tl selftest 1777/1777 ==".
+- selftest-H.log (69bb82b8…): clone sạch H, rc=0, "== tl selftest 1778/1778 ==".
+- ruff.log (53c65cdf…): ruff 0.17.5 `check --select F`: scripts/tl.py 12→12, scripts/tl_core/workflow.py 28→28, tệp fragment mới "All checks passed!" ⇒ delta 0.
+- n6-windows-TOM-TAT.txt (223838bb…): N6 trên máy Windows local tra-luat-win, Python 3.12.10, cp1252, KHÔNG PYTHONUTF8, cùng một lệnh: base 1777/1777 rc=0, H 1778/1778 rc=0, mỗi lượt checkout sạch, fail=0 skip=0.
+- N7 (CI trên PR) theo ADR-0060 M5/M6 chỉ có SAU khi bạn approve (PR mở sau review offline); phiên điều phối sẽ đo N7 và connector trên PR rồi mới đề xuất merge. Không đòi N7 ở lượt này.
+
+Việc: (1) kiểm sha256 các tệp bằng chứng và đọc chúng; tự xác nhận dòng tổng kết và rc; đối chiếu tập ca đỏ trong sandbox lượt 1 của bạn là do môi trường (vd. so tên 9 ca với log ngoài sandbox, tất cả đạt ở đó). (2) Nếu cần, chạy lại một phần (fragment wp1326, doc-claims-check) trên H để xác nhận không có gì đổi. (3) Kết luận: còn P0–P2 nào không.
+
+Đầu ra stdout: bảng N1–N8 (passed/failed/not_run kèm nguồn), finding P0–P3 nếu có, dòng neo reviewed_sha/reviewed_tree/spec_sha256. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`.

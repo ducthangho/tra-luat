@@ -1,0 +1,52 @@
+M1–M4 phù hợp đặc tả; chưa đủ bằng chứng để approve vì N1 chưa đạt N/N, Ruff chưa đo được, Windows và CI chưa xác minh.
+
+Reviewer: `openai_codex / codex_cli / machine`, session `2012c303`, độc lập với Executor. Model/effort thực phục vụ: `KHONG_DO_DUOC`. Môi trường: Linux, Python 3.13.18, Git 2.43.0, `core.abbrev=7`, sandbox `workspace-write`.
+
+Các lệnh dưới dùng tiền tố `python -B scripts/tl.py`; `-B` ngăn ghi bytecode vào checkout.
+
+| Mục | Bằng chứng tự đo | Kết quả |
+|---|---|---|
+| M1(a–c,f) | Fragment và probe kiểm giữ dấu chấm đầu, bỏ dấu chấm cuối câu, giữ nguyên claim; `./`, `../` không sinh L1; đường tồn tại ở gốc/theo tài liệu được chấp nhận | passed |
+| M1(d) | Giữ `/` cuối khi hỏi Git; cache phân biệt `x` với `x/`; probe rc 0/1/128/127 đúng hợp đồng | passed |
+| M1(e) | Tập miễn trừ khớp đúng 9 cặp trong spec. Cả 9 được kiểm thêm với missing/deleted/historical/tài liệu khác | passed |
+| M2, N1 | Fragment trên H: rc 0, `[OK] wp1326_doc_claims_dau_cham`. Trên base: rc 1, lệch đúng `a,b,c,d,e3,e4,e5,h1,h2` | Fragment passed |
+| N1 full | `--selftest`: H **1769/1778**, rc 1; base **1768/1777**, rc 1. Cùng đúng 9 ca đỏ, stderr trùng byte; delta ca đỏ = 0 | **failed** |
+| N2 | Baseline fragment đạt trước khi chạy 8 đột biến bên dưới | passed trong phạm vi đã chọn |
+| N3 | `doc-claims-check --strict --json`: H/base đều rc 0, `flags=[]`, 131 tệp. Advisory L1 **173/162**; số miễn trừ theo cặp 1→9: **1,1,1,1,1,1,1,1,2**. H có đúng 3 advisory deleted bắt đầu bằng dấu chấm, không còn claim fixture golden | passed |
+| N4 | ADR tạm phục hồi backtick: base rc 2, `PATH_MISSING` claim `agents/skills/land-packets/SKILL.md`; H rc 0, không phát hiện L1 | passed |
+| M3, N5 | `test-fragments-check --json`: rc 0, `status=current`, hash sinh/hiện tại cùng `e3668526…`. `python -B .github/checks/bundle_fragment_check.py --json`: rc 0, **12/12**, có fragment mới đạt | passed |
+| M4, N5 | `release-verify RELEASE_MANIFEST.json --strict --json`: rc 0, `ok=true`, **expected=checked=185**, hash package khớp | passed |
+| N5 khác | `git diff --check <base> HEAD`, doctrine-scan, golden, workflow-audit strict, determinism-audit strict: đều rc 0; golden 20 ca, các JSON báo `ok=true` | passed |
+| N5 Ruff | Lệnh lint rc 1: `No module named ruff`; cài pin 0.15.15 thất bại do DNS. Probe hợp đồng pin/probe rc 0, `RUFF_CONTRACT 3 []` | Bare lint **not_measured** |
+| N6, N7 | Windows native và CI/GitHub không được chạy trong lượt này. Probe CRLF trên Linux giữ nguyên tập L1, không thay bằng chứng Windows | **not_run** |
+| N8 | Đúng 4 tệp được phép, **+231/−14**, trong trần 6 tệp/450 dòng thêm; không đổi VERSION/CHANGELOG | passed |
+
+Các đột biến chạy trên bản sao dưới `/tmp`, đều rc 1 vì đúng ca lệch:
+
+| Đột biến | Ca lệch quan sát |
+|---|---|
+| D1 | `a,b,c,d,e3,e4,h1,h2` |
+| D2 | `g` |
+| D3 | `e,e2,e3,e5` |
+| D4 | `h2` |
+| **D5** | **`h1`** |
+| D6 | `f` |
+| D8 | `e2,e3,e5` |
+| **D9** | **`e3`** |
+
+Không xác nhận lỗi triển khai P0–P3 trong diff. Hai điểm Executor tự khai được đánh giá như sau:
+
+- **(a), [workflow.py:1185](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1326/ws1/scripts/tl_core/workflow.py:1185): có ảnh hưởng môi trường thật, nhưng không phải sai lệch phải sửa trong r3.** Cùng H và tài liệu thử, `GIT_CONFIG_GLOBAL=/dev/null` cho rc 2 với `PATH_MISSING`; cấu hình tạm có `core.excludesFile` khớp claim cho rc 0, `flags=[]`. `.git/info/exclude` cũng làm mất phát hiện trên fixture riêng. Tuy nhiên M1(d) quy định tường minh đúng lời gọi `check-ignore -q --no-index -- q`; implementation tuân thủ. Muốn giới hạn nguồn ignore vào `.gitignore` cần thay hợp đồng này.
+- **(b), [workflow.py:1123](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1326/ws1/scripts/tl_core/workflow.py:1123): hằng không còn caller, không phải lỗi bắt buộc sửa theo M1–M4.** Không thấy tác động hành vi.
+
+Hiệu năng quan sát: một lượt quét khoảng **3,06 giây**, **104** lời gọi check-ignore cho **104** khóa phân biệt, không hỏi lặp cùng khóa.
+
+Chặn nghiệm thu còn lại: chín ca selftest đỏ sẵn trên base gồm bảy ca bootstrap gặp `/tmp/.git` của sandbox và hai ca L2 gặp cấu hình ký commit SSH không hoạt động trong sandbox. Đây chưa phải bằng chứng N/N. Cần bổ sung lần đo N1 đạt cùng bằng chứng Ruff, Windows và CI theo đặc tả trước khi approve.
+
+[Lệnh, rc và kết quả tổng hợp](/tmp/rv1326-review-2012c303/review-summary.json), [selftest H](/tmp/rv1326-review-2012c303/head-selftest.stdout), [selftest base](/tmp/rv1326-review-2012c303/base-selftest.stdout), [probe](/tmp/rv1326-review-2012c303/probe-results.json). Checkout được giao không đổi tracked/index; sandbox xuất hiện thêm `.codex/` rỗng, chỉ đọc.
+
+reviewed_sha: c46f7287039d207b1d377d9a10c6e77191778404  
+reviewed_tree: 84adb4ba705749f26c475b852f71dcb55257954b  
+spec_sha256: 0712647206e62eaca32701ddc05dd4aa0930f43174722aa016883d645be84864
+
+KET_LUAN: request_changes

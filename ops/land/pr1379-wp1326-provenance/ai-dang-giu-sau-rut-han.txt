@@ -1,0 +1,22 @@
+# ai-dang-giu sau rut han lease doc-claims-dau-cham-r3-g2-claude (han moi 2026-11-18T00:20:00Z); do luc 2026-11-18T00:32:32Z tren clone rieng, fetch --prune +refs/heads/*
+may_chu=302 cuc_bo=302 thieu_cuc_bo=0
+## RELEASE_MANIFEST.json
+HẾT_HẠN	doc-claims-dau-cham-r3-g2-claude	refs/remotes/origin/ops/doc-claims-dau-cham-g2-lease:ops/leases/doc-claims-dau-cham-r3-g2-claude.yaml
+HẾT_HẠN	doc-claims-dau-cham-r3-g1-claude	refs/remotes/origin/ops/doc-claims-dau-cham-lease:ops/leases/doc-claims-dau-cham-r3-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/test_fragments/wp1326_doc_claims_dau_cham.py
+HẾT_HẠN	doc-claims-dau-cham-r3-g2-claude	refs/remotes/origin/ops/doc-claims-dau-cham-g2-lease:ops/leases/doc-claims-dau-cham-r3-g2-claude.yaml
+HẾT_HẠN	doc-claims-dau-cham-r3-g1-claude	refs/remotes/origin/ops/doc-claims-dau-cham-lease:ops/leases/doc-claims-dau-cham-r3-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/tl_core/workflow.py
+HẾT_HẠN	doc-claims-dau-cham-r3-g2-claude	refs/remotes/origin/ops/doc-claims-dau-cham-g2-lease:ops/leases/doc-claims-dau-cham-r3-g2-claude.yaml
+HẾT_HẠN	doc-claims-dau-cham-r3-g1-claude	refs/remotes/origin/ops/doc-claims-dau-cham-lease:ops/leases/doc-claims-dau-cham-r3-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/tl_test_fragments_bundled.py
+HẾT_HẠN	doc-claims-dau-cham-r3-g2-claude	refs/remotes/origin/ops/doc-claims-dau-cham-g2-lease:ops/leases/doc-claims-dau-cham-r3-g2-claude.yaml
+HẾT_HẠN	doc-claims-dau-cham-r3-g1-claude	refs/remotes/origin/ops/doc-claims-dau-cham-lease:ops/leases/doc-claims-dau-cham-r3-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

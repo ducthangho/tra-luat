@@ -1,0 +1,41 @@
+# Bien ban M8 (ADR-0060) dong WP #1326 DOC-CLAIMS-DAU-CHAM r3 g2 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1379-wp1326-land-evidence.yaml. landed true (assurance cross_approved: Codex offline approve run a5485408, ho openai khac ho claude cua executor; khong co human audit).
+# Bon moc §10.2.2 run 44204093238 measured passed (wd-run 44208290060; gate output 39/39 bang danh_gia_gate.py v2).
+packet: DOC-CLAIMS-DAU-CHAM
+revision: 3
+generation: 2
+spec_hash: 0712647206e62eaca32701ddc05dd4aa0930f43174722aa016883d645be84864
+head_da_review: c46f7287039d207b1d377d9a10c6e77191778404
+tree_h: 84adb4ba705749f26c475b852f71dcb55257954b
+review:
+  offline: 'launcher.py run codex_cli effort xhigh: run 2012c303 request_changes (0 loi trien khai; thieu bang chung do sandbox), run a5485408 APPROVE tren c46f728 (review-codex/)'
+  connector: 'readback-pr1379-comments.json: 6963202230 "Didn''t find any major issues", Reviewed commit c46f728703 (goi bang @codex review 6963171399)'
+  human_audit: 'khong ap dung — lease assurance_target cross_approved'
+windows:
+  phan_loai: required
+  nguon: '_phan_loai_windows(13bf69f, c46f728, dac ta r3) = required (ADR-0060 M3 buoc 2: tep test moi dung subprocess/pathlib).'
+  ket_qua: 'measured truoc merge — n6-windows-tra-luat-win-readback.txt: may native tra-luat-win, Python 3.12.10, cp1252, khong PYTHONUTF8, cung mot lenh: base 13bf69f 1777/1777 rc 0, H c46f728 1778/1778 rc 0, fail 0 skip 0.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1379
+duyet_chu_kho_ghi_chu: 'loi_khai_co_neo — chu kho chon "Merge c46f728" qua AskUserQuestion trong phien dieu phoi #1206 (khong co hien vat GitHub); merge 23:59:40Z 17-11 bang MCP merge_pull_request expectedHeadSha c46f728.'
+merge_commit: 3d6bfa5361dc30caf1caea9ae2c3ffe1a563902f
+tree_m: 84adb4ba705749f26c475b852f71dcb55257954b
+ci_master:
+  run_id: 44204093238
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong; tl selftest 1778/1778; gom "GOM: ĐẠT · 16 mảnh · 1514 ca bắt buộc".'
+nghiem_thu:
+  N1: passed  # review-codex/bang-chung-luot2: selftest ngoai sandbox base 1777/1777, H 1778/1778; danh-gia-gate-output-44204093238.txt: tl selftest 1778/1778 tren 3d6bfa5
+  N2: passed  # review-codex/a5485408/stdout.log.txt + 2012c303: D1-D9 lech dung ten ca (reviewer tu do lai 8 dot bien + D7)
+  N3: passed  # review-codex/a5485408/stdout.log.txt: doc-claims-check rc 0 flags 0, advisory L1 162 -> 173, mien tru 1x8,2
+  N4: passed  # review-codex/2012c303/stdout.log.txt: ADR tam base rc 2 PATH_MISSING, H rc 0
+  N5: passed  # review-codex/bang-chung-luot2/ruff.log.txt delta 0; nghiem-thu-3d6bfa5.txt: diff --check rc 0, doctrine-scan/adr-song rc 0, release-verify 185/185
+  N6: passed  # n6-windows-tra-luat-win-readback.txt
+  N7: passed  # readback-checkruns-head-c46f728.json + ci/provenance.yaml run 44204093238
+  N8: passed  # nghiem-thu-3d6bfa5.txt: numstat dung 4 tep write set +231/-14
+lease_cuoi: doc-claims-dau-cham-r3-g2-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

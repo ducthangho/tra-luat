@@ -165,8 +165,8 @@ review:
 
 nghiem_thu:
   N1: 'measured — danh-gia-gate-output-44326753737.txt: gate-packet-loop "GOM: ĐẠT · 16 mảnh · 1559 ca bắt buộc" tren aeb5cae. linux/nghiem-thu-aeb5cae.txt: MUTANTS 972089e = eca1d12 (1852 muc, bam repr sap xep 3dfc650f0fd2143a ca hai); WP1174_REQUIRED 108 / WP1174_BOTH 12 bang base; CASES 1550 -> 1560. linux/suite-wp1342-wp1174.txt: 138 ca wp1342_/wp1174_ tren merge, 0 do.'
-  N2: 'measured — linux/nghiem-thu-aeb5cae.txt: _additive1342r2(eca1d12, 972089e) = [] va _additive1342r2(d39313e, aeb5cae) = []. Phan chung (sua mot byte than ham r1/r2, them decorator) chi la loi_khai_co_neo than PR #1390.'
-  N3: 'measured — linux/suite-wp1342-wp1174.txt: wp1342_additive_byte_preserved DAT tren merge; _wired1342(aeb5cae) = []; windows-native TOM-TAT: HEAD wp1342_additive_byte_preserved rc=0. Phan chung chen loi goi _1174_win_seed: loi_khai_co_neo than PR #1390.'
+  N2: 'measured — linux/nghiem-thu-aeb5cae.txt + linux/n23-phan-chung-aeb5cae.json (driver linux/n23_1390.py): _additive1342r2(eca1d12, 972089e) = [] va _additive1342r2(d39313e, aeb5cae) = []. Phan chung do tren blob 972089e (phien dieu phoi 2026-11-18, Codex P1 PR #1403): sua mot byte than ham r1 _1174_win_read, sua mot byte than ham r2 _1174_win_lock, them decorator vao ham moi r3 _1174_win_seed_acl => ca ba KHAC [] (DO_DUNG).'
+  N3: 'measured — linux/suite-wp1342-wp1174.txt: wp1342_additive_byte_preserved DAT tren merge; _wired1342(aeb5cae) = []; windows-native TOM-TAT: HEAD wp1342_additive_byte_preserved rc=0. Phan chung do trong ban sao tam o aeb5cae (linux/n23-phan-chung-aeb5cae.json, driver linux/n23_1390.py): chen _1174_win_seed(e) vao than _1174_seed => ca DO tai assertion (N3 tren CAY LAM VIEC, [_1174_seed:4763]); doi chung ban sach DAT.'
   N4: 'measured — Linux (merge): wp1342_pure_seed_acl_bang, wp1342_pure_seed_boot_refuse DAT (linux/suite-wp1342-wp1174.txt); Windows (Desktop, HEAD): ca hai rc=0 (TOM-TAT). linux/dot-bien-linux.json: (d) "dòng ''thiếu P''", (e) "dòng ''ACE cho BA''", (g) "dòng ''nhận: cờ DACL PAI''" GIET, doi chung dat.'
   N5: 'measured — windows-native/desktop/wp1342r3-out/TOM-TAT.txt: wp1174_windows_claim_rejected + 12 ca WP1174_BOTH rc 0 base va HEAD; 15 ca native r1/r2 cung ket qua base va HEAD (2 ca symlink KHONG DO DUOC ca hai ve tren Desktop; dat tren VM, windows-native/vm/wp1342r3-vm-out/TOM-TAT.txt).'
   N6: 'measured — windows-native/desktop/wp1342r3-out/TOM-TAT.txt: wp1342_native_seed_ok (S1), seed_hardlink (S2), seed_acl (S3+S4), seed_fingerprint (S5+S6), seed_nonfile (S7), seed_drift (S8), boot_stable (B1), boot_failclosed (B2, 5 dong fail-closed) deu WP1342_NATIVE_V1 passed:1, rc 0.'
@@ -178,4 +178,3 @@ khong_do_duoc:
   - 'Lua chon cach merge qua AskUserQuestion (khong co hien vat GitHub).'
   - 'So lan khoi dong giua hai pha N7 (BootId tang 3, chi biet chac 36 -> 39).'
   - 'Phep do native Windows tren cay merge aeb5cae (chi do tren HEAD 972089e).'
-  - 'Phan chung N2/N3 (chi co loi khai than PR #1390).'

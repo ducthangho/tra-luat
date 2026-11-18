@@ -6630,6 +6630,118 @@ def _1174_win_persist(path, raw, *, create):
             os.unlink(temporary)
 
 
+def _1174_win_api_bao_mat():
+    """r3 security bindings on top of _1174_win_api: five advapi32 APIs plus LocalFree/GetCurrentProcess, nothing else."""
+    c, w, k = _1174_win_api()
+    a = c.WinDLL("advapi32", use_last_error=True)
+    V, D, H, B, PV, PT = c.c_void_p, w.DWORD, w.HANDLE, w.BOOL, c.POINTER(c.c_void_p), c.POINTER(w.LPWSTR)
+    for dll, name, args, result in (
+            (a, "GetSecurityInfo", [H, c.c_int, D, PV, PV, PV, PV, PV], D),
+            (a, "ConvertSecurityDescriptorToStringSecurityDescriptorW", [V, D, D, PT, c.POINTER(D)], B),
+            (a, "OpenProcessToken", [H, D, c.POINTER(H)], B), (a, "GetTokenInformation", [H, c.c_int, V, D, c.POINTER(D)], B),
+            (a, "ConvertSidToStringSidW", [V, PT], B), (k, "LocalFree", [V], V), (k, "GetCurrentProcess", [], H)):
+        fn = getattr(dll, name)
+        fn.argtypes, fn.restype = args, result
+    return c, w, k, a
+
+
+def _1174_win_seed_acl(sddl, user_sid):
+    """Pure r3 seed policy on the OWNER|DACL SDDL text (any platform): `O:<sid>D:<DACL flags><ACE>...` and nothing else.
+
+    True iff the owner is user_sid, the DACL is protected (flags drawn from P/AI/AR, P present), it has at least one ACE,
+    every ACE is a six-field plain ALLOW (no ACE flags) for user_sid or SYSTEM, and one of them names user_sid.
+    SIDs are compared as text: a user whose SID the system prints as an alias (RID 500 as LA) is refused, not resolved.
+    """
+    if type(sddl) is not str or type(user_sid) is not str or not user_sid.startswith("S-1-"):
+        return False
+    found = re.fullmatch(r"O:([^:()]*?)D:((?:P|AI|AR)*)((?:\([^()]*\))*)", sddl)
+    if found is None or found[1] != user_sid or "P" not in found[2]:
+        return False
+    aces = [ace.split(";") for ace in re.findall(r"\(([^()]*)\)", found[3])]
+    return bool(aces) and any(f[-1] == user_sid for f in aces) and all(
+        len(f) == 6 and f[0] == "A" and f[1] == "" and f[5] in (user_sid, "SY", "S-1-5-18") for f in aces)
+
+
+def _1174_win_seed(e, between=None):
+    """Windows counterpart of _1174_seed; standalone in r3, no runtime caller. Read-only: never creates or repairs a seed.
+
+    GENERIC_READ|READ_CONTROL, share READ only, the reparse point itself, handle not inheritable. On ONE handle, before
+    and after the read: identity (regular file, no reparse, local NTFS), NumberOfLinks == 1 and the OWNER|DACL SDDL
+    accepted by _1174_win_seed_acl for the process-token user; the two observations must be equal. `between` is the
+    test seam that runs after the bytes are read and before the second observation.
+    """
+    text = e["private_seed_path"]
+    _1174_require(_1174_win_path(text), "Windows drive path required")
+    c, w, k, a = _1174_win_api_bao_mat()
+
+    def text_of(ok, out):   # value of one LocalAlloc'ed string; the string is freed on every path
+        try:
+            if not ok:
+                raise c.WinError(c.get_last_error())
+            return out.value
+        finally:
+            if out:
+                k.LocalFree(c.cast(out, c.c_void_p))
+
+    def observed(handle, sid):
+        links, sd, out = (w.DWORD * 6)(), c.c_void_p(), w.LPWSTR()   # FILE_STANDARD_INFO = 24 bytes, [4] = NumberOfLinks
+        identity = _1174_win_identity(c, w, k, handle, text)
+        if not k.GetFileInformationByHandleEx(handle, 1, links, 24):
+            raise c.WinError(c.get_last_error())
+        code = a.GetSecurityInfo(handle, 1, 5, None, None, None, None, c.byref(sd))
+        if code:
+            raise c.WinError(code)
+        try:
+            sddl = text_of(a.ConvertSecurityDescriptorToStringSecurityDescriptorW(sd, 1, 5, c.byref(out), None), out)
+        finally:
+            k.LocalFree(sd)
+        _1174_require(links[4] == 1 and _1174_win_seed_acl(sddl, sid), "private seed owner/DACL/links")
+        return identity, links[4], sddl
+    try:
+        token, user, size, out = w.HANDLE(), c.create_string_buffer(256), w.DWORD(), w.LPWSTR()
+        if not a.OpenProcessToken(k.GetCurrentProcess(), 8, c.byref(token)):
+            raise c.WinError(c.get_last_error())
+        try:   # TOKEN_USER starts with the PSID of the user
+            if not a.GetTokenInformation(token, 1, user, 256, c.byref(size)):
+                raise c.WinError(c.get_last_error())
+            sid = text_of(a.ConvertSidToStringSidW(c.cast(user, c.POINTER(c.c_void_p))[0], c.byref(out)), out)
+        finally:
+            k.CloseHandle(token)
+        handle = _1174_win_open(c, k, text, 0x80000000 | 0x00020000, 1, 0x00200000)
+        try:
+            first, chunk, count = observed(handle, sid), c.create_string_buffer(64), w.DWORD()
+            if not k.ReadFile(handle, chunk, 64, c.byref(count), None):
+                raise c.WinError(c.get_last_error())
+            seed = chunk.raw[:count.value]
+            if between is not None:
+                between()
+            _1174_require(first == observed(handle, sid), "private seed metadata drift")
+        finally:
+            k.CloseHandle(handle)
+    except OSError as error:
+        raise ValueError("WP1174 UNKNOWN: private seed read/lstat") from error
+    _1174_require(len(seed) == 32 and hashlib.sha256(seed).hexdigest() == e["private_seed_sha256"], "private seed fingerprint")
+    return seed
+
+
+def _1174_win_boot_id():
+    """Windows counterpart of the boot_id read in _1174_runtime; standalone in r3. Fail-closed, no fallback source.
+
+    HKLM PrefetchParameters\\BootId (REG_DWORD, 64-bit view) is NOT documented by Microsoft: the value is observed to
+    increase per boot; behaviour across feature updates and Fast Startup/hibernate is not measured.
+    """
+    _1174_require(os.name == "nt", "native Windows required")
+    import winreg
+    try:
+        with winreg.OpenKeyEx(winreg.HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management"
+                              "\\PrefetchParameters", 0, winreg.KEY_READ | winreg.KEY_WOW64_64KEY) as key:
+            value, kind = winreg.QueryValueEx(key, "BootId")
+    except OSError as error:
+        raise _1174Error("Windows BootId registry read") from error
+    _1174_require(kind == winreg.REG_DWORD, "Windows BootId type")
+    return str(int(value))
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="packet_loop.py",

@@ -18369,5 +18369,193 @@ CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for 
     ("persist_update_symlink", _n_update_symlink1342), ("persist_update_held", _n_update_held1342), ("persist_bindings", _n_bindings1342))]
 
 
+# --- #1342 r3 (bậc r1c): seed riêng (ACL) + BootId Windows ĐỨNG RIÊNG (`_1174_win_api_bao_mat`, `_1174_win_seed_acl`, `_1174_win_seed`,
+# `_1174_win_boot_id`), CHƯA nối dây (`_wired1342` phủ sẵn). Không đổi MUTANTS, không vào WP1174_REQUIRED/WP1174_BOTH.
+def _pure_seed_acl1342(c):
+    m, u, khac = _module1174(c), "S-1-5-21-1-2-3-1001", "S-1-5-21-1-2-3-1002"
+    cua_u = f"(A;;FA;;;{u})"
+    bang = (   # (nhãn, kết quả đòi, SDDL) — thứ tự là hợp đồng của các đột biến M7 (d)/(e)/(g)
+        ("nhận: chỉ người dùng", True, f"O:{u}D:P{cua_u}"), ("nhận: người dùng + SY", True, f"O:{u}D:P{cua_u}(A;;FA;;;SY)"),
+        ("nhận: người dùng + S-1-5-18", True, f"O:{u}D:P{cua_u}(A;;FA;;;S-1-5-18)"),
+        ("nhận: cờ DACL PAI", True, f"O:{u}D:PAI{cua_u}"), ("nhận: cờ DACL PAR", True, f"O:{u}D:PAR{cua_u}"),
+        ("owner khác", False, f"O:{khac}D:P{cua_u}"), ("thiếu phần O:", False, f"D:P{cua_u}"),
+        ("hai phần O:", False, f"O:{u}O:{u}D:P{cua_u}"), ("hai phần D:", False, f"O:{u}D:P{cua_u}D:P{cua_u}"),
+        ("có phần G:", False, f"O:{u}G:SYD:P{cua_u}"), ("có phần S:", False, f"O:{u}D:P{cua_u}S:AI"),
+        ("thiếu P", False, f"O:{u}D:AI{cua_u}"), ("NO_ACCESS_CONTROL", False, f"O:{u}D:NO_ACCESS_CONTROL"),
+        ("P kèm NO_ACCESS_CONTROL", False, f"O:{u}D:PNO_ACCESS_CONTROL{cua_u}"),
+        ("ACE cho BA", False, f"O:{u}D:P{cua_u}(A;;FA;;;BA)"), ("ACE cho OW", False, f"O:{u}D:P{cua_u}(A;;FA;;;OW)"),
+        ("ACE cho SID người khác", False, f"O:{u}D:P{cua_u}(A;;FA;;;{khac})"), ("ACE deny D", False, f"O:{u}D:P{cua_u}(D;;FA;;;{u})"),
+        ("ACE cờ ID", False, f"O:{u}D:P{cua_u}(A;ID;FA;;;{u})"), ("ACE cờ IO", False, f"O:{u}D:P{cua_u}(A;IO;FA;;;{u})"),
+        ("ACE cờ OI", False, f"O:{u}D:P{cua_u}(A;OI;FA;;;{u})"), ("ACE cờ CI", False, f"O:{u}D:P{cua_u}(A;CI;FA;;;{u})"),
+        ("ACE 5 trường", False, f"O:{u}D:P{cua_u}(A;;FA;;{u})"), ("DACL rỗng", False, f"O:{u}D:P"),
+        ("chỉ có ACE SY", False, f"O:{u}D:P(A;;FA;;;SY)"), ("phần dư sau ACE cuối", False, f"O:{u}D:P{cua_u}x"),
+        ("chuỗi rác", False, "rác"), ("chuỗi rỗng", False, ""), ("không phải chuỗi", False, None))
+    for nhan, doi, sddl in bang:
+        assert _call1174(m._1174_win_seed_acl, sddl, u) is doi, f"dòng {nhan!r}: đòi {doi}, SDDL {sddl!r}"
+    assert len({nhan for nhan, _, _ in bang}) == len(bang) == 29 and sum(doi for _, doi, _ in bang) == 5, "bảng trùng nhãn/thiếu dòng"
+    for sid in ("", "SY", None):   # user_sid không phải SID số ⇒ không SDDL nào được nhận
+        assert _call1174(m._1174_win_seed_acl, f"O:{sid}D:P(A;;FA;;;{sid})", sid) is False, sid
+
+
+def _pure_seed_boot1342(c):
+    m, e = _module1174(c), dict(private_seed_path="C:\\wp1342-r3\\seed", private_seed_sha256="0" * 64)
+    _reject1174(m._1174_win_seed, dict(e, private_seed_path="C:/wp1342-r3/seed"), reason="Windows drive path required")
+    if os.name != "nt":   # seed: SAU kiểm đường dẫn; boot id và bindings: ngay dòng đầu
+        for fn, args in ((m._1174_win_seed, (e,)), (m._1174_win_boot_id, ()), (m._1174_win_api_bao_mat, ())):
+            _reject1174(fn, *args, reason="native Windows required")
+
+
+def _acl1342(c, w, path, sddl=None):
+    """FIXTURE (bindings chỉ ở tệp test): đặt OWNER|DACL của `path` theo SDDL (`D:P` ⇒ DACL bảo vệ, khác ⇒ kế thừa từ cha); `None` ⇒ chỉ
+    đọc. Trả SDDL OWNER|DACL đọc lại THEO TÊN, bỏ cờ `AI` mà SetNamedSecurityInfoW tự thêm. Lỗi Win32 ⇒ KHÔNG ĐO ĐƯỢC."""
+    a, k = c.WinDLL("advapi32", use_last_error=True), c.WinDLL("kernel32", use_last_error=True)
+    V, D, S, PV, PB = c.c_void_p, w.DWORD, w.LPCWSTR, c.POINTER(c.c_void_p), c.POINTER(w.BOOL)
+    k.LocalFree.argtypes, k.LocalFree.restype = [V], V
+    for ten, args, kq in (("ConvertStringSecurityDescriptorToSecurityDescriptorW", [S, D, PV, V], w.BOOL),
+                          ("GetSecurityDescriptorOwner", [V, PV, PB], w.BOOL), ("GetSecurityDescriptorDacl", [V, PB, PV, PB], w.BOOL),
+                          ("SetNamedSecurityInfoW", [S, c.c_int, D, V, V, V, V], D),
+                          ("GetNamedSecurityInfoW", [S, c.c_int, D, PV, PV, PV, PV, PV], D),
+                          ("ConvertSecurityDescriptorToStringSecurityDescriptorW", [V, D, D, c.POINTER(w.LPWSTR), V], w.BOOL)):
+        getattr(a, ten).argtypes, getattr(a, ten).restype = args, kq
+    sd, owner, dacl, co, out = V(), V(), V(), w.BOOL(), w.LPWSTR()
+    try:
+        if sddl is not None:
+            if not a.ConvertStringSecurityDescriptorToSecurityDescriptorW(sddl, 1, c.byref(sd), None):
+                raise c.WinError(c.get_last_error())
+            try:
+                if not (a.GetSecurityDescriptorOwner(sd, c.byref(owner), c.byref(co)) and
+                        a.GetSecurityDescriptorDacl(sd, c.byref(co), c.byref(dacl), c.byref(co))):
+                    raise c.WinError(c.get_last_error())
+                ma = a.SetNamedSecurityInfoW(str(path), 1, 5 | (0x80000000 if "D:P" in sddl else 0x20000000), owner, None, dacl, None)
+                if ma:
+                    raise c.WinError(ma)
+            finally:
+                k.LocalFree(sd)
+        sd = V()
+        ma = a.GetNamedSecurityInfoW(str(path), 1, 5, None, None, None, None, c.byref(sd))
+        if ma:
+            raise c.WinError(ma)
+        try:
+            if not a.ConvertSecurityDescriptorToStringSecurityDescriptorW(sd, 1, 5, c.byref(out), None):
+                raise c.WinError(c.get_last_error())
+            return out.value.replace("D:PAI(", "D:P(", 1).replace("D:AI(", "D:(", 1)
+        finally:
+            k.LocalFree(sd)
+            if out:
+                k.LocalFree(c.cast(out, V))
+    except OSError as ex:
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: fixture ACL ({sddl!r}) thất bại: {ex}") from ex
+
+
+def _seed1342(c, w, d, raw=None, sddl="O:{u}D:P(A;;FA;;;{u})(A;;FA;;;SY)"):
+    """FIXTURE: tệp seed (mặc định 32 byte ngẫu nhiên) với OWNER|DACL đã đặt VÀ đọc lại khớp. Trả (đường, e, SID người dùng, bytes)."""
+    p = subprocess.run(["whoami", "/user", "/fo", "csv", "/nh"], capture_output=True, text=True, timeout=30)
+    u = p.stdout.strip().rsplit(",", 1)[-1].strip('"')
+    if p.returncode or not re.fullmatch(r"S-1-[0-9]+(-[0-9]+)+", u):
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: `whoami /user` không cho SID: rc={p.returncode} {p.stdout!r}") from OSError(p.returncode)
+    raw, f, sddl = os.urandom(32) if raw is None else raw, d / "seed", sddl.format(u=u)
+    f.write_bytes(raw)
+    doc = _acl1342(c, w, f, sddl)
+    if not (doc == sddl if "D:P" in sddl else doc.startswith(f"O:{u}D:(")):   # SID in ra dạng bí danh, cha không cho kế thừa…
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: SD đọc lại {doc!r} khác SD fixture đặt {sddl!r}") from OSError("fixture ACL readback")
+    return f, dict(private_seed_path=str(f), private_seed_sha256=hashlib.sha256(raw).hexdigest()), u, raw
+
+
+def _n_seed_ok1342(m, d, c, w, k):   # S1
+    f, e, u, raw = _seed1342(c, w, d)
+    assert m._1174_win_seed(e) == raw and len(raw) == 32, "S1: seed đúng phải trả đúng bytes"
+    assert f.read_bytes() == raw and _acl1342(c, w, f) == f"O:{u}D:P(A;;FA;;;{u})(A;;FA;;;SY)", "S1: đọc seed mà làm đổi tệp/ACL"
+    return u, _acl1342(c, w, f)
+
+
+def _n_seed_hardlink1342(m, d, c, w, k):   # S2 — đúng hash, đúng ACL, thêm MỘT hard link
+    f, e, _, raw = _seed1342(c, w, d)
+    assert m._1174_win_seed(e) == raw, "S2 đối chứng: trước khi thêm hard link seed phải được nhận"
+    os.link(f, d / "seed-link")
+    assert os.stat(f).st_nlink == 2, os.stat(f).st_nlink
+    return _refuse1342(m._1174_win_seed, e, reason="private seed owner/DACL/links")
+
+
+def _n_seed_acl1342(m, d, c, w, k):   # S3 (thêm ACE Administrators) + S4 (DACL không bảo vệ, kế thừa từ cha)
+    ghi = []
+    for nhan, sddl in (("S3", "O:{u}D:P(A;;FA;;;{u})(A;;FA;;;SY)(A;;FA;;;BA)"), ("S4", "O:{u}D:(A;;FA;;;{u})(A;;FA;;;SY)")):
+        (d / nhan).mkdir()
+        _, e, _, _ = _seed1342(c, w, d / nhan, sddl=sddl)
+        ghi.append((nhan, _acl1342(c, w, e["private_seed_path"]), _refuse1342(m._1174_win_seed, e, reason="private seed owner/DACL/links")))
+    return ghi
+
+
+def _n_seed_fingerprint1342(m, d, c, w, k):   # S5 (32 byte, sha256 khác) + S6 (31 byte, sha256 KHỚP 31 byte ấy)
+    _, e, _, raw = _seed1342(c, w, d)
+    assert m._1174_win_seed(e) == raw, "S5 đối chứng: đúng sha256 thì được nhận"
+    s5 = _refuse1342(m._1174_win_seed, dict(e, private_seed_sha256=hashlib.sha256(raw + b"x").hexdigest()), reason="private seed fingerprint")
+    (d / "S6").mkdir()
+    _, e6, _, raw6 = _seed1342(c, w, d / "S6", raw=os.urandom(31))
+    assert e6["private_seed_sha256"] == hashlib.sha256(raw6).hexdigest() and len(raw6) == 31
+    return s5, _refuse1342(m._1174_win_seed, e6, reason="private seed fingerprint")
+
+
+def _n_seed_nonfile1342(m, d, c, w, k):   # S7 — thư mục, và junction tới thư mục
+    (d / "dir").mkdir()
+    _junction1342(d / "junction", d / "dir")
+    try:
+        return [(ten, _refuse1342(m._1174_win_seed, dict(private_seed_path=str(d / ten), private_seed_sha256="0" * 64)))
+                for ten in ("dir", "junction")]
+    finally:
+        os.rmdir(d / "junction")
+
+
+def _n_seed_drift1342(m, d, c, w, k):   # S8 — DACL đổi giữa HAI dạng hợp lệ sau khi đọc, trước kiểm lại
+    f, e, u, _ = _seed1342(c, w, d)
+    moi, thay = f"O:{u}D:P(A;;FA;;;{u})", []
+
+    def between():
+        thay.append(_acl1342(c, w, f, moi))   # đặt rồi ĐỌC LẠI theo tên khi handle của runtime còn mở
+    try:
+        raw = m._1174_win_seed(e, between)
+    except ValueError as ex:
+        assert "private seed metadata drift" in str(ex), f"S8: từ chối ở lớp KHÁC kiểm hậu đọc: {ex}"
+    else:
+        raise AssertionError(f"S8: đã trả bytes dù metadata đổi: {raw!r}")
+    assert thay == [moi], f"S8: hook không chạy hoặc DACL không đổi thành công: {thay}"
+    assert m._1174_win_seed(e) == f.read_bytes(), "S8 đối chứng: dạng {u} tự nó hợp lệ khi không đổi giữa chừng"
+    return thay
+
+
+def _n_boot_stable1342(m, d, c, w, k):   # B1
+    v = m._1174_win_boot_id()
+    assert type(v) is str and re.fullmatch(r"[0-9]+", v) and v == m._1174_win_boot_id(), f"B1: {v!r}"
+    return v
+
+
+def _n_boot_failclosed1342(m, d, c, w, k):   # B2 — đường MẶC ĐỊNH; patch có phạm vi từng dòng, không đụng registry thật
+    import winreg
+    from unittest.mock import patch
+    with patch.object(winreg, "QueryValueEx", return_value=(5, winreg.REG_DWORD)) as gia:
+        assert m._1174_win_boot_id() == "5" and gia.call_count == 1, "B2 đối chứng: REG_DWORD 5 phải ra '5' qua đúng QueryValueEx"
+    ghi = []
+    for nhan, ten, kw in (("thiếu khoá", "OpenKeyEx", dict(side_effect=FileNotFoundError(2, "no key"))),
+                          ("thiếu giá trị", "QueryValueEx", dict(side_effect=FileNotFoundError(2, "no value"))),
+                          ("lỗi đọc", "QueryValueEx", dict(side_effect=PermissionError(13, "denied"))),
+                          ("REG_SZ", "QueryValueEx", dict(return_value=("5", winreg.REG_SZ))),
+                          ("REG_QWORD", "QueryValueEx", dict(return_value=(5, winreg.REG_QWORD)))):
+        with patch.object(winreg, ten, **kw) as gia:
+            try:
+                v = m._1174_win_boot_id()
+            except m._1174Error as ex:
+                ghi.append((nhan, str(ex)))
+            else:
+                raise AssertionError(f"B2 dòng {nhan!r}: phải từ chối (fail-closed) mà lại trả {v!r}")
+            assert gia.call_count == 1, f"B2 dòng {nhan!r}: runtime không đi qua winreg.{ten}"
+    return ghi
+
+
+CASES += [("wp1342_pure_seed_acl_bang", _pure_seed_acl1342), ("wp1342_pure_seed_boot_refuse", _pure_seed_boot1342)]
+CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for ten, fn in (
+    ("seed_ok", _n_seed_ok1342), ("seed_hardlink", _n_seed_hardlink1342), ("seed_acl", _n_seed_acl1342),
+    ("seed_fingerprint", _n_seed_fingerprint1342), ("seed_nonfile", _n_seed_nonfile1342), ("seed_drift", _n_seed_drift1342),
+    ("boot_stable", _n_boot_stable1342), ("boot_failclosed", _n_boot_failclosed1342))]
+
+
 if __name__ == "__main__":
     sys.exit(main())

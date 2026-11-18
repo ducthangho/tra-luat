@@ -21,7 +21,7 @@ Base `eca1d125b8`. SKILL tại base: blob `678ba2f0`, sha256 `1799c2bd…faadb`.
 | `2875afc`, `07efca6` | hai lỗi harness PS do local Windows bắt (W5, W6) | Codex lượt 3 ở `86879e1`: `request_changes` (2 P1 + 2 P2 chặn merge; P3 là giới hạn đã khai) |
 | `429fb5b` | chủ kho nâng trần Codex 3 → 4. Bản vá: neo nonce, kiểm liên kết trước `close`, kênh base64 UTF-8, ma trận TOÀN LUỒNG | Codex lượt 4 ở `999f5fc`: `request_changes` (1 P1 + 4 P2 chặn merge) |
 | `ff34b2c` | sửa theo lượt 4 (§8) | local Windows bắt một lỗi đột biến PS (W7) |
-| **`d7960ee`** | vá W7 | **đo cuối** (§2–§5, §8) |
+| **`d7960ee`** | vá W7 | **đo cuối** (§2–§5, §8). Codex lượt 5 ở `376e9c2` (mã trùng byte): `request_changes` (1 P1 + 2 P2 chặn merge) — trần Codex 5/5 đã dùng hết |
 
 ## 0. Thiết kế (vì sao (b), và cách lấy sổ phiên)
 

@@ -99,7 +99,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.6.0"
+VERSION = "1.6.1"
 
 
 def ky_ban_ghi_luot(ban_ghi: dict, khoa_hex: str) -> str:
@@ -597,6 +597,40 @@ def _thanh_vien_nhom(pgid: int) -> list[int] | None:
                 continue
         return ra
     return None
+
+
+_HAN_CHO_CAY_TRUOC_BAM_LOG = 10.0   # giây; bằng `bo_loc.ket_thuc(10)`
+
+
+def _nen_do_cay_truoc_bam() -> bool:
+    """#387: CHỖ DUY NHẤT quyết nền nào được đo cây trước khi băm log. Packet A: chỉ Linux."""
+    return platform.system() == "Linux"
+
+
+def _cho_cay_chet_truoc_bam(pid: int, job, han: float) -> bool:
+    """#387: đợi nhóm tiến trình `pid` rỗng trước khi băm log; kết quả thành `log_bam_cay_da_chet` của `run.json`.
+
+    `True` = phép dò trả danh sách rỗng trong nhóm tiến trình POSIX; tiến trình rời nhóm (`setsid`) nằm ngoài
+    phạm vi. `False` = CHƯA chứng minh được: còn thành viên khi hết hạn, lần dò trả về sau hạn, không đo được,
+    bị ngắt, hoặc nền không phải Linux (ở đó trả ngay: không dò, không ngủ). `job` để dành cho packet B.
+    Một deadline monotonic phủ mọi lần dò và mọi lần ngủ. Quét `/proc` là lời gọi đồng bộ, nên tổng thời gian
+    ≤ `han` cộng một lần dò; kết quả của lần dò vượt hạn bị bỏ, kể cả `[]`.
+    """
+    if not _nen_do_cay_truoc_bam():
+        return False
+    het = time.monotonic() + han
+    while True:
+        if het - time.monotonic() <= 0:
+            return False
+        nhom = _thanh_vien_nhom(pid)
+        if nhom is None:
+            return False
+        con_sau = het - time.monotonic()
+        if con_sau <= 0:
+            return False
+        if nhom == []:
+            return True
+        time.sleep(min(0.1, con_sau))
 
 
 def _chup_cay(pid: int) -> dict[int, str] | None:
@@ -2951,6 +2985,16 @@ def lenh_run(a) -> int:
         ban_ghi["ma_thoat_that"] = ma
         ma = 1
 
+    # #387: mốc kết thúc lấy TRƯỚC khi đợi cây, nên `ket_thuc_utc`/`thoi_luong_giay` không gồm thời gian đợi. Đợi
+    # TRƯỚC phép đọc lại sổ bên dưới, để `stop` hoàn tất trong lúc đợi vẫn được thấy (không mở lại cửa sổ t50).
+    ket_thuc = _bay_gio()
+    moc_cho = time.monotonic()
+    ngat_khi_cho = False
+    try:
+        log_cay_chet = _cho_cay_chet_truoc_bam(p.pid, job, _HAN_CHO_CAY_TRUOC_BAM_LOG)
+    except KeyboardInterrupt:
+        log_cay_chet, ngat_khi_cho = False, True
+    ban_ghi.update(log_bam_cay_da_chet=log_cay_chet, log_bam_cho_giay=round(time.monotonic() - moc_cho, 3))
     # Có thể `stop` đã ghi "da_dung" trong lúc ta còn chờ. Đừng đè lên quyết định
     # đó: ĐÃ ĐO (codex) - stop ghi da_dung xong runner ghi đè thành "xong", nên
     # sổ nói lượt chạy kết thúc bình thường trong khi thực tế nó bị dừng.
@@ -2976,6 +3020,11 @@ def lenh_run(a) -> int:
         elif kq_chup["snapshot_ket_qua"] == "khong_do_duoc":
             ban_ghi["trang_thai"] = "khong_do_duoc_workspace"
             ma = MA_KHONG_DO_WORKSPACE
+    # #387: Ctrl-C trong lúc đợi cây. Cùng quy tắc `ngat_khi_chup`: chỉ thay `xong`, `ma_thoat` vẫn là mã THẬT.
+    if ngat_khi_cho and ban_ghi["trang_thai"] == "xong":
+        ban_ghi["trang_thai"] = "bi_ngat"
+        ban_ghi["ly_do_dung"] = "bi ngat trong luc doi cay truoc khi bam log"
+        ma = 130
     # Wrapper thoát KHÔNG có nghĩa bản chụp đã hết việc: nó có thể vừa
     # sinh cháu, và cháu mới là người mở {PROMPT_FILE}. Xoá ngay khi p.wait()
     # trả về tạo một TOCTOU do chính launcher gây ra: sổ báo xong/rc=0
@@ -2988,7 +3037,8 @@ def lenh_run(a) -> int:
     # bi xoa ngay. Do la lua chon co y (hong lan doc te hon giu mot tep kin),
     # nhung "khong xoa ngay" KHONG duoc thanh "nam lai vinh vien": `_cap_id`
     # quet don ban chup qua han o moi luot chay moi.
-    cay_da_chet = (_thanh_vien_nhom(p.pid) == [])
+    # #387: Linux dùng kết quả đợi ở trên; nền khác giữ nguyên biểu thức cũ (đo một lần, không chờ).
+    cay_da_chet = log_cay_chet if _nen_do_cay_truoc_bam() else (_thanh_vien_nhom(p.pid) == [])
     if (ban_ghi.get("prompt_ban_chup") and not a.giu_ban_chup
             and cay_da_chet):
         try:
@@ -2996,7 +3046,8 @@ def lenh_run(a) -> int:
             ban_ghi["prompt_ban_chup_da_xoa"] = True
         except OSError:
             pass
-    ket_thuc = _bay_gio()
+    if not _nen_do_cay_truoc_bam():   # #387: nền khác Linux giữ mốc ở vị trí cũ, sau phép đo xoá prompt
+        ket_thuc = _bay_gio()
     ban_ghi.update(ket_thuc_utc=ket_thuc.isoformat(), ma_thoat=ma_that)
     # wp484 g7 (connector P2 17-10, đo: run `47cf857e` ghi `xong`/0/`unknown`) — nhãn
     # "unknown" gán lúc con vừa sinh là đúng cho lượt chết GIỮA chừng; lượt đã CHẠY HẾT
@@ -3013,6 +3064,7 @@ def lenh_run(a) -> int:
         ban_ghi["thoi_luong_giay"] = round((ket_thuc - bat_dau).total_seconds(), 3)
     except (ValueError, KeyError, TypeError):
         ban_ghi["thoi_luong_giay"] = None    # không đo được thì nói KHÔNG ĐO ĐƯỢC
+    ban_ghi["log_bam_luc_utc"] = _bay_gio().isoformat()   # #387: gán NGAY TRƯỚC vòng băm
     for ten, ten_bam, tep in (("stdout_byte", "stdout_sha256", "stdout.log"),
                               ("stderr_byte", "stderr_sha256", "stderr.log")):
         try:

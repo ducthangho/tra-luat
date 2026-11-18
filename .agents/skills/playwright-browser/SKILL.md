@@ -201,6 +201,8 @@ chay_ghi() { local ten=$1 rc; shift
     [ "$DH" = "$D/${DH##*/}" ] && [[ "${DH##*/}" =~ ^[0-9a-f]{16}$ ]] &&
     [ "$(realpath -m -- "$DH" && echo .)" = "$DH"$'\n.' ] &&   # không thành phần nào là liên kết; `echo .` giữ LF cuối mà $(…) cắt
     pre=$([ ! -e "$D" ] || find "$D" -mindepth 2 -maxdepth 2 -name "*$TL_PW_SESSION*" -print) && [ -z "$pre" ] &&
+    [ ! -e "$DH/$TL_PW_SESSION.err" ] && [ ! -L "$DH/$TL_PW_SESSION.err" ] &&   # đúng tên Node sẽ mở bằng `w` (cache casefold: find phân biệt hoa thường còn open thì không)
+    [ ! -e "$DH/$TL_PW_SESSION.session" ] && [ ! -L "$DH/$TL_PW_SESSION.session" ] &&
     [ ! -e "$TL_PW_RUN/00-sophien.txt" ] && [ ! -L "$TL_PW_RUN/00-sophien.txt" ] &&   # mọi mục có sẵn (cả FIFO) ⇒ dừng
     ( set -C; printf '%s\n%s\n%s\n' "$D" "$DH" "$TL_PW_SESSION" > "$TL_PW_RUN/00-sophien.txt" ) ) ||
     { echo 'STOP trước open: phiên CHƯA tạo — KHÔNG chạy Cleanup' >&2; exit 1; }
@@ -259,6 +261,8 @@ function Invoke-PwGhi([string]$Ten, [string[]]$Argv, [switch]$PhaiLoi) {
       Where-Object { -not ((Get-Item -Force -LiteralPath $_).Attributes -band $reparse) } |
       ForEach-Object { [IO.Directory]::GetFileSystemEntries($_, "*$env:TL_PW_SESSION*") } })
     Need ($pre.Count -eq 0) 'nonce đã có trong sổ phiên CLI'
+    foreach ($t in "$($so[1])\$env:TL_PW_SESSION.err", "$($so[1])\$env:TL_PW_SESSION.session") {   # đúng tên Node sẽ mở
+      Need (-not (Test-Path -LiteralPath $t)) "đã có $t" }
     $fs = [IO.File]::Open("$env:TL_PW_RUN\00-sophien.txt", [IO.FileMode]::CreateNew)   # không ghi đè, không đi theo liên kết có sẵn
     try { $b = (New-Object Text.UTF8Encoding($false)).GetBytes("$($so[0])`n$($so[1])`n$env:TL_PW_SESSION`n"); $fs.Write($b, 0, $b.Length) }
     finally { $fs.Dispose() }
@@ -544,4 +548,6 @@ cập nhật/nâng bản. Không có đăng nhập, nên không hứa cookie/phi
   Đường dẫn tới thư mục hash KHÔNG được chứa liên kết ở bất kỳ thành phần nào (kể cả thư mục cha phía trên `daemon`);
   có ⇒ DỪNG trước `open`/`close`/Gỡ. Cache Linux nằm sau symlink thì đặt `XDG_CACHE_HOME` về đường dẫn vật lý trước
   Setup. Giả định cache TIN CẬY: không chống một tiến trình cùng người dùng tráo thư mục, hay thay `00-sophien.txt` bằng
-  hard link, giữa lúc kiểm và lúc thao tác. CWD `work` không được nằm dưới thư mục có `.playwright`.
+  hard link, giữa lúc kiểm và lúc thao tác. Trước `open` có thêm phép tra ĐÚNG tên `<thư mục hash>/<nonce>.err|.session`
+  mà Node sẽ mở, cho cache không phân biệt hoa thường (ext4 casefold), nơi phép quét `find` có thể bỏ sót; casefold
+  chưa đo trên hệ thật (chỉ mô phỏng). CWD `work` không được nằm dưới thư mục có `.playwright`.

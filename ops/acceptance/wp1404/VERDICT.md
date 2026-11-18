@@ -121,7 +121,19 @@ là băm của tệp gốc trong sandbox review.
 > - §6. Doctrine scan khớp. Đọc trực tiếp ba job CI xác nhận cả ba đỏ ở G5 và log nêu đúng hai tệp. Quét local base/head xác nhận delta 0 của báo cáo. Chưa xác minh tuyên bố lượt push trên master không chạy `cong_cu_test`. Trên exact head, job gate `135006578500` đã kết thúc đỏ ở G5 và log nêu đúng hai tệp trên. Workflow Windows bỏ qua. N4 chưa đạt. [CI 3d2035b](https://github.com/ducthangho/tra-luat/actions/runs/44356207824/job/134985225080), [CI 141a3a7](https://github.com/ducthangho/tra-luat/actions/runs/44358498604/job/134993417970), [CI 5505f7a](https://github.com/ducthangho/tra-luat/actions/runs/44359968089/job/134998669752), [gate exact head](https://github.com/ducthangho/tra-luat/actions/runs/44362172770/job/135006578500).
 > - §7. Đã đo xung đột `LAN_CAI`. Kiểm thử hành vi cài dùng stub, không chạy apt thật trên runner thiếu danh sách gói, không chạy trên macOS/Windows thật.
 
-### Trạng thái sau lượt 2
+### Review Rescue Checkpoint sau lượt 2
 
-Ngân sách Codex trong lease đã hết (2/2). Theo protocol, executor DỪNG ở Review Rescue Checkpoint và chờ chủ kho quyết
-trước khi sửa tiếp hoặc gọi thêm review.
+Ngân sách Codex trong lease đã hết (2/2), nên executor dừng và hỏi chủ kho. Chủ kho chọn qua AskUserQuestion
+(18-11-2026, khoảng 22:35Z): **"Sửa 3, nợ 1, Codex lượt 3"**. Lease ghi `nang_tran` 2→3 và `gia_han` tới 2026-11-19T04:51:13Z.
+
+### Executor xử lý (sửa ở `6b0e375`)
+
+| Finding | Kiểm lại | Xử lý |
+|---|---|---|
+| P2 writer muộn ghi lại kênh lần đầu | Thật. Ca (f) dựng từ probe `late_channel` của reviewer: script `921cbb6` ĐỎ, rc 3. | Lần cài lại dùng đường dẫn kênh MỚI `$TAM_CAI/kq-thu-lai` (`export -n` vì allexport tự export phép gán). Đột biến `wp1404_sh_giu_kenh_lan_dau` (giữ đường dẫn cũ) làm (f) đỏ; `wp1404_sh_kenh_moi_lo_export` làm (h) đỏ; `wp1404_sh_kenh_moi_khong_tao` làm (d) đỏ (rc 7). |
+| P3 `GITHUB_PATH` của lần cài lỗi | Thật với công thức dạng (d). Mọi công thức apt hiện có kết thúc bằng bộ chọn nên hiện không xảy ra. | **Nợ có tên `WP1404-GITHUB-PATH-LAN-LOI`**, theo quyết định của chủ kho. Sửa đúng phải hoãn ghi `GITHUB_PATH` trong `chon_thu_muc_chay_duoc` (bộ chọn của wp858) tới khi công thức thành công; ngoài phạm vi đã duyệt của packet này. |
+| P3 `LAN_CAI` ghi đè biến shell gọi | Thật: probe `source`/`readonly` của reviewer. | Bỏ vòng và biến đếm. Dòng `eval` nằm trong hàm `_wp1404_chay_cong_thuc` gọi hai lần (bốn dòng thân không thụt lề, giữ nguyên neo của `r1045_hinh_dang…` và đột biến wp1045). Ca (g) chạy `source` hai lượt từ shell gọi có `readonly LAN_CAI=42`; đột biến `wp1404_sh_bien_dem_toan_cuc` làm (g) đỏ. Hàm là một tên MỚI ở shell gọi khi `source`; tên có tiền tố packet. |
+| P3 lỗ đo nhánh update gọi thẳng | Thật. | (c) tách thành (c1) toàn argv + update in rác + stdout JSON và (c2) update rc 78, cài lại rc 42 ⇒ thoát 42. Ba đột biến `wp1404_sh_tran_*` (bỏ `>&2`, bỏ `-qq`, bỏ `\|\| echo`) làm (c1)/(c2) đỏ. (e) chặt hơn: writer chỉ ghi khi đã được phép. |
+
+Bảng đột biến loại `cai_sh` (65, gồm 17 của wp1404) chạy riêng: 65/65 giết, không neo nào khớp sai. Lần đầu đo ra 64/65:
+dòng `declare +x KENH_KQ` mới làm neo `wp868_sh_kenh_export` khớp hai chỗ; đổi sang `export -n KENH_KQ`.

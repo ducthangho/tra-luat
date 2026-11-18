@@ -14710,7 +14710,395 @@ def r1375_shutilwin311_chi_nhan_trong_d():
         bang(os.getcwd() == cwd_truoc, f"cwd ro sau ca: {os.getcwd()!r} != {cwd_truoc!r}")
 
 
+# --- #387 packet A (LAUNCHER-BAM-LOG-SAU-CAY-CHET r1): `run.json` khai cây đã chết hay chưa lúc băm log (Linux).
+_R387_CHI_LINUX = "BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS"
+
+
+@contextlib.contextmanager
+def _r387_va(doi_tuong, **gia):
+    """Vá thuộc tính rồi khôi phục trong `finally`."""
+    goc = {k: getattr(doi_tuong, k) for k in gia}
+    for k, v in gia.items():
+        setattr(doi_tuong, k, v)
+    try:
+        yield
+    finally:
+        for k, v in goc.items():
+            setattr(doi_tuong, k, v)
+
+
+def _r387_cho_cay_rong(do, pgid, han):
+    """Ba trạng thái: `True` nhóm rỗng · `False` hết hạn mà còn thành viên · `None` không đo được."""
+    het = time.monotonic() + han
+    while True:
+        nhom = do(pgid)
+        if nhom is None or nhom == []:
+            return None if nhom is None else True
+        if time.monotonic() >= het:
+            return False
+        time.sleep(0.05)
+
+
+def _r387_don_dep(m, han=8.0):
+    """Teardown KHÔNG gửi tín hiệu nào: chờ nhóm của con về `[]`. Trả `None`, hoặc thông điệp lỗi."""
+    pgid = getattr(m, "_r387_pgid", None)
+    if pgid is None:        # `lenh_run` chưa kịp sinh con
+        return None
+    kq = _r387_cho_cay_rong(m._r387_do_that, pgid, han)
+    if kq:
+        return None
+    return f"r387 teardown: nhom {pgid} " + ("cay khong do duoc" if kq is None else f"con thanh vien sau {han}s")
+
+
+@contextlib.contextmanager
+def _r387_don_khi_thoat(m, han=8.0):
+    """Đặt SAU `San()` trong cùng `with`, nên teardown chạy trước `rmtree`, kể cả khi ca đỏ.
+    Ca đã đỏ giữ lỗi gốc và gắn thông điệp teardown bằng `add_note`; ca xanh mà teardown lỗi thì ĐỎ."""
+    try:
+        yield
+    except BaseException as e:
+        loi = _r387_don_dep(m, han)
+        if loi:
+            e.add_note(loi)
+        raise
+    loi = _r387_don_dep(m, han)
+    bang(loi is None, loi)
+
+
+@contextlib.contextmanager
+def _r387_nhat_ky_kill():
+    """`os.kill`/`os.killpg` thành hàm GIẢ chỉ ghi nhật ký, không bao giờ chuyển tiếp; ra khỏi khối thì đòi nhật ký
+    RỖNG. KHÔNG bọc `lenh_run`: launcher dùng `os.kill(pid, 0)` để dò."""
+    nk, goc = [], (os.kill, os.killpg)
+    os.kill, os.killpg = (lambda *a: nk.append(("kill", a))), (lambda *a: nk.append(("killpg", a)))
+    try:
+        yield
+    finally:
+        os.kill, os.killpg = goc
+    bang(nk == [], f"r387 fixture da goi kill sau lenh_run (nhat ky phai RONG): {nk}")
+
+
+def _r387_chay(m, s, ma_con, *them, han=None, co_chau=True, chup=False, do=None):
+    """Fixture chung (POSIX): `lenh_run` trong tiến trình; ghi mọi danh sách phép dò trả vào `m._r387_ds_do`; lưu
+    `pgid = run.json["pid"]` làm tham chiếu SỞ HỮU cho teardown. `do` thay phép dò BÊN TRONG `lenh_run`; teardown luôn
+    dùng phép dò thật. Hằng hạn đọc bằng `getattr` để fixture chạy được với `launcher.py` của base (đối chứng N1)."""
+    that, goc_han = m._thanh_vien_nhom, getattr(m, "_HAN_CHO_CAY_TRUOC_BAM_LOG", None)
+    m._r387_do_that, m._r387_ds_do = that, []
+
+    def ghi_do(pgid):
+        m._r387_ds_do.append((do or that)(pgid))
+        return m._r387_ds_do[-1]
+
+    m._thanh_vien_nhom = ghi_do
+    if han is not None:
+        m._HAN_CHO_CAY_TRUOC_BAM_LOG = han
+    s.mkdir(exist_ok=True)
+    try:
+        rc, so, tm = _r1252_run(_r1252_kho(s), s / "runs", ma_con, *them, m=m, chup=chup)
+    finally:
+        m._thanh_vien_nhom = that
+        if goc_han is not None:
+            m._HAN_CHO_CAY_TRUOC_BAM_LOG = goc_han
+    m._r387_pgid = so["pid"]
+    if not co_chau:
+        loi = _r387_don_dep(m)
+        bang(loi is None, loi)
+    return rc, so, tm
+
+
+def _r387_ma_con(s, ngu, doi_chau=False):
+    """Con in `CON`, sinh cháu CÙNG nhóm (không `start_new_session`) nối chung stdout, ghi PID cháu ra tệp. Cháu ngủ
+    `ngu` giây, ghi một dòng, flush, viết dấu `chau-xong`, rồi TỰ thoát."""
+    chau = (f"import pathlib,sys,time;time.sleep({ngu});print('CHAU-GHI-MUON');sys.stdout.flush();"
+            f"pathlib.Path({str(s / 'chau-xong')!r}).write_text('x')")
+    return ("import pathlib,subprocess,sys;print('CON');sys.stdout.flush();"
+            f"c=subprocess.Popen([sys.executable,'-c',{chau!r}],stdout=sys.stdout);"
+            f"pathlib.Path({str(s / 'pid-chau')!r}).write_text(str(c.pid))" + (";c.wait()" if doi_chau else ""))
+
+
+def _r387_bam_dia_sau_dau(s, tm, ve):
+    """Chờ dấu `chau-xong` tối đa 10 s (thiếu dấu là ĐỎ), rồi trả băm `stdout.log` trên đĩa."""
+    het = time.monotonic() + 10.0
+    while not (s / "chau-xong").exists() and time.monotonic() < het:
+        time.sleep(0.05)
+    bang((s / "chau-xong").exists(), f"r387({ve}) chau khong viet dau chau-xong trong 10 s")
+    return hashlib.sha256((tm / "stdout.log").read_bytes()).hexdigest()
+
+
+def _r387_pid_chau_da_do(m, s, ve):
+    pid = int((s / "pid-chau").read_text(encoding="utf-8"))
+    bang(any(pid in d for d in m._r387_ds_do if d), f"r387({ve}) PID chau {pid} khong co trong phep do nao: {m._r387_ds_do}")
+    return pid
+
+
+def _r387_prompt(s):
+    pf = s / "prompt.txt"
+    pf.write_text("PROMPT-R387\n", encoding="utf-8")
+    return "--prompt-file", str(pf), "--expected-prompt-sha256", hashlib.sha256(pf.read_bytes()).hexdigest()
+
+
+@ca
+def r387_fixture_teardown_bao_loi_giu_loi_goc():
+    """(t) Teardown lỗi (phép dò luôn `[7]`, hạn 0,2 s): ca đã đỏ giữ lỗi gốc kèm ghi chú; ca xanh thì ĐỎ. Mọi nền."""
+    m = _tai_launcher_thu()
+    m._r387_pgid, m._r387_do_that = 1, lambda _p: [7]
+    for than_loi in (True, False):
+        try:
+            with _r387_don_khi_thoat(m, han=0.2):
+                if than_loi:
+                    raise TinHieuChotCa("LOI-GOC")
+        except TinHieuChotCa as e:
+            ghi_chu = " ".join(getattr(e, "__notes__", []))
+            if than_loi:
+                bang(str(e) == "LOI-GOC" and "r387 teardown" in ghi_chu, f"r387(t) mat loi goc hoac ghi chu teardown: {e} / {ghi_chu!r}")
+            else:
+                bang("r387 teardown" in str(e), f"r387(t) ca xanh phai DO bang thong diep teardown: {e}")
+        else:
+            bang(False, f"r387(t) teardown loi ma ca van xanh (than_loi={than_loi})")
+
+
+def _r387_than_a(ngu, doi_chau):
+    """Thân chung của (a) và đối chứng (a′). Các vế theo THỨ TỰ của đặc tả; vế băm đứng trước mọi vế khoá."""
+    m = _tai_launcher_thu()
+    with San() as s, _r387_don_khi_thoat(m):
+        _rc, so, tm = _r387_chay(m, s, _r387_ma_con(s, ngu, doi_chau), han=2.0)
+        with _r387_nhat_ky_kill():
+            bam_dia = _r387_bam_dia_sau_dau(s, tm, "a")
+            bang(bam_dia != so["stdout_sha256"], "r387(a) ve bam: bam so == bam dia, chau khong ghi SAU luc bam")
+            pid_chau = _r387_pid_chau_da_do(m, s, "a")
+            bang(so.get("log_bam_cay_da_chet") is False, f"r387(a) cay chua chet ma khai {so.get('log_bam_cay_da_chet')}")
+            cho = so.get("log_bam_cho_giay")
+            bang(isinstance(cho, float) and 1.8 <= cho <= 2.5, f"r387(a) log_bam_cho_giay={cho}, mong 1,8..2,5 (han 2,0)")
+            lech = (datetime.fromisoformat(so["log_bam_luc_utc"]) - datetime.fromisoformat(so["ket_thuc_utc"])).total_seconds()
+            bang(lech >= 1.8, f"r387(a) log_bam_luc_utc - ket_thuc_utc = {lech}: ket_thuc_utc da gom thoi gian doi (chau {pid_chau})")
+
+
+@ca
+def r387_m1_chau_ghi_muon_khai_pham_vi_bam():
+    """(a) Cháu ghi SAU hạn đợi 2,0 s (ngủ 4 s): băm sổ ≠ băm đĩa, và sổ phải khai `log_bam_cay_da_chet = false`."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    _r387_than_a(4, False)
+
+
+@ca
+def r387_m1_doi_chung_ghi_som_lam_ve_bam_do():
+    """(a′) Đối chứng: con đợi cháu, cháu ghi ngay ⇒ băm sổ = băm đĩa ⇒ thân (a) phải ĐỎ đúng ở vế băm."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    try:
+        _r387_than_a(0, True)
+    except TinHieuChotCa as e:
+        bang("ve bam" in str(e), f"r387(a') than (a) do o ve khac, khong phai ve bam: {e}")
+    else:
+        bang(False, "r387(a') chau ghi som ma than (a) van xanh: ve bam khong do gi")
+
+
+@ca
+def r387_m1_con_thuong_chung_minh_cay_chet():
+    """(b) Con thường, không cháu: khai `true`, mốc băm không đứng trước mốc kết thúc, băm sổ = băm đĩa."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s:
+        _rc, so, tm = _r387_chay(m, s, "print('MOT-DONG')", co_chau=False)
+        bang(so.get("log_bam_cay_da_chet") is True, f"r387(b) cay da chet ma khai {so.get('log_bam_cay_da_chet')}")
+        luc, kt = so.get("log_bam_luc_utc"), so.get("ket_thuc_utc")
+        bang(isinstance(luc, str) and isinstance(kt, str) and datetime.fromisoformat(luc) >= datetime.fromisoformat(kt),
+             f"r387(b) log_bam_luc_utc={luc!r} phai co va khong truoc ket_thuc_utc={kt!r}")
+        bang(so.get("stdout_sha256") == hashlib.sha256((tm / "stdout.log").read_bytes()).hexdigest(), "r387(b) bam so != bam dia")
+
+
+@ca
+def r387_m2_chau_ghi_trong_han_thi_bam_du():
+    """(c) Hạn mặc định, cháu ghi sau 1 s: launcher đợi cây, khai `true`, băm sổ = băm đĩa đọc sau dấu."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s, _r387_don_khi_thoat(m):
+        _rc, so, tm = _r387_chay(m, s, _r387_ma_con(s, 1))
+        with _r387_nhat_ky_kill():
+            bam_dia = _r387_bam_dia_sau_dau(s, tm, "c")
+            _r387_pid_chau_da_do(m, s, "c")
+            bang(so.get("log_bam_cay_da_chet") is True, f"r387(c) cay chet trong han ma khai {so.get('log_bam_cay_da_chet')}")
+            bang(so.get("stdout_sha256") == bam_dia, "r387(c) bam so != bam dia: bam truoc khi chau ghi xong")
+
+
+@ca
+def r387_m2_khong_do_duoc_thi_khong_cho():
+    """(d) Phép dò trả `None` (không đo được), hạn vá 5,0 s: khai `false` và KHÔNG ngồi chờ hết hạn (`lenh_run` < 3 s)."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s:
+        t0 = time.monotonic()
+        _rc, so, _tm = _r387_chay(m, s, "pass", han=5.0, co_chau=False, do=lambda _p: None)
+        dt = time.monotonic() - t0
+        bang(so.get("log_bam_cay_da_chet") is False, f"r387(d) khong do duoc ma khai {so.get('log_bam_cay_da_chet')}")
+        bang(dt < 3.0, f"r387(d) khong do duoc ma van cho: {dt:.2f} s (han 5,0)")
+
+
+@ca
+def r387_m2_han_chung_cho_moi_lan_do():
+    """(e) Gọi THẲNG hàm đợi, nền vá bằng `m.platform`; chạy được trên mọi nền. Hạn 0,5 s; dung sai đo 0,5 s
+    (e1 đòi ≤ 1,0 s), chỉ đo trên container Linux của gate."""
+    import types
+    m = _tai_launcher_thu()
+
+    def goi(do, nen="Linux", **va):
+        with _r387_va(m, platform=types.SimpleNamespace(system=lambda: nen), _thanh_vien_nhom=do, **va):
+            t0 = time.monotonic()
+            return m._cho_cay_chet_truoc_bam(1, None, 0.5), time.monotonic() - t0
+
+    kq, dt = goi(lambda _p: [7])
+    bang(kq is False and dt <= 1.0, f"r387(e1) con thanh vien: phai False trong <= 1,0 s, duoc {kq} sau {dt:.2f} s")
+    kq, _ = goi(lambda _p: time.sleep(0.6) or [])
+    bang(kq is False, f"r387(e2) lan do tra ve SAU han ma ket qua van duoc nhan: {kq}")
+    dong_ho, ngu = [0.0], []
+
+    def do_cham(_p):
+        dong_ho[0] += 0.47
+        return [7]
+
+    def ngu_gia(x):
+        ngu.append(round(x, 6))
+        dong_ho[0] += x
+
+    kq, _ = goi(do_cham, time=types.SimpleNamespace(monotonic=lambda: dong_ho[0], sleep=ngu_gia))
+    bang(kq is False and ngu == [0.03], f"r387(e4) lan ngu phai tru thoi gian lan do: kq={kq} ngu={ngu}, mong [0.03]")
+    for nen in ("Darwin", "Windows", "FreeBSD"):
+        ngu.clear()
+        kq, _ = goi(lambda _p: bang(False, "r387(e5) ham doi DO tren nen khac Linux"), nen,
+                    time=types.SimpleNamespace(monotonic=time.monotonic, sleep=ngu.append))
+        bang(kq is False and ngu == [], f"r387(e5) {nen}: phai False ngay, 0 loi ngu; duoc {kq}, ngu={ngu}")
+
+
+@ca
+def r387_a_nen_khac_giu_moc_ket_thuc_base():
+    """(i) Chạy trên Linux, MÔ PHỎNG nền khác (`_nen_do_cay_truoc_bam` trả False; phép đo xoá prompt giả ngủ 0,5 s rồi
+    trả `[]`, đại diện `ps` của Darwin): mốc `ket_thuc` phải lấy SAU phép đo và SAU unlink bản chụp, như base."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s:
+        goi, gio_that = [], m._bay_gio
+
+        def gio():
+            goi.append((gio_that(), any((s / "runs").glob("*/prompt.snapshot"))))
+            return goi[-1][0]
+
+        with _r387_va(m, _nen_do_cay_truoc_bam=lambda: False, _bay_gio=gio):
+            _rc, so, _tm = _r387_chay(m, s, "pass", *_r387_prompt(s), co_chau=False, do=lambda _p: time.sleep(0.5) or [])
+        cho = so.get("log_bam_cho_giay")
+        bang(so.get("log_bam_cay_da_chet") is False and isinstance(cho, float) and cho < 0.1,
+             f"r387(i) nen khac phai khai false va khong cho: {so.get('log_bam_cay_da_chet')} / {cho}")
+        bang(so.get("prompt_ban_chup_da_xoa") is True, "r387(i) phep do xoa prompt cua nen khac (bieu thuc base) khong xoa ban chup")
+        bang((so.get("thoi_luong_giay") or 0) >= 0.45, f"r387(i) moc ket_thuc truoc phep do xoa prompt: {so.get('thoi_luong_giay')}")
+        con = [c for g, c in goi if g.isoformat() == so.get("ket_thuc_utc")]
+        bang(con == [False], f"r387(i) moc ket_thuc_utc phai lay SAU unlink ban chup (ban chup con tren dia: {con})")
+
+
+@ca
+def r387_m1_stop_trong_luc_cho_khong_bi_de():
+    """(f) `stop` hoàn tất TRONG lúc đợi cây (lần dò đầu ghi sổ như nhánh `else` của `lenh_stop`): sổ cuối giữ `da_dung`."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s:
+        da_ghi = []
+
+        def do_roi_stop(pgid):
+            if not da_ghi:
+                tm = next(d for d in (s / "runs").iterdir() if (d / "run.json").is_file())
+                so = m._doc_so(tm)
+                so.update(trang_thai="da_dung", ly_do_dung="r387-stop-gia")
+                m._ghi_so(tm, so)
+                da_ghi.append(tm)
+            return m._r387_do_that(pgid)
+
+        _rc, so, _tm = _r387_chay(m, s, "pass", co_chau=False, do=do_roi_stop)
+        bang(da_ghi and so.get("trang_thai") == "da_dung" and so.get("ly_do_dung") == "r387-stop-gia",
+             f"r387(f) stop trong luc cho bi runner ghi de: {so.get('trang_thai')} / {so.get('ly_do_dung')}")
+
+
+@ca
+def r387_m1_prompt_linux_xoa_khi_cay_chet():
+    """(g) Linux: quyết định xoá bản chụp prompt dùng kết quả đợi; cây chết ⇒ bản chụp bị xoá, sổ ghi đã xoá."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s:
+        _rc, so, tm = _r387_chay(m, s, "pass", *_r387_prompt(s), co_chau=False)
+        bang(so.get("log_bam_cay_da_chet") is True, f"r387(g) cay da chet ma khai {so.get('log_bam_cay_da_chet')}")
+        bang(not (tm / "prompt.snapshot").exists() and so.get("prompt_ban_chup_da_xoa") is True,
+             f"r387(g) ban chup prompt chua xoa: da_xoa={so.get('prompt_ban_chup_da_xoa')}")
+
+
+@ca
+def r387_m2_ngat_trong_luc_doi_ghi_bi_ngat():
+    """(h) Ctrl-C trong lúc đợi cây. (h1) `xong` thành `bi_ngat`, rc 130, `ma_thoat` vẫn là mã THẬT, log vẫn được băm.
+    (h2) kết quả chụp workspace (`ghi_workspace`) KHÔNG bị cú ngắt che."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+
+    def ngat(*_a):
+        raise KeyboardInterrupt
+
+    with San() as s, _r387_va(m, _cho_cay_chet_truoc_bam=ngat):
+        rc, so, _tm = _r387_chay(m, s / "h1", "pass", co_chau=False)
+        bang(rc == 130 and so.get("ma_thoat") == 0 and so.get("trang_thai") == "bi_ngat"
+             and so.get("ly_do_dung") == "bi ngat trong luc doi cay truoc khi bam log",
+             f"r387(h1) rc={rc} ma_thoat={so.get('ma_thoat')} {so.get('trang_thai')} / {so.get('ly_do_dung')}")
+        bang(so.get("log_bam_cay_da_chet") is False and so.get("stdout_sha256"),
+             f"r387(h1) bi ngat phai khai false va van bam log: {so.get('log_bam_cay_da_chet')} / {so.get('stdout_sha256')}")
+        rc, so, _tm = _r387_chay(m, s / "h2", "open('.tl_state/x','w').write('1')", co_chau=False, chup=True)
+        bang(rc == m.MA_GHI_WORKSPACE and so.get("trang_thai") == "ghi_workspace",
+             f"r387(h2) cu ngat che ket qua chup workspace: rc={rc} {so.get('trang_thai')}")
+
+
+# wp387: các khối của `lenh_run` mà đột biến DỜI CHỖ (xoá ở chỗ cũ rồi chèn ở chỗ mới); `t117` đòi mỗi khối khớp đúng một chỗ.
+_R387_KHOI_MOC = ("    if not _nen_do_cay_truoc_bam():   # #387: nền khác Linux giữ mốc ở vị trí cũ, sau phép đo xoá prompt\n"
+                  "        ket_thuc = _bay_gio()\n")
+_R387_DONG_CAY = "    cay_da_chet = log_cay_chet if _nen_do_cay_truoc_bam() else (_thanh_vien_nhom(p.pid) == [])\n"
+_R387_KHOI_CHO = ("    try:\n        log_cay_chet = _cho_cay_chet_truoc_bam(p.pid, job, _HAN_CHO_CAY_TRUOC_BAM_LOG)\n"
+                  "    except KeyboardInterrupt:\n        log_cay_chet, ngat_khi_cho = False, True\n"
+                  "    ban_ghi.update(log_bam_cay_da_chet=log_cay_chet, log_bam_cho_giay=round(time.monotonic() - moc_cho, 3))\n")
+_R387_DONG_DOC_SO = "    so_moi = _doc_so(thu_muc) or {}\n"
+
+
 DOT_BIEN = [
+    # wp387 packet A (M6): mỗi chốt của đặc tả LAUNCHER-BAM-LOG-SAU-CAY-CHET r1 một đột biến; không mục nào mang điều kiện nền.
+    ("r387_khai_cay_chet_luon_true", ("log_bam_cay_da_chet=log_cay_chet,", "log_bam_cay_da_chet=True,"), ["r387_m1_chau_ghi_muon_khai_pham_vi_bam"]),
+    ("r387_khai_cay_chet_luon_false", ("log_bam_cay_da_chet=log_cay_chet,", "log_bam_cay_da_chet=False,"), ["r387_m1_con_thuong_chung_minh_cay_chet"]),
+    ("r387_moc_bam_truoc_khi_con_thoat", ('    ban_ghi["log_bam_luc_utc"] = _bay_gio().isoformat()', '    ban_ghi["log_bam_luc_utc"] = ban_ghi["bat_dau_utc"]'),
+     ["r387_m1_con_thuong_chung_minh_cay_chet"]),
+    ("r387_ket_thuc_sau_vong_cho", ("ket_thuc_utc=ket_thuc.isoformat(), ma_thoat=ma_that)", "ket_thuc_utc=_bay_gio().isoformat(), ma_thoat=ma_that)"),
+     ["r387_m1_chau_ghi_muon_khai_pham_vi_bam"]),
+    ("r387_bo_vong_cho", ("(p.pid, job, _HAN_CHO_CAY_TRUOC_BAM_LOG)", "(p.pid, job, 0)"), ["r387_m2_chau_ghi_trong_han_thi_bam_du"]),
+    ("r387_khong_do_duoc_van_cho", ("        if nhom is None:\n", "        if False:\n"), ["r387_m2_khong_do_duoc_thi_khong_cho"]),
+    # KHÔNG dùng `pass`: `time.sleep` nhận số âm sẽ ném ValueError, thành tín dụng giả.
+    ("r387_nhan_ket_qua_sau_han", ("        if con_sau <= 0:\n            return False\n", "        if con_sau <= 0:\n            con_sau = 0.0\n"),
+     ["r387_m2_han_chung_cho_moi_lan_do"]),
+    ("r387_ngu_khong_tru_lan_do", ("        time.sleep(min(0.1, con_sau))", "        time.sleep(0.1)"), ["r387_m2_han_chung_cho_moi_lan_do"]),
+    ("r387_a_nen_khac_van_do", ("    if not _nen_do_cay_truoc_bam():\n        return False\n", ""), ["r387_m2_han_chung_cho_moi_lan_do"]),
+    ("r387_a_nen_khac_ngu_thua", ("    if not _nen_do_cay_truoc_bam():\n        return False\n",
+                                  "    if not _nen_do_cay_truoc_bam():\n        time.sleep(0.1)\n        return False\n"),
+     ["r387_m2_han_chung_cho_moi_lan_do"]),
+    ("r387_a_nen_khac_doi_moc", (_R387_KHOI_MOC, ""), ["r387_a_nen_khac_giu_moc_ket_thuc_base"]),
+    # Hai thay thế áp TUẦN TỰ (runner thay chỗ khớp đầu tiên): xoá khối ở chỗ cũ, rồi chèn nó TRƯỚC khối unlink.
+    ("r387_a_nen_khac_moc_truoc_unlink", [(_R387_KHOI_MOC, ""), (_R387_DONG_CAY, _R387_DONG_CAY + _R387_KHOI_MOC)],
+     ["r387_a_nen_khac_giu_moc_ket_thuc_base"]),
+    # Dời CẢ khối đợi và dòng ghi khoá xuống SAU phép đọc lại sổ; chỉ đổi chỗ dòng gán khoá thì đột biến SỐNG.
+    ("r387_cho_sau_doc_lai_stop", [(_R387_KHOI_CHO, ""), (_R387_DONG_DOC_SO, _R387_DONG_DOC_SO + _R387_KHOI_CHO)],
+     ["r387_m1_stop_trong_luc_cho_khong_bi_de"]),
+    ("r387_ngat_khi_doi_bi_nuot", ('    if ngat_khi_cho and ban_ghi["trang_thai"] == "xong":', '    if False and ban_ghi["trang_thai"] == "xong":'),
+     ["r387_m2_ngat_trong_luc_doi_ghi_bi_ngat"]),
+    ("r387_ngat_che_ket_qua_chup", ('    if ngat_khi_cho and ban_ghi["trang_thai"] == "xong":', '    if ngat_khi_cho:'),
+     ["r387_m2_ngat_trong_luc_doi_ghi_bi_ngat"]),
+    ("r387_ngat_ghi_130_vao_so", ('"bi ngat trong luc doi cay truoc khi bam log"\n        ma = 130\n',
+                                  '"bi ngat trong luc doi cay truoc khi bam log"\n        ma = 130\n        ma_that = 130\n'),
+     ["r387_m2_ngat_trong_luc_doi_ghi_bi_ngat"]),
     # wp1335 (M8): mỗi chốt của đặc tả AGENT-DINH-DANH-MOT-NGUON r3 một đột biến.
     ("r1335_bo_chan_vo_shell", ("    elif ten in VO_SHELL:\n", "    elif False:\n"), ["r1335_ma_tran_agent_khai_bao"]),
     ("r1335_agent_khong_ghi_de_ten", ('        suy_ra = agent.strip()\n', '        suy_ra = ten if ten in AGENT_CHO_PHEP else "khong"\n'),
@@ -16107,8 +16495,8 @@ DOT_BIEN = [
      ["t71_ban_chup_prompt_phai_KIN_va_bi_XOA"],
      ("posix", "tren Windows ban chup GIU LAI theo thiet ke, nen 'khong xoa' khong doi gi")),
     ("xoa_prompt_khi_wrapper_vua_thoat",
-     ('    cay_da_chet = (_thanh_vien_nhom(p.pid) == [])',
-      '    cay_da_chet = True'),
+     ('        log_cay_chet = _cho_cay_chet_truoc_bam(p.pid, job, _HAN_CHO_CAY_TRUOC_BAM_LOG)',
+      '        log_cay_chet = True'),
      ["t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau"]),
     ("ngat_ghi_thanh_xong",
      ('        ban_ghi["trang_thai"] = ("bi_ngat" if bi_ngat',
@@ -16900,6 +17288,11 @@ DOT_BIEN_HOOK = [
 
 
 DOT_BIEN_HARNESS = [
+    # wp387: fixture KHÔNG được có đường gửi tín hiệu (lời gọi rơi vào hàm giả, ca chết ở vế nhật ký); teardown không được nuốt lỗi.
+    ('r387_fixture_gui_tin_hieu_theo_pid_chau', ('            pid_chau = _r387_pid_chau_da_do(m, s, "a")\n',
+      '            pid_chau = _r387_pid_chau_da_do(m, s, "a")\n            os.kill(pid_chau, signal.SIGTERM)\n'),
+     ['r387_m1_chau_ghi_muon_khai_pham_vi_bam']),
+    ('r387_teardown_nuot_loi', ('            e.add_note(loi)', '            pass'), ['r387_fixture_teardown_bao_loi_giu_loi_goc']),
     ('wp1122_assertion_dinh_dang_lai_sau_map', ('ket = f"HONG: {tin}"', 'ket = f"HONG: {mo_ta_loi(e)}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
     ('wp1122_assertion_map_truoc_dinh_dang', ('except AssertionError as e:\n            tin = mo_ta_loi(e)   # #1122 (Codex lượt 6): định dạng MỘT lần, TRƯỚC khi ghi map; `str(e)` chạy mã của ngoại lệ\n            hong_ds.append((fn.__name__, tin))\n            # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.\n            LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)\n                                      else f"khac:{type(e).__qualname__}")\n            ket = f"HONG: {tin}"', 'except AssertionError as e:\n            LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)\n                                      else f"khac:{type(e).__qualname__}")\n            tin = mo_ta_loi(e)   # #1122 (Codex lượt 6): định dạng MỘT lần, TRƯỚC khi ghi map; `str(e)` chạy mã của ngoại lệ\n            hong_ds.append((fn.__name__, tin))\n            # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.\n            ket = f"HONG: {tin}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
     # #1117 r2 (spec mục 9): bảo đảm (a)(b)(c) của các ca kênh #1122 đo qua runner — mỗi bảo đảm một đột biến.

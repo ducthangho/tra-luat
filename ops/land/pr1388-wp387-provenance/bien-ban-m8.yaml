@@ -1,0 +1,39 @@
+# Bien ban M8 (ADR-0060) dong WP #387 LAUNCHER-BAM-LOG-SAU-CAY-CHET r1 (packet A, Linux) — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1388-wp387-land-evidence.yaml. Audit human_audited chu kho tu dang 6975774421 tren 5bcea6c.
+# Moc §10.2.2 run 44285378727: run/checkout/gate_output measured passed; workflow_definition not_measured (GraphQL 403 trong phien, chua co wd-run).
+packet: wp387
+revision: 1
+generation: 1
+spec_hash: a2dbdb0cab14f42fea36c6a2bec5326f3be7775c1edcb941b15ecc800319eaff
+head_da_review: 5bcea6cdf56ae6b4ba76345837927870af2ef86e
+tree_h: 2d44e1e7f32ed94de3696d97fc2efa05e4937161
+review:
+  offline: 'khong goi Codex offline tren ma; 9 luot Codex offline chi review DAC TA truoc lease (ops/reviews/wp387-spec-r1/ tren nhanh ops/wp387-r1-g1-lease), luot 9 approve, 1 P3 cau chu N4 mo'
+  connector: 'readback-pr1388-comments.json: codex-review-receipt 6975089935 "Didn''t find any major issues" tren 5bcea6c (kich bang @codex review 6975039313); summary 6975047877 cap nhat 10:26:49Z: luot "Draft marked ready" tren 5bcea6c cung khong finding'
+  human_audit: 'issuecomment-6975774421 human_exact_head_audit.v1 approve tren 5bcea6c (chu kho tu dang, performed_via_github_app null)'
+windows:
+  phan_loai: not_required
+  nguon: 'packet A chi doi hanh vi Linux (nen khac tra false ngay, giu moc/xoa prompt nhu base); nhanh Darwin/Windows thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS (hoan toi sau khi A land). Lease khong cap ngan sach Windows. launcher-windows 44285378703 tren e4fdf09: windows-latest 332/332 (bo qua 94, gom 9 ca r387 bo qua theo thiet ke), hong 0.'
+  ket_qua: 'not_applicable'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1388#issuecomment-6975774421
+duyet_chu_kho_ghi_chu: 'audit tu dang 10:25:25Z 18-11, truoc merge 10:26:06Z; chu kho chon "Merge 5bcea6c" trong phien dieu phoi (loi khai).'
+merge_commit: e4fdf09e56db55bcdec494db49fb589307b47688
+tree_m: 83d85149b52f0ad2ca7458a54652df3d4ee4bb36
+ci_master:
+  run_id: 44285378727
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44285378727.txt); gate-packet-loop GOM DAT.'
+nghiem_thu:
+  N1: passed  # launcher-test-toan-suite-e4fdf09.txt: toan suite 424/424 tren merge (gom ca (a),(a')); doi chung base + phan chung: loi khai than PR
+  N2: passed  # nhu tren, ca (b) dat; phan chung: loi khai than PR
+  N3: passed  # nhu tren, tam ca con lai dat; dot bien: loi khai than PR (--dot-bien 720/720)
+  N4: passed  # loi_khai_co_neo than PR: --dot-bien du bang 720/720, 6 KHONG DO DUOC ke thua dung danh sach N4
+  N5: passed  # khong do native (packet B); nen khac Linux do bang (e5),(i) trong suite 424/424
+  N6: passed  # nghiem-thu-e4fdf09.txt: diff --check, adr-song, doctrine-scan rc 0, numstat 2 tep +450; ruff delta 0 loi khai than PR
+lease_cuoi: wp387-r1-g1-claude
+landed: false
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: not_measured
+  gate_output: passed

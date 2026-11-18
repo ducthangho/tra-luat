@@ -1,0 +1,9 @@
+# do 2026-11-18T11:07:29Z clone rieng, fetch +refs/heads/*; may chu 318 ref, cuc bo thieu 0
+== ai-dang-giu .claude/dev/launcher.py
+HẾT_HẠN	wp387-r1-g1-claude	refs/remotes/origin/ops/wp387-r1-g1-lease:ops/leases/wp387-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ai-dang-giu .claude/dev/launcher_test.py
+HẾT_HẠN	wp387-r1-g1-claude	refs/remotes/origin/ops/wp387-r1-g1-lease:ops/leases/wp387-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

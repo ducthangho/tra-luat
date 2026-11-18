@@ -1,0 +1,7 @@
+# do 2026-11-18T10:27:49Z
+ref origin/ops/wp387-r1-g1-lease = e5bcdc853e1ab3ce32fc767c204cc619102c7adc
+spec blob: c2fac6d2d8ba8c50d714cb3f00606239c874651d
+spec sha256: a2dbdb0cab14f42fea36c6a2bec5326f3be7775c1edcb941b15ecc800319eaff
+lease spec_hash: spec_hash: a2dbdb0cab14f42fea36c6a2bec5326f3be7775c1edcb941b15ecc800319eaff
+lease commit rut han: e5bcdc8 ops/leases: rut han wp387-r1-g1-claude sau land (PR #1388, e4fdf09)
+packet B spec (hoan, chua vao kho): scratchpad LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS-r1.md sha256 dcc6e039a23d4d335cf900480f0a32cec12ba7899974781df0a03b35ac5dd323

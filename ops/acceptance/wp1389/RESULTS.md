@@ -3,10 +3,10 @@
 Spec: `ops/specs/wp1389-r1.md` (sha256 `12257fa8…10bc`). Lease: `ops/leases/wp1389-r1-g1-claude.yaml`.
 Base `eca1d125b8`. SKILL tại base: blob `678ba2f0`, sha256 `1799c2bd…faadb`.
 
-**Head mã đã đo: `429fb5b0d43b5298734142c8eafafb9a0804c40e`** (tree `f5706c9d…`).
-- SKILL: blob `b5f8a237`, sha256 `2dcbb5d4fa8362df603999b299c481ba099a6b3e6e47763cb925d7f48c84e0e5`.
-- `residue_matrix.sh` `7606f312…`, `residue_matrix.ps1` `4b6e3aad…`.
-- Commit sau `429fb5b` chỉ đổi tệp này, `VERDICT.md`, `REVIEW-PROMPT.md` và lease.
+**Head mã đã đo (lượt 5): `d7960ee57770f320d4cdc00cb58ce3a424fa4a62`** (tree `28c0eeb5…`).
+- SKILL: sha256 `75e9be5ff358476de7405008955bf898f9186a02d34e1616c50e079f6826c94c` (không đổi từ `ff34b2c`).
+- `residue_matrix.sh` `d7cae57b…`, `residue_matrix.ps1` `edb2d5fb…`.
+- Commit sau head này chỉ đổi tệp này, `REVIEW-PROMPT.md` và lease.
 
 ## Lịch sử (rút gọn; chi tiết từng lượt trong git log và `VERDICT.md`)
 
@@ -16,7 +16,9 @@ Base `eca1d125b8`. SKILL tại base: blob `678ba2f0`, sha256 `1799c2bd…faadb`.
 | `5c01f39` → `6896f16` | sửa theo lượt 1; vá W3, W4 | Codex lượt 2 ở `f2654b2`: `request_changes` (3 P1, 4 P2, 1 P3) |
 | `4d8e9a7` | **thiết kế lại** theo quyết định của chủ kho tại Review Rescue Checkpoint (AskUserQuestion: "Redesign: ask the CLI") | — |
 | `2875afc`, `07efca6` | hai lỗi harness PS do local Windows bắt (W5, W6) | Codex lượt 3 ở `86879e1`: `request_changes` (2 P1 + 2 P2 chặn merge; P3 là giới hạn đã khai) |
-| **`429fb5b`** | chủ kho nâng trần Codex 3 → 4. Bản vá: neo nonce, kiểm liên kết trước `close`, kênh base64 UTF-8, ma trận TOÀN LUỒNG | **đo cuối** (§2–§5) |
+| `429fb5b` | chủ kho nâng trần Codex 3 → 4. Bản vá: neo nonce, kiểm liên kết trước `close`, kênh base64 UTF-8, ma trận TOÀN LUỒNG | Codex lượt 4 ở `999f5fc`: `request_changes` (1 P1 + 4 P2 chặn merge) |
+| `ff34b2c` | sửa theo lượt 4 (§8) | local Windows bắt một lỗi đột biến PS (W7) |
+| **`d7960ee`** | vá W7 | **đo cuối** (§2–§5, §8) |
 
 ## 0. Thiết kế (vì sao (b), và cách lấy sổ phiên)
 
@@ -32,15 +34,16 @@ Base `eca1d125b8`. SKILL tại base: blob `678ba2f0`, sha256 `1799c2bd…faadb`.
     `playwright-core/lib/tools/cli-client/registry.js`, in `baseDaemonDir()` và `createClientInfo().daemonProfilesDir`.
     Chuỗi JS không có dấu nháy, vì đường dẫn mô-đun đi qua `argv`. Từ `429fb5b`, lệnh in **base64 của UTF-8** và cả hai
     shell giải mã tường minh, nên code page của console không đổi được đường dẫn.
-  - Capture kiểm kết quả: tuyệt đối, dạng `<base>/<16 hex>`, không liên kết; bash ≥ 4.4. Đạt thì ghi `00-sophien.txt`,
-    gồm 3 dòng: sổ phiên, thư mục hash và **nonce**.
+  - Capture kiểm kết quả: tuyệt đối, dạng `<base>/<16 hex>`, KHÔNG thành phần nào của đường dẫn là liên kết (từ
+    `ff34b2c`); bash ≥ 4.4. Đạt thì tạo mới (không ghi đè) `00-sophien.txt`, gồm 3 dòng: sổ phiên, thư mục hash và
+    **nonce**.
     Lỗi thì in `STOP trước open: phiên CHƯA tạo — KHÔNG chạy Cleanup`, không qua trap ERR.
   - Cleanup hỏi lại **trước `close`** và đòi trùng cả ba dòng `00-sophien.txt`. Thêm điều kiện: hai thư mục là thư mục
     thường, không có hook, bash ≥ 4.4. Như vậy có neo xuất xứ: không có, khác hoặc nonce lạ thì không đóng, không dọn.
   - Bước dọn đòi đúng một mục mang nonce, và mục ấy phải là `<dòng 2>/<nonce>.err`. Thứ tự theo B4: ghi đường dẫn →
     chép → so → xoá.
-  - Gỡ bản cài hỏi lại sổ phiên của bản cài bị loại TRƯỚC khi xoá `install`, đối chiếu `00-sophien.txt`, rồi xoá thư mục
-    không đệ quy.
+  - Gỡ bản cài (khối mã từ `ff34b2c`) lấy thư mục từ `11-daemon-path.txt` của run (B7), đòi nó bằng
+    `<dòng 2 của 00>/<nonce>.err` và câu trả lời CLI hỏi TRƯỚC khi xoá `install`, không liên kết; xoá không đệ quy.
 - Đo đường thật: lượt N3/N4 dùng `registry.js` THẬT của bản ghim. Ở N3, `00-sophien.txt` dòng 2 bằng đúng
   `sha1("<install>/node_modules/playwright-core")[:16]` (`0804253c76c63b3f`).
 
@@ -50,61 +53,62 @@ Base `eca1d125b8`. SKILL tại base: blob `678ba2f0`, sha256 `1799c2bd…faadb`.
 - Sau `CLEANUP OK` còn `daemon/3815e4e10d63867a/tl-pw-cedba9810ed1.err`. Tệp này được để nguyên làm "tệp cũ" cho mọi lượt
   sau.
 
-## 2. N1 — ma trận bash (Linux) tại `429fb5b`
+## 2. N1 — ma trận bash (Linux) tại `d7960ee`
 
-Lệnh: `bash ops/acceptance/wp1389/residue_matrix.sh <SKILL> <scratch rỗng> <node v24.19.0>`
+Lệnh: `bash ops/acceptance/wp1389/residue_matrix.sh <SKILL> <scratch rỗng> <node v24.19.0>`, chạy trên `git archive d7960ee`.
 
 ```
-SOURCE 2dcbb5d4fa8362df603999b299c481ba099a6b3e6e47763cb925d7f48c84e0e5 pre_frag 4b8bb645114af21f66422222cab295c1773fda0a25820c3790648f2f99dac488 dau_frag 6b163824fd0e886d4ae1fe921a7a2e65a2912d257c0fd0ab358b9e105d4f5640 cleanup_frag 52328848e4da336eef8c35aa539a728ed6118cc41b943c0ef46e0e79b666fdbd node v24.19.0
-TONG: 66 dat / 66        rc=0
+SOURCE 75e9be5ff358476de7405008955bf898f9186a02d34e1616c50e079f6826c94c pre_frag 972cff1823a754c92a63887429e71a90ae5233a6867c8eefbdb9fd4de31f1ffc dau_frag 385efe408f5d9c3eae8f7ffef8194b0c620d171229d749a5b2940694b618f938 cleanup_frag 29d8183b49ff76fca502885c7578299c531a26cfe87954f0cff16f0ce057bae8 go_frag 418a97a2aa1b0fc28fc30b372a7e7cd27166f4bbff2a9c5791b65699b5e51416 node v24.19.0
+TONG: 99 dat / 99        rc=0
 ```
 
-- Đoạn trích: ba cặp đánh dấu, mỗi cặp đúng 2 lần. Dòng `node -e` của SKILL chạy bằng node thật, trên một `registry.js`
-  giả do từng ca chỉ định.
-- Tệp phải giữ được chụp TRƯỚC khi chạy. Ca STOP không được sinh output `11-*` mới.
+- Đoạn trích: năm cặp đánh dấu (thêm `…-go-truoc`, `…-go-sau` của bước Gỡ), mỗi cặp đúng 2 lần. Dòng `node -e` của SKILL
+  chạy bằng node thật, trên một `registry.js` giả do từng ca chỉ định.
+- Tệp phải giữ được chụp TRƯỚC khi chạy. Ca STOP không được sinh output `11-*` mới (trừ ca lỗi sau bước ghi đường dẫn).
 - Cleanup:
   - Qua: P1, P2.
-  - Phải dừng: N1–N12, N14–N19 (N18: `.err` nằm ở thư mục hash của bản cài khác; N19: thư mục hash của chính bản cài là
-    symlink).
-- Đầu Cleanup (trước `close`):
-  - Phải dừng: D1 thiếu bản ghi · D2 CLI trả sổ khác · D3 workspace · **D5 sổ phiên là link** · **D6 thư mục hash là
-    link** · **D7 bản ghi mang nonce khác** · **D8 hook**.
-  - Qua: D4.
-- Trước `open`: C1–C13; mọi ca dừng in `KHÔNG chạy Cleanup`, không ghi `00-sophien.txt`.
-- **TOÀN LUỒNG**: chạy chính khối bash Capture (khối 3) và Cleanup (khối 5) của SKILL, với một CLI giả ghi nhật ký và giữ
-  trạng thái. Định dạng phản hồi JSON của CLI giả trùng mẫu so byte của Cleanup.
-  - E1 đường đúng: nhật ký đúng thứ tự `open goto tab-list requests close delete-data tab-list`; dư lượng đã dọn; hash gồm
-    cả `00`/`11`.
-  - **E2** run A nhưng nonce của phiên B đang mở cùng bản cài: KHÔNG gọi `close`/`delete-data`; phiên B nguyên vẹn.
-  - **E3** thư mục hash bị thay bằng symlink giữa Capture và Cleanup: KHÔNG gọi `close`; đích nguyên vẹn.
-  - **E4** kiểm trước `open` dừng: KHÔNG gọi `open`, không có `00-sophien.txt`, và Cleanup không gọi `close`.
-- 20 đột biến (đếm `PASS MUT` trong log), mỗi đột biến làm ca đích lọt hoặc đỏ:
-  - 17 đột biến cũ, cộng no-nonce-binding→D7 và dau-link→D5.
-  - **dau-after-close**: đưa đoạn đầu-Cleanup ra SAU `10-verify` ⇒ E2 gọi `close` VÀ `delete-data` trên phiên B. Đột biến
-    này cho thấy vị trí của chốt là thứ bảo vệ.
-- Tự kiểm harness: cho SKILL biến thể đổi nội dung mồi rồi trả mtime cũ ⇒ harness rc 1.
+  - Phải dừng: N1–N12, N14–N19; **N20** thư mục tổ tiên (`ms-playwright`) là symlink, cả qua đoạn đầu lẫn chỉ đoạn dọn
+    (N20R); **N21** `cp` lỗi, **N22** `cmp` lỗi, **N23** `rm` lỗi (tệp gốc còn nguyên); **N24** ghi `11-daemon-path.txt`
+    lỗi (hàm `printf` hỏng tiêm qua `BASH_FUNC_printf%%`) ⇒ chưa chép, chưa xoá.
+- Đầu Cleanup (trước `close`): phải dừng D1–D3, D5–D8, **D9** tổ tiên là symlink; qua D4.
+- Trước `open`: C1–C13; **C14** tổ tiên là symlink ⇒ dừng; **C15** `00-sophien.txt` đã có ⇒ dừng, tệp cũ KHÔNG bị ghi đè.
+- **Gỡ** (khối mã mới): G1 thư mục hash rỗng, 11/00/CLI khớp ⇒ xoá. Giữ nguyên, có biên nhận `GIỮ`: G2 thiếu
+  `11-daemon-path.txt`, G3 `11` trỏ thư mục khác, G4 thư mục còn mục (`rmdir` từ chối), G5 tổ tiên là symlink, G6 `00`
+  khác, G7 CLI trả khác.
+- **TOÀN LUỒNG** (khối bash Capture 3 + Cleanup 5 của SKILL, CLI giả có nhật ký và trạng thái). CLI giả mô phỏng
+  `session.js`: `close` xoá descriptor, `delete-data` trả `deleted` = descriptor CÓ tồn tại.
+  - E1: nhật ký đúng `open goto tab-list requests close delete-data tab-list`; `deleted: false`; `11-daemon-path.txt` đúng;
+    `SHA256SUMS` có dòng và băm KHỚP tệp thật cho `00-sophien.txt`, `11-daemon.err`, `11-daemon-path.txt`,
+    `09-delete-data.json`; tệp cũ nguyên.
+  - **E6**: descriptor còn sót sau `close` ⇒ `deleted: true`; Cleanup vẫn đạt với cùng các khẳng định E1.
+  - E2: nhật ký ĐÚNG BẰNG `open goto tab-list requests open <B>`; byte `.err`/`.session` của B nguyên; trạng thái B vẫn
+    `open`; không có output 08–11.
+  - E3 (thư mục hash bị thay bằng symlink giữa hai bước) và **E5** (thư mục tổ tiên bị thay bằng symlink giữa hai bước):
+    nhật ký chỉ có Capture; byte phiên ở đích nguyên; không output 08–11.
+  - E4 dừng trước `open`. **E7** `open` lỗi trước khi daemon tạo gì ⇒ Cleanup dừng trước `close`, không xoá gì. **E8**
+    `open` lỗi SAU khi daemon tạo `.err` ⇒ Cleanup gọi `close` cho nonce của chính nó, phản hồi sai ⇒ STOP, `.err` GIỮ.
+- 33 đột biến (đếm `PASS MUT`), mỗi đột biến làm ca đích lọt hoặc đỏ. Mới ở lượt này: residue-ancestor→N20,
+  no-cmp→N22, no-rm-check→N23, no-write-check→N24, dau-ancestor→D9, pre-ancestor→C14, pre-noclobber→C15, go-no-receipt→G2,
+  go-receipt-parent→G3, go-link→G5, go-record→G6, **only-false→E6** (bỏ nhánh `deleted: true`), **hash-early→E1** (dọn sau
+  khi băm). Chốt `realpath` cũng bắt đường dẫn tương đối, nên đột biến relative-cache/pre-relative gỡ CẢ HAI lớp.
+- Không có đột biến riêng: kiểm `cp` (lỗi chép đã bị `cmp` bắt, hai lớp).
 
-## 3. N2 — ma trận PowerShell (Desktop, local, ADR-0057) tại `429fb5b`
+## 3. N2 — ma trận PowerShell (Desktop, local, ADR-0057) tại `d7960ee`
 
 | shell | kết quả | tệp out (sha256) |
 |---|---|---|
-| PS 5.1 (`5.1.26100`) | **`TONG: 80 dat / 80`**, rc 0 | `01fedecb…` |
-| pwsh 7.6.10 | **`TONG: 80 dat / 80`**, rc 0 | `62ad0350…` |
+| PS 5.1 (`5.1.26100`) | **`TONG: 110 dat / 110`** (bỏ qua 3), rc 0 | `4f0f2fed…` |
+| pwsh 7.6.10 | **`TONG: 110 dat / 110`** (bỏ qua 3), rc 0 | `375cdbe1…` |
 
-- Cả hai shell chạy node `v26.13.0`, in `SOURCE 2dcbb5d4… pre_frag 78ce992d… dau_frag a86ff384… cleanup_frag ad52db3e…`.
-  Ba băm này trùng byte với cùng đoạn trích trên Linux.
-- Ca giống bản bash, thêm các ca riêng Windows:
-  - N13 biến thể viết hoa.
-  - N15/C7 `icacls /deny`.
-  - L1–L3 khoá tệp.
-  - D5/D6 bằng junction.
-  - **U1**: cache có dấu cách và ký tự Unicode (`cache ộê`). Kiểm trước `open` ghi đúng bản ghi; nonce có sẵn ⇒ dừng;
-    dọn đúng.
-  - **TOÀN LUỒNG E1–E4** chạy chính khối PowerShell Capture/Cleanup của SKILL qua `Invoke-PwGhi`, với cùng CLI giả.
-- 22 đột biến PS; mỗi đột biến làm ca đích lọt hoặc đỏ. Có thêm:
-  - utf8-decode→U1: đổi giải mã sang ASCII làm U1 đỏ.
-  - dau-after-close→E2.
-- **KHÔNG ĐO ĐƯỢC: N5** (symlink tệp) vì máy không có quyền tạo; ghi `SKIP`.
+- Cả hai shell chạy node `v26.13.0`, in `SOURCE 75e9be5f… pre_frag 34746a0a… dau_frag e8f8d307… cleanup_frag 6124a30b…
+  go_frag 5a114c16…`. Bốn băm đoạn trích PS này tính lại trên Linux từ cùng SKILL ra trùng.
+- Ca giống bản bash, cộng các ca riêng Windows: N13 biến thể viết hoa; N15/C7 `icacls /deny`; L1–L3 khoá tệp; **L4** khoá
+  xoá 12 s ⇒ STOP, bản sao đã chép trùng byte, gốc còn; **W1** thư mục run cấm ghi ⇒ không chép, không xoá; junction cho
+  D5/D6/N6/N7/N19 và tổ tiên (N20, N20R, D9, C14, E5, G5); U1 Unicode; TOÀN LUỒNG E1–E8 qua `Invoke-PwGhi` của SKILL,
+  với E1/E6 đọc `SHA256SUMS.csv` và so băm từng tệp.
+- 33 đột biến PS mỗi shell (đếm `PASS MUT`).
+- **KHÔNG ĐO ĐƯỢC** (máy không có quyền tạo symlink TỆP, ghi `SKIP`): N5, **D10** (`00-sophien.txt` là symlink tới bản ghi
+  của run khác) và đột biến record-reparse→D10. Chốt reparse của bản ghi vì thế chỉ được đọc mã, chưa đo trên Windows.
 
 ## 4. N3 — Linux native
 
@@ -112,9 +116,11 @@ TONG: 66 dat / 66        rc=0
 |---|---|---|---|---|
 | `045c913` … `6896f16` | (5 lượt, xem git log) | (mỗi lượt một) | OK / OK / OK | `rmdir` thư mục rỗng |
 | `4d8e9a7` | `tl-pw-7b6df2b6198e` | `0804253c76c63b3f` | OK / OK / OK | hỏi CLI ⇒ trùng ⇒ `rmdir` |
-| **`429fb5b`** | `tl-pw-f9a312651e84` | `56408881502008d7` | OK / OK / OK; `00-sophien.txt` có 3 dòng gồm nonce | hỏi CLI (base64): trùng, thư mục thường ⇒ xoá `install`/`browsers` ⇒ `rmdir` |
+| `429fb5b` | `tl-pw-f9a312651e84` | `56408881502008d7` | OK / OK / OK; `00-sophien.txt` có 3 dòng gồm nonce | hỏi CLI (base64): trùng, thư mục thường ⇒ xoá `install`/`browsers` ⇒ `rmdir` |
+| **`ff34b2c`** (SKILL trùng byte `d7960ee`) | `tl-pw-4328fdb0c7a7` | `0b62672472ad0641` | OK / OK / OK; `deleted: false`; `11-daemon.err` 0 byte | **chính khối Gỡ của SKILL**: `GO_DH` = thư mục hash ⇒ xoá `install`/`browsers` ⇒ `rmdir`; `con_ton_tai=khong` |
 
-- Ở cả 7 lượt, ảnh chụp `~/.cache/ms-playwright` trước Setup và sau Gỡ **trùng byte** (`8c247ab02e544cb8…`).
+- Ở cả 8 lượt, ảnh chụp `~/.cache/ms-playwright` trước Setup và sau Gỡ **trùng byte** (`8c247ab02e544cb8…`). Lượt
+  `ff34b2c`: sau Cleanup, mọi mục ngoài thư mục hash của lượt này trùng ảnh chụp trước Setup.
 
 ## 5. N4 — Windows native (Desktop, pwsh 7.6.10, local)
 
@@ -122,10 +128,12 @@ TONG: 66 dat / 66        rc=0
 |---|---|---|---|---|---|
 | `bcc239c`, `783e219`, `6896f16` | (3 lượt) | (mỗi lượt một) | `CLEANUP OK` | đếm rồi `Remove-Item` | **trùng byte** |
 | `07efca6` | `tl-pw-caf69393a0ce` | `dc4a3fa1ae37afc7` | `CLEANUP OK` | hỏi CLI ⇒ `[IO.Directory]::Delete(p, $false)` | **trùng byte** |
-| **`429fb5b`** | `tl-pw-81711a4330cf` | `06605341ebe36b2d` | `CLEANUP OK`, stderr 0 | hỏi CLI (base64): trùng, thư mục thường ⇒ xoá `install`/`browsers` ⇒ `[IO.Directory]::Delete(p, $false)` | **trùng byte** `a36424f6…` |
+| `429fb5b` | `tl-pw-81711a4330cf` | `06605341ebe36b2d` | `CLEANUP OK`, stderr 0 | hỏi CLI (base64): trùng, thư mục thường ⇒ xoá `install`/`browsers` ⇒ `[IO.Directory]::Delete(p, $false)` | **trùng byte** `a36424f6…` |
+| **`d7960ee`** | `tl-pw-8ad25bd9fbde` | `3809d38db5c43001` | `CLEANUP OK`, stderr 0; `deleted: false`; `11-daemon.err` 0 byte; `SHA256SUMS.csv` 31 dòng | **chính khối Gỡ của SKILL** (`C-uninstall.ps1` sinh từ khối 6): `GODH=[…\3809d38db5c43001]`, `exists_after=False` | **trùng byte** `a36424f6…` |
 
-- `00-sophien.txt`: `…\ms-playwright\daemon` | `…\daemon\06605341ebe36b2d` | `tl-pw-81711a4330cf`, do `registry.js` thật
-  trả về.
+- Lượt `d7960ee`: `00-sophien.txt` = `…\ms-playwright\daemon` | `…\daemon\3809d38db5c43001` | `tl-pw-8ad25bd9fbde`, do
+  `registry.js` thật trả về; chốt dò tổ tiên chạy trên đường dẫn thật `C:\Users\…\AppData\Local\…` và cho qua. Tệp
+  out: Cleanup `3f4f56fc…`, Gỡ `36749f86…`. Setup lại gặp 502 từ cổng web và Playwright tự thử lại (`SETUP OK`).
 - 15 tệp `.err` có từ trước giữ nguyên tên, kích thước, sha256 và mtime.
 - Giữa lượt, `<nonce>.err` bị khoá đọc (`locked`). Sau Cleanup chỉ còn thư mục hash rỗng; Gỡ xoá nó.
 - Phản chứng ở `07efca6`: `[IO.Directory]::Delete(p, $false)` trên thư mục có tệp ⇒ bị từ chối, tệp còn nguyên.
@@ -134,7 +142,8 @@ TONG: 66 dat / 66        rc=0
 - Khoá `C:\tl-win\KHOA.txt` và `F:\tl-win\KHOA.txt` (ADR-0057/58/59) được giữ trong bốn đợt; lúc lấy, cả hai đều rỗng.
   Đợt cuối: 12:03:30Z → nhả ~12:07Z.
   - Có tiến trình của phiên khác; đã ghi lại, không đụng tới.
-- Tổng cộng đã ghi 15 dòng vào `C:\tl-win\do-luong.csv`.
+- Lượt 5: khoá lấy 13:09:40Z (cả hai rỗng), nhịp tim 13:40:45Z, nhả ~13:48Z (0 byte). Tổng cộng đã ghi 20 dòng vào
+  `C:\tl-win\do-luong.csv`.
 
 ## 6. Lỗi do local Windows bắt (ADR-0057: lỗi do diff gây ra phải vá trước merge)
 
@@ -145,6 +154,7 @@ TONG: 66 dat / 66        rc=0
 | W3 | `5c01f39` | **pwsh 7**: `Get-ChildItem -ErrorAction Stop` trên thư mục không liệt kê được trả 0 mục, im lặng. Cleanup vì thế XOÁ `.err` khi lẽ ra phải dừng. Đây là P1 "quét thiếu" của Codex lượt 1, tái hiện trên Windows. | `6896f16`: quét bằng `[IO.Directory]` |
 | W4 | `5c01f39` | Harness: biến vòng `$c` chính là `$script:C` (PS không phân biệt hoa thường), nên P2 không thực sự đo. | `6896f16` |
 | W5 | `4d8e9a7` | Harness: biến đường dẫn `$DAU` và biến nội dung `$dau` là MỘT biến. Băm `dau_frag` Windows (`76fa593e`) lệch Linux (`3b4431a8`), nên lượt bị huỷ. | `2875afc` |
+| W7 | `ff34b2c` | Đột biến PS no-capture-record (`… -and` ⇒ `$true -or`) không còn lọt: chốt reparse mới của bản ghi đứng sau một `-and`, nên `-or` không ngắt được phần đọc tệp, và đột biến ném lỗi đọc thay vì lọt. Cả 5.1 lẫn 7: 109/110. Ca D1 thật vẫn STOP; lỗi ở đột biến. | `d7960ee`: đột biến gỡ cả cụm chốt bản ghi |
 | W6 | `2875afc` | Đột biến chỉ gỡ chốt tuyệt đối ở N17 không làm ca lọt, vì `FullName` tuyệt đối vẫn không trùng đường dẫn tương đối: chặn hai lớp. Không phải lỗi skill; đột biến được đổi thành gỡ cả hai lớp. | `07efca6` |
 
 Bài học W4/W5: bẫy PowerShell không phân biệt hoa thường đã cắn harness hai lần. Lượt W5 chỉ lộ ra nhờ đối chiếu băm đoạn
@@ -152,14 +162,19 @@ trích giữa hai nền.
 
 ## 7. Chưa đo được / giới hạn
 
-- N5 trên Windows (symlink tệp): KHÔNG ĐO ĐƯỢC. Chỉ đo một máy Windows; ASUS và VM không chạy.
+- N5, D10 trên Windows (symlink tệp): KHÔNG ĐO ĐƯỢC. Chỉ đo một máy Windows; ASUS và VM không chạy.
 - Phụ thuộc vào mô-đun NỘI BỘ `lib/tools/cli-client/registry.js` của bản ghim; Limits có khai điều này. Nâng ghim thì
   phải đo lại đường này. Codex lượt 3 xếp điều này là giới hạn đã khai, không chặn merge.
 - Bash < 4.4: chốt có trong mã (dừng trước `open`) nhưng không có shell cũ để đo; KHÔNG ĐO ĐƯỢC.
-- Giả định cache TIN CẬY và ỔN ĐỊNH; đã khai trong Limits. Liên kết tĩnh ở thư mục cha được chấp nhận.
-  - Bị bắt: đổi môi trường giữa các bước (D2); đổi sổ phiên hoặc thư mục hash thành liên kết giữa các bước (D5, D6, E3).
-  - Không chống được: tiến trình cùng người dùng tráo thư mục giữa lúc kiểm và lúc xoá.
-  - Codex lượt 3 xếp đây là giới hạn đã khai.
+- Từ `ff34b2c`, liên kết ở BẤT KỲ thành phần nào của đường dẫn tới thư mục hash ⇒ DỪNG (trước `open`, trước `close`,
+  bước dọn, Gỡ). Liên kết tĩnh ở thư mục cha KHÔNG còn được chấp nhận; cache Linux sau symlink phải đặt `XDG_CACHE_HOME`
+  về đường dẫn vật lý (Limits).
+  - Bị bắt: đổi môi trường giữa các bước (D2); đổi sổ phiên, thư mục hash hoặc thư mục tổ tiên thành liên kết giữa các
+    bước (D5, D6, D9, E3, E5).
+  - Không chống được (Limits): tiến trình cùng người dùng tráo thư mục, hoặc thay `00-sophien.txt` bằng hard link, giữa lúc
+    kiểm và lúc thao tác.
+- E8: `open` lỗi sau khi daemon đã tạo `.err` ⇒ Cleanup dừng ở `close` và `.err` ở lại (không xoá gì khi chưa chứng minh
+  đóng đúng phiên). Đây là hành vi "lỗi ⇒ không dọn" của B5, không phải dư lượng mới của đường thành công.
 - Thời gian thật để daemon nhả handle sau `10-verify` chưa đo. Các lượt N4 không cần thử lại.
 - Máy mới tinh, chưa có `ms-playwright\b`/`daemon`: suy từ mã sẽ còn hai thư mục rỗng dùng chung; chưa đo.
 - Ngoài chữ của spec: thêm hai cặp đánh dấu (`…-truoc-open`, `…-dau-cleanup`) và tệp `00-sophien.txt` (3 dòng). Đây là
@@ -167,3 +182,13 @@ trích giữa hai nền.
 - Harness kiểm ca DỪNG bằng sự có mặt của `STOP`, chưa khớp ĐÚNG lý do dừng cho từng ca. Lý do của các chốt quan trọng
   được khẳng định bằng đột biến; N17, E2–E4 được kiểm lý do bằng tay. Một ca có thể dừng vì lý do khác mà vẫn xanh. Đây
   là chỗ yếu đã biết của ma trận.
+
+## 8. Lượt 5 — sửa theo Codex lượt 4
+
+| finding lượt 4 | sửa ở SKILL | ca đo |
+|---|---|---|
+| P1 liên kết cha đổi đích giữa hai bước | bash `[ "$(realpath -m/-e -- "$DH")" = "$DH" ]`; PS dò `Split-Path -Parent` tới gốc, từ chối ReparsePoint. Ở trước `open`, đầu Cleanup, bước dọn, Gỡ. Thay cho các chốt `-L`/reparse riêng lẻ. | C14, D9, N20, N20R, E5, G5 (+ đột biến) |
+| P2 PS nhận bản ghi qua reparse point | kiểm thuộc tính `00-sophien.txt` trước khi đọc; tạo bản ghi bằng `FileMode.CreateNew` (PS) / `set -C` (bash) | D10 (Windows: KHÔNG ĐO ĐƯỢC), C15 |
+| P2 Gỡ dùng bản ghi Capture thay cho biên nhận Cleanup (B7) | khối mã Gỡ (1)/(2): thư mục từ `11-daemon-path.txt`, phải bằng `<dòng 2 của 00>/<nonce>.err` và câu trả lời CLI; không liên kết; xoá không đệ quy | G1–G7 (+ đột biến), N3, N4 |
+| P2 ma trận toàn luồng chưa chứng minh hết | CLI giả `deleted` = descriptor tồn tại; E1/E6 so băm; E2/E3 nhật ký chính xác + byte; lỗi ghi/chép/so/xoá; đột biến only-false, hash-early | E1–E8, N21–N24, L4, W1 |
+| P2 N2–N4 chưa có trên exact H | đo lại N1–N4 trên `d7960ee` (N3 trên `ff34b2c`, SKILL trùng byte) | §2–§5 |

@@ -106,3 +106,26 @@ là prompt, KHÔNG phải lease. Thứ định danh mã là **băm commit**, kh�
      - phần toàn luồng của harness: CLI giả có mô phỏng đúng hợp đồng phản hồi mà Cleanup so byte không?
   3. Chạy N1 đúng một lần, như lượt 3. Báo dòng `SOURCE` và dòng `TONG`.
   4. Ghi verdict vào `scratch/VERDICT.md`. Tách riêng finding chặn merge và giới hạn đã khai.
+
+## Lượt 5 (delta; CHỈ chạy khi chủ kho đã nâng trần hoặc chọn đường review khác — lease đang `used: 4, limit: 4`)
+
+- Lượt 4 ở `999f5fc`: `request_changes`. Chặn merge gồm 1 P1 và 4 P2. Nguyên văn trong `VERDICT.md`.
+- Sửa ở `ff34b2c` và `d7960ee`, chi tiết trong `RESULTS.md` §8:
+  - Không thành phần nào của đường dẫn tới thư mục hash được là liên kết: bash so `realpath`, PowerShell dò từng thư mục
+    tổ tiên tìm ReparsePoint. Áp ở trước `open`, trước `close`, bước dọn và Gỡ. Các chốt `-L`/reparse riêng lẻ cũ đã gộp
+    vào phép này.
+  - `00-sophien.txt`: PowerShell kiểm thuộc tính reparse trước khi đọc; cả hai shell tạo tệp ở chế độ không ghi đè.
+  - Gỡ có khối mã (1)/(2) cho cả hai shell: thư mục lấy từ `11-daemon-path.txt` (B7), đối chiếu `00-sophien.txt` và câu
+    trả lời CLI, rồi xoá không đệ quy.
+  - Harness: CLI giả trả `deleted` theo descriptor có tồn tại (như `session.js`); E1/E6 so `SHA256SUMS` với 4 tệp; E2/E3
+    so nhật ký chính xác và byte phiên kia; thêm E5/E7/E8, N20–N24, D9/D10, C14/C15, L4, W1, G1–G7 và các đột biến.
+- Việc lượt 5:
+  1. Với TỪNG finding chặn merge của lượt 4, xác minh trên mã ở H: đã sửa, sửa một phần, hay chưa. Căn cứ là dòng mã.
+  2. Tìm lỗi MỚI do bản sửa đưa vào. Chú ý:
+     - `realpath -m` khi thư mục chưa tồn tại;
+     - dò tổ tiên bằng `Split-Path -Parent` với đường dẫn UNC;
+     - `set -C` trong subshell lồng;
+     - khối Gỡ: `GO_DH=$(…) || …` và chuỗi `-and` trong ngoặc của PowerShell;
+     - CLI giả có còn mô phỏng đúng hợp đồng `close`/`delete-data` của bản ghim không.
+  3. Chạy N1 đúng một lần, như lượt 3. Báo dòng `SOURCE` và dòng `TONG`.
+  4. Ghi verdict vào `scratch/VERDICT.md`. Tách riêng finding chặn merge và giới hạn đã khai.

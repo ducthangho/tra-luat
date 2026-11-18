@@ -1,0 +1,3 @@
+$ python .claude/dev/launcher.py doctor  # e4fdf09 2026-11-18T16:21:59Z
+KET LUAN  : DU CONG CU BAT BUOC
+rc=0

@@ -24,13 +24,13 @@ ci_master:
   conclusion: success
   ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44278858848.txt); gate-packet-loop "GOM: ĐẠT · 16 mảnh".'
 nghiem_thu:
-  N1: passed  # n1-n5-chay-lai.txt: n1.sh d1ca71a..cd73961 va bf47a36^1..bf47a36 rc 0 "N1 DAT ... them/xoa 14 0"; phan chung H=base rc 1
-  N2: passed  # nghiem-thu-bf47a36.txt: doctrine-scan rc 0, adr-song rc 0 tren merge
-  N3: passed  # nghiem-thu-bf47a36.txt: doc-claims-check --strict --json rc 0, ok true, flags 0 tren merge
-  N4: not_measured  # chi co loi khai, khong duoc tinh passed (cung bai hoc Codex P1 PR #1398) — loi_khai_co_neo than PR #1386 (so hit dung ky vong tung mau)
-  N5: passed  # n1-n5-chay-lai.txt: n5.py tren blob tai bf47a36 rc 0 vung_dich_khop_khoi_chot 6c4ec88c; phan chung base rc 1
+  N1: passed  # n1-n5-chay-lai.txt: n1.sh merge va head rc 0, H=base rc 1; linux/n1-rig-cd73961.json 11/11; linux/n1-env-cd73961.json: ca moi truong 20/20, dot bien tung chot 5/5 GIET
+  N2: passed  # nghiem-thu-bf47a36.txt: doctrine-scan rc 0, adr-song rc 0 tren merge; linux/n23-phan-chung-bf47a36.json: hai ca phan chung mau DAT tren merge
+  N3: passed  # nghiem-thu-bf47a36.txt: doc-claims-check rc 0, ok true, flags 0 tren merge; linux/n23-phan-chung-bf47a36.json: phan chung PATH_MISSING rc 2 dung dong
+  N4: passed  # linux/n4_1386.py + linux/n4-grep-bf47a36.json / n4-grep-cd73961.json: 37/37 phep dung so hit va rc; phan chung ten sai va go cau doc/kiem => 0 hit rc 1
+  N5: passed  # n1-n5-chay-lai.txt: n5.py merge rc 0, base rc 1; linux/n5-ma-tran-31-bf47a36.json: ma tran 31/31, dot bien bang->chua 26/31 (5 ca am doi rc 0)
 lease_cuoi: wp646-r1-g1-claude
-landed: false
+landed: true
 moc_10_2_2:
   run: passed
   checkout: passed

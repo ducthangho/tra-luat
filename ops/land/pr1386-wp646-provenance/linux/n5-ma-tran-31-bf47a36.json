@@ -1,0 +1,329 @@
+{
+ "M": "bf47a369fa4872b0bc2032ddef1024fc79377cca",
+ "B": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+ "n5_sha256": "b8ebeb4ad417a14b3b3c01c1982dd2fbab890f40ed021de780f611a73ea021c4",
+ "ca": {
+  "H_dung_khoi": {
+   "rc_sach": 0,
+   "ky_vong_sach": 0,
+   "rc_noi": 0,
+   "ky_vong_noi": 0,
+   "out_sach": "56f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68",
+   "out_noi": "56f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "cau_them_o_muc_5": {
+   "rc_sach": 0,
+   "ky_vong_sach": 0,
+   "rc_noi": 0,
+   "ky_vong_noi": 0,
+   "out_sach": "56f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68",
+   "out_noi": "56f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "base_vung_0_byte": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 0 byte, sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "out_noi": "DO: vung dich lech khoi da chot: 0 byte, sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "ngat_60_cot": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1297 byte, sha256 21ef3afba298921d41887585c28a491b031920103d6bfd99f212b72ad70b94a6",
+   "out_noi": "DO: vung dich lech khoi da chot: 1297 byte, sha256 21ef3afba298921d41887585c28a491b031920103d6bfd99f212b72ad70b94a6",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "gop_hai_doan": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1292 byte, sha256 de53309fb06cb50f5e1e7e881f7fd16e84e900c087f418ad873152d8065566dd",
+   "out_noi": "DO: vung dich lech khoi da chot: 1292 byte, sha256 de53309fb06cb50f5e1e7e881f7fd16e84e900c087f418ad873152d8065566dd",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "dao_nghia_menh_de_1": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1285 byte, sha256 06752e6a4097da596b7601a13fc7ae9d09b1c0fb454d3be2b1aede39ea395027",
+   "out_noi": "DO: vung dich lech khoi da chot: 1285 byte, sha256 06752e6a4097da596b7601a13fc7ae9d09b1c0fb454d3be2b1aede39ea395027",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "dao_nghia_menh_de_3": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1291 byte, sha256 415b868bf7bd26146ef79dad3031cbae23f5b249a93c9d852a707c5aa875decb",
+   "out_noi": "DO: vung dich lech khoi da chot: 1291 byte, sha256 415b868bf7bd26146ef79dad3031cbae23f5b249a93c9d852a707c5aa875decb",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "dao_nghia_menh_de_6": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1298 byte, sha256 f8280de27b2c61600b2e59334f7c8df6d26c41b8816325728b945d103736dc45",
+   "out_noi": "DO: vung dich lech khoi da chot: 1298 byte, sha256 f8280de27b2c61600b2e59334f7c8df6d26c41b8816325728b945d103736dc45",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "crlf_trong_vung": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1311 byte, sha256 4675a99a72e6b4f9a4852423350d0185ea9aecf4196733f407523fe69b2df1d0",
+   "out_noi": "DO: vung dich lech khoi da chot: 1311 byte, sha256 4675a99a72e6b4f9a4852423350d0185ea9aecf4196733f407523fe69b2df1d0",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "doi_khoi_ra_cuoi_tep": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 0 byte, sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "out_noi": "DO: vung dich lech khoi da chot: 0 byte, sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "doi_khoi_sang_muc_5": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 0 byte, sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "out_noi": "DO: vung dich lech khoi da chot: 0 byte, sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "boc_rao": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 0,
+   "ky_vong_noi": 0,
+   "out_sach": "DO: vung dich lech khoi da chot: 1309 byte, sha256 a78963c1f18e962be42275bc68541af0479dc95264ef9b19f802427e4b786468",
+   "out_noi": "56f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "thut_le_4": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1325 byte, sha256 7a6864768d103f7beb807a45bbabfcc70b96189230adbb1c059d973b603182a1",
+   "out_noi": "DO: vung dich lech khoi da chot: 1325 byte, sha256 7a6864768d103f7beb807a45bbabfcc70b96189230adbb1c059d973b603182a1",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "comment_html_giua_dong": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1309 byte, sha256 12eaba5a2c947a7b6de403a975ef7cf68bd3c7756b841455d47ac78c8c83806e",
+   "out_noi": "DO: vung dich lech khoi da chot: 1309 byte, sha256 12eaba5a2c947a7b6de403a975ef7cf68bd3c7756b841455d47ac78c8c83806e",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "blockquote_chua_rao": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1317 byte, sha256 9c8b0b43bf0bfc67ce82483d263f9c6d8d3df744b8152c18f25d6c77d7705dc4",
+   "out_noi": "DO: vung dich lech khoi da chot: 1317 byte, sha256 9c8b0b43bf0bfc67ce82483d263f9c6d8d3df744b8152c18f25d6c77d7705dc4",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "code_span_hai_backtick": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1303 byte, sha256 fd69ea7d2fff49574d24318eeab2ce4c35d3ca840e1576c88bffb8eca812c11c",
+   "out_noi": "DO: vung dich lech khoi da chot: 1303 byte, sha256 fd69ea7d2fff49574d24318eeab2ce4c35d3ca840e1576c88bffb8eca812c11c",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "danh_sach": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1311 byte, sha256 09ad037a571ebe04225ba9176d2b5d7f2dfb0d4173777a7a3a5e6838ac51b2ac",
+   "out_noi": "DO: vung dich lech khoi da chot: 1311 byte, sha256 09ad037a571ebe04225ba9176d2b5d7f2dfb0d4173777a7a3a5e6838ac51b2ac",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "l5_span_title": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1319 byte, sha256 5fd04dadc5b5ac69c787b30dd3e72d9ace3a2354bdd44e157011f353bcb0f947",
+   "out_noi": "DO: vung dich lech khoi da chot: 1319 byte, sha256 5fd04dadc5b5ac69c787b30dd3e72d9ace3a2354bdd44e157011f353bcb0f947",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "l5_link_reference_definition": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1309 byte, sha256 0ca0abd68a08191898d4e7abc0f7676877df9b2bb989768a5759beabafb9af13",
+   "out_noi": "DO: vung dich lech khoi da chot: 1309 byte, sha256 0ca0abd68a08191898d4e7abc0f7676877df9b2bb989768a5759beabafb9af13",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "l5_setext_heading": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1301 byte, sha256 6d3db7e9749128d279b20e2699486f5899e435ea5ad6c0ae3d90bc82dbb8912b",
+   "out_noi": "DO: vung dich lech khoi da chot: 1301 byte, sha256 6d3db7e9749128d279b20e2699486f5899e435ea5ad6c0ae3d90bc82dbb8912b",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "l5_o_tieu_de_bang": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1307 byte, sha256 e107671f67d66fbf31883fb78995c936e4a85c5537f6dcbee698b82c3d27aafb",
+   "out_noi": "DO: vung dich lech khoi da chot: 1307 byte, sha256 e107671f67d66fbf31883fb78995c936e4a85c5537f6dcbee698b82c3d27aafb",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "l5_ngat_dong_giua_menh_de": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1297 byte, sha256 02ced55e64fc8e0839567f3337f4a8dab811fd9d81165f8a2431da848150aff8",
+   "out_noi": "DO: vung dich lech khoi da chot: 1297 byte, sha256 02ced55e64fc8e0839567f3337f4a8dab811fd9d81165f8a2431da848150aff8",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "them_cau_khong_ten_truong": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 0,
+   "ky_vong_noi": 0,
+   "out_sach": "DO: vung dich lech khoi da chot: 1344 byte, sha256 720b09498f78398853fa29bd8a1d7a3418ee5ac958551a0606c4260083e2f9e7",
+   "out_noi": "56f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "them_cau_dao_nghia": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 0,
+   "ky_vong_noi": 0,
+   "out_sach": "DO: vung dich lech khoi da chot: 1361 byte, sha256 80177d2f31d03cce92387998bdb6c543b65681424993fd39e968bcd330432573",
+   "out_noi": "56f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "dong_trong_thua": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 0,
+   "ky_vong_noi": 0,
+   "out_sach": "DO: vung dich lech khoi da chot: 1298 byte, sha256 0d5fa54adb462725908f8e8fcd39242d5e7c46257f3c85090f47ee1db8986efc",
+   "out_noi": "56f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "khoang_trang_cuoi_dong": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: vung dich lech khoi da chot: 1298 byte, sha256 00e433e20c963bbe36fa2eeaa88cfb0d9a38be9ba3b8670577b26862d1ccbc2f",
+   "out_noi": "DO: vung dich lech khoi da chot: 1298 byte, sha256 00e433e20c963bbe36fa2eeaa88cfb0d9a38be9ba3b8670577b26862d1ccbc2f",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "cau_them_sat_truoc_role_reviewer": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 0,
+   "ky_vong_noi": 0,
+   "out_sach": "DO: vung dich lech khoi da chot: 1324 byte, sha256 e249d7b787950c958a976b82c2656c4e955c3a17d5c7ffff7a1000c9a4d9d194",
+   "out_noi": "56f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "mot_byte_0D_trong_yaml": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: khoi YAML lech byte: f2ed31351ddf3becc91bd606e762b01aea3d10bf5ddbc0b6030fb4ae1c511e76",
+   "out_noi": "DO: khoi YAML lech byte: f2ed31351ddf3becc91bd606e762b01aea3d10bf5ddbc0b6030fb4ae1c511e76",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "crlf_toan_tep": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: khong thay \"Lease gồm:\" + rao yaml trong §4",
+   "out_noi": "DO: khong thay \"Lease gồm:\" + rao yaml trong §4",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "MD_rong": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: bay menh de nhung trong script khong khop MD_SHA cua dac ta",
+   "out_noi": "DO: bay menh de nhung trong script khong khop MD_SHA cua dac ta",
+   "dung_sach": true,
+   "dung_noi": true
+  },
+  "MD_bi_sua": {
+   "rc_sach": 1,
+   "ky_vong_sach": 1,
+   "rc_noi": 1,
+   "ky_vong_noi": 1,
+   "out_sach": "DO: bay menh de nhung trong script khong khop MD_SHA cua dac ta",
+   "out_noi": "DO: bay menh de nhung trong script khong khop MD_SHA cua dac ta",
+   "dung_sach": true,
+   "dung_noi": true
+  }
+ },
+ "so_ca": 31,
+ "sach_dung": 31,
+ "noi_dung_rc_ky_vong_sach": 26,
+ "noi_doi_sang_0": [
+  "boc_rao",
+  "cau_them_sat_truoc_role_reviewer",
+  "dong_trong_thua",
+  "them_cau_dao_nghia",
+  "them_cau_khong_ten_truong"
+ ],
+ "noi_khop_ky_vong_rieng": 31,
+ "TONG": "DAT"
+}

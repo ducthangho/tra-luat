@@ -9,3 +9,8 @@ rc=12
   THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
 CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
 rc=12
+
+# LAN 3 (sau do that tieu chi con la loi khai, 2026-11-18); lease = git show 92c0d57ece5a2a5076a75158b4bcf01bd6300a25:ops/leases/wp1342-r2-g1-claude.yaml (blob b8110ec82a69cf29f278cbd93a4b7328f5dd042d, lay tu GitHub)
+# checkout: nhanh ops/land-wd-moc 2addb28 + ban ghi da sua; origin/master = 640a092daaab87b95cca7679d93d80b83f37d996 (ls-remote) ; luc: 2026-11-18T16:23:50Z
+ĐÓNG ĐƯỢC WP wp1342 — merge d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a
+rc=0

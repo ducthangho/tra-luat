@@ -24,16 +24,16 @@ ci_master:
   conclusion: success
   ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44271842401.txt); gate-packet-loop "GOM: ĐẠT · 16 mảnh".'
 nghiem_thu:
-  N1: passed  # danh-gia-gate-output-44271842401.txt: gate-packet-loop GOM DAT 16 manh tren d1ca71a; so MUTANTS bang base: loi_khai_co_neo than PR #1384
-  N2: not_measured  # chi co loi khai, khong duoc tinh passed (cung bai hoc Codex P1 PR #1398) — loi_khai_co_neo than PR #1384: _additive1342r2(base, head) = [] va phan chung
-  N3: passed  # loi_khai_co_neo than PR #1384: wp1342_additive_byte_preserved dat, dot bien do; windows-native TOM-TAT: HEAD wp1342_additive_byte_preserved rc=0
-  N4: passed  # windows-native TOM-TAT: N4W 13/13 base va H; Linux: loi_khai_co_neo than PR #1384
+  N1: passed  # danh-gia-gate-output-44271842401.txt: gate-packet-loop GOM DAT 16 manh tren d1ca71a; linux/n134_1384.py + linux/n134-phan-chung-d1ca71a.json: MUTANTS 1852 = 1852, phan chung doi ten khoa DO
+  N2: passed  # linux/n2_1384.py + linux/n2-phan-chung-d1ca71a.json: _additive1342r2 B/H va P/M = [], ba tu kiem = [], ba phan chung DO
+  N3: passed  # linux/n134_1384.py + linux/n134-phan-chung-d1ca71a.json: ca dat tren merge, chen _1174_win_lock vao _1174_lock => DO (N3 trên CÂY LÀM VIỆC); windows-native TOM-TAT: HEAD rc=0
+  N4: passed  # windows-native TOM-TAT: N4W 13/13 base va H; linux/n134_1384.py + linux/n134-phan-chung-d1ca71a.json: M4 dat tren merge, xoa kiem kieu persist => DO
   N5: passed  # windows-native TOM-TAT: ca native r1 dat base va H; symlink_file KHONG DO DUOC Desktop (dat tren VM)
   N6: passed  # windows-native TOM-TAT + vm-p5: 8/9 Desktop + P5 VM; B1 phan chung GIET
   N7: passed  # windows-native dot-bien.json: a/b/c GIET dung ca dich, doi chung dat
   N8: passed  # nghiem-thu-d1ca71a.txt: numstat 2 tep +293; ruff F 3/13 = 3/13; diff --check rc 0; adr-song/doctrine-scan rc 0
 lease_cuoi: wp1342-r2-g1-claude
-landed: false
+landed: true
 moc_10_2_2:
   run: passed
   checkout: passed

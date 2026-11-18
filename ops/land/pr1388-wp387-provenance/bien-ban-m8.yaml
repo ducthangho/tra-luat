@@ -24,14 +24,14 @@ ci_master:
   conclusion: success
   ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44285378727.txt); gate-packet-loop GOM DAT.'
 nghiem_thu:
-  N1: passed  # launcher-test-toan-suite-e4fdf09.txt: toan suite 424/424 tren merge (gom ca (a),(a')); doi chung base + phan chung: loi khai than PR
-  N2: passed  # nhu tren, ca (b) dat; phan chung: loi khai than PR
-  N3: passed  # nhu tren, tam ca con lai dat; dot bien: loi khai than PR (--dot-bien 720/720)
-  N4: not_measured  # chi co loi khai, khong duoc tinh passed (cung bai hoc Codex P1 PR #1398) — loi_khai_co_neo than PR: --dot-bien du bang 720/720, 6 KHONG DO DUOC ke thua dung danh sach N4
-  N5: passed  # khong do native (packet B); nen khac Linux do bang (e5),(i) trong suite 424/424
-  N6: passed  # nghiem-thu-e4fdf09.txt: diff --check, adr-song, doctrine-scan rc 0, numstat 2 tep +450; ruff delta 0 loi khai than PR
+  N1: passed  # launcher-test-toan-suite-e4fdf09.txt (a),(a') dat; do-lai-n1-n6/n1-a-tren-base.txt (a) DO tren base dung TinHieuChotCa; do-lai-n1-n6/do-tay-n1-n2-n3-e4fdf09.json xoa ve bam => (a') DO; dot bien (a) OK giet
+  N2: passed  # do-lai-n1-n6/do-tay-n1-n2-n3-e4fdf09.json (b) dat, xoa gan log_bam_luc_utc => (b) DO TinHieuChotCa khong KeyError; dot bien (b) OK giet
+  N3: passed  # do-lai-n1-n6/do-tay-n1-n2-n3-e4fdf09.json 11 ca rc 0, tong 19,14 s < 25 s; do-lai-n1-n6/dot-bien-e4fdf09.stdout.txt dot bien dung ca dich OK giet
+  N4: passed  # do-lai-n1-n6/dot-bien-e4fdf09.stdout.txt rc 0 DOT BIEN 720/720 dat (6 khong do duoc = 5 windows + 124_khi_chau_con_song, ke thua base: khong-do-duoc-ke-thua.txt); tap bo qua suite base = head (suite-base-d1ca71a.txt)
+  N5: passed  # khong do native (packet B); nen khac Linux do bang (e5),(i) trong suite 424/424 va dot bien r387_a_nen_khac_* OK giet
+  N6: passed  # nghiem-thu-e4fdf09.txt: diff --check, adr-song, doctrine-scan rc 0, numstat 2 tep +450; do-lai-n1-n6: ruff F delta 0, doctor rc = base, run.json 1.6.1 du ba khoa
 lease_cuoi: wp387-r1-g1-claude
-landed: false
+landed: true
 moc_10_2_2:
   run: passed
   checkout: passed

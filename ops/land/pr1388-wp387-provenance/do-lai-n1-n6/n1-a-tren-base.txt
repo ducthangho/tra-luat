@@ -1,0 +1,9 @@
+2026-11-18T16:14:58Z
+$ python .claude/dev/launcher_test.py --lap-ca r387_m1_chau_ghi_muon_khai_pham_vi_bam --lan 1   # launcher.py base d1ca71a, launcher_test.py head e4fdf09
+moi truong: pid=2430 pgid=2430 sid=2202 truong_nhom=True chung_nhom_voi_cha=False job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: khong can (da la truong nhom)
+  lan 1/1: HONG
+  HONG r387_m1_chau_ghi_muon_khai_pham_vi_bam: TinHieuChotCa: r387(a) cay chua chet ma khai None
+
+LAP r387_m1_chau_ghi_muon_khai_pham_vi_bam: 0/1 qua, 0 bo qua, 1 hong
+rc=1

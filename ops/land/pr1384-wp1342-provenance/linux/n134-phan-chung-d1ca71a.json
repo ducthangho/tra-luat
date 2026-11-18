@@ -1,0 +1,59 @@
+{
+ "B": "641108cb997872b0ef2a277ea9c8faf8b82532bb",
+ "H": "c10d0710735e3532035a5219d469704d8a7592bb",
+ "M": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+ "n1": {
+  "so_luong": {
+   "B": 1852,
+   "H": 1852
+  },
+  "bang_nhau": true,
+  "phan_chung_doi_ten_khoa": {
+   "khoa": "74a_raw_closing_cung_ten",
+   "so_luong": 1852,
+   "bang_nhau": false,
+   "ket_qua": "DO_DUNG"
+  }
+ },
+ "n3": {
+  "doi_chung_sach": {
+   "rc": 0,
+   "kq": {
+    "wp1342_additive_byte_preserved": null
+   },
+   "stderr_cuoi": "/tmp/tmp9v0vlsyo/m/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n"
+  },
+  "chen_goi__1174_win_lock_vao__1174_lock": {
+   "rc": 0,
+   "kq": {
+    "wp1342_additive_byte_preserved": [
+     "str",
+     "AssertionError: ('N3 trên CÂY LÀM VIỆC', ['_1174_lock:3993'])"
+    ]
+   },
+   "stderr_cuoi": "/tmp/tmp9v0vlsyo/m/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_qua": "DO_DUNG"
+  }
+ },
+ "n4": {
+  "doi_chung_sach": {
+   "rc": 0,
+   "kq": {
+    "wp1342_pure_lock_persist_refuse": null
+   },
+   "stderr_cuoi": "/tmp/tmp9v0vlsyo/m/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n"
+  },
+  "xoa_kiem_kieu_persist_o__1174_win_persist": {
+   "rc": 0,
+   "kq": {
+    "wp1342_pure_lock_persist_refuse": [
+     "str",
+     "AssertionError: ('persist bytes/mode', 'WP1174 UNKNOWN: native Windows required')"
+    ]
+   },
+   "stderr_cuoi": "/tmp/tmp9v0vlsyo/m/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_qua": "DO_DUNG"
+  }
+ },
+ "TONG": "DAT"
+}

@@ -1,0 +1,486 @@
+{
+ "M": "cd739618e80ba1163758900673da69f732ae0f61",
+ "phep": [
+  {
+   "lenh": "grep -n -Fw -e heartbeat_at cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 1,
+   "hit": 0,
+   "dong": [],
+   "nhom": "i",
+   "hit_ky_vong": 0,
+   "rc_ky_vong": 1,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -Fw -e heartbeat_at cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 1,
+   "hit": 0,
+   "dong": [],
+   "nhom": "i",
+   "hit_ky_vong": 0,
+   "rc_ky_vong": 1,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -Fw -e heartbeat_at cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/launcher.py",
+   "rc": 1,
+   "hit": 0,
+   "dong": [],
+   "nhom": "i",
+   "hit_ky_vong": 0,
+   "rc_ky_vong": 1,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -Fw -e heartbeat_at cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/gate_lifecycle.py",
+   "rc": 1,
+   "hit": 0,
+   "dong": [],
+   "nhom": "i",
+   "hit_ky_vong": 0,
+   "rc_ky_vong": 1,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -Fw -e heartbeat_at cd739618e80ba1163758900673da69f732ae0f61 -- .github/workflows/ci.yml",
+   "rc": 1,
+   "hit": 0,
+   "dong": [],
+   "nhom": "i",
+   "hit_ky_vong": 0,
+   "rc_ky_vong": 1,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -Fw -e heartbeat_at cd739618e80ba1163758900673da69f732ae0f61 -- .github/workflows/ops-publish-lease.yml",
+   "rc": 1,
+   "hit": 0,
+   "dong": [],
+   "nhom": "i",
+   "hit_ky_vong": 0,
+   "rc_ky_vong": 1,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -Fw -e heartbeat_at cd739618e80ba1163758900673da69f732ae0f61 -- :(glob).claude/dev/*.py :(glob)ops/*.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop_test.py:7809:               \"heartbeat_at\": \"2026-10-18T07:58:00Z\"}"
+   ],
+   "nhom": "ii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e ^BAT_BUOC = \\( cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:292:BAT_BUOC = ("
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e ^def kiem\\( cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:1028:def kiem(lease: dict, tep=None, goc=None, bo_qua_han: bool = False) -> tuple:"
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e ^def kiem_github\\( cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:1246:def kiem_github(lease: dict, tep=None, goc=None) -> tuple:"
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e ^def _phan_loai_lease\\( cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:783:def _phan_loai_lease(lease: dict, bay_gio=None) -> str:"
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e add_parser\\(\"ai-dang-giu\" cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:2705:    q = sub.add_parser(\"ai-dang-giu\", help=\"quét toàn kho xem ai đang giữ một đường dẫn\")"
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -Fw -e lease_until cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 1,
+   "hit": 0,
+   "dong": [],
+   "nhom": "iii",
+   "hit_ky_vong": 0,
+   "rc_ky_vong": 1,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -F -e han = _doc_han(lease[\"lease_expires_at_utc\"]) cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:1125:    han = _doc_han(lease[\"lease_expires_at_utc\"])"
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -F -e if not bo_qua_han and han <= datetime.now(timezone.utc): cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:1129:    if not bo_qua_han and han <= datetime.now(timezone.utc):"
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -F -e han = _doc_han(lease.get(\"lease_expires_at_utc\")) cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:785:        han = _doc_han(lease.get(\"lease_expires_at_utc\"))"
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -F -e sha = str(lease[\"reviewed_sha_required\"]).strip() cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:1104:    sha = str(lease[\"reviewed_sha_required\"]).strip()"
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -F -e if not SHA40.match(sha): cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:1105:    if not SHA40.match(sha):"
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -F -e kiem(lease, tep, goc, bo_qua_han=True) cd739618e80ba1163758900673da69f732ae0f61 -- ops/lease_publish.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/lease_publish.py:1299:        kiem(lease, tep, goc, bo_qua_han=True)"
+   ],
+   "nhom": "iii",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e ^def kiem_lease\\( cd739618e80ba1163758900673da69f732ae0f61 -- ops/ci_duong_nhanh.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/ci_duong_nhanh.py:689:def kiem_lease(doi, kho=ROOT, chay=subprocess.run, bay_gio=None, ra=None) -> list[str]:"
+   ],
+   "nhom": "iv",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -F -e han = _han_lease(lease.get(\"lease_expires_at_utc\")) cd739618e80ba1163758900673da69f732ae0f61 -- ops/ci_duong_nhanh.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/ci_duong_nhanh.py:713:        han = _han_lease(lease.get(\"lease_expires_at_utc\"))"
+   ],
+   "nhom": "iv",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -F -e lenh = [sys.executable, \"-B\", \"-c\", MA_KIEM_HET_HAN, duong] cd739618e80ba1163758900673da69f732ae0f61 -- ops/ci_duong_nhanh.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/ci_duong_nhanh.py:718:            lenh = [sys.executable, \"-B\", \"-c\", MA_KIEM_HET_HAN, duong]"
+   ],
+   "nhom": "iv",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -F -e lp.kiem(lp._doc_yaml(sys.argv[1]), sys.argv[1], '.', bo_qua_han=True) cd739618e80ba1163758900673da69f732ae0f61 -- ops/ci_duong_nhanh.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:ops/ci_duong_nhanh.py:131:    \"try:\\n    lp.kiem(lp._doc_yaml(sys.argv[1]), sys.argv[1], '.', bo_qua_han=True)\\n\""
+   ],
+   "nhom": "iv",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e ^def cmd_kiem_dong_wp\\( cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:3617:def cmd_kiem_dong_wp(a, state_dir: Path) -> int:"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e add_parser\\(\"kiem-dong-wp\" cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:6849:    q = sub.add_parser(\"kiem-dong-wp\", help=\"#1106 ADR-0060 M8: biên bản sổ sách + lease đủ để đóng WP? (D1–D4, không state)\")"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e D4 lease cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:3651:            thieu.append(\"D4 lease: không khớp lease_cuoi/packet/generation hoặc lease_until chưa qua\")"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e ^def cmd_kiem_merge\\( cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:3506:def cmd_kiem_merge(a, state_dir: Path) -> int:"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e add_parser\\(\"kiem-merge\" cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:6801:    q = sub.add_parser(\"kiem-merge\", help=\"#1106 ADR-0060: đủ điều kiện bỏ draft/merge trên head H? (K0–K7, không state)\")"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e _dk\\(\"K0  cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:3599:    _dk(\"K0 đầu vào neo\", k0, thieu)"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e _dk\\(\"K3  cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:3602:    p3 += (_dk(\"K3 connector\", lambda: _doc_connector(a.connector, a.repo, a.pr, h), thieu) or ([], None))[0]"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e _dk\\(\"K4  cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:3603:    _dk(\"K4 review offline\", k4, thieu)"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e ^def _human_merge\\( cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:3441:def _human_merge(a, root, lease, spec, p3):"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e ^def cmd_record_review\\( cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:1180:def cmd_record_review(a, state_dir: Path) -> int:"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e add_parser\\(\"record-review\" cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:6659:    q = sub.add_parser(\"record-review\", help=\"ghi một lượt review\")"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -E -e a\\.reviewed_sha != st\\[\"reviewing_head_sha\"\\] cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:1215:    if a.reviewed_sha != st[\"reviewing_head_sha\"]:"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -F -e str(ls.get(\"lease_until\")) cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 0,
+   "hit": 1,
+   "dong": [
+    "cd739618e80ba1163758900673da69f732ae0f61:.claude/dev/packet_loop.py:3646:            het = datetime.strptime(str(ls.get(\"lease_until\")), \"%Y-%m-%dT%H:%M:%SZ\").replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)"
+   ],
+   "nhom": "v",
+   "hit_ky_vong": 1,
+   "rc_ky_vong": 0,
+   "dung": true
+  },
+  {
+   "lenh": "grep -n -Fw -e reviewed_sha_required cd739618e80ba1163758900673da69f732ae0f61 -- .claude/dev/packet_loop.py",
+   "rc": 1,
+   "hit": 0,
+   "dong": [],
+   "nhom": "v",
+   "hit_ky_vong": 0,
+   "rc_ky_vong": 1,
+   "dung": true
+  }
+ ],
+ "phan_chung": {
+  "ten_sai_cmd_kiem_dong": {
+   "lenh": "grep -n -Fw -e cmd_kiem_dong -- .claude/dev/packet_loop.py ops/lease_publish.py",
+   "rc": 1,
+   "hit": 0,
+   "dong": [],
+   "ket_qua": "DO_DUNG"
+  },
+  "ten_sai_BAT_BUOC_LEASE": {
+   "lenh": "grep -n -Fw -e BAT_BUOC_LEASE -- .claude/dev/packet_loop.py ops/lease_publish.py",
+   "rc": 1,
+   "hit": 0,
+   "dong": [],
+   "ket_qua": "DO_DUNG"
+  },
+  "go_cau_doc_han_kiem": {
+   "truoc": {
+    "lenh": "grep -n -F -e han = _doc_han(lease[\"lease_expires_at_utc\"]) -- ops/lease_publish.py",
+    "rc": 0,
+    "hit": 1,
+    "dong": [
+     "ops/lease_publish.py:1125:    han = _doc_han(lease[\"lease_expires_at_utc\"])"
+    ]
+   },
+   "sau": {
+    "lenh": "grep -n -F -e han = _doc_han(lease[\"lease_expires_at_utc\"]) -- ops/lease_publish.py",
+    "rc": 1,
+    "hit": 0,
+    "dong": []
+   },
+   "ket_qua": "DO_DUNG"
+  },
+  "go_cau_kiem_dang": {
+   "truoc": {
+    "lenh": "grep -n -F -e if not SHA40.match(sha): -- ops/lease_publish.py",
+    "rc": 0,
+    "hit": 1,
+    "dong": [
+     "ops/lease_publish.py:1105:    if not SHA40.match(sha):"
+    ]
+   },
+   "sau": {
+    "lenh": "grep -n -F -e if not SHA40.match(sha): -- ops/lease_publish.py",
+    "rc": 1,
+    "hit": 0,
+    "dong": []
+   },
+   "ket_qua": "DO_DUNG"
+  }
+ },
+ "so_phep": 37,
+ "so_phep_dung": 37,
+ "TONG": "DAT"
+}

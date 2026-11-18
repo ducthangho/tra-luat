@@ -1,0 +1,49 @@
+{
+ "M": "bf47a369fa4872b0bc2032ddef1024fc79377cca",
+ "n2": {
+  "doi_chung_doctrine-scan": {
+   "rc": 0,
+   "stdout_cuoi": "doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine\n"
+  },
+  "doi_chung_adr-song": {
+   "rc": 0,
+   "stdout_cuoi": "adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])\n"
+  },
+  "phan_chung_hai_ca_mau": {
+   "rc": 0,
+   "kq": {
+    "doctrine_scan_chep_tron_5_1_bi_chan": null,
+    "adr_song_thieu_dong_thi_do": null
+   },
+   "stderr_cuoi": "/tmp/tmpy6rvcn4e/m/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_qua": "DO_DUNG"
+  }
+ },
+ "n3": {
+  "doi_chung": {
+   "rc": 0,
+   "ok": true,
+   "flags": []
+  },
+  "phan_chung": {
+   "rc": 2,
+   "ok": false,
+   "flags": [
+    {
+     "layer": "L1",
+     "file": "docs/PROTOCOL_DA_PHIEN.md",
+     "line": 1753,
+     "claim": "ops/khong_ton_tai_dot_bien.py",
+     "reason": "PATH_MISSING"
+    }
+   ],
+   "dong_them": 1753,
+   "co_PATH_MISSING_ten_dot_bien": true,
+   "trich": [
+    "{\"ok\": false, \"schema\": \"doc_claims_check.v1\", \"roots\": [\"CHANGELOG.md\", \"SKILL.md\", \"CLAUDE.md\", \"CONTEXT.md\", \"references\", \"docs\"], \"files_scanned\": 131, \"claims_flagged\": 393, \"flags\": [{\"layer\": \"L1\", \"file\": \"docs/PROTOCOL_DA_PHIEN.md\", \"line\": 1753, \"claim\": \"ops/khong_ton_tai_dot_bien.py\", \"reason\": \"PATH_MISSING\"}], \"advisories\": [{\"layer\": \"L1\", \"file\": \"CHANGELOG.md\", \"line\": 147, \"claim\": \"ops/reviews/wp538/\", \"reason\": \"PATH_MISSING_IN_HISTORICAL_DOC\""
+   ],
+   "ket_qua": "DO_DUNG"
+  }
+ },
+ "TONG": "DAT"
+}

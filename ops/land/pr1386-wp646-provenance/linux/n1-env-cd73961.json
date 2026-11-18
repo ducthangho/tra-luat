@@ -1,0 +1,201 @@
+{
+ "B": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+ "H": "cd739618e80ba1163758900673da69f732ae0f61",
+ "ca": {
+  "doi_chung_Hg": {
+   "rc": 0,
+   "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+   "ky_vong": 0,
+   "dung": true
+  },
+  "ignoreSubmodules_all_Hg": {
+   "rc": 0,
+   "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+   "ky_vong": 0,
+   "dung": true
+  },
+  "gitlink_duoi_ignoreSubmodules_all": {
+   "rc": 1,
+   "out": "IEN.md: :100644 100644 7aebad643e2f6176515882d8331606f04c63c51f edcb6a154cc8b03a0553f955621e4332168809af M docs/PROTOCOL_DA_PHIEN.md|:000000 160000 0000000000000000000000000000000000000000 d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a A docs/sub",
+   "ky_vong": 1,
+   "dung": true
+  },
+  "gitlink": {
+   "rc": 1,
+   "out": "IEN.md: :100644 100644 7aebad643e2f6176515882d8331606f04c63c51f edcb6a154cc8b03a0553f955621e4332168809af M docs/PROTOCOL_DA_PHIEN.md|:000000 160000 0000000000000000000000000000000000000000 d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a A docs/sub",
+   "ky_vong": 1,
+   "dung": true
+  },
+  "attr_khong_diff_Hg": {
+   "rc": 0,
+   "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+   "ky_vong": 0,
+   "dung": true
+  },
+  "them_dong_5_duoi_attr_khong_diff": {
+   "rc": 1,
+   "out": "N1 DO: dong them/xoa = 15 0, can 14 0",
+   "ky_vong": 1,
+   "dung": true
+  },
+  "grafts_Hg": {
+   "rc": 0,
+   "out": " be removed in a future Git version.\nhint: \nhint: Please use \"git replace --convert-graft-file\"\nhint: to convert the grafts into replace refs.\nhint: \nhint: Turn this message off by running\nhint: \"git config advice.graftFileDeprecated false\"",
+   "ky_vong": 0,
+   "dung": true
+  },
+  "H_bad_duoi_grafts": {
+   "rc": 1,
+   "out": " be removed in a future Git version.\nhint: \nhint: Please use \"git replace --convert-graft-file\"\nhint: to convert the grafts into replace refs.\nhint: \nhint: Turn this message off by running\nhint: \"git config advice.graftFileDeprecated false\"",
+   "ky_vong": 1,
+   "dung": true
+  },
+  "nguoi_goi_dat_GIT_DIR_sai": {
+   "rc": 0,
+   "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+   "ky_vong": 0,
+   "dung": true
+  },
+  "nguoi_goi_dat_GIT_WORK_TREE_sai": {
+   "rc": 0,
+   "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+   "ky_vong": 0,
+   "dung": true
+  },
+  "nguoi_goi_dat_GIT_OBJECT_DIRECTORY_sai": {
+   "rc": 0,
+   "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+   "ky_vong": 0,
+   "dung": true
+  },
+  "nguoi_goi_dat_GIT_ALTERNATE_OBJECT_DIRECTORIES_sai": {
+   "rc": 0,
+   "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+   "ky_vong": 0,
+   "dung": true
+  },
+  "replace_ref_object_khac_Hg": {
+   "rc": 0,
+   "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+   "ky_vong": 0,
+   "dung": true
+  },
+  "replace_H_bad_bang_Hg": {
+   "rc": 1,
+   "out": "md: :100644 100644 7aebad643e2f6176515882d8331606f04c63c51f edcb6a154cc8b03a0553f955621e4332168809af M docs/PROTOCOL_DA_PHIEN.md|:000000 100644 0000000000000000000000000000000000000000 587be6b4c3f93f93c489c0111bba5596147a26cb A docs/them.md",
+   "ky_vong": 1,
+   "dung": true
+  },
+  "replace_H_bad_GIT_NO_REPLACE_OBJECTS_rong": {
+   "rc": 1,
+   "out": "md: :100644 100644 7aebad643e2f6176515882d8331606f04c63c51f edcb6a154cc8b03a0553f955621e4332168809af M docs/PROTOCOL_DA_PHIEN.md|:000000 100644 0000000000000000000000000000000000000000 587be6b4c3f93f93c489c0111bba5596147a26cb A docs/them.md",
+   "ky_vong": 1,
+   "dung": true
+  },
+  "replace_blob_xau_bang_blob_dung": {
+   "rc": 1,
+   "out": "N1 DO: dong them/xoa = 15 0, can 14 0",
+   "ky_vong": 1,
+   "dung": true
+  },
+  "chen_khoi_sai_vi_tri": {
+   "rc": 1,
+   "out": "N1 DO: blob H f7cc6ac962512524d38df5b9bb30f26620461afb khac blob ky vong edcb6a154cc8b03a0553f955621e4332168809af",
+   "ky_vong": 1,
+   "dung": true
+  },
+  "core_abbrev_bogus": {
+   "rc": 2,
+   "out": "N1 MOI_TRUONG: khong mo duoc kho /tmp/tmp85qn4rej/rig: fatal: bad numeric config value 'bogus' for 'core.abbrev' in file .git/config: invalid unit",
+   "ky_vong": 2,
+   "dung": true
+  },
+  "chmod_x_ban_sach": {
+   "rc": 1,
+   "out": "N1 DO: diff-tree khac dung mot dong M 100644->100644 cho docs/PROTOCOL_DA_PHIEN.md: :100644 100755 7aebad643e2f6176515882d8331606f04c63c51f edcb6a154cc8b03a0553f955621e4332168809af M docs/PROTOCOL_DA_PHIEN.md",
+   "ky_vong": 1,
+   "dung": true
+  },
+  "them_tep_ban_sach": {
+   "rc": 1,
+   "out": "md: :100644 100644 7aebad643e2f6176515882d8331606f04c63c51f edcb6a154cc8b03a0553f955621e4332168809af M docs/PROTOCOL_DA_PHIEN.md|:000000 100644 0000000000000000000000000000000000000000 587be6b4c3f93f93c489c0111bba5596147a26cb A docs/them.md",
+   "ky_vong": 1,
+   "dung": true
+  }
+ },
+ "dot_bien": {
+  "bo_GIT_NO_REPLACE_OBJECTS": {
+   "ca": {
+    "replace_H_bad_bang_Hg": {
+     "rc": 0,
+     "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+     "ky_vong_duoi_dot_bien": 0,
+     "doi_ket_qua": true
+    }
+   },
+   "ket_qua": "GIET"
+  },
+  "bo_unset": {
+   "ca": {
+    "nguoi_goi_dat_GIT_DIR_sai": {
+     "rc": 2,
+     "out": "N1 MOI_TRUONG: khong mo duoc kho /tmp/tmp85qn4rej/rig: fatal: not a git repository: '/tmp/tmp85qn4rej/khong-co.git'",
+     "ky_vong_duoi_dot_bien": 2,
+     "doi_ket_qua": true
+    }
+   },
+   "ket_qua": "GIET"
+  },
+  "bo_b_diff_tree": {
+   "ca": {
+    "chmod_x": {
+     "rc": 0,
+     "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+     "ky_vong_duoi_dot_bien": 0,
+     "doi_ket_qua": true
+    },
+    "them_tep": {
+     "rc": 0,
+     "out": "N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0",
+     "ky_vong_duoi_dot_bien": 0,
+     "doi_ket_qua": true
+    }
+   },
+   "ket_qua": "GIET"
+  },
+  "bo_c_d_e": {
+   "ca": {
+    "them_dong_5": {
+     "rc": 0,
+     "out": "N1 DAT: blob 4359509a4796f61bb88c4d1a37b1d35706e8c0d1, mode 100644, them/xoa 15 0",
+     "ky_vong_duoi_dot_bien": 0,
+     "doi_ket_qua": true
+    },
+    "chen_khoi_sai_vi_tri": {
+     "rc": 0,
+     "out": "N1 DAT: blob f7cc6ac962512524d38df5b9bb30f26620461afb, mode 100644, them/xoa 14 0",
+     "ky_vong_duoi_dot_bien": 0,
+     "doi_ket_qua": true
+    }
+   },
+   "ket_qua": "GIET"
+  },
+  "bo_d_e": {
+   "ca": {
+    "chen_khoi_sai_vi_tri": {
+     "rc": 0,
+     "out": "N1 DAT: blob f7cc6ac962512524d38df5b9bb30f26620461afb, mode 100644, them/xoa 14 0",
+     "ky_vong_duoi_dot_bien": 0,
+     "doi_ket_qua": true
+    }
+   },
+   "ket_qua": "GIET"
+  }
+ },
+ "khoi_chen_byte": 1297,
+ "so_ca": 20,
+ "so_ca_dung": 20,
+ "so_dot_bien": 5,
+ "so_dot_bien_giet": 5,
+ "TONG": "DAT"
+}

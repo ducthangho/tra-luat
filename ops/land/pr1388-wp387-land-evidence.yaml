@@ -1,8 +1,8 @@
 # HO SO LAND — packet #387 LAUNCHER-BAM-LOG-SAU-CAY-CHET r1 (packet A, chi Linux), lease g1, qua PR #1388. Khuon: ops/land/pr1386-wp646-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
 #
-# TRANG THAI: merged (e4fdf09), landed FALSE. Bon moc §10.2.2 cua ci.yml 44285378727 measured passed (Workflow definition qua wd-run 44339151012,
-#   2026-11-18); van chua landed vi N4 (--dot-bien 720/720) chi co loi_khai_co_neo (than PR #1388), khong chay lai sau merge — kiem-dong-wp doc GIA TRI nghiem_thu, khong doc chu thich.
+# TRANG THAI: merged (e4fdf09), landed TRUE tu 2026-11-18: bon moc §10.2.2 cua ci.yml 44285378727 measured passed (Workflow definition qua wd-run
+#   44339151012); N1-N6 do lai sau merge (do-lai-n1-n6/: --dot-bien 720/720, doi chung base, do tay N1/N2, ruff, doctor, run.json). Ban landed false truoc do giu trong lich su git.
 # MUC TIEU: launcher cho cay tien trinh con chet han (toi da 10 s) truoc khi bam log; run.json them log_bam_luc_utc,
 #   log_bam_cay_da_chet, log_bam_cho_giay; chi Linux. Nen khac: tra false ngay, giu moc ket_thuc va quyet dinh xoa prompt nhu base.
 #   Packet B (LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS, nhanh Darwin/Windows) HOAN toi sau khi A land; Issue #387 van mo cho B.
@@ -89,7 +89,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp387-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1388.'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" (dung du kien khi landed false); lan 2 (2026-11-18, sau wd-run) van rc 12 thieu D2 (landed false, xem landed_con_thieu).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" (dung du kien khi landed false); lan 2 (2026-11-18, sau wd-run) van rc 12 thieu D2 (landed false luc do); lan 3 (2026-11-18T16:28:48Z, sau do lai N1-N6, landed true) rc 0 "ĐÓNG ĐƯỢC WP wp387 — merge e4fdf09…".'}
   - {item: 'dong Issue #387', ket_qua: 'not_applicable — readback-issue-387.json open; KHONG dong: packet B (Darwin/Windows) con lai.'}
   - {item: 'phat hanh', ket_qua: 'not_applicable — tep dev-side (.claude/dev/), khong vao goi.'}
 # ---- het truong chuan
@@ -124,14 +124,15 @@ lease:
 
 trang_thai_packet:
   merged: true
-  landed: false
-  landed_con_thieu: 'N4 (--dot-bien 720/720) chi co loi_khai_co_neo (than PR #1388), khong chay lai sau merge. Bon moc §10.2.2 da du (2026-11-18); muon lat landed can phep do that cho tieu chi do (hoac chu kho owner_waived), roi chay lai kiem-dong-wp.'
+  landed: true
+  landed_nang_cap: 'measured — do-lai-n1-n6/TOM-TAT.md: N1-N6 do lai sau merge tren cay e4fdf09 (2026-11-18T16:14Z–16:27Z): --dot-bien rc 0 "DOT BIEN: 720/720 dat  (6 khong do duoc tren nen nay)" (dot-bien-e4fdf09.stdout.txt), doi chung base (n1-a-tren-base.txt), do tay N1/N2 + N3 (do-tay-n1-n2-n3-e4fdf09.json), ruff/doctor/run.json; kiem-dong-wp-m8.txt LAN 3 rc 0.'
+  landed_nang_cap_chi_thi: 'loi_khai_co_neo — chu kho yeu cau phien dieu phoi #1206 do cac tieu chi con loi khai de lat landed (2026-11-18, trong phien; khong co hien vat GitHub).'
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren e4fdf09: run/checkout/gate_output measured passed, workflow_definition measured passed (wd-run 44339151012) => DAT.
-    (2) lease nha: DAT. (3) bookkeeping: ho so nay; M8 kiem-dong-wp LAN 2 van rc 12 (D2: landed false, xem landed_con_thieu). (4) review neo 5bcea6c: connector sach + audit chu
+    (2) lease nha: DAT. (3) bookkeeping: ho so nay; M8 kiem-dong-wp LAN 3 rc 0 (kiem-dong-wp-m8.txt). (4) review neo 5bcea6c: connector sach + audit chu
     kho. (5) uy quyen: audit tu dang 6975774421. (6) muc tieu: N1-N6 (xem nghiem_thu). (7) tran: Codex PR 2/10 (connector), CI 1/2, kich thuoc 450/450.
   canh_bao_cho_chu_kho: >-
-    (i) --dot-bien du bang 720/720 va doi chung base chi co loi khai than PR #1388 (khong chay lai sau merge vi dai). (ii) Diff dung bang
+    (i) --dot-bien du bang 720/720 va doi chung base DA DO LAI sau merge 2026-11-18 (do-lai-n1-n6/). (ii) Diff dung bang
     tran 450: moi sua doi them dong ve sau cho packet nay phai di revision moi. (iii) Packet B con lai, Issue #387 de mo. (iv) Moc Workflow
     definition: DA DO 2026-11-18 (wd-run 44339151012 cho run 44285378727).
 
@@ -139,14 +140,13 @@ review:
   so_loi_goi_codex: 'measured — readback-pr1388-comments.json: PR 2/10: connector tren 5bcea6c hai luot (manual + draft marked ready), ca hai sach. Ngoai ngan sach PR: 9 luot Codex offline review dac ta.'
 
 nghiem_thu:
-  N1: 'measured — launcher-test-toan-suite-e4fdf09.txt (clone rieng detached e4fdf09, 10:27:11Z–10:34:00Z, Python 3.13.18): `python3 .claude/dev/launcher_test.py` rc 0 "424/424 ca DA CHAY QUA (tong 426, bo qua 2, hong 0)" (bo qua t62_..., r484_g4_windows_sid_alias_identity), gom ca (a), (a′). Doi chung base va phan chung xoa ve bam: loi_khai_co_neo than PR.'
-  N2: 'measured — launcher-test-toan-suite-e4fdf09.txt (ca (b) dat trong suite) + loi_khai_co_neo (phan chung xoa dong gan log_bam_luc_utc, than PR).'
-  N3: 'measured — launcher-test-toan-suite-e4fdf09.txt (tam ca con lai (t),(c),(d),(e),(i),(f),(g),(h) dat trong suite tren) + loi_khai_co_neo (dot bien OK giet 1/1 dung ca dich, than PR).'
-  N4: 'loi_khai_co_neo — than PR: --dot-bien du bang rc 0 "DOT BIEN: 720/720 dat  (6 khong do duoc tren nen nay)", 0 SAI; sau muc khop N4. Khong chay lai sau merge.'
+  N1: 'measured — launcher-test-toan-suite-e4fdf09.txt (clone rieng detached e4fdf09, 10:27:11Z–10:34:00Z, Python 3.13.18): `python3 .claude/dev/launcher_test.py` rc 0 "424/424 ca DA CHAY QUA (tong 426, bo qua 2, hong 0)" (bo qua t62_..., r484_g4_windows_sid_alias_identity), gom ca (a), (a′). Doi chung base: do-lai-n1-n6/n1-a-tren-base.txt (test e4fdf09 + launcher d1ca71a, --lap-ca) rc 1 "TinHieuChotCa: r387(a) cay chua chet ma khai None". Do tay xoa ve bam => (a′) DO rc 1: do-lai-n1-n6/do-tay-n1-n2-n3-e4fdf09.json. Dot bien (a) OK giet 1/1: do-lai-n1-n6/dot-bien-e4fdf09.stdout.txt.'
+  N2: 'measured — launcher-test-toan-suite-e4fdf09.txt (ca (b) dat) + do-lai-n1-n6/do-tay-n1-n2-n3-e4fdf09.json: xoa dong gan log_bam_luc_utc => (b) DO rc 1 bang TinHieuChotCa, khong KeyError; dot bien luon_false/moc_bam_truoc OK giet 1/1 (do-lai-n1-n6/dot-bien-e4fdf09.stdout.txt).'
+  N3: 'measured — do-lai-n1-n6/do-tay-n1-n2-n3-e4fdf09.json: 11 ca moi rc 0, tong wall 19,14 s (< 25 s); dot bien (t),(c),(d),(e),(i),(f),(h) va neo M5 -> t76 OK giet 1/1 dung ca dich (do-lai-n1-n6/dot-bien-e4fdf09.stdout.txt).'
+  N4: 'measured — do-lai-n1-n6/dot-bien-e4fdf09.stdout.txt + dot-bien-e4fdf09.rc.txt: `python .claude/dev/launcher_test.py --dot-bien` tren e4fdf09 (16:14:24Z–16:26:57Z, Python 3.13.18) rc 0 "DOT BIEN: 720/720 dat  (6 khong do duoc tren nen nay)"; 18 dot bien moi cua A + neo M5 OK; sau muc khong do duoc = 5 windows + 124_khi_chau_con_song, deu co o base (do-lai-n1-n6/khong-do-duoc-ke-thua.txt). Tap bo qua suite base = head: do-lai-n1-n6/suite-base-d1ca71a.txt (413/413, bo qua t62 + r484_g4) va launcher-test-toan-suite-e4fdf09.txt.'
   N5: 'measured — launcher-test-toan-suite-e4fdf09.txt + launcher-windows-44285378703.trich.txt (Linux): suite tren merge gom (e5), (i) mo phong nen khac; launcher-windows 44285378703 windows-latest: 9 ca r387 BO QUA dung thiet ke, hong 0. Native Darwin/Windows thuoc packet B.'
-  N6: 'measured — nghiem-thu-e4fdf09.txt: git diff --check rc 0, adr-song rc 0 (66/66), doctrine-scan rc 0 (12 tep), VERSION 1.6.1, numstat 2 tep +450. ruff F delta 0 va doctor: loi_khai_co_neo than PR.'
+  N6: 'measured — nghiem-thu-e4fdf09.txt: git diff --check rc 0, adr-song rc 0 (66/66), doctrine-scan rc 0 (12 tep), VERSION 1.6.1, numstat 2 tep +450. ruff F (0.17.5) base rc 1 5 F841 = merge rc 1 5 F841 => delta 0 (do-lai-n1-n6/ruff-F-d1ca71a.txt, ruff-F-e4fdf09.txt); doctor base rc 0 = merge rc 0 (do-lai-n1-n6/doctor-*.trich.txt); run.json version 1.6.1 du ba khoa M1 (do-lai-n1-n6/n6-run-e4fdf09.txt).'
 
 khong_do_duoc:
   - 'Lua chon cach merge qua AskUserQuestion (khong co hien vat GitHub).'
-  - '--dot-bien du bang va doi chung base khong chay lai sau merge (chi loi khai than PR #1388).'
   - 'Native Darwin/Windows (packet B, hoan).'

@@ -1,0 +1,109 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1313
+packet_id: wp1313
+spec_packet_id: LAUNCHER-5XX-KHONG-PHAI-CHAN
+revision: 3
+generation: 1
+lease_id: wp1313-r3-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-fable-5-2
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: '5xx khong header GitHub la khong_do_duoc o _do_rest_github va _do_mcp_endpoint, mo ta loi truyen tai o mcp_github_doc Phien._post, canh bao kho_chan chi khi tt_kho == chan (no #1313); executor Claude Fable 5.2, reviewer Codex connector; khong do Windows; human_audited tren exact head truoc merge.'
+depends_on: []
+spec_path: ops/specs/LAUNCHER-5XX-KHONG-PHAI-CHAN-r3.md
+spec_ref: refs/heads/ops/wp1313-r2-g1-lease
+spec_nguon: 'dac ta tren nhanh lease nay; dinh danh theo grammar ADR-0063 (revision 3). Ghim bang spec_hash.'
+spec_sha256_required: 1bca349acd50d018147907686e29b2db700d1d2cf216961b36b6b6de70d4a23d
+spec_hash: 1bca349acd50d018147907686e29b2db700d1d2cf216961b36b6b6de70d4a23d
+spec_duyet: 'chu kho duyet bam dac ta r3 1bca349a qua AskUserQuestion 18-11 ~00:2xZ (packet khong thuoc Mission, ADR-0067), sau review doc lap Codex luot 3-5 tren r3 (ops/reviews/wp1313-spec/: luot 3, 4 request_changes; luot 5 approve, con 1 P3 chu); r3 sinh ra vi executor r2 g1 dung o preflight theo §6 (cho thu ba mcp_github_doc.py); chu kho xac nhan qua human audit cuoi packet.'
+prompt_path: ops/specs/LAUNCHER-5XX-KHONG-PHAI-CHAN-r3.md
+prompt_sha256_required: 1bca349acd50d018147907686e29b2db700d1d2cf216961b36b6b6de70d4a23d
+write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+- .claude/dev/mcp_github_doc.py
+- .claude/dev/mcp_github_doc_test.py
+write_set_hash: 26ce5983e879e25e61a93885bfa35dc4a2b715cbd4853ca6a7f9ab3d7703a3d8
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+- .claude/dev/mcp_github_doc.py
+- .claude/dev/mcp_github_doc_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'N1-N6 cua dac ta r3 dat tren exact head'}
+- {id: M-2, dieu_kien: 'ADR-0060: CI required xanh tren exact head; 0 P0-P2 mo; connector da review dung commit; human audit human_exact_head_audit.v1 tren H'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chi cap quyen thi cong; merge/land do chu kho duyet dung SHA.'
+branch: agent/wp1313-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3d6bfa5361dc30caf1caea9ae2c3ffe1a563902f
+start_from_sha: 3d6bfa5361dc30caf1caea9ae2c3ffe1a563902f
+start_from_ghi_chu: 'origin/master luc cap lease (merge PR #1379). .claude/dev/launcher.py va launcher_test.py KHONG doi giua base dac ta 13bf69f va 3d6bfa5 (git diff rong), nen so dong o §0 van dung.'
+reviewed_sha_required: 3d6bfa5361dc30caf1caea9ae2c3ffe1a563902f
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1313
+granted_on_instruction_readback: 'chu kho 17-11 ~16:1xZ chon "#1313 LAUNCHER-5XX"; 18-11 ~00:0xZ chon "Lam r3 gop luon" khi executor r2 dung o preflight; 18-11 ~00:2xZ duyet bam dac ta r3 1bca349a.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+executor_ghi_chu: 'Executor la phien Claude Code cloud do phien dieu phoi mo (create_session, model claude-fable-5-2); phien dieu phoi khong tu thi cong.'
+recorder_ghi_chu: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS ghi lease, KHONG phai executor.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-18T00:25:00Z'
+  goc_quet: 'container phien #1206, fetch +refs/heads/* (sau khi ai-dang-giu bao thieu nhanh may chu agent/wp1370-r1-g1-claude); master cuc bo = origin/master 3d6bfa5'
+  ket_qua: '.claude/dev/mcp_github_doc.py, mcp_github_doc_test.py: NGUOI_GIU 0. .claude/dev/launcher.py, launcher_test.py: NGUOI_GIU 1 = wp1313-r2-g1-claude, chinh lease duoc thay the boi lease nay (bia mo hai chieu).'
+thay_the_cho:
+  - wp1313-r2-g1-claude
+thay_the_cho_ghi_chu: 'lease r2 con han (toi 12:01Z 18-11) nhung KHONG co cong viec: executor dung o preflight, chua sua tep nao, nhanh agent/wp1313-g1-claude chua day. Thu hoi bang bia mo hai chieu (lease cu mang da_bi_thay_the).'
+leased_at_utc: '2026-11-18T00:25:00Z'
+heartbeat_at: '2026-11-18T00:25:00Z'
+heartbeat_required_minutes: 360
+heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
+lease_until: '2026-11-18T02:05:00Z'
+lease_expires_at_utc: '2026-11-18T02:05:00Z'
+lease_until_ghi_chu: '12h; rut han ngay sau land.'
+attempts_used: 1
+attempts_limit: 2
+attempts_basis: '<= 2 phien executor.'
+budget:
+  codex_review_calls:
+    pr_wp1313_r3_g1: {used: 0, reserved: 0, limit: 10}
+  ci_ubuntu_runs:
+    pr_wp1313_r3_g1: {used: 0, reserved: 0, limit: 2}
+  windows_native_runs:
+    pr_wp1313_r3_g1: {used: 0, reserved: 0, limit: 0}
+  khong_reset_theo_generation: true
+budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native 0 (ca thuan gia urlopen, chay moi nen; khong CI Windows). Ngoai ngan sach PR: 6 loi goi Codex offline review dac ta truoc lease (ops/reviews/wp1313-spec/: r1 luot 1, r2 luot 2 (mot lan treo stdin goi lai), r3 luot 3-5).'
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-18T01:47:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex PR 1/10: connector tren eb6a4ce (sach). CI Ubuntu 1/2: PR #1382 tren eb6a4ce (41 success, 1 skipped). Windows native 0/0. Ngoai ngan sach PR: 6 loi goi review dac ta. Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-18T12:25:00Z'
+  han_moi_utc: '2026-11-18T02:05:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1313 da MERGE: PR #1382 (head eb6a4ce14e7287ef94bca15c948bbe28762507b0) merge commit e2849760a5c2c00c679b02ca559de69c7d5e48ef,
+    human audit chu kho issuecomment-6966483711. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu bon duong dan write set sau 2026-11-18T02:05:00Z phai ra NGUOI_GIU 0.'

@@ -1,0 +1,61 @@
+# ai-dang-giu sau rut han (han moi 02:05Z), luc 2026-11-18T02:21:20Z; fetch +refs/heads/*; may chu 304 ref, cuc bo thieu 0
+## .claude/dev/launcher.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ag-t0-01b-exec-1-antigravity-20260821	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/ag-t0-01b-exec-1-antigravity-20260821.yaml
+HẾT_HẠN	ag-t0-01b-exec-1r2-antigravity-20260822	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/ag-t0-01b-exec-1r2-antigravity-20260822.yaml
+HẾT_HẠN	plat-m4-exec-2-claude-20260821	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/plat-m4-exec-2-claude-20260821.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g6	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp-codex-credential-refresh-exec-g6.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1313-r2-g1-claude	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp1313-r2-g1-claude.yaml
+HẾT_HẠN	wp1313-r3-g1-claude	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp1313-r3-g1-claude.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1-claude-20260907.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1g2-claude-20260907.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1g3-claude-20260924.yaml
+HẾT_HẠN	wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp461-be-mat-thu-hai-cua-codex-exec-1r2-claude-20260907.yaml
+HẾT_HẠN	wp685-r18-g1-antigravity-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r18-g1-antigravity-20261007.yaml
+HẾT_HẠN	wp685-r19-g2-codex-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r19-g2-codex-20261007.yaml
+HẾT_HẠN	wp685-r19-g2b-codex-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r19-g2b-codex-20261007.yaml
+HẾT_HẠN	wp685-r20-g3-codex-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r20-g3-codex-20261007.yaml
+HẾT_HẠN	wp685-r23-g4-codex-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r23-g4-codex-20261007.yaml
+HẾT_HẠN	wp685-r23-g4b-codex-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r23-g4b-codex-20261007.yaml
+HẾT_HẠN	wp685-r28-g5-claude-20261009	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r28-g5-claude-20261009.yaml
+HẾT_HẠN	wp743-r1-g1-claude-20261016	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp743-r1-g1-claude-20261016.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## .claude/dev/launcher_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ag-t0-01b-exec-1-antigravity-20260821	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/ag-t0-01b-exec-1-antigravity-20260821.yaml
+HẾT_HẠN	ag-t0-01b-exec-1r2-antigravity-20260822	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/ag-t0-01b-exec-1r2-antigravity-20260822.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g1-claude	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/ci-g5-cong-cu-chia-manh-r1-g1-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g2-claude	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/ci-g5-cong-cu-chia-manh-r1-g2-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g3-claude	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/ci-g5-cong-cu-chia-manh-r1-g3-claude.yaml
+HẾT_HẠN	plat-m4-exec-2-claude-20260821	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/plat-m4-exec-2-claude-20260821.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g2	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp-codex-credential-refresh-exec-g2.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g3	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp-codex-credential-refresh-exec-g3.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g4	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp-codex-credential-refresh-exec-g4.yaml
+HẾT_HẠN	wp-codex-credential-refresh-exec-g6	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp-codex-credential-refresh-exec-g6.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp1313-r2-g1-claude	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp1313-r2-g1-claude.yaml
+HẾT_HẠN	wp1313-r3-g1-claude	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp1313-r3-g1-claude.yaml
+HẾT_HẠN	wp685-r18-g1-antigravity-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r18-g1-antigravity-20261007.yaml
+HẾT_HẠN	wp685-r19-g2-codex-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r19-g2-codex-20261007.yaml
+HẾT_HẠN	wp685-r19-g2b-codex-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r19-g2b-codex-20261007.yaml
+HẾT_HẠN	wp685-r20-g3-codex-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r20-g3-codex-20261007.yaml
+HẾT_HẠN	wp685-r23-g4-codex-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r23-g4-codex-20261007.yaml
+HẾT_HẠN	wp685-r23-g4b-codex-20261007	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r23-g4b-codex-20261007.yaml
+HẾT_HẠN	wp685-r28-g5-claude-20261009	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp685-r28-g5-claude-20261009.yaml
+HẾT_HẠN	wp743-r1-g1-claude-20261016	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp743-r1-g1-claude-20261016.yaml
+HẾT_HẠN	wp766-r1-g1-claude-20261016	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp766-r1-g1-claude-20261016.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## .claude/dev/mcp_github_doc.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp1313-r3-g1-claude	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp1313-r3-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## .claude/dev/mcp_github_doc_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp1313-r3-g1-claude	refs/heads/ops/wp1313-r2-g1-lease:ops/leases/wp1313-r3-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

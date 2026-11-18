@@ -1,0 +1,3 @@
+== job 134514462578 gate-registry (ubuntu-latest), ci.yml run 44218314533 (GET actions/jobs/134514462578/logs, trich dong khop) ==
+2026-11-18T01:52:10.0214286Z mcp_github_doc tests: 18/18 ca QUA (hong 0, bo qua 0)
+2026-11-18T01:52:10.0214731Z CI_DANG_KY .claude/dev/mcp_github_doc_test.py: ĐẠT rc=0

@@ -1,0 +1,16 @@
+== job 134513608224 ubuntu-latest (GET actions/jobs/134513608224/logs, trich dong khop) ==
+2026-11-18T01:52:47.2424544Z 413/413 ca DA CHAY QUA (tong 415, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+2026-11-18T01:58:13.8925973Z   r1313_rest_5xx_ve_chan       OK  giet 1/1: r1313_rest_5xx_khong_header_la_khong_do_duoc
+2026-11-18T01:58:13.8926652Z   r1313_mcp_5xx_ve_chan        OK  giet 1/1: r1313_mcp_endpoint_5xx_khong_header_la_khong_do_duoc
+2026-11-18T01:58:13.8927327Z   r1313_rest_mo_ta_noi_chan    OK  giet 1/1: r1313_rest_5xx_khong_header_la_khong_do_duoc
+2026-11-18T01:58:13.8928170Z   r1313_canh_kho_gop_moi_that_bai OK  giet 1/1: r1313_canh_gh_chi_noi_chan_khi_kho_chan
+2026-11-18T02:02:24.4533124Z DOT BIEN: 702/702 dat  (6 khong do duoc tren nen nay)
+== job 134513607931 windows-latest (GET actions/jobs/134513607931/logs, trich dong khop) ==
+2026-11-18T01:54:18.7296975Z   BO QUA r1335_giu_argv0_goc_khi_ghim_tep: BO QUA r1335_argv0: Windows van thay argv[0] bang duong da bam (venv Windows mac dinh la ban sao)
+2026-11-18T01:54:20.9730269Z   BO QUA r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke: BO QUA r1335_F4: shebang/errno exec la khai niem POSIX (nhanh chon ung vien dung chung, do tren Linux)
+2026-11-18T01:54:21.8841839Z 330/330 ca DA CHAY QUA (tong 415, bo qua 85, hong 0) - KHONG DU: 85 ca BO QUA, chua do gi
+2026-11-18T02:01:06.3373272Z   r1313_rest_5xx_ve_chan       OK  giet 1/1: r1313_rest_5xx_khong_header_la_khong_do_duoc
+2026-11-18T02:01:06.3373842Z   r1313_mcp_5xx_ve_chan        OK  giet 1/1: r1313_mcp_endpoint_5xx_khong_header_la_khong_do_duoc
+2026-11-18T02:01:06.3374420Z   r1313_rest_mo_ta_noi_chan    OK  giet 1/1: r1313_rest_5xx_khong_header_la_khong_do_duoc
+2026-11-18T02:01:06.3374960Z   r1313_canh_kho_gop_moi_that_bai OK  giet 1/1: r1313_canh_gh_chi_noi_chan_khi_kho_chan
+2026-11-18T02:04:37.4039175Z DOT BIEN: 561/561 dat  (147 khong do duoc tren nen nay)

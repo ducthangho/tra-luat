@@ -1,0 +1,39 @@
+# Bien ban M8 (ADR-0060) dong WP #1313 LAUNCHER-5XX-KHONG-PHAI-CHAN r3 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1382-wp1313-land-evidence.yaml. landed true (audit human_audited chu kho tu dang 6966483711 tren eb6a4ce).
+# Bon moc §10.2.2 run 44218314533 measured passed (wd-run 44222450562; gate output 39/39 bang danh_gia_gate.py v2).
+packet: wp1313
+revision: 3
+generation: 1
+spec_hash: 1bca349acd50d018147907686e29b2db700d1d2cf216961b36b6b6de70d4a23d
+head_da_review: eb6a4ce14e7287ef94bca15c948bbe28762507b0
+tree_h: fcee784989af3f4d13951878da1251012be748f2
+review:
+  offline: 'khong goi Codex offline tren ma; 6 luot Codex offline chi review DAC TA truoc lease (ops/reviews/wp1313-spec/ tren nhanh ops/wp1313-r2-g1-lease: r1 luot 1, r2 luot 2 kem 1 lan treo stdin, r3 luot 3-5)'
+  connector: 'readback-pr1382-comments.json: 6965401104 codex-review-receipt "Didn''t find any major issues", Reviewed commit eb6a4ce14e (kich bang @codex review 6965372312)'
+  human_audit: 'issuecomment-6966483711 human_exact_head_audit.v1 approve tren eb6a4ce (chu kho tu dang)'
+windows:
+  phan_loai: required
+  nguon: 'duong .claude/dev/ (ADR-0060 M3). Lease: Windows native 0/0 (ca thuan gia urlopen, chay moi nen; khong CI Windows).'
+  ket_qua: 'measured hau merge — launcher-windows-44218314443.trich.txt: job windows-latest 134513607931 tren e284976, "330/330 ca DA CHAY QUA (tong 415, bo qua 85, hong 0)", bon dot bien r1313_* OK giet 1/1, "DOT BIEN: 561/561 dat"; khong dong BO QUA nao ten r1313. Runner GitHub, khong phai may native; do SAU merge.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1382#issuecomment-6966483711
+duyet_chu_kho_ghi_chu: 'audit tu dang 01:45:16Z 18-11, truoc merge 01:46:06Z; chu kho chon "Merge eb6a4ce" trong phien dieu phoi (loi khai).'
+merge_commit: e2849760a5c2c00c679b02ca559de69c7d5e48ef
+tree_m: 64d0155cbc5976d84e115cffeaa543ac55bbb8b9
+ci_master:
+  run_id: 44218314533
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44218314533.txt); gate-registry "mcp_github_doc tests: 18/18 ca QUA".'
+nghiem_thu:
+  N1: passed  # launcher-windows-44218314443.trich.txt: 4 dot bien r1313_* giet 1/1 dung ca dich tren ubuntu va windows; ma tran cheo 4x3 va doi chung bien/dinh dang: loi_khai_co_neo than PR #1382
+  N2: passed  # launcher-windows-44218314443.trich.txt: ubuntu "DOT BIEN: 702/702 dat", windows "561/561 dat"
+  N3: passed  # launcher-windows-44218314443.trich.txt: ubuntu 413/413 hong 0, windows 330/330 hong 0; tap ca dong base/head: loi_khai_co_neo than PR #1382
+  N4: passed  # nghiem-thu-e284976.txt: numstat 4 tep +181/-2; ruff F 0/5/1/0 = 0/5/1/0; diff --check rc 0; adr-song/doctrine-scan rc 0
+  N5: passed  # loi_khai_co_neo than PR #1382: doctor rc 0 base va H, dong github du 7 duong
+  N6: passed  # gate-registry-44218314533.trich.txt: mcp_github_doc tests 18/18; --dot-bien (20 giet that, 0 tin dung gia, 0 song sot): loi_khai_co_neo than PR #1382
+lease_cuoi: wp1313-r3-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

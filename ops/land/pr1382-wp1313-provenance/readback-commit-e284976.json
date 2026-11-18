@@ -1,0 +1,142 @@
+{
+ "author": {
+  "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+  "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+  "followers_url": "https://api.github.com/users/ducthangho/followers",
+  "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+  "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+  "gravatar_id": "",
+  "html_url": "https://github.com/ducthangho",
+  "id": 12748935,
+  "login": "ducthangho",
+  "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+  "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+  "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+  "repos_url": "https://api.github.com/users/ducthangho/repos",
+  "site_admin": false,
+  "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+  "type": "User",
+  "url": "https://api.github.com/users/ducthangho",
+  "user_view_type": "public"
+ },
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/e2849760a5c2c00c679b02ca559de69c7d5e48ef/comments",
+ "commit": {
+  "author": {
+   "date": "2026-11-18T01:46:06Z",
+   "email": "ducthangho@gmail.com",
+   "name": "ducthangho"
+  },
+  "comment_count": 0,
+  "committer": {
+   "date": "2026-11-18T01:46:06Z",
+   "email": "noreply@github.com",
+   "name": "GitHub"
+  },
+  "message": "Merge pull request #1382 from ducthangho/agent/wp1313-g1-claude\n\nLAUNCHER-5XX-KHONG-PHAI-CHAN r3 g1: 5xx không header GitHub là khong_do_duoc, không phải chan (#1313)",
+  "tree": {
+   "sha": "64d0155cbc5976d84e115cffeaa543ac55bbb8b9",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/64d0155cbc5976d84e115cffeaa543ac55bbb8b9"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/e2849760a5c2c00c679b02ca559de69c7d5e48ef",
+  "verification": {
+   "payload": "tree 64d0155cbc5976d84e115cffeaa543ac55bbb8b9\nparent 5f9bf6b3b499ac8d137328b4ae0c0550395d2c53\nparent eb6a4ce14e7287ef94bca15c948bbe28762507b0\nauthor ducthangho <ducthangho@gmail.com> 1794966366 +0700\ncommitter GitHub <noreply@github.com> 1794966366 +0700\n\nMerge pull request #1382 from ducthangho/agent/wp1313-g1-claude\n\nLAUNCHER-5XX-KHONG-PHAI-CHAN r3 g1: 5xx không header GitHub là khong_do_duoc, không phải chan (#1313)",
+   "reason": "valid",
+   "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq/QNeCRC1aQ7uu5UhlAAAB0cQABg1BXwHiKW1jPkqpaeGSiob\nNE0rqFt26Dzv/nPdSwdW1bBE2CmvBPTbDFjY6O8k5JbusKnpz/R0ZhIVVyGfJzva\nTRzOH03ILRRW8w8GHZPcNeKORQu9025vLmgSotalKpM2uXI9Tq5a4BEBplgwtnvy\nLcrQsQ8hcFkxopUGraYQE3peEhqIqob4+c7JE0Phwwxjq+8djJgQGRmvzJS7mEFo\nVylm7Hou/K5WUbIF+vWzsACgPnn0mxTCcBhReLiSM4+OZxqdxqo5fE3R5zyGjsqL\nqr0is5vGROsmQitmo1nAb1siSjfP3Oa4IzcvMyl6QsSWtwCN4079avYUnOU68R2+\nwiCiixGIbpgH8xxC+hUez+ZjJW0aG2r3LINzRfsEEFx2pbKOrnrMKLCepGhPiwbn\nCPx+il/K+f1ZI4IiOSallocMaW4dYRmlkmDeZ9cTg8jvkhP1OKRcByM8lVC4xTAt\nACcuswhiazaMZoLMGkiu3b7DSdqU4jn8qUg9jewbtiXa7mDKkFSTkCo8o8N6mhiK\nXA8zJzgLfulk1ypgKSYZ9jxFr9eAUAImJJ0N4jepqJ+ZswFRFDr2ely63j6RhQD6\nkBNuKYQuhmgD1K2Jvwgw2aSW5+r0gFru6PdcAfkdfkcqBQmE087+eZkPmpFln7Zt\nXNOu/EODiwwqQIdvFWZD\n=MXE1\n-----END PGP SIGNATURE-----\n",
+   "verified": true,
+   "verified_at": "2026-11-18T01:46:06Z"
+  }
+ },
+ "committer": {
+  "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+  "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+  "followers_url": "https://api.github.com/users/web-flow/followers",
+  "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+  "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+  "gravatar_id": "",
+  "html_url": "https://github.com/web-flow",
+  "id": 19864447,
+  "login": "web-flow",
+  "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+  "organizations_url": "https://api.github.com/users/web-flow/orgs",
+  "received_events_url": "https://api.github.com/users/web-flow/received_events",
+  "repos_url": "https://api.github.com/users/web-flow/repos",
+  "site_admin": false,
+  "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+  "type": "User",
+  "url": "https://api.github.com/users/web-flow",
+  "user_view_type": "public"
+ },
+ "files": [
+  {
+   "additions": 24,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/e2849760a5c2c00c679b02ca559de69c7d5e48ef/.claude%2Fdev%2Flauncher.py",
+   "changes": 25,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/.claude%2Fdev%2Flauncher.py?ref=e2849760a5c2c00c679b02ca559de69c7d5e48ef",
+   "deletions": 1,
+   "filename": ".claude/dev/launcher.py",
+   "patch": "@@ -4742,6 +4742,13 @@ def _do_rest_github(url: str, timeout: float = 6.0, *, token: str | None = None)\n \n     Trạng thái thứ ba `khong_do_duoc` (mạng hỏng, DNS, quá hạn) KHÔNG được gộp\n     vào `chan` — đúng doctrine `None ≠ False`.\n+\n+    NGOẠI LỆ CỦA \"phân loại theo header\" (#1313): `HTTPError` KHÔNG header GitHub\n+    mà mã 5xx (`500 <= mã < 600`) ⇒ `khong_do_duoc`, mô tả `loi truyen tai`, KHÔNG\n+    phải `chan`. Đo 13-11-2026: 502 không header do đường hầm proxy đứt bị in y\n+    như 403 chặn theo đường dẫn, vài phút sau REST thông lại. Đây là lựa chọn\n+    chẩn đoán BẢO THỦ (chưa đủ bằng chứng kết luận chặn), không khẳng định chắc\n+    chắn là lỗi truyền tải. Mọi 2xx/4xx không header (kể cả 407, 429) vẫn `chan`.\n     \"\"\"\n     dau = {\"Accept\": \"application/vnd.github+json\"}\n     # Credential ĐÃ CHUẨN HOÁ phải đi tới ĐÂY. `_doc_moi_truong` loại bản giữ chỗ và\n@@ -4762,6 +4769,11 @@ def _do_rest_github(url: str, timeout: float = 6.0, *, token: str | None = None)\n         # 4xx CÓ header GitHub = TỚI NƠI nhưng THAO TÁC HỎNG. `mo` đúng cho câu\n         # \"đường có thông không\"; `thanh_cong=False` đúng cho câu \"làm được việc\n         # không\". Gộp hai câu ấy chính là lỗi P1 mà cross-review bắt trên PR \"#143\".\n+        if not co_gh and 500 <= e.code < 600:\n+            # #1313: 5xx KHÔNG header chưa đủ bằng chứng để nói \"proxy chặn\".\n+            return (\"khong_do_duoc\",\n+                    f\"HTTP {e.code} (KHONG header GitHub, 5xx -> loi truyen tai, KHONG DO DUOC)\",\n+                    False)\n         return (\"mo\" if co_gh else \"chan\",\n                 f\"HTTP {e.code}\" + (\" (toi GitHub, thieu quyen)\" if co_gh\n                                     else \" (KHONG header GitHub -> proxy tu sinh)\"),\n@@ -5012,6 +5024,10 @@ def _do_mcp_endpoint(url: str | None, *, token: str | None = None,\n     `_do_rest_github` đã trả giá để có: 403 KHÔNG header là proxy tự sinh (phản hồi chưa\n     từng tới GitHub), còn 4xx CÓ header là tới nơi nhưng thiếu quyền. Hai chuyện ấy chữa\n     bằng hai cách khác hẳn nhau.\n+\n+    NGOẠI LỆ (#1313), cùng quy tắc với `_do_rest_github`: `HTTPError` KHÔNG header GitHub\n+    mà mã 5xx (`500 <= mã < 600`) ⇒ `khong_do_duoc`, mô tả `loi truyen tai` — chưa đủ\n+    bằng chứng để kết luận proxy chặn. 2xx/4xx không header vẫn `chan`.\n     \"\"\"\n     # KHÔNG CÓ URL / URL KHÔNG PHẢI HTTP ⇒ CHƯA ĐO ĐƯỢC, không phải HỎNG. Server kiểu\n     # `stdio` không có `url` là khai hợp lệ; gọi nó là \"hỏng\" thì đẩy người đọc đi chữa\n@@ -5086,6 +5102,10 @@ def _do_mcp_endpoint(url: str | None, *, token: str | None = None,\n         co_gh_ep = any(k.lower().startswith(\"x-github\") for k in e.headers)\n         vi_sao_ep = (\" (toi GitHub, thieu quyen)\" if co_gh_ep\n                      else \" (KHONG header GitHub -> proxy tu sinh)\")\n+        # #1313, viết KHÁC CHỮ với nhánh cùng nghĩa của `_do_rest_github` (xem `t117`).\n+        if 500 <= e.code < 600 and not co_gh_ep:\n+            mo_ta_5xx_ep = f\"HTTP {e.code} (5xx, KHONG header GitHub -> loi truyen tai, KHONG DO DUOC)\"\n+            return (\"khong_do_duoc\", mo_ta_5xx_ep, False)\n         # 4xx/5xx: tới nơi hay không thì THAO TÁC vẫn hỏng — hai câu hỏi, hai giá trị.\n         return ((\"mo\" if co_gh_ep else \"chan\"), f\"HTTP {e.code}{vi_sao_ep}\", False)\n     except Exception as e:                       # mạng/DNS/quá hạn = KHÔNG ĐO ĐƯỢC\n@@ -5177,6 +5197,7 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl\n     # CHẨN ĐOÁN, KHÔNG TÍNH vào kết luận \"dùng được\" — xem `_tinh_kha_dung` dưới.\n     duong.append((\"rest-chung\", tt_chung == \"mo\", mt_chung))\n     slug = None\n+    tt_kho = None            # #1313: `None` = `rest-kho` CHƯA ĐO (không đọc được slug)\n     if ws:\n         rc_u, url_o, _ = _git(ws, \"remote\", \"get-url\", \"origin\")\n         if rc_u == 0:\n@@ -5255,7 +5276,9 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl\n             canh_ep = f\" · mcp-endpoint: {mt_ep}\"\n \n     gh_ok = next((ok for t, ok, _ in duong if t == \"gh-cli\"), False)\n-    kho_chan = any(t == \"rest-kho\" and not ok for t, ok, _ in duong)\n+    # #1313: chỉ nói \"bị chặn\" khi `rest-kho` ĐÃ ĐO và trạng thái là `chan`. Suy từ cờ\n+    # `ok` là gộp 404 có header, lỗi mạng, 5xx và \"không đọc được slug\" vào chữ \"chặn\".\n+    kho_chan = tt_kho == \"chan\"\n     canh = \" · gh BAO da xac thuc nhung duong kho bi chan -> dung lam duong viec\" \\\n         if (gh_ok and kho_chan) else \"\"\n     # CHỈ ĐƯỜNG LÀM ĐƯỢC VIỆC mới được tính vào `DUNG_DUOC`.",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/e2849760a5c2c00c679b02ca559de69c7d5e48ef/.claude%2Fdev%2Flauncher.py",
+   "sha": "7c4443a0e0084307dbaf52220847d03c30fd8c81",
+   "status": "modified"
+  },
+  {
+   "additions": 114,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/e2849760a5c2c00c679b02ca559de69c7d5e48ef/.claude%2Fdev%2Flauncher_test.py",
+   "changes": 114,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/.claude%2Fdev%2Flauncher_test.py?ref=e2849760a5c2c00c679b02ca559de69c7d5e48ef",
+   "deletions": 0,
+   "filename": ".claude/dev/launcher_test.py",
+   "patch": "@@ -3431,6 +3431,103 @@ def _no():\n     bang(m._do_rest_github(\"https://x/y\")[2] is False, \"khong do duoc ma tinh la thanh cong\")\n \n \n+def _r1313_tam_ve_5xx(m, do, url, ten):\n+    \"\"\"Tám vế (a)–(h) của #1313, dùng chung cho hai hàm đo (`do` là hàm đang thử).\n+\n+    5xx KHÔNG header GitHub ⇒ `khong_do_duoc` + mô tả `loi truyen tai`; dải là\n+    `500 <= mã < 600`. 4xx không header (kể cả 429 — GIỚI HẠN CỐ Ý của packet) và 600\n+    vẫn `chan`; 5xx CÓ header vẫn `mo`. Mọi vế: thao tác KHÔNG thành công.\n+    \"\"\"\n+    khong_gh = {\"Content-Type\": \"text/plain\"}\n+\n+    def nem(ma, headers):\n+        def gia(*_a, **_k):\n+            raise m.urllib.error.HTTPError(url, ma, \"loi\", headers, None)\n+        m.urllib.request.urlopen = gia\n+\n+    goc = m.urllib.request.urlopen\n+    try:\n+        for ve, ma in ((\"a\", 502), (\"b\", 503), (\"c\", 500)):\n+            nem(ma, khong_gh)\n+            tt, mo_ta, ok = do(url)\n+            bang(tt == \"khong_do_duoc\", f\"{ten} ({ve}) {ma} khong header phai `khong_do_duoc`: {tt} {mo_ta!r}\")\n+            bang(ok is False, f\"{ten} ({ve}) {ma} khong header ma thao tac thanh cong: {ok!r}\")\n+            bang(f\"HTTP {ma}\" in mo_ta, f\"{ten} ({ve}) mo ta thieu cum `HTTP {ma}`: {mo_ta!r}\")\n+            bang(\"loi truyen tai\" in mo_ta and \"proxy tu sinh\" not in mo_ta,\n+                 f\"{ten} ({ve}) {ma} khong header: mo ta phai noi `loi truyen tai`, khong noi proxy tu sinh: {mo_ta!r}\")\n+        for ve, ma in ((\"d\", 499), (\"g\", 600), (\"h\", 429)):\n+            nem(ma, khong_gh)\n+            tt, mo_ta, ok = do(url)\n+            bang(tt == \"chan\" and ok is False, f\"{ten} ({ve}) {ma} khong header phai giu `chan`: {tt} {ok!r} {mo_ta!r}\")\n+        nem(403, khong_gh)\n+        tt, mo_ta, ok = do(url)\n+        bang(tt == \"chan\" and \"proxy\" in mo_ta, f\"{ten} (e) 403 khong header phai `chan` + noi proxy: {tt} {mo_ta!r}\")\n+        nem(502, {\"X-GitHub-Request-Id\": \"abc\"})\n+        tt, mo_ta, ok = do(url)\n+        bang(tt == \"mo\" and ok is False, f\"{ten} (f) 502 CO header GitHub phai `mo`, khong thanh cong: {tt} {ok!r}\")\n+    finally:\n+        m.urllib.request.urlopen = goc\n+\n+\n+@ca\n+def r1313_rest_5xx_khong_header_la_khong_do_duoc():\n+    \"\"\"#1313: 502 do đường hầm proxy đứt KHÔNG phải 403 chặn theo đường dẫn.\n+\n+    Đo 13-11-2026: `_do_rest_github` in `chan HTTP 502 (KHONG header GitHub -> proxy tu\n+    sinh)` trong khi proxy ghi `ws_closed_mid_exchange`, vài phút sau REST thông lại.\n+    \"\"\"\n+    m = _tai_launcher_thu()\n+    _r1313_tam_ve_5xx(m, m._do_rest_github, \"https://x/y\", \"rest\")\n+\n+\n+@ca\n+def r1313_mcp_endpoint_5xx_khong_header_la_khong_do_duoc():\n+    \"\"\"#1313, cùng tám vế cho `_do_mcp_endpoint` — hai hàm hỏng độc lập nên đo riêng.\"\"\"\n+    m = _tai_launcher_thu()\n+    _r1313_tam_ve_5xx(m, m._do_mcp_endpoint, \"https://x/mcp/\", \"mcp-endpoint\")\n+\n+\n+@ca\n+def r1313_canh_gh_chi_noi_chan_khi_kho_chan():\n+    \"\"\"#1313 (M6): `gh BAO da xac thuc nhung duong kho bi chan` chỉ in khi `rest-kho` là `chan`.\n+\n+    Bản trước suy từ cờ `ok`, nên 502, 404 có header hay lỗi mạng đều thành chữ \"bị chặn\".\n+    \"\"\"\n+    m = _tai_launcher_thu()\n+    goc = (m._do_rest_github, m._git, m.subprocess.run, m.shutil.which, m._chay_probe_nhu_shell)\n+\n+    class _P:\n+        def __init__(self, rc, out=\"\"):\n+            self.returncode, self.stdout, self.stderr = rc, out, \"\"\n+\n+    def chay(cmd, **_k):                     # `gh auth status` xanh; thao tác mức kho hỏng\n+        return _P(0, \"Logged in\") if cmd[:3] == [\"gh\", \"auth\", \"status\"] else _P(1)\n+\n+    def git_gia(ws, *a, **_k):\n+        if a[:2] == (\"remote\", \"get-url\"):\n+            return (0, \"https://github.com/o/r.git\", \"\")\n+        return (128, \"\", \"fatal: unable to access\")\n+\n+    def dau_ra(kho):\n+        m._do_rest_github = lambda url, **_k: ((\"mo\", \"HTTP 200\", True) if \"rate_limit\" in url else kho)\n+        with tempfile.TemporaryDirectory() as td:\n+            return m._do_github(td, {})[1]\n+\n+    cau = \"duong kho bi chan\"\n+    try:\n+        m._git, m.subprocess.run, m._chay_probe_nhu_shell = git_gia, chay, chay\n+        m.shutil.which = lambda t, *_a, **_k: \"/gia/gh\" if t == \"gh\" else None\n+        ra = dau_ra((\"khong_do_duoc\", \"HTTP 502 (KHONG header GitHub, 5xx -> loi truyen tai, KHONG DO DUOC)\", False))\n+        bang(\"gh-cli=OK\" in ra, f\"fixture hong: gh-cli khong xanh nen canh bao khong the in: {ra}\")\n+        bang(cau not in ra, f\"(a) rest-kho `khong_do_duoc` (502) ma van noi bi chan: {ra}\")\n+        ra = dau_ra((\"mo\", \"HTTP 404 (toi GitHub, thieu quyen)\", False))\n+        bang(cau not in ra, f\"(b) rest-kho `mo` thieu quyen (404 co header) ma van noi bi chan: {ra}\")\n+        ra = dau_ra((\"chan\", \"HTTP 403 (KHONG header GitHub -> proxy tu sinh)\", False))\n+        bang(cau in ra, f\"(c) rest-kho `chan` (403 khong header) ma KHONG canh bao: {ra}\")\n+    finally:\n+        m._do_rest_github, m._git, m.subprocess.run, m.shutil.which, m._chay_probe_nhu_shell = goc\n+\n+\n @ca\n def t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec():\n     \"\"\"`gh auth status` xanh mà mọi thao tác kho 403 thì GitHub KHÔNG dùng được.\n@@ -15922,6 +16019,23 @@ def r1375_shutilwin311_chi_nhan_trong_d():\n      # CHI `t110`: `t111` thay han `_do_rest_github` bang ban gia, nen dot bien vao\n      # ban that khong toi duoc no.\n      [\"t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI\"]),\n+    # --- #1313: 5xx KHONG header la `khong_do_duoc`, khong phai `chan`. Moi chot mot dot bien.\n+    (\"r1313_rest_5xx_ve_chan\",\n+     ('        if not co_gh and 500 <= e.code < 600:', '        if False:'),\n+     [\"r1313_rest_5xx_khong_header_la_khong_do_duoc\"]),\n+    (\"r1313_mcp_5xx_ve_chan\",\n+     ('        if 500 <= e.code < 600 and not co_gh_ep:', '        if False:'),\n+     [\"r1313_mcp_endpoint_5xx_khong_header_la_khong_do_duoc\"]),\n+    # Giu trang thai `khong_do_duoc` nhung mo ta lai ket luan proxy chan.\n+    (\"r1313_rest_mo_ta_noi_chan\",\n+     ('                    f\"HTTP {e.code} (KHONG header GitHub, 5xx -> loi truyen tai, KHONG DO DUOC)\",',\n+      '                    f\"HTTP {e.code} (KHONG header GitHub -> proxy tu sinh)\",'),\n+     [\"r1313_rest_5xx_khong_header_la_khong_do_duoc\"]),\n+    # Canh bao `gh` quay ve suy tu co `ok`: moi that bai cua rest-kho thanh \"bi chan\".\n+    (\"r1313_canh_kho_gop_moi_that_bai\",\n+     ('    kho_chan = tt_kho == \"chan\"',\n+      '    kho_chan = any(t == \"rest-kho\" and not ok for t, ok, _ in duong)'),\n+     [\"r1313_canh_gh_chi_noi_chan_khi_kho_chan\"]),\n     (\"worktree_bo_qua_tep_moi\",\n      ('\"--untracked-files=all\"', '\"--untracked-files=no\"'),\n      [\"t12_tep_khong_theo_doi_van_tinh_la_ban\"]),",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/e2849760a5c2c00c679b02ca559de69c7d5e48ef/.claude%2Fdev%2Flauncher_test.py",
+   "sha": "beca481aff898bfc8793fe7d75b33cd6149f4776",
+   "status": "modified"
+  },
+  {
+   "additions": 7,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/e2849760a5c2c00c679b02ca559de69c7d5e48ef/.claude%2Fdev%2Fmcp_github_doc.py",
+   "changes": 7,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/.claude%2Fdev%2Fmcp_github_doc.py?ref=e2849760a5c2c00c679b02ca559de69c7d5e48ef",
+   "deletions": 0,
+   "filename": ".claude/dev/mcp_github_doc.py",
+   "patch": "@@ -17,6 +17,9 @@\n GitHub = proxy tự sinh, CHƯA từng tới GitHub) · `khong_do_duoc` (mạng/DNS/quá hạn).\n Phân loại theo HEADER, không theo mã trạng thái — cùng tiêu chí `_do_rest_github` và\n `_do_mcp_endpoint` đã trả giá để có.\n+NGOẠI LỆ (#1313), cũng cùng hai hàm ấy: `HTTPError` KHÔNG header GitHub mà mã 5xx\n+(`500 <= mã < 600`) được mô tả là `loi truyen tai`, KHÔNG phải `proxy tu sinh` — một 502\n+do đường hầm proxy đứt chưa đủ bằng chứng để kết luận bị chặn.\n \n MÔ TẢ KHÔNG BAO GIỜ CHỞ TOKEN: không in `headers`, không nội suy `url` vào nhánh từ chối.\n \n@@ -129,6 +132,10 @@ def _post(self, than: dict) -> tuple[int, str, dict]:\n                 return int(r.status), r.read().decode(\"utf-8\", \"replace\"), dict(r.headers)\n         except urllib.error.HTTPError as e:\n             co_gh = any(k.lower().startswith(\"x-github\") for k in e.headers)\n+            if not co_gh and 500 <= e.code < 600:\n+                # #1313: 5xx KHÔNG header chưa đủ bằng chứng để nói \"proxy chặn\".\n+                raise Hong(f\"HTTP {e.code} (KHONG header GitHub, 5xx -> loi truyen tai, \"\n+                           \"KHONG DO DUOC)\") from None\n             vi_sao = (\" (toi GitHub, thieu quyen)\" if co_gh\n                       else \" (KHONG header GitHub -> proxy tu sinh)\")\n             raise Hong(f\"HTTP {e.code}{vi_sao}\") from None",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/e2849760a5c2c00c679b02ca559de69c7d5e48ef/.claude%2Fdev%2Fmcp_github_doc.py",
+   "sha": "24a4eec9811764472a8d942d824b5b7d88b6ba2d",
+   "status": "modified"
+  },
+  {
+   "additions": 36,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/e2849760a5c2c00c679b02ca559de69c7d5e48ef/.claude%2Fdev%2Fmcp_github_doc_test.py",
+   "changes": 37,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/.claude%2Fdev%2Fmcp_github_doc_test.py?ref=e2849760a5c2c00c679b02ca559de69c7d5e48ef",
+   "deletions": 1,
+   "filename": ".claude/dev/mcp_github_doc_test.py",
+   "patch": "@@ -281,7 +281,10 @@ def t05_bat_tay_giu_session_va_gui_notification(m=M):\n @ca\n def t06_thieu_header_github_phai_chan(m=M):\n     init = json.dumps({\"jsonrpc\": \"2.0\", \"id\": 1, \"result\": {}})\n-    server = _MayChuGia({\"initialize\": _TraLoi(200, init, {})})\n+    # #1313 (M9): CÓ fixture cho `notifications/initialized` để đột biến `bo_header_github`\n+    # chết vì `bang` của ca này (hàm cho qua), không vì `KeyError` của đồ giả.\n+    server = _MayChuGia({\"initialize\": _TraLoi(200, init, {}),\n+                         \"notifications/initialized\": _TraLoi(202, \"\", {})})\n     with _cau_hinh(_cfg()) as d:\n         with _urlopen_gia(m, server):\n             mo_ta = _hong(lambda: m.Phien(d).bat_tay(), m)\n@@ -426,6 +429,36 @@ def t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly(m=M):\n         bang(rc != 0, f\"_main bao thanh cong cho isError=true: rc={rc}\")\n \n \n+@ca\n+def t18_5xx_khong_header_la_loi_truyen_tai_khong_phai_proxy(m=M):\n+    \"\"\"#1313: 5xx KHÔNG header GitHub là `loi truyen tai`, không phải `proxy tu sinh`.\n+\n+    Đo 13-11-2026: 502 do đường hầm proxy đứt bị mô tả y như 403 chặn theo đường dẫn.\n+    Dải là `500 <= mã < 600`; 499, 600 và 403 không header giữ nguyên chữ base.\n+    \"\"\"\n+    def mo_ta_cua(ma, headers):\n+        loi = m.urllib.error.HTTPError(\"https://api.example/mcp\", ma, \"loi\", headers, None)\n+        server = _MayChuGia({\"tools/list\": loi})\n+        with _cau_hinh(_cfg()) as d:\n+            p = m.Phien(d)\n+            with _urlopen_gia(m, server):\n+                return _hong(lambda: p._post({\"method\": \"tools/list\"}), m)\n+\n+    for ve, ma in ((\"a\", 502), (\"b\", 503), (\"c\", 500)):\n+        mo_ta = mo_ta_cua(ma, {\"Content-Type\": \"text/plain\"})\n+        bang(f\"HTTP {ma}\" in mo_ta, f\"({ve}) {ma} khong header: mo ta thieu cum `HTTP {ma}`: {mo_ta}\")\n+        bang(\"loi truyen tai\" in mo_ta, f\"({ve}) {ma} khong header: thieu `loi truyen tai`: {mo_ta}\")\n+        bang(\"proxy tu sinh\" not in mo_ta, f\"({ve}) {ma} khong header ma van noi proxy tu sinh: {mo_ta}\")\n+    for ve, ma in ((\"d\", 499), (\"e\", 600)):\n+        mo_ta = mo_ta_cua(ma, {\"Content-Type\": \"text/plain\"})\n+        bang(mo_ta == f\"HTTP {ma} (KHONG header GitHub -> proxy tu sinh)\",\n+             f\"({ve}) {ma} khong header phai giu chu base: {mo_ta}\")\n+    mo_ta = mo_ta_cua(403, {\"Content-Type\": \"text/plain\"})\n+    bang(\"proxy tu sinh\" in mo_ta, f\"(f) 403 khong header phai noi proxy tu sinh: {mo_ta}\")\n+    mo_ta = mo_ta_cua(502, {\"X-GitHub-Request-Id\": \"r\"})\n+    bang(\"thieu quyen\" in mo_ta, f\"(g) 502 CO header GitHub phai giu mo ta toi noi: {mo_ta}\")\n+\n+\n # Mỗi mẫu chỉ thay đúng một chốt; ca đích phải đỏ trên bản mutant tương ứng.\n DOT_BIEN = [\n     (\"goi_parser_hai_lan_ghep_hai_anh\",\n@@ -459,6 +492,8 @@ def t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly(m=M):\n     (\"nuot_loi_initialize\", '        if \"error\" in d:\\n            raise Hong(\"initialize loi: \" + json.dumps(d[\"error\"], ensure_ascii=False)[:300])', '        if False:\\n            raise Hong(\"initialize loi\")', \"t08_loi_initialized_khong_duoc_nuot\"),\n     (\"nuot_loi_initialized\", '            if \"error\" in bao:\\n                raise Hong(\"notifications/initialized loi\")', '            if \"error\" in bao:\\n                pass', \"t08_loi_initialized_khong_duoc_nuot\"),\n     (\"nuot_loi_rpc\", '        if \"error\" in d:\\n            raise Hong(f\"{method} loi: \" + json.dumps(d[\"error\"], ensure_ascii=False)[:300])', '        if False:\\n            raise Hong(\"rpc loi\")', \"t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly\"),\n+    (\"r1313_mcp_doc_5xx_ve_proxy\", '            if not co_gh and 500 <= e.code < 600:', '            if False:',\n+     \"t18_5xx_khong_header_la_loi_truyen_tai_khong_phai_proxy\"),\n     (\"bo_chot_iserror\", '        if isinstance(kq, dict) and kq.get(\"isError\") is True:', '        if False:', \"t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly\"),\n ]\n ",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/e2849760a5c2c00c679b02ca559de69c7d5e48ef/.claude%2Fdev%2Fmcp_github_doc_test.py",
+   "sha": "0c9c94cbcfc4c065c56b423a82b57e7f24f8bda3",
+   "status": "modified"
+  }
+ ],
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/e2849760a5c2c00c679b02ca559de69c7d5e48ef",
+ "node_id": "C_kwDOTNeRjdoAKGUyODQ5NzYwYTVjMmMwMGM2NzliMDJjYTU1OWRlNjljN2Q1ZTQ4ZWY",
+ "parents": [
+  {
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/5f9bf6b3b499ac8d137328b4ae0c0550395d2c53",
+   "sha": "5f9bf6b3b499ac8d137328b4ae0c0550395d2c53",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/5f9bf6b3b499ac8d137328b4ae0c0550395d2c53"
+  },
+  {
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/eb6a4ce14e7287ef94bca15c948bbe28762507b0",
+   "sha": "eb6a4ce14e7287ef94bca15c948bbe28762507b0",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/eb6a4ce14e7287ef94bca15c948bbe28762507b0"
+  }
+ ],
+ "sha": "e2849760a5c2c00c679b02ca559de69c7d5e48ef",
+ "stats": {
+  "additions": 181,
+  "deletions": 2,
+  "total": 183
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/e2849760a5c2c00c679b02ca559de69c7d5e48ef"
+}

@@ -64,18 +64,22 @@ recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị 
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
 leased_at_utc: '2026-11-18T10:02:07Z'
-heartbeat_at: '2026-11-18T13:44:00Z'
+heartbeat_at: '2026-11-18T14:04:00Z'
 lease_until: '2026-11-18T16:02:07Z'
 lease_expires_at_utc: '2026-11-18T16:02:07Z'
 lease_until_ghi_chu: '6h; rút hạn sau land.'
 attempts_used: 1
 attempts_limit: 2
 budget:
-  codex_review_calls: {used: 4, reserved: 0, limit: 4}
+  codex_review_calls: {used: 4, reserved: 1, limit: 5}
   native_runs: {linux: 1, windows_desktop: 1, rerun_per_step_on_build_error: 1}
 budget_nang_tran:
   codex_review_calls: {tu: 3, len: 4}
   chi_thi: 'chủ kho chọn "Fix + raise Codex cap (Recommended)" qua AskUserQuestion 18-11-2026 ~11:58Z, sau verdict Codex lượt 3 (request_changes) — Review Rescue Checkpoint.'
+budget_nang_tran_2:
+  codex_review_calls: {tu: 4, len: 5}
+  chi_thi: 'chủ kho chọn "Nâng trần Codex lên 5 (Recommended)" qua AskUserQuestion 18-11-2026 ~14:05Z, sau khi sửa xong các finding chặn merge của Codex lượt 4 (request_changes).'
+exact_head_chap_nhan: 'chủ kho chọn "Chấp nhận, ghi quyết định (Recommended)" qua AskUserQuestion 18-11-2026 ~14:05Z: phép đo N1–N4 trên d7960ee được dùng cho head cuối khi mã thực thi (SKILL + 2 harness) trùng byte, kiểm bằng git diff --exit-code.'
 native_runs_ghi_chu: 'Mỗi lần vá sản phẩm sau lỗi local/review được đo lại trên head mới theo spec §8 ("sửa rồi đo lại trên head mới"); số lượt thực tế ghi trong RESULTS.md.'
 requires_live: false
 uy_quyen_merge: false

@@ -6,7 +6,10 @@ Base `eca1d125b8`. SKILL tại base: blob `678ba2f0`, sha256 `1799c2bd…faadb`.
 **Head mã đã đo (lượt 5): `d7960ee57770f320d4cdc00cb58ce3a424fa4a62`** (tree `28c0eeb5…`).
 - SKILL: sha256 `75e9be5ff358476de7405008955bf898f9186a02d34e1616c50e079f6826c94c` (không đổi từ `ff34b2c`).
 - `residue_matrix.sh` `d7cae57b…`, `residue_matrix.ps1` `edb2d5fb…`.
-- Commit sau head này chỉ đổi tệp này, `REVIEW-PROMPT.md` và lease.
+- Commit sau head này chỉ đổi tệp này, `REVIEW-PROMPT.md`, `VERDICT.md` và lease. **Chủ kho chấp nhận** (AskUserQuestion
+  18-11-2026 ~14:05Z, ghi ở lease `exact_head_chap_nhan`) dùng phép đo N1–N4 trên `d7960ee` cho head cuối khi
+  `git diff --exit-code d7960ee <head> -- .agents ops/acceptance/wp1389/residue_matrix.sh ops/acceptance/wp1389/residue_matrix.ps1`
+  trả 0. Đây là quyết định của chủ kho cho finding P2 "exact H" của Codex lượt 4, không phải phép đo trên head cuối.
 
 ## Lịch sử (rút gọn; chi tiết từng lượt trong git log và `VERDICT.md`)
 

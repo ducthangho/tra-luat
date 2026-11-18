@@ -1,0 +1,41 @@
+# Bien ban M8 (ADR-0060) dong WP #1342 WP1174-WINDOWS-BACKEND r2 (bac r1b) — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1384-wp1342-land-evidence.yaml. Audit human_audited chu kho tu dang 6973845894 tren c10d071.
+# Moc §10.2.2 run 44271842401: run/checkout/gate_output measured passed; workflow_definition not_measured (GraphQL 403 trong phien, chua co wd-run).
+packet: wp1342
+revision: 2
+generation: 1
+spec_hash: ff7bcc079f1e5629f7281eef14978189e41cc3570d4c3bc12569ca71712a779a
+head_da_review: c10d0710735e3532035a5219d469704d8a7592bb
+tree_h: ba0bbc46c90f19c26ce569129f319fb844f23513
+review:
+  offline: 'khong goi Codex offline tren ma; 3 luot Codex offline chi review DAC TA r2 truoc lease (ops/reviews/wp1342-spec-r2/ tren nhanh ops/wp1342-r2-g1-lease)'
+  connector: 'readback-pr1384-comments.json: 6970604374 codex-review-receipt "Didn''t find any major issues" tren c10d071 (kich bang @codex review 6970571418); truoc do 6969726973 sach tren f50be35'
+  human_audit: 'issuecomment-6973845894 human_exact_head_audit.v1 approve tren c10d071 (chu kho tu dang, performed_via_github_app null)'
+windows:
+  phan_loai: required
+  nguon: 'duong .claude/dev/ (ADR-0060 M3). Lease: Windows native <= 3; do native tren Desktop DESKTOP-T9R33P2 (Windows 11 26300) + VM tra-luat-win (Server 2022) cho P5; khong CI Windows.'
+  ket_qua: 'measured truoc merge — windows-native/wp1342r2c-out/TOM-TAT.txt (Desktop, HEAD c10d071): N4W 13/13 base va H; N5 ca r1 dat ca hai ve; N6 8/9 dat, P5 KHONG DO DUOC tren Desktop (WinError 1314); windows-native/vm-p5/TOM-TAT-VM.txt: P5 dat tren VM; windows-native/wp1342r2c-out/dot-bien/dot-bien.json (src_head c10d071): 4 dot bien GIET, tu kiem z KHONG_DO dung du kien.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1384#issuecomment-6973845894
+duyet_chu_kho_ghi_chu: 'audit tu dang 08:59:22Z 18-11, truoc merge 09:00:10Z; chu kho chon "Merge c10d071" trong phien dieu phoi (loi khai).'
+merge_commit: d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a
+tree_m: ba0bbc46c90f19c26ce569129f319fb844f23513
+ci_master:
+  run_id: 44271842401
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44271842401.txt); gate-packet-loop "GOM: ĐẠT · 16 mảnh".'
+nghiem_thu:
+  N1: passed  # danh-gia-gate-output-44271842401.txt: gate-packet-loop GOM DAT 16 manh tren d1ca71a; so MUTANTS bang base: loi_khai_co_neo than PR #1384
+  N2: passed  # loi_khai_co_neo than PR #1384: _additive1342r2(base, head) = [] va phan chung
+  N3: passed  # loi_khai_co_neo than PR #1384: wp1342_additive_byte_preserved dat, dot bien do; windows-native TOM-TAT: HEAD wp1342_additive_byte_preserved rc=0
+  N4: passed  # windows-native TOM-TAT: N4W 13/13 base va H; Linux: loi_khai_co_neo than PR #1384
+  N5: passed  # windows-native TOM-TAT: ca native r1 dat base va H; symlink_file KHONG DO DUOC Desktop (dat tren VM)
+  N6: passed  # windows-native TOM-TAT + vm-p5: 8/9 Desktop + P5 VM; B1 phan chung GIET
+  N7: passed  # windows-native dot-bien.json: a/b/c GIET dung ca dich, doi chung dat
+  N8: passed  # nghiem-thu-d1ca71a.txt: numstat 2 tep +293; ruff F 3/13 = 3/13; diff --check rc 0; adr-song/doctrine-scan rc 0
+lease_cuoi: wp1342-r2-g1-claude
+landed: false
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: not_measured
+  gate_output: passed

@@ -1,0 +1,172 @@
+{
+ "src_head": "c10d0710735e3532035a5219d469704d8a7592bb",
+ "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+ "driver_sha256": "c5e8c1a52660ce7efcb5c4a9b23adb77d5c69d9cb41f437d72f0ab7d66d6e25f",
+ "dot_bien": [
+  {
+   "ten": "a_khoa_chia_se",
+   "dich": "wp1342_native_lock_exclusive",
+   "doi_chung": "wp1342_native_lock_names",
+   "nhan_assert_mong_doi": "L1",
+   "sach_wp1342_native_lock_exclusive": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_lock_names": [
+    0,
+    null,
+    "DAT"
+   ],
+   "so_lan_khop": [
+    1
+   ],
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex bdb4bd108..11a889468 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6522,7 +6522,7 @@ def _1174_win_lock(path):\n         region, locked = overlapped(), False   # one OVERLAPPED (offset 0) lives for the whole context: lock and unlock\n         try:\n             identity = _1174_win_identity(c, w, k, handle, text)\n-            if not k.LockFileEx(handle, 2, 0, 0xFFFFFFFF, 0xFFFFFFFF, c.byref(region)):\n+            if not k.LockFileEx(handle, 0, 0, 0xFFFFFFFF, 0xFFFFFFFF, c.byref(region)):\n                 raise c.WinError(c.get_last_error())\n             locked = True\n             named = _1174_win_open(c, k, text, 0x80, 7, 0x00200000)   # the NAME must still be the locked file\n",
+   "dot_bien_wp1342_native_lock_exclusive": [
+    1,
+    [
+     "str",
+     "AssertionError: L1: tiến trình con phải thất bại 33 (ERROR_LOCK_VIOLATION) khi khoá đang giữ: lock 0"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_lock_exclusive": "KQ_JSON {\"wp1342_native_lock_exclusive\": [\"str\", \"AssertionError: L1: ti\\u1ebfn tr\\u00ecnh con ph\\u1ea3i th\\u1ea5t b\\u1ea1i 33 (ERROR_LOCK_VIOLATION) khi kho\\u00e1 \\u0111ang gi\\u1eef: lock 0\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m3\\a\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_lock_names": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_lock_names": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_lock_names\", \"observed\": \"[('dir', 'PermissionError: [WinError 5] Access is denied.'), ('junction', 'PermissionError: [WinError 5] Access is denied.')]\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_lock_names\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m3\\a\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "b_khong_xoa_tam",
+   "dich": "wp1342_native_persist_create",
+   "doi_chung": "wp1342_native_persist_update",
+   "nhan_assert_mong_doi": "P1",
+   "sach_wp1342_native_persist_create": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_persist_update": [
+    0,
+    null,
+    "DAT"
+   ],
+   "so_lan_khop": [
+    1,
+    1
+   ],
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex bdb4bd108..945aa1b02 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6571,7 +6571,7 @@ def _1174_win_persist(path, raw, *, create):\n             if not k.CreateHardLinkW(text, temporary, None):\n                 error = c.get_last_error()\n                 raise FileExistsError(text) if error == 183 else c.WinError(error)\n-            if not k.DeleteFileW(temporary):\n+            if False:\n                 raise c.WinError(c.get_last_error())\n         elif not k.MoveFileExW(temporary, text, 1 | 8):\n             raise c.WinError(c.get_last_error())\n@@ -6580,7 +6580,7 @@ def _1174_win_persist(path, raw, *, create):\n     finally:\n         if temporary is not None:\n             # Only our own temporary image is removed, never a published final image.\n-            os.unlink(temporary)\n+            pass\n \n \n def build_parser() -> argparse.ArgumentParser:\n",
+   "dot_bien_wp1342_native_persist_create": [
+    1,
+    [
+     "str",
+     "AssertionError: P1: còn tên `.wp1174-*` sau create: ['.wp1174-qanmd5hh']"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_persist_create": "KQ_JSON {\"wp1342_native_persist_create\": [\"str\", \"AssertionError: P1: c\\u00f2n t\\u00ean `.wp1174-*` sau create: ['.wp1174-qanmd5hh']\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m3\\b\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_persist_update": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_persist_update": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_persist_update\", \"observed\": \"(1, 1)\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_persist_update\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m3\\b\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "c_bo_replace_existing",
+   "dich": "wp1342_native_persist_update",
+   "doi_chung": "wp1342_native_persist_create",
+   "nhan_assert_mong_doi": "P3",
+   "sach_wp1342_native_persist_update": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_persist_create": [
+    0,
+    null,
+    "DAT"
+   ],
+   "so_lan_khop": [
+    1
+   ],
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex bdb4bd108..159cb50cb 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6573,7 +6573,7 @@ def _1174_win_persist(path, raw, *, create):\n                 raise FileExistsError(text) if error == 183 else c.WinError(error)\n             if not k.DeleteFileW(temporary):\n                 raise c.WinError(c.get_last_error())\n-        elif not k.MoveFileExW(temporary, text, 1 | 8):\n+        elif not k.MoveFileExW(temporary, text, 8):\n             raise c.WinError(c.get_last_error())\n         temporary = None\n         _1174_require(_1174_win_read(text) == raw, \"persist exact readback\")\n",
+   "dot_bien_wp1342_native_persist_update": [
+    1,
+    [
+     "str",
+     "AssertionError: P3: update không thay được đích đang có: FileExistsError(17, 'Cannot create a file when that file already exists.', None, 183)"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_persist_update": "KQ_JSON {\"wp1342_native_persist_update\": [\"str\", \"AssertionError: P3: update kh\\u00f4ng thay \\u0111\\u01b0\\u1ee3c \\u0111\\u00edch \\u0111ang c\\u00f3: FileExistsError(17, 'Cannot create a file when that file already exists.', None, 183)\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m3\\c\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_persist_create": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_persist_create": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_persist_create\", \"observed\": \"['FileExistsError: F:\\\\\\\\tl-win\\\\\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\\\\\tmp1342r2\\\\\\\\tmpt6y3ii2s\\\\\\\\wp1342_n-91930022d70194d8\\\\\\\\state.json', 'FileExistsError: F:\\\\\\\\tl-win\\\\\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\\\\\tmp1342r2\\\\\\\\tmpt6y3ii2s\\\\\\\\wp1342_n-91930022d70194d8\\\\\\\\state.json']\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_persist_create\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m3\\c\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "d_b1_bo_signature_ghi",
+   "dich": "wp1342_native_persist_bindings",
+   "doi_chung": "wp1342_native_lock_names",
+   "nhan_assert_mong_doi": "B1",
+   "sach_wp1342_native_persist_bindings": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_lock_names": [
+    0,
+    null,
+    "DAT"
+   ],
+   "so_lan_khop": [
+    1
+   ],
+   "diff": "diff --git a/.claude/dev/packet_loop.py b/.claude/dev/packet_loop.py\nindex bdb4bd108..d2b0fa5e8 100644\n--- a/.claude/dev/packet_loop.py\n+++ b/.claude/dev/packet_loop.py\n@@ -6496,8 +6496,7 @@ def _1174_win_api_ghi():\n     D, H, B, S, O = w.DWORD, w.HANDLE, w.BOOL, w.LPCWSTR, c.POINTER(OVERLAPPED)\n     for name, args, result in (\n             (\"LockFileEx\", [H, D, D, D, D, O], B), (\"UnlockFileEx\", [H, D, D, D, O], B),\n-            (\"CreateHardLinkW\", [S, S, c.c_void_p], B), (\"MoveFileExW\", [S, S, D], B), (\"DeleteFileW\", [S], B),\n-            (\"GetHandleInformation\", [H, c.POINTER(D)], B)):\n+            (\"CreateHardLinkW\", [S, S, c.c_void_p], B), (\"MoveFileExW\", [S, S, D], B), (\"DeleteFileW\", [S], B)):\n         fn = getattr(k, name)\n         fn.argtypes, fn.restype = args, result\n     return c, w, k, OVERLAPPED\n",
+   "dot_bien_wp1342_native_persist_bindings": [
+    1,
+    [
+     "str",
+     "AssertionError: ('B1 signature GetHandleInformation', None, <class 'ctypes.c_long'>)"
+    ],
+    "DO_ASSERT"
+   ],
+   "ra_wp1342_native_persist_bindings": "KQ_JSON {\"wp1342_native_persist_bindings\": [\"str\", \"AssertionError: ('B1 signature GetHandleInformation', None, <class 'ctypes.c_long'>)\"]}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m3\\d\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "dot_bien_wp1342_native_lock_names": [
+    0,
+    null,
+    "DAT"
+   ],
+   "ra_wp1342_native_lock_names": "WP1342_NATIVE_V1 {\"executed\": 1, \"id\": \"wp1342_native_lock_names\", \"observed\": \"[('dir', 'PermissionError: [WinError 5] Access is denied.'), ('junction', 'PermissionError: [WinError 5] Access is denied.')]\", \"os\": \"Windows-11-10.0.26300-SP0\", \"passed\": 1, \"python\": \"3.12.10\"}\nKQ_JSON {\"wp1342_native_lock_names\": null}\nF:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\m3\\d\\.claude/dev\\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_luan": "GIET"
+  },
+  {
+   "ten": "z_tu_kiem_khong_khop",
+   "dich": "wp1342_native_lock_names",
+   "doi_chung": "wp1342_native_persist_create",
+   "nhan_assert_mong_doi": "",
+   "sach_wp1342_native_lock_names": [
+    0,
+    null,
+    "DAT"
+   ],
+   "sach_wp1342_native_persist_create": [
+    0,
+    null,
+    "DAT"
+   ],
+   "so_lan_khop": [
+    0
+   ],
+   "ket_luan": "KHONG_DO (chuoi tim khong khop dung 1 lan)"
+  }
+ ]
+}

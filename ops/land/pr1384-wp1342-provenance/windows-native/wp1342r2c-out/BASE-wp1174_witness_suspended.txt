@@ -1,0 +1,10 @@
+﻿python.exe : F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1342-src\.claude/dev\packet_loop_test.py:3786: 
+SyntaxWarning: invalid escape sequence '\d'
+At F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\chay-1342r2.ps1:41 char:10
++     $o = & python -X utf8 -B -c $lenh $c 2>&1
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (F:\tl-win\sessi...e sequence '\d':String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # ─æß╗Öt biß║┐n\n',
+KQ_JSON {"wp1174_witness_suspended": null}

@@ -1,0 +1,11 @@
+﻿python.exe : F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1342-src\.claude/dev\packet_loop_test.py:3786: 
+SyntaxWarning: invalid escape sequence '\d'
+At F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\chay-1342r2.ps1:41 char:10
++     $o = & python -X utf8 -B -c $lenh $c 2>&1
++          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (F:\tl-win\sessi...e sequence '\d':String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # ─æß╗Öt biß║┐n\n',
+WP1174_WINDOWS_ORACLE_V1 {"actual_os": "Windows", "executed": 1, "head": "641108cb997872b0ef2a277ea9c8faf8b82532bb", "killed_by_assertion": 1, "kind": "pure_platform_guard", "mutated_module_sha256": "90e929425d439f0c2e3ed08043f0a5539eeec35e5fcbdc27c69b43c39f91e9cf", "mutation_id": "m1174_allow_windows", "no_dispatch": true, "original_module_sha256": "83743ed78450aad879974fc97699e6d508e5f712f54a52f83a2af1e4f1a0cbdb", "positive_control": "passed", "real_cli_rejection_rc": 8, "schema": "wp1174_windows_oracle.v1", "tree": "e6c7c50863421e32cac4f5f1894f176d758375b1", "unchanged": true}
+KQ_JSON {"wp1174_windows_claim_rejected": null}

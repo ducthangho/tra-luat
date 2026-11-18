@@ -1,0 +1,7 @@
+# launcher-windows.yml run 44271842410 (push master d1ca71a): dong tong ket launcher_test + dot bien. Lane nay do launcher_test, KHONG do packet_loop (write set #1342).
+## job 134690140739 ubuntu-latest log_sha256=9e36e0062861ce7678b5216496ca2aa415f2bbeae17785fb33a8fb3cde78ea61 bytes=149209
+2026-11-18T09:06:09.9537039Z 413/413 ca DA CHAY QUA (tong 415, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+2026-11-18T09:15:32.9870844Z DOT BIEN: 702/702 dat  (6 khong do duoc tren nen nay)
+## job 134690141241 windows-latest log_sha256=2454c7fc73453b514b75c700bcd9d90d4968e2c9880ab8e2bb8c677790a30926 bytes=182703
+2026-11-18T09:08:32.7819142Z 330/330 ca DA CHAY QUA (tong 415, bo qua 85, hong 0) - KHONG DU: 85 ca BO QUA, chua do gi
+2026-11-18T09:18:37.6652064Z DOT BIEN: 561/561 dat  (147 khong do duoc tren nen nay)

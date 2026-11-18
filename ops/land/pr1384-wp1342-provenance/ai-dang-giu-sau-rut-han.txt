@@ -1,0 +1,11 @@
+# do 2026-11-18T09:21:13Z, sau han moi 09:20Z; lease = git show 92c0d57ece5a2a5076a75158b4bcf01bd6300a25:ops/leases/wp1342-r2-g1-claude.yaml
+may_chu_ref 311
+cuc_bo_thieu 0
+== .claude/dev/packet_loop.py
+HẾT_HẠN	wp1342-r1-g1-claude	refs/heads/ops/wp1342-r1-g1-lease:ops/leases/wp1342-r1-g1-claude.yaml
+HẾT_HẠN	wp1342-r2-g1-claude	refs/heads/ops/wp1342-r2-g1-lease:ops/leases/wp1342-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+== .claude/dev/packet_loop_test.py
+HẾT_HẠN	wp1342-r1-g1-claude	refs/heads/ops/wp1342-r1-g1-lease:ops/leases/wp1342-r1-g1-claude.yaml
+HẾT_HẠN	wp1342-r2-g1-claude	refs/heads/ops/wp1342-r2-g1-lease:ops/leases/wp1342-r2-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có

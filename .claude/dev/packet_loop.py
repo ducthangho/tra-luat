@@ -6742,6 +6742,178 @@ def _1174_win_boot_id():
     return str(int(value))
 
 
+_1174_WIN_JOB_LIMIT = 0x2000   # JOBOBJECT LimitFlags: KILL_ON_JOB_CLOSE and nothing else (no breakaway bit)
+_1174_WIN_SPAWN_FLAGS = 0x204   # creationflags: CREATE_SUSPENDED (0x4) | CREATE_NEW_PROCESS_GROUP (0x200) and nothing else
+_1174_WIN_RESUME_OK = 1   # the only accepted ResumeThread result: exactly the one suspension of CREATE_SUSPENDED
+
+
+def _1174_win_api_job():
+    """r4: exactly twelve job/thread bindings on the kernel32 of _1174_win_api; s = documented Win64 layouts, fixed-width types."""
+    import types
+    c, w, k = _1174_win_api()
+    V, D, H, B, P, I, Q = c.c_void_p, w.DWORD, w.HANDLE, w.BOOL, c.POINTER(w.DWORD), c.c_uint32, c.c_uint64
+    for name, args, result in (
+            ("CreateJobObjectW", [V, w.LPCWSTR], H), ("SetInformationJobObject", [H, c.c_int, V, D], B),
+            ("AssignProcessToJobObject", [H, H], B), ("TerminateJobObject", [H, w.UINT], B),
+            ("QueryInformationJobObject", [H, c.c_int, V, D, P], B), ("CreateToolhelp32Snapshot", [D, D], H),
+            ("Thread32First", [H, V], B), ("Thread32Next", [H, V], B), ("OpenThread", [D, B, D], H),
+            ("GetProcessIdOfThread", [H], D), ("ResumeThread", [H], D), ("GetHandleInformation", [H, P], B)):
+        fn = getattr(k, name)
+        fn.argtypes, fn.restype = args, result
+
+    def layout(name, *fields):
+        return type(name, (c.Structure,), {"_fields_": list(fields)})
+    basic = layout("JOBOBJECT_BASIC_LIMIT_INFORMATION", ("PerProcessUserTimeLimit", c.c_int64), ("PerJobUserTimeLimit", c.c_int64),
+                   ("LimitFlags", I), ("MinimumWorkingSetSize", Q), ("MaximumWorkingSetSize", Q), ("ActiveProcessLimit", I),
+                   ("Affinity", Q), ("PriorityClass", I), ("SchedulingClass", I))
+    io = layout("IO_COUNTERS", *((ten, Q) for ten in ("ReadOperationCount", "WriteOperationCount", "OtherOperationCount",
+                                                      "ReadTransferCount", "WriteTransferCount", "OtherTransferCount")))
+    return c, w, k, types.SimpleNamespace(JOBOBJECT_BASIC_LIMIT_INFORMATION=basic, IO_COUNTERS=io, JOBOBJECT_EXTENDED_LIMIT_INFORMATION=layout(
+        "JOBOBJECT_EXTENDED_LIMIT_INFORMATION", ("BasicLimitInformation", basic), ("IoInfo", io), ("ProcessMemoryLimit", Q),
+        ("JobMemoryLimit", Q), ("PeakProcessMemoryUsed", Q), ("PeakJobMemoryUsed", Q)), JOBOBJECT_BASIC_ACCOUNTING_INFORMATION=layout(
+        "JOBOBJECT_BASIC_ACCOUNTING_INFORMATION", ("TotalUserTime", c.c_int64), ("TotalKernelTime", c.c_int64),
+        ("ThisPeriodTotalUserTime", c.c_int64), ("ThisPeriodTotalKernelTime", c.c_int64), ("TotalPageFaultCount", I), ("TotalProcesses", I),
+        ("ActiveProcesses", I), ("TotalTerminatedProcesses", I)), THREADENTRY32=layout(
+        "THREADENTRY32", ("dwSize", I), ("cntUsage", I), ("th32ThreadID", I), ("th32OwnerProcessID", I), ("tpBasePri", c.c_int32),
+        ("tpDeltaPri", c.c_int32), ("dwFlags", I)))
+
+
+def _1174_win_pick_thread(entries, pid):
+    """Pure: the thread id of the ONLY (owner_pid, tid) entry owned by pid; no candidate or several is refused."""
+    found = [tid for owner, tid in entries if owner == pid]
+    _1174_require(len(found) == 1, "suspended start")
+    return found[0]
+
+
+def _1174_win_resume_ok(count):
+    """Pure: ResumeThread must report the single suspension the process was created with."""
+    _1174_require(type(count) is int and count == _1174_WIN_RESUME_OK, "suspended start")
+
+
+def _1174_win_cleanup(steps):
+    """Pure: run every (step code, callable) in order, a failing step never blocks a later one; returns [(step code, exception)].
+
+    Only Exception is collected: an interrupt raised inside a step propagates at once (declared limit). The caller picks the winner."""
+    failed = []
+    for code, step in steps:
+        try:
+            step()
+        except Exception as error:
+            failed.append((code, error))
+    return failed
+
+
+def _1174_win_note(err, ma_buoc):
+    """Pure: best-effort `cleanup:<step code>` notes on the winning error, through BaseException.add_note itself (never an override).
+
+    Reads nothing of any cleanup exception. EVERY exception of this diagnostic step is dropped, a real interrupt landing here included."""
+    for ma in ma_buoc:
+        try:
+            BaseException.add_note(err, "cleanup:" + ma)
+        except BaseException:
+            pass
+
+
+def _1174_win_job_empty(k, s, job, wait_s):
+    """None once the job reports ActiveProcesses == 0 within wait_s seconds; a failed query is never read as empty."""
+    import ctypes
+    info, het = s.JOBOBJECT_BASIC_ACCOUNTING_INFORMATION(), time.monotonic() + wait_s
+    while True:
+        if not k.QueryInformationJobObject(job, 1, ctypes.byref(info), ctypes.sizeof(info), None):
+            raise _1174Error("job query") from ctypes.WinError(ctypes.get_last_error())
+        if info.ActiveProcesses == 0:
+            return None
+        _1174_require(time.monotonic() < het, "job not empty")
+        time.sleep(0.05)
+
+
+def _1174_win_spawn_job(argv, *, cwd, deadline, env=None, truoc_gan=None, between=None):
+    """r4: run ONE command inside a fresh Job Object from a suspended start; standalone, no runtime caller, no pipes.
+
+    The job (KILL_ON_JOB_CLOSE only) is assigned BEFORE the primary thread is resumed, so the child and all it creates afterwards is
+    reclaimed when this returns, or when the caller dies after the assignment. The exit code is returned ONLY when no error happened at
+    all (job terminated and observed empty, leader reaped, every handle owned here closed); a root error is re-raised even when the
+    reclaim was confirmed, a cleanup error alone means "tried, not confirmed". `truoc_gan(proc)`/`between(job)` are test seams.
+    NOT guaranteed (debt wp1342-pre-assign-orphan): the caller dying between Popen and the assignment, Popen raising after CreateProcess
+    succeeded, or a Popen without _handle, leaves a suspended child that never ran any code."""
+    import math
+    _1174_require(
+        type(argv) is list and bool(argv) and all(type(x) is str for x in argv) and type(cwd) is str and
+        type(deadline) in (int, float) and (type(deadline) is int or math.isfinite(deadline)) and
+        time.monotonic() < deadline <= time.monotonic() + 86400 and
+        (env is None or type(env) is dict and all(type(a) is str and type(b) is str for a, b in env.items())) and
+        all(x is None or callable(x) for x in (truoc_gan, between)), "spawn arguments")
+    _1174_require(os.name == "nt", "native Windows required")
+    _1174_require(sys.implementation.name == "cpython" and sys.version_info >= (3, 11), "spawn runtime")
+    c, w, k, s = _1174_win_api_job()
+
+    def need(ok, reason):   # called on the result of ONE Win32 call: on failure its code is read at once and kept as the cause
+        if not ok:
+            raise _1174Error(reason) from c.WinError(c.get_last_error())
+
+    def reap():
+        try:
+            proc.wait(5)
+        except subprocess.TimeoutExpired:
+            raise _1174Error("leader not reaped") from None
+    job = k.CreateJobObjectW(None, None)
+    need(job, "job create")
+    dang_ky = {"terminate": lambda: need(k.TerminateJobObject(job, 1), "job terminate"),
+               "xac_nhan": lambda: _1174_win_job_empty(k, s, job, 5), "close_job": lambda: need(k.CloseHandle(job), "handle close")}
+    da_gan, goc, rc = False, None, None
+    try:
+        try:
+            info = s.JOBOBJECT_EXTENDED_LIMIT_INFORMATION()
+            info.BasicLimitInformation.LimitFlags = _1174_WIN_JOB_LIMIT
+            need(k.SetInformationJobObject(job, 9, c.byref(info), c.sizeof(info)), "job limit")
+            proc = subprocess.Popen(argv, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL, close_fds=True, creationflags=_1174_WIN_SPAWN_FLAGS)
+            dang_ky["kill_truoc_gan"] = proc.kill
+            dang_ky["reap"] = reap
+            _1174_require(getattr(proc, "_handle", None) is not None, "spawn handle")
+            if truoc_gan is not None:
+                truoc_gan(proc)
+            need(k.AssignProcessToJobObject(job, proc._handle), "job assignment")
+            da_gan = True
+            if between is not None:
+                between(job)
+            snap = k.CreateToolhelp32Snapshot(0x4, 0)   # TH32CS_SNAPTHREAD: CPython closed the primary thread handle
+            need(snap and snap != c.c_void_p(-1).value, "thread snapshot")
+            dang_ky["close_snap"] = lambda: need(k.CloseHandle(snap), "handle close")
+            te, entries = s.THREADENTRY32(), []
+            te.dwSize = c.sizeof(te)
+            more = k.Thread32First(snap, c.byref(te))
+            while more:
+                entries.append((te.th32OwnerProcessID, te.th32ThreadID))
+                more = k.Thread32Next(snap, c.byref(te))
+            need(c.get_last_error() == 18, "thread snapshot")   # only ERROR_NO_MORE_FILES ends the walk (or means an empty list)
+            th = k.OpenThread(0x2 | 0x800, False, _1174_win_pick_thread(entries, proc.pid))   # SUSPEND_RESUME | QUERY_LIMITED_INFORMATION
+            need(th, "suspended start")
+            dang_ky["close_thread"] = lambda: need(k.CloseHandle(th), "handle close")
+            _1174_require(0 != k.GetProcessIdOfThread(th) == proc.pid, "suspended start")   # the thread id was not reused meanwhile
+            _1174_win_resume_ok(k.ResumeThread(th))
+            while rc is None:   # finite slices keep the absolute deadline and stay below INFINITE milliseconds
+                con_lai = deadline - time.monotonic()
+                _1174_require(con_lai > 0, "lifecycle deadline")
+                try:
+                    rc = proc.wait(timeout=min(con_lai, 60.0))
+                except subprocess.TimeoutExpired:
+                    pass
+        except BaseException as error:
+            goc = error
+            raise
+    finally:   # no proc.kill() once assigned: the job is the only reclaim path, and xac_nhan the only confirmation
+        thu_tu = ("terminate", "xac_nhan") if da_gan else ("kill_truoc_gan",)
+        hong = _1174_win_cleanup([(ma, dang_ky[ma]) for ma in thu_tu + ("reap", "close_thread", "close_snap", "close_job")
+                                  if ma in dang_ky])
+        if goc is not None:
+            _1174_win_note(goc, [ma for ma, _ in hong])
+        elif hong:
+            _1174_win_note(hong[0][1], [ma for ma, _ in hong[1:]])
+            raise hong[0][1]
+    return rc
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="packet_loop.py",

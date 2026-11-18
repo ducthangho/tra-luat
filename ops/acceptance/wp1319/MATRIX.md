@@ -159,3 +159,12 @@ Không đổi: §11 #2 (gateway thật / không fallback chưa đo), §11 #6–#
 Finding sản phẩm cần chủ kho quyết định (không tự sửa):
 - **P1-2:** đường kiểm trước khi spawn phải từ chối tệp ngoài manifest (DLL-planting).
 - **P1-3:** cần `requestSingleInstanceLock` theo profile, hoặc chấp nhận rằng chỉ khoá operator bảo vệ.
+
+### H.2 Quyết định của chủ kho, 18/11 tối
+- **Quyền thi công**, chủ kho xác nhận "theo đề xuất":
+  - **NSIS** được cài thật trên Desktop (máy thử), per-user, phải gỡ sạch sau khi đo.
+  - **U8**: chủ kho tự đăng nhập/2FA trên profile thử; phiên điều phối không chạm credential, chỉ đo việc giữ phiên qua backup/restore.
+  - **LIVE promote sang VM (gateway) chưa làm.** Chỉ làm sau khi WP-PXA (#1401) land và có kế hoạch promote, và phải hỏi xác nhận riêng cho đúng thao tác đó.
+- **Raw P5 / hồ sơ P6 không thể khôi phục.** Chủ kho xác nhận không giữ bản nào. Đã tìm trên ASUS, Desktop và VM ngày 18/11 nhưng không thấy. Chưa đọc được `C:\Users\tladmin` (VM) và `C:\Users\ADMIN` (Desktop) vì bị từ chối quyền.
+  - Mọi hàng chỉ dựa vào P5/P6 (§11 #8 "ASUS passed before VM canary", U2, U12 "P6 daily check", phần P5 của §11 #1/#3/#11) **không được tính là đạt dựa trên P5/P6**. Các hàng này phải đo lại hoặc giữ `not_evidenced`.
+- **WP-PXA (#1401)** sửa P1-2 (tệp thừa) và P1-3 (khoá profile ở operator), và làm §11 #8 (promotion fence) ở mức hàm và test. Đã đối chứng trên cây Proxima thật ở ASUS: cây sạch cho `OK`; thêm `version.dll` thì bị chặn với `ARTIFACT_EXTRA`; gỡ ra thì lại `OK`. Còn chờ review 2/2 (Codex `gpt-6-astra` trên ASUS).

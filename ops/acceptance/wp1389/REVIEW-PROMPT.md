@@ -160,3 +160,19 @@ là prompt, KHÔNG phải lease. Thứ định danh mã là **băm commit**, kh�
     mở dòng tiếp sau dấu phẩy có chú thích, mã hoá UTF-8 không BOM ở cả hai phía phép so.
   3. Chạy N1 đúng một lần, như lượt 3. Báo dòng `SOURCE` và dòng `TONG`.
   4. Ghi verdict vào `scratch/VERDICT.md`. Tách riêng finding chặn merge và giới hạn đã khai.
+
+## Lượt 8 (delta; chủ kho nâng trần Codex 7 → 8, ghi ở lease `budget_nang_tran_5`)
+
+- Lượt 7 ở `3c524fc`: `request_changes`; 3 chốt của lượt 6 được xác nhận đã sửa; 1 P1 mới (cache Linux casefold),
+  nguyên văn trong `VERDICT.md`.
+- Sửa ở `511cf5f`, chi tiết trong `RESULTS.md` §11:
+  - Trước `open`, Capture tra ĐÚNG đường dẫn `<thư mục hash>/<nonce>.err` và `.session` mà Node sẽ mở (bash `-e`/`-L`,
+    PowerShell `Test-Path`), dừng nếu đã có. Phép quét `find`/`GetFileSystemEntries` giữ nguyên cho các thư mục khác.
+  - Ca C19/C20 mô phỏng casefold bằng `find` giả trả rỗng (rc 0) trong khi tệp đúng tên đã có; đột biến gỡ từng chốt
+    làm ca lọt. Casefold thật CHƯA đo (container không mount được ext4 casefold).
+  - Trên Windows phép quét vốn không phân biệt hoa thường, nên chốt mới là lớp thứ hai, không đo tách được.
+- Việc lượt 8:
+  1. Xác minh P1 lượt 7 trên mã ở H. Căn cứ là dòng mã.
+  2. Tìm lỗi MỚI do bản sửa đưa vào.
+  3. Chạy N1 đúng một lần, như lượt 3. Báo dòng `SOURCE` và dòng `TONG`.
+  4. Ghi verdict vào `scratch/VERDICT.md`. Tách riêng finding chặn merge và giới hạn đã khai.

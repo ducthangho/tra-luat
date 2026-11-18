@@ -1,0 +1,47 @@
+# Bien ban M8 (ADR-0060) dong WP #433 NLM-GWS-DICH-NGOAI-KHO r1 (packet 1) — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1394-wp433-land-evidence.yaml. Audit human_audited chu kho tu dang 6977263194 tren 80f926c.
+# Moc §10.2.2 run 44295243563 (ci.yml push master tren 700fbca): run/checkout passed; gate_output FAILED (gate ubuntu, buoc
+# release-verify strict lane LAND rc 2: RELEASE_MANIFEST.json chua tai sinh); workflow_definition not_measured (GraphQL 403).
+packet: wp433
+revision: 1
+generation: 1
+spec_hash: 3721e4684c12a22ab165a032c409ddb979dc9786e8862f9cdbaeba4bd7a74f88
+head_da_review: 80f926c9866e4ab2c32a4253359b72c4de511962
+tree_h: 5f12998f24ea1cd21062480e8849c9396276759b
+review:
+  offline: 'khong goi Codex offline tren ma; 13 luot Codex offline chi review DAC TA truoc lease (ops/reviews/wp433-spec-r1/ tren nhanh ops/wp433-r1-g1-lease), luot 13 approve'
+  connector: 'readback-pr1394-comments.json: codex-review-receipt 6976267096 "Didn''t find any major issues" tren 80f926c (kich bang @codex review 6976240462); summary 6976246999 cap nhat 11:30:43Z'
+  human_audit: 'issuecomment-6977263194 human_exact_head_audit.v1 approve tren 80f926c (chu kho tu dang, performed_via_github_app null)'
+windows:
+  phan_loai: not_required
+  nguon: 'packet 1 chi chot dich ghi W1-W3/W6, ca chay moi nen; junction/W4/W5 thuoc packet 2 GWS-CRED-DICH-NGOAI-KHO. Lease khong cap ngan sach Windows.'
+  ket_qua: 'not_applicable'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1394#issuecomment-6977263194
+duyet_chu_kho_ghi_chu: 'audit tu dang 11:29:07Z 18-11, truoc merge 11:30:02Z; chu kho chon "Merge 80f926c" trong phien dieu phoi (loi khai).'
+merge_commit: 700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef
+tree_m: 6c5dbcf4eb2f43e008c765ba7a4b94e889ca9c95
+ci_master:
+  run_id: 44295243563
+  conclusion: failure
+  ghi_chu: 'ci.yml push master 38/39 job co dau hieu duong; gate (ubuntu-latest) failure tai buoc release-verify strict (lane LAND) rc 2 — scripts/tl_gws.py va scripts/tl_test_fragments_bundled.py lech RELEASE_MANIFEST.json; tai sinh o PR #1396 (983795c) do phien land.'
+nghiem_thu:
+  N1: passed   # selftest-fragment-700fbca.txt: fragment 18/18 ca, 30/30 dot bien giet dung tren merge
+  N2: passed   # nhu tren
+  N3: passed   # nhu tren
+  N4: passed   # nhu tren
+  N5: passed   # chuyen packet 2 theo dac ta; khong co tieu chi do o packet nay
+  N6: passed   # nhu N1
+  N7: passed   # nhu N1
+  N8: passed   # fragment tren merge + loi khai than PR (cloud_agent_creds_test 60/60, 91/91 base va H)
+  N9: passed   # nhu N1
+  N10: passed  # dong tong ket fragment tren merge; tu kiem (1)-(7): loi khai than PR; N10(5) ve hai chua chay (loi khai)
+  N11: passed  # selftest 1779/1779, test-fragments-check ok, bundle_fragment_check ok 13 ca tren merge
+  N12: failed  # release-verify strict tren master 700fbca rc 2 (release-verify-strict-700fbca.txt); manifest tai sinh o PR #1396 chua merge
+  N13: passed  # nghiem-thu-700fbca.txt: diff --check, adr-song, doctrine-scan rc 0, numstat 3 tep +448; ruff F delta -2 (loi khai than PR, lech nguyen van chu kho da audit)
+lease_cuoi: wp433-r1-g1-claude
+landed: false
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: not_measured
+  gate_output: failed

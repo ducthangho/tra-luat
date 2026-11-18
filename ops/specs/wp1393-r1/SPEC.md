@@ -23,42 +23,42 @@ Chi tiết ở #1393.
 
 ## Hợp đồng
 
-1. **Phép so sánh khi `accept`.** Biên nhận nộp (`supplied`) và biên nhận thu lại (`collected`) phải trùng đúng từng giá trị ở các khoá bất biến sau:
-   - `schema`, `repo_id`, `repo`, `head`;
-   - `audit_comment_id`, `audit_updated_at`, `audit_sha256`;
-   - `query_scope`, `ref_scope`, `event_scope`;
-   - `dag_coverage`, `earliest`, `residual_classes`, `status`.
-2. **`cursor_coverage`.** So tập khoá, không so số trang. Tập khoá của `supplied["cursor_coverage"]` và `collected["cursor_coverage"]` phải trùng nhau và trùng `set(query_scope)`. Mỗi giá trị phải là số nguyên ≥ 1. Thiếu một họ, thừa một họ, hoặc có giá trị không hợp lệ thì phải từ chối.
-3. **Bỏ khỏi phép so sánh:** `raw_snapshot_sha256`, `started_utc`, `ended_utc`.
-   - `_1174_collector_receipt` vẫn phải kiểm định dạng `raw_snapshot_sha256` của cả hai biên nhận như hiện nay.
-   - Không khoá nào khác của `_1174_COLLECTOR_KEYS` được bỏ.
-4. **Điều kiện giữ nguyên, không nới:**
-   - `collected["status"] != "FAIL"`, nếu sai thì `publication evidence FAIL`;
-   - `collected["status"] == "RECORDED_EARLIEST_MATCH"`;
-   - `collected["dag_coverage"] is True`;
-   - `collected["earliest"] is not None`;
-   - mọi kiểm tra snapshot audit/comment trước và sau khi thu;
-   - deadline `collection_end`;
-   - thông báo lỗi hiện có.
-   Không thay đổi `_1174_collect`, `_1174_collector_receipt`, `_1174_COLLECTOR_KEYS`, schema receipt v2, hay bất kỳ đường `accept`/human/gate nào khác.
-5. **Ca kiểm bắt buộc.** Đăng ký vào inventory WP1174, giữ nhất quán các literal đếm.
-   - `wp1174_activity_accept_snapshot_drift`. Dựng hai biên nhận chỉ khác `raw_snapshot_sha256` và số trang `cursor_coverage` (cùng tập họ). Chạy đường `accept` thật trên fixture như các ca `accept_roundtrip` hiện có. Kết quả phải được chấp nhận.
-   - Các ca con phải bị từ chối với `publication evidence UNKNOWN/FAIL`, mỗi ca khác đúng một thứ:
-     - `earliest` (id khác, hoặc time khác);
-     - tập họ `cursor_coverage` (thiếu một họ);
-     - giá trị `cursor_coverage` bằng 0;
-     - `status`;
-     - `dag_coverage`;
-     - `residual_classes`;
-     - `audit_sha256`.
-   - Có một ca đối chứng: `collected` FAIL vẫn cho `publication evidence FAIL`.
-6. **Mutant bắt buộc.** Mỗi mutant phải làm ca đích đỏ đúng ở assertion của chính ca đó.
-   - `m1393_compare_raw_snapshot`: khôi phục việc so `raw_snapshot_sha256`.
-   - `m1393_compare_cursor_counts`: so số trang `cursor_coverage`.
-   - `m1393_drop_earliest`: bỏ `earliest` khỏi phép so.
-   - `m1393_cursor_family_unchecked`: không kiểm tập họ của `cursor_coverage`.
+Có hai lớp kiểm, và đặc tả này giữ chúng tách biệt:
+- **Lớp hợp lệ** — `_1174_collector_receipt(receipt, head, audit, repo_id)`, KHÔNG đổi. Nó đã từ chối với thông báo riêng: sai `schema`/`repo`/`repo_id`/`head`/audit/`query_scope`/`ref_scope`/`event_scope`/`residual_classes`/định dạng `raw_snapshot_sha256` (`collector receipt closed bindings`); họ `cursor_coverage` ngoài `query_scope` hoặc giá trị không phải int trong 1..1000 (`collector cursor schema`); `earliest` sai dạng (`collector earliest schema`); `status == "RECORDED_EARLIEST_MATCH"` mà thiếu `earliest`, `dag_coverage` khác true, hoặc tập họ khác `query_scope` (`collector success completeness`).
+- **Lớp so sánh** — phần cuối `_1174_human_evidence`, đối tượng của packet này.
+
+1. **Validate cả `collected`.** Hiện chỉ `supplied` đi qua `_1174_collector_receipt`. Thêm một lời gọi `_1174_collector_receipt(collected, head, audit, repo["id"])` (hàm không đổi) TRƯỚC phép so sánh; vị trí: sau dòng `collected["status"] != "FAIL"` hoặc trước nó, nhưng `collected` FAIL vẫn phải ra `publication evidence FAIL` (FAIL là trạng thái hợp lệ với validator nên thứ tự nào cũng giữ được điều này — ca đối chứng ở mục 5 khoá lại).
+2. **Hàm so sánh thuần.** Tách phép so sánh thành hàm module-level `_1174_receipts_agree(supplied, collected) -> bool`, không I/O, không ném ngoại lệ với dict bất kỳ có đủ khoá (thiếu khoá hoặc sai kiểu ⇒ trả `False`). Nó trả `True` khi và chỉ khi:
+   - mọi khoá trong `_1174_RECEIPT_IMMUTABLE_KEYS` (hằng mới, đúng tập: `schema`, `repo_id`, `repo`, `head`, `audit_comment_id`, `audit_updated_at`, `audit_sha256`, `query_scope`, `ref_scope`, `event_scope`, `dag_coverage`, `earliest`, `residual_classes`, `status`) bằng nhau giữa hai biên nhận;
+   - `cursor_coverage` của cả hai là dict, `set(supplied["cursor_coverage"]) == set(collected["cursor_coverage"]) == set(supplied["query_scope"])`, và mọi giá trị ở cả hai là `int` (không phải `bool`) ≥ 1. Số trang KHÔNG được so.
+   `raw_snapshot_sha256`, `started_utc`, `ended_utc` không được so. Hằng phải thoả `_1174_RECEIPT_IMMUTABLE_KEYS | {"cursor_coverage","raw_snapshot_sha256","started_utc","ended_utc"} == _1174_COLLECTOR_KEYS` — đặt một assert mức module hoặc một ca kiểm, để thêm khoá mới vào receipt mà quên phân loại là ĐỎ.
+3. **Điều kiện accept** thay `all(supplied[k] == collected[k] for k in keys)` bằng `_1174_receipts_agree(supplied, collected)`; mọi vế còn lại giữ nguyên: `collected["status"] != "FAIL"` (`publication evidence FAIL`), rồi `collected["status"] == "RECORDED_EARLIEST_MATCH"`, `collected["dag_coverage"] is True`, `collected["earliest"] is not None` (`publication evidence UNKNOWN/FAIL`). Giữ mọi kiểm tra snapshot audit/comment, deadline `collection_end`, thông báo lỗi hiện có. Không đổi `_1174_collect`, `_1174_collector_receipt`, `_1174_COLLECTOR_KEYS`, schema receipt v2, hay đường `accept`/human/gate nào khác.
+4. **Không có đường nào mới cho bằng chứng yếu hơn.** Ngoài `raw_snapshot_sha256` và số trang, không vế nào được nới; đặc biệt `earliest` (cả sáu trường), `audit_*`, `status`, `dag_coverage` vẫn phải bằng nhau.
+
+5. **Ca kiểm bắt buộc.** Mọi ca dương phải đòi kết quả DƯƠNG cụ thể (rc=0 + `PASS`, hoặc trạng thái `accepted` đã ghi); UNKNOWN/skipped/not_run không bao giờ thoả một ca dương. Mọi ca âm của đường `accept` phải đòi trạng thái state KHÔNG đổi (state revision và `accepted_sha` như trước).
+   a. **Sửa ca hiện có `wp1174_activity_accept_roundtrip`** (giữ ID): hai mục `("raw_snapshot_sha256","0"*64)` và `("cursor_coverage",dict(..., activity=2))` chuyển từ danh sách "phải từ chối" sang dương — `guard-first-publication` rc=0 `PASS`. Mọi ca âm khác của nó giữ nguyên, với đúng thông báo hiện có.
+   b. **Ca mới `wp1174_activity_accept_snapshot_drift`** — đường `accept` THẬT (`_accept_entry1174` hoặc tham số mới của nó viết lại tệp `publication_receipt` trước khi gọi `accept`), ba biến thể dương độc lập, mỗi biến thể phải ra trạng thái `accepted` gắn đúng H và audit:
+      - `digest_only`: chỉ `raw_snapshot_sha256` khác (hex 64 hợp lệ);
+      - `count_only`: chỉ số trang của MỘT họ khác (vẫn int 1..1000, cùng tập họ);
+      - `both`: cả hai.
+      Kèm một biến thể âm trên cùng đường: `earliest.id` khác ⇒ từ chối `publication evidence UNKNOWN/FAIL`, state không đổi.
+   c. **Ca mới `wp1174_receipt_agree_unit`** — gọi thẳng `_1174_receipts_agree` trên hai biên nhận hợp lệ dựng từ fixture:
+      - `True` cho: giống hệt; chỉ digest khác; chỉ số trang khác; cả hai; chỉ `started_utc`/`ended_utc` khác.
+      - `False` cho, mỗi ca khác đúng một thứ: từng khoá trong `_1174_RECEIPT_IMMUTABLE_KEYS` (14 ca, mỗi ca một giá trị khác hợp kiểu); `cursor_coverage` thiếu một họ ở `supplied`; thiếu một họ ở `collected`; thừa một họ ngoài `query_scope` ở cả hai; giá trị 0; giá trị `True` (bool); giá trị chuỗi; `cursor_coverage` không phải dict; thiếu khoá `cursor_coverage`.
+   d. **Ca lớp hợp lệ trên đường accept** (có thể gộp vào b): `supplied` RECORDED với `dag_coverage` false ⇒ `collector success completeness`; `cursor_coverage` một họ = 0 ⇒ `collector cursor schema`; `residual_classes` khác ⇒ `collector receipt closed bindings`. Các ca này đo lớp hợp lệ vẫn đứng trước, KHÔNG được ghi là đo phép so sánh.
+   e. **Đối chứng FAIL:** `collected` FAIL vẫn cho `publication evidence FAIL` (ca hiện có trong `accept_roundtrip` giữ nguyên là đủ, miễn còn xanh).
+   f. **Ca validate `collected`:** một fixture mà `_1174_collect` (qua seam) trả biên nhận RECORDED hỏng lớp hợp lệ (vd. `residual_classes` lệch) phải bị từ chối với thông báo của validator — chứng minh lời gọi ở mục 1 có thật.
+   Đăng ký mọi ca mới vào inventory WP1174, giữ nhất quán các literal đếm.
+
+6. **Mutant bắt buộc** — mỗi mutant phải làm ca đích ĐỎ đúng ở assertion của chính ca đó (không phải lỗi dựng fixture, không phải ca khác); và ca đích phải XANH trên mã chưa đột biến.
+   - `m1393_compare_raw_snapshot` (so lại `raw_snapshot_sha256` trong `_1174_receipts_agree`) ⇒ đích: `digest_only` của 5b và các vế digest của 5c.
+   - `m1393_compare_cursor_counts` (so giá trị `cursor_coverage`) ⇒ đích: `count_only` của 5b và vế số trang của 5c.
+   - `m1393_drop_earliest` (bỏ `earliest` khỏi `_1174_RECEIPT_IMMUTABLE_KEYS`) ⇒ đích: 5c (vế `earliest`) và biến thể âm của 5b.
+   - `m1393_cursor_family_unchecked` (bỏ phép so tập họ trong `_1174_receipts_agree`) ⇒ đích: 5c (các vế thiếu/thừa họ). Ở đường accept, validator che phần này; đích đơn vị là đích đúng, không cần mutant ghép.
+   - `m1393_collected_unvalidated` (bỏ lời gọi validate `collected` ở mục 1) ⇒ đích: 5f.
+
 7. **Không hồi quy.**
-   - Mọi ca `wp1174_activity_*`, `wp1174_lifecycle*`, `wp1174_writer_accept` và `wp1174_race_accept` giữ nguyên ID và xanh.
+   - Mọi ca `wp1174_activity_*`, `wp1174_lifecycle*`, `wp1174_writer_accept`, `wp1174_race_accept` giữ nguyên ID và xanh (riêng `accept_roundtrip` theo 5a).
    - Kiểm kê anchor: mọi product mutant đã đăng ký khớp đúng một lần.
    - Ruff F delta so base bằng 0.
 

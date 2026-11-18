@@ -57,14 +57,15 @@ recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị 
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
 leased_at_utc: '2026-11-18T16:51:13Z'
-heartbeat_at: '2026-11-18T16:51:13Z'
+heartbeat_at: '2026-11-18T17:32:57Z'
 lease_until: '2026-11-18T22:51:13Z'
 lease_expires_at_utc: '2026-11-18T22:51:13Z'
 lease_until_ghi_chu: '6h; rút hạn sau land.'
 attempts_used: 1
 attempts_limit: 2
 budget:
-  codex_review_calls: {used: 0, reserved: 1, limit: 2}
+  codex_review_calls: {used: 1, reserved: 1, limit: 2}
+  codex_review_calls_ghi_chu: 'lượt 1 ở 141a3a7: request_changes (VERDICT.md); lượt 2 (cuối) dành cho head sau khi sửa.'
 requires_live: false
 uy_quyen_merge: false
 uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'

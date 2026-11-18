@@ -1,7 +1,7 @@
 # Bien ban M8 (ADR-0060) dong WP #1342 WP1174-WINDOWS-BACKEND r3 (bac r1c) — kiem bang packet_loop.py kiem-dong-wp
 # Nhan nguon tung muc: ops/land/pr1390-wp1342-land-evidence.yaml. Audit human_audited chu kho tu dang 6981763980 tren 972089e.
 # Moc §10.2.2 run 44326753737 (ci.yml push master tren aeb5cae): run/checkout/gate_output measured passed; workflow_definition
-# not_measured (GraphQL 403 trong phien, chua co wd-run). Issue #1342 con bac r1d (Job Object + probe) => khong dong Issue.
+# measured passed (wd-run 44339158716, 2026-11-18). Issue #1342 con bac r1d (Job Object + probe) => khong dong Issue.
 packet: wp1342
 revision: 3
 generation: 1
@@ -35,9 +35,9 @@ nghiem_thu:
   N8: passed  # dot-bien.json (Desktop): a/b/c/f/h GIET dung ca dich, doi chung dat; linux/dot-bien-linux.json: d/e/g GIET
   N9: passed  # linux/nghiem-thu-aeb5cae.txt: ruff F 3/13 = 3/13 (base, head, cha1, merge); adr-song, doctrine-scan rc 0; diff --check rc 0; numstat 2 tep +300; linux/eol-policy-all-aeb5cae.json ok true, 0 vi pham
 lease_cuoi: wp1342-r3-g1-claude
-landed: false
+landed: true
 moc_10_2_2:
   run: passed
   checkout: passed
-  workflow_definition: not_measured
+  workflow_definition: passed   # wd/wd-44339158716.json + ci/provenance.yaml (thu --wd-run 44339158716)
   gate_output: passed

@@ -1,9 +1,8 @@
 # HO SO LAND — packet #387 LAUNCHER-BAM-LOG-SAU-CAY-CHET r1 (packet A, chi Linux), lease g1, qua PR #1388. Khuon: ops/land/pr1386-wp646-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
 #
-# TRANG THAI: merged (e4fdf09), landed FALSE (ban nhap). Ba moc §10.2.2 cua ci.yml 44285378727 measured passed (run, checkout 39/39,
-#   gate output 39/39 bang danh_gia_gate.py v2); moc Workflow definition not_measured (GraphQL 403 trong phien; chua co luot
-#   ops-do-workflow-definition.yml cho run nay). Co wd-run thi chay lai `ops/ci_provenance.py thu --wd-run <id>` va lat landed.
+# TRANG THAI: merged (e4fdf09), landed FALSE. Bon moc §10.2.2 cua ci.yml 44285378727 measured passed (Workflow definition qua wd-run 44339151012,
+#   2026-11-18); van chua landed vi N4 (--dot-bien 720/720) chi co loi_khai_co_neo (than PR #1388), khong chay lai sau merge — kiem-dong-wp doc GIA TRI nghiem_thu, khong doc chu thich.
 # MUC TIEU: launcher cho cay tien trinh con chet han (toi da 10 s) truoc khi bam log; run.json them log_bam_luc_utc,
 #   log_bam_cay_da_chet, log_bam_cho_giay; chi Linux. Nen khac: tra false ngay, giu moc ket_thuc va quyet dinh xoa prompt nhu base.
 #   Packet B (LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS, nhanh Darwin/Windows) HOAN toi sau khi A land; Issue #387 van mo cho B.
@@ -70,10 +69,10 @@ post_merge_checks:
     run_attempt: 1
     sha: e4fdf09e56db55bcdec494db49fb589307b47688
     conclusion: success
-    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44285378727.json, readback-jobs-44285378727.json, readback-runs-merge-e4fdf09.json, danh-gia-gate-output-44285378727.txt, danh_gia_gate.py, phan-chung-buoc-44285378727.txt]
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44285378727.json, readback-jobs-44285378727.json, readback-runs-merge-e4fdf09.json, danh-gia-gate-output-44285378727.txt, danh_gia_gate.py, phan-chung-buoc-44285378727.txt, wd/wd-44339151012.json, wd/ci-provenance-thu-wd-44339151012.log, wd/readback-run-44339151012.json, wd/readback-jobs-44339151012.json]
     moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha e4fdf09, run_attempt 1.'
     moc_checkout: 'measured — ci/provenance.yaml: 39/39 job checkout passed e4fdf09.'
-    moc_workflow_definition: 'not_measured — ci/provenance.yaml moc.workflow_definition: graphql_bi_chan_trong_phien_claude; chua dispatch ops-do-workflow-definition.yml (run_id 44285378727).'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition passed (ops/ci_provenance.py thu --wd-run 44339151012, wd/ci-provenance-thu-wd-44339151012.log): path .github/workflows/ci.yml, oid e4fdf09, blob a1db88d9433fd548e36dcd598a63135f5fac7b73, sha256 d1201a76…82f5; wd/wd-44339151012.json (artifact 14441644070 workflow-definition-44285378727); luot do wd/readback-run-44339151012.json (ops-do-workflow-definition.yml, workflow_dispatch tren master 640a092, do-wd success ubuntu-latest). Do 2026-11-18.'
     moc_gate_output: >-
       measured — danh-gia-gate-output-44285378727.txt (danh_gia_gate.py v2 sha256 539fed68): passed 39/39; gate-packet-loop GOM DAT.
       phan-chung-buoc-44285378727.txt: xoa dau hieu 3 buoc => not_measured, rc 0.
@@ -90,7 +89,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp387-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1388.'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" (dung du kien khi landed false).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" (dung du kien khi landed false); lan 2 (2026-11-18, sau wd-run) van rc 12 thieu D2 (landed false, xem landed_con_thieu).'}
   - {item: 'dong Issue #387', ket_qua: 'not_applicable — readback-issue-387.json open; KHONG dong: packet B (Darwin/Windows) con lai.'}
   - {item: 'phat hanh', ket_qua: 'not_applicable — tep dev-side (.claude/dev/), khong vao goi.'}
 # ---- het truong chuan
@@ -126,14 +125,15 @@ lease:
 trang_thai_packet:
   merged: true
   landed: false
+  landed_con_thieu: 'N4 (--dot-bien 720/720) chi co loi_khai_co_neo (than PR #1388), khong chay lai sau merge. Bon moc §10.2.2 da du (2026-11-18); muon lat landed can phep do that cho tieu chi do (hoac chu kho owner_waived), roi chay lai kiem-dong-wp.'
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren e4fdf09: run/checkout/gate_output measured passed, workflow_definition not_measured => CHUA DU.
-    (2) lease nha: DAT. (3) bookkeeping: ho so nay; M8 rc 12 cho den khi du bon moc. (4) review neo 5bcea6c: connector sach + audit chu
+    PROTOCOL §10.2.4 — (1) gate tren e4fdf09: run/checkout/gate_output measured passed, workflow_definition measured passed (wd-run 44339151012) => DAT.
+    (2) lease nha: DAT. (3) bookkeeping: ho so nay; M8 kiem-dong-wp LAN 2 van rc 12 (D2: landed false, xem landed_con_thieu). (4) review neo 5bcea6c: connector sach + audit chu
     kho. (5) uy quyen: audit tu dang 6975774421. (6) muc tieu: N1-N6 (xem nghiem_thu). (7) tran: Codex PR 2/10 (connector), CI 1/2, kich thuoc 450/450.
   canh_bao_cho_chu_kho: >-
     (i) --dot-bien du bang 720/720 va doi chung base chi co loi khai than PR #1388 (khong chay lai sau merge vi dai). (ii) Diff dung bang
     tran 450: moi sua doi them dong ve sau cho packet nay phai di revision moi. (iii) Packet B con lai, Issue #387 de mo. (iv) Moc Workflow
-    definition can luot ops-do-workflow-definition.yml cho run 44285378727 roi chay lai ci_provenance thu --wd-run.
+    definition: DA DO 2026-11-18 (wd-run 44339151012 cho run 44285378727).
 
 review:
   so_loi_goi_codex: 'measured — readback-pr1388-comments.json: PR 2/10: connector tren 5bcea6c hai luot (manual + draft marked ready), ca hai sach. Ngoai ngan sach PR: 9 luot Codex offline review dac ta.'
@@ -147,7 +147,6 @@ nghiem_thu:
   N6: 'measured — nghiem-thu-e4fdf09.txt: git diff --check rc 0, adr-song rc 0 (66/66), doctrine-scan rc 0 (12 tep), VERSION 1.6.1, numstat 2 tep +450. ruff F delta 0 va doctor: loi_khai_co_neo than PR.'
 
 khong_do_duoc:
-  - 'Moc Workflow definition §10.2.2 cua run 44285378727 (GraphQL 403 trong phien).'
   - 'Lua chon cach merge qua AskUserQuestion (khong co hien vat GitHub).'
   - '--dot-bien du bang va doi chung base khong chay lai sau merge (chi loi khai than PR #1388).'
   - 'Native Darwin/Windows (packet B, hoan).'

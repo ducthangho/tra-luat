@@ -1,6 +1,6 @@
 # Bien ban M8 (ADR-0060) dong WP #387 LAUNCHER-BAM-LOG-SAU-CAY-CHET r1 (packet A, Linux) — kiem bang packet_loop.py kiem-dong-wp
 # Nhan nguon tung muc: ops/land/pr1388-wp387-land-evidence.yaml. Audit human_audited chu kho tu dang 6975774421 tren 5bcea6c.
-# Moc §10.2.2 run 44285378727: run/checkout/gate_output measured passed; workflow_definition not_measured (GraphQL 403 trong phien, chua co wd-run).
+# Moc §10.2.2 run 44285378727: run/checkout/gate_output measured passed; workflow_definition measured passed (wd-run 44339151012, 2026-11-18).
 packet: wp387
 revision: 1
 generation: 1
@@ -27,7 +27,7 @@ nghiem_thu:
   N1: passed  # launcher-test-toan-suite-e4fdf09.txt: toan suite 424/424 tren merge (gom ca (a),(a')); doi chung base + phan chung: loi khai than PR
   N2: passed  # nhu tren, ca (b) dat; phan chung: loi khai than PR
   N3: passed  # nhu tren, tam ca con lai dat; dot bien: loi khai than PR (--dot-bien 720/720)
-  N4: passed  # loi_khai_co_neo than PR: --dot-bien du bang 720/720, 6 KHONG DO DUOC ke thua dung danh sach N4
+  N4: not_measured  # chi co loi khai, khong duoc tinh passed (cung bai hoc Codex P1 PR #1398) — loi_khai_co_neo than PR: --dot-bien du bang 720/720, 6 KHONG DO DUOC ke thua dung danh sach N4
   N5: passed  # khong do native (packet B); nen khac Linux do bang (e5),(i) trong suite 424/424
   N6: passed  # nghiem-thu-e4fdf09.txt: diff --check, adr-song, doctrine-scan rc 0, numstat 2 tep +450; ruff delta 0 loi khai than PR
 lease_cuoi: wp387-r1-g1-claude
@@ -35,5 +35,5 @@ landed: false
 moc_10_2_2:
   run: passed
   checkout: passed
-  workflow_definition: not_measured
+  workflow_definition: passed   # wd/wd-44339151012.json + ci/provenance.yaml (thu --wd-run 44339151012)
   gate_output: passed

@@ -1,9 +1,8 @@
 # HO SO LAND — packet #1342 WP1174-WINDOWS-BACKEND r2 (bac r1b), lease g1, qua PR #1384. Khuon: ops/land/pr1382-wp1313-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
 #
-# TRANG THAI: merged (d1ca71a), landed FALSE (ban nhap). Ba moc §10.2.2 cua ci.yml 44271842401 measured passed (run, checkout 39/39,
-#   gate output 39/39 bang danh_gia_gate.py v2); moc Workflow definition not_measured (GraphQL 403 trong phien; chua co lượt
-#   ops-do-workflow-definition.yml cho run nay). Co wd-run thi chay lai `ops/ci_provenance.py thu --wd-run <id>` va lat landed.
+# TRANG THAI: merged (d1ca71a), landed FALSE. Bon moc §10.2.2 cua ci.yml 44271842401 measured passed (Workflow definition qua wd-run 44339133885,
+#   2026-11-18); van chua landed vi N2 chi co loi_khai_co_neo (than PR #1384), khong co phep do tren merge/head — kiem-dong-wp doc GIA TRI nghiem_thu, khong doc chu thich.
 # MUC TIEU: backend Windows dung rieng, chua noi day — `_1174_win_api_ghi`, `_1174_win_lock` (LockFileEx doc quyen), `_1174_win_persist`
 #   (create = CreateHardLinkW, update = MoveFileExW REPLACE_EXISTING|WRITE_THROUGH), chin ca native wp1342_native_*, `_additive1342r2`.
 # WINDOWS: do native TRUOC merge tren Desktop DESKTOP-T9R33P2 (Windows 11 26300) va VM tra-luat-win (Server 2022, chi P5); khong CI Windows.
@@ -73,10 +72,10 @@ post_merge_checks:
     run_attempt: 1
     sha: d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a
     conclusion: success
-    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44271842401.json, readback-jobs-44271842401.json, danh-gia-gate-output-44271842401.txt, danh_gia_gate.py, phan-chung-buoc-44271842401.txt]
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44271842401.json, readback-jobs-44271842401.json, danh-gia-gate-output-44271842401.txt, danh_gia_gate.py, phan-chung-buoc-44271842401.txt, wd/wd-44339133885.json, wd/ci-provenance-thu-wd-44339133885.log, wd/readback-run-44339133885.json, wd/readback-jobs-44339133885.json]
     moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha d1ca71a, run_attempt 1.'
     moc_checkout: 'measured — ci/provenance.yaml: 39/39 job checkout passed d1ca71a.'
-    moc_workflow_definition: 'not_measured — ci/provenance.yaml moc.workflow_definition: graphql_bi_chan_trong_phien_claude; chua dispatch ops-do-workflow-definition.yml (run_id 44271842401).'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition passed (ops/ci_provenance.py thu --wd-run 44339133885, wd/ci-provenance-thu-wd-44339133885.log): path .github/workflows/ci.yml, oid d1ca71a, blob a1db88d9433fd548e36dcd598a63135f5fac7b73, sha256 d1201a76…82f5; wd/wd-44339133885.json (artifact 14441908599 workflow-definition-44271842401); luot do wd/readback-run-44339133885.json (ops-do-workflow-definition.yml, workflow_dispatch tren master 640a092, do-wd success ubuntu-latest). Do 2026-11-18.'
     moc_gate_output: >-
       measured — danh-gia-gate-output-44271842401.txt (danh_gia_gate.py v2 sha256 539fed68): passed 39/39; gate-packet-loop "GOM: ĐẠT · 16
       mảnh". phan-chung-buoc-44271842401.txt: xoa dau hieu 3 buoc => not_measured, rc 0.
@@ -93,7 +92,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1342-r2-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1342r2.'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" (dung du kien khi landed false).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" (dung du kien khi landed false); lan 2 (2026-11-18, sau wd-run) van rc 12 thieu D2 (landed false, xem landed_con_thieu).'}
   - {item: 'dong Issue #1342', ket_qua: 'not_applicable — readback-issue-1342.json open; #1342 con revision 3 (r3 lease sau khi do lai tren base moi).'}
   - {item: 'phat hanh', ket_qua: 'not_applicable — tep dev-side (.claude/), khong vao goi.'}
 # ---- het truong chuan
@@ -128,14 +127,15 @@ lease:
 trang_thai_packet:
   merged: true
   landed: false
+  landed_con_thieu: 'N2 chi co loi_khai_co_neo (than PR #1384), khong co phep do tren merge/head. Bon moc §10.2.2 da du (2026-11-18); muon lat landed can phep do that cho tieu chi do (hoac chu kho owner_waived), roi chay lai kiem-dong-wp.'
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren d1ca71a: run/checkout/gate_output measured passed, workflow_definition not_measured => CHUA DU.
-    (2) lease nha: DAT. (3) bookkeeping: ho so nay; M8 rc 12 cho den khi du bon moc. (4) review neo c10d071: connector sach + audit chu
+    PROTOCOL §10.2.4 — (1) gate tren d1ca71a: run/checkout/gate_output measured passed, workflow_definition measured passed (wd-run 44339133885) => DAT.
+    (2) lease nha: DAT. (3) bookkeeping: ho so nay; M8 kiem-dong-wp LAN 2 van rc 12 (D2: landed false, xem landed_con_thieu). (4) review neo c10d071: connector sach + audit chu
     kho. (5) uy quyen: audit tu dang 6973845894. (6) muc tieu: N1-N8 (xem nghiem_thu). (7) tran: Codex PR 2/10, CI 2/2, Windows 2/3.
   canh_bao_cho_chu_kho: >-
     (i) P5 (persist_update_symlink) chi do duoc tren VM Server 2022; Desktop Windows 11 thieu quyen symlink (WinError 1314).
     (ii) So MUTANTS head = base, N2 `_additive1342r2` = [], N3 byte-preserved tren Linux: loi khai than PR #1384. (iii) Moc Workflow
-    definition can lượt ops-do-workflow-definition.yml cho run 44271842401 roi chay lai ci_provenance thu --wd-run.
+    definition: DA DO 2026-11-18 (wd-run 44339133885 cho run 44271842401).
 
 review:
   so_loi_goi_codex: 'loi_khai_co_neo — PR 2/10: connector f50be35 va c10d071 (deu sach). Ngoai ngan sach PR: 3 luot Codex offline review dac ta r2.'
@@ -152,7 +152,6 @@ nghiem_thu:
   N8: 'measured — nghiem-thu-d1ca71a.txt: numstat 2 tep +293/-0; ruff 0.17.5 --select F 3/13 o cha thu nhat va merge (delta 0); diff --check rc 0; adr-song, doctrine-scan rc 0.'
 
 khong_do_duoc:
-  - 'Moc Workflow definition §10.2.2 cua run 44271842401 (GraphQL 403 trong phien).'
   - 'Lua chon cach merge qua AskUserQuestion (khong co hien vat GitHub).'
   - 'So MUTANTS, N2 va phan Linux cua N3/N4 (chi co loi khai than PR #1384).'
   - 'P5 tren Windows 11 (chi do duoc tren Server 2022).'

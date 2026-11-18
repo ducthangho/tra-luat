@@ -1,9 +1,8 @@
 # HO SO LAND — packet #646 LEASE-TRUONG-KHAI-NGHIA r1, lease g1, qua PR #1386. Khuon: ops/land/pr1384-wp1342-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
 #
-# TRANG THAI: merged (bf47a36), landed FALSE (ban nhap). Ba moc §10.2.2 cua ci.yml 44278858848 measured passed (run, checkout 39/39,
-#   gate output 39/39 bang danh_gia_gate.py v2); moc Workflow definition not_measured (GraphQL 403 trong phien; chua co luot
-#   ops-do-workflow-definition.yml cho run nay). Co wd-run thi chay lai `ops/ci_provenance.py thu --wd-run <id>` va lat landed.
+# TRANG THAI: merged (bf47a36), landed FALSE. Bon moc §10.2.2 cua ci.yml 44278858848 measured passed (Workflow definition qua wd-run 44339143070,
+#   2026-11-18); van chua landed vi N4 (so hit tung mau) chi co loi_khai_co_neo (than PR #1386) — kiem-dong-wp doc GIA TRI nghiem_thu, khong doc chu thich.
 # MUC TIEU: chen dung khoi 14 dong da chot nguyen van (bay menh de lam ro nghia truong lease: heartbeat_at, nguong 360 phut,
 #   lease_until, lease_expires_at_utc, duong bo chan het han, reviewed_sha_required, exact head) vao docs/PROTOCOL_DA_PHIEN.md §4.
 # UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head cd73961 (issuecomment-6974832145, app null).
@@ -67,17 +66,17 @@ post_merge_checks:
     run_attempt: 1
     sha: bf47a369fa4872b0bc2032ddef1024fc79377cca
     conclusion: success
-    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44278858848.json, readback-jobs-44278858848.json, readback-runs-merge-bf47a36.json, danh-gia-gate-output-44278858848.txt, danh_gia_gate.py, phan-chung-buoc-44278858848.txt]
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44278858848.json, readback-jobs-44278858848.json, readback-runs-merge-bf47a36.json, danh-gia-gate-output-44278858848.txt, danh_gia_gate.py, phan-chung-buoc-44278858848.txt, wd/wd-44339143070.json, wd/ci-provenance-thu-wd-44339143070.log, wd/readback-run-44339143070.json, wd/readback-jobs-44339143070.json]
     moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha bf47a36, run_attempt 1.'
     moc_checkout: 'measured — ci/provenance.yaml: 39/39 job checkout passed bf47a36.'
-    moc_workflow_definition: 'not_measured — ci/provenance.yaml moc.workflow_definition: graphql_bi_chan_trong_phien_claude; chua dispatch ops-do-workflow-definition.yml (run_id 44278858848).'
+    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition passed (ops/ci_provenance.py thu --wd-run 44339143070, wd/ci-provenance-thu-wd-44339143070.log): path .github/workflows/ci.yml, oid bf47a36, blob a1db88d9433fd548e36dcd598a63135f5fac7b73, sha256 d1201a76…82f5; wd/wd-44339143070.json (artifact 14442193065 workflow-definition-44278858848); luot do wd/readback-run-44339143070.json (ops-do-workflow-definition.yml, workflow_dispatch tren master 640a092, do-wd success ubuntu-latest). Do 2026-11-18.'
     moc_gate_output: >-
       measured — danh-gia-gate-output-44278858848.txt (danh_gia_gate.py v2 sha256 539fed68): passed 39/39; gate-packet-loop "GOM: ĐẠT · 16
       mảnh". phan-chung-buoc-44278858848.txt: xoa dau hieu 3 buoc => not_measured, rc 0.
 bookkeeping:
   - {item: 'rut han lease wp646-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1386.'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" (dung du kien khi landed false).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" (dung du kien khi landed false); lan 2 (2026-11-18, sau wd-run) van rc 12 thieu D2 (landed false, xem landed_con_thieu).'}
   - {item: 'dong Issue #646', ket_qua: 'not_measured — readback-issue-646.json open luc doc; dong sau ho so nay.'}
   - {item: 'phat hanh', ket_qua: 'not_applicable — tep dev-side (docs/), khong vao goi.'}
 # ---- het truong chuan
@@ -114,13 +113,14 @@ lease:
 trang_thai_packet:
   merged: true
   landed: false
+  landed_con_thieu: 'N4 (so hit tung mau) chi co loi_khai_co_neo (than PR #1386). Bon moc §10.2.2 da du (2026-11-18); muon lat landed can phep do that cho tieu chi do (hoac chu kho owner_waived), roi chay lai kiem-dong-wp.'
   landed_dieu_kien: >-
-    PROTOCOL §10.2.4 — (1) gate tren bf47a36: run/checkout/gate_output measured passed, workflow_definition not_measured => CHUA DU.
-    (2) lease nha: DAT. (3) bookkeeping: ho so nay; M8 rc 12 cho den khi du bon moc. (4) review neo cd73961: connector sach + audit chu
+    PROTOCOL §10.2.4 — (1) gate tren bf47a36: run/checkout/gate_output measured passed, workflow_definition measured passed (wd-run 44339143070) => DAT.
+    (2) lease nha: DAT. (3) bookkeeping: ho so nay; M8 kiem-dong-wp LAN 2 van rc 12 (D2: landed false, xem landed_con_thieu). (4) review neo cd73961: connector sach + audit chu
     kho. (5) uy quyen: audit tu dang 6974832145. (6) muc tieu: N1-N5 (xem nghiem_thu). (7) tran: Codex PR 1/10, CI 1/2.
   canh_bao_cho_chu_kho: >-
-    (i) N4 (so hit tung mau) chi co loi khai than PR #1386. (ii) Hai P3 mo cua n1.sh (spec). (iii) Moc Workflow definition can luot
-    ops-do-workflow-definition.yml cho run 44278858848 roi chay lai ci_provenance thu --wd-run.
+    (i) N4 (so hit tung mau) chi co loi khai than PR #1386. (ii) Hai P3 mo cua n1.sh (spec). (iii) Moc Workflow definition: DA DO
+    2026-11-18 (wd-run 44339143070 cho run 44278858848).
 
 review:
   so_loi_goi_codex: 'loi_khai_co_neo — PR 1/10: connector cd73961 (sach). Ngoai ngan sach PR: 9 luot Codex offline review dac ta.'
@@ -133,6 +133,5 @@ nghiem_thu:
   N5: 'measured — n1-n5-chay-lai.txt: n5.py tren blob docs/PROTOCOL_DA_PHIEN.md tai bf47a36 rc 0 "vung_dich_khop_khoi_chot 6c4ec88c…8215 yaml_sha 28fe56a3…df68"; tren base d1ca71a rc 1 (vung 0 byte).'
 
 khong_do_duoc:
-  - 'Moc Workflow definition §10.2.2 cua run 44278858848 (GraphQL 403 trong phien).'
   - 'Lua chon cach merge qua AskUserQuestion (khong co hien vat GitHub).'
   - 'N4 so hit tung mau (chi co loi khai than PR #1386); ma tran 31 ca N5 va dot bien tung chot N1 khong chay lai sau merge.'

@@ -2582,9 +2582,15 @@ moc:
       size_in_bytes: 2427
       expired: false
   workflow_definition:
-    trang_thai: not_measured
-    ly_do: graphql_bi_chan_trong_phien_claude; cho P-B
-    loi_khai_rest_path: .github/workflows/ci.yml
+    trang_thai: passed
+    path: .github/workflows/ci.yml
+    oid: d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a
+    blob: a1db88d9433fd548e36dcd598a63135f5fac7b73
+    sha256: d1201a7691f1ece1de20f7616c0f2034ec14a9d8632ae23584091291407182f5
+    wd_run_id: 44339133885
+    artifact_id: 14441908599
+    artifact_sha256: b9fd27fb5eb75e1084d5eac56204868c8ee4f45756c75db96a589eb11aae190d
+    nguon: https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44339133885
 log_day_du:
   134690140231:
     sha256: 8d946f217affd0a99310bbeeee8fd71e34437bc26dffdcff4e33d483a7d5fe8a

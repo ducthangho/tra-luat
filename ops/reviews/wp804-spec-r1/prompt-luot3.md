@@ -1,0 +1,12 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 3, cho đặc tả `ops/specs/HOAN-LOI-GOI-CODEX-r1.md` (Issue #804, đóng kèm #177). CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng. Chạy thử trong RAM hoặc bản sao dưới /tmp hay /dev/shm.
+
+Worktree master aeb5cae. `ops/specs/HOAN-LOI-GOI-CODEX-r1-ban2.md` là bản bạn review lượt 2 (request_changes: P1 `_phong` ném có thể sau fork nên `("phong","hong")` không chứng minh được; P2 claim thiếu kiểm reservation/tên file/quyền/lỗi I/O; P2 điểm dừng P3 và lệnh không tồn tại bị chặn trước sổ; P2 ma trận đột biến D2b/D3/D6/D8/D11/D14/D15a; P2 D17 thiếu `transition reviewing`; P2 N3 ID sai; P3 danh sách đường v3 và phạm vi một-writer). Bản sửa là `ops/specs/HOAN-LOI-GOI-CODEX-r1.md`; §10 liệt kê thay đổi. Thiết kế hiện: chỉ P2 (ngắt khi chụp) và P3 (hạn hết trong lúc chụp) — cả hai TRƯỚC `_phong` — được ghi `chua_sinh_con`; launcher kiểm reservation rồi mới claim (tên sha256, `O_EXCL`, 0600/0700, fsync); `void-codex-call` chín nhóm chốt. §9 là quyết định chủ kho Q1–Q4 — không phản biện.
+
+Việc:
+(1) `diff` hai bản; với từng finding lượt 2 kiểm đã đóng THẬT bằng đọc/chạy mã (`launcher.py` `lenh_run` ~2690–2900, `chot_han`, `_chup_an_toan`, `_ghi_so`, `ky_ban_ghi_luot`, fixture `r1252_ngat_khi_chup`/`r1252_han_sau_khi_chup` trong `launcher_test.py`; `packet_loop.py` `_load`, `cmd_record_review`, `cmd_record_codex_call`, `record-rescue`, `transition`, `nang-tran`, `void-attempt`; `_adopt_fixture1174` trong `packet_loop_test.py`).
+(2) Tìm đường MỚI: P2/P3 có thật trước MỌI tiến trình con của lệnh review chính không (kể cả trên Windows theo đọc mã); giữa điểm claim và P2/P3 có chỗ nào sinh tiến trình (checkpoint, prompt snapshot) không; launcher kiểm reservation đọc state một lần rồi claim — TOCTOU với `record-codex-call`/`void-codex-call` song song có làm hỏng bất biến không (trong ranh giới một-writer đã khai); chốt (9) và M1(a) có mâu thuẫn với D7b (head khác) không; đường P2 trả 130 qua `KeyboardInterrupt` — bản ghi cuối có ký và mang `codex_call` không.
+(3) Ma trận đột biến: mỗi chốt có tập-ID đỏ riêng; các cặp khai tương đương có hợp lý.
+(4) Kích thước ~450 (chạm trần 450). Theo bạn có nên bắt buộc tách A/B ngay trong đặc tả không; nếu có thì nói rõ ranh giới hợp đồng A→B cần ghi những gì.
+(5) Rà nhanh L1–L7 của `.claude/skills/soan-spec/SKILL.md`.
+
+Đầu ra stdout: bảng finding lượt 2 (đóng/chưa, bằng chứng), finding mới P0–P3 (chỗ, vấn đề, câu thay thế cụ thể). Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2.

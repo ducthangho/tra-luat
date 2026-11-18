@@ -25,16 +25,16 @@
   "review_class": "sensitive",
   "effective_review_class": "sensitive",
   "assurance_target": "cross_approved",
-  "spec_ref": "refs/heads/ops/wp1393-r1-g1@c7a6bc11125152ebe424d989d1b747c2bb58db0c",
+  "spec_ref": "refs/heads/ops/wp1393-r1-g1@defa86d2f84cae6d7cf5daeeff6471356844dc63",
   "spec_path": "ops/specs/wp1393-r1/SPEC.md",
-  "spec_hash": "35aea6c9f2c5ae7e14bd918c067c2767351c45147ed5ab103bf166e391ce9034",
-  "spec_sha256_required": "35aea6c9f2c5ae7e14bd918c067c2767351c45147ed5ab103bf166e391ce9034",
+  "spec_hash": "8a4942001d455dd484d76448890c9850b8bcd6e8ab4b846fb1faec3cdc3f6339",
+  "spec_sha256_required": "8a4942001d455dd484d76448890c9850b8bcd6e8ab4b846fb1faec3cdc3f6339",
   "prompt_path": "ops/prompts/wp1393-r1-g1-claude-author.txt",
-  "prompt_sha256_required": "d34bdc8a2e5b4c2b98b9448c72ec6784f5cd3b8c6f10dc3e27bbf2add7fa9b0a",
+  "prompt_sha256_required": "71cfef885369b49670662bbc6618376d8a465143af32a8ffbb3fcea97b098e71",
   "spec_review_prompt_path": "ops/prompts/wp1393-r1-spec-review-codex.txt",
   "spec_review_prompt_sha256": "69308185e8b8a5025b85c063f05c3727a7e3cc2435c2d61a47e99cc0670bfaec",
   "source_review_prompt_template_path": "ops/prompts/wp1393-r1-g1-codex-source-review.txt",
-  "source_review_prompt_template_sha256": "1b27e6062990c2b1c7ac11f1fccb4d5ff68cdc6465a8789d23920c0001f2b307",
+  "source_review_prompt_template_sha256": "1aa50ad13e6ed872112471e5f9b95ff57f0f2c40ade7d786e625e2b489e578bb",
   "write_set": [
     ".claude/dev/packet_loop.py",
     ".claude/dev/packet_loop_test.py"
@@ -88,5 +88,14 @@
     "write_outside_effective_write_set",
     "ruleset_or_gate_change",
     "CI_rerun"
-  ]
+  ],
+  "spec_review_1": {
+    "run": "8bee9306",
+    "verdict": "changes_requested",
+    "findings": [
+      "WP1393-F1-validation-versus-comparison P2",
+      "WP1393-F2-drift-regression-oracle P2"
+    ],
+    "reviewed_spec_sha256": "35aea6c9f2c5ae7e14bd918c067c2767351c45147ed5ab103bf166e391ce9034"
+  }
 }

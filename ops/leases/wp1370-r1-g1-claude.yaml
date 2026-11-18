@@ -65,8 +65,8 @@
   "lease_expires_at_utc": "2026-11-18T10:20:09Z",
   "limits": {
     "Codex_spec_review": 3,
-    "Claude_author": 10,
-    "Codex_source_review": 6,
+    "Claude_author": 11,
+    "Codex_source_review": 7,
     "source_push": 2,
     "draft_PR": 1,
     "connector": 1,
@@ -183,6 +183,20 @@
       10
     ],
     "can_cu": "https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6965256096",
+    "ai_nang": "owner decision in chat, recorded by Claude Code coordinator"
+  },
+  "author_fix8_prompt_path": "ops/prompts/wp1370-r1-g1-claude-author-fix8.txt",
+  "author_fix8_prompt_sha256": "88cf68d217f36f5511cd1118bb08ea393c2c2c755e60e66bb9614b1f8a8708c2",
+  "nang_tran_owner_20261118c": {
+    "Claude_author": [
+      10,
+      11
+    ],
+    "Codex_source_review": [
+      6,
+      7
+    ],
+    "can_cu": "https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6965636577",
     "ai_nang": "owner decision in chat, recorded by Claude Code coordinator"
   }
 }

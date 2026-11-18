@@ -1,0 +1,104 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1342
+packet_id: wp1342
+spec_packet_id: WP1174-WINDOWS-BACKEND
+revision: 3
+generation: 1
+lease_id: wp1342-r3-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-fable-5-2
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: 'backend Windows r3/bac r1c (seed rieng ACL + BootId registry dung rieng, chua noi day); executor Claude Fable 5.2, reviewer Codex connector; do native N4-N6, N8 tren Desktop, N7 (BootId doi qua MOT lan khoi dong lai VM tra-luat-win) do phien dieu phoi; human_audited tren exact head truoc merge.'
+depends_on: [1174, 1384]
+spec_path: ops/specs/WP1174-WINDOWS-BACKEND-r3.md
+spec_ref: refs/heads/ops/wp1342-r3-spec
+spec_nguon: 'dac ta tren nhanh lease nay; dinh danh theo grammar ADR-0063. Ghim bang spec_hash.'
+spec_sha256_required: f93b9a6ea2192f6ef1832bfb8467c781340a4479b9c5910e2d469ddc9d666d4c
+spec_hash: f93b9a6ea2192f6ef1832bfb8467c781340a4479b9c5910e2d469ddc9d666d4c
+spec_duyet: 'chu kho duyet bam dac ta r3 f93b9a6e 17-11 (ADR-0067, commit d0a5c4c), sau review doc lap Codex luot 3 approve (ops/reviews/wp1342-spec-r3/); chu kho xac nhan qua human audit cuoi packet.'
+prompt_path: ops/specs/WP1174-WINDOWS-BACKEND-r3.md
+prompt_sha256_required: f93b9a6ea2192f6ef1832bfb8467c781340a4479b9c5910e2d469ddc9d666d4c
+write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+write_set_hash: a7ec25392f536bb7467de62e4bb9b0da8689fe4c020031ed88fec36390ea96b3
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/packet_loop.py
+- .claude/dev/packet_loop_test.py
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'N1-N9 cua dac ta r3 dat tren exact head (N4 phan Windows, N5, N6, N8 do native tren Desktop; N7 BootId qua mot lan khoi dong lai VM, do phien dieu phoi)'}
+- {id: M-2, dieu_kien: 'ADR-0060: CI required xanh tren exact head; 0 P0-P2 mo; connector da review dung commit; human audit human_exact_head_audit.v1 tren H'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chi cap quyen thi cong; merge/land do chu kho duyet dung SHA.'
+branch: agent/wp1342-r3-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: eca1d125b82783a6a736c7023751ba53cc9a49c8
+start_from_sha: eca1d125b82783a6a736c7023751ba53cc9a49c8
+start_from_ghi_chu: 'origin/master luc cap lease (sau land r2 #1384 d1ca71a va ho so land #1387). Do lai §0 r3 tren eca1d12 (2026-11-18): chi troi so dong, khong doi nghia. _1174_seed 4761-4776; _1174_runtime 4850 (boot_id 4855); _1174_win_api 6372 (GetFileInformationByHandleEx 6381, require nt 6374); _1174_win_open 6390; _1174_win_identity 6416; _1174_win_read 6454; r2: _1174_win_api_ghi 6489, _1174_win_lock 6506, _1174_win_persist 6541; launcher _KhoCodex._win_private 4060-4089 (ngoai le OW); helper test _new1342 17594, _additive1342 17611, _wired1342 17635, _native1342 17874, _additive1342r2 17893 (_wired1342 tren master = [], _additive1342r2(src,src) = []); MUTANTS 1852, WP1174_REQUIRED 108, WP1174_BOTH 12, CASES 1550; ten moi r3 chua co. BAY (cung dang loi CI r2 f50be35): than _1174_seed chua 6 chuoi la neo dot bien (m1174_ignore_seed_fingerprint, m1174_seed_length, m1174_ignore_seed_fingerprint_nlink, m1174_seed_mode, m1174_seed_owner, m1174_seed_regular) — _1174_win_seed KHONG duoc chep nguyen van dong nao; chay moc_dot_bien_phai_khop_DUNG_MOT_CHO truoc khi push.'
+reviewed_sha_required: eca1d125b82783a6a736c7023751ba53cc9a49c8
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1342
+granted_on_instruction_readback: 'chu kho 17-11: duyet tach r1c (seed + BootId) va duyet bam r3 f93b9a6e; cap ngay khi r2 land (d1ca71a) va do lai §0 khong doi nghia (eca1d12).'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+executor_ghi_chu: 'Executor la phien Claude Code cloud do phien dieu phoi mo (create_session, model claude-fable-5-2); phien dieu phoi khong tu thi cong.'
+recorder_ghi_chu: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS ghi lease, KHONG phai executor.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-18T09:55:00Z'
+  goc_quet: 'clone rieng phien #1206, fetch +refs/heads/*, so tap ten ref may chu/cuc bo thieu 0; master cuc bo = origin/master eca1d12'
+  ket_qua: '.claude/dev/packet_loop.py, .claude/dev/packet_loop_test.py: NGUOI_GIU 0 (lease wp1342-r2-g1-claude da rut han 09:20Z sau land #1384).'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 dau tien cua revision 3; lease r2 (wp1342-r2-g1-claude) da rut han sau land r2, khong khai bia mo.'
+leased_at_utc: '2026-11-18T09:55:00Z'
+heartbeat_at: '2026-11-18T09:55:00Z'
+heartbeat_required_minutes: 360
+heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
+lease_until: '2026-11-18T15:10:00Z'
+lease_expires_at_utc: '2026-11-18T15:10:00Z'
+lease_until_ghi_chu: '24h (packet lon, do native Windows); rut han ngay sau land.'
+attempts_used: 1
+attempts_limit: 2
+attempts_basis: '<= 2 phien executor.'
+budget:
+  codex_review_calls:
+    pr_wp1342_r3_g1: {used: 0, reserved: 0, limit: 10}
+  ci_ubuntu_runs:
+    pr_wp1342_r3_g1: {used: 0, reserved: 0, limit: 2}
+  windows_native_runs:
+    pr_wp1342_r3_g1: {used: 0, reserved: 0, limit: 3}
+  khong_reset_theo_generation: true
+budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 3 (Desktop uu tien; VM cho N7 va du phong; MOT lan khoi dong lai VM cho N7; khong CI Windows). Ngoai ngan sach PR: 3 loi goi Codex offline review dac ta r3 truoc lease (ops/reviews/wp1342-spec-r3/).'
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-18T14:50:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex PR: 1 loi goi tay (@codex review tren 972089e, sach) + 1 lan tu kich khi bo draft luc merge. CI Ubuntu 1 luot tren 972089e. Windows native: Desktop DESKTOP-T9R33P2 (bang ca + dot bien) va VM tra-luat-win (N7). Khoi dong lai VM: shutdown /r cua agent bi tu choi (Access is denied 5); chu kho reset bang gcloud compute instances reset; N7 BootId 36 -> 39, LastBootUpTime 2026-11-18T14:36:34Z. Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-19T09:55:00Z'
+  han_moi_utc: '2026-11-18T15:10:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1342 r3 da MERGE: PR #1390 (head 972089eb4acd5e83f7b58b757f02a69590b26e4b) merge commit aeb5cae0af01538c88ab2b50c27902dfaf7a7382,
+    human audit chu kho issuecomment-6981763980. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem nao cho write set nay luc rut.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu cac duong dan write set sau 2026-11-18T15:10:00Z phai ra NGUOI_GIU 0.'

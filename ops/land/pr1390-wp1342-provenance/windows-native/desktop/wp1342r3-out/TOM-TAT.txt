@@ -1,0 +1,123 @@
+﻿python=Python 3.12.10 os=Microsoft Windows NT 10.0.26300.0 bd=2026-11-18T10:32:44Z shallow=false
+whoami_user="desktop-t9r33p2\thanghd","S-1-5-21-3557025573-3225223210-839716364-1002" user=DESKTOP-T9R33P2\ThangHD
+BASE HEAD=eca1d125b82783a6a736c7023751ba53cc9a49c8 tree=f562495e11496d6a7c7a68a1b3baec86ef5cbcbf sach_truoc=[]
+BASE wp1174_windows_claim_rejected rc=0 3.7s :: KQ_JSON {"wp1174_windows_claim_rejected": null}
+BASE wp1174_admission_valid rc=0 2.8s :: KQ_JSON {"wp1174_admission_valid": null}
+BASE wp1174_admission_wrong_scope rc=0 2.7s :: KQ_JSON {"wp1174_admission_wrong_scope": null}
+BASE wp1174_witness_valid rc=0 2.8s :: KQ_JSON {"wp1174_witness_valid": null}
+BASE wp1174_witness_keyset rc=0 3s :: KQ_JSON {"wp1174_witness_keyset": null}
+BASE wp1174_witness_int_bool rc=0 2.8s :: KQ_JSON {"wp1174_witness_int_bool": null}
+BASE wp1174_witness_json_bytes rc=0 2.6s :: KQ_JSON {"wp1174_witness_json_bytes": null}
+BASE wp1174_witness_fresh_reserved rc=0 2.7s :: KQ_JSON {"wp1174_witness_fresh_reserved": null}
+BASE wp1174_witness_import_retry rc=0 2.8s :: KQ_JSON {"wp1174_witness_import_retry": null}
+BASE wp1174_witness_suspended rc=0 2.8s :: KQ_JSON {"wp1174_witness_suspended": null}
+BASE wp1174_witness_active_pending rc=0 2.8s :: KQ_JSON {"wp1174_witness_active_pending": null}
+BASE wp1174_lifecycle_legacy_unchanged rc=0 2.8s :: KQ_JSON {"wp1174_lifecycle_legacy_unchanged": null}
+BASE wp1174_status_closed rc=0 2.8s :: KQ_JSON {"wp1174_status_closed": null}
+BASE wp1342_native_read rc=0 2.7s :: KQ_JSON {"wp1342_native_read": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_read", "observed": "[('dir', 'PermissionError: [WinError 5] Access is denied.'), ('junction', 'PermissionError: [WinError 5] Access is denied.'), ('NUL', '_1174Error: WP1174 UNKNOWN: nondisk handle'), ('missing', 'FileNotFoundError: [WinError 2] The system cannot find the file specified.')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_volume_junction rc=0 2.7s :: KQ_JSON {"wp1342_native_volume_junction": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_volume_junction", "observed": "[('t\u1ec7p l\u00e0m th\u01b0 m\u1ee5c', '_1174Error: WP1174 UNKNOWN: directory required'), ('junction', '_1174Error: WP1174 UNKNOWN: reparse point'), ('facts', {'filesystem': 'NTFS', 'serial': 2082241159, 'drive_type': 3, 'volume_root': 'F:\\\\'})]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_swap_ancestor rc=0 2.7s :: KQ_JSON {"wp1342_native_swap_ancestor": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_swap_ancestor", "observed": "[(True, True, b'old-bytes', b'new-bytes')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_metadata_drift rc=0 2.9s :: KQ_JSON {"wp1342_native_metadata_drift": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_metadata_drift", "observed": "'_1174Error: WP1174 UNKNOWN: file identity after read'", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_noinherit rc=0 3.8s :: KQ_JSON {"wp1342_native_noinherit": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_noinherit", "observed": "[0]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_symlink_file rc=1 2.8s :: KQ_JSON {"wp1342_native_symlink_file": ["BoQua", "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: n\u1ec1n kh\u00f4ng t\u1ea1o \u0111\u01b0\u1ee3c symlink t\u1ec7p (thi\u1ebfu quy\u1ec1n): [WinError 1314] A required privilege is not held by the client: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmp313vggm3\\\\wp1342_n-9ff2629123cf910a\\\\target' -> 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmp313vggm3\\\\wp1342_n-9ff2629123cf910a\\\\link'"]}
+BASE wp1342_native_lock_exclusive rc=0 2.7s :: KQ_JSON {"wp1342_native_lock_exclusive": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_lock_exclusive", "observed": "('lock 33', 'lock 0')", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_lock_noinherit rc=0 2.7s :: KQ_JSON {"wp1342_native_lock_noinherit": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_lock_noinherit", "observed": "(0, 1)", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_lock_names rc=0 2.7s :: KQ_JSON {"wp1342_native_lock_names": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_lock_names", "observed": "[('dir', 'PermissionError: [WinError 5] Access is denied.'), ('junction', 'PermissionError: [WinError 5] Access is denied.')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_persist_create rc=0 3s :: KQ_JSON {"wp1342_native_persist_create": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_create", "observed": "['FileExistsError: F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmpjg4mbpis\\\\wp1342_n-91930022d70194d8\\\\state.json', 'FileExistsError: F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmpjg4mbpis\\\\wp1342_n-91930022d70194d8\\\\state.json']", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_persist_update rc=0 2.7s :: KQ_JSON {"wp1342_native_persist_update": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_update", "observed": "(1, 1)", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_persist_update_refuse rc=0 2.7s :: KQ_JSON {"wp1342_native_persist_update_refuse": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_update_refuse", "observed": "[('dir', 'PermissionError: [WinError 5] Access is denied.'), ('junction', 'PermissionError: [WinError 5] Access is denied.'), ('missing', 'FileNotFoundError: [WinError 2] The system cannot find the file specified.')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_persist_update_symlink rc=1 2.7s :: KQ_JSON {"wp1342_native_persist_update_symlink": ["BoQua", "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: n\u1ec1n kh\u00f4ng t\u1ea1o \u0111\u01b0\u1ee3c symlink t\u1ec7p (thi\u1ebfu quy\u1ec1n): [WinError 1314] A required privilege is not held by the client: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmpvgn0tds9\\\\wp1342_n-8c9af7c85fce356e\\\\target' -> 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmpvgn0tds9\\\\wp1342_n-8c9af7c85fce356e\\\\link'"]}
+BASE wp1342_native_persist_update_held rc=0 2.7s :: KQ_JSON {"wp1342_native_persist_update_held": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_update_held", "observed": "'PermissionError: [WinError 5] Access is denied.'", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_native_persist_bindings rc=0 2.9s :: KQ_JSON {"wp1342_native_persist_bindings": null}
+  BASE WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_bindings", "observed": "([('Internal', 0, 8), ('InternalHigh', 8, 8), ('Offset', 16, 4), ('OffsetHigh', 20, 4), ('hEvent', 24, 8)], ['CreateHardLinkW', 'DeleteFileW', 'GetHandleInformation', 'LockFileEx', 'MoveFileExW', 'UnlockFileEx'])", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+BASE wp1342_pure_platform_path rc=0 2.8s :: KQ_JSON {"wp1342_pure_platform_path": null}
+BASE wp1342_additive_byte_preserved rc=0 12.4s :: KQ_JSON {"wp1342_additive_byte_preserved": null}
+BASE wp1342_pure_lock_persist_refuse rc=0 2.7s :: KQ_JSON {"wp1342_pure_lock_persist_refuse": null}
+BASE sach_sau=[]
+HEAD HEAD=972089eb4acd5e83f7b58b757f02a69590b26e4b tree=bda52ba50cd764758429d4f5dc8c2d5f8b50afb8 sach_truoc=[]
+HEAD wp1174_windows_claim_rejected rc=0 3.3s :: KQ_JSON {"wp1174_windows_claim_rejected": null}
+HEAD wp1174_admission_valid rc=0 2.7s :: KQ_JSON {"wp1174_admission_valid": null}
+HEAD wp1174_admission_wrong_scope rc=0 2.7s :: KQ_JSON {"wp1174_admission_wrong_scope": null}
+HEAD wp1174_witness_valid rc=0 2.9s :: KQ_JSON {"wp1174_witness_valid": null}
+HEAD wp1174_witness_keyset rc=0 3.1s :: KQ_JSON {"wp1174_witness_keyset": null}
+HEAD wp1174_witness_int_bool rc=0 2.7s :: KQ_JSON {"wp1174_witness_int_bool": null}
+HEAD wp1174_witness_json_bytes rc=0 2.9s :: KQ_JSON {"wp1174_witness_json_bytes": null}
+HEAD wp1174_witness_fresh_reserved rc=0 2.9s :: KQ_JSON {"wp1174_witness_fresh_reserved": null}
+HEAD wp1174_witness_import_retry rc=0 2.8s :: KQ_JSON {"wp1174_witness_import_retry": null}
+HEAD wp1174_witness_suspended rc=0 2.7s :: KQ_JSON {"wp1174_witness_suspended": null}
+HEAD wp1174_witness_active_pending rc=0 2.7s :: KQ_JSON {"wp1174_witness_active_pending": null}
+HEAD wp1174_lifecycle_legacy_unchanged rc=0 2.9s :: KQ_JSON {"wp1174_lifecycle_legacy_unchanged": null}
+HEAD wp1174_status_closed rc=0 2.9s :: KQ_JSON {"wp1174_status_closed": null}
+HEAD wp1342_native_read rc=0 2.9s :: KQ_JSON {"wp1342_native_read": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_read", "observed": "[('dir', 'PermissionError: [WinError 5] Access is denied.'), ('junction', 'PermissionError: [WinError 5] Access is denied.'), ('NUL', '_1174Error: WP1174 UNKNOWN: nondisk handle'), ('missing', 'FileNotFoundError: [WinError 2] The system cannot find the file specified.')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_volume_junction rc=0 2.9s :: KQ_JSON {"wp1342_native_volume_junction": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_volume_junction", "observed": "[('t\u1ec7p l\u00e0m th\u01b0 m\u1ee5c', '_1174Error: WP1174 UNKNOWN: directory required'), ('junction', '_1174Error: WP1174 UNKNOWN: reparse point'), ('facts', {'filesystem': 'NTFS', 'serial': 2082241159, 'drive_type': 3, 'volume_root': 'F:\\\\'})]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_swap_ancestor rc=0 2.9s :: KQ_JSON {"wp1342_native_swap_ancestor": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_swap_ancestor", "observed": "[(True, True, b'old-bytes', b'new-bytes')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_metadata_drift rc=0 2.8s :: KQ_JSON {"wp1342_native_metadata_drift": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_metadata_drift", "observed": "'_1174Error: WP1174 UNKNOWN: file identity after read'", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_noinherit rc=0 3.8s :: KQ_JSON {"wp1342_native_noinherit": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_noinherit", "observed": "[0]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_symlink_file rc=1 2.7s :: KQ_JSON {"wp1342_native_symlink_file": ["BoQua", "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: n\u1ec1n kh\u00f4ng t\u1ea1o \u0111\u01b0\u1ee3c symlink t\u1ec7p (thi\u1ebfu quy\u1ec1n): [WinError 1314] A required privilege is not held by the client: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmph_wclpth\\\\wp1342_n-9ff2629123cf910a\\\\target' -> 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmph_wclpth\\\\wp1342_n-9ff2629123cf910a\\\\link'"]}
+HEAD wp1342_native_lock_exclusive rc=0 2.9s :: KQ_JSON {"wp1342_native_lock_exclusive": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_lock_exclusive", "observed": "('lock 33', 'lock 0')", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_lock_noinherit rc=0 2.7s :: KQ_JSON {"wp1342_native_lock_noinherit": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_lock_noinherit", "observed": "(0, 1)", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_lock_names rc=0 2.9s :: KQ_JSON {"wp1342_native_lock_names": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_lock_names", "observed": "[('dir', 'PermissionError: [WinError 5] Access is denied.'), ('junction', 'PermissionError: [WinError 5] Access is denied.')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_persist_create rc=0 3s :: KQ_JSON {"wp1342_native_persist_create": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_create", "observed": "['FileExistsError: F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmp9_rjn9u5\\\\wp1342_n-91930022d70194d8\\\\state.json', 'FileExistsError: F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmp9_rjn9u5\\\\wp1342_n-91930022d70194d8\\\\state.json']", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_persist_update rc=0 2.7s :: KQ_JSON {"wp1342_native_persist_update": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_update", "observed": "(1, 1)", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_persist_update_refuse rc=0 2.7s :: KQ_JSON {"wp1342_native_persist_update_refuse": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_update_refuse", "observed": "[('dir', 'PermissionError: [WinError 5] Access is denied.'), ('junction', 'PermissionError: [WinError 5] Access is denied.'), ('missing', 'FileNotFoundError: [WinError 2] The system cannot find the file specified.')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_persist_update_symlink rc=1 2.7s :: KQ_JSON {"wp1342_native_persist_update_symlink": ["BoQua", "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: n\u1ec1n kh\u00f4ng t\u1ea1o \u0111\u01b0\u1ee3c symlink t\u1ec7p (thi\u1ebfu quy\u1ec1n): [WinError 1314] A required privilege is not held by the client: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmpwlbdi7lu\\\\wp1342_n-8c9af7c85fce356e\\\\target' -> 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r3\\\\tmpwlbdi7lu\\\\wp1342_n-8c9af7c85fce356e\\\\link'"]}
+HEAD wp1342_native_persist_update_held rc=0 2.9s :: KQ_JSON {"wp1342_native_persist_update_held": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_update_held", "observed": "'PermissionError: [WinError 5] Access is denied.'", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_persist_bindings rc=0 2.7s :: KQ_JSON {"wp1342_native_persist_bindings": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_bindings", "observed": "([('Internal', 0, 8), ('InternalHigh', 8, 8), ('Offset', 16, 4), ('OffsetHigh', 20, 4), ('hEvent', 24, 8)], ['CreateHardLinkW', 'DeleteFileW', 'GetHandleInformation', 'LockFileEx', 'MoveFileExW', 'UnlockFileEx'])", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_pure_platform_path rc=0 2.9s :: KQ_JSON {"wp1342_pure_platform_path": null}
+HEAD wp1342_additive_byte_preserved rc=0 12.4s :: KQ_JSON {"wp1342_additive_byte_preserved": null}
+HEAD wp1342_pure_lock_persist_refuse rc=0 2.7s :: KQ_JSON {"wp1342_pure_lock_persist_refuse": null}
+HEAD wp1342_pure_seed_acl_bang rc=0 2.9s :: KQ_JSON {"wp1342_pure_seed_acl_bang": null}
+HEAD wp1342_pure_seed_boot_refuse rc=0 2.9s :: KQ_JSON {"wp1342_pure_seed_boot_refuse": null}
+HEAD wp1342_native_seed_ok rc=0 2.8s :: KQ_JSON {"wp1342_native_seed_ok": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_seed_ok", "observed": "('S-1-5-21-3557025573-3225223210-839716364-1002', 'O:S-1-5-21-3557025573-3225223210-839716364-1002D:P(A;;FA;;;S-1-5-21-3557025573-3225223210-839716364-1002)(A;;FA;;;SY)')", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_seed_hardlink rc=0 2.9s :: KQ_JSON {"wp1342_native_seed_hardlink": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_seed_hardlink", "observed": "'_1174Error: WP1174 UNKNOWN: private seed owner/DACL/links'", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_seed_acl rc=0 2.9s :: KQ_JSON {"wp1342_native_seed_acl": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_seed_acl", "observed": "[('S3', 'O:S-1-5-21-3557025573-3225223210-839716364-1002D:P(A;;FA;;;S-1-5-21-3557025573-3225223210-839716364-1002)(A;;FA;;;SY)(A;;FA;;;BA)', '_1174Error: WP1174 UNKNOWN: private seed owner/DACL/links'), ('S4', 'O:S-1-5-21-3557025573-3225223210-839716364-1002D:(A;;FA;;;S-1-5-21-3557025573-3225223210-839716364-1002)(A;;FA;;;SY)(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;FA;;;OW)', '_1174Error: WP1174 UNKNOWN: private seed owner/DACL/links')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_seed_fingerprint rc=0 2.7s :: KQ_JSON {"wp1342_native_seed_fingerprint": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_seed_fingerprint", "observed": "('_1174Error: WP1174 UNKNOWN: private seed fingerprint', '_1174Error: WP1174 UNKNOWN: private seed fingerprint')", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_seed_nonfile rc=0 2.9s :: KQ_JSON {"wp1342_native_seed_nonfile": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_seed_nonfile", "observed": "[('dir', 'ValueError: WP1174 UNKNOWN: private seed read/lstat'), ('junction', 'ValueError: WP1174 UNKNOWN: private seed read/lstat')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_seed_drift rc=0 2.9s :: KQ_JSON {"wp1342_native_seed_drift": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_seed_drift", "observed": "['O:S-1-5-21-3557025573-3225223210-839716364-1002D:P(A;;FA;;;S-1-5-21-3557025573-3225223210-839716364-1002)']", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_boot_stable rc=0 2.7s :: KQ_JSON {"wp1342_native_boot_stable": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_boot_stable", "observed": "'15'", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD wp1342_native_boot_failclosed rc=0 2.8s :: KQ_JSON {"wp1342_native_boot_failclosed": null}
+  HEAD WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_boot_failclosed", "observed": "[('thi\u1ebfu kho\u00e1', 'WP1174 UNKNOWN: Windows BootId registry read'), ('thi\u1ebfu gi\u00e1 tr\u1ecb', 'WP1174 UNKNOWN: Windows BootId registry read'), ('l\u1ed7i \u0111\u1ecdc', 'WP1174 UNKNOWN: Windows BootId registry read'), ('REG_SZ', 'WP1174 UNKNOWN: Windows BootId type'), ('REG_QWORD', 'WP1174 UNKNOWN: Windows BootId type')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+HEAD sach_sau=[]
+DOT_BIEN 238.9s
+  a_bo_nlink [1] GIET
+  b_bo_sha256 [1] GIET
+  c_bo_kiem_hau_doc [1] GIET
+  f_bo_kiem_reg_dword [1] GIET
+  h_fallback_registry [1] GIET
+  z_tu_kiem_khong_khop [0] KHONG_DO (chuoi tim khong khop dung 1 lan)
+0c496173ad2d1b16c0bc09cb5f032a2feb195cd4540493b85c2f96dd8d8ca386 F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\dot-bien-1342r3.py
+04243bab0cae61b2cbe9c8a2dfec4cf332a0e9859f2d43782b28a47686473839 F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\chay-1342r3.ps1
+TONG 465.9s
+XONG (khoa da nha)

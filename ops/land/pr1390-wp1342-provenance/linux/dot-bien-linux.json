@@ -1,0 +1,69 @@
+{
+ "src_head": "aeb5cae0af01538c88ab2b50c27902dfaf7a7382",
+ "sach": {
+  "rc": 0,
+  "kq": {
+   "wp1342_pure_seed_acl_bang": null,
+   "wp1342_pure_seed_boot_refuse": null
+  }
+ },
+ "dot_bien": {
+  "d_bo_doi_co_P": {
+   "cap": [
+    [
+     " or \"P\" not in found[2]",
+     ""
+    ]
+   ],
+   "nhan_mong_doi": "dòng 'thiếu P'",
+   "rc": 0,
+   "kq": {
+    "wp1342_pure_seed_acl_bang": [
+     "str",
+     "AssertionError: dòng 'thiếu P': đòi False, SDDL 'O:S-1-5-21-1-2-3-1001D:AI(A;;FA;;;S-1-5-21-1-2-3-1001)'"
+    ],
+    "wp1342_pure_seed_boot_refuse": null
+   },
+   "ket_luan": "GIET",
+   "stderr_cuoi": "/tmp/tmpriua_nn5/d_bo_doi_co_P/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n"
+  },
+  "e_them_BA": {
+   "cap": [
+    [
+     "(user_sid, \"SY\", \"S-1-5-18\")",
+     "(user_sid, \"SY\", \"S-1-5-18\", \"BA\")"
+    ]
+   ],
+   "nhan_mong_doi": "dòng 'ACE cho BA'",
+   "rc": 0,
+   "kq": {
+    "wp1342_pure_seed_acl_bang": [
+     "str",
+     "AssertionError: dòng 'ACE cho BA': đòi False, SDDL 'O:S-1-5-21-1-2-3-1001D:P(A;;FA;;;S-1-5-21-1-2-3-1001)(A;;FA;;;BA)'"
+    ],
+    "wp1342_pure_seed_boot_refuse": null
+   },
+   "ket_luan": "GIET",
+   "stderr_cuoi": "/tmp/tmpriua_nn5/e_them_BA/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n"
+  },
+  "g_chi_co_P": {
+   "cap": [
+    [
+     "D:((?:P|AI|AR)*)(",
+     "D:(P)("
+    ]
+   ],
+   "nhan_mong_doi": "dòng 'nhận: cờ DACL PAI'",
+   "rc": 0,
+   "kq": {
+    "wp1342_pure_seed_acl_bang": [
+     "str",
+     "AssertionError: dòng 'nhận: cờ DACL PAI': đòi True, SDDL 'O:S-1-5-21-1-2-3-1001D:PAI(A;;FA;;;S-1-5-21-1-2-3-1001)'"
+    ],
+    "wp1342_pure_seed_boot_refuse": null
+   },
+   "ket_luan": "GIET",
+   "stderr_cuoi": "/tmp/tmpriua_nn5/g_chi_co_P/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n"
+  }
+ }
+}

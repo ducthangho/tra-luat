@@ -1,0 +1,47 @@
+# do 2026-11-18T14:52:23Z, Linux, Python 3.13.18, git version 2.43.0, ruff 0.16.9
+merge aeb5cae0af01538c88ab2b50c27902dfaf7a7382 parents: d39313eceb71c185deca65878383a94284be3f54 972089eb4acd5e83f7b58b757f02a69590b26e4b  tree 71c133c857612d5927bb0c89ad6b9983b329a59b
+head 972089eb4acd5e83f7b58b757f02a69590b26e4b tree bda52ba50cd764758429d4f5dc8c2d5f8b50afb8  base lease eca1d125b82783a6a736c7023751ba53cc9a49c8  (base la to tien cua cha1: co)
+== numstat aeb5cae0af01538c88ab2b50c27902dfaf7a7382^1..aeb5cae0af01538c88ab2b50c27902dfaf7a7382
+112	0	.claude/dev/packet_loop.py
+188	0	.claude/dev/packet_loop_test.py
+== numstat eca1d125b82783a6a736c7023751ba53cc9a49c8..972089eb4acd5e83f7b58b757f02a69590b26e4b
+112	0	.claude/dev/packet_loop.py
+188	0	.claude/dev/packet_loop_test.py
+== so tep doi giua cha1 va merge ngoai write set: 0
+== blob H vs merge (khac vi master tien qua #1397, 9fcf64d wp1393, cham CUNG hai tep):
+.claude/dev/packet_loop.py H=9ac9ea5c1d92319576858d02e526b23b169fabdd M=7fbb45cbf4adb42d8bc9187c8839b1fb030264d3
+.claude/dev/packet_loop_test.py H=d7dee5739784af6491a45387c0a8ab9cd0f43056 M=afc6f85cc0f907142d07874018e38b9f1a8bdae8
+numstat eca1d125b82783a6a736c7023751ba53cc9a49c8..d39313eceb71c185deca65878383a94284be3f54 tren write set:
+51	4	.claude/dev/packet_loop.py
+298	13	.claude/dev/packet_loop_test.py
+doi chieu ba chieu: dong +/- cua diff(H,M) == dong +/- cua diff(B,P) tren write set:
+BANG
+== git diff --check aeb5cae0af01538c88ab2b50c27902dfaf7a7382^1 aeb5cae0af01538c88ab2b50c27902dfaf7a7382
+rc=0
+== adr-song (merge)
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+== doctrine-scan (merge)
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+== ruff --select F (dem dong ma F)
+-- base eca1d125b82783a6a736c7023751ba53cc9a49c8
+.claude/dev/packet_loop.py 3
+.claude/dev/packet_loop_test.py 13
+-- head 972089eb4acd5e83f7b58b757f02a69590b26e4b
+.claude/dev/packet_loop.py 3
+.claude/dev/packet_loop_test.py 13
+-- cha1 d39313eceb71c185deca65878383a94284be3f54
+.claude/dev/packet_loop.py 3
+.claude/dev/packet_loop_test.py 13
+-- merge aeb5cae0af01538c88ab2b50c27902dfaf7a7382
+.claude/dev/packet_loop.py 3
+.claude/dev/packet_loop_test.py 13
+== do_python_1390.py (_additive1342r2, _wired1342, MUTANTS)
+_additive1342r2(base eca1d12, head 972089e) = []
+_additive1342r2(cha1 d39313e, merge aeb5cae) = []
+_wired1342(merge aeb5cae) = []
+eca1d12 MUTANTS 1852 sha256(repr sap xep) 3dfc650f0fd2143a CASES 1550 WP1174_REQUIRED 108 WP1174_BOTH 12
+972089e MUTANTS 1852 sha256(repr sap xep) 3dfc650f0fd2143a CASES 1560 WP1174_REQUIRED 108 WP1174_BOTH 12
+d39313e MUTANTS 1859 sha256(repr sap xep) 363c37fb4652d902 CASES 1552 WP1174_REQUIRED 110 WP1174_BOTH 12
+aeb5cae MUTANTS 1859 sha256(repr sap xep) 363c37fb4652d902 CASES 1562 WP1174_REQUIRED 110 WP1174_BOTH 12

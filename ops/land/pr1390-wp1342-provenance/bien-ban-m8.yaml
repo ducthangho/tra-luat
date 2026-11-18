@@ -1,0 +1,43 @@
+# Bien ban M8 (ADR-0060) dong WP #1342 WP1174-WINDOWS-BACKEND r3 (bac r1c) — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1390-wp1342-land-evidence.yaml. Audit human_audited chu kho tu dang 6981763980 tren 972089e.
+# Moc §10.2.2 run 44326753737 (ci.yml push master tren aeb5cae): run/checkout/gate_output measured passed; workflow_definition
+# not_measured (GraphQL 403 trong phien, chua co wd-run). Issue #1342 con bac r1d (Job Object + probe) => khong dong Issue.
+packet: wp1342
+revision: 3
+generation: 1
+spec_hash: f93b9a6ea2192f6ef1832bfb8467c781340a4479b9c5910e2d469ddc9d666d4c
+head_da_review: 972089eb4acd5e83f7b58b757f02a69590b26e4b
+tree_h: bda52ba50cd764758429d4f5dc8c2d5f8b50afb8
+review:
+  offline: 'khong goi Codex offline tren ma; 3 luot Codex offline chi review DAC TA r3 truoc lease (ops/reviews/wp1342-spec-r3/ tren nhanh ops/wp1342-r3-spec): request_changes, request_changes, approve'
+  connector: 'readback-pr1390-comments.json: 6975685419 codex-review-receipt "Didn''t find any major issues" tren 972089e (kich bang @codex review 6975642459); tom tat 6975648486 cap nhat 14:40:41Z: luot "Draft marked ready" tren 972089e completed, has_any_findings false; reviews va review-comments rong'
+  human_audit: 'issuecomment-6981763980 human_exact_head_audit.v1 approve tren 972089e (chu kho tu dang, performed_via_github_app null)'
+windows:
+  phan_loai: required
+  nguon: 'duong .claude/dev/ (ADR-0060 M3). Lease: Windows native <= 3; Desktop DESKTOP-T9R33P2 (Windows 11 26300) cho bang ca + dot bien, VM tra-luat-win (Server 2022) cho N7 va bang ca du phong; khong CI Windows.'
+  ket_qua: 'measured truoc merge tren HEAD 972089e — windows-native/desktop/wp1342r3-out/TOM-TAT.txt: 8 ca native moi (S1-S8, B1, B2) passed:1, 13 ca wp1174 + ca native r1/r2 bang base; windows-native/desktop/wp1342r3-out/dot-bien/dot-bien.json: a/b/c/f/h GIET, tu kiem z KHONG_DO; windows-native/vm/wp1342r3-n7-out: BootId 36 -> 39 qua mot lan khoi dong lai. KHONG do lai tren cay merge aeb5cae (blob khac head vi #1397 cham cung hai tep).'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1390#issuecomment-6981763980
+duyet_chu_kho_ghi_chu: 'audit tu dang 14:39:25Z 18-11, truoc merge 14:39:59Z; chu kho chon "Merge 972089e" trong phien dieu phoi (loi khai).'
+merge_commit: aeb5cae0af01538c88ab2b50c27902dfaf7a7382
+tree_m: 71c133c857612d5927bb0c89ad6b9983b329a59b
+ci_master:
+  run_id: 44326753737
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44326753737.txt); gate-packet-loop "GOM: ĐẠT · 16 mảnh · 1559 ca bắt buộc".'
+nghiem_thu:
+  N1: passed  # danh-gia-gate-output-44326753737.txt: gate-packet-loop GOM DAT 16 manh tren aeb5cae; linux/nghiem-thu-aeb5cae.txt: MUTANTS 972089e = eca1d12 (1852, cung bam repr sap xep 3dfc650f), merge = cha1 (1859, 363c37fb); linux/suite-wp1342-wp1174.txt: 138 ca wp1342_/wp1174_ tren merge, 115 dat, 23 BO QUA (deu wp1342_native_*), 0 do
+  N2: passed  # linux/nghiem-thu-aeb5cae.txt: _additive1342r2(eca1d12, 972089e) = [] va _additive1342r2(cha1 d39313e, merge aeb5cae) = []
+  N3: passed  # linux/suite-wp1342-wp1174.txt: wp1342_additive_byte_preserved DAT tren merge; _wired1342(merge) = []; windows-native TOM-TAT: HEAD wp1342_additive_byte_preserved rc=0
+  N4: passed  # linux/suite-wp1342-wp1174.txt (Linux, merge) + windows-native TOM-TAT (Desktop, HEAD): wp1342_pure_seed_acl_bang dat; linux/dot-bien-linux.json: (d)(e)(g) GIET dung dong bang, doi chung dat
+  N5: passed  # windows-native TOM-TAT: wp1174_windows_claim_rejected + 12 ca WP1174_BOTH rc=0 base va HEAD; ca native r1/r2 cung ket qua base va HEAD (symlink_file, persist_update_symlink BO QUA ca hai ve tren Desktop, dat tren VM: windows-native/vm/wp1342r3-vm-out/TOM-TAT.txt)
+  N6: passed  # windows-native TOM-TAT: seed_ok, seed_hardlink, seed_acl (S3+S4), seed_fingerprint (S5+S6), seed_nonfile, seed_drift, boot_stable, boot_failclosed deu WP1342_NATIVE_V1 passed:1
+  N7: passed  # windows-native/vm/wp1342r3-n7-out: truoc 36/36 (LastBoot 2026-11-12T21:02:29Z), sau 39/39 (LastBoot 2026-11-18T14:36:34Z), cung HEAD 972089e tree bda52ba cay sach; 39 >= 36+1
+  N8: passed  # dot-bien.json (Desktop): a/b/c/f/h GIET dung ca dich, doi chung dat; linux/dot-bien-linux.json: d/e/g GIET
+  N9: passed  # linux/nghiem-thu-aeb5cae.txt: ruff F 3/13 = 3/13 (base, head, cha1, merge); adr-song, doctrine-scan rc 0; diff --check rc 0; numstat 2 tep +300; linux/eol-policy-all-aeb5cae.json ok true, 0 vi pham
+lease_cuoi: wp1342-r3-g1-claude
+landed: false
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: not_measured
+  gate_output: passed

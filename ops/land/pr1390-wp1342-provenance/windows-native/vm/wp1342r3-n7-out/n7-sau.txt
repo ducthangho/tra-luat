@@ -1,0 +1,6 @@
+pha=sau utc=2026-11-18T14:37:54.1219270Z LastBootUpTime=2026-11-18T14:36:34.5000000Z
+HEAD=972089eb4acd5e83f7b58b757f02a69590b26e4b tree=bda52ba50cd764758429d4f5dc8c2d5f8b50afb8 sach=[]
+python_rc=0
+N7_BOOTID {"v1": "39", "v2": "39", "utc": "2026-11-18T14:38:00.213942+00:00"}
+reg= | HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters |     BootId    REG_DWORD    0x27 | 
+KHOA KHONG PHAI CUA TA, KHONG DUNG: []

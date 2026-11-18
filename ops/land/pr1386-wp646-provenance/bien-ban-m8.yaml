@@ -1,0 +1,38 @@
+# Bien ban M8 (ADR-0060) dong WP #646 LEASE-TRUONG-KHAI-NGHIA r1 — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1386-wp646-land-evidence.yaml. Audit human_audited chu kho tu dang 6974832145 tren cd73961.
+# Moc §10.2.2 run 44278858848: run/checkout/gate_output measured passed; workflow_definition not_measured (GraphQL 403 trong phien, chua co wd-run).
+packet: wp646
+revision: 1
+generation: 1
+spec_hash: fc18ac389650951e14ecdddeb91798f6b0869380f50ac8eba46cacb57d15e42f
+head_da_review: cd739618e80ba1163758900673da69f732ae0f61
+tree_h: 5988e8a30eb19858a8abf12e96398cea7c593e38
+review:
+  offline: 'khong goi Codex offline tren ma; 9 luot Codex offline chi review DAC TA truoc lease (ops/reviews/wp646-spec-r1/ tren nhanh ops/wp646-r1-g1-lease), luot 9 approve, 2 P3 mo chu kho chap nhan'
+  connector: 'readback-pr1386-comments.json: codex-review-receipt "Didn''t find any major issues" tren cd73961 (kich bang @codex review 6974161612)'
+  human_audit: 'issuecomment-6974832145 human_exact_head_audit.v1 approve tren cd73961 (chu kho tu dang, performed_via_github_app null)'
+windows:
+  phan_loai: not_required
+  nguon: 'write set chi docs/PROTOCOL_DA_PHIEN.md (tai lieu); lease khong cap ngan sach Windows.'
+  ket_qua: 'not_applicable'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1386#issuecomment-6974832145
+duyet_chu_kho_ghi_chu: 'audit tu dang 09:44:38Z 18-11, truoc merge 09:45:07Z; chu kho chon "Merge cd73961" trong phien dieu phoi (loi khai).'
+merge_commit: bf47a369fa4872b0bc2032ddef1024fc79377cca
+tree_m: 5988e8a30eb19858a8abf12e96398cea7c593e38
+ci_master:
+  run_id: 44278858848
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44278858848.txt); gate-packet-loop "GOM: ĐẠT · 16 mảnh".'
+nghiem_thu:
+  N1: passed  # n1-n5-chay-lai.txt: n1.sh d1ca71a..cd73961 va bf47a36^1..bf47a36 rc 0 "N1 DAT ... them/xoa 14 0"; phan chung H=base rc 1
+  N2: passed  # nghiem-thu-bf47a36.txt: doctrine-scan rc 0, adr-song rc 0 tren merge
+  N3: passed  # nghiem-thu-bf47a36.txt: doc-claims-check --strict --json rc 0, ok true, flags 0 tren merge
+  N4: passed  # loi_khai_co_neo than PR #1386 (so hit dung ky vong tung mau)
+  N5: passed  # n1-n5-chay-lai.txt: n5.py tren blob tai bf47a36 rc 0 vung_dich_khop_khoi_chot 6c4ec88c; phan chung base rc 1
+lease_cuoi: wp646-r1-g1-claude
+landed: false
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: not_measured
+  gate_output: passed

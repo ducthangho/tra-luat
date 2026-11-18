@@ -1,0 +1,25 @@
+# Chay lai N1/N5 cua dac ta LEASE-TRUONG-KHAI-NGHIA-r1 (sha256 fc18ac38) sau merge. Clone moi tu GitHub (core.abbrev 7).
+# date -u: 2026-11-18T09:46:38Z; git 2.43.0; python 3.13.18
+# Script trich tu dac ta (dong 190-230 n5.py, dong 236-282 n1.sh) tren nhanh ops/wp646-r1-g1-lease @ 4833647:
+b8ebeb4ad417a14b3b3c01c1982dd2fbab890f40ed021de780f611a73ea021c4  n5.py
+4579c4d6563ba8bdb249bfbba942e23fd181bd8b24d9ac63226fbbb859415ab3  n1.sh
+
+$ bash n1.sh <kho> d1ca71a cd73961 n5.py   # B = base lease, H = head PR
+N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0
+rc=0
+
+$ bash n1.sh <kho> bf47a36^1 bf47a36 n5.py   # B = cha thu nhat cua merge, H = merge commit
+N1 DAT: blob edcb6a154cc8b03a0553f955621e4332168809af, mode 100644, them/xoa 14 0
+rc=0
+
+$ bash n1.sh <kho> d1ca71a d1ca71a n5.py   # phan chung H = base
+N1 DO: diff-tree khac dung mot dong M 100644->100644 cho docs/PROTOCOL_DA_PHIEN.md: 
+rc=1
+
+$ python3 -I n5.py <blob docs/PROTOCOL_DA_PHIEN.md tai bf47a36>
+vung_dich_khop_khoi_chot 6c4ec88cb1e15fd43556f6ed5e8304da613814b825a283e445d0ba33db8b8215 yaml_sha 28fe56a370bf264bdc4604c54374f5700de528171794faefff803a37f2e1df68
+rc=0
+
+$ python3 -I n5.py <blob tai d1ca71a (base)>   # phan chung
+DO: vung dich lech khoi da chot: 0 byte, sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+rc=1

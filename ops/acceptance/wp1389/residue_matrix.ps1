@@ -245,7 +245,11 @@ Mut stale-output N8 $FileClean 'Need (-not (Test-Path -LiteralPath "$env:TL_PW_R
 Mut pwtest-hook N10 $FileClean 'Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR))' 'Need $true'
 Mut exact-path N14 $FileClean '$f.FullName -ceq "$hashDir\$session.err"' '$f.Name -like "$session*err"'
 Mut scan-silent N15 $FileClean '[IO.Directory]::GetFileSystemEntries($_, "*$session*")' '@(Get-ChildItem -Force -LiteralPath $_ -Filter "*$session*" -ErrorAction SilentlyContinue | ForEach-Object FullName)'
-Mut relative-cache N17 $FileClean 'Need ($daemonDir -match ''^([A-Za-z]:\\|\\\\)'')' 'Need ($true)'
+# N17 trong PS duoc chan HAI lop: chot tuyet doi, va FullName (Get-Item tra duong dan tuyet doi) khong bao gio bang
+# "$hashDir\..." tuong doi. Dot bien go MOT lop khong lam ca lot (do 2875afc), nen dot bien nay go CA HAI.
+$preMutRel = "$Scratch\pre-mut-relative.ps1"
+[IO.File]::WriteAllText($preMutRel, ([IO.File]::ReadAllText($FileClean, [Text.Encoding]::UTF8)).Replace('$f.FullName -ceq "$hashDir\$session.err"', '$f.Name -ceq "$session.err"'), $bom)
+Mut relative-cache-and-path N17 $preMutRel 'Need ($daemonDir -match ''^([A-Za-z]:\\|\\\\)'')' 'Need ($true)'
 Mut install-dir-binding N18 $FileClean '$f.FullName -ceq "$hashDir\$session.err"' '$f.Name -ceq "$session.err"'
 Mut no-capture-record D1 $FileDau '(Test-Path -LiteralPath $rec -PathType Leaf) -and' '$true -or'
 Mut no-registry-compare D2 $FileDau '([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n")' '$true'

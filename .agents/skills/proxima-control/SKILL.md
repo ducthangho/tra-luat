@@ -62,3 +62,16 @@ Ba miền danh tính tách biệt, không suy miền này từ miền kia:
   thật chưa được đo; băm chỉ ràng tương thích mã, không chứng thực máy chủ; dịch vụ bọc (kiểu NSSM) bị từ chối.
 - Kiểm thử: `tests/ProximaManifest.Tests.ps1` (manifest, tài liệu), `tests/ProximaControl.Tests.ps1` (S2), `tests/ProximaConfig.Tests.ps1`
   (S1). Một lượt xanh không chứng minh bản đã triển khai trên máy nào.
+
+## Kích hoạt (Activation guard)
+Nạp riêng `scripts/ProximaActivation.psm1` khi kiểm tra kích hoạt.
+- `Test-ProximaArtifactTree` đối chiếu cây tệp với manifest và giá trị ghi đè. Thành công trả `OK`. Lỗi trả
+  `REPARSE_POINT`, `DUPLICATE_CASE`, `ARTIFACT_EXTRA`, `ARTIFACT_MISSING` hoặc `ARTIFACT_CHANGED`.
+- `Enter-ProximaProfileGuard` trả `PROFILE_BUSY` nếu phát hiện Proxima đang dùng profile, `PROFILE_LOCKED` nếu
+  khoá đang được giữ, hoặc `ACQUIRED` kèm guard. Giữ guard suốt thời gian ứng dụng chạy rồi gọi
+  `Exit-ProximaProfileGuard` để đóng khoá (`RELEASED`). Tệp khoá được giữ lại. Chốt chỉ phối hợp những
+  bên gọi guard và không chặn người tự mở Proxima bằng tay.
+- `Test-ProximaPromotionFence` trả `ALLOWED` nếu được chuyển tiếp theo thứ tự host. Khi bị chặn, hàm trả
+  `FENCE_TARGET_UNKNOWN`, `FENCE_PRIOR_MISSING`, `FENCE_RECEIPT_INVALID`, `FENCE_PRIOR_FAILED` hoặc
+  `FENCE_ARTIFACT_MISMATCH`.
+- Lỗi ngoài dự kiến trả `NOT_MEASURED` kèm thông tin lỗi.

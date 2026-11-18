@@ -54,6 +54,13 @@ target_host: DESKTOP-T9R33P2
 target_device_id: a5f7076e-a491-4f84-829b-8d1fbcc1c767
 target_workdir: 'F:\tl-win\session_015GtxrazyAyLwN5BiEB52Sq\wp1389'
 target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt']
+target_bo_sung:
+  - host: tra-luat-win
+    device_id: f7281f27-f79f-40a2-a2f5-b454b58a166a
+    workdir: 'C:\tl-win\session_015GtxrazyAyLwN5BiEB52Sq\wp1389'
+    locks: ['C:\tl-win\KHOA.txt']
+    muc_dich: 'đo N2 (ma trận PS) cho các ca cần symlink TỆP — N5, D10, G9, G10 và đột biến reparse — vì DESKTOP-T9R33P2 thiếu SeCreateSymbolicLinkPrivilege; tra-luat-win có quyền (probe 18-11 ~15:50Z: New-Item/mklink/python/node đều tạo được, PS 5.1 + pwsh 7, không elevated).'
+    chi_thi: 'chủ kho 18-11 ~16:24Z: "Dùng tra-luat-win, thêm vào lease và đo luôn".'
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1389
 granted_on_instruction_readback: 'chủ kho 18-11: giao việc xử lý F1 của #1319 theo protocol (Issue + spec + lease trước code), rồi duyệt băm spec và cấp lease + dùng Desktop qua AskUserQuestion.'
@@ -64,7 +71,7 @@ recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị 
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
 leased_at_utc: '2026-11-18T10:02:07Z'
-heartbeat_at: '2026-11-18T15:57:00Z'
+heartbeat_at: '2026-11-18T16:26:00Z'
 lease_until: '2026-11-18T20:02:07Z'
 lease_expires_at_utc: '2026-11-18T20:02:07Z'
 lease_until_ghi_chu: '6h; gia hạn +4h (16:02Z → 20:02Z) theo chỉ thị chủ kho 18-11 ~15:54Z "Tiếp tục xử lý các vấn đề đang chạy" (bật Developer Mode trên Desktop để đo các ca symlink KHÔNG ĐO ĐƯỢC); rút hạn sau land.'

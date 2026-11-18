@@ -163,7 +163,7 @@ nghiem_thu:
     chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0`, run() True, rc 0 (phu cac ca N1-N4, N6-N9 va dot bien bang §4b). N5 chuyen packet 2 theo dac ta.
     Ve am tren base: loi_khai_co_neo than PR.
   N8_cloud_agent_creds: 'loi_khai_co_neo — than PR: ops/cloud_agent_creds_test.py 60/60 ca, 91/91 dot bien tren base va H. Khong chay lai sau merge.'
-  N10: 'measured — selftest-fragment-700fbca.txt: dong tong ket ra stderr dung dang, run() True. Tu kiem (1)-(7) va ve hai N10(5): loi_khai_co_neo than PR (ve hai CHUA CHAY, executor tu khai).'
+  N10: 'not_measured (ve hai N10(5) chua chay; bien-ban-m8 ghi not_measured) — selftest-fragment-700fbca.txt: dong tong ket ra stderr dung dang, run() True. Tu kiem (1)-(7) va ve hai N10(5): loi_khai_co_neo than PR (ve hai CHUA CHAY, executor tu khai).'
   N11: >-
     measured — selftest-fragment-700fbca.txt: `python3 scripts/tl.py --selftest` rc 0 `== tl selftest 1779/1779 ==`; test-fragments-check
     rc 0 ok true status current (3d656448, 144209 byte); bundle_fragment_check rc 0 ok true failed [] case_count 13 (gom wp433). Doi chung base

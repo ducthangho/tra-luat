@@ -34,7 +34,7 @@ nghiem_thu:
   N7: passed   # nhu N1
   N8: passed   # fragment tren merge + loi khai than PR (cloud_agent_creds_test 60/60, 91/91 base va H)
   N9: passed   # nhu N1
-  N10: passed  # dong tong ket fragment tren merge; tu kiem (1)-(7): loi khai than PR; N10(5) ve hai chua chay (loi khai)
+  N10: not_measured  # dong tong ket fragment tren merge do duoc; tu kiem (1)-(7) chi la loi khai than PR; N10(5) ve hai (bundle_fragment_check ok:false) CHUA CHAY - khong duoc tinh passed (Codex P1 PR #1398)
   N11: passed  # selftest 1779/1779, test-fragments-check ok, bundle_fragment_check ok 13 ca tren merge
   N12: failed  # release-verify strict tren master 700fbca rc 2 (release-verify-strict-700fbca.txt); manifest tai sinh o PR #1396 chua merge
   N13: passed  # nghiem-thu-700fbca.txt: diff --check, adr-song, doctrine-scan rc 0, numstat 3 tep +448; ruff F delta -2 (loi khai than PR, lech nguyen van chu kho da audit)

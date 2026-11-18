@@ -128,3 +128,17 @@ Zip `74f02bd3…`. Mã đúng bằng mã P4 (`97e9b78f…`), không đổi sau k
 
 Giới hạn sản phẩm quan sát được (P3 #7): sau promotion-failure, thư mục `profile` bị vắng; sau ca native locked profile, staging còn sót lại. Giao dịch chỉ chạy một lần nên cần người can thiệp.
 
+## G. r3: chạy lại có chỉnh trên Desktop (18/11, `r3/VERDICT-claude-xhigh.md`: **approve_scoped**)
+
+Zip `ad9a8a6e…`. Bốn finding chính của review r1 (N3, raw N5, N6, N7) **đã giải quyết**.
+
+| Hàng | Cập nhật | Điều kiện đọc |
+|---|---|---|
+| §11 #3 WhatIf + U3 | **passed (scoped)** | r1 N4 12/12 trên cấu hình mẫu. Harness S2 Control 38/38 kèm counterexamples dưới `tr-TR` (r3), PS5.1 + PS7. Backend là đồ giả: **không** chứng minh trên gateway thật |
+| §11 #1 bốn lựa chọn cài | **passed (scoped Desktop)** | r1 N2: selftest lõi 1777/1777 ×4 (không add-on / chỉ Proxima / chỉ Playwright / cả hai). r3: harness proxima-control đạt trên O1 (chỉ Proxima) và O3 (cả hai); Playwright đạt trên O2. Chỉ Desktop, PS7 cho Playwright |
+| U1 PS5.1 | **passed (scoped)** | S1, S2, S3 đạt trên PS5.1.26100 kèm counterexamples dưới `tr-TR`, backend giả |
+| §11 #5 / U10 pin Playwright | **passed (scoped Desktop + ASUS)** | Raw npm "3 verified registry signatures / 3 verified attestations" (r3). `PIN OK`. Kèm finding F1: dư lượng `ms-playwright\daemon` (P3-4, cần quyết sửa SKILL hay ghi nhận) |
+| §11 #4 không secret | **passed (scoped gói r1/r2/r3/P3)** | Quét secret rc 0 lưu trong tệp, cộng quét bổ sung của reviewer |
+
+Không đổi: §11 #2 (gateway thật / không fallback chưa đo), §11 #6–#10, U2, U4, U7, U8, U11, U12 (xem mục D, E, F).
+

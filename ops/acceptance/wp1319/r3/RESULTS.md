@@ -1,9 +1,9 @@
-# WP1319 r3 — Chạy lại có chỉnh các bước r1 trên Desktop (lời khai operator, CHƯA review)
+# WP1319 r3 — Chạy lại có chỉnh các bước r1 trên Desktop (lời khai operator; review độc lập: **approve_scoped**, xem `VERDICT-claude-xhigh.md`)
 
 - Đặc tả: `ops/specs/wp1319-r3.md` (sha256 `77a6f24b…`). Lease `wp1319-r3-g1-operator`.
 - Máy: Desktop `a5f7076e`. Khoá `C:\tl-win` và `F:\tl-win` giữ từ 08:58:00Z đến khoảng 09:35Z ngày 18/11, đã nhả.
 - Mã đo: master `13bf69f6`, trên các cây `repo-O1`, `repo-O2`, `repo-O3` mà r1 đã clone. HEAD đã kiểm.
-- Gói: `wp1319-r3-evidence.zip` sha256 **`ad9a8a6ea3af924c608ab7381218a370d4c32cc053c595fb36d362cf2fd8fbaf`**, 80 tệp kèm MANIFEST, 262 574 byte. Gói nằm trên Desktop, không vào kho.
+- Gói: `wp1319-r3-evidence.zip` sha256 **`ad9a8a6ea3af924c608ab7381218a370d4c32cc053c595fb36d362cf2fd8fbaf`**, 80 mục trong MANIFEST cộng chính `MANIFEST.json` (81 entry), 262 574 byte (bổ chính theo review P3). Gói nằm trên Desktop, không vào kho.
 
 | Bước | Kết quả operator | Marker |
 |---|---|---|

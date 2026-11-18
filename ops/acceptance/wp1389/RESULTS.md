@@ -25,7 +25,7 @@ Base `eca1d125b8`. SKILL tại base: blob `678ba2f0`, sha256 `1799c2bd…faadb`.
 | `d7960ee` | vá W7 | đo lượt 5 (§2–§5, §8). Codex lượt 5 ở `376e9c2` (mã trùng byte): `request_changes` (1 P1 + 2 P2 chặn merge) |
 | `1d7b9f4` | chủ kho nâng trần Codex 5 → 6; sửa theo lượt 5 (§9) | đo lượt 6 (§9). Codex lượt 6 ở `d0d4879` (mã trùng byte): `request_changes` (1 P1 + 2 P2 chặn merge) |
 | `8be8070` | chủ kho nâng trần Codex 6 → 7; sửa theo lượt 6 (§10) | đo lượt 7 (§10). Codex lượt 7 ở `3c524fc` (mã trùng byte): `request_changes` — 3 chốt lượt 6 **đã sửa**; 1 P1 MỚI (cache Linux casefold, lỗi có sẵn từ thiết kế preflight, chưa ai chạy) |
-| **`511cf5f`** | chủ kho nâng trần Codex 7 → 8; sửa P1 lượt 7 (§11) | **đo cuối** (§11) |
+| **`511cf5f`** | chủ kho nâng trần Codex 7 → 8; sửa P1 lượt 7 (§11) | **đo cuối** (§11). **Codex lượt 8 ở `277db46` (mã trùng byte): `approve`**, không P0–P2; 1 P3 không chặn (C20 chưa chụp byte descriptor) |
 
 ## 0. Thiết kế (vì sao (b), và cách lấy sổ phiên)
 
@@ -261,3 +261,13 @@ trích giữa hai nền.
 | N4 Windows native (pwsh 7) | `tl-pw-d70f778ed015`, hash `e7f0337db6e10a57`: chốt tra đúng tên chạy trên đường dẫn thật và cho qua; `CLEANUP OK`, `deleted: false`; khối Gỡ: `GODH` đúng, `exists_after=False`; `ms-playwright` trước = sau **trùng byte** `a36424f6…`; 15 `.err` cũ nguyên. Out Cleanup `fda190e6…`, Gỡ `6a05598f…` |
 
 - Khoá Windows: lấy 14:58:15Z (cả hai rỗng), nhả 15:07:28Z (0 byte); thêm 3 dòng `do-luong.csv` (tổng 29).
+
+## 12. Trạng thái review
+
+- **Codex lượt 8: `approve`** ở `277db46263883c05d6d3e839d0c4661d7b95597f` (SKILL + hai harness trùng byte `511cf5f`, nơi đo
+  N1–N4). Nguyên văn trong `VERDICT.md`.
+- P3 còn mở (không chặn): C20 chỉ đo việc dừng, chưa chụp tồn tại/byte/mtime của descriptor như C19. Chưa sửa để giữ
+  nguyên byte đã được review; nếu sửa thì harness đổi và cần đo/review lại.
+- Gợi ý chưa làm (reviewer nêu, không chặn): Limits có thể ghi thêm fallback Windows khi `LOCALAPPDATA` thiếu/rỗng.
+- Merge/land do chủ kho duyệt đúng SHA (lease `uy_quyen_merge: false`). CI trên các head mang mã (`511cf5f`) báo xong,
+  không suite nào lỗi theo thông báo GitHub; cổng merge vẫn phải xác nhận lại trên head cuối.

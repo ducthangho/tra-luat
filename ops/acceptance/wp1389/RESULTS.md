@@ -266,8 +266,33 @@ trích giữa hai nền.
 
 - **Codex lượt 8: `approve`** ở `277db46263883c05d6d3e839d0c4661d7b95597f` (SKILL + hai harness trùng byte `511cf5f`, nơi đo
   N1–N4). Nguyên văn trong `VERDICT.md`.
+- Các ca symlink tệp trên Windows (N5, D10, G9, G10 + 2 đột biến) đã đo THẬT trên tra-luat-win, §13: 128/128 cả hai shell, không bỏ qua ca nào.
 - P3 còn mở (không chặn): C20 chỉ đo việc dừng, chưa chụp tồn tại/byte/mtime của descriptor như C19. Chưa sửa để giữ
   nguyên byte đã được review; nếu sửa thì harness đổi và cần đo/review lại.
 - Gợi ý chưa làm (reviewer nêu, không chặn): Limits có thể ghi thêm fallback Windows khi `LOCALAPPDATA` thiếu/rỗng.
 - Merge/land do chủ kho duyệt đúng SHA (lease `uy_quyen_merge: false`). CI trên các head mang mã (`511cf5f`) báo xong,
   không suite nào lỗi theo thông báo GitHub; cổng merge vẫn phải xác nhận lại trên head cuối.
+
+## 13. N2 trên tra-luat-win: đo THẬT các ca symlink tệp (trước đây KHÔNG ĐO ĐƯỢC)
+
+- Lý do: DESKTOP-T9R33P2 không có `SeCreateSymbolicLinkPrivilege` (probe 18-11 ~15:50Z: `New-Item`, `mklink`, `python
+  os.symlink`, `node fs.symlinkSync` đều bị từ chối trên PS 5.1 và pwsh 7; bật Developer Mode cần UAC tại máy, không
+  bấm được từ xa). tra-luat-win (VM, user `tlcommander`, không elevated) đã được cấp quyền ấy (`secedit`,
+  `C:\tl-win\cap-quyen-symlink.log`) và tạo được symlink tệp ở cả hai shell. Chủ kho chỉ thị dùng máy này; lease ghi ở
+  `target_bo_sung`.
+- Mã đo: clone thưa nhánh tại `de0ab63` (chỉ đổi lease so với `511cf5f`), băm SKILL `5b965c59…` và
+  `residue_matrix.ps1` `5b6ebe43…` **trùng byte đã approve**; băm bốn đoạn trích PS (`c61b4ef5` · `ee293fa8` ·
+  `e57ec505` · `174450f5`) trùng phép tính trên Linux từ `511cf5f`. Node `v26.13.1`.
+
+| shell | kết quả | tệp out (sha256) |
+|---|---|---|
+| PS 5.1 (`5.1.20348`) | **`TONG: 128 dat / 128 (bo qua khong do duoc: 0)`**, rc 0 | `170a6bb0…` |
+| pwsh 7.6.9 | **`%(PS7)s`**, rc %(PS7RC)s | `%(PS7SHA)s` |
+
+- Sáu phép đo trước đây SKIP nay chạy thật và ĐẠT trên cả hai shell: N5 (`<nonce>.err` là symlink ⇒ dừng),
+  D10 (`00-sophien.txt` là symlink tới bản ghi hợp lệ của run khác ⇒ dừng trước `close`), G9 (`11-daemon-path.txt` là
+  symlink ⇒ GIỮ), G10 (`00-sophien.txt` là symlink ⇒ GIỮ); đột biến record-reparse→D10 lọt, go-record-reparse→G10 xoá
+  (chốt reparse của bản ghi có răng trên Windows thật).
+- Đột biến `ceq-path` cũng LỌT trên máy này (PS 5.1 và pwsh 7) ⇒ P1 Codex lượt 6 tái hiện trên hai máy Windows.
+- Khoá `C:\tl-win\KHOA.txt` (ADR-0057): %(LOCK)s; thêm 2 dòng `C:\tl-win\do-luong.csv` (`may=tra-luat-win`).
+- Còn KHÔNG ĐO ĐƯỢC: ext4 casefold thật, UNC, Bash 4.4. Native N4 vẫn đo trên Desktop (không cần symlink).

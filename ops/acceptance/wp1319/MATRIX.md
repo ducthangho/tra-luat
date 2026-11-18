@@ -96,3 +96,22 @@ Bảng này **thay** cột `ket_luan` của các hàng tương ứng ở mục A
 | U12 binary ↔ upstream | **partial** | Có digest của bộ cài release. Không có chữ ký, attestation hay provenance tới commit. Soak chạy trên biến thể `repaired` |
 
 Còn thiếu: raw P5 trên VM (không có tệp nào trên VM); hồ sơ P6 (ma trận ca, runbook, review, retention); scheduler; NSIS thật; migration; kết quả chạy `test_recovery` trên Windows; các ca âm của updater và artifact; chữ ký; phiên đăng nhập.
+
+## E. Review độc lập raw P3 (18/11, `RAW-P3-VERDICT-claude-xhigh.md`)
+
+Verdict: **request_changes**. Toàn vẹn sạch: zip 118 entry khớp.
+
+| Hàng | Từ raw P3 | Ghi chú |
+|---|---|---|
+| §11 #1 | partial | Raw có đúng **một** lựa chọn: add-on Playwright trên ASUS, chạy PS5.1 và PS7 |
+| §11 #2 | partial | Target là chính máy cục bộ (`TL_PW_TARGET_ID`). Không có đích từ xa |
+| §11 #3 / U3 | not_evidenced | Không có WhatIf trong raw P3 |
+| §11 #4 | passed (zip 118 entry) | Reviewer tự quét: không có secret hay profile |
+| §11 #5 | partial | Lock khớp và `audit signatures` đạt. Cache trình duyệt được seed bằng cách chép từ lượt trước |
+| §11 #11 | not_evidenced | P3 không có healthcheck. Các cờ `no_inference` là hằng gán sẵn |
+| U1 | partial | Fragment PowerShell của Playwright chạy thật trên PS5.1. Raw không có endpoint Proxima |
+| U10 | passed (ASUS, PS5.1 + PS7) | `PIN OK`, lock `0DA56E1E…` |
+| U11 | not_evidenced | `real_VM_WinRM_auth: not_measured` |
+
+Hai lời khai công khai của P3 **không có trong raw**: "selected_remote authorized DC target + 4 status/WhatIf" và "guards 6 prior native cases via 4-module equivalence" (finding F1, F2).
+

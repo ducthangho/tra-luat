@@ -442,7 +442,8 @@ $preMutRel = "$Scratch\pre-mut-relative.ps1"
 [IO.File]::WriteAllText($preMutRel, ([IO.File]::ReadAllText($FileClean, [Text.Encoding]::UTF8)).Replace('$f.FullName -ceq "$hashDir\$session.err"', '$f.Name -ceq "$session.err"'), $bom)
 Mut relative-cache-and-path N17 $preMutRel 'Need ($daemonDir -match ''^([A-Za-z]:\\|\\\\)'')' 'Need ($true)'
 Mut install-dir-binding N18 $FileClean '$f.FullName -ceq "$hashDir\$session.err"' '$f.Name -ceq "$session.err"'
-Mut no-capture-record D1 $FileDau '(Test-Path -LiteralPath $rec -PathType Leaf) -and' '$true -or'
+# go CA CUM chot ban ghi (ton tai + khong reparse + noi dung): '-or' khong ngat duoc chuoi '-and' phia sau (do r5, ff34b2c)
+Mut no-capture-record D1 $FileDau ('(Test-Path -LiteralPath $rec -PathType Leaf) -and' + "`n" + '    -not ((Get-Item -Force -LiteralPath $rec).Attributes -band $reparse) -and' + "`n" + '    ([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n$session`n")') '$true'
 Mut no-registry-compare D2 $FileDau '([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n$session`n")' '$true'
 Mut no-nonce-binding D7 $FileDau '([IO.File]::ReadAllText($rec) -ceq "$($so[0])`n$($so[1])`n$session`n")' '([IO.File]::ReadAllText($rec).StartsWith("$($so[0])`n$($so[1])`n"))'
 Mut dau-link D5 $FileDau 'while ($q) { Need (-not' 'while ($false) { Need (-not'

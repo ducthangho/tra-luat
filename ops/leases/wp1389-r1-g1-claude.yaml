@@ -64,7 +64,7 @@ recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị 
 thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
 leased_at_utc: '2026-11-18T10:02:07Z'
-heartbeat_at: '2026-11-18T14:10:00Z'
+heartbeat_at: '2026-11-18T14:27:00Z'
 lease_until: '2026-11-18T16:02:07Z'
 lease_expires_at_utc: '2026-11-18T16:02:07Z'
 lease_until_ghi_chu: '6h; rút hạn sau land.'

@@ -129,3 +129,17 @@ là prompt, KHÔNG phải lease. Thứ định danh mã là **băm commit**, kh�
      - CLI giả có còn mô phỏng đúng hợp đồng `close`/`delete-data` của bản ghim không.
   3. Chạy N1 đúng một lần, như lượt 3. Báo dòng `SOURCE` và dòng `TONG`.
   4. Ghi verdict vào `scratch/VERDICT.md`. Tách riêng finding chặn merge và giới hạn đã khai.
+
+## Lượt 6 (delta; chủ kho nâng trần Codex 5 → 6, ghi ở lease `budget_nang_tran_3`)
+
+- Lượt 5 ở `376e9c2`: `request_changes` (1 P1 + 2 P2 chặn merge), nguyên văn trong `VERDICT.md`.
+- Sửa ở `1d7b9f4` (và commit vá harness sau nó nếu có, xem `RESULTS.md` §9):
+  - P1: mọi phép so `realpath` của bash giữ byte cuối: `[ "$(realpath … -- "$DH"; echo .)" = "$DH"$'\n.' ]`.
+  - P2 Gỡ: `00-sophien.txt` và `11-daemon-path.txt` phải là tệp thường, không liên kết, TRƯỚC khi đọc; cấm hook; `00`
+    trùng NGUYÊN câu trả lời CLI + nonce (bash so cả tệp kèm LF cuối; PS so từng dòng và dòng rỗng cuối).
+  - P2 Capture: từ chối mọi mục có sẵn ở `00-sophien.txt` (gồm FIFO, symlink treo) trước khi tạo với `set -C`.
+- Việc lượt 6:
+  1. Với TỪNG finding chặn merge của lượt 5, xác minh trên mã ở H: đã sửa, sửa một phần, hay chưa. Căn cứ là dòng mã.
+  2. Tìm lỗi MỚI do bản sửa đưa vào, đặc biệt ở các phép so `"$(…; echo .)"` và khối Gỡ PowerShell.
+  3. Chạy N1 đúng một lần, như lượt 3. Báo dòng `SOURCE` và dòng `TONG`.
+  4. Ghi verdict vào `scratch/VERDICT.md`. Tách riêng finding chặn merge và giới hạn đã khai.

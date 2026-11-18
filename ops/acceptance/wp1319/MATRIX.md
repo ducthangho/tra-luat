@@ -76,3 +76,23 @@ Cột `ket_luan`: `passed` · `failed` · `skipped` · `not_run` · `cho_raw` (�
 1. ~~Gói raw cuối 13/11 không tìm thấy~~ → **18/11: đã định vị raw P3 + P4 trên ASUS** (xem `RAW-1311-POINTERS.md`, zip P4 `97e9b78f…`, zip P3 `147714ad…`, khớp băm tự khai). Vẫn thiếu raw P5 (VM) và hồ sơ P6 (ma trận ca/runbook/review/quyết định). Chưa review độc lập trên raw này.
 2. VM chỉ còn ~1,67 GB trống ở C: — chặn mọi native run trên VM cho tới khi có quyết định dọn đĩa.
 3. Chưa có spec/lease cho thi công bổ sung.
+
+## D. Review độc lập raw P4 cuối 13/11 (18/11, `RAW-1311-VERDICT-claude-xhigh.md`)
+
+Verdict tổng: **request_changes**. Toàn vẹn P4: khớp 41/41 entry, không có P1. Nội dung P3 chưa đọc được, vì ASUS ngừng phản hồi từ ~04:54Z.
+Bảng này **thay** cột `ket_luan` của các hàng tương ứng ở mục A và B. Reviewer: Claude, context mới, chỉ đọc; effort KHONG_do_duoc.
+
+| Hàng | Kết luận từ raw | Lý do chính |
+|---|---|---|
+| §11 #6 artifact sai/hỏng không kích hoạt | **partial** | Chỉ kiểm băm của artifact đúng (OS thật). Không có ca native nào đưa vào artifact sai hoặc hỏng |
+| §11 #7 máy bận / updater trùng | **partial** | Khóa hai bên trên OS thật nằm ngoài zip. "Máy bận" chỉ dẫn tới dừng (assert), không hoãn, và chưa từng kích hoạt |
+| §11 #8 promotion fence | **not_evidenced** | Raw chỉ có một máy |
+| §11 #9 phục hồi binary + dữ liệu | **partial** | Dữ liệu: 7957 tệp khôi phục khớp byte (OS thật). "Rollback binary" chỉ là đổi sang thư mục baseline đặt song song |
+| §11 #10 file lock / đĩa đầy / rollback thất bại | **not_evidenced** | Các ca này chỉ có trong mã test, không có kết quả chạy |
+| §11 #11 healthcheck không inference | **passed (scoped)** | 180 mẫu `/v1/stats`, `totalRequests` 0, egress bị chặn. Chỉ trong phạm vi soak P4 trên profile thử |
+| U4 updater thực tế | **partial** | Đã chứng minh trỏ được về feed owned. Nhánh có bản mới hơn (tải về, kiểm integrity, cài khi thoát) chưa từng chạy |
+| U7 soak / retention | **partial** | Ngưỡng soak chỉ nằm trong mã. Không có retention, owner hay cửa sổ theo dõi |
+| U8 restore profile/đăng nhập | **partial** | Vế dữ liệu đạt. Vế đăng nhập không đo được: profile thử chưa từng đăng nhập |
+| U12 binary ↔ upstream | **partial** | Có digest của bộ cài release. Không có chữ ký, attestation hay provenance tới commit. Soak chạy trên biến thể `repaired` |
+
+Còn thiếu: raw P5 trên VM (không có tệp nào trên VM); hồ sơ P6 (ma trận ca, runbook, review, retention); scheduler; NSIS thật; migration; kết quả chạy `test_recovery` trên Windows; các ca âm của updater và artifact; chữ ký; phiên đăng nhập.

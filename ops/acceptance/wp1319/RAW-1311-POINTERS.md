@@ -34,7 +34,7 @@ Thư mục raw đầy đủ, chưa băm từng tệp:
   Phạm vi tự ghi: *"fresh all-registered-data rollback plus full uninterrupted30min soak; R1 invalid observation gap preserved"*.
 - `recovery-induced-failure-r2/activation-result.json` ghi `passed: false`, tức FAIL của controller được giữ nguyên.
 - `induced-fixture-result.json` ghi `passed: true`, `controller_expected_verdict: FAIL`, `injected_failures` 1, `restore_calls` 1, `baseline_restart_calls` 1, `profile_files_restored` 7957, `source_after_run_equal: true`.
-- `source-after-run.json`: 12 tệp mã operator, `all_equal: true`. Cả hai lượt dùng cùng bộ băm, ví dụ `run_activation.py` có băm `6004fcea…`.
+- `source-after-run.json`: `all_equal: true`. Lượt normal có 12 tệp mã operator, lượt induced có **13** (thêm `induced_sequence_20261113.py`); các tệp chung trùng băm, ví dụ `run_activation.py` là `6004fcea…`. Tệp này được sinh lúc export (03:16Z), không nằm trong thư mục raw (reviewer F7).
 - `runtime-after-verification-20261113.json`: `dependency_files_exact` 251, `binary_and_official_installer_pin_matches`, `baseline_asar_official_byte_equal`, `asar_packed_payload_unchanged`, `only_four_unpacked_metadata_entries_changed`, `runtime_or_profile_mutation: false`, `source_updater_head` `efa4f122…`.
 - `recovery-native-export-20261113.json`: `real_credentials_or_profiles_used: false` và `profile_contents_exported: false`.
 

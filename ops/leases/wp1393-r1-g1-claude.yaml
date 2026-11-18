@@ -122,5 +122,24 @@
     "result": "edits uncommitted on H1; residual same-type-both-sides declared"
   },
   "author_fix2_prompt_path": "ops/prompts/wp1393-r1-g1-claude-author-fix2.txt",
-  "author_fix2_prompt_sha256": "4e4c7e0305eaf16c72e1408929cc596bccfbff7e91d30ef975b25604399a0b1e"
+  "author_fix2_prompt_sha256": "4e4c7e0305eaf16c72e1408929cc596bccfbff7e91d30ef975b25604399a0b1e",
+  "author_fix2": {
+    "run": "1c923e01",
+    "note": "squashed with fix1 into single H on base"
+  },
+  "source_review_2": {
+    "run": "76cf5a7e",
+    "reviewed_sha": "9fcf64d01d43f528b91263597e7366142cef7459",
+    "reviewed_tree": "b6d8d6ec145bbed66e299c8abc84dbf23d82999a",
+    "verdict": "approve",
+    "findings": []
+  },
+  "source_push": {
+    "head": "9fcf64d01d43f528b91263597e7366142cef7459",
+    "branch": "agent/wp1393-r1-g1-claude",
+    "count": 1
+  },
+  "draft_PR": 1397,
+  "delegated_audit": "https://github.com/ducthangho/tra-luat/issues/1393#issuecomment-6977362861",
+  "windows_waiver": "https://github.com/ducthangho/tra-luat/pull/1397#issuecomment-6977366752"
 }

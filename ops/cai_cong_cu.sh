@@ -157,6 +157,26 @@ set +e
 ( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"
 RC_CAI=$?
 set -e
+# wp1404: runner Ubuntu doi khi chua co danh sach goi apt => `apt-get install` bao "Unable to locate package" (do: 1/343 lan
+# cai rg trong 19 luot gate, run 44347295196). Cong thuc trong cong_cu.yaml KHONG duoc sua (phan truoc ` && ` dau tien phai
+# khop CONG_CU cua launcher.py), nen va o day: loi + lenh co `apt-get install` => `apt-get update` MOT lan roi chay lai
+# DUNG MOT lan, cung co che o tren. Update loi khong dung script: loi cuoi cung la cua lan cai lai.
+if [ "$RC_CAI" -ne 0 ]; then
+  case "$LENH" in
+    *"apt-get install"*)
+      echo "cai_cong_cu: '$TEN' cai loi (rc=$RC_CAI); apt-get update roi thu lai mot lan" >&2
+      case "$LENH" in
+        "sudo apt-get"*) sudo apt-get update -qq || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
+        *) apt-get update -qq || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
+      esac
+      : > "$KENH_KQ"
+      set +e
+      ( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"
+      RC_CAI=$?
+      set -e
+      ;;
+  esac
+fi
 if [ "$RC_CAI" -ne 0 ]; then
   if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && cong_cu_json_dung "$TEN" bat_buoc false; then
     echo "cai_cong_cu: '$TEN' (bat_buoc: false) khong cai duoc (rc=$RC_CAI); --bat-buoc di tiep" >&2

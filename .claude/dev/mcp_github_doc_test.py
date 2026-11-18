@@ -281,7 +281,10 @@ def t05_bat_tay_giu_session_va_gui_notification(m=M):
 @ca
 def t06_thieu_header_github_phai_chan(m=M):
     init = json.dumps({"jsonrpc": "2.0", "id": 1, "result": {}})
-    server = _MayChuGia({"initialize": _TraLoi(200, init, {})})
+    # #1313 (M9): CÓ fixture cho `notifications/initialized` để đột biến `bo_header_github`
+    # chết vì `bang` của ca này (hàm cho qua), không vì `KeyError` của đồ giả.
+    server = _MayChuGia({"initialize": _TraLoi(200, init, {}),
+                         "notifications/initialized": _TraLoi(202, "", {})})
     with _cau_hinh(_cfg()) as d:
         with _urlopen_gia(m, server):
             mo_ta = _hong(lambda: m.Phien(d).bat_tay(), m)
@@ -426,6 +429,36 @@ def t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly(m=M):
         bang(rc != 0, f"_main bao thanh cong cho isError=true: rc={rc}")
 
 
+@ca
+def t18_5xx_khong_header_la_loi_truyen_tai_khong_phai_proxy(m=M):
+    """#1313: 5xx KHÔNG header GitHub là `loi truyen tai`, không phải `proxy tu sinh`.
+
+    Đo 13-11-2026: 502 do đường hầm proxy đứt bị mô tả y như 403 chặn theo đường dẫn.
+    Dải là `500 <= mã < 600`; 499, 600 và 403 không header giữ nguyên chữ base.
+    """
+    def mo_ta_cua(ma, headers):
+        loi = m.urllib.error.HTTPError("https://api.example/mcp", ma, "loi", headers, None)
+        server = _MayChuGia({"tools/list": loi})
+        with _cau_hinh(_cfg()) as d:
+            p = m.Phien(d)
+            with _urlopen_gia(m, server):
+                return _hong(lambda: p._post({"method": "tools/list"}), m)
+
+    for ve, ma in (("a", 502), ("b", 503), ("c", 500)):
+        mo_ta = mo_ta_cua(ma, {"Content-Type": "text/plain"})
+        bang(f"HTTP {ma}" in mo_ta, f"({ve}) {ma} khong header: mo ta thieu cum `HTTP {ma}`: {mo_ta}")
+        bang("loi truyen tai" in mo_ta, f"({ve}) {ma} khong header: thieu `loi truyen tai`: {mo_ta}")
+        bang("proxy tu sinh" not in mo_ta, f"({ve}) {ma} khong header ma van noi proxy tu sinh: {mo_ta}")
+    for ve, ma in (("d", 499), ("e", 600)):
+        mo_ta = mo_ta_cua(ma, {"Content-Type": "text/plain"})
+        bang(mo_ta == f"HTTP {ma} (KHONG header GitHub -> proxy tu sinh)",
+             f"({ve}) {ma} khong header phai giu chu base: {mo_ta}")
+    mo_ta = mo_ta_cua(403, {"Content-Type": "text/plain"})
+    bang("proxy tu sinh" in mo_ta, f"(f) 403 khong header phai noi proxy tu sinh: {mo_ta}")
+    mo_ta = mo_ta_cua(502, {"X-GitHub-Request-Id": "r"})
+    bang("thieu quyen" in mo_ta, f"(g) 502 CO header GitHub phai giu mo ta toi noi: {mo_ta}")
+
+
 # Mỗi mẫu chỉ thay đúng một chốt; ca đích phải đỏ trên bản mutant tương ứng.
 DOT_BIEN = [
     ("goi_parser_hai_lan_ghep_hai_anh",
@@ -459,6 +492,8 @@ DOT_BIEN = [
     ("nuot_loi_initialize", '        if "error" in d:\n            raise Hong("initialize loi: " + json.dumps(d["error"], ensure_ascii=False)[:300])', '        if False:\n            raise Hong("initialize loi")', "t08_loi_initialized_khong_duoc_nuot"),
     ("nuot_loi_initialized", '            if "error" in bao:\n                raise Hong("notifications/initialized loi")', '            if "error" in bao:\n                pass', "t08_loi_initialized_khong_duoc_nuot"),
     ("nuot_loi_rpc", '        if "error" in d:\n            raise Hong(f"{method} loi: " + json.dumps(d["error"], ensure_ascii=False)[:300])', '        if False:\n            raise Hong("rpc loi")', "t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly"),
+    ("r1313_mcp_doc_5xx_ve_proxy", '            if not co_gh and 500 <= e.code < 600:', '            if False:',
+     "t18_5xx_khong_header_la_loi_truyen_tai_khong_phai_proxy"),
     ("bo_chot_iserror", '        if isinstance(kq, dict) and kq.get("isError") is True:', '        if False:', "t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly"),
 ]
 

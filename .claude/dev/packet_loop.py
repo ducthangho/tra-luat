@@ -6566,7 +6566,7 @@ def _1174_win_persist(path, raw, *, create):
         with os.fdopen(fd, "wb") as stream:
             stream.write(raw)
             stream.flush()
-            os.fsync(stream.fileno())
+            os.fsync(fd)   # FlushFileBuffers; the stream still owns fd here
         if create:
             if not k.CreateHardLinkW(text, temporary, None):
                 error = c.get_last_error()

@@ -1,6 +1,6 @@
 # WP1319 — Ma trận nghiệm thu bổ sung Mission #1238 (khung, 2026-11-17)
 
-Trạng thái: **khung — chưa có raw**. Mọi hàng dưới đây chỉ dựa trên bản chiếu công khai.
+Trạng thái: **khung — chưa có raw 13/11**; lượt native r1 trên Desktop 18/11 đã đóng băng (`r1/RESULTS.md`, zip `54506f18…`), chờ review độc lập. Mọi hàng dưới đây chỉ dựa trên bản chiếu công khai.
 Không hàng nào là audit raw PASS, human audit hay product review mới.
 
 ## Neo
@@ -32,11 +32,11 @@ Cột `ket_luan`: `passed` · `failed` · `skipped` · `not_run` · `cho_raw` (�
 
 | # | Tiêu chí | Lời khai công khai (nguồn) | loai | ket_luan | Còn thiếu để nghiệm thu |
 |---|---|---|---|---|---|
-| 1 | Bốn lựa chọn cài hoạt động; thiếu add-on không phá core | P2 M8: `lifecycle_reuse`, `Linux_literal_flow` passed; P5: VM PS5.1/PS7 4 bước browser, status/WhatIf 4/4 | ci_artifact (P2) + public_projection_only (P5) | cho_raw | Ma trận 4 lựa chọn (không cài / chỉ Proxima / chỉ Playwright / cả hai) × host × PS5.1/PS7 với rc, marker từng ca. Chưa thấy bằng chứng tách riêng cả 4 lựa chọn ở mức host |
-| 2 | Đúng target; không fallback/retry inference | P3: "actual authorized DC target execution and 4 status/WhatIf" | public_projection_only | cho_raw | Raw log target, bằng chứng 0 lần retry/fallback |
-| 3 | WhatIf không mutation ngoài artifact dry-run | P3/P5: status/WhatIf 4/4; P1-S2 (U1/U3) | public_projection_only | cho_raw | Snapshot trước/sau của WhatIf, PS5.1 + PS7 |
+| 1 | Bốn lựa chọn cài hoạt động; thiếu add-on không phá core | P2 M8: `lifecycle_reuse`, `Linux_literal_flow` passed; P5: VM PS5.1/PS7 4 bước browser, status/WhatIf 4/4. **[r1](r1/RESULTS.md) Desktop 18/11: O0/O1/O2/O3 selftest 1777/1777 ×4; proxima harness O1+O3; playwright O2** | ci_artifact (P2) + public_projection_only (P5) + **direct_native_desktop_18_11** | **cho_review** (Desktop) | Ma trận 4 lựa chọn (không cài / chỉ Proxima / chỉ Playwright / cả hai) × host × PS5.1/PS7 với rc, marker từng ca. Chưa thấy bằng chứng tách riêng cả 4 lựa chọn ở mức host |
+| 2 | Đúng target; không fallback/retry inference | P3: "actual authorized DC target execution and 4 status/WhatIf". **[r1](r1/RESULTS.md): từ chối thiếu/sai TargetId (`ArgumentMissing`, `TargetMismatch`) PS5.1+PS7** | public_projection_only + **direct_native_desktop_18_11** (cấu hình mẫu) | cho_raw (gateway thật) · **cho_review** (chốt target) | Raw log target, bằng chứng 0 lần retry/fallback |
+| 3 | WhatIf không mutation ngoài artifact dry-run | P3/P5: status/WhatIf 4/4; P1-S2 (U1/U3). **[r1](r1/RESULTS.md): status/restart/stop -WhatIf rc0, snapshot trước=sau, PS5.1+PS7** | public_projection_only + **direct_native_desktop_18_11** (cấu hình mẫu, backend không thật) | **cho_review** | Snapshot trước/sau của WhatIf, PS5.1 + PS7 |
 | 4 | Không secrets/profile trong repo và báo cáo | Closeout: "no profile contents or credentials published" | public_projection_only | cho_raw | Quét secrets trên chính gói raw trước khi đóng băng |
-| 5 | Profile riêng; package/browser/cache nhất quán | P4: 251 dependency/exe/installer exact pins; P2 lockfile | ci_artifact (lockfile) + public_projection_only | cho_raw | Manifest pin + cache path theo máy; U9 ASUS |
+| 5 | Profile riêng; package/browser/cache nhất quán | P4: 251 dependency/exe/installer exact pins; P2 lockfile. **[r1](r1/RESULTS.md): PIN OK Windows (cli 0.1.23, Chromium 1252), 3/3 chữ ký+attestation; F1 dư lượng `ms-playwright\daemon` ngoài TL_PW_ROOT** | ci_artifact + public_projection_only + **direct_native_desktop_18_11** | **cho_review**, kèm finding F1 | Manifest pin + cache path theo máy; U9 ASUS |
 | 6 | Artifact sai nguồn/hỏng không được kích hoạt | P4 coverage: artifact/download/cache/metadata → fault-injection | public_projection_only + fixture | cho_raw | Tách ca native thật và ca fixture; raw FAIL induced phải giữ nguyên |
 | 7 | Máy bận hoãn, updater trùng bị khóa | P4: busy/dual lock; VM `wp1298-operator-unit-20261112/verified-result.json` (helper-only) | public_projection_only + fixture | cho_raw | Ca native trên host đích; receipt VM tự nói không thay ASUS activation |
 | 8 | Desktop lỗi chặn ASUS/VM (promotion fence) | P5: "ASUS passed before VM canary" | public_projection_only | cho_raw | Owner đã đổi Desktop→ASUS làm máy đầu; cần raw chứng minh fence chặn khi máy đầu FAIL, không chỉ thứ tự đã chạy |
@@ -49,7 +49,7 @@ Cột `ket_luan`: `passed` · `failed` · `skipped` · `not_run` · `cho_raw` (�
 
 | U | Hạng mục | Lời khai công khai | loai | ket_luan | Ghi chú |
 |---|---|---|---|---|---|
-| U1 | PS5.1 endpoint | P2: ASUS PS5.1/PS7 carry-forward; P3 4 bước mỗi bản rc0 | carry_forward + public_projection_only | cho_raw | |
+| U1 | PS5.1 endpoint | P2: ASUS PS5.1/PS7 carry-forward; P3 4 bước mỗi bản rc0 | carry_forward + public_projection_only + **direct_native_desktop_18_11** | **cho_review** | [r1](r1/RESULTS.md): harness S1/S2/S3 đạt trên PS5.1.26100 Desktop (backend giả) |
 | U2 | Danh tính VM f728/810 | P6 "U1–U12 per datum reconciled" | public_projection_only | cho_raw | 17/11: `f7281f27` online, `810f79bb` offline 116h (direct_live_17_11) |
 | U3 | WhatIf | như §11 #3 | public_projection_only | cho_raw | |
 | U4 | Updater thực tế | P4 post_runtime: ASAR bằng nhau, 4 mục metadata đổi | public_projection_only | cho_raw | |
@@ -58,7 +58,7 @@ Cột `ket_luan`: `passed` · `failed` · `skipped` · `not_run` · `cho_raw` (�
 | U7 | Retention/soak/theo dõi | P4 normal 1800s/180 mẫu | public_projection_only | cho_raw | Ngưỡng/owner phải có trong raw |
 | U8 | Restore profile/đăng nhập | P4 7957 file restored | public_projection_only | **mở** | Không có bằng chứng phiên đăng nhập còn hiệu lực. Không được ghi PASS. Xem DESIGN.md §U8 |
 | U9 | Cache/ACL ổ D ASUS | — | not_measured | cho_raw | ASUS offline 17/11 |
-| U10 | Playwright CLI ghim | P2 lockfile + CI | ci_artifact | passed (nguồn) | `package-lock.json` blob `8b234cfa…` |
+| U10 | Playwright CLI ghim | P2 lockfile + CI | ci_artifact + **direct_native_desktop_18_11** | passed (nguồn) · **cho_review** (Windows) | `package-lock.json` blob `8b234cfa…`; [r1](r1/RESULTS.md) PIN OK |
 | U11 | Auth remote f728 | P3 "actual authorized DC target" | public_projection_only | cho_raw | Status không chứng minh model auth/quota |
 | U12 | Binary 5.5.0 ↔ upstream | P6 daily check 5.5.0/same asset digest | public_projection_only | cho_raw | |
 

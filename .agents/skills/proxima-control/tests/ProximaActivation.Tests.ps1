@@ -23,8 +23,8 @@ $report = [ordered]@{
     cases = $null; counterexamples = $null
 }
 $reportWritable = $false
-$requiredIds = @(1..28 | ForEach-Object { 'PA{0:d2}' -f $_ })
-if ($Counterexamples) { $requiredIds += @(1..5 | ForEach-Object { 'CX{0:d2}' -f $_ }) }
+$requiredIds = @(1..30 | ForEach-Object { 'PA{0:d2}' -f $_ })
+if ($Counterexamples) { $requiredIds += @(1..6 | ForEach-Object { 'CX{0:d2}' -f $_ }) }
 $report.required_ids = $requiredIds
 
 function Get-FileSha([string]$Path) {
@@ -152,6 +152,18 @@ function Measure-Artifact($Fixture, [string[]]$Mutable = @(), [hashtable]$Overri
 
 function New-Profile([string]$Id) {
     return [IO.Directory]::CreateDirectory([IO.Path]::Combine($run, "$Id profile")).FullName
+}
+
+function Read-ModuleJson([string]$Path) {
+    # The JSON reader is internal to the module; run it in the module's own scope.
+    $module = @(Get-Module -Name ProximaActivation)
+    if ($module.Count -ne 1) { throw 'Expected exactly one loaded ProximaActivation module' }
+    return , (& $module[0] { param($p) Read-ActivationJson $p } $Path)
+}
+
+function Get-JsonRefusal([string]$Path) {
+    try { $null = Read-ModuleJson $Path } catch { return $_.Exception.Message }
+    return ''
 }
 
 function Assert-Unlocked([string]$Profile) {
@@ -621,6 +633,134 @@ try {
         Assert-Result (Measure-Artifact $f -Mutable @('../providers.json') -Override $override) 'NOT_MEASURED'
     }
 
+    Invoke-Case 'PA29' {
+        # A real manifest holds thousands of entries; reading it must stay linear in its size.
+        $dir = [IO.Directory]::CreateDirectory([IO.Path]::Combine($run, 'PA29')).FullName
+        $invariant = [Globalization.CultureInfo]::InvariantCulture
+        $sha = 'c3' * 32
+        $count = 4000
+        $names = [string[]]::new($count)
+        $builder = [Text.StringBuilder]::new()
+        for ($i = 0; $i -lt $count; $i++) {
+            $names[$i] = 'resources/app/node_modules/package-' + ($i % 97).ToString('d4', $invariant) +
+                '/dist/lib/module-' + $i.ToString('d5', $invariant) + '.js'
+            if ($i) { $null = $builder.Append(",`n") }
+            $null = $builder.Append('  "' + $names[$i] + '": {"bytes": ' + (1000 + $i).ToString($invariant) +
+                ', "sha256": "' + $sha + '"}')
+        }
+        $body = "{`n" + $builder.ToString()
+        $entry = ': {"bytes": 1, "sha256": "' + $sha + '"}'
+        $large = [IO.Path]::Combine($dir, 'manifest.json')
+        [IO.File]::WriteAllText($large, $body + "`n}`n", $utf8)
+        $watch = [Diagnostics.Stopwatch]::StartNew()
+        $parsed = Read-ModuleJson $large
+        $watch.Stop()
+        $parseMs = $watch.ElapsedMilliseconds
+        if ($parsed.PSBase.Count -ne $count) { Stop-Case "Expected $count parsed keys, got $($parsed.PSBase.Count)" }
+        $last = $names[$count - 1]
+        if (-not $parsed.ContainsKey($last) -or $parsed[$last].K -cne 'object' -or
+            $parsed[$last].V['bytes'].V -cne '4999' -or $parsed[$last].V['sha256'].V -cne $sha) {
+            Stop-Case 'Expected the last large-manifest entry to keep its fields'
+        }
+        if ($parseMs -gt 20000) { Stop-Case "Reading $count entries took $parseMs ms (limit 20000 ms)" }
+        # A repeated key is refused however far into the document it sits.
+        $repeated = [IO.Path]::Combine($dir, 'repeated.json')
+        [IO.File]::WriteAllText($repeated, $body + ",`n" + '  "' + $names[$count - 2] + '"' + $entry + "`n}`n", $utf8)
+        $refusal = Get-JsonRefusal $repeated
+        if ($refusal -cne 'Invalid JSON: DuplicateField') {
+            Stop-Case "Expected DuplicateField for a repeated key at $count entries, got '$refusal'"
+        }
+        # A key that differs only by case is a different key to the reader.
+        $cased = [IO.Path]::Combine($dir, 'cased.json')
+        [IO.File]::WriteAllText($cased, $body + ",`n" + '  "' + $names[$count - 2].ToUpperInvariant() + '"' + $entry + "`n}`n", $utf8)
+        if ((Read-ModuleJson $cased).PSBase.Count -ne ($count + 1)) { Stop-Case 'Expected a case-distinct key to be kept' }
+        # The public check reads the same manifest within the same bound.
+        $tree = [IO.Directory]::CreateDirectory([IO.Path]::Combine($dir, 'tree')).FullName
+        $watch = [Diagnostics.Stopwatch]::StartNew()
+        $actual = Test-ProximaArtifactTree -Root $tree -ManifestPath $large
+        $watch.Stop()
+        $treeMs = $watch.ElapsedMilliseconds
+        Assert-Result $actual 'ARTIFACT_MISSING'
+        if (@($actual.missing).Count -ne 100) { Stop-Case 'Expected the capped list of 100 missing files' }
+        if ($treeMs -gt 60000) { Stop-Case "Checking against $count entries took $treeMs ms (limit 60000 ms)" }
+        $actual = Test-ProximaArtifactTree -Root $tree -ManifestPath $repeated
+        Assert-Result $actual 'NOT_MEASURED'
+        if ([string](Get-ResultField $actual 'error') -cne 'Invalid JSON: DuplicateField') {
+            Stop-Case 'Expected DuplicateField from the public check of a repeated key'
+        }
+        "entries=$count"
+        "parse_ms=$parseMs"
+        "tree_ms=$treeMs"
+    }
+    Invoke-Case 'PA30' {
+        $f = New-ArtifactFixture 'PA30'
+        $probe = [IO.Path]::Combine($f.dir, 'probe.json')
+        $nest31 = '{"a":' + ('[' * 31) + '1' + (']' * 31) + '}'
+        $nest32 = '{"a":' + ('[' * 32) + '1' + (']' * 32) + '}'
+        $refused = @(
+            @('trailing garbage', '{"a":1} x'), @('second document', '{"a":1}{}'), @('trailing comma after root', '{"a":1},'),
+            @('unterminated string', '{"a":"b}'), @('unterminated key', '{"a'), @('unclosed object', '{"a":1'),
+            @('control char in string', ('{"a":"b' + [char]1 + '"}')), @('raw tab in string', ('{"a":"b' + [char]9 + 'c"}')),
+            @('raw newline in key', ('{"a' + [char]10 + '":1}')),
+            @('leading zero', '{"a":01}'), @('negative leading zero', '{"a":-01}'), @('bare minus', '{"a":-}'),
+            @('trailing dot', '{"a":1.}'), @('leading dot', '{"a":.5}'), @('plus sign', '{"a":+1}'),
+            @('empty exponent', '{"a":1e}'), @('hex number', '{"a":0x10}'),
+            @('bare word', '{"a":nul}'), @('capitalised literal', '{"a":True}'), @('unquoted key', '{a:1}'),
+            @('joined literals', '{"a":truefalse}'), @('adjacent values', '{"a":1 2}'), @('single quotes', "{'a':1}"),
+            @('missing colon', '{"a" 1}'), @('key without value', '{"a"}'), @('colon without value', '{"a":}'),
+            @('double colon', '{"a"::1}'), @('number key', '{1:2}'),
+            @('trailing comma in object', '{"a":1,}'), @('trailing comma in array', '{"a":[1,]}'),
+            @('leading comma in object', '{,"a":1}'), @('leading comma in array', '{"a":[,1]}'),
+            @('double comma', '{"a":[1,,2]}'), @('missing comma', '{"a":1 "b":2}'),
+            @('unknown escape', '{"a":"\x"}'), @('short unicode escape', '{"a":"\u12G4"}'), @('lone backslash', '{"a":"\"}'),
+            @('mismatched close', '{"a":[1}}'), @('array close on object', '{"a":1]'), @('stray close', '}'),
+            @('empty text', ''), @('whitespace only', " `t`r`n"), @('root array', '[]'), @('root string', '"a"'),
+            @('root number', '1'), @('no-break space', ('{"a":1}' + [char]0xA0)), @('form feed', ('{"a":1}' + [char]12)),
+            @('comment', '{"a":1} // x'), @('depth 33', $nest32)
+        )
+        foreach ($item in $refused) {
+            [IO.File]::WriteAllText($probe, $item[1], $utf8)
+            $refusal = Get-JsonRefusal $probe
+            if ($refusal -cne 'Invalid JSON: MalformedJson' -and $refusal -cne 'Expected one JSON object.') {
+                Stop-Case "Expected the reader to refuse: $($item[0]); got '$refusal'"
+            }
+            [IO.File]::WriteAllText($f.manifest, $item[1], $utf8)
+            $actual = Measure-Artifact $f
+            Assert-Result $actual 'NOT_MEASURED'
+            if ([string](Get-ResultField $actual 'error') -cne $refusal) { Stop-Case "Expected the public check to report: $($item[0])" }
+        }
+        # The nearest valid neighbours are still read.
+        [IO.File]::WriteAllText($probe, $nest31, $utf8)
+        if ((Read-ModuleJson $probe)['a'].K -cne 'array') { Stop-Case 'Expected depth 32 to be read' }
+        $valid = "`t{ `"a`" : 0 ,`r`n `"b`":-0.5e+10, `"c`":[ true,false , null,{} , [] ], `"d`":{`"e`":`"`"}, `"`":-0, `"A`":1E2 } `n"
+        [IO.File]::WriteAllText($probe, $valid, $utf8)
+        $parsed = Read-ModuleJson $probe
+        if ($parsed.PSBase.Count -ne 6 -or $parsed['a'].K -cne 'number' -or $parsed['a'].V -cne '0' -or
+            $parsed['b'].V -cne '-0.5e+10' -or $parsed['c'].K -cne 'array' -or $parsed['d'].K -cne 'object' -or
+            $parsed['d'].V['e'].K -cne 'string' -or $parsed['d'].V['e'].V -cne '' -or $parsed[''].V -cne '-0' -or
+            $parsed['A'].V -cne '1E2') { Stop-Case 'Expected the valid document to keep kinds and raw numbers' }
+        [IO.File]::WriteAllText($probe, '{"t":true,"f":false,"n":null}', $utf8)
+        $parsed = Read-ModuleJson $probe
+        if ($parsed['t'].K -cne 'bool' -or $parsed['t'].V -ne $true -or $parsed['f'].K -cne 'bool' -or
+            $parsed['f'].V -ne $false -or $parsed['n'].K -cne 'null') { Stop-Case 'Expected literals to keep their kinds' }
+        # Escapes and raw non-ASCII text give back exactly the characters written.
+        $e = [string][char]0xE9
+        $key = 'caf' + $e + ' "q" \ / ' + [char]8 + [char]12 + [char]10 + [char]13 + [char]9 + ' ' + $e + [char]0xD83D + [char]0xDE00 + '\A'
+        $text = '{"caf\u00e9 \"q\" \\ \/ \b\f\n\r\t ' + $e + '\ud83d\uDE00\\\u0041":"x\\\"' + $e + '"}'
+        [IO.File]::WriteAllText($probe, $text, $utf8)
+        $parsed = Read-ModuleJson $probe
+        if ($parsed.PSBase.Count -ne 1 -or -not $parsed.ContainsKey($key) -or $parsed[$key].K -cne 'string' -or
+            $parsed[$key].V -cne ('x\"' + $e)) { Stop-Case 'Expected escaped text to round-trip exactly' }
+        # An escaped spelling of a file name is the same manifest entry.
+        $text = '{"Proxima\u002eexe":{"bytes":3,"sha256":"' + (Get-FileSha $f.exe) + '"},' +
+            '"providers.json":{"bytes":2,"sha256":"' + (Get-FileSha $f.mutable) + '"}}'
+        [IO.File]::WriteAllText($f.manifest, $text, $utf8)
+        $actual = Measure-Artifact $f
+        Assert-Result $actual 'OK' $true
+        if ($actual.verified_files -ne 2) { Stop-Case 'Expected both files checked through the escaped name' }
+        "refused=$($refused.Count)"
+    }
+
     if ($Counterexamples) {
         $counterexampleCases = @(
             @{ id = 'CX01'; target = 'PA04'; anchor = 'foreach ($relative in $actualPaths) {'
@@ -640,6 +780,10 @@ try {
                 anchor = '-not [string]::Equals($receiptHost, $prior, [StringComparison]::Ordinal) -or'
                 replacement = '$false -or'
                 reason = 'Expected FENCE_RECEIPT_INVALID (ok=False), got ALLOWED (ok=True)' }
+            @{ id = 'CX06'; target = 'PA29'
+                anchor = 'if ($objs[$n - 1].ContainsKey($keys[$n - 1])) {'
+                replacement = 'if ($false) {'
+                reason = 'Expected DuplicateField for a repeated key at 4000 entries, got ''''' }
         )
         foreach ($mutation in $counterexampleCases) {
             Invoke-Case $mutation.id { Invoke-Counterexample $mutation }

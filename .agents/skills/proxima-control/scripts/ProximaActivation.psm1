@@ -6,67 +6,130 @@ function New-ActivationResult([string]$Code, [bool]$Ok = $false, [hashtable]$Det
     return [pscustomobject]$Details
 }
 
-# JSON tokenizer and object parser follow ProximaConfig's RFC 8259 parser.
+# JSON reader: RFC 8259 grammar, same strictness as ProximaConfig's parser.
+# One tokenizing pass (a single Regex.Matches call receives the text) and one non-recursive walk.
+# No helper function or .NET method receives the document per token, so the cost of a token never
+# depends on the size of the document.
 # Preserve case-distinct keys, value types, and string timestamps across hosts.
-$script:ReWs = [regex]'\G[ \t\r\n]*'
-$script:ReString = [regex]'\G"((?:[^"\\\x00-\x1f]|\\(?:["\\/bfnrt]|u[0-9A-Fa-f]{4}))*)"'
-$script:ReNumber = [regex]'\G-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?'
+$script:ReJsonToken = [regex]::new(
+    '[ \t\r\n]*(?:(?<p>[{}\[\]:,])' +
+    '|"(?<s>(?>[^"\\\x00-\x1f]*))"' +
+    '|"(?<x>(?>(?:[^"\\\x00-\x1f]+|\\(?:["\\/bfnrt]|u[0-9A-Fa-f]{4}))*))"' +
+    '|(?<n>-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)' +
+    '|(?<l>true|false|null)' +
+    '|(?<e>[\s\S])|\z)',
+    [Text.RegularExpressions.RegexOptions]'CultureInvariant, ExplicitCapture')
+$script:ReJsonEscape = [regex]'\\(u[0-9A-Fa-f]{4}|.)'
 
 function Stop-ActivationJson([string]$Reason) { throw "Invalid JSON: $Reason" }
 
-function Skip-ActivationJsonWs($s) { $s.P += $script:ReWs.Match($s.T, $s.P).Length }
-function Test-ActivationJsonNext($s, [string]$Ch) { Skip-ActivationJsonWs $s; return ($s.P -lt $s.T.Length -and $s.T[$s.P] -ceq $Ch) }
-function Read-ActivationJsonLiteral($s, [string]$Lit) {
-    if ($s.P + $Lit.Length -gt $s.T.Length -or [string]::CompareOrdinal($s.T, $s.P, $Lit, 0, $Lit.Length) -ne 0) { Stop-ActivationJson MalformedJson }
-    $s.P += $Lit.Length
-}
-function Read-ActivationJsonString($s) {
-    $m = $script:ReString.Match($s.T, $s.P)
-    if (-not $m.Success) { Stop-ActivationJson MalformedJson }
-    $s.P += $m.Length
-    return [regex]::Replace($m.Groups[1].Value, '\\(u[0-9A-Fa-f]{4}|.)', [Text.RegularExpressions.MatchEvaluator]{
+function ConvertFrom-ActivationJsonEscape([string]$Raw) {
+    # Only called for strings that contain a backslash; the tokenizer already validated every escape.
+    return $script:ReJsonEscape.Replace($Raw, [Text.RegularExpressions.MatchEvaluator]{
             param($e) $c = $e.Groups[1].Value
             if ($c.Length -eq 5) { return [string][char][Convert]::ToInt32($c.Substring(1), 16) }
             switch -CaseSensitive ($c) { 'b' { "`b" } 'f' { "`f" } 'n' { "`n" } 'r' { "`r" } 't' { "`t" } default { $c } } })
 }
-function Read-ActivationJsonValue($s, [int]$Depth) {
-    Skip-ActivationJsonWs $s
-    if ($Depth -gt 32 -or $s.P -ge $s.T.Length) { Stop-ActivationJson MalformedJson }
-    switch -CaseSensitive ([string]$s.T[$s.P]) {
-        '{' { return @{ K = 'object'; V = (Read-ActivationJsonContainer $s $Depth '}') } }
-        '[' { $null = Read-ActivationJsonContainer $s $Depth ']'; return @{ K = 'array'; V = $null } }
-        '"' { return @{ K = 'string'; V = (Read-ActivationJsonString $s) } }
-        't' { Read-ActivationJsonLiteral $s 'true'; return @{ K = 'bool'; V = $true } }
-        'f' { Read-ActivationJsonLiteral $s 'false'; return @{ K = 'bool'; V = $false } }
-        'n' { Read-ActivationJsonLiteral $s 'null'; return @{ K = 'null'; V = $null } }
-    }
-    $m = $script:ReNumber.Match($s.T, $s.P)
-    if (-not $m.Success -or $m.Length -eq 0) { Stop-ActivationJson MalformedJson }
-    $s.P += $m.Length
-    return @{ K = 'number'; V = $m.Value }
-}
-function Read-ActivationJsonContainer($s, [int]$Depth, [string]$Close) {
-    $o = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
-    $s.P += 1
-    if (Test-ActivationJsonNext $s $Close) { $s.P += 1; return , $o }
-    while ($true) {
-        if ($Close -ceq '}') {
-            if (-not (Test-ActivationJsonNext $s '"')) { Stop-ActivationJson MalformedJson }
-            $k = Read-ActivationJsonString $s; Skip-ActivationJsonWs $s; Read-ActivationJsonLiteral $s ':'
-            if ($o.ContainsKey($k)) { Stop-ActivationJson DuplicateField }
-            $o[$k] = Read-ActivationJsonValue $s ($Depth + 1)
-        } else { $null = Read-ActivationJsonValue $s ($Depth + 1) }
-        if (Test-ActivationJsonNext $s ',') { $s.P += 1; continue }
-        Read-ActivationJsonLiteral $s $Close
-        return , $o
-    }
-}
+
 function Read-ActivationJson([string]$Path) {
     $text = [IO.File]::ReadAllText($Path, [Text.UTF8Encoding]::new($false, $true))
-    $state = @{ T = $text; P = 0 }
-    $root = Read-ActivationJsonValue $state 0
-    Skip-ActivationJsonWs $state
-    if ($state.P -ne $text.Length -or $root.K -cne 'object') { throw 'Expected one JSON object.' }
+    # Open containers, outermost first. A value at depth 33 or deeper is refused, so 33 slots suffice.
+    $objs = [object[]]::new(33)
+    $keys = [string[]]::new(33)
+    $isObj = [bool[]]::new(33)
+    $n = 0
+    # 0 value; 1 key or '}'; 2 key; 3 ':'; 4 ',' or close; 5 value or ']'; 6 end of text.
+    $expect = 0
+    $pos = 0
+    $root = $null
+    foreach ($m in $script:ReJsonToken.Matches($text)) {
+        # Tokens must tile the text: no gap may be skipped by the scanner.
+        if ($m.Index -ne $pos) { Stop-ActivationJson MalformedJson }
+        $pos += $m.Length
+        $g = $m.Groups
+        $v = $null
+        $t = $g['p']
+        if ($t.Success) {
+            if ($expect -eq 6) { throw 'Expected one JSON object.' }
+            $c = $t.Value
+            if ($c -ceq ',') {
+                if ($expect -ne 4 -or $n -eq 0) { Stop-ActivationJson MalformedJson }
+                if ($isObj[$n - 1]) { $expect = 2 } else { $expect = 0 }
+                continue
+            }
+            if ($c -ceq ':') {
+                if ($expect -ne 3) { Stop-ActivationJson MalformedJson }
+                if ($objs[$n - 1].ContainsKey($keys[$n - 1])) { Stop-ActivationJson DuplicateField }
+                $expect = 0
+                continue
+            }
+            if ($c -ceq '{' -or $c -ceq '[') {
+                if (($expect -ne 0 -and $expect -ne 5) -or $n -gt 32) { Stop-ActivationJson MalformedJson }
+                if ($c -ceq '{') {
+                    $objs[$n] = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+                    $isObj[$n] = $true
+                    $expect = 1
+                } else {
+                    $objs[$n] = $null
+                    $isObj[$n] = $false
+                    $expect = 5
+                }
+                $n++
+                continue
+            }
+            if ($n -eq 0) { Stop-ActivationJson MalformedJson }
+            if ($c -ceq '}') {
+                if (-not $isObj[$n - 1] -or ($expect -ne 1 -and $expect -ne 4)) { Stop-ActivationJson MalformedJson }
+                $v = @{ K = 'object'; V = $objs[$n - 1] }
+            } else {
+                if ($isObj[$n - 1] -or ($expect -ne 5 -and $expect -ne 4)) { Stop-ActivationJson MalformedJson }
+                $v = @{ K = 'array'; V = $null }
+            }
+            $objs[$n - 1] = $null
+            $n--
+        } else {
+            $str = $null
+            $t = $g['s']
+            if ($t.Success) { $str = $t.Value }
+            else {
+                $t = $g['x']
+                if ($t.Success) { $str = ConvertFrom-ActivationJsonEscape $t.Value }
+            }
+            if ($null -ne $str) {
+                if ($expect -eq 1 -or $expect -eq 2) {
+                    $keys[$n - 1] = $str
+                    $expect = 3
+                    continue
+                }
+                $v = @{ K = 'string'; V = $str }
+            } else {
+                $t = $g['n']
+                if ($t.Success) { $v = @{ K = 'number'; V = $t.Value } }
+                else {
+                    $t = $g['l']
+                    if ($t.Success) {
+                        $c = $t.Value
+                        if ($c -ceq 'null') { $v = @{ K = 'null'; V = $null } }
+                        else { $v = @{ K = 'bool'; V = ($c -ceq 'true') } }
+                    } elseif ($g['e'].Success) {
+                        if ($expect -eq 6) { throw 'Expected one JSON object.' }
+                        Stop-ActivationJson MalformedJson
+                    } else { continue }
+                }
+            }
+            if ($expect -eq 6) { throw 'Expected one JSON object.' }
+            if (($expect -ne 0 -and $expect -ne 5) -or $n -gt 32) { Stop-ActivationJson MalformedJson }
+        }
+        if ($n -eq 0) {
+            $root = $v
+            $expect = 6
+        } else {
+            if ($isObj[$n - 1]) { $objs[$n - 1][$keys[$n - 1]] = $v }
+            $expect = 4
+        }
+    }
+    if ($pos -ne $text.Length -or $expect -ne 6) { Stop-ActivationJson MalformedJson }
+    if ($root.K -cne 'object') { throw 'Expected one JSON object.' }
     return , $root.V
 }
 

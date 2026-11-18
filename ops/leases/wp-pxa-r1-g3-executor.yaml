@@ -51,4 +51,4 @@ windows: native_desktop_asus_only
 carried_over: 'Codex executor da dung 2/3 (g1 preflight + g2 viet ma); review 1/2 da dung'
 executor_change: 'chu kho 18/11: doi Executor sang Fable 5.2, Reviewer sang Codex 6 Astra'
 fable_executor_calls_limit: 2
-fable_executor_calls_used: 1
+fable_executor_calls_used: 2

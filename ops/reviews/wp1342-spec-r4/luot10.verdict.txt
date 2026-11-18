@@ -1,0 +1,70 @@
+codex
+## Review độc lập lượt 10 · Issue #1342 · r1d-a1-i
+
+| Finding lượt 9 | Trạng thái | Bằng chứng |
+|---|---|---|
+| R9-1 · P2 | **Đóng** | §5 N2(iv)(a–c), dòng 105, buộc ID mới có tiền tố, duy nhất và rời tập ID base. Đăng ký chỉ được chèn sau câu lệnh base kết thúc ở dòng 18557 và trước `if __name__ == "__main__"` ở dòng 18560. Phản chứng `wp1174_writer_accept` đỏ cả ở vị trí cũ trước dòng 16217 lẫn khi chuyển vào cửa sổ hợp lệ. Trong RAM, cưỡng ép nạp phản chứng cũ vẫn tái hiện `_r26_original_accept1174` trỏ sang `_wp1342a1_noop`. |
+
+Diff bản 9 → bản hiện tại có 2 dòng thêm và 1 dòng xóa, rc `1`. Thay đổi nằm ở N2 và nhật ký lượt 9. [Đặc tả r4](ops/specs/WP1174-WINDOWS-BACKEND-r4.md#L105)
+
+### Finding mới
+
+| ID | Mức | Bằng chứng và sửa cần thiết |
+|---|---|---|
+| R10-1 | **P2** | N2 yêu cầu đối chứng dương mang ID `"id"` đạt cả bốn vế, đồng thời N2(iv)(a) bắt buộc tiền tố `wp1342_pure_spawn_` hoặc `wp1342_native_job_`. Chạy nguyên ID `"id"` tại cửa sổ đúng cho `1010`. Đổi cả ID đăng ký lẫn ID truyền vào wrapper thành `wp1342_native_job_review10` cho `1111`. Sửa đối chứng dương trong đặc tả để hai yêu cầu có thể cùng đạt. |
+| R10-2 | **P2** | N2 kiểm ID trong mục `CASES` nhưng chưa buộc ID mà `_native1342` ghi ra phải bằng ID đăng ký. `("wp1342_native_job_review10", _native1342("wp1174_writer_accept", _wp1342a1_fn))` tại cửa sổ hợp lệ đạt `1111`. Chạy chính wrapper base trong RAM với stub cho nền native cho biên nhận `WP1342_NATIVE_V1` có `executed=1`, `passed=1`, `id="wp1174_writer_accept"`. Siết mẫu mục native thành cặp `(id, _native1342(id, fn))`, kiểm đúng số đối số và so hai ID sau khi tính tĩnh. Thêm riêng phản chứng lệch ID. |
+| R10-3 | **P3** | N2 ghi cho phép list comprehension nhưng danh sách nút lúc nạp chỉ cho `Name(Load)`. AST của mẫu `for x in ("demo",)` có `Name(Store)` cho `x`. Ghi ngoại lệ hẹp cho đích lặp cục bộ đã được kiểm hoặc dùng duy nhất list literal. |
+
+### N2 trong RAM
+
+`python -B -` trên Linux, CPython 3.13.18, rc `0`. Phép đo tái dựng N2 từ đặc tả, nạp blob Git trong RAM với stub import `launcher`. Các bit theo thứ tự (i)–(iv).
+
+| Ca | Kết quả |
+|---|---|
+| Base và khối hợp lệ chèn sau dòng 18558 | `1111` mỗi ca. Base nạp 1.562 mục, 85 điểm bind `CASES` và 14 điểm bind `MUTANTS_NHAM_TEST`. |
+| Chèn `return` vào thân cũ, thêm decorator vào định nghĩa cũ | `0110` mỗi ca |
+| Định nghĩa trùng tên, gán trong `if`, walrus trong `if` hoặc RHS | `1010` mỗi ca |
+| `match`, `del`, walrus trong default, `globals().update`, che `frozenset`, hai lớp có `__init_subclass__` | `1110` mỗi ca |
+| ID base trùng ở vị trí cũ hoặc đúng cửa sổ, ID mới trùng, ID mới đặt quá sớm hoặc quá muộn | `1010` mỗi ca |
+| Vế `packet_loop.py` | `_additive1342r2` trả `[]` trên base. Sửa một byte trong khối cũ và thêm hàm mới có decorator đều cho kết quả khác `[]`. |
+
+### 15 đột biến §4b
+
+Mỗi hàng xác định một vị trí logic dự kiến và dấu hiệu đích theo cặp ID ca và nhãn. Đối chiếu tĩnh đủ 15 ID. Số lần khớp neo byte-exact và dấu hiệu trên mã triển khai thuộc N7, `not_run`.
+
+| ID | Vị trí logic duy nhất | Dấu hiệu đích và vế phân biệt |
+|---|---|---|
+| `a1` | Khối gọi và kiểm BOOL của `TerminateJobObject`, M4(9) | J3 `job not empty`. `a2` giữ terminate tường minh. `k2` vẫn đặt `da_gan` trên đường thuận J3. |
+| `a2` | Giá trị `_1174_WIN_JOB_LIMIT` | J10 con/cháu sống sau khi trợ giúp chết. `a1` giữ kill-on-close. |
+| `a3` | Nhánh query FALSE, M3 | J11 nhận handle tệp là job rỗng. Các đột biến khác giữ nhánh từ chối query. |
+| `b` | Khối (5)–(7) đổi thứ tự và chờ marker | J6(ii) marker đã có ở `between`, với J6(i) xanh. `c` đỏ tại J6(i). |
+| `c` | Giá trị `_1174_WIN_SPAWN_FLAGS` | S1 `SPAWN_FLAGS == 0x204`. `a2` đỏ ở assertion `JOB_LIMIT`. |
+| `h` | Điểm chèn sau đăng ký `close_job`, M4(1) | J7 thấy `HANDLE_FLAG_INHERIT` sau khi phép tiêm trả TRUE. Chỉ `h` đổi cờ handle này. |
+| `k1` | Đăng ký `kill_truoc_gan`, M4(3) | J8 bản sao handle con chưa signaled. `k2` tác động sau gán. |
+| `k2` | Khối từ `da_gan = True` đến hết (7) | J9 phụ còn sống và thiếu `cleanup:xac_nhan`. `a1` vẫn có ghi chú này. |
+| `k3` | Nhánh bắt `Exception` trong `_1174_win_cleanup` | S4 bước 2 không chạy. Các đột biến khác giữ vòng dọn. |
+| `t1` | Nhánh chọn ứng viên của `_1174_win_pick_thread` | S2 nhận hai ứng viên. `t2` chỉ đổi kiểm resume count. |
+| `t2` | Điều kiện của `_1174_win_resume_ok` | S3 `count=2`. Các đột biến khác giữ điều kiện đúng 1. |
+| `d0` | Lời gọi `proc.wait(timeout=min(con_lai, 60.0))` | J2 thiếu lỗi `lifecycle deadline` trong 6–11 s. `d1` giữ chờ theo lát. |
+| `g0` | Khối kiểm đối số và nền, M4(0) | S5 Linux đỏ đầu tiên ở `argv=[]`. `d1` qua vector này. |
+| `abi` | Kiểu trường `th32OwnerProcessID` | J0 báo offset 12 trước size. Các đột biến khác giữ kiểu trường. |
+| `d1` | Vế cận trên deadline, M4(0) | S5 Linux đỏ đầu tiên ở `now+10**6`. `g0` đã dừng ở assertion đầu. |
+
+### N1–N8 theo L1–L7
+
+| Tiêu chí | Kết quả rà đặc tả |
+|---|---|
+| N1 | L1/L3/L6. So từng ID, khóa và neo. Có phản chứng mất ID, đổi khóa cùng số lượng và neo trùng. |
+| N2 | L2/L3/L6. Hai đường dẫn và phản chứng cũ đã đo. Đối chứng ghi trong đặc tả tự mâu thuẫn, đường lệch ID còn xanh. |
+| N3 | L1–L3/L6. Chốt đúng mười tên trên một đường dẫn. Có phép đỏ cho thiếu khối và nối dây. |
+| N4 | L2/L3. Có dấu hiệu đỏ cho S1–S5. Thứ tự S5 phân biệt `g0` và `d1`. |
+| N5 | L3/L5/L6. So từng ID trên base/head cùng lượt. Đột biến mở claim phải tới assertion đích. |
+| N6 | L1/L3/L5/L6. Chốt tập ca, máy đo, cửa sổ 90 s và bằng chứng dương. R10-2 chỉ ra chỗ cần buộc ID trong biên nhận khớp ID đã chạy. |
+| N7 | L1/L3/L6. Phân biệt 15 ID và 16 lần chạy. Yêu cầu một neo, đối chứng khỏe và đúng nhãn đích. |
+| N8 | L2/L3/L5/L6. So tập diagnostic, ghi rc riêng và đo numstat toàn diff. Trần áp trên numstat thực tế. |
+
+L4 khai `khong_ap_dung`. L5 neo số liệu vào base và yêu cầu đo lại trước công bố băm, cấp lease và merge. L7 khai E4/E5, dẫn protocol và ADR cho các điểm dừng, gắn E2 cho quyết định cần thẩm quyền. Không có finding ngân sách.
+
+Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`, SHA-256 đặc tả `033dc9be679d0b90bc1129682882e2c38d36a4c0712671342aa5a3d5967fec25`. `git diff --exit-code HEAD --` trả `0`. Phiên `openai_codex` qua API, transport `machine`, shell cục bộ chỉ đọc. Model phục vụ và effort chưa đo được. Không gọi mạng. Desktop, VM, CI và driver đột biến trên mã triển khai ở trạng thái `not_run`.
+
+KET_LUAN: request_changes

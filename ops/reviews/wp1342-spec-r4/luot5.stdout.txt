@@ -1,0 +1,1346 @@
+Reading additional input from stdin...
+OpenAI Codex v0.170.0
+--------
+workdir: /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+model: gpt-6.2-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1f0da-b893-7330-bc12-c34127d2d7b8
+--------
+user
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 5, cho đặc tả `ops/specs/WP1174-WINDOWS-BACKEND-r4.md` (Issue #1342, bậc r1d-a1-i). CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng. Chạy thử trong RAM hoặc bản sao dưới /tmp.
+
+Clone master e2c3b82 (cộng chưa commit: đặc tả r1–r4, các bản trước `ops/specs/WP1174-WINDOWS-BACKEND-r4-ban1.md` … `-ban4.md`, review `ops/reviews/wp1342-spec-r1..r3/` và `ops/reviews/wp1342-spec-r4/luot1..4.verdict.txt`).
+
+Ràng buộc đã chốt (§9, không tranh luận): phạm vi r1d-a1-i; J4/J5/J12 sang a1-ii; transport sang a2; nợ `wp1342-pre-assign-orphan` (gồm hai biến thể constructor `Popen` và thiếu `_handle`) đã được chủ kho chấp nhận; trần nâng ≤ 2 tệp / ≤ 550 dòng thêm, CƯỠNG CHẾ trên numstat thật lúc thi công (§7), không trên đầu cao của ước lượng tĩnh (quyết định điều phối). Chỉ nêu finding về ngân sách nếu ước lượng hợp lý của bạn có ĐIỂM GIỮA > 550.
+
+Việc:
+1. `diff` bản 4 (`-ban4.md`) với bản hiện tại; với từng finding lượt 4 (`luot4.verdict.txt`, F1–F8), kiểm đã đóng thật (trích chỗ) hay chưa.
+2. Tìm đường MỚI ở các chỗ vừa sửa: `_1174_win_note` (chỉ tên kiểu); hợp đồng trả `rc` hai điều kiện; bàn giao handle của luồng quan sát (khoá, cờ `huy`, worker tự đóng khi muộn); tệp mở riêng từng mốc của trợ giúp (J10 giết khi trợ giúp chặn ở bước (8); J10b đứng ở `truoc_gan`); J9 phụ chờ `tha_phu`; `b` chờ đúng tệp marker J6; `d0` cửa sổ 6–11 s; N2 vế (iv) danh sách cho phép phần chèn — CHẠY thử trong RAM trên `packet_loop_test.py` của base: base phải xanh cả bốn vế; các phản chứng (return chèn thân `_native1342`, def trùng cuối tệp, decorator tiêm, `if True:` gán lại, `match`/`case _native1342`, walrus, `del _native1342`) phải đỏ; và một khối chèn HỢP LỆ mô phỏng phần test r4 (vài `def` mới không decorator, một gán tên mới, một `CASES += [...]`) phải xanh. Kiểm thêm: base có chứa sẵn dạng câu lệnh mức module nào mà r4 hợp lệ cần thêm nhưng (iv) cấm không.
+3. Mỗi đột biến §4b (15 ID): khớp đúng một chỗ trong mã dự kiến, đúng dấu hiệu đã ghi, dấu hiệu không đột biến nào khác gây ra.
+4. N1–N8 theo L1–L7 `.claude/skills/soan-spec/SKILL.md`.
+
+Đầu ra stdout: bảng finding lượt 4 (đóng/chưa, kèm chỗ), finding mới P0–P3. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2.
+warning: Codex could not find bubblewrap on PATH. Install bubblewrap with your OS package manager. See the sandbox prerequisites: https://developers.openai.com/codex/concepts/sandboxing#prerequisites. Codex will use the bundled bubblewrap in the meantime.
+codex
+Tôi sẽ dùng kỹ năng `cross-review` để đối chiếu bản 4 với bản hiện tại, rồi chạy các phản chứng N2 trong RAM. Tôi sẽ giữ checkout ở chế độ chỉ đọc và không gọi mạng.
+exec
+/bin/bash -lc 'pwd; git rev-parse HEAD HEAD''^{tree}; git status --short; wc -l CONTEXT.md docs/PROTOCOL_DA_PHIEN.md CLAUDE.md ops/specs/WP1174-WINDOWS-BACKEND-r4.md; cat .agents/skills/cross-review/SKILL.md' in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ succeeded in 0ms:
+/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+e2c3b82f818bd1739d31261e8129d3ef44915acf
+7693a24fa9169d91370dae782ec51eabd3fa0a35
+?? ops/reviews/wp1342-spec-r1/
+?? ops/reviews/wp1342-spec-r2/
+?? ops/reviews/wp1342-spec-r3/
+?? ops/reviews/wp1342-spec-r4/
+?? ops/specs/WP1174-WINDOWS-BACKEND-r1.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r2.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r3.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban1.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban2.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban3.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban4.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+   244 CONTEXT.md
+  1751 docs/PROTOCOL_DA_PHIEN.md
+  1149 CLAUDE.md
+   175 ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+  3319 total
+---
+name: cross-review
+description: Adapter review packet trên Codex CLI với checkout/context được cấp riêng. Assurance và hợp đồng evidence lấy từ docs/PROTOCOL_DA_PHIEN.md; cung cấp cú pháp PowerShell.
+---
+
+# Adapter `cross-review` — Codex CLI / PowerShell
+
+Đọc [protocol](../../../docs/PROTOCOL_DA_PHIEN.md) §7 (receipt), §8/§8.1–§8.3
+(assurance, bootstrap, runtime, cache, Ruff, lịch sử lớp), §10.2.1–§10.2.3 (CI) và §13.
+Nguồn cú pháp và ghi chép provider: [.claude adapter](../../../.claude/skills/cross-review/SKILL.md).
+Các mục model selector Claude ở nguồn chỉ dành cho lane Claude; không dùng bảng đó chọn Codex.
+Nhận dạng nền này là `openai_codex / codex_cli / machine`; model/effort và sandbox đọc từ run.
+
+## Bootstrap và snapshot
+
+Biến `$Remote`, `$ReviewRoot`, `$Branch`, `$ReviewedSha`, `$Scratch` lấy từ assignment.
+Lệnh clone/config/checkout thuộc bootstrap trước bàn giao (§8.1):
+
+```powershell
+git -c core.longpaths=true clone --no-checkout $Remote $ReviewRoot
+git -C $ReviewRoot remote get-url origin
+git -C $ReviewRoot config core.abbrev 7
+git -C $ReviewRoot config core.longpaths true
+git -C $ReviewRoot fetch origin $Branch
+git -C $ReviewRoot checkout --detach $ReviewedSha
+git -C $ReviewRoot rev-parse HEAD 'HEAD^{tree}'
+git -C $ReviewRoot status --porcelain=v1 --untracked-files=all --ignored=matching
+git -C $ReviewRoot diff --binary
+git -C $ReviewRoot diff --cached --binary
+git -C $ReviewRoot ls-files --others --exclude-standard
+git -C $ReviewRoot ls-files --others --ignored --exclude-standard
+```
+
+Ghi rc của từng command ngay sau chạy; snapshot bytes/hash và giới hạn quan sát ở §8.2.
+Trust path/capability theo §8.1; không có lệnh tự chấp nhận trust trong adapter này.
+
+Ví dụ diff/numstat giữ raw bytes trong scratch của run, với `$BaseSha` từ assignment:
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+& $Py -B -c 'import pathlib,subprocess,sys; r,b,h,o=sys.argv[1:]; p=subprocess.run(["git","-C",r,"diff",b,h],check=True,capture_output=True); (pathlib.Path(o)/"diff.patch").write_bytes(p.stdout); p=subprocess.run(["git","-C",r,"diff","--numstat",b,h],check=True,capture_output=True); (pathlib.Path(o)/"numstat.txt").write_bytes(p.stdout)' $ReviewRoot $BaseSha $ReviewedSha $Scratch
+$DiffArtifactsRc = $LASTEXITCODE
+```
+
+`$ReviewRoot`/`$Scratch` là đường dẫn tuyệt đối. Khi đọc `modelUsage` lane Claude qua nguồn,
+truyền `$ReviewRoot` vào đối số SOURCE và JSON đúng `$Scratch/reviewer.json`; producer và
+consumer cùng run theo §8.1. Không đọc JSON trùng tên ở cwd.
+
+## Runtime và Ruff
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+codex --version
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:PYTHONPYCACHEPREFIX = Join-Path $Scratch 'pycache'
+& $Py -B -c 'import pathlib,runpy,sys; m=runpy.run_path(str(pathlib.Path(sys.argv[1])/".claude/dev/ci_dang_ky_test.py")); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)' $ReviewRoot
+$RuffContractRc = $LASTEXITCODE
+& $Py -m ruff check --no-cache --select F (Join-Path $ReviewRoot 'scripts/tl.py')
+$RuffLintRc = $LASTEXITCODE
+```
+
+Hai lệnh Ruff trỏ checkout được giao, không phụ thuộc cwd. Pin/probe và bare lint là hai scope của §8.2;
+tiêu chí A7/mutant riêng xem §10.2.3. Cú pháp `launcher.py run --prompt-file` và mẫu Codex
+ở nguồn, mục “Reviewer là codex”; schema đầy đủ ở `docs/GOI_AGENT_DA_NEN.md`.
+`$Run = Get-Content -Raw -LiteralPath $RunJson | ConvertFrom-Json` đọc rc con/trạng thái; parse được chưa là
+completion evidence. Model/effort/sandbox lấy từ `$Run.model_phuc_vu`, `$Run.effort_phuc_vu`, `$Run.sandbox_quan_sat`,
+chỉ đo được khi `model_phuc_vu_trang_thai`/`effort_phuc_vu_trang_thai`/`sandbox_trang_thai` là `DO_DUOC`
+(khác thì đọc `*_ly_do`); đối chiếu với prompt/receipt theo §8.1. Header `model:`/`reasoning effort:` trong
+`$StderrLog`, nếu có, chỉ là lời khai phụ; vắng header không phải chưa đo được. Không lấy model từ actor GitHub.
+
+## Provenance và vận chuyển
+
+Lưu khối GraphQL “Provenance CI” của .claude adapter vào `$QueryFile` ngoài checkout:
+
+```powershell
+gh api graphql -F "query=@$QueryFile" -f "id=$RunNodeId"
+$ProvenanceRc = $LASTEXITCODE
+gh api --paginate --slurp "repos/ducthangho/tra-luat/actions/runs/$RunId/attempts/$Attempt/jobs?per_page=100"
+$JobsRc = $LASTEXITCODE
+git -C $ReviewRoot cat-file blob "${DefinitionOid}:$WorkflowPath"
+```
+
+Khối `cat-file` minh họa đọc; để lưu bytes/hash dùng Python `subprocess` như work-packet.
+Nguồn URL/OID, nullable `file`, 403, skipped/waiver và đủ attempt/context theo §10.2.2–§10.2.3.
+Receipt body-file dùng Python ở [work-packet nguồn](../../../.claude/skills/work-packet/SKILL.md),
+mục “Body file và exact readback”. Bảng verdict/lịch sử lớp ở nguồn; không đổi contract khi
+đổi shell. Không dispatch reviewer từ ví dụ đọc evidence này.
+
+exec
+/bin/bash -lc "cat CONTEXT.md docs/PROTOCOL_DA_PHIEN.md CLAUDE.md >/dev/null
+git branch --show-current
+cat ops/reviews/wp1342-spec-r4/luot4.verdict.txt
+nl -ba ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+cat .claude/skills/soan-spec/SKILL.md
+rg --files | rg 'packet_loop_test|THI_CONG_DA_PROVIDER'" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ succeeded in 0ms:
+master
+codex
+## Review độc lập lượt 4 — Issue #1342, r4 (`r1d-a1-i`)
+
+Còn P2 ở hợp đồng trả kết quả, giao thức fixture và tiêu chí nghiệm thu. Hai P1 của lượt 3 đã đóng.
+
+Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 bản 3 `fb7a24eedbf1de05a8bdc8bb3c96354b8bbac1f3c7b8a486ebc573be08c59ed4` khớp verdict lượt 3. SHA-256 bản hiện tại `d7a5d5b27ed64307f764febf36d5cfe2f11f89e18a09b69c05fe433eb386cf00`. `git diff --no-index --numstat` trả `1`, ghi **31 dòng thêm, 23 dòng xóa** từ bản 3 sang bản hiện tại.
+
+Phiên reviewer `openai_codex / codex_cli / machine`, Linux, CPython 3.13.18, chỉ đọc và không gọi mạng. Model cụ thể và effort chưa xác minh. Các phép `python -B -` trong RAM trả `0`. Windows Desktop, VM, CI và các đột biến trên mã triển khai đều `not_run`.
+
+### Đối chiếu finding lượt 3
+
+| Finding | Trạng thái | Đối chiếu bản hiện tại |
+|---|---|---|
+| P1 — `Popen` ném sau khi tạo con hoặc trả thiếu `_handle` | **Đóng** | §2 dòng 48 và M4(3) ghi rõ cả hai biến thể của nợ đã được chấp nhận. |
+| P1 — Deadline hữu hạn thành `INFINITE`, số nguyên lớn gây `OverflowError` | **Đóng** | M4(0)/(8), S5. So trực tiếp từ chối `10**400`. Tôi chạy `_wait` nhánh Windows trích từ CPython trong RAM. Timeout cũ truyền `4294967295` ms, lát 60 s truyền `60000` ms. Nhãn của `d0` còn lỗi riêng. |
+| P2 — Ưu tiên lỗi, ghi chú, hậu điều cleanup | **Chưa đóng** | M2 và S4 thống nhất `Exception` được gom, `KeyboardInterrupt` lan ra ngay. M4(9) chọn lỗi gốc hoặc lỗi dọn đầu tiên. §2 giải thích quyền sở hữu `_handle`. Biểu thức dựng ghi chú và mệnh đề `⇔` vẫn hở, xem F1–F2. |
+| P2 — J9 thiếu tiền điều kiện thành viên thứ hai | **Đóng về handle và kết quả gán** | M7/J9 dùng handle gốc, đòi `TRUE`, ghi mã Win32 và `KHÔNG ĐO` nếu gán thất bại. Khả năng dựng trên hai máy còn `not_run`. Cửa sổ giữ phụ sống còn hở, xem F4. |
+| P2 — Giao thức quan sát và trợ giúp | **Chưa đóng** | M6 thêm ô kết quả, `join(20)`, quy tắc mượn handle và kiểm trước cú giết. J2 tách lỗi bắt tay. J10b dùng đường ghi marker có đối chứng J1. Quyền sở hữu khi join hết hạn và thứ tự mở `giu` còn hở, xem F3–F4. |
+| P2 — N2 lọt decorator và gán lồng | **Chưa đóng** | N2 dòng 104 chặn đúng cả hai phản chứng cũ. Phạm vi duyệt vẫn bỏ sót điểm bind và xóa tên, xem phép đo F5. |
+| P2 — Dấu hiệu đột biến | **Đóng phần phân biệt J6 và thứ tự J0, còn N7** | J6(i) chạy trước J6(ii), nên `c` không thể đỏ ở (ii). J0 chấm offset trước size. Giao thức `b`, cửa sổ `k2` và nhãn `d0` còn hở, xem F4 và F6. |
+| P2 — N1–N8 | **Chưa đóng** | N6 đã liệt kê đúng ID. N7 ghi đúng 15 ID và 16 lần chạy. N8 ghim Ruff 0.15.15. N2, N4, N6–N8 còn các vấn đề bên dưới. |
+| P3 — Dẫn nguồn điểm dừng khi giả định `Popen` sai | **Đóng** | §7 dòng 123 dẫn quy tắc protocol về đổi thiết kế hoặc phạm vi sau khi đóng băng. |
+
+### Finding lượt 4
+
+- **F1 · P2 — Dựng ghi chú vẫn có thể thay lỗi thắng.** M4(9) tránh `repr(e)` nhưng `str(e.args[:1])` gọi `repr` của phần tử trong tuple. Tôi chạy biểu thức nguyên văn trong RAM với `ValueError(arg)` và `arg.__repr__` ném một lớp con của `BaseException`. Ngoại lệ mới thoát qua `except Exception` và thay `RuntimeError("j9")`. Đây là lỗi ở bước chẩn đoán sau cleanup. S4 hiện chỉ kiểm `__repr__` của chính ngoại lệ trong helper gom lỗi. Dùng nội dung ghi chú không gọi mã tùy biến và chấm cả bước gắn ghi chú lên lỗi thắng.
+- **F2 · P2 — Mệnh đề `trả rc ⇔ đã xác nhận thu hồi` mâu thuẫn với M4(9), J2 và J9.** J9 trên head khỏe có thể terminate thành công, query job rỗng, reap và đóng các handle do hàm quản lý, rồi vẫn phải ném đúng `j9`. J2 cũng có thể xác nhận thu hồi rồi ném lỗi deadline. §2 cần ghi hai điều kiện để trả `rc`: đường chạy đã có `rc` và cleanup đã xác nhận thành công. Lỗi gốc vẫn được ném dù cleanup đã xác nhận. Cụm “mọi handle” cần giới hạn theo quyền sở hữu đã ghi, vì `_handle` thuộc `Popen` và J9 cố ý giữ `proc`.
+- **F3 · P2 — `join(20)` hết hạn chưa giải quyết quyền sở hữu handle quan sát.** M6 cho luồng chính phân loại `KHÔNG ĐO` rồi đóng handle trong `finally`. Nếu worker đang mở handle hoặc chưa công bố vào ô khi `join` hết hạn, nó có thể công bố sau `finally` và làm rò handle. Nếu worker còn đang dùng handle đã công bố, luồng chính có thể đóng quá sớm. Cần quy định worker sở hữu handle đến khi bàn giao thành công, và tự đóng nếu bàn giao bị hủy. Chốt cả đường worker hoàn tất muộn.
+- **F4 · P2 — Fixture chưa xác định đủ thứ tự mốc và thời gian sống.** M6 nói trợ giúp chờ `giu` tại mỗi mốc. J10 lại đợi `da_gan` và `chau` trước cú giết. Nếu `da_gan` được ghi trong `between` rồi chờ tại đó, M4(7) chưa resume con và `chau` chưa thể xuất hiện. Nếu mở chung một tệp `giu` để qua mốc đầu, tệp cũ có thể mở luôn mốc cần giữ. Cần ghi mốc nào được mở, bên nào mở, và mốc nào giữ tới cú giết. Với J9, `sleep(30)` bắt đầu ở tiến trình phụ tạo trước, nên riêng độ dài giấc ngủ chưa bảo đảm còn đủ 5 s kể từ `between`. Giữ phụ sống bằng chốt có hạn cho đến khi ca đọc xong kết quả, hoặc xác nhận đủ thời gian còn lại trước phép đo `a1`/`k2`.
+- **F5 · P2 — N2 vẫn cho xanh khi thay hành vi tên cũ chỉ bằng dòng thêm.** Trên blob base, tôi so đoạn nguồn AST có decorator, đếm điểm bind theo danh sách scope N2 và chạy `difflib` trên dòng. Base xanh cả ba vế. `_native1342` có 1 điểm bind, `MUTANTS_NHAM_TEST` có 14 điểm hợp lệ. Kết quả bên dưới. N2 cần khóa cả bind bằng capture/walrus và xóa tên, hoặc so nguyên byte phần cũ sau khi loại đúng các khối thêm được phép.
+- **F6 · P2 — `b` và `d0` chưa có đường tất định tới nhãn N7.** J6 chỉ yêu cầu con ghi **marker**, còn §4b bắt `b` chờ **tệp bắt tay**. Nếu là hai tệp khác nhau, `b` hết hạn và bị chấm `KHÔNG ĐO`. Ghi cùng một tệp ở cả hai chỗ. Với `d0`, §4b dùng cửa sổ **3–8 s** còn J2 chấp nhận **6–11 s**. Dùng một cửa sổ và một nhãn ở cả J2, §4b và driver. Đồng thời, ghi anchor `a1` bao cả kiểm BOOL để bỏ lời gọi vẫn sinh mã hợp lệ.
+- **F7 · P2 — N8 và §7 cần cùng đếm toàn bộ diff.** N8 đòi phản chứng tệp thứ ba làm đỏ, nhưng §7 chỉ định đo numstat “trên đúng hai tệp”. Nếu executor lọc theo hai đường dẫn, phản chứng tệp thứ ba sẽ biến mất khỏi phép đo. Ghi lệnh không lọc đường dẫn, đối chiếu tập đường dẫn với write set, rồi cộng số dòng thêm.
+- **F8 · P3 — `d1` đo trần đầu vào, còn lát chờ khóa sentinel.** Sau khi bỏ riêng trần, M4(8) vẫn giới hạn mỗi lần chờ ở 60 s. Đổi mô tả hàng `d1` thành “deadline ngoài miền được nhận”; khóa số đo của S5 bằng cùng một giá trị `now` để tránh sai màu nếu tiến trình bị tạm dừng giữa lúc tạo vector và lúc kiểm.
+
+| N2 trong RAM | (i) Đoạn nguồn | (ii) Điểm bind | (iii) Chỉ thêm dòng |
+|---|---|---|---|
+| Base | Xanh | Xanh | Xanh |
+| Chèn `return lambda c: None` | **Đỏ** | Xanh | Xanh |
+| Thêm `def _native1342` trùng cuối tệp | Xanh | **Đỏ** | Xanh |
+| Tiêm decorator trước `def` | **Đỏ** | Xanh | Xanh |
+| Thêm `if True: _native1342 = None` | Xanh | **Đỏ** | Xanh |
+| Thêm `match None:` với `case _native1342: pass` | Xanh | Xanh | Xanh |
+| Thêm `if (_native1342 := None): pass` | Xanh | Xanh | Xanh |
+| Thêm `del _native1342` | Xanh | Xanh | Xanh |
+
+### Đối chiếu 15 đột biến §4b
+
+Đây là kiểm vị trí và dấu hiệu trên mã dự kiến. Số lần khớp byte-exact và tính độc quyền thực tế của từng dấu hiệu cần driver chạy trên mã triển khai.
+
+| ID | Vị trí dự kiến và dấu hiệu |
+|---|---|
+| `a1` | M4(9), một khối terminate và kiểm BOOL. J3 ném `job not empty`. `k2` đã đặt `da_gan` trên đường thuận J3. J9 dưới `a1` có note `job not empty` nếu phụ còn sống. |
+| `a2` | Một hằng `JOB_LIMIT`. J10 còn con/cháu sống sau khi trợ giúp chết nếu cú giết diễn ra đúng mốc F4. S1 `JOB_LIMIT` cũng đỏ, với nhãn riêng. |
+| `a3` | Một nhánh query FALSE trong M3. J11 nhận sai handle tệp thành job rỗng. |
+| `b` | Một khối đổi thứ tự (5)–(7). J6(ii) độc quyền với `c` nhờ J6(i), nhưng còn sai tên tệp chờ ở F6. |
+| `c` | Một hằng `SPAWN_FLAGS`. S1 đỏ đúng assertion trên Linux và Desktop. Nếu J6 tới hook, J6(i) đỏ trước (ii). |
+| `h` | Một điểm tiêm sau đăng ký `close_job`. Sau khi phép tiêm trả `TRUE`, J7 đọc thấy `HANDLE_FLAG_INHERIT`. |
+| `k1` | Một đăng ký `kill_truoc_gan`. J8 thấy bản sao con chưa signaled sau lỗi `j8`. |
+| `k2` | Một phép dời cập nhật `da_gan`. J9 thấy phụ còn sống và thiếu note `job not empty`. Phân biệt với `a1` phụ thuộc cửa sổ sống ở F4. |
+| `k3` | Một nhánh gom ngoại lệ trong M2. S4 đỏ `bước 2 không chạy`. |
+| `t1` | Một nhánh chọn ứng viên trong M2. S2 đỏ ở vector hai ứng viên. |
+| `t2` | Một điều kiện nhận resume count. S3 đỏ riêng `count=2`. |
+| `d0` | Một lời gọi `wait` trong M4(8). Bỏ đối số timeout làm chờ con `sleep(30)` qua hạn. Nhãn thời gian chưa khớp J2, xem F6. |
+| `g0` | Một khối đổi thứ tự kiểm nền và đối số. S5 trên Linux đỏ ở vector `argv=[]` đầu tiên. |
+| `abi` | Một kiểu trường `th32OwnerProcessID`. J0 thu đủ lỗi và chọn nhãn offset trước size theo thứ tự đã ghi. |
+| `d1` | Một vế so sánh cận trên. S5 đỏ ở `now+86401`, lát chờ giữ nguyên. Xem F8 về nhãn và đồng hồ của vector. |
+
+### N1–N8 theo L1–L7
+
+| Tiêu chí | Kết quả |
+|---|---|
+| N1 | Có vế dương và ba phản chứng theo từng ID, khóa và vị trí neo, phù hợp L1/L3/L6. |
+| N2 | Bốn phản chứng được giao đỏ đúng vế. Ba phản chứng mới xanh sai theo L3/L6, xem F5. |
+| N3 | Có vế dương đúng chín tên và vế âm nối dây. Hai phép đỏ phân biệt được theo L3/L6. |
+| N4 | S1–S5 có vector và nhãn riêng. S4 cần đo đường gắn ghi chú ở F1. Vector `d1` xem F8. |
+| N5 | So từng ID và trường ổn định trên base/head cùng lượt, có phép đỏ tại assertion claim. Phù hợp L3/L5/L6. |
+| N6 | Tập ID và môi trường đã rõ theo L1. Chưa đủ điều kiện quan sát tất định ở F3–F4. |
+| N7 | 15 ID, 16 lần chạy, yêu cầu đúng nhãn, đối chứng và đúng một neo mỗi cặp. Còn F4/F6 theo L3/L6. |
+| N8 | Ruff đã ghim. Phép đếm tệp thứ ba cần dùng toàn diff theo L2/L3/L6, xem F7. |
+
+Write set hai tệp và driver ngoài kho phù hợp L2. L4 khai `khong_ap_dung`. L5 có thời điểm đo base và ba mốc đo lại. L7 đã bổ sung viện dẫn protocol cho điểm dừng `Popen` và gắn E2 cho quyết định thuộc chủ kho.
+
+KET_LUAN: request_changes
+     1	tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
+     2	tran_kich_thuoc_sensitive: nang_tran AskUserQuestion chủ kho 2026-11-18 phiên điều phối #1206 (≤ 2 tệp / ≤ 550 dòng thêm; thay ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab)
+     3	
+     4	# WP1174-WINDOWS-BACKEND r4 — lõi vòng đời tiến trình trong Job Object, Windows native, đứng riêng, KHÔNG pipe (bậc r1d-a1-i), chưa nối vào runtime
+     5	
+     6	- packet_id: WP1174-WINDOWS-BACKEND; revision: 4;
+     7	
+     8	| trường | giá trị |
+     9	|---|---|
+    10	| `packet_issue` | #1342 |
+    11	| `nguon_cap_viec` | Lộ trình bậc ở §1 đặc tả r1. Chủ kho 17-11-2026: seed + BootId vào r3 (land `aeb5cae`, `landed: true`), tiến trình + probe sang r1d. Chủ kho 18-11-2026 (phiên điều phối #1206): "Làm tiếp #1342 r1d", rồi lần lượt tách r1d → r1d-a (tiến trình) / r1d-b (probe); r1d-a → a1 (vòng đời, không pipe) / a2 (transport hai pipe); a1 → **a1-i** (lõi vòng đời, revision này) / a1-ii (kháng thoát job: breakaway tường minh/ngầm, job lồng); và nâng trần kích thước lên 550 cho riêng revision này. §9. |
+    12	| `review_class` | `sensitive` (runtime trạng thái WP1174) |
+    13	| `base` | `e2c3b82f818bd1739d31261e8129d3ef44915acf`. Số đo §0 lấy lúc 2026-11-18T17:20Z–18:10Z trên OID này. L5: người cấp lease đo lại §0 trên OID base thật (1) trước khi công bố băm, (2) lúc cấp lease, (3) trước merge; lệch ⇒ revision đặc tả. |
+    14	
+    15	**Đánh số:** `revision: 4` (ADR-0063, số nguyên); bậc **r1d-a1-i** của lộ trình. r1d-a1-ii, r1d-a2, r1d-b là các revision sau.
+    16	
+    17	## 0. Hiện trạng (đo trên `e2c3b82`; số dòng từ `def`, gồm dòng trống cuối khối)
+    18	
+    19	- `_1174_process` 4260 (51 dòng, Linux, có pipe): mẫu hợp đồng cho a2, KHÔNG đổi ở r4. `killpg` vô điều kiện chỉ chạy khi đã vào `try` cleanup nội bộ (sau `Popen`, `ExitStack`, `streams`).
+    20	- `_1174Error(ValueError)` 3670; `_1174_require`.
+    21	- `_1174_win_api` 6419 (18 dòng): `WinDLL("kernel32", use_last_error=True)` mới mỗi lần gọi, bind argtypes/restype tường minh, trả `(c, w, k)`. r1–r3 đứng riêng ở 6406–6742; `_1174_win_seed` 62 dòng, `_1174_win_persist` 45, `_1174_win_read`/`_lock` 35.
+    22	- CPython 3.13 `subprocess.py` (Windows, ~1555–1578): `creationflags` chuyển nguyên cho `_winapi.CreateProcess`; giữ process handle ở `Popen._handle` (chi tiết triển khai CPython); ĐÓNG primary thread handle; KHÔNG gọi `ResumeThread`. Do đó phải tìm lại luồng qua Toolhelp.
+    23	- `.claude/dev/launcher.py` `_job_windows` 905–973 gán job SAU khi con đã chạy (khe tự khai); `_pid_trong_job` 976–1003 dùng lớp 3. Không sửa launcher.
+    24	- Test: `WP1174_BOTH` 12421 (12 ID); `_new1342` 17879, `_additive1342` 17896, `_wired1342` 17920, `_native1342` 18159 (in `WP1342_NATIVE_V1` ở 18165 sau khi thân ca trả về), `_additive1342r2` 18178; đăng ký ca 18170/18171, 18365/18366, 18553/18554; `MUTANTS` 3592 + các `MUTANTS.update`.
+    25	- Kích thước tiền nhiệm (numstat): r1 +428 (mã 130 + test 298), r2 +293, r3 +300 (test 188).
+    26	
+    27	## 1. Phạm vi r4 (r1d-a1-i)
+    28	
+    29	Thêm, ĐỨNG RIÊNG (không hàm hiện có nào gọi tới): bindings job/thread có nghiệm thu ABI; ba hằng cho phép; ba hàm thuần; `_1174_win_job_empty`; `_1174_win_spawn_job` chạy MỘT lệnh trong job từ trạng thái treo, chờ tiến trình đầu thoát có hạn, thu hồi cả job theo các bước có hậu điều riêng. stdin/stdout/stderr của con đều `DEVNULL`. Không sửa thân định nghĩa nào đang có.
+    30	
+    31	## 2. `write_set`, `ngoai_pham_vi`, ranh giới bảo đảm
+    32	
+    33	```
+    34	.claude/dev/packet_loop.py
+    35	.claude/dev/packet_loop_test.py
+    36	```
+    37	
+    38	Ngoài phạm vi:
+    39	- Không sửa thân hàm/khối nào đang có (kể cả `_1174_process`, `_1174_win_*` r1–r3, helper test `_new1342` `_additive1342` `_wired1342` `_additive1342r2` `_native1342`). Không đổi `MUTANTS` đang có; không runner mới; không CI Windows.
+    40	- **Để r1d-a1-ii:** breakaway tường minh (J4 cũ, danh sách mã `{5}`, job đối chứng cho phép breakaway, đột biến e1), breakaway ngầm (J5 cũ, membership với job đích, e2), job lồng (J12 cũ). Hằng `_1174_WIN_JOB_LIMIT == 0x2000` vẫn khoá ở r4 bằng S1 và J10.
+    41	- **Để r1d-a2:** đọc hai pipe, hạn mức byte chung, huỷ I/O có thời hạn (P1 "hai reader" lượt 1), `on_bytes`/callback, trần byte, `stdin` bytes, M3 cũ, P1–P4 cũ, đột biến (d)(f)(g) cũ, **N4 (f)(g) cũ**, CRLF/NUL.
+    42	- **Để r1d-b:** probe.
+    43	- Không nối dây. Không API không tài liệu, không `pywin32`, không đồ giả Win32 (Q11 r1). Không giới hạn CPU/bộ nhớ/số tiến trình.
+    44	
+    45	**Ranh giới bảo đảm (khai thẳng, có ca đo J10b):**
+    46	- Bảo đảm: mọi tiến trình thuộc cây kế thừa job của con (con và hậu duệ do nó tạo SAU khi resume) bị thu hồi khi hàm trả, hoặc khi tiến trình gọi chết SAU lúc gán job thành công (nhờ `KILL_ON_JOB_CLOSE`).
+    47	- KHÔNG bảo đảm — nợ có tên **`wp1342-pre-assign-orphan`**: nếu tiến trình gọi chết trong khoảng `Popen` → `AssignProcessToJobObject` (không `finally` nào chạy), con treo bị bỏ lại ngoài job. Con chưa từng chạy lệnh nào (tạo với `CREATE_SUSPENDED`, chưa resume) nên không thể sinh hậu duệ, nhưng tiến trình treo tồn tại tới khi bị giết từ ngoài. Đường đóng triệt để là `CreateProcessW` + `PROC_THREAD_ATTRIBUTE_JOB_LIST` (OS gán job ngay khi tạo); chủ kho đã bác vì kích thước (§9 Q2).
+    48	- KHÔNG bảo đảm — cùng nợ `wp1342-pre-assign-orphan`, hai biến thể còn lại: (a) constructor `Popen` ném SAU khi `CreateProcess` đã thành công (CPython 3.13 còn chạy `_close_pipe_fds`, cấp `Handle(hp)`, đóng thread handle trước khi gán `_handle`): con treo tồn tại nhưng tiến trình gọi không có handle để giết; (b) `Popen` trả mà không có `_handle`: bước `kill_truoc_gan` ghi lỗi, con treo bị bỏ lại. Cả hai: con chưa từng chạy nên không sinh hậu duệ; hàm luôn ném lỗi, không bao giờ trả `rc`.
+    49	- Hợp đồng kết quả: hàm TRẢ `rc` ⇔ (đường chạy đã có `rc` — không lỗi gốc nào) VÀ (thu hồi ĐÃ XÁC NHẬN: job đã gán, `TerminateJobObject` TRUE, `ActiveProcesses == 0`, leader đã reap, và mọi handle do HÀM sở hữu — job, snapshot, thread — đã đóng thành công; process handle thuộc `Popen`, không tính). Có lỗi gốc ⇒ NÉM lỗi gốc dù thu hồi đã xác nhận (J2, J8, J9). Không lỗi gốc mà thu hồi chưa xác nhận ⇒ NÉM lỗi dọn, nghĩa là "đã cố dọn nhưng chưa xác nhận" (vd `terminate` FALSE, `xac_nhan` hết hạn; khi đó việc đóng handle job cuối kích hoạt `KILL_ON_JOB_CLOSE` như đường dự phòng không được xác nhận). Process handle do `Popen` sở hữu; sau `reap` leader đã thoát nên việc traceback giữ `proc` lâu hơn không kéo dài vòng đời tiến trình nào.
+    50	- KHÔNG bảo đảm: ngắt bất đồng bộ trong tiến trình gọi (vd `KeyboardInterrupt`) rơi giữa hai câu lệnh, sau khi một tài nguyên đã nhận nhưng trước khi trạng thái sở hữu được ghi; khi đó đường dọn có thể dựa trạng thái cũ. Hậu quả tối đa tương đương nợ trên (con treo bị bỏ lại) hoặc job chưa đóng tới khi tiến trình gọi thoát (lúc đó `KILL_ON_JOB_CLOSE` dọn). `KeyboardInterrupt`/`SystemExit` phát sinh TRONG một bước dọn không bị nuốt: nó lan ra ngay và các bước sau không chạy (cùng giới hạn này).
+    51	- Ngoài phạm vi Job Object: tiến trình do dịch vụ ngoài job tạo thay mặt con (COM/WMI/Task Scheduler). Giả định: không tiến trình ngoài nào có quyền can thiệp vào con (chèn luồng, resume hộ) trong khoảng tạo → resume.
+    52	- Phiên bản Python hỗ trợ: CPython (`sys.implementation.name == "cpython"`), `sys.version_info >= (3, 11)` (cần `add_note`); khác ⇒ `_1174Error("spawn runtime")` TRƯỚC `Popen`.
+    53	
+    54	## 3. Hằng số (danh sách CHO PHÉP, một giá trị mỗi hằng)
+    55	
+    56	| hằng | giá trị | ý nghĩa |
+    57	|---|---|---|
+    58	| `_1174_WIN_JOB_LIMIT` | `0x2000` | `LimitFlags` = CHỈ `KILL_ON_JOB_CLOSE` |
+    59	| `_1174_WIN_SPAWN_FLAGS` | `0x204` | `creationflags` = CHỈ `CREATE_SUSPENDED` (0x4) \| `CREATE_NEW_PROCESS_GROUP` (0x200) |
+    60	| `_1174_WIN_RESUME_OK` | `1` | giá trị DUY NHẤT nhận từ `ResumeThread` |
+    61	
+    62	## 4. `muc_tieu`
+    63	
+    64	| # | mục tiêu |
+    65	|---|---|
+    66	| M1 | `_1174_win_api_job()`: gọi `_1174_win_api()`; bind trên CÙNG `kernel32` đúng tập (không hơn) với chữ ký: `CreateJobObjectW([V, S], H)`, `SetInformationJobObject([H, c_int, V, D], B)`, `AssignProcessToJobObject([H, H], B)`, `TerminateJobObject([H, UINT], B)`, `QueryInformationJobObject([H, c_int, V, D, P], B)`, `CreateToolhelp32Snapshot([D, D], H)`, `Thread32First([H, V], B)`, `Thread32Next([H, V], B)`, `OpenThread([D, B, D], H)`, `GetProcessIdOfThread([H], D)`, `ResumeThread([H], D)`, `GetHandleInformation([H, P], B)` (`V`=`c_void_p`, `H`=`w.HANDLE`, `D`=`w.DWORD`, `B`=`w.BOOL`, `S`=`w.LPCWSTR`, `P`=`POINTER(DWORD)`). Cấu trúc theo layout Win64 có tài liệu, kiểu độ rộng cố định: `JOBOBJECT_BASIC_LIMIT_INFORMATION` (64 byte, `LimitFlags` offset 16), `IO_COUNTERS` (48), `JOBOBJECT_EXTENDED_LIMIT_INFORMATION` (144), `JOBOBJECT_BASIC_ACCOUNTING_INFORMATION` (48, `ActiveProcesses` offset 40), `THREADENTRY32` (28, `th32OwnerProcessID` offset 12). Trả `(c, w, k, s)` với `s` là namespace các lớp cấu trúc. |
+    67	| M2 | Bốn hàm THUẦN (mọi nền, không ctypes): (a) `_1174_win_pick_thread(entries, pid)`: `entries` là iterable `(owner_pid, tid)`; trả tid khi có ĐÚNG MỘT mục `owner_pid == pid`; 0 hoặc ≥ 2 ⇒ `_1174Error("suspended start")`. (b) `_1174_win_resume_ok(count)`: không lỗi khi `type(count) is int and count == _1174_WIN_RESUME_OK`; khác ⇒ `_1174Error("suspended start")`. (d) `_1174_win_note(err, loi_don)`: với mỗi `e` trong `loi_don`, `err.add_note("cleanup: " + type(e).__name__)` bọc `try/except Exception: pass`; KHÔNG đọc `args`, `str`, `repr` của `e` (không gọi mã tuỳ biến nào của ngoại lệ). (c) `_1174_win_cleanup(steps)`: chạy TỪNG callable theo thứ tự, mỗi cái trong `try` riêng bắt `Exception` (KHÔNG bắt `BaseException`: ngắt lan ra ngay, §2); bước lỗi không chặn bước sau; trả list ngoại lệ theo thứ tự; tự nó không ném `Exception` nào. Đây là nơi DUY NHẤT gom lỗi dọn; M4(9) là nơi DUY NHẤT quyết định lỗi thắng. |
+    68	| M3 | `_1174_win_job_empty(k, s, job, wait_s)`: lặp tới `wait_s` giây (bước 0,05 s): `QueryInformationJobObject(job, 1, byref(info), sizeof(info), None)`; FALSE ⇒ đọc `ctypes.get_last_error()` NGAY, `_1174Error("job query")` (không đọc buffer, không coi là rỗng); TRUE và `info.ActiveProcesses == 0` ⇒ trả `None`. Hết `wait_s` ⇒ `_1174Error("job not empty")`. |
+    69	| M4 | `_1174_win_spawn_job(argv, *, cwd, deadline, env=None, truoc_gan=None, between=None)` → `int`. **(0)** Kiểm đối số: `argv` là list khác rỗng toàn `str`; `deadline` là `int` hoặc `float` (không `bool`); với `float` đòi `math.isfinite`; với cả hai đòi `time.monotonic() < deadline <= time.monotonic() + 86400` (so sánh trực tiếp, không đổi kiểu, nên `10**400` bị từ chối mà không `OverflowError`); `cwd` là `str`; `env` `None` hoặc dict str→str; `truoc_gan`, `between` `None` hoặc callable; vi phạm ⇒ `_1174Error("spawn arguments")`. Sau đó `os.name == "nt"` ("native Windows required"), rồi kiểm phiên bản (§2, "spawn runtime"). **(1)** `CreateJobObjectW(None, None)`; NULL ⇒ `get_last_error` ngay, "job create". ĐĂNG KÝ bước `close_job`. **(2)** `SetInformationJobObject(job, 9, …)` với `info.BasicLimitInformation.LimitFlags = _1174_WIN_JOB_LIMIT`, các trường khác 0; FALSE ⇒ "job limit". **(3)** `proc = Popen(argv, cwd, env, stdin/stdout/stderr=DEVNULL, close_fds=True, creationflags=_1174_WIN_SPAWN_FLAGS)`. NGAY sau khi `Popen` trả (trước mọi kiểm khác): ĐĂNG KÝ bước `kill_truoc_gan` (chỉ hiệu lực khi chưa gán) và `reap`. Sau đó mới kiểm `getattr(proc, "_handle", None)` khác `None` ⇒ thiếu ⇒ "spawn handle" (bước `kill_truoc_gan` dùng `proc.kill()`, vốn cũng dựa `_handle` của CPython; khi thiếu, bước ấy ghi lỗi và nợ `wp1342-pre-assign-orphan` áp dụng). **(4)** `truoc_gan(proc)` nếu có. **(5)** `AssignProcessToJobObject(job, proc._handle)`; FALSE ⇒ "job assignment"; TRUE ⇒ đặt `da_gan = True` NGAY câu lệnh kế tiếp. **(6)** `between(job)` nếu có. **(7)** `snap = CreateToolhelp32Snapshot(0x4, 0)`; so với `INVALID_HANDLE_VALUE = c_void_p(-1).value` (đúng độ rộng con trỏ) ⇒ "thread snapshot"; ĐĂNG KÝ `close_snap`. `te = THREADENTRY32(); te.dwSize = sizeof(te)`; `Thread32First` FALSE ⇒ đọc last-error ngay: 18 (`ERROR_NO_MORE_FILES`) ⇒ danh sách rỗng, khác ⇒ "thread snapshot"; lặp `Thread32Next` tới FALSE với last-error 18 (khác ⇒ "thread snapshot"). Chọn tid bằng `_1174_win_pick_thread`. `th = OpenThread(0x2 \| 0x800, False, tid)`; NULL ⇒ "suspended start"; ĐĂNG KÝ `close_thread`. `GetProcessIdOfThread(th)` == 0 hoặc ≠ `proc.pid` ⇒ "suspended start". `_1174_win_resume_ok(ResumeThread(th))`. Trong suốt (5)–(7) `proc` (và `_handle`) được giữ sống. **(8)** chờ theo lát hữu hạn giữ deadline tuyệt đối: lặp `con_lai = deadline - time.monotonic()`; `con_lai <= 0` ⇒ `_1174Error("lifecycle deadline")`; `proc.wait(timeout=min(con_lai, 60.0))` (mỗi lát < `INFINITE` 0xFFFFFFFF ms), `TimeoutExpired` ⇒ lặp tiếp; thoát ⇒ ghi `rc`. **(9)** `finally`: `_1174_win_cleanup` với các bước theo thứ tự, mỗi bước một hậu điều: `terminate` (chỉ khi `da_gan`): `TerminateJobObject(job, 1)` FALSE ⇒ lỗi "job terminate"; `xac_nhan` (chỉ khi `da_gan`): `_1174_win_job_empty(…, 5)` — chạy kể cả khi `terminate` lỗi, và là phép xác nhận DUY NHẤT; `kill_truoc_gan` (chỉ khi KHÔNG `da_gan`): `proc.kill()`; `reap`: `proc.wait(5)`, `TimeoutExpired` ⇒ "leader not reaped"; `close_thread`, `close_snap`, `close_job`: `CloseHandle` FALSE ⇒ "handle close". KHÔNG có `proc.kill()` khi đã gán. Ưu tiên lỗi (chỉ ở đây): có lỗi gốc ⇒ ném lỗi gốc; không lỗi gốc mà có lỗi dọn ⇒ ném lỗi dọn ĐẦU TIÊN. Các lỗi dọn còn lại gắn vào ngoại lệ được ném qua `_1174_win_note` (chỉ tên kiểu, không gọi mã tuỳ biến của ngoại lệ, nên không bước chẩn đoán nào thay được lỗi thắng). Chỉ trả `rc` khi KHÔNG có lỗi nào. |
+    70	| M5 | Ca THUẦN (mọi nền) `wp1342_pure_spawn_*`, mỗi vector một assertion có nhãn riêng: **S1** ba assertion: `JOB_LIMIT == 0x2000`, `SPAWN_FLAGS == 0x204`, `RESUME_OK == 1`. **S2** `pick_thread`: `[]` ⇒ lỗi; `[(7,1),(7,2)]` (pid 7) ⇒ lỗi; `[(9,1),(7,5),(8,6)]` ⇒ 5. **S3** `resume_ok` theo thứ tự: `2` ⇒ lỗi (assertion "count=2"); `0` ⇒ lỗi; `0xFFFFFFFF` ⇒ lỗi; `True` ⇒ lỗi; `1` ⇒ qua. **S4** `cleanup([ném ValueError, ghi_cờ])` ⇒ cờ được ghi, trả đúng 1 lỗi (nhãn "bước 2 không chạy"); `cleanup([ném KeyboardInterrupt, ghi_cờ])` ⇒ `KeyboardInterrupt` lan ra, cờ KHÔNG ghi (nhãn "ngắt bị nuốt"); `cleanup([ném lỗi có __repr__ ném])` trả lỗi ấy, không ném; `_1174_win_note(RuntimeError("j9"), [ValueError(x)])` với `x.__repr__`/`__str__` ném một lớp con `BaseException` ⇒ không ném, ghi chú đúng `"cleanup: ValueError"` (nhãn "ghi chú gọi mã tuỳ biến"). **S5** `_1174_win_spawn_job` từ chối "spawn arguments" cho `argv=[]` (assertion đầu tiên), `["x", 1]`, `"x"`, deadline đã qua, `True`, `float("inf")`, `float("nan")`, `10**400`, `now + 86401` (với `now = time.monotonic()` chụp MỘT lần ngay trước lời gọi), `cwd=None`, `between=1`; trên nền khác Windows đối số hợp lệ ⇒ "native Windows required". Không thêm vào `WP1174_REQUIRED`/`WP1174_BOTH`. |
+    71	| M6 | Hạ tầng test native (trong `packet_loop_test.py`). **Bindings phía test** (không thuộc allowlist M1): `OpenProcess`, `DuplicateHandle`, `GetCurrentProcess`, `WaitForSingleObject`, `TerminateProcess`, `CloseHandle`, `GetProcessTimes`, `SetHandleInformation` (chỉ để dựng phản chứng `h` nếu cần), chữ ký tường minh. **Bắt tay xác minh danh tính:** fixture ghi `{pid, creation_time (GetProcessTimes trên chính nó), nonce}` bằng ghi tệp tạm + `os.replace` (nguyên tử); nonce do CA cấp qua argv; ca mở `OpenProcess(SYNCHRONIZE \| PROCESS_QUERY_LIMITED_INFORMATION \| PROCESS_TERMINATE)`, đòi `GetProcessTimes(handle).creation == creation_time` trong tệp, và handle chưa signaled; chỉ sau đó ca mới ghi tệp `go` cho fixture đi tiếp. Mọi kiểm vòng đời trên HANDLE đó; tự dọn bằng `TerminateProcess` trên handle giữ khi đột biến sống sót. **Luồng quan sát:** chạy song song khi `_1174_win_spawn_job` đang chặn trong luồng chính; đọc bắt tay, mở handle, ghi `go`; worker SỞ HỮU mọi handle nó mở cho tới khi BÀN GIAO thành công: bàn giao = dưới một khoá, nếu cờ `huy` chưa đặt thì ghi kết quả/ngoại lệ vào ô chung và chuyển quyền sở hữu handle cho luồng chính; nếu `huy` đã đặt thì worker tự đóng handle của nó. Luồng chính `join(20)` sau khi hàm trả/ném; hết hạn ⇒ dưới cùng khoá đặt `huy`, KHÔNG đóng handle nào (worker tự đóng khi xong muộn), phân loại `KHÔNG ĐO`; join thành công ⇒ luồng chính chỉ dùng và đóng (trong `finally` của ca) các handle đã được bàn giao; ô chứa ngoại lệ ⇒ `KHÔNG ĐO` (lỗi fixture, tách khỏi dấu hiệu sản phẩm). **Hook:** `truoc_gan`/`between` của ca chỉ MƯỢN tài nguyên (không đóng `proc._handle` hay job, không sửa trạng thái `Popen`), mọi chờ trong hook có hạn. **Trợ giúp (J10/J10b):** tiến trình python riêng chạy `_1174_win_spawn_job` từ cây làm việc; giao thức tệp: `san_sang` (pid + creation time trợ giúp), `da_gan` hoặc `truoc_gan` (pid + creation time con), `chau` (J10); mỗi mốc có tệp mở riêng `tha_<mốc>` (không dùng chung tệp): J10b — trợ giúp ghi `truoc_gan` rồi CHỜ `tha_truoc_gan` (≤ 30 s, hết hạn ⇒ trợ giúp thoát mã 3 ⇒ `KHÔNG ĐO`) và ca KHÔNG bao giờ tạo tệp ấy (cú giết diễn ra khi trợ giúp đang đứng ở mốc); J10 — trợ giúp ghi `da_gan` trong `between` KHÔNG chờ (để resume tiếp), con sinh cháu, cháu bắt tay `chau`, con và cháu sau đó CHỜ `tha_ket` (≤ 60 s) nên còn sống trong lúc trợ giúp chặn ở bước (8); ca giết trợ giúp khi nó đang chặn ở (8) và KHÔNG tạo `tha_ket`. Trước cú giết: ca xác minh từng mốc, kiểm handle trợ giúp và các đối tượng cần đo chưa signaled; `TerminateProcess` trợ giúp bằng handle `Popen` của chính ca phải trả TRUE; chờ trợ giúp signaled ≤ 5 s. Ca KHÔNG nhân bản handle job trong J10 (trợ giúp là chủ duy nhất). |
+    72	| M7 | Ca NATIVE `wp1342_native_job_*` qua `_native1342` (nền khác in `BỎ QUA <lý do>`, không tính đạt), lệnh con `sys.executable -B -c …`, mỗi ca có dấu hiệu dương. **J0 ABI**: thu ĐỦ mọi assertion (không dừng ở cái đầu), báo nhãn hỏng đầu tiên theo thứ tự cố định: offset trước size; tập tên bind == allowlist M1; `argtypes`/`restype` từng hàm khớp bảng M1; `offsetof` rồi `sizeof` khớp số ở M1; chạy trên Win64 (kiểm `sizeof(c_void_p) == 8`, khác ⇒ `KHÔNG ĐO`). **J1 thuận**: con ghi tệp đánh dấu rồi `exit(7)` ⇒ trả `7`, tệp có. **J2 hạn**: con bắt tay rồi `sleep(30)`; deadline = lúc gọi + 6 s; bắt tay phải xong trong 5 s (không xong ⇒ `KHÔNG ĐO`, lỗi khởi động fixture, không chấm deadline); ném "lifecycle deadline" trong khoảng 6–11 s; handle con signaled. **J3 mồ côi**: con sinh cháu `DETACHED_PROCESS (0x8)`; cháu bắt tay rồi `sleep(30)`; con chờ `go` của cháu rồi `exit(0)`; hàm trả `0`; handle cháu signaled khi hàm trả. **J6 treo trước gán**: con ghi marker ở dòng đầu (cùng đoạn mã marker với J1, nên J1 là đối chứng dương của đường ghi marker); `between(job)` kiểm theo thứ tự hai nhãn: (i) "cờ treo vắng": `packet_loop._1174_WIN_SPAWN_FLAGS & 0x4` khác 0; (ii) "marker đã có lúc between": tệp marker CHƯA tồn tại; sau khi hàm trả, tệp có. **J7 handle kế thừa**: `between(job)`: `GetHandleInformation(job, &f)` TRUE và `f & 0x1 == 0`. **J8 lỗi trước gán**: `truoc_gan(proc)` lấy bản sao handle con (`DuplicateHandle`, quyền `SYNCHRONIZE \| PROCESS_TERMINATE`) rồi ném `RuntimeError("j8")`; hàm ném lại đúng lỗi ấy; bản sao signaled khi hàm trả (không chờ thêm). **J9 lỗi sau gán**: `truoc_gan` giữ `proc`; ca tạo trước một tiến trình phụ (bắt tay, handle giữ); `between(job)` gán tiến trình phụ vào CÙNG job bằng handle GỐC của `Popen` phụ (đủ quyền `PROCESS_SET_QUOTA \| PROCESS_TERMINATE`; handle quan sát giữ riêng để đo), đòi `AssignProcessToJobObject` TRUE (FALSE ⇒ ghi mã Win32, `KHÔNG ĐO` trước khi ném — tiền điều kiện; ghi kết quả trên Desktop và VM), lấy bản sao handle job, rồi ném `RuntimeError("j9")`; tiến trình phụ CHỜ tệp `tha_phu` (≤ 60 s) thay vì ngủ cố định, nên còn sống suốt cửa sổ `xac_nhan` (5 s) cho tới khi ca đo xong kết quả rồi mới tạo `tha_phu` (và tự dọn bằng `TerminateProcess` nếu còn sống); hàm ném lại lỗi ấy; khi hàm trả: handle con và handle tiến trình phụ signaled, `ActiveProcesses == 0` qua bản sao job (query phải TRUE). **J10 cha chết sau gán**: trợ giúp chạy `_1174_win_spawn_job` với con sinh cháu, con và cháu bắt tay và `sleep(30)`; sau khi xác minh `da_gan` + `chau`, ca `TerminateProcess` trợ giúp; handle con và cháu signaled trong ≤ 5 s. **J10b cha chết trước gán (đo nợ)**: trợ giúp dùng `truoc_gan` ghi mốc `truoc_gan` (pid + creation time con lấy qua `GetProcessTimes(proc._handle)`) rồi chờ `giu`; con dùng cùng đoạn mã marker với J1/J6; ca mở handle con, xác minh, `TerminateProcess` trợ giúp; sau 2 s: con CHƯA signaled (còn treo, bị bỏ lại — đúng nợ đã khai) VÀ tệp bắt tay của con KHÔNG tồn tại (chưa từng chạy); ca tự dọn con. J10b đạt nghĩa là ranh giới đã khai ĐÚNG như đo, không phải bảo đảm thu hồi. **J11 query lỗi**: `_1174_win_job_empty` với handle tệp (mở bằng `CreateFileW` của r1) ⇒ "job query"; với job rỗng do ca tạo ⇒ `None`. J3, J9, J10 chạy thêm trên VM `tra-luat-win`. |
+    73	| M8 | Đột biến qua driver NGOÀI kho (khuôn r1–r3: mỗi cặp (tìm, thay) khớp đúng một chỗ, đổi khối thì neo cả khối làm một cặp; bản sao tạm; ca đích + đối chứng khoẻ; lỗi import/fixture, quan sát hết hạn hoặc watchdog ngoài ca 90 s ⇒ `KHÔNG ĐO`). Bảng §4b. |
+    74	
+    75	## 4b. Đường vào, chốt, ca, đột biến (mỗi đường một chốt; dấu hiệu = ID ca + nhãn assertion, chỉ đột biến đó gây ra)
+    76	
+    77	| # | đường | chốt | dấu hiệu đỏ | đột biến |
+    78	|---|---|---|---|---|
+    79	| 1 | con thoát, cháu mồ côi còn sống | `terminate` ở (9) | J3 ném "job not empty" | **a1** (khối) thay bước `terminate` — lời gọi `TerminateJobObject` CÙNG nhánh kiểm BOOL của nó — bằng `pass` |
+    80	| 2 | tiến trình gọi chết sau gán | `KILL_ON_JOB_CLOSE` | J10 "con/cháu sống sau khi cha chết" | **a2** `_1174_WIN_JOB_LIMIT = 0` |
+    81	| 3 | query lỗi đọc thành rỗng | M3 ném "job query" | J11 "handle tệp được nhận là job rỗng" | **a3** nhánh query-FALSE đổi thành `return None` |
+    82	| 4 | khe "chạy trước, gán sau" | gán trước resume | J6 "marker đã có lúc between" (nhãn (i) "cờ treo vắng" xanh) | **b** (khối) dời (7) lên trước (5) và chờ ĐÚNG tệp marker của J6 (cùng đường dẫn, truyền qua argv của con) ≤ 5 s trước khi gán; chờ hết hạn ⇒ `KHÔNG ĐO` |
+    83	| 5 | con không treo khi tạo | `CREATE_SUSPENDED` | S1 "SPAWN_FLAGS == 0x204" (tất định; mọi đột biến khác không chạm hằng này) | **c** `_1174_WIN_SPAWN_FLAGS = 0x200` |
+    84	| 6 | handle job kế thừa | security attributes `None` | J7 "job handle có HANDLE_FLAG_INHERIT" | **h** chèn sau (1) một dòng bind `SetHandleInformation([w.HANDLE, w.DWORD, w.DWORD], w.BOOL)` trên `k` và gọi `(job, 1, 1)`, đòi TRUE |
+    85	| 7 | lỗi sau `Popen`, trước gán | `kill_truoc_gan` | J8 "bản sao con chưa signaled khi hàm trả" | **k1** bỏ đăng ký `kill_truoc_gan` |
+    86	| 8 | lỗi sau gán, trước resume | `terminate` khi `da_gan` (không `proc.kill` sau gán) | J9 "tiến trình phụ còn sống VÀ lỗi j9 không có ghi chú job not empty" | **k2** đặt `da_gan = True` sau (7) thay vì sau (5) |
+    87	| 9 | bước dọn lỗi chặn bước sau | `_1174_win_cleanup` chạy hết | S4 "bước 2 không chạy" | **k3** `break` sau ngoại lệ đầu |
+    88	| 10 | 0/≥2 luồng ứng viên | đúng-một | S2 "hai ứng viên được nhận" | **t1** trả mục khớp đầu tiên |
+    89	| 11 | `ResumeThread` ≠ 1 được nhận | `resume_ok` | S3 "count=2" | **t2** `== _1174_WIN_RESUME_OK` đổi thành `in (1, 2)` |
+    90	| 12 | treo vô hạn chờ tiến trình đầu | `wait(timeout=…)` | J2 "không ném lifecycle deadline trong 6–11 s" | **d0** bỏ `timeout=` |
+    91	| 13 | đối số sai lọt vào Windows | kiểm đối số trước nền | S5 "argv=[] phải là spawn arguments" | **g0** (khối) đổi chỗ khối kiểm `os.name` lên trước khối kiểm đối số |
+    92	| 14 | ABI sai lệch | layout cố định | J0 "THREADENTRY32 offset th32OwnerProcessID == 12" | **abi** đổi kiểu trường `th32OwnerProcessID` sang `c_uint64` |
+    93	| 15 | deadline hữu hạn quá xa thành chờ vô hạn | trần `now + 86400` + chờ theo lát | S5 "deadline ngoài miền nhận (now+86401) phải là spawn arguments" | **d1** bỏ vế cận trên `<= time.monotonic() + 86400` (lát chờ 60 s giữ nguyên) |
+    94	
+    95	Phân biệt: k2 chỉ đổi hành vi khi có lỗi giữa (5) và (7), nên đường thuận J3 không đổi dưới k2. Ở J9, cả a1 và k2 đều để tiến trình phụ sống; dấu hiệu tách bằng ghi chú lỗi: dưới a1 bước `xac_nhan` vẫn chạy và lỗi gốc `j9` mang `add_note` chứa "job not empty"; dưới k2 không có bước `xac_nhan` nên KHÔNG có ghi chú ấy. Dấu hiệu của k2 = J9 "tiến trình phụ còn sống VÀ không có ghi chú job not empty"; dấu hiệu của a1 = J3 "job not empty". a2/c chạm hai hằng khác nhau; S1 tách assertion theo hằng nên a2 làm đỏ assertion `JOB_LIMIT`, không đỏ `SPAWN_FLAGS`. b giữ cờ treo nên S1 và nhãn J6(i) xanh, đỏ ở J6(ii). c đỏ ở S1 `SPAWN_FLAGS` và ở J6(i) "cờ treo vắng" (kiểm trước (ii)), không bao giờ ở J6(ii). abi: J0 chấm offset trước size.
+    96	
+    97	Đường KHÔNG có kích hoạt native tự nhiên (chỉ code review, KHÔNG ghi là đã đo bằng ca native): TID cũ giữa snapshot và `OpenThread` (chốt `GetProcessIdOfThread`); `Thread32First/Next` lỗi khác 18; `OpenThread` NULL; `TerminateJobObject` FALSE trên job hợp lệ; `CloseHandle` FALSE; `GetProcessIdOfThread == 0`. Logic chọn/nhận nằm trong hàm thuần đã đo (S2, S3, S4).
+    98	
+    99	## 5. `nghiem_thu`
+   100	
+   101	| # | tiêu chí | phép đo làm nó ĐỎ |
+   102	|---|---|---|
+   103	| N1 | Linux không đổi: CI Ubuntu exact head `GOM: ĐẠT`; sổ ID ca base ⊆ head, mỗi ID base cùng trạng thái (đạt/bỏ qua + lý do); `MUTANTS` head == base; mỗi mốc (tìm) của `MUTANTS` đang có khớp ĐÚNG MỘT lần trên head. Biên nhận ghi từng ID và từng mốc. | Rút một ca base; đổi tên một khoá giữ số lượng; mã mới làm một mốc cũ khớp 2 lần. |
+   104	| N2 | Chỉ THÊM, cả hai tệp. `packet_loop.py`: `_additive1342r2(base, head) == []`. `packet_loop_test.py`: (i) với mỗi định nghĩa mức module của base (def/class/gán), đoạn nguồn TÍNH TỪ DÒNG DECORATOR ĐẦU TIÊN (nếu có) tới hết khối ở head BẰNG TỪNG BYTE, đoạn ngay trước nó không thêm decorator mới, và vẫn là một định nghĩa mức module riêng; (ii) với mỗi tên được bind ở base, SỐ điểm bind thực thi ở phạm vi module (duyệt `Module.body` đệ quy qua `If`/`Try`/`With`/`For`/`While`, không vào thân hàm/lớp; tính def, class, gán, gán tăng, import) ở head BẰNG base; (iii) `difflib` trên dòng chỉ có `equal`/`insert`; (iv) DANH SÁCH CHO PHÉP cho phần chèn: mỗi khối `insert` phải nằm GIỮA hai câu lệnh mức module của base (không trong một câu lệnh nào), tự parse được thành dãy câu lệnh mức module hoàn chỉnh, và mỗi câu lệnh chỉ thuộc một trong ba dạng: `def`/`class` không decorator với tên CHƯA có ở base; gán một tên CHƯA có ở base; `CASES += [...]`. Mọi dạng khác (`del`, `match`, walrus, `if`/`for`, import, gán lại tên cũ, gọi hàm) ⇒ đỏ. Phép đo chạy ngoài kho (không tính vào numstat). Phiên điều phối đo lại kèm phản chứng chạy thật. | Sửa một byte thân hàm r1–r3 ⇒ khác `[]`; decorator vào hàm mới ⇒ khác `[]`; chèn `return lambda c: None` vào đầu thân `_native1342` ⇒ (i) ĐỎ; thêm `def _native1342(...)` ở cuối tệp ⇒ (ii) ĐỎ; chèn `@(lambda fn: lambda *a: None)` ngay trước `def _native1342` ⇒ (i) ĐỎ; thêm `if True: _native1342 = None` ⇒ (ii) ĐỎ; thêm `match None:\n    case _native1342: pass`, `if (_native1342 := None): pass`, `del _native1342` ⇒ (iv) ĐỎ (base xanh cả bốn vế, kể cả `MUTANTS_NHAM_TEST` có 14 điểm bind hợp lệ). |
+   105	| N3 | Không nối dây + vế dương: `wp1342_additive_byte_preserved` (vế N3, cây làm việc) đạt; VÀ head chứa đúng tập tên mới mức module `{_1174_WIN_JOB_LIMIT, _1174_WIN_SPAWN_FLAGS, _1174_WIN_RESUME_OK, _1174_win_api_job, _1174_win_pick_thread, _1174_win_resume_ok, _1174_win_cleanup, _1174_win_note, _1174_win_job_empty, _1174_win_spawn_job}` (mười tên; không thiếu, không thừa tên mới nào khác trong `packet_loop.py`). | Thêm lời gọi `_1174_win_spawn_job` trong `_1174_process` ⇒ đỏ; bỏ một khối bắt buộc ⇒ vế dương đỏ. |
+   106	| N4 | M5 (S1–S5) đạt trên Linux (CI) và Windows (Desktop). | c (S1 SPAWN_FLAGS), t1 (S2), t2 (S3 "count=2"), k3 (S4), g0 (S5 argv=[]), d1 (S5 deadline ngoài miền) ⇒ đỏ đúng dấu hiệu. |
+   107	| N5 | Windows vẫn bị từ chối, không đổi: chạy đúng tập ID base đã ghi (`wp1174_windows_claim_rejected` + 12 ID `WP1174_BOTH` + ca native r1–r3) trên base và head cùng lượt; so từng ID trên trạng thái, lý do bỏ qua, dấu hiệu dương (bỏ các trường thời gian/pid). | Một ID lệch; đột biến mở chốt claim Windows phải đi tới và đỏ tại assertion đích của `wp1174_windows_claim_rejected`. |
+   108	| N6 | Đúng tập J0, J1, J2, J3, J6, J7, J8, J9, J10, J10b, J11 đạt trên Desktop với dấu hiệu dương; J3, J9, J10 đạt thêm trên VM. Biên nhận ghi ID + mọi assertion + kết quả xác minh creation time. | Ca native `BỎ QUA` trên Windows ⇒ ĐỎ; con/cháu/phụ sống sót ⇒ ĐỎ; ca rơi vào `KHÔNG ĐO` ⇒ tiêu chí `not_measured`, không `passed`. |
+   109	| N7 | 15 đột biến §4b (16 lần chạy) bị giết đúng dấu hiệu: Windows (a1 a2 a3 b h k1 k2 d0 abi) trên Desktop; thuần (c t1 t2 k3 g0 d1) trên Linux, và c lặp lại trên Desktop. Hợp đồng N7 r1: driver byte-exact trong hồ sơ land; chỉ tính giết khi assertion đích thất bại, đối chứng đạt, và nhãn khớp dấu hiệu đã ghi. | Đột biến sống; đỏ vì import/fixture/quan sát hết hạn; đỏ với nhãn KHÁC. |
+   110	| N8 | Ruff `--select F` 0.15.15 (bản ghim của gate tại base): TẬP diagnostic (mã, tệp, tên) head == base, ghi từng tệp; `adr-song`, `doctrine-scan` rc 0 (ghi riêng); `git diff --check` sạch; `eol_policy --all` ok; `git diff --numstat <base>..<H>` không lọc đường dẫn: tập đường dẫn == write set, tổng dòng thêm ≤ **550** (trần nâng, §9). | Thay một diagnostic bằng diagnostic khác cùng số lượng; tệp thứ ba; vượt 550 ⇒ dừng §7. |
+   111	
+   112	Đo Windows trên **`DESKTOP-T9R33P2`** (ưu tiên, Q8 r1); VM `tra-luat-win` đo bổ sung. Base và head đo cùng một lượt.
+   113	
+   114	## 6. `pham_vi_e`
+   115	
+   116	Không chạm E4, E5. Không đảo quyết định "chỉ Linux" ⇒ không E3. Ca native chỉ giết tiến trình do chính ca sinh ra, qua handle/job của nó.
+   117	
+   118	## 7. `luat_dung`
+   119	
+   120	- Trần lời gọi Codex theo `ADR-0055`; trần vòng review theo `ADR-0048`. Chạm trần ⇒ Review Rescue Checkpoint; xin tăng mang **E2**.
+   121	- Trần 550 cưỡng chế trên NUMSTAT THẬT, không trên ước lượng tĩnh: executor đo `git diff --numstat <base>..<H>` KHÔNG lọc đường dẫn TRƯỚC khi công bố (push/PR): tập đường dẫn phải BẰNG write set (§2), và tổng cột dòng thêm của mọi đường dẫn > 550 ⇒ DỪNG, không push, báo điều phối (**E2**). KHÔNG tự cắt ca, assertion, đột biến hay bước dọn để lọt trần: cắt phép đo là đổi đặc tả, phải qua revision mới.
+   122	- Cần sửa thân định nghĩa đang có, sửa ngoài write set, hoặc nối dây ⇒ dừng, revision đặc tả (protocol: thay đổi phạm vi sau đóng băng là revision mới).
+   123	- `Popen` trên máy đo không giữ con treo với `CREATE_SUSPENDED` (J6 đỏ trên head sạch, hoặc `ResumeThread` ≠ 1 trên J1) ⇒ dừng; theo protocol, đổi thiết kế/phạm vi sau đóng băng là revision mới; không chuyển sang API không tài liệu.
+   124	- J9 không dựng được tiền điều kiện (gán thành viên thứ hai FALSE) trên cả Desktop và VM ⇒ J9 và k2 `not_measured`; quyết định tiếp là của chủ kho (**E2**).
+   125	- Máy đo Windows không có trong hạn lease ⇒ tiêu chí native `not_measured`; lease hết hạn theo protocol; gia hạn/cấp lại là quyết định chủ kho (**E2**).
+   126	- Đặc tả không thuộc Mission ⇒ chờ chủ kho duyệt băm (`ADR-0067`, **E2**) một lần sau khi review độc lập approve.
+   127	
+   128	## 8. `hinh_dang_ke_thua` và ngân sách
+   129	
+   130	`khong_ap_dung`. Ghi chú: hàm mới không decorator (r2 F2); additive dùng `_additive1342r2` (r2 F1); hook là tham số default `None`, chạy TRÊN đường mặc định, chỉ dùng trong ca test để quan sát/gây lỗi, không thay đường runtime (r3 F5); tiêu chí chỉ có lời khai ghi `not_measured` (Codex P1 PR #1398, #1403). Nợ có tên của revision này: `wp1342-pre-assign-orphan` (§2).
+   131	
+   132	Ngân sách dòng (đếm theo hàm tương tự đo trên `e2c3b82`, gồm dòng trống; chưa phải numstat):
+   133	
+   134	| khối | căn cứ | ước |
+   135	|---|---|---|
+   136	| hằng | 3 hằng + chú thích | 4–6 |
+   137	| `_1174_win_api_job` (12 bindings, 5 cấu trúc) | `_1174_win_api` 18 dòng/10 bindings + 5 lớp | 38–48 |
+   138	| `_1174_win_job_empty` | | 13–16 |
+   139	| 4 hàm thuần (thêm `_1174_win_note`) | | 28–35 |
+   140	| `_1174_win_spawn_job` | `_1174_process` 51, `_1174_win_seed` 62; thêm Toolhelp, last-error, 7 bước dọn có hậu điều, `add_note` an toàn, chờ theo lát, trần deadline | 100–122 |
+   141	| **mã** | | **183–227** |
+   142	| bindings phía test | 8 hàm | 12–16 |
+   143	| hạ tầng bắt tay + luồng quan sát (bàn giao có khoá, cờ huỷ) + trợ giúp có giao thức (tệp mở riêng từng mốc) | | 72–90 |
+   144	| S1–S5 tách assertion (thêm vector deadline, S4 ba vế) | | 50–62 |
+   145	| J0 ABI | | 18–24 |
+   146	| J1, J2, J3, J6, J7, J8, J9, J10, J10b, J11 | r3: 188 dòng test cho phạm vi đơn giản hơn; thêm tiền điều kiện J9, kiểm trước cú giết J10/J10b | 126–158 |
+   147	| đăng ký ca | | 6–8 |
+   148	| **test** | | **284–356** |
+   149	| **tổng** | | **467–583** |
+   150	
+   151	Ước lượng tĩnh 467–583 (điểm giữa ~525); đầu cao chỉ vượt 550 khi mọi khối cùng chạm trần ước của nó. Trần 550 được cưỡng chế ở numstat thật lúc thi công (§7), không ở ước lượng này (quyết định điều phối 2026-11-18).
+   152	
+   153	## 9. Quyết định đã ghi
+   154	
+   155	- **Q1.** Tách r1d → r1d-a (tiến trình) / r1d-b (probe) — chủ kho 2026-11-18. Tách tầng hai a1/a2 (chủ kho 2026-11-18). **Tách tầng ba a1-i/a1-ii (chủ kho 2026-11-18)**: a1-i = lõi vòng đời (revision này); a1-ii = breakaway tường minh/ngầm, job lồng.
+   156	- **Q2.** Đóng khe "chạy trước, gán sau" bằng `CREATE_SUSPENDED` + gán + `ResumeThread` (tìm luồng qua Toolhelp) — chủ kho 2026-11-18. `CreateProcessW` + `PROC_THREAD_ATTRIBUTE_JOB_LIST` bị bác vì kích thước ⇒ nợ `wp1342-pre-assign-orphan`.
+   157	- **Q3.** Cấm tuyệt đối breakaway: `LimitFlags == KILL_ON_JOB_CLOSE` — chủ kho 2026-11-18 (ca đo breakaway ở a1-ii).
+   158	- **Q4.** Job còn tiến trình sau khi kết thúc ⇒ `_1174Error`, fail-closed — chủ kho 2026-11-18.
+   159	- **Q5.** Nâng trần kích thước cho riêng revision này lên ≤ 2 tệp / ≤ 550 dòng thêm (thay `ADR-0053`) — chủ kho 2026-11-18, phiên điều phối #1206, qua AskUserQuestion; không tách thêm.
+   160	
+   161	## 10. `chua_do_duoc`
+   162	
+   163	- Kích thước thật (ước tĩnh 467–583; trần cưỡng chế ở numstat, §7).
+   164	- `Popen` + `CREATE_SUSPENDED` trên Python 3.13 Windows mới đọc mã, chưa chạy; sai thì §7.
+   165	- Các đường chỉ code review (§4b cuối).
+   166	- `GetProcessTimes` creation time có độ phân giải 100 ns; hai tiến trình khác nhau cùng pid và cùng creation time được coi là không xảy ra (chưa đo).
+   167	- Hằng số §0 trôi khi master tiến; đo lại theo L5.
+   168	
+   169	## 11. Nhật ký review
+   170	
+   171	- **Lượt 1** (bản r1d-a gộp transport; `request_changes` 2 P1, 7 P2, 1 P3): chủ kho tách a1/a2.
+   172	- **Lượt 2** (bản r1d-a1, sha256 `234b1804…`; `request_changes`: 2 P1 mới, P2 fixture/ABI/đột biến/N2/N3, P3): chủ kho tách a1-i/a1-ii và nâng trần 550. Bản này xử lý: P1 trước-gán ⇒ khai ranh giới + nợ `wp1342-pre-assign-orphan` + J10b; P1 đường thu hồi ⇒ đăng ký `kill_truoc_gan`/`reap` NGAY sau `Popen` trước mọi kiểm, bỏ `proc.kill()` sau gán, bước dọn tách hậu điều, kiểm `CloseHandle`, `add_note`, khai giới hạn ngắt bất đồng bộ, ghim CPython ≥ 3.11; P2 hook/handle/danh tính ⇒ creation time, `PROCESS_TERMINATE`, luồng quan sát, trợ giúp có giao thức, J9 thành viên thứ hai; P2 ABI ⇒ J0 + đột biến abi, `dwSize`, `Thread32First` lỗi, last-error ngay, `INVALID_HANDLE_VALUE` theo độ rộng con trỏ, `GetProcessIdOfThread == 0`, deadline hữu hạn; P2 đột biến ⇒ b bắt tay, c dấu hiệu S1, h bind đúng chữ ký, k2 có thành viên thứ hai, t2 tách vector; P2 N2 ⇒ AST + cấm trùng tên; N3 vế dương; P3 ⇒ giờ UTC thật, L5 ba mốc, M4 dẫn (9), §2 nhãn N4(f)(g) cũ. Chuyển sang a1-ii: J4, J5, J12, e1, e2.
+   173	
+   174	- **Lượt 3** (bản sha256 `fb7a24ee…`; `request_changes`: 2 P1, 4 P2, 1 P3; không đòi tách). Bản này xử lý: P1 constructor `Popen` ném sau `CreateProcess` và thiếu `_handle` ⇒ khai thành hai biến thể của nợ `wp1342-pre-assign-orphan` (§2); P1 deadline ⇒ trần `now + 86400`, so trực tiếp không đổi kiểu (chặn `10**400`), chờ theo lát `min(con_lai, 60)`, đột biến d1; P2 ưu tiên lỗi ⇒ `_1174_win_cleanup` chỉ bắt `Exception` (ngắt lan ra, khai §2), M4(9) là nơi duy nhất quyết định lỗi thắng, `add_note` không gọi `repr`, S4 ba vế, §2 hợp đồng "trả rc ⇔ đã xác nhận"; P2 J9 ⇒ gán bằng handle gốc, đòi TRUE, FALSE ⇒ `KHÔNG ĐO` + mã Win32, giữ phụ sống qua cửa sổ xác nhận; P2 quan sát ⇒ ô kết quả, `join(20)`, handle đóng trong `finally`, hook chỉ mượn, J2 tách lỗi khởi động, trợ giúp chờ `giu`, kiểm trước cú giết, J10b dùng chung đoạn marker; P2 N2 ⇒ đoạn nguồn gồm decorator + đếm điểm bind thực thi ở phạm vi module, thêm hai phản chứng; đột biến ⇒ J6 nhãn (i) "cờ treo vắng" tách c khỏi b, J0 chấm offset trước size; N6 liệt kê đúng ID; N7 15 ID/16 lần chạy; N8 Ruff 0.15.15; P3 §7 dẫn quy tắc revision. Ngân sách tính lại 454–568: đầu cao vượt 550.
+   175	- **Lượt 4** (bản sha256 `d7a5d5b2…`; `request_changes`: 7 P2, 1 P3; hai P1 lượt 3 đóng). Bản này: F1 thêm hàm thuần `_1174_win_note` chỉ dùng tên kiểu, S4 vế "ghi chú gọi mã tuỳ biến", N3 mười tên; F2 hợp đồng trả `rc` hai điều kiện, lỗi gốc vẫn ném khi thu hồi đã xác nhận, "handle do hàm sở hữu"; F3 bàn giao handle có khoá + cờ huỷ, worker tự đóng khi muộn; F4 tệp mở riêng từng mốc, J10 giết khi trợ giúp chặn ở (8), J9 phụ chờ `tha_phu`; F5 N2 thêm vế (iv) danh sách cho phép cho phần chèn, thêm ba phản chứng match/walrus/del; F6 b chờ đúng tệp marker J6, d0 cửa sổ 6–11 s thống nhất, a1 neo cả khối terminate + BOOL; F7 numstat không lọc đường dẫn, so tập đường dẫn với write set; F8 nhãn d1 "ngoài miền nhận", vector S5 dùng một `now`. Ngân sách 467–583, điểm giữa ~525.
+---
+name: soan-spec
+description: Chất vấn người giữ kho tới khi hết chỗ giả định, rồi xuất ra ĐẶC TẢ PACKET đóng băng ở ops/specs/<packet-id>.md kèm sha256 để lease neo vào. Dùng khi sắp mở một packet mới, khi một packet bị chặn vì đặc tả tự mâu thuẫn, hoặc khi người dùng nói "soạn spec", "chốt đặc tả", "grill trước khi code".
+---
+
+Cơ chế hỏi ở mục 1 mượn từ skill `grilling` của `mattpocock/skills` (MIT) — đã vendor nguyên
+văn tại `.claude/skills/grilling/`. Mục 2–5 là phần của kho này; đừng trộn hai phần khi sửa.
+
+Skill này KHÔNG nhắc lại luật của protocol. Luật ở `docs/PROTOCOL_DA_PHIEN.md`; từ vựng ở
+`CONTEXT.md`. Chỗ nào skill này lệch protocol thì SKILL NÀY sai.
+
+## 1. Cách hỏi — theo vòng, theo biên giới
+
+Dựng cây quyết định: mỗi quyết định rẽ ra những quyết định treo vào nó. **Biên giới** là mọi
+quyết định đã đủ tiền đề — tức những câu hỏi được ngay bây giờ mà không phải đoán câu trả lời
+chưa nghe. Hỏi TRỌN biên giới trong một vòng, đánh số, mỗi câu kèm một câu trả lời khuyến nghị.
+Rồi ĐỢI.
+
+```
+❓ **Q1** — **<tiêu đề>**: <thân câu hỏi, có thể nhiều đoạn, có thể kèm lựa chọn>
+
+➡️ <câu trả lời tôi khuyến nghị>
+```
+
+Câu nào phụ thuộc một câu **đang mở trong cùng vòng** thì thuộc vòng SAU, không phải vòng này.
+
+**Tra dữ kiện là việc của tôi, không bao giờ là việc của người dùng.** Câu hỏi nào cần một
+sự thật của môi trường (tệp, lịch sử git, số đo CI, trạng thái PR) thì tôi đi đo hoặc phái
+subagent đi đo. Không chặn cả vòng vì nó: một phép đo đang chạy là một tiền đề chưa xong, nên
+chỉ các câu nằm dưới nó phải đợi — phần còn lại của biên giới hỏi ngay. **Quyết định** thì
+luôn là của người dùng.
+
+Xong khi biên giới RỖNG: mọi nhánh đã đi qua, không còn gì được giả định trong im lặng.
+**Không hành động cho tới khi người dùng xác nhận đã hiểu giống nhau.**
+
+## 2. Bảy luật riêng của kho — chúng sinh ra từ những lần đã trả giá
+
+**L1 — Mọi con số "N thứ phải xử" phải khai N ĐẾM GÌ.** Một đặc tả từng viết một con số mà
+người viết đếm phản chứng còn người đọc đếm finding; lượt thi hành đốt hơn 170 nghìn token và
+54 lượt gọi để cho ra 0 dòng mã, rồi dừng vì đặc tả tự mâu thuẫn. Con số nào cũng phải đi kèm
+đơn vị của nó.
+
+**L2 — Mỗi mục phải chiếu được vào MỘT đường dẫn trong write set.** Mục nào cần sửa một tệp
+ngoài write set thì đó là phát hiện của lượt soạn spec, phải xử NGAY tại đây — mở rộng write
+set, hay cắt mục đó ra — chứ không để phiên thi hành gặp rồi tự xoay. Đặc tả hứa thứ mà write
+set không kham được là lỗi của đặc tả.
+
+**L3 — Mỗi tiêu chí nghiệm thu phải nói được phép đo nào làm nó ĐỎ.** "Có ca test" không phải
+tiêu chí; "ca `rXX_` này, và đột biến ĐỔI MÀU nó" mới là. Tiêu chí không thể đỏ thì không phải
+tiêu chí — ghi thẳng là chưa có cách đo, đừng làm tròn thành đã có.
+
+**L4 — Packet khắc phục phải chép số đếm HÌNH DẠNG LỖI từ hồ sơ tiền nhiệm.** Bộ đếm ấy sống
+trong biên nhận của packet trước; packet mới bắt đầu từ 0 nếu không ai chép sang, và chốt "lặp
+ba lần thì hỏi có nên làm nữa không" mất tác dụng đúng lúc cần nhất.
+
+**L5 — Mọi con số phải kèm THỜI ĐIỂM ĐO, và phải ĐO LẠI trước mỗi bước công bố.** Con số đúng
+lúc viết vẫn sai lúc người khác đọc. Đo trên đợt #250: **bốn** con số trong hai đặc tả đã trôi
+giữa lúc viết và lúc review — `117 cặp / 100 đường dẫn` → `120 / 110`, `37` biên nhận → `39`,
+`3/90` → `3/100`, `4/120` blob → `5/121`. Không con nào là đoán bừa; tất cả **từng được đo đúng**.
+
+Ba hệ quả bắt buộc:
+
+- **Ghi thời điểm ngay cạnh con số** (`đo 17:38Z 22-08`), không ghi trống. Thiếu nó thì người đọc
+  không biết con số ấy bao nhiêu tuổi.
+- **Neo quyết định vào BẤT BIẾN, không vào con số.** *"`PLAT-X8` đang giữ hai đường dẫn"* không
+  trôi; *"13 lease"* trôi từng giờ. Con số chỉ để đối chiếu.
+- **Đo lại trước MỖI bước công bố** — đăng băm, cấp lease, merge. Rẻ, và nó là thứ duy nhất bắt
+  được trôi số.
+
+Cạm bẫy đắt nhất của luật này, vì nó làm lời khai **trông như đã kiểm**: một BẤT BIẾN còn đúng
+KHÔNG chứng minh các SỐ HẠNG còn đúng. Dòng `117 / 100` khai *"chênh 10"*; đo lại ra `120 / 110`
+— **chênh vẫn đúng 10**. Ba lượt cross-review đọc qua và không ai dừng lại, vì soi tính nhất quán
+nội tại thì dòng ấy sạch hoàn toàn. **Câu nào vừa nêu số hạng vừa nêu quan hệ giữa chúng thì kiểm
+SỐ HẠNG** — quan hệ là thứ sống sót qua trôi số.
+
+Một ca nữa, hình dạng KHÁC và đắt hơn — trôi số thành lời khai sai về THẨM QUYỀN. `PLAT-X8` để
+cùng hai con số trôi **bốn** lần trong một packet: `265 → 313 → 328` dòng thêm và `82/82 → 85/85 →
+87/87` ca test. Ba lần đầu vô hại. Lần thứ tư không: ô *"trần `ADR-0044`"* trong thân PR khai một
+cổng **ĐẠT** trong khi số thật đã vượt trần và cần **ngoại lệ người giữ kho** — tức nó không sai
+một chữ số, nó khai sai rằng một thẩm quyền đã có. Phân biệt để biết đâu là trôi số phải chữa
+NGAY: hỏi *"con số này có đang chống đỡ một câu về THẨM QUYỀN không"* — nếu có thì nó không còn là
+số, nó là một lời khai.
+
+**L6 — Tiêu chí khớp chuỗi là một thước đo, và thước đo phải được kiểm như mã.** Hai packet liền
+đốt hơn mười revision/lượt review vào CÙNG một lớp lỗi: tiêu chí trông chặt mà mù.
+Mỗi tiêu chí dùng `rg`/regex/đếm chuỗi phải qua đủ năm vế dưới đây; vế nào không áp dụng thì ghi
+thẳng vì sao trong tiêu chí.
+
+- **(a) Có vế dương trên nội dung MỚI và vế âm trên nội dung CŨ.** Chỉ có vế âm ("không còn câu
+  X") thì xoá trắng tệp cũng ĐẠT. Bằng chứng: wp782 r3 — A3 chỉ có phép âm (`rg … ⇒ 0
+  dòng` trên protocol), không phép nào đòi ADR mang ngưỡng mới
+  (`ops/specs/TRAN-CODEX-VA-SENSITIVE-r3.md` mục A3); wp784 r2 — nợ
+  `WP784-R2-TIEU-CHI-THIEU-VE-DUONG`.
+- **(b) Đo trên văn bản đã nối dòng, hoặc chọn cụm không bị xuống dòng — chỉ trong biên hẹp dưới
+  đây.** Markdown được ngắt cột tuỳ người viết, mà `rg` khớp TỪNG dòng: cụm đầy đủ vắt sang dòng sau
+  thì `rg -F` không khớp gì (tiêu chí dương đỏ oan); rút mẫu xuống phần đầu cho khỏi vướng chỗ ngắt
+  thì một hậu tố sai vẫn khớp (tiêu chí xanh giả). Cả hai đều đổi màu theo chỗ ngắt chứ không theo
+  nội dung. Mặc định là nối dòng: gộp khoảng trắng trong phạm vi TỪNG đoạn (không nối qua dòng trống
+  hay sang mục khác, kẻo khớp nhầm hai câu không liên quan) rồi khớp TOÀN BỘ lời khẳng định. Khớp
+  cụm trên một dòng chỉ được dùng khi cả hai điều sau cùng đúng: cụm ấy là toàn bộ lời khẳng định
+  (không phải tiền tố của nó), và phép đo chạy trên một blob đã neo băm nên không bị ngắt dòng lại.
+  Đột biến kèm theo: với cách nối dòng, ngắt dòng lại mà giữ nghĩa thì vẫn xanh và đổi hậu tố thì
+  đỏ; với cụm cùng dòng chỉ đột biến đổi hậu tố áp dụng — ngắt dòng lại sinh blob MỚI, phải neo băm
+  và đo lại, đừng coi phép khớp cùng dòng là đã chịu được ngắt dòng. Bằng chứng: lớp
+  "khớp tiền tố cụm bị cắt" của #782, chép ở `ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md` mục
+  `hinh_dang_ke_thua`.
+- **(c) Tiêu chí nói "N chỗ" thì đếm theo từng vị trí, không đếm gộp.** Một tổng `≥ N` trên nhiều
+  tệp vẫn ĐẠT khi một chỗ có thừa còn chỗ khác vắng hẳn; khớp chuỗi con thay vì nguyên từ còn đếm
+  cả thứ không liên quan. Bằng chứng: wp782 r1 A6 đếm chuỗi con trên mọi `*.py` (P1 comment
+  4300256160), sửa thành đếm nguyên từ, từng trường, từng tệp; wp784 r2 — nợ `WP784-R2-A7-DO-PHU`.
+- **(d) Regex phủ cả dạng chữ lẫn dạng chữ số.** "tám lời gọi" và "8 lời gọi" là cùng một lời
+  khai; tiêu chí âm chỉ bắt dạng chữ thì dạng chữ số lọt qua. Bằng chứng: wp782 r5 A2 phải thêm
+  `[0-9]+ lời gọi Codex` (P2 comment 4300560293).
+- **(e) Lời khai "không cổng nào cưỡng chế" phải đo đủ danh sách vị trí cổng của §20 protocol.**
+  Dẫn hai tệp rồi kết luận cho cả kho là lời khai rộng hơn phép đo. Ghi lệnh và kết quả cho TỪNG
+  vị trí cổng mà `docs/PROTOCOL_DA_PHIEN.md` §20 liệt kê. Bằng chứng: wp784 g2 — `ADR-0054` mục
+  Cưỡng chế ban đầu chỉ dẫn hai tệp, phải đo lại trên đủ sáu vị trí (commit `1182060`, P2 connector
+  4302037482 trên PR #785).
+
+Trước khi đóng băng, chạy thử trên nền mọi tiêu chí ĐO ĐƯỢC lúc ấy. Tiêu chí đo hành vi MỚI phải ra
+đúng màu "chưa làm"; tiêu chí canh bất biến (`doctrine-scan`, selftest, `release-verify`…) xanh sẵn trên
+nền là đúng, và răng của nó đến từ đột biến. Tiêu chí chỉ đo được sau land (canary trên PR đầu tiên sau
+land, gate master, receipt LIVE) thì khai điều kiện đo, thời điểm, ai đo và bằng chứng phải đọc lại; nó ở
+trạng thái `chưa đo được` cho tới khi đo thật — chưa chạy KHÔNG phải đạt, và đừng thay canary bằng một phép
+đo khác. Mỗi tiêu chí kèm một đột biến làm nó đổi màu — nối với L3.
+
+**L7 — Đặc tả không tự đặt điểm hỏi chủ kho.** Một mẫu đã lan từ đặc tả này sang đặc tả khác mà
+không ADR, protocol hay skill nào đặt ra: "ngân sách mềm N lời gọi; hai lượt liên tiếp chưa approve ⇒
+Review Rescue Checkpoint". Đo 08-11-2026 trên `origin/master` `e3c639b`, đếm tệp trong 581 tệp của
+`ops/specs/`: 26 tệp có cụm "liên tiếp chưa approve", 173 tệp có cụm "hỏi chủ kho" (kể cả câu phủ
+định). Mỗi điểm hỏi tự đặt là một lần chủ kho phải dừng việc để trả lời. Danh sách những lần được
+hỏi nằm ở `docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md`; skill này không chép định nghĩa.
+
+- **Không khai ngân sách mềm** dưới trần của dòng khai, và không đặt luật kiểu "N lượt liên tiếp chưa
+  approve thì dừng hay hỏi chủ kho". Mức dành sẵn của `ADR-0041` là ngân sách giữ trước, không phải
+  trần hay điểm dừng. Lượt thứ hai trở đi theo điều kiện của `ADR-0052` và không cần hỏi ai.
+- **Mục `luat_dung` chỉ có hai loại dòng.** (i) Điểm dừng mà protocol hay một ADR đang hiệu lực đã
+  đặt: dẫn bằng tên mục hay ADR, không chép lại, không hạ ngưỡng. (ii) Mã E1, E2 hay E3 của danh sách
+  đóng, kèm thứ ADR ấy bắt mang theo khi hỏi.
+- **Câu nào trong đặc tả nói tới việc hỏi, báo hay chờ chủ kho thì phải mang một mã E.** Điểm dừng
+  loại (i) chỉ dừng phiên; khi nó cần chủ kho quyết thì câu hỏi ấy cũng mang mã, thường là E2 vì quyền
+  quyết thuộc chủ kho (chạm trần cứng, việc protocol giao chủ kho duyệt). Không gắn được mã nào thì đó
+  không phải điểm hỏi: phiên đang giữ việc tự quyết, rồi ghi gốc rễ, phương án chọn và phép đo chống đỡ
+  vào revision kế tiếp hay handoff.
+- **Mục `pham_vi_e` khai đặc tả có chạm E4, E5 không**, theo định nghĩa của ADR ấy; không rõ thì khai là
+  chạm. Đặc tả của packet thuộc Mission chủ kho đã duyệt hướng, không chạm E4, E5 và không đảo quyết
+  định nào của chủ kho, được người soạn đóng băng khi một review độc lập approve; đặc tả khác chờ chủ
+  kho duyệt băm. Với packet như thế, vòng hỏi ở mục 1 lấy câu trả lời từ các quyết định Mission đã ghi;
+  câu không trả lời được từ đó mà cũng không thuộc mã E nào thì người soạn tự quyết và ghi vào sổ quyết
+  định uỷ quyền. Cho đúng loại packet ấy, luật này thắng hai câu của mục 1, "Quyết định thì luôn là của
+  người dùng" và "Không hành động cho tới khi người dùng xác nhận đã hiểu giống nhau": thứ thay cho lần
+  xác nhận là review độc lập approve.
+
+## 3. Đo trước khi hỏi
+
+Trước vòng 1, tự đo và ĐƯA SỐ vào câu hỏi, đừng bắt người dùng nhớ hộ:
+
+- kích thước dự kiến (`git diff --numstat` trên phạm vi tương đương gần nhất) — đối chiếu
+  ngưỡng thường ở `docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md`; packet `sensitive`
+  đối chiếu cặp số ở `docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md`; số lời gọi Codex
+  review dự kiến đối chiếu trần ở `docs/adr/0055-tran-loi-goi-codex-len-muoi.md`. Skill này
+  không chép ngưỡng; đặc tả ghi số đo, trần hay khối vượt trần (`nang_tran`) theo đúng dạng ADR
+  tương ứng quy định;
+- dòng khai trần: **mọi đặc tả mới đều có dòng khai của `ADR-0055`**, đứng riêng một dòng ở đầu tệp:
+  `tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544`
+  OID ấy là commit land `ADR-0055` trên nhánh mặc định (merge PR #926). Trước khi đóng băng, chạy lại
+  ba phép đo ở mục *Hiệu lực* của `ADR-0055`. Trần lời gọi do bảng ở mục ấy chọn theo các dòng khai
+  của đặc tả: thiếu dòng này thì `ADR-0055` không áp và trần theo luật của `ADR-0052`, thấp hơn trần
+  của `ADR-0055`, nên trần chạm sớm hơn và mỗi lần chạm là một lần hỏi chủ kho. Đừng thêm dòng
+  `ADR-0052` cạnh dòng `ADR-0055`: bảng ấy chọn trần thấp hơn khi có cả hai. Skill này không chép con
+  số của bảng. Packet `sensitive` khai thêm dòng của `ADR-0053`:
+  `tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab`
+  Giá trị sau `@` luôn là OID 40 ký tự của commit LAND ADR trên nhánh mặc định, không phải một commit
+  bất kỳ có chứa ADR (base của packet chứa ADR mà không phải commit land). ADR nào đang hiệu lực thì
+  hỏi bảng định tuyến ADR của `docs/PROTOCOL_DA_PHIEN.md`;
+- write set dự kiến có giao với packet nào đang mở không;
+- base dự kiến có phải tổ tiên của nhánh mặc định không;
+- lớp review theo đường dẫn bị chạm (`docs/PROTOCOL_DA_PHIEN.md` §8), fail-closed khi không rõ.
+
+Một câu hỏi mang sẵn số đo tốn của người dùng một chữ; cùng câu hỏi ấy không có số đo tốn họ
+một buổi.
+
+## 4. Thứ phải xuất ra
+
+`ops/specs/<packet-id>.md`, các mục dưới đây đủ cả, mục nào rỗng thì ghi rõ **RỖNG VÌ SAO**:
+
+| mục | nội dung |
+|---|---|
+| `packet_id` · `packet_issue` | định danh |
+| `nguon_cap_viec` | trỏ một dòng kế hoạch `tệp:dòng`, HOẶC biên nhận/packet cha nếu là khắc phục |
+| `review_class` | theo đường dẫn bị chạm; không rõ ⇒ mức chặt nhất |
+| `write_set` | liệt kê từng đường dẫn, không dùng ký tự đại diện |
+| `ngoai_pham_vi` | thứ CỐ Ý không làm, kèm lý do |
+| `muc_tieu` | mỗi mục một dòng, đánh số, mỗi dòng chiếu vào một đường dẫn ở `write_set` (L2) |
+| `nghiem_thu` | mỗi mục tiêu ≥1 tiêu chí, mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3) |
+| `tran_*` | dòng khai trần ở đầu tệp theo mục 3; mặc định có dòng của `ADR-0055` |
+| `luat_dung` | điểm dừng của protocol hay ADR dẫn bằng tên, và mã E1–E3 theo L7; không có ngân sách mềm |
+| `pham_vi_e` | chạm E4, chạm E5 hay không chạm, theo L7; không rõ thì khai là chạm |
+| `hinh_dang_ke_thua` | chép từ biên nhận tiền nhiệm; không phải packet khắc phục thì ghi `khong_ap_dung` (L4) |
+| `chua_do_duoc` | thứ không kiểm được từ phiên này — ghi thẳng, đừng giấu sau chữ "có thể" |
+
+Xong thì in băm để đưa vào lease:
+
+```
+sha256sum ops/specs/<packet-id>.md
+```
+
+Băm ấy là giá trị của `spec_sha256` trong lease. Đặc tả sống trong kho và có băm thì nó diff
+được, review được, và không đổi sau lưng ai — khác hẳn một đặc tả nằm trong thân Issue.
+
+## 5. Skill này KHÔNG làm gì
+
+Nó **không** cấp việc. Đặc tả không phải lease, và một cây quyết định đã chốt cũng không phải
+lease. Sau khi đóng băng vẫn phải có Issue và lease còn hiệu lực theo `docs/PROTOCOL_DA_PHIEN.md`
+§3.2 và §4 thì mới được bắt tay. Phiên nào đọc spec rồi tự làm là tự cấp việc cho mình.
+
+Nó cũng **không** tự sửa đặc tả đã đóng băng. Đặc tả đã có băm mà cần đổi thì đi qua bản sửa
+đổi mới; sửa đè là làm băm trong lease trỏ vào một thứ không còn tồn tại.
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+ops/land/pr836-wp812-provenance/ai-dang-giu-sau-rut-han/packet_loop_test.py.txt
+ops/land/pr836-wp812-provenance/ai-dang-giu-sau-merge/packet_loop_test.py.txt
+ops/land/pr779-wp775-provenance/ai-dang-giu-sau-bia-mo/packet_loop_test.py.txt
+ops/land/pr779-wp775-provenance/ai-dang-giu/packet_loop_test.py.txt
+ops/land/pr818-wp788-provenance/ai-dang-giu-sau-rut-han/packet_loop_test.py.txt
+
+exec
+/bin/bash -lc "git diff --no-index --numstat ops/specs/WP1174-WINDOWS-BACKEND-r4{\\-ban4,}.md; sha256sum ops/specs/WP1174-WINDOWS-BACKEND-r4{\\-ban4,}.md
+nl -ba ops/specs/WP1174-WINDOWS-BACKEND-r4.md | sed -n '50,143p'" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ succeeded in 0ms:
+23	22	ops/specs/{WP1174-WINDOWS-BACKEND-r4-ban4.md => WP1174-WINDOWS-BACKEND-r4.md}
+d7a5d5b27ed64307f764febf36d5cfe2f11f89e18a09b69c05fe433eb386cf00  ops/specs/WP1174-WINDOWS-BACKEND-r4-ban4.md
+37522b2d8c7c1651076c8c739ab86cdffeaad014d46fed9b47dab44ed91f9fee  ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+    50	- KHÔNG bảo đảm: ngắt bất đồng bộ trong tiến trình gọi (vd `KeyboardInterrupt`) rơi giữa hai câu lệnh, sau khi một tài nguyên đã nhận nhưng trước khi trạng thái sở hữu được ghi; khi đó đường dọn có thể dựa trạng thái cũ. Hậu quả tối đa tương đương nợ trên (con treo bị bỏ lại) hoặc job chưa đóng tới khi tiến trình gọi thoát (lúc đó `KILL_ON_JOB_CLOSE` dọn). `KeyboardInterrupt`/`SystemExit` phát sinh TRONG một bước dọn không bị nuốt: nó lan ra ngay và các bước sau không chạy (cùng giới hạn này).
+    51	- Ngoài phạm vi Job Object: tiến trình do dịch vụ ngoài job tạo thay mặt con (COM/WMI/Task Scheduler). Giả định: không tiến trình ngoài nào có quyền can thiệp vào con (chèn luồng, resume hộ) trong khoảng tạo → resume.
+    52	- Phiên bản Python hỗ trợ: CPython (`sys.implementation.name == "cpython"`), `sys.version_info >= (3, 11)` (cần `add_note`); khác ⇒ `_1174Error("spawn runtime")` TRƯỚC `Popen`.
+    53	
+    54	## 3. Hằng số (danh sách CHO PHÉP, một giá trị mỗi hằng)
+    55	
+    56	| hằng | giá trị | ý nghĩa |
+    57	|---|---|---|
+    58	| `_1174_WIN_JOB_LIMIT` | `0x2000` | `LimitFlags` = CHỈ `KILL_ON_JOB_CLOSE` |
+    59	| `_1174_WIN_SPAWN_FLAGS` | `0x204` | `creationflags` = CHỈ `CREATE_SUSPENDED` (0x4) \| `CREATE_NEW_PROCESS_GROUP` (0x200) |
+    60	| `_1174_WIN_RESUME_OK` | `1` | giá trị DUY NHẤT nhận từ `ResumeThread` |
+    61	
+    62	## 4. `muc_tieu`
+    63	
+    64	| # | mục tiêu |
+    65	|---|---|
+    66	| M1 | `_1174_win_api_job()`: gọi `_1174_win_api()`; bind trên CÙNG `kernel32` đúng tập (không hơn) với chữ ký: `CreateJobObjectW([V, S], H)`, `SetInformationJobObject([H, c_int, V, D], B)`, `AssignProcessToJobObject([H, H], B)`, `TerminateJobObject([H, UINT], B)`, `QueryInformationJobObject([H, c_int, V, D, P], B)`, `CreateToolhelp32Snapshot([D, D], H)`, `Thread32First([H, V], B)`, `Thread32Next([H, V], B)`, `OpenThread([D, B, D], H)`, `GetProcessIdOfThread([H], D)`, `ResumeThread([H], D)`, `GetHandleInformation([H, P], B)` (`V`=`c_void_p`, `H`=`w.HANDLE`, `D`=`w.DWORD`, `B`=`w.BOOL`, `S`=`w.LPCWSTR`, `P`=`POINTER(DWORD)`). Cấu trúc theo layout Win64 có tài liệu, kiểu độ rộng cố định: `JOBOBJECT_BASIC_LIMIT_INFORMATION` (64 byte, `LimitFlags` offset 16), `IO_COUNTERS` (48), `JOBOBJECT_EXTENDED_LIMIT_INFORMATION` (144), `JOBOBJECT_BASIC_ACCOUNTING_INFORMATION` (48, `ActiveProcesses` offset 40), `THREADENTRY32` (28, `th32OwnerProcessID` offset 12). Trả `(c, w, k, s)` với `s` là namespace các lớp cấu trúc. |
+    67	| M2 | Bốn hàm THUẦN (mọi nền, không ctypes): (a) `_1174_win_pick_thread(entries, pid)`: `entries` là iterable `(owner_pid, tid)`; trả tid khi có ĐÚNG MỘT mục `owner_pid == pid`; 0 hoặc ≥ 2 ⇒ `_1174Error("suspended start")`. (b) `_1174_win_resume_ok(count)`: không lỗi khi `type(count) is int and count == _1174_WIN_RESUME_OK`; khác ⇒ `_1174Error("suspended start")`. (d) `_1174_win_note(err, loi_don)`: với mỗi `e` trong `loi_don`, `err.add_note("cleanup: " + type(e).__name__)` bọc `try/except Exception: pass`; KHÔNG đọc `args`, `str`, `repr` của `e` (không gọi mã tuỳ biến nào của ngoại lệ). (c) `_1174_win_cleanup(steps)`: chạy TỪNG callable theo thứ tự, mỗi cái trong `try` riêng bắt `Exception` (KHÔNG bắt `BaseException`: ngắt lan ra ngay, §2); bước lỗi không chặn bước sau; trả list ngoại lệ theo thứ tự; tự nó không ném `Exception` nào. Đây là nơi DUY NHẤT gom lỗi dọn; M4(9) là nơi DUY NHẤT quyết định lỗi thắng. |
+    68	| M3 | `_1174_win_job_empty(k, s, job, wait_s)`: lặp tới `wait_s` giây (bước 0,05 s): `QueryInformationJobObject(job, 1, byref(info), sizeof(info), None)`; FALSE ⇒ đọc `ctypes.get_last_error()` NGAY, `_1174Error("job query")` (không đọc buffer, không coi là rỗng); TRUE và `info.ActiveProcesses == 0` ⇒ trả `None`. Hết `wait_s` ⇒ `_1174Error("job not empty")`. |
+    69	| M4 | `_1174_win_spawn_job(argv, *, cwd, deadline, env=None, truoc_gan=None, between=None)` → `int`. **(0)** Kiểm đối số: `argv` là list khác rỗng toàn `str`; `deadline` là `int` hoặc `float` (không `bool`); với `float` đòi `math.isfinite`; với cả hai đòi `time.monotonic() < deadline <= time.monotonic() + 86400` (so sánh trực tiếp, không đổi kiểu, nên `10**400` bị từ chối mà không `OverflowError`); `cwd` là `str`; `env` `None` hoặc dict str→str; `truoc_gan`, `between` `None` hoặc callable; vi phạm ⇒ `_1174Error("spawn arguments")`. Sau đó `os.name == "nt"` ("native Windows required"), rồi kiểm phiên bản (§2, "spawn runtime"). **(1)** `CreateJobObjectW(None, None)`; NULL ⇒ `get_last_error` ngay, "job create". ĐĂNG KÝ bước `close_job`. **(2)** `SetInformationJobObject(job, 9, …)` với `info.BasicLimitInformation.LimitFlags = _1174_WIN_JOB_LIMIT`, các trường khác 0; FALSE ⇒ "job limit". **(3)** `proc = Popen(argv, cwd, env, stdin/stdout/stderr=DEVNULL, close_fds=True, creationflags=_1174_WIN_SPAWN_FLAGS)`. NGAY sau khi `Popen` trả (trước mọi kiểm khác): ĐĂNG KÝ bước `kill_truoc_gan` (chỉ hiệu lực khi chưa gán) và `reap`. Sau đó mới kiểm `getattr(proc, "_handle", None)` khác `None` ⇒ thiếu ⇒ "spawn handle" (bước `kill_truoc_gan` dùng `proc.kill()`, vốn cũng dựa `_handle` của CPython; khi thiếu, bước ấy ghi lỗi và nợ `wp1342-pre-assign-orphan` áp dụng). **(4)** `truoc_gan(proc)` nếu có. **(5)** `AssignProcessToJobObject(job, proc._handle)`; FALSE ⇒ "job assignment"; TRUE ⇒ đặt `da_gan = True` NGAY câu lệnh kế tiếp. **(6)** `between(job)` nếu có. **(7)** `snap = CreateToolhelp32Snapshot(0x4, 0)`; so với `INVALID_HANDLE_VALUE = c_void_p(-1).value` (đúng độ rộng con trỏ) ⇒ "thread snapshot"; ĐĂNG KÝ `close_snap`. `te = THREADENTRY32(); te.dwSize = sizeof(te)`; `Thread32First` FALSE ⇒ đọc last-error ngay: 18 (`ERROR_NO_MORE_FILES`) ⇒ danh sách rỗng, khác ⇒ "thread snapshot"; lặp `Thread32Next` tới FALSE với last-error 18 (khác ⇒ "thread snapshot"). Chọn tid bằng `_1174_win_pick_thread`. `th = OpenThread(0x2 \| 0x800, False, tid)`; NULL ⇒ "suspended start"; ĐĂNG KÝ `close_thread`. `GetProcessIdOfThread(th)` == 0 hoặc ≠ `proc.pid` ⇒ "suspended start". `_1174_win_resume_ok(ResumeThread(th))`. Trong suốt (5)–(7) `proc` (và `_handle`) được giữ sống. **(8)** chờ theo lát hữu hạn giữ deadline tuyệt đối: lặp `con_lai = deadline - time.monotonic()`; `con_lai <= 0` ⇒ `_1174Error("lifecycle deadline")`; `proc.wait(timeout=min(con_lai, 60.0))` (mỗi lát < `INFINITE` 0xFFFFFFFF ms), `TimeoutExpired` ⇒ lặp tiếp; thoát ⇒ ghi `rc`. **(9)** `finally`: `_1174_win_cleanup` với các bước theo thứ tự, mỗi bước một hậu điều: `terminate` (chỉ khi `da_gan`): `TerminateJobObject(job, 1)` FALSE ⇒ lỗi "job terminate"; `xac_nhan` (chỉ khi `da_gan`): `_1174_win_job_empty(…, 5)` — chạy kể cả khi `terminate` lỗi, và là phép xác nhận DUY NHẤT; `kill_truoc_gan` (chỉ khi KHÔNG `da_gan`): `proc.kill()`; `reap`: `proc.wait(5)`, `TimeoutExpired` ⇒ "leader not reaped"; `close_thread`, `close_snap`, `close_job`: `CloseHandle` FALSE ⇒ "handle close". KHÔNG có `proc.kill()` khi đã gán. Ưu tiên lỗi (chỉ ở đây): có lỗi gốc ⇒ ném lỗi gốc; không lỗi gốc mà có lỗi dọn ⇒ ném lỗi dọn ĐẦU TIÊN. Các lỗi dọn còn lại gắn vào ngoại lệ được ném qua `_1174_win_note` (chỉ tên kiểu, không gọi mã tuỳ biến của ngoại lệ, nên không bước chẩn đoán nào thay được lỗi thắng). Chỉ trả `rc` khi KHÔNG có lỗi nào. |
+    70	| M5 | Ca THUẦN (mọi nền) `wp1342_pure_spawn_*`, mỗi vector một assertion có nhãn riêng: **S1** ba assertion: `JOB_LIMIT == 0x2000`, `SPAWN_FLAGS == 0x204`, `RESUME_OK == 1`. **S2** `pick_thread`: `[]` ⇒ lỗi; `[(7,1),(7,2)]` (pid 7) ⇒ lỗi; `[(9,1),(7,5),(8,6)]` ⇒ 5. **S3** `resume_ok` theo thứ tự: `2` ⇒ lỗi (assertion "count=2"); `0` ⇒ lỗi; `0xFFFFFFFF` ⇒ lỗi; `True` ⇒ lỗi; `1` ⇒ qua. **S4** `cleanup([ném ValueError, ghi_cờ])` ⇒ cờ được ghi, trả đúng 1 lỗi (nhãn "bước 2 không chạy"); `cleanup([ném KeyboardInterrupt, ghi_cờ])` ⇒ `KeyboardInterrupt` lan ra, cờ KHÔNG ghi (nhãn "ngắt bị nuốt"); `cleanup([ném lỗi có __repr__ ném])` trả lỗi ấy, không ném; `_1174_win_note(RuntimeError("j9"), [ValueError(x)])` với `x.__repr__`/`__str__` ném một lớp con `BaseException` ⇒ không ném, ghi chú đúng `"cleanup: ValueError"` (nhãn "ghi chú gọi mã tuỳ biến"). **S5** `_1174_win_spawn_job` từ chối "spawn arguments" cho `argv=[]` (assertion đầu tiên), `["x", 1]`, `"x"`, deadline đã qua, `True`, `float("inf")`, `float("nan")`, `10**400`, `now + 86401` (với `now = time.monotonic()` chụp MỘT lần ngay trước lời gọi), `cwd=None`, `between=1`; trên nền khác Windows đối số hợp lệ ⇒ "native Windows required". Không thêm vào `WP1174_REQUIRED`/`WP1174_BOTH`. |
+    71	| M6 | Hạ tầng test native (trong `packet_loop_test.py`). **Bindings phía test** (không thuộc allowlist M1): `OpenProcess`, `DuplicateHandle`, `GetCurrentProcess`, `WaitForSingleObject`, `TerminateProcess`, `CloseHandle`, `GetProcessTimes`, `SetHandleInformation` (chỉ để dựng phản chứng `h` nếu cần), chữ ký tường minh. **Bắt tay xác minh danh tính:** fixture ghi `{pid, creation_time (GetProcessTimes trên chính nó), nonce}` bằng ghi tệp tạm + `os.replace` (nguyên tử); nonce do CA cấp qua argv; ca mở `OpenProcess(SYNCHRONIZE \| PROCESS_QUERY_LIMITED_INFORMATION \| PROCESS_TERMINATE)`, đòi `GetProcessTimes(handle).creation == creation_time` trong tệp, và handle chưa signaled; chỉ sau đó ca mới ghi tệp `go` cho fixture đi tiếp. Mọi kiểm vòng đời trên HANDLE đó; tự dọn bằng `TerminateProcess` trên handle giữ khi đột biến sống sót. **Luồng quan sát:** chạy song song khi `_1174_win_spawn_job` đang chặn trong luồng chính; đọc bắt tay, mở handle, ghi `go`; worker SỞ HỮU mọi handle nó mở cho tới khi BÀN GIAO thành công: bàn giao = dưới một khoá, nếu cờ `huy` chưa đặt thì ghi kết quả/ngoại lệ vào ô chung và chuyển quyền sở hữu handle cho luồng chính; nếu `huy` đã đặt thì worker tự đóng handle của nó. Luồng chính `join(20)` sau khi hàm trả/ném; hết hạn ⇒ dưới cùng khoá đặt `huy`, KHÔNG đóng handle nào (worker tự đóng khi xong muộn), phân loại `KHÔNG ĐO`; join thành công ⇒ luồng chính chỉ dùng và đóng (trong `finally` của ca) các handle đã được bàn giao; ô chứa ngoại lệ ⇒ `KHÔNG ĐO` (lỗi fixture, tách khỏi dấu hiệu sản phẩm). **Hook:** `truoc_gan`/`between` của ca chỉ MƯỢN tài nguyên (không đóng `proc._handle` hay job, không sửa trạng thái `Popen`), mọi chờ trong hook có hạn. **Trợ giúp (J10/J10b):** tiến trình python riêng chạy `_1174_win_spawn_job` từ cây làm việc; giao thức tệp: `san_sang` (pid + creation time trợ giúp), `da_gan` hoặc `truoc_gan` (pid + creation time con), `chau` (J10); mỗi mốc có tệp mở riêng `tha_<mốc>` (không dùng chung tệp): J10b — trợ giúp ghi `truoc_gan` rồi CHỜ `tha_truoc_gan` (≤ 30 s, hết hạn ⇒ trợ giúp thoát mã 3 ⇒ `KHÔNG ĐO`) và ca KHÔNG bao giờ tạo tệp ấy (cú giết diễn ra khi trợ giúp đang đứng ở mốc); J10 — trợ giúp ghi `da_gan` trong `between` KHÔNG chờ (để resume tiếp), con sinh cháu, cháu bắt tay `chau`, con và cháu sau đó CHỜ `tha_ket` (≤ 60 s) nên còn sống trong lúc trợ giúp chặn ở bước (8); ca giết trợ giúp khi nó đang chặn ở (8) và KHÔNG tạo `tha_ket`. Trước cú giết: ca xác minh từng mốc, kiểm handle trợ giúp và các đối tượng cần đo chưa signaled; `TerminateProcess` trợ giúp bằng handle `Popen` của chính ca phải trả TRUE; chờ trợ giúp signaled ≤ 5 s. Ca KHÔNG nhân bản handle job trong J10 (trợ giúp là chủ duy nhất). |
+    72	| M7 | Ca NATIVE `wp1342_native_job_*` qua `_native1342` (nền khác in `BỎ QUA <lý do>`, không tính đạt), lệnh con `sys.executable -B -c …`, mỗi ca có dấu hiệu dương. **J0 ABI**: thu ĐỦ mọi assertion (không dừng ở cái đầu), báo nhãn hỏng đầu tiên theo thứ tự cố định: offset trước size; tập tên bind == allowlist M1; `argtypes`/`restype` từng hàm khớp bảng M1; `offsetof` rồi `sizeof` khớp số ở M1; chạy trên Win64 (kiểm `sizeof(c_void_p) == 8`, khác ⇒ `KHÔNG ĐO`). **J1 thuận**: con ghi tệp đánh dấu rồi `exit(7)` ⇒ trả `7`, tệp có. **J2 hạn**: con bắt tay rồi `sleep(30)`; deadline = lúc gọi + 6 s; bắt tay phải xong trong 5 s (không xong ⇒ `KHÔNG ĐO`, lỗi khởi động fixture, không chấm deadline); ném "lifecycle deadline" trong khoảng 6–11 s; handle con signaled. **J3 mồ côi**: con sinh cháu `DETACHED_PROCESS (0x8)`; cháu bắt tay rồi `sleep(30)`; con chờ `go` của cháu rồi `exit(0)`; hàm trả `0`; handle cháu signaled khi hàm trả. **J6 treo trước gán**: con ghi marker ở dòng đầu (cùng đoạn mã marker với J1, nên J1 là đối chứng dương của đường ghi marker); `between(job)` kiểm theo thứ tự hai nhãn: (i) "cờ treo vắng": `packet_loop._1174_WIN_SPAWN_FLAGS & 0x4` khác 0; (ii) "marker đã có lúc between": tệp marker CHƯA tồn tại; sau khi hàm trả, tệp có. **J7 handle kế thừa**: `between(job)`: `GetHandleInformation(job, &f)` TRUE và `f & 0x1 == 0`. **J8 lỗi trước gán**: `truoc_gan(proc)` lấy bản sao handle con (`DuplicateHandle`, quyền `SYNCHRONIZE \| PROCESS_TERMINATE`) rồi ném `RuntimeError("j8")`; hàm ném lại đúng lỗi ấy; bản sao signaled khi hàm trả (không chờ thêm). **J9 lỗi sau gán**: `truoc_gan` giữ `proc`; ca tạo trước một tiến trình phụ (bắt tay, handle giữ); `between(job)` gán tiến trình phụ vào CÙNG job bằng handle GỐC của `Popen` phụ (đủ quyền `PROCESS_SET_QUOTA \| PROCESS_TERMINATE`; handle quan sát giữ riêng để đo), đòi `AssignProcessToJobObject` TRUE (FALSE ⇒ ghi mã Win32, `KHÔNG ĐO` trước khi ném — tiền điều kiện; ghi kết quả trên Desktop và VM), lấy bản sao handle job, rồi ném `RuntimeError("j9")`; tiến trình phụ CHỜ tệp `tha_phu` (≤ 60 s) thay vì ngủ cố định, nên còn sống suốt cửa sổ `xac_nhan` (5 s) cho tới khi ca đo xong kết quả rồi mới tạo `tha_phu` (và tự dọn bằng `TerminateProcess` nếu còn sống); hàm ném lại lỗi ấy; khi hàm trả: handle con và handle tiến trình phụ signaled, `ActiveProcesses == 0` qua bản sao job (query phải TRUE). **J10 cha chết sau gán**: trợ giúp chạy `_1174_win_spawn_job` với con sinh cháu, con và cháu bắt tay và `sleep(30)`; sau khi xác minh `da_gan` + `chau`, ca `TerminateProcess` trợ giúp; handle con và cháu signaled trong ≤ 5 s. **J10b cha chết trước gán (đo nợ)**: trợ giúp dùng `truoc_gan` ghi mốc `truoc_gan` (pid + creation time con lấy qua `GetProcessTimes(proc._handle)`) rồi chờ `giu`; con dùng cùng đoạn mã marker với J1/J6; ca mở handle con, xác minh, `TerminateProcess` trợ giúp; sau 2 s: con CHƯA signaled (còn treo, bị bỏ lại — đúng nợ đã khai) VÀ tệp bắt tay của con KHÔNG tồn tại (chưa từng chạy); ca tự dọn con. J10b đạt nghĩa là ranh giới đã khai ĐÚNG như đo, không phải bảo đảm thu hồi. **J11 query lỗi**: `_1174_win_job_empty` với handle tệp (mở bằng `CreateFileW` của r1) ⇒ "job query"; với job rỗng do ca tạo ⇒ `None`. J3, J9, J10 chạy thêm trên VM `tra-luat-win`. |
+    73	| M8 | Đột biến qua driver NGOÀI kho (khuôn r1–r3: mỗi cặp (tìm, thay) khớp đúng một chỗ, đổi khối thì neo cả khối làm một cặp; bản sao tạm; ca đích + đối chứng khoẻ; lỗi import/fixture, quan sát hết hạn hoặc watchdog ngoài ca 90 s ⇒ `KHÔNG ĐO`). Bảng §4b. |
+    74	
+    75	## 4b. Đường vào, chốt, ca, đột biến (mỗi đường một chốt; dấu hiệu = ID ca + nhãn assertion, chỉ đột biến đó gây ra)
+    76	
+    77	| # | đường | chốt | dấu hiệu đỏ | đột biến |
+    78	|---|---|---|---|---|
+    79	| 1 | con thoát, cháu mồ côi còn sống | `terminate` ở (9) | J3 ném "job not empty" | **a1** (khối) thay bước `terminate` — lời gọi `TerminateJobObject` CÙNG nhánh kiểm BOOL của nó — bằng `pass` |
+    80	| 2 | tiến trình gọi chết sau gán | `KILL_ON_JOB_CLOSE` | J10 "con/cháu sống sau khi cha chết" | **a2** `_1174_WIN_JOB_LIMIT = 0` |
+    81	| 3 | query lỗi đọc thành rỗng | M3 ném "job query" | J11 "handle tệp được nhận là job rỗng" | **a3** nhánh query-FALSE đổi thành `return None` |
+    82	| 4 | khe "chạy trước, gán sau" | gán trước resume | J6 "marker đã có lúc between" (nhãn (i) "cờ treo vắng" xanh) | **b** (khối) dời (7) lên trước (5) và chờ ĐÚNG tệp marker của J6 (cùng đường dẫn, truyền qua argv của con) ≤ 5 s trước khi gán; chờ hết hạn ⇒ `KHÔNG ĐO` |
+    83	| 5 | con không treo khi tạo | `CREATE_SUSPENDED` | S1 "SPAWN_FLAGS == 0x204" (tất định; mọi đột biến khác không chạm hằng này) | **c** `_1174_WIN_SPAWN_FLAGS = 0x200` |
+    84	| 6 | handle job kế thừa | security attributes `None` | J7 "job handle có HANDLE_FLAG_INHERIT" | **h** chèn sau (1) một dòng bind `SetHandleInformation([w.HANDLE, w.DWORD, w.DWORD], w.BOOL)` trên `k` và gọi `(job, 1, 1)`, đòi TRUE |
+    85	| 7 | lỗi sau `Popen`, trước gán | `kill_truoc_gan` | J8 "bản sao con chưa signaled khi hàm trả" | **k1** bỏ đăng ký `kill_truoc_gan` |
+    86	| 8 | lỗi sau gán, trước resume | `terminate` khi `da_gan` (không `proc.kill` sau gán) | J9 "tiến trình phụ còn sống VÀ lỗi j9 không có ghi chú job not empty" | **k2** đặt `da_gan = True` sau (7) thay vì sau (5) |
+    87	| 9 | bước dọn lỗi chặn bước sau | `_1174_win_cleanup` chạy hết | S4 "bước 2 không chạy" | **k3** `break` sau ngoại lệ đầu |
+    88	| 10 | 0/≥2 luồng ứng viên | đúng-một | S2 "hai ứng viên được nhận" | **t1** trả mục khớp đầu tiên |
+    89	| 11 | `ResumeThread` ≠ 1 được nhận | `resume_ok` | S3 "count=2" | **t2** `== _1174_WIN_RESUME_OK` đổi thành `in (1, 2)` |
+    90	| 12 | treo vô hạn chờ tiến trình đầu | `wait(timeout=…)` | J2 "không ném lifecycle deadline trong 6–11 s" | **d0** bỏ `timeout=` |
+    91	| 13 | đối số sai lọt vào Windows | kiểm đối số trước nền | S5 "argv=[] phải là spawn arguments" | **g0** (khối) đổi chỗ khối kiểm `os.name` lên trước khối kiểm đối số |
+    92	| 14 | ABI sai lệch | layout cố định | J0 "THREADENTRY32 offset th32OwnerProcessID == 12" | **abi** đổi kiểu trường `th32OwnerProcessID` sang `c_uint64` |
+    93	| 15 | deadline hữu hạn quá xa thành chờ vô hạn | trần `now + 86400` + chờ theo lát | S5 "deadline ngoài miền nhận (now+86401) phải là spawn arguments" | **d1** bỏ vế cận trên `<= time.monotonic() + 86400` (lát chờ 60 s giữ nguyên) |
+    94	
+    95	Phân biệt: k2 chỉ đổi hành vi khi có lỗi giữa (5) và (7), nên đường thuận J3 không đổi dưới k2. Ở J9, cả a1 và k2 đều để tiến trình phụ sống; dấu hiệu tách bằng ghi chú lỗi: dưới a1 bước `xac_nhan` vẫn chạy và lỗi gốc `j9` mang `add_note` chứa "job not empty"; dưới k2 không có bước `xac_nhan` nên KHÔNG có ghi chú ấy. Dấu hiệu của k2 = J9 "tiến trình phụ còn sống VÀ không có ghi chú job not empty"; dấu hiệu của a1 = J3 "job not empty". a2/c chạm hai hằng khác nhau; S1 tách assertion theo hằng nên a2 làm đỏ assertion `JOB_LIMIT`, không đỏ `SPAWN_FLAGS`. b giữ cờ treo nên S1 và nhãn J6(i) xanh, đỏ ở J6(ii). c đỏ ở S1 `SPAWN_FLAGS` và ở J6(i) "cờ treo vắng" (kiểm trước (ii)), không bao giờ ở J6(ii). abi: J0 chấm offset trước size.
+    96	
+    97	Đường KHÔNG có kích hoạt native tự nhiên (chỉ code review, KHÔNG ghi là đã đo bằng ca native): TID cũ giữa snapshot và `OpenThread` (chốt `GetProcessIdOfThread`); `Thread32First/Next` lỗi khác 18; `OpenThread` NULL; `TerminateJobObject` FALSE trên job hợp lệ; `CloseHandle` FALSE; `GetProcessIdOfThread == 0`. Logic chọn/nhận nằm trong hàm thuần đã đo (S2, S3, S4).
+    98	
+    99	## 5. `nghiem_thu`
+   100	
+   101	| # | tiêu chí | phép đo làm nó ĐỎ |
+   102	|---|---|---|
+   103	| N1 | Linux không đổi: CI Ubuntu exact head `GOM: ĐẠT`; sổ ID ca base ⊆ head, mỗi ID base cùng trạng thái (đạt/bỏ qua + lý do); `MUTANTS` head == base; mỗi mốc (tìm) của `MUTANTS` đang có khớp ĐÚNG MỘT lần trên head. Biên nhận ghi từng ID và từng mốc. | Rút một ca base; đổi tên một khoá giữ số lượng; mã mới làm một mốc cũ khớp 2 lần. |
+   104	| N2 | Chỉ THÊM, cả hai tệp. `packet_loop.py`: `_additive1342r2(base, head) == []`. `packet_loop_test.py`: (i) với mỗi định nghĩa mức module của base (def/class/gán), đoạn nguồn TÍNH TỪ DÒNG DECORATOR ĐẦU TIÊN (nếu có) tới hết khối ở head BẰNG TỪNG BYTE, đoạn ngay trước nó không thêm decorator mới, và vẫn là một định nghĩa mức module riêng; (ii) với mỗi tên được bind ở base, SỐ điểm bind thực thi ở phạm vi module (duyệt `Module.body` đệ quy qua `If`/`Try`/`With`/`For`/`While`, không vào thân hàm/lớp; tính def, class, gán, gán tăng, import) ở head BẰNG base; (iii) `difflib` trên dòng chỉ có `equal`/`insert`; (iv) DANH SÁCH CHO PHÉP cho phần chèn: mỗi khối `insert` phải nằm GIỮA hai câu lệnh mức module của base (không trong một câu lệnh nào), tự parse được thành dãy câu lệnh mức module hoàn chỉnh, và mỗi câu lệnh chỉ thuộc một trong ba dạng: `def`/`class` không decorator với tên CHƯA có ở base; gán một tên CHƯA có ở base; `CASES += [...]`. Mọi dạng khác (`del`, `match`, walrus, `if`/`for`, import, gán lại tên cũ, gọi hàm) ⇒ đỏ. Phép đo chạy ngoài kho (không tính vào numstat). Phiên điều phối đo lại kèm phản chứng chạy thật. | Sửa một byte thân hàm r1–r3 ⇒ khác `[]`; decorator vào hàm mới ⇒ khác `[]`; chèn `return lambda c: None` vào đầu thân `_native1342` ⇒ (i) ĐỎ; thêm `def _native1342(...)` ở cuối tệp ⇒ (ii) ĐỎ; chèn `@(lambda fn: lambda *a: None)` ngay trước `def _native1342` ⇒ (i) ĐỎ; thêm `if True: _native1342 = None` ⇒ (ii) ĐỎ; thêm `match None:\n    case _native1342: pass`, `if (_native1342 := None): pass`, `del _native1342` ⇒ (iv) ĐỎ (base xanh cả bốn vế, kể cả `MUTANTS_NHAM_TEST` có 14 điểm bind hợp lệ). |
+   105	| N3 | Không nối dây + vế dương: `wp1342_additive_byte_preserved` (vế N3, cây làm việc) đạt; VÀ head chứa đúng tập tên mới mức module `{_1174_WIN_JOB_LIMIT, _1174_WIN_SPAWN_FLAGS, _1174_WIN_RESUME_OK, _1174_win_api_job, _1174_win_pick_thread, _1174_win_resume_ok, _1174_win_cleanup, _1174_win_note, _1174_win_job_empty, _1174_win_spawn_job}` (mười tên; không thiếu, không thừa tên mới nào khác trong `packet_loop.py`). | Thêm lời gọi `_1174_win_spawn_job` trong `_1174_process` ⇒ đỏ; bỏ một khối bắt buộc ⇒ vế dương đỏ. |
+   106	| N4 | M5 (S1–S5) đạt trên Linux (CI) và Windows (Desktop). | c (S1 SPAWN_FLAGS), t1 (S2), t2 (S3 "count=2"), k3 (S4), g0 (S5 argv=[]), d1 (S5 deadline ngoài miền) ⇒ đỏ đúng dấu hiệu. |
+   107	| N5 | Windows vẫn bị từ chối, không đổi: chạy đúng tập ID base đã ghi (`wp1174_windows_claim_rejected` + 12 ID `WP1174_BOTH` + ca native r1–r3) trên base và head cùng lượt; so từng ID trên trạng thái, lý do bỏ qua, dấu hiệu dương (bỏ các trường thời gian/pid). | Một ID lệch; đột biến mở chốt claim Windows phải đi tới và đỏ tại assertion đích của `wp1174_windows_claim_rejected`. |
+   108	| N6 | Đúng tập J0, J1, J2, J3, J6, J7, J8, J9, J10, J10b, J11 đạt trên Desktop với dấu hiệu dương; J3, J9, J10 đạt thêm trên VM. Biên nhận ghi ID + mọi assertion + kết quả xác minh creation time. | Ca native `BỎ QUA` trên Windows ⇒ ĐỎ; con/cháu/phụ sống sót ⇒ ĐỎ; ca rơi vào `KHÔNG ĐO` ⇒ tiêu chí `not_measured`, không `passed`. |
+   109	| N7 | 15 đột biến §4b (16 lần chạy) bị giết đúng dấu hiệu: Windows (a1 a2 a3 b h k1 k2 d0 abi) trên Desktop; thuần (c t1 t2 k3 g0 d1) trên Linux, và c lặp lại trên Desktop. Hợp đồng N7 r1: driver byte-exact trong hồ sơ land; chỉ tính giết khi assertion đích thất bại, đối chứng đạt, và nhãn khớp dấu hiệu đã ghi. | Đột biến sống; đỏ vì import/fixture/quan sát hết hạn; đỏ với nhãn KHÁC. |
+   110	| N8 | Ruff `--select F` 0.15.15 (bản ghim của gate tại base): TẬP diagnostic (mã, tệp, tên) head == base, ghi từng tệp; `adr-song`, `doctrine-scan` rc 0 (ghi riêng); `git diff --check` sạch; `eol_policy --all` ok; `git diff --numstat <base>..<H>` không lọc đường dẫn: tập đường dẫn == write set, tổng dòng thêm ≤ **550** (trần nâng, §9). | Thay một diagnostic bằng diagnostic khác cùng số lượng; tệp thứ ba; vượt 550 ⇒ dừng §7. |
+   111	
+   112	Đo Windows trên **`DESKTOP-T9R33P2`** (ưu tiên, Q8 r1); VM `tra-luat-win` đo bổ sung. Base và head đo cùng một lượt.
+   113	
+   114	## 6. `pham_vi_e`
+   115	
+   116	Không chạm E4, E5. Không đảo quyết định "chỉ Linux" ⇒ không E3. Ca native chỉ giết tiến trình do chính ca sinh ra, qua handle/job của nó.
+   117	
+   118	## 7. `luat_dung`
+   119	
+   120	- Trần lời gọi Codex theo `ADR-0055`; trần vòng review theo `ADR-0048`. Chạm trần ⇒ Review Rescue Checkpoint; xin tăng mang **E2**.
+   121	- Trần 550 cưỡng chế trên NUMSTAT THẬT, không trên ước lượng tĩnh: executor đo `git diff --numstat <base>..<H>` KHÔNG lọc đường dẫn TRƯỚC khi công bố (push/PR): tập đường dẫn phải BẰNG write set (§2), và tổng cột dòng thêm của mọi đường dẫn > 550 ⇒ DỪNG, không push, báo điều phối (**E2**). KHÔNG tự cắt ca, assertion, đột biến hay bước dọn để lọt trần: cắt phép đo là đổi đặc tả, phải qua revision mới.
+   122	- Cần sửa thân định nghĩa đang có, sửa ngoài write set, hoặc nối dây ⇒ dừng, revision đặc tả (protocol: thay đổi phạm vi sau đóng băng là revision mới).
+   123	- `Popen` trên máy đo không giữ con treo với `CREATE_SUSPENDED` (J6 đỏ trên head sạch, hoặc `ResumeThread` ≠ 1 trên J1) ⇒ dừng; theo protocol, đổi thiết kế/phạm vi sau đóng băng là revision mới; không chuyển sang API không tài liệu.
+   124	- J9 không dựng được tiền điều kiện (gán thành viên thứ hai FALSE) trên cả Desktop và VM ⇒ J9 và k2 `not_measured`; quyết định tiếp là của chủ kho (**E2**).
+   125	- Máy đo Windows không có trong hạn lease ⇒ tiêu chí native `not_measured`; lease hết hạn theo protocol; gia hạn/cấp lại là quyết định chủ kho (**E2**).
+   126	- Đặc tả không thuộc Mission ⇒ chờ chủ kho duyệt băm (`ADR-0067`, **E2**) một lần sau khi review độc lập approve.
+   127	
+   128	## 8. `hinh_dang_ke_thua` và ngân sách
+   129	
+   130	`khong_ap_dung`. Ghi chú: hàm mới không decorator (r2 F2); additive dùng `_additive1342r2` (r2 F1); hook là tham số default `None`, chạy TRÊN đường mặc định, chỉ dùng trong ca test để quan sát/gây lỗi, không thay đường runtime (r3 F5); tiêu chí chỉ có lời khai ghi `not_measured` (Codex P1 PR #1398, #1403). Nợ có tên của revision này: `wp1342-pre-assign-orphan` (§2).
+   131	
+   132	Ngân sách dòng (đếm theo hàm tương tự đo trên `e2c3b82`, gồm dòng trống; chưa phải numstat):
+   133	
+   134	| khối | căn cứ | ước |
+   135	|---|---|---|
+   136	| hằng | 3 hằng + chú thích | 4–6 |
+   137	| `_1174_win_api_job` (12 bindings, 5 cấu trúc) | `_1174_win_api` 18 dòng/10 bindings + 5 lớp | 38–48 |
+   138	| `_1174_win_job_empty` | | 13–16 |
+   139	| 4 hàm thuần (thêm `_1174_win_note`) | | 28–35 |
+   140	| `_1174_win_spawn_job` | `_1174_process` 51, `_1174_win_seed` 62; thêm Toolhelp, last-error, 7 bước dọn có hậu điều, `add_note` an toàn, chờ theo lát, trần deadline | 100–122 |
+   141	| **mã** | | **183–227** |
+   142	| bindings phía test | 8 hàm | 12–16 |
+   143	| hạ tầng bắt tay + luồng quan sát (bàn giao có khoá, cờ huỷ) + trợ giúp có giao thức (tệp mở riêng từng mốc) | | 72–90 |
+
+exec
+/bin/bash -lc "git diff --no-index --unified=0 ops/specs/WP1174-WINDOWS-BACKEND-r4{\\-ban4,}.md | cut -c1-240
+cat ops/KE_HOACH_THI_CONG_DA_PROVIDER.md >/dev/null
+rg -n 'Phương pháp làm việc' SKILL.md
+python -B - <<'PY'
+import ast, collections, difflib, subprocess, sys
+p='.claude/dev/packet_loop_test.py'
+base=subprocess.check_output(['git','show','HEAD:'+p]).decode()
+def start(n):
+ return min([n.lineno]+[x.lineno for x in getattr(n,'decorator_list',[])])-1
+def bindings(s):
+ out=collections.Counter()
+ def visit(body):
+  for n in body:
+   if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)): out[n.name]+=1; continue
+   if isinstance(n,(ast.Assign,ast.AnnAssign,ast.AugAssign,ast.For,ast.AsyncFor,ast.With,ast.AsyncWith)):
+    ts=n.targets if isinstance(n,ast.Assign) else [i.optional_vars for i in n.items if i.optional_vars] if isinstance(n,(ast.With,ast.AsyncWith)) else [n.target]
+    out.update(x.id for t in ts for x in ast.walk(t) if isinstance(x,ast.Name) and isinstance(x.ctx,ast.Store))
+   if isinstance(n,(ast.Import,ast.ImportFrom)): out.update(a.asname or a.name.split('.')[0] for a in n.names)
+   if isinstance(n,ast.ExceptHandler) and n.name: out[n.name]+=1
+   if isinstance(n,(ast.If,ast.Try,ast.TryStar,ast.With,ast.For,ast.While,ast.ExceptHandler)):
+    for field in ('body','orelse','handlers','finalbody'): visit(getattr(n,field,[]))
+ visit(ast.parse(s).body)
+ return out
+B=base.splitlines(keepends=True); T=ast.parse(base).body; names=bindings(base)
+def gate(s):
+ H=s.splitlines(keepends=True); U=ast.parse(s).body
+ ops=difflib.SequenceMatcher(None,B,H,autojunk=False).get_opcodes()
+ mapping={a+i:c+i for k,a,b,c,d in ops if k=='equal' for i in range(b-a)}
+ defs={start(n):n for n in U}
+ def old(n):
+  if not isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Assign,ast.AnnAssign,ast.AugAssign)): return True
+  h=defs.get(mapping.get(start(n)))
+  return h is not None and B[start(n):n.end_lineno]==H[start(h):h.end_lineno]
+ def allowed(n):
+  if isinstance(n,(ast.FunctionDef,ast.ClassDef)): return not n.decorator_list and n.name not in names
+  if isinstance(n,ast.Assign): return len(n.targets)==1 and isinstance(n.targets[0],ast.Name) and n.targets[0].id not in names
+  return isinstance(n,ast.AugAssign) and isinstance(n.target,ast.Name) and n.target.id=='CASES' and isinstance(n.op,ast.Add) and isinstance(n.value,ast.List)
+ def insert(a,c,d):
+  if any(start(n)<a<n.end_lineno for n in T): return False
+  try: return all(allowed(n) for n in ast.parse(''.join(H[c:d])).body)
+  except SyntaxError: return False
+ hn=bindings(s)
+ return tuple(bool(x) for x in (all(map(old,T)),all(hn[k]==v for k,v in names.items()),all(k in ('equal','insert') for k,*_ in ops),all(insert(a,c,d) for k,a,b,c,d in ops if k=='insert')))
+n=next(n for n in T if getattr(n,'name','')=='_native1342')
+def at(i,x): return ''.join(B[:i])+x+''.join(B[i:])
+slot=next(start(n) for n in T if getattr(n,'name','')=='_additive1342r2')
+tests={'base':base,'return':at(n.body[0].lineno-1,'    return lambda c: None\\n'),'duplicate':base+'\\ndef _native1342(f): pass\\n','decorator':at(start(n),'@(lambda fn: lambda *a: None)\\n'),'if':at(slot,'if True: _native1342 = None\\n'),'match':at(slot,'match None:\\n    case _native1342: pass\\n'),'walrus':at(slot,'if (_native1342 := None): pass\\n'),'del':at(slot,'del _native1342\\n'),'valid':at(slot,'def _r4_a():\\n    return True\\ndef _r4_b():\\n    return True\\n_r4_x = 1\\nCASES += [_r4_a, _r4_b]\\n'),'nested_walrus':at(slot,'_r4_x = (_native1342 := None)\\n'),'default_walrus':at(slot,'def _r4_a(x=(_native1342 := None)):\\n    pass\\n')}
+print(sys.version.split()[0],collections.Counter(type(n).__name__ for n in T),{k:names[k] for k in ('_native1342','MUTANTS_NHAM_TEST')})
+for k,s in tests.items():
+ compile(s,p,'exec')
+ result=gate(s)
+ print(k,result)
+ if k in ('base','valid'): assert all(result)
+ elif k not in ('nested_walrus','default_walrus'): assert not all(result)
+for n in T:
+ if isinstance(n,ast.Expr) and isinstance(n.value,ast.Call) or isinstance(n,ast.AugAssign) and not (isinstance(n.target,ast.Name) and n.target.id=='CASES'):
+  print(n.lineno, B[n.lineno-1].strip()[:100])
+PY" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ exited 1 in 13726ms:
+diff --git a/ops/specs/WP1174-WINDOWS-BACKEND-r4-ban4.md b/ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+index d05a7155d..392fe3998 100644
+--- a/ops/specs/WP1174-WINDOWS-BACKEND-r4-ban4.md
++++ b/ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+@@ -49 +49 @@ Ngoài phạm vi:
+-- Hợp đồng kết quả: hàm TRẢ `rc` ⇔ thu hồi ĐÃ XÁC NHẬN (job đã gán, `TerminateJobObject` TRUE, `ActiveProcesses == 0`, leader đã reap, mọi handle đã đóng thành công). Mọi trường hợp khác hàm NÉM,
++- Hợp đồng kết quả: hàm TRẢ `rc` ⇔ (đường chạy đã có `rc` — không lỗi gốc nào) VÀ (thu hồi ĐÃ XÁC NHẬN: job đã gán, `TerminateJobObject` TRUE, `ActiveProcesses == 0`, leader đã reap, và mọi ha
+@@ -67 +67 @@ Ngoài phạm vi:
+-| M2 | Ba hàm THUẦN (mọi nền, không ctypes): (a) `_1174_win_pick_thread(entries, pid)`: `entries` là iterable `(owner_pid, tid)`; trả tid khi có ĐÚNG MỘT mục `owner_pid == pid`; 0 hoặc ≥ 2 ⇒ `_1174Error("suspended s
++| M2 | Bốn hàm THUẦN (mọi nền, không ctypes): (a) `_1174_win_pick_thread(entries, pid)`: `entries` là iterable `(owner_pid, tid)`; trả tid khi có ĐÚNG MỘT mục `owner_pid == pid`; 0 hoặc ≥ 2 ⇒ `_1174Error("suspende
+@@ -69,4 +69,4 @@ Ngoài phạm vi:
+-| M4 | `_1174_win_spawn_job(argv, *, cwd, deadline, env=None, truoc_gan=None, between=None)` → `int`. **(0)** Kiểm đối số: `argv` là list khác rỗng toàn `str`; `deadline` là `int` hoặc `float` (không `bool`); với `float
+-| M5 | Ca THUẦN (mọi nền) `wp1342_pure_spawn_*`, mỗi vector một assertion có nhãn riêng: **S1** ba assertion: `JOB_LIMIT == 0x2000`, `SPAWN_FLAGS == 0x204`, `RESUME_OK == 1`. **S2** `pick_thread`: `[]` ⇒ lỗi; `[(7,1),(7,2)
+-| M6 | Hạ tầng test native (trong `packet_loop_test.py`). **Bindings phía test** (không thuộc allowlist M1): `OpenProcess`, `DuplicateHandle`, `GetCurrentProcess`, `WaitForSingleObject`, `TerminateProcess`, `CloseHandle`, `GetProce
+-| M7 | Ca NATIVE `wp1342_native_job_*` qua `_native1342` (nền khác in `BỎ QUA <lý do>`, không tính đạt), lệnh con `sys.executable -B -c …`, mỗi ca có dấu hiệu dương. **J0 ABI**: thu ĐỦ mọi assertion (không d�
++| M4 | `_1174_win_spawn_job(argv, *, cwd, deadline, env=None, truoc_gan=None, between=None)` → `int`. **(0)** Kiểm đối số: `argv` là list khác rỗng toàn `str`; `deadline` là `int` hoặc `float` (không `bool`); với `float
++| M5 | Ca THUẦN (mọi nền) `wp1342_pure_spawn_*`, mỗi vector một assertion có nhãn riêng: **S1** ba assertion: `JOB_LIMIT == 0x2000`, `SPAWN_FLAGS == 0x204`, `RESUME_OK == 1`. **S2** `pick_thread`: `[]` ⇒ lỗi; `[(7,1),(7,2)
++| M6 | Hạ tầng test native (trong `packet_loop_test.py`). **Bindings phía test** (không thuộc allowlist M1): `OpenProcess`, `DuplicateHandle`, `GetCurrentProcess`, `WaitForSingleObject`, `TerminateProcess`, `CloseHandle`, `GetProce
++| M7 | Ca NATIVE `wp1342_native_job_*` qua `_native1342` (nền khác in `BỎ QUA <lý do>`, không tính đạt), lệnh con `sys.executable -B -c …`, mỗi ca có dấu hiệu dương. **J0 ABI**: thu ĐỦ mọi assertion (không d�
+@@ -79 +79 @@ Ngoài phạm vi:
+-| 1 | con thoát, cháu mồ côi còn sống | `terminate` ở (9) | J3 ném "job not empty" | **a1** xoá lời gọi `TerminateJobObject` |
++| 1 | con thoát, cháu mồ côi còn sống | `terminate` ở (9) | J3 ném "job not empty" | **a1** (khối) thay bước `terminate` — lời gọi `TerminateJobObject` CÙNG nhánh kiểm BOOL của nó — bằng `pass` |
+@@ -82 +82 @@ Ngoài phạm vi:
+-| 4 | khe "chạy trước, gán sau" | gán trước resume | J6 "marker đã có lúc between" (nhãn (i) "cờ treo vắng" xanh) | **b** (khối) dời (7) lên trước (5) và chờ tệp bắt tay của con ≤ 5 s trước khi gán
++| 4 | khe "chạy trước, gán sau" | gán trước resume | J6 "marker đã có lúc between" (nhãn (i) "cờ treo vắng" xanh) | **b** (khối) dời (7) lên trước (5) và chờ ĐÚNG tệp marker của J6 (cùng đường dẫn
+@@ -90 +90 @@ Ngoài phạm vi:
+-| 12 | treo vô hạn chờ tiến trình đầu | `wait(timeout=…)` | J2 "không ném lifecycle deadline trong 3–8 s" | **d0** bỏ `timeout=` |
++| 12 | treo vô hạn chờ tiến trình đầu | `wait(timeout=…)` | J2 "không ném lifecycle deadline trong 6–11 s" | **d0** bỏ `timeout=` |
+@@ -93 +93 @@ Ngoài phạm vi:
+-| 15 | deadline hữu hạn quá xa thành chờ vô hạn | trần `now + 86400` + chờ theo lát | S5 "now+86401 phải là spawn arguments" | **d1** bỏ vế `<= time.monotonic() + 86400` |
++| 15 | deadline hữu hạn quá xa thành chờ vô hạn | trần `now + 86400` + chờ theo lát | S5 "deadline ngoài miền nhận (now+86401) phải là spawn arguments" | **d1** bỏ vế cận trên `<= time.monotonic() + 86400` (l
+@@ -104,3 +104,3 @@ Phân biệt: k2 chỉ đổi hành vi khi có lỗi giữa (5) và (7), nên đ
+-| N2 | Chỉ THÊM, cả hai tệp. `packet_loop.py`: `_additive1342r2(base, head) == []`. `packet_loop_test.py`: (i) với mỗi định nghĩa mức module của base (def/class/gán), đoạn nguồn TÍNH TỪ DÒNG DECORATOR ĐẦU TI
+-| N3 | Không nối dây + vế dương: `wp1342_additive_byte_preserved` (vế N3, cây làm việc) đạt; VÀ head chứa đúng tập tên mới mức module `{_1174_WIN_JOB_LIMIT, _1174_WIN_SPAWN_FLAGS, _1174_WIN_RESUME_OK, _1174_win
+-| N4 | M5 (S1–S5) đạt trên Linux (CI) và Windows (Desktop). | c (S1 SPAWN_FLAGS), t1 (S2), t2 (S3 "count=2"), k3 (S4), g0 (S5 argv=[]), d1 (S5 now+86401) ⇒ đỏ đúng dấu hiệu. |
++| N2 | Chỉ THÊM, cả hai tệp. `packet_loop.py`: `_additive1342r2(base, head) == []`. `packet_loop_test.py`: (i) với mỗi định nghĩa mức module của base (def/class/gán), đoạn nguồn TÍNH TỪ DÒNG DECORATOR ĐẦU TI
++| N3 | Không nối dây + vế dương: `wp1342_additive_byte_preserved` (vế N3, cây làm việc) đạt; VÀ head chứa đúng tập tên mới mức module `{_1174_WIN_JOB_LIMIT, _1174_WIN_SPAWN_FLAGS, _1174_WIN_RESUME_OK, _1174_win
++| N4 | M5 (S1–S5) đạt trên Linux (CI) và Windows (Desktop). | c (S1 SPAWN_FLAGS), t1 (S2), t2 (S3 "count=2"), k3 (S4), g0 (S5 argv=[]), d1 (S5 deadline ngoài miền) ⇒ đỏ đúng dấu hiệu. |
+@@ -110 +110 @@ Phân biệt: k2 chỉ đổi hành vi khi có lỗi giữa (5) và (7), nên đ
+-| N8 | Ruff `--select F` 0.15.15 (bản ghim của gate tại base): TẬP diagnostic (mã, tệp, tên) head == base, ghi từng tệp; `adr-song`, `doctrine-scan` rc 0 (ghi riêng); `git diff --check` sạch; `eol_policy --all` ok; numst
++| N8 | Ruff `--select F` 0.15.15 (bản ghim của gate tại base): TẬP diagnostic (mã, tệp, tên) head == base, ghi từng tệp; `adr-song`, `doctrine-scan` rc 0 (ghi riêng); `git diff --check` sạch; `eol_policy --all` ok; `git 
+@@ -121 +121 @@ Không chạm E4, E5. Không đảo quyết định "chỉ Linux" ⇒ không E3.
+-- Trần 550 cưỡng chế trên NUMSTAT THẬT, không trên ước lượng tĩnh: executor đo `git diff --numstat <base>..<H>` trên đúng hai tệp TRƯỚC khi công bố (push/PR); tổng dòng thêm > 550 ⇒ DỪNG, không push,
++- Trần 550 cưỡng chế trên NUMSTAT THẬT, không trên ước lượng tĩnh: executor đo `git diff --numstat <base>..<H>` KHÔNG lọc đường dẫn TRƯỚC khi công bố (push/PR): tập đường dẫn phải BẰNG write s
+@@ -138 +137,0 @@ Ngân sách dòng (đếm theo hàm tương tự đo trên `e2c3b82`, gồm dòn
+-| 3 hàm thuần | | 22–28 |
+@@ -139,0 +139 @@ Ngân sách dòng (đếm theo hàm tương tự đo trên `e2c3b82`, gồm dòn
++| 4 hàm thuần (thêm `_1174_win_note`) | | 28–35 |
+@@ -141 +141 @@ Ngân sách dòng (đếm theo hàm tương tự đo trên `e2c3b82`, gồm dòn
+-| **mã** | | **177–220** |
++| **mã** | | **183–227** |
+@@ -143 +143 @@ Ngân sách dòng (đếm theo hàm tương tự đo trên `e2c3b82`, gồm dòn
+-| hạ tầng bắt tay + luồng quan sát (ô kết quả, join có hạn) + trợ giúp có giao thức (`giu`) | | 65–82 |
++| hạ tầng bắt tay + luồng quan sát (bàn giao có khoá, cờ huỷ) + trợ giúp có giao thức (tệp mở riêng từng mốc) | | 72–90 |
+@@ -148,2 +148,2 @@ Ngân sách dòng (đếm theo hàm tương tự đo trên `e2c3b82`, gồm dòn
+-| **test** | | **277–348** |
+-| **tổng** | | **454–568** |
++| **test** | | **284–356** |
++| **tổng** | | **467–583** |
+@@ -151 +151 @@ Ngân sách dòng (đếm theo hàm tương tự đo trên `e2c3b82`, gồm dòn
+-Ước lượng tĩnh 454–568 (điểm giữa ~511); đầu cao chỉ vượt 550 khi mọi khối cùng chạm trần ước của nó. Trần 550 được cưỡng chế ở numstat thật lúc thi công (§7), không ở ước lượ
++Ước lượng tĩnh 467–583 (điểm giữa ~525); đầu cao chỉ vượt 550 khi mọi khối cùng chạm trần ước của nó. Trần 550 được cưỡng chế ở numstat thật lúc thi công (§7), không ở ước lượ
+@@ -163 +163 @@ Ngân sách dòng (đếm theo hàm tương tự đo trên `e2c3b82`, gồm dòn
+-- Kích thước thật (ước tĩnh 454–568; trần cưỡng chế ở numstat, §7).
++- Kích thước thật (ước tĩnh 467–583; trần cưỡng chế ở numstat, §7).
+@@ -174,0 +175 @@ Ngân sách dòng (đếm theo hàm tương tự đo trên `e2c3b82`, gồm dòn
++- **Lượt 4** (bản sha256 `d7a5d5b2…`; `request_changes`: 7 P2, 1 P3; hai P1 lượt 3 đóng). Bản này: F1 thêm hàm thuần `_1174_win_note` chỉ dùng tên kiểu, S4 vế "ghi chú gọi mã tuỳ biến", N3 mười tên; F
+28:## Phương pháp làm việc: thiết kế kỹ, triển khai chủ động
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+3.13.18 Counter({'FunctionDef': 570, 'Assign': 293, 'AugAssign': 90, 'Expr': 89, 'For': 80, 'Import': 12, 'ClassDef': 4, 'ImportFrom': 3, 'AnnAssign': 2, 'Assert': 2, 'If': 1}) {'_native1342': 1, 'MUTANTS_NHAM_TEST': 14}
+.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+base (True, True, True, True)
+.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+return (False, True, True, False)
+.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+duplicate (True, False, True, False)
+.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+decorator (False, True, True, False)
+.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+if (True, False, True, False)
+.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+match (True, True, True, False)
+.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+walrus (True, True, True, False)
+.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+del (True, True, True, False)
+.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+valid (True, False, True, True)
+Traceback (most recent call last):
+  File "<stdin>", line 49, in <module>
+AssertionError
+
+codex
+Các phản chứng N2 được giao đang đỏ ở các vế dự kiến. Tôi cũng thấy một mâu thuẫn giữa ghi chú chỉ chứa tên kiểu và dấu hiệu dùng để tách `a1` khỏi `k2`. Tôi sẽ kiểm tra thêm các đường bàn giao handle và đăng ký ca test.
+exec
+/bin/bash -lc "sed -n '28,55p' SKILL.md
+cat references/WORKING_METHOD.md >/dev/null
+git show HEAD:.claude/dev/packet_loop_test.py | sed -n '18145,18185p;18355,18375p;18535,18605p'
+python -B - <<'PY'
+class Boom(BaseException): pass
+class Meta(type):
+ def __getattribute__(self,k):
+  if k=='__name__': raise Boom('type name')
+  return super().__getattribute__(k)
+class Bad(Exception,metaclass=Meta): pass
+class Root(RuntimeError):
+ def add_note(self,n): raise Boom('overridden add_note')
+def note(err, errors):
+ for e in errors:
+  try: err.add_note('cleanup: '+type(e).__name__)
+  except Exception: pass
+for err,e in [(RuntimeError('j9'),Bad()),(Root('j9'),ValueError()),(RuntimeError('j9'),ValueError('job not empty'))]:
+ try: note(err,[e]); print(getattr(err,'__notes__',[]))
+ except Boom as ex: print('escaped',ex.args)
+PY
+git status --short" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ succeeded in 0ms:
+## Phương pháp làm việc: thiết kế kỹ, triển khai chủ động
+
+- **WM-01 — Nhận diện giai đoạn.** Khi nghiên cứu hoặc thiết kế, làm rõ yêu cầu, mục tiêu, phạm vi, đánh đổi và tiêu chí nghiệm thu. Khi triển khai phương án đã chốt, chủ động thực hiện trong phạm vi quyền đã cấp. Một tác vụ có thể chuyển giữa hai giai đoạn.
+- **WM-02 — Phân biệt làm rõ với xin quyền.** Làm rõ để xác định đúng điều cần xây dựng; xin quyền khi hành động cụ thể chưa được cho phép. Đọc tài liệu, bằng chứng và quyết định hiện có trước khi hỏi; không xin lại quyền còn hiệu lực, đúng phạm vi và đúng điều kiện.
+- **WM-03 — Chủ động với việc thông lệ.** Tự quyết việc quen thuộc, tác động nhỏ và lựa chọn kỹ thuật nằm trong phương án được giao khi không làm đổi hợp đồng hoặc vượt quyền. Tính quen thuộc, khả năng đảo ngược và sự im lặng không tự tạo quyền.
+- **WM-04 — Làm rõ thay đổi có ảnh hưởng.** Yêu cầu mới chưa xác định, thay đổi giao thức/quy trình, tiêu chí nghiệm thu, quyền hạn hoặc tác động đáng kể phải được làm rõ và chốt trước phần thực hiện phụ thuộc; tiếp tục phần độc lập đã được phép. Làm theo chỉ thị cụ thể đã đủ rõ, không hỏi lại chỉ vì đó là yêu cầu mới.
+- **WM-05 — Hỏi có chuẩn bị.** Gộp các điểm quyết định liên quan; nêu điều đã kiểm tra, vấn đề còn thiếu, phương án khuyến nghị và ảnh hưởng. Chỉ hỏi phần chưa được giải quyết; không dùng câu hỏi chung để đẩy lựa chọn vận hành thông lệ cho người dùng.
+- **WM-06 — Thực hiện gọn và có bằng chứng.** Dùng công cụ hiện có, chọn cách đơn giản đáp ứng đủ yêu cầu, sửa đúng phạm vi và kiểm chứng hành vi. Lặp trong giới hạn đã chốt; không bỏ gate, giả kết quả hoặc nới ngân sách để hoàn tất. Chưa đủ bằng chứng về quyền, điều kiện bắt buộc hoặc tính tương đương nghiệm thu thì dừng phần phụ thuộc, đọc hướng dẫn chi tiết và tiếp tục phần độc lập đã được phép.
+
+Đọc **references/WORKING_METHOD.md** khi lập hoặc sửa kế hoạch, giao thức, quy trình; khi phân vân có cần hỏi; hoặc khi phát sinh thay đổi có ảnh hưởng trong lúc triển khai. Hướng dẫn này bổ sung cách phối hợp; các quy định chuyên biệt về legal safety, authority, approval, protocol và release tiếp tục áp dụng.
+
+## DETERMINISTIC WORKFLOW GATES — tool inventory / route-task / dry-run / readback
+
+Trước khi Claude viết script, hàm, tool, loop hoặc đoạn xử lý tự chế, PHẢI kiểm kho công cụ hiện có:
+
+1. `python scripts/tl.py tool-inventory --json` để xem nhóm tool/script/workflow.
+2. `python scripts/tl.py route-task --task <tac_vu> --json` với tác vụ rủi ro: `write_new_tool`, `nlm_query_quality`, `ingest_local`, `convert_rename`, `ingest_zip`, `ocr_pdf_scan`, `large_doc_chunk`.
+3. `python scripts/tl.py -h` và `python scripts/tl.py <lệnh> --help` với nhóm lệnh liên quan.
+4. Kiểm `scripts/*.py` và `references/API_CONTRACT.md` trước khi gọi webapp/Drive/registry/NLM hoặc thêm tool mới.
+5. Khi sửa skill/workflow/release gate, chạy deterministic mode: `python scripts/tl.py --deterministic workflow-audit --strict --json`, `python scripts/tl.py --deterministic determinism-audit --strict --json`, và trước khi đóng gói `python scripts/tl.py --deterministic release-check --strict-determinism --full --json`.
+
+PHÁT HÀNH & NHÁNH (ADR-0001): CHỈ canonical (D:\Quốc hội	ra-luat / github ducthangho/tra-luat) được tăng VERSION + drive-push. Nhánh song song giao nộp `tl bundle-export --note "…" --json` (zip giữ VERSION fork-point + BUNDLE_META.json) — KHÔNG tự đánh version/publish; drive-push TỪ CHỐI cây có BUNDLE_META.json. Canonical qua đủ gate ⇒ deploy CÙNG NGÀY + verify tải lại VERSION; SKILL.md đổi ⇒ user re-import Capabilities.
+
+Chỉ viết tool mới khi lệnh/script/hàm hiện có không đáp ứng; tool mới: input/output rõ (ưu tiên JSON), dry-run nếu ghi, verify/readback, selftest/audit phù hợp.
+
+Mọi quy trình nạp/convert/rename/OCR/zip/chunk theo mẫu: `route-task → dry-run plan → apply có chủ đích → verify/readback → commit/report`
+
+`tool-inventory`, `route-task`, `workflow-audit`, `doc-claims-check`, `determinism-audit`, `golden-test` = READ-ONLY (không Drive/NLM nặng, không ghi). Workflow: `references/workflows/*.json`; schema: `references/workflows/workflow_card.schema.json`; fixtures: `references/golden/*.json`. SKILL.md chỉ giữ nguyên tắc lõi.
+            p.kill(), p.wait()
+    return co
+
+
+def _n_symlink1342(m, d, c, w, k):
+    (d / "target").write_bytes(b"symlink-target")
+    try:
+        os.symlink(d / "target", d / "link")
+    except OSError as ex:
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: nền không tạo được symlink tệp (thiếu quyền): {ex}") from ex
+    assert m._1174_win_read(str(d / "target")) == b"symlink-target"
+    return _refuse1342(m._1174_win_read, str(d / "link"), reason="reparse point")
+
+
+def _native1342(ten, fn):
+    def ca(c):
+        if os.name != "nt":
+            raise BoQua(f"ca native Windows (kernel32) — nền {platform.system()} không đo, KHÔNG tính đạt") from OSError("kernel32 unavailable")
+        m = _module1174(c)
+        ghi = fn(m, c.tmp.resolve(), *m._1174_win_api())
+        print("WP1342_NATIVE_V1 " + json.dumps(dict(id=ten, executed=1, passed=1, os=platform.platform(),
+              python=platform.python_version(), observed=repr(ghi)), sort_keys=True, ensure_ascii=True), flush=True)
+    return ca
+
+
+CASES += [("wp1342_additive_byte_preserved", _additive_case1342), ("wp1342_pure_platform_path", _pure1342)]
+CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for ten, fn in (
+    ("read", _n_read1342), ("volume_junction", _n_volume1342), ("swap_ancestor", _n_swap1342), ("metadata_drift", _n_metadata1342),
+    ("noinherit", _n_noinherit1342), ("symlink_file", _n_symlink1342))]
+
+
+# --- #1342 r2 (bậc r1b): khoá + publish Windows ĐỨNG RIÊNG (`_1174_win_api_ghi`, `_1174_win_lock`, `_1174_win_persist`), CHƯA nối dây.
+# Không-nối-dây do `_wired1342` (ca `wp1342_additive_byte_preserved`) phủ sẵn; không đổi MUTANTS, không vào WP1174_REQUIRED/WP1174_BOTH.
+def _additive1342r2(base, head):
+    """N2 của r2 — HÀM đo MỘT LẦN lúc PR, KHÔNG đăng ký vào CASES. [] ⇔ head (bytes) = base + các khối mới `_new1342` nhận có tên CHƯA
+    có trong base. Khối `_1174_win_*` ĐÃ có trong base (r1) không bị loại: như mọi định nghĩa cũ, nó phải bằng NGUYÊN BYTE base."""
+    import ast
+    try:
+        cu, moi = ast.parse(base), ast.parse(head)
+    except (SyntaxError, ValueError) as ex:
+        return [f"không parse được: {ex}"]
+        fn = getattr(k2, ten)
+        assert list(fn.argtypes or ()) == args and fn.restype is kq, ("B1 signature " + ten, fn.argtypes, fn.restype)
+    bo_cuc = [(ten, getattr(O, ten).offset, getattr(O, ten).size) for ten, _ in O._fields_]
+    assert bo_cuc == [("Internal", 0, n), ("InternalHigh", n, n), ("Offset", 2 * n, 4), ("OffsetHigh", 2 * n + 4, 4),
+                      ("hEvent", 2 * n + 8, n)] and c.sizeof(O) == 3 * n + 8 and issubclass(O, c.Structure), ("B1 OVERLAPPED", bo_cuc, c.sizeof(O))
+    them = sorted({t for t in vars(k2) if not t.startswith("_")} - {t for t in vars(k) if not t.startswith("_")})
+    assert them == sorted(bang), ("B1: tập API bind thêm khác đúng sáu API của M1", them)
+    return bo_cuc, them
+
+
+CASES += [("wp1342_pure_lock_persist_refuse", _pure_r2_1342)]
+CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for ten, fn in (
+    ("lock_exclusive", _n_lock1342), ("lock_noinherit", _n_lock_noinherit1342), ("lock_names", _n_lock_names1342),
+    ("persist_create", _n_create1342), ("persist_update", _n_update1342), ("persist_update_refuse", _n_update_refuse1342),
+    ("persist_update_symlink", _n_update_symlink1342), ("persist_update_held", _n_update_held1342), ("persist_bindings", _n_bindings1342))]
+
+
+# --- #1342 r3 (bậc r1c): seed riêng (ACL) + BootId Windows ĐỨNG RIÊNG (`_1174_win_api_bao_mat`, `_1174_win_seed_acl`, `_1174_win_seed`,
+# `_1174_win_boot_id`), CHƯA nối dây (`_wired1342` phủ sẵn). Không đổi MUTANTS, không vào WP1174_REQUIRED/WP1174_BOTH.
+def _pure_seed_acl1342(c):
+    m, u, khac = _module1174(c), "S-1-5-21-1-2-3-1001", "S-1-5-21-1-2-3-1002"
+        assert m._1174_win_boot_id() == "5" and gia.call_count == 1, "B2 đối chứng: REG_DWORD 5 phải ra '5' qua đúng QueryValueEx"
+    ghi = []
+    for nhan, ten, kw in (("thiếu khoá", "OpenKeyEx", dict(side_effect=FileNotFoundError(2, "no key"))),
+                          ("thiếu giá trị", "QueryValueEx", dict(side_effect=FileNotFoundError(2, "no value"))),
+                          ("lỗi đọc", "QueryValueEx", dict(side_effect=PermissionError(13, "denied"))),
+                          ("REG_SZ", "QueryValueEx", dict(return_value=("5", winreg.REG_SZ))),
+                          ("REG_QWORD", "QueryValueEx", dict(return_value=(5, winreg.REG_QWORD)))):
+        with patch.object(winreg, ten, **kw) as gia:
+            try:
+                v = m._1174_win_boot_id()
+            except m._1174Error as ex:
+                ghi.append((nhan, str(ex)))
+            else:
+                raise AssertionError(f"B2 dòng {nhan!r}: phải từ chối (fail-closed) mà lại trả {v!r}")
+            assert gia.call_count == 1, f"B2 dòng {nhan!r}: runtime không đi qua winreg.{ten}"
+    return ghi
+
+
+CASES += [("wp1342_pure_seed_acl_bang", _pure_seed_acl1342), ("wp1342_pure_seed_boot_refuse", _pure_seed_boot1342)]
+CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for ten, fn in (
+    ("seed_ok", _n_seed_ok1342), ("seed_hardlink", _n_seed_hardlink1342), ("seed_acl", _n_seed_acl1342),
+    ("seed_fingerprint", _n_seed_fingerprint1342), ("seed_nonfile", _n_seed_nonfile1342), ("seed_drift", _n_seed_drift1342),
+    ("boot_stable", _n_boot_stable1342), ("boot_failclosed", _n_boot_failclosed1342))]
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+escaped ('type name',)
+escaped ('overridden add_note',)
+['cleanup: ValueError']
+?? ops/reviews/wp1342-spec-r1/
+?? ops/reviews/wp1342-spec-r2/
+?? ops/reviews/wp1342-spec-r3/
+?? ops/reviews/wp1342-spec-r4/
+?? ops/specs/WP1174-WINDOWS-BACKEND-r1.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r2.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r3.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban1.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban2.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban3.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban4.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+
+exec
+/bin/bash -lc "python -B - <<'PY'
+import ast, collections, difflib, subprocess, warnings
+warnings.simplefilter('ignore',SyntaxWarning)
+s=subprocess.check_output(['git','show','HEAD:.claude/dev/packet_loop_test.py']).decode()
+def lo(n): return min([n.lineno]+[d.lineno for d in getattr(n,'decorator_list',())])-1
+A=s.splitlines(True); X=ast.parse(s).body
+D=(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef,ast.Assign,ast.AnnAssign,ast.AugAssign)
+def binds(nodes, skip=()):
+ c=collections.Counter()
+ for n in nodes:
+  if n in skip: continue
+  if isinstance(n,D[:3]): c[n.name]+=1; continue
+  if isinstance(n,(ast.Import,ast.ImportFrom)): c.update(a.asname or a.name.split('.')[0] for a in n.names)
+  if isinstance(n,(ast.If,ast.Try,ast.With,ast.For,ast.While,ast.ExceptHandler)):
+   for k in ('body','orelse','handlers','finalbody'): c.update(binds(getattr(n,k,())))
+  t=getattr(n,'targets',[getattr(n,'target',None)])
+  if isinstance(n,ast.With): t=[a.optional_vars for a in n.items]
+  for a in t:
+   if a: c.update(j.id for j in ast.walk(a) if isinstance(j,ast.Name) and isinstance(j.ctx,ast.Store))
+ return c
+C=binds(X)
+def allowed(n):
+ if isinstance(n,(ast.FunctionDef,ast.ClassDef)): return n.name not in C and not n.decorator_list
+ if isinstance(n,ast.Assign): return len(n.targets)==1 and isinstance(n.targets[0],ast.Name) and n.targets[0].id not in C
+ return isinstance(n,ast.AugAssign) and isinstance(n.target,ast.Name) and n.target.id=='CASES' and isinstance(n.op,ast.Add) and isinstance(n.value,ast.List)
+def check(h):
+ B=h.splitlines(True); Y=ast.parse(h).body
+ ops=difflib.SequenceMatcher(None,A,B,autojunk=False).get_opcodes()
+ eq={a+i:c+i for k,a,b,c,d in ops if k=='equal' for i in range(b-a)}
+ def preserved(n):
+  return any(lo(m)==eq.get(lo(n)) and B[lo(m):m.end_lineno]==A[lo(n):n.end_lineno] for m in Y if isinstance(m,D))
+ def good(a,c,d):
+  if any(lo(n)<a<n.end_lineno for n in X): return False
+  try: return all(map(allowed,ast.parse(''.join(B[c:d])).body))
+  except SyntaxError: return False
+ ins=[(a,c,d) for k,a,b,c,d in ops if k=='insert']
+ exc=[n for n in Y if isinstance(n,ast.AugAssign) and allowed(n) and any(c<=lo(n) and n.end_lineno<=d for a,c,d in ins)]
+ raw=binds(Y); amended=binds(Y,exc)
+ return (all(preserved(n) for n in X if isinstance(n,D)),all(raw[k]==v for k,v in C.items()),all(k in ('equal','insert') for k,*_ in ops),all(good(*i) for i in ins)), all(amended[k]==v for k,v in C.items()),(C['CASES'],raw['CASES'])
+n=next(n for n in X if getattr(n,'name','')=='_native1342')
+p=next(lo(n) for n in X if getattr(n,'name','')=='_additive1342r2')
+def splice(i,t): return ''.join(A[:i])+t+''.join(A[i:])
+rows={'base':s,'return':splice(lo(n.body[0]),'    return lambda c: None\\n'),'duplicate':s+'\\ndef _native1342(f): pass\\n','decorator':splice(lo(n),'@(lambda fn: lambda *a: None)\\n'),'if':splice(p,'if True: _native1342 = None\\n'),'match':splice(p,'match None:\\n    case _native1342: pass\\n'),'walrus':splice(p,'if (_native1342 := None): pass\\n'),'del':splice(p,'del _native1342\\n'),'valid':splice(p,'def _r4_a():\\n    return True\\ndef _r4_b():\\n    return True\\n_r4_x = 1\\nCASES += [(\"r4\", _r4_a), (\"r4b\", _r4_b)]\\n'),'rhs':splice(p,'_r4_x = (_native1342 := None)\\n'),'default':splice(p,'def _r4_a(x=(_native1342 := None)):\\n    pass\\n')}
+for k,h in rows.items(): print(k,check(h),flush=True)
+print(collections.Counter(type(n).__name__ for n in X))
+PY" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+exec
+/bin/bash -lc "python -B - <<'PY'
+from threading import Event, Lock, Thread
+from subprocess import Popen
+from inspect import signature
+lock=Lock(); done=Event(); release=Event(); box={}; huy=False; closed=[]
+def worker():
+ with lock:
+  if huy: closed.append('H')
+  else: box['handle']='H'
+ done.set(); release.wait()
+t=Thread(target=worker); t.start()
+assert done.wait(1)
+t.join(0)
+assert t.is_alive()
+with lock: huy=True
+release.set(); t.join()
+assert box=={'handle':'H'} and not closed
+print('M6: join timeout after handoff leaves H unclosed')
+print('positional wait',signature(Popen.wait).bind(None,6).arguments)
+vector=100+86401
+print('S5 after 1-second scheduling delay: accepts', 101 < vector <= 101+86400)
+PY
+git diff --exit-code; git diff --cached --exit-code; git diff --no-index --numstat ops/specs/WP1174-WINDOWS-BACKEND-r4{\\-ban4,}.md" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ exited 1 in 0ms:
+M6: join timeout after handoff leaves H unclosed
+positional wait {'self': None, 'timeout': 6}
+S5 after 1-second scheduling delay: accepts True
+23	22	ops/specs/{WP1174-WINDOWS-BACKEND-r4-ban4.md => WP1174-WINDOWS-BACKEND-r4.md}
+
+ succeeded in 11518ms:
+base ((True, True, True, True), True, (85, 85))
+return ((False, True, True, False), True, (85, 85))
+duplicate ((True, False, True, False), False, (85, 85))
+decorator ((False, True, True, False), True, (85, 85))
+if ((True, False, True, False), False, (85, 85))
+match ((True, True, True, False), True, (85, 85))
+walrus ((True, True, True, False), True, (85, 85))
+del ((True, True, True, False), True, (85, 85))
+valid ((True, False, True, True), True, (85, 86))
+rhs ((True, True, True, True), True, (85, 85))
+default ((True, True, True, True), True, (85, 85))
+Counter({'FunctionDef': 570, 'Assign': 293, 'AugAssign': 90, 'Expr': 89, 'For': 80, 'Import': 12, 'ClassDef': 4, 'ImportFrom': 3, 'AnnAssign': 2, 'Assert': 2, 'If': 1})
+
+codex
+## Review độc lập lượt 5 · Issue #1342 · r1d-a1-i
+
+Còn P2 ở hợp đồng ghi chú, bàn giao handle, giao thức fixture và tiêu chí N2/N7.
+
+Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 bản 4 khớp verdict lượt 4. SHA-256 bản hiện tại là `37522b2d8c7c1651076c8c739ab86cdffeaad014d46fed9b47dab44ed91f9fee`. `git diff --no-index --numstat` trả `1`, ghi 23 dòng thêm và 22 dòng xóa.
+
+Phiên `openai_codex / codex_cli / machine`, Linux, CPython 3.13.18, chỉ đọc, không gọi mạng. Model cụ thể và effort chưa xác minh. Các phép `python -B -` chạy trong RAM. Windows Desktop, VM, CI và driver đột biến trên mã triển khai đều `not_run`. Số dòng trong các bảng dưới đây trỏ vào đặc tả hiện tại. [Đặc tả r4](ops/specs/WP1174-WINDOWS-BACKEND-r4.md)
+
+### Finding lượt 4
+
+| ID | Trạng thái | Đối chiếu |
+|---|---|---|
+| F1 | **Chưa đóng** | M2/M4(9), dòng 67/69, bỏ `args` và `repr`. S4 kiểm được phản chứng cũ, nhưng biểu thức mới vẫn gọi mã tùy biến. Xem R5-1. |
+| F2 | **Đóng** | §2 dòng 49 đòi đồng thời có `rc` và thu hồi đã xác nhận. Lỗi gốc vẫn được ném. Phạm vi handle giới hạn theo quyền sở hữu, `_handle` thuộc `Popen`. |
+| F3 | **Chưa đóng** | M6 dòng 71 xử lý được worker hoàn tất sau khi `huy` đã đặt. Còn đường bàn giao thành công ngay trước khi `join` hết hạn. Xem R5-3. |
+| F4 | **Chưa đóng** | M6 dòng 71 bỏ chờ ở `da_gan` và đặt chốt riêng cho J10/J10b. M7 dòng 72 vẫn ghi `sleep(30)` và `giu`. `tha_phu` có hạn nhưng chưa khóa thời gian sống còn lại. Xem R5-4. |
+| F5 | **Chưa đóng** | N2 dòng 104 làm đỏ cả bảy phản chứng được giao. Khối chèn hợp lệ đỏ ở (ii), còn hai biến thể walrus xanh theo cách đo hình dạng câu lệnh. Xem R5-5 và R5-6. |
+| F6 | **Chưa đóng** | §4b dòng 79/82/90 đã neo cả khối `a1`, dùng đúng marker cho `b` và thống nhất cửa sổ 6–11 s của `d0`. Còn thiếu điều kiện giữ con sống cho `b`, và “bỏ `timeout=`” vẫn cho phép giữ nguyên timeout vị trí. Xem R5-7. |
+| F7 | **Đóng** | N8 và §7 dòng 110/121 cùng dùng `git diff --numstat <base>..<H>` không lọc đường dẫn, so tập đường dẫn với write set và cộng dòng thêm trên toàn diff. |
+| F8 | **Chưa đóng** | Dòng 93 đổi nhãn `d1` sang ngoài miền nhận, nhưng cột đường vẫn mô tả chờ vô hạn. S5 chụp `now` để dựng vector, còn M4(0) đọc đồng hồ mới. Xem R5-8. |
+
+### Finding lượt 5
+
+- **R5-1 · P2 — `_1174_win_note` vẫn có thể thay lỗi thắng.** Tôi chạy đúng biểu thức M2 trong RAM. Một ngoại lệ dọn có metaclass ghi đè `__getattribute__` cho `__name__`, hoặc lỗi gốc ghi đè `add_note`, đều có thể ném một lớp con `BaseException` thoát khỏi `except Exception`. S4 dòng 70 dùng `RuntimeError` chuẩn và chỉ gài `__repr__`/`__str__` vào đối số của lỗi dọn, nên cả hai đường mới đều lọt. Chốt cách đính kèm và hành vi khi chẩn đoán lỗi, rồi kiểm cả hai phản chứng trong S4.
+- **R5-2 · P2 — Ghi chú chỉ tên kiểu làm mất dấu hiệu phân biệt `a1` và `k2`.** Dưới `a1`, J9 vẫn có phụ sống và `xac_nhan` vẫn sinh `_1174Error("job not empty")`. M2 chỉ tạo `"cleanup: _1174Error"`, nên J9 thỏa luôn điều kiện hiện ghi cho `k2`: phụ còn sống và không có ghi chú chứa `"job not empty"`. Dòng 86/95 cần một dấu hiệu quan sát được của riêng bước `xac_nhan`, chẳng hạn mã bước cố định đi cùng tên kiểu.
+- **R5-3 · P2 — Timeout sau bàn giao bỏ sót handle đã chuyển quyền.** Tôi mô phỏng M6 bằng `Thread`, `Lock` và `Event`. Worker công bố handle dưới khóa rồi bị giữ trước khi thoát. Luồng chính thấy `join` hết hạn, đặt `huy` và không đóng handle. Worker đã chuyển quyền nên cũng không đóng. Khi hết hạn, kiểm ô bàn giao dưới cùng khóa. Luồng chính dọn handle đã nhận, worker dọn handle chưa bàn giao. Giữ kết quả ca là `KHÔNG ĐO`.
+- **R5-4 · P2 — J10/J10b có hai giao thức, J9 chưa xác nhận đủ cửa sổ sống.** Dòng 71 dùng `tha_truoc_gan` và `tha_ket`, còn dòng 72 dùng `giu` và `sleep(30)`. `da_gan` và `chau` chứng minh đã gán và đã resume, nhưng trợ giúp có thể bị ngưng lịch ngay sau resume, trước khi vào `wait` ở (8). Cần thống nhất M6/M7 và có bằng chứng trợ giúp đã vào đường chờ trước cú giết nếu (8) là điều kiện đo. Với J9, hạn 60 s tính từ lúc phụ bắt đầu chờ. Phụ có thể gần hết hạn khi `between` chạy hoặc khi ca đọc kết quả. Xác nhận thời gian sống còn lại đủ cho cả cleanup và phép đọc, rồi phân loại `KHÔNG ĐO` nếu fixture tự hết hạn.
+- **R5-5 · P2 — N2(ii) cấm chính mẫu đăng ký mà N2(iv) cho phép.** Phép đo trên blob base đếm 85 điểm bind của `CASES`. Khối hợp lệ có hai `def` mới, một gán tên mới và một `CASES += [...]` nâng số đếm lên 86, nên đỏ ở (ii). Trong RAM, chỉ khi loại đúng khối đăng ký mới đã được (iv) chấp nhận khỏi phép đếm thì cả bốn vế mới xanh. Ghi ngoại lệ này vào (ii) để hai vế có cùng hợp đồng.
+- **R5-6 · P2 — N2(iv) chưa khóa biểu thức được thực thi khi nạp module.** Với danh sách cho phép xét dạng câu lệnh ngoài cùng, cả `_r4_x = (_native1342 := None)` và `def _r4_a(x=(_native1342 := None)):` đều xanh cả bốn vế. Cả hai gán lại tên cũ ở lúc nạp module. Dòng 104 cần nói rõ cách xét RHS, giá trị mặc định, annotation, biểu thức dựng lớp và phần tử đăng ký, đồng thời giữ đường gọi `_native1342(...)` mà M7 cần để đăng ký ca native.
+- **R5-7 · P2 — `b` và `d0` chưa khóa được phép đổi tới dấu hiệu đích.** Với `b`, J6 có thể ghi marker rồi thoát trước khi `AssignProcessToJobObject` chạy, khiến đột biến đỏ ở gán job hoặc chọn luồng thay vì J6(ii). Giữ con sống qua phép kiểm trong `between` bằng chốt hữu hạn. Với `d0`, `Popen.wait(min(con_lai, 60.0))` vẫn truyền timeout. Tôi xác nhận bằng `inspect.signature(Popen.wait).bind(...)` trong RAM. Ghi phép thay đầy đủ thành `proc.wait()`.
+- **R5-8 · P3 — Vector biên `d1` còn phụ thuộc độ trễ lịch.** Dựng `deadline = now + 86401` rồi để M4(0) đọc đồng hồ sau đúng 1 s làm deadline chạm cận trên và được nhận trên head khỏe. Phép tính này đã được tái hiện trong RAM. Dùng cùng giá trị đồng hồ kiểm soát được cho vector và phép kiểm. Đồng bộ cột mô tả §4b với lỗi nhận deadline ngoài miền, vì lát chờ 60 s vẫn giữ nguyên.
+
+### N2 chạy trong RAM
+
+Hai lượt dùng `python -B -`, đọc blob bằng `git show HEAD:.claude/dev/packet_loop_test.py`. Lượt đầu trả `1` tại assertion yêu cầu khối hợp lệ xanh. Lượt thứ hai trả `0` và in kết quả từng vế, gồm phép thử với ngoại lệ đếm `CASES` ở R5-5. Đây là phép đo AST và diff dòng theo đặc tả, trước khi có driver triển khai.
+
+| Ca | (i) Byte định nghĩa | (ii) Điểm bind | (iii) Chỉ thêm dòng | (iv) Dạng chèn |
+|---|---|---|---|---|
+| Base | Xanh | Xanh | Xanh | Xanh |
+| Chèn `return` vào `_native1342` | Đỏ | Xanh | Xanh | Đỏ |
+| `def _native1342` trùng cuối tệp | Xanh | Đỏ | Xanh | Đỏ |
+| Tiêm decorator | Đỏ | Xanh | Xanh | Đỏ |
+| `if True:` gán lại | Xanh | Đỏ | Xanh | Đỏ |
+| `match` / `case _native1342` | Xanh | Xanh | Xanh | Đỏ |
+| Walrus trong `if` | Xanh | Xanh | Xanh | Đỏ |
+| `del _native1342` | Xanh | Xanh | Xanh | Đỏ |
+| Hai `def` mới, một gán tên mới, `CASES += [...]` | Xanh | **Đỏ** | Xanh | Xanh |
+| Walrus trong RHS của gán tên mới | Xanh | Xanh | Xanh | **Xanh** |
+| Walrus trong giá trị mặc định của `def` mới | Xanh | Xanh | Xanh | **Xanh** |
+
+Base còn có import, vòng `for`, lời gọi độc lập, `CASES += [...]` dạng list comprehension và `if __name__ == "__main__"`. R4 có thể đặt import trong helper và đăng ký bằng list literal, nên tôi không thấy dạng câu lệnh module bị cấm nào khác mà r4 bắt buộc phải thêm. Đăng ký native vẫn cần cho phép lời gọi wrapper trong phần tử của list, như base đang làm. `MUTANTS_NHAM_TEST` giữ 14 điểm bind.
+
+### 15 đột biến §4b
+
+Mỗi hàng dưới đây xác định neo và dấu hiệu trên mã dự kiến. Số lần khớp byte-exact và tính độc quyền khi chạy cần xác nhận bằng driver trên mã triển khai.
+
+| ID | Neo và dấu hiệu |
+|---|---|
+| `a1` | Một khối `terminate` cùng kiểm BOOL ở M4(9). J3 `job not empty`. Dưới J9 còn gây nhầm dấu hiệu `k2`, R5-2. |
+| `a2` | Một giá trị `JOB_LIMIT`. J10 con/cháu còn sống. S1 `JOB_LIMIT` cũng đỏ bằng nhãn riêng. J10 phụ thuộc R5-4. |
+| `a3` | Một nhánh query FALSE ở M3. J11 nhận handle tệp thành job rỗng. |
+| `b` | Một khối đổi thứ tự (5)–(7). J6(ii) marker đã có, với J6(i) xanh. Còn tiền điều kiện giữ con sống, R5-7. |
+| `c` | Một giá trị `SPAWN_FLAGS`. S1 đỏ đúng assertion cờ. Nếu đến J6, (i) đỏ trước (ii). |
+| `h` | Một điểm chèn sau đăng ký đóng job ở (1). J7 đọc được `HANDLE_FLAG_INHERIT` sau khi phép tiêm trả TRUE. |
+| `k1` | Một đăng ký `kill_truoc_gan`. J8 bản sao handle con chưa signaled sau lỗi `j8`. |
+| `k2` | Một lần dời `da_gan = True`. J9 phụ sống và thiếu dấu `xac_nhan`. Dấu hiện tại trùng `a1`, R5-2. |
+| `k3` | Một nhánh bắt lỗi của helper cleanup. S4 `bước 2 không chạy`. |
+| `t1` | Một nhánh chọn ứng viên. S2 nhận sai vector hai ứng viên. |
+| `t2` | Một điều kiện nhận resume count. S3 `count=2`. |
+| `d0` | Một lời gọi `proc.wait` ở (8). J2 cần đỏ ở nhãn thiếu lỗi deadline trong 6–11 s. Phải bỏ cả đối số timeout, R5-7. |
+| `g0` | Một khối đổi thứ tự kiểm nền và đối số. S5 trên Linux đỏ tại vector `argv=[]` đầu tiên. |
+| `abi` | Một kiểu trường `th32OwnerProcessID`. J0 thu cả offset và size, chọn nhãn offset trước. |
+| `d1` | Một vế cận trên. S5 đỏ tại `now+86401`, với lát chờ giữ nguyên. Vector còn phụ thuộc đồng hồ, R5-8. |
+
+### N1–N8 theo L1–L7
+
+| Tiêu chí | Kết quả review |
+|---|---|
+| N1 | Khóa từng ID, khóa `MUTANTS` và đếm từng neo. Có phản chứng cho cả ba phép đo theo L1/L3/L6. |
+| N2 | Base xanh và bảy phản chứng được giao đỏ. Khối hợp lệ đỏ ở (ii), hai phản chứng biểu thức xanh sai theo L3/L6. |
+| N3 | Tập dương đúng mười tên. Có phản chứng thiếu khối và nối dây theo L1/L3/L6. |
+| N4 | Có vector và nhãn cho S1–S5. S4 chưa chứng minh bảo toàn lỗi thắng ở bước gắn note. S5 chưa khóa đồng hồ cho `d1`. |
+| N5 | So từng ID và từng trường ổn định trên base/head cùng lượt. Có phép đỏ tại assertion claim Windows theo L3/L5/L6. |
+| N6 | Tập ID, Desktop/VM, dấu hiệu dương và `KHÔNG ĐO` đã rõ. Còn đường timeout bàn giao và điều kiện fixture ở R5-3/R5-4. |
+| N7 | Đếm đúng 15 ID và 16 lượt chạy. Yêu cầu một neo mỗi cặp và đúng nhãn. Tính độc quyền `a1`/`k2` và đường tới nhãn `b`/`d0` còn hở. |
+| N8 | Ruff đã ghim. Phép đo toàn diff bắt được tệp thứ ba và áp trần trên numstat thật theo L2/L3/L6. |
+
+Hai đường dẫn và driver ngoài kho phù hợp L2. L4 khai `khong_ap_dung`. L5 ghi mốc đo base và ba mốc đo lại. L7 dẫn protocol/ADR cho các điểm dừng và ghi E2 ở các quyết định thuộc chủ kho. Không có finding ngân sách theo ngưỡng điểm giữa đã giao.
+
+KET_LUAN: request_changes
+tokens used
+55,928
+## Review độc lập lượt 5 · Issue #1342 · r1d-a1-i
+
+Còn P2 ở hợp đồng ghi chú, bàn giao handle, giao thức fixture và tiêu chí N2/N7.
+
+Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 bản 4 khớp verdict lượt 4. SHA-256 bản hiện tại là `37522b2d8c7c1651076c8c739ab86cdffeaad014d46fed9b47dab44ed91f9fee`. `git diff --no-index --numstat` trả `1`, ghi 23 dòng thêm và 22 dòng xóa.
+
+Phiên `openai_codex / codex_cli / machine`, Linux, CPython 3.13.18, chỉ đọc, không gọi mạng. Model cụ thể và effort chưa xác minh. Các phép `python -B -` chạy trong RAM. Windows Desktop, VM, CI và driver đột biến trên mã triển khai đều `not_run`. Số dòng trong các bảng dưới đây trỏ vào đặc tả hiện tại. [Đặc tả r4](ops/specs/WP1174-WINDOWS-BACKEND-r4.md)
+
+### Finding lượt 4
+
+| ID | Trạng thái | Đối chiếu |
+|---|---|---|
+| F1 | **Chưa đóng** | M2/M4(9), dòng 67/69, bỏ `args` và `repr`. S4 kiểm được phản chứng cũ, nhưng biểu thức mới vẫn gọi mã tùy biến. Xem R5-1. |
+| F2 | **Đóng** | §2 dòng 49 đòi đồng thời có `rc` và thu hồi đã xác nhận. Lỗi gốc vẫn được ném. Phạm vi handle giới hạn theo quyền sở hữu, `_handle` thuộc `Popen`. |
+| F3 | **Chưa đóng** | M6 dòng 71 xử lý được worker hoàn tất sau khi `huy` đã đặt. Còn đường bàn giao thành công ngay trước khi `join` hết hạn. Xem R5-3. |
+| F4 | **Chưa đóng** | M6 dòng 71 bỏ chờ ở `da_gan` và đặt chốt riêng cho J10/J10b. M7 dòng 72 vẫn ghi `sleep(30)` và `giu`. `tha_phu` có hạn nhưng chưa khóa thời gian sống còn lại. Xem R5-4. |
+| F5 | **Chưa đóng** | N2 dòng 104 làm đỏ cả bảy phản chứng được giao. Khối chèn hợp lệ đỏ ở (ii), còn hai biến thể walrus xanh theo cách đo hình dạng câu lệnh. Xem R5-5 và R5-6. |
+| F6 | **Chưa đóng** | §4b dòng 79/82/90 đã neo cả khối `a1`, dùng đúng marker cho `b` và thống nhất cửa sổ 6–11 s của `d0`. Còn thiếu điều kiện giữ con sống cho `b`, và “bỏ `timeout=`” vẫn cho phép giữ nguyên timeout vị trí. Xem R5-7. |
+| F7 | **Đóng** | N8 và §7 dòng 110/121 cùng dùng `git diff --numstat <base>..<H>` không lọc đường dẫn, so tập đường dẫn với write set và cộng dòng thêm trên toàn diff. |
+| F8 | **Chưa đóng** | Dòng 93 đổi nhãn `d1` sang ngoài miền nhận, nhưng cột đường vẫn mô tả chờ vô hạn. S5 chụp `now` để dựng vector, còn M4(0) đọc đồng hồ mới. Xem R5-8. |
+
+### Finding lượt 5
+
+- **R5-1 · P2 — `_1174_win_note` vẫn có thể thay lỗi thắng.** Tôi chạy đúng biểu thức M2 trong RAM. Một ngoại lệ dọn có metaclass ghi đè `__getattribute__` cho `__name__`, hoặc lỗi gốc ghi đè `add_note`, đều có thể ném một lớp con `BaseException` thoát khỏi `except Exception`. S4 dòng 70 dùng `RuntimeError` chuẩn và chỉ gài `__repr__`/`__str__` vào đối số của lỗi dọn, nên cả hai đường mới đều lọt. Chốt cách đính kèm và hành vi khi chẩn đoán lỗi, rồi kiểm cả hai phản chứng trong S4.
+- **R5-2 · P2 — Ghi chú chỉ tên kiểu làm mất dấu hiệu phân biệt `a1` và `k2`.** Dưới `a1`, J9 vẫn có phụ sống và `xac_nhan` vẫn sinh `_1174Error("job not empty")`. M2 chỉ tạo `"cleanup: _1174Error"`, nên J9 thỏa luôn điều kiện hiện ghi cho `k2`: phụ còn sống và không có ghi chú chứa `"job not empty"`. Dòng 86/95 cần một dấu hiệu quan sát được của riêng bước `xac_nhan`, chẳng hạn mã bước cố định đi cùng tên kiểu.
+- **R5-3 · P2 — Timeout sau bàn giao bỏ sót handle đã chuyển quyền.** Tôi mô phỏng M6 bằng `Thread`, `Lock` và `Event`. Worker công bố handle dưới khóa rồi bị giữ trước khi thoát. Luồng chính thấy `join` hết hạn, đặt `huy` và không đóng handle. Worker đã chuyển quyền nên cũng không đóng. Khi hết hạn, kiểm ô bàn giao dưới cùng khóa. Luồng chính dọn handle đã nhận, worker dọn handle chưa bàn giao. Giữ kết quả ca là `KHÔNG ĐO`.
+- **R5-4 · P2 — J10/J10b có hai giao thức, J9 chưa xác nhận đủ cửa sổ sống.** Dòng 71 dùng `tha_truoc_gan` và `tha_ket`, còn dòng 72 dùng `giu` và `sleep(30)`. `da_gan` và `chau` chứng minh đã gán và đã resume, nhưng trợ giúp có thể bị ngưng lịch ngay sau resume, trước khi vào `wait` ở (8). Cần thống nhất M6/M7 và có bằng chứng trợ giúp đã vào đường chờ trước cú giết nếu (8) là điều kiện đo. Với J9, hạn 60 s tính từ lúc phụ bắt đầu chờ. Phụ có thể gần hết hạn khi `between` chạy hoặc khi ca đọc kết quả. Xác nhận thời gian sống còn lại đủ cho cả cleanup và phép đọc, rồi phân loại `KHÔNG ĐO` nếu fixture tự hết hạn.
+- **R5-5 · P2 — N2(ii) cấm chính mẫu đăng ký mà N2(iv) cho phép.** Phép đo trên blob base đếm 85 điểm bind của `CASES`. Khối hợp lệ có hai `def` mới, một gán tên mới và một `CASES += [...]` nâng số đếm lên 86, nên đỏ ở (ii). Trong RAM, chỉ khi loại đúng khối đăng ký mới đã được (iv) chấp nhận khỏi phép đếm thì cả bốn vế mới xanh. Ghi ngoại lệ này vào (ii) để hai vế có cùng hợp đồng.
+- **R5-6 · P2 — N2(iv) chưa khóa biểu thức được thực thi khi nạp module.** Với danh sách cho phép xét dạng câu lệnh ngoài cùng, cả `_r4_x = (_native1342 := None)` và `def _r4_a(x=(_native1342 := None)):` đều xanh cả bốn vế. Cả hai gán lại tên cũ ở lúc nạp module. Dòng 104 cần nói rõ cách xét RHS, giá trị mặc định, annotation, biểu thức dựng lớp và phần tử đăng ký, đồng thời giữ đường gọi `_native1342(...)` mà M7 cần để đăng ký ca native.
+- **R5-7 · P2 — `b` và `d0` chưa khóa được phép đổi tới dấu hiệu đích.** Với `b`, J6 có thể ghi marker rồi thoát trước khi `AssignProcessToJobObject` chạy, khiến đột biến đỏ ở gán job hoặc chọn luồng thay vì J6(ii). Giữ con sống qua phép kiểm trong `between` bằng chốt hữu hạn. Với `d0`, `Popen.wait(min(con_lai, 60.0))` vẫn truyền timeout. Tôi xác nhận bằng `inspect.signature(Popen.wait).bind(...)` trong RAM. Ghi phép thay đầy đủ thành `proc.wait()`.
+- **R5-8 · P3 — Vector biên `d1` còn phụ thuộc độ trễ lịch.** Dựng `deadline = now + 86401` rồi để M4(0) đọc đồng hồ sau đúng 1 s làm deadline chạm cận trên và được nhận trên head khỏe. Phép tính này đã được tái hiện trong RAM. Dùng cùng giá trị đồng hồ kiểm soát được cho vector và phép kiểm. Đồng bộ cột mô tả §4b với lỗi nhận deadline ngoài miền, vì lát chờ 60 s vẫn giữ nguyên.
+
+### N2 chạy trong RAM
+
+Hai lượt dùng `python -B -`, đọc blob bằng `git show HEAD:.claude/dev/packet_loop_test.py`. Lượt đầu trả `1` tại assertion yêu cầu khối hợp lệ xanh. Lượt thứ hai trả `0` và in kết quả từng vế, gồm phép thử với ngoại lệ đếm `CASES` ở R5-5. Đây là phép đo AST và diff dòng theo đặc tả, trước khi có driver triển khai.
+
+| Ca | (i) Byte định nghĩa | (ii) Điểm bind | (iii) Chỉ thêm dòng | (iv) Dạng chèn |
+|---|---|---|---|---|
+| Base | Xanh | Xanh | Xanh | Xanh |
+| Chèn `return` vào `_native1342` | Đỏ | Xanh | Xanh | Đỏ |
+| `def _native1342` trùng cuối tệp | Xanh | Đỏ | Xanh | Đỏ |
+| Tiêm decorator | Đỏ | Xanh | Xanh | Đỏ |
+| `if True:` gán lại | Xanh | Đỏ | Xanh | Đỏ |
+| `match` / `case _native1342` | Xanh | Xanh | Xanh | Đỏ |
+| Walrus trong `if` | Xanh | Xanh | Xanh | Đỏ |
+| `del _native1342` | Xanh | Xanh | Xanh | Đỏ |
+| Hai `def` mới, một gán tên mới, `CASES += [...]` | Xanh | **Đỏ** | Xanh | Xanh |
+| Walrus trong RHS của gán tên mới | Xanh | Xanh | Xanh | **Xanh** |
+| Walrus trong giá trị mặc định của `def` mới | Xanh | Xanh | Xanh | **Xanh** |
+
+Base còn có import, vòng `for`, lời gọi độc lập, `CASES += [...]` dạng list comprehension và `if __name__ == "__main__"`. R4 có thể đặt import trong helper và đăng ký bằng list literal, nên tôi không thấy dạng câu lệnh module bị cấm nào khác mà r4 bắt buộc phải thêm. Đăng ký native vẫn cần cho phép lời gọi wrapper trong phần tử của list, như base đang làm. `MUTANTS_NHAM_TEST` giữ 14 điểm bind.
+
+### 15 đột biến §4b
+
+Mỗi hàng dưới đây xác định neo và dấu hiệu trên mã dự kiến. Số lần khớp byte-exact và tính độc quyền khi chạy cần xác nhận bằng driver trên mã triển khai.
+
+| ID | Neo và dấu hiệu |
+|---|---|
+| `a1` | Một khối `terminate` cùng kiểm BOOL ở M4(9). J3 `job not empty`. Dưới J9 còn gây nhầm dấu hiệu `k2`, R5-2. |
+| `a2` | Một giá trị `JOB_LIMIT`. J10 con/cháu còn sống. S1 `JOB_LIMIT` cũng đỏ bằng nhãn riêng. J10 phụ thuộc R5-4. |
+| `a3` | Một nhánh query FALSE ở M3. J11 nhận handle tệp thành job rỗng. |
+| `b` | Một khối đổi thứ tự (5)–(7). J6(ii) marker đã có, với J6(i) xanh. Còn tiền điều kiện giữ con sống, R5-7. |
+| `c` | Một giá trị `SPAWN_FLAGS`. S1 đỏ đúng assertion cờ. Nếu đến J6, (i) đỏ trước (ii). |
+| `h` | Một điểm chèn sau đăng ký đóng job ở (1). J7 đọc được `HANDLE_FLAG_INHERIT` sau khi phép tiêm trả TRUE. |
+| `k1` | Một đăng ký `kill_truoc_gan`. J8 bản sao handle con chưa signaled sau lỗi `j8`. |
+| `k2` | Một lần dời `da_gan = True`. J9 phụ sống và thiếu dấu `xac_nhan`. Dấu hiện tại trùng `a1`, R5-2. |
+| `k3` | Một nhánh bắt lỗi của helper cleanup. S4 `bước 2 không chạy`. |
+| `t1` | Một nhánh chọn ứng viên. S2 nhận sai vector hai ứng viên. |
+| `t2` | Một điều kiện nhận resume count. S3 `count=2`. |
+| `d0` | Một lời gọi `proc.wait` ở (8). J2 cần đỏ ở nhãn thiếu lỗi deadline trong 6–11 s. Phải bỏ cả đối số timeout, R5-7. |
+| `g0` | Một khối đổi thứ tự kiểm nền và đối số. S5 trên Linux đỏ tại vector `argv=[]` đầu tiên. |
+| `abi` | Một kiểu trường `th32OwnerProcessID`. J0 thu cả offset và size, chọn nhãn offset trước. |
+| `d1` | Một vế cận trên. S5 đỏ tại `now+86401`, với lát chờ giữ nguyên. Vector còn phụ thuộc đồng hồ, R5-8. |
+
+### N1–N8 theo L1–L7
+
+| Tiêu chí | Kết quả review |
+|---|---|
+| N1 | Khóa từng ID, khóa `MUTANTS` và đếm từng neo. Có phản chứng cho cả ba phép đo theo L1/L3/L6. |
+| N2 | Base xanh và bảy phản chứng được giao đỏ. Khối hợp lệ đỏ ở (ii), hai phản chứng biểu thức xanh sai theo L3/L6. |
+| N3 | Tập dương đúng mười tên. Có phản chứng thiếu khối và nối dây theo L1/L3/L6. |
+| N4 | Có vector và nhãn cho S1–S5. S4 chưa chứng minh bảo toàn lỗi thắng ở bước gắn note. S5 chưa khóa đồng hồ cho `d1`. |
+| N5 | So từng ID và từng trường ổn định trên base/head cùng lượt. Có phép đỏ tại assertion claim Windows theo L3/L5/L6. |
+| N6 | Tập ID, Desktop/VM, dấu hiệu dương và `KHÔNG ĐO` đã rõ. Còn đường timeout bàn giao và điều kiện fixture ở R5-3/R5-4. |
+| N7 | Đếm đúng 15 ID và 16 lượt chạy. Yêu cầu một neo mỗi cặp và đúng nhãn. Tính độc quyền `a1`/`k2` và đường tới nhãn `b`/`d0` còn hở. |
+| N8 | Ruff đã ghim. Phép đo toàn diff bắt được tệp thứ ba và áp trần trên numstat thật theo L2/L3/L6. |
+
+Hai đường dẫn và driver ngoài kho phù hợp L2. L4 khai `khong_ap_dung`. L5 ghi mốc đo base và ba mốc đo lại. L7 dẫn protocol/ADR cho các điểm dừng và ghi E2 ở các quyết định thuộc chủ kho. Không có finding ngân sách theo ngưỡng điểm giữa đã giao.
+
+KET_LUAN: request_changes

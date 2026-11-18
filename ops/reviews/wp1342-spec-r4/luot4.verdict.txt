@@ -1,0 +1,83 @@
+codex
+## Review độc lập lượt 4 — Issue #1342, r4 (`r1d-a1-i`)
+
+Còn P2 ở hợp đồng trả kết quả, giao thức fixture và tiêu chí nghiệm thu. Hai P1 của lượt 3 đã đóng.
+
+Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 bản 3 `fb7a24eedbf1de05a8bdc8bb3c96354b8bbac1f3c7b8a486ebc573be08c59ed4` khớp verdict lượt 3. SHA-256 bản hiện tại `d7a5d5b27ed64307f764febf36d5cfe2f11f89e18a09b69c05fe433eb386cf00`. `git diff --no-index --numstat` trả `1`, ghi **31 dòng thêm, 23 dòng xóa** từ bản 3 sang bản hiện tại.
+
+Phiên reviewer `openai_codex / codex_cli / machine`, Linux, CPython 3.13.18, chỉ đọc và không gọi mạng. Model cụ thể và effort chưa xác minh. Các phép `python -B -` trong RAM trả `0`. Windows Desktop, VM, CI và các đột biến trên mã triển khai đều `not_run`.
+
+### Đối chiếu finding lượt 3
+
+| Finding | Trạng thái | Đối chiếu bản hiện tại |
+|---|---|---|
+| P1 — `Popen` ném sau khi tạo con hoặc trả thiếu `_handle` | **Đóng** | §2 dòng 48 và M4(3) ghi rõ cả hai biến thể của nợ đã được chấp nhận. |
+| P1 — Deadline hữu hạn thành `INFINITE`, số nguyên lớn gây `OverflowError` | **Đóng** | M4(0)/(8), S5. So trực tiếp từ chối `10**400`. Tôi chạy `_wait` nhánh Windows trích từ CPython trong RAM. Timeout cũ truyền `4294967295` ms, lát 60 s truyền `60000` ms. Nhãn của `d0` còn lỗi riêng. |
+| P2 — Ưu tiên lỗi, ghi chú, hậu điều cleanup | **Chưa đóng** | M2 và S4 thống nhất `Exception` được gom, `KeyboardInterrupt` lan ra ngay. M4(9) chọn lỗi gốc hoặc lỗi dọn đầu tiên. §2 giải thích quyền sở hữu `_handle`. Biểu thức dựng ghi chú và mệnh đề `⇔` vẫn hở, xem F1–F2. |
+| P2 — J9 thiếu tiền điều kiện thành viên thứ hai | **Đóng về handle và kết quả gán** | M7/J9 dùng handle gốc, đòi `TRUE`, ghi mã Win32 và `KHÔNG ĐO` nếu gán thất bại. Khả năng dựng trên hai máy còn `not_run`. Cửa sổ giữ phụ sống còn hở, xem F4. |
+| P2 — Giao thức quan sát và trợ giúp | **Chưa đóng** | M6 thêm ô kết quả, `join(20)`, quy tắc mượn handle và kiểm trước cú giết. J2 tách lỗi bắt tay. J10b dùng đường ghi marker có đối chứng J1. Quyền sở hữu khi join hết hạn và thứ tự mở `giu` còn hở, xem F3–F4. |
+| P2 — N2 lọt decorator và gán lồng | **Chưa đóng** | N2 dòng 104 chặn đúng cả hai phản chứng cũ. Phạm vi duyệt vẫn bỏ sót điểm bind và xóa tên, xem phép đo F5. |
+| P2 — Dấu hiệu đột biến | **Đóng phần phân biệt J6 và thứ tự J0, còn N7** | J6(i) chạy trước J6(ii), nên `c` không thể đỏ ở (ii). J0 chấm offset trước size. Giao thức `b`, cửa sổ `k2` và nhãn `d0` còn hở, xem F4 và F6. |
+| P2 — N1–N8 | **Chưa đóng** | N6 đã liệt kê đúng ID. N7 ghi đúng 15 ID và 16 lần chạy. N8 ghim Ruff 0.15.15. N2, N4, N6–N8 còn các vấn đề bên dưới. |
+| P3 — Dẫn nguồn điểm dừng khi giả định `Popen` sai | **Đóng** | §7 dòng 123 dẫn quy tắc protocol về đổi thiết kế hoặc phạm vi sau khi đóng băng. |
+
+### Finding lượt 4
+
+- **F1 · P2 — Dựng ghi chú vẫn có thể thay lỗi thắng.** M4(9) tránh `repr(e)` nhưng `str(e.args[:1])` gọi `repr` của phần tử trong tuple. Tôi chạy biểu thức nguyên văn trong RAM với `ValueError(arg)` và `arg.__repr__` ném một lớp con của `BaseException`. Ngoại lệ mới thoát qua `except Exception` và thay `RuntimeError("j9")`. Đây là lỗi ở bước chẩn đoán sau cleanup. S4 hiện chỉ kiểm `__repr__` của chính ngoại lệ trong helper gom lỗi. Dùng nội dung ghi chú không gọi mã tùy biến và chấm cả bước gắn ghi chú lên lỗi thắng.
+- **F2 · P2 — Mệnh đề `trả rc ⇔ đã xác nhận thu hồi` mâu thuẫn với M4(9), J2 và J9.** J9 trên head khỏe có thể terminate thành công, query job rỗng, reap và đóng các handle do hàm quản lý, rồi vẫn phải ném đúng `j9`. J2 cũng có thể xác nhận thu hồi rồi ném lỗi deadline. §2 cần ghi hai điều kiện để trả `rc`: đường chạy đã có `rc` và cleanup đã xác nhận thành công. Lỗi gốc vẫn được ném dù cleanup đã xác nhận. Cụm “mọi handle” cần giới hạn theo quyền sở hữu đã ghi, vì `_handle` thuộc `Popen` và J9 cố ý giữ `proc`.
+- **F3 · P2 — `join(20)` hết hạn chưa giải quyết quyền sở hữu handle quan sát.** M6 cho luồng chính phân loại `KHÔNG ĐO` rồi đóng handle trong `finally`. Nếu worker đang mở handle hoặc chưa công bố vào ô khi `join` hết hạn, nó có thể công bố sau `finally` và làm rò handle. Nếu worker còn đang dùng handle đã công bố, luồng chính có thể đóng quá sớm. Cần quy định worker sở hữu handle đến khi bàn giao thành công, và tự đóng nếu bàn giao bị hủy. Chốt cả đường worker hoàn tất muộn.
+- **F4 · P2 — Fixture chưa xác định đủ thứ tự mốc và thời gian sống.** M6 nói trợ giúp chờ `giu` tại mỗi mốc. J10 lại đợi `da_gan` và `chau` trước cú giết. Nếu `da_gan` được ghi trong `between` rồi chờ tại đó, M4(7) chưa resume con và `chau` chưa thể xuất hiện. Nếu mở chung một tệp `giu` để qua mốc đầu, tệp cũ có thể mở luôn mốc cần giữ. Cần ghi mốc nào được mở, bên nào mở, và mốc nào giữ tới cú giết. Với J9, `sleep(30)` bắt đầu ở tiến trình phụ tạo trước, nên riêng độ dài giấc ngủ chưa bảo đảm còn đủ 5 s kể từ `between`. Giữ phụ sống bằng chốt có hạn cho đến khi ca đọc xong kết quả, hoặc xác nhận đủ thời gian còn lại trước phép đo `a1`/`k2`.
+- **F5 · P2 — N2 vẫn cho xanh khi thay hành vi tên cũ chỉ bằng dòng thêm.** Trên blob base, tôi so đoạn nguồn AST có decorator, đếm điểm bind theo danh sách scope N2 và chạy `difflib` trên dòng. Base xanh cả ba vế. `_native1342` có 1 điểm bind, `MUTANTS_NHAM_TEST` có 14 điểm hợp lệ. Kết quả bên dưới. N2 cần khóa cả bind bằng capture/walrus và xóa tên, hoặc so nguyên byte phần cũ sau khi loại đúng các khối thêm được phép.
+- **F6 · P2 — `b` và `d0` chưa có đường tất định tới nhãn N7.** J6 chỉ yêu cầu con ghi **marker**, còn §4b bắt `b` chờ **tệp bắt tay**. Nếu là hai tệp khác nhau, `b` hết hạn và bị chấm `KHÔNG ĐO`. Ghi cùng một tệp ở cả hai chỗ. Với `d0`, §4b dùng cửa sổ **3–8 s** còn J2 chấp nhận **6–11 s**. Dùng một cửa sổ và một nhãn ở cả J2, §4b và driver. Đồng thời, ghi anchor `a1` bao cả kiểm BOOL để bỏ lời gọi vẫn sinh mã hợp lệ.
+- **F7 · P2 — N8 và §7 cần cùng đếm toàn bộ diff.** N8 đòi phản chứng tệp thứ ba làm đỏ, nhưng §7 chỉ định đo numstat “trên đúng hai tệp”. Nếu executor lọc theo hai đường dẫn, phản chứng tệp thứ ba sẽ biến mất khỏi phép đo. Ghi lệnh không lọc đường dẫn, đối chiếu tập đường dẫn với write set, rồi cộng số dòng thêm.
+- **F8 · P3 — `d1` đo trần đầu vào, còn lát chờ khóa sentinel.** Sau khi bỏ riêng trần, M4(8) vẫn giới hạn mỗi lần chờ ở 60 s. Đổi mô tả hàng `d1` thành “deadline ngoài miền được nhận”; khóa số đo của S5 bằng cùng một giá trị `now` để tránh sai màu nếu tiến trình bị tạm dừng giữa lúc tạo vector và lúc kiểm.
+
+| N2 trong RAM | (i) Đoạn nguồn | (ii) Điểm bind | (iii) Chỉ thêm dòng |
+|---|---|---|---|
+| Base | Xanh | Xanh | Xanh |
+| Chèn `return lambda c: None` | **Đỏ** | Xanh | Xanh |
+| Thêm `def _native1342` trùng cuối tệp | Xanh | **Đỏ** | Xanh |
+| Tiêm decorator trước `def` | **Đỏ** | Xanh | Xanh |
+| Thêm `if True: _native1342 = None` | Xanh | **Đỏ** | Xanh |
+| Thêm `match None:` với `case _native1342: pass` | Xanh | Xanh | Xanh |
+| Thêm `if (_native1342 := None): pass` | Xanh | Xanh | Xanh |
+| Thêm `del _native1342` | Xanh | Xanh | Xanh |
+
+### Đối chiếu 15 đột biến §4b
+
+Đây là kiểm vị trí và dấu hiệu trên mã dự kiến. Số lần khớp byte-exact và tính độc quyền thực tế của từng dấu hiệu cần driver chạy trên mã triển khai.
+
+| ID | Vị trí dự kiến và dấu hiệu |
+|---|---|
+| `a1` | M4(9), một khối terminate và kiểm BOOL. J3 ném `job not empty`. `k2` đã đặt `da_gan` trên đường thuận J3. J9 dưới `a1` có note `job not empty` nếu phụ còn sống. |
+| `a2` | Một hằng `JOB_LIMIT`. J10 còn con/cháu sống sau khi trợ giúp chết nếu cú giết diễn ra đúng mốc F4. S1 `JOB_LIMIT` cũng đỏ, với nhãn riêng. |
+| `a3` | Một nhánh query FALSE trong M3. J11 nhận sai handle tệp thành job rỗng. |
+| `b` | Một khối đổi thứ tự (5)–(7). J6(ii) độc quyền với `c` nhờ J6(i), nhưng còn sai tên tệp chờ ở F6. |
+| `c` | Một hằng `SPAWN_FLAGS`. S1 đỏ đúng assertion trên Linux và Desktop. Nếu J6 tới hook, J6(i) đỏ trước (ii). |
+| `h` | Một điểm tiêm sau đăng ký `close_job`. Sau khi phép tiêm trả `TRUE`, J7 đọc thấy `HANDLE_FLAG_INHERIT`. |
+| `k1` | Một đăng ký `kill_truoc_gan`. J8 thấy bản sao con chưa signaled sau lỗi `j8`. |
+| `k2` | Một phép dời cập nhật `da_gan`. J9 thấy phụ còn sống và thiếu note `job not empty`. Phân biệt với `a1` phụ thuộc cửa sổ sống ở F4. |
+| `k3` | Một nhánh gom ngoại lệ trong M2. S4 đỏ `bước 2 không chạy`. |
+| `t1` | Một nhánh chọn ứng viên trong M2. S2 đỏ ở vector hai ứng viên. |
+| `t2` | Một điều kiện nhận resume count. S3 đỏ riêng `count=2`. |
+| `d0` | Một lời gọi `wait` trong M4(8). Bỏ đối số timeout làm chờ con `sleep(30)` qua hạn. Nhãn thời gian chưa khớp J2, xem F6. |
+| `g0` | Một khối đổi thứ tự kiểm nền và đối số. S5 trên Linux đỏ ở vector `argv=[]` đầu tiên. |
+| `abi` | Một kiểu trường `th32OwnerProcessID`. J0 thu đủ lỗi và chọn nhãn offset trước size theo thứ tự đã ghi. |
+| `d1` | Một vế so sánh cận trên. S5 đỏ ở `now+86401`, lát chờ giữ nguyên. Xem F8 về nhãn và đồng hồ của vector. |
+
+### N1–N8 theo L1–L7
+
+| Tiêu chí | Kết quả |
+|---|---|
+| N1 | Có vế dương và ba phản chứng theo từng ID, khóa và vị trí neo, phù hợp L1/L3/L6. |
+| N2 | Bốn phản chứng được giao đỏ đúng vế. Ba phản chứng mới xanh sai theo L3/L6, xem F5. |
+| N3 | Có vế dương đúng chín tên và vế âm nối dây. Hai phép đỏ phân biệt được theo L3/L6. |
+| N4 | S1–S5 có vector và nhãn riêng. S4 cần đo đường gắn ghi chú ở F1. Vector `d1` xem F8. |
+| N5 | So từng ID và trường ổn định trên base/head cùng lượt, có phép đỏ tại assertion claim. Phù hợp L3/L5/L6. |
+| N6 | Tập ID và môi trường đã rõ theo L1. Chưa đủ điều kiện quan sát tất định ở F3–F4. |
+| N7 | 15 ID, 16 lần chạy, yêu cầu đúng nhãn, đối chứng và đúng một neo mỗi cặp. Còn F4/F6 theo L3/L6. |
+| N8 | Ruff đã ghim. Phép đếm tệp thứ ba cần dùng toàn diff theo L2/L3/L6, xem F7. |
+
+Write set hai tệp và driver ngoài kho phù hợp L2. L4 khai `khong_ap_dung`. L5 có thời điểm đo base và ba mốc đo lại. L7 đã bổ sung viện dẫn protocol cho điểm dừng `Popen` và gắn E2 cho quyết định thuộc chủ kho.
+
+KET_LUAN: request_changes

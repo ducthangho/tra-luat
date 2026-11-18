@@ -1,0 +1,84 @@
+codex
+## Review độc lập lượt 7 · Issue #1342 · r1d-a1-i
+
+Còn hai P2. N2 bỏ lọt việc gán lại tên cũ qua hook tạo lớp. J10 có thể báo đạt trên lượt nghiệm thu native nếu trợ giúp tự dọn job ngay trước cú giết.
+
+Review đặc tả `r4` có SHA-256 `6c93bdac952b7e06824300064b702d92f3b7cba9e11313a9b6097d5f1e64daa4`, trên `master` tại `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. Băm bản 6 khớp verdict lượt 6. `diff -u` và `git diff --no-index --numstat` trả `1` vì có khác biệt, với 7 dòng thêm và 5 dòng xóa theo chiều bản 6 → bản hiện tại. `git diff --exit-code HEAD --` trả `0`.
+
+Phiên Codex họ OpenAI trên Linux qua API, dùng shell cục bộ, chỉ đọc và không gọi mạng. Bề mặt Codex cụ thể và model phục vụ chưa xác minh. Lượt mô phỏng đầu được dừng với mã `130` vì parse lặp không cần thiết. Lượt thay thế `python -B -` trên CPython 3.13.18 trả `0`. Desktop, VM, CI và driver đột biến trên mã triển khai đều `not_run`.
+
+### Finding lượt 6
+
+| ID | Trạng thái | Đối chiếu bản hiện tại |
+|---|---|---|
+| R6-1 | **Đóng** | M2(d) bọc `BaseException.add_note` bằng `except BaseException: pass`. M2(c) giữ `except Exception` cho bước dọn. M5/S4 dùng cặp `(mã, callable)` ở cả vector ngắt và vector `__repr__`. Sáu vector qua trong RAM. Khi `F.__getattribute__("__notes__")` ném `KeyboardInterrupt`, đường gom lỗi → ghi chú → ném lại giữ đúng đối tượng `F`. [M2–M5](ops/specs/WP1174-WINDOWS-BACKEND-r4.md#4-muc-tieu) |
+| R6-2 | **Đóng** | N2(iv) miễn đúng nút `target` của mẫu `CASES += [...]`. N2(ii) bỏ đúng khối được (iv) chấp nhận khi đếm. Base và khối hợp lệ mô phỏng đều `1111`. [N2](ops/specs/WP1174-WINDOWS-BACKEND-r4.md#5-nghiem_thu) |
+| R6-3 | **Đóng cho phản chứng lượt 6** | N2(iv) cấm `globals` và chỉ cho lời gọi tường minh tới `_native1342` khi nạp module. `_r4_x = globals().update(_native1342=None)` ra `1110`. Đường gọi ngầm mới còn lọt ở R7-1. [N2](ops/specs/WP1174-WINDOWS-BACKEND-r4.md#5-nghiem_thu) |
+| R6-4 | **Đóng trong cửa sổ M8, chưa đóng hết cho N6** | M6–M8 bổ sung hạn giữ 300 s, `het_han_*`, `tu_ket_thuc`, deadline trợ giúp +300 s và phân loại J6 hết hạn. J2 dưới `d0` cho con tự hết hạn sau khoảng 60 s và vẫn chấm lỗi deadline. Watchdog 90 s khóa đường hết hạn trong lượt đột biến. N6 chưa buộc lượt native sạch dùng cùng cửa sổ. Xem R7-2. [M6–N6](ops/specs/WP1174-WINDOWS-BACKEND-r4.md#5-nghiem_thu) |
+
+Mô phỏng N2 dùng bốn cột theo thứ tự (i)–(iv). Base đo được `CASES=85` và `MUTANTS_NHAM_TEST=14` điểm bind.
+
+| Ca | Kết quả |
+|---|---|
+| Base, khối chèn hợp lệ | `1111` cho từng ca |
+| Chèn `return`, thêm decorator | `0110` cho từng ca |
+| Trùng `def`, gán lại trong `if` | `1010` cho từng ca |
+| `match`, walrus trong `if`, `del`, walrus ở RHS, walrus trong default | `1110` cho từng ca |
+| `_r4_x = globals().update(_native1342=None)` | `1110` |
+| Hook tạo lớp ở R7-1 | `1111` |
+
+### Finding mới
+
+- **R7-1 · P2 — N2 bỏ lọt gán lại tên cũ khi Python tạo lớp.** Hai lớp có tên mới, không decorator. Header lớp thứ hai chỉ đọc một `Name`. Python gọi ngầm `__init_subclass__` khi tạo lớp thứ hai, dù header không có nút `Call`. Trong RAM, khối dưới đây ra `1111` và đổi `_native1342` trích từ base từ callable thành `None`. N2 cần giới hạn cả những thao tác chạy ngầm lúc nạp module. Có thể bỏ dạng `class` khỏi mẫu chèn nếu ca mới không cần lớp, hoặc định rõ một mẫu lớp đủ hẹp và thêm phản chứng này. [N2](ops/specs/WP1174-WINDOWS-BACKEND-r4.md#5-nghiem_thu)
+
+  ```python
+  class _r4_A:
+      def __init_subclass__(cls):
+          sys._getframe(1).f_globals["_native1342"] = None
+
+  class _r4_B(_r4_A):
+      pass
+  ```
+
+- **R7-2 · P2 — N6 chưa cưỡng chế cửa sổ mà J10 dựa vào để quy nguyên nhân thoát.** M8 đặt watchdog 90 s cho driver đột biến. N6 chưa đặt cùng giới hạn cho J10 trên Desktop và VM. Mô phỏng thứ tự sự kiện trong RAM cho thấy ca có thể đọc trạng thái ở 299,9 s, trợ giúp chạm deadline ở 300 s và dọn xong job, rồi ca giết trợ giúp trước khi nó ghi `tu_ket_thuc`. Con và cháu bắt đầu chờ sau trợ giúp nên chưa có `het_han_*`. J10 có thể ghi đạt dù cleanup của trợ giúp đã làm cả hai handle signaled. Buộc cửa sổ 90 s cho cả lượt native sạch, tính từ trước khi tạo trợ giúp, và phân loại lượt vượt cửa sổ là `KHÔNG ĐO`. [N6](ops/specs/WP1174-WINDOWS-BACKEND-r4.md#5-nghiem_thu)
+- **R7-3 · P3 — J10b gọi hai tên cho bằng chứng con chưa chạy.** M7 cho con dùng đoạn ghi marker của J1/J6, nhưng hậu điều lại kiểm “tệp bắt tay của con”. Ghi cùng một đường dẫn ở bước tạo fixture và bước kiểm âm. [M7](ops/specs/WP1174-WINDOWS-BACKEND-r4.md#4-muc-tieu)
+- **R7-4 · P3 — §1 đếm ba hàm thuần trong khi M2 và N3 yêu cầu bốn.** Sửa số đếm ở §1 để tính cả `_1174_win_note`. [§1](ops/specs/WP1174-WINDOWS-BACKEND-r4.md#1-pham-vi-r4-r1d-a1-i)
+
+### 15 đột biến §4b
+
+Mỗi ID có một vị trí sửa logic trong thiết kế. Bảng kiểm dấu hiệu theo cặp **ID ca + nhãn** trong cửa sổ đo M8. Số lần khớp byte-exact và tính độc quyền khi chạy phải đo trên mã triển khai.
+
+| ID | Một điểm sửa dự kiến | Dấu hiệu và phân biệt |
+|---|---|---|
+| `a1` | Toàn khối gọi `TerminateJobObject` và kiểm BOOL ở (9) | J3 `job not empty`. `k2` vẫn đặt `da_gan` trên đường thuận J3. `a2` vẫn gọi terminate tường minh. |
+| `a2` | Gán `_1174_WIN_JOB_LIMIT` | J10 `con/cháu sống sau khi cha chết`. `a1` vẫn giữ kill-on-close. |
+| `a3` | Nhánh query FALSE ở M3 | J11 `handle tệp được nhận là job rỗng`. Các ID khác giữ nhánh FALSE. |
+| `b` | Một khối đổi thứ tự (5)–(7), kèm chờ marker J6 | J6(ii) `marker đã có lúc between` với J6(i) xanh. `c` đỏ ở (i) trước. |
+| `c` | Gán `_1174_WIN_SPAWN_FLAGS` | S1 `SPAWN_FLAGS == 0x204`. `a2` đổi `JOB_LIMIT`. |
+| `h` | Chèn sau khi đăng ký đóng job ở (1) | J7 `job handle có HANDLE_FLAG_INHERIT`, sau khi phép tiêm trả TRUE. Không ID nào khác đổi cờ này. |
+| `k1` | Bỏ đăng ký `kill_truoc_gan` | J8 `bản sao con chưa signaled khi hàm trả`. `k2` tác động sau gán. |
+| `k2` | Dời `da_gan = True` từ sau (5) sang sau (7) | J9 phụ còn sống **và** thiếu `cleanup:xac_nhan`. `a1` để phụ sống nhưng vẫn ghi mã xác nhận. |
+| `k3` | Thêm `break` tại nhánh bắt lỗi ở M2(c) | S4 `bước 2 không chạy`. Các ID khác giữ vòng gom lỗi. |
+| `t1` | Nhánh chọn ứng viên của hàm pick | S2 `hai ứng viên được nhận`. `t2` chỉ đổi điều kiện resume. |
+| `t2` | Điều kiện nhận resume count | S3 `count=2`. Các ID khác giữ điều kiện nhận đúng 1. |
+| `d0` | Một lời gọi wait ở (8), thay bằng `proc.wait()` | J2 `không ném lifecycle deadline trong 6–11 s`. `d1` giữ wait theo lát. Mốc bắt tay tối đa 5 s và thời gian giữ khoảng 60 s nằm trong watchdog 90 s. |
+| `g0` | Một khối đổi thứ tự kiểm nền và đối số | S5 trên Linux `argv=[] phải là spawn arguments`. `d1` vẫn từ chối `argv=[]`. |
+| `abi` | Kiểu trường `th32OwnerProcessID` | J0 báo nhãn offset trước size. Mô phỏng `ctypes` với trường độ rộng cố định cho offset `12 → 16` và size `28 → 40`. |
+| `d1` | Bỏ vế cận trên deadline ở (0) | S5 `deadline ngoài miền nhận (now+10**6) phải là spawn arguments`. `g0` đỏ từ vector `argv=[]` đầu tiên. |
+
+### N1–N8 theo L1–L7
+
+| Tiêu chí | Kết quả |
+|---|---|
+| N1 | L1/L3/L6. Kiểm từng ID, từng mốc và tập `MUTANTS`; có phản chứng mất ID, đổi khóa cùng số lượng và nhân đôi mốc. |
+| N2 | L2/L3/L6. Hai đường dẫn rõ, base và đối chứng hợp lệ xanh, toàn bộ phản chứng cũ đỏ. R7-1 chứng minh vế canh gán lại tên cũ còn thiếu. |
+| N3 | L1–L3/L6. Tập dương đúng mười tên trong `packet_loop.py`; nối dây hoặc thiếu khối làm đỏ. |
+| N4 | L2/L3. S1–S5 có vector và phép đỏ. S4 đã qua mô phỏng RAM, gate Linux và Windows chờ mã triển khai. |
+| N5 | L3/L5/L6. So từng ID và trường ổn định trên base/head cùng lượt; đột biến claim Windows phải đến đúng assertion. |
+| N6 | L1/L3/L5. Tập ca, máy đo, dấu hiệu dương và `not_measured` đều được khai. R7-2 còn ảnh hưởng bằng chứng nguyên nhân ở J10. |
+| N7 | L1/L3/L6. Phân biệt 15 ID với 16 lượt, yêu cầu một neo byte-exact, đối chứng khỏe và đúng nhãn; watchdog 90 s áp dụng cho driver. |
+| N8 | L2/L3/L5/L6. So tập diagnostic, ghi riêng mã thoát và đo numstat toàn diff. Diagnostic đổi cùng số lượng, tệp thứ ba hoặc vượt trần trên số đo thật đều làm đỏ. |
+
+L4 được khai `khong_ap_dung`. L5 có OID, thời điểm đo và ba mốc đo lại. L7 dẫn protocol/ADR và gắn E2 cho các quyết định cần thẩm quyền. Điểm giữa ước lượng ghi trong đặc tả là 525 dòng, dưới ngưỡng báo finding đã giao.
+
+KET_LUAN: request_changes

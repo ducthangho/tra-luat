@@ -1,0 +1,79 @@
+codex
+## Review độc lập lượt 9 · Issue #1342 · r1d-a1-i
+
+**Còn một P2.** N2 chặn được việc che `frozenset`, nhưng một đăng ký `CASES += [...]` hợp lệ theo cú pháp vẫn đổi được giá trị mà câu lệnh base gán lúc nạp module.
+
+Review trên `master` tại `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 đặc tả là `5dd6f0e264eb4e1e8a21c760b3ee6f424aa2b48f62c7d49ad3460a976bf7b70b`. Băm bản 8 khớp verdict lượt 8. `git diff --no-index --numstat` giữa hai bản báo **3 dòng thêm, 2 dòng xóa**, rc `1`. `git diff --exit-code HEAD --` trả `0`.
+
+Phiên Codex họ OpenAI qua API, dùng shell cục bộ trên Linux, sandbox read-only. Model và effort phục vụ chưa đo được. Phép đo `python -B -` trên CPython 3.13.18 chạy trong RAM, rc `0`, với stub cho import `launcher`. Desktop, VM, CI và driver byte-exact trên mã triển khai ở trạng thái `not_run`.
+
+### Đối chiếu lượt 8
+
+| ID | Trạng thái | Bằng chứng |
+|---|---|---|
+| R8-1 | **Đóng phản chứng che builtin** | N2(iv), dòng 105, đòi tiền tố `_wp1342a1_` cho tên mới mức module. `def frozenset(items): return ()` ra `1110`. Khi cố ý bỏ qua N2 và nạp biến thể, `_WP1174_NATIVE_KEYS` giảm từ 29 xuống 0 phần tử. Đường qua `CASES` ở R9-1 vẫn mở. |
+| R8-2 | **Đóng** | M5/S5, dòng 71, chốt ba vector đầu theo thứ tự `argv=[]` → `now+10**6` → `10**400`, mỗi vector một assertion. Mô phỏng Linux cho base qua cả ba, `g0` đỏ đầu tiên ở `argv=[]`, `d1` qua vector đầu và đỏ đầu tiên ở `now+10**6`, đúng các nhãn §4b dòng 92 và 94. |
+
+### Finding mới
+
+**R9-1 · P2 — N2 cho phép đăng ký trùng ID làm câu lệnh base chụp nhầm hàm lúc nạp module.** Chèn ngay trước `_r26_original_accept1174 = dict(CASES)["wp1174_writer_accept"]` ở `.claude/dev/packet_loop_test.py:16217`:
+
+```python
+def _wp1342a1_noop(c): pass
+CASES += [("wp1174_writer_accept", _wp1342a1_noop)]
+```
+
+Khối có tên mới đúng tiền tố, dùng đúng mẫu đăng ký và đạt `1111`. Khi nạp blob trong RAM, `_r26_original_accept1174` trỏ tới hàm `case` trên base và trỏ tới `_wp1342a1_noop` sau khi chèn. Thân `_r26_accept1174` giữ nguyên từng byte nhưng từ đó bỏ qua lời gọi ca gốc. Runner base có kiểm đếm trùng cho ID bắt buộc khi chạy suite. Phản chứng này xác nhận riêng vế bất biến N2 đã xanh sai ngay lúc nạp.
+
+Yêu cầu N2 kiểm mỗi mục `CASES += [...]` có ID mới, duy nhất và rời tập ID base. Khóa vị trí đăng ký sau các câu lệnh base đọc hoặc biến đổi `CASES` lúc nạp, trước khối `if __name__ == "__main__"`. Dùng khối trên làm phản chứng đỏ và giữ khối mẫu có ID mới làm đối chứng xanh.
+
+### N2 trong RAM
+
+Các cột lần lượt là (i)–(iv). Blob base có 85 điểm bind `CASES` và 14 điểm bind `MUTANTS_NHAM_TEST`.
+
+| Ca | Kết quả |
+|---|---|
+| Base, khối hợp lệ có tiền tố | `1111` mỗi ca |
+| Chèn `return` trong thân cũ, thêm decorator | `0110` mỗi ca |
+| Trùng `def`, gán trong `if`, walrus trong `if`, walrus ở RHS | `1010` mỗi ca |
+| `match`, `del`, walrus trong default, `globals().update`, hai lớp `__init_subclass__`, che `frozenset` | `1110` mỗi ca |
+| Đăng ký trùng ID trước câu gán base | **`1111`** |
+
+### 15 đột biến §4b
+
+Mỗi ID quy về một vị trí logic dự kiến. Bảng đối chiếu dấu hiệu theo **ID ca và nhãn assertion được báo**. Số lần khớp neo byte-exact và dấu hiệu trên mã triển khai còn chờ N7.
+
+| ID | Một vị trí sửa | Dấu hiệu và điều kiện phân biệt |
+|---|---|---|
+| `a1` | Khối gọi và kiểm BOOL của `TerminateJobObject`, M4(9) | J3 `job not empty`. `a2` giữ terminate tường minh, `k2` vẫn đặt `da_gan` đúng trên đường thuận J3. |
+| `a2` | Gán `_1174_WIN_JOB_LIMIT` | J10 con/cháu sống sau khi trợ giúp chết. `a1` giữ kill-on-close. |
+| `a3` | Nhánh query FALSE, M3 | J11 nhận handle tệp là job rỗng. Các ID khác giữ nhánh từ chối query. |
+| `b` | Khối (5)–(7), chuyển resume lên trước gán và chờ marker | J6(ii) đã có marker tại `between`, J6(i) xanh. `c` đỏ ngay J6(i). |
+| `c` | Gán `_1174_WIN_SPAWN_FLAGS` | S1 đỏ ở `SPAWN_FLAGS == 0x204`. `a2` đổi assertion `JOB_LIMIT`. |
+| `h` | Ngay sau đăng ký `close_job`, M4(1) | J7 thấy `HANDLE_FLAG_INHERIT` sau phép tiêm trả TRUE. Chỉ `h` đổi cờ này. |
+| `k1` | Đăng ký `kill_truoc_gan`, M4(3) | J8 bản sao handle con chưa signaled. `k2` đổi trạng thái sau gán. |
+| `k2` | Khối từ đặt `da_gan` đến hết (7) | J9 phụ còn sống và thiếu `cleanup:xac_nhan`. `a1` để phụ sống nhưng vẫn có ghi chú này. |
+| `k3` | Nhánh bắt lỗi của `_1174_win_cleanup` | S4 bước 2 không chạy. Các ID khác giữ vòng dọn. |
+| `t1` | Nhánh chọn ứng viên của `_1174_win_pick_thread` | S2 nhận hai ứng viên. `t2` đổi điều kiện nhận resume count. |
+| `t2` | Điều kiện của `_1174_win_resume_ok` | S3 đỏ tại `count=2`. Các ID khác giữ điều kiện đúng 1. |
+| `d0` | Lời gọi `proc.wait(timeout=min(con_lai, 60.0))` | J2 thiếu lỗi `lifecycle deadline` trong 6–11 s. `d1` giữ chờ theo lát. |
+| `g0` | Khối kiểm đối số và nền, M4(0) | S5 Linux đỏ đầu tiên ở `argv=[]`. `d1` qua vector đó. |
+| `abi` | Kiểu trường `th32OwnerProcessID` | J0 báo offset 12 trước size. Các ID khác giữ kiểu trường. |
+| `d1` | Vế cận trên deadline, M4(0) | S5 Linux đỏ đầu tiên ở `now+10**6`. `g0` đã dừng ở assertion đầu. |
+
+### N1–N8 theo L1–L7
+
+| Tiêu chí | Kết quả rà đặc tả |
+|---|---|
+| N1 | L1/L3/L6. So từng ID, khóa và neo. Có phản chứng mất ID, đổi khóa cùng số lượng và neo trùng. |
+| N2 | L2/L3/L6. Hai đường dẫn và đối chứng rõ. R9-1 chứng minh vế bất biến còn xanh sai. |
+| N3 | L1–L3/L6. Tập đúng mười tên trên một đường dẫn. Có phép đỏ cho thiếu khối và nối dây. |
+| N4 | L2/L3. S1–S5 có phép đỏ. Thứ tự S5 phân biệt được `g0` và `d1` trong RAM. |
+| N5 | L3/L5/L6. So từng ID và trường ổn định trên base/head cùng lượt. Đột biến mở claim phải tới assertion đích. |
+| N6 | L1/L3/L5. Chốt tập ca, máy chạy, dấu hiệu dương và cửa sổ 90 s mỗi ca. `KHÔNG ĐO` không được tính đạt. |
+| N7 | L1/L3/L6. Phân biệt 15 ID với 16 lần chạy. Yêu cầu một neo, đối chứng khỏe và nhãn đích. |
+| N8 | L2/L3/L5/L6. So tập diagnostic, ghi rc riêng và đo numstat toàn diff. Có phép đỏ cho thay diagnostic cùng số lượng, thêm tệp thứ ba và vượt trần thật. |
+
+L4 khai `khong_ap_dung`. L5 neo số đo vào base và quy định đo lại trước công bố băm, cấp lease và merge. L7 có khai E4/E5, dẫn protocol và ADR cho điểm dừng, gắn E2 cho quyết định cần thẩm quyền.
+
+KET_LUAN: request_changes

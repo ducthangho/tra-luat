@@ -1,0 +1,77 @@
+codex
+# Review độc lập lượt 3 — Issue #1342, r4 (`r1d-a1-i`)
+
+Còn **P1 và P2**. Bản hiện tại đã ghi đúng phạm vi chuyển tiếp và ranh giới khi tiến trình gọi chết trước gán. Các điểm chặn còn lại nằm ở đường thu hồi khi `Popen` ném sau khi đã tạo con, thời hạn chờ trên Windows, hợp đồng cleanup, phép đo J9 và chốt bảo toàn mã N2.
+
+**Mỏ neo review.** `master` tại `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 bản 2 `234b1804ad169f1ab4c75f6cf83f39fdd8ec17f071139b96d297fc4b167b37bb` khớp verdict lượt 2. SHA-256 đặc tả đang review `fb7a24eedbf1de05a8bdc8bb3c96354b8bbac1f3c7b8a486ebc573be08c59ed4`. `git diff --no-index --numstat` trả `1` và báo **105 dòng thêm, 78 dòng xóa** giữa hai bản đặc tả. Các phép `python -B -` trong RAM trả `0`. Phiên Codex họ OpenAI, shell cục bộ trên Linux x86-64, CPython 3.13.18, chỉ đọc, không gọi mạng. Model, effort và bề mặt launcher cụ thể chưa xác minh được. Windows, CI và đột biến trên mã sản phẩm đều `not_run`.
+
+## Finding lượt 2 thuộc a1-i
+
+| Finding | Trạng thái | Đối chiếu bản hiện tại |
+|---|---|---|
+| P1 — Tiến trình gọi chết trước gán | **Đóng cho đường đã nêu** | §2/Q2 ghi `wp1342-pre-assign-orphan`. M6/M7 J10b giết trợ giúp trong `truoc_gan`, xác minh danh tính con và kiểm con còn sống, chưa công bố marker. Cần giữ trợ giúp tại mốc bằng chốt có hạn và đối chứng marker chạy được để phép đo quy đúng nguyên nhân. |
+| P1 — Sở hữu cleanup và ưu tiên lỗi | **Chưa đóng** | M4(3)/(9) đã dịch đăng ký dọn lên trước kiểm `_handle`, tách `kill_truoc_gan`/`reap`, bỏ `proc.kill()` sau gán, kiểm `CloseHandle` và quy định thứ tự lỗi. Còn khe **trong** `Popen`, mâu thuẫn M2/M4 về `BaseException` và đường ghi chú làm mất lỗi gốc. |
+| P2 — Thứ tự gán, Toolhelp, ABI và deadline | **Đóng phần ABI và chọn luồng, còn deadline** | M1/J0 có chữ ký, kích thước, offset Win64. M4(7) có `dwSize`, `Thread32First`, last-error, sentinel đúng độ rộng và kiểm PID. M4(0) chặn `inf`, nhưng số hữu hạn vẫn có thể thành `INFINITE` ở M4(8). |
+| P2 — Job rỗng, lỗi query/terminate và handle | **Đóng phần query, còn hậu điều khi dọn lỗi** | M3/J11 phân biệt query lỗi với job rỗng. M4(9) xác nhận job trước khi đóng và không trả `rc` nếu dọn lỗi. §2 vẫn hứa thu hồi rộng hơn hậu điều có thể xác nhận khi terminate/query/close thất bại. Quyền sở hữu process handle khi traceback giữ `proc` cũng chưa được chốt. |
+| P2 — Hook, danh tính và fixture | **Chưa đóng** | M6 thêm nonce, creation time, quyền terminate và luồng quan sát. M7 thêm giao thức trợ giúp và thành viên thứ hai. Còn thiếu hợp đồng mượn handle, tiền điều kiện J9 và cách truyền lỗi từ luồng quan sát về ca. J7 đã đo đúng thuộc tính `HANDLE_FLAG_INHERIT`. |
+| P2 — Dấu hiệu đột biến | **Chưa đóng** | `t2` đã tách đúng vector, `h` đã bind đúng chữ ký, `c` có dấu hiệu S1 riêng và `k2` có thiết kế phân biệt với `a1`. Còn va chạm dấu hiệu J6 giữa `b/c` và điều kiện để J9 thực sự phân biệt `a1/k2`. |
+| P2 — N1–N8 | **Chưa đóng** | N3 đã có vế dương đúng tập tên. Hai phản chứng yêu cầu cho N2 đã đỏ trong RAM, nhưng decorator vẫn lọt. N6/N7 phụ thuộc các lỗi fixture và dấu hiệu dưới đây. |
+| P2 — Dự toán | **Đóng ở mức dự toán** | §8 cộng đúng 428–536, trần Q5 là **550**. Còn 14 dòng dự phòng ở đầu cao. Numstat triển khai chưa đo. |
+| P3 — Văn bản và truy vết | **Đóng các lỗi đã nêu** | Dòng 13 ghi giờ UTC và ba lần đo lại. M4 dẫn bước dọn tới (9). §2 ghi đủ chuyển tiếp, gồm `N4(f)(g)` cũ. |
+
+## Finding mới và phần còn chặn
+
+**P1 — M4(3) chỉ nhận quyền dọn sau khi `Popen` trả.** Nhánh Windows của `subprocess.py` CPython 3.13 gọi `CreateProcess`, rồi chạy `_close_pipe_fds` trong `finally`, sau đó mới gán `_handle` và đóng primary thread handle. Một ngoại lệ đồng bộ ở phần đóng handle hoặc cấp phát `Handle(hp)` sau khi `CreateProcess` thành công có thể làm constructor ném khi con treo đã tồn tại. Tiến trình gọi vẫn sống, `proc = Popen(...)` chưa gán, và cleanup chỉ có job rỗng. Đăng ký ngay sau `Popen` không bao phủ đường này. Đặc tả cần chốt cơ chế giữ quyền thu hồi hoặc khai riêng giới hạn của constructor. Nhánh thiếu `_handle` sau khi constructor trả cũng cần mô tả bằng giới hạn riêng. J10b đo tiến trình **gọi bị giết**, nên bằng chứng đó không bao phủ hai trường hợp này.
+
+**P1 — M4(0)/(8) có thể chờ vô hạn với deadline hữu hạn.** Tôi trích đúng hàm `_wait` nhánh Windows từ CPython 3.13.18 cục bộ và chạy trong RAM với đầu nhận lời gọi `_winapi`. Với timeout còn lại `0xffffffff / 1000` giây, `_wait` truyền `4294967295` ms, đúng sentinel `INFINITE`. Ngoài ra, `math.isfinite(10**400)` ném `OverflowError` ngay lúc kiểm đối số. Cần chặn miền đầu vào hoặc chờ theo các lát hữu hạn, bảo toàn deadline tuyệt đối và có phản chứng cho sentinel lẫn số nguyên quá lớn.
+
+**P2 — M2 và M4(9) có hai quy tắc ưu tiên lỗi khác nhau.** M2 bảo `_1174_win_cleanup` ghi `KeyboardInterrupt`/`SystemExit`, chạy tiếp rồi ném lại. M4 bảo giữ lỗi gốc và nhận danh sách lỗi dọn. Nếu helper tự ném, một `KeyboardInterrupt` trong cleanup có thể thay `RuntimeError("j9")` trước khi M4 ghi chú. Ngược lại, `add_note(repr(lỗi_dọn))` có thể tự ném nếu `__repr__` của ngoại lệ lỗi. Phản chứng RAM cho trường hợp sau đã làm `RuntimeError("repr")` thay lỗi gốc. Cần một nơi duy nhất quyết định lỗi thắng, quy định xử lý lỗi khi tạo ghi chú, và kiểm bằng S4 với cả lỗi thường lẫn lớp `BaseException` đặc biệt. §2 cũng cần phân biệt **thu hồi đã xác nhận** với **đã cố dọn rồi ném vì chưa xác nhận**, ví dụ `terminate` FALSE, `xac_nhan` hết hạn, rồi `close_job` kích hoạt đường dự phòng. `reap` xác nhận trạng thái leader, còn traceback giữ `proc` có thể kéo dài vòng đời `_handle`.
+
+**P2 — J9 thiếu tiền điều kiện gán thành viên thứ hai.** `between` có thể gán tiến trình phụ nếu handle có `PROCESS_SET_QUOTA | PROCESS_TERMINATE` và tổ hợp job hiện tại cho phép. Handle mở theo quyền quan sát M6 thiếu `PROCESS_SET_QUOTA`. Dùng handle gốc của `Popen` phụ cho phép thử gán, còn handle quan sát giữ để đo. Tiến trình phụ cũng có thể đã kế thừa job của runner. J9 cần đòi phép gán **TRUE**, giữ phụ sống đến lúc quan sát, và phân loại lỗi gán thành `KHÔNG ĐO` kèm mã Win32 trước khi ném `j9`. Cần xác nhận Desktop và VM có môi trường dựng được tiền điều kiện này. Hook chỉ dùng trong fixture, mượn tài nguyên, không đóng handle gốc, không sửa trạng thái `Popen`, và mọi chờ phải có hạn.
+
+**P2 — M6/M7 chưa khép giao thức quan sát.** Creation time đối chiếu trên handle đang sống, nonce do ca cấp và ACK `go` là cơ sở phù hợp. Cần quy định luồng quan sát truyền kết quả hoặc lỗi về luồng chính, join có hạn và giải phóng handle kể cả khi spawn ném trước khi có marker. J2 cần tách lỗi fixture không bắt tay kịp khỏi lỗi deadline của sản phẩm. J10/J10b cần giữ trợ giúp tại mốc bằng chốt có hạn, kiểm handle trợ giúp chưa signaled ngay trước `TerminateProcess`, kiểm lời gọi thành công và chờ signaled. J10 còn cần xác nhận con/cháu đang sống ngay trước cú giết và trợ giúp là chủ duy nhất giữ job handle. J10b cần dùng cùng đường ghi marker đã có đối chứng dương để sự vắng mặt của marker có giá trị đo.
+
+**P2 — N2 vẫn cho phép thay hành vi của định nghĩa cũ chỉ bằng dòng thêm.** Tôi đọc blob `HEAD:.claude/dev/packet_loop_test.py` qua `git show`, chạy `ast.parse`, `ast.get_source_segment`, đếm tên và so opcode trong RAM. Kết quả theo thứ tự ba vế N2:
+
+| Dữ liệu | (i) đoạn nguồn | (ii) tên | (iii) opcode |
+|---|---|---|---|
+| Base | đạt | đạt | đạt |
+| Chèn `return lambda c: None` vào `_native1342` | **đỏ** | đạt | đạt |
+| Thêm `def _native1342` thứ hai | đạt | **đỏ** | đạt |
+| Chèn `@(lambda fn: lambda *args: None)` ngay trước `def _native1342` | **đạt** | **đạt** | **đạt** |
+
+AST của `FunctionDef` bắt đầu ở `def`, nên đoạn nguồn không gồm decorator. Tôi cũng đo phép gán lại `_native1342` trong một `if True` cấp module. Bộ đo chỉ lấy các định nghĩa trực tiếp trong `Module.body` cho cả ba vế đạt. Cần khóa cả decorator và các điểm bind tên cũ thực thi ở phạm vi module, hoặc dùng phép loại đúng các khối thêm được phép rồi so nguyên byte phần còn lại. Bổ sung hai phản chứng này vào N2.
+
+## Đột biến §4b
+
+Đây là đối chiếu **neo dự kiến**. Số lần khớp byte-exact chỉ đo được khi có mã và driver.
+
+| ID | Neo dự kiến và dấu hiệu |
+|---|---|
+| `a1` | Một nhánh `terminate` trong (9). J3 còn cháu sống khi query, nên ném `job not empty`. `k2` đã đặt `da_gan` trên đường thuận J3. Neo cả lời gọi và nhánh kiểm BOOL để mutant còn hợp lệ. |
+| `k2` | Một phép dời cập nhật `da_gan`. Với J9 đã gán phụ thành công và bản sao job còn mở, `k2` bỏ cả terminate lẫn query, phụ còn sống và `j9` không có note `job not empty`. `a1` vẫn query và có note đó. Cần chấm chính xác note, đồng thời giữ phụ sống xuyên cửa sổ query. |
+| `a2` | Một hằng job. J10 có dấu hiệu riêng nếu chính cú giết trợ giúp làm đóng handle cuối và hai đối tượng đang sống trước cú giết. S1 `JOB_LIMIT` cũng đổi màu, nhưng khác nhãn của `c`. |
+| `b`, `c` | `b` thay một khối thứ tự và chờ marker, `c` thay một hằng và đỏ riêng ở S1 `SPAWN_FLAGS`. **J6 của `b` chưa có dấu hiệu độc quyền**: dưới `c`, con có thể ghi marker trước `between`, chính §4b thừa nhận. Giới hạn lịch chạy `c` vào S1 không loại va chạm. Có thể đưa xác nhận cờ tạo thực tế vào tiền điều kiện của nhãn J6 để `c` rơi vào nhãn khác. |
+| `a3`, `h`, `k1` | Neo riêng tại nhánh query FALSE, sau đăng ký `close_job`, và đăng ký `kill_truoc_gan`. Dấu hiệu tương ứng là J11 nhận handle tệp, J7 có bit inherit, và J8 còn con chưa signaled. `h` phải đòi lời gọi tiêm thành công. |
+| `k3`, `t1`, `t2` | Neo riêng tại thân xử lý lỗi cleanup, nhánh chọn thread và điều kiện resume. S4 bước hai, S2 hai ứng viên, S3 count `2` phân biệt được với các mutant còn lại. |
+| `d0`, `g0` | Neo riêng ở lần `proc.wait` trong (8) và khối kiểm đối số/nền. J2 cần chứng cứ bắt tay trước khi chấm deadline. S5 `argv=[]` trên Linux phân biệt được. |
+| `abi` | Một dòng kiểu trường owner. Mô hình `ctypes` trong RAM cho `(size, offset)` đổi từ `(28, 12)` sang `(40, 16)`. **J0 phải chấm offset trước size**, hoặc thu đủ assertion kể cả khi size sai. Với fail-fast và size trước, mutant đỏ sai nhãn N7. |
+
+## N1–N8, L1–L7 và ngân sách
+
+| Tiêu chí | Kết quả review |
+|---|---|
+| N1 | Có phép đỏ cho thiếu ID, sai khóa và trùng neo. L6 cần kết quả theo từng ID và từng neo. |
+| N2 | Hai phản chứng được yêu cầu đều đỏ đúng vế. Hai đường xanh sai ở trên còn mở theo L3/L6. |
+| N3 | Đã chạy helper base trong RAM. Base thiếu tập tên, bộ stub đúng chín tên qua vế tập tên, bỏ một tên làm đỏ, và lời gọi trực tiếp làm `_wired1342` báo `_1174_process:4261`. |
+| N4 | Có nhãn riêng cho S1–S5. S4 hiện chưa xác định được đường `KeyboardInterrupt`/`SystemExit` theo hợp đồng mới. |
+| N5 | So từng ID và loại trường biến động là phép đo phù hợp. Chốt danh sách bằng ID lấy từ base neo SHA và yêu cầu mutant mở chốt claim đỏ tại assertion đích. |
+| N6 | Có điều kiện đỏ và `not_measured` rõ. Ghi chính xác tập J0, J1–J3, J6–J11 và J10b. Cụm `J0–J11 + J10b` đọc theo dải bao gồm hai ID đã chuyển đi, trái L1. |
+| N7 | 14 ID, **15 lần chạy đột biến** vì `c` lặp trên Desktop. Có tiêu chí lỗi fixture và nhãn sai. Chưa khép các dấu hiệu nêu trên. |
+| N8 | Có phép đỏ cho thay diagnostic, tệp thứ ba và vượt 550. Ghi theo từng tệp và từng gate, với Ruff `0.15.15` theo validator tại base. |
+
+L2 phù hợp với hai tệp và driver ngoài kho. L4 `khong_ap_dung` phù hợp cho lát triển khai mới. L5 đã ghi đủ ba mốc đo lại. L7 đã gắn E2 cho các quyết định chủ kho. **P3** — dòng dừng do `Popen` không đáp ứng giả định ở §7 nên dẫn điều khoản protocol về thay revision khi đổi thiết kế hoặc phạm vi, để khớp quy tắc dẫn nguồn của L7.
+
+**Ngân sách §8 hợp lý để lập kế hoạch, sát ở đầu cao.** Tổng mã `172–213` và test `256–323` cho `428–536`, còn **14 dòng** dưới trần 550 ở đầu cao. Nếu phép đo N2 chạy ngoài kho như mô tả, nó không ăn trần. Phần cần tính lại là giao thức trợ giúp, truyền lỗi quan sát và dựng J9 trên cả hai máy. Tính khả thi cuối cùng phụ thuộc numstat của đúng hai tệp.
+
+KET_LUAN: request_changes

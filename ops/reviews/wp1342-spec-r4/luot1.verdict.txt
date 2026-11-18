@@ -1,0 +1,92 @@
+codex
+**Review đặc tả #1342 r4 — còn P1 và P2.** Phương án `Popen` → gán Job Object → tìm luồng bằng Toolhelp → `ResumeThread` khả thi theo mã CPython 3.13 đã đọc. Các điểm chặn nằm ở hợp đồng thu hồi tiến trình, giới hạn đọc hai pipe và phép đo native. Kết luận giữ nguyên Q1–Q4.
+
+Phiên độc lập `openai_codex / codex_cli / machine`, Linux, chỉ đọc. `master` tại `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 đặc tả r4 `e5e5e8e62cbdf8cb9a0c049fde3d7662ceaee27784610626bd19f80bfa95425c`. `git rev-parse`, `git status --short`, `sha256sum`, `git diff --numstat` và hai lượt `python -B -` chạy trong RAM đều rc 0. Trạng thái cây làm việc trước và sau giống nhau. Windows, CI và các đột biến r4 ở trạng thái `not_run` vì chưa có mã r4 và phiên này chạy trên Linux. Không truy cập mạng. Phiên cung cấp nhận dạng họ OpenAI, còn model và effort phục vụ chưa đo được.
+
+## Bảng kiểm sự thật §0
+
+| Lời khai | Đối chiếu |
+|---|---|
+| `_1174_process` 4260–4308 | Khớp. Kiểm `type(max_bytes) is int`, `max_bytes > 0`, deadline còn hạn, `stdin is None or type(stdin) is bytes`. Tất cả đối số sai trong M3 dùng cùng lý do `transport deadline/byte budget`. Với stdin có dữ liệu, mã ghi, flush và seek về 0 trước khi tạo con. |
+| Transport Linux và callback | Khớp đường chạy chính. `close_fds=True`, `start_new_session=True`, selectors và hai pipe không chặn. Lệnh đọc dùng `min(65536, max_bytes-size+1)`. Thử RAM thu được `rc=7`, stdout `b'ab'`, stderr `b'cd'`, callback `[4]`; tràn `[129]`; deadline `[0]`; `max_bytes=0` cho `[0]`. `killpg` vô điều kiện **khi đã vào `try` cleanup nội bộ**. Nó nằm sau `Popen`, thoát `ExitStack` và khởi tạo `streams`. Callback nằm ở `finally` ngoài. |
+| Caller, probe và lỗi | `_1174_api` 4324–4350 gọi ở 4341. `_1174_fetch_objects` 5605–5620 gọi ở 5619. `_1174_probe` 4038–4073. `_1174Error` 3670–3673, kế thừa `ValueError`. Lần chờ leader sau EOF ở 4298 còn có thể phát `subprocess.TimeoutExpired`. |
+| Ca Linux và mutant | Khớp 13622–13636, gồm ngưỡng `<0,8 s`, hậu duệ giữ pipe và tràn. Hai mutant tại 13699 và 13702 đều nhắm `wp1174_admission_candidate_root`. Mutant orphan chỉ bỏ `killpg` khi leader đã thoát. `WP1174_BOTH` có 12 ID khi đếm trong RAM. |
+| Launcher | Khớp thứ tự trong `_job_windows` 905–973 và phép liệt kê PID lớp 3 trong `_pid_trong_job` 976–1003. Khe được khai là launcher gán job sau khi con đã chạy. Câu chú thích của launcher về việc `Popen` thiếu `CREATE_SUSPENDED` không đúng với giao diện `creationflags` của CPython. |
+| r1–r3 và helper | Danh sách khối 6406–6742 khớp. `_new1342` 17879, `_additive1342` 17896, `_wired1342` 17920, `_additive1342r2` 18178. `_native1342` bắt đầu 18159, in marker ở 18165 **sau khi** thân ca trả về. Trong RAM, chèn hàm hợp lệ giữa hai khối cho N2/N3 `[]`; thêm decorator làm cả hai đỏ; chèn lời gọi trực tiếp vào `_1174_process` làm N3 đỏ. `_new1342` loại khối được phép khỏi phép quét N3. N2 và N3 cần chạy cùng nhau để chứng minh phạm vi đã khai. |
+| Số dòng tiền nhiệm | r1 `+428` (`130+298`, đo lại bằng Git). Hồ sơ r2 ghi `+293` (`97+196`), r3 `+300` (`112+188`). Cả ba dưới 450 dòng thêm. |
+
+## Khả thi trên Windows
+
+| Cơ chế | Kết quả đọc mã |
+|---|---|
+| `CREATE_SUSPENDED \| CREATE_NEW_PROCESS_GROUP` | CPython 3.13 `subprocess.py:1555–1578` chuyển nguyên cờ cho `_winapi.CreateProcess`, giữ process handle, đóng primary thread handle và không gọi `ResumeThread`. Với `Popen`, muốn resume qua Win32 có tài liệu thì cần tìm lại và mở thread handle. `_handle` là chi tiết triển khai CPython, cần ghi rõ phụ thuộc và giữ `Popen` sống suốt lúc dùng handle. |
+| `TemporaryFile` và `close_fds=True` | Nhánh Windows dùng `msvcrt.get_osfhandle(stdin.fileno())`, tạo bản sao kế thừa được và đưa ba std handles vào `STARTUPINFOEX` handle list. Đây là đường truyền stdin hợp lệ. Pipe nhị phân có thể đọc bằng worker khi con đang treo, nhưng worker sẽ chờ dữ liệu hoặc EOF. Trong thời gian treo, luồng điều phối vẫn phải tiến được tới resume hoặc cleanup. |
+| Toolhelp và `ResumeThread` | Snapshot luồng là toàn hệ thống. Một mục trùng owner PID là điều kiện cần, còn TID trong snapshot có thể stale trước `OpenThread`. Giữ process handle gốc và kiểm liveness/owner trên handle đã mở giúp gắn phép đo với đúng đối tượng. Tạo suspended chỉ bảo đảm luồng chính được tạo treo. Luồng do thành phần ngoài chèn vào không nằm trong bảo đảm đó. `ResumeThread` trả suspend count trước thao tác: `1` thành công, `0` đã chạy, `>1` còn treo, `DWORD(-1)` thất bại. |
+| Đếm job | Lớp 1 là `JobObjectBasicAccountingInformation`, đọc `ActiveProcesses` sau khi lời query thành công. Poll tới 0 là phép đo phù hợp. Lớp 3 của launcher có layout khác. Job rỗng chỉ chứng minh các thành viên của job đã hết, nên P5/P6 vẫn cần chứng cứ vòng đời của tiến trình fixture. |
+
+## Findings
+
+### P1 — M2(c,e), §4b — Cleanup thiếu quyền sở hữu rõ ràng trước khi gán job
+
+**Bằng chứng.** Nếu `Popen` đã trả về rồi có lỗi trước hoặc trong `AssignProcessToJobObject`, `TerminateJobObject` trên job rỗng vẫn để con treo sống. Sau khi gán, lỗi hook, enumerate, resume hoặc khởi động một trong hai reader cũng cần cùng một đường thu hồi. R4 chỉ nêu trường hợp gán trả thất bại, chưa quy định wait xác nhận, thứ tự xử lý lỗi cleanup và sở hữu process handle. Một `finally` có lệnh phát lỗi sớm có thể bỏ qua phần dọn còn lại.
+
+**Câu thay thế.** “Đăng ký cleanup ngay khi nhận từng tài nguyên. Giữ handle tiến trình gốc từ `Popen`. Khi chưa xác nhận gán thành công, dùng handle ấy để terminate và xác nhận con đã thoát. Sau khi gán, mọi lối ra đi qua cleanup job. Thử từng bước cleanup dù bước trước lỗi, ghi cả lỗi gốc và lỗi thu hồi, và chỉ trả kết quả khi đã xác nhận vòng đời kết thúc. Ca native gây lỗi riêng ngay sau `Popen`, tại gán và trong hook sau gán. Mỗi đột biến bỏ đúng một bước thu hồi và mỗi ca kiểm handle đối tượng do fixture giữ.”
+
+### P1 — M2(d,e), §4b — Hai reader chưa có cách giữ trần byte và thời gian cleanup
+
+**Bằng chứng.** Hai lần đọc 65.536 byte có thể tiêu thụ hơn `max_bytes+1` trước lượt kiểm tiếp theo. Cắt buffer hoặc kẹp số callback chỉ sửa số báo cáo. Giữ khóa chung qua thao tác đọc chặn có thể khiến một pipe im lặng chặn reader kia trong khi con đang đợi pipe kia được rút. Reader phát ngoại lệ có thể trông giống reader đã hoàn tất nếu chỉ kiểm `is_alive()`. `join(timeout)` rồi đóng stream đang có I/O chặn cũng chưa chứng minh được thời hạn trả về hoặc thu hồi luồng. P4 hiện chỉ có một nguồn ghi.
+
+**Câu thay thế.** “Chốt cơ chế đọc hoặc hủy I/O có giới hạn thời gian và phân bổ lại hạn mức dùng chung theo số byte thực đọc. Tổng byte thực đọc qua hai pipe dừng ở `max_bytes+1` khi tràn. Worker báo riêng EOF, lỗi và trạng thái hủy. Điều phối kiểm cả hai trạng thái và việc leader thoát trước khi trả kết quả. Đặc tả đường thu hồi khi pipe vẫn mở sau hạn chờ. Thêm ca và đột biến riêng cho hai pipe cùng tràn, một pipe im lặng khi pipe kia đầy, reader lỗi, leader còn sống sau EOF và hậu duệ giữ pipe sau khi leader thoát.” Cơ chế được chọn phải đi kèm danh sách API được phép và dự toán cập nhật.
+
+### P2 — M1, M2(c), P7, N7(b,c) — Chứng cứ bắt đầu treo và thứ tự gán chưa phân biệt được
+
+**Bằng chứng.** Marker vắng mặt tại một thời điểm cũng xảy ra khi Python đã được chạy nhưng còn khởi động. Mutant (b) còn có thể thất bại trước khi lấy được thread nếu chỉ dời lời `ResumeThread` lên trước gán. P7 hiện cho (b) và (c) dùng cùng dấu hiệu đỏ. M2 chưa phân biệt hết snapshot lỗi, duyệt kết thúc bình thường, không có hoặc nhiều ứng viên, `OpenThread` lỗi, stale TID và các giá trị `ResumeThread`. R4 cũng chưa có nghiệm thu chữ ký ABI của M1.
+
+**Câu thay thế.** “Đòi snapshot hợp lệ và duyệt tới kết thúc hợp lệ, đúng một thread khớp, rồi xác minh danh tính thread trên handle mở trong lúc process gốc còn sống. Chỉ nhận `ResumeThread == 1`. Mỗi nhánh thất bại có ca đích và đột biến riêng. P7 kiểm riêng cặp cờ tạo chính xác và thứ tự gán trước resume. Mutant (b) giữ cờ suspended, dời đủ khối mở/resume và chờ handshake marker có hạn trước khi gán. Mutant (c) chỉ bỏ cờ suspended và đỏ ở vế cờ hoặc phép đo suspend count riêng. Thử ABI theo danh sách tên, chữ ký, size/offset của các struct được cho phép.” Chốt thêm giả định về tiến trình ngoài có quyền can thiệp vào con để giới hạn đúng lời bảo đảm của Toolhelp.
+
+### P2 — M2(e), P3–P5, §4b — Chưa đo được job rỗng và kiểm chứng vòng đời bằng đối tượng ổn định
+
+**Bằng chứng.** `TerminateJobObject` và `QueryInformationJobObject` đều có thể thất bại. Đọc buffer zero-init sau query lỗi tạo kết quả rỗng giả. P3 chưa nêu cách giữ job handle hợp lệ khi hàm đóng handle trước khi trả, hoặc cách nhận diện đúng process gốc. `OpenProcess` thất bại có thể do quyền, và PID mở lại có thể thuộc tiến trình khác. P5 ghi PID và giữ một tệp mở chưa chứng minh cháu đã vào thân fixture, leader đã thoát trong khi cháu còn sống, hay cháu không giữ pipe. Nếu P5 vô tình giữ pipe thì có thể đỏ ở deadline thay vì chốt orphan cleanup. Hai vế bỏ `TerminateJobObject` và bỏ `KILL_ON_JOB_CLOSE` trong (a) còn che lẫn nhau.
+
+**Câu thay thế.** “Kiểm kết quả terminate riêng. Chỉ chấp nhận query lớp 1 thành công với `ActiveProcesses == 0`; query lỗi hoặc hết hạn khi còn thành viên phát `_1174Error`. Trong P3/P5 giữ handle quan sát được lấy khi đối tượng fixture còn sống, rồi kiểm trạng thái signaled. P3 lấy số đếm thật tại bước cleanup trước khi đóng job, hoặc giữ bản sao handle quan sát và đóng sau phép đo. P5 đồng bộ tín hiệu cháu đã chạy, dùng std handles độc lập và xác nhận leader thoát trước cleanup. Tách đột biến bỏ terminate, sai lớp/trạng thái query và bỏ `KILL_ON_JOB_CLOSE`, mỗi đột biến có vế đỏ riêng. Fixture có đường tự thu hồi khi mutant sống sót.”
+
+### P2 — M2(b,c), P6–P7, §10 — Breakaway, job lồng và handle kế thừa còn lỗ trong phép đo
+
+**Bằng chứng.** P6 yêu cầu mã 5, §10 nhận mọi `OSError`; cách sau nhận cả lỗi dựng executable hoặc lệnh con. Job ngoài có thể chặn breakaway và làm mutant (e) xanh giả. Win8+ hỗ trợ nested job nhưng không bảo đảm mọi phép gán thành công, chẳng hạn khi tổ hợp job hoặc giới hạn UI không tương thích. P6 chỉ thử yêu cầu breakaway tường minh. Nó không kiểm hậu duệ sinh bình thường dưới `SILENT_BREAKAWAY_OK`. P7 chỉ đọc cờ của job handle, chưa đo allowlist của lần tạo con và đường rò handle trên lỗi.
+
+**Câu thay thế.** “Chỉ cho phép cặp creation flags của M2(c), `LimitFlags == 0x2000` và std-handle list của CPython. P6 có đối chứng cùng executable/argv sinh thành công, rồi nhận mã Win32 thuộc tập allowlist đã đo và ghi mã thật. Trước khi tính kết quả mutant (e), chứng minh job ngoài không che mất phản chứng. Thêm vế hậu duệ sinh không yêu cầu breakaway với mutant silent-breakaway, vế cờ breakaway trên lần tạo con đầu, vế job handle kế thừa được và vế gán vào job lồng bị từ chối. Các vế lỗi xác nhận con fixture đã được thu hồi.” §4b cần ghi phạm vi là tiến trình sinh thuộc cây kế thừa job. Tiến trình do dịch vụ ngoài job tạo thay mặt con nằm ngoài phạm vi bảo đảm của Job Object.
+
+### P2 — M2, M3, §4b — Callback và handle chưa có ma trận lối ra
+
+**Bằng chứng.** P1/P4 và M3 đo callback khi thành công, tràn và lỗi validation. Chưa đo deadline sau khi đọc một phần, lỗi tạo job/tệp/con, lỗi gán, lỗi reader, lỗi query, hoặc callback tự phát lỗi. Snapshot/thread/job, tempfile, pipe và process handle có các thời điểm sở hữu khác nhau. Chỉ dẫn hiện tại mới nêu `finally` tường minh cho một phần số đó.
+
+**Câu thay thế.** “Một `finally` ngoài gọi `on_bytes` đúng một lần sau khi đã chốt số byte thực và hoàn tất các bước thu hồi. Quy định thứ tự ưu tiên nếu callback và cleanup cùng lỗi. Dùng bảng lối ra theo từng mốc sở hữu, với số callback kỳ vọng và tài nguyên phải đóng. Có ca deadline sau output một phần, lỗi trước byte đầu, và phản chứng riêng bỏ hoặc lặp callback, bỏ đóng thread/snapshot và bỏ thu hồi pipe/process/job handle.”
+
+### P2 — N1–N8, L1–L6 — Một số phép đo chưa cưỡng chế đủ chính tiêu chí đã khai
+
+| N | Kiểm và câu thay thế |
+|---|---|
+| N1 | Đổi tên khóa làm phép đồng nhất `MUTANTS` đỏ. **Thêm** đối chiếu sổ ID base/head và chạy chốt mốc mutant khớp đúng một lần, để bắt ca bị rút đăng ký và anchor cũ bị mã mới làm trùng như r2. |
+| N2 | RAM xác nhận helper bắt decorator và nhận khối mới hợp lệ. Helper này so `packet_loop.py`. **Thêm** phép so chỉ-chèn đã định nghĩa cho `packet_loop_test.py`, giữ nguyên byte các khối cũ, và phản chứng sửa thân helper test. |
+| N3 | Lời gọi trực tiếp làm đỏ như đã khai. **Ghi** N2+N3 là cặp gate và dẫn vế dương khối mới thực sự tồn tại. N3 tự nó chỉ quét dạng tham chiếu mà AST predicate nhận. |
+| N4 | (f) và (g) cùng có thể đỏ ở vector `0` với cùng lý do trên Linux. **Đo** (f) bằng một vector `0` trên Windows với lệnh fixture vô hại. Đo (g) bằng vector deadline hết hạn trên Linux và giữ vector hợp lệ ra `native Windows required` làm đối chứng. |
+| N5 | “Lệch base” chưa có phản chứng cụ thể. **Chạy** đúng tập ID base đã ghi và kiểm trạng thái, lý do nếu skip, marker dương của ca native áp dụng. Đột biến mở chốt Windows phải đỏ tại `wp1174_windows_claim_rejected`. |
+| N6 | P1/P2 có thể chạy native như mô tả. **Thêm** vế dữ liệu nhị phân CRLF/NUL cho P1 và lỗi/trần thời gian rõ ràng cho hai vế P2. P3–P7 cần sửa theo các finding trên. |
+| N7 | (d) cần ca cho ra assertion đích dù triển khai còn phép kiểm deadline cuối, hoặc worker/fixture có watchdog. **Ghi** thứ tự kiểm thời gian tại P3 và mã assertion đích, giới hạn watchdog ngoài ca, cặp byte-exact và đối chứng cho từng mutant. Lỗi trước hành vi đích là `KHÔNG ĐO`. |
+| N8 | §4b trỏ tới N8 như chỗ có mutant trần byte, nhưng N8 là các gate tĩnh. **Đưa** mutant byte vào N7. Đo Ruff theo chênh lệch tập diagnostic theo từng tệp với pin cụ thể, gồm phản chứng thay một diagnostic bằng diagnostic khác cùng số lượng. Ghi hai tệp là write set, ADR-0053 cho tối đa sáu tệp và 450 dòng thêm. |
+
+Mỗi ca cần đối chiếu ID và assertion đầy đủ trong biên nhận, thay vì chỉ đếm marker. L2 giữ được với hai tệp nếu driver nằm ngoài kho và có hồ sơ tái lập. L4 áp dụng đúng với `khong_ap_dung`.
+
+### P2 — §0, §7, §10 — Dự toán chưa bao gồm phần bắt buộc để nghiệm thu
+
+**Bằng chứng.** Ước lượng hiện tại `100–130` dòng mã và `170–230` dòng test có thể chứa đường chạy thuận và bảy ca ban đầu. Sau khi tính bindings/layout và định danh `45–65`, khởi tạo/resume/cleanup job `65–95`, transport và lifecycle reader `65–100`, mã sản phẩm khoảng **175–260 dòng**. Fixture, ca dương và ca lỗi riêng khoảng **200–290 dòng test** nếu tái sử dụng `_native1342` và để driver ngoài kho. Tổng ước **375–550 dòng thêm**, chưa đo bằng triển khai. Trần 450 có thể đạt ở nửa thấp của khoảng.
+
+**Câu thay thế.** “Dự toán theo ba khối mã và các nhóm ca, gồm đầy đủ đường thất bại §4b. Trước khi đóng băng, chốt cơ chế I/O và lập ngân sách dòng cho từng nhóm. Sau triển khai đo `git diff --numstat` trên đúng base/head. Nếu vượt 450 dòng thêm, áp dụng §7 và E2 theo ADR-0053.”
+
+### P3 — §0, §7, §9, §10 — Sửa lời khai tĩnh và điểm chuyển giao
+
+**Bằng chứng.** §0 cần nói rõ điều kiện đã vào `finally` nội bộ của Linux và sửa dòng bắt đầu `_native1342`. §10 dùng “bảo đảm” cho nested jobs. §9 còn tiêu đề “Câu hỏi” dù Q1–Q4 đã chốt. Dòng về desktop/VM offline tự nó mô tả thiếu bằng chứng native; lease hết hạn mới là điểm dừng có căn cứ, còn E2 cần gắn với quyết định cụ thể thuộc thẩm quyền chủ kho.
+
+**Câu thay thế.** “Đổi §9 thành ‘Quyết định đã ghi’. Gắn giờ UTC và OID cạnh số đo §0, đo lại trước công bố băm, cấp lease và merge theo L5. Ghi nested job là năng lực có điều kiện tương thích. Khi thiếu máy đo, ghi `not_measured` và áp dụng điều kiện hết hạn lease của protocol. Dùng E2 khi cần quyết định về lease hoặc ngoại lệ thuộc thẩm quyền chủ kho.”
+
+KET_LUAN: request_changes

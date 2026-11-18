@@ -1,0 +1,27 @@
+codex
+## Xác nhận cuối lượt 11 · Issue #1342 · r1d-a1-i
+
+| Finding lượt 10 | Trạng thái | Bằng chứng chạy trong RAM |
+|---|---|---|
+| R10-1 · P2 | **Đóng** | Đối chứng đúng N2 với hai `def` mới, một gán có tiền tố `_wp1342a1_` và đăng ký `wp1342_native_job_review` đạt `1111`. Nạp biến thể thu được 1.563 mục, thêm đúng ID này. Đối chứng cũ dùng `"id"` cho `1010`. |
+| R10-2 · P2 | **Đóng** | Mục `("wp1342_native_job_x", _native1342("wp1174_writer_accept", _wp1342a1_fn))` đặt trong cửa sổ hợp lệ cho `1010`. Wrapper của đối chứng dương giữ đúng ID đăng ký. |
+| R10-3 · P3 | **Đóng** | Cùng mẫu đăng ký và cùng ID, list literal đạt `1111` trong đối chứng dương, còn list comprehension cho `1010`. |
+
+**Diff bản 10 → bản 11.** `diff -U0` trả `1`, với 4 dòng thêm và 1 dòng xóa. Chỉ thay dòng 105 (§5 N2), thêm dòng 161 (§9 Q6) và dòng 183–184 (§11, nhật ký lượt 10–11). Phần còn lại trùng từng byte. Không có dòng ngoài phạm vi bị đổi. [Đặc tả r4](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt/ops/specs/WP1174-WINDOWS-BACKEND-r4.md:105)
+
+**N2 trong RAM.** `python -B -` trên Linux, CPython 3.13.18, trả `0`. Phép đo tái dựng bốn vế từ N2, lấy source bằng `git show` và dùng stub cho import `launcher`. Các bit theo thứ tự (i)–(iv).
+
+| Ca | Kết quả |
+|---|---|
+| Base `packet_loop_test.py` | `1111`. Có 1.562 mục, 85 điểm bind `CASES` và 14 điểm bind `MUTANTS_NHAM_TEST`. Cửa sổ đăng ký nằm sau câu lệnh kết thúc ở dòng 18557 và trước `if __name__ == "__main__"` ở dòng 18560. |
+| Chèn `return` vào thân `_native1342`, thêm decorator vào định nghĩa cũ | `0110` mỗi ca |
+| Định nghĩa lại `_native1342`, gán trong `if`, walrus trong `if`, RHS hoặc giá trị mặc định | `1010` mỗi ca |
+| `match`, `del`, `globals().update`, che `frozenset`, cặp lớp có `__init_subclass__` | `1110` mỗi ca |
+| Trùng `wp1174_writer_accept` ở vị trí cũ và trong cửa sổ hợp lệ, lệch ID native, list comprehension, trùng ID mới, ID mới đặt quá sớm hoặc quá muộn | `1010` mỗi ca |
+| Vế `packet_loop.py` | `_additive1342r2` trả `[]` trên base. Sửa một byte trong `_1174_win_seed` và thêm hàm mới có decorator đều trả lỗi khác `[]`. |
+
+**Hồi quy và finding.** Các chốt đã đóng ngoài N2 giữ nguyên từng byte. Trong N2, đối chứng dương vẫn qua và toàn bộ phản chứng đã liệt kê đều đỏ. Không phát hiện hồi quy hay finding P0–P3 trong phạm vi xác nhận. Windows native, CI và gate trên mã triển khai ở trạng thái `not_run`.
+
+Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 bản 11 `2fcb8e6064e8d4c51572af12d886e9e740fa5dc12e79c6c7b764bc1b5c410bef`. `git diff --exit-code HEAD --` trả `0`. Phiên `openai_codex` qua API, transport `machine`, sandbox chỉ đọc. Model phục vụ và effort chưa đo được. Không ghi tệp, không gọi mạng.
+
+KET_LUAN: approve

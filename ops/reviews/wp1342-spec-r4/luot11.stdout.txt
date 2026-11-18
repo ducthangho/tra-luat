@@ -1,0 +1,1441 @@
+Reading additional input from stdin...
+OpenAI Codex v0.170.0
+--------
+workdir: /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+model: gpt-6.2-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1f0f8-2fdf-7cd1-a18b-9baa58c7d743
+--------
+user
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 11 — LƯỢT XÁC NHẬN CUỐI (chủ kho cấp thêm đúng một lời gọi, §9 Q6) — cho đặc tả `ops/specs/WP1174-WINDOWS-BACKEND-r4.md` (Issue #1342, bậc r1d-a1-i). CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng. Chạy thử trong RAM hoặc bản sao dưới /tmp.
+
+Clone master e2c3b82 (cộng chưa commit: đặc tả r1–r4, bản 10 đã review ở lượt 10 tại `ops/specs/WP1174-WINDOWS-BACKEND-r4-ban10.md`, các verdict `ops/reviews/wp1342-spec-r4/luot1..10.verdict.txt`).
+
+Ràng buộc đã chốt (§9 Q1–Q6, không tranh luận). Đây KHÔNG phải lượt tìm finding mới trên toàn đặc tả; phạm vi là:
+1. `diff` bản 10 (`-ban10.md`) với bản hiện tại. Xác nhận diff CHỈ chạm N2 (§5) và §9 (Q6) / §11 (nhật ký). Nêu mọi dòng khác bị đổi.
+2. Ba finding lượt 10 (`luot10.verdict.txt`: R10-1, R10-2, R10-3) đã ĐÓNG THẬT. CHẠY N2 trong RAM trên `packet_loop_test.py` của base theo đúng chữ N2 hiện tại: base xanh bốn vế; đối chứng dương (hai `def` mới có tiền tố `_wp1342a1_`, một gán tên mới có tiền tố, `CASES += [("wp1342_native_job_review", _native1342("wp1342_native_job_review", _wp1342a1_fn))]` đặt trong cửa sổ đăng ký) XANH; mọi phản chứng đã liệt kê ở N2 ĐỎ, kể cả phản chứng lệch ID `("wp1342_native_job_x", _native1342("wp1174_writer_accept", _wp1342a1_fn))` và đăng ký trùng `wp1174_writer_accept`; một `CASES += [...]` dạng list comprehension ĐỎ.
+3. Rà nhanh hồi quy: các chốt đã đóng ở lượt 1–10 không bị bản này làm hở lại.
+
+Đầu ra stdout: bảng ba finding R10 (đóng/chưa, kèm bằng chứng chạy), kết quả diff, kết quả N2 trong RAM, finding nếu có (P0–P3). Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2.
+warning: Codex could not find bubblewrap on PATH. Install bubblewrap with your OS package manager. See the sandbox prerequisites: https://developers.openai.com/codex/concepts/sandboxing#prerequisites. Codex will use the bundled bubblewrap in the meantime.
+codex
+Tôi sẽ dùng skill `cross-review` để kiểm tra diff và chạy N2 trong RAM trên đúng base, trong phạm vi xác nhận lượt 11.
+exec
+/bin/bash -lc 'cat CONTEXT.md docs/PROTOCOL_DA_PHIEN.md CLAUDE.md >/dev/null
+cat .agents/skills/cross-review/SKILL.md
+git status --short --branch
+git rev-parse HEAD HEAD''^{tree}
+diff -u ops/specs/WP1174-WINDOWS-BACKEND-r4{,-ban10}.md
+cat ops/reviews/wp1342-spec-r4/luot10.verdict.txt' in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ succeeded in 0ms:
+---
+name: cross-review
+description: Adapter review packet trên Codex CLI với checkout/context được cấp riêng. Assurance và hợp đồng evidence lấy từ docs/PROTOCOL_DA_PHIEN.md; cung cấp cú pháp PowerShell.
+---
+
+# Adapter `cross-review` — Codex CLI / PowerShell
+
+Đọc [protocol](../../../docs/PROTOCOL_DA_PHIEN.md) §7 (receipt), §8/§8.1–§8.3
+(assurance, bootstrap, runtime, cache, Ruff, lịch sử lớp), §10.2.1–§10.2.3 (CI) và §13.
+Nguồn cú pháp và ghi chép provider: [.claude adapter](../../../.claude/skills/cross-review/SKILL.md).
+Các mục model selector Claude ở nguồn chỉ dành cho lane Claude; không dùng bảng đó chọn Codex.
+Nhận dạng nền này là `openai_codex / codex_cli / machine`; model/effort và sandbox đọc từ run.
+
+## Bootstrap và snapshot
+
+Biến `$Remote`, `$ReviewRoot`, `$Branch`, `$ReviewedSha`, `$Scratch` lấy từ assignment.
+Lệnh clone/config/checkout thuộc bootstrap trước bàn giao (§8.1):
+
+```powershell
+git -c core.longpaths=true clone --no-checkout $Remote $ReviewRoot
+git -C $ReviewRoot remote get-url origin
+git -C $ReviewRoot config core.abbrev 7
+git -C $ReviewRoot config core.longpaths true
+git -C $ReviewRoot fetch origin $Branch
+git -C $ReviewRoot checkout --detach $ReviewedSha
+git -C $ReviewRoot rev-parse HEAD 'HEAD^{tree}'
+git -C $ReviewRoot status --porcelain=v1 --untracked-files=all --ignored=matching
+git -C $ReviewRoot diff --binary
+git -C $ReviewRoot diff --cached --binary
+git -C $ReviewRoot ls-files --others --exclude-standard
+git -C $ReviewRoot ls-files --others --ignored --exclude-standard
+```
+
+Ghi rc của từng command ngay sau chạy; snapshot bytes/hash và giới hạn quan sát ở §8.2.
+Trust path/capability theo §8.1; không có lệnh tự chấp nhận trust trong adapter này.
+
+Ví dụ diff/numstat giữ raw bytes trong scratch của run, với `$BaseSha` từ assignment:
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+& $Py -B -c 'import pathlib,subprocess,sys; r,b,h,o=sys.argv[1:]; p=subprocess.run(["git","-C",r,"diff",b,h],check=True,capture_output=True); (pathlib.Path(o)/"diff.patch").write_bytes(p.stdout); p=subprocess.run(["git","-C",r,"diff","--numstat",b,h],check=True,capture_output=True); (pathlib.Path(o)/"numstat.txt").write_bytes(p.stdout)' $ReviewRoot $BaseSha $ReviewedSha $Scratch
+$DiffArtifactsRc = $LASTEXITCODE
+```
+
+`$ReviewRoot`/`$Scratch` là đường dẫn tuyệt đối. Khi đọc `modelUsage` lane Claude qua nguồn,
+truyền `$ReviewRoot` vào đối số SOURCE và JSON đúng `$Scratch/reviewer.json`; producer và
+consumer cùng run theo §8.1. Không đọc JSON trùng tên ở cwd.
+
+## Runtime và Ruff
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+codex --version
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:PYTHONPYCACHEPREFIX = Join-Path $Scratch 'pycache'
+& $Py -B -c 'import pathlib,runpy,sys; m=runpy.run_path(str(pathlib.Path(sys.argv[1])/".claude/dev/ci_dang_ky_test.py")); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)' $ReviewRoot
+$RuffContractRc = $LASTEXITCODE
+& $Py -m ruff check --no-cache --select F (Join-Path $ReviewRoot 'scripts/tl.py')
+$RuffLintRc = $LASTEXITCODE
+```
+
+Hai lệnh Ruff trỏ checkout được giao, không phụ thuộc cwd. Pin/probe và bare lint là hai scope của §8.2;
+tiêu chí A7/mutant riêng xem §10.2.3. Cú pháp `launcher.py run --prompt-file` và mẫu Codex
+ở nguồn, mục “Reviewer là codex”; schema đầy đủ ở `docs/GOI_AGENT_DA_NEN.md`.
+`$Run = Get-Content -Raw -LiteralPath $RunJson | ConvertFrom-Json` đọc rc con/trạng thái; parse được chưa là
+completion evidence. Model/effort/sandbox lấy từ `$Run.model_phuc_vu`, `$Run.effort_phuc_vu`, `$Run.sandbox_quan_sat`,
+chỉ đo được khi `model_phuc_vu_trang_thai`/`effort_phuc_vu_trang_thai`/`sandbox_trang_thai` là `DO_DUOC`
+(khác thì đọc `*_ly_do`); đối chiếu với prompt/receipt theo §8.1. Header `model:`/`reasoning effort:` trong
+`$StderrLog`, nếu có, chỉ là lời khai phụ; vắng header không phải chưa đo được. Không lấy model từ actor GitHub.
+
+## Provenance và vận chuyển
+
+Lưu khối GraphQL “Provenance CI” của .claude adapter vào `$QueryFile` ngoài checkout:
+
+```powershell
+gh api graphql -F "query=@$QueryFile" -f "id=$RunNodeId"
+$ProvenanceRc = $LASTEXITCODE
+gh api --paginate --slurp "repos/ducthangho/tra-luat/actions/runs/$RunId/attempts/$Attempt/jobs?per_page=100"
+$JobsRc = $LASTEXITCODE
+git -C $ReviewRoot cat-file blob "${DefinitionOid}:$WorkflowPath"
+```
+
+Khối `cat-file` minh họa đọc; để lưu bytes/hash dùng Python `subprocess` như work-packet.
+Nguồn URL/OID, nullable `file`, 403, skipped/waiver và đủ attempt/context theo §10.2.2–§10.2.3.
+Receipt body-file dùng Python ở [work-packet nguồn](../../../.claude/skills/work-packet/SKILL.md),
+mục “Body file và exact readback”. Bảng verdict/lịch sử lớp ở nguồn; không đổi contract khi
+đổi shell. Không dispatch reviewer từ ví dụ đọc evidence này.
+## master...origin/master
+?? ops/reviews/wp1342-spec-r1/
+?? ops/reviews/wp1342-spec-r2/
+?? ops/reviews/wp1342-spec-r3/
+?? ops/reviews/wp1342-spec-r4/
+?? ops/specs/WP1174-WINDOWS-BACKEND-r1.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r2.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r3.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban1.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban10.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban2.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban3.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban4.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban5.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban6.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban7.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban8.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4-ban9.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+e2c3b82f818bd1739d31261e8129d3ef44915acf
+7693a24fa9169d91370dae782ec51eabd3fa0a35
+--- ops/specs/WP1174-WINDOWS-BACKEND-r4.md	2026-11-18 23:22:33.583897737 +0000
++++ ops/specs/WP1174-WINDOWS-BACKEND-r4-ban10.md	2026-11-18 23:22:33.579189648 +0000
+@@ -102,7 +102,7 @@
+ | # | tiêu chí | phép đo làm nó ĐỎ |
+ |---|---|---|
+ | N1 | Linux không đổi: CI Ubuntu exact head `GOM: ĐẠT`; sổ ID ca base ⊆ head, mỗi ID base cùng trạng thái (đạt/bỏ qua + lý do); `MUTANTS` head == base; mỗi mốc (tìm) của `MUTANTS` đang có khớp ĐÚNG MỘT lần trên head. Biên nhận ghi từng ID và từng mốc. | Rút một ca base; đổi tên một khoá giữ số lượng; mã mới làm một mốc cũ khớp 2 lần. |
+-| N2 | Chỉ THÊM, cả hai tệp. `packet_loop.py`: `_additive1342r2(base, head) == []`. `packet_loop_test.py`: (i) với mỗi định nghĩa mức module của base (def/class/gán), đoạn nguồn TÍNH TỪ DÒNG DECORATOR ĐẦU TIÊN (nếu có) tới hết khối ở head BẰNG TỪNG BYTE, đoạn ngay trước nó không thêm decorator mới, và vẫn là một định nghĩa mức module riêng; (ii) với mỗi tên được bind ở base, SỐ điểm bind thực thi ở phạm vi module — đếm trên head SAU KHI loại đúng các khối chèn đã được (iv) chấp nhận (nên `CASES += [...]` hợp lệ không làm đỏ) — (duyệt `Module.body` đệ quy qua `If`/`Try`/`With`/`For`/`While`, không vào thân hàm/lớp; tính def, class, gán, gán tăng, import) ở head BẰNG base; (iii) `difflib` trên dòng chỉ có `equal`/`insert`; (iv) DANH SÁCH CHO PHÉP cho phần chèn: mỗi khối `insert` phải nằm GIỮA hai câu lệnh mức module của base (không trong một câu lệnh nào), tự parse được thành dãy câu lệnh mức module hoàn chỉnh, và mỗi câu lệnh chỉ thuộc một trong ba dạng: `def` không decorator với tên CHƯA có ở base (KHÔNG cho phép `class` ở mức module: tạo lớp chạy ngầm `__init_subclass__`/metaclass lúc nạp); gán một tên CHƯA có ở base. Mọi tên mức module MỚI trong `packet_loop_test.py` phải mang tiền tố dành riêng `_wp1342a1_` (danh sách cho phép theo tiền tố; tiền tố này không trùng tên nào base đọc, kể cả builtin), nên không tên mới nào che được builtin hay tên mà câu lệnh base đọc lúc import; `CASES += [list literal]` (KHÔNG list comprehension), với ràng buộc ĐĂNG KÝ: mỗi mục là `(ID, _wp1342a1_<tên>)` cho ca thuần hoặc `(ID, _native1342(ID, _wp1342a1_<tên>))` cho ca native — đúng hai đối số, và ID truyền vào `_native1342` là CÙNG hằng chuỗi với ID đăng ký; (a) ID là hằng chuỗi bắt đầu bằng `wp1342_pure_spawn_` hoặc `wp1342_native_job_`; (b) tập ID mới tính tĩnh được, các ID đôi một khác nhau và RỜI tập ID của base; (c) mọi câu `CASES += [...]` chèn nằm SAU câu lệnh base cuối cùng đọc hoặc biến đổi `CASES` lúc nạp module và TRƯỚC khối `if __name__ == "__main__"`. Thêm, trên TOÀN BỘ cây AST của phần chèn (kể cả RHS, giá trị mặc định, annotation, thân lớp, phần tử đăng ký, thân hàm mới): không `NamedExpr` (walrus) nào; không `Global`/`Nonlocal`; không `Name` ngữ cảnh `Store`/`Del` trùng một tên mức module của base ở bất kỳ vị trí nào được đánh giá lúc nạp module (ngoài thân hàm), TRỪ đúng nút đích `target` của câu `CASES += [...]` đã khớp mẫu; không `ClassDef` nào ở BẤT KỲ đâu trong phần chèn; không `Name`/`Attribute` nào tên `globals`, `vars`, `locals`, `setattr`, `delattr`, `exec`, `eval`, `compile`, `__import__`, `__dict__`, `modules`, `_getframe`, `f_globals`, `f_locals`, `f_back`, `__init_subclass__`, `__class_getitem__`, `__set_name__` ở BẤT KỲ đâu trong phần chèn. Ở các vị trí được đánh giá lúc nạp module (RHS gán mới, giá trị mặc định, annotation, phần tử `CASES += [...]`), DANH SÁCH CHO PHÉP nút: `Constant`, `Name` (Load), `Tuple`, `List`, `BinOp` cộng chuỗi, và `Call` chỉ khi hàm được gọi là `Name` `_native1342` (mẫu đăng ký như base); mọi nút khác (gồm `Attribute`, `Call` tới hàm khác — kể cả hàm mới, vì thân nó sẽ chạy lúc nạp) ⇒ đỏ. Mọi dạng khác (`del`, `match`, `if`/`for`/`with`, import mức module, gán lại tên cũ) ⇒ đỏ. Phép đo chạy ngoài kho (không tính vào numstat). Phiên điều phối đo lại kèm phản chứng chạy thật. | Sửa một byte thân hàm r1–r3 ⇒ khác `[]`; decorator vào hàm mới ⇒ khác `[]`; chèn `return lambda c: None` vào đầu thân `_native1342` ⇒ (i) ĐỎ; thêm `def _native1342(...)` ở cuối tệp ⇒ (ii) ĐỎ; chèn `@(lambda fn: lambda *a: None)` ngay trước `def _native1342` ⇒ (i) ĐỎ; thêm `if True: _native1342 = None` ⇒ (ii) ĐỎ; thêm `match None:\n    case _native1342: pass`, `if (_native1342 := None): pass`, `del _native1342`, `_r4_x = (_native1342 := None)`, `def _r4_a(x=(_native1342 := None)): pass`, `_r4_x = globals().update(_native1342=None)`, khối `def _wp1342a1_noop(c): pass` + `CASES += [("wp1174_writer_accept", _wp1342a1_noop)]` chèn ngay trước câu gán `_r26_original_accept1174 = dict(CASES)["wp1174_writer_accept"]` (ID trùng base, sai tiền tố, sai vị trí), mục native lệch ID `("wp1342_native_job_x", _native1342("wp1174_writer_accept", _wp1342a1_fn))`, `def frozenset(items): return ()` chèn ngay trước câu gán `_WP1174_NATIVE_KEYS = frozenset(...)` của base (che builtin; tên không mang tiền tố), và khối hai lớp `class _r4_A:` có `__init_subclass__` ghi `sys._getframe(1).f_globals["_native1342"] = None` + `class _r4_B(_r4_A): pass` ⇒ (iv) ĐỎ; đối chứng dương: khối chèn mô phỏng phần test r4 (hai `def` mới không decorator, một gán tên mới — đều mang tiền tố `_wp1342a1_` —, một `CASES += [("wp1342_native_job_review", _native1342("wp1342_native_job_review", _wp1342a1_fn))]` đặt trong cửa sổ đăng ký) ⇒ XANH cả bốn vế (đích `CASES` của mẫu đăng ký được miễn đúng một nút; base xanh cả bốn vế, `MUTANTS_NHAM_TEST` 14 điểm bind, `CASES` 85 điểm bind). |
++| N2 | Chỉ THÊM, cả hai tệp. `packet_loop.py`: `_additive1342r2(base, head) == []`. `packet_loop_test.py`: (i) với mỗi định nghĩa mức module của base (def/class/gán), đoạn nguồn TÍNH TỪ DÒNG DECORATOR ĐẦU TIÊN (nếu có) tới hết khối ở head BẰNG TỪNG BYTE, đoạn ngay trước nó không thêm decorator mới, và vẫn là một định nghĩa mức module riêng; (ii) với mỗi tên được bind ở base, SỐ điểm bind thực thi ở phạm vi module — đếm trên head SAU KHI loại đúng các khối chèn đã được (iv) chấp nhận (nên `CASES += [...]` hợp lệ không làm đỏ) — (duyệt `Module.body` đệ quy qua `If`/`Try`/`With`/`For`/`While`, không vào thân hàm/lớp; tính def, class, gán, gán tăng, import) ở head BẰNG base; (iii) `difflib` trên dòng chỉ có `equal`/`insert`; (iv) DANH SÁCH CHO PHÉP cho phần chèn: mỗi khối `insert` phải nằm GIỮA hai câu lệnh mức module của base (không trong một câu lệnh nào), tự parse được thành dãy câu lệnh mức module hoàn chỉnh, và mỗi câu lệnh chỉ thuộc một trong ba dạng: `def` không decorator với tên CHƯA có ở base (KHÔNG cho phép `class` ở mức module: tạo lớp chạy ngầm `__init_subclass__`/metaclass lúc nạp); gán một tên CHƯA có ở base. Mọi tên mức module MỚI trong `packet_loop_test.py` phải mang tiền tố dành riêng `_wp1342a1_` (danh sách cho phép theo tiền tố; tiền tố này không trùng tên nào base đọc, kể cả builtin), nên không tên mới nào che được builtin hay tên mà câu lệnh base đọc lúc import; `CASES += [list literal hoặc list comprehension]`, với ràng buộc ĐĂNG KÝ: (a) ID mỗi mục là hằng chuỗi (hoặc, trong list comprehension, hằng chuỗi tiền tố cộng phần tử của một tuple hằng) bắt đầu bằng `wp1342_pure_spawn_` hoặc `wp1342_native_job_`; (b) tập ID mới tính tĩnh được, các ID đôi một khác nhau và RỜI tập ID của base; (c) mọi câu `CASES += [...]` chèn nằm SAU câu lệnh base cuối cùng đọc hoặc biến đổi `CASES` lúc nạp module và TRƯỚC khối `if __name__ == "__main__"`. Thêm, trên TOÀN BỘ cây AST của phần chèn (kể cả RHS, giá trị mặc định, annotation, thân lớp, phần tử đăng ký, thân hàm mới): không `NamedExpr` (walrus) nào; không `Global`/`Nonlocal`; không `Name` ngữ cảnh `Store`/`Del` trùng một tên mức module của base ở bất kỳ vị trí nào được đánh giá lúc nạp module (ngoài thân hàm), TRỪ đúng nút đích `target` của câu `CASES += [...]` đã khớp mẫu; không `ClassDef` nào ở BẤT KỲ đâu trong phần chèn; không `Name`/`Attribute` nào tên `globals`, `vars`, `locals`, `setattr`, `delattr`, `exec`, `eval`, `compile`, `__import__`, `__dict__`, `modules`, `_getframe`, `f_globals`, `f_locals`, `f_back`, `__init_subclass__`, `__class_getitem__`, `__set_name__` ở BẤT KỲ đâu trong phần chèn. Ở các vị trí được đánh giá lúc nạp module (RHS gán mới, giá trị mặc định, annotation, phần tử `CASES += [...]`), DANH SÁCH CHO PHÉP nút: `Constant`, `Name` (Load), `Tuple`, `List`, `BinOp` cộng chuỗi, `ListComp`/`comprehension`, và `Call` chỉ khi hàm được gọi là `Name` `_native1342` (mẫu đăng ký như base); mọi nút khác (gồm `Attribute`, `Call` tới hàm khác — kể cả hàm mới, vì thân nó sẽ chạy lúc nạp) ⇒ đỏ. Mọi dạng khác (`del`, `match`, `if`/`for`/`with`, import mức module, gán lại tên cũ) ⇒ đỏ. Phép đo chạy ngoài kho (không tính vào numstat). Phiên điều phối đo lại kèm phản chứng chạy thật. | Sửa một byte thân hàm r1–r3 ⇒ khác `[]`; decorator vào hàm mới ⇒ khác `[]`; chèn `return lambda c: None` vào đầu thân `_native1342` ⇒ (i) ĐỎ; thêm `def _native1342(...)` ở cuối tệp ⇒ (ii) ĐỎ; chèn `@(lambda fn: lambda *a: None)` ngay trước `def _native1342` ⇒ (i) ĐỎ; thêm `if True: _native1342 = None` ⇒ (ii) ĐỎ; thêm `match None:\n    case _native1342: pass`, `if (_native1342 := None): pass`, `del _native1342`, `_r4_x = (_native1342 := None)`, `def _r4_a(x=(_native1342 := None)): pass`, `_r4_x = globals().update(_native1342=None)`, khối `def _wp1342a1_noop(c): pass` + `CASES += [("wp1174_writer_accept", _wp1342a1_noop)]` chèn ngay trước câu gán `_r26_original_accept1174 = dict(CASES)["wp1174_writer_accept"]` (ID trùng base, sai tiền tố, sai vị trí), `def frozenset(items): return ()` chèn ngay trước câu gán `_WP1174_NATIVE_KEYS = frozenset(...)` của base (che builtin; tên không mang tiền tố), và khối hai lớp `class _r4_A:` có `__init_subclass__` ghi `sys._getframe(1).f_globals["_native1342"] = None` + `class _r4_B(_r4_A): pass` ⇒ (iv) ĐỎ; đối chứng dương: khối chèn mô phỏng phần test r4 (hai `def` mới không decorator, một gán tên mới — đều mang tiền tố `_wp1342a1_` —, một `CASES += [("id", _native1342("id", _wp1342a1_fn))]`) ⇒ XANH cả bốn vế (đích `CASES` của mẫu đăng ký được miễn đúng một nút; base xanh cả bốn vế, `MUTANTS_NHAM_TEST` 14 điểm bind, `CASES` 85 điểm bind). |
+ | N3 | Không nối dây + vế dương: `wp1342_additive_byte_preserved` (vế N3, cây làm việc) đạt; VÀ head chứa đúng tập tên mới mức module `{_1174_WIN_JOB_LIMIT, _1174_WIN_SPAWN_FLAGS, _1174_WIN_RESUME_OK, _1174_win_api_job, _1174_win_pick_thread, _1174_win_resume_ok, _1174_win_cleanup, _1174_win_note, _1174_win_job_empty, _1174_win_spawn_job}` (mười tên; không thiếu, không thừa tên mới nào khác trong `packet_loop.py`). | Thêm lời gọi `_1174_win_spawn_job` trong `_1174_process` ⇒ đỏ; bỏ một khối bắt buộc ⇒ vế dương đỏ. |
+ | N4 | M5 (S1–S5) đạt trên Linux (CI) và Windows (Desktop). | c (S1 SPAWN_FLAGS), t1 (S2), t2 (S3 "count=2"), k3 (S4), g0 (S5 argv=[]), d1 (S5 deadline ngoài miền) ⇒ đỏ đúng dấu hiệu. |
+ | N5 | Windows vẫn bị từ chối, không đổi: chạy đúng tập ID base đã ghi (`wp1174_windows_claim_rejected` + 12 ID `WP1174_BOTH` + ca native r1–r3) trên base và head cùng lượt; so từng ID trên trạng thái, lý do bỏ qua, dấu hiệu dương (bỏ các trường thời gian/pid). | Một ID lệch; đột biến mở chốt claim Windows phải đi tới và đỏ tại assertion đích của `wp1174_windows_claim_rejected`. |
+@@ -158,7 +158,6 @@
+ - **Q3.** Cấm tuyệt đối breakaway: `LimitFlags == KILL_ON_JOB_CLOSE` — chủ kho 2026-11-18 (ca đo breakaway ở a1-ii).
+ - **Q4.** Job còn tiến trình sau khi kết thúc ⇒ `_1174Error`, fail-closed — chủ kho 2026-11-18.
+ - **Q5.** Nâng trần kích thước cho riêng revision này lên ≤ 2 tệp / ≤ 550 dòng thêm (thay `ADR-0053`) — chủ kho 2026-11-18, phiên điều phối #1206, qua AskUserQuestion; không tách thêm.
+-- **Q6.** Nâng trần lời gọi Codex +1 (tổng 11) cho riêng vòng review đặc tả này, CHỈ để xác nhận bản 11 sau Review Rescue Checkpoint ở lượt 10 (`ADR-0055`, **E2**) — chủ kho 2026-11-18, phiên điều phối #1206, qua AskUserQuestion. Không còn lời gọi nào sau lượt 11.
+ 
+ ## 10. `chua_do_duoc`
+ 
+@@ -180,5 +179,3 @@
+ - **Lượt 7** (bản sha256 `6c93bdac…`; `request_changes`: 2 P2, 2 P3; R6-1, R6-2 đóng; R6-3 đóng cho phản chứng cũ; R6-4 đóng trong cửa sổ M8). Bản này: R7-1 bỏ `class` khỏi dạng chèn được phép, cấm `ClassDef` mọi nơi trong phần chèn, thêm `_getframe`/`f_globals`/`f_locals`/`f_back`/`__init_subclass__`/`__class_getitem__`/`__set_name__` vào tên cấm, thêm phản chứng hai lớp; R7-2 N6 cưỡng chế cửa sổ 90 s mỗi ca native, vượt ⇒ `KHÔNG ĐO`; R7-3 J10b kiểm đúng tệp marker cùng đường dẫn; R7-4 §1 "bốn hàm thuần".
+ - **Lượt 8** (bản sha256 `738d2ffb…`; `request_changes`: 2 P2; R7-1 đóng cho phản chứng hai lớp; R7-2, R7-3, R7-4 đóng). Bản này: R8-1 tên mức module mới trong tệp test phải mang tiền tố `_wp1342a1_` (không che được builtin/tên base đọc lúc import), thêm phản chứng che `frozenset`; R8-2 S5 chốt thứ tự `argv=[]` → `now+10**6` → `10**400` → còn lại, mỗi vector một assertion.
+ - **Lượt 9** (bản sha256 `5dd6f0e2…`; `request_changes`: 1 P2; R8-1 đóng cho phản chứng che builtin; R8-2 đóng). Bản này: R9-1 ràng buộc đăng ký `CASES += [...]` — ID hằng có tiền tố `wp1342_pure_spawn_`/`wp1342_native_job_`, mới, duy nhất, rời tập ID base; vị trí sau câu lệnh base cuối cùng đọc/biến đổi `CASES` lúc nạp và trước `if __name__ == "__main__"`; thêm phản chứng đăng ký trùng `wp1174_writer_accept`.
+-- **Lượt 10** (bản sha256 `033dc9be…`; `request_changes`: 2 P2, 1 P3; R9-1 đóng). CHẠM TRẦN 10/10 lời gọi Codex ⇒ Review Rescue Checkpoint. Bản này (CHƯA review) sửa: R10-1 đối chứng dương dùng ID có tiền tố; R10-2 mẫu mục native `(ID, _native1342(ID, fn))` cùng hằng, thêm phản chứng lệch ID; R10-3 chỉ cho list literal trong đăng ký, bỏ comprehension.
+-- **Lượt 11 (xác nhận cuối, theo Q6):** chạy trên bản này (đã gồm Q6). Kết quả ghi ngoài tệp đặc tả (`ops/reviews/wp1342-spec-r4/luot11.verdict.txt`) để băm bản được duyệt không đổi sau lượt xác nhận.
+codex
+## Review độc lập lượt 10 · Issue #1342 · r1d-a1-i
+
+| Finding lượt 9 | Trạng thái | Bằng chứng |
+|---|---|---|
+| R9-1 · P2 | **Đóng** | §5 N2(iv)(a–c), dòng 105, buộc ID mới có tiền tố, duy nhất và rời tập ID base. Đăng ký chỉ được chèn sau câu lệnh base kết thúc ở dòng 18557 và trước `if __name__ == "__main__"` ở dòng 18560. Phản chứng `wp1174_writer_accept` đỏ cả ở vị trí cũ trước dòng 16217 lẫn khi chuyển vào cửa sổ hợp lệ. Trong RAM, cưỡng ép nạp phản chứng cũ vẫn tái hiện `_r26_original_accept1174` trỏ sang `_wp1342a1_noop`. |
+
+Diff bản 9 → bản hiện tại có 2 dòng thêm và 1 dòng xóa, rc `1`. Thay đổi nằm ở N2 và nhật ký lượt 9. [Đặc tả r4](ops/specs/WP1174-WINDOWS-BACKEND-r4.md#L105)
+
+### Finding mới
+
+| ID | Mức | Bằng chứng và sửa cần thiết |
+|---|---|---|
+| R10-1 | **P2** | N2 yêu cầu đối chứng dương mang ID `"id"` đạt cả bốn vế, đồng thời N2(iv)(a) bắt buộc tiền tố `wp1342_pure_spawn_` hoặc `wp1342_native_job_`. Chạy nguyên ID `"id"` tại cửa sổ đúng cho `1010`. Đổi cả ID đăng ký lẫn ID truyền vào wrapper thành `wp1342_native_job_review10` cho `1111`. Sửa đối chứng dương trong đặc tả để hai yêu cầu có thể cùng đạt. |
+| R10-2 | **P2** | N2 kiểm ID trong mục `CASES` nhưng chưa buộc ID mà `_native1342` ghi ra phải bằng ID đăng ký. `("wp1342_native_job_review10", _native1342("wp1174_writer_accept", _wp1342a1_fn))` tại cửa sổ hợp lệ đạt `1111`. Chạy chính wrapper base trong RAM với stub cho nền native cho biên nhận `WP1342_NATIVE_V1` có `executed=1`, `passed=1`, `id="wp1174_writer_accept"`. Siết mẫu mục native thành cặp `(id, _native1342(id, fn))`, kiểm đúng số đối số và so hai ID sau khi tính tĩnh. Thêm riêng phản chứng lệch ID. |
+| R10-3 | **P3** | N2 ghi cho phép list comprehension nhưng danh sách nút lúc nạp chỉ cho `Name(Load)`. AST của mẫu `for x in ("demo",)` có `Name(Store)` cho `x`. Ghi ngoại lệ hẹp cho đích lặp cục bộ đã được kiểm hoặc dùng duy nhất list literal. |
+
+### N2 trong RAM
+
+`python -B -` trên Linux, CPython 3.13.18, rc `0`. Phép đo tái dựng N2 từ đặc tả, nạp blob Git trong RAM với stub import `launcher`. Các bit theo thứ tự (i)–(iv).
+
+| Ca | Kết quả |
+|---|---|
+| Base và khối hợp lệ chèn sau dòng 18558 | `1111` mỗi ca. Base nạp 1.562 mục, 85 điểm bind `CASES` và 14 điểm bind `MUTANTS_NHAM_TEST`. |
+| Chèn `return` vào thân cũ, thêm decorator vào định nghĩa cũ | `0110` mỗi ca |
+| Định nghĩa trùng tên, gán trong `if`, walrus trong `if` hoặc RHS | `1010` mỗi ca |
+| `match`, `del`, walrus trong default, `globals().update`, che `frozenset`, hai lớp có `__init_subclass__` | `1110` mỗi ca |
+| ID base trùng ở vị trí cũ hoặc đúng cửa sổ, ID mới trùng, ID mới đặt quá sớm hoặc quá muộn | `1010` mỗi ca |
+| Vế `packet_loop.py` | `_additive1342r2` trả `[]` trên base. Sửa một byte trong khối cũ và thêm hàm mới có decorator đều cho kết quả khác `[]`. |
+
+### 15 đột biến §4b
+
+Mỗi hàng xác định một vị trí logic dự kiến và dấu hiệu đích theo cặp ID ca và nhãn. Đối chiếu tĩnh đủ 15 ID. Số lần khớp neo byte-exact và dấu hiệu trên mã triển khai thuộc N7, `not_run`.
+
+| ID | Vị trí logic duy nhất | Dấu hiệu đích và vế phân biệt |
+|---|---|---|
+| `a1` | Khối gọi và kiểm BOOL của `TerminateJobObject`, M4(9) | J3 `job not empty`. `a2` giữ terminate tường minh. `k2` vẫn đặt `da_gan` trên đường thuận J3. |
+| `a2` | Giá trị `_1174_WIN_JOB_LIMIT` | J10 con/cháu sống sau khi trợ giúp chết. `a1` giữ kill-on-close. |
+| `a3` | Nhánh query FALSE, M3 | J11 nhận handle tệp là job rỗng. Các đột biến khác giữ nhánh từ chối query. |
+| `b` | Khối (5)–(7) đổi thứ tự và chờ marker | J6(ii) marker đã có ở `between`, với J6(i) xanh. `c` đỏ tại J6(i). |
+| `c` | Giá trị `_1174_WIN_SPAWN_FLAGS` | S1 `SPAWN_FLAGS == 0x204`. `a2` đỏ ở assertion `JOB_LIMIT`. |
+| `h` | Điểm chèn sau đăng ký `close_job`, M4(1) | J7 thấy `HANDLE_FLAG_INHERIT` sau khi phép tiêm trả TRUE. Chỉ `h` đổi cờ handle này. |
+| `k1` | Đăng ký `kill_truoc_gan`, M4(3) | J8 bản sao handle con chưa signaled. `k2` tác động sau gán. |
+| `k2` | Khối từ `da_gan = True` đến hết (7) | J9 phụ còn sống và thiếu `cleanup:xac_nhan`. `a1` vẫn có ghi chú này. |
+| `k3` | Nhánh bắt `Exception` trong `_1174_win_cleanup` | S4 bước 2 không chạy. Các đột biến khác giữ vòng dọn. |
+| `t1` | Nhánh chọn ứng viên của `_1174_win_pick_thread` | S2 nhận hai ứng viên. `t2` chỉ đổi kiểm resume count. |
+| `t2` | Điều kiện của `_1174_win_resume_ok` | S3 `count=2`. Các đột biến khác giữ điều kiện đúng 1. |
+| `d0` | Lời gọi `proc.wait(timeout=min(con_lai, 60.0))` | J2 thiếu lỗi `lifecycle deadline` trong 6–11 s. `d1` giữ chờ theo lát. |
+| `g0` | Khối kiểm đối số và nền, M4(0) | S5 Linux đỏ đầu tiên ở `argv=[]`. `d1` qua vector này. |
+| `abi` | Kiểu trường `th32OwnerProcessID` | J0 báo offset 12 trước size. Các đột biến khác giữ kiểu trường. |
+| `d1` | Vế cận trên deadline, M4(0) | S5 Linux đỏ đầu tiên ở `now+10**6`. `g0` đã dừng ở assertion đầu. |
+
+### N1–N8 theo L1–L7
+
+| Tiêu chí | Kết quả rà đặc tả |
+|---|---|
+| N1 | L1/L3/L6. So từng ID, khóa và neo. Có phản chứng mất ID, đổi khóa cùng số lượng và neo trùng. |
+| N2 | L2/L3/L6. Hai đường dẫn và phản chứng cũ đã đo. Đối chứng ghi trong đặc tả tự mâu thuẫn, đường lệch ID còn xanh. |
+| N3 | L1–L3/L6. Chốt đúng mười tên trên một đường dẫn. Có phép đỏ cho thiếu khối và nối dây. |
+| N4 | L2/L3. Có dấu hiệu đỏ cho S1–S5. Thứ tự S5 phân biệt `g0` và `d1`. |
+| N5 | L3/L5/L6. So từng ID trên base/head cùng lượt. Đột biến mở claim phải tới assertion đích. |
+| N6 | L1/L3/L5/L6. Chốt tập ca, máy đo, cửa sổ 90 s và bằng chứng dương. R10-2 chỉ ra chỗ cần buộc ID trong biên nhận khớp ID đã chạy. |
+| N7 | L1/L3/L6. Phân biệt 15 ID và 16 lần chạy. Yêu cầu một neo, đối chứng khỏe và đúng nhãn đích. |
+| N8 | L2/L3/L5/L6. So tập diagnostic, ghi rc riêng và đo numstat toàn diff. Trần áp trên numstat thực tế. |
+
+L4 khai `khong_ap_dung`. L5 neo số liệu vào base và yêu cầu đo lại trước công bố băm, cấp lease và merge. L7 khai E4/E5, dẫn protocol và ADR cho các điểm dừng, gắn E2 cho quyết định cần thẩm quyền. Không có finding ngân sách.
+
+Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`, SHA-256 đặc tả `033dc9be679d0b90bc1129682882e2c38d36a4c0712671342aa5a3d5967fec25`. `git diff --exit-code HEAD --` trả `0`. Phiên `openai_codex` qua API, transport `machine`, shell cục bộ chỉ đọc. Model phục vụ và effort chưa đo được. Không gọi mạng. Desktop, VM, CI và driver đột biến trên mã triển khai ở trạng thái `not_run`.
+
+KET_LUAN: request_changes
+
+exec
+/bin/bash -lc "cat CONTEXT.md
+rg -n '"'^#{1,4} '"' docs/PROTOCOL_DA_PHIEN.md CLAUDE.md SKILL.md ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+rg --files | rg 'packet_loop(_test)?\\.py"'$'"'
+sha256sum ops/specs/WP1174-WINDOWS-BACKEND-r4{,-ban10}.md
+diff --old-line-format='-%dn ' --new-line-format='+%dn ' --unchanged-line-format='' ops/specs/WP1174-WINDOWS-BACKEND-r4{-ban10,}.md
+git diff --exit-code HEAD --" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ succeeded in 0ms:
+# CONTEXT — Ngôn ngữ chung của dự án tra-luat
+
+Thuật ngữ chuẩn dùng trong SKILL.md, CHANGELOG, commit message và các phiên làm việc.
+File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết định kiến trúc ở `docs/adr/`
+(cây nguồn dev — r291: KHÔNG nằm trong gói phát hành).
+
+## Điều phối đa phiên
+
+- **Mission Plan** — kế hoạch chuẩn của một mục tiêu lớn, gồm outcome, acceptance, risk, budget và đồ thị Packet.
+  Thay đổi material chỉ có hiệu lực qua Mission Change Request được phê duyệt và một revision mới.
+- **Packet Spec** — hợp đồng đóng băng của một đơn vị công việc tự đủ: objective, acceptance, write set,
+  dependency, executor và environment. Khác **Session Plan**, đây là phạm vi được phép ghi và nghiệm thu.
+- **Session Plan** — trình tự chiến thuật của một phiên để hoàn thành đúng một vai trò trên một Packet/review/land.
+  Có thể đổi trong phiên nếu không làm đổi Packet Spec; việc ngoài spec trở thành successor Packet và phiên mới.
+- **Mission Change Request (MCR)** — yêu cầu có audit để đổi Mission Plan, ghi lý do, tác động, quyết định của
+  người có thẩm quyền và revision bị thay thế. MCR không tự có hiệu lực chỉ vì agent đề xuất.
+- **Executor** — vai trò duy nhất được ghi vào branch/worktree của generation để thực hiện Packet Spec.
+- **Reviewer** — vai trò độc lập, read-only với branch Executor, kiểm Spec và Standards/Security trên exact SHA
+  rồi ghi verdict. Cùng provider chỉ được tính là độc lập khi dùng một phiên khác và assurance thấp hơn.
+- **Model Reviewer Identity** — danh tính provider/model/session đã thực sự đọc diff và tạo verdict; không suy từ
+  tài khoản đăng comment hoặc ghi receipt.
+- **GitHub Submitter Identity** — actor vận chuyển verdict/comment/check lên GitHub; không tự chứng minh actor đó
+  là model reviewer hoặc có quyền approval độc lập.
+- **Review Delivery Receipt** — biên nhận bền neo verdict path/hash, exact reviewed SHA, Model Reviewer
+  Identity, GitHub Submitter Identity và cường độ mỏ neo. Receipt v1 là lịch sử read-only; chỉ v2 đã
+  validate mới đủ cho identity gate mới. _Tránh dùng:_ receipt là required check, submitter là reviewer.
+- **Wall Deadline / Working-state Evidence** — deadline bắt buộc tính theo absolute wall clock; working-state
+  time chỉ là bằng chứng phân biệt process chậm với máy ngủ, không thay deadline và không tự void attempt.
+- **Review Class** — mức assurance/reviewer tối thiểu của một Packet sau khi đối chiếu khai báo với phạm vi thay
+  đổi thật: `routine`, `systemic` hoặc `sensitive`. Mức không biết được xử lý như `sensitive`.
+- **Thin Orchestration** — lớp điều phối tối thiểu tái dùng launcher, packet loop, ba skill và GitHub Issue/PR;
+  chỉ tự động hóa kiểm tra/state transition tất định, còn quyết định tách, đổi thiết kế, land và cấp quyền chặn
+  thuộc human cho tới khi đủ bằng chứng promote. _Tránh dùng:_ orchestrator mới, autopilot.
+- **Review Rescue Checkpoint** — điểm quyết định bắt buộc khi một PR đã hết review budget hoặc chưa hội tụ sau
+  ba vòng code/review; kết quả là tách phần độc lập, revision kế hoạch, fallback đúng assurance hoặc pause.
+- **Stable Slice** — phần thay đổi hữu ích độc lập, đạt acceptance/evidence riêng và không phụ thuộc phần đang có
+  finding; chỉ được tích hợp qua Packet/PR sạch và review trên exact head của chính nó.
+- **Remediation Slice** — phần chưa hội tụ được tách khỏi Stable Slice thành successor Packet/PR, giữ finding IDs
+  và lịch sử để sửa hoặc thiết kế lại. _Tránh dùng:_ phần thừa, phần để sau.
+- **Approver** — người có thẩm quyền chấp nhận exact SHA và điều kiện land; output của agent không tự tạo quyền này.
+- **Land Operator** — người hoặc agent chỉ thực hiện thao tác land đã được Approver ủy quyền bền và có điều kiện.
+  Executor có thể kiêm Land Operator nhưng không nhờ đó trở thành Reviewer hay Approver của code mình.
+- **Merged** — một PR đã được hợp nhất vào nhánh đích của chính PR đó; chưa khẳng định kết quả đã vào canonical.
+- **Integrated** — Packet đã được merge tuần tự vào mission integration branch sau worker gate và review.
+- **Landed** — kết quả đã xuất hiện trên canonical ở exact SHA được duyệt, hậu-merge gate xanh và bookkeeping xong.
+- **Mission complete** — mọi Packet cần thiết đã landed, final acceptance/readback đạt và không còn lease/công việc mở.
+- **Bằng chứng chạy được** — dữ liệu reviewer kèm theo finding: cặp neo/thay đột biến nguyên văn, phác thảo ca test,
+  script đo A/B — đã chạy trong sandbox/cây riêng của reviewer, ghi kết quả chạy kèm theo. Là DỮ LIỆU trong verdict,
+  không phải commit, không mang quyền ghi; Executor tái dẫn xuất trên cây thật rồi tự đo. _Tránh dùng:_ bản vá hộ.
+- **Patch-as-hint** — patch reviewer sinh từ cây riêng, đính dạng artifact (comment/tệp) kèm nhãn "chưa chạy trên
+  cây thật"; Executor tự áp, tự đo, tự chịu trách nhiệm commit — cấm `git am` mù, cấm push ref vào kho.
+- **hint_provenance** — trường TUỲ CHỌN trong handoff Executor: khai hunk nào bắt nguồn từ hint của reviewer nào
+  và xác nhận đã tái dẫn xuất. Đã dùng hint mà thiếu khai là vi phạm quy trình; không dùng hint thì được vắng.
+- **Treo theo review** — chế độ lease khi packet ở `reviewing`, với `review_sla` là absolute timestamp do
+  dispatcher/người giữ ghi vào lease/state bằng audit bền; mặc định khi đo được là thời điểm vào `reviewing` + 2 giờ.
+  Thiếu trường, không parse được hoặc cơ sở giờ mơ hồ thì chế độ treo không kích hoạt và đồng hồ thu hồi thường tiếp tục
+  chạy; quá timestamp hợp lệ mà chưa có verdict thì lease trở lại đồng hồ thường.
+- **Phiên ấm / phục-hồi-nguội** — phiên executor giữ context sống chờ verdict (tối ưu hoá, không phải quyền) đối lại
+  đường dựng phiên mới từ handoff. Đường nguội luôn phải đủ sống một mình; phiên ấm thức dậy phải đo lại trước khi làm.
+
+## Bản thể & phát hành
+
+- **Canonical** — cây git chính thức duy nhất tại `D:\Quốc hội\tra-luat` (remote `github.com/ducthangho/tra-luat`).
+  Chỉ canonical được đánh số VERSION và publish. Số version không phát từ canonical là không hợp lệ.
+- **Nhánh song song** — phiên làm việc khác (Cowork/Chat/Codex…) sửa skill trên bản copy. Sản phẩm hợp lệ duy nhất
+  của nhánh song song là **bundle** (không phải version mới, không phải publish). Xem ADR-0001.
+- **Bundle** — zip giao nộp từ nhánh song song: giữ nguyên VERSION fork-point, kèm `BUNDLE_META.json`
+  (commit gốc, danh sách file đổi, test thêm). Canonical merge bundle rồi mới đánh số.
+- **LIVE (Package)** — file zip trên Drive Package (fileId cố định) mà Cowork/Chat thực tải qua `tl_fetch.sh`.
+  LIVE có thể TRỄ so canonical (drift) — kết luận "skill có lỗi X" phải nói rõ đo trên LIVE hay canonical.
+- **Deploy** — `tl drive-push` đưa zip canonical lên LIVE, giữ fileId. Luật vận hành: **xanh là deploy ngay**
+  (gate xanh ⇒ push cùng ngày + verify tải lại VERSION; SKILL.md đổi ⇒ nhắc user re-import Capabilities).
+- **Re-import** — user nạp lại zip vào Cowork Settings→Capabilities; bắt buộc khi SKILL.md đổi, vì agent đọc
+  bản import chứ không phải bản Drive.
+
+## Chất lượng & gate
+
+- **Gate xanh** — đủ bộ: `--selftest` + `workflow-audit --strict` + `golden-test` + `determinism-audit --strict`
+  + `gen_instructions --selftest` + `release-bundle` ×2 cùng SHA-256 + `release-verify` trong gói giải nén.
+- **Ingest thành công** — mọi hậu điều bắt buộc của phạm vi đã chọn đều được đọc lại và xác nhận đúng. Kết quả
+  thiếu, mơ hồ hoặc chỉ hoàn tất một phần là ingest thất bại có thể nối tiếp; ngoại lệ chủ ý dừng trước NLM chỉ
+  thành công khi phần Drive/registry đã được xác nhận và tài liệu chưa được nhận là corpus. Ngoại lệ duy nhất
+  của vế corpus (ADR-0015): tài liệu đã qua **verify parity** thì corpus được flip dù NLM còn nợ —
+  nợ NLM theo dõi riêng bằng `nlm_status`.
+- **Kế hoạch ingest** — bản mô tả bất biến của một lần ingest, ràng buộc byte nguồn, đích, tên canonical và toàn
+  bộ tùy chọn bằng một dấu vân tay. Apply chỉ là quyền thực thi đúng kế hoạch đã xác nhận; nguồn hoặc cấu hình
+  thay đổi thì phải lập và xác nhận kế hoạch mới. Resume có thể dùng kế hoạch đã ghi trong journal nhưng vẫn phải
+  kiểm tra lại dấu vân tay trước khi tiếp tục.
+- **Kết quả tất định** — cùng dữ liệu và cấu hình tạo ra cùng nội dung nghiệp vụ, không sửa giá trị để che khác
+  biệt. Canonical hóa chỉ áp dụng cho cấu trúc và các trường có kiểu được khai báo; biến động hợp lệ phải được
+  schema từng lệnh chỉ rõ và chỉ bị loại trong bản chiếu audit. Khác biệt thô không được khai báo là lỗi.
+- **Ingest engine** — bộ điều phối dùng chung cho mọi đường ingest, sở hữu state machine, kế hoạch, journal,
+  identity, idempotency và hậu điều; adapter chỉ thực hiện I/O với Drive, registry, NLM hoặc cache. Engine phải
+  tránh đọc lại trùng lặp, hỗ trợ batch có thứ tự kết quả tất định và được kiểm soát bằng ngân sách hiệu năng.
+- **Ngân sách hiệu năng ingest** — giới hạn có thể kiểm thử cho số lần đọc nguồn, số API call, concurrency và
+  thời gian chạy. Hash nguồn một lần mỗi run; mỗi resource tối đa một write và một readback bắt buộc cho mỗi
+  giai đoạn thành công; benchmark local không được chậm hơn baseline quá 15% ở median. Không được bỏ hậu điều
+  an toàn để đạt ngân sách.
+- **Source policy** — quyền quyết định nguồn/host/scheme nào được phép, do môi trường chạy cung cấp qua policy
+  hoặc fetch adapter; skill không hard-code danh sách domain. Ingest engine luôn giữ các bất biến độc lập với
+  host: giới hạn tài nguyên, streaming, xác minh loại và hash, không rò credential, dọn tệp tạm và audit provider.
+- **Identity ingest** — tổ hợp `content_hash + target scope + canonical name + profile` dùng cho idempotency,
+  deduplicate và resume. Tên file đơn lẻ không phải identity; cùng identity là no-op đã xác minh, còn cùng tên
+  nhưng khác hash là conflict và chỉ được thay thế bằng một kế hoạch chỉ rõ source ID cũ.
+- **Ba van NLM (r192)** — ba chốt điều tiết đường nạp NLM, con số chốt qua grilling 23-07: **van trước lô**
+  (lô >4 nguồn → không auto-add API, xuất BẢNG TAY markdown + hẹn reconcile), **van kích thước** (nguồn
+  >150k ký tự → tự `--nlm-no-wait`), **van runtime** (chờ settle quá 120s → thôi chờ KHÔNG huỷ, ghi
+  deferred, chạy tiếp; cuối lô một lượt reconcile). Đường "nạp tay" chỉ kích hoạt ở van 1 hoặc khi NLM
+  chết hẳn.
+- **Bảng tay (nạp NLM)** — file markdown do van 1 sinh (`hand_sheet`): link bấm-được từng nguồn + link
+  notebook đích + hẹn `nlm-reconcile --apply` sau khi người dùng nạp xong trên UI. Lô >4 nguồn chia
+  **khối ≤4 URL** (r199): mỗi khối tự đủ (link notebook tại header), nạp từng khối và chờ NLM nhận
+  xong khối trước — sự cố NLM khoanh vùng theo khối, không mất cả lô. Sinh bằng
+  `tl nlm-links --drive-ids … --md-out …` hoặc tự động ở nhánh bảng-tay của `ingest-missing`.
+- **PDF_IMAGE** — verdict đo text-layer PDF lúc lập plan ingest (r191): trung bình **< 100 ký tự
+  không-trắng/trang** ⇒ PDF scan/ảnh (text layer chỉ còn metadata chữ ký số) → coi
+  `source_quality=ocr` chưa verify, rơi vào ocr_gate hiện hành — KHÔNG convert mù. Không đo được
+  (thiếu pdftotext) → `unknown`, cảnh báo chứ không đoán.
+- **Manifest bẩn (marker)** — trạng thái sau một lệnh GHI registry (r191): cache manifest local bị xoá
+  + để lại `manifest.dirty`; lệnh ĐỌC resolve-theo-số-hiệu kế tiếp PHẢI tự refresh LIVE rồi xoá marker
+  (fail-closed nếu không fetch được). Đường đọc advisory (discovery) không bị ép.
+- **Cache staged / verified** — `staged` là dữ liệu đã thu nhận nhưng chưa đạt đủ schema, provenance và quality
+  gate; `verified` chỉ được đặt sau khi mọi gate này đọc lại thành công. Fallback hoặc candidate được suy đoán
+  không bao giờ được tự nâng thành verified.
+- **Staged ingest (lane trì hoãn, ADR-0015)** — đường `profile-ingest --staged` cho docx digital: GIỮ đủ cổng
+  AN TOÀN lúc nạp (dedup tên/số hiệu LIVE, claim xuyên host, convert-readback), HOÃN cổng CHẤT LƯỢNG (đọc
+  toàn văn canonical, verify_gate, quét Điều/chunk) và NLM. Dòng vào registry `corpus=false` +
+  note `staged:pending;sq=…`; TỪ CHỐI pdf/ocr/bảng tính. Hoãn ≠ bỏ — ADR-0004 giữ nguyên.
+- **Verify parity** — nguyên tắc của `verify-staged`: chạy ĐÚNG bộ cổng lane thường đã hoãn, không hơn không
+  kém — lane staged đổi THỜI ĐIỂM kiểm, không đổi TIÊU CHUẨN. PASS → bulk-flip `corpus=true` cả lô (journal,
+  undo được); FAIL → ở lại staged (note `staged:fail:<FLAG>`), không auto-xóa, không NLM.
+- **ZIP portable-safe** — profile archive dùng path Unicode NFC với dấu `/`, từ chối traversal, special entry,
+  tên không portable và mọi collision sau canonical hóa kể cả khác hoa thường. Kế hoạch ZIP ràng buộc hash toàn
+  archive cùng `normalized_path + member_hash + size`; giới hạn tài nguyên do môi trường cấu hình và apply luôn
+  giải nén vào staging riêng trước khi chuyển từng member qua ingest engine.
+- **Reproducible bundle** — gói phát hành có `content_hash` từ manifest canonical và `archive_sha256` từ byte
+  ZIP. Exporter dùng ZIP không nén với root, thứ tự, timestamp, permission và metadata cố định để cùng nội dung
+  tạo đúng cùng byte trên mọi lần build; mọi hash mismatch luôn là lỗi.
+- **Golden** — fixture JSON tất định tại `references/golden/`. Độ chặt đã chốt: PASS/FAIL so bản canonical-hoá,
+  cộng check **raw-stability** (stdout thô chạy ×2 phải trùng byte) — không so raw-bytes với fixture.
+- **Characterization test** — test đặc tả hành vi hiện có của một cụm lõi cũ, viết TRƯỚC khi tách cụm đó
+  khỏi tl.py (điều kiện bắt buộc của lộ trình về đích 2.500 dòng).
+- **Grandfather** — nợ-đã-biết ghi ở `registry.warnings` (advisory, không fail strict), có deadline siết.
+  Đã chốt: 6 lệnh ghi đụng Drive/NLM/registry-corpus siết ở Pha G; 6 backfill/plan siết pha kế tiếp.
+- **Command registry** — `tl_core/command_registry.py`: metadata risk/gate/card/contract của LỆNH CLI;
+  nguồn sự thật cho tool-inventory/workflow-audit. KHÁC **registry corpus** (Google Sheet `tra_luat_registry`
+  — sổ cái văn bản pháp luật). Nói trần "registry" trong ngữ cảnh vận hành corpus = registry corpus.
+
+## Sổ cái corpus & NLM
+
+- **Draft (ingest)** — văn bản CHƯA BAN HÀNH, xét theo BẬC BẰNG CHỨNG (chốt 2026-07-21): banner «DỰ THẢO»
+  hoặc số hiệu rỗng/khuyết là bằng chứng draft mạnh; số hiệu đầy đủ + ngày ban hành là bằng chứng official
+  mạnh và PHỦ QUYẾT các marker chữ yếu («lấy ý kiến», «góp ý» — chỉ có nghĩa khi không có bằng chứng ban
+  hành). Văn bản góp ý/BC về một dự thảo là văn bản official — đối tượng nó bàn tới không đổi bản chất nó.
+
+- **nlm_status** — trạng thái NLM của một dòng registry corpus. Từ vựng ĐÓNG (chốt 2026-07-21): họ `pushed*`
+  (đã đẩy nguồn lên notebook), họ `synced*` (đã đối soát khớp), `active` (xác nhận đang sống trên notebook),
+  `deferred` (xem mục riêng), họ `removed_*` (đã gỡ CÓ CHỦ ĐÍCH — hậu tố ghi lý do, vd
+  `removed_superseded_by_VBHN`), hoặc RỖNG (chưa từng đụng NLM). Giá trị ngoài họ là dữ liệu lỗi: cửa ghi
+  từ chối, audit gắn cờ. `added`/`live` là từ cũ đã nắn về `pushed`/`active` — không phải trạng thái hợp lệ.
+- **deferred (nlm_status)** — ngữ nghĩa MỞ RỘNG (r191, 2026-07-23): «việc đưa nguồn lên NLM đang TREO
+  XÁC MINH» — gồm CẢ hai ca (a) NLM chết, chưa gửi (defer v1.34.60 — dòng không có nlm_source_id) và
+  (b) ĐÃ GỬI qua `--no-wait`, có source_id thật nhưng CHƯA xác minh settle. deferred KHÔNG claim có mặt
+  vật lý (không thuộc nlm_claim) nên không vi phạm VERIFY-THEN-LINK; corpus KHÔNG auto-true khi còn
+  deferred. `nlm-reconcile` thấy sid có mặt live đúng notebook → nâng `deferred→pushed` (settle_confirm,
+  chỉ cột nlm_status).
+- **Thay bản (`--replace-sohieu`)** — thoát CÓ CHỦ ĐÍCH khỏi cổng dedup số hiệu LIVE của `ingest-local`
+  (r191): nạp bản MỚI cùng số hiệu (khoá lỏng-năm) khi corpus đã có dòng effective — plan in dòng cũ +
+  chuỗi hạ bản sau nạp; mặc định KHÔNG cờ là CHẶN rc=2. KHÁC «nạp trùng do cache nguội» (bug đã vá F1).
+- **Scope (dòng kết quả)** — nguồn gốc của MỘT dòng trong kết quả lệnh đọc: dòng profile (mặc định, không
+  đánh dấu) hay dòng NỀN VBQPPL kéo vào qua base-also — dòng nền mang `scope: vbqppl` + cờ `BASE_SCOPE_HIT`,
+  MỘT cách mã hoá duy nhất ở mọi lệnh đọc (chốt 2026-07-21; khe `_scope`/`scope` hai kiểu là sự cố đã vá).
+  Đếm/lọc "của profile" phải loại dòng nền bằng đúng hai dấu này.
+- **nlm_claim** — điều SỔ CÁI KHẲNG ĐỊNH đang có mặt trên notebook: dòng có `nlm_status` thuộc họ sống
+  (`pushed*`/`synced*`/`active`). Đối chiếu claim ↔ live (đếm vật lý trên NLM) ra **desync** — việc của
+  `nlm-reconcile`. KHÁC nlm_due.
+- **Hạ ref (demote corpus→ref)** — thao tác MỘT BƯỚC đưa một nguồn ra khỏi diện căn cứ nhưng GIỮ nó
+  truy-vấn-được: corpus=false + row_kind=ref, nguồn NLM và nlm_status họ sống GIỮ NGUYÊN (chốt
+  2026-07-22, ca ILO C102). KHÁC «bỏ ra khỏi corpus» thường (corpus=false + GỠ nguồn NLM + removed_*).
+  Nhất quán [[nlm_due]]: due = corpus ∪ ref nên dòng hạ ref không sinh nhiễu desync/coverage_gap.
+- **nlm_due** — diện PHẢI-CÓ-MẶT theo chính sách corpus (dòng corpus ∪ ref). Đối chiếu due ↔ vật lý ra
+  **coverage_gap** (nợ phủ) — việc của `slot-audit`. Hai phép đo trả lời hai câu hỏi khác nhau; con số
+  lệch nhau giữa chúng KHÔNG phải mâu thuẫn. Cấm dùng trần chữ "claim"/"gap" không kèm định nghĩa
+  (chốt 2026-07-21 — sự cố hai lệnh cho số "vênh" 51/40/51).
+
+## Thể thức
+
+- **Đặc tả thể thức** — bản khai duy nhất về trình bày (cỡ/kiểu/canh/thụt + căn cứ) của từng thành phần
+  văn bản theo hệ. Builder và bộ kiểm cùng đọc từ đây; giá trị trình bày không được ghi nơi thứ hai. Xem ADR-0009.
+- **Bậc thẩm quyền (B1/B2/B3)** — thứ tự phân xử khi các nguồn quy định lệch nhau: **B1** văn bản gốc
+  nguyên văn thắng tuyệt đối; **B2** reference có trích § cụ thể thắng code; **B3** quy ước nội bộ — hợp lệ
+  nhưng buộc mang nhãn "quy ước", cấm trình bày như căn cứ pháp lý. Mỗi ô đặc tả tự khai bậc của mình.
+- **Cách ly (ô đặc tả)** — trạng thái của ô chưa xác minh được căn cứ: không dùng để build/kiểm, chờ đối
+  soát văn bản gốc. Khác với **khai trắng** — hệ tuyên bố tường minh là chưa được đặc tả.
+- **Biến thể mẫu** — trục thứ ba chồng lên (thành phần × hệ): cùng một hệ nhưng nhóm mẫu khác trình bày
+  khác (Mẫu 16 QĐ-CTN quốc hiệu 13; công văn không tên loại, trích yếu «V/v» riêng). Bản khai
+  `_tt_dac_ta_bien_the()`: override/thêm/bỏ ô theo nhóm, mỗi mục vẫn mang căn cứ + bậc. Xem ADR-0009 r175.
+- **«na» (ô đặc tả)** — giá trị thuộc tính nghĩa «luật KHÔNG ấn định và thực tiễn đa dạng — không kiểm».
+  Khác «0» (ấn định là không-thụt) và khác cách ly (cả Ô không dùng được).
+- **Lớp đặc tả (TT-DT)** — lớp kiểm của `the-thuc-check` ĐỌC bảng đặc tả (ADR-0009 bước 5, r176):
+  phân loại từng đoạn bằng neo văn bản rồi so 4 thuộc tính với ô, finding `TT-DT-<Ô>-<THUỘC_TÍNH>`.
+  Chỉ chạy khi nhận diện được khối đầu (Đ3); nhường cờ viết tay các thuộc tính đã có người canh (Đ4);
+  mức WARN/INFO theo bậc + độ tin cậy nhận diện, không FAIL (Đ1 — thăng FAIL từng ô do user duyệt
+  theo chuẩn zero-oan).
+
+## Profile
+
+- **Profile** — không gian corpus tự chủ (folder Drive + notebook NLM + registry Sheet riêng + manifest JSON riêng,
+  own/own), tách khỏi corpus nền vbqppl nhưng ĐỌC cộng nền (base-also).
+- **Profile marker** — file tự mô tả của một profile trên Drive (trong `_meta` của folder profile). Là nguồn
+  sự thật về TỒN TẠI + ĐỊNH DANH + metadata mô tả của profile (đã chốt 2026-07-10, thay heuristic discover).
+- **Config (profile)** — bản materialize cây profile về local + nguồn sự thật về LỰA CHỌN runtime
+  (defaultProfile, token, webapp). KHÔNG còn là nguồn sự thật duy nhất về tồn tại profile.
+- **profile-sync** — đồng bộ MỘT CHIỀU marker Drive → config. Ghi marker chỉ qua lệnh tl (journaled);
+  cấm sync hai chiều.
+- **Adopt** — seed vào config một profile ĐÃ có hạ tầng Drive (registry/manifest sẵn). KHÁC **Promote**.
+- **Promote (folder→profile)** — biến một folder Drive thường thành profile: dựng phần hạ tầng còn thiếu
+  (marker, registry, manifest, notebook) rồi seed registry từ nội dung folder; việc nạp NLM đi đường
+  ingest chuẩn, không nạp trọn gói trong lệnh promote.
+- **Nguồn nlm-only** — nguồn của profile chỉ tồn tại trên notebook NLM (URL/YouTube/text/nguồn chưa xuất),
+  không có file Drive tương ứng; định danh bằng nlm_source_id.
+- **Materialize (nguồn)** — xuất nội dung một nguồn nlm-only thành file trong folder profile trên Drive,
+  nâng cấp nó thành nguồn thường. Chính sách mặc định (chốt 2026-07-10): **materialize_preferred** —
+  ưu tiên materialize mọi nguồn xuất được, chạy bằng lệnh riêng resumable (không trộn vào lệnh adopt);
+  nguồn không xuất được (URL/YouTube/text) ở lại nlm-only với materialize_status tường minh — hợp lệ,
+  và Instruction phải nói rõ nguồn nào chỉ có trên NLM để Claude không tưởng nhầm đã có file Drive.
+- **Nền VBQPPL luôn bật** — mọi profile nghiệp vụ mặc định ĐỌC cộng nền vbqppl (base-also), không phụ
+  thuộc khai báo relations; profile không phải "đảo riêng" — luôn có nền pháp lý để đối chiếu.
+- **Instruction Block (profile)** — khối instruction generator-sinh từ marker của một profile (tra NLM
+  đúng notebook, luật không-bịa, văn phong, quan hệ với vbqppl/profile khác, scope đọc/ghi). MỘT bản
+  thống nhất cho mọi môi trường (Chat=Cowork=Code); chỉ rẽ theo TARGET artifact (session | project).
+- **profile-load** — hành vi "dùng profile X trong phiên": xuất Instruction Block làm doctrine PHIÊN,
+  không ghi config. Khác **profile-use** (đổi defaultProfile — trạng thái máy, cần --apply).
+
+## Kiến trúc skill
+
+- **Kernel (SKILL.md)** — doctrine agent đọc mỗi phiên; đích Pha F: 20-35KB, chỉ bất biến + con trỏ references.
+  Quy trình đổi kernel: draft ở tệp nháp CỤC BỘ trong `references/` (tên đang dùng: `SKILL_KERNEL_DRAFT.md`;
+  KHÔNG commit — chưa từng có trong lịch sử git) → user duyệt → thay thật → re-import.
+- **tl_core** — package module tách từ tl.py (Pha B trở đi); tl.py là CLI facade duy nhất, bên ngoài không
+  gọi tl_core trực tiếp. Đích dài hạn: tl.py ≈ 2.500 dòng (facade + parser skeleton + stubs).
+- **bind(tl)** — cơ chế copy-globals cấp helper cho module tl_core trong GIAI ĐOẠN DI CƯ; là giàn giáo,
+  không phải kiến trúc đích (xem ADR-0002). Module tl_core cấm đọc bare mutable-global của tl.
+- **Stub ủy quyền** — hàm trong tl.py chỉ forward sang tl_core (giữ tương thích selftest/parser/tham chiếu chéo).
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:1:# Kế hoạch thi công đa provider — tra-luat
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:15:## 1. Mục tiêu
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:26:## 2. Nhận dạng provider và execution surface
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:53:## 3. Vai trò ChatGPT Pro Web
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:57:### 3.1 Advisory Reviewer
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:61:### 3.2 Patch Planner
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:81:## 4. Review Class
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:91:### Routine
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:104:### Systemic
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:109:### Sensitive
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:118:## 5. Review bundle
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:161:## 6. Quy trình review ChatGPT
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:180:## 7. Quy trình Patch Planner
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:193:## 8. Review note
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:230:## 9. Validation receipt
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:258:## 10. Non-convergence
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:300:## 10b. Master drift sau khi gate đã xanh — merge thẳng
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:316:## 10c. Reviewer bắt buộc kèm gợi ý cách vá
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:330:## 11. Review debt
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:347:## 12. Trạng thái động
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:359:## 13. Stop conditions
+SKILL.md:18:# tra-luat — LÕI VẬN HÀNH (v1.36.70 — KERNEL)
+SKILL.md:28:## Phương pháp làm việc: thiết kế kỹ, triển khai chủ động
+SKILL.md:39:## DETERMINISTIC WORKFLOW GATES — tool inventory / route-task / dry-run / readback
+SKILL.md:61:## 0. NGUYÊN TẮC BẤT BIẾN
+SKILL.md:105:## 1. KHỞI ĐỘNG (bắt buộc, đúng thứ tự — chi tiết: RUNBOOK §A)
+SKILL.md:185:## 2. CỔNG VẬN HÀNH (mệnh lệnh — chi tiết: RUNBOOK §B)
+SKILL.md:204:## 3. KẾT PHIÊN
+SKILL.md:207:# profile categories=inherit → CHỈ export-only
+SKILL.md:208:# KHÔNG manifest --touched-drive trên profile văn bản thường (gây PROFILE_MANIFEST_SCOPE_BLOWUP)
+SKILL.md:209:# nếu thật sự cần quét cây own của profile:
+SKILL.md:212:# phục hồi nếu registry profile đã bị phình (DRY trước):
+SKILL.md:217:## 4. CLI `tl`
+SKILL.md:222:## 5. HAI KIỂU CẤU TRÚC (tự nhận diện)
+SKILL.md:226:## 6. TRA CỨU NHANH
+SKILL.md:231:## 7. BẢN ĐỒ SCRIPT
+SKILL.md:235:## 8. APPS SCRIPT WEBAPP
+SKILL.md:243:## 9. PHỤ THUỘC
+SKILL.md:250:## v1.17.26 combined external-ingest + instruction-audit gate
+SKILL.md:256:## OCR / CHUNK / RELEASE — doctrine rút gọn (chi tiết: workflow cards + DOCTRINE_APPENDIX)
+SKILL.md:271:## LỆNH KIỂM CUỐI TRƯỚC BÀN GIAO (mọi thay đổi skill)
+SKILL.md:285:## DANH MỤC REFERENCES
+docs/PROTOCOL_DA_PHIEN.md:1:# Protocol đa phiên đa provider
+docs/PROTOCOL_DA_PHIEN.md:3:## Google Antigravity provider identity
+docs/PROTOCOL_DA_PHIEN.md:22:## 1. Mục tiêu và bất biến
+docs/PROTOCOL_DA_PHIEN.md:45:## 2. Thành phần và quyền
+docs/PROTOCOL_DA_PHIEN.md:70:## 3. Nguồn sự thật và schema
+docs/PROTOCOL_DA_PHIEN.md:72:### 3.1 Mission Issue
+docs/PROTOCOL_DA_PHIEN.md:111:#### 3.1.1 Mission Change Request
+docs/PROTOCOL_DA_PHIEN.md:144:### 3.2 Work Packet Issue
+docs/PROTOCOL_DA_PHIEN.md:190:#### 3.2.1 Nguồn spec và ba mốc Git
+docs/PROTOCOL_DA_PHIEN.md:216:### 3.3 State projection, event journal và recovery snapshot
+docs/PROTOCOL_DA_PHIEN.md:241:## 4. State machine và lease
+docs/PROTOCOL_DA_PHIEN.md:327:## 5. Write set và giảm conflict
+docs/PROTOCOL_DA_PHIEN.md:385:### 5.1 Ngoại lệ master drift — merge thẳng, không chạy lại gate
+docs/PROTOCOL_DA_PHIEN.md:436:## 6. Định tuyến cloud và local
+docs/PROTOCOL_DA_PHIEN.md:456:## 7. Handoff và tự sinh phiên kế nhiệm
+docs/PROTOCOL_DA_PHIEN.md:634:## 8. Review phân tầng
+docs/PROTOCOL_DA_PHIEN.md:770:### 8.1 Bootstrap reviewer và receipt thực thi
+docs/PROTOCOL_DA_PHIEN.md:797:### 8.2 Phạm vi phép đo và checkout read-only
+docs/PROTOCOL_DA_PHIEN.md:812:### 8.3 Lịch sử lớp finding và giới hạn nghiệm thu
+docs/PROTOCOL_DA_PHIEN.md:854:## 9. EOL và tệp phái sinh
+docs/PROTOCOL_DA_PHIEN.md:862:# Các loại binary và golden byte fixtures: -text
+docs/PROTOCOL_DA_PHIEN.md:890:## 10. Worker gate, land gate và definition of done
+docs/PROTOCOL_DA_PHIEN.md:892:### 10.1 Gate selftest phân tầng và fail-closed
+docs/PROTOCOL_DA_PHIEN.md:925:### 10.2 Worker/land gate và trạng thái hoàn tất
+docs/PROTOCOL_DA_PHIEN.md:927:#### 10.2.1 Candidate preflight trước freeze
+docs/PROTOCOL_DA_PHIEN.md:962:#### 10.2.2 Identity và provenance CI
+docs/PROTOCOL_DA_PHIEN.md:986:#### 10.2.3 Evidence thiếu, skipped và tiêu chí riêng
+docs/PROTOCOL_DA_PHIEN.md:1006:#### 10.2.4 Worker gate và hoàn tất
+docs/PROTOCOL_DA_PHIEN.md:1080:## 11. Security boundary
+docs/PROTOCOL_DA_PHIEN.md:1097:## 12. Stop conditions và budget
+docs/PROTOCOL_DA_PHIEN.md:1195:## 13. Hợp đồng ba skill
+docs/PROTOCOL_DA_PHIEN.md:1197:### `work-packet` — model-invoked
+docs/PROTOCOL_DA_PHIEN.md:1205:### `cross-review` — model-invoked
+docs/PROTOCOL_DA_PHIEN.md:1217:### `land-packets` — user-invoked client
+docs/PROTOCOL_DA_PHIEN.md:1227:#### 13.1 Evidence trước và sau land
+docs/PROTOCOL_DA_PHIEN.md:1240:#### 13.2 Thay ruleset trong phạm vi được ủy quyền riêng
+docs/PROTOCOL_DA_PHIEN.md:1262:## 14. Rollout
+docs/PROTOCOL_DA_PHIEN.md:1314:## 15. Phán quyết so sánh
+docs/PROTOCOL_DA_PHIEN.md:1336:## 16. Các phương án bị loại
+docs/PROTOCOL_DA_PHIEN.md:1355:## 17. Tiêu chí nghiệm thu hệ thống
+docs/PROTOCOL_DA_PHIEN.md:1383:## 18. Căn cứ khả năng nền tảng
+docs/PROTOCOL_DA_PHIEN.md:1414:## 19. Bootstrap gaps đo tại 2026-08-03
+docs/PROTOCOL_DA_PHIEN.md:1440:## 20. Quy tắc đang hiệu lực — bảng định tuyến ADR
+docs/PROTOCOL_DA_PHIEN.md:1495:### Cột "cổng đã ĐO" nghĩa là gì — đọc trước khi dùng
+docs/PROTOCOL_DA_PHIEN.md:1509:### A. ADR quản trị phiên đa agent
+docs/PROTOCOL_DA_PHIEN.md:1564:### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
+docs/PROTOCOL_DA_PHIEN.md:1587:### Nợ có tên đã lộ ra khi dựng bảng này
+docs/PROTOCOL_DA_PHIEN.md:1598:# WP1174 r10 — adapter scoped, chờ gate native và review độc lập
+docs/PROTOCOL_DA_PHIEN.md:1712:### WP1174 R22/g19: verified source policy and V3 diagnostics
+CLAUDE.md:1:# tra-luat — Claude Code Project (dev-side, KHÔNG vào zip deploy)
+CLAUDE.md:3:## Vai trò
+CLAUDE.md:7:## Nguồn sự thật
+CLAUDE.md:15:## Quy trình sửa code
+CLAUDE.md:39:## Bài học đắt giá (đã trả giá, không lặp lại)
+CLAUDE.md:618:## Đẩy ref từ phiên Claude Code trên web (đo 16-08-2026)
+CLAUDE.md:665:## Gọi agent đa nền (chi tiết: `docs/GOI_AGENT_DA_NEN.md`)
+CLAUDE.md:880:## Bài học lớp "chạy được ở đây" (12-08-2026, codex đo trên Windows thật)
+CLAUDE.md:1022:## Lệnh `gh api graphql` đưa cho chủ kho chạy — máy chủ kho là Windows `cmd` (đo 27-10-2026)
+CLAUDE.md:1048:## Cấm
+CLAUDE.md:1055:## Protocol đa phiên — CON TRỎ, không phải bản sao
+CLAUDE.md:1093:## Khi đóng gói
+CLAUDE.md:1104:## Quy ước deploy (AI ĐẨY Package — chốt 30-07-2026)
+CLAUDE.md:1143:## Kho tham chiếu Claude Code
+2fcb8e6064e8d4c51572af12d886e9e740fa5dc12e79c6c7b764bc1b5c410bef  ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+033dc9be679d0b90bc1129682882e2c38d36a4c0712671342aa5a3d5967fec25  ops/specs/WP1174-WINDOWS-BACKEND-r4-ban10.md
+-105 +105 +161 +183 +184 
+exec
+/bin/bash -lc "git ls-files '*packet_loop*.py'
+sed -n '28,38p' SKILL.md
+sed -n '1,32p' ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+rg -n '_additive1342r2|_r26_original_accept1174|"'^_WP1174_NATIVE_KEYS|''^if __name__|''^def _native1342'"' .claude/dev/packet_loop_test.py
+head -65 .claude/dev/packet_loop_test.py
+for f in ops/reviews/wp1342-spec-r4/luot*.txt; do rg -m 5 'R[0-9]+-[0-9]+.*P[0-3]' \""'$f" | cut -c1-250; done' in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ succeeded in 0ms:
+.claude/dev/packet_loop.py
+.claude/dev/packet_loop_test.py
+.claude/dev/packet_loop_test_manh.py
+## Phương pháp làm việc: thiết kế kỹ, triển khai chủ động
+
+- **WM-01 — Nhận diện giai đoạn.** Khi nghiên cứu hoặc thiết kế, làm rõ yêu cầu, mục tiêu, phạm vi, đánh đổi và tiêu chí nghiệm thu. Khi triển khai phương án đã chốt, chủ động thực hiện trong phạm vi quyền đã cấp. Một tác vụ có thể chuyển giữa hai giai đoạn.
+- **WM-02 — Phân biệt làm rõ với xin quyền.** Làm rõ để xác định đúng điều cần xây dựng; xin quyền khi hành động cụ thể chưa được cho phép. Đọc tài liệu, bằng chứng và quyết định hiện có trước khi hỏi; không xin lại quyền còn hiệu lực, đúng phạm vi và đúng điều kiện.
+- **WM-03 — Chủ động với việc thông lệ.** Tự quyết việc quen thuộc, tác động nhỏ và lựa chọn kỹ thuật nằm trong phương án được giao khi không làm đổi hợp đồng hoặc vượt quyền. Tính quen thuộc, khả năng đảo ngược và sự im lặng không tự tạo quyền.
+- **WM-04 — Làm rõ thay đổi có ảnh hưởng.** Yêu cầu mới chưa xác định, thay đổi giao thức/quy trình, tiêu chí nghiệm thu, quyền hạn hoặc tác động đáng kể phải được làm rõ và chốt trước phần thực hiện phụ thuộc; tiếp tục phần độc lập đã được phép. Làm theo chỉ thị cụ thể đã đủ rõ, không hỏi lại chỉ vì đó là yêu cầu mới.
+- **WM-05 — Hỏi có chuẩn bị.** Gộp các điểm quyết định liên quan; nêu điều đã kiểm tra, vấn đề còn thiếu, phương án khuyến nghị và ảnh hưởng. Chỉ hỏi phần chưa được giải quyết; không dùng câu hỏi chung để đẩy lựa chọn vận hành thông lệ cho người dùng.
+- **WM-06 — Thực hiện gọn và có bằng chứng.** Dùng công cụ hiện có, chọn cách đơn giản đáp ứng đủ yêu cầu, sửa đúng phạm vi và kiểm chứng hành vi. Lặp trong giới hạn đã chốt; không bỏ gate, giả kết quả hoặc nới ngân sách để hoàn tất. Chưa đủ bằng chứng về quyền, điều kiện bắt buộc hoặc tính tương đương nghiệm thu thì dừng phần phụ thuộc, đọc hướng dẫn chi tiết và tiếp tục phần độc lập đã được phép.
+
+Đọc **references/WORKING_METHOD.md** khi lập hoặc sửa kế hoạch, giao thức, quy trình; khi phân vân có cần hỏi; hoặc khi phát sinh thay đổi có ảnh hưởng trong lúc triển khai. Hướng dẫn này bổ sung cách phối hợp; các quy định chuyên biệt về legal safety, authority, approval, protocol và release tiếp tục áp dụng.
+
+tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
+tran_kich_thuoc_sensitive: nang_tran AskUserQuestion chủ kho 2026-11-18 phiên điều phối #1206 (≤ 2 tệp / ≤ 550 dòng thêm; thay ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab)
+
+# WP1174-WINDOWS-BACKEND r4 — lõi vòng đời tiến trình trong Job Object, Windows native, đứng riêng, KHÔNG pipe (bậc r1d-a1-i), chưa nối vào runtime
+
+- packet_id: WP1174-WINDOWS-BACKEND; revision: 4;
+
+| trường | giá trị |
+|---|---|
+| `packet_issue` | #1342 |
+| `nguon_cap_viec` | Lộ trình bậc ở §1 đặc tả r1. Chủ kho 17-11-2026: seed + BootId vào r3 (land `aeb5cae`, `landed: true`), tiến trình + probe sang r1d. Chủ kho 18-11-2026 (phiên điều phối #1206): "Làm tiếp #1342 r1d", rồi lần lượt tách r1d → r1d-a (tiến trình) / r1d-b (probe); r1d-a → a1 (vòng đời, không pipe) / a2 (transport hai pipe); a1 → **a1-i** (lõi vòng đời, revision này) / a1-ii (kháng thoát job: breakaway tường minh/ngầm, job lồng); và nâng trần kích thước lên 550 cho riêng revision này. §9. |
+| `review_class` | `sensitive` (runtime trạng thái WP1174) |
+| `base` | `e2c3b82f818bd1739d31261e8129d3ef44915acf`. Số đo §0 lấy lúc 2026-11-18T17:20Z–18:10Z trên OID này. L5: người cấp lease đo lại §0 trên OID base thật (1) trước khi công bố băm, (2) lúc cấp lease, (3) trước merge; lệch ⇒ revision đặc tả. |
+
+**Đánh số:** `revision: 4` (ADR-0063, số nguyên); bậc **r1d-a1-i** của lộ trình. r1d-a1-ii, r1d-a2, r1d-b là các revision sau.
+
+## 0. Hiện trạng (đo trên `e2c3b82`; số dòng từ `def`, gồm dòng trống cuối khối)
+
+- `_1174_process` 4260 (51 dòng, Linux, có pipe): mẫu hợp đồng cho a2, KHÔNG đổi ở r4. `killpg` vô điều kiện chỉ chạy khi đã vào `try` cleanup nội bộ (sau `Popen`, `ExitStack`, `streams`).
+- `_1174Error(ValueError)` 3670; `_1174_require`.
+- `_1174_win_api` 6419 (18 dòng): `WinDLL("kernel32", use_last_error=True)` mới mỗi lần gọi, bind argtypes/restype tường minh, trả `(c, w, k)`. r1–r3 đứng riêng ở 6406–6742; `_1174_win_seed` 62 dòng, `_1174_win_persist` 45, `_1174_win_read`/`_lock` 35.
+- CPython 3.13 `subprocess.py` (Windows, ~1555–1578): `creationflags` chuyển nguyên cho `_winapi.CreateProcess`; giữ process handle ở `Popen._handle` (chi tiết triển khai CPython); ĐÓNG primary thread handle; KHÔNG gọi `ResumeThread`. Do đó phải tìm lại luồng qua Toolhelp.
+- `.claude/dev/launcher.py` `_job_windows` 905–973 gán job SAU khi con đã chạy (khe tự khai); `_pid_trong_job` 976–1003 dùng lớp 3. Không sửa launcher.
+- Test: `WP1174_BOTH` 12421 (12 ID); `_new1342` 17879, `_additive1342` 17896, `_wired1342` 17920, `_native1342` 18159 (in `WP1342_NATIVE_V1` ở 18165 sau khi thân ca trả về), `_additive1342r2` 18178; đăng ký ca 18170/18171, 18365/18366, 18553/18554; `MUTANTS` 3592 + các `MUTANTS.update`.
+- Kích thước tiền nhiệm (numstat): r1 +428 (mã 130 + test 298), r2 +293, r3 +300 (test 188).
+
+## 1. Phạm vi r4 (r1d-a1-i)
+
+Thêm, ĐỨNG RIÊNG (không hàm hiện có nào gọi tới): bindings job/thread có nghiệm thu ABI; ba hằng cho phép; bốn hàm thuần; `_1174_win_job_empty`; `_1174_win_spawn_job` chạy MỘT lệnh trong job từ trạng thái treo, chờ tiến trình đầu thoát có hạn, thu hồi cả job theo các bước có hậu điều riêng. stdin/stdout/stderr của con đều `DEVNULL`. Không sửa thân định nghĩa nào đang có.
+
+## 2. `write_set`, `ngoai_pham_vi`, ranh giới bảo đảm
+
+15292:_WP1174_NATIVE_KEYS = frozenset("schema actual_os scope proof_eligible source_pr repo pr run_id run_attempt job checkout_sha checkout_tree executed_sha executed_tree expected_head expected_tree path_hashes producer_digests producer_after snapshot_before snapshot_after required_ids required_count outcomes profiles native_probe native_seam overall_status windows_oracle".split())
+16217:_r26_original_accept1174=dict(CASES)["wp1174_writer_accept"]
+16221:    _r26_original_accept1174(c)
+18159:def _native1342(ten, fn):
+18178:def _additive1342r2(base, head):
+18560:if __name__ == "__main__":
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Phản chứng CHẠY ĐƯỢC cho từng chốt của `packet_loop.py`.
+
+Hai nguyên tắc, cả hai đều đã phải trả giá mới có:
+
+1. Suite gọi CHÍNH entrypoint qua `subprocess` với `--state-dir` riêng trong Temp,
+   KHÔNG import và KHÔNG gọi hàm nội bộ. Cùng doctrine với
+   `.githooks/eol_policy_test.py::case_real_hook_rename_only_bi_chan`: gọi hàm
+   nội bộ chứng minh hàm chạy, không chứng minh LỆNH chạy — mà thứ người dùng gõ
+   là lệnh.
+
+2. Suite tự chứng minh KHÔNG RỖNG. "26/26 đạt" chẳng nói lên gì nếu không có ca
+   nào đỏ được. Mỗi chốt số có một ĐỘT BIẾN nới ngưỡng, và ca tương ứng BẮT BUỘC
+   phải chết theo. Ca không chết được là ca không đo gì.
+
+Chạy: `python .claude/dev/packet_loop_test.py`
+"""
+
+from __future__ import annotations
+
+import hashlib
+import importlib.machinery
+import importlib.util
+import json
+import os
+import platform
+import re
+import subprocess
+import sys
+import tempfile
+import time
+import unicodedata
+from pathlib import Path
+
+from launcher import ky_ban_ghi_luot
+
+HERE = Path(__file__).resolve().parent
+CANONICAL = HERE / "packet_loop.py"
+ROOT = HERE.parents[1]
+
+# --- CÔ LẬP GIT KHỎI CẤU HÌNH NGOÀI (cross-review codex, PR #343, cùng lớp với P1-a của
+# PR #342) --------------------------------------------------------------------------
+#
+# TRIỆU CHỨNG: fixture nào `git commit` mà không ghim `commit.gpgsign=false` sẽ ăn cấu hình
+# TOÀN CỤC của máy chạy. Container này ĐANG có đúng nền ấy — đo được:
+#     git config --global --list | grep -E 'gpgsign|signingkey'
+#       commit.gpgsign=true · user.signingkey=… · gpg.format=ssh
+# Tái hiện được cú chết bằng một global config dựng sẵn có `signingkey` trỏ tệp KHÔNG tồn
+# tại: `error: cannot run ssh-keygen` → `fatal: failed to write commit object`, rc=128.
+# Reviewer đo `271/273` trên một nền bật ký; ở đây nền bật ký vẫn `rc=0` vì máy có sẵn
+# `gpg.ssh.program`. Hai nền, hai kết quả — tức con số phụ thuộc MÁY, đúng thứ hermeticity
+# sinh ra để giết.
+#
+# VÌ SAO KHÔNG GHIM TỪNG KHOÁ: bản của PR #342 liệt `commit.gpgsign` `tag.gpgsign`
+# `core.autocrlf` `core.eol` `gc.auto` — đó là DANH SÁCH CẤM, và kho này đã trả giá cho
+# hình dạng ấy (`lease-authority-spoof`: "danh sách cấm không bao giờ đủ"). `core.hooksPath`,
+# `include.path`, `core.fsmonitor`, `merge.*`, `diff.*`… đều có thể phá fixture, và không ai
+# liệt hết được. ĐẢO thành: KHÔNG đọc nguồn cấu hình ngoài NÀO — `GIT_CONFIG_GLOBAL` và
+# `GIT_CONFIG_SYSTEM` trỏ `os.devnull` (git ≥ 2.32; đo tại chỗ: 2.43.0). Cấu hình
+# REPO-LOCAL (`.git/config`, ví dụ `core.abbrev=7` mà CLAUDE.md đòi) KHÔNG bị đụng.
+#
+# Danh tính commit phải cấp bằng biến vì global đã tắt — fixture nào quên `git config
+# user.email` sẽ không còn mượn được của máy chạy.
+#
+| R9-1 · P2 | **Đóng** | §5 N2(iv)(a–c), dòng 105, buộc ID mới có tiền tố, duy nhất và rời tập ID base. Đăng ký chỉ được chèn sau câu lệnh base kết thúc ở dòng 18557 và trước `if __name__ == "__main__"` �
+| R10-1 | **P2** | N2 yêu cầu đối chứng dương mang ID `"id"` đạt cả bốn vế, đồng thời N2(iv)(a) bắt buộc tiền tố `wp1342_pure_spawn_` hoặc `wp1342_native_job_`. Chạy nguyên ID `"id"` tại cửa sổ đúng cho `1
+| R10-2 | **P2** | N2 kiểm ID trong mục `CASES` nhưng chưa buộc ID mà `_native1342` ghi ra phải bằng ID đăng ký. `("wp1342_native_job_review10", _native1342("wp1174_writer_accept", _wp1342a1_fn))` tại cửa sổ hợp lệ đạt `1
+| R10-3 | **P3** | N2 ghi cho phép list comprehension nhưng danh sách nút lúc nạp chỉ cho `Name(Load)`. AST của mẫu `for x in ("demo",)` có `Name(Store)` cho `x`. Ghi ngoại lệ hẹp cho đích lặp cục bộ đã được kiểm h
+- **R5-1 · P2 — `_1174_win_note` vẫn có thể thay lỗi thắng.** Tôi chạy đúng biểu thức M2 trong RAM. Một ngoại lệ dọn có metaclass ghi đè `__getattribute__` cho `__name__`, hoặc lỗi gốc ghi đè `add_note`, đều
+- **R5-2 · P2 — Ghi chú chỉ tên kiểu làm mất dấu hiệu phân biệt `a1` và `k2`.** Dưới `a1`, J9 vẫn có phụ sống và `xac_nhan` vẫn sinh `_1174Error("job not empty")`. M2 chỉ tạo `"cleanup: _1174Error"`, nên J9 thỏ
+- **R5-3 · P2 — Timeout sau bàn giao bỏ sót handle đã chuyển quyền.** Tôi mô phỏng M6 bằng `Thread`, `Lock` và `Event`. Worker công bố handle dưới khóa rồi bị giữ trước khi thoát. Luồng chính thấy `join` hế
+- **R5-4 · P2 — J10/J10b có hai giao thức, J9 chưa xác nhận đủ cửa sổ sống.** Dòng 71 dùng `tha_truoc_gan` và `tha_ket`, còn dòng 72 dùng `giu` và `sleep(30)`. `da_gan` và `chau` chứng minh đã gán và đã resume, như
+- **R5-5 · P2 — N2(ii) cấm chính mẫu đăng ký mà N2(iv) cho phép.** Phép đo trên blob base đếm 85 điểm bind của `CASES`. Khối hợp lệ có hai `def` mới, một gán tên mới và một `CASES += [...]` nâng số đếm 
+- **R6-1 · P2 — S4 còn hai vector sai hợp đồng, và đường ghi chú có thể thay lỗi thắng.** M2 nhận từng cặp `(mã, callable)`, nhưng M5 vẫn đưa callable trần vào hai vector `KeyboardInterrupt` và `__repr__`. Mô ph
+- **R6-2 · P2 — N2(iv) tự bác mẫu đăng ký bắt buộc.** `ast.parse` cho `CASES += [...]` một đích `Name(id="CASES", ctx=Store())`. Đích này trùng tên cũ và được đánh giá lúc nạp module. Theo chữ hiện tại, khố
+- **R6-3 · P2 — N2 cho phép gán lại tên cũ thông qua lời gọi cấp module.** Chèn `_r4_x = globals().update(_native1342=None)` xanh cả bốn vế. Tôi thực thi đúng dòng chèn trên định nghĩa `_native1342` trích từ blob
+- **R6-4 · P2 — M6–M8 chưa khóa nguyên nhân thoát của fixture quanh thời điểm đo.** Với J3, lịch `cháu tự hết hạn ở giây 60, con thoát ở giây 61` nằm trong watchdog 90 s. Khi đó `a1` thấy job rỗng, cháu đ
+| R6-1 | **Đóng** | M2(d) bọc `BaseException.add_note` bằng `except BaseException: pass`. M2(c) giữ `except Exception` cho bước dọn. M5/S4 dùng cặp `(mã, callable)` ở cả vector ngắt và vector `__repr__`. Sáu vector qua trong 
+| R6-2 | **Đóng** | N2(iv) miễn đúng nút `target` của mẫu `CASES += [...]`. N2(ii) bỏ đúng khối được (iv) chấp nhận khi đếm. Base và khối hợp lệ mô phỏng đều `1111`. [N2](ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+| R6-3 | **Đóng cho phản chứng lượt 6** | N2(iv) cấm `globals` và chỉ cho lời gọi tường minh tới `_native1342` khi nạp module. `_r4_x = globals().update(_native1342=None)` ra `1110`. Đường gọi ngầm mới còn lọt �
+| R6-4 | **Đóng trong cửa sổ M8, chưa đóng hết cho N6** | M6–M8 bổ sung hạn giữ 300 s, `het_han_*`, `tu_ket_thuc`, deadline trợ giúp +300 s và phân loại J6 hết hạn. J2 dưới `d0` cho con tự hết hạn sau khoảng 6
+- **R7-1 · P2 — N2 bỏ lọt gán lại tên cũ khi Python tạo lớp.** Hai lớp có tên mới, không decorator. Header lớp thứ hai chỉ đọc một `Name`. Python gọi ngầm `__init_subclass__` khi tạo lớp thứ hai, dù header
+- **R8-1 · P2 — N2 cho phép mã chèn đổi giá trị của tên cũ qua câu lệnh base chạy lúc import.** Chèn `def frozenset(items):` với thân `return ()` ngay trước phép gán `_WP1174_NATIVE_KEYS = frozenset(...)` ở dòng 1529
+- **R8-2 · P2 — `d1` có thể đỏ ở `10**400` trước nhãn mà N7 đòi.** M5/S5 liệt kê `10**400` trước `now+10**6`. Khi bỏ cận trên ở M4(0), cả hai số qua kiểm đối số và nhận `native Windows required` trên Linu
+| R8-1 | **Đóng phản chứng che builtin** | N2(iv), dòng 105, đòi tiền tố `_wp1342a1_` cho tên mới mức module. `def frozenset(items): return ()` ra `1110`. Khi cố ý bỏ qua N2 và nạp biến thể, `_WP1174_NATIVE_KEYS` giảm 
+**R9-1 · P2 — N2 cho phép đăng ký trùng ID làm câu lệnh base chụp nhầm hàm lúc nạp module.** Chèn ngay trước `_r26_original_accept1174 = dict(CASES)["wp1174_writer_accept"]` ở `.claude/dev/packet_loop_test.py:16217`:
+
+exec
+/bin/bash -lc "sed -n '18159,18230p;18547,18562p' .claude/dev/packet_loop_test.py
+ls ops/reviews/wp1342-spec-r4/
+sed -n '26,52p' ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+sed -n '770,813p' docs/PROTOCOL_DA_PHIEN.md
+rg -n 'Vế N2|chỉ THÊM|write_set' ops/specs/WP1174-WINDOWS-BACKEND-r4.md | cut -c1-230" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ succeeded in 0ms:
+def _native1342(ten, fn):
+    def ca(c):
+        if os.name != "nt":
+            raise BoQua(f"ca native Windows (kernel32) — nền {platform.system()} không đo, KHÔNG tính đạt") from OSError("kernel32 unavailable")
+        m = _module1174(c)
+        ghi = fn(m, c.tmp.resolve(), *m._1174_win_api())
+        print("WP1342_NATIVE_V1 " + json.dumps(dict(id=ten, executed=1, passed=1, os=platform.platform(),
+              python=platform.python_version(), observed=repr(ghi)), sort_keys=True, ensure_ascii=True), flush=True)
+    return ca
+
+
+CASES += [("wp1342_additive_byte_preserved", _additive_case1342), ("wp1342_pure_platform_path", _pure1342)]
+CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for ten, fn in (
+    ("read", _n_read1342), ("volume_junction", _n_volume1342), ("swap_ancestor", _n_swap1342), ("metadata_drift", _n_metadata1342),
+    ("noinherit", _n_noinherit1342), ("symlink_file", _n_symlink1342))]
+
+
+# --- #1342 r2 (bậc r1b): khoá + publish Windows ĐỨNG RIÊNG (`_1174_win_api_ghi`, `_1174_win_lock`, `_1174_win_persist`), CHƯA nối dây.
+# Không-nối-dây do `_wired1342` (ca `wp1342_additive_byte_preserved`) phủ sẵn; không đổi MUTANTS, không vào WP1174_REQUIRED/WP1174_BOTH.
+def _additive1342r2(base, head):
+    """N2 của r2 — HÀM đo MỘT LẦN lúc PR, KHÔNG đăng ký vào CASES. [] ⇔ head (bytes) = base + các khối mới `_new1342` nhận có tên CHƯA
+    có trong base. Khối `_1174_win_*` ĐÃ có trong base (r1) không bị loại: như mọi định nghĩa cũ, nó phải bằng NGUYÊN BYTE base."""
+    import ast
+    try:
+        cu, moi = ast.parse(base), ast.parse(head)
+    except (SyntaxError, ValueError) as ex:
+        return [f"không parse được: {ex}"]
+    da_co = {n.id for n in ast.walk(cu) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)} | {
+        n.name for n in ast.walk(cu) if hasattr(n, "name")}
+    dong, bo, ten = head.split(b"\n"), set(), []
+    for s in moi.body:
+        if _new1342(s) and _new1342(s) not in da_co:
+            ten.append(_new1342(s))
+            cuoi = s.end_lineno
+            while cuoi < len(dong) - 1 and not dong[cuoi].strip():
+                cuoi += 1
+            bo |= set(range(s.lineno - 1, cuoi))
+    loi = [f"tên khối mới trùng nhau: {n}" for n in sorted(set(ten)) if ten.count(n) > 1]
+    con, goc = [d for i, d in enumerate(dong) if i not in bo], base.split(b"\n")
+    lech = next((i + 1 for i, (a, b) in enumerate(zip(con, goc)) if a != b), min(len(con), len(goc)) + 1)
+    return loi + ([f"phần ngoài khối mới KHÁC byte base, từ dòng {lech} của base"] if con != goc else [])
+
+
+def _pure_r2_1342(c):
+    m, d, o_dia = _module1174(c), c.tmp / "r2", "C:\\wp1342-r2\\state.json"
+    d.mkdir()
+
+    def khoa(text):   # ĐI VÀO context manager: chỉ gọi hàm thì chưa chạy dòng nào của khoá
+        with m._1174_win_lock(text) as handle:
+            return handle
+    for fn, args, kw in ((khoa, (), {}), (m._1174_win_persist, (b"x",), dict(create=True)), (m._1174_win_persist, (b"x",), dict(create=False))):
+        _reject1174(fn, (d / "state.json").as_posix(), *args, reason="Windows drive path required", **kw)
+        if os.name != "nt":
+            _reject1174(fn, o_dia, *args, reason="native Windows required", **kw)
+    if os.name != "nt":
+        _reject1174(m._1174_win_api_ghi, reason="native Windows required")
+    for raw, create in (("x", True), ("x", False), (bytearray(b"x"), True), (None, False), (b"x", 1), (b"x", None)):
+        _reject1174(m._1174_win_persist, o_dia, raw, create=create, reason="persist bytes/mode")   # kiểu đứng TRƯỚC đường dẫn và nền
+    assert list(d.iterdir()) == [], ("từ chối mà vẫn tạo tệp", sorted(p.name for p in d.iterdir()))
+
+
+def _tam1342(d):
+    return sorted(p.name for p in d.iterdir() if p.name.startswith(".wp1174-"))
+
+
+def _vao_khoa1342(m, path):
+    with m._1174_win_lock(str(path)) as handle:
+        return handle
+
+
+_CON1342 = (   # tiến trình con của L1: xin khoá CHIA SẺ, LOCKFILE_FAIL_IMMEDIATELY, trên cùng tệp; in `lock <mã lỗi, 0 = được>`
+    "import ctypes as c, sys\nfrom ctypes import wintypes as w\nk = c.WinDLL('kernel32', use_last_error=True)\n"
+            else:
+                raise AssertionError(f"B2 dòng {nhan!r}: phải từ chối (fail-closed) mà lại trả {v!r}")
+            assert gia.call_count == 1, f"B2 dòng {nhan!r}: runtime không đi qua winreg.{ten}"
+    return ghi
+
+
+CASES += [("wp1342_pure_seed_acl_bang", _pure_seed_acl1342), ("wp1342_pure_seed_boot_refuse", _pure_seed_boot1342)]
+CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for ten, fn in (
+    ("seed_ok", _n_seed_ok1342), ("seed_hardlink", _n_seed_hardlink1342), ("seed_acl", _n_seed_acl1342),
+    ("seed_fingerprint", _n_seed_fingerprint1342), ("seed_nonfile", _n_seed_nonfile1342), ("seed_drift", _n_seed_drift1342),
+    ("boot_stable", _n_boot_stable1342), ("boot_failclosed", _n_boot_failclosed1342))]
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+luot1.verdict.txt
+luot10.verdict.txt
+luot2.verdict.txt
+luot3.verdict.txt
+luot4.verdict.txt
+luot5.verdict.txt
+luot6.verdict.txt
+luot7.verdict.txt
+luot8.verdict.txt
+luot9.verdict.txt
+## 2. Nhận dạng provider và execution surface
+
+| Công cụ/bề mặt | Provider | Execution surface | Transport |
+|---|---|---|---|
+| Google Antigravity | `google_antigravity` | `antigravity` | machine/local |
+| ChatGPT Pro Web | `openai_chatgpt` | `chatgpt_web` | `human_mediated` |
+| Claude Code | `anthropic_claude` | `claude_code` | machine/local |
+| Codex CLI | `openai_codex` | `codex_cli` | machine |
+| Codex Desktop | `openai_codex` | `codex_desktop` | machine |
+| Codex service (GitHub App / cloud) | `openai_codex` | `codex_service` | machine |
+| Human Auditor | `human` | `manual_audit` | human |
+
+Tên công cụ không tự quyết định assurance.
+Codex Desktop không được khai thành CLI. Bề mặt Desktop không chứng minh model/effort
+đã phục vụ hoặc tính độc lập của session; khai giới hạn đo được và giữ mức advisory
+khi chưa đủ evidence theo protocol.
+
+Tên lịch sử “Codex service” có tên máy `codex_service` từ wp461 r3 (Mission
+[#470](https://github.com/ducthangho/tra-luat/issues/470) Q1; nợ mở ở
+[#461](https://github.com/ducthangho/tra-luat/issues/461) theo mục `no_khai_ra` của
+[biên nhận review #460 lượt 9](reviews/pr460-bien-nhan-v2-review-9-gpt6astra-verdict.receipt.yaml)).
+`codex_service` là mọi đường chạy Codex không qua lệnh `codex` (CLI) và không qua Codex
+Desktop — gồm GitHub App `chatgpt-codex-connector[bot]` review trên PR và Codex cloud nói
+chung. Nó không chứng minh model/effort đã phục vụ hay tính độc lập của phiên; receipt phải
+khai `KHONG_do_duoc` cho phần không đo được. Các biên nhận lịch sử khai `codex_cli` giữ
+nguyên (Q2 #470): chúng đi qua `codex exec`, không được ánh xạ lại.
+
+### 8.1 Bootstrap reviewer và receipt thực thi
+
+Hoàn tất bootstrap **trước** khi giao checkout read-only: clone riêng từ remote thật hoặc
+mirror đã kiểm và đặt origin về endpoint thật; chứng minh objects/exact head, tree và phạm vi
+refs đã cấp. Bootstrapper xác minh path/trust trên đúng OS, longpaths nếu đường dẫn Windows
+đòi hỏi, Git config phục vụ gate và toàn bộ tool/env capability trong runtime sẽ chạy.
+Không tự chấp nhận trust, đổi permission hay dùng cờ bypass để làm probe xanh. Permission
+denial là evidence thiếu năng lực; sửa bootstrap bằng quyền đã cấp hoặc trả checkpoint.
+Clone, cài dependency và cấu hình cần thiết kết thúc trước mốc snapshot bàn giao.
+
+Ghi cặp Executor–Reviewer thực tế: provider, execution surface, transport, session/run ID
+và nguồn đo; cấu hình yêu cầu không phải runtime evidence. Theo `ADR-0065`, model và effort
+phục vụ của reviewer là trường ghi nếu đo được, ở mọi Packet, không ngoại lệ: đo được thì ghi
+kèm nguồn, không đo được thì ghi `KHONG_DO_DUOC`. `KHONG_DO_DUOC` ở hai trường này không làm
+assurance thành `CHUA_DAT` và không chặn `landed`. Các mốc vẫn bắt buộc: `exact SHA`,
+`ma_thoat`, `stdout_sha256`, verdict và sandbox mode. Header CLI chỉ chứng minh model/effort
+CLI công bố; không chứng minh mọi request giữ model đó. Thiếu nhận dạng provider, execution
+surface, transport, session/run ID hoặc sandbox thì chưa nhận assurance. ChatGPT Web qua người vận chuyển vẫn chỉ là
+`advisory_review` theo hợp đồng provider, không tự tạo các mức approval ở trên.
+
+Sau run, đối chiếu trạng thái terminal/rc con, launcher rc, lỗi permission, header/model
+evidence và verdict; cùng exact SHA/tree ở đầu/cuối. Output phải ổn định sau khi writer
+kết thúc, ghi path/size/hash và xác minh lại trước bàn giao. Timeout, output dở dang hoặc
+launcher rc=0 nhưng con lỗi không là review hoàn chỉnh. GitHub actor chỉ là submitter (§7).
+Producer và consumer phải cùng trỏ hiện vật của đúng run trong scratch riêng; ghi rõ nguồn
+code/Git và đường dẫn hiện vật, không chọn JSON, diff hay numstat theo cwd ngầm định.
+
+### 8.2 Phạm vi phép đo và checkout read-only
+
+Đặt cache/output ngoài checkout hoặc dùng no-cache, kể cả bytecode Python, Ruff và pytest.
+Snapshot đầu/cuối kiểm tracked, untracked **và ignored**, HEAD/tree, diff/index và nội dung
+hiện vật có thể thay đổi; không chỉ đếm path. Kiểm cả checkout được giao lẫn repo nguồn nếu
+nó nằm trong phạm vi quan sát. Snapshot sạch chỉ chứng minh không có delta quan sát được
+ở hai mốc; nó không chứng minh chưa từng ghi rồi hoàn nguyên trong cả lịch sử run. Ghi rõ
+giới hạn đó và sandbox mode thực tế; prompt read-only không thay cơ chế sandbox.
+
+Tách **Ruff pin/probe contract** (workflow cài đúng pin và probe version đúng cấu trúc) khỏi
+**bare Ruff lint** (chạy lint thật với config/rules/path cụ thể). Mỗi phép có command, rc,
+scope, tool version và output riêng. Contract xanh không chứng minh lint xanh; bare lint
+chưa chạy ghi `not_run`, lỗi quyền ghi `not_measured`, đỏ giữ `failed` cùng delta baseline
+nếu tiêu chí cho phép nợ nền. Không dùng nhãn chung “Ruff passed” cho kết quả contract.
+
+### 8.3 Lịch sử lớp finding và giới hạn nghiệm thu
+
+31:## 2. `write_set`, `ngoai_pham_vi`, ranh giới bảo đảm
+
+exec
+/bin/bash -lc "python -B - <<'PY'
+import ast as a, builtins, collections, difflib, itertools, pathlib, platform, subprocess, sys, types
+def blob(name):
+    return subprocess.check_output(['git','show','HEAD:.claude/dev/'+name+'.py'])
+base, code = blob('packet_loop_test'), blob('packet_loop')
+launcher=types.ModuleType('launcher')
+launcher.ky_ban_ghi_luot=lambda *args,**kwargs: None
+sys.modules['launcher']=launcher
+mod=types.ModuleType('review_base')
+sys.modules[mod.__name__]=mod
+mod.__file__=str(pathlib.Path('.claude/dev/packet_loop_test.py').resolve())
+exec(compile(base,mod.__file__,'exec'),mod.__dict__)
+ids={key for key,_ in mod.CASES}
+tree=a.parse(base)
+lines=base.splitlines(keepends=True)
+def start(n):
+    return min([n.lineno]+[d.lineno for d in getattr(n,'decorator_list',[])])-1
+def walk(n):
+    yield n
+    for field, value in a.iter_fields(n):
+        if field=='body' and isinstance(n,(a.FunctionDef,a.AsyncFunctionDef,a.ClassDef,a.Lambda)):
+            continue
+        for child in value if isinstance(value,list) else [value]:
+            if isinstance(child,a.AST):
+                yield from walk(child)
+def binds(t):
+    counts=collections.Counter()
+    for n in walk(t):
+        if isinstance(n,(a.FunctionDef,a.AsyncFunctionDef,a.ClassDef)):
+            counts[n.name]+=1
+        if isinstance(n,a.Name) and isinstance(n.ctx,a.Store):
+            counts[n.id]+=1
+        if isinstance(n,a.alias):
+            counts[n.asname or n.name.split('.')[0]]+=1
+    return counts
+old=binds(tree)
+print(platform.platform(),sys.version.split()[0], 'base',len(mod.CASES),old['CASES'],old['MUTANTS_NHAM_TEST'])
+assert (old['CASES'],old['MUTANTS_NHAM_TEST'])==(85,14)
+main=tree.body[-1]
+last=max(n.end_lineno for n in tree.body[:-1] if any(isinstance(x,a.Name) and x.id=='CASES' for x in walk(n)))
+print('window',last,main.lineno)
+prefix='_wp1342a1_'
+assert not any(k.startswith(prefix) for k in itertools.chain(vars(builtins),old,(n.id for n in a.walk(tree) if isinstance(n,a.Name))))
+banned=set('globals vars locals setattr delattr exec eval compile __import__ __dict__ modules _getframe f_globals f_locals f_back __init_subclass__ __class_getitem__ __set_name__'.split())
+def fresh(s):
+    return s.startswith(prefix) and s not in old
+def name(n,s=None):
+    return isinstance(n,a.Name) and isinstance(n.ctx,a.Load) and (s is None or n.id==s)
+def string(n):
+    if isinstance(n,a.Constant) and isinstance(n.value,str):
+        return n.value
+    if isinstance(n,a.BinOp) and isinstance(n.op,a.Add):
+        l,r=string(n.left),string(n.right)
+        if l is not None and r is not None:
+            return l+r
+def constant_string(n):
+    return n.value if isinstance(n,a.Constant) and isinstance(n.value,str) else None
+def registration(n,pos,seen):
+    if not isinstance(n.value,a.List) or not last<=pos<main.lineno:
+        return False
+    new=[]
+    for entry in n.value.elts:
+        if not isinstance(entry,a.Tuple) or len(entry.elts)"'!=2:
+            return False
+        key,fn=entry.elts
+        key=constant_string(key)
+        if key is None or not key.startswith(('"'wp1342_pure_spawn_','wp1342_native_job_')):
+            return False
+        if isinstance(fn,a.Call):
+            if not name(fn.func,'_native1342') or len(fn.args)"'!=2 or fn.keywords or constant_string(fn.args[0])!=key:
+                return False
+            fn=fn.args[1]
+        if not name(fn) or not fresh(fn.id) or key in ids or key in seen or key in new:
+            return False
+        new.append(key)
+    seen.update(new)
+    return True
+def expr(n):
+    if isinstance(n,a.Constant) or name(n):
+        return True
+    if isinstance(n,(a.List,a.Tuple)):
+        return all(map(expr,n.elts))
+    if isinstance(n,a.BinOp):
+        return string(n) is not None
+    return isinstance(n,a.Call) and name(n.func,'"'_native1342') and not n.keywords and len(n.args)==2 and constant_string(n.args[0]) is not None and name(n.args[1]) and fresh(n.args[1].id)
+def block(chunk,pos,seen):
+    if not tree.body[0].end_lineno<=pos<tree.body[-1].lineno or any(start(n)<pos<n.end_lineno for n in tree.body):
+        return False
+    try:
+        t=a.parse(b''.join(chunk))
+    except SyntaxError:
+        return False
+    staged=set(seen)
+    for n in t.body:
+        if any(isinstance(x,(a.NamedExpr,a.Global,a.Nonlocal,a.ClassDef)) or isinstance(x,a.Name) and x.id in banned or isinstance(x,a.Attribute) and x.attr in banned for x in a.walk(n)):
+            return False
+        if isinstance(n,a.FunctionDef) and fresh(n.name) and not n.decorator_list:
+            args=n.args
+            formal=[*args.posonlyargs,*args.args,*args.kwonlyargs,args.vararg,args.kwarg]
+            expressions=[*args.defaults,*args.kw_defaults,n.returns,*(arg.annotation for arg in formal if arg)]
+            if getattr(n,'type_params',[]) or not all(expr(e) for e in expressions if e is not None):
+                return False
+        elif isinstance(n,a.Assign) and len(n.targets)==1 and isinstance(n.targets[0],a.Name) and fresh(n.targets[0].id) and expr(n.value):
+            pass
+        elif isinstance(n,a.AugAssign) and isinstance(n.target,a.Name) and n.target.id=='CASES' and isinstance(n.op,a.Add) and registration(n,pos,staged) and expr(n.value):
+            pass
+        else:
+            return False
+        if any(isinstance(x,a.Name) and isinstance(x.ctx,(a.Store,a.Del)) and x.id in old and x is not getattr(n,'target',None) for x in walk(n)):
+            return False
+    seen.update(staged)
+    return True
+def measure(raw):
+    head=raw.splitlines(keepends=True)
+    ht=a.parse(raw)
+    ops=difflib.SequenceMatcher(None,lines,head,autojunk=False).get_opcodes()
+    mapped={i:j for op,p,q,r,s in ops if op=='equal' for i,j in zip(range(p,q),range(r,s))}
+    starts={start(n):n for n in ht.body}
+    def intact(n):
+        i,j=start(n),mapped.get(start(n))
+        h=starts.get(j)
+        return type(n)==type(h) and lines[i:n.end_lineno]==head[j:h.end_lineno]
+    seen,removed=set(),set()
+    iv=True
+    for op,p,q,r,s in ops:
+        if op=='insert':
+            if block(head[r:s],p,seen):
+                removed.update(range(r,s))
+            else:
+                iv=False
+    pruned=a.Module(body=[n for n in ht.body if not all(i in removed for i in range(start(n),n.end_lineno))],type_ignores=[])
+    counts=binds(pruned)
+    bits=(all(intact(n) for n in tree.body if isinstance(n,(a.FunctionDef,a.ClassDef,a.Assign,a.AugAssign,a.AnnAssign,a.AsyncFunctionDef))), all(counts[k]==v for k,v in old.items()), all(op in ('equal','insert') for op,*_ in ops),iv)
+    return ''.join(str(int(b)) for b in bits)
+def insert(text,pos=last+1):
+    return b''.join(lines[:pos])+text.encode()+b''.join(lines[pos:])
+n=next(n for n in tree.body if isinstance(n,a.FunctionDef) and n.name=='_native1342')
+fn='def _wp1342a1_fn(c):\\n    pass\\n\\n'
+pos=fn+'def _wp1342a1_other(c):\\n    pass\\n\\n_wp1342a1_value = \"review\"\\n'
+def reg(key, inner=None):
+    return f'CASES += [(\"{key}\", _native1342(\"{inner or key}\", _wp1342a1_fn))]\\n'
+dup='def _wp1342a1_noop(c): pass\\nCASES += [(\"wp1174_writer_accept\", _wp1342a1_noop)]\\n'
+ok='wp1342_native_job_review'
+samples={
+'base':base,'positive':insert(pos+reg(ok)),
+'old positive':insert(pos+reg('id')),
+'insert return':insert('    return lambda c: None\\n',n.lineno),
+'duplicate def':insert('def _native1342(ten, fn): pass\\n',len(lines)),
+'old decorator':insert('@(lambda fn: lambda *a: None)\\n',n.lineno-1),
+'conditional bind':insert('if True: _native1342 = None\\n'),
+'match':insert('match None:\\n    case _native1342: pass\\n'),
+'if walrus':insert('if (_native1342 := None): pass\\n'),
+'del':insert('del _native1342\\n'),
+'RHS walrus':insert('_r4_x = (_native1342 := None)\\n'),
+'default walrus':insert('def _r4_a(x=(_native1342 := None)): pass\\n'),
+'globals':insert('_r4_x = globals().update(_native1342=None)\\n'),
+'duplicate ID early':insert(dup,16216),
+'duplicate ID in window':insert(dup),
+'mismatched ID':insert(fn+reg('wp1342_native_job_x','wp1174_writer_accept')),
+'builtin shadow':insert('def frozenset(items): return ()\\n',15291),
+'class pair':insert('class _r4_A:\\n    def __init_subclass__(cls):\\n        sys._getframe(1).f_globals[\"_native1342\"] = None\\nclass _r4_B(_r4_A): pass\\n'),
+'list comprehension':insert(fn+f'CASES += [(\"{ok}\", _native1342(\"{ok}\", _wp1342a1_fn)) for x in (\"demo\",)]\\n'),
+'duplicate new ID':insert(fn+reg(ok)+reg(ok)),
+'valid ID too early':insert(fn+reg(ok),16216),
+'valid ID too late':insert(fn+reg(ok),len(lines)),
+}
+for label,raw in samples.items():
+    bits=measure(raw)
+    print(label,bits,flush=True)
+    assert (bits=='1111')==(label in ('base','positive')),label
+positive={'__name__':'review_base','__file__':mod.__file__}
+exec(compile(samples['positive'],mod.__file__,'exec'),positive)
+assert tuple(k for k,_ in positive['CASES'])==tuple(k for k,_ in mod.CASES)+(ok,)
+assert dict(zip(positive['CASES'][-1][1].__code__.co_freevars,(x.cell_contents for x in positive['CASES'][-1][1].__closure__)))['ten']==ok
+print('positive import',len(positive['CASES']),ok)
+different=code.replace(b'WinDLL(\"kernel32\", use_last_error=True)',b'WinDLL(\"kernel32\", use_last_error= True)',1)
+# Change exactly one byte in the existing seed definition, without altering syntax.
+needle=b'def _1174_win_seed('
+assert code.count(needle)==1
+i=code.index(b'\\n',code.index(needle))
+j=code.index(b'\\n',i+1)
+different=code[:i+1]+code[i+1:j].replace(b' ',b'\\t',0)+code[j:]
+# Change one character in an existing docstring instead.
+t=next(n for n in a.parse(code).body if isinstance(n,a.FunctionDef) and n.name=='_1174_win_seed')
+cl=code.splitlines(keepends=True)
+k=t.body[0].lineno-1
+assert isinstance(t.body[0],a.Expr) and isinstance(t.body[0].value,a.Constant)
+cl[k]=cl[k].replace(b' ',b' ',1)
+offset=next(i for i,c in enumerate(cl[k]) if 97<=c<=122)
+cl[k]=cl[k][:offset]+bytes([cl[k][offset]-32])+cl[k][offset+1:]
+different=b''.join(cl)
+assert sum(x"'!=y for x,y in zip(code,different))==1
+for label,raw,expected in [('"'code base',code,True),('code old byte',different,False),('code new decorator',code+b'\\n@staticmethod\\ndef _1174_win_review_probe():\\n    pass\\n',False)]:
+    result=mod._additive1342r2(code,raw)
+    print(label,result)
+    assert (result==[])==expected
+PY" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+exec
+/bin/bash -lc 'for i in 1 2 3 4 5 6 7 8 9; do f=ops/reviews/wp1342-spec-r4/luot$i.verdict.txt; printf '"'\\nLượt %s\\n' \""'$i"; rg -n '"'P[0-3]|[Đđ]óng|KET_LUAN' \""'$f" | cut -c1-185; done
+sed -n '"'31,43p' ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+diff -U0 ops/specs/WP1174-WINDOWS-BACKEND-r4{-ban10,}.md | awk '/"'^@@/{print}'"'
+printf 'diff_rc=%s\\n' \""'${PIPESTATUS[0]}"' in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ succeeded in 0ms:
+
+Lượt 1
+2:**Review đặc tả #1342 r4 — còn P1 và P2.** Phương án `Popen` → gán Job Object → tìm luồng bằng Toolhelp → `ResumeThread` khả thi theo mã CPython 3.13 đã �
+13:| Ca Linux và mutant | Khớp 13622–13636, gồm ngưỡng `<0,8 s`, hậu duệ giữ pipe và tràn. Hai mutant tại 13699 và 13702 đều nhắm `wp1174_admission_candidate_r
+22:| `CREATE_SUSPENDED \| CREATE_NEW_PROCESS_GROUP` | CPython 3.13 `subprocess.py:1555–1578` chuyển nguyên cờ cho `_winapi.CreateProcess`, giữ process handle, đóng primary th
+29:### P1 — M2(c,e), §4b — Cleanup thiếu quyền sở hữu rõ ràng trước khi gán job
+35:### P1 — M2(d,e), §4b — Hai reader chưa có cách giữ trần byte và thời gian cleanup
+37:**Bằng chứng.** Hai lần đọc 65.536 byte có thể tiêu thụ hơn `max_bytes+1` trước lượt kiểm tiếp theo. Cắt buffer hoặc kẹp số callback chỉ sửa s�
+41:### P2 — M1, M2(c), P7, N7(b,c) — Chứng cứ bắt đầu treo và thứ tự gán chưa phân biệt được
+47:### P2 — M2(e), P3–P5, §4b — Chưa đo được job rỗng và kiểm chứng vòng đời bằng đối tượng ổn định
+49:**Bằng chứng.** `TerminateJobObject` và `QueryInformationJobObject` đều có thể thất bại. Đọc buffer zero-init sau query lỗi tạo kết quả rỗng giả. P3 ch�
+51:**Câu thay thế.** “Kiểm kết quả terminate riêng. Chỉ chấp nhận query lớp 1 thành công với `ActiveProcesses == 0`; query lỗi hoặc hết hạn khi còn thà
+53:### P2 — M2(b,c), P6–P7, §10 — Breakaway, job lồng và handle kế thừa còn lỗ trong phép đo
+59:### P2 — M2, M3, §4b — Callback và handle chưa có ma trận lối ra
+61:**Bằng chứng.** P1/P4 và M3 đo callback khi thành công, tràn và lỗi validation. Chưa đo deadline sau khi đọc một phần, lỗi tạo job/tệp/con, lỗi gán, l�
+63:**Câu thay thế.** “Một `finally` ngoài gọi `on_bytes` đúng một lần sau khi đã chốt số byte thực và hoàn tất các bước thu hồi. Quy định thứ tự
+65:### P2 — N1–N8, L1–L6 — Một số phép đo chưa cưỡng chế đủ chính tiêu chí đã khai
+74:| N6 | P1/P2 có thể chạy native như mô tả. **Thêm** vế dữ liệu nhị phân CRLF/NUL cho P1 và lỗi/trần thời gian rõ ràng cho hai vế P2. P3–P7 cần sửa
+75:| N7 | (d) cần ca cho ra assertion đích dù triển khai còn phép kiểm deadline cuối, hoặc worker/fixture có watchdog. **Ghi** thứ tự kiểm thời gian tại P3 và
+80:### P2 — §0, §7, §10 — Dự toán chưa bao gồm phần bắt buộc để nghiệm thu
+84:**Câu thay thế.** “Dự toán theo ba khối mã và các nhóm ca, gồm đầy đủ đường thất bại §4b. Trước khi đóng băng, chốt cơ chế I/O và lập ng�
+86:### P3 — §0, §7, §9, §10 — Sửa lời khai tĩnh và điểm chuyển giao
+92:KET_LUAN: request_changes
+
+Lượt 2
+4:Còn **P1 và P2**. Khe trước khi gán job vẫn có thể để lại tiến trình treo nếu tiến trình gọi chết. Hai đột biến cleanup còn bị đường dự phòn
+12:| **P1** Sở hữu cleanup trước/sau gán | **Chưa đóng** | M4(3)–(9) quy định hai đường dọn, S4 kiểm bước sau vẫn chạy. Nhưng nhánh thiếu `_handle` n�
+13:| **P2** Bắt đầu treo, thứ tự gán, Toolhelp/ResumeThread và ABI | **Chưa đóng** | M1/M2/M4(7) đặt allowlist API, kiểm đúng một thread, kiểm PID của thread 
+14:| **P2** Job rỗng, lỗi query/terminate, đúng đối tượng | **Chưa đóng** | M3 và J11/a3 đóng đường query lỗi bị nhận là rỗng. M4 ghi lỗi terminate. J9 
+15:| **P2** Breakaway, job lồng, kế thừa handle, allowlist cờ | **Chưa đóng** | §3/S1 khóa giá trị hằng, J4 giới hạn mã `{5}` và thêm hai đối chứng, J5/J7/
+16:| **P2** Phần handle của finding callback và handle | **Chưa đóng** | M4 có thứ tự đăng ký và đóng job/snapshot/thread, J8/J9 giữ bản sao để quan sát. Chư
+17:| **P2** N1–N8 | **Chưa đóng** | N1, N5 và N8 đã có phản chứng cụ thể. N2 cho phép chèn vào thân helper cũ. N3 chưa đòi đủ khối mới. N6/N7 còn các p
+18:| **P2** Dự toán | **Chưa đóng** | §5 đã chia theo khối và giữ trần 450. Dự toán chưa tính đủ phần cần để làm các ca và đường lỗi hiện tại
+19:| **P3** Văn bản | **Chưa đóng, mức P3** | §0 đã sửa vị trí `_native1342` và phạm vi `finally` Linux. §7/§9/§10 đã sửa tiêu đề, điều kiện job lồn
+21:§2 đã chuyển sang a2 các mục về hai reader, trần byte, hủy I/O, callback, M3 cũ, P1–P4 cũ và đột biến `(d)(f)(g)`. N4(f)(g) cũ được bao hàm qua M3 và h
+25:### P1 — M4/J10: tiến trình gọi chết giữa `Popen` và gán job
+27:Ngay khi `Popen` tạo con treo, con đã tồn tại ngoài job đích. Nếu tiến trình gọi bị chấm dứt tại `truoc_gan`, `finally` không chạy, hệ điều hành đ
+31:### P1 — M4(3), (5), (9): đường thu hồi và ưu tiên lỗi chưa đủ chặt
+35:Trong cleanup, `kill+wait` là một callable nên `kill()` ném sẽ bỏ lần `wait` trong callable đó. Lần `proc.wait(5)` cuối vẫn chạy nhưng có thể chỉ xác nh�
+37:### P2 — M4/M6: hook, quyền handle và danh tính fixture
+39:- `truoc_gan` và `between` đều chạy trên đường thật nếu phần triển khai tuân thủ M4. Với callable tùy ý nhận trực tiếp `Popen` hoặc raw job handle, 
+42:- J10 cần xác nhận trợ giúp còn sống trước khi chủ động giết và chính lần giết đó làm nó signaled. J12 cần trợ giúp dùng một lần với kết 
+44:### P2 — M1/M4/N6: chữ ký và chốt định danh chưa được nghiệm thu
+50:### P2 — §4b/N7: dấu hiệu của từng đột biến
+52:Chưa có mã a1 để kiểm số lần khớp byte-exact. Một số hàng khả thi nếu driver lưu đúng diff và neo cụ thể. Các hàng sau cần sửa dấu hiệu hoặ
+92:KET_LUAN: request_changes
+
+Lượt 3
+4:Còn **P1 và P2**. Bản hiện tại đã ghi đúng phạm vi chuyển tiếp và ranh giới khi tiến trình gọi chết trước gán. Các điểm chặn còn lại nằm ở
+12:| P1 — Tiến trình gọi chết trước gán | **Đóng cho đường đã nêu** | §2/Q2 ghi `wp1342-pre-assign-orphan`. M6/M7 J10b giết trợ giúp trong `truoc_gan`, xác 
+13:| P1 — Sở hữu cleanup và ưu tiên lỗi | **Chưa đóng** | M4(3)/(9) đã dịch đăng ký dọn lên trước kiểm `_handle`, tách `kill_truoc_gan`/`reap`, bỏ `proc.
+14:| P2 — Thứ tự gán, Toolhelp, ABI và deadline | **Đóng phần ABI và chọn luồng, còn deadline** | M1/J0 có chữ ký, kích thước, offset Win64. M4(7) có `dwSize`
+15:| P2 — Job rỗng, lỗi query/terminate và handle | **Đóng phần query, còn hậu điều khi dọn lỗi** | M3/J11 phân biệt query lỗi với job rỗng. M4(9) xác nh�
+16:| P2 — Hook, danh tính và fixture | **Chưa đóng** | M6 thêm nonce, creation time, quyền terminate và luồng quan sát. M7 thêm giao thức trợ giúp và thành viên t
+17:| P2 — Dấu hiệu đột biến | **Chưa đóng** | `t2` đã tách đúng vector, `h` đã bind đúng chữ ký, `c` có dấu hiệu S1 riêng và `k2` có thiết kế phân
+18:| P2 — N1–N8 | **Chưa đóng** | N3 đã có vế dương đúng tập tên. Hai phản chứng yêu cầu cho N2 đã đỏ trong RAM, nhưng decorator vẫn lọt. N6/N7 phụ
+19:| P2 — Dự toán | **Đóng ở mức dự toán** | §8 cộng đúng 428–536, trần Q5 là **550**. Còn 14 dòng dự phòng ở đầu cao. Numstat triển khai chưa đo. 
+20:| P3 — Văn bản và truy vết | **Đóng các lỗi đã nêu** | Dòng 13 ghi giờ UTC và ba lần đo lại. M4 dẫn bước dọn tới (9). §2 ghi đủ chuyển tiếp,
+24:**P1 — M4(3) chỉ nhận quyền dọn sau khi `Popen` trả.** Nhánh Windows của `subprocess.py` CPython 3.13 gọi `CreateProcess`, rồi chạy `_close_pipe_fds` trong `fina
+26:**P1 — M4(0)/(8) có thể chờ vô hạn với deadline hữu hạn.** Tôi trích đúng hàm `_wait` nhánh Windows từ CPython 3.13.18 cục bộ và chạy trong RAM với �
+28:**P2 — M2 và M4(9) có hai quy tắc ưu tiên lỗi khác nhau.** M2 bảo `_1174_win_cleanup` ghi `KeyboardInterrupt`/`SystemExit`, chạy tiếp rồi ném lại. M4 bảo gi�
+30:**P2 — J9 thiếu tiền điều kiện gán thành viên thứ hai.** `between` có thể gán tiến trình phụ nếu handle có `PROCESS_SET_QUOTA | PROCESS_TERMINATE` và t�
+32:**P2 — M6/M7 chưa khép giao thức quan sát.** Creation time đối chiếu trên handle đang sống, nonce do ca cấp và ACK `go` là cơ sở phù hợp. Cần quy định 
+34:**P2 — N2 vẫn cho phép thay hành vi của định nghĩa cũ chỉ bằng dòng thêm.** Tôi đọc blob `HEAD:.claude/dev/packet_loop_test.py` qua `git show`, chạy `ast.par
+53:| `a2` | Một hằng job. J10 có dấu hiệu riêng nếu chính cú giết trợ giúp làm đóng handle cuối và hai đối tượng đang sống trước cú giết. S1 `JOB
+73:L2 phù hợp với hai tệp và driver ngoài kho. L4 `khong_ap_dung` phù hợp cho lát triển khai mới. L5 đã ghi đủ ba mốc đo lại. L7 đã gắn E2 cho các quyế
+77:KET_LUAN: request_changes
+
+Lượt 4
+4:Còn P2 ở hợp đồng trả kết quả, giao thức fixture và tiêu chí nghiệm thu. Hai P1 của lượt 3 đã đóng.
+14:| P1 — `Popen` ném sau khi tạo con hoặc trả thiếu `_handle` | **Đóng** | §2 dòng 48 và M4(3) ghi rõ cả hai biến thể của nợ đã được chấp nhận. |
+15:| P1 — Deadline hữu hạn thành `INFINITE`, số nguyên lớn gây `OverflowError` | **Đóng** | M4(0)/(8), S5. So trực tiếp từ chối `10**400`. Tôi chạy `_wait` nh�
+16:| P2 — Ưu tiên lỗi, ghi chú, hậu điều cleanup | **Chưa đóng** | M2 và S4 thống nhất `Exception` được gom, `KeyboardInterrupt` lan ra ngay. M4(9) chọn lỗi 
+17:| P2 — J9 thiếu tiền điều kiện thành viên thứ hai | **Đóng về handle và kết quả gán** | M7/J9 dùng handle gốc, đòi `TRUE`, ghi mã Win32 và `KHÔNG ĐO
+18:| P2 — Giao thức quan sát và trợ giúp | **Chưa đóng** | M6 thêm ô kết quả, `join(20)`, quy tắc mượn handle và kiểm trước cú giết. J2 tách lỗi bắt
+19:| P2 — N2 lọt decorator và gán lồng | **Chưa đóng** | N2 dòng 104 chặn đúng cả hai phản chứng cũ. Phạm vi duyệt vẫn bỏ sót điểm bind và xóa tên,
+20:| P2 — Dấu hiệu đột biến | **Đóng phần phân biệt J6 và thứ tự J0, còn N7** | J6(i) chạy trước J6(ii), nên `c` không thể đỏ ở (ii). J0 chấm off
+21:| P2 — N1–N8 | **Chưa đóng** | N6 đã liệt kê đúng ID. N7 ghi đúng 15 ID và 16 lần chạy. N8 ghim Ruff 0.15.15. N2, N4, N6–N8 còn các vấn đề bên dưới.
+22:| P3 — Dẫn nguồn điểm dừng khi giả định `Popen` sai | **Đóng** | §7 dòng 123 dẫn quy tắc protocol về đổi thiết kế hoặc phạm vi sau khi đóng bă
+26:- **F1 · P2 — Dựng ghi chú vẫn có thể thay lỗi thắng.** M4(9) tránh `repr(e)` nhưng `str(e.args[:1])` gọi `repr` của phần tử trong tuple. Tôi chạy biểu 
+27:- **F2 · P2 — Mệnh đề `trả rc ⇔ đã xác nhận thu hồi` mâu thuẫn với M4(9), J2 và J9.** J9 trên head khỏe có thể terminate thành công, query job rỗng
+28:- **F3 · P2 — `join(20)` hết hạn chưa giải quyết quyền sở hữu handle quan sát.** M6 cho luồng chính phân loại `KHÔNG ĐO` rồi đóng handle trong `finally
+29:- **F4 · P2 — Fixture chưa xác định đủ thứ tự mốc và thời gian sống.** M6 nói trợ giúp chờ `giu` tại mỗi mốc. J10 lại đợi `da_gan` và `chau` t
+30:- **F5 · P2 — N2 vẫn cho xanh khi thay hành vi tên cũ chỉ bằng dòng thêm.** Trên blob base, tôi so đoạn nguồn AST có decorator, đếm điểm bind theo danh s�
+31:- **F6 · P2 — `b` và `d0` chưa có đường tất định tới nhãn N7.** J6 chỉ yêu cầu con ghi **marker**, còn §4b bắt `b` chờ **tệp bắt tay**. Nếu là hai
+32:- **F7 · P2 — N8 và §7 cần cùng đếm toàn bộ diff.** N8 đòi phản chứng tệp thứ ba làm đỏ, nhưng §7 chỉ định đo numstat “trên đúng hai tệp”
+33:- **F8 · P3 — `d1` đo trần đầu vào, còn lát chờ khóa sentinel.** Sau khi bỏ riêng trần, M4(8) vẫn giới hạn mỗi lần chờ ở 60 s. Đổi mô tả hàng
+83:KET_LUAN: request_changes
+
+Lượt 5
+4:Còn P2 ở hợp đồng ghi chú, bàn giao handle, giao thức fixture và tiêu chí N2/N7.
+8:Phiên `openai_codex / codex_cli / machine`, Linux, CPython 3.13.18, chỉ đọc, không gọi mạng. Model cụ thể và effort chưa xác minh. Các phép `python -B -` chạy tr
+14:| F1 | **Chưa đóng** | M2/M4(9), dòng 67/69, bỏ `args` và `repr`. S4 kiểm được phản chứng cũ, nhưng biểu thức mới vẫn gọi mã tùy biến. Xem R5-1. |
+15:| F2 | **Đóng** | §2 dòng 49 đòi đồng thời có `rc` và thu hồi đã xác nhận. Lỗi gốc vẫn được ném. Phạm vi handle giới hạn theo quyền sở hữu,
+16:| F3 | **Chưa đóng** | M6 dòng 71 xử lý được worker hoàn tất sau khi `huy` đã đặt. Còn đường bàn giao thành công ngay trước khi `join` hết hạn. Xem 
+17:| F4 | **Chưa đóng** | M6 dòng 71 bỏ chờ ở `da_gan` và đặt chốt riêng cho J10/J10b. M7 dòng 72 vẫn ghi `sleep(30)` và `giu`. `tha_phu` có hạn nhưng chưa kh�
+18:| F5 | **Chưa đóng** | N2 dòng 104 làm đỏ cả bảy phản chứng được giao. Khối chèn hợp lệ đỏ ở (ii), còn hai biến thể walrus xanh theo cách đo h�
+19:| F6 | **Chưa đóng** | §4b dòng 79/82/90 đã neo cả khối `a1`, dùng đúng marker cho `b` và thống nhất cửa sổ 6–11 s của `d0`. Còn thiếu điều kiện gi
+20:| F7 | **Đóng** | N8 và §7 dòng 110/121 cùng dùng `git diff --numstat <base>..<H>` không lọc đường dẫn, so tập đường dẫn với write set và cộng dòng thê
+21:| F8 | **Chưa đóng** | Dòng 93 đổi nhãn `d1` sang ngoài miền nhận, nhưng cột đường vẫn mô tả chờ vô hạn. S5 chụp `now` để dựng vector, còn M4(0)
+25:- **R5-1 · P2 — `_1174_win_note` vẫn có thể thay lỗi thắng.** Tôi chạy đúng biểu thức M2 trong RAM. Một ngoại lệ dọn có metaclass ghi đè `__getattribu
+26:- **R5-2 · P2 — Ghi chú chỉ tên kiểu làm mất dấu hiệu phân biệt `a1` và `k2`.** Dưới `a1`, J9 vẫn có phụ sống và `xac_nhan` vẫn sinh `_1174Error("job
+27:- **R5-3 · P2 — Timeout sau bàn giao bỏ sót handle đã chuyển quyền.** Tôi mô phỏng M6 bằng `Thread`, `Lock` và `Event`. Worker công bố handle dưới khóa r�
+28:- **R5-4 · P2 — J10/J10b có hai giao thức, J9 chưa xác nhận đủ cửa sổ sống.** Dòng 71 dùng `tha_truoc_gan` và `tha_ket`, còn dòng 72 dùng `giu` và `sleep(30
+29:- **R5-5 · P2 — N2(ii) cấm chính mẫu đăng ký mà N2(iv) cho phép.** Phép đo trên blob base đếm 85 điểm bind của `CASES`. Khối hợp lệ có hai `def` mới,
+30:- **R5-6 · P2 — N2(iv) chưa khóa biểu thức được thực thi khi nạp module.** Với danh sách cho phép xét dạng câu lệnh ngoài cùng, cả `_r4_x = (_native134
+31:- **R5-7 · P2 — `b` và `d0` chưa khóa được phép đổi tới dấu hiệu đích.** Với `b`, J6 có thể ghi marker rồi thoát trước khi `AssignProcessToJobObject`
+32:- **R5-8 · P3 — Vector biên `d1` còn phụ thuộc độ trễ lịch.** Dựng `deadline = now + 86401` rồi để M4(0) đọc đồng hồ sau đúng 1 s làm deadline chạ
+65:| `h` | Một điểm chèn sau đăng ký đóng job ở (1). J7 đọc được `HANDLE_FLAG_INHERIT` sau khi phép tiêm trả TRUE. |
+91:KET_LUAN: request_changes
+
+Lượt 6
+4:Còn P2 ở hợp đồng ghi chú, N2 và điều kiện phân loại kết quả của fixture native.
+6:Review trên `master` tại `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 [đặc tả hiện tại](ops/specs/WP1174-WINDOWS-BA
+14:| R5-1 | **Chưa đóng hết** | M2 dùng mã bước và `BaseException.add_note` gọi thẳng. Hai phản chứng cũ chạy cùng nhau trong RAM cho đúng `["cleanup:xac_nhan"]
+15:| R5-2 | **Đóng** | M2 và §4b phân biệt J9 bằng `cleanup:xac_nhan`. `a1` vẫn gọi bước xác nhận và ghi mã khi phụ còn sống. `k2` bỏ qua bước này vì `d
+16:| R5-3 | **Đóng** | M6 lấy handle đã bàn giao dưới cùng khóa khi hết hạn `join`. Mô phỏng cả hai thứ tự cho đúng một lần đóng, do luồng chính nế
+17:| R5-4 | **Chưa đóng hết** | M6/M7 đã đồng bộ `tha_ket` và `tha_truoc_gan`, bỏ yêu cầu J10 phải đứng đúng ở (8). J9 có điều kiện còn ít nhất 90 s
+18:| R5-5 | **Chưa đóng** | N2(ii) đã loại khối được (iv) chấp nhận. N2(iv) vẫn cấm chính nút `Store` của `CASES += [...]`, làm đối chứng dương đỏ �
+19:| R5-6 | **Đóng cho hai phản chứng đã nêu** | N2(iv) duyệt toàn cây. Walrus ở RHS và ở giá trị mặc định đều đỏ trong RAM. Lời gọi lúc nạp modul
+20:| R5-7 | **Đóng cho hai sửa đổi đã nêu** | M7 giữ con J6 bằng `tha_j6`. §4b ghi phép thay đầy đủ thành `proc.wait()`. `inspect.signature` xác nhận lời g�
+21:| R5-8 | **Đóng** | M5 và hàng 15 cùng dùng `now + 10**6`. Trong RAM, độ trễ 1 s vẫn cho kết quả từ chối. Cận chỉ bị chạm sau 913.600 s, vượt xa watch
+25:- **R6-1 · P2 — S4 còn hai vector sai hợp đồng, và đường ghi chú có thể thay lỗi thắng.** M2 nhận từng cặp `(mã, callable)`, nhưng M5 vẫn đưa callab
+26:- **R6-2 · P2 — N2(iv) tự bác mẫu đăng ký bắt buộc.** `ast.parse` cho `CASES += [...]` một đích `Name(id="CASES", ctx=Store())`. Đích này trùng tên cũ và đ
+27:- **R6-3 · P2 — N2 cho phép gán lại tên cũ thông qua lời gọi cấp module.** Chèn `_r4_x = globals().update(_native1342=None)` xanh cả bốn vế. Tôi thực thi đ
+28:- **R6-4 · P2 — M6–M8 chưa khóa nguyên nhân thoát của fixture quanh thời điểm đo.** Với J3, lịch `cháu tự hết hạn ở giây 60, con thoát ở giây 61` 
+55:| `h` | Một điểm chèn sau đăng ký đóng job ở (1). J7 đọc được `HANDLE_FLAG_INHERIT` sau phép tiêm TRUE. |
+81:KET_LUAN: request_changes
+
+Lượt 7
+4:Còn hai P2. N2 bỏ lọt việc gán lại tên cũ qua hook tạo lớp. J10 có thể báo đạt trên lượt nghiệm thu native nếu trợ giúp tự dọn job ngay trước 
+14:| R6-1 | **Đóng** | M2(d) bọc `BaseException.add_note` bằng `except BaseException: pass`. M2(c) giữ `except Exception` cho bước dọn. M5/S4 dùng cặp `(mã, callable)` 
+15:| R6-2 | **Đóng** | N2(iv) miễn đúng nút `target` của mẫu `CASES += [...]`. N2(ii) bỏ đúng khối được (iv) chấp nhận khi đếm. Base và khối hợp lệ m�
+16:| R6-3 | **Đóng cho phản chứng lượt 6** | N2(iv) cấm `globals` và chỉ cho lời gọi tường minh tới `_native1342` khi nạp module. `_r4_x = globals().update(_nat
+17:| R6-4 | **Đóng trong cửa sổ M8, chưa đóng hết cho N6** | M6–M8 bổ sung hạn giữ 300 s, `het_han_*`, `tu_ket_thuc`, deadline trợ giúp +300 s và phân loại J6 
+32:- **R7-1 · P2 — N2 bỏ lọt gán lại tên cũ khi Python tạo lớp.** Hai lớp có tên mới, không decorator. Header lớp thứ hai chỉ đọc một `Name`. Python g�
+43:- **R7-2 · P2 — N6 chưa cưỡng chế cửa sổ mà J10 dựa vào để quy nguyên nhân thoát.** M8 đặt watchdog 90 s cho driver đột biến. N6 chưa đặt cùng gi�
+44:- **R7-3 · P3 — J10b gọi hai tên cho bằng chứng con chưa chạy.** M7 cho con dùng đoạn ghi marker của J1/J6, nhưng hậu điều lại kiểm “tệp bắt tay c�
+45:- **R7-4 · P3 — §1 đếm ba hàm thuần trong khi M2 và N3 yêu cầu bốn.** Sửa số đếm ở §1 để tính cả `_1174_win_note`. [§1](ops/specs/WP1174-WINDOWS-BACK
+58:| `h` | Chèn sau khi đăng ký đóng job ở (1) | J7 `job handle có HANDLE_FLAG_INHERIT`, sau khi phép tiêm trả TRUE. Không ID nào khác đổi cờ này. |
+84:KET_LUAN: request_changes
+
+Lượt 8
+4:Còn **2 finding P2**. N2 cho phép tên mới che builtin mà mã base gọi lúc nạp module. N7 chưa bảo đảm `d1` đỏ ở đúng vector đã khai.
+14:| R7-1 | **Đóng cho phản chứng hai lớp** | N2(iv), dòng 105, bỏ `class` khỏi ba dạng chèn, cấm `ClassDef` trên toàn phần chèn và bổ sung các tên bị cấ
+15:| R7-2 | **Đóng** | N6, dòng 109, đặt cửa sổ 90 s mỗi ca từ trước khi tạo fixture/trợ giúp đầu tiên, quá hạn là `KHÔNG ĐO`. M6 đặt deadline trợ g
+16:| R7-3 | **Đóng** | M7/J10b, dòng 73, kiểm sự vắng mặt của tệp marker tại “CÙNG đường dẫn mà con được giao để ghi, như J1/J6”, cùng với bằng
+17:| R7-4 | **Đóng** | §1, dòng 29, ghi “bốn hàm thuần”, khớp M2 và N3. |
+34:- **R8-1 · P2 — N2 cho phép mã chèn đổi giá trị của tên cũ qua câu lệnh base chạy lúc import.** Chèn `def frozenset(items):` với thân `return ()` ngay trư�
+35:- **R8-2 · P2 — `d1` có thể đỏ ở `10**400` trước nhãn mà N7 đòi.** M5/S5 liệt kê `10**400` trước `now+10**6`. Khi bỏ cận trên ở M4(0), cả hai số qu
+48:| `h` | Chèn sau đăng ký đóng job ở (1) | J7 có `HANDLE_FLAG_INHERIT` sau phép tiêm trả TRUE. Chỉ `h` đổi cờ này. |
+74:KET_LUAN: request_changes
+
+Lượt 9
+4:**Còn một P2.** N2 chặn được việc che `frozenset`, nhưng một đăng ký `CASES += [...]` hợp lệ theo cú pháp vẫn đổi được giá trị mà câu lệnh base 
+14:| R8-1 | **Đóng phản chứng che builtin** | N2(iv), dòng 105, đòi tiền tố `_wp1342a1_` cho tên mới mức module. `def frozenset(items): return ()` ra `1110`. Khi cố 
+15:| R8-2 | **Đóng** | M5/S5, dòng 71, chốt ba vector đầu theo thứ tự `argv=[]` → `now+10**6` → `10**400`, mỗi vector một assertion. Mô phỏng Linux cho base qua c
+19:**R9-1 · P2 — N2 cho phép đăng ký trùng ID làm câu lệnh base chụp nhầm hàm lúc nạp module.** Chèn ngay trước `_r26_original_accept1174 = dict(CASES)["wp1174_w
+79:KET_LUAN: request_changes
+## 2. `write_set`, `ngoai_pham_vi`, ranh giới bảo đảm
+
+```
+.claude/dev/packet_loop.py
+.claude/dev/packet_loop_test.py
+```
+
+Ngoài phạm vi:
+- Không sửa thân hàm/khối nào đang có (kể cả `_1174_process`, `_1174_win_*` r1–r3, helper test `_new1342` `_additive1342` `_wired1342` `_additive1342r2` `_native1342`). Không đổi `MUTANTS` đang có; không runner mới; không CI Windows.
+- **Để r1d-a1-ii:** breakaway tường minh (J4 cũ, danh sách mã `{5}`, job đối chứng cho phép breakaway, đột biến e1), breakaway ngầm (J5 cũ, membership với job đích, e2), job lồng (J12 cũ). Hằng `_1174_WIN_JOB_LIMIT == 0x2000` vẫn khoá ở r4 bằng S1 và J10.
+- **Để r1d-a2:** đọc hai pipe, hạn mức byte chung, huỷ I/O có thời hạn (P1 "hai reader" lượt 1), `on_bytes`/callback, trần byte, `stdin` bytes, M3 cũ, P1–P4 cũ, đột biến (d)(f)(g) cũ, **N4 (f)(g) cũ**, CRLF/NUL.
+- **Để r1d-b:** probe.
+- Không nối dây. Không API không tài liệu, không `pywin32`, không đồ giả Win32 (Q11 r1). Không giới hạn CPU/bộ nhớ/số tiến trình.
+@@ -105 +105 @@
+@@ -160,0 +161 @@
+@@ -181,0 +183,2 @@
+diff_rc=1
+
+ succeeded in 22438ms:
+/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+Linux-6.18.44-fc-v595-x86_64-with-glibc2.39 3.13.18 base 1562 85 14
+window 18557 18560
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+base 1111
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+positive 1111
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+old positive 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+insert return 0110
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+duplicate def 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+old decorator 0110
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+conditional bind 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+match 1110
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+if walrus 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+del 1110
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+RHS walrus 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+default walrus 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+globals 1110
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+duplicate ID early 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+duplicate ID in window 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+mismatched ID 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+builtin shadow 1110
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+class pair 1110
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+list comprehension 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+duplicate new ID 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+valid ID too early 1010
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+valid ID too late 1010
+/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+positive import 1563 wp1342_native_job_review
+code base []
+code old byte ['phần ngoài khối mới KHÁC byte base, từ dòng 6666 của base']
+code new decorator ['phần ngoài khối mới KHÁC byte base, từ dòng 7069 của base']
+
+exec
+/bin/bash -lc "python -B - <<'PY'
+from pathlib import Path
+import hashlib,subprocess
+p=Path('ops/specs/WP1174-WINDOWS-BACKEND-r4.md')
+old=p.with_name(p.stem+'-ban10.md').read_bytes()
+new=p.read_bytes()
+a,b=old.splitlines(keepends=True),new.splitlines(keepends=True)
+assert a[104].startswith(b'| N2 |') and b[104].startswith(b'| N2 |')
+assert b[160].startswith('- **Q6.**'.encode())
+assert b[182].startswith('- **Lượt 10**'.encode()) and b[183].startswith('- **Lượt 11'.encode())
+assert a[:104]+a[105:]==b[:104]+b[105:160]+b[161:182]+b[184:]
+print('outside approved lines: byte-identical')
+for raw in (old,new):
+    print(hashlib.sha256(raw).hexdigest())
+print(subprocess.check_output(['git','rev-parse','HEAD','HEAD"'^{tree}'"'],text=True),end='')
+PY
+git diff --exit-code HEAD --" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt
+ succeeded in 0ms:
+outside approved lines: byte-identical
+033dc9be679d0b90bc1129682882e2c38d36a4c0712671342aa5a3d5967fec25
+2fcb8e6064e8d4c51572af12d886e9e740fa5dc12e79c6c7b764bc1b5c410bef
+e2c3b82f818bd1739d31261e8129d3ef44915acf
+7693a24fa9169d91370dae782ec51eabd3fa0a35
+
+codex
+## Xác nhận cuối lượt 11 · Issue #1342 · r1d-a1-i
+
+| Finding lượt 10 | Trạng thái | Bằng chứng chạy trong RAM |
+|---|---|---|
+| R10-1 · P2 | **Đóng** | Đối chứng đúng N2 với hai `def` mới, một gán có tiền tố `_wp1342a1_` và đăng ký `wp1342_native_job_review` đạt `1111`. Nạp biến thể thu được 1.563 mục, thêm đúng ID này. Đối chứng cũ dùng `"id"` cho `1010`. |
+| R10-2 · P2 | **Đóng** | Mục `("wp1342_native_job_x", _native1342("wp1174_writer_accept", _wp1342a1_fn))` đặt trong cửa sổ hợp lệ cho `1010`. Wrapper của đối chứng dương giữ đúng ID đăng ký. |
+| R10-3 · P3 | **Đóng** | Cùng mẫu đăng ký và cùng ID, list literal đạt `1111` trong đối chứng dương, còn list comprehension cho `1010`. |
+
+**Diff bản 10 → bản 11.** `diff -U0` trả `1`, với 4 dòng thêm và 1 dòng xóa. Chỉ thay dòng 105 (§5 N2), thêm dòng 161 (§9 Q6) và dòng 183–184 (§11, nhật ký lượt 10–11). Phần còn lại trùng từng byte. Không có dòng ngoài phạm vi bị đổi. [Đặc tả r4](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt/ops/specs/WP1174-WINDOWS-BACKEND-r4.md:105)
+
+**N2 trong RAM.** `python -B -` trên Linux, CPython 3.13.18, trả `0`. Phép đo tái dựng bốn vế từ N2, lấy source bằng `git show` và dùng stub cho import `launcher`. Các bit theo thứ tự (i)–(iv).
+
+| Ca | Kết quả |
+|---|---|
+| Base `packet_loop_test.py` | `1111`. Có 1.562 mục, 85 điểm bind `CASES` và 14 điểm bind `MUTANTS_NHAM_TEST`. Cửa sổ đăng ký nằm sau câu lệnh kết thúc ở dòng 18557 và trước `if __name__ == "__main__"` ở dòng 18560. |
+| Chèn `return` vào thân `_native1342`, thêm decorator vào định nghĩa cũ | `0110` mỗi ca |
+| Định nghĩa lại `_native1342`, gán trong `if`, walrus trong `if`, RHS hoặc giá trị mặc định | `1010` mỗi ca |
+| `match`, `del`, `globals().update`, che `frozenset`, cặp lớp có `__init_subclass__` | `1110` mỗi ca |
+| Trùng `wp1174_writer_accept` ở vị trí cũ và trong cửa sổ hợp lệ, lệch ID native, list comprehension, trùng ID mới, ID mới đặt quá sớm hoặc quá muộn | `1010` mỗi ca |
+| Vế `packet_loop.py` | `_additive1342r2` trả `[]` trên base. Sửa một byte trong `_1174_win_seed` và thêm hàm mới có decorator đều trả lỗi khác `[]`. |
+
+**Hồi quy và finding.** Các chốt đã đóng ngoài N2 giữ nguyên từng byte. Trong N2, đối chứng dương vẫn qua và toàn bộ phản chứng đã liệt kê đều đỏ. Không phát hiện hồi quy hay finding P0–P3 trong phạm vi xác nhận. Windows native, CI và gate trên mã triển khai ở trạng thái `not_run`.
+
+Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 bản 11 `2fcb8e6064e8d4c51572af12d886e9e740fa5dc12e79c6c7b764bc1b5c410bef`. `git diff --exit-code HEAD --` trả `0`. Phiên `openai_codex` qua API, transport `machine`, sandbox chỉ đọc. Model phục vụ và effort chưa đo được. Không ghi tệp, không gọi mạng.
+
+KET_LUAN: approve
+tokens used
+58,091
+## Xác nhận cuối lượt 11 · Issue #1342 · r1d-a1-i
+
+| Finding lượt 10 | Trạng thái | Bằng chứng chạy trong RAM |
+|---|---|---|
+| R10-1 · P2 | **Đóng** | Đối chứng đúng N2 với hai `def` mới, một gán có tiền tố `_wp1342a1_` và đăng ký `wp1342_native_job_review` đạt `1111`. Nạp biến thể thu được 1.563 mục, thêm đúng ID này. Đối chứng cũ dùng `"id"` cho `1010`. |
+| R10-2 · P2 | **Đóng** | Mục `("wp1342_native_job_x", _native1342("wp1174_writer_accept", _wp1342a1_fn))` đặt trong cửa sổ hợp lệ cho `1010`. Wrapper của đối chứng dương giữ đúng ID đăng ký. |
+| R10-3 · P3 | **Đóng** | Cùng mẫu đăng ký và cùng ID, list literal đạt `1111` trong đối chứng dương, còn list comprehension cho `1010`. |
+
+**Diff bản 10 → bản 11.** `diff -U0` trả `1`, với 4 dòng thêm và 1 dòng xóa. Chỉ thay dòng 105 (§5 N2), thêm dòng 161 (§9 Q6) và dòng 183–184 (§11, nhật ký lượt 10–11). Phần còn lại trùng từng byte. Không có dòng ngoài phạm vi bị đổi. [Đặc tả r4](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv1342r4/wt/ops/specs/WP1174-WINDOWS-BACKEND-r4.md:105)
+
+**N2 trong RAM.** `python -B -` trên Linux, CPython 3.13.18, trả `0`. Phép đo tái dựng bốn vế từ N2, lấy source bằng `git show` và dùng stub cho import `launcher`. Các bit theo thứ tự (i)–(iv).
+
+| Ca | Kết quả |
+|---|---|
+| Base `packet_loop_test.py` | `1111`. Có 1.562 mục, 85 điểm bind `CASES` và 14 điểm bind `MUTANTS_NHAM_TEST`. Cửa sổ đăng ký nằm sau câu lệnh kết thúc ở dòng 18557 và trước `if __name__ == "__main__"` ở dòng 18560. |
+| Chèn `return` vào thân `_native1342`, thêm decorator vào định nghĩa cũ | `0110` mỗi ca |
+| Định nghĩa lại `_native1342`, gán trong `if`, walrus trong `if`, RHS hoặc giá trị mặc định | `1010` mỗi ca |
+| `match`, `del`, `globals().update`, che `frozenset`, cặp lớp có `__init_subclass__` | `1110` mỗi ca |
+| Trùng `wp1174_writer_accept` ở vị trí cũ và trong cửa sổ hợp lệ, lệch ID native, list comprehension, trùng ID mới, ID mới đặt quá sớm hoặc quá muộn | `1010` mỗi ca |
+| Vế `packet_loop.py` | `_additive1342r2` trả `[]` trên base. Sửa một byte trong `_1174_win_seed` và thêm hàm mới có decorator đều trả lỗi khác `[]`. |
+
+**Hồi quy và finding.** Các chốt đã đóng ngoài N2 giữ nguyên từng byte. Trong N2, đối chứng dương vẫn qua và toàn bộ phản chứng đã liệt kê đều đỏ. Không phát hiện hồi quy hay finding P0–P3 trong phạm vi xác nhận. Windows native, CI và gate trên mã triển khai ở trạng thái `not_run`.
+
+Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 bản 11 `2fcb8e6064e8d4c51572af12d886e9e740fa5dc12e79c6c7b764bc1b5c410bef`. `git diff --exit-code HEAD --` trả `0`. Phiên `openai_codex` qua API, transport `machine`, sandbox chỉ đọc. Model phục vụ và effort chưa đo được. Không ghi tệp, không gọi mạng.
+
+KET_LUAN: approve

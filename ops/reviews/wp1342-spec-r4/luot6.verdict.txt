@@ -1,0 +1,81 @@
+codex
+## Review độc lập lượt 6 · Issue #1342 · r1d-a1-i
+
+Còn P2 ở hợp đồng ghi chú, N2 và điều kiện phân loại kết quả của fixture native.
+
+Review trên `master` tại `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 [đặc tả hiện tại](ops/specs/WP1174-WINDOWS-BACKEND-r4.md) là `710a698c324654cc8e0d2b90bb83f23a79d3a4b7d2af34df2cc88a73c4c77a43`. Bản 5 khớp băm trong verdict lượt 5. `git diff --no-index --numstat` trả `1` với 11 dòng thêm và 10 dòng xóa. Diff tracked so với `HEAD` trả `0` sau khi review.
+
+Phiên Codex họ OpenAI, Linux, CPython 3.13.18, chỉ đọc và không gọi mạng. Bề mặt Codex cụ thể, transport, model phục vụ và effort chưa xác minh từ metadata của lượt chạy. Các phép `python -B -` báo dưới đây chạy trong RAM và trả `0`. Desktop, VM, CI và driver đột biến trên mã triển khai đều `not_run`.
+
+### Finding lượt 5
+
+| ID | Trạng thái | Đối chiếu bản hiện tại |
+|---|---|---|
+| R5-1 | **Chưa đóng hết** | M2 dùng mã bước và `BaseException.add_note` gọi thẳng. Hai phản chứng cũ chạy cùng nhau trong RAM cho đúng `["cleanup:xac_nhan"]`. S4 vẫn còn hai vector sai dạng và một đường ghi chú thay lỗi thắng. Xem R6-1. |
+| R5-2 | **Đóng** | M2 và §4b phân biệt J9 bằng `cleanup:xac_nhan`. `a1` vẫn gọi bước xác nhận và ghi mã khi phụ còn sống. `k2` bỏ qua bước này vì `da_gan` chưa được đặt. |
+| R5-3 | **Đóng** | M6 lấy handle đã bàn giao dưới cùng khóa khi hết hạn `join`. Mô phỏng cả hai thứ tự cho đúng một lần đóng, do luồng chính nếu đã bàn giao và do worker nếu bàn giao muộn. |
+| R5-4 | **Chưa đóng hết** | M6/M7 đã đồng bộ `tha_ket` và `tha_truoc_gan`, bỏ yêu cầu J10 phải đứng đúng ở (8). J9 có điều kiện còn ít nhất 90 s và phân loại hết hạn. Các fixture còn lại chưa phân biệt đầy đủ tự hết hạn với kết quả đo. Xem R6-4. |
+| R5-5 | **Chưa đóng** | N2(ii) đã loại khối được (iv) chấp nhận. N2(iv) vẫn cấm chính nút `Store` của `CASES += [...]`, làm đối chứng dương đỏ ở cả (ii) và (iv). Xem R6-2. |
+| R5-6 | **Đóng cho hai phản chứng đã nêu** | N2(iv) duyệt toàn cây. Walrus ở RHS và ở giá trị mặc định đều đỏ trong RAM. Lời gọi lúc nạp module còn một đường khác để gán lại tên cũ. Xem R6-3. |
+| R5-7 | **Đóng cho hai sửa đổi đã nêu** | M7 giữ con J6 bằng `tha_j6`. §4b ghi phép thay đầy đủ thành `proc.wait()`. `inspect.signature` xác nhận lời gọi này chỉ bind `self`. Việc phân loại khi fixture hết hạn còn ở R6-4. |
+| R5-8 | **Đóng** | M5 và hàng 15 cùng dùng `now + 10**6`. Trong RAM, độ trễ 1 s vẫn cho kết quả từ chối. Cận chỉ bị chạm sau 913.600 s, vượt xa watchdog 90 s. |
+
+### Finding mới
+
+- **R6-1 · P2 — S4 còn hai vector sai hợp đồng, và đường ghi chú có thể thay lỗi thắng.** M2 nhận từng cặp `(mã, callable)`, nhưng M5 vẫn đưa callable trần vào hai vector `KeyboardInterrupt` và `__repr__`. Mô phỏng trong RAM đỏ tại unpack với `TypeError` trước khi gọi bước dọn. Ngoài ra, `BaseException.add_note(err, ...)` vẫn truy cập `err.__notes__` qua cơ chế thuộc tính của đối tượng. Một lớp lỗi thắng ghi đè `__getattribute__` để ném `KeyboardInterrupt` khi đọc tên đó đã thay lỗi gốc trong phép đo RAM. Chuẩn hóa cả hai vector thành cặp, rồi kiểm lỗi thắng qua toàn đường gom lỗi, gắn ghi chú và ném lại. Chốt xử lý ngắt do bước chẩn đoán kích hoạt để M2 và M4(9) có cùng hợp đồng.
+- **R6-2 · P2 — N2(iv) tự bác mẫu đăng ký bắt buộc.** `ast.parse` cho `CASES += [...]` một đích `Name(id="CASES", ctx=Store())`. Đích này trùng tên cũ và được đánh giá lúc nạp module. Theo chữ hiện tại, khối chèn hợp lệ ra `(xanh, đỏ, xanh, đỏ)`. Trong RAM, miễn đúng nút `target` của câu `CASES += [...]` đã khớp mẫu làm ca xanh cả bốn vế, đồng thời giữ cả chín phản chứng đỏ. Ghi ngoại lệ hẹp đó vào (iv).
+- **R6-3 · P2 — N2 cho phép gán lại tên cũ thông qua lời gọi cấp module.** Chèn `_r4_x = globals().update(_native1342=None)` xanh cả bốn vế. Tôi thực thi đúng dòng chèn trên định nghĩa `_native1342` trích từ blob base và xác nhận tên đó đổi từ callable thành `None`. Đặc tả cần giới hạn biểu thức được chạy lúc nạp module, đồng thời cho phép lời gọi `_native1342(...)` theo mẫu đăng ký cần dùng. Thêm phản chứng này vào N2.
+- **R6-4 · P2 — M6–M8 chưa khóa nguyên nhân thoát của fixture quanh thời điểm đo.** Với J3, lịch `cháu tự hết hạn ở giây 60, con thoát ở giây 61` nằm trong watchdog 90 s. Khi đó `a1` thấy job rỗng, cháu đã signaled, và J3 có thể xanh dù bỏ `terminate`. Với J10, kiểm handle ngay trước cú giết vẫn cho phép trợ giúp chạm deadline và chạy `TerminateJobObject` giữa hai thao tác. Đường đó có thể làm `a2` xanh. J10b có khe tương tự khi hook hết hạn. Cần phân biệt fixture còn bị giữ, fixture tự hết hạn và trợ giúp bị chính ca giết, bằng hạn còn lại và bằng chứng kết thúc quan sát được. J6 cần phân loại hết hạn `tha_j6` trước phép kiểm là `KHÔNG ĐO`. J2 cần ghi rõ việc con tự thoát theo hạn `tha_j2` là đường kết thúc dự kiến cho `d0`, để M8 chấm nhãn thiếu lỗi deadline thay vì loại lượt chạy do lỗi fixture.
+
+### Phép đo N2 trong RAM
+
+Các cột theo thứ tự (i)–(iv), `1` là xanh. Phép đếm base cho `CASES = 85`, `MUTANTS_NHAM_TEST = 14`. Cột cuối chỉ miễn đích `Store` của mẫu `CASES += [...]` được phép.
+
+| Ca trên blob base | Theo chữ hiện tại | Có ngoại lệ hẹp |
+|---|---|---|
+| Base | `1111` | `1111` |
+| Chèn `return`, thêm decorator | `0110` cho từng ca | `0110` cho từng ca |
+| Trùng `def`, gán lại trong `if` | `1010` cho từng ca | `1010` cho từng ca |
+| `match`, walrus trong `if`, `del` | `1110` cho từng ca | `1110` cho từng ca |
+| Walrus trong RHS, walrus trong default | `1110` cho từng ca | `1110` cho từng ca |
+| Hai `def` mới, một gán mới, một đăng ký native | `1010` | `1111` |
+| Gán gián tiếp qua `globals().update(...)` | `1111` | `1111` |
+
+### 15 đột biến §4b
+
+Mỗi hàng định vị một điểm sửa logic trong mã dự kiến. Số khớp byte-exact và tính độc quyền khi thực thi còn phải đo trên mã triển khai.
+
+| ID | Điểm sửa và dấu hiệu đích |
+|---|---|
+| `a1` | Cả khối `terminate` và kiểm BOOL ở M4(9). J3 `job not empty`, phụ thuộc cửa sổ sống của cháu. J9 có `cleanup:xac_nhan`, tách khỏi `k2`. |
+| `a2` | Một gán `JOB_LIMIT`. J10 con/cháu sống sau khi trợ giúp chết, phụ thuộc việc loại trừ cleanup thông thường. S1 có nhãn `JOB_LIMIT` riêng. |
+| `a3` | Một nhánh query FALSE ở M3. J11 nhận handle tệp thành job rỗng. |
+| `b` | Một khối đổi thứ tự (5)–(7), có chờ marker. J6(ii) thấy marker với J6(i) xanh. `c` đỏ ở (i) trước. Cần khóa hạn giữ con như R6-4. |
+| `c` | Một gán `SPAWN_FLAGS`. S1 đỏ tại `SPAWN_FLAGS == 0x204`. `a2` đụng hằng khác. |
+| `h` | Một điểm chèn sau đăng ký đóng job ở (1). J7 đọc được `HANDLE_FLAG_INHERIT` sau phép tiêm TRUE. |
+| `k1` | Một đăng ký `kill_truoc_gan`. J8 thấy bản sao handle con chưa signaled sau lỗi `j8`. |
+| `k2` | Một phép dời `da_gan = True`. J9 phụ còn sống và thiếu `cleanup:xac_nhan`. `a1` có mã này khi phụ còn sống. |
+| `k3` | Một nhánh gom lỗi trong M2. Vector đầu S4 đỏ ở `bước 2 không chạy`. |
+| `t1` | Một nhánh chọn ứng viên trong M2. S2 đỏ ở vector hai ứng viên cùng PID. |
+| `t2` | Một điều kiện kiểm resume count. S3 đỏ ở vector `count=2`. |
+| `d0` | Một lời gọi wait có timeout ở (8). J2 đỏ ở nhãn thiếu lỗi deadline trong 6–11 s, với phân loại kết thúc fixture còn thiếu. |
+| `g0` | Một khối kiểm nền ở (0). S5 trên Linux đỏ ở vector `argv=[]` đầu tiên. |
+| `abi` | Một kiểu trường `th32OwnerProcessID`. J0 báo offset trước size. |
+| `d1` | Một vế cận trên ở (0). S5 đỏ tại vector `now + 10**6`, lát chờ vẫn giữ 60 s. |
+
+### N1–N8 theo L1–L7
+
+| Tiêu chí | Kết quả review đặc tả |
+|---|---|
+| N1 | Khóa từng ID, từng mốc và `MUTANTS`. Có phản chứng mất ID, đổi khóa cùng số lượng và nhân đôi mốc theo L1/L3/L6. |
+| N2 | Có vế dương và vế âm, nhưng thất bại ở đối chứng đăng ký và bỏ lọt gán gián tiếp theo R6-2/R6-3. Chưa đạt L3/L6. |
+| N3 | Tập dương đúng mười tên trên một đường dẫn. Có phản chứng thiếu khối và nối dây theo L1/L2/L3. |
+| N4 | S1–S5 có vector và nhãn riêng. S4 chưa cho phép đo đầy đủ như đã ghi, theo R6-1 và L3. |
+| N5 | Đối chiếu từng ID và trường ổn định trên base/head cùng lượt. Có phép đỏ ở assertion claim Windows theo L3/L5/L6. |
+| N6 | Có tập ID, máy đo, dấu hiệu dương và trạng thái `not_measured`. Điều kiện thời gian và nguyên nhân thoát còn thiếu theo R6-4 và L3. |
+| N7 | Đếm đúng 15 ID và 16 lượt. Có yêu cầu neo một chỗ, đối chứng và nhãn đích. Các đường native trong R6-4 chưa khóa được phép đo theo L3/L6. |
+| N8 | So tập diagnostic, ghi riêng mã thoát và đo numstat toàn diff. Có phép đỏ cho tệp thứ ba và vượt trần trên số đo thật theo L2/L3/L6. |
+
+Hai đường dẫn thi công và driver ngoài kho phù hợp L2. L4 khai `khong_ap_dung`. L5 ghi OID, thời điểm đo và ba mốc đo lại. L7 dẫn protocol/ADR cho điểm dừng và gắn E2 cho quyết định cần thẩm quyền. Không có finding ngân sách theo ngưỡng điểm giữa đã giao.
+
+KET_LUAN: request_changes

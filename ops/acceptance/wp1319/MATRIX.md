@@ -168,3 +168,10 @@ Finding sản phẩm cần chủ kho quyết định (không tự sửa):
 - **Raw P5 / hồ sơ P6 không thể khôi phục.** Chủ kho xác nhận không giữ bản nào. Đã tìm trên ASUS, Desktop và VM ngày 18/11 nhưng không thấy. Chưa đọc được `C:\Users\tladmin` (VM) và `C:\Users\ADMIN` (Desktop) vì bị từ chối quyền.
   - Mọi hàng chỉ dựa vào P5/P6 (§11 #8 "ASUS passed before VM canary", U2, U12 "P6 daily check", phần P5 của §11 #1/#3/#11) **không được tính là đạt dựa trên P5/P6**. Các hàng này phải đo lại hoặc giữ `not_evidenced`.
 - **WP-PXA (#1401)** sửa P1-2 (tệp thừa) và P1-3 (khoá profile ở operator), và làm §11 #8 (promotion fence) ở mức hàm và test. Đã đối chứng trên cây Proxima thật ở ASUS: cây sạch cho `OK`; thêm `version.dll` thì bị chặn với `ARTIFACT_EXTRA`; gỡ ra thì lại `OK`. Còn chờ review 2/2 (Codex `gpt-6-astra` trên ASUS).
+
+### H.3 WP-PXA (#1401) xong review 2/2 `approve_scoped` (`ops/acceptance/wp-pxa/`)
+| Hàng | Trước | Sau | Điều kiện đọc |
+|---|---|---|---|
+| §11 #6 vế âm | partial (B2: tệp thừa lọt) | **passed (scoped)** | `Test-ProximaArtifactTree` chặn được tệp thừa, tệp thiếu, tệp đổi nội dung và junction trên cây Proxima thật 3226 tệp. **Chỉ có hiệu lực khi luồng kích hoạt gọi module này**; hiện chưa có luồng nào trong repo gọi nó |
+| §11 #7 updater chạy trùng | partial | **partial (cải thiện)** | Chốt profile ở operator ngăn được giữa các bên cùng dùng guard. Proxima tự nó vẫn không có single-instance; mở bằng tay vẫn lọt (đã chấp nhận) |
+| §11 #8 promotion fence | cho_raw | **passed (scoped, mức hàm và test)** | `Test-ProximaPromotionFence` + PA13–PA18/PA26/PA27. **Chưa có** promote thật giữa hai máy (LIVE chưa được cấp) |

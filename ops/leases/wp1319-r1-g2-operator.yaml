@@ -29,11 +29,14 @@ spec_path: ops/specs/wp1319-r1.md
 spec_hash: deee1b43fffeae178733ff948847f05ac506976964823a9f33437635a9be42e3
 spec_sha256_required: deee1b43fffeae178733ff948847f05ac506976964823a9f33437635a9be42e3
 write_set:
-- ops/acceptance/wp1319/**
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r1/RESULTS.md
+- ops/acceptance/wp1319/r1/VERDICT-claude-xhigh.md
 - ops/leases/wp1319-r1-g1-operator.yaml
 - ops/leases/wp1319-r1-g2-operator.yaml
 - ops/specs/wp1319-r1.md
-write_set_hash: 6f44a612b473e4d22981ff8f16058e89ac3451e6585070c050f8e877678ce0e2
+write_set_hash: eaad9c3d2b6df80e7214b39ebf17f0f2cbaf516154745088bddcdc256c360e6d
+write_set_note_glob: 'sửa 18/11 ~09:40Z: thay mục glob (thư mục ops/acceptance/wp1319 kèm hai dấu sao) bằng danh sách tệp cụ thể; glob làm bộ quét I2 toàn kho (packet_loop._bieu_dien_duong) fail-close cho mọi phiên (báo từ phiên điều phối #1172)'
 write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
 branch: ccr-8ee03d7f-vnmqk0
 branch_ownership: exclusive

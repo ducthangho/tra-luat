@@ -22,10 +22,16 @@ spec_path: ops/specs/wp1319-r2.md
 spec_hash: d1c594aa9034b884e8f521c75ea31ae456a2d0f828e554dd11518706efd2cb9d
 spec_sha256_required: d1c594aa9034b884e8f521c75ea31ae456a2d0f828e554dd11518706efd2cb9d
 write_set:
-- ops/acceptance/wp1319/**
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/RAW-1311-POINTERS.md
+- ops/acceptance/wp1319/RAW-1311-VERDICT-claude-xhigh.md
+- ops/acceptance/wp1319/RAW-P3-VERDICT-claude-xhigh.md
+- ops/acceptance/wp1319/r2/RESULTS.md
+- ops/acceptance/wp1319/r2/VERDICT-claude-xhigh.md
 - ops/leases/wp1319-r2-g1-operator.yaml
 - ops/specs/wp1319-r2.md
-write_set_hash: 3992c27bc96273fa6e49bac2ae3edce43713fca78bfd12b0839932a12478623a
+write_set_hash: b8d1d1731aaee07967387d1820bc5e0ecf25cfab98b9ddf8998706d6748565c5
+write_set_note_glob: 'sửa 18/11 ~09:40Z: thay mục glob (thư mục ops/acceptance/wp1319 kèm hai dấu sao) bằng danh sách tệp cụ thể; glob làm bộ quét I2 toàn kho (packet_loop._bieu_dien_duong) fail-close cho mọi phiên (báo từ phiên điều phối #1172)'
 branch: ccr-8ee03d7f-vnmqk0
 target_pull_request: 1378
 base_sha: 13bf69f6eb797e859619a2062e7c9577e6a9cc0b
@@ -37,11 +43,12 @@ recorder_is_operator: true
 thay_the_cho: []
 leased_at_utc: '2026-11-18T08:21:29Z'
 heartbeat_at: '2026-11-18T08:21:29Z'
-lease_until: '2026-11-18T12:21:29Z'
-lease_expires_at_utc: '2026-11-18T12:21:29Z'
+lease_until: '2026-11-18T09:37:20Z'
+lease_expires_at_utc: '2026-11-18T09:37:20Z'
 max_lease_hours: 4
 native_runs_limit: 1
 native_step_reruns_limit: 1
 codex_review_calls_limit: 2
 codex_review_calls_used: 0
 windows: native_asus_only
+rut_han_note: 'r2 đã xong (verdict approve_scoped, d000b7f); rút hạn về 2026-11-18T09:37:20Z để không giữ write set song song với r3'

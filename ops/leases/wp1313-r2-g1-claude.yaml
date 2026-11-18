@@ -91,3 +91,4 @@ budget:
 budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native 0 (ca thuan gia urlopen, chay moi nen; khong CI Windows). Ngoai ngan sach PR: 3 loi goi Codex offline review dac ta truoc lease (ops/reviews/wp1313-spec/, mot lan treo stdin).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+da_bi_thay_the: wp1313-r3-g1-claude

@@ -371,6 +371,7 @@ reparse point, không còn `<nonce>.session`/`ud-<nonce>-*`. Nó chép tệp và
   Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR)) 'PWTEST_DAEMON_SESSION_DIR'
   $cacheRoot = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA } else { "$env:USERPROFILE\AppData\Local" }
   $daemonDir = "$cacheRoot\ms-playwright\daemon"; $reparse = [IO.FileAttributes]::ReparsePoint
+  Need (Test-Path -LiteralPath $daemonDir -PathType Container) 'không có sổ phiên CLI'
   $dd = Get-Item -Force -LiteralPath $daemonDir -ErrorAction Stop
   Need ($dd.PSIsContainer -and -not ($dd.Attributes -band $reparse)) 'sổ phiên không phải thư mục thường'
   foreach ($ten in '11-daemon.err', '11-daemon-path.txt') {

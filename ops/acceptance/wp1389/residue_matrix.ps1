@@ -3,6 +3,7 @@
 # `open` trong khoi Capture PowerShell. Moi ca chay trong TIEN TRINH CON cua chinh shell dang do ($Shell), voi
 # LOCALAPPDATA tro vao scratch. Khong goi CLI, khong mang, khong trinh duyet.
 # Dung: <shell> -NoProfile -File residue_matrix.ps1 -Skill <SKILL.md> -Scratch <thu muc rong> -Shell <pwsh.exe|powershell.exe>
+# PowerShell 5.1 goi tu pwsh 7 phai mang PSModulePath = gia tri Machine, neu khong se thieu Get-FileHash (do r3 #1319).
 param([Parameter(Mandatory)][string]$Skill, [Parameter(Mandatory)][string]$Scratch, [Parameter(Mandatory)][string]$Shell)
 $ErrorActionPreference = 'Stop'
 if (-not (Test-Path -LiteralPath $Skill -PathType Leaf)) { throw 'SKILL.md?' }

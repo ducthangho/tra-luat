@@ -157,7 +157,10 @@ declare +x KENH_KQ
 # cai rg trong 19 luot gate, run 44347295196). Cong thuc trong cong_cu.yaml KHONG duoc sua (phan truoc ` && ` dau tien phai
 # khop CONG_CU cua launcher.py), nen va o day: loi + lenh co `apt-get install` => `apt-get update` MOT lan roi chay lai
 # DUNG MOT lan. Vong lap (khong chep lai dong chay) de chinh dong `eval` o tren la DUY NHAT: bang dot bien wp868 neo vao
-# no va doi khop dung mot cho. Update loi khong dung script: loi cuoi cung la cua lan cai lai.
+# no va doi khop dung mot cho. Update loi khong dung script: loi cuoi cung la cua lan cai lai. Stdout cua update di sang
+# stderr: stdout cua script la JSON cua `kiem-tra` (Codex wp1404 luot 1, P2). Truoc khi chay lai: lam rong kenh va XOA tep
+# stdout de lan sau mo INODE MOI — tien trinh con cua lan dau con giu FD cu thi ghi vao tep da xoa, khong vao ket qua
+# lan cai lai (Codex wp1404 luot 1, P2; cung ly do voi r868 writer muon).
 LAN_CAI=0
 while :; do
 set +e
@@ -170,10 +173,11 @@ if [ "$RC_CAI" -ne 0 ] && [ "$LAN_CAI" -eq 1 ]; then
     *"apt-get install"*)
       echo "cai_cong_cu: '$TEN' cai loi (rc=$RC_CAI); apt-get update roi thu lai mot lan" >&2
       case "$LENH" in
-        "sudo apt-get"*) sudo apt-get update -qq || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
-        *) apt-get update -qq || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
+        "sudo apt-get"*) sudo apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
+        *) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
       esac
       : > "$KENH_KQ"
+      rm -f -- "$TAM_CAI/stdout"
       continue ;;
   esac
 fi

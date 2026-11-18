@@ -1,0 +1,7 @@
+# do 2026-11-18T11:33:45Z
+ref origin/ops/wp433-r1-g1-lease = ab68bb8c58a78d102d4cadbf13fb8487ac05cdbd
+spec blob: f2911ec70f46a74059ebe66285027cfea7a1d604
+spec sha256: 3721e4684c12a22ab165a032c409ddb979dc9786e8862f9cdbaeba4bd7a74f88
+lease spec_hash: 3721e4684c12a22ab165a032c409ddb979dc9786e8862f9cdbaeba4bd7a74f88
+lease commit rut han: ab68bb8 ops/leases: rut han wp433-r1-g1-claude sau land (PR #1394, 700fbca)
+spec o master 700fbca: khong

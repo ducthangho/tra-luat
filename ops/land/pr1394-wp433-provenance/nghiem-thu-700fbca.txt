@@ -1,0 +1,34 @@
+# do 2026-11-18T11:33:38Z, Linux, Python 3.13.18, git version 2.43.0
+merge 700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef parents: 3bdb479a7580a0d249c1b7b72bb545bbca15b7a6 80f926c9866e4ab2c32a4253359b72c4de511962  tree 6c5dbcf4eb2f43e008c765ba7a4b94e889ca9c95
+head 80f926c9866e4ab2c32a4253359b72c4de511962 tree 5f12998f24ea1cd21062480e8849c9396276759b
+== numstat 700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef^1..700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef
+353	0	scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py
+94	42	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled.py
+== numstat base eca1d125b82783a6a736c7023751ba53cc9a49c8..head 80f926c9866e4ab2c32a4253359b72c4de511962
+353	0	scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py
+94	42	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled.py
+== blob write set: head vs merge
+scripts/tl_gws.py head=12e04c03971861d96161b9c1cd55de9c59a5f371 merge=12e04c03971861d96161b9c1cd55de9c59a5f371
+scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py head=f7769ece5ff0ac9c04644ddc47e70cff612ffaec merge=f7769ece5ff0ac9c04644ddc47e70cff612ffaec
+scripts/tl_test_fragments_bundled.py head=f943b35da9de538f1d4ed49bf2048c3c45a8552d merge=f943b35da9de538f1d4ed49bf2048c3c45a8552d
+== tep khac ngoai write set giua 700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef^1 va 700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef:
+0
+== write set: base eca1d125b82783a6a736c7023751ba53cc9a49c8 vs 700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef^1 (master tien giua lease va merge)
+0
+== git log --oneline eca1d125b82783a6a736c7023751ba53cc9a49c8..700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef^1
+3bdb479 Merge pull request #1391 from ducthangho/ops/land-1386
+e4fdf09 Merge pull request #1388 from ducthangho/agent/wp387-r1-g1-claude
+2377af6 ops/land: ho so land PR #1386 (#646 LEASE-TRUONG-KHAI-NGHIA, bf47a36)
+5bcea6c #387 LAUNCHER-BAM-LOG-SAU-CAY-CHET r1 (packet A, Linux): run.json khai cay da chet hay chua luc bam log
+== git diff --check 700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef^1 700fbcaa78c23cbe4d8c20763f7f1a7b59d763ef
+rc=0
+== adr-song (merge)
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+== doctrine-scan (merge)
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+== VERSION (merge)
+1.36.70104:VERSION = "1.36.70"

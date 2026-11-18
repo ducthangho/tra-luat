@@ -1,0 +1,78 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1389
+packet_id: wp1389
+spec_packet_id: PLAYWRIGHT-DAEMON-DU-LUONG
+revision: 1
+generation: 1
+lease_id: wp1389-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+windows_transport: desktop_commander
+reviewer: codex
+reviewer_fallback: 'claude, context đọc-chỉ độc lập, khai same-provider'
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+review_class: sensitive
+effective_review_class: sensitive
+risk: sensitive
+access: read-write
+depends_on: []
+spec_path: ops/specs/wp1389-r1.md
+spec_hash: 12257fa8d659ff5c013af4bc31de700de4a53b085a99ec8c47cbd403d66610bc
+spec_sha256_required: 12257fa8d659ff5c013af4bc31de700de4a53b085a99ec8c47cbd403d66610bc
+spec_duyet: 'chủ kho duyệt băm 12257fa8 qua AskUserQuestion 18-11-2026 ~10:02Z trong phiên session_015GtxrazyAyLwN5BiEB52Sq, lựa chọn "Approve + Desktop (Recommended)"; reviewer "Codex, fallback Claude".'
+write_set:
+- .agents/skills/playwright-browser/SKILL.md
+- ops/acceptance/wp1389/REVIEW-PROMPT.md
+- ops/acceptance/wp1389/RESULTS.md
+- ops/acceptance/wp1389/VERDICT.md
+- ops/acceptance/wp1389/residue_matrix.ps1
+- ops/acceptance/wp1389/residue_matrix.sh
+- ops/leases/wp1389-r1-g1-claude.yaml
+- ops/specs/wp1389-r1.md
+write_set_hash: 96e5930132be6171e883848e773191f7e713903267f0d9b157021488a828fad1
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp (LC_ALL=C), nối bằng LF, kết thúc bằng LF
+effective_write_set_nguon: khai_bao_trong_spec
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-18T10:00:00Z'
+  goc_quet: 'clone đầy đủ (không nông), ls-remote --heads so tập với refs/remotes/origin: thiếu 0/313; master cục bộ = origin/master eca1d12'
+  ket_qua: '.agents/skills/playwright-browser/SKILL.md và package.json: ai-dang-giu NGƯỜI_GIỮ 0 (chỉ lease wp1287 HẾT_HẠN)'
+branch: claude/busy-brown-x1np9m
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: eca1d125b82783a6a736c7023751ba53cc9a49c8
+start_from_sha: eca1d125b82783a6a736c7023751ba53cc9a49c8
+reviewed_sha_required: eca1d125b82783a6a736c7023751ba53cc9a49c8
+reviewed_sha_required_nghia: 'Chưa có head ứng viên; mọi verdict neo exact head THẬT của nhánh thi công.'
+target_host: DESKTOP-T9R33P2
+target_device_id: a5f7076e-a491-4f84-829b-8d1fbcc1c767
+target_workdir: 'F:\tl-win\session_015GtxrazyAyLwN5BiEB52Sq\wp1389'
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt']
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1389
+granted_on_instruction_readback: 'chủ kho 18-11: giao việc xử lý F1 của #1319 theo protocol (Issue + spec + lease trước code), rồi duyệt băm spec và cấp lease + dùng Desktop qua AskUserQuestion.'
+granted_on_instruction_note: 'không cấp: merge/land, deploy, LIVE, xoá 13 tệp .err cũ trên Desktop, đụng skill khác hoặc lõi.'
+recorded_by: 'phiên session_015GtxrazyAyLwN5BiEB52Sq'
+recorder_is_executor: true
+recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị trực tiếp của chủ kho; lease KHÔNG tự cấp — chủ kho duyệt qua AskUserQuestion.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
+leased_at_utc: '2026-11-18T10:02:07Z'
+heartbeat_at: '2026-11-18T10:02:07Z'
+lease_until: '2026-11-18T16:02:07Z'
+lease_expires_at_utc: '2026-11-18T16:02:07Z'
+lease_until_ghi_chu: '6h; rút hạn sau land.'
+attempts_used: 1
+attempts_limit: 2
+budget:
+  codex_review_calls: {used: 0, reserved: 0, limit: 3}
+  native_runs: {linux: 1, windows_desktop: 1, rerun_per_step_on_build_error: 1}
+requires_live: false
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'

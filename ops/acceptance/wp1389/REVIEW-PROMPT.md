@@ -61,3 +61,27 @@ là prompt, KHÔNG phải lease. Thứ định danh mã là **băm commit**, kh�
      - quét bằng `[IO.Directory]` của PowerShell: thư mục là junction, mẫu `*nonce*` khớp tên 8.3, đường dẫn UNC;
      - thứ tự chép → so → ghi `11-daemon-path.txt` → xoá.
   4. Ghi verdict theo đúng khuôn đầu ra ở trên vào `scratch/VERDICT.md`.
+
+## Lượt 3 (delta, lời gọi Codex cuối theo lease) — sau thiết kế lại
+
+- Lượt 2 ở `f2654b2`: `request_changes` (3 P1, 4 P2, 1 P3), nguyên văn trong `VERDICT.md`.
+- Chủ kho chọn thiết kế lại "hỏi chính CLI", ghi ở `RESULTS.md`. Sổ phiên giờ lấy từ `baseDaemonDir()` và
+  `createClientInfo().daemonProfilesDir` của `playwright-core/lib/tools/cli-client/registry.js` trong bản ghim, chạy bằng
+  `node -e` từ `work`.
+  - Capture ghi kết quả vào `00-sophien.txt`.
+  - Cleanup hỏi lại TRƯỚC `close` và đòi kết quả trùng tệp đó.
+  - Bước dọn đòi mục duy nhất phải là `<dòng 2>/<nonce>.err`.
+  - Gỡ bản cài hỏi lại trước khi xoá `install`.
+- Việc lượt 3:
+  1. Với TỪNG finding lượt 2, xác minh trên mã ở H: đã sửa, sửa một phần, hay chưa. Căn cứ phải là dòng mã.
+  2. Đánh giá chính thiết kế mới:
+     - phụ thuộc vào mô-đun nội bộ của bản ghim;
+     - `node -e` có cùng CWD và môi trường với CLI không (`chay_ghi`/`Invoke-PwGhi`);
+     - `00-sophien.txt` có thật sự neo được từ Capture tới Cleanup không;
+     - hành vi khi Capture dừng trước `open`;
+     - cách truyền đối số `node -e` trong PowerShell 5.1/7 (chuỗi JS không có dấu nháy).
+  3. Chạy N1 đúng một lần:
+     `bash repo/ops/acceptance/wp1389/residue_matrix.sh repo/.agents/skills/playwright-browser/SKILL.md scratch/n1 "$(command -v node)"`,
+     tạo `scratch/n1` rỗng trước. Báo dòng `SOURCE` và dòng `TONG`.
+  4. Ghi verdict theo khuôn đầu ra ở trên vào `scratch/VERDICT.md`. Trong verdict, tách riêng finding nào chặn merge và
+     finding nào chỉ là giới hạn đã khai.

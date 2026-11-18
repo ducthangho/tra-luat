@@ -1,0 +1,12 @@
+# Chep lai (doc qua read_file DC; bytes co the khac BOM/CRLF) -- sha256 do TREN VM:
+# d1e2787a3b353b7e3cfe1ff01d9fad8d207fb3d94d66be858d844ac4676b06ae wp1342r2c-p5-out\TOM-TAT.txt
+# e5c1784220fe5fa3842f42550baa745f52dcab99b08b1569d529ae0848f89397 wp1342r2c-p5-out\wp1342_native_persist_update_symlink.txt
+# 6ce705d2650b58f04db531c1fb407440d78aa91daf1d45b41e57f3862791bf21 wp1342r2c-p5-out\wp1342_native_symlink_file.txt
+# 1540a99a4cece4b425dde02b2aad11c85c342f5d83dd0293b9795ac423fcfe60 chay-p5-1342r2.ps1
+python=Python 3.12.10 os=Microsoft Windows NT 10.0.20348.0 HEAD=c10d0710735e3532035a5219d469704d8a7592bb tree=ba0bbc46c90f19c26ce569129f319fb844f23513 sach_truoc=[]
+wp1342_native_persist_update_symlink rc=0 17.1s :: KQ_JSON {"wp1342_native_persist_update_symlink": null}
+  WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_persist_update_symlink", "observed": "'_1174Error: WP1174 UNKNOWN: reparse point'", "os": "Windows-2022Server-10.0.20348-SP0", "passed": 1, "python": "3.12.10"}
+wp1342_native_symlink_file rc=0 14.1s :: KQ_JSON {"wp1342_native_symlink_file": null}
+  WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_symlink_file", "observed": "'_1174Error: WP1174 UNKNOWN: reparse point'", "os": "Windows-2022Server-10.0.20348-SP0", "passed": 1, "python": "3.12.10"}
+sach_sau=[]
+XONG (khoa da nha)

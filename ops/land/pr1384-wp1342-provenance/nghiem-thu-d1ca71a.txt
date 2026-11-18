@@ -1,0 +1,24 @@
+# do 2026-11-18T09:03:07Z, Linux, Python 3.13.18, git 2.43.0
+merge d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a parents: 641108cb997872b0ef2a277ea9c8faf8b82532bb c10d0710735e3532035a5219d469704d8a7592bb  tree ba0bbc46c90f19c26ce569129f319fb844f23513
+== numstat d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a^1..d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a
+97	0	.claude/dev/packet_loop.py
+196	0	.claude/dev/packet_loop_test.py
+== numstat 641108c..c10d0710735e3532035a5219d469704d8a7592bb
+97	0	.claude/dev/packet_loop.py
+196	0	.claude/dev/packet_loop_test.py
+== so tep khac giua cay head va cay merge: 0
+== git diff --check d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a^1 d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a
+rc=0
+== ruff 0.17.5 --select F tren cha1
+.claude/dev/packet_loop.py 3
+.claude/dev/packet_loop_test.py 13
+== ruff 0.17.5 --select F tren merge
+.claude/dev/packet_loop.py 3
+.claude/dev/packet_loop_test.py 13
+== adr-song (merge)
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+== doctrine-scan (merge)
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+== rc that (chay lai khong pipe): adr-song rc=0, doctrine-scan rc=0

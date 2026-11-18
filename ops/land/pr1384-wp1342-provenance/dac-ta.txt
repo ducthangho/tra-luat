@@ -1,0 +1,5 @@
+# do 2026-11-18T09:02:09Z, git 2.43.0
+spec_path ops/specs/WP1174-WINDOWS-BACKEND-r2.md
+blob bc2f4595f00ccfa1b19217acfc25b7ab043fa6e2
+sha256 ff7bcc079f1e5629f7281eef14978189e41cc3570d4c3bc12569ca71712a779a
+lease spec_hash spec_hash: ff7bcc079f1e5629f7281eef14978189e41cc3570d4c3bc12569ca71712a779a

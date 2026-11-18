@@ -1,0 +1,5 @@
+# LAN 1 (sau rut han 09:20Z); lease = git show 92c0d57ece5a2a5076a75158b4bcf01bd6300a25:ops/leases/wp1342-r2-g1-claude.yaml (blob b8110ec82a69cf29f278cbd93a4b7328f5dd042d)
+# checkout: d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a ; luc: 2026-11-18T09:36:45Z
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

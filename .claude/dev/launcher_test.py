@@ -3431,6 +3431,103 @@ def t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI():
     bang(m._do_rest_github("https://x/y")[2] is False, "khong do duoc ma tinh la thanh cong")
 
 
+def _r1313_tam_ve_5xx(m, do, url, ten):
+    """Tám vế (a)–(h) của #1313, dùng chung cho hai hàm đo (`do` là hàm đang thử).
+
+    5xx KHÔNG header GitHub ⇒ `khong_do_duoc` + mô tả `loi truyen tai`; dải là
+    `500 <= mã < 600`. 4xx không header (kể cả 429 — GIỚI HẠN CỐ Ý của packet) và 600
+    vẫn `chan`; 5xx CÓ header vẫn `mo`. Mọi vế: thao tác KHÔNG thành công.
+    """
+    khong_gh = {"Content-Type": "text/plain"}
+
+    def nem(ma, headers):
+        def gia(*_a, **_k):
+            raise m.urllib.error.HTTPError(url, ma, "loi", headers, None)
+        m.urllib.request.urlopen = gia
+
+    goc = m.urllib.request.urlopen
+    try:
+        for ve, ma in (("a", 502), ("b", 503), ("c", 500)):
+            nem(ma, khong_gh)
+            tt, mo_ta, ok = do(url)
+            bang(tt == "khong_do_duoc", f"{ten} ({ve}) {ma} khong header phai `khong_do_duoc`: {tt} {mo_ta!r}")
+            bang(ok is False, f"{ten} ({ve}) {ma} khong header ma thao tac thanh cong: {ok!r}")
+            bang(f"HTTP {ma}" in mo_ta, f"{ten} ({ve}) mo ta thieu cum `HTTP {ma}`: {mo_ta!r}")
+            bang("loi truyen tai" in mo_ta and "proxy tu sinh" not in mo_ta,
+                 f"{ten} ({ve}) {ma} khong header: mo ta phai noi `loi truyen tai`, khong noi proxy tu sinh: {mo_ta!r}")
+        for ve, ma in (("d", 499), ("g", 600), ("h", 429)):
+            nem(ma, khong_gh)
+            tt, mo_ta, ok = do(url)
+            bang(tt == "chan" and ok is False, f"{ten} ({ve}) {ma} khong header phai giu `chan`: {tt} {ok!r} {mo_ta!r}")
+        nem(403, khong_gh)
+        tt, mo_ta, ok = do(url)
+        bang(tt == "chan" and "proxy" in mo_ta, f"{ten} (e) 403 khong header phai `chan` + noi proxy: {tt} {mo_ta!r}")
+        nem(502, {"X-GitHub-Request-Id": "abc"})
+        tt, mo_ta, ok = do(url)
+        bang(tt == "mo" and ok is False, f"{ten} (f) 502 CO header GitHub phai `mo`, khong thanh cong: {tt} {ok!r}")
+    finally:
+        m.urllib.request.urlopen = goc
+
+
+@ca
+def r1313_rest_5xx_khong_header_la_khong_do_duoc():
+    """#1313: 502 do đường hầm proxy đứt KHÔNG phải 403 chặn theo đường dẫn.
+
+    Đo 13-11-2026: `_do_rest_github` in `chan HTTP 502 (KHONG header GitHub -> proxy tu
+    sinh)` trong khi proxy ghi `ws_closed_mid_exchange`, vài phút sau REST thông lại.
+    """
+    m = _tai_launcher_thu()
+    _r1313_tam_ve_5xx(m, m._do_rest_github, "https://x/y", "rest")
+
+
+@ca
+def r1313_mcp_endpoint_5xx_khong_header_la_khong_do_duoc():
+    """#1313, cùng tám vế cho `_do_mcp_endpoint` — hai hàm hỏng độc lập nên đo riêng."""
+    m = _tai_launcher_thu()
+    _r1313_tam_ve_5xx(m, m._do_mcp_endpoint, "https://x/mcp/", "mcp-endpoint")
+
+
+@ca
+def r1313_canh_gh_chi_noi_chan_khi_kho_chan():
+    """#1313 (M6): `gh BAO da xac thuc nhung duong kho bi chan` chỉ in khi `rest-kho` là `chan`.
+
+    Bản trước suy từ cờ `ok`, nên 502, 404 có header hay lỗi mạng đều thành chữ "bị chặn".
+    """
+    m = _tai_launcher_thu()
+    goc = (m._do_rest_github, m._git, m.subprocess.run, m.shutil.which, m._chay_probe_nhu_shell)
+
+    class _P:
+        def __init__(self, rc, out=""):
+            self.returncode, self.stdout, self.stderr = rc, out, ""
+
+    def chay(cmd, **_k):                     # `gh auth status` xanh; thao tác mức kho hỏng
+        return _P(0, "Logged in") if cmd[:3] == ["gh", "auth", "status"] else _P(1)
+
+    def git_gia(ws, *a, **_k):
+        if a[:2] == ("remote", "get-url"):
+            return (0, "https://github.com/o/r.git", "")
+        return (128, "", "fatal: unable to access")
+
+    def dau_ra(kho):
+        m._do_rest_github = lambda url, **_k: (("mo", "HTTP 200", True) if "rate_limit" in url else kho)
+        with tempfile.TemporaryDirectory() as td:
+            return m._do_github(td, {})[1]
+
+    cau = "duong kho bi chan"
+    try:
+        m._git, m.subprocess.run, m._chay_probe_nhu_shell = git_gia, chay, chay
+        m.shutil.which = lambda t, *_a, **_k: "/gia/gh" if t == "gh" else None
+        ra = dau_ra(("khong_do_duoc", "HTTP 502 (KHONG header GitHub, 5xx -> loi truyen tai, KHONG DO DUOC)", False))
+        bang("gh-cli=OK" in ra, f"fixture hong: gh-cli khong xanh nen canh bao khong the in: {ra}")
+        bang(cau not in ra, f"(a) rest-kho `khong_do_duoc` (502) ma van noi bi chan: {ra}")
+        ra = dau_ra(("mo", "HTTP 404 (toi GitHub, thieu quyen)", False))
+        bang(cau not in ra, f"(b) rest-kho `mo` thieu quyen (404 co header) ma van noi bi chan: {ra}")
+        ra = dau_ra(("chan", "HTTP 403 (KHONG header GitHub -> proxy tu sinh)", False))
+        bang(cau in ra, f"(c) rest-kho `chan` (403 khong header) ma KHONG canh bao: {ra}")
+    finally:
+        m._do_rest_github, m._git, m.subprocess.run, m.shutil.which, m._chay_probe_nhu_shell = goc
+
+
 @ca
 def t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec():
     """`gh auth status` xanh mà mọi thao tác kho 403 thì GitHub KHÔNG dùng được.
@@ -15922,6 +16019,23 @@ DOT_BIEN = [
      # CHI `t110`: `t111` thay han `_do_rest_github` bang ban gia, nen dot bien vao
      # ban that khong toi duoc no.
      ["t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI"]),
+    # --- #1313: 5xx KHONG header la `khong_do_duoc`, khong phai `chan`. Moi chot mot dot bien.
+    ("r1313_rest_5xx_ve_chan",
+     ('        if not co_gh and 500 <= e.code < 600:', '        if False:'),
+     ["r1313_rest_5xx_khong_header_la_khong_do_duoc"]),
+    ("r1313_mcp_5xx_ve_chan",
+     ('        if 500 <= e.code < 600 and not co_gh_ep:', '        if False:'),
+     ["r1313_mcp_endpoint_5xx_khong_header_la_khong_do_duoc"]),
+    # Giu trang thai `khong_do_duoc` nhung mo ta lai ket luan proxy chan.
+    ("r1313_rest_mo_ta_noi_chan",
+     ('                    f"HTTP {e.code} (KHONG header GitHub, 5xx -> loi truyen tai, KHONG DO DUOC)",',
+      '                    f"HTTP {e.code} (KHONG header GitHub -> proxy tu sinh)",'),
+     ["r1313_rest_5xx_khong_header_la_khong_do_duoc"]),
+    # Canh bao `gh` quay ve suy tu co `ok`: moi that bai cua rest-kho thanh "bi chan".
+    ("r1313_canh_kho_gop_moi_that_bai",
+     ('    kho_chan = tt_kho == "chan"',
+      '    kho_chan = any(t == "rest-kho" and not ok for t, ok, _ in duong)'),
+     ["r1313_canh_gh_chi_noi_chan_khi_kho_chan"]),
     ("worktree_bo_qua_tep_moi",
      ('"--untracked-files=all"', '"--untracked-files=no"'),
      ["t12_tep_khong_theo_doi_van_tinh_la_ban"]),

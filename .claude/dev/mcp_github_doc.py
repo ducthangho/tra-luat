@@ -17,6 +17,9 @@ BA TRẠNG THÁI, không phải hai: `mo` (có header `X-GitHub-*`) · `chan` (4
 GitHub = proxy tự sinh, CHƯA từng tới GitHub) · `khong_do_duoc` (mạng/DNS/quá hạn).
 Phân loại theo HEADER, không theo mã trạng thái — cùng tiêu chí `_do_rest_github` và
 `_do_mcp_endpoint` đã trả giá để có.
+NGOẠI LỆ (#1313), cũng cùng hai hàm ấy: `HTTPError` KHÔNG header GitHub mà mã 5xx
+(`500 <= mã < 600`) được mô tả là `loi truyen tai`, KHÔNG phải `proxy tu sinh` — một 502
+do đường hầm proxy đứt chưa đủ bằng chứng để kết luận bị chặn.
 
 MÔ TẢ KHÔNG BAO GIỜ CHỞ TOKEN: không in `headers`, không nội suy `url` vào nhánh từ chối.
 
@@ -129,6 +132,10 @@ class Phien:
                 return int(r.status), r.read().decode("utf-8", "replace"), dict(r.headers)
         except urllib.error.HTTPError as e:
             co_gh = any(k.lower().startswith("x-github") for k in e.headers)
+            if not co_gh and 500 <= e.code < 600:
+                # #1313: 5xx KHÔNG header chưa đủ bằng chứng để nói "proxy chặn".
+                raise Hong(f"HTTP {e.code} (KHONG header GitHub, 5xx -> loi truyen tai, "
+                           "KHONG DO DUOC)") from None
             vi_sao = (" (toi GitHub, thieu quyen)" if co_gh
                       else " (KHONG header GitHub -> proxy tu sinh)")
             raise Hong(f"HTTP {e.code}{vi_sao}") from None

@@ -4742,6 +4742,13 @@ def _do_rest_github(url: str, timeout: float = 6.0, *, token: str | None = None)
 
     Trạng thái thứ ba `khong_do_duoc` (mạng hỏng, DNS, quá hạn) KHÔNG được gộp
     vào `chan` — đúng doctrine `None ≠ False`.
+
+    NGOẠI LỆ CỦA "phân loại theo header" (#1313): `HTTPError` KHÔNG header GitHub
+    mà mã 5xx (`500 <= mã < 600`) ⇒ `khong_do_duoc`, mô tả `loi truyen tai`, KHÔNG
+    phải `chan`. Đo 13-11-2026: 502 không header do đường hầm proxy đứt bị in y
+    như 403 chặn theo đường dẫn, vài phút sau REST thông lại. Đây là lựa chọn
+    chẩn đoán BẢO THỦ (chưa đủ bằng chứng kết luận chặn), không khẳng định chắc
+    chắn là lỗi truyền tải. Mọi 2xx/4xx không header (kể cả 407, 429) vẫn `chan`.
     """
     dau = {"Accept": "application/vnd.github+json"}
     # Credential ĐÃ CHUẨN HOÁ phải đi tới ĐÂY. `_doc_moi_truong` loại bản giữ chỗ và
@@ -4762,6 +4769,11 @@ def _do_rest_github(url: str, timeout: float = 6.0, *, token: str | None = None)
         # 4xx CÓ header GitHub = TỚI NƠI nhưng THAO TÁC HỎNG. `mo` đúng cho câu
         # "đường có thông không"; `thanh_cong=False` đúng cho câu "làm được việc
         # không". Gộp hai câu ấy chính là lỗi P1 mà cross-review bắt trên PR "#143".
+        if not co_gh and 500 <= e.code < 600:
+            # #1313: 5xx KHÔNG header chưa đủ bằng chứng để nói "proxy chặn".
+            return ("khong_do_duoc",
+                    f"HTTP {e.code} (KHONG header GitHub, 5xx -> loi truyen tai, KHONG DO DUOC)",
+                    False)
         return ("mo" if co_gh else "chan",
                 f"HTTP {e.code}" + (" (toi GitHub, thieu quyen)" if co_gh
                                     else " (KHONG header GitHub -> proxy tu sinh)"),
@@ -5012,6 +5024,10 @@ def _do_mcp_endpoint(url: str | None, *, token: str | None = None,
     `_do_rest_github` đã trả giá để có: 403 KHÔNG header là proxy tự sinh (phản hồi chưa
     từng tới GitHub), còn 4xx CÓ header là tới nơi nhưng thiếu quyền. Hai chuyện ấy chữa
     bằng hai cách khác hẳn nhau.
+
+    NGOẠI LỆ (#1313), cùng quy tắc với `_do_rest_github`: `HTTPError` KHÔNG header GitHub
+    mà mã 5xx (`500 <= mã < 600`) ⇒ `khong_do_duoc`, mô tả `loi truyen tai` — chưa đủ
+    bằng chứng để kết luận proxy chặn. 2xx/4xx không header vẫn `chan`.
     """
     # KHÔNG CÓ URL / URL KHÔNG PHẢI HTTP ⇒ CHƯA ĐO ĐƯỢC, không phải HỎNG. Server kiểu
     # `stdio` không có `url` là khai hợp lệ; gọi nó là "hỏng" thì đẩy người đọc đi chữa
@@ -5086,6 +5102,10 @@ def _do_mcp_endpoint(url: str | None, *, token: str | None = None,
         co_gh_ep = any(k.lower().startswith("x-github") for k in e.headers)
         vi_sao_ep = (" (toi GitHub, thieu quyen)" if co_gh_ep
                      else " (KHONG header GitHub -> proxy tu sinh)")
+        # #1313, viết KHÁC CHỮ với nhánh cùng nghĩa của `_do_rest_github` (xem `t117`).
+        if 500 <= e.code < 600 and not co_gh_ep:
+            mo_ta_5xx_ep = f"HTTP {e.code} (5xx, KHONG header GitHub -> loi truyen tai, KHONG DO DUOC)"
+            return ("khong_do_duoc", mo_ta_5xx_ep, False)
         # 4xx/5xx: tới nơi hay không thì THAO TÁC vẫn hỏng — hai câu hỏi, hai giá trị.
         return (("mo" if co_gh_ep else "chan"), f"HTTP {e.code}{vi_sao_ep}", False)
     except Exception as e:                       # mạng/DNS/quá hạn = KHÔNG ĐO ĐƯỢC
@@ -5177,6 +5197,7 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # CHẨN ĐOÁN, KHÔNG TÍNH vào kết luận "dùng được" — xem `_tinh_kha_dung` dưới.
     duong.append(("rest-chung", tt_chung == "mo", mt_chung))
     slug = None
+    tt_kho = None            # #1313: `None` = `rest-kho` CHƯA ĐO (không đọc được slug)
     if ws:
         rc_u, url_o, _ = _git(ws, "remote", "get-url", "origin")
         if rc_u == 0:
@@ -5255,7 +5276,9 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
             canh_ep = f" · mcp-endpoint: {mt_ep}"
 
     gh_ok = next((ok for t, ok, _ in duong if t == "gh-cli"), False)
-    kho_chan = any(t == "rest-kho" and not ok for t, ok, _ in duong)
+    # #1313: chỉ nói "bị chặn" khi `rest-kho` ĐÃ ĐO và trạng thái là `chan`. Suy từ cờ
+    # `ok` là gộp 404 có header, lỗi mạng, 5xx và "không đọc được slug" vào chữ "chặn".
+    kho_chan = tt_kho == "chan"
     canh = " · gh BAO da xac thuc nhung duong kho bi chan -> dung lam duong viec" \
         if (gh_ok and kho_chan) else ""
     # CHỈ ĐƯỜNG LÀM ĐƯỢC VIỆC mới được tính vào `DUNG_DUOC`.

@@ -1,0 +1,9 @@
+# do 2026-11-18T10:17:49Z, sau han moi 10:05Z; lease = git show 4833647f9a1c4fb620b30ed45a3388f98a767a62:ops/leases/wp646-r1-g1-claude.yaml
+# clone moi tu GitHub, fetch +refs/heads/*; git branch -f master refs/remotes/origin/master
+may_chu_ref 314
+cuc_bo_thieu 0
+== docs/PROTOCOL_DA_PHIEN.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp646-r1-g1-claude	refs/remotes/origin/ops/wp646-r1-g1-lease:ops/leases/wp646-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

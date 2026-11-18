@@ -1,0 +1,14 @@
+2026-11-18T09:45:30.4427174Z Image: ubuntu-26.04
+2026-11-18T09:45:31.1532561Z ##[group]Run git config --global core.autocrlf false
+2026-11-18T09:45:31.1995235Z ##[group]Run actions/checkout@v4
+2026-11-18T09:45:37.8239736Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-11-18T09:45:37.8239977Z bf47a369fa4872b0bc2032ddef1024fc79377cca
+2026-11-18T09:45:38.8538813Z [command]/usr/bin/git log -1 --format=%H
+2026-11-18T09:45:38.8556426Z bf47a369fa4872b0bc2032ddef1024fc79377cca
+2026-11-18T09:45:38.8732098Z ##[group]Run actions/setup-python@v5
+2026-11-18T09:45:38.9847410Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-18T09:45:40.6680998Z ##[group]Run bash ops/cai_actionlint.sh
+2026-11-18T09:45:41.0267837Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-18T09:45:42.5624103Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-18T09:45:46.2213639Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-11-18T09:59:58.4456619Z ##[group]Run actions/upload-artifact@v4

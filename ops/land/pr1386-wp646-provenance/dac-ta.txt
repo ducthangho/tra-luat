@@ -1,0 +1,5 @@
+# do 2026-11-18T09:46:55Z, git 2.43.0
+spec_path ops/specs/LEASE-TRUONG-KHAI-NGHIA-r1.md
+blob a366e1eaf2e6f889366cdc352ffd47aa38bbdf76
+sha256 fc18ac389650951e14ecdddeb91798f6b0869380f50ac8eba46cacb57d15e42f
+lease spec_hash spec_hash: fc18ac389650951e14ecdddeb91798f6b0869380f50ac8eba46cacb57d15e42f

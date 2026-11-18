@@ -1,0 +1,100 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 646
+packet_id: wp646
+spec_packet_id: LEASE-TRUONG-KHAI-NGHIA
+revision: 1
+generation: 1
+lease_id: wp646-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-fable-5-2
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: 'chen dung khoi 14 dong da chot nguyen van vao docs/PROTOCOL_DA_PHIEN.md (lam ro nghia truong lease); executor Claude Fable 5.2, reviewer Codex connector; N1 (n1.sh) + N5 doi khop tung byte; human_audited tren exact head truoc merge.'
+depends_on: []
+spec_path: ops/specs/LEASE-TRUONG-KHAI-NGHIA-r1.md
+spec_ref: refs/heads/ops/wp646-r1-g1-lease
+spec_nguon: 'dac ta tren nhanh lease nay; dinh danh theo grammar ADR-0063. Ghim bang spec_hash.'
+spec_sha256_required: fc18ac389650951e14ecdddeb91798f6b0869380f50ac8eba46cacb57d15e42f
+spec_hash: fc18ac389650951e14ecdddeb91798f6b0869380f50ac8eba46cacb57d15e42f
+spec_duyet: 'chu kho duyet bam dac ta fc18ac38 qua AskUserQuestion 18-11 (packet khong thuoc Mission, ADR-0067), sau review doc lap Codex luot 9 approve (ops/reviews/wp646-spec-r1/); 2 P3 mo ve ma thoat n1.sh khi goi sai doi so duoc chu kho chap nhan.'
+prompt_path: ops/specs/LEASE-TRUONG-KHAI-NGHIA-r1.md
+prompt_sha256_required: fc18ac389650951e14ecdddeb91798f6b0869380f50ac8eba46cacb57d15e42f
+write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+write_set_hash: 2627d2ddce43c8f1a307da16d0ffc2cf3de0edeb75e6e0eb1d8ccc65ea7633ca
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+effective_write_set_nguon: khai_bao_trong_spec
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'N1-N5 cua dac ta dat tren exact head (n1.sh rc 0, N5 khop VUNG_SHA)'}
+- {id: M-2, dieu_kien: 'ADR-0060: CI required xanh tren exact head; 0 P0-P2 mo; connector da review dung commit; human audit human_exact_head_audit.v1 tren H'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chi cap quyen thi cong; merge/land do chu kho duyet dung SHA.'
+branch: agent/wp646-r1-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a
+start_from_sha: d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a
+start_from_ghi_chu: 'origin/master luc cap lease (merge PR #1384). Dac ta do tren 641108c; 641108c..d1ca71a chi doi .claude/dev/packet_loop.py va packet_loop_test.py; blob docs/PROTOCOL_DA_PHIEN.md giu nguyen 7aebad643e2f (do lai 2026-11-18).'
+reviewed_sha_required: d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/646
+granted_on_instruction_readback: 'chu kho 18-11: duyet packet P3 (#646) trong dot "va het cho nho con sot" va duyet bam fc18ac38.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+executor_ghi_chu: 'Executor la phien Claude Code cloud do phien dieu phoi mo (create_session, model claude-fable-5-2); phien dieu phoi khong tu thi cong.'
+recorder_ghi_chu: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS ghi lease, KHONG phai executor.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-18T09:10:00Z'
+  goc_quet: 'container phien #1206, fetch +refs/heads/*; master cuc bo = origin/master d1ca71a'
+  ket_qua: 'docs/PROTOCOL_DA_PHIEN.md: NGUOI_GIU 0.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 dau tien cua packet.'
+leased_at_utc: '2026-11-18T09:10:00Z'
+heartbeat_at: '2026-11-18T09:10:00Z'
+heartbeat_required_minutes: 360
+heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
+lease_until: '2026-11-18T10:05:00Z'
+lease_expires_at_utc: '2026-11-18T10:05:00Z'
+lease_until_ghi_chu: '12h (packet nho, mot tep tai lieu); rut han ngay sau land.'
+attempts_used: 1
+attempts_limit: 2
+attempts_basis: '<= 2 phien executor.'
+budget:
+  codex_review_calls:
+    pr_wp646_r1_g1: {used: 0, reserved: 0, limit: 10}
+  ci_ubuntu_runs:
+    pr_wp646_r1_g1: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; khong Windows. Ngoai ngan sach PR: 9 loi goi Codex offline review dac ta truoc lease (ops/reviews/wp646-spec-r1/).'
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-18T09:47:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex PR 1/10: connector tren cd73961 (sach). CI Ubuntu 1/2: PR #1386 tren cd73961 (40 success). Windows 0. Ngoai ngan sach PR: 9 loi goi review dac ta. Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-18T21:10:00Z'
+  han_moi_utc: '2026-11-18T10:05:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #646 da MERGE: PR #1386 (head cd739618e80ba1163758900673da69f732ae0f61) merge commit bf47a369fa4872b0bc2032ddef1024fc79377cca,
+    human audit chu kho issuecomment-6974832145. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu docs/PROTOCOL_DA_PHIEN.md sau 2026-11-18T10:05:00Z phai ra NGUOI_GIU 0.'

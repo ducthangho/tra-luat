@@ -1,0 +1,18 @@
+# do 2026-11-18T09:46:55Z, Linux, Python 3.13.18, git 2.43.0
+merge bf47a369fa4872b0bc2032ddef1024fc79377cca parents: d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a cd739618e80ba1163758900673da69f732ae0f61  tree 5988e8a30eb19858a8abf12e96398cea7c593e38
+== numstat bf47a369fa4872b0bc2032ddef1024fc79377cca^1..bf47a369fa4872b0bc2032ddef1024fc79377cca
+14	0	docs/PROTOCOL_DA_PHIEN.md
+== numstat d1ca71a..cd739618e80ba1163758900673da69f732ae0f61
+14	0	docs/PROTOCOL_DA_PHIEN.md
+== so tep khac giua cay head va cay merge: 0
+== git diff --check bf47a369fa4872b0bc2032ddef1024fc79377cca^1 bf47a369fa4872b0bc2032ddef1024fc79377cca
+rc=0
+== adr-song (merge)
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+== doctrine-scan (merge)
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+== doc-claims-check --strict --json (merge)
+rc=0
+ok True flags 0

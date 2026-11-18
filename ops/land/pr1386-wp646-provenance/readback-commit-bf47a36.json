@@ -1,0 +1,106 @@
+{
+ "sha": "bf47a369fa4872b0bc2032ddef1024fc79377cca",
+ "node_id": "C_kwDOTNeRjdoAKGJmNDdhMzY5ZmE0ODcyYjBiYzIwMzJkZGVmMTAyNGZjNzkzNzdjY2E",
+ "commit": {
+  "author": {
+   "name": "ducthangho",
+   "email": "ducthangho@gmail.com",
+   "date": "2026-11-18T09:45:06Z"
+  },
+  "committer": {
+   "name": "GitHub",
+   "email": "noreply@github.com",
+   "date": "2026-11-18T09:45:06Z"
+  },
+  "message": "Merge pull request #1386 from ducthangho/agent/wp646-r1-g1-claude\n\n#646 LEASE-TRUONG-KHAI-NGHIA r1 g1: khai nghĩa trường lease trong protocol §4",
+  "tree": {
+   "sha": "5988e8a30eb19858a8abf12e96398cea7c593e38",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/5988e8a30eb19858a8abf12e96398cea7c593e38"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/bf47a369fa4872b0bc2032ddef1024fc79377cca",
+  "comment_count": 0,
+  "verification": {
+   "verified": true,
+   "reason": "valid",
+   "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq/XOiCRC1aQ7uu5UhlAAAh+oQAKobF7b2xedmhAHg9pLWdyXR\nmyamf2aAArQ0iAl2cXMDoE9h1PWW1cXn5iJ6SOkBtE8F5zErayHeSswq2r0m69w8\njHaQDPOFL3vygGnTm+ziRkEi/TjPs+1WQA1LEBhxENPY8q5XZcJRJVM/OHfZQ/2k\navTulKJDCKVMZt6GGP4oxL6A6tSASHl5eSCtw9UKvyg4Hgee2mc3soeVxATCq5Id\nWUyExgBxtUfKOLkLZJrTMDDBHBRQoz5dVOhnB5T0KHMCneSAmWp3NtpPD5N33AVG\nnF0xMDngSWgpg6/eRezi0XmvJSYF/JAjmM0iZPCIzQo1vTNrbk4u6tCXCfRVvjdw\ng7rU057nNs7k61ctKkiLXvyAz5oKm3Qw7ZDdyk5aNifwahy+v3h6UygqQ1ZUvejl\nThHc9HuwqNWiY04q8ueTEMHtsdQ2hYCp+vBaWFE3/MlFWVVWbpTCMIfKGIp8ZtkK\nYqU/1XMcp/SDf+wXwYI5xALPry3dD1CUB4acAgVGXuv/YCey+tvKrXx2Z2MtckT6\nxi19E8dBBUsHIbrIkR2v+hbA9oN2VmXjqwrQ1wl6KJ0afl6e9j/sq6UPnlGyYUN1\nIJfGYUHyq3x9kQasjfCDnnWuFkS8pMhPUlkUec39E1dCRSm96HqL9GKV+XPMMmfv\nTq30+BfvcJtdj3pA/0BB\n=5mYH\n-----END PGP SIGNATURE-----\n",
+   "payload": "tree 5988e8a30eb19858a8abf12e96398cea7c593e38\nparent d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a\nparent cd739618e80ba1163758900673da69f732ae0f61\nauthor ducthangho <ducthangho@gmail.com> 1794995106 +0700\ncommitter GitHub <noreply@github.com> 1794995106 +0700\n\nMerge pull request #1386 from ducthangho/agent/wp646-r1-g1-claude\n\n#646 LEASE-TRUONG-KHAI-NGHIA r1 g1: khai nghĩa trường lease trong protocol §4",
+   "verified_at": "2026-11-18T09:45:06Z"
+  }
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/bf47a369fa4872b0bc2032ddef1024fc79377cca",
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/bf47a369fa4872b0bc2032ddef1024fc79377cca",
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/bf47a369fa4872b0bc2032ddef1024fc79377cca/comments",
+ "author": {
+  "login": "ducthangho",
+  "id": 12748935,
+  "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+  "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/ducthangho",
+  "html_url": "https://github.com/ducthangho",
+  "followers_url": "https://api.github.com/users/ducthangho/followers",
+  "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+  "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+  "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+  "repos_url": "https://api.github.com/users/ducthangho/repos",
+  "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "committer": {
+  "login": "web-flow",
+  "id": 19864447,
+  "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+  "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/web-flow",
+  "html_url": "https://github.com/web-flow",
+  "followers_url": "https://api.github.com/users/web-flow/followers",
+  "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+  "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+  "organizations_url": "https://api.github.com/users/web-flow/orgs",
+  "repos_url": "https://api.github.com/users/web-flow/repos",
+  "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/web-flow/received_events",
+  "type": "User",
+  "user_view_type": "public",
+  "site_admin": false
+ },
+ "parents": [
+  {
+   "sha": "d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a"
+  },
+  {
+   "sha": "cd739618e80ba1163758900673da69f732ae0f61",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/cd739618e80ba1163758900673da69f732ae0f61",
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/cd739618e80ba1163758900673da69f732ae0f61"
+  }
+ ],
+ "stats": {
+  "total": 14,
+  "additions": 14,
+  "deletions": 0
+ },
+ "files": [
+  {
+   "sha": "edcb6a154cc8b03a0553f955621e4332168809af",
+   "filename": "docs/PROTOCOL_DA_PHIEN.md",
+   "status": "modified",
+   "additions": 14,
+   "deletions": 0,
+   "changes": 14,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/bf47a369fa4872b0bc2032ddef1024fc79377cca/docs%2FPROTOCOL_DA_PHIEN.md",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/bf47a369fa4872b0bc2032ddef1024fc79377cca/docs%2FPROTOCOL_DA_PHIEN.md",
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/docs%2FPROTOCOL_DA_PHIEN.md?ref=bf47a369fa4872b0bc2032ddef1024fc79377cca",
+   "patch": "@@ -275,6 +275,20 @@ lease_until: <timestamp>\n heartbeat_required_minutes: 360   # lease MỚI cấp sau khi ADR-0056 kích hoạt; lease đã cấp giữ số đã đóng dấu\n ```\n \n+`heartbeat_at` là lời khai: trong kho không có cổng nào đọc trực tiếp trường này.\n+\n+Ngưỡng thu hồi 360 phút cho lease mới thuộc hiệu lực `ADR-0056` do phiên điều phối áp tay, theo bảng §20.\n+\n+Theo protocol, `lease_until` là hạn tuyệt đối; trong mã, chỉ `kiem-dong-wp` của `.claude/dev/packet_loop.py` đọc trường này, ở điều kiện D4: `lease_until` phải đã qua thì mới đóng được WP.\n+\n+Khi kiểm lease để công bố với chốt hạn bật, `kiem()` của `ops/lease_publish.py` dùng `lease_expires_at_utc` để từ chối lease đã hết hạn; `ai-dang-giu` dùng cùng trường để phân loại hạn.\n+\n+Đường kiểm idempotent (`kiem_github`) và đường kiểm lease lịch sử trong CI (`ops/ci_duong_nhanh.py`) bỏ riêng phép chặn hết hạn.\n+\n+`reviewed_sha_required` là mỏ neo xuất phát, được phép bằng `base_sha` khi chưa có head ứng viên; `kiem()` chỉ đòi trường có mặt và đúng dạng 40 hex thường.\n+\n+Exact head không đọc từ lease: `kiem-merge` neo head PR ở K0, kiểm review connector ở K3, và kiểm review offline hoặc human audit trên cùng head ở K4; `record-review` so `--reviewed-sha` với head đã ghi khi vào `reviewing`.\n+\n Lease `role: reviewer` khai `provider: claude | codex | google_antigravity | human`\n và `executor` là provider đã viết code. Reviewer AG khai `model_family`,\n `execution_surface: antigravity`, `transport: machine/local` của chính lượt review;"
+  }
+ ]
+}

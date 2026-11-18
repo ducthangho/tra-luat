@@ -97,5 +97,24 @@
       "WP1393-F2-drift-regression-oracle P2"
     ],
     "reviewed_spec_sha256": "35aea6c9f2c5ae7e14bd918c067c2767351c45147ed5ab103bf166e391ce9034"
-  }
+  },
+  "spec_review_2": {
+    "run": "edd44827",
+    "verdict": "approve",
+    "reviewed_spec_sha256": "8a4942001d455dd484d76448890c9850b8bcd6e8ab4b846fb1faec3cdc3f6339"
+  },
+  "author_1": {
+    "run": "f0d28e44",
+    "head": "870d24d37260c847c03dbf84be603da48e12d838"
+  },
+  "source_review_1": {
+    "run": "38f4410f",
+    "reviewed_sha": "870d24d37260c847c03dbf84be603da48e12d838",
+    "verdict": "changes_requested",
+    "findings": [
+      "WP1393-F1-comparator-malformed-input P2"
+    ]
+  },
+  "author_fix1_prompt_path": "ops/prompts/wp1393-r1-g1-claude-author-fix1.txt",
+  "author_fix1_prompt_sha256": "acbc802f08b8d52ced1a41c15c330a57ddf813afcb147f4c02c5bc5ae9488d2e"
 }

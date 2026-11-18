@@ -74,8 +74,8 @@ leased_at_utc: '2026-11-18T09:55:00Z'
 heartbeat_at: '2026-11-18T09:55:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-19T09:55:00Z'
-lease_expires_at_utc: '2026-11-19T09:55:00Z'
+lease_until: '2026-11-18T15:10:00Z'
+lease_expires_at_utc: '2026-11-18T15:10:00Z'
 lease_until_ghi_chu: '24h (packet lon, do native Windows); rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
@@ -91,3 +91,14 @@ budget:
 budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 3 (Desktop uu tien; VM cho N7 va du phong; MOT lan khoi dong lai VM cho N7; khong CI Windows). Ngoai ngan sach PR: 3 loi goi Codex offline review dac ta r3 truoc lease (ops/reviews/wp1342-spec-r3/).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-18T14:50:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex PR: 1 loi goi tay (@codex review tren 972089e, sach) + 1 lan tu kich khi bo draft luc merge. CI Ubuntu 1 luot tren 972089e. Windows native: Desktop DESKTOP-T9R33P2 (bang ca + dot bien) va VM tra-luat-win (N7). Khoi dong lai VM: shutdown /r cua agent bi tu choi (Access is denied 5); chu kho reset bang gcloud compute instances reset; N7 BootId 36 -> 39, LastBootUpTime 2026-11-18T14:36:34Z. Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-19T09:55:00Z'
+  han_moi_utc: '2026-11-18T15:10:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1342 r3 da MERGE: PR #1390 (head 972089eb4acd5e83f7b58b757f02a69590b26e4b) merge commit aeb5cae0af01538c88ab2b50c27902dfaf7a7382,
+    human audit chu kho issuecomment-6981763980. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem nao cho write set nay luc rut.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu cac duong dan write set sau 2026-11-18T15:10:00Z phai ra NGUOI_GIU 0.'

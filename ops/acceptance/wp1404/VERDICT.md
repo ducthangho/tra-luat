@@ -203,6 +203,14 @@ dòng `declare +x KENH_KQ` mới làm neo `wp868_sh_kenh_export` khớp hai ch�
 > - Không chạy toàn bộ `--dot-bien`. Các số 720/720, 721/723, 723/723, 731/731, 737/737 và sáu đột biến không đo được vẫn là lời khai executor. Phép đo lọc `cai_sh` chỉ có dòng tổng **65/65**, không có dòng `DOT BIEN:` của toàn bộ bộ đột biến.
 > - Các probe cài dùng stub. Chưa chạy apt thật trên runner Ubuntu thiếu danh sách gói, thử quyền sudo thật, hoặc chạy trên macOS/Windows thật.
 
-### Trạng thái sau lượt 3
+### Review Rescue Checkpoint lần hai
 
-Trần Codex sau nâng (3/3) đã hết. Executor dừng ở Review Rescue Checkpoint lần hai và chờ chủ kho quyết.
+Trần Codex sau nâng (3/3) đã hết. Chủ kho chọn qua AskUserQuestion (18-11-2026, khoảng 23:22Z): **"Sửa + Codex lượt 4
+delta"**. Lease ghi `nang_tran` 3→4.
+
+### Executor xử lý (sửa ở `b0e9866`)
+
+| Finding | Kiểm lại | Xử lý |
+|---|---|---|
+| P3 hàm làm mất tham số vị trí | Thật. Ca (i) với công thức `test "${1-}" = rg && apt-get install -y ripgrep && chon_thu_muc_chay_duoc …`: script `6b0e375` ĐỎ (cài được ngay ⇒ rc 1, nhật ký chỉ `update`). | `_wp1404_chay_cong_thuc "$@"` ở cả hai lời gọi. Hai đột biến `wp1404_sh_mat_tham_so_lan_dau` / `_cai_lai` làm (i) đỏ ở đúng hai nhánh (cài được ngay / cần update). Bảng `cai_sh` 67/67. |
+| Ghi chú (không phải finding): bảng N2 gọi tắt (c) cho `wp1404_sh_nhanh_tran_dung_sudo` | Đúng, ca thực đỏ ở (c1). | Sửa RESULTS.md §4. |

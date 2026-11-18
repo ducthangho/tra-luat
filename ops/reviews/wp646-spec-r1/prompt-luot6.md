@@ -1,0 +1,7 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 6, cho đặc tả `ops/specs/LEASE-TRUONG-KHAI-NGHIA-r1.md` (Issue #646). CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng. Chạy thử trong RAM hoặc bản sao dưới /tmp.
+
+Worktree master 641108c. `ops/specs/LEASE-TRUONG-KHAI-NGHIA-r1-ban5.md` là bản bạn review lượt 5 (request_changes: P2 N5 lọt bảy mệnh đề trong thuộc tính HTML / link reference / setext heading / ô tiêu đề bảng; P2 đỏ oan khi ngắt dòng trước `#646.`). Bản mới `ops/specs/LEASE-TRUONG-KHAI-NGHIA-r1.md` ĐỔI THIẾT KẾ: bỏ danh sách cấm, chốt nguyên văn khối 14 dòng sẽ chèn vào PROTOCOL, N5 đòi vùng đích bằng từng byte khối đã chốt (VUNG_SHA), N1 đòi numstat đúng `14 0`; bỏ cam kết ngắt dòng tự do (§9 giải thích).
+
+Việc: (1) Kiểm thiết kế mới: trích khối từ đặc tả, dựng H = base + khối đúng vị trí, chạy script N5 ⇒ rc 0; các biến thể (bốn ca lượt 5, ngắt `#646.`, đảo nghĩa, dời vị trí, CRLF, thêm câu) ⇒ rc 1; đột biến nới "bằng" thành "chứa" ⇒ có ca âm đổi xanh. (2) Kiểm định nghĩa vùng đích/neo: có cách nào H khác base ngoài khối mà N1+N5 vẫn xanh? Vùng đích xác định duy nhất không? (3) Nội dung bảy mệnh đề có đúng với mã/protocol hiện tại (N4 mẫu dương/âm) không, có khẳng định sai nào không. (4) Rà L1–L7 và điểm chờ E2.
+
+Đầu ra stdout: bảng finding lượt 5 (đóng/chưa), finding mới P0–P3. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2.

@@ -38,14 +38,17 @@ granted_on_instruction_note: 'không cấp LIVE, gateway/account/endpoint/ACL, �
 recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-18T09:51:02Z'
-heartbeat_at: '2026-11-18T09:51:02Z'
-lease_until: '2026-11-18T15:51:02Z'
-lease_expires_at_utc: '2026-11-18T15:51:02Z'
+heartbeat_at: '2026-11-18T11:13:03Z'
+lease_until: '2026-11-18T11:13:03Z'
+lease_expires_at_utc: '2026-11-18T11:13:03Z'
 max_lease_hours: 6
 codex_executor_calls_limit: 3
-codex_executor_calls_used: 0
+codex_executor_calls_used: 3
 review_calls_limit: 2
-review_calls_used: 0
+review_calls_used: 2
 native_runs_limit: 1
 native_step_reruns_limit: 1
 windows: native_asus_only
+withdrawn_at_utc: '2026-11-18T11:13:03Z'
+withdrawn_reason: 'r4 xong: chay native 1 luot tron, dong bang zip cf712bc1, review 2/2 approve_scoped; khong dung lan chay lai'
+native_runs_used: 1

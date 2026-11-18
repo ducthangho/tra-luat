@@ -1,0 +1,7 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 13 — LƯỢT XÁC NHẬN CUỐI (chủ kho nâng trần 12→13 chỉ cho packet 1) — cho ĐẶC TẢ packet bảo mật `ops/specs/NLM-GWS-DICH-NGOAI-KHO-r1.md` (Issue #433), chưa có mã. Packet 2 `ops/specs/GWS-CRED-DICH-NGOAI-KHO-r1.md` HOÃN; không review. CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng; KHÔNG đọc secrets thật. Chạy thử trong RAM (/dev/shm).
+
+Worktree master 641108c. `NLM-GWS-DICH-NGOAI-KHO-r1-ban12.md` là bản bạn review lượt 12 (P2 §4b dòng 14 `db_w6_bo_symlink` đổi cả đầu vào luật (a) lẫn luật (b); P3 §2/M3 mô tả quá rộng việc giữ hành vi base khi tuần tự hoá W6 lỗi). Bản hiện tại: dòng 14 định nghĩa lại — W6 thay `_kiem_dich_ghi(cfgp, cfgp, ())` bằng phép kiểm chỉ còn luật (a) trên cùng đầu vào `dirname(cfgp)`, kèm đối chứng N10(7) (HOME = K/home và HOME = K không đổi màu, chỉ `w6_symlink_config` đỏ); §2/M3 ghi ngoại lệ vẫn lan nhưng config cũ giữ nguyên byte.
+
+Việc — CHỈ hai điểm: (1) Kiểm hai finding lượt 12 đã đóng thật (mô phỏng RAM với thân `_trong_kho_git` của base: dòng 14 mới chỉ đổi luật (b) ở lá config, đầu vào luật (a) giữ nguyên, fixture N6(2) đỏ đúng nhãn `stderr`, đối chứng N10(7) đúng). (2) Kiểm diff giữa ban12 và bản hiện tại không đưa vào lỗi P0–P2 mới (chỉ xét phần đã đổi). Không mở lại các phần đã đóng ở lượt trước.
+
+Đầu ra stdout: bảng hai finding lượt 12 (đóng/chưa), finding mới P0–P3 chỉ trong phần đã đổi. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Approve khi không còn P0–P2.

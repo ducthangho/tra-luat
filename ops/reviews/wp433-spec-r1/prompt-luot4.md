@@ -1,0 +1,7 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 4, cho hai ĐẶC TẢ packet bảo mật (chưa có mã) của Issue #433: packet 1 `ops/specs/NLM-GWS-DICH-NGOAI-KHO-r1.md` và packet 2 `ops/specs/GWS-CRED-DICH-NGOAI-KHO-r1.md` (phụ thuộc packet 1 đã land). CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng; KHÔNG đọc secrets thật (dữ liệu giả). Chạy thử trong RAM hoặc bản sao dưới /tmp.
+
+Worktree master 641108c. `*-r1-ban3.md` là bản bạn review lượt 3 (request_changes: P2 surrogate W6 mâu thuẫn + config cũ không phải dict; P2 N1 không giết đột biến riêng W2; P2 nhánh reparse packet 1 không có test; P2 tên fragment packet 2 `wp433b_` sai regex; P3 N6(2) thứ tự đọc config; P3 N13 phản chứng trần). Bản hiện tại là bản sửa (§9 mỗi tệp). Để giữ trần 450, hai ca chuỗi `_trong_kho_git` và phép đo rc 4 `--require-agent-creds` đã chuyển sang packet 2.
+
+Việc: (1) Kiểm từng finding lượt 3 đã đóng thật (đo trên bản sao khi được: surrogate os.environ, `.update` trên list/null, regex `_PACKET_TEST_ID_PATTERN`). (2) Những gì chuyển sang packet 2 có rơi mất bảo đảm nào packet 1 tự hứa không; packet 1 có lời khai nào phụ thuộc phép đo nay nằm ở packet 2. (3) Ước lượng packet 1 386–441 (biên 9) so trần 450 và luật dừng khi vượt. (4) Hợp đồng `_kiem_dich_ghi` giữa hai packet. (5) Rà L1–L7 (`.claude/skills/soan-spec/SKILL.md`) cho cả hai.
+
+Đầu ra stdout: bảng finding lượt 3 (đóng/chưa), finding mới P0–P3 ghi rõ packet nào. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2 ở CẢ HAI packet.

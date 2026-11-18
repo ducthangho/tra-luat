@@ -1,0 +1,7 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 5, cho hai ĐẶC TẢ packet bảo mật (chưa có mã) của Issue #433: packet 1 `ops/specs/NLM-GWS-DICH-NGOAI-KHO-r1.md` và packet 2 `ops/specs/GWS-CRED-DICH-NGOAI-KHO-r1.md` (phụ thuộc packet 1 đã land). CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng; KHÔNG đọc secrets thật (dữ liệu giả). Chạy thử trong RAM hoặc bản sao dưới /tmp.
+
+Worktree master 641108c. `*-r1-ban4.md` là bản bạn review lượt 4 (request_changes: P2 pk1 NUL trong env; P2 pk1 đột biến db_reparse_moi_thu sống; P2 pk1 nhánh định dạng W1/W3; P2 pk1+2 rc 4 khi W2 bị từ chối; P2 pk2 đường Windows theo ổ; P3 pk1 §7 độ phủ). Bản hiện tại là bản sửa (§9 mỗi tệp). Để giữ trần 450, ca symlink tệp cuối của jar và đột biến db_bo_symlink_cuoi chuyển sang packet 2 (ước lượng packet 1 391–446, biên 4).
+
+Việc: (1) Kiểm từng finding lượt 4 đã đóng thật (đo trên bản sao khi được: NUL os.environ, ntpath splitdrive/isabs, bit FILE_ATTRIBUTE_DIRECTORY vs REPARSE_POINT, dòng 1652 và 1955 base). (2) Những gì chuyển sang packet 2 có rơi mất bảo đảm nào packet 1 tự hứa không; packet 1 có lời khai nào phụ thuộc phép đo nay nằm ở packet 2. (3) Ước lượng packet 1 391–446 (biên 4) so trần 450 và luật dừng khi vượt. (4) Hợp đồng `_kiem_dich_ghi` giữa hai packet. (5) Rà L1–L7 (`.claude/skills/soan-spec/SKILL.md`) cho cả hai.
+
+Đầu ra stdout: bảng finding lượt 4 (đóng/chưa), finding mới P0–P3 ghi rõ packet nào. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2 ở CẢ HAI packet.

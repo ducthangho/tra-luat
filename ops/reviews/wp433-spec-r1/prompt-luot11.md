@@ -1,0 +1,8 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 11 (chủ kho đã nâng trần lời gọi 10→12 CHỈ cho packet 1), cho ĐẶC TẢ packet bảo mật packet 1 `ops/specs/NLM-GWS-DICH-NGOAI-KHO-r1.md` (Issue #433), chưa có mã. Packet 2 `ops/specs/GWS-CRED-DICH-NGOAI-KHO-r1.md` đã HOÃN (revision riêng sau khi packet 1 land); chỉ đọc nó để kiểm ranh giới, finding chỉ của packet 2 ghi nhận nhưng không chặn. CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng; KHÔNG đọc secrets thật (dữ liệu giả). Chạy thử trong RAM hoặc bản sao dưới /tmp.
+
+Worktree master 641108c. `*-r1-ban10.md` là bản bạn review lượt 10 (packet 1: P2 đột biến dòng 1–2 §4b quay về vòng ghi base nên bỏ cả hai chốt, thiếu đột biến riêng bỏ `_kiem_jar_nlm` ở từng caller; P3 M4 còn hứa "không ngoại lệ" cho phần W6 đã chuyển và viện dẫn M3(0b)). Bản hiện tại: ba đột biến `db_w{1,2,3}_bo_kiem_jar` + ca `chung_khoa_la_mot_thanh_phan` (khoá một thành phần ngoài allowlist), §4b 30 dòng, M4 thu hẹp. Ước lượng 369–420.
+
+Việc: (1) Kiểm hai finding lượt 10 đã đóng thật (mô phỏng trong RAM: khoá `khac.json` một thành phần qua `_kiem_dich_ghi` đúng tiền điều kiện M1; mỗi đột biến chỉ bỏ một chốt đổi màu đúng nhãn `khong_khoa_la` ở đúng lượt). (2) Rà TOÀN BỘ §4b packet 1 theo cùng tiêu chí các lượt trước (cơ chế chết H/E, tập khai theo lượt, không đột biến gộp chốt). (3) Packet 1 tự nhất quán sau các lần chuyển khối sang packet 2. (4) Trần ≤450 và luật dừng. (5) L1–L7.
+Chỉ nêu finding mới nếu là lỗi thật có phản chứng chạy được hoặc mâu thuẫn trích dẫn được; ghi rõ packet.
+
+Đầu ra stdout: bảng finding lượt 10 packet 1 (đóng/chưa), finding mới P0–P3. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Approve khi packet 1 không còn P0–P2.

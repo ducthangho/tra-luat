@@ -1,0 +1,8 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 10 — LƯỢT CUỐI trong trần lời gọi — cho hai ĐẶC TẢ packet bảo mật (chưa có mã) của Issue #433: packet 1 `ops/specs/NLM-GWS-DICH-NGOAI-KHO-r1.md` và packet 2 `ops/specs/GWS-CRED-DICH-NGOAI-KHO-r1.md` (phụ thuộc packet 1 đã land). CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng; KHÔNG đọc secrets thật (dữ liệu giả). Chạy thử trong RAM hoặc bản sao dưới /tmp.
+
+Worktree master 641108c. `*-r1-ban9.md` là bản bạn review lượt 9 (request_changes: P2 pk1 §4b #8–10 tập khai theo ca thay vì theo lượt gọi; P2 pk1 db_w3_bo_chot gộp hai chốt; P2 pk2 reparse_w1 không đi qua tiền tố gắn bit; P3 pk1 fixture list rỗng; P3 pk2 ntpath.isabs khác phiên bản). Bản hiện tại là bản sửa; ngoài ra, để giữ trần 450, khối KIỂM DỮ LIỆU W6 (mã M3(0b), ca N3(4)–(7), năm đột biến db_w6_*) chuyển từ packet 1 sang packet 2 (M7/N9w6); packet 1 giữ nguyên hành vi base cho các trường hợp ấy. Ước lượng: packet 1 365–416, packet 2 374–446.
+
+Việc: (1) Kiểm từng finding lượt 9 đã đóng thật (đo khi được: tập khai theo lượt + tự kiểm sai lượt; đột biến tách chốt W1/W3; khoá lồng `profiles/default/cookies.json`; `[1]`; thứ tự kiểm gốc-thiếu-ổ trước isabs). (2) Việc chuyển khối W6: packet 1 có còn lời khai/mã nào phụ thuộc phần đã chuyển; packet 2 M7 nhất quán với W6 của packet 1. (3) Rà TOÀN BỘ §4b cả hai packet theo cùng tiêu chí các lượt trước. (4) Trần và luật dừng. (5) L1–L7.
+Chỉ nêu finding mới nếu là lỗi thật có phản chứng chạy được hoặc mâu thuẫn trích dẫn được; ghi rõ mức và packet.
+
+Đầu ra stdout: bảng finding lượt 9 (đóng/chưa), finding mới P0–P3 ghi rõ packet nào. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2 ở CẢ HAI packet.

@@ -73,6 +73,6 @@ Cột `ket_luan`: `passed` · `failed` · `skipped` · `not_run` · `cho_raw` (�
 | Dọn dẹp / khóa | 17/11 16:26Z: KHOA.txt 0 byte trên Desktop `C:\tl-win`, `F:\tl-win`, VM `C:\tl-win`. VM: Proxima + ProximaGateway chạy từ 13/11 04:04Z | direct_live_17_11 | Lúc đo không ai giữ khóa. Chưa chứng minh dọn dẹp đã xong |
 
 ## Blocker
-1. **Gói raw cuối 13/11 không tìm thấy** trên Desktop/VM (quét tên) và Google Drive. ASUS offline 28h. Phiên bridge ASUS không đọc được từ phiên Cloud.
+1. ~~Gói raw cuối 13/11 không tìm thấy~~ → **18/11: đã định vị raw P3 + P4 trên ASUS** (xem `RAW-1311-POINTERS.md`, zip P4 `97e9b78f…`, zip P3 `147714ad…`, khớp băm tự khai). Vẫn thiếu raw P5 (VM) và hồ sơ P6 (ma trận ca/runbook/review/quyết định). Chưa review độc lập trên raw này.
 2. VM chỉ còn ~1,67 GB trống ở C: — chặn mọi native run trên VM cho tới khi có quyết định dọn đĩa.
 3. Chưa có spec/lease cho thi công bổ sung.

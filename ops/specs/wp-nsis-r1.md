@@ -1,6 +1,6 @@
 # WP-NSIS r1 — Cài, gỡ, cài lại bộ cài NSIS chính thức của Proxima trên Desktop (đặc tả đóng băng)
 
-- Packet: con của #1319 (Issue sẽ được tạo khi cấp lease). Revision 1. Review Class: `sensitive`.
+- Packet: #1405 (con của #1319). Revision 1. Review Class: `sensitive`.
 - Căn cứ:
   - Bảng ma trận `ops/acceptance/wp1319/MATRIX.md`, hàng "NSIS thật".
   - Quyết định của chủ kho ngày 18/11 (mục H.2): "NSIS cài thật trên Desktop (máy thử)", per-user, gỡ sạch sau khi đo.

@@ -1,0 +1,50 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1401
+packet_id: WP-PXA
+revision: 1
+generation: 1
+lease_id: wp-pxa-r1-g1-executor
+role: executor_dispatcher
+executor: codex
+executor_surface: codex_cli
+executor_model: KHONG_do_duoc
+reviewer: independent_readonly
+reviewer_model: KHONG_do_duoc
+review_class: sensitive
+target_hosts: [DESKTOP-T9R33P2, ASUS-LAPTOP]
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt', 'D:\tl-win\KHOA.txt']
+spec_path: ops/specs/wp-pxa-r1.md
+spec_hash: 5f2924c21bc745e3d5ab29da53ce7e0a8ee5b9f14b90fd871d4e4f3e656b33e9
+write_set:
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/scripts/ProximaActivation.psm1
+- .agents/skills/proxima-control/tests/ProximaActivation.Tests.ps1
+- ops/acceptance/wp-pxa/RESULTS.md
+- ops/acceptance/wp-pxa/VERDICT-code.md
+- ops/acceptance/wp-pxa/VERDICT-run.md
+- ops/acceptance/wp1319/MATRIX.md
+- ops/leases/wp-pxa-r1-g1-executor.yaml
+- ops/specs/wp-pxa-r1.md
+write_set_hash: 6208b5860c238c224d68464c9a92553cc0a97dc23e0cce6406815a02461e58e3
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: 13bf69f6eb797e859619a2062e7c9577e6a9cc0b
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 18/11 trong phiên session_015GtxrapMSm976JLC7Fp1HM: "Sửa ngay" (P1-2 module mới trong repo; P1-3 chốt ở operator), "Xử lý luôn" (§11 #8), gateway không inference'
+granted_on_instruction_note: 'không LIVE, không inference, không đăng nhập, không sửa ProximaControl/ProximaConfig hay mã P4, không vá binary Proxima'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-18T15:22:10Z'
+heartbeat_at: '2026-11-18T15:22:10Z'
+lease_until: '2026-11-18T23:22:10Z'
+lease_expires_at_utc: '2026-11-18T23:22:10Z'
+max_lease_hours: 8
+codex_executor_calls_limit: 3
+codex_executor_calls_used: 0
+review_calls_limit: 2
+review_calls_used: 0
+native_runs_limit: 2
+native_step_reruns_limit: 1
+windows: native_desktop_asus_only

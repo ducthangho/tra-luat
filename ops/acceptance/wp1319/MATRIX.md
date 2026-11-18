@@ -115,3 +115,16 @@ Verdict: **request_changes**. Toàn vẹn sạch: zip 118 entry khớp.
 
 Hai lời khai công khai của P3 **không có trong raw**: "selected_remote authorized DC target + 4 status/WhatIf" và "guards 6 prior native cases via 4-module equivalence" (finding F1, F2).
 
+## F. r2: bộ test operator P4 chạy trên ASUS (18/11, `r2/VERDICT-claude-xhigh.md`: **approve_scoped**)
+
+Zip `74f02bd3…`. Mã đúng bằng mã P4 (`97e9b78f…`), không đổi sau khi chạy. `test_recovery.py` 19/19 trên win32; `test_native_lock` 4/4; `test_operator_safety` và `test_dependency_pins` đạt. Quét secret rc 0, lưu trong tệp.
+
+| Hàng | Trước r2 | Sau r2 | Điều kiện đọc |
+|---|---|---|---|
+| §11 #10 file khoá / đĩa đầy / rollback thất bại | not_evidenced | **partial** | File khoá: `real_os` ở mức primitive Windows, trên dữ liệu tổng hợp. Đĩa đầy, chép dở, promotion-failure, restart-failure: **fixture** (`passed_fixture_scope`). "Đĩa đầy" là kiểm dự trữ khi hàm đo dung lượng bị giả về 0, **không phải ổ đầy thật** |
+| §11 #7 máy bận / updater trùng | partial | partial | Khoá trùng nay có raw đóng băng. Ca `busy` nghĩa là "chưa xác minh chủ sở hữu đã đóng", **không** nâng được vế "máy bận thì hoãn" (vẫn not_evidenced). Khoá trùng của electron-updater vẫn not_evidenced |
+| §11 #9 phục hồi | partial | partial | Thêm các ca âm ở phạm vi fixture. Rollback binary vẫn yếu |
+| §11 #6 vế âm, §11 #8, U4, U8 | — | không đổi | Chưa có ca native trên Proxima/Electron thật |
+
+Giới hạn sản phẩm quan sát được (P3 #7): sau promotion-failure, thư mục `profile` bị vắng; sau ca native locked profile, staging còn sót lại. Giao dịch chỉ chạy một lần nên cần người can thiệp.
+

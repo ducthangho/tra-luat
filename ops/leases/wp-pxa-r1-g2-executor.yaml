@@ -37,16 +37,18 @@ granted_on_instruction_note: 'không LIVE, không inference, không đăng nhậ
 recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-18T15:24:34Z'
-heartbeat_at: '2026-11-18T15:24:34Z'
-lease_until: '2026-11-18T23:24:34Z'
-lease_expires_at_utc: '2026-11-18T23:24:34Z'
+heartbeat_at: '2026-11-18T15:46:13Z'
+lease_until: '2026-11-18T15:46:13Z'
+lease_expires_at_utc: '2026-11-18T15:46:13Z'
 max_lease_hours: 8
 codex_executor_calls_limit: 3
-codex_executor_calls_used: 1
+codex_executor_calls_used: 2
 review_calls_limit: 2
-review_calls_used: 0
+review_calls_used: 1
 native_runs_limit: 2
 native_step_reruns_limit: 1
 windows: native_desktop_asus_only
 carried_over: 'g1 da dung 1 loi goi Codex (tu choi preflight); ngan sach khong reset'
 base_note: 'HEAD cua workspace la commit ghi lease g2; cha cua no la base_sha; base..HEAD chi doi ops/leases/'
+withdrawn_at_utc: '2026-11-18T15:46:13Z'
+withdrawn_reason: 'doi Executor sang Fable 5.2 theo chu kho; thay bang g3'

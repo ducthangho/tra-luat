@@ -147,3 +147,15 @@ Không đổi: §11 #2 (gateway thật / không fallback chưa đo), §11 #6–#
 
 - **§11 #7, vế "máy bận"**: chủ kho **chấp nhận "dừng"** (`HOST_BUSY`: dừng, chờ người chạy lại) thay cho "tự hoãn". Lấy qua AskUserQuestion trong phiên `session_015GtxrapMSm976JLC7Fp1HM`. Vế này đọc theo nghĩa mới: mã P4 dừng đúng như vậy (`run_activation.py` dòng 23), và r2 đã có raw cho khoá trùng ở mức fixture. Vế "updater chạy trùng bị khoá" vẫn chờ R4-D.
 - **r4** (đặc tả `ops/specs/wp1319-r4.md`, lease `ops/leases/wp1319-r4-g1-operator.yaml`): R4-A/B (§11 #6 vế âm), R4-C (U4), R4-D (§11 #7 vế updater trùng). Chủ kho duyệt "R4-A..D đủ". Kết quả sẽ ghi ở `r4/RESULTS.md`.
+
+### H.1 Kết quả r4 (review 2/2 `approve_scoped`, `r4/VERDICT-run.md`, zip ASUS `cf712bc1…`)
+| Hàng | Trước r4 | Sau r4 | Điều kiện đọc |
+|---|---|---|---|
+| §11 #6 vế âm (artifact hỏng hoặc sai nguồn) | not_evidenced | **partial (real_os)** | Sửa 1 byte (A) hoặc đổi kích thước (B1) thì bị chặn trước khi spawn. **Tệp thừa cạnh `Proxima.exe` (B2) KHÔNG bị chặn**: lỗi của đường kiểm P4 (P1-2) |
+| U4 updater có bản mới | not_evidenced | **passed (scoped, real_os), chỉ nhánh sai integrity** | Proxima 5.5.0 (`baseline`, electron-updater gốc) thấy 5.5.1, tải về, từ chối vì `sha512 checksum mismatch`, không cài, binary và ASAR trùng byte. Chưa đo: cài thật khi bản tải hợp lệ, chữ ký số, biến thể `repaired` |
+| §11 #7 máy bận | partial | **passed (scoped) theo quyết định "dừng"** | Khoá host trùng bị chặn trên OS thật (D1 `winerror 32`); khoá có nội dung thì `HOST_BUSY` (D2, fixture) |
+| §11 #7 updater chạy trùng | not_evidenced | **partial** | Chỉ khoá của operator chặn được. **Proxima không có single-instance (D3):** lần chạy thứ hai cùng profile vẫn chạy updater song song và ghi đè `rest-port.json`, `ipc-port.json` và `settings.json` của profile (P1-1, P1-3) |
+
+Finding sản phẩm cần chủ kho quyết định (không tự sửa):
+- **P1-2:** đường kiểm trước khi spawn phải từ chối tệp ngoài manifest (DLL-planting).
+- **P1-3:** cần `requestSingleInstanceLock` theo profile, hoặc chấp nhận rằng chỉ khoá operator bảo vệ.

@@ -1,11 +1,11 @@
-# WP1319 r4 — Kết quả chạy native trên ASUS (đã đọc được; chờ review 2/2)
+# WP1319 r4 — Kết quả chạy native trên ASUS (review 2/2: approve_scoped)
 
 Trạng thái lúc 2026-11-18 khoảng 11:05Z:
 - Lượt chạy đã **trọn vẹn** từ 10:23:32Z đến 10:29:57Z, `stopped_at: null`.
 - Desktop Commander mất kết nối khoảng 10:31–10:56Z, **sau** khi lượt chạy đã xong. Máy không khởi động lại (`LastBootUpTime` 04:05Z).
 - Khoá `D:\tl-win\KHOA.txt` đã được harness tự nhả: tệp rỗng, `host_lock_released: true`.
 - Không còn tiến trình nào chạy từ `C:\Users\admin\tl-work\wp1319-r4\`.
-- **Chưa có review độc lập trên gói này, nên MATRIX chưa đổi.**
+- Review 2/2 kết luận `approve_scoped` (xem `VERDICT-run.md`). MATRIX đã cập nhật ở mục H.
 
 ## Hiện vật (ASUS, ngoài kho)
 - Gói đóng băng: `C:\Users\admin\tl-work\wp1319-r4\freeze\wp1319-r4-evidence.zip`.
@@ -29,13 +29,13 @@ Trạng thái lúc 2026-11-18 khoảng 11:05Z:
 | D1: khoá host trùng | rejected | `winerror: 32` |
 | D2: khoá có nội dung | rejected | `size: 17`, `would_raise: HOST_BUSY` |
 | D3: kích hoạt Proxima lần hai, cùng profile | **không bị chặn** | Instance hai chạy đủ: `[IPC] Port 19222 in use, trying 19223...`, mở API riêng và updater riêng (cũng tải 5.5.1 rồi bị sha512 từ chối). Không thoát trong 30 s; harness dọn cưỡng bức (`forced_cleanup: true`, `owned_active_after_cleanup: 0`) |
-| D tổng | **false** | `first_unaffected: false` (cần reviewer xác định nguyên nhân); `profile_intact: true` |
+| D tổng | **false** | `first_unaffected: false`, vì instance hai (pid 26124) **ghi đè** `profile-C\rest-port.json`, `ipc-port.json` và `settings.json` (`ipcPort` 19223). Instance một vẫn trả `/v1/stats` và thoát với rc 0. **Sửa P1-1:** cờ `profile_intact: true` chỉ kiểm provider và sentinel; về thực chất, các tệp discovery của profile **đã bị ghi đè**. Phụ lục nằm ở `addendum-profile\` (xem `VERDICT-run.md`) |
 
 Mạng ra ngoài: chỉ có CONNECT tới `fonts.googleapis.com` và `pypi.org`, tất cả bị proxy Deny trả 403. Không có inference; provider tắt.
 
 ## Ngân sách
 - Codex: 3/3.
-- Review: 1/2 (`VERDICT-code.md`), lượt 2/2 đang chạy trên gói này.
+- Review: 2/2 (`VERDICT-code.md` request_changes; `VERDICT-run.md` approve_scoped).
 - Native: 1 lượt, chưa dùng lần chạy lại.
 
 ## Finding của phiên điều phối

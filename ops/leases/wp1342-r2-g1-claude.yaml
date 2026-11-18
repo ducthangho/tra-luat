@@ -74,8 +74,8 @@ leased_at_utc: '2026-11-18T04:50:00Z'
 heartbeat_at: '2026-11-18T04:50:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-19T04:50:00Z'
-lease_expires_at_utc: '2026-11-19T04:50:00Z'
+lease_until: '2026-11-18T09:20:00Z'
+lease_expires_at_utc: '2026-11-18T09:20:00Z'
 lease_until_ghi_chu: '24h (packet lon, do native Windows); rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
@@ -91,3 +91,14 @@ budget:
 budget_ghi_chu: 'Codex <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 3 (Desktop uu tien, VM cho P5 va du phong; khong CI Windows). Ngoai ngan sach PR: 3 loi goi Codex offline review dac ta r2 truoc lease (ops/reviews/wp1342-spec-r2/).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-18T09:03:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex PR 2/10: connector tren f50be35 va c10d071 (sach). CI Ubuntu 2/2: f50be35 (36 xanh, 2 do moc dot bien trung) va c10d071 (41 success, 1 skipped). Windows native 2/3: luot Desktop+VM tren f50be35 va do lai tren c10d071. Push them 1 (chu kho duyet checkpoint M5). Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-19T04:50:00Z'
+  han_moi_utc: '2026-11-18T09:20:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1342 r2 da MERGE: PR #1384 (head c10d0710735e3532035a5219d469704d8a7592bb) merge commit d1ca71a4b30eb5816c3e7be43c87a18acdf3fd7a,
+    human audit chu kho issuecomment-6973845894. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Revision 3 se cap lease moi sau khi do lai dac ta r3 tren base moi; chua co lease ke nhiem luc rut.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu hai duong dan write set sau 2026-11-18T09:20:00Z phai ra NGUOI_GIU 0.'

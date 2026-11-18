@@ -24,7 +24,7 @@ Base `eca1d125b8`. SKILL tại base: blob `678ba2f0`, sha256 `1799c2bd…faadb`.
 | `ff34b2c` | sửa theo lượt 4 (§8) | local Windows bắt một lỗi đột biến PS (W7) |
 | `d7960ee` | vá W7 | đo lượt 5 (§2–§5, §8). Codex lượt 5 ở `376e9c2` (mã trùng byte): `request_changes` (1 P1 + 2 P2 chặn merge) |
 | `1d7b9f4` | chủ kho nâng trần Codex 5 → 6; sửa theo lượt 5 (§9) | đo lượt 6 (§9). Codex lượt 6 ở `d0d4879` (mã trùng byte): `request_changes` (1 P1 + 2 P2 chặn merge) |
-| **`8be8070`** | chủ kho nâng trần Codex 6 → 7; sửa theo lượt 6 (§10) | **đo cuối** (§10) |
+| **`8be8070`** | chủ kho nâng trần Codex 6 → 7; sửa theo lượt 6 (§10) | **đo cuối** (§10). Codex lượt 7 ở `3c524fc` (mã trùng byte): `request_changes` — 3 chốt lượt 6 **đã sửa**; 1 P1 MỚI (cache Linux casefold, lỗi có sẵn từ thiết kế preflight, chưa ai chạy) — trần Codex 7/7 đã dùng hết |
 
 ## 0. Thiết kế (vì sao (b), và cách lấy sổ phiên)
 

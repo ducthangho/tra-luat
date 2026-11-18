@@ -381,3 +381,68 @@ TONG: 116 dat / 116
 - `python -B -` kiểm SRI và byte tarball — rc 0. `python -B -` đối chiếu ID các ca với mutant — rc 0. Probe Bash trên `scratch/receipt-byte-probe`: ghi bằng `printf` rc 0, phép so command substitution rc 0 và có cảnh báo bỏ NUL, `cmp -s` rc 1.
 - Các nhóm đọc bằng `cat`, `nl`, `sed`, `rg`, `head`, `tail`, `wc` cho chỉ dẫn, spec, lease, verdict cũ, mã, nguồn, harness, RESULTS và log — rc nhóm 0, trừ nhóm kết thúc bằng `command -v pwsh` rc 1. `bash --version | head -1` rc 0. Tra tài liệu Microsoft và mã nguồn PowerShell qua web trả kết quả, không có mã thoát shell.
 - `python -B repo/.claude/dev/packet_loop.py doctrine-scan --root repo` — rc 0, quét 12 tệp, 0 chỗ chép doctrine. Kiểm lại trạng thái checkout — rc 0, cây sạch.
+
+## Lượt 7 (Codex CLI, 2026-11-18T14:48:37Z → 14:51:53Z, rc 0; chép nguyên văn `scratch/VERDICT.md`)
+
+# WP1389 r1 — review độc lập lượt 7
+
+reviewed_sha: 3c524fce69931fc38a23ba9056b1b24cb71f4049
+verdict: request_changes
+reviewer: codex (OpenAI), codex_cli, read-only
+
+HEAD khớp HEAD_SHA.txt, tree cb3d08340819dbe4876844d830849d78f9cc7308, checkout sạch trước và sau review. Base là tổ tiên của HEAD, blob SKILL tại base khớp spec. SHA-256 spec là 12257fa8d659ff5c013af4bc31de700de4a53b085a99ec8c47cbd403d66610bc. Lease ghi budget_nang_tran_4, used 6, reserved 1, limit 7.
+
+## Finding chặn merge
+
+- **P1 — Capture Bash có thể cho CLI cắt rỗng tệp .err đã có trên cache Linux không phân biệt hoa thường.** `.agents/skills/playwright-browser/SKILL.md:195–208`, đặc biệt dòng 203, và nguồn ghim `cli-client/session.js:121–126`. Trên một thư mục cache Linux có tra cứu tên không phân biệt hoa thường, chẳng hạn thư mục ext4 bật casefold, giả sử thư mục hash đã chứa tệp .err với các chữ hex trong nonce được viết hoa. `find -name` so tên phân biệt hoa thường nên preflight có thể thấy 0 mục. Tuy nhiên tra cứu đúng pathname chữ thường của Node có thể mở chính tệp đã có với cờ `w`, làm mất byte trước khi Cleanup chạy. Limits hiện bao gồm Linux x64 và giả định cache tin cậy, nhưng tình huống này không cần liên kết, can thiệp đồng thời hay cache không tin cậy. Đây là lỗi có sẵn trong thiết kế preflight, phát hiện khi đối chiếu hai shell ở lượt 7. Thêm chốt tra cứu pathname chính xác mà Node sẽ mở, từ chối khi mục đã tồn tại, kể cả symlink treo, và dừng nếu lỗi tra cứu khác trường hợp vắng mặt. Giữ phép quét B1 cho các mục cùng nonce ở các thư mục khác. Ca test do executor dựng trên cache Linux casefold, chỉ đặt biến thể hoa tại hash hiện hành, ép nonce fixture có chữ hex, rồi yêu cầu không chạy open, byte và mtime của tệp giữ nguyên. Gỡ chốt tra cứu trực tiếp phải làm ca lọt. Ca này là suy luận từ mã, chưa được chạy trong review.
+
+## Đối chiếu từng chốt chặn của lượt 6
+
+| Chốt | Trạng thái ở HEAD |
+|---|---|
+| P1 PowerShell có thể xoá sai tên do phép so theo văn hoá | **Đã sửa.** SKILL:253 và :452 dùng Equals Ordinal cho ràng buộc hash và đường dẫn đích. :452–464 chỉ chép/xoá mục đã qua chốt. N26 PS có mutant riêng. Executor báo mutant tái hiện trên cả 5.1 và 7. |
+| P2 đầu Cleanup nhận 00 khác byte | **Đã sửa.** SKILL:341–346 và :402–411 bắt tệp thường, so dữ liệu thô với ba dòng và LF cuối trước :354/:429. D12 và mutant record-bytes đo byte NUL trên Bash và BOM trên PS theo mã harness. |
+| P2 Gỡ nhận 00 hoặc 11 khác byte | **Đã sửa.** SKILL:485–493 và :505–520 kiểm loại tệp, trích nonce rồi so byte của cả hai biên nhận. Việc đọc dòng nonce bằng sed hoặc ReadAllText không quyết định một mình, vì cả tệp vẫn phải qua cmp hoặc ReadAllBytes. G13/G14 và mutant tương ứng tách hai chốt. |
+
+Bản verdict lượt 6 gộp hai hàng P2 trên vào một bullet. P3 về sentinel cũng đã sửa tại SKILL:202,345,374,493. Sentinel được in sau khi realpath thành công, đồng thời giữ LF cuối đường dẫn trong phép so.
+
+## B1–B8 và kiểm tra delta
+
+- **Nguồn ghim.** SRI SHA-512 của cả ba tarball khớp lockfile. 16 tệp CLI và 116 tệp core trong cây giải nén trùng byte với tarball. `registry.js:119–165` xác nhận hook test, cache Linux/Windows, nhánh macOS ngoài phạm vi, hash SHA-1 cắt 16 hex trên workspaceDir hoặc packageRoot. `session.js:73–97,121–126` xác nhận chỉ delete-data chọn .session và ud- cùng phiên, .err mở bằng w. Nguồn registry trình duyệt trong coreBundle dùng cache ms-playwright/b riêng. README, session-management và chương trình ghim không cung cấp tuỳ chọn chuyển sổ phiên được hỗ trợ. --profile và --config phục vụ cấu hình trình duyệt. Phương án (a) vẫn không khả dụng theo định nghĩa spec.
+- **B1/B2.** Probe và CLI dùng cùng Node, CWD work và môi trường kế thừa qua các wrapper thông thường (SKILL:180–184,194–205,216–225,246–263). JS ASCII được truyền thành một đối số, không có dấu nháy kép nhúng. Base64 giữ Unicode qua stdout. Node xử lý XDG_CACHE_HOME rỗng và slash cuối, Windows lấy LOCALAPPDATA hoặc home của Node. Cache thiếu cho qua preflight, cache rỗng trả 0 mục, Cleanup cần cả hai thư mục hiện hữu. Bản ghi tạo mới trước open, thiếu hoặc khác thì đầu Cleanup dừng. Có bản ghi chưa chứng minh open thành công. E4/E7/E8 phân biệt các thời điểm dừng ở mức fixture. Bảng ghim, Setup, Kiểm pin và lệnh 08–10 giữ nguyên.
+- **B3/B4.** Bash dùng mapfile -d với NUL, wait PID quét, rồi so đường dẫn chính xác và loại tệp. PS bỏ qua thư mục con reparse khi liệt kê, kiểm tổ tiên của đích và dùng ordinal cho mục duy nhất. Tên ngắn 8.3 không chứa trọn nonce dài 18 ký tự. Đường dẫn UNC chưa được đo. Hai shell ghi 11-path, chép, so, xoá, kiểm mất, theo thứ tự đó. Ngoài lỗi preflight nêu trên và giới hạn dưới đây, không thấy đường mới xoá nhầm đích hoặc báo OK khi bước dọn chưa đạt.
+- **Pipeline và UTF-8.** Pipe có ưu tiên cao hơn danh sách &&/||. Không bật pipefail ở Cleanup/Gỡ nghĩa là status cmp quyết định. Một luồng bị cắt ngắn so với biên nhận hợp lệ bị cmp từ chối. Probe cục bộ cho thấy luồng đủ byte vẫn khớp dù producer báo lỗi, còn luồng ngắn trả 1. Với printf format cố định và stdout là pipe, không tìm thấy đường mà lỗi producer thực tế làm biên nhận sai khớp. PowerShell tiếp dòng sau dấu phẩy bên trong đối số phương thức, dấu chú thích không làm mất dấu phẩy. GetBytes không chèn preamble, Capture ghi UTF-8 no BOM và LF, WriteAllText hai đối số mặc định ghi UTF-8 no BOM, ReadAllBytes giữ nguyên BOM nếu bị thêm. Executor báo cả PS 5.1 và 7 đã chạy các khối có cú pháp này.
+- **B5/B6.** Marker vẫn bao đúng phần dọn. Dọn xong mới băm và in CLEANUP OK. CLI giả của E1/E6/E8 mô phỏng JSON/LF, rc, trạng thái mở và nhánh deleted theo descriptor cho các tình huống harness dùng. Fixture không mô phỏng đầy đủ launcher hay userdata. N3/N4 của ma trận dựng riêng dư lượng descriptor/userdata. Giới hạn bỏ qua lỗi xoá registry trình duyệt trong close vẫn cần đọc cùng kết quả CLEANUP OK.
+- **B7/B8.** Gỡ kiểm 00/11 và hỏi CLI trước khi xoá install, sau đó chỉ rmdir hoặc Directory.Delete với false. Evidence khai cả hai output 11. Limits nêu phạm vi file, thư mục, .err cũ, cache dùng chung, mô-đun nội bộ và Bash tối thiểu 4.4. Nên bổ sung fallback Windows của LOCALAPPDATA vào Limits.
+
+## Findings không chặn merge và giới hạn đã khai
+
+- **P3 — N26 có thể quy nhầm lỗi fixture thành runtime không tái hiện.** `ops/acceptance/wp1389/residue_matrix.ps1:478–482`. Nếu mutant dừng vì parse, IO hay chốt khác, nhánh else vẫn ghi SKIP với lý do -ceq không bỏ qua U+00AD. Sửa bằng probe so sánh độc lập trên hai tên và kiểm riêng lý do thất bại của mutant. Ca test cho mutant gặp lỗi trước chốt tên và yêu cầu FAIL thay vì SKIP. Executor báo mutant đạt đường lọt trên cả hai runtime đã đo nên nhược điểm này chưa làm mất bằng chứng của lượt đó.
+- **P3 — Cache và cây run cần ổn định.** SKILL:202,374–386,442–464,493–526,544–547. Sau lần kiểm cuối, các thao tác dựa trên pathname. Một tiến trình đồng quyền có thể tráo thư mục hoặc biên nhận giữa kiểm và dùng. Limits đã khai giả định cache tin cậy. Nếu mở rộng mục tiêu sang thay đổi đồng thời, cần thao tác neo vào thư mục đã mở và kiểm danh tính đối tượng. Ca xác nhận do executor dựng sẽ thay thư mục sau chốt và kiểm mục ở đích giữ nguyên. Review không dựng fixture đường dẫn thoát cây.
+- `git diff --check d0d4879..HEAD` báo trailing whitespace tại harness Bash :399,400,437,446 và hai dòng xuống hàng Markdown trong verdict lưu :326–327. Lỗi trình bày, không ảnh hưởng phép đo.
+
+## Độ phủ ma trận
+
+- Bash không có mutant đích riêng theo log hoặc có mutant nhắm ca khác: P1/P2, C1/C2/C3/C6/C8/C10/C12/C13/C17, D3/D4/D6/D8, E3/E4/E5/E7/E8, G1/G4/G7/G8, N1/N2/N4/N6/N9/N11/N12/N16/N19/N20R/N21/N25/N26 và biến thể N8-path. D12/G13/G14 có mutant đích mới, đều lọt.
+- PS không có mutant đích riêng theo mã: P1/P2, C1/C2/C3/C6/C8/C10/C12/C13, D3/D4/D6/D8, E3/E4/E5/E7/E8, G1/G4/G7/G9, N1/N2/N4/N5/N6/N9/N11/N12/N13/N19/N20R, L2 và W1. Chưa có mutant riêng cho so nội dung bản sao PS hoặc phép ordinal ở pre-open. D10/G10 có mutant nhưng executor báo SKIP.
+- **Có mặt mà chưa cô lập được phép đo.** N25 chạy qua đầu Cleanup, có thể dừng trước chốt residue. G8 chỉ kiểm giữ cây, rmdir tự từ chối symlink nên kết quả chưa chứng minh pha (1) từ chối biên nhận. N20R chạy riêng residue nhưng mutant dùng N20. D2 đổi đầu ra registry giả, chưa đo thay đổi CWD/môi trường của registry thật. Các ca Gỡ PS kiểm cây cuối nhưng chưa bắt buộc có cảnh báo GIỮ. N26 Bash kiểm yêu cầu đích đúng, không đo khác biệt giữa ordinal và so theo văn hoá. N13 Windows không đo cache casefold của Linux. Các ca dừng thường cho phép thông báo STOP chung.
+
+## N1 độc lập
+
+```text
+SOURCE 01b08e953c5f012fdb7ab2f2c0c62a913d670536da47360d30c6469e66f1a776 pre_frag 79d485ba6e16310e512e886b76d4d8e1328eb2a45e00c35975368512589c89b6 dau_frag 84a893f5600389fae3bf2ba8c27a4650eeaf1bbeda8d7ec858a73006e84eadda cleanup_frag 2198f91d554fcbe0c17a5ab6ac6238281501ace9d0c01debbb82a4845a425f2e go_frag b63d3f537755e5c97f92c996dab3a5acd032f66923482dca855c336de54bcf2c node v22.23.5
+TONG: 123 dat / 123
+```
+
+## Không đo được và bằng chứng executor
+
+- **Windows N5-err-symlink: KHÔNG ĐO ĐƯỢC.** Executor báo D10, G9, G10 và mutant record-reparse/go-record-reparse cũng không dựng được. N2 theo lời khai trên 8be8070 là 122/122 và 6 SKIP ở mỗi shell. Review không tự chạy Windows.
+- RESULTS §10 báo N3/N4 native trên 8be8070 khớp snapshot trước/sau, gỡ được hash directory và giữ nguyên 15 .err cũ trên Windows, gồm 13 tệp chỉ định. Tôi xác minh SKILL và hai harness trùng byte giữa commit đo và H. Tôi không tự chạy native.
+- Chưa đo cache Linux casefold, UNC, Bash 4.4, host có cache hoàn toàn mới hoặc thời gian daemon thật nhả handle. N1 dùng Node v22.23.5 có sẵn, khác Node ghim của lượt native. CI bắt buộc trên H chưa được xác minh. Doctrine-scan local đạt.
+
+## Lệnh và mã thoát
+
+- cat HEAD_SHA.txt, git -C repo rev-parse HEAD, rev-parse HEAD^{tree} và blob base, merge-base --is-ancestor, git --no-optional-locks -C repo status --porcelain=v1 --untracked-files=all trước/sau, sha256sum spec, các nhóm đọc cat/nl/sed/rg/ls và diff đọc SKILL/harness/RESULTS — rc 0. command -v pwsh — rc 1, không có pwsh.
+- mkdir scratch/n1 rồi bash repo/ops/acceptance/wp1389/residue_matrix.sh repo/.agents/skills/playwright-browser/SKILL.md scratch/n1 "$(command -v node)" — rc 0, đúng một lần. Log scratch/n1.log.
+- python -B - kiểm SHA-512 và byte từng file tarball — rc 0. git -C repo diff --exit-code 8be8070 HEAD -- .agents/skills/playwright-browser/SKILL.md ops/acceptance/wp1389/residue_matrix.sh ops/acceptance/wp1389/residue_matrix.ps1 — rc 0.
+- git -C repo diff --check d0d4879..HEAD — rc 2 theo mã báo lỗi whitespace của git diff --check. Bash probe pipe cmp — luồng đầy đủ rc 0, luồng bị cắt rc 1. python -B repo/.claude/dev/packet_loop.py doctrine-scan --root repo — rc 0 (12 tệp, 0 vi phạm).

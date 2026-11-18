@@ -1,0 +1,24 @@
+Review độc lập lượt 2 cho `DOC-CLAIMS-DAU-CHAM r3 g2` (#1326). Không phát hiện lỗi triển khai P0–P3 trên ứng viên H.
+
+| Mục | Kết quả | Bằng chứng |
+|---|---|---|
+| N1 | `passed` | `python3 -B scripts/tl.py --selftest` ngoài sandbox ghi base **1777/1777**, H **1778/1778**, `rc=0` theo phiên điều phối. Hai log xác nhận các dòng tổng kết và `[OK] wp1326_doc_claims_dau_cham` trên H. Fragment chạy lại trên H trả `rc=0`. Trên base, lượt 1 trả `rc=1` với đúng chín ca lệch theo đặc tả. |
+| N2 | `passed` | D1–D6, D8 và D9 ở lượt 1 đều trả `rc=1` và nêu đúng tên ca lệch. Lượt 2 chạy `bundle_fragment_check.py --json` trên bản sao H, baseline `rc=0`. D7 trả `rc=1` với `TEST_ID_SET_MISMATCH` và nêu đúng `wp1326_doc_claims_dau_cham`. |
+| N3 | `passed` | Chạy lại `doc-claims-check --strict --json` trên H, `rc=0`, `flags=[]`. Có 173 advisory L1, số lượt miễn trừ theo cặp là `1,1,1,1,1,1,1,1,2`. Có đúng ba advisory đường dẫn dấu chấm đã xoá trong tài liệu lịch sử và không có advisory cho `references/golden/fixtures/`. Base ở lượt 1 có 162 advisory L1 và 0 miễn trừ. |
+| N4 | `passed` | Bản ADR tạm ở lượt 1 tái hiện đúng lỗi. Base `rc=2` với `PATH_MISSING` cho `agents/skills/land-packets/SKILL.md`. H `rc=0`, không có phát hiện L1. |
+| N5 | `passed` | `ruff.log` khớp băm. Chạy lại `ruff check --select F` bằng Ruff 0.16.9 cho cùng kết quả, `scripts/tl.py` **12→12** và `workflow.py` **28→28** (`rc=1` trên cả hai SHA), fragment mới **0** (`rc=0`). `git diff --check`, doctrine scan, golden, workflow audit strict, determinism audit strict, release verify strict và bundle check đều `rc=0` theo biên nhận lượt 1. Golden **20/20**, manifest **185/185**, bundle **12/12**. |
+| N6 | `passed` | Đọc trực tiếp `TOM-TAT.txt`, `selftest-BASE.txt`, `selftest-HEAD.txt` và `do-luong.csv` trên `tra-luat-win`. Cùng một lượt chạy `python -u scripts\tl.py --selftest` với Python 3.12.10, cp1252, `PYTHONUTF8` rỗng. Đúng base và H, **1777/1777** và **1778/1778**, cả hai `rc=0`, không có test ID fail hoặc skip. H chỉ thêm ID `wp1326_doc_claims_dau_cham`. |
+| N7 | `not_run` | CI và connector trên PR thuộc bước sau review offline theo ADR-0060 M5/M6. |
+| N8 | `passed` | `git diff --name-only` và `git diff --numstat` xác nhận đúng bốn tệp trong write set, **+231/−14**, dưới trần sáu tệp và 450 dòng thêm của ADR-0053. |
+
+SHA-256 của cả bốn tệp khớp tiền tố được giao: `selftest-base.log` (`01f85a34…`), `selftest-H.log` (`69bb82b8…`), `ruff.log` (`53c65cdf…`) và `n6-windows-TOM-TAT.txt` (`223838bb…`). Đối chiếu theo tên xác nhận cả chín ca đỏ giống nhau trên base và H trong sandbox lượt 1 đều có `[OK]` trên cả hai SHA ngoài sandbox. Bảy ca `r973_bootstrap_*` gặp `/tmp/.git` của sandbox. Hai ca `r226_nguong_l2_troi_theo_abbrev_va_ci_ghim` và `r268_l2_trichotomy_theo_trang_thai_object` gặp cấu hình ký commit SSH của sandbox.
+
+N6 đạt các tiêu chí kết quả M3(a)–(c). Bộ log chưa có dấu vết kiểm tải `python.exe` trước lượt chạy. Script điều phối ghi lại và nhả khóa trực tiếp, thiếu bước đọc lại chủ khóa theo ADR-0059.
+
+Reviewer `openai_codex / codex_cli / machine`, run `a5485408`, Linux workspace-write. Model và effort thực phục vụ chưa có trong biên nhận tại thời điểm xuất verdict. HEAD, tree và index của checkout review khớp ở đầu và cuối lượt.
+
+reviewed_sha: c46f7287039d207b1d377d9a10c6e77191778404  
+reviewed_tree: 84adb4ba705749f26c475b852f71dcb55257954b  
+spec_sha256: 0712647206e62eaca32701ddc05dd4aa0930f43174722aa016883d645be84864
+
+KET_LUAN: approve

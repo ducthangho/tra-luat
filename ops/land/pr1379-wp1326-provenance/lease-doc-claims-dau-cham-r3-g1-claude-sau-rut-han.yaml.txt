@@ -1,0 +1,93 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1326
+packet_id: DOC-CLAIMS-DAU-CHAM
+revision: 3
+generation: 1
+lease_id: doc-claims-dau-cham-r3-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-fable-5-2
+effort: high
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: local
+depends_on: []
+reviewer: codex
+reviewer_model: gpt-6-astra
+reviewer_effort: xhigh
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+assurance_note: 'đặc tả r3 hàng reviewer: Codex qua .claude/dev/launcher.py run, phiên mới, chỉ đọc, không fork context executor; họ openai khác họ claude của executor nên đủ cho lớp sensitive mà không cần chủ kho audit SHA ứng viên. Biên nhận lượt (run.json, stdout) là đầu vào K4 đường model của kiem-merge. Cộng connector @codex review trên PR (ADR-0060 M6).'
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/DOC-CLAIMS-DAU-CHAM-r3.md
+spec_ref: refs/heads/ops/spec-doc-claims-dau-cham@889d8a7e49b9940d8d20de896b1656a06c809222
+spec_sha256_required: 0712647206e62eaca32701ddc05dd4aa0930f43174722aa016883d645be84864
+spec_hash: 0712647206e62eaca32701ddc05dd4aa0930f43174722aa016883d645be84864
+prompt_path: ops/prompts/doc-claims-dau-cham-r3-g1-claude.md
+prompt_sha256_required: 02ee9d514e3b0738a13724af26787f39d8e1d83e9946fda9392dfa08631ded08
+write_set:
+- RELEASE_MANIFEST.json
+- scripts/test_fragments/wp1326_doc_claims_dau_cham.py
+- scripts/tl_core/workflow.py
+- scripts/tl_test_fragments_bundled.py
+write_set_hash: e346c4d74b59bd3d6fce7cb2b9c7f4c8f4e7fd14fec9cf1273c8cd16e33853c0
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+write_set_note: 'bundle và RELEASE_MANIFEST.json CHỈ tái sinh (đặc tả M3, M4). Diff PR đúng 4 tệp; trần ADR-0053 sensitive (<=6 tệp, <=450 dòng thêm) theo dòng khai ở đầu đặc tả.'
+effective_write_set:
+- RELEASE_MANIFEST.json
+- scripts/test_fragments/wp1326_doc_claims_dau_cham.py
+- scripts/tl_core/workflow.py
+- scripts/tl_test_fragments_bundled.py
+change_policy_sha: null
+branch: agent/doc-claims-dau-cham-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 9c1661f76d5f4ef811aa349df102989cc2e2d53d
+start_from_sha: 9c1661f76d5f4ef811aa349df102989cc2e2d53d
+start_from_sha_note: 'origin/master lúc cấp lease (merge PR #1338). Đặc tả r3 đo trên 815b9ac; đo lại trên 9c1661f lúc 11:37–11:40Z 16-11-2026: gốc doc-claims-check rc 0, 131 tệp, 162 advisory L1 / 98 claim, 2 lần khớp .gitignore; mô phỏng M1 rc 0, 0 cờ, 173 advisory L1, chín cặp [1,1,1,1,1,1,1,1,2]; D5 10 cờ. Giữa hai base .gitignore và scripts/tl_core/workflow.py không đổi.'
+reviewed_sha_required: 9c1661f76d5f4ef811aa349df102989cc2e2d53d
+reviewed_sha_required_note: mốc ban đầu là base; verdict Codex phải neo SHA ứng viên H thật của nhánh thi công, không bao giờ neo base
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1326#issuecomment-6905320921
+granted_on_instruction_note: 'duyệt băm đặc tả r3 (16-11-2026, ghi hộ); chủ kho chọn "Chờ #1325 land (Recommended)", rồi sau khi #1325 land trả lời phiên điều phối "Nhắn chạy tiếp" (16-11-2026, giờ Việt Nam).'
+recorded_by: phiên Claude Code điều phối DOC-CLAIMS-DAU-CHAM (worktree brave-rosalind-730dc7), ghi theo chỉ đạo chủ kho; không phải executor
+recorder_is_executor: false
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-16T11:36:47Z'
+  goc_quet: 'kho bare D:/tlscan.git, fetch --prune; tập tên ls-remote --heads (249) so for-each-ref refs/heads (249): thiếu cục bộ 0'
+  ket_qua: 'ai-dang-giu bốn đường dẫn write set (11:36:47–11:38:46Z): NGƯỜI_GIỮ 0 cả bốn. wp1325-r6-g6-claude (giữ manifest và bundle) đã rút hạn về 2026-11-16T09:13:27Z (commit 9cb1696 trên ops/wp1325-r6-g6), báo trên #1326 issuecomment-6912377877.'
+thay_the_cho: []
+thay_the_cho_note: lease đầu tiên của packet; không có lease cũ để khai bia mộ
+leased_at_utc: '2026-11-16T11:43:10Z'
+heartbeat_at: '2026-11-17T08:39:00Z'
+heartbeat_required_minutes: 360
+lease_until: '2026-11-17T08:54:00Z'
+lease_expires_at_utc: '2026-11-17T08:54:00Z'
+max_lease_hours: 24
+codex_review_calls_limit: 10
+codex_review_calls_used: 3
+codex_review_ledger: 'sổ chung trên Packet Issue #1326 cho lời gọi offline và connector (đặc tả mục 6); ba lời gọi đã dùng là ba lượt review đặc tả r1, r2, r3.'
+windows: required
+windows_note: 'ADR-0060 M3 bước 2; N6 chạy trên máy chủ kho theo ADR-0057/0058/0059.'
+full_mutant_audit: not_required
+uy_quyen_merge: false
+merge_approval: 'ADR-0060 M7: chủ kho duyệt merge một lần neo SHA H sau CI và connector (E2). Không deploy Package.'
+push_policy: 'ADR-0060 M5 (đặc tả mục 6); executor không push, phiên điều phối đẩy sau review.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-17T11:43:10Z'
+  han_moi_utc: '2026-11-17T08:54:00Z'
+  chi_thi: 'chu kho 17-11-2026 ~08:4xZ qua AskUserQuestion trong phien dieu phoi #1206 (session_015GtxrZk6gmfQKo7g4BfMBS): "Withdraw #1326, run P-D now".'
+  ly_do: >-
+    Lease giu RELEASE_MANIFEST.json tu 2026-11-16T11:51Z nhung KHONG co cong viec: nhanh thi cong agent/doc-claims-dau-cham-g1-claude
+    chua tung duoc tao (ls-remote 2026-11-17T08:39:00Z), #1326 khong co PR. P-D #1334 can RELEASE_MANIFEST.json. Mo lai #1326 can lease moi (g2).
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet; rut han theo tien le cac packet cua phien #1206.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS, theo chi thi chu kho (khong phai phien ghi lease goc).'
+  nghiem_thu: 'ai-dang-giu RELEASE_MANIFEST.json sau 2026-11-17T08:54:00Z phai ra NGUOI_GIU 0.'

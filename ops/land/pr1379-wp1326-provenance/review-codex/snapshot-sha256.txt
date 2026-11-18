@@ -1,0 +1,8 @@
+# Hien vat Codex offline review #1326 qua .claude/dev/launcher.py run (scratchpad phien dieu phoi #1206: rv1326/runs/<id>/).
+# snapshot-truoc/sau.txt (~3,3 MB moi tep) KHONG chep vao kho; ghi sha256 de doi chieu:
+2012c303/snapshot-truoc.txt 7d0300c9612d86f29b5f919740c662ede61d0991124faf5b77046dbce1191786
+2012c303/snapshot-sau.txt 7d0300c9612d86f29b5f919740c662ede61d0991124faf5b77046dbce1191786
+2012c303/checkpoint.json bfff4c21492b405ab5c14dab097acd5b0c358fd5823556bc207137b2e647baae
+a5485408/snapshot-truoc.txt 7d0300c9612d86f29b5f919740c662ede61d0991124faf5b77046dbce1191786
+a5485408/snapshot-sau.txt 7d0300c9612d86f29b5f919740c662ede61d0991124faf5b77046dbce1191786
+a5485408/checkpoint.json 4d088c8d6979724e81e6f9e1701a69c51400e1afe94ab89b2bf30d8e6d5c375c

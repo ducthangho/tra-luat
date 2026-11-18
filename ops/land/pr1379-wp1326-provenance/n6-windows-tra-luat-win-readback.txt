@@ -1,0 +1,20 @@
+# Readback N6 Windows native #1326 tren may tra-luat-win (Desktop Commander device f7281f27-f79f-40a2-a2f5-b454b58a166a), chi DOC, 2026-11-18T00:3xZ.
+# Script: C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\chay-n6-1326.ps1 (3116 byte, sha256 b5e2001cc9b4b3c12e6825fd2dd20bcd69fe8fd30320125921e47f19a048f994)
+# Thu muc ra: C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1326-n6-out\ (python hashlib tren VM):
+selftest-BASE.txt 86333 9c11d0e765404ed0a70ee8ccdd696ef48b413cd9f275da09569c390f55db4bef
+selftest-HEAD.txt 86368 c894de46fb6d45f420b424f75c23a1756a9341dfc8ed9bfc79a73937c71b6f45
+TOM-TAT.txt 496 49f17fc2ecc46320442150db17bbc71b2ef06cc59a92f2a051e50d20a22bef70
+## TOM-TAT.txt (nguyen van):
+python=Python 3.12.10 git=git version 2.56.0.windows.4 PYTHONUTF8=[] ma_hoa=cp1252 0 may=TRA-LUAT-WIN
+BASE HEAD=13bf69f6eb797e859619a2062e7c9577e6a9cc0b tree=a4cb90571c5432ad97d62fd7409b45147acf6c2a sach=[]
+BASE rc=0 1122.4s ok=1789 fail=0 skip=0 :: == tl selftest 1777/1777 ==
+HEAD HEAD=c46f7287039d207b1d377d9a10c6e77191778404 tree=84adb4ba705749f26c475b852f71dcb55257954b sach=[]
+HEAD rc=0 1164.1s ok=1790 fail=0 skip=0 :: == tl selftest 1778/1778 ==
+TONG 2296.5s
+XONG (khoa da nha)
+## dong cuoi selftest-BASE.txt / selftest-HEAD.txt:
+== tl selftest 1777/1777 ==
+== tl selftest 1778/1778 ==
+## dong do-luong.csv (C:\tl-win\do-luong.csv):
+"2026-11-17T16:52:55Z","session_015GtxrZk6gmfQKo7g4BfMBS","wp1326","c46f7287039d207b1d377d9a10c6e77191778404","N6 selftest base 13bf69f6eb797e859619a2062e7c9577e6a9cc0b + head","","","","2296.5","N6 Windows native (khong PYTHONUTF8)","xem TOM-TAT","khong","may=tra-luat-win"
+# Gioi han: script ghi khoa C:\tl-win\KHOA.txt va nha trong finally, KHONG doc lai chu khoa sau khi ghi (ADR-0059; reviewer luot 2 ghi nhan); khong co dau vet kiem tai python.exe truoc luot chay.

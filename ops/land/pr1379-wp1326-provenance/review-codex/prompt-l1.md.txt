@@ -1,0 +1,13 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI, Codex) của packet DOC-CLAIMS-DAU-CHAM r3 g2 (Issue #1326), lượt 1. Không fork context của executor. Không push, không gọi GitHub, không sửa tệp đã theo dõi trong thư mục làm việc; muốn đột biến hay dựng kho thử thì làm trong bản sao dưới /tmp. Không đọc/ghi secrets.
+
+Thư mục làm việc: clone đầy đủ lịch sử kho tra-luat, detached tại ứng viên H = c46f7287039d207b1d377d9a10c6e77191778404 (tree 84adb4ba705749f26c475b852f71dcb55257954b), base = 13bf69f6eb797e859619a2062e7c9577e6a9cc0b. `core.abbrev 7` đã đặt.
+
+Đặc tả: `git show refs/remotes/origin/ops/spec-doc-claims-dau-cham:ops/specs/DOC-CLAIMS-DAU-CHAM-r3.md` — sha256 byte thô phải bằng 0712647206e62eaca32701ddc05dd4aa0930f43174722aa016883d645be84864 (kiểm trước). Mục 2 M1–M4 là việc; mục 5 N1–N8 nghiệm thu; mục 6 luật dừng.
+
+Việc:
+1. Đọc diff `git diff 13bf69f c46f728` (4 tệp: scripts/tl_core/workflow.py, scripts/test_fragments/wp1326_doc_claims_dau_cham.py, scripts/tl_test_fragments_bundled.py, RELEASE_MANIFEST.json) đối chiếu từng mục M1(a)–(e), M2–M4 của đặc tả.
+2. TỰ ĐO lại, ghi lệnh + rc: `python scripts/tl.py --selftest` (N/N hai số bằng nhau); `python scripts/tl.py doc-claims-check --strict --json` trên H và trên một clone base (số advisory L1, cờ, theo N3); `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json`; `test-fragments-check`. Chọn ít nhất 3 đột biến D trong bảng N2 của đặc tả (trong đó D5 và D9) áp trên BẢN SAO và xác nhận ca lệch đúng tên.
+3. Executor tự khai hai điểm; đánh giá từng điểm có phải lỗi phải sửa trong packet này không (theo câu chữ đặc tả, không theo sở thích): (a) M1(d) gọi `git check-ignore --no-index`, nên đọc cả core.excludesFile toàn cục và .git/info/exclude của máy, không chỉ .gitignore trong cây — một máy có excludes toàn cục rộng có thể làm cờ PATH_MISSING thật biến mất tại máy đó; (b) hằng `_DOC_CLAIMS_RELPATH_RE` không còn nơi dùng nhưng được giữ. Nếu (a) là lỗi thì nêu phép đo làm nó hiện ra (dựng excludesFile tạm qua GIT_CONFIG_GLOBAL trong /tmp) và câu sửa tối thiểu trong write set.
+4. Tìm lỗi khác: đường dẫn `./`, `../` (Q1 giữ không kiểm), đường dẫn có `/` cuối, khớp miễn trừ đúng 9 cặp, hiệu năng, Windows (đường dẫn, CRLF) theo câu chữ đặc tả.
+
+Đầu ra stdout: (1) bảng đối chiếu M/N với bằng chứng đo; (2) finding P0–P3 (tệp:dòng, vấn đề, kịch bản thất bại, sửa đề xuất); (3) dòng neo: reviewed_sha, reviewed_tree, spec_sha256. Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2.

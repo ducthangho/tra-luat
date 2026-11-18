@@ -1,0 +1,8 @@
+python=Python 3.12.10 git=git version 2.56.0.windows.4 PYTHONUTF8=[] ma_hoa=cp1252 0 may=TRA-LUAT-WIN
+BASE HEAD=13bf69f6eb797e859619a2062e7c9577e6a9cc0b tree=a4cb90571c5432ad97d62fd7409b45147acf6c2a sach=[]
+BASE rc=0 1122.4s ok=1789 fail=0 skip=0 :: == tl selftest 1777/1777 ==
+HEAD HEAD=c46f7287039d207b1d377d9a10c6e77191778404 tree=84adb4ba705749f26c475b852f71dcb55257954b sach=[]
+HEAD rc=0 1164.1s ok=1790 fail=0 skip=0 :: == tl selftest 1778/1778 ==
+TONG 2296.5s
+XONG (khoa da nha)
+(nguon: C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1326-n6-out\TOM-TAT.txt tren tra-luat-win, script chay-n6-1326.ps1, chep tay boi phien dieu phoi 2026-11-17T18:4xZ)

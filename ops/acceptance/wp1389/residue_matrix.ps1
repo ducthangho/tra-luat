@@ -23,7 +23,7 @@ function Extract([string]$Name) {
   $p = $pairs[1]; if ($p[1] - $p[0] -lt 2) { throw "doan rong: $Name" }
   (($lines[($p[0] + 1)..($p[1] - 1)]) -join "`n") + "`n" }
 $frag = Extract 'du-luong-daemon'; $pre = Extract 'du-luong-daemon-truoc-open'
-if (-not $frag.Contains('$hits = @(Get-ChildItem')) { throw 'doan cleanup khong phai ban PowerShell' }
+if (-not $frag.Contains('$hits = @([IO.Directory]::GetDirectories(')) { throw 'doan cleanup khong phai ban PowerShell' }
 if (-not $pre.Contains('$daemonDir')) { throw 'doan truoc-open khong phai ban PowerShell' }
 function ShaText([string]$t) { $h = [Security.Cryptography.SHA256]::Create(); (($h.ComputeHash($utf8.GetBytes($t)) | ForEach-Object { $_.ToString('x2') }) -join '') }
 function Sha([string]$p) { (Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash.ToLower() }
@@ -90,17 +90,20 @@ function Try-Link([string]$Type, [string]$Path, [string]$Target) {
   try { New-Item -ItemType $Type -Path $Path -Target $Target -ErrorAction Stop | Out-Null; $true } catch { $false } }
 function Run-Locked([string]$Body, [int]$Seconds, [string]$Share, [hashtable]$ExtraEnv) {
   $ready = "$script:C\ready"
-  $h = Start-Process -FilePath $Shell -PassThru -WindowStyle Hidden -ArgumentList "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$Scratch\holder.ps1`" -Path `"$(Own)`" -Seconds $Seconds -Ready `"$ready`" -Share $Share"
+  $holderProc = Start-Process -FilePath $Shell -PassThru -WindowStyle Hidden -ArgumentList "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$Scratch\holder.ps1`" -Path `"$(Own)`" -Seconds $Seconds -Ready `"$ready`" -Share $Share"
   for ($i = 0; $i -lt 100 -and -not (Test-Path -LiteralPath $ready); $i++) { Start-Sleep -Milliseconds 100 }
   if (-not (Test-Path -LiteralPath $ready)) { throw 'holder khong san sang' }
-  $r = Run-Frag $Body $ExtraEnv; $null = $h.Handle; $h.WaitForExit(); $r }
+  $r = Run-Frag $Body $ExtraEnv; $null = $holderProc.Handle; $holderProc.WaitForExit(); $r }
 $me = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 function Deny-List([string]$Dir) { & icacls $Dir /deny "*${me}:(RD)" | Out-Null; $LASTEXITCODE -eq 0 }
 function Undeny([string]$Dir) { & icacls $Dir /remove:d "*$me" | Out-Null }
 $F = "$Scratch\frag_cleanup.ps1"; $P = "$Scratch\frag_pre.ps1"
 
-foreach ($c in 'P1', 'P2') { New-Case $c; if ($c -eq 'P2') { [IO.File]::WriteAllText((Own), '') }
-  $d0 = Decoys; $os = Sha (Own); $r = Run-Frag $F; Expect-Ok "$c-positive" $r $d0 $os }
+# Bien vong KHONG duoc ten $c: PowerShell khong phan biet hoa thuong nen $c chinh la $script:C ma New-Case ghi de.
+foreach ($caseName in 'P1', 'P2') { New-Case $caseName; if ($caseName -eq 'P2') { [IO.File]::WriteAllText((Own), '') }
+  $sz = (Get-Item -LiteralPath (Own)).Length; $want = if ($caseName -eq 'P2') { 0 } else { $utf8.GetByteCount("own stderr $caseName`n") }
+  Rec ($sz -eq $want) "$caseName-fixture-size=$sz" @{ rc = '-' }
+  $d0 = Decoys; $os = Sha (Own); $r = Run-Frag $F; Expect-Ok "$caseName-positive" $r $d0 $os }
 New-Case N1; Remove-Item -LiteralPath (Own); $d0 = Decoys; $r = Run-Frag $F; Expect-Stop N1-zero-match $r $d0
 New-Case N2; $dup = "$(Dm)\$H2\$NONCE.err"; [IO.File]::WriteAllText($dup, "dup`n"); $d0 = Decoys
 $r = Run-Frag $F; Expect-Stop N2-two-hash-dirs $r $d0 @{ (Own) = (Sha (Own)); $dup = (Sha $dup) }
@@ -146,6 +149,8 @@ New-Case C3; Remove-Item -LiteralPath "$script:C\cache\ms-playwright" -Recurse -
 New-Case C4; New-Item -ItemType Directory -Path "$script:C\home\rel" | Out-Null; Move-Item -LiteralPath "$script:C\cache" -Destination "$script:C\home\rel\"
 $r = Run-Frag $P @{ LOCALAPPDATA = 'rel\cache' }; Rec (IsStop $r) C4-pre-relative-cache $r
 New-Case C5; Remove-Item -LiteralPath (Own); $r = Run-Frag $P @{ PWTEST_DAEMON_SESSION_DIR = "$script:C\x" }; Rec (IsStop $r) C5-pre-pwtest-hook $r
+New-Case C7; Remove-Item -LiteralPath (Own); $h7 = "$(Dm)\dddddddddddddddd"; New-Item -ItemType Directory -Path $h7 | Out-Null; [IO.File]::WriteAllText("$h7\$NONCE.err", "x`n")
+if (Deny-List $h7) { $r = Run-Frag $P; Undeny $h7; Rec (IsStop $r) C7-pre-scan-denied $r } else { $script:FAIL++; 'FAIL C7: icacls /deny khong dat' }
 New-Case C6; Move-Item -LiteralPath (Own) -Destination "$(Dm)\$NONCE.err"; $r = Run-Frag $P; Rec (IsOk $r) 'C6-pre-depth1-ignored (chi do do sau 2, nhu CLI va bash)' $r
 
 function Mut([string]$Name, [string]$Target, [string]$Src, [string]$Old, [string]$New) {
@@ -162,6 +167,8 @@ function Mut([string]$Name, [string]$Target, [string]$Src, [string]$Old, [string
     'N9' { New-Item -ItemType Directory -Path "$(Dm)\not-a-hash" | Out-Null; Move-Item -LiteralPath (Own) -Destination "$(Dm)\not-a-hash\" }
     'N10' { $extra = @{ PWTEST_DAEMON_SESSION_DIR = 'x' } }
     'N14' { Move-Item -LiteralPath (Own) -Destination "$(Dm)\$H\${NONCE}Xerr" }
+    'C7' { Remove-Item -LiteralPath (Own); $h3 = "$(Dm)\dddddddddddddddd"; New-Item -ItemType Directory -Path $h3 | Out-Null; [IO.File]::WriteAllText("$h3\$NONCE.err", "x`n")
+           if (-not (Deny-List $h3)) { $script:FAIL++; "FAIL MUT ${Name}: icacls"; return } }
     'N15' { $h3 = "$(Dm)\dddddddddddddddd"; New-Item -ItemType Directory -Path $h3 | Out-Null; [IO.File]::WriteAllText("$h3\$NONCE.session", "{}`n")
             if (-not (Deny-List $h3)) { $script:FAIL++; "FAIL MUT ${Name}: icacls"; return } }
     'N17' { New-Item -ItemType Directory -Path "$script:C\home\rel" | Out-Null; Copy-Item -LiteralPath "$script:C\cache" -Destination "$script:C\home\rel" -Recurse
@@ -173,18 +180,19 @@ function Mut([string]$Name, [string]$Target, [string]$Src, [string]$Old, [string
     'L3' { $expectStop = $true }
   }
   if ($Target -eq 'L1') { $r = Run-Locked $m 2 'None' } elseif ($Target -eq 'L3') { $r = Run-Locked $m 2 'Read' } else { $r = Run-Frag $m $extra }
-  if ($Target -eq 'N15') { Undeny "$(Dm)\dddddddddddddddd" }
+  if ($Target -eq 'N15' -or $Target -eq 'C7') { Undeny "$(Dm)\dddddddddddddddd" }
   $caught = if ($expectStop) { -not (IsOk $r) } else { IsOk $r }
   if ($caught) { $script:PASS++; "PASS MUT $Name -> $Target $(if ($expectStop) { 'do' } else { 'lot' }) (chot co rang)" }
   else { $script:FAIL++; "FAIL MUT $Name -> $Target khong doi (chot khong do duoc)"; Get-Content -LiteralPath "$script:C\out" | ForEach-Object { "    $_" } } }
 Mut exact-one N2 $F '$hits.Count -eq 1 -and' '$hits.Count -ge 1 -and'
-Mut name-filter N3 $F '-Filter "*$session*" -ErrorAction Stop' '-Filter "$session.err" -ErrorAction Stop'
+Mut name-filter N3 $F 'GetFileSystemEntries($_, "*$session*")' 'GetFileSystemEntries($_, "$session.err")'
 Mut daemon-reparse N7 $F '-not ($dd.Attributes -band $reparse)' '$true'
 Mut stale-output N8 $F 'Need (-not (Test-Path -LiteralPath "$env:TL_PW_RUN\$ten"))' 'Need $true'
 Mut hash-shape N9 $F "-cmatch '\A[0-9a-f]{16}\z'" "-cmatch '.'"
 Mut pwtest-hook N10 $F 'Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR))' 'Need $true'
 Mut exact-name N14 $F '$f.Name -ceq "$session.err"' '$f.Name -like "$session*err"'
-Mut scan-silent N15 $F '-Filter "*$session*" -ErrorAction Stop' '-Filter "*$session*" -ErrorAction SilentlyContinue'
+Mut scan-silent N15 $F '[IO.Directory]::GetFileSystemEntries($_, "*$session*")' '@(Get-ChildItem -Force -LiteralPath $_ -Filter "*$session*" -ErrorAction SilentlyContinue | ForEach-Object FullName)'
+Mut pre-scan-silent C7 $P '[IO.Directory]::GetFileSystemEntries($_, "*$env:TL_PW_SESSION*")' '@(Get-ChildItem -Force -LiteralPath $_ -Filter "*$env:TL_PW_SESSION*" -ErrorAction SilentlyContinue | ForEach-Object FullName)'
 Mut relative-cache N17 $F 'Need ($daemonDir -match ''^([A-Za-z]:\\|\\\\)'')' 'Need ($true)'
 Mut pre-relative C4 $P 'Need ($daemonDir -match ''^([A-Za-z]:\\|\\\\)'')' 'Need ($true)'
 Mut pre-hook C5 $P 'Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR))' 'Need $true'

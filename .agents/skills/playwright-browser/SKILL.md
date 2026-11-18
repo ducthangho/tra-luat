@@ -233,9 +233,12 @@ function Invoke-PwGhi([string]$Ten, [string[]]$Argv, [switch]$PhaiLoi) {
   $cacheRoot = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA } else { "$env:USERPROFILE\AppData\Local" }
   $daemonDir = "$cacheRoot\ms-playwright\daemon"; $reparse = [IO.FileAttributes]::ReparsePoint   # sổ phiên CLI
   Need ($daemonDir -match '^([A-Za-z]:\\|\\\\)') 'sổ phiên không tuyệt đối'
-  Need (-not (Test-Path -LiteralPath $daemonDir) -or -not @(Get-ChildItem -Force -Directory -LiteralPath $daemonDir |
-    Where-Object { -not ($_.Attributes -band $reparse) } | ForEach-Object {
-      Get-ChildItem -Force -LiteralPath $_.FullName -Filter "*$env:TL_PW_SESSION*" })) 'nonce đã có trong sổ phiên CLI'
+  # .NET, không Get-ChildItem: pwsh 7 bỏ qua IM LẶNG thư mục không liệt kê được (đo trên Desktop), PS 5.1 thì ném lỗi
+  try { $pre = @(if (Test-Path -LiteralPath $daemonDir) { [IO.Directory]::GetDirectories($daemonDir) |
+      Where-Object { -not ((Get-Item -Force -LiteralPath $_).Attributes -band $reparse) } |
+      ForEach-Object { [IO.Directory]::GetFileSystemEntries($_, "*$env:TL_PW_SESSION*") } })
+  } catch { Need $false "không quét được sổ phiên CLI: $($_.Exception.Message)" }
+  Need ($pre.Count -eq 0) 'nonce đã có trong sổ phiên CLI'
   # --- du-luong-daemon-truoc-open: het
   Invoke-PwGhi 01-open @('open', 'about:blank', '--config', "$env:TL_PW_RUN\browser.json")
   Invoke-PwGhi 02-goto @('goto', $env:TL_PW_URL); Invoke-PwGhi 03-tab-list @('tab-list'); Invoke-PwGhi 04-requests @('requests', '--static')
@@ -387,9 +390,10 @@ Chỉ xoá tệp mang nonce của Capture hiện tại; Capture đã kiểm nonc
   Need ($dd.PSIsContainer -and -not ($dd.Attributes -band $reparse)) 'sổ phiên không phải thư mục thường'
   foreach ($ten in '11-daemon.err', '11-daemon-path.txt') {
     Need (-not (Test-Path -LiteralPath "$env:TL_PW_RUN\$ten")) "output cũ $ten, không ghi đè" }
-  try { $hits = @(Get-ChildItem -Force -Directory -LiteralPath $daemonDir -ErrorAction Stop |
-      Where-Object { -not ($_.Attributes -band $reparse) } | ForEach-Object {
-        Get-ChildItem -Force -LiteralPath $_.FullName -Filter "*$session*" -ErrorAction Stop })
+  try { $hits = @([IO.Directory]::GetDirectories($daemonDir) |   # .NET: thư mục không liệt kê được ⇒ ném lỗi, cả 5.1 lẫn 7
+      Where-Object { -not ((Get-Item -Force -LiteralPath $_).Attributes -band $reparse) } |
+      ForEach-Object { [IO.Directory]::GetFileSystemEntries($_, "*$session*") } |
+      ForEach-Object { Get-Item -Force -LiteralPath $_ -ErrorAction Stop })
   } catch { Need $false "quét sổ phiên lỗi/thiếu, không xoá gì: $($_.Exception.Message)" }
   $f = $hits | Select-Object -First 1
   Need ($hits.Count -eq 1 -and -not $f.PSIsContainer -and $f.Name -ceq "$session.err" -and

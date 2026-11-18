@@ -93,6 +93,7 @@ fake_find() { cat > "$CASE_DIR/bin/find" <<EOF
 printf '%s\0' "$(OWN)"; echo "find: '\$1/dddddddddddddddd': Permission denied" >&2; exit 1
 EOF
   chmod +x "$CASE_DIR/bin/find"; }
+fake_find_empty() { printf '#!/bin/bash\necho "find: $1/dddddddddddddddd: Permission denied" >&2; exit 1\n' > "$CASE_DIR/bin/find"; chmod +x "$CASE_DIR/bin/find"; }
 new_case N15; fake_find; d0=$(decoys); rc=$(run_frag "$F"); expect_stop N15-scan-error "$rc" "$d0" "$(OWN)=$(sha "$(OWN)")"; no_new_outputs || ko "N15 output 11"
 new_case N16; NL="$CASE_DIR/cache/ms-playwright/daemon/$H2/x
 $NONCE.err"; printf 'nl\n' > "$NL"; d0=$(decoys); rc=$(run_frag "$F")
@@ -107,6 +108,7 @@ new_case C3; rm -r "$CASE_DIR/cache/ms-playwright"; rc=$(run_pre "$P"); is_ok "$
 new_case C4; mkdir -p "$CASE_DIR/home/rel"; mv "$CASE_DIR/cache" "$CASE_DIR/home/rel/"; rc=$(run_pre "$P" XDG_CACHE_HOME=rel/cache)
 is_stop "$rc" && ok "C4-pre-relative-cache rc=$rc" || ko "C4-pre-relative-cache rc=$rc"
 new_case C5; rm "$(OWN)"; rc=$(run_pre "$P" PWTEST_DAEMON_SESSION_DIR="$CASE_DIR/x"); is_stop "$rc" && ok "C5-pre-pwtest-hook rc=$rc" || ko "C5-pre-pwtest-hook rc=$rc"
+new_case C7; rm "$(OWN)"; fake_find_empty; rc=$(run_pre "$P"); is_stop "$rc" && ok "C7-pre-scan-error rc=$rc" || ko "C7-pre-scan-error rc=$rc"
 new_case C6; mv "$(OWN)" "$CASE_DIR/cache/ms-playwright/daemon/$NONCE.err"; rc=$(run_pre "$P")
 is_ok "$rc" && ok "C6-pre-depth1-ignored (chi do do sau 2, nhu CLI) rc=$rc" || ko "C6-pre-depth1-ignored rc=$rc"
 
@@ -128,6 +130,7 @@ mut() { # name target file sed_expr
     N15) fake_find;;
     N17) mkdir -p "$CASE_DIR/home/rel"; cp -a "$CASE_DIR/cache" "$CASE_DIR/home/rel/"; extra=(XDG_CACHE_HOME=rel/cache);;
     C4) runner=run_pre; rm "$(OWN)"; mkdir -p "$CASE_DIR/home/rel"; mv "$CASE_DIR/cache" "$CASE_DIR/home/rel/"; extra=(XDG_CACHE_HOME=rel/cache);;
+    C7) runner=run_pre; rm "$(OWN)"; fake_find_empty;;
     C5) runner=run_pre; rm "$(OWN)"; extra=(PWTEST_DAEMON_SESSION_DIR=x);;
   esac
   rc=$($runner "$m" "${extra[@]}")
@@ -143,6 +146,7 @@ mut dot-wildcard N14 "$F" 's/\[ "\$\{f##\*\/\}" = "\$TL_PW_SESSION\.err" \]/[[ "
 mut no-scan-rc N15 "$F" 's/wait "\$!" \|\|/true ||/'
 mut relative-cache N17 "$F" 's/case "\$D" in \/\*\) ;; \*\) echo/case "$D" in *) ;; \/*) echo/'
 mut pre-relative C4 "$P" 's/case "\$D" in \/\*\) ;; \*\) false;; esac/true/'
+mut pre-scan-rc C7 "$P" 's/pre=\$\(find (.*) -print\);/pre=$(find \1 -print || true);/'
 mut pre-hook C5 "$P" 's/\[ -z "\$\{PWTEST_DAEMON_SESSION_DIR\+x\}" \];/true;/'
 
 echo "TONG: $PASS dat / $((PASS+FAIL))"

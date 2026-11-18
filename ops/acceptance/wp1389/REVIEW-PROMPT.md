@@ -85,3 +85,24 @@ là prompt, KHÔNG phải lease. Thứ định danh mã là **băm commit**, kh�
      tạo `scratch/n1` rỗng trước. Báo dòng `SOURCE` và dòng `TONG`.
   4. Ghi verdict theo khuôn đầu ra ở trên vào `scratch/VERDICT.md`. Trong verdict, tách riêng finding nào chặn merge và
      finding nào chỉ là giới hạn đã khai.
+
+## Lượt 4 (delta, lời gọi Codex thứ 4 do chủ kho nâng trần trong lease)
+
+- Lượt 3 ở `86879e1`: `request_changes`. Chặn merge gồm 2 P1 và 2 P2; P3 là giới hạn đã khai. Nguyên văn trong
+  `VERDICT.md`.
+- Sửa ở `429fb5b`, chi tiết trong `RESULTS.md`:
+  - `00-sophien.txt` thêm dòng nonce; Cleanup đòi trùng cả ba dòng TRƯỚC `close`.
+  - Trước `close`, sổ phiên và thư mục hash phải là thư mục thường, không có hook; bash ≥ 4.4.
+  - `node -e` in base64 của UTF-8; cả hai shell giải mã tường minh.
+  - Gỡ bản cài kiểm loại thư mục.
+  - Ma trận thêm phần TOÀN LUỒNG E1–E4: chạy chính khối Capture và Cleanup của SKILL với một CLI giả có nhật ký và
+    trạng thái, kèm đột biến đưa chốt đầu Cleanup ra sau `10-verify`.
+- Việc lượt 4:
+  1. Với TỪNG finding chặn merge của lượt 3, xác minh trên mã ở H: đã sửa, sửa một phần, hay chưa. Căn cứ phải là dòng mã.
+  2. Tìm lỗi MỚI do bản sửa đưa vào. Chú ý:
+     - `base64 -d` và `FromBase64String`;
+     - dòng thứ ba nonce;
+     - thứ tự kiểm trước `close`;
+     - phần toàn luồng của harness: CLI giả có mô phỏng đúng hợp đồng phản hồi mà Cleanup so byte không?
+  3. Chạy N1 đúng một lần, như lượt 3. Báo dòng `SOURCE` và dòng `TONG`.
+  4. Ghi verdict vào `scratch/VERDICT.md`. Tách riêng finding chặn merge và giới hạn đã khai.

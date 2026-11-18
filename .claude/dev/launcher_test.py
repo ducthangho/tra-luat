@@ -17182,8 +17182,7 @@ DOT_BIEN_HOOK = [
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
     ("wp1404_sh_thu_lai_moi_loi", ('    *"apt-get install"*)\n', '    *)\n'),
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
-    ("wp1404_sh_bo_cai_lai", ('      : > "$KENH_KQ"\n      set +e\n      ( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"\n'
-                              '      RC_CAI=$?\n      set -e\n      ;;\n', '      ;;\n'),
+    ("wp1404_sh_bo_cai_lai", ('      continue ;;\n', '      ;;\n'),
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
     # wp868 (Q3): dòng canh `/dev/null` trên stdout thay bằng `GIU_PATH` trên kênh riêng; ba đột biến dòng canh đổi neo.
     ("wp858_sh_bo_dong_canh_giu_path",

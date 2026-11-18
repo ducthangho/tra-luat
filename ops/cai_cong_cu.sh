@@ -153,15 +153,19 @@ declare +x KENH_KQ
 # cuoi vong quyet. Moi truong hop khac thoat DUNG ma cu (errexit truoc day thoat bang chinh ma cua lenh hong).
 # Codex wp1045 luot 1 (P3): KHONG `( … ) || RC_CAI=$?` — `||` dat CA subshell vao ngu canh dieu kien, nen cong thuc tu bat lai
 # `set -e` cung khong dung (base rc=1, ban `||` rc=0). Tat errexit o shell CHA, chay subshell o vi tri khong dieu kien, lay `$?`.
+# wp1404: runner Ubuntu doi khi chua co danh sach goi apt => `apt-get install` bao "Unable to locate package" (do: 1/343 lan
+# cai rg trong 19 luot gate, run 44347295196). Cong thuc trong cong_cu.yaml KHONG duoc sua (phan truoc ` && ` dau tien phai
+# khop CONG_CU cua launcher.py), nen va o day: loi + lenh co `apt-get install` => `apt-get update` MOT lan roi chay lai
+# DUNG MOT lan. Vong lap (khong chep lai dong chay) de chinh dong `eval` o tren la DUY NHAT: bang dot bien wp868 neo vao
+# no va doi khop dung mot cho. Update loi khong dung script: loi cuoi cung la cua lan cai lai.
+LAN_CAI=0
+while :; do
 set +e
 ( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"
 RC_CAI=$?
 set -e
-# wp1404: runner Ubuntu doi khi chua co danh sach goi apt => `apt-get install` bao "Unable to locate package" (do: 1/343 lan
-# cai rg trong 19 luot gate, run 44347295196). Cong thuc trong cong_cu.yaml KHONG duoc sua (phan truoc ` && ` dau tien phai
-# khop CONG_CU cua launcher.py), nen va o day: loi + lenh co `apt-get install` => `apt-get update` MOT lan roi chay lai
-# DUNG MOT lan, cung co che o tren. Update loi khong dung script: loi cuoi cung la cua lan cai lai.
-if [ "$RC_CAI" -ne 0 ]; then
+LAN_CAI=$((LAN_CAI + 1))
+if [ "$RC_CAI" -ne 0 ] && [ "$LAN_CAI" -eq 1 ]; then
   case "$LENH" in
     *"apt-get install"*)
       echo "cai_cong_cu: '$TEN' cai loi (rc=$RC_CAI); apt-get update roi thu lai mot lan" >&2
@@ -170,13 +174,11 @@ if [ "$RC_CAI" -ne 0 ]; then
         *) apt-get update -qq || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
       esac
       : > "$KENH_KQ"
-      set +e
-      ( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"
-      RC_CAI=$?
-      set -e
-      ;;
+      continue ;;
   esac
 fi
+break
+done
 if [ "$RC_CAI" -ne 0 ]; then
   if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && cong_cu_json_dung "$TEN" bat_buoc false; then
     echo "cai_cong_cu: '$TEN' (bat_buoc: false) khong cai duoc (rc=$RC_CAI); --bat-buoc di tiep" >&2

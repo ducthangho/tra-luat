@@ -1,0 +1,47 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: WP1319-NGHIEM-THU-BO-SUNG
+revision: 3
+generation: 1
+lease_id: wp1319-r3-g1-operator
+role: operator
+provider: claude
+execution_surface: claude_code_web
+transport: desktop_commander
+executor: none
+executor_note: 'r3 chạy lại các bước r1 với harness và khối SKILL có sẵn tại 13bf69f6, không tạo mã sản phẩm'
+reviewer: independent_readonly
+reviewer_model: KHONG_do_duoc
+review_class: sensitive
+target_host: DESKTOP-T9R33P2
+target_device_id: a5f7076e-a491-4f84-829b-8d1fbcc1c767
+target_workdir: 'F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\wp1319-r3'
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt']
+spec_path: ops/specs/wp1319-r3.md
+spec_hash: 77a6f24b314b65e88c53032b7a71bbeada15311d874984057e1e199e8fa2bf85
+spec_sha256_required: 77a6f24b314b65e88c53032b7a71bbeada15311d874984057e1e199e8fa2bf85
+write_set:
+- ops/acceptance/wp1319/**
+- ops/leases/wp1319-r3-g1-operator.yaml
+- ops/specs/wp1319-r3.md
+write_set_hash: fb1d52bc34e029569402ebfa555d30d950ba817f3bbf3bb765f9e483c16e6b5c
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: 13bf69f6eb797e859619a2062e7c9577e6a9cc0b
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 18/11 trong phiên session_015GtxrapMSm976JLC7Fp1HM: "ASUS đã bật" rồi "Làm tiếp đi, báo cáo tiến độ"; cộng ủy quyền tiếp tục trong prompt bàn giao #1319'
+granted_on_instruction_note: 'không cấp cài/kích hoạt Proxima, LIVE, gateway/account/endpoint/ACL, đăng nhập, copy profile'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+recorder_is_operator: true
+thay_the_cho: []
+leased_at_utc: '2026-11-18T08:57:37Z'
+heartbeat_at: '2026-11-18T08:57:37Z'
+lease_until: '2026-11-18T12:57:37Z'
+lease_expires_at_utc: '2026-11-18T12:57:37Z'
+max_lease_hours: 4
+native_runs_limit: 1
+native_step_reruns_limit: 1
+codex_review_calls_limit: 2
+codex_review_calls_used: 0
+windows: native_desktop_only

@@ -69,8 +69,8 @@ thay_the_cho_note: 'g1 (doc-claims-dau-cham-r3-g1-claude) đã HẾT HẠN do r�
 leased_at_utc: '2026-11-17T16:20:00Z'
 heartbeat_at: '2026-11-17T16:20:00Z'
 heartbeat_required_minutes: 360
-lease_until: '2026-11-18T16:20:00Z'
-lease_expires_at_utc: '2026-11-18T16:20:00Z'
+lease_until: '2026-11-18T00:20:00Z'
+lease_expires_at_utc: '2026-11-18T00:20:00Z'
 max_lease_hours: 24
 codex_review_calls_limit: 10
 codex_review_calls_used: 3
@@ -82,3 +82,14 @@ uy_quyen_merge: false
 merge_approval: 'ADR-0060 M7: chủ kho duyệt merge một lần neo SHA H sau CI và connector (E2). Không deploy Package.'
 push_policy: 'ADR-0060 M5 (đặc tả mục 6). Executor cloud đẩy nhánh agent/doc-claims-dau-cham-g2-claude MỘT lần (không mở PR) để phiên điều phối chạy review Codex offline trên đúng SHA; tiền lệ #1336. Mỗi push thêm cần checkpoint chủ kho kèm biên nhận SHA trước/sau.'
 budget_ghi_chu: 'Codex trần 10 (ADR-0055), đã dùng 3 (review đặc tả). CI Ubuntu theo PR. Windows native: N6 hai lượt base+ứng viên trong một lệnh.'
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-18T00:00:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex 6/10: 3 review dac ta (g1) + offline run 2012c303 (request_changes, thieu bang chung sandbox) + offline run a5485408 (approve) + connector tren c46f728 (sach). Push nhanh code 1/1 (executor). CI Ubuntu 1: PR #1379 tren c46f728 (24 success, 1 skipped). Windows native 1: tra-luat-win N6 base 1777/1777 + H 1778/1778. Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-18T16:20:00Z'
+  han_moi_utc: '2026-11-18T00:20:00Z'
+  chi_thi: 'thong le phien dieu phoi #1206: rut han ngay sau land.'
+  ly_do: >-
+    Packet #1326 da MERGE: PR #1379 (head c46f7287039d207b1d377d9a10c6e77191778404) merge commit 3d6bfa5361dc30caf1caea9ae2c3ffe1a563902f,
+    chu kho duyet merge dung SHA c46f728 trong phien dieu phoi (loi khai co neo). Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Khong co lease ke nhiem cung packet.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu bon duong dan write set sau 2026-11-18T00:20:00Z phai ra NGUOI_GIU 0.'

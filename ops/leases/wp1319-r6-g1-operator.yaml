@@ -1,0 +1,36 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: wp1319
+revision: 6
+generation: 1
+lease_id: wp1319-r6-g1-operator
+role: operator
+executor: none
+reviewer: 'connector Codex tren PR'
+review_class: routine
+target_hosts:
+- 7404cfba-9034-4787-b46b-7c358126a411
+live_change: 'khong — do chi doc vi tri cache trinh duyet cua add-on Playwright tren ASUS'
+spec_path: ops/specs/wp1319-r6.md
+spec_hash: cfecbe610a8af7878a9929c4a0533d5496917f13aab1d723ef293ef1f5054f04
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r6/RESULTS.md
+- ops/leases/wp1319-r6-g1-operator.yaml
+- ops/specs/wp1319-r6.md
+write_set_hash: d542ee186cc8641678b430a5103559b3aef3ceac43c3e074ac6ecab73645958a
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: 3bd9728efe41745500a2ac47faffa7d5ca3bf851
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 19/11: "Tiep di" sau merge PR #1426 (U9 con muc chua kiem)'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-19T21:13:07Z'
+heartbeat_at: '2026-11-19T21:13:07Z'
+lease_until: '2026-11-20T00:13:07Z'
+lease_expires_at_utc: '2026-11-20T00:13:07Z'
+max_lease_hours: 3
+review_calls_limit: 0
+native_runs_limit_per_host: 2

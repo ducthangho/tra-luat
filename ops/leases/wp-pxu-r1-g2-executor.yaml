@@ -47,7 +47,7 @@ max_lease_hours: 8
 executor_calls_limit: 1
 executor_calls_used: 1
 review_calls_limit: 1
-review_calls_used: 0
+review_calls_used: 1
 native_runs_limit: 1
 native_step_reruns_limit: 1
 windows: native_desktop_only

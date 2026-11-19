@@ -82,7 +82,7 @@ Gói bằng chứng trên Desktop: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\u
 
 | Bước | Kết quả | Dấu hiệu |
 |---|---|---|
-| B1 snapshot | 12 153 tệp, 303 308 699 byte, 0 reparse point | digest `f20155da…`, **trùng DryRun 07:46Z**, tức profile không đổi từ lúc đăng nhập |
+| B1 snapshot | 12 153 tệp, 303 308 699 byte, 0 reparse point | digest `f20155da…`, **trùng ảnh chụp DryRun 07:46Z** (hai ảnh chụp trùng nhau; không chứng minh profile bất biến liên tục, và không phủ khoảng từ lúc đăng nhập tới DryRun) |
 | B2 backup | **đạt** | robocopy rc 1; manifest = B1 |
 | B3 làm hỏng | đạt | đổi tên thành `profile-u8.damaged-20261119T082337Z` |
 | B4 restore | **đạt** | robocopy rc 1; manifest = B1 (`f20155da…`) |
@@ -93,10 +93,12 @@ Gói bằng chứng: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\u8\freeze-c\wp-
 
 **Kết luận vế đăng nhập: `quan_sat` (theo đặc tả §4, không có PASS/FAIL).**
 - Sau khi backup, làm mất và restore profile, **cả 4 phiên đăng nhập còn hiệu lực** theo quan sát của chủ kho.
-- Riêng **Claude** bắt xác minh "verify human" (một lần tick) rồi mới vào. Đây là kiểm tra chống bot phía provider, không phải mất phiên.
+- Riêng **Claude** hiện yêu cầu "verify human"; chủ kho tick xong thì vào được. *(Sửa theo review, P2: chủ kho chỉ báo hiện tượng, nên **không** suy ra nguyên nhân kỹ thuật.)*
 
 **Không đo:**
 - không có lời gọi `/v1/stats` (REST tắt mặc định);
 - không kiểm phiên bằng máy; nguồn duy nhất là quan sát của chủ kho;
 - chỉ thử restore **cùng máy, cùng đường dẫn**; restore sang máy hay đường dẫn khác chưa đo.
+
+**Review pha C (1/1): `approve_with_fixes`** (xem `VERDICT.md`, mục pha C). Hai P2 câu chữ đã sửa.
 

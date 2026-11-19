@@ -33,9 +33,9 @@ recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 thay_the_cho_note: 'g1 da thu hoi (het han tai thoi diem thu hoi); g2 la luot moi cho ve dang nhap, khong ghi bia mo vao g1'
 leased_at_utc: '2026-11-19T07:44:20Z'
-heartbeat_at: '2026-11-19T07:44:20Z'
-lease_until: '2026-11-19T13:44:20Z'
-lease_expires_at_utc: '2026-11-19T13:44:20Z'
+heartbeat_at: '2026-11-19T08:38:36Z'
+lease_until: '2026-11-19T08:38:36Z'
+lease_expires_at_utc: '2026-11-19T08:38:36Z'
 max_lease_hours: 12
 lease_hours_note: 'pha B phu thuoc luc chu kho dang nhap xong; het han thi gia han bang heartbeat moi, khong suy da xong'
 review_calls_limit: 1
@@ -47,3 +47,6 @@ windows: native_desktop_only
 phase: 'C - ve dang nhap: chu kho da tu dang nhap tren profile thu (19/11 ~07:43Z "da dang nhap xong, da dong app"); operator chay B0-B4 lai vao evidence-c, chu kho mo lai va quan sat'
 granted_on_instruction_g2: 'chu kho 19/11 "Tu dang nhap tai Desktop" roi "da dang nhap xong, da dong app"'
 native_runs_limit_phase_C: 1
+withdrawn_at_utc: '2026-11-19T08:38:36Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'xong pha C (ve dang nhap: quan_sat, phien giu duoc) + review approve_with_fixes; khoa da nha; backup va damaged da xoa'

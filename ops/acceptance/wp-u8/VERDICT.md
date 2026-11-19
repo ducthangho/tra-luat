@@ -47,3 +47,59 @@ Limits to record: login leg **not_measured**, correctly disclosed (R:37,63; M:23
 ```
 </details>
 
+---
+
+# Review pha C, vế đăng nhập (lease g2, 1/1)
+- **Reviewer:** Codex CLI 0.169.0, `-m gpt-6-astra`, chạy trong container điều phối, chỉ đọc. Model tự khai **`KHONG_do_duoc`**. Thời gian 08:36:41Z–08:38:11Z ngày 19/11, rc 0. Verdict gốc có sha256 `42d2cba7…`.
+- **Đối tượng:** bộ con `54343712…`, 7/7 tệp khớp MANIFEST `814f7e02…` của zip `3310b4d7…`.
+
+## Verdict: `approve_with_fixes` (không có P0/P1)
+- Chuỗi bước khớp:
+  - B1 lúc DryRun = B1 lúc chạy thật;
+  - B2 = B1, B4 = B1, robocopy rc 1;
+  - `HOST_BUSY` lúc 07:47Z dừng mà không thao tác gì.
+- Kết luận về đăng nhập trung thành với `owner-observation.json`; giữ nhãn `quan_sat`, không khai PASS/FAIL.
+- Không thấy nội dung credential.
+- Bước dọn đúng phạm vi.
+
+**Hai P2 (đã sửa trong RESULTS):**
+- "profile không đổi từ lúc đăng nhập" → "hai ảnh chụp trùng nhau";
+- bỏ câu tự suy nguyên nhân "chống bot".
+
+**Giới hạn:**
+- Zip đầy đủ, driver chính và manifest B1 không được chuyển về.
+- Quét secret chỉ phủ các tệp trong danh sách đích của nó.
+- Chỉ có quan sát của chủ kho.
+- Chỉ restore cùng máy, cùng đường dẫn.
+- Không có REST.
+
+<details><summary>Nguyên văn verdict của reviewer (sha256 42d2cba7…)</summary>
+
+```text
+VERDICT: approve_with_fixes
+
+Independent, offline phase-C evidence review; I executed none of the Windows procedure. Model: KHONG_do_duoc. Provider: OpenAI; surface: API agent/container tools; transport: local files. No network, repository modifications, or git writes; only this verdict written in cwd.
+
+Reviewed SHA: `9804ba968dd44b35fb7b73f19f1ed85309fd2dd1`; tree: `9571aa392bdd1c04d1adb9eb4c24a93d63cb52b0`; branch: `ccr-8ee03d7f-vnmqk0`. Reviewed repository files match HEAD.
+
+References: E = supplied EV/evidence-c; R = ops/acceptance/wp-u8/RESULTS.md; M = ops/acceptance/wp1319/MATRIX.md; S = ops/specs/wp-u8-r1.md; L1/L2 = ops/leases/wp-u8-r1-g1/g2-operator.yaml.
+
+| Check | Assessment and evidence |
+|---|---|
+| Integrity | Subset SHA256 `5434371246aa474d3bbe6fb7062fd37d3ca45c9090cb03e08be0eff26ad852be`; MANIFEST SHA256 `814f7e02a635f7b19df9fe5e5d3fba06df8d0db027e24de52dda78d157e5dea0`. All seven relayed evidence files match MANIFEST `$.files[*].size/sha256`; extracted bytes match ZIP, without extras. |
+| Contract/leases | Spec SHA256 `80b91bc878d0aa20213ff665e867e0e21b521151094f1bbf592485585f7dc34d` matches L2:17. L1 withdrawn (45–47); phase C authorized within g2 window (L2:35–48). |
+| Sequence | E/U8-B-progress.log:3–4,13 records identical DryRun/real B1 digest `f20155da…`, 12,153 files/303,308,699 bytes. B0 reports no profile processes (12); B2=B1, rename/profile absent, B4=B1 (14–16); both rc=1<8. Both robocopy logs:6–11,18–21 confirm direction, required options and zero failures. |
+| Locks | HOST_BUSY stops without a subsequent operation at 07:47 (log:8–10); later acquisition at 08:20 (11). Releases recorded after DryRun, real run and cleanup (5–6,17–18,24–25). No overwrite evidenced; missing driver prevents auditing acquisition logic or independently identifying the other owner. |
+| Login | E/owner-observation.json:3–4 faithfully supports “all four survived; Claude required a human-verification tick” in the stated four-provider context. R:89,94–101 and M:233 retain owner attribution and `quan_sat`, without login PASS/FAIL. Logged booleans remain false and are not used as proof (R:77; S:70–71). Driver `$.passed=true` concerns B0–B4, not login. |
+| Credentials/cleanup | No credential contents or exfiltration evidenced in supplied files; only allowed settings booleans appear. Hashing is permitted (S:13). E/U8-C7.ps1:10–22 restricts deletion to backup plus one damaged directory, checks containment and root/descendant reparse points. Log:20–25 confirms both removed after observation, profile/install retained, locks released. |
+
+Findings:
+
+- **P0/P1:** None evidenced within this scope.
+- **P2 — R:85:** Replace “unchanged since login” with “DryRun and real B1 snapshots match.” Equal snapshots cannot establish continuous immutability or cover the earlier login-to-DryRun interval.
+- **P2 — R:96:** Remove or qualify the asserted provider-side anti-bot diagnosis. The owner reports the prompt and successful entry, not its technical cause. M:233 does not make this overclaim.
+
+Limits to record: Full frozen ZIP (`3310b4d7…`), main driver, B1 manifest and freezer are unavailable; their bytes, digest algorithms, complete package contents and credential handling cannot be independently verified. Secret scan `$.rc=0` covers `$.target_files`, not every frozen member. Owner-only observation; loggedIn proves nothing; same machine/path only; no REST measurement or proof of totalRequests=0. R:76 metadata claims lack direct relayed evidence. This does not expand the prior A/B scoped acceptance.
+```
+</details>
+

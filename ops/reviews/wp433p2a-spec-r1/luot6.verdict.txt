@@ -1,0 +1,20 @@
+## Review độc lập lượt 6 · P2a · Issue #433
+
+HEAD nền `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. Đặc tả chưa commit có SHA-256 `b0065947f941a122716cff1b15a81ad65fe9b92a15fb9effad1456100c64624d`, đối chiếu với `-ban6.md` (`0560b8bf…`).
+
+| Finding lượt 5 | Trạng thái | Bằng chứng |
+|---|---|---|
+| P2 · N9(b) · `pc_probe_quyen` thiếu `winerror` | **Đóng** | Cố định `nt` cho bộ phân loại. Probe thành công cho lượt chạy ở cả hai bộ phân loại. Với fixture cũ, bộ sai chấp nhận mọi `OSError` có `winerror` vẫn cho lượt đỏ, nên phản chứng cũ lọt. Với `PermissionError` có `errno=13`, `winerror=5`, bộ đúng cho lượt đỏ, chẩn đoán chứa mã 5, `u=h=0`, `run=False`. Bộ sai cho cả lượt và đột biến 37 `bỏ_qua`, `u=h=1`, `run=True`. Phản chứng mới bắt được sai lệch này. |
+| P3 · §8 · Năm/sáu phản chứng | **Đóng** | §8 ghi “Sáu”, khớp sáu ID riêng biệt ở §4b. |
+
+N9(c) giữ nguyên và cân bằng. Bộ `(ca chạy, lượt chạy, đột biến chạy)` là `(11,46,37)` trên POSIX, `(4,19,16)` khi probe thành công trên `nt`, và `(4,18,15)` khi được phép bỏ qua. §4b vẫn có 37 đột biến, gồm 5 E / 32 H và 21 `posix` / 16 `mọi`. Diff giữ nguyên nhãn và thứ tự lượt, gồm đích của đột biến 37 là `W5.hardlink → ban_kia_giu`.
+
+## Finding mới
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|
+| **P3 · N9(b) · Nhánh cho phép `bỏ_qua`** | Đối chứng probe thành công và phản chứng mã 5 đều đạt kỳ vọng với bộ phân loại từ chối mọi lỗi probe. Trong mô hình, bộ này làm đỏ cả mã 1 và 50. Phép đo hiện tại chưa xác nhận nhánh cho phép bỏ qua trên `nt`. | “Trong `pc_probe_quyen`, giữ cùng thiết lập `nt` và thêm hai đối chứng với `OSError` mang `winerror` lần lượt là 1 và 50. Mỗi đối chứng phải cho `W5.hardlink` và đột biến 37 `bỏ_qua`, với `u=h=1`.” |
+
+Đối chiếu và mô phỏng trong RAM bằng `python3 -IB` trên Linux, Python 3.13.18. Lần đầu kiểm sai chỉ số cột trong harness, rc 1. Các lần chạy lại để kiểm bảng và xác nhận `errno=EACCES` đều rc 0. Không ghi tệp hoặc gọi mạng. Windows thật, fragment triển khai và gate đầy đủ `not_run`. Reviewer `openai_codex` qua API, transport máy. Model và effort phục vụ chưa xác minh được.
+
+KET_LUAN: approve

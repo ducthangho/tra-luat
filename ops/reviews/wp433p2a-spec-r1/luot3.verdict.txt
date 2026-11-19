@@ -1,0 +1,56 @@
+codex
+## Review độc lập lượt 3 · P2a · Issue #433
+
+Còn bốn finding P2 về phạm vi bộ đếm W4, phân hạng ngoại lệ POSIX, cách đếm bỏ qua và phép đỏ độc lập. Mô hình theo thứ tự ca đích khớp cả 30 bộ `(ca, lượt, nhãn)` dưới các giả định ghi bên dưới.
+
+Review neo detached HEAD `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. SHA-256 đặc tả `2e6cd1dcf2e106ddd5c6cf891bb70570aed1d3440511880d683d30a5c67cb66d`, đối chiếu bản 2 `0619ff83425e63912a553d2f57da4cd9e40f6d1631386dd41fb942004c22e9c4`. Reviewer họ OpenAI, `openai_codex`, Codex qua API, transport máy. Model và effort phục vụ chưa đo được. Linux, Python 3.13.18, checkout chỉ đọc, không gọi mạng.
+
+### Đối chiếu tám finding lượt 2
+
+| Finding lượt 2 | Trạng thái |
+|---|---|
+| P2 · N7 `_safe_exc` và lỗi theo pha | **Đóng.** |
+| P2 · N1 thứ tự nhãn | **Đóng.** |
+| P2 · N8 đột biến 19/42 | **Đóng.** |
+| P2 · N4/N5/N9, nền và hậu điều | **Chưa đóng hết.** Tách ca và phép đỏ `quyen`/`byte` đã đạt. Phạm vi đếm W4 và sổ lượt bỏ qua còn hở. |
+| P2 · N3e, đột biến 4–5/22 | **Đóng.** |
+| P2 · N10 topology dev | **Đóng.** |
+| P3 · §2 ổn định dấu `.git` | **Đóng.** |
+| P3 · §8 cộng ước lượng | **Đóng.** |
+
+### Finding lượt 3
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế đề nghị |
+|---|---|---|
+| **P2 · N4b/N6, phạm vi đếm writer** | Fixture có `token` chạy W6 trước W4. Chạy thân `cmd_bootstrap` của base với dependency giả trong RAM đã ghi nhận `_ghi_nguyen_tu_0600('/home-fixture/.tra_luat_config.json', …)` trước W4. Do M2 dùng cùng writer, đếm toàn lượt khiến N4b thấy hai lần gọi writer ở W4. Ở `W4.cfg_la_tep`, `mkstemp` của W6 cũng làm sai kỳ vọng 0. N6 có cùng vấn đề nếu tái dùng fixture có `token`. | “Các số đếm writer, `mkstemp` và tệp tạm ở N4b/N6 chỉ thuộc thao tác ghi GWS. Lọc lời gọi writer theo đích `credentials.json`, lọc `mkstemp` theo thư mục của đích đó, và kiểm các số đếm trên từng lượt.” |
+| **P2 · §4b dòng 41, E phụ thuộc locale** | `FileExistsError` từ `makedirs` mang thông báo hệ điều hành. Linux locale C cho `[Errno 17] File exists` khi gọi `os.makedirs('/proc/version', exist_ok=True)`. Bảng dùng chuỗi tiếng Anh để nhận dạng E trên mọi POSIX, nên ở locale dịch thông báo, cùng lỗi có thể bị đưa vào `ngoai_le_la`. | “Dòng 41 chỉ nhận `FileExistsError` có `e.errno == errno.EEXIST` tại lượt `W4.cfg_la_tep`, từ thao tác `makedirs` của writer trên `cfgdir` fixture.” |
+| **P2 · N9(b), sổ lượt và điều kiện bỏ qua** | N9 vẫn chỉ công bố tổng theo **ca** và **đột biến**. Một lượt `W5.hardlink` bị bỏ không có bản ghi lượt bắt buộc. Các phương trình hiện tại cũng chấp nhận nền khác có `a=11, b=c=4, d=1, w=6` và đủ 14 đột biến `mọi` chạy xanh, dù một ca `mọi` bị bỏ nguyên. Phép đỏ hiện có chỉ ép bỏ ca trên POSIX. | “Khai danh sách lượt dự kiến theo từng ca. Trên nền khác, sáu ca POSIX và các lượt của chúng vào `chỉ_posix`. Cả năm ca `mọi` phải chạy. Chỉ `nguyen_tu · W5.hardlink` và đột biến 37 được `bỏ_qua` khi phép thử tạo hardlink trên chính volume fixture xác nhận không hỗ trợ. Công bố ID lượt, lý do và tổng lượt theo trạng thái. Tự kiểm phải đỏ khi bỏ một lượt bắt buộc hoặc bỏ nguyên một ca `mọi`.” |
+| **P2 · N1/N4b/N7/N8, L3/L6** | Một số tiêu chí độc lập vẫn thiếu phép đỏ. Trong N7, 20/21 đánh `hop_dong` qua E và 36 đánh `khong_tam`; không phép nào chứng minh `tiem` phát hiện nhật ký thiếu khi lỗi vẫn được ném đúng, hoặc `ban_cu` phát hiện đích cũ bị đổi khi hợp đồng lỗi và dọn tạm vẫn đạt. N4b chưa phản chứng riêng cho `nguyen_trang`. N1 chưa phản chứng riêng cho số dòng `agent_creds` hoặc SENT. Ở lượt `require`, 23 chỉ đánh ưu tiên mã trả về. | “Thêm phản chứng cho từng vế độc lập. N7 bỏ bản ghi nhưng vẫn tiêm đúng lỗi để làm đỏ `tiem`, và đổi byte đích cũ trong lượt tiêm để làm đỏ `ban_cu`. N4b làm sai hậu điều sau khi đã thu đúng ngoại lệ. N1 lặp dòng trạng thái và in SENT, mỗi lần chỉ đổi một vế. N8 chạy riêng phép thiếu/lặp dòng §0.1 với rc 4 giữ nguyên. Ghi rõ phép nào là tự kiểm bộ đo và cập nhật các tổng tương ứng.” |
+| **P3 · M2/N6, `gws_cred` có giá trị falsy** | M2 yêu cầu kiểu `str` nhưng chưa nói rõ xử lý điều kiện `if bundle.get("gws_cred")` của base. Ca kiểu với số `5` cho phép giữ điều kiện cũ. Base chạy trong RAM cho `0`, `False`, `[]`, `None` và `""` đi thẳng tới cảnh báo thiếu dữ liệu. | “Khai rõ trường vắng, chuỗi rỗng và giá trị sai kiểu có mặt đi vào nhánh nào. Thêm một fixture sai kiểu falsy, chẳng hạn `0`, để khóa lựa chọn.” |
+
+### §4b · Nhãn đỏ đầu tiên trong ca đích
+
+`python3 -IB` chạy mô hình trong RAM, theo thứ tự lượt và nhãn, rc 0. Mô hình dùng thân checker và writer của base ở các phép phù hợp, stub hệ tệp cho writer và mô hình hóa các nhánh W4/W5 chưa có candidate. Với 19/42, `W4.trong_kho` trong N8 tái dùng fixture N1 và dùng hai nhãn riêng của N8. Với 37, hai lượt thường giữ đúng byte cuối, và dữ liệu mới khác `CU` ở lượt hardlink.
+
+| ID | Lượt → nhãn đầu tiên |
+|---|---|
+| 1, 2, 3 | `W4 → sach`, `W5 → sach`, `W4 → ma` |
+| 4, 6, 7 | `W5.goc_1 → goc_1`, `W5.hai_cham → hai_cham`, `W5.tuong_doi_thuong → tuong_doi_thuong` |
+| 10, 11, 12 | `realpath → kho_truoc`, `tu_vung → tu_choi_tu_vung`, `W4.tep_cuoi → lien_ket` |
+| 15, 16, 17, 18 | `W4.thuong → nguyen_tu`, `W5.thuong → nguyen_tu`, `N6.kieu → kieu`, `N6.surrogate → surrogate` |
+| 19, 20, 21, 22, 23 | `W4.trong_kho → mau_loi`, `W4.mkstemp → hop_dong`, `W5.mkstemp → hop_dong`, `W5.cli → mot_dong`, `require → require` |
+| 33, 35, 36, 37 | `W4.ong → lien_ket`, `W4.thuong → fsync`, `W4.fsync → khong_tam`, `W5.hardlink → ban_kia_giu` |
+| 38, 39, 40, 41 | `nul → nul`, `trang → trang`, `goc → goc_rong`, `W4.cfg_la_tep → hop_dong` với thông báo locale C |
+| 42, 43, 44, 45 | `W4.trong_kho → mot_dong_loi`, `xuong_dong → mot_dong_m1`, `W4.thuong → quyen`, `W4.thuong → byte` |
+
+Đếm được **30 ID và 30 bộ đích duy nhất**, gồm **5 E, 25 H, 16 POSIX, 14 mọi nền**. §4 có **11 ca và 45 ID lượt**. Lượt `goc` chứa hai lời gọi helper. N9(c) trong mô hình cho `GIET` với đích 20 nguyên bản, `TIN_DUNG_GIA` khi chỉ đổi lượt kỳ vọng sang `W4.fsync`, và `GIET` sai nếu bộ phân hạng bỏ so lượt. Phép nhận diện E vẫn neo tại lượt thực `W4.mkstemp`.
+
+Các phép base chạy được xác nhận `_safe_exc` trả đúng ba tên lớp, `goc` thô có `/` bỏ lọt symlink mà cách kiểm từ `/` bắt được, và topology selftest chọn `dev`. Mô phỏng discovery với fragment giả định cho 14 đường, bỏ riêng đường ấy còn 13 và vẫn chọn `dev`. Thử hai chuỗi N3b trên thân `_trong_kho_git` cho kết quả mong đợi khi bỏ riêng từng chuỗi. Hai lượt probe phụ thoát rc 1 do lỗi harness hoặc assertion, nên chỉ dùng quan sát đã in và các phép chạy lại thành công làm bằng chứng. Candidate, gate đầy đủ, macOS và Windows đều `not_run`.
+
+### L1–L7 và trần 450
+
+L1 khớp số ID tĩnh, còn thiếu sổ lượt chạy theo nền. L2, L4, L5 và L7 có căn cứ trong write set, số liệu kế thừa, mốc base và các ADR được dẫn. L3/L6 chưa đạt ở các phép đỏ độc lập nêu trên. Trong phạm vi P2a, chốt POSIX đi theo danh sách cho phép của M1 rồi mới cho ghi khi cả hai luật kiểm đích đều đạt. Các ca gộp giữ được thứ tự dự kiến nếu mỗi lượt dựng và đo fixture riêng trước khi so nhãn.
+
+§8 cộng đúng **408–479**, điểm giữa **443,5**, dư **6,5 dòng** so với trần ở điểm giữa. Packet 1 đo được **+448**, fragment 353 dòng, 18 ca, 30 mục `_DB`, 4 tự kiểm. AST cho 115 dòng tính cả khai báo 18 hàm ca và 97 dòng thân hàm. Dải 125–155 dòng cho 11 hàm ca với 45 ID lượt có thể đạt nếu dùng bảng và tái dùng rig, nhưng biên 6,5 dòng rất nhỏ khi tính thêm sổ lượt và các phép đỏ còn thiếu. Trần vẫn do numstat thật ở N12 quyết định.
+
+KET_LUAN: request_changes

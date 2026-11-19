@@ -1,0 +1,1147 @@
+Reading additional input from stdin...
+OpenAI Codex v0.170.0
+--------
+workdir: /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv433p2a/wt
+model: gpt-6.2-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1f26c-5277-7711-b490-c5aeda00cb1d
+--------
+user
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), lượt 5, cho đặc tả `ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md` (packet P2a, Issue #433, phạm vi POSIX). CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng. Chạy thử trong RAM hoặc bản sao dưới /tmp (nếu /tmp chỉ đọc, mô phỏng trong RAM và ghi rõ).
+
+Clone master 3b647461db7c8ded1bddd9aafc5c6aa5eead223f, cộng chưa commit: đặc tả cần review; `ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban5.md` là bản bạn review lượt 4 (sha256 567af28f…); verdict lượt 1–4 ở `ops/reviews/wp433p2a-spec/luot{1,2,3,4}.verdict.txt`.
+
+Quyết định chủ kho là RÀNG BUỘC, không nêu lại: §2/§9 (P2b, P2c, Q2, Q4 đã quyết), Q1 trần riêng ≤ 3 tệp / ≤ 550 dòng thêm. Q3 chặn lease không chặn review — không nêu.
+
+Việc:
+1. Diff với `-ban5.md`. Hai finding lượt 4 (P2 probe hardlink, P3 §8 cộng hạng mục): đã đóng THẬT chưa. Với probe: danh sách cho phép `winerror` {1, 50} chỉ trên nt, mọi lỗi khác ⇒ lượt đỏ; `pc_probe_quyen` có đổi đúng một thứ và làm đỏ đúng vế không; có lỗ nào khiến lượt hardlink và đột biến 37 vẫn `bỏ_qua` sai. Với §8: cộng lại hạng mục và dự phòng.
+2. Sửa có làm vỡ chỗ khác không (đẳng thức N9(c), tổng §4b, nhãn, thứ tự lượt).
+3. Chỉ nêu finding MỚI nếu nó là lỗ đo hoặc tự mâu thuẫn có bằng chứng; không nêu lại finding đã đóng.
+
+Đầu ra stdout: bảng finding lượt 4 (đóng / chưa), finding mới P0–P3 (chỗ, vấn đề, bằng chứng, câu thay thế). Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2.
+warning: Codex could not find bubblewrap on PATH. Install bubblewrap with your OS package manager. See the sandbox prerequisites: https://developers.openai.com/codex/concepts/sandboxing#prerequisites. Codex will use the bundled bubblewrap in the meantime.
+codex
+Tôi dùng skill cross-review để đối chiếu bản hiện hành với bản lượt 4 và kiểm tra các nhánh probe trong RAM, không ghi tệp hay gọi mạng.
+exec
+/bin/bash -lc 'pwd && git rev-parse HEAD HEAD''^{tree} && git --no-optional-locks status --short && wc -l CONTEXT.md docs/PROTOCOL_DA_PHIEN.md CLAUDE.md ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md && cat .agents/skills/cross-review/SKILL.md' in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv433p2a/wt
+ succeeded in 0ms:
+/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv433p2a/wt
+3b647461db7c8ded1bddd9aafc5c6aa5eead223f
+306ec6c89a18ac12988d0b324a0867f6d3e91a54
+?? ops/reviews/wp433-spec-r1/
+?? ops/reviews/wp433p2a-spec/
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban1.md
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban2.md
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban3.md
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban5.md
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-r1-truoc-tach.md
+?? ops/specs/NLM-GWS-DICH-NGOAI-KHO-r1.md
+   244 CONTEXT.md
+  1751 docs/PROTOCOL_DA_PHIEN.md
+  1149 CLAUDE.md
+   347 ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md
+  3491 total
+---
+name: cross-review
+description: Adapter review packet trên Codex CLI với checkout/context được cấp riêng. Assurance và hợp đồng evidence lấy từ docs/PROTOCOL_DA_PHIEN.md; cung cấp cú pháp PowerShell.
+---
+
+# Adapter `cross-review` — Codex CLI / PowerShell
+
+Đọc [protocol](../../../docs/PROTOCOL_DA_PHIEN.md) §7 (receipt), §8/§8.1–§8.3
+(assurance, bootstrap, runtime, cache, Ruff, lịch sử lớp), §10.2.1–§10.2.3 (CI) và §13.
+Nguồn cú pháp và ghi chép provider: [.claude adapter](../../../.claude/skills/cross-review/SKILL.md).
+Các mục model selector Claude ở nguồn chỉ dành cho lane Claude; không dùng bảng đó chọn Codex.
+Nhận dạng nền này là `openai_codex / codex_cli / machine`; model/effort và sandbox đọc từ run.
+
+## Bootstrap và snapshot
+
+Biến `$Remote`, `$ReviewRoot`, `$Branch`, `$ReviewedSha`, `$Scratch` lấy từ assignment.
+Lệnh clone/config/checkout thuộc bootstrap trước bàn giao (§8.1):
+
+```powershell
+git -c core.longpaths=true clone --no-checkout $Remote $ReviewRoot
+git -C $ReviewRoot remote get-url origin
+git -C $ReviewRoot config core.abbrev 7
+git -C $ReviewRoot config core.longpaths true
+git -C $ReviewRoot fetch origin $Branch
+git -C $ReviewRoot checkout --detach $ReviewedSha
+git -C $ReviewRoot rev-parse HEAD 'HEAD^{tree}'
+git -C $ReviewRoot status --porcelain=v1 --untracked-files=all --ignored=matching
+git -C $ReviewRoot diff --binary
+git -C $ReviewRoot diff --cached --binary
+git -C $ReviewRoot ls-files --others --exclude-standard
+git -C $ReviewRoot ls-files --others --ignored --exclude-standard
+```
+
+Ghi rc của từng command ngay sau chạy; snapshot bytes/hash và giới hạn quan sát ở §8.2.
+Trust path/capability theo §8.1; không có lệnh tự chấp nhận trust trong adapter này.
+
+Ví dụ diff/numstat giữ raw bytes trong scratch của run, với `$BaseSha` từ assignment:
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+& $Py -B -c 'import pathlib,subprocess,sys; r,b,h,o=sys.argv[1:]; p=subprocess.run(["git","-C",r,"diff",b,h],check=True,capture_output=True); (pathlib.Path(o)/"diff.patch").write_bytes(p.stdout); p=subprocess.run(["git","-C",r,"diff","--numstat",b,h],check=True,capture_output=True); (pathlib.Path(o)/"numstat.txt").write_bytes(p.stdout)' $ReviewRoot $BaseSha $ReviewedSha $Scratch
+$DiffArtifactsRc = $LASTEXITCODE
+```
+
+`$ReviewRoot`/`$Scratch` là đường dẫn tuyệt đối. Khi đọc `modelUsage` lane Claude qua nguồn,
+truyền `$ReviewRoot` vào đối số SOURCE và JSON đúng `$Scratch/reviewer.json`; producer và
+consumer cùng run theo §8.1. Không đọc JSON trùng tên ở cwd.
+
+## Runtime và Ruff
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+codex --version
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:PYTHONPYCACHEPREFIX = Join-Path $Scratch 'pycache'
+& $Py -B -c 'import pathlib,runpy,sys; m=runpy.run_path(str(pathlib.Path(sys.argv[1])/".claude/dev/ci_dang_ky_test.py")); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)' $ReviewRoot
+$RuffContractRc = $LASTEXITCODE
+& $Py -m ruff check --no-cache --select F (Join-Path $ReviewRoot 'scripts/tl.py')
+$RuffLintRc = $LASTEXITCODE
+```
+
+Hai lệnh Ruff trỏ checkout được giao, không phụ thuộc cwd. Pin/probe và bare lint là hai scope của §8.2;
+tiêu chí A7/mutant riêng xem §10.2.3. Cú pháp `launcher.py run --prompt-file` và mẫu Codex
+ở nguồn, mục “Reviewer là codex”; schema đầy đủ ở `docs/GOI_AGENT_DA_NEN.md`.
+`$Run = Get-Content -Raw -LiteralPath $RunJson | ConvertFrom-Json` đọc rc con/trạng thái; parse được chưa là
+completion evidence. Model/effort/sandbox lấy từ `$Run.model_phuc_vu`, `$Run.effort_phuc_vu`, `$Run.sandbox_quan_sat`,
+chỉ đo được khi `model_phuc_vu_trang_thai`/`effort_phuc_vu_trang_thai`/`sandbox_trang_thai` là `DO_DUOC`
+(khác thì đọc `*_ly_do`); đối chiếu với prompt/receipt theo §8.1. Header `model:`/`reasoning effort:` trong
+`$StderrLog`, nếu có, chỉ là lời khai phụ; vắng header không phải chưa đo được. Không lấy model từ actor GitHub.
+
+## Provenance và vận chuyển
+
+Lưu khối GraphQL “Provenance CI” của .claude adapter vào `$QueryFile` ngoài checkout:
+
+```powershell
+gh api graphql -F "query=@$QueryFile" -f "id=$RunNodeId"
+$ProvenanceRc = $LASTEXITCODE
+gh api --paginate --slurp "repos/ducthangho/tra-luat/actions/runs/$RunId/attempts/$Attempt/jobs?per_page=100"
+$JobsRc = $LASTEXITCODE
+git -C $ReviewRoot cat-file blob "${DefinitionOid}:$WorkflowPath"
+```
+
+Khối `cat-file` minh họa đọc; để lưu bytes/hash dùng Python `subprocess` như work-packet.
+Nguồn URL/OID, nullable `file`, 403, skipped/waiver và đủ attempt/context theo §10.2.2–§10.2.3.
+Receipt body-file dùng Python ở [work-packet nguồn](../../../.claude/skills/work-packet/SKILL.md),
+mục “Body file và exact readback”. Bảng verdict/lịch sử lớp ở nguồn; không đổi contract khi
+đổi shell. Không dispatch reviewer từ ví dụ đọc evidence này.
+
+exec
+/bin/bash -lc 'diff -u ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1{ -ban5,}.md 2>/dev/null || diff -u ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban5.md ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md
+cat ops/reviews/wp433p2a-spec/luot{1,2,3,4}.verdict.txt
+sha256sum ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1{,-ban5}.md' in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv433p2a/wt
+ succeeded in 0ms:
+--- ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban5.md	2026-11-19 06:08:52.533017294 +0000
++++ ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md	2026-11-19 06:09:07.596927965 +0000
+@@ -138,7 +138,7 @@
+ | N6 | `du_lieu_sai_dang` (mọi): lượt theo thứ tự `N6.kieu` — `gws_cred` là số `5`; `N6.surrogate` — chứa surrogate đơn; `N6.falsy` — `gws_cred` là số `0` (falsy, CÓ MẶT) | [`kieu`], [`surrogate`], [`falsy`] rc 1, stderr đúng với `dữ liệu không hợp lệ`, không `credentials.json`, không tệp tạm, writer 0 lần, không ngoại lệ. | `db_w4_bo_kiem_kieu` ⇒ `kieu`. `db_w4_bo_kiem_encode` ⇒ `surrogate`. `db_w4_dieu_kien_truthy` (điều kiện vào nhánh về `if bundle.get("gws_cred")` của base) ⇒ `N6.falsy`, `falsy` (base bỏ qua nhánh và in cảnh báo thiếu — không có dòng `dữ liệu không hợp lệ` nên `falsy` đỏ dù rc là gì; hai lượt đầu vẫn đạt vì `5` và chuỗi surrogate là truthy). |
+ | N7 | `ghi_loi_theo_pha` (mọi): bộ quan sát ném `OSError("wp433-oserror-<pha>")` ở ĐÚNG MỘT pha, chỉ khi thư mục đích là `cfgdir` của ca: `mkstemp`, `fsync`, `chmod`, `replace`. Lượt theo thứ tự `W4.mkstemp`, `W4.fsync`, `W4.chmod`, `W4.replace`, `W5.mkstemp`, `W5.fsync`, `W5.chmod`, `W5.replace`, `W5.cli` (`cmd_gws_auth_load` với `_gws_auth_load` thật, pha `replace`); mỗi lượt có sẵn `credentials.json` cũ. | Nhãn theo thứ tự: [`tiem`] nhật ký bộ quan sát có ĐÚNG MỘT lần tiêm, đúng pha, đúng thư mục (với `fsync`: đúng fd `mkstemp`), dấu `wp433-oserror-<pha>`; [`hop_dong`] W4 rc 1, stderr đúng với dòng `fullmatch` `\[bootstrap\] ✗ ghi lỗi: OSError` (hợp đồng công khai qua `_safe_exc`, không lộ thông điệp), không in `✓ gws cred`; W5 `(False, "ghi lỗi: OSError")`; `W5.cli` đúng một dòng `[gws-auth-load] ✗ ghi lỗi: OSError`, rc 2; [`ban_cu`] `credentials.json` giữ byte cũ; [`khong_tam`] không tệp `.auth.json.*` trong `cfgdir`. | `db_cat_dich_truoc` (thân writer mở `path` bằng `"wb"` rồi đóng TRƯỚC `mkstemp`; tiêm, nhật ký, hợp đồng giữ) ⇒ `W4.mkstemp`, `ban_cu`. Phản chứng BỘ ĐO `pc_tiem_khong_ghi` (trên bản sao fragment, không phải mục `_DB`): bộ quan sát vẫn ném đúng `OSError` ở đúng pha nhưng KHÔNG ghi nhật ký ⇒ lượt `W4.mkstemp` đỏ ở `tiem`, `run` False. `db_w4_oserror_lan`, `db_w5_oserror_lan` (bỏ `except OSError` ở đúng một chỗ; dấu thô `wp433-oserror` chỉ dùng để nhận diện ngoại lệ E ở biên lượt) ⇒ lượt ĐẦU của chỗ ấy (`W4.mkstemp`, `W5.mkstemp`), `hop_dong`. `db_bo_don_tam` (thân writer bỏ nhánh xoá tệp tạm; hợp đồng vẫn đúng) ⇒ `W4.fsync` (lượt đầu có tệp tạm), `khong_tam`. |
+ | N8 | `chung_hop_dong_loi` (posix). Lượt theo thứ tự `W4.trong_kho`, `require` | `W4.trong_kho`: lặp N1 lượt W4 ⇒ [`mot_dong_loi`] đúng MỘT dòng bắt đầu `[bootstrap] ✗ ` (khác dòng §0.1); [`mau_loi`] dòng ấy `fullmatch` mẫu M3. `require`: kèm `--require-agent-creds` ⇒ [`require`] rc 4, đúng một dòng mang cụm `nằm trong kho git`, một `agent_creds:`; [`dong_0_1`] dòng §0.1 xuất hiện ĐÚNG một lần (đếm bằng so nguyên dòng). Thêm: `python3 ops/cloud_agent_creds_test.py` trên head `TONG: DAT`, `PD*` vẫn `GIET`, từng ca bằng base; fragment packet 1 vẫn ĐẠT. | `db_w4_lap_dong` (in lại ĐÚNG dòng lỗi hợp lệ lần hai) ⇒ `mot_dong_loi`. `db_w4_mau_loi` (THAY dòng lỗi duy nhất bằng `[bootstrap] ✗ nằm trong kho git: ` — chi tiết rỗng; rc và số dòng giữ nguyên) ⇒ `mau_loi`. `db_require_thua_rc1` ⇒ `require` (lượt `W4.trong_kho` vẫn rc 1). `db_require_thieu_dong` (bỏ in dòng §0.1, vẫn trả 4) và `db_require_lap_dong` (in dòng §0.1 hai lần, vẫn trả 4) ⇒ `require`, `dong_0_1` — hai chiều của phép đếm `== 1`, cùng đích có chủ ý (§4b). Gate PD/packet 1: trên cây tạm sửa một ký tự trong một chuỗi neo PD của `tl_gws.py` ⇒ `cloud_agent_creds_test` không `TONG: DAT`; sửa một ký tự trong một neo của fragment packet 1 ⇒ fragment ấy `HONG ≥ 1`, `run` False. |
+-| N9 | Tự kiểm của fragment | (a) mỗi ID trong `_DU_KIEN` có đúng một mục `_DB` và ngược lại (so TẬP ID); mỗi mục giết đúng (ca, lượt, nhãn) đã khai; (b) SỔ LƯỢT: `_LUOT_DU_KIEN` viết RIÊNG khỏi bảng ca, ánh xạ mỗi ca §4 tới tuple ID lượt đúng thứ tự §4 — 11 ca, 46 lượt; nền `posix` 7 ca/27 lượt (`trong_kho`, `goc_bieu_dien`, `to_tien`, `chuoi_kho`, `duong_xuong_dong`, `bien_cfgdir`, `chung_hop_dong_loi`), nền `mọi` 4 ca/19 lượt (`m1_bien`, `nguyen_tu`, `du_lieu_sai_dang`, `ghi_loi_theo_pha`). Mỗi lượt kết thúc với đúng một trạng thái `đạt` · `đỏ` · `bỏ_qua` · `chỉ_posix`; tập (ca, lượt) đã ghi trạng thái phải BẰNG tập trong `_LUOT_DU_KIEN` (thiếu, thừa hay lặp ⇒ False). Trên nền khác POSIX, mọi lượt của 7 ca `posix` là `chỉ_posix`; 4 ca `mọi` phải chạy. Danh sách cho phép `bỏ_qua` có ĐÚNG MỘT mục: (`nguyen_tu`, `W5.hardlink`), và chỉ khi phép thử `os.link` trên CHÍNH thư mục fixture của lượt ấy ném `OSError` — khi ấy đột biến 37 đếm `bỏ_qua`, mọi đột biến khác không được `bỏ_qua`. Mỗi lượt `bỏ_qua` in một dòng stderr `[wp433_gws_cred_dich_ngoai_kho] BO_QUA <ca>·<lượt>: <repr(lý do)>`. (c) MỘT dòng tổng kết RA STDERR `[wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=a chạy=b đạt=c bỏ_qua=d chỉ_posix=w · LUOT: dự_kiến=x chạy=y đạt=z bỏ_qua=u chỉ_posix=t · DOT BIEN: dự_kiến=e chạy=f giết_đúng=g bỏ_qua=h chỉ_posix=v · HONG: i · TU_KIEM: k/k`; ca `bỏ_qua` không tồn tại (một lượt `bỏ_qua` không làm ca bỏ qua) nên `d == 0` mọi nền; `run` True chỉ khi `b == c`, `y == z`, `f == g`, `i == 0`, `d == 0`, `a == b + w`, `x == y + u + t`, `e == f + h + v`, `x == 46`, `e == len(_DU_KIEN)`, `u ≤ 1`, `h == u` (chỉ đột biến 37 theo lượt duy nhất được phép), mọi tự kiểm đúng hạng; trên POSIX `u == h == w == t == v == 0`; trên nền khác `w == 7`, `t == 27`, `v` = số đột biến có cột nền `posix`; (d) tự kiểm phân hạng, mỗi mục là (đột biến, ca, lượt, nhãn, hạng mong đợi): `tu_kiem_doi_kieu` — chèn vào W4 `try: raise AttributeError("wp433-tu-kiem") except Exception as e: raise AssertionError(f"wp433-tu-kiem {type(e).__name__}")`, nhắm (`du_lieu_sai_dang`, `N6.kieu`, `kieu`) ⇒ `TIN_DUNG_GIA`, VÀ ngoại lệ bắt được có `__context__` kiểu `AttributeError` (chứng minh đã đi qua `except` đổi kiểu); `tu_kiem_chu_thich` — chỉ thêm chú thích ⇒ `SONG_SOT`; `tu_kiem_sai_luot` — CHÍNH đột biến `db_w4_oserror_lan`, cùng ca `ghi_loi_theo_pha`, cùng nhãn `hop_dong`, cùng kiểu `OSError`, cùng dấu `wp433-oserror`, CHỈ khai lượt `W4.fsync` thay `W4.mkstemp` ⇒ `TIN_DUNG_GIA`; (e) neo 0/2 lần hoặc không `compile` ⇒ `HONG`; (f) stdout của `run` rỗng. | Trên cây tạm: thêm một ID vào `_DU_KIEN` không có mục `_DB` ⇒ (a) False; đổi lượt đích của `db_w5_bo_chot` sang `W4` ⇒ False; TẮT nhãn `goc_1` ⇒ `db_lstat_tho` không giết đúng ⇒ False; neo khớp 2 lần ⇒ `HONG: 1`, False; ép một ca `posix` vào `bỏ_qua` trên POSIX ⇒ False; bộ phân hạng bỏ so lượt ⇒ `tu_kiem_sai_luot` ra `GIET` ⇒ False; in tổng kết ra stdout ⇒ (f) đỏ. Phản chứng BỘ ĐO cho sổ lượt (b), mỗi phép đổi đúng một thứ trên bản sao fragment: `pc_bo_luot` — bảng ca bỏ chạy lượt `W5.cfg_la_tep` của `bien_cfgdir` (ca vẫn báo đạt) ⇒ False; `pc_bo_ca_moi` — gỡ nguyên ca `m1_bien` khỏi bảng ca, giữ `_LUOT_DU_KIEN` ⇒ False; `pc_bo_qua_ngoai_danh_sach` — đánh `bỏ_qua` lượt `W4.thuong` của `nguyen_tu` ⇒ False; `pc_bo_qua_khi_ho_tro` — ép `W5.hardlink` `bỏ_qua` trong khi phép thử `os.link` thành công ⇒ False. |
++| N9 | Tự kiểm của fragment | (a) mỗi ID trong `_DU_KIEN` có đúng một mục `_DB` và ngược lại (so TẬP ID); mỗi mục giết đúng (ca, lượt, nhãn) đã khai; (b) SỔ LƯỢT: `_LUOT_DU_KIEN` viết RIÊNG khỏi bảng ca, ánh xạ mỗi ca §4 tới tuple ID lượt đúng thứ tự §4 — 11 ca, 46 lượt; nền `posix` 7 ca/27 lượt (`trong_kho`, `goc_bieu_dien`, `to_tien`, `chuoi_kho`, `duong_xuong_dong`, `bien_cfgdir`, `chung_hop_dong_loi`), nền `mọi` 4 ca/19 lượt (`m1_bien`, `nguyen_tu`, `du_lieu_sai_dang`, `ghi_loi_theo_pha`). Mỗi lượt kết thúc với đúng một trạng thái `đạt` · `đỏ` · `bỏ_qua` · `chỉ_posix`; tập (ca, lượt) đã ghi trạng thái phải BẰNG tập trong `_LUOT_DU_KIEN` (thiếu, thừa hay lặp ⇒ False). Trên nền khác POSIX, mọi lượt của 7 ca `posix` là `chỉ_posix`; 4 ca `mọi` phải chạy. Danh sách cho phép `bỏ_qua` có ĐÚNG MỘT mục: (`nguyen_tu`, `W5.hardlink`), chỉ trên `os.name == "nt"`, và chỉ khi phép thử `os.link` trên CHÍNH thư mục fixture của lượt ấy ném `OSError` có `winerror` thuộc danh sách CHO PHÉP {1 `ERROR_INVALID_FUNCTION`, 50 `ERROR_NOT_SUPPORTED`} (mã volume không hỗ trợ hardlink; chưa đo trên Windows thật, §8) — khi ấy đột biến 37 đếm `bỏ_qua`, mọi đột biến khác không được `bỏ_qua`. Probe ném bất kỳ lỗi nào khác (quyền, đường dẫn, `winerror` ngoài danh sách, hay mọi lỗi trên POSIX) ⇒ lượt `đỏ` với chẩn đoán `probe hardlink: <repr(lớp, errno, winerror)>`. Mỗi lượt `bỏ_qua` in một dòng stderr `[wp433_gws_cred_dich_ngoai_kho] BO_QUA <ca>·<lượt>: <repr(lý do)>`. (c) MỘT dòng tổng kết RA STDERR `[wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=a chạy=b đạt=c bỏ_qua=d chỉ_posix=w · LUOT: dự_kiến=x chạy=y đạt=z bỏ_qua=u chỉ_posix=t · DOT BIEN: dự_kiến=e chạy=f giết_đúng=g bỏ_qua=h chỉ_posix=v · HONG: i · TU_KIEM: k/k`; ca `bỏ_qua` không tồn tại (một lượt `bỏ_qua` không làm ca bỏ qua) nên `d == 0` mọi nền; `run` True chỉ khi `b == c`, `y == z`, `f == g`, `i == 0`, `d == 0`, `a == b + w`, `x == y + u + t`, `e == f + h + v`, `x == 46`, `e == len(_DU_KIEN)`, `u ≤ 1`, `h == u` (chỉ đột biến 37 theo lượt duy nhất được phép), mọi tự kiểm đúng hạng; trên POSIX `u == h == w == t == v == 0`; trên nền khác `w == 7`, `t == 27`, `v` = số đột biến có cột nền `posix`; (d) tự kiểm phân hạng, mỗi mục là (đột biến, ca, lượt, nhãn, hạng mong đợi): `tu_kiem_doi_kieu` — chèn vào W4 `try: raise AttributeError("wp433-tu-kiem") except Exception as e: raise AssertionError(f"wp433-tu-kiem {type(e).__name__}")`, nhắm (`du_lieu_sai_dang`, `N6.kieu`, `kieu`) ⇒ `TIN_DUNG_GIA`, VÀ ngoại lệ bắt được có `__context__` kiểu `AttributeError` (chứng minh đã đi qua `except` đổi kiểu); `tu_kiem_chu_thich` — chỉ thêm chú thích ⇒ `SONG_SOT`; `tu_kiem_sai_luot` — CHÍNH đột biến `db_w4_oserror_lan`, cùng ca `ghi_loi_theo_pha`, cùng nhãn `hop_dong`, cùng kiểu `OSError`, cùng dấu `wp433-oserror`, CHỈ khai lượt `W4.fsync` thay `W4.mkstemp` ⇒ `TIN_DUNG_GIA`; (e) neo 0/2 lần hoặc không `compile` ⇒ `HONG`; (f) stdout của `run` rỗng. | Trên cây tạm: thêm một ID vào `_DU_KIEN` không có mục `_DB` ⇒ (a) False; đổi lượt đích của `db_w5_bo_chot` sang `W4` ⇒ False; TẮT nhãn `goc_1` ⇒ `db_lstat_tho` không giết đúng ⇒ False; neo khớp 2 lần ⇒ `HONG: 1`, False; ép một ca `posix` vào `bỏ_qua` trên POSIX ⇒ False; bộ phân hạng bỏ so lượt ⇒ `tu_kiem_sai_luot` ra `GIET` ⇒ False; in tổng kết ra stdout ⇒ (f) đỏ. Phản chứng BỘ ĐO cho sổ lượt (b), mỗi phép đổi đúng một thứ trên bản sao fragment: `pc_bo_luot` — bảng ca bỏ chạy lượt `W5.cfg_la_tep` của `bien_cfgdir` (ca vẫn báo đạt) ⇒ False; `pc_bo_ca_moi` — gỡ nguyên ca `m1_bien` khỏi bảng ca, giữ `_LUOT_DU_KIEN` ⇒ False; `pc_bo_qua_ngoai_danh_sach` — đánh `bỏ_qua` lượt `W4.thuong` của `nguyen_tu` ⇒ False; `pc_bo_qua_khi_ho_tro` — ép `W5.hardlink` `bỏ_qua` trong khi phép thử `os.link` thành công ⇒ False; `pc_probe_quyen` — chỉ cho probe ném `PermissionError(errno.EACCES)` (giả lập `os.name == "nt"` cho riêng phép quyết định bỏ qua, các vế khác giữ) ⇒ lượt `W5.hardlink` `đỏ`, chẩn đoán probe, False. |
+ | N10 | Exact head: `--selftest` ĐẠT N/N hai số bằng nhau trên clone thật, N = N_base + 1, DELTA = 0 ca đỏ mới (base và head dựng trong CÙNG một lệnh); `test-fragments-check --json` ⇒ `ok: true`; `bundle_fragment_check.py --json` ⇒ `ok: true`, `failed: []`. | Không tái sinh bundled ⇒ `TEST_ID_SET_MISMATCH`; sửa tay bundled ⇒ `GENERATED_BUNDLE_STALE` (hai phép này dành cho checker bundled). Selftest trên clone đọc fragment DEV khi `scripts/test_fragments` có dữ liệu (`scripts/tl_core/test_fragments.py:439–460`, `_runtime_fragment_topology` ⇒ `dev`, đo lượt 2), nên phản chứng số ca dựng trên BẢN SAO clone: chuyển riêng `wp433_gws_cred_dich_ngoai_kho.py` ra khỏi `scripts/test_fragments`, giữ các fragment khác ⇒ selftest cho N = N_base ⇒ đỏ vế `N_base + 1`; đổi `run` của fragment dev thành `return False` ⇒ `N−1/N` ⇒ đỏ vế N/N. |
+ | N11 | Lane worker `ci.yml` (521–532) tại chỗ: `release-manifest --root . --out <tạm>` rồi `release-verify <tạm> --root . --strict` ⇒ `ok: true`, `expected_file_count == checked_file_count`. Phiên land tái sinh manifest trong commit land, hồ sơ land ghi `release-verify RELEASE_MANIFEST.json --strict` `ok: true` trên commit ấy. | Trên bản sao: sửa một byte của một tệp trong gói sau khi sinh manifest tạm ⇒ `ok: false`; xoá một tệp trong gói ⇒ `ok: false` hoặc `checked_file_count < expected_file_count`. |
+ | N12 | Exact head, lệnh + rc + bằng chứng dương: `ruff check --select F` delta = 0 trên `scripts/tl_gws.py`, 0 trên fragment và bundled; `git diff --check <base>..<head>` rc 0; `doctrine-scan`, `adr-song` rc 0; dưới `set -o pipefail`: `git diff --numstat <base>..<head> > numstat.txt` (rc ≠ 0 ⇒ đỏ), (i) đúng 3 dòng, (ii) mỗi dòng khớp `^[0-9]+\t[0-9]+\t<đường>$`, tập đường == §1, (iii) tổng cột thêm ≤ 550 (trần đã nâng, dòng khai đầu tệp). | Tên chưa định nghĩa ⇒ delta ≠ 0. Trên bản sao head thêm khoảng trắng cuối dòng ⇒ `git diff --check` rc ≠ 0. Numstat dựng tay: đúng 3 dòng, đúng tập đường, tổng 550 ⇒ XANH; đổi một cột cho tổng 551 ⇒ (iii) ĐỎ; giữ số, đổi một đường thành đường ngoài §1 ⇒ (ii) ĐỎ; đổi một cột thành `-` (tệp nhị phân) ⇒ (ii) ĐỎ; đầu vào rỗng ⇒ (i); `<base>` không tồn tại ⇒ rc 128 ⇒ đỏ. `doctrine-scan`/`adr-song`: gate kế thừa, phản chứng thuộc bộ test của chính lệnh ấy (`.claude/dev/packet_loop_test.py`); packet này không thêm (L3 khai). |
+@@ -200,8 +200,8 @@
+ Tổng: **37** đột biến (1–4, 6, 7, 10–12, 15–23, 33, 35–52); E: **5** (17, 18, 20, 21, 41); H: **32**. Nền `posix`: **21** (1–4, 6, 7, 10–12,
+ 19, 22, 23, 33, 41, 42, 44, 46–50); nền `mọi`: **16** (15–18, 20, 21, 35–40, 43, 45, 51, 52). Tự kiểm bằng phép đo: 9 dòng (4, 6, 12 qua S4, 17, 18, 19, 22,
+ 36, 41); còn lại lập luận, xác nhận khi chạy bảng trên mã thật (N9(a)). Tự kiểm phân hạng (trong fragment): 3 mục (N9(d)). Phản chứng
+-BỘ ĐO (executor chạy trên bản sao fragment, KHÔNG phải mục `_DB`, không vào tổng 37): 5 — `pc_tiem_khong_ghi` (N7), `pc_bo_luot`,
+-`pc_bo_ca_moi`, `pc_bo_qua_ngoai_danh_sach`, `pc_bo_qua_khi_ho_tro` (N9(b)); mỗi phép phải cho `run` False với dòng lỗi nêu đúng vế.
++BỘ ĐO (executor chạy trên bản sao fragment, KHÔNG phải mục `_DB`, không vào tổng 37): 6 — `pc_tiem_khong_ghi` (N7), `pc_bo_luot`,
++`pc_bo_ca_moi`, `pc_bo_qua_ngoai_danh_sach`, `pc_bo_qua_khi_ho_tro`, `pc_probe_quyen` (N9(b)); mỗi phép phải cho `run` False với dòng lỗi nêu đúng vế.
+ 
+ ## 5. `pham_vi_e`
+ 
+@@ -238,13 +238,14 @@
+ - Windows: P2a không đổi chốt đích trên nt (§2); nhánh nt của `_dich_cred_gws` chỉ được đo gián tiếp qua các ca `mọi` nền khi fragment
+   chạy trên Windows, không có CI Windows bắt buộc.
+ - TOCTOU: không đo (§2, giới hạn khai).
+-- Kích thước P2a (ước lượng tĩnh, chưa đo; tính lại 2026-11-19 sau review lượt 2, theo mật độ packet 1 §0.4 — khung 116/353, `_Rig` 74,
++- Kích thước P2a (ước lượng tĩnh, chưa đo; tính lại 2026-11-19 ở bản 6 sau review lượt 4, theo mật độ packet 1 §0.4 — khung 116/353, `_Rig` 74,
+   thân ca ~6,4 dòng/ca, khai báo `_DB` 32 dòng cho 30 mục — đo lượt 2):
+   `tl_gws.py` +45–55 (M1 POSIX kèm `repr` ~15–19; `_dich_cred_gws` ~8–10; W4 viết lại ~14–16 dòng thêm, thay 9 dòng; W5 ~8–10, thay 8);
+-  fragment +409–489 (khung + `_DU_KIEN` + đếm theo nền + 3 tự kiểm ~125–135; sổ lượt `_LUOT_DU_KIEN` 11 ca/46 lượt, phép thử hardlink,
+-  dòng `BO_QUA`, vế LUOT của tổng kết ~22–30; rig có W4/W5 và bộ quan sát bốn pha có nhật ký ~80–95; 11 hàm ca, 46 lượt, viết dạng bảng
+-  lượt kèm nhãn mới `khong_lo`, `dong_0_1`, `falsy` ~130–160 — gộp W4/W5 cùng chủ đề vào một ca để bớt khung hàm; bảng 37 mục ~40–48);
+-  bundled +1 ⇒ **455–545 dòng thêm, 3 tệp, điểm giữa ~500** — dưới trần 550 nhưng biên trên sát (packet 1 với 30 mục `_DB`, 18 ca đo
++  fragment +399–470 theo hạng mục (khung + `_DU_KIEN` + đếm theo nền + 3 tự kiểm ~125–135; sổ lượt `_LUOT_DU_KIEN` 11 ca/46 lượt, phép thử
++  hardlink có danh sách `winerror`, dòng `BO_QUA`, vế LUOT của tổng kết ~24–32; rig có W4/W5 và bộ quan sát bốn pha có nhật ký ~80–95; 11 hàm ca, 46 lượt, viết dạng bảng
++  lượt kèm nhãn mới `khong_lo`, `dong_0_1`, `falsy` ~130–160 — gộp W4/W5 cùng chủ đề vào một ca để bớt khung hàm; bảng 37 mục ~40–48) cộng dự phòng
++  RIÊNG 10–19 dòng; bundled +1 ⇒ hạng mục cộng **445–526**, kèm dự phòng **455–545 dòng thêm, 3 tệp, điểm giữa ~500** (reviewer lượt 4
++  cộng lại các hạng mục bản 5: 443–524) — dưới trần 550 nhưng biên trên sát (packet 1 với 30 mục `_DB`, 18 ca đo
+   được +448). Năm phản chứng bộ đo chạy trên bản sao, không vào numstat. Trần CƯỠNG CHẾ trên numstat thật (N12 (iii), §6): vượt ⇒ DỪNG
+   trước khi công bố, không cắt ca.
+ - `review_class`, lease của ba đường, nền test: đo khi cấp lease trên base thật.
+@@ -322,6 +323,10 @@
+ - §4b: 37 đột biến (E 5, H 32; `posix` 21, `mọi` 16); tách rõ "tự kiểm phân hạng" (3, trong fragment) và "phản chứng bộ đo" (5, trên
+   bản sao). §8 tính lại 455–545, giữa ~500.
+ 
++**Review Codex lượt 4 của P2a** (2026-11-19, bản `567af28f…`, `rv433p2a/luot4.verdict.txt`): request_changes, 1 P2, 1 P3; đóng 4/5
++finding lượt 3; xác nhận 11 ca/46 lượt, đột biến 46–52 đỏ đúng đích trong mô hình, tổng §4b. Xử lý: P2 probe hardlink — ĐÃ SỬA (N9(b)
++danh sách `winerror`, `pc_probe_quyen`); P3 §8 cộng hạng mục — ĐÃ SỬA (tách dự phòng).
++
+ ## 10. Nhật ký revision
+ 
+ - 2026-11-19T04:5xZ (phiên con của điều phối #1206): đo lại §0.1 trên `3b64746`; đóng bốn finding lượt 10 của đặc tả gốc. Bản trước:
+@@ -338,3 +343,5 @@
+ - 2026-11-19 (phiên con, sau Q1 nâng trần 550 và Q4): dòng khai trần `nang_tran` thay `ADR-0053@…`; §6/N12 về 550; đóng hai P2 + một P3
+   còn mở của lượt 3 (§9); thêm đột biến 46–52, sổ lượt N9(b), năm phản chứng bộ đo; §8 455–545. Bản trước: `9e02d0df…`
+   (`rv433p2a/dac-ta-ban4.md`).
++- 2026-11-19 (phiên con, sau review lượt 4 trên `567af28f…`): N9(b) probe hardlink thành danh sách cho phép `winerror` {1, 50} chỉ trên nt,
++  lỗi probe khác ⇒ lượt đỏ; thêm `pc_probe_quyen` (6 phản chứng bộ đo); §8 tách hạng mục/dự phòng. Bản lượt 4: `rv433p2a/dac-ta-ban5.md`.
+codex
+**GWS-CRED-DICH-NGOAI-KHO-A r1 · Review đặc tả độc lập · Issue #433**
+
+- Base `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. Checkout ở detached HEAD và không có ref `master` cục bộ. Merge packet 1 `700fbca` là tổ tiên của HEAD.
+- SHA-256 của đặc tả chưa commit `9ec552f1420cdfada010a229e3de82bfba31ca440cdf057b6e4285672f07fe25`. H1 và khai báo inline khớp grammar ADR-0063. Hậu tố `-A` phù hợp tiền lệ `THU-HOI-ADMISSION-MERGE-BASE-A`.
+- Reviewer thuộc họ OpenAI, bề mặt Codex qua API, transport máy, sandbox chỉ đọc. Run không cung cấp định danh model cụ thể. Các phép chạy dùng `python3 -IB` trong RAM với dữ liệu giả, không gọi mạng. Không có mã P2a để chạy gate exact head.
+
+### Bảng kiểm sự thật §0
+
+| Mục | Kết quả |
+|---|---|
+| §0.1 · Blob, dòng, caller | **Khớp.** Blob `12e04c03971861d96161b9c1cd55de9c59a5f371`, 2.620 dòng. W4 ở 1780–1790, W5 ở 1930–1939. Các caller và nhánh CLI W5 `✗`/rc 2 khớp. So AST với `641108c` xác nhận cả `_gws_auth_load` và CLI wrapper giống hệt. `cmd_bootstrap` đổi ở phần khác, còn khối ghi W4 giữ hành vi cũ. Cả hai dùng `env or expanduser(...)`, nên giá trị rỗng chọn mặc định. |
+| §0.2 · E1/E2 | **Tái hiện phần hành vi trong RAM, rc tiến trình 0.** W4 trả 0, W5 trả `(True, '/K/gwscfg/credentials.json')`. Cả hai gọi `makedirs`, `open(..., 'wb')`, ghi byte giả rồi `chmod(0600)`. Phép này mô phỏng filesystem, chưa chạy lại porcelain trên kho tạm. Các timestamp cũ lấy từ đặc tả. |
+| §0.2 · S4/S5/L1/L2 | **S4/S5/L1 đối chiếu mã và biên nhận, chưa chạy lại trên filesystem thật.** Writer dùng `mkstemp` cùng thư mục, ghi/flush/fsync, chmod, replace và dọn tệp tạm nếu có lỗi. Thay entry cuối giữ nguyên inode cũ qua hardlink và không ghi qua symlink cuối. Các thao tác với thư mục cha vẫn dùng đường dẫn. **L2 tái hiện**, `normpath` trả `T/x`. `SKILL.md:161` ghi Python ≥3.11. Native Windows chưa đo. |
+| §0.3 · PD, bundled, stdout | **Khớp qua đọc.** Bảng PD ở 796–806. Fragment đã có trong bundled. `ci.yml:294` gọi checker trên lane thường và checker parse stdout con bằng `json.loads`. Lane manifest committed ở 501–503, lane manifest tạm ở 521–532. Tính duy nhất của neo và kết quả PD trên candidate còn `not_run`. |
+| §0.4 · Helper, lỗi, W6 | **Khớp.** Helper ở 1173–1187, chỉ `S_ISLNK`, có đủ năm cụm lỗi được kê. W6 gán hai biến trước chốt đích, gọi `.update()` trên giá trị JSON đã parse và chỉ bắt `OSError` quanh ghi. Phần này vẫn là tiền đề của P2b. |
+| §0.4 · `ntpath`, env, môi trường | **Tái hiện trên Linux/Python 3.13.18 lúc 05:23:51Z, rc 0.** Các giá trị `splitdrive`, `isabs`, surrogateescape, lỗi UTF-8 và lỗi NUL khớp cho bản này. Python 3.11/3.12 và Windows chưa chạy lại. |
+| §0.4 · Kích thước packet 1 | **Lệch số đếm.** Hai lệnh `git show --format= --numstat 700fbca^1..700fbca` và `git diff --numstat 641108c..HEAD` giới hạn ba đường packet đều cho `tl_gws.py` +94/−42, fragment +353, bundled +1, tổng +448. AST đếm **30** mục `_DB`, **18** ca `_CA` và 4 mục `_TU_KIEM`. Khoảng `641108c..HEAD` trên toàn kho còn chứa thay đổi khác. |
+
+### Findings
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế đề nghị |
+|---|---|---|
+| **P1 · M1/M2/M6, N2/N3b/N3c/N4** | **Chốt liên kết bỏ qua tổ tiên của `cfgdir`.** M1 trả thành phần từ gốc, nhưng M2 truyền `goc=cfgdir`, `thanh_phan=("credentials.json",)`. Vòng lặp 1180–1186 chỉ kiểm hai entry này. N3b còn ghi rõ một tổ tiên nằm ngoài phạm vi `lstat`. Hai lượt kho của N3b chứng minh đối chiếu từ vựng/đường thật, chưa chứng minh từ chối tổ tiên liên kết khi cả hai đường đều ngoài kho. N3c/N4 chỉ mô phỏng hoặc dựng reparse ngay tại `cfgdir`; N3 chỉ đo symlink cuối ở W4. | “W4/W5 kiểm symlink và bit reparse trên từng tiền tố từ gốc volume/share qua `cfgdir` tới tệp cuối, kể cả khi cả hai đường đều ngoài kho. Thêm lượt và phản chứng riêng cho tổ tiên, chính `cfgdir` và entry cuối. Giữ xuất xứ lỗi kho của N3b bằng ca riêng.” |
+| **P1 · M1/M2, N2w/N3b** | **Danh sách cho phép chỉ định dạng cú pháp, chưa xác nhận đích UNC nằm ngoài kho.** N1/N2/N3 đúng là các nhánh cho phép, bao gồm UNC đủ share. Tuy nhiên, `_trong_kho_git` chỉ leo chuỗi từ vựng và `realpath`. Một share cùng máy có thể bắt đầu tại thư mục con của kho, nên việc leo tới gốc share không chứng minh đã kiểm các tổ tiên phía volume. N2w chỉ kiểm hàm xử lý chuỗi, chưa có phép chứng minh danh tính đích trên Windows. Cùng khoảng trống cần xét với volume được ánh xạ. | “UNC đủ share qua bước kiểm cú pháp. Trước mọi thao tác ghi, xác minh danh tính filesystem và phạm vi ngoài kho của đích, kể cả share cùng máy và ổ ánh xạ. Khi không xác minh được, từ chối với lý do ổn định. Có ca dương cho share hợp lệ ngoài kho và ca âm độc lập cho share cùng máy thuộc kho.” |
+| **P2 · M1, N2/N2w, §4b 8–9 và 30–32** | **Thiếu ca và có một đột biến sống theo đúng mô tả.** Đường tương đối thường có ca dương, `D:fake` và `\fake` có nhãn riêng. `C:` có nhãn nhưng chưa có phản chứng riêng. `..` chỉ đo qua W5 trên nền host. Gạch trộn, chữ hoa/thường ổ, nhánh R5 và việc giữ gốc ổ/share khi dựng lại chưa có phép đo. `\\?\` và `\\.\` dùng chung một nhãn, chưa chứng minh từng vế. Tôi chạy regex §4b dòng 32 trên `ntpath`: chỉ cho phép **share rỗng** vẫn không nhận `\\server`, vì regex vẫn đòi phân cách trước share. Dòng 30 gộp UNC gốc và UNC có đuôi, nên chưa đo riêng hồi quy từ chối chỉ dạng có đuôi. M1 còn lặp một lời khai `isabs("\\fake") == False` thiếu giới hạn phiên bản. | “Phân loại đường thô trước khi ghép cwd. Cho từng dạng một lượt và nhãn, gồm ổ trần, ổ khác R5, từng namespace thiết bị, UNC gốc/có đuôi/thiếu share, gạch trộn, khác hoa/thường ổ, và `..` Windows. Dòng 32 phải mô phỏng việc nhận hẳn ổ UNC thiếu phần share. `isabs("\\fake")` chỉ là dữ kiện môi trường có ghi phiên bản.” |
+| **P2 · M1/M3, N1–N3** | **Biên `cfgdir` và loại entry chưa có hợp đồng đo được.** Chuỗi rỗng hiện chọn mặc định. Chuỗi toàn khoảng trắng vẫn là đường tương đối trên POSIX và chưa có chính sách Windows. NUL không đặt được qua `os.environ` trên nền đã đo, nhưng có thể truyền vào helper; để lọt xuống API đường dẫn có thể sinh `ValueError`, ngoài `except OSError`. `credentials.json` đã là thư mục hiện rơi đến `replace`; `cfgdir` là tệp thường rơi đến `makedirs`. N7 chỉ tiêm lỗi `replace` với đích thường. | “Giữ giá trị env rỗng chọn mặc định. Quy định rõ đường chỉ có khoảng trắng và từ chối NUL tại biên chuẩn hóa. Kiểm riêng `cfgdir` là tệp, đích là thư mục và đích là symlink/reparse cho W4/W5. Ghi cụm lỗi, rc/tuple, số lần gọi writer và hậu điều filesystem cho từng lượt.” |
+| **P2 · §2, M1–M3** | **Giới hạn TOCTOU rộng hơn ngoại lệ đã ghi.** Cwd cố định loại bỏ lệch do đường tương đối. Các bước kiểm rồi `makedirs`/`mkstemp`/`replace` theo tên vẫn dựa vào việc namespace ổn định. §2 chỉ loại đối thủ đồng thời cùng uid, chưa nói rõ giới hạn tại thư mục hoặc share ghi được bởi principal khác. | “Nêu điều kiện tin cậy và ổn định của chuỗi thư mục/share trong suốt lượt ghi. Nếu đặc tả vẫn bảo đảm khi thành phần cha có thể bị thay đồng thời, yêu cầu thao tác gắn với định danh thư mục đã kiểm và ca xác định mô phỏng đổi cha giữa kiểm và ghi.” |
+| **P2 · M2/M3, N5/N7, §4b 15–16, 20–21** | **N5 chứng minh replace nhưng chưa chứng minh fsync hay toàn bộ dọn lỗi.** Bỏ `fsync` vẫn qua bộ quan sát đã mô tả. N7 kiểm giữ byte cũ và dọn temp cho W4 khi replace lỗi, còn W5 chỉ kiểm tuple/CLI. Thiếu vế lỗi trước replace từ `makedirs`/`mkstemp`, ghi/flush/fsync, chmod và lỗi chốt `lstat`. `ban_kia_giu` chung cụm với các hậu điều nguyên tử, trong khi 15–16 chỉ nhắm nhãn số lần replace. Giới hạn kiểm mode 0600 ở POSIX là đúng. | “Cho W4 và W5 cùng kiểm `fsync` trên fd tệp tạm trước replace, nguồn cùng thư mục và mode 0600 trên POSIX. Tiêm lỗi theo pha trước/sau tạo temp và tại replace; mỗi lượt khẳng định hợp đồng lỗi, đích cũ và tình trạng tệp tạm. Có vế đỏ riêng cho bỏ fsync, bỏ dọn và vi phạm hardlink.” |
+| **P2 · M3, N1/N3e/N6/N7, §4b 1–3, 17–23** | **Nhãn có thể chết trước vế đích hoặc chứng minh gộp.** Bỏ chốt ở 1–2 đổi cả `ma`, `stderr` và `sach`; chưa chỉ rõ cách ghi nhận `sach` khi điều kiện trước sai. N3e có cả W4 và W5 nhưng dòng 22 mô tả thay nội suy W4/W5, chỉ nhắm W5. N7(3) nói kiểm mọi stderr trong `chung_hop_dong_loi` nhưng chưa chỉ định lượt mà dòng 19 tác động. `--require-agent-creds` còn in một dòng `✗` riêng ở base, nên đếm toàn stderr theo M3 sẽ mâu thuẫn với N7(1). Hai dòng E 17–18 chỉ khả thi nếu đột biến giữ bước `.encode` ngoài biên bắt lỗi; cần neo cả thao tác và lượt. | “Bảng §4b ghi `(ca, lượt, nhãn)` cho từng đích và quy định thu đủ hậu điều trước khi phân hạng. Tách từ chối W4/W5 và lượt xuống dòng theo caller. Đếm đúng một dòng lỗi credential, cộng riêng dòng `--require-agent-creds` khi áp dụng. Dùng fullmatch cho dòng lỗi và phản chứng thêm hậu tố sai hoặc lặp dòng. Ghi phép thay nguồn khiến 17 và 18 thoát đúng ngoại lệ đã khai.” |
+| **P2 · N8, §4b 13/13b, 20–21** | **Tự kiểm sau khi tách vẫn dựng được, nhưng hợp đồng đếm và phân hạng chưa ép đủ.** Có **26 đột biến duy nhất**, 22 H và 4 E, 27 dòng vật lý nếu tính 13b, và **28 đích** nếu mục 13 bắt buộc đủ hai lượt giả lập cùng một lượt native. N8 chỉ đòi `b == c`, `f == g` và các phương trình tổng; thiếu đối chiếu danh sách kỳ vọng độc lập và thiếu cách tính một mục đa đích giữa POSIX/Windows. N8(a) còn rơi mất trường `lượt`. Chỉ đổi đích dòng 21 sang W4 dễ đỏ ngay vì nhãn W4/W5 khác nhau, kể cả khi bộ phân hạng bỏ kiểm lượt. Nhập nguyên tự kiểm `AttributeError` của packet 1 cũng chỉ chứng minh nhánh ngoại lệ lạ nếu không chứng minh nó đi qua `except` đổi kiểu. | “Khai số đếm theo ID, lượt đích và nền. Mục 13 chỉ đạt khi mọi đích áp dụng đều đạt. Chạy tự kiểm sai lượt với cùng ca, cùng nhãn, cùng kiểu và dấu, chỉ đổi lượt, rồi yêu cầu đúng `TIN_DUNG_GIA`. Tự kiểm đổi kiểu phải chứng minh ngoại lệ đã đi qua nhánh `except`; tự kiểm chú thích phải ra `SONG_SOT`. Đối chiếu ID dự kiến độc lập và báo riêng đích native chưa chạy.” |
+| **P2 · N7/N9–N11, L3/L6** | **Một số vế gate thiếu phản chứng đúng phép đo.** N7 chưa chỉ cách làm đỏ khi một PD hoặc neo packet 1 hỏng. N9 có phép đỏ cho bundle, chưa có phép riêng cho `N_base + 1` hoặc một ca mới đỏ. N10 sửa tệp sau manifest tạm kiểm được hash lệch nhưng chưa kiểm số tệp bị rút khỏi expected set. N11 thiếu phép đỏ riêng cho `git diff --check`, `doctrine-scan`, `adr-song` và dòng numstat có số hợp lệ nhưng đường sai. | “Gắn từng vế gate với lệnh, rc và bằng chứng dương/âm độc lập. Đối với kiểm kế thừa, dẫn đúng phản chứng đã có hoặc ghi phần còn chưa đo. Với selftest, thêm đầu vào thiếu ca và ca mới đỏ. Với numstat, giữ đúng ba dòng và ≤450 rồi thay một đường hoặc một cột để kiểm đúng nhánh từ chối.” |
+| **P3 · §2, §9, §10** | **Phần thực thi P2a đã tách sạch**, không còn yêu cầu chạy M7/N9w6/N3d hay các đột biến 24–29. Dẫn chiếu còn lại là lịch sử hoặc giao P2b. Tuy nhiên, §2 ghi P2b “không phụ thuộc P2a” trong khi §đầu và Q1 ghi làm sau khi P2a land. Q1 cũng ghi danh sách rút gọn mà chưa chỉ ra M4/M5 và N9–N11 vẫn áp dụng. | “P2b độc lập về thay đổi mã W6 và được xếp lịch sau khi P2a land theo Q1. Danh sách Q1 liệt kê phần hành vi được tách; M4/M5 và N9–N11 tiếp tục áp dụng cho P2a.” |
+| **P3 · §0.4, §8, L1/L5** | **Phép cộng đúng, căn cứ đếm cần sửa.** `51+317+1=369`, `63+392+1=456`, giữa **412,5**, cận trên vượt **6**. Packet 1 thực tế +448, chỉ dư 2 dòng, với 30 mục `_DB`, 18 ca và 4 tự kiểm. Ước lượng 317–392 cho fragment P2a có thể dùng để lập kế hoạch, nhưng chưa bao gồm các vế còn thiếu ở trên và chưa chứng minh vừa trần. Với phần production +51–63 và bundled +1, fragment chỉ có ngân sách **386–398** dòng. | “Ghi mốc đo theo đúng SHA và đơn vị AST: packet 1 có 18 ca, 30 mục `_DB`, 4 tự kiểm, +448 trên ba tệp. Tính lại P2a theo các lượt và đột biến của revision mới, tính cả phần gọi writer và kiểm gate. Chốt 450 theo numstat exact head như §6.” |
+
+L2 chiếu được các mục tiêu vào ba đường trong write set. L4 giữ bộ đếm tiền nhiệm và khai giới hạn nguồn. L7 không phát sinh điểm xin quyết định mới từ lượt review này. Các phép đo candidate, full selftest, PD, Ruff và Windows native vẫn `not_run`. Không có finding P0.
+
+KET_LUAN: request_changes
+codex
+## Review độc lập lượt 2 · P2a · Issue #433
+
+Có hai phản chứng nghiệm thu sai theo mã base: **N7 đòi một thông điệp mà `_safe_exc` loại bỏ**, và **N10 gỡ fragment khỏi bundled trong khi selftest trên clone đọc fragment dev**. §4b cũng còn trường hợp đỏ ở nhãn sớm hơn đích đã khai.
+
+Review trên detached HEAD `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. SHA-256 đặc tả `0619ff83425e63912a553d2f57da4cd9e40f6d1631386dd41fb942004c22e9c4`, so với bản lượt 1 `9ec552f1420cdfada010a229e3de82bfba31ca440cdf057b6e4285672f07fe25`. Reviewer họ OpenAI, `openai_codex`, bề mặt Codex qua API, transport máy, sandbox chỉ đọc. Model và effort phục vụ không đo được. Không gọi mạng hoặc ghi tệp.
+
+### Kiểm chứng §0
+
+- **§0.1 · `--require-agent-creds`.** Chạy thân `cmd_bootstrap` của base bằng `python3 -IB` với bundle và dependency giả trong RAM. Có cờ và agent `KHÔNG CẤU HÌNH` cho rc 4, đúng nguyên văn dòng stderr §0.1 và một dòng `agent_creds:`. Bỏ cờ cho rc 0, stderr rỗng và một dòng `agent_creds:`. Tiến trình kiểm chứng rc 0.
+- **B1 và luật (b).** Linux/Python 3.13.18 cho `FileExistsError` ở `makedirs` trên tệp, `IsADirectoryError` ở `open("wb")` trên thư mục, `NotADirectoryError` ở `lstat` qua tệp trung gian, `ValueError` với NUL và `getcwd() == realpath(getcwd())`. Gọi `_kiem_dich_ghi('/proc/thread-self/fd/credentials.json', '/', ('proc', 'thread-self', 'fd', 'credentials.json'))` trên symlink thật ngoài kho trả `là liên kết tượng trưng: '/proc/thread-self'`. `/proc/self/cwd/scripts/tl_gws.py` trả cụm kho trước cụm liên kết. `lstat` thấy symlink ở `/proc/thread-self`, còn hai dạng hậu tố `/` và `/.` cho entry thư mục.
+- **§0.4 · Writer.** Chạy thân `_ghi_nguyen_tu_0600` của base với filesystem giả trong RAM. Tiêm ở `mkstemp` giữ bản cũ và chưa có temp. Tiêm ở `fsync`, `chmod` hoặc `replace` đều gọi `unlink`, giữ bản cũ và ném lại đúng ngoại lệ. Lượt dương thay bản cũ bằng byte mới. Cả bốn ngoại lệ cho `_safe_exc(e) == "OSError"`. Các assertion này chạy qua trước khi lần chạy ghép thoát rc 1 vì stub `_secrets_fetch` sai arity. Phép bootstrap đã được sửa stub và chạy lại riêng thành công.
+- **Giới hạn phép đo.** Tạo thư mục tạm dưới `/tmp` trả `EROFS`. Phép `replace(tệp, thư mục)` của B1 được đối chiếu qua mã, chưa lặp trên filesystem ghi được. macOS, Windows native, gate đầy đủ và bảng đột biến trên candidate đều `not_run`.
+
+### Đối chiếu finding lượt 1
+
+| Finding lượt 1 | Trạng thái lượt 2 |
+|---|---|
+| P1 · Tổ tiên `cfgdir` | **Đã đóng.** M2 truyền `/` và toàn bộ thành phần. Luật (b) bắt được tổ tiên liên kết thật ngoài kho. N3 có đích riêng cho W4/W5 và symlink cuối. |
+| P1 · UNC ngoài kho | **Chuyển P2c đúng.** §2 ghi so định danh volume/file với gốc kho tra-luat và giới hạn bảo vệ đối với kho Git khác. |
+| P2 · Dạng đường M1 Windows, dòng 32, `isabs("\\fake")` | **Chuyển P2c đúng.** §2 ghi `\fake`, namespace thiết bị, UNC thiếu share và lý do dòng 32 cũ sống sót. |
+| P2 · Biên `cfgdir` | **Chưa đóng hết.** M1 đã quy định NUL, khoảng trắng, gốc và mặc định rỗng. N4 chưa chốt số lần writer cho hai lượt `cfg_la_tep`, cũng chưa chốt cách đếm ca chạy một phần trên Windows. |
+| P2 · TOCTOU | **Đã đóng ý chính.** §2 nêu kiểm và ghi theo tên, xét mọi principal. Có một chỗ nên làm rõ thêm về tính ổn định của dấu `.git`. |
+| P2 · `fsync` và tiêm lỗi theo pha | **Chưa đóng.** Cơ chế ném và dọn của writer khớp. Hợp đồng đầu ra N7 mâu thuẫn M2 và nhãn hậu điều sai cho một số đột biến. |
+| P2 · Nhãn, `fullmatch`, đếm stderr | **Chưa đóng.** Dòng `require` đã đếm riêng đúng. N1 có đích đỏ sai thứ tự. N8 có hai cách làm đỏ bộ đếm nhưng thiếu phản chứng độc lập cho `fullmatch`. N3e còn thiếu ID lượt. |
+| P2 · Tự kiểm theo ID/lượt/nền | **Chưa đóng hết.** 29 ID và các tổng đột biến khớp. Đổi lượt kỳ vọng ở N9(c) là đúng một biến nếu bảng bắt ngoại lệ giữ nguyên. Cách đếm ca N4 còn thiếu. |
+| P2 · Phản chứng các gate | **Chưa đóng.** N8, N11, N12 đã bổ sung phép đỏ. Phép xóa bundled của N10 không làm giảm số ca trên clone thật. |
+| P3 · Phụ thuộc §2 | **Đã đóng.** P2b độc lập về mã W6 và được xếp sau P2a theo Q1. |
+| P3 · Căn cứ §8 | **Đã đóng phần số đo tiền nhiệm.** AST cho 18 ca, 30 `_DB`, 4 tự kiểm. Numstat là `+94 +353 +1 = +448`. Ước lượng mới lệch một dòng ở mỗi cận. |
+
+### Findings cần sửa
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế đề nghị |
+|---|---|---|
+| **P2 · M2, N7, §4b 20/21/36** | N7 đòi chi tiết công khai chứa `wp433-oserror-<pha>`. M2 dùng `_safe_exc(e)`, và `scripts/tl_gws.py:302` chỉ trả tên lớp. Với writer đúng đặc tả, `W4.mkstemp` đã đỏ ở `hop_dong`. Đột biến 36 cũng đỏ ở `hop_dong` tại `W4.fsync` trước khi tới `khong_tam`. | “Mỗi lượt xác nhận đúng một lần tiêm bằng nhật ký bộ quan sát, có pha, đích hoặc fd nguồn và dấu `wp433-oserror-<pha>`. Hợp đồng công khai phải khớp `ghi lỗi: OSError`. Dấu ngoại lệ thô chỉ dùng ở biên lượt của đột biến 20/21.” |
+| **P2 · N1, §4b 1–2** | Bỏ chốt cho phép ghi trên fixture hợp lệ ngoài lỗi đích. W4 chuyển từ rc 1 sang rc 0 và W5 chuyển từ `False` sang `True`. `ma` đứng trước `stderr` và `sach`, nên cả hai chết ở `ma`. Thu đủ hậu điều trước khi so vẫn cho kết quả đó. | “N1 thu đủ hậu điều rồi so theo thứ tự `sach`, `ma`, `stderr`, `agent_creds`. Dòng 1–2 nhắm `sach`, dòng 3 nhắm `ma`.” |
+| **P2 · N8, §4b 19/42, L6** | Hai đột biến cùng `(ca, lượt, nhãn)` đều tạo **hai** dòng bắt đầu bằng `[bootstrap] ✗ `. Cả hai chết chỉ nhờ đếm dòng. Chạy regex trong RAM xác nhận dòng hợp lệ đầu tiên vẫn `fullmatch` ở cả hai. Bộ đo bỏ `fullmatch` vẫn giết cả hai. | “Dòng 19 thay **duy nhất** dòng lỗi bằng `[bootstrap] ✗ nằm trong kho git: `, giữ rc và số dòng. Dòng 42 giữ nguyên nội dung hợp lệ và lặp đúng dòng ấy.” |
+| **P2 · N4/N5/N9, nền và hậu điều** | N4 vừa được gắn `posix` ở cấp ca, vừa có ba lượt `M1.*` bắt buộc chạy mọi nền. N9 chỉ đếm cấp ca. Bỏ nguyên ca khiến 38–40 thiếu đích trên Windows. N4 cũng bỏ trống số writer tại `cfg_la_tep`, dù M2 và B1 xác định writer được gọi một lần và `makedirs` thất bại trước `mkstemp`. N5 chưa có phép đỏ độc lập cho `quyen` hoặc `byte`. Bỏ `chmod` đơn thuần không đủ vì `mkstemp` có thể đã tạo temp mode `0600`. | “Tách ba lượt `M1.*` thành một ca `mọi`, bốn lượt W4/W5 thành một ca `posix`. Bốn lượt W4/W5 gọi writer đúng một lần, hai lượt `cfg_la_tep` gọi `mkstemp` 0 lần. Cho `quyen` một phản chứng đặt mode nguồn sai ngay trước `replace` trên POSIX và cho `byte` một phản chứng đổi byte ghi nhưng giữ `fsync`/`replace`. Cập nhật số ca và bảng ID nếu thêm đột biến.” |
+| **P2 · N3e, §4b 4–5 và 22** | Bảng dùng `-` cho 22, trong khi N3e mô tả hai lời gọi khác nhau. N2 nói kiểm toàn bộ tổ tiên, nhưng §4b thiếu phép thay cho 4–5. Nếu chỉ bỏ chuẩn hóa rồi vẫn tách thành phần sạch và kiểm từ `/`, prefix `alias` vẫn được thấy. Kết quả L1 chỉ chứng minh phần tử được `lstat` **trực tiếp** dưới dạng `alias/` hoặc `alias/.` sẽ lọt. | “N3e chạy `W5.cli` trước `W4.bootstrap`, có nhãn riêng. Dòng 22 thay bỏ `repr` ở nguồn lý do mà `W5.cli` nhận và nhắm `W5.cli · mot_dong`. Dòng 4–5 thay chính phép kiểm entry `alias` bằng `lstat` trên `cfgdir` thô, khai `goc_0` là `alias`, `goc_1` là `alias/`, và giữ nguyên các phép kiểm khác.” |
+| **P2 · N10, phản chứng `N_base + 1`** | `scripts/tl_core/test_fragments.py:439–460` ưu tiên dev nếu thư mục fragment có dữ liệu. Gọi `_runtime_fragment_topology(Path('scripts'))` trên checkout này trả `('dev', …)` với rc 0. Gỡ riêng mục trong bundled có thể làm checker bundle đỏ nhưng selftest trên clone vẫn thấy ca dev. | “Để phản chứng số ca, trên bản sao clone chuyển riêng fragment P2a ra khỏi `scripts/test_fragments`, giữ các fragment dev khác, rồi chạy lại `--selftest`. Để phản chứng N/N, đổi `run` trong fragment dev thành `False`. Giữ phép bỏ bundled cho checker bundled.” |
+| **P3 · §2, TOCTOU** | Ổn định định danh thư mục cha chưa bao hàm ổn định kết quả luật (a). Dấu `.git` có thể xuất hiện trong thư mục hiện hữu mà thư mục đó không bị thay hoặc đổi tên. | “Bảo đảm giả định đường phân giải giữ ổn định và trạng thái dấu `.git` liên quan không đổi từ lúc kiểm đến khi thao tác ghi hoàn tất.” |
+| **P3 · §8, ước lượng** | Thành phần fragment cộng thành **366–427**, nên tổng **411–482**, điểm giữa **446,5**. Mật độ tiền nhiệm đo lại được là 115 dòng thân hàm cho 18 ca, khoảng 6,39 dòng/ca, và 32 dòng khai báo `_DB` cho 30 mục. Ước lượng 130–160 dòng cho 13 hàm ca P2a là hợp lý khi ba ca có nhiều lượt, nhưng ở điểm giữa phần production +49 và bundled +1, fragment chỉ còn **400** dòng. Điểm giữa 396,5 dòng của fragment để dư khoảng 3,5 dòng trước các sửa đổi nghiệm thu. | “Ước lượng hiện tại 411–482, điểm giữa 446,5. Tính lại theo số ca và phép đỏ sau sửa. Trần 450 được quyết định bằng numstat thật theo §6.” |
+
+### Đối chiếu đủ 29 đột biến §4b
+
+Kết quả dưới đây xét **lượt sớm nhất trong ca đích**, theo cách packet 1 chạy từng đột biến. §4b nên ghi rõ phạm vi này. Ví dụ đột biến 19 hoặc 42 cũng làm N1 đỏ nếu chạy toàn bộ các ca theo thứ tự bảng.
+
+| Dòng | Lượt và nhãn đầu tiên theo đặc tả |
+|---|---|
+| 1–3 | **1–2 sai:** `ma` đến trước `sach`. **3 đúng:** `w4_trong_kho · ma`. |
+| 4–7 | **4–5 cần neo phép thay** như bảng finding. Nếu thay đúng `lstat` tại entry, 4 đỏ ở `goc_1`, 5 ở `goc_w4`. **6–7 đúng:** `hai_cham` và `tuong_doi_thuong`. |
+| 10–12 | **Đúng:** `kho_truoc`, `tu_choi_tu_vung`, rồi `W4.tep_cuoi · lien_ket` tương ứng. Với 12, bốn lượt đầu vẫn phát hiện liên kết thư mục. |
+| 15–18 | **Đúng:** 15/16 lần lượt đỏ ở `W4.thuong`/`W5.thuong · nguyen_tu`, trước `fsync`. 17/18 đỏ ở `N6.kieu · kieu` và `N6.surrogate · surrogate` qua ngoại lệ E đã khai. |
+| 19–23 | **19** đỏ đúng đích nhưng trùng vế đếm của **42**. **20** đến `W4.mkstemp · hop_dong` qua E. **21** chỉ đến `W5.mkstemp · hop_dong` sau khi sửa bốn lượt W4 đang đỏ vì hợp đồng N7, đồng thời phải giữ bộ bắt E gắn với lượt thật. **22** cần ID lượt `W5.cli`. **23** đúng ở `require · require` nếu neo chỉ đổi thứ tự ưu tiên trả mã khi có cờ, hoặc khi đã `degraded` mà lượt trước vốn trả 1. |
+| 33–35 | **Đúng:** 33/34 lần lượt ở `W4.ong`/`W5.ong · lien_ket`. 35 đến `W4.thuong · fsync` vì vẫn gọi `replace` đúng nguồn. |
+| 36–42 | **36 sai hiện tại:** `W4.fsync · hop_dong` đến trước `khong_tam`. **37 đúng:** hai lượt thường vẫn qua, `W5.hardlink · ban_kia_giu` đỏ. **38–40 đúng** tại ba lượt `M1.*` nếu chúng luôn được chạy. **41 đúng:** `W4.cfg_la_tep · hop_dong` qua `FileExistsError`. **42** đỏ đúng đích bằng lặp dòng, cần **19** đo vế `fullmatch` riêng. |
+
+Script đếm bảng cho **29 ID duy nhất, 5 E, 24 H, 17 POSIX và 12 mọi nền**. Cặp duy nhất trùng cả ca, lượt và nhãn là **19/42**. N9(c) đổi đúng một biến khi chỉ sửa **lượt kỳ vọng** của 20 thành `W4.fsync`, giữ nguyên phép thay và bảng nhận dạng E tại `W4.mkstemp`.
+
+Trên POSIX, từ chối `/var`, `/tmp` hoặc `/home` khi chúng thực sự là tổ tiên symlink phù hợp với M2 và hệ quả §8. Rig dùng đường vật lý nên vẫn dựng được ca dương khi thư mục tạm mặc định đi qua symlink. Trên Windows, N5–N7 có thể chạy qua nhánh bỏ chốt với đích giả hợp lệ và thư mục tạm hỗ trợ hardlink. Riêng `W5.hardlink` và dòng 37 cần khả năng hardlink của volume. N4 cần sửa cách đếm như trên. Phạm vi reparse ở P2c nhất quán với nhánh Windows của P2a.
+
+Theo L1–L7, write set, bộ đếm tiền nhiệm, mốc đo và ranh giới thẩm quyền đều có căn cứ. Chốt POSIX cho phép ghi khi đường thuộc dạng M1 và vượt cả kiểm kho lẫn kiểm liên kết theo tiền tố. Các khoảng trống còn lại nằm ở phép đỏ L3, độ độc lập của phép đo chuỗi L6 và bộ đếm ca theo nền L1.
+
+KET_LUAN: request_changes
+codex
+## Review độc lập lượt 3 · P2a · Issue #433
+
+Còn bốn finding P2 về phạm vi bộ đếm W4, phân hạng ngoại lệ POSIX, cách đếm bỏ qua và phép đỏ độc lập. Mô hình theo thứ tự ca đích khớp cả 30 bộ `(ca, lượt, nhãn)` dưới các giả định ghi bên dưới.
+
+Review neo detached HEAD `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. SHA-256 đặc tả `2e6cd1dcf2e106ddd5c6cf891bb70570aed1d3440511880d683d30a5c67cb66d`, đối chiếu bản 2 `0619ff83425e63912a553d2f57da4cd9e40f6d1631386dd41fb942004c22e9c4`. Reviewer họ OpenAI, `openai_codex`, Codex qua API, transport máy. Model và effort phục vụ chưa đo được. Linux, Python 3.13.18, checkout chỉ đọc, không gọi mạng.
+
+### Đối chiếu tám finding lượt 2
+
+| Finding lượt 2 | Trạng thái |
+|---|---|
+| P2 · N7 `_safe_exc` và lỗi theo pha | **Đóng.** |
+| P2 · N1 thứ tự nhãn | **Đóng.** |
+| P2 · N8 đột biến 19/42 | **Đóng.** |
+| P2 · N4/N5/N9, nền và hậu điều | **Chưa đóng hết.** Tách ca và phép đỏ `quyen`/`byte` đã đạt. Phạm vi đếm W4 và sổ lượt bỏ qua còn hở. |
+| P2 · N3e, đột biến 4–5/22 | **Đóng.** |
+| P2 · N10 topology dev | **Đóng.** |
+| P3 · §2 ổn định dấu `.git` | **Đóng.** |
+| P3 · §8 cộng ước lượng | **Đóng.** |
+
+### Finding lượt 3
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế đề nghị |
+|---|---|---|
+| **P2 · N4b/N6, phạm vi đếm writer** | Fixture có `token` chạy W6 trước W4. Chạy thân `cmd_bootstrap` của base với dependency giả trong RAM đã ghi nhận `_ghi_nguyen_tu_0600('/home-fixture/.tra_luat_config.json', …)` trước W4. Do M2 dùng cùng writer, đếm toàn lượt khiến N4b thấy hai lần gọi writer ở W4. Ở `W4.cfg_la_tep`, `mkstemp` của W6 cũng làm sai kỳ vọng 0. N6 có cùng vấn đề nếu tái dùng fixture có `token`. | “Các số đếm writer, `mkstemp` và tệp tạm ở N4b/N6 chỉ thuộc thao tác ghi GWS. Lọc lời gọi writer theo đích `credentials.json`, lọc `mkstemp` theo thư mục của đích đó, và kiểm các số đếm trên từng lượt.” |
+| **P2 · §4b dòng 41, E phụ thuộc locale** | `FileExistsError` từ `makedirs` mang thông báo hệ điều hành. Linux locale C cho `[Errno 17] File exists` khi gọi `os.makedirs('/proc/version', exist_ok=True)`. Bảng dùng chuỗi tiếng Anh để nhận dạng E trên mọi POSIX, nên ở locale dịch thông báo, cùng lỗi có thể bị đưa vào `ngoai_le_la`. | “Dòng 41 chỉ nhận `FileExistsError` có `e.errno == errno.EEXIST` tại lượt `W4.cfg_la_tep`, từ thao tác `makedirs` của writer trên `cfgdir` fixture.” |
+| **P2 · N9(b), sổ lượt và điều kiện bỏ qua** | N9 vẫn chỉ công bố tổng theo **ca** và **đột biến**. Một lượt `W5.hardlink` bị bỏ không có bản ghi lượt bắt buộc. Các phương trình hiện tại cũng chấp nhận nền khác có `a=11, b=c=4, d=1, w=6` và đủ 14 đột biến `mọi` chạy xanh, dù một ca `mọi` bị bỏ nguyên. Phép đỏ hiện có chỉ ép bỏ ca trên POSIX. | “Khai danh sách lượt dự kiến theo từng ca. Trên nền khác, sáu ca POSIX và các lượt của chúng vào `chỉ_posix`. Cả năm ca `mọi` phải chạy. Chỉ `nguyen_tu · W5.hardlink` và đột biến 37 được `bỏ_qua` khi phép thử tạo hardlink trên chính volume fixture xác nhận không hỗ trợ. Công bố ID lượt, lý do và tổng lượt theo trạng thái. Tự kiểm phải đỏ khi bỏ một lượt bắt buộc hoặc bỏ nguyên một ca `mọi`.” |
+| **P2 · N1/N4b/N7/N8, L3/L6** | Một số tiêu chí độc lập vẫn thiếu phép đỏ. Trong N7, 20/21 đánh `hop_dong` qua E và 36 đánh `khong_tam`; không phép nào chứng minh `tiem` phát hiện nhật ký thiếu khi lỗi vẫn được ném đúng, hoặc `ban_cu` phát hiện đích cũ bị đổi khi hợp đồng lỗi và dọn tạm vẫn đạt. N4b chưa phản chứng riêng cho `nguyen_trang`. N1 chưa phản chứng riêng cho số dòng `agent_creds` hoặc SENT. Ở lượt `require`, 23 chỉ đánh ưu tiên mã trả về. | “Thêm phản chứng cho từng vế độc lập. N7 bỏ bản ghi nhưng vẫn tiêm đúng lỗi để làm đỏ `tiem`, và đổi byte đích cũ trong lượt tiêm để làm đỏ `ban_cu`. N4b làm sai hậu điều sau khi đã thu đúng ngoại lệ. N1 lặp dòng trạng thái và in SENT, mỗi lần chỉ đổi một vế. N8 chạy riêng phép thiếu/lặp dòng §0.1 với rc 4 giữ nguyên. Ghi rõ phép nào là tự kiểm bộ đo và cập nhật các tổng tương ứng.” |
+| **P3 · M2/N6, `gws_cred` có giá trị falsy** | M2 yêu cầu kiểu `str` nhưng chưa nói rõ xử lý điều kiện `if bundle.get("gws_cred")` của base. Ca kiểu với số `5` cho phép giữ điều kiện cũ. Base chạy trong RAM cho `0`, `False`, `[]`, `None` và `""` đi thẳng tới cảnh báo thiếu dữ liệu. | “Khai rõ trường vắng, chuỗi rỗng và giá trị sai kiểu có mặt đi vào nhánh nào. Thêm một fixture sai kiểu falsy, chẳng hạn `0`, để khóa lựa chọn.” |
+
+### §4b · Nhãn đỏ đầu tiên trong ca đích
+
+`python3 -IB` chạy mô hình trong RAM, theo thứ tự lượt và nhãn, rc 0. Mô hình dùng thân checker và writer của base ở các phép phù hợp, stub hệ tệp cho writer và mô hình hóa các nhánh W4/W5 chưa có candidate. Với 19/42, `W4.trong_kho` trong N8 tái dùng fixture N1 và dùng hai nhãn riêng của N8. Với 37, hai lượt thường giữ đúng byte cuối, và dữ liệu mới khác `CU` ở lượt hardlink.
+
+| ID | Lượt → nhãn đầu tiên |
+|---|---|
+| 1, 2, 3 | `W4 → sach`, `W5 → sach`, `W4 → ma` |
+| 4, 6, 7 | `W5.goc_1 → goc_1`, `W5.hai_cham → hai_cham`, `W5.tuong_doi_thuong → tuong_doi_thuong` |
+| 10, 11, 12 | `realpath → kho_truoc`, `tu_vung → tu_choi_tu_vung`, `W4.tep_cuoi → lien_ket` |
+| 15, 16, 17, 18 | `W4.thuong → nguyen_tu`, `W5.thuong → nguyen_tu`, `N6.kieu → kieu`, `N6.surrogate → surrogate` |
+| 19, 20, 21, 22, 23 | `W4.trong_kho → mau_loi`, `W4.mkstemp → hop_dong`, `W5.mkstemp → hop_dong`, `W5.cli → mot_dong`, `require → require` |
+| 33, 35, 36, 37 | `W4.ong → lien_ket`, `W4.thuong → fsync`, `W4.fsync → khong_tam`, `W5.hardlink → ban_kia_giu` |
+| 38, 39, 40, 41 | `nul → nul`, `trang → trang`, `goc → goc_rong`, `W4.cfg_la_tep → hop_dong` với thông báo locale C |
+| 42, 43, 44, 45 | `W4.trong_kho → mot_dong_loi`, `xuong_dong → mot_dong_m1`, `W4.thuong → quyen`, `W4.thuong → byte` |
+
+Đếm được **30 ID và 30 bộ đích duy nhất**, gồm **5 E, 25 H, 16 POSIX, 14 mọi nền**. §4 có **11 ca và 45 ID lượt**. Lượt `goc` chứa hai lời gọi helper. N9(c) trong mô hình cho `GIET` với đích 20 nguyên bản, `TIN_DUNG_GIA` khi chỉ đổi lượt kỳ vọng sang `W4.fsync`, và `GIET` sai nếu bộ phân hạng bỏ so lượt. Phép nhận diện E vẫn neo tại lượt thực `W4.mkstemp`.
+
+Các phép base chạy được xác nhận `_safe_exc` trả đúng ba tên lớp, `goc` thô có `/` bỏ lọt symlink mà cách kiểm từ `/` bắt được, và topology selftest chọn `dev`. Mô phỏng discovery với fragment giả định cho 14 đường, bỏ riêng đường ấy còn 13 và vẫn chọn `dev`. Thử hai chuỗi N3b trên thân `_trong_kho_git` cho kết quả mong đợi khi bỏ riêng từng chuỗi. Hai lượt probe phụ thoát rc 1 do lỗi harness hoặc assertion, nên chỉ dùng quan sát đã in và các phép chạy lại thành công làm bằng chứng. Candidate, gate đầy đủ, macOS và Windows đều `not_run`.
+
+### L1–L7 và trần 450
+
+L1 khớp số ID tĩnh, còn thiếu sổ lượt chạy theo nền. L2, L4, L5 và L7 có căn cứ trong write set, số liệu kế thừa, mốc base và các ADR được dẫn. L3/L6 chưa đạt ở các phép đỏ độc lập nêu trên. Trong phạm vi P2a, chốt POSIX đi theo danh sách cho phép của M1 rồi mới cho ghi khi cả hai luật kiểm đích đều đạt. Các ca gộp giữ được thứ tự dự kiến nếu mỗi lượt dựng và đo fixture riêng trước khi so nhãn.
+
+§8 cộng đúng **408–479**, điểm giữa **443,5**, dư **6,5 dòng** so với trần ở điểm giữa. Packet 1 đo được **+448**, fragment 353 dòng, 18 ca, 30 mục `_DB`, 4 tự kiểm. AST cho 115 dòng tính cả khai báo 18 hàm ca và 97 dòng thân hàm. Dải 125–155 dòng cho 11 hàm ca với 45 ID lượt có thể đạt nếu dùng bảng và tái dùng rig, nhưng biên 6,5 dòng rất nhỏ khi tính thêm sổ lượt và các phép đỏ còn thiếu. Trần vẫn do numstat thật ở N12 quyết định.
+
+KET_LUAN: request_changes
+## Review độc lập lượt 4 · P2a · Issue #433
+
+Còn **1 P2** ở điều kiện bỏ qua hardlink. Cả bảy đột biến mới cho đúng lượt và nhãn đỏ đầu tiên trong mô hình.
+
+Review bản chưa commit có SHA-256 `567af28fc5eb3c7f065b854f5ea31cdaaa61dad39c71146c213a4022a59d8ab7`, đối chiếu bản 3 `2e6cd1dcf2e106ddd5c6cf891bb70570aed1d3440511880d683d30a5c67cb66d`. HEAD nền `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. Reviewer `openai_codex`, Codex qua API, transport máy. Model và effort phục vụ chưa đo được.
+
+### Finding lượt 3
+
+| Finding | Trạng thái |
+|---|---|
+| P2 · N4b/N6 · Phạm vi đếm writer | **Đóng.** |
+| P2 · §4b dòng 41 · Phân hạng theo locale | **Đóng.** |
+| P2 · N9(b) · Sổ lượt và điều kiện bỏ qua | **Chưa đóng hết.** Sổ lượt và các tổng đã đúng. Điều kiện xác nhận volume thiếu hỗ trợ hardlink còn hở. |
+| P2 · N1/N4b/N7/N8 · Phép đỏ độc lập | **Đóng.** |
+| P3 · M2/N6 · `gws_cred` falsy | **Đóng.** |
+
+**Sổ lượt.** Theo cột nền §4, `posix` có 7 ca với `2+9+6+2+2+4+2 = 27` lượt. `mọi` có 4 ca với `4+3+3+9 = 19` lượt. Tổng bản 4 là **11 ca, 46 lượt**. Bản 3 có **45 lượt**, vì chưa có `N6.falsy`. Lượt `goc` chứa hai lời gọi helper và vẫn chỉ là một lượt.
+
+Các đẳng thức N9(c) nhất quán. `(b,y,f)` lần lượt là `(11,46,37)` trên POSIX, `(4,19,16)` trên nền khác có hardlink và `(4,18,15)` khi lượt hardlink được phép bỏ qua. Trong trường hợp cuối, `d=0` vì ca vẫn chạy hai lượt thường, còn `u=h=1` vì đúng một lượt và đột biến 37 đi cùng nhau.
+
+### Đột biến 46–52
+
+Chạy `python3 -IB` trên Linux, Python 3.13.18. Hai lần chạy xác nhận thoát rc 0. Mô hình lấy thân `cmd_bootstrap`, `_safe_exc` và writer từ Git blob của base, thay phần W4 dự kiến và mô phỏng hệ tệp trong RAM vì sandbox chỉ đọc. Phép 50 dùng lỗi thật từ `makedirs('/proc/version', exist_ok=True)`, nhận `FileExistsError` với `errno.EEXIST`. Một lần dựng harness trước đó thoát rc 1 do lỗi của harness. Candidate, fragment hoàn chỉnh và gate đầy đủ đều `not_run`.
+
+| ID | Lượt → nhãn đỏ đầu tiên | Bằng chứng |
+|---|---|---|
+| 46 | `require → dong_0_1` | `W4.trong_kho` đạt. Rc 4 giữ nguyên, dòng §0.1 xuất hiện 0 lần. |
+| 47 | `require → dong_0_1` | `W4.trong_kho` đạt. Rc 4 giữ nguyên, dòng §0.1 xuất hiện 2 lần. |
+| 48 | `W4 → agent_creds` | Rc và stderr giữ nguyên, có 2 dòng trạng thái agent. |
+| 49 | `W4 → khong_lo` | Fixture có `token`. W6 chạy trước và dữ liệu gửi writer W6 không chứa SENT. Dòng stdout được chèn mới làm lộ SENT, các nhãn trước vẫn đạt. |
+| 50 | `W4.cfg_la_tep → nguyen_trang` | Cả hai lần gọi writer GWS dừng ở `makedirs`. Hợp đồng lỗi giữ nguyên, có 2 lần gọi writer GWS và 0 `mkstemp` GWS. |
+| 51 | `W4.mkstemp → ban_cu` | W6 gọi cùng writer trước và hoàn tất. GWS tiêm đúng một lần, hợp đồng lỗi giữ nguyên, byte đích đổi từ `CU` thành rỗng. |
+| 52 | `N6.falsy → falsy` | `5` và surrogate qua đúng nhánh kiểm tra. Với `0`, điều kiện truthy của base in cảnh báo thiếu và trả rc 1, nên sai vế stderr. |
+
+Cặp 46/47 chung đích hợp lý vì kiểm hai biên của `== 1`. Đếm trực tiếp §4b được **37 mục, 5 E, 32 H, 21 `posix`, 16 `mọi`**, tương ứng 36 bộ đích khác nhau.
+
+### Phản chứng bộ đo và L1–L7
+
+Mô hình RAM của năm phản chứng thoát rc 0. Mỗi phép đổi đúng một đầu vào của phép đo và chạm đúng vế dưới đây.
+
+| Phản chứng | Thay đổi duy nhất → vế đỏ |
+|---|---|
+| `pc_tiem_khong_ghi` | Bỏ bản ghi tiêm, giữ ngoại lệ và hậu điều → `tiem`. |
+| `pc_bo_luot` | Bỏ `W5.cfg_la_tep` trên POSIX, giữ kết quả ca → sổ lượt thiếu một ID. |
+| `pc_bo_ca_moi` | Bỏ `m1_bien`, giữ `_LUOT_DU_KIEN` → sổ lượt thiếu bốn ID. |
+| `pc_bo_qua_ngoai_danh_sach` | Chỉ đổi trạng thái `W4.thuong` → sai danh sách cho phép. |
+| `pc_bo_qua_khi_ho_tro` | Chỉ đổi trạng thái `W5.hardlink`, giữ kết quả probe thành công → sai điều kiện hỗ trợ. |
+
+Ba tự kiểm phân hạng ở N9(d) kiểm kết quả phân hạng đột biến. Năm `pc_*` kiểm các vế của bộ đo trên bản sao fragment. §4b phân biệt rõ hai nhóm và loại cả hai khỏi tổng 37 đột biến.
+
+L1 khớp đơn vị và tổng tĩnh. L2 khớp write set. L4 giữ số đếm kế thừa. L7 không phát sinh điểm hỏi mới. L3/L6 còn thiếu vế âm với lỗi probe hardlink. L5 có mốc ngày và base, nhưng §8 vẫn ghi “tính lại sau review lượt 2” cho ước lượng đã cập nhật ở bản 4.
+
+### Finding mới
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|
+| **P2 · N5/N9(b) · Phân loại lỗi probe hardlink** | `os.link` ném `OSError` chưa đủ để kết luận volume thiếu hỗ trợ. Mô hình với `PermissionError(EACCES)` cho sổ lượt hợp lệ trên nền khác và cho cả lượt hardlink lẫn đột biến 37 bỏ qua. `pc_bo_qua_khi_ho_tro` chỉ thử probe thành công, nên lỗi quyền hoặc lỗi dựng fixture vẫn có thể cho `run=True`. | “Chỉ trên nền ngoài POSIX, `W5.hardlink` và đột biến 37 được `bỏ_qua` khi probe trên chính volume fixture trả mã lỗi đã khai là không hỗ trợ hardlink. Lỗi quyền, lỗi đường dẫn và lỗi ngoài danh sách làm đỏ ca. Giữ các vế khác và cho probe ném `PermissionError(EACCES)` ⇒ `run=False`, chẩn đoán lỗi probe.” |
+| **P3 · §8 · Bóc tách ước lượng** | Đo lại packet 1 được fragment 353 dòng, 18 ca, 30 `_DB`, tổng +448. Với 46 lượt, 37 `_DB` và sổ lượt mới, dự toán khoảng 500 dòng là khả thi nếu tái dùng rig và dùng bảng. Tuy nhiên, các khoản fragment được liệt kê chỉ cộng **397–468**, thiếu **12–21** so với **409–489** đã khai. Cộng các khoản hiện có cho toàn packet là **443–524**, giữa **483,5**. | “Tính lại ở bản 4 ngày 2026-11-19. Các hạng mục liệt kê cho 443–524 dòng thêm. Nếu giữ dự toán 455–545, ghi riêng 12–21 dòng dự phòng trong fragment. Numstat thật quyết định kết quả N12.” |
+
+KET_LUAN: request_changes
+0560b8bfe8bbddec3a34f7a9f510115becc026193d29a3db5f67de0ff97716d1  ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md
+567af28fc5eb3c7f065b854f5ea31cdaaa61dad39c71146c213a4022a59d8ab7  ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban5.md
+
+exec
+/bin/bash -lc 'f=ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md
+diff -U0 "${f%.md}-ban5.md" "$f" | cut -c1-250
+rg -n '"'probe|dự phòng|409|489|455|545|phản chứng' \""'$f" | cut -c1-520
+sed -n '"'245,347p' \""'$f"
+rg -n '"'"'^#{1,4} '"' CONTEXT.md docs/PROTOCOL_DA_PHIEN.md CLAUDE.md SKILL.md ops/KE_HOACH_THI_CONG_DA_PROVIDER.md | rg 'WORK|Phương pháp|§|:.*(7\\.|8\\.|13\\.|Review)' | head -45" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv433p2a/wt
+ succeeded in 0ms:
+--- ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban5.md	2026-11-19 06:08:52.533017294 +0000
++++ ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md	2026-11-19 06:09:07.596927965 +0000
+@@ -141 +141 @@
+-| N9 | Tự kiểm của fragment | (a) mỗi ID trong `_DU_KIEN` có đúng một mục `_DB` và ngược lại (so TẬP ID); mỗi mục giết đúng (ca, lượt, nhãn) đã khai; (b) SỔ LƯỢT: `_LUOT_DU_KIEN` viết RIÊNG khỏi bảng 
++| N9 | Tự kiểm của fragment | (a) mỗi ID trong `_DU_KIEN` có đúng một mục `_DB` và ngược lại (so TẬP ID); mỗi mục giết đúng (ca, lượt, nhãn) đã khai; (b) SỔ LƯỢT: `_LUOT_DU_KIEN` viết RIÊNG khỏi bảng 
+@@ -203,2 +203,2 @@
+-BỘ ĐO (executor chạy trên bản sao fragment, KHÔNG phải mục `_DB`, không vào tổng 37): 5 — `pc_tiem_khong_ghi` (N7), `pc_bo_luot`,
+-`pc_bo_ca_moi`, `pc_bo_qua_ngoai_danh_sach`, `pc_bo_qua_khi_ho_tro` (N9(b)); mỗi phép phải cho `run` False với dòng lỗi nêu đúng vế.
++BỘ ĐO (executor chạy trên bản sao fragment, KHÔNG phải mục `_DB`, không vào tổng 37): 6 — `pc_tiem_khong_ghi` (N7), `pc_bo_luot`,
++`pc_bo_ca_moi`, `pc_bo_qua_ngoai_danh_sach`, `pc_bo_qua_khi_ho_tro`, `pc_probe_quyen` (N9(b)); mỗi phép phải cho `run` False với dòng lỗi nêu đúng vế.
+@@ -241 +241 @@
+-- Kích thước P2a (ước lượng tĩnh, chưa đo; tính lại 2026-11-19 sau review lượt 2, theo mật độ packet 1 §0.4 — khung 116/353, `_Rig` 74,
++- Kích thước P2a (ước lượng tĩnh, chưa đo; tính lại 2026-11-19 ở bản 6 sau review lượt 4, theo mật độ packet 1 §0.4 — khung 116/353, `_Rig` 74,
+@@ -244,4 +244,5 @@
+-  fragment +409–489 (khung + `_DU_KIEN` + đếm theo nền + 3 tự kiểm ~125–135; sổ lượt `_LUOT_DU_KIEN` 11 ca/46 lượt, phép thử hardlink,
+-  dòng `BO_QUA`, vế LUOT của tổng kết ~22–30; rig có W4/W5 và bộ quan sát bốn pha có nhật ký ~80–95; 11 hàm ca, 46 lượt, viết dạng bảng
+-  lượt kèm nhãn mới `khong_lo`, `dong_0_1`, `falsy` ~130–160 — gộp W4/W5 cùng chủ đề vào một ca để bớt khung hàm; bảng 37 mục ~40–48);
+-  bundled +1 ⇒ **455–545 dòng thêm, 3 tệp, điểm giữa ~500** — dưới trần 550 nhưng biên trên sát (packet 1 với 30 mục `_DB`, 18 ca đo
++  fragment +399–470 theo hạng mục (khung + `_DU_KIEN` + đếm theo nền + 3 tự kiểm ~125–135; sổ lượt `_LUOT_DU_KIEN` 11 ca/46 lượt, phép thử
++  hardlink có danh sách `winerror`, dòng `BO_QUA`, vế LUOT của tổng kết ~24–32; rig có W4/W5 và bộ quan sát bốn pha có nhật ký ~80–95; 11 hàm ca, 46 lượt, viết dạng bảng
++  lượt kèm nhãn mới `khong_lo`, `dong_0_1`, `falsy` ~130–160 — gộp W4/W5 cùng chủ đề vào một ca để bớt khung hàm; bảng 37 mục ~40–48) cộng dự phòng
++  RIÊNG 10–19 dòng; bundled +1 ⇒ hạng mục cộng **445–526**, kèm dự phòng **455–545 dòng thêm, 3 tệp, điểm giữa ~500** (reviewer lượt 4
++  cộng lại các hạng mục bản 5: 443–524) — dưới trần 550 nhưng biên trên sát (packet 1 với 30 mục `_DB`, 18 ca đo
+@@ -324,0 +326,4 @@
++**Review Codex lượt 4 của P2a** (2026-11-19, bản `567af28f…`, `rv433p2a/luot4.verdict.txt`): request_changes, 1 P2, 1 P3; đóng 4/5
++finding lượt 3; xác nhận 11 ca/46 lượt, đột biến 46–52 đỏ đúng đích trong mô hình, tổng §4b. Xử lý: P2 probe hardlink — ĐÃ SỬA (N9(b)
++danh sách `winerror`, `pc_probe_quyen`); P3 §8 cộng hạng mục — ĐÃ SỬA (tách dự phòng).
++
+@@ -340,0 +346,2 @@
++- 2026-11-19 (phiên con, sau review lượt 4 trên `567af28f…`): N9(b) probe hardlink thành danh sách cho phép `winerror` {1, 50} chỉ trên nt,
++  lỗi probe khác ⇒ lượt đỏ; thêm `pc_probe_quyen` (6 phản chứng bộ đo); §8 tách hạng mục/dự phòng. Bản lượt 4: `rv433p2a/dac-ta-ban5.md`.
+141:| N9 | Tự kiểm của fragment | (a) mỗi ID trong `_DU_KIEN` có đúng một mục `_DB` và ngược lại (so TẬP ID); mỗi mục giết đúng (ca, lượt, nhãn) đã khai; (b) SỔ LƯỢT: `_LUOT_DU_KIEN` viết RIÊNG khỏi bảng ca, ánh xạ mỗi ca §4 tới tuple ID lượt đúng thứ tự §4 — 11 ca, 46 lượt; nền `posix` 7 ca/27 lượt (`trong_kho`, `goc_bieu_dien`, `to_tien`, `chuoi_kho`, `duong_xuong_dong`, `bien_cfgdir`, `chung_hop_dong_loi`), nền `mọi` 4 ca/19 lượt
+142:| N10 | Exact head: `--selftest` ĐẠT N/N hai số bằng nhau trên clone thật, N = N_base + 1, DELTA = 0 ca đỏ mới (base và head dựng trong CÙNG một lệnh); `test-fragments-check --json` ⇒ `ok: true`; `bundle_fragment_check.py --json` ⇒ `ok: true`, `failed: []`. | Không tái sinh bundled ⇒ `TEST_ID_SET_MISMATCH`; sửa tay bundled ⇒ `GENERATED_BUNDLE_STALE` (hai phép này dành cho checker bundled). Selftest trên clone đọc fragment DEV khi `scripts/test_fragments` có dữ liệu
+144:| N12 | Exact head, lệnh + rc + bằng chứng dương: `ruff check --select F` delta = 0 trên `scripts/tl_gws.py`, 0 trên fragment và bundled; `git diff --check <base>..<head>` rc 0; `doctrine-scan`, `adr-song` rc 0; dưới `set -o pipefail`: `git diff --numstat <base>..<head> > numstat.txt` (rc ≠ 0 ⇒ đỏ), (i) đúng 3 dòng, (ii) mỗi dòng khớp `^[0-9]+\t[0-9]+\t<đường>$`, tập đường == §1, (iii) tổng cột thêm ≤ 550 (trần đã nâng, dòng khai đầu tệp). | Tên chưa �
+204:`pc_bo_ca_moi`, `pc_bo_qua_ngoai_danh_sach`, `pc_bo_qua_khi_ho_tro`, `pc_probe_quyen` (N9(b)); mỗi phép phải cho `run` False với dòng lỗi nêu đúng vế.
+246:  lượt kèm nhãn mới `khong_lo`, `dong_0_1`, `falsy` ~130–160 — gộp W4/W5 cùng chủ đề vào một ca để bớt khung hàm; bảng 37 mục ~40–48) cộng dự phòng
+247:  RIÊNG 10–19 dòng; bundled +1 ⇒ hạng mục cộng **445–526**, kèm dự phòng **455–545 dòng thêm, 3 tệp, điểm giữa ~500** (reviewer lượt 4
+249:  được +448). Năm phản chứng bộ đo chạy trên bản sao, không vào numstat. Trần CƯỠNG CHẾ trên numstat thật (N12 (iii), §6): vượt ⇒ DỪNG
+289:- P2 gate — ĐÃ SỬA: N8 phản chứng neo PD/packet 1; N10 phản chứng `N_base + 1` và ca mới đỏ; N11 xoá tệp; N12 `git diff --check`, đường
+303:- P2 N10 phản chứng `N_base + 1` — ĐÃ SỬA: chuyển fragment dev ra khỏi `scripts/test_fragments` trên bản sao; bỏ bundled chỉ cho checker bundled.
+317:  `os.link` trên thư mục fixture, dòng `BO_QUA` có lý do, vế LUOT trong tổng kết; bốn phản chứng bộ đo (bỏ lượt, bỏ ca `mọi`, bỏ qua ngoài
+319:- P2 phép đỏ độc lập — ĐÃ SỬA: N7 `ban_cu` bằng đột biến mã 51 (`db_cat_dich_truoc`), N7 `tiem` bằng phản chứng bộ đo `pc_tiem_khong_ghi`
+323:- §4b: 37 đột biến (E 5, H 32; `posix` 21, `mọi` 16); tách rõ "tự kiểm phân hạng" (3, trong fragment) và "phản chứng bộ đo" (5, trên
+324:  bản sao). §8 tính lại 455–545, giữa ~500.
+327:finding lượt 3; xác nhận 11 ca/46 lượt, đột biến 46–52 đỏ đúng đích trong mô hình, tổng §4b. Xử lý: P2 probe hardlink — ĐÃ SỬA (N9(b)
+328:danh sách `winerror`, `pc_probe_quyen`); P3 §8 cộng hạng mục — ĐÃ SỬA (tách dự phòng).
+344:  còn mở của lượt 3 (§9); thêm đột biến 46–52, sổ lượt N9(b), năm phản chứng bộ đo; §8 455–545. Bản trước: `9e02d0df…`
+346:- 2026-11-19 (phiên con, sau review lượt 4 trên `567af28f…`): N9(b) probe hardlink thành danh sách cho phép `winerror` {1, 50} chỉ trên nt,
+347:  lỗi probe khác ⇒ lượt đỏ; thêm `pc_probe_quyen` (6 phản chứng bộ đo); §8 tách hạng mục/dự phòng. Bản lượt 4: `rv433p2a/dac-ta-ban5.md`.
+  hardlink có danh sách `winerror`, dòng `BO_QUA`, vế LUOT của tổng kết ~24–32; rig có W4/W5 và bộ quan sát bốn pha có nhật ký ~80–95; 11 hàm ca, 46 lượt, viết dạng bảng
+  lượt kèm nhãn mới `khong_lo`, `dong_0_1`, `falsy` ~130–160 — gộp W4/W5 cùng chủ đề vào một ca để bớt khung hàm; bảng 37 mục ~40–48) cộng dự phòng
+  RIÊNG 10–19 dòng; bundled +1 ⇒ hạng mục cộng **445–526**, kèm dự phòng **455–545 dòng thêm, 3 tệp, điểm giữa ~500** (reviewer lượt 4
+  cộng lại các hạng mục bản 5: 443–524) — dưới trần 550 nhưng biên trên sát (packet 1 với 30 mục `_DB`, 18 ca đo
+  được +448). Năm phản chứng bộ đo chạy trên bản sao, không vào numstat. Trần CƯỠNG CHẾ trên numstat thật (N12 (iii), §6): vượt ⇒ DỪNG
+  trước khi công bố, không cắt ca.
+- `review_class`, lease của ba đường, nền test: đo khi cấp lease trên base thật.
+
+## 9. Lịch sử review và quyết định
+
+Lịch sử của đặc tả gốc `GWS-CRED-DICH-NGOAI-KHO` (lượt 3–10 trên các bản trước khi tách) giữ ở bản lưu
+`rv433p2a/dac-ta-ban0-truoc-tach.md` (`0d0f586b…`); các kết quả còn hiệu lực đã nằm trong §0, §4: tên `TEST_ID` khớp
+`_PACKET_TEST_ID_PATTERN` (lượt 3), định dạng dòng cố định và `repr` (lượt 5–6), luật ngoại lệ theo lượt và bảng §4b là nguồn duy nhất
+(lượt 8–9).
+
+**Quyết định của chủ kho (2026-11-19, phiên điều phối #1206, AskUserQuestion):**
+- **Q1 — Kích thước: TÁCH hai tầng, rồi NÂNG TRẦN cho P2a (AskUserQuestion 2026-11-19, phiên #1206: "Nâng trần lên 550").** Sau review
+  lượt 3, đóng hết finding cần ~+22–35 dòng nữa; chủ kho chọn nâng trần `ADR-0053` cho riêng `GWS-CRED-DICH-NGOAI-KHO-A` lên ≤ 3 tệp /
+  ≤ 550 dòng thêm (dòng khai đầu tệp), KHÔNG tách thêm; trần cưỡng chế trên numstat thật lúc thi công (N12 (iii)). Hai tầng tách trước đó giữ nguyên: Tầng một: kiểm DỮ LIỆU W6 sang P2b `GWS-CRED-DICH-NGOAI-KHO-B`. Tầng hai (sau review lượt 1 của
+  P2a, vì đóng hết finding vượt 450): P2a = W4/W5 trên POSIX + chốt thư mục tổ tiên của `cfgdir`; P2c `GWS-CRED-DICH-NGOAI-KHO-C` =
+  danh sách cho phép đường Windows và UNC, đặc tả riêng, làm sau. M4/M5 và các gate N10–N12 áp cho P2a.
+- **Q2 — UNC: thu hẹp, áp cho P2c.** Chốt UNC bằng so định danh tệp (volume + file id) của thư mục đích với gốc kho tra-luat và các tổ
+  tiên của đích; trùng ⇒ từ chối. Khai rõ không bảo vệ kho git khác (§2 "Để P2c").
+- **Q3 — Ngoại lệ bundled (E2, §1): CÒN MỞ.** Cần comment mới của chủ kho trên #433 nêu đúng `packet_id` `GWS-CRED-DICH-NGOAI-KHO-A`,
+  đúng tệp `scripts/tl_test_fragments_bundled.py` và sha256 đặc tả đã đóng băng (comment 6973856830 chỉ phủ packet 1). Không chặn review,
+  chặn cấp lease.
+- **Q4 — Reparse point sang P2c: CHỦ KHO ĐÃ QUYẾT (AskUserQuestion 2026-11-19, phiên #1206: "Đồng ý, sang P2c").** Vế reparse point
+  (M6 cũ) là khái niệm chỉ có trên Windows; P2a giữ phạm vi POSIX (§2 "Để P2c" mục (3)).
+
+**Review Codex lượt 1 của P2a** (2026-11-19, bản `9ec552f1…`, `rv433p2a/luot1.verdict.txt`): request_changes, 0 P0, 2 P1, 7 P2, 2 P3.
+Xử lý trong bản này:
+- P1 tổ tiên `cfgdir` — ĐÃ SỬA: M2 truyền `goc = "/"` và mọi thành phần; N3 `to_tien` sáu lượt (tổ tiên hai cấp, cha, chính `cfgdir`,
+  tệp cuối; W4 và W5), cả hai đường ngoài kho; đột biến 33, 34 (bản lượt 1) và 12. N3b giữ riêng xuất xứ lỗi kho (`kho_truoc`).
+- P1 UNC ngoài kho — CHUYỂN P2c (Q1 tầng hai, Q2).
+- P2 dạng đường M1, dòng 32 không thể đỏ, `isabs("\\fake")` — CHUYỂN P2c.
+- P2 biên `cfgdir` — ĐÃ SỬA: M1 từ chối NUL, chỉ khoảng trắng, gốc `/`; N4 `bien_cfgdir` (tệp thay thư mục, thư mục thay tệp, W4/W5,
+  số lần gọi writer, hậu điều); rỗng giữ chọn mặc định (§0.1); đích symlink ở N3 `tep_cuoi` cả W4/W5.
+- P2 TOCTOU — ĐÃ SỬA bằng khai giới hạn ĐÚNG (§2: mọi principal, không chỉ cùng uid; không hứa, không đo).
+- P2 fsync/tiêm lỗi theo pha — ĐÃ SỬA: N5 nhãn `fsync` gắn fd `mkstemp`; N7 bốn pha × W4/W5 với `hop_dong`/`ban_cu`/`khong_tam`; đột biến
+  35 (bỏ fsync), 36 (bỏ dọn tạm), 37 (ghi xuyên hardlink, nhãn và lượt riêng khỏi `nguyen_tu`).
+- P2 nhãn/fullmatch/đếm stderr — ĐÃ SỬA: §4 định nghĩa "stderr đúng" bằng `fullmatch`, dòng `--require-agent-creds` đếm riêng (§0.1, M3);
+  §4b ghi (ca, lượt, nhãn), thứ tự nhãn và thu đủ hậu điều; tách W4/W5 theo lượt; đột biến 42 (lặp đúng dòng lỗi; 19 là dòng thêm không khớp mẫu); 17/18 ghi rõ thao tác ném.
+- P2 N8 tự kiểm — ĐÃ SỬA (nay N9): `_DU_KIEN` độc lập, so tập ID, đếm theo nền (`chỉ_posix`), `tu_kiem_sai_luot` chỉ đổi lượt (cùng
+  ca/nhãn/kiểu/dấu), `tu_kiem_doi_kieu` đòi `__context__` là `AttributeError`.
+- P2 gate — ĐÃ SỬA: N8 phản chứng neo PD/packet 1; N10 phản chứng `N_base + 1` và ca mới đỏ; N11 xoá tệp; N12 `git diff --check`, đường
+  sai, cột `-`; `doctrine-scan`/`adr-song` khai gate kế thừa.
+- P3 §2 phụ thuộc P2b — ĐÃ SỬA (lịch theo Q1, mã độc lập). P3 căn cứ §8 — ĐÃ SỬA (§0.4 theo AST: 18 ca, 30 `_DB`, 4 tự kiểm, +448).
+
+**Review Codex lượt 2 của P2a** (2026-11-19, bản `0619ff83…`, `rv433p2a/luot2.verdict.txt`): request_changes, 0 P0/P1, 6 P2, 2 P3. Đóng
+thật: P1 tổ tiên, P1/P2 chuyển P2c, P3 §2. Xử lý trong bản này:
+- P2 N7 đòi thông điệp mà `_safe_exc` xoá — ĐÃ SỬA: hợp đồng công khai `ghi lỗi: OSError` (`fullmatch`); nhãn `tiem` đọc NHẬT KÝ bộ quan
+  sát (pha, thư mục/fd, dấu); dấu thô chỉ dùng ở biên lượt E (20/21); 36 nay tới `khong_tam` vì `hop_dong` đạt.
+- P2 N1 thứ tự nhãn — ĐÃ SỬA: `sach`, `ma`, `stderr`, `agent_creds`; 1/2 nhắm `sach`, 3 nhắm `ma`.
+- P2 19/42 cùng đích — ĐÃ SỬA: 19 `db_w4_mau_loi` (thay dòng duy nhất bằng dòng chi tiết rỗng) nhắm `mau_loi`; 42 `db_w4_lap_dong` nhắm `mot_dong_loi`.
+- P2 nền/hậu điều N4/N5 — ĐÃ SỬA: tách `m1_bien` (mọi) khỏi `bien_cfgdir` (posix); số lần writer/`mkstemp` cho từng lượt; `quyen` (44) và `byte`
+  (45) có đột biến riêng; N9 đếm lượt bỏ qua trên nền khác.
+- P2 N3e/4–5/22 — ĐÃ SỬA: N3e lượt `W5.cli` rồi `W4.bootstrap`, 22 nhắm `W5.cli`; 4 neo vào phép THAY lời gọi `_kiem_dich_ghi` trong
+  `_dich_cred_gws` bằng `lstat` chuỗi thô (`goc_0` vẫn đạt, `goc_1` đỏ); 5 và 34 bỏ vì W4/W5 dùng chung `_dich_cred_gws` (33 → `db_goc_cfgdir`).
+- P2 N10 phản chứng `N_base + 1` — ĐÃ SỬA: chuyển fragment dev ra khỏi `scripts/test_fragments` trên bản sao; bỏ bundled chỉ cho checker bundled.
+- P3 TOCTOU `.git` — ĐÃ SỬA (§2). P3 §8 — ĐÃ SỬA: tính lại 408–479, giữa ~443.
+- Thêm (không do finding): `m1_bien.xuong_dong` + đột biến 43 cho `repr` của lý do M1. Gộp ca cùng chủ đề (W4/W5 trong kho, N2, N3b) thành
+  ca nhiều lượt.
+
+**Review Codex lượt 3 của P2a** (2026-11-19, bản `2e6cd1dc…`, `rv433p2a/luot3.verdict.txt`): request_changes, 4 P2, 1 P3; đóng 7/8 finding
+lượt 2; §4b 30/30 bộ đích đúng trong mô hình của reviewer. Sửa NGAY trong bản này (không đổi kích thước đáng kể): P2 phạm vi đếm writer
+(lọc theo đích `credentials.json`), P2 dòng 41 nhận E bằng `errno.EEXIST`, P3 `gws_cred` falsy (điều kiện vào nhánh — CHƯA thêm lượt
+`0` vào N6). CÒN MỞ, dừng vì kích thước: P2 sổ lượt theo nền ở N9 (danh sách lượt dự kiến từng ca, ID lượt bỏ qua + lý do, tự kiểm đỏ khi
+bỏ lượt bắt buộc/bỏ nguyên ca `mọi`); P2 phép đỏ độc lập còn thiếu (N7 `tiem`, `ban_cu`; N4b `nguyen_trang`; N1 `agent_creds`, SENT; N8 dòng
+§0.1 thiếu/lặp với rc 4) và lượt `N6.falsy`. Ước lượng thêm +22–35 dòng ⇒ ~430–514, giữa ~466 > 450 — DỪNG theo chỉ thị điều phối.
+Sau Q1 (nâng trần 550), đóng nốt trong bản 5:
+- P2 sổ lượt theo nền — ĐÃ SỬA: N9(b) `_LUOT_DU_KIEN` (11 ca, 46 lượt; 7 ca/27 lượt `posix`, 4 ca/19 lượt `mọi` — reviewer lượt 3 viết
+  "sáu ca POSIX", "năm ca `mọi`"; đếm lại theo cột nền §4 ra 7/4), trạng thái từng lượt, danh sách cho phép `bỏ_qua` một mục kèm phép thử
+  `os.link` trên thư mục fixture, dòng `BO_QUA` có lý do, vế LUOT trong tổng kết; bốn phản chứng bộ đo (bỏ lượt, bỏ ca `mọi`, bỏ qua ngoài
+  danh sách, bỏ qua khi có hỗ trợ).
+- P2 phép đỏ độc lập — ĐÃ SỬA: N7 `ban_cu` bằng đột biến mã 51 (`db_cat_dich_truoc`), N7 `tiem` bằng phản chứng bộ đo `pc_tiem_khong_ghi`
+  (nhật ký là thứ của rig, không đột biến mã nào làm nó đỏ mà giữ các nhãn trước); N4b `nguyen_trang` bằng 50; N1 tách nhãn `khong_lo`,
+  48 (lặp `agent_creds:`) và 49 (lộ SENT) mỗi cái đổi một vế; N8 tách nhãn `dong_0_1`, 46 (thiếu) và 47 (lặp) với rc 4 giữ.
+- P3 `gws_cred` falsy — ĐÃ SỬA: lượt `N6.falsy` (`0`) + đột biến 52 về điều kiện truthy của base.
+- §4b: 37 đột biến (E 5, H 32; `posix` 21, `mọi` 16); tách rõ "tự kiểm phân hạng" (3, trong fragment) và "phản chứng bộ đo" (5, trên
+  bản sao). §8 tính lại 455–545, giữa ~500.
+
+**Review Codex lượt 4 của P2a** (2026-11-19, bản `567af28f…`, `rv433p2a/luot4.verdict.txt`): request_changes, 1 P2, 1 P3; đóng 4/5
+finding lượt 3; xác nhận 11 ca/46 lượt, đột biến 46–52 đỏ đúng đích trong mô hình, tổng §4b. Xử lý: P2 probe hardlink — ĐÃ SỬA (N9(b)
+danh sách `winerror`, `pc_probe_quyen`); P3 §8 cộng hạng mục — ĐÃ SỬA (tách dự phòng).
+
+## 10. Nhật ký revision
+
+- 2026-11-19T04:5xZ (phiên con của điều phối #1206): đo lại §0.1 trên `3b64746`; đóng bốn finding lượt 10 của đặc tả gốc. Bản trước:
+  `6c654d64…` (`rv433p2/dac-ta-ban0-hoan.md`).
+- 2026-11-19 (phiên con): theo Q1 tầng một — đổi `packet_id` thành `GWS-CRED-DICH-NGOAI-KHO-A`, gỡ phần W6 sang P2b. Bản trước tách:
+  `0d0f586b…` (`rv433p2a/dac-ta-ban0-truoc-tach.md`). Bản review lượt 1: `9ec552f1…` (`rv433p2a/dac-ta-ban1.md`).
+- 2026-11-19 (phiên con, sau lượt 1 và Q1 tầng hai/Q2 thu hẹp): thu phạm vi về POSIX; chuyển dạng đường Windows, UNC, M6 reparse sang
+  P2c; đóng các finding lượt 1 thuộc P2a (§9); đánh số lại N (N4 mới = biên `cfgdir`, N7 = tiêm lỗi theo pha, N9 = tự kiểm, N10–N12 = gate);
+  thêm đột biến 33–42 (29 tổng); §8 tính lại 410–481, giữa ~446.
+- 2026-11-19 (phiên con, sau lượt 2): đóng 6 P2 + 2 P3 lượt 2 (§9); N4 tách `m1_bien`/`bien_cfgdir` (N4b); §4b 30 đột biến (bỏ 5, 34;
+  thêm 43–45; đổi tên 19, 33); §8 408–479. Bản lượt 2: `0619ff83…` (`rv433p2a/dac-ta-ban2.md`).
+- 2026-11-19 (phiên con, sau lượt 3): sửa ba finding rẻ của lượt 3 (§9); hai P2 còn lại cần +22–35 dòng ⇒ vượt trần, DỪNG, chưa gọi
+  lượt 4. Bản lượt 3: `2e6cd1dc…` (`rv433p2a/dac-ta-ban3.md`).
+- 2026-11-19 (phiên con, sau Q1 nâng trần 550 và Q4): dòng khai trần `nang_tran` thay `ADR-0053@…`; §6/N12 về 550; đóng hai P2 + một P3
+  còn mở của lượt 3 (§9); thêm đột biến 46–52, sổ lượt N9(b), năm phản chứng bộ đo; §8 455–545. Bản trước: `9e02d0df…`
+  (`rv433p2a/dac-ta-ban4.md`).
+- 2026-11-19 (phiên con, sau review lượt 4 trên `567af28f…`): N9(b) probe hardlink thành danh sách cho phép `winerror` {1, 50} chỉ trên nt,
+  lỗi probe khác ⇒ lượt đỏ; thêm `pc_probe_quyen` (6 phản chứng bộ đo); §8 tách hạng mục/dự phòng. Bản lượt 4: `rv433p2a/dac-ta-ban5.md`.
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:57:### 3.1 Advisory Reviewer
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:81:## 4. Review Class
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:118:## 5. Review bundle
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:180:## 7. Quy trình Patch Planner
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:193:## 8. Review note
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:316:## 10c. Reviewer bắt buộc kèm gợi ý cách vá
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:330:## 11. Review debt
+ops/KE_HOACH_THI_CONG_DA_PROVIDER.md:359:## 13. Stop conditions
+SKILL.md:28:## Phương pháp làm việc: thiết kế kỹ, triển khai chủ động
+SKILL.md:39:## DETERMINISTIC WORKFLOW GATES — tool inventory / route-task / dry-run / readback
+SKILL.md:105:## 1. KHỞI ĐỘNG (bắt buộc, đúng thứ tự — chi tiết: RUNBOOK §A)
+SKILL.md:185:## 2. CỔNG VẬN HÀNH (mệnh lệnh — chi tiết: RUNBOOK §B)
+SKILL.md:231:## 7. BẢN ĐỒ SCRIPT
+SKILL.md:235:## 8. APPS SCRIPT WEBAPP
+SKILL.md:250:## v1.17.26 combined external-ingest + instruction-audit gate
+docs/PROTOCOL_DA_PHIEN.md:456:## 7. Handoff và tự sinh phiên kế nhiệm
+docs/PROTOCOL_DA_PHIEN.md:634:## 8. Review phân tầng
+docs/PROTOCOL_DA_PHIEN.md:770:### 8.1 Bootstrap reviewer và receipt thực thi
+docs/PROTOCOL_DA_PHIEN.md:797:### 8.2 Phạm vi phép đo và checkout read-only
+docs/PROTOCOL_DA_PHIEN.md:812:### 8.3 Lịch sử lớp finding và giới hạn nghiệm thu
+docs/PROTOCOL_DA_PHIEN.md:1195:## 13. Hợp đồng ba skill
+docs/PROTOCOL_DA_PHIEN.md:1227:#### 13.1 Evidence trước và sau land
+docs/PROTOCOL_DA_PHIEN.md:1240:#### 13.2 Thay ruleset trong phạm vi được ủy quyền riêng
+docs/PROTOCOL_DA_PHIEN.md:1355:## 17. Tiêu chí nghiệm thu hệ thống
+docs/PROTOCOL_DA_PHIEN.md:1383:## 18. Căn cứ khả năng nền tảng
+
+exec
+/bin/bash -lc "f=ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md
+sed -n '1,36p;146,211p;238,251p' \""'$f"
+sed -n '"'1,45p' CONTEXT.md
+sed -n '770,825p;1195,1226p' docs/PROTOCOL_DA_PHIEN.md
+sed -n '1,40p' CLAUDE.md
+sed -n '1,40p' SKILL.md
+sed -n '1,30p' ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+rg -n '"'^'"\\| N5' \""'$f"' in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv433p2a/wt
+ succeeded in 0ms:
+tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
+tran_kich_thuoc_sensitive: nang_tran AskUserQuestion chủ kho 2026-11-19 phiên điều phối #1206 (≤ 3 tệp / ≤ 550 dòng thêm; thay ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab)
+
+# GWS-CRED-DICH-NGOAI-KHO-A r1 — trên POSIX, `credentials.json` của gws (W4, W5 trong `tl_gws.py`) phải nằm ngoài kho git, không ghi xuyên liên kết ở BẤT KỲ thành phần nào của đường, và ghi nguyên tử
+
+- packet_id: GWS-CRED-DICH-NGOAI-KHO-A; revision: 1;
+
+| trường | giá trị |
+|---|---|
+| `packet_issue` | #433 |
+| `nguon_cap_viec` | Issue #433. Tách từ đặc tả `NLM-GWS-DICH-NGOAI-KHO-r1.md` theo quyết định của chủ kho ngày 18-11-2026: packet `NLM-GWS-DICH-NGOAI-KHO` giữ W1–W3, W6 (chốt đích) và điều kiện `.claude`; packet `GWS-CRED-DICH-NGOAI-KHO` giữ W4, W5. Chủ kho 2026-11-19 (phiên điều phối #1206, AskUserQuestion) tách tiếp hai tầng: (Q1) kiểm DỮ LIỆU W6 sang **P2b** `GWS-CRED-DICH-NGOAI-KHO-B`; (Q1 tầng hai, sau review lượt 1) danh sách cho phép đường Windows/UNC sang **P2c** `GWS-CRED-DICH-NGOAI-KHO-C`. Đặc tả này là **P2a**: W4/W5 trên POSIX cộng chốt thư mục tổ tiên của `cfgdir`. |
+| `phu_thuoc` | Packet `NLM-GWS-DICH-NGOAI-KHO` ĐÃ LAND trên `master` (PR #1394, merge `700fbca`). Packet này gọi lại `_kiem_dich_ghi(dich, goc, thanh_phan)` và `_ghi_nguyen_tu_0600(path, data)` của packet ấy KHÔNG sửa thân, dùng chung hợp đồng lỗi của nó (M4: năm cụm cố định, một dòng stderr, `degraded`). P2b và P2c không là tiền đề của P2a. |
+| `review_class` | `sensitive`: `scripts/tl_gws.py` là đường ghi credential. Đối chiếu bằng `lease_publish check` khi cấp lease; không rõ thì giữ `sensitive`. |
+| `base` | `3b647461db7c8ded1bddd9aafc5c6aa5eead223f` lúc soạn (2026-11-19, SAU khi packet 1 land); blob `scripts/tl_gws.py` `12e04c03971861d96161b9c1cd55de9c59a5f371`, 2620 dòng. Lease ghi OID base thật lúc cấp; phiên thi hành đo lại §0 trên base ấy trước khi sửa. Số dòng `641108c` trong §0.2 là mốc lịch sử của phép đo E1/E2/S4/S5/L1/L2. |
+
+## 0. Hiện trạng (§0.1, §0.4 đo trên `3b64746`; §0.2 đo trên `641108c` trước packet 1 — hành vi W4/W5 không đổi vì packet 1 không chạm hai chỗ ấy; Linux, Python 3.13.18, dữ liệu GIẢ, không mạng; mốc phút là lời khai của phiên soạn, trừ chỗ ghi giờ máy)
+
+### 0.1 Hai chỗ ghi thuộc packet
+
+| # | hàm | dòng (`3b64746`) | đích | cách ghi hiện tại |
+|---|---|---|---|---|
+| W4 | `cmd_bootstrap` (1717), nhánh `bundle.get("gws_cred")` | 1780–1790 | `cfgdir/credentials.json`, `cfgdir` = `$GOOGLE_WORKSPACE_CLI_CONFIG_DIR` hoặc `~/.config/gws` (1781; giá trị rỗng chọn mặc định vì `or`) | `os.makedirs(cfgdir)` (1782), `open("wb")` (1784) ghi `bundle["gws_cred"].encode("utf-8")` (1785) không nguyên tử, `chmod` sau (1787); không `try` |
+| W5 | `_gws_auth_load` (định nghĩa 1911) | 1930–1939 | như W4 | cùng mẫu (1931–1934); dữ liệu là `bytes` từ `store.decrypt` (1927) |
+
+Người gọi W5: `cmd_gws_auth_load` (1942–1953, nhánh lỗi in một dòng `[gws-auth-load] ✗ {msg}`, rc 2), `cmd_gws_bootstrap_cowork` (2317, 2374),
+`tl_core/ops_misc.py` (592). Không ai ghi riêng. `cfgdir` đến THẲNG từ biến môi trường, có thể tương đối hoặc có hậu tố.
+Nhánh `--require-agent-creds` của `cmd_bootstrap` (1836–1838) in dòng riêng `[bootstrap] ✗ --require-agent-creds: credential agent chưa nạp
+được (rc 4).` rồi trả 4; dòng ấy không mang cụm nào của hợp đồng lỗi.
+
+### 0.2 Phép đo
+
+| phép | dựng | kết quả |
+|---|---|---|
+| E1 (04:51:21Z) | `_gws_auth_load`, `GOOGLE_WORKSPACE_CLI_CONFIG_DIR=<kho git tạm>/gwscfg` | `(True, …/kho/gwscfg/credentials.json)`; `git status --porcelain` = `?? gwscfg/credentials.json` |
+| E2 (04:51:21Z) | `cmd_bootstrap --env code`, bundle có `gws_cred`, cùng biến | rc 0; porcelain = `?? gwscfg/credentials.json` |
+| S4 (05:17:57Z) | `_ghi_nguyen_tu_0600` trên đích là symlink vào kho; trên đích là hardlink | tệp được trỏ tới giữ nguyên; hardlink còn lại giữ nội dung cũ |
+### 4b. Bảng đột biến — NGUỒN DUY NHẤT (thắng mọi mô tả đột biến rải trong §4)
+
+Luật như §4b packet 1, gồm luật LƯỢT GỌI: tập ngoại lệ khai gắn với từng lượt; ngoại lệ ngoài tập của lượt đang chạy ⇒ ca dừng với nhãn
+`ngoai_le_la` (không bao giờ là nhãn đích); đột biến chỉ GIẾT khi tín hiệu `TinHieuChotCa` mang đúng (ca, lượt, nhãn). Trong một lượt các
+nhãn được kiểm theo thứ tự ghi ở §4 và các lượt chạy theo thứ tự ghi ở §4; nhãn đầu tiên đỏ là nhãn của tín hiệu, nên lượt đích của một đột biến là lượt ĐẦU TIÊN nó làm đỏ. Mọi hậu điều của lượt được THU trước khi so (không dừng giữa
+lúc đo). Ràng buộc cài đặt: kiểu/encode của `gws_cred` kiểm TRƯỚC khi ghi; NUL/khoảng trắng bị M1 từ chối; lời ghi W4/W5 chỉ bắt `OSError`.
+Đột biến neo trên NGUỒN CANDIDATE (đã áp M1–M3). Cột "nền": `posix` ⇒ đột biến đếm `chỉ_posix` trên nền khác.
+
+| # | đột biến | ca · lượt | nhãn | cơ chế | ngoại lệ khai ở biên lượt | nền | tự kiểm |
+|---|---|---|---|---|---|---|---|
+| 1 | `db_w4_bo_chot` | `trong_kho` · `W4` | `sach` | H | — | posix | lập luận (§0.2 E2) |
+| 2 | `db_w5_bo_chot` | `trong_kho` · `W5` | `sach` | H | — | posix | lập luận (§0.2 E1) |
+| 3 | `db_w4_quen_degraded` | `trong_kho` · `W4` | `ma` | H | — | posix | lập luận |
+| 4 | `db_lstat_tho` | `goc_bieu_dien` · `W5.goc_1` | `goc_1` | H | — | posix | đo L1: `lstat("alias/")` không phải symlink |
+| 6 | `db_bo_cam_hai_cham` | `goc_bieu_dien` · `W5.hai_cham` | `hai_cham` | H | — | posix | đo 2026-11-18T06:42:22Z: `makedirs("x/../that")` không ném |
+| 7 | `db_ghi_duong_tho` | `goc_bieu_dien` · `W5.tuong_doi_thuong` | `tuong_doi_thuong` | H | — | posix | lập luận |
+| 10 | `db_chi_tu_vung` | `chuoi_kho` · `realpath` | `kho_truoc` | H | — | posix | lập luận |
+| 11 | `db_chi_realpath` | `chuoi_kho` · `tu_vung` | `tu_choi_tu_vung` | H | — | posix | lập luận |
+| 12 | `db_bo_symlink_cuoi` | `to_tien` · `W4.tep_cuoi` | `lien_ket` | H | — | posix | lập luận (§0.2 S4: replace giữ tệp được trỏ ⇒ chỉ lớp từ chối đỏ) |
+| 15 | `db_w4_khong_nguyen_tu` | `nguyen_tu` · `W4.thuong` | `nguyen_tu` | H | — | mọi | lập luận |
+| 16 | `db_w5_khong_nguyen_tu` | `nguyen_tu` · `W5.thuong` | `nguyen_tu` | H | — | mọi | lập luận |
+| 17 | `db_w4_bo_kiem_kieu` | `du_lieu_sai_dang` · `N6.kieu` | `kieu` | E — `.encode` trên số | `AttributeError` chứa `'int' object has no attribute 'encode'` | mọi | đo: `(5).encode` ⇒ đúng thông điệp |
+| 18 | `db_w4_bo_kiem_encode` | `du_lieu_sai_dang` · `N6.surrogate` | `surrogate` | E — `.encode` trước writer, ngoài `try` | `UnicodeEncodeError` chứa `surrogates not allowed` | mọi | đo: đúng thông điệp |
+| 19 | `db_w4_mau_loi` | `chung_hop_dong_loi` · `W4.trong_kho` | `mau_loi` | H | — | posix | lập luận (lượt 2 đo: dòng chi tiết rỗng không `fullmatch` `.+`) |
+| 20 | `db_w4_oserror_lan` | `ghi_loi_theo_pha` · `W4.mkstemp` | `hop_dong` | E | `OSError` chứa `wp433-oserror` | mọi | lập luận (thông điệp do bộ quan sát đặt) |
+| 21 | `db_w5_oserror_lan` | `ghi_loi_theo_pha` · `W5.mkstemp` | `hop_dong` | E | `OSError` chứa `wp433-oserror` | mọi | lập luận |
+| 22 | `db_khong_repr_gws` | `duong_xuong_dong` · `W5.cli` | `mot_dong` | H | — | posix | đo 2026-11-18T06:33:10Z: không `repr` ⇒ 2 dòng |
+| 23 | `db_require_thua_rc1` | `chung_hop_dong_loi` · `require` | `require` | H | — | posix | lập luận |
+| 33 | `db_goc_cfgdir` | `to_tien` · `W4.ong` | `lien_ket` | H | — | posix | lập luận (§0.2 S5); lượt 2 đo `_kiem_dich_ghi(…, "/", tp)` bắt tổ tiên `/proc/thread-self` |
+| 35 | `db_bo_fsync` | `nguyen_tu` · `W4.thuong` | `fsync` | H | — | mọi | lập luận |
+| 36 | `db_bo_don_tam` | `ghi_loi_theo_pha` · `W4.fsync` | `khong_tam` | H | — | mọi | lượt 2 đo writer base: pha `fsync` đã có tệp tạm và nhánh `unlink` xoá nó |
+| 37 | `db_ghi_xuyen_hardlink` | `nguyen_tu` · `W5.hardlink` | `ban_kia_giu` | H | — | mọi (lượt bỏ qua ⇒ đột biến `bỏ_qua`) | lập luận |
+| 38 | `db_nhan_nul` | `m1_bien` · `nul` | `nul` | H | — | mọi | lập luận |
+| 39 | `db_nhan_khoang_trang` | `m1_bien` · `trang` | `trang` | H | — | mọi | lập luận |
+| 40 | `db_nhan_goc` | `m1_bien` · `goc` | `goc_rong` | H | — | mọi | lập luận |
+| 41 | `db_w4_oserror_hep` | `bien_cfgdir` · `W4.cfg_la_tep` | `hop_dong` | E | `FileExistsError` có `e.errno == errno.EEXIST` (không so thông điệp — phụ thuộc locale) | posix | đo B1 |
+| 42 | `db_w4_lap_dong` | `chung_hop_dong_loi` · `W4.trong_kho` | `mot_dong_loi` | H | — | posix | lập luận |
+| 43 | `db_m1_khong_repr` | `m1_bien` · `xuong_dong` | `mot_dong_m1` | H | — | mọi | lập luận |
+| 44 | `db_sai_quyen` | `nguyen_tu` · `W4.thuong` | `quyen` | H | — | posix | lập luận (`mkstemp` tạo `0600`; đột biến đặt `0644` chủ động) |
+| 45 | `db_w4_sai_byte` | `nguyen_tu` · `W4.thuong` | `byte` | H | — | mọi | lập luận |
+| 46 | `db_require_thieu_dong` | `chung_hop_dong_loi` · `require` | `dong_0_1` | H | — | posix | lập luận (đếm 0 ≠ 1) |
+| 47 | `db_require_lap_dong` | `chung_hop_dong_loi` · `require` | `dong_0_1` | H | — | posix | lập luận (đếm 2 ≠ 1) |
+| 48 | `db_w4_lap_agent_creds` | `trong_kho` · `W4` | `agent_creds` | H | — | posix | lập luận |
+| 49 | `db_w4_lo_sent` | `trong_kho` · `W4` | `khong_lo` | H | — | posix | lập luận |
+| 50 | `db_w4_ghi_lai_khi_loi` | `bien_cfgdir` · `W4.cfg_la_tep` | `nguyen_trang` | H | — | posix | lập luận (lần ghi thứ hai ném `FileExistsError` bị nuốt bên trong; B1) |
+| 51 | `db_cat_dich_truoc` | `ghi_loi_theo_pha` · `W4.mkstemp` | `ban_cu` | H | — | mọi | lập luận (cắt đích xảy ra trước pha tiêm) |
+| 52 | `db_w4_dieu_kien_truthy` | `du_lieu_sai_dang` · `N6.falsy` | `falsy` | H | — | mọi | lập luận (base: `bundle.get` ⇒ `0` falsy ⇒ nhánh thiếu) |
+
+Số dòng giữ như các lượt trước để đối chiếu: 8, 9, 13, 13b, 14, 30–32 chuyển P2c; 24–29 chuyển P2b; 5 và 34 bỏ vì W4/W5 nay dùng CHUNG
+`_dich_cred_gws` (một chỗ chuẩn hoá, một chỗ chọn `goc`) — đột biến riêng theo chỗ chỉ còn ở lời gọi (1, 2, 3, 7, 15, 16, 20, 21).
+Dòng 20 và 21: cùng ca, cùng nhãn, cùng (loại, dấu), khác lượt; N9(d) `tu_kiem_sai_luot` đổi ĐÚNG MỘT biến (lượt khai của dòng 20, sang
+`W4.fsync` — lượt đột biến ấy không bao giờ tới vì ca dừng ở `W4.mkstemp`), giữ phép thay và bảng nhận dạng E. Không còn hai đột biến
+chung (ca, lượt, nhãn) ngoài MỘT cặp có chủ ý: 46/47 cùng (`chung_hop_dong_loi`, `require`, `dong_0_1`) vì là hai chiều (thiếu/lặp) của cùng phép đếm `== 1`, mỗi chiều cần đột biến riêng mới biết phép đếm không phải `≥ 1` hay `≤ 1`. 19/42 tách `mau_loi`/`mot_dong_loi`; 15/35/44/45 cùng lượt `W4.thuong` nhưng khác nhãn, theo thứ tự nhãn N5; 1/3/48/49 cùng lượt `W4` của `trong_kho`, khác nhãn; 20/51 cùng lượt `W4.mkstemp`, khác nhãn và khác cơ chế (E/H).
+Phạm vi: mỗi đột biến chỉ chạy CA ĐÍCH của nó (như packet 1); lượt đích là lượt sớm nhất nó làm đỏ trong ca ấy.
+Tổng: **37** đột biến (1–4, 6, 7, 10–12, 15–23, 33, 35–52); E: **5** (17, 18, 20, 21, 41); H: **32**. Nền `posix`: **21** (1–4, 6, 7, 10–12,
+19, 22, 23, 33, 41, 42, 44, 46–50); nền `mọi`: **16** (15–18, 20, 21, 35–40, 43, 45, 51, 52). Tự kiểm bằng phép đo: 9 dòng (4, 6, 12 qua S4, 17, 18, 19, 22,
+36, 41); còn lại lập luận, xác nhận khi chạy bảng trên mã thật (N9(a)). Tự kiểm phân hạng (trong fragment): 3 mục (N9(d)). Phản chứng
+BỘ ĐO (executor chạy trên bản sao fragment, KHÔNG phải mục `_DB`, không vào tổng 37): 6 — `pc_tiem_khong_ghi` (N7), `pc_bo_luot`,
+`pc_bo_ca_moi`, `pc_bo_qua_ngoai_danh_sach`, `pc_bo_qua_khi_ho_tro`, `pc_probe_quyen` (N9(b)); mỗi phép phải cho `run` False với dòng lỗi nêu đúng vế.
+
+## 5. `pham_vi_e`
+
+Không chạm E4, không chạm E5: chỉ sửa mã đường ghi, mọi ca dùng giá trị giả, HOME/cfgdir tạm, đồ giả thay tải Drive (rig chặn cả hằng
+baked), không LIVE, không đẩy Package. Ngoại lệ bundled ở §1 là quyết định của chủ kho cho đúng packet này.
+
+## 6. `luat_dung`
+- Windows: P2a không đổi chốt đích trên nt (§2); nhánh nt của `_dich_cred_gws` chỉ được đo gián tiếp qua các ca `mọi` nền khi fragment
+  chạy trên Windows, không có CI Windows bắt buộc.
+- TOCTOU: không đo (§2, giới hạn khai).
+- Kích thước P2a (ước lượng tĩnh, chưa đo; tính lại 2026-11-19 ở bản 6 sau review lượt 4, theo mật độ packet 1 §0.4 — khung 116/353, `_Rig` 74,
+  thân ca ~6,4 dòng/ca, khai báo `_DB` 32 dòng cho 30 mục — đo lượt 2):
+  `tl_gws.py` +45–55 (M1 POSIX kèm `repr` ~15–19; `_dich_cred_gws` ~8–10; W4 viết lại ~14–16 dòng thêm, thay 9 dòng; W5 ~8–10, thay 8);
+  fragment +399–470 theo hạng mục (khung + `_DU_KIEN` + đếm theo nền + 3 tự kiểm ~125–135; sổ lượt `_LUOT_DU_KIEN` 11 ca/46 lượt, phép thử
+  hardlink có danh sách `winerror`, dòng `BO_QUA`, vế LUOT của tổng kết ~24–32; rig có W4/W5 và bộ quan sát bốn pha có nhật ký ~80–95; 11 hàm ca, 46 lượt, viết dạng bảng
+  lượt kèm nhãn mới `khong_lo`, `dong_0_1`, `falsy` ~130–160 — gộp W4/W5 cùng chủ đề vào một ca để bớt khung hàm; bảng 37 mục ~40–48) cộng dự phòng
+  RIÊNG 10–19 dòng; bundled +1 ⇒ hạng mục cộng **445–526**, kèm dự phòng **455–545 dòng thêm, 3 tệp, điểm giữa ~500** (reviewer lượt 4
+  cộng lại các hạng mục bản 5: 443–524) — dưới trần 550 nhưng biên trên sát (packet 1 với 30 mục `_DB`, 18 ca đo
+  được +448). Năm phản chứng bộ đo chạy trên bản sao, không vào numstat. Trần CƯỠNG CHẾ trên numstat thật (N12 (iii), §6): vượt ⇒ DỪNG
+  trước khi công bố, không cắt ca.
+- `review_class`, lease của ba đường, nền test: đo khi cấp lease trên base thật.
+# CONTEXT — Ngôn ngữ chung của dự án tra-luat
+
+Thuật ngữ chuẩn dùng trong SKILL.md, CHANGELOG, commit message và các phiên làm việc.
+File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết định kiến trúc ở `docs/adr/`
+(cây nguồn dev — r291: KHÔNG nằm trong gói phát hành).
+
+## Điều phối đa phiên
+
+- **Mission Plan** — kế hoạch chuẩn của một mục tiêu lớn, gồm outcome, acceptance, risk, budget và đồ thị Packet.
+  Thay đổi material chỉ có hiệu lực qua Mission Change Request được phê duyệt và một revision mới.
+- **Packet Spec** — hợp đồng đóng băng của một đơn vị công việc tự đủ: objective, acceptance, write set,
+  dependency, executor và environment. Khác **Session Plan**, đây là phạm vi được phép ghi và nghiệm thu.
+- **Session Plan** — trình tự chiến thuật của một phiên để hoàn thành đúng một vai trò trên một Packet/review/land.
+  Có thể đổi trong phiên nếu không làm đổi Packet Spec; việc ngoài spec trở thành successor Packet và phiên mới.
+- **Mission Change Request (MCR)** — yêu cầu có audit để đổi Mission Plan, ghi lý do, tác động, quyết định của
+  người có thẩm quyền và revision bị thay thế. MCR không tự có hiệu lực chỉ vì agent đề xuất.
+- **Executor** — vai trò duy nhất được ghi vào branch/worktree của generation để thực hiện Packet Spec.
+- **Reviewer** — vai trò độc lập, read-only với branch Executor, kiểm Spec và Standards/Security trên exact SHA
+  rồi ghi verdict. Cùng provider chỉ được tính là độc lập khi dùng một phiên khác và assurance thấp hơn.
+- **Model Reviewer Identity** — danh tính provider/model/session đã thực sự đọc diff và tạo verdict; không suy từ
+  tài khoản đăng comment hoặc ghi receipt.
+- **GitHub Submitter Identity** — actor vận chuyển verdict/comment/check lên GitHub; không tự chứng minh actor đó
+  là model reviewer hoặc có quyền approval độc lập.
+- **Review Delivery Receipt** — biên nhận bền neo verdict path/hash, exact reviewed SHA, Model Reviewer
+  Identity, GitHub Submitter Identity và cường độ mỏ neo. Receipt v1 là lịch sử read-only; chỉ v2 đã
+  validate mới đủ cho identity gate mới. _Tránh dùng:_ receipt là required check, submitter là reviewer.
+- **Wall Deadline / Working-state Evidence** — deadline bắt buộc tính theo absolute wall clock; working-state
+  time chỉ là bằng chứng phân biệt process chậm với máy ngủ, không thay deadline và không tự void attempt.
+- **Review Class** — mức assurance/reviewer tối thiểu của một Packet sau khi đối chiếu khai báo với phạm vi thay
+  đổi thật: `routine`, `systemic` hoặc `sensitive`. Mức không biết được xử lý như `sensitive`.
+- **Thin Orchestration** — lớp điều phối tối thiểu tái dùng launcher, packet loop, ba skill và GitHub Issue/PR;
+  chỉ tự động hóa kiểm tra/state transition tất định, còn quyết định tách, đổi thiết kế, land và cấp quyền chặn
+  thuộc human cho tới khi đủ bằng chứng promote. _Tránh dùng:_ orchestrator mới, autopilot.
+- **Review Rescue Checkpoint** — điểm quyết định bắt buộc khi một PR đã hết review budget hoặc chưa hội tụ sau
+  ba vòng code/review; kết quả là tách phần độc lập, revision kế hoạch, fallback đúng assurance hoặc pause.
+- **Stable Slice** — phần thay đổi hữu ích độc lập, đạt acceptance/evidence riêng và không phụ thuộc phần đang có
+  finding; chỉ được tích hợp qua Packet/PR sạch và review trên exact head của chính nó.
+- **Remediation Slice** — phần chưa hội tụ được tách khỏi Stable Slice thành successor Packet/PR, giữ finding IDs
+  và lịch sử để sửa hoặc thiết kế lại. _Tránh dùng:_ phần thừa, phần để sau.
+- **Approver** — người có thẩm quyền chấp nhận exact SHA và điều kiện land; output của agent không tự tạo quyền này.
+- **Land Operator** — người hoặc agent chỉ thực hiện thao tác land đã được Approver ủy quyền bền và có điều kiện.
+  Executor có thể kiêm Land Operator nhưng không nhờ đó trở thành Reviewer hay Approver của code mình.
+- **Merged** — một PR đã được hợp nhất vào nhánh đích của chính PR đó; chưa khẳng định kết quả đã vào canonical.
+- **Integrated** — Packet đã được merge tuần tự vào mission integration branch sau worker gate và review.
+- **Landed** — kết quả đã xuất hiện trên canonical ở exact SHA được duyệt, hậu-merge gate xanh và bookkeeping xong.
+### 8.1 Bootstrap reviewer và receipt thực thi
+
+Hoàn tất bootstrap **trước** khi giao checkout read-only: clone riêng từ remote thật hoặc
+mirror đã kiểm và đặt origin về endpoint thật; chứng minh objects/exact head, tree và phạm vi
+refs đã cấp. Bootstrapper xác minh path/trust trên đúng OS, longpaths nếu đường dẫn Windows
+đòi hỏi, Git config phục vụ gate và toàn bộ tool/env capability trong runtime sẽ chạy.
+Không tự chấp nhận trust, đổi permission hay dùng cờ bypass để làm probe xanh. Permission
+denial là evidence thiếu năng lực; sửa bootstrap bằng quyền đã cấp hoặc trả checkpoint.
+Clone, cài dependency và cấu hình cần thiết kết thúc trước mốc snapshot bàn giao.
+
+Ghi cặp Executor–Reviewer thực tế: provider, execution surface, transport, session/run ID
+và nguồn đo; cấu hình yêu cầu không phải runtime evidence. Theo `ADR-0065`, model và effort
+phục vụ của reviewer là trường ghi nếu đo được, ở mọi Packet, không ngoại lệ: đo được thì ghi
+kèm nguồn, không đo được thì ghi `KHONG_DO_DUOC`. `KHONG_DO_DUOC` ở hai trường này không làm
+assurance thành `CHUA_DAT` và không chặn `landed`. Các mốc vẫn bắt buộc: `exact SHA`,
+`ma_thoat`, `stdout_sha256`, verdict và sandbox mode. Header CLI chỉ chứng minh model/effort
+CLI công bố; không chứng minh mọi request giữ model đó. Thiếu nhận dạng provider, execution
+surface, transport, session/run ID hoặc sandbox thì chưa nhận assurance. ChatGPT Web qua người vận chuyển vẫn chỉ là
+`advisory_review` theo hợp đồng provider, không tự tạo các mức approval ở trên.
+
+Sau run, đối chiếu trạng thái terminal/rc con, launcher rc, lỗi permission, header/model
+evidence và verdict; cùng exact SHA/tree ở đầu/cuối. Output phải ổn định sau khi writer
+kết thúc, ghi path/size/hash và xác minh lại trước bàn giao. Timeout, output dở dang hoặc
+launcher rc=0 nhưng con lỗi không là review hoàn chỉnh. GitHub actor chỉ là submitter (§7).
+Producer và consumer phải cùng trỏ hiện vật của đúng run trong scratch riêng; ghi rõ nguồn
+code/Git và đường dẫn hiện vật, không chọn JSON, diff hay numstat theo cwd ngầm định.
+
+### 8.2 Phạm vi phép đo và checkout read-only
+
+Đặt cache/output ngoài checkout hoặc dùng no-cache, kể cả bytecode Python, Ruff và pytest.
+Snapshot đầu/cuối kiểm tracked, untracked **và ignored**, HEAD/tree, diff/index và nội dung
+hiện vật có thể thay đổi; không chỉ đếm path. Kiểm cả checkout được giao lẫn repo nguồn nếu
+nó nằm trong phạm vi quan sát. Snapshot sạch chỉ chứng minh không có delta quan sát được
+ở hai mốc; nó không chứng minh chưa từng ghi rồi hoàn nguyên trong cả lịch sử run. Ghi rõ
+giới hạn đó và sandbox mode thực tế; prompt read-only không thay cơ chế sandbox.
+
+Tách **Ruff pin/probe contract** (workflow cài đúng pin và probe version đúng cấu trúc) khỏi
+**bare Ruff lint** (chạy lint thật với config/rules/path cụ thể). Mỗi phép có command, rc,
+scope, tool version và output riêng. Contract xanh không chứng minh lint xanh; bare lint
+chưa chạy ghi `not_run`, lỗi quyền ghi `not_measured`, đỏ giữ `failed` cùng delta baseline
+nếu tiêu chí cho phép nợ nền. Không dùng nhãn chung “Ruff passed” cho kết quả contract.
+
+### 8.3 Lịch sử lớp finding và giới hạn nghiệm thu
+
+Giữ stable slug theo lớp nguyên nhân/đơn vị nghĩa qua các lượt; một finding tách thành nhiều
+biểu hiện vẫn phải nối lớp cũ. Reviewer tự dựng thước kiểm acceptance và soi cả câu cũ trái
+tiêu chí mới, không lấy danh sách Executor làm trần. Bảng đối chiếu ghi nguồn lượt/SHA,
+phạm vi đã đo, kết quả dương/âm và phần chưa đo; tổng suite hay số dòng khớp không đóng lớp.
+Đổi Packet hoặc baseline không reset lịch sử, budget hay receipt đã giao (§3.2.1/§12).
+Reviewer khái quát mỗi biểu hiện thành lớp và quét mọi biểu hiện cùng lớp trên candidate trước khi báo theo ADR-0060 M2; không báo từng lỗi riêng lẻ.
+
+**Bảng lớp của mỗi lượt.** Mỗi finding có đúng một slug lớp nguyên nhân; mỗi lớp ghi
+các finding IDs/biểu hiện, mức nghiêm trọng cao nhất còn mở, nguồn lượt/SHA, cách vá
+chung và phép kiểm đóng lớp. Nếu cần vá riêng từng biểu hiện, ghi lý do cơ chế không
+cho một thay đổi chung; gợi ý reviewer vẫn theo §7/§8, không trở thành mệnh lệnh.
+Đếm số lớp và số biểu hiện riêng. Tách/gộp lớp cần bảng nối slug nguồn, lý do và phép
+## 13. Hợp đồng ba skill
+
+### `work-packet` — model-invoked
+
+Trigger khi agent nhận Issue có lease hợp lệ. Trình tự bắt buộc: đọc protocol → preflight spec/lease/worktree → heartbeat → chỉ sửa effective write set → worker gate → handoff → review offline → đẩy → PR theo ADR-0060. Hoàn tất khi SHA được approve đã đẩy và PR mở ở trạng thái `draft`; run kết thúc trước đó thì run kế nhiệm làm nốt.
+Quyết định phiên tự đưa thay cho một câu hỏi trước đây (nợ P3, huỷ lượt vì hạ tầng, xét lại cách làm…) ghi vào sổ quyết định uỷ quyền theo `ADR-0067`.
+Skill từ chối làm việc nếu lease/generation/spec hash sai, cần LIVE, closure thiếu hoặc security path chưa duyệt.
+Adapter chỉ trỏ các mục protocol và mô tả cú pháp/công cụ riêng của nền; không sao chép schema, stop condition hay
+completion criteria. Phiên `work-packet` không chuyển vai sang reviewer hoặc land trong cùng run.
+
+### `cross-review` — model-invoked
+
+Trigger khi Packet vào `reviewing` với SHA ứng viên cục bộ theo ADR-0060. Đọc protocol/spec/diff/gate evidence; review hai trục `Spec` và `Standards/Security`; không sửa file; xuất verdict `approve | changes_requested | blocked` có severity/evidence. Finding nên kèm bằng chứng chạy được và patch-as-hint theo §8. Ghi verdict trên Packet Issue trước push rồi chép sang PR sau push.
+Reviewer dùng checkout/context độc lập, ghi exact `reviewed_sha`; nếu cùng provider thì phải là phiên mới và mang
+assurance theo §8 khi evidence đủ, không tự nhận `same_provider_approved` chỉ từ cấu hình
+cùng provider và không giả thành cross-provider.
+
+Trong bootstrap trước W1-S1, adapter hiện tại tiếp tục dùng prepared sandbox ngoài kho, closed read scope và bản
+sao writable chỉ để chạy phản chứng mà không chạm kho thật; mọi transport chưa chứng minh phải khai caveat. W1-S1
+chỉ cập nhật adapter mỏng sau khi prompt contract và receipt/state integration đã land; không được viết trước cú
+pháp cho capability chưa tồn tại.
+
+### `land-packets` — user-invoked client
+
+Không tự trigger. Mặc định gọi `land prepare`: freeze mission, kiểm packet/review/override, rebase integration,
+tạo release metadata và chạy land gate. `--apply` gửi mission/head SHA tới cùng operation `land apply` mà
+GitHub/Android dùng; skill không chứa quyền hay logic merge riêng. Deploy là lệnh riêng và cần quyền LIVE.
+Phiên land chỉ nhận authorization bền cho exact SHA. Với packet không chạm E4, E5, khi cơ chế tự merge của `ADR-0067`
+đã có hiệu lực, authorization ấy là mục sổ `tu_merge` của ADR ấy: neo exact SHA, mang đủ các ràng buộc ở §13.1, kèm review
+approve, audit uỷ quyền đạt và đủ điều kiện `ADR-0060`. Adapter không tự cấp approval; Land Operator ghi merge,
+post-merge và bookkeeping evidence trước khi chuyển `landed`/`complete`.
+
+# tra-luat — Claude Code Project (dev-side, KHÔNG vào zip deploy)
+
+## Vai trò
+Dev/operator cho skill tra-luat. Không tự ý ghi Drive/NLM/registry khi người dùng chưa yêu cầu rõ.
+Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package — không mang file này).
+
+## Nguồn sự thật
+- `scripts/tl.py` là runtime chính; `VERSION` + hằng `VERSION` trong tl.py + header `SKILL.md` phải khớp nhau
+  (selftest có guard `skill_md_version_matches_VERSION`).
+- `references/API_CONTRACT.md` là hợp đồng webapp (EXPECT_VERSION trong tl.py phải khớp).
+- `SKILL.md` là lõi skill — sửa phải nêu lý do + đổi cả vocab/flag nếu thêm cờ mới.
+- Kiến trúc ghi/đọc: GHI registry CHỈ qua GAS webapp (LockService + RMW nguyên tử); Drive đọc/push qua gws CLI
+  (PRIMARY từ v1.29.0). KHÔNG thêm đường ghi thứ ba (Drive MCP/Sheets MCP).
+
+## Quy trình sửa code
+1. `git status` / `git log --oneline -5`
+2. Sửa tối thiểu, giữ idiom comment "vX.Y.Z (bằng chứng) — fix"
+3. `python -m ruff check --select F scripts/tl.py` — tiêu chí là **DELTA so master = 0**, KHÔNG phải "0 tuyệt đối".
+   Nền ĐO 29-07-2026 (v1.35.60): tl.py **12 F821 + 0 F401**; tl_selftest **3914 F821 + 1 F401**.
+   12 F821 (10 tên: `build_parser` `load_creds` `norm_sohieu` `_active_profile` `_cache_file` `_dang_bare_key`
+   `_entry_drive_id` `_reassemble_parts` `_sha256_file` `_sohieu_key_entry`) là BY DESIGN: stub-farm gán qua
+   `globals()[tên]` từ bảng `_STUB_MAP` nên ruff không thấy tĩnh — đã kiểm HÀNH VI: cả 10 resolve sau import,
+   không tên nào bị gọi trước lúc bảng stub chạy (đường cứu hộ `_selfheal_module` không có caller mức module).
+   Mốc trôi: v1.34.14 = 0 F821 → v1.34.15 (`bfd18ea`, I10 nén 488 stub → `_STUB_MAP` + factory) = 217 → I11 = 11 → r201 = 12.
+   **F401 = 0 nhờ `# noqa` CÓ CHỦ ĐÍCH, KHÔNG phải vì xoá import** (r224): `base64` `datetime` `hashlib`
+   `unicodedata` `zipfile` ở đầu tl.py là MẶT NAMESPACE dùng chung — 1646 hàm tl_core được re-home
+   `__globals__` về tl.py nên tra tên toàn cục ở ĐÂY, kể cả khi tệp gốc đã tự import (profile_mgmt.py có
+   `import datetime` riêng mà vẫn NameError khi tl.py thiếu). Số hàm re-home tra từng tên: unicodedata 19 ·
+   base64 9 · hashlib 3 · datetime 2 · zipfile 0. **ĐỪNG "dọn import thừa" ở dòng đó** — gate đã ĐỎ 2 lượt vì việc này.
+   Ruff KHÔNG nằm trong gate ⇒ ngưỡng này do người giữ; thấy số lạ thì đo lại master TRƯỚC khi nghi bản vá của mình.
+4. `python scripts/tl.py --selftest` (phải N/N, thêm test rXX_ cho mỗi fix)
+5. Output DÀI (selftest N case, audit/golden JSON, gate logs) → giao agent `tl-auditor` (read-only) tiêu hoá,
+   phiên chính chỉ nhận kết luận — giữ context sạch (G5 §11 kế hoạch guard-va-boc-tl-core).
+6. `git diff` → CHANGELOG.md (mục ★ vX.Y.Z) → commit
+7. Deploy — xem "## Quy ước deploy" bên dưới. KHÔNG tự chạy khi user chưa duyệt.
+   Windows: `.\scripts\deploy-package.ps1 -Pull -Push` · Linux/Cowork: `./scripts/deploy-package.sh --push`.
+   (Cả hai TRONG repo, cùng quy trình, cùng chốt. `upload-skill-to-Package.ps1/.cmd` đã bỏ từ v1.35.83.)
+
+## Bài học đắt giá (đã trả giá, không lặp lại)
+- **Đối chiếu nhánh/patch ngoài: BẮT BUỘC test HÀNH VI 2 CHIỀU** (fixture họ chạy trên ta + phản chứng bơm vào
+---
+name: tra-luat
+description: >-
+  Lấy và tra cứu chính xác từng câu chữ văn bản pháp luật và văn bản của Đảng. Dùng khi
+  cần: tra nguyên văn Điều/Khoản/Điểm/Mục (đúng từng chữ, không tóm tắt); lấy toàn văn từ
+  AI Tra Cứu Luật (MCP), vbpl.vn, Công báo, cổng .gov.vn/.chinhphu.vn, dangcongsan.vn, Thư
+  viện Pháp luật, luatvietnam.vn, NotebookLM, hoặc file tải lên (docx/doc/pdf/html/txt);
+  bóc tách cấu trúc kiểu Điều (Hiến pháp, Luật, Bộ luật, Nghị định, Thông tư, Nghị quyết)
+  và kiểu Mục (văn kiện, Nghị quyết/Kết luận/Chỉ thị của Đảng); chuẩn hóa JSON; sắp xếp tự
+  động theo 45 chủ đề pháp điển (đặt tên chuẩn, move folder, registry/manifest — lệnh
+  sapxep); đẩy Google Drive rồi nạp NotebookLM. Kích hoạt khi nói "tra Điều X của Luật Y",
+  "lấy nguyên văn Mục II Nghị quyết Z", "cho tôi toàn văn Điều...", "lấy văn bản này về",
+  "sắp xếp file này", "bóc tách văn kiện Đảng". Trả lời điều khoản nguyên văn từ nguồn đã
+  xác minh, KHÔNG dùng RAG để sinh. Thao tác Drive qua Apps Script webapp, KHÔNG dùng
+  Drive MCP.
+---
+
+# tra-luat — LÕI VẬN HÀNH (v1.36.70 — KERNEL)
+> Kernel = bất biến + cổng + con trỏ. Chi tiết sống ở `references/` (danh mục cuối file).
+
+> Đây là LÕI MỆNH LỆNH. Ba tài liệu vận hành (đọc khi cần, KHÔNG nạp toàn bộ vào context):
+> - **`references/API_CONTRACT.md`** — tham số + khóa response MỌI action webapp (target `2.21.2q`). **Tra trước khi gọi action — KHÔNG đoán tham số.**
+> - **`references/RUNBOOK.md`** — trình tự khởi động + cổng vận hành (đánh số, tất định).
+> - **`references/DOCTRINE_APPENDIX.md`** — lịch sử + biện luận đầy đủ (changelog v1.x→v1.15.7). Tra khi cần BỐI CẢNH/lý do.
+>
+> Khi mâu thuẫn: LÕI + API_CONTRACT + RUNBOOK **thắng** phụ lục.
+
+## Phương pháp làm việc: thiết kế kỹ, triển khai chủ động
+
+- **WM-01 — Nhận diện giai đoạn.** Khi nghiên cứu hoặc thiết kế, làm rõ yêu cầu, mục tiêu, phạm vi, đánh đổi và tiêu chí nghiệm thu. Khi triển khai phương án đã chốt, chủ động thực hiện trong phạm vi quyền đã cấp. Một tác vụ có thể chuyển giữa hai giai đoạn.
+- **WM-02 — Phân biệt làm rõ với xin quyền.** Làm rõ để xác định đúng điều cần xây dựng; xin quyền khi hành động cụ thể chưa được cho phép. Đọc tài liệu, bằng chứng và quyết định hiện có trước khi hỏi; không xin lại quyền còn hiệu lực, đúng phạm vi và đúng điều kiện.
+- **WM-03 — Chủ động với việc thông lệ.** Tự quyết việc quen thuộc, tác động nhỏ và lựa chọn kỹ thuật nằm trong phương án được giao khi không làm đổi hợp đồng hoặc vượt quyền. Tính quen thuộc, khả năng đảo ngược và sự im lặng không tự tạo quyền.
+- **WM-04 — Làm rõ thay đổi có ảnh hưởng.** Yêu cầu mới chưa xác định, thay đổi giao thức/quy trình, tiêu chí nghiệm thu, quyền hạn hoặc tác động đáng kể phải được làm rõ và chốt trước phần thực hiện phụ thuộc; tiếp tục phần độc lập đã được phép. Làm theo chỉ thị cụ thể đã đủ rõ, không hỏi lại chỉ vì đó là yêu cầu mới.
+- **WM-05 — Hỏi có chuẩn bị.** Gộp các điểm quyết định liên quan; nêu điều đã kiểm tra, vấn đề còn thiếu, phương án khuyến nghị và ảnh hưởng. Chỉ hỏi phần chưa được giải quyết; không dùng câu hỏi chung để đẩy lựa chọn vận hành thông lệ cho người dùng.
+- **WM-06 — Thực hiện gọn và có bằng chứng.** Dùng công cụ hiện có, chọn cách đơn giản đáp ứng đủ yêu cầu, sửa đúng phạm vi và kiểm chứng hành vi. Lặp trong giới hạn đã chốt; không bỏ gate, giả kết quả hoặc nới ngân sách để hoàn tất. Chưa đủ bằng chứng về quyền, điều kiện bắt buộc hoặc tính tương đương nghiệm thu thì dừng phần phụ thuộc, đọc hướng dẫn chi tiết và tiếp tục phần độc lập đã được phép.
+
+Đọc **references/WORKING_METHOD.md** khi lập hoặc sửa kế hoạch, giao thức, quy trình; khi phân vân có cần hỏi; hoặc khi phát sinh thay đổi có ảnh hưởng trong lúc triển khai. Hướng dẫn này bổ sung cách phối hợp; các quy định chuyên biệt về legal safety, authority, approval, protocol và release tiếp tục áp dụng.
+
+## DETERMINISTIC WORKFLOW GATES — tool inventory / route-task / dry-run / readback
+
+# Kế hoạch thi công đa provider — tra-luat
+
+> **Trạng thái:** Active transition plan
+>
+> Tài liệu này không cấp authority. Authority nằm trong Packet Spec,
+> GitHub facts và verified receipts.
+>
+> Các provider/bề mặt hiện được sử dụng:
+>
+> - Google Antigravity;
+> - ChatGPT Pro qua Web;
+> - Claude Code và Codex khi quota khả dụng;
+> - Human Auditor.
+
+## 1. Mục tiêu
+
+Duy trì tiến độ phát triển khi một hoặc nhiều provider không khả dụng, nhưng:
+
+- không tạo orchestrator mới;
+- không hạ chuẩn exact-SHA review;
+- không khai sai provider hoặc transport;
+- không cho output model tự tạo quyền ghi;
+- không làm trạng thái động trôi vào tài liệu kế hoạch tĩnh;
+- không dùng provider tạm thời để tự hợp thức hóa thay đổi sensitive.
+
+## 2. Nhận dạng provider và execution surface
+
+| Công cụ/bề mặt | Provider | Execution surface | Transport |
+|---|---|---|---|
+| Google Antigravity | `google_antigravity` | `antigravity` | machine/local |
+137:| N5 | `nguyen_tu` (mọi). Lượt theo thứ tự `W4.thuong`, `W5.thuong` (`cfgdir` ngoài kho có sẵn `credentials.json` cũ), `W5.hardlink` (`credentials.json` là hardlink của H = `CU`; trên Windows cần volume hỗ trợ hardlink, không có thì lượt ấy `bỏ_qua` có lý do) | Nhãn theo thứ tự: [`nguyen_tu`] đúng MỘT `os.replace` có đích `credentials.json`, nguồn cùng thư mục và là đường `mkstemp` trả; [`fsync`] trước `replace` ấy có `os.fsync(fd)` với `fd` chính là fd `mkstemp` của nguồn; [`quyen`] (chỉ POSIX) nguồn `0600` lúc thay, đích `0600` sau cùng; [`byte`] tệp đúng byte, W4 rc 0 và in `✓ gws cred → …`; `W5.hardlink`: [`ban_kia_giu`] H còn `CU`. | `db_w4_khong_nguyen_tu`, `db_w5_khong_nguyen_tu` (về `makedirs` + `open("wb")` + `chmod`) ⇒ `W4.thuong`/`W5.thuong`, `nguyen_tu`. `db_bo_fsync` (thân writer bỏ `os.fsync`) ⇒ `W4.thuong`, `fsync`. `db_sai_quyen` (thân writer `chmod(tmp, 0o644)`) ⇒ `W4.thuong`, `quyen`. `db_w4_sai_byte` (W4 ghi `data + b"\n"`) ⇒ `W4.thuong`, `byte`. `db_ghi_xuyen_hardlink` (writer `open(path, "r+b")` ghi đè đích đang có trước `replace`; số `replace` vẫn 1, byte cuối vẫn đúng) ⇒ `W5.hardlink`, `ban_kia_giu`. |
+
+exec
+/bin/bash -lc "python3 -IB - <<'PY'
+from pathlib import Path
+from collections import Counter
+from types import SimpleNamespace
+import errno, os, sys
+p=Path('ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md')
+s=p.read_text()
+old=p.with_name(p.stem+'-ban5.md').read_text()
+def block(text,a,b): return text.split(a,1)[1].split(b,1)[0]
+assert block(s,'| N5 |','| N9 |')==block(old,'| N5 |','| N9 |')
+assert block(s,'(c) MỘT dòng','(d) tự kiểm')==block(old,'(c) MỘT dòng','(d) tự kiểm')
+rows=[r.split('|') for r in block(s,'### 4b.','## 5.').splitlines() if r.startswith('| ') and r.split('|')[1].strip().isdigit()]
+print(len(rows),Counter(r[5].strip()[0] for r in rows),Counter(r[7].strip().split()[0] for r in rows))
+assert len(rows)==37 and len({r[1] for r in rows})==37
+def state(platform,error,bug=False):
+    win=getattr(error,'winerror',None)
+    if error is None: return 'đạt'
+    if platform=='nt' and isinstance(error,OSError) and (win is not None if bug else win in {1,50}): return 'bỏ_qua'
+    return 'đỏ'
+def err(code):
+    e=PermissionError(errno.EACCES) if code==5 else OSError()
+    e.winerror=code
+    return e
+for platform in ('posix','nt','other'):
+    for e in (None,PermissionError(errno.EACCES),FileNotFoundError(errno.ENOENT),ValueError(),*(err(c) for c in (1,50,5,3,87))):
+        assert state(platform,e)==('đạt' if e is None else 'bỏ_qua' if platform=='nt' and getattr(e,'winerror',None) in (1,50) else 'đỏ')
+plain=PermissionError(errno.EACCES)
+assert not hasattr(plain,'winerror')
+assert state('nt',plain)==state('nt',plain,True)=='đỏ'
+assert state('nt',err(5))=='đỏ' and state('nt',err(5),True)=='bỏ_qua'
+def totals(platform,hardlink):
+    w,t,v=(0,0,0) if platform=='posix' else (7,27,21)
+    u=h=int(hardlink=='bỏ_qua')
+    b,y,f=11-w,46-u-t,37-h-v
+    assert 11==b+w and 46==y+u+t and 37==f+h+v and h==u<=1
+    return (b,y,f)
+for platform,hardlink in [('posix','đạt'),('nt','đạt'),('nt','bỏ_qua')]:
+    print(platform,hardlink,totals(platform,hardlink))
+print('false skip', totals('nt',state('nt',err(5),True)))
+lo,hi=map(sum,zip((125,24,80,130,40),(135,32,95,160,48)))
+assert (lo,hi)==(399,470)
+assert (lo+45+1+10,hi+55+1+19)==(455,545)
+print(sys.version.split()[0],os.name,'RAM assertions passed')
+PY
+git --no-optional-locks status --short
+" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv433p2a/wt
+ succeeded in 0ms:
+37 Counter({'H': 32, 'E': 5}) Counter({'posix': 21, 'mọi': 16})
+posix đạt (11, 46, 37)
+nt đạt (4, 19, 16)
+nt bỏ_qua (4, 18, 15)
+false skip (4, 18, 15)
+Traceback (most recent call last):
+  File "<stdin>", line 39, in <module>
+ValueError: too many values to unpack (expected 2)
+?? ops/reviews/wp433-spec-r1/
+?? ops/reviews/wp433p2a-spec/
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban1.md
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban2.md
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban3.md
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1-ban5.md
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md
+?? ops/specs/GWS-CRED-DICH-NGOAI-KHO-r1-truoc-tach.md
+?? ops/specs/NLM-GWS-DICH-NGOAI-KHO-r1.md
+
+exec
+/bin/bash -lc "python3 -IB - <<'PY'
+import errno, os, sys
+from itertools import product
+from pathlib import Path
+from collections import Counter
+p=Path('ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md')
+s=p.read_text()
+old=p.with_name(p.stem+'-ban5.md').read_text()
+def section(text,start,end): return text.split(start,1)[1].split(end,1)[0]
+assert section(s,'## 4.','| N9 |')==section(old,'## 4.','| N9 |')
+assert section(s,'(c) MỘT dòng','(d) tự kiểm')==section(old,'(c) MỘT dòng','(d) tự kiểm')
+assert section(s,'### 4b.','Tổng:')==section(old,'### 4b.','Tổng:')
+rows=[r.split('|') for r in section(s,'### 4b.','## 5.').splitlines() if r.startswith('| ') and r.split('|')[1].strip().isdigit()]
+assert len(rows)==len({r[1] for r in rows})==37
+assert Counter(r[5].strip()[0] for r in rows)=={'H':32,'E':5}
+assert Counter(r[7].strip().split()[0] for r in rows)=={'posix':21,'mọi':16}
+def decide(platform,error,broken=False):
+    if error is None: return 'đạt'
+    win=getattr(error,'winerror',None)
+    if platform=='nt' and isinstance(error,OSError) and (win is not None if broken else win in {1,50}):
+        return 'bỏ_qua'
+    return 'đỏ'
+def winerr(code, error=None):
+    error=OSError() if error is None else error
+    error.winerror=code
+    return error
+plain=PermissionError(errno.EACCES)
+denied=winerr(5,PermissionError(errno.EACCES))
+assert getattr(plain,'winerror',None) is None
+for plat in ('posix','nt','other'):
+    assert decide(plat,None)=='đạt'
+    for err in (plain,denied,winerr(3),winerr(87),FileNotFoundError(errno.ENOENT),ValueError()):
+        assert decide(plat,err)=='đỏ'
+    for code in (1,50):
+        assert decide(plat,winerr(code))==('bỏ_qua' if plat=='nt' else 'đỏ')
+assert decide('nt',None,True)=='đạt'
+assert decide('nt',plain,True)=='đỏ'
+assert decide('nt',denied,True)=='bỏ_qua'
+for plat,skip,expected in [('posix',0,(11,46,37)),('nt',0,(4,19,16)),('nt',1,(4,18,15))]:
+    w,t,v=(0,0,0) if plat=='posix' else (7,27,21)
+    d=0
+    u=h=skip
+    b,y,f=expected
+    assert d==0 and 11==b+w and 46==y+u+t and 37==f+h+v and h==u<=1
+lo,hi=map(sum,((125,24,80,130,40),(135,32,95,160,48)))
+assert (lo,hi)==(399,470)
+assert (lo+45+1,hi+55+1)==(445,526)
+assert (lo+45+1+10,hi+55+1+19)==(455,545)
+print(sys.version.split()[0], os.name, 'RAM assertions passed')
+PY" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv433p2a/wt
+ succeeded in 0ms:
+3.13.18 posix RAM assertions passed
+
+codex
+## Review độc lập lượt 5 · P2a · Issue #433
+
+Đối chiếu bản hiện hành SHA-256 `0560b8bfe8bbddec3a34f7a9f510115becc026193d29a3db5f67de0ff97716d1` với `-ban5.md` (`567af28f…`). HEAD nền `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`.
+
+### Finding lượt 4
+
+| Finding | Trạng thái | Bằng chứng |
+|---|---|---|
+| P2 · N5/N9(b) · Phân loại lỗi probe hardlink | **Đóng** | Quy tắc mới chỉ cho `bỏ_qua` trên `nt` với `OSError` có `winerror` thuộc `{1, 50}`. Các lỗi khác làm lượt `đỏ`. Cố định `nt` cho riêng bộ phân loại ở cả đối chứng và phản chứng, `pc_probe_quyen` chỉ đổi kết quả probe từ thành công sang `PermissionError(EACCES)` và làm đỏ đúng vế probe. Phép này bắt được lỗi chấp nhận mọi `OSError`. |
+| P3 · §8 · Cộng hạng mục | **Đóng** | Năm khoản fragment cộng **399–470**. Thêm `tl_gws.py` **45–55** và bundled **1** thành **445–526**. Cộng dự phòng riêng **10–19** thành **455–545**, điểm giữa **500**. |
+
+N9(c) giữ nguyên và cân bằng. Bộ `(ca chạy, lượt chạy, đột biến chạy)` lần lượt là `(11,46,37)` trên POSIX, `(4,19,16)` trên `nt` khi probe đạt và `(4,18,15)` khi được phép bỏ qua. §4b vẫn có **37 đột biến**, gồm **5 E / 32 H**, **21 `posix` / 16 `mọi`**. Diff giữ nguyên nhãn và thứ tự lượt, kể cả đích của 37 là `W5.hardlink → ban_kia_giu`.
+
+### Finding mới
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|
+| **P2 · N9(b), `pc_probe_quyen`** | `PermissionError(errno.EACCES)` trong mô hình Linux thiếu `winerror`. Bộ phân loại sai chấp nhận mọi `OSError` có `winerror` khác `None` vẫn làm đỏ phản chứng hiện tại và vẫn phân loại đúng probe thành công. Khi mô phỏng lỗi quyền có `winerror=5`, bộ phân loại sai cho cả `W5.hardlink` và đột biến 37 `bỏ_qua`. Các đẳng thức N9(c) vẫn cân bằng với `u=h=1`, nên không bắt được lỗi này. | “Trong `pc_probe_quyen`, cố định nền `nt` cho riêng bộ phân loại ở cả đối chứng và phản chứng. Chỉ thay kết quả probe thành `PermissionError` có `errno=EACCES` và `winerror=5`. Yêu cầu `W5.hardlink` `đỏ` với chẩn đoán probe chứa mã 5, đột biến 37 không được đếm `bỏ_qua`, và `run=False`.” |
+| **P3 · §8, dòng 249** | §8 ghi “Năm phản chứng bộ đo” trong khi §4b liệt kê sáu, gồm `pc_probe_quyen`. | “Sáu phản chứng bộ đo chạy trên bản sao fragment, ngoài numstat của packet.” |
+
+Đối chiếu diff và mô phỏng bằng `python3 -IB` trên Linux, Python 3.13.18. Lượt đầu lỗi ở phép cộng của harness, lượt chạy lại thoát **0** và xác nhận các phép thử trên. Mô phỏng chạy trong RAM, không ghi tệp hay gọi mạng. Windows thật, fragment triển khai và gate đầy đủ `not_run`. Reviewer `openai_codex` qua API, transport máy. Model và effort phục vụ chưa đo được.
+
+KET_LUAN: request_changes
+tokens used
+39,697
+## Review độc lập lượt 5 · P2a · Issue #433
+
+Đối chiếu bản hiện hành SHA-256 `0560b8bfe8bbddec3a34f7a9f510115becc026193d29a3db5f67de0ff97716d1` với `-ban5.md` (`567af28f…`). HEAD nền `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`.
+
+### Finding lượt 4
+
+| Finding | Trạng thái | Bằng chứng |
+|---|---|---|
+| P2 · N5/N9(b) · Phân loại lỗi probe hardlink | **Đóng** | Quy tắc mới chỉ cho `bỏ_qua` trên `nt` với `OSError` có `winerror` thuộc `{1, 50}`. Các lỗi khác làm lượt `đỏ`. Cố định `nt` cho riêng bộ phân loại ở cả đối chứng và phản chứng, `pc_probe_quyen` chỉ đổi kết quả probe từ thành công sang `PermissionError(EACCES)` và làm đỏ đúng vế probe. Phép này bắt được lỗi chấp nhận mọi `OSError`. |
+| P3 · §8 · Cộng hạng mục | **Đóng** | Năm khoản fragment cộng **399–470**. Thêm `tl_gws.py` **45–55** và bundled **1** thành **445–526**. Cộng dự phòng riêng **10–19** thành **455–545**, điểm giữa **500**. |
+
+N9(c) giữ nguyên và cân bằng. Bộ `(ca chạy, lượt chạy, đột biến chạy)` lần lượt là `(11,46,37)` trên POSIX, `(4,19,16)` trên `nt` khi probe đạt và `(4,18,15)` khi được phép bỏ qua. §4b vẫn có **37 đột biến**, gồm **5 E / 32 H**, **21 `posix` / 16 `mọi`**. Diff giữ nguyên nhãn và thứ tự lượt, kể cả đích của 37 là `W5.hardlink → ban_kia_giu`.
+
+### Finding mới
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|
+| **P2 · N9(b), `pc_probe_quyen`** | `PermissionError(errno.EACCES)` trong mô hình Linux thiếu `winerror`. Bộ phân loại sai chấp nhận mọi `OSError` có `winerror` khác `None` vẫn làm đỏ phản chứng hiện tại và vẫn phân loại đúng probe thành công. Khi mô phỏng lỗi quyền có `winerror=5`, bộ phân loại sai cho cả `W5.hardlink` và đột biến 37 `bỏ_qua`. Các đẳng thức N9(c) vẫn cân bằng với `u=h=1`, nên không bắt được lỗi này. | “Trong `pc_probe_quyen`, cố định nền `nt` cho riêng bộ phân loại ở cả đối chứng và phản chứng. Chỉ thay kết quả probe thành `PermissionError` có `errno=EACCES` và `winerror=5`. Yêu cầu `W5.hardlink` `đỏ` với chẩn đoán probe chứa mã 5, đột biến 37 không được đếm `bỏ_qua`, và `run=False`.” |
+| **P3 · §8, dòng 249** | §8 ghi “Năm phản chứng bộ đo” trong khi §4b liệt kê sáu, gồm `pc_probe_quyen`. | “Sáu phản chứng bộ đo chạy trên bản sao fragment, ngoài numstat của packet.” |
+
+Đối chiếu diff và mô phỏng bằng `python3 -IB` trên Linux, Python 3.13.18. Lượt đầu lỗi ở phép cộng của harness, lượt chạy lại thoát **0** và xác nhận các phép thử trên. Mô phỏng chạy trong RAM, không ghi tệp hay gọi mạng. Windows thật, fragment triển khai và gate đầy đủ `not_run`. Reviewer `openai_codex` qua API, transport máy. Model và effort phục vụ chưa đo được.
+
+KET_LUAN: request_changes
+rc=0

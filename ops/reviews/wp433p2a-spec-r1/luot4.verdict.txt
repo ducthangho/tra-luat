@@ -1,0 +1,60 @@
+## Review độc lập lượt 4 · P2a · Issue #433
+
+Còn **1 P2** ở điều kiện bỏ qua hardlink. Cả bảy đột biến mới cho đúng lượt và nhãn đỏ đầu tiên trong mô hình.
+
+Review bản chưa commit có SHA-256 `567af28fc5eb3c7f065b854f5ea31cdaaa61dad39c71146c213a4022a59d8ab7`, đối chiếu bản 3 `2e6cd1dcf2e106ddd5c6cf891bb70570aed1d3440511880d683d30a5c67cb66d`. HEAD nền `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. Reviewer `openai_codex`, Codex qua API, transport máy. Model và effort phục vụ chưa đo được.
+
+### Finding lượt 3
+
+| Finding | Trạng thái |
+|---|---|
+| P2 · N4b/N6 · Phạm vi đếm writer | **Đóng.** |
+| P2 · §4b dòng 41 · Phân hạng theo locale | **Đóng.** |
+| P2 · N9(b) · Sổ lượt và điều kiện bỏ qua | **Chưa đóng hết.** Sổ lượt và các tổng đã đúng. Điều kiện xác nhận volume thiếu hỗ trợ hardlink còn hở. |
+| P2 · N1/N4b/N7/N8 · Phép đỏ độc lập | **Đóng.** |
+| P3 · M2/N6 · `gws_cred` falsy | **Đóng.** |
+
+**Sổ lượt.** Theo cột nền §4, `posix` có 7 ca với `2+9+6+2+2+4+2 = 27` lượt. `mọi` có 4 ca với `4+3+3+9 = 19` lượt. Tổng bản 4 là **11 ca, 46 lượt**. Bản 3 có **45 lượt**, vì chưa có `N6.falsy`. Lượt `goc` chứa hai lời gọi helper và vẫn chỉ là một lượt.
+
+Các đẳng thức N9(c) nhất quán. `(b,y,f)` lần lượt là `(11,46,37)` trên POSIX, `(4,19,16)` trên nền khác có hardlink và `(4,18,15)` khi lượt hardlink được phép bỏ qua. Trong trường hợp cuối, `d=0` vì ca vẫn chạy hai lượt thường, còn `u=h=1` vì đúng một lượt và đột biến 37 đi cùng nhau.
+
+### Đột biến 46–52
+
+Chạy `python3 -IB` trên Linux, Python 3.13.18. Hai lần chạy xác nhận thoát rc 0. Mô hình lấy thân `cmd_bootstrap`, `_safe_exc` và writer từ Git blob của base, thay phần W4 dự kiến và mô phỏng hệ tệp trong RAM vì sandbox chỉ đọc. Phép 50 dùng lỗi thật từ `makedirs('/proc/version', exist_ok=True)`, nhận `FileExistsError` với `errno.EEXIST`. Một lần dựng harness trước đó thoát rc 1 do lỗi của harness. Candidate, fragment hoàn chỉnh và gate đầy đủ đều `not_run`.
+
+| ID | Lượt → nhãn đỏ đầu tiên | Bằng chứng |
+|---|---|---|
+| 46 | `require → dong_0_1` | `W4.trong_kho` đạt. Rc 4 giữ nguyên, dòng §0.1 xuất hiện 0 lần. |
+| 47 | `require → dong_0_1` | `W4.trong_kho` đạt. Rc 4 giữ nguyên, dòng §0.1 xuất hiện 2 lần. |
+| 48 | `W4 → agent_creds` | Rc và stderr giữ nguyên, có 2 dòng trạng thái agent. |
+| 49 | `W4 → khong_lo` | Fixture có `token`. W6 chạy trước và dữ liệu gửi writer W6 không chứa SENT. Dòng stdout được chèn mới làm lộ SENT, các nhãn trước vẫn đạt. |
+| 50 | `W4.cfg_la_tep → nguyen_trang` | Cả hai lần gọi writer GWS dừng ở `makedirs`. Hợp đồng lỗi giữ nguyên, có 2 lần gọi writer GWS và 0 `mkstemp` GWS. |
+| 51 | `W4.mkstemp → ban_cu` | W6 gọi cùng writer trước và hoàn tất. GWS tiêm đúng một lần, hợp đồng lỗi giữ nguyên, byte đích đổi từ `CU` thành rỗng. |
+| 52 | `N6.falsy → falsy` | `5` và surrogate qua đúng nhánh kiểm tra. Với `0`, điều kiện truthy của base in cảnh báo thiếu và trả rc 1, nên sai vế stderr. |
+
+Cặp 46/47 chung đích hợp lý vì kiểm hai biên của `== 1`. Đếm trực tiếp §4b được **37 mục, 5 E, 32 H, 21 `posix`, 16 `mọi`**, tương ứng 36 bộ đích khác nhau.
+
+### Phản chứng bộ đo và L1–L7
+
+Mô hình RAM của năm phản chứng thoát rc 0. Mỗi phép đổi đúng một đầu vào của phép đo và chạm đúng vế dưới đây.
+
+| Phản chứng | Thay đổi duy nhất → vế đỏ |
+|---|---|
+| `pc_tiem_khong_ghi` | Bỏ bản ghi tiêm, giữ ngoại lệ và hậu điều → `tiem`. |
+| `pc_bo_luot` | Bỏ `W5.cfg_la_tep` trên POSIX, giữ kết quả ca → sổ lượt thiếu một ID. |
+| `pc_bo_ca_moi` | Bỏ `m1_bien`, giữ `_LUOT_DU_KIEN` → sổ lượt thiếu bốn ID. |
+| `pc_bo_qua_ngoai_danh_sach` | Chỉ đổi trạng thái `W4.thuong` → sai danh sách cho phép. |
+| `pc_bo_qua_khi_ho_tro` | Chỉ đổi trạng thái `W5.hardlink`, giữ kết quả probe thành công → sai điều kiện hỗ trợ. |
+
+Ba tự kiểm phân hạng ở N9(d) kiểm kết quả phân hạng đột biến. Năm `pc_*` kiểm các vế của bộ đo trên bản sao fragment. §4b phân biệt rõ hai nhóm và loại cả hai khỏi tổng 37 đột biến.
+
+L1 khớp đơn vị và tổng tĩnh. L2 khớp write set. L4 giữ số đếm kế thừa. L7 không phát sinh điểm hỏi mới. L3/L6 còn thiếu vế âm với lỗi probe hardlink. L5 có mốc ngày và base, nhưng §8 vẫn ghi “tính lại sau review lượt 2” cho ước lượng đã cập nhật ở bản 4.
+
+### Finding mới
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|
+| **P2 · N5/N9(b) · Phân loại lỗi probe hardlink** | `os.link` ném `OSError` chưa đủ để kết luận volume thiếu hỗ trợ. Mô hình với `PermissionError(EACCES)` cho sổ lượt hợp lệ trên nền khác và cho cả lượt hardlink lẫn đột biến 37 bỏ qua. `pc_bo_qua_khi_ho_tro` chỉ thử probe thành công, nên lỗi quyền hoặc lỗi dựng fixture vẫn có thể cho `run=True`. | “Chỉ trên nền ngoài POSIX, `W5.hardlink` và đột biến 37 được `bỏ_qua` khi probe trên chính volume fixture trả mã lỗi đã khai là không hỗ trợ hardlink. Lỗi quyền, lỗi đường dẫn và lỗi ngoài danh sách làm đỏ ca. Giữ các vế khác và cho probe ném `PermissionError(EACCES)` ⇒ `run=False`, chẩn đoán lỗi probe.” |
+| **P3 · §8 · Bóc tách ước lượng** | Đo lại packet 1 được fragment 353 dòng, 18 ca, 30 `_DB`, tổng +448. Với 46 lượt, 37 `_DB` và sổ lượt mới, dự toán khoảng 500 dòng là khả thi nếu tái dùng rig và dùng bảng. Tuy nhiên, các khoản fragment được liệt kê chỉ cộng **397–468**, thiếu **12–21** so với **409–489** đã khai. Cộng các khoản hiện có cho toàn packet là **443–524**, giữa **483,5**. | “Tính lại ở bản 4 ngày 2026-11-19. Các hạng mục liệt kê cho 443–524 dòng thêm. Nếu giữ dự toán 455–545, ghi riêng 12–21 dòng dự phòng trong fragment. Numstat thật quyết định kết quả N12.” |
+
+KET_LUAN: request_changes

@@ -1,0 +1,99 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 433
+packet_id: wp433
+spec_packet_id: GWS-CRED-DICH-NGOAI-KHO-A
+revision: 2
+generation: 1
+lease_id: wp433-r2-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-fable-5-2
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: 'packet P2a cua #433: W4/W5 trong tl_gws.py tren POSIX ghi credentials.json gws ra ngoai kho git, chot thu muc to tien cua cfgdir, ghi nguyen tu 0600; Windows chi doi sang ghi nguyen tu (P2c sau); executor Claude Fable 5.2, reviewer Codex connector; human_audited tren exact head truoc merge.'
+depends_on: [1394]
+spec_path: ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md
+spec_ref: refs/heads/ops/wp433-p2a-spec
+spec_nguon: 'dac ta tren nhanh lease nay; dinh danh theo grammar ADR-0063. Ghim bang spec_hash.'
+spec_sha256_required: b0065947f941a122716cff1b15a81ad65fe9b92a15fb9effad1456100c64624d
+spec_hash: b0065947f941a122716cff1b15a81ad65fe9b92a15fb9effad1456100c64624d
+spec_duyet: 'chu kho duyet bam dac ta b0065947 19-11 (ADR-0067, AskUserQuestion phien #1206), sau review doc lap Codex luot 6/10 approve tren 3b64746 (ops/reviews/wp433p2a-spec-r1/); tran 550 dong do chu kho nang (dong khai dau dac ta); ngoai le bundled E2-Q3 do chu kho cap tai issuecomment-7002145681; chu kho xac nhan qua human audit cuoi packet.'
+prompt_path: ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md
+prompt_sha256_required: b0065947f941a122716cff1b15a81ad65fe9b92a15fb9effad1456100c64624d
+write_set:
+- scripts/tl_gws.py
+- scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py
+- scripts/tl_test_fragments_bundled.py
+write_set_hash: ccd49e6a1e13c19cd7e5137dad875d5403d91cbfcd0637c50e49fcfc4f0cc3f9
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- scripts/tl_gws.py
+- scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py
+- scripts/tl_test_fragments_bundled.py
+effective_write_set_nguon: khai_bao_trong_spec
+ngoai_le_bundled:
+  tep: scripts/tl_test_fragments_bundled.py
+  uy_quyen: https://github.com/ducthangho/tra-luat/issues/433#issuecomment-7002145681
+  dieu_kien: 'chi sinh bang generate_bundled_module_bytes(scripts/test_fragments), khong sua tay, khong mang RELEASE_MANIFEST.json'
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'N1-N12 cua dac ta GWS-CRED-DICH-NGOAI-KHO-A r1 dat tren exact head; numstat base..H dung 3 tep, <= 550 dong them'}
+- {id: M-2, dieu_kien: 'ADR-0060: CI required xanh tren exact head; 0 P0-P2 mo; connector da review dung commit; human audit human_exact_head_audit.v1 tren H'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chi cap quyen thi cong; merge/land do chu kho duyet dung SHA.'
+branch: agent/wp433-r2-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 3b647461db7c8ded1bddd9aafc5c6aa5eead223f
+start_from_sha: 3b647461db7c8ded1bddd9aafc5c6aa5eead223f
+start_from_ghi_chu: 'origin/master luc cap lease (3b64746); dac ta do §0 tren chinh 3b64746. Packet NLM-GWS-DICH-NGOAI-KHO da land 700fbca (#1394). Lease wp433-r1-g1-claude da rut han 18-11.'
+reviewed_sha_required: 3b647461db7c8ded1bddd9aafc5c6aa5eead223f
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact head THAT cua nhanh thi cong.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/433
+granted_on_instruction_readback: 'chu kho 19-11 (phien #1206): Tiep di theo ban de xuat -> lam #433 packet 2; tach P2a/P2b, P2a POSIX / P2c Windows-UNC, nang tran 550; duyet bam b0065947; dang comment uy quyen bundled 7002145681.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+executor_ghi_chu: 'Executor la phien Claude Code cloud do phien dieu phoi mo (create_session, model claude-fable-5-2); phien dieu phoi khong tu thi cong.'
+recorder_ghi_chu: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS ghi lease, KHONG phai executor.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-19T07:10:00Z'
+  goc_quet: 'kho chinh phien #1206, fetch +refs/heads/*:refs/remotes/origin/*; master cuc bo = origin/master 3b64746'
+  ket_qua: 'scripts/tl_gws.py, scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py, scripts/tl_test_fragments_bundled.py: NGUOI_GIU 0.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 dau tien cua revision 2 (packet P2a); lease revision 1 (wp433-r1-g1-claude) da rut han sau land #1394, khong khai bia mo.'
+leased_at_utc: '2026-11-19T07:15:00Z'
+heartbeat_at: '2026-11-19T07:15:00Z'
+heartbeat_required_minutes: 360
+heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
+lease_until: '2026-11-20T07:15:00Z'
+lease_expires_at_utc: '2026-11-20T07:15:00Z'
+lease_until_ghi_chu: '24h; rut han ngay sau land.'
+attempts_used: 1
+attempts_limit: 2
+attempts_basis: '<= 2 phien executor.'
+budget:
+  codex_review_calls:
+    pr_wp433_r2_g1: {used: 0, reserved: 0, limit: 10}
+  ci_ubuntu_runs:
+    pr_wp433_r2_g1: {used: 0, reserved: 0, limit: 2}
+  windows_native_runs:
+    pr_wp433_r2_g1: {used: 0, reserved: 0, limit: 1}
+  khong_reset_theo_generation: true
+budget_ghi_chu: 'Codex PR <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 1 (tuy chon, Desktop; P2a khong doi CI Windows). Ngoai ngan sach PR: 6 loi goi Codex offline review dac ta (ops/reviews/wp433p2a-spec-r1/).'
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

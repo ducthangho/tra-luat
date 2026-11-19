@@ -1,0 +1,23 @@
+## Review độc lập lượt 5 · P2a · Issue #433
+
+Đối chiếu bản hiện hành SHA-256 `0560b8bfe8bbddec3a34f7a9f510115becc026193d29a3db5f67de0ff97716d1` với `-ban5.md` (`567af28f…`). HEAD nền `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`.
+
+### Finding lượt 4
+
+| Finding | Trạng thái | Bằng chứng |
+|---|---|---|
+| P2 · N5/N9(b) · Phân loại lỗi probe hardlink | **Đóng** | Quy tắc mới chỉ cho `bỏ_qua` trên `nt` với `OSError` có `winerror` thuộc `{1, 50}`. Các lỗi khác làm lượt `đỏ`. Cố định `nt` cho riêng bộ phân loại ở cả đối chứng và phản chứng, `pc_probe_quyen` chỉ đổi kết quả probe từ thành công sang `PermissionError(EACCES)` và làm đỏ đúng vế probe. Phép này bắt được lỗi chấp nhận mọi `OSError`. |
+| P3 · §8 · Cộng hạng mục | **Đóng** | Năm khoản fragment cộng **399–470**. Thêm `tl_gws.py` **45–55** và bundled **1** thành **445–526**. Cộng dự phòng riêng **10–19** thành **455–545**, điểm giữa **500**. |
+
+N9(c) giữ nguyên và cân bằng. Bộ `(ca chạy, lượt chạy, đột biến chạy)` lần lượt là `(11,46,37)` trên POSIX, `(4,19,16)` trên `nt` khi probe đạt và `(4,18,15)` khi được phép bỏ qua. §4b vẫn có **37 đột biến**, gồm **5 E / 32 H**, **21 `posix` / 16 `mọi`**. Diff giữ nguyên nhãn và thứ tự lượt, kể cả đích của 37 là `W5.hardlink → ban_kia_giu`.
+
+### Finding mới
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|
+| **P2 · N9(b), `pc_probe_quyen`** | `PermissionError(errno.EACCES)` trong mô hình Linux thiếu `winerror`. Bộ phân loại sai chấp nhận mọi `OSError` có `winerror` khác `None` vẫn làm đỏ phản chứng hiện tại và vẫn phân loại đúng probe thành công. Khi mô phỏng lỗi quyền có `winerror=5`, bộ phân loại sai cho cả `W5.hardlink` và đột biến 37 `bỏ_qua`. Các đẳng thức N9(c) vẫn cân bằng với `u=h=1`, nên không bắt được lỗi này. | “Trong `pc_probe_quyen`, cố định nền `nt` cho riêng bộ phân loại ở cả đối chứng và phản chứng. Chỉ thay kết quả probe thành `PermissionError` có `errno=EACCES` và `winerror=5`. Yêu cầu `W5.hardlink` `đỏ` với chẩn đoán probe chứa mã 5, đột biến 37 không được đếm `bỏ_qua`, và `run=False`.” |
+| **P3 · §8, dòng 249** | §8 ghi “Năm phản chứng bộ đo” trong khi §4b liệt kê sáu, gồm `pc_probe_quyen`. | “Sáu phản chứng bộ đo chạy trên bản sao fragment, ngoài numstat của packet.” |
+
+Đối chiếu diff và mô phỏng bằng `python3 -IB` trên Linux, Python 3.13.18. Lượt đầu lỗi ở phép cộng của harness, lượt chạy lại thoát **0** và xác nhận các phép thử trên. Mô phỏng chạy trong RAM, không ghi tệp hay gọi mạng. Windows thật, fragment triển khai và gate đầy đủ `not_run`. Reviewer `openai_codex` qua API, transport máy. Model và effort phục vụ chưa đo được.
+
+KET_LUAN: request_changes

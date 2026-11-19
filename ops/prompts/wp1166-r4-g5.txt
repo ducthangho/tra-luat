@@ -1,0 +1,5 @@
+Execute Packet1166 (PR0) r4/g5 under installed Mission68 and the current immutable spec/admission.
+Start from H2 18d48b603933707460fc764a4f8022e8de86b66a (owner-audited, Codex-approved) and add ONE new commit H3 on top; do not rewrite H1/H2.
+Fix the exact-H2 CI failure: gate (ubuntu-latest) run 44488618410, `cong_cu_test` rejects the bare `bash` call at .claude/dev/ci_dang_ky_test.py:2596 (subprocess.run(["bash", ...])) outside the allow-list. Resolve bash through ops/bash_nen.py::tim_bash() (it decides by capability); if it returns None on a non-Windows host the affected cases must FAIL (KHONG DO DUOC), never be skipped or counted as passing.
+Write only .github/workflows/ci-dot-bien-du.yml and .claude/dev/ci_dang_ky_test.py. Keep every H2 behaviour, schedule, test inventory, timeouts and M9 requirements.
+Run the same checks as gate locally where possible: python ops/cong_cu_test.py (or the exact gate command for the real-tree check), python .claude/dev/ci_dang_ky_test.py N/N, actionlint delta vs a89c808; report exact commands and rc. No Windows CI, no secrets, no other paths.

@@ -1,0 +1,7 @@
+rc=1 giay=2.8
+--- stdout
+KQ_JSON {"wp1342_native_symlink_file": ["BoQua", "KH\u00d4NG \u0110O \u0110\u01af\u1ee2C: n\u1ec1n kh\u00f4ng t\u1ea1o \u0111\u01b0\u1ee3c symlink t\u1ec7p (thi\u1ebfu quy\u1ec1n): [WinError 1314] A required privilege is not held by the client: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r4\\\\tmpdiltmisj\\\\wp1342_n-9ff2629123cf910a\\\\target' -> 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp1342r4\\\\tmpdiltmisj\\\\wp1342_n-9ff2629123cf910a\\\\link'"]}
+
+--- stderr
+F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1342-src\.claude/dev\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',

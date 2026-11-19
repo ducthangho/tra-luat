@@ -1,0 +1,6 @@
+# ci.yml push master run 44350194077 head e2c3b82f818bd1739d31261e8129d3ef44915acf conclusion success; job 134966608850 gate-packet-loop
+2026-11-18T16:46:43.2575137Z GOM: mọi mảnh khớp phân hoạch
+2026-11-18T16:46:43.2577566Z GOM: ĐẠT · 16 mảnh · 1559 ca bắt buộc (sổ 1561 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)
+# ci.yml push master run 44445202862 head a2c7d75; job 135297479393 gate-packet-loop
+2026-11-19T02:38:43.8868375Z GOM: mọi mảnh khớp phân hoạch
+2026-11-19T02:38:43.8870242Z GOM: ĐẠT · 16 mảnh · 1573 ca bắt buộc (sổ 1575 − CA_DAI; CA_DAI chạy ở workflow packet-loop-dot-bien)

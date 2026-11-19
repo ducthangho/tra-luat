@@ -1,0 +1,26 @@
+# 2026-11-19T03:30:25Z zip Desktop wp1342r4c-out.zip sha256 b57473640a753b1736a0c44e87a2c421601c7747cacce7d187f3bd40fa602d5e (khop bam do tren Desktop), 70 tep
+# python -I n6_merge_1407.py windows-native/desktop/wp1342r4b-out windows-native/desktop/wp1342r4c-out
+(a) MERGE 55 ID vs HEAD 55 ID; lech 0 []
+    rc != 0 tren MERGE: ['wp1342_native_persist_update_symlink', 'wp1342_native_symlink_file']
+(c) N5 tren MERGE: 41 ID base; lech so BASE e2c3b82: 0 []
+(b) MERGE J0   wp1342_native_job_abi: rc=0 giay=3.0 observed="['tập tên bind == allowlist M1', 'CreateJobObjectW argtypes/restype', 'SetInformationJobObject argtypes/restype', 'AssignProcessToJobObject argtypes/restype', 'TerminateJobObject argtypes/restype', 'QueryInformationJobObject argtypes/restype', 'CreateToolhelp32Snapshot argtypes/restype', 'Thread32First argtypes/restype', 'Thread32Next argtypes/restype', 'OpenThread argtypes/restype', 'GetProcessIdOfThread argtypes/restype', 'ResumeThread argtypes/restype', 'GetHandleInformation argtypes/restype', 'JOBOBJECT_BASIC_LIMIT_INFORMATION offset LimitFlags == 16', 'JOBOBJECT_BASIC_ACCOUNTING_INFORMATION offset ActiveProcesses == 40', 'THREADENTRY32 offset th32OwnerProcessID == 12', 'sizeof JOBOBJECT_BASIC_LIMIT_INFORMATION == 64', 'sizeof IO_COUNTERS == 48', 'sizeof JOBOBJECT_EXTENDED_LIMIT_INFORMATION == 144', 'sizeof JOBOBJECT_BASIC_ACCOUNTING_INFORMATION == 48', 'sizeof THREADENTRY32 == 28']"
+(b) MERGE J1   wp1342_native_job_thuan: rc=0 giay=3.0 observed='(None, [])'
+(b) MERGE J2   wp1342_native_job_han: rc=0 giay=8.8 observed="(('WP1174 UNKNOWN: lifecycle deadline', 6.02), [('dau', 6624, 134395324693930850)])"
+(b) MERGE J3   wp1342_native_job_mo_coi: rc=0 giay=3.1 observed="(None, [('chau', 7804, 134395324784379709)])"
+(b) MERGE J6   wp1342_native_job_treo_truoc_gan: rc=0 giay=3.0 observed='([(4, False)], [])'
+(b) MERGE J7   wp1342_native_job_khong_ke_thua: rc=0 giay=3.0 observed='(0, [])'
+(b) MERGE J8   wp1342_native_job_loi_truoc_gan: rc=0 giay=2.9 observed='(None, [])'
+(b) MERGE J9   wp1342_native_job_loi_sau_gan: rc=0 giay=2.9 observed="([], [('phu', 13372, 134395324902057458)])"
+(b) MERGE J10  wp1342_native_job_cha_chet_sau_gan: rc=0 giay=3.6 observed="(None, [('san_sang', 11856, 134395324932442901), ('da_gan', 14596, 134395324937220168), ('chau', 15624, 134395324937873670)])"
+(b) MERGE J10b wp1342_native_job_cha_chet_truoc_gan: rc=0 giay=5.3 observed="(None, [('san_sang', 11484, 134395324966274559), ('truoc_gan', 10632, 134395324971097585)])"
+(b) MERGE J11  wp1342_native_job_query_loi: rc=0 giay=2.9 observed="'WP1174 UNKNOWN: job query'"
+(b) LAP-J3: 3/3 rc 0, giay_max 3.1, lan cuoi observed="(None, [('chau', 4992, 134395325119629993)])"
+(b) LAP-J9: 3/3 rc 0, giay_max 3.0, lan cuoi observed="([], [('phu', 15200, 134395325208691198)])"
+KET QUA: DAT
+rc=0
+
+# PHAN CHUNG (ban sao tam cua wp1342r4c-out, khong luu): sua KQ_JSON cua wp1174_witness_valid thanh loi va passed 1->0 cua J3 => phai DO
+(a) MERGE 55 ID vs HEAD 55 ID; lech 2 [('wp1174_witness_valid', 0, 0), ('wp1342_native_job_mo_coi', 0, 0)]
+(c) N5 tren MERGE: 41 ID base; lech so BASE e2c3b82: 1 ['wp1174_witness_valid']
+KET QUA: DO lech=[('wp1174_witness_valid', 0, 0), ('wp1342_native_job_mo_coi', 0, 0)] n5=['wp1174_witness_valid'] n6=['J3']
+rc=1

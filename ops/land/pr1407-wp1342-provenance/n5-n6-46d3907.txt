@@ -1,0 +1,21 @@
+N5: 41 ID base; lech 0
+N5 rc!=0 ca hai ve (BO QUA KHONG DO DUOC): ['wp1342_native_symlink_file', 'wp1342_native_persist_update_symlink']
+  HEAD J0   wp1342_native_job_abi: lan=1 rc=[0] giay_max=3.0 observed="['tập tên bind == allowlist M1', 'CreateJobObjectW argtypes/restype', 'SetInformationJobObject argtypes/restype', 'AssignProcessToJobObject argtypes/restype', 'TerminateJobObject argtypes/restype', 'QueryInformationJobObject argtypes/restype', 'CreateToolhelp32Snapshot argtypes/restype', 'Thread32First argtypes/restype', 'Thread32Next argtypes/restype', 'OpenThread argtypes/restype', 'GetProcessIdOfThread argtypes/restype', 'ResumeThread argtypes/restype', 'GetHandleInformation argtypes/restype', 'JOBOBJECT_BASIC_LIMIT_INFORMATION offset LimitFlags == 16', 'JOBOBJECT_BASIC_ACCOUNTING_INFORMATION offset ActiveProcesses == 40', 'THREADENTRY32 offset th32OwnerProcessID == 12', 'sizeof JOBOBJECT_BASIC_LIMIT_INFORMATION == 64', 'sizeof IO_COUNTERS == 48', 'sizeof JOBOBJECT_EXTENDED_LIMIT_INFORMATION == 144', 'sizeof JOBOBJECT_BASIC_ACCOUNTING_INFORMATION == 48', 'sizeof THREADENTRY32 == 28']"
+  HEAD J1   wp1342_native_job_thuan: lan=1 rc=[0] giay_max=2.9 observed='(None, [])'
+  HEAD J2   wp1342_native_job_han: lan=1 rc=[0] giay_max=8.8 observed="(('WP1174 UNKNOWN: lifecycle deadline', 6.02), [('dau', 15100, 134395272044305431)])"
+  HEAD J3   wp1342_native_job_mo_coi: lan=1 rc=[0] giay_max=2.9 observed="(None, [('chau', 9264, 134395272132891989)])"
+  HEAD J6   wp1342_native_job_treo_truoc_gan: lan=1 rc=[0] giay_max=3.0 observed='([(4, False)], [])'
+  HEAD J7   wp1342_native_job_khong_ke_thua: lan=1 rc=[0] giay_max=2.9 observed='(0, [])'
+  HEAD J8   wp1342_native_job_loi_truoc_gan: lan=1 rc=[0] giay_max=3.0 observed='(None, [])'
+  HEAD J9   wp1342_native_job_loi_sau_gan: lan=1 rc=[0] giay_max=2.9 observed="([], [('phu', 16876, 134395272250703143)])"
+  HEAD J10  wp1342_native_job_cha_chet_sau_gan: lan=1 rc=[0] giay_max=3.4 observed="(None, [('san_sang', 9308, 134395272279317906), ('da_gan', 9028, 134395272284171728), ('chau', 18216, 134395272284773971)])"
+  HEAD J10b wp1342_native_job_cha_chet_truoc_gan: lan=1 rc=[0] giay_max=5.4 observed="(None, [('san_sang', 15500, 134395272314494483), ('truoc_gan', 7732, 134395272319296373)])"
+  HEAD J11  wp1342_native_job_query_loi: lan=1 rc=[0] giay_max=2.8 observed="'WP1174 UNKNOWN: job query'"
+  VM J3   wp1342_native_job_mo_coi: lan=3 rc=[0, 0, 0] giay_max=14.1 observed="(None, [('chau', 5260, 134395286341392838)])"
+  VM J9   wp1342_native_job_loi_sau_gan: lan=3 rc=[0, 0, 0] giay_max=12.6 observed="([], [('phu', 5460, 134395286707105155)])"
+  VM J10  wp1342_native_job_cha_chet_sau_gan: lan=3 rc=[0, 0, 0] giay_max=15.0 observed="(None, [('san_sang', 1188, 134395287120943026), ('da_gan', 4192, 134395287140237034), ('chau', 5112, 134395287142723630)])"
+  LAP-J3: 10/10 rc 0, giay_max 3.2
+  LAP-J9: 10/10 rc 0, giay_max 3.1
+N6 Desktop: DAT
+N6 VM: DAT
+rc=0

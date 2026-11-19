@@ -1,0 +1,10 @@
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 2.9, "lan": 0}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 1}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 2}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 3}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 4}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.1, "lan": 5}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 6}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 7}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.1, "lan": 8}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 2.9, "lan": 9}

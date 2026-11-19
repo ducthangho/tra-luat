@@ -1,0 +1,17 @@
+bat_dau=2026-11-19T02:23:06Z python=Python 3.12.10 os=Microsoft Windows NT 10.0.20348.0 ptr=8 C_free_GB=2.14
+CHOT sha=46d39071989fd77582ef8d1d61a7ab7de90a12ba tree=a8bc50284bc9fffc0759e81d5b723d66e51701ce sach=[]
+VM exit=0
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 14.1, "lan": 0}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 11.9, "lan": 1}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 12.4, "lan": 2}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 12.0, "lan": 3}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 12.0, "lan": 4}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 12.6, "lan": 5}
+  {"id": "wp1342_native_job_cha_chet_sau_gan", "rc": 0, "giay": 14.6, "lan": 6}
+  {"id": "wp1342_native_job_cha_chet_sau_gan", "rc": 0, "giay": 15.0, "lan": 7}
+  {"id": "wp1342_native_job_cha_chet_sau_gan", "rc": 0, "giay": 14.0, "lan": 8}
+sach_sau=[]
+98ff6d6ffae0ae4755b89318c1d24100372d61a363ef384b0977c2d2b4acc6f3 C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\do_r4.py
+d0c9af496c0488dc08e4ce51e086d61052e1d3f95d4fbcafaa54bcf8cb50ae09 C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\chay-1342r4b-vm.ps1
+TONG 128.6s
+XONG (khoa da nha)

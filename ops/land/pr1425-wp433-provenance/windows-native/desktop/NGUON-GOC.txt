@@ -1,0 +1,38 @@
+# Nguon goc: Desktop DESKTOP-T9R33P2, thu muc F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\ (doc 2026-11-19T21:2xZ qua Remote Desktop Commander).
+# Zip dung TRONG BO NHO tren Desktop (khong ghi tep), in base64 ra stdout; giai ma trong container va so khop bam.
+# zip sha256 e2409e87d3b8c701d1550ff23a83561ebe4d5142f8c67c69591a550cef3ed920 (26388 byte, 29 tep) = dong ZIPSHA Desktop in ra (e2409e87...). Ban ma hoa: win1425.zip.b64.
+# Doi chieu: do1425.py 9ddc98ee (= bam phien dieu phoi in khi giai tren Desktop), do1425b.py 008daa83 (idem), rig433c1.b64 sha256(strip) 677a40a0 = khoi base64 comment PR 7012795076; rig .py sau giai nen 48166acb (TOM-TAT.txt dong 'sha256 rig').
+# sha256 tung tep (tinh lai tu zip trong container):
+3500b51558a8480037e0436b33a0bc4417946bee451e925f8773d0060f62108d  wp433c1-out-20261119T151704Z/ADMIN-CHU-KHO-CHAY-TAY.txt
+a3ac21098f5924135163d72c540e48711eaf7c404bb5ddd90730a5a9c63991c5  wp433c1-out-20261119T151704Z/D10-d10a.txt
+f04137549cd7e821f3c0790b772346ca166b6eb8b74b3a2d548f180f977d5fdb  wp433c1-out-20261119T151704Z/D10-d10b.txt
+9df8ff3e7a02f23f32030c8779898ace5939f1566a6a4b8144141735499f9079  wp433c1-out-20261119T151704Z/D10-d10c.txt
+9ee51cd3e1117586fd3bcdcc06a1c477a9874741031cca7b639e3221a91b7288  wp433c1-out-20261119T151704Z/D5-C1.stderr.txt
+447981c750b765d59248328cf78d14347692110552a6266e86851cbc252ea5c3  wp433c1-out-20261119T151704Z/D5-C1.stdout.txt
+2d71eb2b7218caec53a891a3d189c456bb5a1b02e38daee0100049898e4251ae  wp433c1-out-20261119T151704Z/D5-P2A.stderr.txt
+447981c750b765d59248328cf78d14347692110552a6266e86851cbc252ea5c3  wp433c1-out-20261119T151704Z/D5-P2A.stdout.txt
+abfc4ad052ca7dc38a1d791d15ad38559dff2d3ba8a170be22f19e5f9c37bb02  wp433c1-out-20261119T151704Z/D5-PK1.stderr.txt
+f9c3d6b6e747fffdcb224a9642e54850492bd08659d13560196db9ca4565d33f  wp433c1-out-20261119T151704Z/D5-PK1.stdout.txt
+abfc4ad052ca7dc38a1d791d15ad38559dff2d3ba8a170be22f19e5f9c37bb02  wp433c1-out-20261119T151704Z/PK1-BASE-1.stderr.txt
+f9c3d6b6e747fffdcb224a9642e54850492bd08659d13560196db9ca4565d33f  wp433c1-out-20261119T151704Z/PK1-BASE-1.stdout.txt
+abfc4ad052ca7dc38a1d791d15ad38559dff2d3ba8a170be22f19e5f9c37bb02  wp433c1-out-20261119T151704Z/PK1-BASE-2.stderr.txt
+f9c3d6b6e747fffdcb224a9642e54850492bd08659d13560196db9ca4565d33f  wp433c1-out-20261119T151704Z/PK1-BASE-2.stdout.txt
+d605f8e8f087f80c88842685bf0bb0547ed76a990a169feb2b7f6f3f15cf0652  wp433c1-out-20261119T151704Z/PK1-BASE-HEAD.txt
+abfc4ad052ca7dc38a1d791d15ad38559dff2d3ba8a170be22f19e5f9c37bb02  wp433c1-out-20261119T151704Z/PK1-HEAD-1.stderr.txt
+f9c3d6b6e747fffdcb224a9642e54850492bd08659d13560196db9ca4565d33f  wp433c1-out-20261119T151704Z/PK1-HEAD-1.stdout.txt
+abfc4ad052ca7dc38a1d791d15ad38559dff2d3ba8a170be22f19e5f9c37bb02  wp433c1-out-20261119T151704Z/PK1-HEAD-2.stderr.txt
+f9c3d6b6e747fffdcb224a9642e54850492bd08659d13560196db9ca4565d33f  wp433c1-out-20261119T151704Z/PK1-HEAD-2.stdout.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  wp433c1-out-20261119T151704Z/TAT-CA.stderr.txt
+dd550f289ecc27b239f178c84f2fc3866e9599f889a56e468844180f0741bff7  wp433c1-out-20261119T151704Z/TAT-CA.stdout.txt
+5f832c78f5d926591caef755d0e6d00057f6827062d64855f06d7a6e70d8e9dc  wp433c1-out-20261119T151704Z/TOM-TAT.txt
+9ddc98ee85f61441280d8c6e73d7231d6d1bde2d6a44e3a9fe327ec57c898f19  do1425.py
+008daa83836c7c5347cfa85f371d528b3b45fa45bfde466312f2722448431177  do1425b.py
+e9736165fb006caefbd3d97c2f18adedc5defff13d7c36554e7c19f511001fbe  d10.ps1
+9b9ff49b1d61ff5c21a7801963271451ecd0c8be7b1a0c1ce1aeafde832c441c  chay-1425.ps1
+c223fcafab90a8022db1beffab348f4241bc917296cd1d31be02a292dfe777f5  chay-1425b.ps1
+677a40a0e7dd5c365f7e52faba46503119b2e2a7f133b7a8d5bbb486bc07e471  rig433c1.b64
+f86cda681e91b1b97469f890d6171b2800733011f60532f807afce9dad02c59c  admin-d10-tao.ps1
+# CHUYEN MA (cong ci_duong_nhanh kiem-re tu choi tep nhi phan; ba tep D10 tron hai ma):
+#   D10-d10a.txt (sha256 a3ac21098f5924135163d72c540e48711eaf7c404bb5ddd90730a5a9c63991c5, 2759 byte): dong dau UTF-8 BOM (Out-File -Encoding utf8) + phan con lai UTF-16LE (Tee-Object PS 5.1) => ban CHUYEN MA D10-d10a.utf8.txt (UTF-8, LF), sha256 231931e3f6c19f033c383964f06cba712c465f0e343f367554b7a697805e2cd3. Ban goc nguyen byte chi con trong win1425.zip.b64.
+#   D10-d10b.txt (sha256 f04137549cd7e821f3c0790b772346ca166b6eb8b74b3a2d548f180f977d5fdb, 4247 byte): dong dau UTF-8 BOM (Out-File -Encoding utf8) + phan con lai UTF-16LE (Tee-Object PS 5.1) => ban CHUYEN MA D10-d10b.utf8.txt (UTF-8, LF), sha256 6039f7d25fb4a266672035e4ddcea527a643e8e758761b9b125952237278ddc2. Ban goc nguyen byte chi con trong win1425.zip.b64.
+#   D10-d10c.txt (sha256 9df8ff3e7a02f23f32030c8779898ace5939f1566a6a4b8144141735499f9079, 1615 byte): dong dau UTF-8 BOM (Out-File -Encoding utf8) + phan con lai UTF-16LE (Tee-Object PS 5.1) => ban CHUYEN MA D10-d10c.utf8.txt (UTF-8, LF), sha256 b57057ba573c8b52dd94d334343d56b0e51f8fc372f38e304aa5050cb1303636. Ban goc nguyen byte chi con trong win1425.zip.b64.

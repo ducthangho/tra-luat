@@ -1,0 +1,84 @@
+[
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/724a9e55727c82cc0c5ad7d3c4479cfb69be791b/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-19T14:19:56Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-19T14:19:56Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "wp433 P2c-C1: tren Windows credentials.json cua gws (W4, W5) chi ghi toi o cuc bo, ngoai kho git, khong xuyen lien ket\n\nDac ta GWS-CRED-DICH-NGOAI-KHO-C1 r1 (sha256 758782c72e86...), lease wp433-r4-g1-claude, Issue #433.\n\n- M1 `_phan_loai_duong_nt(p)`: phan loai thuan (ntpath.splitdrive + regex, khong cham he tep). Nhan duong o\n  co chu tuyet doi va duong tuong doi; tu choi theo thu tu NUL, trang, `\\\\?\\`, `\\\\.\\`, `\\??\\`, UNC, o tran,\n  o tuong doi, goc o khong chu, o khac, `..`, ky tu cam / surrogate, cuoi cham-cach, ten thiet bi\n  (ke ca COM0/LPT0, chu so mu, CONIN$/CONOUT$).\n- M2 `_duong_dich_chuan_nt(p, cwd, loai_o=None)`: ghep THANH PHAN vao cwd; chi nhan loai o REMOVABLE (2) va\n  FIXED (3) theo `GetDriveTypeW` nap luoi (`_loai_o_nt`); ly do mot dong `duong khong hop le: repr(x)[:200]`.\n- M3 `_dich_cred_gws_nt`: nhanh `os.name != \"posix\"` cua `_dich_cred_gws` goi ham nay. Thu tu: chuan hoa;\n  do `.git` ba trang thai tren chuoi tu vung; `_kiem_dich_ghi` tu goc o (lien ket o moi tien to, ke ca\n  symlink treo); do `.git` tren chuoi that (`realpath(strict=True)` cua to tien gan nhat dang ton tai).\n  Loi `lstat`/`realpath` ngoai \"chua co\" lan ra thanh `ghi loi` o W4/W5.\n- M4: giu sau cum loi cua P2a, khong them cum; moi tu choi xay ra truoc writer.\n- M5: fragment wp433_gws_cred_win_duong: 3 ca / 76 luot (47 + 18 + 11), 47 dot bien (39 moi nen, 8 chi nt),\n  3 tu kiem phan hang, so luot va danh sach ID viet rieng.\n- M6: tai sinh scripts/tl_test_fragments_bundled.py bang generate_bundled_module_bytes.\n\nKhong sua than `_kiem_dich_ghi`, `_ghi_nguyen_tu_0600`, `_trong_kho_git`, `_duong_dich_chuan`; W4, W5 khong\ndoi. Ca `tich_hop_nt` va 8 dot bien nen nt CHUA chay tren Windows that (do native §4c do phien dieu phoi chay).\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYktHKop1BsgG1zjmZ",
+   "tree": {
+    "sha": "e942f6a320ed927ffcf85310e75929ac4443a4fe",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/e942f6a320ed927ffcf85310e75929ac4443a4fe"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/724a9e55727c82cc0c5ad7d3c4479cfb69be791b",
+   "verification": {
+    "payload": "tree e942f6a320ed927ffcf85310e75929ac4443a4fe\nparent c6487ff884c61085c939a75a37c657006ee690f2\nauthor Claude <noreply@anthropic.com> 1795097996 +0000\ncommitter Claude <noreply@anthropic.com> 1795097996 +0000\n\nwp433 P2c-C1: tren Windows credentials.json cua gws (W4, W5) chi ghi toi o cuc bo, ngoai kho git, khong xuyen lien ket\n\nDac ta GWS-CRED-DICH-NGOAI-KHO-C1 r1 (sha256 758782c72e86...), lease wp433-r4-g1-claude, Issue #433.\n\n- M1 `_phan_loai_duong_nt(p)`: phan loai thuan (ntpath.splitdrive + regex, khong cham he tep). Nhan duong o\n  co chu tuyet doi va duong tuong doi; tu choi theo thu tu NUL, trang, `\\\\?\\`, `\\\\.\\`, `\\??\\`, UNC, o tran,\n  o tuong doi, goc o khong chu, o khac, `..`, ky tu cam / surrogate, cuoi cham-cach, ten thiet bi\n  (ke ca COM0/LPT0, chu so mu, CONIN$/CONOUT$).\n- M2 `_duong_dich_chuan_nt(p, cwd, loai_o=None)`: ghep THANH PHAN vao cwd; chi nhan loai o REMOVABLE (2) va\n  FIXED (3) theo `GetDriveTypeW` nap luoi (`_loai_o_nt`); ly do mot dong `duong khong hop le: repr(x)[:200]`.\n- M3 `_dich_cred_gws_nt`: nhanh `os.name != \"posix\"` cua `_dich_cred_gws` goi ham nay. Thu tu: chuan hoa;\n  do `.git` ba trang thai tren chuoi tu vung; `_kiem_dich_ghi` tu goc o (lien ket o moi tien to, ke ca\n  symlink treo); do `.git` tren chuoi that (`realpath(strict=True)` cua to tien gan nhat dang ton tai).\n  Loi `lstat`/`realpath` ngoai \"chua co\" lan ra thanh `ghi loi` o W4/W5.\n- M4: giu sau cum loi cua P2a, khong them cum; moi tu choi xay ra truoc writer.\n- M5: fragment wp433_gws_cred_win_duong: 3 ca / 76 luot (47 + 18 + 11), 47 dot bien (39 moi nen, 8 chi nt),\n  3 tu kiem phan hang, so luot va danh sach ID viet rieng.\n- M6: tai sinh scripts/tl_test_fragments_bundled.py bang generate_bundled_module_bytes.\n\nKhong sua than `_kiem_dich_ghi`, `_ghi_nguyen_tu_0600`, `_trong_kho_git`, `_duong_dich_chuan`; W4, W5 khong\ndoi. Ca `tich_hop_nt` va 8 dot bien nen nt CHUA chay tren Windows that (do native §4c do phien dieu phoi chay).\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYktHKop1BsgG1zjmZ\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQFJ45c2D\nCaHGFm5tgr5SIFJLGRLh4cHWTbr+qHFoBs/vhnLK8bHCEpDHidkTfhoYbSIxLv/KRVrpDWhaHbxi\ncAk=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-19T14:54:32Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/724a9e55727c82cc0c5ad7d3c4479cfb69be791b",
+  "node_id": "C_kwDOTNeRjdoAKDcyNGE5ZTU1NzI3YzgyY2MwYzVhZDdkM2M0NDc5Y2ZiNjliZTc5MWI",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/c6487ff884c61085c939a75a37c657006ee690f2",
+    "sha": "c6487ff884c61085c939a75a37c657006ee690f2",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/c6487ff884c61085c939a75a37c657006ee690f2"
+   }
+  ],
+  "sha": "724a9e55727c82cc0c5ad7d3c4479cfb69be791b",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/724a9e55727c82cc0c5ad7d3c4479cfb69be791b"
+ }
+]

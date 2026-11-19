@@ -1,0 +1,30 @@
+# do 2026-11-19T21:16:01Z, clone rieng scratchpad (git clone /home/user/tra-luat), core.abbrev 7
+## rev-parse merge, tree, cha
+20eac111b1f95567bf2ec87260888f77222eea3b
+47eb33539f800a56f5c5c0fc00df15c7f387e786
+367e722e227672dd382643896211afa6a143f549
+724a9e55727c82cc0c5ad7d3c4479cfb69be791b
+## rev-parse head, tree
+724a9e55727c82cc0c5ad7d3c4479cfb69be791b
+e942f6a320ed927ffcf85310e75929ac4443a4fe
+## numstat 20eac111b1f95567bf2ec87260888f77222eea3b^1..20eac111b1f95567bf2ec87260888f77222eea3b (= phan PR dua vao)
+287	0	scripts/test_fragments/wp433_gws_cred_win_duong.py
+99	2	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled.py
+## numstat c6487ff..724a9e55727c82cc0c5ad7d3c4479cfb69be791b (base lease..head)
+287	0	scripts/test_fragments/wp433_gws_cred_win_duong.py
+99	2	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled.py
+## blob 3 tep tai head / merge
+scripts/tl_gws.py head=e53ae2c246d84471b48c406b3d42f6d7b6e57f91 merge=e53ae2c246d84471b48c406b3d42f6d7b6e57f91
+scripts/test_fragments/wp433_gws_cred_win_duong.py head=e21c2e4ea5eb54a135cbc3defce112ea96e553de merge=e21c2e4ea5eb54a135cbc3defce112ea96e553de
+scripts/tl_test_fragments_bundled.py head=6ffaccd01e7f4dd546b5487427df39e06afbc7cf merge=6ffaccd01e7f4dd546b5487427df39e06afbc7cf
+## git diff --check 20eac111b1f95567bf2ec87260888f77222eea3b^1 20eac111b1f95567bf2ec87260888f77222eea3b
+rc=0
+## release-verify --strict tai 20eac111b1f95567bf2ec87260888f77222eea3b
+rc=2
+ok False 185 185 ['scripts/tl_gws.py', 'scripts/tl_test_fragments_bundled.py']
+## sha256 3 tep tai merge
+572c131f79ed5ca24e2dd11effb6a76496cc7a82d354fbf20e26b227a2cc3644  scripts/tl_gws.py
+b1f64a8b7e2828aed4f73f25704c652a61522b99f1c6afb2ceebb2258c0995ef  scripts/test_fragments/wp433_gws_cred_win_duong.py
+75cd756145c68a6d0772e1d3bf7ba78019ed29269726376b086f3c23c558de3d  scripts/tl_test_fragments_bundled.py

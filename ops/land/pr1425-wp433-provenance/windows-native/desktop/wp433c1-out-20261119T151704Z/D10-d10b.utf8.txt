@@ -1,0 +1,31 @@
+== D10 d10b bat_dau=2026-11-19T16:33:50Z
+python: 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+kho: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\c433c1-20261119T151704Z'
+  $ git rev-parse HEAD HEAD^{tree}
+    rc=0
+    | 724a9e55727c82cc0c5ad7d3c4479cfb69be791b
+    | e942f6a320ed927ffcf85310e75929ac4443a4fe
+  $ git status --porcelain
+    rc=0
+== D10b ─æo (shell TH╞»ß╗£NG, sau khi share ─æ├ú ─æ╞░ß╗úc tß║ío)
+  $ net use Z: \\localhost\wp433c1
+    rc=0
+    | The command completed successfully.
+    ─æß╗æi chß╗⌐ng d╞░╞íng: isdir('Z:\\')=True GetDriveTypeW=4
+    W5 cfgdir='\\\\localhost\\wp433c1\\x' cwd=None -> (False, "─æ╞░ß╗¥ng kh├┤ng hß╗úp lß╗ç: '\\\\\\\\localhost\\\\wp433c1\\\\x'") | writer=0 loai_o=[] lstat=[]
+  [─Éß║áT] D10 UNC: W5 ΓçÆ (False, "─æ╞░ß╗¥ng kh├┤ng hß╗úp lß╗ç: '\\\\\\\\localhost\\\\wp433c1\\\\x'"); loai_o=[] (mong []); writer=0; lstat tr├¬n ─æ├¡ch=[]; tß╗çp mß╗¢i d╞░ß╗¢i T=[]
+    W5 cfgdir='Z:\\x' cwd=None -> (False, "─æ╞░ß╗¥ng kh├┤ng hß╗úp lß╗ç: 'Z:\\\\x'") | writer=0 loai_o=[('Z:\\', 4)] lstat=[]
+  [─Éß║áT] D10 ß╗ò mß║íng: W5 ΓçÆ (False, "─æ╞░ß╗¥ng kh├┤ng hß╗úp lß╗ç: 'Z:\\\\x'"); loai_o=[('Z:\\', 4)] (mong [('Z:\\', 4)]); writer=0; lstat tr├¬n ─æ├¡ch=[]; tß╗çp mß╗¢i d╞░ß╗¢i T=[]
+    W5 cfgdir='x' cwd='Z:\\' -> (False, "─æ╞░ß╗¥ng kh├┤ng hß╗úp lß╗ç: 'Z:\\\\'") | writer=0 loai_o=[('Z:\\', 4)] lstat=[] | getcwd='Z:\\' ph├ón loß║íi=('o_tuyet_doi', 'Z:\\', ())
+  [─Éß║áT] D10 cwd tr├¬n ß╗ò mß║íng: W5 ΓçÆ (False, "─æ╞░ß╗¥ng kh├┤ng hß╗úp lß╗ç: 'Z:\\\\'"); loai_o=[('Z:\\', 4)] (mong [('Z:\\', 4)]); writer=0; lstat tr├¬n ─æ├¡ch=[]; tß╗çp mß╗¢i d╞░ß╗¢i T=[]
+  $ net use Z: /delete /y
+    rc=0
+    | Z: was deleted successfully.
+  [ADMIN] PowerShell, CHß╗ê v├¼ l╞░ß╗út n├áy ─æ├ú tß║ío share:
+      net share wp433c1 /delete ; $LASTEXITCODE
+  Sau ─æ├│, shell TH╞»ß╗£NG:  python <rig> d10c "F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-d10-223323-4qb2fu4p"
+== Tß╗öNG Kß║╛T
+  ─Éß║áT            D10 UNC
+  ─Éß║áT            D10 ß╗ò mß║íng
+  ─Éß║áT            D10 cwd tr├¬n ß╗ò mß║íng
+rc=0 ket_thuc=2026-11-19T16:33:52Z

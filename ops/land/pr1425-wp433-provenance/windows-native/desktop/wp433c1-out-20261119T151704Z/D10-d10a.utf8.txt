@@ -1,0 +1,26 @@
+== D10 d10a bat_dau=2026-11-19T15:33:22Z
+python: 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+kho: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\c433c1-20261119T151704Z'
+  $ git rev-parse HEAD HEAD^{tree}
+    rc=0
+    | 724a9e55727c82cc0c5ad7d3c4479cfb69be791b
+    | e942f6a320ed927ffcf85310e75929ac4443a4fe
+  $ git status --porcelain
+    rc=0
+== D10a chuß║⌐n bß╗ï (shell TH╞»ß╗£NG)
+  $ whoami
+    rc=0
+    | desktop-t9r33p2\thanghd
+  $ net share wp433c1
+    rc=2
+    | This shared resource does not exist.
+
+    | More help is available by typing NET HELPMSG 2310.
+  T = 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-d10-223323-4qb2fu4p'
+  [ADMIN] PowerShell (Run as Administrator), nguy├¬n v─ân Mß╗ÿT d├▓ng:
+      net share "wp433c1=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-d10-223323-4qb2fu4p" '/grant:desktop-t9r33p2\thanghd,FULL' ; $LASTEXITCODE
+  Sau ─æ├│, shell TH╞»ß╗£NG:  python <rig> d10b "F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-d10-223323-4qb2fu4p"
+  [─Éß║áT] D10a: whoami='desktop-t9r33p2\\thanghd'; share ch╞░a tß╗ôn tß║íi (rc=2); T='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-d10-223323-4qb2fu4p'
+== Tß╗öNG Kß║╛T
+  ─Éß║áT            D10a
+rc=0 ket_thuc=2026-11-19T15:33:23Z

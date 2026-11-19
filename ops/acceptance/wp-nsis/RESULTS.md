@@ -21,3 +21,28 @@ Trạng thái: **đã đo, CHƯA review độc lập.** Gói bằng chứng nằ
 ## Còn thiếu
 - S3/S4b cần đo lại, với vòng chờ theo `Un_*.exe` / `Au_*.exe`.
 - Review độc lập (1 lượt, Codex) chưa chạy.
+
+## N2: đo lại bằng driver đã sửa (lease g2; chủ kho cấp thêm 1 lượt bằng câu "Làm tiếp đi", 18/11 khoảng 23:29Z)
+Gói bằng chứng: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\wp-nsis\freeze-n2\wp-nsis-n2-evidence.zip`, sha256 `6084f4a764b78d75a4e2bd8d6f440144c4c84f1b29e04fe1868d1b3eaa28322a`, MANIFEST `003f54f3…`, quét secret rc 0.
+
+Driver đã sửa ba điểm:
+- lấy đường dẫn cài từ `QuietUninstallString`;
+- chờ cả tiến trình `Un_*`/`Au_*` tự nhân bản của bộ gỡ, tối đa 300 s;
+- ghi phần tồn dư tách riêng khỏi trạng thái "gỡ chưa xong".
+
+| Bước | Kết quả | Dấu hiệu (`NSIS-N2-progress.log`) |
+|---|---|---|
+| S0 | sạch | `S0 clean` |
+| S1 | đạt | sha256 `959c14c1…`, chữ ký `NotSigned` |
+| S2 cài | **đạt** | rc 0, 31 s; `exe` 6990dce4; 3226 tệp; có bộ gỡ; 0 tiến trình |
+| S3 gỡ | **xong nhưng để tồn dư** | Tiến trình gốc thoát sau 1 s, gỡ xong sau 5 s. Khoá HKCU, shortcut và `Proxima.exe` đều hết. **Còn lại:** thư mục cài rỗng và `proxima-updater\installer.exe` (161 754 969 byte) |
+| S4a cài lại | **đạt** | rc 0, 40 s; manifest **trùng S2** (`2537b108…`) |
+| S4b gỡ lần 2 | **xong nhưng để tồn dư** | Xong sau 8 s; tồn dư y hệt S3 |
+
+**Kết luận N2:** cài per-user hoạt động và lặp lại được. Bộ gỡ chính thức gỡ đủ khoá, shortcut và 3226 tệp, nhưng **lần nào cũng để lại** thư mục rỗng cùng một bản sao bộ cài 161 MB. Vì vậy tiêu chí PASS "gỡ sạch" của đặc tả **không đạt**. Đây là hành vi của sản phẩm (finding NSIS-2), không phải lỗi đo.
+
+**Dọn sau đo:** phiên điều phối xoá thư mục rỗng và `proxima-updater` (đã kiểm `installer.exe` có băm = bộ cài). Desktop cuối cùng sạch.
+
+**Lỗi phía điều phối:** trong lệnh dọn một dòng, biến `$L` (đường dẫn) ghi đè `$l` (dòng khoá), vì biến PowerShell không phân biệt hoa thường. Hậu quả là khoá không được nhả, ở cả lần dọn 22:38Z lẫn lần sau N2. Tôi đã nhả tay sau khi khớp nội dung khoá.
+
+Review: Codex chạy trên ASUS, đang chạy.

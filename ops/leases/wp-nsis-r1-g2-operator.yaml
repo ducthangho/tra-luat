@@ -32,9 +32,9 @@ granted_on_instruction_note: 'không mở app đã cài, không inference, khôn
 recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-18T23:29:49Z'
-heartbeat_at: '2026-11-18T23:29:49Z'
-lease_until: '2026-11-19T03:29:49Z'
-lease_expires_at_utc: '2026-11-19T03:29:49Z'
+heartbeat_at: '2026-11-19T01:09:43Z'
+lease_until: '2026-11-19T01:09:43Z'
+lease_expires_at_utc: '2026-11-19T01:09:43Z'
 max_lease_hours: 6
 review_calls_limit: 1
 review_calls_used: 0
@@ -44,3 +44,5 @@ windows: native_desktop_only
 native_runs_used_g1: 2
 extra_native_run_granted: 'chu kho 18/11 ~23:29Z "Lam tiep di" sau bao cao xin them 1 luot do S3/S4 (bo go NSIS bat dong bo)'
 native_runs_limit_g2: 1
+withdrawn_at_utc: '2026-11-19T01:09:43Z'
+withdrawn_reason: 'N2 da dung + review request_changes; thay bang g3 cho do bo sung'

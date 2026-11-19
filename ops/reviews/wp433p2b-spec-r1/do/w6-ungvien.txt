@@ -1,0 +1,63 @@
+B0 hop_le: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP='https://w' | cfg=b'{"token": "tok", "webappUrl": "https://w", "rootFolderId": "r"}'
+   err= []
+   out_ac= 1
+B1 token_so: ('rc', 1) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: token']
+   out_ac= 1
+B2 token_d800: ('rc', 1) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: token']
+   out_ac= 1
+B3 token_dc80: ('rc', 1) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: token']
+   out_ac= 1
+B4 token_nul: ('rc', 1) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: token']
+   out_ac= 1
+B5 web_nul: ('rc', 1) | TL_TOKEN='truoc' TL_WEBAPP='truoc' | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: webappUrl']
+   out_ac= 1
+B6 web_so: ('rc', 1) | TL_TOKEN='truoc' TL_WEBAPP='truoc' | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: webappUrl']
+   out_ac= 1
+B7 web_d800: ('rc', 1) | TL_TOKEN='truoc' TL_WEBAPP='truoc' | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: webappUrl']
+   out_ac= 1
+B8 root_d800: ('rc', 1) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: config']
+   out_ac= 1
+B9 cfg_list: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "tok"}'
+   err= []
+   out_ac= 1
+B10 cfg_null: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "tok"}'
+   err= []
+   out_ac= 1
+B11 cfg_str: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "tok"}'
+   err= []
+   out_ac= 1
+B12 cfg_cu_d800: ('rc', 1) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"x": "\\ud800"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: config']
+   out_ac= 1
+B13 token_0: ('rc', 0) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ⚠ bundle thiếu GAS token.']
+   out_ac= 1
+B14 token_null: ('rc', 0) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ⚠ bundle thiếu GAS token.']
+   out_ac= 1
+B15 token_rong: ('rc', 0) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ⚠ bundle thiếu GAS token.']
+   out_ac= 1
+B16 web_rong_falsy0: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP='truoc' | cfg=b'{"token": "tok", "webappUrl": 0}'
+   err= []
+   out_ac= 1
+B17 khoa_d800: ('rc', 1) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: config']
+   out_ac= 1
+B18 token_list: ('rc', 1) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: token']
+   out_ac= 1
+B19 cfg_khong_doc: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "tok"}'
+   err= []
+   out_ac= 1
+B20 bundle_list: ('NEM', 'AttributeError', "'list' object has no attribute 'get'") | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0

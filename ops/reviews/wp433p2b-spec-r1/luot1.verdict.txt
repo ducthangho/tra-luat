@@ -1,0 +1,85 @@
+codex
+## Bảng kiểm sự thật
+
+Review độc lập đặc tả `GWS-CRED-DICH-NGOAI-KHO-B` r1, Issue #433, trên Codex họ OpenAI. SHA-256 đặc tả `cd88fbe9c35358e984165009a4b5e29e0e356c306f6bd3aad415b4438ade1afa`. Checkout detached đúng base `11bd0336d00b4a9544e70dcbbe049d372053a3ec`, tree `daf13b1e486822aacd5c8dba56c1d0a36f478feb`. Không có thay đổi tracked. `/tmp` trả `EROFS`, nên tôi chạy trên hệ tệp RAM `/dev/shm` với thao tác tệp thật, dữ liệu giả và không gọi mạng.
+
+| Mục | Kết quả |
+|---|---|
+| §0.1, dòng và thứ tự | Khớp blob `9ec027c2808868a05b67adc3d93ea68a574d6ec0`, 2.649 dòng. Giải mã 1766 → kiểm jar 1772–1775 → gán env 1777–1780 → chốt 1784 → đọc 1787 → merge 1791 → encode/ghi 1792. Bắt `OSError` ở 1794. Token falsy đi 1799, không đặt `degraded`. W1 ở 1722 và W3 ở 2035 khớp. |
+| §0.2, B0–B20 trên base | `do_w6.py` rc 0, toàn bộ kết quả khớp biên nhận. B0, B13–B16 và B19 trả rc 0. B1–B12, B17, B18 và B20 ném trước dòng `agent_creds:`. B3 đã đổi token trước khi lỗi encode config. B5–B7 đã đổi token nhưng giữ web trước lỗi. B20 ném ở 1772. Các ca ném không trả rc **từ hàm**. |
+| §0.2, ngữ nghĩa env | Python 3.11.18, 3.12.3 và 3.13.18 trên Linux tái hiện thông điệp kiểu, NUL, `\ud800` và việc env nhận `\udc80`. Nguồn `os.py` 3.13 xác nhận chuỗi lỗi kiểu ở nhánh `nt`. Windows chưa chạy. |
+| §0.3, prototype và bẫy neo | `va_ung_vien.py` rc 0, diff `+27/−2`. Ruff `--select F --output-format concise` đếm 95 lỗi trên mỗi cây, rc 1 cả hai. `chay_frag.py` trên prototype cho P2a `run=True`, 37/37, tự kiểm 3/3 và packet 1 `run=True`, 30/30. Bỏ chú thích ở `except` làm P2a `HONG: 1`, `run=False`. Driver vẫn trả rc 0 ở lượt phản chứng, nên verdict phải đọc cả `run`. |
+| §0.3, PD và CI | `cloud_agent_creds_test.py` với `CAC_TLGWS` trên base và prototype đều rc 0, 60/60 ca, 91/91 đột biến, tự kiểm 4/4 và `TONG: DAT`. Sửa một ký tự neo PD1 cho `HONG` vì khớp 0 lần. Bảng PD còn hai neo `ma` ngoài `tl_gws.py`. Không thấy neo thực thi W6 bổ sung qua các chuỗi tìm nêu trong §0.3. Đọc CI xác nhận cổng bundled trên PR và manifest committed trên master. |
+| N1–N3, §4b | `do_dot_bien.py` rc 0 trên cả ba bản Python, output khớp từng biên nhận. Đủ 21 bộ ba khác nhau, E=7, H=14, `posix`=2 ở dòng 3–4. Tập ngoại lệ theo lượt khớp cột 6. Trên base N1 đỏ đầu ở `W6.web_kieu/nem_env`, còn N2 đạt cả sáu lượt. |
+| N3 và các lượt không là đích | `tu_kiem_doi_kieu` giữ chuỗi `AssertionError → AttributeError`, `tu_kiem_chu_thich` sống, và so thiếu lượt cấp nhầm tín dụng cho `tu_kiem_sai_luot`. Với bộ đo tạm, `pc_bo_luot` và `pc_bo_ca` làm sổ lượt lệch, còn `pc_bo_khai` đưa hai ngoại lệ của dòng 1–2 ra ngoài tập khai. Đây là phép đo bộ đo tạm vì fragment P2b chưa có. Cả tám lượt phụ thực sự gọi hàm và so hậu điều. Đổi riêng kết quả trả về của từng lượt đều làm đỏ đúng lượt, nên chúng có đo dù không là đích trong bảng 21 đột biến. |
+| N5–N7 | Trên bản sao base sạch cache, `test-fragments-check` rc 0, thêm một chú thích vào bundled làm rc 2 `GENERATED_BUNDLE_STALE`. Checkout giao kèm có `__pycache__` từ trước review nên check trực tiếp báo `INVALID_FRAGMENT_PATH`. Manifest tạm đạt 185/185, rc 0. Sửa hash làm `ok=false`, rc 2 dù bộ đếm vẫn 185/185. `doctrine-scan`, `adr-song` và `git diff --check` trên base đều rc 0. Các gate cần exact head P2b chưa chạy vì chưa có head thi hành. |
+
+L1, L2 và L4 khớp về đơn vị đếm, ánh xạ write set và số kế thừa `3/0`. Hai OID khai ADR-0053/0055 đạt ba phép đối chiếu Git trên ref cục bộ. Các chỗ cần sửa ở L3, L5 và L6 nằm dưới đây.
+
+## Findings
+
+**P2 — M1–M2, kiểm UTF-8 chưa bảo đảm gán được env POSIX.** Chạy prototype với `LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0`, dùng `token="tok"` và `webappUrl="https://example.invalid/é"`. Cả hai qua M1. Gán URL ném `UnicodeEncodeError` do encoding env là ASCII, sau khi token đã đổi.  
+**Câu thay thế:** “Trên POSIX, sau kiểm kiểu, NUL và UTF-8 nghiêm ngặt, kiểm cả hai giá trị theo encoding mà `os.environ` dùng trước phép gán đầu tiên. Lỗi encode đi qua nhánh từ chối M2. Thêm lượt locale ASCII kiểm hai biến giữ nguyên và một dòng trạng thái agent.”
+
+**P2 — M3(c), tuần tự hoá có thể ghi config ngoài chuẩn JSON và báo thành công.** Bundle `{"token":"tok","extra":1e999}` tạo config có `Infinity`. Config cũ `{"extra":NaN}` giữ `NaN` sau merge. Cả hai trả rc 0. Thử lại trong RAM với `allow_nan=False` và bắt `ValueError` quanh bước tuần tự hoá cho rc 1, giữ byte cũ. Surrogate ở khóa bundle và khóa config cũ đã được prototype xử lý đúng.  
+**Câu thay thế:** “Tuần tự hoá dict đã merge bằng `json.dumps(existing, ensure_ascii=False, allow_nan=False).encode("utf-8")`. Chỉ bắt `ValueError` quanh bước này, gồm lỗi encode UTF-8. Dùng cùng lý do `dữ liệu không hợp lệ: config`, không gọi writer và giữ env đã gán. Đo cả số không hữu hạn từ bundle lẫn config cũ.”
+
+**P2 — M2/N1, mốc giữ env và hợp đồng lỗi ghép chưa được đặc tả và đo nhất quán.** Với env ban đầu trống và `load_creds` thật, config mồi đặt cả hai biến trước W6. W6 từ chối token số nhưng giữ cặp vừa nạp, khác giá trị trước lệnh. Trên Code và Cowork, prototype vẫn ghi GWS cred hợp lệ. Với `--require-agent-creds`, kết quả là rc 1 khi agent `ĐÃ NẠP` và rc 4 khi chưa nạp, thêm một dòng lỗi của cờ. Jar sai có thể thêm dòng lỗi riêng trước W6. Đổi nhánh rc 4 thành rc 1 vẫn qua bộ đo tạm.  
+**Câu thay thế:** “Giữ hai biến như tại đầu W6, sau bước `load_creds` dùng để tải bundle. W6 phát đúng một dòng lỗi của W6 rồi tiếp tục các nhánh sau. Kiểm riêng lỗi W6, lỗi jar và lỗi `--require-agent-creds`. Thêm lượt Code/Cowork có agent đã nạp và chưa nạp, kiểm rc 1/4 và đúng một dòng trạng thái agent.”
+
+**P2 — N1, bộ đo chưa chứng minh không chạm config và không lộ token hợp lệ.** Chèn riêng từng thay đổi vào nhánh từ chối: gọi chốt đích, đọc config, ghi lại đúng byte cũ, hoặc in chỉ `TOK` khi URL sai. Cả bốn đều `SONG_SOT`. Byte cuối, danh sách tệp tạm và kiểm riêng `SENT` bỏ lọt các hành vi này. Lượt dương cũng chưa có khóa cũ độc lập để chứng minh merge giữ khóa đó.  
+**Câu thay thế:** “Quan sát số lần chốt, đọc và gọi writer riêng cho đích W6. M2 từ chối phải cho `0/0/0`, M3(c) phải có writer bằng 0. Cấm cả `TOK` và `SENT` trong hai luồng của lượt từ chối. Lượt hợp lệ phải giữ một khóa cũ ngoài bundle. Thêm phản chứng riêng cho các hậu điều này và cập nhật tổng đếm.”
+
+**P3 — §0.3, biên nhận W6 ứng viên lệch script dựng.** Chạy lại `do_w6.py` trên cây ứng viên cho B8, B12 và B17 in `dữ liệu không hợp lệ: config`, khớp M3. Biên nhận cũ còn hậu tố `không mã hoá UTF-8 được`.  
+**Câu thay thế:** “Tái sinh `w6-ungvien.txt` bằng đúng `va_ung_vien.py` của revision này và ghi SHA-256 nguồn dựng cùng lệnh, thời điểm và rc.”
+
+**P3 — N3(b), so tập bỏ lọt sai thứ tự.** Đổi chỗ `W3.rong` và `W3.list_rong` vẫn cho ca đạt, tập sổ lượt bằng nhau và hai dãy khác nhau.  
+**Câu thay thế:** “So dãy `(ca, lượt)` thực chạy với dãy khai trong `_LUOT_DU_KIEN`. Hoán đổi hai lượt phải làm `run` trả False.”
+
+**P3 — §8, cận trên thiếu khoản dự phòng trong phép cộng.** Năm khoản fragment cộng ra `225–285`, nên tổng liệt kê là `251–321`. Khoảng `251–336` hợp lý nếu ghi riêng 15 dòng dự phòng. Numstat P2a là `389/0`, `48/19`, `1/0`, tổng **438 dòng thêm**. Ước lượng P2b dưới trần 450, với số thực tế còn chờ N7.  
+**Câu thay thế:** “Fragment dự kiến `225–285` dòng, cộng tối đa 15 dòng dự phòng, cho tổng P2b `251–336` dòng thêm. Sau khi cập nhật tiêu chí, đo lại bằng numstat exact head.”
+
+KET_LUAN: request_changes
+tokens used
+164,070
+## Bảng kiểm sự thật
+
+Review độc lập đặc tả `GWS-CRED-DICH-NGOAI-KHO-B` r1, Issue #433, trên Codex họ OpenAI. SHA-256 đặc tả `cd88fbe9c35358e984165009a4b5e29e0e356c306f6bd3aad415b4438ade1afa`. Checkout detached đúng base `11bd0336d00b4a9544e70dcbbe049d372053a3ec`, tree `daf13b1e486822aacd5c8dba56c1d0a36f478feb`. Không có thay đổi tracked. `/tmp` trả `EROFS`, nên tôi chạy trên hệ tệp RAM `/dev/shm` với thao tác tệp thật, dữ liệu giả và không gọi mạng.
+
+| Mục | Kết quả |
+|---|---|
+| §0.1, dòng và thứ tự | Khớp blob `9ec027c2808868a05b67adc3d93ea68a574d6ec0`, 2.649 dòng. Giải mã 1766 → kiểm jar 1772–1775 → gán env 1777–1780 → chốt 1784 → đọc 1787 → merge 1791 → encode/ghi 1792. Bắt `OSError` ở 1794. Token falsy đi 1799, không đặt `degraded`. W1 ở 1722 và W3 ở 2035 khớp. |
+| §0.2, B0–B20 trên base | `do_w6.py` rc 0, toàn bộ kết quả khớp biên nhận. B0, B13–B16 và B19 trả rc 0. B1–B12, B17, B18 và B20 ném trước dòng `agent_creds:`. B3 đã đổi token trước khi lỗi encode config. B5–B7 đã đổi token nhưng giữ web trước lỗi. B20 ném ở 1772. Các ca ném không trả rc **từ hàm**. |
+| §0.2, ngữ nghĩa env | Python 3.11.18, 3.12.3 và 3.13.18 trên Linux tái hiện thông điệp kiểu, NUL, `\ud800` và việc env nhận `\udc80`. Nguồn `os.py` 3.13 xác nhận chuỗi lỗi kiểu ở nhánh `nt`. Windows chưa chạy. |
+| §0.3, prototype và bẫy neo | `va_ung_vien.py` rc 0, diff `+27/−2`. Ruff `--select F --output-format concise` đếm 95 lỗi trên mỗi cây, rc 1 cả hai. `chay_frag.py` trên prototype cho P2a `run=True`, 37/37, tự kiểm 3/3 và packet 1 `run=True`, 30/30. Bỏ chú thích ở `except` làm P2a `HONG: 1`, `run=False`. Driver vẫn trả rc 0 ở lượt phản chứng, nên verdict phải đọc cả `run`. |
+| §0.3, PD và CI | `cloud_agent_creds_test.py` với `CAC_TLGWS` trên base và prototype đều rc 0, 60/60 ca, 91/91 đột biến, tự kiểm 4/4 và `TONG: DAT`. Sửa một ký tự neo PD1 cho `HONG` vì khớp 0 lần. Bảng PD còn hai neo `ma` ngoài `tl_gws.py`. Không thấy neo thực thi W6 bổ sung qua các chuỗi tìm nêu trong §0.3. Đọc CI xác nhận cổng bundled trên PR và manifest committed trên master. |
+| N1–N3, §4b | `do_dot_bien.py` rc 0 trên cả ba bản Python, output khớp từng biên nhận. Đủ 21 bộ ba khác nhau, E=7, H=14, `posix`=2 ở dòng 3–4. Tập ngoại lệ theo lượt khớp cột 6. Trên base N1 đỏ đầu ở `W6.web_kieu/nem_env`, còn N2 đạt cả sáu lượt. |
+| N3 và các lượt không là đích | `tu_kiem_doi_kieu` giữ chuỗi `AssertionError → AttributeError`, `tu_kiem_chu_thich` sống, và so thiếu lượt cấp nhầm tín dụng cho `tu_kiem_sai_luot`. Với bộ đo tạm, `pc_bo_luot` và `pc_bo_ca` làm sổ lượt lệch, còn `pc_bo_khai` đưa hai ngoại lệ của dòng 1–2 ra ngoài tập khai. Đây là phép đo bộ đo tạm vì fragment P2b chưa có. Cả tám lượt phụ thực sự gọi hàm và so hậu điều. Đổi riêng kết quả trả về của từng lượt đều làm đỏ đúng lượt, nên chúng có đo dù không là đích trong bảng 21 đột biến. |
+| N5–N7 | Trên bản sao base sạch cache, `test-fragments-check` rc 0, thêm một chú thích vào bundled làm rc 2 `GENERATED_BUNDLE_STALE`. Checkout giao kèm có `__pycache__` từ trước review nên check trực tiếp báo `INVALID_FRAGMENT_PATH`. Manifest tạm đạt 185/185, rc 0. Sửa hash làm `ok=false`, rc 2 dù bộ đếm vẫn 185/185. `doctrine-scan`, `adr-song` và `git diff --check` trên base đều rc 0. Các gate cần exact head P2b chưa chạy vì chưa có head thi hành. |
+
+L1, L2 và L4 khớp về đơn vị đếm, ánh xạ write set và số kế thừa `3/0`. Hai OID khai ADR-0053/0055 đạt ba phép đối chiếu Git trên ref cục bộ. Các chỗ cần sửa ở L3, L5 và L6 nằm dưới đây.
+
+## Findings
+
+**P2 — M1–M2, kiểm UTF-8 chưa bảo đảm gán được env POSIX.** Chạy prototype với `LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0`, dùng `token="tok"` và `webappUrl="https://example.invalid/é"`. Cả hai qua M1. Gán URL ném `UnicodeEncodeError` do encoding env là ASCII, sau khi token đã đổi.  
+**Câu thay thế:** “Trên POSIX, sau kiểm kiểu, NUL và UTF-8 nghiêm ngặt, kiểm cả hai giá trị theo encoding mà `os.environ` dùng trước phép gán đầu tiên. Lỗi encode đi qua nhánh từ chối M2. Thêm lượt locale ASCII kiểm hai biến giữ nguyên và một dòng trạng thái agent.”
+
+**P2 — M3(c), tuần tự hoá có thể ghi config ngoài chuẩn JSON và báo thành công.** Bundle `{"token":"tok","extra":1e999}` tạo config có `Infinity`. Config cũ `{"extra":NaN}` giữ `NaN` sau merge. Cả hai trả rc 0. Thử lại trong RAM với `allow_nan=False` và bắt `ValueError` quanh bước tuần tự hoá cho rc 1, giữ byte cũ. Surrogate ở khóa bundle và khóa config cũ đã được prototype xử lý đúng.  
+**Câu thay thế:** “Tuần tự hoá dict đã merge bằng `json.dumps(existing, ensure_ascii=False, allow_nan=False).encode("utf-8")`. Chỉ bắt `ValueError` quanh bước này, gồm lỗi encode UTF-8. Dùng cùng lý do `dữ liệu không hợp lệ: config`, không gọi writer và giữ env đã gán. Đo cả số không hữu hạn từ bundle lẫn config cũ.”
+
+**P2 — M2/N1, mốc giữ env và hợp đồng lỗi ghép chưa được đặc tả và đo nhất quán.** Với env ban đầu trống và `load_creds` thật, config mồi đặt cả hai biến trước W6. W6 từ chối token số nhưng giữ cặp vừa nạp, khác giá trị trước lệnh. Trên Code và Cowork, prototype vẫn ghi GWS cred hợp lệ. Với `--require-agent-creds`, kết quả là rc 1 khi agent `ĐÃ NẠP` và rc 4 khi chưa nạp, thêm một dòng lỗi của cờ. Jar sai có thể thêm dòng lỗi riêng trước W6. Đổi nhánh rc 4 thành rc 1 vẫn qua bộ đo tạm.  
+**Câu thay thế:** “Giữ hai biến như tại đầu W6, sau bước `load_creds` dùng để tải bundle. W6 phát đúng một dòng lỗi của W6 rồi tiếp tục các nhánh sau. Kiểm riêng lỗi W6, lỗi jar và lỗi `--require-agent-creds`. Thêm lượt Code/Cowork có agent đã nạp và chưa nạp, kiểm rc 1/4 và đúng một dòng trạng thái agent.”
+
+**P2 — N1, bộ đo chưa chứng minh không chạm config và không lộ token hợp lệ.** Chèn riêng từng thay đổi vào nhánh từ chối: gọi chốt đích, đọc config, ghi lại đúng byte cũ, hoặc in chỉ `TOK` khi URL sai. Cả bốn đều `SONG_SOT`. Byte cuối, danh sách tệp tạm và kiểm riêng `SENT` bỏ lọt các hành vi này. Lượt dương cũng chưa có khóa cũ độc lập để chứng minh merge giữ khóa đó.  
+**Câu thay thế:** “Quan sát số lần chốt, đọc và gọi writer riêng cho đích W6. M2 từ chối phải cho `0/0/0`, M3(c) phải có writer bằng 0. Cấm cả `TOK` và `SENT` trong hai luồng của lượt từ chối. Lượt hợp lệ phải giữ một khóa cũ ngoài bundle. Thêm phản chứng riêng cho các hậu điều này và cập nhật tổng đếm.”
+
+**P3 — §0.3, biên nhận W6 ứng viên lệch script dựng.** Chạy lại `do_w6.py` trên cây ứng viên cho B8, B12 và B17 in `dữ liệu không hợp lệ: config`, khớp M3. Biên nhận cũ còn hậu tố `không mã hoá UTF-8 được`.  
+**Câu thay thế:** “Tái sinh `w6-ungvien.txt` bằng đúng `va_ung_vien.py` của revision này và ghi SHA-256 nguồn dựng cùng lệnh, thời điểm và rc.”
+
+**P3 — N3(b), so tập bỏ lọt sai thứ tự.** Đổi chỗ `W3.rong` và `W3.list_rong` vẫn cho ca đạt, tập sổ lượt bằng nhau và hai dãy khác nhau.  
+**Câu thay thế:** “So dãy `(ca, lượt)` thực chạy với dãy khai trong `_LUOT_DU_KIEN`. Hoán đổi hai lượt phải làm `run` trả False.”
+
+**P3 — §8, cận trên thiếu khoản dự phòng trong phép cộng.** Năm khoản fragment cộng ra `225–285`, nên tổng liệt kê là `251–321`. Khoảng `251–336` hợp lý nếu ghi riêng 15 dòng dự phòng. Numstat P2a là `389/0`, `48/19`, `1/0`, tổng **438 dòng thêm**. Ước lượng P2b dưới trần 450, với số thực tế còn chờ N7.  
+**Câu thay thế:** “Fragment dự kiến `225–285` dòng, cộng tối đa 15 dòng dự phòng, cho tổng P2b `251–336` dòng thêm. Sau khi cập nhật tiêu chí, đo lại bằng numstat exact head.”
+
+KET_LUAN: request_changes

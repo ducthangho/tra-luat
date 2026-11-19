@@ -1,0 +1,71 @@
+codex
+## Review độc lập lượt 3 — P2b, Issue #433
+
+Đã đối chiếu bản 3 (`cd0b51a3d458de79c577f1573899fe0518aa2871dfc217fa143b822da1bac267`) với bản 2 (`c63c1166afcae6e85bc2e69944ff454ffd684183cd6595046741f5b19e1732db`). HEAD detached tại `11bd0336d00b4a9544e70dcbbe049d372053a3ec`, tree `daf13b1e486822aacd5c8dba56c1d0a36f478feb`. Prototype dựng lại bằng `va_ung_vien.py` có SHA-256 `22baf3fd97b6263545c763865013f1445e034c65e1ff7e84cdb819dda39cb9c8`.
+
+Reviewer họ OpenAI, phiên Codex qua API với shell cục bộ. Chạy trên Linux, Python 3.13.18, với bản sao và fixture trong RAM tại `/dev/shm`. Không ghi vào clone, không gọi mạng. Fragment P2b và các gate trên head thi hành chưa chạy vì chưa có head thi hành.
+
+### Finding lượt 1
+
+| Finding | Trạng thái | Phép đo |
+|---|---|---|
+| P2 — M1–M2, locale ASCII | Đóng | L1 của `do_locale.py`, chạy không `-I` với `LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0`. Base ném `UnicodeEncodeError` sau khi đổi token. Prototype trả rc 1, giữ cặp env và byte config, in đúng một lỗi W6 và một dòng trạng thái agent. Script rc 0 trên cả hai nguồn. |
+| P2 — M3(c), `Infinity` và `NaN` | Đóng | L2/L3 trên prototype trả rc 1, giữ byte cũ và báo lỗi `config`. Đột biến 27 đỏ ở `W6.nan/cfg`. |
+| P2 — M2/N1, mốc env và lỗi ghép | Đóng | Bản 3 giữ mốc đầu W6 sau `load_creds`. Đo lại các lượt `jar_va_token`, `require`, `require_da_nap` và `code`: nền đạt, đột biến 29–33 đỏ đúng đích. |
+| P2 — N1, chạm config và lộ token | Đóng | Đột biến 15 và 22–26 đỏ lần lượt ở `khong_lo`, `khong_chot`, `khong_doc`, `khong_ghi`, `khong_ghi`, `merge`. |
+| P3 — §0.3, biên nhận lệch prototype | Đóng | `do_w6.py` rc 0. Output khớp nguyên văn `w6-ungvien.txt`, `diff` rc 0. |
+| P3 — N3(b), đảo thứ tự lượt | Đóng | Đảo `W3.rong` và `W3.list_rong` trong bộ chạy tạm. Tập lượt giữ nguyên, phép so dãy báo `SO_LUOT`. |
+| P3 — §8, thiếu dự phòng trong phép cộng | Đóng | Fragment 286–352 dòng. Cộng 27–37 dòng nguồn và 1 dòng bundled thành 314–390. Dự phòng tối đa 15 dòng đưa cận trên lên 405, còn 45 dòng so với trần 450. |
+
+### Finding lượt 2
+
+| Finding | Trạng thái | Phản chứng dựng lại |
+|---|---|---|
+| P2 — N1b chỉ đo chiều từ chối | Đóng | Ép M1 dùng ASCII đúng khi hàm báo `utf-8` cho `('w6_locale', 'W6.web_utf8', 'duong_utf8')`, khớp §4b dòng 35. |
+| P2 — M3(c) chưa đo giữ `TL_WEBAPP` | Đóng | Chèn `os.environ["TL_WEBAPP"] = "truoc-web"` vào `except ValueError` cho `('w6_du_lieu', 'W6.encode', 'env_web')`. Đột biến `pop` ghi ở §4b dòng 36 cũng đỏ đúng bộ ba này. Dòng 9 vẫn đỏ riêng ở `env_token`. |
+
+`do_dot_bien2.py` rc 0. Output khớp biên nhận Python 3.13 từng byte. Đối chiếu theo ID xác nhận 36/36 bộ ba riêng khớp §4b, không có neo `HONG`. Tổng E=8, H=28, `posix`=4 ở dòng 3, 4, 28, 35. N3(c) cân bằng với 3/29/36 trên POSIX UTF-8. Đối chiếu tĩnh trên nền khác cho 2/27/32 lượt chạy theo ba bộ đếm, với `w=1, t=2, v=4`. Hai fragment kề bên đều `run=True`, `HONG: 0`, lần lượt giết đúng 30/30 và 37/37 đột biến. Driver `chay_frag.py` rc 0.
+
+### Finding mới
+
+**P3 — §4 N1b và `do_dot_bien2.py:127–130`, `tien_de` được chấm sau lời gọi cần tiền điều kiện đó.** Trên tiến trình ASCII thật, chạy riêng `w6_locale` bằng `python3 -B` với ba biến locale ở L1. `sys.getfilesystemencoding()` trả `ascii`. Sau khi giả lập `utf-8`, `cmd_bootstrap` ném `UnicodeEncodeError` lúc gán URL chứa `é`. Bộ chạy báo `W6.web_utf8/ngoai_le_la:UnicodeEncodeError` thay vì `W6.web_utf8/tien_de` như N1b quy định. Chèn riêng kiểm tra `tien_de` trước `r.boot(...)` trong bản sao RAM cho đúng bộ ba `('w6_locale', 'W6.web_utf8', 'tien_de')`. Script đối chứng rc 0. Sai lệch nằm ở nhãn chẩn đoán. Lượt vẫn đỏ và đột biến 35 vẫn bị bắt đúng trên UTF-8.
+
+**Câu thay thế.** “Trước khi giả lập hoặc gọi `cmd_bootstrap` cho `W6.web_utf8`, đọc và chuẩn hóa encoding filesystem thật. Nếu khác UTF-8, ghi lượt đỏ với nhãn `tien_de` và kết thúc lượt. Nếu là UTF-8, thực hiện lời gọi và chấm `duong_utf8`.”
+
+KET_LUAN: approve
+tokens used
+67,002
+## Review độc lập lượt 3 — P2b, Issue #433
+
+Đã đối chiếu bản 3 (`cd0b51a3d458de79c577f1573899fe0518aa2871dfc217fa143b822da1bac267`) với bản 2 (`c63c1166afcae6e85bc2e69944ff454ffd684183cd6595046741f5b19e1732db`). HEAD detached tại `11bd0336d00b4a9544e70dcbbe049d372053a3ec`, tree `daf13b1e486822aacd5c8dba56c1d0a36f478feb`. Prototype dựng lại bằng `va_ung_vien.py` có SHA-256 `22baf3fd97b6263545c763865013f1445e034c65e1ff7e84cdb819dda39cb9c8`.
+
+Reviewer họ OpenAI, phiên Codex qua API với shell cục bộ. Chạy trên Linux, Python 3.13.18, với bản sao và fixture trong RAM tại `/dev/shm`. Không ghi vào clone, không gọi mạng. Fragment P2b và các gate trên head thi hành chưa chạy vì chưa có head thi hành.
+
+### Finding lượt 1
+
+| Finding | Trạng thái | Phép đo |
+|---|---|---|
+| P2 — M1–M2, locale ASCII | Đóng | L1 của `do_locale.py`, chạy không `-I` với `LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0`. Base ném `UnicodeEncodeError` sau khi đổi token. Prototype trả rc 1, giữ cặp env và byte config, in đúng một lỗi W6 và một dòng trạng thái agent. Script rc 0 trên cả hai nguồn. |
+| P2 — M3(c), `Infinity` và `NaN` | Đóng | L2/L3 trên prototype trả rc 1, giữ byte cũ và báo lỗi `config`. Đột biến 27 đỏ ở `W6.nan/cfg`. |
+| P2 — M2/N1, mốc env và lỗi ghép | Đóng | Bản 3 giữ mốc đầu W6 sau `load_creds`. Đo lại các lượt `jar_va_token`, `require`, `require_da_nap` và `code`: nền đạt, đột biến 29–33 đỏ đúng đích. |
+| P2 — N1, chạm config và lộ token | Đóng | Đột biến 15 và 22–26 đỏ lần lượt ở `khong_lo`, `khong_chot`, `khong_doc`, `khong_ghi`, `khong_ghi`, `merge`. |
+| P3 — §0.3, biên nhận lệch prototype | Đóng | `do_w6.py` rc 0. Output khớp nguyên văn `w6-ungvien.txt`, `diff` rc 0. |
+| P3 — N3(b), đảo thứ tự lượt | Đóng | Đảo `W3.rong` và `W3.list_rong` trong bộ chạy tạm. Tập lượt giữ nguyên, phép so dãy báo `SO_LUOT`. |
+| P3 — §8, thiếu dự phòng trong phép cộng | Đóng | Fragment 286–352 dòng. Cộng 27–37 dòng nguồn và 1 dòng bundled thành 314–390. Dự phòng tối đa 15 dòng đưa cận trên lên 405, còn 45 dòng so với trần 450. |
+
+### Finding lượt 2
+
+| Finding | Trạng thái | Phản chứng dựng lại |
+|---|---|---|
+| P2 — N1b chỉ đo chiều từ chối | Đóng | Ép M1 dùng ASCII đúng khi hàm báo `utf-8` cho `('w6_locale', 'W6.web_utf8', 'duong_utf8')`, khớp §4b dòng 35. |
+| P2 — M3(c) chưa đo giữ `TL_WEBAPP` | Đóng | Chèn `os.environ["TL_WEBAPP"] = "truoc-web"` vào `except ValueError` cho `('w6_du_lieu', 'W6.encode', 'env_web')`. Đột biến `pop` ghi ở §4b dòng 36 cũng đỏ đúng bộ ba này. Dòng 9 vẫn đỏ riêng ở `env_token`. |
+
+`do_dot_bien2.py` rc 0. Output khớp biên nhận Python 3.13 từng byte. Đối chiếu theo ID xác nhận 36/36 bộ ba riêng khớp §4b, không có neo `HONG`. Tổng E=8, H=28, `posix`=4 ở dòng 3, 4, 28, 35. N3(c) cân bằng với 3/29/36 trên POSIX UTF-8. Đối chiếu tĩnh trên nền khác cho 2/27/32 lượt chạy theo ba bộ đếm, với `w=1, t=2, v=4`. Hai fragment kề bên đều `run=True`, `HONG: 0`, lần lượt giết đúng 30/30 và 37/37 đột biến. Driver `chay_frag.py` rc 0.
+
+### Finding mới
+
+**P3 — §4 N1b và `do_dot_bien2.py:127–130`, `tien_de` được chấm sau lời gọi cần tiền điều kiện đó.** Trên tiến trình ASCII thật, chạy riêng `w6_locale` bằng `python3 -B` với ba biến locale ở L1. `sys.getfilesystemencoding()` trả `ascii`. Sau khi giả lập `utf-8`, `cmd_bootstrap` ném `UnicodeEncodeError` lúc gán URL chứa `é`. Bộ chạy báo `W6.web_utf8/ngoai_le_la:UnicodeEncodeError` thay vì `W6.web_utf8/tien_de` như N1b quy định. Chèn riêng kiểm tra `tien_de` trước `r.boot(...)` trong bản sao RAM cho đúng bộ ba `('w6_locale', 'W6.web_utf8', 'tien_de')`. Script đối chứng rc 0. Sai lệch nằm ở nhãn chẩn đoán. Lượt vẫn đỏ và đột biến 35 vẫn bị bắt đúng trên UTF-8.
+
+**Câu thay thế.** “Trước khi giả lập hoặc gọi `cmd_bootstrap` cho `W6.web_utf8`, đọc và chuẩn hóa encoding filesystem thật. Nếu khác UTF-8, ghi lượt đỏ với nhãn `tien_de` và kết thúc lượt. Nếu là UTF-8, thực hiện lời gọi và chấm `duong_utf8`.”
+
+KET_LUAN: approve

@@ -1,0 +1,69 @@
+codex
+## Review độc lập lượt 2 — P2b, Issue #433
+
+Đã diff bản 2 (`c63c1166afcae6e85bc2e69944ff454ffd684183cd6595046741f5b19e1732db`) với bản 1 (`cd88fbe9c35358e984165009a4b5e29e0e356c306f6bd3aad415b4438ade1afa`). Checkout detached tại base `11bd0336d00b4a9544e70dcbbe049d372053a3ec`, tree `daf13b1e486822aacd5c8dba56c1d0a36f478feb`. Prototype dựng lại có SHA-256 `22baf3fd97b6263545c763865013f1445e034c65e1ff7e84cdb819dda39cb9c8`.
+
+Reviewer `openai_codex / codex_cli / machine`. Đo ngoại tuyến trên Linux, Python 3.13.18, với bản sao và fixture trong RAM tại `/dev/shm`. Checkout giữ nguyên.
+
+## Bảy finding lượt 1
+
+| Finding | Trạng thái | Phép đo |
+|---|---|---|
+| P2 — M1–M2, locale ASCII | Đóng | `do_locale.py` chạy trong tiến trình con với `LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0`, bỏ `-I`. Base ném `UnicodeEncodeError` sau khi đổi token. Bản 2 trả rc 1, giữ cả hai biến và byte config, in đúng một dòng lỗi W6 và một dòng trạng thái agent. Cùng URL dưới UTF-8 trả rc 0. |
+| P2 — M3(c), `Infinity` và `NaN` | Đóng | L2 với `1e999` trong bundle và L3 với `NaN` trong config cũ đều trả rc 1, giữ byte cũ và in lỗi `config`. Đột biến 27 bỏ `allow_nan=False` đỏ tại `W6.nan/cfg`. |
+| P2 — M2/N1, mốc env và lỗi ghép | Đóng | Với env ban đầu trống, `load_creds` thật nạp cả hai biến từ config mồi. W6 giữ đúng cặp đó trên Code và Cowork, đồng thời ghi đúng byte GWS cred. Cả hai nhánh trả rc 1 khi agent đã nạp và rc 4 khi chưa nạp với cờ bắt buộc. Dòng jar đứng trước dòng W6, dòng cờ chỉ xuất hiện ở rc 4, mỗi lượt có đúng một dòng trạng thái agent. Đột biến 29–33 đỏ đúng đích. |
+| P2 — N1, chạm/đọc/ghi config và lộ `TOK` | Đóng | Chạy lại bốn phép từng `SONG_SOT`. Gọi chốt, mở đọc, ghi lại đúng byte cũ và chỉ in `TOK` lần lượt đỏ ở `khong_chot`, `khong_doc`, `khong_ghi`, `khong_lo`. Đột biến 25 bắt writer ở M3(c), đột biến 26 bắt mất khóa cũ khi merge. |
+| P3 — §0.3, biên nhận W6 lệch prototype | Đóng | `do_w6.py` rc 0, output khớp nguyên văn `w6-ungvien.txt`. B8, B12 và B17 đều in `dữ liệu không hợp lệ: config`. |
+| P3 — N3(b), sổ lượt bỏ lọt đảo thứ tự | Đóng | Đảo `W3.rong` và `W3.list_rong` trong bộ chạy tạm. Tập lượt giữ nguyên, phép so dãy báo `SO_LUOT`. |
+| P3 — §8, phép cộng thiếu dự phòng | Đóng | Các khoản fragment cộng thành 282–348. Cộng 27–37 dòng nguồn và 1 dòng bundled cho 310–386, cộng tối đa 15 dòng dự phòng cho 310–401. |
+
+`do_dot_bien2.py` rc 0 với đủ 3 ca, 28 lượt và 34 bộ ba riêng, tất cả đột biến đỏ đúng đích, không có neo `HONG`. Tập ngoại lệ theo lượt và thứ tự so nhãn khớp §4–§4b. Tổng E=8, H=26, POSIX=3 ở dòng 3, 4, 28. Các đẳng thức N3(c) cân bằng với 3/28/34 chạy trên POSIX và 2/27/31 chạy, `chỉ_posix=1/1/3` trên nền khác. Vế nền khác được đối chiếu từ bảng, chưa chạy trên Windows. Trên base, W6 đỏ đầu ở `W6.web_kieu/nem_env`, nhóm jar đạt 6/6.
+
+Đọc trực tiếp giá trị `run` của hai fragment kề bên trên prototype. P2a `True`, 37/37, tự kiểm 3/3, `HONG: 0`. Packet 1 `True`, 30/30, `HONG: 0`. Fragment P2b và các gate trên head thi hành chưa có để chạy.
+
+## Finding mới
+
+**P2 — N1b chỉ đo chiều từ chối của M1.** Giả lập `sys.getfilesystemencoding()` trả `ascii` làm đỏ đột biến 28 ở nhãn `env`. Phép này kiểm quyết định từ chối của M1 trong khi `os.environ` của tiến trình vẫn mã hóa UTF-8. Tôi sửa riêng prototype để dùng ASCII khi hàm báo `utf-8`, giữ nguyên hành vi khi hàm báo `ascii`. Nền 28 lượt vẫn `SONG_SOT`, nhưng URL `https://x/é` trên tiến trình UTF-8 đổi từ rc 0 thành rc 1 với lỗi `webappUrl`. Tất cả fixture thành công hiện hành dùng giá trị ASCII.
+
+**Câu thay thế:** “N1b đo cả hai chiều với cùng URL chứa `é`: giả lập ASCII phải từ chối và giữ cặp env cũ; trong tiến trình POSIX UTF-8 thật phải trả rc 0 và gán đúng cả hai biến. Phản chứng dùng ASCII khi encoding thật là UTF-8 phải đỏ ở lượt thành công. Cập nhật sổ lượt và tổng N3(c).”
+
+**P2 — N1, các lượt M3(c) chưa đo giữ `TL_WEBAPP` đã gán.** M3(c) hứa giữ cả hai giá trị đã gán, nhưng các fixture lỗi tuần tự hóa đều bỏ `webappUrl`. Tôi chèn `os.environ["TL_WEBAPP"] = "truoc-web"` vào `except ValueError`. Nền 28 lượt vẫn `SONG_SOT`. Khi chạy bundle có `webappUrl=WEB` và `extra=Infinity`, cả hai nguồn trả rc 1, nhưng prototype giữ `(TOK, WEB)` còn đột biến trả env về `(TOK, "truoc-web")`.
+
+**Câu thay thế:** “Trong `W6.encode`, truyền thêm `webappUrl=WEB` khác giá trị trước. Nhãn `env` của lượt này đòi `(TOK, WEB)` sau lỗi tuần tự hóa. Thêm phản chứng khôi phục riêng `TL_WEBAPP` về giá trị trước trong `except`; lượt phải đỏ ở `env`. Cập nhật bảng đột biến và tổng N3(c).”
+
+KET_LUAN: request_changes
+tokens used
+64,946
+## Review độc lập lượt 2 — P2b, Issue #433
+
+Đã diff bản 2 (`c63c1166afcae6e85bc2e69944ff454ffd684183cd6595046741f5b19e1732db`) với bản 1 (`cd88fbe9c35358e984165009a4b5e29e0e356c306f6bd3aad415b4438ade1afa`). Checkout detached tại base `11bd0336d00b4a9544e70dcbbe049d372053a3ec`, tree `daf13b1e486822aacd5c8dba56c1d0a36f478feb`. Prototype dựng lại có SHA-256 `22baf3fd97b6263545c763865013f1445e034c65e1ff7e84cdb819dda39cb9c8`.
+
+Reviewer `openai_codex / codex_cli / machine`. Đo ngoại tuyến trên Linux, Python 3.13.18, với bản sao và fixture trong RAM tại `/dev/shm`. Checkout giữ nguyên.
+
+## Bảy finding lượt 1
+
+| Finding | Trạng thái | Phép đo |
+|---|---|---|
+| P2 — M1–M2, locale ASCII | Đóng | `do_locale.py` chạy trong tiến trình con với `LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0`, bỏ `-I`. Base ném `UnicodeEncodeError` sau khi đổi token. Bản 2 trả rc 1, giữ cả hai biến và byte config, in đúng một dòng lỗi W6 và một dòng trạng thái agent. Cùng URL dưới UTF-8 trả rc 0. |
+| P2 — M3(c), `Infinity` và `NaN` | Đóng | L2 với `1e999` trong bundle và L3 với `NaN` trong config cũ đều trả rc 1, giữ byte cũ và in lỗi `config`. Đột biến 27 bỏ `allow_nan=False` đỏ tại `W6.nan/cfg`. |
+| P2 — M2/N1, mốc env và lỗi ghép | Đóng | Với env ban đầu trống, `load_creds` thật nạp cả hai biến từ config mồi. W6 giữ đúng cặp đó trên Code và Cowork, đồng thời ghi đúng byte GWS cred. Cả hai nhánh trả rc 1 khi agent đã nạp và rc 4 khi chưa nạp với cờ bắt buộc. Dòng jar đứng trước dòng W6, dòng cờ chỉ xuất hiện ở rc 4, mỗi lượt có đúng một dòng trạng thái agent. Đột biến 29–33 đỏ đúng đích. |
+| P2 — N1, chạm/đọc/ghi config và lộ `TOK` | Đóng | Chạy lại bốn phép từng `SONG_SOT`. Gọi chốt, mở đọc, ghi lại đúng byte cũ và chỉ in `TOK` lần lượt đỏ ở `khong_chot`, `khong_doc`, `khong_ghi`, `khong_lo`. Đột biến 25 bắt writer ở M3(c), đột biến 26 bắt mất khóa cũ khi merge. |
+| P3 — §0.3, biên nhận W6 lệch prototype | Đóng | `do_w6.py` rc 0, output khớp nguyên văn `w6-ungvien.txt`. B8, B12 và B17 đều in `dữ liệu không hợp lệ: config`. |
+| P3 — N3(b), sổ lượt bỏ lọt đảo thứ tự | Đóng | Đảo `W3.rong` và `W3.list_rong` trong bộ chạy tạm. Tập lượt giữ nguyên, phép so dãy báo `SO_LUOT`. |
+| P3 — §8, phép cộng thiếu dự phòng | Đóng | Các khoản fragment cộng thành 282–348. Cộng 27–37 dòng nguồn và 1 dòng bundled cho 310–386, cộng tối đa 15 dòng dự phòng cho 310–401. |
+
+`do_dot_bien2.py` rc 0 với đủ 3 ca, 28 lượt và 34 bộ ba riêng, tất cả đột biến đỏ đúng đích, không có neo `HONG`. Tập ngoại lệ theo lượt và thứ tự so nhãn khớp §4–§4b. Tổng E=8, H=26, POSIX=3 ở dòng 3, 4, 28. Các đẳng thức N3(c) cân bằng với 3/28/34 chạy trên POSIX và 2/27/31 chạy, `chỉ_posix=1/1/3` trên nền khác. Vế nền khác được đối chiếu từ bảng, chưa chạy trên Windows. Trên base, W6 đỏ đầu ở `W6.web_kieu/nem_env`, nhóm jar đạt 6/6.
+
+Đọc trực tiếp giá trị `run` của hai fragment kề bên trên prototype. P2a `True`, 37/37, tự kiểm 3/3, `HONG: 0`. Packet 1 `True`, 30/30, `HONG: 0`. Fragment P2b và các gate trên head thi hành chưa có để chạy.
+
+## Finding mới
+
+**P2 — N1b chỉ đo chiều từ chối của M1.** Giả lập `sys.getfilesystemencoding()` trả `ascii` làm đỏ đột biến 28 ở nhãn `env`. Phép này kiểm quyết định từ chối của M1 trong khi `os.environ` của tiến trình vẫn mã hóa UTF-8. Tôi sửa riêng prototype để dùng ASCII khi hàm báo `utf-8`, giữ nguyên hành vi khi hàm báo `ascii`. Nền 28 lượt vẫn `SONG_SOT`, nhưng URL `https://x/é` trên tiến trình UTF-8 đổi từ rc 0 thành rc 1 với lỗi `webappUrl`. Tất cả fixture thành công hiện hành dùng giá trị ASCII.
+
+**Câu thay thế:** “N1b đo cả hai chiều với cùng URL chứa `é`: giả lập ASCII phải từ chối và giữ cặp env cũ; trong tiến trình POSIX UTF-8 thật phải trả rc 0 và gán đúng cả hai biến. Phản chứng dùng ASCII khi encoding thật là UTF-8 phải đỏ ở lượt thành công. Cập nhật sổ lượt và tổng N3(c).”
+
+**P2 — N1, các lượt M3(c) chưa đo giữ `TL_WEBAPP` đã gán.** M3(c) hứa giữ cả hai giá trị đã gán, nhưng các fixture lỗi tuần tự hóa đều bỏ `webappUrl`. Tôi chèn `os.environ["TL_WEBAPP"] = "truoc-web"` vào `except ValueError`. Nền 28 lượt vẫn `SONG_SOT`. Khi chạy bundle có `webappUrl=WEB` và `extra=Infinity`, cả hai nguồn trả rc 1, nhưng prototype giữ `(TOK, WEB)` còn đột biến trả env về `(TOK, "truoc-web")`.
+
+**Câu thay thế:** “Trong `W6.encode`, truyền thêm `webappUrl=WEB` khác giá trị trước. Nhãn `env` của lượt này đòi `(TOK, WEB)` sau lỗi tuần tự hóa. Thêm phản chứng khôi phục riêng `TL_WEBAPP` về giá trị trước trong `except`; lượt phải đỏ ở `env`. Cập nhật bảng đột biến và tổng N3(c).”
+
+KET_LUAN: request_changes

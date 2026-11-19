@@ -1,0 +1,63 @@
+B0 hop_le: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP='https://w' | cfg=b'{"token": "tok", "webappUrl": "https://w", "rootFolderId": "r"}'
+   err= []
+   out_ac= 1
+B1 token_so: ('NEM', 'TypeError', 'str expected, not int') | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0
+B2 token_d800: ('NEM', 'UnicodeEncodeError', "'utf-8' codec can't encode character '\\ud800' in position 1: surrogates not allowed") | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0
+B3 token_dc80: ('NEM', 'UnicodeEncodeError', "'utf-8' codec can't encode character '\\udc80' in position 12: surrogates not allowed") | TL_TOKEN='a\udc80' TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0
+B4 token_nul: ('NEM', 'ValueError', 'embedded null byte') | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0
+B5 web_nul: ('NEM', 'ValueError', 'embedded null byte') | TL_TOKEN='tok' TL_WEBAPP='truoc' | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0
+B6 web_so: ('NEM', 'TypeError', 'str expected, not int') | TL_TOKEN='tok' TL_WEBAPP='truoc' | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0
+B7 web_d800: ('NEM', 'UnicodeEncodeError', "'utf-8' codec can't encode character '\\ud800' in position 0: surrogates not allowed") | TL_TOKEN='tok' TL_WEBAPP='truoc' | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0
+B8 root_d800: ('NEM', 'UnicodeEncodeError', "'utf-8' codec can't encode character '\\ud800' in position 34: surrogates not allowed") | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0
+B9 cfg_list: ('NEM', 'AttributeError', "'list' object has no attribute 'update'") | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'[]'
+   err= []
+   out_ac= 0
+B10 cfg_null: ('NEM', 'AttributeError', "'NoneType' object has no attribute 'update'") | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'null'
+   err= []
+   out_ac= 0
+B11 cfg_str: ('NEM', 'AttributeError', "'str' object has no attribute 'update'") | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'"s"'
+   err= []
+   out_ac= 0
+B12 cfg_cu_d800: ('NEM', 'UnicodeEncodeError', "'utf-8' codec can't encode character '\\ud800' in position 7: surrogates not allowed") | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"x": "\\ud800"}'
+   err= []
+   out_ac= 0
+B13 token_0: ('rc', 0) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ⚠ bundle thiếu GAS token.']
+   out_ac= 1
+B14 token_null: ('rc', 0) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ⚠ bundle thiếu GAS token.']
+   out_ac= 1
+B15 token_rong: ('rc', 0) | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ⚠ bundle thiếu GAS token.']
+   out_ac= 1
+B16 web_rong_falsy0: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP='truoc' | cfg=b'{"token": "tok", "webappUrl": 0}'
+   err= []
+   out_ac= 1
+B17 khoa_d800: ('NEM', 'UnicodeEncodeError', "'utf-8' codec can't encode character '\\ud800' in position 18: surrogates not allowed") | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0
+B18 token_list: ('NEM', 'TypeError', 'str expected, not list') | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0
+B19 cfg_khong_doc: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "tok"}'
+   err= []
+   out_ac= 1
+B20 bundle_list: ('NEM', 'AttributeError', "'list' object has no attribute 'get'") | TL_TOKEN=None TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= []
+   out_ac= 0

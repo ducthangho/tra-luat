@@ -1,0 +1,42 @@
+== clone []
+fsenc= utf-8
+L1 web_e_locale: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP='https://x/é' | cfg=b'{"token": "tok", "webappUrl": "https://x/\xc3\xa9"}'
+   err= []
+L2 nan_bundle: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "tok", "extra": Infinity}'
+   err= []
+L3 nan_cu: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"x": NaN, "token": "tok"}'
+   err= []
+== clone [LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0]
+fsenc= utf-8
+L1 web_e_locale: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP='https://x/é' | cfg=b'{"token": "tok", "webappUrl": "https://x/\xc3\xa9"}'
+   err= []
+L2 nan_bundle: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "tok", "extra": Infinity}'
+   err= []
+L3 nan_cu: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"x": NaN, "token": "tok"}'
+   err= []
+== proto []
+fsenc= utf-8
+L1 web_e_locale: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP='https://x/é' | cfg=b'{"token": "tok", "webappUrl": "https://x/\xc3\xa9"}'
+   err= []
+L2 nan_bundle: ('rc', 1) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: config']
+L3 nan_cu: ('rc', 1) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"x": NaN}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: config']
+== proto [LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0]
+fsenc= utf-8
+L1 web_e_locale: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP='https://x/é' | cfg=b'{"token": "tok", "webappUrl": "https://x/\xc3\xa9"}'
+   err= []
+L2 nan_bundle: ('rc', 1) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: config']
+L3 nan_cu: ('rc', 1) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"x": NaN}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: config']
+== clone [LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0, không -I]
+fsenc= ascii
+L1 web_e_locale: ('NEM', 'UnicodeEncodeError', "'ascii' codec can't encode character '\\xe9' in position 10: ordinal not in range(128)") | TL_TOKEN='tok' TL_WEBAPP='truoc' | cfg=b'{"token": "CU"}'
+   err= []
+L2 nan_bundle: ('rc', 0) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "tok", "extra": Infinity}'
+== proto [LC_ALL=C PYTHONUTF8=0 PYTHONCOERCECLOCALE=0, không -I]
+fsenc= ascii
+L1 web_e_locale: ('rc', 1) | TL_TOKEN='truoc' TL_WEBAPP='truoc' | cfg=b'{"token": "CU"}'
+   err= ['[bootstrap] ✗ dữ liệu không hợp lệ: webappUrl']
+L2 nan_bundle: ('rc', 1) | TL_TOKEN='tok' TL_WEBAPP=None | cfg=b'{"token": "CU"}'

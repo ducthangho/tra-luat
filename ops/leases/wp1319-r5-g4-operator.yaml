@@ -1,0 +1,37 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: wp1319
+revision: 5
+generation: 4
+lease_id: wp1319-r5-g4-operator
+role: operator
+executor: none
+reviewer: 'connector Codex tren PR #1426'
+review_class: routine
+target_hosts: []
+live_change: 'khong — sua so theo 2 P2 cua connector Codex tren PR #1426 (review 5979837406): U9 tach y dinh chu kho khoi vi tri cache that cua add-on; §11 #4 thu hep pham vi quet secret'
+spec_path: ops/specs/wp1319-r5.md
+spec_hash: e96920d3a70d9c2c6f508d3c38aa30760ef65a4ad4ef16f12dc228ca0bb39dc0
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/leases/wp1319-r5-g4-operator.yaml
+write_set_hash: 43831d18527031a41f573bd6973e9936290f8b6326be6636acd74d7a3603b3f9
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1426
+base_sha: fb4c343fa8b5952130c969ce5116970d254bc8c5
+granted_by: ducthangho
+granted_on_instruction: 'uy quyen phien dieu phoi xu ly finding connector trong pham vi so sach #1319; chu kho 19/11: "Lam di, can nhac dung o C dung luong nhieu hon"'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-19T17:15:25Z'
+heartbeat_at: '2026-11-19T17:15:25Z'
+lease_until: '2026-11-19T17:15:25Z'
+lease_expires_at_utc: '2026-11-19T17:15:25Z'
+max_lease_hours: 1
+review_calls_limit: 0
+native_runs_limit_per_host: 0
+withdrawn_at_utc: '2026-11-19T17:15:25Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'sua so trong cung commit; khong con viec'

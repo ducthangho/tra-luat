@@ -259,7 +259,7 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 | 1 | Bốn lựa chọn cài; thiếu add-on không phá core | **passed (scoped Desktop)** | G (r3) | Chỉ Desktop; ASUS chỉ có raw cho lựa chọn Playwright (E) |
 | 2 | Đúng target; không fallback/retry inference | **partial** | A (r1), E | Chốt TargetId đạt trên cấu hình mẫu. Chưa đo trên gateway hay đích từ xa thật; chưa có bằng chứng 0 retry |
 | 3 | WhatIf không mutation | **passed (scoped, backend giả)** | G | Chưa đo trên gateway thật |
-| 4 | Không secret/profile trong repo, báo cáo | **passed (scoped các gói đã đóng băng)** | G; quét secret rc 0 ở mọi gói r1–r5 và WP | — |
+| 4 | Không secret/profile trong repo, báo cáo | **passed (scoped: các tệp bằng chứng có trong danh sách đích của từng lượt quét)** | G (r1/r2/r3/P3); quét secret rc 0 trên danh sách tệp đích của từng gói | Quét **không** phủ mọi thành viên của mọi zip đóng băng (`wp-u8/VERDICT.md`, `wp-pxl/VERDICT.md` ghi rõ giới hạn này). Toàn bộ nội dung gói: **chưa kiểm** |
 | 5 | Profile riêng; pin package/browser/cache | **passed (scoped Desktop + ASUS)** | G | Finding F1: dư lượng `ms-playwright\daemon` (P3-4) chưa quyết |
 | 6 | Artifact sai nguồn/hỏng không kích hoạt | **passed (scoped)** | H.3 | Chỉ có hiệu lực khi luồng kích hoạt gọi `Test-ProximaArtifactTree`; chưa luồng nào trong repo gọi |
 | 7 | Máy bận hoãn; updater trùng bị khoá | máy bận: **passed (scoped, theo quyết định "dừng")** · updater trùng: **partial (đã chấp nhận)** | H.1, H.3 | Proxima không có single-instance; mở bằng tay vẫn lọt |
@@ -280,7 +280,7 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 | U6 | License | **passed (owner)** | B | — |
 | U7 | Retention/soak/theo dõi | **partial** | D | Ngưỡng, owner, cửa sổ theo dõi chưa ghi |
 | U8 | Restore profile/đăng nhập | dữ liệu: **passed (hẹp)** · đăng nhập: **quan_sat: giữ được** | H.10 | Không có PASS/FAIL cho vế đăng nhập theo đặc tả U8 |
-| U9 | Cache/ACL ổ D ASUS | **đo được (r5)**: lúc đo ổ D đầy (trống 8 192 byte); **sau khi dọn theo duyệt của chủ kho, trống 2 003 MB** (19/11 16:48Z) | **r5** | **Quyết định của chủ kho (19/11): dùng ổ C** (*"cân nhắc dùng ổ C dung lượng nhiều hơn"*). Đo 17:1xZ: `PLAYWRIGHT_BROWSERS_PATH`, `TL_PW_ROOT` đều chưa đặt ⇒ Playwright mặc định dùng `C:\Users\admin\AppData\Local\ms-playwright` (đã có, 0 MB); C trống 20 114 MB. **Không đổi biến môi trường hay cấu hình nào**; ổ D không dùng cho cache trình duyệt |
+| U9 | Cache/ACL ổ D ASUS | **đo được (r5)**: lúc đo ổ D đầy (trống 8 192 byte); **sau khi dọn theo duyệt của chủ kho, trống 2 003 MB** (19/11 16:48Z) | **r5** | **Quyết định của chủ kho (19/11): dùng ổ C** (*"cân nhắc dùng ổ C dung lượng nhiều hơn"*). Đo 17:1xZ: `PLAYWRIGHT_BROWSERS_PATH`, `TL_PW_ROOT` đều chưa đặt ⇒ Playwright mặc định dùng `C:\Users\admin\AppData\Local\ms-playwright` (đã có, 0 MB); C trống 20 114 MB. **Không đổi biến môi trường hay cấu hình nào.** Phép đo này chỉ nói biến bền (User/Machine) chưa đặt; nó **không** chứng minh add-on dùng ổ C. Quy trình cài của add-on (`.agents/skills/playwright-browser/SKILL.md`, khối PowerShell) đặt `PLAYWRIGHT_BROWSERS_PATH = $env:TL_PW_ROOT\browsers\0.1.0` **trong tiến trình**, mẫu `TL_PW_ROOT` ghi ổ D, và P3 (`RAW-P3-VERDICT-claude-xhigh.md` §11 #5) ghi mỗi add-on trên ASUS có cache riêng dưới `D:\tl-win\…`. Nên: ổ C là **ý định của chủ kho**; nơi add-on **thật sự** đặt cache: **chưa kiểm** (môi trường khởi chạy và các đường dẫn cache hiện có chưa đo). Lượt cài/chạy add-on kế tiếp trên ASUS phải đặt `TL_PW_ROOT` trên ổ C rồi đo lại |
 | U10 | Playwright CLI ghim | **passed (Desktop + ASUS)** | E, G | — |
 | U11 | Auth remote f728 | **not_evidenced** | E | Chưa có bằng chứng auth thực tới f728 |
 | U12 | Binary ↔ upstream | **partial** | D, H.4 | Chỉ có digest bộ cài; không chữ ký, không provenance tới commit |
@@ -296,7 +296,7 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 | Runtime promotion / LIVE | **done (scoped: 2 module mới)** | H.11 |
 
 **Việc còn mở có thể làm tiếp, cần chủ kho chọn:**
-1. Ổ D của ASUS: đã dọn lên 2 003 MB trống (r5, phần sau dọn). Cache trình duyệt Playwright để ở ổ C mặc định theo quyết định của chủ kho (U9).
+1. Ổ D của ASUS: đã dọn lên 2 003 MB trống (r5, phần sau dọn). Chủ kho chọn ổ C cho cache trình duyệt Playwright (U9); vị trí cache thật của add-on chưa kiểm, lượt cài kế tiếp phải đặt `TL_PW_ROOT` trên C.
 2. U5/U12: chính sách khi bộ cài không ký.
 3. U11 và §11 #2: đo auth và target thật tới VM. Có rủi ro chạm gateway LIVE nên cần cấp riêng.
 4. §11 #10: ca đĩa đầy thật hoặc rollback thất bại trên OS thật.

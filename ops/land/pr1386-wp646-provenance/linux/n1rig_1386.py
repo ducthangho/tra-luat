@@ -7,6 +7,15 @@ Ky vong: doi chung H that => rc 0; bien the dung noi dung (commit moi = B + blob
 KHONG chay lai o day (ghi thang): cac ca moi truong gia (GIT_DIR/GIT_OBJECT_DIRECTORY sai, grafts, replace refs, gitlink,
   diff.ignoreSubmodules=all, * -diff, core.abbrev=bogus) va dot bien tung chot cua n1.sh."""
 import json, os, pathlib, subprocess, sys, tempfile
+
+# r1407: goi bash qua ops/bash_nen.tim_bash() (cong cong_cu_test cam loi goi `bash` TRAN).
+import sys as _sys_bn
+from pathlib import Path as _Path_bn
+_sys_bn.path.insert(0, str(_Path_bn(__file__).resolve().parents[3]))
+from bash_nen import tim_bash as _tim_bash  # noqa: E402
+_BASH, _BASH_CHAN_DOAN = _tim_bash()
+if not _BASH:
+    raise SystemExit(f'KHONG DO DUOC: khong co bash dung duoc ({_BASH_CHAN_DOAN})')
 SRC, B, H, N1, N5 = sys.argv[1:6]
 P = "docs/PROTOCOL_DA_PHIEN.md"
 ENV = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
@@ -22,7 +31,7 @@ def git(d, *a, inp=None):
 
 
 def chay(repo, b, h):
-    p = subprocess.run(["bash", N1, str(repo), b, h, N5], capture_output=True, text=True, env={k: v for k, v in os.environ.items()})
+    p = subprocess.run([_BASH, N1, str(repo), b, h, N5], capture_output=True, text=True, env={k: v for k, v in os.environ.items()})
     return {"rc": p.returncode, "out": (p.stdout + p.stderr).strip()[-300:]}
 
 

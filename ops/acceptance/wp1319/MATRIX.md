@@ -225,3 +225,9 @@ Cần chủ kho quyết định: nâng trần WP-PXU (+1 Executor, +1 native Des
 - `Remove-ProximaUninstallResidue`: **passed** trên VM `tra-luat-win`, PS 5.1 + PS 7, gồm cả PU13s symlink. 32/32 · 42/42, `setup_error_ids` rỗng, 10/10 phản chứng (zip `eba83af7…`).
 - Cộng với Desktop (31/32), tiêu chí §4 đã được đo đủ trên ít nhất một máy.
 - Phần còn mở: chạy hàm ngay sau một lần gỡ thật (hàng "quy trình gỡ" của NSIS, H.7/H.8).
+
+### H.10 WP-U8 (#1410): backup/restore profile trên Desktop (operator làm thay theo lệnh chủ kho 19/11)
+| Hàng | Kết quả | Điều kiện đọc |
+|---|---|---|
+| U8 vế dữ liệu | **passed (scoped Desktop)** | 12 404 tệp / 180 MB; backup và restore trùng manifest (sha256 từng tệp); app mở lại và đóng êm trên profile đã restore (zip `eb1688b7…`) |
+| U8 vế đăng nhập | **not_measured** | Chưa ai đăng nhập; phiên điều phối không được chạm credential. Cần chủ kho tự đăng nhập rồi đo lại |

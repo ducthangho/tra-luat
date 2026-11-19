@@ -38,12 +38,13 @@
 **Đo lại bằng chứng cũ trên Desktop** (culture mặc định `en-AU`):
 - Ở lượt N1 trên cả PS 7 và PS 5.1, report của tiến trình cha ghi `tr-TR`.
 - Cả 10 report của tiến trình con CX01–CX05 đều ghi **`en-AU`**.
-- Vậy ở các lượt trước, ca CX được ghi nhận dưới culture mặc định của máy, không phải dưới `tr-TR`.
+- Đo thêm toàn bộ report con còn trên Desktop dưới `wp-pxa\scratch*` (19/11 ~10:05Z, `find3.ps1` sha256 `a037bf1c…`, danh sách `old-child-culture-all.txt` sha256 `9e77f3b5…`, đã chuyển nguyên byte về container): **34/34** report con ghi `en-AU`, gồm PXA N1 (10: CX01–CX05 × PS 7, PS 5.1), PXA N2 (12: CX01–CX06 × 2, lượt được khai trong bảng trên) và lượt hồi quy Activation trong PXU N1 (12).
+- Vậy ở **cả ba lượt đã đo**, ca CX được ghi nhận dưới culture mặc định của máy, không phải dưới `tr-TR`. Lượt nào không còn report con thì không thuộc phép đo này.
 
 **Sửa** (đặc tả `ops/specs/wp-pxa-r2.md`, chỉ đổi `tests/ProximaActivation.Tests.ps1`, theo đúng mẫu của `ProximaInstall.Tests.ps1`):
 - thêm tham số `-Culture`, đặt culture cho tiến trình cha;
 - report thêm `ui_culture` và `culture_at_end`;
-- luôn truyền `-Culture` cho tiến trình con;
+- truyền `-Culture` cho tiến trình con khi culture của cha khác rỗng (cha chạy invariant culture thì không truyền, và con có culture mặc định khác rỗng sẽ bị từ chối ghi nhận);
 - trước khi cấp `killed`, kiểm `culture` và `culture_at_end` của con phải bằng culture của cha.
 
 Harness mới có sha256 `e5cc81c1…`. Module không đổi (`bb96cd58…`).

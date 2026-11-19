@@ -1,0 +1,22 @@
+# trich log job 135592897003 gate (ubuntu-latest), run 44533503543 push master c6487ff; log_sha256=04925211c0b40f14986f6cfd435112bf03eca95e0d0e9a116a3a6eb8a08849ee
+1764:   "failed": [],
+1913: {"ok": false, "error": "STUB_EARLY_EXIT"}
+3730: == tl selftest 1781/1781 ==
+3915:           "command": "release-verify RELEASE_MANIFEST.json --json",
+4009:           "command": "release-verify RELEASE_MANIFEST.json --json",
+4725:           "command": "release-verify RELEASE_MANIFEST.json --json",
+4757:           "command": "release-verify RELEASE_MANIFEST.json --json",
+4761:           "command": "release-verify RELEASE_MANIFEST.json --strict --json",
+4793:           "command": "release-verify RELEASE_MANIFEST.json --json",
+10048:       "failed": []
+10073: ##[group]Run python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+10074: [36;1mpython scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json[0m
+10088:   "ok": false,
+10094:   "expected_file_count": 185,
+10095:   "checked_file_count": 185,
+10096:   "failed": [
+10098:       "path": "scripts/tl_gws.py",
+10099:       "ok": false,
+10106:       "path": "scripts/tl_test_fragments_bundled.py",
+10107:       "ok": false,
+11072: ##[error]Process completed with exit code 2.

@@ -1,0 +1,3 @@
+git rev-parse origin/ops/wp433-p2b-spec:ops/specs/GWS-CRED-DICH-NGOAI-KHO-B-r1.md = d423c364b3b9f4ecfadf0fc3c68046424acb191d
+sha256(git show ...) = cd0b51a3d458de79c577f1573899fe0518aa2871dfc217fa143b822da1bac267
+lease spec_hash: cd0b51a3d458de79c577f1573899fe0518aa2871dfc217fa143b822da1bac267

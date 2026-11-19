@@ -1,0 +1,8 @@
+rc=0 giay=3.1
+--- stdout
+WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_seed_nonfile", "observed": "[('dir', 'ValueError: WP1174 UNKNOWN: private seed read/lstat'), ('junction', 'ValueError: WP1174 UNKNOWN: private seed read/lstat')]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+KQ_JSON {"wp1342_native_seed_nonfile": null}
+
+--- stderr
+F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\r1342h-20261119T120908Z\.claude/dev\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',

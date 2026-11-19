@@ -1,0 +1,3 @@
+{"id": "wp1342_native_job_breakaway_tuong_minh", "rc": 0, "giay": 3.5, "lan": 0}
+{"id": "wp1342_native_job_breakaway_tuong_minh", "rc": 0, "giay": 3.6, "lan": 1}
+{"id": "wp1342_native_job_breakaway_tuong_minh", "rc": 0, "giay": 3.7, "lan": 2}

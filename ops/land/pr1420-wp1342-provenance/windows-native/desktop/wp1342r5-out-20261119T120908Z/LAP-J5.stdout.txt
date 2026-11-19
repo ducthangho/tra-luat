@@ -1,0 +1,3 @@
+{"id": "wp1342_native_job_breakaway_ngam", "rc": 0, "giay": 3.2, "lan": 0}
+{"id": "wp1342_native_job_breakaway_ngam", "rc": 0, "giay": 3.2, "lan": 1}
+{"id": "wp1342_native_job_breakaway_ngam", "rc": 0, "giay": 3.2, "lan": 2}

@@ -1,0 +1,31 @@
+KHÔNG ĐO       e1   tệp=packet_loop.py đích=wp1342_native_job_breakaway_tuong_minh [sạch=DAT đột biến=KHONG_DO] xanh=wp1342_native_job_breakaway_ngam+wp1342_native_job_thuan ['DAT', 'DAT'] dấu hiệu đòi=['J4: breakaway tường minh được nhận']
+               thông điệp: không có dòng kết quả: rc=1 ^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\shutil.py", line 639, in _rmtree_unsafe
+    onexc(os.rmdir, path, err)
+  File "C:\Program Files\Python312\Lib\shutil.py", line 637, in _rmtree_unsafe
+    os.rmdir(path)
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp1342r5\\tmpwx5_ba_9'
+
+               observed sạch: ({'doi_chung': [['ok', 2956], ['ok', 5832]], 'do': [['ok', 7304], ['loi', 5]], 'tien_trinh_chay_ca_trong_job': (1, 0, 0)}, [])
+GIẾT           e2   tệp=packet_loop.py đích=wp1342_native_job_breakaway_ngam [sạch=DAT đột biến=DO] xanh=wp1342_native_job_thuan ['DAT'] dấu hiệu đòi=['J5: cháu ngoài job đích']
+               thông điệp: ('J5: cháu ngoài job đích', [(776, (1, 0, 0), (1, 0, 0))])
+               observed sạch: (((1, 1, 0), (1, 1, 0)), [('chau', 7136, 134395642968976168)])
+               GHI (không chấm) wp1342_native_job_breakaway_tuong_minh: KHONG_DO không có dòng kết quả: rc=1 ^^^^^^^^^
+  File "C:\Program Files\Python312\Lib\shutil.py", line 639, in _rmtree_unsafe
+    onexc(os.rmdir, path, err)
+  File "C:\Program Files\Python312\Lib\shutil.py", line 637, in _rmtree_unsafe
+    os.rmdir(path)
+PermissionError: [WinError 32] The process cannot acce
+GIET_DOI_CHUNG e1c  tệp=packet_loop_test.py đích=wp1342_native_job_breakaway_tuong_minh [sạch=DAT đột biến=KHONG_DO] xanh=wp1342_native_job_thuan ['DAT'] dấu hiệu đòi=['J4 (ii): job cho phép breakaway mà lời xin vẫn bị từ chối', "['loi', 5]]"]
+               thông điệp: KHÔNG ĐO ĐƯỢC: J4 (ii): job cho phép breakaway mà lời xin vẫn bị từ chối ([['ok', 11184], ['loi', 5]],)
+               observed sạch: ({'doi_chung': [['ok', 16644], ['ok', 13372]], 'do': [['ok', 9080], ['loi', 5]], 'tien_trinh_chay_ca_trong_job': (1, 0, 0)}, [])
+GIẾT           a1   tệp=packet_loop.py đích=wp1342_native_job_long [sạch=DAT đột biến=DO] xanh=wp1342_native_job_thuan ['DAT'] dấu hiệu đòi=['J12: nhánh khác', 'job not empty', '[1, 1, 0, 1, 1, 0]', "'chau'"]
+               thông điệp: ('J12: nhánh khác', ['loi', 'WP1174 UNKNOWN: job not empty'], [1, 1, 0, 1, 1, 0], 'chau', True)
+               observed sạch: (('B', [1, 1, 0, 1, 1, 0]), [('san_sang', 8512, 134395643197911857), ('truoc_gan', 10576, 134395643205631626), ('chau', 9380, 134395643206453270)])
+GIẾT           f1   tệp=packet_loop_test.py đích=wp1342_pure_spawn_fx_mo_rong [sạch=DAT đột biến=DO] xanh=wp1342_pure_spawn_hang_luong ['DAT'] dấu hiệu đòi=['S6: fixture mở rộng không biên dịch']
+               thông điệp: ('S6: fixture mở rộng không biên dịch', "expected ':' (<unknown>, line 57)")
+               observed sạch: 
+GIẾT           f2   tệp=packet_loop_test.py đích=wp1342_pure_spawn_fx_mo_rong [sạch=DAT đột biến=DO] xanh=wp1342_pure_spawn_hang_luong ['DAT'] dấu hiệu đòi=['S6: fixture base bị đổi']
+               thông điệp: S6: fixture base bị đổi
+               observed sạch: 
+TỔNG: 5/6 giết đúng dấu hiệu

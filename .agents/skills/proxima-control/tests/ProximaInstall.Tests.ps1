@@ -318,7 +318,8 @@ function Invoke-Counterexample($Mutation) {
         }
         # Dispatcher fix (WP-PXU N1): a child may return rc 2 ONLY because of environment-limited cases that the parent
         # itself measured as setup_error (e.g. PU13 without symlink privilege); anything else is still no credit.
-        $parentEnvLimited = @($report.cases | Where-Object { $_.outcome -ceq 'setup_error' } | ForEach-Object { [string]$_.id })
+        # $report.cases is only filled at the end of the run; the completed cases so far live in $cases (each has an outcome).
+        $parentEnvLimited = @($cases | Where-Object { [string]$_['outcome'] -ceq 'setup_error' } | ForEach-Object { [string]$_['id'] })
         if ($record.rc -notin 0, 1, 2 -or -not [IO.File]::Exists($record.report_path)) {
             throw "Counterexample child did not complete (rc=$($record.rc))"
         }

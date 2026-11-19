@@ -1,0 +1,61 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1409
+packet_id: WP-PXU
+revision: 1
+generation: 2
+lease_id: wp-pxu-r1-g2-executor
+role: executor_dispatcher
+executor: claude_fable
+executor_surface: claude_subagent
+executor_model: claude-fable-5-2
+reviewer: independent_readonly
+reviewer_model: 'codex gpt-6-astra (Windows neu co, khong thi container dieu phoi; chi doc)'
+review_class: sensitive
+target_hosts: [DESKTOP-T9R33P2]
+target_device_id: a5f7076e-a491-4f84-829b-8d1fbcc1c767
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt']
+spec_path: ops/specs/wp-pxu-r1.md
+spec_hash: 4c37b3b5f4701536be1f479d7d9a7a92b530845fd632d87d3418b3a4f62db914
+write_set:
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/scripts/ProximaInstall.psm1
+- .agents/skills/proxima-control/tests/ProximaInstall.Tests.ps1
+- ops/acceptance/wp-pxu/RESULTS.md
+- ops/acceptance/wp-pxu/VERDICT-code.md
+- ops/acceptance/wp-pxu/VERDICT-run.md
+- ops/acceptance/wp1319/MATRIX.md
+- ops/leases/wp-pxu-r1-g1-executor.yaml
+- ops/leases/wp-pxu-r1-g2-executor.yaml
+- ops/specs/wp-pxu-r1.md
+write_set_hash: 757f05304c1882078cb50aa82651eacaa9feff37ed83652ffd11ca03ba9a3ce7
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: aff9ed3f361d4a5ca662bc8468155f8b0df05d98
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 19/11 ~01:08Z "Dong y, lam di" cho đề xuất thêm bước dọn tồn dư có kiểm soát vào quy trình gỡ của skill; chủ kho 18/11 "có thể đổi Executor sang Fable 5.2, Reviewer Codex 6 Astra"'
+granted_on_instruction_note: 'khong LIVE, khong inference, khong dang nhap, khong chay bo cai/bo go that; khong quyet dinh thay tieu chi PASS NSIS (cho chu kho); Fable ghi vao staging trong scratch, dieu phoi chep vao kho va doi chieu bam'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: [wp-pxu-r1-g1-executor]
+thay_the_cho_note: 'g2 thay g1 vi chu kho nang tran sau review 2/2 request_changes; g1 con han nen ghi bia mo hai chieu (g1.da_bi_thay_the)'
+leased_at_utc: '2026-11-19T03:13:29Z'
+heartbeat_at: '2026-11-19T03:35:08Z'
+lease_until: '2026-11-19T03:35:08Z'
+lease_expires_at_utc: '2026-11-19T03:35:08Z'
+max_lease_hours: 8
+executor_calls_limit: 1
+executor_calls_used: 1
+review_calls_limit: 1
+review_calls_used: 1
+native_runs_limit: 1
+native_step_reruns_limit: 1
+windows: native_desktop_only
+nang_tran_granted_by: ducthangho
+nang_tran_instruction: 'chủ kho 19/11 ~03:07Z "1. Tiếp tục làm đi" trả lời đề xuất nâng trần WP-PXU (+1 Executor, +1 native Desktop, +1 review) để sửa P1 review 2/2'
+nang_tran_scope: 'g2: Executor 1 (sua P1 tinh: kiem final path truoc moi nhanh xoa o InstallDir + mo rong PU24), native Desktop 1 (+1 chay lai khi loi dung), review 1'
+usage_before_g2: 'g1: executor 2/2, review 2/2, native 1 + chay lai 1'
+native_runs_used_g2: 1
+withdrawn_at_utc: '2026-11-19T03:35:08Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'xong: N2 + review g2 approve_scoped; het ngan sach g2 (executor 1/1, native 1/1, review 1/1); khoa host da nha (PXU-N2-progress.log)'

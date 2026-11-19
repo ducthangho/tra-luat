@@ -1,0 +1,48 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1405
+packet_id: WP-NSIS
+revision: 1
+generation: 2
+lease_id: wp-nsis-r1-g2-operator
+role: operator
+executor: none
+reviewer: independent_readonly
+reviewer_model: 'codex gpt-6-astra tren may Windows'
+review_class: sensitive
+target_host: DESKTOP-T9R33P2
+target_device_id: a5f7076e-a491-4f84-829b-8d1fbcc1c767
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt']
+spec_path: ops/specs/wp-nsis-r1.md
+spec_hash: 04f2e4eb26811031e9c8f45400ec14bb9a1e544c23bc0dcca2ce6822efc760a9
+write_set:
+- ops/acceptance/wp-nsis/RESULTS.md
+- ops/acceptance/wp-nsis/VERDICT.md
+- ops/acceptance/wp1319/MATRIX.md
+- ops/leases/wp-nsis-r1-g2-operator.yaml
+- ops/specs/wp-nsis-r1.md
+write_set_hash: 7b88edb76689ffc3ab6b2fff291c0bfa646905191fd1b08da90afe7f3702b153
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: 8c0ccbdcda7417ff25450468ae954bce72398103
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 18/11: "Xác nhận các quyền theo đề xuất của bạn" (NSIS cài thật trên Desktop máy thử, per-user, gỡ sạch)'
+granted_on_instruction_note: 'không mở app đã cài, không inference, không VM/gateway, không LIVE'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-18T23:29:49Z'
+heartbeat_at: '2026-11-19T01:09:43Z'
+lease_until: '2026-11-19T01:09:43Z'
+lease_expires_at_utc: '2026-11-19T01:09:43Z'
+max_lease_hours: 6
+review_calls_limit: 1
+review_calls_used: 0
+native_runs_limit: 1
+native_step_reruns_limit: 1
+windows: native_desktop_only
+native_runs_used_g1: 2
+extra_native_run_granted: 'chu kho 18/11 ~23:29Z "Lam tiep di" sau bao cao xin them 1 luot do S3/S4 (bo go NSIS bat dong bo)'
+native_runs_limit_g2: 1
+withdrawn_at_utc: '2026-11-19T01:09:43Z'
+withdrawn_reason: 'N2 da dung + review request_changes; thay bang g3 cho do bo sung'

@@ -1,0 +1,47 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1410
+packet_id: WP-U8
+revision: 1
+generation: 1
+lease_id: wp-u8-r1-g1-operator
+role: operator
+executor: none
+reviewer: independent_readonly
+reviewer_model: 'codex gpt-6-astra (Windows neu co, khong thi container dieu phoi; chi doc)'
+review_class: sensitive
+target_host: DESKTOP-T9R33P2
+target_device_id: a5f7076e-a491-4f84-829b-8d1fbcc1c767
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt']
+spec_path: ops/specs/wp-u8-r1.md
+spec_hash: 80b91bc878d0aa20213ff665e867e0e21b521151094f1bbf592485585f7dc34d
+write_set:
+- ops/acceptance/wp-u8/RESULTS.md
+- ops/acceptance/wp-u8/VERDICT.md
+- ops/leases/wp-u8-r1-g1-operator.yaml
+- ops/specs/wp-u8-r1.md
+write_set_hash: ef8072615c3e81bbef1d5907f507891af7fa6354e74f46c9b9dc096de8e2e866
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: 629522246567b629a688f41cd2ac32e7ac5cc3a9
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 18/11 "Xác nhận các quyền theo đề xuất của bạn" (U8: chủ kho tự đăng nhập/2FA trên profile thử, phiên điều phối không chạm credential, chỉ đo giữ phiên qua backup/restore); 19/11 ~01:08Z "Dong y, lam di" (chuẩn bị tới điểm đăng nhập)'
+granted_on_instruction_note: 'khong inference, khong doc/in noi dung cookie/token, khong tep profile nao roi Desktop, khong VM/gateway, khong LIVE; giu ban cai + profile sau khi do cho chu kho quyet'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-19T01:49:38Z'
+heartbeat_at: '2026-11-19T05:30:30Z'
+lease_until: '2026-11-19T05:30:30Z'
+lease_expires_at_utc: '2026-11-19T05:30:30Z'
+max_lease_hours: 12
+lease_hours_note: 'pha B phu thuoc luc chu kho dang nhap xong; het han thi gia han bang heartbeat moi, khong suy da xong'
+review_calls_limit: 1
+review_calls_used: 1
+native_runs_limit_phase_A: 1
+native_runs_limit_phase_B: 1
+native_step_reruns_limit: 1
+windows: native_desktop_only
+withdrawn_at_utc: '2026-11-19T05:30:30Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'xong pha A + pha B (operator lam thay theo lenh chu kho 19/11) + review approve_with_fixes; ve dang nhap chua do -> can lease moi neu chu kho dang nhap'

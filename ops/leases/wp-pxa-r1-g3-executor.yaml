@@ -1,0 +1,54 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1401
+packet_id: WP-PXA
+revision: 1
+generation: 3
+lease_id: wp-pxa-r1-g3-executor
+role: executor_dispatcher
+executor: claude_fable
+executor_surface: claude_subagent
+executor_model: claude-fable-5-2
+reviewer: independent_readonly
+reviewer_model: 'luot1 claude-opus-5-5 (xong); luot2 codex gpt-6-astra tren Windows'
+review_class: sensitive
+target_hosts: [DESKTOP-T9R33P2, ASUS-LAPTOP]
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt', 'D:\tl-win\KHOA.txt']
+spec_path: ops/specs/wp-pxa-r1.md
+spec_hash: 5f2924c21bc745e3d5ab29da53ce7e0a8ee5b9f14b90fd871d4e4f3e656b33e9
+write_set:
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/scripts/ProximaActivation.psm1
+- .agents/skills/proxima-control/tests/ProximaActivation.Tests.ps1
+- ops/acceptance/wp-pxa/RESULTS.md
+- ops/acceptance/wp-pxa/VERDICT-code.md
+- ops/acceptance/wp-pxa/VERDICT-run.md
+- ops/acceptance/wp1319/MATRIX.md
+- ops/leases/wp-pxa-r1-g3-executor.yaml
+- ops/specs/wp-pxa-r1.md
+write_set_hash: 045198df4542454904d67fc86dded918833e5563e07655955f184e7d097ee48d
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: 04b382719c471a89fb7b15eec6bf023cf6852f59
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 18/11 trong phiên session_015GtxrapMSm976JLC7Fp1HM: "Sửa ngay" (P1-2 module mới trong repo; P1-3 chốt ở operator), "Xử lý luôn" (§11 #8), gateway không inference'
+granted_on_instruction_note: 'khong LIVE, khong inference, khong dang nhap; Fable ghi vao staging trong ban sao scratch, dieu phoi chep vao kho va doi chieu bam'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-18T15:46:13Z'
+heartbeat_at: '2026-11-18T15:46:13Z'
+lease_until: '2026-11-18T23:46:13Z'
+lease_expires_at_utc: '2026-11-18T23:46:13Z'
+max_lease_hours: 8
+codex_executor_calls_limit: 3
+codex_executor_calls_used: 2
+review_calls_limit: 2
+review_calls_used: 1
+native_runs_limit: 2
+native_step_reruns_limit: 1
+windows: native_desktop_asus_only
+carried_over: 'Codex executor da dung 2/3 (g1 preflight + g2 viet ma); review 1/2 da dung'
+executor_change: 'chu kho 18/11: doi Executor sang Fable 5.2, Reviewer sang Codex 6 Astra'
+fable_executor_calls_limit: 2
+fable_executor_calls_used: 2

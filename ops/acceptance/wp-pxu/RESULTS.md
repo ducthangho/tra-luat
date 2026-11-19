@@ -79,3 +79,18 @@ Gói bằng chứng: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\wp-pxa\freeze-p
   - UNC: chỉ có bộ phân loại.
   - Chưa chạy bộ cài/bộ gỡ thật cùng hàm này. Hàng "quy trình gỡ" của NSIS (MATRIX H.7) vẫn chờ một lần gỡ thật.
 
+## V1: đo trên VM (lease g3; chủ kho "Symlink đo ở VM", 19/11 khoảng 04:35Z) @ `9cdfeaf5b`, 04:37–04:41Z
+- **Máy:** `tra-luat-win`, user `tlcommander`, Medium integrity, có `SeCreateSymbolicLinkPrivilege`. Thử tạo và xoá một symlink trong `%TEMP%`: thành công.
+- **Phạm vi trên gateway LIVE:** chỉ chạy harness Install với LocalAppData giả trong scratch. Không cài, không gỡ, không đụng Proxima, gateway hay dịch vụ. Khoá `C:\tl-win\KHOA.txt` được lấy rồi nhả. Scratch đã xoá; cây sạch.
+- **Cây mã:** fetch nông kèm sparse checkout `.agents/skills/proxima-control` @ `9cdfeaf5b`. Module `81c1164b…`, harness `b2627283…`.
+- **Gói bằng chứng trên VM:** `C:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\pxu-vm\freeze\wp-pxu-v1-evidence.zip`, sha256 `eba83af7ea828c04b93224bacd01002a87c198161f90635fdd9e29d62094d819`, 12 tệp, MANIFEST `4604b1a8…`, quét secret rc 0 (bộ quét `fbf9392b…`).
+
+| Harness Install | PS 5.1 (Desktop edition) | PS 7 (Core) |
+|---|---|---|
+| Mặc định (en-US) | **32/32**, `setup_error_ids=[]` | **32/32**, `[]` |
+| Phản chứng + `tr-TR` | **42/42**, `[]`; CU01–CU10 `killed` (con rc 1) | **42/42**, `[]`; CU01–CU10 `killed` (con rc 1) |
+
+- **PU13s (symlink) đạt**; PU13 `hardlink=CLEANED`.
+- **Tiêu chí PASS §4 theo chữ (`passed == total`, `setup_error_ids` rỗng) đạt trên VM**, ở cả hai runtime.
+- Desktop vẫn là nơi đo 31/32 (chỉ thiếu PU13s), đúng như mục N2.
+

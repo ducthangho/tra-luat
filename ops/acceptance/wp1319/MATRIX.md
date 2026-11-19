@@ -220,3 +220,8 @@ Cần chủ kho quyết định: nâng trần WP-PXU (+1 Executor, +1 native Des
 |---|---|---|
 | `Remove-ProximaUninstallResidue` (hàm dọn tồn dư có kiểm soát) | **passed (scoped, Desktop, PS 5.1 + PS 7)** | Xoá qua handle đã kiểm, cô lập updater bằng đổi tên nguyên tử, kiểm final path trước mọi nhánh xoá. 31/32 ca; 10/10 phản chứng do harness cấp. **Không đo:** symlink (PU13s, thiếu quyền), UNC thật. Chỉ dùng LocalAppData giả; chưa chạy sau một lần gỡ thật |
 | NSIS "quy trình gỡ" (tiêu chí sửa ở H.7) | **chờ một lần gỡ thật** | Hàm đã đạt; còn thiếu một lần chạy hàm trên OS thật ngay sau bộ gỡ chính thức. Dự kiến lúc dọn sau U8, nếu chủ kho quyết định gỡ |
+
+### H.9 WP-PXU: đo symlink trên VM (lease g3)
+- `Remove-ProximaUninstallResidue`: **passed** trên VM `tra-luat-win`, PS 5.1 + PS 7, gồm cả PU13s symlink. 32/32 · 42/42, `setup_error_ids` rỗng, 10/10 phản chứng (zip `eba83af7…`).
+- Cộng với Desktop (31/32), tiêu chí §4 đã được đo đủ trên ít nhất một máy.
+- Phần còn mở: chạy hàm ngay sau một lần gỡ thật (hàng "quy trình gỡ" của NSIS, H.7/H.8).

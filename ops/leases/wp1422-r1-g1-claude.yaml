@@ -55,8 +55,8 @@
   "audit_label_if_delegated": "E5: owner audits exact H personally (human_exact_head_audit.v1); coordinator never signs",
   "recorded_by": "Claude Code coordinator session; not author or reviewer",
   "recorder_is_executor": false,
-  "lease_until": "2026-11-21T13:00:00Z",
-  "lease_expires_at_utc": "2026-11-21T13:00:00Z",
+  "lease_until": "2026-11-19T17:43:27Z",
+  "lease_expires_at_utc": "2026-11-19T17:43:27Z",
   "limits": {
     "Codex_spec_review": 2,
     "Claude_author": 3,
@@ -90,5 +90,34 @@
       "WP1422-SPEC-01 connector mutant routing oracle",
       "WP1422-SPEC-02 receipt duplicate-key/canonical parsing"
     ]
+  },
+  "source_review": [
+    {
+      "run": "wp1422-source-review-1",
+      "reviewed_sha": "7c68d118c4f4dc9be12b66f49dc44fef6ec0b301",
+      "verdict": "approve",
+      "findings": []
+    },
+    {
+      "run": "wp1422-source-review-2",
+      "reviewed_sha": "7c68d118c4f4dc9be12b66f49dc44fef6ec0b301",
+      "verdict": "approve",
+      "format": "KET_LUAN"
+    }
+  ],
+  "human_audit": "https://github.com/ducthangho/tra-luat/pull/1427#issuecomment-7015801311",
+  "merge": {
+    "pr": 1427,
+    "merge_commit": "b830d471d67cdca69ba25e6888983a35fb937326",
+    "merged_at": "2026-11-19T17:12:12Z",
+    "merged_by": "ducthangho"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-21T13:00:00Z",
+    "han_moi_utc": "2026-11-19T17:43:27Z",
+    "nguoi_rut": "Claude Code coordinator under owner delegation",
+    "chi_thi": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+    "ly_do": "PR #1427 da merge tai b830d47 (chu kho bam merge); khong con ghi source.",
+    "gioi_han": "Chi rut han; lich su va so lieu giu nguyen."
   }
 }

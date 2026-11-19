@@ -1,0 +1,46 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1409
+packet_id: WP-PXU
+revision: 1
+generation: 3
+lease_id: wp-pxu-r1-g3-operator
+role: operator
+executor: none
+reviewer: independent_readonly
+reviewer_model: 'codex gpt-6-astra trong container dieu phoi (chi doc)'
+review_class: sensitive
+target_host: tra-luat-win
+target_device_id: f7281f27-f79f-40a2-a2f5-b454b58a166a
+target_host_note: 'VM la gateway LIVE: chi chay harness ProximaInstall.Tests voi LocalAppData gia trong scratch; khong cai, khong go, khong dung Proxima/gateway/dich vu; khong doi cau hinh may'
+target_locks: ['C:\tl-win\KHOA.txt']
+spec_path: ops/specs/wp-pxu-r1.md
+spec_hash: 4c37b3b5f4701536be1f479d7d9a7a92b530845fd632d87d3418b3a4f62db914
+code_under_test: 9cdfeaf5b1eb17d0d75eb4ce6defe5a29ba69e7a
+write_set:
+- ops/acceptance/wp-pxu/RESULTS.md
+- ops/acceptance/wp-pxu/VERDICT-run.md
+- ops/acceptance/wp1319/MATRIX.md
+- ops/leases/wp-pxu-r1-g3-operator.yaml
+write_set_hash: f443ab0c7cf3d31a71b7cb3e210705333d73df79549ca7b655747276169c4363
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: 21a5adaf91fa77d0397222bffaf391cb8c4e242f
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 19/11 ~04:35Z "Symlink đo ở VM" (đo PU13s symlink trên VM vì Desktop thiếu quyền)'
+granted_on_instruction_note: 'VM tlcommander co SeCreateSymbolicLinkPrivilege; probe tao/xoa symlink trong TEMP thanh cong 04:3xZ. Khong LIVE, khong inference'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+thay_the_cho_note: 'g2 (executor) da thu hoi; g3 chi la luot do bo sung, khong sua ma'
+leased_at_utc: '2026-11-19T04:35:30Z'
+heartbeat_at: '2026-11-19T04:35:30Z'
+lease_until: '2026-11-19T07:35:30Z'
+lease_expires_at_utc: '2026-11-19T07:35:30Z'
+max_lease_hours: 3
+executor_calls_limit: 0
+review_calls_limit: 1
+review_calls_used: 0
+native_runs_limit: 1
+native_step_reruns_limit: 1
+windows: native_vm_only_harness

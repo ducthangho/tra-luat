@@ -7,10 +7,19 @@ param(
     [Parameter(Mandatory = $true)][string]$AddonRoot,
     [Parameter(Mandatory = $true)][string]$ScratchRoot,
     [Parameter(Mandatory = $true)][string]$ReportPath,
-    [switch]$Counterexamples
+    [switch]$Counterexamples,
+    # Culture to run under (for example tr-TR). Counterexample children always receive the parent's culture.
+    [string]$Culture
 )
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
+if ($PSBoundParameters.ContainsKey('Culture') -and $Culture.Length -gt 0) {
+    $requestedCulture = [Globalization.CultureInfo]::GetCultureInfo($Culture)
+    [Threading.Thread]::CurrentThread.CurrentCulture = $requestedCulture
+    [Threading.Thread]::CurrentThread.CurrentUICulture = $requestedCulture
+    [Globalization.CultureInfo]::DefaultThreadCurrentCulture = $requestedCulture
+    [Globalization.CultureInfo]::DefaultThreadCurrentUICulture = $requestedCulture
+}
 $utf8 = [Text.UTF8Encoding]::new($false, $true)
 $windows = [Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT
 $moduleKey = 'scripts/ProximaInstall.psm1'
@@ -19,7 +28,8 @@ $mutations = [Collections.Generic.List[object]]::new()
 $report = [ordered]@{
     schema = 'proxima_install_tests.v1'; ps_version = "$($PSVersionTable.PSVersion)"
     ps_edition = $PSVersionTable.PSEdition; edition = $PSVersionTable.PSEdition
-    culture = [Globalization.CultureInfo]::CurrentCulture.Name
+    culture = [Globalization.CultureInfo]::CurrentCulture.Name; culture_at_end = $null
+    ui_culture = [Globalization.CultureInfo]::CurrentUICulture.Name
     addon_root = $AddonRoot; scratch_run = $null; setup_error = $null
     total = 0; passed = 0; failed_ids = @(); skipped_ids = @(); setup_error_ids = @()
     required_ids = @(); id_errors = @(); child_timeout_sec = 300
@@ -27,8 +37,8 @@ $report = [ordered]@{
     cases = $null; counterexamples = $null
 }
 $reportWritable = $false
-$requiredIds = @(1..21 | ForEach-Object { 'PU{0:d2}' -f $_ }) + @('PU21b', 'PU21c', 'PU22')
-if ($Counterexamples) { $requiredIds += @(1..7 | ForEach-Object { 'CU{0:d2}' -f $_ }) }
+$requiredIds = @(1..28 | ForEach-Object { 'PU{0:d2}' -f $_ }) + @('PU21b', 'PU21c')
+if ($Counterexamples) { $requiredIds += @(1..9 | ForEach-Object { 'CU{0:d2}' -f $_ }) }
 $report.required_ids = $requiredIds
 
 function Get-FileSha([string]$Path) {
@@ -70,6 +80,12 @@ function Find-RepositoryTop([string]$Start) {
         if ([IO.Directory]::Exists($marker) -or [IO.File]::Exists($marker)) { return $probe.FullName }
         $probe = $probe.Parent
     }
+}
+
+function Assert-OutsideGitTree([string]$Path) {
+    # No output may land in ANY Git tree: an ancestor holding a .git directory, or a .git file (worktree).
+    $top = Find-RepositoryTop $Path
+    if ($top) { throw "Output path is inside a Git tree ($top): $Path" }
 }
 
 function ConvertTo-ArgText([string]$Value) {
@@ -240,7 +256,7 @@ function Invoke-Counterexample($Mutation) {
         id = $Mutation.id; target_case = ($targetIds -join ','); edits = $Mutation.edits
         source_sha256 = $report.source_hashes[$moduleKey]
         mutated_sha256 = $null; rc = $null; report_path = $null; stdout_path = $null; stderr_path = $null
-        timed_out = $false; child_failed_ids = $null
+        timed_out = $false; child_failed_ids = $null; child_culture = $null
         verdict = $null; reason = $null
     }
     $mutations.Add($record)
@@ -267,6 +283,8 @@ function Invoke-Counterexample($Mutation) {
         $exe = [IO.Path]::Combine($PSHOME, $exeName)
         $arguments = @('-NoProfile', '-NonInteractive', '-File', $PSCommandPath, '-AddonRoot', $addon,
             '-ScratchRoot', $dir, '-ReportPath', $record.report_path)
+        # The child runs under the parent's culture, stated explicitly and checked from its report.
+        if ($report.culture.Length -gt 0) { $arguments += @('-Culture', $report.culture) }
         $start = [Diagnostics.ProcessStartInfo]::new($exe)
         $start.Arguments = @($arguments | ForEach-Object { ConvertTo-ArgText $_ }) -join ' '
         $start.UseShellExecute = $false
@@ -305,6 +323,10 @@ function Invoke-Counterexample($Mutation) {
         $moduleSha = $childReport.source_hashes.PSObject.Properties[$moduleKey].Value
         if ($moduleSha -cne $record.mutated_sha256 -or $childReport.harness_sha256 -cne $report.harness_sha256 -or
             $childReport.ps_edition -cne $report.ps_edition) { throw 'Counterexample child provenance mismatch' }
+        $record.child_culture = [string]$childReport.culture
+        if ([string]$childReport.culture -cne $report.culture -or [string]$childReport.culture_at_end -cne $report.culture) {
+            throw "Counterexample child ran under culture '$($childReport.culture)'/'$($childReport.culture_at_end)', parent under '$($report.culture)'"
+        }
         $childFailed = @($childReport.failed_ids | Where-Object { $null -ne $_ })
         $record.child_failed_ids = $childFailed
         # Killed only when exactly the declared cases turn red, each for its declared reason.
@@ -354,8 +376,10 @@ try {
         if ($top) { $protected.Add($top) }
     }
     foreach ($source in $protected) { Assert-SafeOutputPath $ReportPath $source }
+    Assert-OutsideGitTree $ReportPath
     $reportWritable = $true
     foreach ($source in $protected) { Assert-SafeOutputPath $scratch $source }
+    Assert-OutsideGitTree $scratch
     if (-not [IO.Directory]::Exists($scratch)) { throw 'ScratchRoot must be an existing directory' }
     $run = [IO.Directory]::CreateDirectory([IO.Path]::Combine($scratch, 'install-' + [guid]::NewGuid().ToString('N'))).FullName
     $report.scratch_run = $run
@@ -532,8 +556,16 @@ try {
         $null = [IO.Directory]::CreateDirectory($h.updater)
         $null = New-Item -Path $h.installer -ItemType HardLink -Target $original -ErrorAction Stop
         $actual = Invoke-Clean $h
-        Assert-Result $actual 'CLEANED' $true
-        Assert-BothGone $h
+        # Either outcome is recorded; in both the content must stay reachable under its other name.
+        # CLEANED: the link was accepted and only that name was removed. RESIDUE_CHANGED: the file system
+        # reported the opened file under its other name, so the function refused and put the updater back.
+        $hardlink = [string]$actual.code
+        if ($hardlink -ceq 'CLEANED') { Assert-Result $actual 'CLEANED' $true; Assert-BothGone $h }
+        elseif ($hardlink -ceq 'RESIDUE_CHANGED') {
+            Assert-Result $actual 'RESIDUE_CHANGED'
+            if (-not [IO.File]::Exists($h.installer)) { Stop-Case 'The refused hard link was not put back' }
+            Assert-NoQuarantine $h
+        } else { Stop-Case "Expected CLEANED or RESIDUE_CHANGED for a hard link, got $hardlink" }
         if (-not [IO.File]::Exists($original) -or (Get-FileSha $original) -cne $installerSha) {
             Stop-Case 'Removing the hard link damaged the original file'
         }
@@ -547,7 +579,7 @@ try {
         if (-not [IO.File]::Exists($target) -or (Get-FileSha $target) -cne $installerSha) { Stop-Case 'The symbolic link target was removed or changed' }
         if (-not (Test-PathPresent $s.installer) -or -not (Test-Reparse $s.installer)) { Stop-Case 'The symbolic link was removed' }
         Assert-NoQuarantine $s
-        'hardlink=accepted_one_name_removed'
+        "hardlink=$hardlink"
     }
     Invoke-Case 'PU14' {
         $f = New-Fixture 'PU14' -Install -Updater
@@ -611,7 +643,7 @@ try {
         $linked = [IO.Path]::Combine($f.dir, 'LinkedLocal')
         New-Junction $linked $f.local
         $badValues = @('Local\relative', 'relative', 'C:relative', '', '   ', $null, 42, $missing, $f.keep, $linked,
-            ('\\?\' + $f.local))
+            ('\\?\' + $f.local), ('\\.\' + $f.local))
         foreach ($value in $badValues) {
             $actual = Invoke-Clean $f @{ LocalAppData = $value }
             Assert-Result $actual 'BAD_ARGUMENT'
@@ -620,9 +652,9 @@ try {
         }
         $badArguments = @(
             @{ InstallerSha256 = 'abc' }, @{ InstallerSha256 = $null }, @{ InstallerSha256 = ('g' * 64) },
-            @{ InstallerBytes = -1 }, @{ InstallerBytes = '30' }, @{ InstallerBytes = $null },
+            @{ InstallerBytes = -1 }, @{ InstallerBytes = 0 },
             @{ ProcessProvider = $null }, @{ ProcessProvider = 'Get-Process' }, @{ UninstallKeyProvider = $null },
-            @{ TestHook = 'hook' })
+            @{ TestHook = 'hook' }, @{ TestHookStage = 'Nope' })
         foreach ($extra in $badArguments) {
             Assert-Result (Invoke-Clean $f $extra) 'BAD_ARGUMENT'
             Assert-InstallDirKept $f
@@ -645,8 +677,6 @@ try {
         $providers = @(
             @{ ProcessProvider = { throw 'process provider failed' } },
             @{ UninstallKeyProvider = { throw 'key provider failed' } },
-            # An empty process list is not evidence that nothing runs.
-            @{ ProcessProvider = { } },
             @{ ProcessProvider = { [pscustomobject]@{ Id = 1 } } })
         foreach ($extra in $providers) {
             $actual = Invoke-Clean $f $extra
@@ -665,10 +695,17 @@ try {
     Invoke-Case 'PU21' {
         $f = New-Fixture 'PU21' -Install -Updater
         $added = [IO.Path]::Combine($f.updater, 'added.txt')
-        $calls = @{ n = 0 }
+        $calls = @{ n = 0; error = $null }
         # The closure only sees variables of this block, so it uses nothing else.
-        $hook = { $calls.n++; [IO.File]::WriteAllText($added, 'added after the preliminary check') }.GetNewClosure()
+        $hook = {
+            $calls.n++
+            try { [IO.File]::WriteAllText($added, 'added after the preliminary check') }
+            catch { $calls.error = $_.Exception.GetBaseException().GetType().FullName; throw }
+        }.GetNewClosure()
         $actual = Invoke-Clean $f @{ TestHook = $hook }
+        if ($null -ne $calls.error) {
+            Stop-Case "The hook could not write into the updater directory ($($calls.error)); updater directory present=$([IO.Directory]::Exists($f.updater))"
+        }
         Assert-Result $actual 'RESIDUE_CHANGED'
         if (-not [IO.Directory]::Exists($f.updater)) { Stop-Case 'Expected the updater back under its original name' }
         if (-not [IO.File]::Exists($added)) { Stop-Case 'The file added after the preliminary check was removed' }
@@ -715,55 +752,224 @@ try {
         "exports=$($commands -join ',')"
     }
 
+    Invoke-Case 'PU23' {
+        # A junction takes the place of InstallDir after the preliminary check: the link object is
+        # removed through its own handle, what it points to is not touched, and the run reports the change.
+        foreach ($withFile in $true, $false) {
+            $f = New-Fixture "PU23-$withFile" -Install
+            $outside = [IO.Directory]::CreateDirectory([IO.Path]::Combine($f.dir, 'outside')).FullName
+            $outsideFile = [IO.Path]::Combine($outside, 'outside.txt')
+            if ($withFile) { [IO.File]::WriteAllText($outsideFile, 'outside', $utf8) }
+            $installPath = $f.install
+            $calls = @{ n = 0; done = $false }
+            $hook = {
+                $calls.n++
+                [IO.Directory]::Delete($installPath)
+                $null = New-Item -Path $installPath -ItemType Junction -Target $outside -ErrorAction Stop
+                $calls.done = $true
+            }.GetNewClosure()
+            $actual = Invoke-Clean $f @{ TestHook = $hook }
+            if (-not $calls.done -or $calls.n -ne 1) { throw 'The hook could not put a junction at InstallDir' }
+            Assert-Result $actual 'RESIDUE_CHANGED'
+            if (-not [IO.Directory]::Exists($outside)) { Stop-Case 'The junction target was removed' }
+            if ($withFile -and -not [IO.File]::Exists($outsideFile)) { Stop-Case 'The junction target lost its file' }
+            if (Test-PathPresent $f.install) { Stop-Case 'Expected the junction at InstallDir to be unlinked' }
+            if (@($actual.actions | Where-Object { $_.StartsWith('unlinked junction at InstallDir', [StringComparison]::Ordinal) }).Count -ne 1) {
+                Stop-Case 'Expected one action recording the unlinked junction'
+            }
+            Assert-Neighbours $f
+        }
+    }
+    Invoke-Case 'PU24' {
+        # Programs is swapped for a junction after the preliminary check. The path InstallDir now leads to
+        # an empty "Proxima" somewhere else; the final path of the opened handle gives that away.
+        $f = New-Fixture 'PU24' -Install
+        $outside = [IO.Directory]::CreateDirectory([IO.Path]::Combine($f.dir, 'outside')).FullName
+        $outsideInstall = [IO.Directory]::CreateDirectory([IO.Path]::Combine($outside, 'Proxima')).FullName
+        $installPath = $f.install
+        $programsPath = $f.programs
+        $calls = @{ n = 0; done = $false }
+        $hook = {
+            $calls.n++
+            [IO.Directory]::Delete($installPath)
+            [IO.Directory]::Delete($programsPath)
+            $null = New-Item -Path $programsPath -ItemType Junction -Target $outside -ErrorAction Stop
+            $calls.done = $true
+        }.GetNewClosure()
+        $actual = Invoke-Clean $f @{ TestHook = $hook }
+        if (-not $calls.done -or $calls.n -ne 1) { throw 'The hook could not swap Programs for a junction' }
+        if (-not [IO.Directory]::Exists($outsideInstall)) { Stop-Case 'A directory behind the swapped Programs junction was removed' }
+        Assert-Result $actual 'RESIDUE_CHANGED'
+        if (-not (Test-PathPresent $f.programs) -or -not (Test-Reparse $f.programs)) { Stop-Case 'The swapped Programs junction was removed' }
+        Assert-ActionCount $actual 0 0
+        Assert-Neighbours $f
+    }
+    Invoke-Case 'PU25' {
+        # installer.exe is replaced by another file of the same size after the preliminary check.
+        # The replacement was never verified, so it must survive, back under the original name.
+        $f = New-Fixture 'PU25' -Install -Updater
+        $probe = [IO.Path]::Combine($f.dir, 'wrong.bin')
+        [IO.File]::WriteAllBytes($probe, $wrongContent)
+        $wrongSha = Get-FileSha $probe
+        $installerPath = $f.installer
+        $replacement = $wrongContent
+        $calls = @{ n = 0; error = $null }
+        $hook = {
+            $calls.n++
+            try { [IO.File]::WriteAllBytes($installerPath, $replacement) }
+            catch { $calls.error = $_.Exception.GetBaseException().GetType().FullName; throw }
+        }.GetNewClosure()
+        $actual = Invoke-Clean $f @{ TestHook = $hook }
+        if ($null -ne $calls.error) {
+            Stop-Case "The hook could not replace the installer ($($calls.error)); updater directory present=$([IO.Directory]::Exists($f.updater))"
+        }
+        Assert-Result $actual 'RESIDUE_CHANGED'
+        if (-not [IO.Directory]::Exists($f.updater)) { Stop-Case 'Expected the updater back under its original name' }
+        if (-not [IO.File]::Exists($f.installer) -or (Get-FileSha $f.installer) -cne $wrongSha) {
+            Stop-Case 'The unverified replacement of the installer was removed or changed'
+        }
+        Assert-NoQuarantine $f
+        Assert-InstallDirKept $f
+        if ($calls.n -ne 1) { Stop-Case "Expected the hook to run exactly once, ran $($calls.n) times" }
+    }
+    Invoke-Case 'PU26' {
+        # The path-form classifier behind -LocalAppData: drive and UNC paths are absolute, device and
+        # namespace forms and anything relative are refused. (A real UNC share needs elevation to set up.)
+        $module = @(Get-Module -Name ProximaInstall)
+        if ($module.Count -ne 1) { throw 'Expected exactly one loaded ProximaInstall module' }
+        $forms = @(
+            @('C:\Data\Local', 'drive'), @('c:/data/local', 'drive'), @('\\server\share\Local', 'unc'),
+            @('//server/share/Local', 'unc'), @('\\server\share', 'unc'), @('\\?\C:\Data\Local', 'device'),
+            @('\\.\C:\Data\Local', 'device'), @('\\?\UNC\server\share\Local', 'device'), @('\\.\pipe\x', 'device'),
+            @('relative\Local', 'relative'), @('C:relative', 'relative'), @('\rooted\Local', 'relative'),
+            @('\\server', 'relative'), @('Local', 'relative'))
+        foreach ($pair in $forms) {
+            $form = & $module[0] { param($p) Get-InstallPathForm $p } $pair[0]
+            if ($form -cne $pair[1]) { Stop-Case "Expected '$($pair[0])' to be classified $($pair[1]), got $form" }
+        }
+        "forms=$($forms.Count)"
+    }
+    Invoke-Case 'PU27' {
+        # An injected process list that is empty holds no blocker.
+        $f = New-Fixture 'PU27-empty' -Install -Updater
+        $actual = Invoke-Clean $f @{ ProcessProvider = { } }
+        Assert-Result $actual 'CLEANED' $true
+        Assert-BothGone $f
+        # A DisplayName with a leading space does not start with Proxima.
+        $g = New-Fixture 'PU27-space' -Install -Updater
+        $keys = @([pscustomobject]@{ Key = 'x'; DisplayName = ' Proxima 5' })
+        $actual = Invoke-Clean $g @{ UninstallKeyProvider = (New-KeyProvider $keys) }
+        Assert-Result $actual 'CLEANED' $true
+        Assert-BothGone $g
+        # -InstallerBytes is a [long] parameter: a numeric string binds like a number.
+        $h = New-Fixture 'PU27-bytes' -Install -Updater
+        $actual = Invoke-Clean $h @{ InstallerBytes = "$installerLength" }
+        Assert-Result $actual 'CLEANED' $true
+        Assert-BothGone $h
+    }
+    Invoke-Case 'PU28' {
+        # Between verification and deletion the verified installer cannot be swapped: the hook (run at
+        # that very point, with the quarantine path) tries to move it aside and plant another file.
+        $f = New-Fixture 'PU28' -Install -Updater
+        $aside = [IO.Path]::Combine($f.dir, 'aside.bin')
+        $decoy = $wrongContent
+        $state = @{ calls = 0; held = $null; planted = $false; blocked = $null }
+        $hook = {
+            param($heldDir)
+            $state.calls++
+            $state.held = $heldDir
+            $heldItem = [IO.Path]::Combine($heldDir, 'installer.exe')
+            try {
+                [IO.File]::Move($heldItem, $aside)
+                [IO.File]::WriteAllBytes($heldItem, $decoy)
+                $state.planted = $true
+            } catch { $state.blocked = $_.Exception.GetBaseException().GetType().FullName }
+        }.GetNewClosure()
+        $actual = Invoke-Clean $f @{ TestHook = $hook; TestHookStage = 'BeforeInstallerDelete' }
+        if ($state.calls -ne 1) { Stop-Case "Expected the hook to run exactly once before the installer was deleted, ran $($state.calls) times" }
+        if ($state.planted -and -not [IO.File]::Exists([IO.Path]::Combine([string]$state.held, 'installer.exe'))) {
+            Stop-Case 'An unverified file planted at the installer path was deleted'
+        }
+        if ($state.planted -or $null -eq $state.blocked) { Stop-Case 'The verified installer could be replaced before its deletion' }
+        if ([IO.File]::Exists($aside)) { Stop-Case 'The verified installer was moved aside' }
+        Assert-Result $actual 'CLEANED' $true
+        Assert-BothGone $f
+        "blocked_by=$($state.blocked)"
+    }
+
     if ($Counterexamples) {
         $unexpectedToCleaned = 'Expected RESIDUE_UNEXPECTED (ok=False), got CLEANED (ok=True)'
         $unexpectedToChanged = 'Expected RESIDUE_UNEXPECTED (ok=False), got RESIDUE_CHANGED (ok=False)'
         $changedToCleaned = 'Expected RESIDUE_CHANGED (ok=False), got CLEANED (ok=True)'
         $updaterTouched = 'Expected the updater residue to be left untouched'
+        $hookRanZeroTimes = 'Expected the hook to run exactly once before the installer was deleted, ran 0 times'
+        $missingDirectory = '(System.IO.DirectoryNotFoundException); updater directory present=False'
         $counterexampleCases = @(
-            # The "empty" check is gone and the install directory is deleted recursively.
+            # The "empty" check is gone and the install directory is deleted recursively by path.
             @{ id = 'CU01'
                 edits = @(
                     @{ anchor = 'if ($installEntries.Length -ne 0) {'; replacement = 'if ($false) {' },
-                    @{ anchor = '[IO.Directory]::Delete($installDir, $false)'; replacement = '[IO.Directory]::Delete($installDir, $true)' })
+                    @{ anchor = '$installError = $native::MarkDelete($State.installNode.Handle)'
+                        replacement = '$State.installNode.Dispose(); [IO.Directory]::Delete($Plan.installDir, $true); $installError = 0' })
                 targets = [ordered]@{ PU05 = $unexpectedToCleaned; PU06 = $unexpectedToCleaned
                     PU17 = 'Expected RESIDUE_UNEXPECTED (ok=False), got WOULD_REMOVE (ok=False)'; PU21b = $changedToCleaned } }
             # The installer hash is not compared.
             @{ id = 'CU02'
                 edits = @(@{ anchor = 'if (-not [string]::Equals($actualSha, $ExpectedSha, [StringComparison]::OrdinalIgnoreCase)) {'
                         replacement = 'if ($false) {' })
-                targets = [ordered]@{ PU08 = $unexpectedToCleaned } }
+                targets = [ordered]@{ PU08 = $unexpectedToCleaned; PU25 = $changedToCleaned } }
             # The updater directory may hold more than the installer. The mutant then removes the installer
             # and strands the rest in quarantine, so the race case PU21 is red as well.
             @{ id = 'CU03'
                 edits = @(@{ anchor = 'if ($updaterEntries.Length -ne 1) {'; replacement = 'if ($false) {' })
                 targets = [ordered]@{ PU07 = $unexpectedToChanged; PU10 = $unexpectedToChanged
                     PU21 = 'Expected the updater back under its original name' } }
-            # The install directory may be a reparse point.
+            # The preliminary check accepts a reparse point at InstallDir. The handle check still unlinks
+            # it without touching its target, but the run no longer refuses up front.
             @{ id = 'CU04'
                 edits = @(@{ anchor = 'if (Test-InstallReparseFlag $attributes) { return ''InstallDir is a reparse point.'' }'
                         replacement = 'if ($false) { return ''InstallDir is a reparse point.'' }' })
-                targets = [ordered]@{ PU11 = $unexpectedToCleaned } }
+                targets = [ordered]@{ PU11 = $unexpectedToChanged } }
             # A running uninstaller no longer blocks.
             @{ id = 'CU05'
                 edits = @(@{ anchor = 'if ($null -ne $running) {'; replacement = 'if ($false) {' })
                 targets = [ordered]@{ PU14 = 'Expected UNINSTALL_RUNNING (ok=False), got CLEANED (ok=True)' } }
             # Each target is removed as soon as its own check passes, before the other one is looked at.
+            # PU21 and PU25 are credited only for the declared cause: their hook finds the updater
+            # directory already gone (exception type and directory state are part of the reason).
             @{ id = 'CU06'
-                edits = @(@{ anchor = 'if ($updaterPresent) { $updaterRefusal = (Get-InstallUpdaterState $updaterDir $bytes $expectedSha).refusal }'
-                        replacement = 'if ($updaterPresent) { $updaterRefusal = (Get-InstallUpdaterState $updaterDir $bytes $expectedSha).refusal }; ' +
+                edits = @(@{ anchor = 'if ($updaterPresent) { $updaterRefusal = Get-InstallUpdaterRefusal $updaterDir $bytes $expectedSha }'
+                        replacement = 'if ($updaterPresent) { $updaterRefusal = Get-InstallUpdaterRefusal $updaterDir $bytes $expectedSha }; ' +
                             'if ($updaterPresent -and $null -eq $updaterRefusal -and -not $WhatIf) { ' +
                             '[IO.File]::Delete([IO.Path]::Combine($updaterDir, ''installer.exe'')); [IO.Directory]::Delete($updaterDir, $false); ' +
                             '$actions.Add(''mutant removed installer''); $actions.Add(''mutant removed updater''); $removed += 2; $updaterPresent = $false }' })
                 targets = [ordered]@{ PU05 = $updaterTouched
-                    PU21 = 'Expected RESIDUE_CHANGED (ok=False), got NOT_MEASURED (ok=False)'; PU21b = $updaterTouched } }
+                    PU21 = 'The hook could not write into the updater directory ' + $missingDirectory
+                    PU21b = $updaterTouched
+                    PU25 = 'The hook could not replace the installer ' + $missingDirectory
+                    PU28 = $hookRanZeroTimes } }
             # The defect of the N3 driver: the updater is deleted recursively on the strength of the
             # preliminary check, without quarantine and without a second look.
             @{ id = 'CU07'
-                edits = @(@{ anchor = '$isolation = Move-InstallUpdaterToQuarantine $updaterDir $root $bytes $expectedSha $actions'
-                        replacement = '[IO.Directory]::Delete($updaterDir, $true); $actions.Add(''mutant removed installer''); ' +
-                            '$actions.Add(''mutant removed updater''); $removed += 2; $isolation = @{ refusal = $null; quarantine = $null; item = $null }' })
-                targets = [ordered]@{ PU21 = $changedToCleaned } }
+                edits = @(@{ anchor = '$isolationRefusal = Enter-InstallUpdaterQuarantine $Plan $State'
+                        replacement = '[IO.Directory]::Delete($Plan.updaterDir, $true); $Actions.Add(''mutant removed installer''); ' +
+                            '$Actions.Add(''mutant removed updater''); $State.removed += 2; $isolationRefusal = $null' })
+                targets = [ordered]@{ PU21 = $changedToCleaned; PU25 = $changedToCleaned; PU28 = $hookRanZeroTimes } }
+            # The opened InstallDir is no longer required to sit at its canonical path, so a swapped
+            # Programs junction leads the deletion to a directory somewhere else.
+            @{ id = 'CU08'
+                edits = @(@{ anchor = 'if (-not (Test-InstallSamePath $State.installNode.FinalPath $Plan.installCanonical)) {'
+                        replacement = 'if ($false) {' })
+                targets = [ordered]@{ PU24 = 'A directory behind the swapped Programs junction was removed' } }
+            # Deletion by path instead of by the verified handle: handles are opened with full sharing and
+            # the installer is deleted through its path, so whatever sits at that path is what gets deleted.
+            @{ id = 'CU09'
+                edits = @(
+                    @{ anchor = '$fileError = $native::MarkDelete($State.fileNode.Handle)'
+                        replacement = '[IO.File]::Delete($State.item); $fileError = 0' },
+                    @{ anchor = 'uint share = directory ? (FILE_SHARE_READ | FILE_SHARE_WRITE) : FILE_SHARE_READ;'
+                        replacement = 'uint share = FILE_SHARE_READ | FILE_SHARE_WRITE | 4u;' })
+                targets = [ordered]@{ PU28 = 'An unverified file planted at the installer path was deleted' } }
         )
         foreach ($mutation in $counterexampleCases) {
             Invoke-Case $mutation.id { Invoke-Counterexample $mutation }
@@ -775,6 +981,7 @@ try {
     $report.setup_error = $_.Exception.Message
 }
 
+$report.culture_at_end = [Globalization.CultureInfo]::CurrentCulture.Name
 $report.cases = $cases.ToArray()
 $report.counterexamples = $mutations.ToArray()
 $report.total = $cases.Count

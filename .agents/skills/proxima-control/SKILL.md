@@ -97,12 +97,17 @@ Remove-ProximaUninstallResidue
 ```
 - Kết quả có `ok`, `code`, `actions` (việc đã làm, hoặc việc sẽ làm khi `-WhatIf`), `before`, `after`, `error`. Thành công:
   `CLEANED` hoặc `NOTHING_TO_DO` (`ok` là true). `-WhatIf` trả `WOULD_REMOVE` (`ok` là false vì chưa dọn gì) hoặc `NOTHING_TO_DO`.
-- Từ chối trước khi xoá bất cứ thứ gì: `UNINSTALL_RUNNING` (còn tiến trình `Proxima`, `Un_*` hoặc `Au_*`), `STILL_INSTALLED` (còn
-  khoá gỡ cài đặt có tên bắt đầu bằng `Proxima`, hoặc còn `Proxima.exe`), `BAD_ARGUMENT`, `NOT_MEASURED` (lỗi ngoài dự kiến, xem
-  `error`; nếu lỗi xảy ra giữa chừng thì `actions` ghi việc đã làm).
+- Luôn trả trước khi xoá bất cứ thứ gì: `UNINSTALL_RUNNING` (còn tiến trình `Proxima`, `Un_*` hoặc `Au_*`), `STILL_INSTALLED` (còn
+  khoá gỡ cài đặt có tên bắt đầu bằng `Proxima`, hoặc còn `Proxima.exe`), `BAD_ARGUMENT`, `RESIDUE_UNEXPECTED`.
 - `RESIDUE_UNEXPECTED`: có thứ ngoài dự kiến (thư mục cài còn tệp, updater có thêm mục, bộ cài sai kích thước hoặc sai băm, có
   junction/symlink). **Phải có người xem**; không tự xoá tay, không chạy lại với băm khác chỉ để cho qua.
-- `RESIDUE_CHANGED`: đích bị đổi giữa lúc kiểm và lúc xoá. Hàm trả updater về tên cũ khi được; nếu không, `actions` ghi đường dẫn
-  `proxima-updater.pxu-<GUID>` còn giữ lại. `CLEAN_INCOMPLETE`: đã xoá nhưng kiểm kê sau vẫn còn đích. Cả hai cũng cần người xem.
+- Có thể trả sau khi đã xoá một phần, khi đó `actions` ghi đúng việc đã làm và cần người xem:
+  `RESIDUE_CHANGED` (đích bị đổi giữa lúc kiểm và lúc xoá; updater được trả về tên cũ khi bộ cài chưa bị xoá, nếu không thì `actions`
+  ghi đường dẫn `proxima-updater.pxu-<GUID>` còn giữ lại; junction xuất hiện ở thư mục cài thì chỉ gỡ liên kết, không đụng đích),
+  `CLEAN_INCOMPLETE` (đã xoá nhưng kiểm kê sau vẫn còn đích) và `NOT_MEASURED` (lỗi ngoài dự kiến, kể cả lỗi I/O giữa chừng; xem `error`).
+- Chống đua: mỗi đích được mở bằng handle không chia sẻ quyền xoá, kiểm trên chính handle đó (không phải liên kết, đường dẫn cuối
+  của handle khớp vị trí chuẩn nên tổ tiên bị tráo thành junction sẽ lộ, băm bộ cài đọc qua handle), rồi xoá bằng chính handle.
+  Khoảng hở còn lại là từ lần kiểm sơ bộ tới lúc mở handle: đổi thay trong khoảng đó được phát hiện và trả `RESIDUE_CHANGED`,
+  không bị xoá theo. Danh sách tiến trình và khoá registry vẫn chỉ là ảnh chụp tại lúc gọi.
 - Giới hạn: chỉ cho bản cài per-user nói trên với băm bộ cài đã biết; bản khác phải truyền `-InstallerSha256` và `-InstallerBytes`
-  tương ứng. Danh sách tiến trình và khoá registry là ảnh chụp tại lúc gọi. Kiểm thử: `tests/ProximaInstall.Tests.ps1`.
+  tương ứng. Kiểm thử: `tests/ProximaInstall.Tests.ps1`.

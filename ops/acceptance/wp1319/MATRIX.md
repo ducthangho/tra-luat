@@ -231,3 +231,9 @@ Cần chủ kho quyết định: nâng trần WP-PXU (+1 Executor, +1 native Des
 |---|---|---|
 | U8 vế dữ liệu | **passed (hẹp, scoped Desktop)**: sao chép, khôi phục, mở lại | 12 404 tệp / 180 MB; backup và restore trùng manifest (sha256 từng tệp); app mở lại và đóng êm trên profile đã restore (zip `eb1688b7…`). **Chưa đo:** `/v1/stats`, `totalRequests=0` (REST tắt mặc định). Review `approve_with_fixes` (`ops/acceptance/wp-u8/VERDICT.md`) |
 | U8 vế đăng nhập | **not_measured** | Chưa ai đăng nhập; phiên điều phối không được chạm credential. Cần chủ kho tự đăng nhập rồi đo lại |
+
+### H.11 WP-PXL (#1413): LIVE promote 2 module mới, Desktop → VM (19/11, 06:27–06:34Z)
+| Hàng | Trước | Sau | Điều kiện đọc |
+|---|---|---|---|
+| §11 #8 promotion fence | passed (scoped, mức hàm và test) | **passed (scoped, promote thật giữa 2 máy)** | VM chỉ được `ALLOWED` nhờ receipt `passed=true` của Desktop với cùng `artifact_sha256`. Ca âm "máy đầu FAIL thì chặn máy sau" đã có ở mức test (PA13–PA18), **chưa** chạy thật trên 2 máy |
+| Runtime promotion / LIVE | not_run | **done (scoped: chỉ 2 module mới)** | Gateway, `ProximaControl` 1.0.1, tác vụ, service, endpoint **không đổi** (đo trước/sau). Runtime Proxima vẫn 5.5.0: không có runtime mới để promote |

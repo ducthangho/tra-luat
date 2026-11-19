@@ -1,0 +1,302 @@
+{
+ "sha": "1cf535fddbd81f343872c81582b301f08bd79f45",
+ "os": "Windows",
+ "host": "DESKTOP-T9R33P2",
+ "run_utc": "2026-11-19T09:50:04Z/09:51:41Z",
+ "evidence_zip_sha256": "e1d6505bf6d4251f207e2ada20a67498e3a627d2aeed312d8fb1f8f670ee0b8e",
+ "tested_blobs": {
+  "tests/ProximaActivation.Tests.ps1": "e5cc81c10dee5350d3145339b84c6a02712ece252bf2f0c076ef6db4de587f60",
+  "scripts/ProximaActivation.psm1": "bb96cd5814752c66e84a44ed09b1e311772120413abf991e813d2ce9517a677d"
+ },
+ "note": "Chay tren cay dung tu blob cu + build.py; bam tep da test == blob trong commit sha (kiem lai bang git show). Pham vi: chi harness ProximaActivation (tep duy nhat doi so voi head 953ba9d8 da co lan Windows truoc).",
+ "tests": [
+  {
+   "id": "ps7:PA01",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA02",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA03",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA04",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA05",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA06",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA07",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA08",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA09",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA10",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA11",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA12",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA13",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA14",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA15",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA16",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA17",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA18",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA19",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA20",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA21",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA22",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA23",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA24",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA25",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA26",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA27",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA28",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA29",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:PA30",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:CX01",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:CX02",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:CX03",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:CX04",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:CX05",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps7:CX06",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA01",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA02",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA03",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA04",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA05",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA06",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA07",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA08",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA09",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA10",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA11",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA12",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA13",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA14",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA15",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA16",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA17",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA18",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA19",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA20",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA21",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA22",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA23",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA24",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA25",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA26",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA27",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA28",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA29",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:PA30",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:CX01",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:CX02",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:CX03",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:CX04",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:CX05",
+   "ket_qua": "passed"
+  },
+  {
+   "id": "ps51:CX06",
+   "ket_qua": "passed"
+  }
+ ]
+}

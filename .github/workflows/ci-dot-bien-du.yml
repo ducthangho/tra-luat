@@ -10,8 +10,11 @@ name: đột biến đủ (hằng tuần)
 # Bắt buộc trên ĐÚNG SHA ứng viên (workflow_dispatch trên ref ấy) trước merge/land/release; biên nhận targeted của
 # `ci.yml` KHÔNG thay được. Ước tính g12: ~73 800 s nối tiếp ⇒ 8 mảnh ≈ 2,6 h/mảnh ⇒ trần 360 phút (trần job GitHub).
 # wp1166 (PR0): mọi checkout GHIM biểu thức SHA sự kiện (không tên nhánh) rồi ĐO lại HEAD; artifact mảnh mang run_id +
-# run_attempt; job gom đòi đủ N biên nhận, mỗi biên nhận `head` = SHA sự kiện, job mảnh `success`. Group concurrency
-# theo run_id + không huỷ ⇒ hai lượt audit không thay chỗ nhau. Chốt: `loi_ghim_sha_du` / `loi_bien_nhan_du`.
+# run_attempt (tên riêng từng attempt). Job gom tải MỌI artifact mảnh của ĐÚNG run_id (mọi attempt) vào thư mục RIÊNG
+# từng artifact (không merge-multiple ⇒ không ghi đè nhau), rồi với MỖI mảnh chọn đúng MỘT bên sản xuất hợp lệ (`head` =
+# SHA sự kiện, rc 0, mọi mục passed; attempt cao nhất, in attempt đã dùng) ⇒ chạy lại riêng job gom / riêng một mảnh hỏng
+# vẫn gom được. Group concurrency theo run_id + không huỷ ⇒ hai lượt audit không thay chỗ nhau.
+# Chốt: `loi_ghim_sha_du` / `chon_bien_nhan_du` / `loi_bien_nhan_du`.
 
 on:
   schedule:
@@ -134,10 +137,9 @@ jobs:
         run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - uses: actions/download-artifact@v4
         with:
-          pattern: dot-bien-manh-${{ github.run_id }}-${{ github.run_attempt }}-*
-          path: manh
-          merge-multiple: true
+          pattern: dot-bien-manh-${{ github.run_id }}-*
+          path: manh-tho
       - name: biên nhận mảnh phải đủ, đúng SHA sự kiện, job mảnh success (wp1166)
-        run: python .claude/dev/ci_dang_ky_test.py --kiem-bien-nhan-du manh --sha-su-kien "${{ github.sha }}" --ket-qua-manh "${{ needs.dot-bien-manh.result }}"
+        run: python .claude/dev/ci_dang_ky_test.py --kiem-bien-nhan-du manh-tho --chon-ra manh --run-id "${{ github.run_id }}" --sha-su-kien "${{ github.sha }}" --ket-qua-manh "${{ needs.dot-bien-manh.result }}"
       - name: gom mảnh
         run: python ops/nhanh_don_duoc_test.py --gop-du manh

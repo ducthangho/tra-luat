@@ -1,0 +1,44 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1401
+packet_id: WP-PXA
+revision: 2
+generation: 1
+lease_id: wp-pxa-r2-g1-executor
+role: executor
+executor: phien_dieu_phoi
+executor_surface: claude_code_main_session
+reviewer: independent_readonly
+reviewer_model: 'CHUA CAP ngan sach (E2 ADR-0067: PR #1378 vuot tran loi goi Codex mac dinh); connector Codex review lai head moi'
+review_class: sensitive
+target_hosts: [DESKTOP-T9R33P2]
+target_device_ids: [a5f7076e-a491-4f84-829b-8d1fbcc1c767]
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt']
+spec_path: ops/specs/wp-pxa-r2.md
+spec_hash: 99abe98869caa7f4cfa2e12822a9c46e21099c96657e95f8fe433dc12bc0c73f
+write_set:
+- .agents/skills/proxima-control/tests/ProximaActivation.Tests.ps1
+- ops/acceptance/wp-pxa/RESULTS.md
+- ops/leases/wp-pxa-r2-g1-executor.yaml
+- ops/specs/wp-pxa-r2.md
+write_set_hash: 2004707111fe3203ce22afab19bf376843e3dac17c923587248f08167d663e83
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: 953ba9d8c32e2e6867956a6f8ed6a90a4137ecb1
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 19/11: "1378 xử lý tiếp theo quy trình", "Tiếp đi", rồi gọi /land-packets 1378; finding P2 connector chặn merge theo ADR-0060 M1, agent tự quyết sửa theo ADR-0067 (không rơi E1–E5 trừ ngân sách review = E2, chờ chủ kho)'
+finding: 'connector review 5972629197 comment 4626897634 (P2) tests/ProximaActivation.Tests.ps1:216'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-19T09:46:49Z'
+heartbeat_at: '2026-11-19T09:46:49Z'
+lease_until: '2026-11-19T13:46:49Z'
+lease_expires_at_utc: '2026-11-19T13:46:49Z'
+max_lease_hours: 4
+review_calls_limit: 0
+review_calls_used: 0
+native_runs_limit_per_host: 1
+native_step_reruns_limit: 1
+native_runs_used: 'DESKTOP-T9R33P2 0'
+windows: native_desktop_focused

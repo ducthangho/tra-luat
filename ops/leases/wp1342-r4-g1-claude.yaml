@@ -74,8 +74,8 @@ leased_at_utc: '2026-11-18T23:30:00Z'
 heartbeat_at: '2026-11-18T23:30:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-20T11:30:00Z'
-lease_expires_at_utc: '2026-11-20T11:30:00Z'
+lease_until: '2026-11-19T03:05:00Z'
+lease_expires_at_utc: '2026-11-19T03:05:00Z'
 lease_until_ghi_chu: '36h (packet lon, ca native Windows nhieu); rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
@@ -91,3 +91,14 @@ budget:
 budget_ghi_chu: 'Codex PR <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 3 (Desktop uu tien, VM du phong; khong CI Windows). Ngoai ngan sach PR: 11 loi goi Codex offline review dac ta r4 truoc lease (ops/reviews/wp1342-spec-r4/; tran nang +1 theo Q6).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-19T02:45:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex PR 2/10 (728ecca, 46d3907; ca hai sach) + 1 tu kich khi bo draft luc merge. CI Ubuntu 2/2 (728ecca: 38/39, gate do san tren base do bash tran ops/land - sua o PR #1408; 46d3907: 41 success 1 skipped, GOM DAT 1573). Windows native: Desktop 2 luot (728ecca: J3/J9 do 10/10 => dac ta ban 13; 46d3907: 11/11, dot bien 13/15) + VM 1 luot (J3/J9/J10 x3). Push them 1 (chu kho duyet checkpoint ADR-0060 M5, gop merge master d135697). Codex offline review dac ta 13 loi goi (tran nang Q6/Q8/Q9). Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-20T11:30:00Z'
+  han_moi_utc: '2026-11-19T03:05:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #1342 r4 da MERGE: PR #1407 (head 46d39071989fd77582ef8d1d61a7ab7de90a12ba) merge commit a2c7d759866502e7da318e4f83e17d5f77491eb5,
+    human audit chu kho issuecomment-6997893490. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem nao cho write set nay luc rut.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu cac duong dan write set sau 2026-11-19T03:05:00Z phai ra NGUOI_GIU 0.'

@@ -1,0 +1,24 @@
+**Lượt 4: còn 1 P2 về phạm vi bảo đảm teardown và 1 P3 về kết quả khi hàm đợi bị ngắt.** Các phản chứng trong bộ nhớ xác nhận thứ tự mới của (e) giữ đúng điểm đỏ và H1–H7 đi tới các chốt dự kiến.
+
+### Finding còn mở
+
+- **P2 · M5(iii)–(iv), §4b X1, §9 · Bảo đảm giữ lỗi gốc vẫn rộng hơn hành vi được phép triển khai.** M5(iii) đã giới hạn bảo đảm “không ném” cho nhánh job và giữ nhánh pgid của A. M5(iv) vẫn hứa giữ đúng đối tượng lỗi gốc cho cả hai đường teardown, còn §9 vẫn ghi “teardown không bao giờ ném”. Tôi chạy `_r387_don_khi_thoat` và `_r387_don_dep` nguyên văn từ base, với thân ném sentinel và phép dò pgid ném `OSError`. Ngoại lệ thoát ra là `OSError`; sentinel chỉ còn trong `__context__`. **Cách sửa:** giới hạn lời hứa giữ lỗi gốc khi chính teardown ném ở M5(iv) và §9 vào nhánh job, đồng thời ghi rõ giới hạn tương ứng của nhánh pgid. Cập nhật X1 để dẫn cả (t3c) cho phép dò ném và (t3d) cho hàm đóng ném.
+- **P3 · M2, docstring `_cho_cay_chet_truoc_bam` · Tài liệu gán kết quả `False` cho sai tầng khi bị ngắt.** Probe cho phép dò ném `KeyboardInterrupt` xác nhận hàm đợi truyền ngoại lệ ra ngoài. `lenh_run` mới bắt nó và đặt `log_cay_chet = False` tại dòng 2995–2996. M2 yêu cầu giữ nguyên thân hàm ngoài dòng dò. **Cách sửa:** mô tả riêng giá trị trả về của hàm đợi và cách `lenh_run` ghi `False` khi bắt `KeyboardInterrupt`. Giữ (h) làm phép đo cho hợp đồng của `lenh_run`.
+
+### Đối chiếu bảy finding lượt 3
+
+| Finding lượt 3 | Kết quả lượt 4 |
+|---|---|
+| P2 · W6 chết ở (e4) | **Đóng.** Probe dùng thân hàm đợi và phần (e) cũ từ base, áp M1/M2 và thứ tự mới trong bộ nhớ. Bản đối chứng xanh. Điểm đỏ đầu tiên là W1 → e8, W2 → bẫy nhóm e6, W3 → e7, W4 → bẫy `_cay_da_chet` e6, W6 → bẫy job e9. Bốn mutant A có đích (e) vẫn đỏ ở e2, e4, e5, e5. W5 đổi điều kiện unlink Windows từ `False` sang `True` với job rỗng, đúng vế mà (g) kiểm. Nhãn W7 khớp vế cuối của `_r387_than_a`. |
+| P2 · Lọc AST và tách bảng | **Đóng.** Lọc nguồn base giữ 16/0/2 mục, gồm 9 nút sản phẩm và 1 nút harness trải nhiều dòng. `compile()` qua. Hai mốc `partition()` tách được bảng và ghép lại đúng từng ký tự. Thêm 6 mục W và 7 mục H cho 22/0/9, tổng 31. |
+| P2 · (t6)/H7 chỉ đo hàm phụ | **Đóng.** (a′) chuyển đúng lời gọi `_r387_than_a(0, True)` qua `_r387_doi_chung_a`. Probe cùng đường xử lý cho lỗi băm sạch đi qua, lỗi có ghi chú bị từ chối, và H7 đỏ tại (t6) khi bỏ vế lọc ghi chú. |
+| P2 · Hàm đóng ném và phạm vi “không ném” | **Còn mở về phạm vi ghi trong M5(iv) và §9.** Phép đo (t3d) đã đủ cho nhánh job. Probe với `OSError` cho đúng một lần đóng, lỗi `ham dong nem` và trạng thái job đã xóa. |
+| P2 · H1/H2/H4 chết trước nhãn | **Đóng.** Probe cho H1/H4 đỏ ở kiểm trace đầu tiên của (t2) và H2 đỏ ở (t4a). H3/H5/H6 lần lượt đỏ ở (t3)/(t4b)/(t5). Neo `e.add_note(loi)` hiện khớp một chỗ trong vùng runner thay. Mẫu nguyên văn trên mã mới là phần executor được giao chốt, kèm số lần khớp, kết quả biên dịch và dòng `HONG` đầu tiên. |
+| P3 · Docstring M2 | **Còn mở ở trường hợp ngắt.** Bản 4 đã khôi phục các trường hợp hết hạn, dò về muộn và `None`. |
+| P3 · Bộ bọc POSIX và trạng thái fixture | **Đóng.** `lenh_run` gọi `_job_windows` vô điều kiện và hàm thật trả `None` trên POSIX. Bản 4 yêu cầu khôi phục đúng đối tượng và khởi tạo trạng thái sau khi kiểm lượt trước. Đọc lần đầu bằng `getattr(..., None)`, dùng `setattr`/`delattr` cho thuộc tính mới và đặt việc xóa trạng thái trong đường `finally` của lời đóng là các chi tiết executor có thể chốt theo hợp đồng và phép đo đã nêu. |
+
+**L1–L7.** L1 có đơn vị và tập ID cho 22/0/9 và tổng 31. L2 giữ các thay đổi trong hai tệp đã khai, với bước lọc thực hiện trên bản sao nghiệm thu. L3 và L6 có phản chứng cho các nhãn và mốc tách bảng đã đổi, còn hai finding trên cần đồng bộ lời khai với hành vi đo được. L4 dùng `khong_ap_dung` cho packet tách. L5 phân biệt số đo base với số mục kỳ vọng và yêu cầu đo lại trên exact head. L7 giữ nguyên các điểm dừng và mã E.
+
+**Bằng chứng lượt review.** Codex qua API, họ OpenAI, transport máy. Phiên bản model phục vụ chưa đo được. Base `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`, SHA-256 bản 4 `3e78637e06f347e103b69ea516f2e561c661020cc9383d432bf3c19da03318d0`. Đo trên Linux, Python 3.13.18, lúc 05:45–05:48 UTC ngày 2026-11-19. `diff -u` trả 1 vì hai bản khác nhau. Probe `python -B -` đầu tiên trả 1 do thiếu decorator khi trích fixture; lượt chạy lại và các probe còn lại trả 0. Windows native, full suite và full mutation runner chưa chạy. Worktree giữ nguyên.
+
+KET_LUAN: request_changes

@@ -1,0 +1,15 @@
+**Lượt 5 · review độc lập, chỉ đọc.** Tôi đối chiếu bản 4 với bản 5 bằng `diff -u` (rc `1`, có khác biệt). Base là `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. SHA-256 bản 5 chưa commit là `d658de69bc2509ec9b9686b4160908e956b4d3abe79b94c7cd9a21600699db02`. Tôi không sửa tệp.
+
+**Hai finding lượt 4 đã đóng.**
+
+- **P2 giữ lỗi gốc.** M5(iv), §8 và §9 cùng giới hạn bảo đảm giữ đối tượng lỗi gốc vào nhánh job và ghi rõ ngoại lệ teardown ở nhánh pgid có thể thoát ra, để lỗi gốc trong `__context__`. X1 ở §4b dẫn đúng cả (t3c) cho phép dò ném và (t3d) cho hàm đóng ném. M6(t5) kiểm riêng định danh lỗi gốc cùng ghi chú teardown.
+- **P3 tầng xử lý ngắt.** M2 ghi đúng rằng `KeyboardInterrupt` truyền ra khỏi hàm đợi và `lenh_run` ghi `log_bam_cay_da_chet = False`. Luồng tại `launcher.py:2990–2997` và kỳ vọng M6(h) khớp với mô tả này.
+
+**Hai điểm cần sửa trước khi đóng băng.**
+
+- **P3 · M2, dòng 63.** Docstring khẳng định tổng thời gian `≤ han` cộng một lần dò. Thân hàm giữ nguyên chỉ giới hạn *thời gian yêu cầu ngủ*, trong khi lần ngủ có thể trả muộn. Tôi chạy thân hàm trên base với đồng hồ giả, phép dò tức thời trả `[7]`, `han=0.1` và lần ngủ trả muộn `0.5` giây. Probe thoát `0` và in `False 0.6`. **Cách sửa:** mô tả deadline dùng để quyết định có dò tiếp, nhận kết quả hay ngủ thêm. Ghi rõ thời gian thực có thể vượt hạn do lần dò đồng bộ hoặc do thức dậy muộn. Giữ các dung sai N1/N4 làm tiêu chí đo.
+- **P3 · M5(i) và M5(iii), dòng 66.** M5(i) yêu cầu kiểm lượt trước *đã đóng* và làm ca đỏ nếu còn handle chưa đóng. M5(iii) yêu cầu xoá `m._r387_job` ngay cả khi `CloseHandle` trả `0` hoặc ném, và M6(t3d) kiểm chính trạng thái `None` sau khi ném. Khi ấy giá trị `None` chỉ cho biết fixture đã bỏ tham chiếu sau lần thử đóng. Nó không chứng minh handle đã đóng. **Cách sửa:** giới hạn chốt M5(i) vào handle còn được fixture giữ và quy định lần đóng thất bại làm đỏ tại teardown. Giữ quy tắc chỉ thử đóng một lần.
+
+Các mẫu thay thế H1–H7, việc đo lại neo `r387_teardown_nuot_loi` và kích thước diff đã có phép đo giao cho executor. N4/N5 vẫn cần bằng chứng Windows native tại exact head. Review này chưa chạy các gate đó.
+
+KET_LUAN: request_changes

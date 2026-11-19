@@ -1,0 +1,192 @@
+**Đặc tả r1 cần sửa trước khi đóng băng.** Áp nguyên văn M1–M4 làm hai đột biến cũ mất neo. Hai yêu cầu của N4 cũng chưa thực hiện được như mô tả với runner hiện tại. H2 còn phụ thuộc lịch chạy tiến trình, nên có thể sống dù bắt tay bị đảo.
+
+Tôi review bản đặc tả chưa commit do người dùng chỉ định, SHA-256 `7b1f23249a404c37b299f1fd48343f811c35b3b072e5ce94b4d5d9432abdb156`. `HEAD` và `origin/master` cục bộ cùng là `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. Đây là phiên reviewer độc lập họ OpenAI, dùng shell máy Linux, Python 3.13.18, sandbox chỉ đọc. Model/effort phục vụ và receipt CLI chưa xác minh. `git status` cuối lượt vẫn chỉ có tệp đặc tả untracked. Tôi đã áp M1–M4 và chạy phép dò giả trong bộ nhớ. **Không chạy được** suite, runner đột biến đầy đủ hoặc phép đo Windows native. `mktemp -d /tmp/review-r387.XXXXXXXX` trả `Read-only file system`.
+
+## 1. Đo §0 trên base
+
+Phép đo lúc `2026-11-19T05:26:24Z`, cùng checkout trong suốt lượt:
+
+| Lệnh hoặc phép đo | Kết quả |
+|---|---|
+| `wc -l .claude/dev/launcher{,_test}.py` | `6213`, `18032` |
+| `sha256sum .claude/dev/launcher{,_test}.py` | Tiền tố `f2503d59927f`, `37042727f8b8`, đúng §0 |
+| `git merge-base --is-ancestor e4fdf09 HEAD` | rc `0` |
+| `rg -n '^ *return _R387_CHI_LINUX$' .claude/dev/launcher_test.py` | 9 dòng, tại 14880, 14888, 14901, 14916, 14931, 14981, 15005, 15028, 15042 |
+| `python -B -` đọc AST, đếm hàm có decorator `ca` và tuple có ID bắt đầu `r387_` trong từng bảng | 426 ca, 16 mục `DOT_BIEN`, 2 mục `DOT_BIEN_HARNESS` |
+| `rg -n '44285378703\|332/332' ops/land/pr1388*` | Hồ sơ Windows cũ ghi `332/332`, tổng 426, bỏ qua 94 gồm 9 ca r387, hỏng 0 |
+| `rg -n '_nen_do_cay_truoc_bam\(' .claude/dev/launcher.py` | Định nghĩa 605, đúng ba chỗ gọi 619, 3041, 3049 |
+
+Đã đối chiếu nguyên văn `VERSION`, guard của hàm đợi, dòng dò, biểu thức xoá prompt, chú thích neo mốc và các hàm Job Object. `_job_windows` gán sau `Popen`, đặt `0x2000`, và `lenh_run` giữ handle thành công. `_pid_trong_job` phân biệt `[]`, danh sách và `None`. `_cay_da_chet` có vòng Windows 20 lần. Các chi tiết đó khớp §0. [launcher.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher.py:605)
+
+**P3 — §0 dòng 26, 30 và 33 trỏ sai một số vị trí và nhập nhằng hai đột biến prompt.** `nl -ba .claude/dev/launcher.py | sed -n '2988,3004p'` cho thấy mốc ở **2990**, khối đợi **2991–2997**, đọc lại sổ **3001**. `rg -n 'def __exit__|rmtree\(self.d' .claude/dev/launcher_test.py` cho thấy `San` bắt đầu ở **177**, `__exit__` ở **184**, `rmtree` ở **185**. `nl -ba .claude/dev/launcher_test.py | sed -n '16488,16502p'` cho thấy mục có neo `and cay_da_chet):` và điều kiện `posix` là **`ban_chup_de_lai_tren_dia`**. `xoa_prompt_khi_wrapper_vua_thoat` neo vào lời gọi hàm đợi, và chính `t76` trả bỏ qua trên Windows. Sửa lại vị trí và ghi riêng hai mục để tính đúng danh mục không đo được. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:16488)
+
+## 2. Luật L1–L7
+
+| Luật | Kết quả |
+|---|---|
+| L1 | Các số chính có đơn vị. M7 cần ghi **6 mục sản phẩm mới** W1–W6, W7 tái dùng 1 mục, W8/W9 giữ 4 mục, và H1–H3 là 3 mục harness mới. |
+| L2 | M1–M4 và M5–M7 chiếu được vào hai tệp. Yêu cầu runner của N4 cần chốt cách thực hiện và nguồn nhãn lỗi như finding bên dưới. |
+| L3 | Chưa đạt. N2 thiếu neo, H2 thiếu phản chứng tất định, N4 chưa thu được nhãn lỗi qua runner hiện tại. N6 cũng nên nêu rõ `> 450`, lỗi EOL và `diff --check` là các kết quả đỏ. |
+| L4 | `khong_ap_dung` hợp lý cho phần mở rộng nền tách từ A. Hai finding mang sang được ghi rõ ở §9. |
+| L5 | §0 có ngày, OID, nền và Python. Còn thiếu giờ UTC tới giây theo chính §4, cùng lệnh và rc của lần đo khi soạn. |
+| L6 | Phép đếm bỏ qua đã đặt đúng nền và có đối chứng base. Neo W9, cơ chế lọc bảng và nhãn lỗi cần sửa. Nên khoá phép đếm vào bản ghi từng ca, rồi đối chiếu tập ID thay vì chỉ dùng tổng chênh 9. |
+| L7 | Dùng trần ADR và khai E4/E5 phù hợp phạm vi. §6 nên dẫn cụ thể điều khoản cho các điểm dừng về phạm vi, revision và bằng chứng native. Khi thực sự cần quyền hoặc tài nguyên E2, ghi mức đã dùng, phần thiếu và mục đích theo ADR-0067. |
+
+## 3. Đường vào và đột biến §4b
+
+Tôi dùng `python -B -` để đọc AST của bảng, lấy giá trị các hằng neo, áp M1–M4 vào chuỗi nguồn và đo `source.count(neo)`. Bản M1–M4 biên dịch được trong bộ nhớ. W1, dòng chung W2/W3/W4/W6 và W5 mỗi mẫu khớp đúng 1 chỗ. Trong 16 mục cũ, 14 mục giữ số khớp 1 cho từng mẫu. Hai mục W9 cần cập nhật như dưới đây.
+
+| Mục | Kết quả đối chiếu đường vào và dấu hiệu đỏ |
+|---|---|
+| W1 | Đúng 1 neo. Phép dò giả (e8) sạch trả `True` sau `[7] → []`; mutant trả `False` ngay. |
+| W2 | Đúng 1 neo. Phép đo trong bộ nhớ chạm bẫy `_thanh_vien_nhom` trên nhánh Windows của (e6). |
+| W3 | Đúng 1 neo. Với `job=None`, sạch trả `False`, mutant trả `True`, đều không ngủ. |
+| W4 | Đúng 1 neo. Mutant chạm bẫy `_cay_da_chet` của (e6). |
+| W5 | Đúng 1 neo. Theo mã, nếu (g) chứng minh job rỗng và tạo được snapshot, mutant cho `unlink` chạy, đúng vế snapshot Windows. Cần phép đo native. |
+| W6 | Đúng 1 neo. Với `job=None`, mutant trả `False` nhưng **không gọi bẫy job**. Với job giả khác `None`, mutant gọi bẫy, đúng dấu hiệu đã khai. |
+| W7 | Neo A đúng 1. Mutant ghi `ket_thuc_utc` sau khi đợi, nên (a) đỏ ở độ lệch mốc nếu các vế trước qua. `thoi_luong_giay` vẫn dùng biến `ket_thuc` cũ, nên mutant này chỉ chứng minh vế UTC. |
+| W8 | Cả hai neo đúng 1. Với job giả, bỏ guard gọi bẫy job trên Darwin. Thêm ngủ ghi `[0.1]` trên FreeBSD. Hai kết quả đã chạy trong bộ nhớ. |
+| W9 | Neo cũ có kết quả `[0]` và `[0, 0]`. Sau khi cập nhật **cả hai** hằng, từng mẫu khớp 1. Theo mã (i), bỏ khối mốc làm mốc vẫn đứng trước lần dò giả. Dời khối đến trước unlink khiến mốc được ghi lúc snapshot còn tồn tại. |
+| H1 | M5 chưa có mã nên chưa đếm được neo. Có thể giết đúng bằng trace `dò → đóng` trên đường đối chứng. Trace cần kiểm cả số lần gọi. |
+| H2 | Chưa có neo. Đảo thứ tự công bố marker và assign chỉ mở một race. Nếu assign vẫn xong trước lúc wrapper sinh cháu, (c) qua và mutant sống. |
+| H3 | Chưa có mã để đếm neo. Theo đề xuất, bỏ kiểm kết quả `0` làm mất thông báo mà (t) đòi, miễn ca xác nhận đường đóng handle đã thực sự chạy. |
+
+**P1 — M3, M7, N2 và W9 bỏ sót `_R387_DONG_CAY`.** M3 thay cả dòng 3041. `r387_a_nen_khac_moc_truoc_unlink` dùng `_R387_KHOI_MOC` để xoá và `_R387_DONG_CAY` để chèn. Cập nhật riêng `_R387_KHOI_MOC` cho kết quả `[1, 0]`, khiến `t117` đỏ và runner báo thiếu mẫu. Sửa M7 để cập nhật cả hai hằng và nêu phản chứng bỏ cập nhật từng hằng. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:15061)
+
+**P2 — M6 (e9) và W6 thiếu job giả và dấu hiệu đỏ tường minh.** `goi()` hiện truyền `None` ở dòng 14950. Phép đo trong bộ nhớ cho `W6 handle=False → False, 0 lần ngủ`, còn `W6 handle=True → trap job`. Nếu (e9) có `bang(kq is True, ...)`, `None` vẫn có thể giết mutant ở vế kết quả, nhưng sẽ lệch dấu hiệu W6 đang cam kết. Cho `goi()` nhận `job=`, truyền `object()` ở (e9), và đặt nhãn riêng cho bẫy job. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:14942)
+
+**P2 — H2 chưa chứng minh thứ tự bắt tay.** `_r387_ma_con` sinh cháu sau khi wrapper được scheduler cho chạy. Một lời gọi assign ngay sau khi ghi marker có thể thắng ở mọi lần chạy. `job_windows != True` cũng có thể do assign hỏng độc lập với thứ tự. Sửa H2 thành phản chứng tất định, chẳng hạn đo marker vắng lúc vào phép gán và chỉ có sau khi phép gán trả handle thành công. Giữ (c) native để chứng minh PID cháu thực sự vào đúng job. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:14809)
+
+**P2 — N3/N4 không khớp giao diện runner.** Có ba điểm cụ thể:
+
+- `DOT_BIEN_HARNESS` được unpack thành đúng ba trường ở dòng 17665. Gán trường nền thứ tư cho H2 sẽ lỗi. Muốn H2 ra `KHONG DO DUOC` trên Linux, dùng một ca đích riêng trả bỏ qua trên Linux hoặc ghi rõ thay đổi hỗ trợ điều kiện nền trong runner. Dùng (c) làm ca đích như hiện tại khiến (c) chạy trên Linux.
+- `ast.literal_eval` không giải được các biểu thức chứa `_R387_KHOI_MOC`, `_R387_DONG_CAY` và phép cộng hằng ở W9. Lọc các **node nguồn** theo ID rồi giữ nguyên biểu thức và hằng phụ thuộc, hoặc lọc bảng đã được Python khởi tạo. Nêu rõ có giữ bảng hook hay không, ghi tập ID kỳ vọng và băm bản sao.
+- `cham_mot_ca` trả `("giet", tên_ca)` và headline tổng hợp chỉ mang tên ca. `OK giet 1/1` không phân biệt chết đúng vế với một `TinHieuChotCa` vô can trong cùng ca. Thu riêng thông điệp của đúng mutant và ca trong bản sao thử, hoặc cho kênh runner mang nhãn chốt. M6/W1–W6/H1–H3 cần ghi ID mutant cụ thể để lọc và kiểm đủ mục.
+
+[launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:222), [vòng harness](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:17649)
+
+**P2 — §4b còn thiếu một số chốt của M1–M5.** Ba điểm gọi helper đã có hàng cho đợi, prompt và mốc. Bảng còn thiếu các vế riêng cho **job có handle nhưng query trả `None`**, **kết quả query về sau hạn**, **Windows kết thúc sớm hoặc lỗi giữa fixture**, **close đúng một lần kể cả khi query không chứng minh rỗng**, **nhánh `os.killpg` vắng**, và **giá trị phiên bản M4**. Một phần đã có phép đo ở ngoài bảng: (d) và hai mutant deadline của A, các ca r387 có `_r387_nhat_ky_kill`, N5 cho version. Hãy dẫn chúng vào bảng. Thêm phản chứng cho việc bỏ close, bỏ báo lỗi `None`, và nhánh không có `killpg`. W9 đo thứ tự mốc qua biểu thức unlink của nền khác. Nếu muốn chứng minh chính biểu thức xoá vẫn dùng phép dò cũ, chỉ rõ chốt `prompt_ban_chup_da_xoa` của (i) và mutant bỏ riêng phép dò đó. Windows (f)/(h) cũng nên được nối rõ với các mục A đã có cho đọc lại `stop`, `KeyboardInterrupt`, mã thoát và kết quả snapshot.
+
+## 4. Khả thi trên Windows và hai finding cũ
+
+**P2 — M5(iii), M6(t) và §9 chưa đóng hết lỗi teardown.** `_r387_chay` hiện chỉ gọi dọn cho `co_chau=False` sau khi `_r1252_run` trả về. Các ca (b), (d), (f), (g), (h), (i) chỉ dùng `with San()` ở ngoài. Nếu wrapper gán job thành công rồi launcher hoặc fixture ném lỗi, `San.__exit__` vẫn chạy mà không qua đường dọn hiện tại. Ngoài ra, `_r387_cho_cay_rong` có kết quả `None`, nhưng M5 mới quy định rõ lỗi hết hạn còn thành viên và lỗi `CloseHandle == 0`. Kiểm `0` sửa được phần kiểm kết quả API. Để đóng finding, đặt quyền sở hữu handle dưới một đường `finally` cho mọi lượt, kể cả từng lượt của (h). Báo lỗi cho cả `False` lẫn `None`, giữ lỗi gốc, thử số lần đóng và trạng thái handle. Nếu `CloseHandle` thất bại, đừng diễn giải việc xoá tham chiếu Python là đã đóng handle thành công. `(t)` cần ép nhánh POSIX cho các vế cũ dùng `_r387_pgid`, rồi ép nhánh Windows với job giả và hàm đóng giả cho các vế mới. Nếu vế cũ chạy nhánh Windows mà chỉ có `_r387_pgid`, nó có thể đỏ oan vì không thấy lỗi teardown mong đợi. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:14730)
+
+**P2 — M5(i) và N5 dùng hai giả thiết gán job khác nhau.** Fixture chặn wrapper bằng `job-da-gan`. Lượt N5 `python -c "print(1)"` không có chặn, còn `_job_windows` gọi `OpenProcess` và `AssignProcessToJobObject` sau `Popen`. Nếu con ngắn thoát trước assign, N5 có thể đỏ dù M1–M4 đúng. Dùng lệnh native đầy đủ với một con sống có kiểm soát đủ lâu để gán job, rồi kiểm `ma_thoat == 0`, `job_windows`, kết quả đợi và version. Giữ phép thử con thoát tức thì riêng nếu cần đo khe đã khai ngoài phạm vi. [launcher.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher.py:959)
+
+| Ca | Kết luận từ mã |
+|---|---|
+| (a), (a′), (c) | Bắt tay trên wrapper trước khi sinh cháu xử lý khe trong fixture. Cần kiểm PID và dấu `chau-xong` trên Windows thật. (a) còn nhạy với dung sai 1,8–2,5 s. (a′) kiểm vế băm đúng thứ tự. |
+| (b) | Có đường qua nếu job được gán, query chứng minh rỗng và teardown chạy. |
+| (d) | `do=` trả `None` đúng nhánh Windows. Ngưỡng `< 3 s` hiện đo cả dựng kho, tạo tiến trình và teardown. Có thể đỏ oan trên máy chậm. Đo riêng đoạn chờ hoặc số lần dò/ngủ, và kiểm mã thoát con. |
+| (f) | Phép dò job giả có thể ghi trạng thái dừng trước khi launcher đọc lại sổ. Teardown phải quay về phép dò thật. |
+| (g) | M3 cho kết quả băm `True` trong khi giữ snapshot, đúng vế Windows. `t71` kiểm giữ snapshot và `t77` kiểm quét snapshot quá hạn. Hai ca này không có guard bỏ qua Windows. |
+| (h) | `KeyboardInterrupt` là tiêm trực tiếp, không phụ thuộc tín hiệu POSIX. Hai lượt phải dùng hai job và marker riêng. Đòi `ma_thoat == 0` cho cả h1 và h2 thay vì miễn mã 3 ở fixture. |
+| (i) | `do_nhom=` là đúng đường, vì helper nền bị vá `False` và biểu thức cũ gọi `_thanh_vien_nhom`. Điều kiện `< 0,1 s` còn nhạy với việc tiến trình test bị ngắt lịch. Có thể kiểm bằng đồng hồ giả hoặc đếm trực tiếp việc không dò, không ngủ trong hàm đợi. |
+| `_r387_nhat_ky_kill` | `hasattr` giải quyết chỗ `AttributeError` hiện tại nếu đặt trước cả việc đọc, lưu và khôi phục `os.killpg`. |
+
+**P3 — M6 gỡ toàn bộ guard mở ca ra cả ngoài Windows.** Chẳng hạn (b) trên Darwin đi qua guard sản phẩm, nhận `log_bam_cay_da_chet=False` và đỏ. (a)/(c) cũng thiếu quan sát mà ca đòi. Giữ guard cho các nền ngoài Linux/Windows, đổi thông báo bỏ qua cho đúng phạm vi mới, và giữ (e5)/(i) làm phép đo mô phỏng có chủ ý. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:14877)
+
+**Finding P3 cũ về đếm bỏ qua đã đóng ở thiết kế nghiệm thu.** N4 yêu cầu log **Windows native** của base và head trên cùng máy, cùng bằng chứng dương từng ca. Format suite thực tế là `BO QUA {fn.__name__}: ...`, nên tìm `BO QUA r387` bao phủ đúng prefix của 9 ca. Tôi chưa xác nhận kết quả chạy native. Nên đối chiếu danh sách ID bỏ qua để một ca bỏ qua mới ngoài r387 không thể bị che bởi một ca cũ khác được mở. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:17824)
+
+## 5. Trần ADR-0053
+
+Hai tệp nằm trong trần sáu tệp. Ước lượng **120–180 dòng thêm** khả thi với bản mô tả hiện tại, nhưng thấp nếu tính đủ sửa teardown, phản chứng bắt tay tất định và thu nhãn lỗi. Tôi ước lượng **180–300 dòng thêm** cho phiên bản xử lý các finding trên, vẫn có khoảng cách tới 450. Đây là ước lượng theo khối mã. Cổng thật dùng tổng cột dòng thêm của `git diff --numstat base..H` trên toàn diff, không trừ các dòng xoá.
+
+KET_LUAN: request_changes
+tokens used
+90,825
+**Đặc tả r1 cần sửa trước khi đóng băng.** Áp nguyên văn M1–M4 làm hai đột biến cũ mất neo. Hai yêu cầu của N4 cũng chưa thực hiện được như mô tả với runner hiện tại. H2 còn phụ thuộc lịch chạy tiến trình, nên có thể sống dù bắt tay bị đảo.
+
+Tôi review bản đặc tả chưa commit do người dùng chỉ định, SHA-256 `7b1f23249a404c37b299f1fd48343f811c35b3b072e5ce94b4d5d9432abdb156`. `HEAD` và `origin/master` cục bộ cùng là `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. Đây là phiên reviewer độc lập họ OpenAI, dùng shell máy Linux, Python 3.13.18, sandbox chỉ đọc. Model/effort phục vụ và receipt CLI chưa xác minh. `git status` cuối lượt vẫn chỉ có tệp đặc tả untracked. Tôi đã áp M1–M4 và chạy phép dò giả trong bộ nhớ. **Không chạy được** suite, runner đột biến đầy đủ hoặc phép đo Windows native. `mktemp -d /tmp/review-r387.XXXXXXXX` trả `Read-only file system`.
+
+## 1. Đo §0 trên base
+
+Phép đo lúc `2026-11-19T05:26:24Z`, cùng checkout trong suốt lượt:
+
+| Lệnh hoặc phép đo | Kết quả |
+|---|---|
+| `wc -l .claude/dev/launcher{,_test}.py` | `6213`, `18032` |
+| `sha256sum .claude/dev/launcher{,_test}.py` | Tiền tố `f2503d59927f`, `37042727f8b8`, đúng §0 |
+| `git merge-base --is-ancestor e4fdf09 HEAD` | rc `0` |
+| `rg -n '^ *return _R387_CHI_LINUX$' .claude/dev/launcher_test.py` | 9 dòng, tại 14880, 14888, 14901, 14916, 14931, 14981, 15005, 15028, 15042 |
+| `python -B -` đọc AST, đếm hàm có decorator `ca` và tuple có ID bắt đầu `r387_` trong từng bảng | 426 ca, 16 mục `DOT_BIEN`, 2 mục `DOT_BIEN_HARNESS` |
+| `rg -n '44285378703\|332/332' ops/land/pr1388*` | Hồ sơ Windows cũ ghi `332/332`, tổng 426, bỏ qua 94 gồm 9 ca r387, hỏng 0 |
+| `rg -n '_nen_do_cay_truoc_bam\(' .claude/dev/launcher.py` | Định nghĩa 605, đúng ba chỗ gọi 619, 3041, 3049 |
+
+Đã đối chiếu nguyên văn `VERSION`, guard của hàm đợi, dòng dò, biểu thức xoá prompt, chú thích neo mốc và các hàm Job Object. `_job_windows` gán sau `Popen`, đặt `0x2000`, và `lenh_run` giữ handle thành công. `_pid_trong_job` phân biệt `[]`, danh sách và `None`. `_cay_da_chet` có vòng Windows 20 lần. Các chi tiết đó khớp §0. [launcher.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher.py:605)
+
+**P3 — §0 dòng 26, 30 và 33 trỏ sai một số vị trí và nhập nhằng hai đột biến prompt.** `nl -ba .claude/dev/launcher.py | sed -n '2988,3004p'` cho thấy mốc ở **2990**, khối đợi **2991–2997**, đọc lại sổ **3001**. `rg -n 'def __exit__|rmtree\(self.d' .claude/dev/launcher_test.py` cho thấy `San` bắt đầu ở **177**, `__exit__` ở **184**, `rmtree` ở **185**. `nl -ba .claude/dev/launcher_test.py | sed -n '16488,16502p'` cho thấy mục có neo `and cay_da_chet):` và điều kiện `posix` là **`ban_chup_de_lai_tren_dia`**. `xoa_prompt_khi_wrapper_vua_thoat` neo vào lời gọi hàm đợi, và chính `t76` trả bỏ qua trên Windows. Sửa lại vị trí và ghi riêng hai mục để tính đúng danh mục không đo được. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:16488)
+
+## 2. Luật L1–L7
+
+| Luật | Kết quả |
+|---|---|
+| L1 | Các số chính có đơn vị. M7 cần ghi **6 mục sản phẩm mới** W1–W6, W7 tái dùng 1 mục, W8/W9 giữ 4 mục, và H1–H3 là 3 mục harness mới. |
+| L2 | M1–M4 và M5–M7 chiếu được vào hai tệp. Yêu cầu runner của N4 cần chốt cách thực hiện và nguồn nhãn lỗi như finding bên dưới. |
+| L3 | Chưa đạt. N2 thiếu neo, H2 thiếu phản chứng tất định, N4 chưa thu được nhãn lỗi qua runner hiện tại. N6 cũng nên nêu rõ `> 450`, lỗi EOL và `diff --check` là các kết quả đỏ. |
+| L4 | `khong_ap_dung` hợp lý cho phần mở rộng nền tách từ A. Hai finding mang sang được ghi rõ ở §9. |
+| L5 | §0 có ngày, OID, nền và Python. Còn thiếu giờ UTC tới giây theo chính §4, cùng lệnh và rc của lần đo khi soạn. |
+| L6 | Phép đếm bỏ qua đã đặt đúng nền và có đối chứng base. Neo W9, cơ chế lọc bảng và nhãn lỗi cần sửa. Nên khoá phép đếm vào bản ghi từng ca, rồi đối chiếu tập ID thay vì chỉ dùng tổng chênh 9. |
+| L7 | Dùng trần ADR và khai E4/E5 phù hợp phạm vi. §6 nên dẫn cụ thể điều khoản cho các điểm dừng về phạm vi, revision và bằng chứng native. Khi thực sự cần quyền hoặc tài nguyên E2, ghi mức đã dùng, phần thiếu và mục đích theo ADR-0067. |
+
+## 3. Đường vào và đột biến §4b
+
+Tôi dùng `python -B -` để đọc AST của bảng, lấy giá trị các hằng neo, áp M1–M4 vào chuỗi nguồn và đo `source.count(neo)`. Bản M1–M4 biên dịch được trong bộ nhớ. W1, dòng chung W2/W3/W4/W6 và W5 mỗi mẫu khớp đúng 1 chỗ. Trong 16 mục cũ, 14 mục giữ số khớp 1 cho từng mẫu. Hai mục W9 cần cập nhật như dưới đây.
+
+| Mục | Kết quả đối chiếu đường vào và dấu hiệu đỏ |
+|---|---|
+| W1 | Đúng 1 neo. Phép dò giả (e8) sạch trả `True` sau `[7] → []`; mutant trả `False` ngay. |
+| W2 | Đúng 1 neo. Phép đo trong bộ nhớ chạm bẫy `_thanh_vien_nhom` trên nhánh Windows của (e6). |
+| W3 | Đúng 1 neo. Với `job=None`, sạch trả `False`, mutant trả `True`, đều không ngủ. |
+| W4 | Đúng 1 neo. Mutant chạm bẫy `_cay_da_chet` của (e6). |
+| W5 | Đúng 1 neo. Theo mã, nếu (g) chứng minh job rỗng và tạo được snapshot, mutant cho `unlink` chạy, đúng vế snapshot Windows. Cần phép đo native. |
+| W6 | Đúng 1 neo. Với `job=None`, mutant trả `False` nhưng **không gọi bẫy job**. Với job giả khác `None`, mutant gọi bẫy, đúng dấu hiệu đã khai. |
+| W7 | Neo A đúng 1. Mutant ghi `ket_thuc_utc` sau khi đợi, nên (a) đỏ ở độ lệch mốc nếu các vế trước qua. `thoi_luong_giay` vẫn dùng biến `ket_thuc` cũ, nên mutant này chỉ chứng minh vế UTC. |
+| W8 | Cả hai neo đúng 1. Với job giả, bỏ guard gọi bẫy job trên Darwin. Thêm ngủ ghi `[0.1]` trên FreeBSD. Hai kết quả đã chạy trong bộ nhớ. |
+| W9 | Neo cũ có kết quả `[0]` và `[0, 0]`. Sau khi cập nhật **cả hai** hằng, từng mẫu khớp 1. Theo mã (i), bỏ khối mốc làm mốc vẫn đứng trước lần dò giả. Dời khối đến trước unlink khiến mốc được ghi lúc snapshot còn tồn tại. |
+| H1 | M5 chưa có mã nên chưa đếm được neo. Có thể giết đúng bằng trace `dò → đóng` trên đường đối chứng. Trace cần kiểm cả số lần gọi. |
+| H2 | Chưa có neo. Đảo thứ tự công bố marker và assign chỉ mở một race. Nếu assign vẫn xong trước lúc wrapper sinh cháu, (c) qua và mutant sống. |
+| H3 | Chưa có mã để đếm neo. Theo đề xuất, bỏ kiểm kết quả `0` làm mất thông báo mà (t) đòi, miễn ca xác nhận đường đóng handle đã thực sự chạy. |
+
+**P1 — M3, M7, N2 và W9 bỏ sót `_R387_DONG_CAY`.** M3 thay cả dòng 3041. `r387_a_nen_khac_moc_truoc_unlink` dùng `_R387_KHOI_MOC` để xoá và `_R387_DONG_CAY` để chèn. Cập nhật riêng `_R387_KHOI_MOC` cho kết quả `[1, 0]`, khiến `t117` đỏ và runner báo thiếu mẫu. Sửa M7 để cập nhật cả hai hằng và nêu phản chứng bỏ cập nhật từng hằng. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:15061)
+
+**P2 — M6 (e9) và W6 thiếu job giả và dấu hiệu đỏ tường minh.** `goi()` hiện truyền `None` ở dòng 14950. Phép đo trong bộ nhớ cho `W6 handle=False → False, 0 lần ngủ`, còn `W6 handle=True → trap job`. Nếu (e9) có `bang(kq is True, ...)`, `None` vẫn có thể giết mutant ở vế kết quả, nhưng sẽ lệch dấu hiệu W6 đang cam kết. Cho `goi()` nhận `job=`, truyền `object()` ở (e9), và đặt nhãn riêng cho bẫy job. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:14942)
+
+**P2 — H2 chưa chứng minh thứ tự bắt tay.** `_r387_ma_con` sinh cháu sau khi wrapper được scheduler cho chạy. Một lời gọi assign ngay sau khi ghi marker có thể thắng ở mọi lần chạy. `job_windows != True` cũng có thể do assign hỏng độc lập với thứ tự. Sửa H2 thành phản chứng tất định, chẳng hạn đo marker vắng lúc vào phép gán và chỉ có sau khi phép gán trả handle thành công. Giữ (c) native để chứng minh PID cháu thực sự vào đúng job. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:14809)
+
+**P2 — N3/N4 không khớp giao diện runner.** Có ba điểm cụ thể:
+
+- `DOT_BIEN_HARNESS` được unpack thành đúng ba trường ở dòng 17665. Gán trường nền thứ tư cho H2 sẽ lỗi. Muốn H2 ra `KHONG DO DUOC` trên Linux, dùng một ca đích riêng trả bỏ qua trên Linux hoặc ghi rõ thay đổi hỗ trợ điều kiện nền trong runner. Dùng (c) làm ca đích như hiện tại khiến (c) chạy trên Linux.
+- `ast.literal_eval` không giải được các biểu thức chứa `_R387_KHOI_MOC`, `_R387_DONG_CAY` và phép cộng hằng ở W9. Lọc các **node nguồn** theo ID rồi giữ nguyên biểu thức và hằng phụ thuộc, hoặc lọc bảng đã được Python khởi tạo. Nêu rõ có giữ bảng hook hay không, ghi tập ID kỳ vọng và băm bản sao.
+- `cham_mot_ca` trả `("giet", tên_ca)` và headline tổng hợp chỉ mang tên ca. `OK giet 1/1` không phân biệt chết đúng vế với một `TinHieuChotCa` vô can trong cùng ca. Thu riêng thông điệp của đúng mutant và ca trong bản sao thử, hoặc cho kênh runner mang nhãn chốt. M6/W1–W6/H1–H3 cần ghi ID mutant cụ thể để lọc và kiểm đủ mục.
+
+[launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:222), [vòng harness](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:17649)
+
+**P2 — §4b còn thiếu một số chốt của M1–M5.** Ba điểm gọi helper đã có hàng cho đợi, prompt và mốc. Bảng còn thiếu các vế riêng cho **job có handle nhưng query trả `None`**, **kết quả query về sau hạn**, **Windows kết thúc sớm hoặc lỗi giữa fixture**, **close đúng một lần kể cả khi query không chứng minh rỗng**, **nhánh `os.killpg` vắng**, và **giá trị phiên bản M4**. Một phần đã có phép đo ở ngoài bảng: (d) và hai mutant deadline của A, các ca r387 có `_r387_nhat_ky_kill`, N5 cho version. Hãy dẫn chúng vào bảng. Thêm phản chứng cho việc bỏ close, bỏ báo lỗi `None`, và nhánh không có `killpg`. W9 đo thứ tự mốc qua biểu thức unlink của nền khác. Nếu muốn chứng minh chính biểu thức xoá vẫn dùng phép dò cũ, chỉ rõ chốt `prompt_ban_chup_da_xoa` của (i) và mutant bỏ riêng phép dò đó. Windows (f)/(h) cũng nên được nối rõ với các mục A đã có cho đọc lại `stop`, `KeyboardInterrupt`, mã thoát và kết quả snapshot.
+
+## 4. Khả thi trên Windows và hai finding cũ
+
+**P2 — M5(iii), M6(t) và §9 chưa đóng hết lỗi teardown.** `_r387_chay` hiện chỉ gọi dọn cho `co_chau=False` sau khi `_r1252_run` trả về. Các ca (b), (d), (f), (g), (h), (i) chỉ dùng `with San()` ở ngoài. Nếu wrapper gán job thành công rồi launcher hoặc fixture ném lỗi, `San.__exit__` vẫn chạy mà không qua đường dọn hiện tại. Ngoài ra, `_r387_cho_cay_rong` có kết quả `None`, nhưng M5 mới quy định rõ lỗi hết hạn còn thành viên và lỗi `CloseHandle == 0`. Kiểm `0` sửa được phần kiểm kết quả API. Để đóng finding, đặt quyền sở hữu handle dưới một đường `finally` cho mọi lượt, kể cả từng lượt của (h). Báo lỗi cho cả `False` lẫn `None`, giữ lỗi gốc, thử số lần đóng và trạng thái handle. Nếu `CloseHandle` thất bại, đừng diễn giải việc xoá tham chiếu Python là đã đóng handle thành công. `(t)` cần ép nhánh POSIX cho các vế cũ dùng `_r387_pgid`, rồi ép nhánh Windows với job giả và hàm đóng giả cho các vế mới. Nếu vế cũ chạy nhánh Windows mà chỉ có `_r387_pgid`, nó có thể đỏ oan vì không thấy lỗi teardown mong đợi. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:14730)
+
+**P2 — M5(i) và N5 dùng hai giả thiết gán job khác nhau.** Fixture chặn wrapper bằng `job-da-gan`. Lượt N5 `python -c "print(1)"` không có chặn, còn `_job_windows` gọi `OpenProcess` và `AssignProcessToJobObject` sau `Popen`. Nếu con ngắn thoát trước assign, N5 có thể đỏ dù M1–M4 đúng. Dùng lệnh native đầy đủ với một con sống có kiểm soát đủ lâu để gán job, rồi kiểm `ma_thoat == 0`, `job_windows`, kết quả đợi và version. Giữ phép thử con thoát tức thì riêng nếu cần đo khe đã khai ngoài phạm vi. [launcher.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher.py:959)
+
+| Ca | Kết luận từ mã |
+|---|---|
+| (a), (a′), (c) | Bắt tay trên wrapper trước khi sinh cháu xử lý khe trong fixture. Cần kiểm PID và dấu `chau-xong` trên Windows thật. (a) còn nhạy với dung sai 1,8–2,5 s. (a′) kiểm vế băm đúng thứ tự. |
+| (b) | Có đường qua nếu job được gán, query chứng minh rỗng và teardown chạy. |
+| (d) | `do=` trả `None` đúng nhánh Windows. Ngưỡng `< 3 s` hiện đo cả dựng kho, tạo tiến trình và teardown. Có thể đỏ oan trên máy chậm. Đo riêng đoạn chờ hoặc số lần dò/ngủ, và kiểm mã thoát con. |
+| (f) | Phép dò job giả có thể ghi trạng thái dừng trước khi launcher đọc lại sổ. Teardown phải quay về phép dò thật. |
+| (g) | M3 cho kết quả băm `True` trong khi giữ snapshot, đúng vế Windows. `t71` kiểm giữ snapshot và `t77` kiểm quét snapshot quá hạn. Hai ca này không có guard bỏ qua Windows. |
+| (h) | `KeyboardInterrupt` là tiêm trực tiếp, không phụ thuộc tín hiệu POSIX. Hai lượt phải dùng hai job và marker riêng. Đòi `ma_thoat == 0` cho cả h1 và h2 thay vì miễn mã 3 ở fixture. |
+| (i) | `do_nhom=` là đúng đường, vì helper nền bị vá `False` và biểu thức cũ gọi `_thanh_vien_nhom`. Điều kiện `< 0,1 s` còn nhạy với việc tiến trình test bị ngắt lịch. Có thể kiểm bằng đồng hồ giả hoặc đếm trực tiếp việc không dò, không ngủ trong hàm đợi. |
+| `_r387_nhat_ky_kill` | `hasattr` giải quyết chỗ `AttributeError` hiện tại nếu đặt trước cả việc đọc, lưu và khôi phục `os.killpg`. |
+
+**P3 — M6 gỡ toàn bộ guard mở ca ra cả ngoài Windows.** Chẳng hạn (b) trên Darwin đi qua guard sản phẩm, nhận `log_bam_cay_da_chet=False` và đỏ. (a)/(c) cũng thiếu quan sát mà ca đòi. Giữ guard cho các nền ngoài Linux/Windows, đổi thông báo bỏ qua cho đúng phạm vi mới, và giữ (e5)/(i) làm phép đo mô phỏng có chủ ý. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:14877)
+
+**Finding P3 cũ về đếm bỏ qua đã đóng ở thiết kế nghiệm thu.** N4 yêu cầu log **Windows native** của base và head trên cùng máy, cùng bằng chứng dương từng ca. Format suite thực tế là `BO QUA {fn.__name__}: ...`, nên tìm `BO QUA r387` bao phủ đúng prefix của 9 ca. Tôi chưa xác nhận kết quả chạy native. Nên đối chiếu danh sách ID bỏ qua để một ca bỏ qua mới ngoài r387 không thể bị che bởi một ca cũ khác được mở. [launcher_test.py](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher_test.py:17824)
+
+## 5. Trần ADR-0053
+
+Hai tệp nằm trong trần sáu tệp. Ước lượng **120–180 dòng thêm** khả thi với bản mô tả hiện tại, nhưng thấp nếu tính đủ sửa teardown, phản chứng bắt tay tất định và thu nhãn lỗi. Tôi ước lượng **180–300 dòng thêm** cho phiên bản xử lý các finding trên, vẫn có khoảng cách tới 450. Đây là ước lượng theo khối mã. Cổng thật dùng tổng cột dòng thêm của `git diff --numstat base..H` trên toàn diff, không trừ các dòng xoá.
+
+KET_LUAN: request_changes

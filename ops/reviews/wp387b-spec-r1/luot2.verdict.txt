@@ -1,0 +1,44 @@
+**Lượt 2 — cần sửa đặc tả trước khi đóng băng.** Neo review là bản 2 chưa commit, SHA-256 `24d06138198206e1ecf16e45bcd059dfd258f15fe49c04ee596180c3ecb5f722`, trên HEAD `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. `diff -u` giữa hai bản trả `1`, có khác biệt. Đầu và cuối lượt, `git status` chỉ liệt kê hai bản đặc tả untracked và các phép kiểm diff tracked/index đều trả `0`. Phiên Codex họ OpenAI, transport máy, sandbox chỉ đọc, Linux/Python 3.13.18. Các phép đo Python chạy trong bộ nhớ. Windows native, full suite và mutation runner trên mã triển khai đều chưa chạy.
+
+### Findings
+
+1. **P2 · §4 N1 và N4 L2, cách đọc nhãn vẫn CÒN MỞ.** N1 yêu cầu ghi “dòng `HONG` đầu tiên”. `launcher_test.py:18002` in `lan 1/1: HONG` trước, còn dòng có ID ca, kiểu lỗi và nhãn chỉ xuất hiện ở `:18008` dưới dạng `HONG <tên ca>: <lý do>`. Đọc theo chỉ dẫn hiện tại sẽ đánh rớt cả mutant chết đúng nhãn. **Sửa:** yêu cầu đúng một dòng chi tiết có tiền tố `HONG <ID ca đích>:` sau khi bỏ thụt lề, kiểm nhãn trên dòng đó và giữ điều kiện runner xác nhận `TinHieuChotCa`.
+
+2. **P2 · §4 N4 L2, lọc theo nút nguồn vẫn CÒN MỞ.** Phép đo `python -B` trên AST cho `DOT_BIEN=566`, `DOT_BIEN_HOOK=88`, `DOT_BIEN_HARNESS=72` trên base. Runner vẫn chạy bảng hook ở `launcher_test.py:17609` và cộng cả ba bảng vào mẫu số ở `:17966`. Lọc hai bảng theo N4 sẽ để lại **116 mục runner** gồm 28 mục r387 và 88 mục hook. Ngoài ra, thử ghép nút nguồn trong bộ nhớ cho thấy runner tách thành công khi giữ `\nDOT_BIEN_HARNESS = [` và `\n]\n\n\ndef chay_dot_bien()`, nhưng mất mốc cuối nếu ghép `]` cùng dòng với phần tử cuối. **Sửa:** trên bản sao, đặt `DOT_BIEN_HOOK = []`, chỉ thay vùng danh sách của hai bảng còn lại, giữ nguyên hai mốc tách, rồi kiểm compile, số mục từng bảng và tập ID duy nhất. Chốt ID thật cho W1–W6/H1–H4 để có thể so tập chính xác.
+
+3. **P2 · M5(iii)(iv), X1 và §8, bảo toàn lỗi và quyền sở hữu teardown vẫn CÒN MỞ.** `finally` bao quanh `_r1252_run` bảo đảm *thử* dọn. Nếu phép dò ném, trình tự M5(iii) chưa buộc đóng handle. Nếu teardown ném trong lúc xử lý lỗi gốc, `add_note` chưa có cơ hội chạy. Trên POSIX, `_r1252_run` có thể ném trước khi trả `so`, trong khi base chỉ lưu pgid sau khi hàm trả (`launcher_test.py:13784–13796`, `:14742–14749`, `:14802–14805`). Khi ấy nhánh pgid có thể trả `None` vì thiếu tham chiếu dù con đã sinh. **Sửa:** ghi nhận quyền sở hữu khi sinh/gán tiến trình, bảo đảm thử đóng job đúng một lần kể cả khi phép dò ném, và chuyển lỗi teardown thành ghi chú khi đã có lỗi gốc. X1 có thể đo tất định bằng `_r1252_run` giả lập đã nhận quyền sở hữu rồi ném lỗi sentinel. Kiểm danh tính lỗi gốc, `__notes__` và số lần dọn. Thêm ca job với phép dò trả `False` và `None`, kết hợp đóng trả `0` để kiểm đủ thông báo lỗi.
+
+4. **P2 · M6(a′) và §4 N4, ca Windows có thể xanh dù teardown thất bại.** `(a′)` chỉ kiểm `"ve bam" in str(e)` tại `launcher_test.py:14891–14894`; lỗi teardown được đính trong `e.__notes__` tại `:14759–14763`. Phép đo `python -B` trích chính thân ca qua AST, đưa vào lỗi băm đúng kỳ vọng kèm ghi chú `r387 teardown: CloseHandle that bai`, cho kết quả `None`, tức ca qua. Khi mở guard sang Windows, chính đường này có thể nuốt lỗi đóng handle thật. **Sửa:** chỉ chấp nhận lỗi băm dự kiến khi không có ghi chú teardown, hoặc đưa đối chứng lỗi băm ra ngoài phạm vi sở hữu teardown để lỗi dọn tự đi tới suite. Thêm phản chứng lỗi băm đúng kèm lỗi teardown.
+
+5. **P2 · §4b H1–H4 và M6(t2)–(t4), kiểm kê đường đã bổ sung nhưng bằng chứng vẫn CÒN MỞ.** H1 có thể chết đúng `(t2)` khi trace đảo thứ tự. H4 có thể chết ở cùng nhãn khi trace thiếu `dong`. H3 chỉ bảo đảm tới đúng `(t3)` nếu mutant giữ lời gọi đóng và thay riêng phép kiểm giá trị trả. H2 đã bỏ phụ thuộc lịch và có thể chết đúng nhãn ghi sớm, nhưng `(t4)` hiện cũng xanh nếu ghi dấu sau khi `that(pid)` **trả `None`**, hoặc ghi dấu **trước khi lưu handle**. Hai lỗi này vi phạm thứ tự M5(i) và thiếu phản chứng theo L3. **Sửa:** giữ mẫu H3 tách riêng lời gọi khỏi phép kiểm, định nghĩa H4 bằng thay thế vẫn biên dịch và tới được assertion trace, rồi mở `(t4)` để đo ba đường: gán thất bại không phát dấu, lúc phát dấu đã lưu đúng handle, và gọi lại khi job cũ còn mở không gọi `that` lần nữa. Gắn nhãn riêng cho các đường này.
+
+6. **P3 · M2, mô tả nền trong docstring thiếu một vế cập nhật.** `launcher.py:615–617` hiện nói nền ngoài Linux trả ngay và chỉ mô tả `/proc` là phép dò đồng bộ. M2 quy định sửa nghĩa `True` và bỏ câu dành `job` cho packet B, nhưng chưa yêu cầu thay rõ vế `False` đã lỗi thời. **Sửa:** ghi rõ nền ngoài Linux/Windows trả ngay, Windows thiếu job cũng trả ngay, và deadline chung bao cả phép dò đồng bộ của hai nền. Điều này vẫn nằm trong `launcher.py`.
+
+7. **P3 · §6 dòng 120–121, L7.** Bản 2 mở rộng hai dòng dừng sang runner và dung sai `(a)/(e6)`, nhưng chưa dẫn nguồn cho các điểm dừng này theo mẫu L7. **Sửa:** dẫn protocol §12 cho trường hợp phải đổi Packet Spec, giữ cấm sửa ngoài write set ở §2, và ghi dung sai là điều kiện nghiệm thu của N1/N4. Các yêu cầu thuộc quyền chủ kho ở §6 đã có mã E2.
+
+### Đối chiếu đủ 11 finding lượt 1
+
+| Finding lượt 1 | Trạng thái lượt 2 |
+|---|---|
+| P1 thiếu `_R387_DONG_CAY` | **Đóng.** Áp các thay đổi mã M1–M4 trong bộ nhớ, hai neo cũ đếm `0/0`, hai neo M7 mới đếm `1/1`. Cả 16 mục sản phẩm r387 cũ có từng mẫu khớp đúng một chỗ, kể cả hai mục nhiều mẫu. Mẫu M1, dòng M2 và mẫu W5 cũng mỗi mẫu khớp một chỗ. |
+| P2 (e9)/W6 thiếu job giả | **Đóng.** Mô phỏng hàm đợi từ AST với đồng hồ giả cho bản sạch qua và W6 chạm `e9:_pid_trong_job`. Cùng phép đo cho W1 → `e8`, W2 → `e6:_thanh_vien_nhom`, W3 → `e7`, W4 → `e6:_cay_da_chet`. |
+| P2 H2 phụ thuộc lịch | **Đóng về phụ thuộc lịch.** `that_gia` quan sát dấu đồng bộ ngay trong bộ bọc. Phần thiếu về bắt tay khi gán thất bại và thứ tự lưu handle nằm ở finding 5. |
+| P2 harness thiếu trường nền | **Đóng.** Runner unpack đúng ba trường ở `launcher_test.py:17666`; M6 thiết kế `(t2)–(t4)` chạy mọi nền. `(t)` cũ đặt job `None`, module nạp mới và chưa có `_r387_nen`, nên đi nhánh pgid cả trên Windows. Các ca Windows thật phải có `_r387_nen` và giữ job tới lúc teardown. |
+| P2 `literal_eval` không giải hằng | **CÒN MỞ ở công thức lọc.** Đã xác nhận `literal_eval` thất bại với ba mục r387 có hằng. `ast.get_source_segment` giữ được biểu thức, nhưng công thức N4 còn thiếu bảng hook và các mốc tách. Xem finding 2. |
+| P2 runner chỉ kết luận mức ca | **CÒN MỞ.** Kiểm tra nhãn ngoài runner là hướng đúng, nhưng chỉ dẫn đang chọn nhầm dòng. Xem finding 1. |
+| P2 §4b thiếu đường | **CÒN MỞ.** W10–W12 và X2–X3 đã chỉ ra đường đo. X1 có thể phản chứng tất định và H2 còn hai vế chưa đo. Xem findings 3 và 5. |
+| P2 teardown thiếu `finally` và báo lỗi chưa đủ | **CÒN MỞ.** M5 đã thêm `finally` và mô tả ba kết quả lỗi thường, nhưng chưa xử lý đầy đủ đường ném và `(a′)` còn nuốt ghi chú. Xem findings 3–4. |
+| P2 N5 con quá ngắn | **Đóng ở mức đặc tả.** Con sống 2 giây, yêu cầu `ma_thoat=0` và `job_windows=true`. Kết quả native vẫn chờ đo. |
+| P3 vị trí §0 | **Đóng.** `wc -l` cho `6213/18032`; kiểm mã khớp các vị trí đã sửa, gồm `San` 177/184/185, khối đợi 2990–2997 và đọc lại sổ 3001. AST đếm 426 ca và đúng 9 dòng trả guard, khớp §0. |
+| P3 gỡ guard trên nền khác, và P3 đếm bỏ qua theo tổng | **Cả hai đóng.** M6 giữ guard ngoài Linux/Windows. N4 so tập ID head với tập base trừ đúng chín ID. Dòng nguồn `launcher_test.py:17834` in ID ca, nên phép so tập khả thi. |
+
+### L1–L7 trên phần đã đổi
+
+- **L1, L5:** Phân biệt đúng số ca, mục sản phẩm, mục harness và dòng thêm. Đo lại số nền lúc `2026-11-19T05:36:25Z`, Python 3.13.18, các phép AST và neo trả `0`. Số **28** là số mục **r387 dự kiến**; phép chạy được viết hiện giữ 116 mục. Số liệu head/native và numstat triển khai vẫn chờ đo.
+- **L2:** M1–M7 chiếu vào hai đường dẫn của write set. Các sửa phép đo đề xuất thực hiện trên bản sao và không cần sửa runner hay `San`.
+- **L3:** Còn hở ở phép đọc nhãn, teardown khi ném và các trạng thái bắt tay. Xem findings 1, 3–5.
+- **L4:** §7 ghi `khong_ap_dung` cho packet mở rộng theo nền. §9 giữ lại hai finding của A, nhưng trạng thái teardown phải sửa lại thành còn mở theo findings 3–4.
+- **L6:** Các neo có vế dương/âm và đếm riêng theo mẫu. Phép lọc và phép đọc nhãn cần sửa theo findings 1–2. Hai vế về regex số chữ/số digit và tuyên bố phủ toàn bộ cổng không áp dụng cho các phép đo đã đổi.
+- **L7:** Không thêm ngân sách mềm. Cần chỉnh nguồn dẫn cho hai dòng `luat_dung` theo finding 7.
+
+KET_LUAN: request_changes

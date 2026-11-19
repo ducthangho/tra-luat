@@ -1,0 +1,8 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), chỉ đọc, LƯỢT 2. Worktree kho tra-luat ở commit 3b647461db7c8ded1bddd9aafc5c6aa5eead223f. Đối tượng: đặc tả `ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md` (bản 2, chưa commit). Bản lượt trước để so: `ops/specs/BAN1-truoc-luot2.md`. Verdict lượt 1 của bạn được tóm tắt ở §11 của đặc tả (1 P1, 7 P2, 3 P3: thiếu `_R387_DONG_CAY`; (e9)/W6 thiếu job giả; H2 phụ thuộc lịch; runner harness không có trường nền, `literal_eval` không giải hằng, runner chỉ kết luận mức ca; §4b thiếu đường; teardown không dưới `finally`/không báo đủ lỗi; N5 con quá ngắn; vị trí §0; gỡ guard ra nền khác; đếm bỏ qua theo tổng).
+
+Việc:
+1. `diff -u ops/specs/BAN1-truoc-luot2.md ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md` và kiểm TỪNG finding lượt 1 đã thực sự đóng (bằng đo trên mã nếu cần: số dòng, neo khớp đúng một chỗ sau khi áp M1–M4, cấu trúc runner `chay_dot_bien`/`DOT_BIEN_HARNESS`, fixture `_r387_*`). Ghi rõ finding nào CÒN MỞ.
+2. Tìm lỗi MỚI do bản sửa đưa vào: đặc biệt §4b H1–H4 và (t2)–(t4) có giết được đúng nhãn không, nhánh teardown chọn theo `m._r387_job` có làm (t) cũ hay ca Windows đỏ oan không, `finally` + `add_note` cho `co_chau=False`, bắt tay `_r387_boc_job`, lọc theo nút nguồn (`ast.get_source_segment`) có khả thi với cách runner tách bảng harness bằng chuỗi `"\nDOT_BIEN_HARNESS = ["`… không, tập 28 ID.
+3. Kiểm L1–L7 (`.claude/skills/soan-spec/SKILL.md`) cho phần đã đổi.
+
+Không sửa tệp nào. Mỗi finding: mức P1/P2/P3, vị trí, bằng chứng (lệnh+output hoặc dẫn dòng mã), cách sửa. Kết thúc bằng đúng một dòng cuối: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`.

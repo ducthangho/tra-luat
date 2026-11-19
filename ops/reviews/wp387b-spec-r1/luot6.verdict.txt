@@ -1,0 +1,10 @@
+Cả hai finding P3 lượt 5 đã đóng. Không phát hiện lỗi chặn đóng băng bản 6.
+
+- **M2, deadline.** `han` được mô tả là mốc quyết định dò tiếp, nhận kết quả và giới hạn thời gian yêu cầu ngủ. Probe trong bộ nhớ với đồng hồ giả trên cả hai nhánh cho kết quả `False` sau `0,6 s` khi `han=0,1 s`, mỗi nhánh chỉ dò một lần. Điều này khớp với M2 và với vai trò của các phép đo W11, (a), (e6).
+- **M5(i)/(iii), handle.** Chốt đầu fixture kiểm tra còn giữ tham chiếu. Teardown báo lỗi ngay nếu đóng thất bại, kể cả khi đã xoá tham chiếu sau lần thử duy nhất. Cách hiểu này khớp với H3–H4, X1, các ca (t3)–(t3d) và §9. Giới hạn của nhánh pgid vẫn được ghi ở §8.
+
+Các mẫu tìm/thay nguyên văn H1–H7 thuộc phần executor chốt và đo số lần khớp, biên dịch và nhãn đỏ theo §4b. N4/N5 vẫn cần bằng chứng Windows native.
+
+Review chỉ đọc trên `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. `diff -u` trả `1` vì hai bản có khác biệt. SHA-256 của bản 6 chưa commit là `c67ecfa7caef071ddf3888e9e47f2082284b57ca15de37377e3ce3f9bd5fe3af`.
+
+KET_LUAN: approve

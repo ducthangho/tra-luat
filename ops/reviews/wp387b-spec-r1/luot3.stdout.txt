@@ -1,0 +1,2023 @@
+Reading additional input from stdin...
+OpenAI Codex v0.170.0
+--------
+workdir: /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt
+model: gpt-6.2-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1f252-4693-7891-b5a6-22a49f12ad6d
+--------
+user
+Bạn là reviewer ĐỘC LẬP (họ OpenAI), chỉ đọc, LƯỢT 3. Worktree kho tra-luat ở commit 3b647461db7c8ded1bddd9aafc5c6aa5eead223f. Đối tượng: đặc tả `ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md` (bản 3, chưa commit). Bản lượt trước: `ops/specs/BAN2-truoc-luot3.md`. Verdict lượt 2 của bạn (5 P2, 2 P3) được tóm tắt ở mục "Lượt 2" của §11.
+
+Việc:
+1. `diff -u ops/specs/BAN2-truoc-luot3.md ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md`; kiểm TỪNG finding lượt 2 đã thực sự đóng, bằng đo trên mã khi cần (dòng `HONG <ca>:` mà `--lap-ca` in; cách runner tách bảng harness và cộng `DOT_BIEN_HOOK`; thân `_r387_*`, `_r1252_run`, ca (a′)). Ghi rõ finding nào CÒN MỞ.
+2. Tìm lỗi MỚI do bản 3 đưa vào: (t3b)/(t3c)/(t4a–d)/(t5)/(t6), H1–H7 (mỗi mục có giết đúng nhãn đã khai không, có chết ở chốt khác/tín dụng giả không, mẫu có khớp đúng một chỗ được không), (t5) vá `_r1252_run` toàn cục + `m._job_windows`/`m._pid_trong_job` trước `_r387_chay` có khả thi và khôi phục sạch không, bộ bọc `_job_windows` cài trên mọi nền có làm ca POSIX/`t*` khác đổi hành vi không, kiểm 22/0/9.
+3. L1–L7 (`.claude/skills/soan-spec/SKILL.md`) cho phần đã đổi.
+
+Chỉ nêu finding có bằng chứng. Không sửa tệp nào. Mỗi finding: mức, vị trí, bằng chứng, cách sửa. Kết thúc bằng đúng một dòng cuối: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`.
+warning: Codex could not find bubblewrap on PATH. Install bubblewrap with your OS package manager. See the sandbox prerequisites: https://developers.openai.com/codex/concepts/sandboxing#prerequisites. Codex will use the bundled bubblewrap in the meantime.
+codex
+Tôi sẽ dùng skill `cross-review` để đối chiếu hai bản đặc tả và kiểm từng finding lượt 2 trên mã trong worktree chỉ đọc.
+exec
+/bin/bash -lc "git rev-parse HEAD 'HEAD"'^{tree}'"'; git status --short; sha256sum ops/specs/{BAN2-truoc-luot3,LAUNCHER-BAM-LOG-NEN-WINDOWS-r1}.md
+nl -ba ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md | sed -n '30,85p'
+rg -n 'def _r387_|def _r1252_run|DOT_BIEN_HOOK|DOT_BIEN_HARNESS|HONG \\{' .claude/dev/launcher_test.py
+cat .agents/skills/cross-review/SKILL.md
+rg -n 'L[1-7]' .claude/skills/soan-spec/SKILL.md" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt
+ succeeded in 0ms:
+3b647461db7c8ded1bddd9aafc5c6aa5eead223f
+306ec6c89a18ac12988d0b324a0867f6d3e91a54
+?? ops/specs/BAN2-truoc-luot3.md
+?? ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md
+24d06138198206e1ecf16e45bcd059dfd258f15fe49c04ee596180c3ecb5f722  ops/specs/BAN2-truoc-luot3.md
+29deb740f03ca032edaffc85a2956f8961772e3a623eeacb9f2707825dfd5780  ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md
+    30	- Hệ quả trên Windows hôm nay: hàm đợi trả `False` ngay; `_thanh_vien_nhom` trả `None` nên bản chụp prompt không bao giờ bị xoá ngay (thiết kế, `_cap_id` quét về sau — `t77`).
+    31	
+    32	`.claude/dev/launcher_test.py`:
+    33	- `class San` dòng 177, `__exit__` 184, `shutil.rmtree(self.d, ignore_errors=True)` 185.
+    34	- 426 ca `@ca`. `_R387_CHI_LINUX` định nghĩa 14714 (thông điệp nhắc tên packet cũ); đúng **9** dòng `return _R387_CHI_LINUX` (14880, 14888, 14901, 14916, 14931, 14981, 15005, 15028, 15042) trong 9 ca: (a) `r387_m1_chau_ghi_muon_khai_pham_vi_bam`, (a′) `r387_m1_doi_chung_ghi_som_lam_ve_bam_do`, (b) `r387_m1_con_thuong_chung_minh_cay_chet`, (c) `r387_m2_chau_ghi_trong_han_thi_bam_du`, (d) `r387_m2_khong_do_duoc_thi_khong_cho`, (i) `r387_a_nen_khac_giu_moc_ket_thuc_base`, (f) `r387_m1_stop_trong_luc_cho_khong_bi_de`, (g) `r387_m1_prompt_linux_xoa_khi_cay_chet`, (h) `r387_m2_ngat_trong_luc_doi_ghi_bi_ngat`. Khớp hồ sơ land A (`launcher-windows` 44285378703: Windows 332/332, tổng 426, bỏ qua 94 gồm 9 ca r387, hỏng 0). (e) `r387_m2_han_chung_cho_moi_lan_do` và (t) `r387_fixture_teardown_bao_loi_giu_loi_goc` chạy mọi nền.
+    35	- (e): `goi()` (14942) luôn truyền `job=None` (14950); (e5) vòng `("Darwin","Windows","FreeBSD")` đòi `False` ngay, 0 lần ngủ.
+    36	- Fixture POSIX: `_r387_chay` vá `m._thanh_vien_nhom` bằng bộ ghi vào `m._r387_ds_do`, lưu `m._r387_pgid = so["pid"]`; với `co_chau=False` gọi `_r387_don_dep` SAU khi `_r1252_run` trả về (không trong `finally`); `_r387_don_dep` chờ nhóm về `[]` bằng `m._r387_do_that`, báo lỗi cho cả `False` lẫn `None`; `_r387_don_khi_thoat` (dùng bởi ca có cháu) chạy teardown trước `rmtree`, giữ lỗi gốc bằng `add_note`; `_r387_nhat_ky_kill` gán `os.killpg` vô điều kiện (Windows không có ⇒ `AttributeError`).
+    37	- Hằng neo (15061–15067): `_R387_KHOI_MOC` (chứa nguyên văn dòng 3049 kèm chú thích), `_R387_DONG_CAY` (= nguyên văn dòng 3041), `_R387_KHOI_CHO`, `_R387_DONG_DOC_SO`.
+    38	- `DOT_BIEN`: 16 mục `r387_*` (15072–15101), không mục nào mang điều kiện nền; trong đó `r387_a_nen_khac_van_do`, `r387_a_nen_khac_ngu_thua` neo vào lời gọi guard ở 619 (ca (e)); `r387_a_nen_khac_doi_moc` neo `_R387_KHOI_MOC`, `r387_a_nen_khac_moc_truoc_unlink` neo `_R387_KHOI_MOC` + `_R387_DONG_CAY` (ca (i)); `r387_ket_thuc_sau_vong_cho` → (a). `DOT_BIEN_HARNESS` có 2 mục `r387_*` (17292, 17295); vòng chạy harness unpack ĐÚNG ba trường `ten, cap, phai_chet` — không có trường nền. Ở bảng sản phẩm khác: `ban_chup_de_lai_tren_dia` (16493) neo `            and cay_da_chet):`, điều kiện `("posix", …)`, ca `t71`; `xoa_prompt_khi_wrapper_vua_thoat` (16497) neo dòng gọi hàm đợi (2994), ca `t76` (t76 bỏ qua trên Windows).
+    39	- Runner `--dot-bien`: ca đích của mục bị bỏ qua hết ⇒ `KHONG DO DUOC tren nen nay`; kết luận ở mức CA (`TinHieuChotCa` của đúng ca), không ở mức nhãn trong ca. Không có cờ lọc mục.
+    40	- CI chỉ có `ubuntu-latest`/`windows-latest`; ràng buộc chủ kho: không dùng CI Windows cho packet này ⇒ Windows đo NATIVE.
+    41	
+    42	## 1. `write_set`
+    43	
+    44	```
+    45	.claude/dev/launcher.py
+    46	.claude/dev/launcher_test.py
+    47	```
+    48	
+    49	## 2. `ngoai_pham_vi`
+    50	
+    51	- **Darwin và mọi nền khác Linux/Windows**: giữ NGUYÊN hành vi A (hàm đợi `False` ngay; xoá prompt theo biểu thức cũ; mốc `ket_thuc` sau phép đo xoá). Nợ có tên **`wp387-darwin-chua-do`** (không có máy macOS, CI không có runner macOS). Không đổi `_thanh_vien_nhom`.
+    52	- Linux: không đổi hành vi nào của A.
+    53	- Không đóng khe gán job sau `Popen`, không theo dõi breakaway: giới hạn khai ở docstring.
+    54	- Không đổi `_cay_da_chet`, `_job_windows`, `_pid_trong_job`, nhánh chụp workspace, `San`, runner đột biến.
+    55	- Windows vẫn KHÔNG xoá ngay bản chụp prompt, kể cả khi job đã chứng minh rỗng (giữ `t71`/`t77`).
+    56	- Không dùng CI Windows.
+    57	
+    58	## 3. `muc_tieu`
+    59	
+    60	| # | mục tiêu | tệp |
+    61	|---|---|---|
+    62	| M1 | `_nen_do_cay_truoc_bam()` trả `platform.system() in ("Linux", "Windows")`; docstring: "Packet B: Linux và Windows; Darwin/nền khác chưa đo (nợ `wp387-darwin-chua-do`)". | `launcher.py` |
+    63	| M2 | `_cho_cay_chet_truoc_bam`: thay ĐÚNG dòng 625 bằng MỘT dòng nguyên văn (thụt 8 dấu cách) — **dòng M2**: `nhom = _thanh_vien_nhom(pid) if platform.system() == "Linux" else (_pid_trong_job(job) if job is not None else None)  # #387 B: dò theo nền`. Mỗi vòng dò đúng một lần; mọi phần còn lại của hàm giữ nguyên từng byte. KHÔNG gọi `_cay_da_chet`. Docstring (thay toàn bộ phần mô tả kết quả, dòng 611–617): `True` = phép dò trả rỗng trong nhóm tiến trình POSIX (Linux) hoặc trong Job Object được theo dõi (Windows); rời nhóm (`setsid`), breakaway, hoặc sinh trong khe giữa `Popen` và lúc gán job nằm ngoài phạm vi. `False` ngay (không dò, không ngủ) khi: nền ngoài Linux/Windows; Windows không có job; phép dò trả `None`. Deadline chung bao cả thời gian của phép dò đồng bộ ở hai nền (`/proc` · `QueryInformationJobObject`). Bỏ câu "`job` để dành cho packet B". | `launcher.py` |
+    64	| M3 | Dòng 3041 thành `    cay_da_chet = (log_cay_chet and platform.system() != "Windows") if _nen_do_cay_truoc_bam() else (_thanh_vien_nhom(p.pid) == [])`. Dòng `            and cay_da_chet):` giữ nguyên. Chú thích dòng 3049 đổi "nền khác Linux" → "nền khác Linux/Windows". | `launcher.py` |
+    65	| M4 | `VERSION = "1.6.1"` → `"1.6.2"`. | `launcher.py` |
+    66	| M5 | **Fixture Windows** (POSIX giữ hành vi A). Mọi thứ dưới đây nằm trong `_r387_chay` và các hàm `_r387_*`. (i) **Bắt tay gán job**: `_r387_chay` ghép trước `ma_con` một đoạn mở đầu chờ tệp `<s>/job-da-gan` tối đa 10 s, không thấy thì `sys.exit(3)`. Hàm mới `_r387_boc_job(m, s, that)` trả bộ bọc của `m._job_windows`: vào bộ bọc, nếu `m._r387_job` khác `None` ⇒ ca ĐỎ ("r387 fixture: job cu chua dong") và KHÔNG gọi `that`; gọi `that(pid)`; trả `None` ⇒ không phát dấu, trả `None`; trả handle ⇒ lưu `m._r387_job = handle`, RỒI gọi `_r387_bao_da_gan(m, s)` — hàm này đòi `m._r387_job is not None` ("r387 fixture: bao gan khi chua luu handle") rồi mới ghi `job-da-gan`. `_r387_chay` cài bộ bọc trên MỌI nền (POSIX: `lenh_run` không gọi `_job_windows`, vô hại) bằng `that` = `m._job_windows` lúc vào `_r387_chay`; trên POSIX ghi sẵn `job-da-gan` trước khi chạy. Quyền sở hữu job được ghi ĐÚNG lúc gán (trong bộ bọc), không đợi `_r1252_run` trả. Sau `lenh_run`: mọi ca đòi `so["ma_thoat"] != 3`; Windows đòi thêm `so.get("job_windows") is True` và `m._r387_job` khác `None`. (ii) Bộ ghi phép dò: `do=` thay phép dò của nền hiện tại (Linux `_thanh_vien_nhom`, nhận pid; Windows `_pid_trong_job`, nhận handle) và nhận đúng đối số của phép dò nó thay; mọi danh sách trả (của phép dò nền hiện tại) ghi vào `m._r387_ds_do`; `m._r387_do_that` = bản THẬT của phép dò nền hiện tại; `m._r387_do_job` = `m._pid_trong_job` lúc vào `_r387_chay` (mọi nền; teardown nhánh job chỉ dùng nó); `m._r387_nen = platform.system()`. Tham số mới `do_nhom=` thay `m._thanh_vien_nhom` trên mọi nền. (iii) **Teardown** (`_r387_don_dep`): nếu `m._r387_job` khác `None` ⇒ nhánh job: chờ `m._r387_do_job(h)` về `[]` bằng `_r387_cho_cay_rong` (ba trạng thái) bên trong `try`, phép dò ném thì đổi thành lỗi "phep do nem <kiểu>"; trong `finally` của khối chờ, gọi đóng ĐÚNG MỘT lần, viết thành hai dòng tách rời `ket_dong = m._r387_dong_job(h)` rồi `if ket_dong == 0:` (mặc định `ctypes.windll.kernel32.CloseHandle`; hàm đóng ném cũng đổi thành lỗi), gán `m._r387_job = None` ngay sau lời gọi (không gọi lại, kể cả khi thất bại); thông điệp lỗi khi chờ ra `False` ("con thanh vien"), `None` ("cay khong do duoc"), phép dò/hàm đóng ném, hoặc `ket_dong == 0` ("CloseHandle that bai" — thông điệp nói rõ handle CHƯA đóng được); nhiều lỗi thì nối. `_r387_don_dep` KHÔNG BAO GIỜ ném (mọi ngoại lệ thành thông điệp), để `add_note` luôn chạy được khi đã có lỗi gốc. Không có job mà `getattr(m, "_r387_nen", None) == "Windows"` ⇒ lỗi "khong co job de chung minh cay rong". Còn lại ⇒ nhánh pgid của A (không đổi). (iv) **Quyền sở hữu dưới `finally`**: `_r387_chay` bọc lời gọi `_r1252_run` và các kiểm sau nó trong `try`; với `co_chau=False`, `_r387_don_dep` chạy trong `finally` — lỗi gốc (cùng đối tượng) giữ nguyên và nhận thông điệp teardown qua `add_note`; không có lỗi gốc mà teardown lỗi ⇒ ca ĐỎ. Với `co_chau=True`, `_r387_don_khi_thoat` (đặt sau `San()`) giữ vai đó như A. Hệ quả: `San.__exit__` (`rmtree(ignore_errors=True)`) chỉ chạy SAU teardown; teardown không chứng minh được cây rỗng thì ca đã ĐỎ — thư mục sót không còn bị nuốt im lặng. (v) `_r387_nhat_ky_kill` chỉ đọc/lưu/thay/khôi phục `os.killpg` khi `hasattr(os, "killpg")`. | `launcher_test.py` |
+    67	| M6 | **Ca**: thay `_R387_CHI_LINUX` bằng `_R387_CHI_LINUX_WINDOWS` ("BO QUA r387 chi do tren Linux va Windows; nen khac: no wp387-darwin-chua-do") và đổi guard của 9 ca thành `platform.system() not in ("Linux", "Windows")`. Thay đổi riêng: (a), (c): vế PID cháu đọc `m._r387_ds_do` (Windows = danh sách `_pid_trong_job` của đúng job đã gán). (d): `do=lambda _x: None`; vế thời gian đổi thành `so["log_bam_cho_giay"] < 0.5` (đo riêng đoạn đợi, thay `dt < 3.0` đo cả dựng kho). (f): `do_roi_stop` nhận đối số của phép dò nền hiện tại, chuyển tiếp cho `m._r387_do_that`. (a′): chỉ chấp nhận lỗi vế băm khi lỗi KHÔNG mang ghi chú teardown — tách điều kiện thành hàm `_r387_loi_bam_hop_le(e)` (`"ve bam" in str(e)` VÀ không có `__notes__` chứa `"r387 teardown"`); lỗi băm kèm ghi chú teardown ⇒ (a′) ĐỎ, thông điệp kèm ghi chú. (g): giữ ID; Linux như A; Windows: `log_bam_cay_da_chet is True`, tệp bản chụp CÒN, không có khoá `prompt_ban_chup_da_xoa` (nhãn "r387(g) Windows xoa ban chup"). (h): mỗi lượt h1/h2 là một job riêng (đóng trong `finally` của lượt đó); không đổi logic. (i): phép dò giả ngủ 0,5 s rồi trả `[]` truyền qua `do_nhom=`. **(e)**: `goi()` nhận thêm `job=None`; (e1)–(e4) giữ nguyên. (e5) vòng `("Darwin", "FreeBSD")`, `job=object()`, `_thanh_vien_nhom` và `_pid_trong_job` đều vá thành hàm làm ca ĐỎ ⇒ `False` ngay, 0 lần ngủ. (e6) nền Windows, `job=object()`, `_pid_trong_job` luôn `[7]`, `_thanh_vien_nhom` vá thành `bang(False, "r387(e6) goi _thanh_vien_nhom tren Windows")`, `_cay_da_chet` vá thành `bang(False, "r387(e6) goi _cay_da_chet")` ⇒ `False` trong ≤ 1,0 s. (e7) Windows, `job=None` ⇒ `False`, 0 lần ngủ, `_pid_trong_job` không được gọi. (e8) Windows, `job=object()`, `_pid_trong_job` trả `[7]` lần đầu rồi `[]` ⇒ `True`. (e9) Linux, `job=object()`, `_pid_trong_job` vá thành `bang(False, "r387(e9) Linux goi _pid_trong_job")`, `_thanh_vien_nhom` trả `[]` ⇒ `True`. **(t)**: vế cũ giữ nguyên (đặt `m._r387_job = None`, nên đi nhánh pgid). Vế mới (t2) đóng thành công: `m._r387_job = object()`, `m._r387_do_job` ghi `("do",)` vào trace cục bộ rồi trả `[]`, `m._r387_dong_job` ghi `("dong",)` rồi trả `1` ⇒ `_r387_don_dep` trả `None`, trace đúng `[("do",), ("dong",)]`, `m._r387_job is None`. (t3) `CloseHandle` thất bại: như (t2) nhưng hàm đóng trả `0` ⇒ thông điệp chứa `"CloseHandle that bai"`, trace có đúng một `("dong",)` (nhãn "r387(t3) CloseHandle that bai khong bao"); (t3b) phép dò trả `None` VÀ hàm đóng trả `0` ⇒ thông điệp chứa cả `"cay khong do duoc"` lẫn `"CloseHandle that bai"`; (t3c) phép dò ném `OSError` ⇒ `_r387_don_dep` không ném, thông điệp chứa `"phep do nem"`, hàm đóng vẫn được gọi đúng một lần (nhãn "r387(t3c) do nem ma khong dong"). (t4) bắt tay, với `that_gia` đếm số lần gọi và ghi `job-da-gan` có tồn tại không lúc nó chạy: (t4a) `that_gia` trả `object()` ⇒ lúc nó chạy tệp CHƯA có, sau khi bộ bọc trả thì tệp CÓ và `m._r387_job` là đúng handle ấy (nhãn "r387(t4) job-da-gan ghi truoc khi gan"); (t4b) `that_gia` trả `None` ⇒ tệp KHÔNG có, `m._r387_job is None` (nhãn "r387(t4b) gan that bai van phat dau"); (t4c) gọi khi `m._r387_job` chưa đóng ⇒ lỗi "job cu chua dong" được bắt và `that_gia` KHÔNG được gọi thêm; (t4d) `_r387_bao_da_gan` gọi khi `m._r387_job is None` ⇒ lỗi "bao gan khi chua luu handle". (t5) teardown dưới `finally` (X1, tất định): vá biến toàn cục `_r1252_run` của tệp test bằng hàm giả gọi `m._job_windows(1)` (đã vá trước `_r387_chay` thành hàm trả `object()`, nên bộ bọc nhận quyền sở hữu) rồi ném `TinHieuChotCa("SENTINEL")`; `m._pid_trong_job` vá trước thành `lambda h: None`, `m._r387_dong_job` đếm lời gọi trả `1`; gọi `_r387_chay(..., co_chau=False)` ⇒ bắt được ĐÚNG đối tượng sentinel, `__notes__` chứa `"r387 teardown"` và `"cay khong do duoc"`, hàm đóng gọi đúng 1 lần (nhãn "r387(t5) teardown khong chay khi ne"). (t6) `_r387_loi_bam_hop_le`: lỗi `"ve bam"` không ghi chú ⇒ `True`; cùng lỗi có ghi chú `"r387 teardown: CloseHandle that bai"` ⇒ `False` (nhãn "r387(t6) loi bam nuot loi teardown"). (t2)–(t6) chạy mọi nền; mọi vá khôi phục trong `finally`. | `launcher_test.py` |
+    68	| M7 | **Neo và bảng đột biến**: cập nhật CẢ `_R387_KHOI_MOC` (theo chú thích mới M3) LẪN `_R387_DONG_CAY` (theo dòng M3), để mỗi mẫu của `r387_a_nen_khac_doi_moc`/`r387_a_nen_khac_moc_truoc_unlink` khớp đúng một chỗ (`t117`). Bốn mục `r387_a_nen_khac_*` giữ tên, ca đích; hai mục neo guard giữ nguyên mẫu. Thêm vào `DOT_BIEN` **6** mục mới W1–W6 (§4b); thêm vào `DOT_BIEN_HARNESS` **7** mục mới H1–H7. W7–W12 tái dùng mục có sẵn của A. | `launcher_test.py` |
+    69	
+    70	## 4. `nghiem_thu`
+    71	
+    72	Mọi số công bố kèm thời điểm UTC tới giây, phiên bản công cụ, lệnh nguyên văn, mã thoát.
+    73	
+    74	| # | tiêu chí | phép đo làm nó ĐỎ |
+    75	|---|---|---|
+    76	| N1 | Linux (head): (e), (t) và 9 ca mở ĐẠT; mọi ca r387 của A giữ kết quả. | Mỗi mục W1–W4, W6, H1–H7 qua runner `--dot-bien` ⇒ `OK giet 1/1` đúng ca đích. Ngoài runner (vốn chỉ kết luận ở mức CA), executor đo NHÃN: áp từng mục vào bản sao đủ cây, chạy `--lap-ca <ca đích> --lan 1`, lấy dòng chi tiết DUY NHẤT có dạng `HONG <ID ca đích>: <lý do>` (sau khi bỏ thụt lề; KHÔNG phải dòng tổng `lan 1/1: HONG`); `<lý do>` phải chứa nhãn ở cột "nhãn đỏ" của §4b. Không có đúng một dòng như thế, hoặc nhãn khác ⇒ mục đó tính SAI (tín dụng giả) dù runner báo giết. |
+    77	| N2 | `t117` ĐẠT trên head. | Bỏ cập nhật `_R387_KHOI_MOC` ⇒ mẫu `r387_a_nen_khac_doi_moc` khớp 0 chỗ ⇒ `t117` ĐỎ; bỏ cập nhật `_R387_DONG_CAY` ⇒ mẫu thứ hai của `r387_a_nen_khac_moc_truoc_unlink` khớp 0 ⇒ ĐỎ. Executor chạy cả hai phản chứng, ghi rc. |
+    78	| N3 | `launcher_test.py` trên head (Linux, gate + tại chỗ): N/N, hai số bằng nhau; TẬP ID bỏ qua của head ⊆ của base (không thêm bỏ qua mới). `--dot-bien`: rc 0, `DOT BIEN: N/N dat`; tập mục `KHONG DO DUOC tren nen nay` của head = của base ∪ {W5}. | Tập ID bỏ qua head có ID ngoài base; hai số dòng cuối khác nhau; tập `KHONG DO DUOC` khác kỳ vọng. |
+    79	| N4 | **Windows NATIVE** trên Desktop `DESKTOP-T9R33P2` (VM `tra-luat-win` dự phòng), exact head (`git rev-parse HEAD` = head, cây sạch), ghi `python --version`, `platform.platform()`, giờ UTC. (L1) (e), (t), 9 ca mở, `t71`, `t77`: mỗi ca `1/1 qua, 0 bo qua, 0 hong` qua `python .claude/dev/launcher_test.py --lap-ca <ca> --lan 1`. **Toàn suite** Windows (`python .claude/dev/launcher_test.py`) trên head VÀ base `3b64746` cùng máy cùng lượt: log head KHÔNG có dòng `BO QUA r387`; tập ID bỏ qua head = tập ID bỏ qua base trừ đúng 9 ID r387 ở §0 (so TẬP, không so tổng). (L2) Đột biến trên Windows: bản sao đủ cây của exact head (`git archive`); trong tệp test của bản sao: `DOT_BIEN_HOOK = []`; thân danh sách `DOT_BIEN` và `DOT_BIEN_HARNESS` được thay bằng nguyên văn đoạn nguồn (`ast.get_source_segment`) của từng phần tử có ID bắt đầu `r387_`, mỗi phần tử một dòng kết thúc bằng dấu phẩy, GIỮ NGUYÊN hai mốc runner dùng để tách bảng harness (`\nDOT_BIEN_HARNESS = [` và `\n]\n\n\ndef chay_dot_bien()`) — `]` đóng phải đứng dòng riêng; các hằng `_R387_*` ở mức module không đụng tới. Trước khi chạy: bản sao `py_compile` rc 0, đếm `len(DOT_BIEN)=22`, `len(DOT_BIEN_HOOK)=0`, `len(DOT_BIEN_HARNESS)=9`, tập ID = 16 ID r387 cũ của `DOT_BIEN` + {W1–W6 ở §4b} và 2 ID r387 cũ của harness + {H1–H7}, không trùng; ghi sha256 tệp đã lọc. W5 bắt buộc `OK giet 1/1`; mọi mục khác kỳ vọng như Linux. Đo nhãn như N1 cho W5 và W7. (L3) (a), (c) mỗi ca `--lan 5` trên Windows: 5/5. | Ca L1 `bo qua`/`hong`; log head còn `BO QUA r387`; hiệu tập ID khác đúng 9 ID r387; mục L2 sống, chết sai ca, hoặc nhãn sai; số mục từng bảng khác 22/0/9 hoặc tập ID khác kỳ vọng. Thiếu job, con thoát mã 3, PID cháu không có trong phép dò job, thiếu `chau-xong`, teardown lỗi ⇒ ca ĐỎ bằng `TinHieuChotCa`, không thành bỏ qua. HEAD khác exact head ⇒ N4 vô hiệu. Chưa có log native ⇒ `chưa đo được`. |
+    80	| N5 | Một lượt `run` thật trên Windows native: `python .claude/dev/launcher.py run <cờ bắt buộc của hợp đồng run, ghi nguyên văn> -- python -c "import time;time.sleep(2);print(1)"` (con sống 2 s để `_job_windows` kịp gán). `run.json`: `"version": "1.6.2"`, `ma_thoat` 0, `job_windows: true`, `log_bam_cay_da_chet: true`, `log_bam_cho_giay` < 10. | Thiếu một khoá hoặc giá trị khác. |
+    81	| N6 | `git diff --numstat base..H` đúng 2 tệp write set, tổng cột thêm ≤ 450; Ruff 0.15.15 `--select F` tập diagnostic head = base trên 2 tệp; `doctrine-scan`, `adr-song` rc 0; `git diff --check` rỗng; `eol_policy --all` ok. | Đường dẫn thứ ba, tổng thêm > 450, diagnostic Ruff mới, `diff --check` có dòng, `eol_policy` không ok ⇒ ĐỎ. (`doctrine-scan`/`adr-song`: không có phản chứng riêng ở packet này — khai thẳng.) |
+    82	
+    83	### 4b. Bảng đường vào và chốt (danh sách CHO PHÉP: mọi đường M1–M5 mở ra đều có một hàng; mỗi hàng một chốt, một phép đo làm đỏ)
+    84	
+    85	Mẫu "trọn dòng M2" = nguyên văn dòng M2 (§3), khớp đúng một chỗ; các mảnh con của nó KHÔNG được làm mẫu riêng vì đã có ở 1131 và 2499.
+7816:SCHEMA_DANG_DUNG = SCHEMA_REVIEW   # #1336: đích đột biến loại "schema" của DOT_BIEN_HOOK, cùng luật con trỏ
+9589:# wp858: hai đích đột biến nữa, cùng luật con trỏ (phần tử thứ tư của DOT_BIEN_HOOK: "cai_sh" / "selftest").
+9990:    luu = {k: g[k] for k in ("DOT_BIEN", "DOT_BIEN_HARNESS", "DOT_BIEN_HOOK", "HOOK_DANG_DUNG", "YAML_DANG_DUNG")}
+9993:            g.update(DOT_BIEN=[], DOT_BIEN_HARNESS=[], DOT_BIEN_HOOK=[("x", ("a", "b"), []), ("y", ("a", "b"), [], "yaml")],
+10465:             'DOT_BIEN_HOOK = []\nDOT_BIEN_HARNESS = []\n')
+10538:                    DOT_BIEN_HOOK=[], DOT_BIEN_HARNESS=[]), contextlib.redirect_stdout(out):
+10706:            "a": {"DOT_BIEN": [("r1079_a", neo, ["review_do_san"])], "DOT_BIEN_HARNESS": []},
+10707:            "a_thieu": {"DOT_BIEN": [("r1079_thieu", neo, ["review_ca_vang"])], "DOT_BIEN_HARNESS": []},
+10708:            "b": {"DOT_BIEN": [], "DOT_BIEN_HARNESS": [
+10711:        with patch.dict(chay_dot_bien.__globals__, {"CA": [review_do_san], "DOT_BIEN_HOOK": [],
+10966:            "CA": [], "DOT_BIEN_HOOK": [], "DOT_BIEN_HARNESS": [],
+11013:            "CA": [target, other], "DOT_BIEN_HOOK": [], "DOT_BIEN_HARNESS": [],
+11069:            'CA': [target, alias], 'DOT_BIEN_HOOK': [], 'DOT_BIEN_HARNESS': [],
+11100:                'DOT_BIEN_HOOK = []\nDOT_BIEN_HARNESS = []\n')
+11161:    with patch.dict(chay_dot_bien.__globals__, {"CA": [a, b], "DOT_BIEN": [], "DOT_BIEN_HARNESS": [],
+11162:                                                "DOT_BIEN_HOOK": [("review_hook", ("#!/bin/bash\n", "#!/bin/bash\n# r1079 tro\n"), ["review_a"])]}):
+13784:def _r1252_run(repo: Path, run_root: Path, ma_con: str, *them, m=None, chup=True):
+14718:def _r387_va(doi_tuong, **gia):
+14730:def _r387_cho_cay_rong(do, pgid, han):
+14742:def _r387_don_dep(m, han=8.0):
+14754:def _r387_don_khi_thoat(m, han=8.0):
+14769:def _r387_nhat_ky_kill():
+14781:def _r387_chay(m, s, ma_con, *them, han=None, co_chau=True, chup=False, do=None):
+14809:def _r387_ma_con(s, ngu, doi_chau=False):
+14819:def _r387_bam_dia_sau_dau(s, tm, ve):
+14828:def _r387_pid_chau_da_do(m, s, ve):
+14834:def _r387_prompt(s):
+14860:def _r387_than_a(ngu, doi_chau):
+17011:DOT_BIEN_HOOK = [
+17290:DOT_BIEN_HARNESS = [
+17609:        for i, muc in enumerate(DOT_BIEN_HOOK):
+17654:            "\nDOT_BIEN_HARNESS = [")
+17659:            hong += len(DOT_BIEN_HARNESS)
+17665:        for i, muc in enumerate(DOT_BIEN_HARNESS):
+17785:    THẬT (ngoài vùng `DOT_BIEN_HARNESS` đột biến), không qua `--lap-ca` của bản bị đột biến. Đường kênh và nonce đi qua STDIN,
+17966:        tong_dot_bien = len(DOT_BIEN) + len(DOT_BIEN_HOOK) + len(DOT_BIEN_HARNESS)
+18008:            print(f"  HONG {ten}: {ly_do}", flush=True)
+18022:        print(f"  HONG {ten}: {ly_do}", flush=True)
+---
+name: cross-review
+description: Adapter review packet trên Codex CLI với checkout/context được cấp riêng. Assurance và hợp đồng evidence lấy từ docs/PROTOCOL_DA_PHIEN.md; cung cấp cú pháp PowerShell.
+---
+
+# Adapter `cross-review` — Codex CLI / PowerShell
+
+Đọc [protocol](../../../docs/PROTOCOL_DA_PHIEN.md) §7 (receipt), §8/§8.1–§8.3
+(assurance, bootstrap, runtime, cache, Ruff, lịch sử lớp), §10.2.1–§10.2.3 (CI) và §13.
+Nguồn cú pháp và ghi chép provider: [.claude adapter](../../../.claude/skills/cross-review/SKILL.md).
+Các mục model selector Claude ở nguồn chỉ dành cho lane Claude; không dùng bảng đó chọn Codex.
+Nhận dạng nền này là `openai_codex / codex_cli / machine`; model/effort và sandbox đọc từ run.
+
+## Bootstrap và snapshot
+
+Biến `$Remote`, `$ReviewRoot`, `$Branch`, `$ReviewedSha`, `$Scratch` lấy từ assignment.
+Lệnh clone/config/checkout thuộc bootstrap trước bàn giao (§8.1):
+
+```powershell
+git -c core.longpaths=true clone --no-checkout $Remote $ReviewRoot
+git -C $ReviewRoot remote get-url origin
+git -C $ReviewRoot config core.abbrev 7
+git -C $ReviewRoot config core.longpaths true
+git -C $ReviewRoot fetch origin $Branch
+git -C $ReviewRoot checkout --detach $ReviewedSha
+git -C $ReviewRoot rev-parse HEAD 'HEAD^{tree}'
+git -C $ReviewRoot status --porcelain=v1 --untracked-files=all --ignored=matching
+git -C $ReviewRoot diff --binary
+git -C $ReviewRoot diff --cached --binary
+git -C $ReviewRoot ls-files --others --exclude-standard
+git -C $ReviewRoot ls-files --others --ignored --exclude-standard
+```
+
+Ghi rc của từng command ngay sau chạy; snapshot bytes/hash và giới hạn quan sát ở §8.2.
+Trust path/capability theo §8.1; không có lệnh tự chấp nhận trust trong adapter này.
+
+Ví dụ diff/numstat giữ raw bytes trong scratch của run, với `$BaseSha` từ assignment:
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+& $Py -B -c 'import pathlib,subprocess,sys; r,b,h,o=sys.argv[1:]; p=subprocess.run(["git","-C",r,"diff",b,h],check=True,capture_output=True); (pathlib.Path(o)/"diff.patch").write_bytes(p.stdout); p=subprocess.run(["git","-C",r,"diff","--numstat",b,h],check=True,capture_output=True); (pathlib.Path(o)/"numstat.txt").write_bytes(p.stdout)' $ReviewRoot $BaseSha $ReviewedSha $Scratch
+$DiffArtifactsRc = $LASTEXITCODE
+```
+
+`$ReviewRoot`/`$Scratch` là đường dẫn tuyệt đối. Khi đọc `modelUsage` lane Claude qua nguồn,
+truyền `$ReviewRoot` vào đối số SOURCE và JSON đúng `$Scratch/reviewer.json`; producer và
+consumer cùng run theo §8.1. Không đọc JSON trùng tên ở cwd.
+
+## Runtime và Ruff
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+codex --version
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:PYTHONPYCACHEPREFIX = Join-Path $Scratch 'pycache'
+& $Py -B -c 'import pathlib,runpy,sys; m=runpy.run_path(str(pathlib.Path(sys.argv[1])/".claude/dev/ci_dang_ky_test.py")); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)' $ReviewRoot
+$RuffContractRc = $LASTEXITCODE
+& $Py -m ruff check --no-cache --select F (Join-Path $ReviewRoot 'scripts/tl.py')
+$RuffLintRc = $LASTEXITCODE
+```
+
+Hai lệnh Ruff trỏ checkout được giao, không phụ thuộc cwd. Pin/probe và bare lint là hai scope của §8.2;
+tiêu chí A7/mutant riêng xem §10.2.3. Cú pháp `launcher.py run --prompt-file` và mẫu Codex
+ở nguồn, mục “Reviewer là codex”; schema đầy đủ ở `docs/GOI_AGENT_DA_NEN.md`.
+`$Run = Get-Content -Raw -LiteralPath $RunJson | ConvertFrom-Json` đọc rc con/trạng thái; parse được chưa là
+completion evidence. Model/effort/sandbox lấy từ `$Run.model_phuc_vu`, `$Run.effort_phuc_vu`, `$Run.sandbox_quan_sat`,
+chỉ đo được khi `model_phuc_vu_trang_thai`/`effort_phuc_vu_trang_thai`/`sandbox_trang_thai` là `DO_DUOC`
+(khác thì đọc `*_ly_do`); đối chiếu với prompt/receipt theo §8.1. Header `model:`/`reasoning effort:` trong
+`$StderrLog`, nếu có, chỉ là lời khai phụ; vắng header không phải chưa đo được. Không lấy model từ actor GitHub.
+
+## Provenance và vận chuyển
+
+Lưu khối GraphQL “Provenance CI” của .claude adapter vào `$QueryFile` ngoài checkout:
+
+```powershell
+gh api graphql -F "query=@$QueryFile" -f "id=$RunNodeId"
+$ProvenanceRc = $LASTEXITCODE
+gh api --paginate --slurp "repos/ducthangho/tra-luat/actions/runs/$RunId/attempts/$Attempt/jobs?per_page=100"
+$JobsRc = $LASTEXITCODE
+git -C $ReviewRoot cat-file blob "${DefinitionOid}:$WorkflowPath"
+```
+
+Khối `cat-file` minh họa đọc; để lưu bytes/hash dùng Python `subprocess` như work-packet.
+Nguồn URL/OID, nullable `file`, 403, skipped/waiver và đủ attempt/context theo §10.2.2–§10.2.3.
+Receipt body-file dùng Python ở [work-packet nguồn](../../../.claude/skills/work-packet/SKILL.md),
+mục “Body file và exact readback”. Bảng verdict/lịch sử lớp ở nguồn; không đổi contract khi
+đổi shell. Không dispatch reviewer từ ví dụ đọc evidence này.
+38:**L1 — Mọi con số "N thứ phải xử" phải khai N ĐẾM GÌ.** Một đặc tả từng viết một con số mà
+43:**L2 — Mỗi mục phải chiếu được vào MỘT đường dẫn trong write set.** Mục nào cần sửa một tệp
+48:**L3 — Mỗi tiêu chí nghiệm thu phải nói được phép đo nào làm nó ĐỎ.** "Có ca test" không phải
+52:**L4 — Packet khắc phục phải chép số đếm HÌNH DẠNG LỖI từ hồ sơ tiền nhiệm.** Bộ đếm ấy sống
+56:**L5 — Mọi con số phải kèm THỜI ĐIỂM ĐO, và phải ĐO LẠI trước mỗi bước công bố.** Con số đúng
+84:**L6 — Tiêu chí khớp chuỗi là một thước đo, và thước đo phải được kiểm như mã.** Hai packet liền
+125:đo khác. Mỗi tiêu chí kèm một đột biến làm nó đổi màu — nối với L3.
+127:**L7 — Đặc tả không tự đặt điểm hỏi chủ kho.** Một mẫu đã lan từ đặc tả này sang đặc tả khác mà
+194:| `muc_tieu` | mỗi mục một dòng, đánh số, mỗi dòng chiếu vào một đường dẫn ở `write_set` (L2) |
+195:| `nghiem_thu` | mỗi mục tiêu ≥1 tiêu chí, mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3) |
+197:| `luat_dung` | điểm dừng của protocol hay ADR dẫn bằng tên, và mã E1–E3 theo L7; không có ngân sách mềm |
+198:| `pham_vi_e` | chạm E4, chạm E5 hay không chạm, theo L7; không rõ thì khai là chạm |
+199:| `hinh_dang_ke_thua` | chép từ biên nhận tiền nhiệm; không phải packet khắc phục thì ghi `khong_ap_dung` (L4) |
+
+exec
+/bin/bash -lc "sed -n '13780,13813p;14714,14810p;14856,14918p;15035,15060p;17290,17310p;17512,17585p;17650,17734p;17982,18025p' .claude/dev/launcher_test.py
+rg -n '_job_windows\\(|CloseHandle|def bang|def _r1252_nap' .claude/dev/{launcher,launcher_test}.py
+sed -n '38,150p' .claude/skills/soan-spec/SKILL.md
+sed -n '110,136p' ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt
+ succeeded in 0ms:
+    bang(len(ds) == 1, f"phai co dung mot luot chay trong {run_root}: {ds}")
+    return json.loads((ds[0] / "run.json").read_text(encoding="utf-8")), ds[0]
+
+
+def _r1252_run(repo: Path, run_root: Path, ma_con: str, *them, m=None, chup=True):
+    """`run` THẬT qua CLI (m=None) hoặc `m.lenh_run` trong tiến trình; trả `(rc, run.json, thư mục lượt)`."""
+    doi = ["run", "--workspace", str(repo), "--run-root", str(run_root), *them]
+    if chup:
+        doi.append("--chup-workspace")
+    doi += ["--", PY, "-c", ma_con]
+    if m is None:
+        rc = chay(*doi).returncode
+    else:
+        a = m.build_parser().parse_args(doi)
+        a.lenh = a.lenh[1:]
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = m.lenh_run(a)
+    so, thu_muc = _r1252_so(run_root)
+    return rc, so, thu_muc
+
+
+_R1252_KHOA = ("snapshot_truoc_sha256", "snapshot_sau_sha256", "snapshot_so_muc", "snapshot_ket_qua",
+               "snapshot_ly_do", "tep_doi", "tep_doi_tong", "tep_doi_bi_cat", "snapshot_gioi_han")
+
+
+@ca
+def r1252_ghi_tep_ignored():
+    """A2: tệp ignored mới ⇒ ghi_workspace rc 16, đúng một mục `them`; ghi đè tệp ignored có sẵn ⇒ `sua`."""
+    with San() as s:
+        repo = _r1252_kho(s)
+        rc, so, _ = _r1252_run(repo, s / "runs", "open('.tl_state/x','w').write('1')")
+        bang(rc == 16 and so["trang_thai"] == "ghi_workspace" and so["ma_thoat"] == 0,
+             f"ghi tep ignored phai ra ghi_workspace/16: rc={rc} {so.get('trang_thai')} {so.get('snapshot_ly_do')}")
+        bang(so["tep_doi"] == [{"duong_dan": ".tl_state/x", "doi": "them"}] and so["tep_doi_tong"] == 1,
+_R387_CHI_LINUX = "BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS"
+
+
+@contextlib.contextmanager
+def _r387_va(doi_tuong, **gia):
+    """Vá thuộc tính rồi khôi phục trong `finally`."""
+    goc = {k: getattr(doi_tuong, k) for k in gia}
+    for k, v in gia.items():
+        setattr(doi_tuong, k, v)
+    try:
+        yield
+    finally:
+        for k, v in goc.items():
+            setattr(doi_tuong, k, v)
+
+
+def _r387_cho_cay_rong(do, pgid, han):
+    """Ba trạng thái: `True` nhóm rỗng · `False` hết hạn mà còn thành viên · `None` không đo được."""
+    het = time.monotonic() + han
+    while True:
+        nhom = do(pgid)
+        if nhom is None or nhom == []:
+            return None if nhom is None else True
+        if time.monotonic() >= het:
+            return False
+        time.sleep(0.05)
+
+
+def _r387_don_dep(m, han=8.0):
+    """Teardown KHÔNG gửi tín hiệu nào: chờ nhóm của con về `[]`. Trả `None`, hoặc thông điệp lỗi."""
+    pgid = getattr(m, "_r387_pgid", None)
+    if pgid is None:        # `lenh_run` chưa kịp sinh con
+        return None
+    kq = _r387_cho_cay_rong(m._r387_do_that, pgid, han)
+    if kq:
+        return None
+    return f"r387 teardown: nhom {pgid} " + ("cay khong do duoc" if kq is None else f"con thanh vien sau {han}s")
+
+
+@contextlib.contextmanager
+def _r387_don_khi_thoat(m, han=8.0):
+    """Đặt SAU `San()` trong cùng `with`, nên teardown chạy trước `rmtree`, kể cả khi ca đỏ.
+    Ca đã đỏ giữ lỗi gốc và gắn thông điệp teardown bằng `add_note`; ca xanh mà teardown lỗi thì ĐỎ."""
+    try:
+        yield
+    except BaseException as e:
+        loi = _r387_don_dep(m, han)
+        if loi:
+            e.add_note(loi)
+        raise
+    loi = _r387_don_dep(m, han)
+    bang(loi is None, loi)
+
+
+@contextlib.contextmanager
+def _r387_nhat_ky_kill():
+    """`os.kill`/`os.killpg` thành hàm GIẢ chỉ ghi nhật ký, không bao giờ chuyển tiếp; ra khỏi khối thì đòi nhật ký
+    RỖNG. KHÔNG bọc `lenh_run`: launcher dùng `os.kill(pid, 0)` để dò."""
+    nk, goc = [], (os.kill, os.killpg)
+    os.kill, os.killpg = (lambda *a: nk.append(("kill", a))), (lambda *a: nk.append(("killpg", a)))
+    try:
+        yield
+    finally:
+        os.kill, os.killpg = goc
+    bang(nk == [], f"r387 fixture da goi kill sau lenh_run (nhat ky phai RONG): {nk}")
+
+
+def _r387_chay(m, s, ma_con, *them, han=None, co_chau=True, chup=False, do=None):
+    """Fixture chung (POSIX): `lenh_run` trong tiến trình; ghi mọi danh sách phép dò trả vào `m._r387_ds_do`; lưu
+    `pgid = run.json["pid"]` làm tham chiếu SỞ HỮU cho teardown. `do` thay phép dò BÊN TRONG `lenh_run`; teardown luôn
+    dùng phép dò thật. Hằng hạn đọc bằng `getattr` để fixture chạy được với `launcher.py` của base (đối chứng N1)."""
+    that, goc_han = m._thanh_vien_nhom, getattr(m, "_HAN_CHO_CAY_TRUOC_BAM_LOG", None)
+    m._r387_do_that, m._r387_ds_do = that, []
+
+    def ghi_do(pgid):
+        m._r387_ds_do.append((do or that)(pgid))
+        return m._r387_ds_do[-1]
+
+    m._thanh_vien_nhom = ghi_do
+    if han is not None:
+        m._HAN_CHO_CAY_TRUOC_BAM_LOG = han
+    s.mkdir(exist_ok=True)
+    try:
+        rc, so, tm = _r1252_run(_r1252_kho(s), s / "runs", ma_con, *them, m=m, chup=chup)
+    finally:
+        m._thanh_vien_nhom = that
+        if goc_han is not None:
+            m._HAN_CHO_CAY_TRUOC_BAM_LOG = goc_han
+    m._r387_pgid = so["pid"]
+    if not co_chau:
+        loi = _r387_don_dep(m)
+        bang(loi is None, loi)
+    return rc, so, tm
+
+
+def _r387_ma_con(s, ngu, doi_chau=False):
+    """Con in `CON`, sinh cháu CÙNG nhóm (không `start_new_session`) nối chung stdout, ghi PID cháu ra tệp. Cháu ngủ
+        else:
+            bang(False, f"r387(t) teardown loi ma ca van xanh (than_loi={than_loi})")
+
+
+def _r387_than_a(ngu, doi_chau):
+    """Thân chung của (a) và đối chứng (a′). Các vế theo THỨ TỰ của đặc tả; vế băm đứng trước mọi vế khoá."""
+    m = _tai_launcher_thu()
+    with San() as s, _r387_don_khi_thoat(m):
+        _rc, so, tm = _r387_chay(m, s, _r387_ma_con(s, ngu, doi_chau), han=2.0)
+        with _r387_nhat_ky_kill():
+            bam_dia = _r387_bam_dia_sau_dau(s, tm, "a")
+            bang(bam_dia != so["stdout_sha256"], "r387(a) ve bam: bam so == bam dia, chau khong ghi SAU luc bam")
+            pid_chau = _r387_pid_chau_da_do(m, s, "a")
+            bang(so.get("log_bam_cay_da_chet") is False, f"r387(a) cay chua chet ma khai {so.get('log_bam_cay_da_chet')}")
+            cho = so.get("log_bam_cho_giay")
+            bang(isinstance(cho, float) and 1.8 <= cho <= 2.5, f"r387(a) log_bam_cho_giay={cho}, mong 1,8..2,5 (han 2,0)")
+            lech = (datetime.fromisoformat(so["log_bam_luc_utc"]) - datetime.fromisoformat(so["ket_thuc_utc"])).total_seconds()
+            bang(lech >= 1.8, f"r387(a) log_bam_luc_utc - ket_thuc_utc = {lech}: ket_thuc_utc da gom thoi gian doi (chau {pid_chau})")
+
+
+@ca
+def r387_m1_chau_ghi_muon_khai_pham_vi_bam():
+    """(a) Cháu ghi SAU hạn đợi 2,0 s (ngủ 4 s): băm sổ ≠ băm đĩa, và sổ phải khai `log_bam_cay_da_chet = false`."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    _r387_than_a(4, False)
+
+
+@ca
+def r387_m1_doi_chung_ghi_som_lam_ve_bam_do():
+    """(a′) Đối chứng: con đợi cháu, cháu ghi ngay ⇒ băm sổ = băm đĩa ⇒ thân (a) phải ĐỎ đúng ở vế băm."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    try:
+        _r387_than_a(0, True)
+    except TinHieuChotCa as e:
+        bang("ve bam" in str(e), f"r387(a') than (a) do o ve khac, khong phai ve bam: {e}")
+    else:
+        bang(False, "r387(a') chau ghi som ma than (a) van xanh: ve bam khong do gi")
+
+
+@ca
+def r387_m1_con_thuong_chung_minh_cay_chet():
+    """(b) Con thường, không cháu: khai `true`, mốc băm không đứng trước mốc kết thúc, băm sổ = băm đĩa."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s:
+        _rc, so, tm = _r387_chay(m, s, "print('MOT-DONG')", co_chau=False)
+        bang(so.get("log_bam_cay_da_chet") is True, f"r387(b) cay da chet ma khai {so.get('log_bam_cay_da_chet')}")
+        luc, kt = so.get("log_bam_luc_utc"), so.get("ket_thuc_utc")
+        bang(isinstance(luc, str) and isinstance(kt, str) and datetime.fromisoformat(luc) >= datetime.fromisoformat(kt),
+             f"r387(b) log_bam_luc_utc={luc!r} phai co va khong truoc ket_thuc_utc={kt!r}")
+        bang(so.get("stdout_sha256") == hashlib.sha256((tm / "stdout.log").read_bytes()).hexdigest(), "r387(b) bam so != bam dia")
+
+
+@ca
+def r387_m2_chau_ghi_trong_han_thi_bam_du():
+    """(c) Hạn mặc định, cháu ghi sau 1 s: launcher đợi cây, khai `true`, băm sổ = băm đĩa đọc sau dấu."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s, _r387_don_khi_thoat(m):
+
+
+@ca
+def r387_m2_ngat_trong_luc_doi_ghi_bi_ngat():
+    """(h) Ctrl-C trong lúc đợi cây. (h1) `xong` thành `bi_ngat`, rc 130, `ma_thoat` vẫn là mã THẬT, log vẫn được băm.
+    (h2) kết quả chụp workspace (`ghi_workspace`) KHÔNG bị cú ngắt che."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+
+    def ngat(*_a):
+        raise KeyboardInterrupt
+
+    with San() as s, _r387_va(m, _cho_cay_chet_truoc_bam=ngat):
+        rc, so, _tm = _r387_chay(m, s / "h1", "pass", co_chau=False)
+        bang(rc == 130 and so.get("ma_thoat") == 0 and so.get("trang_thai") == "bi_ngat"
+             and so.get("ly_do_dung") == "bi ngat trong luc doi cay truoc khi bam log",
+             f"r387(h1) rc={rc} ma_thoat={so.get('ma_thoat')} {so.get('trang_thai')} / {so.get('ly_do_dung')}")
+        bang(so.get("log_bam_cay_da_chet") is False and so.get("stdout_sha256"),
+             f"r387(h1) bi ngat phai khai false va van bam log: {so.get('log_bam_cay_da_chet')} / {so.get('stdout_sha256')}")
+        rc, so, _tm = _r387_chay(m, s / "h2", "open('.tl_state/x','w').write('1')", co_chau=False, chup=True)
+        bang(rc == m.MA_GHI_WORKSPACE and so.get("trang_thai") == "ghi_workspace",
+             f"r387(h2) cu ngat che ket qua chup workspace: rc={rc} {so.get('trang_thai')}")
+
+
+# wp387: các khối của `lenh_run` mà đột biến DỜI CHỖ (xoá ở chỗ cũ rồi chèn ở chỗ mới); `t117` đòi mỗi khối khớp đúng một chỗ.
+DOT_BIEN_HARNESS = [
+    # wp387: fixture KHÔNG được có đường gửi tín hiệu (lời gọi rơi vào hàm giả, ca chết ở vế nhật ký); teardown không được nuốt lỗi.
+    ('r387_fixture_gui_tin_hieu_theo_pid_chau', ('            pid_chau = _r387_pid_chau_da_do(m, s, "a")\n',
+      '            pid_chau = _r387_pid_chau_da_do(m, s, "a")\n            os.kill(pid_chau, signal.SIGTERM)\n'),
+     ['r387_m1_chau_ghi_muon_khai_pham_vi_bam']),
+    ('r387_teardown_nuot_loi', ('            e.add_note(loi)', '            pass'), ['r387_fixture_teardown_bao_loi_giu_loi_goc']),
+    ('wp1122_assertion_dinh_dang_lai_sau_map', ('ket = f"HONG: {tin}"', 'ket = f"HONG: {mo_ta_loi(e)}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
+    ('wp1122_assertion_map_truoc_dinh_dang', ('except AssertionError as e:\n            tin = mo_ta_loi(e)   # #1122 (Codex lượt 6): định dạng MỘT lần, TRƯỚC khi ghi map; `str(e)` chạy mã của ngoại lệ\n            hong_ds.append((fn.__name__, tin))\n            # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.\n            LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)\n                                      else f"khac:{type(e).__qualname__}")\n            ket = f"HONG: {tin}"', 'except AssertionError as e:\n            LOAI_HONG[fn.__name__] = ("TinHieuChotCa" if isinstance(e, TinHieuChotCa) and not chot_tu_ca_khac(e, fn)\n                                      else f"khac:{type(e).__qualname__}")\n            tin = mo_ta_loi(e)   # #1122 (Codex lượt 6): định dạng MỘT lần, TRƯỚC khi ghi map; `str(e)` chạy mã của ngoại lệ\n            hong_ds.append((fn.__name__, tin))\n            # #1079 F01: danh tính lớp THẬT; lớp khác (kể cả cùng `__qualname__`) mang tiền tố `khac:`.\n            ket = f"HONG: {tin}"'), ['r1122_nhat_ky_giu_loai_va_thong_diep_160']),
+    # #1117 r2 (spec mục 9): bảo đảm (a)(b)(c) của các ca kênh #1122 đo qua runner — mỗi bảo đảm một đột biến.
+    ('wp1117_runner_doc_map_toan_cuc',
+     ('    shutil.copy2(Path(__file__).with_name(RUNNER_TEN), dev / RUNNER_TEN)',
+      '    (dev / RUNNER_TEN).write_text(Path(__file__).with_name(RUNNER_TEN).read_text(encoding="utf-8").replace(\'        loai, chi_tiet = mod.cham_mot_ca(chon[0])   # (iv)\\n\', \'        loai, chi_tiet = mod.cham_mot_ca(chon[0])   # (iv)\\n        h = getattr(mod, "LOAI_HONG", {}).get(ten)\\n        if h and loai == "loi":\\n            loai = "giet" if h == "TinHieuChotCa" else loai\\n\'), encoding="utf-8")'),
+     ['r1122_kenh_loi_phai_thuoc_luot_ngoai']),
+    ('wp1117_runner_map_de_ket_qua_qua',
+     ('    shutil.copy2(Path(__file__).with_name(RUNNER_TEN), dev / RUNNER_TEN)',
+      '    (dev / RUNNER_TEN).write_text(Path(__file__).with_name(RUNNER_TEN).read_text(encoding="utf-8").replace(\'        loai, chi_tiet = mod.cham_mot_ca(chon[0])   # (iv)\\n\', \'        loai, chi_tiet = mod.cham_mot_ca(chon[0])   # (iv)\\n        if getattr(mod, "LOAI_HONG", {}).get(ten):\\n            loai, chi_tiet = "loi", ten\\n\'), encoding="utf-8")'),
+     ['r1122_kenh_ca_qua_khong_mang_chi_tiet_cu']),
+    ('wp1117_lap_ca_bo_chi_tiet_loi',
+     ('    return loai, (str(kq.get("chi_tiet") or ten_ca) if loai == "loi" else ten_ca)',
+      '    return loai, ten_ca'),
+     ['r1122_kenh_loi_phai_thuoc_luot_ngoai']),
+def chay_dot_bien() -> int:
+    """Chạy đột biến trên BẢN SAO TẠM, KHÔNG bao giờ ghi vào launcher.py thật.
+
+    ĐÃ TRẢ GIÁ (2026-08-12): bản trước ghi thẳng vào launcher.py rồi khôi phục
+    trong `finally`. Một lượt chạy bị SIGTERM cắt giữa chừng thì `finally` KHÔNG
+    chạy, tệp thật ở lại trạng thái đã méo (`if False:` thay cho chốt chống giết
+    nhầm PID) — và lượt đột biến KẾ TIẾP đọc đúng bản méo đó làm "bản gốc", khôi
+    phục về nó, xoá luôn bản sao. Bản méo đi thẳng vào commit và đã được đẩy lên.
+    Dấu hiệu duy nhất lộ ra là một đột biến báo "khong tim thay doan de dot bien":
+    đoạn cần sửa đã bị chính nó thay mất từ lượt trước.
+
+    Sửa ở TẦNG chứ không vá triệu chứng: tệp dưới quản lý phiên bản không bao giờ
+    bị ghi, nên dù bị SIGKILL (không bắt được) cây làm việc vẫn nguyên.
+    """
+    global LAUNCHER_DANG_DUNG, HOOK_DANG_DUNG, YAML_DANG_DUNG, CAI_SH_DANG_DUNG, SELFTEST_DANG_DUNG, CONG_CU_DANG_DUNG, CC_TEST_DANG_DUNG
+    kiem_registry(CA)   # #1079 F08 (Codex lượt 5): gọi thẳng `chay_dot_bien` cũng phải qua chốt
+    _cung_hoa_dau_ra_harness()
+    goc = LAUNCHER.read_text(encoding="utf-8")
+    goc_test = Path(__file__).read_text(encoding="utf-8")
+    hong = 0
+    khong_do = 0
+    neutral = {}
+    neutral_h = {}
+    tam = Path(tempfile.mkdtemp(prefix="lt_db_"))
+    try:
+        # Preserve the real delegated probe dependency in neutral/mutant copies.
+        # Otherwise t133 fails before reaching the mutation and reports a false kill.
+        companion = LAUNCHER.with_name("codex_cred.py")
+        if companion.is_file():
+            shutil.copy2(companion, tam / companion.name)
+        for muc in DOT_BIEN:
+            ten, cap, phai_chet = muc[0], muc[1], muc[2]
+            # Phan tu thu TU (tuy chon) = ('posix'|'windows', ly do). Co dot bien
+            # KHONG THE do duoc tren mot nen du ca dich VAN CHAY: vd t71 tu bo qua
+            # dung khang dinh ve quyen/xoa ban chup tren Windows. Truoc day nhung ca
+            # do bao SAI oan, va mot cong khong bao gio xanh duoc thi nguoi ta se bo
+            # qua no - dung bay da ghi trong chu thich `can_do` ben duoi.
+            # LY DO la BAT BUOC va duoc IN RA, de day khong thanh cho giau that bai.
+            gioi_han = muc[3] if len(muc) > 3 else None
+            if gioi_han:
+                nen, ly_do = gioi_han
+                if (nen == "posix") == LA_WINDOWS:
+                    khong_do += 1
+                    print(f"  {ten:<28} KHONG DO DUOC tren nen nay ({ly_do})")
+                    continue
+            if isinstance(cap, tuple):
+                cap = [cap]
+            thieu = [c for c, _ in cap if c not in goc]
+            if thieu:
+                print(f"  {ten:<28} SAI - khong tim thay doan de dot bien")
+                hong += 1
+                continue
+            moi_ma = goc
+            for c, m in cap:
+                moi_ma = moi_ma.replace(c, m, 1)
+            # TÊN RIÊNG cho từng đột biến. Bản trước ghi đè CÙNG một `launcher.py`,
+            # và hai đột biến cùng kích thước rơi vào cùng một giây thì bản sau ăn
+            # `.pyc` của bản trước — cổng chấm điểm nhầm bản (xem `_nap_sach`).
+            # Đường dẫn khác nhau ⇒ đường `.pyc` khác nhau ⇒ va chạm là bất khả.
+            ban_sao = tam / f"launcher_db_{DOT_BIEN.index(muc):02d}.py"
+            ban_sao.write_text(moi_ma, encoding="utf-8")
+            try:
+                compile(moi_ma, str(ban_sao), "exec")
+            except SyntaxError as e:
+                print(f"  {ten:<28} SAI - dot bien khong bien dich: {mo_ta_loi(e)}")
+                hong += 1
+                continue
+            dich = [fn for fn in CA if fn.__name__ in phai_chet]
+            if sorted(fn.__name__ for fn in dich) != sorted(set(phai_chet)):   # #1079 F06
+                hong += 1
+                print(f"  {ten:<28} SAI - ca dich khong tim thay/trung: "
+                      f"{sorted(set(phai_chet) - {fn.__name__ for fn in dich})}")
+                continue
+            for fn in dich:   # #1079 F01: NEUTRAL trên bản gốc, mỗi ca đo một lần
+        # Mutant của chính harness phải chạy trên BẢN SAO của CẢ tệp test. Runner
+    # sản phẩm chỉ thay launcher.py nên không thể đo ba finding test-only
+        # (`MODULE_PY`, điều kiện bản-sao-rời, mẫu số headline).
+        phan_truoc_bang, dau_bang, sau_dau_bang = goc_test.partition(
+            "\nDOT_BIEN_HARNESS = [")
+        than_bang, dau_ham_runner, phan_sau_bang = sau_dau_bang.partition(
+            "\n]\n\n\ndef chay_dot_bien()")
+        if not dau_bang or not dau_ham_runner:
+            print("  !! khong tach duoc bang dot bien harness khoi ma can dot bien")
+            hong += len(DOT_BIEN_HARNESS)
+            phan_ma_test = goc_test
+        else:
+            # Bỏ chính bảng đặc tả ra khỏi vùng đếm/thay; code cần đột biến nằm ở
+            # CẢ trước và sau bảng (`dong_ket_qua` được định nghĩa sau runner).
+            phan_ma_test = phan_truoc_bang + "\n\n\ndef chay_dot_bien()" + phan_sau_bang
+        for i, muc in enumerate(DOT_BIEN_HARNESS):
+            ten, cap, phai_chet = muc
+            if isinstance(cap, tuple):
+                cap = [cap]
+            sai_neo = [c for c, _ in cap if phan_ma_test.count(c) != 1]
+            if sai_neo:
+                print(f"  {ten:<28} SAI - neo harness khong khop DUNG MOT cho")
+                hong += 1
+                continue
+            moi_phan_ma = phan_ma_test
+            for c, m in cap:
+                moi_phan_ma = moi_phan_ma.replace(c, m, 1)
+            if dau_bang and dau_ham_runner:
+                moi_truoc, moc_ham, moi_sau = moi_phan_ma.partition(
+                    "\n\n\ndef chay_dot_bien()")
+                moi_test = (moi_truoc + dau_bang + than_bang + "\n]"
+                            + moc_ham + moi_sau)
+            else:
+                moi_test = moi_phan_ma
+            thu_muc = _dung_cay_harness(tam / f"harness_db_{i:02d}", moi_test, goc)
+            for ten_ca in phai_chet:   # #1079 F01: neutral trên bản sao NGUYÊN của tệp test
+                if ten_ca not in neutral_h:
+                    goc_h = tam / "harness_goc" / ".claude" / "dev"
+                    if not goc_h.is_dir():
+                        _dung_cay_harness(tam / "harness_goc", goc_test, goc)
+                    neutral_h[ten_ca] = cham_lap_ca(goc_h, ten_ca)
+            tt, so_chet, can_do, mo_ta = ket_luan_mutant(
+                list(phai_chet), neutral_h, {t: cham_lap_ca(thu_muc, t) for t in phai_chet})
+            if tt == "KHONG_DO":
+                khong_do += 1
+                print(f"  {ten:<28} KHONG DO DUOC tren nen nay (ca dich bo qua: {mo_ta})")
+                continue
+            if tt == "KHONG_DO_NEUTRAL":
+                hong += 1
+                print(f"  {ten:<28} SAI - KHONG DO DUOC (neutral do: {mo_ta})")
+                continue
+            hong += 0 if tt == "OK" else 1
+            print(f"  {ten:<28} {tt}  giet {so_chet}/{can_do}: {mo_ta}")
+    finally:
+        LAUNCHER_DANG_DUNG = LAUNCHER
+        shutil.rmtree(tam, ignore_errors=True)
+        # Chốt cuối: tệp thật PHẢI y nguyên. Không tin `finally` - lượt trước
+        # chết vì tin nó.
+        if LAUNCHER.read_text(encoding="utf-8") != goc:
+            print("  !! launcher.py DA BI DOI - dot bien ro ri ra tep that")
+            hong += 1
+    return hong, khong_do
+
+
+# ---------------------------------------------------------------------- main
+
+class NhatKyCa:
+    """Nhật ký TỪNG CA, `flush` + `fsync` TRƯỚC khi ca kế chạy.
+
+    VÌ SAO CẦN — bài học lượt 6/7, và cả hai bên đều đọc sai một lần:
+
+    Bộ test này KHÔNG in gì trong lúc chạy; nó chỉ in dòng BỎ QUA và dòng tổng kết.
+    Nên khi tiến trình bị giết giữa chừng, thứ duy nhất còn lại trên màn hình là
+    `BO QUA t62...`. Reviewer đọc thành "chết ngay sau t62", tôi cũng đọc y như thế
+    và đi truy `t63` — trong khi dòng đó chỉ là dòng CUỐI CÙNG ĐƯỢC IN, không phải
+    ca cuối cùng ĐƯỢC CHẠY. Cộng thêm stdout nối vào ống là bộ đệm KHỐI, nên mọi
+    thứ chưa xả cũng mất sạch cùng cú giết. Ba lượt review đi tìm ở sai chỗ vì
+    một tạo tác của bộ đệm.
+
+    `flush()` chưa đủ: nó mới đẩy khỏi bộ đệm Python. `fsync()` mới qua bộ đệm HĐH.
+    Cú giết không chờ ta. Ca nào có `>>> vao` mà KHÔNG có `<<< ra` chính là ca giết
+    tiến trình — đây là kỹ thuật duy nhất sống sót qua một cú giết KHÔNG BẮT ĐƯỢC.
+
+    Nhật ký ghi RA NGOÀI cây kho, đường dẫn do phía gọi đưa (`--nhat-ky`).
+    """
+        # ĐO LẶP MỘT CA (cross-review lượt 9). Lượt 8 nhật ký chạy trọn `100/100` rồi
+        # vỏ shell mới chết; lượt 9 chết ngay trong `t72`. HAI CHỖ KHÁC NHAU ⇒ chập
+        # chờn hoặc phụ thuộc thứ tự. Chạy MỘT ca N lần là cách rẻ nhất phân biệt
+        # "ca này tự nó chập chờn" với "chỉ chết khi đứng sau 73 ca khác".
+        #
+        # KHÔNG kết luận nguyên nhân ở đây — chỉ đếm. Nhật ký (nếu bật) mới là thứ
+        # sống sót qua một cú giết: lần lặp nào có `vao` mà không có `ra` là lần chết.
+        chon = [f for f in CA if f.__name__.startswith(a.lap_ca)]
+        if len(chon) != 1:
+            print(f"--lap-ca {a.lap_ca!r} khop {len(chon)} ca "
+                  f"({', '.join(f.__name__ for f in chon[:5]) or 'khong ca nao'})"), sys.exit(2)
+        nk = NhatKyCa(a.nhat_ky) if a.nhat_ky else None
+        qua = bo_qua = 0
+        hong_ds = []
+        try:
+            for i in range(a.lan):
+                q, b, h = chay_bo_ca(chon, nk, bat_dau=i)
+                qua += q
+                bo_qua += b
+                hong_ds += h
+                print(f"  lan {i + 1}/{a.lan}: {'qua' if q else ('BO QUA' if b else 'HONG')}",
+                      flush=True)
+        finally:
+            if nk:
+                nk.dong()
+        for ten, ly_do in hong_ds:
+            print(f"  HONG {ten}: {ly_do}", flush=True)
+        # #1117: `--lap-ca` KHÔNG còn ghi kênh kết quả; bộ chấm đột biến đi qua `launcher_test_runner.py`.
+        print(f"\nLAP {chon[0].__name__}: {qua}/{a.lan} qua, {bo_qua} bo qua, "
+              f"{len(hong_ds)} hong", flush=True)
+        return 1 if hong_ds else 0
+
+    nk = NhatKyCa(a.nhat_ky) if a.nhat_ky else None
+    try:
+        qua, bo_qua, hong_ds = chay_bo_ca(CA, nk)
+    finally:
+        if nk:
+            nk.dong()
+    tong = len(CA)
+    for ten, ly_do in hong_ds:
+        print(f"  HONG {ten}: {ly_do}", flush=True)
+    print("\n" + dong_ket_qua(tong, qua, bo_qua, len(hong_ds)), flush=True)
+    return 1 if hong_ds else 0
+
+.claude/dev/launcher.py:523:            k32.CloseHandle.argtypes = [wintypes.HANDLE]
+.claude/dev/launcher.py:524:            k32.CloseHandle.restype = wintypes.BOOL
+.claude/dev/launcher.py:536:                k32.CloseHandle(h)
+.claude/dev/launcher.py:753:        k32.CloseHandle.argtypes = [wintypes.HANDLE]
+.claude/dev/launcher.py:754:        k32.CloseHandle.restype = wintypes.BOOL
+.claude/dev/launcher.py:770:            k32.CloseHandle(snap)
+.claude/dev/launcher.py:906:def _job_windows(pid: int):
+.claude/dev/launcher.py:961:            k32.CloseHandle(job)
+.claude/dev/launcher.py:965:            k32.CloseHandle(job)
+.claude/dev/launcher.py:968:        k32.CloseHandle(h)
+.claude/dev/launcher.py:970:            k32.CloseHandle(job)
+.claude/dev/launcher.py:1330:            k32.CloseHandle(h)
+.claude/dev/launcher.py:2889:    job = _job_windows(p.pid)
+.claude/dev/launcher.py:3909:                    self.stack.callback(self.k.CloseHandle, h)
+.claude/dev/launcher.py:3965:                    self.k.CloseHandle(h)
+.claude/dev/launcher.py:3998:                    self.k.CloseHandle(h)
+.claude/dev/launcher.py:4033:            (self.k, "CloseHandle", [H], B),
+.claude/dev/launcher.py:4068:            self.k.CloseHandle(token)
+.claude/dev/launcher.py:4092:            self.k.CloseHandle(h)
+.claude/dev/launcher_test.py:193:def bang(dieu_kien, thong_diep):
+.claude/dev/launcher_test.py:1963:        def CloseHandle(self, h): self.dong.append(h); return 1
+.claude/dev/launcher_test.py:1970:        bang(m._job_windows(12345) is None and fake.kernel32.dong == [41],
+.claude/dev/launcher_test.py:7830:    def bang_json(a, b):
+**L1 — Mọi con số "N thứ phải xử" phải khai N ĐẾM GÌ.** Một đặc tả từng viết một con số mà
+người viết đếm phản chứng còn người đọc đếm finding; lượt thi hành đốt hơn 170 nghìn token và
+54 lượt gọi để cho ra 0 dòng mã, rồi dừng vì đặc tả tự mâu thuẫn. Con số nào cũng phải đi kèm
+đơn vị của nó.
+
+**L2 — Mỗi mục phải chiếu được vào MỘT đường dẫn trong write set.** Mục nào cần sửa một tệp
+ngoài write set thì đó là phát hiện của lượt soạn spec, phải xử NGAY tại đây — mở rộng write
+set, hay cắt mục đó ra — chứ không để phiên thi hành gặp rồi tự xoay. Đặc tả hứa thứ mà write
+set không kham được là lỗi của đặc tả.
+
+**L3 — Mỗi tiêu chí nghiệm thu phải nói được phép đo nào làm nó ĐỎ.** "Có ca test" không phải
+tiêu chí; "ca `rXX_` này, và đột biến ĐỔI MÀU nó" mới là. Tiêu chí không thể đỏ thì không phải
+tiêu chí — ghi thẳng là chưa có cách đo, đừng làm tròn thành đã có.
+
+**L4 — Packet khắc phục phải chép số đếm HÌNH DẠNG LỖI từ hồ sơ tiền nhiệm.** Bộ đếm ấy sống
+trong biên nhận của packet trước; packet mới bắt đầu từ 0 nếu không ai chép sang, và chốt "lặp
+ba lần thì hỏi có nên làm nữa không" mất tác dụng đúng lúc cần nhất.
+
+**L5 — Mọi con số phải kèm THỜI ĐIỂM ĐO, và phải ĐO LẠI trước mỗi bước công bố.** Con số đúng
+lúc viết vẫn sai lúc người khác đọc. Đo trên đợt #250: **bốn** con số trong hai đặc tả đã trôi
+giữa lúc viết và lúc review — `117 cặp / 100 đường dẫn` → `120 / 110`, `37` biên nhận → `39`,
+`3/90` → `3/100`, `4/120` blob → `5/121`. Không con nào là đoán bừa; tất cả **từng được đo đúng**.
+
+Ba hệ quả bắt buộc:
+
+- **Ghi thời điểm ngay cạnh con số** (`đo 17:38Z 22-08`), không ghi trống. Thiếu nó thì người đọc
+  không biết con số ấy bao nhiêu tuổi.
+- **Neo quyết định vào BẤT BIẾN, không vào con số.** *"`PLAT-X8` đang giữ hai đường dẫn"* không
+  trôi; *"13 lease"* trôi từng giờ. Con số chỉ để đối chiếu.
+- **Đo lại trước MỖI bước công bố** — đăng băm, cấp lease, merge. Rẻ, và nó là thứ duy nhất bắt
+  được trôi số.
+
+Cạm bẫy đắt nhất của luật này, vì nó làm lời khai **trông như đã kiểm**: một BẤT BIẾN còn đúng
+KHÔNG chứng minh các SỐ HẠNG còn đúng. Dòng `117 / 100` khai *"chênh 10"*; đo lại ra `120 / 110`
+— **chênh vẫn đúng 10**. Ba lượt cross-review đọc qua và không ai dừng lại, vì soi tính nhất quán
+nội tại thì dòng ấy sạch hoàn toàn. **Câu nào vừa nêu số hạng vừa nêu quan hệ giữa chúng thì kiểm
+SỐ HẠNG** — quan hệ là thứ sống sót qua trôi số.
+
+Một ca nữa, hình dạng KHÁC và đắt hơn — trôi số thành lời khai sai về THẨM QUYỀN. `PLAT-X8` để
+cùng hai con số trôi **bốn** lần trong một packet: `265 → 313 → 328` dòng thêm và `82/82 → 85/85 →
+87/87` ca test. Ba lần đầu vô hại. Lần thứ tư không: ô *"trần `ADR-0044`"* trong thân PR khai một
+cổng **ĐẠT** trong khi số thật đã vượt trần và cần **ngoại lệ người giữ kho** — tức nó không sai
+một chữ số, nó khai sai rằng một thẩm quyền đã có. Phân biệt để biết đâu là trôi số phải chữa
+NGAY: hỏi *"con số này có đang chống đỡ một câu về THẨM QUYỀN không"* — nếu có thì nó không còn là
+số, nó là một lời khai.
+
+**L6 — Tiêu chí khớp chuỗi là một thước đo, và thước đo phải được kiểm như mã.** Hai packet liền
+đốt hơn mười revision/lượt review vào CÙNG một lớp lỗi: tiêu chí trông chặt mà mù.
+Mỗi tiêu chí dùng `rg`/regex/đếm chuỗi phải qua đủ năm vế dưới đây; vế nào không áp dụng thì ghi
+thẳng vì sao trong tiêu chí.
+
+- **(a) Có vế dương trên nội dung MỚI và vế âm trên nội dung CŨ.** Chỉ có vế âm ("không còn câu
+  X") thì xoá trắng tệp cũng ĐẠT. Bằng chứng: wp782 r3 — A3 chỉ có phép âm (`rg … ⇒ 0
+  dòng` trên protocol), không phép nào đòi ADR mang ngưỡng mới
+  (`ops/specs/TRAN-CODEX-VA-SENSITIVE-r3.md` mục A3); wp784 r2 — nợ
+  `WP784-R2-TIEU-CHI-THIEU-VE-DUONG`.
+- **(b) Đo trên văn bản đã nối dòng, hoặc chọn cụm không bị xuống dòng — chỉ trong biên hẹp dưới
+  đây.** Markdown được ngắt cột tuỳ người viết, mà `rg` khớp TỪNG dòng: cụm đầy đủ vắt sang dòng sau
+  thì `rg -F` không khớp gì (tiêu chí dương đỏ oan); rút mẫu xuống phần đầu cho khỏi vướng chỗ ngắt
+  thì một hậu tố sai vẫn khớp (tiêu chí xanh giả). Cả hai đều đổi màu theo chỗ ngắt chứ không theo
+  nội dung. Mặc định là nối dòng: gộp khoảng trắng trong phạm vi TỪNG đoạn (không nối qua dòng trống
+  hay sang mục khác, kẻo khớp nhầm hai câu không liên quan) rồi khớp TOÀN BỘ lời khẳng định. Khớp
+  cụm trên một dòng chỉ được dùng khi cả hai điều sau cùng đúng: cụm ấy là toàn bộ lời khẳng định
+  (không phải tiền tố của nó), và phép đo chạy trên một blob đã neo băm nên không bị ngắt dòng lại.
+  Đột biến kèm theo: với cách nối dòng, ngắt dòng lại mà giữ nghĩa thì vẫn xanh và đổi hậu tố thì
+  đỏ; với cụm cùng dòng chỉ đột biến đổi hậu tố áp dụng — ngắt dòng lại sinh blob MỚI, phải neo băm
+  và đo lại, đừng coi phép khớp cùng dòng là đã chịu được ngắt dòng. Bằng chứng: lớp
+  "khớp tiền tố cụm bị cắt" của #782, chép ở `ops/specs/PUSH-MOT-LAN-VA-DUNG-VA-r2.md` mục
+  `hinh_dang_ke_thua`.
+- **(c) Tiêu chí nói "N chỗ" thì đếm theo từng vị trí, không đếm gộp.** Một tổng `≥ N` trên nhiều
+  tệp vẫn ĐẠT khi một chỗ có thừa còn chỗ khác vắng hẳn; khớp chuỗi con thay vì nguyên từ còn đếm
+  cả thứ không liên quan. Bằng chứng: wp782 r1 A6 đếm chuỗi con trên mọi `*.py` (P1 comment
+  4300256160), sửa thành đếm nguyên từ, từng trường, từng tệp; wp784 r2 — nợ `WP784-R2-A7-DO-PHU`.
+- **(d) Regex phủ cả dạng chữ lẫn dạng chữ số.** "tám lời gọi" và "8 lời gọi" là cùng một lời
+  khai; tiêu chí âm chỉ bắt dạng chữ thì dạng chữ số lọt qua. Bằng chứng: wp782 r5 A2 phải thêm
+  `[0-9]+ lời gọi Codex` (P2 comment 4300560293).
+- **(e) Lời khai "không cổng nào cưỡng chế" phải đo đủ danh sách vị trí cổng của §20 protocol.**
+  Dẫn hai tệp rồi kết luận cho cả kho là lời khai rộng hơn phép đo. Ghi lệnh và kết quả cho TỪNG
+  vị trí cổng mà `docs/PROTOCOL_DA_PHIEN.md` §20 liệt kê. Bằng chứng: wp784 g2 — `ADR-0054` mục
+  Cưỡng chế ban đầu chỉ dẫn hai tệp, phải đo lại trên đủ sáu vị trí (commit `1182060`, P2 connector
+  4302037482 trên PR #785).
+
+Trước khi đóng băng, chạy thử trên nền mọi tiêu chí ĐO ĐƯỢC lúc ấy. Tiêu chí đo hành vi MỚI phải ra
+đúng màu "chưa làm"; tiêu chí canh bất biến (`doctrine-scan`, selftest, `release-verify`…) xanh sẵn trên
+nền là đúng, và răng của nó đến từ đột biến. Tiêu chí chỉ đo được sau land (canary trên PR đầu tiên sau
+land, gate master, receipt LIVE) thì khai điều kiện đo, thời điểm, ai đo và bằng chứng phải đọc lại; nó ở
+trạng thái `chưa đo được` cho tới khi đo thật — chưa chạy KHÔNG phải đạt, và đừng thay canary bằng một phép
+đo khác. Mỗi tiêu chí kèm một đột biến làm nó đổi màu — nối với L3.
+
+**L7 — Đặc tả không tự đặt điểm hỏi chủ kho.** Một mẫu đã lan từ đặc tả này sang đặc tả khác mà
+không ADR, protocol hay skill nào đặt ra: "ngân sách mềm N lời gọi; hai lượt liên tiếp chưa approve ⇒
+Review Rescue Checkpoint". Đo 08-11-2026 trên `origin/master` `e3c639b`, đếm tệp trong 581 tệp của
+`ops/specs/`: 26 tệp có cụm "liên tiếp chưa approve", 173 tệp có cụm "hỏi chủ kho" (kể cả câu phủ
+định). Mỗi điểm hỏi tự đặt là một lần chủ kho phải dừng việc để trả lời. Danh sách những lần được
+hỏi nằm ở `docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md`; skill này không chép định nghĩa.
+
+- **Không khai ngân sách mềm** dưới trần của dòng khai, và không đặt luật kiểu "N lượt liên tiếp chưa
+  approve thì dừng hay hỏi chủ kho". Mức dành sẵn của `ADR-0041` là ngân sách giữ trước, không phải
+  trần hay điểm dừng. Lượt thứ hai trở đi theo điều kiện của `ADR-0052` và không cần hỏi ai.
+- **Mục `luat_dung` chỉ có hai loại dòng.** (i) Điểm dừng mà protocol hay một ADR đang hiệu lực đã
+  đặt: dẫn bằng tên mục hay ADR, không chép lại, không hạ ngưỡng. (ii) Mã E1, E2 hay E3 của danh sách
+  đóng, kèm thứ ADR ấy bắt mang theo khi hỏi.
+- **Câu nào trong đặc tả nói tới việc hỏi, báo hay chờ chủ kho thì phải mang một mã E.** Điểm dừng
+  loại (i) chỉ dừng phiên; khi nó cần chủ kho quyết thì câu hỏi ấy cũng mang mã, thường là E2 vì quyền
+  quyết thuộc chủ kho (chạm trần cứng, việc protocol giao chủ kho duyệt). Không gắn được mã nào thì đó
+  không phải điểm hỏi: phiên đang giữ việc tự quyết, rồi ghi gốc rễ, phương án chọn và phép đo chống đỡ
+  vào revision kế tiếp hay handoff.
+- **Mục `pham_vi_e` khai đặc tả có chạm E4, E5 không**, theo định nghĩa của ADR ấy; không rõ thì khai là
+  chạm. Đặc tả của packet thuộc Mission chủ kho đã duyệt hướng, không chạm E4, E5 và không đảo quyết
+  định nào của chủ kho, được người soạn đóng băng khi một review độc lập approve; đặc tả khác chờ chủ
+  kho duyệt băm. Với packet như thế, vòng hỏi ở mục 1 lấy câu trả lời từ các quyết định Mission đã ghi;
+  câu không trả lời được từ đó mà cũng không thuộc mã E nào thì người soạn tự quyết và ghi vào sổ quyết
+  định uỷ quyền. Cho đúng loại packet ấy, luật này thắng hai câu của mục 1, "Quyết định thì luôn là của
+| X3 | `VERSION` (M4) | không đột biến | N5 `"version": "1.6.2"` | Windows |
+
+Mẫu (tìm, thay) của H1–H7 chốt nguyên văn khi executor viết mã, mỗi mẫu khớp đúng một chỗ trong phần mã test (kiểm neo harness). Mọi đột biến chỉ tính GIẾT khi ca đích đỏ bằng `TinHieuChotCa` của đúng ca, ca đích ĐẠT trên bản sạch, và (N1/N4) nhãn khớp.
+
+## 5. `pham_vi_e`
+
+Không chạm E4, không chạm E5.
+
+## 6. `luat_dung`
+
+- Trần lời gọi Codex theo dòng khai `ADR-0055`; chạm trần ⇒ Review Rescue Checkpoint (`docs/PROTOCOL_DA_PHIEN.md` §12); xin tăng mang **E2**, ghi mức đã dùng, phần thiếu và mục đích (`ADR-0067`).
+- Trần kích thước `ADR-0053` (450 dòng thêm, `git diff --numstat base..H` toàn diff). > 450 ⇒ DỪNG, không push, báo điều phối; không cắt ca/phép đo để lọt trần.
+- Chưa có log native Windows (N4, N5) ⇒ không công bố `landed`/`ready`.
+- Cần sửa ngoài write set (§1; §2 cấm sửa `San`, runner đột biến) ⇒ dừng, đổi Packet Spec theo `docs/PROTOCOL_DA_PHIEN.md` §12 (revision mới, băm mới, chủ kho duyệt — E2).
+- Dung sai (a) 1,8–2,5 s và (e6) ≤ 1,0 s là điều kiện nghiệm thu của N1/N4: vượt trên Windows ⇒ N4 ĐỎ, không tự nới; nới hoặc đổi hàm đợi ⇒ đổi Packet Spec như trên.
+- Đặc tả không thuộc Mission ⇒ chờ chủ kho duyệt băm (`ADR-0067`) — **E2**.
+
+## 7. `hinh_dang_ke_thua`
+
+`khong_ap_dung` — phần nền của một packet tách (#387 A → B), không phải packet khắc phục bản vá cũ. Hai finding mở mang sang từ review A ghi ở §9.
+
+## 8. `chua_do_duoc`
+
+- Toàn bộ hành vi Windows native (bắt tay giữ con tới lúc gán, cháu trong job, job cập nhật trễ, `CloseHandle` thật): N4/N5 là phép đo duy nhất.
+- Darwin: không đo (nợ `wp387-darwin-chua-do`).
+- Giới hạn có tên: cháu breakaway hoặc sinh trong khe `Popen`→gán job ⇒ `true` có thể sai.
+- POSIX: quyền sở hữu nhóm (`m._r387_pgid`) vẫn chỉ ghi SAU khi `_r1252_run` trả (hành vi A, không đổi ở packet này); `_r1252_run` ném sau khi đã sinh con thì teardown nhánh pgid không có tham chiếu. Ghi nợ `wp387-pgid-so-huu-muon`. Windows không mắc vì quyền sở hữu job ghi lúc gán (M5 i).
+
+exec
+/bin/bash -lc "sed -n '14904,15030p' .claude/dev/launcher_test.py
+sed -n '600,643p;906,977p;2878,2905p' .claude/dev/launcher.py
+rg -n 'def _tai_launcher_thu|def chot_tu_ca_khac|def mo_ta_loi|def _dung_cay_harness' .claude/dev/launcher_test.py
+diff -u ops/specs/BAN2-truoc-luot3.md ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md | grep '"'^@@'"'
+rg -n 'Packet Spec|write set' docs/PROTOCOL_DA_PHIEN.md | tail -22" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt
+ succeeded in 0ms:
+        _rc, so, tm = _r387_chay(m, s, "print('MOT-DONG')", co_chau=False)
+        bang(so.get("log_bam_cay_da_chet") is True, f"r387(b) cay da chet ma khai {so.get('log_bam_cay_da_chet')}")
+        luc, kt = so.get("log_bam_luc_utc"), so.get("ket_thuc_utc")
+        bang(isinstance(luc, str) and isinstance(kt, str) and datetime.fromisoformat(luc) >= datetime.fromisoformat(kt),
+             f"r387(b) log_bam_luc_utc={luc!r} phai co va khong truoc ket_thuc_utc={kt!r}")
+        bang(so.get("stdout_sha256") == hashlib.sha256((tm / "stdout.log").read_bytes()).hexdigest(), "r387(b) bam so != bam dia")
+
+
+@ca
+def r387_m2_chau_ghi_trong_han_thi_bam_du():
+    """(c) Hạn mặc định, cháu ghi sau 1 s: launcher đợi cây, khai `true`, băm sổ = băm đĩa đọc sau dấu."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s, _r387_don_khi_thoat(m):
+        _rc, so, tm = _r387_chay(m, s, _r387_ma_con(s, 1))
+        with _r387_nhat_ky_kill():
+            bam_dia = _r387_bam_dia_sau_dau(s, tm, "c")
+            _r387_pid_chau_da_do(m, s, "c")
+            bang(so.get("log_bam_cay_da_chet") is True, f"r387(c) cay chet trong han ma khai {so.get('log_bam_cay_da_chet')}")
+            bang(so.get("stdout_sha256") == bam_dia, "r387(c) bam so != bam dia: bam truoc khi chau ghi xong")
+
+
+@ca
+def r387_m2_khong_do_duoc_thi_khong_cho():
+    """(d) Phép dò trả `None` (không đo được), hạn vá 5,0 s: khai `false` và KHÔNG ngồi chờ hết hạn (`lenh_run` < 3 s)."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s:
+        t0 = time.monotonic()
+        _rc, so, _tm = _r387_chay(m, s, "pass", han=5.0, co_chau=False, do=lambda _p: None)
+        dt = time.monotonic() - t0
+        bang(so.get("log_bam_cay_da_chet") is False, f"r387(d) khong do duoc ma khai {so.get('log_bam_cay_da_chet')}")
+        bang(dt < 3.0, f"r387(d) khong do duoc ma van cho: {dt:.2f} s (han 5,0)")
+
+
+@ca
+def r387_m2_han_chung_cho_moi_lan_do():
+    """(e) Gọi THẲNG hàm đợi, nền vá bằng `m.platform`; chạy được trên mọi nền. Hạn 0,5 s; dung sai đo 0,5 s
+    (e1 đòi ≤ 1,0 s), chỉ đo trên container Linux của gate."""
+    import types
+    m = _tai_launcher_thu()
+
+    def goi(do, nen="Linux", **va):
+        with _r387_va(m, platform=types.SimpleNamespace(system=lambda: nen), _thanh_vien_nhom=do, **va):
+            t0 = time.monotonic()
+            return m._cho_cay_chet_truoc_bam(1, None, 0.5), time.monotonic() - t0
+
+    kq, dt = goi(lambda _p: [7])
+    bang(kq is False and dt <= 1.0, f"r387(e1) con thanh vien: phai False trong <= 1,0 s, duoc {kq} sau {dt:.2f} s")
+    kq, _ = goi(lambda _p: time.sleep(0.6) or [])
+    bang(kq is False, f"r387(e2) lan do tra ve SAU han ma ket qua van duoc nhan: {kq}")
+    dong_ho, ngu = [0.0], []
+
+    def do_cham(_p):
+        dong_ho[0] += 0.47
+        return [7]
+
+    def ngu_gia(x):
+        ngu.append(round(x, 6))
+        dong_ho[0] += x
+
+    kq, _ = goi(do_cham, time=types.SimpleNamespace(monotonic=lambda: dong_ho[0], sleep=ngu_gia))
+    bang(kq is False and ngu == [0.03], f"r387(e4) lan ngu phai tru thoi gian lan do: kq={kq} ngu={ngu}, mong [0.03]")
+    for nen in ("Darwin", "Windows", "FreeBSD"):
+        ngu.clear()
+        kq, _ = goi(lambda _p: bang(False, "r387(e5) ham doi DO tren nen khac Linux"), nen,
+                    time=types.SimpleNamespace(monotonic=time.monotonic, sleep=ngu.append))
+        bang(kq is False and ngu == [], f"r387(e5) {nen}: phai False ngay, 0 loi ngu; duoc {kq}, ngu={ngu}")
+
+
+@ca
+def r387_a_nen_khac_giu_moc_ket_thuc_base():
+    """(i) Chạy trên Linux, MÔ PHỎNG nền khác (`_nen_do_cay_truoc_bam` trả False; phép đo xoá prompt giả ngủ 0,5 s rồi
+    trả `[]`, đại diện `ps` của Darwin): mốc `ket_thuc` phải lấy SAU phép đo và SAU unlink bản chụp, như base."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s:
+        goi, gio_that = [], m._bay_gio
+
+        def gio():
+            goi.append((gio_that(), any((s / "runs").glob("*/prompt.snapshot"))))
+            return goi[-1][0]
+
+        with _r387_va(m, _nen_do_cay_truoc_bam=lambda: False, _bay_gio=gio):
+            _rc, so, _tm = _r387_chay(m, s, "pass", *_r387_prompt(s), co_chau=False, do=lambda _p: time.sleep(0.5) or [])
+        cho = so.get("log_bam_cho_giay")
+        bang(so.get("log_bam_cay_da_chet") is False and isinstance(cho, float) and cho < 0.1,
+             f"r387(i) nen khac phai khai false va khong cho: {so.get('log_bam_cay_da_chet')} / {cho}")
+        bang(so.get("prompt_ban_chup_da_xoa") is True, "r387(i) phep do xoa prompt cua nen khac (bieu thuc base) khong xoa ban chup")
+        bang((so.get("thoi_luong_giay") or 0) >= 0.45, f"r387(i) moc ket_thuc truoc phep do xoa prompt: {so.get('thoi_luong_giay')}")
+        con = [c for g, c in goi if g.isoformat() == so.get("ket_thuc_utc")]
+        bang(con == [False], f"r387(i) moc ket_thuc_utc phai lay SAU unlink ban chup (ban chup con tren dia: {con})")
+
+
+@ca
+def r387_m1_stop_trong_luc_cho_khong_bi_de():
+    """(f) `stop` hoàn tất TRONG lúc đợi cây (lần dò đầu ghi sổ như nhánh `else` của `lenh_stop`): sổ cuối giữ `da_dung`."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s:
+        da_ghi = []
+
+        def do_roi_stop(pgid):
+            if not da_ghi:
+                tm = next(d for d in (s / "runs").iterdir() if (d / "run.json").is_file())
+                so = m._doc_so(tm)
+                so.update(trang_thai="da_dung", ly_do_dung="r387-stop-gia")
+                m._ghi_so(tm, so)
+                da_ghi.append(tm)
+            return m._r387_do_that(pgid)
+
+        _rc, so, _tm = _r387_chay(m, s, "pass", co_chau=False, do=do_roi_stop)
+        bang(da_ghi and so.get("trang_thai") == "da_dung" and so.get("ly_do_dung") == "r387-stop-gia",
+             f"r387(f) stop trong luc cho bi runner ghi de: {so.get('trang_thai')} / {so.get('ly_do_dung')}")
+
+
+@ca
+def r387_m1_prompt_linux_xoa_khi_cay_chet():
+    """(g) Linux: quyết định xoá bản chụp prompt dùng kết quả đợi; cây chết ⇒ bản chụp bị xoá, sổ ghi đã xoá."""
+    if platform.system() != "Linux":
+        return _R387_CHI_LINUX
+    m = _tai_launcher_thu()
+    with San() as s:
+
+
+_HAN_CHO_CAY_TRUOC_BAM_LOG = 10.0   # giây; bằng `bo_loc.ket_thuc(10)`
+
+
+def _nen_do_cay_truoc_bam() -> bool:
+    """#387: CHỖ DUY NHẤT quyết nền nào được đo cây trước khi băm log. Packet A: chỉ Linux."""
+    return platform.system() == "Linux"
+
+
+def _cho_cay_chet_truoc_bam(pid: int, job, han: float) -> bool:
+    """#387: đợi nhóm tiến trình `pid` rỗng trước khi băm log; kết quả thành `log_bam_cay_da_chet` của `run.json`.
+
+    `True` = phép dò trả danh sách rỗng trong nhóm tiến trình POSIX; tiến trình rời nhóm (`setsid`) nằm ngoài
+    phạm vi. `False` = CHƯA chứng minh được: còn thành viên khi hết hạn, lần dò trả về sau hạn, không đo được,
+    bị ngắt, hoặc nền không phải Linux (ở đó trả ngay: không dò, không ngủ). `job` để dành cho packet B.
+    Một deadline monotonic phủ mọi lần dò và mọi lần ngủ. Quét `/proc` là lời gọi đồng bộ, nên tổng thời gian
+    ≤ `han` cộng một lần dò; kết quả của lần dò vượt hạn bị bỏ, kể cả `[]`.
+    """
+    if not _nen_do_cay_truoc_bam():
+        return False
+    het = time.monotonic() + han
+    while True:
+        if het - time.monotonic() <= 0:
+            return False
+        nhom = _thanh_vien_nhom(pid)
+        if nhom is None:
+            return False
+        con_sau = het - time.monotonic()
+        if con_sau <= 0:
+            return False
+        if nhom == []:
+            return True
+        time.sleep(min(0.1, con_sau))
+
+
+def _chup_cay(pid: int) -> dict[int, str] | None:
+    """Ảnh chụp {pid: khoá danh tính} của `pid`, MỌI hậu duệ, và mọi thành viên nhóm.
+
+    PHẢI chụp TRƯỚC khi giết. Cháu đã `setsid()` thì đã rời NHÓM; đến khi mẹ chết
+    nó được init nhận nuôi nên mất nốt liên kết CHA — sau thời điểm đó không còn
+    đường nào tìm ra nó nữa. Chụp trước là cách duy nhất giữ được danh sách phải
+    kiểm, và cũng là cách duy nhất GIẾT được nó (`killpg` không với tới).
+
+def _job_windows(pid: int):
+    """Nhốt tiến trình vào một Job Object. Trả handle, hoặc None nếu không được.
+
+    VÌ SAO PHẢI CÓ: `taskkill /T` duyệt cây CHA-CON tại thời điểm chạy, nên một
+    tiến trình mà cha đã thoát trước đó (MỒ CÔI) không nằm trong cây và sống sót
+    nguyên vẹn. `_chup_cay` cũng đi đúng những liên kết ấy nên bỏ sót y hệt —
+    nó chỉ nâng "tin rc=0" thành "kiểm từng pid", không phủ được ca mồ côi.
+    Job Object là cơ chế DUY NHẤT trên Windows giữ được cả hậu duệ mồ côi: tiến
+    trình con sinh ra đã ở trong job của cha, và ở lại đó kể cả khi cha chết.
+
+    KHE HỞ, nói thẳng: `Popen` không cho gán job lúc tạo (không có CREATE_SUSPENDED),
+    nên có một khoảng rất ngắn giữa lúc sinh con và lúc gán. Con nào sinh cháu
+    trong khoảng đó thì cháu nằm ngoài job. Hẹp hơn hẳn khe cũ, nhưng không phải
+    không có.
+    """
+    if platform.system() != "Windows":
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.windll.kernel32
+        job = k32.CreateJobObjectW(None, None)
+        if not job:
+            return None
+
+        class _GIOI_HAN(ctypes.Structure):
+            _fields_ = [("PerProcessUserTimeLimit", ctypes.c_int64),
+                        ("PerJobUserTimeLimit", ctypes.c_int64),
+                        ("LimitFlags", wintypes.DWORD),
+                        ("MinimumWorkingSetSize", ctypes.c_size_t),
+                        ("MaximumWorkingSetSize", ctypes.c_size_t),
+                        ("ActiveProcessLimit", wintypes.DWORD),
+                        ("Affinity", ctypes.POINTER(ctypes.c_ulong)),
+                        ("PriorityClass", wintypes.DWORD),
+                        ("SchedulingClass", wintypes.DWORD)]
+
+        class _IO(ctypes.Structure):
+            _fields_ = [("ReadOperationCount", ctypes.c_uint64),
+                        ("WriteOperationCount", ctypes.c_uint64),
+                        ("OtherOperationCount", ctypes.c_uint64),
+                        ("ReadTransferCount", ctypes.c_uint64),
+                        ("WriteTransferCount", ctypes.c_uint64),
+                        ("OtherTransferCount", ctypes.c_uint64)]
+
+        class _MO_RONG(ctypes.Structure):
+            _fields_ = [("BasicLimitInformation", _GIOI_HAN),
+                        ("IoInfo", _IO),
+                        ("ProcessMemoryLimit", ctypes.c_size_t),
+                        ("JobMemoryLimit", ctypes.c_size_t),
+                        ("PeakProcessMemoryUsed", ctypes.c_size_t),
+                        ("PeakJobMemoryUsed", ctypes.c_size_t)]
+
+        tt = _MO_RONG()
+        tt.BasicLimitInformation.LimitFlags = 0x2000   # KILL_ON_JOB_CLOSE
+        if not k32.SetInformationJobObject(job, 9, ctypes.byref(tt), ctypes.sizeof(tt)):
+            k32.CloseHandle(job)
+            return None
+        h = k32.OpenProcess(0x1F0FFF, False, int(pid))  # PROCESS_ALL_ACCESS
+        if not h:
+            k32.CloseHandle(job)
+            return None
+        ok = k32.AssignProcessToJobObject(job, h)
+        k32.CloseHandle(h)
+        if not ok:
+            k32.CloseHandle(job)
+            return None
+        return job
+    except (OSError, AttributeError, ValueError):
+        return None
+
+
+def _pid_trong_job(job) -> list[int] | None:
+
+    # Once a child has started, a timeout/nonzero exit does not prove its cause.
+    # Keep the requested label for audit, not as a machine-void certificate.
+    # The existing consumer rejects a signed record without void_reason.
+    requested_void = ban_ghi.pop("void_reason", None)
+    if requested_void:
+        ban_ghi["void_reason_requested"] = requested_void
+    ban_ghi["failure_class"] = "unknown"
+
+    # Nhot con vao Job Object NGAY sau khi sinh: chi co no giu duoc hau due mo coi
+    # tren Windows (xem `_job_windows`). Tren POSIX tra None, khong anh huong gi.
+    job = _job_windows(p.pid)
+    khoa = _khoa_danh_tinh(p.pid)
+    ban_ghi.update(pid=p.pid, khoa_danh_tinh=khoa)
+    if platform.system() == "Windows":
+        ban_ghi["job_windows"] = job is not None
+    if khoa is None:
+        # Nói RÕ vì sao thiếu, đừng để phía đọc phải đoán. Con thoát quá nhanh là
+        # ca lành; không lấy được khoá cho một tiến trình CÒN SỐNG mới là ca đáng lo.
+        ban_ghi["khoa_thieu_ly_do"] = ("con da thoat truoc khi lay duoc khoa"
+                                       if p.poll() is not None
+                                       else "khong doc duoc danh tinh du tien trinh con song")
+    _ghi_so(thu_muc, ban_ghi, khoa_ky)
+    if not a.json:
+        print(f"short_id  : {sid}")
+        print(f"run_id    : {rid}")
+        print(f"so        : {thu_muc}")
+
+198:def chot_tu_ca_khac(e, fn):
+214:def mo_ta_loi(e) -> str:
+335:def _tai_launcher_thu():
+17756:def _dung_cay_harness(goc_cay, ma_test, ma_launcher):
+@@ -60,12 +60,12 @@
+@@ -73,10 +73,10 @@
+@@ -86,27 +86,30 @@
+@@ -117,8 +120,8 @@
+@@ -130,7 +133,7 @@
+@@ -138,12 +141,12 @@
+@@ -159,3 +162,11 @@
+32:2. Mỗi lần chạy có branch/worktree riêng; không có hai lease với effective write set giao nhau trên toàn repo.
+40:   exact head. Substep nằm trong cùng Packet Spec không bị tách vụn; việc ngoài spec sang successor Packet.
+50:| Executor | Sửa đúng effective write set trên branch của generation, tạo PR/handoff | Sửa branch khác, file land/security, tự review/approve, merge dưới vai Executor, deploy |
+170:Khi vào `ready`, spec được đóng băng bằng `spec_hash`. Đổi objective, acceptance, write set, dependency, executor
+185:`Packet Spec` là hợp đồng ở các trường trên. `Session Plan` chỉ là checklist chiến thuật của một phiên và có thể
+186:đổi thứ tự/cách làm nếu vẫn giữ nguyên Packet Spec. Phát hiện ngoài spec phải xuất handoff/successor rồi kết thúc
+187:phiên; agent không tự mở write set. Findings của Reviewer được sửa trong cùng Packet khi spec vẫn đủ; finding cho
+197:nó vào product tree ngoài effective write set. Thiếu nguồn hoặc hash lệch thì dừng.
+254:objective/write set/acceptance của Packet. Khi xuất hiện outcome độc lập hoặc phạm vi mới, phiên ghi successor và
+317:Executor lease chỉ cấp quyền thi công trong write set/generation và hạn của nó. Land authority
+354:Dispatcher tính closure bắc cầu từ write set khai báo, tạo effective write set rồi mới kiểm giao nhau/cấp lease.
+413:| 2 | `DRIFT` giao **write set** của packet ≠ rỗng | hai bên cùng sửa một tệp; merge dòng không chứng minh ngữ nghĩa |
+744:Review Class được tính fail-closed từ `risk`, effective write set và diff thật. Packet khai `review_class` là
+759:Trong rollout Thin Orchestration, tối đa hai Executor writer chạy đồng thời và chỉ khi effective write set không
+1126:**Bất biến (c) — nhánh sổ sách.** Nhánh chỉ chứa sổ sách (`ops/leases/**`, `ops/specs/**`, biên nhận, bia mộ) và không chứa tệp thuộc write set code nằm ngoài luật đếm push; nhánh chứa bất kỳ tệp thuộc write set code thì bị đếm, bất kể tên ref. Nguồn ADR-0054 §1, ADR-0062, tương thích ADR-0060 M5.
+1165:Packet Spec hoặc Mission Plan sai, phải đi qua Packet revision hoặc Mission Change Request; không thêm cờ nới bí
+1199:Trigger khi agent nhận Issue có lease hợp lệ. Trình tự bắt buộc: đọc protocol → preflight spec/lease/worktree → heartbeat → chỉ sửa effective write set → worker gate → handoff → review offline → đẩy → PR theo ADR-0060. Hoàn tất khi SHA được approve đã đẩy và PR mở ở trạng thái `draft`; run kết thúc trước đó thì run kế nhiệm làm nốt.
+1341:| Chỉ dùng worktree | Cô lập vật lý nhưng không ngăn hai agent nhận cùng việc hoặc sửa write set giao nhau |
+1359:- hai packet effective write set không giao chạy song song mà không đụng file/worktree;
+1360:- thay `SKILL.md` tự mở rộng effective write set/check theo policy; sửa GOTCHAS độc lập không khóa ngược, còn
+1534:| `ADR-0038` | Review Class fail-closed và phân bổ quota Codex | Accepted — điều kiện cấp *"lượt hai"* của `systemic` **đã mở rộng** sang mọi lượt sau lượt đầu, mọi class, bởi `ADR-0052` (2026-10-16) | `ops/lease_publish.py` `_kiem_lop_review`, cho lease `schema_version` từ 2: `effective_review_class` phải bằng lớp cao hơn giữa lớp khai và lớp tính từ write set; đường dẫn ngoài `_BANG_LOP`, write set rỗng hay không đọc được đều thành `sensitive`; lệch thì `RC_LOP`. `packet_loop.py` không đọc lớp review. Phân bổ quota Codex theo class: **0 cổng**. Đo 08-11-2026 trên `e3c639b` |
+
+exec
+/bin/bash -lc "sed -n '187,234p;327,351p;14837,14860p' .claude/dev/launcher_test.py
+rg -n '"'^def t(71|77|117)|def _cung_hoa_dau_ra_harness|BO QUA '"\\{|r387_.*(None|ve bam)' .claude/dev/launcher_test.py | tail -30
+sed -n '1151,1173p' docs/PROTOCOL_DA_PHIEN.md
+sed -n '1,24p;97,112p' ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md
+cat ops/KE_HOACH_THI_CONG_DA_PROVIDER.md | head -45
+rg -n 'Phương pháp làm việc' SKILL.md" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt
+ succeeded in 0ms:
+
+class TinHieuChotCa(AssertionError):
+    """Tín hiệu ngoại lệ riêng của chốt test trong harness, ngăn tín dụng giả khi đột biến."""
+    pass
+
+
+def bang(dieu_kien, thong_diep):
+    if not dieu_kien:
+        raise TinHieuChotCa(thong_diep)
+
+
+def chot_tu_ca_khac(e, fn):
+    """#1079 F05 (Codex lượt 2): tín hiệu sinh ra BÊN TRONG một ca đã đăng ký KHÁC (ca đích gọi
+    sang nó) không phải chốt của ca đích. Dò từng khung traceback theo `__code__` của `CA`."""
+    kiem_registry(CA)
+    khac = {c.__code__ for c in CA if c is not fn}
+    tb = e.__traceback__
+    while tb is not None:
+        if tb.tb_frame.f_code in khac:
+            return True
+        tb = tb.tb_next
+    return False
+
+
+TRAN_THONG_DIEP_LOI = 160
+
+
+def mo_ta_loi(e) -> str:
+    """#1122: `<Loại>: <thông điệp cắt TRAN_THONG_DIEP_LOI ký tự>`, hoặc chỉ `<Loại>` khi thông điệp rỗng.
+    Trước đây chi tiết `loi` chỉ mang tên loại, nên `t73(TypeError)` trên lane Windows (run 41322980509) không
+    chẩn đoán được từ log."""
+    tin = str(e)
+    return f"{type(e).__name__}: {tin[:TRAN_THONG_DIEP_LOI]}" if tin else type(e).__name__
+
+
+def cham_mot_ca(fn):
+    """#1079 F01: chạy một ca, trả `(loai, chi_tiet)`; loai ∈ qua · bo_qua · giet · loi.
+    CHỈ `TinHieuChotCa` là `giet` — AssertionError trần hay lỗi vô can (kể cả khi một `except`
+    đã đổi kiểu sang AssertionError) là `loi`, tức tín dụng giả."""
+    kiem_registry(CA)   # #1079 F08 (Codex lượt 6): TRƯỚC khi thân ca chạy
+    try:
+        with _co_lap_toan_cuc():
+            kq = fn()
+    except TinHieuChotCa as e:
+        if not chot_tu_ca_khac(e, fn):
+            return "giet", fn.__name__
+        return "loi", f"{fn.__name__}({mo_ta_loi(e)}; chot cua ca khac)"
+    except Exception as e:  # noqa: BLE001 - chinh la thu dang phan hang
+        sp = importlib.util.spec_from_file_location(ten, duong)
+        m = importlib.util.module_from_spec(sp)
+        sp.loader.exec_module(m)
+        return m
+    finally:
+        sys.dont_write_bytecode = truoc
+
+
+def _tai_launcher_thu():
+    """Nạp đúng bản launcher đang thử (kể cả bản sao đột biến)."""
+    return _nap_sach(LAUNCHER_DANG_DUNG)
+
+
+# ------------------------------------------------------------- chốt: workspace
+
+@ca
+def t01_workspace_khong_phai_repo():
+    with San() as s:
+        (s / "tron").mkdir()
+        r = chay("check", "--workspace", str(s / "tron"))
+        bang(r.returncode == MA_GIT, f"mong doi {MA_GIT}, duoc {r.returncode}: {r.stderr}")
+
+
+@ca
+def t02_workspace_khong_ton_tai():
+    return "--prompt-file", str(pf), "--expected-prompt-sha256", hashlib.sha256(pf.read_bytes()).hexdigest()
+
+
+@ca
+def r387_fixture_teardown_bao_loi_giu_loi_goc():
+    """(t) Teardown lỗi (phép dò luôn `[7]`, hạn 0,2 s): ca đã đỏ giữ lỗi gốc kèm ghi chú; ca xanh thì ĐỎ. Mọi nền."""
+    m = _tai_launcher_thu()
+    m._r387_pgid, m._r387_do_that = 1, lambda _p: [7]
+    for than_loi in (True, False):
+        try:
+            with _r387_don_khi_thoat(m, han=0.2):
+                if than_loi:
+                    raise TinHieuChotCa("LOI-GOC")
+        except TinHieuChotCa as e:
+            ghi_chu = " ".join(getattr(e, "__notes__", []))
+            if than_loi:
+                bang(str(e) == "LOI-GOC" and "r387 teardown" in ghi_chu, f"r387(t) mat loi goc hoac ghi chu teardown: {e} / {ghi_chu!r}")
+            else:
+                bang("r387 teardown" in str(e), f"r387(t) ca xanh phai DO bang thong diep teardown: {e}")
+        else:
+            bang(False, f"r387(t) teardown loi ma ca van xanh (than_loi={than_loi})")
+
+
+def _r387_than_a(ngu, doi_chau):
+1709:def t71_ban_chup_prompt_phai_KIN_va_bi_XOA():
+1789:def t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay():
+4108:def t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho():
+14744:    pgid = getattr(m, "_r387_pgid", None)
+14781:def _r387_chay(m, s, ma_con, *them, han=None, co_chau=True, chup=False, do=None):
+14935:        _rc, so, _tm = _r387_chay(m, s, "pass", han=5.0, co_chau=False, do=lambda _p: None)
+15079:    ("r387_khong_do_duoc_van_cho", ("        if nhom is None:\n", "        if False:\n"), ["r387_m2_khong_do_duoc_thi_khong_cho"]),
+17834:                print(f"  BO QUA {fn.__name__}: {kq}", flush=True)
+17938:def _cung_hoa_dau_ra_harness():
+lease/review, dispatcher ước tính `used / reserved / limit` cho packet đã biết dưới review policy hiện tại; phần
+còn lại không đủ thì `paused: budget_infeasible` với phép tính hiển thị. Provider phải có hard quota ngày và
+tháng; 80% cảnh báo, 100% pause. Không tự đổi provider để lách budget.
+
+Executor đăng handoff đầy đủ rồi KẾT THÚC run hiện hành; thời gian CHỜ verdict nằm ngoài run. Việc chờ dùng
+cơ chế đánh thức (alarm/monitor/notification), không poll chủ động. Khi verdict đổ về, lượt xử lý tiếp theo là RUN MỚI
+với trần 90 phút và đồng hồ absolute wall clock riêng; run mới phải ĐO LẠI trước khi làm: `git ls-remote` head, hạn lease,
+state packet, sáu kích hoạt drift — trí nhớ ấm không thay được phép đo (bài học “phiên sau phải đo lại”).
+
+Mission không được complete khi còn packet `ready`, `leased`, `running`, `reviewing`, `blocked` hoặc khi land gate
+chưa xanh. Land thất bại quay về `paused` hoặc sinh packet sửa lỗi trong envelope.
+
+Khi chạm attempt/same-failure/quota/permission stop condition, phiên ghi failure evidence và handoff rồi dừng.
+Human/dispatcher có thể reroute bằng generation mới nhưng không hồi sinh lease cũ. Nếu stop condition cho thấy
+Packet Spec hoặc Mission Plan sai, phải đi qua Packet revision hoặc Mission Change Request; không thêm cờ nới bí
+mật. Việc mới phát hiện trong phiên chỉ được tiếp tục tại chỗ khi nó là substep cần thiết trong spec hiện hành.
+
+Trần lượt Codex review trên cùng PR (`ADR-0052`) là một stop condition riêng của review budget. Review Rescue Checkpoint được
+kích hoạt khi chạm trần này hoặc khi PR chạm trần vòng review canon của `ADR-0043` mà chưa approve. Chạm checkpoint
+không tự biến Packet thành thất bại nội dung và không cho phép gọi thêm bằng prompt/phiên khác để lách trần.
+Chạm hai trần này mà cần thêm lời gọi hay vòng là E2 của `ADR-0067`.
+
+State giữ riêng `codex_review_calls_used`, `codex_executor_calls_used` và `review_rounds_used`.
+tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
+tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
+
+# LAUNCHER-BAM-LOG-NEN-WINDOWS r1 — mở phép đợi cây trước khi băm log (`run.json`) sang Windows bằng Job Object
+
+- packet_id: LAUNCHER-BAM-LOG-NEN-WINDOWS; revision: 1;
+
+| trường | giá trị |
+|---|---|
+| `packet_issue` | #387 |
+| `nguon_cap_viec` | Packet B của #387, tách từ `LAUNCHER-BAM-LOG-SAU-CAY-CHET` r1 (packet A, land `e4fdf09`, PR #1388; hồ sơ `ops/land/pr1388-wp387-land-evidence.yaml`, `landed: true`). Chủ kho 2026-11-19 (phiên điều phối #1206, AskUserQuestion) quyết **bỏ Darwin**, chỉ mở Windows; tên cũ `LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS` bỏ. |
+| `phu_thuoc` | Packet A đã land trên `master` (`e4fdf09` là tổ tiên của base). |
+| `review_class` | `sensitive`: `.claude/dev/launcher.py` + `.claude/dev/launcher_test.py`, cùng lý do với A. Đối chiếu `lease_publish check` khi cấp lease. |
+| `base` | `3b647461db7c8ded1bddd9aafc5c6aa5eead223f` lúc soạn; lease ghi OID thật lúc cấp (phải chứa `e4fdf09`). Đo lại §0 nếu base trôi. |
+
+## 0. Hiện trạng
+
+Đo `2026-11-19T05:20Z–05:31Z` trên `3b64746` (tree `306ec6c8…`), Linux, Python 3.13.18, bằng `wc -l`, `sha256sum`, `grep -n`, `nl -ba … | sed -n`, đọc AST bảng đột biến (`python -B -`); mọi lệnh rc 0. `launcher.py` sha256 `f2503d59927f…` 6213 dòng; `launcher_test.py` `37042727f8b8…` 18032 dòng. Reviewer lượt 1 đo lại độc lập lúc `05:26:24Z`, khớp (§11).
+
+`.claude/dev/launcher.py`:
+- `VERSION = "1.6.1"` (dòng 102).
+- `_thanh_vien_nhom(pgid)` (542): Linux quét `/proc`; Darwin hỏi `ps` với `timeout=15` (583); nền khác trả `None`. KHÔNG đổi ở packet này.
+- `_nen_do_cay_truoc_bam()` (605) là chỗ DUY NHẤT quyết nền được đo cây: `return platform.system() == "Linux"`. Đúng ba chỗ gọi: 619, 3041, 3049.
+- `_cho_cay_chet_truoc_bam(pid, job, han)` (610): 619 `if not _nen_do_cay_truoc_bam(): return False`; vòng dò, dòng 625 `nhom = _thanh_vien_nhom(pid)`; deadline monotonic chung, kết quả về sau hạn bị bỏ, ngủ `min(0.1, con_sau)`. Tham số `job` chưa dùng.
+| W9 | Nền khác giữ mốc `ket_thuc` sau phép đo xoá; nền khác vẫn xoá theo biểu thức base | tái dùng `r387_a_nen_khac_doi_moc`, `r387_a_nen_khac_moc_truoc_unlink` (A, neo hai hằng mới) | (i) nhãn mốc; vế `prompt_ban_chup_da_xoa is True` của (i) đo biểu thức base | Linux + Windows |
+| W10 | Job có handle nhưng truy vấn trả `None` ⇒ `False` ngay | tái dùng `r387_khong_do_duoc_van_cho` (A, neo `if nhom is None:` — chung hai nền) | (d) trên Windows: `do=` trả `None` ở nhánh job | Linux + Windows |
+| W11 | Kết quả dò về sau hạn bị bỏ; ngủ trừ thời gian dò | tái dùng `r387_nhan_ket_qua_sau_han`, `r387_ngu_khong_tru_lan_do` (A, thân vòng chung hai nền) | (e2)/(e4) | Linux + Windows |
+| W12 | `stop` trong lúc đợi; Ctrl-C trong lúc đợi; kết quả chụp không bị ngắt che | tái dùng `r387_cho_sau_doc_lai_stop`, `r387_ngat_*` (A) | (f), (h) — nay chạy native trên Windows | Windows (đo lại mục A) |
+| H1 `r387_fx_dong_truoc_khi_cho` | Teardown chờ job rỗng TRƯỚC khi đóng handle (M5 iii) | trong `_r387_don_dep` nhánh job: dời dòng `ket_dong = m._r387_dong_job(h)` lên trước khối chờ (mẫu nguyên văn khi viết) | (t2) "r387(t2) thu tu do/dong" (trace `[("dong",),("do",)]`) | Linux + Windows |
+| H2 `r387_fx_bao_gan_truoc_khi_gan` | Bắt tay: dấu chỉ phát SAU khi gán thành công (M5 i) | trong `_r387_boc_job`: dời lời gọi `_r387_bao_da_gan(m, s)` lên trước `that(pid)`, bỏ chốt "đã lưu handle" trong `_r387_bao_da_gan` để mutant không chết ở chốt khác | (t4a) "r387(t4) job-da-gan ghi truoc khi gan" — tất định; hai thay thế áp tuần tự (dời lời gọi; bỏ chốt) |  Linux + Windows |
+| H3 `r387_fx_bo_kiem_closehandle` | Hàm đóng trả 0 ⇒ lỗi teardown (M5 iii) | `if ket_dong == 0:` → `if False:` (lời gọi đóng giữ nguyên) | (t3) "r387(t3) CloseHandle that bai khong bao" | Linux + Windows |
+| H4 `r387_fx_khong_dong_job` | Teardown đóng handle đúng một lần (M5 iii) | `ket_dong = m._r387_dong_job(h)` → `ket_dong = 1` (biên dịch được, tới được assertion trace) | (t2) "r387(t2) thu tu do/dong" (trace thiếu `("dong",)`) | Linux + Windows |
+| H5 `r387_fx_phat_dau_khi_gan_hong` | Gán thất bại không phát dấu (M5 i) | trong `_r387_boc_job`, nhánh `that(pid)` trả `None`: chèn ghi THẲNG `job-da-gan` trước khi trả (không qua `_r387_bao_da_gan`, để mutant không chết ở chốt khác; mẫu nguyên văn khi viết) | (t4b) "r387(t4b) gan that bai van phat dau" | Linux + Windows |
+| H6 `r387_fx_don_dep_ngoai_finally` | Teardown `co_chau=False` chạy dưới `finally` khi `_r1252_run` ném (M5 iv, X1) | dời lời gọi `_r387_don_dep` của `co_chau=False` ra khỏi `finally` (sau khối `try`) | (t5) "r387(t5) teardown khong chay khi ne" | Linux + Windows |
+| H7 `r387_fx_loi_bam_nuot_teardown` | (a′) không nuốt lỗi teardown (M6) | trong `_r387_loi_bam_hop_le`: bỏ vế kiểm `__notes__` | (t6) "r387(t6) loi bam nuot loi teardown" | Linux + Windows |
+| X1 | Phép dò/hàm đóng ném trong teardown | đo bằng (t3c); đột biến bỏ `try` quanh phép dò làm (t3c) ĐỎ bằng `OSError` lọt ra — đó là tín dụng giả theo định nghĩa nên KHÔNG đưa vào bảng; (t3c) giữ vai ca hành vi | (t3c) | Linux + Windows |
+| X2 | `os.killpg` vắng trên Windows (M5 v) | không đột biến: gỡ `hasattr` chỉ làm ca chết bằng `AttributeError` — tín dụng giả theo định nghĩa | đo bằng N4 L1 (ca có `_r387_nhat_ky_kill` ĐẠT trên Windows) | Windows |
+| X3 | `VERSION` (M4) | không đột biến | N5 `"version": "1.6.2"` | Windows |
+
+Mẫu (tìm, thay) của H1–H7 chốt nguyên văn khi executor viết mã, mỗi mẫu khớp đúng một chỗ trong phần mã test (kiểm neo harness). Mọi đột biến chỉ tính GIẾT khi ca đích đỏ bằng `TinHieuChotCa` của đúng ca, ca đích ĐẠT trên bản sạch, và (N1/N4) nhãn khớp.
+# Kế hoạch thi công đa provider — tra-luat
+
+> **Trạng thái:** Active transition plan
+>
+> Tài liệu này không cấp authority. Authority nằm trong Packet Spec,
+> GitHub facts và verified receipts.
+>
+> Các provider/bề mặt hiện được sử dụng:
+>
+> - Google Antigravity;
+> - ChatGPT Pro qua Web;
+> - Claude Code và Codex khi quota khả dụng;
+> - Human Auditor.
+
+## 1. Mục tiêu
+
+Duy trì tiến độ phát triển khi một hoặc nhiều provider không khả dụng, nhưng:
+
+- không tạo orchestrator mới;
+- không hạ chuẩn exact-SHA review;
+- không khai sai provider hoặc transport;
+- không cho output model tự tạo quyền ghi;
+- không làm trạng thái động trôi vào tài liệu kế hoạch tĩnh;
+- không dùng provider tạm thời để tự hợp thức hóa thay đổi sensitive.
+
+## 2. Nhận dạng provider và execution surface
+
+| Công cụ/bề mặt | Provider | Execution surface | Transport |
+|---|---|---|---|
+| Google Antigravity | `google_antigravity` | `antigravity` | machine/local |
+| ChatGPT Pro Web | `openai_chatgpt` | `chatgpt_web` | `human_mediated` |
+| Claude Code | `anthropic_claude` | `claude_code` | machine/local |
+| Codex CLI | `openai_codex` | `codex_cli` | machine |
+| Codex Desktop | `openai_codex` | `codex_desktop` | machine |
+| Codex service (GitHub App / cloud) | `openai_codex` | `codex_service` | machine |
+| Human Auditor | `human` | `manual_audit` | human |
+
+Tên công cụ không tự quyết định assurance.
+Codex Desktop không được khai thành CLI. Bề mặt Desktop không chứng minh model/effort
+đã phục vụ hoặc tính độc lập của session; khai giới hạn đo được và giữ mức advisory
+khi chưa đủ evidence theo protocol.
+
+Tên lịch sử “Codex service” có tên máy `codex_service` từ wp461 r3 (Mission
+[#470](https://github.com/ducthangho/tra-luat/issues/470) Q1; nợ mở ở
+[#461](https://github.com/ducthangho/tra-luat/issues/461) theo mục `no_khai_ra` của
+28:## Phương pháp làm việc: thiết kế kỹ, triển khai chủ động
+
+codex
+Tôi đã xác nhận hai mốc tách bảng harness và cách runner cộng `DOT_BIEN_HOOK`. Tôi sẽ chạy các phép đo trong bộ nhớ để kiểm định dạng dòng lỗi, việc lọc bảng và chốt đầu tiên mà W6 chạm tới.
+exec
+/bin/bash -lc "date -u +%FT%TZ
+python -B - <<'PY'
+import ast, pathlib, runpy, sys, types
+p=pathlib.Path('.claude/dev/launcher_test.py')
+s=p.read_text()
+sys.path.insert(0,str(p.parent.resolve()))
+ns=runpy.run_path(str(p))
+g=ns['chay_dot_bien'].__globals__
+def probe():
+    g['bang'](False,'nhan thu')
+g['CA']=[probe]
+sys.argv=[str(p),'--lap-ca','probe','--lan','1']
+print('lap rc',g['main']())
+for n in ast.parse(s).body:
+    if not isinstance(n,ast.Assign) or n.targets[0].__class__ is not ast.Name or n.targets[0].id not in ('DOT_BIEN','DOT_BIEN_HOOK','DOT_BIEN_HARNESS'):
+        continue
+    k=n.targets[0].id
+    items=[v for v in n.value.elts if k"'!='"'DOT_BIEN_HOOK' and v.elts[0].value.startswith('r387_')]
+    print(k,'base total',len(n.value.elts),'filtered',len(items),'multiline',sum(v.lineno"'!=v.end_lineno for v in items),'"'old IDs',[v.elts[0].value for v in items])
+    src='\\n'.join(s.splitlines()[n.lineno-1:n.end_lineno])
+    body='['+''.join('\\n    '+ast.get_source_segment(s,v)+',' for v in items)+'\\n]' if items else '[]'
+    s=s.replace(src,k+' = '+body,1) if False else s
+print('separator',tuple(s.count(x) for x in ('\\nDOT_BIEN_HARNESS = [','\\n]\\n\\n\\ndef chay_dot_bien()')))
+q=pathlib.Path('.claude/dev/launcher.py')
+a=ast.parse(q.read_text())
+f=next(n for n in a.body if isinstance(n,ast.FunctionDef) and n.name=='_cho_cay_chet_truoc_bam')
+source=ast.get_source_segment(q.read_text(),f)
+e=next(n for n in ast.parse(p.read_text()).body if isinstance(n,ast.FunctionDef) and n.name=='r387_m2_han_chung_cho_moi_lan_do')
+es=ast.get_source_segment(p.read_text(),e)
+m=types.ModuleType('m')
+mg={'platform':types.SimpleNamespace(system=lambda:'Linux'),'_nen_do_cay_truoc_bam':lambda: m.__dict__['platform'].system() in ('Linux','Windows'),'time':__import__('time'),'_thanh_vien_nhom':None}
+m.__dict__.update(mg)
+exec(source.replace('nhom = _thanh_vien_nhom(pid)','nhom = _thanh_vien_nhom(pid) if platform.system() == \"LinuxX\" else (_pid_trong_job(job) if job is not None else None)'),m.__dict__)
+eg={'_tai_launcher_thu':lambda:m, **{k:g[k] for k in ('_r387_va','bang','time')}}
+exec(es,eg)
+try: eg[e.name]()
+except g['TinHieuChotCa'] as err: print('W6 first:',err)
+PY" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt
+ exited 1 in 98ms:
+2026-11-19T05:41:36Z
+Traceback (most recent call last):
+  File "<stdin>", line 5, in <module>
+  File "<frozen runpy>", line 294, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File ".claude/dev/launcher_test.py", line 2445, in <module>
+    _WP858_GOC_TAM_UNG_VIEN = (tempfile.gettempdir(), "/var/tmp", "/dev/shm")
+                               ~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/tempfile.py", line 366, in gettempdir
+    return _os.fsdecode(_gettempdir())
+                        ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/tempfile.py", line 359, in _gettempdir
+    tempdir = _get_default_tempdir()
+  File "/usr/local/lib/python3.13/tempfile.py", line 223, in _get_default_tempdir
+    raise FileNotFoundError(_errno.ENOENT,
+                            "No usable temporary directory found in %s" %
+                            dirlist)
+FileNotFoundError: [Errno 2] No usable temporary directory found in ['/tmp', '/tmp', '/tmp', '/tmp', '/var/tmp', '/usr/tmp', '/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt']
+
+exec
+/bin/bash -lc "python -B - <<'PY'
+import ast, pathlib, runpy, sys, types, tempfile
+p=pathlib.Path('.claude/dev/launcher_test.py'); s=p.read_text(); a=ast.parse(s)
+sys.path.insert(0,str(p.parent.resolve()))
+tempfile.tempdir='/tmp'
+ns=runpy.run_path(str(p)); g=ns['main'].__globals__
+@g['ca']
+def probe(): g['bang'](False,'nhan thu')
+g['CA'][:]=[probe]
+sys.argv=[str(p),'--lap-ca','probe','--lan','1']
+print('lap rc',g['main']())
+edits=[]
+for n in a.body:
+    if not isinstance(n,ast.Assign) or not isinstance(n.targets[0],ast.Name) or n.targets[0].id not in ('DOT_BIEN','DOT_BIEN_HOOK','DOT_BIEN_HARNESS'): continue
+    k=n.targets[0].id
+    items=[v for v in n.value.elts if k"'!='"'DOT_BIEN_HOOK' and v.elts[0].value.startswith('r387_')]
+    print(k,'base',len(n.value.elts),'filtered',len(items),'multiline',sum(v.lineno"'!=v.end_lineno for v in items))
+    edits.append((n.lineno-1,n.end_lineno,[k+'"' = [',*['    '+ast.get_source_segment(s,v)+',' for v in items],']'] if items else [k+' = []']))
+ls=s.splitlines()
+for start,end,repl in sorted(edits,reverse=True): ls[start:end]=repl
+filtered='\\n'.join(ls)+'\\n'
+compile(filtered,str(p),'exec')
+print('filtered compile OK; separators',tuple(filtered.count(x) for x in ('\\nDOT_BIEN_HARNESS = [','\\n]\\n\\n\\ndef chay_dot_bien()')))
+q=pathlib.Path('.claude/dev/launcher.py').read_text()
+f=next(n for n in ast.parse(q).body if isinstance(n,ast.FunctionDef) and n.name=='_cho_cay_chet_truoc_bam')
+e=next(n for n in a.body if isinstance(n,ast.FunctionDef) and n.name=='r387_m2_han_chung_cho_moi_lan_do')
+m=types.ModuleType('m')
+m.__dict__.update(platform=types.SimpleNamespace(system=lambda:'Linux'),_nen_do_cay_truoc_bam=lambda:m.platform.system() in ('Linux','Windows'),time=__import__('time'),_thanh_vien_nhom=None)
+exec(ast.get_source_segment(q,f).replace('nhom = _thanh_vien_nhom(pid)','nhom = _thanh_vien_nhom(pid) if platform.system() == \"LinuxX\" else (_pid_trong_job(job) if job is not None else None)'),m.__dict__)
+eg={'_tai_launcher_thu':lambda:m, **{k:g[k] for k in ('_r387_va','bang','time')}}
+exec(ast.get_source_segment(s,e),eg)
+try: eg[e.name]()
+except g['TinHieuChotCa'] as err: print('W6 first:',err)
+PY
+sed -n '17930,17981p;17752,17785p' .claude/dev/launcher_test.py
+sed -n '28,66p' SKILL.md" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt
+ succeeded in 1733ms:
+moi truong: pid=3 pgid=1 sid=1 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026532321] init=codex
+nhom tien trinh: da tach sang session moi (pgid=3)
+  lan 1/1: HONG
+  HONG probe: TinHieuChotCa: nhan thu
+
+LAP probe: 0/1 qua, 0 bo qua, 1 hong
+lap rc 1
+DOT_BIEN base 566 filtered 16 multiline 9
+DOT_BIEN_HOOK base 88 filtered 0 multiline 0
+DOT_BIEN_HARNESS base 72 filtered 2 multiline 1
+filtered compile OK; separators (1, 1)
+W6 first: r387(e4) lan ngu phai tru thoi gian lan do: kq=False ngu=[], mong [0.03]
+        self.ghi("# XONG TRON VEN")
+        self.tep.close()
+
+
+def _dung_cay_harness(goc_cay, ma_test, ma_launcher):
+    """#1079: bản sao harness giữ ĐÚNG bố cục kho (`.claude/dev`, `.claude/hooks`, `ops/bash_nen.py`)
+    vì ca đọc `LAUNCHER.parents[1|2]`. Bố cục phẳng làm ca chết FileNotFoundError — trước #1079 lỗi
+    ấy được đếm là giết (đo: `g8_fixture_chep_nguyen_moi_truong`, neutral đỏ). Trả thư mục `dev`."""
+    dev = goc_cay / ".claude" / "dev"
+    dev.mkdir(parents=True)
+    (dev / "launcher_test.py").write_text(ma_test, encoding="utf-8")
+    (dev / "launcher.py").write_text(ma_launcher, encoding="utf-8")
+    for ten in ("codex_cred.py", "codex_cred_test.py"):   # ca r1079 nạp codex_cred_test qua CC_TEST_DANG_DUNG
+        if LAUNCHER.with_name(ten).is_file():
+            shutil.copy2(LAUNCHER.with_name(ten), dev)
+    # #1117: runner THẬT, không lấy từ `ma_test`; `cham_lap_ca` chạy runner nằm trong `thu_muc`. Thiếu runner
+    # thì để lỗi nổ ra, đừng bỏ qua êm.
+    shutil.copy2(Path(__file__).with_name(RUNNER_TEN), dev / RUNNER_TEN)
+    shutil.copytree(LAUNCHER.parents[1] / "hooks", goc_cay / ".claude" / "hooks")
+    (goc_cay / "ops").mkdir()
+    shutil.copy2(LAUNCHER.parents[2] / "ops" / "bash_nen.py", goc_cay / "ops")
+    return dev
+
+
+RUNNER_TEN = "launcher_test_runner.py"
+
+
+def cham_lap_ca(thu_muc, ten_ca):
+    """#1079 F01 + #1117: chạy MỘT ca của bản `launcher_test.py` trong `thu_muc`, trả `(loai, chi_tiet)` như
+    `cham_mot_ca`. Chứng cứ là KÊNH KẾT QUẢ (tệp + nonce), không phải stdout: in đuôi giả rồi thoát thì không có
+    kết quả ⇒ `loi`.
+
+    #1117: ca chạy qua RUNNER TIN CẬY `thu_muc/launcher_test_runner.py`, do `_dung_cay_harness` chép từ tệp
+    THẬT (ngoài vùng `DOT_BIEN_HARNESS` đột biến), không qua `--lap-ca` của bản bị đột biến. Đường kênh và nonce đi qua STDIN,
+        p.error("--nhat-ky chi dung o che do mac dinh hoac --lap-ca")
+    if "--lan" in argv and not a.lap_ca:
+        p.error("--lan chi co nghia kem --lap-ca")
+    if a.lap_ca and a.lan < 1:
+        p.error("--lan phai >= 1")
+    return a
+
+
+def _cung_hoa_dau_ra_harness():
+    """Reporter có thông điệp Unicode; chuẩn hóa stdout/stderr như launcher CLI."""
+    for luong in (sys.stdout, sys.stderr):
+        try:
+            luong.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass
+
+
+def main() -> int:
+    # PHÂN TÍCH ĐỐI SỐ TRƯỚC MỌI VIỆC — kể cả trước khi tự khai/tách nhóm. Sai đối số
+    # phải đỏ NGAY, đừng để người ta chờ hết suite mới biết mình gõ nhầm.
+    a = phan_tich_doi_so(sys.argv[1:])
+    _cung_hoa_dau_ra_harness()
+    # Kế đó: nếu đang chung nhóm với vỏ shell thì tách ra, kẻo một cú `killpg` của ca
+    # test cuốn theo cả người gọi (xem `_tu_tach_nhom_neu_can`).
+    # TỰ KHAI TRƯỚC, tách nhóm SAU — thứ tự này cố ý: bản khai phải mô tả môi trường
+    # NHƯ NÓ ĐẾN, không phải như sau khi ta đã sửa nó. Khai sau khi tách thì mọi lượt
+    # chạy đều trông giống nhau và khối này thành vô dụng.
+    mt = khai_moi_truong()
+    if a.moi_truong:
+        print(json.dumps(mt, ensure_ascii=False, indent=2, default=str))
+        return 0
+    print(_mot_dong_moi_truong(mt))
+    print(f"nhom tien trinh: {_tu_tach_nhom_neu_can()}")
+    if a.dot_bien:
+        print("TU DOT BIEN - moi dot bien PHAI giet dung cac ca da chi dinh:")
+        hong, khong_do = chay_dot_bien()
+        tong_dot_bien = len(DOT_BIEN) + len(DOT_BIEN_HOOK) + len(DOT_BIEN_HARNESS)
+        do_duoc = tong_dot_bien - khong_do
+        print(f"\nDOT BIEN: {do_duoc - hong}/{do_duoc} dat"
+              + (f"  ({khong_do} khong do duoc tren nen nay)" if khong_do else ""))
+        if not _dot_bien_du_san(tong_dot_bien, khong_do):
+            # SÀN. Bảng mà MỌI đột biến đều không đo được sẽ in "0/0 dat" rồi
+            # thoát 0 — thoả đúng hình thức "hai số BẰNG NHAU" mà chứng minh CON
+            # SỐ KHÔNG. Đây là cổng xanh nhờ rc=0, thứ CLAUDE.md dặn đừng tin.
+            print("!! DUOI SAN: phai do duoc it nhat 70% dot bien tren moi nen")
+            return 1
+        return 1 if hong else 0
+
+    if not shutil.which("git"):
+        print("khong co git - khong chay duoc"), sys.exit(2)
+
+    if a.lap_ca:
+## Phương pháp làm việc: thiết kế kỹ, triển khai chủ động
+
+- **WM-01 — Nhận diện giai đoạn.** Khi nghiên cứu hoặc thiết kế, làm rõ yêu cầu, mục tiêu, phạm vi, đánh đổi và tiêu chí nghiệm thu. Khi triển khai phương án đã chốt, chủ động thực hiện trong phạm vi quyền đã cấp. Một tác vụ có thể chuyển giữa hai giai đoạn.
+- **WM-02 — Phân biệt làm rõ với xin quyền.** Làm rõ để xác định đúng điều cần xây dựng; xin quyền khi hành động cụ thể chưa được cho phép. Đọc tài liệu, bằng chứng và quyết định hiện có trước khi hỏi; không xin lại quyền còn hiệu lực, đúng phạm vi và đúng điều kiện.
+- **WM-03 — Chủ động với việc thông lệ.** Tự quyết việc quen thuộc, tác động nhỏ và lựa chọn kỹ thuật nằm trong phương án được giao khi không làm đổi hợp đồng hoặc vượt quyền. Tính quen thuộc, khả năng đảo ngược và sự im lặng không tự tạo quyền.
+- **WM-04 — Làm rõ thay đổi có ảnh hưởng.** Yêu cầu mới chưa xác định, thay đổi giao thức/quy trình, tiêu chí nghiệm thu, quyền hạn hoặc tác động đáng kể phải được làm rõ và chốt trước phần thực hiện phụ thuộc; tiếp tục phần độc lập đã được phép. Làm theo chỉ thị cụ thể đã đủ rõ, không hỏi lại chỉ vì đó là yêu cầu mới.
+- **WM-05 — Hỏi có chuẩn bị.** Gộp các điểm quyết định liên quan; nêu điều đã kiểm tra, vấn đề còn thiếu, phương án khuyến nghị và ảnh hưởng. Chỉ hỏi phần chưa được giải quyết; không dùng câu hỏi chung để đẩy lựa chọn vận hành thông lệ cho người dùng.
+- **WM-06 — Thực hiện gọn và có bằng chứng.** Dùng công cụ hiện có, chọn cách đơn giản đáp ứng đủ yêu cầu, sửa đúng phạm vi và kiểm chứng hành vi. Lặp trong giới hạn đã chốt; không bỏ gate, giả kết quả hoặc nới ngân sách để hoàn tất. Chưa đủ bằng chứng về quyền, điều kiện bắt buộc hoặc tính tương đương nghiệm thu thì dừng phần phụ thuộc, đọc hướng dẫn chi tiết và tiếp tục phần độc lập đã được phép.
+
+Đọc **references/WORKING_METHOD.md** khi lập hoặc sửa kế hoạch, giao thức, quy trình; khi phân vân có cần hỏi; hoặc khi phát sinh thay đổi có ảnh hưởng trong lúc triển khai. Hướng dẫn này bổ sung cách phối hợp; các quy định chuyên biệt về legal safety, authority, approval, protocol và release tiếp tục áp dụng.
+
+## DETERMINISTIC WORKFLOW GATES — tool inventory / route-task / dry-run / readback
+
+Trước khi Claude viết script, hàm, tool, loop hoặc đoạn xử lý tự chế, PHẢI kiểm kho công cụ hiện có:
+
+1. `python scripts/tl.py tool-inventory --json` để xem nhóm tool/script/workflow.
+2. `python scripts/tl.py route-task --task <tac_vu> --json` với tác vụ rủi ro: `write_new_tool`, `nlm_query_quality`, `ingest_local`, `convert_rename`, `ingest_zip`, `ocr_pdf_scan`, `large_doc_chunk`.
+3. `python scripts/tl.py -h` và `python scripts/tl.py <lệnh> --help` với nhóm lệnh liên quan.
+4. Kiểm `scripts/*.py` và `references/API_CONTRACT.md` trước khi gọi webapp/Drive/registry/NLM hoặc thêm tool mới.
+5. Khi sửa skill/workflow/release gate, chạy deterministic mode: `python scripts/tl.py --deterministic workflow-audit --strict --json`, `python scripts/tl.py --deterministic determinism-audit --strict --json`, và trước khi đóng gói `python scripts/tl.py --deterministic release-check --strict-determinism --full --json`.
+
+PHÁT HÀNH & NHÁNH (ADR-0001): CHỈ canonical (D:\Quốc hội	ra-luat / github ducthangho/tra-luat) được tăng VERSION + drive-push. Nhánh song song giao nộp `tl bundle-export --note "…" --json` (zip giữ VERSION fork-point + BUNDLE_META.json) — KHÔNG tự đánh version/publish; drive-push TỪ CHỐI cây có BUNDLE_META.json. Canonical qua đủ gate ⇒ deploy CÙNG NGÀY + verify tải lại VERSION; SKILL.md đổi ⇒ user re-import Capabilities.
+
+Chỉ viết tool mới khi lệnh/script/hàm hiện có không đáp ứng; tool mới: input/output rõ (ưu tiên JSON), dry-run nếu ghi, verify/readback, selftest/audit phù hợp.
+
+Mọi quy trình nạp/convert/rename/OCR/zip/chunk theo mẫu: `route-task → dry-run plan → apply có chủ đích → verify/readback → commit/report`
+
+`tool-inventory`, `route-task`, `workflow-audit`, `doc-claims-check`, `determinism-audit`, `golden-test` = READ-ONLY (không Drive/NLM nặng, không ghi). Workflow: `references/workflows/*.json`; schema: `references/workflows/workflow_card.schema.json`; fixtures: `references/golden/*.json`. SKILL.md chỉ giữ nguyên tắc lõi.
+
+Helper tách sang `scripts/tl_core/*.py` (Pha B–E v1.33.55–58; command_registry = metadata lệnh risk/gates/card/contract, `workflow-audit` đối chiếu registry↔parser↔cards); `scripts/tl.py` = entrypoint public DUY NHẤT (stub ủy quyền — KHÔNG gọi tl_core trực tiếp từ ngoài).
+
+Stage local deterministic: `ocr-run` (sidecar text/OCR khi engine sẵn), `chunk-apply` (chunk files+manifest), `chunk-verify` — chưa ghi Drive/NLM; đưa vào corpus vẫn phải qua pipeline ingest/verify/readback.
+
+## 0. NGUYÊN TẮC BẤT BIẾN
+1. **VBHN-first + LATEST-VBHN** — có VBHN còn hiệu lực → dùng VBHN, không bản gốc/sửa đổi rời. **Khi TRA/TÌM Luật theo tên:** thử keyword **'<tên> hợp nhất' TRƯỚC** (vd "Luật PPP hợp nhất") → rồi **'<tên> mới nhất'** → cuối cùng tên gốc; truy vấn theo SỐ HIỆU thì tìm thẳng. **MỌI tìm-văn-bản-trên-web dùng GOOGLE `site:` (VBHN-first), KHÔNG dùng search nội bộ TVPL/LVN (kém)** — áp cho `fetch-route`/`fetch-links`/`find-doc` VÀ QT-5 (`vbhn-check`/`status`/`relation-check` đều xuất `google_discovery`). **⚠ S9/S11 (log 🔴 2026-07-01): KHÔNG chốt ở VBHN ĐẦU TIÊN tìm thấy — số hiệu VBHN TĂNG theo mỗi lần hợp nhất (Bộ luật Hình sự: 01/VBHN 2017 → 11/VBHN → 135/VBHN 2025; KHÔNG phải semver).** Bắt buộc LƯỢT-2: tìm SỐ VBHN LỚN HƠN / NGÀY MỚI HƠN cùng cơ quan (VPQH) qua `'<tên> hợp nhất mới nhất <năm>'` + `site:congbao.chinhphu.vn`. Ứng viên VBHN chưa xác minh là mới nhất → cờ `VBHN_CANDIDATE_UNVERIFIED_LATEST`; NGOẠI LỆ v1.33.15: VBHN duy nhất RẤT MỚI (năm ≥ năm-nay−1) + không luật-sửa nào mới hơn đã biết + không thuộc nhóm S10 → hạ thành cờ INFO `VBHN_LATEST_RECENT_COVERED` (rời hàng web lượt-2; vẫn `vbhn-verify --official-required` trước khi trích dẫn). **S10:** luật cải cách cao 2024-2026 (Hình sự/tố tụng/phí-lệ-phí/đất đai/doanh nghiệp/đầu tư/đấu thầu/thuế…) → cờ `VBHN_HIGH_AMENDMENT_VELOCITY`, PHẢI kiểm bản hợp nhất mới nhất trước khi trả.
+2. **Verify nguyên văn** — điều khoản trả ra lấy từ cache/raw đã xác minh; NLM chỉ định vị + tổng hợp; KHÔNG nhận RAG làm nguyên văn.
+3. **Official-first cho VBHN** — thiếu VBHN chính thức thì HỎI người dùng nạp vào `_HOP_NAP` hoặc lấy nguồn chính thức; KHÔNG tự ghép bản hợp nhất làm bản dùng. Bản tự ghép/chắp nội dung chỉ là bản tạm để so sánh, phải gắn provisional và quarantine khi có bản chính thức.
+4. **Không bịa** — thiếu dữ liệu → nói "không có" / REVIEW.
+5. **Dedup nhiều lớp** — cache → registry → NLM (số hiệu + biến thể + text_hash).
+
+exec
+/bin/bash -lc "diff -u ops/specs/BAN2-truoc-luot3.md ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md | cut -c1-245
+rg -n '_r387_chay\\(|_r1252_run\\(|log_bam_cho_giay|r387_ket_thuc_sau_vong_cho' .claude/dev/launcher_test.py | tail -26
+sed -n '977,1022p;2985,3011p' .claude/dev/launcher.py
+sed -n '105,125p' docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md
+git status --short" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt
+ succeeded in 0ms:
+--- ops/specs/BAN2-truoc-luot3.md	2026-11-19 05:40:40.615896306 +0000
++++ ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md	2026-11-19 05:40:40.612897564 +0000
+@@ -60,12 +60,12 @@
+ | # | mục tiêu | tệp |
+ |---|---|---|
+ | M1 | `_nen_do_cay_truoc_bam()` trả `platform.system() in ("Linux", "Windows")`; docstring: "Packet B: Linux và Windows; Darwin/nền khác chưa đo (nợ `wp387-darwin-chua-do`)". | `launcher.py` |
+-| M2 | `_cho_cay_chet_truoc_bam`: thay ĐÚNG dòng 625 bằng MỘT dòng nguyên văn (thụt 8 dấu cách) — **dòng M2**: `nhom = _thanh_vien_nhom(pid) if platform.system() == "Linux" else (_pid_trong_job(job) if job is not None else Non
++| M2 | `_cho_cay_chet_truoc_bam`: thay ĐÚNG dòng 625 bằng MỘT dòng nguyên văn (thụt 8 dấu cách) — **dòng M2**: `nhom = _thanh_vien_nhom(pid) if platform.system() == "Linux" else (_pid_trong_job(job) if job is not None else Non
+ | M3 | Dòng 3041 thành `    cay_da_chet = (log_cay_chet and platform.system() != "Windows") if _nen_do_cay_truoc_bam() else (_thanh_vien_nhom(p.pid) == [])`. Dòng `            and cay_da_chet):` giữ nguyên. Chú thích dòng 3049 đổi "
+ | M4 | `VERSION = "1.6.1"` → `"1.6.2"`. | `launcher.py` |
+-| M5 | **Fixture Windows** (POSIX giữ hành vi A). Mọi thứ dưới đây nằm trong `_r387_chay` và các hàm `_r387_*`. (i) **Bắt tay gán job**: `_r387_chay` ghép trước `ma_con` một đoạn mở đầu chờ tệp `<s>/job-da-
+-| M6 | **Ca**: thay `_R387_CHI_LINUX` bằng `_R387_CHI_LINUX_WINDOWS` ("BO QUA r387 chi do tren Linux va Windows; nen khac: no wp387-darwin-chua-do") và đổi guard của 9 ca thành `platform.system() not in ("Linux", "Windows")`. Thay đ�
+-| M7 | **Neo và bảng đột biến**: cập nhật CẢ `_R387_KHOI_MOC` (theo chú thích mới M3) LẪN `_R387_DONG_CAY` (theo dòng M3), để mỗi mẫu của `r387_a_nen_khac_doi_moc`/`r387_a_nen_khac_moc_truoc_unlink` khớp đúng m
++| M5 | **Fixture Windows** (POSIX giữ hành vi A). Mọi thứ dưới đây nằm trong `_r387_chay` và các hàm `_r387_*`. (i) **Bắt tay gán job**: `_r387_chay` ghép trước `ma_con` một đoạn mở đầu chờ tệp `<s>/job-da-
++| M6 | **Ca**: thay `_R387_CHI_LINUX` bằng `_R387_CHI_LINUX_WINDOWS` ("BO QUA r387 chi do tren Linux va Windows; nen khac: no wp387-darwin-chua-do") và đổi guard của 9 ca thành `platform.system() not in ("Linux", "Windows")`. Thay đ�
++| M7 | **Neo và bảng đột biến**: cập nhật CẢ `_R387_KHOI_MOC` (theo chú thích mới M3) LẪN `_R387_DONG_CAY` (theo dòng M3), để mỗi mẫu của `r387_a_nen_khac_doi_moc`/`r387_a_nen_khac_moc_truoc_unlink` khớp đúng m
+ 
+ ## 4. `nghiem_thu`
+ 
+@@ -73,10 +73,10 @@
+ 
+ | # | tiêu chí | phép đo làm nó ĐỎ |
+ |---|---|---|
+-| N1 | Linux (head): (e), (t) và 9 ca mở ĐẠT; mọi ca r387 của A giữ kết quả. | Mỗi mục W1–W4, W6, H1–H4 qua runner `--dot-bien` ⇒ `OK giet 1/1` đúng ca đích. Ngoài runner (vốn chỉ kết luận ở mức CA), e
++| N1 | Linux (head): (e), (t) và 9 ca mở ĐẠT; mọi ca r387 của A giữ kết quả. | Mỗi mục W1–W4, W6, H1–H7 qua runner `--dot-bien` ⇒ `OK giet 1/1` đúng ca đích. Ngoài runner (vốn chỉ kết luận ở mức CA), e
+ | N2 | `t117` ĐẠT trên head. | Bỏ cập nhật `_R387_KHOI_MOC` ⇒ mẫu `r387_a_nen_khac_doi_moc` khớp 0 chỗ ⇒ `t117` ĐỎ; bỏ cập nhật `_R387_DONG_CAY` ⇒ mẫu thứ hai của `r387_a_nen_khac_moc_truoc_unlink` khớp 0 
+ | N3 | `launcher_test.py` trên head (Linux, gate + tại chỗ): N/N, hai số bằng nhau; TẬP ID bỏ qua của head ⊆ của base (không thêm bỏ qua mới). `--dot-bien`: rc 0, `DOT BIEN: N/N dat`; tập mục `KHONG DO DUOC tren nen
+-| N4 | **Windows NATIVE** trên Desktop `DESKTOP-T9R33P2` (VM `tra-luat-win` dự phòng), exact head (`git rev-parse HEAD` = head, cây sạch), ghi `python --version`, `platform.platform()`, giờ UTC. (L1) (e), (t), 9 ca mở, `t71`, `t77`: 
++| N4 | **Windows NATIVE** trên Desktop `DESKTOP-T9R33P2` (VM `tra-luat-win` dự phòng), exact head (`git rev-parse HEAD` = head, cây sạch), ghi `python --version`, `platform.platform()`, giờ UTC. (L1) (e), (t), 9 ca mở, `t71`, `t77`: 
+ | N5 | Một lượt `run` thật trên Windows native: `python .claude/dev/launcher.py run <cờ bắt buộc của hợp đồng run, ghi nguyên văn> -- python -c "import time;time.sleep(2);print(1)"` (con sống 2 s để `_job_windows` k�
+ | N6 | `git diff --numstat base..H` đúng 2 tệp write set, tổng cột thêm ≤ 450; Ruff 0.15.15 `--select F` tập diagnostic head = base trên 2 tệp; `doctrine-scan`, `adr-song` rc 0; `git diff --check` rỗng; `eol_policy --all` ok. 
+ 
+@@ -86,27 +86,30 @@
+ 
+ | # | đường vào / chốt | đột biến (tìm → thay) | ca đích & nhãn đỏ | nền đo |
+ |---|---|---|---|---|
+-| W1 | Windows thuộc tập nền được đo (M1) | `return platform.system() in ("Linux", "Windows")` → `return platform.system() in ("Linux",)` | (e8) "r387(e8)…" (`False` thay `True`) | Linux + Windows |
+-| W2 | Windows dò job, không dò nhóm POSIX (M2) | trọn dòng M2 → `nhom = _thanh_vien_nhom(pid)  # #387 B: dò theo nền` | (e6) "r387(e6) goi _thanh_vien_nhom tren Windows" | Linux + Windows |
+-| W3 | Windows thiếu job ⇒ không đo được (M2) | trọn dòng M2 → cùng dòng, `else None)` cuối thành `else [])` | (e7) "r387(e7)…" (`True` thay `False`) | Linux + Windows |
+-| W4 | Windows không dùng `_cay_da_chet` (M2) | trọn dòng M2 → cùng dòng, `_pid_trong_job(job)` thành `([] if _cay_da_chet(pid, job) else [7])` | (e6) "r387(e6) goi _cay_da_chet" | Linux + Windows |
+-| W5 | Windows KHÔNG xoá bản chụp kể cả khi job rỗng (M3) | `(log_cay_chet and platform.system() != "Windows")` → `log_cay_chet`; điều kiện `("windows", "POSIX xoa ban chup khi cay chet; chi Windows giu")` | (g) "r387(g) Wind
+-| W6 | Linux dò nhóm, không đi nhánh job (M2) | trọn dòng M2 → cùng dòng, `"Linux"` thành `"LinuxX"` | (e9) "r387(e9) Linux goi _pid_trong_job" | Linux + Windows |
++| W1 `r387_b_windows_khong_do` | Windows thuộc tập nền được đo (M1) | `return platform.system() in ("Linux", "Windows")` → `return platform.system() in ("Linux",)` | (e8) "r387(e8)…" (`False` thay `True`) | Linux + Windows |
++| W2 `r387_b_windows_dung_nhom` | Windows dò job, không dò nhóm POSIX (M2) | trọn dòng M2 → `nhom = _thanh_vien_nhom(pid)  # #387 B: dò theo nền` | (e6) "r387(e6) goi _thanh_vien_nhom tren Windows" | Linux + Windows |
++| W3 `r387_b_job_none_thanh_rong` | Windows thiếu job ⇒ không đo được (M2) | trọn dòng M2 → cùng dòng, `else None)` cuối thành `else [])` | (e7) "r387(e7)…" (`True` thay `False`) | Linux + Windows |
++| W4 `r387_b_windows_long_cay_da_chet` | Windows không dùng `_cay_da_chet` (M2) | trọn dòng M2 → cùng dòng, `_pid_trong_job(job)` thành `([] if _cay_da_chet(pid, job) else [7])` | (e6) "r387(e6) goi _cay_da_chet" | Linux + Windows |
++| W5 `r387_b_windows_xoa_prompt_khi_job_rong` | Windows KHÔNG xoá bản chụp kể cả khi job rỗng (M3) | `(log_cay_chet and platform.system() != "Windows")` → `log_cay_chet`; điều kiện `("windows", "POSIX xoa ban chup khi cay che
++| W6 `r387_b_linux_di_nhanh_job` | Linux dò nhóm, không đi nhánh job (M2) | trọn dòng M2 → cùng dòng, `"Linux"` thành `"LinuxX"` | (e9) "r387(e9) Linux goi _pid_trong_job" | Linux + Windows |
+ | W7 | Mốc `ket_thuc` lấy TRƯỚC khi đợi — Windows nay đi đường Linux (M1) | tái dùng `r387_ket_thuc_sau_vong_cho` (A) | (a) nhãn lệch mốc `ket_thuc_utc` (đo nhãn N4 L2) | Windows (đo lại mục A) |
+ | W8 | Darwin/nền khác: `False` ngay, không dò, không ngủ | tái dùng `r387_a_nen_khac_van_do`, `r387_a_nen_khac_ngu_thua` (A) | (e5) — `job=object()` nên bỏ guard ⇒ đi nhánh job ⇒ chạm bẫy; thêm ngủ ⇒ `ngu != []` |
+ | W9 | Nền khác giữ mốc `ket_thuc` sau phép đo xoá; nền khác vẫn xoá theo biểu thức base | tái dùng `r387_a_nen_khac_doi_moc`, `r387_a_nen_khac_moc_truoc_unlink` (A, neo hai hằng mới) | (i) nhãn mốc; vế `prompt_ba
+ | W10 | Job có handle nhưng truy vấn trả `None` ⇒ `False` ngay | tái dùng `r387_khong_do_duoc_van_cho` (A, neo `if nhom is None:` — chung hai nền) | (d) trên Windows: `do=` trả `None` ở nhánh job | Linux + Windows |
+ | W11 | Kết quả dò về sau hạn bị bỏ; ngủ trừ thời gian dò | tái dùng `r387_nhan_ket_qua_sau_han`, `r387_ngu_khong_tru_lan_do` (A, thân vòng chung hai nền) | (e2)/(e4) | Linux + Windows |
+ | W12 | `stop` trong lúc đợi; Ctrl-C trong lúc đợi; kết quả chụp không bị ngắt che | tái dùng `r387_cho_sau_doc_lai_stop`, `r387_ngat_*` (A) | (f), (h) — nay chạy native trên Windows | Windows (đo lại mục A) |
+-| H1 | Teardown chờ job rỗng TRƯỚC khi đóng handle (M5 iii) | trong `_r387_don_dep` nhánh job: dời lời gọi `m._r387_dong_job(` lên trước lời gọi chờ (mẫu nguyên văn khi viết) | (t2) "r387(t2) thu tu do/dong" (tra
+-| H2 | Bắt tay: `job-da-gan` chỉ ghi SAU khi gán thành công (M5 i) | trong `_r387_boc_job`: dời dòng ghi `job-da-gan` lên trước lời gọi `that(pid)` | (t4) "r387(t4) job-da-gan ghi truoc khi gan" — tất định, không phụ
+-| H3 | Hàm đóng trả 0 ⇒ lỗi teardown (M5 iii) | điều kiện kiểm giá trị trả của `m._r387_dong_job(...)` → `False` | (t3) "r387(t3) CloseHandle that bai khong bao" | Linux + Windows |
+-| H4 | Teardown đóng handle đúng một lần (M5 iii) | xoá lời gọi `m._r387_dong_job(` (thay bằng không làm gì) | (t2) "r387(t2) thu tu do/dong" (trace thiếu `("dong",)`) | Linux + Windows |
+-| X1 | Teardown chạy dưới `finally` khi `lenh_run`/fixture ném (M5 iv) | không đột biến: đường ném thật không dựng được tất định trong `lenh_run`; cơ chế giữ lỗi gốc + ghi chú đã có phản chứng `r3
++| H1 `r387_fx_dong_truoc_khi_cho` | Teardown chờ job rỗng TRƯỚC khi đóng handle (M5 iii) | trong `_r387_don_dep` nhánh job: dời dòng `ket_dong = m._r387_dong_job(h)` lên trước khối chờ (mẫu nguyên văn khi viết) | (t2)
++| H2 `r387_fx_bao_gan_truoc_khi_gan` | Bắt tay: dấu chỉ phát SAU khi gán thành công (M5 i) | trong `_r387_boc_job`: dời lời gọi `_r387_bao_da_gan(m, s)` lên trước `that(pid)`, bỏ chốt "đã lưu handle" trong `_r387_bao_
++| H3 `r387_fx_bo_kiem_closehandle` | Hàm đóng trả 0 ⇒ lỗi teardown (M5 iii) | `if ket_dong == 0:` → `if False:` (lời gọi đóng giữ nguyên) | (t3) "r387(t3) CloseHandle that bai khong bao" | Linux + Windows |
++| H4 `r387_fx_khong_dong_job` | Teardown đóng handle đúng một lần (M5 iii) | `ket_dong = m._r387_dong_job(h)` → `ket_dong = 1` (biên dịch được, tới được assertion trace) | (t2) "r387(t2) thu tu do/dong" (trace thiếu `("
++| H5 `r387_fx_phat_dau_khi_gan_hong` | Gán thất bại không phát dấu (M5 i) | trong `_r387_boc_job`, nhánh `that(pid)` trả `None`: chèn ghi THẲNG `job-da-gan` trước khi trả (không qua `_r387_bao_da_gan`, để mutant không c
++| H6 `r387_fx_don_dep_ngoai_finally` | Teardown `co_chau=False` chạy dưới `finally` khi `_r1252_run` ném (M5 iv, X1) | dời lời gọi `_r387_don_dep` của `co_chau=False` ra khỏi `finally` (sau khối `try`) | (t5) "r387(t5) teardow
++| H7 `r387_fx_loi_bam_nuot_teardown` | (a′) không nuốt lỗi teardown (M6) | trong `_r387_loi_bam_hop_le`: bỏ vế kiểm `__notes__` | (t6) "r387(t6) loi bam nuot loi teardown" | Linux + Windows |
++| X1 | Phép dò/hàm đóng ném trong teardown | đo bằng (t3c); đột biến bỏ `try` quanh phép dò làm (t3c) ĐỎ bằng `OSError` lọt ra — đó là tín dụng giả theo định nghĩa nên KHÔNG đưa vào bảng; (t3c) gi�
+ | X2 | `os.killpg` vắng trên Windows (M5 v) | không đột biến: gỡ `hasattr` chỉ làm ca chết bằng `AttributeError` — tín dụng giả theo định nghĩa | đo bằng N4 L1 (ca có `_r387_nhat_ky_kill` ĐẠT trên Windows) |
+ | X3 | `VERSION` (M4) | không đột biến | N5 `"version": "1.6.2"` | Windows |
+ 
+-Mẫu (tìm, thay) của H1–H4 chốt nguyên văn khi executor viết mã, mỗi mẫu khớp đúng một chỗ trong phần mã test (kiểm neo harness). Mọi đột biến chỉ tính GIẾT khi ca đích đỏ bằng `TinHieuChotCa` c�
++Mẫu (tìm, thay) của H1–H7 chốt nguyên văn khi executor viết mã, mỗi mẫu khớp đúng một chỗ trong phần mã test (kiểm neo harness). Mọi đột biến chỉ tính GIẾT khi ca đích đỏ bằng `TinHieuChotCa` c�
+ 
+ ## 5. `pham_vi_e`
+ 
+@@ -117,8 +120,8 @@
+ - Trần lời gọi Codex theo dòng khai `ADR-0055`; chạm trần ⇒ Review Rescue Checkpoint (`docs/PROTOCOL_DA_PHIEN.md` §12); xin tăng mang **E2**, ghi mức đã dùng, phần thiếu và mục đích (`ADR-0067`).
+ - Trần kích thước `ADR-0053` (450 dòng thêm, `git diff --numstat base..H` toàn diff). > 450 ⇒ DỪNG, không push, báo điều phối; không cắt ca/phép đo để lọt trần.
+ - Chưa có log native Windows (N4, N5) ⇒ không công bố `landed`/`ready`.
+-- Cần sửa ngoài write set (kể cả `San`, runner đột biến) ⇒ dừng, đi revision đặc tả.
+-- Windows cần ngủ/chờ khác trong hàm đợi, hoặc dung sai (a)/(e6) phải nới ⇒ dừng, ghi số đo, đi revision; không tự nới.
++- Cần sửa ngoài write set (§1; §2 cấm sửa `San`, runner đột biến) ⇒ dừng, đổi Packet Spec theo `docs/PROTOCOL_DA_PHIEN.md` §12 (revision mới, băm mới, chủ kho duyệt — E2).
++- Dung sai (a) 1,8–2,5 s và (e6) ≤ 1,0 s là điều kiện nghiệm thu của N1/N4: vượt trên Windows ⇒ N4 ĐỎ, không tự nới; nới hoặc đổi hàm đợi ⇒ đổi Packet Spec như trên.
+ - Đặc tả không thuộc Mission ⇒ chờ chủ kho duyệt băm (`ADR-0067`) — **E2**.
+ 
+ ## 7. `hinh_dang_ke_thua`
+@@ -130,7 +133,7 @@
+ - Toàn bộ hành vi Windows native (bắt tay giữ con tới lúc gán, cháu trong job, job cập nhật trễ, `CloseHandle` thật): N4/N5 là phép đo duy nhất.
+ - Darwin: không đo (nợ `wp387-darwin-chua-do`).
+ - Giới hạn có tên: cháu breakaway hoặc sinh trong khe `Popen`→gán job ⇒ `true` có thể sai.
+-- X1: đường teardown-dưới-`finally` khi `lenh_run` ném thật không có phản chứng tất định riêng.
++- POSIX: quyền sở hữu nhóm (`m._r387_pgid`) vẫn chỉ ghi SAU khi `_r1252_run` trả (hành vi A, không đổi ở packet này); `_r1252_run` ném sau khi đã sinh con thì teardown nhánh pgid không có tham chiếu. Ghi nợ `wp38
+ - Dung sai (a) 1,8–2,5 s và (e6) ≤ 1,0 s mới đo trên Linux.
+ - Kích thước, ước lượng theo khối tương tự trên base (đo `2026-11-19T05:31Z`): `launcher.py` ~ +8/−6 (M1 1, M2 1 + docstring ~4, M3 1, chú thích 1, M4 1). `launcher_test.py`: fixture A hiện tại (`_r387_cho_cay_rong` �
+ 
+@@ -138,12 +141,12 @@
+ 
+ - **Q-D (2026-11-19, chủ kho, AskUserQuestion, phiên #1206):** bỏ Darwin khỏi B, chỉ mở Windows; Darwin giữ hành vi A; nợ có tên `wp387-darwin-chua-do`.
+ - **Q-W (cùng quyết định):** tên packet `LAUNCHER-BAM-LOG-NEN-WINDOWS` r1; 4 đột biến `r387_a_nen_khac_*` giữ, tiếp tục đo đường "không phải Linux/Windows" qua (e5) Darwin/FreeBSD và (i).
+-- **Finding mở từ review A, đóng ở bản này:** P2 teardown Windows — M5(iii)(iv): chờ job rỗng rồi mới đóng, kiểm giá trị trả `CloseHandle`, báo lỗi cho `False`/`None`/`CloseHandle=0`, teardown dưới `finally` 
++- **Finding mở từ review A, đóng ở bản này:** P2 teardown Windows — M5(i)(iii)(iv) + M6(a′): quyền sở hữu job ghi lúc gán; chờ job rỗng rồi mới đóng (đóng trong `finally` kể cả khi phép dò ném); kiểm 
+ 
+ ## 10. Nhật ký
+ 
+ - 2026-11-18: bản Darwin+Windows dựng trên vá thử `trA` (`rv387b/dac-ta-ban0.md`).
+-- 2026-11-19: đo lại trên base thật `3b64746` (`rv387b/dac-ta-ban0b-darwin-c1cbe870.md`); chủ kho bỏ Darwin; viết lại thành bản 1 (`rv387b/dac-ta-ban1.md`, sha256 `7b1f2324…`).
++- 2026-11-19: đo lại trên base thật `3b64746` (`rv387b/dac-ta-ban0b-darwin-c1cbe870.md`); chủ kho bỏ Darwin; viết lại thành bản 1 (`rv387b/dac-ta-ban1.md`, sha256 `7b1f2324…`); bản 2 (`rv387b/dac-ta-ban2.md`, `24d06138…`)
+ 
+ ## 11. Nhật ký review
+ 
+@@ -159,3 +162,11 @@
+   - P3 gỡ guard ra cả nền khác ⇒ giữ guard cho nền ngoài Linux/Windows (`_R387_CHI_LINUX_WINDOWS`).
+   - P3 đếm bỏ qua ⇒ so TẬP ID.
+   - Ghi thêm: (d) đo `log_bam_cho_giay` thay thời gian toàn ca; (h) bỏ miễn mã 3.
++- **Lượt 2** (Codex, read-only, `3b64746`; `rv387b/luot2.verdict.txt`): `request_changes` — 5 P2, 2 P3; xác nhận đóng 7/11 finding lượt 1 (P1 `_R387_DONG_CAY`, (e9)/W6, phụ thuộc lịch H2, trường nền harness, N5, vị tr�
++  - P2 đọc nhãn ⇒ N1 lấy dòng `HONG <ID ca đích>: …`, không phải dòng tổng.
++  - P2 lọc nút nguồn ⇒ `DOT_BIEN_HOOK = []`, giữ hai mốc tách, `]` dòng riêng, kiểm compile + 22/0/9 + tập ID; chốt ID cho W1–W6/H1–H7.
++  - P2 teardown ⇒ quyền sở hữu job ghi lúc gán; đóng trong `finally` kể cả khi dò ném; `_r387_don_dep` không ném; (t3b)/(t3c)/(t5) + H6; phần POSIX ghi nợ `wp387-pgid-so-huu-muon`.
++  - P2 (a′) nuốt ghi chú teardown ⇒ `_r387_loi_bam_hop_le` + (t6) + H7.
++  - P2 H1–H4 ⇒ H3/H4 tách dòng gọi/kiểm; (t4) mở bốn đường (t4a–t4d) + H5.
++  - P3 docstring M2 ⇒ thay toàn phần mô tả kết quả.
++  - P3 L7 §6 ⇒ dẫn protocol §12, §1/§2; dung sai là điều kiện N1/N4.
+14034:        rc, so, _ = _r1252_run(repo, s / "runs", ma)
+14039:        rc, so, _ = _r1252_run(repo, s / "runs2", ma2)
+14057:            rc, so, thu_muc = _r1252_run(repo, goc, con)
+14066:        rc, so, _ = _r1252_run(repo, goc, f"import glob,os\nos.mkdir(glob.glob({str(goc)!r} + '/*/')[0] + 'snapshot-truoc.txt')\n")
+14083:                _, so, _ = _r1252_run(repo, goc, ma, m=m if qua_m else None)
+14118:                rc, so, _ = _r1252_run(repo, s / f"r{lan_ngat}", f"open({str(dau)!r},'w').write('1')", m=m)
+14147:                _r1252_run(repo, s / "runs", f"open({str(dau)!r},'w').write('1')", "--deadline-utc", mai_sau(2), m=m)
+14239:        rc, so, _ = _r1252_run(repo, s / "runs", "open(b'.tl_state/\\xff','w').write('1');open(b'.tl_state/?','w').write('1')")
+14269:            rc, so, thu_muc = _r1252_run(repo, goc, con, m=m)
+14320:            rc, so, _ = _r1252_run(_r1252_kho(s), s / "runs", "pass", m=m)
+14781:def _r387_chay(m, s, ma_con, *them, han=None, co_chau=True, chup=False, do=None):
+14797:        rc, so, tm = _r1252_run(_r1252_kho(s), s / "runs", ma_con, *them, m=m, chup=chup)
+14864:        _rc, so, tm = _r387_chay(m, s, _r387_ma_con(s, ngu, doi_chau), han=2.0)
+14870:            cho = so.get("log_bam_cho_giay")
+14871:            bang(isinstance(cho, float) and 1.8 <= cho <= 2.5, f"r387(a) log_bam_cho_giay={cho}, mong 1,8..2,5 (han 2,0)")
+14904:        _rc, so, tm = _r387_chay(m, s, "print('MOT-DONG')", co_chau=False)
+14919:        _rc, so, tm = _r387_chay(m, s, _r387_ma_con(s, 1))
+14935:        _rc, so, _tm = _r387_chay(m, s, "pass", han=5.0, co_chau=False, do=lambda _p: None)
+14991:            _rc, so, _tm = _r387_chay(m, s, "pass", *_r387_prompt(s), co_chau=False, do=lambda _p: time.sleep(0.5) or [])
+14992:        cho = so.get("log_bam_cho_giay")
+15019:        _rc, so, _tm = _r387_chay(m, s, "pass", co_chau=False, do=do_roi_stop)
+15031:        _rc, so, tm = _r387_chay(m, s, "pass", *_r387_prompt(s), co_chau=False)
+15049:        rc, so, _tm = _r387_chay(m, s / "h1", "pass", co_chau=False)
+15055:        rc, so, _tm = _r387_chay(m, s / "h2", "open('.tl_state/x','w').write('1')", co_chau=False, chup=True)
+15066:                  "    ban_ghi.update(log_bam_cay_da_chet=log_cay_chet, log_bam_cho_giay=round(time.monotonic() - moc_cho, 3))\n")
+15076:    ("r387_ket_thuc_sau_vong_cho", ("ket_thuc_utc=ket_thuc.isoformat(), ma_thoat=ma_that)", "ket_thuc_utc=_bay_gio().isoformat(), ma_thoat=ma_that)"),
+def _pid_trong_job(job) -> list[int] | None:
+    """PID còn trong job. [] = đã chứng minh rỗng · None = không đọc được."""
+    try:
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.windll.kernel32
+
+        # JOBOBJECT_BASIC_PROCESS_ID_LIST là mảng độ dài biến đổi. Không đóng
+        # đinh 512 PID: job lớn hơn sẽ trả ERROR_MORE_DATA; đó là tín hiệu tăng
+        # buffer, không phải "job rỗng".
+        suc_chua = 64
+        for _ in range(8):
+            class _DS(ctypes.Structure):
+                _fields_ = [("NumberOfAssignedProcesses", wintypes.DWORD),
+                            ("NumberOfProcessIdsInList", wintypes.DWORD),
+                            ("ProcessIdList", ctypes.c_size_t * suc_chua)]
+
+            ds = _DS()
+            if k32.QueryInformationJobObject(job, 3, ctypes.byref(ds),
+                                             ctypes.sizeof(ds), None):
+                n = int(ds.NumberOfProcessIdsInList)
+                if n > suc_chua:
+                    return None
+                return [int(ds.ProcessIdList[i]) for i in range(n)]
+            can = int(ds.NumberOfAssignedProcesses)
+            if can <= suc_chua:
+                return None
+            suc_chua = max(suc_chua * 2, can)
+        return None
+    except (OSError, AttributeError, ValueError):
+        return None
+
+
+# ------------------------------------------------- #1252: chụp workspace trước/sau
+
+# Spec `ops/specs/launcher-readonly-ignored-r1.md` (#1252): `chot_sach` chỉ đo MỘT mốc trước khi sinh con, không
+# đo tệp ignored hay `.git` — #1224 `a8d7350a` (11 tệp) và #1240 `bc004964` (20 tệp) đã lọt qua.
+_TEP_DOI_TRAN = 50
+_SNAPSHOT_GIOI_HAN = ("chi so hai moc truoc/sau; ghi roi hoan nguyen giua hai moc thi khong thay; "
+                      "chau tu setsid hoac sinh truoc khi gan job thi khong chung minh duoc")
+
+
+def _bieu_dien_chuan(muc) -> bytes:
+    """Hàm THUẦN (spec §2.2): mỗi phần tử `(loai, gia_tri, duong_dan_bytes)` một dòng JSON, đường dẫn
+    LUÔN mã hoá hex theo một quy tắc — tên có xuống dòng/tab, hay trùng chữ một tiền tố, không thể sinh
+    cùng dòng với tên khác (connector P2 4489586579). Sắp theo byte của đường dẫn."""
+        ban_ghi["ma_thoat_that"] = ma
+        ma = 1
+
+    # #387: mốc kết thúc lấy TRƯỚC khi đợi cây, nên `ket_thuc_utc`/`thoi_luong_giay` không gồm thời gian đợi. Đợi
+    # TRƯỚC phép đọc lại sổ bên dưới, để `stop` hoàn tất trong lúc đợi vẫn được thấy (không mở lại cửa sổ t50).
+    ket_thuc = _bay_gio()
+    moc_cho = time.monotonic()
+    ngat_khi_cho = False
+    try:
+        log_cay_chet = _cho_cay_chet_truoc_bam(p.pid, job, _HAN_CHO_CAY_TRUOC_BAM_LOG)
+    except KeyboardInterrupt:
+        log_cay_chet, ngat_khi_cho = False, True
+    ban_ghi.update(log_bam_cay_da_chet=log_cay_chet, log_bam_cho_giay=round(time.monotonic() - moc_cho, 3))
+    # Có thể `stop` đã ghi "da_dung" trong lúc ta còn chờ. Đừng đè lên quyết định
+    # đó: ĐÃ ĐO (codex) - stop ghi da_dung xong runner ghi đè thành "xong", nên
+    # sổ nói lượt chạy kết thúc bình thường trong khi thực tế nó bị dừng.
+    so_moi = _doc_so(thu_muc) or {}
+    if so_moi.get("trang_thai") == "da_dung":
+        ban_ghi["trang_thai"] = "da_dung"
+        ban_ghi["ly_do_dung"] = so_moi.get("ly_do_dung") or ban_ghi.get("ly_do_dung")
+    else:
+        # "xong" nghĩa là CHẠY HẾT. Bản trước để Ctrl-C rơi vào nhánh này: lượt
+        # chạy bị ngắt giữa chừng và con bị giết, mà `trang_thai` — đúng trường
+        # `status` liệt kê — nói là kết thúc bình thường. Cùng lớp lỗi với t50.
+        ban_ghi["trang_thai"] = ("bi_ngat" if bi_ngat
+                                 else "qua_han" if qua_han else "xong")
+    # #1252 §2.4: chỉ thay `xong`; qua_han/bi_ngat/da_dung giữ nguyên (A8). `ma_thoat` vẫn là mã THẬT.
+
+```yaml
+schema: uy_quyen_quyet_dinh.v1
+loai: cap_lease
+packet: VI-DU-PACKET
+revision: 1
+sha: null
+spec_sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+can_cu:
+  - {vai: uy_quyen, url: "https://github.com/ducthangho/tra-luat/issues/1#issuecomment-1"}
+phep_do:
+  - lenh: python ops/lease_publish.py ai-dang-giu --root . docs/vi-du.md
+    rc: 0
+    ket_qua: "NGƯỜI_GIỮ 0: không có"
+kiem_e: {E1: khong, E2: khong, E3: khong, E4: khong, E5: khong}
+nguoi_quyet: {provider: claude, model_family: claude, session_id: vi-du-1}
+hoan_tac: thu hồi lease theo luật thu hồi hiện hành
+luc: "2026-11-08T00:00:00Z"
+```
+
+```yaml
+?? ops/specs/BAN2-truoc-luot3.md
+?? ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md
+
+exec
+/bin/bash -lc "python -B - <<'PY'
+import ast, contextlib, pathlib, types
+s=pathlib.Path('.claude/dev/launcher_test.py').read_text()
+t=ast.parse(s)
+def f(n): return next(x for x in t.body if isinstance(x,ast.FunctionDef) and x.name==n)
+g={'contextlib':contextlib}
+exec(ast.get_source_segment(s,f('_r387_va')).join(['@contextlib.contextmanager\\n','']),g)
+m=types.SimpleNamespace(_job_windows=lambda _:None,_pid_trong_job=lambda _:None)
+try:
+    with g['_r387_va'](m,_r387_dong_job=lambda _:1): pass
+except AttributeError as e: print('new attribute with existing _r387_va:',e)
+src=ast.get_source_segment(s,f('r387_m1_doi_chung_ghi_som_lam_ve_bam_do'))
+class TinHieuChotCa(AssertionError): pass
+def bang(ok,msg):
+    if not ok: raise TinHieuChotCa(msg)
+def than(*_):
+    err=TinHieuChotCa('r387(a) ve bam')
+    err.add_note('r387 teardown: CloseHandle that bai')
+    raise err
+for wrong_wiring in [True, False]:
+    ns=dict(platform=types.SimpleNamespace(system=lambda:'Linux'), _r387_than_a=than,TinHieuChotCa=TinHieuChotCa,bang=bang)
+    helper=lambda e: 've bam' in str(e) and not any('r387 teardown' in note for note in getattr(e,'__notes__',[]))
+    ns['_r387_loi_bam_hop_le']=helper
+    clean=helper(TinHieuChotCa('ve bam'))
+    bad=TinHieuChotCa('ve bam'); bad.add_note('r387 teardown: CloseHandle that bai')
+    if not wrong_wiring: src=src.replace('\"ve bam\" in str(e)','_r387_loi_bam_hop_le(e)')
+    exec(src,ns)
+    try: ns[f('r387_m1_doi_chung_ghi_som_lam_ve_bam_do').name]()
+    except TinHieuChotCa: verdict='red'
+    else: verdict='green'
+    print('t6 helper:',clean, helper(bad),'(a-prime):',verdict)
+PY
+python -V
+git branch --show-current
+git diff --check
+sed -n '4108,4129p;17784,17814p' .claude/dev/launcher_test.py" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt
+ succeeded in 327ms:
+new attribute with existing _r387_va: 'types.SimpleNamespace' object has no attribute '_r387_dong_job'
+t6 helper: True False (a-prime): green
+t6 helper: True False (a-prime): red
+Python 3.13.18
+master
+def t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho():
+    """Mẫu tìm-thay của MỖI đột biến phải khớp ĐÚNG MỘT chỗ trong `launcher.py`.
+
+    VÌ SAO CÓ CA NÀY — nó chặn một cách làm hỏng chốt mà KHÔNG sửa dòng nào của ai.
+    `chay_dot_bien` thay chỗ khớp ĐẦU TIÊN. Nên nếu mã mới TRÙNG CHỮ với đoạn mà một
+    đột biến cũ đang nhắm, VÀ đứng trước nó, thì đột biến ấy lặng lẽ nhảy sang bản sao:
+    ca đích không chết nữa, mà bảng vẫn báo "đạt".
+
+    ĐÃ XẢY RA THẬT trong chính đợt này: khối chuẩn hoá env chép vào
+    `_suc_khoe_mcp_github` trùng khít với khối của `_do_github` và đứng trước nó ⇒
+    `probe_github_bo_qua_moi_truong_chuan_hoa` (đột biến CÓ SẴN, canh `t113`) SỐNG SÓT.
+    Không dòng logic nào sai; chốt chỉ mất răng vì trùng chữ. Chữa bằng `_env_da_chuan`,
+    và chốt NÀY để lần sau không phải trông vào việc ai đó tình cờ chạy đột biến rồi
+    đọc kỹ dòng `SAI`.
+
+    Đây là ca đo CÔNG CỤ ĐO, không đo `launcher.py` — cùng họ với `t116`.
+
+    GIỚI HẠN — cùng phạm vi phải khai như `t116`, và cross-review lượt 8 đúng khi bảo
+    lời khai cũ ("cùng họ với `t116`") HẸP HƠN thứ cần công bố. Nói cho đủ: ca này lấy
+    CẢ đặc tả (`DOT_BIEN` và `DA_BIET_TRUNG` ngay trong tệp test) LẪN bằng chứng
+    (`launcher.py`) từ những tệp mà một thay đổi PHỐI HỢP sửa được cùng lúc — thêm một
+    bản sao rồi nới `DA_BIET_TRUNG` cho khớp thì ca vẫn xanh. Nó chặn được việc TÌNH CỜ
+    #1117: ca chạy qua RUNNER TIN CẬY `thu_muc/launcher_test_runner.py`, do `_dung_cay_harness` chép từ tệp
+    THẬT (ngoài vùng `DOT_BIEN_HARNESS` đột biến), không qua `--lap-ca` của bản bị đột biến. Đường kênh và nonce đi qua STDIN,
+    runner đọc chúng TRƯỚC khi nạp bản ấy, và env con bị lọc sạch `LT_KENH_*`. Trước đây env mang cả hai, nên
+    mã CẤP MODULE của bản đột biến (chạy trước `main`) giả được kênh (Codex lượt 2 của #1079, F04).
+    GIỚI HẠN CÓ TÊN `RUNNER-CUNG-TIEN-TRINH`: mã đột biến CỐ Ý can thiệp runner trong cùng tiến trình thì không
+    chặn được. Xem docstring của runner."""
+    import secrets
+    kenh = Path(tempfile.mkdtemp(prefix="lt_kenh_")) / "ket_qua.json"
+    nonce = secrets.token_hex(16)
+    env = {k: v for k, v in os.environ.items() if not k.startswith("LT_KENH_")}
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    try:
+        p = subprocess.run(
+            [PY, str(Path(thu_muc) / RUNNER_TEN), str(Path(thu_muc) / "launcher_test.py"), ten_ca],
+            input=f"{kenh}\n{nonce}\n", capture_output=True, text=True, encoding="utf-8", errors="replace",
+            timeout=180, cwd=thu_muc, env=env)
+        kq = json.loads(kenh.read_text(encoding="utf-8")) if kenh.is_file() else {}
+    except (OSError, subprocess.SubprocessError, ValueError) as e:
+        return "loi", f"{ten_ca}({mo_ta_loi(e)})"
+    finally:
+        shutil.rmtree(kenh.parent, ignore_errors=True)
+    if not isinstance(kq, dict) or kq.get("nonce") != nonce or kq.get("ten") != ten_ca:
+        return "loi", f"{ten_ca}(khong co ket qua kenh, rc={p.returncode})"
+    loai = kq.get("loai")
+    if loai not in ("qua", "bo_qua", "giet", "loi"):   # #1117: loại lạ KHÔNG được rơi về một nhánh mặc định
+        return "loi", f"{ten_ca}(loai khong hop le: {loai!r})"
+    # wp484 g7 (launcher-windows 39057167905): ca POSIX tự bỏ qua là KHÔNG ĐO ĐƯỢC (`bo_qua`).
+    return loai, (str(kq.get("chi_tiet") or ten_ca) if loai == "loi" else ten_ca)
+
+
+LOAI_HONG: dict = {}
+
+codex
+Review độc lập lượt 3 trên Linux, Python 3.13.18, qua Codex của OpenAI với công cụ cục bộ và sandbox chỉ đọc. Base `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. SHA-256 của bản 3 chưa commit là `29deb740f03ca032edaffc85a2956f8961772e3a623eeacb9f2707825dfd5780`. `diff -u` trả 1 vì hai bản khác nhau. Các probe hoàn tất trong bộ nhớ. Chưa chạy suite, runner đột biến đầy đủ hoặc Windows native. Không sửa tệp.
+
+### Findings
+
+1. **P2 · CÒN MỞ — W6 chết sai chốt, N1/N4 thiếu chuỗi nhãn đối chiếu.** Khi giữ (e1)–(e4) như M6 yêu cầu, chúng vẫn truyền `job=None`. W6 làm cả ba phép gọi Linux đi nhánh job và trả `False` ngay. Probe chạy thân ca với đúng phép thay W6 cho kết quả đầu tiên là `r387(e4) ... ngu=[], mong [0.03]`, trước khi tới bẫy (e9). Runner có thể ghi giết đúng ca, nhưng N1 phải bác kết quả đó. W1/W3 còn dùng dấu `…`, còn W7 chỉ mô tả “nhãn lệch mốc”, trong khi N1/N4 yêu cầu tìm chuỗi cụ thể. **Sửa:** chạy (e9) trước (e1)–(e4), hoặc tách (e9) thành ca đích riêng. Chốt chuỗi nguyên văn cho W1/W3/W7 và ghi dòng `HONG` thực tế của từng mutant. [N1/N4 và bảng W](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:76)
+
+2. **P2 · CÒN MỞ — N4 L2 đặt hai yêu cầu lọc AST không tương thích.** Tôi đọc AST trên base ngày `2026-11-19T05:41Z`: 16 mục cũ được giữ của `DOT_BIEN` có 9 mục nhiều dòng, 2 mục harness có 1 mục nhiều dòng. Giữ nguyên `ast.get_source_segment` và thêm dấu phẩy sau từng **nút** cho bản `16/0/2` biên dịch trong bộ nhớ, hai mốc tách đều xuất hiện đúng một lần. Yêu cầu “mỗi phần tử một dòng” xung đột với việc giữ nguyên văn các nút đó. Bản 3 đã sửa phép cộng: runner cộng cả ba bảng, và `16+6 / 0 / 2+7` cho đúng **22/0/9**, tổng 31 mục. **Sửa:** cho phép mỗi nút trải nhiều dòng, thêm dấu phẩy sau toàn bộ nút và giữ `]` đóng trên dòng riêng cùng hai mốc nguyên văn. [N4 L2](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:79)
+
+3. **P2 · CÒN MỞ — (t6)/H7 chỉ đo hàm phụ, trong khi finding lượt 2 nằm ở (a′).** Tôi nạp thân (a′) từ base và cho `_r387_than_a` ném lỗi `ve bam` kèm ghi chú `r387 teardown: CloseHandle that bai`. Với hàm phụ đúng hợp đồng, hai vế (t6) vẫn xanh, nhưng (a′) dùng điều kiện cũ cũng xanh và nuốt lỗi. Khi nối (a′) qua hàm phụ, cùng probe làm (a′) đỏ. H7 có thể giết đúng nhãn (t6) mà bỏ lọt lỗi ở đường gọi thực tế. **Sửa:** cho (t6) đi qua chính nhánh xử lý của (a′), đưa lỗi băm sạch và lỗi băm có ghi chú qua cùng đường, rồi dùng H7 để đo đường đó. [M6 và H7](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:67)
+
+4. **P2 · CÒN MỞ — M5/X1 khai đo ngoại lệ hàm đóng, nhưng (t3c) chỉ cho phép dò ném.** (t3b) đo gộp hai lỗi trả về, (t3c) đo việc vẫn đóng sau `OSError` từ phép dò, còn (t5) cho hàm đóng trả `1`. Bỏ riêng phần bắt ngoại lệ của hàm đóng vẫn qua toàn bộ các kích thích này, trong khi có thể che lỗi gốc trước `add_note`. Phạm vi “`_r387_don_dep` không bao giờ ném” cũng bao gồm nhánh pgid, nhưng nhánh đó được yêu cầu giữ nguyên và hiện để ngoại lệ từ `_r387_cho_cay_rong` thoát ra. **Sửa:** thêm vế hàm đóng ném, kiểm thông điệp, đúng một lần gọi và việc giữ lỗi gốc. Khai rõ bảo đảm không ném áp dụng cho nhánh job, hoặc sửa và đo cả nhánh pgid nếu muốn bảo đảm chung. [M5–M6](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:66)
+
+5. **P2 · CÒN MỞ — H1/H2/H4 có thể chết trước nhãn đã khai.** M6 chỉ gắn nhãn trace ở H1/H4, trong khi (t2) còn đòi thông điệp phải là `None` và handle phải được xóa. H4 bỏ lời gọi đóng và giả giá trị `1` nên chỉ cô lập được chốt trace nếu vẫn giữ nguyên phần xóa handle. H1 cần dời lời gọi mà vẫn giữ cấu trúc `try/finally` hợp lệ và để dò giả hoạt động sau đóng. H2 bỏ chốt trong `_r387_bao_da_gan`, do đó cũng làm (t4d) đỏ trong cùng ca đăng ký. Runner có thể tính giết nếu (t4d) chạy trước, nhưng N1 sẽ bác nhãn. **Sửa:** chốt kiểm trace của (t2) trước các kiểm tra phụ hoặc dùng một assertion có nhãn chung. Với H2, ghi dấu trực tiếp trước `that(pid)` trong mutant và bỏ lời phát dấu ở vị trí cũ, giữ nguyên chốt của helper. Chốt mẫu H1–H7 theo khối đủ ngữ cảnh, đếm từng mẫu đúng một lần ở vùng mã runner thực sự thay, rồi kiểm compile và dòng lỗi đầu tiên. [H1–H7](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:103)
+
+6. **P3 · CÒN MỞ — Docstring M2 vẫn thiếu các kết quả `False` đang có.** Thay toàn phần như mô tả sẽ bỏ các trường hợp còn thành viên khi hết hạn và kết quả rỗng về sau hạn. Vòng lặp kiểm hạn trước khi công nhận `[]`. Câu “không ngủ” cũng cần giới hạn vào lần dò trả `None`, vì các vòng trước đó có thể đã ngủ. **Sửa:** mô tả đầy đủ hai kết quả, ghi rõ phép dò đồng bộ có thể hoàn tất sau hạn và kết quả đến muộn bị bỏ. [M2](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:63)
+
+7. **P3 · MỚI — Lý do cài wrapper trên POSIX trái với đường gọi thật.** `lenh_run` gọi `_job_windows(p.pid)` vô điều kiện. Hàm thật tự trả `None` trên POSIX. Vì thế wrapper **có chạy** trong các ca POSIX đi qua `_r387_chay`, dù với trạng thái mới nó chỉ chuyển tiếp `None`. Các ca `t*` gọi launcher ngoài fixture này không đi qua wrapper. **Sửa:** ghi đúng đường gọi, khởi tạo quyền sở hữu job rõ ràng, khôi phục `_job_windows` về đúng đối tượng tại lúc vào fixture và kiểm lượt thứ hai của (h) độc lập với lượt đầu. [M5(i)](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:66) · [Lời gọi thật](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher.py:2889)
+
+### Đối chiếu còn lại
+
+- **Đã đóng phần định dạng của finding đọc nhãn.** Probe gọi `main()` với `--lap-ca probe --lan 1` trả 1 và in cả `lan 1/1: HONG` lẫn đúng một dòng `HONG probe: TinHieuChotCa: nhan thu`. Vấn đề nhãn kỳ vọng còn ở finding 1.
+- **(t4b)/(t4c)/(t4d), H3/H5/H6 khả thi theo thiết kế.** Dùng fixture riêng cho từng vế. H3 vẫn gọi hàm đóng trả `0` rồi mất thông điệp đích. H5 ghi dấu trực tiếp để (t4b) quan sát tệp xuất hiện. H6 làm sentinel bỏ qua đoạn teardown bị dời xuống sau `try`, nên (t5) phải bắt đúng đối tượng rồi kiểm note và số lần đóng. Các neo mới chưa có mã để xác nhận số lần khớp; riêng neo cũ `e.add_note(loi)` cũng cần đo lại vì M5(iv) thêm một đường gắn note.
+- **(t5) vá và khôi phục được.** `_r387_chay` tra `_r1252_run` qua globals của tệp test. Vá global đó trong context có `finally`, đặt fake `_job_windows` và `_pid_trong_job` trước khi vào fixture, để wrapper gọi fake và teardown dùng đúng phép dò đã lưu. `_r387_va` hiện chỉ vá thuộc tính đã tồn tại; probe với thuộc tính mới `_r387_dong_job` cho `AttributeError` trước thân context. Dùng module thử riêng với thuộc tính fake được tạo rõ ràng, hoặc lưu cả trạng thái vắng mặt và xóa thuộc tính khi thoát. Chỉ phân giải `ctypes.windll` khi cần hàm đóng thật để ca giả chạy trên POSIX.
+- **L1–L7.** L1 xác định rõ đơn vị `22/0/9`. L2 chiếu các thay đổi vào hai tệp write set; việc lọc N4 thực hiện trên bản sao. L3/L6 còn các lỗ hổng về nhãn, đường gọi và phép đo teardown ở trên. L4 giữ nguyên phân loại packet tách và §9 ghi các finding mang sang. Với L5, `22/0/9` là số kỳ vọng; số thực của bản sao phải được đo và ghi UTC cùng hash khi chạy. Finding **L7 lượt 2 đã đóng**: yêu cầu đổi write set dẫn protocol §12 và E2, còn dung sai là điều kiện nghiệm thu N1/N4.
+
+KET_LUAN: request_changes
+tokens used
+72,944
+Review độc lập lượt 3 trên Linux, Python 3.13.18, qua Codex của OpenAI với công cụ cục bộ và sandbox chỉ đọc. Base `3b647461db7c8ded1bddd9aafc5c6aa5eead223f`, tree `306ec6c89a18ac12988d0b324a0867f6d3e91a54`. SHA-256 của bản 3 chưa commit là `29deb740f03ca032edaffc85a2956f8961772e3a623eeacb9f2707825dfd5780`. `diff -u` trả 1 vì hai bản khác nhau. Các probe hoàn tất trong bộ nhớ. Chưa chạy suite, runner đột biến đầy đủ hoặc Windows native. Không sửa tệp.
+
+### Findings
+
+1. **P2 · CÒN MỞ — W6 chết sai chốt, N1/N4 thiếu chuỗi nhãn đối chiếu.** Khi giữ (e1)–(e4) như M6 yêu cầu, chúng vẫn truyền `job=None`. W6 làm cả ba phép gọi Linux đi nhánh job và trả `False` ngay. Probe chạy thân ca với đúng phép thay W6 cho kết quả đầu tiên là `r387(e4) ... ngu=[], mong [0.03]`, trước khi tới bẫy (e9). Runner có thể ghi giết đúng ca, nhưng N1 phải bác kết quả đó. W1/W3 còn dùng dấu `…`, còn W7 chỉ mô tả “nhãn lệch mốc”, trong khi N1/N4 yêu cầu tìm chuỗi cụ thể. **Sửa:** chạy (e9) trước (e1)–(e4), hoặc tách (e9) thành ca đích riêng. Chốt chuỗi nguyên văn cho W1/W3/W7 và ghi dòng `HONG` thực tế của từng mutant. [N1/N4 và bảng W](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:76)
+
+2. **P2 · CÒN MỞ — N4 L2 đặt hai yêu cầu lọc AST không tương thích.** Tôi đọc AST trên base ngày `2026-11-19T05:41Z`: 16 mục cũ được giữ của `DOT_BIEN` có 9 mục nhiều dòng, 2 mục harness có 1 mục nhiều dòng. Giữ nguyên `ast.get_source_segment` và thêm dấu phẩy sau từng **nút** cho bản `16/0/2` biên dịch trong bộ nhớ, hai mốc tách đều xuất hiện đúng một lần. Yêu cầu “mỗi phần tử một dòng” xung đột với việc giữ nguyên văn các nút đó. Bản 3 đã sửa phép cộng: runner cộng cả ba bảng, và `16+6 / 0 / 2+7` cho đúng **22/0/9**, tổng 31 mục. **Sửa:** cho phép mỗi nút trải nhiều dòng, thêm dấu phẩy sau toàn bộ nút và giữ `]` đóng trên dòng riêng cùng hai mốc nguyên văn. [N4 L2](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:79)
+
+3. **P2 · CÒN MỞ — (t6)/H7 chỉ đo hàm phụ, trong khi finding lượt 2 nằm ở (a′).** Tôi nạp thân (a′) từ base và cho `_r387_than_a` ném lỗi `ve bam` kèm ghi chú `r387 teardown: CloseHandle that bai`. Với hàm phụ đúng hợp đồng, hai vế (t6) vẫn xanh, nhưng (a′) dùng điều kiện cũ cũng xanh và nuốt lỗi. Khi nối (a′) qua hàm phụ, cùng probe làm (a′) đỏ. H7 có thể giết đúng nhãn (t6) mà bỏ lọt lỗi ở đường gọi thực tế. **Sửa:** cho (t6) đi qua chính nhánh xử lý của (a′), đưa lỗi băm sạch và lỗi băm có ghi chú qua cùng đường, rồi dùng H7 để đo đường đó. [M6 và H7](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:67)
+
+4. **P2 · CÒN MỞ — M5/X1 khai đo ngoại lệ hàm đóng, nhưng (t3c) chỉ cho phép dò ném.** (t3b) đo gộp hai lỗi trả về, (t3c) đo việc vẫn đóng sau `OSError` từ phép dò, còn (t5) cho hàm đóng trả `1`. Bỏ riêng phần bắt ngoại lệ của hàm đóng vẫn qua toàn bộ các kích thích này, trong khi có thể che lỗi gốc trước `add_note`. Phạm vi “`_r387_don_dep` không bao giờ ném” cũng bao gồm nhánh pgid, nhưng nhánh đó được yêu cầu giữ nguyên và hiện để ngoại lệ từ `_r387_cho_cay_rong` thoát ra. **Sửa:** thêm vế hàm đóng ném, kiểm thông điệp, đúng một lần gọi và việc giữ lỗi gốc. Khai rõ bảo đảm không ném áp dụng cho nhánh job, hoặc sửa và đo cả nhánh pgid nếu muốn bảo đảm chung. [M5–M6](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:66)
+
+5. **P2 · CÒN MỞ — H1/H2/H4 có thể chết trước nhãn đã khai.** M6 chỉ gắn nhãn trace ở H1/H4, trong khi (t2) còn đòi thông điệp phải là `None` và handle phải được xóa. H4 bỏ lời gọi đóng và giả giá trị `1` nên chỉ cô lập được chốt trace nếu vẫn giữ nguyên phần xóa handle. H1 cần dời lời gọi mà vẫn giữ cấu trúc `try/finally` hợp lệ và để dò giả hoạt động sau đóng. H2 bỏ chốt trong `_r387_bao_da_gan`, do đó cũng làm (t4d) đỏ trong cùng ca đăng ký. Runner có thể tính giết nếu (t4d) chạy trước, nhưng N1 sẽ bác nhãn. **Sửa:** chốt kiểm trace của (t2) trước các kiểm tra phụ hoặc dùng một assertion có nhãn chung. Với H2, ghi dấu trực tiếp trước `that(pid)` trong mutant và bỏ lời phát dấu ở vị trí cũ, giữ nguyên chốt của helper. Chốt mẫu H1–H7 theo khối đủ ngữ cảnh, đếm từng mẫu đúng một lần ở vùng mã runner thực sự thay, rồi kiểm compile và dòng lỗi đầu tiên. [H1–H7](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:103)
+
+6. **P3 · CÒN MỞ — Docstring M2 vẫn thiếu các kết quả `False` đang có.** Thay toàn phần như mô tả sẽ bỏ các trường hợp còn thành viên khi hết hạn và kết quả rỗng về sau hạn. Vòng lặp kiểm hạn trước khi công nhận `[]`. Câu “không ngủ” cũng cần giới hạn vào lần dò trả `None`, vì các vòng trước đó có thể đã ngủ. **Sửa:** mô tả đầy đủ hai kết quả, ghi rõ phép dò đồng bộ có thể hoàn tất sau hạn và kết quả đến muộn bị bỏ. [M2](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:63)
+
+7. **P3 · MỚI — Lý do cài wrapper trên POSIX trái với đường gọi thật.** `lenh_run` gọi `_job_windows(p.pid)` vô điều kiện. Hàm thật tự trả `None` trên POSIX. Vì thế wrapper **có chạy** trong các ca POSIX đi qua `_r387_chay`, dù với trạng thái mới nó chỉ chuyển tiếp `None`. Các ca `t*` gọi launcher ngoài fixture này không đi qua wrapper. **Sửa:** ghi đúng đường gọi, khởi tạo quyền sở hữu job rõ ràng, khôi phục `_job_windows` về đúng đối tượng tại lúc vào fixture và kiểm lượt thứ hai của (h) độc lập với lượt đầu. [M5(i)](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md:66) · [Lời gọi thật](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/rv387b/wt/.claude/dev/launcher.py:2889)
+
+### Đối chiếu còn lại
+
+- **Đã đóng phần định dạng của finding đọc nhãn.** Probe gọi `main()` với `--lap-ca probe --lan 1` trả 1 và in cả `lan 1/1: HONG` lẫn đúng một dòng `HONG probe: TinHieuChotCa: nhan thu`. Vấn đề nhãn kỳ vọng còn ở finding 1.
+- **(t4b)/(t4c)/(t4d), H3/H5/H6 khả thi theo thiết kế.** Dùng fixture riêng cho từng vế. H3 vẫn gọi hàm đóng trả `0` rồi mất thông điệp đích. H5 ghi dấu trực tiếp để (t4b) quan sát tệp xuất hiện. H6 làm sentinel bỏ qua đoạn teardown bị dời xuống sau `try`, nên (t5) phải bắt đúng đối tượng rồi kiểm note và số lần đóng. Các neo mới chưa có mã để xác nhận số lần khớp; riêng neo cũ `e.add_note(loi)` cũng cần đo lại vì M5(iv) thêm một đường gắn note.
+- **(t5) vá và khôi phục được.** `_r387_chay` tra `_r1252_run` qua globals của tệp test. Vá global đó trong context có `finally`, đặt fake `_job_windows` và `_pid_trong_job` trước khi vào fixture, để wrapper gọi fake và teardown dùng đúng phép dò đã lưu. `_r387_va` hiện chỉ vá thuộc tính đã tồn tại; probe với thuộc tính mới `_r387_dong_job` cho `AttributeError` trước thân context. Dùng module thử riêng với thuộc tính fake được tạo rõ ràng, hoặc lưu cả trạng thái vắng mặt và xóa thuộc tính khi thoát. Chỉ phân giải `ctypes.windll` khi cần hàm đóng thật để ca giả chạy trên POSIX.
+- **L1–L7.** L1 xác định rõ đơn vị `22/0/9`. L2 chiếu các thay đổi vào hai tệp write set; việc lọc N4 thực hiện trên bản sao. L3/L6 còn các lỗ hổng về nhãn, đường gọi và phép đo teardown ở trên. L4 giữ nguyên phân loại packet tách và §9 ghi các finding mang sang. Với L5, `22/0/9` là số kỳ vọng; số thực của bản sao phải được đo và ghi UTC cùng hash khi chạy. Finding **L7 lượt 2 đã đóng**: yêu cầu đổi write set dẫn protocol §12 và E2, còn dung sai là điều kiện nghiệm thu N1/N4.
+
+KET_LUAN: request_changes

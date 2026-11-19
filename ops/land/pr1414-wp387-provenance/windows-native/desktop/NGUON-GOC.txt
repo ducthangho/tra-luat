@@ -14,3 +14,4 @@ driver do387.py (sha256 afff2a4f…) va do387b.py (2e1a71e2…): ban trong scrat
 nhan: du lieu tho = measured, chep tu may chu kho (bam hai dau khop); cac con so trong TOM-TAT do driver tren Desktop tinh, container chi doc lai.
 Luu y luot 2: dong `SUITE BASE dung lai log luot 1` (base do TRUOC khi bat Developer Mode) nen hieu tap bo qua ra 10 ID (them r1335_symlink_doi_dich_giua_bam_va_phong);
   luot 3 do lai base cung dieu kien => hieu dung 9 ID r387, HONG base = head (10 ca, do san).
+ghi chu 19-11 ~11:20Z: tep zip nhi phan da thay bang n4n5-387b.zip.b64 (base64 MIME 76 cot, dung ban da chuyen qua Desktop Commander) vi gate-ops duong nhanh tu choi tep nhi phan; giai ma: base64 -d n4n5-387b.zip.b64 => sha256 440270aa43936212c80e5768b83d9a30a1f62d7d721331b37a255ac9b7435769.

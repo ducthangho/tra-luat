@@ -154,7 +154,7 @@ trang_thai_packet:
     sach + audit chu kho. (5) uy quyen: audit tu dang 7004039929. (6) muc tieu: N1-N3, N6 measured passed tren cay merge; N4/N5 measured
     passed tren Desktop o exact head 9804f64 (log tho trong windows-native/desktop/). (7) tran: Codex PR 2/10, CI Ubuntu 2/2, Windows native 3/3, kich thuoc 333/450.
   dieu_kien_dong_wp: >-
-    DA LAM: log native Desktop luot 1/2/3 vao windows-native/desktop/ (zip n4n5-387b.zip sha256 440270aa…, bam tung tep khop hai dau),
+    DA LAM: log native Desktop luot 1/2/3 vao windows-native/desktop/ (zip n4n5-387b.zip, luu dang base64 n4n5-387b.zip.b64, sha256 zip 440270aa…, bam tung tep khop hai dau),
     doi chieu head/base trong log (CHOT HEAD 9804f64 tree 13c48c05 sach; CHOT BASE 3b64746 sach), lat N4/N5, chay lai kiem-dong-wp.
   canh_bao_cho_chu_kho: >-
     (i) landed true dua tren bon moc §10.2.2. (ii) N4/N5 do tren Desktop TRUOC merge, o exact head 9804f64 (cay merge 0ca331b co tree

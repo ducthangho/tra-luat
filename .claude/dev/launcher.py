@@ -99,7 +99,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.6.1"
+VERSION = "1.6.2"
 
 
 def ky_ban_ghi_luot(ban_ghi: dict, khoa_hex: str) -> str:
@@ -603,18 +603,25 @@ _HAN_CHO_CAY_TRUOC_BAM_LOG = 10.0   # giây; bằng `bo_loc.ket_thuc(10)`
 
 
 def _nen_do_cay_truoc_bam() -> bool:
-    """#387: CHỖ DUY NHẤT quyết nền nào được đo cây trước khi băm log. Packet A: chỉ Linux."""
-    return platform.system() == "Linux"
+    """#387: CHỖ DUY NHẤT quyết nền nào được đo cây trước khi băm log.
+
+    Packet B: Linux và Windows; Darwin/nền khác chưa đo (nợ `wp387-darwin-chua-do`).
+    """
+    return platform.system() in ("Linux", "Windows")
 
 
 def _cho_cay_chet_truoc_bam(pid: int, job, han: float) -> bool:
-    """#387: đợi nhóm tiến trình `pid` rỗng trước khi băm log; kết quả thành `log_bam_cay_da_chet` của `run.json`.
+    """#387: đợi cây của `pid` rỗng trước khi băm log; kết quả thành `log_bam_cay_da_chet` của `run.json`.
 
-    `True` = phép dò trả danh sách rỗng trong nhóm tiến trình POSIX; tiến trình rời nhóm (`setsid`) nằm ngoài
-    phạm vi. `False` = CHƯA chứng minh được: còn thành viên khi hết hạn, lần dò trả về sau hạn, không đo được,
-    bị ngắt, hoặc nền không phải Linux (ở đó trả ngay: không dò, không ngủ). `job` để dành cho packet B.
-    Một deadline monotonic phủ mọi lần dò và mọi lần ngủ. Quét `/proc` là lời gọi đồng bộ, nên tổng thời gian
-    ≤ `han` cộng một lần dò; kết quả của lần dò vượt hạn bị bỏ, kể cả `[]`.
+    `True` = phép dò trả danh sách rỗng TRONG hạn, trong nhóm tiến trình POSIX (Linux) hoặc trong Job Object được
+    theo dõi (Windows); rời nhóm (`setsid`), breakaway, hoặc sinh trong khe giữa `Popen` và lúc gán job nằm ngoài
+    phạm vi. `False` = CHƯA chứng minh được: còn thành viên khi hết hạn, lần dò trả về sau hạn (kể cả `[]`), phép
+    dò trả `None` (không đo được — trả ngay ở lần dò đó, có thể sau các lần ngủ trước); nền ngoài Linux/Windows
+    hoặc Windows không có job thì trả ngay từ đầu (không dò, không ngủ). `KeyboardInterrupt` KHÔNG bị hàm này
+    bắt: nó truyền ra, và `lenh_run` bắt rồi ghi `log_bam_cay_da_chet = False`.
+    Một deadline monotonic phủ mọi lần dò và mọi lần ngủ; deadline quyết định có dò tiếp, có nhận kết quả, và ngủ
+    tối đa bao lâu. Thời gian thực có thể vượt `han` vì phép dò đồng bộ (`/proc` · `QueryInformationJobObject`)
+    chạy quá hạn hoặc vì lần ngủ thức dậy muộn — kết quả khi ấy vẫn bị bỏ.
     """
     if not _nen_do_cay_truoc_bam():
         return False
@@ -622,7 +629,7 @@ def _cho_cay_chet_truoc_bam(pid: int, job, han: float) -> bool:
     while True:
         if het - time.monotonic() <= 0:
             return False
-        nhom = _thanh_vien_nhom(pid)
+        nhom = _thanh_vien_nhom(pid) if platform.system() == "Linux" else (_pid_trong_job(job) if job is not None else None)  # #387 B: dò theo nền
         if nhom is None:
             return False
         con_sau = het - time.monotonic()
@@ -3038,7 +3045,7 @@ def lenh_run(a) -> int:
     # nhung "khong xoa ngay" KHONG duoc thanh "nam lai vinh vien": `_cap_id`
     # quet don ban chup qua han o moi luot chay moi.
     # #387: Linux dùng kết quả đợi ở trên; nền khác giữ nguyên biểu thức cũ (đo một lần, không chờ).
-    cay_da_chet = log_cay_chet if _nen_do_cay_truoc_bam() else (_thanh_vien_nhom(p.pid) == [])
+    cay_da_chet = (log_cay_chet and platform.system() != "Windows") if _nen_do_cay_truoc_bam() else (_thanh_vien_nhom(p.pid) == [])
     if (ban_ghi.get("prompt_ban_chup") and not a.giu_ban_chup
             and cay_da_chet):
         try:
@@ -3046,7 +3053,7 @@ def lenh_run(a) -> int:
             ban_ghi["prompt_ban_chup_da_xoa"] = True
         except OSError:
             pass
-    if not _nen_do_cay_truoc_bam():   # #387: nền khác Linux giữ mốc ở vị trí cũ, sau phép đo xoá prompt
+    if not _nen_do_cay_truoc_bam():   # #387: nền khác Linux/Windows giữ mốc ở vị trí cũ, sau phép đo xoá prompt
         ket_thuc = _bay_gio()
     ban_ghi.update(ket_thuc_utc=ket_thuc.isoformat(), ma_thoat=ma_that)
     # wp484 g7 (connector P2 17-10, đo: run `47cf857e` ghi `xong`/0/`unknown`) — nhãn

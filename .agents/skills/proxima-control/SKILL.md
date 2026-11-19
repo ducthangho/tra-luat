@@ -83,3 +83,26 @@ Nạp riêng `scripts/ProximaActivation.psm1` khi kiểm tra kích hoạt. Mọi
   `FENCE_ARTIFACT_MISMATCH`. Băm artifact phải đủ 64 ký tự hex và kế hoạch không được lặp host, nếu không hàm trả
   `NOT_MEASURED`.
 - Lỗi ngoài dự kiến trả `NOT_MEASURED` kèm thông tin lỗi. Kiểm thử: `tests/ProximaActivation.Tests.ps1`.
+
+## Gỡ cài đặt (Uninstall residue)
+Bộ gỡ chính thức của Proxima per-user (phiên bản 5.5, bản vá 0) luôn để lại thư mục rỗng `%LOCALAPPDATA%\Programs\Proxima` và
+`%LOCALAPPDATA%\proxima-updater\installer.exe`. Nạp riêng `scripts/ProximaInstall.psm1` (không qua manifest) để dọn hai thứ đó. Hàm
+`Remove-ProximaUninstallResidue` không chạy bộ gỡ, không cài, không mở Proxima, chỉ đọc registry, và chỉ xoá đúng hai đích trên.
+1. Chạy bộ gỡ của nhà cung cấp: `"<dir>\Uninstall Proxima.exe" /currentuser /S`.
+2. Chờ cả các tiến trình `Un_*`/`Au_*` do bộ gỡ tự nhân bản kết thúc; bộ gỡ chạy bất đồng bộ nên lệnh ở bước 1 trả về sớm.
+3. Xem trước bằng `-WhatIf`, đọc kết quả, rồi mới dọn:
+```powershell
+Remove-ProximaUninstallResidue -WhatIf
+Remove-ProximaUninstallResidue
+```
+- Kết quả có `ok`, `code`, `actions` (việc đã làm, hoặc việc sẽ làm khi `-WhatIf`), `before`, `after`, `error`. Thành công:
+  `CLEANED` hoặc `NOTHING_TO_DO` (`ok` là true). `-WhatIf` trả `WOULD_REMOVE` (`ok` là false vì chưa dọn gì) hoặc `NOTHING_TO_DO`.
+- Từ chối trước khi xoá bất cứ thứ gì: `UNINSTALL_RUNNING` (còn tiến trình `Proxima`, `Un_*` hoặc `Au_*`), `STILL_INSTALLED` (còn
+  khoá gỡ cài đặt có tên bắt đầu bằng `Proxima`, hoặc còn `Proxima.exe`), `BAD_ARGUMENT`, `NOT_MEASURED` (lỗi ngoài dự kiến, xem
+  `error`; nếu lỗi xảy ra giữa chừng thì `actions` ghi việc đã làm).
+- `RESIDUE_UNEXPECTED`: có thứ ngoài dự kiến (thư mục cài còn tệp, updater có thêm mục, bộ cài sai kích thước hoặc sai băm, có
+  junction/symlink). **Phải có người xem**; không tự xoá tay, không chạy lại với băm khác chỉ để cho qua.
+- `RESIDUE_CHANGED`: đích bị đổi giữa lúc kiểm và lúc xoá. Hàm trả updater về tên cũ khi được; nếu không, `actions` ghi đường dẫn
+  `proxima-updater.pxu-<GUID>` còn giữ lại. `CLEAN_INCOMPLETE`: đã xoá nhưng kiểm kê sau vẫn còn đích. Cả hai cũng cần người xem.
+- Giới hạn: chỉ cho bản cài per-user nói trên với băm bộ cài đã biết; bản khác phải truyền `-InstallerSha256` và `-InstallerBytes`
+  tương ứng. Danh sách tiến trình và khoá registry là ảnh chụp tại lúc gọi. Kiểm thử: `tests/ProximaInstall.Tests.ps1`.

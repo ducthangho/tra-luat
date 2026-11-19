@@ -47,5 +47,7 @@
   "spec_path": "ops/specs/wp1166-r4-g4.md",
   "spec_hash": "a77f06c5316d5777a3a7650fad77b74474fa4621ba2e29e0ca19e83865641998",
   "prompt_path": "ops/prompts/wp1166-r4-g4.txt",
-  "prompt_sha256_required": "d0f971e07707f54c92ffc0eb07e00a04b1acfbc4c6ec1aa9c7bb7d3e728b8a3d"
+  "prompt_sha256_required": "d0f971e07707f54c92ffc0eb07e00a04b1acfbc4c6ec1aa9c7bb7d3e728b8a3d",
+  "da_bi_thay_the": "wp1166-r4-g5-claude",
+  "da_bi_thay_the_note": "g4 ended approved_pending rev11 (H2 18d48b6) with exact-H2 CI red; owner decision https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7004832203 moves PR0 to g5 (Installed Mission68 7004889140). Revoked early by tombstone while still live so the write set has one holder."
 }

@@ -316,7 +316,10 @@ function Invoke-Counterexample($Mutation) {
         if ($record.timed_out) {
             Stop-Case "Counterexample child timed out after $($report.child_timeout_sec) s and was killed"
         }
-        if ($record.rc -notin 0, 1 -or -not [IO.File]::Exists($record.report_path)) {
+        # Dispatcher fix (WP-PXU N1): a child may return rc 2 ONLY because of environment-limited cases that the parent
+        # itself measured as setup_error (e.g. PU13 without symlink privilege); anything else is still no credit.
+        $parentEnvLimited = @($report.cases | Where-Object { $_.outcome -ceq 'setup_error' } | ForEach-Object { [string]$_.id })
+        if ($record.rc -notin 0, 1, 2 -or -not [IO.File]::Exists($record.report_path)) {
             throw "Counterexample child did not complete (rc=$($record.rc))"
         }
         $childReport = ConvertFrom-Json -InputObject ([IO.File]::ReadAllText($record.report_path, $utf8))
@@ -329,9 +332,23 @@ function Invoke-Counterexample($Mutation) {
         }
         $childFailed = @($childReport.failed_ids | Where-Object { $null -ne $_ })
         $record.child_failed_ids = $childFailed
+        $childSetupIds = @($childReport.setup_error_ids | Where-Object { $null -ne $_ } | ForEach-Object { [string]$_ })
+        $record.child_setup_error_ids = $childSetupIds
+        if ($record.rc -eq 2) {
+            if ($childReport.setup_error -or @($childReport.skipped_ids | Where-Object { $null -ne $_ }).Count -or
+                @($childReport.id_errors | Where-Object { $null -ne $_ }).Count -or $childSetupIds.Count -eq 0) {
+                throw "Counterexample child did not complete (rc=2; setup_error='$($childReport.setup_error)')"
+            }
+            foreach ($id in $childSetupIds) {
+                if ($parentEnvLimited -cnotcontains $id) { throw "Counterexample child setup_error $id not measured as setup_error in parent (rc=2)" }
+                if ($targetIds -ccontains $id) { throw "Counterexample child setup_error on declared target $id (rc=2)" }
+            }
+            $record.env_limited_ids = $childSetupIds
+        }
         # Killed only when exactly the declared cases turn red, each for its declared reason.
         $problems = [Collections.Generic.List[string]]::new()
-        if ($record.rc -ne 1) { $problems.Add("child rc=$($record.rc)") }
+        if ($record.rc -ne 1 -and $record.rc -ne 2) { $problems.Add("child rc=$($record.rc)") }
+        if ($childFailed.Count -eq 0) { $problems.Add('child reported no failed case') }
         foreach ($id in $childFailed) {
             if ($targetIds -cnotcontains $id) { $problems.Add("undeclared failure $id") }
         }

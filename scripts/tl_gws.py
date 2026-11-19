@@ -9,6 +9,7 @@ from __future__ import annotations
 # stdlib TƯỜNG MINH (tránh phụ thuộc bind() chèn — vd khi dispatch trực tiếp KHÔNG qua build_parser thì bind chưa
 # chạy → 'tempfile/tarfile/...' bare sẽ NameError). bind() chỉ còn chèn tên tl-RIÊNG (_gas/_imp/hằng GWS_*…).
 import os
+import ntpath
 import sys
 import re
 import json
@@ -1217,14 +1218,110 @@ def _duong_dich_chuan(p: str, cwd: str):
 
 def _dich_cred_gws(cfgdir_tho: str):
     """WP433 P2a: `(dest, lý_do)` cho `credentials.json` của gws (W4, W5); KHÔNG tạo/ghi gì. POSIX: chuẩn hoá rồi chốt MỌI thành phần
-    từ `/` tới chính tệp (ngoài kho git, không liên kết tượng trưng). Nền khác: giữ đích như cũ, chưa chốt (P2c)."""
+    từ `/` tới chính tệp (ngoài kho git, không liên kết tượng trưng). Nền khác: `_dich_cred_gws_nt` (P2c-C1)."""
     if os.name != "posix":
-        return os.path.join(cfgdir_tho, "credentials.json"), None
+        return _dich_cred_gws_nt(cfgdir_tho)
     chuan = _duong_dich_chuan(cfgdir_tho, os.getcwd())
     if isinstance(chuan, str):
         return None, chuan
     dest = chuan[0] + "/credentials.json"
     return dest, _kiem_dich_ghi(dest, "/", (*chuan[1], "credentials.json"))
+
+
+_NS_NT = ((r"[\\/]{2}\?[\\/]", "thiet_bi_win32"), (r"[\\/]{2}\.[\\/]", "thiet_bi_dos"), (r"[\\/]\?\?[\\/]", "nt_doi_tuong"), (r"[\\/]{2}", "unc"))
+_TEN_TB_NT = re.compile(r"(CON|PRN|AUX|NUL|COM[0-9¹²³]|LPT[0-9¹²³]|CONIN\$|CONOUT\$) *(\..*)?", re.I)
+
+
+def _tp_sai_nt(t: str) -> str | None:
+    """WP433 P2c-C1: mã từ chối của MỘT thành phần đường Windows, hoặc None (mã đầu tiên khớp thắng)."""
+    if re.search(r'[<>:"|?*\x01-\x1f]', t) or re.search(r"[\ud800-\udfff]", t):
+        return "ky_tu_cam"
+    if t.endswith((".", " ")):
+        return "cuoi_cham_cach"
+    return "ten_thiet_bi" if _TEN_TB_NT.fullmatch(t) else None
+
+
+def _phan_loai_duong_nt(p: str) -> tuple:
+    """WP433 P2c-C1: phân loại THUẦN (chỉ `ntpath.splitdrive` + regex, không chạm hệ tệp) một đường Windows. Nhận: `("o_tuyet_doi",
+    "X:\\", thành_phần)` hoặc `("tuong_doi", None, thành_phần)`; mọi dạng khác (thiết bị, UNC, ổ trần, `..`, tên cấm…) ⇒ `(mã,)`."""
+    if "\x00" in p:
+        return ("nul",)
+    if p.strip() == "":
+        return ("trang",)
+    for mau, ma in _NS_NT:
+        if re.match(mau, p):
+            return (ma,)
+    d, r = ntpath.splitdrive(p)
+    if re.fullmatch(r"[A-Za-z]:", d):
+        if r == "" or r[0] not in "\\/":
+            return ("o_tuong_doi" if r else "o_tran",)
+        loai, goc = "o_tuyet_doi", d.upper() + "\\"
+    elif d == "":
+        if p[0] in "\\/":
+            return ("goc_o",)
+        loai, goc = "tuong_doi", None
+    else:
+        return ("o_khac",)
+    tp = tuple(t for t in re.split(r"[\\/]", r) if t not in ("", "."))
+    if ".." in tp:
+        return ("hai_cham",)
+    sai = next(filter(None, map(_tp_sai_nt, tp)), None)
+    return (sai,) if sai else (loai, goc, tp)
+
+
+def _loai_o_nt(goc: str) -> int:
+    """`GetDriveTypeW(gốc ổ)`; nạp lười vì `ctypes.WinDLL` chỉ có trên nt."""
+    import ctypes
+    f = ctypes.WinDLL("kernel32", use_last_error=True).GetDriveTypeW
+    f.argtypes, f.restype = [ctypes.c_wchar_p], ctypes.c_uint
+    return f(goc)
+
+
+def _duong_dich_chuan_nt(p: str, cwd: str, loai_o=None):
+    """WP433 P2c-C1: `(gốc_ổ, thành_phần)` hoặc lý do một dòng. Đường tương đối ghép THÀNH PHẦN vào `cwd`; chỉ nhận ổ có chữ, còn
+    thành phần, loại ổ REMOVABLE (2) hoặc FIXED (3) — UNC, ổ mạng, CD, RAM, không rõ đều bị từ chối."""
+    a, x = _phan_loai_duong_nt(p), p
+    if a[0] == "tuong_doi":
+        c, x = _phan_loai_duong_nt(cwd), cwd
+        a = (c[0], c[1], c[2] + a[2]) if c[0] == "o_tuyet_doi" else c
+    if a[0] != "o_tuyet_doi" or not a[2] or (loai_o or _loai_o_nt)(a[1]) not in (2, 3):
+        return "đường không hợp lệ: " + repr(x)[:200]
+    return a[1], a[2]
+
+
+def _co_git_nt(d: str) -> str | None:
+    """`d` hoặc tổ tiên gần nhất có mục `.git`, hoặc None. Ba trạng thái: lỗi `lstat` ngoài "chưa có" LAN RA (không nuốt)."""
+    while True:
+        try:
+            os.lstat(ntpath.join(d, ".git"))
+            return d
+        except (FileNotFoundError, NotADirectoryError):
+            if ntpath.dirname(d) == d:
+                return None
+            d = ntpath.dirname(d)
+
+
+def _dich_cred_gws_nt(cfgdir_tho: str):
+    """WP433 P2c-C1 (Windows): `(dest, lý_do)`; KHÔNG tạo/ghi gì. Thứ tự: chuẩn hoá; `.git` trên chuỗi từ vựng; liên kết ở mọi tiền
+    tố từ gốc ổ; `.git` trên chuỗi THẬT (`realpath` strict của tổ tiên gần nhất đang tồn tại + đuôi chưa tồn tại)."""
+    chuan = _duong_dich_chuan_nt(cfgdir_tho, os.getcwd())
+    if isinstance(chuan, str):
+        return None, chuan
+    goc, tp = chuan[0], (*chuan[1], "credentials.json")
+    dest = goc + "\\".join(tp)
+    if (kho := _co_git_nt(ntpath.dirname(dest))) is None:
+        if (ly := _kiem_dich_ghi(dest, goc, tp)) is not None:
+            return dest, ly
+        for i in range(len(tp) - 1, -1, -1):
+            a = goc + "\\".join(tp[:i])
+            try:
+                os.lstat(a)
+                break
+            except FileNotFoundError:
+                if i == 0:
+                    raise
+        kho = _co_git_nt(ntpath.join(os.path.realpath(a, strict=True), *tp[i:-1]))
+    return dest, None if kho is None else "nằm trong kho git: " + repr(kho)[:200]
 
 
 def _kiem_jar_nlm(nlm) -> str | None:

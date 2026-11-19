@@ -1,0 +1,51 @@
+# HO SO LAND — PR #1378 (ho so nghiem thu #1319 + proxima-control: ProximaActivation, ProximaInstall).
+# Khuon: ops/land/pr882-wp748-r23-land-evidence.yaml. Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1.
+# TRANG THAI: merged (96b6a33d), `landed: true` — bon moc §10.2.2 passed (Gate output do bang danh_gia_gate.py v3);
+# lease r2 nha (ai-dang-giu 13:47:37Z NGUOI_GIU 0).
+# NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo; not_measured = khong do, ghi ly do.
+# Readback tho: ops/land/pr1378-wp1319-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-19.
+
+schema_version: 1
+mission_id: gh-1238
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrapMSm976JLC7Fp1HM
+input_packet_generations:
+  - {packet_issue: 1401, packet_id: WP-PXA, revision: 2, generation: 1, lease_id: wp-pxa-r2-g1-executor}
+  - {packet_issue: 1319, ghi_chu: 'PR gom cac packet con #1401 #1405 #1409 #1410 #1413 #1416; moi packet co lease/review rieng, deu da thu hoi'}
+authorized_head_sha: 1cf535fddbd81f343872c81582b301f08bd79f45
+authorized_head_tree: efbd119cea400cca706cdcb7791c3204214fdf1c
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1378#issuecomment-7006185095
+authorization_ghi_chu: >-
+  measured — readback-comment-7006185095.json: user ducthangho, author_association OWNER, 2026-11-19T10:15:55Z, body
+  "land: 1cf535fd… -> master, merge commit, sau merge: ghi sổ land + thu hồi lease r2 + VERDICT K4" (neo dung SHA, dich,
+  phuong thuc, thao tac hau merge). Ghi them vao state bang packet_loop.py ghi-uy-quyen (loi khai, khong mo khoa guard).
+land_operator: 'phien dieu phoi (cung phien la executor WP-PXA r2) — ADR-0034 cho phep Executor lam Land Operator khi co uy quyen ben neo exact SHA; khong tu review/approve'
+merge_method: merge
+merge_commit: 96b6a33d770f7539a3eacbebdc215f87ded4ea7f
+merge_commit_tree: d007b41f5b17c47c04150a56680081ec79f2ac5b
+merge_commit_parents: [4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd, 1cf535fddbd81f343872c81582b301f08bd79f45]
+merge_goi: 'measured — readback-pr-1378.json: merged true, merge_commit_sha 96b6a33d, head.sha 1cf535fd (goi MCP merge_pull_request voi expectedHeadSha=1cf535fd, merge_method=merge); git show -s: parents = master cu 4eda94e9 + ung vien; merge-base --is-ancestor 1cf535fd origin/master rc 0'
+ref_fence: >-
+  measured — ref-fence-delta.txt: git ls-remote truoc/sau merge (moi ben 2000 ref; sha256 tap 3e84a0e9… / 791346e9…). Delta 4:
+  HEAD va refs/heads/master 4eda94e9 -> 96b6a33d (chinh merge nay); refs/pull/1378/merge mat (binh thuong sau merge);
+  refs/heads/ops/wp1342-r5-spec moi (phien khac, khong lien quan). Gioi han: hai ben deu dung 2000 dong — co the bi cat boi
+  proxy, chua do; delta tren tap da doc van giai thich du.
+pre_merge_checks:
+  - {name: 'kiem-merge ADR-0060 K0-K7', sha: 1cf535fddbd81f343872c81582b301f08bd79f45, conclusion: 'ĐỦ ĐIỀU KIỆN MERGE, rc 0', nguon: kiem-merge-1cf535f.txt, ghi_chu: 'measured — dau vao: readback-runs/check-runs/jobs-1cf535f, readback-connector-1378.json, run-b4dcb23d.json + stdout (sha 1ddb3cfa), --p3-offline offline-k4b-P3-1 + readback-comment-7006027112.json, windows-k6-1cf535f.json; spec ops/specs/wp-pxa-r2.md + lease r2. K7 khong cham vung M9.'}
+  - {name: 'ci.yml pull_request tren head cuoi', run_id: 44502793274, run_attempt: 1, sha: 1cf535fddbd81f343872c81582b301f08bd79f45, conclusion: success, nguon: [readback-runs-1cf535f.json, readback-jobs_44502793274.json, readback-check-runs-1cf535f.json]}
+  - {name: 'review offline K4 (Codex gpt-6-astra qua launcher.py run, 2/2 do chu kho cap, E2)', sha: 1cf535fddbd81f343872c81582b301f08bd79f45, conclusion: 'approve; 1 P3 offline-k4b-P3-1 mien boi chu kho', nguon: [run-315c2e65.json, run-b4dcb23d.json, ../../acceptance/wp-pxa/VERDICT-r2.md], ghi_chu: 'measured — run-315c2e65.json va run-b4dcb23d.json: head dung, trang_thai xong, ma_thoat 0, model_phuc_vu_trang_thai DO_DUOC (gpt-6-astra)'}
+  - {name: 'Codex connector', sha: 1cf535fddbd81f343872c81582b301f08bd79f45, conclusion: 'sach — "Didn''t find any major issues" (issue comment 7006080824)', nguon: readback-connector-1378.json, ghi_chu: 'finding P2 cu (review 5972629197, head 953ba9d8) da sua o 9a495967 va duoc K4 xac nhan dong'}
+  - {name: 'Windows K6 (test tap trung Desktop)', sha: 1cf535fddbd81f343872c81582b301f08bd79f45, conclusion: 'PS7 36/36 + PS5.1 36/36 duoi tr-TR; phan chung rc 2', nguon: windows-k6-1cf535f.json, ghi_chu: 'chay 09:50Z tren cay dung tu blob; bam tep da test == blob trong commit (kiem bang git show). Zip e1d6505b. Lua chon cua chu kho: "Dung luot Desktop vua chay"'}
+post_merge_checks:
+  - {name: 'ci.yml push master — DUNG merge SHA', run_id: 44507921722, run_attempt: 1, sha: 96b6a33d770f7539a3eacbebdc215f87ded4ea7f, conclusion: success, jobs: '39/39 success, nhan ubuntu-latest', xong: '2026-11-19T11:12:08Z', nguon: [readback-run-44507921722.json, readback-jobs-44507921722.json], ghi_chu: 'measured — readback-run-44507921722.json va readback-jobs-44507921722.json (REST). Chi Ubuntu: ma tran os cua workflow cho push master.', provenance_10_2_2: {run: passed, checkout: 'passed — 39/39 job sha 96b6a33d, parents 4eda94e9+1cf535fd, tree d007b41f', workflow_definition: 'passed — ops-do-workflow-definition.yml run 44513468945 (goi qua MCP actions_run_trigger theo yeu cau chu kho "Chạy luôn lệnh cho tôi"), artifact 14523674028 sha256 63962432…; path .github/workflows/ci.yml, oid 96b6a33d, blob a1db88d9 (= git rev-parse 96b6a33d:.github/workflows/ci.yml), sha256 d1201a76…', gate_output: 'passed — danh-gia-gate-output-44507921722.txt (danh_gia_gate.py v3 sha256 0ea9a5e9 = v2 539fed68 cua ho so #1386-#1407 + sua connector P2 r4629096903: job skipped => not_measured): MOC_GATE_OUTPUT passed 39/39 job co dau hieu duong theo TUNG BUOC; readback-jobs-44507921722.json 39/39 success, 0 skipped. Phan chung phan-chung-buoc-44507921722.txt: xoa dau hieu buoc gate-registry / gate-nhanh-manh / gate-cong-cu => not_measured rc 0 ca ba; kiem_skipped.py: run gia lap chuan-bi success + gate skipped => not_measured tren v3 (DAT), passed tren v2 (DO — tai hien finding). ci_provenance.py (bo sinh chuan) van ghi gate_output not_measured (khong_co_trong_MOI / che_do_khong_xac_dinh) — khong viet lai.', nguon: 'ci-provenance-44507921722/provenance.yaml sha256 cece1096… (ops/ci_provenance.py thu --run 44507921722 --attempt 1 --wd-run 44513468945, rc 0)'}}
+bookkeeping:
+  - {item: 'VERDICT K4 WP-PXA r2', duong_dan: ops/acceptance/wp-pxa/VERDICT-r2.md}
+  - {item: 'thu hoi lease wp-pxa-r2-g1-executor', ket_qua: 'rut han 10:42:28Z, ghi merged + withdrawn_*'}
+  - {item: 'PR ghi so', nhanh: ccr-8ee03d7f-vnmqk0}
+landed: true
+landed_dieu_kien: 'PROTOCOL §10.2.4 — (1) gate hau merge tren 96b6a33d: run/checkout/workflow_definition/gate_output measured passed (ci-provenance-44507921722/provenance.yaml + danh-gia-gate-output-44507921722.txt v3) => DAT. (2) lease nha: ai-dang-giu-sau-rut-han.txt (2026-11-19T13:47:37Z, sau han 13:46:49Z cua ban tren master) 4/4 duong dan write set r2 NGUOI_GIU 0 rc 0 => DAT. (3) bookkeeping: VERDICT-r2, lease r2 rut han, ho so nay (PR ghi so #1419). (4) review: K4 offline approve 2/2 + connector sach tren 1cf535f. (5) uy quyen: issuecomment-7006185095 neo 1cf535f. (6) kiem-merge K0-K7 DU DIEU KIEN. (7) tran: Codex K4 2/2 do chu kho cap (E2).'

@@ -97,3 +97,8 @@ budget:
 budget_ghi_chu: 'Codex PR <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 3 (BAT BUOC, Desktop uu tien, VM du phong). Ngoai ngan sach PR: 5 loi goi Codex offline review dac ta (ops/reviews/wp433p2r-spec-r1/).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+da_bi_thay_the: wp433-r5-g2-claude
+da_bi_thay_the_ly_do: >-
+  Dac ta R doi sang ban r1b (sha256 43d60d7c, chu kho duyet bam 19-11) vi dot bien 2 cua ban r1 (`!= 0`) chet sai luot tren
+  Windows (probe Desktop, ops/reviews/wp433p2r-spec-r1/r1b/). Cung revision 5, cung nhanh agent/wp433-r5-g1-claude, cung executor;
+  chua push gi duoi lease nay.

@@ -1,0 +1,13 @@
+$ python -X utf8 -B probe_db2.py   (TEMP = F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmpprobe)
+sha256 93d92dbb70d4296969e1912fbdbf8a7ec8e2d7e5996ba4289db7f4cf0c7ed28c
+os.name=nt attr(goc)=22 attr(T)=16
+candidate chan tai: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmpprobe\\wp433r-probe-lglzprva\\cfg' (ky vong cfg: True)
+dot bien 2 chan tai: 'F:\\' (== cfg: False)
+KET LUAN: dot bien 2 chet SAI LUOT o W5.bit (TIN_DUNG_GIA)
+rc=0
+$ python -X utf8 -B probe_db2.py   (TEMP = C:\Users\<user>\AppData\Local\Temp)
+os.name=nt attr(goc)=22 attr(T)=16
+candidate chan tai: 'C:\\Users\\<user>\\AppData\\Local\\Temp\\wp433r-probe-6_xsc316\\cfg' (ky vong cfg: True)
+dot bien 2 chan tai: 'C:\\' (== cfg: False)
+KET LUAN: dot bien 2 chet SAI LUOT o W5.bit (TIN_DUNG_GIA)
+rc=0

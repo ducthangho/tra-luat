@@ -33,12 +33,12 @@ granted_on_instruction: 'chủ kho 19/11 trả lời câu hỏi "Có cần gỡ 
 recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-19T08:53:06Z'
-heartbeat_at: '2026-11-19T08:53:06Z'
+heartbeat_at: '2026-11-19T09:08:15Z'
 lease_until: '2026-11-19T12:53:06Z'
 lease_expires_at_utc: '2026-11-19T12:53:06Z'
 max_lease_hours: 4
 review_calls_limit: 1
-review_calls_used: 0
+review_calls_used: 1
 native_runs_limit_per_host: 1
 native_step_reruns_limit: 1
-native_runs_used: 'DESKTOP-T9R33P2 0'
+native_runs_used: 'DESKTOP-T9R33P2 1 (2 dryrun truoc do, dryrun 1 dung o tien kiem do loi dem trong driver, khong cham may)'

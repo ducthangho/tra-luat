@@ -1,0 +1,6 @@
+# LAN 1; lease = git show 4eda94e:ops/leases/wp1389-r1-g1-claude.yaml (blob a381fda83349ac14cdeeae895547217b6422bde1) — lease nam tren master (trong diff PR)
+# checkout: 6f02e0390d605867628f5a0adaa625a19feb44a3 ; origin/master 96b6a33d770f7539a3eacbebdc215f87ded4ea7f ; luc: 2026-11-19T10:58:11Z
+# python .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban <bien-ban-m8.yaml> --lease <lease>
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

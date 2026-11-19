@@ -1,0 +1,141 @@
+moi truong: pid=5808 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+  BO QUA t03_git_gia_thoat_0_im_lang_van_bi_chan: bo qua tren Windows (can shim .cmd)
+  BO QUA t28_qua_han_giet_ca_CON_CHAU: bo qua tren Windows (can kiem bang cay tien trinh that)
+  BO QUA t33_stop_giet_that: bo qua tren Windows
+  BO QUA t50_stop_roi_runner_KHONG_duoc_de_len_so: bo qua tren Windows (can kiem rieng)
+  BO QUA t51_ma_thoat_ngoai_khoang_khong_bi_cat_cut: bo qua tren Windows (can tin hieu POSIX)
+  BO QUA t55_doctor_nhan_python_khong_can_ten_python3: bo qua tren Windows (can shim khong duoi .exe)
+  BO QUA t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc: bo qua tren Windows (can .exe rong)
+  BO QUA t63_chau_phot_lo_SIGTERM_ma_bao_da_giet_ca_cay_la_noi_doi: ca nay dung SIG_IGN cua POSIX; duong Windows la t62
+  BO QUA t67_chau_sinh_SAU_luc_chup_van_phai_bi_dem: dua tren SIGTERM cua POSIX; duong Windows la t62
+  BO QUA t66_chau_setsid_roi_khoi_nhom_van_phai_bi_giet: setsid la khai niem POSIX; duong Windows la t62
+  BO QUA t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau: ca nhom tien trinh POSIX; Windows can fixture that rieng
+  BO QUA t72_bi_ngat_KHONG_duoc_ghi_thanh_xong: SIGINT tren Windows khong cung ngu nghia; can ca rieng
+  BO QUA t108_hook_phai_probe_CHAY_DUOC_khong_chi_CO_MAT: bo qua tren Windows (can shim .cmd cho fixture)
+  BO QUA t125_bridge_bo_bash_hong_dau_PATH_va_truyen_rc_hook_ve_nguyen_ven: bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)
+  BO QUA t126_bridge_hook_vuot_han_phai_rc124_khong_phai_treo_hay_0: bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)
+  BO QUA r925_chau_giu_ong_stderr_thi_khong_treo_va_KHONG_DO_DUOC: bo qua tren Windows (chau thua ke handle stderr can fixture rieng; duong POSIX do o CI ubuntu)
+    r1336 bang M5 (schema verdict): 27 dong · stdlib lech 0/27 · jsonschema KHONG DO (chua cai)
+  BO QUA r1336_bang_m5_hai_validator_cung_ket_qua: BO QUA nua jsonschema (chua cai); nua stdlib da do
+    r1336 tuan thu oracle (schema thu nghiem): 23 dong · stdlib lech 0/23 · jsonschema KHONG DO (chua cai)
+  BO QUA r1336_oracle_stdlib_khop_ngu_nghia_validator_that: BO QUA nua jsonschema (chua cai); nua stdlib da do
+  BO QUA r351_co_chi_thi_thi_KHONG_duoc_dat_moc: bo qua: khoi dat moc la shell POSIX
+  BO QUA r351_KHONG_co_chi_thi_thi_van_phai_dat_moc: bo qua: khoi dat moc la shell POSIX
+  BO QUA r484_g2_hook_shell_scrub_truoc_probe: BO QUA shell POSIX; verified on WSL Linux
+  BO QUA r484_g8_hook_scrub_kin_voi_bash_env: BO QUA shell POSIX; verified on WSL Linux
+Windows token matches local RID500: False
+  BO QUA r484_g6_trust_posix_backslash_is_not_separator: POSIX literal backslash semantics measured on Linux
+  BO QUA r484_g7_bridge_codex_co_mat_nhung_hong_van_hoan: BO QUA shim POSIX
+  BO QUA r484_g7_hook_vang_codex_cai_cli_truoc_materialize: BO QUA shell POSIX
+  BO QUA r484_g7_auth_doi_truoc_khi_thay_thi_giu_ban_moi: đo trên POSIX; nhánh Windows dùng cùng phép đọc lại trước os.replace
+  BO QUA r1077_doctor_khong_shebang_chay_duoc_khong_BI_CHE: BO QUA shell POSIX
+  BO QUA r1077_doctor_khong_shebang_hong_van_BI_CHE: BO QUA shell POSIX
+  BO QUA r1077_probe_khong_chay_lai_khi_khong_phai_ENOEXEC: BO QUA shell POSIX
+  BO QUA r1077_xac_thuc_khong_shebang_chay_duoc: BO QUA shell POSIX
+  BO QUA r1077_retry_giu_argv_env: BO QUA shell POSIX
+  BO QUA r1077_doctor_codex_status_khong_shebang: BO QUA shell POSIX
+  BO QUA r1077_llm_khong_shebang_ten_tran_giai_PATH: BO QUA shell POSIX
+  BO QUA r1077_PATH_rong_khong_bo_qua_wrapper_dau: BO QUA shell POSIX
+  BO QUA r1077_cwd_dai_khong_keo_dai_duong_da_chay_duoc: BO QUA can getcwd Linux dai hon PATH_MAX
+  BO QUA r1077_PATH_hop_dong_glibc: BO QUA can Linux (ETXTBSY, glibc)
+  BO QUA r802_cai_rg_windows_chon_ban_chay_duoc: BO QUA shell POSIX
+  BO QUA r802_hook_linux_rg_hong_van_thu_cargo: BO QUA shell POSIX
+  BO QUA r802_hook_windows_khong_cai_in_dung_lenh: BO QUA shell POSIX
+  BO QUA r831_cai_rg_linux_chon_ban_chay_duoc: BO QUA shell POSIX
+  BO QUA r831_cai_rg_macos_chon_ban_chay_duoc: BO QUA shell POSIX
+  BO QUA r831_cai_rg_linux_python_ham_ke_thua: BO QUA shell POSIX
+  BO QUA r831_cai_rg_macos_python_ham_ke_thua: BO QUA shell POSIX
+  BO QUA r1078_ham_python_khong_phai_python_khong_duoc_goi: BO QUA shell POSIX
+  BO QUA r1078_py_dung_lai_khong_tuyet_doi_phai_thoat_4: BO QUA shell POSIX
+  r1079_a                      SAI - KHONG DO DUOC (neutral do: review_do_san)
+  r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+  r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+  BO QUA r1079_n13_do_bash_cung_phai_loc_env_cha: BO QUA shell POSIX
+  review_missing               SAI - ca dich khong tim thay/trung: ['review_missing_case']
+  r1079_a                      OK  giet 1/1: review_do_san
+  r1079_thieu                  SAI - ca dich khong tim thay/trung: ['review_ca_vang']
+  r1079_b                      SAI - KHONG DO DUOC (neutral do: review_do_san(neutral do))
+  BO QUA r858_cai_linux_chon_ban_chay_duoc: BO QUA shell POSIX
+  BO QUA r858_cai_macos_chon_ban_chay_duoc: BO QUA shell POSIX
+  BO QUA r858_cai_windows_chon_ban_chay_duoc: BO QUA shell POSIX
+  BO QUA r858_cai_python_khong_in_thu_muc_ban_hong: BO QUA shell POSIX
+  BO QUA r886_n3_chi_python3_DAT_va_do_dung_interpreter: BO QUA shell POSIX
+  BO QUA r886_n1_bo_qua_tep_khong_thuc_thi: BO QUA X_OK khong co nghia tren Windows
+  BO QUA r858_bat_buoc_bash_khong_dua_rg_hong_len_dau: BO QUA shell POSIX
+  BO QUA r868_kenh_rieng_khong_doc_stdout_trinh_cai: BO QUA shell POSIX
+  BO QUA r868_writer_muon_khong_lam_treo: BO QUA shell POSIX
+  BO QUA r868_khong_bo_chon_doc_dong_cuoi: BO QUA shell POSIX
+  BO QUA r868_doc_kenh_hong_thi_dung: BO QUA shell POSIX
+  BO QUA r868_ghi_kenh_hong_thi_dung: BO QUA shell POSIX
+  BO QUA r868_don_kenh_khi_loi: BO QUA shell POSIX
+  BO QUA r868_vong_duyet_ung_vien: BO QUA shell POSIX
+  BO QUA r1045_cong_cu_tuy_chon_vang_mat_khong_duoc_nhan_giu_path: BO QUA shell POSIX
+  BO QUA r1045_bat_buoc_cong_cu_tuy_chon_thieu_khong_chan_cong_cu_sau: BO QUA shell POSIX
+  BO QUA r1045_bat_buoc_cong_cu_bat_buoc_hong_van_dung: BO QUA shell POSIX
+  BO QUA r1045_bat_buoc_kiem_cuoi_luot_source_hong_thi_dung_ca_loat: BO QUA shell POSIX
+  BO QUA t156_con_song_esrch_va_mien_loi_proc_stat_theo_nhan: bo qua: nhanh /proc chi co tren Linux
+  BO QUA t157_giet_cay_khi_stat_EACCES_van_tron_ven: bo qua: nhanh /proc chi co tren Linux
+  BO QUA r743_con_song_tham_do_bang_stat_giu_errno_moi_phien_ban: bo qua: nhanh /proc chi co tren Linux
+  BO QUA t158_comm_hong_SAU_luc_sinh_qua_han_khong_duoc_124_khi_con_song: bo qua: comm/prctl/proc chi co tren Linux
+  BO QUA t159_chuong_trinh_ten_tieng_Viet_qua_han_phai_giet_duoc: bo qua: comm/proc chi co tren Linux
+  BO QUA t160_giet_cay_chau_setsid_comm_hong_phot_lo_SIGTERM: bo qua: setsid/proc chi co tren Linux
+  BO QUA t161_giet_cay_me_da_thoat_chau_cung_nhom_comm_hong: bo qua: nhom tien trinh/proc chi co tren Linux
+  BO QUA r927_lay_mau_that_thay_sandbox_sau_exec_va_khong_doc_environ: can /proc cua Linux
+  BO QUA r927_lay_mau_loi_doc_va_danh_tinh_doi_khong_bi_nuot: can /proc cua Linux
+  BO QUA r927_canh_cha_doi_giua_hai_luot_quet: can /proc cua Linux
+  BO QUA r1105_cha_zombie_ve_to_tien: can /proc cua Linux
+  BO QUA r1105_chuyen_cha_xuyen_luot: can /proc cua Linux
+  BO QUA r1105_tha_doc_lai_chuoi_to_tien: can /proc cua Linux
+  BO QUA r1105_tien_trinh_that_ve_subreaper: can prctl(PR_SET_CHILD_SUBREAPER) cua Linux
+  BO QUA r927_cmdline_tho_giu_doi_so_rong_qua_bo_giai_ma_that: phan _quet can /proc cua Linux
+  BO QUA r1252_ghi_qua_dir_fd: bo qua: nen khong co dir_fd/O_NOFOLLOW (Windows dung nhanh du phong, xem _ghi_tep_0600)
+  BO QUA r1252_status_va_chu_ky_byte_la: bo qua ve status: Windows khong tao duoc ten tep byte khong phai UTF-8
+  BO QUA r1252_doi_to_tien_thu_muc_luot: bo qua: nen tu choi doi ten thu muc luot dang mo tep (do A10)
+  BO QUA r1252_mo_thu_muc_luot_dung_mot_lan: bo qua: nen khong co dir_fd
+  BO QUA r1252_bam_tep_khong_theo_lien_ket: bo qua: nen khong co FIFO/O_NOFOLLOW
+    r1335 to hop --agent claude claude      provider=anthropic_claude claude_trust=True KHOP
+    r1335 to hop --agent claude codex       provider=anthropic_claude claude_trust=True KHOP
+    r1335 to hop --agent claude bash        provider=anthropic_claude claude_trust=True KHOP
+    r1335 to hop --agent claude claude.cmd  provider=anthropic_claude claude_trust=True KHOP
+    r1335 to hop --agent claude git         provider=anthropic_claude claude_trust=True KHOP
+    r1335 to hop --agent codex  claude      provider=openai_codex claude_trust=False KHOP
+    r1335 to hop --agent codex  codex       provider=openai_codex claude_trust=False KHOP
+    r1335 to hop --agent codex  bash        provider=openai_codex claude_trust=False KHOP
+    r1335 to hop --agent codex  claude.cmd  provider=openai_codex claude_trust=False KHOP
+    r1335 to hop --agent codex  git         provider=openai_codex claude_trust=False KHOP
+    r1335 to hop --agent khong  claude      provider=local_process claude_trust=False KHOP
+    r1335 to hop --agent khong  codex       provider=local_process claude_trust=False KHOP
+    r1335 to hop --agent khong  bash        provider=local_process claude_trust=False KHOP
+    r1335 to hop --agent khong  claude.cmd  provider=local_process claude_trust=False KHOP
+    r1335 to hop --agent khong  git         provider=local_process claude_trust=False KHOP
+{"version": "1.6.1", "run_id": "6c0b0c097e2d4f26aa14265d8acf8f90", "short_id": "6c0b0c09", "ten": "", "lenh": {"chuong_trinh": "lk.cmd", "so_doi_so": 0, "van_tay": "9667c651d14ad88a"}, "trang_thai": "xong", "bat_dau_utc": "2026-11-19T08:11:12.660756+00:00", "ket_thuc_utc": "2026-11-19T08:11:12.687958+00:00", "ma_thoat": 0, "ly_do_dung": null, "pid": 10612, "khoa_danh_tinh": "win:134395494726650914", "workspace": "F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp387\\lt_ccimpfi0\\repo", "head": "81cffb65cfb1950af731b58c04b63afc31e7025b", "ref": "main", "remotes": [], "commit_goc": ["81cffb65cfb1950af731b58c04b63afc31e7025b"], "worktree_sach": true, "so_muc_ban": 0, "prompt_sha256": null, "deadline_utc": null, "probe": {"workspace": {"trang_thai": "DAT", "chi_tiet": ".git la thu muc"}, "ghi": {"trang_thai": "DAT", "chi_tiet": "ghi-readback-xoa thanh cong"}, "spawn": {"trang_thai": "DAT", "chi_tiet": "rc=0; output=6B"}}, "bo_qua_probe_ly_do": null, "probe_da_chay": ["ghi", "spawn", "workspace"], "provider": "local_process", "execution_surface": "subprocess", "transport": "machine", "transport_sha256": "754f01e8f12dfecee0eacb31703b47eed9ab7db618e9f5a6210ac0e0483f1125", "thuc_thi_duong_dan": "F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp387\\lt_ccimpfi0\\X.cmd", "thuc_thi_ly_do": null, "thuc_thi_ung_vien_sau": [], "agent_da_khai": null, "agent_suy_ra": "khong", "probe_bo_qua": ["claude_trust"], "chup_workspace": false, "job_windows": true, "log_bam_cay_da_chet": false, "log_bam_cho_giay": 0.0, "thoi_luong_giay": 0.027, "log_bam_luc_utc": "2026-11-19T08:11:12.687958+00:00", "stdout_byte": 7, "stdout_sha256": "87c8af72fdc781cbe32c12c9b5bd18788ce27fac346ebc25a31734af37a2f7b1", "stderr_byte": 0, "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
+  BO QUA r1335_giu_argv0_goc_khi_ghim_tep: BO QUA r1335_argv0: Windows van thay argv[0] bang duong da bam (venv Windows mac dinh la ban sao)
+  BO QUA r1335_F4_ung_vien_exec_hong_sang_ung_vien_ke: BO QUA r1335_F4: shebang/errno exec la khai niem POSIX (nhanh chon ung vien dung chung, do tren Linux)
+  BO QUA r387_m1_chau_ghi_muon_khai_pham_vi_bam: BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS
+  BO QUA r387_m1_doi_chung_ghi_som_lam_ve_bam_do: BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS
+  BO QUA r387_m1_con_thuong_chung_minh_cay_chet: BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS
+  BO QUA r387_m2_chau_ghi_trong_han_thi_bam_du: BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS
+  BO QUA r387_m2_khong_do_duoc_thi_khong_cho: BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS
+  BO QUA r387_a_nen_khac_giu_moc_ket_thuc_base: BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS
+  BO QUA r387_m1_stop_trong_luc_cho_khong_bi_de: BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS
+  BO QUA r387_m1_prompt_linux_xoa_khi_cay_chet: BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS
+  BO QUA r387_m2_ngat_trong_luc_doi_ghi_bi_ngat: BO QUA r387 can nhom tien trinh Linux; nen khac thuoc packet B LAUNCHER-BAM-LOG-NEN-DARWIN-WINDOWS
+  HONG t53_doctor_bao_du_khi_du: TinHieuChotCa: rc=12 · stderr='' · stdout JSON cua luot hong: {
+  "ok": false,
+  "ok_kha_dung": false,
+  "he_dieu_hanh": "Windows",
+  "python_dang_chay": "3.12.10",
+  "moi_tru
+  HONG r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh: TinHieuChotCa: luot 0 rc=13: CHAN [13]: CHỜ snapshot Codex mới; không lặp credential đã thất bại
+
+  HONG r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat: FileNotFoundError: [WinError 3] The system cannot find the path specified: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp387\\lt_x1j6zvbk\\runs'
+  HONG r926_lenh_run_khung_mat_thi_run_json_KHONG_DO_DUOC: FileNotFoundError: [WinError 3] The system cannot find the path specified: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp387\\lt_3n5ulav7\\runs'
+  HONG r926_dot_bien_tu_sinh_moi_thanh_phan_regex: TinHieuChotCa: dot bien chet vi loi KHONG phai chot (tin dung gia): ["_RE_ANSI_B '\\\\x1b\\\\[[0-9;]*[ -/]*[@-~]' -> r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_
+  HONG r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC: Chan: CHỜ snapshot Codex mới; không lặp credential đã thất bại
+  HONG r925_rust_log_thua_ke_bi_GHI_DE_khong_noi: FileNotFoundError: [WinError 3] The system cannot find the path specified: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp387\\lt_domxo0f1\\runs'
+  HONG r925_codex_khong_co_khung_thi_KHONG_DO_DUOC_khong_suy_tu_m: FileNotFoundError: [WinError 3] The system cannot find the path specified: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp387\\lt_k6h1hwhb\\runs'
+  HONG r925_codex_qua_han_van_124_va_giu_khung_da_den: FileNotFoundError: [WinError 3] The system cannot find the path specified: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp387\\lt_2u0kg13y\\runs'
+  HONG r927_lenh_run_ghi_effort_va_sandbox_vao_run_json: FileNotFoundError: [WinError 3] The system cannot find the path specified: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp387\\lt_nwuhdcxc\\runs'
+
+321/331 ca DA CHAY QUA (tong 426, bo qua 95, hong 10) - KHONG DU: 95 ca BO QUA, chua do gi

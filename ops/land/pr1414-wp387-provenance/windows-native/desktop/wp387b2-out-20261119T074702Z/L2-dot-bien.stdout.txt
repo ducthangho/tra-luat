@@ -1,0 +1,36 @@
+moi truong: pid=15444 pgid=? sid=? truong_nhom=? chung_nhom_voi_cha=? job_control=? ns_pid=? init=?
+nhom tien trinh: bo qua (khong phai POSIX)
+TU DOT BIEN - moi dot bien PHAI giet dung cac ca da chi dinh:
+  r387_khai_cay_chet_luon_true OK  giet 1/1: r387_m1_chau_ghi_muon_khai_pham_vi_bam
+  r387_khai_cay_chet_luon_false OK  giet 1/1: r387_m1_con_thuong_chung_minh_cay_chet
+  r387_moc_bam_truoc_khi_con_thoat OK  giet 1/1: r387_m1_con_thuong_chung_minh_cay_chet
+  r387_ket_thuc_sau_vong_cho   OK  giet 1/1: r387_m1_chau_ghi_muon_khai_pham_vi_bam
+  r387_bo_vong_cho             OK  giet 1/1: r387_m2_chau_ghi_trong_han_thi_bam_du
+  r387_khong_do_duoc_van_cho   OK  giet 1/1: r387_m2_khong_do_duoc_thi_khong_cho
+  r387_nhan_ket_qua_sau_han    OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+  r387_ngu_khong_tru_lan_do    OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+  r387_a_nen_khac_van_do       OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+  r387_a_nen_khac_ngu_thua     OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+  r387_a_nen_khac_doi_moc      OK  giet 1/1: r387_a_nen_khac_giu_moc_ket_thuc_base
+  r387_a_nen_khac_moc_truoc_unlink OK  giet 1/1: r387_a_nen_khac_giu_moc_ket_thuc_base
+  r387_cho_sau_doc_lai_stop    OK  giet 1/1: r387_m1_stop_trong_luc_cho_khong_bi_de
+  r387_ngat_khi_doi_bi_nuot    OK  giet 1/1: r387_m2_ngat_trong_luc_doi_ghi_bi_ngat
+  r387_ngat_che_ket_qua_chup   OK  giet 1/1: r387_m2_ngat_trong_luc_doi_ghi_bi_ngat
+  r387_ngat_ghi_130_vao_so     OK  giet 1/1: r387_m2_ngat_trong_luc_doi_ghi_bi_ngat
+  r387_b_windows_khong_do      OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+  r387_b_windows_dung_nhom     OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+  r387_b_job_none_thanh_rong   OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+  r387_b_windows_long_cay_da_chet OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+  r387_b_windows_xoa_prompt_khi_job_rong OK  giet 1/1: r387_m1_prompt_linux_xoa_khi_cay_chet
+  r387_b_linux_di_nhanh_job    OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+  r387_fixture_gui_tin_hieu_theo_pid_chau OK  giet 1/1: r387_m1_chau_ghi_muon_khai_pham_vi_bam
+  r387_teardown_nuot_loi       OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+  r387_fx_dong_truoc_khi_cho   OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+  r387_fx_bao_gan_truoc_khi_gan OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+  r387_fx_bo_kiem_closehandle  OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+  r387_fx_khong_dong_job       OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+  r387_fx_phat_dau_khi_gan_hong OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+  r387_fx_don_dep_ngoai_finally OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+  r387_fx_loi_bam_nuot_teardown OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+
+DOT BIEN: 31/31 dat

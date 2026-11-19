@@ -1,0 +1,11 @@
+bat_dau=2026-11-19T08:03:25Z devmode=1
+CHOT BASE sha=3b647461db7c8ded1bddd9aafc5c6aa5eead223f sach=[]
+SUITE BASE rc=1 [2026-11-19T08:03:56Z->2026-11-19T08:11:17Z] ['321/331 ca DA CHAY QUA (tong 426, bo qua 95, hong 10) - KHONG DU: 95 ca BO QUA, chua do gi'] bo_qua=95
+HONG base=['r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh', 'r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat', 'r925_codex_khong_co_khung_thi_KHONG_DO_DUOC_khong_suy_tu_m', 'r925_codex_qua_han_van_124_va_giu_khung_da_den', 'r925_rust_log_thua_ke_bi_GHI_DE_khong_noi', 'r926_dot_bien_tu_sinh_moi_thanh_phan_regex', 'r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC', 'r926_lenh_run_khung_mat_thi_run_json_KHONG_DO_DUOC', 'r927_lenh_run_ghi_effort_va_sandbox_vao_run_json', 't53_doctor_bao_du_khi_du']
+HONG head(luot2)=['r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh', 'r925_codex_ghi_model_phuc_vu_tung_response_va_khong_lo_bi_mat', 'r925_codex_khong_co_khung_thi_KHONG_DO_DUOC_khong_suy_tu_m', 'r925_codex_qua_han_van_124_va_giu_khung_da_den', 'r925_rust_log_thua_ke_bi_GHI_DE_khong_noi', 'r926_dot_bien_tu_sinh_moi_thanh_phan_regex', 'r926_lenh_run_doc_xong_luc_dong_tep_thi_KHONG_DO_DUOC', 'r926_lenh_run_khung_mat_thi_run_json_KHONG_DO_DUOC', 'r927_lenh_run_ghi_effort_va_sandbox_vao_run_json', 't53_doctor_bao_du_khi_du']
+HONG bang nhau=True
+base-head=['r387_a_nen_khac_giu_moc_ket_thuc_base', 'r387_m1_chau_ghi_muon_khai_pham_vi_bam', 'r387_m1_con_thuong_chung_minh_cay_chet', 'r387_m1_doi_chung_ghi_som_lam_ve_bam_do', 'r387_m1_prompt_linux_xoa_khi_cay_chet', 'r387_m1_stop_trong_luc_cho_khong_bi_de', 'r387_m2_chau_ghi_trong_han_thi_bam_du', 'r387_m2_khong_do_duoc_thi_khong_cho', 'r387_m2_ngat_trong_luc_doi_ghi_bi_ngat']
+head-base=[]
+hieu==9 r387: True
+ket_thuc=2026-11-19T08:11:17Z
+XONG (khoa da nha)

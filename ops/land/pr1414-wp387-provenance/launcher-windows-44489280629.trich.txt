@@ -1,0 +1,6 @@
+## job 135440486405 launcher (windows-latest) log_sha256=1b44f986dce2127ef5269a15d3ed0215715d663b760df730c61af9079c67dab3
+341/341 ca DA CHAY QUA (tong 426, bo qua 85, hong 0) - KHONG DU: 85 ca BO QUA, chua do gi
+DOT BIEN: 592/592 dat  (147 khong do duoc tren nen nay)
+## job 135440486636 launcher (ubuntu-latest) log_sha256=b97b732ba2f781d340acb85686bd84403054915e89942461d4a17fbac680e707
+424/424 ca DA CHAY QUA (tong 426, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+DOT BIEN: 732/732 dat  (7 khong do duoc tren nen nay)

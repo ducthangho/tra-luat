@@ -1,0 +1,42 @@
+# do lai Linux sau merge PR #1415, merge 417b59397669e6966da2b546537279d15e2ba0c0, head 6e49b6807886e1d42b22245dd394a2f19a99bfb5, base 3b647461db7c8ded1bddd9aafc5c6aa5eead223f; python 3.13.18
+
+## 2026-11-19T09:41:13Z (cwd clone-merge) $ git rev-parse HEAD HEAD^{tree} HEAD^1 HEAD^2 6e49b6807886e1d42b22245dd394a2f19a99bfb5^{tree} 6e49b6807886e1d42b22245dd394a2f19a99bfb5^1
+417b59397669e6966da2b546537279d15e2ba0c0
+2ce543cffc1fff5a0c99d9ba283d8023122bb2fa
+0ca331b4a11835913bb91618d310a34e65599c20
+6e49b6807886e1d42b22245dd394a2f19a99bfb5
+6d49d42d31e6b415f9c5472258365bab828ee605
+3b647461db7c8ded1bddd9aafc5c6aa5eead223f
+rc=0
+
+## 2026-11-19T09:41:13Z (cwd clone-merge) $ git diff --numstat HEAD^1 HEAD
+389	0	scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py
+48	19	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled.py
+rc=0
+
+## 2026-11-19T09:41:13Z (cwd clone-merge) $ git diff --numstat 3b647461db7c8ded1bddd9aafc5c6aa5eead223f 6e49b6807886e1d42b22245dd394a2f19a99bfb5
+389	0	scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py
+48	19	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled.py
+rc=0
+
+## 2026-11-19T09:41:13Z (cwd clone-merge) $ git diff --name-only HEAD^1 HEAD
+scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py
+scripts/tl_gws.py
+scripts/tl_test_fragments_bundled.py
+rc=0
+
+## 2026-11-19T09:41:13Z (cwd clone-merge) $ git rev-parse 417b59397669e6966da2b546537279d15e2ba0c0:scripts/tl_gws.py 417b59397669e6966da2b546537279d15e2ba0c0:scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py 417b59397669e6966da2b546537279d15e2ba0c0:scripts/tl_test_fragments_bundled.py 6e49b6807886e1d42b22245dd394a2f19a99bfb5:scripts/tl_gws.py 6e49b6807886e1d42b22245dd394a2f19a99bfb5:scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py 6e49b6807886e1d42b22245dd394a2f19a99bfb5:scripts/tl_test_fragments_bundled.py
+9ec027c2808868a05b67adc3d93ea68a574d6ec0
+2783e20c916b33b81598ec619268678577e0ae13
+317494012c52de6b241063656a33e802ca103e85
+9ec027c2808868a05b67adc3d93ea68a574d6ec0
+2783e20c916b33b81598ec619268678577e0ae13
+317494012c52de6b241063656a33e802ca103e85
+rc=0
+
+## 2026-11-19T09:41:13Z (cwd clone-merge) $ git diff --check HEAD^1 HEAD
+rc=0
+
+# HET

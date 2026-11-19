@@ -1,0 +1,36 @@
+# Bien ban M8 (ADR-0060) dong WP #1404 CI-RG-APT-UPDATE r1 — kiem bang packet_loop.py kiem-dong-wp. Nguon tung muc: ops/land/pr1406-wp1404-land-evidence.yaml.
+# Moc §10.2.2: run tren merge chinh cad9b1f FAILED o release-verify LAND (manifest, do san tu #1415); ci_master va moc_10_2_2 ghi theo run
+# hau due 44502045702 tren 4eda94e (bon moc measured passed, wd-run 44506427885) — quyet dinh phien dieu phoi, xem post_merge_checks[1].
+packet: wp1404
+revision: 1
+generation: 1
+spec_hash: 1eb8f4428e0da7c2074b94938e89990c3f3bd681b254bcacccb2336a76a5314d
+head_da_review: c245a59e4c18968bce5afafcb381adc304d64d13
+tree_h: bf2ff68167b06874e62b5c586e09e80ce18c17af
+review:
+  connector: 'readback-pr1406-comments.json: connector sach tren c245a59 (codex-review-state has_any_findings false)'
+  human_audit: 'issuecomment-7005282588 human_exact_head_audit.v1 approve tren c245a59 (chu kho tu dang, performed_via_github_app null)'
+windows:
+  phan_loai: not_required
+  nguon: "dac ta §5: cac nen khac (macOS/Windows) ngoai pham vi tru B3; lane launcher-windows 44497897774 windows-latest 341/341 hong 0, 2 ca r1404 bo qua dung thiet ke (lw/)."
+  ket_qua: not_applicable
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1406#issuecomment-7005282588
+merge_commit: cad9b1fa95da303b085a4555e85608c0b77b8ae0
+tree_m: bf2ff68167b06874e62b5c586e09e80ce18c17af
+ci_master:
+  run_id: 44502045702
+  conclusion: success
+  ghi_chu: 'run hau due tren 4eda94e 39/39 (pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt); run tren chinh cad9b1f FAILED 38/39 (ci-cad9b1f/).'
+nghiem_thu:
+  N1: passed        # linux/nghiem-thu-cad9b1f.txt: --lap-ca r1404_* (2 ca) va r886 1/1 qua tren blob merge
+  N2: passed        # lw/launcher-ubuntu-135469673544-wp1404.trich.txt: 19 dot bien wp1404_sh_* OK giet (ubuntu, run 44497897774 tren cad9b1f)
+  N3: passed        # lw/so-lane-launcher-44489280629-vs-44497897774.txt: 424 -> 426 (+2 ca r1404), bo qua va KHONG DO DUOC base = merge (ubuntu)
+  N4: passed        # readback-checkruns-head-c245a59.json CI PR xanh; linux/nghiem-thu-cad9b1f.txt doctrine-scan rc 0
+  N5: passed        # connector sach tren c245a59 (readback-pr1406-comments.json); VERDICT.md luot 4 approve (thuat_lai)
+lease_cuoi: wp1404-r1-g1-claude
+landed: true
+moc_10_2_2:   # theo run 44502045702 tren 4eda94e
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

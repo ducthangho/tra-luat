@@ -1,0 +1,11 @@
+# LAN 1 (sau rut han 08:58Z); lease = git show 6b232a5:ops/leases/wp387-r2-g1-claude.yaml (blob 25568a557b4ad755b7ceb02026423c817090a079) tu origin/ops/wp387-b-spec
+# checkout: 417b59397669e6966da2b546537279d15e2ba0c0 ; origin/master 11bd0336d00b4a9544e70dcbbe049d372053a3ec ; luc: 2026-11-19T09:49:16Z
+# python .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban <bien-ban-m8.yaml> --lease <lease>
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12
+
+# LAN 2 (sau khi dua log native Desktop vao windows-native/desktop/, bien-ban lat N4/N5 va windows.ket_qua); lease = git show 6b232a5:ops/leases/wp387-r2-g1-claude.yaml (blob 25568a557b4ad755b7ceb02026423c817090a079)
+# checkout: 6f02e0390d605867628f5a0adaa625a19feb44a3 ; origin/master 4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd ; luc: 2026-11-19T10:43:15Z
+ĐÓNG ĐƯỢC WP wp387 — merge 0ca331b4a11835913bb91618d310a34e65599c20
+rc=0

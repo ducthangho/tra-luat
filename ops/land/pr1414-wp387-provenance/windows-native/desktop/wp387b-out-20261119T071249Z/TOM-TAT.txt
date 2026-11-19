@@ -1,0 +1,70 @@
+bat_dau=2026-11-19T07:12:49Z python=3.12.10 platform=Windows-11-10.0.26300-SP0 exe=C:\Program Files\Python312\python.exe
+fetch agent/wp387-r2-g1-claude rc=0 
+fetch master rc=0 
+CHOT HEAD sha=966ee164b5b7bcd7f5df9e4674bb7b0fb8ef9515 tree=782dc9dc72b6749e16c0b8ae8795c6a03f607053 sach=[]
+CHOT BASE sha=3b647461db7c8ded1bddd9aafc5c6aa5eead223f tree=306ec6c89a18ac12988d0b324a0867f6d3e91a54 sach=[]
+L1 r387_m2_han_chung_cho_moi_lan_do rc=0 5.0s [2026-11-19T07:14:04Z->2026-11-19T07:14:09Z] LAP r387_m2_han_chung_cho_moi_lan_do: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 r387_fixture_teardown_bao_loi_giu_loi_goc rc=0 2.1s [2026-11-19T07:14:09Z->2026-11-19T07:14:11Z] LAP r387_fixture_teardown_bao_loi_giu_loi_goc: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 r387_m1_chau_ghi_muon_khai_pham_vi_bam rc=0 7.4s [2026-11-19T07:14:11Z->2026-11-19T07:14:18Z] LAP r387_m1_chau_ghi_muon_khai_pham_vi_bam: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 r387_m1_doi_chung_ghi_som_lam_ve_bam_do rc=0 2.1s [2026-11-19T07:14:18Z->2026-11-19T07:14:21Z] LAP r387_m1_doi_chung_ghi_som_lam_ve_bam_do: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 r387_m1_con_thuong_chung_minh_cay_chet rc=0 1.8s [2026-11-19T07:14:21Z->2026-11-19T07:14:22Z] LAP r387_m1_con_thuong_chung_minh_cay_chet: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 r387_m2_chau_ghi_trong_han_thi_bam_du rc=0 2.7s [2026-11-19T07:14:22Z->2026-11-19T07:14:25Z] LAP r387_m2_chau_ghi_trong_han_thi_bam_du: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 r387_m2_khong_do_duoc_thi_khong_cho rc=0 2.5s [2026-11-19T07:14:25Z->2026-11-19T07:14:27Z] LAP r387_m2_khong_do_duoc_thi_khong_cho: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 r387_a_nen_khac_giu_moc_ket_thuc_base rc=1 2.5s [2026-11-19T07:14:27Z->2026-11-19T07:14:30Z] LAP r387_a_nen_khac_giu_moc_ket_thuc_base: 0/1 qua, 0 bo qua, 1 hong DO []
+L1 r387_m1_stop_trong_luc_cho_khong_bi_de rc=0 1.9s [2026-11-19T07:14:30Z->2026-11-19T07:14:32Z] LAP r387_m1_stop_trong_luc_cho_khong_bi_de: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 r387_m1_prompt_linux_xoa_khi_cay_chet rc=0 2.2s [2026-11-19T07:14:32Z->2026-11-19T07:14:34Z] LAP r387_m1_prompt_linux_xoa_khi_cay_chet: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 r387_m2_ngat_trong_luc_doi_ghi_bi_ngat rc=0 4.0s [2026-11-19T07:14:34Z->2026-11-19T07:14:38Z] LAP r387_m2_ngat_trong_luc_doi_ghi_bi_ngat: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 t71_ban_chup_prompt_phai_KIN_va_bi_XOA rc=0 2.0s [2026-11-19T07:14:38Z->2026-11-19T07:14:40Z] LAP t71_ban_chup_prompt_phai_KIN_va_bi_XOA: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay rc=0 1.8s [2026-11-19T07:14:40Z->2026-11-19T07:14:42Z] LAP t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay: 1/1 qua, 0 bo qua, 0 hong DAT []
+L1 TONG 12/13
+L3 r387_m1_chau_ghi_muon_khai_pham_vi_bam rc=0 26.7s [2026-11-19T07:14:42Z->2026-11-19T07:15:08Z] LAP r387_m1_chau_ghi_muon_khai_pham_vi_bam: 5/5 qua, 0 bo qua, 0 hong DAT
+L3 r387_m2_chau_ghi_trong_han_thi_bam_du rc=0 14.9s [2026-11-19T07:15:08Z->2026-11-19T07:15:23Z] LAP r387_m2_chau_ghi_trong_han_thi_bam_du: 5/5 qua, 0 bo qua, 0 hong DAT
+N5 rc=0 3.8s [2026-11-19T07:15:23Z->2026-11-19T07:15:27Z] run.json=['F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\n5-rr-20261119T071249Z\\6d235bad\\run.json']
+N5 khoa={"version": "1.6.2", "ma_thoat": 0, "job_windows": true, "log_bam_cay_da_chet": true, "log_bam_cho_giay": 0.0, "log_bam_luc_utc": "2026-11-19T07:15:27.620032+00:00", "ket_thuc_utc": "2026-11-19T07:15:27.620032+00:00"} DAT
+L2 loc sha256=0a661861fe58293f8e43eed8dee4f260f1968144b02efda8d6cb8115d0810755 len={'DOT_BIEN': 22, 'DOT_BIEN_HOOK': 0, 'DOT_BIEN_HARNESS': 9} trung=0 tong=31 moc=(True, 1)
+L2 W co mat=True H co mat=True
+L2 dot-bien rc=1 107.5s [2026-11-19T07:16:06Z->2026-11-19T07:17:54Z]
+  TU DOT BIEN - moi dot bien PHAI giet dung cac ca da chi dinh:
+    r387_khai_cay_chet_luon_true OK  giet 1/1: r387_m1_chau_ghi_muon_khai_pham_vi_bam
+    r387_khai_cay_chet_luon_false OK  giet 1/1: r387_m1_con_thuong_chung_minh_cay_chet
+    r387_moc_bam_truoc_khi_con_thoat OK  giet 1/1: r387_m1_con_thuong_chung_minh_cay_chet
+    r387_ket_thuc_sau_vong_cho   OK  giet 1/1: r387_m1_chau_ghi_muon_khai_pham_vi_bam
+    r387_bo_vong_cho             OK  giet 1/1: r387_m2_chau_ghi_trong_han_thi_bam_du
+    r387_khong_do_duoc_van_cho   OK  giet 1/1: r387_m2_khong_do_duoc_thi_khong_cho
+    r387_nhan_ket_qua_sau_han    OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+    r387_ngu_khong_tru_lan_do    OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+    r387_a_nen_khac_van_do       OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+    r387_a_nen_khac_ngu_thua     OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+    r387_a_nen_khac_doi_moc      SAI - KHONG DO DUOC (neutral do: r387_a_nen_khac_giu_moc_ket_thuc_base)
+    r387_a_nen_khac_moc_truoc_unlink SAI - KHONG DO DUOC (neutral do: r387_a_nen_khac_giu_moc_ket_thuc_base)
+    r387_cho_sau_doc_lai_stop    OK  giet 1/1: r387_m1_stop_trong_luc_cho_khong_bi_de
+    r387_ngat_khi_doi_bi_nuot    OK  giet 1/1: r387_m2_ngat_trong_luc_doi_ghi_bi_ngat
+    r387_ngat_che_ket_qua_chup   OK  giet 1/1: r387_m2_ngat_trong_luc_doi_ghi_bi_ngat
+    r387_ngat_ghi_130_vao_so     OK  giet 1/1: r387_m2_ngat_trong_luc_doi_ghi_bi_ngat
+    r387_b_windows_khong_do      OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+    r387_b_windows_dung_nhom     OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+    r387_b_job_none_thanh_rong   OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+    r387_b_windows_long_cay_da_chet OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+    r387_b_windows_xoa_prompt_khi_job_rong OK  giet 1/1: r387_m1_prompt_linux_xoa_khi_cay_chet
+    r387_b_linux_di_nhanh_job    OK  giet 1/1: r387_m2_han_chung_cho_moi_lan_do
+    r387_fixture_gui_tin_hieu_theo_pid_chau OK  giet 1/1: r387_m1_chau_ghi_muon_khai_pham_vi_bam
+    r387_teardown_nuot_loi       OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+    r387_fx_dong_truoc_khi_cho   OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+    r387_fx_bao_gan_truoc_khi_gan OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+    r387_fx_bo_kiem_closehandle  OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+    r387_fx_khong_dong_job       OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+    r387_fx_phat_dau_khi_gan_hong OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+    r387_fx_don_dep_ngoai_finally OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+    r387_fx_loi_bam_nuot_teardown OK  giet 1/1: r387_fixture_teardown_bao_loi_giu_loi_goc
+  DOT BIEN: 29/31 dat
+NHAN r387_ket_thuc_sau_vong_cho khop=1 dich=r387_m1_chau_ghi_muon_khai_pham_vi_bam rc=1 so_HONG=0 dong=[]
+NHAN r387_b_windows_xoa_prompt_khi_job_rong khop=1 dich=r387_m1_prompt_linux_xoa_khi_cay_chet rc=1 so_HONG=0 dong=[]
+SUITE HEAD rc=1 412.0s [2026-11-19T07:18:05Z->2026-11-19T07:24:57Z] ['328/339 ca DA CHAY QUA (tong 426, bo qua 87, hong 11) - KHONG DU: 87 ca BO QUA, chua do gi'] bo_qua=87
+  dong BO QUA r387 = 0
+SUITE BASE rc=1 422.6s [2026-11-19T07:24:57Z->2026-11-19T07:32:00Z] ['320/330 ca DA CHAY QUA (tong 426, bo qua 96, hong 10) - KHONG DU: 96 ca BO QUA, chua do gi'] bo_qua=96
+  dong BO QUA r387 = 9
+SUITE base-head=['r387_a_nen_khac_giu_moc_ket_thuc_base', 'r387_m1_chau_ghi_muon_khai_pham_vi_bam', 'r387_m1_con_thuong_chung_minh_cay_chet', 'r387_m1_doi_chung_ghi_som_lam_ve_bam_do', 'r387_m1_prompt_linux_xoa_khi_cay_chet', 'r387_m1_stop_trong_luc_cho_khong_bi_de', 'r387_m2_chau_ghi_trong_han_thi_bam_du', 'r387_m2_khong_do_duoc_thi_khong_cho', 'r387_m2_ngat_trong_luc_doi_ghi_bi_ngat']
+SUITE head-base=[]
+SUITE hieu==9 r387: True
+TONG 1151.3s ket_thuc=2026-11-19T07:32:00Z
+XONG (khoa da nha)

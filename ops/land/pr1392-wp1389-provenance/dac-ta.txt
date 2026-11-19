@@ -1,0 +1,19 @@
+# do 2026-11-19T10:48:22Z
+merge 11bd0336d00b4a9544e70dcbbe049d372053a3ec
+spec blob tai merge: 3ce05164f9cf67551f6aa9a17e623ccef7a7a115
+spec sha256 tai merge: 12257fa8d659ff5c013af4bc31de700de4a53b085a99ec8c47cbd403d66610bc
+spec sha256 tai head PR: 12257fa8d659ff5c013af4bc31de700de4a53b085a99ec8c47cbd403d66610bc
+lease spec_hash: 12257fa8d659ff5c013af4bc31de700de4a53b085a99ec8c47cbd403d66610bc
+lease blob tai merge: a381fda83349ac14cdeeae895547217b6422bde1
+spec + lease tai origin/master 4eda94e: 3ce05164f9cf67551f6aa9a17e623ccef7a7a115 a381fda83349ac14cdeeae895547217b6422bde1
+$ git show 4eda94e:ops/specs/wp1389-r1.md | grep -nE 'tran_kich_thuoc|ADR-0053|ADR-0044|nang_tran|450|Review Class'
+3:- Packet: #1389. Revision 1, generation 1. Review Class: `sensitive` (bước mới XOÁ tệp trên máy người dùng).
+$ git show 4eda94e:ops/leases/wp1389-r1-g1-claude.yaml | grep -nE '^(review_class|effective_review_class|risk|nang_tran|budget_nang_tran[_0-9]*):|tran_kich|ADR-0053'
+21:review_class: sensitive
+22:effective_review_class: sensitive
+23:risk: sensitive
+83:budget_nang_tran:
+86:budget_nang_tran_2:
+89:budget_nang_tran_3:
+92:budget_nang_tran_4:
+95:budget_nang_tran_5:

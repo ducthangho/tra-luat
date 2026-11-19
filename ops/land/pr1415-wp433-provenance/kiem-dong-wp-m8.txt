@@ -1,0 +1,17 @@
+# LAN 1 (sau rut han 08:58Z); lease = git show d67046c:ops/leases/wp433-r2-g1-claude.yaml (blob 9e9d401b3d6aec290e2a70e3b1dbec21a506b65e) tu origin/ops/wp433-p2a-spec
+# checkout: 417b59397669e6966da2b546537279d15e2ba0c0 ; origin/master 11bd0336d00b4a9544e70dcbbe049d372053a3ec ; luc: 2026-11-19T09:49:17Z
+# python .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban <bien-ban-m8.yaml> --lease <lease>
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12
+
+# LAN 2 (sau merge #1417 4eda94e; bien-ban: landed true, ci_master/moc theo run 44502045702, N11 passed); lease = git show d67046c:ops/leases/wp433-r2-g1-claude.yaml (blob 9e9d401b3d6aec290e2a70e3b1dbec21a506b65e)
+# checkout: 6f02e0390d605867628f5a0adaa625a19feb44a3 ; origin/master 96b6a33d770f7539a3eacbebdc215f87ded4ea7f ; luc: 2026-11-19T10:53:19Z
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12
+
+# LAN 3 (sau do lai N8/N10 trong cung mot lenh, linux/n8-n10-1415.txt; bien-ban N8/N10 passed); lease = git show d67046c:ops/leases/wp433-r2-g1-claude.yaml (blob 9e9d401b3d6aec290e2a70e3b1dbec21a506b65e)
+# checkout: 6f02e0390d605867628f5a0adaa625a19feb44a3 ; origin/master 96b6a33d770f7539a3eacbebdc215f87ded4ea7f ; luc: 2026-11-19T11:13:03Z
+ĐÓNG ĐƯỢC WP wp433 — merge 417b59397669e6966da2b546537279d15e2ba0c0
+rc=0

@@ -1,0 +1,170 @@
+# do lai Linux sau merge PR #1414, merge 0ca331b4a11835913bb91618d310a34e65599c20, head 9804f642ad9c7abcc9e7ae4877c2ff133ef31f00, base 3b647461db7c8ded1bddd9aafc5c6aa5eead223f; python 3.13.18
+
+## 2026-11-19T09:27:55Z (cwd clone-merge) $ git rev-parse HEAD HEAD^{tree} HEAD^1 HEAD^2
+0ca331b4a11835913bb91618d310a34e65599c20
+13c48c05ed0a87c288c79386876c5f78315828f6
+3b647461db7c8ded1bddd9aafc5c6aa5eead223f
+9804f642ad9c7abcc9e7ae4877c2ff133ef31f00
+rc=0
+
+## 2026-11-19T09:27:55Z (cwd clone-merge) $ git diff --numstat HEAD^1 HEAD
+20	13	.claude/dev/launcher.py
+313	64	.claude/dev/launcher_test.py
+rc=0
+
+## 2026-11-19T09:27:55Z (cwd clone-merge) $ git diff --name-only HEAD^1 HEAD
+.claude/dev/launcher.py
+.claude/dev/launcher_test.py
+rc=0
+
+## 2026-11-19T09:27:55Z (cwd clone-merge) $ git rev-parse 0ca331b4a11835913bb91618d310a34e65599c20:.claude/dev/launcher.py 0ca331b4a11835913bb91618d310a34e65599c20:.claude/dev/launcher_test.py 9804f642ad9c7abcc9e7ae4877c2ff133ef31f00:.claude/dev/launcher.py 9804f642ad9c7abcc9e7ae4877c2ff133ef31f00:.claude/dev/launcher_test.py
+f427f1d1241e0a148bc4380cac1cd18c007d0e5f
+a4cc55c0496c6c2e82bb5b54a4f355e91e0a5c00
+f427f1d1241e0a148bc4380cac1cd18c007d0e5f
+a4cc55c0496c6c2e82bb5b54a4f355e91e0a5c00
+rc=0
+
+## 2026-11-19T09:27:55Z (cwd clone-merge) $ git diff --check HEAD^1 HEAD
+rc=0
+
+## 2026-11-19T09:27:55Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_fixture_teardown_bao_loi_giu_loi_goc --lan 1
+moi truong: pid=14631 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14631)
+  lan 1/1: qua
+
+LAP r387_fixture_teardown_bao_loi_giu_loi_goc: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:27:57Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_m1_chau_ghi_muon_khai_pham_vi_bam --lan 1
+moi truong: pid=14636 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14636)
+  lan 1/1: qua
+
+LAP r387_m1_chau_ghi_muon_khai_pham_vi_bam: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:02Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_m1_doi_chung_ghi_som_lam_ve_bam_do --lan 1
+moi truong: pid=14650 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14650)
+  lan 1/1: qua
+
+LAP r387_m1_doi_chung_ghi_som_lam_ve_bam_do: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:03Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_m1_con_thuong_chung_minh_cay_chet --lan 1
+moi truong: pid=14664 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14664)
+  lan 1/1: qua
+
+LAP r387_m1_con_thuong_chung_minh_cay_chet: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:04Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_m2_chau_ghi_trong_han_thi_bam_du --lan 1
+moi truong: pid=14677 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14677)
+  lan 1/1: qua
+
+LAP r387_m2_chau_ghi_trong_han_thi_bam_du: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:07Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_m2_khong_do_duoc_thi_khong_cho --lan 1
+moi truong: pid=14691 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14691)
+  lan 1/1: qua
+
+LAP r387_m2_khong_do_duoc_thi_khong_cho: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:08Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_m2_han_chung_cho_moi_lan_do --lan 1
+moi truong: pid=14704 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14704)
+  lan 1/1: qua
+
+LAP r387_m2_han_chung_cho_moi_lan_do: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:11Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_a_nen_khac_giu_moc_ket_thuc_base --lan 1
+moi truong: pid=14705 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14705)
+  lan 1/1: qua
+
+LAP r387_a_nen_khac_giu_moc_ket_thuc_base: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:13Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_m1_stop_trong_luc_cho_khong_bi_de --lan 1
+moi truong: pid=14718 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14718)
+  lan 1/1: qua
+
+LAP r387_m1_stop_trong_luc_cho_khong_bi_de: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:14Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_m1_prompt_linux_xoa_khi_cay_chet --lan 1
+moi truong: pid=14731 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14731)
+  lan 1/1: qua
+
+LAP r387_m1_prompt_linux_xoa_khi_cay_chet: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:15Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca r387_m2_ngat_trong_luc_doi_ghi_bi_ngat --lan 1
+moi truong: pid=14744 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14744)
+  lan 1/1: qua
+
+LAP r387_m2_ngat_trong_luc_doi_ghi_bi_ngat: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:16Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher_test.py --lap-ca t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho --lan 1
+moi truong: pid=14769 pgid=14623 sid=14620 truong_nhom=False chung_nhom_voi_cha=True job_control=? ns_pid=pid:[4026531836] init=process_api
+nhom tien trinh: da tach sang session moi (pgid=14769)
+  lan 1/1: qua
+
+LAP t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho: 1/1 qua, 0 bo qua, 0 hong
+rc=0
+
+## 2026-11-19T09:28:17Z (cwd clone-merge) $ /usr/local/bin/python3 -m ruff --version
+ruff 0.17.5
+rc=0
+
+## 2026-11-19T09:28:17Z (cwd clone-base) $ /usr/local/bin/python3 -m ruff check --select F --output-format concise .claude/dev/launcher.py .claude/dev/launcher_test.py
+.claude/dev/launcher_test.py:2767:5: F841 Local variable `goc_open` is assigned to but never used
+.claude/dev/launcher_test.py:3695:9: F841 Local variable `rc` is assigned to but never used
+.claude/dev/launcher_test.py:3937:5: F841 Local variable `PENDING` is assigned to but never used
+.claude/dev/launcher_test.py:4421:5: F841 Local variable `goc_run` is assigned to but never used
+.claude/dev/launcher_test.py:6465:9: F841 Local variable `p` is assigned to but never used
+Found 5 errors.
+5 unsafe fixes available with `--fix --unsafe-fixes`.
+rc=1
+
+## 2026-11-19T09:28:18Z (cwd clone-merge) $ /usr/local/bin/python3 -m ruff check --select F --output-format concise .claude/dev/launcher.py .claude/dev/launcher_test.py
+.claude/dev/launcher_test.py:2767:5: F841 Local variable `goc_open` is assigned to but never used
+.claude/dev/launcher_test.py:3695:9: F841 Local variable `rc` is assigned to but never used
+.claude/dev/launcher_test.py:3937:5: F841 Local variable `PENDING` is assigned to but never used
+.claude/dev/launcher_test.py:4421:5: F841 Local variable `goc_run` is assigned to but never used
+.claude/dev/launcher_test.py:6465:9: F841 Local variable `p` is assigned to but never used
+Found 5 errors.
+5 unsafe fixes available with `--fix --unsafe-fixes`.
+rc=1
+
+## 2026-11-19T09:28:18Z (cwd clone-base) $ /usr/local/bin/python3 .claude/dev/launcher.py doctor   [TRICH: chi giu dong KET LUAN va rc; ban day du in bien moi truong, khong luu]
+KET LUAN  : DU CONG CU BAT BUOC
+rc=0
+
+## 2026-11-19T09:28:23Z (cwd clone-merge) $ /usr/local/bin/python3 .claude/dev/launcher.py doctor   [TRICH: chi giu dong KET LUAN va rc; ban day du in bien moi truong, khong luu]
+KET LUAN  : DU CONG CU BAT BUOC
+rc=0
+
+
+## 2026-11-19T09:31:31Z (cwd clone-merge) $ python3 .claude/dev/packet_loop.py adr-song --root .
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+
+## 2026-11-19T09:31:32Z (cwd clone-merge) $ python3 .claude/dev/packet_loop.py doctrine-scan --root .
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+
+## (cwd clone-merge) $ grep -n '^VERSION\b' .claude/dev/launcher.py  (base 3b64746 roi merge)
+102:VERSION = "1.6.1"
+102:VERSION = "1.6.2"
+# HET (bo sung)

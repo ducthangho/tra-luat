@@ -1,0 +1,56 @@
+# 2026-11-19T10:53:34Z N8+N10 #1415; hai clone dung trong CUNG mot lenh nay; python 3.13.18
+
+## 2026-11-19T10:53:34Z->2026-11-19T10:53:35Z (base) $ git clone -q --shared /home/user/tra-luat /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/n810-base
+rc=0
+
+## 2026-11-19T10:53:35Z->2026-11-19T10:53:38Z (base) $ git -C /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/n810-base checkout -q --detach 3b647461db7c8ded1bddd9aafc5c6aa5eead223f
+rc=0
+
+## 2026-11-19T10:53:38Z->2026-11-19T10:53:38Z (base) $ git -C /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/n810-base config core.abbrev 7
+rc=0
+
+## 2026-11-19T10:53:38Z->2026-11-19T10:53:38Z (base) $ git -C /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/n810-base rev-parse HEAD
+3b647461db7c8ded1bddd9aafc5c6aa5eead223f
+rc=0
+
+## 2026-11-19T10:53:38Z->2026-11-19T10:53:39Z (merge) $ git clone -q --shared /home/user/tra-luat /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/n810-merge
+rc=0
+
+## 2026-11-19T10:53:39Z->2026-11-19T10:53:40Z (merge) $ git -C /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/n810-merge checkout -q --detach 417b59397669e6966da2b546537279d15e2ba0c0
+rc=0
+
+## 2026-11-19T10:53:40Z->2026-11-19T10:53:40Z (merge) $ git -C /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/n810-merge config core.abbrev 7
+rc=0
+
+## 2026-11-19T10:53:40Z->2026-11-19T10:53:40Z (merge) $ git -C /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/n810-merge rev-parse HEAD
+417b59397669e6966da2b546537279d15e2ba0c0
+rc=0
+
+## 2026-11-19T10:53:40Z->2026-11-19T10:57:46Z (base) $ /usr/local/bin/python3 -B scripts/tl.py --selftest
+== tl selftest 1779/1779 ==
+rc=0
+
+## 2026-11-19T10:57:46Z->2026-11-19T11:02:02Z (merge) $ /usr/local/bin/python3 -B scripts/tl.py --selftest
+  [OK] wp433_gws_cred_dich_ngoai_kho
+== tl selftest 1780/1780 ==
+[wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=11 chạy=11 đạt=11 bỏ_qua=0 chỉ_posix=0 · LUOT: dự_kiến=46 chạy=46 đạt=46 bỏ_qua=0 chỉ_posix=0 · DOT BIEN: dự_kiến=37 chạy=37 giết_đúng=37 bỏ_qua=0 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+rc=0
+
+## 2026-11-19T11:02:02Z->2026-11-19T11:07:10Z (base) $ /usr/local/bin/python3 -B ops/cloud_agent_creds_test.py
+CA: 60/60 dat
+DOT BIEN: 91/91 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (4 dot bien)
+TONG: DAT
+rc=0
+
+## 2026-11-19T11:07:10Z->2026-11-19T11:12:20Z (merge) $ /usr/local/bin/python3 -B ops/cloud_agent_creds_test.py
+CA: 60/60 dat
+DOT BIEN: 91/91 bi giet dung ly do
+TU KIEM PHAN HANG: DAT (4 dot bien)
+TONG: DAT
+rc=0
+
+# HET 2026-11-19T11:12:20Z
+
+# bo sung 2026-11-19T11:12:57Z: $ git diff --stat 3b64746 417b593 -- ops/cloud_agent_creds_test.py
+rc=0 (output rong = tep test giong nhau hai ve => cung tap ca)

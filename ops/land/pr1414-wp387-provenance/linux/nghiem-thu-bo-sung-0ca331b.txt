@@ -1,0 +1,39 @@
+# bo sung do lai; python 3.13.18; base 3b647461db7c8ded1bddd9aafc5c6aa5eead223f, merge 0ca331b4a11835913bb91618d310a34e65599c20
+
+## 2026-11-19T09:46:59Z (cwd clone-merge) $ /usr/local/bin/python3 -m ruff --version
+ruff 0.17.5
+rc=0
+
+## 2026-11-19T09:46:59Z (cwd clone-base) $ /usr/local/bin/python3 -m ruff check --no-cache --select F --output-format concise .claude/dev/launcher.py .claude/dev/launcher_test.py
+.claude/dev/launcher_test.py:2767:5: F841 Local variable `goc_open` is assigned to but never used
+.claude/dev/launcher_test.py:3695:9: F841 Local variable `rc` is assigned to but never used
+.claude/dev/launcher_test.py:3937:5: F841 Local variable `PENDING` is assigned to but never used
+.claude/dev/launcher_test.py:4421:5: F841 Local variable `goc_run` is assigned to but never used
+.claude/dev/launcher_test.py:6465:9: F841 Local variable `p` is assigned to but never used
+Found 5 errors.
+5 unsafe fixes available with `--fix --unsafe-fixes`.
+rc=1
+
+## 2026-11-19T09:46:59Z (cwd clone-merge) $ /usr/local/bin/python3 -m ruff check --no-cache --select F --output-format concise .claude/dev/launcher.py .claude/dev/launcher_test.py
+.claude/dev/launcher_test.py:2767:5: F841 Local variable `goc_open` is assigned to but never used
+.claude/dev/launcher_test.py:3695:9: F841 Local variable `rc` is assigned to but never used
+.claude/dev/launcher_test.py:3937:5: F841 Local variable `PENDING` is assigned to but never used
+.claude/dev/launcher_test.py:4421:5: F841 Local variable `goc_run` is assigned to but never used
+.claude/dev/launcher_test.py:6465:9: F841 Local variable `p` is assigned to but never used
+Found 5 errors.
+5 unsafe fixes available with `--fix --unsafe-fixes`.
+rc=1
+
+## 2026-11-19T09:46:59Z (cwd clone-merge) $ /usr/local/bin/python3 -B .claude/dev/packet_loop.py adr-song --root .
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+
+## 2026-11-19T09:46:59Z (cwd clone-merge) $ /usr/local/bin/python3 -B .claude/dev/packet_loop.py doctrine-scan --root .
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+
+## 2026-11-19T09:47:00Z (cwd clone-merge) $ /usr/local/bin/python3 -B .githooks/eol_policy.py --all --json
+{"checked": 15023, "mode": "all", "ok": true, "scanned": 15669, "schema": "eol_policy.v1", "skipped": 646, "violations": []}
+rc=0
+
+# HET

@@ -1,0 +1,106 @@
+{
+ "author": {
+  "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+  "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+  "followers_url": "https://api.github.com/users/ducthangho/followers",
+  "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+  "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+  "gravatar_id": "",
+  "html_url": "https://github.com/ducthangho",
+  "id": 12748935,
+  "login": "ducthangho",
+  "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+  "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+  "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+  "repos_url": "https://api.github.com/users/ducthangho/repos",
+  "site_admin": false,
+  "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+  "type": "User",
+  "url": "https://api.github.com/users/ducthangho",
+  "user_view_type": "public"
+ },
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd/comments",
+ "commit": {
+  "author": {
+   "date": "2026-11-19T10:03:16Z",
+   "email": "ducthangho@gmail.com",
+   "name": "ducthangho"
+  },
+  "comment_count": 0,
+  "committer": {
+   "date": "2026-11-19T10:03:16Z",
+   "email": "noreply@github.com",
+   "name": "GitHub"
+  },
+  "message": "Merge pull request #1417 from ducthangho/ops/manifest-433-p2a\n\nrelease: tái sinh RELEASE_MANIFEST.json sau land #1415 (#433 P2a)",
+  "tree": {
+   "sha": "ceba0869d378f6c326955e4e1920a9776ba1a0a7",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/ceba0869d378f6c326955e4e1920a9776ba1a0a7"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd",
+  "verification": {
+   "payload": "tree ceba0869d378f6c326955e4e1920a9776ba1a0a7\nparent 11bd0336d00b4a9544e70dcbbe049d372053a3ec\nparent f8eaed6636d5a321cfd057e656578882c9bdd5e4\nauthor ducthangho <ducthangho@gmail.com> 1795082596 +0700\ncommitter GitHub <noreply@github.com> 1795082596 +0700\n\nMerge pull request #1417 from ducthangho/ops/manifest-433-p2a\n\nrelease: tái sinh RELEASE_MANIFEST.json sau land #1415 (#433 P2a)",
+   "reason": "valid",
+   "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq/sllCRC1aQ7uu5UhlAAArE4QAA2l8SMRFBH2VBblffhWsib2\n1F7oIUNbeORIzJRxx+9RxcAQiLIvZejs3xDSpg4jw+krmth323AnN7XeFJFT+iG2\nFO1PlTTWsGmzMrw4KVY5cCp7imfXey7UYduW1tz+y1jHkme11UuOdKKeqNeYKili\n1mU5FatR+d59mgQqxWx772zPa4HfxZ5emoTLQHrTh+Eh8HqLraHZpPhWLxZZsY5x\nu5s/8rTxpwRwb6OdLbyF96uE7TTBr4tu6kulErkQMYnzvRgDdC5/m2LD59xvzY8m\nk226HBNfn56BVn2l1Q6Egkh/87hflUEofWo2rtCTP43mHJfCbRpXQ3OGwc+cC+Vo\nBLRSqNhIBL2WrdtjfRtIwDVw/iS2Q57mwG5Tuf9Qm4y9Lfvigp5zWfxZO6H5SBls\n7XkioiD/yYntZnfO2ST7zrSq9GlBFqF/24QafgS49OWwj3sdVKI0ydJg2ck/tRfl\n1oABp9w2TWlDB3hpG1MDUe52HRPv40kj2QyPBq2DAuOU2H7nAcBPYc5zWosSN6el\nNcvxnW7HuSqfQVVAxEbM+4wWVtERqA6daLmzM/AiHxsdYKWA92Jbk2GNNIQFZKm2\nrCKUJbkxZ5Sk7eJktGhobTzthB7EhxcV0JNe2ulTkvWmc3sXZM9HXi5mI8iaGfnP\nDyICuYmY6dC7/Zxo745c\n=d7yC\n-----END PGP SIGNATURE-----\n",
+   "verified": true,
+   "verified_at": "2026-11-19T10:03:17Z"
+  }
+ },
+ "committer": {
+  "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+  "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+  "followers_url": "https://api.github.com/users/web-flow/followers",
+  "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+  "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+  "gravatar_id": "",
+  "html_url": "https://github.com/web-flow",
+  "id": 19864447,
+  "login": "web-flow",
+  "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+  "organizations_url": "https://api.github.com/users/web-flow/orgs",
+  "received_events_url": "https://api.github.com/users/web-flow/received_events",
+  "repos_url": "https://api.github.com/users/web-flow/repos",
+  "site_admin": false,
+  "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+  "type": "User",
+  "url": "https://api.github.com/users/web-flow",
+  "user_view_type": "public"
+ },
+ "files": [
+  {
+   "additions": 7,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd/RELEASE_MANIFEST.json",
+   "changes": 14,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/RELEASE_MANIFEST.json?ref=4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd",
+   "deletions": 7,
+   "filename": "RELEASE_MANIFEST.json",
+   "patch": "@@ -6,9 +6,9 @@\n   \"webapp_target\": \"2.21.2q\",\n   \"root_name\": \"tra-luat\",\n   \"file_count\": 185,\n-  \"total_bytes\": 9192801,\n-  \"package_hash\": \"a5574d897924a6d4db17a33aa8739c8bcbb21476fefb13d224e43deadfdd6f24\",\n-  \"content_hash\": \"a5574d897924a6d4db17a33aa8739c8bcbb21476fefb13d224e43deadfdd6f24\",\n+  \"total_bytes\": 9230234,\n+  \"package_hash\": \"fc8256241d2c27a36aacbc8f673244116487e4a13fc022e7999a992bd38840de\",\n+  \"content_hash\": \"fc8256241d2c27a36aacbc8f673244116487e4a13fc022e7999a992bd38840de\",\n   \"required_missing\": [],\n   \"files\": [\n     {\n@@ -878,8 +878,8 @@\n     },\n     {\n       \"path\": \"scripts/tl_gws.py\",\n-      \"size\": 158548,\n-      \"sha256\": \"e254f4406c58d41bf35168ff59ed906f7bfe522cb6d6c2db61760cdd423698db\"\n+      \"size\": 160762,\n+      \"sha256\": \"dffb4905b58164fd683f7a74997c42db0128ee90b59d8309e96cb2d489a03aa8\"\n     },\n     {\n       \"path\": \"scripts/tl_selftest.py\",\n@@ -888,8 +888,8 @@\n     },\n     {\n       \"path\": \"scripts/tl_test_fragments_bundled.py\",\n-      \"size\": 144209,\n-      \"sha256\": \"3d656448dfa8a2d39dda9fde28a13d9d0b99752e89e50e8ad81d0be18de0ceee\"\n+      \"size\": 179428,\n+      \"sha256\": \"be32c696c17ff6acd9a3894de4b7a34e7a7021a256ec8d051616a05cc0850111\"\n     },\n     {\n       \"path\": \"scripts/tra_cuu.py\",",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd/RELEASE_MANIFEST.json",
+   "sha": "f200bceb37d10748e72635374e85000e853bd3ba",
+   "status": "modified"
+  }
+ ],
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd",
+ "node_id": "C_kwDOTNeRjdoAKDRlZGE5NGU5ZWZmYzZjZmU3ZmNjMGIzZTNmYjQxNTFhZDQzN2VjYmQ",
+ "parents": [
+  {
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/11bd0336d00b4a9544e70dcbbe049d372053a3ec",
+   "sha": "11bd0336d00b4a9544e70dcbbe049d372053a3ec",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/11bd0336d00b4a9544e70dcbbe049d372053a3ec"
+  },
+  {
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/f8eaed6636d5a321cfd057e656578882c9bdd5e4",
+   "sha": "f8eaed6636d5a321cfd057e656578882c9bdd5e4",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f8eaed6636d5a321cfd057e656578882c9bdd5e4"
+  }
+ ],
+ "sha": "4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd",
+ "stats": {
+  "additions": 7,
+  "deletions": 7,
+  "total": 14
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd"
+}

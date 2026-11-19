@@ -1,0 +1,41 @@
+# do 2026-11-19T10:49:27Z clone rieng --shared, origin = github, fetch +refs/heads/*, master = origin/master 96b6a33d7; may chu 340 ref, cuc bo thieu 0 (thua cuc bo 3)
+== ai-dang-giu .agents/skills/playwright-browser/SKILL.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 6; HẾT_HẠN	wp1389-r1-g1-claude	refs/heads/master:ops/leases/wp1389-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/acceptance/wp1389/REVIEW-PROMPT.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1389-r1-g1-claude	refs/heads/master:ops/leases/wp1389-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/acceptance/wp1389/RESULTS.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1389-r1-g1-claude	refs/heads/master:ops/leases/wp1389-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/acceptance/wp1389/VERDICT.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1389-r1-g1-claude	refs/heads/master:ops/leases/wp1389-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/acceptance/wp1389/residue_matrix.ps1
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1389-r1-g1-claude	refs/heads/master:ops/leases/wp1389-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/acceptance/wp1389/residue_matrix.sh
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1389-r1-g1-claude	refs/heads/master:ops/leases/wp1389-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/leases/wp1389-r1-g1-claude.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1389-r1-g1-claude	refs/heads/master:ops/leases/wp1389-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/specs/wp1389-r1.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1389-r1-g1-claude	refs/heads/master:ops/leases/wp1389-r1-g1-claude.yaml)
+rc=0

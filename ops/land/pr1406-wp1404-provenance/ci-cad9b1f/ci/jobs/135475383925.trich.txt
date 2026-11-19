@@ -1,0 +1,15 @@
+2026-11-19T09:46:56.1406940Z Image: ubuntu-26.04
+2026-11-19T09:46:56.8833503Z ##[group]Run git config --global core.autocrlf false
+2026-11-19T09:46:57.1105778Z ##[group]Run actions/checkout@v4
+2026-11-19T09:47:04.7691227Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-11-19T09:47:04.7691836Z 11bd0336d00b4a9544e70dcbbe049d372053a3ec
+2026-11-19T09:47:05.8109897Z [command]/usr/bin/git log -1 --format=%H
+2026-11-19T09:47:05.8131381Z cad9b1fa95da303b085a4555e85608c0b77b8ae0
+2026-11-19T09:47:05.9634424Z ##[group]Run actions/setup-python@v5
+2026-11-19T09:47:06.2142742Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-19T09:47:08.1413785Z ##[group]Run bash ops/cai_actionlint.sh
+2026-11-19T09:47:08.3263194Z ##[group]Run bash ops/cai_cong_cu.sh shellcheck
+2026-11-19T09:47:11.9776415Z ##[group]Run bash ops/cai_cong_cu.sh rg
+2026-11-19T09:47:45.8022574Z ##[group]Run python ops/cong_cu.py kiem-tra --json
+2026-11-19T09:47:46.5432219Z ##[group]Run python -m pip install --quiet ruff==0.15.15
+2026-11-19T09:47:47.4535373Z ##[group]Run python .claude/dev/ci_dang_ky_test.py --chay

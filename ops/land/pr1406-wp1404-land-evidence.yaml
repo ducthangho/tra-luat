@@ -1,0 +1,177 @@
+# HO SO LAND — packet #1404 CI-RG-APT-UPDATE r1, lease g1, qua PR #1406. Khuon: ops/land/pr1415-wp433-land-evidence.yaml (run hau due) va
+#   ops/land/pr1414-wp387-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (cad9b1f), landed TRUE qua run HAU DUE. ci.yml push master 44497897849 tren CHINH cad9b1f: run/checkout passed, gate
+#   output FAILED 38/39 — job gate (ubuntu-latest) do o buoc release-verify strict (lane LAND) vi hai tep scripts/tl_gws.py,
+#   scripts/tl_test_fragments_bundled.py lech manifest: do SAN tu 417b593 (#1415), #1406 khong cham tep nao trong manifest. Moc dung de lat:
+#   ci.yml push master 44502045702 tren 4eda94e (merge #1417 tai sinh manifest, hau due first-parent cua cad9b1f) — bon moc measured passed,
+#   Workflow definition qua wd-run 44506427885 (dung chung, nam o ops/land/pr1415-wp433-provenance/hau-due-4eda94e/).
+# MUC TIEU: ops/cai_cong_cu.sh — apt-get install loi va cong thuc co `apt-get install` => apt-get update mot lan roi cai lai mot lan; ca va
+#   dot bien trong .claude/dev/launcher_test.py. No co ten con mo: WP1404-GITHUB-PATH-LAN-LOI.
+# UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head c245a59 (issuecomment-7005282588, app null).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
+# Readback tho: ops/land/pr1406-wp1404-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-19T10:39–10:50Z.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS
+input_packet_generations:
+  - packet_issue: 1404
+    packet_id: wp1404
+    revision: 1
+    generation: 1
+    lease_id: wp1404-r1-g1-claude
+    ghi_chu: 'Executor: phien session_015GtxrazyAyLwN5BiEB52Sq (vua ghi lease vua thi cong theo chi thi chu kho, lease recorded_by). Ho so do subagent cua phien dieu phoi #1206 soan.'
+authorized_head_sha: c245a59e4c18968bce5afafcb381adc304d64d13
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1406#issuecomment-7005282588
+authorization_ghi_chu: >-
+  measured — readback-pr1406-comments.json: comment 7005282588, user ducthangho, created_at = updated_at 2026-11-19T09:35:17Z,
+  performed_via_github_app null (cac comment @codex review / ghi chu cua phien mang app `claude`); than human_exact_head_audit.v1 packet
+  wp1404 revision 1 generation 1 pr 1406 reviewed_sha c245a59 (= head), reviewed_tree bf2ff681 (= tree head = tree merge, linux/nghiem-thu-cad9b1f.txt),
+  spec_sha256 1eb8f442 (= lease spec_hash, dac-ta.txt), verdict approve, assurance human_audited, review_axes [spec, standards_security],
+  open_findings []. Merged_at 09:35:55Z (readback-pr-1406.json). CAVEAT #566: ai bam merge khong do duoc.
+land_operator: 'measured — readback-pr-1406.json: merged_at 2026-11-19T09:35:55Z, merge_commit_sha cad9b1f, state closed.'
+merge_method: merge
+merge_commit: cad9b1fa95da303b085a4555e85608c0b77b8ae0
+merge_commit_tree: bf2ff68167b06874e62b5c586e09e80ce18c17af
+merge_commit_parents: [417b59397669e6966da2b546537279d15e2ba0c0, c245a59e4c18968bce5afafcb381adc304d64d13]
+merge_ghi_chu: >-
+  measured — readback-commit-cad9b1f.json + linux/nghiem-thu-cad9b1f.txt: cha thu nhat 417b593, cha thu hai c245a59; tree merge bf2ff681 =
+  tree head (c245a59 la merge origin/master 417b593 vao nhanh, nen numstat c245a59..cad9b1f rong). numstat cad9b1f^1..cad9b1f: dung 6 tep
+  write set (launcher_test.py +251/-4, RESULTS.md +113, VERDICT.md +275, cai_cong_cu.sh +28, lease +82, spec +64; tong +813/-4); blob 6 tep
+  tai merge = tai head = tai 4eda94e. git diff --check cad9b1f^1 cad9b1f rc 2: khoang trang cuoi dong trong ops/acceptance/wp1404/VERDICT.md
+  (dong `> ...  ` cua ban sao nguyen van verdict) — CI cua PR van xanh.
+  c245a59 (merge origin/master 417b593 vao nhanh) do phien dieu phoi day theo duyet chu kho (ADR-0060 M5) — ai day: loi_khai_co_neo.
+  Noi dung thi measured (linux/nghiem-thu-cad9b1f.txt): c245a59^{tree} = git merge-tree --write-tree a75baf7 417b593 = bf2ff681, tuc merge
+  TU DONG khong sua tay; tren write set no chi mang dong gop cua #1414 vao launcher_test.py (+313/-64 = numstat 3b64746..9804f64).
+pre_merge_checks:
+  - name: 'CI PR tren head cuoi'
+    sha: c245a59e4c18968bce5afafcb381adc304d64d13
+    conclusion: success
+    nguon: [readback-runs-head-c245a59.json, readback-checkruns-head-c245a59.json]
+    ghi_chu: 'measured — readback-runs-head-c245a59.json: ci.yml pull_request 44491442271 success (launcher-windows pull_request skipped); readback-checkruns-head-c245a59.json: 28 check run, 25 success, 3 skipped (gate-packet-loop-manh, launcher, mo), 0 that bai.'
+  - name: 'Codex connector tren head cuoi'
+    sha: c245a59e4c18968bce5afafcb381adc304d64d13
+    conclusion: 'sach'
+    nguon: [readback-pr1406-comments.json, readback-pr1406-reviews.json, readback-pr1406-review-comments.json]
+    ghi_chu: 'measured — readback-pr1406-comments.json: 7004414665 codex-review-receipt "Didn''t find any major issues" (kich @codex review 7004377744 tren c245a59); summary 7004415677: code_review commit_sha c245a59, completed, has_any_findings false. reviews va review-comments rong.'
+  - name: 'N1-N5 cua executor tren head'
+    sha: c245a59e4c18968bce5afafcb381adc304d64d13
+    conclusion: success
+    nguon: [loi-khai-executor-than-pr1406.md, readback-pr-1406.json, lease-wp1404-r1-g1-claude-tai-merge.yaml.txt]
+    ghi_chu: >-
+      loi_khai_co_neo — than PR #1406 (loi-khai-executor-than-pr1406.md) va ops/acceptance/wp1404/RESULTS.md tai merge: base e2c3b82
+      launcher_test 424/424, --dot-bien 720/720; head b0e9866 426/426, 739/739; bang dot bien cai_sh 67/67; doctrine-scan sach. Codex offline
+      4 luot (luot 1-3 request_changes, luot 4 approve tren 0bd8edc, chi delta); tran Codex chu kho nang 2 -> 3 -> 4 (lease nang_tran).
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA cad9b1f'
+    run_id: 44497897849
+    run_attempt: 1
+    sha: cad9b1fa95da303b085a4555e85608c0b77b8ae0
+    conclusion: failure
+    nguon: [ci-cad9b1f/ci/provenance.yaml, ci-cad9b1f/ci-provenance-thu.log, readback-run-44497897849.json, readback-jobs-44497897849.json, readback-runs-merge-cad9b1f.json, ci-cad9b1f/danh-gia-gate-output-44497897849.txt, ci-cad9b1f/gate-release-verify-land-44497897849.trich.txt, danh_gia_gate.py, trich_gate_1415.py]
+    moc_run: 'measured — ci-cad9b1f/ci/provenance.yaml moc.run passed: event push, head_sha cad9b1f, run_attempt 1.'
+    moc_checkout: 'measured — ci-cad9b1f/ci/provenance.yaml: 39/39 job checkout passed cad9b1f.'
+    moc_workflow_definition: 'not_measured — ci-cad9b1f/ci/provenance.yaml: graphql_bi_chan_trong_phien_claude; khong dispatch ops-do-workflow-definition.yml cho run nay (run da FAILED).'
+    moc_gate_output: >-
+      measured — ci-cad9b1f/danh-gia-gate-output-44497897849.txt (danh_gia_gate.py v2 sha256 539fed68): FAILED 38/39; job gate (ubuntu-latest)
+      conclusion failure. ci-cad9b1f/gate-release-verify-land-44497897849.trich.txt: `== tl selftest 1780/1780 ==`; buoc release-verify LAND
+      ok false, failed dung scripts/tl_gws.py va scripts/tl_test_fragments_bundled.py, exit code 2 — do san tu 417b593 (#1415), khong do #1406.
+  - name: 'ci.yml push master tren HAU DUE 4eda94e (merge #1417) — moc §10.2.2 dung de lat landed'
+    run_id: 44502045702
+    run_attempt: 1
+    sha: 4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd
+    conclusion: success
+    nguon: [pr1415-wp433-provenance/hau-due-4eda94e/ci/provenance.yaml, pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt, pr1415-wp433-provenance/hau-due-4eda94e/phan-chung-buoc-44502045702.txt, pr1415-wp433-provenance/hau-due-4eda94e/wd/wd-44502045702.json, pr1415-wp433-provenance/hau-due-4eda94e/wd/ci-provenance-thu-wd-44506427885.log, pr1415-wp433-provenance/hau-due-4eda94e/hau-due-417b593-4eda94e.txt, linux/nghiem-thu-cad9b1f.txt]
+    moc_run: 'measured — pr1415-wp433-provenance/hau-due-4eda94e/ci/provenance.yaml moc.run passed (push, 4eda94e, attempt 1).'
+    moc_checkout: 'measured — pr1415-wp433-provenance/hau-due-4eda94e/ci/provenance.yaml: 39/39 job checkout passed 4eda94e.'
+    moc_workflow_definition: 'measured — pr1415-wp433-provenance/hau-due-4eda94e/ci/provenance.yaml moc.workflow_definition passed (thu --wd-run 44506427885; pr1415-wp433-provenance/hau-due-4eda94e/wd/wd-44502045702.json): .github/workflows/ci.yml blob a1db88d9 tai 4eda94e.'
+    moc_gate_output: 'measured — pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt: passed 39/39; pr1415-wp433-provenance/hau-due-4eda94e/phan-chung-buoc-44502045702.txt: xoa dau hieu 4 buoc => not_measured rc 0.'
+    ly_do_chap_nhan: >-
+      measured — pr1415-wp433-provenance/hau-due-4eda94e/hau-due-417b593-4eda94e.txt: cad9b1f nam tren chuoi first-parent 417b593..4eda94e;
+      linux/nghiem-thu-cad9b1f.txt: git diff --numstat cad9b1f 4eda94e tren 6 tep write set rong (blob bang nhau). linux/manifest-va-write-set.txt:
+      giao tap tep cua cad9b1f voi 185 duong dan RELEASE_MANIFEST.json (tai 417b593 va 4eda94e) = rong. Chap nhan run hau due: quyet dinh
+      cua phien dieu phoi #1206 (loi_khai_co_neo), cung ly le voi pr1415-wp433-land-evidence.yaml post_merge_checks[1].
+  - name: 'launcher-windows.yml push master tren DUNG merge SHA cad9b1f'
+    run_id: 44497897774
+    run_attempt: 1
+    sha: cad9b1fa95da303b085a4555e85608c0b77b8ae0
+    conclusion: success
+    nguon: [readback-run-44497897774.json, readback-jobs-44497897774.json, lw/launcher-windows-44497897774.trich.txt, lw/so-lane-launcher-44489280629-vs-44497897774.txt, lw/launcher-ubuntu-135469673544-wp1404.trich.txt, trich_launcher.py, so_lane_launcher.py, trich_dong_khop.py]
+    ghi_chu: >-
+      measured — lw/launcher-windows-44497897774.trich.txt: ubuntu-latest "426/426 (tong 428, bo qua 2, hong 0)", "DOT BIEN: 751/751 dat (7 khong
+      do duoc)"; windows-latest "341/341 (tong 428, bo qua 87, hong 0)", "DOT BIEN: 592/592 dat (166 khong do duoc)". lw/so-lane-launcher-44489280629-vs-44497897774.txt
+      (base = run tren 0ca331b): ubuntu bo qua base = merge, KHONG DO DUOC base = merge; windows bo qua them dung 2 ca r1404 va KHONG DO DUOC
+      them cac muc wp1404_sh_* (nhanh Linux, dung thiet ke). lw/launcher-ubuntu-135469673544-wp1404.trich.txt: 19 dot bien wp1404 `OK giet` tren ubuntu.
+bookkeeping:
+  - {item: 'lease wp1404-r1-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — PR #1418 tu nhanh ops/land-1414-1415 (phien dieu phoi), chua merge luc ghi.'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt (rc ghi trong tep).'}
+  - {item: 'dong Issue #1404', ket_qua: 'not_applicable — readback-issue-1404.json open; no WP1404-GITHUB-PATH-LAN-LOI con mo; dong hay khong do chu kho.'}
+  - {item: 'phat hanh', ket_qua: 'not_applicable — ops/ va .claude/dev/ la dev-side, khong vao goi.'}
+# ---- het truong chuan
+packet_id: wp1404
+packet_issue: 1404
+packet_ten: CI-RG-APT-UPDATE
+revision: 1
+generation: 1
+pham_vi_land: '.claude/dev/launcher_test.py +251/-4, ops/cai_cong_cu.sh +28, ops/acceptance/wp1404/{RESULTS,VERDICT}.md +113/+275, ops/leases/wp1404-r1-g1-claude.yaml +82, ops/specs/wp1404-r1.md +64.'
+environment: cloud
+operating_system: linux
+recorded_by: claude-session — subagent cua phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS (ban nhap, phien dieu phoi ra soat).
+
+spec:
+  path: ops/specs/wp1404-r1.md
+  blob: 5dbb795624dda376a01907ac66281db92a0625da
+  sha256: 1eb8f4428e0da7c2074b94938e89990c3f3bd681b254bcacccb2336a76a5314d
+  nguon: 'measured — dac-ta.txt: sha256 spec tai merge = tai head PR = lease spec_hash; spec nam TRONG diff PR (write set).'
+  review_class_lech: 'measured — dac-ta.txt va lease-wp1404-r1-g1-claude-tai-merge.yaml.txt: dac ta khai `systemic`, lease khai review_class/effective_review_class `sensitive`.'
+
+lease:
+  lease_id: wp1404-r1-g1-claude
+  path: ops/leases/wp1404-r1-g1-claude.yaml (TRONG diff PR, nay tren master)
+  write_set_so_tep: 6
+  thu_hoi_cuoi: >-
+    measured — lease-wp1404-r1-g1-claude-tai-merge.yaml.txt: leased_at 2026-11-18T16:51:13Z, lease_until 2026-11-19T04:51:13Z (da gia han
+    6h theo chu kho), HET HAN truoc merge; KHONG rut han, KHONG bia mo (lease het han tu nhien). Commit c245a59 (merge origin/master vao
+    nhanh) duoc day SAU khi lease het han, boi phien dieu phoi theo duyet chu kho (ADR-0060 M5) — loi_khai_co_neo. ai-dang-giu-sau-merge.txt
+    (10:5xZ, clone rieng, master = origin/master, may chu va cuc bo khop): 6/6 duong dan NGUOI_GIU 0 (wp1404-r1-g1-claude HẾT_HẠN).
+  tran_kich_thuoc: >-
+    measured — numstat 6 tep +813/-4 (linux/nghiem-thu-cad9b1f.txt). Lease khai `sensitive`; dac ta khong co dong `tran_kich_thuoc_sensitive:
+    ADR-0053@<oid>` (dac-ta.txt: grep tren spec chi ra dong 3 Review Class `systemic`) va lease khong co khoi nang_tran cho kich thuoc (chi cho codex_review_calls) => theo ADR-0053
+    tran fail-closed la sensitive cu (<= 3 tep / <= 300 dong them): VUOT. Neu doc theo `systemic` cua dac ta (tran thuong ADR-0044 <= 6 tep,
+    <= 1000 them+xoa: 6 tep, 817) thi trong tran. Khong cong nao canh; ghi de chu kho quyet.
+
+trang_thai_packet:
+  merged: true
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate: run 44497897849 tren cad9b1f gate_output FAILED (manifest, do san tu #1415); run hau due 44502045702 tren
+    4eda94e bon moc measured passed => DAT theo post_merge_checks[1]. (2) lease: het han tu nhien truoc merge, NGUOI_GIU 0. (3) bookkeeping:
+    ho so nay; M8 kiem-dong-wp-m8.txt. (4) review neo c245a59: connector sach + audit chu kho. (5) uy quyen: audit tu dang 7005282588.
+    (6) muc tieu: N1-N4 measured tren merge/CI; N5 measured (connector + VERDICT trong kho). (7) tran: Codex 4/4 (chu kho nang), kich thuoc xem lease.tran_kich_thuoc.
+  canh_bao_cho_chu_kho: >-
+    (i) landed true dua tren run HAU DUE 4eda94e (quyet dinh phien dieu phoi). (ii) Lech review class spec `systemic` / lease `sensitive` va kich
+    thuoc vuot tran sensitive fail-closed cua ADR-0053 neu doc theo lease. (iii) c245a59 day sau khi lease het han. (iv) No WP1404-GITHUB-PATH-LAN-LOI.
+
+review:
+  so_loi_goi_codex: 'measured — readback-pr1406-comments.json: connector 1 luot tren c245a59 sach. thuat_lai — lease budget codex_review_calls used 4/4 (offline, ops/acceptance/wp1404/VERDICT.md).'
+
+nghiem_thu:
+  N1: 'measured — linux/nghiem-thu-cad9b1f.txt (clone detached 4eda94e, blob write set = cad9b1f): `--lap-ca r1404_cai_apt_update_roi_thu_lai`, `r1404_thu_lai_chot_chi_tiet`, `r886_ten_python_khop_cai_cong_cu_sh` moi ca `1/1 qua, 0 bo qua, 0 hong`; bash -n ops/cai_cong_cu.sh rc 0.'
+  N2: 'measured — lw/launcher-ubuntu-135469673544-wp1404.trich.txt: 19 dot bien wp1404_sh_* `OK giet` tren ubuntu-latest (lane launcher-windows 44497897774 tren cad9b1f), DOT BIEN 751/751 dat.'
+  N3: 'measured — lw/so-lane-launcher-44489280629-vs-44497897774.txt: ubuntu 424/424 -> 426/426 (them dung 2 ca r1404), bo qua va KHONG DO DUOC base = merge; dot bien 732 -> 751.'
+  N4: 'measured — readback-checkruns-head-c245a59.json (CI PR xanh, 25 success 3 skipped 0 do); linux/nghiem-thu-cad9b1f.txt: doctrine-scan rc 0 tren clone 4eda94e (blob write set = cad9b1f).'
+  N5: 'measured — readback-pr1406-comments.json connector sach tren c245a59; ops/acceptance/wp1404/VERDICT.md (tren master) luot 4 approve tren 0bd8edc: thuat_lai.'
+
+khong_do_duoc:
+  - 'Moc Workflow definition cua run 44497897849 tren cad9b1f (khong dispatch; dung run hau due 44502045702).'
+  - 'Codex offline 4 luot: chi doc VERDICT.md trong kho, khong doi chieu transcript.'
+  - 'Ai bam merge va lua chon cach merge (khong co hien vat).'

@@ -1,0 +1,15 @@
+# do 2026-11-19T10:47:52Z
+merge cad9b1fa95da303b085a4555e85608c0b77b8ae0
+spec blob tai merge: 5dbb795624dda376a01907ac66281db92a0625da
+spec sha256 tai merge: 1eb8f4428e0da7c2074b94938e89990c3f3bd681b254bcacccb2336a76a5314d
+spec sha256 tai head PR: 1eb8f4428e0da7c2074b94938e89990c3f3bd681b254bcacccb2336a76a5314d
+lease spec_hash: 1eb8f4428e0da7c2074b94938e89990c3f3bd681b254bcacccb2336a76a5314d
+lease blob tai merge: 3326b95d873f9514d1aac8eae4d76b4a7f2e5512
+spec + lease tai origin/master 4eda94e: 5dbb795624dda376a01907ac66281db92a0625da 3326b95d873f9514d1aac8eae4d76b4a7f2e5512
+$ git show 4eda94e:ops/specs/wp1404-r1.md | grep -nE 'tran_kich_thuoc|ADR-0053|ADR-0044|nang_tran|450|Review Class'
+3:- Packet: #1404. Revision 1, generation 1. Review Class khai: `systemic` (sửa đường cài công cụ mà mọi job CI dùng);
+$ git show 4eda94e:ops/leases/wp1404-r1-g1-claude.yaml | grep -nE '^(review_class|effective_review_class|risk|nang_tran|budget_nang_tran[_0-9]*):|tran_kich|ADR-0053'
+20:review_class: sensitive
+21:effective_review_class: sensitive
+22:risk: sensitive
+69:nang_tran:

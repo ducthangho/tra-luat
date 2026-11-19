@@ -1,0 +1,5 @@
+# do 2026-11-19T10:55:52Z, kho chinh
+$ python giao_manifest.py cad9b1fa95da303b085a4555e85608c0b77b8ae0 417b593
+manifest 417b593: 185 duong dan; merge cad9b1fa95da303b085a4555e85608c0b77b8ae0: 6 tep; giao = []
+$ python giao_manifest.py cad9b1fa95da303b085a4555e85608c0b77b8ae0 4eda94e
+manifest 4eda94e: 185 duong dan; merge cad9b1fa95da303b085a4555e85608c0b77b8ae0: 6 tep; giao = []

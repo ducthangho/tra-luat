@@ -50,3 +50,5 @@ review_calls_used: 2
 native_runs_limit: 1
 native_step_reruns_limit: 1
 windows: native_desktop_only
+da_bi_thay_the: wp-pxu-r1-g2-executor
+da_bi_thay_the_at_utc: '2026-11-19T03:13:29Z'

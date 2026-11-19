@@ -201,3 +201,16 @@ Finding sản phẩm cần chủ kho quyết định (không tự sửa):
 | Gỡ + `Remove-ProximaUninstallResidue` | **partial** | Desktop, PS 5.1 + PS 7: 29/30 ca hành vi đạt, gồm cả tráo junction và tráo tệp (PU23/24/25/28). 9/9 đột biến khớp đúng tập ca khai báo, nhưng do **phân loại tay**; harness cấp 0/9. Hồi quy 4 harness cũ không đổi. **Còn mở:** P1 tĩnh (nhánh junction ở InstallDir gỡ liên kết trước khi kiểm final path); PU13 symlink chưa đo vì thiếu quyền; bản sửa harness chưa chạy |
 
 Cần chủ kho quyết định: nâng trần WP-PXU (+1 Executor, +1 native Desktop, +1 review) để sửa P1. Đồng thời, tiêu chí NSIS (H.5) vẫn chờ quyết định.
+
+### H.7 Quyết định của chủ kho, 19/11 khoảng 03:07Z
+- **WP-PXU:** "Tiếp tục làm đi". Nâng trần bằng lease g2: Executor 1, native Desktop 1, review 1, để sửa P1 của review 2/2.
+- **Developer Mode (PU13):** chưa bật. Desktop Commander trên Desktop chạy ở Medium integrity (không admin) nên không tự bật được. Phiên điều phối **không trích mật khẩu UltraViewer** (credential truy cập từ xa). PU13 giữ `not_measured` cho tới khi có máy có quyền symlink, hoặc chủ kho tự bật.
+- **Tiêu chí NSIS: "theo khuyến nghị".** Phiên điều phối khuyến nghị và ghi như sau:
+  1. Hàng **"gỡ của nhà cung cấp"** giữ **failed**, như một finding sản phẩm (NSIS-2): sự thật đã đo ba lượt, không xoá.
+  2. **Tiêu chí quy trình gỡ** được sửa thành ba bước:
+     - chạy `"<dir>\Uninstall Proxima.exe" /currentuser /S`;
+     - chờ hết `Un_*`/`Au_*`;
+     - chạy `Remove-ProximaUninstallResidue`, kết quả phải là `CLEANED` hoặc `NOTHING_TO_DO`.
+
+     Hàng này chỉ chuyển `passed` khi WP-PXU được review chấp nhận **và** hàm đã chạy trên OS thật sau một lần gỡ thật. Dự kiến dịp đo là lúc dọn sau U8, nếu chủ kho quyết định gỡ.
+  3. **Bỏ yêu cầu `InstallLocation`** (sai với electron-builder per-user). Thay bằng: thư mục cài suy từ `QuietUninstallString` của **đúng một** khoá HKCU, và thư mục đó chứa `Proxima.exe` đúng băm `6990dce4…`.

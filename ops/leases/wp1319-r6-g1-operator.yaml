@@ -29,8 +29,11 @@ recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-19T21:13:07Z'
 heartbeat_at: '2026-11-19T21:13:07Z'
-lease_until: '2026-11-20T00:13:07Z'
-lease_expires_at_utc: '2026-11-20T00:13:07Z'
+lease_until: '2026-11-19T21:18:10Z'
+lease_expires_at_utc: '2026-11-19T21:18:10Z'
 max_lease_hours: 3
 review_calls_limit: 0
 native_runs_limit_per_host: 2
+withdrawn_at_utc: '2026-11-19T21:18:10Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'het 2/2 luot ASUS do loi dung (PS5.1 thieu Get-FileHash; bien $r ghi de $R vi PowerShell khong phan biet hoa thuong); khong do duoc gi; chu kho cap them 1 luot o g2'

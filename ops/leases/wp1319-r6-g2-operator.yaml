@@ -1,0 +1,36 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: wp1319
+revision: 6
+generation: 2
+lease_id: wp1319-r6-g2-operator
+role: operator
+executor: none
+reviewer: 'connector Codex tren PR'
+review_class: routine
+target_hosts:
+- 7404cfba-9034-4787-b46b-7c358126a411
+live_change: 'khong — do chi doc vi tri cache trinh duyet cua add-on Playwright tren ASUS'
+spec_path: ops/specs/wp1319-r6.md
+spec_hash: cfecbe610a8af7878a9929c4a0533d5496917f13aab1d723ef293ef1f5054f04
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r6/RESULTS.md
+- ops/leases/wp1319-r6-g2-operator.yaml
+- ops/specs/wp1319-r6.md
+write_set_hash: f84850ede428eaa005f0fe32cafc6b9958f41db565a8cc8f5a5c966f10637c8d
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: 3bd9728efe41745500a2ac47faffa7d5ca3bf851
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 19/11 cap them 1 luot ASUS cho r6 (AskUserQuestion: "Cap 1 luot") sau khi g1 het 2/2 luot do loi dung'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-19T21:18:10Z'
+heartbeat_at: '2026-11-19T21:18:10Z'
+lease_until: '2026-11-19T23:18:10Z'
+lease_expires_at_utc: '2026-11-19T23:18:10Z'
+max_lease_hours: 2
+review_calls_limit: 0
+native_runs_limit_per_host: 1

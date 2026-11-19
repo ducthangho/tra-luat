@@ -10091,7 +10091,7 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
 
 
 def _wp831_chay_cai_rg(s, nen, tot, dau="hong", venv=False, batch=False, tiem=False,
-                       allexport=None, thu_tu=("rg", "bash")):
+                       allexport=None, thu_tu=("rg", "bash"), apt_get=None, brew=None):
     """NGUYÊN `rg.cai.<nen>`; installer là stub, `tot` là thân `rg` ở thư mục ứng viên của trình cài (`/usr/bin` dưới
     `CONG_CU_GOC` tạm / `$(brew --prefix)/bin`). Đầu PATH: `dau="hong"` một `rg` hỏng · `"uv"` chính thư mục ứng viên
     (`rg` tên trần đã tốt) · `"truoc"` một `rg` tốt KHÁC và tệp ứng viên KHÔNG thực thi (F01). `venv`: thư mục ứng viên là `bin/` của một venv
@@ -10099,7 +10099,8 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", venv=False, batch=False, tiem=Fa
     YAML đang đo) — lượt `source` cho `bash` chạy sau khi `rg` đã đổi PATH. `tiem`: khởi chạy qua `exec` (giữ PID) với
     `CAI_CONG_CU_PY_CUA=$$` và `PY` vô hướng trỏ Python của venv đã EXPORT sẵn (F04); installer giả ghi việc chúng thấy dấu
     hay không vào `dau.log`. `allexport`: `"co"` chạy `bash -a`, `"env"` đặt `SHELLOPTS=allexport` (Codex lượt 5);
-    `thu_tu`: thứ tự hai mục của bảng kê batch. Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
+    `thu_tu`: thứ tự hai mục của bảng kê batch. `apt_get`/`brew` (wp1404): thân thay cho installer giả mặc định (ghi dấu rồi
+    `exit 0`). Trả (process, GITHUB_PATH, ứng viên, thư mục đầu)."""
     kho = s / "kho"; ops = kho / "ops"; ops.mkdir(parents=True)
     shutil.copy2(CAI_SH_DANG_DUNG, ops / "cai_cong_cu.sh")   # wp1078: bản ĐANG THỬ (đột biến), không phải tệp thật
     shutil.copy2(LAUNCHER.parents[2] / "ops" / "cong_cu.py", ops / "cong_cu.py")
@@ -10122,8 +10123,10 @@ def _wp831_chay_cai_rg(s, nen, tot, dau="hong", venv=False, batch=False, tiem=Fa
     dau_log = s / "dau.log"
     ghi_dau = f'echo "${{CAI_CONG_CU_PY_CUA:-ABSENT}}" >> \'{dau_log}\''
     # `sudo` giả gọi `apt-get` giả bằng ĐƯỜNG DẪN TUYỆT ĐỐI, không qua PATH (Codex lượt 6 F05).
-    tep = {uv / "rg": tot, bin_ / "sudo": f'n="$1"; shift; exec \'{bin_}\'/"$n" "$@"', bin_ / "apt-get": f"{ghi_dau}; exit 0",
-           bin_ / "brew": f"[ \"$1\" = --prefix ] && echo '{uv.parent}' && exit 0; {ghi_dau}; exit 0"}
+    tep = {uv / "rg": tot, bin_ / "sudo": f'n="$1"; shift; exec \'{bin_}\'/"$n" "$@"',
+           bin_ / "apt-get": apt_get if apt_get is not None else f"{ghi_dau}; exit 0",
+           bin_ / "brew": f"[ \"$1\" = --prefix ] && echo '{uv.parent}' && exit 0; "
+                          + (brew if brew is not None else f"{ghi_dau}; exit 0")}
     if dau != "uv":
         tep[dau_d / "rg"] = ("echo 'rg: error while loading shared libraries' >&2; exit 1" if dau == "hong"
                              else "echo 'ripgrep 14.1.0'")
@@ -11300,6 +11303,202 @@ def _wp858_cai_chon_ban_chay_duoc(nen):
 def r858_cai_linux_chon_ban_chay_duoc():
     """N1/N3: NGUYÊN `git`/`shellcheck`/`bash`.cai.linux; bản hỏng đầu PATH ⇒ chọn `/usr/bin` (dưới `CONG_CU_GOC`)."""
     return _wp858_cai_chon_ban_chay_duoc("linux")
+
+
+@ca
+def r1404_cai_apt_update_roi_thu_lai():
+    """wp1404: NGUYÊN `rg.cai.<nen>`; `apt-get install` lỗi ⇒ `cai_cong_cu.sh` chạy `apt-get update` MỘT lần rồi cài lại
+    MỘT lần. Lỗi thật ⇒ ≠ 0 sau đúng một lần thử lại; cài được ngay ⇒ không update; công thức không phải apt (brew) lỗi ⇒
+    không gọi `apt-get`. Nhật ký đối số của `apt-get` giả là phép đo, không chỉ mã thoát."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
+
+    def apt(s, kieu):
+        log, co = s / "apt.log", s / "da-update"
+        cai = {"loi_den_update": f"[ -f '{co}' ] && exit 0; echo 'E: Unable to locate package ripgrep' >&2; exit 100",
+               "luon_loi": "echo 'E: Unable to locate package ripgrep' >&2; exit 100",
+               "duoc_ngay": "exit 0"}[kieu]
+        return f"echo \"$1\" >> '{log}'; case \"$1\" in update) : > '{co}'; exit 0;; install) {cai};; esac; exit 0", log
+
+    def doc(log):
+        return log.read_text().split() if log.exists() else []
+
+    with San() as s:   # runner thiếu danh sách gói: lần đầu lỗi, sau update thì được
+        than, log = apt(s, "loi_den_update")
+        p, gp, uv, _d = _wp831_chay_cai_rg(s, "linux", "echo 'ripgrep 14.1.0'", apt_get=than)
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
+             f"apt loi roi khoi sau update ma khong DAT: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+        bang(doc(log) == ["install", "update", "install"], f"nhat ky apt sai: {doc(log)}")
+        bang("apt-get update roi thu lai mot lan" in p.stderr, f"thieu dong bao thu lai: {p.stderr[-300:]}")
+    with San() as s:   # lỗi thật: đúng một lần thử lại, giữ mã lỗi của lần cài lại
+        than, log = apt(s, "luon_loi")
+        p, gp, _uv, _d = _wp831_chay_cai_rg(s, "linux", "echo 'ripgrep 14.1.0'", apt_get=than)
+        bang(p.returncode == 100 and gp == "", f"apt luon loi phai thoat 100, khong chon: rc={p.returncode} GITHUB_PATH={gp!r}")
+        bang(doc(log) == ["install", "update", "install"], f"apt luon loi: nhat ky phai dung MOT lan thu lai: {doc(log)}")
+    with San() as s:   # cài được ngay: không update
+        than, log = apt(s, "duoc_ngay")
+        p, gp, uv, _d = _wp831_chay_cai_rg(s, "linux", "echo 'ripgrep 14.1.0'", apt_get=than)
+        bang(p.returncode == 0 and gp == str(uv), f"apt duoc ngay ma khong DAT: rc={p.returncode} {p.stderr[-300:]}")
+        bang(doc(log) == ["install"], f"apt duoc ngay ma van update: {doc(log)}")
+    with San() as s:   # công thức không phải apt lỗi: không đụng apt-get
+        than, log = apt(s, "duoc_ngay")
+        p, gp, _uv, _d = _wp831_chay_cai_rg(s, "macos", "echo 'ripgrep 14.1.0'", apt_get=than, brew="exit 1")
+        bang(p.returncode == 1 and gp == "", f"brew loi phai thoat 1: rc={p.returncode} GITHUB_PATH={gp!r}")
+        bang(doc(log) == [], f"cong thuc brew loi ma van goi apt-get: {doc(log)}")
+
+
+@ca
+def r1404_thu_lai_chot_chi_tiet():
+    """wp1404, Codex lượt 1 (P2 ×2, P3): chốt từng chi tiết của nhánh thử lại qua `_wp868_chay` (công thức thay được).
+    (a) NGUYÊN `rg.cai.linux`: nhật ký TOÀN argv tách `sudo` khỏi `apt-get` ⇒ đúng `sudo` + `-qq`; `update` in rác ra stdout
+    mà stdout của script vẫn là MỘT tài liệu JSON; đúng MỘT dòng báo thử lại có tên và rc lần đầu.
+    (b) `update` lỗi rc 78, hai lần install rc 100 rồi 42 ⇒ script thoát 42 (B2 + mã của lần cài lại).
+    (c) công thức gọi `apt-get` thẳng (không `sudo`) ⇒ `update` cũng không qua `sudo`.
+    (d) lần đầu: bộ chọn GHI KÊNH rồi một bước sau lỗi; lần cài lại thành công qua stdout ⇒ kênh cũ không được dùng.
+    (e) lần đầu để tiến trình con giữ stdout và ghi thư mục hỏng SAU khi lần cài lại in thư mục tốt ⇒ vẫn chọn thư mục tốt.
+    Codex lượt 2–3: (f) tiến trình nền của lần đầu ghi KÊNH cũ · (g) `source` từ shell gọi có `readonly LAN_CAI` ·
+    (h) allexport với kênh mới · (i) công thức dùng tham số vị trí của script (`${1-}`), cài được ngay và cần update."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
+    import json as _json
+    q = shlex.quote
+
+    def doc(f):
+        return f.read_text().splitlines() if f.exists() else []
+
+    with San() as s:   # (a)
+        log, co = s / "apt.log", s / "da-update"
+        apt = (f'printf \'%s\\n\' "$*" >> {q(str(log))}; case "$1" in update) echo update-rac; : > {q(str(co))}; exit 0;; '
+               f'install) [ -f {q(str(co))} ] && exit 0; exit 100;; esac; exit 99')
+        sudo = f'printf \'sudo %s\\n\' "$*" >> {q(str(log))}; n="$1"; shift; exec {q(str(s / "bin"))}/"$n" "$@"'
+        p, gp, uv, _x, _t = _wp868_chay(s, apt=apt, ung_vien={str(s / "dau" / "sudo"): sudo})
+        bang(p.returncode == 0 and gp == str(uv), f"(a) khong DAT: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
+        mong = ["sudo apt-get install -y ripgrep", "install -y ripgrep", "sudo apt-get update -qq", "update -qq",
+                "sudo apt-get install -y ripgrep", "install -y ripgrep"]
+        bang(doc(log) == mong, f"(a) nhat ky argv sai: {doc(log)}")
+        try:
+            _json.loads(p.stdout)
+        except ValueError as e:
+            bang(False, f"(a) stdout khong con la MOT tai lieu JSON ({e}): {p.stdout[:80]!r}")
+        dong = [d for d in p.stderr.splitlines() if "apt-get update roi thu lai mot lan" in d]
+        bang(len(dong) == 1 and "'rg'" in dong[0] and "rc=100" in dong[0],
+             f"(a) dong bao thu lai phai DUNG MOT, co ten va rc lan dau: {dong}")
+    with San() as s:   # (b)
+        log = s / "apt.log"
+        apt = (f'echo "$1" >> {q(str(log))}; case "$1" in update) exit 78;; '
+               f'install) [ "$(grep -c install {q(str(log))})" -eq 1 ] && exit 100; exit 42;; esac; exit 99')
+        p, gp, _uv, _x, _t = _wp868_chay(s, apt=apt)
+        bang(p.returncode == 42 and gp == "", f"(b) update loi + cai lai rc 42 phai thoat 42: rc={p.returncode} {p.stderr[-300:]}")
+        bang(doc(log) == ["install", "update", "install"], f"(b) update loi thi van phai cai lai MOT lan: {doc(log)}")
+    lenh_tran = 'apt-get install -y ripgrep && chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin"'
+    with San() as s:   # (c1) nhánh gọi thẳng: toàn argv, không sudo, update in rác mà stdout vẫn là JSON
+        log, co = s / "apt.log", s / "da-update"
+        apt = (f'printf \'%s\\n\' "$*" >> {q(str(log))}; case "$1" in update) echo update-rac; : > {q(str(co))}; exit 0;; '
+               f'install) [ -f {q(str(co))} ] && exit 0; exit 100;; esac; exit 99')
+        sudo = f'echo sudo >> {q(str(log))}; n="$1"; shift; exec {q(str(s / "bin"))}/"$n" "$@"'
+        p, gp, uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh_tran, ung_vien={str(s / "dau" / "sudo"): sudo})
+        bang(p.returncode == 0 and gp == str(uv), f"(c1) khong DAT: rc={p.returncode} {p.stderr[-300:]}")
+        bang(doc(log) == ["install -y ripgrep", "update -qq", "install -y ripgrep"],
+             f"(c1) nhanh goi thang: nhat ky argv sai (co sudo / thieu -qq?): {doc(log)}")
+        try:
+            _json.loads(p.stdout)
+        except ValueError as e:
+            bang(False, f"(c1) stdout khong con la MOT tai lieu JSON ({e}): {p.stdout[:80]!r}")
+    with San() as s:   # (c2) nhánh gọi thẳng: update rc 78, install 100 rồi 42 ⇒ thoát 42
+        log = s / "apt.log"
+        apt = (f'echo "$1" >> {q(str(log))}; case "$1" in update) exit 78;; '
+               f'install) [ "$(grep -c install {q(str(log))})" -eq 1 ] && exit 100; exit 42;; esac; exit 99')
+        p, gp, _uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh_tran)
+        bang(p.returncode == 42 and doc(log) == ["install", "update", "install"],
+             f"(c2) nhanh goi thang: update loi thi van cai lai va thoat ma lan cai lai: rc={p.returncode} {doc(log)}")
+    with San() as s:   # (d)
+        co, tot2 = s / "da-update", s / "tot2"
+        apt = f'case "$1" in update) : > {q(str(co))}; exit 0;; esac; exit 0'
+        lenh = (f'if [ -f {q(str(co))} ]; then echo "${{CONG_CU_GOC:-}}/usr/bin"; else apt-get install -y ripgrep '
+                f'&& chon_thu_muc_chay_duoc rg {q(str(tot2))} && false; fi')
+        p, gp, uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh, ung_vien={str(tot2): (
+            f"[ -f {q(str(co))} ] && exit 1; echo 'ripgrep 14.1.0'")})
+        bang(p.returncode == 0 and '"DAT"' in p.stdout,
+             f"(d) kenh cua lan dau (thu muc nay da hong) bi dung lai: rc={p.returncode} {p.stdout[-200:]} {p.stderr[-300:]}")
+    with San() as s:   # (e) — Codex lượt 1 dựng probe này; đồng bộ bằng hai tệp dấu
+        uv = s / "goc" / "usr" / "bin"
+        di, xong, co = (q(str(s / t)) for t in ("di", "xong", "da-update"))
+        apt = f'''
+case "$1" in
+update) : > {co}; exit 0 ;;
+install)
+  if [ ! -f {co} ]; then
+    ( i=0; while [ "$i" -lt 500 ]; do [ -f {di} ] && break; sleep 0.01; i=$((i + 1)); done
+      [ -f {di} ] || exit 96
+      printf '%s\\n' {q(str(s / "xau"))}
+      : > {xong}
+    ) 2>/dev/null &
+    exit 100
+  fi
+  printf '%s\\n' {q(str(uv))}
+  : > {di}
+  i=0; while [ "$i" -lt 500 ]; do [ -f {xong} ] && exit 0; sleep 0.01; i=$((i + 1)); done
+  exit 97 ;;
+esac
+'''
+        p, gp, _uv, _x, _t = _wp868_chay(s, apt=apt, lenh=": && apt-get install -y ripgrep")
+        bang((s / "xong").exists(), "(e) fixture ro: tien trinh con cua lan dau chua ghi gi (phep do khong xay ra)")
+        bang(p.returncode == 0 and '"DAT"' in p.stdout,
+             f"(e) writer cua lan dau ghi vao ket qua lan cai lai: rc={p.returncode} {p.stdout[-200:]} {p.stderr[-300:]}")
+    with San() as s:   # (f) — Codex lượt 2 (P2): tiến trình nền của lần đầu gọi bộ chọn, ghi KÊNH cũ sau khi lần cài lại xong
+        uv, muon = s / "goc" / "usr" / "bin", s / "muon"
+        co, di, xong = (q(str(s / t)) for t in ("da-update", "di", "xong"))
+        lenh = (f'if [ -f {co} ]; then printf "%s\\n" {q(str(uv))}; : > {di}; '
+                f'i=0; while [ "$i" -lt 500 ]; do [ -f {xong} ] && exit 0; sleep 0.01; i=$((i + 1)); done; exit 97; '
+                f'else ( i=0; while [ ! -f {di} ] && [ "$i" -lt 500 ]; do sleep 0.01; i=$((i + 1)); done; '
+                f'[ -f {di} ] || exit 96; GITHUB_PATH= chon_thu_muc_chay_duoc rg {q(str(muon))} && : > {xong} ) 2>/dev/null & '
+                f'apt-get install -y ripgrep; fi')
+        apt = f'if [ "$1" = update ]; then : > {co}; exit 0; fi; exit 100'
+        p, gp, _uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh, ung_vien={str(muon): (
+            f"[ -f {xong} ] && exit 1; echo 'ripgrep 14.1.0'")})
+        bang((s / "xong").exists(), "(f) fixture ro: bo chon cua tien trinh nen chua ghi kenh (phep do khong xay ra)")
+        bang(p.returncode == 0 and '"DAT"' in p.stdout,
+             f"(f) kenh cua lan dau bi tien trinh nen ghi lai va duoc doc: rc={p.returncode} {p.stdout[-200:]} {p.stderr[-300:]}")
+    with San() as s:   # (g) — Codex lượt 2 (P3): `source` trong vòng của shell gọi có `readonly LAN_CAI`; buộc cài lại
+        co = s / "da-update"
+        apt = f'if [ "$1" = update ]; then : > {q(str(co))}; exit 0; fi; [ -f {q(str(co))} ] || exit 100'
+        goc_run = subprocess.run
+
+        def run_source(args, **kw):
+            if len(args) > 1 and str(args[-2]).endswith("cai_cong_cu.sh"):
+                kich = ('readonly LAN_CAI=42; tep=$1; for n in 1 2; do rm -f -- ' + q(str(co))
+                        + '; . "$tep" rg; echo "ngoai=$n LAN_CAI=$LAN_CAI" >&2; done')
+                args = [args[0], "-c", kich, "goi", args[-2]]
+            return goc_run(args, **kw)
+        subprocess.run = run_source
+        try:
+            p, _gp, _uv, _x, _t = _wp868_chay(s, apt=apt)
+        finally:
+            subprocess.run = goc_run
+        bang(p.returncode == 0 and all(f"ngoai={n} LAN_CAI=42" in p.stderr for n in (1, 2))
+             and p.stderr.count("apt-get update roi thu lai mot lan") == 2,
+             f"(g) source tu shell goi: bien cua shell goi bi dung toi / vong ngoai dung: rc={p.returncode} {p.stderr[-400:]}")
+    for kieu in ("duoc_ngay", "can_update"):   # (i) — Codex lượt 3 (P3): công thức dùng tham số vị trí của script
+        with San() as s:
+            log, co = s / "apt.log", s / "da-update"
+            cai = "exit 0" if kieu == "duoc_ngay" else f"[ -f {q(str(co))} ] && exit 0; exit 100"
+            apt = f'echo "$1" >> {q(str(log))}; case "$1" in update) : > {q(str(co))}; exit 0;; install) {cai};; esac; exit 99'
+            lenh = 'test "${1-}" = rg && apt-get install -y ripgrep && chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin"'
+            p, gp, uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh)
+            mong = ["install"] if kieu == "duoc_ngay" else ["install", "update", "install"]
+            bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv) and doc(log) == mong,
+                 f"(i) {kieu}: cong thuc khong thay tham so vi tri cua script: rc={p.returncode} nhat ky={doc(log)} "
+                 f"{p.stderr[-200:]}")
+    with San() as s:   # (h) allexport: kênh MỚI của lần cài lại vẫn không lộ cho trình cài
+        log, co = s / "apt.log", s / "da-update"
+        apt = (f'echo "$1 ${{KENH_KQ:-VANG}} ${{TAM_CAI:-VANG}}" >> {q(str(log))}; case "$1" in update) : > {q(str(co))}; exit 0;; '
+               f'install) [ -f {q(str(co))} ] && exit 0; exit 100;; esac; exit 99')
+        p, gp, uv, _x, _t = _wp868_chay(s, apt=apt, allexport="co")
+        bang(p.returncode == 0 and gp == str(uv), f"(h) allexport: khong DAT: rc={p.returncode} {p.stderr[-300:]}")
+        bang(doc(log) == ["install VANG VANG", "update VANG VANG", "install VANG VANG"],
+             f"(h) allexport: kenh/thu muc tam lo cho trinh cai o lan cai lai: {doc(log)}")
 
 
 @ca
@@ -17367,6 +17566,54 @@ DOT_BIEN_HOOK = [
      ('printf \'%s\\n\' "$w" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \\$GITHUB_PATH" >&2; return 1; }',
       'printf \'%s\\n\' "$w" >> "$GITHUB_PATH"'),
      ["r858_cai_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    # wp1404: nhánh thử lại sau `apt-get update` — gỡ hẳn · nới cho MỌI lỗi · bỏ lần cài lại.
+    ("wp1404_sh_bo_thu_lai_apt", ('    *"apt-get install"*)\n', '    *"KHONG_BAO_GIO_KHOP"*)\n'),
+     ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
+    ("wp1404_sh_thu_lai_moi_loi", ('    *"apt-get install"*)\n', '    *)\n'),
+     ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
+    ("wp1404_sh_bo_cai_lai", ('      _wp1404_chay_cong_thuc "$@" ;;\n', '      ;;\n'),
+     ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
+    # Codex wp1404 lượt 1: đột biến cho từng chốt của nhánh thử lại.
+    ("wp1404_sh_thu_lai_hai_lan", ('      _wp1404_chay_cong_thuc "$@" ;;\n',
+                                   '      _wp1404_chay_cong_thuc "$@"; _wp1404_chay_cong_thuc "$@" ;;\n'),
+     ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
+    ("wp1404_sh_update_vao_stdout", ('sudo apt-get update -qq >&2 ||', 'sudo apt-get update -qq ||'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_bo_sudo_update", ('"sudo apt-get"*) sudo apt-get update', '"sudo apt-get"*) apt-get update'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_nhanh_tran_dung_sudo", ('        *) apt-get update -qq >&2', '        *) sudo apt-get update -qq >&2'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_update_loi_dung", ('"sudo apt-get"*) sudo apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, '
+                                   'van thu lai)" >&2 ;;', '"sudo apt-get"*) sudo apt-get update -qq >&2 ;;'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_bo_ten_rc_dong_bao", ("'$TEN' cai loi (rc=$RC_CAI); apt-get update", "cai loi; apt-get update"),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_giu_kenh_lan_dau", ('      KENH_KQ="$TAM_CAI/kq-thu-lai"\n', '      : > "$KENH_KQ"\n'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_dung_lai_inode_stdout", ('      rm -f -- "$TAM_CAI/stdout"\n', ''),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    # Codex wp1404 lượt 2.
+    ("wp1404_sh_kenh_moi_khong_tao", ('      export -n KENH_KQ\n      : > "$KENH_KQ"\n', '      export -n KENH_KQ\n'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_kenh_moi_lo_export", ('      KENH_KQ="$TAM_CAI/kq-thu-lai"\n      export -n KENH_KQ\n',
+                                      '      KENH_KQ="$TAM_CAI/kq-thu-lai"\n'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_bien_dem_toan_cuc", ('_wp1404_chay_cong_thuc "$@"\nif [ "$RC_CAI" -ne 0 ]; then\n  case',
+                                     'LAN_CAI=0\n_wp1404_chay_cong_thuc "$@"\nif [ "$RC_CAI" -ne 0 ]; then\n  case'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_tran_update_vao_stdout", ('        *) apt-get update -qq >&2 ||', '        *) apt-get update -qq ||'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_tran_bo_qq", ('        *) apt-get update -qq >&2 ||', '        *) apt-get update >&2 ||'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    # Codex wp1404 lượt 3 (P3): hàm phải nhận "$@" ở CẢ HAI lời gọi.
+    ("wp1404_sh_mat_tham_so_lan_dau", ('_wp1404_chay_cong_thuc "$@"\nif [ "$RC_CAI" -ne 0 ]; then\n  case',
+                                       '_wp1404_chay_cong_thuc\nif [ "$RC_CAI" -ne 0 ]; then\n  case'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_mat_tham_so_cai_lai", ('      _wp1404_chay_cong_thuc "$@" ;;\n', '      _wp1404_chay_cong_thuc ;;\n'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    ("wp1404_sh_tran_update_loi_dung", ('*) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;',
+                                        '*) apt-get update -qq >&2 ;;'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
     # wp868 (Q3): dòng canh `/dev/null` trên stdout thay bằng `GIU_PATH` trên kênh riêng; ba đột biến dòng canh đổi neo.
     ("wp858_sh_bo_dong_canh_giu_path",
      ('    printf \'GIU_PATH\' > "$KENH_KQ" || { echo "cai_cong_cu: khong ghi duoc kenh ket qua" >&2; return 1; }\n', ''),

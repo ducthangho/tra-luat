@@ -153,10 +153,38 @@ declare +x KENH_KQ
 # cuoi vong quyet. Moi truong hop khac thoat DUNG ma cu (errexit truoc day thoat bang chinh ma cua lenh hong).
 # Codex wp1045 luot 1 (P3): KHONG `( … ) || RC_CAI=$?` — `||` dat CA subshell vao ngu canh dieu kien, nen cong thuc tu bat lai
 # `set -e` cung khong dung (base rc=1, ban `||` rc=0). Tat errexit o shell CHA, chay subshell o vi tri khong dieu kien, lay `$?`.
+# wp1404: runner Ubuntu doi khi chua co danh sach goi apt => `apt-get install` bao "Unable to locate package" (do: 1/343 lan
+# cai rg trong 19 luot gate, run 44347295196). Cong thuc trong cong_cu.yaml KHONG duoc sua (phan truoc ` && ` dau tien phai
+# khop CONG_CU cua launcher.py), nen va o day: loi + lenh co `apt-get install` => `apt-get update` MOT lan roi chay lai
+# DUNG MOT lan. Dong `eval` nam trong HAM goi hai lan, khong chep lai: bang dot bien wp868/wp1045 neo vao no va doi khop dung
+# mot cho. Ham, khong vong + bien dem: lan `source` cua --bat-buoc khong de lai bien moi o shell goi (Codex wp1404 luot 2,
+# P3). Ham goi o vi tri cau lenh doc lap nen ngu canh errexit nhu cu (wp1045 P3); truyen "$@" de cong thuc van thay
+# tham so vi tri cua script/luot `source` nhu khi `eval` nam ngoai ham (luot 3, P3). Update loi khong dung script: loi cuoi
+# cung la cua lan cai lai. Stdout cua update sang stderr: stdout cua script la JSON cua `kiem-tra` (luot 1, P2). Truoc khi
+# chay lai: KENH MOI (duong dan khac; `export -n` vi allexport tu export phep gan — khong viet lai dong `declare` cua kenh dau, neo dot bien wp868 doi khop dung mot cho) va XOA tep stdout — tien trinh con cua
+# lan dau con giu FD/duong dan cu thi ghi vao tep khong con ai doc (luot 1 P2 voi stdout, luot 2 P2 voi kenh).
+_wp1404_chay_cong_thuc() {
 set +e
 ( set +e; eval "$LENH" ) > "$TAM_CAI/stdout"
 RC_CAI=$?
 set -e
+}
+_wp1404_chay_cong_thuc "$@"
+if [ "$RC_CAI" -ne 0 ]; then
+  case "$LENH" in
+    *"apt-get install"*)
+      echo "cai_cong_cu: '$TEN' cai loi (rc=$RC_CAI); apt-get update roi thu lai mot lan" >&2
+      case "$LENH" in
+        "sudo apt-get"*) sudo apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
+        *) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
+      esac
+      KENH_KQ="$TAM_CAI/kq-thu-lai"
+      export -n KENH_KQ
+      : > "$KENH_KQ"
+      rm -f -- "$TAM_CAI/stdout"
+      _wp1404_chay_cong_thuc "$@" ;;
+  esac
+fi
 if [ "$RC_CAI" -ne 0 ]; then
   if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && cong_cu_json_dung "$TEN" bat_buoc false; then
     echo "cai_cong_cu: '$TEN' (bat_buoc: false) khong cai duoc (rc=$RC_CAI); --bat-buoc di tiep" >&2

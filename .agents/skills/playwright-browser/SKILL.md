@@ -169,7 +169,11 @@ Mỗi lần chụp = MỘT phiên nonce ngẫu nhiên mới + MỘT run mới, `
 `--filename` LUÔN tuyệt đối trong run (tên tương đối resolve theo CWD tiến trình, không theo `outputDir`). Hàm ghi chỉ
 chuyển NGUYÊN đối số cho CLI chính thức, lưu stdout/stderr thô + argv + UTC + rc, không lọc lệnh. Windows dùng
 `Start-Process` để stdout vào THẲNG tệp (`>` của PowerShell 5.1 mã hoá lại), chờ đúng tiến trình CLI (`-Wait` có thể
-chờ cả daemon con). Lỗi giữa chừng ⇒ Cleanup.
+chờ cả daemon con). Lỗi giữa chừng ⇒ Cleanup, TRỪ khi dừng ở bước kiểm trước `open` (thông báo `STOP trước open … KHÔNG
+chạy Cleanup`): phiên chưa tạo, và Cleanup cũng tự từ chối vì thiếu `00-sophien.txt`. Sổ phiên được hỏi CHÍNH mã CLI đã
+ghim (`node -e` nạp `playwright-core/lib/tools/cli-client/registry.js`, chỉ đọc, chạy từ `work` như CLI; in base64 của
+UTF-8 để console không giải mã sai), không tự suy đường dẫn. `00-sophien.txt` = sổ phiên, thư mục hash, nonce (tạo mới, không
+ghi đè); Cleanup đối chiếu lại CẢ BA trước khi đụng phiên. Mọi thành phần của đường dẫn tới thư mục hash phải KHÔNG là liên kết.
 ```bash
 export TL_PW_URL='<https://nguon-cong-khai/duong-dan>' TL_PW_SESSION="tl-pw-$(od -An -N6 -tx1 /dev/urandom | tr -d ' \n')"
 export TL_PW_RUN="$TL_PW_ROOT/runs/$(date -u +%Y%m%dT%H%M%SZ)-$TL_PW_SESSION"; mkdir "$TL_PW_RUN"
@@ -181,11 +185,28 @@ chay_ghi() { local ten=$1 rc; shift
   printf '\trc=%s\t%s\n' "$rc" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$TL_PW_RUN/commands.tsv" || return 70
   return "$rc"; }
 # Chạy khối Kiểm pin bash ở trên dạng: ( … ) 2>&1 | tee "$TL_PW_RUN/00-pins.log"
-( set -Eeuo pipefail; trap 'echo "STOP: $BASH_COMMAND — chạy Cleanup" >&2' ERR
+( set -Eeuo pipefail; trap 'echo "STOP: $BASH_COMMAND — chạy Cleanup (tự từ chối nếu chưa có 00-sophien.txt)" >&2' ERR
   [[ ${TL_PW_SESSION:-} =~ ^tl-pw-[0-9a-f]{12}$ ]]
   [ "$(tail -n 1 "$TL_PW_RUN/00-pins.log")" = 'PIN OK' ]; case "$TL_PW_URL" in http://*|https://*) ;; *) false;; esac
   printf '{"browser":{"browserName":"chromium","isolated":true,"launchOptions":{"channel":"chromium","headless":true,"timeout":30000}},"timeouts":{"action":10000},"outputDir":"%s","outputMode":"file"}\n' \
     "$TL_PW_RUN" > "$TL_PW_RUN/browser.json"
+  # --- du-luong-daemon-truoc-open: bat dau
+  ( trap - ERR; set +eE   # bash >= 4.4; sổ phiên = câu trả lời của mã CLI ghim, từ `work`
+    (( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 4) )) && [ -z "${PWTEST_DAEMON_SESSION_DIR+x}" ] &&
+    so=$(cd "$TL_PW_ROOT/work" && "$TL_PW_NODE" -e \
+      'const r=require(process.argv[1]),c=r.createClientInfo(),b=s=>Buffer.from(s).toString(`base64`);if(c.workspaceDir)process.exit(3);console.log(b(r.baseDaemonDir()));console.log(b(c.daemonProfilesDir))' \
+      "$TL_PW_INSTALL/node_modules/playwright-core/lib/tools/cli-client/registry.js") &&
+    D=$(printf %s "${so%%$'\n'*}" | base64 -d) && DH=$(printf %s "${so#*$'\n'}" | base64 -d) &&
+    case "$D$DH" in *$'\n'*) false;; esac && case "$D" in /*) ;; *) false;; esac &&
+    [ "$DH" = "$D/${DH##*/}" ] && [[ "${DH##*/}" =~ ^[0-9a-f]{16}$ ]] &&
+    [ "$(realpath -m -- "$DH" && echo .)" = "$DH"$'\n.' ] &&   # không thành phần nào là liên kết; `echo .` giữ LF cuối mà $(…) cắt
+    pre=$([ ! -e "$D" ] || find "$D" -mindepth 2 -maxdepth 2 -name "*$TL_PW_SESSION*" -print) && [ -z "$pre" ] &&
+    [ ! -e "$DH/$TL_PW_SESSION.err" ] && [ ! -L "$DH/$TL_PW_SESSION.err" ] &&   # đúng tên Node sẽ mở bằng `w` (cache casefold: find phân biệt hoa thường còn open thì không)
+    [ ! -e "$DH/$TL_PW_SESSION.session" ] && [ ! -L "$DH/$TL_PW_SESSION.session" ] &&
+    [ ! -e "$TL_PW_RUN/00-sophien.txt" ] && [ ! -L "$TL_PW_RUN/00-sophien.txt" ] &&   # mọi mục có sẵn (cả FIFO) ⇒ dừng
+    ( set -C; printf '%s\n%s\n%s\n' "$D" "$DH" "$TL_PW_SESSION" > "$TL_PW_RUN/00-sophien.txt" ) ) ||
+    { echo 'STOP trước open: phiên CHƯA tạo — KHÔNG chạy Cleanup' >&2; exit 1; }
+  # --- du-luong-daemon-truoc-open: het
   chay_ghi 01-open open about:blank --config "$TL_PW_RUN/browser.json"
   chay_ghi 02-goto goto "$TL_PW_URL"; chay_ghi 03-tab-list tab-list; chay_ghi 04-requests requests --static
   cat "$TL_PW_RUN/03-tab-list.json" "$TL_PW_RUN/04-requests.json" )
@@ -223,6 +244,30 @@ function Invoke-PwGhi([string]$Ten, [string[]]$Argv, [switch]$PhaiLoi) {
   $cfg = [ordered]@{ browser = [ordered]@{ browserName = 'chromium'; isolated = $true; launchOptions = [ordered]@{
       channel = 'chromium'; headless = $true; timeout = 30000 } }; timeouts = @{ action = 10000 }; outputDir = $env:TL_PW_RUN; outputMode = 'file' }
   [IO.File]::WriteAllText("$env:TL_PW_RUN\browser.json", ($cfg | ConvertTo-Json -Depth 5))
+  # --- du-luong-daemon-truoc-open: bat dau
+  $js = 'const r=require(process.argv[1]),c=r.createClientInfo(),b=s=>Buffer.from(s).toString(`base64`);if(c.workspaceDir)process.exit(3);console.log(b(r.baseDaemonDir()));console.log(b(c.daemonProfilesDir))'
+  try { Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR)) 'PWTEST_DAEMON_SESSION_DIR'
+    Push-Location "$env:TL_PW_ROOT\work"   # sổ phiên = câu trả lời của mã CLI ghim, từ `work`
+    try { $raw = @(& $env:TL_PW_NODE -e $js "$env:TL_PW_INSTALL\node_modules\playwright-core\lib\tools\cli-client\registry.js"); $soRc = $LASTEXITCODE } finally { Pop-Location }
+    $so = @($raw | ForEach-Object { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) })
+    $reparse = [IO.FileAttributes]::ReparsePoint
+    Need ($soRc -eq 0 -and $so.Count -eq 2 -and $so[0] -match '^([A-Za-z]:\\|\\\\[^\\]+\\[^\\]+\\)' -and
+      [string]::Equals($so[1], "$($so[0])\$(Split-Path -Leaf $so[1])", [StringComparison]::Ordinal) -and (Split-Path -Leaf $so[1]) -cmatch '\A[0-9a-f]{16}\z') "sổ phiên CLI không hợp lệ: $so"
+    $q = $so[1]; while ($q) { if (Test-Path -LiteralPath $q) {   # không thành phần nào của đường dẫn (kể cả sổ phiên, thư mục hash) là liên kết
+        Need (-not ((Get-Item -Force -LiteralPath $q).Attributes -band $reparse)) "đường dẫn sổ phiên có liên kết: $q" }
+      $q = Split-Path -Parent $q }
+    # .NET, không Get-ChildItem: pwsh 7 bỏ qua IM LẶNG thư mục không liệt kê được (đo trên Desktop), PS 5.1 thì ném lỗi
+    $pre = @(if (Test-Path -LiteralPath $so[0]) { [IO.Directory]::GetDirectories($so[0]) |
+      Where-Object { -not ((Get-Item -Force -LiteralPath $_).Attributes -band $reparse) } |
+      ForEach-Object { [IO.Directory]::GetFileSystemEntries($_, "*$env:TL_PW_SESSION*") } })
+    Need ($pre.Count -eq 0) 'nonce đã có trong sổ phiên CLI'
+    foreach ($t in "$($so[1])\$env:TL_PW_SESSION.err", "$($so[1])\$env:TL_PW_SESSION.session") {   # đúng tên Node sẽ mở
+      Need (-not (Test-Path -LiteralPath $t)) "đã có $t" }
+    $fs = [IO.File]::Open("$env:TL_PW_RUN\00-sophien.txt", [IO.FileMode]::CreateNew)   # không ghi đè, không đi theo liên kết có sẵn
+    try { $b = (New-Object Text.UTF8Encoding($false)).GetBytes("$($so[0])`n$($so[1])`n$env:TL_PW_SESSION`n"); $fs.Write($b, 0, $b.Length) }
+    finally { $fs.Dispose() }
+  } catch { throw "STOP trước open: phiên CHƯA tạo — KHÔNG chạy Cleanup. $($_.Exception.Message)" }
+  # --- du-luong-daemon-truoc-open: het
   Invoke-PwGhi 01-open @('open', 'about:blank', '--config', "$env:TL_PW_RUN\browser.json")
   Invoke-PwGhi 02-goto @('goto', $env:TL_PW_URL); Invoke-PwGhi 03-tab-list @('tab-list'); Invoke-PwGhi 04-requests @('requests', '--static')
   Get-Content -LiteralPath "$env:TL_PW_RUN\03-tab-list.json", "$env:TL_PW_RUN\04-requests.json" }
@@ -260,7 +305,8 @@ $env:TL_PW_IDX = '<N đọc từ 04-requests.json>'
 ## Evidence
 Thư mục run (NGOÀI Git, không commit): TargetId; URL yêu cầu; chuỗi chuyển hướng + URL cuối (hoặc KHÔNG XÁC ĐỊNH); UTC +
 argv + rc từng lệnh (`commands.tsv`); JSON/stderr thô; dòng `requests` đã chọn chép nguyên; `source.body` + kích thước +
-SHA256; đường dẫn tuyệt đối + SHA256 của PNG/PDF; `00-pins.log`; `browser.json`; commit checkout skill; `NOTE.txt`.
+SHA256; đường dẫn tuyệt đối + SHA256 của PNG/PDF; `00-pins.log`; `browser.json`; `00-sophien.txt`; `11-daemon.err` + `11-daemon-path.txt`
+(stderr daemon và vị trí gốc của nó trong sổ phiên, xem Cleanup); commit checkout skill; `NOTE.txt`.
 - `response-body` kiểu văn bản là chuỗi đã GIẢI MÃ rồi ghi lại UTF-8, không phải byte trên dây/TLS; chỉ trùng byte
   máy chủ khi máy chủ gửi UTF-8, charset khác ⇒ ghi rõ "đã giải mã lại".
 - Lệnh lỗi, thiếu tệp/trường ⇒ lượt chụp THẤT BẠI (không phải thành công một phần); giữ lượt hỏng trong run riêng.
@@ -281,9 +327,28 @@ mã thoát khác 0, không `CLEANUP OK`. Khác định dạng cũng dừng để
 không tự đổi mẫu/nhận mọi lỗi là đóng phiên. Giữ nguyên JSON/stderr/command/rc và cập nhật hash SAU Cleanup.
 Tên output Cleanup phải chưa tồn tại; không ghi đè bằng chứng cũ hoặc lấy output cũ làm kết quả lệnh mới.
 Nếu dừng sớm, operator lưu hash các output mới và `commands.tsv` vào biên nhận thất bại, không chạy lại để ghi đè.
+Daemon CLI ghi stderr vào `<sổ phiên>/<16 hex>/<nonce>.err`, NGOÀI `TL_PW_ROOT`, và `delete-data` không xoá tệp đó (Limits).
+TRƯỚC `close`, Cleanup hỏi lại sổ phiên từ mã CLI (như Capture), đòi sổ phiên + thư mục hash + nonce TRÙNG TỪNG BYTE `00-sophien.txt`
+và không thành phần nào của đường dẫn tới thư mục hash là liên kết; thiếu/khác/liên kết ⇒ THẤT BẠI, không đóng, không dọn. Sau `10-verify`, nó đòi ĐÚNG MỘT mục mang nonce trong sổ phiên và mục đó phải là tệp thường
+`<thư mục hash của bản cài>/<nonce>.err` (dòng 2 của `00-sophien.txt`), không symlink/reparse point, không còn
+`<nonce>.session`/`ud-<nonce>-*`, phép quét không lỗi. Nó ghi `11-daemon-path.txt`, chép tệp vào run (`11-daemon.err`, so
+byte), rồi xoá tệp gốc. 0 hoặc nhiều mục, sai chỗ, quét lỗi, output cũ ⇒ THẤT BẠI, không xoá tệp nào.
 ```bash
 ( set -u
   [[ "$TL_PW_SESSION" =~ ^tl-pw-[0-9a-f]{12}$ ]] || { echo 'STOP: nonce không hợp lệ' >&2; exit 1; }
+  # --- du-luong-daemon-dau-cleanup: bat dau
+  (( BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 4) )) &&
+  so=$(cd "$TL_PW_ROOT/work" && "$TL_PW_NODE" -e \
+      'const r=require(process.argv[1]),c=r.createClientInfo(),b=s=>Buffer.from(s).toString(`base64`);if(c.workspaceDir)process.exit(3);console.log(b(r.baseDaemonDir()));console.log(b(c.daemonProfilesDir))' \
+      "$TL_PW_INSTALL/node_modules/playwright-core/lib/tools/cli-client/registry.js") &&
+    D=$(printf %s "${so%%$'\n'*}" | base64 -d) && DH=$(printf %s "${so#*$'\n'}" | base64 -d) &&
+    [ -f "$TL_PW_RUN/00-sophien.txt" ] && [ ! -L "$TL_PW_RUN/00-sophien.txt" ] &&
+    printf '%s\n%s\n%s\n' "$D" "$DH" "$TL_PW_SESSION" | cmp -s -- - "$TL_PW_RUN/00-sophien.txt" ||   # so BYTE
+    { echo 'STOP: thiếu/khác sổ phiên + nonce ghi lúc Capture (00-sophien.txt) — không đóng phiên, không dọn' >&2; exit 1; }
+  [ -z "${PWTEST_DAEMON_SESSION_DIR+x}" ] && [ -d "$D" ] && [ -d "$DH" ] &&
+    [ "$(realpath -e -- "$DH" && echo .)" = "$DH"$'\n.' ] ||
+    { echo 'STOP: sổ phiên/thư mục hash không phải thư mục thường, đường dẫn có liên kết, hoặc có hook test — không đóng phiên, không dọn' >&2; exit 1; }
+  # --- du-luong-daemon-dau-cleanup: het
   for ten in 08-close 09-delete-data 10-verify; do
     for ext in json err; do
       [ ! -e "$TL_PW_RUN/$ten.$ext" ] && [ ! -L "$TL_PW_RUN/$ten.$ext" ] ||
@@ -307,6 +372,23 @@ Nếu dừng sớm, operator lưu hash các output mới và `commands.tsv` vào
   [ -f "$TL_PW_RUN/10-verify.err" ] && [ ! -s "$TL_PW_RUN/10-verify.err" ] &&
     cmp -s -- "$TL_PW_RUN/10-verify.json" <(printf '{\n  "isError": true,\n  "error": "The browser '\''%s'\'' is not open, please run open first"\n}\n' "$TL_PW_SESSION") ||
     { echo 'STOP: thiếu/sai bằng chứng đóng đúng phiên' >&2; exit 1; }
+  # --- du-luong-daemon: bat dau
+  [ -z "${PWTEST_DAEMON_SESSION_DIR+x}" ] || { echo 'STOP: PWTEST_DAEMON_SESSION_DIR' >&2; exit 1; }
+  case "$D" in /*) ;; *) echo 'STOP: sổ phiên không tuyệt đối' >&2; exit 1;; esac
+  [ -d "$D" ] && [ -d "$DH" ] && [ "$(realpath -e -- "$DH" && echo .)" = "$DH"$'\n.' ] ||
+    { echo 'STOP: sổ phiên không phải thư mục thường hoặc đường dẫn có liên kết' >&2; exit 1; }
+  for ten in 11-daemon.err 11-daemon-path.txt; do
+    [ ! -e "$TL_PW_RUN/$ten" ] && [ ! -L "$TL_PW_RUN/$ten" ] || { echo "STOP: output cũ $ten, không ghi đè" >&2; exit 1; }
+  done
+  mapfile -d '' -t hit < <(find "$D" -mindepth 2 -maxdepth 2 -name "*$TL_PW_SESSION*" -print0) &&
+    wait "$!" || { echo 'STOP: quét sổ phiên lỗi/thiếu, không xoá gì' >&2; exit 1; }
+  f=${hit[0]:-}
+  [ "${#hit[@]}" -eq 1 ] && [ "$f" = "$DH/$TL_PW_SESSION.err" ] && [ -f "$f" ] && [ ! -L "$f" ] ||
+    { echo "STOP: cần đúng 1 tệp $DH/$TL_PW_SESSION.err trong sổ phiên, thấy ${#hit[@]} mục" >&2; exit 1; }
+  printf '%s\n' "$f" > "$TL_PW_RUN/11-daemon-path.txt" && cp -- "$f" "$TL_PW_RUN/11-daemon.err" &&
+    cmp -s -- "$f" "$TL_PW_RUN/11-daemon.err" || { echo 'STOP: chưa chép được .err daemon' >&2; exit 1; }
+  rm -- "$f" && [ ! -e "$f" ] && [ ! -L "$f" ] || { echo "STOP: chưa xoá được $f" >&2; exit 1; }
+  # --- du-luong-daemon: het
   find "$TL_PW_RUN" -type f ! -name SHA256SUMS -exec sha256sum {} + > "$TL_PW_RUN/SHA256SUMS" ||
     { echo 'STOP: chưa lưu đủ hash Cleanup' >&2; exit 1; }
   echo 'CLEANUP OK' )
@@ -315,6 +397,23 @@ Nếu dừng sớm, operator lưu hash các output mới và `commands.tsv` vào
 & { $ErrorActionPreference = 'Stop'
   $session = $env:TL_PW_SESSION
   Need ($session -cmatch '\Atl-pw-[0-9a-f]{12}\z') 'nonce không hợp lệ'
+  # --- du-luong-daemon-dau-cleanup: bat dau
+  $js = 'const r=require(process.argv[1]),c=r.createClientInfo(),b=s=>Buffer.from(s).toString(`base64`);if(c.workspaceDir)process.exit(3);console.log(b(r.baseDaemonDir()));console.log(b(c.daemonProfilesDir))'
+  try { Push-Location "$env:TL_PW_ROOT\work"
+    try { $raw = @(& $env:TL_PW_NODE -e $js "$env:TL_PW_INSTALL\node_modules\playwright-core\lib\tools\cli-client\registry.js"); $soRc = $LASTEXITCODE } finally { Pop-Location }
+    $so = @($raw | ForEach-Object { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) })
+  } catch { $soRc = -1; $so = @() }
+  $rec = "$env:TL_PW_RUN\00-sophien.txt"; $reparse = [IO.FileAttributes]::ReparsePoint
+  Need ($soRc -eq 0 -and $so.Count -eq 2 -and (Test-Path -LiteralPath $rec -PathType Leaf) -and
+    -not ((Get-Item -Force -LiteralPath $rec).Attributes -band $reparse) -and
+    [string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($rec)),   # so BYTE (ReadAllText bỏ BOM; -ceq so theo văn hoá)
+      [Convert]::ToBase64String((New-Object Text.UTF8Encoding($false)).GetBytes("$($so[0])`n$($so[1])`n$session`n")), [StringComparison]::Ordinal)) 'thiếu/khác sổ phiên + nonce ghi lúc Capture (00-sophien.txt) — không đóng phiên, không dọn'
+  Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR)) 'PWTEST_DAEMON_SESSION_DIR — không đóng phiên'
+  foreach ($d in $so) { Need (Test-Path -LiteralPath $d -PathType Container) "không có sổ phiên: $d — không đóng phiên" }
+  $q = $so[1]; while ($q) { Need (-not ((Get-Item -Force -LiteralPath $q).Attributes -band $reparse)) "đường dẫn sổ phiên có liên kết: $q — không đóng phiên"
+    $q = Split-Path -Parent $q }
+  $daemonDir = $so[0]; $hashDir = $so[1]
+  # --- du-luong-daemon-dau-cleanup: het
   foreach ($ten in '08-close', '09-delete-data', '10-verify') {
     foreach ($ext in 'json', 'err') {
       Need (-not (Test-Path -LiteralPath "$env:TL_PW_RUN\$ten.$ext")) "output cũ $ten.$ext, không ghi đè"
@@ -339,6 +438,35 @@ Nếu dừng sớm, operator lưu hash các output mới và `commands.tsv` vào
     "{`n  `"session`": `"$session`",`n  `"deleted`": true`n}`n")
   Invoke-PwGhi 10-verify @('tab-list') -PhaiLoi
   Assert-PwCleanupOutput 10-verify @("{`n  `"isError`": true,`n  `"error`": `"The browser '$session' is not open, please run open first`"`n}`n")
+  # --- du-luong-daemon: bat dau
+  Need (-not (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR)) 'PWTEST_DAEMON_SESSION_DIR'
+  $reparse = [IO.FileAttributes]::ReparsePoint
+  Need ($daemonDir -match '^([A-Za-z]:\\|\\\\)') 'sổ phiên không tuyệt đối'
+  foreach ($d in $daemonDir, $hashDir) { Need (Test-Path -LiteralPath $d -PathType Container) "không có sổ phiên CLI: $d" }
+  $q = $hashDir; while ($q) { Need (-not ((Get-Item -Force -LiteralPath $q -ErrorAction Stop).Attributes -band $reparse)) "đường dẫn sổ phiên có liên kết: $q"
+    $q = Split-Path -Parent $q }
+  foreach ($ten in '11-daemon.err', '11-daemon-path.txt') {
+    Need (-not (Test-Path -LiteralPath "$env:TL_PW_RUN\$ten")) "output cũ $ten, không ghi đè" }
+  try { $hits = @([IO.Directory]::GetDirectories($daemonDir) |   # .NET: thư mục không liệt kê được ⇒ ném lỗi, cả 5.1 lẫn 7
+      Where-Object { -not ((Get-Item -Force -LiteralPath $_).Attributes -band $reparse) } |
+      ForEach-Object { [IO.Directory]::GetFileSystemEntries($_, "*$session*") } |
+      ForEach-Object { Get-Item -Force -LiteralPath $_ -ErrorAction Stop })
+  } catch { Need $false "quét sổ phiên lỗi/thiếu, không xoá gì: $($_.Exception.Message)" }
+  $f = $hits | Select-Object -First 1
+  Need ($hits.Count -eq 1 -and -not $f.PSIsContainer -and [string]::Equals($f.FullName, "$hashDir\$session.err", [StringComparison]::Ordinal) -and
+    -not ($f.Attributes -band $reparse)) "cần đúng 1 tệp $hashDir\$session.err trong sổ phiên, thấy $($hits.Count) mục"
+  [IO.File]::WriteAllText("$env:TL_PW_RUN\11-daemon-path.txt", "$($f.FullName)`n")
+  $copied = $false   # daemon còn sống thì khoá cả ĐỌC .err (đo trên Desktop), nên chờ nó nhả handle
+  for ($i = 0; $i -lt 5 -and -not $copied; $i++) {
+    try { Copy-Item -LiteralPath $f.FullName -Destination "$env:TL_PW_RUN\11-daemon.err" -ErrorAction Stop; $copied = $true }
+    catch { Start-Sleep -Seconds 1 } }
+  Need $copied "chưa chép được $($f.FullName)"
+  Need ((Get-FileHash -LiteralPath $f.FullName).Hash -ceq (Get-FileHash -LiteralPath "$env:TL_PW_RUN\11-daemon.err").Hash) `
+    'bản sao .err daemon lệch'
+  for ($i = 0; $i -lt 5 -and (Test-Path -LiteralPath $f.FullName); $i++) {   # daemon có thể chưa nhả handle
+    try { Remove-Item -LiteralPath $f.FullName -Force -ErrorAction Stop } catch { Start-Sleep -Seconds 1 } }
+  Need (-not (Test-Path -LiteralPath $f.FullName)) "chưa xoá được $($f.FullName)"
+  # --- du-luong-daemon: het
   $files = Get-ChildItem -Force -File -LiteralPath $env:TL_PW_RUN | Where-Object Name -ne 'SHA256SUMS.csv'
   $h = @(Get-PwHashes $files)
   $h | Export-Csv -LiteralPath "$env:TL_PW_RUN\SHA256SUMS.csv" -NoTypeInformation -Encoding UTF8 -ErrorAction Stop
@@ -346,11 +474,80 @@ Nếu dừng sớm, operator lưu hash các output mới và `commands.tsv` vào
 ```
 Gỡ bản cài: kiểm không còn tiến trình dùng nó (`pgrep -af "$TL_PW_ROOT"`; `Get-CimInstance Win32_Process | Where-Object
 CommandLine -like "*$env:TL_PW_ROOT*"`; chỉ đọc, không giết), rồi xoá đúng `install/<rev>` + `browsers/<rev>` của revision
-bị loại; GIỮ revision trước và `runs/`; không `npm uninstall -g`, không đụng lõi. Rollback = trỏ `TL_PW_INSTALL`/
+bị loại; GIỮ revision trước và `runs/`; không `npm uninstall -g`, không đụng lõi. Sổ phiên của bản cài bị loại là thư mục
+cha trong `11-daemon-path.txt` của các run dùng nó (chưa có tệp này ⇒ không xoá sổ phiên). TRƯỚC khi xoá `install/<rev>`,
+hỏi sổ phiên bằng đúng lệnh `node -e` của Capture (với `TL_PW_INSTALL` của revision ấy, từ `work`) và đòi: `00-sophien.txt`,
+`11-daemon-path.txt` là tệp thường (không liên kết), không hook; `00` trùng TỪNG BYTE câu trả lời + nonce; `11` = `<dòng 2>/<nonce>.err` (từng byte);
+thư mục là thư mục thường, không thành phần nào của đường dẫn là liên kết; khác/thiếu/liên kết ⇒ không xoá sổ phiên, ghi biên nhận. Sau khi xoá `install/<rev>` + `browsers/<rev>`, xoá thư mục ấy CHỈ khi rỗng,
+bằng thao tác không đệ quy tự từ chối khi còn mục (`rmdir -- <thư mục>`; PowerShell:
+`[IO.Directory]::Delete('<thư mục>', $false)`); bị từ chối ⇒ giữ nguyên, ghi biên nhận. Mã dưới chạy cho MỘT run
+(`TL_PW_RUN`) với `TL_PW_INSTALL` = bản cài bị loại; phần (1) chạy TRƯỚC khi xoá `install/<rev>`, phần (2) SAU đó.
+```bash
+# (1) TRƯỚC khi xoá install/<rev>
+  # --- du-luong-daemon-go-truoc: bat dau
+  GO_DH=$( trap - ERR; set +eE
+    r=$TL_PW_RUN/00-sophien.txt g=$TL_PW_RUN/11-daemon-path.txt
+    [ -z "${PWTEST_DAEMON_SESSION_DIR+x}" ] && [ -f "$r" ] && [ ! -L "$r" ] && [ -f "$g" ] && [ ! -L "$g" ] &&
+    so=$(cd "$TL_PW_ROOT/work" && "$TL_PW_NODE" -e \
+      'const r=require(process.argv[1]),c=r.createClientInfo(),b=s=>Buffer.from(s).toString(`base64`);if(c.workspaceDir)process.exit(3);console.log(b(r.baseDaemonDir()));console.log(b(c.daemonProfilesDir))' \
+      "$TL_PW_INSTALL/node_modules/playwright-core/lib/tools/cli-client/registry.js") &&
+    D=$(printf %s "${so%%$'\n'*}" | base64 -d) && DH=$(printf %s "${so#*$'\n'}" | base64 -d) && n=$(sed -n 3p "$r") &&
+    [[ "$n" =~ ^tl-pw-[0-9a-f]{12}$ ]] && printf '%s\n%s\n%s\n' "$D" "$DH" "$n" | cmp -s -- - "$r" &&   # so BYTE
+    printf '%s\n' "$DH/$n.err" | cmp -s -- - "$g" &&
+    [ -d "$DH" ] && [ "$(realpath -e -- "$DH" && echo .)" = "$DH"$'\n.' ] && printf %s "$DH" ) ||
+    { GO_DH=; echo 'GIỮ sổ phiên: thiếu/khác/liên kết 11-daemon-path.txt hoặc 00-sophien.txt, CLI trả khác, có hook, hoặc đường dẫn có liên kết' >&2; }
+  # --- du-luong-daemon-go-truoc: het
+# (2) xoá install/<rev> + browsers/<rev> như trên, rồi:
+  # --- du-luong-daemon-go-sau: bat dau
+  [ -z "$GO_DH" ] || rmdir -- "$GO_DH" || echo "GIỮ $GO_DH: còn mục" >&2
+  # --- du-luong-daemon-go-sau: het
+```
+```powershell
+# (1) TRƯỚC khi xoá install\<rev>
+  # --- du-luong-daemon-go-truoc: bat dau
+  $goDh = $null; $rp = [IO.FileAttributes]::ReparsePoint
+  try { $r0 = "$env:TL_PW_RUN\00-sophien.txt"; $g = "$env:TL_PW_RUN\11-daemon-path.txt"
+    foreach ($t in $r0, $g) {   # tệp thường, không reparse, TRƯỚC khi đọc
+      if (-not (Test-Path -LiteralPath $t -PathType Leaf) -or ((Get-Item -Force -LiteralPath $t).Attributes -band $rp)) { throw "biên nhận: $t" } }
+    if (Test-Path -LiteralPath Env:PWTEST_DAEMON_SESSION_DIR) { throw 'PWTEST_DAEMON_SESSION_DIR' }
+    $js = 'const r=require(process.argv[1]),c=r.createClientInfo(),b=s=>Buffer.from(s).toString(`base64`);if(c.workspaceDir)process.exit(3);console.log(b(r.baseDaemonDir()));console.log(b(c.daemonProfilesDir))'
+    Push-Location "$env:TL_PW_ROOT\work"
+    try { $raw = @(& $env:TL_PW_NODE -e $js "$env:TL_PW_INSTALL\node_modules\playwright-core\lib\tools\cli-client\registry.js"); $soRc = $LASTEXITCODE } finally { Pop-Location }
+    $so = @($raw | ForEach-Object { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) })
+    $u8 = New-Object Text.UTF8Encoding($false); $rec = [IO.File]::ReadAllText($r0) -split "`n"; $n = if ($rec.Count -eq 4) { $rec[2] } else { '' }
+    $ok = ($soRc -eq 0 -and $so.Count -eq 2 -and $n -cmatch '\Atl-pw-[0-9a-f]{12}\z' -and   # so BYTE, ordinal
+      [string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($r0)), [Convert]::ToBase64String($u8.GetBytes("$($so[0])`n$($so[1])`n$n`n")), [StringComparison]::Ordinal) -and
+      [string]::Equals([Convert]::ToBase64String([IO.File]::ReadAllBytes($g)), [Convert]::ToBase64String($u8.GetBytes("$($so[1])\$n.err`n")), [StringComparison]::Ordinal) -and
+      (Test-Path -LiteralPath $so[1] -PathType Container))
+    $q = $so[1]; while ($ok -and $q) {
+      $ok = -not ((Get-Item -Force -LiteralPath $q).Attributes -band $rp); $q = Split-Path -Parent $q }
+    if ($ok) { $goDh = $so[1] }
+  } catch { $goDh = $null }
+  if (-not $goDh) { Write-Warning 'GIỮ sổ phiên: thiếu/khác/liên kết 11-daemon-path.txt hoặc 00-sophien.txt, CLI trả khác, có hook, hoặc đường dẫn có liên kết' }
+  # --- du-luong-daemon-go-truoc: het
+# (2) xoá install\<rev> + browsers\<rev> như trên, rồi:
+  # --- du-luong-daemon-go-sau: bat dau
+  if ($goDh) { try { [IO.Directory]::Delete($goDh, $false) } catch { Write-Warning "GIỮ ${goDh}: còn mục" } }
+  # --- du-luong-daemon-go-sau: het
+```
+Rollback = trỏ `TL_PW_INSTALL`/
 `PLAYWRIGHT_BROWSERS_PATH` về revision cũ (lock + browser cache bất biến) rồi Kiểm pin theo metadata của nó; không tự
 cập nhật/nâng bản. Không có đăng nhập, nên không hứa cookie/phiên còn sau khôi phục.
 ## Limits
 - Chỉ Linux x64/Windows x64 đúng bảng ghim. Thiếu thư viện hệ thống cho Chromium ⇒ DỪNG (không `install-deps`/`sudo`).
   Trang cần đăng nhập, CAPTCHA, tương tác hay script: ngoài phạm vi, DỪNG. Tài liệu này không phải biên nhận chạy.
-- Sổ phiên CLI ở cache mặc định của người dùng (`~/.cache/ms-playwright/daemon`; `%LOCALAPPDATA%\ms-playwright\daemon`),
-  skill không đổi vị trí ấy, chỉ dùng phiên nonce của mình. CWD `work` không được nằm dưới thư mục có `.playwright`.
+- Sổ phiên CLI ở cache mặc định của người dùng (`${XDG_CACHE_HOME:-~/.cache}/ms-playwright/daemon`;
+  `%LOCALAPPDATA%\ms-playwright\daemon`), NGOÀI `TL_PW_ROOT`; CLI 0.1.23 không có tuỳ chọn được hỗ trợ để dời nó
+  (`PWTEST_DAEMON_SESSION_DIR`/`PWTEST_SERVER_REGISTRY` là hook test, bị cấm; không ghi đè biến cache của HĐH). Thư mục
+  con `<16 hex>` = SHA-1 đường dẫn `node_modules/playwright-core`, tức riêng từng bản cài. Skill lấy cả hai bằng cách hỏi
+  `baseDaemonDir()`/`createClientInfo()` của `lib/tools/cli-client/registry.js` trong bản ghim — mô-đun NỘI BỘ: đổi ghim
+  thì phải đo lại đường này. Cleanup chỉ xoá `<nonce>.err` của mình; `<nonce>.session`/`ud-<nonce>-*` do `delete-data`
+  xoá. DƯ LƯỢNG CÒN LẠI (đã biết, không phải dữ liệu phiên): các thư mục `ms-playwright/daemon`, `daemon/<16 hex>` (xoá
+  khi gỡ bản cài nếu rỗng) và `ms-playwright/b` (sổ trình duyệt dùng chung; tệp từng trình duyệt CLI cố xoá khi `close`,
+  bỏ qua lỗi); skill không xoá thư mục dùng chung. `.err` của lượt chạy trước bản này KHÔNG tự dọn. Bash cần >= 4.4.
+  Đường dẫn tới thư mục hash KHÔNG được chứa liên kết ở bất kỳ thành phần nào (kể cả thư mục cha phía trên `daemon`);
+  có ⇒ DỪNG trước `open`/`close`/Gỡ. Cache Linux nằm sau symlink thì đặt `XDG_CACHE_HOME` về đường dẫn vật lý trước
+  Setup. Giả định cache TIN CẬY: không chống một tiến trình cùng người dùng tráo thư mục, hay thay `00-sophien.txt` bằng
+  hard link, giữa lúc kiểm và lúc thao tác. Trước `open` có thêm phép tra ĐÚNG tên `<thư mục hash>/<nonce>.err|.session`
+  mà Node sẽ mở, cho cache không phân biệt hoa thường (ext4 casefold), nơi phép quét `find` có thể bỏ sót; casefold
+  chưa đo trên hệ thật (chỉ mô phỏng). CWD `work` không được nằm dưới thư mục có `.playwright`.

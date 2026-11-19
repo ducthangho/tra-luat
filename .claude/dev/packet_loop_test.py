@@ -18667,7 +18667,7 @@ def _wp1342a1_lenh(x, vai, *buoc, marker=""):
 
 
 def _wp1342a1_tin(x, h, ms=0):
-    return x.k.WaitForSingleObject(h, ms) == 0   # WAIT_OBJECT_0: tiến trình đã kết thúc
+    return x.k.WaitForSingleObject(h, ms) == 0   # WAIT_OBJECT_0; kiểm ĐÃ signaled sau khi hàm trả/ném dùng ms=5000 (đo native 19-11)
 
 
 def _wp1342a1_mo(x, mo, ten, han=20.0, go=True):
@@ -18805,7 +18805,7 @@ def _wp1342a1_j2(m, d, c, w, k):   # hạn: deadline = lúc gọi + 6 s; `cho0`:
     def than(x):
         rc, loi, giay = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "bt", "cho0=tha_j2,60"), lambda mo: _wp1342a1_mo(x, mo, "dau", 5), han=6)
         assert loi is not None and "lifecycle deadline" in str(loi) and 6 <= giay <= 11, ("J2: không ném lifecycle deadline trong 6–11 s", rc, loi, giay)
-        assert _wp1342a1_tin(x, x.hs[0]), "J2: con chưa signaled khi hàm ném"
+        assert _wp1342a1_tin(x, x.hs[0], 5000), "J2: con chưa signaled trong 5 s sau khi hàm ném"
         return str(loi), round(giay, 2)
     return _wp1342a1_ca(m, d, c, w, than)
 
@@ -18815,7 +18815,7 @@ def _wp1342a1_j3(m, d, c, w, k):   # mồ côi: cháu DETACHED_PROCESS (0x8) cò
         rc, loi, _ = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "chau=8,chau,bt+cho=tha_j3,300", "cho=go_chau,300", "ra=0"),
                                    lambda mo: _wp1342a1_mo(x, mo, "chau"))
         assert loi is None and rc == 0, ("J3: hàm phải trả 0 sau khi thu hồi cháu", rc, loi)
-        assert _wp1342a1_tin(x, x.hs[0]), "J3: cháu mồ côi chưa signaled khi hàm trả"
+        assert _wp1342a1_tin(x, x.hs[0], 5000), "J3: cháu mồ côi chưa signaled trong 5 s"
     return _wp1342a1_ca(m, d, c, w, than)
 
 
@@ -18854,7 +18854,7 @@ def _wp1342a1_j8(m, d, c, w, k):   # lỗi sau Popen, TRƯỚC gán ⇒ `kill_tr
             raise loi_j8
         _, loi, _ = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "ra=0"), truoc_gan=truoc_gan)
         assert loi is loi_j8, ("J8: hàm phải ném lại ĐÚNG lỗi j8", loi)
-        assert len(x.hs) == 1 and _wp1342a1_tin(x, x.hs[0]), ("J8: bản sao con chưa signaled khi hàm trả", getattr(loi, "__notes__", None))
+        assert len(x.hs) == 1 and _wp1342a1_tin(x, x.hs[0], 5000), ("J8: bản sao con chưa signaled trong 5 s", getattr(loi, "__notes__", None))
         return getattr(loi, "__notes__", None)
     return _wp1342a1_ca(m, d, c, w, than)
 
@@ -18873,13 +18873,13 @@ def _wp1342a1_j9(m, d, c, w, k):   # lỗi SAU gán, trước resume ⇒ thu h�
         if 300 - (time.monotonic() - t_phu) < 90:
             raise BoQua("KHÔNG ĐO ĐƯỢC: J9 — thời gian còn lại của tiến trình phụ < 90 s") from OSError("J9")
         _, loi, _ = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "ra=0"), truoc_gan=giu.append, between=between)
-        ghi_chu = list(getattr(loi_j9, "__notes__", []))
+        mau = len(giu) > 1 and (bool(x.kj.QueryInformationJobObject(giu[1], 1, c.byref(info), c.sizeof(info), None)), info.ActiveProcesses)
+        ghi_chu = list(getattr(loi_j9, "__notes__", []))   # `mau` LẤY ngay sau khi hàm ném, assert SAU CÙNG (nhãn k2 được chấm trước)
         assert loi is loi_j9, ("J9: hàm phải ném lại ĐÚNG lỗi j9", loi)
-        assert _wp1342a1_tin(x, h_phu), (f"J9: tiến trình phụ còn sống VÀ j9 {'CÓ' if 'cleanup:xac_nhan' in ghi_chu else 'không có'} "
-                                         "ghi chú cleanup:xac_nhan", ghi_chu)
-        assert _wp1342a1_tin(x, int(giu[0]._handle)), ("J9: con chưa signaled khi hàm trả", ghi_chu)
-        assert x.kj.QueryInformationJobObject(giu[1], 1, c.byref(info), c.sizeof(info), None) and info.ActiveProcesses == 0, (
-            "J9: ActiveProcesses != 0 qua bản sao job (hoặc query FALSE)", info.ActiveProcesses, c.get_last_error())
+        assert _wp1342a1_tin(x, h_phu, 5000), (f"J9: tiến trình phụ chưa signaled trong 5 s VÀ j9 {'CÓ' if 'cleanup:xac_nhan' in ghi_chu else 'không có'} "
+                                               "ghi chú cleanup:xac_nhan", ghi_chu)
+        assert _wp1342a1_tin(x, int(giu[0]._handle), 5000), ("J9: con chưa signaled trong 5 s", ghi_chu)
+        assert mau == (True, 0), ("J9: ActiveProcesses != 0 qua bản sao job ngay sau khi hàm ném (hoặc query FALSE)", mau)
         (d / "tha_phu").write_bytes(b"")
         return ghi_chu
     return _wp1342a1_ca(m, d, c, w, than)

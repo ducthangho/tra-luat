@@ -1173,15 +1173,16 @@ def _ghi_nguyen_tu_0600(path: str, data: bytes) -> None:
 
 def _kiem_dich_ghi(dich: str, goc: str, thanh_phan: tuple) -> str | None:
     """WP433: None (được ghi) hoặc lý do `<cụm>: <chi tiết repr>`; KHÔNG tạo/ghi gì. (a) cha của `dich` không nằm trong kho git;
-    (b) `goc` và mọi tiền tố `goc/thanh_phan[:i]` tới chính `dich`, nếu ĐANG TỒN TẠI, không phải symlink (S_ISLNK; junction/reparse
-    Windows chưa chặn). Người gọi bảo đảm: `goc` `lstat` trực tiếp được (không hậu tố `/`, `/.`), `dich == join(goc, *thanh_phan)`,
+    (b) `goc` và mọi tiền tố `goc/thanh_phan[:i]` tới chính `dich`, nếu ĐANG TỒN TẠI, không phải liên kết: S_ISLNK, hoặc (P2c-R,
+    Windows) `lstat` báo `FILE_ATTRIBUTE_REPARSE_POINT` — junction, mount point; tag mà `lstat` đi xuyên thì không thấy. Người gọi bảo đảm: `goc` `lstat` trực tiếp được (không hậu tố `/`, `/.`), `dich == join(goc, *thanh_phan)`,
     mỗi phần tử là MỘT tên thành phần. Lỗi `lstat` ngoài "chưa tồn tại" lan ra dạng OSError (người gọi báo `ghi lỗi`)."""
     if (kho_dich := _trong_kho_git(os.path.dirname(dich))) is not None:
         return f"nằm trong kho git: {repr(kho_dich)[:200]}"
     for i in range(len(thanh_phan) + 1):
         tien_to = os.path.join(goc, *thanh_phan[:i])
         try:
-            if stat.S_ISLNK(os.lstat(tien_to).st_mode):
+            st = os.lstat(tien_to)
+            if stat.S_ISLNK(st.st_mode) or getattr(st, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT:
                 return f"là liên kết tượng trưng: {repr(tien_to)[:200]}"
         except (FileNotFoundError, NotADirectoryError):
             pass

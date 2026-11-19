@@ -53,3 +53,21 @@ Giữa hai commit chỉ harness Install đổi; module `ProximaInstall.psm1` gi�
   - bản sửa harness ở HEAD (để harness tự cấp tín dụng);
   - UNC thật (chỉ có bộ phân loại dạng đường dẫn).
 - **Tiêu chí PASS §4 của đặc tả chưa đạt theo chữ** (`setup_error_ids` phải rỗng): cần quyết định của chủ kho, hoặc một lượt đo trên máy có Developer Mode hay quyền symlink.
+
+## N2 (lease g2, lượt native 1/1) @ `9cdfeaf5b`, 03:24–03:25Z
+Gói bằng chứng: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\wp-pxa\freeze-pxu2\wp-pxu-n2-evidence.zip`
+- sha256 `64efd2de866ca6fcb015f32af464f966dfc5a7c9c2d0e48d6ff2fd54dd3e4aaa`, 13 tệp, MANIFEST `c03c1235…`, quét secret rc 0.
+- Cây `tree5` là clone sạch. **Trước khi chạy**, cả module lẫn harness đã được kiểm cú pháp bằng parser của PS 5.1 và PS 7: 0 lỗi.
+- Module `81c1164b…`, harness `b2627283…`.
+
+| Harness Install | PS 5.1 (Desktop) | PS 7 (Core) |
+|---|---|---|
+| Mặc định (en-AU) | **31/32**, `setup_error_ids=[PU13s]` | **31/32**, `[PU13s]` |
+| Phản chứng + `tr-TR` | **41/42**, `[PU13s]`; **CU01–CU10 đều `killed` do harness cấp** | **41/42**, như PS 5.1 |
+
+- **PU29 đạt** (kịch bản P1 của review 2: `Programs` bị tráo sang thư mục ngoài có junction `Proxima` → `RESIDUE_CHANGED`, 0 hành động, junction ngoài và tệp đánh dấu còn nguyên). PU23 và PU24 đạt; PU28 `blocked_by=System.IO.IOException`.
+- **PU13 (hardlink) đo được:** `hardlink=CLEANED`; bản gốc của hardlink còn nguyên.
+- **PU13s (symlink):** `setup_error`, lỗi 1314, vì máy thiếu quyền. Đây là ca duy nhất không đo được.
+- **Phản chứng:** mỗi CU làm đỏ đúng tập ca khai báo, `env_limited=[PU13s]`, tiến trình con chạy `tr-TR`. CU08 → PU24, PU29 · CU10 → PU29. Các CU còn lại khớp bảng N1. Bản vá rc-2 của phiên điều phối nay **đã chạy native** và cấp đúng.
+- 4 harness cũ không chạy lại: module `ProximaInstall` không được chúng nạp, và số đếm N1 giữ nguyên.
+

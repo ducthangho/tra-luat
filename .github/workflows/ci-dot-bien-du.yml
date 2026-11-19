@@ -9,6 +9,9 @@ name: đột biến đủ (hằng tuần)
 # WP748 r16: đây là `full_mutant_audit` — 52 ca dưới MỖI 239 tự đột biến + 10 đột biến sản phẩm, KHÔNG thu hẹp ma trận.
 # Bắt buộc trên ĐÚNG SHA ứng viên (workflow_dispatch trên ref ấy) trước merge/land/release; biên nhận targeted của
 # `ci.yml` KHÔNG thay được. Ước tính g12: ~73 800 s nối tiếp ⇒ 8 mảnh ≈ 2,6 h/mảnh ⇒ trần 360 phút (trần job GitHub).
+# wp1166 (PR0): mọi checkout GHIM biểu thức SHA sự kiện (không tên nhánh) rồi ĐO lại HEAD; artifact mảnh mang run_id +
+# run_attempt; job gom đòi đủ N biên nhận, mỗi biên nhận `head` = SHA sự kiện, job mảnh `success`. Group concurrency
+# theo run_id + không huỷ ⇒ hai lượt audit không thay chỗ nhau. Chốt: `loi_ghim_sha_du` / `loi_bien_nhan_du`.
 
 on:
   schedule:
@@ -17,6 +20,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: dot-bien-du-${{ github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   dot-bien-du:
@@ -36,6 +43,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.sha }}
+      - name: checkout phải đúng SHA sự kiện (wp1166)
+        run: |
+          h="$(git rev-parse HEAD)"
+          echo "CHECKOUT_SHA=$h EVENT_SHA=${{ github.sha }} RUN=${{ github.run_id }}/${{ github.run_attempt }}"
+          test "$h" = "${{ github.sha }}"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -79,6 +92,13 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: checkout phải đúng SHA sự kiện (wp1166)
+        run: |
+          h="$(git rev-parse HEAD)"
+          echo "CHECKOUT_SHA=$h EVENT_SHA=${{ github.sha }} RUN=${{ github.run_id }}/${{ github.run_attempt }}"
+          test "$h" = "${{ github.sha }}"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -90,7 +110,7 @@ jobs:
         run: python ops/nhanh_don_duoc_test.py
       - uses: actions/upload-artifact@v4
         with:
-          name: dot-bien-manh-${{ matrix.manh }}
+          name: dot-bien-manh-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.manh }}
           path: manh/manh-${{ matrix.manh }}.json
           if-no-files-found: error
 
@@ -100,13 +120,24 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: checkout phải đúng SHA sự kiện (wp1166)
+        run: |
+          h="$(git rev-parse HEAD)"
+          echo "CHECKOUT_SHA=$h EVENT_SHA=${{ github.sha }} RUN=${{ github.run_id }}/${{ github.run_attempt }}"
+          test "$h" = "${{ github.sha }}"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - uses: actions/download-artifact@v4
         with:
-          pattern: dot-bien-manh-*
+          pattern: dot-bien-manh-${{ github.run_id }}-${{ github.run_attempt }}-*
           path: manh
           merge-multiple: true
+      - name: biên nhận mảnh phải đủ, đúng SHA sự kiện, job mảnh success (wp1166)
+        run: python .claude/dev/ci_dang_ky_test.py --kiem-bien-nhan-du manh --sha-su-kien "${{ github.sha }}" --ket-qua-manh "${{ needs.dot-bien-manh.result }}"
       - name: gom mảnh
         run: python ops/nhanh_don_duoc_test.py --gop-du manh

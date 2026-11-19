@@ -249,3 +249,55 @@ Chủ kho chọn "Gỡ bản cài + xoá profile thử". Chi tiết ở `ops/acc
 | Dọn U8 | profile và bản cài được giữ, chờ quyết định | **xong** | Đã xoá shortcut U8 và profile thử (12 085 tệp / 287 MB, chứa phiên đăng nhập 4 provider). Phiên phía provider có thể còn hiệu lực tới khi hết hạn (không đo) |
 
 Driver `PXR.ps1` chỉ được duyệt cho lượt đã ghi. Trước khi dùng lại phải sửa 2 P1 của review: xoá profile theo tên chứ không theo handle; chốt chưa kiểm host, chưa lọc chặt hành động R4, và chưa kiểm băm module trước lượt chạy thật.
+
+## I. Trạng thái hợp nhất (19/11, sau r5; đọc mục này trước)
+Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trước. Bảng dưới lấy **kết luận mới nhất đã có review** cho từng hàng và trỏ tới mục nguồn. Không hàng nào được nâng lên mức cao hơn bằng chứng của mục nguồn.
+
+### I.1 §11, 12 tiêu chí
+| # | Tiêu chí | Hiện trạng | Nguồn | Còn thiếu |
+|---|---|---|---|---|
+| 1 | Bốn lựa chọn cài; thiếu add-on không phá core | **passed (scoped Desktop)** | G (r3) | Chỉ Desktop; ASUS chỉ có raw cho lựa chọn Playwright (E) |
+| 2 | Đúng target; không fallback/retry inference | **partial** | A (r1), E | Chốt TargetId đạt trên cấu hình mẫu. Chưa đo trên gateway hay đích từ xa thật; chưa có bằng chứng 0 retry |
+| 3 | WhatIf không mutation | **passed (scoped, backend giả)** | G | Chưa đo trên gateway thật |
+| 4 | Không secret/profile trong repo, báo cáo | **passed (scoped: các tệp bằng chứng có trong danh sách đích của từng lượt quét)** | G (r1/r2/r3/P3); quét secret rc 0 trên danh sách tệp đích của từng gói | Quét **không** phủ mọi thành viên của mọi zip đóng băng (`wp-u8/VERDICT.md`, `wp-pxl/VERDICT.md` ghi rõ giới hạn này). Toàn bộ nội dung gói: **chưa kiểm** |
+| 5 | Profile riêng; pin package/browser/cache | **passed (scoped Desktop + ASUS)** | G | Finding F1: dư lượng `ms-playwright\daemon` (P3-4) chưa quyết |
+| 6 | Artifact sai nguồn/hỏng không kích hoạt | **passed (scoped)** | H.3 | Chỉ có hiệu lực khi luồng kích hoạt gọi `Test-ProximaArtifactTree`; chưa luồng nào trong repo gọi |
+| 7 | Máy bận hoãn; updater trùng bị khoá | máy bận: **passed (scoped, theo quyết định "dừng")** · updater trùng: **partial (đã chấp nhận)** | H.1, H.3 | Proxima không có single-instance; mở bằng tay vẫn lọt |
+| 8 | Promotion fence | **passed (scoped, promote thật Desktop → VM)** | H.11 | Ca âm "máy đầu FAIL thì chặn máy sau" chỉ có ở mức test |
+| 9 | Phục hồi binary + dữ liệu | dữ liệu: **passed** · binary: **partial** | D, H.10 | "Rollback binary" chỉ là đổi sang thư mục baseline đặt song song |
+| 10 | File khoá / đĩa đầy / rollback thất bại | **partial** | F | Khoá: real_os mức primitive. Đĩa đầy, chép dở, rollback thất bại: chỉ fixture |
+| 11 | Healthcheck không inference | **passed (scoped soak P4)** | D | 180 mẫu `/v1/stats`, `totalRequests` 0; chỉ trên profile thử |
+| 12 | Review độc lập đúng head/tree + evidence | r1–r5 và mọi WP: **passed** (review độc lập trên gói đóng băng + connector) · P3–P6: **gioi_han** | D, E, H; `wp-*/VERDICT*.md` | Raw P5 và hồ sơ P6 không khôi phục được (H.2) |
+
+### I.2 U1–U12
+| U | Hạng mục | Hiện trạng | Nguồn | Còn thiếu |
+|---|---|---|---|---|
+| U1 | PS5.1 endpoint | **passed (scoped, backend giả)** | G | Endpoint Proxima thật trên PS5.1 |
+| U2 | Danh tính VM | **passed (scoped `f7281f27`)** | **r5** | `810f79bb` offline: chưa định danh được |
+| U3 | WhatIf | **passed (scoped)** | G | như §11 #3 |
+| U4 | Updater thực tế | **passed (scoped, chỉ nhánh sai integrity)** | H.1 | Cài thật khi bản tải hợp lệ; chữ ký; biến thể `repaired` |
+| U5 | Chữ ký/attestation/provenance artifact | **not_evidenced** · bộ cài **NotSigned** (đo được) | H.4/H.5 | Cần attestation hoặc quyết định chính sách ghi rõ (người giữ) |
+| U6 | License | **passed (owner)** | B | — |
+| U7 | Retention/soak/theo dõi | **partial** | D | Ngưỡng, owner, cửa sổ theo dõi chưa ghi |
+| U8 | Restore profile/đăng nhập | dữ liệu: **passed (hẹp)** · đăng nhập: **quan_sat: giữ được** | H.10 | Không có PASS/FAIL cho vế đăng nhập theo đặc tả U8 |
+| U9 | Cache/ACL ổ D ASUS | **đo được (r5)**: lúc đo ổ D đầy (trống 8 192 byte); **sau khi dọn theo duyệt của chủ kho, trống 2 003 MB** (19/11 16:48Z) | **r5** | **Quyết định của chủ kho (19/11): dùng ổ C** (*"cân nhắc dùng ổ C dung lượng nhiều hơn"*). Đo 17:1xZ: `PLAYWRIGHT_BROWSERS_PATH`, `TL_PW_ROOT` đều chưa đặt ⇒ Playwright mặc định dùng `C:\Users\admin\AppData\Local\ms-playwright` (đã có, 0 MB); C trống 20 114 MB. **Không đổi biến môi trường hay cấu hình nào.** Phép đo này chỉ nói biến bền (User/Machine) chưa đặt; nó **không** chứng minh add-on dùng ổ C. Quy trình cài của add-on (`.agents/skills/playwright-browser/SKILL.md`, khối PowerShell) đặt `PLAYWRIGHT_BROWSERS_PATH = $env:TL_PW_ROOT\browsers\0.1.0` **trong tiến trình**, mẫu `TL_PW_ROOT` ghi ổ D, và P3 (`RAW-P3-VERDICT-claude-xhigh.md` §11 #5) ghi mỗi add-on trên ASUS có cache riêng dưới `D:\tl-win\…`. Nên: ổ C là **ý định của chủ kho**; nơi add-on **thật sự** đặt cache: **chưa kiểm** (môi trường khởi chạy và các đường dẫn cache hiện có chưa đo). Lượt cài/chạy add-on kế tiếp trên ASUS phải đặt `TL_PW_ROOT` trên ổ C rồi đo lại |
+| U10 | Playwright CLI ghim | **passed (Desktop + ASUS)** | E, G | — |
+| U11 | Auth remote f728 | **not_evidenced** | E | Chưa có bằng chứng auth thực tới f728 |
+| U12 | Binary ↔ upstream | **partial** | D, H.4 | Chỉ có digest bộ cài; không chữ ký, không provenance tới commit |
+
+### I.3 Hạng mục chéo
+| Hạng mục | Hiện trạng | Nguồn |
+|---|---|---|
+| Kiểm release hằng ngày | **not_present** trên cả 3 máy (VM, Desktop: C; ASUS: **r5**, 0/209 tác vụ) | C, r5 |
+| NSIS cài per-user | **passed (scoped Desktop)** | H.5 |
+| NSIS gỡ của nhà cung cấp | **failed** (finding sản phẩm NSIS-2) | H.5, H.12 |
+| NSIS quy trình gỡ (tiêu chí H.7) | **passed (scoped Desktop, 1 lượt)** | H.12 |
+| Migration / nâng cấp / per-machine | **not_evidenced** | H.5 |
+| Runtime promotion / LIVE | **done (scoped: 2 module mới)** | H.11 |
+
+**Việc còn mở có thể làm tiếp, cần chủ kho chọn:**
+1. Ổ D của ASUS: đã dọn lên 2 003 MB trống (r5, phần sau dọn). Chủ kho chọn ổ C cho cache trình duyệt Playwright (U9); vị trí cache thật của add-on chưa kiểm, lượt cài kế tiếp phải đặt `TL_PW_ROOT` trên C.
+2. U5/U12: chính sách khi bộ cài không ký.
+3. U11 và §11 #2: đo auth và target thật tới VM. Có rủi ro chạm gateway LIVE nên cần cấp riêng.
+4. §11 #10: ca đĩa đầy thật hoặc rollback thất bại trên OS thật.
+5. Đóng các Issue WP (#1401, #1405, #1409, #1410, #1413) bằng `kiem-dong-wp`. Mỗi WP cần một biên bản M8; các tiêu chí còn `not_measured` hay `partial` của từng WP phải được chủ kho miễn thì mới qua được D2.

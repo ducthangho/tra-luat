@@ -501,8 +501,14 @@ function Invoke-InstallRemovalCore($Plan, $State, $Actions) {
             return (New-InstallChange 'InstallDir is no longer there.')
         }
         if ($State.installNode.Error -ne 0) { throw "Opening InstallDir failed with Win32 error $($State.installNode.Error)." }
+        # Before anything is deleted: the opened object must sit at the canonical InstallDir. A link object
+        # reports its own path here (it was opened, not followed), so a junction at the real InstallDir still
+        # matches; an ancestor swapped for a link makes the opened object something else, somewhere else.
+        if (-not (Test-InstallSamePath $State.installNode.FinalPath $Plan.installCanonical)) {
+            return (New-InstallChange "InstallDir resolves to '$($State.installNode.FinalPath)', not to '$($Plan.installCanonical)'.")
+        }
         if (Test-InstallNodeReparse $State.installNode) {
-            # A link appeared after the preliminary check: remove the link object, never what it points to.
+            # A link appeared at InstallDir after the preliminary check: remove the link object, never what it points to.
             $unlinkError = $native::MarkDelete($State.installNode.Handle)
             if ($unlinkError -ne 0) { throw "Unlinking the reparse point at InstallDir failed with Win32 error $unlinkError." }
             $State.installNode.Dispose()
@@ -511,10 +517,6 @@ function Invoke-InstallRemovalCore($Plan, $State, $Actions) {
             return (New-InstallChange 'InstallDir became a reparse point after the preliminary check.')
         }
         if (-not (Test-InstallNodeDirectory $State.installNode)) { return (New-InstallChange 'InstallDir is not a directory.') }
-        # An ancestor swapped for a link shows up here: the opened object is then somewhere else.
-        if (-not (Test-InstallSamePath $State.installNode.FinalPath $Plan.installCanonical)) {
-            return (New-InstallChange "InstallDir resolves to '$($State.installNode.FinalPath)', not to '$($Plan.installCanonical)'.")
-        }
         $installChange = Get-InstallDirRefusal $Plan.installDir
         if ($null -ne $installChange) { return (New-InstallChange $installChange) }
     }

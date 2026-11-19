@@ -45,7 +45,7 @@ lease_until: '2026-11-19T11:13:29Z'
 lease_expires_at_utc: '2026-11-19T11:13:29Z'
 max_lease_hours: 8
 executor_calls_limit: 1
-executor_calls_used: 0
+executor_calls_used: 1
 review_calls_limit: 1
 review_calls_used: 0
 native_runs_limit: 1

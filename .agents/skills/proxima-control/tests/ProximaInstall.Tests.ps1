@@ -37,8 +37,8 @@ $report = [ordered]@{
     cases = $null; counterexamples = $null
 }
 $reportWritable = $false
-$requiredIds = @(1..28 | ForEach-Object { 'PU{0:d2}' -f $_ }) + @('PU21b', 'PU21c')
-if ($Counterexamples) { $requiredIds += @(1..9 | ForEach-Object { 'CU{0:d2}' -f $_ }) }
+$requiredIds = @(1..28 | ForEach-Object { 'PU{0:d2}' -f $_ }) + @('PU13s', 'PU21b', 'PU21c', 'PU29')
+if ($Counterexamples) { $requiredIds += @(1..10 | ForEach-Object { 'CU{0:d2}' -f $_ }) }
 $report.required_ids = $requiredIds
 
 function Get-FileSha([string]$Path) {
@@ -587,7 +587,11 @@ try {
         if (-not [IO.File]::Exists($original) -or (Get-FileSha $original) -cne $installerSha) {
             Stop-Case 'Removing the hard link damaged the original file'
         }
+        "hardlink=$hardlink"
+    }
+    Invoke-Case 'PU13s' {
         # Symbolic link to a file with the right size and hash: refused because it is a reparse point.
+        # Creating the link needs Developer Mode or elevation; without it this case is a setup_error.
         $s = New-Fixture 'PU13-sym'
         $target = [IO.Path]::Combine($s.dir, 'target.bin')
         [IO.File]::WriteAllBytes($target, $installerContent)
@@ -597,7 +601,6 @@ try {
         if (-not [IO.File]::Exists($target) -or (Get-FileSha $target) -cne $installerSha) { Stop-Case 'The symbolic link target was removed or changed' }
         if (-not (Test-PathPresent $s.installer) -or -not (Test-Reparse $s.installer)) { Stop-Case 'The symbolic link was removed' }
         Assert-NoQuarantine $s
-        "hardlink=$hardlink"
     }
     Invoke-Case 'PU14' {
         $f = New-Fixture 'PU14' -Install -Updater
@@ -822,6 +825,38 @@ try {
         Assert-ActionCount $actual 0 0
         Assert-Neighbours $f
     }
+    Invoke-Case 'PU29' {
+        # Programs is swapped for a junction to an outside directory that has its OWN "Proxima" junction
+        # (to a third directory). The path InstallDir now opens that outside link. It is not at the
+        # canonical InstallDir, so it must be left alone: nothing removed, no action recorded.
+        $f = New-Fixture 'PU29' -Install
+        $outside = [IO.Directory]::CreateDirectory([IO.Path]::Combine($f.dir, 'outside')).FullName
+        $third = [IO.Directory]::CreateDirectory([IO.Path]::Combine($f.dir, 'third')).FullName
+        $marker = [IO.Path]::Combine($third, 'marker.txt')
+        [IO.File]::WriteAllText($marker, 'marker', $utf8)
+        $outsideLink = [IO.Path]::Combine($outside, 'Proxima')
+        New-Junction $outsideLink $third
+        $installPath = $f.install
+        $programsPath = $f.programs
+        $calls = @{ n = 0; done = $false }
+        $hook = {
+            $calls.n++
+            [IO.Directory]::Delete($installPath)
+            [IO.Directory]::Delete($programsPath)
+            $null = New-Item -Path $programsPath -ItemType Junction -Target $outside -ErrorAction Stop
+            $calls.done = $true
+        }.GetNewClosure()
+        $actual = Invoke-Clean $f @{ TestHook = $hook }
+        if (-not $calls.done -or $calls.n -ne 1) { throw 'The hook could not swap Programs for a junction' }
+        if (-not (Test-PathPresent $outsideLink) -or -not (Test-Reparse $outsideLink)) {
+            Stop-Case 'The Proxima junction behind the swapped Programs junction was removed'
+        }
+        Assert-Result $actual 'RESIDUE_CHANGED'
+        Assert-ActionCount $actual 0 0
+        if (-not [IO.File]::Exists($marker)) { Stop-Case 'The marker file behind the outside junction was lost' }
+        if (-not (Test-PathPresent $f.programs) -or -not (Test-Reparse $f.programs)) { Stop-Case 'The swapped Programs junction was removed' }
+        Assert-Neighbours $f
+    }
     Invoke-Case 'PU25' {
         # installer.exe is replaced by another file of the same size after the preliminary check.
         # The replacement was never verified, so it must survive, back under the original name.
@@ -978,7 +1013,14 @@ try {
             @{ id = 'CU08'
                 edits = @(@{ anchor = 'if (-not (Test-InstallSamePath $State.installNode.FinalPath $Plan.installCanonical)) {'
                         replacement = 'if ($false) {' })
-                targets = [ordered]@{ PU24 = 'A directory behind the swapped Programs junction was removed' } }
+                targets = [ordered]@{ PU24 = 'A directory behind the swapped Programs junction was removed'
+                    PU29 = 'The Proxima junction behind the swapped Programs junction was removed' } }
+            # The review-2 defect: a reparse point is unlinked before its final path is validated, so a
+            # link that merely sits behind a swapped ancestor is removed.
+            @{ id = 'CU10'
+                edits = @(@{ anchor = 'if (-not (Test-InstallSamePath $State.installNode.FinalPath $Plan.installCanonical)) {'
+                        replacement = 'if (-not (Test-InstallNodeReparse $State.installNode) -and -not (Test-InstallSamePath $State.installNode.FinalPath $Plan.installCanonical)) {' })
+                targets = [ordered]@{ PU29 = 'The Proxima junction behind the swapped Programs junction was removed' } }
             # Deletion by path instead of by the verified handle: handles are opened with full sharing and
             # the installer is deleted through its path, so whatever sits at that path is what gets deleted.
             @{ id = 'CU09'

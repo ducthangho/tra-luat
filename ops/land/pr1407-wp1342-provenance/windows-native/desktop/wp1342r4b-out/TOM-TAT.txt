@@ -1,0 +1,182 @@
+﻿bat_dau=2026-11-19T01:57:24Z python=Python 3.12.10 os=Microsoft Windows NT 10.0.26300.0 ptr=8
+CHOT sha=46d39071989fd77582ef8d1d61a7ab7de90a12ba tree=a8bc50284bc9fffc0759e81d5b723d66e51701ce sach=[]
+GATE exit=0
+  {"id": "wp1342_native_job_abi", "rc": 0, "giay": 3.0, "lan": 0}
+  {"id": "wp1342_native_job_thuan", "rc": 0, "giay": 3.0, "lan": 1}
+  {"id": "wp1342_native_job_query_loi", "rc": 0, "giay": 3.0, "lan": 2}
+HEAD exit=0
+  {"id": "wp1174_windows_claim_rejected", "rc": 0, "giay": 3.6, "lan": 0}
+  {"id": "wp1174_witness_valid", "rc": 0, "giay": 2.8, "lan": 1}
+  {"id": "wp1174_witness_keyset", "rc": 0, "giay": 3.0, "lan": 2}
+  {"id": "wp1174_witness_int_bool", "rc": 0, "giay": 2.8, "lan": 3}
+  {"id": "wp1174_witness_json_bytes", "rc": 0, "giay": 2.8, "lan": 4}
+  {"id": "wp1174_witness_fresh_reserved", "rc": 0, "giay": 2.8, "lan": 5}
+  {"id": "wp1174_witness_import_retry", "rc": 0, "giay": 2.8, "lan": 6}
+  {"id": "wp1174_witness_suspended", "rc": 0, "giay": 2.8, "lan": 7}
+  {"id": "wp1174_witness_active_pending", "rc": 0, "giay": 2.8, "lan": 8}
+  {"id": "wp1174_status_closed", "rc": 0, "giay": 3.0, "lan": 9}
+  {"id": "wp1174_admission_valid", "rc": 0, "giay": 2.8, "lan": 10}
+  {"id": "wp1174_admission_wrong_scope", "rc": 0, "giay": 3.0, "lan": 11}
+  {"id": "wp1174_lifecycle_legacy_unchanged", "rc": 0, "giay": 2.9, "lan": 12}
+  {"id": "wp1342_additive_byte_preserved", "rc": 0, "giay": 12.4, "lan": 13}
+  {"id": "wp1342_pure_platform_path", "rc": 0, "giay": 2.8, "lan": 14}
+  {"id": "wp1342_native_read", "rc": 0, "giay": 2.8, "lan": 15}
+  {"id": "wp1342_native_volume_junction", "rc": 0, "giay": 2.8, "lan": 16}
+  {"id": "wp1342_native_swap_ancestor", "rc": 0, "giay": 3.0, "lan": 17}
+  {"id": "wp1342_native_metadata_drift", "rc": 0, "giay": 3.0, "lan": 18}
+  {"id": "wp1342_native_noinherit", "rc": 0, "giay": 3.9, "lan": 19}
+  {"id": "wp1342_native_symlink_file", "rc": 1, "giay": 2.8, "lan": 20}
+  {"id": "wp1342_pure_lock_persist_refuse", "rc": 0, "giay": 2.8, "lan": 21}
+  {"id": "wp1342_native_lock_exclusive", "rc": 0, "giay": 3.0, "lan": 22}
+  {"id": "wp1342_native_lock_noinherit", "rc": 0, "giay": 2.8, "lan": 23}
+  {"id": "wp1342_native_lock_names", "rc": 0, "giay": 2.9, "lan": 24}
+  {"id": "wp1342_native_persist_create", "rc": 0, "giay": 3.0, "lan": 25}
+  {"id": "wp1342_native_persist_update", "rc": 0, "giay": 3.0, "lan": 26}
+  {"id": "wp1342_native_persist_update_refuse", "rc": 0, "giay": 2.8, "lan": 27}
+  {"id": "wp1342_native_persist_update_symlink", "rc": 1, "giay": 2.8, "lan": 28}
+  {"id": "wp1342_native_persist_update_held", "rc": 0, "giay": 2.8, "lan": 29}
+  {"id": "wp1342_native_persist_bindings", "rc": 0, "giay": 2.9, "lan": 30}
+  {"id": "wp1342_pure_seed_acl_bang", "rc": 0, "giay": 2.8, "lan": 31}
+  {"id": "wp1342_pure_seed_boot_refuse", "rc": 0, "giay": 2.8, "lan": 32}
+  {"id": "wp1342_native_seed_ok", "rc": 0, "giay": 2.9, "lan": 33}
+  {"id": "wp1342_native_seed_hardlink", "rc": 0, "giay": 3.0, "lan": 34}
+  {"id": "wp1342_native_seed_acl", "rc": 0, "giay": 2.8, "lan": 35}
+  {"id": "wp1342_native_seed_fingerprint", "rc": 0, "giay": 2.8, "lan": 36}
+  {"id": "wp1342_native_seed_nonfile", "rc": 0, "giay": 2.8, "lan": 37}
+  {"id": "wp1342_native_seed_drift", "rc": 0, "giay": 3.0, "lan": 38}
+  {"id": "wp1342_native_boot_stable", "rc": 0, "giay": 2.8, "lan": 39}
+  {"id": "wp1342_native_boot_failclosed", "rc": 0, "giay": 3.0, "lan": 40}
+  {"id": "wp1342_pure_spawn_hang_luong", "rc": 0, "giay": 3.0, "lan": 41}
+  {"id": "wp1342_pure_spawn_cleanup_note", "rc": 0, "giay": 2.8, "lan": 42}
+  {"id": "wp1342_pure_spawn_arguments", "rc": 0, "giay": 2.8, "lan": 43}
+  {"id": "wp1342_native_job_abi", "rc": 0, "giay": 3.0, "lan": 44}
+  {"id": "wp1342_native_job_thuan", "rc": 0, "giay": 2.9, "lan": 45}
+  {"id": "wp1342_native_job_han", "rc": 0, "giay": 8.8, "lan": 46}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 2.9, "lan": 47}
+  {"id": "wp1342_native_job_treo_truoc_gan", "rc": 0, "giay": 3.0, "lan": 48}
+  {"id": "wp1342_native_job_khong_ke_thua", "rc": 0, "giay": 2.9, "lan": 49}
+  {"id": "wp1342_native_job_loi_truoc_gan", "rc": 0, "giay": 3.0, "lan": 50}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 2.9, "lan": 51}
+  {"id": "wp1342_native_job_cha_chet_sau_gan", "rc": 0, "giay": 3.4, "lan": 52}
+  {"id": "wp1342_native_job_cha_chet_truoc_gan", "rc": 0, "giay": 5.4, "lan": 53}
+  {"id": "wp1342_native_job_query_loi", "rc": 0, "giay": 2.8, "lan": 54}
+CHOT sha=e2c3b82f818bd1739d31261e8129d3ef44915acf tree=7693a24fa9169d91370dae782ec51eabd3fa0a35 sach=[]
+BASE exit=0
+  {"id": "wp1174_windows_claim_rejected", "rc": 0, "giay": 3.4, "lan": 0}
+  {"id": "wp1174_witness_valid", "rc": 0, "giay": 2.8, "lan": 1}
+  {"id": "wp1174_witness_keyset", "rc": 0, "giay": 3.0, "lan": 2}
+  {"id": "wp1174_witness_int_bool", "rc": 0, "giay": 2.7, "lan": 3}
+  {"id": "wp1174_witness_json_bytes", "rc": 0, "giay": 2.7, "lan": 4}
+  {"id": "wp1174_witness_fresh_reserved", "rc": 0, "giay": 2.9, "lan": 5}
+  {"id": "wp1174_witness_import_retry", "rc": 0, "giay": 2.9, "lan": 6}
+  {"id": "wp1174_witness_suspended", "rc": 0, "giay": 2.7, "lan": 7}
+  {"id": "wp1174_witness_active_pending", "rc": 0, "giay": 2.9, "lan": 8}
+  {"id": "wp1174_status_closed", "rc": 0, "giay": 2.7, "lan": 9}
+  {"id": "wp1174_admission_valid", "rc": 0, "giay": 2.9, "lan": 10}
+  {"id": "wp1174_admission_wrong_scope", "rc": 0, "giay": 2.7, "lan": 11}
+  {"id": "wp1174_lifecycle_legacy_unchanged", "rc": 0, "giay": 2.9, "lan": 12}
+  {"id": "wp1342_additive_byte_preserved", "rc": 0, "giay": 12.5, "lan": 13}
+  {"id": "wp1342_pure_platform_path", "rc": 0, "giay": 2.7, "lan": 14}
+  {"id": "wp1342_native_read", "rc": 0, "giay": 3.0, "lan": 15}
+  {"id": "wp1342_native_volume_junction", "rc": 0, "giay": 2.7, "lan": 16}
+  {"id": "wp1342_native_swap_ancestor", "rc": 0, "giay": 2.7, "lan": 17}
+  {"id": "wp1342_native_metadata_drift", "rc": 0, "giay": 2.8, "lan": 18}
+  {"id": "wp1342_native_noinherit", "rc": 0, "giay": 4.0, "lan": 19}
+  {"id": "wp1342_native_symlink_file", "rc": 1, "giay": 2.8, "lan": 20}
+  {"id": "wp1342_pure_lock_persist_refuse", "rc": 0, "giay": 2.7, "lan": 21}
+  {"id": "wp1342_native_lock_exclusive", "rc": 0, "giay": 2.8, "lan": 22}
+  {"id": "wp1342_native_lock_noinherit", "rc": 0, "giay": 2.9, "lan": 23}
+  {"id": "wp1342_native_lock_names", "rc": 0, "giay": 2.8, "lan": 24}
+  {"id": "wp1342_native_persist_create", "rc": 0, "giay": 2.8, "lan": 25}
+  {"id": "wp1342_native_persist_update", "rc": 0, "giay": 2.7, "lan": 26}
+  {"id": "wp1342_native_persist_update_refuse", "rc": 0, "giay": 2.7, "lan": 27}
+  {"id": "wp1342_native_persist_update_symlink", "rc": 1, "giay": 2.7, "lan": 28}
+  {"id": "wp1342_native_persist_update_held", "rc": 0, "giay": 2.7, "lan": 29}
+  {"id": "wp1342_native_persist_bindings", "rc": 0, "giay": 2.7, "lan": 30}
+  {"id": "wp1342_pure_seed_acl_bang", "rc": 0, "giay": 2.7, "lan": 31}
+  {"id": "wp1342_pure_seed_boot_refuse", "rc": 0, "giay": 2.7, "lan": 32}
+  {"id": "wp1342_native_seed_ok", "rc": 0, "giay": 2.9, "lan": 33}
+  {"id": "wp1342_native_seed_hardlink", "rc": 0, "giay": 2.9, "lan": 34}
+  {"id": "wp1342_native_seed_acl", "rc": 0, "giay": 2.7, "lan": 35}
+  {"id": "wp1342_native_seed_fingerprint", "rc": 0, "giay": 3.0, "lan": 36}
+  {"id": "wp1342_native_seed_nonfile", "rc": 0, "giay": 2.8, "lan": 37}
+  {"id": "wp1342_native_seed_drift", "rc": 0, "giay": 2.9, "lan": 38}
+  {"id": "wp1342_native_boot_stable", "rc": 0, "giay": 2.8, "lan": 39}
+  {"id": "wp1342_native_boot_failclosed", "rc": 0, "giay": 2.8, "lan": 40}
+CHOT sha=46d39071989fd77582ef8d1d61a7ab7de90a12ba tree=a8bc50284bc9fffc0759e81d5b723d66e51701ce sach=[]
+LAP-J3 exit=0
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 3.0, "lan": 0}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 2.9, "lan": 1}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 3.0, "lan": 2}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 3.2, "lan": 3}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 2.9, "lan": 4}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 2.9, "lan": 5}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 2.9, "lan": 6}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 3.1, "lan": 7}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 3.2, "lan": 8}
+  {"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 3.1, "lan": 9}
+LAP-J9 exit=0
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 2.9, "lan": 0}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 1}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 2}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 3}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 4}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.1, "lan": 5}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 6}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.0, "lan": 7}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 3.1, "lan": 8}
+  {"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 2.9, "lan": 9}
+NEO exit=0
+    neo OK + compile OK  a1 (1 cáº·p)
+    neo OK + compile OK  a2 (1 cáº·p)
+    neo OK + compile OK  a3 (1 cáº·p)
+    neo OK + compile OK  b (1 cáº·p)
+    neo OK + compile OK  c (1 cáº·p)
+    neo OK + compile OK  h (1 cáº·p)
+    neo OK + compile OK  k1 (1 cáº·p)
+    neo OK + compile OK  k2 (2 cáº·p)
+    neo OK + compile OK  k3 (1 cáº·p)
+    neo OK + compile OK  t1 (1 cáº·p)
+    neo OK + compile OK  t2 (1 cáº·p)
+    neo OK + compile OK  d0 (1 cáº·p)
+    neo OK + compile OK  g0 (1 cáº·p)
+    neo OK + compile OK  abi (1 cáº·p)
+    neo OK + compile OK  d1 (1 cáº·p)
+DOT_BIEN exit= 227.6s
+  GIáº¾T      a1   Ä‘Ã­ch=wp1342_native_job_mo_coi [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_native_job_thuan ['DAT'] nhÃ£n Ä‘Ã²i='job not empty'
+            thÃ´ng Ä‘iá»‡p: ('J3: hÃ m pháº£i tráº£ 0 sau khi thu há»“i chÃ¡u', None, _1174Error('WP1174 UNKNOWN: job not empty'))
+  GIáº¾T      a2   Ä‘Ã­ch=wp1342_native_job_cha_chet_sau_gan [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_native_job_thuan ['DAT'] nhÃ£n Ä‘Ã²i='J10: con/chÃ¡u sá»‘ng sau khi cha cháº¿t'
+            thÃ´ng Ä‘iá»‡p: ('J10: con/chÃ¡u sá»‘ng sau khi cha cháº¿t', ['con', 'chÃ¡u'])
+  GIáº¾T      a3   Ä‘Ã­ch=wp1342_native_job_query_loi [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_native_job_thuan ['DAT'] nhÃ£n Ä‘Ã²i='J11: handle tá»‡p Ä‘Æ°á»£c nháº­n lÃ  job rá»—ng'
+            thÃ´ng Ä‘iá»‡p: ('J11: handle tá»‡p Ä‘Æ°á»£c nháº­n lÃ  job rá»—ng', None)
+  GIáº¾T      b    Ä‘Ã­ch=wp1342_native_job_treo_truoc_gan [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_native_job_query_loi+wp1342_pure_spawn_hang_luong ['DAT', 'DAT'] nhÃ£n Ä‘Ã²i='J6 (ii): marker Ä‘Ã£ cÃ³ lÃºc between'
+            thÃ´ng Ä‘iá»‡p: ('J6 (ii): marker Ä‘Ã£ cÃ³ lÃºc between', [(4, True)])
+  GIáº¾T      c    Ä‘Ã­ch=wp1342_pure_spawn_hang_luong [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_pure_spawn_arguments ['DAT'] nhÃ£n Ä‘Ã²i='S1 SPAWN_FLAGS == 0x204'
+            thÃ´ng Ä‘iá»‡p: ('S1 SPAWN_FLAGS == 0x204', 512)
+  GIáº¾T      h    Ä‘Ã­ch=wp1342_native_job_khong_ke_thua [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_native_job_thuan ['DAT'] nhÃ£n Ä‘Ã²i='J7: job handle cÃ³ HANDLE_FLAG_INHERIT'
+            thÃ´ng Ä‘iá»‡p: ('J7: job handle cÃ³ HANDLE_FLAG_INHERIT', 1)
+  GIáº¾T      k1   Ä‘Ã­ch=wp1342_native_job_loi_truoc_gan [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_native_job_thuan ['DAT'] nhÃ£n Ä‘Ã²i='J8: báº£n sao con chÆ°a signaled trong 5 s'
+            thÃ´ng Ä‘iá»‡p: ('J8: báº£n sao con chÆ°a signaled trong 5 s', ['cleanup:reap'])
+  GIáº¾T      k2   Ä‘Ã­ch=wp1342_native_job_loi_sau_gan [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_native_job_mo_coi ['DAT'] nhÃ£n Ä‘Ã²i='J9: tiáº¿n trÃ¬nh phá»¥ chÆ°a signaled trong 5 s VÃ€ j9 khÃ´ng cÃ³ ghi chÃº cleanup:xac_nhan'
+            thÃ´ng Ä‘iá»‡p: ('J9: tiáº¿n trÃ¬nh phá»¥ chÆ°a signaled trong 5 s VÃ€ j9 khÃ´ng cÃ³ ghi chÃº cleanup:xac_nhan', [])
+  GIáº¾T      k3   Ä‘Ã­ch=wp1342_pure_spawn_cleanup_note [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_pure_spawn_hang_luong ['DAT'] nhÃ£n Ä‘Ã²i='S4: bÆ°á»›c 2 khÃ´ng cháº¡y'
+            thÃ´ng Ä‘iá»‡p: ('S4: bÆ°á»›c 2 khÃ´ng cháº¡y', [])
+  GIáº¾T      t1   Ä‘Ã­ch=wp1342_pure_spawn_hang_luong [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_pure_spawn_cleanup_note ['DAT'] nhÃ£n Ä‘Ã²i='S2: hai á»©ng viÃªn Ä‘Æ°á»£c nháº­n'
+            thÃ´ng Ä‘iá»‡p: ('S2: hai á»©ng viÃªn Ä‘Æ°á»£c nháº­n', 1)
+  GIáº¾T      t2   Ä‘Ã­ch=wp1342_pure_spawn_hang_luong [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_pure_spawn_cleanup_note ['DAT'] nhÃ£n Ä‘Ã²i='S3 count=2'
+            thÃ´ng Ä‘iá»‡p: ('S3 count=2', None)
+  GIáº¾T      d0   Ä‘Ã­ch=wp1342_native_job_han [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_native_job_thuan ['DAT'] nhÃ£n Ä‘Ã²i='J2: khÃ´ng nÃ©m lifecycle deadline trong 6â€“11 s'
+            thÃ´ng Ä‘iá»‡p: ('J2: khÃ´ng nÃ©m lifecycle deadline trong 6â€“11 s', 3, None, 60.14000000001397)
+  Sá»NG      g0   Ä‘Ã­ch=wp1342_pure_spawn_arguments [sáº¡ch=DAT Ä‘á»™t biáº¿n=DAT] Ä‘á»‘i chá»©ng=wp1342_pure_spawn_hang_luong ['DAT'] nhÃ£n Ä‘Ã²i='S5 argv=[] pháº£i lÃ  spawn arguments'
+            thÃ´ng Ä‘iá»‡p: 
+  GIáº¾T      abi  Ä‘Ã­ch=wp1342_native_job_abi [sáº¡ch=DAT Ä‘á»™t biáº¿n=DO] Ä‘á»‘i chá»©ng=wp1342_native_job_query_loi+wp1342_pure_spawn_hang_luong ['DAT', 'DAT'] nhÃ£n Ä‘Ã²i='J0 THREADENTRY32 offset th32OwnerProcessID == 12'
+            thÃ´ng Ä‘iá»‡p: ('J0 THREADENTRY32 offset th32OwnerProcessID == 12', [('THREADENTRY32 offset th32OwnerProcessID == 12', 16), ('sizeof THREADENTRY32 == 28', 40)])
+  KHÃ”NG ÄO  d1   Ä‘Ã­ch=wp1342_pure_spawn_arguments [sáº¡ch=DAT Ä‘á»™t biáº¿n=KHONG_DO] Ä‘á»‘i chá»©ng=wp1342_pure_spawn_hang_luong ['DAT'] nhÃ£n Ä‘Ã²i='S5 deadline ngoÃ i miá»n nháº­n (now+10**6) pháº£i lÃ  spawn arguments'
+            thÃ´ng Ä‘iá»‡p: ngoáº¡i lá»‡ khÃ¡c AssertionError: FileNotFoundError: [WinError 2] The system cannot find the file specified
+  Tá»”NG: 13/15 giáº¿t Ä‘Ãºng dáº¥u hiá»‡u
+sach_sau=[]
+98ff6d6ffae0ae4755b89318c1d24100372d61a363ef384b0977c2d2b4acc6f3 F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\do_r4.py
+9e32013a92c6c89c0a21c00858bcb6b9e1af40ba18d2fc35e6745dff9c380afa F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\dot_bien_r4_ban2.py
+6f3a94e0c5d131d89aadc67d7362ed1afffb60cc69a7f58a8cb4d61880d2c277 F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\chay-1342r4b.ps1
+TONG 615.8s
+XONG (khoa da nha)

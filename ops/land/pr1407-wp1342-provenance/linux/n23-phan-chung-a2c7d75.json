@@ -1,0 +1,75 @@
+{
+ "B": "e2c3b82f818bd1739d31261e8129d3ef44915acf",
+ "H": "46d39071989fd77582ef8d1d61a7ab7de90a12ba",
+ "P": "d59527fe49ccfd9105f03b70165a8bd13c96e74d",
+ "M": "a2c7d759866502e7da318e4f83e17d5f77491eb5",
+ "n2": {
+  "doi_chung_B_H": [],
+  "doi_chung_P_M": [],
+  "n2a_mot_byte_than_ham_cu__1174_process": {
+   "additive": [
+    "phần ngoài khối mới KHÁC byte base, từ dòng 4266 của base"
+   ],
+   "ket_qua": "DO_DUNG"
+  },
+  "n2b_decorator_vao_ham_moi_r4__1174_win_note": {
+   "additive": [
+    "phần ngoài khối mới KHÁC byte base, từ dòng 6745 của base"
+   ],
+   "ket_qua": "DO_DUNG"
+  }
+ },
+ "n3": {
+  "ve_duong_doi_chung": {
+   "ten_moi": [
+    "_1174_WIN_JOB_LIMIT",
+    "_1174_WIN_RESUME_OK",
+    "_1174_WIN_SPAWN_FLAGS",
+    "_1174_win_api_job",
+    "_1174_win_cleanup",
+    "_1174_win_job_empty",
+    "_1174_win_note",
+    "_1174_win_pick_thread",
+    "_1174_win_resume_ok",
+    "_1174_win_spawn_job"
+   ],
+   "dung": true
+  },
+  "n3b_bo_khoi_bat_buoc__1174_win_note": {
+   "ten_moi": [
+    "_1174_WIN_JOB_LIMIT",
+    "_1174_WIN_RESUME_OK",
+    "_1174_WIN_SPAWN_FLAGS",
+    "_1174_win_api_job",
+    "_1174_win_cleanup",
+    "_1174_win_job_empty",
+    "_1174_win_pick_thread",
+    "_1174_win_resume_ok",
+    "_1174_win_spawn_job",
+    "_wp_bo_khoi"
+   ],
+   "ket_qua": "DO_DUNG"
+  },
+  "doi_chung_sach": {
+   "rc": 0,
+   "kq": {
+    "wp1342_additive_byte_preserved": null
+   },
+   "stderr_cuoi": "/tmp/tmpd18mqi_m/m/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n"
+  },
+  "n3a_chen_goi__1174_win_spawn_job_trong__1174_process": {
+   "rc": 0,
+   "kq": {
+    "wp1342_additive_byte_preserved": [
+     "str",
+     "AssertionError: ('N3 trên CÂY LÀM VIỆC', ['_1174_process:4267'])"
+    ]
+   },
+   "stderr_cuoi": "/tmp/tmpd18mqi_m/m/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\\d'\n  '    trong_bang: list[str] = re.findall(r\"`ADR-(\\d{4})`\", than)   # đột biến\\n',\n",
+   "ket_qua": "DO_DUNG",
+   "wired_bien": [
+    "_1174_process:4267"
+   ]
+  }
+ }
+}

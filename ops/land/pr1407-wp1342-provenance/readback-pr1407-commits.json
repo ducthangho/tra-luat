@@ -1,0 +1,253 @@
+[
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/728eccab3886e5fbba1eeb76c6b770068bae9226/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-18T23:58:24Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-19T00:15:49Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "feat(#1342 r4): vong doi tien trinh trong Job Object tren Windows, dung rieng (bac r1d-a1-i)\n\nWP1174-WINDOWS-BACKEND revision 4, dac ta ops/specs/WP1174-WINDOWS-BACKEND-r4.md\n(sha256 2fcb8e60...), lease wp1342-r4-g1-claude, base e2c3b82.\n\npacket_loop.py — chi THEM, khong ham nao dang co goi toi (chua noi day):\n- _1174_WIN_JOB_LIMIT / _1174_WIN_SPAWN_FLAGS / _1174_WIN_RESUME_OK\n- _1174_win_api_job: dung 12 binding job/thread + 5 layout Win64 do rong co dinh\n- _1174_win_pick_thread, _1174_win_resume_ok, _1174_win_cleanup, _1174_win_note (thuan)\n- _1174_win_job_empty: query FALSE khong bao gio doc thanh job rong\n- _1174_win_spawn_job: tao treo -> gan job -> resume -> cho co han -> terminate ->\n  xac nhan job rong -> reap -> dong handle; khong pipe. No da khai:\n  wp1342-pre-assign-orphan.\n\npacket_loop_test.py — chi THEM: 3 ca thuan wp1342_pure_spawn_* (S1-S5) va 11 ca\nnative wp1342_native_job_* (J0 J1 J2 J3 J6 J7 J8 J9 J10 J10b J11). Khong doi MUTANTS,\nkhong vao WP1174_REQUIRED/WP1174_BOTH.\n\nDa do tren Linux: 3 ca thuan dat (Python 3.12 va 3.13); 6 dot bien thuan\n(c t1 t2 k3 g0 d1) bi giet dung nhan qua driver ngoai kho; N2 hai tep; ruff F\ntap diagnostic head == base. CHUA DO: 11 ca native va 9 dot bien Windows — tren\nLinux chung BO QUA, khong tinh dat; cho do tren may Windows.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrbS2o9PgqmSPNdRCNY",
+   "tree": {
+    "sha": "0af9a4fe74cf9bc2075d1d898d0ad088ac19b0f8",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/0af9a4fe74cf9bc2075d1d898d0ad088ac19b0f8"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/728eccab3886e5fbba1eeb76c6b770068bae9226",
+   "verification": {
+    "payload": "tree 0af9a4fe74cf9bc2075d1d898d0ad088ac19b0f8\nparent e2c3b82f818bd1739d31261e8129d3ef44915acf\nauthor Claude <noreply@anthropic.com> 1795046304 +0000\ncommitter Claude <noreply@anthropic.com> 1795047349 +0000\n\nfeat(#1342 r4): vong doi tien trinh trong Job Object tren Windows, dung rieng (bac r1d-a1-i)\n\nWP1174-WINDOWS-BACKEND revision 4, dac ta ops/specs/WP1174-WINDOWS-BACKEND-r4.md\n(sha256 2fcb8e60...), lease wp1342-r4-g1-claude, base e2c3b82.\n\npacket_loop.py — chi THEM, khong ham nao dang co goi toi (chua noi day):\n- _1174_WIN_JOB_LIMIT / _1174_WIN_SPAWN_FLAGS / _1174_WIN_RESUME_OK\n- _1174_win_api_job: dung 12 binding job/thread + 5 layout Win64 do rong co dinh\n- _1174_win_pick_thread, _1174_win_resume_ok, _1174_win_cleanup, _1174_win_note (thuan)\n- _1174_win_job_empty: query FALSE khong bao gio doc thanh job rong\n- _1174_win_spawn_job: tao treo -> gan job -> resume -> cho co han -> terminate ->\n  xac nhan job rong -> reap -> dong handle; khong pipe. No da khai:\n  wp1342-pre-assign-orphan.\n\npacket_loop_test.py — chi THEM: 3 ca thuan wp1342_pure_spawn_* (S1-S5) va 11 ca\nnative wp1342_native_job_* (J0 J1 J2 J3 J6 J7 J8 J9 J10 J10b J11). Khong doi MUTANTS,\nkhong vao WP1174_REQUIRED/WP1174_BOTH.\n\nDa do tren Linux: 3 ca thuan dat (Python 3.12 va 3.13); 6 dot bien thuan\n(c t1 t2 k3 g0 d1) bi giet dung nhan qua driver ngoai kho; N2 hai tep; ruff F\ntap diagnostic head == base. CHUA DO: 11 ca native va 9 dot bien Windows — tren\nLinux chung BO QUA, khong tinh dat; cho do tren may Windows.\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrbS2o9PgqmSPNdRCNY\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQLEtOeTu\n1BVUvwt9T0Z72VJADEF7Stj7Bng8PHWPRKDo2LPxHXGUKNhFJxC+zsTZnxxOPZFM26MuMNf+hoPV\n/g0=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-19T00:31:10Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/728eccab3886e5fbba1eeb76c6b770068bae9226",
+  "node_id": "C_kwDOTNeRjdoAKDcyOGVjY2FiMzg4NmU1ZmJiYTFlZWI3NmM2Yjc3MDA2OGJhZTkyMjY",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/e2c3b82f818bd1739d31261e8129d3ef44915acf",
+    "sha": "e2c3b82f818bd1739d31261e8129d3ef44915acf",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/e2c3b82f818bd1739d31261e8129d3ef44915acf"
+   }
+  ],
+  "sha": "728eccab3886e5fbba1eeb76c6b770068bae9226",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/728eccab3886e5fbba1eeb76c6b770068bae9226"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ae762640a58fa45b8d8c7ef09a5c4974b869bb25/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-19T01:35:47Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-19T01:35:55Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "Merge origin/master (d135697, #1408) vao agent/wp1342-r4-g1-claude\n\nLay ban chua bash tran trong ops/land de gate tren exact head do duoc.\nMot lan push them theo checkpoint chu kho ghi trong lease wp1342-r4-g1-claude (51dc2ce).\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrbS2o9PgqmSPNdRCNY",
+   "tree": {
+    "sha": "dd8e98fe58de252cb0f97aad6c74419d50d3b296",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/dd8e98fe58de252cb0f97aad6c74419d50d3b296"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/ae762640a58fa45b8d8c7ef09a5c4974b869bb25",
+   "verification": {
+    "payload": "tree dd8e98fe58de252cb0f97aad6c74419d50d3b296\nparent 728eccab3886e5fbba1eeb76c6b770068bae9226\nparent d1356979a3b3d9b77479d57e2458ff3d042feec5\nauthor Claude <noreply@anthropic.com> 1795052147 +0000\ncommitter Claude <noreply@anthropic.com> 1795052155 +0000\n\nMerge origin/master (d135697, #1408) vao agent/wp1342-r4-g1-claude\n\nLay ban chua bash tran trong ops/land de gate tren exact head do duoc.\nMot lan push them theo checkpoint chu kho ghi trong lease wp1342-r4-g1-claude (51dc2ce).\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrbS2o9PgqmSPNdRCNY\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQMGdu1QO\nxJOi0rtHWgiono4WVF8uvQPdlI4IpIqzVZImrfIGfIMCI9snuXedDlo2PD8Ix3JaiFZ9uXgIoF1P\nEQw=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-19T01:54:43Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/ae762640a58fa45b8d8c7ef09a5c4974b869bb25",
+  "node_id": "C_kwDOTNeRjdoAKGFlNzYyNjQwYTU4ZmE0NWI4ZDhjN2VmMDlhNWM0OTc0Yjg2OWJiMjU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/728eccab3886e5fbba1eeb76c6b770068bae9226",
+    "sha": "728eccab3886e5fbba1eeb76c6b770068bae9226",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/728eccab3886e5fbba1eeb76c6b770068bae9226"
+   },
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/d1356979a3b3d9b77479d57e2458ff3d042feec5",
+    "sha": "d1356979a3b3d9b77479d57e2458ff3d042feec5",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/d1356979a3b3d9b77479d57e2458ff3d042feec5"
+   }
+  ],
+  "sha": "ae762640a58fa45b8d8c7ef09a5c4974b869bb25",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ae762640a58fa45b8d8c7ef09a5c4974b869bb25"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/46d39071989fd77582ef8d1d61a7ab7de90a12ba/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-19T01:37:01Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-19T01:37:01Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "test(#1342 r4): kiem \"da signaled\" cho co han 5 s; J9 lay mau ActiveProcesses ngay sau khi ham nem (dac ta ban 13)\n\nDo native Desktop tren 728ecca (phien dieu phoi): J3 va J9 do 10/10 vi\nWaitForSingleObject(h, 0) tra 258 ngay khi ham tra, cho them thi signaled sau\nduoi 50 micro-giay — doi tuong tien trinh chuyen signaled SAU luc job bao\nActiveProcesses == 0. Dac ta ban 13 (sha256 f435eb5c...) Q7/Q9:\n- J2, J3, J8, J9: phep kiem \"da signaled\" sau khi ham tra/nem cho toi 5000 ms.\n- J9: doc va LUU ActiveProcesses qua ban sao job ngay sau khi ham nem; cham\n  tien trinh phu (nhan k2) roi con; sau cung moi assert mau da luu.\nKhong doi ma san pham. Khong them dong: 376 dong them cua tep test giu nguyen.\n\nChua do tren Windows: phan sua nay moi do tren Linux (cac ca native BO QUA).\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrbS2o9PgqmSPNdRCNY",
+   "tree": {
+    "sha": "a8bc50284bc9fffc0759e81d5b723d66e51701ce",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/a8bc50284bc9fffc0759e81d5b723d66e51701ce"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/46d39071989fd77582ef8d1d61a7ab7de90a12ba",
+   "verification": {
+    "payload": "tree a8bc50284bc9fffc0759e81d5b723d66e51701ce\nparent ae762640a58fa45b8d8c7ef09a5c4974b869bb25\nauthor Claude <noreply@anthropic.com> 1795052221 +0000\ncommitter Claude <noreply@anthropic.com> 1795052221 +0000\n\ntest(#1342 r4): kiem \"da signaled\" cho co han 5 s; J9 lay mau ActiveProcesses ngay sau khi ham nem (dac ta ban 13)\n\nDo native Desktop tren 728ecca (phien dieu phoi): J3 va J9 do 10/10 vi\nWaitForSingleObject(h, 0) tra 258 ngay khi ham tra, cho them thi signaled sau\nduoi 50 micro-giay — doi tuong tien trinh chuyen signaled SAU luc job bao\nActiveProcesses == 0. Dac ta ban 13 (sha256 f435eb5c...) Q7/Q9:\n- J2, J3, J8, J9: phep kiem \"da signaled\" sau khi ham tra/nem cho toi 5000 ms.\n- J9: doc va LUU ActiveProcesses qua ban sao job ngay sau khi ham nem; cham\n  tien trinh phu (nhan k2) roi con; sau cung moi assert mau da luu.\nKhong doi ma san pham. Khong them dong: 376 dong them cua tep test giu nguyen.\n\nChua do tren Windows: phan sua nay moi do tren Linux (cac ca native BO QUA).\n\nCo-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrbS2o9PgqmSPNdRCNY\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQCjlmRK5\nsLeOXNNKAVKH+vXDzeuSjNVF6PAeJTfqwlnhJsMx0Kuu/M7hzNfia6GiNzv9bF3e1o6n5Dk0nwPf\ndwA=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-19T01:54:43Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/46d39071989fd77582ef8d1d61a7ab7de90a12ba",
+  "node_id": "C_kwDOTNeRjdoAKDQ2ZDM5MDcxOTg5ZmQ3NzU4MmVmOGQxZDYxYTdhYjdkZTkwYTEyYmE",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/ae762640a58fa45b8d8c7ef09a5c4974b869bb25",
+    "sha": "ae762640a58fa45b8d8c7ef09a5c4974b869bb25",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ae762640a58fa45b8d8c7ef09a5c4974b869bb25"
+   }
+  ],
+  "sha": "46d39071989fd77582ef8d1d61a7ab7de90a12ba",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/46d39071989fd77582ef8d1d61a7ab7de90a12ba"
+ }
+]

@@ -1,0 +1,32 @@
+2026-11-19T02:46:15Z
+a2c7d759866502e7da318e4f83e17d5f77491eb5
+  neo OK + compile OK  a1 (1 cặp)
+  neo OK + compile OK  a2 (1 cặp)
+  neo OK + compile OK  a3 (1 cặp)
+  neo OK + compile OK  b (1 cặp)
+  neo OK + compile OK  c (1 cặp)
+  neo OK + compile OK  h (1 cặp)
+  neo OK + compile OK  k1 (1 cặp)
+  neo OK + compile OK  k2 (2 cặp)
+  neo OK + compile OK  k3 (1 cặp)
+  neo OK + compile OK  t1 (1 cặp)
+  neo OK + compile OK  t2 (1 cặp)
+  neo OK + compile OK  d0 (1 cặp)
+  neo OK + compile OK  g0 (1 cặp)
+  neo OK + compile OK  abi (1 cặp)
+  neo OK + compile OK  d1 (1 cặp)
+rc=0
+GIẾT      c    đích=wp1342_pure_spawn_hang_luong [sạch=DAT đột biến=DO] đối chứng=wp1342_pure_spawn_arguments ['DAT'] nhãn đòi='S1 SPAWN_FLAGS == 0x204'
+          thông điệp: ('S1 SPAWN_FLAGS == 0x204', 512)
+GIẾT      k3   đích=wp1342_pure_spawn_cleanup_note [sạch=DAT đột biến=DO] đối chứng=wp1342_pure_spawn_hang_luong ['DAT'] nhãn đòi='S4: bước 2 không chạy'
+          thông điệp: ('S4: bước 2 không chạy', [])
+GIẾT      t1   đích=wp1342_pure_spawn_hang_luong [sạch=DAT đột biến=DO] đối chứng=wp1342_pure_spawn_cleanup_note ['DAT'] nhãn đòi='S2: hai ứng viên được nhận'
+          thông điệp: ('S2: hai ứng viên được nhận', 1)
+GIẾT      t2   đích=wp1342_pure_spawn_hang_luong [sạch=DAT đột biến=DO] đối chứng=wp1342_pure_spawn_cleanup_note ['DAT'] nhãn đòi='S3 count=2'
+          thông điệp: ('S3 count=2', None)
+GIẾT      g0   đích=wp1342_pure_spawn_arguments [sạch=DAT đột biến=DO] đối chứng=wp1342_pure_spawn_hang_luong ['DAT'] nhãn đòi='S5 argv=[] phải là spawn arguments'
+          thông điệp: ('S5 argv=[] phải là spawn arguments', 'spawn arguments', 'WP1174 UNKNOWN: native Windows required')
+GIẾT      d1   đích=wp1342_pure_spawn_arguments [sạch=DAT đột biến=DO] đối chứng=wp1342_pure_spawn_hang_luong ['DAT'] nhãn đòi='S5 deadline ngoài miền nhận (now+10**6) phải là spawn arguments'
+          thông điệp: ('S5 deadline ngoài miền nhận (now+10**6) phải là spawn arguments', 'spawn arguments', 'WP1174 UNKNOWN: native Windows required')
+TỔNG: 6/6 giết đúng dấu hiệu
+rc=0

@@ -1,0 +1,8 @@
+rc=0 giay=14.0
+--- stdout
+WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_job_cha_chet_sau_gan", "observed": "(None, [('san_sang', 1188, 134395287120943026), ('da_gan', 4192, 134395287140237034), ('chau', 5112, 134395287142723630)])", "os": "Windows-2022Server-10.0.20348-SP0", "passed": 1, "python": "3.12.10"}
+KQ_JSON {"wp1342_native_job_cha_chet_sau_gan": null}
+
+--- stderr
+C:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1361-n2-src\.claude/dev\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',

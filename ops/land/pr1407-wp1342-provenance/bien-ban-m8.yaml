@@ -1,0 +1,43 @@
+# Bien ban M8 (ADR-0060) dong WP #1342 WP1174-WINDOWS-BACKEND r4 (bac r1d-a1-i) — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1407-wp1342-land-evidence.yaml. Audit human_audited chu kho tu dang 6997893490 tren 46d3907.
+# Moc §10.2.2 run 44445202862 (ci.yml push master tren a2c7d75): run/checkout/gate_output measured passed; workflow_definition
+# measured passed (wd-run 44448900232). N8 tinh tran 550 theo PHAN PACKET (d135697..46d3907, 548) — quyet dinh (A) phien dieu phoi;
+# doc theo chu (e2c3b82..46d3907) la 570 / 5 duong dan. Xem canh_bao_cho_chu_kho trong ho so land.
+packet: wp1342
+revision: 4
+generation: 1
+spec_hash: f435eb5c035e511f92c77321d2a2573f9088a17b4fe6a2ccca9c64a794cd1eb8
+head_da_review: 46d39071989fd77582ef8d1d61a7ab7de90a12ba
+tree_h: a8bc50284bc9fffc0759e81d5b723d66e51701ce
+review:
+  offline: 'khong goi Codex offline tren ma; 13 luot Codex offline chi review DAC TA r4 (ops/reviews/wp1342-spec-r4/ tren nhanh ops/wp1342-r4-spec): luot 1-10 request_changes, 11 approve, 12 request_changes, 13 approve'
+  connector: 'readback-pr1407-comments.json: 6997320685 codex-review-receipt "Didn''t find any major issues" tren 46d3907 (kich @codex review 6997293274); 6995899714 sach tren 728ecca; tom tat 6995867170 cap nhat 02:34:42Z: code_review 46d3907 completed, has_any_findings false (xong sau merge); reviews va review-comments rong'
+  human_audit: 'issuecomment-6997893490 human_exact_head_audit.v1 approve tren 46d3907 tree a8bc5028 spec f435eb5c (chu kho tu dang, performed_via_github_app null)'
+windows:
+  phan_loai: required
+  nguon: 'duong .claude/dev/ (ADR-0060 M3). Lease: Windows native <= 3; Desktop DESKTOP-T9R33P2 (Windows 11 26300) cho bang ca + dot bien, VM tra-luat-win (Server 2022 20348) cho J3/J9/J10; khong CI Windows cho packet_loop.'
+  ket_qua: 'measured truoc merge tren HEAD 46d3907 — n5-n6-46d3907.txt: N5 41 ID base/head lech 0; N6 J0..J11 Desktop rc 0 passed 1 (<= 8.8 s), LAP-J3/J9 10/10, VM J3/J9/J10 3/3; windows-native/desktop/wp1342r4b-out/dot-bien.stdout.txt: a1 a2 a3 b h k1 k2 d0 abi + c GIET dung nhan (g0 SONG, d1 KHONG DO tren Windows — tap thuan, do tren Linux). Sau merge do LAI tren cay merge a2c7d75 (Desktop): n6-merge-a2c7d75.txt — 55 ID lech 0 so HEAD, N5 lech 0 so BASE, J0..J11 + LAP-J3/J9 3/3 DAT; phan chung N5 GIET dung assertion dich 11788 (Linux + Desktop). Dot bien N7 Windows va VM chi do tren HEAD.'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1407#issuecomment-6997893490
+duyet_chu_kho_ghi_chu: 'audit tu dang 02:32:55Z 19-11, truoc merge 02:33:34Z; lua chon cach merge trong phien dieu phoi (loi khai).'
+merge_commit: a2c7d759866502e7da318e4f83e17d5f77491eb5
+tree_m: 24094d95f6e1e40a506befe5aab3abd81478f254
+ci_master:
+  run_id: 44445202862
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44445202862.txt); gate-packet-loop "GOM: ĐẠT · 16 mảnh · 1573 ca bắt buộc".'
+nghiem_thu:
+  N1: passed  # gom-base-vs-merge.trich.txt: GOM DAT base 1559 / merge 1573 (+14 ID moi); linux/suite-wp1342-wp1174.txt: ID base 1562 ⊆ head 1576, MUTANTS 1859 cung bam 363c37fb bon ve, moc DUNG MOT CHO DAT
+  N2: passed  # linux/suite: _additive1342r2 = [] (B->H, d135697->H, P1->M); linux/n2-test-46d3907.txt: N2 test head DAT [], 16 phan chung DO dung, doi chung []; linux/n23-phan-chung: n2a/n2b DO_DUNG
+  N3: passed  # linux/suite: _wired1342(merge) = [], tap ten moi == 10 ten; linux/n23-phan-chung: n3a/n3b DO_DUNG, doi chung sach DAT
+  N4: passed  # S1–S5 DAT Linux (suite + GOM CI) va Desktop HEAD rc 0; phan chung c/t1/t2/k3/g0/d1 GIET tren Linux
+  N5: passed  # n5-n6-46d3907.txt + n6-merge-a2c7d75.txt: 41 ID base lech 0 (HEAD va cay merge); phan chung mo chot claim Windows GIET dung assertion dich 11788: linux/n5-phan-chung-linux-a2c7d75.txt + windows-native/desktop/wp1342r4c-out/n5-phan-chung.stdout.txt
+  N6: passed  # n5-n6-46d3907.txt: 11 ca J Desktop + J3/J9/J10 VM rc 0, passed 1, observed co creation time, <= 15 s; n6-merge-a2c7d75.txt: 11 ca J + J3/J9 x3 tren cay merge DAT
+  N7: passed  # dot_bien_r4_ban2.py (9e32013a) byte-exact trong ho so: Windows 9/9 + c lap lai (Desktop), thuan 6/6 (Linux), 16/16 lan chay
+  N8: passed  # linux/nghiem-thu-a2c7d75.txt: ruff F tap bang (3/13) bon ve; adr-song, doctrine-scan rc 0; diff --check 0; eol ok 0 vi pham; numstat phan packet 2 tep +548 (theo chu 5 duong dan +570)
+lease_cuoi: wp1342-r4-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed   # wd/wd-44445202862.json + ci/provenance.yaml (thu --wd-run 44448900232)
+  gate_output: passed

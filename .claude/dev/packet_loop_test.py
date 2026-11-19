@@ -18557,5 +18557,381 @@ CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for 
     ("boot_stable", _n_boot_stable1342), ("boot_failclosed", _n_boot_failclosed1342))]
 
 
+# --- #1342 r4 (bậc r1d-a1-i): vòng đời tiến trình trong Job Object, KHÔNG pipe, ĐỨNG RIÊNG (`_1174_win_api_job`, `_1174_win_job_empty`,
+# `_1174_win_spawn_job` + bốn hàm thuần), CHƯA nối dây (`_wired1342` phủ sẵn). Không đổi MUTANTS, không vào WP1174_REQUIRED/WP1174_BOTH.
+def _wp1342a1_tu_choi(nhan, ly_do, fn, *args, **kw):
+    try:
+        v = fn(*args, **kw)
+    except ValueError as ex:
+        assert ly_do in str(ex), (nhan, ly_do, str(ex))
+        return str(ex)
+    raise AssertionError((nhan, v))
+
+
+def _wp1342a1_s123(c):   # S1 hằng (mỗi hằng một assertion) · S2 pick_thread · S3 resume_ok
+    m = _module1174(c)
+    assert m._1174_WIN_JOB_LIMIT == 0x2000, ("S1 JOB_LIMIT == 0x2000", m._1174_WIN_JOB_LIMIT)
+    assert m._1174_WIN_SPAWN_FLAGS == 0x204, ("S1 SPAWN_FLAGS == 0x204", m._1174_WIN_SPAWN_FLAGS)
+    assert m._1174_WIN_RESUME_OK == 1, ("S1 RESUME_OK == 1", m._1174_WIN_RESUME_OK)
+    _wp1342a1_tu_choi("S2: không ứng viên được nhận", "suspended start", m._1174_win_pick_thread, [], 7)
+    _wp1342a1_tu_choi("S2: hai ứng viên được nhận", "suspended start", m._1174_win_pick_thread, [(7, 1), (7, 2)], 7)
+    assert _call1174(m._1174_win_pick_thread, [(9, 1), (7, 5), (8, 6)], 7) == 5, "S2: đúng một ứng viên phải ra tid 5"
+    for count in (2, 0, 0xFFFFFFFF, True):
+        _wp1342a1_tu_choi(f"S3 count={count!r}", "suspended start", m._1174_win_resume_ok, count)
+    assert _call1174(m._1174_win_resume_ok, 1) is None, "S3 count=1 phải qua"
+
+
+def _wp1342a1_s4(c):   # cleanup chạy hết và chỉ gom Exception; note không bao giờ đổi lỗi thắng, không chạm ngoại lệ dọn
+    m, co, e1 = _module1174(c), [], ValueError("x")
+
+    def nem(loi):
+        raise loi
+
+    def yen(nhan, fn):   # MỌI ngoại lệ thoát ra khỏi `fn` ⇒ đỏ đúng nhãn
+        try:
+            return fn()
+        except BaseException:
+            raise AssertionError(nhan) from None
+    kq = m._1174_win_cleanup([("x", lambda: nem(e1)), ("y", lambda: co.append(1))])
+    assert co == [1], ("S4: bước 2 không chạy", co)
+    assert len(kq) == 1 and kq[0][0] == "x" and kq[0][1] is e1, ("S4: cleanup trả sai danh sách (mã bước, lỗi)", len(kq))
+    try:
+        m._1174_win_cleanup([("x", lambda: nem(KeyboardInterrupt())), ("y", lambda: co.append(2))])
+    except KeyboardInterrupt:
+        assert co == [1], ("S4: bước sau ngắt vẫn chạy", co)
+    else:
+        raise AssertionError("S4: ngắt bị nuốt")
+    e3 = type("E3", (Exception,), {"__repr__": lambda self: nem(RuntimeError("repr"))})()
+    kq = yen("S4: lỗi dọn có __repr__ ném làm cleanup ném", lambda: m._1174_win_cleanup([("x", lambda: nem(e3))]))
+    assert len(kq) == 1 and kq[0][0] == "x" and kq[0][1] is e3, "S4: cleanup phải trả đúng lỗi có __repr__ ném"
+    e4 = type("E", (Exception,), {"add_note": lambda self, note: nem(type("B", (BaseException,), {})())})("j9")
+    yen("S4: ghi chú qua add_note ghi đè", lambda: m._1174_win_note(e4, ["xac_nhan"]))
+    assert e4.__notes__ == ["cleanup:xac_nhan"], ("S4: ghi chú qua add_note ghi đè", e4.__notes__)
+    f5 = type("F", (Exception,), {"__getattribute__": lambda self, ten: nem(KeyboardInterrupt()) if ten == "__notes__" else
+                                  BaseException.__getattribute__(self, ten)})("w")
+    assert yen("S4: chẩn đoán đổi lỗi thắng", lambda: m._1174_win_note(f5, ["xac_nhan"])) is None
+    meta = type("Meta", (type,), {"__getattribute__": lambda cls, ten: nem(RuntimeError(ten)) if ten == "__name__" else type.__getattribute__(cls, ten)})
+    kq = yen("S4: ghi chú chạm ngoại lệ dọn", lambda: m._1174_win_cleanup([("x", lambda: nem(meta("E6", (Exception,), {})()))]))
+    assert [ma for ma, _ in kq] == ["x"] and yen("S4: ghi chú chạm ngoại lệ dọn", lambda: m._1174_win_note(e1, [ma for ma, _ in kq])) is None
+    assert e1.__notes__ == ["cleanup:x"], ("S4: ghi chú chạm ngoại lệ dọn", e1.__notes__)
+
+
+def _wp1342a1_s5(c):   # THỨ TỰ là hợp đồng: vector 1 phân biệt g0, vector 2 phân biệt d1; dùng MỘT `now`
+    m, now = _module1174(c), time.monotonic()
+    tot = dict(argv=["x"], cwd=str(c.tmp), deadline=now + 60)
+    for nhan, doi in (("argv=[] phải là spawn arguments", dict(argv=[])),
+                      ("deadline ngoài miền nhận (now+10**6) phải là spawn arguments", dict(deadline=now + 10**6)),
+                      ("deadline=10**400", dict(deadline=10**400)), ("argv=['x', 1]", dict(argv=["x", 1])), ("argv='x'", dict(argv="x")),
+                      ("deadline đã qua", dict(deadline=now - 1)), ("deadline=True", dict(deadline=True)),
+                      ("deadline=inf", dict(deadline=float("inf"))), ("deadline=nan", dict(deadline=float("nan"))),
+                      ("cwd=None", dict(cwd=None)), ("between=1", dict(between=1))):
+        kw = dict(tot, **doi)
+        _wp1342a1_tu_choi("S5 " + nhan, "spawn arguments", m._1174_win_spawn_job, kw.pop("argv"), **kw)
+    if os.name != "nt":
+        _wp1342a1_tu_choi("S5 đối số hợp lệ trên nền khác Windows", "native Windows required", m._1174_win_spawn_job, **tot)
+
+
+_wp1342a1_FX = (   # fixture + trợ giúp: `d vai nonce marker bước... [-- argv con]`; cháu đọc mã này từ `d/fx.py`. Vai KHÔNG đặt `con`: tên thiết bị Windows
+    "import ctypes as c, json, os, subprocess, sys, time\nd, vai, nonce, marker = sys.argv[1:5]\nbuoc, con = sys.argv[5:], []\n"
+    "if '--' in buoc:\n    buoc, con = buoc[:buoc.index('--')], buoc[buoc.index('--') + 1:]\n"
+    "if marker:\n    open(marker, 'w').close()\n"   # đoạn marker DÙNG CHUNG của J1/J6/J10b: câu lệnh thực thi đầu tiên sau phần đọc argv
+    "sys.excepthook = lambda *a: open(os.path.join(d, 'loi_' + vai), 'w').write(repr(a[1]))\n"   # fixture tự vỡ ⇒ để lại `loi_<vai>` ⇒ KHÔNG ĐO
+    "k = c.WinDLL('kernel32', use_last_error=True)\nk.GetCurrentProcess.restype = c.c_void_p\n"
+    "k.GetProcessTimes.argtypes, k.GetProcessTimes.restype = [c.c_void_p] * 5, c.c_int\n"
+    "def ghi(ten, h, pid):\n    t = (c.c_uint64 * 4)()\n"   # bắt tay nguyên tử: [pid, creation time (100 ns), nonce]
+    "    if not k.GetProcessTimes(h, t, c.byref(t, 8), c.byref(t, 16), c.byref(t, 24)):\n        sys.exit(4)\n"
+    "    with open(os.path.join(d, ten + '.tmp'), 'w') as f:\n        json.dump([pid, t[0], nonce], f)\n"
+    "    os.replace(os.path.join(d, ten + '.tmp'), os.path.join(d, ten))\n"
+    "def cho(ten, han, bao=True):\n    het = time.monotonic() + float(han)\n"   # tự hết hạn ⇒ ghi `het_han_<vai>` (trừ `cho0`), thoát 3
+    "    while not os.path.exists(os.path.join(d, ten)):\n        if time.monotonic() > het:\n"
+    "            if bao:\n                open(os.path.join(d, 'het_han_' + vai), 'w').close()\n            sys.exit(3)\n        time.sleep(0.02)\n"
+    "for b in buoc:\n    ma, _, gt = b.partition('=')\n"
+    "    if ma == 'bt':\n        ghi(vai, k.GetCurrentProcess(), os.getpid())\n        cho('go_' + vai, 300)\n"
+    "    elif ma in ('cho', 'cho0'):\n        cho(*gt.split(','), bao=ma == 'cho')\n    elif ma == 'ra':\n        sys.exit(int(gt))\n"
+    "    elif ma == 'chau':\n        co, ten, viec = gt.split(',', 2)\n"
+    "        subprocess.Popen([sys.executable, '-B', '-c', open(os.path.join(d, 'fx.py'), encoding='utf-8').read(), d, ten, nonce, '',\n"
+    "            *viec.split('+')], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=int(co))\n"
+    "    elif ma in ('tro_a', 'tro_b'):\n        import importlib.util\n"   # trợ giúp: J10 ghi `da_gan` trong between (KHÔNG chờ); J10b ghi `truoc_gan` rồi chờ
+    "        s = importlib.util.spec_from_file_location('wp1342a1_pl', gt)\n        m = importlib.util.module_from_spec(s)\n"
+    "        s.loader.exec_module(m)\n        giu = []\n"
+    "        def truoc(proc):\n            giu.append(proc)\n"
+    "            if ma == 'tro_b':\n                ghi('truoc_gan', int(proc._handle), proc.pid)\n                cho('tha_truoc_gan', 300)\n"
+    "        ghi('san_sang', k.GetCurrentProcess(), os.getpid())\n"
+    "        try:\n            m._1174_win_spawn_job(con, cwd=d, deadline=time.monotonic() + 300, truoc_gan=truoc, between=(\n"
+    "                lambda job: ghi('da_gan', int(giu[0]._handle), giu[0].pid)) if ma == 'tro_a' else None)\n"
+    "        finally:\n            open(os.path.join(d, 'tu_ket_thuc'), 'w').close()\n")
+
+
+def _wp1342a1_lenh(x, vai, *buoc, marker=""):
+    return [sys.executable, "-B", "-c", _wp1342a1_FX, str(x.d), vai, x.nonce, str(marker), *buoc]
+
+
+def _wp1342a1_tin(x, h, ms=0):
+    return x.k.WaitForSingleObject(h, ms) == 0   # WAIT_OBJECT_0; kiểm ĐÃ signaled sau khi hàm trả/ném dùng ms=5000 (đo native 19-11)
+
+
+def _wp1342a1_mo(x, mo, ten, han=20.0, go=True):
+    """Bắt tay: đọc `[pid, creation time, nonce]` ở tệp `ten`, mở handle SYNCHRONIZE|QUERY_LIMITED_INFORMATION|TERMINATE, đòi nonce và creation
+    time khớp, handle CHƯA signaled; chỉ sau đó mới ghi `go_<ten>`. Handle vào `mo` NGAY khi mở (chủ của `mo` đóng). Không xác minh được ⇒ KHÔNG ĐO."""
+    c, tep, het, t = x.c, x.d / ten, time.monotonic() + han, (x.c.c_uint64 * 4)()
+    while not tep.exists():
+        if time.monotonic() > het:
+            raise BoQua(f"KHÔNG ĐO ĐƯỢC: không có bắt tay `{ten}` sau {han} s") from OSError(ten)
+        time.sleep(0.02)
+    pid, tao, nonce = json.loads(tep.read_text())
+    h = x.k.OpenProcess(0x00100000 | 0x1000 | 0x1, False, pid)
+    if not h:
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: OpenProcess `{ten}` pid {pid} thất bại, mã Win32 {c.get_last_error()}") from OSError(ten)
+    mo.append(h)
+    if not (nonce == x.nonce and x.k.GetProcessTimes(h, t, c.byref(t, 8), c.byref(t, 16), c.byref(t, 24)) and t[0] == tao and
+            x.k.WaitForSingleObject(h, 0) == 258):
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: bắt tay `{ten}` không xác minh được danh tính: pid {pid}, creation {tao}/{t[0]}") from OSError(ten)
+    x.bt.append((ten, pid, tao))
+    if go:
+        (x.d / ("go_" + ten)).write_bytes(b"")
+    return h
+
+
+def _wp1342a1_ban_sao(x, h, quyen, tuy_chon=0):
+    ra, toi = x.w.HANDLE(), x.k.GetCurrentProcess()
+    if not x.k.DuplicateHandle(toi, h, toi, x.c.byref(ra), quyen, False, tuy_chon):
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: DuplicateHandle thất bại, mã Win32 {x.c.get_last_error()}") from OSError("DuplicateHandle")
+    return ra.value
+
+
+def _wp1342a1_goi(x, argv, viec=None, han=60, **kw):
+    """Gọi `_1174_win_spawn_job` ở luồng CHÍNH; `viec(mo)` là LUỒNG QUAN SÁT chạy song song. Worker sở hữu mọi handle trong `mo` tới khi BÀN GIAO dưới
+    khoá (cờ `huy` chưa đặt); bàn giao hụt hoặc `viec` lỗi ⇒ worker tự đóng. Luồng chính `join(20)` SAU khi hàm trả/ném rồi đặt `huy` dưới cùng khoá;
+    chưa bàn giao (hết hạn, hoặc ô chứa ngoại lệ) ⇒ KHÔNG ĐO. Handle đã bàn giao vào `x.hs`. Trả (rc, lỗi, số giây của lời gọi)."""
+    import threading
+    khoa, o, mo, rc, loi = threading.Lock(), {}, [], None, None
+
+    def chay():
+        try:
+            _ = viec is None or viec(mo)
+        except BaseException as ex:
+            o["loi"] = ex
+        with khoa:
+            if "huy" not in o and "loi" not in o:
+                o["h"] = list(mo)
+                return
+        _ = [x.k.CloseHandle(h) for h in mo]
+    luong, t = threading.Thread(target=chay, daemon=True), time.monotonic()
+    luong.start()
+    try:
+        rc = x.m._1174_win_spawn_job(argv, cwd=str(x.d), deadline=t + han, **kw)
+    except Exception as ex:
+        loi = ex
+    giay = time.monotonic() - t
+    luong.join(20)
+    with khoa:
+        o["huy"] = True
+        x.hs += o.get("h", [])
+    if "h" not in o:
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: luồng quan sát không bàn giao (lỗi fixture: {o.get('loi')!r}; lỗi hàm: {loi!r})") from OSError("quan sát")
+    if isinstance(loi, BoQua):   # tiền điều kiện của hook không dựng được
+        raise loi
+    return rc, loi, giay
+
+
+def _wp1342a1_ca(m, d, c, w, than):
+    """Khung MỘT ca native: bindings PHÍA TEST (WinDLL riêng, ngoài allowlist M1), nonce, `fx.py`; cửa sổ 90 s (N6) tính từ TRƯỚC fixture đầu tiên.
+    `finally`: TerminateProcess + đóng mọi handle ca giữ. Thấy `het_han_*`/`tu_ket_thuc`/`loi_*` (fixture tự kết thúc hoặc vỡ ngoài đường dự kiến) hoặc
+    vượt cửa sổ ⇒ KHÔNG ĐO, kể cả khi thân ca đã đỏ. Trả (kết quả thân ca, các bắt tay đã xác minh creation time)."""
+    import types
+    t0, k, (_, _, kj, s) = time.monotonic(), c.WinDLL("kernel32", use_last_error=True), m._1174_win_api_job()
+    D, H, B, V = w.DWORD, w.HANDLE, w.BOOL, c.c_void_p
+    for ten, args, kq in (("OpenProcess", [D, B, D], H), ("DuplicateHandle", [H, H, H, c.POINTER(H), D, B, D], B), ("GetCurrentProcess", [], H),
+                          ("WaitForSingleObject", [H, D], D), ("TerminateProcess", [H, w.UINT], B), ("CloseHandle", [H], B),
+                          ("GetProcessTimes", [H, V, V, V, V], B), ("SetHandleInformation", [H, D, D], B)):
+        getattr(k, ten).argtypes, getattr(k, ten).restype = args, kq
+    x, _ = types.SimpleNamespace(m=m, d=d, c=c, w=w, k=k, kj=kj, s=s, hs=[], ps=[], bt=[], nonce=os.urandom(8).hex()), (d / "fx.py").write_text(
+        _wp1342a1_FX, encoding="utf-8")
+    try:
+        ghi = than(x)
+    finally:
+        _ = [(k.TerminateProcess(h, 1), k.CloseHandle(h)) for h in x.hs], [(p.kill(), p.wait(5)) for p in x.ps]
+        la = sorted((p.name, p.read_text(errors="replace")[:300]) for p in d.iterdir() if p.name.startswith(("het_han_", "tu_ket_thuc", "loi_")))
+        if la or time.monotonic() - t0 > 90:
+            raise BoQua(f"KHÔNG ĐO ĐƯỢC: fixture tự kết thúc/vỡ ngoài đường dự kiến {la} hoặc ca vượt cửa sổ 90 s ({time.monotonic() - t0:.1f} s)") from OSError("fixture")
+    return ghi, x.bt
+
+
+def _wp1342a1_phu(x, lenh, ten, **kw):
+    """Tiến trình python RIÊNG của ca (J9: tiến trình phụ; J10/J10b: trợ giúp chạy `_1174_win_spawn_job` của cây đang đo); xác minh bắt tay `ten`."""
+    x.ps.append(subprocess.Popen(lenh, env=dict(os.environ, PYTHONPATH=str(HERE)), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL))
+    return x.ps[-1], _wp1342a1_mo(x, x.hs, ten, **kw)
+
+
+def _wp1342a1_giet_cha(x, tro, *hs):
+    """Kiểm TRƯỚC cú giết (trợ giúp và các đối tượng cần đo chưa signaled, chưa có `tu_ket_thuc`), TerminateProcess bằng handle Popen của ca phải
+    TRUE, trợ giúp signaled ≤ 5 s. Không đạt ⇒ KHÔNG ĐO."""
+    truoc = (_wp1342a1_tin(x, int(tro._handle)), [_wp1342a1_tin(x, h) for h in hs], (x.d / "tu_ket_thuc").exists())
+    if truoc != (False, [False] * len(hs), False) or not x.k.TerminateProcess(int(tro._handle), 1) or not _wp1342a1_tin(x, int(tro._handle), 5000):
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: tiền điều kiện cú giết trợ giúp không đạt: {truoc}, mã Win32 {x.c.get_last_error()}") from OSError("giết cha")
+
+
+def _wp1342a1_j0(m, d, c, w, k):   # ABI: thu ĐỦ mọi assertion, báo nhãn hỏng ĐẦU TIÊN theo thứ tự cố định (tên, chữ ký, offset, size)
+    if c.sizeof(c.c_void_p) != 8:
+        raise BoQua("KHÔNG ĐO ĐƯỢC: J0 chỉ đo layout Win64") from OSError(c.sizeof(c.c_void_p))
+    (_, _, kj, s), V, D, H, B, P = m._1174_win_api_job(), c.c_void_p, w.DWORD, w.HANDLE, w.BOOL, c.POINTER(w.DWORD)
+    bang = dict(CreateJobObjectW=([V, w.LPCWSTR], H), SetInformationJobObject=([H, c.c_int, V, D], B), AssignProcessToJobObject=([H, H], B),
+                TerminateJobObject=([H, w.UINT], B), QueryInformationJobObject=([H, c.c_int, V, D, P], B),
+                CreateToolhelp32Snapshot=([D, D], H), Thread32First=([H, V], B), Thread32Next=([H, V], B), OpenThread=([D, B, D], H),
+                GetProcessIdOfThread=([H], D), ResumeThread=([H], D), GetHandleInformation=([H, P], B))
+    them = sorted(set(dir(kj)) - set(dir(k)))
+    do = [("tập tên bind == allowlist M1", them, sorted(bang))]
+    do += [(f"{ten} argtypes/restype", (list(getattr(kj, ten).argtypes or ()), getattr(kj, ten).restype), bang[ten]) for ten in bang if ten in them]
+    do += [(f"{lop} offset {truong} == {n}", getattr(getattr(s, lop), truong).offset, n) for lop, truong, n in (
+        ("JOBOBJECT_BASIC_LIMIT_INFORMATION", "LimitFlags", 16), ("JOBOBJECT_BASIC_ACCOUNTING_INFORMATION", "ActiveProcesses", 40),
+        ("THREADENTRY32", "th32OwnerProcessID", 12))]
+    do += [(f"sizeof {lop} == {n}", c.sizeof(getattr(s, lop)), n) for lop, n in (
+        ("JOBOBJECT_BASIC_LIMIT_INFORMATION", 64), ("IO_COUNTERS", 48), ("JOBOBJECT_EXTENDED_LIMIT_INFORMATION", 144),
+        ("JOBOBJECT_BASIC_ACCOUNTING_INFORMATION", 48), ("THREADENTRY32", 28))]
+    hong = [(nhan, thay) for nhan, thay, doi in do if thay != doi]
+    assert not hong, ("J0 " + hong[0][0], hong)
+    return [nhan for nhan, _, _ in do]
+
+
+def _wp1342a1_j1(m, d, c, w, k):   # thuận
+    def than(x):
+        rc, loi, _ = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "ra=7", marker=d / "marker"))
+        assert loi is None and rc == 7 and (d / "marker").is_file(), ("J1: đòi trả 7 và có tệp đánh dấu", rc, loi, (d / "marker").exists())
+    return _wp1342a1_ca(m, d, c, w, than)
+
+
+def _wp1342a1_j2(m, d, c, w, k):   # hạn: deadline = lúc gọi + 6 s; `cho0`: dưới d0 con TỰ hết hạn ~60 s là đường DỰ KIẾN (không ghi het_han)
+    def than(x):
+        rc, loi, giay = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "bt", "cho0=tha_j2,60"), lambda mo: _wp1342a1_mo(x, mo, "dau", 5), han=6)
+        assert loi is not None and "lifecycle deadline" in str(loi) and 6 <= giay <= 11, ("J2: không ném lifecycle deadline trong 6–11 s", rc, loi, giay)
+        assert _wp1342a1_tin(x, x.hs[0], 5000), "J2: con chưa signaled trong 5 s sau khi hàm ném"
+        return str(loi), round(giay, 2)
+    return _wp1342a1_ca(m, d, c, w, than)
+
+
+def _wp1342a1_j3(m, d, c, w, k):   # mồ côi: cháu DETACHED_PROCESS (0x8) còn sống khi con thoát 0 ⇒ `terminate` phải thu hồi
+    def than(x):
+        rc, loi, _ = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "chau=8,chau,bt+cho=tha_j3,300", "cho=go_chau,300", "ra=0"),
+                                   lambda mo: _wp1342a1_mo(x, mo, "chau"))
+        assert loi is None and rc == 0, ("J3: hàm phải trả 0 sau khi thu hồi cháu", rc, loi)
+        assert _wp1342a1_tin(x, x.hs[0], 5000), "J3: cháu mồ côi chưa signaled trong 5 s"
+    return _wp1342a1_ca(m, d, c, w, than)
+
+
+def _wp1342a1_j6(m, d, c, w, k):   # treo trước gán: tới `between` (đã gán, chưa resume) con CHƯA chạy dòng nào
+    def than(x):
+        thay, marker = [], d / "marker"
+
+        def between(job):
+            thay.append((m._1174_WIN_SPAWN_FLAGS & 0x4, marker.exists()))
+            (d / "tha_j6").write_bytes(b"")   # chỉ tạo SAU phép kiểm
+        rc, loi, _ = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "cho=tha_j6,300", marker=marker), between=between)
+        assert len(thay) == 1 and thay[0][0], ("J6 (i): cờ treo vắng", thay, loi)
+        assert not thay[0][1], ("J6 (ii): marker đã có lúc between", thay)
+        assert loi is None and rc == 0 and marker.is_file(), ("J6: sau khi hàm trả phải có marker, rc 0", rc, loi)
+        return thay
+    return _wp1342a1_ca(m, d, c, w, than)
+
+
+def _wp1342a1_j7(m, d, c, w, k):   # handle job không kế thừa
+    def than(x):
+        thay, co = [], w.DWORD(0xFFFFFFFF)
+        rc, loi, _ = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "ra=0"),
+                                   between=lambda job: thay.append(bool(x.kj.GetHandleInformation(job, c.byref(co)))))
+        assert loi is None and rc == 0 and thay == [True], ("J7: GetHandleInformation(job) phải TRUE trên đường thuận", rc, loi, thay)
+        assert co.value & 0x1 == 0, ("J7: job handle có HANDLE_FLAG_INHERIT", co.value)
+        return co.value
+    return _wp1342a1_ca(m, d, c, w, than)
+
+
+def _wp1342a1_j8(m, d, c, w, k):   # lỗi sau Popen, TRƯỚC gán ⇒ `kill_truoc_gan`
+    def than(x):
+        loi_j8 = RuntimeError("j8")
+
+        def truoc_gan(proc):
+            x.hs.append(_wp1342a1_ban_sao(x, int(proc._handle), 0x00100000 | 0x1))   # SYNCHRONIZE | PROCESS_TERMINATE
+            raise loi_j8
+        _, loi, _ = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "ra=0"), truoc_gan=truoc_gan)
+        assert loi is loi_j8, ("J8: hàm phải ném lại ĐÚNG lỗi j8", loi)
+        assert len(x.hs) == 1 and _wp1342a1_tin(x, x.hs[0], 5000), ("J8: bản sao con chưa signaled trong 5 s", getattr(loi, "__notes__", None))
+        return getattr(loi, "__notes__", None)
+    return _wp1342a1_ca(m, d, c, w, than)
+
+
+def _wp1342a1_j9(m, d, c, w, k):   # lỗi SAU gán, trước resume ⇒ thu hồi qua job (không proc.kill), kể cả thành viên thứ hai
+    def than(x):
+        giu, loi_j9, info, t_phu = [], RuntimeError("j9"), x.s.JOBOBJECT_BASIC_ACCOUNTING_INFORMATION(), time.monotonic()
+        phu, h_phu = _wp1342a1_phu(x, _wp1342a1_lenh(x, "phu", "bt", "cho=tha_phu,300"), "phu")   # h_phu: handle QUAN SÁT; gán job bằng handle GỐC
+
+        def between(job):
+            if not x.kj.AssignProcessToJobObject(job, int(phu._handle)):
+                raise BoQua(f"KHÔNG ĐO ĐƯỢC: J9 tiền điều kiện — gán thành viên thứ hai FALSE, mã Win32 {c.get_last_error()}") from OSError("J9")
+            giu.append(_wp1342a1_ban_sao(x, job, 0, 2))   # DUPLICATE_SAME_ACCESS; ca đóng trong `finally` của khung
+            x.hs.append(giu[1])
+            raise loi_j9
+        if 300 - (time.monotonic() - t_phu) < 90:
+            raise BoQua("KHÔNG ĐO ĐƯỢC: J9 — thời gian còn lại của tiến trình phụ < 90 s") from OSError("J9")
+        _, loi, _ = _wp1342a1_goi(x, _wp1342a1_lenh(x, "dau", "ra=0"), truoc_gan=giu.append, between=between)
+        mau = len(giu) > 1 and (bool(x.kj.QueryInformationJobObject(giu[1], 1, c.byref(info), c.sizeof(info), None)), info.ActiveProcesses)
+        ghi_chu = list(getattr(loi_j9, "__notes__", []))   # `mau` LẤY ngay sau khi hàm ném, assert SAU CÙNG (nhãn k2 được chấm trước)
+        assert loi is loi_j9, ("J9: hàm phải ném lại ĐÚNG lỗi j9", loi)
+        assert _wp1342a1_tin(x, h_phu, 5000), (f"J9: tiến trình phụ chưa signaled trong 5 s VÀ j9 {'CÓ' if 'cleanup:xac_nhan' in ghi_chu else 'không có'} "
+                                               "ghi chú cleanup:xac_nhan", ghi_chu)
+        assert _wp1342a1_tin(x, int(giu[0]._handle), 5000), ("J9: con chưa signaled trong 5 s", ghi_chu)
+        assert mau == (True, 0), ("J9: ActiveProcesses != 0 qua bản sao job ngay sau khi hàm ném (hoặc query FALSE)", mau)
+        (d / "tha_phu").write_bytes(b"")
+        return ghi_chu
+    return _wp1342a1_ca(m, d, c, w, than)
+
+
+def _wp1342a1_j10(m, d, c, w, k):   # cha chết SAU gán ⇒ KILL_ON_JOB_CLOSE thu hồi con và cháu; ca KHÔNG nhân bản handle job, KHÔNG tạo tha_ket
+    def than(x):
+        tro, _ = _wp1342a1_phu(x, _wp1342a1_lenh(x, "tro_giup", "tro_a=" + m.__file__, "--", *_wp1342a1_lenh(
+            x, "dau", "chau=0,chau,bt+cho=tha_ket,300", "cho=tha_ket,300")), "san_sang", go=False)
+        con, chau = _wp1342a1_mo(x, x.hs, "da_gan", go=False), _wp1342a1_mo(x, x.hs, "chau")
+        _wp1342a1_giet_cha(x, tro, con, chau)
+        het = time.monotonic() + 5
+        song = [ten for ten, h in (("con", con), ("cháu", chau)) if not _wp1342a1_tin(x, h, max(0, int((het - time.monotonic()) * 1000)))]
+        assert not song, ("J10: con/cháu sống sau khi cha chết", song)
+    return _wp1342a1_ca(m, d, c, w, than)
+
+
+def _wp1342a1_j10b(m, d, c, w, k):   # ĐO NỢ wp1342-pre-assign-orphan: cha chết TRƯỚC gán ⇒ con treo bị bỏ lại, chưa từng chạy. Đạt = ranh giới ĐÚNG như khai
+    def than(x):
+        tro, _ = _wp1342a1_phu(x, _wp1342a1_lenh(x, "tro_giup", "tro_b=" + m.__file__, "--", *_wp1342a1_lenh(x, "dau", "ra=0", marker=d / "marker")),
+                               "san_sang", go=False)
+        con = _wp1342a1_mo(x, x.hs, "truoc_gan", go=False)
+        _wp1342a1_giet_cha(x, tro, con)
+        time.sleep(2)
+        assert not _wp1342a1_tin(x, con), "J10b: con đã signaled sau 2 s — ranh giới nợ wp1342-pre-assign-orphan KHÔNG như đã khai"
+        assert not (d / "marker").exists(), "J10b: marker của con đã có — con đã chạy dù chưa từng được resume"
+    return _wp1342a1_ca(m, d, c, w, than)
+
+
+def _wp1342a1_j11(m, d, c, w, k):   # query lỗi KHÔNG được đọc thành job rỗng
+    (_, _, kj, s), _ = m._1174_win_api_job(), (d / "tep").write_bytes(b"x")
+    tep, job = m._1174_win_open(c, k, str(d / "tep"), 0x80000000, 3, 0), kj.CreateJobObjectW(None, None)
+    try:
+        if not job:
+            raise BoQua(f"KHÔNG ĐO ĐƯỢC: ca không tạo được job rỗng, mã Win32 {c.get_last_error()}") from OSError("J11")
+        ly_do = _wp1342a1_tu_choi("J11: handle tệp được nhận là job rỗng", "job query", m._1174_win_job_empty, kj, s, tep, 1)
+        assert m._1174_win_job_empty(kj, s, job, 1) is None, "J11: job rỗng do ca tạo phải ra None"
+        return ly_do
+    finally:
+        _ = k.CloseHandle(tep), k.CloseHandle(job)
+
+
+CASES += [("wp1342_pure_spawn_hang_luong", _wp1342a1_s123), ("wp1342_pure_spawn_cleanup_note", _wp1342a1_s4), ("wp1342_pure_spawn_arguments", _wp1342a1_s5)]
+CASES += [("wp1342_native_job_abi", _native1342("wp1342_native_job_abi", _wp1342a1_j0)), ("wp1342_native_job_thuan", _native1342("wp1342_native_job_thuan", _wp1342a1_j1)),
+          ("wp1342_native_job_han", _native1342("wp1342_native_job_han", _wp1342a1_j2)), ("wp1342_native_job_mo_coi", _native1342("wp1342_native_job_mo_coi", _wp1342a1_j3)),
+          ("wp1342_native_job_treo_truoc_gan", _native1342("wp1342_native_job_treo_truoc_gan", _wp1342a1_j6)),
+          ("wp1342_native_job_khong_ke_thua", _native1342("wp1342_native_job_khong_ke_thua", _wp1342a1_j7)),
+          ("wp1342_native_job_loi_truoc_gan", _native1342("wp1342_native_job_loi_truoc_gan", _wp1342a1_j8)), ("wp1342_native_job_loi_sau_gan", _native1342("wp1342_native_job_loi_sau_gan", _wp1342a1_j9)),
+          ("wp1342_native_job_cha_chet_sau_gan", _native1342("wp1342_native_job_cha_chet_sau_gan", _wp1342a1_j10)),
+          ("wp1342_native_job_cha_chet_truoc_gan", _native1342("wp1342_native_job_cha_chet_truoc_gan", _wp1342a1_j10b)),
+          ("wp1342_native_job_query_loi", _native1342("wp1342_native_job_query_loi", _wp1342a1_j11))]
+
+
 if __name__ == "__main__":
     sys.exit(main())

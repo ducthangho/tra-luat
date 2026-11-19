@@ -287,12 +287,12 @@ trích giữa hai nền.
 | shell | kết quả | tệp out (sha256) |
 |---|---|---|
 | PS 5.1 (`5.1.20348`) | **`TONG: 128 dat / 128 (bo qua khong do duoc: 0)`**, rc 0 | `170a6bb0…` |
-| pwsh 7.6.9 | **`%(PS7)s`**, rc %(PS7RC)s | `%(PS7SHA)s` |
+| pwsh 7.6.9 | **`TONG: 128 dat / 128 (bo qua khong do duoc: 0)`**, rc 0 | `4ca13270…` |
 
 - Sáu phép đo trước đây SKIP nay chạy thật và ĐẠT trên cả hai shell: N5 (`<nonce>.err` là symlink ⇒ dừng),
   D10 (`00-sophien.txt` là symlink tới bản ghi hợp lệ của run khác ⇒ dừng trước `close`), G9 (`11-daemon-path.txt` là
   symlink ⇒ GIỮ), G10 (`00-sophien.txt` là symlink ⇒ GIỮ); đột biến record-reparse→D10 lọt, go-record-reparse→G10 xoá
   (chốt reparse của bản ghi có răng trên Windows thật).
 - Đột biến `ceq-path` cũng LỌT trên máy này (PS 5.1 và pwsh 7) ⇒ P1 Codex lượt 6 tái hiện trên hai máy Windows.
-- Khoá `C:\tl-win\KHOA.txt` (ADR-0057): %(LOCK)s; thêm 2 dòng `C:\tl-win\do-luong.csv` (`may=tra-luat-win`).
+- Khoá `C:\tl-win\KHOA.txt` (ADR-0057): lấy `2026-11-18T16:28:08Z`, nhả (`len=0`) `2026-11-18T16:36:07Z` (log `C:\tl-win\session_015GtxrazyAyLwN5BiEB52Sq\wp1389\n2-symlink-2.log`; sha256 hai tệp out đo lại 2026-11-19 trên VM: PS 5.1 `170a6bb0452fd197…`, pwsh 7 `4ca13270915db0d6…`, cả hai `.err` rỗng; lượt đầu `n2-symlink.log` dừng ở `Get-FileHash` không có, không sinh số đo); thêm 2 dòng `C:\tl-win\do-luong.csv` (`may=tra-luat-win`).
 - Còn KHÔNG ĐO ĐƯỢC: ext4 casefold thật, UNC, Bash 4.4. Native N4 vẫn đo trên Desktop (không cần symlink).

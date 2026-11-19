@@ -1,0 +1,8 @@
+rc=0 giay=3.4
+--- stdout
+WP1174_WINDOWS_ORACLE_V1 {"actual_os": "Windows", "executed": 1, "head": "e2c3b82f818bd1739d31261e8129d3ef44915acf", "killed_by_assertion": 1, "kind": "pure_platform_guard", "mutated_module_sha256": "a97d9ba332e423e48b65ce8a6917abccfddc1ddbbff41bf40180e998ff1a647c", "mutation_id": "m1174_allow_windows", "no_dispatch": true, "original_module_sha256": "669772e18cd0e09f060f36fe9e093e8634a48f4af7492aa5ddfae122e4cb9719", "positive_control": "passed", "real_cli_rejection_rc": 8, "schema": "wp1174_windows_oracle.v1", "tree": "7693a24fa9169d91370dae782ec51eabd3fa0a35", "unchanged": true}
+KQ_JSON {"wp1174_windows_claim_rejected": null}
+
+--- stderr
+F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1342-src\.claude/dev\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',

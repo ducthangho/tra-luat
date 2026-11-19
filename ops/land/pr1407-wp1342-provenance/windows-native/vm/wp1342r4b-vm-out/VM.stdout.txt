@@ -1,0 +1,9 @@
+{"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 14.1, "lan": 0}
+{"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 11.9, "lan": 1}
+{"id": "wp1342_native_job_mo_coi", "rc": 0, "giay": 12.4, "lan": 2}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 12.0, "lan": 3}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 12.0, "lan": 4}
+{"id": "wp1342_native_job_loi_sau_gan", "rc": 0, "giay": 12.6, "lan": 5}
+{"id": "wp1342_native_job_cha_chet_sau_gan", "rc": 0, "giay": 14.6, "lan": 6}
+{"id": "wp1342_native_job_cha_chet_sau_gan", "rc": 0, "giay": 15.0, "lan": 7}
+{"id": "wp1342_native_job_cha_chet_sau_gan", "rc": 0, "giay": 14.0, "lan": 8}

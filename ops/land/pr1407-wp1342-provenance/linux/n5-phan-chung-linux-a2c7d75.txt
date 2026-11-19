@@ -1,0 +1,8 @@
+# 2026-11-19T03:22:13Z Linux Python 3.13.18 ; HEAD a2c7d759866502e7da318e4f83e17d5f77491eb5 tree 24094d95f6e1e40a506befe5aab3abd81478f254 ; .claude/dev sach: []
+# driver sha256 958e7da80a7dd992be2012df5209878c71f705675958d7e070bdff153f6c7742
+tim khop 1 cho; dong dich khop 1 dong
+ban sach    wp1174_windows_claim_rejected ['DAT', None, None, None]
+dot bien    wp1174_windows_claim_rejected ['DO', 'AssertionError', 11788, 'assert _call1174(m._1174_platform, "Windows", "ext4", 0xEF53) is False'] (dong assertion dich = 11788)
+doi chung   wp1174_witness_valid tren ban dot bien ['DAT', None, None, None]
+KET QUA: GIET dung assertion dich
+rc=0

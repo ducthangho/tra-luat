@@ -1,0 +1,8 @@
+rc=0 giay=3.0
+--- stdout
+WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_job_abi", "observed": "['t\u1eadp t\u00ean bind == allowlist M1', 'CreateJobObjectW argtypes/restype', 'SetInformationJobObject argtypes/restype', 'AssignProcessToJobObject argtypes/restype', 'TerminateJobObject argtypes/restype', 'QueryInformationJobObject argtypes/restype', 'CreateToolhelp32Snapshot argtypes/restype', 'Thread32First argtypes/restype', 'Thread32Next argtypes/restype', 'OpenThread argtypes/restype', 'GetProcessIdOfThread argtypes/restype', 'ResumeThread argtypes/restype', 'GetHandleInformation argtypes/restype', 'JOBOBJECT_BASIC_LIMIT_INFORMATION offset LimitFlags == 16', 'JOBOBJECT_BASIC_ACCOUNTING_INFORMATION offset ActiveProcesses == 40', 'THREADENTRY32 offset th32OwnerProcessID == 12', 'sizeof JOBOBJECT_BASIC_LIMIT_INFORMATION == 64', 'sizeof IO_COUNTERS == 48', 'sizeof JOBOBJECT_EXTENDED_LIMIT_INFORMATION == 144', 'sizeof JOBOBJECT_BASIC_ACCOUNTING_INFORMATION == 48', 'sizeof THREADENTRY32 == 28']", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+KQ_JSON {"wp1342_native_job_abi": null}
+
+--- stderr
+F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1342-src\.claude/dev\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',

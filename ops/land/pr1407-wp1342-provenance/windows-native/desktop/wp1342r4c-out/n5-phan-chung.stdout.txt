@@ -1,0 +1,5 @@
+tim khop 1 cho; dong dich khop 1 dong
+ban sach    wp1174_windows_claim_rejected ['DAT', None, None, None]
+dot bien    wp1174_windows_claim_rejected ['DO', 'AssertionError', 11788, 'assert _call1174(m._1174_platform, "Windows", "ext4", 0xEF53) is False'] (dong assertion dich = 11788)
+doi chung   wp1174_witness_valid tren ban dot bien ['DAT', None, None, None]
+KET QUA: GIET dung assertion dich

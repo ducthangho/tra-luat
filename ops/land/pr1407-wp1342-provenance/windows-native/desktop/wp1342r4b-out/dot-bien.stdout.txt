@@ -1,0 +1,31 @@
+GIẾT      a1   đích=wp1342_native_job_mo_coi [sạch=DAT đột biến=DO] đối chứng=wp1342_native_job_thuan ['DAT'] nhãn đòi='job not empty'
+          thông điệp: ('J3: hàm phải trả 0 sau khi thu hồi cháu', None, _1174Error('WP1174 UNKNOWN: job not empty'))
+GIẾT      a2   đích=wp1342_native_job_cha_chet_sau_gan [sạch=DAT đột biến=DO] đối chứng=wp1342_native_job_thuan ['DAT'] nhãn đòi='J10: con/cháu sống sau khi cha chết'
+          thông điệp: ('J10: con/cháu sống sau khi cha chết', ['con', 'cháu'])
+GIẾT      a3   đích=wp1342_native_job_query_loi [sạch=DAT đột biến=DO] đối chứng=wp1342_native_job_thuan ['DAT'] nhãn đòi='J11: handle tệp được nhận là job rỗng'
+          thông điệp: ('J11: handle tệp được nhận là job rỗng', None)
+GIẾT      b    đích=wp1342_native_job_treo_truoc_gan [sạch=DAT đột biến=DO] đối chứng=wp1342_native_job_query_loi+wp1342_pure_spawn_hang_luong ['DAT', 'DAT'] nhãn đòi='J6 (ii): marker đã có lúc between'
+          thông điệp: ('J6 (ii): marker đã có lúc between', [(4, True)])
+GIẾT      c    đích=wp1342_pure_spawn_hang_luong [sạch=DAT đột biến=DO] đối chứng=wp1342_pure_spawn_arguments ['DAT'] nhãn đòi='S1 SPAWN_FLAGS == 0x204'
+          thông điệp: ('S1 SPAWN_FLAGS == 0x204', 512)
+GIẾT      h    đích=wp1342_native_job_khong_ke_thua [sạch=DAT đột biến=DO] đối chứng=wp1342_native_job_thuan ['DAT'] nhãn đòi='J7: job handle có HANDLE_FLAG_INHERIT'
+          thông điệp: ('J7: job handle có HANDLE_FLAG_INHERIT', 1)
+GIẾT      k1   đích=wp1342_native_job_loi_truoc_gan [sạch=DAT đột biến=DO] đối chứng=wp1342_native_job_thuan ['DAT'] nhãn đòi='J8: bản sao con chưa signaled trong 5 s'
+          thông điệp: ('J8: bản sao con chưa signaled trong 5 s', ['cleanup:reap'])
+GIẾT      k2   đích=wp1342_native_job_loi_sau_gan [sạch=DAT đột biến=DO] đối chứng=wp1342_native_job_mo_coi ['DAT'] nhãn đòi='J9: tiến trình phụ chưa signaled trong 5 s VÀ j9 không có ghi chú cleanup:xac_nhan'
+          thông điệp: ('J9: tiến trình phụ chưa signaled trong 5 s VÀ j9 không có ghi chú cleanup:xac_nhan', [])
+GIẾT      k3   đích=wp1342_pure_spawn_cleanup_note [sạch=DAT đột biến=DO] đối chứng=wp1342_pure_spawn_hang_luong ['DAT'] nhãn đòi='S4: bước 2 không chạy'
+          thông điệp: ('S4: bước 2 không chạy', [])
+GIẾT      t1   đích=wp1342_pure_spawn_hang_luong [sạch=DAT đột biến=DO] đối chứng=wp1342_pure_spawn_cleanup_note ['DAT'] nhãn đòi='S2: hai ứng viên được nhận'
+          thông điệp: ('S2: hai ứng viên được nhận', 1)
+GIẾT      t2   đích=wp1342_pure_spawn_hang_luong [sạch=DAT đột biến=DO] đối chứng=wp1342_pure_spawn_cleanup_note ['DAT'] nhãn đòi='S3 count=2'
+          thông điệp: ('S3 count=2', None)
+GIẾT      d0   đích=wp1342_native_job_han [sạch=DAT đột biến=DO] đối chứng=wp1342_native_job_thuan ['DAT'] nhãn đòi='J2: không ném lifecycle deadline trong 6–11 s'
+          thông điệp: ('J2: không ném lifecycle deadline trong 6–11 s', 3, None, 60.14000000001397)
+SỐNG      g0   đích=wp1342_pure_spawn_arguments [sạch=DAT đột biến=DAT] đối chứng=wp1342_pure_spawn_hang_luong ['DAT'] nhãn đòi='S5 argv=[] phải là spawn arguments'
+          thông điệp: 
+GIẾT      abi  đích=wp1342_native_job_abi [sạch=DAT đột biến=DO] đối chứng=wp1342_native_job_query_loi+wp1342_pure_spawn_hang_luong ['DAT', 'DAT'] nhãn đòi='J0 THREADENTRY32 offset th32OwnerProcessID == 12'
+          thông điệp: ('J0 THREADENTRY32 offset th32OwnerProcessID == 12', [('THREADENTRY32 offset th32OwnerProcessID == 12', 16), ('sizeof THREADENTRY32 == 28', 40)])
+KHÔNG ĐO  d1   đích=wp1342_pure_spawn_arguments [sạch=DAT đột biến=KHONG_DO] đối chứng=wp1342_pure_spawn_hang_luong ['DAT'] nhãn đòi='S5 deadline ngoài miền nhận (now+10**6) phải là spawn arguments'
+          thông điệp: ngoại lệ khác AssertionError: FileNotFoundError: [WinError 2] The system cannot find the file specified
+TỔNG: 13/15 giết đúng dấu hiệu

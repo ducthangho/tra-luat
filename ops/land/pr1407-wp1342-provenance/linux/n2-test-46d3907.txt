@@ -1,0 +1,25 @@
+2026-11-19T02:45:20Z
+N2 test head: ĐẠT []
+N2 base tự khớp: []
+điểm bind base: MUTANTS_NHAM_TEST 14 · CASES 85
+  ĐỎ đúng lambda vào đầu thân _native1342: (i) định nghĩa base `_native1342` lần 1 không còn nguyên byte ở head
+  ĐỎ đúng def _native1342 ở cuối tệp: (iv) def `_native1342`: thiếu tiền tố / trùng tên
+  ĐỎ đúng decorator trước def _native1342: (i) định nghĩa base `_native1342` lần 1 không còn nguyên byte ở head
+  ĐỎ đúng if True: _native1342 = None: (iv) dạng câu lệnh không được phép: If `if True:
+    _native1342 = None`
+  ĐỎ đúng match: (iv) dạng câu lệnh không được phép: Match `match None:
+    case _native1342:
+        pass`
+  ĐỎ đúng walrus if: (iv) nút cấm NamedExpr trong khối chèn head 18560
+  ĐỎ đúng del: (iv) dạng câu lệnh không được phép: Delete `del _native1342`
+  ĐỎ đúng walrus RHS: (iv) nút cấm NamedExpr trong khối chèn head 18560
+  ĐỎ đúng walrus default: (iv) nút cấm NamedExpr trong khối chèn head 18560
+  ĐỎ đúng globals().update: (iv) tên cấm `globals` trong khối chèn head 18560
+  ĐỎ đúng đăng ký trùng wp1174_writer_accept: (i) định nghĩa base `Name(id='CASES', ctx=Store())` lần 71 không còn nguyên byte ở head
+  ĐỎ đúng native lệch ID: (iv) mục đăng ký không khớp mẫu: ('wp1342_native_job_x', _native1342('wp1174_writer_accept', _wp1342a1_fn))
+  ĐỎ đúng che frozenset: (iv) def `frozenset`: thiếu tiền tố / trùng tên
+  ĐỎ đúng hai lớp __init_subclass__: (iv) nút cấm ClassDef trong khối chèn head 18560
+  ĐỎ đúng list comprehension trong đăng ký: (iv) dạng câu lệnh không được phép: AugAssign `CASES += [('wp1342_pure_spawn_' + t, _wp1342a1_fn) for t in ('a
+  ĐỎ đúng sửa một byte thân hàm cũ: (iii) difflib có thao tác khác equal/insert: [('replace', 17919, 17920, 17919, 17920)]
+đối chứng dương: []
+rc=0

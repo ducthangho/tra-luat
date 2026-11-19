@@ -1,0 +1,40 @@
+2026-11-19T02:48:23+00:00
+HEAD a2c7d759866502e7da318e4f83e17d5f77491eb5 tree 24094d95f6e1e40a506befe5aab3abd81478f254
+ruff 0.15.15
+ruff F packet_loop.py: base 3 head 3 cha1 3 merge 3; TAP head==base: True; TAP merge==cha1: True
+   base ('F841', 'packet_loop.py', 'Local variable `current_lock` is assigned to but never used')
+   base ('F841', 'packet_loop.py', 'Local variable `n` is assigned to but never used')
+   base ('F841', 'packet_loop.py', 'Local variable `spec` is assigned to but never used')
+ruff F packet_loop_test.py: base 13 head 13 cha1 13 merge 13; TAP head==base: True; TAP merge==cha1: True
+   base ('F401', 'packet_loop_test.py', '`argparse` imported but unused')
+   base ('F401', 'packet_loop_test.py', '`contextlib` imported but unused')
+   base ('F401', 'packet_loop_test.py', '`contextlib` imported but unused')
+   base ('F401', 'packet_loop_test.py', '`copy` imported but unused')
+   base ('F401', 'packet_loop_test.py', '`copy` imported but unused')
+   base ('F401', 'packet_loop_test.py', '`copy` imported but unused')
+   base ('F401', 'packet_loop_test.py', '`io` imported but unused')
+   base ('F401', 'packet_loop_test.py', '`unittest.mock.patch` imported but unused')
+   base ('F541', 'packet_loop_test.py', 'f-string without any placeholders')
+   base ('F541', 'packet_loop_test.py', 'f-string without any placeholders')
+   base ('F811', 'packet_loop_test.py', 'Redefinition of unused `lock_fd` from line 12372: `lock_fd` redefined here')
+   base ('F811', 'packet_loop_test.py', 'Redefinition of unused `lock_fd` from line 12848: `lock_fd` redefined here')
+   base ('F811', 'packet_loop_test.py', 'Redefinition of unused `lock_fd` from line 12996: `lock_fd` redefined here')
+--- numstat phan packet d135697..46d3907
+172	0	.claude/dev/packet_loop.py
+376	0	.claude/dev/packet_loop_test.py
+--- numstat theo chu e2c3b82..46d3907
+172	0	.claude/dev/packet_loop.py
+376	0	.claude/dev/packet_loop_test.py
+2	2	ops/land/pr1386-wp646-provenance/SHA256SUMS
+10	1	ops/land/pr1386-wp646-provenance/linux/n1env_1386.py
+10	1	ops/land/pr1386-wp646-provenance/linux/n1rig_1386.py
+--- numstat PR #1408 e2c3b82..d135697
+2	2	ops/land/pr1386-wp646-provenance/SHA256SUMS
+10	1	ops/land/pr1386-wp646-provenance/linux/n1env_1386.py
+10	1	ops/land/pr1386-wp646-provenance/linux/n1rig_1386.py
+--- numstat cha1..merge d59527f..a2c7d75
+172	0	.claude/dev/packet_loop.py
+376	0	.claude/dev/packet_loop_test.py
+--- diff --check d135697..46d3907 rc 0 
+--- adr-song rc 0 adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+--- doctrine-scan rc 0 doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine

@@ -1,0 +1,8 @@
+2026-11-19T02:49:10Z
+nhanh origin/ops/wp1342-r4-spec = 9f1fff079a551a5d760fba36c3dc30b2e0b12cfd
+spec blob ab308e37cde94b0386cc106cee8cd6273c24e19c
+f435eb5c035e511f92c77321d2a2573f9088a17b4fe6a2ccca9c64a794cd1eb8  -
+lease spec_hash: spec_hash: f435eb5c035e511f92c77321d2a2573f9088a17b4fe6a2ccca9c64a794cd1eb8
+lich su spec:
+51dc2ce ops(#1342): dac ta r4 ban 13 (f435eb5c) sau do native PR #1407; lease neo bam moi
+d80f52d ops(#1342): dac ta WP1174-WINDOWS-BACKEND r4 (bac r1d-a1-i) + 11 luot review

@@ -1,0 +1,20 @@
+#1342 r4 (PR #1407) — do native Windows, DESKTOP-T9R33P2, 2026-11-19 00:46–00:56Z (+ chan doan 01:0xZ)
+Head 728eccab3886e5fbba1eeb76c6b770068bae9226 tree 0af9a4fe74cf9bc2075d1d898d0ad088ac19b0f8 (cay sach); base e2c3b82 tree 7693a24f (cay sach)
+Python 3.12.10, Windows NT 10.0.26300 (Windows-11), ptr 8. Khoa F:\tl-win\KHOA.txt: ghi khi trong, nha sau moi luot (da kiem trong).
+Tep tren Desktop: F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\  (wp1342r4-out\ day du; wp1342r4-out.zip 67972 B sha256 e770042f51a8a584bc38de59b485815e29c24517bdc18e7a065bc9923b4423a7)
+sha256: do_r4.py 98ff6d6f…c6f3 · chay-1342r4.ps1 7366a648…7e0b · dot_bien_r4.py e01af575…6c38c16 (lay qua REST tu comment 6995876153, kiem tren Desktop bang python + certutil)
+
+GATE (J0 J1 J11, HEAD): rc 0 ca ba, WP1342_NATIVE_V1 executed=1 passed=1.
+HEAD tap (55 ID): rc 0 tru 4: native_symlink_file + native_persist_update_symlink (BoQua "KHONG DO DUOC: thieu quyen symlink, WinError 1314" — y het base),
+  native_job_mo_coi (J3) DO "J3: chau mo coi chua signaled khi ham tra", native_job_loi_sau_gan (J9) DO "J9: tien trinh phu con song VA j9 khong co ghi chu cleanup:xac_nhan" (notes []).
+  11 ca J*: J0 2.8s J1 3.1 J2 8.8 J3 DO J6 2.8 J7 3.1 J8 2.9 J9 DO J10 3.6 J10b 5.3 J11 3.0 — moi ca < 90 s.
+BASE tap (41 ID): cung trang thai voi 41 ID tuong ung o HEAD (rc 0 tru 2 ca symlink BoQua giong het). N5: khong lech.
+LAP J3 x10: 10/10 DO cung nhan. LAP J9 x10: 10/10 DO cung nhan.
+CHAN DOAN (ban sao tam, thay _wp1342a1_tin bang: Wait(h,0) roi Wait(h,10000)): J3 x3, J9 x3: r0=258 (WAIT_TIMEOUT) r1=0, tong < 0.00005 s. J8: r0=0.
+  => tien trinh DA chet; doi tuong tien trinh chuyen signaled ngay sau (micro-giay) khi ActiveProcesses == 0 da quan sat. Khong ro ri tien trinh; la cuoc dua ActiveProcesses vs signaled.
+DOT BIEN (dot_bien_r4.py, Desktop, 15 ma, 605 s tong luot): 9/15 "giet" theo driver.
+  Pham vi Windows cua N7 (a1 a2 a3 b h k1 k2 d0 abi): GIET a2 a3 h k1 d0; KHONG DO a1 (dich J3 do tren ban SACH), k2 (dich J9 do tren ban SACH; doi chung J3 cung do),
+  b (dich J6 DO dung nhan 'J6 (ii): marker da co luc between' nhung doi chung J1 cung DO duoi dot bien b; driver khong in thong diep doi chung nen nguyen nhan CHUA DO — gia thuyet: duoi b con J1 chay xong/thoat truoc khi gan job), abi (dich DO dung nhan "THREADENTRY32 offset th32OwnerProcessID == 12" nhung doi chung J1 cung DO vi ABI hong lam hong ca duong thuan).
+  c lap tren Desktop: GIET (S1 SPAWN_FLAGS == 0x204).
+  Ngoai pham vi Windows (spec: thuan tren Linux): t1 t2 k3 GIET; g0 SONG (tren nt doi cho kiem os.name khong doi hanh vi — dung ky vong, chi do duoc tren Linux); d1 KHONG DO (FileNotFoundError: tren nt deadline lot qua roi spawn argv rong).
+N2 tep test (n2_test_r4.py, sha256 68074fd2…, chay doc lap Linux tren git show e2c3b82/728ecca): "N2 test head: DAT []", base tu khop [], diem bind MUTANTS_NHAM_TEST 14 · CASES 85, 16/16 phan chung DO, doi chung duong [] — khop tin executor.

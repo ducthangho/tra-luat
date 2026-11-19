@@ -1,0 +1,8 @@
+rc=0 giay=2.7
+--- stdout
+WP1342_NATIVE_V1 {"executed": 1, "id": "wp1342_native_volume_junction", "observed": "[('t\u1ec7p l\u00e0m th\u01b0 m\u1ee5c', '_1174Error: WP1174 UNKNOWN: directory required'), ('junction', '_1174Error: WP1174 UNKNOWN: reparse point'), ('facts', {'filesystem': 'NTFS', 'serial': 2082241159, 'drive_type': 3, 'volume_root': 'F:\\\\'})]", "os": "Windows-11-10.0.26300-SP0", "passed": 1, "python": "3.12.10"}
+KQ_JSON {"wp1342_native_volume_junction": null}
+
+--- stderr
+F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\wp1342-src\.claude/dev\packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',

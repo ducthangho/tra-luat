@@ -183,3 +183,14 @@ Finding sản phẩm cần chủ kho quyết định (không tự sửa):
 | NSIS gỡ (`/currentuser /S`) | **failed (hành vi sản phẩm)** | Gỡ bất đồng bộ (`Un_A.exe`), xong sau 5–8 s. **Luôn để lại** thư mục cài rỗng và `%LOCALAPPDATA%\proxima-updater\installer.exe` (161 MB) |
 | Chữ ký bộ cài | **not_signed (đo được)** | Authenticode `NotSigned`; chỉ còn dựa vào kiểm băm theo GitHub release |
 | Migration / rollback / nâng cấp | not_evidenced | Chưa đo |
+
+### H.5 WP-NSIS (#1405): đo N3 trên Desktop, review N3 `request_changes` (`ops/acceptance/wp-nsis/`)
+| Hàng | Kết quả | Điều kiện đọc |
+|---|---|---|
+| NSIS cài per-user | **passed (scoped Desktop)** | Đo ở N3:<br>• khoá chỉ có ở HKCU (`hkcu_only=True`, có đường dẫn hive);<br>• không có tiến trình app nào trong 115/118 lần lấy mẫu suốt lúc cài;<br>• `Proxima.exe` 6990dce4; 3226 tệp; cài lại cho manifest trùng.<br>`InstallLocation` **vắng** (electron-builder per-user), nên tiêu chí chữ của đặc tả sai (review xác nhận). Lấy mẫu, không phải bắt sự kiện |
+| NSIS gỡ của nhà cung cấp | **failed (hành vi sản phẩm, 3 lượt N1b/N2/N3)** | Luôn còn thư mục cài rỗng và `proxima-updater\installer.exe` (= bộ cài `959c14c1…`). Bộ cài tự chép tệp này **ngay lúc cài** |
+| Gỡ + dọn tồn dư có kiểm soát | **chờ quyết định tiêu chí** | Dọn trên OS thật cho kết quả sạch ở cả hai vòng (S3c/S4c). Nhưng:<br>• tiêu chí đóng băng chưa được sửa để công nhận cách này;<br>• đoạn dọn trong driver N3 **không an toàn trước đua** (xoá updater đệ quy theo ảnh chụp cũ).<br>Hàm an toàn sẽ làm ở packet WP-PXU (`ops/specs/wp-pxu-r1.md`) |
+| Chữ ký bộ cài | not_signed (đo được) | Không ghi trường chứng chỉ/timestamp |
+| Per-machine / nâng cấp / rollback / lần chạy đầu | not_evidenced | Chưa đo |
+
+**Cần chủ kho quyết định:** sửa tiêu chí NSIS thành "gỡ của nhà cung cấp + `Remove-ProximaUninstallResidue`" (cùng với bỏ đòi `InstallLocation`), hay giữ hàng "gỡ" ở FAIL như finding sản phẩm.

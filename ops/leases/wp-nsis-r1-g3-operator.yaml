@@ -32,12 +32,12 @@ granted_on_instruction_note: 'không mở app đã cài, không inference, khôn
 recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-19T01:09:43Z'
-heartbeat_at: '2026-11-19T01:09:43Z'
-lease_until: '2026-11-19T05:09:43Z'
-lease_expires_at_utc: '2026-11-19T05:09:43Z'
+heartbeat_at: '2026-11-19T01:44:32Z'
+lease_until: '2026-11-19T01:44:32Z'
+lease_expires_at_utc: '2026-11-19T01:44:32Z'
 max_lease_hours: 6
 review_calls_limit: 1
-review_calls_used: 0
+review_calls_used: 1
 native_runs_limit: 1
 native_step_reruns_limit: 1
 windows: native_desktop_only
@@ -45,3 +45,9 @@ native_runs_used_before_g3: 'g1: N1+N1b; g2: N2'
 extra_native_run_granted: 'chu kho 19/11 ~01:08Z "Dong y, lam di" cho de xuat do bo sung khe do (hive registry, InstallLocation tho, theo doi tien trinh lien tuc, bam ton du) + thu buoc don ton du co kiem soat'
 native_runs_limit_g3: 1
 review_calls_limit_g3: 1
+native_runs_used_g3: 1
+review_calls_used_g3: 1
+review_note: 'review N3 chay trong container Linux cua phien dieu phoi (ASUS offline), khong tren Windows nhu lease ghi; reviewer chi doc bang chung dong bang'
+withdrawn_at_utc: '2026-11-19T01:44:32Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'xong N3 + review N3 (request_changes); het ngan sach native va review cua g3; khoa host da nha (NSIS-N3-progress.log)'

@@ -230,7 +230,7 @@ Cần chủ kho quyết định: nâng trần WP-PXU (+1 Executor, +1 native Des
 | Hàng | Kết quả | Điều kiện đọc |
 |---|---|---|
 | U8 vế dữ liệu | **passed (hẹp, scoped Desktop)**: sao chép, khôi phục, mở lại | 12 404 tệp / 180 MB; backup và restore trùng manifest (sha256 từng tệp); app mở lại và đóng êm trên profile đã restore (zip `eb1688b7…`). **Chưa đo:** `/v1/stats`, `totalRequests=0` (REST tắt mặc định). Review `approve_with_fixes` (`ops/acceptance/wp-u8/VERDICT.md`) |
-| U8 vế đăng nhập | **not_measured** | Chưa ai đăng nhập; phiên điều phối không được chạm credential. Cần chủ kho tự đăng nhập rồi đo lại |
+| U8 vế đăng nhập | **quan_sat: phiên giữ được** (pha C, 19/11) | Chủ kho tự đăng nhập 4 provider. Backup/restore 12 153 tệp / 303 MB trùng manifest (`f20155da…`). Mở lại trên profile đã restore: "Tất cả còn nhưng Claude đòi verify human, tick xong thì vào được." Chỉ dựa vào quan sát của chủ kho; cờ `loggedIn` không phản ánh trạng thái. Chỉ restore cùng máy, cùng đường dẫn (zip `3310b4d7…`) |
 
 ### H.11 WP-PXL (#1413): LIVE promote 2 module mới, Desktop → VM (19/11, 06:27–06:34Z)
 | Hàng | Trước | Sau | Điều kiện đọc |

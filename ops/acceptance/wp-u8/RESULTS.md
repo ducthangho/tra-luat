@@ -71,3 +71,32 @@ Gói bằng chứng trên Desktop: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\u
 - **Vế đăng nhập: `not_measured`.** Profile chưa từng đăng nhập. Muốn đo thì chủ kho tự đăng nhập trên shortcut `Proxima U8 (profile thu)`, rồi chạy lại B1–B4 + L2.
 - Bản cài Proxima 5.5.0 và profile thử **vẫn còn trên Desktop**, chờ chủ kho quyết định gỡ hay giữ.
 
+## Pha C: vế đăng nhập (lease g2; 19/11, 07:43–08:31Z)
+1. **Chủ kho tự đăng nhập** trên shortcut `Proxima U8 (profile thu)`, đóng app, rồi báo "đã đăng nhập xong, đã đóng app". Phiên điều phối không chạm credential.
+2. **Kiểm profile được dùng** (chỉ siêu dữ liệu): profile mặc định `%APPDATA%\Proxima` **không tồn tại**; tệp mới nhất trong profile U8 được ghi lúc 07:43:23Z; mỗi provider có thư mục phiên riêng trong `Partitions` (chatgpt, claude, gemini, perplexity).
+3. **Cờ `loggedIn` trong `settings.json` vẫn `false` cho cả 4 provider** dù chủ kho đã đăng nhập. Cờ này **không phản ánh** trạng thái đăng nhập thật, đúng như đặc tả §4 đã cảnh báo, nên không dùng làm bằng chứng.
+4. **Đo:**
+   - DryRun B1 lúc 07:46Z.
+   - Lượt đầu (07:47Z) **dừng ở `HOST_BUSY`**: một phiên khác (`session_015GtxrZk6…`, native #387 / PR #1414) đang giữ khoá F:. Không ghi đè, không chạy chồng; đặt nhắc kiểm lại.
+   - Khoá trống lúc 08:20Z thì chạy thật.
+
+| Bước | Kết quả | Dấu hiệu |
+|---|---|---|
+| B1 snapshot | 12 153 tệp, 303 308 699 byte, 0 reparse point | digest `f20155da…`, **trùng DryRun 07:46Z**, tức profile không đổi từ lúc đăng nhập |
+| B2 backup | **đạt** | robocopy rc 1; manifest = B1 |
+| B3 làm hỏng | đạt | đổi tên thành `profile-u8.damaged-20261119T082337Z` |
+| B4 restore | **đạt** | robocopy rc 1; manifest = B1 (`f20155da…`) |
+| B5/B6 chủ kho mở lại trên profile đã restore và quan sát | **giữ được phiên** | Nguyên văn: **"Tất cả còn nhưng Claude đòi verify human, tick xong thì vào được."** (`owner-observation.json`) |
+| B7 dọn | đạt | đã xoá `backup-u8` và `.damaged-…` (mỗi cái 12 153 tệp); giữ profile (22 mục) và bản cài |
+
+Gói bằng chứng: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\u8\freeze-c\wp-u8-c-evidence.zip`, sha256 `3310b4d70ea3aed613a074b0f38f5fb298179f6851a298ac86792c5e33387289`, 10 tệp, MANIFEST `814f7e02…`, quét secret rc 0. Không chứa tệp nào của profile.
+
+**Kết luận vế đăng nhập: `quan_sat` (theo đặc tả §4, không có PASS/FAIL).**
+- Sau khi backup, làm mất và restore profile, **cả 4 phiên đăng nhập còn hiệu lực** theo quan sát của chủ kho.
+- Riêng **Claude** bắt xác minh "verify human" (một lần tick) rồi mới vào. Đây là kiểm tra chống bot phía provider, không phải mất phiên.
+
+**Không đo:**
+- không có lời gọi `/v1/stats` (REST tắt mặc định);
+- không kiểm phiên bằng máy; nguồn duy nhất là quan sát của chủ kho;
+- chỉ thử restore **cùng máy, cùng đường dẫn**; restore sang máy hay đường dẫn khác chưa đo.
+

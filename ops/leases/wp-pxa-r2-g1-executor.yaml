@@ -9,7 +9,7 @@ role: executor
 executor: phien_dieu_phoi
 executor_surface: claude_code_main_session
 reviewer: independent_readonly
-reviewer_model: 'CHUA CAP ngan sach (E2 ADR-0067: PR #1378 vuot tran loi goi Codex mac dinh); connector Codex review lai head moi'
+reviewer_model: 'codex gpt-6-astra qua launcher.py run, chi doc, tren ung vien cuc bo truoc push (ADR-0060 M12)'
 review_class: sensitive
 target_hosts: [DESKTOP-T9R33P2]
 target_device_ids: [a5f7076e-a491-4f84-829b-8d1fbcc1c767]
@@ -32,13 +32,16 @@ finding: 'connector review 5972629197 comment 4626897634 (P2) tests/ProximaActiv
 recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-19T09:46:49Z'
-heartbeat_at: '2026-11-19T09:50:23Z'
+heartbeat_at: '2026-11-19T09:55:16Z'
 lease_until: '2026-11-19T13:46:49Z'
 lease_expires_at_utc: '2026-11-19T13:46:49Z'
 max_lease_hours: 4
-review_calls_limit: 0
+review_calls_limit: 2
 review_calls_used: 0
 native_runs_limit_per_host: 1
 native_step_reruns_limit: 1
-native_runs_used: 'DESKTOP-T9R33P2 1 (dang chay tu 09:50Z tren ung vien cuc bo fa6ffda9, nhanh cuc bo pxa-r2-candidate; dryrun truoc do dat)'
+native_runs_used: 'DESKTOP-T9R33P2 1/1 xong 09:50:04-09:51:41Z (PS7 36/36, PS5.1 36/36 tr-TR, phan chung rc 2); zip e1d6505b'
 windows: native_desktop_focused
+review_budget_grant: 'chu kho 19/11 ~09:55Z (AskUserQuestion, E2 ADR-0067): "Cap 2 loi goi Codex" cho K4 review offline ung vien'
+windows_k6_decision: 'chu kho 19/11: "Dung luot Desktop vua chay" - JSON Windows gan SHA ung vien tu luot 09:50Z, kem bam blob'
+candidate_sha_local: 9613487be184f17817e515c0ed39baa2c9498848

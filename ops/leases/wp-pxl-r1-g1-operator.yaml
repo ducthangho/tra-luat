@@ -1,0 +1,45 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1413
+packet_id: WP-PXL
+revision: 1
+generation: 1
+lease_id: wp-pxl-r1-g1-operator
+role: operator
+executor: none
+reviewer: independent_readonly
+reviewer_model: 'codex gpt-6-astra trong container dieu phoi (chi doc)'
+review_class: sensitive
+target_hosts: [DESKTOP-T9R33P2, TRA-LUAT-WIN]
+target_device_ids: [a5f7076e-a491-4f84-829b-8d1fbcc1c767, f7281f27-f79f-40a2-a2f5-b454b58a166a]
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt', 'TRA-LUAT-WIN C:\tl-win\KHOA.txt']
+live_change: 'CHI them 2 thu muc module moi (ProximaActivation, ProximaInstall); khong dung ProximaControl 1.0.1, ProximaGateway/runtime, service, task, account, endpoint'
+artifact_commit: 9cdfeaf5b1eb17d0d75eb4ce6defe5a29ba69e7a
+artifact_sha256: 194de2661beac7804ff77aec7397ff652220a2a6f8cf30212d77baf9b3510b86
+spec_path: ops/specs/wp-pxl-r1.md
+spec_hash: 46e68c04fa6d63990e8eb2e613dac26baf78085ff1fa7898c3abe1e7ba139e1e
+write_set:
+- ops/acceptance/wp-pxl/RESULTS.md
+- ops/acceptance/wp-pxl/VERDICT.md
+- ops/acceptance/wp1319/MATRIX.md
+- ops/leases/wp-pxl-r1-g1-operator.yaml
+- ops/specs/wp-pxl-r1.md
+write_set_hash: 7b73bacf09708a80c7430ace431c2015c0e3fe79e1dd591aee76c0c58bb78e62
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: 3ec32704d81e881ebd33d5c9e9b0e024c46dd6e9
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 19/11 ~06:03Z "Live Promote thì đẩy bản lên desktop và cả VM đi"; xác nhận thao tác cụ thể (AskUserQuestion) "Chỉ 2 module mới"'
+granted_on_instruction_note: 'hang rao Desktop -> VM; khong inference; rollback = xoa 2 thu muc module moi'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-19T06:15:23Z'
+heartbeat_at: '2026-11-19T06:15:23Z'
+lease_until: '2026-11-19T10:15:23Z'
+lease_expires_at_utc: '2026-11-19T10:15:23Z'
+max_lease_hours: 4
+review_calls_limit: 1
+review_calls_used: 0
+native_runs_limit_per_host: 1
+native_step_reruns_limit: 1

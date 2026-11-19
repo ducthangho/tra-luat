@@ -29,3 +29,35 @@
 - **§11 #8:** promotion fence ở mức hàm và test.
 
 **Không phủ:** mở Proxima bằng tay, cửa sổ race sau snapshot, tiến trình elevated (trả `NOT_MEASURED`), và việc tích hợp module này vào một luồng kích hoạt thật. Hiện chưa có luồng kích hoạt nào trong repo gọi module.
+
+## r2 (19/11): finding P2 của connector Codex — culture của tiến trình con phản chứng
+**Finding:** review `5972629197` (comment `4626897634`, PR #1378, head `953ba9d8`).
+- Harness không truyền culture cho tiến trình con phản chứng, và không kiểm culture của con.
+- Lời khai "6 CX, tr-TR" ở dòng N2 phía trên **không được chứng minh cho tiến trình con**.
+
+**Đo lại bằng chứng cũ trên Desktop** (culture mặc định `en-AU`):
+- Ở lượt N1 trên cả PS 7 và PS 5.1, report của tiến trình cha ghi `tr-TR`.
+- Cả 10 report của tiến trình con CX01–CX05 đều ghi **`en-AU`**.
+- Vậy ở các lượt trước, ca CX được ghi nhận dưới culture mặc định của máy, không phải dưới `tr-TR`.
+
+**Sửa** (đặc tả `ops/specs/wp-pxa-r2.md`, chỉ đổi `tests/ProximaActivation.Tests.ps1`, theo đúng mẫu của `ProximaInstall.Tests.ps1`):
+- thêm tham số `-Culture`, đặt culture cho tiến trình cha;
+- report thêm `ui_culture` và `culture_at_end`;
+- luôn truyền `-Culture` cho tiến trình con;
+- trước khi cấp `killed`, kiểm `culture` và `culture_at_end` của con phải bằng culture của cha.
+
+Harness mới có sha256 `e5cc81c1…`. Module không đổi (`bb96cd58…`).
+
+**Đo trên Desktop** (19/11, 09:50:04–09:51:41Z):
+- Có khoá host. Parse bằng parser PS 7 và PS 5.1 đều cho 0 lỗi. Chạy khô trước đó đạt.
+
+| Lượt | Kết quả |
+|---|---|
+| PS 7.6.10, `-Culture tr-TR -Counterexamples` | **36/36**, rc 0. Cha `tr-TR`/`tr-TR`; CX01–CX06 `killed`, `child_culture=tr-TR` |
+| PS 5.1.26100, cùng cờ | **36/36**, rc 0. Cha `tr-TR`/`tr-TR`; CX01–CX06 `killed`, `child_culture=tr-TR` |
+| Phản chứng: bản sao tạm bỏ `-Culture` cho con (`cb0e231a…`), PS 7 | rc 2, 30/36. CX01–CX06 `not_credited`: *"child ran under culture 'en-AU'/'en-AU', parent under 'tr-TR'"* |
+
+**Bằng chứng:**
+- Zip: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\pxa-r2\freeze\wp-pxa-r2-evidence.zip`, sha256 `e1d6505bf6d4251f207e2ada20a67498e3a627d2aeed312d8fb1f8f670ee0b8e`, 16 tệp, MANIFEST `297d4093…`.
+- Quét secret rc 0.
+- Driver `R2.ps1`. Bản harness được dựng từ blob cũ cộng đúng các thay thế trong `build.py`; băm khớp commit vá.

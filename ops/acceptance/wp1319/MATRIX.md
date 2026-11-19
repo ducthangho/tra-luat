@@ -237,3 +237,15 @@ Cần chủ kho quyết định: nâng trần WP-PXU (+1 Executor, +1 native Des
 |---|---|---|---|
 | §11 #8 promotion fence | passed (scoped, mức hàm và test) | **passed (scoped, promote thật giữa 2 máy)** | VM chỉ được `ALLOWED` nhờ receipt `passed=true` của Desktop với cùng `artifact_sha256`. Ca âm "máy đầu FAIL thì chặn máy sau" đã có ở mức test (PA13–PA18), **chưa** chạy thật trên 2 máy |
 | Runtime promotion / LIVE | not_run | **done (scoped: chỉ 2 module mới)**; review `approve_with_fixes` | **Đã đo** trước/sau: 14 tiến trình gateway/Proxima (PID, thời điểm khởi động), băm `ProximaControl` 1.0.1, trạng thái tác vụ `TraLuat*` không đổi. **Không đo:** service, endpoint, module đang nạp, `PSModulePath`. Runtime Proxima vẫn 5.5.0: không có runtime mới để promote. Driver cần sửa trước khi dùng lại (khoá, rollback) |
+
+### H.12 WP-PXR (#1416): gỡ thật Proxima trên Desktop, dọn tồn dư, xoá profile thử U8 (19/11, 08:58:53–08:59:09Z)
+Chủ kho chọn "Gỡ bản cài + xoá profile thử". Chi tiết ở `ops/acceptance/wp-pxr/RESULTS.md`; review `approve_scoped` ở `ops/acceptance/wp-pxr/VERDICT.md`. Zip bằng chứng `3a1f04b1…`.
+
+| Hàng | Trước | Sau | Điều kiện đọc |
+|---|---|---|---|
+| NSIS "quy trình gỡ" (tiêu chí sửa ở H.7) | chờ một lần gỡ thật | **passed (scoped: Desktop, Proxima 5.5.0 per-user, 1 lượt)** | Bộ gỡ chính thức thoát mã 0 → chờ helper (`Un_A.exe`, xong ở 9,2 s) → hàm đã promote trả `WOULD_REMOVE` rồi `CLEANED`. Sau đó không còn khoá gỡ cài đặt, thư mục cài, `proxima-updater`, shortcut hay `%APPDATA%\Proxima`. **Điều 3 của H.7 đo một phần:** đúng một khoá HKCU và `QuietUninstallString` có kiểm, nhưng băm `Proxima.exe` `6990dce4…` không đo lại ngay trước khi gỡ (chỉ đo lúc cài, ở U8 A1). **Không đo:** `%TEMP%` của helper, khoá registry khác, cache Electron ngoài APPDATA |
+| NSIS "gỡ của nhà cung cấp" | failed (NSIS-2) | **giữ failed** | Lượt này tái hiện đúng tồn dư đã biết: thư mục cài rỗng và `installer.exe` |
+| `Remove-ProximaUninstallResidue` | passed (scoped, LocalAppData giả; VM 42/42) | **passed (scoped) + đã chạy một lần trên OS thật sau lần gỡ thật** | Lượt chạy thật nạp module theo tên từ chỗ đã promote (`81c1164b…`). Các ca chưa đo của WP-PXU giữ nguyên |
+| Dọn U8 | profile và bản cài được giữ, chờ quyết định | **xong** | Đã xoá shortcut U8 và profile thử (12 085 tệp / 287 MB, chứa phiên đăng nhập 4 provider). Phiên phía provider có thể còn hiệu lực tới khi hết hạn (không đo) |
+
+Driver `PXR.ps1` chỉ được duyệt cho lượt đã ghi. Trước khi dùng lại phải sửa 2 P1 của review: xoá profile theo tên chứ không theo handle; chốt chưa kiểm host, chưa lọc chặt hành động R4, và chưa kiểm băm module trước lượt chạy thật.

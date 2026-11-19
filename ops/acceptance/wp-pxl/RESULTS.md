@@ -29,12 +29,23 @@
 - Desktop: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\pxl\freeze-desktop\wp-pxl-desktop-evidence.zip`, sha256 `2021e18376d60f90bc394bac0d32f5c0a95c0890ffa6ca80ffe1d79940e2036e`, 8 tệp, MANIFEST `9280a6d4…`.
 - VM: `C:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\pxl\freeze-vm\wp-pxl-vm-evidence.zip`, sha256 `df30ce64ac6175c9998752ce8836927fa5983abf8f227d401774aadbb0b51d57`, 9 tệp, MANIFEST `8d3a5310…`.
 
-**Không làm:**
+**Không làm** (theo thiết kế driver):
 - không đụng `ProximaControl` 1.0.1, gateway hay runtime Proxima;
 - không restart gì;
-- không đổi service, tác vụ, tài khoản hay endpoint;
+- không ghi vào service, tác vụ, tài khoản hay endpoint;
 - không inference.
 
-Các module mới **chưa được luồng nào trên VM gọi tới**. Chúng sẵn sàng để `Import-Module` khi cần, nhưng không thay đổi hành vi nào đang chạy.
+Việc gateway, `ProximaControl` và tác vụ **không đổi** là **đã đo**. Service và endpoint **không đo**.
+
+*(Sửa theo review, P2.)* Bằng chứng chỉ cho thấy:
+- trong lúc promote, gateway, `ProximaControl` 1.0.1 và tác vụ `TraLuat*` không đổi (PID, thời điểm khởi động, băm, trạng thái);
+- 2 module chỉ được **thêm** vào thư mục Modules.
+
+**Không chứng minh được** rằng chưa luồng nào sẽ nạp chúng: PowerShell có thể tự nạp module khi một lệnh được gọi. Service, endpoint, module đang nạp và `PSModulePath` **không được đo**.
 
 **Rollback**, mỗi máy: xoá đúng 2 thư mục module mới (và trên Desktop, thư mục gốc vừa tạo nếu rỗng).
+
+## Review (1/1): `approve_with_fixes` (xem `VERDICT.md`)
+- Chấp nhận lần cài 2 module đã ghi.
+- Driver `PXL.ps1` cần sửa trước khi dùng lại (P1/P2 trong VERDICT): lấy khoá nguyên tử, rollback kiểm đúng tên và băm, kiểm khói chặt hơn.
+

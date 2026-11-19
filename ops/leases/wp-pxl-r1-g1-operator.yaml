@@ -35,11 +35,15 @@ granted_on_instruction_note: 'hang rao Desktop -> VM; khong inference; rollback 
 recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-19T06:15:23Z'
-heartbeat_at: '2026-11-19T06:15:23Z'
-lease_until: '2026-11-19T10:15:23Z'
-lease_expires_at_utc: '2026-11-19T10:15:23Z'
+heartbeat_at: '2026-11-19T06:45:36Z'
+lease_until: '2026-11-19T06:45:36Z'
+lease_expires_at_utc: '2026-11-19T06:45:36Z'
 max_lease_hours: 4
 review_calls_limit: 1
 review_calls_used: 1
 native_runs_limit_per_host: 1
 native_step_reruns_limit: 1
+native_runs_used: 'DESKTOP-T9R33P2 1, TRA-LUAT-WIN 1'
+withdrawn_at_utc: '2026-11-19T06:45:36Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'xong promote Desktop -> VM (receipt passed ca hai) + review approve_with_fixes; khoa da nha'

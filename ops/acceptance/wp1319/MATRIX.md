@@ -236,4 +236,4 @@ Cần chủ kho quyết định: nâng trần WP-PXU (+1 Executor, +1 native Des
 | Hàng | Trước | Sau | Điều kiện đọc |
 |---|---|---|---|
 | §11 #8 promotion fence | passed (scoped, mức hàm và test) | **passed (scoped, promote thật giữa 2 máy)** | VM chỉ được `ALLOWED` nhờ receipt `passed=true` của Desktop với cùng `artifact_sha256`. Ca âm "máy đầu FAIL thì chặn máy sau" đã có ở mức test (PA13–PA18), **chưa** chạy thật trên 2 máy |
-| Runtime promotion / LIVE | not_run | **done (scoped: chỉ 2 module mới)** | Gateway, `ProximaControl` 1.0.1, tác vụ, service, endpoint **không đổi** (đo trước/sau). Runtime Proxima vẫn 5.5.0: không có runtime mới để promote |
+| Runtime promotion / LIVE | not_run | **done (scoped: chỉ 2 module mới)**; review `approve_with_fixes` | **Đã đo** trước/sau: 14 tiến trình gateway/Proxima (PID, thời điểm khởi động), băm `ProximaControl` 1.0.1, trạng thái tác vụ `TraLuat*` không đổi. **Không đo:** service, endpoint, module đang nạp, `PSModulePath`. Runtime Proxima vẫn 5.5.0: không có runtime mới để promote. Driver cần sửa trước khi dùng lại (khoá, rollback) |

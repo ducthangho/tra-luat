@@ -175,3 +175,11 @@ Finding sản phẩm cần chủ kho quyết định (không tự sửa):
 | §11 #6 vế âm | partial (B2: tệp thừa lọt) | **passed (scoped)** | `Test-ProximaArtifactTree` chặn được tệp thừa, tệp thiếu, tệp đổi nội dung và junction trên cây Proxima thật 3226 tệp. **Chỉ có hiệu lực khi luồng kích hoạt gọi module này**; hiện chưa có luồng nào trong repo gọi nó |
 | §11 #7 updater chạy trùng | partial | **partial (cải thiện)** | Chốt profile ở operator ngăn được giữa các bên cùng dùng guard. Proxima tự nó vẫn không có single-instance; mở bằng tay vẫn lọt (đã chấp nhận) |
 | §11 #8 promotion fence | cho_raw | **passed (scoped, mức hàm và test)** | `Test-ProximaPromotionFence` + PA13–PA18/PA26/PA27. **Chưa có** promote thật giữa hai máy (LIVE chưa được cấp) |
+
+### H.4 WP-NSIS (#1405): đo N2 trên Desktop, review `request_changes` (`ops/acceptance/wp-nsis/`)
+| Hàng | Kết quả | Điều kiện đọc |
+|---|---|---|
+| NSIS cài per-user (`/S /currentuser`) | **passed (scoped Desktop)** | rc 0; `Proxima.exe` 6990dce4; 3226 tệp; cài lại cho manifest trùng. Chưa đo: hive registry, theo dõi tiến trình suốt lúc cài, per-machine, nâng cấp |
+| NSIS gỡ (`/currentuser /S`) | **failed (hành vi sản phẩm)** | Gỡ bất đồng bộ (`Un_A.exe`), xong sau 5–8 s. **Luôn để lại** thư mục cài rỗng và `%LOCALAPPDATA%\proxima-updater\installer.exe` (161 MB) |
+| Chữ ký bộ cài | **not_signed (đo được)** | Authenticode `NotSigned`; chỉ còn dựa vào kiểm băm theo GitHub release |
+| Migration / rollback / nâng cấp | not_evidenced | Chưa đo |

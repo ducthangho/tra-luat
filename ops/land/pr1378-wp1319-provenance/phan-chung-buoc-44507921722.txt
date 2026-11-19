@@ -1,0 +1,9 @@
+### --am-buoc 'gate-registry' '.claude/dev/ci_dang_ky_test.py --chay'
+MOC_GATE_OUTPUT: not_measured (0/1 job co dau hieu duong)
+rc=0
+### --am-buoc 'gate-nhanh-manh' 'ops/nhanh_don_duoc_test.py'
+MOC_GATE_OUTPUT: not_measured (0/8 job co dau hieu duong)
+rc=0
+### --am-buoc 'gate-cong-cu (' 'ops/cong_cu.py kiem-tra'
+MOC_GATE_OUTPUT: not_measured (0/8 job co dau hieu duong)
+rc=0

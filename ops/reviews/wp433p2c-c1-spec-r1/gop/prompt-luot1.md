@@ -1,0 +1,20 @@
+Bạn là reviewer ĐỘC LẬP (họ OpenAI) cho một ĐẶC TẢ packet, chưa có mã. CHỈ ĐỌC; không ghi tệp trong thư mục làm việc; không gọi mạng. Chạy thử trong RAM hoặc bản sao dưới /tmp.
+
+Thư mục làm việc: clone kho tra-luat ở master 11bd0336d00b4a9544e70dcbbe049d372053a3ec (đã chứa P2a của Issue #433, merge 417b593: `_duong_dich_chuan`, `_dich_cred_gws`, `_kiem_dich_ghi`, `_ghi_nguyen_tu_0600`, `_trong_kho_git` trong `scripts/tl_gws.py`; fragment `scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py` và `wp433_nlm_gws_dich_ngoai_kho.py`), cộng (chưa commit):
+- `ops/specs/GWS-CRED-DICH-NGOAI-KHO-C-r1.md` — ĐẶC TẢ CẦN REVIEW (packet P2c: nhánh Windows của W4/W5 — danh sách cho phép đường Windows thuần `ntpath`, vế reparse point trong `_kiem_dich_ghi`, định danh tệp Win32 cho UNC). Các mục mang thẻ [C1]/[C2] vì đặc tả đề xuất tách.
+- `ops/specs/GWS-CRED-DICH-NGOAI-KHO-A-r1.md` — đặc tả P2a đã land (khuôn và các bài học); `ops/reviews/wp433p2a-spec-r1/` — README, bản 1 và verdict lượt 1 (finding Windows/UNC đã chuyển sang P2c) và lượt 6.
+- `ops/reviews/wp433p2c-spec-r1/nguyen-mau/` — nguyên mẫu Python của bộ phân loại M1/M2 (`nguyen_mau_c1_r1.py`), bộ chạy đột biến `do_dot_bien_nm.py`, kết quả `dich-dot-bien-nguyen-mau-r1.txt`, đo `ntpath` trên 3.11/3.12/3.13. Đây là bằng chứng của §0.2/§0.3: CHẠY lại được (python3.11, python3.12, python3.13 có trên máy).
+
+Ràng buộc (không phải đối tượng tranh luận; chỉ nêu finding nếu KHÔNG thực hiện được như mô tả): quyết định chủ kho 19-11 — UNC được phép; UNC nhận diện bằng định danh tệp, không so chuỗi; reparse point thuộc P2c; danh sách cho phép chạy mọi nền qua `ntpath`; mỗi namespace thiết bị một nhãn. Các câu hỏi §9 Q1–Q9 là của chủ kho, chưa quyết: đừng nêu "còn câu hỏi mở" là finding; NHƯNG nếu một phương án khuyến nghị sai về kỹ thuật (ví dụ Q2 phương án B không bắt được ca nó khai, hoặc có ca nó bỏ sót), đó là finding. Không có Windows trong môi trường này: hành vi native là lời khai cần ĐO (§4c), hãy kiểm xem phép đo được mô tả có đủ để làm đỏ/xanh lời khai không; đừng tự soạn đường dẫn dựng để thoát khỏi cây thư mục — mô tả hướng thử bằng lời.
+
+Đọc: đặc tả; `.claude/skills/soan-spec/SKILL.md` (L1–L7); `scripts/tl_gws.py` (W4 ~1803–1823, W5 ~1961–1968, `_kiem_dich_ghi` 1173–1187, `_dich_cred_gws` 1201–1210, `_trong_kho_git` 1119–1139); hai fragment wp433 (neo đột biến của chúng); `.claude/dev/packet_loop.py` 6400–6520 (backend Win32 #1174 được nhắc ở §0.4); `docs/adr/0053*`, `0055*`, `0067*`.
+
+Việc:
+1. Kiểm từng lời khai sự thật §0 (dòng, blob, hành vi, đo `ntpath`, nguyên mẫu) bằng đọc/chạy; chạy lại nguyên mẫu và bộ đột biến; ghi lệch.
+2. M1/M2: có đúng là danh sách CHO PHÉP; liệt kê đường vào còn lọt (dạng Windows nào chưa có lượt, thứ tự kiểm có tạo vùng mù, Unicode/chuẩn hoá Win32 như dấu chấm/khoảng trắng cuối, ổ thường, `\\?\` với gạch xuôi, UNC lồng phân cách, `cwd` lạ). Mỗi mã có đột biến riêng làm đỏ ĐÚNG lượt khai không (chạy nguyên mẫu).
+3. M3/M4: nối nhánh nt có giữ được neo §0.4 (đếm thử: văn bản mới đề xuất có chứa lại neo nào không), có phá fragment P2a/packet 1 trên nt không; vế reparse M4 có đúng phạm vi và có ca phân biệt được.
+4. M5/M6 (C2): thiết kế định danh có đúng về Win32 (OpenFileById, FILE_ID_DESCRIPTOR, GetFinalPathNameByHandleW, quyền mở, BACKUP_SEMANTICS cho thư mục), có bắt được share có gốc là thư mục con của kho, ổ ánh xạ, subst; ca giả lập N5 có đủ vế; phương án fail-closed; seam `be` có làm mù phép đo native không.
+5. Theo L1–L7: mỗi N có phép làm đỏ; §4b đánh số, đích, tổng đếm, nền đúng; tự kiểm (N7) còn răng; số lượt sổ N7(b) khớp bảng N1–N6; §4c phép đo native đủ cụ thể để phiên khác chạy (lệnh, kỳ vọng, nhánh KHÔNG ĐO ĐƯỢC), và các điều kiện dừng §6 có đo được.
+6. Ước lượng kích thước §8 (C1 343–427, C2 236–313, trọn 579–740) so với mốc P2a thật (+438: `git show --numstat 417b593^1..417b593`) và trần 450 — đề xuất tách có hợp lý.
+
+Đầu ra stdout: bảng kiểm sự thật, finding P0–P3 (chỗ, vấn đề, bằng chứng, câu thay thế). Dòng CUỐI CÙNG đúng một trong hai: `KET_LUAN: approve` hoặc `KET_LUAN: request_changes`. Chỉ approve khi không còn P0–P2.

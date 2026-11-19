@@ -1,0 +1,16 @@
+db_nt_bo_win32 luot_dau: ('p11', "('unc', '\\\\\\\\?\\\\C:\\\\', ('x',))") | so_luot_do: 4
+db_nt_bo_dos luot_dau: ('p14', "('unc', '\\\\\\\\.\\\\pipe\\\\', ('x',))") | so_luot_do: 2
+db_nt_bo_nt luot_dau: ('p16', "('goc_o',)") | so_luot_do: 1
+db_nt_o_tran luot_dau: ('p17', "('o_tuyet_doi', 'C:\\\\', ())") | so_luot_do: 1
+db_nt_o_tuong_doi luot_dau: ('p18', "('o_tuyet_doi', 'D:\\\\', ('fake',))") | so_luot_do: 2
+db_nt_o_chi_hoa luot_dau: ('p02', "('o_khac',)") | so_luot_do: 2
+db_nt_khong_hoa_o luot_dau: ('p02', "('o_tuyet_doi', 'c:\\\\', ('x',))") | so_luot_do: 2
+db_nt_goc_o_tuyet_doi luot_dau: ('p19', "('tuong_doi', None, ('fake',))") | so_luot_do: 2
+db_nt_unc_share_rong luot_dau: ('p21', "('unc', '\\\\\\\\server\\\\\\\\', ())") | so_luot_do: 3
+db_nt_chi_gach_nguoc luot_dau: ('p02', "('o_tuyet_doi', 'C:\\\\', ('/x',))") | so_luot_do: 5
+db_nt_bo_hai_cham luot_dau: ('p26', "('cuoi_cham_cach',)") | so_luot_do: 4
+db_nt_bo_ky_tu_cam luot_dau: ('p29', "('o_tuyet_doi', 'C:\\\\', ('x:ads',))") | so_luot_do: 2
+db_nt_bo_cuoi_cham luot_dau: ('p31', "('o_tuyet_doi', 'C:\\\\', ('a.', 'b'))") | so_luot_do: 2
+db_nt_bo_ten_tb luot_dau: ('p33', "('o_tuyet_doi', 'C:\\\\', ('CON',))") | so_luot_do: 3
+db_nt_o_khac_nhan luot_dau: ('p25', "('o_tuyet_doi', '1:\\\\', ('x',))") | so_luot_do: 1
+db_nt_goc_rong luot_dau: ('q06', "'C:\\\\'") | so_luot_do: 2

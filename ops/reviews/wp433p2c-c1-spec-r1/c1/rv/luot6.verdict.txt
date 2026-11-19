@@ -1,0 +1,72 @@
+## Finding lượt 5
+
+| Finding | Trạng thái | Bằng chứng |
+|---|---|---|
+| P2 · Namespace trước luật thành phần | Đóng | Đột biến 40 đỏ đầu ở `p11`, đổi mã sang `ky_tu_cam`. Đột biến 3 cũng đỏ đầu ở `p11` nhưng đổi sang `unc`. Cả ba bản Python tái lập kết quả. |
+| P2 · Cắt `repr` ở 200 ký tự | Đóng | `q18` có `len(repr(p)) = 305`. Đột biến 41 chỉ đổi `q18`. N2 yêu cầu so nguyên văn cả tiền tố và lát cắt. |
+| P2 · Lỗi chọn đích riêng của W4 | Đóng ở thiết kế | 42 chỉ thay xử lý ngoại lệ ở bước chọn đích của W4. `W4.loai_o_loi` đòi `ghi lỗi: OSError`, rc 1, không in thành công và không gọi writer. 39 vẫn nhắm W5. Cả hai chờ chạy trên candidate. |
+| P2 · D8 bật 8.3 nhưng K thiếu alias | Đóng nhánh đã nêu | D8 thử `setshortname` rồi chuyển VM, thiếu bằng chứng thì chặn land. Nhánh **tắt** 8.3 còn lỗi riêng ở F2 bên dưới. |
+| P2 · D10 ổ mạng đến từ cwd | Đóng ở thiết kế | D10 đo `getcwd()` trong chính tiến trình W5, xác nhận mã M1, quan sát backend thật đúng một lần trả 4 cho mỗi lượt ổ mạng và 0 lần cho UNC. |
+| P2 · Tên trường T3 | Đóng | D12 đòi rc 0, `ok: true` và hai trường số nguyên hiện diện, bằng nhau. Tên trường khớp `release.py`. |
+| P3 · Bốn ô thiếu lượt đổi màu | Đóng bốn ô | 15/18 đã thêm `p43`/`p44`; 25/26 đã thêm `q15`–`q17`. Còn sai khác ở ô khác, xem F4. |
+| P3 · UTC của lần đếm neo | Đóng một phần | §10 đã có `11:06Z`. §0.4 khai rõ lần đo cũ thiếu giờ; lượt này đo lại lúc `11:08Z` và ghi kết quả dưới đây. |
+
+## Finding lượt 1–4
+
+| Lượt và finding | Còn áp dụng | Đã đóng trong C1 | Bằng chứng |
+|---|---|---|---|
+| 1 · Luật máy/share, tên DOS, cwd | Một phần | Có | M1 chặn cả họ UNC trước luật thành phần. `p37`–`p45` và `q03`–`q10` khóa phần tên và cwd còn áp dụng. |
+| 1–2 · Ổ ánh xạ, `subst`, đối chứng cục bộ | Có | Có ở thiết kế | `q11`–`q17`, D10 qua W5 và D11 bắt buộc đo `realpath` của cha đích cả khi có và chưa có thư mục cuối, thêm ổ `subst` ngoài kho làm đối chứng. |
+| 1–3 · Tập gốc rỗng, serial/ID, ABI, handle, miền SMB; 2 F2/F3; 3 R3-1/R3-3 | Không | Đã rút khỏi phạm vi | M1/M2 loại UNC và ổ mạng, §2 bỏ định danh qua mạng và `OpenFileById`. |
+| 1–2 · Junction, tag, đột biến reparse; 2 F5 | Không | Chuyển R | §2 ghi rõ giới hạn hiện tại. N3 chỉ kiểm symlink mà `S_ISLNK` báo. |
+| 1–2 · `q11` mặc định UNC, đột biến 22 cũ, sai đích khi dừng ở lượt đỏ đầu | Một phần | Có | C1 bỏ tham số `unc` và lựa chọn mặc định tương ứng. Dòng 22 hiện nay nhắm mã `o_khac` tại `p27`; dòng 30 chỉ nhận bằng chứng ở `W5.trong_kho`. |
+| 1–2 · Sổ lượt, tự kiểm từng fragment, neo lặp; 2 F1/F7 | Có | Sổ và neo đóng; tự kiểm còn thiếu một phép cụ thể | 73 lượt, 42 đột biến, `tu_kiem_neo_lap` giữ hai lần; `h == u ≤ 1` đúng với duy nhất lượt symlink và đột biến 32. Xem F3 về tự kiểm sai kiểu. |
+| 1–2 · Numstat, write set gộp, điều kiện ADR; 2 F8 | Có với C1 | Có | Ba đường đúng §1, so exact OID trước numstat, có phản chứng base tồn tại nhưng sai và ref không tồn tại. Phép ADR trên ref mới vẫn phải chạy ở bước công bố. |
+| 1–3 · Rig D, shell, quyền, dọn ổ; 2 F6; 3 R3-6 | Một phần | Có ở các nhánh còn áp dụng, trừ D8 | D4 đo tiến trình Python; D5 gọi riêng từng fragment; D10 dùng principal runtime, lệnh ADMIN có trích dẫn và dọn share mình tạo; D11 dựng `K\sub` và dọn cả hai ổ. Xem F2. |
+| 3 · R3-2, lỗi dò `.git` sau khi quy về đích thật | Có ở chốt cục bộ | **Tái phát** | M3 tái dùng `_trong_kho_git`; lỗi quyền khi dò marker vẫn bị nuốt. Xem F1. |
+| 3 · R3-4, T3 | Có | Có | D5 và D12 tách rõ. D12 đòi full selftest và toàn bộ release gate trên hai nền cùng integration SHA/tree. |
+| 2 F9, 3 R3-5/R3-7, 4 P2 · Biên ký tự, thứ tự, loại ổ | Có | Có ở phép thuần | `p34/17` khóa ký tự điều khiển; `q13/27` khóa REMOVABLE; `p43`–`p45` với 33–35, 40 khóa thứ tự và Unicode biên. D9 chỉ khai đo Unicode thông thường. |
+| 4 P2 · Dòng 30 và lỗi backend W4/W5 | Có | Có ở thiết kế | Dòng 30 đã thu hẹp lời khai. Hai lượt lỗi backend có đột biến 39 và 42. |
+| 4 P2 · D8/D11 | Có | D11 đóng ở thiết kế; D8 còn F2 | D11 có đường so sánh và tuple dương rõ. D8 đã tách phép chặn tên ngắn khỏi việc quy công cho `realpath`. |
+| 4 P2 · D10, D12, numstat; các P3 về giờ và số kế thừa | Có | Các tiêu chí chính đã đóng | D10/D12 và N5 có phép đọc dương và điều kiện dừng. §7 khôi phục `3 mức đặc tả / 0 mức mã`; giờ đếm neo cũ vẫn bất khả hồi. |
+
+## Kiểm lời khai và nghiệm thu
+
+| Mục | Kết quả |
+|---|---|
+| §0.1 · Base và call site | `tl_gws.py` có 2.649 dòng, blob `9ec027c2808868a05b67adc3d93ea68a574d6ec0` giống nhau tại HEAD, `417b593` và `11bd033`. W4/W5 chọn đích và ghi trong cùng `try … except OSError`. Nhánh ngoài POSIX trên base ghép đường thô. `_kiem_dich_ghi` kiểm kho trước rồi `lstat` tiền tố. Hành vi `realpath` với `subst` vẫn chờ D11. |
+| §0.2 · `ntpath` | `python3.11/3.12/3.13 -IB do_ntpath.py`: cả ba rc 0, stdout khớp từng biên nhận. 28 đầu vào có cùng `splitdrive`; `isabs` lệch đúng ở dạng gốc ổ không ghi chữ ổ. `splitroot`/`isreserved` vắng trên 3.11. |
+| §0.3 · Nguyên mẫu và runner | `python3.11/3.12/3.13 -IB nguyen_mau_c1_r3.py` và `python3.11/3.12/3.13 -IB do_dot_bien_c1_r3.py nguyen_mau_c1_r3.py`: đều rc 0, stdout khớp từng biên nhận. Mỗi bản có 63 dòng ca thuần và `TONG 36 LECH 0`. Runner xác nhận lượt đầu đổi đầu ra trong RAM. Nhãn, loại tín hiệu và sáu đột biến ghi “lập luận” chờ candidate. |
+| §0.4 · Neo M3 | Nạp bảng bằng `runpy.run_path`, đếm `str.count` trên base, trên bản RAM thay đúng hai dòng nhánh M3, và quét văn bản M1–M6. P2a có 37 mục `_DB`, 26 neo phân biệt; packet 1 có 30 mục, 25 neo phân biệt. Mọi neo giữ số lần, `tu_kiem_neo_lap` giữ 2, văn bản M1–M6 lặp 0 neo. Đây là phép đo văn bản đề xuất, chưa phải đếm mã candidate. |
+| §0.4 · Tương thích fragment | P2a đúng là đòi `(7, 27, 21)` trên nt. Ba ca `mọi` qua call site W4/W5 vẫn giữ neo và dùng thư mục cục bộ trong rig. Các so chuỗi đích cần D5 trên Windows vì C1 viết hoa ổ. D5 cũng bắt buộc chạy packet 1. Chưa xác nhận riêng được lịch sử biên nhận Windows hay quyền của Desktop. |
+| M1/M2 | Đây là allowlist ở lớp cú pháp: kết quả được dùng để dựng đích chỉ có gốc ổ ASCII tuyệt đối và thành phần đã qua M1, lấy trực tiếp hoặc từ cwd đã phân loại. Cửa loại ổ dùng cùng gốc cho cả hai nhánh. Không thấy nhánh cú pháp nào bỏ qua hai cửa này. Mỗi mã từ chối có lượt đỏ đích. `q14` và D10 phân biệt đường tương đối trên ổ mạng với cwd UNC bị loại ngay ở M1. |
+| N1–N6, L1–L7 | N1/N2 có 45/18 lượt, N3 có 10 lượt. Bảng liên tục từ 1–42, gồm 37 `mọi` và 5 `nt`, toàn bộ H. N5 có vế dương và phản chứng cho exact OID, neo, selftest, bundled, manifest và numstat. N6 chặn khi mất phép native bắt buộc. M1–M6 chiếu được vào ba đường §1. L4 giữ sổ kế thừa; L5 còn mốc neo cũ; L3/L6 còn F3–F4. §6 dẫn trần và mã E2, không thêm ngân sách mềm. |
+| ADR và kích thước | Hai OID ADR cho `cat-file` tại land/cha và kiểm first-parent trên ref cục bộ lần lượt `0/128/0`, clone đầy đủ. `git diff --numstat 417b593^1 417b593` rc 0, `389/0 + 48/19 + 1/0 = +438`. Dự toán C1 `45–58 + 306–363 + 1 = 352–422`, thấp hơn P2a 16 dòng ở cận trên và còn 28 dưới trần 450. Đây là dự toán; N5 phải đo diff thật sau khi sửa các finding. |
+
+## Finding còn mở
+
+### F1 · P1 · §0.1, M3/M4, N3 — lỗi dò kho có thể đi qua chốt
+
+`_trong_kho_git` ở `scripts/tl_gws.py:1134–1135` bắt mọi `OSError` từ phép dò `.git` rồi tiếp tục. Do đó M4 chỉ giữ được hợp đồng `ghi lỗi` với ngoại lệ **lan ra** khỏi chốt. Probe RAM lấy nguyên hai thân hàm trên base, dùng `lstat` giả báo `PermissionError` khi dò marker và trả mục thư mục thường ở các tiền tố. `_kiem_dich_ghi` trả `None`. N3 hiện có lỗi từ backend loại ổ và kho có marker đọc được, nên cả hai vẫn có thể xanh khi lỗi dò kho bị nuốt. Điều này làm sai tiêu chí M3 “ngoài kho” ở bước phải xác nhận tổ tiên, ngay cả khi đường đã qua M1/M2.
+
+**Câu thay thế đề nghị** — “Nhánh nt chỉ coi lỗi thiếu mục đã phân loại là không có marker kho. Lỗi quyền hoặc I/O khi dò marker đi vào `ghi lỗi` trước writer. Thêm lượt giả lập lỗi dò marker qua W5, yêu cầu `ghi lỗi: PermissionError`, writer 0 và không có tệp tạm. Đột biến nuốt lỗi phải đỏ đúng lượt này. Đồng bộ phạm vi sửa helper và giữ đối chứng POSIX.”
+
+### F2 · P2 · D8, N6, §6–7 — điều kiện bỏ qua 8.3 chưa dựa trên alias của fixture
+
+D8 suy từ trạng thái tắt **tạo** tên ngắn rằng alias không tồn tại trên máy, rồi cho qua. Hai câu hỏi khác nhau: `fsutil 8dot3name query` cho trạng thái chính sách, còn `dir /x` trên cha K cho biết alias của chính K. Điều kiện hiện tại cho phép hồ sơ bỏ phép gọi qua alias dù hồ sơ có thể quan sát được alias thực tế.
+
+**Câu thay thế đề nghị** — “Luôn đọc `dir /x` ở cha K. Có alias thực tế thì chạy phép chặn và lưu đầu ra dù chính sách tạo tên ngắn đang bật hay tắt. Chỉ ghi `KHÔNG ĐO ĐƯỢC` không chặn khi chính sách tắt và quan sát xác nhận K mới không có alias. Giữ nhánh ADMIN, VM và chặn land khi chính sách bật mà vẫn thiếu fixture.”
+
+### F3 · P2 · N4(d), §4b — tự kiểm sai kiểu chưa có đột biến cụ thể
+
+`tu_kiem_doi_kieu` khai `TIN_DUNG_GIA` với `__context__` là `AttributeError`, nhưng không chỉ ra thay `except` nào, ở lượt nào, hay thao tác nào sinh `AttributeError`. Khuôn P2a có ca `N6.kieu` và đối tượng lỗi tương ứng. Ba ca C1 có tập lượt khác, còn §4b khai `E: 0`. Vì vậy phiên thi hành chưa có phép thay cụ thể để chứng minh bộ phân hạng từ chối một ngoại lệ có vẻ giống tín hiệu đích. `tu_kiem_sai_luot` với đột biến 3 và `p12` đã đủ cụ thể.
+
+**Câu thay thế đề nghị** — “Neo tự kiểm sai kiểu ở `phan_loai_nt · p11 · ma` trên bản RAM. Dùng cùng ca/lượt/nhãn với một lớp ngoại lệ khác, phát sinh khi đang xử lý `AttributeError` giả của fixture. Đòi `TIN_DUNG_GIA` và kiểm `__context__`. Đối chứng bộ phân hạng bỏ so lớp phải cho `GIET` và làm `run()` trả False.”
+
+### F4 · P3 · §0.3, §4b dòng 9, §8 — lời khai nguyên mẫu lệch đầu ra
+
+Nguyên mẫu dùng `"ly_do:" + repr(x)[:200]`. §0.3 mô tả là `repr(x)` chưa có tiền tố cụm, §8 còn khai chưa cắt 200 dù 41 đo đúng lát cắt. Dòng 9 còn thiếu `q18` trong cột “mọi lượt đổi màu”. Cả ba stdout đều cho `['p18', 'q04', 'q18']`; đích `p18` vẫn đúng.
+
+**Câu thay thế đề nghị** — “Nguyên mẫu dùng tiền tố thử `ly_do:` và đã cắt `repr` tại 200; tiền tố công khai chờ mã thi công. Dòng 9 ghi `p18`, `q04`, `q18`.”
+
+KET_LUAN: request_changes

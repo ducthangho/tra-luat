@@ -1,0 +1,47 @@
+## Finding lượt 8
+
+| Finding | Trạng thái trên bản 9 | Bằng chứng |
+|---|---|---|
+| P2-A · Phân giải cha đích | **Đã đóng** | M3 quy định ngay trong thân đặc tả `realpath(a, strict=True)` trên tổ tiên hiện hữu gần nhất. N3 dựng `rp`, xác nhận `gws` chưa tồn tại và tiêm lỗi đúng tại lời gọi strict. Dòng 44 bỏ `strict=True` để làm đỏ `W5.realpath_loi/hop_dong`. |
+| P2-B · Đích đột biến 29 | **Đã đóng** | Dòng 29 đổi đích sang `q03/ly_do`. Thay `repr` bằng chuỗi thô trong RAM cho lượt đổi đầu tiên là `q03`, trước `q07`. `q07` vẫn kiểm trực tiếp hợp đồng một dòng. |
+| P3 · UTC của phép đếm neo | **Đã đóng** | §0.4 ghi hai thời điểm UTC, base/blob, phép đếm và rc. Phép đếm lại trên checkout hiện tại khớp, gồm cả neo lặp có chủ ý. |
+
+## Finding lượt 1–7
+
+| Finding | Còn áp dụng cho C1 | Đã đóng trong C1 | Bằng chứng |
+|---|---|---|---|
+| L1–3 · Luật riêng của máy/share, `IPC$`, miền định danh SMB, tập gốc, ABI, serial/ID và handle | Không | Đã rút khỏi C1 | M1 từ chối UNC trước `splitdrive`. M2 chỉ nhận loại ổ 2 và 3. §2 bỏ định danh tệp. |
+| L1–3 · Junction, tag reparse, `lstat` và W1–W3/W6 | Phần junction/reparse chuyển R | Theo phạm vi đã chốt | §2 và M3 giữ `S_ISLNK` cho W4/W5. Cách xếp lỗi khi gặp symlink treo có finding mới bên dưới. |
+| L1–5 · Luật thành phần, Unicode biên, thứ tự kiểm | Có | Có | `p31`–`p45`, dòng 15–21, 33–35, 40. COM0 bị chặn. Khoảng trắng đầu, NBSP và DEL được nhận theo quyết định đã chốt. |
+| L1–5 · Cwd lạ và loại ổ, kể cả ổ mạng từ cwd | Có | Có trong thiết kế | `q03`–`q17`, dòng 23–28, 36–38. D10 kiểm ánh xạ dương và quan sát backend thật trong chính tiến trình W5. |
+| L1–4 · Đột biến 22 cũ, `q` mặc định UNC, khai quá lượt đỏ đầu | Một phần | Có | Tham số UNC đã bỏ. Dòng 22 hiện nhắm `p27/ma`, chạy khớp. Dòng 30 chỉ nhận bằng chứng ở `W5.trong_kho`. |
+| L1–7 · Rig D, 8.3, `subst`, quyền và dọn tài nguyên | Có | Có trong thiết kế phép đo | D8 đọc cả chính sách lẫn alias thật. D10 tách shell thường và ADMIN, có lệnh tạo/xoá. D11 dựng `K\sub`, có hai trạng thái cha đích và đối chứng ghi ngoài kho. D8/D11 đều đi qua W5 để đo writer. |
+| L1–3, L6–7 · Sổ lượt, tự kiểm phân hạng, `tu_kiem_neo_lap` | Có | Có | N4 kiểm cả số lần và định danh lượt. Ngoại lệ giả mang đủ tuple đích. Neo `tu_kiem_neo_lap` giữ đúng 2 lần. |
+| L1–4 · Write set, numstat, exact OID, trần và số kế thừa | Có | Có | N5 kiểm exact base/head trước numstat, đúng ba đường và có phản chứng tổng 451. §7 giữ bộ đếm kế thừa `3/0`. |
+| L3–5 · T3 và bằng chứng manifest | Có | Có trong thiết kế | D12 yêu cầu full selftest và release gates trên cả hai nền, cùng integration SHA/tree sau commit manifest. Hai trường đếm được gọi đúng tên. |
+| L4–7 · Lỗi backend, cắt 200, lỗi dò `.git`, strict, cột đo và UTC | Có | Có cho các finding cũ | Dòng 39/42 nhắm riêng W5/W4, `q18` khóa lát cắt, 43/44 tiêm tại marker và bước phân giải. Các ô đo cũ khớp stdout. Số `len(repr(p))` của `q18` có sai số riêng bên dưới. |
+
+## Bảng kiểm sự thật và nghiệm thu
+
+Snapshot review chỉ đọc, không gọi mạng. `HEAD` detached tại `96b6a33d770f7539a3eacbebdc215f87ded4ea7f`, khớp `master` và `origin/master` cục bộ. Tree `d007b41f5b17c47c04150a56680081ec79f2ac5b`. SHA-256 đặc tả `64681c36293e57f2d142566a07d94be356ba18d99e03253aebabac997e4725aa`. Review qua `openai_codex / codex_cli / machine`, Linux. Các phép chạy không làm đổi trạng thái worktree.
+
+| Mục | Kết quả |
+|---|---|
+| §0.1 · Nguồn P2a | `git rev-parse` và `wc -l` rc 0. Blob `9ec027c2808868a05b67adc3d93ea68a574d6ec0`, 2.649 dòng, khớp HEAD, `417b593`, `11bd033`. Nhánh ngoài POSIX ghép đường thô. `_kiem_dich_ghi` dò kho rồi `lstat` từng tiền tố. W4/W5 chọn đích và ghi trong cùng `try … except OSError`. |
+| §0.2 · `ntpath` | `python3.{11,12,13} -IB do_ntpath.py` và ba phép `diff -u` đều rc 0. 28 đầu vào cho cùng `splitdrive`. `isabs` đổi ở đường một phân cách đầu trên 3.13. Probe riêng xác nhận phiên bản có `splitroot`/`isreserved`, `COM0` không bị `isreserved` 3.13 chặn và Linux thiếu `ctypes.WinDLL`. |
+| §0.3 · Nguyên mẫu | Trên 3.11.18, 3.12.3, 3.13.18, `python -IB nguyen_mau_c1_r3.py` cho 45 lượt N1 và 18 lượt N2. `python -IB do_dot_bien_c1_r3.py nguyen_mau_c1_r3.py` cho `TONG 36 LECH 0`, rc 0 cả ba. Sáu phép `diff -u` khớp biên nhận. Lần gọi thăm dò đầu thiếu đối số tệp nguyên mẫu, rc 1. Lần chạy đúng cú pháp ở trên đã thay thế lần đó. |
+| §0.4 · Neo, fragment và binding | `dem_neo.py` rc 0. P2a có 37 mục `_DB`, 3 tự kiểm. Packet 1 có 30 mục `_DB`, 3 tự kiểm khớp một lần và `tu_kiem_neo_lap` khớp hai lần. Thay đúng dòng trả về M3 trong RAM giữ mọi số đếm. Quét nguyên văn M1–M6 tìm 0 neo cũ lặp lại. Binding nguồn dùng `LPCWSTR → UINT`. P2a thực sự đòi `(7,27,21)` trên nt. Ba ca qua W4/W5 giữ các điểm gọi cũ, nhưng phép so chuỗi đích và đường tiêm lỗi vẫn cần D5 nếu rig trả chữ ổ thường. |
+| M1/M2 · Danh sách cho phép | Đích chỉ được dựng từ ổ tuyệt đối ASCII và thành phần đã qua M1. Cwd chỉ tham gia với đường tương đối, phải qua cùng bộ phân loại, sau đó gốc vẫn qua chốt loại ổ. Chưa thấy dạng cú pháp trong phạm vi C1 vượt hai chốt này. Các mã từ chối có đột biến đích. Bộ chạy đo dòng đầu ra, còn nhãn và phân hạng của fragment chờ mã thi công. |
+| N1–N6 · L1–L7 | Bảng liên tục 1–44, gồm 37 `mọi`, 7 `nt`, toàn bộ H. Trong đó 36 dòng đã đo, dòng 29 có probe riêng và 7 dòng nt còn ở mức lập luận. Sổ `45 + 18 + 12 = 75`. Ngoài nt, `t=12`, `v=7`, `h=u=0`. Trên nt, `h == u ≤ 1` đúng khi đột biến 32 là đột biến duy nhất được bỏ qua cùng lượt symlink. N4 có phản chứng cho sai lớp, sai lượt, sai sổ, bỏ qua sai và stdout. N5/N6 có điều kiện đỏ cho gate và thiếu phép native. |
+| §4c và §6 · Native | D3/D4 kiểm gốc và cwd. D5 chạy ba fragment riêng. D8 bắt buộc khi có alias thật hoặc 8.3 bật, và chặn land nếu nhánh bắt buộc không đo được. D8 đo việc chặn alias 8.3, còn D11 phân biệt được việc chặn `subst` trong kho với ghi qua `subst` ngoài kho. D10 có đối chứng dương và bộ đếm. D12 lấy lệnh từ workflow đúng integration SHA. D3–D12, fragment candidate và T3 đều `not_run` trong phiên này. Lịch sử biên nhận Windows, trạng thái Desktop và độ mới của ref chưa được xác minh độc lập. |
+| §6–8 · ADR và kích thước | Ba phép hiệu lực ADR-0053 và ADR-0055 lần lượt `0/128/0` trên ref cục bộ cho mỗi ADR. `git diff --numstat 417b593^1 417b593` rc 0, `389/0 + 48/19 + 1/0` = **+438**. C1 dự toán `57–73 + 314–372 + 1` = **+372–446**, cận trên hơn P2a 8 dòng và còn 4 dòng dưới trần. Numstat candidate và hiệu lực trên ref vừa fetch còn chờ bước công bố. |
+
+## Finding còn mở
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|
+| **P2 · M3, M4, N3 · Symlink treo ở cha đích** | M4 gán symlink vào cụm `là liên kết tượng trưng`, nhưng M3 gọi strict trước khi `_kiem_dich_ghi` tới chốt `S_ISLNK`. `lstat` có thể thấy chính symlink trong khi phân giải đích của nó báo thiếu. Probe RAM dùng helper gốc cho cụm symlink, còn trình tự M3 trả `ghi lỗi: FileNotFoundError` trên cùng trạng thái giả lập. N3 hiện chỉ dựng symlink có đích tồn tại, nên `W5.sl_to_tien` vẫn xanh. Cả hai trình tự đều dừng trước writer. Sai khác nằm ở cụm lỗi đã cam kết. | “Sau chuỗi từ vựng, nếu `realpath(a, strict=True)` báo thiếu đích và `lstat(a)` đã xác nhận `S_ISLNK`, trả `là liên kết tượng trưng` với `repr(a)[:200]`. Lỗi quyền/I/O vẫn lan ra. Bổ sung phép W5 với symlink thư mục treo ngoài kho, đòi đúng cụm và writer 0. Giữ `W5.realpath_loi` cho nhánh lỗi quyền.” |
+| **P2 · M4, N3 · Mã thoát W4 khi có `--require-agent-creds`** | M4 ghi W4 `rc 1` vô điều kiện, đồng thời dẫn P2a M3 và giữ nguyên W4. P2a M3 và nhánh cuối `cmd_bootstrap` quy định `rc 4` cùng một dòng riêng khi bật cờ và agent chưa nạp. Ca W4 chuẩn ở N3 chỉ đo `rc 1`, nên hai yêu cầu vẫn mâu thuẫn ở chế độ có cờ. | “W4 với fixture chuẩn của N3 trả rc 1 và `degraded`. Khi có `--require-agent-creds` và agent chưa nạp, giữ rc 4 và dòng chẩn đoán riêng theo P2a M3. Venue kiểm hai mã thoát dùng cùng đích bị từ chối, chỉ đổi cờ.” |
+| **P3 · N2 `q18` · Độ dài `repr`** | Probe trực tiếp trên dữ liệu nguyên mẫu cho `len(repr(p)) == 304`. Đặc tả ghi 305. Đột biến 41 vẫn làm đỏ `q18/cat_200`. | “`len(repr(p)) = 304`. Lý do bằng tiền tố công khai cộng `repr(p)[:200]`.” |
+
+KET_LUAN: request_changes

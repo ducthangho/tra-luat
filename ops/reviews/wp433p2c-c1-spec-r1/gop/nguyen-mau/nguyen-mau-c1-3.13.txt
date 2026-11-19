@@ -1,0 +1,33 @@
+'C:\\x' -> C:\x
+'c:/x' -> C:\x
+'C:' -> o_tran
+'D:fake' -> o_tuong_doi
+'\\fake' -> goc_o
+'\\\\server\\share\\x' -> \\server\share\x
+'\\\\server\\share' -> goc_rong
+'\\\\server' -> unc_thieu_share
+'\\\\server\\' -> unc_thieu_share
+'\\\\?\\C:\\x' -> thiet_bi_win32
+'//?/C:/x' -> thiet_bi_win32
+'\\\\.\\pipe\\x' -> thiet_bi_dos
+'\\??\\C:\\x' -> nt_doi_tuong
+'\\\\?\\UNC\\s\\sh' -> thiet_bi_win32
+'//server/share/x' -> \\server\share\x
+'/\\server\\share\\x' -> \\server\share\x
+'C:\\a\\..\\b' -> hai_cham
+'a/../b' -> hai_cham
+'..' -> hai_cham
+'C:\\a/b\\c' -> C:\a\b\c
+'C:\\x:ads' -> ky_tu_cam
+'\\\\\\server\\share' -> unc_thieu_share
+'\\\\server\\\\share' -> unc_thieu_share
+'C:\\CON' -> ten_thiet_bi
+'C:\\nul.txt' -> ten_thiet_bi
+'C:\\a.\\b' -> cuoi_cham_cach
+'C:\\a ' -> cuoi_cham_cach
+'1:\\x' -> o_khac
+'fake' -> C:\cwd\fake
+'C:\\' -> goc_rong
+'a\x00b' -> nul
+'   ' -> trang
+'C:\\x\\.\\y\\\\' -> C:\x\y

@@ -1,0 +1,31 @@
+3.11.18
+'C:\\x' | splitdrive ('C:', '\\x') | isabs True | splitroot -
+'c:/x' | splitdrive ('c:', '/x') | isabs True | splitroot -
+'C:' | splitdrive ('C:', '') | isabs False | splitroot -
+'D:fake' | splitdrive ('D:', 'fake') | isabs False | splitroot -
+'\\fake' | splitdrive ('', '\\fake') | isabs True | splitroot -
+'/fake' | splitdrive ('', '/fake') | isabs True | splitroot -
+'\\\\server\\share' | splitdrive ('\\\\server\\share', '') | isabs True | splitroot -
+'\\\\server\\share\\x' | splitdrive ('\\\\server\\share', '\\x') | isabs True | splitroot -
+'\\\\server' | splitdrive ('\\\\server', '') | isabs True | splitroot -
+'\\\\server\\' | splitdrive ('\\\\server\\', '') | isabs True | splitroot -
+'\\\\?\\C:\\x' | splitdrive ('\\\\?\\C:', '\\x') | isabs True | splitroot -
+'\\\\.\\pipe\\x' | splitdrive ('\\\\.\\pipe', '\\x') | isabs True | splitroot -
+'\\\\?\\UNC\\s\\sh' | splitdrive ('\\\\?\\UNC\\s\\sh', '') | isabs True | splitroot -
+'//server/share/x' | splitdrive ('//server/share', '/x') | isabs True | splitroot -
+'/\\server\\share' | splitdrive ('/\\server\\share', '') | isabs True | splitroot -
+'\\/server/share' | splitdrive ('\\/server/share', '') | isabs True | splitroot -
+'C:\\a\\..\\b' | splitdrive ('C:', '\\a\\..\\b') | isabs True | splitroot -
+'fake' | splitdrive ('', 'fake') | isabs False | splitroot -
+'..' | splitdrive ('', '..') | isabs False | splitroot -
+'C:\\a/b\\c' | splitdrive ('C:', '\\a/b\\c') | isabs True | splitroot -
+'C:\\x:ads' | splitdrive ('C:', '\\x:ads') | isabs True | splitroot -
+'\\\\\\server\\share' | splitdrive ('\\\\\\server', '\\share') | isabs True | splitroot -
+'\\\\server\\\\share' | splitdrive ('\\\\server\\', '\\share') | isabs True | splitroot -
+'CON' | splitdrive ('', 'CON') | isabs False | splitroot -
+'C:\\NUL' | splitdrive ('C:', '\\NUL') | isabs True | splitroot -
+'C:\\a.\\b ' | splitdrive ('C:', '\\a.\\b ') | isabs True | splitroot -
+'1:\\x' | splitdrive ('1:', '\\x') | isabs True | splitroot -
+'\\\\localhost\\C$\\x' | splitdrive ('\\\\localhost\\C$', '\\x') | isabs True | splitroot -
+REPARSE 1024 join D:fake C:\fake
+isreserved None

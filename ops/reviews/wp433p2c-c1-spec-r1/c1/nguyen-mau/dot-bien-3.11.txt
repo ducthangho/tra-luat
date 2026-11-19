@@ -1,0 +1,29 @@
+db_nt_bo_nul dich p09 luot_do ['p09'] OK
+db_nt_bo_trang dich p10 luot_do ['p10'] OK
+db_nt_bo_win32 dich p11 luot_do ['p11', 'p12', 'p13'] OK
+db_nt_bo_dos dich p14 luot_do ['p14', 'p15'] OK
+db_nt_bo_nt dich p16 luot_do ['p16'] OK
+db_nt_bo_unc dich p21 luot_do ['p21', 'p22', 'p23', 'p24', 'p25', 'p26'] OK
+db_nt_unc_chi_gach_nguoc dich p22 luot_do ['p22', 'p23'] OK
+db_nt_o_tran dich p17 luot_do ['p17'] OK
+db_nt_o_tuong_doi dich p18 luot_do ['p18', 'q04'] OK
+db_nt_o_chi_hoa dich p03 luot_do ['p03', 'q02'] OK
+db_nt_khong_hoa_o dich p03 luot_do ['p03', 'q02'] OK
+db_nt_goc_o_tuyet_doi dich p19 luot_do ['p19', 'p20'] OK
+db_nt_chi_gach_nguoc dich p02 luot_do ['p02', 'p04', 'p29', 'q02'] OK
+db_nt_bo_hai_cham dich p28 luot_do ['p28', 'p29', 'p30'] OK
+db_nt_bo_ky_tu_cam dich p31 luot_do ['p31', 'p32', 'p34'] OK
+db_nt_bo_surrogate dich p33 luot_do ['p33'] OK
+db_nt_bo_dieu_khien dich p34 luot_do ['p34'] OK
+db_nt_bo_cuoi_cham dich p35 luot_do ['p35', 'p36'] OK
+db_nt_bo_ten_tb dich p37 luot_do ['p37', 'p38', 'p39', 'p40', 'p41', 'p42'] OK
+db_nt_ten_tb_khong_cach dich p40 luot_do ['p40'] OK
+db_nt_bo_conin dich p41 luot_do ['p41'] OK
+db_nt_o_khac_nhan dich p27 luot_do ['p27'] OK
+db_nt_cwd_khong_kiem dich q03 luot_do ['q03', 'q04', 'q05'] OK
+db_nt_goc_rong dich q06 luot_do ['q06', 'q10'] OK
+db_nt_bo_loai_o dich q11 luot_do ['q11', 'q12', 'q14'] OK
+db_nt_loai_o_moi_loai dich q12 luot_do ['q12'] OK
+db_nt_bo_removable dich q13 luot_do ['q13'] OK
+db_nt_loai_o_chi_tuyet_doi dich q14 luot_do ['q14'] OK
+TONG 28 LECH 0

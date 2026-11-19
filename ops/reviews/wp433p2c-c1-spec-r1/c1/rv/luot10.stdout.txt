@@ -1,0 +1,49 @@
+## Review độc lập C1 r1 · lượt 10
+
+Review đặc tả SHA-256 `e89ccf9ef8c3be395dacb1fab920cce97a1ee0082ceb093bbafdcebfceafa477` trên `master`, HEAD `96b6a33d770f7539a3eacbebdc215f87ded4ea7f`, tree `d007b41f5b17c47c04150a56680081ec79f2ac5b`. Review bằng Codex họ OpenAI qua API, transport `machine`, trên Linux. Model phục vụ cụ thể chưa xác minh. Trạng thái checkout trước và sau giống nhau. Ref `origin/master` cục bộ là `5953f1531f453f0017e7bfa9f2b9fbf25e7c567a`. Độ mới của ref từ xa chưa đo trong phiên offline này.
+
+### Finding lượt 9
+
+| Finding | Trạng thái trên bản này | Bằng chứng |
+|---|---|---|
+| P2 · Symlink treo | **Đóng về thứ tự và cụm lỗi.** Phép thử có finding mới về bỏ qua từng lượt. | M3 chạy dò `.git` từ vựng, rồi `_kiem_dich_ghi`, rồi `realpath(strict=True)`. N3 `W5.sl_treo` đòi đúng cụm `là liên kết tượng trưng`, writer 0 và đích của link vẫn vắng. Dòng 45 đảo lại thứ tự cũ. |
+| P2 · W4 có `--require-agent-creds` | **Đóng mâu thuẫn trong hợp đồng.** | M4 ghi fixture thường rc 1 và trường hợp có cờ, agent chưa `ĐÃ NẠP`, rc 4 kèm đúng dòng riêng. Khớp nhánh cuối `cmd_bootstrap` và P2a N8 `require`. N3 đo rc 1 trên nt. Bằng chứng kế thừa cho rc 4 là ca POSIX. |
+| P3 · `q18` | **Đóng.** | Đặc tả ghi `len(repr(p)) = 304`. Probe RAM ra 304. Dòng 41 đỏ đầu tại `q18` trên cả ba bản Python. |
+
+### Finding lượt 1–8
+
+| Finding | Còn áp dụng? | Đã đóng trong C1? | Bằng chứng |
+|---|---|---|---|
+| L1–3 · Authority máy/share, `IPC$`, serial/ID, ABI, mở lại handle, tập gốc và miền SMB | Không | Đã rút khỏi C1 | M1 trả `unc` trước `splitdrive`. M2 chỉ nhận loại ổ 2 và 3. §2 bỏ định danh tệp. |
+| L1–3 · Junction/tag reparse và mở rộng W1–W3/W6 | Chuyển R hoặc ngoài phạm vi C1 | Theo phạm vi đã chốt | C1 dùng lại `S_ISLNK` cho W4/W5. §2 ghi rõ giới hạn junction. |
+| L1–5 · Luật thành phần, điều khiển, surrogate, Unicode biên và thứ tự kiểm | Có | Có | `p31`–`p45`, dòng 15–21 và 33–35, 40. `COM0` bị từ chối. Khoảng trắng đầu, NBSP và DEL được nhận theo quyết định đã chốt. |
+| L1–5 · Cwd lạ, ổ ánh xạ, loại ổ, REMOVABLE và ổ mạng từ cwd | Có | Có trong thiết kế | `q03`–`q17`, dòng 23–28, 36–38. D10 kiểm ánh xạ dương, cwd trong chính tiến trình W5 và lời gọi backend thật. |
+| L1–4, L8 · Đột biến 22, `q` mặc định UNC, khai vượt lượt đầu đỏ, sai đích dòng 29 | Một phần | Có | Tham số UNC đã bỏ. Dòng 22 khớp `p27/ma`. Dòng 30 chỉ nhận bằng chứng ở `W5.trong_kho`. Dòng 29 nhắm `q03/ly_do`, trước `q07`. |
+| L1–7 · Rig D, tên 8.3, `subst`, principal và dọn tài nguyên | Có | Có về các điều kiện đo cũ | D8 đọc alias thật và chính sách. D10 tách shell thường và ADMIN. D11 tạo `K\sub`, có hai trạng thái cha đích, đối chứng ghi ngoài kho và dọn cả hai ổ. D8/D11 đều đi qua W5. |
+| L1–3, L6–8 · Neo lặp, sổ lượt và phân hạng | Có | Các lỗi cũ đã đóng. Hai lượt symlink tạo lỗi mới. | `tu_kiem_neo_lap` giữ hai lần. N4 có lớp giả đủ tuple, sai lượt đích, đối chứng lệch sổ và stdout. Số học khớp, nhưng đột biến 32 có thể đổi lượt đỏ đầu khi lượt symlink thứ nhất bị bỏ qua. |
+| L1–5 · Numstat, OID, T3 và manifest | Có | Các lỗi cũ đã đóng. D12 còn xung đột về shell. | N5 phân biệt OID có thật nhưng sai với ref không tồn tại. D12 đòi cả hai nền, cùng integration SHA/tree sau commit manifest, đầy đủ hai trường đếm và bundle hai lần. |
+| L4–8 · Backend lỗi, cắt 200, `.git` nuốt lỗi, `realpath` non-strict và giờ đo neo | Có | Có | Dòng 39/42 nhắm riêng W5/W4. Dòng 41 nhắm `q18`, 43 tiêm tại marker, 44 tiêm trên tổ tiên hiện hữu. M3 ghi `strict=True` trực tiếp. §0.4 có UTC, base và blob. Các ô lượt đổi màu của nguyên mẫu khớp biên nhận. |
+
+### Kiểm sự thật và nghiệm thu
+
+| Mục | Kết quả |
+|---|---|
+| §0.1 · Mã gốc | `git rev-parse` và `wc -l` rc 0. `tl_gws.py` 2.649 dòng, blob `9ec027c2808868a05b67adc3d93ea68a574d6ec0` giống nhau ở HEAD, `417b593` và `11bd033`. Nhánh ngoài POSIX ghép đường thô. W4/W5 chọn đích và gọi writer trong cùng `try … except OSError`. `_kiem_dich_ghi` dò kho trước rồi `lstat` từng tiền tố. |
+| §0.2 · `ntpath` | `python3.{11,12,13} -IB do_ntpath.py` và từng `diff -u` đều rc `0/0`, trên 3.11.18, 3.12.3, 3.13.18. 28 đầu vào cho cùng `splitdrive`. `isabs` đổi với đường bắt đầu bằng một phân cách trên 3.13. Probe xác nhận `splitroot` xuất hiện từ 3.12, `isreserved` từ 3.13, và Linux thiếu `ctypes.WinDLL`. |
+| §0.3 · Nguyên mẫu và đột biến | `python -IB nguyen_mau_c1_r3.py` và `python -IB do_dot_bien_c1_r3.py nguyen_mau_c1_r3.py` đều rc 0 trên cả ba bản. Sáu phép `diff -u` đều rc 0. Mỗi bản cho 45 lượt N1, 18 lượt N2 và `TONG 36 LECH 0`. Bộ chạy xác nhận dòng đầu đổi màu. Nhãn và lớp tín hiệu của fragment còn chờ candidate. |
+| §0.4 · Neo M3 | `python3.11 -IB …/dem_neo.py` từ gốc kho rc 0 lúc `2026-11-19T11:51:32Z`. Lần gọi từ thư mục nguyên mẫu rc 1 vì script dùng đường dẫn tương đối từ gốc kho. P2a có 37 mục `_DB` và ba tự kiểm, mỗi neo một lần. Packet 1 có 30 mục `_DB`, ba neo tự kiểm một lần và `tu_kiem_neo_lap` hai lần. Thay đúng dòng `return` của M3 trong RAM đổi **0** số đếm. Quét nguyên văn M1–M6 có **0** lần lặp neo cũ. |
+| §0.4 · Tương thích và CI | Binding mẫu là `GetDriveTypeW(LPCWSTR) → UINT`. P2a thực sự đòi `(7,27,21)` trên nt. Ba ca `mọi` qua W4/W5 vẫn giữ điểm gọi, nhưng P2a so chuỗi đích và đường tiêm lỗi theo dạng rig. Nếu rig trả chữ ổ thường, dạng viết hoa của C1 có thể làm D5 đỏ. Packet 1 giữ các điểm gọi và helper của nó. Workflow có bundled check và phân lane manifest committed theo ref. D5 là phép xác nhận native của cả ba fragment. |
+| M1/M2 · Danh sách cho phép | Cú pháp chỉ sinh đích từ ổ tuyệt đối ASCII và các thành phần đã qua M1. Đường tương đối dùng cwd qua chính M1, rồi kiểm loại ổ trên gốc đã chọn. Không thấy nhánh cú pháp trong phạm vi C1 bỏ qua hai chốt. Các mã từ chối đều có đột biến đích. `q14` khóa ổ mạng đến từ cwd. N2 cũng kiểm lý do đúng nguyên văn. |
+| N1–N6 · L1–L7 | M1–M6 chiếu vào ba đường của §1. Sổ khớp `45 + 18 + 11 = 74`. Bảng liên tục 1–45, gồm 37 `mọi`, 8 `nt`, toàn bộ H. Ngoài nt, `t=11`, `v=8`, `h=u=0`. Trên nt, `h == u ≤ 2` đúng về số học, với điều kiện từng đột biến thực sự có đúng lượt bỏ qua như khai. N1/N2 có các đích đã đo. N3 có lỗi đích 32 bên dưới. N4 có phản chứng cho phân hạng, sổ và trạng thái. N5 có phản chứng neo/OID/numstat. N6 chặn khi thiếu phép bắt buộc. §7 giữ số kế thừa `3/0`. §6 neo điểm dừng và điều kiện E2 vào các gate cụ thể. |
+| §4c · Native | D3/D4 đo gốc và cwd. D5 gọi riêng từng fragment. D8 đo chặn alias thực tế, gồm nhánh `KHÔNG ĐO ĐƯỢC` theo chính sách và quan sát alias. D9 đo Unicode thông thường. D10 có đối chứng dương và lệnh ADMIN đã trích dẫn. D11 buộc đo `subst` trước land, với cha đích có/vắng và đối chứng ghi ngoài kho. D12 đủ tiêu chí bằng chứng T3 nhưng cần sửa chỉ dẫn shell. D3–D12, fragment candidate và T3 đều `not_run` trong phiên này. |
+| §6–8 · ADR và kích thước | Kiểm tệp tại commit land, tại cha thứ nhất và membership first-parent trên ref cục bộ cho mỗi ADR-0053/0055 ra `0/128/0`. `git diff --numstat 417b593^1 417b593` rc 0, `389/0 + 48/19 + 1/0` = **+438**. C1 cộng đúng `57–73 + 313–370 + 1` = **+371–444**. Cận trên cao hơn P2a 6 dòng và còn 6 dòng dưới 450. Numstat candidate còn chờ thi công. |
+
+### Finding còn mở
+
+| Mức · chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|
+| **P2 · N3, N4, §4b dòng 32 · Lượt đỏ đầu sau một lần bỏ qua hợp lệ** | Cả `W5.sl_to_tien` và `W5.sl_treo` đặt symlink **trên** `cfgdir`. Dòng 32 dời gốc kiểm xuống `cfgdir`, nên bỏ sót cả hai. Probe RAM dùng nguyên thân `_kiem_dich_ghi` với `lstat` giả theo fixture treo. Helper gốc trả `là liên kết tượng trưng`, còn bản thay lời gọi theo dòng 32 trả `None`. Khi chạy tiếp M3, `realpath(strict=True)` trên link treo sẽ đổi cụm thành `ghi lỗi`. Nếu probe thứ nhất báo 1314 và probe thứ hai thành công, N3 cho phép tổ hợp ấy nhưng dòng 32 làm đỏ `W5.sl_treo/lien_ket`, sai lượt khai. Bộ phân hạng đúng sẽ báo sai đích thay vì `bỏ_qua`, làm N4/D5 đỏ trên trạng thái đặc tả cho phép. | “Trong `W5.sl_treo`, đặt symlink thư mục treo tại chính `cfgdir`, giữ đích link vắng và yêu cầu đúng cụm, writer 0. Chạy đối chứng N4 với `W5.sl_to_tien` bị bỏ qua vì 1314 và `W5.sl_treo` dựng được. Dòng 32 phải `bỏ_qua` theo lượt thứ nhất, dòng 45 phải bị giết đúng lượt thứ hai.” |
+| **P2 · §4c chung và D12 · Lệnh T3 Windows có hai chỉ dẫn shell xung đột** | Phần chung đặt lệnh thường trong `cmd.exe`, còn D12 trỏ tới bước `release-bundle x2` của workflow. Bước đó khai `shell: bash`, dùng `/dev/null` và heredoc `python - <<'PY'`. Chạy nguyên văn trong `cmd.exe` không thực hiện được phép so SHA-256 bắt buộc. | “D3–D11 dùng shell như phần chung. D12 dùng shell khai cho từng bước ở workflow tại integration SHA. Trên Windows, chạy nguyên khối `release-bundle x2` bằng Git Bash và ghi shell, rc cùng hai hash. Thiếu shell hoặc thiếu bằng chứng của bước này thì T3 chưa đạt.” |
+| **P3 · §7 và D8 · Phạm vi bằng chứng 8.3** | §7 gán cả `subst` và 8.3 cho `realpath`, trong khi kỳ vọng D8 cho phép chuỗi từ vựng tự thấy `.git`. D8 có thể xanh dù chuỗi thật không đóng góp vào quyết định chặn. | “D8 đo chặn đích qua tên ngắn thực tế. D11 đo chặn đích qua `subst` và đối chiếu kết quả `realpath` với đường vật lý.” |
+
+KET_LUAN: request_changes

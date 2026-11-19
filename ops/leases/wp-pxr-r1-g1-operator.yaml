@@ -1,0 +1,44 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1416
+packet_id: WP-PXR
+revision: 1
+generation: 1
+lease_id: wp-pxr-r1-g1-operator
+role: operator
+executor: none
+reviewer: independent_readonly
+reviewer_model: 'codex gpt-6-astra trong container dieu phoi (chi doc)'
+review_class: sensitive
+target_hosts: [DESKTOP-T9R33P2]
+target_device_ids: [a5f7076e-a491-4f84-829b-8d1fbcc1c767]
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt']
+live_change: 'go Proxima 5.5.0 per-user tren Desktop bang bo go chinh thuc; Remove-ProximaUninstallResidue (ban da promote); xoa shortcut U8 va profile-u8. Khong dung VM/gateway/ASUS, khong inference, khong cai lai'
+irreversible: 'go cai dat va xoa profile-u8 khong hoan tac duoc'
+spec_path: ops/specs/wp-pxr-r1.md
+spec_hash: 5da780284704ff021f852b9e4bea85576d0a40bc4f3054ae75b5b3287046fb04
+write_set:
+- ops/acceptance/wp-pxr/RESULTS.md
+- ops/acceptance/wp-pxr/VERDICT.md
+- ops/acceptance/wp1319/MATRIX.md
+- ops/leases/wp-pxr-r1-g1-operator.yaml
+- ops/specs/wp-pxr-r1.md
+write_set_hash: 25f580286c5b90d2f9fb9b49a44f3be1bf2ecca8f4bbf355e63db3960fabd3f6
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1378
+base_sha: dde32804e7d31384ea59c456550ac4a10fe5b7ab
+granted_by: ducthangho
+granted_on_instruction: 'chủ kho 19/11 trả lời câu hỏi "Có cần gỡ bản cài Proxima hay không": "Gỡ bản cài + xoá profile thử"'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-19T08:53:06Z'
+heartbeat_at: '2026-11-19T08:53:06Z'
+lease_until: '2026-11-19T12:53:06Z'
+lease_expires_at_utc: '2026-11-19T12:53:06Z'
+max_lease_hours: 4
+review_calls_limit: 1
+review_calls_used: 0
+native_runs_limit_per_host: 1
+native_step_reruns_limit: 1
+native_runs_used: 'DESKTOP-T9R33P2 0'

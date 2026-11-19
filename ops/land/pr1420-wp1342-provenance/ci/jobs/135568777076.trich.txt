@@ -1,0 +1,10 @@
+2026-11-19T12:44:03.3643432Z Image: ubuntu-26.04
+2026-11-19T12:44:04.4096427Z ##[group]Run git config --global core.autocrlf false
+2026-11-19T12:44:04.6042477Z ##[group]Run actions/checkout@v4
+2026-11-19T12:44:12.9271528Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-11-19T12:44:12.9271935Z d89e0002f863a8fc8f374787a4dbd81e04f66c4d
+2026-11-19T12:44:14.3373886Z [command]/usr/bin/git log -1 --format=%H
+2026-11-19T12:44:14.3406649Z d89e0002f863a8fc8f374787a4dbd81e04f66c4d
+2026-11-19T12:44:14.4480299Z ##[group]Run actions/setup-python@v5
+2026-11-19T12:44:14.7250685Z ##[group]Run actions/download-artifact@v4
+2026-11-19T12:44:15.3537472Z ##[group]Run python ops/nhanh_don_duoc_test.py --gop-dich manh

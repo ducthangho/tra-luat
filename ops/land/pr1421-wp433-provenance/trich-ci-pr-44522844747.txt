@@ -1,0 +1,72 @@
+# trich log job (REST /actions/jobs/<id>/logs), run 44522844747 PR #1421 head bec60a9
+## job 135555750657 attempt1 gate-cong-cu (ubuntu-latest, 3) log_sha256=d22b6155acf8f91cf747ca86f4102e710b5f5a7d5b64082628e4aea4bff00a28
+E: Failed to fetch https://security.ubuntu.com/ubuntu/pool/universe/r/rust-ripgrep/ripgrep_15.1.0-1ubuntu1_amd64v3.deb  Could not wait for server fd - select (11: Resource temporarily unavailable) [IP: 91.189.92.24 443]
+cai_cong_cu: 'rg' cai loi (rc=100); apt-get update roi thu lai mot lan
+W: Failed to fetch mirror+file:/etc/apt/apt-mirrors.txt/dists/resolute/InRelease  Could not wait for server fd - select (11: Resource temporarily unavailable) [IP: 91.189.91.81 443]
+W: Failed to fetch mirror+file:/etc/apt/apt-mirrors.txt/dists/resolute-updates/InRelease  Could not wait for server fd - select (11: Resource temporarily unavailable) [IP: 91.189.91.81 443]
+W: Failed to fetch mirror+file:/etc/apt/apt-mirrors.txt/dists/resolute-backports/InRelease  Could not wait for server fd - select (11: Resource temporarily unavailable) [IP: 91.189.91.81 443]
+W: Failed to fetch http://security.ubuntu.com/ubuntu/dists/resolute-security/InRelease  Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4000:1::101). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2a06:bc80:0:1000::17). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2a06:bc80:0:1000::16). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4002:1::102). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2a06:bc80:0:1000::18). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4000:1::103). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4002:1::101). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4002:1::103). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4000:1::102). - connect (101: Network is unreachable) [IP: 91.189.91.83 80]
+E: Failed to fetch https://security.ubuntu.com/ubuntu/pool/universe/r/rust-ripgrep/ripgrep_15.1.0-1ubuntu1_amd64v3.deb  Connection failed [IP: 91.189.91.81 443]
+##[error]Process completed with exit code 100.
+## job 135555750697 attempt1 gate-cong-cu (ubuntu-latest, 6) log_sha256=0176a370ddf0f96fabaf650f361bc6ff4570a1245fe49a09c72ccec1966473cb
+E: Failed to fetch https://security.ubuntu.com/ubuntu/pool/universe/r/rust-ripgrep/ripgrep_15.1.0-1ubuntu1_amd64v3.deb  Could not wait for server fd - select (11: Resource temporarily unavailable) [IP: 91.189.92.24 443]
+cai_cong_cu: 'rg' cai loi (rc=100); apt-get update roi thu lai mot lan
+W: Failed to fetch mirror+file:/etc/apt/apt-mirrors.txt/dists/resolute/InRelease  Could not wait for server fd - select (11: Resource temporarily unavailable) [IP: 91.189.92.24 443]
+W: Failed to fetch mirror+file:/etc/apt/apt-mirrors.txt/dists/resolute-updates/InRelease  Could not wait for server fd - select (11: Resource temporarily unavailable) [IP: 91.189.92.24 443]
+W: Failed to fetch mirror+file:/etc/apt/apt-mirrors.txt/dists/resolute-backports/InRelease  Could not wait for server fd - select (11: Resource temporarily unavailable) [IP: 91.189.92.24 443]
+W: Failed to fetch http://security.ubuntu.com/ubuntu/dists/resolute-security/InRelease  Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4000:1::101). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4000:1::102). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2a06:bc80:0:1000::16). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4002:1::101). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2a06:bc80:0:1000::18). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4002:1::103). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4002:1::102). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2620:2d:4000:1::103). - connect (101: Network is unreachable) Cannot initiate the connection to security.ubuntu.com:80 (2a06:bc80:0:1000::17). - connect (101: Network is unreachable)
+E: Failed to fetch https://security.ubuntu.com/ubuntu/pool/universe/r/rust-ripgrep/ripgrep_15.1.0-1ubuntu1_amd64v3.deb  Could not wait for server fd - select (11: Resource temporarily unavailable) [IP: 91.189.91.82 443]
+##[error]Process completed with exit code 100.
+## job 135577552764 attempt2 gate-cong-cu (ubuntu-latest, 3) log_sha256=9127d35c6de3f33cfa07b30491fc455ef58e3059f973fd29d9a59209451451b3
+##[group]Run bash ops/cai_cong_cu.sh shellcheck
+[36;1mbash ops/cai_cong_cu.sh shellcheck[0m
+cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+##[group]Run bash ops/cai_cong_cu.sh rg
+[36;1mbash ops/cai_cong_cu.sh rg[0m
+cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+BÁN KÍNH ĐỘT BIẾN — MẢNH 3/8 (61/490 đột biến; 4 tiến trình):
+MẢNH 3/8: 61/61 đột biến bán kính 1 · ghi manh/manh-3.txt
+## job 135577552775 attempt2 gate-cong-cu (ubuntu-latest, 6) log_sha256=94376220461068b9beba03b3f713936c332860abfe3f32bd110570d698faebe7
+##[group]Run bash ops/cai_cong_cu.sh shellcheck
+[36;1mbash ops/cai_cong_cu.sh shellcheck[0m
+cai_cong_cu: 'shellcheck' ten tran da DAT, giu nguyen PATH
+##[group]Run bash ops/cai_cong_cu.sh rg
+[36;1mbash ops/cai_cong_cu.sh rg[0m
+cai_cong_cu: 'rg' ten tran da DAT, giu nguyen PATH
+BÁN KÍNH ĐỘT BIẾN — MẢNH 6/8 (61/490 đột biến; 4 tiến trình):
+MẢNH 6/8: 61/61 đột biến bán kính 1 · ghi manh/manh-6.txt
+## job 135586014307 attempt2 gate-cong-cu-gop log_sha256=9e121e6ad9b65d513502e1deb72a49361d392ffcdf15e0eb8a9150ab8a37bdae
+GOM MẢNH 8/8
+SỐ LIỆU GOM: ca=61 · đột biến=490 · lỗi đột biến=0
+## job 135577554926 attempt2 gate (ubuntu-latest) log_sha256=e9ff2efdbf93de79ecde228487e8ac1e0b10651974b7560c11ef6e4122427f33
+  "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+      "ok": true,
+  "ok": true,
+== gen_instructions selftest 44/44 ==
+== transport selftest 12/12 ==
+{"ok": false, "error": "STUB_EARLY_EXIT"}
+  "ok": true,
+== tl selftest 1781/1781 ==
+  "ok": true,
+          "command": "release-verify RELEASE_MANIFEST.json --json",
+          "command": "release-verify RELEASE_MANIFEST.json --json",
+## job 135577554926 attempt2 gate (ubuntu-latest) — dong selftest (log_sha256=e9ff2efdbf93de79ecde228487e8ac1e0b10651974b7560c11ef6e4122427f33)
+== gen_instructions selftest 44/44 ==
+== transport selftest 12/12 ==
+== tl selftest 1781/1781 ==
+== ci_phamvi_test 7/7 ==
+      "detail": "[OK] tier_full_audit_ok\n  [OK] tier_core_fails_full_audit\n  [OK] tier_full_litany_deduped\n  [OK] tier_core_size_budget\n  [OK] tier_nlm_unaffected_by_tier\n  [OK] style_template_separate_artifact\n  [OK] profile_block_binds_marker_meta\n  [OK] profile_block_no_fabrication_guard\n  [OK] profile_block_unified_env_target_split\n  [OK] profile_block_vbqppl_base_variant\n  [OK] profile_block_default_style_when_empty\n  [OK] profile_block_templates_conditional\n  [OK] audit_bad_project_instruction_fails\n  [OK] audit_bad_nlm_prompt_fails\n  [OK] version_fail_closed_missing_raises\n  [OK] version_fail_closed_empty_raises\n  [OK] version_fail_closed_invalid_raises\n  [OK] version_valid_returns_exact\n  [OK] version_allow_unversioned_dev\n  [OK] no_historical_fallback_literal\n== gen_instructions selftest 44/44 ==\n"

@@ -1,0 +1,14 @@
+bat_dau=2026-11-19T12:27:15Z sha256 dot_bien_r5b.py 1d1aa393a7eb927f84d8c37451b696ea2992f06752c94c884a7987f092500d7e
+CHOT HEAD ['2de12d38cda7d4bfe1f6f8c970e7ccd77e44a4de', '0bab340e0fe6661a12e47a1757fe715acb06679d'] sach=[]
+E1 lan=1 rc=0 [2026-11-19T12:27:16Z->2026-11-19T12:27:29Z]
+  GIẾT           e1   tệp=packet_loop.py đích=wp1342_native_job_breakaway_tuong_minh [sạch=DAT đột biến=DO] xanh=wp1342_native_job_breakaway_ngam+wp1342_native_job_thuan ['DAT', 'DAT'] dấu hiệu đòi=['J4: breakaway tường minh được nhận']
+                 thông điệp: ('J4: breakaway tường minh được nhận', 0, [['ok', 13316], ['ok', 19316]], [['ok', 14060], ['ok', 1316]])
+                 observed sạch: ({'doi_chung': [['ok', 18344], ['ok', 3076]], 'do': [['ok', 9016], ['loi', 5]], 'tien_trinh_chay_ca_trong_job': (1, 0, 0)}, [])
+  TỔNG: 1/1 giết đúng dấu hiệu
+E1 lan=2 rc=0 [2026-11-19T12:27:29Z->2026-11-19T12:27:42Z]
+  GIẾT           e1   tệp=packet_loop.py đích=wp1342_native_job_breakaway_tuong_minh [sạch=DAT đột biến=DO] xanh=wp1342_native_job_breakaway_ngam+wp1342_native_job_thuan ['DAT', 'DAT'] dấu hiệu đòi=['J4: breakaway tường minh được nhận']
+                 thông điệp: ('J4: breakaway tường minh được nhận', 0, [['ok', 13644], ['ok', 2748]], [['ok', 6852], ['ok', 1224]])
+                 observed sạch: ({'doi_chung': [['ok', 14596], ['ok', 10764]], 'do': [['ok', 19380], ['loi', 5]], 'tien_trinh_chay_ca_trong_job': (1, 0, 0)}, [])
+  TỔNG: 1/1 giết đúng dấu hiệu
+ket_thuc=2026-11-19T12:27:42Z
+XONG (khoa da nha)

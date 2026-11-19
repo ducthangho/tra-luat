@@ -1,0 +1,169 @@
+# HO SO LAND — packet #1342 WP1174-WINDOWS-BACKEND r5 (bac r1d-a1-ii: phep do khang thoat job), lease g1, qua PR #1420. Khuon: ops/land/pr1407-wp1342-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (d89e000), landed TRUE: bon moc §10.2.2 cua ci.yml 44526317417 measured passed (run, checkout 39/39,
+#   gate output 39/39 bang danh_gia_gate.py v2, Workflow definition qua wd-run 44534420744).
+# MUC TIEU: chi them phep do vao .claude/dev/packet_loop_test.py (+233/-0): J4 breakaway tuong minh (kem doi chung LimitFlags), J5 breakaway
+#   ngam (IsProcessInJob), J12 job long, S6 ca thuan fixture mo rong; packet_loop.py giu nguyen blob f98d3f53.
+# WINDOWS: do native TRUOC merge tren Desktop DESKTOP-T9R33P2 (Windows 11 26300) tren HEAD 2de12d3; khong CI Windows cho packet_loop.
+#   KHONG do lai sau merge tren cay merge (khac pr1407) — ly do: cay merge d89e000 co cung blob packet_loop.py va packet_loop_test.py voi
+#   head 2de12d3 (linux/nghiem-thu-d89e000.txt), cha thu nhat f8b9cdd khong cham hai tep ay; xem khong_do_duoc.
+# UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head 2de12d3 (issuecomment-7009299599, app null).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
+# Readback tho: ops/land/pr1420-wp1342-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-19T13:3xZ.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS
+input_packet_generations:
+  - packet_issue: 1342
+    packet_id: wp1342
+    revision: 5
+    generation: 1
+    lease_id: wp1342-r5-g1-claude
+    ghi_chu: 'Executor Claude Fable 5.2 do phien dieu phoi nay mo. Rut han lease sau merge (lease.thu_hoi_cuoi).'
+authorized_head_sha: 2de12d38cda7d4bfe1f6f8c970e7ccd77e44a4de
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1420#issuecomment-7009299599
+authorization_ghi_chu: >-
+  measured — readback-audit-7009299599.json + readback-pr1420-comments.json: comment 7009299599, user ducthangho, author_association OWNER,
+  created_at = updated_at 2026-11-19T12:36:22Z, performed_via_github_app null; than human_exact_head_audit.v1 packet wp1342 revision 5
+  generation 1 pr 1420 reviewed_sha 2de12d3 (= head), reviewed_tree 0bab340e (= tree head, linux/nghiem-thu-d89e000.txt), spec_sha256
+  0550af21 (= lease spec_hash, dac-ta.txt), verdict approve, assurance human_audited, review_axes [spec, standards_security],
+  open_findings []. Merged_at 12:42:01Z (readback-pr-1420.json). Lua chon cach merge qua AskUserQuestion: loi_khai_co_neo. CAVEAT #566:
+  ai bam merge khong do duoc (merged_by la danh tinh token).
+land_operator: 'measured — readback-pr-1420.json: merged_at 2026-11-19T12:42:01Z, merge_commit_sha d89e000, state closed, draft false.'
+merge_method: merge
+merge_commit: d89e0002f863a8fc8f374787a4dbd81e04f66c4d
+merge_commit_tree: e7b257c1a3ca32fda786609d4476552a1584085c
+merge_commit_parents: [f8b9cdd81879f25c22709c60e62b69a9c314a472, 2de12d38cda7d4bfe1f6f8c970e7ccd77e44a4de]
+merge_ghi_chu: >-
+  measured — readback-commit-d89e000.json + linux/nghiem-thu-d89e000.txt: cha thu nhat f8b9cdd (master da tien tu base lease 4eda94e), cha
+  thu hai 2de12d3. numstat d89e000^1..d89e000 = 4eda94e..2de12d3: dung 1 tep write set .claude/dev/packet_loop_test.py +233/-0 (<= 450,
+  ADR-0053). Blob packet_loop.py f98d3f53 bang nhau tai base 4eda94e, head, merge; blob packet_loop_test.py 6699ecb7 tai head = merge.
+  git diff --check d89e000^1 d89e000 rc 0. Mot commit, khong push them (readback-pr1420-commits.json).
+pre_merge_checks:
+  - name: 'CI PR tren head cuoi'
+    sha: 2de12d38cda7d4bfe1f6f8c970e7ccd77e44a4de
+    conclusion: success
+    nguon: [readback-runs-head-2de12d3.json, readback-checkruns-head-2de12d3.json]
+    ghi_chu: >-
+      measured — readback-runs-head-2de12d3.json: ci.yml pull_request 44514096057 success; launcher (Windows that) 44514096068 skipped (khong
+      tinh dat); readback-checkruns-head-2de12d3.json: 42 check run, 41 success + 1 skipped, 0 that bai. CI Ubuntu 1/2.
+  - name: 'Codex connector tren head cuoi'
+    sha: 2de12d38cda7d4bfe1f6f8c970e7ccd77e44a4de
+    conclusion: 'sach'
+    nguon: [readback-pr1420-comments.json, readback-pr1420-reviews.json, readback-pr1420-review-comments.json]
+    ghi_chu: >-
+      measured — readback-pr1420-comments.json: 7007707916 codex-review-receipt "Didn't find any major issues" Reviewed commit 2de12d38cd
+      (kich @codex review 7007669643); summary 7007677598: code_review commit_sha 2de12d3, has_any_findings false, status completed.
+      reviews va review-comments rong. Codex PR 1/10.
+  - name: 'Do native Windows cua phien dieu phoi (Desktop, truoc merge)'
+    sha: 2de12d38cda7d4bfe1f6f8c970e7ccd77e44a4de
+    conclusion: success
+    nguon: [windows-native/desktop/wp1342r5-out-20261119T120908Z/TOM-TAT.txt, windows-native/desktop/wp1342r5-out-20261119T120908Z/DB.stdout.txt, windows-native/desktop/wp1342r5-out-20261119T120908Z/E1-LAI.txt, windows-native/desktop/NGUON-GOC.txt, windows-native/desktop/win1420.zip.b64, linux/n5-1420.txt, linux/n5_1420_tai_lap.py]
+    ghi_chu: >-
+      measured — windows-native/desktop/wp1342r5-out-20261119T120908Z/TOM-TAT.txt (Desktop Windows 11 26300, Python 3.12.10, admin=0,
+      12:09:08Z–12:19:09Z, khoa KHOA.txt giu roi nha): CHOT HEAD 2de12d3 tree 0bab340e sach=[] va BASE 4eda94e tree ceba0869 sach=[],
+      sach_sau=[]; BASE rc 0, HEAD rc 0; LAP-J4/J5/J12 rc 0 (moi ca 3/3, LAP-*.stdout.txt); DB-KIEM-NEO 6/6 neo OK + parse OK; DB rc 1:
+      5/6 giet dung dau hieu (e2, e1c GIET_DOI_CHUNG, a1@J12, f1, f2) + e1 KHONG DO vi gian do (dot_bien_r5.py in KQ_R5 SAU khoi
+      TemporaryDirectory, rmtree gap WinError 32). E1-LAI.txt (12:27:15Z–12:27:42Z, dot_bien_r5b.py 1d1aa393 = ban goc + 3 cho: ignore_cleanup_errors
+      hai noi, in KQ_R5 truoc khi don; vaR5b.py dung tren Desktop tu ban goc da kiem bam): e1 GIET 2/2 dung dau hieu "J4: breakaway tuong minh
+      duoc nhan", vế sach DAT, xanh J5+J1 DAT; CHOT HEAD 2de12d3 sach=[]. => N7 Windows 6/6. N5/N6: linux/n5-1420.txt (tai lap tu log trong
+      ho so): BASE 55 ID, HEAD 59 ID, ca 55 ID base rc 0 hai ve, ID moi dung 4 (J4, J5, J12, S6); J4 executed 1 passed 1 doi_chung
+      [ok, ok] do [ok, loi 5]; J5 ((1,1,0),(1,1,0)); J12 nhanh B; phan chung (doi rc mot ID base o HEAD) => DO rc 1. Ban chep: zip dung trong
+      bo nho tren Desktop (khong ghi tep), sha256 785269d6…0bfe = dong ZIPSHA Desktop in ra, 147 tep (NGUON-GOC.txt); do_r4.py 98ff6d6f,
+      dot_bien_r5.py b4afc300, do1420.py c50d92f5, do1420e1.py 01c1122e — khop bam da kiem truoc khi chay. Comment ket qua tren PR: 7009146810.
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 44526317417
+    run_attempt: 1
+    sha: d89e0002f863a8fc8f374787a4dbd81e04f66c4d
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44526317417.json, readback-jobs-44526317417.json, readback-runs-merge-d89e000.json, danh-gia-gate-output-44526317417.txt, danh_gia_gate.py, phan-chung-buoc-44526317417.txt, wd/wd-44526317417.json, wd/ci-provenance-thu-wd-44534420744.log, wd/readback-run-44534420744.json, wd/readback-jobs-44534420744.json, wd_dl.py]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha d89e000, run_attempt 1.'
+    moc_checkout: 'measured — ci/provenance.yaml + wd/ci-provenance-thu-wd-44534420744.log: 39/39 job checkout passed d89e000.'
+    moc_workflow_definition: >-
+      measured — ci/provenance.yaml moc.workflow_definition passed (ops/ci_provenance.py thu --wd-run 44534420744, wd/ci-provenance-thu-wd-44534420744.log):
+      path .github/workflows/ci.yml, oid d89e000, blob a1db88d9433fd548e36dcd598a63135f5fac7b73, sha256 d1201a76…82f5; wd/wd-44526317417.json
+      (artifact workflow-definition-44526317417 tai qua wd_dl.py); luot do wd/readback-run-44534420744.json (ops-do-workflow-definition.yml,
+      workflow_dispatch 13:32:13Z, success).
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-44526317417.txt (danh_gia_gate.py v2 sha256 539fed68): passed 39/39; gate-packet-loop "GOM: ĐẠT · 16
+      mảnh · 1577 ca bắt buộc" (= 1573 cua pr1407 + 4 ID moi). phan-chung-buoc-44526317417.txt: xoa dau hieu 3 buoc (gate selftest,
+      gate-ops, gate-packet-loop --gom) => not_measured, rc 0 ca ba.
+  - name: 'launcher-windows.yml push master tren DUNG merge SHA'
+    run_id: 44526317637
+    run_attempt: 1
+    sha: d89e0002f863a8fc8f374787a4dbd81e04f66c4d
+    conclusion: success
+    nguon: [readback-run-44526317637.json, readback-jobs-44526317637.json, launcher-windows-44526317637.trich.txt, trich_launcher.py]
+    ghi_chu: >-
+      measured — launcher-windows-44526317637.trich.txt: windows-latest "341/341 ca DA CHAY QUA (tong 428, bo qua 87, hong 0)", "DOT BIEN:
+      592/592 dat"; ubuntu-latest "426/426 ca DA CHAY QUA (tong 428, bo qua 2, hong 0)", "DOT BIEN: 751/751 dat". Lane nay do launcher_test,
+      KHONG do packet_loop (write set #1342) va KHONG thuoc bon moc §10.2.2.
+bookkeeping:
+  - {item: 'rut han lease wp1342-r5-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — PR ho so nay (phien dieu phoi), chua merge luc ghi.'}
+  - {item: 'dong Issue #1342', ket_qua: 'not_applicable — readback-issue-1342.json open; KHONG dong: cac bac sau cua WP1174-WINDOWS-BACKEND con lai.'}
+  - {item: 'phat hanh', ket_qua: 'not_applicable — chi tep .claude/dev (khong vao goi); khong bump VERSION.'}
+# ---- het truong chuan
+packet_id: wp1342
+packet_issue: 1342
+packet_ten: WP1174-WINDOWS-BACKEND
+revision: 5
+generation: 1
+pham_vi_land: '.claude/dev/packet_loop_test.py +233/-0 (bac r1d-a1-ii).'
+environment: cloud
+operating_system: linux
+recorded_by: claude-session — fork cua phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS (ban nhap, phien dieu phoi ra soat).
+
+spec:
+  path: ops/specs/WP1174-WINDOWS-BACKEND-r5.md
+  blob: fca45685d307fb4aee8f926501e09622101bb780
+  sha256: 0550af2102ab4616f2639572195bb28bcb01346d35d5be70af62284df53e0791
+  nguon: 'measured — dac-ta.txt: git rev-parse origin/ops/wp1342-r5-spec:<spec> = fca45685; sha256 = lease spec_hash.'
+  review_dac_ta: 'thuat_lai — lease spec_duyet: 6 luot Codex offline (ops/reviews/wp1342-spec-r5/ tren nhanh ops/wp1342-r5-spec), luot 6 approve tren 4eda94e; chu kho duyet bam 0550af21 va pham vi chi tep test 19-11 (ADR-0067).'
+
+lease:
+  lease_id: wp1342-r5-g1-claude
+  path: ops/leases/wp1342-r5-g1-claude.yaml (nhanh ops/wp1342-r5-spec)
+  write_set_so_tep: 1
+  thu_hoi_cuoi: >-
+    RUT HAN sau merge: lease_until 2026-11-20T10:40:00Z -> 2026-11-19T13:05:00Z (commit 8a89ff0), kem ngan sach (budget_cuoi_ghi_chu:
+    Codex PR 1/10; CI Ubuntu 1/2; Windows native 2/3); tep lease-wp1342-r5-g1-claude-sau-rut-han.yaml.txt (git show 8a89ff0).
+    ai-dang-giu-sau-rut-han.txt (13:36:10Z, checkout chinh sau fetch --prune +refs/heads/*; may chu 345 ref, cuc bo thieu 0, thua 0):
+    wp1342-r5-g1-claude HẾT_HẠN; .claude/dev/packet_loop_test.py nay do lease KE TIEP wp1422-r1-g1-claude (nhanh ops/wp1422-r1, phien khac)
+    giu — NGƯỜI_GIỮ 1, rc 11: dung, khong phai lease nay.
+  diff_do: 'measured — linux/nghiem-thu-d89e000.txt numstat d89e000^1..d89e000: 1 tep, +233/-0.'
+
+trang_thai_packet:
+  merged: true
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate: run 44526317417 tren d89e000 run/checkout/gate_output/workflow_definition measured passed. (2) lease nha:
+    DAT (wp1342-r5 HẾT_HẠN). (3) bookkeeping: ho so nay. (4) review neo 2de12d3: connector sach + audit chu kho. (5) uy quyen: audit tu dang
+    7009299599. (6) muc tieu: J4/J5/J12/S6 native passed, N5 55/55 + 4 ID moi, N7 Windows 6/6 (e1 qua gian r5b). (7) tran: Codex PR 1/10,
+    CI 1/2, Windows native 2/3, kich thuoc 233/450.
+  canh_bao_cho_chu_kho: >-
+    (i) e1 can chay lai bang gian do da va (dot_bien_r5b.py); luot dau ghi nguyen trang KHONG DO. (ii) Khong do native lai tren cay merge (khac
+    pr1407); blob hai tep packet_loop* tai merge = head.
+review:
+  so_loi_goi_codex: 'measured — readback-pr1420-comments.json: PR 1/10: connector tren 2de12d3 sach. Ngoai ngan sach PR: 6 luot Codex offline review dac ta (lease).'
+
+nghiem_thu:
+  N1: 'measured — danh-gia-gate-output-44526317417.txt: GOM DAT 16 manh 1577 ca bat buoc tren d89e000 (CI PR 44514096057 tren head cung GOM DAT 1577 — loi_khai_co_neo cua executor, khong chep log).'
+  N2_N3: 'measured — linux/nghiem-thu-d89e000.txt: packet_loop.py blob f98d3f53 khong doi; numstat 1 tep. Bon ve + phan chung cua bo kiem r4/r5: loi_khai_co_neo than PR #1420.'
+  N4_N7_windows: 'measured — windows-native/desktop/wp1342r5-out-20261119T120908Z/TOM-TAT.txt, windows-native/desktop/wp1342r5-out-20261119T120908Z/E1-LAI.txt, linux/n5-1420.txt (chi tiet: pre_merge_checks[2]).'
+  N8: 'loi_khai_co_neo — than PR #1420: ruff F tap diagnostic head == base 16 dong; adr-song, doctrine-scan rc 0; diff --check sach; eol_policy ok true.'
+
+khong_do_duoc:
+  - 'Do native lai tren cay merge d89e000 (khong chay; blob write set tai merge = head).'
+  - 'Lua chon cach merge (khong co hien vat GitHub ghi nguoi bam).'
+  - 'N2/N3/N8 phan chung tren ban sao cua executor: chi loi khai than PR #1420.'
+  - 'VM tra-luat-win: khong dung (a1@J12 da ra nhanh B tren Desktop).'

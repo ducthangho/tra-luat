@@ -1,0 +1,33 @@
+# do 2026-11-19T13:40:37Z, clone rieng scratchpad (git 2.43.0)
+## rev-parse merge, tree, cha
+c6487ff884c61085c939a75a37c657006ee690f2
+5b91f7443f45cad0068ab1d290c1b6824699d56b
+d89e0002f863a8fc8f374787a4dbd81e04f66c4d
+bec60a9cf3757a9beedab45241a50d6aa2169fe7
+## tree head
+8b7a4e4fd8d4e047b39477b84a55cd16f8373980
+## numstat c6487ff884c61085c939a75a37c657006ee690f2^1..c6487ff884c61085c939a75a37c657006ee690f2
+310	0	scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py
+29	2	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled.py
+## numstat base 96b6a33d770f7539a3eacbebdc215f87ded4ea7f..bec60a9cf3757a9beedab45241a50d6aa2169fe7
+310	0	scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py
+29	2	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled.py
+## blob merge / head / base
+scripts/tl_gws.py 949c33f5750fc012e413217e452d4f9777b523e9 949c33f5750fc012e413217e452d4f9777b523e9 9ec027c2808868a05b67adc3d93ea68a574d6ec0
+scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py 620a9f0129c5064306c38d5793a2f66d6270c73f 620a9f0129c5064306c38d5793a2f66d6270c73f 96b6a33d770f7539a3eacbebdc215f87ded4ea7f:scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py
+VANG
+scripts/tl_test_fragments_bundled.py 13d30b08c0af11278b80c34ee9eeb8d53de8248a 13d30b08c0af11278b80c34ee9eeb8d53de8248a 317494012c52de6b241063656a33e802ca103e85
+## sha256 tl_gws.py tai merge
+22baf3fd97b6263545c763865013f1445e034c65e1ff7e84cdb819dda39cb9c8  -
+## diff --check
+rc=0
+## release-verify --strict tai c6487ff884c61085c939a75a37c657006ee690f2 (manifest committed)
+rc=2
+ok False 185 185 ['scripts/tl_gws.py', 'scripts/tl_test_fragments_bundled.py']
+## release-verify --strict tai o2/man (PR #1423 head 5a29b41f852bf35b884a65ce14d3040d75d78200)
+rc=0
+ok True 185 185 []
+## numstat c6487ff884c61085c939a75a37c657006ee690f2..o2/man
+7	7	RELEASE_MANIFEST.json

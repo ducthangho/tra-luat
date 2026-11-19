@@ -1,0 +1,3 @@
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'

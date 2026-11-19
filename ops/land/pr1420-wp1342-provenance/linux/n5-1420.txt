@@ -1,0 +1,14 @@
+## python3 linux/n5_1420_tai_lap.py windows-native/desktop/wp1342r5-out-20261119T120908Z
+B 55 H 59 lech/do [] moi ['wp1342_native_job_breakaway_ngam', 'wp1342_native_job_breakaway_tuong_minh', 'wp1342_native_job_long', 'wp1342_pure_spawn_fx_mo_rong']
+wp1342_native_job_breakaway_ngam executed 1 passed 1 observed (((1, 1, 0), (1, 1, 0)), [('chau', 12768, 134395642392206871)])
+wp1342_native_job_breakaway_tuong_minh executed 1 passed 1 observed ({'doi_chung': [['ok', 14416], ['ok', 6720]], 'do': [['ok', 13152], ['loi', 5]], 'tien_trinh_chay_ca_trong_job': (1, 0, 0)}, [])
+wp1342_native_job_long executed 1 passed 1 observed (('B', [1, 1, 0, 1, 1, 0]), [('san_sang', 9924, 134395642423140332), ('truoc_gan', 15452, 134395642430776221), ('chau', 8860, 134395642431646973)])
+N5: DAT
+rc=0
+## phan chung --phan-chung
+B 55 H 59 lech/do ['wp1174_admission_valid'] moi ['wp1342_native_job_breakaway_ngam', 'wp1342_native_job_breakaway_tuong_minh', 'wp1342_native_job_long', 'wp1342_pure_spawn_fx_mo_rong']
+wp1342_native_job_breakaway_ngam executed 1 passed 1 observed (((1, 1, 0), (1, 1, 0)), [('chau', 12768, 134395642392206871)])
+wp1342_native_job_breakaway_tuong_minh executed 1 passed 1 observed ({'doi_chung': [['ok', 14416], ['ok', 6720]], 'do': [['ok', 13152], ['loi', 5]], 'tien_trinh_chay_ca_trong_job': (1, 0, 0)}, [])
+wp1342_native_job_long executed 1 passed 1 observed (('B', [1, 1, 0, 1, 1, 0]), [('san_sang', 9924, 134395642423140332), ('truoc_gan', 15452, 134395642430776221), ('chau', 8860, 134395642431646973)])
+N5: DO
+rc=1

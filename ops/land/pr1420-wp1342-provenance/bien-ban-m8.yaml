@@ -1,0 +1,42 @@
+# Bien ban M8 (ADR-0060) dong WP #1342 WP1174-WINDOWS-BACKEND r5 (bac r1d-a1-ii) — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1420-wp1342-land-evidence.yaml. Audit human_audited chu kho tu dang 7009299599 tren 2de12d3.
+# Moc §10.2.2 run 44526317417 (ci.yml push master tren d89e000): run/checkout/gate_output measured passed; workflow_definition
+# measured passed (wd-run 44534420744).
+packet: wp1342
+revision: 5
+generation: 1
+spec_hash: 0550af2102ab4616f2639572195bb28bcb01346d35d5be70af62284df53e0791
+head_da_review: 2de12d38cda7d4bfe1f6f8c970e7ccd77e44a4de
+tree_h: 0bab340e0fe6661a12e47a1757fe715acb06679d
+review:
+  offline: 'khong goi Codex offline tren ma; 6 luot Codex offline chi review DAC TA r5 (ops/reviews/wp1342-spec-r5/ tren nhanh ops/wp1342-r5-spec), luot 6 approve'
+  connector: 'readback-pr1420-comments.json: 7007707916 codex-review-receipt "Didn''t find any major issues" tren 2de12d3 (kich @codex review 7007669643); tom tat 7007677598: code_review 2de12d3 completed, has_any_findings false; reviews va review-comments rong'
+  human_audit: 'issuecomment-7009299599 human_exact_head_audit.v1 approve tren 2de12d3 tree 0bab340e spec 0550af21 (chu kho tu dang, performed_via_github_app null)'
+windows:
+  phan_loai: required
+  nguon: 'duong .claude/dev/ (ADR-0060 M3). Lease: Windows native <= 3; Desktop DESKTOP-T9R33P2 (Windows 11 26300); khong CI Windows cho packet_loop.'
+  ket_qua: 'measured truoc merge tren HEAD 2de12d3 — windows-native/desktop/wp1342r5-out-20261119T120908Z/TOM-TAT.txt: BASE/HEAD rc 0, LAP-J4/J5/J12 3/3, DB 5/6 + E1-LAI.txt e1 GIET 2/2 (gian r5b) => N7 6/6; linux/n5-1420.txt: N5 55 ID base rc 0 hai ve, 4 ID moi, J4/J5/J12 passed 1, phan chung DO rc 1. Khong do lai tren cay merge (blob write set tai merge = head).'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1420#issuecomment-7009299599
+duyet_chu_kho_ghi_chu: 'audit tu dang 12:36:22Z 19-11, truoc merge 12:42:01Z; lua chon cach merge trong phien dieu phoi (loi khai).'
+merge_commit: d89e0002f863a8fc8f374787a4dbd81e04f66c4d
+tree_m: e7b257c1a3ca32fda786609d4476552a1584085c
+ci_master:
+  run_id: 44526317417
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44526317417.txt); gate-packet-loop "GOM: ĐẠT · 16 mảnh · 1577 ca bắt buộc".'
+nghiem_thu:
+  N1: passed  # danh-gia-gate-output-44526317417.txt: GOM DAT 1577 (= 1573 + 4 ID moi)
+  N2: passed  # linux/nghiem-thu-d89e000.txt: packet_loop.py blob f98d3f53 khong doi; bon ve + phan chung bo kiem: loi khai than PR #1420
+  N3: passed  # linux/nghiem-thu-d89e000.txt: numstat 1 tep; tap ID moi dung 4 (linux/n5-1420.txt)
+  N4: passed  # S6 HEAD-wp1342_pure_spawn_fx_mo_rong rc 0 tren Desktop; f1/f2 GIET (DB.stdout.txt)
+  N5: passed  # linux/n5-1420.txt: 55 ID base rc 0 hai ve; phan chung DO rc 1
+  N6: passed  # linux/n5-1420.txt + LAP-*: J4/J5/J12 executed 1 passed 1, lap 3/3
+  N7: passed  # DB.stdout.txt + E1-LAI.txt: e1 e2 e1c a1@J12 f1 f2 GIET dung dau hieu (e1 qua gian r5b 1d1aa393)
+  N8: passed  # linux/nghiem-thu-d89e000.txt: diff --check 0, numstat 1 tep +233; ruff/adr-song/doctrine-scan/eol: loi khai than PR #1420
+lease_cuoi: wp1342-r5-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed   # wd/wd-44526317417.json + ci/provenance.yaml (thu --wd-run 44534420744)
+  gate_output: passed

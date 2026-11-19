@@ -3099,11 +3099,54 @@ def _quyen_hop_le(q, khoa: str, mien) -> bool:
                          and type(q["generation"]) is int and type(q["sha"]) is str and bool(SHA_RE.match(q["sha"])))
 
 
+KHOA_ADVISORY_MO_LAI = frozenset(("schema", "head", "identity", "verdict", "finding_ids", "assurance", "bang_lop"))
+
+
+def _1174_advisory_reopen_lane(st: dict, a) -> bool:
+    """#1422 — ĐÚNG MỘT lane: `mo-lai ci-do` từ approved_pending, trong giao dịch target WP1174 (admission khớp proof theo đúng phép
+    `_1174_target_matches` mà `_1174_review` dùng), reviewer `codex_service`. Thiếu một vế ⇒ False ⇒ đường ADR-0054 cũ, không đổi."""
+    tx = globals().get("_1174_TRANSACTION")
+    admission = tx.get("admission") if type(tx) is dict else None
+    return (a.nguyen_nhan == "ci-do" and st["state"] == "approved_pending" and type(admission) is dict
+            and type(st.get("reviewer_identity")) is dict and st["reviewer_identity"].get("execution_surface") == "codex_service"
+            and _1174_target_matches(admission))
+
+
+def _1174_advisory_reopen_receipt(st: dict, a, h: str) -> dict:
+    """#1422 — biên nhận advisory `wp1174_service_advisory.v1` của reviewer `codex_service` để mở lại `ci-do` trên `h` (= pending_sha).
+    Chỉ thay LỚP KIỂM BIÊN NHẬN PHÂN LOẠI: trả cùng hình dạng `_du_dieu_kien_approve` để `check_refs`, connector, `_kiem_ci` (CI đỏ thật),
+    same-failure và lần ghi của `cmd_mo_lai` chạy không đổi. Tập khoá ĐÓNG, so khớp đóng khoá với state; mọi vi phạm ⇒ RC_BIEN_NHAN trước mọi ghi."""
+    nhan = "mo-lai ci-do advisory (reviewer codex_service)"
+    try:
+        d = _1174_json(raw := Path(a.bien_nhan).read_bytes())  # loader nghiêm của `record-review` service: khoá trùng/không canonical ⇒ từ chối
+    except (TypeError, OSError, ValueError, RecursionError) as ex:  # thiếu cờ / không đọc được / không phải JSON đều là KHÔNG ĐO ĐƯỢC
+        _die(RC_BIEN_NHAN, f"{nhan}: --bien-nhan phải là JSON canonical đọc được ({type(ex).__name__}: {ex})")
+    if type(d) is not dict or set(d) != KHOA_ADVISORY_MO_LAI:
+        _die(RC_BIEN_NHAN, f"{nhan}: biên nhận {a.bien_nhan} phải là ánh xạ có ĐÚNG tập khoá {sorted(KHOA_ADVISORY_MO_LAI)}")
+    ids, lop, la_slug = d["finding_ids"], d["bang_lop"], SLUG_RE.fullmatch
+    lop_ok = type(lop) is list and bool(lop) and all(
+        type(x) is dict and set(x) == {"slug", "hang", "check_refs"} and type(x["slug"]) is str and bool(la_slug(x["slug"]))
+        and type(x["hang"]) is str and x["hang"] in HANG_LOP for x in lop) and len(lop) == len({x["slug"] for x in lop})
+    ids_ok = type(ids) is list and bool(ids) and all(type(x) is str and bool(la_slug(x)) for x in ids)
+    loi = [ten for ten, dung in (
+        ("schema", d["schema"] == "wp1174_service_advisory.v1"), ("assurance", d["assurance"] == "advisory_review"),
+        ("verdict", d["verdict"] == "changes_requested"),
+        ("head", d["head"] == h),
+        ("identity", type(d["identity"]) is dict and d["identity"] == st["reviewer_identity"]),
+        ("finding_ids", ids_ok and ids == sorted(set(a.finding_id or []))),
+        ("bang_lop", lop_ok),
+        ("slug-bang-lop", lop_ok and ids_ok and {x["slug"] for x in lop} == set(ids))) if not dung]
+    if loi:
+        _die(RC_BIEN_NHAN, f"{nhan}: biên nhận {a.bien_nhan} không đạt {loi}")
+    return {"tep": str(a.bien_nhan), "sha256": hashlib.sha256(raw).hexdigest(), "p3": sorted(x["slug"] for x in lop if x["hang"] == "P3"), "lop": lop}
+
+
 def cmd_mo_lai(a, state_dir: Path) -> int:
     """M2 — `ci-do`: từ approved_pending (head = pending_sha), mọi check khai trong biên nhận là check ĐỎ THẬT trên head và connector không
     còn P0–P2 ⇒ running. `connector`: (endpoint, id) của biên nhận phủ BẰNG ĐÚNG P0–P2 connector trên head ⇒ cho_chu_kho, từ approved_pending
     hoặc từ running khi quyền mở lại hiện hành là `ci-do` cùng generation, cùng head. Slug từ bảng lớp biên nhận H (I11), cộng bộ đếm
-    same-failure; quyền `mo_lai_tu` bị THAY (I6). Mọi đầu vào xác thực TRƯỚC `_xet_dung` và lần ghi duy nhất (I4/I5)."""
+    same-failure; quyền `mo_lai_tu` bị THAY (I6). Mọi đầu vào xác thực TRƯỚC `_xet_dung` và lần ghi duy nhất (I4/I5).
+    #1422: riêng `ci-do` ở lane target có reviewer `codex_service`, lớp biên nhận là `_1174_advisory_reopen_receipt`; lớp đo CI/connector không đổi."""
     st = _load(state_dir, a.packet)
     nc, ml, connector = st.get("ngu_canh_lease"), st.get("mo_lai_tu"), a.nguyen_nhan == "connector"
     sau_ml = next((st["history"][i:] for i in range(len(st["history"]) - 1, -1, -1) if st["history"][i].get("event") == "mo_lai"), [])
@@ -3115,7 +3158,9 @@ def cmd_mo_lai(a, state_dir: Path) -> int:
     h = ml["sha"] if tu_ci else st["pending_sha"]
     if not a.finding_id:
         _die(RC_ARG, "mo-lai phải có ít nhất một --finding-id (I3: tập bằng chứng dương rỗng ⇒ không đạt)")
-    bn = _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan, verdict="changes_requested", reviewed_sha=h, finding_id=a.finding_id))
+    # #1422: lane target WP1174 có reviewer `codex_service` nộp biên nhận advisory (như `record-review` cùng lane); mọi lane khác giữ vị từ ADR-0054.
+    bn = _1174_advisory_reopen_receipt(st, a, h) if _1174_advisory_reopen_lane(st, a) else \
+        _du_dieu_kien_approve(st, argparse.Namespace(root=a.root, bien_nhan=a.bien_nhan, verdict="changes_requested", reviewed_sha=h, finding_id=a.finding_id))
     khoa = "connector_refs" if connector else "check_refs"
     dung = (lambda r: type(r) is list and len(r) == 2 and r[0] in EP_CONNECTOR and type(r[1]) is int) if connector else (
         lambda r: type(r) is list and len(r) == 2 and all(type(y) is str and y.strip() for y in r))  # ci-do: [workflow, job] — định danh I7

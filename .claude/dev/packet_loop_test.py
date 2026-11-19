@@ -16337,7 +16337,7 @@ def _target_context1303(c):
             m._1174_TRANSACTION=previous;m._1174_TARGET_AUTHORITY.reset(token)
 
 
-def _target_chain1303_one(c, native_identity=None, executor_identity=None, focused=False):
+def _target_chain1303_one(c, native_identity=None, executor_identity=None, focused=False, wp1422=None):
     """Real parser/canonical resolver/I2/reducers; only external authority/OS transport is synthetic."""
     import contextlib,copy,io
     from unittest.mock import patch
@@ -16461,6 +16461,9 @@ def _target_chain1303_one(c, native_identity=None, executor_identity=None, focus
             assert pending["bien_nhan_approve"]["sha256"]==hashlib.sha256(receipt.read_bytes()).hexdigest()
             assert pending["bien_nhan_approve"]["tep"]==str(receipt)
         invoke("record-review",*review,expect=8,reason=native_reason or "advisory attempt/head")
+        if wp1422 is not None:
+            # #1422: the reopen cases take over at the real approved_pending target; nothing below runs for them.
+            return wp1422(dict(m=m,c=c,w=w,head=head,invoke=invoke,pending=pending,identity=identity,record=record,target=target))
         if native_identity is not None and not focused:
             # Supplemental predicate checks reuse the actual validated native
             # receipt and resolver proof after the positive real-router oracle.
@@ -16966,6 +16969,140 @@ _WP1303_LINUX_CASES = frozenset(("wp1303_target_human_chain","wp1303_durability_
 _WP1303_R4_MUTANTS = frozenset(("wp1303_closed_router_error","wp1303_git_graft","wp1303_git_index","wp1303_git_namespace",
     "wp1303_git_shallow","wp1303_human_private_inputs","wp1303_path_precondition","wp1303_reused_barrier_status",
     "wp1303_seed_upper_oracle","wp1303_snapshot_bytes"))
+
+# --- #1422 MO-LAI-TARGET-SERVICE r1 (`ops/specs/wp1422-r1/SPEC.md`): `mo-lai ci-do` ở lane target có reviewer `codex_service` nhận biên nhận
+# advisory. Hai ca dựng lane THẬT bằng `_target_chain1303_one` (router/resolver/I2/reducer thật) rồi tiếp quản ở approved_pending. Mỗi bước âm
+# đổi ĐÚNG MỘT thứ so với bước dương và đòi THÔNG BÁO của đúng lớp từ chối (oracle định tuyến); `invoke` đòi state + witness không đổi từng byte.
+# Thông báo chỉ vị từ ADR-0054 (`_du_dieu_kien_approve`) phát ra khi đọc một biên nhận advisory (không có `schema_version` của biên nhận v2).
+_LOI_CU_1422 = "trường danh tính sai kiểu/rỗng ['schema_version']"
+
+
+def _ci_do1422(f, slug):
+    """Readback CI đỏ thật trên head + connector không còn P0–P2 + biên nhận advisory hợp lệ cho `slug` (cùng dữ liệu ca cùng họ #1303)."""
+    m,c,head=f["m"],f["c"],f["head"]
+    connector=c.tmp/"wp1422-ci-connector.json"
+    connector.write_bytes(m._1174_bytes(dict(repo=m._1174_REPO,pr=55,head_sha=head,
+        reviews=dict(total_count=0,items=[]),review_comments=dict(total_count=0,items=[]),
+        issue_comments=dict(total_count=1,items=[dict(id=21,user=dict(login=m.BOT_CONNECTOR),
+            issue_url=m.API_GH+m._1174_REPO+"/issues/55",body="**Reviewed commit:** `"+head+"`")]))))
+    workflow,job=m.CHECK_BAT_BUOC[0]
+    run=dict(id=101,path=workflow,head_sha=head,repository=dict(full_name=m._1174_REPO),run_attempt=1,
+        status="completed",conclusion="failure",check_suite_id=501)
+    cr=dict(id=301,name=job,head_sha=head,status="completed",conclusion="failure",check_suite=dict(id=501),
+        app=dict(slug=m.APP_CHECK),url=m.API_GH+m._1174_REPO+"/check-runs/301")
+    jj=dict(id=201,run_id=101,run_attempt=1,name=job,head_sha=head,status="completed",conclusion="failure",check_run_url=cr["url"])
+    paths=[]
+    for field,rows in (("workflow_runs",[run]),("jobs",[jj]),("check_runs",[cr])):
+        path=c.tmp/("wp1422-ci-"+field+".json");path.write_bytes(m._1174_bytes(dict(total_count=1,**{field:rows})));paths.append(path)
+    def check_run(**change):
+        paths[2].write_bytes(m._1174_bytes(dict(total_count=1,check_runs=[dict(cr,**change)])))
+    receipt=c.tmp/"wp1422-advisory.json"
+    good=dict(schema="wp1174_service_advisory.v1",head=head,identity=dict(f["identity"]),verdict="changes_requested",
+        finding_ids=[slug],assurance="advisory_review",bang_lop=[dict(slug=slug,hang="P2",check_refs=[[workflow,job]])])
+    def flags(finding=slug):
+        return ["--nguyen-nhan","ci-do","--pr","55","--connector",str(connector),"--bien-nhan",str(receipt),"--finding-id",finding,
+            "--workflow-runs",paths[0],"--workflow-jobs",paths[1],"--check-runs",paths[2]]
+    return good,receipt,flags,check_run
+
+
+def _mo_lai_service1422(c):
+    """4a + 4b + 4c(connector) trên lane khác họ: executor claude/claude_code, reviewer codex/codex_service, lease `human_audited`."""
+    def hook(f):
+        m,invoke,head,pending,identity=f["m"],f["invoke"],f["head"],f["pending"],f["identity"]
+        assert pending["state"]=="approved_pending" and pending["pending_sha"]==head and pending["ngu_canh_lease"]["assurance_target"]=="human_audited"
+        executor=pending["executor_identity"]
+        assert (executor["provider"],executor["execution_surface"],executor["transport"])==("claude","claude_code","machine/local")
+        assert identity==pending["reviewer_identity"] and (identity["provider"],identity["execution_surface"],identity["transport"])==("codex","codex_service","machine")
+        good,receipt,flags,check_run=_ci_do1422(f,"ci-fix")
+        raw_good=m._1174_bytes(good)
+        def am(nhan,ban,loi,co=None):
+            receipt.write_bytes(ban if type(ban) is bytes else m._1174_bytes(ban))
+            try:
+                invoke("mo-lai",*(co or flags()),expect=8,reason="legacy predicate rejected",error_reason=loi)
+            except AssertionError as ex:
+                raise AssertionError(("wp1422 bước âm "+nhan+": phải bị từ chối bởi đúng lớp, state không đổi",)+ex.args) from None
+        lop=good["bang_lop"][0]
+        # 4b — lớp biên nhận advisory: mỗi dòng lệch đúng một thứ so với `good`.
+        for nhan,ban,loi in (
+                ("schema",dict(good,schema="wp1174_owner_scoped_review.v1"),"không đạt ['schema']"),
+                ("assurance",dict(good,assurance="human_audited"),"không đạt ['assurance']"),
+                ("verdict",dict(good,verdict="approve"),"không đạt ['verdict']"),
+                ("head",dict(good,head="f"*40),"không đạt ['head']"),
+                ("identity",dict(good,identity=dict(identity,transport="machine/local")),"không đạt ['identity']"),
+                ("thua-khoa",dict(good,policy_sha256="f"*64),"phải là ánh xạ có ĐÚNG tập khoá"),
+                ("thieu-khoa",{k:v for k,v in good.items() if k!="assurance"},"phải là ánh xạ có ĐÚNG tập khoá"),
+                ("slug-bang-lop",dict(good,bang_lop=[dict(lop,slug="other-fix")]),"không đạt ['slug-bang-lop']"),
+                ("hang",dict(good,bang_lop=[dict(lop,hang="P4")]),"không đạt ['bang_lop', 'slug-bang-lop']"),
+                ("bang-lop-rong",dict(good,bang_lop=[]),"không đạt ['bang_lop', 'slug-bang-lop']"),
+                ("khong-phai-json",b"schema: wp1174_service_advisory.v1\n","--bien-nhan phải là JSON canonical đọc được"),
+                # Advisory WP1422-SPEC-02: loader nghiêm của `record-review` service — khoá trùng và byte không canonical đều bị từ chối.
+                ("khoa-trung",raw_good.replace(b'{"assurance":"advisory_review",',b'{"assurance":"advisory_review","assurance":"advisory_review",'),"duplicate JSON key"),
+                ("khong-canonical",json.dumps(good,indent=1).encode(),"noncanonical JSON bytes")):
+            assert ban!=good and ban!=raw_good,"fixture âm trùng bản dương: "+nhan
+            am(nhan,ban,loi)
+        am("finding-ids",good,"không đạt ['finding_ids']",co=flags(finding="other-fix"))
+        # 4b — lớp đo CI không đổi: biên nhận hợp lệ nhưng check-run không đỏ thật trên head vẫn bị `_kiem_ci` chặn.
+        check_run(head_sha="f"*40);am("check-run-khong-do-that",good,"check-run 301 không đỏ thật");check_run()
+        # 4c — `--nguyen-nhan connector` ở CHÍNH lane này vẫn đi vị từ ADR-0054: biên nhận advisory bị từ chối bằng thông báo của đường cũ.
+        connector=c.tmp/"wp1422-connector.json"
+        connector.write_bytes(m._1174_bytes(dict(repo=m._1174_REPO,pr=55,head_sha=head,
+            reviews=dict(total_count=0,items=[]),issue_comments=dict(total_count=0,items=[]),
+            review_comments=dict(total_count=1,items=[dict(id=11,user=dict(login=m.BOT_CONNECTOR),
+                body="![P2 Badge] fixture",commit_id=head,pull_request_url=m.API_GH+m._1174_REPO+"/pulls/55")]))))
+        am("4c-connector-di-duong-cu",good,_LOI_CU_1422,
+            co=["--nguyen-nhan","connector","--pr","55","--connector",str(connector),"--bien-nhan",str(receipt),"--finding-id","ci-fix"])
+        # 4a — dương, sau mọi bước âm: cùng state approved_pending (chưa bước nào ghi), biên nhận advisory hợp lệ + CI đỏ thật.
+        assert json.loads(f["target"].read_bytes())==pending,"bước âm đã đổi state trước bước dương"
+        receipt.write_bytes(raw_good)
+        reopened=invoke("mo-lai",*flags())
+        assert reopened["state"]=="running" and reopened["accepted_sha"] is None and reopened["finding_counts"]["ci-fix"]==1,reopened["state"]
+        assert reopened["mo_lai_tu"]==dict(nguyen_nhan="ci-do",generation=pending["ngu_canh_lease"]["generation"],sha=head) and reopened["mo_lai_tu"]["generation"]==1
+        event=reopened["history"][-1]
+        assert (event["event"],event["nguyen_nhan"],event["sha"],event["finding_ids"])==("mo_lai","ci-do",head,["ci-fix"])
+        assert event["bien_nhan_sha256"]==hashlib.sha256(raw_good).hexdigest() and event["refs"]==lop["check_refs"]
+        assert reopened["ngu_canh_lease"]==pending["ngu_canh_lease"] and reopened["scoped_review"]==pending["scoped_review"]
+    return _target_chain1303_one(c,None,dict(provider="claude",model_family="claude",execution_surface="claude_code",transport="machine/local"),
+        focused=True,wp1422=hook)
+
+
+def _mo_lai_non_service1422(c):
+    """4c: reviewer KHÔNG phải `codex_service` (codex_cli) — `ci-do` vẫn đi vị từ ADR-0054; biên nhận advisory bị từ chối bởi đường cũ."""
+    def hook(f):
+        m,invoke,head,pending,identity=f["m"],f["invoke"],f["head"],f["pending"],f["identity"]
+        assert pending["state"]=="approved_pending" and identity==pending["reviewer_identity"] and identity["execution_surface"]=="codex_cli"
+        good,receipt,flags,_=_ci_do1422(f,"ci-fix")
+        receipt.write_bytes(m._1174_bytes(good))
+        try:
+            invoke("mo-lai",*flags(),expect=8,reason="legacy predicate rejected",error_reason=_LOI_CU_1422)
+        except AssertionError as ex:
+            raise AssertionError(("wp1422 4c reviewer không phải service: biên nhận advisory phải bị vị từ ADR-0054 từ chối",)+ex.args) from None
+        # Đối chứng dương: cùng lane, cùng readback, biên nhận v2 native ⇒ đường cũ vẫn mở lại được (ca không rỗng).
+        receipt.write_bytes(m._1174_bytes(dict(f["record"],verdict="changes_requested",bang_lop=good["bang_lop"])))
+        reopened=invoke("mo-lai",*flags())
+        assert reopened["state"]=="running" and reopened["finding_counts"]["ci-fix"]==1
+        assert reopened["mo_lai_tu"]==dict(nguyen_nhan="ci-do",generation=1,sha=head)
+    return _target_chain1303_one(c,dict(provider="codex",model_family="openai",execution_surface="codex_cli",transport="machine"),focused=True,wp1422=hook)
+
+
+CASES += [("wp1422_mo_lai_service_advisory",_mo_lai_service1422),("wp1422_mo_lai_non_service_duong_cu",_mo_lai_non_service1422)]
+# Fixture target cần /proc và resolver Linux như `wp1303_target_human_chain`; nền khác không chạy hai ca này và các đột biến nhắm chúng.
+_WP1303_LINUX_CASES |= {"wp1422_mo_lai_service_advisory","wp1422_mo_lai_non_service_duong_cu"}
+MUTANTS.update({
+    # bỏ so `head` ⇒ bước âm `head` được nhận
+    "m1422_head_unchecked": ('        ("head", d["head"] == h),\n', '        ("head", True),\n', ["wp1422_mo_lai_service_advisory"]),
+    # bỏ so `identity` ⇒ bước âm `identity` được nhận
+    "m1422_identity_unchecked": ('        ("identity", type(d["identity"]) is dict and d["identity"] == st["reviewer_identity"]),\n',
+        '        ("identity", True),\n', ["wp1422_mo_lai_service_advisory"]),
+    # bỏ phép bằng giữa slug `bang_lop` và `finding_ids` ⇒ bước âm `slug-bang-lop` được nhận
+    "m1422_slugs_unbound": ('        ("slug-bang-lop", lop_ok and ids_ok and {x["slug"] for x in lop} == set(ids))) if not dung]\n',
+        '        ("slug-bang-lop", lop_ok and ids_ok)) if not dung]\n', ["wp1422_mo_lai_service_advisory"]),
+    # cho `connector` vào đường advisory ⇒ bước 4c connector không còn bị vị từ ADR-0054 từ chối (oracle định tuyến)
+    "m1422_connector_widened": ('    return (a.nguyen_nhan == "ci-do" and st["state"] == "approved_pending" and type(admission) is dict\n',
+        '    return (st["state"] == "approved_pending" and type(admission) is dict\n', ["wp1422_mo_lai_service_advisory"]),
+    # bỏ điều kiện `codex_service` ⇒ lane reviewer codex_cli nhận biên nhận advisory
+    "m1422_any_surface": ('            and type(st.get("reviewer_identity")) is dict and st["reviewer_identity"].get("execution_surface") == "codex_service"\n',
+        '            and type(st.get("reviewer_identity")) is dict\n', ["wp1422_mo_lai_non_service_duong_cu"]),
+})
 
 # #1288 K3-CONNECTOR-STATE-V1 r3 — fixture nguyên văn từ readback đã lưu.
 def _k3s_body(h):

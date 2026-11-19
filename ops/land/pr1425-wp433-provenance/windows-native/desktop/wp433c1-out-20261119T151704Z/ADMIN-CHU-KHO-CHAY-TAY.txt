@@ -1,0 +1,11 @@
+Chu kho tu chay trong PowerShell Run as Administrator (19-11-2026, khoang 16:30-16:36Z), dan lai nguyen van cho phien dieu phoi #1206:
+
+PS C:\Users\ThangHD> fsutil 8dot3name query F: ; $LASTEXITCODE
+The volume state is: 1 (8dot3 name creation is DISABLED)
+The registry state is: 2 (Per volume setting - the default)
+
+Based on the above settings, 8dot3 name creation is DISABLED on "F:"
+0
+
+Lenh tao share (net share "wp433c1=...\wp433c1-d10-223323-4qb2fu4p" '/grant:desktop-t9r33p2\thanghd,FULL') va lenh xoa share (net share wp433c1 /delete): chu kho bao "da chay xong", khong dan output.
+Bang chung gian tiep do phien dieu phoi do: Win32_Share truoc d10b co wp433c1 -> dung Path T; d10c: `net share wp433c1` rc=2 (khong ton tai).

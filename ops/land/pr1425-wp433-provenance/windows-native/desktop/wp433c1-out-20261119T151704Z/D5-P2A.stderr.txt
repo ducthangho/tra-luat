@@ -1,0 +1,1 @@
+[wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=11 chạy=4 đạt=4 bỏ_qua=0 chỉ_posix=7 · LUOT: dự_kiến=46 chạy=19 đạt=19 bỏ_qua=0 chỉ_posix=27 · DOT BIEN: dự_kiến=37 chạy=16 giết_đúng=16 bỏ_qua=0 chỉ_posix=21 · HONG: 0 · TU_KIEM: 3/3

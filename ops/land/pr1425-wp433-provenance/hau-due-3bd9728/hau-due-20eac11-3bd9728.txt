@@ -1,0 +1,49 @@
+# do 2026-11-19T21:16:14Z, clone rieng scratchpad
+## rev-parse 3bd9728efe41745500a2ac47faffa7d5ca3bf851, tree, cha
+3bd9728efe41745500a2ac47faffa7d5ca3bf851
+1947b8d9f82271dc18074a3855574879924f7d0c
+b99658be007ff7f983ac5fba9fb6b6a541f04d88
+cf8393b80adce0d9b9732e12af593caaa58f6a1f
+## merge-base --is-ancestor 20eac111b1f95567bf2ec87260888f77222eea3b 3bd9728efe41745500a2ac47faffa7d5ca3bf851
+rc=0
+## rev-list --first-parent 20eac111b1f95567bf2ec87260888f77222eea3b..3bd9728efe41745500a2ac47faffa7d5ca3bf851
+3bd9728efe41745500a2ac47faffa7d5ca3bf851
+b99658be007ff7f983ac5fba9fb6b6a541f04d88
+b830d471d67cdca69ba25e6888983a35fb937326
+## log --oneline 20eac111b1f95567bf2ec87260888f77222eea3b..3bd9728efe41745500a2ac47faffa7d5ca3bf851 (moi commit, ke ca cua phien khac)
+3bd9728 Merge pull request #1428 from ducthangho/ops/manifest-433-c1
+b99658b Merge PR #1426: wp1319 r5 - do U2/U9/lich ASUS, hop nhat MATRIX muc I
+37e6cee ops(wp1319): sua so theo 2 P2 connector tren PR #1426
+b830d47 Merge pull request #1427 from ducthangho/agent/wp1422-r1-g1-claude
+fb4c343 ops(wp1319): U9 - chu kho chon o C cho cache trinh duyet Playwright (mac dinh, khong doi cau hinh)
+f081441 ops(wp1319): thu hoi lease r5 g2
+835dce7 ops(wp1319): r5 g2 - ghi so sau don o D ASUS (2003 MB trong), U9 + MATRIX muc I
+cf8393b release: tai sinh RELEASE_MANIFEST.json sau land #1425 (#433 P2c-C1)
+b36d25a ops(wp1319): thu hoi lease r5
+0f5ddb6 ops(wp1319): r5 do chi doc U2 (passed f728), U9 (o D ASUS day), lich kiem release ASUS (not_present); MATRIX muc I trang thai hop nhat
+10d59b6 ops(wp1319): r5 dac ta + lease - do chi doc U2/U9/lich kiem release ASUS, hop nhat trang thai MATRIX
+7c68d11 packet_loop(#1422): mo-lai ci-do nhận biên nhận advisory ở lane target codex_service
+## diff --stat 20eac111b1f95567bf2ec87260888f77222eea3b..3bd9728efe41745500a2ac47faffa7d5ca3bf851
+ .claude/dev/packet_loop.py            |  49 ++++++++-
+ .claude/dev/packet_loop_test.py       | 139 +++++++++++++++++++++++-
+ RELEASE_MANIFEST.json                 |  14 +--
+ ops/acceptance/wp1319/MATRIX.md       |  52 +++++++++
+ ops/acceptance/wp1319/r5/RESULTS.md   | 193 ++++++++++++++++++++++++++++++++++
+ ops/leases/wp1319-r5-g1-operator.yaml |  41 ++++++++
+ ops/leases/wp1319-r5-g2-operator.yaml |  38 +++++++
+ ops/leases/wp1319-r5-g3-operator.yaml |  37 +++++++
+ ops/leases/wp1319-r5-g4-operator.yaml |  37 +++++++
+ ops/specs/wp1319-r5.md                |  51 +++++++++
+ 10 files changed, 641 insertions(+), 10 deletions(-)
+## tep doi trong 20eac111b1f95567bf2ec87260888f77222eea3b..3bd9728efe41745500a2ac47faffa7d5ca3bf851 giao write set (phai rong)
+(rong)
+## blob 3 tep tai 20eac111b1f95567bf2ec87260888f77222eea3b / 3bd9728efe41745500a2ac47faffa7d5ca3bf851
+scripts/tl_gws.py merge=e53ae2c246d84471b48c406b3d42f6d7b6e57f91 hau_due=e53ae2c246d84471b48c406b3d42f6d7b6e57f91
+scripts/test_fragments/wp433_gws_cred_win_duong.py merge=e21c2e4ea5eb54a135cbc3defce112ea96e553de hau_due=e21c2e4ea5eb54a135cbc3defce112ea96e553de
+scripts/tl_test_fragments_bundled.py merge=6ffaccd01e7f4dd546b5487427df39e06afbc7cf hau_due=6ffaccd01e7f4dd546b5487427df39e06afbc7cf
+## numstat cf8393b^1..cf8393b (PR #1428)
+7	7	RELEASE_MANIFEST.json
+20eac111b1f95567bf2ec87260888f77222eea3b
+## release-verify --strict tai 3bd9728efe41745500a2ac47faffa7d5ca3bf851
+rc=0
+ok True 185 185 []

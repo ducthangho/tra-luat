@@ -1,0 +1,136 @@
+python: 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+kho: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\c433c1-20261119T151704Z'
+  $ git rev-parse HEAD HEAD^{tree}
+    rc=0
+    | 724a9e55727c82cc0c5ad7d3c4479cfb69be791b
+    | e942f6a320ed927ffcf85310e75929ac4443a4fe
+  $ git status --porcelain
+    rc=0
+== D1 (ghi lại, không bắt buộc)
+  $ ver
+    rc=0
+
+    | Microsoft Windows [Version 10.0.26300.9711]
+  $ reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock /v AllowDevelopmentWithoutDevLicense
+    rc=0
+
+    | HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock
+    |     AllowDevelopmentWithoutDevLicense    REG_DWORD    0x1
+  $ git config --get core.symlinks
+    rc=0
+    | true
+  ổ chứa %TEMP%: 'F:\\' hệ tệp='NTFS' (rc API=1) GetDriveTypeW=3
+  ổ chứa kho: 'F:\\' hệ tệp='NTFS' (rc API=1) GetDriveTypeW=3
+== D3 `os.lstat` trên gốc ổ chứa T
+  [ĐẠT] D3: os.lstat('F:\\') thành công, st_mode=40777
+== D4 dạng `os.getcwd()`
+  $ git init -q F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221745-wc6nm4id\wp433c1-kho-git
+    rc=0
+  rig: td='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-wc6nm4id' K='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-wc6nm4id\\wp433c1-kho-git' T='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-wc6nm4id\\ngoai' .git=True
+  $ cd /d "F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221745-wc6nm4id\ngoai" && "C:\Program Files\Python312\python.exe" -c "import os; print(os.getcwd())"
+    rc=0
+    | F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221745-wc6nm4id\ngoai
+    getcwd='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-wc6nm4id\\ngoai' phân loại=('o_tuyet_doi', 'F:\\', ('tl-win', 'session_015GtxrZk6gmfQKo7g4BfMBS', 'tmp433c1-20261119T151704Z', 'wp433c1-221745-wc6nm4id', 'ngoai'))
+  [ĐẠT] D4 (cmd): getcwd từ cmd ở T: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-wc6nm4id\\ngoai' ⇒ ('o_tuyet_doi', 'F:\\')
+  $ powershell -NoProfile -Command "Set-Location -LiteralPath 'F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221745-wc6nm4id\ngoai'; & 'C:\Program Files\Python312\python.exe' -c 'import os; print(os.getcwd())'"
+    rc=0
+    | F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221745-wc6nm4id\ngoai
+  [ĐẠT] D4 (PowerShell, tuỳ chọn): getcwd từ PowerShell: 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-wc6nm4id\\ngoai' ⇒ ('o_tuyet_doi', 'F:\\')
+== D8 tên ngắn 8.3 của K
+  $ git init -q F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221745-_4_ljnm7\wp433c1-kho-git
+    rc=0
+  rig: td='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-_4_ljnm7' K='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-_4_ljnm7\\wp433c1-kho-git' T='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-_4_ljnm7\\ngoai' .git=True
+  $ fsutil 8dot3name query F:
+    rc=1
+    | Failed to open the volume.
+    | Error 5: Access is denied.
+  $ dir /x "F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221745-_4_ljnm7"
+    rc=0
+    |  Volume in drive F is New Volume
+    |  Volume Serial Number is 7C1C-7A87
+
+    |  Directory of F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221745-_4_ljnm7
+
+    | 19/11/2026  10:17 PM    <DIR>                       .
+    | 19/11/2026  10:17 PM    <DIR>                       ..
+    | 19/11/2026  10:17 PM    <DIR>                       ngoai
+    | 19/11/2026  10:17 PM    <DIR>                       wp433c1-kho-git
+    |                0 File(s)              0 bytes
+    |                4 Dir(s)  74,693,054,464 bytes free
+  [KHÔNG ĐO ĐƯỢC] D8: K không có tên ngắn thực tế (GetShortPathNameW trả chính nó; chính sách: xem đầu ra fsutil rc=1). Chính sách TẮT và `dir /x` không có tên ngắn ⇒ không chặn; chính sách BẬT ⇒ chạy lại `d8 --cho-admin`, vẫn không có ⇒ VM `tra-luat-win`
+== D9 tên Unicode thông thường
+  $ git init -q F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221745-b4mvszqd\wp433c1-kho-git
+    rc=0
+  rig: td='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd' K='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\wp433c1-kho-git' T='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai' .git=True
+    _dich_cred_gws('F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws') -> ('F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws\\credentials.json', None)
+    W5 cfgdir='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws' cwd=None -> (True, 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws\\credentials.json') | writer=1 loai_o=[('F:\\', 3)] lstat=['F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\.git', 'F:\\tl-win\\.git', 'F:\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\.git', 'F:\\tl-win\\.git', 'F:\\.git', 'F:\\', 'F:\\tl-win', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws\\credentials.json', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\.git', 'F:\\tl-win\\.git', 'F:\\.git']
+  [ĐẠT] D9 T: ngoài kho: helper=('F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws\\credentials.json', None) W5=(True, 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\ngoai\\Quốc hội\\gws\\credentials.json') writer=1
+    _dich_cred_gws('F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\wp433c1-kho-git\\Quốc hội\\gws') -> ('F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\wp433c1-kho-git\\Quốc hội\\gws\\credentials.json', "nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221745-b4mvszqd\\\\wp433c1-kho-git'")
+    W5 cfgdir='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\wp433c1-kho-git\\Quốc hội\\gws' cwd=None -> (False, "nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221745-b4mvszqd\\\\wp433c1-kho-git'") | writer=0 loai_o=[('F:\\', 3)] lstat=['F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\wp433c1-kho-git\\Quốc hội\\gws\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\wp433c1-kho-git\\Quốc hội\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221745-b4mvszqd\\wp433c1-kho-git\\.git']
+  [ĐẠT] D9 K: trong kho: helper="nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221745-b4mvszqd\\\\wp433c1-kho-git'" W5=(False, "nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221745-b4mvszqd\\\\wp433c1-kho-git'") writer=0
+== D11 ổ `subst`
+  $ git init -q F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221747-s8992ur2\wp433c1-kho-git
+    rc=0
+  rig: td='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2' K='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\wp433c1-kho-git' T='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\ngoai' .git=True
+  $ subst Z: F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221747-s8992ur2\wp433c1-kho-git\sub
+    rc=0
+  $ subst Y: F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221747-s8992ur2\ngoai
+    rc=0
+  $ subst
+    rc=0
+    | Y:\: => F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221747-s8992ur2\ngoai
+    | Z:\: => F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z\wp433c1-221747-s8992ur2\wp433c1-kho-git\sub
+    (b) chưa có: GetDriveTypeW('Z:\\')=3 realpath('Z:\\gws')='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\wp433c1-kho-git\\sub\\gws'
+    _dich_cred_gws('Z:\\gws') -> ('Z:\\gws\\credentials.json', "nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221747-s8992ur2\\\\wp433c1-kho-git'")
+    W5 cfgdir='Z:\\gws' cwd=None -> (False, "nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221747-s8992ur2\\\\wp433c1-kho-git'") | writer=0 loai_o=[('Z:\\', 3)] lstat=['Z:\\gws\\.git', 'Z:\\.git', 'Z:\\gws\\.git', 'Z:\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\wp433c1-kho-git\\sub\\gws\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\wp433c1-kho-git\\sub\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\wp433c1-kho-git\\.git']
+  [ĐẠT] D11 <S> (b) chưa có: helper="nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221747-s8992ur2\\\\wp433c1-kho-git'"; realpath khớp <K>\sub\gws=True; W5=(False, "nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221747-s8992ur2\\\\wp433c1-kho-git'") writer=0; tệp mới dưới <K>\sub=[]
+    (a) đã có: GetDriveTypeW('Z:\\')=3 realpath('Z:\\gws')='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\wp433c1-kho-git\\sub\\gws'
+    _dich_cred_gws('Z:\\gws') -> ('Z:\\gws\\credentials.json', "nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221747-s8992ur2\\\\wp433c1-kho-git'")
+    W5 cfgdir='Z:\\gws' cwd=None -> (False, "nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221747-s8992ur2\\\\wp433c1-kho-git'") | writer=0 loai_o=[('Z:\\', 3)] lstat=['Z:\\gws\\.git', 'Z:\\.git', 'Z:\\gws\\.git', 'Z:\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\wp433c1-kho-git\\sub\\gws\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\wp433c1-kho-git\\sub\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\wp433c1-kho-git\\.git']
+  [ĐẠT] D11 <S> (a) đã có: helper="nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221747-s8992ur2\\\\wp433c1-kho-git'"; realpath khớp <K>\sub\gws=True; W5=(False, "nằm trong kho git: 'F:\\\\tl-win\\\\session_015GtxrZk6gmfQKo7g4BfMBS\\\\tmp433c1-20261119T151704Z\\\\wp433c1-221747-s8992ur2\\\\wp433c1-kho-git'") writer=0; tệp mới dưới <K>\sub=[]
+    _dich_cred_gws('Y:\\gws') -> ('Y:\\gws\\credentials.json', None)
+    W5 cfgdir='Y:\\gws' cwd=None -> (True, 'Y:\\gws\\credentials.json') | writer=1 loai_o=[('Y:\\', 3)] lstat=['Y:\\gws\\.git', 'Y:\\.git', 'Y:\\gws\\.git', 'Y:\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\ngoai\\gws\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\ngoai\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\.git', 'F:\\tl-win\\.git', 'F:\\.git', 'Y:\\', 'Y:\\gws', 'Y:\\gws\\credentials.json', 'Y:\\gws', 'Y:\\', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\ngoai\\gws\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\ngoai\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\wp433c1-221747-s8992ur2\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433c1-20261119T151704Z\\.git', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\.git', 'F:\\tl-win\\.git', 'F:\\.git']
+  [ĐẠT] D11 <S2>: helper=('Y:\\gws\\credentials.json', None) W5=(True, 'Y:\\gws\\credentials.json') writer=1
+  $ subst Z: /d
+    rc=0
+  $ subst Y: /d
+    rc=0
+== N4 (nt) trên bản sao fragment
+    | [wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=76 đạt=76 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=47 giết_đúng=47 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+  [ĐẠT] N4 đối chứng nguyên bản: mong run=True, thực tế rc=0 run() -> True
+    | [wp433_gws_cred_win_duong] BO_QUA tich_hop_nt·W5.sl_to_tien: None
+    | [wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=75 đạt=75 bỏ_qua=1 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=46 giết_đúng=46 bỏ_qua=1 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+    | [wp433_gws_cred_win_duong] VẾ SAI: bo_qua
+  [ĐẠT] N4 ép bỏ_qua symlink khi probe thành công: mong run=False, thực tế rc=1 run() -> False
+    | [wp433_gws_cred_win_duong] ĐỎ tich_hop_nt: TinHieuChotCa("tich_hop_nt · W5.sl_to_tien · probe symlink: ('PermissionError', 13, 5)") (None)
+    | [wp433_gws_cred_win_duong] ĐỘT BIẾN db_nt_goc_cfg: TIN_DUNG_GIA
+    | [wp433_gws_cred_win_duong] ĐỘT BIẾN db_nt_nuot_loi_loai_o: TIN_DUNG_GIA
+    | [wp433_gws_cred_win_duong] ĐỘT BIẾN db_nt_w4_nuot_loi_dich: TIN_DUNG_GIA
+    | [wp433_gws_cred_win_duong] ĐỘT BIẾN db_nt_git_nuot_loi: TIN_DUNG_GIA
+    | [wp433_gws_cred_win_duong] ĐỘT BIẾN db_nt_realpath_khong_strict: TIN_DUNG_GIA
+    | [wp433_gws_cred_win_duong] ĐỘT BIẾN db_nt_strict_truoc_lien_ket: TIN_DUNG_GIA
+    | [wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=2 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=71 đạt=70 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=47 giết_đúng=41 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+    | [wp433_gws_cred_win_duong] VẾ SAI: ca_dat, luot_dat, giet_dung, so_luot
+  [ĐẠT] N4 probe ném PermissionError winerror 5: mong run=False, thực tế rc=1 run() -> False
+    | [wp433_gws_cred_win_duong] BO_QUA tich_hop_nt·W5.sl_to_tien: PermissionError(1, 'gia')
+    | [wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=75 đạt=75 bỏ_qua=1 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=46 giết_đúng=46 bỏ_qua=1 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+  [ĐẠT] N4 đối chứng XANH: sl_to_tien bỏ qua vì 1314, sl_treo dựng được: mong run=True, thực tế rc=0 run() -> True
+    | [wp433_gws_cred_win_duong] BO_QUA tich_hop_nt·W5.sl_to_tien: PermissionError(1, 'gia')
+    | [wp433_gws_cred_win_duong] BO_QUA tich_hop_nt·W5.sl_treo: PermissionError(1, 'gia')
+    | [wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=74 đạt=74 bỏ_qua=2 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=45 giết_đúng=45 bỏ_qua=2 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+  [ĐẠT] N4 đối chứng XANH: cả hai lượt bỏ qua vì 1314: mong run=True, thực tế rc=0 run() -> True
+== TỔNG KẾT
+  ĐẠT            D3
+  ĐẠT            D4 (cmd)
+  ĐẠT            D4 (PowerShell, tuỳ chọn)
+  KHÔNG ĐO ĐƯỢC  D8
+  ĐẠT            D9 T
+  ĐẠT            D9 K
+  ĐẠT            D11 <S> (b) chưa có
+  ĐẠT            D11 <S> (a) đã có
+  ĐẠT            D11 <S2>
+  ĐẠT            N4 đối chứng nguyên bản
+  ĐẠT            N4 ép bỏ_qua symlink khi probe thành công
+  ĐẠT            N4 probe ném PermissionError winerror 5
+  ĐẠT            N4 đối chứng XANH: sl_to_tien bỏ qua vì 1314, sl_treo dựng được
+  ĐẠT            N4 đối chứng XANH: cả hai lượt bỏ qua vì 1314

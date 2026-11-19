@@ -1,0 +1,33 @@
+bat_dau=2026-11-19T15:17:04Z python=3.12.10 platform=Windows-11-10.0.26300-SP0 admin=0 TEMP=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433c1-20261119T151704Z
+fetch rc=0 
+CHOT HEAD sha=724a9e55727c82cc0c5ad7d3c4479cfb69be791b tree=e942f6a320ed927ffcf85310e75929ac4443a4fe sach=[] git_la_thu_muc=True
+sha256 rig 48166acbd82b0a9243129c727d7dd8fece0b679e155506d4c6470866f7f11794
+TAT-CA rc=0 [2026-11-19T15:17:42Z->2026-11-19T15:19:57Z]
+  TỔNG KẾT
+    ĐẠT            D3
+    ĐẠT            D4 (cmd)
+    ĐẠT            D4 (PowerShell, tuỳ chọn)
+    KHÔNG ĐO ĐƯỢC  D8
+    ĐẠT            D9 T
+    ĐẠT            D9 K
+    ĐẠT            D11 <S> (b) chưa có
+    ĐẠT            D11 <S> (a) đã có
+    ĐẠT            D11 <S2>
+    ĐẠT            N4 đối chứng nguyên bản
+    ĐẠT            N4 ép bỏ_qua symlink khi probe thành công
+    ĐẠT            N4 probe ném PermissionError winerror 5
+    ĐẠT            N4 đối chứng XANH: sl_to_tien bỏ qua vì 1314, sl_treo dựng được
+    ĐẠT            N4 đối chứng XANH: cả hai lượt bỏ qua vì 1314
+D5-C1 rc=0 [2026-11-19T15:19:57Z->2026-11-19T15:20:20Z]
+  run() -> True
+  [wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=76 đạt=76 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=47 giết_đúng=47 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+D5-P2A rc=0 [2026-11-19T15:20:20Z->2026-11-19T15:20:34Z]
+  run() -> True
+  [wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=11 chạy=4 đạt=4 bỏ_qua=0 chỉ_posix=7 · LUOT: dự_kiến=46 chạy=19 đạt=19 bỏ_qua=0 chỉ_posix=27 · DOT BIEN: dự_kiến=37 chạy=16 giết_đúng=16 bỏ_qua=0 chỉ_posix=21 · HONG: 0 · TU_KIEM: 3/3
+D5-PK1 rc=1 [2026-11-19T15:20:34Z->2026-11-19T15:21:33Z]
+  run() -> False
+  [wp433_nlm_gws_dich_ngoai_kho] ĐỎ chung_hop_dong_loi: TinHieuChotCa("chung_hop_dong_loi: [('N8.4-W2', 'oserror_w2'), ('N8.4-W6', 'oserror_w6')]") (None)
+  [wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=17 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0
+sach_sau H=[]
+ket_thuc=2026-11-19T15:21:33Z
+XONG (khoa da nha)

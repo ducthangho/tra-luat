@@ -1,0 +1,16 @@
+# trich log CI PR #1425 run 44549085747 (pull_request, head 724a9e5)
+## job 135647784033 gate (ubuntu-latest) log_sha256=09b2e73016fffcb97e2e92b97d1b2bfbc3ce28aa8bb895b07ed3f2b457c39c60
+1687:     "wp433_gws_cred_win_duong",
+1743:       "name": "wp433_gws_cred_win_duong.py",
+1745:       "test_id": "wp433_gws_cred_win_duong"
+1805:     "wp433_gws_cred_win_duong",
+1884: == gen_instructions selftest 44/44 ==
+1967: [wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3
+3724:   [OK] wp433_gws_cred_win_duong
+3751: == tl selftest 1782/1782 ==
+9902:       "detail": "[OK] tier_full_audit_ok\n  [OK] tier_core_fails_full_audit\n  [OK] tier_full_litany_deduped\n  [OK] tier_core_size_budget\n  [OK] tier_nlm_unaffected_by_tier\n  [OK] style_template_separate_artifact\n  [OK] profile_block_binds_marker_meta\n  [OK] profile_block_no_fabrication_guard\n
+## job 135662716377 gate-cong-cu-gop (ubuntu-latest) log_sha256=c65867d13e2d5d35ff75ebcf6249febaa0c986153d8c8826f4685fa6580e1f96
+292: GOM MẢNH 8/8
+784: SỐ LIỆU GOM: ca=61 · đột biến=490 · lỗi đột biến=0
+## job 135647785110 gate-packet-loop (ubuntu-latest) log_sha256=1357dd25ab9aaab5d097184170a87e1df7bfcbad47fa7c49b59c09ffa2781ccc
+193: GOM: KHÔNG ĐO - packet_loop=bo_qua (diff không chạm tập phụ thuộc của bộ ca, hoặc push nhánh mặc định; lý do ở bước phân loại của job chuan-bi) · job mảnh: 'skipped' (phải là 'skipped')

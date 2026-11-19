@@ -1,0 +1,35 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: wp1319
+revision: 5
+generation: 2
+lease_id: wp1319-r5-g2-operator
+role: operator
+executor: none
+reviewer: 'connector Codex tren PR #1426'
+review_class: routine
+target_hosts: []
+live_change: 'khong — chi ghi so: ket qua sau don o D ASUS (do chu kho duyet "Don o D, dong y 1,2" 19/11 16:28Z, thuc hien 16:46-16:48Z)'
+spec_path: ops/specs/wp1319-r5.md
+spec_hash: e96920d3a70d9c2c6f508d3c38aa30760ef65a4ad4ef16f12dc228ca0bb39dc0
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r5/RESULTS.md
+- ops/leases/wp1319-r5-g2-operator.yaml
+write_set_hash: 0edcd0b6e04c24288fbe1194ddffcae25470ed946650d250c796fb16d0eb2702
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+target_pull_request: 1426
+base_sha: b36d25a2027c3f1d10b91b2934ad7c76b5a8b728
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 19/11: "Tiep tuc trien khai cac noi dung dang tam dung vi cho o D co them dung luong"'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-19T16:55:41Z'
+heartbeat_at: '2026-11-19T16:55:41Z'
+lease_until: '2026-11-19T18:55:41Z'
+lease_expires_at_utc: '2026-11-19T18:55:41Z'
+max_lease_hours: 2
+review_calls_limit: 0
+native_runs_limit_per_host: 0

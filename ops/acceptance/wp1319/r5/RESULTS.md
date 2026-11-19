@@ -22,6 +22,46 @@
 - Hệ quả: mọi lượt chạy native cần ghi lên D (bằng chứng, cache, build) sẽ hỏng ngay.
 - Với U9, nếu sau này đặt `PLAYWRIGHT_BROWSERS_PATH` lên D thì phải dọn hoặc mở rộng ổ trước.
 
+## Sau khi dọn ổ D (19/11, 16:46–16:48Z, lease g2 chỉ để ghi sổ)
+Chủ kho duyệt trong phiên: *"Dọn ô D, đồng ý 1,2"* (16:28Z). Phạm vi duyệt:
+1. `D:\tlx`: chỉ xoá thư mục con không có thay đổi chưa commit, commit chưa đẩy hay stash, và không có tiến trình nào đang dùng.
+2. Đổ thùng rác của ổ D.
+
+Đây là thao tác **ghi** trên host, làm theo chỉ thị trực tiếp của chủ kho. Nó **nằm ngoài** đặc tả r5 (vốn chỉ đọc); g2 chỉ ghi sổ kết quả.
+
+**Trước khi dọn:**
+- Chủ kho đã tự giải phóng một phần: D từ 8 KB lên 824 MB trống.
+- Kiểm từng thư mục bằng `tlx-check.ps1` và `tlx-check2.ps1`. Head của mỗi kho git được đối chiếu trên GitHub qua REST `compare`:
+  - `l1265`, `lease-p1`, `p1`: head nằm trên nhánh còn sống (`behind_by 0`);
+  - `rv1\cay-kho` và các bản `dcc-scratch\*\nen` (`9c1661f7`): head nằm trong master.
+- "Commit chưa đẩy" báo trên máy (226 / 226 / 2) là do ref remote ở máy đã cũ.
+
+**Đã xoá** (script `clean-d.ps1` kiểm lại ngay trước mỗi lần xoá: đường dẫn, reparse point, HEAD đúng SHA, dirty 0, stash 0, không tiến trình nào dùng):
+`D:\tlx\l1265`, `D:\tlx\lease-p1`, `D:\tlx\p1`, `D:\tlx\rv1\cay-kho`, `D:\tlx\dcc-scratch\do\nen`, `D:\tlx\dcc-scratch\wip\nen`, cùng thùng rác ổ D.
+
+**Giữ lại** vì không đạt điều kiện:
+- có thay đổi chưa commit: `dcc`, `dcc-scratch\do\sau`, 4 thư mục `dcc-scratch\do-db\*`, `rv2\cay-kho` (13 300 thay đổi);
+- head không chứng minh được nằm trên nhánh nào còn sống: `rv-1321\cay-kho`, `rv-1322\cay-kho`;
+- thư mục không phải git (có thể là bằng chứng duy nhất): `rv-*`, `km*`, `*-run`, `*-scratch`.
+
+Không đụng `D:\WSL`, `Dữ liệu`, `Quốc hội` và phần mềm đã cài.
+
+**Kết quả: ổ D trống 2 003,3 MB** (khoảng 3,8% của 51,54 GiB). Nhật ký nguyên văn (`C:\Users\admin\tl-work\r5-session_015GtxrapMSm976JLC7Fp1HM\clean-d.log`):
+```text
+2026-11-19T16:46:47.8686148Z BAT DAU free_D_MB=824
+2026-11-19T16:47:04.9474965Z DA XOA D:\tlx\l1265 head=ab16b97885b9773e1086a919e5b92bdbfb8ba252 gone=True free_D_MB 824 -> 993.1
+2026-11-19T16:47:19.1562552Z DA XOA D:\tlx\lease-p1 head=91188e98858ed4a3869821b801d12503110a5738 gone=True free_D_MB 993.1 -> 1165
+2026-11-19T16:47:36.2573691Z DA XOA D:\tlx\p1 head=2b6ff1574dd3d26908eb4bb8c425df87b0ad6d9f gone=True free_D_MB 1173.5 -> 1378.1
+2026-11-19T16:47:54.7407192Z DA XOA D:\tlx\rv1\cay-kho head=e97d5d87f4f17c14fe350fb2fe56eddbd9301c9e gone=True free_D_MB 1378.1 -> 1549.8
+2026-11-19T16:48:13.4652325Z DA XOA D:\tlx\dcc-scratch\do\nen head=9c1661f76d5f4ef811aa349df102989cc2e2d53d gone=True free_D_MB 1549.8 -> 1722.5
+2026-11-19T16:48:32.1435077Z DA XOA D:\tlx\dcc-scratch\wip\nen head=9c1661f76d5f4ef811aa349df102989cc2e2d53d gone=True free_D_MB 1722.5 -> 1895.1
+2026-11-19T16:48:35.0086176Z DA DO THUNG RAC D free_D_MB 1895.1 -> 2003.3
+2026-11-19T16:48:35.1352487Z KET THUC free_D_MB=2003.3
+```
+Còn sót một tệp 0 byte `D:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\r5\R5.ps1`, sinh ra từ lần ghi hỏng do ENOSPC.
+
+**Nếu cần thêm chỗ** (chủ kho quyết): `D:\WSL\Ubuntu-Clean` 13,9 GB nếu không còn dùng WSL; `D:\tlx\dcc-scratch\do-db` 1,17 GB, bỏ 4 thay đổi chưa commit của một packet đã xong.
+
 ## Nguyên văn
 
 ### TRA-LUAT-WIN (`f7281f27`), `C:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\r5\r5-vm-2.json`

@@ -280,7 +280,7 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 | U6 | License | **passed (owner)** | B | — |
 | U7 | Retention/soak/theo dõi | **partial** | D | Ngưỡng, owner, cửa sổ theo dõi chưa ghi |
 | U8 | Restore profile/đăng nhập | dữ liệu: **passed (hẹp)** · đăng nhập: **quan_sat: giữ được** | H.10 | Không có PASS/FAIL cho vế đăng nhập theo đặc tả U8 |
-| U9 | Cache/ACL ổ D ASUS | **đo được (r5): ổ D đầy (trống 8 192 byte)** | **r5** | Phải dọn hoặc mở rộng D trước khi đặt `PLAYWRIGHT_BROWSERS_PATH` lên đó (chủ kho quyết) |
+| U9 | Cache/ACL ổ D ASUS | **đo được (r5)**: lúc đo ổ D đầy (trống 8 192 byte); **sau khi dọn theo duyệt của chủ kho, trống 2 003 MB** (19/11 16:48Z) | **r5** | 2 GB đủ cho một bộ trình duyệt Playwright nhưng sát. Đặt `PLAYWRIGHT_BROWSERS_PATH` lên D hay không là quyết định của chủ kho |
 | U10 | Playwright CLI ghim | **passed (Desktop + ASUS)** | E, G | — |
 | U11 | Auth remote f728 | **not_evidenced** | E | Chưa có bằng chứng auth thực tới f728 |
 | U12 | Binary ↔ upstream | **partial** | D, H.4 | Chỉ có digest bộ cài; không chữ ký, không provenance tới commit |
@@ -296,7 +296,7 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 | Runtime promotion / LIVE | **done (scoped: 2 module mới)** | H.11 |
 
 **Việc còn mở có thể làm tiếp, cần chủ kho chọn:**
-1. Ổ D của ASUS đầy (U9): dọn hoặc mở rộng.
+1. Ổ D của ASUS: đã dọn lên 2 003 MB trống (r5, phần sau dọn). Muốn thêm chỗ thì có `D:\WSL\Ubuntu-Clean` (13,9 GB), chủ kho quyết.
 2. U5/U12: chính sách khi bộ cài không ký.
 3. U11 và §11 #2: đo auth và target thật tới VM. Có rủi ro chạm gateway LIVE nên cần cấp riêng.
 4. §11 #10: ca đĩa đầy thật hoặc rollback thất bại trên OS thật.

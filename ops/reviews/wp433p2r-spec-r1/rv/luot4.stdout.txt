@@ -1,0 +1,31 @@
+## Lượt 4 — kiểm lại finding lượt 3
+
+| Finding lượt 3 | Trạng thái | Bằng chứng trong bản R hiện tại |
+|---|---|---|
+| P2 — D12 có thể xanh khi thiếu phép đo tính tất định của bundle | **Đã đóng** | N4 và D12 yêu cầu full selftest và mọi release gate của lane LAND trên cả Windows và Linux, cùng frozen integration SHA/tree. D12 nêu rõ hai lượt `release-bundle` phải cùng SHA-256. Thiếu một bước thì T3 chưa đạt. |
+| P2 — Base sai OID vẫn qua khi cùng tree | **Đã đóng** | N4 so OID đầy đủ của base và head với OID đã ghim trước khi đọc numstat. Phép đỏ dùng một OID có thật nhưng khác base đã ghim. |
+| P3 — Tên khóa JSON `release-verify` viết tắt | **Đã đóng** | N4 và D12 đòi cả `expected_file_count` và `checked_file_count` hiện diện, là số nguyên và bằng nhau. Hai tên khớp với `scripts/tl_core/release.py:940–941`. |
+
+## Bảng kiểm sự thật
+
+Bản R r1 lượt 4 có SHA-256 `a1ff870adc91267c448c00b685bfbec7fc415507b91d4810e343816c16bbec61`. Checkout ở detached HEAD, trùng ref cục bộ `origin/master` tại `96b6a33d770f7539a3eacbebdc215f87ded4ea7f`, tree `d007b41f5b17c47c04150a56680081ec79f2ac5b`. Phiên reviewer độc lập dùng OpenAI Codex, shell Bash và chuyển verdict qua phiên được giao. Không có metadata phục vụ để xác minh model cụ thể.
+
+| Phạm vi | Kết quả |
+|---|---|
+| §0, M1 — dòng và người gọi | Khớp blob `9ec027c2808868a05b67adc3d93ea68a574d6ec0`. Hàm ở 1173–1187, biểu thức ở 1183. Ba vị trí gọi hiện có là 1210, 1233 và 1784. Nhánh nt theo C1 sẽ dùng cùng helper, với tiền tố từ gốc ổ. M1 giữ nguyên vòng lặp và thứ tự hai luật. W1–W3 vẫn bắt đầu ở `nbase`, W6 vẫn chỉ đưa chính `cfgp` vào vòng kiểm liên kết. |
+| §0, M1 — Linux và neo | `python -B -` chạy probe RAM, rc 0 trên CPython 3.13.18. Linux có hằng `1024` và `os.lstat('.')` trả kết quả thiếu `st_file_attributes`, nên vế mới lấy `0`. So mọi cặp neo trong 37 mục `_DB` và 3 mục `_TU_KIEM` của P2a, cùng 30 và 4 mục của packet 1, cho số lần khớp bằng nhau giữa base và M1. `tu_kiem_neo_lap` giữ `2 → 2`. |
+| N1, N2, §4b — đích đột biến | Probe RAM xác nhận `normcase(normpath)` khớp đúng một tiền tố dự kiến với cả `posixpath` và `ntpath`, cho hình dạng W5 và lời gọi trực tiếp. Với `S_IFDIR`, bit `1024` phân biệt M1 với đột biến 1, thuộc tính `16` phân biệt M1 với đột biến 2. `pc_truc_tiep` chạy riêng nên quan sát được lượt trực tiếp. Đột biến 3 dùng cùng phép thay với 1 nhưng đo trên junction thật và dừng ở `W5.jn_cfg`, với điều kiện D2 xác nhận `S_ISLNK` sai và bit bật. `pc_chi_kiem_cfgdir` có đích riêng ở lượt tổ tiên. Hai lượt symlink đo hồi quy của vế `S_ISLNK`. |
+| N3 — sổ và đẳng thức | Linux có `7 = 3 + 0 + 4` lượt và `3 = 2 + 0 + 1` đột biến. Trên nt, `u = 0, 1, 2` tương ứng `y = z = 7, 6, 5`, với `f = g = 3`, `h = 0`. Các đẳng thức cho phép bỏ qua symlink đúng quy định. Phép tự kiểm bỏ so lượt còn lỗi P2 bên dưới. |
+| N5, §4c, §6 — native | D2 có thư mục thường làm đối chứng, junction phải đổi kết quả khi bỏ vế bit, symlink phải vẫn bị chặn. Chỉ `winerror == 1314` cho phép ghi không đo được ở từng vế symlink. D3 có trạng thái trước khi gắn, xác nhận volume bằng `/L`, kiểm đúng tiền tố và so với bản bỏ vế bit. Việc xác nhận volume phân biệt D3 với junction dù tag có thể trùng. D4 có kỳ vọng dương đủ rõ, nhưng thiếu đối chứng riêng. D2 trái kỳ vọng dẫn tới revision, còn thiếu phép bắt buộc chặn land. |
+| §6, §8 — trần và kích thước | Với cả ADR-0053 và ADR-0055, `git cat-file -e` trả 0 tại OID và 128 tại cha thứ nhất. Cả hai OID nằm trên first-parent của `origin/master` cục bộ trong clone không shallow. Độ mới của ref chưa được xác minh trong phiên offline. Dự toán `179–212 + 4–6 + 1 = 184–219` hợp lý ở mức ước lượng. N4 và §6 yêu cầu đo numstat thật. |
+
+**Chưa chạy (`not_run`)** — Hai fragment nguyên vẹn vì tạo thư mục thử dưới `/tmp` trả `errno=30`. Các phép native Windows, neo C1 trên base đã land và gate candidate còn chờ các đầu vào tương ứng. Probe RAM và phép đọc Git hoàn tất với rc 0. Working tree giữ nguyên.
+
+## Finding mới
+
+| Mức | Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|---|
+| **P2** | **N3(d), phép đỏ của `tu_kiem_sai_luot` — dòng 71** | Phản chứng đổi cả lượt lẫn nhãn. Đột biến 1 chạy ca N1 theo thứ tự và ném tín hiệu đầu tiên tại `(reparse_gia_lap, W5.bit, reparse)`. Nếu lấy nhãn của lượt khai `truc_tiep` theo N1, tín hiệu mong đợi là `(reparse_gia_lap, truc_tiep, reparse_truc_tiep)`. Probe RAM cho so khớp `False` cả trước lẫn sau khi bỏ trường lượt, vì hai nhãn vẫn khác nhau. Do đó phép đỏ được hứa không phân biệt được bộ phân hạng bỏ so lượt. | “`tu_kiem_sai_luot`: chạy nguyên đột biến 1 trên toàn ca `reparse_gia_lap` theo thứ tự N1. Giữ nguyên loại tín hiệu, ca `reparse_gia_lap` và nhãn `reparse`. Chỉ đổi lượt khai từ `W5.bit` thành `truc_tiep`. Bộ phân hạng chuẩn phải trả `TIN_DUNG_GIA`. Bản bỏ riêng phép so lượt phải trả `GIET` và làm tự kiểm đỏ.” |
+| **P3** | **§4c D4 — dòng 99** | D4 chỉ đo candidate trên fixture junction và đòi lý do đúng tiền tố. Một kết quả từ chối vô điều kiện ở tiền tố `profiles` vẫn qua riêng phép D4. Vế âm D2 dùng hình dạng lời gọi khác. | “Với cùng lời gọi hình dạng W1 và cùng fixture junction, candidate phải trả lý do tại đúng tiền tố `profiles`, còn bản sao áp đột biến 1 phải trả `None`. Ghi cả hai kết quả.” |
+
+KET_LUAN: request_changes

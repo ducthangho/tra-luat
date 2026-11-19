@@ -1,0 +1,31 @@
+## Finding lượt 1
+
+| Finding | Trạng thái | Bằng chứng trong bản lượt 2 |
+|---|---|---|
+| P2 · N3(c) loại lượt symlink bỏ qua hợp lệ | Đã đóng | N3(c) bỏ ràng buộc `h == u`, giữ `h == 0` và cho `0 ≤ u ≤ 2`. Đối chứng xanh bắt buộc cho cả `u=1` và `u=2`. Thay số vào các đẳng thức trên nt cho `y=z=6` và `y=z=5`, cả hai đều có `f=g=3`. |
+| P2 · `W5.jn_to_tien` thiếu phép đỏ riêng | Đã đóng | `pc_chi_kiem_cfgdir` giữ `W5.jn_cfg` xanh và buộc `W5.jn_to_tien` đỏ tại `lien_ket`. Phép này đi qua W5/C1 và nằm ngoài ba mục `_DB`. |
+| P2 · D2 thiếu `winerror` để phân loại lỗi dựng symlink | Đã đóng | D2 dùng `os.symlink` cho từng fixture. Chỉ `OSError.winerror == 1314` cho phép bỏ qua vế tương ứng. Junction dùng `mklink /J` và ghi mã thoát. |
+| P3 · D3 thiếu vế âm và bằng chứng quy kết cho bit | Đã đóng | D3 đo thư mục thường trước khi gắn, xác nhận volume tại đúng điểm gắn, rồi so candidate và bản bỏ vế bit trên cùng fixture. D3 vẫn tùy chọn và do chủ kho chạy phần ADMIN. |
+
+## Bảng kiểm sự thật
+
+Bản R lượt 2 có SHA-256 `1c13b527617c1195d591b9ec283a1d3e679a79764d24e8fa968c6d80d8eed1bb`. Checkout detached tại `96b6a33d770f7539a3eacbebdc215f87ded4ea7f`, trùng `origin/master` cục bộ, tree `d007b41f5b17c47c04150a56680081ec79f2ac5b`. Phiên OpenAI Codex (`openai_codex / codex_cli / machine`), Linux, chỉ đọc, offline. Model và effort phục vụ cụ thể chưa xác minh từ receipt.
+
+| Mục | Kết quả |
+|---|---|
+| §0, M1 · Dòng và phạm vi | Khớp blob `9ec027c2808868a05b67adc3d93ea68a574d6ec0`, thân 1173–1187, điều kiện cũ ở 1183. Sau C1 có bốn vị trí gọi phục vụ sáu luồng. W4/W5 kiểm từ `/` trên POSIX hoặc gốc ổ theo C1 trên nt. W1–W3 kiểm từ `nbase`. W6 truyền `(cfgp, cfgp, ())`, nên kiểm chính `cfgp`. M1 giữ thứ tự luật, chuỗi tiền tố và xử lý ngoại lệ. |
+| §0, M1 · POSIX và neo | `python3 -B` chạy probe RAM, `rc=0`, trên CPython 3.13.18. Bit bằng `1024`, `lstat` thật thiếu `st_file_attributes`, và kết quả giữ nguyên trên các entry thật đã thử, gồm symlink. Số lần khớp của 40 neo P2a và 36 neo packet 1 giữ nguyên, gồm neo đối chứng lặp hai lần. |
+| N1, §4b · Giả lập và đột biến 1–2 | Probe RAM với `posixpath` và `ntpath`, `rc=0`. Khóa `normcase(normpath(...))` khớp tiền tố dựng theo hình dạng lời gọi trên hai nền, kể cả khác hoa/thường và dấu phân cách trong mô hình nt. Chi tiết lỗi vẫn lấy chuỗi tiền tố gốc. Bit `1024` phân biệt đột biến 1 ở `W5.bit`, thuộc tính `16` phân biệt đột biến 2 ở `W5.khong_bit`. Phép đỏ được dẫn cho `truc_tiep` còn thiếu, xem finding bên dưới. |
+| N2–N3 · Đột biến 3, sổ và tự kiểm | Đích đầu tiên của đột biến 3 là `W5.jn_cfg` nếu D2 xác nhận `S_ISLNK=False`, bit bật và fixture qua luật kho. Hai lượt symlink là hồi quy cho vế `S_ISLNK` như đặc tả đã khai. Sổ đúng 2 ca, 7 lượt. Ngoài nt có `w=1, t=4, v=1, u=0, y=z=3, f=g=2`. Trên nt có `w=t=v=h=0, y=z=7-u, f=g=3`. `tu_kiem_sai_luot` có tín hiệu phân biệt vì giữ nguyên phép thay, loại tín hiệu, ca và nhãn, chỉ đổi lượt mong đợi. |
+| N4–N5, §4c, §6 · Gate và native | D2 phân biệt thư mục thường, junction và symlink bằng kết quả `lstat` và cặp candidate/bỏ vế bit. D3 xác nhận điểm gắn volume độc lập với tag. D4 kiểm hình dạng lời gọi W1 và chi tiết đúng tiền tố, còn N2 đo qua W5/C1. D2 sai kỳ vọng dẫn đến revision. Thiếu phép bắt buộc chặn land, với ngoại lệ từng vế symlink `1314` đã khai. T3 yêu cầu cùng frozen integration SHA trên hai nền, phù hợp protocol §10.1. Hai OID ADR-0053/0055 đều cho `git cat-file -e` `rc=0` tại commit, `rc=128` tại cha thứ nhất, và nằm trên first-parent của ref cục bộ. Độ mới của ref chưa đo trong phiên offline. |
+| §8 · Kích thước | Dự toán hợp lý. Fragment `179–212` cộng M1 `4–6` và bundled `1` thành `184–219` dòng thêm. Numstat trên candidate sẽ xác nhận số thực tế. |
+
+**Chưa chạy:** hai fragment nguyên vẹn vì tạo thư mục dưới `/tmp` trả `errno=30`. Chưa có candidate R hay base C1 đã land để đo neo C1 và gate. Các phép native Windows chưa đo. Worktree giữ nguyên.
+
+## Finding mới
+
+| Mức | Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|---|
+| **P2** | **N1 `truc_tiep`, cột phép đỏ và §4b dòng 1–2** | Không phép nào trong hai dòng được dẫn làm đỏ **đúng lượt** `truc_tiep`. Theo thứ tự N1, đột biến 1 dừng tại `W5.bit`. Đột biến 2 vẫn chặn thuộc tính `1024` ở `truc_tiep` và chỉ đỏ ở `W5.khong_bit`. Probe RAM `rc=0` xác nhận một bản chỉ áp vế bit khi `goc == "/"` trên POSIX vẫn cho đúng kết quả ở cả hai lượt W5, nhưng `truc_tiep` trả `None`. Hai đột biến vẫn có thể bị giết đúng đích trong khi lỗi phạm vi này tồn tại. | “`truc_tiep`: trên bản sao RAM chạy riêng lượt này với M1 và với phép thay của đột biến 1. Giữ nguyên fixture và bộ bọc `lstat`. M1 phải chặn tại `<T>/x`. Bản bỏ vế bit phải trả `None` và làm đỏ đúng tín hiệu `(reparse_gia_lap, truc_tiep, reparse_truc_tiep)`. Phản chứng này không thêm mục `_DB`.” |
+
+KET_LUAN: request_changes

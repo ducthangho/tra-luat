@@ -1,0 +1,8 @@
+## Finding mới
+
+| Mức | Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|---|
+| **P2** | **N3(d), phép đỏ của `tu_kiem_sai_luot` — dòng 71** | Phản chứng đổi cả lượt lẫn nhãn. Đột biến 1 chạy ca N1 theo thứ tự và ném tín hiệu đầu tiên tại `(reparse_gia_lap, W5.bit, reparse)`. Nếu lấy nhãn của lượt khai `truc_tiep` theo N1, tín hiệu mong đợi là `(reparse_gia_lap, truc_tiep, reparse_truc_tiep)`. Probe RAM cho so khớp `False` cả trước lẫn sau khi bỏ trường lượt, vì hai nhãn vẫn khác nhau. Do đó phép đỏ được hứa không phân biệt được bộ phân hạng bỏ so lượt. | “`tu_kiem_sai_luot`: chạy nguyên đột biến 1 trên toàn ca `reparse_gia_lap` theo thứ tự N1. Giữ nguyên loại tín hiệu, ca `reparse_gia_lap` và nhãn `reparse`. Chỉ đổi lượt khai từ `W5.bit` thành `truc_tiep`. Bộ phân hạng chuẩn phải trả `TIN_DUNG_GIA`. Bản bỏ riêng phép so lượt phải trả `GIET` và làm tự kiểm đỏ.” |
+| **P3** | **§4c D4 — dòng 99** | D4 chỉ đo candidate trên fixture junction và đòi lý do đúng tiền tố. Một kết quả từ chối vô điều kiện ở tiền tố `profiles` vẫn qua riêng phép D4. Vế âm D2 dùng hình dạng lời gọi khác. | “Với cùng lời gọi hình dạng W1 và cùng fixture junction, candidate phải trả lý do tại đúng tiền tố `profiles`, còn bản sao áp đột biến 1 phải trả `None`. Ghi cả hai kết quả.” |
+
+KET_LUAN: request_changes

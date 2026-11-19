@@ -1,0 +1,30 @@
+## Đối chiếu finding lượt 2
+
+| Finding | Trạng thái | Bằng chứng |
+|---|---|---|
+| P2 · `truc_tiep` thiếu phép đỏ riêng | **Đã đóng** | R lượt 3 bổ sung `pc_truc_tiep` tại N1/N3. Probe RAM chạy riêng lời gọi này với cùng fixture và bộ bọc `lstat`. M1 chặn tại đúng `<T>/x`, còn phép thay của đột biến 1 trả `None`. Đặc tả yêu cầu kiểm đúng tín hiệu `(reparse_gia_lap, truc_tiep, reparse_truc_tiep)` ngoài bảng `_DB`, nên `W5.bit` không thể che kết quả của lượt này. |
+
+## Bảng kiểm sự thật
+
+R lượt 3 có SHA-256 `d4a5db681395d6bc4d19b78daf1298a191d4cb6c94286ba484a7507b22e5a9e8`. Checkout detached tại `96b6a33d770f7539a3eacbebdc215f87ded4ea7f`, trùng `origin/master` cục bộ, tree `d007b41f5b17c47c04150a56680081ec79f2ac5b`. Phiên độc lập `openai_codex / codex_cli / machine`, Linux, chỉ đọc, offline. Model và effort phục vụ chưa xác minh qua receipt.
+
+| Mục | Kết quả |
+|---|---|
+| §0, M1 · Phạm vi | Blob `tl_gws.py` khớp `9ec027c2808868a05b67adc3d93ea68a574d6ec0`. Thân hàm ở 1173–1187, điều kiện ở 1183. M1 giữ nguyên thứ tự luật, chi tiết lỗi và xử lý ngoại lệ. W4/W5 kiểm từ `/` trên POSIX và từ gốc ổ theo C1 trên nt. W1–W3 kiểm từ `nbase`. W6 truyền `(cfgp, cfgp, ())`, nên kiểm chính `cfgp`. |
+| §0, M1 · POSIX và neo | Probe `python3 -B` qua stdin, rc 0 trên CPython 3.13.18. Hằng bằng `1024`, `lstat` thật thiếu `st_file_attributes`, và so sánh trước/sau khớp trên thư mục thường, symlink và entry vắng. Số lần khớp của 40 neo P2a và 36 neo packet 1 giữ nguyên, gồm đối chứng lặp hai lần. |
+| N1, N2, §4b · Phép đỏ | Trong RAM, `1024` phân biệt đột biến 1 tại `W5.bit` và trong đối chứng `truc_tiep`. Thuộc tính `16` phân biệt đột biến 2 tại `W5.khong_bit`. Khóa `normcase(normpath(...))` khớp tiền tố W5 trên `posixpath` và `ntpath`, kể cả dạng khác hoa/thường và dấu phân cách trong mô hình nt. Đột biến 3 nhắm `W5.jn_cfg` với tiền đề D2. `pc_chi_kiem_cfgdir` giữ lượt này xanh và kiểm riêng lượt tổ tiên. |
+| N3 · Sổ và tự kiểm | Đúng 2 ca và 7 lượt. Ngoài nt có `(w,t,v,u)=(1,4,1,0)`, `y=z=3`, `f=g=2`. Trên nt có `w=t=v=h=0`, `y=z=7-u`, `f=g=3` với `u=0,1,2`. `tu_kiem_sai_luot` chỉ đổi lượt mong đợi, nên bộ phân hạng bỏ so lượt sẽ chuyển `TIN_DUNG_GIA` thành `GIET`. Các phép đỏ còn lại có quan sát riêng cho ID, sổ lượt, lý do bỏ qua, khôi phục `lstat` và stdout. |
+| N4, N5, §4c, §6 · Gate và native | D2 có thư mục thường làm vế âm và cặp candidate/bỏ vế bit để phân biệt junction với symlink. D3 có đối chứng trước khi gắn và xác nhận volume bằng `mountvol /L`, kể cả khi tag trùng junction. D4 kiểm đúng tiền tố theo hình dạng W1, còn N2 kiểm đường gọi W5/C1. D2 trái kỳ vọng kích hoạt revision. Thiếu phép bắt buộc chặn land, với ngoại lệ riêng cho symlink `winerror == 1314` và phép D3 tùy chọn. Các điểm thiếu của gate N4/D12 ghi bên dưới. |
+| §6, §8 · Trần và kích thước | Cả hai OID ADR-0053/0055 có tệp ADR tại commit, vắng ở cha thứ nhất và nằm trên first-parent của `origin/master` cục bộ. Ước lượng cộng đúng `179–212 + 4–6 + 1 = 184–219` dòng thêm. Đây là dự toán hợp lý, với numstat trên candidate làm phép đo quyết định. |
+
+**Chưa chạy:** hai fragment nguyên vẹn vì tạo thư mục dưới `/tmp` trả `errno=30`. Chưa có candidate R hoặc base C1 đã land để đo neo C1 và các gate. Windows native chưa đo.
+
+## Finding mới
+
+| Mức | Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|---|
+| **P2** | **N4, §4c D12 · T3** | D12 cho xanh sau selftest và `release-verify` trên hai nền, dù chưa đo được tính tất định của bundle. Protocol §10.1 yêu cầu release gates cho cùng frozen integration SHA. CI hiện hành có bước `release-bundle` hai lần rồi so SHA-256 tại `.github/workflows/ci.yml:545–555`. Một hồ sơ thiếu cả hai lượt bundle vẫn thỏa nguyên văn D12. | “Trên cùng frozen integration SHA/tree, chạy full selftest và toàn bộ release gates của lane LAND đọc tại SHA ấy, trên cả Windows và Linux. Ghi rc và đầu ra từng bước, gồm `release-verify --strict --json` và hai lần `release-bundle` có SHA-256 bằng nhau. Thiếu một bước, một nền hoặc sai SHA/tree thì T3 chưa đạt.” |
+| **P2** | **N4 · Phép đỏ `base sai`** | Cột phép đỏ liệt kê `base sai`, nhưng cột tiêu chí chỉ ghim exact head và kiểm hình dạng numstat. Một commit khác có cùng tree vẫn cho cùng numstat, cùng số ca và cùng số neo. `pipefail` giữ lỗi Git, còn một OID hợp lệ với tree giống hệt vẫn cho rc 0. | “Trước mọi phép so base/head, dùng `git rev-parse` lấy đủ OID rồi so base với OID đã ghim trong lease và head với OID candidate đã ghim. OID thiếu hoặc lệch thì đỏ trước khi đọc numstat. Phản chứng dùng một OID hợp lệ khác base đã ghim.” |
+| **P3** | **N4 · JSON `release-verify` lane worker** | Hai trường viết tắt `expected` và `checked` có thể bị đọc thành tên khóa JSON. Lệnh `python3 -B scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` trên base trả rc 0, `ok: true`, `expected_file_count = checked_file_count = 185` và vắng cả hai khóa viết tắt. Phép so bằng `.get()` trên hai khóa vắng sẽ cho `None == None`. | “`release-verify --strict --json` phải trả rc 0, `ok: true`, và có đủ hai trường số nguyên `expected_file_count` và `checked_file_count` bằng nhau. Thiếu trường hoặc lệch số thì đỏ.” |
+
+KET_LUAN: request_changes

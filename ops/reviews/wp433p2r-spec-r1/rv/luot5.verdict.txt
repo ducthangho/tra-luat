@@ -1,0 +1,27 @@
+## Lượt 5 · Đóng finding lượt 4
+
+| Finding lượt 4 | Trạng thái | Bằng chứng |
+|---|---|---|
+| P2 · `tu_kiem_sai_luot` đổi cả lượt lẫn nhãn | **Đã đóng** | N3(d) giữ loại tín hiệu, ca và nhãn `reparse`, chỉ đổi lượt khai thành `truc_tiep`. Probe RAM lấy tín hiệu thật của đột biến 1 tại `W5.bit`. So đủ trường cho `TIN_DUNG_GIA`, bỏ riêng phép so lượt cho `GIET`. |
+| P3 · D4 thiếu vế âm trên cùng hình dạng W1 | **Đã đóng ở đặc tả** | D4 yêu cầu candidate báo đúng tiền tố `profiles` và bản bỏ vế bit trả `None` trên cùng lời gọi, cùng fixture. Một kết quả từ chối vô điều kiện sẽ làm vế âm đỏ. |
+
+## Bảng kiểm sự thật
+
+Đặc tả R r1 có SHA-256 `4d4b31812788ab2f824d4e990074d9d4fdd0b3451095ccb8cc00af31155468f5`. Checkout ở detached HEAD `96b6a33d770f7539a3eacbebdc215f87ded4ea7f`, khớp `origin/master` cục bộ, tree `d007b41f5b17c47c04150a56680081ec79f2ac5b`. Phiên reviewer OpenAI Codex chạy chỉ đọc, offline, trên Linux CPython 3.13.18. Hai lệnh `python -B` chạy harness trong RAM đều thoát `0`.
+
+| Phạm vi | Kết quả |
+|---|---|
+| §0, M1 · Nguồn và người gọi | Blob `tl_gws.py` khớp `9ec027c2808868a05b67adc3d93ea68a574d6ec0`. Dòng 1173–1187 và các điểm gọi 1210, 1233, 1784 khớp. W4/W5 trên POSIX quét từ `/`, và theo C1, trên Windows quét từ gốc ổ. W1–W3 quét từ `nbase`, W6 kiểm chính `cfgp`. M1 giữ thứ tự luật, vòng tiền tố và nhánh ngoại lệ. |
+| §0, N4 · POSIX và neo | CPython đo được hằng bằng `1024`, còn `os.lstat` trên Linux trả kết quả không có `st_file_attributes`. Đếm 40 mục neo P2a và 36 mục neo packet 1 cho kết quả từng mục bằng nhau giữa base và M1. `tu_kiem_neo_lap` vẫn khớp đúng hai lần. Trên cả base và M1, P2a đạt 11/11 ca, 46/46 lượt, giết đúng 37/37 đột biến. Packet 1 đạt 18/18 ca, giết đúng 30/30 đột biến. Cả hai fragment trả `True` với stdout rỗng. Neo trên base C1 thật còn phải đo lại. |
+| N1, §4b · Giả lập và đích đột biến | Candidate qua cả ba lượt. Base và đột biến 1 đỏ ở `W5.bit` với nhãn `reparse`. Đột biến 2 đi qua hai lượt đầu rồi đỏ ở `W5.khong_bit` với nhãn `khong_bit`. Chạy riêng `truc_tiep`, candidate báo đúng tiền tố và bản bỏ bit trả `None`. Probe `posixpath` và mô hình ghép đường C1 bằng `ntpath` đều khớp đúng tiền tố sau chuẩn hóa. Trên Linux, phép bọc cũng có thể được gọi từ `realpath`, nhưng cặp candidate/đột biến trên cùng fixture vẫn đổi màu đúng lượt. |
+| N2–N3 · Native, sổ lượt và tự kiểm | Đột biến 3 có đích đầu tiên là `W5.jn_cfg` nếu D2 xác nhận tiền đề. `pc_chi_kiem_cfgdir` giữ lượt junction tại `cfgdir` xanh và làm lượt junction ở tổ tiên đỏ. Hai lượt symlink là hồi quy đã khai. Sổ có 2 ca và 7 lượt. Ngoài nt, `w/t/v/u = 1/4/1/0`, `y=z=3`, `f=g=2`. Trên nt, `w=t=v=h=0`, `y=z=7−u`, `f=g=3` với `u=0,1,2`. Các phép đỏ bao phủ lệch sổ, bỏ qua sai căn cứ, phân hạng sai lượt, rò stdout và rò phép bọc `lstat`. |
+| N4–N5, §4c, §6 · Gate và điểm dừng | D2 có thư mục thường và cặp candidate/bỏ bit để phân biệt junction với symlink. Chỉ vế symlink gặp `winerror=1314` được miễn. D3 có vế trước khi gắn, xác nhận volume tại đúng điểm gắn bằng `mountvol /L` và đối chứng bỏ bit sau khi gắn. D4 đo hình dạng W1 với cùng fixture cho hai bản. D12 yêu cầu cùng frozen SHA/tree trên Windows và Linux, đúng §10.1. Hai OID ADR cho `cat-file` lần lượt `0`, `128` tại commit và cha thứ nhất, và đều nằm trên first-parent của `origin/master` cục bộ. Độ mới của ref, D2–D5 và D12 chưa đo trong phiên này. |
+| §8 · Kích thước | Cộng đúng `4–6 + 179–212 + 1 = 184–219` dòng thêm. Khoảng này hợp lý để lập kế hoạch với khuôn P2a, còn `numstat` thật là tiêu chí nghiệm thu. |
+
+## Finding mới
+
+| Mức | Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|---|
+| P3 | §4b, dòng 85–86 | Cùng một kết quả D2 đo được là junction có `S_ISLNK=True` bị ghi thành `KHÔNG ĐO ĐƯỢC` ở §4b và thành D2 đỏ ở §4c. Khi đã đọc được kết quả ấy, tiền đề của đột biến 3 đã bị bác bỏ. Cả hai nhánh đều chặn land nên khác biệt nằm ở cách ghi bằng chứng. | “Nếu D2 đo được junction có `S_ISLNK=True`, ghi `D2 đỏ — trái tiền đề của đột biến 3`, dừng và lập revision theo §6. Dùng `KHÔNG ĐO ĐƯỢC` khi thiếu bằng chứng để kết luận.” |
+
+KET_LUAN: approve

@@ -1,0 +1,9 @@
+## Finding mới
+
+| Mức | Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|---|
+| **P2** | **N4, §4c D12 · T3** | D12 cho xanh sau selftest và `release-verify` trên hai nền, dù chưa đo được tính tất định của bundle. Protocol §10.1 yêu cầu release gates cho cùng frozen integration SHA. CI hiện hành có bước `release-bundle` hai lần rồi so SHA-256 tại `.github/workflows/ci.yml:545–555`. Một hồ sơ thiếu cả hai lượt bundle vẫn thỏa nguyên văn D12. | “Trên cùng frozen integration SHA/tree, chạy full selftest và toàn bộ release gates của lane LAND đọc tại SHA ấy, trên cả Windows và Linux. Ghi rc và đầu ra từng bước, gồm `release-verify --strict --json` và hai lần `release-bundle` có SHA-256 bằng nhau. Thiếu một bước, một nền hoặc sai SHA/tree thì T3 chưa đạt.” |
+| **P2** | **N4 · Phép đỏ `base sai`** | Cột phép đỏ liệt kê `base sai`, nhưng cột tiêu chí chỉ ghim exact head và kiểm hình dạng numstat. Một commit khác có cùng tree vẫn cho cùng numstat, cùng số ca và cùng số neo. `pipefail` giữ lỗi Git, còn một OID hợp lệ với tree giống hệt vẫn cho rc 0. | “Trước mọi phép so base/head, dùng `git rev-parse` lấy đủ OID rồi so base với OID đã ghim trong lease và head với OID candidate đã ghim. OID thiếu hoặc lệch thì đỏ trước khi đọc numstat. Phản chứng dùng một OID hợp lệ khác base đã ghim.” |
+| **P3** | **N4 · JSON `release-verify` lane worker** | Hai trường viết tắt `expected` và `checked` có thể bị đọc thành tên khóa JSON. Lệnh `python3 -B scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` trên base trả rc 0, `ok: true`, `expected_file_count = checked_file_count = 185` và vắng cả hai khóa viết tắt. Phép so bằng `.get()` trên hai khóa vắng sẽ cho `None == None`. | “`release-verify --strict --json` phải trả rc 0, `ok: true`, và có đủ hai trường số nguyên `expected_file_count` và `checked_file_count` bằng nhau. Thiếu trường hoặc lệch số thì đỏ.” |
+
+KET_LUAN: request_changes

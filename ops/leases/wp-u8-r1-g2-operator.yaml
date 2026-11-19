@@ -39,7 +39,7 @@ lease_expires_at_utc: '2026-11-19T13:44:20Z'
 max_lease_hours: 12
 lease_hours_note: 'pha B phu thuoc luc chu kho dang nhap xong; het han thi gia han bang heartbeat moi, khong suy da xong'
 review_calls_limit: 1
-review_calls_used: 0
+review_calls_used: 1
 native_runs_limit_phase_A: 1
 native_runs_limit_phase_B: 1
 native_step_reruns_limit: 1

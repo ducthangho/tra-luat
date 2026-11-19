@@ -1,0 +1,10 @@
+codex
+**A2 đã đóng.** J4 có 75 s tổng và yêu cầu còn ít nhất 50 s trước lời gọi đầu. Mỗi lượt dùng tối đa 25 s theo đặc tả (`10 + 5 + 5 + 5`), nên còn 25 s cho lời gọi thứ hai. Hai thao tác đọc và phần xoá sau đối chứng dùng chung hạn 5 s. Quá hạn được ghi `KHÔNG ĐO`.
+
+Delta chỉ sửa ngân sách J4 ở M1 và bổ sung nhật ký §11. Không phát hiện mâu thuẫn mới hay finding P0–P3.
+
+Đã xác minh SHA-256 bản 6 khớp giá trị được giao, trên HEAD `4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd`, tree `ceba0869d378f6c326955e4e1920a9776ba1a0a7`. Review tĩnh, chưa chạy ca native Windows.
+
+KET_LUAN: approve
+tokens used
+46,108

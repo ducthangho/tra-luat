@@ -1,0 +1,1550 @@
+Reading additional input from stdin...
+OpenAI Codex v0.170.0
+--------
+workdir: /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/spec1342a1ii/master
+model: gpt-6.2-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: none
+reasoning summaries: none
+session id: 01a1f35a-094a-7043-8303-2967cdd96ed7
+--------
+user
+# Review độc lập ĐẶC TẢ — packet #1342 WP1174-WINDOWS-BACKEND r5 (bậc r1d-a1-ii), lượt 4
+
+Bạn là reviewer độc lập, CHỈ ĐỌC; không sửa tệp, không commit, không gọi mạng. Giữ đầu ra gọn; KẾT THÚC bằng thông điệp cuối có dòng KET_LUAN (lượt trước phiên dừng giữa chừng không có thông điệp cuối — hãy dành ngân sách cho kết luận).
+
+- Cây làm việc = worktree tách rời của `origin/master` `4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd`. Tệp chưa commit: `ops/specs/WP1174-WINDOWS-BACKEND-r5.md` (bản 4, sha256 e823ed0bd67f82aa3c870a8d574e2cd8150659d3cf5e98f8ae3ba3b86c17eb5a) và `ops/specs/WP1174-WINDOWS-BACKEND-r5-ban2.md` (bản đã review lượt 2) để `diff -u`.
+- Nguồn: r4 trên `origin/ops/wp1342-r4-spec`; hồ sơ land `ops/land/pr1407-wp1342-land-evidence.yaml`; driver r4 `ops/land/pr1407-wp1342-provenance/windows-native/desktop/dot_bien_r4_ban2.py`; hạ tầng test r4 ở `.claude/dev/packet_loop_test.py` 18560–18934, `_module1174` 10647, `_native1342` 18159; sản phẩm `.claude/dev/packet_loop.py` 6745–6912.
+
+Finding lượt 2 (của bạn) cần kiểm đã đóng: F1 P1 J4 nạp bản đối chứng phải neo đúng tệp sản phẩm đang đo (`_module1174` cần `c.script`), argv giống hệt, tách khoá kết quả khỏi argv, dọn tệp kết quả trước đường đo; F2 P2 nhãn đối chứng (ii) gộp nhiều lỗi ⇒ e1c ghi công sai; F3 P2 hạn chung có thể cắt phép chờ 5 s, `_wp1342a1_tin` gộp WAIT_TIMEOUT/WAIT_FAILED, `join(20)` ngoài ngân sách; F4 P2 J12 phải kiểm lại `chau` khi thấy `ket_qua`, payload `long` thiếu mã Win32; F5 P3 không máy nào ra nhánh (B) vì lý do hỗn hợp. Lượt 3 dừng không verdict, với quan sát: tệp `long` chỉ có khi job trong đã gán, nên nhánh (C) không có `long` — bản 4 đã sửa.
+
+## Việc (đo bằng lệnh, ghi lệnh + rc)
+
+1. Bảng trạng thái F1–F5 và quan sát lượt 3: đóng thật hay chưa.
+2. Delta có tạo lỗ mới hoặc mâu thuẫn nội tại (M1–M4, §4b, N6–N7, §7) không. Kiểm riêng: thứ tự phân loại bảy vế của J4 (ii) và đường đo có tự mâu thuẫn không; ngân sách 75 s/45 s có đủ cho J4 (hai lời gọi) và J12 không.
+3. Chỉ P0–P2 mới chặn approve; P3 ghi kèm nhưng không chặn.
+
+Nếu một hướng thử cần nội dung dạng đường dẫn thoát khỏi cây thư mục, MÔ TẢ BẰNG LỜI.
+
+## Đầu ra
+
+Tiếng Việt, gọn. Bảng trạng thái; finding mới P0–P3 kèm bằng chứng + câu thay thế. DÒNG CUỐI CÙNG đúng một trong hai:
+KET_LUAN: approve
+KET_LUAN: request_changes
+warning: Codex could not find bubblewrap on PATH. Install bubblewrap with your OS package manager. See the sandbox prerequisites: https://developers.openai.com/codex/concepts/sandboxing#prerequisites. Codex will use the bundled bubblewrap in the meantime.
+codex
+Tôi dùng skill cross-review để kiểm bản 4 trong worktree chỉ đọc, đối chiếu từng finding và ghi lệnh cùng mã thoát.
+exec
+/bin/bash -lc 'for f in CONTEXT.md docs/PROTOCOL_DA_PHIEN.md CLAUDE.md; do wc -l "$f"; done
+cat .agents/skills/cross-review/SKILL.md
+git rev-parse HEAD HEAD''^{tree} origin/master
+git status --short
+sha256sum ops/specs/WP1174-WINDOWS-BACKEND-r5*.md
+wc -l ops/specs/WP1174-WINDOWS-BACKEND-r5*.md
+git ls-tree -r --name-only origin/ops/wp1342-r4-spec | rg '"'1342|1174.*r4'" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/spec1342a1ii/master
+ succeeded in 0ms:
+244 CONTEXT.md
+1751 docs/PROTOCOL_DA_PHIEN.md
+1149 CLAUDE.md
+---
+name: cross-review
+description: Adapter review packet trên Codex CLI với checkout/context được cấp riêng. Assurance và hợp đồng evidence lấy từ docs/PROTOCOL_DA_PHIEN.md; cung cấp cú pháp PowerShell.
+---
+
+# Adapter `cross-review` — Codex CLI / PowerShell
+
+Đọc [protocol](../../../docs/PROTOCOL_DA_PHIEN.md) §7 (receipt), §8/§8.1–§8.3
+(assurance, bootstrap, runtime, cache, Ruff, lịch sử lớp), §10.2.1–§10.2.3 (CI) và §13.
+Nguồn cú pháp và ghi chép provider: [.claude adapter](../../../.claude/skills/cross-review/SKILL.md).
+Các mục model selector Claude ở nguồn chỉ dành cho lane Claude; không dùng bảng đó chọn Codex.
+Nhận dạng nền này là `openai_codex / codex_cli / machine`; model/effort và sandbox đọc từ run.
+
+## Bootstrap và snapshot
+
+Biến `$Remote`, `$ReviewRoot`, `$Branch`, `$ReviewedSha`, `$Scratch` lấy từ assignment.
+Lệnh clone/config/checkout thuộc bootstrap trước bàn giao (§8.1):
+
+```powershell
+git -c core.longpaths=true clone --no-checkout $Remote $ReviewRoot
+git -C $ReviewRoot remote get-url origin
+git -C $ReviewRoot config core.abbrev 7
+git -C $ReviewRoot config core.longpaths true
+git -C $ReviewRoot fetch origin $Branch
+git -C $ReviewRoot checkout --detach $ReviewedSha
+git -C $ReviewRoot rev-parse HEAD 'HEAD^{tree}'
+git -C $ReviewRoot status --porcelain=v1 --untracked-files=all --ignored=matching
+git -C $ReviewRoot diff --binary
+git -C $ReviewRoot diff --cached --binary
+git -C $ReviewRoot ls-files --others --exclude-standard
+git -C $ReviewRoot ls-files --others --ignored --exclude-standard
+```
+
+Ghi rc của từng command ngay sau chạy; snapshot bytes/hash và giới hạn quan sát ở §8.2.
+Trust path/capability theo §8.1; không có lệnh tự chấp nhận trust trong adapter này.
+
+Ví dụ diff/numstat giữ raw bytes trong scratch của run, với `$BaseSha` từ assignment:
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+& $Py -B -c 'import pathlib,subprocess,sys; r,b,h,o=sys.argv[1:]; p=subprocess.run(["git","-C",r,"diff",b,h],check=True,capture_output=True); (pathlib.Path(o)/"diff.patch").write_bytes(p.stdout); p=subprocess.run(["git","-C",r,"diff","--numstat",b,h],check=True,capture_output=True); (pathlib.Path(o)/"numstat.txt").write_bytes(p.stdout)' $ReviewRoot $BaseSha $ReviewedSha $Scratch
+$DiffArtifactsRc = $LASTEXITCODE
+```
+
+`$ReviewRoot`/`$Scratch` là đường dẫn tuyệt đối. Khi đọc `modelUsage` lane Claude qua nguồn,
+truyền `$ReviewRoot` vào đối số SOURCE và JSON đúng `$Scratch/reviewer.json`; producer và
+consumer cùng run theo §8.1. Không đọc JSON trùng tên ở cwd.
+
+## Runtime và Ruff
+
+```powershell
+$Py = (Get-Command python -ErrorAction Stop).Source
+codex --version
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:PYTHONPYCACHEPREFIX = Join-Path $Scratch 'pycache'
+& $Py -B -c 'import pathlib,runpy,sys; m=runpy.run_path(str(pathlib.Path(sys.argv[1])/".claude/dev/ci_dang_ky_test.py")); errors,count=m["loi_ruff_ci"](); print("RUFF_CONTRACT",count,errors); sys.exit(bool(errors) or count == 0)' $ReviewRoot
+$RuffContractRc = $LASTEXITCODE
+& $Py -m ruff check --no-cache --select F (Join-Path $ReviewRoot 'scripts/tl.py')
+$RuffLintRc = $LASTEXITCODE
+```
+
+Hai lệnh Ruff trỏ checkout được giao, không phụ thuộc cwd. Pin/probe và bare lint là hai scope của §8.2;
+tiêu chí A7/mutant riêng xem §10.2.3. Cú pháp `launcher.py run --prompt-file` và mẫu Codex
+ở nguồn, mục “Reviewer là codex”; schema đầy đủ ở `docs/GOI_AGENT_DA_NEN.md`.
+`$Run = Get-Content -Raw -LiteralPath $RunJson | ConvertFrom-Json` đọc rc con/trạng thái; parse được chưa là
+completion evidence. Model/effort/sandbox lấy từ `$Run.model_phuc_vu`, `$Run.effort_phuc_vu`, `$Run.sandbox_quan_sat`,
+chỉ đo được khi `model_phuc_vu_trang_thai`/`effort_phuc_vu_trang_thai`/`sandbox_trang_thai` là `DO_DUOC`
+(khác thì đọc `*_ly_do`); đối chiếu với prompt/receipt theo §8.1. Header `model:`/`reasoning effort:` trong
+`$StderrLog`, nếu có, chỉ là lời khai phụ; vắng header không phải chưa đo được. Không lấy model từ actor GitHub.
+
+## Provenance và vận chuyển
+
+Lưu khối GraphQL “Provenance CI” của .claude adapter vào `$QueryFile` ngoài checkout:
+
+```powershell
+gh api graphql -F "query=@$QueryFile" -f "id=$RunNodeId"
+$ProvenanceRc = $LASTEXITCODE
+gh api --paginate --slurp "repos/ducthangho/tra-luat/actions/runs/$RunId/attempts/$Attempt/jobs?per_page=100"
+$JobsRc = $LASTEXITCODE
+git -C $ReviewRoot cat-file blob "${DefinitionOid}:$WorkflowPath"
+```
+
+Khối `cat-file` minh họa đọc; để lưu bytes/hash dùng Python `subprocess` như work-packet.
+Nguồn URL/OID, nullable `file`, 403, skipped/waiver và đủ attempt/context theo §10.2.2–§10.2.3.
+Receipt body-file dùng Python ở [work-packet nguồn](../../../.claude/skills/work-packet/SKILL.md),
+mục “Body file và exact readback”. Bảng verdict/lịch sử lớp ở nguồn; không đổi contract khi
+đổi shell. Không dispatch reviewer từ ví dụ đọc evidence này.
+4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd
+ceba0869d378f6c326955e4e1920a9776ba1a0a7
+4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd
+?? ops/specs/WP1174-WINDOWS-BACKEND-r5-ban2.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r5.md
+791673a89b7861b338a07ff45f7e0f51fed696406cb0b00b2541f415abe344a9  ops/specs/WP1174-WINDOWS-BACKEND-r5-ban2.md
+e823ed0bd67f82aa3c870a8d574e2cd8150659d3cf5e98f8ae3ba3b86c17eb5a  ops/specs/WP1174-WINDOWS-BACKEND-r5.md
+  154 ops/specs/WP1174-WINDOWS-BACKEND-r5-ban2.md
+  156 ops/specs/WP1174-WINDOWS-BACKEND-r5.md
+  310 total
+ops/land/pr1100-wp1089-r2-provenance/ci/jobs/124756713428.trich.txt
+ops/land/pr1118-ghi-so-bo-sung-1065-provenance/gate-output-41342580238.txt
+ops/land/pr1118-ghi-so-bo-sung-1065-provenance/readback-graphql-workflowrun-41342580238.json
+ops/land/pr1118-ghi-so-bo-sung-1065-provenance/readback-jobs-41342580238.json
+ops/land/pr1118-ghi-so-bo-sung-1065-provenance/readback-run-41342580238.json
+ops/land/pr1363-wp1342-land-evidence.yaml
+ops/land/pr1363-wp1342-provenance/SHA256SUMS
+ops/land/pr1363-wp1342-provenance/ai-dang-giu-sau-rut-han.txt
+ops/land/pr1363-wp1342-provenance/bien-ban-m8.yaml
+ops/land/pr1363-wp1342-provenance/ci/jobs.json
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908501565.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625271.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625303.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625486.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625503.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625531.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625532.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625537.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625551.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625584.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625591.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625640.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625655.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625666.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625680.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625683.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625692.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625715.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625759.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625862.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625870.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625894.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625897.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625910.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625928.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625934.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625961.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625981.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625985.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908625996.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908626004.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908626005.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908626028.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908626129.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133908626149.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133909431692.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133909669048.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133910548867.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/jobs/133919287562.trich.txt
+ops/land/pr1363-wp1342-provenance/ci/provenance.yaml
+ops/land/pr1363-wp1342-provenance/ci/run.json
+ops/land/pr1363-wp1342-provenance/dac-ta.txt
+ops/land/pr1363-wp1342-provenance/danh-gia-gate-output-44045034569.txt
+ops/land/pr1363-wp1342-provenance/danh_gia_gate.py
+ops/land/pr1363-wp1342-provenance/desktop-dot-bien/dot-bien-1342.py
+ops/land/pr1363-wp1342-provenance/desktop-dot-bien/dot-bien.lf.json
+ops/land/pr1363-wp1342-provenance/kiem-dong-wp-m8.txt
+ops/land/pr1363-wp1342-provenance/lease-wp1342-r1-g1-claude-sau-rut-han.yaml.txt
+ops/land/pr1363-wp1342-provenance/nghiem-thu-ded5d41.txt
+ops/land/pr1363-wp1342-provenance/phan-chung-buoc-44045034569.txt
+ops/land/pr1363-wp1342-provenance/readback-commit-ded5d41.json
+ops/land/pr1363-wp1342-provenance/readback-issue-1342.json
+ops/land/pr1363-wp1342-provenance/readback-jobs-44045034569.json
+ops/land/pr1363-wp1342-provenance/readback-pr-1363.json
+ops/land/pr1363-wp1342-provenance/readback-pr1363-comments.json
+ops/land/pr1363-wp1342-provenance/readback-run-44045034560-launcher-windows.json
+ops/land/pr1363-wp1342-provenance/readback-run-44045034569.json
+ops/land/pr1363-wp1342-provenance/readback-runs-head-675c38d.json
+ops/land/pr1363-wp1342-provenance/windows-desktop-tom-tat.txt
+ops/land/pr1363-wp1342-provenance/windows-vm-n8.txt
+ops/land/pr1366-wp1365-provenance/run1342.py
+ops/land/pr1384-wp1342-land-evidence.yaml
+ops/land/pr1384-wp1342-provenance/SHA256SUMS
+ops/land/pr1384-wp1342-provenance/ai-dang-giu-sau-rut-han.txt
+ops/land/pr1384-wp1342-provenance/bien-ban-m8.yaml
+ops/land/pr1384-wp1342-provenance/ci/jobs.json
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690140231.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332120.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332160.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332190.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332192.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332198.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332204.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332212.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332246.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332258.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332278.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332312.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332314.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332355.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332370.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332385.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332390.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332393.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332415.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332438.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332450.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332455.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332534.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332610.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332620.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332625.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332632.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332676.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332693.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332724.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332747.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332808.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332819.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332851.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134690332890.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134694265469.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134694476184.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134695134170.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/jobs/134703387684.trich.txt
+ops/land/pr1384-wp1342-provenance/ci/provenance.yaml
+ops/land/pr1384-wp1342-provenance/ci/run.json
+ops/land/pr1384-wp1342-provenance/dac-ta.txt
+ops/land/pr1384-wp1342-provenance/danh-gia-gate-output-44271842401.txt
+ops/land/pr1384-wp1342-provenance/danh_gia_gate.py
+ops/land/pr1384-wp1342-provenance/kiem-dong-wp-m8.txt
+ops/land/pr1384-wp1342-provenance/launcher-windows-44271842410.trich.txt
+ops/land/pr1384-wp1342-provenance/lease-wp1342-r2-g1-claude-sau-rut-han.yaml.txt
+ops/land/pr1384-wp1342-provenance/linux/n134-phan-chung-d1ca71a.json
+ops/land/pr1384-wp1342-provenance/linux/n134_1384.py
+ops/land/pr1384-wp1342-provenance/linux/n2-phan-chung-d1ca71a.json
+ops/land/pr1384-wp1342-provenance/linux/n2_1384.py
+ops/land/pr1384-wp1342-provenance/nghiem-thu-d1ca71a.txt
+ops/land/pr1384-wp1342-provenance/phan-chung-buoc-44271842401.txt
+ops/land/pr1384-wp1342-provenance/readback-checkruns-head-c10d071.json
+ops/land/pr1384-wp1342-provenance/readback-commit-d1ca71a.json
+ops/land/pr1384-wp1342-provenance/readback-issue-1342.json
+ops/land/pr1384-wp1342-provenance/readback-jobs-44271842401.json
+ops/land/pr1384-wp1342-provenance/readback-jobs-44271842410.json
+ops/land/pr1384-wp1342-provenance/readback-pr-1384.json
+ops/land/pr1384-wp1342-provenance/readback-pr1384-comments.json
+ops/land/pr1384-wp1342-provenance/readback-pr1384-review-comments.json
+ops/land/pr1384-wp1342-provenance/readback-pr1384-reviews.json
+ops/land/pr1384-wp1342-provenance/readback-run-44271842401.json
+ops/land/pr1384-wp1342-provenance/readback-run-44271842410.json
+ops/land/pr1384-wp1342-provenance/readback-runs-head-c10d071.json
+ops/land/pr1384-wp1342-provenance/readback-runs-head-f50be35.json
+ops/land/pr1384-wp1342-provenance/wd/ci-provenance-thu-wd-44339133885.log
+ops/land/pr1384-wp1342-provenance/wd/readback-jobs-44339133885.json
+ops/land/pr1384-wp1342-provenance/wd/readback-run-44339133885.json
+ops/land/pr1384-wp1342-provenance/wd/wd-44339133885.json
+ops/land/pr1384-wp1342-provenance/windows-native/.gitattributes
+ops/land/pr1384-wp1342-provenance/windows-native/chay-1342r2.ps1
+ops/land/pr1384-wp1342-provenance/windows-native/dot-bien-1342r2.py
+ops/land/pr1384-wp1342-provenance/windows-native/goi-1342r2.json
+ops/land/pr1384-wp1342-provenance/windows-native/vm-p5/TOM-TAT-VM.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_admission_valid.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_admission_wrong_scope.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_lifecycle_legacy_unchanged.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_status_closed.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_windows_claim_rejected.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_witness_active_pending.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_witness_fresh_reserved.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_witness_import_retry.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_witness_int_bool.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_witness_json_bytes.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_witness_keyset.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_witness_suspended.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1174_witness_valid.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1342_native_metadata_drift.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1342_native_noinherit.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1342_native_read.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1342_native_swap_ancestor.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1342_native_symlink_file.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/BASE-wp1342_native_volume_junction.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_admission_valid.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_admission_wrong_scope.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_lifecycle_legacy_unchanged.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_status_closed.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_windows_claim_rejected.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_witness_active_pending.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_witness_fresh_reserved.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_witness_import_retry.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_witness_int_bool.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_witness_json_bytes.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_witness_keyset.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_witness_suspended.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1174_witness_valid.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_additive_byte_preserved.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_lock_exclusive.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_lock_names.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_lock_noinherit.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_metadata_drift.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_noinherit.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_persist_bindings.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_persist_create.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_persist_update.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_persist_update_held.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_persist_update_refuse.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_persist_update_symlink.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_read.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_swap_ancestor.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_symlink_file.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_native_volume_junction.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_pure_lock_persist_refuse.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/HEAD-wp1342_pure_platform_path.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/TOM-TAT.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/clone.log
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/dot-bien.stderr.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/dot-bien.stdout.txt
+ops/land/pr1384-wp1342-provenance/windows-native/wp1342r2c-out/dot-bien/dot-bien.json
+ops/land/pr1390-wp1342-land-evidence.yaml
+ops/land/pr1390-wp1342-provenance/SHA256SUMS
+ops/land/pr1390-wp1342-provenance/ai-dang-giu-sau-rut-han.txt
+ops/land/pr1390-wp1342-provenance/bien-ban-m8.yaml
+ops/land/pr1390-wp1342-provenance/ci-provenance-thu.log
+ops/land/pr1390-wp1342-provenance/ci/jobs.json
+ops/land/pr1390-wp1342-provenance/ci/jobs/134879999384.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880142752.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880142803.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143310.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143333.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143335.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143376.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143385.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143387.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143391.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143412.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143428.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143467.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143478.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143649.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880143670.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880144980.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145274.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145559.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145607.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145619.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145686.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145711.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145717.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145731.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145732.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145818.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145838.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145875.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145883.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880145981.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880146355.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880147127.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880147680.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134880150818.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134882234381.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134882484197.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134883409610.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/jobs/134896177909.trich.txt
+ops/land/pr1390-wp1342-provenance/ci/provenance.yaml
+ops/land/pr1390-wp1342-provenance/ci/run.json
+ops/land/pr1390-wp1342-provenance/dac-ta.txt
+ops/land/pr1390-wp1342-provenance/danh-gia-gate-output-44326753737.txt
+ops/land/pr1390-wp1342-provenance/danh_gia_gate.py
+ops/land/pr1390-wp1342-provenance/kiem-dong-wp-m8.txt
+ops/land/pr1390-wp1342-provenance/launcher-windows-44326753292.trich.txt
+ops/land/pr1390-wp1342-provenance/lease-wp1342-r3-g1-claude-sau-rut-han.yaml.txt
+ops/land/pr1390-wp1342-provenance/linux/do_python_1390.py
+ops/land/pr1390-wp1342-provenance/linux/dot-bien-linux.json
+ops/land/pr1390-wp1342-provenance/linux/dot_bien_linux_1390.py
+ops/land/pr1390-wp1342-provenance/linux/eol-policy-all-aeb5cae.json
+ops/land/pr1390-wp1342-provenance/linux/n23-phan-chung-aeb5cae.json
+ops/land/pr1390-wp1342-provenance/linux/n23_1390.py
+ops/land/pr1390-wp1342-provenance/linux/nghiem-thu-aeb5cae.txt
+ops/land/pr1390-wp1342-provenance/linux/suite-wp1342-wp1174.txt
+ops/land/pr1390-wp1342-provenance/phan-chung-buoc-44326753737.txt
+ops/land/pr1390-wp1342-provenance/readback-checkruns-head-972089e.json
+ops/land/pr1390-wp1342-provenance/readback-commit-aeb5cae.json
+ops/land/pr1390-wp1342-provenance/readback-issue-1342.json
+ops/land/pr1390-wp1342-provenance/readback-jobs-44326753292.json
+ops/land/pr1390-wp1342-provenance/readback-jobs-44326753737.json
+ops/land/pr1390-wp1342-provenance/readback-pr-1390.json
+ops/land/pr1390-wp1342-provenance/readback-pr1390-comments.json
+ops/land/pr1390-wp1342-provenance/readback-pr1390-review-comments.json
+ops/land/pr1390-wp1342-provenance/readback-pr1390-reviews.json
+ops/land/pr1390-wp1342-provenance/readback-run-44326753292.json
+ops/land/pr1390-wp1342-provenance/readback-run-44326753737.json
+ops/land/pr1390-wp1342-provenance/readback-runs-head-972089e.json
+ops/land/pr1390-wp1342-provenance/readback-runs-merge-aeb5cae.json
+ops/land/pr1390-wp1342-provenance/review-dac-ta-r3.txt
+ops/land/pr1390-wp1342-provenance/wd/ci-provenance-thu-wd-44339158716.log
+ops/land/pr1390-wp1342-provenance/wd/readback-jobs-44339158716.json
+ops/land/pr1390-wp1342-provenance/wd/readback-run-44339158716.json
+ops/land/pr1390-wp1342-provenance/wd/wd-44339158716.json
+ops/land/pr1390-wp1342-provenance/windows-native/.gitattributes
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/chay-1342r3.ps1
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/dot-bien-1342r3.py
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/goi-1342r3.json
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_admission_valid.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_admission_wrong_scope.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_lifecycle_legacy_unchanged.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_status_closed.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_windows_claim_rejected.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_active_pending.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_fresh_reserved.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_import_retry.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_int_bool.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_json_bytes.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_keyset.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_suspended.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_valid.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_additive_byte_preserved.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_lock_exclusive.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_lock_names.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_lock_noinherit.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_metadata_drift.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_noinherit.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_bindings.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_create.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_update.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_update_held.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_update_refuse.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_update_symlink.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_read.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_swap_ancestor.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_symlink_file.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_volume_junction.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_pure_lock_persist_refuse.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_pure_platform_path.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_admission_valid.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_admission_wrong_scope.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_lifecycle_legacy_unchanged.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_status_closed.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_windows_claim_rejected.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_active_pending.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_fresh_reserved.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_import_retry.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_int_bool.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_json_bytes.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_keyset.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_suspended.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_valid.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_additive_byte_preserved.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_boot_failclosed.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_boot_stable.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_lock_exclusive.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_lock_names.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_lock_noinherit.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_metadata_drift.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_noinherit.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_bindings.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_create.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_update.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_update_held.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_update_refuse.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_update_symlink.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_read.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_acl.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_drift.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_fingerprint.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_hardlink.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_nonfile.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_ok.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_swap_ancestor.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_symlink_file.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_volume_junction.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_pure_lock_persist_refuse.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_pure_platform_path.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_pure_seed_acl_bang.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_pure_seed_boot_refuse.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/TOM-TAT.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/clone.log
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/dot-bien.stderr.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/dot-bien.stdout.txt
+ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/dot-bien/dot-bien.json
+ops/land/pr1390-wp1342-provenance/windows-native/vm/chay-1342r3-vm.ps1
+ops/land/pr1390-wp1342-provenance/windows-native/vm/goi-1342r3-vm.json
+ops/land/pr1390-wp1342-provenance/windows-native/vm/n7-1342r3.ps1
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-n7-out/fetch.log
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-n7-out/n7-sau-lan1-khong-reboot.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-n7-out/n7-sau.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-n7-out/n7-truoc.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_admission_valid.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_admission_wrong_scope.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_lifecycle_legacy_unchanged.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_status_closed.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_windows_claim_rejected.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_active_pending.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_fresh_reserved.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_import_retry.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_int_bool.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_json_bytes.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_keyset.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_suspended.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_valid.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_additive_byte_preserved.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_lock_exclusive.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_lock_names.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_lock_noinherit.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_metadata_drift.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_noinherit.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_bindings.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_create.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_update.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_update_held.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_update_refuse.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_update_symlink.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_read.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_swap_ancestor.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_symlink_file.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_volume_junction.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_pure_lock_persist_refuse.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_pure_platform_path.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_admission_valid.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_admission_wrong_scope.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_lifecycle_legacy_unchanged.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_status_closed.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_windows_claim_rejected.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_active_pending.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_fresh_reserved.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_import_retry.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_int_bool.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_json_bytes.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_keyset.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_suspended.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_valid.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_additive_byte_preserved.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_boot_failclosed.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_boot_stable.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_lock_exclusive.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_lock_names.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_lock_noinherit.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_metadata_drift.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_noinherit.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_bindings.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_create.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_update.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_update_held.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_update_refuse.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_update_symlink.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_read.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_acl.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_drift.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_fingerprint.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_hardlink.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_nonfile.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_ok.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_swap_ancestor.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_symlink_file.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_volume_junction.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_pure_lock_persist_refuse.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_pure_platform_path.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_pure_seed_acl_bang.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_pure_seed_boot_refuse.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/TOM-TAT.txt
+ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/clone.log
+ops/leases/wp1342-r4-g1-claude.yaml
+ops/reviews/wp1342-spec-r4/.gitattributes
+ops/reviews/wp1342-spec-r4/dac-ta-ban1.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban10.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban11.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban12.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban13.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban2.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban3.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban4.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban5.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban6.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban7.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban8.md
+ops/reviews/wp1342-spec-r4/dac-ta-ban9.md
+ops/reviews/wp1342-spec-r4/luot1.stdout.txt
+ops/reviews/wp1342-spec-r4/luot1.verdict.txt
+ops/reviews/wp1342-spec-r4/luot10.stdout.txt
+ops/reviews/wp1342-spec-r4/luot10.verdict.txt
+ops/reviews/wp1342-spec-r4/luot11.stdout.txt
+ops/reviews/wp1342-spec-r4/luot11.verdict.txt
+ops/reviews/wp1342-spec-r4/luot12.stdout.txt
+ops/reviews/wp1342-spec-r4/luot12.verdict.txt
+ops/reviews/wp1342-spec-r4/luot13.stdout.txt
+ops/reviews/wp1342-spec-r4/luot13.verdict.txt
+ops/reviews/wp1342-spec-r4/luot2.stdout.txt
+ops/reviews/wp1342-spec-r4/luot2.verdict.txt
+ops/reviews/wp1342-spec-r4/luot3.stdout.txt
+ops/reviews/wp1342-spec-r4/luot3.verdict.txt
+ops/reviews/wp1342-spec-r4/luot4.stdout.txt
+ops/reviews/wp1342-spec-r4/luot4.verdict.txt
+ops/reviews/wp1342-spec-r4/luot5.stdout.txt
+ops/reviews/wp1342-spec-r4/luot5.verdict.txt
+ops/reviews/wp1342-spec-r4/luot6.stdout.txt
+ops/reviews/wp1342-spec-r4/luot6.verdict.txt
+ops/reviews/wp1342-spec-r4/luot7.stdout.txt
+ops/reviews/wp1342-spec-r4/luot7.verdict.txt
+ops/reviews/wp1342-spec-r4/luot8.stdout.txt
+ops/reviews/wp1342-spec-r4/luot8.verdict.txt
+ops/reviews/wp1342-spec-r4/luot9.stdout.txt
+ops/reviews/wp1342-spec-r4/luot9.verdict.txt
+ops/reviews/wp1342-spec-r4/prompt-luot1.md
+ops/reviews/wp1342-spec-r4/prompt-luot10.md
+ops/reviews/wp1342-spec-r4/prompt-luot11.md
+ops/reviews/wp1342-spec-r4/prompt-luot12.md
+ops/reviews/wp1342-spec-r4/prompt-luot13.md
+ops/reviews/wp1342-spec-r4/prompt-luot2.md
+ops/reviews/wp1342-spec-r4/prompt-luot3.md
+ops/reviews/wp1342-spec-r4/prompt-luot4.md
+ops/reviews/wp1342-spec-r4/prompt-luot5.md
+ops/reviews/wp1342-spec-r4/prompt-luot6.md
+ops/reviews/wp1342-spec-r4/prompt-luot7.md
+ops/reviews/wp1342-spec-r4/prompt-luot8.md
+ops/reviews/wp1342-spec-r4/prompt-luot9.md
+ops/specs/WP1174-WINDOWS-BACKEND-r4.md
+
+exec
+/bin/bash -lc "nl -ba ops/specs/WP1174-WINDOWS-BACKEND-r5.md
+diff -u ops/specs/WP1174-WINDOWS-BACKEND-r5{,-ban2}.md >/dev/null
+printf 'diff rc=%s\\n' \""'$?"' in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/spec1342a1ii/master
+ succeeded in 0ms:
+     1	tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
+     2	tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
+     3	
+     4	# WP1174-WINDOWS-BACKEND r5 — kháng thoát job: breakaway tường minh, breakaway ngầm, job lồng (bậc r1d-a1-ii), CHỈ phép đo, chưa nối vào runtime
+     5	
+     6	- packet_id: WP1174-WINDOWS-BACKEND; revision: 5;
+     7	
+     8	| trường | giá trị |
+     9	|---|---|
+    10	| `packet_issue` | #1342 |
+    11	| `nguon_cap_viec` | Lộ trình bậc ở §1 đặc tả r1. Đặc tả r4 (`ops/specs/WP1174-WINDOWS-BACKEND-r4.md` trên `origin/ops/wp1342-r4-spec`, sha256 `f435eb5c…1eb8`) §2 "Để r1d-a1-ii" và §9 Q1 (chủ kho 2026-11-18: a1 → a1-i / a1-ii; a1-ii = breakaway tường minh/ngầm, job lồng). r4 land `a2c7d75` (PR #1407, hồ sơ `ops/land/pr1407-wp1342-land-evidence.yaml`, `landed: true`). Comment chủ kho Issue #1342 `issuecomment-6999134364` (2026-11-19T03:51Z): "r1d-a1-ii: kháng thoát job (breakaway tường minh, breakaway ngầm, job lồng)", mỗi phần đặc tả và review riêng. |
+    12	| `review_class` | `sensitive` (`.claude/dev/packet_loop_test.py` không có trong `_BANG_LOP` của `ops/lease_publish.py` ⇒ fail-closed `sensitive`; phạm vi là phép đo của runtime trạng thái WP1174) |
+    13	| `base` | `4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd` (tree `ceba0869d378f6c326955e4e1920a9776ba1a0a7`; master lúc 2026-11-19T10:21Z). Số đo §0 lấy 2026-11-19T09:4xZ–10:2xZ: phần lớn trên `11bd033` (bản 1), rồi xác nhận lại trên `4eda94e` — `git diff --stat 11bd033 4eda94e` chỉ 1 tệp ngoài `.claude/dev/` (7+/7−), blob hai tệp của write set GIỐNG HỆT. L5: người cấp lease đo lại §0 trên OID base thật (1) trước khi công bố băm, (2) lúc cấp lease, (3) trước merge; lệch ⇒ revision đặc tả. |
+    14	
+    15	**Đánh số:** `revision: 5` (ADR-0063, số nguyên); bậc **r1d-a1-ii**. r1d-a2 (transport hai pipe) và r1d-b (probe) là các revision sau.
+    16	
+    17	## 0. Hiện trạng (đo trên `11bd033`, xác nhận trên base `4eda94e`)
+    18	
+    19	Lệnh trong clone `git worktree add --detach … origin/master` (ref vừa `git fetch origin '+refs/heads/*:refs/remotes/origin/*'`, kho không shallow; lúc 09:4xZ `comm -23` tập nhánh máy chủ/đệm = 0 dòng, 339 nhánh; lúc 10:21Z `git ls-remote --heads origin` = 339 dòng. Đây là ảnh chụp lúc soạn; reviewer lượt 1 đếm 340 ref cục bộ — lệch do thời điểm/`HEAD`, không phải bằng chứng); mọi lệnh rc 0 trừ chỗ ghi.
+    20	
+    21	- `git diff --numstat a2c7d75 11bd033 -- .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py` ⇒ RỖNG (và `git rev-parse 4eda94e:<tệp>` ra cùng hai blob dưới đây): hai tệp không đổi từ merge r4. `git merge-base --is-ancestor a2c7d75 11bd033` rc 0. Blob: `packet_loop.py` `f98d3f53e638518790def1f22d78e82623451d41` (7239 dòng), `packet_loop_test.py` `c1ec1c69a7a476689d10ddb60d4e12c092e1f7a3` (18937 dòng).
+    22	- `packet_loop.py`: r4 đứng riêng ở 6745–6912: `_1174_WIN_JOB_LIMIT = 0x2000` 6745 (dòng `_1174_WIN_JOB_LIMIT = 0x2000   # JOBOBJECT LimitFlags: KILL_ON_JOB_CLOSE and nothing else (no breakaway bit)` — cùng neo với đột biến a2 của r4), `_1174_win_api_job` 6750 (12 bindings, KHÔNG có `IsProcessInJob`), `_1174_win_spawn_job` 6830. Job tạo bằng `CreateJobObjectW(None, None)`, `LimitFlags = _1174_WIN_JOB_LIMIT`, gán TRƯỚC resume; thu hồi bằng `terminate` + `xac_nhan` (§4 r4).
+    23	- `packet_loop_test.py`: khối r4 18560–18934. Hạ tầng dùng lại được (KHÔNG sửa): `_wp1342a1_FX` 18634 (fixture; bước `bt` `cho` `cho0` `ra` `chau` `tro_a` `tro_b`; **bước lạ bị BỎ QUA im lặng** — vòng `for b in buoc` không có nhánh `else`), `_wp1342a1_lenh` 18665, `_wp1342a1_tin` 18669, `_wp1342a1_mo` 18673 (bắt tay: đòi nonce, creation time và `WaitForSingleObject(h, 0) == 258`; 20 dòng vật lý `def`→`return`), `_wp1342a1_ban_sao` 18695, `_wp1342a1_goi` 18702 (luồng quan sát + bàn giao handle; dùng `x.m`, mặc định `han=60`, `join(20)`), `_wp1342a1_ca` 18737 (khung ca: cửa sổ 90 s CHỈ kiểm SAU khi thân ca và dọn xong — không tự cắt các bước chờ, `loi_*`/`het_han_*`/`tu_ket_thuc` ⇒ `KHÔNG ĐO`; ghi `_wp1342a1_FX` ra `d/fx.py`), `_wp1342a1_phu` 18760, `_wp1342a1_giet_cha` 18767. `_native1342` 18159. `_module1174(c)` 10647 nạp một module MỚI mỗi lần gọi (`spec_from_file_location` tên `pl1174_<time_ns>`), nên sửa thuộc tính của một bản nạp không chạm bản nạp khác. Đăng ký r4: `CASES += [...]` 18923 (3 ca thuần) và 18924–18933 (11 ca native); `if __name__ == "__main__"` 18936. `MUTANTS` 3592.
+    24	- Numstat r4 (`d59527f..a2c7d75`): `packet_loop.py` +172/-0, `packet_loop_test.py` +376/-0.
+    25	- Dòng khai trần: ADR-0053 `8ab1007…` và ADR-0055 `d2e3052…` — mỗi OID: `git cat-file -e <L>:<adr>` rc 0, `git cat-file -e <L>^1:<adr>` rc 128, `git rev-list --first-parent origin/master | grep -xc <L>` = 1 trên `4eda94e`.
+    26	- Lease chạm write set: quét `ops/leases/*.yaml` trên mọi `refs/remotes/origin/ops/*` (script tạm, regex dòng `lease_until`/`lease_expires_at_utc`/`expires_at`) tìm lease nhắc `packet_loop` hết hạn sau 2026-11-19T10Z ⇒ **0** lease (giới hạn: chỉ nhánh `ops/*`, chỉ ba tên trường ấy; lệnh `ai-dang-giu` chạy trên kho chính bị `CHAN [12]` vì nhánh cục bộ `master` tụt sau — không đo được bằng lệnh ấy trong phiên soạn; người cấp lease đo lại theo L5).
+    27	- Máy đo r4 (hồ sơ land pr1407): Desktop `DESKTOP-T9R33P2` Windows 11 NT 10.0.26300, Python 3.12.10; VM `tra-luat-win` Windows Server 2022 (20348). Tiến trình chạy ca trên hai máy ấy có nằm sẵn trong một job hay không: CHƯA ĐO (§10).
+    28	- Bộ kiểm N2 của r4 (`ops/land/pr1407-wp1342-provenance/linux/n2_test_r4.py`, 196 dòng) sau `sed 's/_wp1342a1_/_wp1342a1ii_/g'` (đổi hằng tiền tố VÀ tên trong phản chứng/đối chứng dương), chạy `base_r5 base_r5` (blob `c1ec1c69`): 16/16 phản chứng ĐỎ đúng vế, đối chứng dương `[]`. Hai phản chứng mới (chèn trước `if __name__`): `_wp1342a1_FX = _wp1342a1_FX + "x"` ⇒ ĐỎ (iv) + (ii) ("1 điểm bind ở base, 2 ở head"); mục native ID `wp1342_native_job_thuan` (ID r4) ⇒ ĐỎ (iv). Một khối mô phỏng r5 (`_wp1342a1ii_FX = _wp1342a1_FX + ("…")`, `def _wp1342a1ii_s6` có `import ast` cục bộ + `ast.parse`, một ca native, hai câu `CASES +=`) ⇒ `[]`; cùng khối mà S6 gọi `compile(...)` ⇒ ĐỎ "(iv) tên cấm `compile`".
+    29	- Hành vi Win32 dùng làm căn cứ (tài liệu Microsoft theo trí nhớ người soạn và reviewer lượt 1, CHƯA tra lại, CHƯA đo trong kho): `CREATE_BREAKAWAY_FROM_JOB` = `0x01000000`; tiến trình trong job không có `JOB_OBJECT_LIMIT_BREAKAWAY_OK` (`0x800`) gọi `CreateProcess` với cờ ấy thì thất bại `ERROR_ACCESS_DENIED` (5); `JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK` (`0x1000`) cho con tự động rời JOB MANG CỜ ẤY — trong chuỗi lồng, việc rời các job tổ tiên phụ thuộc cờ của từng tổ tiên; breakaway được xét THEO TỪNG JOB trong chuỗi; từ Windows 8 job lồng nhau được hỗ trợ nhưng phép gán vẫn có thể bị từ chối; `IsProcessInJob(process, job, &result)` cần `PROCESS_QUERY_INFORMATION` HOẶC `PROCESS_QUERY_LIMITED_INFORMATION` trên tiến trình và `JOB_OBJECT_QUERY` trên job. Vì chuỗi job tổ tiên của tiến trình chạy ca KHÔNG đọc được bằng API có tài liệu, đối chứng của J4 phải đi qua CHÍNH đường sản phẩm từ CHÍNH tiến trình chạy ca (M2), không qua một tiến trình khác tự gán job.
+    30	
+    31	## 1. Phạm vi r5 (r1d-a1-ii)
+    32	
+    33	CHỈ THÊM phép đo vào `packet_loop_test.py`: ba ca native (J4 breakaway tường minh, J5 breakaway ngầm, J12 job lồng), một ca thuần (S6, cú pháp fixture mở rộng), phần mở rộng fixture dựng bằng cộng chuỗi trên `_wp1342a1_FX`. `packet_loop.py` KHÔNG đổi một byte: Q3 ("cấm tuyệt đối breakaway", `LimitFlags == KILL_ON_JOB_CLOSE`) đã nằm trong mã r4; r5 đo rằng nó có răng trên Windows thật. Không sửa thân định nghĩa nào đang có.
+    34	
+    35	## 2. `write_set`, `ngoai_pham_vi`, ranh giới
+    36	
+    37	```
+    38	.claude/dev/packet_loop_test.py
+    39	```
+    40	
+    41	Ngoài phạm vi:
+    42	- `.claude/dev/packet_loop.py` (mọi byte giữ nguyên; đột biến e1/e2 chỉ chạy trên BẢN SAO TẠM qua driver ngoài kho). Không bind `IsProcessInJob` trong mã sản phẩm (allowlist M1 r4 và J0 khoá đúng 12 tên); binding ấy chỉ ở phía test.
+    43	- Không sửa thân hàm/khối nào đang có trong tệp test, kể cả `_wp1342a1_FX`, `_wp1342a1_ca`, `_wp1342a1_goi`, `_native1342`; không gán lại tên base nào. Không đổi `MUTANTS`; không runner mới; không CI Windows; không vào `WP1174_REQUIRED`/`WP1174_BOTH`.
+    44	- Không thêm kiểm runtime trong `_1174_win_spawn_job` (vd đọc lại `LimitFlags`, `IsProcessInJob` sau gán): sửa thân hàm r4 là đổi phạm vi ⇒ revision mới (§7).
+    45	- **Để r1d-a2:** hai pipe, hạn mức byte, `on_bytes`, `stdin` bytes, CRLF/NUL. **Để r1d-b:** probe. Không nối dây.
+    46	- Không API không tài liệu, không `pywin32`, không đồ giả Win32.
+    47	
+    48	Ranh giới bảo đảm: không đổi so với r4 §2 (gồm nợ `wp1342-pre-assign-orphan`). r5 thêm hai câu được ĐO: (a) hậu duệ trong job đích xin breakaway tường minh bị từ chối (J4); (b) hậu duệ sinh bình thường nằm trong job đích (J5). Job lồng (J12) là năng lực CÓ ĐIỀU KIỆN: ca ghi nhánh xảy ra, mỗi nhánh có hậu điều riêng; không khẳng định nhánh nào là bảo đảm. Ngoài bảo đảm như r4: tiến trình do dịch vụ ngoài job tạo thay mặt con (COM/WMI/Task Scheduler).
+    49	
+    50	## 3. Hằng số
+    51	
+    52	Không hằng sản phẩm mới. Hằng phía test (giá trị literal trong ca, mỗi chỗ một lần): `0x01000000` (`CREATE_BREAKAWAY_FROM_JOB`), `0x2800` (đặt vào `_1174_WIN_JOB_LIMIT` của bản nạp riêng cho đối chứng (ii) J4: `KILL_ON_JOB_CLOSE | BREAKAWAY_OK`; đúng MỘT lần trong tệp), `0x2000` (job ngoài J12), tập mã từ chối cho phép `{5}`.
+    53	
+    54	## 4. `muc_tieu` (mọi mục chiếu vào `.claude/dev/packet_loop_test.py`)
+    55	
+    56	| # | mục tiêu |
+    57	|---|---|
+    58	| M1 | **Fixture mở rộng** `_wp1342a1ii_FX = _wp1342a1_FX + "<nhánh mới>"` (cộng chuỗi; `_wp1342a1_FX` không bị gán lại). Phần thêm là các nhánh `elif` nối tiếp chuỗi `if/elif` của vòng `for b in buoc`, cộng binding `IsProcessInJob([c_void_p, c_void_p, POINTER(c_int)], c_int)` trên `k` của fixture. Ba bước mới, mỗi bước LUÔN để lại tệp kết quả (ghi tạm + `os.replace`, như `ghi`) để bước bị bỏ qua im lặng (§0) lộ thành thiếu tệp ⇒ `KHÔNG ĐO`: **`tach=<cờ>,<khoá>,<việc>`**: như `chau` nhưng `Popen` nằm trong `try`, và argv cháu dùng vai CỐ ĐỊNH `tach` (không phụ thuộc `<khoá>`), nên hai cháu `c0`/`c1` có argv GIỐNG HỆT, chỉ khác cờ sinh; `<khoá>` chỉ đặt tên tệp kết quả; `OSError` ⇒ tệp `tach_<khoá>` = `["loi", winerror]`; thành công ⇒ `["ok", pid]`; lỗi khác lan ra (excepthook ⇒ `loi_<vai>` ⇒ `KHÔNG ĐO`). **`vao_job=<LimitFlags>,<đường packet_loop.py>`** (CHỈ J12 dùng): nạp module từ đường dẫn (như `tro_a`), dùng `_1174_win_api_job()` tạo job, `SetInformationJobObject(job, 9, …)` với `LimitFlags` cho trước, rồi `AssignProcessToJobObject(job, GetCurrentProcess())`; giữ handle job tới khi tiến trình thoát; tệp `job_ngoai` = `["ok"]` hoặc `["loi", <bước>, <mã Win32 đọc ngay>]` và khi lỗi thì `sys.exit(0)` (không chạy bước sau). **`tro_c=<đường packet_loop.py>`** (trợ giúp J12, sau `vao_job`): ghi bắt tay `san_sang`; gọi `_1174_win_spawn_job(con, cwd=d, deadline=now+300, truoc_gan, between)` với `truoc_gan(proc)`: giữ `proc`, ghi bắt tay `truoc_gan` (pid + creation time con qua `proc._handle`) rồi `cho('go_truoc_gan', 300)`; `between(job)`: ghi tệp `long` = `[ok1, trong, ma1, ok2, ngoai, ma2]` từ `IsProcessInJob(proc._handle, job)` và `IsProcessInJob(proc._handle, <job của vao_job>)`, với `ma1`/`ma2` là `get_last_error()` đọc NGAY sau lời gọi tương ứng khi nó trả FALSE (0 khi TRUE); sau lời gọi (bắt `Exception`): tệp `ket_qua` = `["ok", rc]` hoặc `["loi", str(lỗi)]`; rồi `cho('tha_tro_giup', 300)` (hết hạn ⇒ `het_han_tro_giup` ⇒ `KHÔNG ĐO`); KHÔNG ghi `tu_ket_thuc`. Hàm phía test đọc tệp kết quả JSON có hạn và KIỂM SCHEMA trước khi chấm (tệp vắng trong hạn, JSON hỏng, sai số phần tử/kiểu, hay một lời gọi Win32 phía fixture báo FALSE ⇒ `KHÔNG ĐO` nêu tên tệp/bước và mã Win32; KHÔNG BAO GIỜ gộp vào nhãn ĐỎ của sản phẩm). **Hạn chung mỗi ca**: thân ca lấy `het = time.monotonic() + 75` ở dòng đầu (trước fixture đầu tiên của nó; khung r4 tự đo 90 s từ sớm hơn một chút). Bước chờ dữ liệu (đọc tệp, bắt tay `_wp1342a1_mo(han=…)`) nhận `min(hạn riêng, het - now - 10)`. Lời gọi `_wp1342a1_goi(han=…)` nhận `min(60, het - now - 45)` (45 s dự phòng = `join(20)` cố định của khung + `xac_nhan` 5 s + `reap` 5 s của sản phẩm + chấm 5 s + 10 s dư); `han` ≤ 5 ⇒ `KHÔNG ĐO` trước khi gọi. Phần còn lại không đủ ⇒ `KHÔNG ĐO` ghi tên mốc đang chờ. **Chờ thô**: r5 có hàm riêng `_wp1342a1ii_cho(x, h, ms)` trả THÔ giá trị `WaitForSingleObject` (đọc `get_last_error()` ngay nếu `WAIT_FAILED` 0xFFFFFFFF); KHÔNG dùng `_wp1342a1_tin` (nó gộp `WAIT_TIMEOUT` và `WAIT_FAILED` thành `False`). Kiểm "CHƯA signaled": đòi `== 258`. Phép chấm thu hồi 5 s: TRƯỚC khi chờ, đòi `het - now ≥ 5 + 5` (đủ trọn 5 s cộng dư) — thiếu ⇒ `KHÔNG ĐO` tại mốc ấy; rồi chờ ĐÚNG 5000 ms: `0` (WAIT_OBJECT_0) ⇒ đạt, `258` sau trọn 5000 ms ⇒ ĐỎ nhãn của ca, `WAIT_FAILED`/giá trị khác ⇒ `KHÔNG ĐO` kèm mã. Lượt `KHÔNG ĐO` (cạn hạn, lỗi API, schema) không bao giờ được tính là đột biến bị giết. Lệnh dựng argv dùng `_wp1342a1ii_FX`; `d/fx.py` (cháu đọc) giữ `_wp1342a1_FX` do khung r4 ghi — cháu của r5 chỉ dùng bước base. |
+    59	| M2 | **J4 breakaway tường minh** `wp1342_native_job_breakaway_tuong_minh` (khung `_wp1342a1_ca`). Hai lời gọi `_1174_win_spawn_job` từ CHÍNH tiến trình chạy ca, qua `_wp1342a1_goi`, CÙNG argv con (`d`, vai, nonce, bước `tach=0,c0,ra=0`, `tach=0x01000000,c1,ra=0`, `ra=0` — giống hệt từng phần tử), cùng cwd `d`, env `None`, cùng `SPAWN_FLAGS`, cùng cơ chế thu kết quả. Biến DUY NHẤT khác là `LimitFlags` của job đích. **Nạp bản đối chứng**: `m2 = _module1174(types.SimpleNamespace(script=Path(x.m.__file__).resolve()))` — `_module1174` chỉ đọc `c.script` (§0), và `x.m.__file__` là CHÍNH tệp sản phẩm của lượt chạy (driver đột biến truyền bản sao qua `Ctx.script`, nên đối chứng và đường đo luôn cùng một tệp); đòi `m2 is not x.m`, `Path(m2.__file__).resolve() == Path(x.m.__file__).resolve()`; đặt `m2._1174_WIN_JOB_LIMIT = 0x2800` (literal DUY NHẤT `0x2800` trong tệp test); sau lời gọi đối chứng đòi `x.m._1174_WIN_JOB_LIMIT` giữ NGUYÊN giá trị đã đọc trước đó (không ghi cứng 0x2000, để e1 vẫn đo được); vi phạm ⇒ `KHÔNG ĐO`. Gọi qua namespace sao chép `x` chỉ thay `m=m2` (chung `hs`, `ps`, `bt`). **(ii) Đối chứng trước**, phân loại theo thứ tự, mỗi vế một nhãn: hàm ném ⇒ `KHÔNG ĐO` "J4 (ii): đối chứng ném <lỗi>"; trả khác 0 ⇒ `KHÔNG ĐO` "J4 (ii): rc"; `tach_c0`/`tach_c1` vắng hoặc sai schema ⇒ `KHÔNG ĐO` "J4 (ii): schema"; `tach_c0` ≠ `["ok", int]` ⇒ `KHÔNG ĐO` "J4 (ii): cháu thường không sinh được"; `tach_c1 == ["loi", 5]` ⇒ `KHÔNG ĐO` nhãn **"J4 (ii): job cho phép breakaway mà lời xin vẫn bị từ chối"**; `tach_c1 == ["loi", m≠5]` ⇒ `KHÔNG ĐO` "J4 (ii): mã khác"; `tach_c1 == ["ok", int]` ⇒ đối chứng ĐẠT. Lưu hai kết quả rồi XOÁ đúng hai tệp `tach_c0`, `tach_c1` (đòi xoá thành công) trước đường đo. **Đường đo** với `x.m`: hàm ném/rc ≠ 0/schema sai ⇒ `KHÔNG ĐO` nhãn riêng theo cùng thứ tự — TRỪ khi `tach_c1 == ["ok", int]`, khi ấy ĐỎ nhãn **"J4: breakaway tường minh được nhận"** được chấm TRƯỚC rc (dưới e1 hàm vẫn trả 0, nên thứ tự này chỉ để không che dấu hiệu); `tach_c0` ≠ ok ⇒ `KHÔNG ĐO` "J4 (i): cháu thường không sinh được"; `tach_c1 == ["loi", 5]` VÀ rc 0 ⇒ ĐẠT; `["loi", m≠5]` ⇒ `KHÔNG ĐO` ghi `m` (danh sách cho phép `{5}`). Kết quả trả (`WP1342_NATIVE_V1 observed`): hai cặp `tach_*`, `IsProcessInJob(GetCurrentProcess(), NULL)` của tiến trình chạy ca (chẩn đoán). Cháu `ra=0` thoát ngay; pid cháu chỉ là chẩn đoán. |
+    60	| M3 | **J5 breakaway ngầm** `wp1342_native_job_breakaway_ngam`. Con bước `chau=0,chau,bt+cho=tha_j5,300`, `cho=go_chau,300`, `ra=0`. `between(job)` (luồng chính, trước resume): lấy bản sao job `_wp1342a1_ban_sao(x, job, 0, 2)` đưa vào danh sách giữ và `x.hs`. Luồng quan sát (`_wp1342a1_goi`): `_wp1342a1_mo(x, mo, "chau", go=False)`; gọi `IsProcessInJob(h_chau, <bản sao job>, &r)` và `IsProcessInJob(h_chau, None, &r0)` (binding phía test trên `x.k`), LƯU `(ok, r, ok0, r0)` (mã Win32 đọc NGAY khi `ok` FALSE); SAU đó mới ghi `go_chau` (nên phép hỏi diễn ra khi cháu còn sống và con chưa thoát). Sau khi hàm trả, assertion theo thứ tự: quan sát vắng hoặc thiếu bản sao job hoặc lời gọi `IsProcessInJob` với job đích trả FALSE ⇒ `KHÔNG ĐO` (ghi mã); `r == 0` ⇒ ĐỎ nhãn **"J5: cháu ngoài job đích"**; hàm trả `0`, không lỗi; phép chấm thu hồi 5 s trên handle cháu theo luật chờ thô M1 (nhãn "J5: cháu chưa signaled trong 5 s"). Cháu không bao giờ được ca tạo `tha_j5`. |
+    61	| M4 | **J12 job lồng** `wp1342_native_job_long`. Trợ giúp DÙNG MỘT LẦN qua `_wp1342a1_phu`-tương đương (Popen vào `x.ps`), bước `vao_job=0x2000,<pl>`, `tro_c=<pl>`, `--`, con bước `chau=8,chau,bt+cho=tha_j12,300`, `cho=go_chau,300`, `ra=0`. Ca: đọc `job_ngoai` (≤ 20 s; `["loi",…]` ⇒ `KHÔNG ĐO` "J12: job ngoài không gán được" kèm mã); bắt tay `san_sang` (`go=False`, giữ handle trợ giúp); bắt tay `truoc_gan` (handle CON lấy trước gán, `go=True`); rồi chờ (theo hạn chung) tệp `chau` hoặc `ket_qua`; khi thấy `ket_qua`, KIỂM LẠI sự có mặt của `chau` NGAY lúc ấy trước khi chọn nhánh (không dùng kết quả kiểm `chau` của vòng poll trước); có `chau` thì xác minh bắt tay (`go=True`) TRƯỚC khi chấm; rồi đọc `ket_qua`. Trình tự dữ liệu được kiểm: `ket_qua == ["ok", …]` mà KHÔNG có bắt tay `chau` đã xác minh ⇒ `KHÔNG ĐO` (fixture không thể ra rc khi con còn chờ `go_chau`); Tệp `long` chỉ do `between` ghi, tức CHỈ tồn tại khi job trong đã gán thành công: ở nhánh có bắt tay `chau` (B, và a1@J12) `long` BẮT BUỘC — vắng/sai schema (6 phần tử int) hoặc `ok1`/`ok2` = 0 ⇒ `KHÔNG ĐO` ghi bước và `ma1`/`ma2` do trợ giúp đọc ngay tại chỗ gọi; ở nhánh (C) `long` phải VẮNG (có `long` mà `ket_qua` báo "job assignment" ⇒ ĐỎ "J12: nhánh khác"). Kiểm trợ giúp còn sống bằng `WaitForSingleObject(h_tro, 0) == 258` THÔ (M1) trước MỌI phép chấm VÀ trong `finally` của khối chấm, TRƯỚC khi ghi `tha_tro_giup`; sai, `WAIT_FAILED`, hoặc có `het_han_*` ⇒ `KHÔNG ĐO` "J12: job ngoài đóng trước khi quan sát", và nhãn này THẮNG mọi nhãn ĐỎ phát sinh trong khối (job ngoài còn mở thì `KILL_ON_JOB_CLOSE` của nó không thể dọn hộ). Phân nhánh: **(B) lồng thành công**: `ket_qua == ["ok", 0]` VÀ `long == [1, 1, 0, 1, 1, 0]` (nhãn "J12 (B): con không thuộc cả job trong lẫn job ngoài" nếu khác) VÀ phép chấm thu hồi 5 s (luật chờ thô M1) trên handle con rồi handle cháu (nhãn "J12 (B): con/cháu chưa signaled trong 5 s khi job ngoài còn mở"); **(C) từ chối lồng**: `ket_qua[0] == "loi"` và `"job assignment"` trong `ket_qua[1]`, KHÔNG có tệp `chau`, KHÔNG có tệp `long`, phép chấm thu hồi 5 s trên handle con (nhãn "J12 (C): con chưa signaled trong 5 s"); **khác** ⇒ ĐỎ nhãn **"J12: nhánh khác"** kèm `ket_qua`, `long`. Sau phép chấm: ca tạo `tha_tro_giup`; trợ giúp signaled trong 5 s theo chờ thô (không ⇒ `KHÔNG ĐO`). Kết quả trả ghi nhánh (`B`/`C`) và `long`. |
+    62	| M5 | **S6 thuần** `wp1342_pure_spawn_fx_mo_rong` (mọi nền): `_wp1342a1ii_FX.startswith(_wp1342a1_FX)` (nhãn "S6: fixture base bị đổi"); `ast.parse(_wp1342a1ii_FX)` (với `import ast` CỤC BỘ trong thân hàm: tệp test không import `ast` ở mức module, và `compile`/`exec`/`eval` là tên cấm của N2(iv)) không lỗi (nhãn "S6: fixture mở rộng không biên dịch"); cây AST của phần thêm chứa đủ ba hằng chuỗi bước `'tach'`, `'vao_job'`, `'tro_c'` trong phép so `ma == …` (nhãn "S6: thiếu bước <tên>"). |
+    63	| M6 | **Đăng ký**: một hoặc hai câu `CASES += [list literal]` sau câu đăng ký r4 cuối cùng (18924–18933) và trước `if __name__`: `("wp1342_pure_spawn_fx_mo_rong", _wp1342a1ii_s6)` và ba mục native mẫu `(ID, _native1342(ID, _wp1342a1ii_<tên>))` cùng hằng ID. Mọi tên mức module mới mang tiền tố `_wp1342a1ii_`. |
+    64	| M7 | Đột biến qua driver NGOÀI kho (khuôn r4: `ops/land/pr1407-wp1342-provenance/windows-native/desktop/dot_bien_r4_ban2.py`; mỗi cặp (tìm, thay) khớp ĐÚNG MỘT chỗ trong tệp đích; bản sao tạm; ca đích + đối chứng khoẻ; lỗi import/fixture, quan sát hết hạn hoặc vượt cửa sổ 90 s ⇒ `KHÔNG ĐO`). Bảng §4b. |
+    65	
+    66	## 4b. Đường vào, chốt, ca, đột biến
+    67	
+    68	| # | đường | chốt | dấu hiệu | đột biến (tệp đích) | đối chứng |
+    69	|---|---|---|---|---|---|
+    70	| 1 | hậu duệ xin breakaway tường minh và được nhận | `LimitFlags` không có `0x800` | J4 ĐỎ "J4: breakaway tường minh được nhận" (đối chứng (ii) đạt trong cùng lượt) VÀ J5 XANH | **e1** `packet_loop.py`: dòng `_1174_WIN_JOB_LIMIT = 0x2000   # JOBOBJECT…` đổi `0x2000` → `0x2800` | J1 xanh |
+    71	| 2 | hậu duệ sinh thường tự rời job | `LimitFlags` không có `0x1000` | J5 ĐỎ "J5: cháu ngoài job đích" | **e2** cùng dòng, `0x2000` → `0x3000` | J1 xanh |
+    72	| 3 | đối chứng (ii) của J4 không có răng (môi trường che phản chứng mà ca vẫn qua) | đối chứng (ii) phải thấy breakaway thành công | J4 KHÔNG ĐẠT, `KHÔNG ĐO` nhãn "J4 (ii): job cho phép breakaway mà lời xin vẫn bị từ chối" với `tach_c1` (ii) == `["loi", 5]` | **e1c** `packet_loop_test.py`: literal `0x2800` (đúng một chỗ trên head; base 0) → `0x2000` | J1 xanh trên CHÍNH bản sao test đã đột biến |
+    73	| 4 | job lồng: thu hồi không xác nhận mà ca vẫn qua | (B) đòi `ket_qua == ["ok", 0]` | J12 ĐỎ "J12: nhánh khác" với `ket_qua == ["loi", <chứa "job not empty">]`, SAU khi `long == [1,1,0,1,1,0]` và bắt tay `chau` đã xác minh; chỉ chấm trên máy mà lượt sạch cùng head ra nhánh (B) | **a1** của r4, neo nguyên văn của driver r4 (`ops/land/pr1407-wp1342-provenance/windows-native/desktop/dot_bien_r4_ban2.py` dòng 58: mục `"terminate"` của `dang_ky` → `lambda: None`) | J1 xanh |
+    74	| 5 | fixture mở rộng vỡ cú pháp / sửa fixture base | S6 | S6 ĐỎ "S6: fixture mở rộng không biên dịch" / "S6: fixture base bị đổi" | **f1** (Linux) xoá dấu `:` đầu tiên của phần thêm; **f2** (Linux) chèn một ký tự vào đầu `_wp1342a1ii_FX` trước `_wp1342a1_FX` | ca thuần r4 `wp1342_pure_spawn_hang_luong` xanh |
+    75	
+    76	Phân biệt: e1 và e2 cùng làm S1 (r4) đỏ assertion `JOB_LIMIT == 0x2000` — không phải dấu hiệu. e1 tách khỏi e2 bằng J5 XANH dưới e1 (`0x2800` không đổi việc hậu duệ sinh thường thuộc job). Dưới e2, J4 có thể đỏ hoặc xanh (tài liệu không nói rõ lời xin breakaway tường minh khi job chỉ có `SILENT_BREAKAWAY_OK`): kết quả J4 dưới e2 được GHI, không dùng làm dấu hiệu. e2 cũng làm J3/J10/J12 (r4/r5) đỏ (cháu rời job đích) — không dùng làm dấu hiệu. Dưới a1, J5 đỏ ở nhãn "hàm trả 0" (khác nhãn e2). Đối chứng J1: không đột biến nào ở bảng chạm đường spawn hay layout, nên J1 (đi qua `_1174_win_spawn_job`) là đối chứng hợp lệ (khác b/abi của r4).
+    77	
+    78	Đường KHÔNG có kích hoạt tự nhiên, chỉ code review: nhánh (C) của J12 trên Windows ≥ 8 (máy đo dự kiến vào (B)); `vao_job` FALSE; `IsProcessInJob` trả FALSE. Nhánh (C) KHÔNG đi qua bước `terminate` (gán job trong thất bại ⇒ `kill_truoc_gan`), nên a1 không đo được ở (C).
+    79	
+    80	**Driver (M7) cho e1c và kết quả `KHÔNG ĐO` có chủ đích:** driver r4 chỉ sửa bản sao `packet_loop.py` và chỉ tính giết khi kết quả `DO`. Driver r5 phải (a) sửa được bản sao `packet_loop_test.py` và chạy CHÍNH bản sao ấy; (b) với e1c, ghi mã kết quả riêng (vd `GIET_DOI_CHUNG`) và chỉ cấp khi ĐỦ: J4 sạch đạt trên cùng máy cùng lượt; bản sao test có đúng một thay thế; ca J4 trên bản sao kết thúc bằng ĐÚNG nhãn "J4 (ii): job cho phép breakaway mà lời xin vẫn bị từ chối" — tức (theo thứ tự phân loại M2) đối chứng không ném, rc 0, schema đúng, `tach_c0 == ["ok", int]`, `tach_c1 == ["loi", 5]` — và khung ca không báo fixture tự kết thúc/vỡ; J1 trên chính bản sao đạt. Thiếu tệp, sai schema, mã ≠ 5, cạn hạn ⇒ KHÔNG tính giết.
+    81	
+    82	## 5. `nghiem_thu`
+    83	
+    84	| # | tiêu chí | phép đo làm nó ĐỎ |
+    85	|---|---|---|
+    86	| N1 | Linux không đổi: CI Ubuntu exact head `GOM: ĐẠT`; sổ ID ca base ⊆ head, mỗi ID base cùng trạng thái (đạt/bỏ qua + lý do); `MUTANTS` head == base; mỗi mốc (tìm) của `MUTANTS` đang có khớp ĐÚNG MỘT lần trên head. Biên nhận ghi từng ID, từng mốc. | Rút một ca base; đổi tên khoá giữ số lượng; phần thêm làm một mốc cũ khớp 2 lần. |
+    87	| N2 | Chỉ THÊM. `packet_loop.py` blob head == `f98d3f53…` (numstat không có dòng của nó). `packet_loop_test.py`: chạy bộ kiểm N2 của r4 (`ops/land/pr1407-wp1342-provenance/linux/n2_test_r4.py`, biến đổi DUY NHẤT `sed 's/_wp1342a1_/_wp1342a1ii_/g'` — đổi hằng tiền tố và tên trong phản chứng/đối chứng dương; tiền tố ID giữ `wp1342_pure_spawn_`/`wp1342_native_job_`) với base `c1ec1c69` và head: bốn vế (i)–(iv) XANH, gồm cửa sổ đăng ký sau câu base cuối đọc/biến đổi `CASES` (nay là đăng ký r4 ~18924) và trước `if __name__`; ID mới rời tập ID base (gồm 14 ID r4). Bộ kiểm chạy ngoài kho; bản đã sửa ghi byte-exact trong hồ sơ. | Toàn bộ 16 phản chứng của N2 r4 (sau `sed` §0) ⇒ ĐỎ; thêm hai phản chứng: `_wp1342a1_FX = _wp1342a1_FX + "x"` chèn trong cửa sổ ⇒ (ii)/(iv) ĐỎ (gán lại tên base); mục native `("wp1342_native_job_thuan", _native1342("wp1342_native_job_thuan", _wp1342a1ii_j4))` ⇒ (iv) ĐỎ (ID trùng base r4); đối chứng dương: phần thêm thật của head XANH. |
+    88	| N3 | Không nối dây: `_wired1342(head) == []` và `wp1342_additive_byte_preserved` đạt; tập tên mức module mới của `packet_loop.py` = ∅; tập ID ca mới đúng `{wp1342_pure_spawn_fx_mo_rong, wp1342_native_job_breakaway_tuong_minh, wp1342_native_job_breakaway_ngam, wp1342_native_job_long}`. | Thêm một tên vào `packet_loop.py` ⇒ đỏ; thiếu một ID ⇒ đỏ. |
+    89	| N4 | S6 đạt trên Linux (CI) và Windows (Desktop); ca thuần r4 không đổi trạng thái. | f1, f2 ⇒ ĐỎ đúng nhãn §4b. |
+    90	| N5 | Windows vẫn bị từ chối, không đổi: tập ID base đã ghi (`wp1174_windows_claim_rejected`, 12 ID `WP1174_BOTH`, ca native r1–r3, 11 ca native r4, 3 ca thuần r4) chạy trên base và head CÙNG lượt trên Desktop; so từng ID: trạng thái, lý do bỏ qua, dấu hiệu dương (bỏ trường thời gian/pid/handle). | Một ID lệch ⇒ ĐỎ; đột biến mở chốt claim Windows phải đi tới và đỏ ở assertion đích của `wp1174_windows_claim_rejected` (phản chứng của N5 r4, chạy lại). |
+    91	| N6 | J4, J5, J12 ĐẠT trên Desktop, mỗi ca trong cửa sổ 90 s của khung r4; và ĐẠT trên VM `tra-luat-win`. J12 đạt N6 ở nhánh (B) HOẶC (C). Biên nhận ghi ID + mọi assertion + `observed`: winerror J4 (phải là 5), đối chứng (ii) thành công, `(ok, r, ok0, r0)` của J5, nhánh J12 (`B`/`C`) + `long`, `IsProcessInJob(GetCurrentProcess(), NULL)` của tiến trình chạy ca, bản Windows/Python. | Ca native `BỎ QUA` trên Windows ⇒ ĐỎ; cháu/con sống sót ⇒ ĐỎ; ca rơi `KHÔNG ĐO` ⇒ tiêu chí `not_measured`, không `passed`. |
+    92	| N7 | Đột biến §4b bị giết đúng dấu hiệu: e1, e2, e1c, a1@J12 trên Desktop (bốn lượt); f1, f2 trên Linux. Hợp đồng N7 r1/r4: driver byte-exact trong hồ sơ land; chỉ tính giết khi assertion đích thất bại (riêng e1c: điều kiện ĐỦ ở đoạn "Driver (M7)" §4b), đối chứng đạt, nhãn khớp. Với e1, J5 phải XANH trong cùng lượt. Ghi kết quả J4 dưới e2 (không chấm). a1@J12 chỉ chấm trên máy mà J12 sạch ra (B); Desktop không ra (B) ⇒ thử VM; không máy nào ra (B) ⇒ `a1@J12: not_measured` (§7). | Đột biến sống; đỏ vì import/fixture/quan sát hết hạn; đỏ với nhãn KHÁC; e1 mà J5 đỏ. |
+    93	| N8 | Ruff `--select F` 0.15.15: TẬP diagnostic (mã, tệp, tên) head == base; `adr-song`, `doctrine-scan` rc 0 (ghi riêng); `git diff --check` sạch; `eol_policy --all` ok; `git diff --numstat <base>..<H>` không lọc đường dẫn: tập đường dẫn == write set (đúng MỘT tệp), tổng dòng thêm ≤ **450** (ADR-0053). | Thay một diagnostic bằng diagnostic khác cùng số lượng; tệp thứ hai; vượt 450 ⇒ dừng §7. |
+    94	
+    95	Đo Windows trên **`DESKTOP-T9R33P2`** (ưu tiên); VM `tra-luat-win` đo bổ sung N6. Base và head đo cùng một lượt. KHÔNG CI Windows.
+    96	
+    97	## 6. `pham_vi_e`
+    98	
+    99	Không chạm E4, E5. Không đảo quyết định "chỉ Linux" ⇒ không E3. Ca native chỉ tạo/giết tiến trình và job do chính ca sinh ra; trợ giúp J12 tự gán MÌNH vào job dùng một lần; đối chứng J4 chỉ đổi thuộc tính của một bản nạp module riêng trong ca, không đụng bản nạp khác hay tiến trình chạy ca.
+   100	
+   101	## 7. `luat_dung`
+   102	
+   103	- Trần lời gọi Codex theo `ADR-0055`; trần vòng review theo `ADR-0048`. Chạm trần ⇒ Review Rescue Checkpoint; xin tăng mang **E2**.
+   104	- Trần `ADR-0053` (≤ 6 tệp / ≤ 450 dòng thêm) cưỡng chế trên NUMSTAT THẬT: executor đo `git diff --numstat <base>..<H>` không lọc đường dẫn TRƯỚC khi công bố; tập đường dẫn ≠ write set hoặc > 450 ⇒ DỪNG, không push, báo điều phối (**E2**). Không tự cắt ca/assertion/đột biến để lọt trần.
+   105	- Ca đo trên head SẠCH làm lộ lỗi sản phẩm (J4 nhận breakaway, J5 cháu ngoài job, J12 nhánh khác) ⇒ DỪNG: sửa `packet_loop.py` nằm ngoài write set, là revision mới; báo chủ kho (**E2**).
+   106	- Cần sửa thân định nghĩa đang có hoặc gán lại tên base ⇒ dừng, revision đặc tả.
+   107	- J4 đối chứng (ii) không đạt trên CẢ Desktop và VM, hoặc winerror ≠ 5 trên cả hai ⇒ J4 và e1/e1c `not_measured`; quyết định tiếp (mở rộng danh sách mã có căn cứ, đổi máy) là của chủ kho (**E2**).
+   108	- J12 `job_ngoai` FALSE trên cả hai máy ⇒ J12 và a1@J12 `not_measured`; **E2**.
+   109	- Sau khi thử Desktop rồi VM theo N7, KHÔNG máy nào có lượt J12 sạch nhánh (B) trên cùng head (bất kể lý do từng máy: (C), job ngoài không gán được, `KHÔNG ĐO`) ⇒ `a1@J12: not_measured`, ghi lý do từng máy; N6 vẫn chấm riêng theo kết quả thực tế của từng máy; đổi máy hay chấp nhận là quyết định chủ kho (**E2**).
+   110	- Máy đo Windows không có trong hạn lease ⇒ tiêu chí native `not_measured`; gia hạn/cấp lại là quyết định chủ kho (**E2**).
+   111	- Đặc tả không thuộc Mission ⇒ chờ chủ kho duyệt băm (`ADR-0067`, **E2**) sau khi review độc lập approve.
+   112	
+   113	## 8. `hinh_dang_ke_thua` và ngân sách
+   114	
+   115	`khong_ap_dung`. Ghi chú kế thừa từ r4: hàm mới không decorator; tên mới mang tiền tố riêng; đăng ký chỉ list literal; hook `truoc_gan`/`between` chỉ MƯỢN tài nguyên, chờ có hạn; tiêu chí chỉ có lời khai ghi `not_measured`; phép kiểm "đã signaled" luôn là chờ có hạn 5 s (Q7 r4).
+   116	
+   117	Ngân sách dòng (ước tĩnh theo khối tương tự đo trên `11bd033`; chưa phải numstat):
+   118	
+   119	| khối | căn cứ | ước |
+   120	|---|---|---|
+   121	| chú thích đầu khối | r4 2 dòng | 2–3 |
+   122	| `_wp1342a1ii_FX` (bước `tach`, `vao_job`, `tro_c` + binding; mỗi bước ghi tệp kết quả, đọc mã Win32 ngay) | `_wp1342a1_FX` 30 dòng / 7 bước; `tro_a`+`tro_b` 11 dòng | 30–42 |
+   123	| argv, đọc tệp kết quả có hạn + kiểm schema, hạn chung, `_wp1342a1ii_cho` + phép chấm 5 s | `_wp1342a1_lenh` 2, `_wp1342a1_mo` 20 | 22–32 |
+   124	| S6 | | 7–10 |
+   125	| J4 (bản nạp riêng có kiểm, đối chứng ii phân loại 7 vế, xoá tệp, đường đo) | J9 24 dòng | 34–48 |
+   126	| J5 | J3 7, J9 24 | 20–28 |
+   127	| J12 (ba nhánh, trình tự dữ liệu, kiểm job ngoài còn mở trong `finally`) | J10 10, J9 24 | 40–56 |
+   128	| đăng ký | r4 2 câu / 11 dòng | 4–6 |
+   129	| **tổng** | | **159–225** |
+   130	
+   131	Đầu cao 225 < 450 (biên ~225 dòng). Trần cưỡng chế ở numstat thật (§7).
+   132	
+   133	## 9. Quyết định đã ghi
+   134	
+   135	- **Q1.** Phạm vi a1-ii = breakaway tường minh, breakaway ngầm, job lồng — chủ kho 2026-11-18 (r4 §9 Q1) và Issue #1342 `issuecomment-6999134364`.
+   136	- **Q2.** Cấm tuyệt đối breakaway (`LimitFlags == KILL_ON_JOB_CLOSE`) — chủ kho 2026-11-18 (r4 Q3). r5 không đổi hằng, chỉ đo.
+   137	- **Q3.** Job còn tiến trình ⇒ `_1174Error`, fail-closed — r4 Q4; J12 nhánh (C) là đường fail-closed đã có.
+   138	- **Q4.** Chờ signaled có hạn 5 s — r4 Q7; áp cho J5, J12.
+   139	- **Đ1 (đề xuất của người soạn, chờ chủ kho xác nhận khi duyệt băm, E2).** Write set CHỈ `packet_loop_test.py`; không thêm kiểm runtime nào vào `_1174_win_spawn_job`. Căn cứ: ba hạng mục hoãn sang a1-ii trong r4 §2 (J4/J5/J12, e1/e2, job đối chứng) đều là phép đo; chốt sản phẩm (Q2) đã có trong r4.
+   140	- **Đ2 (người soạn).** Tập mã từ chối J4 `{5}` (r4 bản 2: "dựa trên tài liệu; mã khác ⇒ `KHÔNG ĐO` và ghi mã thật để mở rộng có căn cứ ở revision sau"); đối chứng (ii) đi qua CHÍNH `_1174_win_spawn_job` từ CHÍNH tiến trình chạy ca, chỉ khác `LimitFlags` (bản nạp module riêng), để cùng chuỗi job tổ tiên, cùng lệnh, cùng cách quan sát (finding lượt 2 r4 cho e1; P1 lượt 1 r5 — bản 1 dùng trợ giúp tự gán job nên không chứng minh được cùng chuỗi tổ tiên).
+   141	- **Đ3 (người soạn).** J5 hỏi membership với job ĐÍCH (không với `NULL`) khi cháu còn sống và con chưa thoát (finding lượt 2 r4 cho e2); J12 tách kết quả gán job ngoài / gán job trong / quan sát, giữ handle con bằng `truoc_gan` có bắt tay chờ `go`, quan sát khi job ngoài còn mở (finding lượt 2 r4 cho J12).
+   142	
+   143	## 10. `chua_do_duoc`
+   144	
+   145	- Kích thước thật (ước 159–225; trần cưỡng chế ở numstat).
+   146	- Mọi hành vi Win32 ở §0 dòng cuối: theo tài liệu, chưa đo trong kho; đặc biệt lời xin breakaway tường minh khi job chỉ có `SILENT_BREAKAWAY_OK` (J4 dưới e2), và breakaway trong chuỗi job lồng khi tiến trình chạy ca đã nằm trong job.
+   147	- Tiến trình chạy ca trên Desktop/VM có nằm sẵn trong job không (N6 ghi lại).
+   148	- Nhánh J12 xảy ra trên từng máy (dự kiến (B) trên Windows ≥ 8; chưa đo).
+   149	- Lease chạm write set: phép quét tạm §0 ra 0, nhưng chỉ nhánh `ops/*` và ba tên trường; `ai-dang-giu` (công cụ có thẩm quyền) chưa chạy được trong phiên soạn ⇒ người cấp lease chạy nó (L5).
+   150	- Hằng số §0 trôi khi master tiến; đo lại theo L5.
+   151	
+   152	## 11. Nhật ký review
+   153	
+   154	- **Lượt 1** (bản 1 sha256 `4657e5d2…`, base `11bd033`; `request_changes`: 1 P1, 4 P2, 1 P3). Bản này: P1 J4 đối chứng (ii) chuyển sang CHÍNH đường sản phẩm từ CHÍNH tiến trình chạy ca, bản nạp module riêng với `LimitFlags = 0x2800` — biến duy nhất khác; bỏ `vao_job` khỏi J4; P2 J12(C) không đo a1 ⇒ a1@J12 chỉ chấm khi lượt sạch ra (B), cả hai máy chỉ (C) ⇒ `not_measured` + §7 E2; P2 thiếu dữ liệu fixture ⇒ kiểm schema, `KHÔNG ĐO` không gộp vào nhãn đỏ, J12 đòi bắt tay `chau` trước `ket_qua`, kiểm trợ giúp bằng `WAIT_TIMEOUT` thô trước mọi phép chấm và trong `finally`; P2 cửa sổ 90 s ⇒ hạn chung mỗi ca (`het = now + 75`, dự phòng 30 s/10 s); P2 e1c ⇒ driver sửa và chạy bản sao test, mã kết quả riêng, điều kiện đủ; P3 ⇒ base `4eda94e` (blob write set không đổi), mô tả breakaway theo từng job, `IsProcessInJob` nhận cả hai quyền truy vấn, `_wp1342a1_mo` 20 dòng, ngân sách tính lại 147–211.
+   155	- **Lượt 2** (bản 2 sha256 `791673a8…`, base `4eda94e`; `request_changes`: 1 P1, 3 P2, 1 P3; P1 lượt 1 đóng về chuỗi job; P2 J12(C)/a1 đóng về cách chấm; P3 lượt 1 đóng). Bản này: F1 nạp đối chứng bằng `_module1174(SimpleNamespace(script=Path(x.m.__file__).resolve()))`, kiểm hai module khác nhau cùng tệp, `x.m` giữ nguyên cờ; argv cháu cố định (khoá kết quả tách khỏi argv); lưu rồi xoá đúng hai tệp kết quả trước đường đo; F2 đối chứng (ii) phân loại bảy vế theo thứ tự, mỗi vế một nhãn, e1c chỉ khi đúng nhãn từ chối với mọi vế trước đạt; F3 dự phòng 45 s cho lời gọi, hàm chờ thô riêng, phép chấm 5 s chỉ chạy khi đủ ngân sách, `WAIT_FAILED` ⇒ `KHÔNG ĐO`; F4 kiểm lại `chau` khi thấy `ket_qua`, `long` mang mã Win32 đọc tại chỗ gọi; F5 `a1@J12: not_measured` khi không máy nào ra (B), bất kể lý do. Ngân sách 159–225.
+   156	- **Lượt 3** (bản 3 sha256 `bdc139ed…`): phiên Codex kết thúc giữa chừng, rc 0, KHÔNG có verdict (`luot3.verdict.txt`); vẫn tính một lời gọi. Quan sát cuối của reviewer: bản 3 đòi tệp `long` ở mọi nhánh trong khi `between` chỉ chạy sau khi gán job trong thành công. Bản này: `long` bắt buộc ở nhánh có bắt tay `chau`, phải VẮNG ở nhánh (C).
+diff rc=1
+
+exec
+/bin/bash -lc "sed -n '61p' ops/specs/WP1174-WINDOWS-BACKEND-r5.md
+sed -n '18634,18772p' .claude/dev/packet_loop_test.py
+sed -n '6830,6912p' .claude/dev/packet_loop.py
+sed -n '10647,10658p;18159,18187p' .claude/dev/packet_loop_test.py
+git show origin/ops/wp1342-r4-spec:ops/specs/WP1174-WINDOWS-BACKEND-r4.md | sha256sum
+rg -n 'terminate|DO|Ctx|script' ops/land/pr1407-wp1342-provenance/windows-native/desktop/dot_bien_r4_ban2.py
+rg -n 'landed:|a2c7d75' ops/land/pr1407-wp1342-land-evidence.yaml" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/spec1342a1ii/master
+ succeeded in 0ms:
+| M4 | **J12 job lồng** `wp1342_native_job_long`. Trợ giúp DÙNG MỘT LẦN qua `_wp1342a1_phu`-tương đương (Popen vào `x.ps`), bước `vao_job=0x2000,<pl>`, `tro_c=<pl>`, `--`, con bước `chau=8,chau,bt+cho=tha_j12,300`, `cho=go_chau,300`, `ra=0`. Ca: đọc `job_ngoai` (≤ 20 s; `["loi",…]` ⇒ `KHÔNG ĐO` "J12: job ngoài không gán được" kèm mã); bắt tay `san_sang` (`go=False`, giữ handle trợ giúp); bắt tay `truoc_gan` (handle CON lấy trước gán, `go=True`); rồi chờ (theo hạn chung) tệp `chau` hoặc `ket_qua`; khi thấy `ket_qua`, KIỂM LẠI sự có mặt của `chau` NGAY lúc ấy trước khi chọn nhánh (không dùng kết quả kiểm `chau` của vòng poll trước); có `chau` thì xác minh bắt tay (`go=True`) TRƯỚC khi chấm; rồi đọc `ket_qua`. Trình tự dữ liệu được kiểm: `ket_qua == ["ok", …]` mà KHÔNG có bắt tay `chau` đã xác minh ⇒ `KHÔNG ĐO` (fixture không thể ra rc khi con còn chờ `go_chau`); Tệp `long` chỉ do `between` ghi, tức CHỈ tồn tại khi job trong đã gán thành công: ở nhánh có bắt tay `chau` (B, và a1@J12) `long` BẮT BUỘC — vắng/sai schema (6 phần tử int) hoặc `ok1`/`ok2` = 0 ⇒ `KHÔNG ĐO` ghi bước và `ma1`/`ma2` do trợ giúp đọc ngay tại chỗ gọi; ở nhánh (C) `long` phải VẮNG (có `long` mà `ket_qua` báo "job assignment" ⇒ ĐỎ "J12: nhánh khác"). Kiểm trợ giúp còn sống bằng `WaitForSingleObject(h_tro, 0) == 258` THÔ (M1) trước MỌI phép chấm VÀ trong `finally` của khối chấm, TRƯỚC khi ghi `tha_tro_giup`; sai, `WAIT_FAILED`, hoặc có `het_han_*` ⇒ `KHÔNG ĐO` "J12: job ngoài đóng trước khi quan sát", và nhãn này THẮNG mọi nhãn ĐỎ phát sinh trong khối (job ngoài còn mở thì `KILL_ON_JOB_CLOSE` của nó không thể dọn hộ). Phân nhánh: **(B) lồng thành công**: `ket_qua == ["ok", 0]` VÀ `long == [1, 1, 0, 1, 1, 0]` (nhãn "J12 (B): con không thuộc cả job trong lẫn job ngoài" nếu khác) VÀ phép chấm thu hồi 5 s (luật chờ thô M1) trên handle con rồi handle cháu (nhãn "J12 (B): con/cháu chưa signaled trong 5 s khi job ngoài còn mở"); **(C) từ chối lồng**: `ket_qua[0] == "loi"` và `"job assignment"` trong `ket_qua[1]`, KHÔNG có tệp `chau`, KHÔNG có tệp `long`, phép chấm thu hồi 5 s trên handle con (nhãn "J12 (C): con chưa signaled trong 5 s"); **khác** ⇒ ĐỎ nhãn **"J12: nhánh khác"** kèm `ket_qua`, `long`. Sau phép chấm: ca tạo `tha_tro_giup`; trợ giúp signaled trong 5 s theo chờ thô (không ⇒ `KHÔNG ĐO`). Kết quả trả ghi nhánh (`B`/`C`) và `long`. |
+_wp1342a1_FX = (   # fixture + trợ giúp: `d vai nonce marker bước... [-- argv con]`; cháu đọc mã này từ `d/fx.py`. Vai KHÔNG đặt `con`: tên thiết bị Windows
+    "import ctypes as c, json, os, subprocess, sys, time\nd, vai, nonce, marker = sys.argv[1:5]\nbuoc, con = sys.argv[5:], []\n"
+    "if '--' in buoc:\n    buoc, con = buoc[:buoc.index('--')], buoc[buoc.index('--') + 1:]\n"
+    "if marker:\n    open(marker, 'w').close()\n"   # đoạn marker DÙNG CHUNG của J1/J6/J10b: câu lệnh thực thi đầu tiên sau phần đọc argv
+    "sys.excepthook = lambda *a: open(os.path.join(d, 'loi_' + vai), 'w').write(repr(a[1]))\n"   # fixture tự vỡ ⇒ để lại `loi_<vai>` ⇒ KHÔNG ĐO
+    "k = c.WinDLL('kernel32', use_last_error=True)\nk.GetCurrentProcess.restype = c.c_void_p\n"
+    "k.GetProcessTimes.argtypes, k.GetProcessTimes.restype = [c.c_void_p] * 5, c.c_int\n"
+    "def ghi(ten, h, pid):\n    t = (c.c_uint64 * 4)()\n"   # bắt tay nguyên tử: [pid, creation time (100 ns), nonce]
+    "    if not k.GetProcessTimes(h, t, c.byref(t, 8), c.byref(t, 16), c.byref(t, 24)):\n        sys.exit(4)\n"
+    "    with open(os.path.join(d, ten + '.tmp'), 'w') as f:\n        json.dump([pid, t[0], nonce], f)\n"
+    "    os.replace(os.path.join(d, ten + '.tmp'), os.path.join(d, ten))\n"
+    "def cho(ten, han, bao=True):\n    het = time.monotonic() + float(han)\n"   # tự hết hạn ⇒ ghi `het_han_<vai>` (trừ `cho0`), thoát 3
+    "    while not os.path.exists(os.path.join(d, ten)):\n        if time.monotonic() > het:\n"
+    "            if bao:\n                open(os.path.join(d, 'het_han_' + vai), 'w').close()\n            sys.exit(3)\n        time.sleep(0.02)\n"
+    "for b in buoc:\n    ma, _, gt = b.partition('=')\n"
+    "    if ma == 'bt':\n        ghi(vai, k.GetCurrentProcess(), os.getpid())\n        cho('go_' + vai, 300)\n"
+    "    elif ma in ('cho', 'cho0'):\n        cho(*gt.split(','), bao=ma == 'cho')\n    elif ma == 'ra':\n        sys.exit(int(gt))\n"
+    "    elif ma == 'chau':\n        co, ten, viec = gt.split(',', 2)\n"
+    "        subprocess.Popen([sys.executable, '-B', '-c', open(os.path.join(d, 'fx.py'), encoding='utf-8').read(), d, ten, nonce, '',\n"
+    "            *viec.split('+')], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=int(co))\n"
+    "    elif ma in ('tro_a', 'tro_b'):\n        import importlib.util\n"   # trợ giúp: J10 ghi `da_gan` trong between (KHÔNG chờ); J10b ghi `truoc_gan` rồi chờ
+    "        s = importlib.util.spec_from_file_location('wp1342a1_pl', gt)\n        m = importlib.util.module_from_spec(s)\n"
+    "        s.loader.exec_module(m)\n        giu = []\n"
+    "        def truoc(proc):\n            giu.append(proc)\n"
+    "            if ma == 'tro_b':\n                ghi('truoc_gan', int(proc._handle), proc.pid)\n                cho('tha_truoc_gan', 300)\n"
+    "        ghi('san_sang', k.GetCurrentProcess(), os.getpid())\n"
+    "        try:\n            m._1174_win_spawn_job(con, cwd=d, deadline=time.monotonic() + 300, truoc_gan=truoc, between=(\n"
+    "                lambda job: ghi('da_gan', int(giu[0]._handle), giu[0].pid)) if ma == 'tro_a' else None)\n"
+    "        finally:\n            open(os.path.join(d, 'tu_ket_thuc'), 'w').close()\n")
+
+
+def _wp1342a1_lenh(x, vai, *buoc, marker=""):
+    return [sys.executable, "-B", "-c", _wp1342a1_FX, str(x.d), vai, x.nonce, str(marker), *buoc]
+
+
+def _wp1342a1_tin(x, h, ms=0):
+    return x.k.WaitForSingleObject(h, ms) == 0   # WAIT_OBJECT_0; kiểm ĐÃ signaled sau khi hàm trả/ném dùng ms=5000 (đo native 19-11)
+
+
+def _wp1342a1_mo(x, mo, ten, han=20.0, go=True):
+    """Bắt tay: đọc `[pid, creation time, nonce]` ở tệp `ten`, mở handle SYNCHRONIZE|QUERY_LIMITED_INFORMATION|TERMINATE, đòi nonce và creation
+    time khớp, handle CHƯA signaled; chỉ sau đó mới ghi `go_<ten>`. Handle vào `mo` NGAY khi mở (chủ của `mo` đóng). Không xác minh được ⇒ KHÔNG ĐO."""
+    c, tep, het, t = x.c, x.d / ten, time.monotonic() + han, (x.c.c_uint64 * 4)()
+    while not tep.exists():
+        if time.monotonic() > het:
+            raise BoQua(f"KHÔNG ĐO ĐƯỢC: không có bắt tay `{ten}` sau {han} s") from OSError(ten)
+        time.sleep(0.02)
+    pid, tao, nonce = json.loads(tep.read_text())
+    h = x.k.OpenProcess(0x00100000 | 0x1000 | 0x1, False, pid)
+    if not h:
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: OpenProcess `{ten}` pid {pid} thất bại, mã Win32 {c.get_last_error()}") from OSError(ten)
+    mo.append(h)
+    if not (nonce == x.nonce and x.k.GetProcessTimes(h, t, c.byref(t, 8), c.byref(t, 16), c.byref(t, 24)) and t[0] == tao and
+            x.k.WaitForSingleObject(h, 0) == 258):
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: bắt tay `{ten}` không xác minh được danh tính: pid {pid}, creation {tao}/{t[0]}") from OSError(ten)
+    x.bt.append((ten, pid, tao))
+    if go:
+        (x.d / ("go_" + ten)).write_bytes(b"")
+    return h
+
+
+def _wp1342a1_ban_sao(x, h, quyen, tuy_chon=0):
+    ra, toi = x.w.HANDLE(), x.k.GetCurrentProcess()
+    if not x.k.DuplicateHandle(toi, h, toi, x.c.byref(ra), quyen, False, tuy_chon):
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: DuplicateHandle thất bại, mã Win32 {x.c.get_last_error()}") from OSError("DuplicateHandle")
+    return ra.value
+
+
+def _wp1342a1_goi(x, argv, viec=None, han=60, **kw):
+    """Gọi `_1174_win_spawn_job` ở luồng CHÍNH; `viec(mo)` là LUỒNG QUAN SÁT chạy song song. Worker sở hữu mọi handle trong `mo` tới khi BÀN GIAO dưới
+    khoá (cờ `huy` chưa đặt); bàn giao hụt hoặc `viec` lỗi ⇒ worker tự đóng. Luồng chính `join(20)` SAU khi hàm trả/ném rồi đặt `huy` dưới cùng khoá;
+    chưa bàn giao (hết hạn, hoặc ô chứa ngoại lệ) ⇒ KHÔNG ĐO. Handle đã bàn giao vào `x.hs`. Trả (rc, lỗi, số giây của lời gọi)."""
+    import threading
+    khoa, o, mo, rc, loi = threading.Lock(), {}, [], None, None
+
+    def chay():
+        try:
+            _ = viec is None or viec(mo)
+        except BaseException as ex:
+            o["loi"] = ex
+        with khoa:
+            if "huy" not in o and "loi" not in o:
+                o["h"] = list(mo)
+                return
+        _ = [x.k.CloseHandle(h) for h in mo]
+    luong, t = threading.Thread(target=chay, daemon=True), time.monotonic()
+    luong.start()
+    try:
+        rc = x.m._1174_win_spawn_job(argv, cwd=str(x.d), deadline=t + han, **kw)
+    except Exception as ex:
+        loi = ex
+    giay = time.monotonic() - t
+    luong.join(20)
+    with khoa:
+        o["huy"] = True
+        x.hs += o.get("h", [])
+    if "h" not in o:
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: luồng quan sát không bàn giao (lỗi fixture: {o.get('loi')!r}; lỗi hàm: {loi!r})") from OSError("quan sát")
+    if isinstance(loi, BoQua):   # tiền điều kiện của hook không dựng được
+        raise loi
+    return rc, loi, giay
+
+
+def _wp1342a1_ca(m, d, c, w, than):
+    """Khung MỘT ca native: bindings PHÍA TEST (WinDLL riêng, ngoài allowlist M1), nonce, `fx.py`; cửa sổ 90 s (N6) tính từ TRƯỚC fixture đầu tiên.
+    `finally`: TerminateProcess + đóng mọi handle ca giữ. Thấy `het_han_*`/`tu_ket_thuc`/`loi_*` (fixture tự kết thúc hoặc vỡ ngoài đường dự kiến) hoặc
+    vượt cửa sổ ⇒ KHÔNG ĐO, kể cả khi thân ca đã đỏ. Trả (kết quả thân ca, các bắt tay đã xác minh creation time)."""
+    import types
+    t0, k, (_, _, kj, s) = time.monotonic(), c.WinDLL("kernel32", use_last_error=True), m._1174_win_api_job()
+    D, H, B, V = w.DWORD, w.HANDLE, w.BOOL, c.c_void_p
+    for ten, args, kq in (("OpenProcess", [D, B, D], H), ("DuplicateHandle", [H, H, H, c.POINTER(H), D, B, D], B), ("GetCurrentProcess", [], H),
+                          ("WaitForSingleObject", [H, D], D), ("TerminateProcess", [H, w.UINT], B), ("CloseHandle", [H], B),
+                          ("GetProcessTimes", [H, V, V, V, V], B), ("SetHandleInformation", [H, D, D], B)):
+        getattr(k, ten).argtypes, getattr(k, ten).restype = args, kq
+    x, _ = types.SimpleNamespace(m=m, d=d, c=c, w=w, k=k, kj=kj, s=s, hs=[], ps=[], bt=[], nonce=os.urandom(8).hex()), (d / "fx.py").write_text(
+        _wp1342a1_FX, encoding="utf-8")
+    try:
+        ghi = than(x)
+    finally:
+        _ = [(k.TerminateProcess(h, 1), k.CloseHandle(h)) for h in x.hs], [(p.kill(), p.wait(5)) for p in x.ps]
+        la = sorted((p.name, p.read_text(errors="replace")[:300]) for p in d.iterdir() if p.name.startswith(("het_han_", "tu_ket_thuc", "loi_")))
+        if la or time.monotonic() - t0 > 90:
+            raise BoQua(f"KHÔNG ĐO ĐƯỢC: fixture tự kết thúc/vỡ ngoài đường dự kiến {la} hoặc ca vượt cửa sổ 90 s ({time.monotonic() - t0:.1f} s)") from OSError("fixture")
+    return ghi, x.bt
+
+
+def _wp1342a1_phu(x, lenh, ten, **kw):
+    """Tiến trình python RIÊNG của ca (J9: tiến trình phụ; J10/J10b: trợ giúp chạy `_1174_win_spawn_job` của cây đang đo); xác minh bắt tay `ten`."""
+    x.ps.append(subprocess.Popen(lenh, env=dict(os.environ, PYTHONPATH=str(HERE)), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL))
+    return x.ps[-1], _wp1342a1_mo(x, x.hs, ten, **kw)
+
+
+def _wp1342a1_giet_cha(x, tro, *hs):
+    """Kiểm TRƯỚC cú giết (trợ giúp và các đối tượng cần đo chưa signaled, chưa có `tu_ket_thuc`), TerminateProcess bằng handle Popen của ca phải
+    TRUE, trợ giúp signaled ≤ 5 s. Không đạt ⇒ KHÔNG ĐO."""
+    truoc = (_wp1342a1_tin(x, int(tro._handle)), [_wp1342a1_tin(x, h) for h in hs], (x.d / "tu_ket_thuc").exists())
+    if truoc != (False, [False] * len(hs), False) or not x.k.TerminateProcess(int(tro._handle), 1) or not _wp1342a1_tin(x, int(tro._handle), 5000):
+        raise BoQua(f"KHÔNG ĐO ĐƯỢC: tiền điều kiện cú giết trợ giúp không đạt: {truoc}, mã Win32 {x.c.get_last_error()}") from OSError("giết cha")
+def _1174_win_spawn_job(argv, *, cwd, deadline, env=None, truoc_gan=None, between=None):
+    """r4: run ONE command inside a fresh Job Object from a suspended start; standalone, no runtime caller, no pipes.
+
+    The job (KILL_ON_JOB_CLOSE only) is assigned BEFORE the primary thread is resumed, so the child and all it creates afterwards is
+    reclaimed when this returns, or when the caller dies after the assignment. The exit code is returned ONLY when no error happened at
+    all (job terminated and observed empty, leader reaped, every handle owned here closed); a root error is re-raised even when the
+    reclaim was confirmed, a cleanup error alone means "tried, not confirmed". `truoc_gan(proc)`/`between(job)` are test seams.
+    NOT guaranteed (debt wp1342-pre-assign-orphan): the caller dying between Popen and the assignment, Popen raising after CreateProcess
+    succeeded, or a Popen without _handle, leaves a suspended child that never ran any code."""
+    import math
+    _1174_require(
+        type(argv) is list and bool(argv) and all(type(x) is str for x in argv) and type(cwd) is str and
+        type(deadline) in (int, float) and (type(deadline) is int or math.isfinite(deadline)) and
+        time.monotonic() < deadline <= time.monotonic() + 86400 and
+        (env is None or type(env) is dict and all(type(a) is str and type(b) is str for a, b in env.items())) and
+        all(x is None or callable(x) for x in (truoc_gan, between)), "spawn arguments")
+    _1174_require(os.name == "nt", "native Windows required")
+    _1174_require(sys.implementation.name == "cpython" and sys.version_info >= (3, 11), "spawn runtime")
+    c, w, k, s = _1174_win_api_job()
+
+    def need(ok, reason):   # called on the result of ONE Win32 call: on failure its code is read at once and kept as the cause
+        if not ok:
+            raise _1174Error(reason) from c.WinError(c.get_last_error())
+
+    def reap():
+        try:
+            proc.wait(5)
+        except subprocess.TimeoutExpired:
+            raise _1174Error("leader not reaped") from None
+    job = k.CreateJobObjectW(None, None)
+    need(job, "job create")
+    dang_ky = {"terminate": lambda: need(k.TerminateJobObject(job, 1), "job terminate"),
+               "xac_nhan": lambda: _1174_win_job_empty(k, s, job, 5), "close_job": lambda: need(k.CloseHandle(job), "handle close")}
+    da_gan, goc, rc = False, None, None
+    try:
+        try:
+            info = s.JOBOBJECT_EXTENDED_LIMIT_INFORMATION()
+            info.BasicLimitInformation.LimitFlags = _1174_WIN_JOB_LIMIT
+            need(k.SetInformationJobObject(job, 9, c.byref(info), c.sizeof(info)), "job limit")
+            proc = subprocess.Popen(argv, cwd=cwd, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL, close_fds=True, creationflags=_1174_WIN_SPAWN_FLAGS)
+            dang_ky["kill_truoc_gan"] = proc.kill
+            dang_ky["reap"] = reap
+            _1174_require(getattr(proc, "_handle", None) is not None, "spawn handle")
+            if truoc_gan is not None:
+                truoc_gan(proc)
+            need(k.AssignProcessToJobObject(job, proc._handle), "job assignment")
+            da_gan = True
+            if between is not None:
+                between(job)
+            snap = k.CreateToolhelp32Snapshot(0x4, 0)   # TH32CS_SNAPTHREAD: CPython closed the primary thread handle
+            need(snap and snap != c.c_void_p(-1).value, "thread snapshot")
+            dang_ky["close_snap"] = lambda: need(k.CloseHandle(snap), "handle close")
+            te, entries = s.THREADENTRY32(), []
+            te.dwSize = c.sizeof(te)
+            more = k.Thread32First(snap, c.byref(te))
+            while more:
+                entries.append((te.th32OwnerProcessID, te.th32ThreadID))
+                more = k.Thread32Next(snap, c.byref(te))
+            need(c.get_last_error() == 18, "thread snapshot")   # only ERROR_NO_MORE_FILES ends the walk (or means an empty list)
+            th = k.OpenThread(0x2 | 0x800, False, _1174_win_pick_thread(entries, proc.pid))   # SUSPEND_RESUME | QUERY_LIMITED_INFORMATION
+            need(th, "suspended start")
+            dang_ky["close_thread"] = lambda: need(k.CloseHandle(th), "handle close")
+            _1174_require(0 != k.GetProcessIdOfThread(th) == proc.pid, "suspended start")   # the thread id was not reused meanwhile
+            _1174_win_resume_ok(k.ResumeThread(th))
+            while rc is None:   # finite slices keep the absolute deadline and stay below INFINITE milliseconds
+                con_lai = deadline - time.monotonic()
+                _1174_require(con_lai > 0, "lifecycle deadline")
+                try:
+                    rc = proc.wait(timeout=min(con_lai, 60.0))
+                except subprocess.TimeoutExpired:
+                    pass
+        except BaseException as error:
+            goc = error
+            raise
+    finally:   # no proc.kill() once assigned: the job is the only reclaim path, and xac_nhan the only confirmation
+        thu_tu = ("terminate", "xac_nhan") if da_gan else ("kill_truoc_gan",)
+        hong = _1174_win_cleanup([(ma, dang_ky[ma]) for ma in thu_tu + ("reap", "close_thread", "close_snap", "close_job")
+                                  if ma in dang_ky])
+        if goc is not None:
+            _1174_win_note(goc, [ma for ma, _ in hong])
+        elif hong:
+            _1174_win_note(hong[0][1], [ma for ma, _ in hong[1:]])
+def _module1174(c):
+    spec = importlib.util.spec_from_file_location("pl1174_" + str(time.time_ns()), c.script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert hasattr(module, "_1174_witness"), "WP1174 pure validator API absent from supplied product"
+    return module
+
+
+def _call1174(fn, *args, **kwargs):
+    try:
+        return fn(*args, **kwargs)
+    except SystemExit as error:
+def _native1342(ten, fn):
+    def ca(c):
+        if os.name != "nt":
+            raise BoQua(f"ca native Windows (kernel32) — nền {platform.system()} không đo, KHÔNG tính đạt") from OSError("kernel32 unavailable")
+        m = _module1174(c)
+        ghi = fn(m, c.tmp.resolve(), *m._1174_win_api())
+        print("WP1342_NATIVE_V1 " + json.dumps(dict(id=ten, executed=1, passed=1, os=platform.platform(),
+              python=platform.python_version(), observed=repr(ghi)), sort_keys=True, ensure_ascii=True), flush=True)
+    return ca
+
+
+CASES += [("wp1342_additive_byte_preserved", _additive_case1342), ("wp1342_pure_platform_path", _pure1342)]
+CASES += [("wp1342_native_" + ten, _native1342("wp1342_native_" + ten, fn)) for ten, fn in (
+    ("read", _n_read1342), ("volume_junction", _n_volume1342), ("swap_ancestor", _n_swap1342), ("metadata_drift", _n_metadata1342),
+    ("noinherit", _n_noinherit1342), ("symlink_file", _n_symlink1342))]
+
+
+# --- #1342 r2 (bậc r1b): khoá + publish Windows ĐỨNG RIÊNG (`_1174_win_api_ghi`, `_1174_win_lock`, `_1174_win_persist`), CHƯA nối dây.
+# Không-nối-dây do `_wired1342` (ca `wp1342_additive_byte_preserved`) phủ sẵn; không đổi MUTANTS, không vào WP1174_REQUIRED/WP1174_BOTH.
+def _additive1342r2(base, head):
+    """N2 của r2 — HÀM đo MỘT LẦN lúc PR, KHÔNG đăng ký vào CASES. [] ⇔ head (bytes) = base + các khối mới `_new1342` nhận có tên CHƯA
+    có trong base. Khối `_1174_win_*` ĐÃ có trong base (r1) không bị loại: như mọi định nghĩa cũ, nó phải bằng NGUYÊN BYTE base."""
+    import ast
+    try:
+        cu, moi = ast.parse(base), ast.parse(head)
+    except (SyntaxError, ValueError) as ex:
+        return [f"không parse được: {ex}"]
+    da_co = {n.id for n in ast.walk(cu) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)} | {
+        n.name for n in ast.walk(cu) if hasattr(n, "name")}
+f435eb5c035e511f92c77321d2a2573f9088a17b4fe6a2ccca9c64a794cd1eb8  -
+50:                    raise RuntimeError("DOT_BIEN_B_KHONG_DO: marker khong xuat hien trong 5 s")
+57:DOT_BIEN = {
+58:    "a1": ("nt", [('"terminate": lambda: need(k.TerminateJobObject(job, 1), "job terminate"),', '"terminate": lambda: None,')],
+96:dev, script, ten = sys.argv[1:4]
+103:        dict(t.CASES)[ten](t.Ctx(Path(script), Path(td)))
+106:        kq = ("KHONG_DO", str(ex))
+108:        kq = ("DO", str(ex))
+110:        kq = ("KHONG_DO", "ngoại lệ khác AssertionError: " + type(ex).__name__ + ": " + str(ex))
+115:def chay_ca(dev, script, ten):
+117:        p = subprocess.run([sys.executable, "-B", "-c", VO, str(dev), str(script), ten], capture_output=True, text=True, timeout=120,
+120:        return ("KHONG_DO", "watchdog ngoài ca 120 s")
+122:    return tuple(json.loads(dong[-1][6:])) if dong else ("KHONG_DO", f"không có dòng kết quả: rc={p.returncode} {p.stderr[-400:]}")
+138:        for ma, (_, cap, *_r) in DOT_BIEN.items():
+143:    chon = chon or [ma for ma, v in DOT_BIEN.items() if v[0] == "moi" or nen == "nt"]
+147:            _, cap, dich, nhan, doi_chung = DOT_BIEN[ma]
+152:            giet = sach[0] == "DAT" and do[0] == "DO" and nhan in do[1] and dc == ["DAT"] * len(dc)
+4:# TRANG THAI: merged (a2c7d75), landed TRUE: bon moc §10.2.2 cua ci.yml 44445202862 measured passed (run, checkout 39/39,
+11:#   khong CI Windows cho packet_loop. Do TRUOC merge tren HEAD 46d3907; do LAI SAU merge tren cay merge a2c7d75 (Desktop: bang ca
+41:land_operator: 'measured — readback-pr-1407.json: merged_at 2026-11-19T02:33:34Z, merge_commit_sha a2c7d75, state closed, draft false.'
+43:merge_commit: a2c7d759866502e7da318e4f83e17d5f77491eb5
+47:  measured — readback-commit-a2c7d75.json + linux/nghiem-thu-a2c7d75.txt: cha thu nhat d59527f, cha thu hai 46d3907. Lich su PR:
+49:  numstat d59527f..a2c7d75 = d135697..46d3907: dung 2 tep write set (+172/-0, +376/-0). _additive1342r2(d59527f, a2c7d75) = [] va
+50:  _wired1342(a2c7d75) = [] (linux/suite-wp1342-wp1174.txt).
+84:    sha: a2c7d759866502e7da318e4f83e17d5f77491eb5
+87:    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha a2c7d75, run_attempt 1.'
+88:    moc_checkout: 'measured — ci/provenance.yaml: 39/39 job checkout passed a2c7d75.'
+89:    moc_workflow_definition: 'measured — ci/provenance.yaml moc.workflow_definition passed (ops/ci_provenance.py thu --wd-run 44448900232, wd/ci-provenance-thu-wd-44448900232.log): path .github/workflows/ci.yml, oid a2c7d75, blob a1db88d9433fd548e36dcd598a63135f5fac7b73, sha256 d1201a76…82f5 (khop git rev-parse a2c7d75:.github/workflows/ci.yml va sha256 git show trong clone); wd/wd-44445202862.json (artifact workflow-definition-44445202862 tai qua wd_dl.py); luot do wd/readback-run-44448900232.json (ops-do-workflow-definition.yml, workflow_dispatch 03:05:03Z, success).'
+97:    sha: a2c7d759866502e7da318e4f83e17d5f77491eb5
+105:    sha: a2c7d759866502e7da318e4f83e17d5f77491eb5
+107:    nguon: [windows-native/desktop/wp1342r4c-out/TOM-TAT.txt, windows-native/desktop/chay-1342r4c.ps1, n6-merge-a2c7d75.txt, n6_merge_1407.py, windows-native/desktop/wp1342r4c-out/n5-phan-chung.stdout.txt, linux/n5_phan_chung_1407.py]
+110:      KHOA.txt giu roi nha; zip sha256 b5747364…2d5e khop bam tren Desktop): CHOT sha a2c7d75 tree 24094d95 sach=[], sach_sau=[]; MERGE 55 ca
+113:      n6-merge-a2c7d75.txt (n6_merge_1407.py): MERGE vs HEAD 55 ID lech 0; N5 41 ID so BASE e2c3b82 lech 0; J0..J11 + LAP deu DAT;
+116:    sha: a2c7d759866502e7da318e4f83e17d5f77491eb5
+118:    nguon: [linux/suite-wp1342-wp1174.txt, linux/do_python_1407.py, linux/nghiem-thu-a2c7d75.txt, linux/nghiem_thu_1407.py, linux/dot-bien-linux-a2c7d75.txt, linux/dot_bien_r4_ban2.py, linux/n2-test-46d3907.txt, linux/n2_test_r4.py, linux/n23-phan-chung-a2c7d75.json, linux/n23_1407.py, linux/eol-policy-all-a2c7d75.json]
+121:      34 BO_QUA (deu wp1342_native_*), 0 DO, rc 0. linux/dot-bien-linux-a2c7d75.txt (driver dot_bien_r4_ban2.py, ban sao tam): --kiem-neo
+156:    measured — linux/nghiem-thu-a2c7d75.txt. Phan packet d135697..46d3907 = d59527f..a2c7d75: 2 tep = write set, +548/-0 (<= 550, §9).
+163:  landed: true
+165:    PROTOCOL §10.2.4 — (1) gate tren a2c7d75: run/checkout/gate_output/workflow_definition measured passed => DAT. (2) lease nha: DAT
+170:    (i) Native Windows: bang ca, J3/J9 lap va phan chung N5 da do LAI tren cay merge a2c7d75 (Desktop, n6-merge-a2c7d75.txt); dot bien N7
+175:    (linux/n5-phan-chung-linux-a2c7d75.txt va Desktop wp1342r4c-out). (v) Cua so 90 s cua N6 doc bang thoi luong tien trinh tung ca (max 8.8 s Desktop, 15.0 s VM),
+181:  windows_native: 'measured — n5-n6-46d3907.txt, windows-native/desktop/wp1342r4b-out/TOM-TAT.txt, windows-native/desktop/wp1342r4b-out/dot-bien.stdout.txt, windows-native/vm/wp1342r4b-vm-out/TOM-TAT.txt, windows-native/vm/chay-1342r4b-vm.ps1, n6-merge-a2c7d75.txt (chi tiet: pre_merge_checks "Do native Windows" va nghiem_thu.N4–N7).'
+184:  N1: 'measured — danh-gia-gate-output-44445202862.txt: gate-packet-loop "GOM: ĐẠT · 16 mảnh · 1573 ca bắt buộc" tren a2c7d75 (va CI PR 44440428474 tren 46d3907 success). linux/suite-wp1342-wp1174.txt: ID base 1562 ⊆ head 1576, 0 trung, 14 ID moi (11 wp1342_native_job_* + 3 wp1342_pure_spawn_*); MUTANTS 1859 cung sha256 repr 363c37fb o e2c3b82/46d3907/d59527f/a2c7d75; moc_dot_bien_phai_khop_DUNG_MOT_CHO DAT. Trang thai ID base: gom-base-vs-merge.trich.txt (REST log job gate-packet-loop, loc dong "GOM:") — base e2c3b82 (run 44350194077) "ĐẠT · 1559 ca bắt buộc (sổ 1561 − CA_DAI)", merge "ĐẠT · 1573 (sổ 1575 − CA_DAI)", chenh 14 = so ID moi; tuc moi ID bat buoc deu DAT ca hai ve. So tung ID kem LY DO bo qua (CA_DAI, BO QUA nen) KHONG lap bang rieng: phep so tung ID chi co o muc GOM.'
+185:  N2: 'measured — linux/suite-wp1342-wp1174.txt: _additive1342r2(e2c3b82, 46d3907) = [], (d135697, 46d3907) = [], (d59527f, a2c7d75) = []. linux/n2-test-46d3907.txt (n2_test_r4.py sha256 68074fd2, khop comment 6995893272): "N2 test head: ĐẠT []", base tu khop [], MUTANTS_NHAM_TEST 14 / CASES 85 diem bind; 16 phan chung DO dung ve, doi chung duong []. linux/n23-phan-chung-a2c7d75.json: n2a (mot byte than _1174_process) va n2b (@staticmethod vao _1174_win_note) DO_DUNG.'
+186:  N3: 'measured — linux/suite-wp1342-wp1174.txt: _wired1342(a2c7d75) = []; tap ten moi muc module (B->H va P1->M) == dung muoi ten ky vong. linux/n23-phan-chung-a2c7d75.json: doi chung sach wp1342_additive_byte_preserved DAT; n3a (chen goi _1174_win_spawn_job trong _1174_process) DO tai "N3 trên CÂY LÀM VIỆC [_1174_process:4267]"; n3b (doi ten _1174_win_note) DO_DUNG. Desktop HEAD wp1342_additive_byte_preserved rc 0.'
+187:  N4: 'measured — Linux: wp1342_pure_spawn_hang_luong/cleanup_note/arguments DAT (linux/suite-wp1342-wp1174.txt, merge) va trong GOM CI; Desktop HEAD: ca ba rc 0 (TOM-TAT). Phan chung c/t1/t2/k3/g0/d1 GIET dung nhan tren Linux (linux/dot-bien-linux-a2c7d75.txt).'
+188:  N5: 'measured — n5-n6-46d3907.txt (n5_n6_1407.py): 41 ID base (wp1174_windows_claim_rejected + 12 WP1174_BOTH + 28 ca r1–r3) chay ca hai ve cung luot Desktop; so rc, KQ_JSON (bo duong dan tam), WP1342_NATIVE_V1 (bo observed/os/python): lech 0. Hai ca symlink rc 1 BO QUA "KHÔNG ĐO ĐƯỢC" (WinError 1314) o CA HAI ve. Phan chung (dac ta §5 N5): dot bien mo chot claim Windows trong _1174_platform (`os_name == "Linux"` -> `os_name in ("Linux", "Windows")`, neo khop dung 1 cho, ban sao tam) — linux/n5-phan-chung-linux-a2c7d75.txt (Linux, cay merge a2c7d75, driver linux/n5_phan_chung_1407.py sha256 958e7da8) va windows-native/desktop/wp1342r4c-out/n5-phan-chung.stdout.txt (Desktop, cay merge): ban sach DAT; ban dot bien DO bang AssertionError o DUNG dong assertion dich 11788 `assert _call1174(m._1174_platform, "Windows", "ext4", 0xEF53) is False`; doi chung wp1174_witness_valid DAT tren ban dot bien => GIET dung assertion dich ca hai nen. Tren cay merge, 41 ID base lech 0 so BASE (n6-merge-a2c7d75.txt).'
+189:  N6: 'measured — n5-n6-46d3907.txt: J0 J1 J2 J3 J6 J7 J8 J9 J10 J10b J11 tren HEAD Desktop rc 0, WP1342_NATIVE_V1 passed 1, observed co (vai, pid, creation time FILETIME), thoi luong <= 8.8 s; LAP-J3 10/10, LAP-J9 10/10 (<= 3.2 s); VM J3/J9/J10 moi ca 3/3 rc 0 (<= 15.0 s). Cay merge a2c7d75 (n6-merge-a2c7d75.txt): J0..J11 rc 0 passed 1 (<= 8.8 s), LAP-J3 3/3, LAP-J9 3/3.'
+191:  N8: 'measured — linux/nghiem-thu-a2c7d75.txt: ruff 0.15.15 --select F TAP packet_loop.py 3 F841 / packet_loop_test.py 13 bang nhau o base, head, cha1, merge; adr-song rc 0 (66 ADR), doctrine-scan rc 0; git diff --check d135697..46d3907 rc 0; linux/eol-policy-all-a2c7d75.json ok true, 14939 tep, 0 vi pham; numstat phan packet 2 tep = write set, +548 <= 550 (doc theo chu: 5 duong dan, +570 — canh_bao ii).'
+195:  - 'Dot bien N7 tren Windows va VM J3/J9/J10 tren cay merge a2c7d75 (chi do tren HEAD 46d3907).'
+
+exec
+/bin/bash -lc "cat CONTEXT.md >/dev/null
+sed -n '1,120p' docs/PROTOCOL_DA_PHIEN.md
+rg -n '"'^## |''^### '"' CLAUDE.md | head -40
+rg -n 'Phương pháp làm việc' SKILL.md
+sed -n '1,100p' ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+rg -n 'SPAWN_FLAGS|def _1174_win_note|def _1174_win_cleanup' .claude/dev/packet_loop.py
+git diff --numstat a2c7d75 HEAD -- .claude/dev/packet_loop{,_test}.py
+uname -s" in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/spec1342a1ii/master
+ succeeded in 0ms:
+# Protocol đa phiên đa provider
+
+## Google Antigravity provider identity
+
+`google_antigravity` là provider riêng cho Executor hoặc Reviewer khi Packet và lease
+cấp đúng vai. Mỗi lượt phải ghi `provider`, họ model thực sự phục vụ lượt chạy
+(`model_family`: `claude`, `openai` hoặc `gemini`),
+`execution_surface: antigravity` và `transport: machine/local` theo hợp đồng
+provider; không suy họ model từ tên ứng dụng. Lượt Antigravity thiếu một trong
+ba thuộc tính sau provider phải dừng. Claude Code và Codex giữ identity cũ tương
+ứng họ `claude` và `openai`. Review cùng provider hoặc cùng họ model không được
+ghi `cross_approved`; chỉ review độc lập trên exact SHA mới có thể được xét assurance.
+Danh tính này không cấp lease: người cấp vẫn phải qua allowlist và authority bền.
+
+- **Trạng thái:** Thiết kế đã chốt qua grilling ngày 2026-08-03
+- **Protocol version:** 1
+- **Governance baseline:** MCR-54-02, chấp thuận ngày 2026-08-08
+- **Phạm vi:** Claude Code, Codex, Google Antigravity, Windows local, cloud worker và Android
+- **Nguồn quyết định:** §20 là bảng định tuyến ADR đang hiệu lực — MỘT dòng cho MỖI ADR, máy canh bằng `packet_loop.py adr-song`. Dòng cũ ghi một PHẠM VI (`ADR-0017 đến ADR-0035`) và phạm vi ấy đã chết: 45 ADR tồn tại, 10 ADR quản trị nằm ngoài nó.
+- **Kế hoạch thi công:** `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md`
+
+## 1. Mục tiêu và bất biến
+
+Hệ thống cho phép nhiều agent run tự xử lý một mission đến `awaiting_land` mà không cần người dùng gõ lại prompt;
+người có thẩm quyền có thể apply exact head SHA và hoàn tất mission từ local, web hoặc Android. GitHub Issue/PR
+là control plane và nguồn trạng thái bền; Claude, Codex, Antigravity, ứng dụng desktop/mobile và local controller chỉ là các
+giao diện/executor có thể thay thế.
+
+Các bất biến không được hạ chuẩn:
+
+1. Mỗi work packet có đúng một executor ghi và một lease generation còn hiệu lực.
+2. Mỗi lần chạy có branch/worktree riêng; không có hai lease với effective write set giao nhau trên toàn repo.
+3. Worker không ghi canonical, không bump version, không deploy và không có credential LIVE.
+4. Dispatcher tuần tự là bên duy nhất chuyển state/cấp lease/merge vào mission integration branch.
+5. Canonical chỉ đổi qua operation `land apply` được người có thẩm quyền gọi cho đúng mission/head SHA; mọi
+   skill, comment hoặc workflow chỉ là client. Deploy là cổng riêng.
+6. Mọi text tracked dùng LF, trừ `*.cmd`/`*.bat` dùng CRLF; binary/golden byte fixture không normalize.
+7. Chat history, label, assignee và board không phải nguồn sự thật.
+8. Một phiên chỉ giữ một vai trò trên một đơn vị công việc: execute một Packet, review một PR hoặc land một
+   exact head. Substep nằm trong cùng Packet Spec không bị tách vụn; việc ngoài spec sang successor Packet.
+9. Review, CI, authorization và land evidence đều gắn exact SHA. Head đổi làm bằng chứng và ủy quyền cũ hết hiệu lực.
+10. GitHub durable facts và deterministic reconciler single-writer là authority cho transition; model, adapter,
+    workflow trigger và prompt chỉ là worker/client có thể thay thế, không tự cấp quyền hoặc tự nối chuỗi vai trò.
+
+## 2. Thành phần và quyền
+
+| Thành phần | Được làm | Không được làm |
+|---|---|---|
+| Dispatcher/reconciler | Reconcile durable inbox, chuyển state, cấp/thu hồi lease, tạo packet/branch/PR, merge tuần tự vào integration | Ghi canonical, chạy LIVE, tự tăng budget/quyền |
+| Executor | Sửa đúng effective write set trên branch của generation, tạo PR/handoff | Sửa branch khác, file land/security, tự review/approve, merge dưới vai Executor, deploy |
+| Reviewer | Đọc code, chạy kiểm tra read-only trên exact SHA, ghi verdict/comment | Dùng worktree ghi của Executor, push hoặc sửa branch |
+| Local controller | Nhận packet local, tạo worktree, gọi CLI headless, heartbeat/handoff | Làm generic runner, giữ credential LIVE |
+| Phiên land | Tích hợp, gán version, changelog, manifest, chạy land gate | Tự cấp approval; deploy ngầm |
+| Approver | Chấp nhận exact mission/head SHA và điều kiện land bằng authorization bền | Tạo quyền qua output agent, duyệt head khác hoặc bỏ qua finding/check chưa đóng |
+| Land Operator | Thực hiện đúng prepare/apply đã được ủy quyền và ghi land evidence | Tự chọn head, tự nới điều kiện hoặc coi thao tác của mình là review/approval |
+| Apply job | Kiểm mission/head SHA/gate/approval rồi merge đúng draft land PR | Gọi model, sửa diff, chọn head khác, deploy |
+| Người có thẩm quyền | Start/pause/resume/reroute/override/authorize/apply/deploy | Thẩm quyền không được chuyển qua output của agent; chỉ có thể ủy quyền bền, có phạm vi và điều kiện |
+
+**Khi nào hỏi người có thẩm quyền.** Agent chỉ dừng để hỏi khi rơi vào một trong năm mã của danh sách đóng ở
+`ADR-0067`; việc khác agent tự quyết, ghi vào sổ quyết định uỷ quyền và báo trong bản tin hằng ngày, và người có thẩm
+quyền bác được bằng một comment. Uỷ quyền thường trực cấp lease, audit uỷ quyền và tự merge là các ủy quyền bền có phạm
+vi, điều kiện và hạn theo `ADR-0067`. Cơ chế nào cần cổng mã đổi theo thì chỉ có hiệu lực khi cổng ấy đã đổi; trước đó
+cổng hiện hành giữ nguyên.
+
+Một người hoặc agent có thể giữ các vai ở những phiên khác nhau, nhưng assurance không được nhập nhằng. Executor có
+thể làm Land Operator khi authorization cho exact SHA cho phép; việc đó không biến họ thành Reviewer hay Approver
+độc lập của chính diff. Reviewer cùng provider với Executor phải là phiên mới, read-only và được ghi mức assurance
+thấp hơn cross-provider.
+
+## 3. Nguồn sự thật và schema
+
+### 3.1 Mission Issue
+
+Mission được tạo từ Issue Form, tối thiểu có:
+
+```yaml
+schema_version: 1
+mission_id: gh-<issue>
+revision: 1
+plan_hash: <sha256>
+supersedes_revision: null
+change_request: null
+base_sha: <canonical-sha>
+objective: <mục tiêu>
+acceptance_criteria: []
+risk: normal | sensitive
+requires_live: false
+envelope:
+  max_packets: 20
+  max_successor_depth: 5
+  max_attempts_per_packet: 3
+  max_run_minutes: 90
+  same_failure_limit: 2
+  max_parallel_workers: 2
+  max_agent_invocations: 30
+  max_cloud_minutes: 360
+  max_inbox_backlog: 100
+  provider_budgets: {}
+```
+
+`max_run_minutes: 90` là profile khởi điểm đã duyệt cho cả Executor và Reviewer. Deadline luôn là
+absolute wall clock và fail-closed; không đổi sang active-time và không tự sửa power policy. Sau 3–5 run thật,
+Mission owner xem lại profile bằng số đo wall/working-state; dispatcher không tự nâng trần.
+
+Trạng thái mission: `proposed`, `running`, `paused`, `blocked`, `awaiting_land`, `complete`, `cancelled`. `plan_hash`
+đóng băng objective, acceptance, risk, requires_live, envelope và seed/constraint của Packet plan. Successor nằm
+trong outcome/envelope đã duyệt được nối bằng event bền mà không tự tạo Mission revision; đổi phase graph,
+dependency chuẩn hoặc constraint material vẫn cần MCR. Label chỉ phản chiếu state; revision/plan hash và event
+journal mới là căn cứ.
+
+#### 3.1.1 Mission Change Request
+
+Thay đổi material của Mission Plan không được sửa im lặng vào body đang chạy. Một Change Request bền tối thiểu có:
+
+```yaml
+schema_version: 1
+change_request_id: mcr-<mission>-<sequence>
+mission_issue: <number>
+requested_by: <actor>
+reason: <text>
+3:## Vai trò
+7:## Nguồn sự thật
+15:## Quy trình sửa code
+39:## Bài học đắt giá (đã trả giá, không lặp lại)
+618:## Đẩy ref từ phiên Claude Code trên web (đo 16-08-2026)
+665:## Gọi agent đa nền (chi tiết: `docs/GOI_AGENT_DA_NEN.md`)
+880:## Bài học lớp "chạy được ở đây" (12-08-2026, codex đo trên Windows thật)
+1022:## Lệnh `gh api graphql` đưa cho chủ kho chạy — máy chủ kho là Windows `cmd` (đo 27-10-2026)
+1048:## Cấm
+1055:## Protocol đa phiên — CON TRỎ, không phải bản sao
+1093:## Khi đóng gói
+1104:## Quy ước deploy (AI ĐẨY Package — chốt 30-07-2026)
+1143:## Kho tham chiếu Claude Code
+28:## Phương pháp làm việc: thiết kế kỹ, triển khai chủ động
+# Kế hoạch thi công đa provider — tra-luat
+
+> **Trạng thái:** Active transition plan
+>
+> Tài liệu này không cấp authority. Authority nằm trong Packet Spec,
+> GitHub facts và verified receipts.
+>
+> Các provider/bề mặt hiện được sử dụng:
+>
+> - Google Antigravity;
+> - ChatGPT Pro qua Web;
+> - Claude Code và Codex khi quota khả dụng;
+> - Human Auditor.
+
+## 1. Mục tiêu
+
+Duy trì tiến độ phát triển khi một hoặc nhiều provider không khả dụng, nhưng:
+
+- không tạo orchestrator mới;
+- không hạ chuẩn exact-SHA review;
+- không khai sai provider hoặc transport;
+- không cho output model tự tạo quyền ghi;
+- không làm trạng thái động trôi vào tài liệu kế hoạch tĩnh;
+- không dùng provider tạm thời để tự hợp thức hóa thay đổi sensitive.
+
+## 2. Nhận dạng provider và execution surface
+
+| Công cụ/bề mặt | Provider | Execution surface | Transport |
+|---|---|---|---|
+| Google Antigravity | `google_antigravity` | `antigravity` | machine/local |
+| ChatGPT Pro Web | `openai_chatgpt` | `chatgpt_web` | `human_mediated` |
+| Claude Code | `anthropic_claude` | `claude_code` | machine/local |
+| Codex CLI | `openai_codex` | `codex_cli` | machine |
+| Codex Desktop | `openai_codex` | `codex_desktop` | machine |
+| Codex service (GitHub App / cloud) | `openai_codex` | `codex_service` | machine |
+| Human Auditor | `human` | `manual_audit` | human |
+
+Tên công cụ không tự quyết định assurance.
+Codex Desktop không được khai thành CLI. Bề mặt Desktop không chứng minh model/effort
+đã phục vụ hoặc tính độc lập của session; khai giới hạn đo được và giữ mức advisory
+khi chưa đủ evidence theo protocol.
+
+Tên lịch sử “Codex service” có tên máy `codex_service` từ wp461 r3 (Mission
+[#470](https://github.com/ducthangho/tra-luat/issues/470) Q1; nợ mở ở
+[#461](https://github.com/ducthangho/tra-luat/issues/461) theo mục `no_khai_ra` của
+[biên nhận review #460 lượt 9](reviews/pr460-bien-nhan-v2-review-9-gpt6astra-verdict.receipt.yaml)).
+`codex_service` là mọi đường chạy Codex không qua lệnh `codex` (CLI) và không qua Codex
+Desktop — gồm GitHub App `chatgpt-codex-connector[bot]` review trên PR và Codex cloud nói
+chung. Nó không chứng minh model/effort đã phục vụ hay tính độc lập của phiên; receipt phải
+khai `KHONG_do_duoc` cho phần không đo được. Các biên nhận lịch sử khai `codex_cli` giữ
+nguyên (Q2 #470): chúng đi qua `codex exec`, không được ánh xạ lại.
+
+## 3. Vai trò ChatGPT Pro Web
+
+ChatGPT Pro Web được dùng theo hai chế độ.
+
+### 3.1 Advisory Reviewer
+
+ChatGPT nhận một review bundle đóng băng và trả review note có cấu trúc. Nó không được xem là authoritative reviewer vì local controller không thể machine-verify model identity, session identity hoặc toàn bộ transport.
+
+### 3.2 Patch Planner
+
+ChatGPT có thể sinh:
+
+- unified diff;
+- patch plan;
+- test plan;
+- remediation plan.
+
+AG hoặc local controller phải:
+
+1. kiểm write set;
+2. kiểm path traversal và symlink;
+3. áp patch;
+4. chạy test;
+5. đọc lại diff;
+6. commit và push.
+
+ChatGPT Web không phải Executor-of-record.
+
+## 4. Review Class
+
+Dùng Review Class canonical:
+
+```text
+routine
+systemic
+sensitive
+```
+
+### Routine
+
+Có thể land khi:
+
+- AG Executor hoặc human-controlled patch application;
+- AG Reviewer độc lập hoặc reviewer theo protocol;
+- ChatGPT advisory review tùy chọn;
+- exact SHA hợp lệ;
+- required CI đầy đủ;
+- human readback.
+6746:_1174_WIN_SPAWN_FLAGS = 0x204   # creationflags: CREATE_SUSPENDED (0x4) | CREATE_NEW_PROCESS_GROUP (0x200) and nothing else
+6793:def _1174_win_cleanup(steps):
+6806:def _1174_win_note(err, ma_buoc):
+6870:                                    stderr=subprocess.DEVNULL, close_fds=True, creationflags=_1174_WIN_SPAWN_FLAGS)
+Linux
+
+exec
+/bin/bash -lc "diff -u ops/specs/WP1174-WINDOWS-BACKEND-r5-ban2.md ops/specs/WP1174-WINDOWS-BACKEND-r5.md | cut -c1-180
+printf 'diff rc=%s\\n' \""'${PIPESTATUS[0]}"
+python -B - <<'"'PY'
+for elapsed in (0, 24, 25, 30):
+    remaining = 75 - elapsed
+    print(elapsed, min(60, remaining - 45), 'call' if remaining - 45 > 5 else 'KHONG DO')
+remaining = 10
+for phase in ('con', 'chau', 'tro giup'):
+    print(phase, remaining, 'wait' if remaining >= 10 else 'KHONG DO')
+    remaining -= 5
+PY
+printf 'python rc=%s\\n' \""'$?"
+sed -n '"'1,38p;1048,1092p' CLAUDE.md >/dev/null
+sed -n '28,56p' SKILL.md >/dev/null
+git status --short
+printf 'status rc=%s\\n' \""'$?"' in /tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/spec1342a1ii/master
+ succeeded in 29ms:
+--- ops/specs/WP1174-WINDOWS-BACKEND-r5-ban2.md	2026-11-19 10:27:23.812536736 +0000
++++ ops/specs/WP1174-WINDOWS-BACKEND-r5.md	2026-11-19 10:28:46.425676697 +0000
+@@ -55,10 +55,10 @@
+ 
+ | # | mục tiêu |
+ |---|---|
+-| M1 | **Fixture mở rộng** `_wp1342a1ii_FX = _wp1342a1_FX + "<nhánh mới>"` (cộng chuỗi; `_wp1342a1_FX` không bị gán lại). Phần thêm là các nhánh `elif` nố
+-| M2 | **J4 breakaway tường minh** `wp1342_native_job_breakaway_tuong_minh` (khung `_wp1342a1_ca`). Hai lời gọi `_1174_win_spawn_job` từ CHÍNH tiến trình chạy ca, q
+-| M3 | **J5 breakaway ngầm** `wp1342_native_job_breakaway_ngam`. Con bước `chau=0,chau,bt+cho=tha_j5,300`, `cho=go_chau,300`, `ra=0`. `between(job)` (luồng chính, trước
+-| M4 | **J12 job lồng** `wp1342_native_job_long`. Trợ giúp DÙNG MỘT LẦN qua `_wp1342a1_phu`-tương đương (Popen vào `x.ps`), bước `vao_job=0x2000,<pl>`, `tro_c=<
++| M1 | **Fixture mở rộng** `_wp1342a1ii_FX = _wp1342a1_FX + "<nhánh mới>"` (cộng chuỗi; `_wp1342a1_FX` không bị gán lại). Phần thêm là các nhánh `elif` nố
++| M2 | **J4 breakaway tường minh** `wp1342_native_job_breakaway_tuong_minh` (khung `_wp1342a1_ca`). Hai lời gọi `_1174_win_spawn_job` từ CHÍNH tiến trình chạy ca, q
++| M3 | **J5 breakaway ngầm** `wp1342_native_job_breakaway_ngam`. Con bước `chau=0,chau,bt+cho=tha_j5,300`, `cho=go_chau,300`, `ra=0`. `between(job)` (luồng chính, trước
++| M4 | **J12 job lồng** `wp1342_native_job_long`. Trợ giúp DÙNG MỘT LẦN qua `_wp1342a1_phu`-tương đương (Popen vào `x.ps`), bước `vao_job=0x2000,<pl>`, `tro_c=<
+ | M5 | **S6 thuần** `wp1342_pure_spawn_fx_mo_rong` (mọi nền): `_wp1342a1ii_FX.startswith(_wp1342a1_FX)` (nhãn "S6: fixture base bị đổi"); `ast.parse(_wp1342a1ii_FX)` (
+ | M6 | **Đăng ký**: một hoặc hai câu `CASES += [list literal]` sau câu đăng ký r4 cuối cùng (18924–18933) và trước `if __name__`: `("wp1342_pure_spawn_fx_mo_r
+ | M7 | Đột biến qua driver NGOÀI kho (khuôn r4: `ops/land/pr1407-wp1342-provenance/windows-native/desktop/dot_bien_r4_ban2.py`; mỗi cặp (tìm, thay) khớp ĐÚNG MỘT
+@@ -70,14 +70,14 @@
+ | 1 | hậu duệ xin breakaway tường minh và được nhận | `LimitFlags` không có `0x800` | J4 ĐỎ "J4: breakaway tường minh được nhận" (đối chứng (ii) �
+ | 2 | hậu duệ sinh thường tự rời job | `LimitFlags` không có `0x1000` | J5 ĐỎ "J5: cháu ngoài job đích" | **e2** cùng dòng, `0x2000` → `0x3000` | J1 xanh |
+ | 3 | đối chứng (ii) của J4 không có răng (môi trường che phản chứng mà ca vẫn qua) | đối chứng (ii) phải thấy breakaway thành công | J4 KHÔNG Đ�
+-| 4 | job lồng: thu hồi không xác nhận mà ca vẫn qua | (B) đòi `ket_qua == ["ok", 0]` | J12 ĐỎ "J12: nhánh khác" với `ket_qua == ["loi", <chứa "job not empty
++| 4 | job lồng: thu hồi không xác nhận mà ca vẫn qua | (B) đòi `ket_qua == ["ok", 0]` | J12 ĐỎ "J12: nhánh khác" với `ket_qua == ["loi", <chứa "job not empty
+ | 5 | fixture mở rộng vỡ cú pháp / sửa fixture base | S6 | S6 ĐỎ "S6: fixture mở rộng không biên dịch" / "S6: fixture base bị đổi" | **f1** (Linux) xoá 
+ 
+ Phân biệt: e1 và e2 cùng làm S1 (r4) đỏ assertion `JOB_LIMIT == 0x2000` — không phải dấu hiệu. e1 tách khỏi e2 bằng J5 XANH dưới e1 (`0x2800` không đ�
+ 
+ Đường KHÔNG có kích hoạt tự nhiên, chỉ code review: nhánh (C) của J12 trên Windows ≥ 8 (máy đo dự kiến vào (B)); `vao_job` FALSE; `IsProcessInJob` trả
+ 
+-**Driver (M7) cho e1c và kết quả `KHÔNG ĐO` có chủ đích:** driver r4 chỉ sửa bản sao `packet_loop.py` và chỉ tính giết khi kết quả `DO`. Driver r5 ph�
++**Driver (M7) cho e1c và kết quả `KHÔNG ĐO` có chủ đích:** driver r4 chỉ sửa bản sao `packet_loop.py` và chỉ tính giết khi kết quả `DO`. Driver r5 ph�
+ 
+ ## 5. `nghiem_thu`
+ 
+@@ -89,7 +89,7 @@
+ | N4 | S6 đạt trên Linux (CI) và Windows (Desktop); ca thuần r4 không đổi trạng thái. | f1, f2 ⇒ ĐỎ đúng nhãn §4b. |
+ | N5 | Windows vẫn bị từ chối, không đổi: tập ID base đã ghi (`wp1174_windows_claim_rejected`, 12 ID `WP1174_BOTH`, ca native r1–r3, 11 ca native r4, 3 ca thuầ
+ | N6 | J4, J5, J12 ĐẠT trên Desktop, mỗi ca trong cửa sổ 90 s của khung r4; và ĐẠT trên VM `tra-luat-win`. J12 đạt N6 ở nhánh (B) HOẶC (C). Biên nhận g
+-| N7 | Đột biến §4b bị giết đúng dấu hiệu: e1, e2, e1c, a1@J12 trên Desktop (bốn lượt); f1, f2 trên Linux. Hợp đồng N7 r1/r4: driver byte-exact trong h
++| N7 | Đột biến §4b bị giết đúng dấu hiệu: e1, e2, e1c, a1@J12 trên Desktop (bốn lượt); f1, f2 trên Linux. Hợp đồng N7 r1/r4: driver byte-exact trong h
+ | N8 | Ruff `--select F` 0.15.15: TẬP diagnostic (mã, tệp, tên) head == base; `adr-song`, `doctrine-scan` rc 0 (ghi riêng); `git diff --check` sạch; `eol_policy --all` ok
+ 
+ Đo Windows trên **`DESKTOP-T9R33P2`** (ưu tiên); VM `tra-luat-win` đo bổ sung N6. Base và head đo cùng một lượt. KHÔNG CI Windows.
+@@ -106,7 +106,7 @@
+ - Cần sửa thân định nghĩa đang có hoặc gán lại tên base ⇒ dừng, revision đặc tả.
+ - J4 đối chứng (ii) không đạt trên CẢ Desktop và VM, hoặc winerror ≠ 5 trên cả hai ⇒ J4 và e1/e1c `not_measured`; quyết định tiếp (mở rộng danh s
+ - J12 `job_ngoai` FALSE trên cả hai máy ⇒ J12 và a1@J12 `not_measured`; **E2**.
+-- J12 sạch ra nhánh (C) trên cả Desktop và VM (job ngoài gán được, job trong bị từ chối) ⇒ J12 vẫn đạt N6 nhưng `a1@J12: not_measured`; đổi máy hay 
++- Sau khi thử Desktop rồi VM theo N7, KHÔNG máy nào có lượt J12 sạch nhánh (B) trên cùng head (bất kể lý do từng máy: (C), job ngoài không gán được,
+ - Máy đo Windows không có trong hạn lease ⇒ tiêu chí native `not_measured`; gia hạn/cấp lại là quyết định chủ kho (**E2**).
+ - Đặc tả không thuộc Mission ⇒ chờ chủ kho duyệt băm (`ADR-0067`, **E2**) sau khi review độc lập approve.
+ 
+@@ -120,15 +120,15 @@
+ |---|---|---|
+ | chú thích đầu khối | r4 2 dòng | 2–3 |
+ | `_wp1342a1ii_FX` (bước `tach`, `vao_job`, `tro_c` + binding; mỗi bước ghi tệp kết quả, đọc mã Win32 ngay) | `_wp1342a1_FX` 30 dòng / 7 bước; `tro_a`+`tro_b
+-| argv, đọc tệp kết quả có hạn + kiểm schema, hạn chung, kiểm WAIT_TIMEOUT thô | `_wp1342a1_lenh` 2, `_wp1342a1_mo` 20 | 18–28 |
++| argv, đọc tệp kết quả có hạn + kiểm schema, hạn chung, `_wp1342a1ii_cho` + phép chấm 5 s | `_wp1342a1_lenh` 2, `_wp1342a1_mo` 20 | 22–32 |
+ | S6 | | 7–10 |
+-| J4 (đối chứng ii qua bản nạp riêng + đường đo) | J9 24 dòng | 26–38 |
++| J4 (bản nạp riêng có kiểm, đối chứng ii phân loại 7 vế, xoá tệp, đường đo) | J9 24 dòng | 34–48 |
+ | J5 | J3 7, J9 24 | 20–28 |
+ | J12 (ba nhánh, trình tự dữ liệu, kiểm job ngoài còn mở trong `finally`) | J10 10, J9 24 | 40–56 |
+ | đăng ký | r4 2 câu / 11 dòng | 4–6 |
+-| **tổng** | | **147–211** |
++| **tổng** | | **159–225** |
+ 
+-Đầu cao 211 < 450 (biên ~240 dòng). Trần cưỡng chế ở numstat thật (§7).
++Đầu cao 225 < 450 (biên ~225 dòng). Trần cưỡng chế ở numstat thật (§7).
+ 
+ ## 9. Quyết định đã ghi
+ 
+@@ -142,7 +142,7 @@
+ 
+ ## 10. `chua_do_duoc`
+ 
+-- Kích thước thật (ước 147–211; trần cưỡng chế ở numstat).
++- Kích thước thật (ước 159–225; trần cưỡng chế ở numstat).
+ - Mọi hành vi Win32 ở §0 dòng cuối: theo tài liệu, chưa đo trong kho; đặc biệt lời xin breakaway tường minh khi job chỉ có `SILENT_BREAKAWAY_OK` (J4 dư
+ - Tiến trình chạy ca trên Desktop/VM có nằm sẵn trong job không (N6 ghi lại).
+ - Nhánh J12 xảy ra trên từng máy (dự kiến (B) trên Windows ≥ 8; chưa đo).
+@@ -152,3 +152,5 @@
+ ## 11. Nhật ký review
+ 
+ - **Lượt 1** (bản 1 sha256 `4657e5d2…`, base `11bd033`; `request_changes`: 1 P1, 4 P2, 1 P3). Bản này: P1 J4 đối chứng (ii) chuyển sang CHÍNH đường sản ph�
++- **Lượt 2** (bản 2 sha256 `791673a8…`, base `4eda94e`; `request_changes`: 1 P1, 3 P2, 1 P3; P1 lượt 1 đóng về chuỗi job; P2 J12(C)/a1 đóng về cách chấm; P3
++- **Lượt 3** (bản 3 sha256 `bdc139ed…`): phiên Codex kết thúc giữa chừng, rc 0, KHÔNG có verdict (`luot3.verdict.txt`); vẫn tính một lời gọi. Quan sát c
+diff rc=1
+0 30 call
+24 6 call
+25 5 KHONG DO
+30 0 KHONG DO
+con 10 wait
+chau 5 KHONG DO
+tro giup 0 KHONG DO
+python rc=0
+?? ops/specs/WP1174-WINDOWS-BACKEND-r5-ban2.md
+?? ops/specs/WP1174-WINDOWS-BACKEND-r5.md
+status rc=0
+
+codex
+Review độc lập đặc tả #1342 r5 bản 4 trên Linux, chỉ đọc. Base `4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd`, tree `ceba0869d378f6c326955e4e1920a9776ba1a0a7`. SHA-256 bản 4 khớp `e823ed0bd67f82aa3c870a8d574e2cd8150659d3cf5e98f8ae3ba3b86c17eb5a`. Phép đo Windows `not_run`. Bề mặt phục vụ và model cụ thể chưa xác minh được từ phiên.
+
+| Mục | Trạng thái | Bằng chứng |
+|---|---|---|
+| F1 P1 | Đóng | M1–M2 dùng đúng `c.script` trỏ tệp sản phẩm đang đo, nạp module riêng, giữ argv giống nhau, tách khoá kết quả khỏi argv và xoá hai tệp trước đường đo. |
+| F2 P2 | Đóng | J4(ii) có thứ tự rõ: ném → rc → schema → c0 → c1 lỗi 5 → c1 lỗi khác → c1 thành công. §4b chỉ ghi công e1c ở vế lỗi 5 với các tiền điều kiện đạt. |
+| F3 P2 | Đóng một phần | M1 tách `WAIT_TIMEOUT`/`WAIT_FAILED`, giữ đủ 5000 ms cho từng lần chờ và tính `join(20)`. Ngân sách cho cả chuỗi vẫn thiếu, xem A2. |
+| F4 P2 | Đóng | M4 kiểm lại `chau` khi thấy `ket_qua`; `long` mang mã lỗi lấy ngay sau mỗi lời gọi Win32 thất bại. |
+| F5 P3 | Đóng | §7 bao quát mọi tổ hợp lý do khiến hai máy đều thiếu lượt sạch nhánh B. |
+| Lượt 3 | Đóng | M4 yêu cầu `long` ở B và a1@J12, yêu cầu vắng ở C. Sản phẩm chỉ gọi `between` sau khi gán job trong thành công. |
+
+**Finding**
+
+- **A1 · P2 · J4 đường đo thiếu thứ tự toàn phần.** M2 đặt `rc` trước schema theo thứ tự đối chứng, rồi cho `tach_c1 == ["ok", int]` thắng `rc`. Với `rc != 0`, c1 hợp lệ và c0 sai schema, quy tắc này có thể cho ĐỎ hoặc `KHÔNG ĐO`. **Câu thay thế:** “Đường đo phân loại theo thứ tự: lỗi ném → xác thực cả hai payload → c0 phải `ok` → c1 `ok` thì ĐỎ, kể cả khi rc khác 0 → rc khác 0 thì `KHÔNG ĐO` → c1 lỗi 5 thì ĐẠT → mã khác thì `KHÔNG ĐO`.”
+- **A2 · P2 · M1/M2/M4 chưa cấp đủ thời gian cho cả ca.** Với `75 − elapsed − 45` và điều kiện `han > 5`, J4 phải bắt đầu lời gọi thứ hai trước giây 25, trong khi lời gọi đầu được cấp tới 30 s cho đường sản phẩm, chưa kể dọn và `join(20)`. J12 có thể đến bước chấm với 10 s còn lại theo M1, nhưng B cần dự phòng 20 s cho ba lần chờ tuần tự 5 s và 5 s dư, chưa kể ghi tín hiệu nhả. **Câu thay thế:** “J4 chia hạn theo hai lời gọi và chừa ngân sách cho lời gọi thứ hai trước khi cấp `han` lần đầu, tính cả dọn, `join` và đọc/xoá tệp. J12 dành trước tối thiểu 20 s cộng thời gian ghi tín hiệu cho chuỗi chấm B, 15 s cộng thời gian ghi tín hiệu cho C. Thiếu ngân sách ở mốc cấp hạn thì ghi `KHÔNG ĐO` kèm mốc.”
+- **A3 · P3 · N7 ghi hai địa điểm cho a1@J12.** Câu đầu yêu cầu bốn lượt trên Desktop, câu sau cho phép VM và §7 dùng chính quy tắc đó. **Câu thay thế:** “Chạy e1, e2 và e1c trên Desktop. Chạy a1@J12 trên Desktop nếu lượt sạch ra B, nếu cần thì áp dụng cùng điều kiện trên VM; nếu cả hai thiếu B, áp dụng §7. Chấm N6 riêng từng máy.”
+
+**Lệnh và rc.** `git rev-parse HEAD HEAD^{tree} origin/master`, `git status --short`, `sha256sum ops/specs/WP1174-WINDOWS-BACKEND-r5*.md` đều `0`. `diff -u` bản 2 → bản 4 trả `1` vì có delta. `git show origin/ops/wp1342-r4-spec:ops/specs/WP1174-WINDOWS-BACKEND-r4.md | sha256sum`, `sed -n` các vùng nguồn và `rg -n` trên driver/hồ sơ land trả `0`. `git diff --numstat a2c7d75 HEAD -- .claude/dev/packet_loop{,_test}.py` trả `0`, đầu ra rỗng. `python -B` tính các biên thời gian trên trả `0`.
+
+KET_LUAN: request_changes
+tokens used
+53,070
+Review độc lập đặc tả #1342 r5 bản 4 trên Linux, chỉ đọc. Base `4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd`, tree `ceba0869d378f6c326955e4e1920a9776ba1a0a7`. SHA-256 bản 4 khớp `e823ed0bd67f82aa3c870a8d574e2cd8150659d3cf5e98f8ae3ba3b86c17eb5a`. Phép đo Windows `not_run`. Bề mặt phục vụ và model cụ thể chưa xác minh được từ phiên.
+
+| Mục | Trạng thái | Bằng chứng |
+|---|---|---|
+| F1 P1 | Đóng | M1–M2 dùng đúng `c.script` trỏ tệp sản phẩm đang đo, nạp module riêng, giữ argv giống nhau, tách khoá kết quả khỏi argv và xoá hai tệp trước đường đo. |
+| F2 P2 | Đóng | J4(ii) có thứ tự rõ: ném → rc → schema → c0 → c1 lỗi 5 → c1 lỗi khác → c1 thành công. §4b chỉ ghi công e1c ở vế lỗi 5 với các tiền điều kiện đạt. |
+| F3 P2 | Đóng một phần | M1 tách `WAIT_TIMEOUT`/`WAIT_FAILED`, giữ đủ 5000 ms cho từng lần chờ và tính `join(20)`. Ngân sách cho cả chuỗi vẫn thiếu, xem A2. |
+| F4 P2 | Đóng | M4 kiểm lại `chau` khi thấy `ket_qua`; `long` mang mã lỗi lấy ngay sau mỗi lời gọi Win32 thất bại. |
+| F5 P3 | Đóng | §7 bao quát mọi tổ hợp lý do khiến hai máy đều thiếu lượt sạch nhánh B. |
+| Lượt 3 | Đóng | M4 yêu cầu `long` ở B và a1@J12, yêu cầu vắng ở C. Sản phẩm chỉ gọi `between` sau khi gán job trong thành công. |
+
+**Finding**
+
+- **A1 · P2 · J4 đường đo thiếu thứ tự toàn phần.** M2 đặt `rc` trước schema theo thứ tự đối chứng, rồi cho `tach_c1 == ["ok", int]` thắng `rc`. Với `rc != 0`, c1 hợp lệ và c0 sai schema, quy tắc này có thể cho ĐỎ hoặc `KHÔNG ĐO`. **Câu thay thế:** “Đường đo phân loại theo thứ tự: lỗi ném → xác thực cả hai payload → c0 phải `ok` → c1 `ok` thì ĐỎ, kể cả khi rc khác 0 → rc khác 0 thì `KHÔNG ĐO` → c1 lỗi 5 thì ĐẠT → mã khác thì `KHÔNG ĐO`.”
+- **A2 · P2 · M1/M2/M4 chưa cấp đủ thời gian cho cả ca.** Với `75 − elapsed − 45` và điều kiện `han > 5`, J4 phải bắt đầu lời gọi thứ hai trước giây 25, trong khi lời gọi đầu được cấp tới 30 s cho đường sản phẩm, chưa kể dọn và `join(20)`. J12 có thể đến bước chấm với 10 s còn lại theo M1, nhưng B cần dự phòng 20 s cho ba lần chờ tuần tự 5 s và 5 s dư, chưa kể ghi tín hiệu nhả. **Câu thay thế:** “J4 chia hạn theo hai lời gọi và chừa ngân sách cho lời gọi thứ hai trước khi cấp `han` lần đầu, tính cả dọn, `join` và đọc/xoá tệp. J12 dành trước tối thiểu 20 s cộng thời gian ghi tín hiệu cho chuỗi chấm B, 15 s cộng thời gian ghi tín hiệu cho C. Thiếu ngân sách ở mốc cấp hạn thì ghi `KHÔNG ĐO` kèm mốc.”
+- **A3 · P3 · N7 ghi hai địa điểm cho a1@J12.** Câu đầu yêu cầu bốn lượt trên Desktop, câu sau cho phép VM và §7 dùng chính quy tắc đó. **Câu thay thế:** “Chạy e1, e2 và e1c trên Desktop. Chạy a1@J12 trên Desktop nếu lượt sạch ra B, nếu cần thì áp dụng cùng điều kiện trên VM; nếu cả hai thiếu B, áp dụng §7. Chấm N6 riêng từng máy.”
+
+**Lệnh và rc.** `git rev-parse HEAD HEAD^{tree} origin/master`, `git status --short`, `sha256sum ops/specs/WP1174-WINDOWS-BACKEND-r5*.md` đều `0`. `diff -u` bản 2 → bản 4 trả `1` vì có delta. `git show origin/ops/wp1342-r4-spec:ops/specs/WP1174-WINDOWS-BACKEND-r4.md | sha256sum`, `sed -n` các vùng nguồn và `rg -n` trên driver/hồ sơ land trả `0`. `git diff --numstat a2c7d75 HEAD -- .claude/dev/packet_loop{,_test}.py` trả `0`, đầu ra rỗng. `python -B` tính các biên thời gian trên trả `0`.
+
+KET_LUAN: request_changes
+rc=0

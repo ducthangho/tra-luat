@@ -1,0 +1,61 @@
+codex
+**Yêu cầu sửa đặc tả #1342 r5 bản 2.** J4 đã sửa nguồn chênh lệch chuỗi job tổ tiên bằng cách gọi cùng hàm spawn từ cùng tiến trình. Tuy nhiên, M2 chưa chỉ ra cách lấy đúng nguồn module qua wrapper native hiện có. Oracle e1c vẫn có thể ghi công khi đối chứng gặp lỗi khác, và hạn chung có thể biến một lần chờ bị cắt ngắn thành lỗi thu hồi.
+
+### Trạng thái từng finding lượt 1
+
+| Finding lượt 1 | Trạng thái bản 2 | Kết quả đối chiếu |
+|---|---|---|
+| P1 — J4 không chứng minh cùng chuỗi job tổ tiên | **Đóng về chuỗi job, còn lỗi triển khai** | Cùng tiến trình gọi, cùng đường `_1174_win_spawn_job`, không tự gán runner vào job mới. Bản nạp riêng cách ly được biến toàn cục. Còn thiếu cách truyền đúng đường dẫn sản phẩm và tách kết quả mà giữ nguyên argv/cwd. Xem F1. |
+| P2 — J12(C) không đo được `a1` | **Đóng về cách chấm** | N7 chỉ chấm `a1@J12` sau lượt sạch (B), và đòi cả `long` lẫn bắt tay cháu trước khi nhận `job not empty`. §7 còn thiếu trường hợp hai máy cho kết quả khác nhau nhưng đều không có (B). Xem F5. |
+| P2 — Dữ liệu fixture thiếu bị chấm thành lỗi sản phẩm | **Đóng một phần** | M1/M4 bổ sung kiểm schema, bắt tay và kiểm liveness trợ giúp bằng `WAIT_TIMEOUT` thô trong `finally`. Các phép đợi signaled và trình tự đọc J12 vẫn còn khe. Xem F3–F4. |
+| P2 — Cửa sổ 90 giây chưa chi phối các lần chờ | **Đóng một phần** | M1 có hạn tuyệt đối 75 giây và dự phòng 30/10 giây. Công thức vẫn cho phép chờ ngắn hơn 5 giây rồi báo lỗi mang nhãn 5 giây. Xem F3. |
+| P2 — e1c có thể ghi công cho lỗi fixture | **Đóng một phần** | Driver phải chạy đúng bản sao test, có mã riêng, J4 sạch đạt và J1 đạt trên bản sao. Nhãn M2 vẫn gộp lỗi của cháu thường và lỗi trả về của hàm với từ chối breakaway. Xem F2. |
+| P3 — Snapshot, Win32 và dự toán | **Đóng ở mức đặc tả** | Base và hai blob khớp. Bản 2 tách snapshot lúc soạn, sửa mô tả breakaway theo từng job và quyền truy vấn, sửa `_wp1342a1_mo` thành 20 dòng. Các khoảng dự toán cộng đúng 147–211. Hành vi Win32 và số dòng triển khai thực tế `not_run`. |
+
+### Findings bản 2
+
+**F1 · P1 — M2/M6: Neo cả hai lần nạp J4 vào bản sản phẩm thực sự đang đo.** `_native1342` nhận `Ctx`, nạp `m` rồi gọi `fn(m, tmp, *m._1174_win_api())`. Trong thân native, `c` là `ctypes`, nên gọi `_module1174(c)` theo M2 sẽ lỗi vì thiếu `script`. Probe RAM xác nhận lỗi này, và xác nhận hai lần nạp từ `m.__file__` có hai bảng globals riêng. Gán `0x2800` vào bản đối chứng giữ nguyên `0x2000` trên bản đo sạch. Driver r4 truyền đường dẫn sản phẩm đột biến qua `Ctx.script`. Nếu lấy nguồn nạp lại từ vị trí mặc định của checkout, đối chứng và đường đo e1 sẽ dùng hai tệp khác nhau.
+
+M2 cũng cho phép đổi thư mục kết quả hoặc tên vai giữa hai lần gọi. Theo `_wp1342a1_lenh`, đường dẫn fixture và tên vai là phần tử argv. Tương tự, `c0` và `c1` sẽ thành hai argv cháu khác nhau nếu `tach` truyền tên vai vào argv như bước `chau`.
+
+**Câu thay thế.** “Trong J4, nạp `m2` bằng `_module1174` với `script` lấy từ đường dẫn đã resolve của `x.m.__file__`. Xác nhận hai module và hai bảng globals khác nhau, hai module cùng nguồn sản phẩm của lượt chạy, và giá trị cờ của `x.m` giữ nguyên qua lần gọi đối chứng. Dùng cùng argv, cwd, env và cơ chế thu kết quả ở hai lần gọi. Tách khóa kết quả `c0`/`c1` khỏi argv cháu. Sau khi đối chứng trả về và đã thu đủ hai kết quả, lưu chúng rồi dọn đúng hai tệp kết quả trước khi chạy đường đo.”
+
+**F2 · P2 — M2/§4b: `tach_c1 == ["loi", 5]` vẫn có thể đi cùng lỗi đối chứng.** M2 phát cùng nhãn nếu bất kỳ vế nào trong ba vế `c0` thành công, `c1` thành công và hàm trả 0 bị sai. Mô phỏng vị từ trong RAM cho thấy driver vẫn đủ nhãn và mã để ghi công nếu cả `c0` lẫn `c1` trả lỗi 5, hoặc nếu `c0` thành công, `c1` trả lỗi 5 nhưng hàm ném `job query`. J1 xanh ở ca khác không xác nhận lần gọi J4 này đã thu hồi thành công.
+
+**Câu thay thế.** “Chỉ phát nhãn từ chối breakaway của đối chứng (ii) khi `tach_c0` đúng schema và thành công, `tach_c1 == ["loi", 5]`, `_1174_win_spawn_job` trả `0` không ngoại lệ, và kiểm fixture cuối ca đạt. Mọi lỗi khác dùng nhãn riêng. Driver chỉ ghi `GIET_DOI_CHUNG` khi có đủ các trường trên cùng các điều kiện chạy sạch, neo thay thế và J1 của §4b.”
+
+**F3 · P2 — M1/M3/M4: Phân biệt hết ngân sách, hết cửa sổ quan sát và lỗi API.** Khi còn 12 giây đến `het`, công thức `min(5, 12 - 10)` chỉ cấp 2 giây. Hết 2 giây có thể bị báo “chưa signaled trong 5 s”. Ngoài ra, `_wp1342a1_tin` chỉ trả `wait == 0`, nên cả `WAIT_TIMEOUT` và `WAIT_FAILED` đều trở thành `False`. Kiểm raw mới đã xử lý liveness của trợ giúp, nhưng M3 vẫn gọi helper bool để chấm thu hồi. `_wp1342a1_goi` cũng giữ `join(20)` cố định ngoài deadline sản phẩm.
+
+**Câu thay thế.** “Trước mỗi phép chấm thu hồi 5 giây, xác nhận đủ 5 giây sau khi trừ dự phòng. Thiếu ngân sách thì `KHÔNG ĐO` tại mốc đó. Đọc raw wait cho cả kiểm còn sống lẫn kiểm đã kết thúc. Khi chấm thu hồi, `WAIT_OBJECT_0` đạt, `WAIT_TIMEOUT` sau đủ cửa sổ 5 giây mới được chấm đỏ, `WAIT_FAILED` hoặc giá trị bất ngờ là `KHÔNG ĐO` kèm mã đọc ngay. Tính ngân sách lời gọi theo phần còn lại và dự phòng đủ cho `join(20)`, các wait nội bộ của sản phẩm và cleanup.”
+
+**F4 · P2 — M1/M4: J12 cần đọc lại tệp bắt tay và giữ mã lỗi tại nơi gọi API.** Vòng poll có thể thấy `chau` vắng, bị ngắt, rồi thấy `ket_qua` sau khi cả hai tệp đã xuất hiện. Nếu dùng kết quả kiểm `chau` cũ, ca có thể bỏ mất bắt tay hoặc chọn sai nhánh. M1 cũng chỉ truyền bốn giá trị `[ok1, trong, ok2, ngoai]`, trong khi M4 đòi báo mã Win32. Tiến trình ca không thể đọc lại mã lỗi của trợ giúp, và lời gọi membership thứ hai có thể làm mất mã của lời gọi thứ nhất.
+
+**Câu thay thế.** “Khi thấy `ket_qua`, kiểm lại sự hiện diện của `chau` trước khi chọn nhánh. Nếu có `chau`, xác minh bắt tay trước khi chấm. J12(B) và `a1@J12` yêu cầu bắt tay đã xác minh cùng kết quả membership hợp lệ. Với mỗi lần `IsProcessInJob` trả FALSE, trợ giúp đọc mã ngay trước lời gọi Win32 tiếp theo và ghi bước cùng mã vào payload lỗi. Bên đọc kiểm schema rồi trả `KHÔNG ĐO`.”
+
+**F5 · P3 — N7/§7: Có thể không có nhánh (B) dù hai điều kiện dừng đều không khớp.** Desktop ra (C), VM không gán được job ngoài là một trường hợp cụ thể. Không máy nào đủ điều kiện chấm `a1@J12`, nhưng §7 chỉ nêu trường hợp cả hai máy ra (C) hoặc cả hai máy không gán được job ngoài.
+
+**Câu thay thế.** “Sau khi thử Desktop rồi VM theo N7, nếu không máy nào có lượt J12 sạch nhánh (B) trên cùng head, ghi `a1@J12: not_measured`, ghi lý do từng máy và chuyển quyết định E2. N6 vẫn chấm riêng theo kết quả thực tế của từng máy.”
+
+### Bằng chứng và giới hạn
+
+Phiên `openai_codex / codex_cli / machine`, Linux, Python 3.13.18, Bash, chỉ đọc và offline. `HEAD` và ref cục bộ `origin/master` là `4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd`, tree `ceba0869d378f6c326955e4e1920a9776ba1a0a7`. Worktree detached, chỉ có ba tệp untracked đã giao.
+
+| Lệnh | Kết quả |
+|---|---|
+| `sha256sum ops/specs/WP1174-WINDOWS-BACKEND-r5{,-ban1}.md` | rc `0`. Bản 2 `791673a89b7861b338a07ff45f7e0f51fed696406cb0b00b2541f415abe344a9`; bản 1 `4657e5d22bbbb05a50bfaaf4b1ff8833c01119ff5ef6d1c80323ee4b4ca5843e`. |
+| `diff -u ops/specs/WP1174-WINDOWS-BACKEND-r5{-ban1,}.md` | rc `1`, hai bản khác nhau. Đối chiếu các hunk §0, M1–M4, §4b, N6–N7, §7–§10. |
+| `git diff --stat 11bd033 4eda94e` | rc `0`. Chỉ `RELEASE_MANIFEST.json`, `7+ / 7−`. |
+| `git rev-parse <base>:<tệp>` cho `11bd033` và `4eda94e` | rc `0`. Cả hai base có product blob `f98d3f53e638518790def1f22d78e82623451d41` và test blob `c1ec1c69a7a476689d10ddb60d4e12c092e1f7a3`. Effective write set của bản 2 chỉ gồm test. |
+| `git show origin/ops/wp1342-r4-spec:ops/specs/WP1174-WINDOWS-BACKEND-r4.md \| sha256sum` | rc `0/0`, SHA-256 `f435eb5c035e511f92c77321d2a2573f9088a17b4fe6a2ccca9c64a794cd1eb8`. |
+| `sed -n '18159,18170p;18660,18759p' .claude/dev/packet_loop_test.py` và `sed -n '6830,6914p' .claude/dev/packet_loop.py` | rc `0` mỗi lệnh. Kiểm wrapper native, argv, raw wait của bắt tay, `join(20)`, cleanup và nhánh gán job. |
+| `PYTHONPATH=.claude/dev python3 -B -` | rc `0`. Probe RAM xác nhận `ctypes` thiếu `script`, hai module cùng nguồn cách ly `0x2000`/`0x2800`, và hai tổ hợp lỗi ngoài mục tiêu vẫn thỏa vị từ e1c hiện tại. |
+| `python3 -B -` | rc `0`. Phép tính hạn cho kết quả chờ 2 giây khi còn 12 giây. Tổng dự toán `147–211`. |
+| `python3 -B ops/land/pr1407-wp1342-provenance/windows-native/desktop/dot_bien_r4_ban2.py .claude/dev --kiem-neo` | rc `0`. Toàn bộ neo r4 khớp và biên dịch, gồm `a1`. |
+| `git show 4eda94e:.claude/dev/packet_loop_test.py \| rg -n '0x2800'` | rc `0/1`, base có 0 lần xuất hiện. Neo e1c trên head thi công `not_run`. |
+| `git diff --check` và `git --no-optional-locks status --short` | rc `0` mỗi lệnh. Không có thay đổi tracked, snapshot cuối vẫn có đúng ba tệp untracked đã giao. |
+
+Windows Desktop/VM, chuỗi job thực tế, liveness Win32, driver r5 và các đột biến runtime đều `not_run`. N2 ngoài kho `not_run` ở lượt này vì delta không đổi N2. Xác minh máy chủ, model phục vụ và effort `not_run`.
+
+KET_LUAN: request_changes
+tokens used
+88,354

@@ -1,0 +1,18 @@
+codex
+Review đặc tả #1342 r5, lượt 5. HEAD `4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd`, tree `ceba0869d378f6c326955e4e1920a9776ba1a0a7`. SHA-256 bản 5 khớp `627e4c8a71dab21e7a4aacb455be9ed9a0368df181d6f4c341522d3a24980911`.
+
+| Finding | Trạng thái | Kết quả |
+|---|---|---|
+| A1 · P2 | Đóng | M2 có bảy vế theo thứ tự toàn phần. Sau khi qua kiểm schema và `c0`, `c1` thành công cho ĐỎ kể cả khi rc khác 0. |
+| A2 · P2 | Còn mở ở J4 | M1 tính 5 s cho đọc/xóa giữa hai lượt, nhưng quy tắc cấp hạn chờ dữ liệu vẫn cho phép dùng quá 5 s. |
+| A3 · P3 | Đóng | N7, §7 và §11 thống nhất Desktop trước, VM nếu Desktop thiếu nhánh B, `not_measured` nếu cả hai thiếu B. |
+
+**A2 · P2, §4 M1.** J4 có `75 − 2×(10+5+5+5) = 25 s` dư danh nghĩa. Tại ngưỡng vào lượt đầu 50 s, sau 20 s gọi và dọn còn 30 s. Quy tắc `min(hạn riêng, het-now-10)` cho phép chờ tới 20 s nếu hạn riêng đủ lớn. Chỉ cần đọc/xóa mất 6 s là còn 24 s, dưới ngưỡng 25 s của lượt hai. Cần ghi hạn **gộp** cho đọc/xóa và giữ 25 s cho lượt hai ngay khi cấp hạn giữa hai lượt.
+
+J5 đủ `han ≥ 10` khi bắt đầu trong 20 s đầu, và cấp đủ `han=20` trong 10 s đầu. J12 chừa 25 s, cao hơn ngưỡng B `3×5+5=20 s` và C `2×5+5=15 s`. Ở cả hai ngưỡng, trước lần chờ cuối còn 10 s theo phép tính. Không thấy mâu thuẫn khác trong delta.
+
+**Lệnh và rc.** `git rev-parse`, `git status --short --untracked-files=all`, `sha256sum` hai bản, đọc mã bằng `sed`, và `python -B` tính ngân sách đều rc `0`. `git symbolic-ref -q HEAD` rc `1` xác nhận detached HEAD. `git show` đặc tả r4 qua `sha256sum` rc `0/0`, hash khớp. Lệnh `diff -u` đầu dùng sai cú pháp, rc `2`. Lệnh chạy lại với hai đường dẫn đúng trả rc `1` và xác nhận delta chỉ ở M1, M2, N7 và §11. Phiên Codex đọc cục bộ qua Bash, không gọi mạng. Ca Win32 chưa chạy.
+
+KET_LUAN: request_changes
+tokens used
+44,222

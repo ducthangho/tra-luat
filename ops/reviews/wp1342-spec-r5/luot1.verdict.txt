@@ -1,0 +1,80 @@
+codex
+# Review độc lập lượt 1 — #1342, WP1174-WINDOWS-BACKEND r5
+
+**Yêu cầu sửa đặc tả.** J4 chưa chứng minh job đối chứng có cùng chuỗi job tổ tiên với đường đo. J12 cho phép nhánh từ chối gán đạt N6, nhưng nhánh đó không đi qua đoạn mã mà N7 yêu cầu đột biến `a1` kiểm tra. Có thể sửa cả hai trong write set chỉ gồm `.claude/dev/packet_loop_test.py`.
+
+Phiên `openai_codex / codex_cli / machine`, Linux, Python 3.13.18, Bash, chỉ đọc và không gọi mạng. Model phục vụ và effort `not_run` vì phiên không có biên nhận launcher để xác minh. `HEAD` là `11bd0336d00b4a9544e70dcbbe049d372053a3ec`, tree `daf13b1e486822aacd5c8dba56c1d0a36f478feb`. SHA-256 của đặc tả chưa commit là `4657e5d22bbbb05a50bfaaf4b1ff8833c01119ff5ef6d1c80323ee4b4ca5843e`.
+
+## Findings
+
+### P1 — §4 M2, §4b e1, §5 N6–N7 — J4 có thể xanh khi job tổ tiên che phản chứng
+
+Job đối chứng được gán vào **trợ giúp sau khi trợ giúp đã sinh**. Job đích được gán vào **con treo do đường sản phẩm sinh**. Trên máy chạy ca đã ở trong job, hai trình tự đó chưa chứng minh hai tiến trình gọi `CreateProcess` mang cùng chuỗi job tổ tiên. Cờ sinh tiến trình trợ giúp và con sản phẩm cũng khác. Một kết quả `tach_dc=["ok",…]` cùng với `tach_c1=["loi",5]` chỉ có sức phân biệt khi điều kiện ngoài job đang thử tương đương. Bit `IsProcessInJob(..., NULL)` của tiến trình chạy ca chỉ cho biết nó thuộc ít nhất một job.
+
+**Bằng chứng.** `git show origin/ops/wp1342-r4-spec:ops/reviews/wp1342-spec-r4/luot2.verdict.txt | sed -n '49,79p'` rc `0`, yêu cầu cùng chuỗi job ngoài, cùng lệnh và cùng cách quan sát. `rg -n '^_1174_WIN_JOB_LIMIT = 0x2000|_1174_WIN_SPAWN_FLAGS =' .claude/dev/packet_loop.py` rc `0`, cho thấy đường sản phẩm dùng `0x204`. Đây là suy luận từ hai trình tự và quy tắc job lồng trong tài liệu Microsoft. Phản chứng Windows `not_run`.
+
+**Câu thay thế đề xuất.** “J4 chỉ chấm khi runner xác nhận thành công `IsProcessInJob(GetCurrentProcess(), NULL)` với kết quả FALSE, hoặc khi phép đo xác nhận hai đường có cùng chuỗi job tổ tiên. Chạy đối chứng và đường đo với cùng argv cháu, cwd, env và cơ chế thu kết quả. Thiếu bằng chứng tương đương thì ghi `KHÔNG ĐO` trước khi diễn giải WinError 5.”
+
+### P2 — §4 M4, §4b a1, §5 N6–N7 — Nhánh J12(C) không đo được đột biến `a1`
+
+Ở (C), gán job trong thất bại khi con còn treo. Cleanup dùng `kill_truoc_gan`, nên thay callback `terminate` không đổi đường này. Desktop có thể đạt J12(C) sạch và đạt lại J12(C) dưới `a1`. §7 hiện chỉ có điều kiện dừng khi **gán job ngoài** thất bại trên cả hai máy, còn trường hợp job ngoài gán được nhưng Desktop chỉ cho nhánh (C) chưa có cách xử lý cho N7.
+
+**Bằng chứng.** `sed -n '6830,6912p' .claude/dev/packet_loop.py` rc `0`, xác nhận `da_gan` chỉ bật sau khi gán thành công và `thu_tu` chọn `kill_truoc_gan` khi `da_gan` sai. Driver r4 chạy với `--kiem-neo` rc `0`, `a1` khớp đúng một chỗ và biên dịch được. Windows `not_run`.
+
+**Câu thay thế đề xuất.** “J12(C) hợp lệ cho N6. N7 `a1@J12` chỉ chấm trên máy được chỉ định khi lượt sạch chứng minh nhánh (B). Nếu Desktop chỉ có (C), ghi `a1@J12: not_measured` và chuyển quyết định đổi máy theo E2. Khi chấm `a1`, đòi đúng `ket_qua=["loi", …]` chứa `job not empty` sau khi đã xác minh `long` và bắt tay cháu.”
+
+### P2 — §4 M1/M3/M4, §5 N6–N7 — Thiếu bằng chứng fixture có thể bị chấm thành lỗi sản phẩm
+
+R5 đã bổ sung tệp kết quả cho các bước mới, xử lý đúng rủi ro `elif` lạ bị bỏ qua. Tuy nhiên, ở J12, `ket_qua=["ok",0]` đến trước hoặc thay cho bắt tay cháu khiến nhánh (B) thiếu một handle đã xác thực. Tệp `long` vắng, JSON sai dạng hoặc `IsProcessInJob` trả FALSE cũng có thể bị gộp vào nhãn “con không thuộc cả job trong lẫn job ngoài”. Kiểm “trợ giúp chưa signaled” bằng phủ định `_wp1342a1_tin` còn nhận cả `WAIT_FAILED`. Nếu một assertion ném trước lần kiểm sau cùng, việc trợ giúp chết trong lúc quan sát có thể bị báo sai nhãn.
+
+**Bằng chứng.** `sed -n '18634,18759p' .claude/dev/packet_loop_test.py` rc `0`. `_wp1342a1_tin` chỉ so kết quả với `WAIT_OBJECT_0`, còn `_wp1342a1_mo` đòi chính xác `WAIT_TIMEOUT` (`258`), nonce và creation time trước khi ghi `go_*`. Hợp đồng bắt tay sẵn có xử lý tái dùng PID tốt cho J5/J12 nếu giữ handle đã xác thực. PID của các cháu J4 chỉ phù hợp làm chẩn đoán, vì `ra=0` cho phép cháu thoát ngay.
+
+**Câu thay thế đề xuất.** “Trước khi chấm J5/J12, xác minh schema, tệp và handle bắt buộc của nhánh. Thiếu dữ liệu, API trả FALSE hoặc wait lỗi thì `KHÔNG ĐO`, ghi bước và mã Win32 ngay. J12(B) đòi bắt tay cháu và cả hai lời hỏi membership thành công rồi mới chấm giá trị membership. Kiểm trợ giúp bằng raw `WAIT_TIMEOUT` trước và trong `finally` của phép chấm, trước khi ghi `tha_tro_giup`.”
+
+### P2 — §4 M2/M4, §5 N6–N7 — Cửa sổ 90 s chưa chi phối các bước chờ
+
+Khung r4 kiểm 90 s sau khi thân ca và dọn tài nguyên kết thúc. J12 cấp các hạn nối tiếp có thể cộng thành **195 s** trước cleanup. J4 có thể dùng 20 s cho đối chứng rồi đi vào lời gọi mặc định 60 s và `join(20)` của khung quan sát. Một lỗi đích đến gần cuối lượt có thể bị ghi đè thành `KHÔNG ĐO`; watchdog ngoài của driver r4 cũng có thể kết thúc lượt trước khi ca ghi bằng chứng.
+
+**Bằng chứng.** `sed -n '18673,18759p' .claude/dev/packet_loop_test.py` rc `0`, xác nhận hạn mặc định và vị trí kiểm 90 s. `python3 -B -` tính tổng `20+20+20+60+60+5+5+5` cho M4, rc `0`, kết quả `195`. Thời gian thực trên Windows `not_run`.
+
+**Câu thay thế đề xuất.** “Mỗi ca dùng một hạn tuyệt đối tính từ trước fixture đầu tiên. Mọi lần đọc, bắt tay, chờ tiến trình và `join` nhận phần thời gian còn lại, có dự phòng cho các wait 5 s và cleanup. Khi cạn hạn, ghi mốc đang chờ. Không tính lượt đó là đột biến bị giết.”
+
+### P2 — §4b e1c, §5 N7 — Dấu hiệu hiện tại có thể ghi công cho lỗi fixture
+
+M2 đưa mọi `tach_dc` khác `["ok", _]` về cùng nhóm kết quả, trong khi e1c được tính giết bằng nhãn chung. Một lần `Popen` lỗi khác 5, hoặc một payload JSON đúng cú pháp nhưng sai dạng, có thể bị tính là đã chứng minh đối chứng phát hiện thiếu `BREAKAWAY_OK`. Ngoài ra, driver r4 chỉ tính giết khi kết quả là `DO`, còn e1c chủ ý dùng `KHÔNG ĐO` và sửa **tệp test**.
+
+**Bằng chứng.** `sed -n '115,185p' ops/land/pr1407-wp1342-provenance/windows-native/desktop/dot_bien_r4_ban2.py` rc `0`. Driver r4 sửa bản sao `packet_loop.py` và đòi `do[0] == "DO"`. Đếm trên blob test base cho `0x2800` được `0`; head thi công chưa có nên neo e1c `not_run`.
+
+**Câu thay thế đề xuất.** “e1c chỉ được tính giết khi J4 sạch đạt trong cùng môi trường, bản sao test có đúng một thay thế, `job_ngoai == ["ok"]`, `tach_dc == ["loi", 5]`, trợ giúp thoát 0 và J1 trên chính bản sao đạt. Driver phải thực thi tệp test đã đột biến và ghi mã riêng cho kết quả e1c dự kiến. Thiếu tệp, sai schema hoặc mã khác 5 không được tính giết.”
+
+### P3 — §0, §8 — Chỉnh lời khai snapshot, Win32 và dự toán
+
+**Bằng chứng.** `git rev-parse HEAD 'HEAD^{tree}' origin/master` rc `0`, cho thấy ref cục bộ `origin/master` hiện ở `4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd`. `git merge-base --is-ancestor HEAD origin/master` rc `0`. Đếm ref thật hiện được 340. Phép quét lease cục bộ bằng `git for-each-ref`, `git ls-tree`, `git cat-file` và regex ba tên trường rc `0`, được 276 ref `origin/ops`, 474 blob YAML phân biệt, 0 kết quả sau mốc đã khai. Đây là ảnh chụp cục bộ của lượt review. Số nhánh máy chủ 339 và `comm -23` tại lúc soạn `not_run` vì không gọi mạng.
+
+Tổng dự toán **127–181** cộng đúng. Đo AST trong RAM bằng `python3 -B -`, rc `0`, cho `_wp1342a1_lenh` 2 dòng, `_wp1342a1_mo` **20 dòng vật lý** từ `def` đến `return`, J3 7, J9 24, J10 10. Mốc 22 của `_wp1342a1_mo` cần ghi rõ nếu tính cả hai dòng trắng. Khoảng 26–36 dòng cho fixture mới còn thiếu căn cứ cho ba giao thức kết quả, đọc lỗi API và kiểm thời hạn. Trần 450 có gate numstat rõ ràng.
+
+Theo tài liệu Microsoft tôi nhớ, các giá trị cờ và năng lực job lồng từ Windows 8 phù hợp. `IsProcessInJob` chấp nhận **`PROCESS_QUERY_INFORMATION` hoặc `PROCESS_QUERY_LIMITED_INFORMATION`** cho process handle và cần `JOB_OBJECT_QUERY` cho job handle truyền vào. `SILENT_BREAKAWAY_OK` điều khiển việc con thoát khỏi **job có cờ đó**. Trong chuỗi lồng, membership ở job tổ tiên vẫn phụ thuộc cờ của tổ tiên. Tập `{5}` là oracle dự kiến cho lần gọi đã kiểm soát, và cần kết quả native để phân biệt với các nguồn `ACCESS_DENIED` khác. Chưa tra lại tài liệu Microsoft trong phiên này theo yêu cầu offline.
+
+**Câu thay thế đề xuất.** “Ghi riêng snapshot lúc soạn và snapshot lúc review, luôn dùng OID base cho phép đo blob. Mô tả breakaway theo từng job và khai cả hai quyền truy vấn process được API chấp nhận. Tính lại dự toán theo khối sau khi bổ sung oracle và hạn chung. Giữ trần 450 theo numstat thật.”
+
+## Đối chiếu phạm vi và phép đo
+
+`git show` bản r4, bản nháp 2 và verdict lượt 2 đều đọc được, rc `0`. SHA-256 r4 là `f435eb5c035e511f92c77321d2a2573f9088a17b4fe6a2ccca9c64a794cd1eb8`. Hồ sơ land neo `a2c7d759866502e7da318e4f83e17d5f77491eb5` và xác nhận môi trường Windows đã khai. R5 bao phủ các hạng mục r4 §2 hoãn lại gồm J4, J5, J12, `{5}`, job đối chứng, e1 và e2. J5 đã sửa đúng điểm của lượt 2 bằng cách hỏi job đích khi cháu còn sống. J12 có ba mốc riêng, nhưng còn các khe nêu trên. S6, e1c và `a1@J12` là phép đo bổ trợ trong phạm vi. Đ1 hợp lý vì chốt `0x2000` đã ở trong sản phẩm và mọi sửa đổi cần thiết của lượt này nằm ở fixture, ca và driver ngoài kho.
+
+| Hạng mục | Lệnh, kết quả và trạng thái |
+|---|---|
+| Snapshot | `git --no-optional-locks status --porcelain=v1 -buall` rc `0`, detached, chỉ có đặc tả untracked. `sha256sum` rc `0`, đúng băm giao việc. `git rev-parse --is-shallow-repository` trả `false`. |
+| Blob, số dòng, numstat | `git rev-parse HEAD:<tệp>` và `wc -l` rc `0`. `packet_loop.py` là `f98d3f53e638518790def1f22d78e82623451d41`, 7239 dòng. Test là `c1ec1c69a7a476689d10ddb60d4e12c092e1f7a3`, 18937 dòng. `git merge-base --is-ancestor a2c7d75 HEAD` rc `0`. `git diff --numstat a2c7d75 HEAD -- <hai tệp>` rỗng, rc `0`; `d59527f a2c7d75` lần lượt `172/0` và `376/0`, rc `0`. |
+| Mốc §0 | `rg -n`, `sed -n` và đếm AST bằng `python3 -B -` rc `0` cho các mốc dương. Các vị trí hàm, đăng ký `CASES`, `MUTANTS` và `__main__` khớp. Binding sản phẩm có 12 mục. Neo `_1174_WIN_JOB_LIMIT = 0x2000` có **1 trong sản phẩm, 0 trong test**. `rg -nc '0x2800' .claude/dev/packet_loop_test.py` rc `1`, không có kết quả. |
+| Hai dòng ADR | Cho từng OID, `git cat-file -e <L>:<adr>` rc `0`, `git cat-file -e <L>^1:<adr>` rc `128`. `git rev-list --first-parent <ref> \| grep -qx <L>` khớp cả hai, rc pipeline `0`, mã từng vế `141/0` do `grep -q` đóng pipe sớm. Đo lại bằng `grep -xE` đọc hết danh sách cho cả `HEAD` và `origin/master`, hai vế `0/0`, đủ hai OID. |
+| N1 | Import registry bằng `PYTHONPATH=.claude/dev python3 -B -`, rc `0`, thấy 1.576 mục `CASES`, 1.859 `MUTANTS`. `_moc_khop_sai` trên base trả `[]`; nhân đôi neo `wp320_overwrite_diagnostic` trong RAM trả đúng “mốc khớp 2 chỗ”. Phản chứng rút ID/đổi khóa có phép so tập trực tiếp. CI và sổ base/head `not_run`, chưa có head thi công. |
+| N2 | Từ scratch, `python3 n2_test_r5.py base_r5.py base_r5.py` rc `0`, 16/16 phản chứng đỏ, đối chứng `[]`. `python3 n2_r5_extra.py` rc `0`, gán lại `_wp1342a1_FX` đỏ (ii)/(iv), ID trùng đỏ (iv), mô phỏng dương `[]`. Biến thể gọi `compile` không nằm trong đầu ra script thứ hai; chạy riêng trong RAM bằng `python3 -B -` rc `0`, đỏ đúng tên cấm `compile`. `git hash-object` xác nhận blob base; `git show \| sed \| cmp` cho `0/0/0`, đúng biến đổi đã khai. |
+| N3–N4 | `PYTHONPATH=.claude/dev python3 -B -` rc `0`, `_wired1342(base)==[]`, 0/4 ID mới, nên cổng đòi đúng bốn ID từ chối base. `python3 -B -` mô phỏng S6 rc `0`, đối chứng parse được, f1 sai cú pháp, f2 sai tiền tố. Cần neo nguyên văn f1/f2 trên head thi công. Ca S6 thật `not_run`. |
+| N5 | `rg -n 'N5\|claim' ops/land/pr1407-wp1342-land-evidence.yaml` rc `0`, có phép đỏ lịch sử đúng dòng assertion `wp1174_windows_claim_rejected` và đối chứng `wp1174_witness_valid` đạt. Đo r5 trên Desktop `not_run`, phiên Linux và chưa có head thi công. |
+| N6–N7 | `python3 -B -` thay e1/e2/a2 trong RAM, rc `0`, mỗi neo khớp một lần và compile được. Driver r4 `--kiem-neo` rc `0`, xác nhận thêm `a1`. e1 được tách khỏi e2 bằng J5 xanh; a2 r4 dùng dấu hiệu J10 khi mất kill-on-close; a1 dùng `job not empty` ở J12(B). J1 là đối chứng sức khỏe đường spawn, ở e1c còn phải chạy đúng bản sao test. Windows Desktop/VM và chạy đột biến thật `not_run`. |
+| N8 | `python3 -B .claude/dev/packet_loop.py doctrine-scan --root .`, `adr-song --root .` và `git diff --check` đều rc `0` trên snapshot. So tập Ruff base/head, EOL và numstat head `not_run`, chưa có head thi công. Phản chứng cùng số diagnostic nhưng đổi thành viên, tệp thứ hai và 451 dòng đều làm sai vị từ đã khai. |
+| Authority và lịch sử | Rà lease cục bộ ra 0 trong giới hạn đã nêu. `ai-dang-giu` có thẩm quyền, đối chiếu ref máy chủ, trạng thái job của runner Windows và hành vi Win32 thật đều `not_run` do giới hạn phiên. |
+
+KET_LUAN: request_changes
+tokens used
+81,936

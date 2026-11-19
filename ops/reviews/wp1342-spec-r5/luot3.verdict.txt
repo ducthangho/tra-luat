@@ -1,0 +1,2 @@
+KHONG CO VERDICT: phien codex exec luot 3 (rc=0) ket thuc sau mot lenh exec, khong in thong diep cuoi va khong co dong KET_LUAN cua luot nay (cac dong KET_LUAN trong luot3.stdout.txt la ban in lai verdict luot 1/2 tu tep). Quan sat cuoi cung cua reviewer truoc khi dung (luot3.stdout.txt dong 3962-3963): "ban 3 yeu cau tep `long`, nhung san pham chi tao du lieu nay sau khi gan job thanh cong" — nhanh (C) cua J12 khong co `long`.
+KET_LUAN: (khong co)

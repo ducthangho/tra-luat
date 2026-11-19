@@ -1,0 +1,23 @@
+codex
+Review độc lập đặc tả #1342 r5 bản 4 trên Linux, chỉ đọc. Base `4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd`, tree `ceba0869d378f6c326955e4e1920a9776ba1a0a7`. SHA-256 bản 4 khớp `e823ed0bd67f82aa3c870a8d574e2cd8150659d3cf5e98f8ae3ba3b86c17eb5a`. Phép đo Windows `not_run`. Bề mặt phục vụ và model cụ thể chưa xác minh được từ phiên.
+
+| Mục | Trạng thái | Bằng chứng |
+|---|---|---|
+| F1 P1 | Đóng | M1–M2 dùng đúng `c.script` trỏ tệp sản phẩm đang đo, nạp module riêng, giữ argv giống nhau, tách khoá kết quả khỏi argv và xoá hai tệp trước đường đo. |
+| F2 P2 | Đóng | J4(ii) có thứ tự rõ: ném → rc → schema → c0 → c1 lỗi 5 → c1 lỗi khác → c1 thành công. §4b chỉ ghi công e1c ở vế lỗi 5 với các tiền điều kiện đạt. |
+| F3 P2 | Đóng một phần | M1 tách `WAIT_TIMEOUT`/`WAIT_FAILED`, giữ đủ 5000 ms cho từng lần chờ và tính `join(20)`. Ngân sách cho cả chuỗi vẫn thiếu, xem A2. |
+| F4 P2 | Đóng | M4 kiểm lại `chau` khi thấy `ket_qua`; `long` mang mã lỗi lấy ngay sau mỗi lời gọi Win32 thất bại. |
+| F5 P3 | Đóng | §7 bao quát mọi tổ hợp lý do khiến hai máy đều thiếu lượt sạch nhánh B. |
+| Lượt 3 | Đóng | M4 yêu cầu `long` ở B và a1@J12, yêu cầu vắng ở C. Sản phẩm chỉ gọi `between` sau khi gán job trong thành công. |
+
+**Finding**
+
+- **A1 · P2 · J4 đường đo thiếu thứ tự toàn phần.** M2 đặt `rc` trước schema theo thứ tự đối chứng, rồi cho `tach_c1 == ["ok", int]` thắng `rc`. Với `rc != 0`, c1 hợp lệ và c0 sai schema, quy tắc này có thể cho ĐỎ hoặc `KHÔNG ĐO`. **Câu thay thế:** “Đường đo phân loại theo thứ tự: lỗi ném → xác thực cả hai payload → c0 phải `ok` → c1 `ok` thì ĐỎ, kể cả khi rc khác 0 → rc khác 0 thì `KHÔNG ĐO` → c1 lỗi 5 thì ĐẠT → mã khác thì `KHÔNG ĐO`.”
+- **A2 · P2 · M1/M2/M4 chưa cấp đủ thời gian cho cả ca.** Với `75 − elapsed − 45` và điều kiện `han > 5`, J4 phải bắt đầu lời gọi thứ hai trước giây 25, trong khi lời gọi đầu được cấp tới 30 s cho đường sản phẩm, chưa kể dọn và `join(20)`. J12 có thể đến bước chấm với 10 s còn lại theo M1, nhưng B cần dự phòng 20 s cho ba lần chờ tuần tự 5 s và 5 s dư, chưa kể ghi tín hiệu nhả. **Câu thay thế:** “J4 chia hạn theo hai lời gọi và chừa ngân sách cho lời gọi thứ hai trước khi cấp `han` lần đầu, tính cả dọn, `join` và đọc/xoá tệp. J12 dành trước tối thiểu 20 s cộng thời gian ghi tín hiệu cho chuỗi chấm B, 15 s cộng thời gian ghi tín hiệu cho C. Thiếu ngân sách ở mốc cấp hạn thì ghi `KHÔNG ĐO` kèm mốc.”
+- **A3 · P3 · N7 ghi hai địa điểm cho a1@J12.** Câu đầu yêu cầu bốn lượt trên Desktop, câu sau cho phép VM và §7 dùng chính quy tắc đó. **Câu thay thế:** “Chạy e1, e2 và e1c trên Desktop. Chạy a1@J12 trên Desktop nếu lượt sạch ra B, nếu cần thì áp dụng cùng điều kiện trên VM; nếu cả hai thiếu B, áp dụng §7. Chấm N6 riêng từng máy.”
+
+**Lệnh và rc.** `git rev-parse HEAD HEAD^{tree} origin/master`, `git status --short`, `sha256sum ops/specs/WP1174-WINDOWS-BACKEND-r5*.md` đều `0`. `diff -u` bản 2 → bản 4 trả `1` vì có delta. `git show origin/ops/wp1342-r4-spec:ops/specs/WP1174-WINDOWS-BACKEND-r4.md | sha256sum`, `sed -n` các vùng nguồn và `rg -n` trên driver/hồ sơ land trả `0`. `git diff --numstat a2c7d75 HEAD -- .claude/dev/packet_loop{,_test}.py` trả `0`, đầu ra rỗng. `python -B` tính các biên thời gian trên trả `0`.
+
+KET_LUAN: request_changes
+tokens used
+53,070

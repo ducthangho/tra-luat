@@ -15199,8 +15199,11 @@ def r387_a_nen_khac_giu_moc_ket_thuc_base():
         goi, gio_that = [], m._bay_gio
 
         def gio():
-            goi.append((gio_that(), any((s / "runs").glob("*/prompt.snapshot"))))
-            return goi[-1][0]
+            t = gio_that()
+            if goi and t <= goi[-1][0]:   # đồng hồ Windows thô: hai lần đọc có thể trùng; ép TĂNG NGẶT để lọc theo mốc ra đúng một
+                t = goi[-1][0] + timedelta(microseconds=1)
+            goi.append((t, any((s / "runs").glob("*/prompt.snapshot"))))
+            return t
 
         with _r387_va(m, _nen_do_cay_truoc_bam=lambda: False, _bay_gio=gio):
             _rc, so, _tm = _r387_chay(m, s, "pass", *_r387_prompt(s), co_chau=False, do_nhom=lambda _p: time.sleep(0.5) or [])

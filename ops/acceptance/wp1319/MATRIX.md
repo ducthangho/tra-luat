@@ -194,3 +194,10 @@ Finding sản phẩm cần chủ kho quyết định (không tự sửa):
 | Per-machine / nâng cấp / rollback / lần chạy đầu | not_evidenced | Chưa đo |
 
 **Cần chủ kho quyết định:** sửa tiêu chí NSIS thành "gỡ của nhà cung cấp + `Remove-ProximaUninstallResidue`" (cùng với bỏ đòi `InstallLocation`), hay giữ hàng "gỡ" ở FAIL như finding sản phẩm.
+
+### H.6 WP-PXU (#1409): hàm dọn tồn dư có kiểm soát. Review 2/2 `request_changes`; dừng chờ nâng trần
+| Hàng | Kết quả | Điều kiện đọc |
+|---|---|---|
+| Gỡ + `Remove-ProximaUninstallResidue` | **partial** | Desktop, PS 5.1 + PS 7: 29/30 ca hành vi đạt, gồm cả tráo junction và tráo tệp (PU23/24/25/28). 9/9 đột biến khớp đúng tập ca khai báo, nhưng do **phân loại tay**; harness cấp 0/9. Hồi quy 4 harness cũ không đổi. **Còn mở:** P1 tĩnh (nhánh junction ở InstallDir gỡ liên kết trước khi kiểm final path); PU13 symlink chưa đo vì thiếu quyền; bản sửa harness chưa chạy |
+
+Cần chủ kho quyết định: nâng trần WP-PXU (+1 Executor, +1 native Desktop, +1 review) để sửa P1. Đồng thời, tiêu chí NSIS (H.5) vẫn chờ quyết định.

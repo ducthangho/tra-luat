@@ -19,12 +19,12 @@ Giữa hai commit chỉ harness Install đổi; module `ProximaInstall.psm1` gi�
 | Manifest / Config / Control (phản chứng, `tr-TR`) | **12/12 · 46/46 · 38/38** | **12/12 · 46/46 · 38/38** |
 
 - **Hồi quy: không có.** Số đếm bốn harness cũ trùng hoàn toàn WP-PXA N2.
-- **PU13 = `setup_error` do môi trường:** tạo symlink tệp cần quyền admin hoặc Developer Mode (`CreateSymbolicLinkW error 1314`). Harness đúng thiết kế: không tính ca này là đạt. Phần hardlink của PU13 vì thế cũng **chưa đo**.
+- **PU13 = `setup_error` do môi trường:** tạo symlink tệp cần quyền admin hoặc Developer Mode (`CreateSymbolicLinkW error 1314`). Harness đúng thiết kế: không tính ca này là đạt. *(Sửa theo review 2, P2: các phép kiểm hardlink của PU13 **đã chạy xong** trước bước symlink; chỉ kết quả riêng của nó không được ghi thành một dòng, vì cả ca chuyển sang `setup_error`.)*
 - **CU01..CU09 = `setup_error`: lỗi dựng của harness.** Tiến trình con cũng gặp PU13 nên trả rc 2, mà tiến trình cha chỉ nhận rc 0/1.
 
 ## N1b (lần chạy lại duy nhất, chỉ harness Install) @ `22865d8dc`, 02:39–02:40Z
 - Bản vá của phiên điều phối (`22865d8dc`) cho phép tiến trình con trả rc 2 khi mọi `setup_error` của nó đã được tiến trình cha đo là `setup_error`.
-- **Bản vá có lỗi:** nó đọc `$report.cases`, mà biến này chỉ được gán ở cuối lượt chạy. Dưới StrictMode, cả 9 CU ném lỗi `The property 'outcome' cannot be found` **trước khi** tiến trình con nào kịp chạy. Kết quả: 29/39, cùng tập `setup_error`.
+- **Bản vá có lỗi:** nó đọc `$report.cases`, mà biến này chỉ được gán ở cuối lượt chạy. Dưới StrictMode, cả 9 CU ném lỗi `The property 'outcome' cannot be found`. *(Sửa theo review 2, P2: tiến trình con **có chạy**; lỗi xảy ra sau đó, lúc tiến trình cha xử lý kết quả. Câu cũ "trước khi tiến trình con nào kịp chạy" là sai.)* Kết quả: 29/39, cùng tập `setup_error`.
 - Tôi không thử bản vá trên Windows trước khi dùng lần chạy lại duy nhất, vì container không có PowerShell.
 - Đã sửa ở HEAD (đọc từ `$cases`, danh sách các case đã xong). **Bản sửa này CHƯA chạy native;** ngân sách chạy lại đã hết.
 
@@ -45,7 +45,7 @@ Giữa hai commit chỉ harness Install đổi; module `ProximaInstall.psm1` gi�
 
 Ở mọi tiến trình con, ngoài các ca đích chỉ có PU13 là `setup_error`; culture là `tr-TR`/`tr-TR`. Mỗi con chạy một module đã đột biến có băm riêng.
 
-## Kết luận tạm (chờ review 2/2)
+## Kết luận tạm (review 2/2: `request_changes`, xem `VERDICT-run.md`)
 - **Đạt trong phạm vi đã đo:** 29/30 ca hành vi trên PS 5.1 và PS 7. Có cả các ca tráo junction và tráo tệp: PU23, PU24, PU25, PU28, trong đó PU28 xác nhận `blocked_by=System.IO.IOException`, tức handle chặn được việc tráo.
 - **Phản chứng:** 9/9 đột biến bị giết, đúng tập ca khai báo, trên cả hai runtime (phân loại tay).
 - **Chưa đo:**

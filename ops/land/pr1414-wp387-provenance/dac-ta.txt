@@ -1,0 +1,7 @@
+# do 2026-11-19T09:27:14Z
+ref origin/ops/wp387-b-spec = 6b232a57e8f9d9f619be028ae4ce4f5105b53f05
+spec blob: 6a7a8637c3c9d45b828d147736ecb326cd472ca1
+spec sha256: c67ecfa7caef071ddf3888e9e47f2082284b57ca15de37377e3ce3f9bd5fe3af
+lease spec_hash: c67ecfa7caef071ddf3888e9e47f2082284b57ca15de37377e3ce3f9bd5fe3af
+lease commit rut han: 6b232a5 ops: rut han lease wp387-r2-g1-claude sau merge PR #1414 (0ca331b)
+spec o master 417b593: khong

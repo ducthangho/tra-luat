@@ -1,0 +1,7 @@
+# do 2026-11-19T09:27:14Z
+ref origin/ops/wp433-p2a-spec = d67046ccefe25513a8a36212443aea273bcafbcc
+spec blob: 345e44016c2e9b677c90adbbf0e712689997dcca
+spec sha256: b0065947f941a122716cff1b15a81ad65fe9b92a15fb9effad1456100c64624d
+lease spec_hash: b0065947f941a122716cff1b15a81ad65fe9b92a15fb9effad1456100c64624d
+lease commit rut han: d67046c ops: rut han lease wp433-r2-g1-claude sau merge PR #1415 (417b593)
+spec o master 417b593: khong

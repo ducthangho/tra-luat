@@ -1,0 +1,2 @@
+base 5 diagnostic, merge 5; base-merge {}; merge-base {}
+DELTA 0

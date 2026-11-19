@@ -1,0 +1,45 @@
+# Bien ban M8 (ADR-0060) dong WP #387 LAUNCHER-BAM-LOG-NEN-WINDOWS r1 (packet B, Windows) — kiem bang packet_loop.py kiem-dong-wp
+# Nhan nguon tung muc: ops/land/pr1414-wp387-land-evidence.yaml. Audit human_audited chu kho tu dang 7004039929 tren 9804f64.
+# Moc §10.2.2 run 44489280770 (ci.yml push master tren 0ca331b): run/checkout/gate_output measured passed; workflow_definition
+# measured passed (wd-run 44495748925). N4/N5 (Windows NATIVE tren Desktop) chi la loi khai co neo cua phien dieu phoi (log nam tren
+# may Desktop, khong co trong kho) => not_measured; vi vay kiem-dong-wp ra rc 12 D2 cho toi khi log native vao kho.
+packet: wp387
+revision: 2
+generation: 1
+spec_hash: c67ecfa7caef071ddf3888e9e47f2082284b57ca15de37377e3ce3f9bd5fe3af
+head_da_review: 9804f642ad9c7abcc9e7ae4877c2ff133ef31f00
+tree_h: 13c48c05ed0a87c288c79386876c5f78315828f6
+review:
+  offline: 'khong goi Codex offline tren ma; 6 luot Codex offline chi review DAC TA truoc lease (ops/reviews/wp387b-spec-r1/ tren nhanh ops/wp387-b-spec), luot 6 approve (lease spec_duyet)'
+  connector: 'readback-pr1414-comments.json: 7002148457 codex-review-receipt "Didn''t find any major issues" tren 966ee16 (kich @codex review 7002120963); 7003036317 sach tren 9804f64 (kich @codex review 7003008210); summary 7002124419 cap nhat 08:38:54Z: code_review 9804f64 completed, has_any_findings false; reviews va review-comments rong'
+  human_audit: 'issuecomment-7004039929 human_exact_head_audit.v1 approve tren 9804f64 tree 13c48c05 spec c67ecfa7 (chu kho tu dang, performed_via_github_app null)'
+windows:
+  phan_loai: required
+  nguon: 'duong .claude/dev/ (ADR-0060 M3); lease: Windows native <= 3 tren Desktop DESKTOP-T9R33P2 (VM du phong), khong CI Windows cho packet.'
+  ket_qua: >-
+    loi_khai_co_neo (not_measured) — than PR #1414 + lease budget_cuoi_ghi_chu: luot 2 tren 9804f64 L1 13/13, L3 5/5 x2, N5 run.json dat,
+    L2 31/31 + nhan W5/W7, suite head 330/340; luot 3 base 3b64746 321/331, bo qua base-head = dung 9 ID r387. Log o F:\tl-win\... tren
+    Desktop, KHONG co trong kho. Do duoc sau merge (lane launcher-windows.yml, windows-latest, KHONG phai Desktop): so-lane-launcher-44445202917-vs-44489280629.txt
+    341/341 (bo qua 85), bo qua base-merge = dung 9 ID r387, merge-base rong; DOT BIEN 592/592 gom W1-W6/H1-H7 OK giet tren Windows (launcher-windows-135440486405-r387.trich.txt).
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1414#issuecomment-7004039929
+duyet_chu_kho_ghi_chu: 'audit tu dang 08:36:51Z 19-11, truoc merge 08:38:09Z; lua chon cach merge trong phien dieu phoi (loi khai).'
+merge_commit: 0ca331b4a11835913bb91618d310a34e65599c20
+tree_m: 13c48c05ed0a87c288c79386876c5f78315828f6
+ci_master:
+  run_id: 44489280770
+  conclusion: success
+  ghi_chu: 'ci.yml push master 39/39 job co dau hieu duong (danh-gia-gate-output-44489280770.txt); phan chung xoa dau hieu 3 buoc => not_measured rc 0.'
+nghiem_thu:
+  N1: passed        # linux/do-nhan-n1-n2-0ca331b.json: 12/12 muc W1-W4,W6,H1-H7 tren ban sao cay merge, moi cap khop 1 cho, dung mot dong HONG <ca dich>, nhan khop §4b; ca dich tren cay sach qua; linux/nghiem-thu-0ca331b.txt: --lap-ca (e),(t), 9 ca mo, t117 1/1 qua; lane launcher ubuntu 424/424, DOT BIEN 732/732 dat
+  N2: passed        # linux/do-nhan-n1-n2-0ca331b.json: dat lai _R387_KHOI_MOC / _R387_DONG_CAY ve dong base => t117 DO (rc 1, dong HONG t117); t117 cay sach qua
+  N3: passed        # so-lane-launcher-44445202917-vs-44489280629.txt (ubuntu-latest, base a2c7d75 = launcher cua 3b64746): 424/424 hai ve, tap bo qua head = base; DOT BIEN 732/732 vs 720/720; KHONG DO DUOC merge = base ∪ {r387_b_windows_xoa_prompt_khi_job_rong (W5)}
+  N4: not_measured  # Windows NATIVE Desktop: chi loi khai co neo (than PR, log khong trong kho). windows-latest CI sau merge do duoc L1 (bo qua lech dung 9 ID r387) va dot bien Windows, nhung KHONG phai may/phep do dac ta chi dinh; nhan W5/W7 (L2) va L3 5/5 chua do duoc trong kho
+  N5: not_measured  # run.json tren Windows native: chi loi khai co neo (version 1.6.2, ma_thoat 0, job_windows true, log_bam_cay_da_chet true, log_bam_cho_giay 0.0)
+  N6: passed        # linux/nghiem-thu-0ca331b.txt: numstat 2 tep +333 (merge^1 = base), diff --check rc 0, VERSION 1.6.2, doctor rc 0 base = merge; linux/ruff-delta-0ca331b.txt (ruff 0.17.5, khong phai 0.15.15) DELTA 0; adr-song, doctrine-scan rc 0, eol_policy --all ok (linux/nghiem-thu-bo-sung-0ca331b.txt)
+lease_cuoi: wp387-r2-g1-claude
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed   # wd/wd-44489280770.json + ci/provenance.yaml (thu --wd-run 44495748925)
+  gate_output: passed

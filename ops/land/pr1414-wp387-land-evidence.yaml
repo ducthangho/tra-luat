@@ -1,0 +1,194 @@
+# HO SO LAND — packet #387 LAUNCHER-BAM-LOG-NEN-WINDOWS r1 (packet B, Windows), revision 2 lease g1, qua PR #1414. Khuon: ops/land/pr1388-wp387-land-evidence.yaml
+#   (packet A) va ops/land/pr1407-wp1342-land-evidence.yaml (moc Workflow definition qua wd-run).
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (0ca331b), landed TRUE: bon moc §10.2.2 cua ci.yml 44489280770 tren 0ca331b measured passed (run, checkout 39/39,
+#   gate output 39/39 bang danh_gia_gate.py v2, Workflow definition qua wd-run 44495748925). WP CHUA DONG DUOC theo M8: N4/N5 (Windows
+#   NATIVE tren Desktop) chi la loi khai co neo cua phien dieu phoi (log nam tren may Desktop, khong co trong kho) => kiem-dong-wp rc 12 D2.
+# MUC TIEU: mo phep doi cay tien trinh con chet truoc khi bam log (run.json) sang Windows bang Job Object; Linux khong doi; Darwin giu
+#   hanh vi packet A (no wp387-darwin-chua-do). launcher VERSION 1.6.1 -> 1.6.2.
+# UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head 9804f64 (issuecomment-7004039929, app null).
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
+# Readback tho: ops/land/pr1414-wp387-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-19T09:23–09:49Z.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS
+input_packet_generations:
+  - packet_issue: 387
+    packet_id: wp387
+    revision: 2
+    generation: 1
+    lease_id: wp387-r2-g1-claude
+    ghi_chu: 'Executor Claude Fable 5.2 do phien dieu phoi nay mo (create_session). Rut han lease sau merge (lease.thu_hoi_cuoi).'
+authorized_head_sha: 9804f642ad9c7abcc9e7ae4877c2ff133ef31f00
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1414#issuecomment-7004039929
+authorization_ghi_chu: >-
+  measured — readback-audit-7004039929.json + readback-pr1414-comments.json: comment 7004039929, user ducthangho, author_association OWNER,
+  created_at = updated_at 2026-11-19T08:36:51Z, performed_via_github_app null (hai comment @codex review 7002120963, 7003008210 cua phien
+  dieu phoi mang app `claude`); than human_exact_head_audit.v1 packet wp387 revision 2 generation 1 pr 1414 reviewed_sha 9804f64 (= head),
+  reviewed_tree 13c48c05 (= tree head, linux/nghiem-thu-0ca331b.txt), spec_sha256 c67ecfa7 (= lease spec_hash, dac-ta.txt), verdict approve,
+  assurance human_audited, review_axes [spec, standards_security], open_findings []. Merged_at 08:38:09Z (readback-pr-1414.json). Lua chon
+  cach merge trong phien dieu phoi: loi_khai_co_neo. CAVEAT #566: ai bam merge khong do duoc (merged_by la danh tinh token).
+land_operator: 'measured — readback-pr-1414.json: merged_at 2026-11-19T08:38:09Z, merge_commit_sha 0ca331b, state closed, draft false.'
+merge_method: merge
+merge_commit: 0ca331b4a11835913bb91618d310a34e65599c20
+merge_commit_tree: 13c48c05ed0a87c288c79386876c5f78315828f6
+merge_commit_parents: [3b647461db7c8ded1bddd9aafc5c6aa5eead223f, 9804f642ad9c7abcc9e7ae4877c2ff133ef31f00]
+merge_ghi_chu: >-
+  measured — readback-commit-0ca331b.json + linux/nghiem-thu-0ca331b.txt: cha thu nhat 3b64746 = base lease (master KHONG tien giua cap lease
+  va merge), cha thu hai 9804f64; tree merge 13c48c05 = tree head. numstat 0ca331b^1..0ca331b = base..head: dung 2 tep write set
+  (launcher.py +20/-13, launcher_test.py +313/-64; tong +333 <= 450 ADR-0053); blob hai tep tai merge = blob tai head (f427f1d1, a4cc55c0);
+  0 tep ngoai write set. PR co 2 commit: 966ee16 (thi cong) va 9804f64 (sua fixture ca (i), chu kho duyet theo ADR-0060 M5 — loi_khai_co_neo).
+pre_merge_checks:
+  - name: 'CI PR tren head cuoi'
+    sha: 9804f642ad9c7abcc9e7ae4877c2ff133ef31f00
+    conclusion: success
+    nguon: [readback-runs-head-9804f64.json, readback-checkruns-head-9804f64.json]
+    ghi_chu: 'measured — readback-checkruns-head-9804f64.json (doc 09:25Z, sau merge): 44 check run, 43 success, 1 skipped (launcher: lane chi chay khi push master), 0 that bai; readback-runs-head-9804f64.json: ci.yml pull_request 44481912757 success. CI Ubuntu 2/2 (966ee16 + 9804f64; lease budget_cuoi_ghi_chu).'
+  - name: 'Codex connector tren head cuoi'
+    sha: 9804f642ad9c7abcc9e7ae4877c2ff133ef31f00
+    conclusion: 'sach'
+    nguon: [readback-pr1414-comments.json, readback-pr1414-reviews.json, readback-pr1414-review-comments.json]
+    ghi_chu: >-
+      measured — readback-pr1414-comments.json: 7002148457 codex-review-receipt "Didn't find any major issues" tren 966ee16 (kich @codex review
+      7002120963); 7003036317 "Didn't find any major issues" tren 9804f64 (kich @codex review 7003008210); summary 7002124419 (updated_at
+      08:38:54Z): code_review commit_sha 9804f64, status completed, has_any_findings false. reviews va review-comments rong. Codex PR 2/10.
+  - name: 'N1-N6 cua executor va do native cua phien dieu phoi tren head'
+    sha: 9804f642ad9c7abcc9e7ae4877c2ff133ef31f00
+    conclusion: success
+    nguon: [loi-khai-executor-than-pr1414.md, readback-pr-1414.json, lease-wp387-r2-g1-claude-sau-rut-han.yaml.txt]
+    ghi_chu: >-
+      loi_khai_co_neo — than PR #1414 (sao nguyen van loi-khai-executor-than-pr1414.md) + lease budget_cuoi_ghi_chu. Linux (executor, tren 966ee16):
+      N1 12/12 nhan, N2 hai phan chung t117 DO, N3 suite 424/424 base = head, --dot-bien 720/720 base vs 732/732 head, KHONG DO DUOC head =
+      base ∪ {W5}, N6 ruff 0.15.15 delta 0. Windows NATIVE (phien dieu phoi, Desktop DESKTOP-T9R33P2, Windows-11-10.0.26300, Python 3.12.10,
+      Developer Mode bat tu luot 2): luot 1 966ee16 (log `wp387b-out-20261119T071249Z`) L1 12/13 — ca (i) r387_a_nen_khac_giu_moc_ket_thuc_base
+      do `ban chup con tren dia: [False, False]` vi dong ho Windows trung moc => commit 2; L3 5/5 x2, N5 dat, L2 29/31. Luot 2 9804f64
+      (`wp387b2-out-20261119T074702Z`, 07:47–07:59Z): L1 13/13, L3 (a) 5/5 (c) 5/5, N5 run.json version 1.6.2 ma_thoat 0 job_windows true
+      log_bam_cay_da_chet true log_bam_cho_giay 0.0, L2 ban loc 22/0/9 sha256 5d5cd9b0312148478276b938a6249da1ff25e99242b01399af1e9def2abe4d2e
+      `DOT BIEN: 31/31 dat`, nhan W5 `r387(g) Windows xoa ban chup`, W7 `ket_thuc_utc da gom thoi gian doi`, suite head 330/340 (tong 426,
+      bo qua 86, hong 10). Luot 3 (`wp387b3-out-20261119T080325Z`, 08:03–08:11Z): suite base 3b64746 321/331 (bo qua 95, hong 10); bo qua
+      base-head = dung 9 ID r387, head-base = rong; 10 ca hong base = head (t53, r15, 4×r925, 3×r926, r927 — do san tren may ay). Windows native
+      3/3. Log o F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\ tren Desktop, KHONG co trong kho; do lai sau merge: xem nghiem_thu.
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 44489280770
+    run_attempt: 1
+    sha: 0ca331b4a11835913bb91618d310a34e65599c20
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, readback-run-44489280770.json, readback-jobs-44489280770.json, readback-runs-merge-0ca331b.json, danh-gia-gate-output-44489280770.txt, danh_gia_gate.py, phan-chung-buoc-44489280770.txt, wd/wd-44489280770.json, wd/ci-provenance-thu-wd-44495748925.log, wd/readback-run-44495748925.json, wd/readback-jobs-44495748925.json, wd_dl.py]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha 0ca331b, run_attempt 1.'
+    moc_checkout: 'measured — ci/provenance.yaml: 39/39 job checkout passed 0ca331b (parents 3b64746, 9804f64; tree 13c48c05).'
+    moc_workflow_definition: >-
+      measured — ci/provenance.yaml moc.workflow_definition passed (ops/ci_provenance.py thu --wd-run 44495748925,
+      wd/ci-provenance-thu-wd-44495748925.log): path .github/workflows/ci.yml, oid 0ca331b, blob a1db88d9433fd548e36dcd598a63135f5fac7b73, sha256
+      d1201a76…82f5 (khop git rev-parse 0ca331b:.github/workflows/ci.yml); wd/wd-44489280770.json (artifact workflow-definition-44489280770 tai
+      qua wd_dl.py); luot do wd/readback-run-44495748925.json (ops-do-workflow-definition.yml, workflow_dispatch 09:22:02Z tren master 417b593,
+      do-wd success ubuntu-latest). Phien dieu phoi dispatch (loi_khai_co_neo); luot va artifact measured.
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-44489280770.txt (danh_gia_gate.py v2 sha256 539fed68): passed 39/39. phan-chung-buoc-44489280770.txt:
+      xoa dau hieu 3 buoc (gate selftest, gate-ops chay_lease_publish_test.sh, gate-packet-loop --gom) => not_measured, rc 0.
+  - name: 'launcher-windows.yml push master tren DUNG merge SHA'
+    run_id: 44489280629
+    run_attempt: 1
+    sha: 0ca331b4a11835913bb91618d310a34e65599c20
+    conclusion: success
+    nguon: [readback-run-44489280629.json, readback-jobs-44489280629.json, launcher-windows-44489280629.trich.txt, launcher-windows-135440486405-r387.trich.txt, so-lane-launcher-44445202917-vs-44489280629.txt, trich_launcher.py, trich_r387_windows.py, so_lane_launcher.py, wd/wd-44489280629.json, wd/readback-run-44495754177.json, wd/readback-jobs-44495754177.json]
+    ghi_chu: >-
+      measured — launcher-windows-44489280629.trich.txt: launcher (windows-latest) "341/341 ca DA CHAY QUA (tong 426, bo qua 85, hong 0)",
+      "DOT BIEN: 592/592 dat (147 khong do duoc)"; launcher (ubuntu-latest) "424/424 (tong 426, bo qua 2, hong 0)", "DOT BIEN: 732/732 dat
+      (7 khong do duoc)". so-lane-launcher-44445202917-vs-44489280629.txt (base = run 44445202917 tren a2c7d75; git diff a2c7d75 3b64746 --
+      .claude/dev/ rong): windows-latest bo qua base-merge = DUNG 9 ID r387 (§0 dac ta), merge-base rong; ubuntu bo qua base = merge; KHONG DO
+      DUOC ubuntu merge-base = {r387_b_windows_xoa_prompt_khi_job_rong}. launcher-windows-135440486405-r387.trich.txt: 0 dong BO QUA r387 tren
+      windows-latest; W1-W6, H1-H7 va cac muc r387 cu `OK giet 1/1` tren Windows. Workflow definition lane nay: wd/wd-44489280629.json passed
+      (blob 0a0f77ff = git rev-parse 0ca331b:.github/workflows/launcher-windows.yml). Lane khong thuoc gate §10.2.2; windows-latest KHONG phai
+      may Desktop ma N4/N5 chi dinh.
+bookkeeping:
+  - {item: 'rut han lease wp387-r2-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1414-1415 (ban nhap, chua commit).'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 (09:49Z) rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" — dung du kien vi N4/N5 not_measured (log native khong trong kho).'}
+  - {item: 'dong Issue #387', ket_qua: 'not_applicable — readback-issue-387.json open; KHONG dong: no Darwin (wp387-darwin-chua-do) va wp387-pgid-so-huu-muon con lai, N4/N5 chua co log trong kho.'}
+  - {item: 'phat hanh', ket_qua: 'not_applicable — tep dev-side (.claude/dev/), khong vao goi.'}
+# ---- het truong chuan
+packet_id: wp387
+packet_issue: 387
+packet_ten: LAUNCHER-BAM-LOG-NEN-WINDOWS
+revision: 2
+generation: 1
+pham_vi_land: '.claude/dev/launcher.py +20/-13, .claude/dev/launcher_test.py +313/-64 (packet B, Windows); launcher VERSION 1.6.2.'
+environment: cloud
+operating_system: linux
+recorded_by: claude-session — subagent cua phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS (ban nhap, phien dieu phoi ra soat).
+
+spec:
+  path: ops/specs/LAUNCHER-BAM-LOG-NEN-WINDOWS-r1.md
+  blob: 6a7a8637c3c9d45b828d147736ecb326cd472ca1
+  sha256: c67ecfa7caef071ddf3888e9e47f2082284b57ca15de37377e3ce3f9bd5fe3af
+  nguon: 'measured — dac-ta.txt: git rev-parse origin/ops/wp387-b-spec:<spec> = 6a7a8637; sha256 = lease spec_hash; spec CHUA co tren master 417b593.'
+  review_dac_ta: 'thuat_lai — lease spec_duyet: 6 luot Codex offline (ops/reviews/wp387b-spec-r1/ tren nhanh ops/wp387-b-spec), luot 6 approve tren 3b64746; chu kho duyet bam c67ecfa7 19-11 (ADR-0067) kem no wp387-pgid-so-huu-muon; chu kho bo Darwin.'
+
+lease:
+  lease_id: wp387-r2-g1-claude
+  path: ops/leases/wp387-r2-g1-claude.yaml (nhanh ops/wp387-b-spec)
+  write_set_so_tep: 2
+  thu_hoi_cuoi: >-
+    RUT HAN sau merge: lease_until 2026-11-20T06:15:00Z -> 2026-11-19T08:58:00Z (commit 6b232a5), kem ngan sach (budget_cuoi_ghi_chu:
+    Codex PR 2/10; CI Ubuntu 2/2; Windows native 3/3); tep lease-wp387-r2-g1-claude-sau-rut-han.yaml.txt (git show 6b232a5).
+    ai-dang-giu-sau-rut-han.txt (09:26:24Z, checkout chinh sau fetch +refs/heads/*; may chu 338 ref, cuc bo thieu 0, thua 1): ca hai duong
+    dan NGUOI_GIU 0 (wp387-r2-g1-claude HẾT_HẠN).
+  diff_do: 'measured — linux/nghiem-thu-0ca331b.txt numstat 0ca331b^1..0ca331b: 2 tep, +333/-77 (<= 6 tep, <= 450 dong them, ADR-0053).'
+
+trang_thai_packet:
+  merged: true
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate tren 0ca331b: run/checkout/gate_output/workflow_definition measured passed => DAT. (2) lease nha: DAT
+    (NGƯỜI_GIỮ 0 sau 08:58Z). (3) bookkeeping: ho so nay; M8 kiem-dong-wp rc 12 D2 (N4/N5 not_measured). (4) review neo 9804f64: connector
+    sach + audit chu kho. (5) uy quyen: audit tu dang 7004039929. (6) muc tieu: N1-N3, N6 measured passed tren cay merge; N4/N5 (Windows
+    NATIVE) chi loi_khai_co_neo => Packet CHUA complete. (7) tran: Codex PR 2/10, CI Ubuntu 2/2, Windows native 3/3, kich thuoc 333/450.
+  dieu_kien_dong_wp: >-
+    Dua log native Desktop cua luot 2 (wp387b2-out-20261119T074702Z) va luot 3 (wp387b3-out-20261119T080325Z) vao provenance (nhu
+    ops/land/pr1407-wp1342-provenance/windows-native/), doi chieu head/base ghi trong log, roi lat N4/N5 trong bien-ban-m8.yaml va chay lai
+    kiem-dong-wp (ky vong rc 0).
+  canh_bao_cho_chu_kho: >-
+    (i) landed true dua tren bon moc §10.2.2; Packet chua complete vi N4/N5 native chi la loi khai (log tren may Desktop). (ii) Bang chung
+    Windows do duoc trong kho la lane windows-latest sau merge (launcher-windows 44489280629) — KHONG phai Desktop, va lease noi khong dung
+    CI Windows cho packet; dung no lam bang chung phu, khong thay N4. (iii) Ruff do lai bang 0.17.5, dac ta ghi 0.15.15 (delta 0 ca hai).
+    (iv) No con lai: wp387-darwin-chua-do, wp387-pgid-so-huu-muon; Issue #387 de mo.
+
+review:
+  so_loi_goi_codex: 'measured — readback-pr1414-comments.json: PR 2/10: connector tren 966ee16 va 9804f64, ca hai sach. Ngoai ngan sach PR: 6 luot Codex offline review dac ta (lease).'
+
+nghiem_thu:
+  N1: >-
+    measured — linux/do-nhan-n1-n2-0ca331b.json (do_nhan_1414.py, ban sao cay merge 0ca331b, 09:35:01Z–09:36:49Z, Python 3.13.18): 12/12 muc
+    W1-W4, W6 (DOT_BIEN, sua launcher.py) va H1-H7 (DOT_BIEN_HARNESS, sua launcher_test.py) lay nguyen van (tim, thay) tu chinh bang cua cay
+    merge, moi cap khop dung 1 cho, `--lap-ca <ca dich> --lan 1` rc 1 voi DUY NHAT mot dong `HONG <ca dich>: TinHieuChotCa: <nhan §4b>`;
+    ca dich tren cay sach qua. linux/nghiem-thu-0ca331b.txt: --lap-ca (e), (t), 9 ca mo va t117 moi ca `lan 1/1: qua`. Lane ubuntu sau merge
+    (launcher-windows-44489280629.trich.txt) suite 424/424, DOT BIEN 732/732 dat (W5 KHONG DO DUOC tren Linux, dung dac ta).
+  N2: 'measured — linux/do-nhan-n1-n2-0ca331b.json: dat lai _R387_KHOI_MOC (bo "/Windows") va _R387_DONG_CAY ve dong base => `--lap-ca t117…` rc 1 voi dong HONG t117 ca hai; t117 tren cay sach rc 0.'
+  N3: >-
+    measured — so-lane-launcher-44445202917-vs-44489280629.txt (CI ubuntu-latest, base a2c7d75 co launcher = 3b64746): suite 424/424 ca hai
+    ve, tap bo qua head = base {2 ID}; DOT BIEN 720/720 -> 732/732, tap KHONG DO DUOC merge = base ∪ {r387_b_windows_xoa_prompt_khi_job_rong (W5)}.
+    Khong chay lai toan suite / --dot-bien tai cho (da co tren CI cung cay).
+  N4: >-
+    not_measured — Windows NATIVE Desktop: chi loi_khai_co_neo (xem pre_merge_checks). Bang chung phu measured tren windows-latest (KHONG phai
+    Desktop): bo qua base-merge dung 9 ID r387, 0 dong BO QUA r387, DOT BIEN 592/592 gom W1-W6/H1-H7 OK giet tren Windows. L2 do nhan W5/W7
+    va L3 5/5 tren Windows: khong co trong kho.
+  N5: 'not_measured — run.json tren Windows native (version 1.6.2, ma_thoat 0, job_windows true, log_bam_cay_da_chet true, log_bam_cho_giay 0.0): chi loi_khai_co_neo; khong co tep run.json trong kho.'
+  N6: >-
+    measured — linux/nghiem-thu-0ca331b.txt: numstat 2 tep +333 (merge^1 = base), git diff --check rc 0, VERSION 1.6.1 -> 1.6.2, doctor base rc 0
+    = merge rc 0 (trich KET LUAN). linux/nghiem-thu-bo-sung-0ca331b.txt + linux/ruff-delta-0ca331b.txt: ruff 0.17.5 --select F base 5 = merge 5
+    (5 F841 cu, so tap bo so dong) DELTA 0; adr-song rc 0 (66/66), doctrine-scan rc 0 (12 tep), eol_policy --all ok true 0 vi pham.
+
+khong_do_duoc:
+  - 'N4/N5 Windows NATIVE tren Desktop: log khong co trong kho (chi loi khai co neo cua phien dieu phoi).'
+  - 'Lua chon cach merge va lenh dispatch ops-do-workflow-definition.yml (khong co hien vat ghi nguoi bam; luot WD thi measured).'
+  - 'Ruff 0.15.15 dung phien ban dac ta: khong co trong container; do bang 0.17.5.'
+  - 'Darwin (no wp387-darwin-chua-do, ngoai pham vi packet B).'

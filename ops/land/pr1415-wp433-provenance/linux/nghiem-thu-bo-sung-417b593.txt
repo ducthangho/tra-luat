@@ -1,0 +1,220 @@
+# bo sung do lai; python 3.13.18; base 3b647461db7c8ded1bddd9aafc5c6aa5eead223f, merge 417b59397669e6966da2b546537279d15e2ba0c0
+
+## 2026-11-19T09:46:56Z (cwd clone-merge) $ /usr/local/bin/python3 -m ruff --version
+ruff 0.17.5
+rc=0
+
+## 2026-11-19T09:46:56Z (cwd clone-base) $ /usr/local/bin/python3 -m ruff check --no-cache --select F --output-format concise scripts/tl_gws.py scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py scripts/tl_test_fragments_bundled.py
+scripts/tl_gws.py:18:8: F401 [*] `tarfile` imported but unused
+scripts/tl_gws.py:317:14: F821 Undefined name `_imp`
+scripts/tl_gws.py:445:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:480:11: F821 Undefined name `_imp`
+scripts/tl_gws.py:567:15: F821 Undefined name `_imp`
+scripts/tl_gws.py:569:15: F821 Undefined name `_runtime_env`
+scripts/tl_gws.py:578:64: F821 Undefined name `GWS_PINNED_VERSION`
+scripts/tl_gws.py:584:93: F821 Undefined name `GWS_PINNED_VERSION`
+scripts/tl_gws.py:592:49: F821 Undefined name `GWS_PINNED_VERSION`
+scripts/tl_gws.py:594:70: F821 Undefined name `GWS_PINNED_VERSION`
+scripts/tl_gws.py:595:104: F821 Undefined name `GWS_PINNED_VERSION`
+scripts/tl_gws.py:653:41: F401 [*] `shutil` imported but unused
+scripts/tl_gws.py:654:11: F821 Undefined name `_imp`
+scripts/tl_gws.py:665:9: F821 Undefined name `_imp`
+scripts/tl_gws.py:688:17: F821 Undefined name `_gas`
+scripts/tl_gws.py:696:17: F821 Undefined name `_imp`
+scripts/tl_gws.py:864:16: F821 Undefined name `NLM_BASE_NOTEBOOK`
+scripts/tl_gws.py:935:5: F821 Undefined name `load_creds`
+scripts/tl_gws.py:982:12: F821 Undefined name `_imp`
+scripts/tl_gws.py:983:66: F821 Undefined name `HOPNAP_FOLDER_ID`
+scripts/tl_gws.py:984:65: F821 Undefined name `SECRETS_FILEID`
+scripts/tl_gws.py:1002:84: F821 Undefined name `SECRETS_FILEID`
+scripts/tl_gws.py:1006:5: F821 Undefined name `load_creds`
+scripts/tl_gws.py:1007:13: F821 Undefined name `_imp`
+scripts/tl_gws.py:1054:56: F821 Undefined name `HOPNAP_FOLDER_ID`
+scripts/tl_gws.py:1062:49: F821 Undefined name `HOPNAP_FOLDER_ID`
+scripts/tl_gws.py:1072:48: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:1073:49: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:1077:88: F821 Undefined name `NLM_CRED_FILEID`
+scripts/tl_gws.py:1078:89: F821 Undefined name `NLM_CRED_FILEID`
+scripts/tl_gws.py:1393:14: F821 Undefined name `_imp`
+scripts/tl_gws.py:1421:23: F821 Undefined name `_imp`
+scripts/tl_gws.py:1436:23: F821 Undefined name `_imp`
+scripts/tl_gws.py:1508:24: F821 Undefined name `_imp`
+scripts/tl_gws.py:1531:9: F821 Undefined name `load_creds`
+scripts/tl_gws.py:1534:45: F821 Undefined name `PY311_FILEID`
+scripts/tl_gws.py:1543:8: F821 Undefined name `PY311_MD5`
+scripts/tl_gws.py:1543:29: F821 Undefined name `PY311_MD5`
+scripts/tl_gws.py:1548:43: F821 Undefined name `PY311_MD5`
+scripts/tl_gws.py:1586:14: F821 Undefined name `_imp`
+scripts/tl_gws.py:1676:9: F821 Undefined name `load_creds`
+scripts/tl_gws.py:1679:84: F821 Undefined name `SECRETS_FILEID`
+scripts/tl_gws.py:1685:21: F821 Undefined name `_imp`
+scripts/tl_gws.py:1694:29: F821 Undefined name `_imp`
+scripts/tl_gws.py:1720:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:1733:9: F821 Undefined name `load_creds`
+scripts/tl_gws.py:1736:84: F821 Undefined name `SECRETS_FILEID`
+scripts/tl_gws.py:1743:29: F821 Undefined name `_imp`
+scripts/tl_gws.py:1810:16: F821 Undefined name `_imp`
+scripts/tl_gws.py:1854:14: F821 Undefined name `_imp`
+scripts/tl_gws.py:1885:13: F821 Undefined name `_imp`
+scripts/tl_gws.py:1890:11: F821 Undefined name `_imp`
+scripts/tl_gws.py:1899:91: F821 Undefined name `HOPNAP_FOLDER_ID`
+scripts/tl_gws.py:1900:75: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:1915:13: F821 Undefined name `_imp`
+scripts/tl_gws.py:1922:13: F821 Undefined name `_gas`
+scripts/tl_gws.py:1945:5: F821 Undefined name `load_creds`
+scripts/tl_gws.py:1947:47: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:1991:13: F821 Undefined name `_imp`
+scripts/tl_gws.py:1998:13: F821 Undefined name `_gas`
+scripts/tl_gws.py:2057:13: F821 Undefined name `_imp`
+scripts/tl_gws.py:2061:13: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2084:91: F821 Undefined name `HOPNAP_FOLDER_ID`
+scripts/tl_gws.py:2086:42: F821 Undefined name `NLM_CRED_FILEID`
+scripts/tl_gws.py:2105:5: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2107:87: F821 Undefined name `NLM_CRED_FILEID`
+scripts/tl_gws.py:2234:42: F821 Undefined name `SKILL_FILEID`
+scripts/tl_gws.py:2241:33: F821 Undefined name `HERE`
+scripts/tl_gws.py:2247:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:2310:12: F401 [*] `base64` imported but unused
+scripts/tl_gws.py:2310:29: F811 [*] Redefinition of unused `tarfile` from line 18: `tarfile` redefined here
+scripts/tl_gws.py:2312:64: F821 Undefined name `_imp`
+scripts/tl_gws.py:2313:35: F821 Undefined name `_imp`
+scripts/tl_gws.py:2316:13: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2317:108: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:2320:42: F821 Undefined name `GWS_COWORK_FILEID`
+scripts/tl_gws.py:2321:43: F821 Undefined name `GWS_COWORK_MD5`
+scripts/tl_gws.py:2373:9: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2374:104: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:2396:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:2418:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:2429:5: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2480:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:2522:13: F821 Undefined name `_DIEU_HEAD_RE`
+scripts/tl_gws.py:2530:12: F821 Undefined name `_DIEU_HEAD_RE`
+scripts/tl_gws.py:2543:12: F821 Undefined name `resolve_identity`
+scripts/tl_gws.py:2546:11: F821 Undefined name `_read_doc_text`
+scripts/tl_gws.py:2546:26: F821 Undefined name `_entry_drive_id`
+scripts/tl_gws.py:2557:5: F821 Undefined name `apply_profile_offline`
+scripts/tl_gws.py:2559:19: F821 Undefined name `_manifest_entries`
+scripts/tl_gws.py:2567:20: F821 Undefined name `resolve_identity`
+scripts/tl_gws.py:2569:23: F821 Undefined name `_entry_drive_id`
+scripts/tl_gws.py:2570:9: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2571:16: F821 Undefined name `_read_doc_text`
+scripts/tl_gws.py:2578:10: F821 Undefined name `resolve_footnote_amendments`
+Found 95 errors.
+[*] 4 fixable with `--fix`.
+warning: Failed to lint scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py: No such file or directory (os error 2)
+rc=1
+
+## 2026-11-19T09:46:56Z (cwd clone-merge) $ /usr/local/bin/python3 -m ruff check --no-cache --select F --output-format concise scripts/tl_gws.py scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py scripts/tl_test_fragments_bundled.py
+scripts/tl_gws.py:18:8: F401 [*] `tarfile` imported but unused
+scripts/tl_gws.py:317:14: F821 Undefined name `_imp`
+scripts/tl_gws.py:445:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:480:11: F821 Undefined name `_imp`
+scripts/tl_gws.py:567:15: F821 Undefined name `_imp`
+scripts/tl_gws.py:569:15: F821 Undefined name `_runtime_env`
+scripts/tl_gws.py:578:64: F821 Undefined name `GWS_PINNED_VERSION`
+scripts/tl_gws.py:584:93: F821 Undefined name `GWS_PINNED_VERSION`
+scripts/tl_gws.py:592:49: F821 Undefined name `GWS_PINNED_VERSION`
+scripts/tl_gws.py:594:70: F821 Undefined name `GWS_PINNED_VERSION`
+scripts/tl_gws.py:595:104: F821 Undefined name `GWS_PINNED_VERSION`
+scripts/tl_gws.py:653:41: F401 [*] `shutil` imported but unused
+scripts/tl_gws.py:654:11: F821 Undefined name `_imp`
+scripts/tl_gws.py:665:9: F821 Undefined name `_imp`
+scripts/tl_gws.py:688:17: F821 Undefined name `_gas`
+scripts/tl_gws.py:696:17: F821 Undefined name `_imp`
+scripts/tl_gws.py:864:16: F821 Undefined name `NLM_BASE_NOTEBOOK`
+scripts/tl_gws.py:935:5: F821 Undefined name `load_creds`
+scripts/tl_gws.py:982:12: F821 Undefined name `_imp`
+scripts/tl_gws.py:983:66: F821 Undefined name `HOPNAP_FOLDER_ID`
+scripts/tl_gws.py:984:65: F821 Undefined name `SECRETS_FILEID`
+scripts/tl_gws.py:1002:84: F821 Undefined name `SECRETS_FILEID`
+scripts/tl_gws.py:1006:5: F821 Undefined name `load_creds`
+scripts/tl_gws.py:1007:13: F821 Undefined name `_imp`
+scripts/tl_gws.py:1054:56: F821 Undefined name `HOPNAP_FOLDER_ID`
+scripts/tl_gws.py:1062:49: F821 Undefined name `HOPNAP_FOLDER_ID`
+scripts/tl_gws.py:1072:48: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:1073:49: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:1077:88: F821 Undefined name `NLM_CRED_FILEID`
+scripts/tl_gws.py:1078:89: F821 Undefined name `NLM_CRED_FILEID`
+scripts/tl_gws.py:1416:14: F821 Undefined name `_imp`
+scripts/tl_gws.py:1444:23: F821 Undefined name `_imp`
+scripts/tl_gws.py:1459:23: F821 Undefined name `_imp`
+scripts/tl_gws.py:1531:24: F821 Undefined name `_imp`
+scripts/tl_gws.py:1554:9: F821 Undefined name `load_creds`
+scripts/tl_gws.py:1557:45: F821 Undefined name `PY311_FILEID`
+scripts/tl_gws.py:1566:8: F821 Undefined name `PY311_MD5`
+scripts/tl_gws.py:1566:29: F821 Undefined name `PY311_MD5`
+scripts/tl_gws.py:1571:43: F821 Undefined name `PY311_MD5`
+scripts/tl_gws.py:1609:14: F821 Undefined name `_imp`
+scripts/tl_gws.py:1699:9: F821 Undefined name `load_creds`
+scripts/tl_gws.py:1702:84: F821 Undefined name `SECRETS_FILEID`
+scripts/tl_gws.py:1708:21: F821 Undefined name `_imp`
+scripts/tl_gws.py:1717:29: F821 Undefined name `_imp`
+scripts/tl_gws.py:1743:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:1756:9: F821 Undefined name `load_creds`
+scripts/tl_gws.py:1759:84: F821 Undefined name `SECRETS_FILEID`
+scripts/tl_gws.py:1766:29: F821 Undefined name `_imp`
+scripts/tl_gws.py:1841:16: F821 Undefined name `_imp`
+scripts/tl_gws.py:1885:14: F821 Undefined name `_imp`
+scripts/tl_gws.py:1916:13: F821 Undefined name `_imp`
+scripts/tl_gws.py:1921:11: F821 Undefined name `_imp`
+scripts/tl_gws.py:1930:91: F821 Undefined name `HOPNAP_FOLDER_ID`
+scripts/tl_gws.py:1931:75: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:1946:13: F821 Undefined name `_imp`
+scripts/tl_gws.py:1953:13: F821 Undefined name `_gas`
+scripts/tl_gws.py:1974:5: F821 Undefined name `load_creds`
+scripts/tl_gws.py:1976:47: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:2020:13: F821 Undefined name `_imp`
+scripts/tl_gws.py:2027:13: F821 Undefined name `_gas`
+scripts/tl_gws.py:2086:13: F821 Undefined name `_imp`
+scripts/tl_gws.py:2090:13: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2113:91: F821 Undefined name `HOPNAP_FOLDER_ID`
+scripts/tl_gws.py:2115:42: F821 Undefined name `NLM_CRED_FILEID`
+scripts/tl_gws.py:2134:5: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2136:87: F821 Undefined name `NLM_CRED_FILEID`
+scripts/tl_gws.py:2263:42: F821 Undefined name `SKILL_FILEID`
+scripts/tl_gws.py:2270:33: F821 Undefined name `HERE`
+scripts/tl_gws.py:2276:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:2339:12: F401 [*] `base64` imported but unused
+scripts/tl_gws.py:2339:29: F811 [*] Redefinition of unused `tarfile` from line 18: `tarfile` redefined here
+scripts/tl_gws.py:2341:64: F821 Undefined name `_imp`
+scripts/tl_gws.py:2342:35: F821 Undefined name `_imp`
+scripts/tl_gws.py:2345:13: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2346:108: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:2349:42: F821 Undefined name `GWS_COWORK_FILEID`
+scripts/tl_gws.py:2350:43: F821 Undefined name `GWS_COWORK_MD5`
+scripts/tl_gws.py:2402:9: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2403:104: F821 Undefined name `GWS_CRED_FILEID`
+scripts/tl_gws.py:2425:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:2447:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:2458:5: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2509:10: F821 Undefined name `_imp`
+scripts/tl_gws.py:2551:13: F821 Undefined name `_DIEU_HEAD_RE`
+scripts/tl_gws.py:2559:12: F821 Undefined name `_DIEU_HEAD_RE`
+scripts/tl_gws.py:2572:12: F821 Undefined name `resolve_identity`
+scripts/tl_gws.py:2575:11: F821 Undefined name `_read_doc_text`
+scripts/tl_gws.py:2575:26: F821 Undefined name `_entry_drive_id`
+scripts/tl_gws.py:2586:5: F821 Undefined name `apply_profile_offline`
+scripts/tl_gws.py:2588:19: F821 Undefined name `_manifest_entries`
+scripts/tl_gws.py:2596:20: F821 Undefined name `resolve_identity`
+scripts/tl_gws.py:2598:23: F821 Undefined name `_entry_drive_id`
+scripts/tl_gws.py:2599:9: F821 Undefined name `load_creds`
+scripts/tl_gws.py:2600:16: F821 Undefined name `_read_doc_text`
+scripts/tl_gws.py:2607:10: F821 Undefined name `resolve_footnote_amendments`
+Found 95 errors.
+[*] 4 fixable with `--fix`.
+rc=1
+
+## 2026-11-19T09:46:56Z (cwd clone-merge) $ /usr/local/bin/python3 -B .claude/dev/packet_loop.py adr-song --root .
+adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])
+rc=0
+
+## 2026-11-19T09:46:56Z (cwd clone-merge) $ /usr/local/bin/python3 -B .claude/dev/packet_loop.py doctrine-scan --root .
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+
+## 2026-11-19T09:46:57Z (cwd clone-merge) $ /usr/local/bin/python3 -B .githooks/eol_policy.py --all --json
+{"checked": 15024, "mode": "all", "ok": true, "scanned": 15670, "schema": "eol_policy.v1", "skipped": 646, "violations": []}
+rc=0
+
+# HET

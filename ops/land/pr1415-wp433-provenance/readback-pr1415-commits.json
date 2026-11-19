@@ -1,0 +1,84 @@
+[
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/6e49b6807886e1d42b22245dd394a2f19a99bfb5/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-19T07:38:36Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-19T07:38:49Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "wp433 P2a: credentials.json cua gws (W4, W5) tren POSIX nam ngoai kho git, khong xuyen lien ket, ghi nguyen tu\n\nDac ta GWS-CRED-DICH-NGOAI-KHO-A r1 (sha256 b0065947f941...), lease wp433-r2-g1-claude, Issue #433.\n\n- M1 `_duong_dich_chuan(p, cwd)`: ghep cwd theo chuoi, bo thanh phan rong va `.`, tu choi NUL / chi khoang\n  trang / `..` / goc `/`; ly do `duong khong hop le: <repr>`.\n- M2 `_dich_cred_gws(cfgdir_tho)`: POSIX goi `_kiem_dich_ghi(dest, \"/\", <moi thanh phan>)` nen luat (b) lstat\n  moi to tien tu `/` toi chinh tep; nen khac giu dich nhu cu. W4/W5 ghi bang `_ghi_nguyen_tu_0600`, chot dich\n  va writer trong mot `try ... except OSError`. W4 kiem kieu/encode truoc; `gws_cred` co mat ma sai kieu\n  (ke ca falsy) bi tu choi thay vi coi la thieu.\n- M3: W4 in dung mot dong `[bootstrap] ✗ <cum>: <chi tiet>` + degraded; W5 tra `(False, \"<cum>: ...\")`.\n- M4: fragment wp433_gws_cred_dich_ngoai_kho — 11 ca / 46 luot, 37 dot bien, 3 tu kiem phan hang, so luot.\n- M5: tai sinh scripts/tl_test_fragments_bundled.py bang generate_bundled_module_bytes.\n\nKhong sua than `_kiem_dich_ghi`, `_trong_kho_git`, `_ghi_nguyen_tu_0600`. Windows: chi doi sang ghi nguyen tu.\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZVGCtqQDy1hD7e1sR",
+   "tree": {
+    "sha": "6d49d42d31e6b415f9c5472258365bab828ee605",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/6d49d42d31e6b415f9c5472258365bab828ee605"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/6e49b6807886e1d42b22245dd394a2f19a99bfb5",
+   "verification": {
+    "payload": "tree 6d49d42d31e6b415f9c5472258365bab828ee605\nparent 3b647461db7c8ded1bddd9aafc5c6aa5eead223f\nauthor Claude <noreply@anthropic.com> 1795073916 +0000\ncommitter Claude <noreply@anthropic.com> 1795073929 +0000\n\nwp433 P2a: credentials.json cua gws (W4, W5) tren POSIX nam ngoai kho git, khong xuyen lien ket, ghi nguyen tu\n\nDac ta GWS-CRED-DICH-NGOAI-KHO-A r1 (sha256 b0065947f941...), lease wp433-r2-g1-claude, Issue #433.\n\n- M1 `_duong_dich_chuan(p, cwd)`: ghep cwd theo chuoi, bo thanh phan rong va `.`, tu choi NUL / chi khoang\n  trang / `..` / goc `/`; ly do `duong khong hop le: <repr>`.\n- M2 `_dich_cred_gws(cfgdir_tho)`: POSIX goi `_kiem_dich_ghi(dest, \"/\", <moi thanh phan>)` nen luat (b) lstat\n  moi to tien tu `/` toi chinh tep; nen khac giu dich nhu cu. W4/W5 ghi bang `_ghi_nguyen_tu_0600`, chot dich\n  va writer trong mot `try ... except OSError`. W4 kiem kieu/encode truoc; `gws_cred` co mat ma sai kieu\n  (ke ca falsy) bi tu choi thay vi coi la thieu.\n- M3: W4 in dung mot dong `[bootstrap] ✗ <cum>: <chi tiet>` + degraded; W5 tra `(False, \"<cum>: ...\")`.\n- M4: fragment wp433_gws_cred_dich_ngoai_kho — 11 ca / 46 luot, 37 dot bien, 3 tu kiem phan hang, so luot.\n- M5: tai sinh scripts/tl_test_fragments_bundled.py bang generate_bundled_module_bytes.\n\nKhong sua than `_kiem_dich_ghi`, `_trong_kho_git`, `_ghi_nguyen_tu_0600`. Windows: chi doi sang ghi nguyen tu.\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZVGCtqQDy1hD7e1sR\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQF+K/PQq\nKtZ7WTnz6BzIC62zvDZbcRU+apkjeDumZPxuDozG4bQTCYF6ARZgt3icdZ5w8pagjepuwOATMxeB\nzQc=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-19T07:58:25Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/6e49b6807886e1d42b22245dd394a2f19a99bfb5",
+  "node_id": "C_kwDOTNeRjdoAKDZlNDliNjgwNzg4NmUxZDQyYjIyMjQ1ZGQzOTRhMmYxOWE5OWJmYjU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/3b647461db7c8ded1bddd9aafc5c6aa5eead223f",
+    "sha": "3b647461db7c8ded1bddd9aafc5c6aa5eead223f",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/3b647461db7c8ded1bddd9aafc5c6aa5eead223f"
+   }
+  ],
+  "sha": "6e49b6807886e1d42b22245dd394a2f19a99bfb5",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/6e49b6807886e1d42b22245dd394a2f19a99bfb5"
+ }
+]

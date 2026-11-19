@@ -1,0 +1,101 @@
+{
+ "author": {
+  "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+  "events_url": "https://api.github.com/users/claude/events{/privacy}",
+  "followers_url": "https://api.github.com/users/claude/followers",
+  "following_url": "https://api.github.com/users/claude/following{/other_user}",
+  "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+  "gravatar_id": "",
+  "html_url": "https://github.com/claude",
+  "id": 81847,
+  "login": "claude",
+  "node_id": "MDQ6VXNlcjgxODQ3",
+  "organizations_url": "https://api.github.com/users/claude/orgs",
+  "received_events_url": "https://api.github.com/users/claude/received_events",
+  "repos_url": "https://api.github.com/users/claude/repos",
+  "site_admin": false,
+  "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+  "type": "User",
+  "url": "https://api.github.com/users/claude",
+  "user_view_type": "public"
+ },
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f8eaed6636d5a321cfd057e656578882c9bdd5e4/comments",
+ "commit": {
+  "author": {
+   "date": "2026-11-19T09:20:58Z",
+   "email": "noreply@anthropic.com",
+   "name": "Claude"
+  },
+  "comment_count": 0,
+  "committer": {
+   "date": "2026-11-19T09:20:58Z",
+   "email": "noreply@anthropic.com",
+   "name": "Claude"
+  },
+  "message": "release: tai sinh RELEASE_MANIFEST.json sau land #1415 (#433 P2a)\n\nPR #1415 (417b593) doi scripts/tl_gws.py va scripts/tl_test_fragments_bundled.py; dac ta P2a cam packet\nmang RELEASE_MANIFEST.json, manifest do phien land tai sinh (tien le #1396). Gate master 417b593 do o\nrelease-verify strict (run 44489289788). Sau tai sinh: release-verify --strict ok, 185/185.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS",
+  "tree": {
+   "sha": "fd30d075f7df4d935eead5ff0f29eb71e1f227fb",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/fd30d075f7df4d935eead5ff0f29eb71e1f227fb"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/f8eaed6636d5a321cfd057e656578882c9bdd5e4",
+  "verification": {
+   "payload": "tree fd30d075f7df4d935eead5ff0f29eb71e1f227fb\nparent 417b59397669e6966da2b546537279d15e2ba0c0\nauthor Claude <noreply@anthropic.com> 1795080058 +0000\ncommitter Claude <noreply@anthropic.com> 1795080058 +0000\n\nrelease: tai sinh RELEASE_MANIFEST.json sau land #1415 (#433 P2a)\n\nPR #1415 (417b593) doi scripts/tl_gws.py va scripts/tl_test_fragments_bundled.py; dac ta P2a cam packet\nmang RELEASE_MANIFEST.json, manifest do phien land tai sinh (tien le #1396). Gate master 417b593 do o\nrelease-verify strict (run 44489289788). Sau tai sinh: release-verify --strict ok, 185/185.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZk6gmfQKo7g4BfMBS\n",
+   "reason": "valid",
+   "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQD1lHDus\nuorFjM76IwdXJ6emJ+LMUs5QtBEk6wYFTysyiGmaXoJTFj+R44AAaRhJBuY9Hg2Nh8taQ76Oiq7o\ntQg=\n-----END SSH SIGNATURE-----",
+   "verified": true,
+   "verified_at": "2026-11-19T09:21:01Z"
+  }
+ },
+ "committer": {
+  "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+  "events_url": "https://api.github.com/users/claude/events{/privacy}",
+  "followers_url": "https://api.github.com/users/claude/followers",
+  "following_url": "https://api.github.com/users/claude/following{/other_user}",
+  "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+  "gravatar_id": "",
+  "html_url": "https://github.com/claude",
+  "id": 81847,
+  "login": "claude",
+  "node_id": "MDQ6VXNlcjgxODQ3",
+  "organizations_url": "https://api.github.com/users/claude/orgs",
+  "received_events_url": "https://api.github.com/users/claude/received_events",
+  "repos_url": "https://api.github.com/users/claude/repos",
+  "site_admin": false,
+  "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+  "type": "User",
+  "url": "https://api.github.com/users/claude",
+  "user_view_type": "public"
+ },
+ "files": [
+  {
+   "additions": 7,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/f8eaed6636d5a321cfd057e656578882c9bdd5e4/RELEASE_MANIFEST.json",
+   "changes": 14,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/RELEASE_MANIFEST.json?ref=f8eaed6636d5a321cfd057e656578882c9bdd5e4",
+   "deletions": 7,
+   "filename": "RELEASE_MANIFEST.json",
+   "patch": "@@ -6,9 +6,9 @@\n   \"webapp_target\": \"2.21.2q\",\n   \"root_name\": \"tra-luat\",\n   \"file_count\": 185,\n-  \"total_bytes\": 9192801,\n-  \"package_hash\": \"a5574d897924a6d4db17a33aa8739c8bcbb21476fefb13d224e43deadfdd6f24\",\n-  \"content_hash\": \"a5574d897924a6d4db17a33aa8739c8bcbb21476fefb13d224e43deadfdd6f24\",\n+  \"total_bytes\": 9230234,\n+  \"package_hash\": \"fc8256241d2c27a36aacbc8f673244116487e4a13fc022e7999a992bd38840de\",\n+  \"content_hash\": \"fc8256241d2c27a36aacbc8f673244116487e4a13fc022e7999a992bd38840de\",\n   \"required_missing\": [],\n   \"files\": [\n     {\n@@ -878,8 +878,8 @@\n     },\n     {\n       \"path\": \"scripts/tl_gws.py\",\n-      \"size\": 158548,\n-      \"sha256\": \"e254f4406c58d41bf35168ff59ed906f7bfe522cb6d6c2db61760cdd423698db\"\n+      \"size\": 160762,\n+      \"sha256\": \"dffb4905b58164fd683f7a74997c42db0128ee90b59d8309e96cb2d489a03aa8\"\n     },\n     {\n       \"path\": \"scripts/tl_selftest.py\",\n@@ -888,8 +888,8 @@\n     },\n     {\n       \"path\": \"scripts/tl_test_fragments_bundled.py\",\n-      \"size\": 144209,\n-      \"sha256\": \"3d656448dfa8a2d39dda9fde28a13d9d0b99752e89e50e8ad81d0be18de0ceee\"\n+      \"size\": 179428,\n+      \"sha256\": \"be32c696c17ff6acd9a3894de4b7a34e7a7021a256ec8d051616a05cc0850111\"\n     },\n     {\n       \"path\": \"scripts/tra_cuu.py\",",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/f8eaed6636d5a321cfd057e656578882c9bdd5e4/RELEASE_MANIFEST.json",
+   "sha": "f200bceb37d10748e72635374e85000e853bd3ba",
+   "status": "modified"
+  }
+ ],
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/f8eaed6636d5a321cfd057e656578882c9bdd5e4",
+ "node_id": "C_kwDOTNeRjdoAKGY4ZWFlZDY2MzZkNWEzMjFjZmQwNTdlNjU2NTc4ODgyYzliZGQ1ZTQ",
+ "parents": [
+  {
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/417b59397669e6966da2b546537279d15e2ba0c0",
+   "sha": "417b59397669e6966da2b546537279d15e2ba0c0",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/417b59397669e6966da2b546537279d15e2ba0c0"
+  }
+ ],
+ "sha": "f8eaed6636d5a321cfd057e656578882c9bdd5e4",
+ "stats": {
+  "additions": 7,
+  "deletions": 7,
+  "total": 14
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f8eaed6636d5a321cfd057e656578882c9bdd5e4"
+}

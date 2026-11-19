@@ -1,0 +1,6 @@
+# LAN 1 (sau rut han 08:58Z); lease = git show d67046c:ops/leases/wp433-r2-g1-claude.yaml (blob 9e9d401b3d6aec290e2a70e3b1dbec21a506b65e) tu origin/ops/wp433-p2a-spec
+# checkout: 417b59397669e6966da2b546537279d15e2ba0c0 ; origin/master 11bd0336d00b4a9544e70dcbbe049d372053a3ec ; luc: 2026-11-19T09:49:17Z
+# python .claude/dev/packet_loop.py kiem-dong-wp --root . --bien-ban <bien-ban-m8.yaml> --lease <lease>
+  THIẾU  D2 chưa land: landed, bốn mốc, nghiệm thu và CI master phải cùng đạt
+CHƯA ĐÓNG ĐƯỢC WP: thiếu D2
+rc=12

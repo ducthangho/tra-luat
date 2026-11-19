@@ -1187,6 +1187,29 @@ def _kiem_dich_ghi(dich: str, goc: str, thanh_phan: tuple) -> str | None:
     return None
 
 
+def _duong_dich_chuan(p: str, cwd: str):
+    """WP433 P2a (POSIX): `(đường_tuyệt_đối, thành_phần_từ_gốc)` hoặc lý do `đường không hợp lệ: <repr>`. Ghép `cwd` theo CHUỖI, không
+    `abspath`/`normpath`/`realpath` (gộp `..` theo từ vựng khác đường kernel đi qua symlink); bỏ thành phần rỗng và `.`. Từ chối: NUL,
+    chỉ khoảng trắng, còn `..`, không còn thành phần nào (`/`)."""
+    ly = f"đường không hợp lệ: {repr(p)[:200]}"
+    if "\x00" in p or p.strip() == "":
+        return ly
+    tp = tuple(t for t in (p if p.startswith("/") else cwd + "/" + p).split("/") if t not in ("", "."))
+    return ly if not tp or ".." in tp else ("/" + "/".join(tp), tp)
+
+
+def _dich_cred_gws(cfgdir_tho: str):
+    """WP433 P2a: `(dest, lý_do)` cho `credentials.json` của gws (W4, W5); KHÔNG tạo/ghi gì. POSIX: chuẩn hoá rồi chốt MỌI thành phần
+    từ `/` tới chính tệp (ngoài kho git, không liên kết tượng trưng). Nền khác: giữ đích như cũ, chưa chốt (P2c)."""
+    if os.name != "posix":
+        return os.path.join(cfgdir_tho, "credentials.json"), None
+    chuan = _duong_dich_chuan(cfgdir_tho, os.getcwd())
+    if isinstance(chuan, str):
+        return None, chuan
+    dest = chuan[0] + "/credentials.json"
+    return dest, _kiem_dich_ghi(dest, "/", (*chuan[1], "credentials.json"))
+
+
 def _kiem_jar_nlm(nlm) -> str | None:
     """WP433: None hoặc lý do. Dict khác rỗng; khoá BẰNG NGUYÊN VĂN một phần tử `_NLM_AUTH_RELS`; giá trị là str encode UTF-8 được."""
     if not isinstance(nlm, dict) or not nlm:
@@ -1777,17 +1800,25 @@ def cmd_bootstrap(a) -> int:
     # 2) gws (Code/Cowork): binary nếu thiếu + cred từ bundle
     if env in ("code", "cowork"):
         # Ghi gws cred TRƯỚC (để cài binary dùng được direct-media raw thay vì webapp b64).
-        if bundle.get("gws_cred"):
+        if "gws_cred" in bundle and bundle["gws_cred"] != "":   # WP433 P2a: có mặt mà sai kiểu (kể cả falsy) ⇒ từ chối, không coi là thiếu
             cfgdir = os.environ.get("GOOGLE_WORKSPACE_CLI_CONFIG_DIR") or os.path.expanduser("~/.config/gws")
-            os.makedirs(cfgdir, exist_ok=True)
-            dest = os.path.join(cfgdir, "credentials.json")
-            with open(dest, "wb") as f:
-                f.write(bundle["gws_cred"].encode("utf-8"))
-            try:
-                os.chmod(dest, 0o600)
-            except OSError:
-                pass
-            print(f"[bootstrap] ✓ gws cred → {dest} (chmod 600)")
+            gws_cred, dest = bundle["gws_cred"], None
+            try:   # kiểu/encode kiểm TRƯỚC mọi thao tác trên đích
+                du_lieu = gws_cred.encode("utf-8") if isinstance(gws_cred, str) else None
+            except UnicodeEncodeError:
+                du_lieu = None
+            ly_gws = None if du_lieu is not None else "dữ liệu không hợp lệ: gws_cred"
+            try:   # chốt đích (ngoài kho, không xuyên liên kết) + ghi nguyên tử trong MỘT try
+                if ly_gws is None:
+                    dest, ly_gws = _dich_cred_gws(cfgdir)
+                if ly_gws is None:
+                    _ghi_nguyen_tu_0600(dest, du_lieu)
+            except OSError as e:
+                ly_gws = f"ghi lỗi: {_safe_exc(e)}"
+            if ly_gws:
+                print(f"[bootstrap] ✗ {ly_gws}", file=sys.stderr); degraded = True
+            else:
+                print(f"[bootstrap] ✓ gws cred → {dest} (chmod 600)")
         else:
             print("[bootstrap] ⚠ bundle thiếu gws_cred — gws sẽ chưa auth (op vẫn fallback GAS).", file=sys.stderr)
             degraded = True
@@ -1928,15 +1959,13 @@ def _gws_auth_load(token: str, fid: str):
     except Exception as e:  # noqa: BLE001
         return False, f"giải mã lỗi: {e}"
     cfgdir = os.environ.get("GOOGLE_WORKSPACE_CLI_CONFIG_DIR") or os.path.expanduser("~/.config/gws")
-    os.makedirs(cfgdir, exist_ok=True)
-    dest = os.path.join(cfgdir, "credentials.json")
-    with open(dest, "wb") as f:
-        f.write(cred)
-    try:
-        os.chmod(dest, 0o600)
-    except OSError:
-        pass
-    return True, dest
+    try:   # WP433 P2a: chốt đích + ghi nguyên tử; đường trả về là đường ĐÃ kiểm
+        dest, ly_do = _dich_cred_gws(cfgdir)
+        if ly_do is None:
+            _ghi_nguyen_tu_0600(dest, cred)
+    except OSError as e:
+        ly_do = f"ghi lỗi: {_safe_exc(e)}"
+    return (False, ly_do) if ly_do else (True, dest)
 
 
 def cmd_gws_auth_load(a) -> int:

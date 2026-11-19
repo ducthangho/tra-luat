@@ -110,7 +110,7 @@ def reparse_gia_lap(r):
     kq = r.w5("W5.bit", c, (c, stat.FILE_ATTRIBUTE_REPARSE_POINT))
     r.xs("W5.bit", reparse=kq == (False, _LK + _r(c)) and r.ghi == 0 and not os.listdir(c))
     _truc_tiep(r)
-    kq = r.w5("W5.khong_bit", c, (c, stat.FILE_ATTRIBUTE_DIRECTORY))
+    kq = r.w5("W5.khong_bit", c, (c, stat.FILE_ATTRIBUTE_DIRECTORY | stat.FILE_ATTRIBUTE_SPARSE_FILE))   # 528: bit 512 không có trên entry thật của Windows
     r.xs("W5.khong_bit", khong_bit=kq == (True, d) and pathlib.Path(d).read_bytes() == _CRED.encode("utf-8"))
 def lien_ket_nt(r):
     p, rong = r.p, lambda d: not [t for _d, _ds, fs in os.walk(d) for t in fs]
@@ -134,7 +134,7 @@ _DU_KIEN = ("db_bo_reparse", "db_reparse_moi_thu", "db_bo_reparse_nt")  # N3(a):
 _BIT, _VAO = ' or getattr(st, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT', "    if (kho_dich := _trong_kho_git(os.path.dirname(dich))) is not None:\n"
 _DB = (  # §4b: (đột biến, [(neo khớp ĐÚNG MỘT lần trên nguồn candidate, thay)…], ca đích, lượt, nhãn)
     ("db_bo_reparse", [(_BIT, "")], _G, "W5.bit", "reparse"),
-    ("db_reparse_moi_thu", [(" & stat.FILE_ATTRIBUTE_REPARSE_POINT:\n", " != 0:\n")], _G, "W5.khong_bit", "khong_bit"),
+    ("db_reparse_moi_thu", [(" & stat.FILE_ATTRIBUTE_REPARSE_POINT:\n", " & (stat.FILE_ATTRIBUTE_REPARSE_POINT | stat.FILE_ATTRIBUTE_SPARSE_FILE):\n")], _G, "W5.khong_bit", "khong_bit"),
     ("db_bo_reparse_nt", [(_BIT, "")], _N, "W5.jn_cfg", "lien_ket"))
 _GIA = ('    class TinGia(AssertionError):\n        ca, luot, nhan = "reparse_gia_lap", "W5.bit", "reparse"\n    try:\n        raise AttributeError("wp433-r-tu-kiem")\n'
         '    except Exception:\n        raise TinGia("wp433-r-tu-kiem")\n')

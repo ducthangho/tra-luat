@@ -983,6 +983,29 @@ CHE_DO_AUDIT_DU = "full_mutant_audit"
 _LENH_DOI_HEAD = re.compile(r"\bgit\s+(?:checkout|switch|reset|pull|fetch|merge|rebase|worktree|clone)\b")
 
 
+def tim_bash_nen(tim=None):
+    """g5 (gate run 44488618410): `bash` qua `ops/bash_nen.py::tim_bash()` — quyết bằng NĂNG LỰC, không gọi tên trần.
+    Trả đường dẫn đã chứng minh, hoặc None = KHÔNG ĐO ĐƯỢC (không ứng viên đạt / không nạp được bộ giải / trả sai kiểu)."""
+    try:
+        if tim is None:
+            import runpy
+            tim = runpy.run_path(str(ROOT / "ops" / "bash_nen.py"))["tim_bash"]
+        vo = tim()[0]
+    except Exception:  # noqa: BLE001 — bộ giải hỏng theo bất kỳ kiểu nào cũng là KHÔNG ĐO ĐƯỢC, người gọi phải ĐỎ
+        return None
+    return vo if isinstance(vo, str) and vo else None
+
+
+def chay_than_buoc(vo, than, cwd):
+    """Chạy thân một bước `run:` bằng shell `vo` đã chứng minh. None khi KHÔNG ĐO ĐƯỢC (vắng shell, còn biểu thức, lỗi phóng)."""
+    if not vo or "${{" in than:
+        return None
+    try:
+        return subprocess.run([vo, "-e", "-c", than], cwd=cwd, capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
 def _la_checkout(b):
     return isinstance(b, dict) and str(b.get("uses", "")).split("@")[0].strip().lower() == "actions/checkout"
 
@@ -2579,8 +2602,18 @@ def phan_chung():
     _them("wp1166-yaml-that-ba-checkout-ghim", [(_co(_wd0, _n).get("with") or {}).get("ref") for _n in (JOB_DU, JOB_MANH, JOB_GOP)]
           == [REF_SU_KIEN] * 3 and WF_DOT_BIEN_DU.read_text(encoding="utf-8").count("ref: " + REF_SU_KIEN) == 3)
     # Hành vi của bước ĐO HEAD, thân lấy TỪ CHÍNH tệp YAML (không chép): HEAD đúng ⇒ 0 + dòng dương; HEAD lệch ⇒ khác 0.
-    # Windows: `bash` có thể là WSL/không có ⇒ KHÔNG thêm ca (không đếm một ca không đo là đạt); Linux thiếu bash/git ⇒ ĐỎ.
+    # Windows: KHÔNG thêm ca (không đếm một ca không đo là đạt). Ngoài Windows: `bash` lấy qua `ops/bash_nen.py::tim_bash()`
+    # (g5: gate cấm lời gọi tên trần); bộ giải trả None / thiếu git ⇒ các ca này được THÊM và ĐỎ, không bỏ qua.
+    def _dat_dung(r, b): return bool(r) and r.returncode == 0 and f"CHECKOUT_SHA={b} EVENT_SHA={b} RUN=7/1" in r.stdout
+    def _dat_lech(r): return bool(r) and r.returncode != 0
+    _them("wp1166-bash-khong-do-duoc-thi-ca-do-head-do", all(
+        tim_bash_nen(_f) is None for _f in (lambda: (None, ["không ứng viên nào đạt"]), lambda: ("", []), lambda: (b"/bin/bash", []),
+                                            lambda: None, lambda: (_ for _ in ()).throw(RuntimeError("x")))
+    ) and tim_bash_nen(lambda: ("/x/bash", [])) == "/x/bash" and chay_than_buoc(None, "true", None) is None
+        and chay_than_buoc(sys.executable, "${{ github.sha }}", None) is None
+        and not _dat_dung(chay_than_buoc(tim_bash_nen(lambda: (None, [])), "true", None), "a") and not _dat_lech(chay_than_buoc(None, "false", None)))
     if not nen_la_windows():
+        _vo = tim_bash_nen()
         with tempfile.TemporaryDirectory(prefix="wp1166-head-") as _d:
             def _git(*a): return subprocess.run(["git", "-C", _d, *a], capture_output=True, text=True, timeout=60,
                                                 env=dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull))
@@ -2592,14 +2625,9 @@ def phan_chung():
                 def _chay(sha, _n=_ten):
                     than = _sau_co(_wd0, _n)["run"].replace(REF_SU_KIEN, sha).replace("${{ github.run_id }}", "7").replace(
                         "${{ github.run_attempt }}", "1")
-                    try:
-                        return "${{" not in than and subprocess.run(["bash", "-e", "-c", than], cwd=_d, capture_output=True, text=True, timeout=60)
-                    except (OSError, subprocess.SubprocessError):
-                        return None
-                _dung, _lech = _chay(_b), _chay(_a)
-                _them(f"wp1166-do-head-{_ten}-dung-sha-dat", bool(_hex and _dung) and _dung.returncode == 0
-                      and f"CHECKOUT_SHA={_b} EVENT_SHA={_b} RUN=7/1" in _dung.stdout)
-                _them(f"wp1166-do-head-{_ten}-lech-sha-do", bool(_hex and _lech) and _lech.returncode != 0)
+                    return chay_than_buoc(_vo, than, _d)
+                _them(f"wp1166-do-head-{_ten}-dung-sha-dat", _hex and _dat_dung(_chay(_b), _b))
+                _them(f"wp1166-do-head-{_ten}-lech-sha-do", _hex and _dat_lech(_chay(_a)))
     # Biên nhận mảnh: fixture hợp lệ ĐẠT; thiếu mảnh / sai SHA / bị huỷ / dở ⇒ ĐỎ đúng dòng.
     _sha, _sha2 = "a" * 40, "b" * 40
 

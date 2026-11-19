@@ -5,9 +5,18 @@ param(
     [Parameter(Mandatory = $true)][string]$AddonRoot,
     [Parameter(Mandatory = $true)][string]$ScratchRoot,
     [Parameter(Mandatory = $true)][string]$ReportPath,
-    [switch]$Counterexamples
+    [switch]$Counterexamples,
+    # Culture to run under (for example tr-TR). Counterexample children always receive the parent's culture.
+    [string]$Culture
 )
 Set-StrictMode -Version 3.0
+if ($PSBoundParameters.ContainsKey('Culture') -and $Culture.Length -gt 0) {
+    $requestedCulture = [Globalization.CultureInfo]::GetCultureInfo($Culture)
+    [Threading.Thread]::CurrentThread.CurrentCulture = $requestedCulture
+    [Threading.Thread]::CurrentThread.CurrentUICulture = $requestedCulture
+    [Globalization.CultureInfo]::DefaultThreadCurrentCulture = $requestedCulture
+    [Globalization.CultureInfo]::DefaultThreadCurrentUICulture = $requestedCulture
+}
 $ErrorActionPreference = 'Stop'
 $utf8 = [Text.UTF8Encoding]::new($false, $true)
 $windows = [Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT
@@ -15,7 +24,8 @@ $cases = [Collections.Generic.List[object]]::new()
 $mutations = [Collections.Generic.List[object]]::new()
 $report = [ordered]@{
     schema = 'proxima_activation_tests.v1'; ps_version = "$($PSVersionTable.PSVersion)"
-    ps_edition = $PSVersionTable.PSEdition; culture = [Globalization.CultureInfo]::CurrentCulture.Name
+    ps_edition = $PSVersionTable.PSEdition; culture = [Globalization.CultureInfo]::CurrentCulture.Name; culture_at_end = $null
+    ui_culture = [Globalization.CultureInfo]::CurrentUICulture.Name
     addon_root = $AddonRoot; scratch_run = $null; setup_error = $null
     total = 0; passed = 0; failed_ids = @(); skipped_ids = @(); setup_error_ids = @()
     required_ids = @(); id_errors = @(); child_timeout_sec = 300
@@ -189,7 +199,7 @@ function Invoke-Counterexample($Mutation) {
         id = $Mutation.id; target_case = $Mutation.target; anchor = $Mutation.anchor
         replacement = $Mutation.replacement; source_sha256 = $report.source_hashes['scripts/ProximaActivation.psm1']
         mutated_sha256 = $null; rc = $null; report_path = $null; stdout_path = $null; stderr_path = $null
-        timed_out = $false
+        timed_out = $false; child_culture = $null
         verdict = $null; reason = $null
     }
     $mutations.Add($record)
@@ -214,6 +224,8 @@ function Invoke-Counterexample($Mutation) {
         $record.stderr_path = [IO.Path]::Combine($dir, 'stderr.txt')
         $arguments = @('-NoProfile', '-NonInteractive', '-File', $PSCommandPath, '-AddonRoot', $addon,
             '-ScratchRoot', $dir, '-ReportPath', $record.report_path)
+        # The child runs under the parent's culture, stated explicitly and checked from its report.
+        if ($report.culture.Length -gt 0) { $arguments += @('-Culture', $report.culture) }
         $start = [Diagnostics.ProcessStartInfo]::new($exe)
         $start.Arguments = @($arguments | ForEach-Object { ConvertTo-ArgText $_ }) -join ' '
         $start.UseShellExecute = $false
@@ -253,6 +265,10 @@ function Invoke-Counterexample($Mutation) {
         $moduleSha = $childReport.source_hashes.PSObject.Properties['scripts/ProximaActivation.psm1'].Value
         if ($moduleSha -cne $record.mutated_sha256 -or $childReport.harness_sha256 -cne $report.harness_sha256 -or
             $childReport.ps_edition -cne $report.ps_edition) { throw 'Counterexample child provenance mismatch' }
+        $record.child_culture = [string]$childReport.culture
+        if ([string]$childReport.culture -cne $report.culture -or [string]$childReport.culture_at_end -cne $report.culture) {
+            throw "Counterexample child ran under culture '$($childReport.culture)'/'$($childReport.culture_at_end)', parent under '$($report.culture)'"
+        }
         if ($record.rc -ne 1 -or @($childReport.failed_ids).Count -ne 1 -or $hit.Count -ne 1 -or
             -not $hit[0].reason.StartsWith($Mutation.reason, [StringComparison]::Ordinal)) {
             Stop-Case "Expected only $($Mutation.target) to fail with '$($Mutation.reason)'"
@@ -795,6 +811,7 @@ try {
     $report.setup_error = $_.Exception.Message
 }
 
+$report.culture_at_end = [Globalization.CultureInfo]::CurrentCulture.Name
 $report.cases = $cases.ToArray()
 $report.counterexamples = $mutations.ToArray()
 $report.total = $cases.Count

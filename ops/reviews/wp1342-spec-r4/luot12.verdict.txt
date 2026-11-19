@@ -1,0 +1,20 @@
+codex
+**Finding P2 — M7/J9 đổi thứ tự kiểm và che dấu hiệu k2.** Bản 11 liệt kê kiểm signaled trước truy vấn job, đúng với thứ tự trong bản chụp `728eccab`. Bản 12 yêu cầu đọc `ActiveProcesses == 0` trước, *rồi* mới chờ signaled. Dưới k2, J9 giữ bản sao job handle và tiến trình phụ vẫn sống trong job, nên phép kiểm job rỗng thất bại trước khi ca có thể báo nhãn “phụ chưa signaled trong 5 s VÀ thiếu `cleanup:xac_nhan`”. N7 yêu cầu đúng nhãn, nên kết quả này không tính là giết k2. Cần giữ phép truy vấn job ngay sau khi hàm ném, lưu kết quả, rồi chấm dấu hiệu k2 trước khi báo lỗi job chưa rỗng.
+
+**Toàn bộ delta bản 11 → bản 12**
+
+- §0 thêm kết quả native trên `728eccab`, chẩn đoán cuộc đua quan sát, kết quả N5, trạng thái đột biến và numstat 548 dòng thêm.
+- §4 M6 thêm quy tắc chờ tối đa 5 s sau khi hàm trả hoặc ném. M7 áp dụng cho J2, J3, J8 và hai handle của J9, cập nhật nhãn J3, đồng thời đổi thứ tự kiểm J9 như finding trên.
+- §4b cập nhật dấu hiệu a1, k1 và k2, thêm J11 + S1 làm đối chứng cho b và abi. §5 N7 dùng cặp đối chứng đó cho hai đột biến này.
+- §8 ghi numstat 548, dự kiến số dòng thêm giữ nguyên sau Q7 và yêu cầu đo lại theo trần 550.
+- §9 thêm Q7 và Q8. §11 thêm nhật ký đo native và lượt xác nhận delta. Các phần còn lại giữ nguyên từng byte.
+
+**Đánh giá theo Q7**
+
+1. **Chờ signaled.** Kiểm AST trong RAM xác nhận đủ năm lời gọi cần đổi ở J2, J3, J8 và J9. Các phép kiểm trước cú giết và J10b giữ nguyên. M4 giữ nguyên bảo đảm job rỗng khi hàm trả. Dưới a1, cháu chờ `tha_j3` 300 s nên `xac_nhan` vẫn ném `job not empty` trước phép chờ handle. Dưới k1, con J8 vẫn treo qua cửa sổ 5 s. Các dấu hiệu đột biến khác vẫn giữ được theo đặc tả, trừ k2 bị thứ tự kiểm J9 che như finding trên.
+2. **Đối chứng b và abi.** J11 đi qua binding native và `_1174_win_job_empty`, kiểm cả handle tệp bị từ chối lẫn job rỗng được chấp nhận. S1 kiểm ba hằng thuần. Cả hai đều tránh `_1174_win_spawn_job` và thao tác phụ thuộc layout `THREADENTRY32`, nên phù hợp để xác nhận giàn test và môi trường Windows hoạt động dưới b và abi.
+3. **Ghi nhận bằng chứng.** §0 và §11 khớp tóm tắt native về J3/J9 đỏ 10/10, timeout tức thời rồi signaled trong dưới 50 µs, và các đột biến chưa đo được. §8 giữ yêu cầu đo lại numstat. Windows native sau delta ở trạng thái `not_run` trong phiên Linux này.
+
+Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`. SHA-256 bản 11 khớp tiền tố được giao. SHA-256 bản 12 là `7d73c43f591149f784c2b2f9c7f1e33612e8b443e1dbe341f4c3fcdce298538f`. Phiên `openai_codex` qua API, transport `machine`, chỉ đọc và không gọi mạng.
+
+KET_LUAN: request_changes

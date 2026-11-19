@@ -1,0 +1,24 @@
+codex
+**Lượt 13, Issue #1342 — Finding P2 lượt 12 đã đóng.**
+
+**Toàn bộ thay đổi từ bản 12**
+
+- **M7/J9, dòng 74.** Sau khi hàm ném, đọc và lưu trạng thái query cùng `ActiveProcesses`. Chấm handle phụ trước, handle con tiếp theo, rồi mới assert kết quả query đã lưu. Thêm câu đối chiếu thứ tự chấm với fixture head.
+- **§9/Q9, dòng 167.** Chủ kho cấp thêm đúng một lời gọi Codex để xác nhận bản sửa J9, nâng tổng lên 13.
+- **§11, dòng 192.** Thêm kết quả lượt 12, nội dung sửa theo Q9 và đường dẫn lưu verdict lượt 13.
+
+Đối chiếu theo byte xác nhận toàn bộ phần còn lại giữ nguyên.
+
+**Đánh giá (2).** Dưới k2, phụ vẫn sống sau 5 giây và ngoại lệ thiếu `cleanup:xac_nhan`. J9 đỏ đúng nhãn k2 trước khi kết quả job được assert. Dưới a1, phụ cũng còn sống nhưng ngoại lệ có `cleanup:xac_nhan`, nên hai trường hợp vẫn phân biệt được. Trên đường sạch, hai handle có tối đa 5 giây để chuyển sang signaled, còn phép assert job rỗng dùng mẫu đã lấy ngay sau khi hàm ném. Khoảng chờ handle không thể làm một mẫu ban đầu khác 0 thành đạt.
+
+AST của fixture được giao xác nhận thứ tự assert tại dòng 18878, 18880 và 18881 là **phụ → con → job**. Fixture head thực hiện query ở bước cuối. Bản đặc tả mới chuyển **thời điểm lấy mẫu** lên ngay sau khi hàm ném và giữ thứ tự assert đó.
+
+**Đánh giá (3).** §4b giữ dấu hiệu phân biệt a1/k2. N7 vẫn yêu cầu assertion đích đỏ đúng nhãn và đối chứng đạt. Hai mục khớp với thứ tự J9 mới và giữ nguyên từng byte. Trong phạm vi xác nhận, không phát hiện hồi quy hay finding P0–P3.
+
+**Bằng chứng.** `diff -u` trả `1` với đúng ba vùng thay đổi. `python -B` trả `0` sau phép so sánh byte, kiểm thứ tự AST và năm ca mô phỏng logic chấm J9 trong RAM. Windows native ở trạng thái `not_run`. Phiên Codex qua API, transport `machine`, chỉ đọc và không gọi mạng. OID `728eccab` không phân giải được trong clone, nên đối chiếu head dựa trên fixture được giao.
+
+- Base `e2c3b82f818bd1739d31261e8129d3ef44915acf`, tree `7693a24fa9169d91370dae782ec51eabd3fa0a35`
+- SHA-256 bản 12 `7d73c43f591149f784c2b2f9c7f1e33612e8b443e1dbe341f4c3fcdce298538f`
+- SHA-256 bản mới `f435eb5c035e511f92c77321d2a2573f9088a17b4fe6a2ccca9c64a794cd1eb8`
+
+KET_LUAN: approve

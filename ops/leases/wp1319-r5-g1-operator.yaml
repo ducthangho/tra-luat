@@ -28,10 +28,14 @@ granted_on_instruction: 'chu kho 19/11 "Tiep di" sau land #1378/#1419; muc tieu 
 recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-19T15:00:33Z'
-heartbeat_at: '2026-11-19T15:00:33Z'
-lease_until: '2026-11-19T18:00:33Z'
-lease_expires_at_utc: '2026-11-19T18:00:33Z'
+heartbeat_at: '2026-11-19T15:14:13Z'
+lease_until: '2026-11-19T15:14:13Z'
+lease_expires_at_utc: '2026-11-19T15:14:13Z'
 max_lease_hours: 3
 review_calls_limit: 0
 native_runs_limit_per_host: 1
 native_step_reruns_limit: 1
+native_runs_used: 'ASUS 1 + chay lai 1 (loi dung: alias h), VM 1 + 1, Desktop 1 + 1 — chi doc'
+withdrawn_at_utc: '2026-11-19T15:14:13Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'xong do chi doc r5 + MATRIX muc I; khong co khoa host nao duoc lay'

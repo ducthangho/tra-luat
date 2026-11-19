@@ -10,7 +10,7 @@
 | 1 | g1 | **Hỏng do lỗi dựng.** Chạy bằng Windows PowerShell 5.1: phiên ấy không nạp được `Get-FileHash`, và script ném lỗi khi gán `errors`. Không có JSON. |
 | 2 | g1 | **Hỏng do lỗi dựng.** Chạy bằng pwsh 7.6.9: biến vòng lặp `$r` ghi đè biến kết quả `$R`, vì tên biến PowerShell không phân biệt hoa thường; lỗi `The property 'caches' cannot be found`. Không có JSON. |
 | — | — | Hết 2/2 lượt của g1. Đã sửa (đổi `$r` thành `$scanRoot`; soát lại tên biến không phân biệt hoa thường: không còn trùng). Chủ kho cấp thêm 1 lượt (g2). |
-| 3 | g2 | **Đạt.** Script sha256 `30dd27702d74e86f559db5d2e9d5b13a048bf759f58dc9a65ef2faa1fd3707b1`, băm khớp giữa container và ASUS, parser PS 7 cho 0 lỗi. JSON 21:18:52Z, `errors` rỗng. |
+| 3 | g2 | **Đạt.** Script sha256 `30dd27702d74e86f559db5d2e9d5b13a048bf759f58dc9a65ef2faa1fd3707b1` (chép nguyên văn ở mục *Script đo* bên dưới), băm khớp giữa container và ASUS, parser PS 7 cho 0 lỗi. Lệnh chạy và trạng thái thoát ở mục *Lệnh chạy lượt 3*. JSON 21:18:52Z, `errors` rỗng. |
 
 Cả ba lượt chỉ ghi vào thư mục làm việc của phiên.
 
@@ -35,6 +35,71 @@ Cả ba lượt chỉ ghi vào thư mục làm việc của phiên.
 - Biến môi trường của các lượt khởi chạy add-on về sau được đặt trong tiến trình, nên không đo trước được.
 - Chỉ quét `D:\tl-win` và `C:\Users\admin\tl-work` tới độ sâu 4, cộng thư mục mặc định. Cache đặt ở nơi khác không nằm trong phép đo.
 - Tiến trình chỉ lọc theo đường dẫn thực thi của `node.exe`/`chrome.exe`.
+
+## Lệnh chạy lượt 3
+Chạy qua Desktop Commander, shell `pwsh` (PS 7.6.9), một dòng:
+
+```powershell
+$d='C:\Users\admin\tl-work\r6-session_015GtxrapMSm976JLC7Fp1HM'; Remove-Variable -Name e -ErrorAction SilentlyContinue; & "$d\R6.ps1" -Out "$d\r6-asus-g2.json" *> "$d\r6-run3.log"; 'OK=' + $?; Get-Content "$d\r6-run3.log"
+```
+
+Đầu ra nguyên văn:
+
+```text
+OK=True
+SHA256=6dcdbafcd1eb80b22411443244f5ad87bed9bad3e2d3b752f5d6d056f8af74b2
+```
+
+Trạng thái thoát: `$?` = `True` sau lời gọi script. Script là `.ps1` gọi trong cùng tiến trình nên **không** đặt `$LASTEXITCODE`; với `$ErrorActionPreference = 'Stop'`, một lỗi kết thúc sẽ làm `$?` = `False` (như lượt 2 đã cho `OK=False`). Dòng `SHA256=` là dòng cuối của script, chỉ chạy sau khi JSON đã ghi xong. Tiến trình Desktop Commander kết thúc bình thường.
+
+Kiểm trước lượt chạy (cùng phiên pwsh, lệnh riêng): `SCRIPT=30dd2770…`, `PARSE_ERRORS=0`.
+
+## Script đo (`R6.ps1`, sha256 `30dd27702d74e86f559db5d2e9d5b13a048bf759f58dc9a65ef2faa1fd3707b1`)
+Tệp trên host dùng LF. Nội dung khối dưới, cộng LF ở cuối dòng cuối, ra đúng băm trên; đã kiểm trong container.
+
+```powershell
+# WP1319 r6 (ops/specs/wp1319-r6.md): do CHI DOC vi tri cache trinh duyet cua add-on Playwright tren ASUS.
+param([Parameter(Mandatory)][string]$Out)
+$ErrorActionPreference = 'Stop'
+$R = [ordered]@{ schema = 'wp1319_r6_probe.v1'; utc = (Get-Date).ToUniversalTime().ToString('o'); host = $env:COMPUTERNAME; errors = @() }
+$R.env = [ordered]@{}
+foreach ($n in 'TL_PW_ROOT', 'PLAYWRIGHT_BROWSERS_PATH') {
+  $R.env[$n] = [ordered]@{ process = [Environment]::GetEnvironmentVariable($n, 'Process'); user = [Environment]::GetEnvironmentVariable($n, 'User'); machine = [Environment]::GetEnvironmentVariable($n, 'Machine') }
+}
+$roots = @('D:\tl-win', 'C:\Users\admin\tl-work')
+$found = New-Object System.Collections.Generic.List[string]
+foreach ($scanRoot in $roots) {
+  if (-not (Test-Path -LiteralPath $scanRoot)) { $R.errors += "root_missing: $scanRoot"; continue }
+  try {
+    @(Get-ChildItem -LiteralPath $scanRoot -Directory -Recurse -Depth 4 -Force -ErrorAction SilentlyContinue | Where-Object { $_.Name -in 'browsers', 'ms-playwright' }) | ForEach-Object { $found.Add($_.FullName) }
+  } catch { $R.errors += "scan ${scanRoot}: $($_.Exception.Message)" }
+}
+$def = 'C:\Users\admin\AppData\Local\ms-playwright'
+if (Test-Path -LiteralPath $def) { $found.Add($def) }
+$R.caches = @(foreach ($d in ($found | Select-Object -Unique)) {
+    $x = [ordered]@{ path = $d; drive = $d.Substring(0, 1) }
+    try {
+      $files = @(Get-ChildItem -LiteralPath $d -Recurse -Force -File -ErrorAction SilentlyContinue)
+      $sum = 0L; foreach ($f in $files) { $sum += $f.Length }
+      $x.files = $files.Count; $x.bytes = $sum
+      $subs = @(Get-ChildItem -LiteralPath $d -Directory -Force -ErrorAction SilentlyContinue)
+      $x.children = @($subs | ForEach-Object { $_.Name })
+      $x.installation_complete = @($subs | Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'INSTALLATION_COMPLETE') } | ForEach-Object { $_.Name })
+      $root = Split-Path -Parent $d
+      $lock = Join-Path $root 'install\0.1.0\package-lock.json'
+      $x.addon_root = $root
+      $x.lock_present = (Test-Path -LiteralPath $lock)
+      if ($x.lock_present) { $x.lock_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $lock).Hash.ToLowerInvariant() }
+    } catch { $R.errors += "cache ${d}: $($_.Exception.Message)" }
+    $x })
+$prefixes = @($R.caches | ForEach-Object { $_.addon_root }) + @($def)
+$R.procs = @(Get-CimInstance Win32_Process -Filter "Name='node.exe' OR Name='chrome.exe'" | Where-Object { $p = $_.ExecutablePath; $p -and @($prefixes | Where-Object { $p.StartsWith($_, [StringComparison]::OrdinalIgnoreCase) }).Count -gt 0 } | ForEach-Object { [ordered]@{ name = $_.Name; exe = $_.ExecutablePath } })
+$R.free = [ordered]@{}
+foreach ($l in 'C', 'D') { try { $R.free[$l] = [int64](Get-Volume -DriveLetter $l).SizeRemaining } catch { $R.errors += "free ${l}: $($_.Exception.Message)" } }
+$json = $R | ConvertTo-Json -Depth 8
+[IO.File]::WriteAllText($Out, $json + "`n", [Text.UTF8Encoding]::new($false))
+'SHA256=' + (Get-FileHash -Algorithm SHA256 -LiteralPath $Out).Hash.ToLowerInvariant()
+```
 
 ## Bằng chứng nguyên văn
 `r6-asus-g2.json` trên host, sha256 `6dcdbafcd1eb80b22411443244f5ad87bed9bad3e2d3b752f5d6d056f8af74b2` (in ở host). Tệp trên host dùng CRLF giữa các dòng và một LF ở cuối. Đổi mỗi LF trong khối dưới thành CRLF rồi thêm một LF ở cuối sẽ ra đúng băm trên; đã kiểm trong container.

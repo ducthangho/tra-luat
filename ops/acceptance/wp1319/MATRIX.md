@@ -214,3 +214,9 @@ Cần chủ kho quyết định: nâng trần WP-PXU (+1 Executor, +1 native Des
 
      Hàng này chỉ chuyển `passed` khi WP-PXU được review chấp nhận **và** hàm đã chạy trên OS thật sau một lần gỡ thật. Dự kiến dịp đo là lúc dọn sau U8, nếu chủ kho quyết định gỡ.
   3. **Bỏ yêu cầu `InstallLocation`** (sai với electron-builder per-user). Thay bằng: thư mục cài suy từ `QuietUninstallString` của **đúng một** khoá HKCU, và thư mục đó chứa `Proxima.exe` đúng băm `6990dce4…`.
+
+### H.8 WP-PXU (#1409) xong review g2 `approve_scoped`
+| Hàng | Kết quả | Điều kiện đọc |
+|---|---|---|
+| `Remove-ProximaUninstallResidue` (hàm dọn tồn dư có kiểm soát) | **passed (scoped, Desktop, PS 5.1 + PS 7)** | Xoá qua handle đã kiểm, cô lập updater bằng đổi tên nguyên tử, kiểm final path trước mọi nhánh xoá. 31/32 ca; 10/10 phản chứng do harness cấp. **Không đo:** symlink (PU13s, thiếu quyền), UNC thật. Chỉ dùng LocalAppData giả; chưa chạy sau một lần gỡ thật |
+| NSIS "quy trình gỡ" (tiêu chí sửa ở H.7) | **chờ một lần gỡ thật** | Hàm đã đạt; còn thiếu một lần chạy hàm trên OS thật ngay sau bộ gỡ chính thức. Dự kiến lúc dọn sau U8, nếu chủ kho quyết định gỡ |

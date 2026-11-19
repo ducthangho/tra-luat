@@ -77,3 +77,65 @@ No P0 identified.
 Exact limits to record: §4 literal PASS is unmet: setup_error_ids is nonempty, defaults are 29/30, and counterexamples lack native harness credit. Legacy counts meet numeric criteria only through derived evidence; reviewed artifacts contain no real installer/uninstaller execution. PU13 symlink behavior is unmeasured; hardlink assertions completed by control-flow evidence, but its accepted/refused outcome lacks standalone reporting. Corrected harness is unexecuted; UNC evidence covers classification only. These limits do **not** support approve_scoped while P1 remains.
 ```
 </details>
+
+---
+
+# Review lease g2 (1/1): bản sửa P1 + kết quả N2
+
+- **Reviewer:** Codex CLI 0.169.0, `-m gpt-6-astra`, chạy trong container điều phối, chỉ đọc. Model tự khai **`KHONG_do_duoc`**. Thời gian 03:31:51Z–03:34:18Z ngày 19/11, rc 0. Verdict gốc có sha256 `7c1d8af2…`.
+- **Đối tượng:**
+  - mã tại `9cdfeaf5b` (HEAD lúc review là `95bf31e17`, chỉ khác sổ sách);
+  - bộ con N2: zip `6152f3d9…`, MANIFEST `c03c1235…` của zip đầy đủ `64efd2de…`.
+
+## Verdict: **`approve_scoped`**. Không còn P0/P1; P1 của review 2 đã đóng.
+| Điểm | Kết luận |
+|---|---|
+| Nguồn gốc | Băm module `81c1164b…` và harness `b2627283…` khớp blob git trong cả 4 report |
+| Sửa P1 | `M:507` kiểm final path **trước cả hai** nhánh xoá (`M:512`, `M:529`). PU23 xác nhận trên máy thật rằng junction trực tiếp ở InstallDir vẫn được gỡ; PU24/PU29 từ chối khi `Programs` bị tráo |
+| Thứ tự xoá, khôi phục | Không thấy lỗi mới |
+| Test | PU29 đúng kịch bản; PU13 tách hardlink/symlink; `requiredIds` 32/42; CU08 và CU10 khai báo đúng; bản vá rc-2 không đổi so với `42fb4743a` và đúng |
+| Native | 31/32 · 31/32 · 41/42 · 41/42; `setup_error_ids=[PU13s]`; 10/10 CU `killed` ở cả hai runtime, khớp đúng tập ca; reviewer dựng lại độc lập 20 băm đột biến |
+
+**P2 (câu chữ):** RESULTS dòng 52 vẫn ghi hardlink "chưa đo"; dòng 29 và 53 còn lời khai đã cũ. **Đã sửa**, có ghi rõ là đã được thay thế và giữ lại lịch sử.
+
+**Giới hạn phải ghi:** xem mục "Kết luận" cuối `RESULTS.md`.
+
+<details><summary>Nguyên văn verdict của reviewer (sha256 7c1d8af2…)</summary>
+
+```text
+VERDICT: approve_scoped
+
+Model: KHONG_do_duoc. Provider: OpenAI; surface: Codex/Linux tools; transport: tool-mediated. Independent review; no network, native execution, repository modifications, or git writes.
+
+Reviewed HEAD `95bf31e17bd0e542b75751db4382599eea9bfc62`, tree `59b977a5dbff83774bf970e24cb74e8066428a60`, branch `ccr-8ee03d7f-vnmqk0`. Native source: `9cdfeaf5b1eb17d0d75eb4ce6defe5a29ba69e7a`; subsequent changes affect only RESULTS and lease bookkeeping. Worktree clean.
+
+References: M/T = `.agents/skills/proxima-control/{scripts/ProximaInstall.psm1,tests/ProximaInstall.Tests.ps1}`; R = `ops/acceptance/wp-pxu/RESULTS.md`; E = supplied EVID; D = E/evidence-pxu2. Report names below have prefix `PXU-N2-` and suffix `-report.json`. JSON selectors identify cases by `id`.
+
+| Check | Evidence and conclusion |
+|---|---|
+| Integrity | Frozen spec SHA matches `4c37b3b5…db914`. Subset ZIP SHA matches `6152f3d9565b5911147708c9487be4e0420620f48d0801117525b2d5f7759d60`; MANIFEST matches `c03c123505751a0d85752000ccd724996123d234d49bf8b1d22110153513c5fb`. All six relayed manifest-listed files match sizes/hashes; all seven ZIP files match extraction, including MANIFEST. |
+| Source provenance | Each report’s `$.source_hashes['scripts/ProximaInstall.psm1']` equals git-blob SHA256 `81c1164bf913b181ae5e8e88a04b4498abd592d1ff2e3a25f6cf24d7ed57a82a`; `$.harness_sha256` equals `b26272831150b072a1149eb1fff771a60edfd3a5ad190a1027e9010fb7692cae`. |
+| P1 fix | M:507 validates final path before BOTH deletions, M:512 and M:529. OPEN_REPARSE_POINT opens the final link itself (M:103); PU23 passes with empty/nonempty destinations and requires unlink plus preserved destination (T:776–802). This supports the link’s own-path behavior on the measured host. PU24/PU29 reject objects reached through swapped Programs. |
+| Removal/restoration | M:454–492 atomically renames updater, validates held directory/file paths and types, hashes through the deletion handle. M:529–574 deletes InstallDir, verified installer, then nonrecursively deletes quarantine. M:580–599 closes handles before restoration; M:430–447 never overwrites an occupied original name. Post-installer failures retain/report quarantine. No new deletion-order defect identified. |
+| Tests | T:828–859 implements review-2’s scenario: outside junction remains a reparse point, marker exists, RESIDUE_CHANGED, zero actions. T:567–604 separates measurable hardlink from privileged symlink. T:40–42 requires 32 baseline/42 counterexample IDs. CU08 targets PU24+PU29; CU10 reproduces validation bypass only for reparse objects, targeting PU29 (T:1013–1023). |
+| Dispatcher | Entire Invoke-Counterexample is byte-identical to 42fb4743a. T:322–369 correctly uses completed parent cases, checks provenance/culture, rejects global setup/skip/ID errors and unknown or target setup failures, then requires exact target failures with declared reason prefixes. Matching setup IDs alone does not prove environmental causation. |
+| ps51-Install-default | Desktop, en-AU, 31/32. |
+| ps7-Install-default | Core, en-AU, 31/32. |
+| ps51-Install-cx-trTR | Desktop, tr-TR, 41/42. |
+| ps7-Install-cx-trTR | Core, tr-TR, 41/42. |
+| Common native fields | All four: `$.failed_ids=[]`, `$.setup_error_ids=[PU13s]`, `$.id_errors=[]`, no skips/global setup error; ending culture matches starting culture. `$.cases[PU13].reason=hardlink=CLEANED`; PU23/PU24/PU29 passed; PU28 reports `blocked_by=System.IO.IOException`. |
+| Counterexamples | Both `$.counterexamples` arrays contain ten killed mutants, rc=2, exact declared failure sets and matching reasons. CU08={PU24,PU29}; CU10={PU29}; others match T:960–1032. Every env_limited_ids={PU13s}, subset of parent setup errors and disjoint from targets; child_culture=tr-TR. All 20 mutation hashes independently reproduced from recorded edits. |
+
+P0/P1: none outstanding identified; review-2 P1 closed.
+
+P2, nonblocking narrative inconsistency: R:22 and R:27 correct both specific review-2 errors, but R:52 still calls hardlink unmeasured; R:29/53 retain stale “HEAD/unexecuted” wording. Reading the historical summary alone misstates coverage. Change R:52 to symlink only and explicitly date/supersede the harness statements with N2. Cross-check against R:69–71; documentation-only correction risks accidentally erasing historical failures, so preserve those results.
+
+Exact limits to record:
+
+- Literal spec §4 PASS remains unmet: PU13s has setup_error 1314, not pass; default runs are en-AU, although baseline cases also execute within tr-TR counterexample runs. H.7 keeps symlink behavior unmeasured; it does not waive PASS.
+- Legacy harnesses were not rerun at 9cdfeaf5b. Carry-forward is reasonable static scope evidence: only Install module/harness changed since N1; legacy imports and SKILL are unchanged. Manifest hashes the whole add-on but compares before/after, not frozen Install bytes (ProximaManifest.Tests.ps1:105,426). Historical counts are not newly verified native passes; raw legacy reports are absent.
+- UNC coverage is classification only (T:888–903). Full ZIP, omitted files, child reports/logs and parser outputs were unavailable. Parent records substantiate counterexample credit; full-ZIP hash cannot be independently attested. Secret-scan.json reports rc=0, not an independent rescan.
+- No real installer/uninstaller execution is evidenced here. This approval covers the measured cleanup behavior, not full §4 acceptance or the end-to-end uninstall criterion still pending under MATRIX.md:215.
+```
+</details>
+

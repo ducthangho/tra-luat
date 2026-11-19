@@ -26,7 +26,7 @@ Giữa hai commit chỉ harness Install đổi; module `ProximaInstall.psm1` gi�
 - Bản vá của phiên điều phối (`22865d8dc`) cho phép tiến trình con trả rc 2 khi mọi `setup_error` của nó đã được tiến trình cha đo là `setup_error`.
 - **Bản vá có lỗi:** nó đọc `$report.cases`, mà biến này chỉ được gán ở cuối lượt chạy. Dưới StrictMode, cả 9 CU ném lỗi `The property 'outcome' cannot be found`. *(Sửa theo review 2, P2: tiến trình con **có chạy**; lỗi xảy ra sau đó, lúc tiến trình cha xử lý kết quả. Câu cũ "trước khi tiến trình con nào kịp chạy" là sai.)* Kết quả: 29/39, cùng tập `setup_error`.
 - Tôi không thử bản vá trên Windows trước khi dùng lần chạy lại duy nhất, vì container không có PowerShell.
-- Đã sửa ở HEAD (đọc từ `$cases`, danh sách các case đã xong). **Bản sửa này CHƯA chạy native;** ngân sách chạy lại đã hết.
+- Đã sửa ở `42fb4743a` (đọc từ `$cases`, danh sách các case đã xong). Tại thời điểm N1b, bản sửa này chưa chạy native. *(Đã được thay thế: bản sửa chạy native ở **N2** (lease g2) và cấp tín dụng đúng cho 10/10 CU. Xem mục N2.)*
 
 ## Phản chứng: phân loại tay từ report của tiến trình con N1 (dữ liệu thật, không phải harness tự cấp tín dụng)
 Ở N1 các tiến trình con **đã chạy trọn** và ghi report; chỉ tiến trình cha từ chối nhận chúng. Cả 18 report đã được chép nguyên văn vào `evidence-pxu/children-N1/` (`pxu-collect.ps1`). Bảng dưới là đối chiếu tay (`N1-children-analysis.txt`).
@@ -45,12 +45,12 @@ Giữa hai commit chỉ harness Install đổi; module `ProximaInstall.psm1` gi�
 
 Ở mọi tiến trình con, ngoài các ca đích chỉ có PU13 là `setup_error`; culture là `tr-TR`/`tr-TR`. Mỗi con chạy một module đã đột biến có băm riêng.
 
-## Kết luận tạm (review 2/2: `request_changes`, xem `VERDICT-run.md`)
+## Kết luận tạm sau N1/N1b (lịch sử; review 2/2: `request_changes`, xem `VERDICT-run.md`; đã được thay thế bởi N2 + review g2 bên dưới)
 - **Đạt trong phạm vi đã đo:** 29/30 ca hành vi trên PS 5.1 và PS 7. Có cả các ca tráo junction và tráo tệp: PU23, PU24, PU25, PU28, trong đó PU28 xác nhận `blocked_by=System.IO.IOException`, tức handle chặn được việc tráo.
 - **Phản chứng:** 9/9 đột biến bị giết, đúng tập ca khai báo, trên cả hai runtime (phân loại tay).
-- **Chưa đo:**
-  - PU13 symlink/hardlink (môi trường thiếu quyền);
-  - bản sửa harness ở HEAD (để harness tự cấp tín dụng);
+- **Chưa đo (tính tới N1b):**
+  - PU13 symlink (môi trường thiếu quyền). *Sửa theo review 3, P2: phần hardlink đã chạy ở N1; ở N2 nó có kết quả riêng `hardlink=CLEANED`.*
+  - bản sửa harness. *Đã thay thế: chạy native ở N2.*
   - UNC thật (chỉ có bộ phân loại dạng đường dẫn).
 - **Tiêu chí PASS §4 của đặc tả chưa đạt theo chữ** (`setup_error_ids` phải rỗng): cần quyết định của chủ kho, hoặc một lượt đo trên máy có Developer Mode hay quyền symlink.
 
@@ -70,4 +70,12 @@ Gói bằng chứng: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\wp-pxa\freeze-p
 - **PU13s (symlink):** `setup_error`, lỗi 1314, vì máy thiếu quyền. Đây là ca duy nhất không đo được.
 - **Phản chứng:** mỗi CU làm đỏ đúng tập ca khai báo, `env_limited=[PU13s]`, tiến trình con chạy `tr-TR`. CU08 → PU24, PU29 · CU10 → PU29. Các CU còn lại khớp bảng N1. Bản vá rc-2 của phiên điều phối nay **đã chạy native** và cấp đúng.
 - 4 harness cũ không chạy lại: module `ProximaInstall` không được chúng nạp, và số đếm N1 giữ nguyên.
+
+## Kết luận (review g2 1/1: **`approve_scoped`**, xem `VERDICT-run.md` mục g2)
+- **Đạt (scoped, Desktop, PS 5.1 + PS 7):** 31/32 ca hành vi; 41/42 khi có phản chứng `tr-TR`; harness tự cấp 10/10 CU. P1 của review 2 đã đóng: PU29 đạt, CU10 bị giết.
+- **Giới hạn phải ghi:**
+  - PU13s (symlink) `setup_error` 1314, nên PASS §4 **theo chữ chưa đạt**. Quyết định H.7 giữ "chưa đo", không miễn tiêu chí.
+  - 4 harness cũ không chạy lại ở `9cdfeaf5b`. Việc mang số đếm N1 sang là suy luận tĩnh, vì chỉ module và harness Install đổi.
+  - UNC: chỉ có bộ phân loại.
+  - Chưa chạy bộ cài/bộ gỡ thật cùng hàm này. Hàng "quy trình gỡ" của NSIS (MATRIX H.7) vẫn chờ một lần gỡ thật.
 

@@ -40,9 +40,9 @@ recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: [wp-pxu-r1-g1-executor]
 thay_the_cho_note: 'g2 thay g1 vi chu kho nang tran sau review 2/2 request_changes; g1 con han nen ghi bia mo hai chieu (g1.da_bi_thay_the)'
 leased_at_utc: '2026-11-19T03:13:29Z'
-heartbeat_at: '2026-11-19T03:13:29Z'
-lease_until: '2026-11-19T11:13:29Z'
-lease_expires_at_utc: '2026-11-19T11:13:29Z'
+heartbeat_at: '2026-11-19T03:35:08Z'
+lease_until: '2026-11-19T03:35:08Z'
+lease_expires_at_utc: '2026-11-19T03:35:08Z'
 max_lease_hours: 8
 executor_calls_limit: 1
 executor_calls_used: 1
@@ -55,4 +55,7 @@ nang_tran_granted_by: ducthangho
 nang_tran_instruction: 'chủ kho 19/11 ~03:07Z "1. Tiếp tục làm đi" trả lời đề xuất nâng trần WP-PXU (+1 Executor, +1 native Desktop, +1 review) để sửa P1 review 2/2'
 nang_tran_scope: 'g2: Executor 1 (sua P1 tinh: kiem final path truoc moi nhanh xoa o InstallDir + mo rong PU24), native Desktop 1 (+1 chay lai khi loi dung), review 1'
 usage_before_g2: 'g1: executor 2/2, review 2/2, native 1 + chay lai 1'
-
+native_runs_used_g2: 1
+withdrawn_at_utc: '2026-11-19T03:35:08Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'xong: N2 + review g2 approve_scoped; het ngan sach g2 (executor 1/1, native 1/1, review 1/1); khoa host da nha (PXU-N2-progress.log)'

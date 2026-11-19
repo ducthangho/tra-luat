@@ -1,0 +1,6 @@
+Execute Packet1166 (PR0) r4/g4 under installed Mission67 and the current immutable spec/admission.
+Goal: scheduled and manually dispatched full mutation audits use the event commit consistently across checkout and shard aggregation; concurrent audit runs keep distinct run IDs and never cancel or replace one another.
+Write only .github/workflows/ci-dot-bien-du.yml and .claude/dev/ci_dang_ky_test.py (plus nothing else); keep schedule, test inventory, timeouts and M9 requirements.
+Add negative tests that reject moving refs, missing shards, incorrect SHA and cancelled/incomplete results. Do not claim reduced runtime.
+WP1166 r1-r3 history (closed PR #1167, H 9fc17a1) is context only: reuse ideas, never its CI/review/audit results.
+Run python .claude/dev/ci_dang_ky_test.py and actionlint on the workflow; report exact commands and rc. No Windows CI, no secrets, no other paths.

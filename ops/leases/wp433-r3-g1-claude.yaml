@@ -80,8 +80,8 @@ leased_at_utc: '2026-11-19T11:25:00Z'
 heartbeat_at: '2026-11-19T11:25:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-20T11:25:00Z'
-lease_expires_at_utc: '2026-11-20T11:25:00Z'
+lease_until: '2026-11-19T13:50:00Z'
+lease_expires_at_utc: '2026-11-19T13:50:00Z'
 lease_until_ghi_chu: '24h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
@@ -97,3 +97,13 @@ budget:
 budget_ghi_chu: 'Codex PR <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 1 (tuy chon). Ngoai ngan sach PR: 3 loi goi Codex offline review dac ta (ops/reviews/wp433p2b-spec-r1/).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han 2026-11-19T13:30:00Z (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex PR 1/10: connector sach tren bec60a9 (7009024077). CI Ubuntu 1/2: run 44522844747 tren bec60a9; attempt 2 chi chay lai 3 job do do ha tang (gate-cong-cu manh 3, 6 apt khong tai duoc ripgrep, va gom), toan bo xanh: tl selftest 1781/1781, GOM MANH 8/8. Windows native 0/1. Ngoai ngan sach PR: 3 loi goi review dac ta. Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-20T11:25:00Z'
+  han_moi_utc: '2026-11-19T13:50:00Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet #433 P2b da MERGE: PR #1421 (head bec60a9cf3757a9beedab45241a50d6aa2169fe7) merge commit c6487ff884c61085c939a75a37c657006ee690f2, human audit chu kho issuecomment-7010386768. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Lease ke nhiem (C1) chua cap luc rut; se cap sau khi lease nay het han de khong trung write set.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 3 duong dan write set sau 2026-11-19T13:50:00Z phai ra NGUOI_GIU 0.'

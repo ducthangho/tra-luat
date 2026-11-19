@@ -229,5 +229,5 @@ Cần chủ kho quyết định: nâng trần WP-PXU (+1 Executor, +1 native Des
 ### H.10 WP-U8 (#1410): backup/restore profile trên Desktop (operator làm thay theo lệnh chủ kho 19/11)
 | Hàng | Kết quả | Điều kiện đọc |
 |---|---|---|
-| U8 vế dữ liệu | **passed (scoped Desktop)** | 12 404 tệp / 180 MB; backup và restore trùng manifest (sha256 từng tệp); app mở lại và đóng êm trên profile đã restore (zip `eb1688b7…`) |
+| U8 vế dữ liệu | **passed (hẹp, scoped Desktop)**: sao chép, khôi phục, mở lại | 12 404 tệp / 180 MB; backup và restore trùng manifest (sha256 từng tệp); app mở lại và đóng êm trên profile đã restore (zip `eb1688b7…`). **Chưa đo:** `/v1/stats`, `totalRequests=0` (REST tắt mặc định). Review `approve_with_fixes` (`ops/acceptance/wp-u8/VERDICT.md`) |
 | U8 vế đăng nhập | **not_measured** | Chưa ai đăng nhập; phiên điều phối không được chạm credential. Cần chủ kho tự đăng nhập rồi đo lại |

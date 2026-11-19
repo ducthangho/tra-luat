@@ -34,9 +34,9 @@ recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 thay_the_cho_note: 'g2 (executor) da thu hoi; g3 chi la luot do bo sung, khong sua ma'
 leased_at_utc: '2026-11-19T04:35:30Z'
-heartbeat_at: '2026-11-19T04:35:30Z'
-lease_until: '2026-11-19T07:35:30Z'
-lease_expires_at_utc: '2026-11-19T07:35:30Z'
+heartbeat_at: '2026-11-19T05:30:30Z'
+lease_until: '2026-11-19T05:30:30Z'
+lease_expires_at_utc: '2026-11-19T05:30:30Z'
 max_lease_hours: 3
 executor_calls_limit: 0
 review_calls_limit: 1
@@ -46,3 +46,6 @@ native_step_reruns_limit: 1
 windows: native_vm_only_harness
 native_runs_used: 1
 evidence_zip_sha256: eba83af7ea828c04b93224bacd01002a87c198161f90635fdd9e29d62094d819
+withdrawn_at_utc: '2026-11-19T05:30:30Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'xong V1 tren VM (32/32, 42/42); khoa VM da nha; khong dung review cua g3'

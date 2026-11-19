@@ -59,7 +59,15 @@ Gói bằng chứng trên Desktop: `F:\tl-win\session_015GtxrapMSm976JLC7Fp1HM\u
 | B7 dọn | đạt | Đã xoá `backup-u8` và `.damaged-…` (mỗi cái 12 404 tệp); có kiểm nằm trong thư mục làm việc và không chứa reparse point. **Giữ** profile (21 mục) và bản cài Proxima |
 
 **Kết luận:**
-- **Vế dữ liệu: PASS** (scoped Desktop). Backup và restore trả đúng từng byte (trùng tên, kích thước, sha256 của 12 404 tệp), và app mở lại được trên profile đã khôi phục.
+- **Vế dữ liệu: PASS hẹp** (scoped Desktop, sửa theo P1 của review). Phần đạt là sao chép, khôi phục và mở lại:
+  - backup và restore trả đúng từng byte (trùng tên, kích thước, sha256 của 12 404 tệp);
+  - app mở lại và đóng êm trên profile đã khôi phục.
+
+  **Chưa đo, và không được miễn:**
+  - `GET /v1/stats` 200 và `totalRequests=0` (REST tắt theo mặc định);
+  - trạng thái "sẵn sàng" của REST.
+
+  Hai lượt mở app (`U8-L-L1-populate-result.json`, `U8-L-L2-restored-result.json`) tự ghi `passed=false`, đúng với tiêu chí đầy đủ của driver.
 - **Vế đăng nhập: `not_measured`.** Profile chưa từng đăng nhập. Muốn đo thì chủ kho tự đăng nhập trên shortcut `Proxima U8 (profile thu)`, rồi chạy lại B1–B4 + L2.
 - Bản cài Proxima 5.5.0 và profile thử **vẫn còn trên Desktop**, chờ chủ kho quyết định gỡ hay giữ.
 

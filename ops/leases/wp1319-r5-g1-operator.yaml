@@ -1,0 +1,37 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: wp1319
+revision: 5
+generation: 1
+lease_id: wp1319-r5-g1-operator
+role: operator
+executor: none
+reviewer: 'connector Codex tren PR'
+review_class: routine
+target_hosts: [TRA-LUAT-WIN, DESKTOP-T9R33P2, ASUS-LAPTOP]
+target_device_ids: [f7281f27-f79f-40a2-a2f5-b454b58a166a, a5f7076e-a491-4f84-829b-8d1fbcc1c767, 7404cfba-9034-4787-b46b-7c358126a411]
+live_change: 'khong — chi doc (U2 MachineGuid/UUID hash, U9 D: dung luong + ACL, task scheduler ASUS)'
+spec_path: ops/specs/wp1319-r5.md
+spec_hash: e96920d3a70d9c2c6f508d3c38aa30760ef65a4ad4ef16f12dc228ca0bb39dc0
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r5/RESULTS.md
+- ops/leases/wp1319-r5-g1-operator.yaml
+- ops/specs/wp1319-r5.md
+write_set_hash: 23123b5e94dfeca99c3981575cc7732c02af991dfffa60304284181373d3f21d
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: 367e722e227672dd382643896211afa6a143f549
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 19/11 "Tiep di" sau land #1378/#1419; muc tieu "Nghiem thu du di"; ADR-0067: viec chi doc khong roi E1-E5'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-19T15:00:33Z'
+heartbeat_at: '2026-11-19T15:00:33Z'
+lease_until: '2026-11-19T18:00:33Z'
+lease_expires_at_utc: '2026-11-19T18:00:33Z'
+max_lease_hours: 3
+review_calls_limit: 0
+native_runs_limit_per_host: 1
+native_step_reruns_limit: 1

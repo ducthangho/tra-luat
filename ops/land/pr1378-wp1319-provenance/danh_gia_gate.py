@@ -1,4 +1,4 @@
-"""[v2: luat gate-packet-loop-manh + gom, xem LUAT] Danh gia moc Gate output §10.2.2 cho MOT run, THEO TUNG BUOC: moi job (tru job skipped) phai co DU cac buoc bat buoc cua loai
+"""[v3: job skipped => not_measured (connector P2 PR #1419); v2: luat gate-packet-loop-manh + gom, xem LUAT] Danh gia moc Gate output §10.2.2 cho MOT run, THEO TUNG BUOC: moi job (tru job skipped) phai co DU cac buoc bat buoc cua loai
 job, va MOI buoc phai co dau hieu ket qua duong NAM TRONG CHINH output cua buoc ay (connector P1 r4469885562 tren PR #1190: ban truoc
 nhan bat ky "TỔNG: ĐẠT" nao trong log job, ma idiom_py_test in dung dong ay doc lap voi tl selftest/golden/release).
 
@@ -174,7 +174,10 @@ def main():
         if am_job and not j["name"].startswith(am_job):
             continue
         if j["conclusion"] == "skipped":
-            out.append(f"JOB {j['id']} {j['name']}: skipped (khong tinh)")
+            # v3 (connector P2 r4629096903, PR #1419): job skipped KHONG duoc bien mat khoi kq — neu khong, moc tong ra passed chi
+            # tu cac job con lai du gate chinh khong chay. Skipped => not_measured; muon mien phai co waiver rieng cua chu kho.
+            kq.append("not_measured")
+            out.append(f"JOB {j['id']} {j['name']}: skipped -> not_measured (khong suy pass)")
             continue
         b = raw(f"actions/jobs/{j['id']}/logs")
         ds = buoc(b)

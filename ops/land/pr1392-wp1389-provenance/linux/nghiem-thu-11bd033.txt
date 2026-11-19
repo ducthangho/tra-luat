@@ -1,0 +1,1053 @@
+# do lai Linux sau merge #1392 (#1389), merge 11bd0336d00b4a9544e70dcbbe049d372053a3ec; clone detached 4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd; python 3.13.18; bash /usr/bin/bash
+
+## 2026-11-19T10:46:45Z $ git rev-parse 11bd0336d00b4a9544e70dcbbe049d372053a3ec 11bd0336d00b4a9544e70dcbbe049d372053a3ec^{tree} 11bd0336d00b4a9544e70dcbbe049d372053a3ec^1 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2^{tree}
+11bd0336d00b4a9544e70dcbbe049d372053a3ec
+daf13b1e486822aacd5c8dba56c1d0a36f478feb
+cad9b1fa95da303b085a4555e85608c0b77b8ae0
+2c1c611c8d0e9c5f8ae0fac9150a6787f73721fe
+24c9726ba2101ba006734577100e6c9347c63c92
+rc=0
+
+## 2026-11-19T10:46:45Z $ git diff --numstat 11bd0336d00b4a9544e70dcbbe049d372053a3ec^1 11bd0336d00b4a9544e70dcbbe049d372053a3ec
+203	6	.agents/skills/playwright-browser/SKILL.md
+298	0	ops/acceptance/wp1389/RESULTS.md
+178	0	ops/acceptance/wp1389/REVIEW-PROMPT.md
+499	0	ops/acceptance/wp1389/VERDICT.md
+512	0	ops/acceptance/wp1389/residue_matrix.ps1
+459	0	ops/acceptance/wp1389/residue_matrix.sh
+102	0	ops/leases/wp1389-r1-g1-claude.yaml
+109	0	ops/specs/wp1389-r1.md
+rc=0
+
+## 2026-11-19T10:46:45Z $ git diff --numstat 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2 11bd0336d00b4a9544e70dcbbe049d372053a3ec
+62	3	.claude/dev/launcher.py
+895	6	.claude/dev/launcher_test.py
+335	4	.claude/dev/packet_loop.py
+862	13	.claude/dev/packet_loop_test.py
+7	7	RELEASE_MANIFEST.json
+113	0	ops/acceptance/wp1404/RESULTS.md
+275	0	ops/acceptance/wp1404/VERDICT.md
+1	0	ops/admissions/wp1308-r5-g9.json
+28	0	ops/cai_cong_cu.sh
+63	0	ops/canary/wp1308-target-canary.md
+16	17	ops/land/pr1384-wp1342-land-evidence.yaml
+11	3	ops/land/pr1384-wp1342-provenance/SHA256SUMS
+7	7	ops/land/pr1384-wp1342-provenance/bien-ban-m8.yaml
+9	3	ops/land/pr1384-wp1342-provenance/ci/provenance.yaml
+11	0	ops/land/pr1384-wp1342-provenance/kiem-dong-wp-m8.txt
+59	0	ops/land/pr1384-wp1342-provenance/linux/n134-phan-chung-d1ca71a.json
+98	0	ops/land/pr1384-wp1342-provenance/linux/n134_1384.py
+49	0	ops/land/pr1384-wp1342-provenance/linux/n2-phan-chung-d1ca71a.json
+65	0	ops/land/pr1384-wp1342-provenance/linux/n2_1384.py
+43	0	ops/land/pr1384-wp1342-provenance/wd/ci-provenance-thu-wd-44339133885.log
+89	0	ops/land/pr1384-wp1342-provenance/wd/readback-jobs-44339133885.json
+228	0	ops/land/pr1384-wp1342-provenance/wd/readback-run-44339133885.json
+21	0	ops/land/pr1384-wp1342-provenance/wd/wd-44339133885.json
+137	0	ops/land/pr1386-wp646-land-evidence.yaml
+82	0	ops/land/pr1386-wp646-provenance/SHA256SUMS
+9	0	ops/land/pr1386-wp646-provenance/ai-dang-giu-sau-rut-han.txt
+38	0	ops/land/pr1386-wp646-provenance/bien-ban-m8.yaml
+5210	0	ops/land/pr1386-wp646-provenance/ci/jobs.json
+7	0	ops/land/pr1386-wp646-provenance/ci/jobs/134713915423.trich.txt
+35	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714076791.trich.txt
+16	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714076897.trich.txt
+10	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714076949.trich.txt
+10	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714076979.trich.txt
+10	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714076986.trich.txt
+10	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077000.trich.txt
+14	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077008.trich.txt
+10	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077018.trich.txt
+14	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077024.trich.txt
+14	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077055.trich.txt
+10	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077059.trich.txt
+10	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077070.trich.txt
+14	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077077.trich.txt
+10	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077080.trich.txt
+14	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077110.trich.txt
+14	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077138.trich.txt
+14	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077202.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077210.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077244.trich.txt
+14	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077245.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077272.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077292.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077295.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077332.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077336.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077341.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077377.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077379.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077414.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077481.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077494.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077565.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077568.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714077642.trich.txt
+10	0	ops/land/pr1386-wp646-provenance/ci/jobs/134714920621.trich.txt
+15	0	ops/land/pr1386-wp646-provenance/ci/jobs/134715072702.trich.txt
+8	0	ops/land/pr1386-wp646-provenance/ci/jobs/134716716773.trich.txt
+9	0	ops/land/pr1386-wp646-provenance/ci/jobs/134726189409.trich.txt
+2750	0	ops/land/pr1386-wp646-provenance/ci/provenance.yaml
+1	0	ops/land/pr1386-wp646-provenance/ci/run.json
+5	0	ops/land/pr1386-wp646-provenance/dac-ta.txt
+43	0	ops/land/pr1386-wp646-provenance/danh-gia-gate-output-44278858848.txt
+199	0	ops/land/pr1386-wp646-provenance/danh_gia_gate.py
+21	0	ops/land/pr1386-wp646-provenance/kiem-dong-wp-m8.txt
+100	0	ops/land/pr1386-wp646-provenance/lease-wp646-r1-g1-claude-sau-rut-han.yaml.txt
+201	0	ops/land/pr1386-wp646-provenance/linux/n1-env-cd73961.json
+97	0	ops/land/pr1386-wp646-provenance/linux/n1-rig-cd73961.json
+192	0	ops/land/pr1386-wp646-provenance/linux/n1env_1386.py
+90	0	ops/land/pr1386-wp646-provenance/linux/n1rig_1386.py
+49	0	ops/land/pr1386-wp646-provenance/linux/n23-phan-chung-bf47a36.json
+66	0	ops/land/pr1386-wp646-provenance/linux/n23_1386.py
+486	0	ops/land/pr1386-wp646-provenance/linux/n4-grep-bf47a36.json
+486	0	ops/land/pr1386-wp646-provenance/linux/n4-grep-cd73961.json
+77	0	ops/land/pr1386-wp646-provenance/linux/n4_1386.py
+72	0	ops/land/pr1386-wp646-provenance/linux/n5-dot-bien-bf47a36.json
+329	0	ops/land/pr1386-wp646-provenance/linux/n5-ma-tran-31-bf47a36.json
+50	0	ops/land/pr1386-wp646-provenance/linux/n5dot_1386.py
+126	0	ops/land/pr1386-wp646-provenance/linux/n5mt_1386.py
+25	0	ops/land/pr1386-wp646-provenance/n1-n5-chay-lai.txt
+47	0	ops/land/pr1386-wp646-provenance/n1.sh
+41	0	ops/land/pr1386-wp646-provenance/n5.py
+18	0	ops/land/pr1386-wp646-provenance/nghiem-thu-bf47a36.txt
+10	0	ops/land/pr1386-wp646-provenance/phan-chung-buoc-44278858848.txt
+4720	0	ops/land/pr1386-wp646-provenance/readback-checkruns-head-cd73961.json
+106	0	ops/land/pr1386-wp646-provenance/readback-commit-bf47a36.json
+146	0	ops/land/pr1386-wp646-provenance/readback-issue-646.json
+5209	0	ops/land/pr1386-wp646-provenance/readback-jobs-44278858848.json
+371	0	ops/land/pr1386-wp646-provenance/readback-pr-1386.json
+370	0	ops/land/pr1386-wp646-provenance/readback-pr1386-comments.json
+1	0	ops/land/pr1386-wp646-provenance/readback-pr1386-review-comments.json
+1	0	ops/land/pr1386-wp646-provenance/readback-pr1386-reviews.json
+224	0	ops/land/pr1386-wp646-provenance/readback-run-44278858848.json
+677	0	ops/land/pr1386-wp646-provenance/readback-runs-head-cd73961.json
+229	0	ops/land/pr1386-wp646-provenance/readback-runs-merge-bf47a36.json
+43	0	ops/land/pr1386-wp646-provenance/wd/ci-provenance-thu-wd-44339143070.log
+89	0	ops/land/pr1386-wp646-provenance/wd/readback-jobs-44339143070.json
+228	0	ops/land/pr1386-wp646-provenance/wd/readback-run-44339143070.json
+21	0	ops/land/pr1386-wp646-provenance/wd/wd-44339143070.json
+152	0	ops/land/pr1388-wp387-land-evidence.yaml
+86	0	ops/land/pr1388-wp387-provenance/SHA256SUMS
+9	0	ops/land/pr1388-wp387-provenance/ai-dang-giu-sau-rut-han.txt
+39	0	ops/land/pr1388-wp387-provenance/bien-ban-m8.yaml
+5210	0	ops/land/pr1388-wp387-provenance/ci/jobs.json
+7	0	ops/land/pr1388-wp387-provenance/ci/jobs/134736562836.trich.txt
+10	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407745.trich.txt
+35	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407766.trich.txt
+10	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407773.trich.txt
+10	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407778.trich.txt
+10	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407793.trich.txt
+16	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407799.trich.txt
+14	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407849.trich.txt
+10	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407850.trich.txt
+14	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407873.trich.txt
+14	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407874.trich.txt
+10	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407884.trich.txt
+14	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407893.trich.txt
+14	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407936.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407942.trich.txt
+14	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407950.trich.txt
+10	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407982.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737407993.trich.txt
+10	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408000.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408008.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408017.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408019.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408029.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408033.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408046.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408069.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408085.trich.txt
+14	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408091.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408102.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408133.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408160.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408185.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408197.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408221.trich.txt
+14	0	ops/land/pr1388-wp387-provenance/ci/jobs/134737408454.trich.txt
+10	0	ops/land/pr1388-wp387-provenance/ci/jobs/134741528120.trich.txt
+8	0	ops/land/pr1388-wp387-provenance/ci/jobs/134743319574.trich.txt
+15	0	ops/land/pr1388-wp387-provenance/ci/jobs/134745702904.trich.txt
+9	0	ops/land/pr1388-wp387-provenance/ci/jobs/134752390852.trich.txt
+2750	0	ops/land/pr1388-wp387-provenance/ci/provenance.yaml
+1	0	ops/land/pr1388-wp387-provenance/ci/run.json
+7	0	ops/land/pr1388-wp387-provenance/dac-ta.txt
+43	0	ops/land/pr1388-wp387-provenance/danh-gia-gate-output-44285378727.txt
+199	0	ops/land/pr1388-wp387-provenance/danh_gia_gate.py
+32	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/TOM-TAT.md
+184	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/do-tay-n1-n2-n3-e4fdf09.json
+103	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/do_tay_1388.py
+3	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/doctor-d1ca71a.trich.txt
+3	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/doctor-e4fdf09.trich.txt
+3	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/dot-bien-e4fdf09.bat-dau.txt
+2	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/dot-bien-e4fdf09.rc.txt
+5	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/dot-bien-e4fdf09.stderr.txt
+860	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/dot-bien-e4fdf09.stdout.txt
+6	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/khong-do-duoc-ke-thua.txt
+9	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/n1-a-tren-base.txt
+4	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/n6-run-e4fdf09.txt
+9	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/ruff-F-d1ca71a.txt
+9	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/ruff-F-e4fdf09.txt
+40	0	ops/land/pr1388-wp387-provenance/do-lai-n1-n6/suite-base-d1ca71a.txt
+16	0	ops/land/pr1388-wp387-provenance/kiem-dong-wp-m8.txt
+42	0	ops/land/pr1388-wp387-provenance/launcher-test-toan-suite-e4fdf09.txt
+109	0	ops/land/pr1388-wp387-provenance/launcher-windows-44285378703.trich.txt
+102	0	ops/land/pr1388-wp387-provenance/lease-wp387-r1-g1-claude-sau-rut-han.yaml.txt
+76	0	ops/land/pr1388-wp387-provenance/loi-khai-executor-than-pr1388.md
+25	0	ops/land/pr1388-wp387-provenance/nghiem-thu-e4fdf09.txt
+10	0	ops/land/pr1388-wp387-provenance/phan-chung-buoc-44285378727.txt
+4835	0	ops/land/pr1388-wp387-provenance/readback-checkruns-head-5bcea6c.json
+118	0	ops/land/pr1388-wp387-provenance/readback-commit-e4fdf09.json
+76	0	ops/land/pr1388-wp387-provenance/readback-issue-387.json
+365	0	ops/land/pr1388-wp387-provenance/readback-jobs-44285378703.json
+5209	0	ops/land/pr1388-wp387-provenance/readback-jobs-44285378727.json
+371	0	ops/land/pr1388-wp387-provenance/readback-pr-1388.json
+370	0	ops/land/pr1388-wp387-provenance/readback-pr1388-comments.json
+1	0	ops/land/pr1388-wp387-provenance/readback-pr1388-review-comments.json
+1	0	ops/land/pr1388-wp387-provenance/readback-pr1388-reviews.json
+224	0	ops/land/pr1388-wp387-provenance/readback-run-44285378703.json
+224	0	ops/land/pr1388-wp387-provenance/readback-run-44285378727.json
+901	0	ops/land/pr1388-wp387-provenance/readback-runs-head-5bcea6c.json
+453	0	ops/land/pr1388-wp387-provenance/readback-runs-merge-e4fdf09.json
+43	0	ops/land/pr1388-wp387-provenance/wd/ci-provenance-thu-wd-44339151012.log
+89	0	ops/land/pr1388-wp387-provenance/wd/readback-jobs-44339151012.json
+228	0	ops/land/pr1388-wp387-provenance/wd/readback-run-44339151012.json
+21	0	ops/land/pr1388-wp387-provenance/wd/wd-44339151012.json
+180	0	ops/land/pr1390-wp1342-land-evidence.yaml
+239	0	ops/land/pr1390-wp1342-provenance/SHA256SUMS
+143	0	ops/land/pr1390-wp1342-provenance/ai-dang-giu-sau-rut-han.txt
+43	0	ops/land/pr1390-wp1342-provenance/bien-ban-m8.yaml
+43	0	ops/land/pr1390-wp1342-provenance/ci-provenance-thu.log
+5210	0	ops/land/pr1390-wp1342-provenance/ci/jobs.json
+7	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134879999384.trich.txt
+16	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880142752.trich.txt
+35	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880142803.trich.txt
+10	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143310.trich.txt
+14	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143333.trich.txt
+14	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143335.trich.txt
+10	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143376.trich.txt
+14	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143385.trich.txt
+14	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143387.trich.txt
+10	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143391.trich.txt
+14	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143412.trich.txt
+14	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143428.trich.txt
+14	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143467.trich.txt
+10	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143478.trich.txt
+10	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143649.trich.txt
+10	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880143670.trich.txt
+10	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880144980.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145274.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145559.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145607.trich.txt
+14	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145619.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145686.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145711.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145717.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145731.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145732.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145818.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145838.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145875.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145883.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880145981.trich.txt
+10	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880146355.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880147127.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880147680.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134880150818.trich.txt
+10	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134882234381.trich.txt
+15	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134882484197.trich.txt
+8	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134883409610.trich.txt
+9	0	ops/land/pr1390-wp1342-provenance/ci/jobs/134896177909.trich.txt
+2750	0	ops/land/pr1390-wp1342-provenance/ci/provenance.yaml
+1	0	ops/land/pr1390-wp1342-provenance/ci/run.json
+6	0	ops/land/pr1390-wp1342-provenance/dac-ta.txt
+43	0	ops/land/pr1390-wp1342-provenance/danh-gia-gate-output-44326753737.txt
+199	0	ops/land/pr1390-wp1342-provenance/danh_gia_gate.py
+14	0	ops/land/pr1390-wp1342-provenance/kiem-dong-wp-m8.txt
+6	0	ops/land/pr1390-wp1342-provenance/launcher-windows-44326753292.trich.txt
+104	0	ops/land/pr1390-wp1342-provenance/lease-wp1342-r3-g1-claude-sau-rut-han.yaml.txt
+21	0	ops/land/pr1390-wp1342-provenance/linux/do_python_1390.py
+69	0	ops/land/pr1390-wp1342-provenance/linux/dot-bien-linux.json
+60	0	ops/land/pr1390-wp1342-provenance/linux/dot_bien_linux_1390.py
+9	0	ops/land/pr1390-wp1342-provenance/linux/eol-policy-all-aeb5cae.json
+48	0	ops/land/pr1390-wp1342-provenance/linux/n23-phan-chung-aeb5cae.json
+83	0	ops/land/pr1390-wp1342-provenance/linux/n23_1390.py
+47	0	ops/land/pr1390-wp1342-provenance/linux/nghiem-thu-aeb5cae.txt
+157	0	ops/land/pr1390-wp1342-provenance/linux/suite-wp1342-wp1174.txt
+10	0	ops/land/pr1390-wp1342-provenance/phan-chung-buoc-44326753737.txt
+4919	0	ops/land/pr1390-wp1342-provenance/readback-checkruns-head-972089e.json
+118	0	ops/land/pr1390-wp1342-provenance/readback-commit-aeb5cae.json
+173	0	ops/land/pr1390-wp1342-provenance/readback-issue-1342.json
+365	0	ops/land/pr1390-wp1342-provenance/readback-jobs-44326753292.json
+5209	0	ops/land/pr1390-wp1342-provenance/readback-jobs-44326753737.json
+371	0	ops/land/pr1390-wp1342-provenance/readback-pr-1390.json
+602	0	ops/land/pr1390-wp1342-provenance/readback-pr1390-comments.json
+3	0	ops/land/pr1390-wp1342-provenance/readback-pr1390-review-comments.json
+3	0	ops/land/pr1390-wp1342-provenance/readback-pr1390-reviews.json
+228	0	ops/land/pr1390-wp1342-provenance/readback-run-44326753292.json
+228	0	ops/land/pr1390-wp1342-provenance/readback-run-44326753737.json
+917	0	ops/land/pr1390-wp1342-provenance/readback-runs-head-972089e.json
+461	0	ops/land/pr1390-wp1342-provenance/readback-runs-merge-aeb5cae.json
+4	0	ops/land/pr1390-wp1342-provenance/review-dac-ta-r3.txt
+43	0	ops/land/pr1390-wp1342-provenance/wd/ci-provenance-thu-wd-44339158716.log
+89	0	ops/land/pr1390-wp1342-provenance/wd/readback-jobs-44339158716.json
+228	0	ops/land/pr1390-wp1342-provenance/wd/readback-run-44339158716.json
+21	0	ops/land/pr1390-wp1342-provenance/wd/wd-44339158716.json
+1	0	ops/land/pr1390-wp1342-provenance/windows-native/.gitattributes
+71	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/chay-1342r3.ps1
+85	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/dot-bien-1342r3.py
+397	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/goi-1342r3.json
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_admission_valid.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_admission_wrong_scope.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_lifecycle_legacy_unchanged.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_status_closed.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_windows_claim_rejected.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_active_pending.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_fresh_reserved.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_import_retry.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_int_bool.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_json_bytes.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_keyset.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_suspended.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1174_witness_valid.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_additive_byte_preserved.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_lock_exclusive.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_lock_names.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_lock_noinherit.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_metadata_drift.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_noinherit.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_bindings.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_create.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_update.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_update_held.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_update_refuse.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_persist_update_symlink.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_read.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_swap_ancestor.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_symlink_file.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_native_volume_junction.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_pure_lock_persist_refuse.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/BASE-wp1342_pure_platform_path.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_admission_valid.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_admission_wrong_scope.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_lifecycle_legacy_unchanged.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_status_closed.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_windows_claim_rejected.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_active_pending.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_fresh_reserved.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_import_retry.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_int_bool.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_json_bytes.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_keyset.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_suspended.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1174_witness_valid.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_additive_byte_preserved.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_boot_failclosed.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_boot_stable.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_lock_exclusive.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_lock_names.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_lock_noinherit.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_metadata_drift.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_noinherit.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_bindings.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_create.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_update.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_update_held.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_update_refuse.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_persist_update_symlink.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_read.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_acl.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_drift.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_fingerprint.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_hardlink.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_nonfile.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_seed_ok.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_swap_ancestor.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_symlink_file.txt
+11	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_native_volume_junction.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_pure_lock_persist_refuse.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_pure_platform_path.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_pure_seed_acl_bang.txt
+10	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/HEAD-wp1342_pure_seed_boot_refuse.txt
+123	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/TOM-TAT.txt
+0	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/clone.log
+102	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/dot-bien.stderr.txt
+6	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/dot-bien.stdout.txt
+213	0	ops/land/pr1390-wp1342-provenance/windows-native/desktop/wp1342r3-out/dot-bien/dot-bien.json
+61	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/chay-1342r3-vm.ps1
+392	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/goi-1342r3-vm.json
+51	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/n7-1342r3.ps1
+0	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-n7-out/fetch.log
+6	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-n7-out/n7-sau-lan1-khong-reboot.txt
+6	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-n7-out/n7-sau.txt
+8	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-n7-out/n7-truoc.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_admission_valid.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_admission_wrong_scope.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_lifecycle_legacy_unchanged.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_status_closed.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_windows_claim_rejected.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_active_pending.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_fresh_reserved.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_import_retry.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_int_bool.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_json_bytes.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_keyset.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_suspended.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1174_witness_valid.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_additive_byte_preserved.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_lock_exclusive.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_lock_names.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_lock_noinherit.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_metadata_drift.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_noinherit.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_bindings.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_create.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_update.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_update_held.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_update_refuse.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_persist_update_symlink.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_read.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_swap_ancestor.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_symlink_file.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_native_volume_junction.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_pure_lock_persist_refuse.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/BASE-wp1342_pure_platform_path.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_admission_valid.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_admission_wrong_scope.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_lifecycle_legacy_unchanged.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_status_closed.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_windows_claim_rejected.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_active_pending.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_fresh_reserved.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_import_retry.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_int_bool.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_json_bytes.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_keyset.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_suspended.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1174_witness_valid.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_additive_byte_preserved.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_boot_failclosed.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_boot_stable.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_lock_exclusive.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_lock_names.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_lock_noinherit.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_metadata_drift.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_noinherit.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_bindings.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_create.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_update.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_update_held.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_update_refuse.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_persist_update_symlink.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_read.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_acl.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_drift.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_fingerprint.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_hardlink.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_nonfile.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_seed_ok.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_swap_ancestor.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_symlink_file.txt
+13	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_native_volume_junction.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_pure_lock_persist_refuse.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_pure_platform_path.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_pure_seed_acl_bang.txt
+12	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/HEAD-wp1342_pure_seed_boot_refuse.txt
+118	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/TOM-TAT.txt
+0	0	ops/land/pr1390-wp1342-provenance/windows-native/vm/wp1342r3-vm-out/clone.log
+183	0	ops/land/pr1394-wp433-land-evidence.yaml
+71	0	ops/land/pr1394-wp433-provenance/SHA256SUMS
+48	0	ops/land/pr1394-wp433-provenance/ai-dang-giu-sau-rut-han.txt
+47	0	ops/land/pr1394-wp433-provenance/bien-ban-m8.yaml
+5210	0	ops/land/pr1394-wp433-provenance/ci/jobs.json
+7	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770490879.trich.txt
+33	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645008.trich.txt
+16	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645208.trich.txt
+10	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645297.trich.txt
+14	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645307.trich.txt
+14	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645317.trich.txt
+10	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645320.trich.txt
+14	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645323.trich.txt
+10	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645328.trich.txt
+14	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645342.trich.txt
+10	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645349.trich.txt
+10	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645367.trich.txt
+14	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645376.trich.txt
+10	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645394.trich.txt
+14	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645396.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645413.trich.txt
+10	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645425.trich.txt
+14	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645430.trich.txt
+10	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645506.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645524.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645528.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645529.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645531.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645532.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645538.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645566.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645588.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645620.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645625.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645659.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645669.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645757.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770645923.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770646062.trich.txt
+14	0	ops/land/pr1394-wp433-provenance/ci/jobs/134770646131.trich.txt
+10	0	ops/land/pr1394-wp433-provenance/ci/jobs/134771531772.trich.txt
+15	0	ops/land/pr1394-wp433-provenance/ci/jobs/134772388758.trich.txt
+8	0	ops/land/pr1394-wp433-provenance/ci/jobs/134773864770.trich.txt
+9	0	ops/land/pr1394-wp433-provenance/ci/jobs/134782069116.trich.txt
+2745	0	ops/land/pr1394-wp433-provenance/ci/provenance.yaml
+1	0	ops/land/pr1394-wp433-provenance/ci/run.json
+7	0	ops/land/pr1394-wp433-provenance/dac-ta.txt
+43	0	ops/land/pr1394-wp433-provenance/danh-gia-gate-output-44295243563.txt
+199	0	ops/land/pr1394-wp433-provenance/danh_gia_gate.py
+1023	0	ops/land/pr1394-wp433-provenance/gate-release-verify-land-44295243563.trich.txt
+5	0	ops/land/pr1394-wp433-provenance/kiem-dong-wp-m8.txt
+106	0	ops/land/pr1394-wp433-provenance/lease-wp433-r1-g1-claude-sau-rut-han.yaml.txt
+87	0	ops/land/pr1394-wp433-provenance/loi-khai-executor-than-pr1394.md
+34	0	ops/land/pr1394-wp433-provenance/nghiem-thu-700fbca.txt
+47	0	ops/land/pr1394-wp433-provenance/readback-audit-6977263194.json
+2995	0	ops/land/pr1394-wp433-provenance/readback-checkruns-head-80f926c.json
+130	0	ops/land/pr1394-wp433-provenance/readback-commit-700fbca.json
+133	0	ops/land/pr1394-wp433-provenance/readback-issue-433.json
+2994	0	ops/land/pr1394-wp433-provenance/readback-jobs-44288388211.json
+5209	0	ops/land/pr1394-wp433-provenance/readback-jobs-44295243563.json
+371	0	ops/land/pr1394-wp433-provenance/readback-pr-1394.json
+351	0	ops/land/pr1394-wp433-provenance/readback-pr-1396.json
+370	0	ops/land/pr1394-wp433-provenance/readback-pr1394-comments.json
+1	0	ops/land/pr1394-wp433-provenance/readback-pr1394-review-comments.json
+1	0	ops/land/pr1394-wp433-provenance/readback-pr1394-reviews.json
+224	0	ops/land/pr1394-wp433-provenance/readback-run-44288388211.json
+224	0	ops/land/pr1394-wp433-provenance/readback-run-44295243563.json
+677	0	ops/land/pr1394-wp433-provenance/readback-runs-head-80f926c.json
+229	0	ops/land/pr1394-wp433-provenance/readback-runs-merge-700fbca.json
+47	0	ops/land/pr1394-wp433-provenance/readback-uy-quyen-6973856830.json
+988	0	ops/land/pr1394-wp433-provenance/release-verify-strict-700fbca.txt
+973	0	ops/land/pr1394-wp433-provenance/release-verify-strict-983795c.txt
+162	0	ops/land/pr1394-wp433-provenance/selftest-fragment-700fbca.txt
+196	0	ops/land/pr1407-wp1342-land-evidence.yaml
+307	0	ops/land/pr1407-wp1342-provenance/SHA256SUMS
+142	0	ops/land/pr1407-wp1342-provenance/ai-dang-giu-sau-rut-han.txt
+43	0	ops/land/pr1407-wp1342-provenance/bien-ban-m8.yaml
+43	0	ops/land/pr1407-wp1342-provenance/ci-provenance-thu.log
+5210	0	ops/land/pr1407-wp1342-provenance/ci/jobs.json
+7	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295553269.trich.txt
+16	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639038.trich.txt
+35	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639199.trich.txt
+14	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639213.trich.txt
+10	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639298.trich.txt
+14	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639376.trich.txt
+10	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639386.trich.txt
+10	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639410.trich.txt
+14	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639413.trich.txt
+14	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639415.trich.txt
+14	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639416.trich.txt
+10	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639460.trich.txt
+14	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639476.trich.txt
+10	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639481.trich.txt
+10	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639492.trich.txt
+14	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639497.trich.txt
+10	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639543.trich.txt
+14	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639587.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639616.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639623.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639761.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639782.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639783.trich.txt
+10	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639819.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639830.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639842.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639863.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639869.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639875.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639888.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639909.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639956.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295639957.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295640001.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135295640061.trich.txt
+10	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135296334293.trich.txt
+15	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135296457791.trich.txt
+8	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135297479393.trich.txt
+9	0	ops/land/pr1407-wp1342-provenance/ci/jobs/135304215161.trich.txt
+2750	0	ops/land/pr1407-wp1342-provenance/ci/provenance.yaml
+1	0	ops/land/pr1407-wp1342-provenance/ci/run.json
+8	0	ops/land/pr1407-wp1342-provenance/dac-ta.txt
+43	0	ops/land/pr1407-wp1342-provenance/danh-gia-gate-output-44445202862.txt
+199	0	ops/land/pr1407-wp1342-provenance/danh_gia_gate.py
+6	0	ops/land/pr1407-wp1342-provenance/gom-base-vs-merge.trich.txt
+14	0	ops/land/pr1407-wp1342-provenance/kiem-dong-wp-m8.txt
+46	0	ops/land/pr1407-wp1342-provenance/lap_ho_so.py
+6	0	ops/land/pr1407-wp1342-provenance/launcher-windows-44445202917.trich.txt
+104	0	ops/land/pr1407-wp1342-provenance/lease-wp1342-r4-g1-claude-sau-rut-han.yaml.txt
+1	0	ops/land/pr1407-wp1342-provenance/linux/.gitattributes
+56	0	ops/land/pr1407-wp1342-provenance/linux/do_python_1407.py
+32	0	ops/land/pr1407-wp1342-provenance/linux/dot-bien-linux-a2c7d75.txt
+160	0	ops/land/pr1407-wp1342-provenance/linux/dot_bien_r4_ban1.py
+162	0	ops/land/pr1407-wp1342-provenance/linux/dot_bien_r4_ban2.py
+9	0	ops/land/pr1407-wp1342-provenance/linux/eol-policy-all-a2c7d75.json
+25	0	ops/land/pr1407-wp1342-provenance/linux/n2-test-46d3907.txt
+75	0	ops/land/pr1407-wp1342-provenance/linux/n23-phan-chung-a2c7d75.json
+100	0	ops/land/pr1407-wp1342-provenance/linux/n23_1407.py
+196	0	ops/land/pr1407-wp1342-provenance/linux/n2_test_r4.py
+8	0	ops/land/pr1407-wp1342-provenance/linux/n5-phan-chung-linux-a2c7d75.txt
+66	0	ops/land/pr1407-wp1342-provenance/linux/n5_phan_chung_1407.py
+40	0	ops/land/pr1407-wp1342-provenance/linux/nghiem-thu-a2c7d75.txt
+45	0	ops/land/pr1407-wp1342-provenance/linux/nghiem_thu_1407.py
+182	0	ops/land/pr1407-wp1342-provenance/linux/suite-wp1342-wp1174.txt
+31	0	ops/land/pr1407-wp1342-provenance/linux/va_driver_ban2.py
+21	0	ops/land/pr1407-wp1342-provenance/n5-n6-46d3907.txt
+80	0	ops/land/pr1407-wp1342-provenance/n5_n6_1407.py
+26	0	ops/land/pr1407-wp1342-provenance/n6-merge-a2c7d75.txt
+70	0	ops/land/pr1407-wp1342-provenance/n6_merge_1407.py
+10	0	ops/land/pr1407-wp1342-provenance/phan-chung-buoc-44445202862.txt
+4950	0	ops/land/pr1407-wp1342-provenance/readback-checkruns-head-46d3907.json
+4720	0	ops/land/pr1407-wp1342-provenance/readback-checkruns-head-728ecca.json
+118	0	ops/land/pr1407-wp1342-provenance/readback-commit-a2c7d75.json
+169	0	ops/land/pr1407-wp1342-provenance/readback-issue-1342.json
+5209	0	ops/land/pr1407-wp1342-provenance/readback-jobs-44445202862.json
+365	0	ops/land/pr1407-wp1342-provenance/readback-jobs-44445202917.json
+371	0	ops/land/pr1407-wp1342-provenance/readback-pr-1407.json
+1285	0	ops/land/pr1407-wp1342-provenance/readback-pr1407-comments.json
+253	0	ops/land/pr1407-wp1342-provenance/readback-pr1407-commits.json
+1	0	ops/land/pr1407-wp1342-provenance/readback-pr1407-review-comments.json
+1	0	ops/land/pr1407-wp1342-provenance/readback-pr1407-reviews.json
+224	0	ops/land/pr1407-wp1342-provenance/readback-run-44445202862.json
+224	0	ops/land/pr1407-wp1342-provenance/readback-run-44445202917.json
+224	0	ops/land/pr1407-wp1342-provenance/readback-run-base-44350194077.json
+1125	0	ops/land/pr1407-wp1342-provenance/readback-runs-head-46d3907.json
+677	0	ops/land/pr1407-wp1342-provenance/readback-runs-merge-a2c7d75.json
+31	0	ops/land/pr1407-wp1342-provenance/readback_1407.py
+14	0	ops/land/pr1407-wp1342-provenance/review-dac-ta-r4.txt
+32	0	ops/land/pr1407-wp1342-provenance/trich_launcher.py
+43	0	ops/land/pr1407-wp1342-provenance/wd/ci-provenance-thu-wd-44448900232.log
+89	0	ops/land/pr1407-wp1342-provenance/wd/readback-jobs-44448900232.json
+224	0	ops/land/pr1407-wp1342-provenance/wd/readback-run-44448900232.json
+21	0	ops/land/pr1407-wp1342-provenance/wd/wd-44445202862.json
+26	0	ops/land/pr1407-wp1342-provenance/wd_dl.py
+1	0	ops/land/pr1407-wp1342-provenance/windows-native/.gitattributes
+69	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/chay-1342r4b.ps1
+52	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/chay-1342r4c.ps1
+38	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/do_r4.py
+162	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/dot_bien_r4_ban2.py
+20	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/luot1-728ecca/TOM-TAT.txt
+69	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/luot1-728ecca/chay-1342r4.ps1
+38	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/luot1-728ecca/do_r4.py
+160	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/luot1-728ecca/dot_bien_r4.py
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_admission_valid.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_admission_wrong_scope.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_lifecycle_legacy_unchanged.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_status_closed.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_windows_claim_rejected.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_witness_active_pending.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_witness_fresh_reserved.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_witness_import_retry.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_witness_int_bool.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_witness_json_bytes.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_witness_keyset.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_witness_suspended.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1174_witness_valid.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_additive_byte_preserved.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_boot_failclosed.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_boot_stable.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_lock_exclusive.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_lock_names.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_lock_noinherit.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_metadata_drift.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_noinherit.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_persist_bindings.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_persist_create.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_persist_update.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_persist_update_held.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_persist_update_refuse.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_persist_update_symlink.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_read.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_seed_acl.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_seed_drift.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_seed_fingerprint.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_seed_hardlink.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_seed_nonfile.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_seed_ok.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_swap_ancestor.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_symlink_file.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_native_volume_junction.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_pure_lock_persist_refuse.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_pure_platform_path.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_pure_seed_acl_bang.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE-wp1342_pure_seed_boot_refuse.txt
+41	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE.jsonl
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE.stderr.txt
+41	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/BASE.stdout.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/GATE-wp1342_native_job_abi.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/GATE-wp1342_native_job_query_loi.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/GATE-wp1342_native_job_thuan.txt
+3	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/GATE.jsonl
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/GATE.stderr.txt
+3	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/GATE.stdout.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_admission_valid.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_admission_wrong_scope.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_lifecycle_legacy_unchanged.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_status_closed.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_windows_claim_rejected.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_witness_active_pending.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_witness_fresh_reserved.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_witness_import_retry.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_witness_int_bool.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_witness_json_bytes.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_witness_keyset.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_witness_suspended.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1174_witness_valid.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_additive_byte_preserved.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_boot_failclosed.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_boot_stable.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_abi.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_cha_chet_sau_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_cha_chet_truoc_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_han.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_khong_ke_thua.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_loi_sau_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_loi_truoc_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_mo_coi.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_query_loi.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_thuan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_job_treo_truoc_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_lock_exclusive.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_lock_names.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_lock_noinherit.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_metadata_drift.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_noinherit.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_persist_bindings.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_persist_create.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_persist_update.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_persist_update_held.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_persist_update_refuse.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_persist_update_symlink.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_read.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_seed_acl.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_seed_drift.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_seed_fingerprint.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_seed_hardlink.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_seed_nonfile.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_seed_ok.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_swap_ancestor.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_symlink_file.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_native_volume_junction.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_pure_lock_persist_refuse.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_pure_platform_path.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_pure_seed_acl_bang.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_pure_seed_boot_refuse.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_pure_spawn_arguments.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_pure_spawn_cleanup_note.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD-wp1342_pure_spawn_hang_luong.txt
+55	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD.jsonl
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD.stderr.txt
+55	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/HEAD.stdout.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/LAP-J3-wp1342_native_job_mo_coi.txt
+10	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/LAP-J3.jsonl
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/LAP-J3.stderr.txt
+10	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/LAP-J3.stdout.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/LAP-J9-wp1342_native_job_loi_sau_gan.txt
+10	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/LAP-J9.jsonl
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/LAP-J9.stderr.txt
+10	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/LAP-J9.stdout.txt
+182	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/TOM-TAT.txt
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/clone.log
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/dot-bien.stderr.txt
+31	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/dot-bien.stdout.txt
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/neo.stderr.txt
+15	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4b-out/neo.stdout.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/LAP-J3-wp1342_native_job_mo_coi.txt
+3	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/LAP-J3.jsonl
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/LAP-J3.stderr.txt
+3	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/LAP-J3.stdout.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/LAP-J9-wp1342_native_job_loi_sau_gan.txt
+3	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/LAP-J9.jsonl
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/LAP-J9.stderr.txt
+3	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/LAP-J9.stdout.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_admission_valid.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_admission_wrong_scope.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_lifecycle_legacy_unchanged.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_status_closed.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_windows_claim_rejected.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_witness_active_pending.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_witness_fresh_reserved.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_witness_import_retry.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_witness_int_bool.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_witness_json_bytes.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_witness_keyset.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_witness_suspended.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1174_witness_valid.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_additive_byte_preserved.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_boot_failclosed.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_boot_stable.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_abi.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_cha_chet_sau_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_cha_chet_truoc_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_han.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_khong_ke_thua.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_loi_sau_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_loi_truoc_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_mo_coi.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_query_loi.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_thuan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_job_treo_truoc_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_lock_exclusive.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_lock_names.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_lock_noinherit.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_metadata_drift.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_noinherit.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_persist_bindings.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_persist_create.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_persist_update.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_persist_update_held.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_persist_update_refuse.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_persist_update_symlink.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_read.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_seed_acl.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_seed_drift.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_seed_fingerprint.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_seed_hardlink.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_seed_nonfile.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_seed_ok.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_swap_ancestor.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_symlink_file.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_native_volume_junction.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_pure_lock_persist_refuse.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_pure_platform_path.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_pure_seed_acl_bang.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_pure_seed_boot_refuse.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_pure_spawn_arguments.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_pure_spawn_cleanup_note.txt
+7	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE-wp1342_pure_spawn_hang_luong.txt
+55	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE.jsonl
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE.stderr.txt
+55	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/MERGE.stdout.txt
+78	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/TOM-TAT.txt
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/clone.log
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/n5-phan-chung.stderr.txt
+5	0	ops/land/pr1407-wp1342-provenance/windows-native/desktop/wp1342r4c-out/n5-phan-chung.stdout.txt
+10	0	ops/land/pr1407-wp1342-provenance/windows-native/vm/TOM-TAT-phien-dieu-phoi.txt
+44	0	ops/land/pr1407-wp1342-provenance/windows-native/vm/chay-1342r4b-vm.ps1
+17	0	ops/land/pr1407-wp1342-provenance/windows-native/vm/wp1342r4b-vm-out/TOM-TAT.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/vm/wp1342r4b-vm-out/VM-wp1342_native_job_cha_chet_sau_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/vm/wp1342r4b-vm-out/VM-wp1342_native_job_loi_sau_gan.txt
+8	0	ops/land/pr1407-wp1342-provenance/windows-native/vm/wp1342r4b-vm-out/VM-wp1342_native_job_mo_coi.txt
+9	0	ops/land/pr1407-wp1342-provenance/windows-native/vm/wp1342r4b-vm-out/VM.jsonl
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/vm/wp1342r4b-vm-out/VM.stderr.txt
+9	0	ops/land/pr1407-wp1342-provenance/windows-native/vm/wp1342r4b-vm-out/VM.stdout.txt
+0	0	ops/land/pr1407-wp1342-provenance/windows-native/vm/wp1342r4b-vm-out/clone.log
+50	0	ops/leases/wp1308-r5-g9-codex.yaml
+82	0	ops/leases/wp1404-r1-g1-claude.yaml
+5	0	ops/prompts/wp1308-target-canary-r5-g9.txt
+1	0	ops/reviews/wp804-spec-r1/.gitattributes
+37	0	ops/reviews/wp804-spec-r1/README.md
+216	0	ops/reviews/wp804-spec-r1/dac-ta-ban1.md
+243	0	ops/reviews/wp804-spec-r1/dac-ta-ban2.md
+4080	0	ops/reviews/wp804-spec-r1/luot1.stdout.txt
+6148	0	ops/reviews/wp804-spec-r1/luot2.stdout.txt
+41	0	ops/reviews/wp804-spec-r1/luot2.verdict.txt
+2655	0	ops/reviews/wp804-spec-r1/luot3.stdout.txt
+54	0	ops/reviews/wp804-spec-r1/luot3.verdict.txt
+14	0	ops/reviews/wp804-spec-r1/prompt-luot1.md
+12	0	ops/reviews/wp804-spec-r1/prompt-luot2.md
+12	0	ops/reviews/wp804-spec-r1/prompt-luot3.md
+242	0	ops/specs/HOAN-LOI-GOI-CODEX-r1.md
+37	0	ops/specs/wp1308-target-canary-r5-g9.md
+64	0	ops/specs/wp1404-r1.md
+389	0	scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py
+353	0	scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py
+142	61	scripts/tl_gws.py
+2	0	scripts/tl_test_fragments_bundled.py
+rc=0
+
+## 2026-11-19T10:46:45Z $ git diff --check 11bd0336d00b4a9544e70dcbbe049d372053a3ec^1 11bd0336d00b4a9544e70dcbbe049d372053a3ec
+ops/acceptance/wp1389/VERDICT.md:5: trailing whitespace.
++reviewed_sha: 4aae991093ab4f314c0121b9953ecc772c50b39d  
+ops/acceptance/wp1389/VERDICT.md:6: trailing whitespace.
++verdict: request_changes  
+ops/acceptance/wp1389/VERDICT.md:133: trailing whitespace.
++reviewed_sha: 86879e1a77b0c89d68b5a0695eab5de1969c6f90  
+ops/acceptance/wp1389/VERDICT.md:134: trailing whitespace.
++verdict: request_changes  
+ops/acceptance/wp1389/VERDICT.md:326: trailing whitespace.
++reviewed_sha: d0d4879c743c124b43c43e0713427d5be99cf1d9  
+ops/acceptance/wp1389/VERDICT.md:327: trailing whitespace.
++verdict: request_changes  
+rc=2
+
+## 2026-11-19T10:46:45Z $ git rev-parse 11bd0336d00b4a9544e70dcbbe049d372053a3ec:.agents/skills/playwright-browser/SKILL.md 11bd0336d00b4a9544e70dcbbe049d372053a3ec:ops/acceptance/wp1389/REVIEW-PROMPT.md 11bd0336d00b4a9544e70dcbbe049d372053a3ec:ops/acceptance/wp1389/RESULTS.md 11bd0336d00b4a9544e70dcbbe049d372053a3ec:ops/acceptance/wp1389/VERDICT.md 11bd0336d00b4a9544e70dcbbe049d372053a3ec:ops/acceptance/wp1389/residue_matrix.ps1 11bd0336d00b4a9544e70dcbbe049d372053a3ec:ops/acceptance/wp1389/residue_matrix.sh 11bd0336d00b4a9544e70dcbbe049d372053a3ec:ops/leases/wp1389-r1-g1-claude.yaml 11bd0336d00b4a9544e70dcbbe049d372053a3ec:ops/specs/wp1389-r1.md 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2:.agents/skills/playwright-browser/SKILL.md 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2:ops/acceptance/wp1389/REVIEW-PROMPT.md 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2:ops/acceptance/wp1389/RESULTS.md 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2:ops/acceptance/wp1389/VERDICT.md 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2:ops/acceptance/wp1389/residue_matrix.ps1 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2:ops/acceptance/wp1389/residue_matrix.sh 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2:ops/leases/wp1389-r1-g1-claude.yaml 11bd0336d00b4a9544e70dcbbe049d372053a3ec^2:ops/specs/wp1389-r1.md HEAD:.agents/skills/playwright-browser/SKILL.md HEAD:ops/acceptance/wp1389/REVIEW-PROMPT.md HEAD:ops/acceptance/wp1389/RESULTS.md HEAD:ops/acceptance/wp1389/VERDICT.md HEAD:ops/acceptance/wp1389/residue_matrix.ps1 HEAD:ops/acceptance/wp1389/residue_matrix.sh HEAD:ops/leases/wp1389-r1-g1-claude.yaml HEAD:ops/specs/wp1389-r1.md
+123d91a7a2b807d5628b50d03b28883e6d495235
+2e0d875b9a9cd07047311c7f8db9fb265b03c7e6
+6f4fb0d5486768568b5cad20f3aa067f5867128b
+c69f49be0bdba7bbf23e4cf244726d9caddcb1eb
+c3cdcd4f0608d33334da0bfa7469bad6142341ff
+4f298d17c84bbe5ad25e508f05bbc958fd05220b
+a381fda83349ac14cdeeae895547217b6422bde1
+3ce05164f9cf67551f6aa9a17e623ccef7a7a115
+123d91a7a2b807d5628b50d03b28883e6d495235
+2e0d875b9a9cd07047311c7f8db9fb265b03c7e6
+6f4fb0d5486768568b5cad20f3aa067f5867128b
+c69f49be0bdba7bbf23e4cf244726d9caddcb1eb
+c3cdcd4f0608d33334da0bfa7469bad6142341ff
+4f298d17c84bbe5ad25e508f05bbc958fd05220b
+a381fda83349ac14cdeeae895547217b6422bde1
+3ce05164f9cf67551f6aa9a17e623ccef7a7a115
+123d91a7a2b807d5628b50d03b28883e6d495235
+2e0d875b9a9cd07047311c7f8db9fb265b03c7e6
+6f4fb0d5486768568b5cad20f3aa067f5867128b
+c69f49be0bdba7bbf23e4cf244726d9caddcb1eb
+c3cdcd4f0608d33334da0bfa7469bad6142341ff
+4f298d17c84bbe5ad25e508f05bbc958fd05220b
+a381fda83349ac14cdeeae895547217b6422bde1
+3ce05164f9cf67551f6aa9a17e623ccef7a7a115
+rc=0
+
+## 2026-11-19T10:46:45Z $ git diff --numstat 11bd0336d00b4a9544e70dcbbe049d372053a3ec HEAD -- .agents/skills/playwright-browser/SKILL.md ops/acceptance/wp1389/REVIEW-PROMPT.md ops/acceptance/wp1389/RESULTS.md ops/acceptance/wp1389/VERDICT.md ops/acceptance/wp1389/residue_matrix.ps1 ops/acceptance/wp1389/residue_matrix.sh ops/leases/wp1389-r1-g1-claude.yaml ops/specs/wp1389-r1.md
+rc=0
+
+## 2026-11-19T10:46:45Z $ /usr/bin/bash ops/acceptance/wp1389/residue_matrix.sh .agents/skills/playwright-browser/SKILL.md <scratch rong tam>
+SOURCE 5b965c597b07e2357fed072018edc8b8a5e7b608303405be81a1a8c649945879 pre_frag 4095df8f66bf807f9984b17508166f95cafd6ca7b847a8a0733225f3ae064d44 dau_frag 84a893f5600389fae3bf2ba8c27a4650eeaf1bbeda8d7ec858a73006e84eadda cleanup_frag 2198f91d554fcbe0c17a5ab6ac6238281501ace9d0c01debbb82a4845a425f2e go_frag b63d3f537755e5c97f92c996dab3a5acd032f66923482dca855c336de54bcf2c node v22.23.4
+PASS P1-positive (goc da xoa, ban sao trung byte, duong dan dung, moi nguyen)
+PASS P2-positive (goc da xoa, ban sao trung byte, duong dan dung, moi nguyen)
+PASS N1-zero-match rc=1
+PASS N2-two-hash-dirs rc=1
+PASS N3-session-left rc=1
+PASS N4-userdata-left rc=1
+PASS N5-err-symlink rc=1
+PASS N6-other-hashdir-symlink rc=1
+PASS N7-daemon-symlink rc=1
+PASS N8-stale-11-daemon.err rc=1
+PASS N8-stale-11-daemon-path.txt rc=1
+PASS N9-bad-hash-name rc=1
+PASS N10-pwtest-hook rc=1
+PASS N11-err-is-dir rc=1
+PASS N12-no-registry rc=1
+PASS N14-wrong-suffix rc=1
+PASS N15-scan-error rc=1
+PASS N16-newline-name rc=1
+PASS N17-relative-cache rc=1
+PASS N18-err-in-other-install-dir rc=1
+PASS N19-own-hashdir-symlink rc=1
+PASS N26-soft-hyphen-before-suffix rc=1
+PASS N25-hashdir-link-to-name-plus-LF rc=1
+PASS N20-ancestor-symlink rc=1
+PASS N20R-ancestor-symlink-residue-only rc=1
+PASS N21-copy-fails rc=1
+PASS N22-compare-fails rc=1
+PASS N23-delete-fails rc=1
+PASS N24-path-write-fails rc=1
+PASS D1-no-capture-record rc=1
+PASS D2-registry-changed rc=1
+PASS D3-cli-workspace-mode rc=1
+PASS D4-dau-matches rc=0
+PASS D5-daemon-link-at-cleanup-start rc=1
+PASS D6-hash-link-at-cleanup-start rc=1
+PASS D7-record-of-other-nonce rc=1
+PASS D8-pwtest-hook-at-cleanup-start rc=1
+PASS D11-hashdir-link-to-name-plus-LF-at-cleanup-start rc=1
+PASS D12-record-extra-NUL rc=1
+PASS D9-ancestor-link-at-cleanup-start rc=1
+PASS C1-pre-clean rc=0 (00-sophien.txt dung)
+PASS C2-pre-nonce-present rc=1
+PASS C3-pre-no-registry rc=0 (00-sophien.txt dung)
+PASS C4-pre-relative rc=1
+PASS C5-pre-pwtest-hook rc=1
+PASS C6-pre-depth1-ignored (nhu CLI) rc=0 (00-sophien.txt dung)
+PASS C7-pre-scan-error rc=1
+PASS C8-pre-cli-workspace-mode rc=1
+PASS C9-pre-daemon-symlink rc=1
+PASS C10-pre-hashdir-symlink rc=1
+PASS C11-pre-bad-hash-shape rc=1
+PASS C12-pre-hash-not-under-base rc=1
+PASS C13-pre-node-missing rc=1
+PASS C14-pre-ancestor-symlink rc=1
+PASS C16-pre-record-is-fifo (dung ngay, FIFO nguyen) rc=1
+PASS C17-pre-record-dangling-symlink rc=1
+PASS C18-pre-hashdir-link-to-name-plus-LF rc=1
+PASS C19-pre-exact-err-exists-scan-blind rc=1
+PASS C20-pre-exact-session-exists-scan-blind rc=1
+PASS C15-pre-record-exists-not-overwritten rc=1
+PASS G1-uninstall-empty-hashdir-removed rc=0
+PASS G2-uninstall-no-receipt-11 rc=0
+PASS G3-uninstall-11-wrong-parent rc=0
+PASS G4-uninstall-hashdir-not-empty rc=0
+PASS G5-uninstall-ancestor-link rc=0
+PASS G6-uninstall-record-differs rc=0
+PASS G7-uninstall-cli-differs rc=0
+PASS G8-uninstall-hashdir-link-to-name-plus-LF rc=0
+PASS G9-uninstall-receipt-11-is-symlink rc=0
+PASS G10-uninstall-record-00-is-symlink rc=0
+PASS G11-uninstall-pwtest-hook rc=0
+PASS G13-uninstall-record-extra-NUL rc=0
+PASS G14-uninstall-receipt-extra-NUL rc=0
+PASS G12-uninstall-record-line1-differs rc=0
+PASS E1-full-flow (thu tu lenh, du luong da don, 11-path dung, SHA256SUMS khop 4 tep, deleted false)
+PASS E6-full-flow-deleted-true
+PASS E2-run-A-nonce-B (nhat ky dung bang Capture + open B; byte phien B nguyen; khong output 08-11)
+PASS E3-hash-link-between-steps (nhat ky chi Capture, byte phien nguyen)
+PASS E5-ancestor-link-between-steps (nhat ky chi Capture, byte phien nguyen)
+PASS E7-open-fails-before-daemon (chi open, Cleanup dung, khong xoa)
+PASS E8-open-fails-after-err (close cua nonce minh roi STOP, .err giu)
+PASS E4-preflight-stop (khong open, khong 00, Cleanup khong goi close)
+PASS MUT dau-after-close -> E2 goi close (chot truoc close co rang)
+PASS MUT only-false -> E6 do (nhanh deleted true co rang)
+PASS MUT hash-early -> E1 do (thu tu don truoc bam co rang)
+PASS MUT exact-one -> N3 (mot trong hai thu tu) lot (chot co rang)
+PASS MUT name-glob -> N3 lot (chot co rang)
+PASS MUT no-symlink-check -> N5 lot (chot co rang)
+PASS MUT daemon-symlink -> N7 lot (chot co rang)
+PASS MUT residue-ancestor -> N20 lot (chot co rang)
+PASS MUT no-cmp -> N22 lot (chot co rang)
+PASS MUT no-rm-check -> N23 lot (chot co rang)
+PASS MUT no-write-check -> N24 lot (chot co rang)
+PASS MUT stale-output -> N8 lot (chot co rang)
+PASS MUT pwtest-hook -> N10 lot (chot co rang)
+PASS MUT exact-path -> N14 lot (chot co rang)
+PASS MUT no-scan-rc -> N15 lot (chot co rang)
+PASS MUT relative-cache -> N17 lot (chot co rang)
+PASS MUT install-dir-binding -> N18 lot (chot co rang)
+PASS MUT no-capture-record -> D1 lot (chot co rang)
+PASS MUT no-registry-compare -> D2 lot (chot co rang)
+PASS MUT no-nonce-binding -> D7 lot (chot co rang)
+PASS MUT record-bytes -> D12 lot (chot co rang)
+PASS MUT dau-link -> D5 lot (chot co rang)
+PASS MUT dau-ancestor -> D9 lot (chot co rang)
+PASS MUT pre-relative -> C4 lot (chot co rang)
+PASS MUT pre-hook -> C5 lot (chot co rang)
+PASS MUT pre-scan-rc -> C7 lot (chot co rang)
+PASS MUT pre-link -> C9 lot (chot co rang)
+PASS MUT pre-ancestor -> C14 lot (chot co rang)
+PASS MUT pre-noclobber -> C15 lot (chot co rang)
+PASS MUT pre-exact-err -> C19 lot (chot co rang)
+PASS MUT pre-exact-session -> C20 lot (chot co rang)
+PASS MUT pre-lf -> C18 lot (chot co rang)
+PASS MUT dau-lf -> D11 lot (chot co rang)
+PASS MUT pre-fifo -> C16 treo rc=124 (chot co rang)
+PASS MUT pre-shape -> C11 lot (chot co rang)
+PASS MUT go-no-receipt -> G2 xoa (chot co rang)
+PASS MUT go-receipt-parent -> G3 xoa (chot co rang)
+PASS MUT go-receipt-bytes -> G14 xoa (chot co rang)
+PASS MUT go-receipt-link -> G9 xoa (chot co rang)
+PASS MUT go-record-link -> G10 xoa (chot co rang)
+PASS MUT go-hook -> G11 xoa (chot co rang)
+PASS MUT go-record-line1 -> G12 xoa (chot co rang)
+PASS MUT go-record-bytes -> G13 xoa (chot co rang)
+PASS MUT go-link -> G5 xoa (chot co rang)
+PASS MUT go-record -> G6 xoa (chot co rang)
+TONG: 127 dat / 127
+rc=0
+
+## 2026-11-19T10:47:25Z $ /usr/bin/bash -n ops/acceptance/wp1389/residue_matrix.sh
+rc=0
+
+# HET
+
+## 2026-11-19T10:56:19Z (clone detached 4eda94e) $ python3 -B .claude/dev/packet_loop.py doctrine-scan --root .
+doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+rc=0
+# HET (doctrine-scan)

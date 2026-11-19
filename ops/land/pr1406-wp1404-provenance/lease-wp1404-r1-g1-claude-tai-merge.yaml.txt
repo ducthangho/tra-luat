@@ -1,0 +1,82 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1404
+packet_id: wp1404
+spec_packet_id: CI-RG-APT-UPDATE
+revision: 1
+generation: 1
+lease_id: wp1404-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_fallback: 'claude, context đọc-chỉ độc lập, khai same-provider'
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+review_class: sensitive
+effective_review_class: sensitive
+risk: sensitive
+access: read-write
+depends_on: []
+spec_path: ops/specs/wp1404-r1.md
+spec_hash: 1eb8f4428e0da7c2074b94938e89990c3f3bd681b254bcacccb2336a76a5314d
+spec_sha256_required: 1eb8f4428e0da7c2074b94938e89990c3f3bd681b254bcacccb2336a76a5314d
+spec_duyet: 'chủ kho duyệt băm 1eb8f442 qua AskUserQuestion 18-11-2026 ~16:58Z trong phiên session_015GtxrazyAyLwN5BiEB52Sq, lựa chọn "Duyệt, cấp lease (Recommended)"; trước đó chọn "Packet mới, nhánh + PR riêng (Recommended)".'
+write_set:
+- .claude/dev/launcher_test.py
+- ops/acceptance/wp1404/RESULTS.md
+- ops/acceptance/wp1404/VERDICT.md
+- ops/cai_cong_cu.sh
+- ops/leases/wp1404-r1-g1-claude.yaml
+- ops/specs/wp1404-r1.md
+write_set_hash: 668f9987cd1f1711ca8ad792160266ab3280d3a43fe0d4bd274901acd5eb4ef6
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp (LC_ALL=C), nối bằng LF, kết thúc bằng LF
+effective_write_set_nguon: khai_bao_trong_spec
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-18T16:51:13Z'
+  goc_quet: 'fetch đủ refs/heads/* (ls-remote so tập với refs/remotes/origin: thiếu 0); master cục bộ = origin/master e2c3b82'
+  ket_qua: 'ops/cai_cong_cu.sh, .claude/dev/launcher_test.py (và ops/cong_cu.yaml, launcher.py, hook, ci.yml đã xét): ai-dang-giu NGƯỜI_GIỮ 0 (chỉ lease HẾT_HẠN)'
+branch: claude/ci-rg-apt-update
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: e2c3b82f818bd1739d31261e8129d3ef44915acf
+start_from_sha: e2c3b82f818bd1739d31261e8129d3ef44915acf
+reviewed_sha_required: e2c3b82f818bd1739d31261e8129d3ef44915acf
+reviewed_sha_required_nghia: 'Chưa có head ứng viên; mọi verdict neo exact head THẬT của nhánh thi công.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1404
+granted_on_instruction_readback: 'chủ kho 18-11: "Xem xử lý luôn lỗi gói ripgrep"; chọn packet mới, nhánh + PR riêng; duyệt spec và cấp lease qua AskUserQuestion.'
+granted_on_instruction_note: 'không cấp: merge/land, deploy, LIVE, sửa cong_cu.yaml/launcher.py/hook/workflow.'
+recorded_by: 'phiên session_015GtxrazyAyLwN5BiEB52Sq'
+recorder_is_executor: true
+recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị trực tiếp của chủ kho; lease KHÔNG tự cấp — chủ kho duyệt qua AskUserQuestion.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
+leased_at_utc: '2026-11-18T16:51:13Z'
+heartbeat_at: '2026-11-18T23:45:07Z'
+lease_until: '2026-11-19T04:51:13Z'
+lease_expires_at_utc: '2026-11-19T04:51:13Z'
+lease_until_ghi_chu: '6h; rút hạn sau land.'
+attempts_used: 1
+attempts_limit: 2
+budget:
+  codex_review_calls: {used: 4, reserved: 0, limit: 4}
+  codex_review_calls_ghi_chu: 'lượt 1–3 request_changes (141a3a7, f9eba6e, 0b3cda8); lượt 4 ở 0bd8edc: approve (delta). Hết trần.'
+nang_tran:
+  truc: codex_review_calls
+  tran_cu: 3
+  tran_moi: 4
+  ai_nang: ducthangho
+  can_cu: 'AskUserQuestion 18-11-2026 ~23:22Z trong phiên session_015GtxrazyAyLwN5BiEB52Sq, lựa chọn "Sửa + Codex lượt 4 delta (Recommended)": sửa P3 duy nhất của lượt 3 (truyền "$@" vào _wp1404_chay_cong_thuc), lượt 4 chỉ xét delta.'
+  lan_truoc: '2→3, AskUserQuestion 18-11-2026 ~22:35Z trong phiên session_015GtxrazyAyLwN5BiEB52Sq, lựa chọn "Sửa 3, nợ 1, Codex lượt 3 (Recommended)": sửa P2 kênh, P3 LAN_CAI, P3 lỗ test nhánh không sudo; P3 GITHUB_PATH ghi nợ có tên.'
+gia_han:
+  han_cu_utc: '2026-11-18T22:51:13Z'
+  han_moi_utc: '2026-11-19T04:51:13Z'
+  chi_thi: 'Cùng lựa chọn trên của chủ kho (đi tiếp sửa + Codex lượt 3 ⇒ cần thời gian quá hạn cũ). Không đổi write set, spec, base.'
+requires_live: false
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'

@@ -1,0 +1,22 @@
+# job 135469673544 log_sha256=6291962fe33c4e0f47018aa8ba9125354bf7ee15a73b76fea909935d4280a335; moi dong khop /wp1404|r1404|DA CHAY QUA|DOT BIEN:/ (21 dong)
+2026-11-19T09:42:40.8233177Z 426/426 ca DA CHAY QUA (tong 428, bo qua 2, hong 0) - KHONG DU: 2 ca BO QUA, chua do gi
+2026-11-19T09:51:58.2309862Z   wp1404_sh_bo_thu_lai_apt     OK  giet 1/1: r1404_cai_apt_update_roi_thu_lai
+2026-11-19T09:51:58.2310394Z   wp1404_sh_thu_lai_moi_loi    OK  giet 1/1: r1404_cai_apt_update_roi_thu_lai
+2026-11-19T09:51:58.2310727Z   wp1404_sh_bo_cai_lai         OK  giet 1/1: r1404_cai_apt_update_roi_thu_lai
+2026-11-19T09:51:58.2311069Z   wp1404_sh_thu_lai_hai_lan    OK  giet 1/1: r1404_cai_apt_update_roi_thu_lai
+2026-11-19T09:51:58.2311412Z   wp1404_sh_update_vao_stdout  OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2311745Z   wp1404_sh_bo_sudo_update     OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2312079Z   wp1404_sh_nhanh_tran_dung_sudo OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2312415Z   wp1404_sh_update_loi_dung    OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2312736Z   wp1404_sh_bo_ten_rc_dong_bao OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2313068Z   wp1404_sh_giu_kenh_lan_dau   OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2313408Z   wp1404_sh_dung_lai_inode_stdout OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2313762Z   wp1404_sh_kenh_moi_khong_tao OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2314090Z   wp1404_sh_kenh_moi_lo_export OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2314415Z   wp1404_sh_bien_dem_toan_cuc  OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2314756Z   wp1404_sh_tran_update_vao_stdout OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2315111Z   wp1404_sh_tran_bo_qq         OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2315427Z   wp1404_sh_mat_tham_so_lan_dau OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2315754Z   wp1404_sh_mat_tham_so_cai_lai OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:51:58.2316093Z   wp1404_sh_tran_update_loi_dung OK  giet 1/1: r1404_thu_lai_chot_chi_tiet
+2026-11-19T09:55:16.2741526Z DOT BIEN: 751/751 dat  (7 khong do duoc tren nen nay)

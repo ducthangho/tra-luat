@@ -3,8 +3,9 @@
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
 #
 # TRANG THAI: merged (0ca331b), landed TRUE: bon moc §10.2.2 cua ci.yml 44489280770 tren 0ca331b measured passed (run, checkout 39/39,
-#   gate output 39/39 bang danh_gia_gate.py v2, Workflow definition qua wd-run 44495748925). WP CHUA DONG DUOC theo M8: N4/N5 (Windows
-#   NATIVE tren Desktop) chi la loi khai co neo cua phien dieu phoi (log nam tren may Desktop, khong co trong kho) => kiem-dong-wp rc 12 D2.
+#   gate output 39/39 bang danh_gia_gate.py v2, Workflow definition qua wd-run 44495748925). N4/N5 (Windows NATIVE tren Desktop): log tho
+#   chep tu may chu kho vao windows-native/desktop/ (bam hai dau khop, NGUON-GOC.txt) => measured; kiem-dong-wp lan 2 (sau khi them log) xem
+#   kiem-dong-wp-m8.txt. Ban dau (bb9cda6) N4/N5 la loi khai, kiem-dong-wp lan 1 rc 12 D2.
 # MUC TIEU: mo phep doi cay tien trinh con chet truoc khi bam log (run.json) sang Windows bang Job Object; Linux khong doi; Darwin giu
 #   hanh vi packet A (no wp387-darwin-chua-do). launcher VERSION 1.6.1 -> 1.6.2.
 # UY QUYEN: audit human_exact_head_audit.v1 chu kho TU DANG tren dung head 9804f64 (issuecomment-7004039929, app null).
@@ -63,7 +64,7 @@ pre_merge_checks:
   - name: 'N1-N6 cua executor va do native cua phien dieu phoi tren head'
     sha: 9804f642ad9c7abcc9e7ae4877c2ff133ef31f00
     conclusion: success
-    nguon: [loi-khai-executor-than-pr1414.md, readback-pr-1414.json, lease-wp387-r2-g1-claude-sau-rut-han.yaml.txt]
+    nguon: [loi-khai-executor-than-pr1414.md, readback-pr-1414.json, lease-wp387-r2-g1-claude-sau-rut-han.yaml.txt, windows-native/desktop/NGUON-GOC.txt]
     ghi_chu: >-
       loi_khai_co_neo — than PR #1414 (sao nguyen van loi-khai-executor-than-pr1414.md) + lease budget_cuoi_ghi_chu. Linux (executor, tren 966ee16):
       N1 12/12 nhan, N2 hai phan chung t117 DO, N3 suite 424/424 base = head, --dot-bien 720/720 base vs 732/732 head, KHONG DO DUOC head =
@@ -75,7 +76,7 @@ pre_merge_checks:
       `DOT BIEN: 31/31 dat`, nhan W5 `r387(g) Windows xoa ban chup`, W7 `ket_thuc_utc da gom thoi gian doi`, suite head 330/340 (tong 426,
       bo qua 86, hong 10). Luot 3 (`wp387b3-out-20261119T080325Z`, 08:03–08:11Z): suite base 3b64746 321/331 (bo qua 95, hong 10); bo qua
       base-head = dung 9 ID r387, head-base = rong; 10 ca hong base = head (t53, r15, 4×r925, 3×r926, r927 — do san tren may ay). Windows native
-      3/3. Log o F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\ tren Desktop, KHONG co trong kho; do lai sau merge: xem nghiem_thu.
+      3/3. Log tho (sau nay chep vao kho): windows-native/desktop/ — so lieu native nay da measured, xem nghiem_thu N4/N5.
 post_merge_checks:
   - name: 'ci.yml push master tren DUNG merge SHA'
     run_id: 44489280770
@@ -111,9 +112,9 @@ post_merge_checks:
       may Desktop ma N4/N5 chi dinh.
 bookkeeping:
   - {item: 'rut han lease wp387-r2-g1-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
-  - {item: 'PR ghi so', ket_qua: 'not_measured — PR rieng tu nhanh ops/land-1414-1415 (ban nhap, chua commit).'}
-  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 (09:49Z) rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" — dung du kien vi N4/N5 not_measured (log native khong trong kho).'}
-  - {item: 'dong Issue #387', ket_qua: 'not_applicable — readback-issue-387.json open; KHONG dong: no Darwin (wp387-darwin-chua-do) va wp387-pgid-so-huu-muon con lai, N4/N5 chua co log trong kho.'}
+  - {item: 'PR ghi so', ket_qua: 'not_measured — PR #1418 tu nhanh ops/land-1414-1415 (phien dieu phoi), chua merge luc ghi.'}
+  - {item: 'ban ghi M8 (ADR-0060)', ket_qua: 'measured — bien-ban-m8.yaml + kiem-dong-wp-m8.txt: lan 1 (09:49Z) rc 12 "CHƯA ĐÓNG ĐƯỢC WP: thiếu D2" (N4/N5 khi do chi la loi khai); lan 2 sau khi dua log native vao windows-native/desktop/ va lat N4/N5: xem kiem-dong-wp-m8.txt.'}
+  - {item: 'dong Issue #387', ket_qua: 'not_applicable — readback-issue-387.json open; KHONG dong trong ho so nay: no Darwin (wp387-darwin-chua-do) va wp387-pgid-so-huu-muon con lai; dong hay khong do chu kho.'}
   - {item: 'phat hanh', ket_qua: 'not_applicable — tep dev-side (.claude/dev/), khong vao goi.'}
 # ---- het truong chuan
 packet_id: wp387
@@ -149,17 +150,16 @@ trang_thai_packet:
   landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate tren 0ca331b: run/checkout/gate_output/workflow_definition measured passed => DAT. (2) lease nha: DAT
-    (NGƯỜI_GIỮ 0 sau 08:58Z). (3) bookkeeping: ho so nay; M8 kiem-dong-wp rc 12 D2 (N4/N5 not_measured). (4) review neo 9804f64: connector
-    sach + audit chu kho. (5) uy quyen: audit tu dang 7004039929. (6) muc tieu: N1-N3, N6 measured passed tren cay merge; N4/N5 (Windows
-    NATIVE) chi loi_khai_co_neo => Packet CHUA complete. (7) tran: Codex PR 2/10, CI Ubuntu 2/2, Windows native 3/3, kich thuoc 333/450.
+    (NGƯỜI_GIỮ 0 sau 08:58Z). (3) bookkeeping: ho so nay; M8 kiem-dong-wp lan 2 (kiem-dong-wp-m8.txt). (4) review neo 9804f64: connector
+    sach + audit chu kho. (5) uy quyen: audit tu dang 7004039929. (6) muc tieu: N1-N3, N6 measured passed tren cay merge; N4/N5 measured
+    passed tren Desktop o exact head 9804f64 (log tho trong windows-native/desktop/). (7) tran: Codex PR 2/10, CI Ubuntu 2/2, Windows native 3/3, kich thuoc 333/450.
   dieu_kien_dong_wp: >-
-    Dua log native Desktop cua luot 2 (wp387b2-out-20261119T074702Z) va luot 3 (wp387b3-out-20261119T080325Z) vao provenance (nhu
-    ops/land/pr1407-wp1342-provenance/windows-native/), doi chieu head/base ghi trong log, roi lat N4/N5 trong bien-ban-m8.yaml va chay lai
-    kiem-dong-wp (ky vong rc 0).
+    DA LAM: log native Desktop luot 1/2/3 vao windows-native/desktop/ (zip n4n5-387b.zip sha256 440270aa…, bam tung tep khop hai dau),
+    doi chieu head/base trong log (CHOT HEAD 9804f64 tree 13c48c05 sach; CHOT BASE 3b64746 sach), lat N4/N5, chay lai kiem-dong-wp.
   canh_bao_cho_chu_kho: >-
-    (i) landed true dua tren bon moc §10.2.2; Packet chua complete vi N4/N5 native chi la loi khai (log tren may Desktop). (ii) Bang chung
-    Windows do duoc trong kho la lane windows-latest sau merge (launcher-windows 44489280629) — KHONG phai Desktop, va lease noi khong dung
-    CI Windows cho packet; dung no lam bang chung phu, khong thay N4. (iii) Ruff do lai bang 0.17.5, dac ta ghi 0.15.15 (delta 0 ca hai).
+    (i) landed true dua tren bon moc §10.2.2. (ii) N4/N5 do tren Desktop TRUOC merge, o exact head 9804f64 (cay merge 0ca331b co tree
+    13c48c05 = tree head, nen cung byte); khong do lai native sau merge. Lane windows-latest sau merge (launcher-windows 44489280629) chi la
+    bang chung phu. (ii-b) Driver do387.py/do387b.py chi co bam phia container (khong co bam Desktop doi chieu); tep KET QUA thi khop hai dau. (iii) Ruff do lai bang 0.17.5, dac ta ghi 0.15.15 (delta 0 ca hai).
     (iv) No con lai: wp387-darwin-chua-do, wp387-pgid-so-huu-muon; Issue #387 de mo.
 
 review:
@@ -178,17 +178,25 @@ nghiem_thu:
     ve, tap bo qua head = base {2 ID}; DOT BIEN 720/720 -> 732/732, tap KHONG DO DUOC merge = base ∪ {r387_b_windows_xoa_prompt_khi_job_rong (W5)}.
     Khong chay lai toan suite / --dot-bien tai cho (da co tren CI cung cay).
   N4: >-
-    not_measured — Windows NATIVE Desktop: chi loi_khai_co_neo (xem pre_merge_checks). Bang chung phu measured tren windows-latest (KHONG phai
-    Desktop): bo qua base-merge dung 9 ID r387, 0 dong BO QUA r387, DOT BIEN 592/592 gom W1-W6/H1-H7 OK giet tren Windows. L2 do nhan W5/W7
-    va L3 5/5 tren Windows: khong co trong kho.
-  N5: 'not_measured — run.json tren Windows native (version 1.6.2, ma_thoat 0, job_windows true, log_bam_cay_da_chet true, log_bam_cho_giay 0.0): chi loi_khai_co_neo; khong co tep run.json trong kho.'
+    measured (du lieu tho chep tu may chu kho, bam hai dau khop — windows-native/desktop/NGUON-GOC.txt) — Desktop DESKTOP-T9R33P2,
+    Windows-11-10.0.26300-SP0, Python 3.12.10. wp387b2-out-20261119T074702Z/TOM-TAT.txt (07:47–07:59Z): CHOT HEAD 9804f64 tree 13c48c05 sach=[];
+    L1 13/13 (e), (t), 9 ca mo, t71, t77 moi ca `1/1 qua, 0 bo qua, 0 hong`; L3 (a) 5/5, (c) 5/5; L2 ban loc sha256 5d5cd9b0…, len DOT_BIEN 22 /
+    HOOK 0 / HARNESS 9, trung 0, tong 31, `DOT BIEN: 31/31 dat` (L2-dot-bien.stdout.txt), W5 OK giet 1/1; NHAN W5 dung mot dong HONG
+    `r387(g) Windows xoa ban chup`, W7 `ket_thuc_utc da gom thoi gian doi`. SUITE-HEAD.stdout.txt 330/340 (tong 426, bo qua 86, hong 10), 0 dong
+    BO QUA r387. wp387b3-out-20261119T080325Z/TOM-TAT.txt + SUITE-BASE.stdout.txt (08:03–08:11Z, Developer Mode bat nhu luot 2): CHOT BASE
+    3b64746 sach, 321/331 (bo qua 95, hong 10); base-head = DUNG 9 ID r387, head-base = rong; HONG base = head (10 ca, do san tren may ay,
+    delta 0). Luu y: hieu tap trong TOM-TAT luot 2 ra 10 ID vi dung lai base luot 1 (truoc Developer Mode); luot 3 thay the. Luot 1 (966ee16):
+    L1 12/13 (ca (i) do) — ly do commit 2. Bang chung phu windows-latest sau merge: so-lane-launcher-44445202917-vs-44489280629.txt.
+  N5: >-
+    measured (chep tu may chu kho) — windows-native/desktop/wp387b2-out-20261119T074702Z/N5-run.json: version 1.6.2, ma_thoat 0, job_windows true,
+    log_bam_cay_da_chet true, log_bam_cho_giay 0.0 (< 10), head 9804f64, worktree_sach true; TOM-TAT luot 2 dong `N5 ... DAT`.
   N6: >-
     measured — linux/nghiem-thu-0ca331b.txt: numstat 2 tep +333 (merge^1 = base), git diff --check rc 0, VERSION 1.6.1 -> 1.6.2, doctor base rc 0
     = merge rc 0 (trich KET LUAN). linux/nghiem-thu-bo-sung-0ca331b.txt + linux/ruff-delta-0ca331b.txt: ruff 0.17.5 --select F base 5 = merge 5
     (5 F841 cu, so tap bo so dong) DELTA 0; adr-song rc 0 (66/66), doctrine-scan rc 0 (12 tep), eol_policy --all ok true 0 vi pham.
 
 khong_do_duoc:
-  - 'N4/N5 Windows NATIVE tren Desktop: log khong co trong kho (chi loi khai co neo cua phien dieu phoi).'
+  - 'N4/N5: khong do lai native SAU merge (do tren exact head truoc merge; tree merge = tree head). Bam Desktop cua hai driver do387.py/do387b.py khong co.'
   - 'Lua chon cach merge va lenh dispatch ops-do-workflow-definition.yml (khong co hien vat ghi nguoi bam; luot WD thi measured).'
   - 'Ruff 0.15.15 dung phien ban dac ta: khong co trong container; do bang 0.17.5.'
   - 'Darwin (no wp387-darwin-chua-do, ngoai pham vi packet B).'

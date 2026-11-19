@@ -1,0 +1,16 @@
+# Nguon goc log native Windows cua #387 packet B (N4/N5) — chep tu may chu kho, KHONG do lai trong container.
+may: Desktop DESKTOP-T9R33P2, Windows-11-10.0.26300-SP0, Python 3.12.10 (C:\Program Files\Python312\python.exe)
+thu muc goc tren may: F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\
+  wp387b-out-20261119T071249Z\TOM-TAT.txt          (luot 1, head 966ee16, driver do387.py)
+  wp387b2-out-20261119T074702Z\{TOM-TAT.txt, N5-run.json, SUITE-HEAD.stdout.txt, L2-dot-bien.stdout.txt}   (luot 2, head 9804f64, driver do387b.py, chay-387b2.ps1)
+  wp387b3-out-20261119T080325Z\{TOM-TAT.txt, SUITE-BASE.stdout.txt}   (luot 3, base 3b64746, Developer Mode bat, driver do387base.py, chay-387base.ps1)
+  chay-387b.ps1 (luot 1)
+cach chuyen: phien dieu phoi nen zip tren Desktop (n4n5-387b.zip, sha256 440270aa43936212c80e5768b83d9a30a1f62d7d721331b37a255ac9b7435769),
+  chuyen qua Desktop Commander dang base64, giai ra container; bam tung tep do HAI DAU (Desktop luc 10:2xZ 19-11, container 10:4xZ) khop:
+  TOM-TAT l1 d155e883a834d8a4… · l2 834a28536f81891a… · l3 3838704f093d938b… · N5-run.json 3e7f2ef9ff3cddaf… · SUITE-HEAD 94c65b5504297ba5… ·
+  SUITE-BASE ccfcdb639f4aca14… · L2 fc1e75c178f99e83… (bam day du: SHA256SUMS cua thu muc provenance).
+driver do387.py (sha256 afff2a4f…) va do387b.py (2e1a71e2…): ban trong scratchpad phien dieu phoi, chep vao day; KHONG co bam Desktop doi chieu
+  cho hai driver (chi co bam tep ket qua) — chay-387b2.ps1 in bam do387b.py luc chay nhung dong in ay khong nam trong cac tep da chuyen.
+nhan: du lieu tho = measured, chep tu may chu kho (bam hai dau khop); cac con so trong TOM-TAT do driver tren Desktop tinh, container chi doc lai.
+Luu y luot 2: dong `SUITE BASE dung lai log luot 1` (base do TRUOC khi bat Developer Mode) nen hieu tap bo qua ra 10 ID (them r1335_symlink_doi_dich_giua_bam_va_phong);
+  luot 3 do lai base cung dieu kien => hieu dung 9 ID r387, HONG base = head (10 ca, do san).

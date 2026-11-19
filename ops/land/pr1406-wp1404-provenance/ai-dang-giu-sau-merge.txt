@@ -1,0 +1,31 @@
+# do 2026-11-19T10:48:45Z clone rieng --shared, origin = github, fetch +refs/heads/*, master = origin/master 96b6a33d7; may chu 340 ref, cuc bo thieu 0 (thua cuc bo 3)
+== ai-dang-giu .claude/dev/launcher_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 59; HẾT_HẠN	wp1404-r1-g1-claude	refs/heads/master:ops/leases/wp1404-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/acceptance/wp1404/RESULTS.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1404-r1-g1-claude	refs/heads/master:ops/leases/wp1404-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/acceptance/wp1404/VERDICT.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1404-r1-g1-claude	refs/heads/master:ops/leases/wp1404-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/cai_cong_cu.sh
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 7; HẾT_HẠN	wp1404-r1-g1-claude	refs/heads/master:ops/leases/wp1404-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/leases/wp1404-r1-g1-claude.yaml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1404-r1-g1-claude	refs/heads/master:ops/leases/wp1404-r1-g1-claude.yaml)
+rc=0
+== ai-dang-giu ops/specs/wp1404-r1.md
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+(dong HẾT_HẠN luoc: 1; HẾT_HẠN	wp1404-r1-g1-claude	refs/heads/master:ops/leases/wp1404-r1-g1-claude.yaml)
+rc=0

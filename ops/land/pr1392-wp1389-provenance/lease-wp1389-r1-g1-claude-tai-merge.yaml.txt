@@ -1,0 +1,102 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1389
+packet_id: wp1389
+spec_packet_id: PLAYWRIGHT-DAEMON-DU-LUONG
+revision: 1
+generation: 1
+lease_id: wp1389-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+windows_transport: desktop_commander
+reviewer: codex
+reviewer_fallback: 'claude, context đọc-chỉ độc lập, khai same-provider'
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+review_class: sensitive
+effective_review_class: sensitive
+risk: sensitive
+access: read-write
+depends_on: []
+spec_path: ops/specs/wp1389-r1.md
+spec_hash: 12257fa8d659ff5c013af4bc31de700de4a53b085a99ec8c47cbd403d66610bc
+spec_sha256_required: 12257fa8d659ff5c013af4bc31de700de4a53b085a99ec8c47cbd403d66610bc
+spec_duyet: 'chủ kho duyệt băm 12257fa8 qua AskUserQuestion 18-11-2026 ~10:02Z trong phiên session_015GtxrazyAyLwN5BiEB52Sq, lựa chọn "Approve + Desktop (Recommended)"; reviewer "Codex, fallback Claude".'
+write_set:
+- .agents/skills/playwright-browser/SKILL.md
+- ops/acceptance/wp1389/REVIEW-PROMPT.md
+- ops/acceptance/wp1389/RESULTS.md
+- ops/acceptance/wp1389/VERDICT.md
+- ops/acceptance/wp1389/residue_matrix.ps1
+- ops/acceptance/wp1389/residue_matrix.sh
+- ops/leases/wp1389-r1-g1-claude.yaml
+- ops/specs/wp1389-r1.md
+write_set_hash: 96e5930132be6171e883848e773191f7e713903267f0d9b157021488a828fad1
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp (LC_ALL=C), nối bằng LF, kết thúc bằng LF
+effective_write_set_nguon: khai_bao_trong_spec
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-18T10:00:00Z'
+  goc_quet: 'clone đầy đủ (không nông), ls-remote --heads so tập với refs/remotes/origin: thiếu 0/313; master cục bộ = origin/master eca1d12'
+  ket_qua: '.agents/skills/playwright-browser/SKILL.md và package.json: ai-dang-giu NGƯỜI_GIỮ 0 (chỉ lease wp1287 HẾT_HẠN)'
+branch: claude/busy-brown-x1np9m
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: eca1d125b82783a6a736c7023751ba53cc9a49c8
+start_from_sha: eca1d125b82783a6a736c7023751ba53cc9a49c8
+reviewed_sha_required: eca1d125b82783a6a736c7023751ba53cc9a49c8
+reviewed_sha_required_nghia: 'Chưa có head ứng viên; mọi verdict neo exact head THẬT của nhánh thi công.'
+target_host: DESKTOP-T9R33P2
+target_device_id: a5f7076e-a491-4f84-829b-8d1fbcc1c767
+target_workdir: 'F:\tl-win\session_015GtxrazyAyLwN5BiEB52Sq\wp1389'
+target_locks: ['C:\tl-win\KHOA.txt', 'F:\tl-win\KHOA.txt']
+target_bo_sung:
+  - host: tra-luat-win
+    device_id: f7281f27-f79f-40a2-a2f5-b454b58a166a
+    workdir: 'C:\tl-win\session_015GtxrazyAyLwN5BiEB52Sq\wp1389'
+    locks: ['C:\tl-win\KHOA.txt']
+    muc_dich: 'đo N2 (ma trận PS) cho các ca cần symlink TỆP — N5, D10, G9, G10 và đột biến reparse — vì DESKTOP-T9R33P2 thiếu SeCreateSymbolicLinkPrivilege; tra-luat-win có quyền (probe 18-11 ~15:50Z: New-Item/mklink/python/node đều tạo được, PS 5.1 + pwsh 7, không elevated).'
+    chi_thi: 'chủ kho 18-11 ~16:24Z: "Dùng tra-luat-win, thêm vào lease và đo luôn".'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1389
+granted_on_instruction_readback: 'chủ kho 18-11: giao việc xử lý F1 của #1319 theo protocol (Issue + spec + lease trước code), rồi duyệt băm spec và cấp lease + dùng Desktop qua AskUserQuestion.'
+granted_on_instruction_note: 'không cấp: merge/land, deploy, LIVE, xoá 13 tệp .err cũ trên Desktop, đụng skill khác hoặc lõi.'
+recorded_by: 'phiên session_015GtxrazyAyLwN5BiEB52Sq'
+recorder_is_executor: true
+recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị trực tiếp của chủ kho; lease KHÔNG tự cấp — chủ kho duyệt qua AskUserQuestion.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
+leased_at_utc: '2026-11-18T10:02:07Z'
+heartbeat_at: '2026-11-18T16:36:00Z'
+lease_until: '2026-11-18T20:02:07Z'
+lease_expires_at_utc: '2026-11-18T20:02:07Z'
+lease_until_ghi_chu: '6h; gia hạn +4h (16:02Z → 20:02Z) theo chỉ thị chủ kho 18-11 ~15:54Z "Tiếp tục xử lý các vấn đề đang chạy" (bật Developer Mode trên Desktop để đo các ca symlink KHÔNG ĐO ĐƯỢC); rút hạn sau land.'
+attempts_used: 1
+attempts_limit: 2
+budget:
+  codex_review_calls: {used: 8, reserved: 0, limit: 8}
+  native_runs: {linux: 1, windows_desktop: 1, rerun_per_step_on_build_error: 1}
+budget_nang_tran:
+  codex_review_calls: {tu: 3, len: 4}
+  chi_thi: 'chủ kho chọn "Fix + raise Codex cap (Recommended)" qua AskUserQuestion 18-11-2026 ~11:58Z, sau verdict Codex lượt 3 (request_changes) — Review Rescue Checkpoint.'
+budget_nang_tran_2:
+  codex_review_calls: {tu: 4, len: 5}
+  chi_thi: 'chủ kho chọn "Nâng trần Codex lên 5 (Recommended)" qua AskUserQuestion 18-11-2026 ~14:05Z, sau khi sửa xong các finding chặn merge của Codex lượt 4 (request_changes).'
+budget_nang_tran_3:
+  codex_review_calls: {tu: 5, len: 6}
+  chi_thi: 'chủ kho chọn "Sửa + nâng trần Codex lên 6 (Recommended)" qua AskUserQuestion 18-11-2026 ~14:13Z, sau verdict Codex lượt 5 (request_changes: 1 P1 + 2 P2) — Review Rescue Checkpoint.'
+budget_nang_tran_4:
+  codex_review_calls: {tu: 6, len: 7}
+  chi_thi: 'chủ kho chọn "Sửa + nâng trần Codex lên 7 (Recommended)" qua AskUserQuestion 18-11-2026 ~14:34Z, sau verdict Codex lượt 6 (request_changes: 1 P1 + 2 P2); cùng lựa chọn cho phép gia hạn lease nếu không kịp trước 16:02Z, có ghi lý do.'
+budget_nang_tran_5:
+  codex_review_calls: {tu: 7, len: 8}
+  chi_thi: 'chủ kho chọn "Sửa + Codex lượt 8 (Recommended)" qua AskUserQuestion 18-11-2026 ~14:53Z, sau verdict Codex lượt 7 (request_changes: 1 P1 mới về cache casefold); cho phép gia hạn lease nếu cần.'
+exact_head_chap_nhan: 'chủ kho chọn "Chấp nhận, ghi quyết định (Recommended)" qua AskUserQuestion 18-11-2026 ~14:05Z: phép đo N1–N4 trên d7960ee được dùng cho head cuối khi mã thực thi (SKILL + 2 harness) trùng byte, kiểm bằng git diff --exit-code.'
+native_runs_ghi_chu: 'Mỗi lần vá sản phẩm sau lỗi local/review được đo lại trên head mới theo spec §8 ("sửa rồi đo lại trên head mới"); số lượt thực tế ghi trong RESULTS.md.'
+requires_live: false
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'

@@ -1,0 +1,36 @@
+# Bien ban M8 (ADR-0060) dong WP #1389 PLAYWRIGHT-DAEMON-DU-LUONG r1 — kiem bang packet_loop.py kiem-dong-wp. Nguon tung muc: ops/land/pr1392-wp1389-land-evidence.yaml.
+# Moc §10.2.2: run tren merge chinh 11bd033 FAILED o release-verify LAND (manifest, do san tu #1415); ci_master va moc_10_2_2 ghi theo run
+# hau due 44502045702 tren 4eda94e (bon moc measured passed, wd-run 44506427885) — quyet dinh phien dieu phoi, xem post_merge_checks[1].
+packet: wp1389
+revision: 1
+generation: 1
+spec_hash: 12257fa8d659ff5c013af4bc31de700de4a53b085a99ec8c47cbd403d66610bc
+head_da_review: 2c1c611c8d0e9c5f8ae0fac9150a6787f73721fe
+tree_h: 24c9726ba2101ba006734577100e6c9347c63c92
+review:
+  connector: 'readback-pr1392-comments.json: connector sach tren 2c1c611 (codex-review-state has_any_findings false)'
+  human_audit: 'issuecomment-7005367506 human_exact_head_audit.v1 approve tren 2c1c611 (chu kho tu dang, performed_via_github_app null)'
+windows:
+  phan_loai: required
+  nguon: "dac ta §5 N2/N4 va §6: PowerShell + Windows native tren Desktop DESKTOP-T9R33P2 (VM tra-luat-win cho ca symlink)."
+  ket_qua: "loi_khai_co_neo (not_measured) — RESULTS.md: Desktop PS 5.1/pwsh 7 122/122, VM 128/128; log tho khong trong kho."
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1392#issuecomment-7005367506
+merge_commit: 11bd0336d00b4a9544e70dcbbe049d372053a3ec
+tree_m: daf13b1e486822aacd5c8dba56c1d0a36f478feb
+ci_master:
+  run_id: 44502045702
+  conclusion: success
+  ghi_chu: 'run hau due tren 4eda94e 39/39 (pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt); run tren chinh 11bd033 FAILED 38/39 (ci-11bd033/).'
+nghiem_thu:
+  N1: passed        # linux/nghiem-thu-11bd033.txt: residue_matrix.sh TONG 127 dat / 127, rc 0, tren blob merge
+  N2: not_measured  # residue_matrix.ps1 Desktop/VM: chi RESULTS.md
+  N3: not_measured  # chay that SKILL Linux native: chi RESULTS.md
+  N4: not_measured  # chay that SKILL Windows native pwsh 7: chi RESULTS.md
+  N5: passed        # connector sach tren 2c1c611; VERDICT.md luot 8 approve (thuat_lai)
+lease_cuoi: wp1389-r1-g1-claude
+landed: true
+moc_10_2_2:   # theo run 44502045702 tren 4eda94e
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed

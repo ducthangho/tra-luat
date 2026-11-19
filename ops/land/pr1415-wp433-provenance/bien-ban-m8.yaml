@@ -1,8 +1,9 @@
 # Bien ban M8 (ADR-0060) dong WP #433 GWS-CRED-DICH-NGOAI-KHO-A r1 (packet P2a) — kiem bang packet_loop.py kiem-dong-wp
 # Nhan nguon tung muc: ops/land/pr1415-wp433-land-evidence.yaml. Audit human_audited chu kho tu dang 7004033259 tren 6e49b68.
-# Moc §10.2.2 run 44489289788 (ci.yml push master tren 417b593): run/checkout passed; gate_output FAILED (gate ubuntu, buoc
-# release-verify strict lane LAND rc 2: RELEASE_MANIFEST.json chua tai sinh); workflow_definition not_measured (chua dispatch
-# ops-do-workflow-definition.yml cho run nay; run da FAILED nen landed phai neo run push master sau merge PR #1417).
+# Moc §10.2.2 — run 44489289788 tren merge chinh 417b593: run/checkout passed, gate_output FAILED (release-verify LAND, manifest),
+# workflow_definition not_measured. Lan 2 (sau merge #1417 = 4eda94e, hau due first-parent, khong cham write set): ci_master va moc_10_2_2
+# ghi theo run 44502045702 tren 4eda94e (bon moc measured passed; wd-run 44506427885) — quyet dinh cua phien dieu phoi, xem ho so land
+# post_merge_checks[1].ly_do_chap_nhan.
 packet: wp433
 revision: 2
 generation: 1
@@ -22,9 +23,9 @@ duyet_chu_kho_ghi_chu: 'audit tu dang 08:36:32Z 19-11, truoc merge 08:38:12Z; lu
 merge_commit: 417b59397669e6966da2b546537279d15e2ba0c0
 tree_m: 2ce543cffc1fff5a0c99d9ba283d8023122bb2fa
 ci_master:
-  run_id: 44489289788
-  conclusion: failure
-  ghi_chu: 'ci.yml push master 38/39 job co dau hieu duong; gate (ubuntu-latest) failure tai buoc release-verify strict (lane LAND) rc 2 — scripts/tl_gws.py va scripts/tl_test_fragments_bundled.py lech RELEASE_MANIFEST.json; tai sinh o PR #1417 (f8eaed6, chua merge).'
+  run_id: 44502045702
+  conclusion: success
+  ghi_chu: 'ci.yml push master tren 4eda94e (merge #1417, hau due cua 417b593) 39/39 job co dau hieu duong (hau-due-4eda94e/danh-gia-gate-output-44502045702.txt). Run tren chinh 417b593 (44489289788) FAILED 38/39 o release-verify LAND vi manifest — giu trong ho so.'
 nghiem_thu:
   N1: passed   # linux/selftest-fragment-417b593.txt: fragment wp433_gws_cred_dich_ngoai_kho tren merge: CA 11/11, LUOT 46/46, DOT BIEN 37/37 giet dung, HONG 0, TU_KIEM 3/3, run() True
   N2: passed   # nhu N1
@@ -33,15 +34,15 @@ nghiem_thu:
   N5: passed   # nhu N1 (nguyen_tu, bo_qua=0 tren Linux)
   N6: passed   # nhu N1
   N7: passed   # nhu N1
-  N8: not_measured  # fragment (chung_hop_dong_loi) do tren merge; ve them `ops/cloud_agent_creds_test.py` TONG DAT tren head chi la loi khai than PR, khong chay lai
+  N8: passed  # linux/n8-n10-1415.txt: cloud_agent_creds_test base va merge CA 60/60, DOT BIEN 91/91, TONG DAT (cung lenh, cung tep test); fragment chung_hop_dong_loi dat
   N9: passed   # TU_KIEM 3/3, so luot 11 ca/46 luot, bo_qua 0 chi_posix 0 tren merge
-  N10: not_measured  # selftest 1780/1780 tren merge (linux + CI 44489289788), test-fragments-check ok, bundle_fragment_check ok; base 1779/1779 do o lenh KHAC (dac ta doi cung mot lenh); phan chung so ca tren ban sao chi la loi khai than PR
-  N11: failed  # release-verify strict tren master 417b593 rc 2 (release-verify-strict-417b593.txt); manifest tai sinh o PR #1417 chua merge (f8eaed6 rc 0 185/185)
+  N10: passed  # linux/n8-n10-1415.txt: selftest base 1779/1779 va merge 1780/1780 trong CUNG mot lenh; test-fragments-check + bundle_fragment_check ok
+  N11: passed  # release-verify-strict-417b593.txt rc 2 (du bao dac ta) -> f8eaed6 rc 0 185/185; gate 44502045702 tren 4eda94e buoc release-verify LAND ok:true
   N12: passed  # linux/nghiem-thu-417b593.txt: numstat 3 tep +438 (merge^1..merge = base..head), diff --check rc 0; linux/ruff-delta-417b593.txt DELTA 0 (ruff 0.17.5); adr-song, doctrine-scan rc 0 (linux/nghiem-thu-bo-sung-417b593.txt)
 lease_cuoi: wp433-r2-g1-claude
-landed: false
-moc_10_2_2:
+landed: true
+moc_10_2_2:   # theo run 44502045702 tren 4eda94e
   run: passed
   checkout: passed
-  workflow_definition: not_measured
-  gate_output: failed
+  workflow_definition: passed   # hau-due-4eda94e/wd/wd-44502045702.json + ci/provenance.yaml (thu --wd-run 44506427885)
+  gate_output: passed

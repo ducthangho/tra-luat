@@ -1,0 +1,32 @@
+# do 2026-11-19T10:51:26Z, kho chinh sau fetch, git 2.43.0
+$ git rev-list --first-parent 417b593..4eda94e
+4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd
+11bd0336d00b4a9544e70dcbbe049d372053a3ec
+cad9b1fa95da303b085a4555e85608c0b77b8ae0
+rc=0
+$ git merge-base --is-ancestor 417b593 4eda94e
+rc=0
+$ git diff --name-only 417b593 4eda94e
+.agents/skills/playwright-browser/SKILL.md
+.claude/dev/launcher_test.py
+RELEASE_MANIFEST.json
+ops/acceptance/wp1389/RESULTS.md
+ops/acceptance/wp1389/REVIEW-PROMPT.md
+ops/acceptance/wp1389/VERDICT.md
+ops/acceptance/wp1389/residue_matrix.ps1
+ops/acceptance/wp1389/residue_matrix.sh
+ops/acceptance/wp1404/RESULTS.md
+ops/acceptance/wp1404/VERDICT.md
+ops/cai_cong_cu.sh
+ops/leases/wp1389-r1-g1-claude.yaml
+ops/leases/wp1404-r1-g1-claude.yaml
+ops/specs/wp1389-r1.md
+ops/specs/wp1404-r1.md
+$ git diff --numstat 417b593 4eda94e -- <3 tep write set wp433-r2>
+rc=0
+$ git rev-parse 417b593:<tep> 4eda94e:<tep> (tl_gws, fragment, bundled)
+scripts/tl_gws.py 9ec027c2808868a05b67adc3d93ea68a574d6ec0 9ec027c2808868a05b67adc3d93ea68a574d6ec0
+scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho.py 2783e20c916b33b81598ec619268678577e0ae13 2783e20c916b33b81598ec619268678577e0ae13
+scripts/tl_test_fragments_bundled.py 317494012c52de6b241063656a33e802ca103e85 317494012c52de6b241063656a33e802ca103e85
+$ git diff --numstat 11bd033 4eda94e   (dong gop rieng cua #1417)
+7	7	RELEASE_MANIFEST.json

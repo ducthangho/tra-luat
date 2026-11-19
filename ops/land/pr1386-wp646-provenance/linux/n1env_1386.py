@@ -11,6 +11,15 @@ Dot bien tung chot (ban sao n1.sh): bo GIT_NO_REPLACE_OBJECTS=1 => ca replace co
   bo (b) diff-tree => chmod +x va them tep rc 0; bo dong thoi (c)(d)(e) => them dong §5 va chen sai vi tri rc 0;
   bo dong thoi (d)(e) => chen sai vi tri rc 0."""
 import json, os, pathlib, shutil, subprocess, sys, tempfile
+
+# r1407: goi bash qua ops/bash_nen.tim_bash() (cong cong_cu_test cam loi goi `bash` TRAN).
+import sys as _sys_bn
+from pathlib import Path as _Path_bn
+_sys_bn.path.insert(0, str(_Path_bn(__file__).resolve().parents[3]))
+from bash_nen import tim_bash as _tim_bash  # noqa: E402
+_BASH, _BASH_CHAN_DOAN = _tim_bash()
+if not _BASH:
+    raise SystemExit(f'KHONG DO DUOC: khong co bash dung duoc ({_BASH_CHAN_DOAN})')
 SRC, B, H, N1, N5 = sys.argv[1:6]
 P = "docs/PROTOCOL_DA_PHIEN.md"
 BASE_ENV = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
@@ -27,7 +36,7 @@ def git(d, *a, inp=None):
 
 def chay(script, repo, b, h, env_them=None):
     env = dict(BASE_ENV, **(env_them or {}))
-    p = subprocess.run(["bash", str(script), str(repo), b, h, N5], capture_output=True, text=True, env=env)
+    p = subprocess.run([_BASH, str(script), str(repo), b, h, N5], capture_output=True, text=True, env=env)
     return {"rc": p.returncode, "out": (p.stdout + p.stderr).strip()[-240:]}
 
 

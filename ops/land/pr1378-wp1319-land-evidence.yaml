@@ -1,7 +1,7 @@
 # HO SO LAND — PR #1378 (ho so nghiem thu #1319 + proxima-control: ProximaActivation, ProximaInstall).
 # Khuon: ops/land/pr882-wp748-r23-land-evidence.yaml. Schema: docs/PROTOCOL_DA_PHIEN.md §7 / §13.1.
-# TRANG THAI: merged (96b6a33d), `landed: false` — bon moc §10.2.2 passed (Gate output do bang danh_gia_gate.py v2);
-# con cho lease r2 tren master nha (het han 13:46:49Z hoac #1419 merge).
+# TRANG THAI: merged (96b6a33d), `landed: true` — bon moc §10.2.2 passed (Gate output do bang danh_gia_gate.py v3);
+# lease r2 nha (ai-dang-giu 13:47:37Z NGUOI_GIU 0).
 # NHAN: measured = do trong phien ghi so (tep kem); loi_khai_co_neo; not_measured = khong do, ghi ly do.
 # Readback tho: ops/land/pr1378-wp1319-provenance/. Moi phep do REST: GET qua proxy phien bang GITHUB_PAT, 2026-11-19.
 
@@ -47,5 +47,5 @@ bookkeeping:
   - {item: 'VERDICT K4 WP-PXA r2', duong_dan: ops/acceptance/wp-pxa/VERDICT-r2.md}
   - {item: 'thu hoi lease wp-pxa-r2-g1-executor', ket_qua: 'rut han 10:42:28Z, ghi merged + withdrawn_*'}
   - {item: 'PR ghi so', nhanh: ccr-8ee03d7f-vnmqk0}
-landed: false
-landed_ly_do: 'Bon moc §10.2.2 cua gate hau merge deu passed (Run, Checkout, Workflow definition, Gate output). CON THIEU dieu kien nha lease: ai-dang-giu-sau-rut-han.txt — ban lease wp-pxa-r2-g1-executor tren master con han toi 2026-11-19T13:46:49Z (ban rut han nam trong PR ghi so #1419, chua merge) => NGUOI_GIU 1 rc 11. Lat landed true khi #1419 merge hoac sau 13:46:49Z, kem ai-dang-giu do lai NGUOI_GIU 0.'
+landed: true
+landed_dieu_kien: 'PROTOCOL §10.2.4 — (1) gate hau merge tren 96b6a33d: run/checkout/workflow_definition/gate_output measured passed (ci-provenance-44507921722/provenance.yaml + danh-gia-gate-output-44507921722.txt v3) => DAT. (2) lease nha: ai-dang-giu-sau-rut-han.txt (2026-11-19T13:47:37Z, sau han 13:46:49Z cua ban tren master) 4/4 duong dan write set r2 NGUOI_GIU 0 rc 0 => DAT. (3) bookkeeping: VERDICT-r2, lease r2 rut han, ho so nay (PR ghi so #1419). (4) review: K4 offline approve 2/2 + connector sach tren 1cf535f. (5) uy quyen: issuecomment-7006185095 neo 1cf535f. (6) kiem-merge K0-K7 DU DIEU KIEN. (7) tran: Codex K4 2/2 do chu kho cap (E2).'

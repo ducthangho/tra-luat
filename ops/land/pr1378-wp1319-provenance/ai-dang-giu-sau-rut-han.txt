@@ -4,28 +4,28 @@ HẾT_HẠN	wp-pxa-r1-g1-executor	refs/heads/ccr-8ee03d7f-vnmqk0:ops/leases/wp-p
 HẾT_HẠN	wp-pxa-r1-g2-executor	refs/heads/ccr-8ee03d7f-vnmqk0:ops/leases/wp-pxa-r1-g2-executor.yaml
 HẾT_HẠN	wp-pxa-r1-g3-executor	refs/heads/ccr-8ee03d7f-vnmqk0:ops/leases/wp-pxa-r1-g3-executor.yaml
 HẾT_HẠN	wp-pxa-r2-g1-executor	refs/heads/ccr-8ee03d7f-vnmqk0:ops/leases/wp-pxa-r2-g1-executor.yaml
-CÒN_HẠN	wp-pxa-r2-g1-executor	refs/heads/master:ops/leases/wp-pxa-r2-g1-executor.yaml
-NGƯỜI_GIỮ 1: wp-pxa-r2-g1-executor
-rc=11
+HẾT_HẠN	wp-pxa-r2-g1-executor	refs/heads/master:ops/leases/wp-pxa-r2-g1-executor.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
 ### ops/acceptance/wp-pxa/RESULTS.md
 PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
 HẾT_HẠN	wp-pxa-r1-g1-executor	refs/heads/ccr-8ee03d7f-vnmqk0:ops/leases/wp-pxa-r1-g1-executor.yaml
 HẾT_HẠN	wp-pxa-r1-g2-executor	refs/heads/ccr-8ee03d7f-vnmqk0:ops/leases/wp-pxa-r1-g2-executor.yaml
 HẾT_HẠN	wp-pxa-r1-g3-executor	refs/heads/ccr-8ee03d7f-vnmqk0:ops/leases/wp-pxa-r1-g3-executor.yaml
 HẾT_HẠN	wp-pxa-r2-g1-executor	refs/heads/ccr-8ee03d7f-vnmqk0:ops/leases/wp-pxa-r2-g1-executor.yaml
-CÒN_HẠN	wp-pxa-r2-g1-executor	refs/heads/master:ops/leases/wp-pxa-r2-g1-executor.yaml
-NGƯỜI_GIỮ 1: wp-pxa-r2-g1-executor
-rc=11
+HẾT_HẠN	wp-pxa-r2-g1-executor	refs/heads/master:ops/leases/wp-pxa-r2-g1-executor.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
 ### ops/specs/wp-pxa-r2.md
 PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
 HẾT_HẠN	wp-pxa-r2-g1-executor	refs/heads/ccr-8ee03d7f-vnmqk0:ops/leases/wp-pxa-r2-g1-executor.yaml
-CÒN_HẠN	wp-pxa-r2-g1-executor	refs/heads/master:ops/leases/wp-pxa-r2-g1-executor.yaml
-NGƯỜI_GIỮ 1: wp-pxa-r2-g1-executor
-rc=11
+HẾT_HẠN	wp-pxa-r2-g1-executor	refs/heads/master:ops/leases/wp-pxa-r2-g1-executor.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
 ### ops/leases/wp-pxa-r2-g1-executor.yaml
 PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
 HẾT_HẠN	wp-pxa-r2-g1-executor	refs/heads/ccr-8ee03d7f-vnmqk0:ops/leases/wp-pxa-r2-g1-executor.yaml
-CÒN_HẠN	wp-pxa-r2-g1-executor	refs/heads/master:ops/leases/wp-pxa-r2-g1-executor.yaml
-NGƯỜI_GIỮ 1: wp-pxa-r2-g1-executor
-rc=11
-2026-11-19T12:56:57Z
+HẾT_HẠN	wp-pxa-r2-g1-executor	refs/heads/master:ops/leases/wp-pxa-r2-g1-executor.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+2026-11-19T13:47:37Z

@@ -5,5 +5,5 @@
 2026-11-01T00:20:00.0Z G5_THOI_GIAN {"bat_dau": 100.0, "cpu_s": 7.0, "ket_thuc": 110.0, "loai": "con", "pid": 1, "so_dot_bien": 1}
 2026-11-01T00:20:00.0Z G5_THOI_GIAN {"bat_dau": 105.0, "cpu_s": 5.0, "ket_thuc": 115.0, "loai": "con", "pid": 2, "so_dot_bien": 1}
 2026-11-01T00:20:00.0Z G5_THOI_GIAN {"bat_dau": 120.0, "cpu_s": 1.0, "ket_thuc": 125.0, "loai": "con", "pid": 3, "so_dot_bien": 1}
-2026-11-01T00:20:00.0Z G5_THOI_GIAN {"hop_con_s": 20.0, "khong_phan_bo_s": 20.0, "loai": "cha", "manh": 0, "so_manh": 8, "trang_thai": "do_duoc", "tuong_s": 40.0}
+2026-11-01T00:20:00.0Z G5_THOI_GIAN {"hop_con_s": 20.0, "khong_phan_bo_s": 20.0, "loai": "cha", "manh": 0, "so_con": 3, "so_manh": 8, "trang_thai": "do_duoc", "tuong_s": 40.0}
 2026-11-01T00:20:01.0Z MẢNH 0/8: 3/3 đột biến bán kính 1

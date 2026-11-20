@@ -1,5 +1,5 @@
 {
- "mo_ta": "MO PHONG (review F1): noi dung 8 bien nhan hop le nhung che do `dich` trong khi luot chon `du` + gom success, khong log gom",
+ "mo_ta": "MO PHONG (review F1): 8 bien nhan mang khoa `che_do` = `dich` trong khi luot chon `du` + gom success, khong log gom — hop dong gom hien tai khong co khoa nay nen `_gom_manh` tu choi ([G-dau]): bien nhan HONG",
  "mo_phong": true,
  "run": {
   "id": 9024,
@@ -97,7 +97,6 @@
  "bien_nhan": {
   "tao": {
    "head": "cccccccccccccccccccccccccccccccccccccccc",
-   "so_dot_bien": 20,
    "che_do": "dich"
   }
  },

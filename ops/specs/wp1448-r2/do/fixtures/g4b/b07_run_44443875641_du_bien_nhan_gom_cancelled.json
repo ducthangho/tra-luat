@@ -1,5 +1,5 @@
 {
- "mo_ta": "luot THAT 44443875641: du 8 manh success, job gom 135300180039 cancelled (log chuan-bi rut gon); NOI DUNG 8 bien nhan THAT (rut gon, xem fixtures/bien_nhan_44443875641.json) + commit cua head (cha hai = head luot)",
+ "mo_ta": "luot THAT 44443875641: du 8 manh success, job gom 135300180039 cancelled (log chuan-bi rut gon); dong dau, bam va KIEM KE cua 8 bien nhan THAT (fixtures/bien_nhan_44443875641.json; bang phan quyet tung ca do phia ghi that dung lai) + commit cua head (cha hai = head luot)",
  "mo_phong": false,
  "run": {
   "id": 44443875641,

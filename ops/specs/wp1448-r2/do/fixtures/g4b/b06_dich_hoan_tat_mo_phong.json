@@ -1,5 +1,5 @@
 {
- "mo_ta": "MO PHONG (tu PR6): noi dung 8 bien nhan hop le che do `dich` + gom success",
+ "mo_ta": "MO PHONG (tu PR6): noi dung 8 bien nhan da qua hop dong gom va mang che do `dich` + gom success. Hop dong gom HOM NAY chua co khoa `che_do`, nen che do cua bo da kiem duoc dat bang `ghi_de`",
  "mo_phong": true,
  "run": {
   "id": 9006,
@@ -87,7 +87,10 @@
  },
  "artifact": null,
  "ghi_de": {
-  "che_do_g5": "dich"
+  "che_do_g5": "dich",
+  "manh": {
+   "che_do_bien_nhan": "dich"
+  }
  },
  "mong": {
   "g4b": [
@@ -98,9 +101,7 @@
  },
  "bien_nhan": {
   "tao": {
-   "head": "cccccccccccccccccccccccccccccccccccccccc",
-   "so_dot_bien": 20,
-   "che_do": "dich"
+   "head": "cccccccccccccccccccccccccccccccccccccccc"
   }
  },
  "cmt": {

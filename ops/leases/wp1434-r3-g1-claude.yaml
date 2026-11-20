@@ -61,8 +61,8 @@
   "audit_label_if_delegated": "owner audits exact H personally (human_exact_head_audit.v1); coordinator never signs",
   "recorded_by": "Claude Code coordinator session; not author or reviewer",
   "recorder_is_executor": false,
-  "lease_until": "2026-11-22T02:00:00Z",
-  "lease_expires_at_utc": "2026-11-22T02:00:00Z",
+  "lease_until": "2026-11-20T03:51:04Z",
+  "lease_expires_at_utc": "2026-11-20T03:51:04Z",
   "limits": {
     "Claude_author": 4,
     "Codex_source_review": 4,
@@ -139,5 +139,45 @@
     },
     "reason": "connector review 5986843693 on 70eafc1: two P2 in thu_thap.py",
     "authority_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7028948296"
+  },
+  "source_review": [
+    {
+      "run": "wp1434-source-review-1",
+      "reviewed_sha": "484d41656ab3f237b87cfe3b0f581c403debce9f",
+      "verdict": "changes_requested"
+    },
+    {
+      "run": "wp1434-source-review-2",
+      "reviewed_sha": "07330ed90662faed5479c3d186cb72363ffba355",
+      "verdict": "changes_requested"
+    },
+    {
+      "run": "wp1434-source-review-3",
+      "reviewed_sha": "70eafc14bfb49ca4c22f6b38ef7a1fd460b4767e",
+      "verdict": "approve"
+    },
+    {
+      "run": "wp1434-source-review-4",
+      "reviewed_sha": "91362b439ea63a2eb0cd164f4e792f7be4cfb8d4",
+      "verdict": "approve"
+    }
+  ],
+  "human_audit": [
+    "https://github.com/ducthangho/tra-luat/pull/1439#issuecomment-7028804716",
+    "https://github.com/ducthangho/tra-luat/pull/1439#issuecomment-7029245325"
+  ],
+  "merge": {
+    "pr": 1439,
+    "merge_commit": "5e5d2cc192758b5a372a875827987b6f471704c0",
+    "merged_at": "2026-11-20T03:45:33Z",
+    "merged_by": "ducthangho"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-22T02:00:00Z",
+    "han_moi_utc": "2026-11-20T03:51:04Z",
+    "nguoi_rut": "Claude Code coordinator under owner delegation",
+    "chi_thi": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+    "ly_do": "PR #1439 da merge tai 5e5d2cc (chu kho bam merge); khong con ghi source.",
+    "gioi_han": "Chi rut han; lich su va so lieu giu nguyen."
   }
 }

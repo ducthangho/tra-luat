@@ -1,0 +1,10 @@
+== goc (gia nt)
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_doc: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_ghi_lai: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_encode_ghi_cu: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=3 đạt=3 chỉ_posix=0 · LUOT: dự_kiến=29 chạy=29 đạt=29 chỉ_posix=0 · DOT BIEN: dự_kiến=36 chạy=36 giết_đúng=32 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+[wp433_gws_cred_dich_ngoai_kho_b] VẾ SAI: giet_dung
+RUN False
+== moi (gia nt)
+[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=3 đạt=3 chỉ_posix=0 · LUOT: dự_kiến=29 chạy=29 đạt=29 chỉ_posix=0 · DOT BIEN: dự_kiến=36 chạy=36 giết_đúng=36 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+RUN True

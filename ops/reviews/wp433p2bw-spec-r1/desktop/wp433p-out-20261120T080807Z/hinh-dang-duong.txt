@@ -1,0 +1,4 @@
+expanduser= 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tp-080807\\hd/.tra_luat_config.json'
+join= 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tp-080807\\hd\\.tra_luat_config.json'
+bang_chuoi= False
+bang_sau_chuan_hoa= True

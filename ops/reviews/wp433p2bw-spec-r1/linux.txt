@@ -1,0 +1,6 @@
+== goc (Linux, 94cbb36, 2026-11-20T08:12:01Z)
+[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=3 đạt=3 chỉ_posix=0 · LUOT: dự_kiến=29 chạy=29 đạt=29 chỉ_posix=0 · DOT BIEN: dự_kiến=36 chạy=36 giết_đúng=36 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+RUN True
+== moi (Linux, 94cbb36, 2026-11-20T08:13:01Z)
+[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=3 đạt=3 chỉ_posix=0 · LUOT: dự_kiến=29 chạy=29 đạt=29 chỉ_posix=0 · DOT BIEN: dự_kiến=36 chạy=36 giết_đúng=36 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+RUN True

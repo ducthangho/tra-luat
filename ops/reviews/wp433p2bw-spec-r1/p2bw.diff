@@ -1,0 +1,34 @@
+--- a/scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py
++++ b/scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py
+@@ -46,6 +46,7 @@
+     gia("_imp", lambda n: types.SimpleNamespace(gws_exe=lambda: "gws-gia") if n == "gws_bridge" else that_imp(n))
+     m.AGENT_CREDS_FILEID = ""          # biến rỗng rơi về hằng baked ⇒ xoá cả hằng (agent giả KHÔNG CẤU HÌNH)
+     return m
++_nc = lambda p: os.path.normcase(os.path.normpath(os.fspath(p)))   # WP433 nợ p2b-w6-windows: `expanduser("~/…")` giữ '/' trên nt
+ _env = lambda: (os.environ.get("TL_TOKEN"), os.environ.get("TL_WEBAPP"))
+ _ac = lambda out: sum(d.startswith("[bootstrap] agent_creds:") for d in out.splitlines()) == 1
+ _x = lambda err: [d for d in err if d.startswith("[bootstrap] ✗ ")]
+@@ -86,19 +87,19 @@
+         """Một LƯỢT GỌI. Cửa sổ: chặn tiến trình con/mạng (`MANG_BI_CHAN`), stdout/stderr RIÊNG; bộ quan sát `self.dem` đếm cho ĐƯỜNG CONFIG:
+         lời gọi chốt đích (`chot`), lần mở ĐỌC qua `builtins.open` (`doc`), lời gọi writer (`ghi`). `fsenc` giả lập giá trị M1 đọc từ
+         `sys.getfilesystemencoding`; `agent` thay `_bootstrap_agent_creds`. Ngoại lệ khớp tập khai CỦA LƯỢT ⇒ nhãn khai; ngoài tập ⇒ `ngoai_le_la`."""
+-        out, err, m, cfg, dem = io.StringIO(), io.StringIO(), self.m, self.cfg, {"chot": 0, "doc": 0, "ghi": 0}
++        out, err, m, cfg, dem = io.StringIO(), io.StringIO(), self.m, _nc(self.cfg), {"chot": 0, "doc": 0, "ghi": 0}
+         self.dem = dem
+         cu = (subprocess.run, subprocess.Popen, urllib.request.urlopen, builtins.open, m._kiem_dich_ghi, m._ghi_nguyen_tu_0600, sys.getfilesystemencoding, m._bootstrap_agent_creds)
+         subprocess.run = subprocess.Popen = urllib.request.urlopen = lambda *a, **k: _nem(RuntimeError("MANG_BI_CHAN"))
+         def op(f, *a, **k):
+-            if f == cfg and not any(c in (a[0] if a else k.get("mode", "r")) for c in "wax+"):
++            if isinstance(f, (str, os.PathLike)) and _nc(f) == cfg and not any(c in (a[0] if a else k.get("mode", "r")) for c in "wax+"):
+                 dem["doc"] += 1
+             return cu[3](f, *a, **k)
+         def kd(dich, goc, tp):
+-            dem["chot"] += dich == cfg
++            dem["chot"] += _nc(dich) == cfg
+             return cu[4](dich, goc, tp)
+         def gh(path, data):
+-            dem["ghi"] += path == cfg
++            dem["ghi"] += _nc(path) == cfg
+             return cu[5](path, data)
+         builtins.open, m._kiem_dich_ghi, m._ghi_nguyen_tu_0600 = op, kd, gh
+         if fsenc:

@@ -1,0 +1,44 @@
+packet: WP-PXU
+revision: 1
+generation: 3
+spec_hash: 4c37b3b5f4701536be1f479d7d9a7a92b530845fd632d87d3418b3a4f62db914
+packet_issue: 1409
+head_da_review: 1cf535fddbd81f343872c81582b301f08bd79f45
+tree_h: efbd119cea400cca706cdcb7791c3204214fdf1c
+review:
+  code: 'ops/acceptance/wp-pxu/VERDICT-code.md: request_changes (P1 junction), sua o g2'
+  run: 'ops/acceptance/wp-pxu/VERDICT-run.md: review 2/2 request_changes, review g2 approve_scoped (khong con P0/P1)'
+  connector: 'PR #1378 sach tren 1cf535f'
+windows:
+  desktop: PS5.1 + PS7 31/32, 10/10 phan chung do harness cap (MATRIX H.8)
+  vm: tra-luat-win PS5.1 + PS7 32/32 va 42/42 gom PU13s symlink, zip eba83af7 (H.9)
+  ci_pr: run 44502793274 success tren 1cf535f
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1378#issuecomment-7006185095
+merge_commit: 96b6a33d770f7539a3eacbebdc215f87ded4ea7f
+merge_parents:
+- 4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd
+- 1cf535fddbd81f343872c81582b301f08bd79f45
+tree_m: d007b41f5b17c47c04150a56680081ec79f2ac5b
+ci_master:
+  run_id: 44507921722
+  conclusion: success
+  jobs: 39/39 success (ubuntu-latest)
+nghiem_thu:
+  Remove-ProximaUninstallResidue (§4): passed
+  Chay sau mot lan go that: passed
+  UNC that: owner_waived
+mien_tru_chi_tiet:
+  UNC that: 'not_measured: bang chung UNC chi phu phan loai'
+  Chay sau mot lan go that: 'passed scoped: 1 luot Desktop o WP-PXR (H.12)'
+mien_tru_chu_kho: 'Chu kho chon ''Dong kem mien tru (Recommended)'' trong phien dieu phoi session_015GtxrapMSm976JLC7Fp1HM, 19/11 khoang 21:3xZ (AskUserQuestion; loi khai cua phien dieu phoi, khong co ban
+  ghi tren GitHub). Mien tru KHONG nang muc bang chung: moi hang owner_waived giu nguyen ket qua do va ly do trong mien_tru_chi_tiet.'
+lease_cuoi: wp-pxu-r1-g3-operator
+nha_lease: lease_until da qua (xem tep lease cuoi)
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+nguon_land: 'ops/land/pr1378-wp1319-land-evidence.yaml (PR #1378 gom cac packet con; ghi so qua PR #1419 36848f1b)'
+ghi_chu: Bien ban M8 (ADR-0060) la diem cuoi. Sua thi dang ban moi tro ban cu.

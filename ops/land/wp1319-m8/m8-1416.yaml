@@ -1,0 +1,42 @@
+packet: WP-PXR
+revision: 1
+generation: 1
+spec_hash: 5da780284704ff021f852b9e4bea85576d0a40bc4f3054ae75b5b3287046fb04
+packet_issue: 1416
+head_da_review: 1cf535fddbd81f343872c81582b301f08bd79f45
+tree_h: efbd119cea400cca706cdcb7791c3204214fdf1c
+review:
+  pxr: 'ops/acceptance/wp-pxr/VERDICT.md: approve_scoped; 2 P1 ve driver PXR.ps1 (xoa profile theo ten, chot chua kiem host/loc hanh dong R4/bam module) - driver khong duoc dung lai khi chua sua (MATRIX
+    H.12)'
+  connector: 'PR #1378 sach tren 1cf535f'
+windows:
+  desktop: go that Proxima 5.5.0 per-user tren Desktop 19/11 08:58:53-08:59:09Z, zip 3a1f04b1 (ops/acceptance/wp-pxr/RESULTS.md)
+  ci_pr: run 44502793274 success tren 1cf535f
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1378#issuecomment-7006185095
+merge_commit: 96b6a33d770f7539a3eacbebdc215f87ded4ea7f
+merge_parents:
+- 4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd
+- 1cf535fddbd81f343872c81582b301f08bd79f45
+tree_m: d007b41f5b17c47c04150a56680081ec79f2ac5b
+ci_master:
+  run_id: 44507921722
+  conclusion: success
+  jobs: 39/39 success (ubuntu-latest)
+nghiem_thu:
+  Go Proxima 5.5.0 bang bo go chinh thuc (ma thoat 0, het khoa go cai dat): passed
+  Don ton du Remove-ProximaUninstallResidue (WOULD_REMOVE roi CLEANED): passed
+  Xoa shortcut va profile thu U8: passed
+gioi_han:
+  H.7 dieu 3: bam Proxima.exe 6990dce4 khong do lai ngay truoc khi go (chi do luc cai, U8 A1); hang NSIS quy trinh go ghi passed scoped kem gioi han nay
+  khong_do: '%TEMP% cua Un_A.exe, khoa registry khac, cache Electron ngoai APPDATA, dong bo OneDrive, phien phia provider'
+chu_kho_chon: Chu kho chon "Go ban cai + xoa profile thu" trong phien dieu phoi 19/11 (loi khai cua phien dieu phoi, khong co ban ghi tren GitHub)
+lease_cuoi: wp-pxr-r1-g1-operator
+nha_lease: lease_until da qua (xem tep lease cuoi)
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+nguon_land: 'ops/land/pr1378-wp1319-land-evidence.yaml (PR #1378 gom cac packet con; ghi so qua PR #1419 36848f1b)'
+ghi_chu: 'Bien ban M8 bo sung: Issue #1416 da dong 19/11 09:11:30Z ma chua co bien ban M8 (review cuoi #1319, luot 1, P3). Ban nay la diem cuoi; sua thi dang ban moi tro ban cu.'

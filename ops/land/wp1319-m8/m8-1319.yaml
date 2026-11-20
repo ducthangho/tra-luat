@@ -1,0 +1,93 @@
+packet: wp1319
+revision: 11
+generation: 1
+spec_hash: 664d12c808d6373a5e46d9229bdbc8afe168ebf38f7832bef2cab1d0595d7fd8
+packet_issue: 1319
+head_da_review: 6f00fde312ca8ec44c51222312f39ca50b599b60
+tree_h: 25baadbbc937652fa538c076632fcc0b72b0a00c
+review:
+  review_cuoi: 'ops/acceptance/wp1319/r11/VERDICT.md: Codex gpt-6-astra offline 2/2 qua launcher.py run; luot 1 c0939197 tren c3ab4aa request_changes (2 P2, 3 P3, da xu ly); luot 2 71689c97 tren ff1cf89
+    KET_LUAN approve (1 P3 da sua); sandbox workspace-write DO_DUOC ca hai luot'
+  connector: 'PR #1440 sach tren 6f00fde (sau khi sua P1 ghi sandbox); cac PR r5-r10 (#1426 #1429 #1433 #1435 #1437 #1438) deu connector sach tren head merge'
+  theo_luot: 'verdict va pham vi tung luot r1-r4 va 6 WP con: MATRIX muc I §11 #12'
+windows:
+  native: do that tren Desktop, ASUS, VM f728 o r1-r8 va cac WP (RESULTS tung luot); r9-r11 khong chay host
+  ci_pr: 'PR #1440 head 6f00fde: 25 check success/skipped'
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1440
+duyet_chu_kho_ghi_chu: 'Chu kho chi thi trong phien dieu phoi: "Nghiem thu du di" (#1319), "1,2,3 dong y cac kien nghi. Xu ly tiep" (20/11: mien/chap nhan hang con do, review cuoi toi da 2 loi goi Codex,
+  M8 va dong #1319). Loi khai cua phien dieu phoi, khong co ban ghi tren GitHub; ghi o ops/acceptance/wp1319/r10/RESULTS.md va ops/specs/wp1319-r11.md.'
+merge_commit: d8cf2ab57f9f25a93cefedcebfb315826b6b78fe
+merge_parents:
+- c3ab4aa5bfd9f1f5494e2efab1718fc2095f908c
+- 6f00fde312ca8ec44c51222312f39ca50b599b60
+tree_m: 25baadbbc937652fa538c076632fcc0b72b0a00c
+ci_master:
+  run_id: 44669622916
+  conclusion: success
+  jobs: 39/39 success (ubuntu-latest), xong 2026-11-20T04:06:07Z
+nghiem_thu:
+  '§11 #1 bon lua chon cai, thieu add-on khong pha core': passed
+  '§11 #2 dung target, khong fallback/retry': owner_waived
+  '§11 #3 WhatIf khong mutation': owner_waived
+  '§11 #4 khong secret/profile trong repo': passed
+  '§11 #5 profile rieng, pin package/browser/cache': owner_waived
+  '§11 #6 artifact sai nguon khong kich hoat': passed
+  '§11 #7 may ban hoan, updater trung bi khoa': owner_waived
+  '§11 #8 promotion fence': passed
+  '§11 #9 phuc hoi binary + du lieu': owner_waived
+  '§11 #10 file khoa / dia day / rollback that bai': owner_waived
+  '§11 #11 healthcheck khong inference': passed
+  '§11 #12 review doc lap dung head/tree': passed
+  U1: owner_waived
+  U2: passed
+  U3: passed
+  U4: owner_waived
+  U5: owner_waived
+  U6: passed
+  U7: owner_waived
+  U8: owner_waived
+  U9: passed
+  U10: passed
+  U11: owner_waived
+  U12: owner_waived
+  Kiem release hang ngay: owner_waived
+  NSIS cai per-user: passed
+  NSIS go cua nha cung cap (NSIS-2): owner_waived
+  NSIS quy trinh go (H.7): passed
+  Migration / nang cap / per-machine: owner_waived
+  Runtime promotion LIVE: passed
+mien_tru_chi_tiet:
+  '§11 #2': partial; phan dich tu xa/gateway owner_waived r10; duong WinRM tu xa chua mo (r9, loi khai chu kho)
+  '§11 #3': passed scoped backend gia; gateway that owner_waived r10
+  '§11 #5': passed scoped Desktop+ASUS; F1 du luong ms-playwright daemon owner_accepted r10
+  '§11 #7': 'may ban passed scoped; updater trung partial (chap nhan tu truoc: Proxima khong single-instance)'
+  '§11 #9': du lieu passed; binary partial owner_waived r10
+  '§11 #10': partial; owner_waived muc fixture r7
+  U1: passed scoped backend gia; endpoint that owner_waived r10
+  U2: passed scoped f7281f27; 810f79bb offline, chua dinh danh (ghi la gioi han, khong mien rieng)
+  U4: passed scoped nhanh sai integrity; phan con lai owner_waived r10
+  U5: 'accepted_risk r7: NotSigned, chap nhan theo digest da ghim'
+  U7: partial; owner_waived r10 (khong dat nguong)
+  U8: 'du lieu passed hep; dang nhap: quan sat chu kho, owner_accepted r10'
+  U9: do duoc r5/r6; cache o C theo quyet dinh chu kho
+  U11: not_evidenced; owner_waived r9 (chi dung RDP qua IAP)
+  U12: partial; accepted_risk r7
+  Kiem release hang ngay: not_present; owner_accepted r10 (kiem tay)
+  NSIS go cua nha cung cap (NSIS-2): failed (finding san pham), giu nguyen; chap nhan tu truoc
+  Migration / nang cap / per-machine: not_evidenced; owner_waived r10
+nguon_nghiem_thu: 'ops/acceptance/wp1319/MATRIX.md muc I tai d8cf2ab; WP con #1401 #1405 #1409 #1410 #1413 #1416 deu da dong co M8'
+lease_cuoi: wp1319-r11-g1-operator
+nha_lease: 'lease r11 thu hoi som 2026-11-20T04:16:29Z qua PR #1443 (merge 6774181); lease r5-r10 da thu hoi hoac het han (review cuoi luot 2 kiem)'
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+moc_10_2_2_nguon:
+  run: run 44669622916 attempt 1 success head d8cf2ab
+  checkout: 39/39 job checkout d8cf2ab (ops/ci_provenance.py thu --run 44669622916 --attempt 1 --wd-run 44672185539, rc 0, provenance.yaml sha256 d749903c0613a112...)
+  workflow_definition: ops-do-workflow-definition.yml run 44672185539 success; WORKFLOW_DEFINITION passed trong provenance.yaml (path .github/workflows/ci.yml)
+  gate_output: 'danh_gia_gate.py v3 (sha256 0ea9a5e9...): MOC_GATE_OUTPUT passed 39/39 job co dau hieu duong theo tung buoc; dau ra sha256 452024d7e9bd5d58...'
+  luu_tru: tep provenance nam trong thu muc lam viec cua phien dieu phoi; dua vao ops/land/ qua lan luu tru tuan (ADR-0060 M8), chua o trong kho
+ghi_chu: 'Bien ban M8 (ADR-0060) la diem cuoi cua packet #1319. Sua thi dang ban moi tro ban cu.'

@@ -1122,7 +1122,9 @@ def _trong_kho_git(path: str) -> str | None:
     `?? codexhome/auth.json`) — trả tổ tiên có mục `.git` nếu `path` hoặc bất kỳ tổ tiên nào của nó có, ngược lại None.
     Đi từ chính `path` lên gốc trên HAI chuỗi: từ vựng (đường như khai) và `os.path.realpath` (đích thật sau symlink —
     kho nằm sau một symlink NGOÀI kho thì chuỗi từ vựng không thấy). `lstat`, không theo symlink ở `.git`: tệp
-    (worktree/submodule), thư mục, symlink treo đều tính. Thành phần chưa tồn tại thì `lstat` hụt và đi tiếp lên tổ tiên."""
+    (worktree/submodule), thư mục, symlink treo đều tính. Thành phần chưa tồn tại thì `lstat` hụt và đi tiếp lên tổ tiên.
+    WP433 N: ba trạng thái như `_co_git_nt` — chỉ `FileNotFoundError`/`NotADirectoryError` là "chưa có `.git` ở đây"; lỗi `lstat` khác
+    (EACCES, ELOOP, EIO…) LAN RA dạng OSError thay vì bị đọc thành "không có" (người gọi đã bọc: báo `ghi lỗi`/`KHÔNG ĐO ĐƯỢC`)."""
     # Chuỗi thật giải từ đường GỐC, không từ bản đã `abspath`: `abspath` gộp `..` theo từ vựng nên `<ngoài>/lk/../x`
     # (lk → <kho>/con) thành `<ngoài>/x`, trong khi kernel ghi vào `<kho>/x` (review PR #1367, comment 4597850151).
     for d in dict.fromkeys((os.path.abspath(path), os.path.realpath(path))):
@@ -1131,7 +1133,7 @@ def _trong_kho_git(path: str) -> str | None:
             try:
                 os.lstat(g)
                 return d
-            except OSError:
+            except (FileNotFoundError, NotADirectoryError):
                 pass
             if os.path.dirname(d) == d:
                 break
@@ -1186,6 +1188,38 @@ def _kiem_dich_ghi(dich: str, goc: str, thanh_phan: tuple) -> str | None:
                 return f"là liên kết tượng trưng: {repr(tien_to)[:200]}"
         except (FileNotFoundError, NotADirectoryError):
             pass
+    return None
+
+
+def _chot_thu_muc(thu_muc: str) -> str | None:
+    """WP433 N: None hoặc lý do — CHỈ luật (b) của `_kiem_dich_ghi` (liên kết) trên MỌI tiền tố từ gốc tới chính `thu_muc`; không kiểm
+    `.git`, không tạo/ghi gì. Tiền tố chưa tồn tại thì bỏ qua, lỗi `lstat` khác LAN RA. `os.getcwd()` chỉ gọi khi `thu_muc` tương đối.
+    `thu_muc` quy về GỐC (`/`; nt: gốc ổ có chữ, loại ổ REMOVABLE/FIXED) ⇒ chỉ `lstat` gốc — hai parser P2a/C1 vốn từ chối ca ấy."""
+    if os.name == "posix":
+        cwd = "" if thu_muc.startswith("/") else os.getcwd()
+        c = _duong_dich_chuan(thu_muc, cwd)
+        if isinstance(c, str) and "\x00" not in thu_muc and thu_muc.strip() and not [t for t in (cwd + "/" + thu_muc).split("/") if t not in ("", ".")]:
+            c = ("/", ())
+    else:
+        a = _phan_loai_duong_nt(thu_muc)
+        cwd = os.getcwd() if a[0] == "tuong_doi" else ""
+        c = _duong_dich_chuan_nt(thu_muc, cwd)
+        if isinstance(c, str) and a[0] == "tuong_doi":
+            k = _phan_loai_duong_nt(cwd)
+            a = (k[0], k[1], k[2] + a[2]) if k[0] == "o_tuyet_doi" else k
+        if isinstance(c, str) and a[0] == "o_tuyet_doi" and not a[2] and _loai_o_nt(a[1]) in (2, 3):
+            c = (a[1], ())
+    if isinstance(c, str):
+        return c
+    goc = "/" if os.name == "posix" else c[0]
+    for i in range(len(c[1]) + 1):
+        tien_to = os.path.join(goc, *c[1][:i])
+        try:
+            st = os.lstat(tien_to)
+        except (FileNotFoundError, NotADirectoryError):
+            continue
+        if stat.S_ISLNK(st.st_mode) or stat.FILE_ATTRIBUTE_REPARSE_POINT & getattr(st, "st_file_attributes", 0):
+            return f"là liên kết tượng trưng: {repr(tien_to)[:200]}"
     return None
 
 
@@ -1347,7 +1381,7 @@ def _dich_jar_nlm(nbase: str, nlm: dict) -> str | None:
         tp = tuple(rel.split("/"))
         if (ly_do := _kiem_dich_ghi(os.path.join(nbase, *tp), nbase, tp)) is not None:
             return ly_do
-    return None
+    return _chot_thu_muc(os.path.dirname(nbase))
 
 
 def _ghi_jar_nlm(nbase: str, nlm: dict) -> None:
@@ -1833,6 +1867,9 @@ def cmd_nlm_auth_pull(a) -> int:
     except Exception as e:  # noqa: BLE001
         print(f"[nlm-auth-pull] ✗ giải mã lỗi: {e}", file=sys.stderr)
         return 3
+    if not isinstance(bundle, dict):   # WP433 N: JSON hợp lệ mà không phải object ⇒ từ chối như giải mã lỗi, không traceback
+        print("[nlm-auth-pull] ✗ dữ liệu không hợp lệ: bundle", file=sys.stderr)
+        return 3
     nlm = bundle.get("nlm_auth")
     if not nlm:
         print("[nlm-auth-pull] ⚠ bundle chưa có nlm_auth — ở Code chạy `tl secrets-set --nlm` trước.", file=sys.stderr)
@@ -1882,6 +1919,9 @@ def cmd_bootstrap(a) -> int:
     except Exception as e:  # noqa: BLE001
         print(f"[bootstrap] ✗ giải mã lỗi: {e} (TL_MASTER_KEY khác lúc stage?)", file=sys.stderr)
         return 3
+    if not isinstance(bundle, dict):   # WP433 N: trước mọi phép gán env/ghi tệp/nhánh agent
+        print("[bootstrap] ✗ dữ liệu không hợp lệ: bundle", file=sys.stderr)
+        return 3
     print(f"[bootstrap] env={env} · bundle giải mã OK (nguồn .enc: {src})")
     degraded = False                       # B8: theo dõi để exit code phản ánh đúng (không "nuốt" lỗi → trả 0)
     jar = bundle.get("nlm_auth")           # WP433: kiểm jar MỘT lần, mọi env; bị từ chối ⇒ không ghi jar, không lưu vào config
@@ -1900,6 +1940,7 @@ def cmd_bootstrap(a) -> int:
         existing = {}
         try:   # WP433: chốt đích TRƯỚC lần đọc phục vụ merge; ghi nguyên tử (dữ liệu dựng xong mới gọi writer)
             ly_cfg = _kiem_dich_ghi(cfgp, cfgp, ())
+            ly_cfg = ly_cfg or _chot_thu_muc(os.path.dirname(cfgp))
             if ly_cfg is None and os.path.exists(cfgp):
                 try:
                     existing = json.load(open(cfgp, encoding="utf-8"))

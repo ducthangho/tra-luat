@@ -1,0 +1,409 @@
+diff --git a/.githooks/eol_policy_test.py b/.githooks/eol_policy_test.py
+index c162f44..40a75bc 100644
+--- a/.githooks/eol_policy_test.py
++++ b/.githooks/eol_policy_test.py
+@@ -883,8 +883,7 @@ def _ban_sao_cay(dest):
+ def _tai_sinh_bundled(copy):
+     """Tái sinh adapter bundled bằng CHÍNH generator canonical — không viết tay module sinh ra."""
+     tf = _hop_dong_fragment()
+-    data = tf.generate_bundled_module_bytes(copy / "scripts" / "test_fragments")
+-    (copy / "scripts" / "tl_test_fragments_bundled.py").write_bytes(data)
++    tf.write_bundled_modules(copy / "scripts" / "test_fragments", copy / "scripts")
+
+
+ def _chay_cong(copy):
+@@ -975,8 +974,7 @@ def case_driver_that_chay_probe_tren_bundle_giai_nen(root):
+     for p in goc:
+         shutil.copyfile(p, nguon / p.name)
+     (nguon / (_PROBE_FILE_ID + ".py")).write_text(_PROBE_FILE_SRC, encoding="utf-8", newline="\n")
+-    (goi / "scripts" / "tl_test_fragments_bundled.py").write_bytes(
+-        tf.generate_bundled_module_bytes(nguon))
++    tf.write_bundled_modules(nguon, goi / "scripts")
+
+     driver = root.parent / "driver.py"
+     driver.write_text(cong._DRIVER, encoding="utf-8", newline="\n")
+diff --git a/references/golden/workflow_audit.json b/references/golden/workflow_audit.json
+index 3dc1ec6..405c7bb 100644
+--- a/references/golden/workflow_audit.json
++++ b/references/golden/workflow_audit.json
+@@ -1193,7 +1193,7 @@
+     "basis": "trần mount ~343KB/file (lớp sự cố #5 cắt cụt); WARN=đệm advisory, FAIL chỉ chặn --strict; waiver tl_selftest.py (không import trên Cowork)",
+     "fail": [],
+     "fail_limit": 327680,
+-    "files_scanned": 73,
++    "files_scanned": 74,
+     "size_ok": true,
+     "waived": [
+       "scripts/tl_selftest.py"
+diff --git a/scripts/test_fragments/wp433_bundled_tach_manh.py b/scripts/test_fragments/wp433_bundled_tach_manh.py
+new file mode 100644
+index 0000000..61eb902
+--- /dev/null
++++ b/scripts/test_fragments/wp433_bundled_tach_manh.py
+@@ -0,0 +1,130 @@
++# -*- coding: utf-8 -*-
++"""Bundle tách mảnh: mỗi mảnh dưới ngưỡng WARN, nạp đúng mảnh được KHAI, kiểm cổng phát hiện mảnh lạc."""
++
++import contextlib
++import importlib
++import io
++import json
++from pathlib import Path
++import tempfile
++
++TEST_ID = "wp433_bundled_tach_manh"
++
++_WARN = 280 * 1024
++_KQ = {}
++
++
++def _frag(root, name, pad=0):
++    tid = name[:-3]
++    body = f'TEST_ID = "{tid}"\n_PAD = "{"x" * pad}"\n\n\ndef run(tl_module):\n    return True\n'
++    (root / name).write_text(body, encoding="utf-8", newline="\n")
++
++
++def _nap(tf, scripts):
++    try:
++        return [c.test_id for c in tf.load_runtime_fragment_cases(scripts)], None
++    except Exception as exc:  # noqa: BLE001
++        return None, getattr(exc, "code", type(exc).__name__)
++
++
++def _check(tl_module, root):
++    out = io.StringIO()
++    with contextlib.redirect_stdout(out):
++        try:
++            rc = tl_module.main(["test-fragments-check", "--root", str(root), "--json"])
++        except SystemExit as exc:
++            rc = int(exc.code or 0)
++    try:
++        return rc, json.loads(out.getvalue())
++    except ValueError:
++        return rc, {}
++
++
++def run(tl_module):
++    tf = importlib.import_module("tl_core.test_fragments")
++    ok = True
++    with tempfile.TemporaryDirectory(prefix="wp433_bt_") as tmp:
++        base = Path(tmp)
++        # (1) nhỏ ⇒ một mảnh, đúng dạng một tệp cũ (không có dòng BUNDLED_FRAGMENT_SHARDS)
++        r1 = base / "r1" / "scripts"
++        (r1 / "test_fragments").mkdir(parents=True)
++        _frag(r1 / "test_fragments", "wp9001_a.py")
++        mods1 = tf.generate_bundled_modules(r1 / "test_fragments")
++        _KQ["mot_manh"] = (len(mods1) == 1 and b"BUNDLED_FRAGMENT_SHARDS" not in mods1[0][1]
++                           and mods1[0][1] == tf.generate_bundled_module_bytes(r1 / "test_fragments"))
++        # (2) vượt hạn ⇒ nhiều mảnh, mảnh 1 khai, nạp đủ theo thứ tự, mỗi mảnh <= hạn + một dòng
++        r2 = base / "r2" / "scripts"
++        fr = r2 / "test_fragments"
++        fr.mkdir(parents=True)
++        names = [f"wp9001_f{i}.py" for i in range(6)]
++        for n in names:
++            _frag(fr, n, pad=40 * 1024)
++        old = tf._BUNDLED_SHARD_LIMIT
++        tf._BUNDLED_SHARD_LIMIT = 100 * 1024
++        try:
++            written = tf.write_bundled_modules(fr, r2)
++            mods2 = tf.generate_bundled_modules(fr)
++        finally:
++            tf._BUNDLED_SHARD_LIMIT = old
++        if len(written) < 3 or len(mods2) < 3:   # chốt: không đủ mảnh thì đỏ, không văng IndexError
++            _KQ["nhieu_manh"] = False
++            return False
++        fr_moved = r2.parent / "src"
++        fr.rename(fr_moved)   # topology bundle: không còn test_fragments/
++        ids, err = _nap(tf, r2)
++        _KQ["nhieu_manh"] = (len(written) >= 3 and err is None
++                             and ids == [n[:-3] for n in names]
++                             and all(len(d) <= 100 * 1024 + 42 * 1024 for _, d in mods2)
++                             and b"BUNDLED_FRAGMENT_SHARDS" in mods2[0][1])
++        # (3) mảnh lạc không khai: loader bỏ qua, cổng báo stale + extra_shards
++        stray = r2 / "tl_test_fragments_bundled_9.py"
++        stray.write_bytes(mods2[1][1])
++        ids3, err3 = _nap(tf, r2)
++        fr_moved.rename(fr)
++        tf._BUNDLED_SHARD_LIMIT = 100 * 1024
++        try:
++            rc3, j3 = _check(tl_module, r2.parent)
++        finally:
++            tf._BUNDLED_SHARD_LIMIT = old
++        _KQ["manh_lac"] = (ids3 == ids and err3 is None and rc3 != 0
++                           and j3.get("error") == "GENERATED_BUNDLE_STALE"
++                           and j3.get("extra_shards") == ["tl_test_fragments_bundled_9.py"])
++        # (4) ghi lại xoá mảnh lạc
++        tf._BUNDLED_SHARD_LIMIT = 100 * 1024
++        try:
++            tf.write_bundled_modules(fr, r2)
++            rc4, j4 = _check(tl_module, r2.parent)
++        finally:
++            tf._BUNDLED_SHARD_LIMIT = old
++        _KQ["ghi_xoa_lac"] = (not stray.exists() and rc4 == 0 and j4.get("ok") is True)
++        fr.rename(fr_moved)
++        # (5) mảnh được khai bị thiếu ⇒ BUNDLED_MODULE_MISSING
++        m2 = r2 / written[1]
++        keep = m2.read_bytes()
++        m2.unlink()
++        _, err5 = _nap(tf, r2)
++        m2.write_bytes(keep)
++        # (6) thứ tự xuyên mảnh sai ⇒ hợp đồng; (7) mảnh k>=2 tự khai mảnh ⇒ hợp đồng
++        m3 = r2 / written[2]
++        keep3 = m3.read_bytes()
++        m2.write_bytes(keep3)
++        m3.write_bytes(keep)
++        _, err6 = _nap(tf, r2)
++        m2.write_bytes(keep)
++        m3.write_bytes(keep3 + b'BUNDLED_FRAGMENT_SHARDS = ("tl_test_fragments_bundled_2.py",)\n')
++        _, err7 = _nap(tf, r2)
++        m3.write_bytes(keep3)
++        _KQ["thieu_manh"] = err5 == "BUNDLED_MODULE_MISSING"
++        _KQ["thu_tu_xuyen_manh"] = err6 == "BUNDLED_MODULE_CONTRACT"
++        _KQ["manh_tu_khai"] = err7 == "BUNDLED_MODULE_CONTRACT"
++    # (8) kho thật: mọi mảnh dưới WARN, hạn mảnh <= 70% WARN
++    repo = Path(tf.__file__).resolve().parent.parent / "test_fragments"
++    if repo.is_dir():
++        real = tf.generate_bundled_modules(repo)
++        _KQ["kho_that"] = (tf._BUNDLED_SHARD_LIMIT <= 0.7 * _WARN
++                           and all(len(d) <= _WARN for _, d in real))
++    else:
++        _KQ["kho_that"] = True
++    for value in _KQ.values():
++        ok = ok and value is True
++    return ok
+diff --git a/scripts/tl_core/release.py b/scripts/tl_core/release.py
+index 735d29c..dcc81d1 100644
+--- a/scripts/tl_core/release.py
++++ b/scripts/tl_core/release.py
+@@ -220,8 +220,8 @@ def _test_fragments_check(root: str | Path) -> dict:
+         return {**payload, "status": "missing", "error": "BUNDLED_MODULE_MISSING"}
+
+     try:
+-        from tl_core.test_fragments import generate_bundled_module_bytes
+-        expected = generate_bundled_module_bytes(fragment_root)
++        from tl_core.test_fragments import _BUNDLED_SHARD_NAME_RE, generate_bundled_modules
++        expected_modules = generate_bundled_modules(fragment_root)
+     except Exception as exc:  # noqa: BLE001 — gate converts generator/input faults to data
+         return {
+             **payload,
+@@ -229,8 +229,16 @@ def _test_fragments_check(root: str | Path) -> dict:
+             "error": "GENERATED_BUNDLE_INPUT_INVALID",
+             "detail": f"{type(exc).__name__}: {exc}",
+         }
++    # Bundle tách mảnh: so TỪNG mảnh theo byte, cộng phát hiện mảnh đánh số lạc trên đĩa.
++    scripts_dir = bundled_path.parent
++    actual_modules = []
+     try:
+-        actual = bundled_path.read_bytes()
++        for name, _ in expected_modules:
++            p = scripts_dir / name
++            actual_modules.append((name, p.read_bytes() if p.is_file() else None))
++        extra = sorted(p.name for p in scripts_dir.iterdir()
++                       if _BUNDLED_SHARD_NAME_RE.fullmatch(p.name)
++                       and p.name not in {n for n, _ in expected_modules})
+     except OSError as exc:
+         return {
+             **payload,
+@@ -238,10 +246,18 @@ def _test_fragments_check(root: str | Path) -> dict:
+             "error": "BUNDLED_MODULE_READ_FAILED",
+             "detail": f"{type(exc).__name__}: {exc}",
+         }
+-
++    if len(expected_modules) == 1:   # một mảnh: giữ nguyên nghĩa băm/byte của bản một tệp
++        expected, actual = expected_modules[0][1], actual_modules[0][1] or b""
++    else:
++        expected = b"".join(n.encode() + b"\0" + d for n, d in expected_modules)
++        actual = b"".join(n.encode() + b"\0" + (d or b"") for n, d in actual_modules)
+     expected_sha256 = hashlib.sha256(expected).hexdigest()
+     actual_sha256 = hashlib.sha256(actual).hexdigest()
+-    if actual != expected:
++    shards = [{"name": n, "expected_bytes": len(d),
++               "actual_bytes": (len(a) if a is not None else None)}
++              for (n, d), (_, a) in zip(expected_modules, actual_modules)]
++    payload["shards"] = shards
++    if extra or any(a != d for (_, d), (_, a) in zip(expected_modules, actual_modules)):
+         return {
+             **payload,
+             "status": "stale",
+@@ -250,6 +266,7 @@ def _test_fragments_check(root: str | Path) -> dict:
+             "actual_sha256": actual_sha256,
+             "expected_bytes": len(expected),
+             "actual_bytes": len(actual),
++            "extra_shards": extra,
+         }
+     return {
+         **payload,
+diff --git a/scripts/tl_core/test_fragments.py b/scripts/tl_core/test_fragments.py
+index 27fbf2a..8422bc3 100644
+--- a/scripts/tl_core/test_fragments.py
++++ b/scripts/tl_core/test_fragments.py
+@@ -30,6 +30,11 @@ _TEST_ID_POINTER_RE = re.compile(
+     + r")(?![A-Za-z0-9_])")
+ _BUNDLED_MODULE_NAME = "tl_test_fragments_bundled.py"
+ _BUNDLED_RELATIVE_PATH = f"scripts/{_BUNDLED_MODULE_NAME}"
++# Bundle tách mảnh: mỗi mảnh giữ dưới ngưỡng WARN 280 KiB của `_py_size_findings` (trần mount Cowork).
++# Mảnh 1 luôn là `_BUNDLED_MODULE_NAME`; mảnh k>=2 là `tl_test_fragments_bundled_<k>.py`, chỉ được nạp
++# khi mảnh 1 KHAI trong `BUNDLED_FRAGMENT_SHARDS` (tệp mảnh lạc không khai thì không được nạp).
++_BUNDLED_SHARD_LIMIT = 192 * 1024
++_BUNDLED_SHARD_NAME_RE = re.compile(r"tl_test_fragments_bundled_([2-9]|[1-9][0-9]+)[.]py\Z")
+
+
+ class FragmentError(RuntimeError):
+@@ -349,48 +354,72 @@ def load_fragment_cases(fragment_root: str | Path, *, existing_ids: Iterable[str
+     return tuple(loaded)
+
+
+-def _read_bundled_sources(bundled_path: str | Path) -> tuple[tuple[str, str], ...]:
+-    """Read the generated data-only adapter without importing or executing it."""
++def _bundled_shard_name(index: int) -> str:
++    return _BUNDLED_MODULE_NAME if index == 1 else f"tl_test_fragments_bundled_{index}.py"
++
++
++def _read_bundled_module(bundled_path: str | Path, *, primary: bool
++                         ) -> tuple[tuple[tuple[str, str], ...], tuple[str, ...]]:
++    """Read one generated data-only shard without importing or executing it."""
+     path = Path(bundled_path)
++    rel = _BUNDLED_RELATIVE_PATH if primary else f"scripts/{path.name}"
+     if not path.is_file():
+-        raise FragmentReadError("BUNDLED_MODULE_MISSING", _BUNDLED_RELATIVE_PATH)
++        raise FragmentReadError("BUNDLED_MODULE_MISSING", rel)
+     try:
+         source = path.read_text(encoding="utf-8")
+         source = source.replace("\r\n", "\n").replace("\r", "\n")
+         tree = ast.parse(source, filename=path.name)
+     except OSError as exc:
+-        raise FragmentReadError("BUNDLED_MODULE_READ", _BUNDLED_RELATIVE_PATH) from exc
++        raise FragmentReadError("BUNDLED_MODULE_READ", rel) from exc
+     except (SyntaxError, UnicodeError) as exc:
+-        raise FragmentSyntaxError("BUNDLED_MODULE_SYNTAX", _BUNDLED_RELATIVE_PATH) from exc
++        raise FragmentSyntaxError("BUNDLED_MODULE_SYNTAX", rel) from exc
+
+     body = list(tree.body)
+     if (body and isinstance(body[0], ast.Expr)
+             and isinstance(body[0].value, ast.Constant)
+             and type(body[0].value.value) is str):
+         body.pop(0)
+-    assignment = body[0] if len(body) == 1 else None
+-    if (not isinstance(assignment, ast.Assign) or len(assignment.targets) != 1
+-            or not isinstance(assignment.targets[0], ast.Name)
+-            or assignment.targets[0].id != "BUNDLED_FRAGMENT_SOURCES"):
+-        raise FragmentContractError(
+-            "BUNDLED_MODULE_CONTRACT", _BUNDLED_RELATIVE_PATH, "data-only assignment")
++    targets = []
++    for node in body:
++        if (not isinstance(node, ast.Assign) or len(node.targets) != 1
++                or not isinstance(node.targets[0], ast.Name)):
++            raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "data-only assignment")
++        targets.append(node.targets[0].id)
++    allowed = (["BUNDLED_FRAGMENT_SOURCES"], ["BUNDLED_FRAGMENT_SOURCES", "BUNDLED_FRAGMENT_SHARDS"])
++    if targets not in (allowed if primary else allowed[:1]):
++        raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "data-only assignment")
+     try:
+-        raw_entries = ast.literal_eval(assignment.value)
++        values = [ast.literal_eval(node.value) for node in body]
+     except (SyntaxError, TypeError, ValueError) as exc:
+-        raise FragmentContractError(
+-            "BUNDLED_MODULE_CONTRACT", _BUNDLED_RELATIVE_PATH, "literal sources") from exc
++        raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "literal sources") from exc
++    raw_entries = values[0]
+     if type(raw_entries) is not tuple:
+-        raise FragmentContractError(
+-            "BUNDLED_MODULE_CONTRACT", _BUNDLED_RELATIVE_PATH, "sources tuple")
+-
++        raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "sources tuple")
+     entries: list[tuple[str, str]] = []
+     for item in raw_entries:
+         if (type(item) is not tuple or len(item) != 2
+                 or type(item[0]) is not str or type(item[1]) is not str
+                 or not _FRAGMENT_NAME_RE.fullmatch(item[0])):
+-            raise FragmentContractError(
+-                "BUNDLED_MODULE_CONTRACT", _BUNDLED_RELATIVE_PATH, "source entry")
++            raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "source entry")
+         entries.append(item)
++    shards: tuple[str, ...] = ()
++    if len(values) == 2:
++        shards = values[1]
++        expected = tuple(_bundled_shard_name(k) for k in range(2, len(shards) + 2)) \
++            if type(shards) is tuple else None
++        if not shards or shards != expected:
++            raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "shard list")
++    return tuple(entries), shards
++
++
++def _read_bundled_sources(bundled_path: str | Path) -> tuple[tuple[str, str], ...]:
++    """Read the primary adapter plus every shard it declares, in declared order."""
++    path = Path(bundled_path)
++    entries, shards = _read_bundled_module(path, primary=True)
++    entries = list(entries)
++    for shard in shards:
++        shard_entries, _ = _read_bundled_module(path.parent / shard, primary=False)
++        entries.extend(shard_entries)
+     names = [name for name, _ in entries]
+     portable_keys = [unicodedata.normalize("NFC", name).casefold() for name in names]
+     if (len(set(portable_keys)) != len(portable_keys)
+@@ -461,23 +490,58 @@ def load_runtime_fragment_cases(scripts_root: str | Path, *,
+     return ()
+
+
+-def generate_bundled_module_bytes(fragment_root: str | Path, *,
+-                                  candidate_paths: Iterable[str | Path] | None = None) -> bytes:
+-    """Render validated fragment sources as a deterministic data-only module."""
+-    lines = [
++def generate_bundled_modules(fragment_root: str | Path, *,
++                             candidate_paths: Iterable[str | Path] | None = None
++                             ) -> tuple[tuple[str, bytes], ...]:
++    """Render validated fragment sources as deterministic data-only shards (name, bytes)."""
++    header = [
+         "# -*- coding: utf-8 -*-",
+         '"""Generated by tl_core.test_fragments; do not edit."""',
+         "",
+         "BUNDLED_FRAGMENT_SOURCES = (",
+     ]
++    groups: list[list[str]] = [[]]
++    used = 0
+     for path in _discover_fragment_paths(fragment_root, candidate_paths=candidate_paths):
+         source, _, tree = _read_fragment_source(path)
+         _literal_fragment_test_id(path, tree)
+         name_literal = json.dumps(path.name, ensure_ascii=False)
+         source_literal = json.dumps(source, ensure_ascii=False)
+-        lines.append(f"    ({name_literal}, {source_literal}),")
+-    lines.append(")")
+-    return ("\n".join(lines) + "\n").encode("utf-8")
++        line = f"    ({name_literal}, {source_literal}),"
++        size = len(line.encode("utf-8")) + 1
++        if groups[-1] and used + size > _BUNDLED_SHARD_LIMIT:
++            groups.append([])
++            used = 0
++        groups[-1].append(line)
++        used += size
++    out = []
++    for index, lines in enumerate(groups, start=1):
++        body = header + lines + [")"]
++        if index == 1 and len(groups) > 1:
++            body.append("BUNDLED_FRAGMENT_SHARDS = ("
++                        + "".join(f"{json.dumps(_bundled_shard_name(k))}, "
++                                  for k in range(2, len(groups) + 1)).rstrip() + ")")
++        out.append((_bundled_shard_name(index), ("\n".join(body) + "\n").encode("utf-8")))
++    return tuple(out)
++
++
++def generate_bundled_module_bytes(fragment_root: str | Path, *,
++                                  candidate_paths: Iterable[str | Path] | None = None) -> bytes:
++    """Bytes of the primary shard; identical to the single-module form when one shard suffices."""
++    return generate_bundled_modules(fragment_root, candidate_paths=candidate_paths)[0][1]
++
++
++def write_bundled_modules(fragment_root: str | Path, scripts_dir: str | Path) -> tuple[str, ...]:
++    """Write every shard and remove stale numbered shards; the only sanctioned regeneration path."""
++    scripts = Path(scripts_dir)
++    modules = generate_bundled_modules(fragment_root)
++    names = {name for name, _ in modules}
++    for name, data in modules:
++        (scripts / name).write_bytes(data)
++    for stale in sorted(scripts.iterdir()):
++        if _BUNDLED_SHARD_NAME_RE.fullmatch(stale.name) and stale.name not in names:
++            stale.unlink()
++    return tuple(name for name, _ in modules)
+
+
+ def load_test_id_index(repo_root: str | Path) -> TestIdIndex:

@@ -1,0 +1,8 @@
+== 2026-11-20T13:58:09Z base 0f9aa2a + nguyen mau
+tfc True current [('tl_test_fragments_bundled.py', 189145), ('tl_test_fragments_bundled_2.py', 101657)]
+bfc True [] 19
+rv True 186 186
+py_size 74 [] []
+golden True None
+30/32 dat
+HONG: case_cong_bao_dev_discovery_failed_truoc_mismatch, case_cong_bao_fragment_failed_khi_run_tra_false

@@ -1,0 +1,12 @@
+a_nap_manh_khong_khai False ['manh_lac', 'thieu_manh']
+b_bo_thu_tu_xuyen_manh False ['thu_tu_xuyen_manh']
+c_bo_han_manh          ~~~~~~~~^^^^
+  File "scripts/test_fragments/wp433_bundled_tach_manh.py", line 78, in run
+    stray.write_bytes(mods2[1][1])
+                      ~~~~~^^^
+IndexError: tuple index out of range
+d_cong_bo_manh_lac False ['manh_lac']
+e_ghi_khong_xoa_lac False ['ghi_xoa_lac']
+f_manh_k_tu_khai False ['manh_tu_khai']
+c_bo_han_manh (sau chot) False ['nhieu_manh']
+khong_dot_bien True []

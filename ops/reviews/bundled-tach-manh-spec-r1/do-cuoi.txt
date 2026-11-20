@@ -1,0 +1,9 @@
+== 2026-11-20T15:02:57Z proto HEAD a279f49 (base 0f9aa2a)
+== tl selftest 1785/1785 ==
+tfc True [('tl_test_fragments_bundled.py', 189328), ('tl_test_fragments_bundled_2.py', 101657)]
+bfc True [] 19
+rv True 186 186
+py_size 74 [] []
+golden True
+32/32 dat
+doctrine rc=0

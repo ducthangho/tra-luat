@@ -22,8 +22,15 @@ Giới hạn (nguyên văn `sandbox_gioi_han`):
 - `DO_DUOC` nghĩa là đã **thấy** cơ chế sandbox với các cờ nói trên. Nó **không** chứng minh mọi lệnh đều chạy trong sandbox.
 
 Chế độ là `workspace-write`, không phải `read-only`:
-- reviewer ghi được vào thư mục review riêng và `/tmp` (đó là nơi `VERDICT.md` và `hash-checks.json` được ghi);
-- bản clone của kho chỉ đọc được trong sandbox, vì gốc hệ tệp được gắn `--ro-bind`.
+- reviewer ghi được vào thư mục review riêng (`VERDICT.md`, `hash-checks.json`), vào `/tmp` và `TMPDIR`;
+- hai bản clone của kho nằm **dưới `/tmp`**, nơi profile cho ghi, nên sandbox **không** ép chúng ở chế độ chỉ đọc. Tính "chỉ đọc" ở đây chỉ đến từ chỉ dẫn trong prompt.
+
+Phép đo sau khi chạy (20/11):
+- `git status --porcelain --ignored` trên cả hai bản clone cho **0 dòng**;
+- HEAD giữ nguyên (`c3ab4aa5…` và `ff1cf890…`);
+- vậy không thấy tệp nào trong clone bị đổi, thêm hay xoá.
+
+Phép đo này không loại trừ việc tệp bị ghi rồi trả lại đúng nội dung cũ.
 
 ## Lượt 1/2
 | Mục | Giá trị |

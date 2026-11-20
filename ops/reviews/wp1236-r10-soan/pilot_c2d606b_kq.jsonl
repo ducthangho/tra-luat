@@ -1,0 +1,927 @@
+{"id": "a2:_chuan:0:0:bo_if0", "op": "a2", "dong": 0, "sha256": "d71103ba3227fc589218c8f6aa458fa59d1826f9b7d7a11facbb34e753343268", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "a2:_chuan:0:0:if0", "op": "a2", "dong": 0, "sha256": "7cbc9f5d6dc2c2c9a2360e36d75fa748a5a5a2eee7fc3fe293466792cfdb3725", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "a2:_kiem_tep:0:0:bo_if0", "op": "a2", "dong": 0, "sha256": "8f9884538dc2a0c5687071fcb8ca333cf0aeba915047b9696eccfa4c192cff0d", "rc": 0, "giet": ["a119_k3_k6_du_lieu_di_dang"], "hong": []}
+{"id": "a2:_kiem_tep:0:0:bo_if0#1", "op": "a2", "dong": 0, "sha256": "f3020d87ee0a5e284781fc39f034cb79c715cca35cd6a054e56e4f7266dcc5af", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "a2:_kiem_tep:0:0:bo_if0#2", "op": "a2", "dong": 0, "sha256": "047210e4bbd3ca886a73cd1e82a706d5e3076bdc018cf9dd1a97781c5d1815ad", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:0:0:bo_if0#3", "op": "a2", "dong": 0, "sha256": "cd7db398e12ccef9a1c501722a6aa2cafda758b34902f8a3ba68fdec311ea68e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:0:0:if0", "op": "a2", "dong": 0, "sha256": "07fc885625735d4218b2e8b4359c924f46bcb9b5d13b7f017266d3543838ea91", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:0:0:if0#1", "op": "a2", "dong": 0, "sha256": "8a1b271bd9077271e550d75f4faf4ab27496aee7c059988c6ffa5fc449fa4846", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:0:0:if0#2", "op": "a2", "dong": 0, "sha256": "b286aaad93c5d907829b265a9a64f545e681d4f6e8a09a56bcbf1b55f81d939d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:0:0:if0#3", "op": "a2", "dong": 0, "sha256": "212fe5921b3dd680ffc58fa75b6ed17c987f9d4b887a4c47c098cb2c969ec0b5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:135:4", "op": "a2", "dong": 135, "sha256": "1ef73d2acdc1b71a0566e15a9f0f02198ed80eb334bb1cbecc5f24e3af9dcb89", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:137:9", "op": "a2", "dong": 137, "sha256": "ffb3c9318c33d1f3e2c2da22069c4d57490dac53108331e8f4e82851f06da0de", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:139:26", "op": "a2", "dong": 139, "sha256": "74da7da2cac3b74d312a0dfd4276a8e724a8ca3ff519d6295958bd903c55e9d8", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:143:4", "op": "a2", "dong": 143, "sha256": "9c6c887afce7902c54883eef0bd4a610815d1bfc1062d48082c4d358e6a59177", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:152:10", "op": "a2", "dong": 152, "sha256": "4ce2d1b9acb9f4f6555d932a625ff46cd18015bcf2172ee19fb9801fd09a181a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:156:8", "op": "a2", "dong": 156, "sha256": "d94ad59631d6c216525af4aab025cd7afeea3f2cd372e188ec49d58e8302f91c", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:159:8", "op": "a2", "dong": 159, "sha256": "51c14457b9f52d829435d3875e740c2a4b40fc0db70775f57cce4f007e81b2eb", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:161:8", "op": "a2", "dong": 161, "sha256": "c7217167879946c44d41e8819de07e2083d7084d9abfdfdbf7848ad2f76f21bd", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:164:4", "op": "a2", "dong": 164, "sha256": "3c42242d6b3b7552a43c7e7982f61951709957e6485315b700927ad53759c287", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:166:51", "op": "a2", "dong": 166, "sha256": "2993269f1fcaac854116cd876e2bc0f8a82baacade9cf68ecbf2d74da4cb964a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:167:13", "op": "a2", "dong": 167, "sha256": "c3aaca30e31ad5770724cd97200085ed41fe768034d5efda8968d3b954841856", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:170:4", "op": "a2", "dong": 170, "sha256": "5864877bcb8c5993cb0307407ef262f5f1a11de770158357cad5967474cbcbbe", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:172:4", "op": "a2", "dong": 172, "sha256": "2e1a1496f0f466accffe77f2af8a0639b8690becde59db908663fc54a6169051", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:174:4", "op": "a2", "dong": 174, "sha256": "0c52fc04ab454c91393f4dce3f2d929fd4b9edfb15246ac78be5390fd29b1d78", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_kiem_tep:178:11", "op": "a2", "dong": 178, "sha256": "59096f40fc8d44e5153a291cee8aa61d3f89ff3a2782d3fee3ea21c926cd2c8b", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:_tep_trong:226:4", "op": "a2", "dong": 226, "sha256": "e042a294f7f2c4eac281b94d81c5cc973a17f409e7c6d684f77db289af625d6e", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "a2:_tep_trong:230:8", "op": "a2", "dong": 230, "sha256": "40e6a05436654d0f55bd9f7f9b6317e69643a5fb557ef003dc8b973431c48145", "rc": 0, "giet": ["a205_duong_khop"], "hong": []}
+{"id": "a2:_tep_trong:232:11", "op": "a2", "dong": 232, "sha256": "5fc058b1be4412f3d6ef5fb0a706abd3b8acd89e39645cc101be3369437f700a", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "a2:chon_provenance:0:0:bo_if0", "op": "a2", "dong": 0, "sha256": "b905f9e0da1379c116cdac32ace782ae18d8e50bfadef32d04bf28cc8ac7c768", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:chon_provenance:0:0:bo_if0#1", "op": "a2", "dong": 0, "sha256": "322f45beedec79a9a9868f00f612c35869e8058814c031d3da876a15d3ff5004", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:chon_provenance:0:0:if0", "op": "a2", "dong": 0, "sha256": "bcef84fbe1b919d284e3ee7771f5638cec4942a623ca2379e97a478a53f0614e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:chon_provenance:0:0:if0#1", "op": "a2", "dong": 0, "sha256": "8d523d88fc75b5e8423ef5e51fa1ff5c910b26adfdec36f2bb9a42cfa20f75d2", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:chon_provenance:101:12", "op": "a2", "dong": 101, "sha256": "7bd2d2c1718d6074d28a98cb786895fd9d6bf600f8c54482a48c9368914f9870", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:chon_provenance:105:12", "op": "a2", "dong": 105, "sha256": "bff42bad212b2d8511e2d6ee8628a67bf651bb86bae4c3229df7f4e8d03f069b", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:chon_provenance:107:16", "op": "a2", "dong": 107, "sha256": "2a7489ad340e59a43aa0c096adb9000103fed79bb2979368552fb687d24fc66d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:chon_provenance:108:12", "op": "a2", "dong": 108, "sha256": "ade7994ae9e89b5e1f0db006e8608e6994170cd589bda7e3433b14ef231b04e3", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:chon_provenance:112:40", "op": "a2", "dong": 112, "sha256": "958efc69d3c49baa9581844008c9a5807ba218e6263bbb5cc8c1944c236a0ea7", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:chon_provenance:96:4", "op": "a2", "dong": 96, "sha256": "3f9173ef075756b048572fa7805bdca43dc9b195a4fa5c873577df997882e521", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:chon_provenance:97:22", "op": "a2", "dong": 97, "sha256": "9782724c19362a6addbfcd1031cab1c31288e3950a89a243e775491d91cf7187", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "a2:doc_danh_gia:52:12", "op": "a2", "dong": 52, "sha256": "4f0f4e31bd2d6e1654d8e9e4665712033754a772e313929ed1c5073882c0f1d7", "rc": 0, "giet": ["a102_ca_kho_tai_base"], "hong": []}
+{"id": "a2:doc_danh_gia:53:4", "op": "a2", "dong": 53, "sha256": "4d7b8433b034c9369907918db008b9ca824e65169631afb90ac93174b43c535d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:doc_danh_gia:54:8", "op": "a2", "dong": 54, "sha256": "fa8e273e0a91d316f7f5d1ce3970f04ad19d42baf6360000d1afd9550e71e420", "rc": 0, "giet": ["a102_ca_kho_tai_base"], "hong": []}
+{"id": "a2:doc_danh_gia:57:4", "op": "a2", "dong": 57, "sha256": "abf0409bd0625fa45e9ef2176168145355b723e1c6ef4aaed7b53caf735430be", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:doc_danh_gia:59:4", "op": "a2", "dong": 59, "sha256": "c45a4b9c3d4a74a13ae90a31de8361860af80456d4fce4ef134b9f03fe6d05ab", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:doc_danh_gia:66:8", "op": "a2", "dong": 66, "sha256": "c63fc1d6013d977e1ad20ba0d1dabf9815c540ed9027eba1452d31f7ced40ef5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:doc_danh_gia:67:12", "op": "a2", "dong": 67, "sha256": "7b52b6f5e56b4d504ff869d10366f4faf3456ba1d4891509c4b671c8c48e3529", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:doc_danh_gia:70:8", "op": "a2", "dong": 70, "sha256": "3daf2f07d36dc52d5cdc928bc94d6cbc5a12aeae3c3948c5e1f8e2e89a3125b8", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:doc_danh_gia:71:18", "op": "a2", "dong": 71, "sha256": "7f60c2e8c89aea96571c4a53995e5950a947af59fcd75e2503a94d44b8eebe44", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:doc_danh_gia:73:8", "op": "a2", "dong": 73, "sha256": "a50bb882abeb05c673ed146d4a2004d213705c3a4010f377c64e25325506936b", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:doc_danh_gia:81:12", "op": "a2", "dong": 81, "sha256": "0bdc2d6277a39b2fb62c30a780dadd55852a500fb00e44ae03a143d4e52968e6", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a2:kiem_ho_so:281:12", "op": "a2", "dong": 281, "sha256": "ef25d47779f0d1a09dc4d22716355e316fcf3cb6a729b297293b90c29aca76c7", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "a2:kiem_ho_so:291:8", "op": "a2", "dong": 291, "sha256": "c2379aa897a4a3f94fea4534990c05c4c4f775bec26e67a8be262c9767004fae", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "a2:kiem_ho_so:293:4", "op": "a2", "dong": 293, "sha256": "f1d5a25e1d7d40d6b20c3919505a9a39cce1da370925c8de7aec820a469ca874", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "a2:kiem_mien:0:0:bo_if0", "op": "a2", "dong": 0, "sha256": "49ab353f1857df0b42e9f37c4693f2550f3c65cf25fbcb76218bd504fda84a5a", "rc": 0, "giet": [], "hong": ["HONG a209_mien HONG:a209_mien:UnboundLocalError: cannot access local variable 'm' where it is not associated with a value"]}
+{"id": "a2:kiem_mien:0:0:bo_if0#1", "op": "a2", "dong": 0, "sha256": "ce25cc4d98cb73f830654b30e3d6249d16af0fb45be9dc4d1fb147fe97765e55", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a2:kiem_mien:0:0:if0", "op": "a2", "dong": 0, "sha256": "1c7d5e144920eda5ea0f9367e010316e0c16c0bdf9d7beee129db4b5ff20b764", "rc": 0, "giet": [], "hong": ["HONG a209_mien HONG:a209_mien:TypeError: 'NoneType' object is not subscriptable"]}
+{"id": "a2:kiem_mien:0:0:if0#1", "op": "a2", "dong": 0, "sha256": "89091fd4a3a9642a1cdd476133f6603e9095c01002e6bf2509c4eafa9c4932d5", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a2:kiem_mien:237:19", "op": "a2", "dong": 237, "sha256": "ae221ae4cb0782c1dec63b5b6de29c9d22ad4a0c0bbf4217557e036507e8abd2", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a2:kiem_mien:240:10", "op": "a2", "dong": 240, "sha256": "1f184cae5a4aac0101973206826841c96b8b11910137d8da454db6169c3a224f", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a2:kiem_mien:248:4", "op": "a2", "dong": 248, "sha256": "79a56e3b9a08d95118c22d847b6d1918470946e98d50541b219505c239e21dae", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a2:kiem_mien:250:4", "op": "a2", "dong": 250, "sha256": "bd4b9ef8640038d6e9cbfe4bc91804c595d6269cdfa68f238c99211b3325d477", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a2:kiem_mien:262:4", "op": "a2", "dong": 262, "sha256": "2bd47451fc415a8e2583c246c55ce3cfa45b6998e88263a7ec3e902fc0a43577", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a2:la_landed:213:4", "op": "a2", "dong": 213, "sha256": "c2124d78f8e383a9912aac11c5388254b1e670f664c72beb592974b87a0fed0f", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "a2:la_landed:216:12", "op": "a2", "dong": 216, "sha256": "a9094299996c262d368cfedee68a1624434fe253e34c3bac01ccd6294010e495", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "a2:loi_khai:190:21", "op": "a2", "dong": 190, "sha256": "039247318bc4bf7b5c488fb13eba430f5022985e56ec5bf129cae67ad6776fea", "rc": 0, "giet": ["a214_vong_tham_chieu"], "hong": []}
+{"id": "a2:loi_khai:191:17", "op": "a2", "dong": 191, "sha256": "67e38cd0eb0c2e411a2efe00bbd1b473b202a9ad017de25d70a63dcd2d64d807", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "a2:loi_khai:191:59", "op": "a2", "dong": 191, "sha256": "c405e228696b2b02c48a94497234b480ee2313a33b5cb3b5b03f3f8fa86c3ec5", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a201_loi_khai HONG:a201_loi_khai:RecursionError: maximum recursion depth exceeded", "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:RecursionError: maximum recursion depth exceeded", "HONG a204_duong_dan HONG:a204_duong_dan:RecursionError: maximum recursion depth exceeded", "HONG a205_duong_khop HONG:a205_duong_khop:RecursionError: maximum recursion depth exceeded", "HONG a206_duong_lech HONG:a206_duong_lech:RecursionError: maximum recursion depth exceeded", "HONG a207_hai_tep HONG:a207_hai_tep:RecursionError: maximum recursion depth exceeded", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:RecursionError: maximum recursion depth exceeded", "HONG a209_mien HONG:a209_mien:RecursionError: maximum recursion depth exceeded"]}
+{"id": "a2:loi_khai:192:12", "op": "a2", "dong": 192, "sha256": "8e61e4fd46d4f92a45e3a21a43905342c7cfe7258b0511fa0922557ae11be8aa", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "a2:loi_khai:193:8", "op": "a2", "dong": 193, "sha256": "e910dcf4c61b1f2225d0c82f67667663b7a4d0e31b5f7a9f36f2f83f7f6fe262", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "a2:loi_khai:195:12", "op": "a2", "dong": 195, "sha256": "1fa8a61570f2eddde5da590c63c09fb11b386bcc5df329de9fca9e0b210e3bf8", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "a2:main:308:15", "op": "a2", "dong": 308, "sha256": "de0bc48b6f662f273d884c10581c228b7cd7dc6af5645946b27cd197692fbe37", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "a2:main:314:8", "op": "a2", "dong": 314, "sha256": "d86260069c94a934ffdd3eb046e99ab70a3c81554459c284607a6373cc4c004e", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "a2:main:323:14", "op": "a2", "dong": 323, "sha256": "a4f41c35af9396fd50fa20cfcfa5a68166b8202189b30d3232136d318fb0aad0", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "a2:main:329:62", "op": "a2", "dong": 329, "sha256": "0ce8ca2978e8f0f4b3023de32d6b6005e544f2d9b50cef51aae8036070130ea0", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "a2:main:330:20", "op": "a2", "dong": 330, "sha256": "d107a0854c0c009eb76cd18651cb23dac4791009926852540ec817718fce8440", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "a2:tep_danh_gia:207:11", "op": "a2", "dong": 207, "sha256": "fb574f4bc0f26877a80812966449eaea229786535a65d4edf892b2774a8157f0", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "a2:token:202:8", "op": "a2", "dong": 202, "sha256": "04940b56333a04e676f1b988c78495b281e90072077ee8564b1c0bdcc0d8c0be", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": ["HONG a202_token HONG:a202_token:AttributeError: 'int' object has no attribute 'casefold'"]}
+{"id": "a2:token:203:11", "op": "a2", "dong": 203, "sha256": "6a58be427764786a0978ee860acea31ff982b9a8b064b87900686d5d91375d5f", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": ["HONG a202_token HONG:a202_token:TypeError: 'NoneType' object is not subscriptable"]}
+{"id": "a:_kiem_tep:126:7", "op": "a", "dong": 126, "sha256": "30765eecc5fd1648870a046c11404f546a7e7b36eb0b25928f68ac29dd8299c7", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:128:7", "op": "a", "dong": 128, "sha256": "5b14a01100e8e208affd3e7158252b266e34c9d184e0af5305e3edd962328f84", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:131:7", "op": "a", "dong": 131, "sha256": "3f8729e7dc33ae596bd85d873d1031fb65a543fef57d5e94b7afe7e5bce7be79", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:135:12", "op": "a", "dong": 135, "sha256": "cec494fda412905dc591318a3f3b52678267eb1e59e6c96cdc51eb0a3368ea57", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:135:41", "op": "a", "dong": 135, "sha256": "cc16571fb061c2615609b92ae71ef07604a1bd8aa81f3c63f5b32ee7e3d4f29c", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:140:45", "op": "a", "dong": 140, "sha256": "3ee83fee1e565d3da20c0e4404c28ec748eb53ca7d55eaa8da2ffe659f136d7a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:143:12", "op": "a", "dong": 143, "sha256": "d86999a430c795b69e5a7be6dd0e7204ea328d13f0c775be1fe376aeda8c6807", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:143:73", "op": "a", "dong": 143, "sha256": "f554b3f20ffd8ddf886dd78b82bac8d9f0e4bc849fc8f1636e27e73d383bf76c", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:145:45", "op": "a", "dong": 145, "sha256": "61a874cd8ee6d93cad90d99b12a2e645289015dc39d57bfa668b8b591bfbd21f", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:146:49", "op": "a", "dong": 146, "sha256": "b87a7ce977a040d0623717a2d55867bff848943c30f4f6ce3290cd12757cf712", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:146:86", "op": "a", "dong": 146, "sha256": "0e8c74339ec572226b1bc14469478e2fe7d4a9356dd6b3e3c88bfff6ff0f7583", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:148:7", "op": "a", "dong": 148, "sha256": "3e39af52dce2e49eccb39655ae07ed0dc08fcc54543cabbabc10da37a1b33413", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:150:7", "op": "a", "dong": 150, "sha256": "f12a476e9095196050a969ecfa5a037306a9ff2bf457b44a7b5fe2867ca7a4d1", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:154:11", "op": "a", "dong": 154, "sha256": "e5a183d1a0afb90317fb9bbc7393d7e2de2c629875fccc68cf22ba904185f8c9", "rc": 0, "giet": ["a105_bam_log"], "hong": []}
+{"id": "a:_kiem_tep:156:12", "op": "a", "dong": 156, "sha256": "d152ccb0babd7161cbe75a25a6c91606f535934cbf79f77edd8e21a741fea105", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:156:42", "op": "a", "dong": 156, "sha256": "804ffd3357fba9c0da9a192ac453b477afe09fb6760766313326aef6c392d9ec", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:157:19", "op": "a", "dong": 157, "sha256": "ca04589f7f4dbf8ce56239f26aea1b182c02c87bec2376fe783ef8e67fbf3fa0", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:159:11", "op": "a", "dong": 159, "sha256": "0ef59d8629637cb444263bebf202ac4b8aa63c203c98ba9a4daa239e70c05711", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:159:44", "op": "a", "dong": 159, "sha256": "74fde25c7cf172728d1955c9dfe6c86b964c8c58cc3bf9455e081e27cf4dc1cb", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:161:55", "op": "a", "dong": 161, "sha256": "96fde0ce2c83d1de5c1801cd2a5f706bfc946e9909baaee7d8c0a71a45f0efbf", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:163:9", "op": "a", "dong": 163, "sha256": "f709de7ae5854ada822de0a79c2c9781f455dfcd969cf9cb40ee0b0d47826944", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:164:11", "op": "a", "dong": 164, "sha256": "c7dcffeb222846c45b29bb62c7f4070d108dd9e7b3feeac2f351c3cb9690ec0a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:164:12", "op": "a", "dong": 164, "sha256": "e79681bd0d3520b68d9b52a5b69f48ce88e2b78437f3ecdb72f6c91104fa4470", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:167:37", "op": "a", "dong": 167, "sha256": "68473dcbf2256f5f228a7f31cf9931a8167fef14819602caafc5e5cf89c4dfbc", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:167:83", "op": "a", "dong": 167, "sha256": "3443d3168680e9241a946a6458c1cb3566165eba3bd4d9319d2c0e62a46b75a0", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:168:7", "op": "a", "dong": 168, "sha256": "eea5e5aa18cca22093da75ad5a28120012b4fbbb1d953f2995fd44176e84f417", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_kiem_tep:172:11", "op": "a", "dong": 172, "sha256": "4cb513989cef92decf244d164f45893eb94a62a56d7acf40b519ec61352a5e3f", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_la_so:85:11", "op": "a", "dong": 85, "sha256": "84c9629ae226778675d6ffc54e218e4c1231ca709d7c899737cd5f27d4b589e5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:_tep_trong:226:31", "op": "a", "dong": 226, "sha256": "0fd6bdd66f371da1ea027e30ee21f609bbf469320430a0a48ca52e8511f76885", "rc": 0, "giet": ["a205_duong_khop"], "hong": []}
+{"id": "a:chon_provenance:105:44", "op": "a", "dong": 105, "sha256": "d2f3b06f1681423c047f0a01b3e450b43e32fbce20185488f2653e1b569feb87", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:chon_provenance:108:68", "op": "a", "dong": 108, "sha256": "27f04f6ab9536f863287628469797af96098d5427a0a513f49a161a05e0e6168", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:chon_provenance:109:101", "op": "a", "dong": 109, "sha256": "0ef286d8f958f8f80bf3310704585bebbaa4a9376f9aef4b389968ea58a2c480", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:chon_provenance:109:61", "op": "a", "dong": 109, "sha256": "17e38b3f644e98b997bfdea4efbb647f102f9bf5e30e729eebdff7ab418476c5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:chon_provenance:111:7", "op": "a", "dong": 111, "sha256": "f5ad3ad8a64433d003c15cadf2ea5349d23865adff0a9d9ae4276319598527c0", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:doc_danh_gia:57:11", "op": "a", "dong": 57, "sha256": "8aebd178b17c98949c8704b3dbfd2df0826a7368be267e1d5cf3ca416bcd50f0", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:doc_danh_gia:64:11", "op": "a", "dong": 64, "sha256": "87f28deea2585b1dd8265ba04c047ba36f5c5c73879921170eba0092fb5178ee", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:doc_danh_gia:67:15", "op": "a", "dong": 67, "sha256": "c6c8be8d8e7c1100cde07062ff9586c1aa21e9f7cbbcb247e16c6ea40e30897e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:doc_danh_gia:67:42", "op": "a", "dong": 67, "sha256": "92cca12a45e8276cbc8014f92b386eacdd09e83bf4fa4d43aaab79ba5dc3efc3", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:doc_danh_gia:71:33", "op": "a", "dong": 71, "sha256": "3a9baaf40ecd7ac35462089a06199165b89b3364c9fb061682edc4c4f3aa3518", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:doc_danh_gia:71:60", "op": "a", "dong": 71, "sha256": "0d0809f47c6c1dc4427018cf0a73c535677c7abd4ceceb4e0927328489dd9ef4", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:doc_danh_gia:72:67", "op": "a", "dong": 72, "sha256": "776806e200cd3e2f348b5f58ce6abf6d46dc871dd5cec80c2e1ea1f517317a73", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:doc_danh_gia:77:7", "op": "a", "dong": 77, "sha256": "2a7f3d55254a4d2dc65a54d06c95422ccabf169f877a32467f50258f328b5a80", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:doc_danh_gia:79:9", "op": "a", "dong": 79, "sha256": "af35548a125c6d65f0c2904e57fe691f2f6f704199e136bbe1eaf06d6987bc8c", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "a:kiem_ho_so:271:11", "op": "a", "dong": 271, "sha256": "f7861c04cc7716771bd7ff190634d1de91da9f201860ddcfa32245acd13c1a03", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "a:kiem_ho_so:274:11", "op": "a", "dong": 274, "sha256": "f4b7ee0b94994a006ac69787db1dedba91700f00ba4244b775fff8e4abfe4fca", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "a:kiem_ho_so:277:11", "op": "a", "dong": 277, "sha256": "f98039ff46465eece71fa51c50a222898f050cda3107bb2ccb9087ee63fd615d", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "a:kiem_ho_so:281:15", "op": "a", "dong": 281, "sha256": "893ad6ea0bd6146f7b906e16667bb86ff62a316253223702bc91f5e3afd8aadc", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "a:kiem_ho_so:283:30", "op": "a", "dong": 283, "sha256": "801ad0b692538ea3da14c0a16a1717f99e544d9f9efcad26ebfb11237431dd47", "rc": 0, "giet": ["a205_duong_khop"], "hong": []}
+{"id": "a:kiem_ho_so:285:19", "op": "a", "dong": 285, "sha256": "245ee88a91798e30ecc218830d5f47d2d91f1de6480421e519416d8563aee43f", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "a:kiem_ho_so:289:19", "op": "a", "dong": 289, "sha256": "000b3e8f09b2c769b385598f1ad085e30fd095fa5942d6d3929d75b18c63bf18", "rc": 0, "giet": ["a205_duong_khop"], "hong": []}
+{"id": "a:kiem_ho_so:291:11", "op": "a", "dong": 291, "sha256": "7666dc2b3289f09a80cc4a14a3757f897a857ecaf67570025d0f95612c05e16b", "rc": 0, "giet": ["a216_hop_le_theo_token"], "hong": []}
+{"id": "a:kiem_ho_so:291:30", "op": "a", "dong": 291, "sha256": "dc7a83a495360a0259e078721a6b1b86ccd25258e54cd9810770277bb5bb592f", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "a:kiem_mien:237:7", "op": "a", "dong": 237, "sha256": "958b06f5ef8836c3b324129f05868cce3d51d73b299dfee2701e669a72356913", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a:kiem_mien:242:7", "op": "a", "dong": 242, "sha256": "538e20743484b6ce798a2d85fd8931e8985d7fb9646128e5154be6884e2f0256", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a:kiem_mien:248:34", "op": "a", "dong": 248, "sha256": "1916e345e626e318e88d5a7b27b8b31cd5eb8b7454f6e6ec861c9a6a79744b82", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a:kiem_mien:250:48", "op": "a", "dong": 250, "sha256": "0eb1182b118a70137f6e239ccfa56c777e51fc6e3bf4fd28dcacd8d455833dff", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a:kiem_mien:250:86", "op": "a", "dong": 250, "sha256": "9a5336d85c5e35d984bb0f1544fc76e9b7c0fbf1874b088f18f5d207e6a1d94d", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a:kiem_mien:253:7", "op": "a", "dong": 253, "sha256": "82a19e2da43d4590dba0bf7fed1d91eed42d5ff9b8f4f00433827eec584a53aa", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a:kiem_mien:260:7", "op": "a", "dong": 260, "sha256": "64b95c7ffa9264320d57074e5cacb500f0baf09712f880c417c216dac213eaab", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a:kiem_mien:262:25", "op": "a", "dong": 262, "sha256": "0d89a2dcb8774edb69597c289de5d3fd8fd2706c2d12097dd40ea587bb5f847b", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a:kiem_mien:262:48", "op": "a", "dong": 262, "sha256": "80496d53476c73ac55dd3b69e148cb823cccdd82ddacdbf8536bb1b7cbe7687b", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a:kiem_mien:262:8", "op": "a", "dong": 262, "sha256": "099aa13d7201f4ce93a25a843420892364d1f6f680ca2eef954598f08f487f0a", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "a:la_landed:215:7", "op": "a", "dong": 215, "sha256": "9104e02389f0abc964d616d45e75322b0ce28884b44f4a69f9a1c41b42d680b7", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:KeyError: 'trang_thai_packet'", "HONG a204_duong_dan HONG:a204_duong_dan:KeyError: 'trang_thai_packet'", "HONG a205_duong_khop HONG:a205_duong_khop:KeyError: 'trang_thai_packet'", "HONG a206_duong_lech HONG:a206_duong_lech:KeyError: 'trang_thai_packet'", "HONG a207_hai_tep HONG:a207_hai_tep:KeyError: 'trang_thai_packet'", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:KeyError: 'trang_thai_packet'", "HONG a209_mien HONG:a209_mien:KeyError: 'trang_thai_packet'"]}
+{"id": "a:la_landed:219:107", "op": "a", "dong": 219, "sha256": "8aa73c58fd0465eadba02621238489ccf8d41e47d0fb28a8bff6a0f6a9e86a8a", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "a:la_landed:219:11", "op": "a", "dong": 219, "sha256": "7427c68bd70bc3c60e9850eec47d94cfe0a6c65c92d81f6c5622ba47784ad2f8", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "a:loi_khai:188:7", "op": "a", "dong": 188, "sha256": "231b52ad61d572923a63fa707440f1218394694fa26493dc6f03a8b4fb061d2f", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a201_loi_khai HONG:a201_loi_khai:ValueError: vong_tham_chieu tại $", "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:ValueError: vong_tham_chieu tại $", "HONG a204_duong_dan HONG:a204_duong_dan:ValueError: vong_tham_chieu tại $", "HONG a205_duong_khop HONG:a205_duong_khop:ValueError: vong_tham_chieu tại $", "HONG a206_duong_lech HONG:a206_duong_lech:ValueError: vong_tham_chieu tại $", "HONG a207_hai_tep HONG:a207_hai_tep:ValueError: vong_tham_chieu tại $", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:ValueError: vong_tham_chieu tại $", "HONG a209_mien HONG:a209_mien:ValueError: vong_tham_chieu tại $"]}
+{"id": "a:loi_khai:195:15", "op": "a", "dong": 195, "sha256": "25a8b6efce26c36176eb285be39df12c524253e4aa8ea786b1305823b3d0b1bb", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "a:loi_khai:195:37", "op": "a", "dong": 195, "sha256": "f66734d3dddb51befe45353e1e9b622268ea4b4b6d3478702e7c04a41a5902ff", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "a:main:309:7", "op": "a", "dong": 309, "sha256": "f7b8cfcf40e7413f5bf2cb6c6c239a1ac02eed6d4e31d2010d5843bb743c222f", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "a:token:203:25", "op": "a", "dong": 203, "sha256": "ea9b679621694519f981303c95247e6d050d038f879c27d064ad38330ef8d50a", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "b:_kiem_tep:135:12:ve0", "op": "b", "dong": 135, "sha256": "c45f52aa5f87fc912e0e47f5eb5c4704097e575c51c5da94508f94af94eb14af", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "b:_kiem_tep:135:12:ve1", "op": "b", "dong": 135, "sha256": "e7ab2b48898be32d445775802697124baa8cc875d403a73810c0ad8420aad406", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "b:_kiem_tep:143:12:ve0", "op": "b", "dong": 143, "sha256": "be3a71c44fff09fd614d2ea554ba3c84afeb412f515b9f07d4e445fa3d3831a4", "rc": 0, "giet": ["a114_provenance_tu_khai_du"], "hong": []}
+{"id": "b:_kiem_tep:143:12:ve1", "op": "b", "dong": 143, "sha256": "41159c7dd2041bcc127e9f41d48eea0b9355bf2091e0e0b8838400648d591d5c", "rc": 0, "giet": ["a119_k3_k6_du_lieu_di_dang"], "hong": []}
+{"id": "b:_kiem_tep:143:12:ve2", "op": "b", "dong": 143, "sha256": "7933e616b5be29afaa1b60ea009e8959e84847c31d74552baf724d12e68cf15f", "rc": 0, "giet": ["a114_provenance_tu_khai_du"], "hong": []}
+{"id": "b:_kiem_tep:143:12:ve3", "op": "b", "dong": 143, "sha256": "a1f0d2ba348fdb132887b9446324272e4a0b221b801142f621e0af3dc7c07cb8", "rc": 0, "giet": ["a119_k3_k6_du_lieu_di_dang"], "hong": []}
+{"id": "b:_kiem_tep:143:12:ve4", "op": "b", "dong": 143, "sha256": "7a8b2b4e87f3408807607372f6efb004bd015b729afbd2d1424729a79d3080fe", "rc": 0, "giet": ["a114_provenance_tu_khai_du"], "hong": []}
+{"id": "b:_kiem_tep:143:12:ve5", "op": "b", "dong": 143, "sha256": "5e82d52f1bf327030f17bc4bbba72a936f118ae7913cfd1fcaa36385b71021c9", "rc": 0, "giet": ["a114_provenance_tu_khai_du"], "hong": []}
+{"id": "b:_kiem_tep:145:20:ve0", "op": "b", "dong": 145, "sha256": "779f8faf027f7ee15b5d6b69cf35b5ea1cae0d0b4c7b4857f6691c5b20c6b497", "rc": 0, "giet": ["a119_k3_k6_du_lieu_di_dang"], "hong": []}
+{"id": "b:_kiem_tep:145:20:ve1", "op": "b", "dong": 145, "sha256": "30b3170369e296ec293f570cc028b4e8bc4a367d81c15cf8b7792ea26498b2b4", "rc": 0, "giet": ["a114_provenance_tu_khai_du"], "hong": []}
+{"id": "b:_kiem_tep:145:45:ve0", "op": "b", "dong": 145, "sha256": "34eee68b2aeec7111512ad91ce5c5cbf5f6b13d26274394d7c4a420ced6dd010", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "b:_kiem_tep:145:45:ve1", "op": "b", "dong": 145, "sha256": "c7fa739be6101dc675ded0d22bd25265006da05a54c5c76bf22e861389a9a486", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "b:_kiem_tep:146:49:ve0", "op": "b", "dong": 146, "sha256": "05f1e38f0e0765159a48502f15fc72ca55e1a222d627f4d1353b5efd279c21c2", "rc": 0, "giet": ["a119_k3_k6_du_lieu_di_dang"], "hong": []}
+{"id": "b:_kiem_tep:146:49:ve1", "op": "b", "dong": 146, "sha256": "a19996f31d4dcd0fda725b849d4108534b3fc11e648138f93fefe40ecb0c7cc9", "rc": 0, "giet": ["a114_provenance_tu_khai_du"], "hong": []}
+{"id": "b:_kiem_tep:156:12:ve0", "op": "b", "dong": 156, "sha256": "3f1f6b7984718b24e345d472d44122bade60120509b64fbd1e94270bdbee5b4a", "rc": 0, "giet": ["a106_danh_tinh_job"], "hong": []}
+{"id": "b:_kiem_tep:156:12:ve1", "op": "b", "dong": 156, "sha256": "66e747f8e3755ed38f4f048a4eed2380c5fab75bea7a7013f684d41331dc8719", "rc": 0, "giet": ["a106_danh_tinh_job"], "hong": []}
+{"id": "b:_kiem_tep:156:12:ve2", "op": "b", "dong": 156, "sha256": "9940e8ca4cea3564eb405276ac2704a5de8a825e4ce3eb624cbd6453f0f7fa03", "rc": 0, "giet": ["a106_danh_tinh_job"], "hong": []}
+{"id": "b:_kiem_tep:157:28:ve0", "op": "b", "dong": 157, "sha256": "91bb1d160444103c00797c8164ce681027c118bfc3591986aee6b999c4e2578a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "b:_kiem_tep:157:28:ve1", "op": "b", "dong": 157, "sha256": "039bd33b6752f4d38aaf76edf4374f454e8e015474dc40df644d63dfeb26b014", "rc": 0, "giet": ["a119_k3_k6_du_lieu_di_dang"], "hong": []}
+{"id": "b:_kiem_tep:159:11:ve0", "op": "b", "dong": 159, "sha256": "0ffc42e0a887fd7d8b3c9bffc78adedff7a400434e931c63fbf00aeb09a8c108", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "b:_kiem_tep:159:11:ve1", "op": "b", "dong": 159, "sha256": "638909ed28a6f9406e2348566f2f333fba59088d5273225088c39026808de80a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "b:_kiem_tep:161:16:ve0", "op": "b", "dong": 161, "sha256": "f625654a6c095b61475c86dfa1dc83eeb97ab96f584ae7f31bef17fda2068961", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "b:_kiem_tep:161:16:ve1", "op": "b", "dong": 161, "sha256": "b2a0291d5aa84c4b1d155361e3f0f9f03e85f42bfe93036d004c4ec124550382", "rc": 0, "giet": ["a105_bam_log"], "hong": []}
+{"id": "b:_kiem_tep:167:25:ve0", "op": "b", "dong": 167, "sha256": "79a52314a44812e399083227f8593387bb1ff504b032e821b2091ba8a2bdb419", "rc": 0, "giet": ["a119_k3_k6_du_lieu_di_dang"], "hong": []}
+{"id": "b:_kiem_tep:167:25:ve1", "op": "b", "dong": 167, "sha256": "920cc7d171a61a028bdf752eb5c4e6f740dcfd8ce5faaffa401148bcbeb8ebe6", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "b:_tep_trong:226:7:ve0", "op": "b", "dong": 226, "sha256": "7111595580449ad96d6220b1e9f116dad43fffaa75f1bf6460ec654a66ea17f4", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "b:_tep_trong:226:7:ve1", "op": "b", "dong": 226, "sha256": "2e32ad1592448b804615924ca54ff981b18e773e850fa155478ac2f81debabfb", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "b:_tep_trong:226:7:ve2", "op": "b", "dong": 226, "sha256": "a97a2eee3d39cea837809959d090f1ccf42cc357d0f886a1c17bbc90b06cda91", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "b:chon_provenance:105:20:ve0", "op": "b", "dong": 105, "sha256": "372a48365fd0d0145def8ce011c4fa8ed6c2d6c07fba9b515ffad72e0c84e855", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "b:chon_provenance:105:20:ve1", "op": "b", "dong": 105, "sha256": "bee86f762220dd94869361229d77a7c012f4419d49e3d27515c86c2ada883309", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "b:chon_provenance:108:16:ve0", "op": "b", "dong": 108, "sha256": "1a14bd0b4b51a0675533eed0a158b1280abab38bc69c99e5ddf04b3fa041dc11", "rc": 0, "giet": ["a118_k1_k2_quet_he_thong"], "hong": []}
+{"id": "b:chon_provenance:108:16:ve1", "op": "b", "dong": 108, "sha256": "22d390ef4d93940ce466fedfeb30dc3566c0e6152a18fd1009b2f8cba9cacafa", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "b:chon_provenance:108:16:ve2", "op": "b", "dong": 108, "sha256": "4fdcae4c849ef73bd506ed799d6ef19df5ed3cd715ab71e6c7a893193d45d705", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "b:chon_provenance:108:16:ve3", "op": "b", "dong": 108, "sha256": "e52e8e779ceb8e0bb6c7fb036c2afc602a4dea034eca81eca813ecd95c6df33c", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "b:chon_provenance:108:16:ve4", "op": "b", "dong": 108, "sha256": "b248a32af3902241cd0d9191503484e4ca9606677bcbff64c996e121368e6f3e", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "b:chon_provenance:108:16:ve5", "op": "b", "dong": 108, "sha256": "688481c2ef6cb6ed817c1cbb632d857c3b7045f303d9578f426fcc8c91a16b76", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "b:chon_provenance:96:7:ve0", "op": "b", "dong": 96, "sha256": "4a9e37e841647a2cba28ff3853b0062a7df35a40cb19ce734a2d12a5d8aa1cec", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "b:chon_provenance:96:7:ve1", "op": "b", "dong": 96, "sha256": "a9546884911e312eec2217d7ba6ca64516e94bf7278c9dadd1df84775d363295", "rc": 0, "giet": ["a118_k1_k2_quet_he_thong"], "hong": []}
+{"id": "b:doc_danh_gia:67:15:ve0", "op": "b", "dong": 67, "sha256": "c0c5763add9d91810dff9a877c7677e901c7e76ba897143ee83098bce43b2d80", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "b:doc_danh_gia:67:15:ve1", "op": "b", "dong": 67, "sha256": "84d13be295941a15bc044f1366557c34b3b95ed3b20ee3994d088150762c855c", "rc": 0, "giet": ["a118_k1_k2_quet_he_thong"], "hong": []}
+{"id": "b:doc_danh_gia:70:19:ve0", "op": "b", "dong": 70, "sha256": "f6d272550c165a28d87e5807f3a760b57691826e20da5b0d893792f62bca988d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "b:doc_danh_gia:70:19:ve1", "op": "b", "dong": 70, "sha256": "147aac62b7a291c5e54fdc29697d472b28ad1706cc681231b32e4d951d12c019", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "b:doc_danh_gia:71:33:ve0", "op": "b", "dong": 71, "sha256": "daea615566e581fcb03dbbf7b81a84af350582788c6fb4b51043506a44da0eea", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "b:doc_danh_gia:71:33:ve1", "op": "b", "dong": 71, "sha256": "d361c83ed2a5ffae8b668f7957d7ca28a22fd25e30c8ec6deea63f67025eac60", "rc": 0, "giet": ["a118_k1_k2_quet_he_thong"], "hong": []}
+{"id": "b:kiem_ho_so:281:15:ve0", "op": "b", "dong": 281, "sha256": "8d449382fecd432eb7a8f24db07bb4cda1a1447de9987e1de3a2a4c1239b721c", "rc": 0, "giet": ["a208_failed_nhat_quan"], "hong": []}
+{"id": "b:kiem_ho_so:281:15:ve1", "op": "b", "dong": 281, "sha256": "72fe50fee835d3d9be232e84faca4aaea8f6e763bfe5aa721716bceff79c3c45", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "b:kiem_ho_so:290:72:ve0", "op": "b", "dong": 290, "sha256": "8421d73acc477bbc7f5abc91656abb9558be8c3926e5d3ddc4e99589277777c2", "rc": 0, "giet": ["a206_duong_lech"], "hong": []}
+{"id": "b:kiem_ho_so:290:72:ve1", "op": "b", "dong": 290, "sha256": "ff481156c7e7170e130ea742720b1c0b55f1c4a642a43b92aa9717ba072888dc", "rc": 0, "giet": ["a206_duong_lech"], "hong": []}
+{"id": "b:kiem_ho_so:291:11:ve0", "op": "b", "dong": 291, "sha256": "0c19d0544eb5333cba37a71d157ecd1b3e59b2d0058907d24cab877d8270680a", "rc": 0, "giet": ["a216_hop_le_theo_token"], "hong": []}
+{"id": "b:kiem_ho_so:291:11:ve1", "op": "b", "dong": 291, "sha256": "1d0fe092e72aa9f8a33191bd26832af2b2a566a57b72907ad1f78d880333a79e", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "b:kiem_ho_so:293:7:ve0", "op": "b", "dong": 293, "sha256": "8a24e25e650f7fbb0e292a6843d8eca97e4ad182ca72ebb1daf9a75c472540ec", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "b:kiem_ho_so:293:7:ve1", "op": "b", "dong": 293, "sha256": "c366b0e3cb9b161fb1a75e26b3edac5f1b0b84ca1aded2b0d769ba40668b220b", "rc": 0, "giet": ["a216_hop_le_theo_token"], "hong": []}
+{"id": "b:kiem_mien:240:80:ve0", "op": "b", "dong": 240, "sha256": "dc67aa623d9191d72152c401a2c32b52fb416bd20b2898c09172f03e9bc5a259", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "b:kiem_mien:240:80:ve1", "op": "b", "dong": 240, "sha256": "0a264765312a9879d84eb2f7707dd6703eb75c1de8c22a99d5f8f9e0b415ce8f", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "b:kiem_mien:248:7:ve0", "op": "b", "dong": 248, "sha256": "6f586c3882714c217375fff10eca6a5087266533d3b6aebf58b626cb931ee5b6", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "b:kiem_mien:248:7:ve1", "op": "b", "dong": 248, "sha256": "c4f9088966622d823424ad1ec4ffbc9c89ac423c4926cf1920c380fedf08bd96", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "b:kiem_mien:250:12:ve0", "op": "b", "dong": 250, "sha256": "8f36fac0777bb33ef1bdf1050420d20ef0865aa7453707502fe68bf4e9386348", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "b:kiem_mien:250:12:ve1", "op": "b", "dong": 250, "sha256": "4e3b9cba78cc4aee10b0209a139e332f53a1685a167846c573501af93f641b33", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "b:kiem_mien:250:12:ve2", "op": "b", "dong": 250, "sha256": "3f60ae3b753452439315bfb57ed938fc2f4d5e909485cdf2bf4c926a1ac612b7", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "b:la_landed:219:11:ve0", "op": "b", "dong": 219, "sha256": "6c515b47ab296d894f0e83e0deec56221c273cfe2b67a6a51616b3b0c150d3e4", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "b:la_landed:219:11:ve1", "op": "b", "dong": 219, "sha256": "423f509ce9b482c7399da268b25b85406b9a9c8f9e3f36a45e177c33d2875a80", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "b:la_landed:219:28:ve0", "op": "b", "dong": 219, "sha256": "c6e9d37d4eed1750de8a1069078761f5a75878b6db7adbe2c1674a8883e89d91", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "b:la_landed:219:28:ve1", "op": "b", "dong": 219, "sha256": "f66c0eac748e0555ac03448b546be7236ea8def76bd684a12a4abab18cdd4365", "rc": 0, "giet": ["a213_la_landed_khop_kiem_ho_so_land"], "hong": []}
+{"id": "b:la_landed:219:28:ve2", "op": "b", "dong": 219, "sha256": "ba675a26ff05674cd3310bbe7b1b90617a710e32146e6913cd783d2258906b96", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "b:la_landed:219:28:ve3", "op": "b", "dong": 219, "sha256": "ae4e7f19bad6752fcf65c00c7ad59e26519cb06354968de179f74e2c5e43d4af", "rc": 0, "giet": ["a213_la_landed_khop_kiem_ho_so_land"], "hong": []}
+{"id": "b:loi_khai:195:15:ve0", "op": "b", "dong": 195, "sha256": "2375a9682eee9ebecc2081ef86d88712ad29bd8d4015ed2c5bde7984eb7a9466", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "b:loi_khai:195:15:ve1", "op": "b", "dong": 195, "sha256": "3aec526a5ce259c0dfac1083c7310a6499d40ec353d600c2966b76331410e1fc", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "b:main:311:19:ve0", "op": "b", "dong": 311, "sha256": "f7994841393896b402bea2dac835d31c3d2ec68928bec5f4e1820f7d12b1f11f", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "b:main:311:19:ve1", "op": "b", "dong": 311, "sha256": "73d64ed098308f9c64a0a727a130edbb875acb94e95895e31bf283945646d5ee", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "b:main:318:30:ve0", "op": "b", "dong": 318, "sha256": "f6e56278e28be90ba7d5a6badec00003e68014ae149cc1f739fdec142982648c", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "b:main:318:30:ve1", "op": "b", "dong": 318, "sha256": "1c7ff236231acfe1491da1c9987833c0739f3f6145ab52d5600af99909f3fe5e", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "b:main:330:13:ve0", "op": "b", "dong": 330, "sha256": "d7f125f1b4b7462f144bc2e7448aec84b3351225b0b6a5f9f057465c84669834", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "b:main:330:13:ve1", "op": "b", "dong": 330, "sha256": "821201bcd228562119b0bc2e3fd3c1915cc16c9102b090c0e737420d36dc99f1", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "b:token:203:19:ve0", "op": "b", "dong": 203, "sha256": "94124c28ccddc6bbfa7f10d9041badfc54052e143bdd7325db011e0a8e836605", "rc": 0, "giet": [], "hong": ["HONG a202_token HONG:a202_token:TypeError: 'NoneType' object is not subscriptable", "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: 'NoneType' object is not subscriptable"]}
+{"id": "b:token:203:19:ve1", "op": "b", "dong": 203, "sha256": "9813400def0a4f00b39c1710d303da52e3854587f06aeff3efc9935be85d6079", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "c2:_chuan:182:4", "op": "c2", "dong": 182, "sha256": "4d42b3c5da12ca133c65843facfaba3c0239fa602ac7a2eef9ddb8631be0db5e", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a201_loi_khai HONG:a201_loi_khai:TypeError: argument of type 'NoneType' is not iterable", "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: argument of type 'NoneType' is not iterable", "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: argument of type 'NoneType' is not iterable", "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: argument of type 'NoneType' is not iterable", "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: argument of type 'NoneType' is not iterable", "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: argument of type 'NoneType' is not iterable", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: argument of type 'NoneType' is not iterable", "HONG a209_mien HONG:a209_mien:TypeError: argument of type 'NoneType' is not iterable"]}
+{"id": "c2:_kiem_tep:127:8", "op": "c2", "dong": 127, "sha256": "627233c95aea6a741ebf06d494dbdc1763c3c07e2fc3246c84b9f842c68a0843", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "c2:_kiem_tep:129:8", "op": "c2", "dong": 129, "sha256": "c25b7468b6e2c98da19d4cc0f7605a7ba7b6c9f2220c487d72c8cde74097f23a", "rc": 0, "giet": ["a104_bo_sinh_la"], "hong": []}
+{"id": "c2:_kiem_tep:132:8", "op": "c2", "dong": 132, "sha256": "0c47090494320cbab89c115a5b84b4d37e8b0866102441a46d5aac706ebe79b5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "c2:_kiem_tep:171:8", "op": "c2", "dong": 171, "sha256": "d280dc884b265cb140adb9031635871c1974c5f3008ec9c1a504be8855fdcc9b", "rc": 0, "giet": ["a105_bam_log"], "hong": []}
+{"id": "c2:_kiem_tep:173:8", "op": "c2", "dong": 173, "sha256": "a1f4ab67cfa5f1baa49a069e4f25384b0bc54334113779475273492fe2011ae5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "c2:_kiem_tep:175:8", "op": "c2", "dong": 175, "sha256": "3700edecdbd1f1c709fd621bf742889547b04c4e1847bba609f677f77b683637", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "c2:_kiem_tep:178:4", "op": "c2", "dong": 178, "sha256": "fa06960818a5210ec2137a8e57b5ec9d679a51e2eb7fad3d8becafa9793fb2d6", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "c2:_la_so:85:4", "op": "c2", "dong": 85, "sha256": "605595cf17dbbf463a566137c2c66f7f10117df50b26c741319d87dbcc018c23", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "c2:_tep_trong:227:8", "op": "c2", "dong": 227, "sha256": "d79accd4443f0d8737c8a1882dd03e5715406bec2e6ca894f32625e5bd5de52b", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "c2:_tep_trong:231:12", "op": "c2", "dong": 231, "sha256": "e46d97867f21bd330bb799ef15ce19ad57d7f1163f3f199517f0450b6f5f8b2c", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "c2:_tep_trong:232:4", "op": "c2", "dong": 232, "sha256": "d1578075e1c4366fbddc006886031e415930b091a2d69e9d75becf145f7a13dc", "rc": 0, "giet": ["a205_duong_khop"], "hong": []}
+{"id": "c2:chon_provenance:112:8", "op": "c2", "dong": 112, "sha256": "780dd5c65588efe55fe0f5e31c381aa1d85d7b1b5bc017b5fd4804ab59a76b1b", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "c2:chon_provenance:113:4", "op": "c2", "dong": 113, "sha256": "abe048a958310d094468ea7faaf5af008d3e0da0768b2ebd14b4ddf3acefb328", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "c2:chon_provenance:97:8", "op": "c2", "dong": 97, "sha256": "c0a2e95ab2a7186a4cddc64bb1d76a605408fc39e7656181b213e68ca1f25a1b", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "c2:doc_danh_gia:51:8", "op": "c2", "dong": 51, "sha256": "afe38038d599635cbc964c8482faaebb984971679382c31f2958f8be6cc33e22", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "c2:doc_danh_gia:55:12", "op": "c2", "dong": 55, "sha256": "54bd38e5baeb7048b53fa89c75b1914afe9b7a2c2510463f42c0593e042cb8b7", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "c2:doc_danh_gia:58:8", "op": "c2", "dong": 58, "sha256": "89a1c3467b3078e26359a7f126d1834dfec781ae9f0bca06b394b7efda916db7", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "c2:doc_danh_gia:60:8", "op": "c2", "dong": 60, "sha256": "11d2f767e31baf0922b4023c99c96b7479f8b28d2e85f1f7c7c11de685949570", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "c2:doc_danh_gia:81:4", "op": "c2", "dong": 81, "sha256": "356941d954f718b81ba791829e346520d017bc8bcc254d71372881c75283adb2", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "c2:kiem_ho_so:295:4", "op": "c2", "dong": 295, "sha256": "e4659cd2443ad230f241f84b687141ac082fbde4ca7fd07a0a563b2cbb59cfe7", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "c2:kiem_mien:238:8", "op": "c2", "dong": 238, "sha256": "d74749f6a87e35dc172e444bdd5ccb67121ab52d580fde3460ef9a696988b993", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "c2:kiem_mien:243:8", "op": "c2", "dong": 243, "sha256": "b7cac07fab569df818f0fa16d215c4dea3e9f922024e4e5df7153f31d49ab44b", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "c2:kiem_mien:247:8", "op": "c2", "dong": 247, "sha256": "2094b22ca508263f3fc3a8171fd320a841c4dc12c114099270cd01541809c3df", "rc": 0, "giet": [], "hong": ["HONG a209_mien HONG:a209_mien:UnboundLocalError: cannot access local variable 'd' where it is not associated with a value"]}
+{"id": "c2:kiem_mien:249:8", "op": "c2", "dong": 249, "sha256": "9eebd7d90aee71aa7556e6a9b61745260e341b58f5ed5ffd09c0c486b3992e4d", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "c2:kiem_mien:251:8", "op": "c2", "dong": 251, "sha256": "3f20ced6a37003c3e473b2a320c0713f0355589c435ee4d7bc0c414e20365900", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "c2:kiem_mien:254:8", "op": "c2", "dong": 254, "sha256": "16acf79057b93e7f6bfe6cd88088883bdd2907fa51c3854029679e274a3083cf", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "c2:kiem_mien:259:8", "op": "c2", "dong": 259, "sha256": "b1865164159be237c1800d056503b32baefb68311fb2e3eed9abf304fa1ead73", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "c2:kiem_mien:261:8", "op": "c2", "dong": 261, "sha256": "0a5fb3e328b17ec001261ef421231b4ba69c55ecaf90a9102deac890b70fb980", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "c2:kiem_mien:263:8", "op": "c2", "dong": 263, "sha256": "b44cb8eb10e33f96f3fe3baa67303d0eb300adb7540e05fd7e5aee379f83bcae", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "c2:kiem_mien:264:4", "op": "c2", "dong": 264, "sha256": "ab8c94a7611338e33bce9969aaff7cae46c3854461a03fb3fa3af8700f701e00", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "c2:kiem_tep:119:8", "op": "c2", "dong": 119, "sha256": "f73814c2ea7dc6acfbebca799c9304ae8a532d105357593fd404148bef732068", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "c2:kiem_tep:121:8", "op": "c2", "dong": 121, "sha256": "ab488b930d505666b84e09a129ce1b3b8a95f23310a6b5e5d4ec14335a1944ad", "rc": 0, "giet": ["a117_loi_duyet_va_job_trung"], "hong": []}
+{"id": "c2:la_landed:214:8", "op": "c2", "dong": 214, "sha256": "78686448fd1bb832ef25cfc97b8950107e93129ae8653d4af0a3df072b07070f", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "c2:la_landed:219:4", "op": "c2", "dong": 219, "sha256": "177515bf7c6da99865d1bcc94aa2d182bcd6e70dc3971cb08795065810264558", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "c2:loi_khai:198:4", "op": "c2", "dong": 198, "sha256": "37bfba77c73867375260d4020e23167c66442895278b027b95cfd740bd2d5318", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a201_loi_khai HONG:a201_loi_khai:TypeError: 'NoneType' object is not iterable", "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: 'NoneType' object is not iterable", "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: 'NoneType' object is not iterable", "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: 'NoneType' object is not iterable", "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: 'NoneType' object is not iterable", "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: 'NoneType' object is not iterable", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: 'NoneType' object is not iterable", "HONG a209_mien HONG:a209_mien:TypeError: 'NoneType' object is not iterable"]}
+{"id": "c2:main:308:8", "op": "c2", "dong": 308, "sha256": "3b201d7563a6bab0ef19b65ae5169449c80d5ae9ede6ab8c4467319a33c35431", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "c2:main:316:12", "op": "c2", "dong": 316, "sha256": "be251ea7e401628a8e56459231fed8b3eae0f786ad867ab6b0229c5b5d31a66b", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "c2:main:319:8", "op": "c2", "dong": 319, "sha256": "5a3dae25e319bc4ad56cb2255e28fc3b601aa900c68fac7eeb3b6610125266b4", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "c2:main:328:12", "op": "c2", "dong": 328, "sha256": "ab2884b7d87ec13450a6d517a4a3ed1104e7501fa4b9dc1bc71f2d9feb1050cb", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "c2:main:331:4", "op": "c2", "dong": 331, "sha256": "d83327f7db7b3f50c7b0bc9d77f51345b4aec054cdffb398f5f68efa55c01335", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "c2:tep_danh_gia:207:4", "op": "c2", "dong": 207, "sha256": "c7761f10a83051a7b08415529bb76d49590aed5e5dda0e585dba5ed6f523a82c", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: 'NoneType' object is not iterable", "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: 'NoneType' object is not iterable", "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: 'NoneType' object is not iterable", "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: 'NoneType' object is not iterable", "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: 'NoneType' object is not iterable", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: 'NoneType' object is not iterable"]}
+{"id": "c2:token:203:4", "op": "c2", "dong": 203, "sha256": "bfc8f347a683135483acd68e2be544ecdcca1b7804496218257974b57e4ab7a4", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "c:_kiem_tep:136:8", "op": "c", "dong": 136, "sha256": "caf97a13256c1352a926c919ae54661a12398d33f4d1fb81fd0c33e70fc6b4ac", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "c:_kiem_tep:140:8", "op": "c", "dong": 140, "sha256": "6b77a1342c9b6e5a5bec3b72c35c27308a538487485d65c008dd1c2cbaba5b88", "rc": 0, "giet": ["a117_loi_duyet_va_job_trung"], "hong": []}
+{"id": "c:_kiem_tep:147:8", "op": "c", "dong": 147, "sha256": "8fcf0bfc2a29fb69c86a406539e75354bb0f6d45e5cf4757c3fceca6b8e3efb8", "rc": 0, "giet": ["a114_provenance_tu_khai_du"], "hong": []}
+{"id": "c:_kiem_tep:149:8", "op": "c", "dong": 149, "sha256": "19f1d92c65f832e8505b977dac3fb2995a1997d1096ae334c167234584e1de9f", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "c:_kiem_tep:151:8", "op": "c", "dong": 151, "sha256": "69b1a76bb4c6c9a89e2a0a5ffe8e8397d5df4d477757f5947cfcc268f7934c33", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "c:_kiem_tep:158:12", "op": "c", "dong": 158, "sha256": "53fc91ac12702e8b3fd3b790a0328e7bf121b6adf7dfab82d19585b3888ffaf4", "rc": 0, "giet": ["a106_danh_tinh_job"], "hong": []}
+{"id": "c:_kiem_tep:160:12", "op": "c", "dong": 160, "sha256": "e05d65487067110c96c2d30dae603b2d5281e8727476848ad4aeeda24b14e3d5", "rc": 0, "giet": ["a113_ket_luan"], "hong": []}
+{"id": "c:_kiem_tep:162:12", "op": "c", "dong": 162, "sha256": "55fe333dc7aa0484a53bf757b176f054679bb1e69318f8fec730c8c4b1b42e2f", "rc": 0, "giet": ["a105_bam_log"], "hong": []}
+{"id": "c:_kiem_tep:165:8", "op": "c", "dong": 165, "sha256": "0c7d3937cdf6c065ebfcd14e57c3466f637c6289052670ddb5392da06d3a3934", "rc": 0, "giet": ["a111_skipped_theo_phien_ban"], "hong": []}
+{"id": "c:_kiem_tep:169:8", "op": "c", "dong": 169, "sha256": "69a2f984ce869e724659532d59cc21d5d0758cf281817a32239cd48e0aaa4e72", "rc": 0, "giet": ["a110_dong_tong"], "hong": []}
+{"id": "c:chon_provenance:102:16", "op": "c", "dong": 102, "sha256": "bebaa65a1d87158492336012c1de5ad92b19f010e43d18607b10633d1a94124f", "rc": 0, "giet": ["a112_symlink"], "hong": []}
+{"id": "c:chon_provenance:110:16", "op": "c", "dong": 110, "sha256": "de28b7c30d81af296927d8b0aff4f16df470d70a1d831d640e701a7752ac96bf", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "c:chon_provenance:99:8", "op": "c", "dong": 99, "sha256": "2beab60fc3476a486f9a0bd6ab6e7243407e2998f6a9e9e267239606a7ea5e6d", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "c:doc_danh_gia:68:16", "op": "c", "dong": 68, "sha256": "5516c0def60008862f6b470296650d7903903d58384692ae152e6c01a244d891", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "c:doc_danh_gia:71:12", "op": "c", "dong": 71, "sha256": "bf99c480c55c11bde54fb9e7cd2ffb1a021bdac91a225541e758984a3a558225", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "c:doc_danh_gia:76:12", "op": "c", "dong": 76, "sha256": "a3c8da86730a8df1249b1600fc0c553b3c3e3b349a7da914a0f325ac3c24d7f4", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "c:doc_danh_gia:78:8", "op": "c", "dong": 78, "sha256": "83a28f8de4232540e73f77b9ff208c2b26499df272c15668723544258d2aed04", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "c:doc_danh_gia:80:8", "op": "c", "dong": 80, "sha256": "ff3c04be71a0404551a43c646765d97b75754ce89e1142457f8f01a43d32f10d", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "c:kiem_ho_so:272:12", "op": "c", "dong": 272, "sha256": "8907951a4bedb86d4c0ed5548ab3f14c93005044b46ea971c2f4f0e6e2b0c5da", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "c:kiem_ho_so:278:12", "op": "c", "dong": 278, "sha256": "81fef18efb254fb33b20ada465a440320680e5017567e5307b2dbb1c22a48628", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "c:kiem_ho_so:282:16", "op": "c", "dong": 282, "sha256": "7d31d70713faf91f910ae460df7eebfa62e6b23e8f511085f9723ef274a2c30b", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "c:kiem_ho_so:286:20", "op": "c", "dong": 286, "sha256": "5d8c3f0e340d12dc6654cef43ffe5d4ae51ed0a9ed4a3d74a0a9f577e32b7f5b", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "c:kiem_ho_so:290:20", "op": "c", "dong": 290, "sha256": "2b9483b7b603daffb54d3d74e5f15f67dc89a753f018f9a3bc78ca5bb1d56eb2", "rc": 0, "giet": ["a206_duong_lech"], "hong": []}
+{"id": "c:kiem_ho_so:294:8", "op": "c", "dong": 294, "sha256": "52ad7a0416be3c71956e706138124817a2aa2f800723bd32b53605e258074078", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "c:loi_khai:196:16", "op": "c", "dong": 196, "sha256": "2839935f12935fc8d5b5756bf5e85a87e7ff7b133fa21cf8cde2221459a7cc0b", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "c:loi_khai:197:8", "op": "c", "dong": 197, "sha256": "5c979c726b3e6efca17cdf9657bbe0860c0d7112c489bed7b3e95982b5ea4abb", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "d:chon_provenance:98:54", "op": "d", "dong": 98, "sha256": "3b08713abb8c82a98dc72e0a2a55f0f1ef09c4e255da2a1f19c0ae0e8e1dcd5c", "rc": 0, "giet": ["a118_k1_k2_quet_he_thong"], "hong": []}
+{"id": "d:kiem_ho_so:269:21", "op": "d", "dong": 269, "sha256": "626339c6a76113311698e0af934b12cf43016daa34d73fbc4481eb6149f3dca5", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "d:kiem_ho_so:292:21", "op": "d", "dong": 292, "sha256": "361c55337766866eda5d4863d5f6e768c7e46e404ddc8f8efa2f34c4b45a9bfc", "rc": 0, "giet": ["a216_hop_le_theo_token"], "hong": []}
+{"id": "d:la_landed:214:15", "op": "d", "dong": 214, "sha256": "d7e7eb27fb388135538349281177d749d0cfd157698f7ce863a4ed0aab7287e4", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "d:la_landed:219:126", "op": "d", "dong": 219, "sha256": "fba07486b6249a8b0123d53e51cce6ff6cf47dd26029efd8de558189f5fd50c6", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "d:la_landed:219:16", "op": "d", "dong": 219, "sha256": "41ba35ec49ef850aec3b244269cece2d8e85ce81d69a8fc3606db83a803c0dc5", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "d:main:300:49", "op": "d", "dong": 300, "sha256": "fe6ae60c4eb8982393f30231e88465c936bc8279d0fa4b2dbe599533f54ee790", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "d:main:303:45", "op": "d", "dong": 303, "sha256": "25b276302a4342b7057d63907a333a86c02fd6d34cffb9e5a755b1cc5cc06719", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "d:main:313:19", "op": "d", "dong": 313, "sha256": "1cfee635b1b28a3af409ea710c9aefa1a88c179debb82ddc0e2b772873d9cb74", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "e:chon_provenance:111:20", "op": "e", "dong": 111, "sha256": "5693b34fb6fd23678436ce8adf0416a9eeadd9c0297aa97e1899f006588e86cc", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:chon_provenance:113:16", "op": "e", "dong": 113, "sha256": "b55e4c0cae58d5ed4293d66816eed8f1e0190ef004033ce60dfa59d0fe4afff4", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:52:18", "op": "e", "dong": 52, "sha256": "faadbc6353364d84302e0ae5c287718a422a7cc8d1e6f7105aa8cb61b6a1d1bc", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:56:20", "op": "e", "dong": 56, "sha256": "a8124d4569ffaed458324d1e216f6adc9bce43e54156017b4e5ab0c0c6447b85", "rc": 0, "giet": ["a102_ca_kho_tai_base"], "hong": []}
+{"id": "e:doc_danh_gia:59:39", "op": "e", "dong": 59, "sha256": "d9be78a5ab7bdced9bfec0b815d5ccf5e684a3781122ea151f8687a031789b86", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:61:23", "op": "e", "dong": 61, "sha256": "3985ed9b8e446d5c512c2d7c2c556e1b78bb78f868bc26bf72886b7d157205df", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:61:45", "op": "e", "dong": 61, "sha256": "b008d2d0067c14e8d15d6893b866b1d447a3db2dd8520ae3b709098d49670017", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:61:60", "op": "e", "dong": 61, "sha256": "1d3bd60eba5ada3392aa0917ecd09c0751e8be0d85d2cc9e4693eb589007a988", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:61:77", "op": "e", "dong": 61, "sha256": "d4730f54aa7b65d75a68519e66eaef7b85f449a89039ee1f1ae352a85f78d5a7", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:62:21", "op": "e", "dong": 62, "sha256": "6dee74e337cab0032e06d9c1baa86399102faae6adbf90e58f038dd4051c7e2e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:63:18", "op": "e", "dong": 63, "sha256": "9995dbacf87d568428292ad1735148ea610f336c975909219affee782ee1e7c0", "rc": 0, "giet": ["a118_k1_k2_quet_he_thong"], "hong": []}
+{"id": "e:doc_danh_gia:67:21", "op": "e", "dong": 67, "sha256": "a583f5e900f06b94bcf8b657f5165d6ed3dce926f0ffa2f9a958d22f13aefe83", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:67:48", "op": "e", "dong": 67, "sha256": "af90f9ea47ffab34c11ce282cdc65b6d2ab5ea97a32a8cb746cd0763549f08dc", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:69:108", "op": "e", "dong": 69, "sha256": "1603e30fd54b777aa1d67b03e6f1b2cab6c556f55177093f7b205764ee279149", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:69:29", "op": "e", "dong": 69, "sha256": "fa254fbc9b3c6ae0463df5a72588cfe3cfecde3428c5fc3c150ec6b5924e7ab4", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:69:47", "op": "e", "dong": 69, "sha256": "a7d10dcbaacd7ca27bcfccbc3ea91035237ce40a7701281bd27f03c3d9809704", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:69:63", "op": "e", "dong": 69, "sha256": "6f0d97a11002b91c3483be1a2aeebca670ebf011811e3bcaa6203781508335c7", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:69:83", "op": "e", "dong": 69, "sha256": "b42b0d0c8d0a1d9086d67a7483971e8fa0d143d18f14ebc8d36afdce0db1d913", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:69:96", "op": "e", "dong": 69, "sha256": "d4086226b4730fb74f00aa4273cabd7d2a2a082cba9d28912d92502e5518df4e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:71:39", "op": "e", "dong": 71, "sha256": "dbe535cfcb5b344bb847142521103bd53d4568f704b77749f0d23494b537196d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:71:66", "op": "e", "dong": 71, "sha256": "a9f0ab0ce48d8d9e39c4d5d2ed803688140686303dfcbed833ec183e2f49b85e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:72:29", "op": "e", "dong": 72, "sha256": "2f2870d0938014c81180262770748a1c9471ba778dd91b0415b66d80d97b2726", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:72:47", "op": "e", "dong": 72, "sha256": "6a5848577e7603bc484549f7881b5a5e0e351942dccfda7e0fe50ba9db135048", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:74:41", "op": "e", "dong": 74, "sha256": "78b02f552e6a6918adff6d85cc89a54e5b7daf731602e5a84f64f20c97a82a43", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:74:48", "op": "e", "dong": 74, "sha256": "35801817bc3359d1940e5517e6d3537fb2bf835092c7322496d9115dd8ae49d4", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:74:59", "op": "e", "dong": 74, "sha256": "3ef272c4ae55fdbc2d8cbab56dab4d27285651ba9f37e7696f4df5290b9bea89", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:74:71", "op": "e", "dong": 74, "sha256": "7f522f449a5c4a7c08479d340d1baa53ddd7091297baa066e9e36bbc453c90fa", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:77:17", "op": "e", "dong": 77, "sha256": "006c521b93fa6e81449a8d71d55f3dcaae261d7331fc9b6fa6197004f0279332", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "e:doc_danh_gia:79:18", "op": "e", "dong": 79, "sha256": "267fb775c2e57bd8f273e4cf0165f90b9620fcd56ac9382ecdaf2f7d10a5d6ad", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "e:kiem_mien:237:83", "op": "e", "dong": 237, "sha256": "5f67785a1d72b82f41927740f711972e3071ae9d4690931bc8605db22df1ebdf", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "e:kiem_mien:239:42", "op": "e", "dong": 239, "sha256": "12925fe1ddf9727eb8704fb9548822fcc304b7313553c4ca662b1bdff5eb3483", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "e:kiem_mien:240:66", "op": "e", "dong": 240, "sha256": "3bacac89dce8382fdd3e15e6bc21498deff4b07cf30c5b8f21b2afe24f5c2178", "rc": 0, "giet": [], "hong": ["HONG a209_mien HONG:a209_mien:IndexError: list index out of range", "HONG a215_landed_mien_di_dang HONG:a215_landed_mien_di_dang:IndexError: list index out of range"]}
+{"id": "e:kiem_mien:242:18", "op": "e", "dong": 242, "sha256": "e9a65e39d0ae4d3d133763cc912ef5bb67a4bd0f60ed02d1283b937c0ea54923", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "e:kiem_mien:245:26", "op": "e", "dong": 245, "sha256": "da80de508e5664220f4c5c929f11e8d3739ba32e63ba648465dd73ca05397875", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "e:kiem_mien:253:20", "op": "e", "dong": 253, "sha256": "5182d1557249368cf4f62338e0c7260e4d62ecd0900869e60805a89b3502e24b", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "e:kiem_mien:255:13", "op": "e", "dong": 255, "sha256": "c5852a4c47dfc3a473f8ad2320f6982ee81c08f4c2e07f00a0ed7341416e5c8f", "rc": 0, "giet": [], "hong": ["HONG a209_mien HONG:a209_mien:IndexError: list index out of range"]}
+{"id": "e:kiem_mien:257:38", "op": "e", "dong": 257, "sha256": "84178ab8e8b92f6c8754a8d78eb02be52cb0602a4be9642c437eef84cc7abf93", "rc": 0, "giet": [], "hong": ["HONG a209_mien HONG:a209_mien:IndexError: no such group"]}
+{"id": "e:kiem_mien:260:32", "op": "e", "dong": 260, "sha256": "374d19b75d066d9534d010736385e142ef5f2110f4cb939f4d35632ff1dda211", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "e:kiem_mien:262:10", "op": "e", "dong": 262, "sha256": "9185e147e3d8acf461abdfe0c80eb9f718c30c6b5f8b9da3f7c9ea3f2cae4415", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "e:kiem_mien:262:50", "op": "e", "dong": 262, "sha256": "fb37741a461c983fcd0ecd186e1442591e082741511d5fb3d1a2c2630db9444c", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "e:main:308:15", "op": "e", "dong": 308, "sha256": "9d8205f173e21d3c0308968c744c6c3377065d49d6b990ecd2eee1f2679f7afb", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "e:main:308:32", "op": "e", "dong": 308, "sha256": "0bcb58016d7d24ab64b62533ea7563980a0c4fb7c998015dd940c52e34b7673b", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "e:main:316:19", "op": "e", "dong": 316, "sha256": "06d8e03dfe79b40f52d56af68762751f21179d7c88b20d44eccd74664a4ab67d", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "e:main:319:26", "op": "e", "dong": 319, "sha256": "b5915407cef8a03f2535ab40378f4b2d27d53f55f759e9df5e1998e1d02b90c2", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "e:main:319:39", "op": "e", "dong": 319, "sha256": "9ab78739fce8d86305bc530d91210dad22caac895b260c88394fc7b20a3f90d6", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "e:main:319:50", "op": "e", "dong": 319, "sha256": "fb28a0480d92b4cd40526e9aa68baa9c8402dbd977c1220ead10df4480800cff", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "e:main:321:9", "op": "e", "dong": 321, "sha256": "4c39e148c3560fcdfe240e08db52f9c5aa2960cf3a02dfb8cf41d53bb69e04e7", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "e:main:328:19", "op": "e", "dong": 328, "sha256": "df5efae57a2102649547aebd4898cf9978658920c66f7c13cf34a14e1d7ffaa8", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "e:main:330:20", "op": "e", "dong": 330, "sha256": "1ad3749ae3a3518c607b889fa08f6340100cf1c9daa69eabf59f608e33cc3bc1", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "e:main:330:33", "op": "e", "dong": 330, "sha256": "c6ae2bac52f7090897c1b49b0d86861ee8364f37afe39848443d4f4c6f4401fd", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "e:token:203:13", "op": "e", "dong": 203, "sha256": "feedfe201a47e624119df50591384c9fa37e42fbaf7a9917ec3009b5b62276b5", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a202_token HONG:a202_token:IndexError: no such group", "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:IndexError: no such group", "HONG a204_duong_dan HONG:a204_duong_dan:IndexError: no such group", "HONG a205_duong_khop HONG:a205_duong_khop:IndexError: no such group", "HONG a206_duong_lech HONG:a206_duong_lech:IndexError: no such group", "HONG a207_hai_tep HONG:a207_hai_tep:IndexError: no such group", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:IndexError: no such group", "HONG a209_mien HONG:a209_mien:IndexError: no such group"]}
+{"id": "e:token:203:27", "op": "e", "dong": 203, "sha256": "d9067f96f7ee8203dfea26ec582cc865f97343f3270a7119c1fd5037bdfe8ceb", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a202_token HONG:a202_token:IndexError: no such group", "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:IndexError: no such group", "HONG a204_duong_dan HONG:a204_duong_dan:IndexError: no such group", "HONG a205_duong_khop HONG:a205_duong_khop:IndexError: no such group", "HONG a206_duong_lech HONG:a206_duong_lech:IndexError: no such group", "HONG a207_hai_tep HONG:a207_hai_tep:IndexError: no such group", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:IndexError: no such group", "HONG a209_mien HONG:a209_mien:IndexError: no such group"]}
+{"id": "f:_chuan:182:4", "op": "f", "dong": 182, "sha256": "e4c4409edf8ce150a7c150129d56f58647e5739ae11d6e6c662e2f1ede047f99", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a201_loi_khai HONG:a201_loi_khai:TypeError: argument of type 'NoneType' is not iterable", "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: argument of type 'NoneType' is not iterable", "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: argument of type 'NoneType' is not iterable", "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: argument of type 'NoneType' is not iterable", "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: argument of type 'NoneType' is not iterable", "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: argument of type 'NoneType' is not iterable", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: argument of type 'NoneType' is not iterable", "HONG a209_mien HONG:a209_mien:TypeError: argument of type 'NoneType' is not iterable"]}
+{"id": "f:_kiem_tep:127:8", "op": "f", "dong": 127, "sha256": "20002da1bad095c13be0f51e35ecf25b1233f25b2bbb9dceeb166d7a94954314", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "f:_kiem_tep:129:8", "op": "f", "dong": 129, "sha256": "1def149ce54633ca5e4be0861a5954b641007c6d0c362baab53846a040d4327a", "rc": 0, "giet": ["a104_bo_sinh_la"], "hong": []}
+{"id": "f:_kiem_tep:132:8", "op": "f", "dong": 132, "sha256": "c7119470b8fa475087f07a17d1bf51b204285f016a5b097180b7fd867e3221a7", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "f:_kiem_tep:171:8", "op": "f", "dong": 171, "sha256": "6b9c67470fa1b178017d839f58749c98000cb9d6b8836e7b276fdc1df178a129", "rc": 0, "giet": ["a105_bam_log"], "hong": []}
+{"id": "f:_kiem_tep:173:8", "op": "f", "dong": 173, "sha256": "1c20584d1550811027711dc5b4e46eaad30c1e29f3387b0c4e1bf5dd6ad34e32", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "f:_kiem_tep:175:8", "op": "f", "dong": 175, "sha256": "aff03a5edb6f82f92938281d06fefc9af41514d39311c9e7be834d47b224c28d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "f:_kiem_tep:178:4", "op": "f", "dong": 178, "sha256": "e07f2aed7089cc38043cb3f9438710bafcd0c6bc77babb58048279d6960723b7", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "f:_la_so:85:4", "op": "f", "dong": 85, "sha256": "fb4a37ed881711f5c5a7a74c868ad3c7b879e230784073e35a16b561bc98991b", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "f:_tep_trong:232:4", "op": "f", "dong": 232, "sha256": "a60934a71e995c32fbeefef829c08d4b7c7094565d684ea9757943f0e29ea411", "rc": 0, "giet": ["a205_duong_khop"], "hong": []}
+{"id": "f:chon_provenance:112:8", "op": "f", "dong": 112, "sha256": "0b0aff19e6ad5a54785d4b342b55b4558e89548b089ad3357ce302aaec8ad506", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "f:chon_provenance:113:4", "op": "f", "dong": 113, "sha256": "73aca8af4ced1af4852bb1789045fdfbc2f5db643fdd93c29f2265cb57de54a9", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "f:chon_provenance:97:8", "op": "f", "dong": 97, "sha256": "2391fab9cf0c8b70ab793daa352979445ebce7415532445423c78e9b19a7dc6c", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "f:doc_danh_gia:51:8", "op": "f", "dong": 51, "sha256": "b39d7e98055d82f1ce1fb1046fd09665d16948adb4732e4277604851ab527d1b", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "f:doc_danh_gia:55:12", "op": "f", "dong": 55, "sha256": "c2de911d841c326b6a1ab7d3a5ec5a58135048bd60350276fa2f5e243e2b9c84", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "f:doc_danh_gia:58:8", "op": "f", "dong": 58, "sha256": "4c7fd1f218e4aa4189bff309ffb88b08cb7fec5189f868aee615f66be54c3fa8", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "f:doc_danh_gia:60:8", "op": "f", "dong": 60, "sha256": "f3c65afab4e9aa07e5aff22709a7d52b4a5abed6d0e7894b77bd0f5b9dcda1cb", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "f:doc_danh_gia:81:4", "op": "f", "dong": 81, "sha256": "f0eff948d0b8b61f848322734fc129af3bf104d9b8976186a6e559af9f79ace0", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "f:kiem_ho_so:295:4", "op": "f", "dong": 295, "sha256": "2a98c51ea4a25a7d7ac271551cb6da5138096afd467985403e599bf197c20726", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "f:kiem_mien:238:8", "op": "f", "dong": 238, "sha256": "984d89e8af97201aecbc9f2bfb9b8f4a67a0a1591ec53a25539b0f8accba0201", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "f:kiem_mien:243:8", "op": "f", "dong": 243, "sha256": "b7484820dbb8f61a8c6dfabe5011c14dc07a8e59898aeb25de3a2c1c3cb508e1", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "f:kiem_mien:247:8", "op": "f", "dong": 247, "sha256": "3623492ee7480ac0f3cbec5c0766f599b755a6b41291a5fad9cf88df083b9c23", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "f:kiem_mien:249:8", "op": "f", "dong": 249, "sha256": "df1211fcec6b6871f63591ef6ab3e5675eec4200b7acd6c168739adea68f938f", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "f:kiem_mien:251:8", "op": "f", "dong": 251, "sha256": "2b506cd6c8a6a7407aee682512921cff4ce4e25314927a9fe16cfec208368d54", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "f:kiem_mien:254:8", "op": "f", "dong": 254, "sha256": "348046bd200465d8bf193415e8faf3778c088d2f45a2be20da629233a45403f3", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "f:kiem_mien:259:8", "op": "f", "dong": 259, "sha256": "d42020713ab1e21701b55d4dc730b9072cf1b93c4c64a7b0cbb83fc101ac618c", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "f:kiem_mien:261:8", "op": "f", "dong": 261, "sha256": "7736084bf05aeec57a32d16f1a8d318e0c7525e01afa93dbfc0cc9238282c69e", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "f:kiem_mien:263:8", "op": "f", "dong": 263, "sha256": "8f74095c3fdb64b07848e6b7645f6d1e00dcadbba8ee32a84381a576f4ae5846", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "f:kiem_mien:264:4", "op": "f", "dong": 264, "sha256": "32769ea0177be49bb7d3c06e4379b721879ea23403a8e54cc8cabe906bd8b470", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "f:kiem_tep:119:8", "op": "f", "dong": 119, "sha256": "11649e1533b0e5960563662e906420bfb0c6277a362133a18a54630cc55ee6a6", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "f:kiem_tep:121:8", "op": "f", "dong": 121, "sha256": "ea47e39f25c61839a754420214eb35ce68c950428e88e5c53bc3dc1a3f8a7147", "rc": 0, "giet": ["a117_loi_duyet_va_job_trung"], "hong": []}
+{"id": "f:la_landed:214:8", "op": "f", "dong": 214, "sha256": "0f4fc866285775e1ab6ca3bc0c58d160d977986e9d35f5f89125be014fec58c5", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "f:la_landed:219:4", "op": "f", "dong": 219, "sha256": "827f0cbda68b893cff156c5b6093a59c3316e2c7c5258b862c767773639cc694", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "f:loi_khai:198:4", "op": "f", "dong": 198, "sha256": "2ad3ce033a9f311b1cca963d5ab95f6dc76f629971769bce6e892125514a13b7", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a201_loi_khai HONG:a201_loi_khai:TypeError: 'NoneType' object is not iterable", "HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: 'NoneType' object is not iterable", "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: 'NoneType' object is not iterable", "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: 'NoneType' object is not iterable", "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: 'NoneType' object is not iterable", "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: 'NoneType' object is not iterable", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: 'NoneType' object is not iterable", "HONG a209_mien HONG:a209_mien:TypeError: 'NoneType' object is not iterable"]}
+{"id": "f:main:308:8", "op": "f", "dong": 308, "sha256": "176acbb1a9d85a3ff7071ee32e47e59c0b6e6e766cd93ef19e4e44dde7ea56d6", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "f:main:316:12", "op": "f", "dong": 316, "sha256": "2a44cc114372f0c14283b4230f9c6ef44e228011f8556a4d5f445cb288c51892", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "f:main:319:8", "op": "f", "dong": 319, "sha256": "e87824740c517f6b49a6093003484df903c95ec3c8ce7ea8179ca6d567c5ca62", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "f:main:328:12", "op": "f", "dong": 328, "sha256": "32a7fbb36ca1d2ae0f11727bdafe9864b893f7382b90dc63c32778a48b709f9c", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "f:main:331:4", "op": "f", "dong": 331, "sha256": "b4471155088fd09e84366eebc51de3cca80b93243d822899d5274a5478ceef1b", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "f:tep_danh_gia:207:4", "op": "f", "dong": 207, "sha256": "47eee7715e75f26692e86c36acd0cd7144f0a80be9fa8a3c03c7cef9e0ac5d0c", "rc": 0, "giet": ["a210_cli"], "hong": ["HONG a203_duong_khong_tep HONG:a203_duong_khong_tep:TypeError: 'NoneType' object is not iterable", "HONG a204_duong_dan HONG:a204_duong_dan:TypeError: 'NoneType' object is not iterable", "HONG a205_duong_khop HONG:a205_duong_khop:TypeError: 'NoneType' object is not iterable", "HONG a206_duong_lech HONG:a206_duong_lech:TypeError: 'NoneType' object is not iterable", "HONG a207_hai_tep HONG:a207_hai_tep:TypeError: 'NoneType' object is not iterable", "HONG a208_failed_nhat_quan HONG:a208_failed_nhat_quan:TypeError: 'NoneType' object is not iterable"]}
+{"id": "f:token:203:4", "op": "f", "dong": 203, "sha256": "f3e086dd63a3f8377dbccd5c14ec97d6477add17f5c97be1ead9cbe76101435f", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "g:_kiem_tep:127:15", "op": "g", "dong": 127, "sha256": "979b6bf2d75120be7abe7c0fe2c97f7062abd3ff65b5e1ee6a1fab195fe789fc", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:_kiem_tep:128:9", "op": "g", "dong": 128, "sha256": "2b8733c72ea9808e864c1033a8531ce6b8e30266955b8149b3787b80e4890fd5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:129:15", "op": "g", "dong": 129, "sha256": "d24758277acf60d1eb25beff1f62b15d9913bfb1b391e31593bcdd19e998bd0e", "rc": 0, "giet": ["a104_bo_sinh_la"], "hong": []}
+{"id": "g:_kiem_tep:129:32", "op": "g", "dong": 129, "sha256": "8deb15043ee027f903aa8fac90b55746842defb8a42ce31c9abeb7325dfbb8dd", "rc": 0, "giet": ["a104_bo_sinh_la"], "hong": []}
+{"id": "g:_kiem_tep:130:39", "op": "g", "dong": 130, "sha256": "9aa918e40824c04a56aba53bc044535c9ba7b593e692b8b109f57bd1b517d018", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:130:49", "op": "g", "dong": 130, "sha256": "b95c73d9fc78d5f28156d6aade5cbc004dbb6554c22a718bfc2aea76eafc1169", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:130:63", "op": "g", "dong": 130, "sha256": "5d8728c577dd7d0e5e7db615d566119d157f7e9004b6dcdc41748c463c68e130", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:132:15", "op": "g", "dong": 132, "sha256": "3ee9ca167d5987dee642a96881adba8441ace5b921b0075026cb3b56ddd1c9ae", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:133:12", "op": "g", "dong": 133, "sha256": "21fcedf17d884541b57605b0b0a64aed5713c30b58086b9185bb4a2661cb3a97", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:134:12", "op": "g", "dong": 134, "sha256": "8d1d58e4cb59701b2fd11944498d39f601cd013be7274491b6e311691be4dc90", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:135:18", "op": "g", "dong": 135, "sha256": "8af81f572a05d4d6227221a45df494365ac30f78207ef32462ba65fca9b28095", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:135:30", "op": "g", "dong": 135, "sha256": "cc5ebfc2733148f3e1716f43bb657a1a48db466a50dfba30b1c00a7ba03362f5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:135:47", "op": "g", "dong": 135, "sha256": "a2d8bfc9b77b0302c675a4dd94d164402fe1fc64340fdc89e3844086ceb6b31e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:135:72", "op": "g", "dong": 135, "sha256": "951c34fbe95343c553293c6a8502833be556523dcfd99501bb31c4bdc9e663e5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:136:18", "op": "g", "dong": 136, "sha256": "9504c2561c4703ff1c50a9222d443655b2fe5d97d5b71609f656d76613df64bc", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "g:_kiem_tep:137:17", "op": "g", "dong": 137, "sha256": "966ca60c81d69960c0e9198ecd8c42d33b2afc5b2bf7cbbade2d442bebf7ccbc", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:137:54", "op": "g", "dong": 137, "sha256": "420ea1fa8c8bbc4eb7a055324431c172f22002eeec932432871c6dacac1afd92", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:139:33", "op": "g", "dong": 139, "sha256": "02b99489aa48a9a97fc2714a5b7ca8b4c4c00c5581c44de0f431229901e595cc", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:139:62", "op": "g", "dong": 139, "sha256": "5cb4badf38aa0b058be79cd4c8648bfd94e8187e75c538839280ef4fc294931a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:140:15", "op": "g", "dong": 140, "sha256": "cf443502929aaf147deaa369eca5ee4a08c55d53f614b935170e8df751a2150f", "rc": 0, "giet": ["a117_loi_duyet_va_job_trung"], "hong": []}
+{"id": "g:_kiem_tep:140:51", "op": "g", "dong": 140, "sha256": "e88514a790ea4ec7b78dd854ffcc1b3dce4b5d80f7925f3f118396d1178fd480", "rc": 0, "giet": ["a117_loi_duyet_va_job_trung"], "hong": []}
+{"id": "g:_kiem_tep:141:16", "op": "g", "dong": 141, "sha256": "6a1e2af1104b085d483f4700c5a082f2d309eed3a550647e7cfc69f3fbb217d8", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:142:112", "op": "g", "dong": 142, "sha256": "aade0f47199eb925d03a9cbfcaed911605f1f8b2df314e58dd6744a1463a3357", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:142:55", "op": "g", "dong": 142, "sha256": "c77ee9a0d15812a8d1b4cf8fb6ca31d939aba2aea984372165ddcf4dd7e4abd2", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:142:72", "op": "g", "dong": 142, "sha256": "9a60d366794cb4cd728e85f245d8b74ee51592a0565643a92b33d078fb9df0e8", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:142:92", "op": "g", "dong": 142, "sha256": "40a2755d506765693fd124745544230aa5e38db30b67e2fae313c6632d534456", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:143:18", "op": "g", "dong": 143, "sha256": "6337f6ad28bf0ad676eb39cb567f2558a2b04e7ce6feafe5898a6c02d0dc056d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:143:35", "op": "g", "dong": 143, "sha256": "d10872c4764b855da019f4dc9071badc4ba24d8a732a9eb8e69434db5f280bcf", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:143:80", "op": "g", "dong": 143, "sha256": "7aa2a1e9967e3746dd51679359197ef616da2e33a4bbda8900a11e9b49dde29d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:143:97", "op": "g", "dong": 143, "sha256": "6def649d785f177e4f3bda21e2d41f46e20e7bc4b32a96e98cacaf2737a2c317", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:145:51", "op": "g", "dong": 145, "sha256": "6f7090d675bf4bae5e1ec6acc5041c6cd3329c9a4cecdc51066599c773017b1f", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:145:68", "op": "g", "dong": 145, "sha256": "1a994532cdd22c5d3c4a6f566b0fde73a1ad2dc45a71c9976de4e9b7c975f7c2", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:146:55", "op": "g", "dong": 146, "sha256": "5388c4ef96bfa15150aa5c48e749474c1a89d1f74c50a78ecfa5fe80963669b1", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:146:72", "op": "g", "dong": 146, "sha256": "e8e0237c4da06dea6f621c7b47d6fd7b00822f5aa3e5f795d5d24279837cb49e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:146:92", "op": "g", "dong": 146, "sha256": "aac25fc0f8019b23039fa0a1b1443501072139d4fa46851fba5f2522125b9a26", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:147:18", "op": "g", "dong": 147, "sha256": "eaf32c795caa1ffb1a488ecc94d61a209ee1329f829622c91ac9e947251a717b", "rc": 0, "giet": ["a114_provenance_tu_khai_du"], "hong": []}
+{"id": "g:_kiem_tep:148:13", "op": "g", "dong": 148, "sha256": "6631adef182406c56558a5947ade7317466f3c95d12f1758477d3403df358584", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:149:18", "op": "g", "dong": 149, "sha256": "0302c0f325d305ca8a7e65930cdd4e6f9c6ab188b0ca2be3710402eb15b2a864", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "g:_kiem_tep:150:13", "op": "g", "dong": 150, "sha256": "0c9a08648d38d3e71efc253eead700411849a8c1369557a2427fedb0940b460d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:151:18", "op": "g", "dong": 151, "sha256": "68fe7eb953a7dc507ddf27793c692ff57e90cb945d5b3cd9ccd6fbf218ee5e7c", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "g:_kiem_tep:152:16", "op": "g", "dong": 152, "sha256": "9ba40f9ea457247ef7f8b81aa3d3655396d8c414e571514c4bf7c33403c5bc67", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:152:50", "op": "g", "dong": 152, "sha256": "a9700d46cf03f099626b0d114e996a45b24beaeb1a99121170f05ff54490aef9", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:153:25", "op": "g", "dong": 153, "sha256": "933445d644022d1c3e290d69f4328e8c4a7b3f4e8befe1dea53b39c49b07b535", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:156:18", "op": "g", "dong": 156, "sha256": "d33b91ed1bab020ae9972870c2822826b25d08aa16cd549fc065cf2115d1023b", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:156:31", "op": "g", "dong": 156, "sha256": "f71a0a615cb6a61a176b9371119c551c0cbeb2d36fa12a0e4acd80e035371d7e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:156:48", "op": "g", "dong": 156, "sha256": "963f41a87d377e4fc5df1ea14f3dd6a9969fe0b8285c894bf75e98142d5a7fb8", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:156:67", "op": "g", "dong": 156, "sha256": "ee282a7510e102da18fd61ad2a0726dc266b5d8351ec4be2d6356947a196d4f2", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:157:19", "op": "g", "dong": 157, "sha256": "492379a2d5d156b9d703d64f76c1fbe138471310d33cc73f4b6777aecd44ee42", "rc": 0, "giet": [], "hong": []}
+{"id": "g:_kiem_tep:157:34", "op": "g", "dong": 157, "sha256": "332a81ac7b8d958a2eeab5db6ddea0ef4e0f397bad1b252f2cb7c42861a02b5e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:157:56", "op": "g", "dong": 157, "sha256": "d1ff459cea8ba257e42b06c3fc0c3aeba2d81182f859ed07341f7b869de335ef", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:158:24", "op": "g", "dong": 158, "sha256": "ec1e19cd84a98011b9f86935afece7517086ac400375b1a0fe2660bdb243a4a3", "rc": 0, "giet": ["a106_danh_tinh_job"], "hong": []}
+{"id": "g:_kiem_tep:159:13", "op": "g", "dong": 159, "sha256": "355677152b0a1e2a89523b3f8cce895be693fa5658235c3b8f8fccb347aec73f", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:159:30", "op": "g", "dong": 159, "sha256": "339004f1007a064e8ec37dae991092862fc470b7166f2b38e91a7361f976f50a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:159:46", "op": "g", "dong": 159, "sha256": "42d877cb27fd1a11f40c9d4c4dc65673dc4d278c3ffb5166b7f86a9c7e11460a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:159:55", "op": "g", "dong": 159, "sha256": "8faa20f89068a434bfede740bd9e483915cf21a19e55d98e234e92835bd4e414", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:160:24", "op": "g", "dong": 160, "sha256": "27c91f3172f8a9b2a507a6a9a4bf3cc1526412333892b857ad7d8ecfeedcee1b", "rc": 0, "giet": ["a113_ket_luan"], "hong": []}
+{"id": "g:_kiem_tep:161:66", "op": "g", "dong": 161, "sha256": "98f1b92b26160f6d135b8a7bae83d9207b675c84cc32c7ebead641e6a2279dd2", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:161:82", "op": "g", "dong": 161, "sha256": "bd229f416765cd9310b4fc5041dfca7720b39e01927e8939a1a49753676ba5a1", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:162:24", "op": "g", "dong": 162, "sha256": "6a87df0ed7b1e48636d94ab25b251a040dcb74672e543a5ab62cec665d1f9c8b", "rc": 0, "giet": ["a105_bam_log"], "hong": []}
+{"id": "g:_kiem_tep:163:19", "op": "g", "dong": 163, "sha256": "997f74713c47f818cda6f75e2c8046614ca47c52378ef2a5a45a7dd9b12b4add", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:163:34", "op": "g", "dong": 163, "sha256": "2434d5c0c83d5b2ba3564a52df44d75bd32314e7b2f6406523e6cd57ddd0010f", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "g:_kiem_tep:164:14", "op": "g", "dong": 164, "sha256": "b908d725c6988c2da72ef7a4eae0e2be28e15c9c70f0f3a14cb4f276fb49a604", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:164:25", "op": "g", "dong": 164, "sha256": "a346a360a2c7fc860430b33d4bc13ba90985c95eca54d196d8c5461adac1bc99", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "g:_kiem_tep:164:48", "op": "g", "dong": 164, "sha256": "8d569dc886b55bd53aee427254089e2f41bab42abd7c89d15c01bf607344780e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:165:18", "op": "g", "dong": 165, "sha256": "27a2f4a6c6d88c689bfacec00815fe10cb024cc7ddc46fe3d0468f5a2190e198", "rc": 0, "giet": ["a111_skipped_theo_phien_ban"], "hong": []}
+{"id": "g:_kiem_tep:166:13", "op": "g", "dong": 166, "sha256": "8ae2225b2c93436ec28600f926bf5619c17282427cf46a3ba652c3137c1b36dc", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:166:30", "op": "g", "dong": 166, "sha256": "1ae03219bcfe5f7baeb1294d7e5c141ef32f6671b4623e79c28f71b284d02e67", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:166:52", "op": "g", "dong": 166, "sha256": "212e0c60d7dd324d4428234e8f3f5be2d39512a286d92fc41f5b831b263aa4ee", "rc": 0, "giet": [], "hong": []}
+{"id": "g:_kiem_tep:166:76", "op": "g", "dong": 166, "sha256": "19863a831d8e4fe2a6fcdb36fd8c9639aacc1d99c7c974cacc5b37e464238b22", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:167:104", "op": "g", "dong": 167, "sha256": "a48252771820ce560a4555813a5be5dce63fa06c00bbb2e2d4e978e7788f38a0", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:167:13", "op": "g", "dong": 167, "sha256": "6452a6c058edb41d8c7d9a0da1b0a72060826a8b232af209def43228be745f10", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:167:42", "op": "g", "dong": 167, "sha256": "9bec8da7224ac347b5e047fe3ae132a40be54281360e93d0b2468a2b6bcb68ef", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:167:71", "op": "g", "dong": 167, "sha256": "7cd55781c95e21ad4fa5e13ec11facc03b8901540654bdc254bdf8712fcd572a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:167:83", "op": "g", "dong": 167, "sha256": "3d6cd60163ed81d231c023e5f4b6510726f3adefaa88a1aca1434aa0002f41d7", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:168:38", "op": "g", "dong": 168, "sha256": "505f0a46104fedf66f818b4adae4b74d9838f4422e864ae643434f928e7dddfb", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:168:9", "op": "g", "dong": 168, "sha256": "ce8339a8e88d5a1e46ee8c0a93bb3b9bc2d8502b0efe82ef59916e3e86644a29", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:169:18", "op": "g", "dong": 169, "sha256": "832b5a5404ef1ee99254a7779085d3e8c1c1fc8fe57bcdc3b16526d93a8c6606", "rc": 0, "giet": ["a110_dong_tong"], "hong": []}
+{"id": "g:_kiem_tep:171:15", "op": "g", "dong": 171, "sha256": "39e30163f02c1bd752c63fe15c9dd3b52e812db7555f45c3fd55ce6ac46e01b6", "rc": 0, "giet": ["a105_bam_log"], "hong": []}
+{"id": "g:_kiem_tep:172:13", "op": "g", "dong": 172, "sha256": "1474abb3104fe4f5d44cbbc92cd7b2cc6759df95a85a7653d55ea37a016d194c", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:172:22", "op": "g", "dong": 172, "sha256": "c7eebecd8ccdfc2d1bb03e8bcd929ead7259716c44022c7e411f952fb2bfa3f7", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:172:42", "op": "g", "dong": 172, "sha256": "b1100f2fe3d86cfb7e50d20b38b7dcae132a09e39606d43ac78fa396390b2cd4", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:173:15", "op": "g", "dong": 173, "sha256": "3baa09b13432563e026426dd4e7c783a972faa9a249254ff96de4968713ce932", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:174:9", "op": "g", "dong": 174, "sha256": "2e542ba290d92462e08f282c07a11bb016881d7561b4948e551f08b28e9a45f3", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:175:15", "op": "g", "dong": 175, "sha256": "4a98681c8b9c967cbfc61892d46c6c57f2ddd218973f545b237c31bc4aa5bce8", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:175:32", "op": "g", "dong": 175, "sha256": "0eb04fc0f871674aff48ba3cdd3809b79768641aaec93671694dc85f834a0d78", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:176:13", "op": "g", "dong": 176, "sha256": "fbf264da494daef5944c478fc619d190329bccc376a697a3119f2b4f7734db31", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:176:32", "op": "g", "dong": 176, "sha256": "0ae2a789c353693f4b9e074d11d5776110e532d440d91aafbfff00bab8c41415", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:176:54", "op": "g", "dong": 176, "sha256": "992e88e213fb8024fdfb6b329985c14fda754bce87c318dc73d0e2d84641c5e6", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:176:63", "op": "g", "dong": 176, "sha256": "acc8e5fd0acba3f1f6a263963107129d91401a67178bea6ccffb0d63ea1a4c3c", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:_kiem_tep:177:15", "op": "g", "dong": 177, "sha256": "a58d47446216b64b374539b19b87dd1d7cf750b60120413cc834cf03df638f52", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "g:_kiem_tep:178:12", "op": "g", "dong": 178, "sha256": "61cf67f9eec63d9abaa9deafa143cb9dd8ed5c31ef10cb87deba1f782917e311", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "g:_tep_trong:226:37", "op": "g", "dong": 226, "sha256": "28b91fa7f33bf4fa2f10076846a485aaf5666d6df350de0f5870c35ab28be15c", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "g:_tep_trong:226:43", "op": "g", "dong": 226, "sha256": "4573e224e78e0387b81cb7cc50593016bf82d6981e103473ecac01c9a5b78565", "rc": 0, "giet": [], "hong": []}
+{"id": "g:chon_provenance:100:67", "op": "g", "dong": 100, "sha256": "7841c96b7df8121502e0521bb1fe5ead473471a4e4d29550136258f6e5afea1d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:102:26", "op": "g", "dong": 102, "sha256": "3f2ba5b7a905e308d9b482ae07009eef81701825f9c8b262b9fdd2eeb069e8a5", "rc": 0, "giet": ["a112_symlink"], "hong": []}
+{"id": "g:chon_provenance:104:53", "op": "g", "dong": 104, "sha256": "dd8f1a1fef99f81a5403f06e84fa68f346ac79c5953dd6778954f9d745682476", "rc": 0, "giet": [], "hong": []}
+{"id": "g:chon_provenance:105:50", "op": "g", "dong": 105, "sha256": "1837713d4e13bace420630197da27e33374da8c99631d199c15e6bf87bcef0cd", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:105:63", "op": "g", "dong": 105, "sha256": "fbedc8f8c9722b04f1c53209c9444f23c374f547bcf46fcf96ea9097a544e89a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:107:18", "op": "g", "dong": 107, "sha256": "abd8fa0ed83fa467f3a895bb87fce7c6b0c137e2960795205b325c755223b6a6", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:107:29", "op": "g", "dong": 107, "sha256": "69e3fe70cde67488d979a00cb608f8720123dffb15819ced024fc679c60cd5c6", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:107:56", "op": "g", "dong": 107, "sha256": "046df4c5a4c1055f26749c93eabdd708ed06e22213c5340658297bc78b4b7c97", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:108:53", "op": "g", "dong": 108, "sha256": "9188ce7d07aaeaa2e694242483222f21aabd77618e878224bf073eaa22f89dfe", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:108:74", "op": "g", "dong": 108, "sha256": "b13fd4919020b3734116de8accfddfddf16187b7daf95bbcaf129fccd67c9037", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:109:107", "op": "g", "dong": 109, "sha256": "5cf6dbdd238f55beaef7edce89b6c06af436735505b04badb6dfaa1dbf0d364d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:109:37", "op": "g", "dong": 109, "sha256": "24cfef4c92dba35eb1a31c4059491cada1db4381f316a355211871a9916a33a6", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:109:67", "op": "g", "dong": 109, "sha256": "22ee6a383c6cede36bee275cdddecdd7e3039a293ec97edda40ae51cb49d1705", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:112:40", "op": "g", "dong": 112, "sha256": "c6c3a3272ccc60cc7157226e82d6a85186b8749a673570736c0d7863067b98e0", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:chon_provenance:112:72", "op": "g", "dong": 112, "sha256": "570eb1450dd5368569e0961ca8c8d4f1241a6f42c17b97717560740f7ed9d4ed", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "g:chon_provenance:97:23", "op": "g", "dong": 97, "sha256": "512ad02f77d441c111541d962db44bbfffeff2587a1cc1ed45592f006655baa3", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "g:chon_provenance:97:70", "op": "g", "dong": 97, "sha256": "79ca271cef4a3406079bf741800d20c21f8a1c7fdac927f670e5132564503935", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "g:chon_provenance:99:15", "op": "g", "dong": 99, "sha256": "f151fc8ffe1b78ed54141ee61492a10745c94cd9908371dd1c02cb9c8801dd2d", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "g:doc_danh_gia:49:26", "op": "g", "dong": 49, "sha256": "b72c206b17e097da4dc924517e1226114bc488baa2953bb6984fb4c7157aa323", "rc": 0, "giet": [], "hong": []}
+{"id": "g:doc_danh_gia:51:22", "op": "g", "dong": 51, "sha256": "69786d8d6c506a9d276fc499de48d498b31c8b831056b82b5b6db1c29c4fd987", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:doc_danh_gia:52:37", "op": "g", "dong": 52, "sha256": "a7fdf9fbffe683131e5f588fe9d080fc211e357408965a2e1d6329cbeeb070b6", "rc": 0, "giet": ["a102_ca_kho_tai_base"], "hong": []}
+{"id": "g:doc_danh_gia:52:59", "op": "g", "dong": 52, "sha256": "0d4c0325753fd2bb11458306cd7981da39a48e28961becde5f9f4a4bfd12f4f6", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:53:22", "op": "g", "dong": 53, "sha256": "d0b176628520b391f58e173749199a9dbde030134e1b23b0edd45d93f82426eb", "rc": 0, "giet": ["a102_ca_kho_tai_base"], "hong": []}
+{"id": "g:doc_danh_gia:54:30", "op": "g", "dong": 54, "sha256": "483d4c11dfda60734006e2746524efa642eabb09deffc21161fdcf8579b99985", "rc": 0, "giet": ["a102_ca_kho_tai_base"], "hong": []}
+{"id": "g:doc_danh_gia:55:26", "op": "g", "dong": 55, "sha256": "2c7f43f2dec890c5c2bfd9dcfaded4f0cc7956879024dcb5249e8524ad1b2b63", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:doc_danh_gia:57:11", "op": "g", "dong": 57, "sha256": "19fb60d25a26846b216ed1c11acfb3d976db4024c718d87496df2a8109dd8bfd", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:doc_danh_gia:58:22", "op": "g", "dong": 58, "sha256": "ee52f8f29567136345a5c60d49e4aa0db02465131f14a5e011da89f231591bed", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:doc_danh_gia:60:22", "op": "g", "dong": 60, "sha256": "1d8bfb088d38456bf7f06c24b99c0b34e7fa38d8c7637da02f49de64f14bfd91", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:doc_danh_gia:61:10", "op": "g", "dong": 61, "sha256": "594bfe6b88b08b4344bc2c6a29f163e625271ab368bcc450e404294100f017c8", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:61:105", "op": "g", "dong": 61, "sha256": "5ad39c729772347ed2e3908c24392fd35f900ca18db3efd207d4cf4d5e8b8c03", "rc": 0, "giet": [], "hong": []}
+{"id": "g:doc_danh_gia:61:28", "op": "g", "dong": 61, "sha256": "17ecc933e181af0ed10fa6b3d630f7db606c680c4c0a1e9f2a3647487ef12f9d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:61:50", "op": "g", "dong": 61, "sha256": "36d24f49a70dacc6df1aba363e1669f8b286fc89f7876a5f0b37f2f14202163f", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:61:64", "op": "g", "dong": 61, "sha256": "df3abb18e492334e19f5a21c9fc142fcb97c2c9c5da911bf59aabbc99de9f9fa", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:61:81", "op": "g", "dong": 61, "sha256": "a52c417b6296ffe8483d33f946d7ee878c72842cf4e24dc1f07e9efc3bdd2b6e", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:61:93", "op": "g", "dong": 61, "sha256": "658a155c966d8aca1c0a586736c7a9baa0d3204b5f42050a8298b3404df5c7c1", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:67:31", "op": "g", "dong": 67, "sha256": "c1cb3570bdc9fad16325b1c68ac242eeb4e44d1a4d44953e80ca3cde4484a251", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:67:58", "op": "g", "dong": 67, "sha256": "8a1c7b6631028f4fa347d0a7e20bbb28fe86a47baf1c2188336b80f826457e1c", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:68:26", "op": "g", "dong": 68, "sha256": "3f92cc1725f0d4b7875fb874797c72fc9bd940e0cfb01aac79a32bb13a62ca95", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:doc_danh_gia:69:100", "op": "g", "dong": 69, "sha256": "ef3c9576ef608d8ee4df19045111c61a582ab196fb7bc4fb2c19170c9a8b805c", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:69:15", "op": "g", "dong": 69, "sha256": "087877fc32622acba65b5464096192a17ddc25a3e3b2e0a76a5f327439e7cb1d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:69:37", "op": "g", "dong": 69, "sha256": "246fe9986994574b6f7fa19da02afffc594a0c187c980937b759c30327019451", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:69:51", "op": "g", "dong": 69, "sha256": "b9c69c72924cae15db92d2918e14e4fb5ab796a9d140c7e0e6bdbce7d286f82d", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:69:67", "op": "g", "dong": 69, "sha256": "030e005b3e4ae8fda843da4f35ba9b145d63fe0896e1eb8979e550c3ba02ab07", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:69:87", "op": "g", "dong": 69, "sha256": "5ab4992d470d636ece109799e92fc0a24fb85aec976ef8d84aff53884a448d21", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:71:19", "op": "g", "dong": 71, "sha256": "cf3a01428116f6a12deb5fdbcd9126f13a279d2ff713a967db7469763fc06a7f", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:doc_danh_gia:71:49", "op": "g", "dong": 71, "sha256": "51990e74b14b7646f1d112d9e40ca5b398e257df755b3e674b953c053d6f25b7", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:71:76", "op": "g", "dong": 71, "sha256": "f029d4e57b4443aada789e225f0bcde9359e6ba57a7602bedb7598a98da83e22", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:72:15", "op": "g", "dong": 72, "sha256": "67d80cc79c541a8568d12d164920c71f3e58c4304dae424b6672ab87a2ea464b", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:72:37", "op": "g", "dong": 72, "sha256": "c42c474d132b829ab3fd634d77e117d70795e83a168fb83bb266c3343d63326c", "rc": 0, "giet": [], "hong": []}
+{"id": "g:doc_danh_gia:72:51", "op": "g", "dong": 72, "sha256": "d32d2bfcdd47b10ffa9c8465f8545c8e4ac8a54f77440b6949c58d961c7f00b5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:72:59", "op": "g", "dong": 72, "sha256": "e31b22943d3845be7e8d35acf4730d6e445051d21436f69358f54af9e5280642", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "g:doc_danh_gia:72:91", "op": "g", "dong": 72, "sha256": "5c60e138ecb97c7ca91a6f80a621bf05fd49d21aa1fe5597b3d1d05d8501b30c", "rc": 0, "giet": [], "hong": []}
+{"id": "g:doc_danh_gia:74:23", "op": "g", "dong": 74, "sha256": "1fc757a9b4a684c69a9cca34e6e1bdcfd29355c33f775e0b7ae70044fb058eda", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "g:doc_danh_gia:76:22", "op": "g", "dong": 76, "sha256": "27c4b0fbe09ff8652d9a469f5795471524bcab4dc52cfbf5e3bd44fcf6e35935", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:doc_danh_gia:78:18", "op": "g", "dong": 78, "sha256": "cdccf4673cd97dcdb6594f49980998786a21254b3fbbb91f172dc79dba7f4488", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:doc_danh_gia:80:18", "op": "g", "dong": 80, "sha256": "4eb636c3d4750d8f62d30117a2b522d778b1ac8731f9d35e9743e3cea372f5f7", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "g:kiem_ho_so:272:31", "op": "g", "dong": 272, "sha256": "bcfd98720416083ceb6ff1a7bf0b788ce39600323911bfd294a42b153319beff", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "g:kiem_ho_so:274:18", "op": "g", "dong": 274, "sha256": "7a947e23cf398df471e75cb4cfb5156011f5b1305a180b1a7c54b93afa5a38d4", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "g:kiem_ho_so:274:34", "op": "g", "dong": 274, "sha256": "51676306ba24ad8b9e5cf8107881ee0b9f72520e6e0d6f66daf3b71e57b23778", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "g:kiem_ho_so:274:45", "op": "g", "dong": 274, "sha256": "aea186408b356e4aa7ad5fbd91341d1ba8eaa6f7b4a7f35019cb443d4542c413", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "g:kiem_ho_so:277:17", "op": "g", "dong": 277, "sha256": "d5e8c941b031edc05a36c31868f27e4d987955272a9e492c38f56eab47fd41c0", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_ho_so:278:28", "op": "g", "dong": 278, "sha256": "d4d2a5a1e4062dfb8a6a6936de5d36761c589267210b1752db3707f6c64f93c7", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_ho_so:281:22", "op": "g", "dong": 281, "sha256": "8fbd655301624f0f48ba366a27cb1f1b6a2940c78de3fd508ccf411b4374cc83", "rc": 0, "giet": [], "hong": []}
+{"id": "g:kiem_ho_so:281:32", "op": "g", "dong": 281, "sha256": "08a648db3c86bdf4c2c63a7710cc0db36b19025735452e839c96040c5502cb98", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "g:kiem_ho_so:282:35", "op": "g", "dong": 282, "sha256": "cd3f8461215ad0356276a6c62fda519cf43bcd9799ccefe7346c845464e11e83", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "g:kiem_ho_so:283:18", "op": "g", "dong": 283, "sha256": "190f8135e081c4b4aac1ddd1b887bdfd9663a8f1ef1f57513963c3370d4b4ff9", "rc": 0, "giet": ["a208_failed_nhat_quan"], "hong": []}
+{"id": "g:kiem_ho_so:283:36", "op": "g", "dong": 283, "sha256": "f61b8231cc76389eb632c2f5d9fae25ef59d18d5dc1dc113ef74bf7f57a9e608", "rc": 0, "giet": ["a208_failed_nhat_quan"], "hong": []}
+{"id": "g:kiem_ho_so:283:50", "op": "g", "dong": 283, "sha256": "b803f4ef6da38587f0081b371e0b625d9aea6f04d48f55cd6b75464204daab73", "rc": 0, "giet": ["a205_duong_khop"], "hong": []}
+{"id": "g:kiem_ho_so:286:39", "op": "g", "dong": 286, "sha256": "f28a3ba895921b3b54ca9fc66a2c266755abdc1f34b3a9d02ee9abfe9949ad88", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "g:kiem_ho_so:290:39", "op": "g", "dong": 290, "sha256": "5809715fbe591cd6edf66834dcea8d4682ab2870837f66904959de1f96dec62e", "rc": 0, "giet": ["a206_duong_lech"], "hong": []}
+{"id": "g:kiem_ho_so:290:61", "op": "g", "dong": 290, "sha256": "a1fb3850267944a992da88e2c63b9ff52ae5f67ffd7ccb182d53ccaf55928ce7", "rc": 0, "giet": ["a207_hai_tep"], "hong": []}
+{"id": "g:kiem_ho_so:290:65", "op": "g", "dong": 290, "sha256": "401020188a84d63e01f9c40f8ef8dc8d4ce120c8367119ee6cf1ac1d4518439c", "rc": 0, "giet": ["a206_duong_lech"], "hong": []}
+{"id": "g:kiem_ho_so:290:70", "op": "g", "dong": 290, "sha256": "33b9852d873f0f7f727813462949d74a7e14d11a1aba49031f0958dd7d070598", "rc": 0, "giet": ["a206_duong_lech"], "hong": []}
+{"id": "g:kiem_ho_so:290:72", "op": "g", "dong": 290, "sha256": "92c7780ab26f11f236917a808168cdb9b57405deedf86a861acd6ed40ce48af2", "rc": 0, "giet": [], "hong": []}
+{"id": "g:kiem_ho_so:290:88", "op": "g", "dong": 290, "sha256": "34ee5cf121e6c28c90005a92178def9b1030b1d7801b5c85f243fe10d6bd4d69", "rc": 0, "giet": ["a206_duong_lech"], "hong": []}
+{"id": "g:kiem_ho_so:291:17", "op": "g", "dong": 291, "sha256": "adc5dd3265258094f9292e54a4ac75eb7373001f1bbbf8230b2a40a888a4836f", "rc": 0, "giet": ["a216_hop_le_theo_token"], "hong": []}
+{"id": "g:kiem_ho_so:294:18", "op": "g", "dong": 294, "sha256": "1fd63b4bf3d56f107fbd91aa41b47f610f37c2de226ca1269b7213ac884253e7", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "g:kiem_mien:238:16", "op": "g", "dong": 238, "sha256": "eb33ded0b7289379c3904bf2ab794303e147e92d0afcda290c25eaf248463eb5", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:240:37", "op": "g", "dong": 240, "sha256": "86f374f69ee85efdbb9a8a6764c40247454f30fde4875ae4343a1e7747508582", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:240:69", "op": "g", "dong": 240, "sha256": "fa23b9bff11c97de44528f81196c42f4bc10d751c55262790268094f47473c40", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:243:16", "op": "g", "dong": 243, "sha256": "6a5b9ee05ea6ed156193d9c41ae76ead9550f559a15229a9bc58498d2d9dfe3a", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:245:49", "op": "g", "dong": 245, "sha256": "48abf9a1a3cfc9edc39afe2ffcb82c1b884ab29fa64177233621b883ed519725", "rc": 0, "giet": [], "hong": []}
+{"id": "g:kiem_mien:247:16", "op": "g", "dong": 247, "sha256": "e7dfb3a8361b400737c6c565fa5752bc00e16e0ad62a0562fcf1c5055c9f5662", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:248:40", "op": "g", "dong": 248, "sha256": "0370fa17ee62b0d2206f75ac62fd4628b02b62a6e6d04b923c14fb99225a0a53", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:249:16", "op": "g", "dong": 249, "sha256": "4670ee6c5602c7df558f745da27dcc6976e82e2975d8c5738dacd3286196c7c3", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:250:117", "op": "g", "dong": 250, "sha256": "f346f2c271c8acedb15d431b25608902edd56bde1f9e3dd0eeb06fab3147ea94", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:250:29", "op": "g", "dong": 250, "sha256": "361863b369c3a53971835cc84b97d3a9037edd75270462a74f3ef150c57a1756", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:250:50", "op": "g", "dong": 250, "sha256": "55bb474df2608f17d9b7e008baef465394e955d66269bdf76b11d907da3023e9", "rc": 0, "giet": [], "hong": ["HONG a209_mien HONG:a209_mien:KeyError: 'user~'"]}
+{"id": "g:kiem_mien:250:62", "op": "g", "dong": 250, "sha256": "e327a748897e9af744adf23d60a2a7ef86dc526ef1cbd2d37af15646f6fca285", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:250:92", "op": "g", "dong": 250, "sha256": "0328c9dffab38184a1fe3b0790f318ea49a7365751c2cde6efc8544a0227ac44", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:251:16", "op": "g", "dong": 251, "sha256": "3ef59608aa115ed7dddcaed951609225723f0dbb1d3fe6213a8ce22e05354613", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:252:33", "op": "g", "dong": 252, "sha256": "ab3bcbaf81dc715caa1ddbb3c3e4c6024b1f1570229332a88dd05ac7b8165a38", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:254:16", "op": "g", "dong": 254, "sha256": "62763676c2c8905ad0f0b490208643f8c4715f2586126fa6644e10f5ef4dbac8", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:259:16", "op": "g", "dong": 259, "sha256": "dd0b6fa2ced9527cd03b02e748e7c610dc66ed39f986c7c5989962400f355727", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:260:41", "op": "g", "dong": 260, "sha256": "700571d54c5b08d6974451ca25e3bc1a2ee0af283a81709c500ec384da055dc1", "rc": 0, "giet": [], "hong": []}
+{"id": "g:kiem_mien:260:7", "op": "g", "dong": 260, "sha256": "42f0980f7b1aed7551a39c4c689eaf8a5d10610e29d2fb797d281fe2d23ae056", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:261:16", "op": "g", "dong": 261, "sha256": "85baa65f451aa2399c8261b4a1dab0ffb364ea4d9d0156223381df2521927fc4", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_mien:263:16", "op": "g", "dong": 263, "sha256": "6e971257ff6877266c862cb2b265e365b83c203aafdf77acfef2e5e33c2aad98", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "g:kiem_tep:121:15", "op": "g", "dong": 121, "sha256": "b1b6c45c3fef37191652e9172c594c1c7e5ac700e3497b4a084d340d61b8cb56", "rc": 0, "giet": ["a117_loi_duyet_va_job_trung"], "hong": []}
+{"id": "g:la_landed:215:7", "op": "g", "dong": 215, "sha256": "01198649fae57d9acd186e78f058dfb67833356675d873ce986feb49d2e8b04a", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "g:la_landed:216:20", "op": "g", "dong": 216, "sha256": "13db65cbc7759513affa3beb532aa77142297625f45809a2d64e1b26a815d760", "rc": 0, "giet": [], "hong": ["HONG a211_ho_so_1127 HONG:a211_ho_so_1127:KeyError: 'trang_thai_packet~'", "HONG a212_landed_khong_loi_khai HONG:a212_landed_khong_loi_khai:KeyError: 'trang_thai_packet~'", "HONG a213_la_landed_khop_kiem_ho_so_land HONG:a213_la_landed_khop_kiem_ho_so_land:KeyError: 'trang_thai_packet~'"]}
+{"id": "g:la_landed:216:45", "op": "g", "dong": 216, "sha256": "683eb8e0fa7d9febf02fb348cb169fc36f69c432f4913637df66ffe24ef01b58", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "g:la_landed:216:77", "op": "g", "dong": 216, "sha256": "6534ac4e412f54f3554f8182ea05ba09d92a1d4edb71e25f7e91f9a44bfe6561", "rc": 0, "giet": [], "hong": ["HONG a211_ho_so_1127 HONG:a211_ho_so_1127:KeyError: 'trang_thai_packet~'", "HONG a212_landed_khong_loi_khai HONG:a212_landed_khong_loi_khai:KeyError: 'trang_thai_packet~'", "HONG a213_la_landed_khop_kiem_ho_so_land HONG:a213_la_landed_khop_kiem_ho_so_land:KeyError: 'trang_thai_packet~'"]}
+{"id": "g:la_landed:218:24", "op": "g", "dong": 218, "sha256": "821c88fae55aad76b1955ee5267322ed3831f17ecd7689560819e7b864dd76c0", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "g:la_landed:219:113", "op": "g", "dong": 219, "sha256": "3f62ca8cc1993e05f83dd598c600db4d7010b8c1a4a03f4cafdb81400314b96e", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "g:loi_khai:185:24", "op": "g", "dong": 185, "sha256": "f69fec6c5a51f369c639594fdf8a348fd808488bfdfe19a6f41ca43f846e23f6", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "g:loi_khai:189:27", "op": "g", "dong": 189, "sha256": "b5818de4094eb3476f654ccc2f5d2461b2caea095c68b5b60ad65ae6b8bdc5e8", "rc": 0, "giet": [], "hong": []}
+{"id": "g:loi_khai:192:21", "op": "g", "dong": 192, "sha256": "8baf45e4160eb35f115824581f622951e58a287e8ecf618592284ea2d4f22eb4", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "g:loi_khai:192:66", "op": "g", "dong": 192, "sha256": "64c94148a1a0a475b6d38911bd74cd5e9ff51c7705bc101806c390987381fe30", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "g:loi_khai:192:70", "op": "g", "dong": 192, "sha256": "e5168edd997f05d96cb8545fabc2f79c6b30ca912bd8b4c2045e8e67d12ef181", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "g:loi_khai:195:15", "op": "g", "dong": 195, "sha256": "4c6634218494f97f59d99403e2dc5602e882900e24273e146a4d4eda351dfe0c", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "g:main:299:45", "op": "g", "dong": 299, "sha256": "2ee8320bedeba71538fb1f43f5a335adeae6709a7bbb80e5a18427226c651c77", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:300:32", "op": "g", "dong": 300, "sha256": "915288c0ffa767c6ddf5bcb0a7648846b67e57e3788c27b58473efd5bfb2b138", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "g:main:301:23", "op": "g", "dong": 301, "sha256": "3643a26bb0ee680b84bda9dcfb57edba60ecc4830a6d4131520bca699f8df426", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "g:main:302:20", "op": "g", "dong": 302, "sha256": "44bd213821b9180583c3e21387f6acf3604f738fbf3d017d8b8c546aa7196fab", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "g:main:303:20", "op": "g", "dong": 303, "sha256": "8f6c2c8ac7e7eeb1b6384a82e8d24e949e8d7d74399b0d598b39538f2fc33bd7", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "g:main:304:18", "op": "g", "dong": 304, "sha256": "cb86d9698dd4e0b264b45ec3037b60c0009153d80df43d12766108ada0337c73", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "g:main:304:45", "op": "g", "dong": 304, "sha256": "ec53fcb41d3de4cda41a233fad48b20a0a66234994fbe892b4c1fd6fb5c08a78", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "g:main:304:60", "op": "g", "dong": 304, "sha256": "7dc47b8546d8c58f0bc966b209b5ec9fc95b81b5423434b9d0982d5288f7f697", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "g:main:309:17", "op": "g", "dong": 309, "sha256": "2fd5e493036f87512528586ee454331d58f7b4637382b04726fb97fcb23ef0be", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "g:main:315:18", "op": "g", "dong": 315, "sha256": "f939d28fd5f0751fe9f56a87ed1b8190bc0a092945316b22c5a989b53b0e1a98", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:318:20", "op": "g", "dong": 318, "sha256": "7ded0111cdc2d53f3729d857ba5628387744212430ffea36b339ee0f04dd6458", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "g:main:318:28", "op": "g", "dong": 318, "sha256": "062a04fe2b8bbcbe6ea24055a646390ff003bf67de1576659eb849d5ecf5fe08", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "g:main:318:30", "op": "g", "dong": 318, "sha256": "0e58eae13f16cb72c55174fd2c29b53ee309fd3bd19b06536650b622f4f5df0f", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:318:46", "op": "g", "dong": 318, "sha256": "f658aa65f914fdbea11bfd3065f92ff6a18e52e0660ea25ab701855b28e1007a", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "g:main:318:50", "op": "g", "dong": 318, "sha256": "61977110d7f18614ea373853b15823e0a587ee942842f80cdcb8902cfc401066", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:319:16", "op": "g", "dong": 319, "sha256": "48c0b129d8097efd5ce026edf1a62581ada36c80caf98cbd530a8e5f9cca4d7b", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "g:main:319:29", "op": "g", "dong": 319, "sha256": "2387f7f167187aeb8f053b4011ae4172c6df0a84809a3ec4bfbfab0af6d02fe7", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "g:main:323:28", "op": "g", "dong": 323, "sha256": "d089769dbeb20dd2fa346a8502e4f39ecf5c583db790ac1acb3d2cfd02f22b58", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "g:main:323:72", "op": "g", "dong": 323, "sha256": "1646f21731dbb071e7821533f5822b1a19d4c346187dad0d68ffdf244f778a05", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "g:main:325:66", "op": "g", "dong": 325, "sha256": "792926f002764a684b832437d755a10ccc2fc5be4d0cb821959923072c51f777", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:325:96", "op": "g", "dong": 325, "sha256": "7c9862018f734f595b2dcfa15663752461b59c5f15d093adfcda9542ffc72946", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "g:main:327:20", "op": "g", "dong": 327, "sha256": "e5aa1c51c0e6d355e3f319d025e1ceed508cf6933a767a3049d41a90e97a6402", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:327:41", "op": "g", "dong": 327, "sha256": "ea33dea781d21c6e5f0f4aa4e45cd24f28e26ea16c02ca303bb9460d62e2f25d", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:327:85", "op": "g", "dong": 327, "sha256": "962d6e8807419d6d3accd2c406ba5138d2ad8e928ab4a4943c16509cb9f5e74e", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:329:100", "op": "g", "dong": 329, "sha256": "7d6edb727b86fbaf49dae18558e2f7a0aa45a2f6d2f7a5c8456f5407839fd58b", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:329:24", "op": "g", "dong": 329, "sha256": "b53e794ea1c5ca83fc375182f7114bb896aafeeb8b059550d64766f1fe823d70", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:329:36", "op": "g", "dong": 329, "sha256": "97cffbd231b448615a9d5dc7d4d6fd1af3dafea568e543e507cf2539cd943287", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:329:40", "op": "g", "dong": 329, "sha256": "5041889f687e4e4507ef0c5002a83c9687357ecf3ca5d69dee97f92f2338dd54", "rc": 0, "giet": [], "hong": []}
+{"id": "g:main:329:62", "op": "g", "dong": 329, "sha256": "5c297af098973d8bda0f7f7263e745125dc1096b9c0eab9f9eed0e7e981551dd", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "g:main:329:78", "op": "g", "dong": 329, "sha256": "5efca0dd240308567253e5831421be5cc66c81ef8b9b07f386f5089de13e8304", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "g:main:329:84", "op": "g", "dong": 329, "sha256": "532e815b167fbdf73abf3555af434d44504a3d5ff5b33217fb8c05a690f5c811", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "g:main:329:89", "op": "g", "dong": 329, "sha256": "df17180aa2e0f50e1b3ddc9fc6382cf195f087d0da6215f22136b4caa40c6b5b", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "h1:BO_SINH:0", "op": "h1", "dong": 26, "sha256": "15c28f6bfae616cf3e94fec5c7573c67b8cd2cba54d620e1e7759c8a4bfb10a8", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "h1:BO_SINH:1", "op": "h1", "dong": 26, "sha256": "4b64379b49bfe84b7db855f0229df48a0f349e67c12b542bde19be0cc7c4da32", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "h1:BO_SINH:2", "op": "h1", "dong": 26, "sha256": "29101fa01fe98d10b5ae0ba4338f42377e6db53b73f373d0ffbd6396a4bfeb90", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "h1:CHECK_BAT_BUOC_TEN:0", "op": "h1", "dong": 29, "sha256": "b23f3bff9b1e5793e6ea63b1b0585d9773d7c432258dca8b94f68d0b6687f5dd", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "h1:CHECK_BAT_BUOC_TEN:1", "op": "h1", "dong": 29, "sha256": "54c8ce52dbfe28099b322011d9ccb7f04a4e3cbd6e2092126d608a6fdb6fa869", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "h1:CHECK_BAT_BUOC_TEN:2", "op": "h1", "dong": 29, "sha256": "f5dd411930f2b06e081af177c1f9260cc23d317edddf44720b1985878aa4e3dc", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "h1:CHECK_BAT_BUOC_TEN:3", "op": "h1", "dong": 29, "sha256": "a74e3eee93796c2ee16ad611b176b716a80c981070d8b94236729e0fb467b12a", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "h1:CHECK_BAT_BUOC_TEN:4", "op": "h1", "dong": 29, "sha256": "cace2d80b821ecee11915f8c1628faa432a15d11062c39c2e632b67bfacab299", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "h1:PHI_LOI_KHAI:0", "op": "h1", "dong": 36, "sha256": "2401781e5c9f2d6911a66bb50f18f392eec3faac68819c3f608c69e16a906b3d", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "h1:PHI_LOI_KHAI:1", "op": "h1", "dong": 36, "sha256": "9fcbec9143a7d7d20c2d1fd8c8a0a50facbffedc8f4f656d3075f17d027b5f19", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "h1:PHI_LOI_KHAI:2", "op": "h1", "dong": 36, "sha256": "e18dc4bdab02f239d74cd91d19270fd470b2b96d62d5580ec3863ac56e5bbc5d", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "h1:TOKEN:0", "op": "h1", "dong": 37, "sha256": "d567fc5fa1d779ec6a55ff505a5dce9bf9d541c4bac5930efb09bb1f2e0d1f2d", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "h1:TOKEN:1", "op": "h1", "dong": 37, "sha256": "d236d1182b212fb64aff108a0a918b9f9bcfb35dc1ac5ffe8200ec0a9b7ca242", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "h1:TOKEN:2", "op": "h1", "dong": 37, "sha256": "dde9aeb8e38af697324d134761ed133078f3a1b61040a1086f4aea55dacd7cc1", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "h1:TOKEN:3", "op": "h1", "dong": 37, "sha256": "bd8297dba01ddbbac618cc3832d8e0abe583efffef76eb6ba87a4420416607c8", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "h1:TOKEN:4", "op": "h1", "dong": 37, "sha256": "6c03ce915a617dc0254ee9f229f4932236059a78abf1ada208dc9f2ad67f4e6d", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "h1:TOKEN:5", "op": "h1", "dong": 37, "sha256": "b2a0ef64a5708e246d4f8976e91f355de0e63e96269f1ff9bf12f3b32f5ae993", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "h1:TOKEN:6", "op": "h1", "dong": 37, "sha256": "c61fbf177a00ae40d7d4c73e2bbba11e2e5ff3d2b38a832b232d163b9532d434", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "h2:BO_SINH", "op": "h2", "dong": 26, "sha256": "1352ab4634d4df0f79f2bf250521099fd9d4ef9caf18c113b1c1e079e28d8ce9", "rc": 0, "giet": [], "hong": []}
+{"id": "h2:CHECK_BAT_BUOC_TEN", "op": "h2", "dong": 29, "sha256": "e0de27c058bceb3100c757d94d35aeb4bd11034e5af581c131218518069d1eac", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "h2:PHI_LOI_KHAI", "op": "h2", "dong": 36, "sha256": "8b0cdda498d14be513d7f7aea236089a84d64d952476c003c8acd5f1199bd272", "rc": 0, "giet": [], "hong": []}
+{"id": "h2:TOKEN", "op": "h2", "dong": 37, "sha256": "8123b40f0a06fc8b10d6e229adc9508f2d134ecdbce09adf8b993c518bf126ce", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_DAU:lop@53 bo '0-9'", "op": "i1", "dong": 31, "sha256": "8fbc7e78946e4655c2411bdcf6fb65377c6abe750eee484a651aa713d045abe3", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i1:RE_DAU:lop@53 bo 'a-f'", "op": "i1", "dong": 31, "sha256": "8391a6436e936c278ae4824839081c040b21614ec0502566d6bfeb9b4d3bb231", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i1:RE_DAU:lop@99 bo '0-9'", "op": "i1", "dong": 31, "sha256": "f9a536f3291c7b9a6a7a292a4e04b1d53bf0925930d7cac67c6c882963c59c83", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i1:RE_DAU:lop@99 bo 'a-f'", "op": "i1", "dong": 31, "sha256": "aa256c7f08394cdf28f07be260809890adce762b57f2dd8966cea8d84ff307b5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i1:RE_JOB:lop@19 bo '\\\\]'", "op": "i1", "dong": 32, "sha256": "0dead645b16fe80d87366fc2c874c017d45f85faba78730079f44ffb7fd3d5e7", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i1:RE_JOB:lop@19 bo '^'", "op": "i1", "dong": 32, "sha256": "2706363881e532357d018f7ad600140eaced70560ec977cba246443202fa4247", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i1:RE_JOB:lop@58 bo '0-9'", "op": "i1", "dong": 32, "sha256": "f7ad0701d6cfe3e25dda521d6be29f148e74197ff9e3f08f78d593a0ca8388c4", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i1:RE_JOB:lop@58 bo 'a-f'", "op": "i1", "dong": 32, "sha256": "fffb82b1b6621be5a3296fd807790d5a61604d8720963287b1904450e18afb7f", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i1:RE_MIEN:lop@19 bo '0-9'", "op": "i1", "dong": 42, "sha256": "f010d9c6d17244c1f7b0900335758c6ac293497bc35ba36e9e728de7c61b3ee5", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "i1:RE_MIEN:lop@19 bo 'a-f'", "op": "i1", "dong": 42, "sha256": "12bc9871ce64c58a89b7b8764d144dc693bae90f21d7bc9487485566ee3837d9", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "i1:RE_MIEN:lop@37 bo ','", "op": "i1", "dong": 42, "sha256": "c5f7fe68bfeff59b4929f8fef5af2eab294f21689c1d5910a794dd2357277e4d", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_MIEN:lop@37 bo '-'", "op": "i1", "dong": 42, "sha256": "0b3f683593be942d7bd5548e17cf2efc3305031011fa98d1941487e04a924fab", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "i1:RE_MIEN:lop@37 bo '.'", "op": "i1", "dong": 42, "sha256": "3be2e83ae0a394d72af525b1b7fc168fdf23526e8c8497b7709290fba7708998", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_MIEN:lop@37 bo '0-9'", "op": "i1", "dong": 42, "sha256": "44cb75ac89f8fb278f743b9dc6cdf97cf27ce982a1b1369ca3ca6e7a1a885745", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_MIEN:lop@37 bo 'a-z'", "op": "i1", "dong": 42, "sha256": "b6e9b79bdf6880ad595fe3f02089b8b0cdf1675933170fb7907bfbe7ee6e3257", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@20 bo '-'", "op": "i1", "dong": 39, "sha256": "133429603a5ae4647f116837204c874a7aeebc27840ad0cdfbcee7a6fbf307ef", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@20 bo '.'", "op": "i1", "dong": 39, "sha256": "53f4cb0637b79ec1298d93bc493ede42ee8b9685342b6194daae3c90546ce11e", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@20 bo '/'", "op": "i1", "dong": 39, "sha256": "3f4ec550fe11b9f62ef14083d69630fe112a377757291c5f68623e78e8cae593", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@20 bo '0-9'", "op": "i1", "dong": 39, "sha256": "b84e57c84d3e5e2ea713933273296fc97c268258684b2f76d0b358be4bd24c38", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@20 bo 'A-Z'", "op": "i1", "dong": 39, "sha256": "fa9dfd92f1d7cb1c86518fc6d00697fa75ba6f4a467033047ad1b37b7d994c13", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@20 bo '_'", "op": "i1", "dong": 39, "sha256": "1e63de62888196275ce824689409a73c9588b158a9e244d2a538545c6307bd20", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@20 bo 'a-z'", "op": "i1", "dong": 39, "sha256": "f96536751daa2776087ea1ac05572a91984582f866b6a96904c224b80e3d7d50", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@4 bo '-'", "op": "i1", "dong": 39, "sha256": "19538376ac077361373a47d94297b3b4ebffe8a46ad93cb7e7d5a7148cf2f6b6", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@4 bo '.'", "op": "i1", "dong": 39, "sha256": "c278c421af3c39a0b34c72a4b3107452717c720594efba1af36510acc0229d02", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@4 bo '/'", "op": "i1", "dong": 39, "sha256": "bc6212329f8f519f6a6430e0dec80fb6def23c6195bdbfdea49f05e89e6a8505", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@4 bo '0-9'", "op": "i1", "dong": 39, "sha256": "04662c1d4de4ac416f87b96b5ac3f7fcdd05973baf5204264a18b9b450252f56", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@4 bo 'A-Z'", "op": "i1", "dong": 39, "sha256": "65468f7bae15fc81889bdbfefcde276a2ab88a6ca19d1d177d0afbbd2d8554e1", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@4 bo '_'", "op": "i1", "dong": 39, "sha256": "e7a85057c8b4df295e1e73ed621d389c22a6cadd122dc8955d907ea67a8b3d3f", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TEP_DG:lop@4 bo 'a-z'", "op": "i1", "dong": 39, "sha256": "1dd840b8e240269dc20b92991cc9911f4c53b517218483c9f573ec748bcb7b18", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TOKEN:lop@17 bo '('", "op": "i1", "dong": 38, "sha256": "dedc688c584ad19b9863e3d69986ccb4d11490dd1bd35c2396d8e44e160aae75", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TOKEN:lop@17 bo ','", "op": "i1", "dong": 38, "sha256": "83c448e04d9bf5108097edfefbadf44fea76a112d5d8affc92d30bb282b95856", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TOKEN:lop@17 bo '.'", "op": "i1", "dong": 38, "sha256": "1bf19b418dbc3a7018c7b0363574f35a3954553ab8281ce58e2e01f50b4b37f7", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TOKEN:lop@17 bo ':'", "op": "i1", "dong": 38, "sha256": "fc817f917e7b9987f023021289932711d8736f0612ab2ef11f4c1745645d6c76", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "i1:RE_TOKEN:lop@17 bo ';'", "op": "i1", "dong": 38, "sha256": "d00827ee988978e4e535d534acf9f93afd39f372d8688140db9d5ee1dc0da705", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TOKEN:lop@17 bo '\\\\-'", "op": "i1", "dong": 38, "sha256": "3f16b147ff074f56a57fd8ccd681806a91388f952a6ef319b6315a7d7ecf9aa4", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TOKEN:lop@17 bo '\\\\s'", "op": "i1", "dong": 38, "sha256": "486f97167fa4f12438aa1b59fb53724c05d45373e4766b98a5b2ea9f0b20b745", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "i1:RE_TOKEN:lop@17 bo '—'", "op": "i1", "dong": 38, "sha256": "6da6eb896bcb7a03d438823af3b9cdb2017885fd3232e0c948d67b9b40219a7c", "rc": 0, "giet": [], "hong": []}
+{"id": "i1:RE_TOKEN:lop@4 bo '_'", "op": "i1", "dong": 38, "sha256": "8e05ec0d4099016f6f3f3c647d9fe497ba0fe294e3e86e7abbb84d17c1039830", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "i1:RE_TOKEN:lop@4 bo 'a-z'", "op": "i1", "dong": 38, "sha256": "43a5d6c50767c30568340f822e9b2dc8d0949f14dbb4a2c3573b57d19f5edd57", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "i2:RE_DAU:lop@53 thanh .", "op": "i2", "dong": 31, "sha256": "e8054054fa584f43325f3e4c4c7b240f304abba32990347c5b7e79dfda748099", "rc": 0, "giet": [], "hong": []}
+{"id": "i2:RE_DAU:lop@99 thanh .", "op": "i2", "dong": 31, "sha256": "66bd3a6acccc242d2e99fbfe78faacc8ddef1841406a304164eea47c4d0b6070", "rc": 0, "giet": [], "hong": []}
+{"id": "i2:RE_JOB:lop@19 thanh .", "op": "i2", "dong": 32, "sha256": "50b3777db72f31c43342b25177198d8645b33c3317b1c8e94964ce9bf69cc78a", "rc": 0, "giet": [], "hong": []}
+{"id": "i2:RE_JOB:lop@58 thanh .", "op": "i2", "dong": 32, "sha256": "9ef4b2332d636f2bfd5b427d788b4afd6ef94b7089cc20638028df019e30df69", "rc": 0, "giet": [], "hong": []}
+{"id": "i2:RE_MIEN:lop@19 thanh .", "op": "i2", "dong": 42, "sha256": "01a4026e2ba6d309ea1a44464a42aba7ef7efc9e9560b57f8b7cd865dd675a39", "rc": 0, "giet": [], "hong": []}
+{"id": "i2:RE_MIEN:lop@37 thanh .", "op": "i2", "dong": 42, "sha256": "cd23ed5a74fe4d881953ceff4344889f72bb9e1c3bf2c32d879e6c97cddf1067", "rc": 0, "giet": [], "hong": []}
+{"id": "i2:RE_TEP_DG:lop@20 thanh .", "op": "i2", "dong": 39, "sha256": "32bcf285fd70b03a7f1471c78ac9ac7e4350bf9b9369244b1b4dc081e396c1f9", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "i2:RE_TEP_DG:lop@4 thanh .", "op": "i2", "dong": 39, "sha256": "a0be0c374d8d5b76a6c4f6ea3fc0ddcea897d77668656866d04b007afa2221b6", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "i2:RE_TEP_DG:lop@57 thanh .", "op": "i2", "dong": 39, "sha256": "b6332a1f24ae1d26e9904e39c4b39a198c681e6b613cda97164bd7f40751f426", "rc": 0, "giet": ["a207_hai_tep"], "hong": []}
+{"id": "i2:RE_TOKEN:lop@17 thanh .", "op": "i2", "dong": 38, "sha256": "04145ade7538c760765e3517704f9f5fb7ad758e69dc11ea5e596f46dd5fcb8d", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "i2:RE_TOKEN:lop@4 thanh .", "op": "i2", "dong": 38, "sha256": "a984e61dd25006f8bbd58681f23ef806a1510ddba352019934fb12644c3dc872", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "i3:RE_JOB:nhanh@75 bo 'failed'", "op": "i3", "dong": 32, "sha256": "509923b88ff91eba188d2956b665dc10d5a679bf3ddcf2801f516734cd144f57", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i3:RE_JOB:nhanh@75 bo 'not_measured'", "op": "i3", "dong": 32, "sha256": "b2fa27da73f0e6d7bb175febbbde47ef0809a42a6f03c3568a012a86355ac2bb", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i3:RE_JOB:nhanh@75 bo 'passed'", "op": "i3", "dong": 32, "sha256": "9ac60c3464e217aa123f16a9d194a046026e7413721f82cbfac8a59d7e2a9a40", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i3:RE_MOC:nhanh@17 bo 'failed'", "op": "i3", "dong": 35, "sha256": "24575275746f80639163bf869ffff246a7b4ae2edbb6db86fcfcdd49c29a4a22", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i3:RE_MOC:nhanh@17 bo 'not_measured'", "op": "i3", "dong": 35, "sha256": "1faeea4dfe287a8f5cf57de73cceed24548fc8ea2304e53a6a0319787b2715e4", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i3:RE_MOC:nhanh@17 bo 'passed'", "op": "i3", "dong": 35, "sha256": "2492d71fd087f51d08dc91285bf50714aeb6dd3b9b50215959f857c7853672d4", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i4:RE_DAU:luong_tu@107 {64}→*", "op": "i4", "dong": 31, "sha256": "3364bce372f597e21cae4e9537a52ce8262b6696dce366cfb1f0555476c6fa15", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "i4:RE_DAU:luong_tu@30 +→*", "op": "i4", "dong": 31, "sha256": "d9f3dc9c389745298a6254e76e370127e2bd02059fa2c5d5143692e94ffdef8f", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_DAU:luong_tu@44 +→*", "op": "i4", "dong": 31, "sha256": "f6ab162049a582adbfeda5532c21b8462469412a9f16bbb4060af9ffc8ef48d5", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_DAU:luong_tu@61 {40}→*", "op": "i4", "dong": 31, "sha256": "6854eb80f7964a34bb8124b47a6a4d39ef184ce0bdf45ed401333bde2a3af5dc", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_JOB:luong_tu@12 +→*", "op": "i4", "dong": 32, "sha256": "5dab1e46c2860ae8a1b6c4da04eda8c0e40a904ce2dd3838111d21a3c95c5fd1", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_JOB:luong_tu@43 +→*", "op": "i4", "dong": 32, "sha256": "b6b2ce50c5772da70e0dfba2f560dd3a090e99028a54bd5b1dfcdb3c1810895d", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_JOB:luong_tu@66 {64}→*", "op": "i4", "dong": 32, "sha256": "0a054b87cb14925a1e4376deb67b951e7ec662c7e6b7a46e2bd7132b4ba38115", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_JOB:luong_tu@7 +→*", "op": "i4", "dong": 32, "sha256": "507b5652b241e0cb57b0d0cef55b609cbd239769750009b80a866eb96100ce67", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_KHOI_LANDED:luong_tu@9 {8}→*", "op": "i4", "dong": 40, "sha256": "a68965702ba433de5eccbe86c0cb907738b3709ebcd1c447e8498a29271c9928", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_MIEN:luong_tu@27 {40}→*", "op": "i4", "dong": 42, "sha256": "7654f0067aa50f79ded36bcbd632dba1670e849aea282ccd27a8d439a5a84694", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_MIEN:luong_tu@48 +→*", "op": "i4", "dong": 42, "sha256": "0d87e71a46aa81499114416f56319c37ecfb67a0d5709a5f983227be88ed236b", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_MIEN:luong_tu@72 {4}→*", "op": "i4", "dong": 42, "sha256": "8cb5a737e553d562202dde94f656fa9f3b739b0ac4a8e562c2b1416bf1d95b46", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_MIEN:luong_tu@78 {2}→*", "op": "i4", "dong": 42, "sha256": "17f61236024f9675b9dd895fc654264a895411e370dd54e12ea5292f7711794e", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_MIEN:luong_tu@84 {2}→*", "op": "i4", "dong": 42, "sha256": "6b681cc203ac43e3d4d736d6f1c3a6fdae79bdb14d47f4ced11266775590ec98", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_MOC:luong_tu@51 +→*", "op": "i4", "dong": 35, "sha256": "58f6b78c8b2b376a4068e5672cded912e932a8781898a0212ebb745e7da26bbf", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_MOC:luong_tu@57 +→*", "op": "i4", "dong": 35, "sha256": "83a924d1ecb175a6bc25aa2e3430d8d0208dc4f2acaf697c93bb76e4113e6fff", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_SKIP_CU:luong_tu@12 +→*", "op": "i4", "dong": 33, "sha256": "8bc4762ff823dda7ade1d824b93beb2fbdf80296451f43d9b42872167cef4bd7", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_SKIP_CU:luong_tu@7 +→*", "op": "i4", "dong": 33, "sha256": "499988ec8c0b87e1d956556ceee941478dcd499a5a41432cfc5df70ddb047dfd", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_SKIP_V3:luong_tu@12 +→*", "op": "i4", "dong": 34, "sha256": "3ec6693ab826c3d5715f19590914c08556c4ee31b469286119f1c65232455fd7", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_SKIP_V3:luong_tu@7 +→*", "op": "i4", "dong": 34, "sha256": "ec6291e524b6daefd7b8428fff724189b5ed8ce11edfb1a23cf511635b88ca4a", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_TEP_DG:luong_tu@62 +→*", "op": "i4", "dong": 39, "sha256": "a243873ad8b20250ae678a993dd525cbb8eee50e94450006dc4a9cfcf62eb74e", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_TOKEN:luong_tu@10 +→*", "op": "i4", "dong": 38, "sha256": "8fa2aeaa07b6594fdb79ce4e1303a26087f532c87c9a993cdeaaba88270265ed", "rc": 0, "giet": [], "hong": []}
+{"id": "i4:RE_URL:luong_tu@61 +→*", "op": "i4", "dong": 41, "sha256": "6df4a129c23560ef16f80e13bca2de636c3b894c027262d1d755575a1bb8548a", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_DAU:escape@112 \\)→.", "op": "i5", "dong": 31, "sha256": "5b69f4e9eedf3f1fb1b6ff5c5b57f1529989573028c004dd981eb9d44381a0af", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_DAU:escape@28 \\d→.", "op": "i5", "dong": 31, "sha256": "cbb974ce82eb0a056b3ff3a4678373f2e3409f7aef37575348ea6c3cd3b07583", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_DAU:escape@42 \\d→.", "op": "i5", "dong": 31, "sha256": "3c2ef558bf4fd1ce740d6d9b4bff353e95492b59c50a964cb263ce93af3a0472", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_DAU:escape@71 \\(→.", "op": "i5", "dong": 31, "sha256": "d877c3863dd8b209a3aaf990b15688259455652f7f8ccf31a1408d93f9af9d69", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_DAU:escape@86 \\.→.", "op": "i5", "dong": 31, "sha256": "0d5b44a72045844972ba20e90f7377465d14c51d1d552a8ee3a77fa67ce7a388", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_JOB:escape@16 \\[→.", "op": "i5", "dong": 32, "sha256": "5dd666f041606ba74cb5f33bcf63b5481b0700cf4071a3c0c80aaaf8f9504c8a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i5:RE_JOB:escape@21 \\]→.", "op": "i5", "dong": 32, "sha256": "66fec2c3dc0308b713b2123febf5dd887493bb1b10bbbf9c50135d39e020268c", "rc": 0, "giet": ["a106_danh_tinh_job"], "hong": []}
+{"id": "i5:RE_JOB:escape@26 \\]→.", "op": "i5", "dong": 32, "sha256": "32cc44bf2fd9100935e3fc9cee53ac1a2e69d19371f2720a6cd09f5836b38ad9", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_JOB:escape@41 \\w→.", "op": "i5", "dong": 32, "sha256": "7323c96daf7b2082fe334db5a19ea5df219af61ce5e522f418b1cf4ffc5bbb90", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_JOB:escape@5 \\d→.", "op": "i5", "dong": 32, "sha256": "fd85b713c6d8440ff50e6a423bea8eaa4fc4db07b2c9d940a93344e87987914a", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "i5:RE_KHOI_LANDED:escape@7 \\d→.", "op": "i5", "dong": 40, "sha256": "7ea6907ddf311e062031b7b8a82f328dd2469e296a04cc50e513271cd05aecdb", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_MIEN:escape@70 \\d→.", "op": "i5", "dong": 42, "sha256": "1f5fec524f8821e334a6511d7058cffb3e47007a4698d2170fbe92ee58743d9b", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_MIEN:escape@76 \\d→.", "op": "i5", "dong": 42, "sha256": "366531989002f7536ec71ac57d9606a1839bf47ae8d4f15f8c1beb0c9f975a7e", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_MIEN:escape@82 \\d→.", "op": "i5", "dong": 42, "sha256": "e24ee7c4949d7a1514fdd39a402a6710bfdd636cd5f49b63b5c424d9999987dd", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_MOC:escape@46 \\(→.", "op": "i5", "dong": 35, "sha256": "b94d24e7f5cc43c575d259432d6881f929116474216a9b28f5ce8fcfef2a4e5f", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_MOC:escape@49 \\d→.", "op": "i5", "dong": 35, "sha256": "4f66d385ede46634bc9faa1b18dc4ff5bc79da3d551610663a825b949b768676", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_MOC:escape@55 \\d→.", "op": "i5", "dong": 35, "sha256": "abd25b1119b54f9761fa2bcfa76f83c9fe5d8a050c85f87a2ca653682a54a6a1", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_MOC:escape@81 \\)→.", "op": "i5", "dong": 35, "sha256": "176b356382e2db790a09a564c7eb33bb93c5453e2174ba5322b62808cd4fb0a0", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_SKIP_CU:escape@25 \\(→.", "op": "i5", "dong": 33, "sha256": "ea5b1f72aa0b2faee60f8fa60b6a1d5389b76f2873aca5f5780421236662f05f", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_SKIP_CU:escape@37 \\)→.", "op": "i5", "dong": 33, "sha256": "b3e7a140fabe89be61ab88d15943b4b8ef5c33016f83ba9a97af7a486c4c62c6", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_SKIP_CU:escape@5 \\d→.", "op": "i5", "dong": 33, "sha256": "94c81bc303471fb9e17f25612ea568f97cf9ba060424f01d0c33e3e9360bfa4f", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "i5:RE_SKIP_V3:escape@41 \\(→.", "op": "i5", "dong": 34, "sha256": "31de984803c2630b4270a5a57cbb5c09fbcd5afb645b5d788b59b59ffb92db6a", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_SKIP_V3:escape@5 \\d→.", "op": "i5", "dong": 34, "sha256": "8ff2b27a8b2fd271acea6d45fcbd8c84f947aa0cd7e104c086fa2a165857e9c5", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "i5:RE_SKIP_V3:escape@57 \\)→.", "op": "i5", "dong": 34, "sha256": "57a7455343acf812af71958cefaa111a2a63b7c6900da5e43668379e8a5414f7", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_TEP_DG:escape@63 \\.→.", "op": "i5", "dong": 39, "sha256": "4dece344a57fcc2981ad6f3e31cc479af9fc05c3452e1d8e5b781fbcbea565a8", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_TOKEN:escape@0 \\s→.", "op": "i5", "dong": 38, "sha256": "f9c91d3ee8dd9a6409341316afbbb0d414e6c745bb9121eda49d323e54e8d0f6", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "i5:RE_TOKEN:escape@18 \\s→.", "op": "i5", "dong": 38, "sha256": "2f34ee3aa60fd0d4cf71b0a7996207b93908c3ddd81bd79d19cb237f45384a81", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "i5:RE_URL:escape@14 \\.→.", "op": "i5", "dong": 41, "sha256": "b84a0f38f3f52d1748e06e056e700dcc312a075745c37e27163688c0529b582d", "rc": 0, "giet": [], "hong": []}
+{"id": "i5:RE_URL:escape@59 \\d→.", "op": "i5", "dong": 41, "sha256": "fa05f12ed05f271816b1e666537d6a3a7fed8c77923fe31ff9c42ae5f49ad8c9", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "i6:RE_TEP_DG:lookaround@0 bo", "op": "i6", "dong": 39, "sha256": "1868ed77b2074d724d7830a0416fce081e2c49840c69920eff18a0c3f4f625ea", "rc": 0, "giet": [], "hong": []}
+{"id": "i6:RE_TOKEN:lookaround@12 bo", "op": "i6", "dong": 38, "sha256": "05faf829c39b278454d69c22b0fd0c485bf33bb680f753c1b3b33f3c5beb589c", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "i7:doc_danh_gia:59:17", "op": "i7", "dong": 59, "sha256": "571486f8b7eaf81ed7922cf07e4641399cffe72b3ebaaba9291955e4aa021cd3", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "i7:doc_danh_gia:66:16", "op": "i7", "dong": 66, "sha256": "f9c2cf47a67e8c69fb670007a3618625fba8b0c69e205a670d3210814120d0a9", "rc": 0, "giet": [], "hong": []}
+{"id": "i7:doc_danh_gia:70:19", "op": "i7", "dong": 70, "sha256": "003843469a5cb8a37aaf87059a871585e1327cfecaefc7fc8052b9e02ea554a1", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "i7:doc_danh_gia:70:46", "op": "i7", "dong": 70, "sha256": "f5451ba5a0ffba7a42dc96c9ee683ae1daeca1861464e0f1678958658043561b", "rc": 0, "giet": [], "hong": []}
+{"id": "i7:doc_danh_gia:73:19", "op": "i7", "dong": 73, "sha256": "6f96064afb79446ec1392ad37bbe6717915187ccbe08d93c407953f513a9c3ae", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "i7:kiem_mien:252:64", "op": "i7", "dong": 252, "sha256": "cfe9d9b306518297d7632bac53be738567e2a7958d8f38209b91f216bd2e5605", "rc": 0, "giet": [], "hong": []}
+{"id": "i7:la_landed:219:51", "op": "i7", "dong": 219, "sha256": "af7d8c255364b1dd5e25bacfa18f1ff5005af44741c3e7cc7d5a58496911702f", "rc": 0, "giet": [], "hong": []}
+{"id": "i7:token:202:8", "op": "i7", "dong": 202, "sha256": "5be1c6c396187ac61ff3f3fc0f3ae51365c6495fbe3492f98588d6686e28525c", "rc": 0, "giet": [], "hong": []}
+{"id": "j1:_kiem_tep:126:7", "op": "j1", "dong": 126, "sha256": "d1f59721a923446abc6487fe4b7af16c3b864a484237640462c94ef3e6269099", "rc": 0, "giet": [], "hong": []}
+{"id": "j1:_kiem_tep:131:7", "op": "j1", "dong": 131, "sha256": "46551a5bda97a18fd2da379668915a884d8553e518e49fac316dadfb29b27eed", "rc": 0, "giet": [], "hong": []}
+{"id": "j1:_kiem_tep:154:11", "op": "j1", "dong": 154, "sha256": "81cb7e545ff914bfd6dff327d46cd8e95a9a6b196c2874d839785be9ad376905", "rc": 0, "giet": [], "hong": []}
+{"id": "j1:_la_so:85:11", "op": "j1", "dong": 85, "sha256": "3641daab352d5b7fc67476104e9eba5c6879939cefa2e1111b7f83834671ac76", "rc": 0, "giet": [], "hong": []}
+{"id": "j1:doc_danh_gia:72:67", "op": "j1", "dong": 72, "sha256": "71ce1c3562c3d0d30dcdb9ada76d91644998b18b3ea2a018ede45cc38877b6f3", "rc": 0, "giet": [], "hong": []}
+{"id": "j1:kiem_ho_so:271:11", "op": "j1", "dong": 271, "sha256": "b5faf88ad8119a4eef36c3bca6706d5e79d49495fe18b91889d60a8e8f091ce1", "rc": 0, "giet": [], "hong": []}
+{"id": "j1:kiem_ho_so:285:19", "op": "j1", "dong": 285, "sha256": "aeccee607f540c577fe477b6c51f07655155a79e5bbe8e164b44f391872bf196", "rc": 0, "giet": [], "hong": []}
+{"id": "j1:kiem_mien:262:25", "op": "j1", "dong": 262, "sha256": "54777a005fd837c439371e6c708f0f5788f042200f580d8100fd693f9153a6a7", "rc": 0, "giet": [], "hong": []}
+{"id": "j1:la_landed:219:107", "op": "j1", "dong": 219, "sha256": "881b340c7fa84c52bf7944180598660953deeae519c0f06edd112897ae750231", "rc": 0, "giet": [], "hong": []}
+{"id": "j1:la_landed:219:11", "op": "j1", "dong": 219, "sha256": "8be19de84c199e38e40329bff66f0239a9abe086bed5f60b956f290293ffe2d6", "rc": 0, "giet": [], "hong": []}
+{"id": "j2:la_landed:219:107", "op": "j2", "dong": 219, "sha256": "9c4313da674247a2447572a683b8afdd018fb146f51058c535ada4f0c7a8d805", "rc": 0, "giet": [], "hong": []}
+{"id": "j2:la_landed:219:11", "op": "j2", "dong": 219, "sha256": "0e08defeff9737f7c9d64342d90e9961e701d265390757dc4437127c9493e6ef", "rc": 0, "giet": [], "hong": []}
+{"id": "k1:_chuan:182:30", "op": "k1", "dong": 182, "sha256": "f83d16af64d3f3912ace2487c69803e48ff10b3334f3938f63ec237fab6dbe03", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "k1:kiem_mien:252:82", "op": "k1", "dong": 252, "sha256": "714438a127e1dcce251ead7dbc04dfd6db12ed44474bbd25df5c564cd309a8a5", "rc": 0, "giet": [], "hong": []}
+{"id": "k1:token:202:23", "op": "k1", "dong": 202, "sha256": "66852f71965b6855721b09bf27d157b35c7df64d84e1723f02ada6f8c966ba18", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "k2:_chuan:182:51", "op": "k2", "dong": 182, "sha256": "bc516d86d1ab35d5b839aea564dc143d7f52a5c44c9412ba3a5d227d19064db5", "rc": 0, "giet": [], "hong": []}
+{"id": "k2:chon_provenance:100:56", "op": "k2", "dong": 100, "sha256": "065ac838a7a37b3e330a4b80ed109964f7f9e0ed0967c51485fceb5008e3c057", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "k2:doc_danh_gia:52:24", "op": "k2", "dong": 52, "sha256": "01d8758f85354b8861b3f6c2d87bb63a23a6677e0421c9a80974e80004c15019", "rc": 0, "giet": ["a102_ca_kho_tai_base"], "hong": []}
+{"id": "k2:doc_danh_gia:53:11", "op": "k2", "dong": 53, "sha256": "57a2223b98b3e6219c4722a67ecc9c458e2195fa5060c1550ed8214388e54027", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "k2:doc_danh_gia:54:19", "op": "k2", "dong": 54, "sha256": "c0e6284b280731edc0f2346e69189e7e27acb6770e7869b85a8a0d5128619f9d", "rc": 0, "giet": ["a102_ca_kho_tai_base"], "hong": []}
+{"id": "k2:main:323:55", "op": "k2", "dong": 323, "sha256": "c416653e3cbef30e90a7668cbec0c7377c23a864fc24030b1b0ab6e546fea1aa", "rc": 0, "giet": ["a217_cli_tham_so_va_ma_thoat"], "hong": []}
+{"id": "k3:_kiem_tep:128:7", "op": "k3", "dong": 128, "sha256": "f92966d11c202367d781a7e60fe0010a9bb8b4a0366ea853e4088f66f5aed1f4", "rc": 0, "giet": [], "hong": []}
+{"id": "k3:loi_khai:195:37", "op": "k3", "dong": 195, "sha256": "e28321efb2a6fcf56f0df01bdfb2424692b89a1cbebc82d83059e1a27e81deb0", "rc": 0, "giet": [], "hong": []}
+{"id": "k3:token:203:25", "op": "k3", "dong": 203, "sha256": "f0589ed6e5bd808e3478ab1ed5f76506866576aded3d2f0e91de95a86e5d1648", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "kho:delete_return_112", "op": "kho", "dong": null, "sha256": "780dd5c65588efe55fe0f5e31c381aa1d85d7b1b5bc017b5fd4804ab59a76b1b", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "kho:delete_return_127", "op": "kho", "dong": null, "sha256": "627233c95aea6a741ebf06d494dbdc1763c3c07e2fc3246c84b9f842c68a0843", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:delete_return_129", "op": "kho", "dong": null, "sha256": "c25b7468b6e2c98da19d4cc0f7605a7ba7b6c9f2220c487d72c8cde74097f23a", "rc": 0, "giet": ["a104_bo_sinh_la"], "hong": []}
+{"id": "kho:delete_return_132", "op": "kho", "dong": null, "sha256": "0c47090494320cbab89c115a5b84b4d37e8b0866102441a46d5aac706ebe79b5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "kho:delete_return_171", "op": "kho", "dong": null, "sha256": "d280dc884b265cb140adb9031635871c1974c5f3008ec9c1a504be8855fdcc9b", "rc": 0, "giet": ["a105_bam_log"], "hong": []}
+{"id": "kho:delete_return_173", "op": "kho", "dong": null, "sha256": "a1f4ab67cfa5f1baa49a069e4f25384b0bc54334113779475273492fe2011ae5", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "kho:delete_return_175", "op": "kho", "dong": null, "sha256": "3700edecdbd1f1c709fd621bf742889547b04c4e1847bba609f677f77b683637", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "kho:delete_return_214", "op": "kho", "dong": null, "sha256": "78686448fd1bb832ef25cfc97b8950107e93129ae8653d4af0a3df072b07070f", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "kho:delete_return_227", "op": "kho", "dong": null, "sha256": "d79accd4443f0d8737c8a1882dd03e5715406bec2e6ca894f32625e5bd5de52b", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "kho:delete_return_231", "op": "kho", "dong": null, "sha256": "e46d97867f21bd330bb799ef15ce19ad57d7f1163f3f199517f0450b6f5f8b2c", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "kho:delete_return_238", "op": "kho", "dong": null, "sha256": "d74749f6a87e35dc172e444bdd5ccb67121ab52d580fde3460ef9a696988b993", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:delete_return_243", "op": "kho", "dong": null, "sha256": "b7cac07fab569df818f0fa16d215c4dea3e9f922024e4e5df7153f31d49ab44b", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:delete_return_249", "op": "kho", "dong": null, "sha256": "9eebd7d90aee71aa7556e6a9b61745260e341b58f5ed5ffd09c0c486b3992e4d", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:delete_return_251", "op": "kho", "dong": null, "sha256": "3f20ced6a37003c3e473b2a320c0713f0355589c435ee4d7bc0c414e20365900", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:delete_return_254", "op": "kho", "dong": null, "sha256": "16acf79057b93e7f6bfe6cd88088883bdd2907fa51c3854029679e274a3083cf", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:delete_return_261", "op": "kho", "dong": null, "sha256": "0a5fb3e328b17ec001261ef421231b4ba69c55ecaf90a9102deac890b70fb980", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:delete_return_263", "op": "kho", "dong": null, "sha256": "b44cb8eb10e33f96f3fe3baa67303d0eb300adb7540e05fd7e5aee379f83bcae", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:delete_return_316", "op": "kho", "dong": null, "sha256": "be251ea7e401628a8e56459231fed8b3eae0f786ad867ab6b0229c5b5d31a66b", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "kho:delete_return_319", "op": "kho", "dong": null, "sha256": "5a3dae25e319bc4ad56cb2255e28fc3b601aa900c68fac7eeb3b6610125266b4", "rc": 0, "giet": ["a210_cli"], "hong": []}
+{"id": "kho:delete_return_55", "op": "kho", "dong": null, "sha256": "54bd38e5baeb7048b53fa89c75b1914afe9b7a2c2510463f42c0593e042cb8b7", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:delete_return_58", "op": "kho", "dong": null, "sha256": "89a1c3467b3078e26359a7f126d1834dfec781ae9f0bca06b394b7efda916db7", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:delete_return_60", "op": "kho", "dong": null, "sha256": "11d2f767e31baf0922b4023c99c96b7479f8b28d2e85f1f7c7c11de685949570", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:delete_return_97", "op": "kho", "dong": null, "sha256": "c0a2e95ab2a7186a4cddc64bb1d76a605408fc39e7656181b213e68ca1f25a1b", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "kho:identity_126_7", "op": "kho", "dong": null, "sha256": "d1f59721a923446abc6487fe4b7af16c3b864a484237640462c94ef3e6269099", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:identity_131_7", "op": "kho", "dong": null, "sha256": "46551a5bda97a18fd2da379668915a884d8553e518e49fac316dadfb29b27eed", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:identity_154_11", "op": "kho", "dong": null, "sha256": "81cb7e545ff914bfd6dff327d46cd8e95a9a6b196c2874d839785be9ad376905", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:identity_219_107", "op": "kho", "dong": null, "sha256": "881b340c7fa84c52bf7944180598660953deeae519c0f06edd112897ae750231", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:identity_219_11", "op": "kho", "dong": null, "sha256": "8be19de84c199e38e40329bff66f0239a9abe086bed5f60b956f290293ffe2d6", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:identity_262_25", "op": "kho", "dong": null, "sha256": "54777a005fd837c439371e6c708f0f5788f042200f580d8100fd693f9153a6a7", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:identity_271_11", "op": "kho", "dong": null, "sha256": "b5faf88ad8119a4eef36c3bca6706d5e79d49495fe18b91889d60a8e8f091ce1", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:identity_285_19", "op": "kho", "dong": null, "sha256": "aeccee607f540c577fe477b6c51f07655155a79e5bbe8e164b44f391872bf196", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:identity_72_67", "op": "kho", "dong": null, "sha256": "71ce1c3562c3d0d30dcdb9ada76d91644998b18b3ea2a018ede45cc38877b6f3", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:identity_85_11", "op": "kho", "dong": null, "sha256": "3641daab352d5b7fc67476104e9eba5c6879939cefa2e1111b7f83834671ac76", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:key_alpha_only", "op": "kho", "dong": null, "sha256": "e4e1e69b8cfb469d4ee876165637b27ffedf33df6e240fa69688c539bcf60b11", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:key_no_casefold", "op": "kho", "dong": null, "sha256": "98b689e5248fb16ee7cbc2bc8c37dc2fb34a3262bbd9781b5a9205b209501bb3", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "kho:landed_partial", "op": "kho", "dong": null, "sha256": "f0ceda5e0393803f2b6d02ec835be4e48c6549682857dec775cf08962c7b8484", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:phi_skip_descendants", "op": "kho", "dong": null, "sha256": "7952abda04d5377e4530dbba72f5ab1a4b1fcb740ee99249ea22e0dd33eb135a", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:phi_substring", "op": "kho", "dong": null, "sha256": "bbe00aa2c57c2b09316866940ab91be9e4724d96997f29899a575e542b5b4c05", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:producer_version_0", "op": "kho", "dong": null, "sha256": "d3eb4b2527269445682d7d31423b53feb1853b235983a356c36a68a48779bc67", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "kho:producer_version_1", "op": "kho", "dong": null, "sha256": "3af68bfd7682735ff3e6f6fb91ac9ba962682588927090deb93d21b788109d77", "rc": 0, "giet": ["a111_skipped_theo_phien_ban"], "hong": []}
+{"id": "kho:producer_version_2", "op": "kho", "dong": null, "sha256": "e4af26589e8486bcd23b28671daf43e0e968d2468dc6c4875bf1146262779e6f", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "kho:reason_129_32", "op": "kho", "dong": null, "sha256": "e05ea6269a20cc9b9811927e988be1201bd0969bbd89c07ac57d4c0e13a08711", "rc": 0, "giet": ["a104_bo_sinh_la"], "hong": []}
+{"id": "kho:reason_140_15", "op": "kho", "dong": null, "sha256": "fce63ce67801006f0274413703b4ec755468f6386f6ba7d11d2345f1fe0af5b1", "rc": 0, "giet": ["a117_loi_duyet_va_job_trung"], "hong": []}
+{"id": "kho:reason_158_24", "op": "kho", "dong": null, "sha256": "9a5404f1bdad16a9c2f0dd9c63e1b80da3cdd37792467abe0517bedbc6bffd66", "rc": 0, "giet": ["a106_danh_tinh_job"], "hong": []}
+{"id": "kho:reason_160_24", "op": "kho", "dong": null, "sha256": "782a31f35f8c7b50047891f9f4dee1448cd4291ca627de03811f5edefdefce16", "rc": 0, "giet": ["a113_ket_luan"], "hong": []}
+{"id": "kho:reason_162_24", "op": "kho", "dong": null, "sha256": "06b10d516e3f99bb3e70c72d5ead7ff07a68423036ca6b34e12097a22692516d", "rc": 0, "giet": ["a105_bam_log"], "hong": []}
+{"id": "kho:reason_175_32", "op": "kho", "dong": null, "sha256": "8a52e7e3655194feddc87ab3ec918009325035947601067f1ef589901e17f6cc", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "kho:reason_177_15", "op": "kho", "dong": null, "sha256": "594d700bf0e04ea50b4881e816a1f30e09f998cdaed53977e9efb26177e6e341", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "kho:reason_238_16", "op": "kho", "dong": null, "sha256": "c6472ae8be62bd7c8bbf59ced1b1f553fb23d96003d67c8fd28b1f84fe4f832a", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:reason_243_16", "op": "kho", "dong": null, "sha256": "bd2f991a1085c0c016b4de8ce6dc8ac69bc2c382fd395c4e63f17c59715356d5", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:reason_247_16", "op": "kho", "dong": null, "sha256": "d489a7142ae568610e56a5afbad489218ef0bf13b592ca3f712151e5147c0960", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:reason_249_16", "op": "kho", "dong": null, "sha256": "8c643469e1aad86901272034aaf9333463d7a45a96a5f077f597e6d9088535ef", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:reason_251_16", "op": "kho", "dong": null, "sha256": "2cca0109c3a7a3ebb232f19d7bcd5c6223335b1f97ef67471161d8b80e466d2c", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:reason_254_16", "op": "kho", "dong": null, "sha256": "86214df7e4c22277c23185bea7d824f48b9334d5145c796605f016fd4ec4f99a", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:reason_259_16", "op": "kho", "dong": null, "sha256": "cbe1c0e5988219fafbb908b9b929948b9135f12f729e27bb471b870ec7240a3f", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:reason_261_16", "op": "kho", "dong": null, "sha256": "784bcadacdc114ffaf72cd7d1b0b4d817ace8c505196baf49329ba06d733efe0", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:reason_263_16", "op": "kho", "dong": null, "sha256": "fa92983421e92722d9d4713e5dd91ea2569bdee6ac15f05eb26b8f7a5b8f6923", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:reason_51_22", "op": "kho", "dong": null, "sha256": "524b9406156e05f5dd50f5e0d5553352a8a668e224435c504a55b2b142e7d305", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:reason_55_26", "op": "kho", "dong": null, "sha256": "36303820a75c2ecd3abc083b20d0b3a23c139ec8bfd30d84f498db2329ce9fad", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:reason_58_22", "op": "kho", "dong": null, "sha256": "cdca49e6510efa22044a6ab41792ee80b915af22e5e7ca1d019d11ae1525ffde", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:reason_60_22", "op": "kho", "dong": null, "sha256": "9c406fe48e6623ec8e193e630c61cdd062cda695f08be013adb7bf318a8eea9c", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:reason_71_19", "op": "kho", "dong": null, "sha256": "8d895b76e777e11cfe66dc7f23ff7a9abf58f07d0bbc9d1a63f5b898b223724d", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:reason_97_23", "op": "kho", "dong": null, "sha256": "6bb36be8ea44a1aba15cbde8cb316a0e6a9b98b135bb16fbd0e08297e0d23a5d", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "kho:reason_97_70", "op": "kho", "dong": null, "sha256": "c218840152ef328478191143e5c2cdbee7b8f207fcacc6b495535cae69723eb3", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "kho:reason_claim_failed", "op": "kho", "dong": null, "sha256": "e4dbbe140ee392f91643abec2a93829fff02a7d72019e2e004f4557f79d928c4", "rc": 0, "giet": ["a206_duong_lech"], "hong": []}
+{"id": "kho:reason_complete_102_26", "op": "kho", "dong": null, "sha256": "54297540a1274d711259f6cdb40941331179b30246b6165e13647fbdb41c56ba", "rc": 0, "giet": ["a112_symlink"], "hong": []}
+{"id": "kho:reason_complete_112_40", "op": "kho", "dong": null, "sha256": "b256f45f338bc51f458b21ce4ac7c9b91274d91023385aa9a8a9cc043b8279d9", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "kho:reason_complete_112_72", "op": "kho", "dong": null, "sha256": "b252b14f06c8956d36e601440ca764a23879207433ef435e474fa3444610aced", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "kho:reason_complete_136_18", "op": "kho", "dong": null, "sha256": "615e7a6387f5376a874b7d3e40022caeddb8e53de69a5c5cea48d33599fd88b3", "rc": 0, "giet": ["a108_neo"], "hong": []}
+{"id": "kho:reason_complete_147_18", "op": "kho", "dong": null, "sha256": "01e7b9d4d97208f2b980122452b7d078398687528befadfa75e7d1d4aa2b4588", "rc": 0, "giet": ["a114_provenance_tu_khai_du"], "hong": []}
+{"id": "kho:reason_complete_149_18", "op": "kho", "dong": null, "sha256": "5d7292d7112444b61598885fd25f8e8028ccafdb7d577e27b8dbd9912d6ac179", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "kho:reason_complete_151_18", "op": "kho", "dong": null, "sha256": "29a31dcdaf93148fdd2af9518e5f4e20109eba43ee0b06fff56e743e30eb4fe5", "rc": 0, "giet": ["a107_tap_job"], "hong": []}
+{"id": "kho:reason_complete_165_18", "op": "kho", "dong": null, "sha256": "3206b46bc04bdbe48fe55b2aa8dc8b4ab86e1d3cb7377fdd1aad84be00b2b3e4", "rc": 0, "giet": ["a111_skipped_theo_phien_ban"], "hong": []}
+{"id": "kho:reason_complete_169_18", "op": "kho", "dong": null, "sha256": "68ce0d35d0a4908f3eab392e3a76ab13a51ebba6fabf0d2d3b62d6627f3c89da", "rc": 0, "giet": ["a110_dong_tong"], "hong": []}
+{"id": "kho:reason_complete_272_31", "op": "kho", "dong": null, "sha256": "c48af8ab1d560d111fed055ed9f3bca081ff76218f4b2ab8b9fe5505aea015bc", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "kho:reason_complete_278_28", "op": "kho", "dong": null, "sha256": "b19316ea91209123213403409195e80698d367c666917f96cbfbc896866eb491", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:reason_complete_282_35", "op": "kho", "dong": null, "sha256": "e6d6eaf981093576a4ed100e577c9ad9a17286cfc7da03afa51b9c530bd516c3", "rc": 0, "giet": ["a203_duong_khong_tep"], "hong": []}
+{"id": "kho:reason_complete_286_39", "op": "kho", "dong": null, "sha256": "3772a174704bebd5604f00fad6ee276ad3fe24591041c16ec04272b8d56a5226", "rc": 0, "giet": ["a204_duong_dan"], "hong": []}
+{"id": "kho:reason_complete_290_39", "op": "kho", "dong": null, "sha256": "4f945c9134d2ae5437c28d7069dadd5e3764ee0aee15cf9ef81b4b00e15cff3e", "rc": 0, "giet": ["a206_duong_lech"], "hong": []}
+{"id": "kho:reason_complete_294_18", "op": "kho", "dong": null, "sha256": "e1eb894ae0e1eac39ab2d1f8107470faa6183bc418185e150ec36b938364db51", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "kho:reason_complete_68_26", "op": "kho", "dong": null, "sha256": "a997e6034eb4b78adec7e32f314f4c9e9b689c9a134c45609f75afa47be3835c", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:reason_complete_76_22", "op": "kho", "dong": null, "sha256": "1f74de53f1af5a1340f4c589063cd1547dd2caa397b98e0648cb2cc1de3b8ced", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:reason_complete_78_18", "op": "kho", "dong": null, "sha256": "098f4fd40e16047908580014a8fa96337e5ad8e6bf2c18735d6705925f78dde7", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:reason_complete_80_18", "op": "kho", "dong": null, "sha256": "f2d56c7f2d4d68630cebf387a806de8d1b6f532d5a8978ec4d3b98769c858ef4", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "kho:reason_complete_99_15", "op": "kho", "dong": null, "sha256": "054738d61b0dbe225b182b1d87c684b6f2ee35dc1633ccc8bb0c202e1106e4cb", "rc": 0, "giet": ["a116_yaml_la_trong_thu_muc"], "hong": []}
+{"id": "kho:reason_waiver", "op": "kho", "dong": null, "sha256": "2b3a6a326f3b7a191b6d3ea1b92f2402f49f2801f644a32947c8f388a11d5620", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:ref_any_run", "op": "kho", "dong": null, "sha256": "3e0b055aa5a6d87f579fe7778acf5a215f0739ad702a4ae7ff80df0059049f87", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:ref_no_boundary", "op": "kho", "dong": null, "sha256": "c21103bf4fe41524e47c817eb16baccfed3efa9a0f597c8e27db1f28ddf4ec2f", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:ref_txt_wild", "op": "kho", "dong": null, "sha256": "9b73cd899d499460ecb3a62d90e45d9080967fae215f41f323bac824a81bb4d7", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:set_remove_BO_SINH_0", "op": "kho", "dong": null, "sha256": "15c28f6bfae616cf3e94fec5c7573c67b8cd2cba54d620e1e7759c8a4bfb10a8", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "kho:set_remove_BO_SINH_1", "op": "kho", "dong": null, "sha256": "4b64379b49bfe84b7db855f0229df48a0f349e67c12b542bde19be0cc7c4da32", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "kho:set_remove_BO_SINH_2", "op": "kho", "dong": null, "sha256": "29101fa01fe98d10b5ae0ba4338f42377e6db53b73f373d0ffbd6396a4bfeb90", "rc": 0, "giet": ["a101_sau_fixture_that"], "hong": []}
+{"id": "kho:set_remove_CHECK_BAT_BUOC_TEN_0", "op": "kho", "dong": null, "sha256": "b23f3bff9b1e5793e6ea63b1b0585d9773d7c432258dca8b94f68d0b6687f5dd", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "kho:set_remove_CHECK_BAT_BUOC_TEN_1", "op": "kho", "dong": null, "sha256": "54c8ce52dbfe28099b322011d9ccb7f04a4e3cbd6e2092126d608a6fdb6fa869", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "kho:set_remove_CHECK_BAT_BUOC_TEN_2", "op": "kho", "dong": null, "sha256": "f5dd411930f2b06e081af177c1f9260cc23d317edddf44720b1985878aa4e3dc", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "kho:set_remove_CHECK_BAT_BUOC_TEN_3", "op": "kho", "dong": null, "sha256": "a74e3eee93796c2ee16ad611b176b716a80c981070d8b94236729e0fb467b12a", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "kho:set_remove_CHECK_BAT_BUOC_TEN_4", "op": "kho", "dong": null, "sha256": "cace2d80b821ecee11915f8c1628faa432a15d11062c39c2e632b67bfacab299", "rc": 0, "giet": ["a109_check_bat_buoc"], "hong": []}
+{"id": "kho:set_remove_PHI_LOI_KHAI_0", "op": "kho", "dong": null, "sha256": "2401781e5c9f2d6911a66bb50f18f392eec3faac68819c3f608c69e16a906b3d", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "kho:set_remove_PHI_LOI_KHAI_1", "op": "kho", "dong": null, "sha256": "9fcbec9143a7d7d20c2d1fd8c8a0a50facbffedc8f4f656d3075f17d027b5f19", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "kho:set_remove_PHI_LOI_KHAI_2", "op": "kho", "dong": null, "sha256": "e18dc4bdab02f239d74cd91d19270fd470b2b96d62d5580ec3863ac56e5bbc5d", "rc": 0, "giet": ["a201_loi_khai"], "hong": []}
+{"id": "kho:set_remove_TOKEN_0", "op": "kho", "dong": null, "sha256": "d567fc5fa1d779ec6a55ff505a5dce9bf9d541c4bac5930efb09bb1f2e0d1f2d", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "kho:set_remove_TOKEN_1", "op": "kho", "dong": null, "sha256": "d236d1182b212fb64aff108a0a918b9f9bcfb35dc1ac5ffe8200ec0a9b7ca242", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "kho:set_remove_TOKEN_2", "op": "kho", "dong": null, "sha256": "dde9aeb8e38af697324d134761ed133078f3a1b61040a1086f4aea55dacd7cc1", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "kho:set_remove_TOKEN_3", "op": "kho", "dong": null, "sha256": "bd8297dba01ddbbac618cc3832d8e0abe583efffef76eb6ba87a4420416607c8", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "kho:set_remove_TOKEN_4", "op": "kho", "dong": null, "sha256": "6c03ce915a617dc0254ee9f229f4932236059a78abf1ada208dc9f2ad67f4e6d", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "kho:set_remove_TOKEN_5", "op": "kho", "dong": null, "sha256": "b2a0ef64a5708e246d4f8976e91f355de0e63e96269f1ff9bf12f3b32f5ae993", "rc": 0, "giet": ["a212_landed_khong_loi_khai"], "hong": []}
+{"id": "kho:set_remove_TOKEN_6", "op": "kho", "dong": null, "sha256": "c61fbf177a00ae40d7d4c73e2bbba11e2e5ff3d2b38a832b232d163b9532d434", "rc": 0, "giet": ["a209_mien"], "hong": []}
+{"id": "kho:skip_v3_partial", "op": "kho", "dong": null, "sha256": "c1373dcc92a8200f78d7bd0e2f46146e9231898df8ab7169b534a3bba130f484", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:token_delimiter_40", "op": "kho", "dong": null, "sha256": "180ef242131351e393e6959786193689ef31905616fe4ab496cf6525ad5448bd", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:token_delimiter_44", "op": "kho", "dong": null, "sha256": "2ac296e6dd5f2e2e9f0efbcca82dac1adbad57e3f2c45ddc54f59a540673674b", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:token_delimiter_45", "op": "kho", "dong": null, "sha256": "60b43cc5990e052301c6c71bf841256b44530b011bf895358a1297519a02f194", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:token_delimiter_46", "op": "kho", "dong": null, "sha256": "0cd09ede7c3655b068939ea06608aef792961e52cc59fceba6db18d3182d5f6a", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:token_delimiter_58", "op": "kho", "dong": null, "sha256": "b555981d8a7f838c8bc22edd9573a211b7fcdd3852bb97e3bf2a0e663ba2a38d", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "kho:token_delimiter_59", "op": "kho", "dong": null, "sha256": "a0606ffcc4007a5c53159bc37aebaf89b8d6e7ee3425d3ceb0186ba86586b414", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:token_delimiter_8212", "op": "kho", "dong": null, "sha256": "74f8fcfcdeecfa5eabfcb18d647c58dea6b303d08e5bdde4c0f633d53733e0db", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:token_expand", "op": "kho", "dong": null, "sha256": "2dcb2395aafb784e7dba11b454f9b0ee4027e4a937467710234114363300d907", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:token_no_casefold", "op": "kho", "dong": null, "sha256": "a868a1523dabf52648a1d15d1ad9d4ca0055bda0098533c11f00968bb8c6ff10", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "kho:token_no_whitespace", "op": "kho", "dong": null, "sha256": "8468613271df2dc45b3bc47118aaf140922606e8b5bb22c2e270912e4a3053ee", "rc": 0, "giet": ["a202_token"], "hong": []}
+{"id": "kho:url_zero_indexerror", "op": "kho", "dong": null, "sha256": "75e98a56c119c629a02f67c00755bb12e2e7f0fc131f503164c9e704e693b93b", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:url_zero_optional", "op": "kho", "dong": null, "sha256": "2c7df1d251e8542336da6c0c3be8e66d5f3e33cffe2534a19a11a3a607715222", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:waiver_head_truthy", "op": "kho", "dong": null, "sha256": "bc3a07e10fde3161bd8f4ecac15e9c5449e91a31cf6fe6693fd21fa1ef16d853", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:waiver_no_strip", "op": "kho", "dong": null, "sha256": "d73ea5879e551dfab74ce480373b0e62ed13f922bfffb1a4ea48d4f723ebef87", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:waiver_order_author_url", "op": "kho", "dong": null, "sha256": "aa9067803a2109066a2b2c67272566e6deb6ce21d662a636f67af1f11cbb0ec6", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:waiver_order_line_author", "op": "kho", "dong": null, "sha256": "bac28ea1bda5ea24342249b062c11c4531e290a82ba505aad7b75139083a41c4", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:waiver_order_os_date", "op": "kho", "dong": null, "sha256": "bb4381fd0b9b358fed172b414cbc842fa20d6873840b548257d55985c1b46d30", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:waiver_order_os_sha", "op": "kho", "dong": null, "sha256": "d4388ae786e4941b1c7867dfb90a8ef4387809c892469077f5afa023edfc6d8f", "rc": 0, "giet": [], "hong": []}
+{"id": "kho:waiver_partial", "op": "kho", "dong": null, "sha256": "ba9ee378e32492a95bc1a270ba49bce4ae9deb848c0db2d7ce43433e576cb2ea", "rc": 0, "giet": [], "hong": []}
+{"id": "l:module:124:0:body1", "op": "l", "dong": 126, "sha256": "45a55edf9990e913738ec823e30e77be8334cf1194c5987fd0945f7208163242", "rc": 0, "giet": ["a103_bo_phan_tich"], "hong": []}
+{"id": "l:module:124:0:body22", "op": "l", "dong": 170, "sha256": "6b9b756a41e3a4cbeba553a016094d21a6d638883769db9f93e47ed839916f12", "rc": 0, "giet": ["a106_danh_tinh_job"], "hong": []}
+{"id": "l:module:124:0:body23", "op": "l", "dong": 172, "sha256": "08c1c4c6b02729ea807e7d7ffb60c54dac32345edf9c420181f2337360dab1c8", "rc": 0, "giet": [], "hong": []}
+{"id": "l:module:235:0:body12", "op": "l", "dong": 260, "sha256": "a85745400df9972a8f6103576a6e69fc2ec9aa7d0a9fbe008ffbfaadb0a1ce81", "rc": 0, "giet": [], "hong": []}
+{"id": "l:module:235:0:body6", "op": "l", "dong": 248, "sha256": "244e981510e344adb09de8c28867745a6fd555ef64613381619beb38c48dc2d4", "rc": 0, "giet": ["a215_landed_mien_di_dang"], "hong": []}
+{"id": "l:module:46:0:body4", "op": "l", "dong": 57, "sha256": "f2bfea5264364e64eefde3cd37c2b943fde96b31393016c4e355d42d4194d2ba", "rc": 0, "giet": [], "hong": []}

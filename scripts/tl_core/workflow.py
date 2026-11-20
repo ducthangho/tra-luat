@@ -730,14 +730,12 @@ def _kernel_size_findings(size_bytes: int, *, warn_limit: int = 47 * 1024, fail_
 
 
 def _py_size_findings(sizes: dict, *, warn_limit: int = 280 * 1024, fail_limit: int = 320 * 1024,
-                      waiver: tuple = ("tl_selftest.py", "tl_test_fragments_bundled.py")) -> dict:
+                      waiver: tuple = ("tl_selftest.py",)) -> dict:
     """PURE (ĐỢT A v1.34.64 — kế hoạch guard-va-boc-tl-core §3/Q1): guard TRẦN MOUNT ~343KB/file (lớp sự
     cố #5 — tl.py từng CẮT CỤT khi vượt; self-heal chỉ cứu NUL-pad, KHÔNG cứu cắt cụt). WARN >280KB
     (đệm ~60KB — vài release để xử lý); FAIL --strict >320KB (chặn release TRƯỚC vách — ép bóc trước
     cliff). WAIVER theo BASENAME: tl_selftest.py (936KB) — không bước runbook nào import nó trên Cowork;
-    nếu hỏng → fail ỒN ÀO (không âm thầm); xét lại nếu có ngày selftest phải chạy trên Cowork.
-    WP433 SS: thêm tl_test_fragments_bundled.py (tệp SINH, chỉ selftest/test-fragments-check nạp; 285KB → 301KB khi thêm
-    một fragment) — cùng lý do; cắt cụt ⇒ SyntaxError + lệch băm test-fragments-check, không âm thầm."""
+    nếu hỏng → fail ỒN ÀO (không âm thầm); xét lại nếu có ngày selftest phải chạy trên Cowork."""
     warn, fail, waived = [], [], []
     for p in sorted(sizes):
         b = int(sizes[p] or 0)
@@ -792,7 +790,7 @@ def cmd_workflow_audit(a) -> int:
                     _pyfiles[f"{_pref}/{_f.name}"] = _f.stat().st_size
         out["py_size"] = dict(_py_size_findings(_pyfiles),
                               basis="trần mount ~343KB/file (lớp sự cố #5 cắt cụt); WARN=đệm advisory, "
-                                    "FAIL chỉ chặn --strict; waiver tl_selftest.py + tl_test_fragments_bundled.py (chỉ selftest nạp)")
+                                    "FAIL chỉ chặn --strict; waiver tl_selftest.py (không import trên Cowork)")
     except Exception as _pe:  # noqa: BLE001
         out["py_size"] = {"size_ok": False, "error": f"{type(_pe).__name__}: {_pe}"}
         out["ok"] = False

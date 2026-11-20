@@ -1,0 +1,518 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+  "reviewed_file_sha256": "5bdd23707bdf2a0ebd995538fbf794a57e5bcbcf7368701585994167e519562d",
+  "findings": [
+    {
+      "id": "B1-04-v1-not-fully-specified",
+      "class_slug": "v1-not-fully-specified",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:44-55,64-66,76-110,114-124,154-156",
+      "claim": "The dong/khai distinction fixes the previous self-reference and missing shard-dimension examples, but does not close this cause class. The frozen representation and predicates still fail to cover required failure inputs consistently. (1) Missing, null or wrongly typed selected sha256_test/sha256_tool become null. Rule M requires equality to the checkout hashes, but M_BAM explicitly ignores null and the pinned legacy hop_le predicate accepts all six variants. Emitting M_BAM violates validator self-consistency; omitting it violates M. (2) When artifact REST metadata is unavailable, mandatory artifact ids cannot be supplied for otherwise downloaded predecessor stamps. Null dau_job then forces B_VANG/do for completed jobs, contradicting acceptance 4's core-REST-failure => khong_ket_luan. (3) When REST lists the current producer but its download is unavailable, retaining Manh.artifact requires an unmeasurable non-null content hash; nulling it while preserving the mandatory producer history forces A_TRON, although the latest-attempt artifact exists. Absence of evidence and proven absence/mismatch remain conflated.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r4-review-PllmDH/adversarial.py",
+          "exit_code": 0,
+          "observed_result": "Actual current-master _loi_mot_bien_nhan returned [] for correct, wrong valid hash, missing, null and wrong-type values of each of sha256_test and sha256_tool. Literal evaluation of r4 M_BAM detected the two wrong-valid-hash controls, but none of the six missing/null/wrong-type variants; MANH_HONG was also false. This is current-helper execution plus an explicitly labelled SPEC deduction, not execution of an unimplemented collector.",
+          "artifact": "/tmp/wp1460-r4-review-PllmDH/adversarial.json"
+        },
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r4-review-PllmDH/adversarial.py",
+          "exit_code": 0,
+          "observed_result": "The core-artifact-REST-unavailable countermodel generated R_KHONG_DOC(artifacts) plus B_VANG for rows lacking mandatory artifact ids; the frozen reduction is do, whereas acceptance 4 requires khong_ket_luan. The download-failure representation analysis records the non-null hash/A_TRON dilemma. These are SPEC countermodels, not native GitHub failure runs."
+        },
+        {
+          "command": "nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '44,55p;64,66p;79,110p;114,124p;154,156p'",
+          "exit_code": 0,
+          "observed_result": "Whole-class scan covered every dong predicate and the Job/Manh absent-evidence shapes. P_THIEU now has an independent root reference and C_CHE_DO now has both raw dimensions; those old manifestations are closed. The remaining witnesses concern both hash fields and both metadata-versus-payload availability boundaries."
+        }
+      ],
+      "suggested_fix": "Complete the mapping from source availability/validity to serialized fields, diagnostic predicates and conclusion before freezing v1. Distinguish unobservable metadata, known-absent producer, unreadable payload and measured mismatch; make hashes nullable where genuinely unavailable and specify the corresponding non-green code. When a selected payload exists and expected hashes are known, missing/invalid hashes must trigger a defined diagnostic. Align B_VANG/A_TRON with those availability states instead of inferring proven absence from a null object alone. Add producer-to-validator round trips for each hash field's missing/null/wrong-type variants, each core endpoint failure, and REST-present/download-missing, with healthy and genuine missing-attempt controls. Give each check its own target-exception mutant, including null-skipping and unknown-to-red mutations. This may change the closed schema/fixture and B2/B3 bindings; revise those dependencies explicitly. B1-04 has now recurred in four rounds: the design checkpoint has produced progress, not closure."
+    },
+    {
+      "id": "B1-14-legacy-selector-equivalence-is-impossible",
+      "class_slug": "legacy-selector-equivalence-is-impossible",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:53,68,114,124,153,159",
+      "claim": "The revised equivalence domain only constrains attempt numbers; it still omits the legacy selector's container/namespace validation. Eight readable, legacy-valid expected receipts can all match their latest REST attempt while an additional out-of-range artifact directory makes chon_bien_nhan_du return errors and an empty set. Under the new REST selection and per-receipt hop_le definitions, the eight expected producers remain selected and valid; the unrelated artifact is a separate X diagnostic. Thus section 3(b)'s biconditional still conflicts with those definitions. Extra members inside a selected artifact and unexpected non-directory entries expose the same omitted legacy-envelope precondition. The executor must guess whether to discard diagnostic rows, silently widen hop_le, or narrow the promised equivalence.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r4-review-PllmDH/adversarial.py",
+          "exit_code": 0,
+          "observed_result": "Healthy control: actual chon_bien_nhan_du selected 8/8 with no errors. Adding dot-bien-manh-123-1-8 produced a namespace error and selected_count=0; an unexpected non-directory entry also produced 0. Adding extra.txt beside manh-0.json produced the legacy exact-one-file error and selected_count=0. In all three fixtures the eight expected raw receipts individually returned [] from _loi_mot_bien_nhan, and latest REST attempts and highest expected artifact attempts were all 1. The new-side selection is a deduction from SPEC 114, not a B1 implementation result.",
+          "artifact": "/tmp/wp1460-r4-review-PllmDH/adversarial.json"
+        },
+        {
+          "command": "sed -n '1089,1147p' /tmp/wp1460-r4-review-PllmDH/current/.claude/dev/ci_dang_ky_test.py; nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '53p;68p;114p;124p;153p;159p'",
+          "exit_code": 0,
+          "observed_result": "Whole-class scan separates the legacy per-receipt predicate from its directory/name/member checks and global empty-on-error return. R4 repairs the newer-REST-attempt and deliberate new hash/key rejection examples, but the new domain does not exclude these structural failures."
+        }
+      ],
+      "suggested_fix": "Define the comparison stage and complete legacy input domain explicitly, including artifact namespace, directory/member shape and readability, while retaining diagnostic rows on invalid inputs. Alternatively compare the old selector's final accept/reject result separately from the diagnostic selection, without asserting universal selection equality on malformed containers. Keep the old CLI and aggregator unchanged. Extend the paired A/B matrix with extra-artifact, extra-member and non-directory cases, healthy controls and dedicated mutants for each domain condition; distinguish old-envelope rejection from intentional new B1 rejection. The fix must not suppress X diagnostics or reinstate all-input equivalence."
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "collector-self-record",
+      "finding_ids": [
+        "B1-01-collector-self-record"
+      ],
+      "manifestations": "SPEC 44-45, 95, 123, 128, 154, 159: provisional self conclusion/end/duration/execution fields remain null; only predecessor jobs count; the bounded self-stamp window and final REST check are explicit.",
+      "highest_open_severity": null,
+      "common_fix": "Keep provisional self records and obtain final success from REST.",
+      "closing_check": "Healthy collector-in-progress plus self-window and denominator mutants.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        }
+      ]
+    },
+    {
+      "class_slug": "failure-evidence-transport",
+      "finding_ids": [
+        "B1-02-failure-evidence-transport"
+      ],
+      "manifestations": "SPEC 63-66, 139, 156, 158: red shard upload and collector steps 5-9 explicitly use always(). Current writer probes still emit completed red receipts. Representation of unavailable evidence is tracked separately in B1-04.",
+      "highest_open_severity": null,
+      "common_fix": "Keep upload/collection execution after failed work.",
+      "closing_check": "Extract actual YAML conditions and run the stateful REST-step mock.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        }
+      ]
+    },
+    {
+      "class_slug": "unselected-attempt-validation",
+      "finding_ids": [
+        "B1-03-unselected-attempt-validation"
+      ],
+      "manifestations": "SPEC 114, 154, 159 restrict semantics to selected producers. Actual current selector accepts corrupt-old/good-new and rejects corrupt-latest.",
+      "highest_open_severity": null,
+      "common_fix": "Apply semantic checks only to selected producers; retain history.",
+      "closing_check": "Paired repaired-rerun/latest-corrupt controls and selection-scope mutant.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        }
+      ]
+    },
+    {
+      "class_slug": "v1-not-fully-specified",
+      "finding_ids": [
+        "B1-04-v1-not-fully-specified"
+      ],
+      "manifestations": "The dong/khai distinction fixes the previous self-reference and missing shard-dimension examples, but does not close this cause class. The frozen representation and predicates still fail to cover required failure inputs consistently. (1) Missing, null or wrongly typed selected sha256_test/sha256_tool become null. Rule M requires equality to the checkout hashes, but M_BAM explicitly ignores null and the pinned legacy hop_le predicate accepts all six variants. Emitting M_BAM violates validator self-consistency; omitting it violates M. (2) When artifact REST metadata is unavailable, mandatory artifact ids cannot be supplied for otherwise downloaded predecessor stamps. Null dau_job then forces B_VANG/do for completed jobs, contradicting acceptance 4's core-REST-failure => khong_ket_luan. (3) When REST lists the current producer but its download is unavailable, retaining Manh.artifact requires an unmeasurable non-null content hash; nulling it while preserving the mandatory producer history forces A_TRON, although the latest-attempt artifact exists. Absence of evidence and proven absence/mismatch remain conflated.",
+      "highest_open_severity": "P2",
+      "common_fix": "Make availability, serialization and every diagnostic predicate agree for all input states.",
+      "closing_check": "Round-trip all required failure states; remove/add each dong code; target-specific mutants.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        }
+      ]
+    },
+    {
+      "class_slug": "b3-interface-mismatch",
+      "finding_ids": [
+        "B1-05-b3-interface-mismatch"
+      ],
+      "manifestations": "B1 31, 45, 127-136 define repository id, provisional self handling, consumer mapping and B3 ownership of A4. B1 10 requires B3 rebinding. Published B3 r3 still pins B1 r2; local B3 r4 seen in scratch pins this r4 contract. Neither sibling is approved here.",
+      "highest_open_severity": null,
+      "common_fix": "Maintain one authoritative B1 contract and explicitly rebind consumers.",
+      "closing_check": "Validate shared fixture and mapping when B3 freezes against the final B1 hash.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        }
+      ]
+    },
+    {
+      "class_slug": "stamp-identity-not-bound",
+      "finding_ids": [
+        "B1-06-stamp-identity-not-bound"
+      ],
+      "manifestations": "SPEC 114, 119, 154, 159 require all bindings for every selected stamp, including an older attempt of a job not rerun; only superseded stamps are exempt.",
+      "highest_open_severity": null,
+      "common_fix": "Bind every selected stamp to its producer identity.",
+      "closing_check": "Every binding tested at current and retained older attempts; separate exception-class mutants.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        }
+      ]
+    },
+    {
+      "class_slug": "missing-compatibility-controls",
+      "finding_ids": [
+        "B1-07-missing-compatibility-controls"
+      ],
+      "manifestations": "SPEC 153 and 159 retain healthy/rerun/non-target-survival A/B controls, old readers and kill-count equality. The remaining overly broad equivalence statement is B1-14.",
+      "highest_open_severity": null,
+      "common_fix": "Keep paired behavior and count controls.",
+      "closing_check": "One-command base/head comparison on the same inputs, including non-target survival.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        }
+      ]
+    },
+    {
+      "class_slug": "canary-authority-budget-unresolved",
+      "finding_ids": [
+        "B1-08-canary-authority-budget-unresolved"
+      ],
+      "manifestations": "SPEC 141-149 and 184 explicitly make A3/K7 blocking, identify nonblocking unmeasured observations, and require a later installing Mission revision to grant two full runs. R85/r86 currently grant one; no extra run is represented as already authorized.",
+      "highest_open_severity": null,
+      "common_fix": "Install the explicit two-run allowance before dispatch and preserve separate run/rerun counters.",
+      "closing_check": "Read back installation authority and exact-H canary receipts before merge.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        }
+      ]
+    },
+    {
+      "class_slug": "sensitive-size-budget",
+      "finding_ids": [
+        "B1-09-sensitive-size-budget"
+      ],
+      "manifestations": "SPEC 8, 170-179 and r86 remove estimates/exceptions and impose default 6 files/450 additions, measured stop and owner-approved nang_tran later. ADR activation checks returned 0/128, first-parent true, non-shallow. Four delivery files fit the file cap; implementation numstat is future acceptance, not a waived check.",
+      "highest_open_severity": null,
+      "common_fix": "Use the default cap; request an exception only with measured numstat if needed.",
+      "closing_check": "Measure actual delivery diff before each source review and validate any later exception.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        }
+      ]
+    },
+    {
+      "class_slug": "stale-canary-reuse",
+      "finding_ids": [
+        "B1-10-stale-canary-reuse"
+      ],
+      "manifestations": "SPEC 143 and 149 invalidate A3/K7 on every head change and require more allowance before repetition; no path-based exception remains.",
+      "highest_open_severity": null,
+      "common_fix": "Bind all retained canary/gate evidence to exact H.",
+      "closing_check": "Change a schema/fixture-only head and reject old canary evidence.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        }
+      ]
+    },
+    {
+      "class_slug": "a4-null-comparison",
+      "finding_ids": [
+        "B1-11-a4-null-comparison"
+      ],
+      "manifestations": "SPEC 57 retains available workflow_sha and 134 transfers all A4 comparisons to B3 under owner r86. No comparison remains in B1. Scope removal is not counted as a measured repair of the former A4 mechanism.",
+      "highest_open_severity": null,
+      "common_fix": "Successor B3 owns null-safe A4 comparison.",
+      "closing_check": "B3 independently tests measured/not-measured/failed/mismatching cases.",
+      "scope": "Transferred to B3 by r86; no open B1 finding",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        }
+      ]
+    },
+    {
+      "class_slug": "a4-failure-downgraded-to-unknown",
+      "finding_ids": [
+        "B1-12-a4-failure-downgraded-to-unknown"
+      ],
+      "manifestations": "Owner r86 explicitly removes A4 integration. SPEC 57, 134, 149, 157 and 188 contain no B1 acquisition/comparator path. Finding is moot in B1, transferred to B3; no claim that the former acquisition failure was repaired or measured.",
+      "highest_open_severity": null,
+      "common_fix": "Preserve failed-versus-unavailable results in the B3-owned acquisition path.",
+      "closing_check": "Review B3 end-to-end acquisition with actual failure-shaped documents; not tested here.",
+      "scope": "Transferred to B3 by r86; no open B1 finding",
+      "source_rounds": [
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        }
+      ]
+    },
+    {
+      "class_slug": "dependency-provenance-can-be-empty",
+      "finding_ids": [
+        "B1-13-dependency-provenance-can-be-empty"
+      ],
+      "manifestations": "SPEC 40, 47, 62, 97-99, 120, 154-155 and 159 require independent file/hash/key coverage and version-shaped values. Synthetic extraction controls distinguish 0.10.0/0.11.0 and reject banner-only output; command failure is explicitly unknown. Native ShellCheck is unavailable locally.",
+      "highest_open_severity": null,
+      "common_fix": "Keep required dependency evidence and tool-specific version extraction.",
+      "closing_check": "Two distinct versions, banner-only and command-failure controls; first-line-extraction mutant.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        }
+      ]
+    },
+    {
+      "class_slug": "legacy-selector-equivalence-is-impossible",
+      "finding_ids": [
+        "B1-14-legacy-selector-equivalence-is-impossible"
+      ],
+      "manifestations": "The revised equivalence domain only constrains attempt numbers; it still omits the legacy selector's container/namespace validation. Eight readable, legacy-valid expected receipts can all match their latest REST attempt while an additional out-of-range artifact directory makes chon_bien_nhan_du return errors and an empty set. Under the new REST selection and per-receipt hop_le definitions, the eight expected producers remain selected and valid; the unrelated artifact is a separate X diagnostic. Thus section 3(b)'s biconditional still conflicts with those definitions. Extra members inside a selected artifact and unexpected non-directory entries expose the same omitted legacy-envelope precondition. The executor must guess whether to discard diagnostic rows, silently widen hop_le, or narrow the promised equivalence.",
+      "highest_open_severity": "P2",
+      "common_fix": "Separate per-receipt validity, container validity and final B1 admission.",
+      "closing_check": "Paired healthy/malformed-envelope cases plus domain-specific mutants.",
+      "scope": "B1 specification",
+      "source_rounds": [
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        }
+      ]
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "collector-self-record",
+      "prior_finding_ids": [
+        "B1-01-collector-self-record"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC 44-45, 95, 123, 128, 154, 159: provisional self conclusion/end/duration/execution fields remain null; only predecessor jobs count; the bounded self-stamp window and final REST check are explicit."
+    },
+    {
+      "class_slug": "failure-evidence-transport",
+      "prior_finding_ids": [
+        "B1-02-failure-evidence-transport"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC 63-66, 139, 156, 158: red shard upload and collector steps 5-9 explicitly use always(). Current writer probes still emit completed red receipts. Representation of unavailable evidence is tracked separately in B1-04."
+    },
+    {
+      "class_slug": "unselected-attempt-validation",
+      "prior_finding_ids": [
+        "B1-03-unselected-attempt-validation"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC 114, 154, 159 restrict semantics to selected producers. Actual current selector accepts corrupt-old/good-new and rejects corrupt-latest."
+    },
+    {
+      "class_slug": "v1-not-fully-specified",
+      "prior_finding_ids": [
+        "B1-04-v1-not-fully-specified"
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "Independent expected dependencies and raw shard dimensions now close the previous examples. Missing-hash and unavailable-artifact countermodels above remain; design change does not close the class."
+    },
+    {
+      "class_slug": "b3-interface-mismatch",
+      "prior_finding_ids": [
+        "B1-05-b3-interface-mismatch"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "B1 31, 45, 127-136 define repository id, provisional self handling, consumer mapping and B3 ownership of A4. B1 10 requires B3 rebinding. Published B3 r3 still pins B1 r2; local B3 r4 seen in scratch pins this r4 contract. Neither sibling is approved here."
+    },
+    {
+      "class_slug": "stamp-identity-not-bound",
+      "prior_finding_ids": [
+        "B1-06-stamp-identity-not-bound"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC 114, 119, 154, 159 require all bindings for every selected stamp, including an older attempt of a job not rerun; only superseded stamps are exempt."
+    },
+    {
+      "class_slug": "missing-compatibility-controls",
+      "prior_finding_ids": [
+        "B1-07-missing-compatibility-controls"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC 153 and 159 retain healthy/rerun/non-target-survival A/B controls, old readers and kill-count equality. The remaining overly broad equivalence statement is B1-14."
+    },
+    {
+      "class_slug": "canary-authority-budget-unresolved",
+      "prior_finding_ids": [
+        "B1-08-canary-authority-budget-unresolved"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC 141-149 and 184 explicitly make A3/K7 blocking, identify nonblocking unmeasured observations, and require a later installing Mission revision to grant two full runs. R85/r86 currently grant one; no extra run is represented as already authorized."
+    },
+    {
+      "class_slug": "sensitive-size-budget",
+      "prior_finding_ids": [
+        "B1-09-sensitive-size-budget"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC 8, 170-179 and r86 remove estimates/exceptions and impose default 6 files/450 additions, measured stop and owner-approved nang_tran later. ADR activation checks returned 0/128, first-parent true, non-shallow. Four delivery files fit the file cap; implementation numstat is future acceptance, not a waived check."
+    },
+    {
+      "class_slug": "stale-canary-reuse",
+      "prior_finding_ids": [
+        "B1-10-stale-canary-reuse"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC 143 and 149 invalidate A3/K7 on every head change and require more allowance before repetition; no path-based exception remains."
+    },
+    {
+      "class_slug": "a4-null-comparison",
+      "prior_finding_ids": [
+        "B1-11-a4-null-comparison"
+      ],
+      "status": "KHONG_DO_DUOC",
+      "evidence": "SPEC 57 retains available workflow_sha and 134 transfers all A4 comparisons to B3 under owner r86. No comparison remains in B1. Scope removal is not counted as a measured repair of the former A4 mechanism."
+    },
+    {
+      "class_slug": "a4-failure-downgraded-to-unknown",
+      "prior_finding_ids": [
+        "B1-12-a4-failure-downgraded-to-unknown"
+      ],
+      "status": "KHONG_DO_DUOC",
+      "evidence": "Owner r86 explicitly removes A4 integration. SPEC 57, 134, 149, 157 and 188 contain no B1 acquisition/comparator path. Finding is moot in B1, transferred to B3; no claim that the former acquisition failure was repaired or measured."
+    },
+    {
+      "class_slug": "dependency-provenance-can-be-empty",
+      "prior_finding_ids": [
+        "B1-13-dependency-provenance-can-be-empty"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC 40, 47, 62, 97-99, 120, 154-155 and 159 require independent file/hash/key coverage and version-shaped values. Synthetic extraction controls distinguish 0.10.0/0.11.0 and reject banner-only output; command failure is explicitly unknown. Native ShellCheck is unavailable locally."
+    },
+    {
+      "class_slug": "legacy-selector-equivalence-is-impossible",
+      "prior_finding_ids": [
+        "B1-14-legacy-selector-equivalence-is-impossible"
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "R4 fixes the prior REST/hash/inventory examples, but the current-helper probes above expose omitted namespace/member preconditions inside its newly declared domain."
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact-object-and-current-source",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; SHA256 of git-show and local SPEC; read-only GitHub matching-refs/heads/",
+      "exit_code": 0,
+      "observed_result": "Candidate 9f09a12a53fb0fc032c4496728b49feef09d5c5e, tree 2387b2fe1a413624ff2366a8a32c940c31b346fa, local/blob hash 5bdd23707bdf2a0ebd995538fbf794a57e5bcbcf7368701585994167e519562d. GitHub confirmed current master 48d372e14f190dae83a75ccbca8ee9a0b25635c5 and unchanged candidate at end. The two existing delivery code files are byte-identical between candidate and that master. GitHub tool reads have no shell exit code."
+    },
+    {
+      "name": "current-code-probes",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r4-review-PllmDH/current-probes.py",
+      "exit_code": 0,
+      "observed_result": "321 unique keys (56 ca, 255 tk, 10 db), shard sizes 37/37/38/38/42/41/40/48, key hash 98cd127f05631214a47b5cd27400cff99f835d19eb0a5054884f118343badf5e. Workflow/pin guards return []; Ruff pin/probe contract 3/3. Synthetic healthy/repaired selection 8/8; latest-corrupt rejects. Actual old aggregator accepts healthy synthetic input and prints 255 self + 10 product mutants. Injected writer controls preserve passed/failed/not_measured/not_run/inconclusive. No native full mutation execution is claimed.",
+      "artifact": "/tmp/wp1460-r4-review-PllmDH/current-probes.json"
+    },
+    {
+      "name": "adversarial-contract-probes",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r4-review-PllmDH/adversarial.py",
+      "exit_code": 0,
+      "observed_result": "Reproduced the finding witnesses and healthy controls; checked previous P_THIEU/C_CHE_DO/version-extraction repairs. Passed means the review probes completed, not that B1 satisfies acceptance. B1 collector/validator do not exist yet.",
+      "artifact": "/tmp/wp1460-r4-review-PllmDH/adversarial.json"
+    },
+    {
+      "name": "plan-authority-budget-and-scope",
+      "status": "passed",
+      "command": "Read plan r4 and mission-r84/r85/r86 from origin/ops/wp1172-plan-r4; compare SPEC; read ADR-0053 and protocol 8.3/12",
+      "exit_code": 0,
+      "observed_result": "Plan ref b4a45179600d3527aa0f332492e3a8a43e2ccff0; plan hash 0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe; r86 hash fffcfbe50cd77ff615914c56a2f2bcd07b051104b511157657814d2a8599b081. Owner A4 removal and default-size rule respected. Spec review allowance is 6, author allowance 5; history is retained. No removed authorization-store mechanism, mutation-classifier change, trigger expansion or CHO_PHEP activation reintroduced. Acceptance requires per-check mutants classified by each target case's own exception and a false-credit control."
+    },
+    {
+      "name": "remote-fetch-and-holder-cli",
+      "status": "not_measured",
+      "command": "git fetch --all in assigned checkout; scratch GitHub fetch of all heads; python3 -B ops/lease_publish.py ai-dang-giu <path> for each of four delivery files, SPEC and representative lease path",
+      "exit_code": [
+        255,
+        128,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12
+      ],
+      "observed_result": "Assigned .git is read-only. Scratch GitHub fetch/ls-remote fail because configured proxy 127.0.0.1:36011 is unavailable. All six holder calls fail closed with KHONG_XAC_DINH, not zero holders. Cached origin refs were fetched from /home/user/tra-luat into scratch (rc 0); a separate GitHub read returned 379 live branch refs, with six cache/live differences. This is not a complete fresh Git fetch or clean admission receipt.",
+      "artifact": "/tmp/wp1460-r4-review-PllmDH/lease-cli.json"
+    },
+    {
+      "name": "informational-lease-and-sibling-scan",
+      "status": "passed",
+      "command": "Cached all-head lease scan with freshness comparison disabled, labelled informational; independent GitHub GET of wp1236 lease at cbfd8e665289206b476bd3aa5cb1f964efd0c844; read sibling specs",
+      "exit_code": 0,
+      "observed_result": "535 cached lease records; wp1166-r4-g4 is symmetrically superseded. wp1236-a-r9-g1-claude-20261120 holds ci_dang_ky_test.py until 2026-11-22T15:35:00Z; live lease read confirms the overlap. SPEC already blocks execution on it. B3 shares only the registration file and must follow B1; B4 has no B1 delivery-file overlap. Repeat authoritative all-ref holder checks before lease. GitHub reads have no shell exit code.",
+      "artifact": "/tmp/wp1460-r4-review-PllmDH/lease-cache.json"
+    },
+    {
+      "name": "runtime-and-lint-capability",
+      "status": "not_measured",
+      "command": "python3 --version; actionlint -version; shellcheck --version; python3 -m ruff check --no-cache --select F .claude/dev/ci_dang_ky_test.py",
+      "exit_code": [
+        0,
+        0,
+        null,
+        1
+      ],
+      "observed_result": "Linux/Python 3.13.18; actionlint 1.7.7. ShellCheck executable and Ruff module unavailable. Native Python 3.12 runner behavior, required actionlint-with-ShellCheck gate and bare Ruff lint are not passing evidence. Separate Ruff pin/probe contract passed above.",
+      "artifact": "/tmp/wp1460-r4-review-PllmDH/runtime.json"
+    },
+    {
+      "name": "implementation-and-live-gates",
+      "status": "not_run",
+      "command": "Future B1 collector/validator, full registry suite and new mutants; CI/A3/reruns/Windows",
+      "exit_code": null,
+      "observed_result": "Specification review only. No workflow dispatch, GitHub write, new model invocation, repository edit, commit or push. No future implementation acceptance is claimed."
+    },
+    {
+      "name": "final-read-only-snapshot",
+      "status": "passed",
+      "command": "git status --porcelain=v1 --untracked-files=all --ignored=matching; git diff --exit-code; git diff --cached --exit-code; git diff --check; git rev-parse HEAD HEAD^{tree}; hash SPEC",
+      "exit_code": 0,
+      "observed_result": "Exact head/tree/hash unchanged; tracked/index diff empty, no untracked additions. Ignored .codex/ remains present. Its private contents and the upstream source checkout were not exhaustively hashed, so full ignored-byte/source-tree invariance is not claimed.",
+      "artifact": "/tmp/wp1460-r4-review-PllmDH/final-snapshot.json"
+    }
+  ],
+  "notes": "Round 4: two open B1 cause classes, both P2; no P0/P1/P3 or new finding IDs. Earlier verdicts lack explicit class_slug/class_table fields, so slugs are assigned from their stable finding-ID suffixes, preserving all 14 historical classes. Sources: round 1 d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e; round 2 9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa; round 3 29c99e736fde5628f8f47689b80e2ec8ba253a8a. DA_VA_THAT refers to closure of the specification defect, not implementation acceptance. A4 scope transfers are explicitly not counted as repairs under protocol 8.3. Of round 3's four open classes, only dependency-provenance-can-be-empty is fully closed: 1/4, with B1-04 recurring for a fourth round. Apply the non-convergence/design checkpoint before another ordinary repair cycle; remaining nominal review allowance alone does not waive it. The dong/khai change is coherent as a trust-boundary decision but its availability-to-record-to-code mapping remains incomplete. No lease/merge/land/deploy authority is granted. Provider=openai_codex; model_family=openai; execution_surface=codex_service; transport=machine. Requested reviewer gpt-6-astra/highest effort; served model/effort and external launcher run id=KHONG_DO_DUOC in this context. Sandbox=workspace-write, restricted network, assigned .git read-only. Applied cross-review skill; no subagents. Scratch only under /tmp and assigned REVIEW_OUT."
+}

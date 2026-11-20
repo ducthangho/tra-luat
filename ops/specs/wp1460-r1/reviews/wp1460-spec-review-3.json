@@ -1,0 +1,232 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a",
+  "reviewed_file_sha256": "a90a948c396f13a2b8681f555a2017b2fe7fe7173f7038008873ff6083a70328",
+  "findings": [
+    {
+      "id": "B1-12-a4-failure-downgraded-to-unknown",
+      "severity": "P1",
+      "location": "ops/specs/wp1460-r1/SPEC.md:135, 149-158, 170",
+      "claim": "The new blocking failed/lech rows are not reachable through the required A4 acquisition/validation contract. Section 6.8 discovers only successful measurement runs and requires the document to be passed with the complete successful key set, following nhap_wd. Section 8 explicitly applies its table to artifacts already checked by 6.8. Actual do_wd failures make the measurement workflow fail, omit blob/sha256, and are rejected by that prerequisite as not_measured. A newer failed measurement can also be hidden by the success-only discovery filter. Thus the direct WD_JSON comparator tests can pass while the real acquisition path still loses the positive failure that this revision intends to make blocking.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r3-adversarial.py",
+          "observed_result": "Probe rc 0. All six actual do_wd cases (databaseId, repo, url_path, file_path, oid_head_sha, oid_check_suite) return rc 12 / failed and lack blob and sha256. Existing nhap_wd through its CLI test seam accepts the healthy control, but measurement conclusion=failure returns not_measured / wd_khong_hop_le:a:conclusion; a failed document returns not_measured / wd_khong_hop_le:c:trang_thai; a wrong document repository returns not_measured / wd_khong_hop_le:c:repo."
+        },
+        {
+          "command": "sed -n '423,548p' /tmp/wp1460-r3-review/ops/ci_provenance.py; cat /tmp/wp1460-r3-review/.github/workflows/ops-do-workflow-definition.yml; nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '135p;149,158p'",
+          "observed_result": "The existing workflow exits with the producer rc and uploads wd.json with always(), so a failed measurement has an inspectable artifact but a failed workflow. SPEC 135 requires success/passed; table heading 149 requires prior 6.8 validation, while 154-155 require those same rejected failures to block. This is a contract contradiction, not a run of a B1 implementation."
+        }
+      ],
+      "suggested_fix": "Separate trusted transport/identity/digest verification from the successful-provenance predicate. For B1 canary comparison, retrieve the explicitly dispatched measurement run even when it failed; preserve verified failed and mismatching documents for the blocking classification without requiring passed-only fields. Define discovery over the latest matching measurement irrespective of success, with no fallback to an older successful result. Keep B3 acceptance fail-closed. Add end-to-end acquisition-to-comparison fixtures for all six real failed shapes and for older-success/newer-failure, with dedicated target-exception mutants. No change to the excluded ci_provenance.py is authorized by this suggestion."
+    },
+    {
+      "id": "B1-04-v1-not-fully-specified",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:43-52, 91, 95, 109-110, 120-121, 168",
+      "claim": "The new structured diagnostics repair the R-only reduction, but some codes marked independently recomputable still lack sufficient or stable evidence in the frozen receipt. P_THIEU uses the collector stamp as the validator reference, while the producer compares every stamp, including that collector stamp, with an independent checkout enumeration. A faulty collector stamp makes those two sets disagree. C_CHE_DO is also marked recomputable although the selected receipt raw so_manh, which rule C must validate, is absent from the closed Manh shape. An executor must either change the schema, trust supposedly recomputable codes, or reject legitimate diagnostic receipts as inconsistent.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r3-adversarial.py",
+          "observed_result": "Probe rc 0. Explicitly labelled set witness: with checkout requirements={requirements.txt}, removing the entry from dot-bien-du yields the same P_THIEU job on both sides. Removing it only from bien-nhan-audit yields producer P_THIEU={bien-nhan-audit}, but the section-109 validator rule yields the ten other jobs instead. Current _loi_mot_bien_nhan rejects raw so_manh=9 for expected 8; the frozen copied Manh fields have no raw so_manh. These are specification counterexamples, not tests of unimplemented B1 code."
+        },
+        {
+          "command": "nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '43,52p;91,110p;120,121p;168p'",
+          "observed_result": "PhuThuoc is copied from the selected stamp; line 109 declares the self stamp the standard for P_THIEU; line 120 instead requires independently enumerating checkout files. Line 110 demands exact equality of all row-recomputable diagnostic pairs. Manh has expected-position manh and copied fields, but no copied so_manh; free-text loi and opaque artifact hashes do not supply its integer value to the receipt-only validator."
+        }
+      ],
+      "suggested_fix": "Audit every code marked dong=co against the serialized fields. Store an independently derived expected requirements set rather than treating a possibly faulty self stamp as ground truth, and retain the raw selected shard dimensions needed for C. Alternatively explicitly classify facts that cannot be reconstructed as producer assertions, consistently with the R_LECH design. Freeze exact doi_tuong rules for each code. Require producer-to-validator round trips for every negative diagnostic class, including a bad collector stamp and wrong raw shard count, plus missing/spurious-code mutants classified by each case exception. This is the third review appearance of B1-04: apply the protocol section-12 design checkpoint before another ordinary repair loop."
+    },
+    {
+      "id": "B1-13-dependency-provenance-can-be-empty",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:46, 61, 120, 167, 172",
+      "claim": "The new required dependency maps close the empty-map cases, but the prescribed executable-version extraction still permits a measured value that contains no version. ShellCheck --version prints a fixed product banner on its first line; the actual version is on its second line. Following section 3 literally records the same nonempty banner for different installed ShellCheck versions, and Do plus rule P accepts it as do_duoc. The required tool-version provenance is therefore still incomplete.",
+      "evidence": [
+        {
+          "command": "GitHub read-only GET https://raw.githubusercontent.com/koalaman/shellcheck/v0.10.0/shellcheck.hs and https://raw.githubusercontent.com/koalaman/shellcheck/v0.11.0/shellcheck.hs; inspect printVersion at lines 620-624",
+          "observed_result": "Both official tagged sources first print \"ShellCheck - shell script analysis tool\" and then print \"version: \" concatenated with shellcheckVersion. Thus taking only the first line loses the version. This is source inspection; ShellCheck is absent locally and no native version probe is claimed."
+        },
+        {
+          "command": "sed -n '71,77p' /tmp/wp1460-r3-review/ops/cong_cu.yaml; nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '46p;61p;120p'",
+          "observed_result": "The repository already uses a version: capture regex for ShellCheck. SPEC instead requires the first --version line for executable tools; Do accepts any nonempty string and P checks presence/availability, so the fixed banner satisfies the stated green conditions."
+        }
+      ],
+      "suggested_fix": "Specify tool-specific extraction of the version-bearing line or capture, preserving the stdlib-only stamp constraint. Treat missing/unparseable version text as khong_do_duoc rather than accepting a banner. Test two different valid ShellCheck version outputs, a banner-only response and a command failure, with a dedicated mutant that substitutes the first line. Keep the completed required-key/hash/availability checks."
+    },
+    {
+      "id": "B1-14-legacy-selector-equivalence-is-impossible",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:67, 114, 117, 122, 172",
+      "claim": "The all-input equivalence required between the new diagnostic selection and unchanged chon_bien_nhan_du conflicts with the new REST-bound selection rules. The old helper only sees artifact directories, while the new selected producer must match the latest REST attempt of each job. When REST has a newer attempt with no uploaded receipt, the old helper accepts eight older receipts but B1 must select no producer for that shard and emit A_TRON. The contract simultaneously demands the same valid 8/8 selection for that input and forbids it. New hash/key-inventory checks likewise intentionally go beyond the old helper.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r3-adversarial.py",
+          "observed_result": "Probe rc 0. On a current-source healthy eight-shard artifact fixture, actual chon_bien_nhan_du returns errors=[] and all eight attempt-1 producers. The same artifact input with latest REST attempt 2 for shard 0 cannot be selected under SPEC 114/122 because its attempt-2 receipt is absent. The legacy function has no REST parameter, so its result cannot change. The added REST premise and required B1 result are explicitly labelled specification deductions."
+        },
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r3-probes.py",
+          "observed_result": "Probe rc 0. Actual legacy selector also accepts wrong_hash and missing_expected_key fixtures with errors=[] and selected_count=8; B1 rule M is required to reject those. Healthy/repaired-rerun controls pass and latest-corrupt receipt has errors with zero selection."
+        }
+      ],
+      "suggested_fix": "Distinguish legacy artifact parsing/selection compatibility from the later B1 admission rules. State the equivalence only for the exact legacy predicate and input domain, then apply REST-attempt/hash/inventory checks separately; do not call the resulting B1-valid set universally equivalent to the old helper. Add the newer-REST-attempt-without-artifact counterexample and explicit paired controls demonstrating intentional new rejection while the old CLI result stays unchanged. Keep the existing selector and excluded mutation code unchanged."
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact-spec-and-current-master",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; hash git-show SPEC blob and local SPEC; GitHub GET git/matching-refs/heads/",
+      "exit_code": 0,
+      "observed_result": "Reviewed SHA 29c99e736fde5628f8f47689b80e2ec8ba253a8a; tree e47bfdc7954e3b9f369f7ab75d6e2f0af29f57be. Both spec byte hashes equal the assigned a90a948c396f13a2b8681f555a2017b2fe7fe7173f7038008873ff6083a70328. Live GitHub refs confirm the candidate and current master 0f9aa2a2cc697129e1f5be72feddf60986286865. GitHub reads have no shell exit code."
+    },
+    {
+      "name": "plan-owner-decisions-and-sibling-contracts",
+      "status": "passed",
+      "command": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/{KE_HOACH_NGUON_R4.md,mission-r84.json,mission-r85.json} (each separately); git show origin/ops/wp1461-r1:ops/specs/wp1461-r1/SPEC.md; git show origin/ops/wp1462-r1:ops/specs/wp1462-r1/SPEC.md",
+      "exit_code": 0,
+      "observed_result": "Plan ref 0bbbcb68abb5e008e272171ff2f17244cd9ac808; plan SHA256 0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe. r84 SHA256 a90f5df0746efcd3e92b8ff356806103a410fff71d3da4d7d4fd5e0f1dd96945; r85 SHA256 6ccdce617409600a5f1f72b616d85381e404fce96853acc66cbef8f0f6861436. Q4/Q6 exclusions and removed authorization-store mechanisms remain excluded. B3 a3e91894d2a433777eee35c058830577213619d0 shares ci_dang_ky_test.py only for registration and is ordered after B1; B4 0d80f45b72796af82899760fde20a15f2b108a37 has no B1 delivery-file overlap. Those sibling tips were confirmed by the live ref list."
+    },
+    {
+      "name": "current-code-characterization",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r3-probes.py",
+      "exit_code": 0,
+      "observed_result": "321 unique keys: 56 ca, 255 tk, 10 db; sizes 37/37/38/38/42/41/40/48; key hash 98cd127f05631214a47b5cd27400cff99f835d19eb0a5054884f118343badf5e. Existing workflow and pin guards return []; Ruff pin/probe contract is 3/3. Healthy/repaired selection is 8/8; latest-corrupt rejects. Existing aggregator accepts the synthetic healthy fixture and reports 46/46 counterexamples, 255/255 self mutants and 10/10 product mutants. These synthetic counts are not a native full mutation run. Writer controls preserve passed/failed/not_measured/not_run/inconclusive with rc 0/1/1/1/1; expensive execution and memory measurement were injected.",
+      "artifact": "/tmp/wp1460-r3-probes.json"
+    },
+    {
+      "name": "adversarial-current-code-and-contract-witnesses",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r3-adversarial.py",
+      "exit_code": 0,
+      "observed_result": "All six A4 failed reasons were generated through the existing CLI test seam. Existing import path demotes failed workflow/document to not_measured, with a passing control. The requirements self-reference and REST-attempt equivalence counterexamples are explicitly labelled spec deductions. Probe success means the observations were obtained; it does not mean the proposed B1 passes.",
+      "artifact": "/tmp/wp1460-r3-adversarial.json"
+    },
+    {
+      "name": "size-deferral-and-authority-audit",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r3-adversarial.py; read ADR-0053, protocol 3.2/8.3/12, SPEC 185-197 and r85 per_new_packet",
+      "exit_code": 0,
+      "observed_result": "ADR activation: file exists at 8ab100793df9831505f495543a74044b91c2c9ab (rc 0), absent at first parent (rc 128), land OID is on master first-parent chain, clone non-shallow. Four delivery files fit the six-file ceiling. Deferral retains the 450-added-line cap, grants no exception and expressly blocks lease until measured size revision and owner approval. Scratch measurement allowance must be assigned by the future Mission revision; no such model call was made here. Actual delivery numstat/exception approval remains not_measured. Fixing the present contract findings requires a substantive spec revision before any later byte-preserving size-only revision; do not force these fixes into the size-only allowance."
+    },
+    {
+      "name": "prior-finding-closure-audit",
+      "status": "passed",
+      "command": "Read wp1460-spec-review-1.json and wp1460-spec-review-2.json; compare each finding against numbered r3 SPEC and the current-code probes",
+      "exit_code": 0,
+      "observed_result": "Audit complete, not an implementation pass: 9 prior classes closed in the specification, 3 partial, 1 explicitly deferred behind admission. Of the five classes open in round 2, only B1-06 is fully closed now; B1-09 is deferred, not counted as fixed. B1-14 is new. Dedicated mutants are specified using each target case exception, including unrelated AttributeError false-credit controls; those new mutants have not been run because B1 is unimplemented.",
+      "closures": [
+        {
+          "id": "B1-01-collector-self-record",
+          "closure": "closed_in_spec",
+          "evidence": "43-44, 123, 128, 167, 172: provisional null self fields, bounded stamp window and eventual REST success remain explicit."
+        },
+        {
+          "id": "B1-02-failure-evidence-transport",
+          "closure": "closed_in_spec",
+          "evidence": "62-65, 169: always-upload/always-collect and core-versus-definition errors remain explicit; current writer still emits completed red receipts."
+        },
+        {
+          "id": "B1-03-unselected-attempt-validation",
+          "closure": "closed_in_spec",
+          "evidence": "114: only superseded, unselected producers are historical. Current selector accepts old-corrupt/new-good and rejects latest-corrupt. B1-14 is a separate overbroad compatibility assertion."
+        },
+        {
+          "id": "B1-04-v1-not-fully-specified",
+          "closure": "partial",
+          "evidence": "R diagnostics and reduction are repaired; P_THIEU/C_CHE_DO still lack independently reconstructible evidence. Third appearance of this class."
+        },
+        {
+          "id": "B1-05-b3-interface-mismatch",
+          "closure": "closed_in_spec",
+          "evidence": "31, 127-137: repository id, provisional self handling and A4 interface are specified. Latest B3 draft a3e91894 consumes the B1 validator but still pins B1 r2; update that dependent draft when B1 actually freezes, as line 10 already requires."
+        },
+        {
+          "id": "B1-06-stamp-identity-not-bound",
+          "closure": "closed_in_spec",
+          "evidence": "114, 119, 167, 172: every selected stamp, including an older attempt on a job not rerun, receives full B/S/T/P checks; only superseded stamps are exempt. Both attempt positions and per-binding mutants are required."
+        },
+        {
+          "id": "B1-07-missing-compatibility-controls",
+          "closure": "closed_in_spec",
+          "evidence": "166, 172: healthy, collector-only, repaired-shard and non-target-survival A/B cases, old readers and kill-count equality remain required."
+        },
+        {
+          "id": "B1-08-canary-authority-budget-unresolved",
+          "closure": "closed_in_spec",
+          "evidence": "142-163, 196: two full runs and two A4 calls are conditional on the installing Mission revision; required versus debt dispositions are explicit. r85 itself still has full_m9_runs=1."
+        },
+        {
+          "id": "B1-09-sensitive-size-budget",
+          "closure": "deferred_with_explicit_admission_block",
+          "evidence": "185-192, 197: no exception or lease is granted by r3. Measured representative four-file numstat, a subsequent size revision, owner hash approval and copied exception are prerequisites. This is consistent as a contract-only stage; actual size compliance is unmeasured, not a completed implementation closure."
+        },
+        {
+          "id": "B1-10-stale-canary-reuse",
+          "closure": "closed_in_spec",
+          "evidence": "144, 162: any head change invalidates A3/A4/K7; additional budget is required before repeating."
+        },
+        {
+          "id": "B1-11-a4-null-comparison",
+          "closure": "closed_in_spec",
+          "evidence": "56, 151-158, 170: retain available workflow_sha; compare only present values; independently measured fallback is permitted. The acquisition issue belongs to B1-12."
+        },
+        {
+          "id": "B1-12-a4-failure-downgraded-to-unknown",
+          "closure": "partial",
+          "evidence": "154-158 repair the result table, but success-only acquisition and passed-only validation at 135/149 still hide the same class of positive failure."
+        },
+        {
+          "id": "B1-13-dependency-provenance-can-be-empty",
+          "closure": "partial",
+          "evidence": "46, 61, 120, 167, 172 require dependency keys, hashes and unavailable states; executable first-line extraction still loses the required ShellCheck version."
+        }
+      ]
+    },
+    {
+      "name": "full-remote-fetch",
+      "status": "failed",
+      "command": "git -C /tmp/wp1460-r3-review fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune",
+      "exit_code": 128,
+      "observed_result": "Configured proxy 127.0.0.1:36011 is unreachable. Cached origin refs were fetched from /home/user/tra-luat into the scratch clone (rc 0). Independently read all 378 live branch refs through the GitHub connector: four cached tips are absent/different; their tip changes were read through GitHub. No complete fresh Git fetch is claimed.",
+      "artifact": "/tmp/wp1460-r3-live-refs.json"
+    },
+    {
+      "name": "canonical-lease-checks",
+      "status": "not_measured",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <path>, separately for all four delivery paths, SPEC.md and a wp1460 lease path, in /tmp/wp1460-r3-review",
+      "exit_code": 12,
+      "observed_result": "All six calls return KHONG_XAC_DINH because git ls-remote cannot connect to the proxy. Informational cached scan of 534 lease records finds wp1166-r4-g4 symmetrically superseded and wp1236-a-r9-g1-claude-20261120 still holding ci_dang_ky_test.py. Direct GitHub read of that lease at cbfd8e665289206b476bd3aa5cb1f964efd0c844 confirms the write set, expiry 2026-11-22T15:35:00Z and no replacement/withdrawal. SPEC already blocks lease on this overlap. This is not a clean live admission receipt; repeat complete ref/holder verification before lease, including the eventual metadata paths.",
+      "artifact": "/tmp/wp1460-r3-lease-info.json"
+    },
+    {
+      "name": "runtime-and-lint-capability",
+      "status": "not_measured",
+      "command": "python3 version; actionlint -version; shellcheck --version; python3 -m ruff check --no-cache --select F .claude/dev/ci_dang_ky_test.py",
+      "exit_code": [
+        0,
+        0,
+        null,
+        1
+      ],
+      "observed_result": "Linux Python 3.13.18; actionlint 1.7.7. ShellCheck executable absent (FileNotFoundError); Ruff module unavailable. The required actionlint-with-ShellCheck gate and bare Ruff lint are not passing evidence. Separate Ruff pin/probe contract passed above. Workflow target Python 3.12/native runner behavior was not measured."
+    },
+    {
+      "name": "implementation-gates-and-live-canaries",
+      "status": "not_run",
+      "command": "B1 collector/validator tests and dedicated mutants; full registry suite; CI; A3/A4 dispatch; rerun; Windows",
+      "exit_code": null,
+      "observed_result": "No implementation exists in the four delivery paths at the reviewed candidate; only SPEC differs. No workflow dispatch/rerun, GitHub write or external execution was performed. Current-code probes do not establish acceptance of future B1."
+    },
+    {
+      "name": "review-checkout-final-state",
+      "status": "passed",
+      "command": "git status --porcelain=v1 --untracked-files=all --ignored=matching; git diff --exit-code; git diff --cached --exit-code; git diff --check; git rev-parse HEAD HEAD^{tree}; hash SPEC bytes",
+      "exit_code": 0,
+      "observed_result": "No tracked/index diff or untracked additions; exact SHA/tree/hash unchanged. Ignored .codex/ is present. The ignored-file enumeration captured zero regular files and did not recursively hash that directory, so complete ignored-byte invariance is not claimed. Source /home/user/tra-luat was read for cached objects/refs, not given a complete byte snapshot.",
+      "artifact": "/tmp/wp1460-r3-preflight-final.json"
+    }
+  ],
+  "notes": "Independent SPEC review round 3: 4 open classes (1 P1, 3 P2; no P0/P3), retaining B1-12/B1-04/B1-13 and adding B1-14. These must be resolved before the contract can be frozen. Size deferral is acceptable only as the explicitly non-executable contract stage; it is not a granted size exception, measured size compliance, or lease authorization. The required later Mission revision must assign prototype workload allowance and the two-full-run/two-A4 budget; r85 alone does not grant those increments. Do not reset prior spec-author/review counters. No additional model/reviewer invocation was dispatched here. B1-04 has now appeared in three distinct reviews, requiring the protocol section-12 design checkpoint before continuing the ordinary repair loop. Provider=openai_codex; model_family=openai; execution_surface=codex_service; transport=machine. Requested model/effort=gpt-6-astra/xhigh; served model/effort and external launcher session/run identity=KHONG_DO_DUOC in this context. Sandbox=workspace-write with restricted network and repository .git read-only; scratch=/tmp/wp1460-r3-review and /tmp/wp1460-r3-*. Applied cross-review adapter with actual service surface declared. No subagents, repository edits, commits, pushes, GitHub writes or workflow dispatches. Review output is the assigned REVIEW_OUT. The verdict grants no execution, lease, merge, land or deployment authority."
+}

@@ -1,0 +1,218 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa",
+  "reviewed_file_sha256": "4c1e8ae9c0983edbe26b6fa1ff62012a28cc46c874be372b02cce18118aba480",
+  "findings": [
+    {
+      "id": "B1-12-a4-failure-downgraded-to-unknown",
+      "severity": "P1",
+      "location": "ops/specs/wp1460-r1/SPEC.md:105-116, 126, 128",
+      "claim": "The A4 table turns a positively measured provenance failure into nonblocking not_measured. Its last row includes every result other than passed, including the existing producer's failed state. The coordinator permitted missing measurement to remain debt at merge; this additionally permits a demonstrated wrong definition OID or wrong run identity to remain debt.",
+      "evidence": [
+        {
+          "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r2-probes.py",
+          "observed_result": "Existing ops/ci_provenance.py, exercised through its current test transport and CLI: valid control => rc 0/passed; GraphQL 403 => rc 3/not_measured; dispatch with a different definition OID => rc 12/failed, reason oid_head_sha; different GraphQL run id => rc 12/failed, reason databaseId. Probe process exited 0."
+        },
+        {
+          "command": "sed -n '423,480p' ops/ci_provenance.py; nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '105,116p'",
+          "observed_result": "do_wd explicitly separates failed from not_measured. SPEC line 110 blocks only passed-but-mismatching results; line 112 maps all non-passed results to not_measured and allows merge. The A4 workflow uploads wd.json with always(), so a failed result can be retained and inspected."
+        }
+      ],
+      "suggested_fix": "Give verified A4 failed results their own blocking disposition, such as lech. Preserve not_measured only for unavailable or insufficient evidence. Add paired passed, unavailable and failed producer fixtures, including each known identity mismatch, plus dedicated mutants classified by each target case's own exception class. Keep the allowed not_measured debt and the two-full-run budget unchanged."
+    },
+    {
+      "id": "B1-04-v1-not-fully-specified",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:29-49, 61, 69, 74, 123-124",
+      "claim": "The new typed records close much of B1-04, but the frozen receipt still cannot support the required independent recomputation of the overall verdict from its rows. Rule R has outcomes that are not serialized as machine-readable facts: for example, a readable run.repository mismatch must produce do, while an unavailable core read must produce khong_ket_luan. The output stores the context repository and otherwise healthy job/item rows, and has only unconstrained free-text loi strings for these failures. No normative codes or mapping let the offline validator distinguish these causes and recompute ket_luan_tong.",
+      "evidence": [
+        {
+          "command": "nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '29,49p;59,74p;121,124p'",
+          "observed_result": "Line 61 requires recomputing ok, ket_cuc and dau_hieu_duong from the rows. Line 74 distinguishes missing core REST evidence from a measured mismatch. The closed root schema contains no per-core-read/per-rule result or observed run.repository value; loi is only [str]. Consequently a valid red diagnostic report for an R-only mismatch has no typed row that explains its required do verdict."
+        }
+      ],
+      "suggested_fix": "Before freezing v1, define sufficient structured diagnostic state, or a closed error-code/severity contract, for every rule whose result cannot be recovered from the existing rows. Specify the validator's exact reduction and exit contract. Add producer-to-validator round trips for an otherwise healthy report with only an R mismatch, only an unavailable core read, and both a definite failure and unavailable evidence; require correct do/khong_ket_luan precedence and dedicated mutants."
+    },
+    {
+      "id": "B1-06-stamp-identity-not-bound",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:73, 78, 80, 123, 128",
+      "claim": "Rule B adds the required bindings, then exempts old-attempt stamps for jobs that were not rerun from semantic validation. Such a stamp is still the selected latest producer for that job. On a collector-only attempt 2, the first sentence therefore requires validating the attempt-1 producer's embedded run/job/event identity, while the last sentence declares that same stamp valid without semantic checks. Following the exemption reopens the original identity gap.",
+      "evidence": [
+        {
+          "command": "nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '73,80p;121,128p'; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r2-probes.py",
+          "observed_result": "The actual selector's healthy/repaired-rerun probes retain attempt-1 producers for unaffected shards; the repaired control selects attempts {0:2,1:1,2:1,3:1,4:1,5:1,6:1,7:1}. SPEC line 78 explicitly exempts 'job không chạy lại'. A witness is an unaffected attempt-1 stamp under the correct artifact name with matching checkout/time but embedded run_id from another run: the first B sentence rejects it and the last sentence exempts its semantic check. This is a specification contradiction, not a run of the unimplemented collector."
+        }
+      ],
+      "suggested_fix": "Define selection per job, independent of the run's latest attempt. Apply all B/S/T bindings to every selected stamp even when its producer attempt is older than luot.run_attempt. Exempt only superseded, unselected historical stamps. Pair a valid reused stamp with wrong embedded run/job/event identities on that same reused producer, and give each binding a dedicated target-class mutant."
+    },
+    {
+      "id": "B1-09-sensitive-size-budget",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:4, 137, 141-152",
+      "claim": "The file-cap problem is repaired, but the requested nang_tran still lacks the numstat evidence expressly required by ADR-0053. Its can_cu says there is no measurement and substitutes component estimates. The new 2100-added-line limit is therefore not yet supported by the evidence contract cited for approving the exception. This finding is about the missing measurement, not the fact that owner approval is still pending.",
+      "evidence": [
+        {
+          "command": "cat docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md; nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '135,152p'; git diff --numstat origin/master 9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa -- .github/workflows/ci-dot-bien-du.yml .claude/dev/ci_dang_ky_test.py ops/specs/wp1460-r1/hop_dong",
+          "observed_result": "ADR-0053 requires can_cu to include git diff --numstat. SPEC line 147 explicitly provides estimates only; the implementation-path diff is empty. The four-file delivery fits the six-file cap. The activation OID was independently verified: ADR present at 8ab100793df9831505f495543a74044b91c2c9ab, absent at its first parent, and that OID is on origin/master's first-parent chain in a non-shallow clone."
+        }
+      ],
+      "suggested_fix": "Attach measured numstat from a representative scratch prototype covering the collector, validator, schema, fixtures and required tests, and use it to substantiate the requested limit. Alternatively obtain an explicit scoped owner decision allowing estimate-only admission instead of silently treating estimates as the ADR-required measurement. Retain actual numstat checks before code review and copy the approved exception into the lease."
+    },
+    {
+      "id": "B1-13-dependency-provenance-can-be-empty",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:42, 56, 72-83, 123-128",
+      "claim": "The dependency-provenance requirement from plan r4 is representable but not required in practice. A stamp with requirements={}, cong_cu={} and pip_freeze_sha256=null satisfies the stated field types, and no collector rule or explicit acceptance case requires the existing requirements file or the installed tool versions to be present. The executor can therefore emit a green receipt with none of the dependency evidence that B1 was assigned to supply.",
+      "evidence": [
+        {
+          "command": "sed -n '242,249p' /tmp/wp1460-r2-plan.md; nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '42,56p;72,83p;121,128p'; PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r2-probes.py",
+          "observed_result": "Plan B1 requires requirements*.txt digests and tool versions. The current checkout contains requirements.txt with SHA-256 97733a880d95f8a900f39af2bcd1a59a3ecb357dfc928c01c7a06636b1b07657; dot-bien-du installs PyYAML 6.0.3, jsonschema 4.26.0 and Ruff 0.15.15. SPEC declares open name-to-hash/version maps without an expected key set or completeness rule. Rule B checks shape and identity, and no subsequent rule checks dependency evidence completeness."
+        }
+      ],
+      "suggested_fix": "Freeze how the stamp enumerates requirements files and which tool/version observations are required for each job. Require complete, nonempty evidence where applicable, bind source-file hashes to the checkout, and define explicit unavailable states instead of empty success-shaped maps. Add healthy controls plus missing-entry, wrong-hash and unavailable-version cases, with a dedicated target-class mutant for each new check."
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact-object-and-current-master",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; sha256sum ops/specs/wp1460-r1/SPEC.md; GitHub GET git/ref/heads/ops/wp1460-r1 and git/ref/heads/master",
+      "exit_code": 0,
+      "observed_result": "Reviewed HEAD 9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa; tree 0abdaef999c4e5afea41171d21de912ef4603484; spec hash matches the assignment. GitHub independently confirms that branch head and current master 0f9aa2a2cc697129e1f5be72feddf60986286865. GitHub tool reads have no shell exit code."
+    },
+    {
+      "name": "plan-authority-and-sibling-contracts",
+      "status": "passed",
+      "command": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; read mission-r84.json and mission-r85.json; git show origin/ops/wp1461-r1:ops/specs/wp1461-r1/SPEC.md; git show origin/ops/wp1462-r1:ops/specs/wp1462-r1/SPEC.md",
+      "exit_code": 0,
+      "observed_result": "Plan source ref 0bbbcb68abb5e008e272171ff2f17244cd9ac808; plan hash 0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe. r84 Q4/Q6 exclusions are preserved. r85 admits B1 spec drafting and requires owner hash approval plus a later Mission revision before lease. The user-authorized full_m9_runs=2 is correctly conditional on that revision. B3 is still draft b8b408d86b3f92a5ea3ae3596ef612481b940b27 and must consume the finalized B1 contract; B4 7582454cff0563f22e0ca13fba9f1f0f04ad2485 has no B1 delivery-file overlap."
+    },
+    {
+      "name": "current-code-cheap-probes",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r2-probes.py",
+      "exit_code": 0,
+      "observed_result": "321 unique keys: 56 ca, 255 tk, 10 db; shard sizes 37/37/38/38/42/41/40/48; key-set hash 98cd127f05631214a47b5cd27400cff99f835d19eb0a5054884f118343badf5e. Existing workflow/pin guards return []; Ruff pin/probe contract is 3/3. Healthy and repaired-rerun selection are 8/8; corrupt latest producer gives errors and zero selections. Existing full aggregator accepts the healthy synthetic fixture, reports 46/46 internal counterexamples, 255/255 self mutants and 10/10 product mutants. These are current-code characterization probes, not B1 implementation tests.",
+      "artifact": "/tmp/wp1460-r2-probes.json"
+    },
+    {
+      "name": "a4-current-producer-and-reader",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r2-probes.py",
+      "exit_code": 0,
+      "observed_result": "Actual current A4 producer: passed rc 0; unavailable rc 3; wrong OID and wrong run rc 12/failed. Existing nhap_wd accepts identical/behind and rejects ahead/diverged. SPEC's phrase 'khong di truoc' can mean 'not ahead' and explicitly cites nhap_wd; no ancestry-direction finding is asserted."
+    },
+    {
+      "name": "current-shard-writer-failure-receipts",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1460-r2-probes.py",
+      "exit_code": 0,
+      "observed_result": "With expensive item execution and memory measurement injected, the actual writer returns rc 0 for passed and rc 1 for failed/not_measured/not_run/inconclusive, while retaining the raw status and ket_thuc in each receipt. The legacy green-selector helper rejects all four non-passed receipts. This is not a native mutation, timeout or RSS measurement."
+    },
+    {
+      "name": "round-1-closure-audit",
+      "status": "passed",
+      "command": "Read wp1460-spec-review-1.json; compare each finding with numbered r2 SPEC and current-code probes",
+      "exit_code": 0,
+      "observed_result": "Disposition audit completed: 8 closed, 3 partial, 0 wholly open. Closed means repaired in this specification; implementation acceptance remains unrun.",
+      "closures": [
+        {
+          "id": "B1-01-collector-self-record",
+          "closure": "closed",
+          "evidence": "SPEC 38-43 and 81 define the provisional self record, exclude it from the 10/10 upstream count and give its stamp a bounded collection-time window. 86 requires the consumer to verify its eventual REST success; 123/128 require the control and mutants."
+        },
+        {
+          "id": "B1-02-failure-evidence-transport",
+          "closure": "closed",
+          "evidence": "SPEC 57-62 permits always-upload for failed shards, always-running collection steps 5-9, separate core/definition REST errors and diagnostic parsing. 125 requires workflow-derived sequencing tests. Current writer and selector probes confirm the failure behavior these changes address."
+        },
+        {
+          "id": "B1-03-unselected-attempt-validation",
+          "closure": "closed",
+          "evidence": "SPEC 73 scopes shard semantic checks to selected producers and preserves corrupt old receipts only as history. 122-123/128 require both rerun directions. Current selector probe accepts a corrupt old artifact plus a good newer producer and rejects a corrupt latest producer without fallback."
+        },
+        {
+          "id": "B1-04-v1-not-fully-specified",
+          "closure": "partial",
+          "evidence": "SPEC 25-49 adds required/nullable fields, closed producer-history entries and explicit equivalent_reviewed fields; 68/124 route equivalence through the validator. The offline-verdict diagnostic gap remains as finding B1-04."
+        },
+        {
+          "id": "B1-05-b3-interface-mismatch",
+          "closure": "closed",
+          "evidence": "SPEC 31 adds kho_id; 86 resolves self success from REST; 93/95 define A4 discovery and field mappings; 63 supplies a shared fixture. B1 is explicitly the producer-contract authority under 10, consistent with r85's B3 dependency on a frozen B1 spec. B3 draft reconciliation is still required before B3 execution."
+        },
+        {
+          "id": "B1-06-stamp-identity-not-bound",
+          "closure": "partial",
+          "evidence": "SPEC 56/78 and 123/128 add identity checks and per-binding mutants, but the selected older-attempt stamp exemption contradicts those checks; see remaining B1-06."
+        },
+        {
+          "id": "B1-07-missing-compatibility-controls",
+          "closure": "closed",
+          "evidence": "SPEC 122 explicitly adds healthy, collector-only rerun, repaired-shard rerun, non-target-survival, legacy-reader and kill-count A/B controls. 128 requires target-case exception classes and an unrelated-exception false-credit self-test."
+        },
+        {
+          "id": "B1-08-canary-authority-budget-unresolved",
+          "closure": "closed",
+          "evidence": "SPEC 103-118 makes A3 merge-blocking, fixes two full runs plus two A4 calls and one rerun, and states the disposition of optional measurements. No dispatch is allowed before the installing Mission revision. This honors the user's explicit round-2 decisions; it does not claim that r85 itself already grants two full runs."
+        },
+        {
+          "id": "B1-09-sensitive-size-budget",
+          "closure": "partial",
+          "evidence": "SPEC 4/137 fixes activation and consolidates delivery to four files; 145-150 requests a line-cap exception. ADR activation probes pass, but can_cu still lacks the required numstat measurement."
+        },
+        {
+          "id": "B1-10-stale-canary-reuse",
+          "closure": "closed",
+          "evidence": "SPEC 102 invalidates A3/A4/K7 on every head change, including schema/fixture-only changes; 118 stops for additional budget before repeating."
+        },
+        {
+          "id": "B1-11-a4-null-comparison",
+          "closure": "closed",
+          "evidence": "SPEC 51 retains an observed workflow_sha across contents failures; 109-114 compares only present values and permits an independent A4 replacement. 126/128 require cases and mutants. New B1-12 concerns the different failed-versus-unavailable classification, not the repaired null comparison."
+        }
+      ]
+    },
+    {
+      "name": "full-remote-fetch",
+      "status": "failed",
+      "command": "git -C /tmp/wp1460-r2-review fetch --all --prune",
+      "exit_code": 128,
+      "observed_result": "Cannot connect to configured proxy 127.0.0.1:36011. Cached origin refs were fetched from /home/user/tra-luat into scratch. Independently read 377 live branch refs through the GitHub connector; two cached tips differ. Their latest commit changes were read through GitHub. No complete fresh Git fetch is claimed."
+    },
+    {
+      "name": "canonical-lease-checks",
+      "status": "not_measured",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <path>, separately for all four delivery files, SPEC.md and a wp1460 lease path, in /tmp/wp1460-r2-review",
+      "exit_code": 12,
+      "observed_result": "All six calls return KHONG_XAC_DINH because git ls-remote cannot reach the proxy. An explicitly informational cached-ref scan reads 534 lease records: wp1166-r4-g4 is symmetrically superseded; wp1236-a-r9-g1-claude-20261120 still holds ci_dang_ky_test.py. Direct GitHub read at cbfd8e665289206b476bd3aa5cb1f964efd0c844 confirms that write set, expiry 2026-11-22T15:35:00Z and no replacement. The candidate already blocks implementation on that lease. This is not a clean lease-admission result; repeat a complete live scan before granting the lease."
+    },
+    {
+      "name": "bare-ruff-and-required-actionlint-capability",
+      "status": "not_measured",
+      "command": "python3 -B -m ruff check --no-cache --select F .claude/dev/ci_dang_ky_test.py; command -v shellcheck; actionlint -version",
+      "exit_code": [
+        1,
+        1,
+        0
+      ],
+      "observed_result": "Ruff module unavailable; shellcheck absent. actionlint 1.7.7 and Python 3.13.18 are available. The separate Ruff pin/probe contract passed in the cheap probes; neither bare lint nor the required actionlint-with-shellcheck gate is claimed to pass."
+    },
+    {
+      "name": "implementation-gates-and-live-canaries",
+      "status": "not_run",
+      "command": "B1 collector/validator tests and mutants; full registry gate; CI; full M9; A3/A4 dispatch; rerun; Windows",
+      "exit_code": null,
+      "observed_result": "No B1 implementation exists in the reviewed commit. No workflow dispatch, rerun or GitHub write was performed."
+    },
+    {
+      "name": "review-checkout-final-state",
+      "status": "passed",
+      "command": "git status --porcelain=v1 --untracked-files=all --ignored=matching; git diff --check; git diff --exit-code; git diff --cached --exit-code; git rev-parse HEAD HEAD^{tree}; sha256sum ops/specs/wp1460-r1/SPEC.md",
+      "exit_code": 0,
+      "observed_result": "Tracked/index diffs empty; no untracked additions; exact SHA/tree/spec hash unchanged. Ignored .codex/ was present at entry and remains present. Its initial byte hashes were not recorded, so full ignored-byte invariance is not claimed."
+    }
+  ],
+  "notes": "Independent SPEC review round 2: five remaining finding classes (1 P1, 4 P2; no P0/P3), with stable prior IDs and new IDs B1-12/B1-13. No removed authorization-store mechanism was reintroduced; mutation classifier and Q4/Q6 exclusions remain intact. The authorized two-full-run adjustment and A4 not_measured debt were treated as accepted round-2 constraints, subject to installation before execution. Provider=openai_codex; execution_surface=codex_service; transport=machine. Requested reviewer identity in SPEC=gpt-6-astra/highest effort; served model/effort and external launcher session ID are KHONG_DO_DUOC from this context. Applied cross-review adapter with the actual service surface declared instead of claiming CLI. Sandbox=workspace-write, restricted network, repository .git read-only. Reviewer remained read-only: no repository edits, commits, pushes, GitHub writes, dispatches or subagents. Scratch=/tmp/wp1460-r2-review and /tmp/wp1460-r2-*; only the assigned REVIEW_OUT is the deliverable. Findings based on prose are labeled specification deductions; running current-code probes does not prove the unimplemented B1 changes. This verdict grants no lease, merge, land or deployment authority."
+}

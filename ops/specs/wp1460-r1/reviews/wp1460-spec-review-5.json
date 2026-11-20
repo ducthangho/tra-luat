@@ -1,0 +1,1595 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1460",
+  "mission_id": "gh-1172",
+  "revision": 5,
+  "generation": null,
+  "generation_note": "Frozen-spec candidate, explicitly no lease; no executor generation invented.",
+  "round": 5,
+  "round_cap": 6,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "session_id": "01a1fa0c-6f76-7d42-b4b6-0fc8b5bbdd2c",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "session_source": "CODEX_THREAD_ID environment in this independent review runtime",
+    "requested_model": "gpt-6-astra per assignment",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "execution_surface_note": "Review executed through this Codex tool/API surface; an installed codex-cli0.170.0 was probed but its presence is not evidence this review ran via that CLI."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789",
+  "reviewed_tree": "4ab83637a6f67c48571b539ac418324afbf6b1f6",
+  "reviewed_file": "ops/specs/wp1460-r1/SPEC.md",
+  "reviewed_file_sha256": "75a1f16459f9dc8e747c486035de4cd04b0fb4e7faec0476b60a244161d5b882",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "changes_requested",
+  "assurance": {
+    "attested": "Independent read-only Codex specification review with direct local measurements and separately labelled executable SPEC countermodels.",
+    "approval_state": null,
+    "limitations": "No cross_approved, same_provider_approved or human_audited state is created by a changes_requested verdict. Serving model/effort, external launcher terminal rc/stdout hash and full fresh remote-ref coverage are not attested.",
+    "executor_identity_source": "Claude Code/Fable5.2 as specified; executor runtime not independently measured in this turn."
+  },
+  "evidence_url": null,
+  "findings": [
+    {
+      "id": "B1-04-v1-not-fully-specified",
+      "class_slug": "v1-not-fully-specified",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:25,33,39-44,53,85; ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json:13-14,21",
+      "claim": "The split does not make the non-green representation total over its required failure inputs. Both event alternatives reused by bien_nhan_khong_xanh require a non-null run_created_at; schedule additionally requires khung_danh_nghia_utc derived from run.created_at. When run.loi replaces run.json, neither timestamp is supplied by the declared remaining inputs. GitHub context has run_id/run_attempt but no workflow-run creation timestamp. The collector is offline, may not invent REST timestamps, yet must always emit schema-valid non-green output. A known unsupported event is also required to produce non-green by X8 but cannot be represented by either event alternative. This is a new in-scope manifestation of the existing availability-to-representation cause class. The old diagnostic/hash manifestations were transferred to B1b, not repaired.",
+      "manifestations": [
+        {
+          "id": "B1-04.m1",
+          "location": "non-green workflow_dispatch su_kien.run_created_at",
+          "observation": "Missing and null both rejected."
+        },
+        {
+          "id": "B1-04.m2",
+          "location": "non-green schedule su_kien.run_created_at",
+          "observation": "Missing and null both rejected."
+        },
+        {
+          "id": "B1-04.m3",
+          "location": "non-green schedule su_kien.khung_danh_nghia_utc",
+          "observation": "Missing and null both rejected when run creation time is unavailable."
+        },
+        {
+          "id": "B1-04.m4",
+          "location": "non-green su_kien.ten outside schedule/workflow_dispatch",
+          "observation": "Known push input cannot be serialized truthfully as required by X8."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1460-review5/probes.py .",
+          "exit_code": 0,
+          "observed_output": "red_availability: six missing/null timestamp variants valid=false; known unsupported event push valid=false.",
+          "artifact": "/tmp/wp1460-review5/probes.json"
+        },
+        {
+          "command": "python3 -B /tmp/wp1460-review5/final_checks.py",
+          "exit_code": 0,
+          "observed_output": "TEST_ONLY_SCHEMA_DIRECTION: red_missing_timestamp_accepted=True, green_missing_timestamp_rejected=True, original_healthy_accepted=True. This is a scratch schema-direction test, not an executor patch.",
+          "artifact": "/tmp/wp1460-review5/final-checks.json"
+        },
+        {
+          "command": "web.open/find GitHub contexts reference and workflow_dispatch payload; inspect SPEC declared inputs",
+          "exit_code": null,
+          "observed_output": "Documented context provides run_id/run_attempt; find(created_at) on the contexts page returned no match. SPEC X8 derives the schedule window from REST run.created_at. Inference: unavailable run REST leaves the frozen mandatory fields unobservable.",
+          "sources": [
+            "https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context",
+            "https://docs.github.com/en/webhooks/webhook-events-and-payloads#workflow_dispatch",
+            "https://docs.github.com/en/rest/actions/workflow-runs#get-a-workflow-run"
+          ]
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json $defs/bien_nhan_khong_xanh and its event representation, ops/specs/wp1460-r1/hop_dong/fixture.json failure cases, and ops/specs/wp1460-r1/SPEC.md producer/error contract. The defect is in the frozen contract; the executor is expressly forbidden to edit those bytes.",
+        "how": "Define an explicit incomplete non-green event shape that can preserve known identity and unknown timestamps without weakening the green shape. Define the unsupported-event/invalid-context boundary, including which inputs are argument errors instead of collectible failures. Do not substitute current time, repository creation time or job start time for run.created_at. Revise hashes before implementation.",
+        "locking_test": "Run python3 -B /tmp/wp1460-review5/final_checks.py as the demonstrated direction, then add full offline collector round trips for run.loi, malformed/missing run.created_at, schedule with unknown window, and unsupported event. Healthy dispatch/schedule remain green. Separate target exception classes must kill fabricated-now, non-green-to-green, and shared-event-schema-loosening mutants; each endpoint failure must hit its own target case.",
+        "what_the_fix_may_spawn": "Sharing the relaxed event definition with green receipts could make freshness evidence optional. Changing event shape affects B2/B3 and frozen hashes; keep B1b diagnostic semantics out of this repair."
+      },
+      "confidence": "high",
+      "product_patch_attempted": false
+    },
+    {
+      "id": "B1-15-consumer-records-not-bound-to-producers",
+      "class_slug": "consumer-records-not-bound-to-producers",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:56-68; ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json:17-20",
+      "claim": "The consumer rules do not bind receipt rows bijectively to the independently expected/latest REST producers. C4 compares sets, C7 counts the submitted arrays, and C6 only compares attempts inside the receipt. Therefore a duplicate job with adjusted tally, a duplicate shard replacing another shard, a missing shard with 7/7, and stale attempt-1 producer rows under a run-attempt-2 receipt all satisfy the literal C1-C8 contract. Real archive/content hashes do not repair a missing relationship: authentic bytes can be duplicated, omitted or assigned to the wrong producer generation. X2/X4/X5 constrain the producer, but section 5 does not require consumers to recheck those relationships. An executor implementing exactly the advertised B2/B3 rules can accept incomplete or stale evidence.",
+      "manifestations": [
+        {
+          "id": "B1-15.m1",
+          "location": "job[] / C4 / C7",
+          "observation": "12 rows, 11 unique job names and 11/11 predecessor tally pass."
+        },
+        {
+          "id": "B1-15.m2",
+          "location": "manh[] / C6 / C7",
+          "observation": "8 rows with only 7 distinct shards pass."
+        },
+        {
+          "id": "B1-15.m3",
+          "location": "manh[] / C7",
+          "observation": "7 rows with 7/7 pass despite 8 expected shard jobs."
+        },
+        {
+          "id": "B1-15.m4",
+          "location": "job[].run_attempt/job_id and selected artifacts / C3-C6",
+          "observation": "Receipt run_attempt=2 with all producer rows/artifacts at attempt 1 passes against a successful REST fixture whose latest producers are attempt 2."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1460-review5/semantic_probe.py",
+          "exit_code": 0,
+          "observed_output": "healthy, duplicate_job, duplicate_shard, missing_shard, stale_producer_rows: passes_literal_C1_C8=true for all five. C8 hashes actual in-memory ZIP bytes and their sole member; all hashes match. External REST is an explicit successful fixture. This is an executable SPEC countermodel, not a deployed consumer result.",
+          "artifact": "/tmp/wp1460-review5/semantic-probe.json"
+        },
+        {
+          "command": "python3 -B /tmp/wp1460-review5/probes.py .",
+          "exit_code": 0,
+          "observed_output": "Additional same-mechanism scan: changed job_id, changed non-shard key, wrong self row and duplicated shard index are schema-valid with no literal C4-C7 errors.",
+          "artifact": "/tmp/wp1460-review5/probes.json"
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1460-r1/SPEC.md section 5 and ops/specs/wp1460-r1/hop_dong/fixture.json consumer fixtures. Bind rows at the consumer boundary, where C1-C8 currently claim to define sufficient verification; producer-only assertions cannot give that boundary teeth.",
+        "how": "Require one receipt row per expected job and one shard per independently expanded matrix entry; bind name/key/job_id/attempt and self identity to the selected latest REST job, and bind artifact name/run/attempt/member to that producer. Keep legitimately retained older attempts for jobs not rerun. Derive completeness from the independent inventory, not from the received array or tally.",
+        "locking_test": "Use python3 -B /tmp/wp1460-review5/semantic_probe.py as the reproducible countermodel matrix. Add healthy full-run, collector-only rerun and one-shard rerun controls. Dedicated case exception classes must kill set-only inventory, duplicate-overwrite, received-length-as-expected, and omit-latest-REST-binding mutants; test a genuinely retained old producer separately from stale substituted rows.",
+        "what_the_fix_may_spawn": "Requiring every producer attempt to equal the overall attempt would break valid partial reruns. Rebinding against current-attempt-only REST instead of the latest record of each job would lose retained jobs. Coordinate the revised contract with B3 GHIM-B1."
+      },
+      "confidence": "high",
+      "product_patch_attempted": false
+    },
+    {
+      "id": "B1-16-frozen-fixture-semantic-oracle-missing",
+      "class_slug": "frozen-fixture-semantic-oracle-missing",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/hop_dong/fixture.json:16,69-79; ops/specs/wp1460-r1/SPEC.md:23,49-50,56,83-85,95-130",
+      "claim": "The frozen fixtures are not consistent executable examples of the semantic contract. xanh-chay-lai-mot-manh increments three job attempts and shard 3 to 2, but leaves all four associated artifact names at attempt 1, contradicting X4/X5 and the canonical artifact naming rules. It is advertised as a healthy rerun and passes the quoted validator and C4-C7. Also, section 5 says every C rule has a luat-C fixture, but only C4/C5/C6/C7 occur; C1/C2/C3/C8/C9/C10 have none. The checker counts vi_pham_luat presence without evaluating its law or even checking its label. These defects survive the exact 70/70 expected output, so passing it does not establish the promised shared contract examples.",
+      "manifestations": [
+        {
+          "id": "B1-16.m1",
+          "location": "xanh-chay-lai-mot-manh /job/4/dau_job/ten",
+          "observation": "dot-bien-manh-3 stamp remains attempt 1."
+        },
+        {
+          "id": "B1-16.m2",
+          "location": "xanh-chay-lai-mot-manh /job/9/dau_job/ten",
+          "observation": "dot-bien-gop stamp remains attempt 1."
+        },
+        {
+          "id": "B1-16.m3",
+          "location": "xanh-chay-lai-mot-manh /job/10/dau_job/ten",
+          "observation": "bien-nhan-audit stamp remains attempt 1."
+        },
+        {
+          "id": "B1-16.m4",
+          "location": "xanh-chay-lai-mot-manh /manh/3/artifact/ten",
+          "observation": "Shard artifact remains dot-bien-manh-44000000001-1-3."
+        },
+        {
+          "id": "B1-16.m5",
+          "location": "fixture.ca vi_pham_luat=C1",
+          "observation": "No such fixture despite section 5 coverage claim."
+        },
+        {
+          "id": "B1-16.m6",
+          "location": "fixture.ca vi_pham_luat=C2",
+          "observation": "No such fixture despite section 5 coverage claim."
+        },
+        {
+          "id": "B1-16.m7",
+          "location": "fixture.ca vi_pham_luat=C3",
+          "observation": "No such fixture despite section 5 coverage claim."
+        },
+        {
+          "id": "B1-16.m8",
+          "location": "fixture.ca vi_pham_luat=C8",
+          "observation": "No such fixture despite section 5 coverage claim."
+        },
+        {
+          "id": "B1-16.m9",
+          "location": "fixture.ca vi_pham_luat=C9",
+          "observation": "No such fixture despite section 5 coverage claim."
+        },
+        {
+          "id": "B1-16.m10",
+          "location": "fixture.ca vi_pham_luat=C10",
+          "observation": "No such fixture despite section 5 coverage claim."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1460-review5/probes.py .",
+          "exit_code": 0,
+          "observed_output": "Healthy first-run and collector-only-rerun controls have 0 artifact-name mismatches. One-shard-rerun has 4 mismatches while shape=true and C4_C7_errors=[]. Rule counts: C4=3, C5=3, C6=3, C7=2; all other C rules=0.",
+          "artifact": "/tmp/wp1460-review5/probes.json"
+        },
+        {
+          "command": "python3 -B /tmp/wp1460-review5/probes.py .",
+          "exit_code": 0,
+          "observed_output": "fixture_wrong_rule_label changes a C7 fixture to C4: rc=0 and unchanged FIXTURE 70/70, valid20/invalid50/C11, TONG: DAT. Shape mutants for unknown root, failed predecessor and two collectors die with rc1; flipped expectation also dies. Thus the validator has shape teeth but no semantic-label teeth.",
+          "artifact": "/tmp/wp1460-review5/probes.json"
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1460-r1/hop_dong/fixture.json all rerun/consumer cases and ops/specs/wp1460-r1/SPEC.md Lệnh kiểm / acceptance. These files are the immutable examples copied by the executor, so fix them before freezing rather than asking the executor to improvise different fixtures.",
+        "how": "Make each positive rerun example internally consistent, including artifact identifiers/names and corresponding external metadata where needed. Separate shape expectations from semantic expectations. Supply the promised per-rule fixtures with the REST/archive/time inputs needed to evaluate them, or state precisely which consumer-owned tests provide that coverage. C9/C10 need consumer-specific expected outcomes; do not turn a permitted B2 not_measured warning into unconditional rejection.",
+        "locking_test": "Run python3 -B /tmp/wp1460-review5/probes.py .; require all healthy examples to pass artifact/producer bindings as well as shape, and each negative semantic case to fail its named law. Pin a declared rule-coverage set. A stale-artifact mutation in each affected rerun producer, a relabel-C7-as-C4 mutation and deleting each promised rule fixture must fail the appropriate test class. Preserve the existing shape-mutant controls.",
+        "what_the_fix_may_spawn": "A helper generated from the same unchecked receipt can repeat its mistake. External expected jobs/attempts and expected law labels must be independently authored; adding cross-field schema constraints must not mislabel semantic negatives as malformed JSON."
+      },
+      "confidence": "high",
+      "product_patch_attempted": false
+    },
+    {
+      "id": "B1-17-collector-stamp-order-conflict",
+      "class_slug": "collector-stamp-order-conflict",
+      "severity": "P2",
+      "location": "ops/specs/wp1460-r1/SPEC.md:37-38,71,88-89",
+      "claim": "Two mandatory descriptions prescribe incompatible step orders for the collector. The stamp rule explicitly includes the collector and requires the two stamp steps immediately after HEAD measurement; the numbered collector recipe puts setup-python and pip between HEAD and the stamp. Section 6 pins every step and acceptance requires an order-changing mutant to die. There is no single collector YAML satisfying both rules, and the schema-over-prose rule cannot resolve a workflow-order contradiction.",
+      "manifestations": [
+        {
+          "id": "B1-17.m1",
+          "location": "section 3 general stamp rule versus collector numbered recipe",
+          "observation": "Required precedence stamp<setup and setup<stamp forms a cycle."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "nl -ba ops/specs/wp1460-r1/SPEC.md | sed -n '36,41p;70,71p;88,89p'",
+          "exit_code": 0,
+          "observed_output": "Line37: every job, including collector, pins two stamp steps immediately after HEAD. Line38: HEAD -> setup-python -> pip -> stamp/upload. Lines71/88-89 require exact order and order mutants."
+        },
+        {
+          "command": "python3 -B /tmp/wp1460-review5/final_checks.py",
+          "exit_code": 0,
+          "observed_output": "COLLECTOR_ORDER_CONFLICT: [HEAD,stamp,upload,setup,pip] versus [HEAD,setup,pip,stamp,upload]; incompatible precedence [stamp < setup, setup < stamp]. This is a constraint analysis, not an executed workflow."
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1460-r1/SPEC.md section 3 and its exact workflow-shape acceptance, because the conflict is between two normative producer recipes.",
+        "how": "Choose one collector sequence explicitly. The smallest repair is to qualify the immediate-after-HEAD rule for the three existing jobs and retain the numbered collector recipe, if that is the intended setup-failure boundary. Alternatively move the collector stamp pair and update the recipe/failure boundary consistently. Keep the three existing job bodies unchanged apart from the allowed pair.",
+        "locking_test": "Use one authoritative ordered collector step list in the shape gate. A positive YAML fixture must satisfy that list; moving the stamp pair across setup/pip must raise the dedicated order-case exception, and removing either stamp step must die independently. The current textual precedence test must no longer contain a cycle.",
+        "what_the_fix_may_spawn": "Moving the stamp before interpreter setup changes which Python is used and whether setup failure leaves a stamp. Moving old job steps would violate I1. Ensure numbered always() steps still identify the intended download/REST/collector/upload steps."
+      },
+      "confidence": "high",
+      "product_patch_attempted": false
+    },
+    {
+      "id": "B1-18-schema-patterns-accept-trailing-newline",
+      "class_slug": "schema-patterns-accept-trailing-newline",
+      "severity": "P3",
+      "location": "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json:7-10,12,20-21",
+      "claim": "Every one of the nine pattern sites accepts a trailing LF under the mandated jsonschema 4.26.0 validator. Dollar anchors match before a final newline. Thus sha40 accepts a 41-character string, digest accepts extra bytes, and timestamp/repository/positive-count patterns have the same defect. This contradicts the frozen exact lexical domains and creates parser-dependent shape acceptance for consumers. The checks are schema shape checks, so C1 cannot be relied on to reject these malformed spellings.",
+      "manifestations": [
+        {
+          "id": "B1-18.m1",
+          "location": "/$defs/sha40",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m2",
+          "location": "/$defs/sha64",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m3",
+          "location": "/$defs/digest",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m4",
+          "location": "/$defs/moc_rest",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m5",
+          "location": "/$defs/moc_ms",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m6",
+          "location": "/$defs/bien_nhan_xanh/properties/kho",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m7",
+          "location": "/$defs/bien_nhan_xanh/properties/dau_hieu_duong/properties/job_truoc_success",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m8",
+          "location": "/$defs/bien_nhan_xanh/properties/dau_hieu_duong/properties/manh",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m9",
+          "location": "/$defs/bien_nhan_khong_xanh/properties/kho",
+          "observation": "Valid control and control+LF both accepted."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1460-review5/final_checks.py",
+          "exit_code": 0,
+          "observed_output": "PATTERN_BOUNDARIES: 9/9 valid controls accepted and 9/9 control+LF strings also accepted.",
+          "artifact": "/tmp/wp1460-review5/final-checks.json"
+        },
+        {
+          "command": "python3 -B /tmp/wp1460-review5/probes.py .",
+          "exit_code": 0,
+          "observed_output": "Whole receipt probes: event SHA+LF and shard digest+LF both schema_valid=true.",
+          "artifact": "/tmp/wp1460-review5/probes.json"
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json shared scalar definitions and all inline pattern sites; ops/specs/wp1460-r1/hop_dong/fixture.json lexical boundary controls. Fix the shared constraint rather than adding ad-hoc stripping at each consumer.",
+        "how": "Use portable full-string constraints (for example fixed lengths for SHA/digest and an absolute-end negative lookahead) or an explicitly enforced lexical validator. Do not strip whitespace before comparison, since the contract promises exact spelling. Recompute both frozen hashes after adding fixtures.",
+        "locking_test": "For all nine sites, retain a valid control and reject LF, CRLF, leading/trailing whitespace and invalid length. A mutant restoring the current dollar-only ending must die in the dedicated lexical-boundary case. If a format checker is added for timestamps, explicitly configure it rather than assuming format assertions run automatically.",
+        "what_the_fix_may_spawn": "Python-only regex endings can make a draft-2020-12 schema non-portable. Broad whitespace normalization could erase evidence differences. Timestamp calendar validation is a separate semantic concern; this finding is limited to the measured extra-byte acceptance."
+      },
+      "confidence": "high",
+      "product_patch_attempted": false
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "collector-self-record",
+      "finding_ids": [
+        "B1-01-collector-self-record"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "Schema job_thu forces null conclusion/completed_at and one self row; mutation allowing two collectors dies rc1, as does non-null self conclusion in the frozen cases. C2 reads final self success from REST."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Keep provisional self records and obtain final success from REST.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "Schema job_thu forces null conclusion/completed_at and one self row; mutation allowing two collectors dies rc1, as does non-null self conclusion in the frozen cases. C2 reads final self success from REST.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "failure-evidence-transport",
+      "finding_ids": [
+        "B1-02-failure-evidence-transport"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "SPEC I1 now forbids changing old shard upload conditions; red-shard transport is explicitly transferred to B1b. Collector steps5-9 still always run by contract, but the previous red-shard fix is not retained in B1a."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Keep upload/collection execution after failed work.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "SPEC I1 now forbids changing old shard upload conditions; red-shard transport is explicitly transferred to B1b. Collector steps5-9 still always run by contract, but the previous red-shard fix is not retained in B1a.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": "B1b"
+    },
+    {
+      "class_slug": "unselected-attempt-validation",
+      "finding_ids": [
+        "B1-03-unselected-attempt-validation"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "X4/X5 bind the selected latest producer for each job. Actual legacy repaired_old selects8 despite corrupt older payload; broken_new selects0. Semantic checks of unselected payloads are not required in B1a."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Apply semantic checks only to selected producers; retain history.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "X4/X5 bind the selected latest producer for each job. Actual legacy repaired_old selects8 despite corrupt older payload; broken_new selects0. Semantic checks of unselected payloads are not required in B1a.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "v1-not-fully-specified",
+      "finding_ids": [
+        "B1-04-v1-not-fully-specified"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-04.m1",
+          "location": "non-green workflow_dispatch su_kien.run_created_at",
+          "observation": "Missing and null both rejected."
+        },
+        {
+          "id": "B1-04.m2",
+          "location": "non-green schedule su_kien.run_created_at",
+          "observation": "Missing and null both rejected."
+        },
+        {
+          "id": "B1-04.m3",
+          "location": "non-green schedule su_kien.khung_danh_nghia_utc",
+          "observation": "Missing and null both rejected when run creation time is unavailable."
+        },
+        {
+          "id": "B1-04.m4",
+          "location": "non-green su_kien.ten outside schedule/workflow_dispatch",
+          "observation": "Known push input cannot be serialized truthfully as required by X8."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": true,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Define an explicit incomplete non-green event shape that can preserve known identity and unknown timestamps without weakening the green shape. Define the unsupported-event/invalid-context boundary, including which inputs are argument errors instead of collectible failures. Do not substitute current time, repository creation time or job start time for run.created_at. Revise hashes before implementation.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-review5/probes.py . ; python3 -B /tmp/wp1460-review5/semantic_probe.py",
+        "result": "Seven frozen-schema probes cannot represent required non-green inputs. Prior diagnostic manifestations transferred, not repaired.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": "B1b; current B1a manifestation also open"
+    },
+    {
+      "class_slug": "b3-interface-mismatch",
+      "finding_ids": [
+        "B1-05-b3-interface-mismatch"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "B3 r4 still pins B1 r4 9f09a12/5bdd237 and its old contract-region hash. Its own GHIM-B1 requires stop/revision when the region changes. B1a maps L1-L13, but joint consumer rebinding has not been measured; no successor approval here."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Maintain one authoritative B1 contract and explicitly rebind consumers.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "B3 r4 still pins B1 r4 9f09a12/5bdd237 and its old contract-region hash. Its own GHIM-B1 requires stop/revision when the region changes. B1a maps L1-L13, but joint consumer rebinding has not been measured; no successor approval here.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": "B3/wp1461"
+    },
+    {
+      "class_slug": "stamp-identity-not-bound",
+      "finding_ids": [
+        "B1-06-stamp-identity-not-bound"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "X4 and acceptance3 explicitly cover every selected stamp binding at both current and retained attempt1. This closes the earlier producer-side spec omission only; newly incomplete consumer row binding is separately reported as B1-15."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Bind every selected stamp to its producer identity.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "X4 and acceptance3 explicitly cover every selected stamp binding at both current and retained attempt1. This closes the earlier producer-side spec omission only; newly incomplete consumer row binding is separately reported as B1-15.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "missing-compatibility-controls",
+      "finding_ids": [
+        "B1-07-missing-compatibility-controls"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "Acceptance5 explicitly demands one-command base/head stdout,rc,output-directory equality for old CLI. Current source hash equals drafting base, and healthy/malformed/repaired-rerun current-helper controls were executed. This is closure of the missing spec obligation, not delivery A/B acceptance."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Keep paired behavior and count controls.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "Acceptance5 explicitly demands one-command base/head stdout,rc,output-directory equality for old CLI. Current source hash equals drafting base, and healthy/malformed/repaired-rerun current-helper controls were executed. This is closure of the missing spec obligation, not delivery A/B acceptance.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "canary-authority-budget-unresolved",
+      "finding_ids": [
+        "B1-08-canary-authority-budget-unresolved"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "A3 is blocking and exact-H; push and attempt observations retain not_run separately. Two full runs are conditional on a later installed Mission revision. Read r85/r86: actual allowance remains1; no dispatch authorized by this review."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Install the explicit two-run allowance before dispatch and preserve separate run/rerun counters.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "A3 is blocking and exact-H; push and attempt observations retain not_run separately. Two full runs are conditional on a later installed Mission revision. Read r85/r86: actual allowance remains1; no dispatch authorized by this review.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "sensitive-size-budget",
+      "finding_ids": [
+        "B1-09-sensitive-size-budget"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "Four delivery paths, machine artifacts24+81=105 lines, default450-addition ceiling and measured-stop/owner-nang_tran procedure. No estimate promoted to a waiver. Delivery numstat not yet available."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Use the default cap; request an exception only with measured numstat if needed.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "Four delivery paths, machine artifacts24+81=105 lines, default450-addition ceiling and measured-stop/owner-nang_tran procedure. No estimate promoted to a waiver. Delivery numstat not yet available.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "stale-canary-reuse",
+      "finding_ids": [
+        "B1-10-stale-canary-reuse"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "SPEC74/79 invalidate A3/K7 on any head change and require more budget before repeat; no path-based exemption remains."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Bind all retained canary/gate evidence to exact H.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "SPEC74/79 invalidate A3/K7 on any head change and require more budget before repeat; no path-based exemption remains.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "a4-null-comparison",
+      "finding_ids": [
+        "B1-11-a4-null-comparison"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "B1a explicitly excludes A4, preserves not_measured/workflow_sha, and delegates the comparison to B3. Scope transfer is not a measured repair."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Successor B3 owns null-safe A4 comparison.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "B1a explicitly excludes A4, preserves not_measured/workflow_sha, and delegates the comparison to B3. Scope transfer is not a measured repair.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": "B3/wp1461"
+    },
+    {
+      "class_slug": "a4-failure-downgraded-to-unknown",
+      "finding_ids": [
+        "B1-12-a4-failure-downgraded-to-unknown"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "No A4 acquisition/comparison remains in B1a. Owner r86 removes it; this review did not execute B3 acquisition/failure semantics."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Preserve failed-versus-unavailable results in the B3-owned acquisition path.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "No A4 acquisition/comparison remains in B1a. Owner r86 removes it; this review did not execute B3 acquisition/failure semantics.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": "B3/wp1461"
+    },
+    {
+      "class_slug": "dependency-provenance-can-be-empty",
+      "finding_ids": [
+        "B1-13-dependency-provenance-can-be-empty"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "Schema has no phu_thuoc/Python/OS/tool-version provenance fields; SPEC explicitly transfers that outcome to B1b. Former collection controls are not a B1a repair."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Keep required dependency evidence and tool-specific version extraction.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "Schema has no phu_thuoc/Python/OS/tool-version provenance fields; SPEC explicitly transfers that outcome to B1b. Former collection controls are not a B1a repair.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": "B1b"
+    },
+    {
+      "class_slug": "legacy-selector-equivalence-is-impossible",
+      "finding_ids": [
+        "B1-14-legacy-selector-equivalence-is-impossible"
+      ],
+      "manifestations": [
+        {
+          "historical": true,
+          "description": "Owner E1 withdraws the equivalence acceptance. Legacy container controls still select8/0 as before; removal is not credited as proof of equivalence."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "source_round_sha": [
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Separate per-receipt validity, container validity and final B1 admission.",
+      "closing_check": {
+        "command": "Read exact SPEC/schema plus current-probes.json and prior disposition",
+        "result": "Owner E1 withdraws the equivalence acceptance. Legacy container controls still select8/0 as before; removal is not credited as proof of equivalence.",
+        "unmeasured": "B1a implementation, real Actions rerun/consumer paths; successor work where named."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "consumer-records-not-bound-to-producers",
+      "finding_ids": [
+        "B1-15-consumer-records-not-bound-to-producers"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-15.m1",
+          "location": "job[] / C4 / C7",
+          "observation": "12 rows, 11 unique job names and 11/11 predecessor tally pass."
+        },
+        {
+          "id": "B1-15.m2",
+          "location": "manh[] / C6 / C7",
+          "observation": "8 rows with only 7 distinct shards pass."
+        },
+        {
+          "id": "B1-15.m3",
+          "location": "manh[] / C7",
+          "observation": "7 rows with 7/7 pass despite 8 expected shard jobs."
+        },
+        {
+          "id": "B1-15.m4",
+          "location": "job[].run_attempt/job_id and selected artifacts / C3-C6",
+          "observation": "Receipt run_attempt=2 with all producer rows/artifacts at attempt 1 passes against a successful REST fixture whose latest producers are attempt 2."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": true,
+      "source_round_sha": [
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Require one receipt row per expected job and one shard per independently expanded matrix entry; bind name/key/job_id/attempt and self identity to the selected latest REST job, and bind artifact name/run/attempt/member to that producer. Keep legitimately retained older attempts for jobs not rerun. Derive completeness from the independent inventory, not from the received array or tally.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-review5/semantic_probe.py",
+        "result": "healthy, duplicate_job, duplicate_shard, missing_shard, stale_producer_rows: passes_literal_C1_C8=true for all five. C8 hashes actual in-memory ZIP bytes and their sole member; all hashes match. External REST is an explicit successful fixture. This is an executable SPEC countermodel, not a deployed consumer result.",
+        "unmeasured": "No revised contract or implementation exists; closing tests in suggested_fix remain future acceptance."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "frozen-fixture-semantic-oracle-missing",
+      "finding_ids": [
+        "B1-16-frozen-fixture-semantic-oracle-missing"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-16.m1",
+          "location": "xanh-chay-lai-mot-manh /job/4/dau_job/ten",
+          "observation": "dot-bien-manh-3 stamp remains attempt 1."
+        },
+        {
+          "id": "B1-16.m2",
+          "location": "xanh-chay-lai-mot-manh /job/9/dau_job/ten",
+          "observation": "dot-bien-gop stamp remains attempt 1."
+        },
+        {
+          "id": "B1-16.m3",
+          "location": "xanh-chay-lai-mot-manh /job/10/dau_job/ten",
+          "observation": "bien-nhan-audit stamp remains attempt 1."
+        },
+        {
+          "id": "B1-16.m4",
+          "location": "xanh-chay-lai-mot-manh /manh/3/artifact/ten",
+          "observation": "Shard artifact remains dot-bien-manh-44000000001-1-3."
+        },
+        {
+          "id": "B1-16.m5",
+          "location": "fixture.ca vi_pham_luat=C1",
+          "observation": "No such fixture despite section 5 coverage claim."
+        },
+        {
+          "id": "B1-16.m6",
+          "location": "fixture.ca vi_pham_luat=C2",
+          "observation": "No such fixture despite section 5 coverage claim."
+        },
+        {
+          "id": "B1-16.m7",
+          "location": "fixture.ca vi_pham_luat=C3",
+          "observation": "No such fixture despite section 5 coverage claim."
+        },
+        {
+          "id": "B1-16.m8",
+          "location": "fixture.ca vi_pham_luat=C8",
+          "observation": "No such fixture despite section 5 coverage claim."
+        },
+        {
+          "id": "B1-16.m9",
+          "location": "fixture.ca vi_pham_luat=C9",
+          "observation": "No such fixture despite section 5 coverage claim."
+        },
+        {
+          "id": "B1-16.m10",
+          "location": "fixture.ca vi_pham_luat=C10",
+          "observation": "No such fixture despite section 5 coverage claim."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": true,
+      "source_round_sha": [
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Make each positive rerun example internally consistent, including artifact identifiers/names and corresponding external metadata where needed. Separate shape expectations from semantic expectations. Supply the promised per-rule fixtures with the REST/archive/time inputs needed to evaluate them, or state precisely which consumer-owned tests provide that coverage. C9/C10 need consumer-specific expected outcomes; do not turn a permitted B2 not_measured warning into unconditional rejection.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-review5/probes.py .",
+        "result": "Healthy first-run and collector-only-rerun controls have 0 artifact-name mismatches. One-shard-rerun has 4 mismatches while shape=true and C4_C7_errors=[]. Rule counts: C4=3, C5=3, C6=3, C7=2; all other C rules=0.",
+        "unmeasured": "No revised contract or implementation exists; closing tests in suggested_fix remain future acceptance."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "collector-stamp-order-conflict",
+      "finding_ids": [
+        "B1-17-collector-stamp-order-conflict"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-17.m1",
+          "location": "section 3 general stamp rule versus collector numbered recipe",
+          "observation": "Required precedence stamp<setup and setup<stamp forms a cycle."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": true,
+      "source_round_sha": [
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Choose one collector sequence explicitly. The smallest repair is to qualify the immediate-after-HEAD rule for the three existing jobs and retain the numbered collector recipe, if that is the intended setup-failure boundary. Alternatively move the collector stamp pair and update the recipe/failure boundary consistently. Keep the three existing job bodies unchanged apart from the allowed pair.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-review5/final_checks.py",
+        "result": "Line37: every job, including collector, pins two stamp steps immediately after HEAD. Line38: HEAD -> setup-python -> pip -> stamp/upload. Lines71/88-89 require exact order and order mutants.",
+        "unmeasured": "No revised contract or implementation exists; closing tests in suggested_fix remain future acceptance."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "schema-patterns-accept-trailing-newline",
+      "finding_ids": [
+        "B1-18-schema-patterns-accept-trailing-newline"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-18.m1",
+          "location": "/$defs/sha40",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m2",
+          "location": "/$defs/sha64",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m3",
+          "location": "/$defs/digest",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m4",
+          "location": "/$defs/moc_rest",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m5",
+          "location": "/$defs/moc_ms",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m6",
+          "location": "/$defs/bien_nhan_xanh/properties/kho",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m7",
+          "location": "/$defs/bien_nhan_xanh/properties/dau_hieu_duong/properties/job_truoc_success",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m8",
+          "location": "/$defs/bien_nhan_xanh/properties/dau_hieu_duong/properties/manh",
+          "observation": "Valid control and control+LF both accepted."
+        },
+        {
+          "id": "B1-18.m9",
+          "location": "/$defs/bien_nhan_khong_xanh/properties/kho",
+          "observation": "Valid control and control+LF both accepted."
+        }
+      ],
+      "highest_open_severity": "P3",
+      "active_in_candidate": true,
+      "source_round_sha": [
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        }
+      ],
+      "common_fix_or_reason": "Use portable full-string constraints (for example fixed lengths for SHA/digest and an absolute-end negative lookahead) or an explicitly enforced lexical validator. Do not strip whitespace before comparison, since the contract promises exact spelling. Recompute both frozen hashes after adding fixtures.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-review5/final_checks.py",
+        "result": "PATTERN_BOUNDARIES: 9/9 valid controls accepted and 9/9 control+LF strings also accepted.",
+        "unmeasured": "No revised contract or implementation exists; closing tests in suggested_fix remain future acceptance."
+      },
+      "successor": null
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "B1-04-v1-not-fully-specified",
+      "class_slug": "v1-not-fully-specified",
+      "status": "CHƯA VÁ",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": "B1b (not yet opened; requires own spec/authority)",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1460-review5/probes.py .",
+          "exit_code": 0,
+          "observed_output": "Prior sha256_test/sha256_tool diagnostics and unavailable artifact-to-diagnostic reduction have no B1a fields/rules; SPEC Ngoài phạm vi explicitly transfers them to B1b. Current red timestamp and unsupported-event probes still fail the mandatory schema."
+        }
+      ],
+      "assessment": "Moving old manifestations to B1b is not a fix. B1a also retains an availability/shape contradiction under the same class; no closure credited."
+    },
+    {
+      "id": "B1-14-legacy-selector-equivalence-is-impossible",
+      "class_slug": "legacy-selector-equivalence-is-impossible",
+      "status": "CHƯA VÁ",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": null,
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1460-review5/current_checks.py; nl -ba ops/specs/wp1460-r1/SPEC.md (I1, acceptance5, r4-to-r5 table)",
+          "exit_code": 0,
+          "observed_output": "Healthy selects8; each malformed container selects0 with an explicit namespace/member error. Acceptance5 now asks only old-CLI base/head equality and explicitly disclaims collector-selector set comparison.",
+          "artifact": "/tmp/wp1460-review5/current-probes.json"
+        }
+      ],
+      "assessment": "The impossible equivalence obligation was withdrawn by owner E1, not proven or repaired. No active B1a finding remains solely for that deleted assertion; no B1b successor for equivalence is declared. Future old-CLI A/B implementation evidence remains due."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "collector-self-record",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": null,
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "Schema job_thu forces null conclusion/completed_at and one self row; mutation allowing two collectors dies rc1, as does non-null self conclusion in the frozen cases. C2 reads final self success from REST.",
+      "chua_do_duoc": "Implementation acceptance is not part of this spec-review closure."
+    },
+    {
+      "class_slug": "failure-evidence-transport",
+      "status": "CHƯA VÁ",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": "B1b",
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "SPEC I1 now forbids changing old shard upload conditions; red-shard transport is explicitly transferred to B1b. Collector steps5-9 still always run by contract, but the previous red-shard fix is not retained in B1a.",
+      "chua_do_duoc": "Successor implementation/review and transferred mechanisms."
+    },
+    {
+      "class_slug": "unselected-attempt-validation",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": null,
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "X4/X5 bind the selected latest producer for each job. Actual legacy repaired_old selects8 despite corrupt older payload; broken_new selects0. Semantic checks of unselected payloads are not required in B1a.",
+      "chua_do_duoc": "Implementation acceptance is not part of this spec-review closure."
+    },
+    {
+      "class_slug": "v1-not-fully-specified",
+      "status": "CHƯA VÁ",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": "B1b; current B1a manifestation also open",
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "Seven frozen-schema probes cannot represent required non-green inputs. Prior diagnostic manifestations transferred, not repaired.",
+      "chua_do_duoc": "Successor implementation/review and transferred mechanisms."
+    },
+    {
+      "class_slug": "b3-interface-mismatch",
+      "status": "CHƯA VÁ",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": "B3/wp1461",
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "B3 r4 still pins B1 r4 9f09a12/5bdd237 and its old contract-region hash. Its own GHIM-B1 requires stop/revision when the region changes. B1a maps L1-L13, but joint consumer rebinding has not been measured; no successor approval here.",
+      "chua_do_duoc": "Successor implementation/review and transferred mechanisms."
+    },
+    {
+      "class_slug": "stamp-identity-not-bound",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": null,
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "X4 and acceptance3 explicitly cover every selected stamp binding at both current and retained attempt1. This closes the earlier producer-side spec omission only; newly incomplete consumer row binding is separately reported as B1-15.",
+      "chua_do_duoc": "Implementation acceptance is not part of this spec-review closure."
+    },
+    {
+      "class_slug": "missing-compatibility-controls",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": null,
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "Acceptance5 explicitly demands one-command base/head stdout,rc,output-directory equality for old CLI. Current source hash equals drafting base, and healthy/malformed/repaired-rerun current-helper controls were executed. This is closure of the missing spec obligation, not delivery A/B acceptance.",
+      "chua_do_duoc": "Implementation acceptance is not part of this spec-review closure."
+    },
+    {
+      "class_slug": "canary-authority-budget-unresolved",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": null,
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "A3 is blocking and exact-H; push and attempt observations retain not_run separately. Two full runs are conditional on a later installed Mission revision. Read r85/r86: actual allowance remains1; no dispatch authorized by this review.",
+      "chua_do_duoc": "Implementation acceptance is not part of this spec-review closure."
+    },
+    {
+      "class_slug": "sensitive-size-budget",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": null,
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "Four delivery paths, machine artifacts24+81=105 lines, default450-addition ceiling and measured-stop/owner-nang_tran procedure. No estimate promoted to a waiver. Delivery numstat not yet available.",
+      "chua_do_duoc": "Implementation acceptance is not part of this spec-review closure."
+    },
+    {
+      "class_slug": "stale-canary-reuse",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": null,
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "SPEC74/79 invalidate A3/K7 on any head change and require more budget before repeat; no path-based exemption remains.",
+      "chua_do_duoc": "Implementation acceptance is not part of this spec-review closure."
+    },
+    {
+      "class_slug": "a4-null-comparison",
+      "status": "CHƯA VÁ",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": "B3/wp1461",
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "B1a explicitly excludes A4, preserves not_measured/workflow_sha, and delegates the comparison to B3. Scope transfer is not a measured repair.",
+      "chua_do_duoc": "Successor implementation/review and transferred mechanisms."
+    },
+    {
+      "class_slug": "a4-failure-downgraded-to-unknown",
+      "status": "CHƯA VÁ",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": "B3/wp1461",
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "No A4 acquisition/comparison remains in B1a. Owner r86 removes it; this review did not execute B3 acquisition/failure semantics.",
+      "chua_do_duoc": "Successor implementation/review and transferred mechanisms."
+    },
+    {
+      "class_slug": "dependency-provenance-can-be-empty",
+      "status": "CHƯA VÁ",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": "B1b",
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "Schema has no phu_thuoc/Python/OS/tool-version provenance fields; SPEC explicitly transfers that outcome to B1b. Former collection controls are not a B1a repair.",
+      "chua_do_duoc": "Successor implementation/review and transferred mechanisms."
+    },
+    {
+      "class_slug": "legacy-selector-equivalence-is-impossible",
+      "status": "CHƯA VÁ",
+      "source_round": 4,
+      "source_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e",
+      "successor": null,
+      "measured_scope": "Specification and listed scratch/current-master probes; no B1a implementation exists.",
+      "evidence": "Owner E1 withdraws the equivalence acceptance. Legacy container controls still select8/0 as before; removal is not credited as proof of equivalence.",
+      "chua_do_duoc": "Implementation acceptance is not part of this spec-review closure."
+    }
+  ],
+  "class_mapping": {
+    "split_merge": [],
+    "explanation": "Existing fourteen slugs retained without renaming or merging. B1-04 retains availability/representation failure. New B1-15 concerns consumer row-to-producer binding; B1-16 concerns executable example/semantic-oracle consistency; B1-17 concerns contradictory workflow order; B1-18 concerns lexical regex boundaries. No historical manifestation is removed from the ledger to improve closure rates."
+  },
+  "counts": {
+    "open_candidate_classes": 5,
+    "open_candidate_findings": 5,
+    "open_candidate_manifestations": 28,
+    "severity": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 4,
+      "P3": 1
+    },
+    "historical_classes_carried": 14,
+    "class_table_total": 18,
+    "new_ids": [
+      "B1-15",
+      "B1-16",
+      "B1-17",
+      "B1-18"
+    ],
+    "prior_round_findings": 2,
+    "prior_round_findings_credited_as_fixed": 0
+  },
+  "hunt_table": [
+    {
+      "direction": 1,
+      "name": "frozen identity and machine baseline",
+      "hypothesis": "Candidate/blob hashes might differ from the assignment or pinned artifacts.",
+      "command": "git rev-parse HEAD HEAD^{tree}; SHA256 exact blob/local files; python3 -B /tmp/wp1460-review5/validate.py ops/specs/wp1460-r1/hop_dong",
+      "real_output": "H/tree match; SPEC75a1f164..., schema ca19c717..., fixture38b003e0...; rc0, FIXTURE70/70 valid20 invalid50 C11, TONG DAT.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": 2,
+      "name": "missing evidence representation",
+      "hypothesis": "An unavailable core endpoint might make required non-green output impossible.",
+      "command": "python3 -B /tmp/wp1460-review5/probes.py .",
+      "real_output": "Six missing/null timestamp cases and unsupported event all schema-invalid; healthy baseline is valid.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": 3,
+      "name": "independent consumer completeness",
+      "hypothesis": "Set/count checks might accept duplicated, omitted or stale producers.",
+      "command": "python3 -B /tmp/wp1460-review5/semantic_probe.py",
+      "real_output": "Healthy and four bad countermodels all pass literal C1-C8, including real ZIP/content hash comparisons.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": 4,
+      "name": "frozen fixture semantics and mutation teeth",
+      "hypothesis": "Healthy examples or rule labels may be unchecked beyond shape.",
+      "command": "python3 -B /tmp/wp1460-review5/probes.py .",
+      "real_output": "One-shard rerun has4 artifact-name mismatches; only C4-C7 fixtures; rule-label mutant survives unchanged70/70; four selected shape/expectation mutants die.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": 5,
+      "name": "workflow sequence feasibility",
+      "hypothesis": "The mandatory stamp placement might conflict with the collector recipe.",
+      "command": "python3 -B /tmp/wp1460-review5/final_checks.py",
+      "real_output": "stamp<setup and setup<stamp both required; no single sequence satisfies them.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": 6,
+      "name": "lexical boundaries",
+      "hypothesis": "Anchored patterns may admit extra bytes.",
+      "command": "python3 -B /tmp/wp1460-review5/final_checks.py",
+      "real_output": "9/9 pattern sites accept control+LF, as do full receipt SHA/digest examples.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": 7,
+      "name": "current-code compatibility",
+      "hypothesis": "Current master might have drifted at both touched product files or old selector behavior.",
+      "command": "python3 -B /tmp/wp1460-review5/current_checks.py",
+      "real_output": "Current master48d372e confirmed through GitHub; both product files equal0f9aa2a bytes; shape/pin errors=[]; healthy/repaired8, invalid0. No collector/legacy equivalence remains required.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": 8,
+      "name": "owner authority, removed mechanisms and budgets",
+      "hypothesis": "B1a may reintroduce removed mechanisms or silently spend beyond r85/r86.",
+      "command": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; read mission-r84.json/mission-r85.json/mission-r86.json at the same ref; GitHub.fetch_issue_comments(repo_full_name=\"ducthangho/tra-luat\",issue_number=1172), select comment7046422866",
+      "real_output": "Plan hash0f287ce4 exact; E1 permits split/schema and removes equivalence; r86 review cap6 supports round5; M9 two-run allowance remains conditional. r87 installation not present in fetched local plan branch; user explicitly authorizes this review. No removed A4/diagnostic/A+3 machinery reintroduced.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": 9,
+      "name": "live lease overlap and ref completeness",
+      "hypothesis": "New paths might overlap active leases or the supplied ref universe may be incomplete.",
+      "command": "git fetch --all --prune; scratch mirror fetch; python3 -B ops/lease_publish.py ai-dang-giu <each of four delivery paths>",
+      "real_output": "Assigned fetch rc255 read-only FETCH_HEAD; scratch fetch from local upstream succeeded, GitHub fetch rc128 proxy unavailable. Assigned ai-dang-giu4/4 rc12 cache missing ops/wp1172-kiem83-thamkhao; scratch4/4 rc12 stale local master. No freedom-from-overlap conclusion.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "direction": 10,
+      "name": "size and cost claims",
+      "hypothesis": "Compressed contract/count/cost claims might be inaccurate.",
+      "command": "Count frozen artifact lines; read BASELINE.json M1; compute paired-run estimate",
+      "real_output": "24+81=105 lines; current workflow3 keys expands10 jobs, +collector=>11;13282+1680+10=14972;two=29944s=8.3178h. Actual collector runtime/queue/implementation size unmeasured.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "SPEC and frozen artifact SHA256",
+      "claimed": [
+        "75a1f16459f9dc8e747c486035de4cd04b0fb4e7faec0476b60a244161d5b882",
+        "ca19c7178a331c41304a46ad4ccc65034970e2f347b3cad302af7e132ee9390f",
+        "38b003e07623056be5b78e19662a9d1263ea5daf36871142979245f77df01cab"
+      ],
+      "measured": "Exact matches at assigned H and local bytes.",
+      "matches": true,
+      "command": "git rev-parse HEAD HEAD^{tree}; hashlib.sha256 on exact git blobs/local files"
+    },
+    {
+      "claim": "Schema/fixture suite",
+      "claimed": "70/70;20 valid;50 invalid;11 law cases",
+      "measured": "70/70;20;50;11;rc0 with jsonschema4.26.0",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1460-review5/validate.py ops/specs/wp1460-r1/hop_dong"
+    },
+    {
+      "claim": "Each C1-C10 has luat-C* case",
+      "claimed": 10,
+      "measured": {
+        "covered": 4,
+        "missing": [
+          "C1",
+          "C2",
+          "C3",
+          "C8",
+          "C9",
+          "C10"
+        ]
+      },
+      "matches": false,
+      "command": "python3 -B /tmp/wp1460-review5/probes.py ."
+    },
+    {
+      "claim": "Frozen machine artifact additions",
+      "claimed": 105,
+      "measured": {
+        "schema_lines": 24,
+        "fixture_lines": 81,
+        "sum": 105,
+        "remaining_of_450": 345
+      },
+      "matches": true,
+      "command": "Python len(read_bytes().splitlines()) for both pinned JSON files"
+    },
+    {
+      "claim": "Jobs after collector",
+      "claimed": 11,
+      "measured": "Current:1 registry+8 shards+1 aggregator=10; planned collector adds1. No executed B1a workflow.",
+      "matches": true,
+      "command": "Current master workflow YAML matrix expansion"
+    },
+    {
+      "claim": "Canary CI estimate",
+      "claimed": "14972s/run;29944s/pair;about8.3 job-hours",
+      "measured": "Pinned BASELINE M1 medians13282+1680+10=14972;pair29944/3600=8.3177777778. Arithmetic verified, future runtime not measured.",
+      "matches": true,
+      "command": "Read ops/specs/wp1434-r3/do/BASELINE.json M1 medians; calculate (13282+1680+10)*2"
+    },
+    {
+      "claim": "Spec review/author ceilings",
+      "claimed": "r86:review6;author5, plus E1 one author",
+      "measured": "mission-r86 per_new_packet review6 author5; owner comment item7 adds one author pending installation; this is review5. No source/full-audit budget spent.",
+      "matches": true,
+      "command": "Read mission-r86.json envelope.provider_budgets.per_new_packet and owner E1 comment"
+    },
+    {
+      "claim": "Schema exact lexical endings",
+      "claimed": "40hex SHA /64hex SHA /sha256:64hex and exact patterns",
+      "measured": "9/9 regex sites accept trailing LF; two full-receipt malformed-spelling controls accepted.",
+      "matches": false,
+      "command": "python3 -B /tmp/wp1460-review5/final_checks.py"
+    },
+    {
+      "claim": "Read-only snapshot",
+      "claimed": "No checkout edits",
+      "measured": "17334 file hashes before/after,0 deltas;HEAD/tree unchanged;diff/index0bytes;existing ignored .codex/ unchanged.",
+      "matches": true,
+      "command": "git ls-files cached/untracked/ignored; hash bytes; git diff --binary; git diff --cached --binary; git rev-parse HEAD HEAD^{tree}"
+    },
+    {
+      "claim": "Live write-set freedom",
+      "claimed": "Must wait for leasewp1236 or two-sided withdrawal",
+      "measured": "4 path checks rc12; full remote-ref freshness not established; no active-lease-free result.",
+      "matches": null,
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <each delivery path>"
+    }
+  ],
+  "tests": [
+    {
+      "name": "frozen-validator",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1460-review5/validate.py ops/specs/wp1460-r1/hop_dong",
+      "exit_code": 0,
+      "observed_output": "FIXTURE: 70/70 ca dung ky vong · hop le 20 · khong hop le 50 · ca luat C 11\nTONG: DAT",
+      "artifact": "/tmp/wp1460-review5/validator.log"
+    },
+    {
+      "name": "adversarial-schema-fixture-probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1460-review5/probes.py .",
+      "exit_code": 0,
+      "observed_output": "Countermodels reproduced;4/6 selected mutations killed,2/6 survive. This is probe execution success, not candidate acceptance.",
+      "artifact": "/tmp/wp1460-review5/probes.json"
+    },
+    {
+      "name": "semantic-C1-C8-countermodels",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1460-review5/semantic_probe.py",
+      "exit_code": 0,
+      "observed_output": "5/5 constructed inputs pass literal rules, including4 malformed/incomplete/stale inputs. Candidate property fails.",
+      "artifact": "/tmp/wp1460-review5/semantic-probe.json"
+    },
+    {
+      "name": "schema-direction-and-pattern-scan",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1460-review5/final_checks.py",
+      "exit_code": 0,
+      "observed_output": "3/3 scratch direction checks true;9/9 trailing-LF counterexamples;order contradiction recorded.",
+      "artifact": "/tmp/wp1460-review5/final-checks.json"
+    },
+    {
+      "name": "scratch-probe-initial-setup",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1460-review5/final_checks.py (initial version)",
+      "exit_code": 1,
+      "observed_output": "SyntaxError: missing closing brace in reviewer scratch prototype. Corrected only in scratch; subsequent execution rc0 above."
+    },
+    {
+      "name": "current-master-focused-helpers",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1460-review5/current_checks.py",
+      "exit_code": 0,
+      "observed_output": "shape_errors=[];pin_errors=[];healthy/repaired8;malformed/new-broken0",
+      "artifact": "/tmp/wp1460-review5/current-probes.json"
+    },
+    {
+      "name": "ruff-pin-probe-contract",
+      "status": "passed",
+      "command": "Current master ci_dang_ky_test.py::loi_ruff_ci()",
+      "exit_code": 0,
+      "observed_output": "([],3); workflow contract pins Ruff0.15.15. Does not attest installed local Ruff version."
+    },
+    {
+      "name": "bare-ruff-current-master",
+      "status": "passed",
+      "command": "ruff --version; ruff check --no-cache --select F /tmp/wp1460-review5/current/.claude/dev/ci_dang_ky_test.py",
+      "exit_code": 0,
+      "observed_output": "ruff0.16.9; All checks passed! This is a current-source probe with a different installed version, not the required0.15.15 source-delivery gate."
+    },
+    {
+      "name": "fetch-all-assigned-checkout",
+      "status": "failed",
+      "command": "git fetch --all --prune",
+      "exit_code": 255,
+      "observed_output": "error: cannot open .git/FETCH_HEAD: Read-only file system"
+    },
+    {
+      "name": "fetch-github-scratch",
+      "status": "failed",
+      "command": "git --git-dir=/tmp/wp1460-review5/repo.git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'",
+      "exit_code": 128,
+      "observed_output": "Failed to connect to127.0.0.1:36011; upstream GitHub fetch unavailable. Prior scratch mirror fetch from /home/user/tra-luat completed; that does not prove all GitHub refs fresh."
+    },
+    {
+      "name": "lease-overlap-all-four-paths",
+      "status": "not_measured",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <each delivery path>",
+      "exit_codes": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "observed_output": "KHÔNG_XÁC_ĐỊNH: cache thiếu nhánh máy chủ: ops/wp1172-kiem83-thamkhao. Scratch mirror also refused for stale local master. No refs repaired in assigned checkout."
+    },
+    {
+      "name": "actionlint-with-shellcheck",
+      "status": "not_run",
+      "command": "Required actionlint with shellcheck present",
+      "exit_code": null,
+      "observed_output": "actionlint found; shellcheck command lookup rc1. Do not count an actionlint-only probe as this gate."
+    },
+    {
+      "name": "full-registry/source-A-B/M9/Windows/real-canary",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "observed_output": "Spec-only candidate. No new product implementation, workflow dispatch or GitHub writes authorized. Real rerun API retention, queue limits and post-merge schedule not measured."
+    }
+  ],
+  "environment": {
+    "os": "Linux",
+    "sandbox": "workspace-write; assigned .git read-only; restricted shell network",
+    "scratch": "/tmp/wp1460-review5",
+    "source_checkout": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1460-clone",
+    "current_master": "48d372e14f190dae83a75ccbca8ee9a0b25635c5",
+    "current_master_online_check": "GitHub fetch_commit(master) returned exactly48d372e14f190dae83a75ccbca8ee9a0b25635c5",
+    "product_files_unchanged_since_drafting_base": true,
+    "jsonschema": "4.26.0",
+    "snapshot_files": 17334,
+    "snapshot_delta_files": 0,
+    "start_end_head_tree_equal": true,
+    "diff_bytes": 0,
+    "index_diff_bytes": 0,
+    "snapshot_limit": "Two endpoint snapshots establish no observed delta, not proof of no transient write over the whole run. Source /home/user/tra-luat was only a local read/fetch source; its worktree was not reviewed or snapshotted."
+  },
+  "authority": {
+    "owner_E1": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7046422866 item7, read through GitHub connector",
+    "r85": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7044368881",
+    "r86": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7045886115",
+    "source_plan_sha256": "0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe",
+    "r87": "Not in the locally fetched plan branch; owner comment says later installation. This review is explicitly authorized by the user and is within r86 review cap. No source lease/canary/merge authority inferred.",
+    "live_lease_clearance": "NOT_MEASURED; ai-dang-giu refused. Existing SPEC wait-for-wp1236 condition remains mandatory."
+  },
+  "notes": "Round5 finds5 active cause classes (4P2,1P3),28 measured manifestations. Quoted schema validator passes70/70, but does not close the semantic contradictions. Previous B1-04 manifestations moved to B1b remain CHƯA VÁ; the new non-green shape problem keeps that class active in B1a. B1-14 equivalence was withdrawn under E1, not proven; no acceptance-removal repair credit. B3 r4 still pins the old contract and must follow its own re-freeze gate. Review is read-only: no commit/push, GitHub write, workflow dispatch, LIVE, permission escalation or subagent. All generated scripts/mutants/snapshots are outside the reviewed checkout under /tmp. Cross-review skill applied. Full implementation gates and real Actions behavior remain future acceptance. Findings are spec defects, so revise the frozen contract/hashes through the authorized process; executor cannot silently repair the immutable schema/fixture."
+}

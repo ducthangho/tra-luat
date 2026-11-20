@@ -1,0 +1,1739 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1460",
+  "mission_id": "gh-1172",
+  "revision": 7,
+  "generation": null,
+  "generation_note": "No execution lease/generation has been issued;this is the authorized frozen-spec review,not a code-generation review.",
+  "round": 7,
+  "round_cap": 8,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "session_id": "01a1fa5b-5c3e-7230-89ec-e48bffccb18c",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "session_source": "CODEX_SESSION_ID/CODEX_THREAD_ID in independent tool runtime",
+    "requested_model": "gpt-6-astra per assignment",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "tooling_version": "0.170.0",
+    "execution_surface_note": "Tool/API review session;CLI version environment does not establish serving model/effort or parent launch method. No GitHub actor used as reviewer identity."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54",
+  "reviewed_tree": "6a274819ca7cdd5227b0bb87c5542da7efeeddf3",
+  "reviewed_file": "ops/specs/wp1460-r1/SPEC.md",
+  "reviewed_file_sha256": "d53341fb8d549d89f99e4cda0bd6ed380bf9975ce47b95a43ad1adaf5b3963b3",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "approve",
+  "assurance": {
+    "attested": "Independent read-only specification approval on exact bytes,with directly run frozen mutation suite,independent probes,current-master measurements and live API-backed lease inventory.",
+    "approval_state": null,
+    "limitations": "This is spec approval only. No source-code/canary/CI/land acceptance or human_audited state. Serving model/effort and external launcher terminal receipt not independently measured. Formal delivery assurance requires its separate receipt.",
+    "executor_identity_source": "Packet declares Claude Code/Fable5.2;author/executor runtime not observed by this session."
+  },
+  "evidence_url": null,
+  "findings": [],
+  "class_table": [
+    {
+      "class_slug": "collector-self-record",
+      "finding_ids": [
+        "B1-01-collector-self-record"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-01-collector-self-record.historical-group-1",
+          "description": "Frozen cases reject success/non-null completion on self and two self rows. C2 checks collector final REST success; drop_C2 dies."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Schema job_thu requires null conclusion/completed_at; C2 checks final REST success. Frozen positive/negative cases and independent C2 removal pass/fail respectively.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Schema job_thu requires null conclusion/completed_at; C2 checks final REST success. Frozen positive/negative cases and independent C2 removal pass/fail respectively.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "failure-evidence-transport",
+      "finding_ids": [
+        "B1-02-failure-evidence-transport"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-02-failure-evidence-transport.historical-group-1",
+          "description": "I1 preserves old upload conditions. Red-shard transport is explicitly outside B1a and transferred to B1b; no repair credit."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "status": "CHƯA VÁ",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Scope transfer/withdrawal authorized by Mission r86/r87, not a fix.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "I1 leaves prior shard upload conditions unchanged; red-shard transport explicitly remains B1b. Transfer is not a repair.",
+        "unmeasured": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+      },
+      "successor": "B1b"
+    },
+    {
+      "class_slug": "unselected-attempt-validation",
+      "finding_ids": [
+        "B1-03-unselected-attempt-validation"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-03-unselected-attempt-validation.historical-group-1",
+          "description": "X4/X5 still select the latest attempt of each producer. Current legacy CLI healthy/repaired controls rc0 output8, newest invalid rc1 output0; no consumer requirement validates unselected payloads."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "X4/X5 use latest REST attempt of each producer; retained old stamps/shards remain accepted. Current CLI has healthy0/8files, latest-invalid1/0files, old-invalid/new-good0/8files.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "X4/X5 use latest REST attempt of each producer; retained old stamps/shards remain accepted. Current CLI has healthy0/8files, latest-invalid1/0files, old-invalid/new-good0/8files.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "v1-not-fully-specified",
+      "finding_ids": [
+        "B1-04-v1-not-fully-specified"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-04-v1-not-fully-specified.historical-group-1",
+          "description": "The four round-5 B1a representation defects are repaired: all three required unknown/unsupported-event probes are shape-valid non-green and C1 rejects them; all corresponding green-null/unsupported fixtures still reject. Historical diagnostic/A+3 manifestations were transferred under E1, not repaired; class-wide credit is withheld."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "status": "CHƯA VÁ",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Scope transfer/withdrawal authorized by Mission r86/r87, not a fix.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Unknown run/schedule timestamps and unsupported push event have schema-valid non-green representation and C1 rejection in measured fixtures. Historical diagnostics/A+3 manifestations remain transferred to B1b; no class-wide repair credit.",
+        "unmeasured": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+      },
+      "successor": "B1b"
+    },
+    {
+      "class_slug": "b3-interface-mismatch",
+      "finding_ids": [
+        "B1-05-b3-interface-mismatch"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-05-b3-interface-mismatch.historical-group-1",
+          "description": "Read sibling wp1461 at bec7de7c59087891197156975f21107383a36a41: GHIM-B1 still pins B1r4 and absent --kiem-bien-nhan-audit; its hash-mismatch stop/revision rule prevents silent use of B1a. Successor remains unresolved."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "status": "CHƯA VÁ",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Scope transfer/withdrawal authorized by Mission r86/r87, not a fix.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Sibling B3 at bec7de7c59087891197156975f21107383a36a41 still pins B1r4 and --kiem-bien-nhan-audit. GHIM-B1 stops on changed contract; B3 must revise before execution. Not repaired by B1a.",
+        "unmeasured": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+      },
+      "successor": "B3/wp1461"
+    },
+    {
+      "class_slug": "stamp-identity-not-bound",
+      "finding_ids": [
+        "B1-06-stamp-identity-not-bound"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-06-stamp-identity-not-bound.historical-group-1",
+          "description": "Producer X4 and acceptance3 explicitly require every identity field for current and retained stamps. Consumer gap stays in B1-15, matching prior round separation."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Producer X4 and acceptance3 retain all identity comparisons for current and retained attempts; consumer C11 now independently rejects all seven contradictory stamp fields.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Producer X4 and acceptance3 retain all identity comparisons for current and retained attempts; consumer C11 now independently rejects all seven contradictory stamp fields.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "missing-compatibility-controls",
+      "finding_ids": [
+        "B1-07-missing-compatibility-controls"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-07-missing-compatibility-controls.historical-group-1",
+          "description": "Acceptance5 still mandates one-command base/head byte comparison of stdout/rc/output directory. Both touched master blobs equal drafting baseline; current CLI control rc0/1/0 and8/0/8 files. Future implementation A/B is not claimed."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Acceptance5 still requires one-command base/head stdout/rc/output-byte A/B. Current-master and drafting-base legacy CLI probes agree on all three controls; this is baseline feasibility, not testing future implementation.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Acceptance5 still requires one-command base/head stdout/rc/output-byte A/B. Current-master and drafting-base legacy CLI probes agree on all three controls; this is baseline feasibility, not testing future implementation.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "canary-authority-budget-unresolved",
+      "finding_ids": [
+        "B1-08-canary-authority-budget-unresolved"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-08-canary-authority-budget-unresolved.historical-group-1",
+          "description": "SPEC makes two M9 runs conditional on a future installed Mission revision and stops on H change. r87 still allocates one, so dispatch remains unauthorized until installation; no hidden second run assumed."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Two M9 runs are explicitly conditional on a later installed Mission revision. Current r88 per_new_packet still grants one, so the second run cannot dispatch yet. The SPEC states the required installation rather than claiming current authority.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Two M9 runs are explicitly conditional on a later installed Mission revision. Current r88 per_new_packet still grants one, so the second run cannot dispatch yet. The SPEC states the required installation rather than claiming current authority.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "sensitive-size-budget",
+      "finding_ids": [
+        "B1-09-sensitive-size-budget"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-09-sensitive-size-budget.historical-group-1",
+          "description": "Four delivery files; exact two JSON additions27+132=159, leaving291 of450 for implementation. ADR0053 OID exists, parent lacks it, first-parent membership true, non-shallow. Stop before review if measured candidate exceeds cap; no speculative waiver."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Measured contract additions34+161=195 leave255/450 lines;4 files fit6. ADR0053 land predicates pass. Verbatim254-line runner plus contracts uses449, so that implementation cannot fit with the required workflow/collector. Exact runnable implementation size remains unknown. Owner r86/r87 explicitly requires measuring the candidate, stopping before review, and owner-approved measured nang_tran; this makes the SPEC conditional, not authorization to omit tests or exceed450.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Measured contract additions34+161=195 leave255/450 lines;4 files fit6. ADR0053 land predicates pass. Verbatim254-line runner plus contracts uses449, so that implementation cannot fit with the required workflow/collector. Exact runnable implementation size remains unknown. Owner r86/r87 explicitly requires measuring the candidate, stopping before review, and owner-approved measured nang_tran; this makes the SPEC conditional, not authorization to omit tests or exceed450.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "stale-canary-reuse",
+      "finding_ids": [
+        "B1-10-stale-canary-reuse"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-10-stale-canary-reuse.historical-group-1",
+          "description": "Sections7/Quy trình continue invalidating A3/K7 on H change and require budget before rerun."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Section7 invalidates A3/K7 on head change and requires new budget before another canary; no old-H reuse allowed.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Section7 invalidates A3/K7 on head change and requires new budget before another canary; no old-H reuse allowed.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "a4-null-comparison",
+      "finding_ids": [
+        "B1-11-a4-null-comparison"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-11-a4-null-comparison.historical-group-1",
+          "description": "B1a excludes A4 under r86; C10 warning is measured on both not_measured fixtures. Actual null-safe A4 comparison remains B3 work, not repaired here."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "status": "CHƯA VÁ",
+      "source_round_sha": [
+        {
+          "round": 1,
+          "reviewed_sha": "d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Scope transfer/withdrawal authorized by Mission r86/r87, not a fix.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "A4 is excluded from B1a under r86 and remains B3 work; both not_measured fixtures produce C10 warnings. No repair credit for removed comparison.",
+        "unmeasured": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+      },
+      "successor": "B3/wp1461"
+    },
+    {
+      "class_slug": "a4-failure-downgraded-to-unknown",
+      "finding_ids": [
+        "B1-12-a4-failure-downgraded-to-unknown"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-12-a4-failure-downgraded-to-unknown.historical-group-1",
+          "description": "No A4 acquisition/comparison reintroduced; r86 transfer to B3 remains. No successor behavior measured."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "status": "CHƯA VÁ",
+      "source_round_sha": [
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Scope transfer/withdrawal authorized by Mission r86/r87, not a fix.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "B1a does not acquire/compare A4. The removed A4 failure distinction remains B3 work, not a fix in this candidate.",
+        "unmeasured": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+      },
+      "successor": "B3/wp1461"
+    },
+    {
+      "class_slug": "dependency-provenance-can-be-empty",
+      "finding_ids": [
+        "B1-13-dependency-provenance-can-be-empty"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-13-dependency-provenance-can-be-empty.historical-group-1",
+          "description": "Schema omits dependency provenance and scope explicitly transfers it to B1b. No repair credit."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "status": "CHƯA VÁ",
+      "source_round_sha": [
+        {
+          "round": 2,
+          "reviewed_sha": "9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Scope transfer/withdrawal authorized by Mission r86/r87, not a fix.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Dependency provenance is absent from B1a schema and explicitly assigned to B1b under E1. No closure claim.",
+        "unmeasured": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+      },
+      "successor": "B1b"
+    },
+    {
+      "class_slug": "legacy-selector-equivalence-is-impossible",
+      "finding_ids": [
+        "B1-14-legacy-selector-equivalence-is-impossible"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-14-legacy-selector-equivalence-is-impossible.historical-group-1",
+          "description": "Owner E1 withdrew equivalence. Acceptance5 is now legacy regression only; 8/0/8 current controls do not prove the withdrawn equivalence."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "active_in_candidate": false,
+      "status": "CHƯA VÁ",
+      "source_round_sha": [
+        {
+          "round": 3,
+          "reviewed_sha": "29c99e736fde5628f8f47689b80e2ec8ba253a8a"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "9f09a12a53fb0fc032c4496728b49feef09d5c5e"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Scope transfer/withdrawal authorized by Mission r86/r87, not a fix.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Owner E1 withdrew collector/legacy equivalence. Acceptance5 now proves only unchanged legacy behavior; no equivalence repair credit.",
+        "unmeasured": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "consumer-records-not-bound-to-producers",
+      "finding_ids": [
+        "B1-15-consumer-records-not-bound-to-producers"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-15.r6.m1",
+          "description": "real_bytes_stamp_checkout_sha: schema-valid, violations=[]"
+        },
+        {
+          "id": "B1-15.r6.m2",
+          "description": "real_bytes_stamp_checkout_tree: schema-valid, violations=[]"
+        },
+        {
+          "id": "B1-15.r6.m3",
+          "description": "real_bytes_stamp_su_kien_sha: schema-valid, violations=[]"
+        },
+        {
+          "id": "B1-15.r6.m4",
+          "description": "real_bytes_stamp_run_id: schema-valid, violations=[]"
+        },
+        {
+          "id": "B1-15.r6.m5",
+          "description": "real_bytes_stamp_run_attempt: schema-valid, violations=[]"
+        },
+        {
+          "id": "B1-15.r6.m6",
+          "description": "real_bytes_stamp_khoa_job: schema-valid, violations=[]"
+        },
+        {
+          "id": "B1-15.r6.m7",
+          "description": "real_bytes_stamp_schema: schema-valid, violations=[]"
+        },
+        {
+          "id": "B1-15.r6.m8",
+          "description": "real_bytes_shard_head: schema-valid, violations=[]"
+        },
+        {
+          "id": "B1-15.r6.m9",
+          "description": "real_bytes_shard_manh: schema-valid, violations=[]"
+        },
+        {
+          "id": "B1-15.r6.m10",
+          "description": "joint_missing_dot-bien-manh (0): schema-valid, violations=[]"
+        },
+        {
+          "id": "B1-15.r6.m11",
+          "description": "joint_missing_dot-bien-du: schema-valid, violations=[]"
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "All 11 prior manifestations reject: seven contradictory stamp payloads -> C11, two contradictory shard payloads -> C12, joint missing shard -> C4/C6/C7, joint missing registry -> C4/C7. Four healthy real-ZIP controls (dispatch, schedule, collector-only rerun, one-shard rerun) have no violations. ZIP/member hashes were computed and members parsed from real bytes. Initial checkout_tree probe accidentally reused the healthy b*40 value; corrected f*40 probe independently rejects with C11.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/probes.py; corrected checkout_tree probe recorded in tree-probe.json; python3 -B /tmp/wp1460-r7-independent/closure_checks.py",
+        "result": "All 11 prior manifestations reject: seven contradictory stamp payloads -> C11, two contradictory shard payloads -> C12, joint missing shard -> C4/C6/C7, joint missing registry -> C4/C7. Four healthy real-ZIP controls (dispatch, schedule, collector-only rerun, one-shard rerun) have no violations. ZIP/member hashes were computed and members parsed from real bytes. Initial checkout_tree probe accidentally reused the healthy b*40 value; corrected f*40 probe independently rejects with C11.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "frozen-fixture-semantic-oracle-missing",
+      "finding_ids": [
+        "B1-16-frozen-fixture-semantic-oracle-missing"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-16.r6.m1",
+          "description": "predicate_C3_0: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m2",
+          "description": "predicate_C3_2: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m3",
+          "description": "predicate_C4_0: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m4",
+          "description": "predicate_C6_0: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m5",
+          "description": "predicate_C8_0: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m6",
+          "description": "C4_job_attempt: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m7",
+          "description": "C4_job_key: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m8",
+          "description": "C4_self: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m9",
+          "description": "C6_shard_index: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m10",
+          "description": "C6_aggregation_attempt: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m11",
+          "description": "C8_digest: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m12",
+          "description": "predicate_C6_3: frozen command stays green; added isolated case kills it"
+        },
+        {
+          "id": "B1-16.r6.m13",
+          "description": "loosen_sha64: frozen command stays green; same-length invalid spelling becomes shape-valid"
+        },
+        {
+          "id": "B1-16.r6.m14",
+          "description": "loosen_digest: frozen command stays green; same-length invalid spelling becomes shape-valid"
+        },
+        {
+          "id": "B1-16.r6.m15",
+          "description": "loosen_moc_rest: frozen command stays green; same-length invalid spelling becomes shape-valid"
+        },
+        {
+          "id": "B1-16.r6.m16",
+          "description": "loosen_moc_ms: frozen command stays green; same-length invalid spelling becomes shape-valid"
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Frozen command passes 480/480 and kills 249/249 (57 named predicates,192 schema changes). Independently rerun the 12 formerly surviving predicate deletions:12/12 LechDauTien with named failing cases. Outside the author list:12 whole-rule removals, C1 shape-guard removal,4 fixture expectation changes,7 pattern-to-any relaxations all die by LechDauTien (24/24). Injected KeyError/TypeError/RuntimeError into the actual mutation classifier each yield0/57 kills and57 unrelated errors. No credit for an unrelated exception.",
+      "closing_check": {
+        "command": "python3 -B -u /tmp/wp1460-r7-independent/runner.py ops/specs/wp1460-r1/hop_dong --dot-bien; python3 -B /tmp/wp1460-r7-independent/probes.py; prior-predicate-check.json; python3 -B /tmp/wp1460-r7-independent/closure_checks.py",
+        "result": "Frozen command passes 480/480 and kills 249/249 (57 named predicates,192 schema changes). Independently rerun the 12 formerly surviving predicate deletions:12/12 LechDauTien with named failing cases. Outside the author list:12 whole-rule removals, C1 shape-guard removal,4 fixture expectation changes,7 pattern-to-any relaxations all die by LechDauTien (24/24). Injected KeyError/TypeError/RuntimeError into the actual mutation classifier each yield0/57 kills and57 unrelated errors. No credit for an unrelated exception.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "collector-stamp-order-conflict",
+      "finding_ids": [
+        "B1-17-collector-stamp-order-conflict"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-17-collector-stamp-order-conflict.historical-group-1",
+          "description": "Both section-3 recipes now require HEAD -> stamp -> upload -> setup -> pip; acceptance 6/7 pins the same order. The former stamp<setup/setup<stamp cycle is gone. Separate early-failure wording defect B1-20 already existed in r5 and is not counted as a remaining order conflict."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Both producer recipes prescribe HEAD->stamp->upload->setup->pip; acceptance6/7 tests that order. No opposing recipe remains.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "Both producer recipes prescribe HEAD->stamp->upload->setup->pip; acceptance6/7 tests that order. No opposing recipe remains.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "schema-patterns-accept-trailing-newline",
+      "finding_ids": [
+        "B1-18-schema-patterns-accept-trailing-newline"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-18-schema-patterns-accept-trailing-newline.historical-group-1",
+          "description": "All seven shared pattern definitions reject LF/CRLF; the ten full-document lexical sites pass all65 checks. Dollar-anchor mutants for variable-length kho/cap die. Five fixed-length dollar-anchor mutants survive because min/maxLength independently rejects extra bytes; this is redundancy, not recurrence."
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 5,
+          "reviewed_sha": "f18abde3c05e15659a9c8ccfe8aa28e67e36d789"
+        },
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "All seven patterns end with (?![\\s\\S]);79 lexical checks pass. Independent pattern-to-any changes all die on the corresponding lexical case.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; python3 -B /tmp/wp1460-r7-independent/probes.py; read exact SPEC,plan and Mission r84-r88,sibling B3",
+        "result": "All seven patterns end with (?![\\s\\S]);79 lexical checks pass. Independent pattern-to-any changes all die on the corresponding lexical case.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "consumer-freshness-anchor-unverified",
+      "finding_ids": [
+        "B1-19-consumer-freshness-anchor-unverified"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-19.r6.m1",
+          "description": "dispatch-future-created: violations=[], age_anchor=2099-01-01T00:00:00Z"
+        },
+        {
+          "id": "B1-19.r6.m2",
+          "description": "dispatch-impossible-date: violations=[], age_anchor=2026-99-99T99:99:99Z"
+        },
+        {
+          "id": "B1-19.r6.m3",
+          "description": "schedule-future-window: violations=[], age_anchor=2099-01-01T00:00:00Z"
+        },
+        {
+          "id": "B1-19.r6.m4",
+          "description": "schedule-wrong-cron: violations=[], age_anchor=2026-11-21T19:17:00Z"
+        },
+        {
+          "id": "B1-19.r6.m5",
+          "description": "schedule-wrong-created: violations=[], age_anchor=2026-11-21T19:17:00Z"
+        },
+        {
+          "id": "B1-19.r6.m6",
+          "description": "xanh-schedule: run created 19:31:12Z, receipt created 10:31:00Z and all job starts 10:00:00Z on the same date"
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Five prior false-green categories now return C9; impossible/future timestamps are never returned with an empty violation set. Schedule at cron, one second before it, and delayed until Tuesday select the correct week; collector-only rerun keeps the original anchor. Schedule fixture chronology is consistent. C9 returns its raw candidate anchor together with violations on invalid input; consumers must reject violations before using it.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/probes.py; python3 -B /tmp/wp1460-r7-independent/closure_checks.py",
+        "result": "Five prior false-green categories now return C9; impossible/future timestamps are never returned with an empty violation set. Schedule at cron, one second before it, and delayed until Tuesday select the correct week; collector-only rerun keeps the original anchor. Schedule fixture chronology is consistent. C9 returns its raw candidate anchor together with violations on invalid input; consumers must reject violations before using it.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "collector-early-failure-contract-contradiction",
+      "finding_ids": [
+        "B1-20-collector-early-failure-contract-contradiction"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-20.r6.m1",
+          "description": "Failure at step 3 still enables collection/upload under the pinned if rules"
+        },
+        {
+          "id": "B1-20.r6.m2",
+          "description": "Failure at step 4 still enables collection/upload under the pinned if rules"
+        },
+        {
+          "id": "B1-20.r6.m3",
+          "description": "Failure at step 5 still enables collection/upload under the pinned if rules"
+        },
+        {
+          "id": "B1-20.r6.m4",
+          "description": "Failure at step 6 still enables collection/upload under the pinned if rules"
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "SPEC now explicitly allows either presence or absence of a receipt after prerequisite failure and retains failed job/C2 rejection. Measured bash exit-status sequence models for failures at steps1-8 retain collection/upload eligibility and job_success=false; the four prior step3-6 contradictions are gone. This is a model of the specified sequence, not a dispatched Actions run.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; SPEC.md:38,90,92",
+        "result": "SPEC now explicitly allows either presence or absence of a receipt after prerequisite failure and retains failed job/C2 rejection. Measured bash exit-status sequence models for failures at steps1-8 retain collection/upload eligibility and job_success=false; the four prior step3-6 contradictions are gone. This is a model of the specified sequence, not a dispatched Actions run.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    },
+    {
+      "class_slug": "source-review-budget-not-activated",
+      "finding_ids": [
+        "B1-21-source-review-budget-not-activated"
+      ],
+      "manifestations": [
+        {
+          "id": "B1-21.r6.m1",
+          "description": "Source review count 3 versus effective unactivated packet ceiling 2"
+        }
+      ],
+      "highest_open_severity": null,
+      "active_in_candidate": false,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round_sha": [
+        {
+          "round": 6,
+          "reviewed_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5"
+        },
+        {
+          "round": 7,
+          "reviewed_sha": "d1b08c219227d4b8925702029cd20d4e0febed54"
+        }
+      ],
+      "common_fix_or_reason": "Exactly one ADR-0055 declaration and no ADR-0052 declaration. For d2e3052d479d140b7e7b91df41ec4914fab7d544: cat-file ADR rc0; first-parent ADR absence rc128; merge-base --is-ancestor origin/master rc0; first-parent membership true; non-shallow=false flag means repository is not shallow. Effective source/connector capacity=min(10,3+2)=5. Spec-review round7/8 is a separate counter; author revision7 is last authorized.",
+      "closing_check": {
+        "command": "git cat-file -e <OID>:docs/adr/0055-tran-loi-goi-codex-len-muoi.md; git cat-file -e <OID>^1:docs/adr/0055-tran-loi-goi-codex-len-muoi.md; git merge-base --is-ancestor <OID> origin/master; git rev-list --first-parent origin/master; git rev-parse --is-shallow-repository; python3 -B /tmp/wp1460-r7-independent/closure_checks.py",
+        "result": "Exactly one ADR-0055 declaration and no ADR-0052 declaration. For d2e3052d479d140b7e7b91df41ec4914fab7d544: cat-file ADR rc0; first-parent ADR absence rc128; merge-base --is-ancestor origin/master rc0; first-parent membership true; non-shallow=false flag means repository is not shallow. Effective source/connector capacity=min(10,3+2)=5. Spec-review round7/8 is a separate counter; author revision7 is last authorized.",
+        "unmeasured": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+      },
+      "successor": null
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "B1-15-consumer-records-not-bound-to-producers",
+      "class_slug": "consumer-records-not-bound-to-producers",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "manifestations_checked": [
+        "B1-15.r6.m1",
+        "B1-15.r6.m2",
+        "B1-15.r6.m3",
+        "B1-15.r6.m4",
+        "B1-15.r6.m5",
+        "B1-15.r6.m6",
+        "B1-15.r6.m7",
+        "B1-15.r6.m8",
+        "B1-15.r6.m9",
+        "B1-15.r6.m10",
+        "B1-15.r6.m11"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/probes.py; corrected checkout_tree probe recorded in tree-probe.json; python3 -B /tmp/wp1460-r7-independent/closure_checks.py",
+        "exit_code": 0,
+        "observed_output": "All 11 prior manifestations reject: seven contradictory stamp payloads -> C11, two contradictory shard payloads -> C12, joint missing shard -> C4/C6/C7, joint missing registry -> C4/C7. Four healthy real-ZIP controls (dispatch, schedule, collector-only rerun, one-shard rerun) have no violations. ZIP/member hashes were computed and members parsed from real bytes. Initial checkout_tree probe accidentally reused the healthy b*40 value; corrected f*40 probe independently rejects with C11."
+      },
+      "unmeasured": "No remaining measurement needed to close the reported specification defect. Production implementation/CI/canary are later acceptance, not claimed here."
+    },
+    {
+      "id": "B1-16-frozen-fixture-semantic-oracle-missing",
+      "class_slug": "frozen-fixture-semantic-oracle-missing",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "manifestations_checked": [
+        "B1-16.r6.m1",
+        "B1-16.r6.m2",
+        "B1-16.r6.m3",
+        "B1-16.r6.m4",
+        "B1-16.r6.m5",
+        "B1-16.r6.m6",
+        "B1-16.r6.m7",
+        "B1-16.r6.m8",
+        "B1-16.r6.m9",
+        "B1-16.r6.m10",
+        "B1-16.r6.m11",
+        "B1-16.r6.m12",
+        "B1-16.r6.m13",
+        "B1-16.r6.m14",
+        "B1-16.r6.m15",
+        "B1-16.r6.m16"
+      ],
+      "evidence": {
+        "command": "python3 -B -u /tmp/wp1460-r7-independent/runner.py ops/specs/wp1460-r1/hop_dong --dot-bien; python3 -B /tmp/wp1460-r7-independent/probes.py; prior-predicate-check.json; python3 -B /tmp/wp1460-r7-independent/closure_checks.py",
+        "exit_code": 0,
+        "observed_output": "Frozen command passes 480/480 and kills 249/249 (57 named predicates,192 schema changes). Independently rerun the 12 formerly surviving predicate deletions:12/12 LechDauTien with named failing cases. Outside the author list:12 whole-rule removals, C1 shape-guard removal,4 fixture expectation changes,7 pattern-to-any relaxations all die by LechDauTien (24/24). Injected KeyError/TypeError/RuntimeError into the actual mutation classifier each yield0/57 kills and57 unrelated errors. No credit for an unrelated exception."
+      },
+      "unmeasured": "No remaining measurement needed to close the reported specification defect. Production implementation/CI/canary are later acceptance, not claimed here."
+    },
+    {
+      "id": "B1-19-consumer-freshness-anchor-unverified",
+      "class_slug": "consumer-freshness-anchor-unverified",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "manifestations_checked": [
+        "B1-19.r6.m1",
+        "B1-19.r6.m2",
+        "B1-19.r6.m3",
+        "B1-19.r6.m4",
+        "B1-19.r6.m5",
+        "B1-19.r6.m6"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/probes.py; python3 -B /tmp/wp1460-r7-independent/closure_checks.py",
+        "exit_code": 0,
+        "observed_output": "Five prior false-green categories now return C9; impossible/future timestamps are never returned with an empty violation set. Schedule at cron, one second before it, and delayed until Tuesday select the correct week; collector-only rerun keeps the original anchor. Schedule fixture chronology is consistent. C9 returns its raw candidate anchor together with violations on invalid input; consumers must reject violations before using it. Measured chronology: run19:31:12Z,all job starts19:32:00Z,receipt20:05:00.000Z on2026-11-21."
+      },
+      "unmeasured": "No remaining measurement needed to close the reported specification defect. Production implementation/CI/canary are later acceptance, not claimed here."
+    },
+    {
+      "id": "B1-20-collector-early-failure-contract-contradiction",
+      "class_slug": "collector-early-failure-contract-contradiction",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "manifestations_checked": [
+        "B1-20.r6.m1",
+        "B1-20.r6.m2",
+        "B1-20.r6.m3",
+        "B1-20.r6.m4"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; SPEC.md:38,90,92",
+        "exit_code": 0,
+        "observed_output": "SPEC now explicitly allows either presence or absence of a receipt after prerequisite failure and retains failed job/C2 rejection. Measured bash exit-status sequence models for failures at steps1-8 retain collection/upload eligibility and job_success=false; the four prior step3-6 contradictions are gone. This is a model of the specified sequence, not a dispatched Actions run."
+      },
+      "unmeasured": "No remaining measurement needed to close the reported specification defect. Production implementation/CI/canary are later acceptance, not claimed here."
+    },
+    {
+      "id": "B1-21-source-review-budget-not-activated",
+      "class_slug": "source-review-budget-not-activated",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "manifestations_checked": [
+        "B1-21.r6.m1"
+      ],
+      "evidence": {
+        "command": "git cat-file -e <OID>:docs/adr/0055-tran-loi-goi-codex-len-muoi.md; git cat-file -e <OID>^1:docs/adr/0055-tran-loi-goi-codex-len-muoi.md; git merge-base --is-ancestor <OID> origin/master; git rev-list --first-parent origin/master; git rev-parse --is-shallow-repository; python3 -B /tmp/wp1460-r7-independent/closure_checks.py",
+        "exit_code": 0,
+        "observed_output": "Exactly one ADR-0055 declaration and no ADR-0052 declaration. For d2e3052d479d140b7e7b91df41ec4914fab7d544: cat-file ADR rc0; first-parent ADR absence rc128; merge-base --is-ancestor origin/master rc0; first-parent membership true; non-shallow=false flag means repository is not shallow. Effective source/connector capacity=min(10,3+2)=5. Spec-review round7/8 is a separate counter; author revision7 is last authorized."
+      },
+      "unmeasured": "No remaining measurement needed to close the reported specification defect. Production implementation/CI/canary are later acceptance, not claimed here."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "collector-self-record",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Schema job_thu requires null conclusion/completed_at; C2 checks final REST success. Frozen positive/negative cases and independent C2 removal pass/fail respectively.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "failure-evidence-transport",
+      "status": "CHƯA VÁ",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "I1 leaves prior shard upload conditions unchanged; red-shard transport explicitly remains B1b. Transfer is not a repair.",
+      "successor": "B1b",
+      "chua_do_duoc": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+    },
+    {
+      "class_slug": "unselected-attempt-validation",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "X4/X5 use latest REST attempt of each producer; retained old stamps/shards remain accepted. Current CLI has healthy0/8files, latest-invalid1/0files, old-invalid/new-good0/8files.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "v1-not-fully-specified",
+      "status": "CHƯA VÁ",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Unknown run/schedule timestamps and unsupported push event have schema-valid non-green representation and C1 rejection in measured fixtures. Historical diagnostics/A+3 manifestations remain transferred to B1b; no class-wide repair credit.",
+      "successor": "B1b",
+      "chua_do_duoc": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+    },
+    {
+      "class_slug": "b3-interface-mismatch",
+      "status": "CHƯA VÁ",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Sibling B3 at bec7de7c59087891197156975f21107383a36a41 still pins B1r4 and --kiem-bien-nhan-audit. GHIM-B1 stops on changed contract; B3 must revise before execution. Not repaired by B1a.",
+      "successor": "B3/wp1461",
+      "chua_do_duoc": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+    },
+    {
+      "class_slug": "stamp-identity-not-bound",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Producer X4 and acceptance3 retain all identity comparisons for current and retained attempts; consumer C11 now independently rejects all seven contradictory stamp fields.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "missing-compatibility-controls",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Acceptance5 still requires one-command base/head stdout/rc/output-byte A/B. Current-master and drafting-base legacy CLI probes agree on all three controls; this is baseline feasibility, not testing future implementation.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "canary-authority-budget-unresolved",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Two M9 runs are explicitly conditional on a later installed Mission revision. Current r88 per_new_packet still grants one, so the second run cannot dispatch yet. The SPEC states the required installation rather than claiming current authority.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "sensitive-size-budget",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Measured contract additions34+161=195 leave255/450 lines;4 files fit6. ADR0053 land predicates pass. Verbatim254-line runner plus contracts uses449, so that implementation cannot fit with the required workflow/collector. Exact runnable implementation size remains unknown. Owner r86/r87 explicitly requires measuring the candidate, stopping before review, and owner-approved measured nang_tran; this makes the SPEC conditional, not authorization to omit tests or exceed450.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "stale-canary-reuse",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Section7 invalidates A3/K7 on head change and requires new budget before another canary; no old-H reuse allowed.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "a4-null-comparison",
+      "status": "CHƯA VÁ",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "A4 is excluded from B1a under r86 and remains B3 work; both not_measured fixtures produce C10 warnings. No repair credit for removed comparison.",
+      "successor": "B3/wp1461",
+      "chua_do_duoc": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+    },
+    {
+      "class_slug": "a4-failure-downgraded-to-unknown",
+      "status": "CHƯA VÁ",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "B1a does not acquire/compare A4. The removed A4 failure distinction remains B3 work, not a fix in this candidate.",
+      "successor": "B3/wp1461",
+      "chua_do_duoc": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+    },
+    {
+      "class_slug": "dependency-provenance-can-be-empty",
+      "status": "CHƯA VÁ",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Dependency provenance is absent from B1a schema and explicitly assigned to B1b under E1. No closure claim.",
+      "successor": "B1b",
+      "chua_do_duoc": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+    },
+    {
+      "class_slug": "legacy-selector-equivalence-is-impossible",
+      "status": "CHƯA VÁ",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Owner E1 withdrew collector/legacy equivalence. Acceptance5 now proves only unchanged legacy behavior; no equivalence repair credit.",
+      "successor": null,
+      "chua_do_duoc": "Successor or withdrawn scope has not been implemented/measured; no repair credit."
+    },
+    {
+      "class_slug": "consumer-records-not-bound-to-producers",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "All 11 prior manifestations reject: seven contradictory stamp payloads -> C11, two contradictory shard payloads -> C12, joint missing shard -> C4/C6/C7, joint missing registry -> C4/C7. Four healthy real-ZIP controls (dispatch, schedule, collector-only rerun, one-shard rerun) have no violations. ZIP/member hashes were computed and members parsed from real bytes. Initial checkout_tree probe accidentally reused the healthy b*40 value; corrected f*40 probe independently rejects with C11.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "frozen-fixture-semantic-oracle-missing",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Frozen command passes 480/480 and kills 249/249 (57 named predicates,192 schema changes). Independently rerun the 12 formerly surviving predicate deletions:12/12 LechDauTien with named failing cases. Outside the author list:12 whole-rule removals, C1 shape-guard removal,4 fixture expectation changes,7 pattern-to-any relaxations all die by LechDauTien (24/24). Injected KeyError/TypeError/RuntimeError into the actual mutation classifier each yield0/57 kills and57 unrelated errors. No credit for an unrelated exception.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "collector-stamp-order-conflict",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Both producer recipes prescribe HEAD->stamp->upload->setup->pip; acceptance6/7 tests that order. No opposing recipe remains.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "schema-patterns-accept-trailing-newline",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "All seven patterns end with (?![\\s\\S]);79 lexical checks pass. Independent pattern-to-any changes all die on the corresponding lexical case.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "consumer-freshness-anchor-unverified",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Five prior false-green categories now return C9; impossible/future timestamps are never returned with an empty violation set. Schedule at cron, one second before it, and delayed until Tuesday select the correct week; collector-only rerun keeps the original anchor. Schedule fixture chronology is consistent. C9 returns its raw candidate anchor together with violations on invalid input; consumers must reject violations before using it.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "collector-early-failure-contract-contradiction",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "SPEC now explicitly allows either presence or absence of a receipt after prerequisite failure and retains failed job/C2 rejection. Measured bash exit-status sequence models for failures at steps1-8 retain collection/upload eligibility and job_success=false; the four prior step3-6 contradictions are gone. This is a model of the specified sequence, not a dispatched Actions run.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    },
+    {
+      "class_slug": "source-review-budget-not-activated",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 6,
+      "source_sha": "2e93730ff2451353086964e78d0bcff7e9bb5ac5",
+      "measured_evidence": "Exactly one ADR-0055 declaration and no ADR-0052 declaration. For d2e3052d479d140b7e7b91df41ec4914fab7d544: cat-file ADR rc0; first-parent ADR absence rc128; merge-base --is-ancestor origin/master rc0; first-parent membership true; non-shallow=false flag means repository is not shallow. Effective source/connector capacity=min(10,3+2)=5. Spec-review round7/8 is a separate counter; author revision7 is last authorized.",
+      "successor": null,
+      "chua_do_duoc": "Future implementation acceptance is not claimed; no unresolved in-scope specification closure measurement."
+    }
+  ],
+  "class_mapping": [],
+  "counts": {
+    "open_candidate_classes": 0,
+    "open_candidate_findings": 0,
+    "open_candidate_manifestations": 0,
+    "severity": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 0,
+      "P3": 0
+    },
+    "class_table_total": 21,
+    "historical_manifestation_entries": 54,
+    "prior_round_classes": 5,
+    "prior_round_manifestations": 38,
+    "prior_classes_closed": 5,
+    "prior_manifestations_closed": 38,
+    "historical_transferred_or_withdrawn_classes_not_fixed": 7,
+    "new_ids": []
+  },
+  "hunt_table": [
+    {
+      "id": "H1",
+      "hypothesis": "Receipt metadata can disagree with independently downloaded producer content or omit a required producer.",
+      "command": "python3 -B /tmp/wp1460-r7-independent/probes.py; tree-probe.json",
+      "observed_output": "All 11 prior manifestations reject: seven contradictory stamp payloads -> C11, two contradictory shard payloads -> C12, joint missing shard -> C4/C6/C7, joint missing registry -> C4/C7. Four healthy real-ZIP controls (dispatch, schedule, collector-only rerun, one-shard rerun) have no violations. ZIP/member hashes were computed and members parsed from real bytes. Initial checkout_tree probe accidentally reused the healthy b*40 value; corrected f*40 probe independently rejects with C11.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": null
+    },
+    {
+      "id": "H2",
+      "hypothesis": "Frozen oracle can be weakened while all tests remain green.",
+      "command": "python3 -B -u /tmp/wp1460-r7-independent/runner.py ops/specs/wp1460-r1/hop_dong --dot-bien; python3 -B /tmp/wp1460-r7-independent/probes.py; prior-predicate-check.json",
+      "observed_output": "Frozen command passes 480/480 and kills 249/249 (57 named predicates,192 schema changes). Independently rerun the 12 formerly surviving predicate deletions:12/12 LechDauTien with named failing cases. Outside the author list:12 whole-rule removals, C1 shape-guard removal,4 fixture expectation changes,7 pattern-to-any relaxations all die by LechDauTien (24/24). Injected KeyError/TypeError/RuntimeError into the actual mutation classifier each yield0/57 kills and57 unrelated errors. No credit for an unrelated exception.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": null
+    },
+    {
+      "id": "H3",
+      "hypothesis": "An unrelated mutant exception receives kill credit.",
+      "command": "python3 -B /tmp/wp1460-r7-independent/probes.py",
+      "observed_output": "Injected KeyError,TypeError,RuntimeError: each killed=0,total=57,errors=57; LechDauTien mismatches from24 independent mutants are counted separately.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": null
+    },
+    {
+      "id": "H4",
+      "hypothesis": "Receipt-controlled or rerun-controlled age anchors create false freshness.",
+      "command": "python3 -B /tmp/wp1460-r7-independent/probes.py",
+      "observed_output": "Five prior false-green categories now return C9; impossible/future timestamps are never returned with an empty violation set. Schedule at cron, one second before it, and delayed until Tuesday select the correct week; collector-only rerun keeps the original anchor. Schedule fixture chronology is consistent. C9 returns its raw candidate anchor together with violations on invalid input; consumers must reject violations before using it.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": null
+    },
+    {
+      "id": "H5",
+      "hypothesis": "Early step failure requires contradictory collector/upload behavior.",
+      "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py",
+      "observed_output": "SPEC now explicitly allows either presence or absence of a receipt after prerequisite failure and retains failed job/C2 rejection. Measured bash exit-status sequence models for failures at steps1-8 retain collection/upload eligibility and job_success=false; the four prior step3-6 contradictions are gone. This is a model of the specified sequence, not a dispatched Actions run.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": null
+    },
+    {
+      "id": "H6",
+      "hypothesis": "Current master or legacy selection invalidates the implementation plan.",
+      "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; git show origin/master:<touched file>",
+      "observed_output": "Current master48d372e14f190dae83a75ccbca8ee9a0b25635c5: both touched code blobs identical to drafting0f9aa2a. Shape errors=[];3 jobs expand to10. Legacy A/B cases rc0/1/0,8/0/8 files and exact stdout/output hashes match.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": "Future B1a product code is not present; future A/B remains mandatory."
+    },
+    {
+      "id": "H7",
+      "hypothesis": "Size note silently permits exceeding the sensitive cap.",
+      "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py; read Mission r88 envelope.size_rule and SPEC Kích thước",
+      "observed_output": "Measured contract additions34+161=195 leave255/450 lines;4 files fit6. ADR0053 land predicates pass. Verbatim254-line runner plus contracts uses449, so that implementation cannot fit with the required workflow/collector. Exact runnable implementation size remains unknown. Owner r86/r87 explicitly requires measuring the candidate, stopping before review, and owner-approved measured nang_tran; this makes the SPEC conditional, not authorization to omit tests or exceed450.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": "No complete implementation was built; cannot prove a hard lower bound or guarantee fit."
+    },
+    {
+      "id": "H8",
+      "hypothesis": "Mission budget or invalid ADR OID promises an unauthorized review.",
+      "command": "git cat-file -e <OID>:docs/adr/0055-tran-loi-goi-codex-len-muoi.md; git cat-file -e <OID>^1:docs/adr/0055-tran-loi-goi-codex-len-muoi.md; git merge-base --is-ancestor <OID> origin/master; git rev-list --first-parent origin/master; git rev-parse --is-shallow-repository; inspect mission-r88.json",
+      "observed_output": "Exactly one ADR-0055 declaration and no ADR-0052 declaration. For d2e3052d479d140b7e7b91df41ec4914fab7d544: cat-file ADR rc0; first-parent ADR absence rc128; merge-base --is-ancestor origin/master rc0; first-parent membership true; non-shallow=false flag means repository is not shallow. Effective source/connector capacity=min(10,3+2)=5. Spec-review round7/8 is a separate counter; author revision7 is last authorized. Mission r88 SHA25696df5fad1793e7c26ebe743a21c92639619a259058ebbe2f3704b3a80d6be0f8 equals installed comment7047934753.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": null
+    },
+    {
+      "id": "H9",
+      "hypothesis": "An unacknowledged live lease overlaps the proposed four delivery files.",
+      "command": "git fetch --all --prune; python3 -B ops/lease_publish.py ai-dang-giu <each path>; GitHub GET git/matching-refs/heads/ and trees; python3 -B /tmp/wp1460-r7-independent/live_lease_scan.py",
+      "observed_output": "Direct command rc12 (proxy); fallback covered382 live heads/218 lease trees/541 blob-path pairs. Only active unsuperseded overlap is wp1236-a-r9-g1-claude-20261120 on ci_dang_ky_test.py until2026-11-22T15:35Z; SPEC explicitly blocks lease until expiry/revocation. No holder on other3 paths.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": "Direct CLI network path remains unavailable; API/tree-based measurement substitutes for it and is not mislabelled rc0."
+    },
+    {
+      "id": "H10",
+      "hypothesis": "Plan mechanisms removed by owner decisions are reintroduced, or moved classes are claimed fixed.",
+      "command": "Read exact PLAN.md B1-B4, mission-r84/r86/r87/r88.json, SPEC Ngoài phạm vi/Thay đổi and sibling B3",
+      "observed_output": "Plan hash0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe verified. A4 remains B3; diagnostics/A+3/item inventory/dependencies/RSS/red-shard transport remain B1b. No CHO_PHEP setting, no new ci.yml trigger or M9 loop optimization. Seven historical classes retain CHƯA VÁ outside B1a.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": "B1b and B3 successor implementation not reviewed."
+    },
+    {
+      "id": "H11",
+      "hypothesis": "Unknown acquired inputs cannot be represented without fabricated timestamps.",
+      "command": "python3 -B /tmp/wp1460-r7-independent/probes.py",
+      "observed_output": "Five non-green fixture variants validate and return C1/anchor null; green timestamp-null/unsupported-event cases are rejected. Removing required independent adapter fields throws KeyError, never produces a false-green result.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "unmeasured": "Malformed REST acquisition mapping to consumer unknown/error belongs to B2/B3 adapters; no production adapter exists in this candidate."
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Frozen SPEC SHA256",
+      "claimed": "d53341fb8d549d89f99e4cda0bd6ed380bf9975ce47b95a43ad1adaf5b3963b3",
+      "measured": "d53341fb8d549d89f99e4cda0bd6ed380bf9975ce47b95a43ad1adaf5b3963b3",
+      "matches": true
+    },
+    {
+      "claim": "Fixture counts",
+      "claimed": "480/480;120 shape,118 semantic,79 lexical,163 object;12/12 laws",
+      "measured": "FIXTURE: 480/480 phep kiem dung ky vong · hinh 120 · ngu nghia 118 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12",
+      "matches": true
+    },
+    {
+      "claim": "Mutant kills",
+      "claimed": "249/249;57 predicates+192 schema",
+      "measured": "DOT BIEN: giet 249/249 · vi tu 57 · noi long schema 192",
+      "matches": true
+    },
+    {
+      "claim": "Independent mutants outside supplied list",
+      "claimed": null,
+      "measured": "24/24 diagnostic kills;12 whole rules+1 schema guard+4 expectation changes+7 schema pattern relaxations",
+      "matches": null
+    },
+    {
+      "claim": "Unrelated exception credit",
+      "claimed": "0",
+      "measured": "0/57 for each of3 injected exception classes",
+      "matches": true
+    },
+    {
+      "claim": "Contract added lines",
+      "claimed": "34+161=195 of450",
+      "measured": "34+161=195;255 remaining;4 files within6",
+      "matches": true
+    },
+    {
+      "claim": "Naive verbatim runner implementation footprint",
+      "claimed": null,
+      "measured": "254 runner lines+195 contracts=449 before workflow/collector/new tests; not a lower bound for another implementation",
+      "matches": null
+    },
+    {
+      "claim": "Full runner wall time approximately5 minutes",
+      "claimed": "about5min",
+      "measured": "Completed rc0; exact end-to-end wall duration was not instrumented",
+      "matches": null
+    },
+    {
+      "claim": "Source review allowance",
+      "claimed": "packet10;Mission3 source+2 connector",
+      "measured": "Valid ADR0055 declaration;effective5 total PR review calls. Spec7/8 separate",
+      "matches": true
+    },
+    {
+      "claim": "Current M9 allocation versus candidate requirement",
+      "claimed": "candidate2 conditional on installation",
+      "measured": "r88 currently1;candidate expressly requires future installed revision before2",
+      "matches": true
+    },
+    {
+      "claim": "Workflow job count after new collector",
+      "claimed": "11",
+      "measured": "current3 job definitions expand10;adding one non-matrix collector yields11",
+      "matches": true
+    },
+    {
+      "claim": "Live-ref lease scan",
+      "claimed": "named wp1236 overlap must clear before lease",
+      "measured": "382 live heads;218 unique lease trees;541 unique blob/path entries;one active overlapping lease matches the SPEC",
+      "matches": true
+    },
+    {
+      "claim": "Round6 closure",
+      "claimed": "five classes",
+      "measured": "5/5 current classes,38/38 previously reported manifestations closed as specification defects;7 historical transferred/withdrawn classes retain no repair credit",
+      "matches": true
+    }
+  ],
+  "tests": [
+    {
+      "name": "frozen_contract_and_mutants",
+      "status": "passed",
+      "command": "python3 -B -u /tmp/wp1460-r7-independent/runner.py ops/specs/wp1460-r1/hop_dong --dot-bien",
+      "exit_code": 0,
+      "observed_output": "FIXTURE: 480/480 phep kiem dung ky vong · hinh 120 · ngu nghia 118 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nDOT BIEN: giet 249/249 · vi tu 57 · noi long schema 192\nTONG: DAT",
+      "artifact": "/tmp/wp1460-r7-independent/runner.log"
+    },
+    {
+      "name": "independent_oracle_payload_and_mutation_probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1460-r7-independent/probes.py",
+      "exit_code": 0,
+      "observed_output": "Real-ZIP controls and prior negative cases;24 external mutants diagnostic kills;3 unrelated exception classes0 kill credit. See tree-probe correction.",
+      "artifact": "/tmp/wp1460-r7-independent/probes.json"
+    },
+    {
+      "name": "corrected_real_zip_tree_probe",
+      "status": "passed",
+      "command": "python3 -B inline real-ZIP checkout_tree=f*40 probe",
+      "exit_code": 0,
+      "observed_output": "baseline tree=b*40;mutated=f*40;violations=[C11]",
+      "artifact": "/tmp/wp1460-r7-independent/tree-probe.json"
+    },
+    {
+      "name": "prior_subpredicate_regression",
+      "status": "passed",
+      "command": "python3 -B inline chay(...,bo=predicate,som=True) for12 prior surviving predicates",
+      "exit_code": 0,
+      "observed_output": "12/12 LechDauTien with expected failing case labels",
+      "artifact": "/tmp/wp1460-r7-independent/prior-predicate-check.json"
+    },
+    {
+      "name": "current_master_helpers_and_legacy_AB",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1460-r7-independent/baseline.py",
+      "exit_code": 0,
+      "observed_output": "loi_workflow=[];loi_ghim=[];legacy rc0/1/0 files8/0/8;byte A/B equal3/3;early-failure sequence models8/8",
+      "artifact": "/tmp/wp1460-r7-independent/baseline.json"
+    },
+    {
+      "name": "direct_fetch_supplied_checkout",
+      "status": "failed",
+      "command": "git fetch --all --prune",
+      "exit_code": 255,
+      "observed_output": "cannot open .git/FETCH_HEAD: Read-only file system",
+      "artifact": null
+    },
+    {
+      "name": "scratch_GitHub_fetch",
+      "status": "failed",
+      "command": "git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'",
+      "exit_code": 128,
+      "observed_output": "proxy127.0.0.1:36011 connection unavailable",
+      "artifact": null
+    },
+    {
+      "name": "local_mirror_all_refs_fetch",
+      "status": "passed",
+      "command": "git fetch /home/user/tra-luat '+refs/remotes/origin/*:refs/remotes/origin/*' '+refs/heads/*:refs/remotes/localmirror/*'",
+      "exit_code": 0,
+      "observed_output": "Fetched local-mirror refs into scratch only;not by itself freshness proof",
+      "artifact": null
+    },
+    {
+      "name": "direct_ai_dang_giu_four_paths",
+      "status": "not_measured",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <each delivery path>",
+      "exit_code": 12,
+      "observed_output": "All4 invocations fail closed at ls-remote network check;no zero-holder claim from this output",
+      "artifact": "/tmp/wp1460-r7-independent/leases.json"
+    },
+    {
+      "name": "independent_live_lease_scan",
+      "status": "passed",
+      "command": "GitHub GET git/matching-refs/heads/;GET git/trees/<head>,git/trees/<ops>;python3 -B /tmp/wp1460-r7-independent/live_lease_scan.py",
+      "exit_code": 0,
+      "observed_output": "382 current heads,218 unique lease trees,541 blob/path pairs;only wp1236 overlap,explicitly gated by SPEC",
+      "artifact": "/tmp/wp1460-r7-independent/live-leases.json"
+    },
+    {
+      "name": "ADR0055_activation",
+      "status": "passed",
+      "command": "git cat-file -e <OID>:docs/adr/0055-tran-loi-goi-codex-len-muoi.md; git cat-file -e <OID>^1:docs/adr/0055-tran-loi-goi-codex-len-muoi.md; git merge-base --is-ancestor <OID> origin/master; git rev-list --first-parent origin/master; git rev-parse --is-shallow-repository",
+      "exit_code": 0,
+      "observed_output": "OID file rc0,parent absence rc128(expected),ancestor rc0,first-parent true,shallow false",
+      "artifact": null
+    },
+    {
+      "name": "ADR0053_activation",
+      "status": "passed",
+      "command": "git cat-file -e 8ab100793df9831505f495543a74044b91c2c9ab:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md; parent/ancestry/first-parent probes",
+      "exit_code": 0,
+      "observed_output": "OID file rc0,parent absence rc128(expected),ancestor rc0,first-parent true,shallow false;initial probe with incorrect shortened filename discarded",
+      "artifact": null
+    },
+    {
+      "name": "full_repository_gate",
+      "status": "not_run",
+      "command": "full CI/selftest/M9/actionlint/Ruff",
+      "exit_code": null,
+      "observed_output": "Specification review;no product patch. Relevant current-master helpers and legacy controls measured. No full gate claimed.",
+      "artifact": null
+    },
+    {
+      "name": "production_canary_A3_A4",
+      "status": "not_run",
+      "command": "workflow_dispatch",
+      "exit_code": null,
+      "observed_output": "Explicitly prohibited for this reviewer;future implementation and owner authority required.",
+      "artifact": null
+    },
+    {
+      "name": "final_source_snapshot",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree};git status --porcelain=v1 --untracked-files=all --ignored=matching;git diff --binary;git diff --cached --binary",
+      "exit_code": 0,
+      "observed_output": "Exact H/tree unchanged;diff/index empty;preexisting ignored .codex directory only;no visible files within it",
+      "artifact": "/tmp/wp1460-r7-independent/final-snapshot.json"
+    },
+    {
+      "name": "reproducible_prior_closure_checks",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1460-r7-independent/closure_checks.py",
+      "exit_code": 0,
+      "observed_output": "Schedule chronology valid;real-ZIP wrong tree -> C11;12 prior predicates -> LechDauTien;ADR0055 OID rc0/128/0,first-parent true,shallow false.",
+      "artifact": "/tmp/wp1460-r7-independent/closure-checks.json"
+    }
+  ],
+  "environment": {
+    "os": "Linux",
+    "python": "3.13.18",
+    "jsonschema": "4.26.0",
+    "sandbox": "workspace-write;assigned .git/.agents/.codex read-only;restricted shell network",
+    "scratch": "/tmp/wp1460-r7-independent",
+    "source_checkout": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1460-clone",
+    "source_origin": "/home/user/tra-luat local mirror",
+    "current_master": "48d372e14f190dae83a75ccbca8ee9a0b25635c5",
+    "current_master_verification": "GitHub fetch_commit(master) and live heads inventory match local OID;both touched code blobs equal drafting base.",
+    "snapshot": "Initial and final HEAD/tree/status clean apart from ignored .codex directory;final diff/index empty. Full per-file initial byte manifest was not captured,so no claim of a complete byte-by-byte two-snapshot audit or absence of transient writes. All deliberate writes confined to scratch/output;fetch against source .git denied."
+  },
+  "authority": {
+    "installed_mission_revision": 88,
+    "mission_sha256": "96df5fad1793e7c26ebe743a21c92639619a259058ebbe2f3704b3a80d6be0f8",
+    "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7047934753",
+    "source_plan_sha256": "0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe",
+    "author_cap": 7,
+    "spec_review_cap": 8,
+    "new_revision_authorized_here": false,
+    "execution_authorized_here": false
+  },
+  "notes": "Approve the B1a frozen-spec candidate only,with zero current findings. The five round6 classes are repaired;scope transfers are not repairs and remain explicitly recorded. No repository edit,commit,push,GitHub write or workflow dispatch performed. Size is a material implementation risk:195 fixed lines leave255;naive full-runner copying leaves1. The approved measured-size stop/nang_tran procedure is necessary if implementation exceeds the cap;approval does not waive it. Existing wp1236 lease and future Mission installation/second-M9 allocation still block execution/canary as the SPEC itself requires. Direct ai-dang-giu network errors are preserved;the independent live-ref/tree scan supplies the missing overlap evidence.",
+  "artifact_hashes": {
+    "mission-r84.json": "a90f5df0746efcd3e92b8ff356806103a410fff71d3da4d7d4fd5e0f1dd96945",
+    "live-tree-proof.json": "464e56d203376955d9f6f76b1e4b9fed61faf393a3042c35af44f7a779eaad6a",
+    "lease-cache.json": "c1d60efa93efd42d0840020011799fdf97726f5c7bd2c77ab59ad4e392090588",
+    "probes.json": "fecf56fcb62129d67ed32c72a1f100b7af02f9502bbe9db76957aeeaa87fa965",
+    "live-refs.json": "c99d44bda6d11aea78484ff27f9d0411538a7165de1071cb71ec284dea3bae3f",
+    "closure_checks.py": "50ca064756692c1c66b6e6f1c0a9ff0e123b21f13648ec1a74cb9ece4eefd30e",
+    "lease_cache.py": "6b16be7a35f737e4726be015460767be8f5646fa22f41fe8bc911e0ca8b938ac",
+    "mission-r86.json": "fffcfbe50cd77ff615914c56a2f2bcd07b051104b511157657814d2a8599b081",
+    "initial.json": "b25d125125f8fe159660d0b49ee6e185feb00052541c14f34715e8f93daa85f8",
+    "r88-installation.json": "9ff52fcdf01fadf27ea4b497c946b90a3182080107affccb1f0886edd0f66b31",
+    "probes.py": "589716cc284cc03ccb55e4c2aeb45e4c20830f3c11a38bc5a6e3108b734a7c17",
+    "ref-comparison.json": "3dbb9c796f806417e5bbdca4c1a8090228200de6982584a8ac3a0cf46e7862b2",
+    "mission-r87.json": "9cc1dc15a426a5617505316f06784fbb9d0ad23638a4449ffa49688d1d628711",
+    "prior-predicate-check.json": "80f3f490fa72f02991840ba4514d366d83e7f027161b51a9f09a387d3f62179e",
+    "probes.log": "557a0e85374d901ebf18643b4b527558a93269cc1632669400bd8e0f4ca3d038",
+    "runner.py": "d9c78e708e18a211b7d8c7309638ffd1c73200578cf3128f9f0fc4275430f24e",
+    "mission-r85.json": "6ccdce617409600a5f1f72b616d85381e404fce96853acc66cbef8f0f6861436",
+    "baseline.py": "7be0aea8956f5e29749e37b5ce63dbd6aef61867671a6b1304045ea9bd4e246e",
+    "closure-checks.json": "df265bc0cfa7c915df8239c4fb891b02f404083f73dd318686e971309b9953b8",
+    "leases.json": "39831081ee84ac1aa7932a64c440289bda6ebfb48f2aaac55be88ee20665c85d",
+    "live-leases.json": "55895a3a2942b2476f0b02619374afaf33426c3dfa2cacd8e507267618698f57",
+    "code-provenance.json": "0b87016d851434e1787d264fa6438013e68f289aa55ad29ae26acc5e88c77f4b",
+    "live_lease_scan.py": "32ea7fec9e963a94bf1dcc468ebf9f993412e19c216d95be8ac117d0e9c3ecb0",
+    "legacy_draft.py": "abca9aed2aaa452720dc9bed30d61b5dc3195b536d8b232fee9b7073d21d9ccf",
+    "tree-probe.json": "8bc7dcc1dba4b9beab6ee969494676408df045b0c0d3fd3f0be7ee94f17908a0",
+    "final-snapshot.json": "e03a4ba138ba233a660e98d36d6fdf95896c6035796b7f61bbd6286901cf93a5",
+    "mission-r88.json": "96df5fad1793e7c26ebe743a21c92639619a259058ebbe2f3704b3a80d6be0f8",
+    "runner.log": "4c41398c75058fb8be8873db13b5776a15d38275a3e15e90638e03ad1ca4d60a",
+    "baseline.json": "40cdf3ac7fb4db6f00a5f5fde3357f22ac718ef7940d4bfaf25293a027978719"
+  }
+}

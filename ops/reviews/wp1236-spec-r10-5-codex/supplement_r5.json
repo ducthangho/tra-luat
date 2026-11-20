@@ -1,0 +1,110 @@
+{
+  "commands": [
+    {
+      "command": [
+        "git",
+        "cat-file",
+        "-e",
+        "8ab100793df9831505f495543a74044b91c2c9ab:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "cat-file",
+        "-e",
+        "8ab100793df9831505f495543a74044b91c2c9ab^1:docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md"
+      ],
+      "rc": 128,
+      "stdout": "",
+      "stderr": "fatal: path 'docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md' exists on disk, but not in '8ab100793df9831505f495543a74044b91c2c9ab^1'\n"
+    },
+    {
+      "command": [
+        "git",
+        "cat-file",
+        "-e",
+        "d2e3052d479d140b7e7b91df41ec4914fab7d544:docs/adr/0055-tran-loi-goi-codex-len-muoi.md"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "cat-file",
+        "-e",
+        "d2e3052d479d140b7e7b91df41ec4914fab7d544^1:docs/adr/0055-tran-loi-goi-codex-len-muoi.md"
+      ],
+      "rc": 128,
+      "stdout": "",
+      "stderr": "fatal: path 'docs/adr/0055-tran-loi-goi-codex-len-muoi.md' exists on disk, but not in 'd2e3052d479d140b7e7b91df41ec4914fab7d544^1'\n"
+    }
+  ],
+  "0053": {
+    "exists_parent_rc": [
+      0,
+      128
+    ],
+    "first_parent_contains": true,
+    "scope": "local refs only, no network freshness"
+  },
+  "0055": {
+    "exists_parent_rc": [
+      0,
+      128
+    ],
+    "first_parent_contains": true,
+    "scope": "local refs only, no network freshness"
+  },
+  "cutover": {
+    "sha256": "964742fef636a70587b2247c094ac4f38aea540a01abdce8b6319c8f74b447bf",
+    "listed": "964742fef636a70587b2247c094ac4f38aea540a01abdce8b6319c8f74b447bf",
+    "l8_if_run": [
+      "$.post_merge_checks[1].moc_gate_output: dinh_dang_loi_khai",
+      "$: landed_khong_loi_khai_gate_output"
+    ]
+  },
+  "conclusion": {
+    "control": [
+      "failed",
+      []
+    ],
+    "altered": [
+      "not_measured",
+      [
+        "ket_luan_lech:136203672900"
+      ]
+    ]
+  },
+  "K3": {
+    "run_flag": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ],
+    "tap_jobs_flag": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ],
+    "checkout_flag": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ],
+    "checkout_empty": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ]
+  }
+}

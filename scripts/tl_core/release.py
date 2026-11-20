@@ -253,6 +253,8 @@ def _test_fragments_check(root: str | Path) -> dict:
         actual = b"".join(n.encode() + b"\0" + (d or b"") for n, d in actual_modules)
     expected_sha256 = hashlib.sha256(expected).hexdigest()
     actual_sha256 = hashlib.sha256(actual).hexdigest()
+    # `*_bytes` là TỔNG độ dài các mảnh (không gồm tên/NUL của chuỗi băm); một mảnh thì bằng độ dài tệp như cũ.
+    expected, actual = (b"".join(d for _, d in expected_modules), b"".join(a or b"" for _, a in actual_modules))
     shards = [{"name": n, "expected_bytes": len(d),
                "actual_bytes": (len(a) if a is not None else None)}
               for (n, d), (_, a) in zip(expected_modules, actual_modules)]

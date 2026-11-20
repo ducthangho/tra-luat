@@ -41,7 +41,7 @@ Không có mục khuyến nghị tối ưu (ngoài phạm vi packet). Mọi con 
 - 62 lượt · kết luận {'cancelled': 7, 'failure': 2, 'success': 53} · lượt có rerun 2 · job hỏng ở attempt trước 10
 - Lượt đủ 8 mảnh success, một attempt: 42. Tổng giây 8 job mảnh mỗi lượt: n=42 · tổng 543527 · trung vị 13282 · p90 13614 · max 13884 s
 - Giây một job mảnh (các lượt ấy): n=336 · tổng 543527 · trung vị 1672.5 · p90 1761 · max 1809 s
-- Lượt đủ mới nhất `43990524880` (2026-11-17T00:47:54Z): job mảnh n=8 · tổng 13010 · trung vị 1621.5 · p90 1730 · max 1730 s; mục theo log 321, theo artifact 321; giây thực thi 14524; đầu-cuối suy ra từ job 1745 s
+- Lượt đủ mới nhất `43990524880` (2026-11-17T00:47:54Z): job mảnh n=8 · tổng 13010 · trung vị 1621.5 · p90 1730 · max 1730 s; mục theo log 321 (8/8 mảnh có nguồn), theo artifact 321 (8/8 mảnh có nguồn); giây thực thi 14524; đầu-cuối suy ra từ job 1745 s
 
 | job gốc | nền | thống kê giây (dòng thực thi, mọi lượt) |
 |---|---|---|
@@ -162,13 +162,13 @@ Bảng đã import có tên chứa `MUT`/`DOT_BIEN` nhưng không được chọ
 
 ## 5 điểm tốn thời gian nhất theo giây thực thi (nhóm job, cả cohort)
 
-| # | workflow | job gốc | tổng giây thực thi | số dòng thực thi | trung vị s |
-|---|---|---|---|---|---|
-| 1 | ci.yml | gate-cong-cu | 8542030 | 7832 | 1079.5 |
-| 2 | ci.yml | gate-packet-loop | 1796318 | 1489 | 42 |
-| 3 | ci.yml | gate-registry | 1371883 | 1472 | 913 |
-| 4 | ci.yml | gate-ops | 1238470 | 1508 | 757.5 |
-| 5 | ci.yml | gate-nhanh-manh | 830933 | 11997 | 59 |
+| # | workflow | job gốc | tổng giây thực thi | số dòng thực thi (tính) | số dòng bị loại | trung vị s |
+|---|---|---|---|---|---|---|
+| 1 | ci.yml | gate-cong-cu | 8542030 | 7832 | 7 | 1079.5 |
+| 2 | ci.yml | gate-packet-loop | 1796318 | 1489 | 29 | 42 |
+| 3 | ci.yml | gate-registry | 1371883 | 1472 | 52 | 913 |
+| 4 | ci.yml | gate-ops | 1238470 | 1508 | 6 | 757.5 |
+| 5 | ci.yml | gate-nhanh-manh | 830933 | 11997 | 6 | 59 |
 
 Nguồn: tổng `completed_at − started_at` của mọi dòng `thuc_thi` cùng tên gốc trong các tệp `jobs/*` của ảnh chụp (URL từng lượt ở `M1.luot[].nguon`, `M2.luot[].nguon`).
 
@@ -251,10 +251,10 @@ Dòng khớp regex nhưng không phải lời khai: `.github/workflows/ci.yml:62
 
 ## Kết quả hai bộ phân loại §6 (trên tập đường dẫn của packet)
 
-Tập đường dẫn (mọi tệp là `A`, mode `100644`): `ops/specs/wp1434-r3/do/BAO_CAO.md`, `ops/specs/wp1434-r3/do/BASELINE.json`, `ops/specs/wp1434-r3/do/COHORT.json`, `ops/specs/wp1434-r3/do/fixtures/artifacts.json`, `ops/specs/wp1434-r3/do/fixtures/attempt_cuoi_rong.json`, `ops/specs/wp1434-r3/do/fixtures/buoc.json`, `ops/specs/wp1434-r3/do/fixtures/cohort_bien.json`, `ops/specs/wp1434-r3/do/fixtures/log_chuan_bi.log`, `ops/specs/wp1434-r3/do/fixtures/log_chuan_bi_cu.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_cat_cut.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_con.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_thieu.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_cat_cut.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_con.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_thieu.log`, `ops/specs/wp1434-r3/do/fixtures/luot_hai_attempt.json`, `ops/specs/wp1434-r3/do/fixtures/m3_bang_dien_sau.txt`, `ops/specs/wp1434-r3/do/fixtures/m3_ghi_tmp.txt`, `ops/specs/wp1434-r3/do/fixtures/m4_loi_khai.json`, `ops/specs/wp1434-r3/do/fixtures/mang_sang_cung_job_id.json`, `ops/specs/wp1434-r3/do/thu_thap.py`
-- `phan_loai_tu_diff` ⇒ `["duong_nhanh", "DUONG_NHANH: toan bo 21 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh"]`
+Tập đường dẫn (mọi tệp là `A`, mode `100644`): `ops/specs/wp1434-r3/do/BAO_CAO.md`, `ops/specs/wp1434-r3/do/BASELINE.json`, `ops/specs/wp1434-r3/do/COHORT.json`, `ops/specs/wp1434-r3/do/fixtures/artifacts.json`, `ops/specs/wp1434-r3/do/fixtures/attempt_cuoi_rong.json`, `ops/specs/wp1434-r3/do/fixtures/buoc.json`, `ops/specs/wp1434-r3/do/fixtures/chuoi_trang.json`, `ops/specs/wp1434-r3/do/fixtures/cohort_bien.json`, `ops/specs/wp1434-r3/do/fixtures/log_chuan_bi.log`, `ops/specs/wp1434-r3/do/fixtures/log_chuan_bi_cu.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_cat_cut.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_con.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_thieu.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_cat_cut.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_con.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_du.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_thieu.log`, `ops/specs/wp1434-r3/do/fixtures/luot_hai_attempt.json`, `ops/specs/wp1434-r3/do/fixtures/m3_bang_dien_sau.txt`, `ops/specs/wp1434-r3/do/fixtures/m3_ghi_tmp.txt`, `ops/specs/wp1434-r3/do/fixtures/m4_loi_khai.json`, `ops/specs/wp1434-r3/do/fixtures/mang_sang_cung_job_id.json`, `ops/specs/wp1434-r3/do/fixtures/tong_manh.json`, `ops/specs/wp1434-r3/do/thu_thap.py`
+- `phan_loai_tu_diff` ⇒ `["duong_nhanh", "DUONG_NHANH: toan bo 24 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh"]`
 - `ly_do_ve_day_du` ⇒ `[]`
-- `phan_loai_packet_loop` ⇒ `["bo_qua", "PACKET_LOOP: bo_qua vi 21 tep doi khong cham tap phu thuoc cua bo ca"]`
+- `phan_loai_packet_loop` ⇒ `["bo_qua", "PACKET_LOOP: bo_qua vi 24 tep doi khong cham tap phu thuoc cua bo ca"]`
 - `tim` ⇒ `{"so_test_song": 29, "so_hien_vat": 2, "vi_tri_la": [], "tep_packet_trong_ket_qua": []}`
 
 Làn của PR phải được đo lại trên log CI thật trước merge (đặc tả §6); kết quả trên là phép chạy tại chỗ của hai hàm phân loại.

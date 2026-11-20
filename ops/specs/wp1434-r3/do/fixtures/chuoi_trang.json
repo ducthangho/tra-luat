@@ -1,0 +1,130 @@
+{
+ "_ghi_chu": "Du lieu TONG HOP cho --tu-kiem: moi khoa trang -> [id job dau, id job cuoi (khong ke), total_count]; [null, null, null] = trang loi/khong co tep. Chuoi chinh per_page=100 o jobs/1/pN (id tu 0), chuoi lui per_page=30 o jobs/1/c30/pN (id tu 1000) de biet chuoi nao duoc dung.",
+ "a_chinh_gay_trang_2_c30_du": {
+  "jobs/1/p1": [
+   0,
+   100,
+   130
+  ],
+  "jobs/1/p2": [
+   null,
+   null,
+   null
+  ],
+  "jobs/1/c30/p1": [
+   1000,
+   1030,
+   130
+  ],
+  "jobs/1/c30/p2": [
+   1030,
+   1060,
+   130
+  ],
+  "jobs/1/c30/p3": [
+   1060,
+   1090,
+   130
+  ],
+  "jobs/1/c30/p4": [
+   1090,
+   1120,
+   130
+  ],
+  "jobs/1/c30/p5": [
+   1120,
+   1130,
+   130
+  ]
+ },
+ "b_khong_chuoi_nao_du": {
+  "jobs/1/p1": [
+   0,
+   100,
+   130
+  ],
+  "jobs/1/p2": [
+   null,
+   null,
+   null
+  ],
+  "jobs/1/c30/p1": [
+   1000,
+   1030,
+   130
+  ],
+  "jobs/1/c30/p2": [
+   null,
+   null,
+   null
+  ]
+ },
+ "c_chinh_du": {
+  "jobs/1/p1": [
+   0,
+   100,
+   130
+  ],
+  "jobs/1/p2": [
+   100,
+   130,
+   130
+  ],
+  "jobs/1/c30/p1": [
+   1000,
+   1030,
+   130
+  ],
+  "jobs/1/c30/p2": [
+   1030,
+   1060,
+   130
+  ],
+  "jobs/1/c30/p3": [
+   1060,
+   1090,
+   130
+  ],
+  "jobs/1/c30/p4": [
+   1090,
+   1120,
+   130
+  ],
+  "jobs/1/c30/p5": [
+   1120,
+   1130,
+   130
+  ]
+ },
+ "d_c30_lech_total_count": {
+  "jobs/1/p1": [
+   null,
+   null,
+   null
+  ],
+  "jobs/1/c30/p1": [
+   1000,
+   1030,
+   130
+  ],
+  "jobs/1/c30/p2": [
+   1030,
+   1050,
+   130
+  ]
+ },
+ "e_chinh_mot_trang_ngan": {
+  "jobs/1/p1": [
+   0,
+   48,
+   48
+  ]
+ },
+ "f_chinh_thieu_trang_cuoi_khong_co_c30": {
+  "jobs/1/p1": [
+   0,
+   100,
+   130
+  ]
+ }
+}

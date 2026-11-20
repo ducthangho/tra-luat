@@ -338,6 +338,86 @@ def can_log(wf, muc):
     return None
 
 
+def doc_chuoi_trang(lay, goc, co):
+    """Mot CHUOI trang `goc/p1..pN` (per_page=`co`). `lay(khoa)` -> bytes | None. Chuoi HOAN CHINH khi: moi trang co mat va doc duoc, trang cuoi
+    ngan hon `co` hoac da du total_count, va tong so muc bang total_count khi API co tra. Tra (danh sach, hoan_chinh, ly_do | None)."""
+    ds, i, tong = [], 1, None
+    while True:
+        b = lay(f"{goc}/p{i}")
+        if b is None:
+            return ds, False, f"thieu trang {goc}/p{i}"
+        try:
+            d = json.loads(b)
+            trang = d.get("workflow_runs") or d.get("jobs") or d.get("artifacts") or []
+            if not isinstance(trang, list):
+                raise ValueError
+        except (ValueError, AttributeError):
+            return ds, False, f"trang {goc}/p{i} khong doc duoc"
+        tong = d.get("total_count") if isinstance(d.get("total_count"), int) else tong
+        ds += trang
+        if len(trang) < co or (tong is not None and len(ds) >= tong):
+            break
+        i += 1
+    if tong is not None and len(ds) != tong:
+        return ds, False, f"chuoi {goc}: {len(ds)} muc, total_count {tong}"
+    return ds, True, None
+
+
+def chon_chuoi_trang(lay, goc):
+    """Chon giua chuoi CHINH (per_page=100) va chuoi lui `goc/c30` (per_page=30) bang cach xac thuc TUNG chuoi tron ven; uu tien chuoi chinh.
+    Khong chuoi nao hoan chinh -> ([], False, 'khong', ly do ca hai): KHONG dung chuoi dang do. Tra (danh sach, du, ten chuoi, ly_do | None)."""
+    a = doc_chuoi_trang(lay, goc, 100)
+    if a[1]:
+        return a[0], True, "chinh", None
+    b = doc_chuoi_trang(lay, goc + "/c30", 30)
+    if b[1]:
+        return b[0], True, "c30", None
+    return [], False, "khong", f"khong chuoi trang nao hoan chinh ({a[2]}; {b[2]})"
+
+
+def tong_theo_manh(gia_tri, so_manh=8):
+    """Tong mot dai luong lay tu nguon RIENG cua tung manh (log, artifact). `gia_tri`: moi manh mot so, hoac None neu manh ay khong co nguon.
+    Chi khi DU `so_manh` nguon moi tra tong; thieu -> khong_do_duoc kem so nguon co/can (khong tra 0, khong tra tong tung phan nhu tong day du)."""
+    co = [v for v in gia_tri if isinstance(v, (int, float)) and not isinstance(v, bool)]
+    kq = gt(sum(co)) if len(co) == so_manh and len(gia_tri) == so_manh else kdd(
+        f"chi {len(co)}/{so_manh} manh co nguon ({len(gia_tri)} manh duoc xet)" if gia_tri else f"0/{so_manh} manh co nguon")
+    kq["so_manh_co_nguon"], kq["so_manh_can"] = len(co), so_manh
+    if kq["trang_thai"] != DO_DUOC and co:
+        kq["tong_phan_co_nguon"] = sum(co)
+    return kq
+
+
+def so_muc_log_theo_manh(ds_job):
+    """Moi dong job dot-bien-manh thuc_thi -> so dong KET QUA neu log cua no TRON VEN ('co'), nguoc lai None."""
+    return [(j["log"]["so_dong_ket_qua"] if (j.get("log") or {}).get("trang_thai_log") == "co" else None)
+            for j in ds_job if ten_goc(j.get("ten")) == "dot-bien-manh" and j.get("loai_dong") == THUC_THI]
+
+
+def so_muc_artifact_theo_manh(ds_art, so_manh=8):
+    """Moi chi so manh 0..so_manh-1 -> so muc trong bien nhan artifact doc duoc cua manh ay; khong co hoac co HON MOT -> None."""
+    theo = {}
+    for a in ds_art:
+        nd = a.get("noi_dung") or {}
+        if nd.get("trang_thai") == DO_DUOC and isinstance(nd.get("manh"), int) and isinstance(nd.get("so_muc"), int):
+            theo.setdefault(nd["manh"], []).append(nd["so_muc"])
+    return [(theo[k][0] if len(theo.get(k, [])) == 1 else None) for k in range(so_manh)]
+
+
+def tong_giay_muc_log(tr):
+    """Tong giay cac dong KET QUA cua MOT log manh. Chi do_duoc khi log tron ven (co dong mo + dong ket), so dong KET QUA bang so muc khai o
+    dong mo va moi dong deu ghi giay; con lai khong_do_duoc kem tong phan co (ghi rieng, khong phai tong cua manh)."""
+    g = [x["giay"]["gia_tri"] for x in tr["muc"] if x["giay"]["trang_thai"] == DO_DUOC]
+    khai = (tr.get("mo") or {}).get("so_muc_khai")
+    if tr["trang_thai_log"] == "co" and len(g) == len(tr["muc"]) == khai:
+        kq = gt(round(sum(g), 3))
+    else:
+        kq = kdd(f"log {tr['trang_thai_log']}: {len(g)} dong KET QUA co giay / {len(tr['muc'])} dong KET QUA / {khai} muc khai")
+        if g:
+            kq["tong_phan_co_giay"] = round(sum(g), 3)
+    kq["so_dong_co_giay"], kq["so_muc_khai"] = len(g), khai
+    return kq
+
+
 def sha256_bytes(b):
     return hashlib.sha256(b).hexdigest()
 
@@ -990,18 +1070,8 @@ def lenh_tinh(ns):
         return (ac / m["duong_dan"]).read_bytes() if m and m.get("duong_dan") else None
 
     def doc_trang(goc):
-        ds, i, du = [], 1, True
-        if doc(f"{goc}/p1") is None and f"{goc}/c30/p1" in theo_khoa:      # trang 100 loi, da thu lai voi per_page=30
-            goc += "/c30"
-        while f"{goc}/p{i}" in theo_khoa:
-            b = doc(f"{goc}/p{i}")
-            if b is None:
-                du = False
-                break
-            d = json.loads(b)
-            ds += d.get("workflow_runs") or d.get("jobs") or d.get("artifacts") or []
-            i += 1
-        return ds, du and i > 1
+        ds, du, _, _ = chon_chuoi_trang(doc, goc)
+        return ds, du
 
     def url(khoa):
         m = theo_khoa.get(khoa)
@@ -1012,18 +1082,24 @@ def lenh_tinh(ns):
         return None if b is None else b.decode("utf-8", errors="replace")
 
     # cohort
-    ds_du, _ = doc_trang("list/du")
+    liet_ke_thieu = []                                    # chuoi trang LIET KE khong hoan chinh: cohort thieu phan ay, phai bao (khong im lang)
+    ds_du, _, _, ly = chon_chuoi_trang(doc, "list/du")
+    if ly:
+        liet_ke_thieu.append((f"liet ke {WF_DU}", ly))
     ds_ci = []
     for k in meta["khoang_con"]:
         if not k.get("chia_doi"):
-            ds_ci += doc_trang(f"list/ci/{k['su_kien']}/{k['nhan']}")[0]
+            ds, _, _, ly = chon_chuoi_trang(doc, f"list/ci/{k['su_kien']}/{k['nhan']}")
+            ds_ci += ds
+            if ly:
+                liet_ke_thieu.append((f"liet ke {WF_CI} {k['su_kien']} {k['tu']}..{k['den']}", ly))
     co_du, loai_du = loc_cohort(ds_du, WF_DU, meta["T0"], meta["T1"])
     co_ci, loai_ci = loc_cohort(sorted({r["id"]: r for r in ds_ci}.values(), key=lambda r: r["id"]), WF_CI, meta["T0"], meta["T1"])
     co_du.sort(key=lambda r: r["id"])
 
     phu = {k: {"yeu_cau": 0, "co": 0, "het_han": 0, "cat_cut": 0, "loi": 0, "khong_thu": 0, "khong_co_ban_ghi": 0}
            for k in ("jobs", "attempt", "log_manh", "log_dang_ky_du", "log_khac_du", "log_dang_ky_ci", "log_chuan_bi", "artifact_manh")}
-    khong_do = []
+    khong_do = [{"doi_tuong": ten, "ly_do": ly, "nguon": "tep list/* cua anh chup"} for ten, ly in liet_ke_thieu]
 
     def tinh_mot(wf, r):
         rid, n = r["id"], int(r.get("run_attempt") or 1)
@@ -1037,12 +1113,13 @@ def lenh_tinh(ns):
                 tao[k] = json.loads(b).get("created_at") if b else None
                 if b is None:
                     khong_do.append({"doi_tuong": f"attempt {rid}/{k}", "ly_do": tt, "nguon": url(f"att/{rid}/{k}")})
-        dong, du = doc_trang(f"jobs/{rid}")
+        dong, du, _, ly_trang = chon_chuoi_trang(doc, f"jobs/{rid}")
         phu["jobs"]["yeu_cau"] += 1
         if not du:
             tt = trang_thai_nguon(theo_khoa.get(f"jobs/{rid}/p1")) if f"jobs/{rid}/p1" in theo_khoa else "khong_thu"
             phu["jobs"]["loi" if tt == "co" else tt] += 1
-            khong_do.append({"doi_tuong": f"jobs cua luot {rid} ({wf})", "ly_do": tt, "nguon": f"{API}actions/runs/{rid}/jobs?filter=all"})
+            khong_do.append({"doi_tuong": f"jobs cua luot {rid} ({wf})", "ly_do": f"{'loi' if tt == 'co' else tt}: {ly_trang}",
+                             "nguon": f"{API}actions/runs/{rid}/jobs?filter=all"})
             return None
         phu["jobs"]["co"] += 1
         lu = tinh_luot(r, tao, dong)
@@ -1097,10 +1174,14 @@ def lenh_tinh(ns):
                 if cu is None or (lu["created_at"], lu["run_id"]) > (cu["created_at"], cu["run_id"]):
                     so_manh[f"{wf}|{ten}"] = {"so": len(tap), "run_id": lu["run_id"], "created_at": lu["created_at"], "nguon": lu["nguon"]}
 
+    top_loai = {}
+
     def cong_nhom(wf, lu, lan="_"):
         for m in lu["dong"]:
             if m["loai_dong"] == THUC_THI and m["giay"]["trang_thai"] == DO_DUOC:
                 top_nhom.setdefault((wf, m["ten_goc"]), []).append(m["giay"]["gia_tri"])
+            elif m["loai_dong"] in (THUC_THI, KHONG_PHAN_LOAI):
+                top_loai[(wf, m["ten_goc"])] = top_loai.get((wf, m["ten_goc"]), 0) + 1
 
     for r in co_du:
         lu = tinh_mot(WF_DU, r)
@@ -1125,7 +1206,7 @@ def lenh_tinh(ns):
                     o["co" if tr["trang_thai_log"] == "co" else tr["trang_thai_log"]] += 1
                     g = [x["giay"]["gia_tri"] for x in tr["muc"] if x["giay"]["trang_thai"] == DO_DUOC]
                     j["log"] = {"trang_thai_log": tr["trang_thai_log"], "mo": tr.get("mo"), "dong": tr.get("dong"), "so_dong_ket_qua": len(tr["muc"]),
-                                "tong_giay_muc": thong_ke(g, len(tr["muc"]) - len(g)).get("tong"), "so_muc_khong_ghi_giay": len(tr["muc"]) - len(g)}
+                                "tong_giay_muc": tong_giay_muc_log(tr), "so_muc_khong_ghi_giay": len(tr["muc"]) - len(g)}
                     if tr["trang_thai_log"] != "co":
                         khong_do.append({"doi_tuong": f"log manh job {m['job_id']} luot {r['id']}", "ly_do": tr["trang_thai_log"],
                                          "nguon": f"{API}actions/jobs/{m['job_id']}/logs"})
@@ -1152,8 +1233,8 @@ def lenh_tinh(ns):
             ds_job.append(j)
         arts, du_art = doc_trang(f"arts/{r['id']}")
         ds_art = []
-        if f"arts/{r['id']}/p1" not in theo_khoa or doc(f"arts/{r['id']}/p1") is None:
-            khong_do.append({"doi_tuong": f"danh sach artifact luot {r['id']}", "ly_do": trang_thai_nguon(theo_khoa.get(f"arts/{r['id']}/p1")),
+        if not du_art:
+            khong_do.append({"doi_tuong": f"danh sach artifact luot {r['id']}", "ly_do": "chuoi trang danh sach artifact khong hoan chinh",
                              "nguon": f"{API}actions/runs/{r['id']}/artifacts"})
         for a in sorted(arts, key=lambda a: a.get("id") or 0):
             if not str(a.get("name", "")).startswith("dot-bien-manh"):
@@ -1181,7 +1262,7 @@ def lenh_tinh(ns):
                         "ket_luan": lu["ket_luan"], "so_attempt": lu["so_attempt"], "updated_at_tham_khao": lu["updated_at_tham_khao"],
                         "giay_thuc_thi": lu["giay_thuc_thi"], "dau_cuoi_suy_ra_tu_job": lu["dau_cuoi_suy_ra_tu_job"], "giay_cho": lu["giay_cho"],
                         "so_dong": lu["so_dong"], "so_job_hong_o_attempt_truoc": lu["so_job_hong_o_attempt_truoc"],
-                        "du_8_manh_success": so_manh_tc == 8 and lu["ket_luan"] == "success" and lu["so_attempt"] == 1,
+                        "du_8_manh_success": so_manh_tc == 8 and len(manh_giay) == 8 and lu["ket_luan"] == "success" and lu["so_attempt"] == 1,
                         "giay_job_manh_success": thong_ke(manh_giay), "job": ds_job, "artifact": ds_art})
 
     def tk_nhom(luot, khoa):
@@ -1212,9 +1293,8 @@ def lenh_tinh(ns):
                                      "moi_nhat": None if moi_nhat is None else {
                                          "run_id": moi_nhat["run_id"], "created_at": moi_nhat["created_at"], "nguon": moi_nhat["nguon"],
                                          "giay_job_manh": moi_nhat["giay_job_manh_success"],
-                                         "so_muc_theo_log": sum((m.get("log") or {}).get("so_dong_ket_qua") or 0 for m in moi_nhat["job"]),
-                                         "so_muc_theo_artifact": sum((a["noi_dung"].get("so_muc") or 0) for a in moi_nhat["artifact"]
-                                                                     if a["noi_dung"]["trang_thai"] == DO_DUOC),
+                                         "so_muc_theo_log": tong_theo_manh(so_muc_log_theo_manh(moi_nhat["job"])),
+                                         "so_muc_theo_artifact": tong_theo_manh(so_muc_artifact_theo_manh(moi_nhat["artifact"])),
                                          "dau_cuoi_suy_ra_tu_job": moi_nhat["dau_cuoi_suy_ra_tu_job"], "giay_thuc_thi": moi_nhat["giay_thuc_thi"]}},
           "muc_ket_qua_theo_khoa": {"cong_thuc": "moi dong KET QUA <khoa>: <kq> (<giay>s) cua log job manh thuc_thi; gom theo (che_do, khoa)",
                                     "so_khoa": len(muc_kq),
@@ -1345,7 +1425,7 @@ def lenh_tinh(ns):
 
     # ── top 5
     top = sorted(({"workflow": wf, "job_goc": ten, "tong_giay_thuc_thi": sum(v), "so_dong_thuc_thi": len(v),
-                   "trung_vi_giay": thong_ke(v)["trung_vi"], "trang_thai": DO_DUOC,
+                   "so_dong_bi_loai": top_loai.get((wf, ten), 0), "trung_vi_giay": thong_ke(v)["trung_vi"], "trang_thai": DO_DUOC,
                    "nguon": f"tong completed_at - started_at cua moi dong thuc_thi ten goc nay trong cohort (tep jobs/* cua anh chup)"}
                   for (wf, ten), v in top_nhom.items()), key=lambda x: (-x["tong_giay_thuc_thi"], x["workflow"], x["job_goc"]))[:5]
 
@@ -1682,6 +1762,9 @@ def bao_cao(b, cohort):
     def v(o):
         return str(o["gia_tri"]) if o["trang_thai"] == DO_DUOC else f"{o['trang_thai']} ({o.get('ly_do')})"
 
+    def vm(o):
+        return f"{v(o)} ({o['so_manh_co_nguon']}/{o['so_manh_can']} mảnh có nguồn)"
+
     tach = lambda k: k.split(" | ")
     w("# wp1434 r3 — Báo cáo đo nền mutation testing (chỉ đọc)\n")
     w(f"Sinh bởi `thu_thap.py --tinh` từ ảnh chụp (MANIFEST sha256 `{meta['manifest_sha256']}`). Đặc tả sha256 `{meta['spec_sha256']}`.")
@@ -1703,7 +1786,7 @@ def bao_cao(b, cohort):
     w(f"- Giây một job mảnh (các lượt ấy): {tk(d8['giay_mot_job_manh'])}")
     if d8["moi_nhat"]:
         mn = d8["moi_nhat"]
-        w(f"- Lượt đủ mới nhất `{mn['run_id']}` ({mn['created_at']}): job mảnh {tk(mn['giay_job_manh'])}; mục theo log {mn['so_muc_theo_log']}, theo artifact {mn['so_muc_theo_artifact']}; "
+        w(f"- Lượt đủ mới nhất `{mn['run_id']}` ({mn['created_at']}): job mảnh {tk(mn['giay_job_manh'])}; mục theo log {vm(mn['so_muc_theo_log'])}, theo artifact {vm(mn['so_muc_theo_artifact'])}; "
           f"giây thực thi {v(mn['giay_thuc_thi'])}; đầu-cuối suy ra từ job {v(mn['dau_cuoi_suy_ra_tu_job'])} s")
     w("")
     bang(["job gốc", "nền", "thống kê giây (dòng thực thi, mọi lượt)"], [tach(k) + [tk(o)] for k, o in m1["theo_job"].items()])
@@ -1748,8 +1831,9 @@ def bao_cao(b, cohort):
     w(f"\nBảng đã import có tên chứa `MUT`/`DOT_BIEN` nhưng không được chọn: {len(kc)}, trong đó nghi bỏ sót (không có lý do loại): {m3.get('so_bang_nghi_bo_sot')}. "
       + "; ".join(f"`{x['tep']}` {x['bang']}={x['so']} ({x['ly_do_loai'] or 'NGHI BO SOT'})" for x in kc))
     w("\n## 5 điểm tốn thời gian nhất theo giây thực thi (nhóm job, cả cohort)\n")
-    bang(["#", "workflow", "job gốc", "tổng giây thực thi", "số dòng thực thi", "trung vị s"],
-         [[i, x["workflow"], x["job_goc"], x["tong_giay_thuc_thi"], x["so_dong_thuc_thi"], x["trung_vi_giay"]] for i, x in enumerate(b["top5_giay_thuc_thi"], 1)])
+    bang(["#", "workflow", "job gốc", "tổng giây thực thi", "số dòng thực thi (tính)", "số dòng bị loại", "trung vị s"],
+         [[i, x["workflow"], x["job_goc"], x["tong_giay_thuc_thi"], x["so_dong_thuc_thi"], x["so_dong_bi_loai"], x["trung_vi_giay"]]
+          for i, x in enumerate(b["top5_giay_thuc_thi"], 1)])
     w("\nNguồn: tổng `completed_at − started_at` của mọi dòng `thuc_thi` cùng tên gốc trong các tệp `jobs/*` của ảnh chụp (URL từng lượt ở `M1.luot[].nguon`, `M2.luot[].nguon`).\n")
     m4 = b["M4"]
     w("## M4 — đối chiếu lời khai\n")
@@ -2114,6 +2198,54 @@ def lenh_tu_kiem():
                 else:
                     raise AssertionError("hop cat la symlink phai bi tu choi")
                 bang((ngoai / "canh_gac.txt").read_bytes(), b"KHONG DUOC DOI", "canh gac sau hop cat symlink")
+
+    @kiem("chuoi_trang: chon giua chuoi chinh va chuoi lui c30 theo chuoi HOAN CHINH; khong chuoi nao hoan chinh -> khong dung")
+    def _():
+        d = J("chuoi_trang.json")
+
+        def dung(kb):
+            tr = {}
+            for khoa, (tu, den, tong) in d[kb].items():
+                tr[khoa] = None if tu is None else json.dumps({"total_count": tong, "jobs": [{"id": i} for i in range(tu, den)]}).encode("utf-8")
+            return lambda k: tr.get(k)
+
+        ds, du, ten, ly = chon_chuoi_trang(dung("a_chinh_gay_trang_2_c30_du"), "jobs/1")
+        bang((du, ten, len(ds), sorted(x["id"] for x in ds) == list(range(1000, 1130))), (True, "c30", 130, True), "(a) p1 chinh co, p2 hong, c30 du -> dung c30, du 130 job")
+        ds, du, ten, ly = chon_chuoi_trang(dung("b_khong_chuoi_nao_du"), "jobs/1")
+        bang((du, ten, ds), (False, "khong", []), "(b) khong chuoi nao hoan chinh -> khong dung chuoi dang do")
+        assert "p2" in ly and "c30" in ly, ly
+        ds, du, ten, ly = chon_chuoi_trang(dung("c_chinh_du"), "jobs/1")
+        bang((du, ten, len(ds), ds[0]["id"]), (True, "chinh", 130, 0), "(c) chuoi chinh hoan chinh -> dung chuoi chinh (khong dung c30)")
+        ds, du, ten, ly = chon_chuoi_trang(dung("d_c30_lech_total_count"), "jobs/1")
+        bang((du, ten), (False, "khong"), "(d) c30 du trang nhung so muc khac total_count -> khong hoan chinh")
+        ds, du, ten, ly = chon_chuoi_trang(dung("e_chinh_mot_trang_ngan"), "jobs/1")
+        bang((du, ten, len(ds)), (True, "chinh", 48), "(e) mot trang ngan hon per_page -> hoan chinh")
+        ds, du, ten, ly = chon_chuoi_trang(dung("f_chinh_thieu_trang_cuoi_khong_co_c30"), "jobs/1")
+        bang((du, ten), (False, "khong"), "(f) trang cuoi day (100) ma total_count con thieu, khong co trang ke -> khong hoan chinh")
+
+    @kiem("tong_theo_manh: khong nguon / thieu nguon -> khong_do_duoc kem so nguon; du 8 nguon moi ra tong")
+    def _():
+        d = J("tong_manh.json")
+        x = tong_theo_manh(d["khong_nguon"])
+        bang((x["gia_tri"], x["trang_thai"], x["so_manh_co_nguon"], x["so_manh_can"]), (None, KHONG_DO_DUOC, 0, 8), "khong nguon: KHONG phai 0")
+        x = tong_theo_manh(d["thieu_nguon"])
+        bang((x["gia_tri"], x["trang_thai"], x["so_manh_co_nguon"], x.get("tong_phan_co_nguon")), (None, KHONG_DO_DUOC, 5, 201), "thieu nguon: khong phai tong tung phan")
+        assert "5/8" in x["ly_do"], x
+        x = tong_theo_manh(d["du_nguon"])
+        bang((x["gia_tri"], x["trang_thai"], x["so_manh_co_nguon"]), (321, DO_DUOC, 8), "du 8 nguon")
+        x = tong_theo_manh(d["du_nguon_co_0"])
+        bang((x["gia_tri"], x["trang_thai"]), (280, DO_DUOC), "nguon co gia tri 0 van la CO nguon")
+        bang(tong_theo_manh(d["du_nguon"][:7])["trang_thai"], KHONG_DO_DUOC, "chi 7 manh duoc xet")
+        bang(tong_theo_manh([])["trang_thai"], KHONG_DO_DUOC, "danh sach rong")
+        bang(so_muc_log_theo_manh(d["job"]), [38, None, None, 41], "log: chi log TRON VEN moi la nguon; job khong phai manh/khong thuc_thi bi bo")
+        bang(so_muc_artifact_theo_manh(d["artifact"], 4), [38, None, None, 40], "artifact: thieu, hong va TRUNG chi so manh -> None")
+        con = trich_ket_qua(T("log_manh_con.log"))
+        y = tong_giay_muc_log(con)
+        bang((y["trang_thai"], y.get("tong_phan_co_giay"), y["so_dong_co_giay"], y["so_muc_khai"]), (KHONG_DO_DUOC, 47.4, 2, 3), "log co mot dong KET QUA khong ghi giay")
+        z = tong_giay_muc_log(trich_ket_qua(T("log_manh_cat_cut.log")))
+        bang((z["trang_thai"], z["gia_tri"], z.get("tong_phan_co_giay")), (KHONG_DO_DUOC, None, 47.4), "log cat cut: tong tung phan KHONG duoc la tong")
+        du = tong_giay_muc_log(trich_ket_qua(T("log_manh_du.log")))
+        bang((du["trang_thai"], du["gia_tri"]), (DO_DUOC, 47.6), "log tron ven, moi dong co giay")
 
     dat = 0
     for ten, f in ca:

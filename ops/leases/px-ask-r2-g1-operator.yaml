@@ -1,0 +1,39 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1446
+packet_id: px-ask
+revision: 2
+generation: 1
+lease_id: px-ask-r2-g1-operator
+role: operator
+reviewer: 'connector Codex tren PR; khong goi Codex offline (khong doi ma)'
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: a995f0b7b292a9695e7ad9ce10a1e4f908026b5e
+target_hosts:
+- f7281f27-f79f-40a2-a2f5-b454b58a166a
+live_change: 'phien chep 4 tep module 2.0.0 + cau hinh px + R2.ps1 vao thu muc lam viec tren VM; chu kho tu chay 1 lenh admin: px config/status/models, ask -WhatIf, dung 1 ask that; nhat ky px.active.v1 duoi basePath\results\px-active. Khong dich vu/tai khoan/ACL.'
+spec_path: ops/specs/px-ask-r2.md
+spec_hash: 95471c15cfb8f828834ba643867e490c38729b3c5f3a2f8c92fcc7b79478a843
+write_set:
+- ops/acceptance/px-ask/r2/RESULTS.md
+- ops/leases/px-ask-r1-g1-operator.yaml
+- ops/leases/px-ask-r2-g1-operator.yaml
+- ops/specs/px-ask-r2.md
+write_set_hash: 093506978defc3f981aa1fa358f7d484c49520bcb1a59cfab36f56bc463ffbf8
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: a995f0b7b292a9695e7ad9ce10a1e4f908026b5e
+module_source_commit: a995f0b7b292a9695e7ad9ce10a1e4f908026b5e
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20/11 chon "VM: anh tu chay 1 lenh admin (Recommended)" sau ket qua r1 (PR #1447)'
+recorded_by: 'phiên điều phối Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T05:52:58Z'
+heartbeat_at: '2026-11-20T05:52:58Z'
+lease_until: '2026-11-20T09:52:58Z'
+lease_expires_at_utc: '2026-11-20T09:52:58Z'
+max_lease_hours: 4
+review_calls_limit: 0
+native_runs_limit_per_host: 2
+inference_calls_limit_per_host: 1

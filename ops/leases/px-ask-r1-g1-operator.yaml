@@ -31,9 +31,12 @@ recorded_by: 'phiên điều phối Mission #1238 session_015GtxrapMSm976JLC7Fp1
 thay_the_cho: []
 leased_at_utc: '2026-11-20T05:45:04Z'
 heartbeat_at: '2026-11-20T05:45:04Z'
-lease_until: '2026-11-20T09:45:04Z'
-lease_expires_at_utc: '2026-11-20T09:45:04Z'
+lease_until: '2026-11-20T05:52:58Z'
+lease_expires_at_utc: '2026-11-20T05:52:58Z'
 max_lease_hours: 4
 review_calls_limit: 0
 native_runs_limit_per_host: 2
 inference_calls_limit_per_host: 1
+withdrawn_at_utc: '2026-11-20T05:52:58Z'
+withdrawn_by: 'phien dieu phoi Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r1 xong (Pha A ca ba may, 0 loi goi model; ket qua ops/acceptance/px-ask/r1/RESULTS.md); chu kho chon huong r2, thu hoi trong r2'

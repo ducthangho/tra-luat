@@ -1,0 +1,73 @@
+# Review lượt 9 (§8.3): BUNDLED-TACH-MANH r3
+
+**Mốc review.** `reviewed_sha` `ecd4ed03c8a320bac220f2d6a0a2dffecd5a591e` (ref `origin/ops/bundled-tach-manh-spec`), tree `820a88f8…`. sha256 của `ops/specs/BUNDLED-TACH-MANH-r3.md` là `305e04fcaee56e3373f06655d3f25bac1739b77bb1a5f009de0b5038cce8be1c`. Protocol và mã đọc tại `origin/master` `48d372e1…`.
+
+**Cách review.** Tôi chỉ đọc tĩnh và không chạy phản chứng nào. Ba nhận định về hành vi mã dựa trên đọc mã tại `origin/master` và `nguyen-mau.diff`:
+- regex tên fragment;
+- chỗ selftest đọc manifest;
+- cấu trúc return sớm của fragment nguyên mẫu.
+
+**Danh tính reviewer.** Claude (Anthropic), cùng họ với phiên điều phối. Vì vậy lượt này không mang assurance cross-provider.
+
+## Bảng lớp lượt 9
+
+| class_slug | biểu hiện + chỗ | mức | cách vá chung | phép kiểm đóng lớp |
+|---|---|---|---|---|
+| `manifest-gan-candidate` | L9-01: chưa giao vai giữ C (chạy cổng (a)/N1–N4, dựng bundle, đăng handoff M12, push). Chỗ: §3a điểm 1–2, §9 bảng r3. Đây là phần còn lại của L8-01a. | P2 | Ghi rõ MỘT vai giữ C từ lúc tạo C tới push và PR draft (hoặc đường chuyển C về run work-packet). Chỉ cần một câu, không chép lại luật. | Đọc §3a: mỗi hành động §13 `work-packet` trên C (cổng (a), handoff §7/M12, review dispatch, push, đối chiếu PR head) có đúng một chủ thể đang giữ C. Phép kiểm "không câu nào diễn đạt lại" ở §9 không đủ, vì nó không đỏ khi thiếu vai. |
+| `tieu-chi-khong-the-do` | L9-02: fixture `trung_xuyen_manh` "khác hoa/thường" không dựng được (N1). L9-03: hàng c của §4b mâu thuẫn với định nghĩa `kho_that`; phần "đỏ thêm nhãn" của N2 vô hiệu khi fragment return sớm (N2, §4b, M6). L9-04: các vế N1 do L7 đòi (`2+2+2`, đường mảnh thiếu) không có đột biến đích (N1, §4b, §9). | P2 | Mỗi vế của N1 phải đỏ được bằng một đột biến chỉ phá đúng vế ấy, trên fixture dựng được với regex hiện hành. N2 so tập nhãn đỏ trên đủ 9 khoá, khoá vắng tính là đỏ. | Mỗi hàng §4b đo trên fragment tính đủ 9 nhãn. Ba đột biến bổ sung phải chỉ đỏ đúng vế đích: h với tên chữ thường trùng, j (`2+2+2`), k (đường mảnh). Tập đỏ của c bằng đúng cột ghi. |
+| `so-do-loi-thoi` (tái mở) | L9-05: §0 dòng 38 khai hai ca r291/r357 đọc manifest "ĐÃ COMMIT", trong khi mã đọc tệp trên đĩa. | P3 | Sửa câu hiện trạng cho khớp mã. | Câu §0 khớp với `mf = root / "RELEASE_MANIFEST.json"; mf.read_text(...)` (tl_selftest ~22574/22815). |
+
+Tổng: 3 lớp mở với 5 biểu hiện. Không có lớp mới hoàn toàn; `so-do-loi-thoi` là lớp tái mở. Lớp tái mở không vào tử số F.
+
+## Nhãn cho hai lớp còn mở cuối lượt 8
+
+| class_slug | nhãn | đối chiếu từng biểu hiện |
+|---|---|---|
+| `manifest-gan-candidate` | **VÁ MỘT PHẦN** | **L8-01b đã đóng:** N4 chạy "Trên BẢN SAO của C… (không áp lên C)", và điểm 2 đòi mọi N1–N4 chính thức chạy trên C. **L8-01c đã đóng nhờ trỏ về protocol:** §3a dẫn §12 stop condition, §6 dòng 151 ghi "Mọi stop condition khác theo protocol §12", và §9 dòng 187 khớp quy tắc hai chuyển tiếp của §12. **L8-01a mới vá một phần:** mỏ neo C và đối chiếu PR head đã giao cho M12, nhưng vai đăng handoff, dựng bundle và push C vẫn chưa ai giữ (L9-01). |
+| `tieu-chi-khong-the-do` | **VÁ MỘT PHẦN** | **L8-02b đã đóng:** thêm đột biến i cho `kho_that`; các nhãn a–i phủ đủ 9/9. **L8-02c đã đóng:** N3 dùng `py_size.fail/warn/files_scanned`, khớp golden (`/py_size/fail`, `/py_size/warn`, `/py_size/files_scanned` = 73; `/ok` ở cấp đỉnh). **L8-02d đã đóng:** §6 dòng 150 đo trên C chưa áp N4. **L8-02a mới vá một phần:** đã tách hai fixture, nhưng fixture trùng mới không dựng được (L9-02). Quét thêm ra L9-03 và L9-04. |
+
+**Tỷ lệ 8→9.** U = {`manifest-gan-candidate`, `tieu-chi-khong-the-do`}, F = ∅, nên tỷ lệ là **0/2 = 0%**. Chuyển tiếp 7→8 là 1/3. Như vậy đã có **hai chuyển tiếp liên tiếp dưới 50%**. Theo §12, và theo chính dòng 187 của r3, phải dừng vòng vá và đưa về Review Rescue Checkpoint. Đây là điểm dừng của phiên, không phải điểm hỏi chủ kho (§12, ADR-0067).
+
+## Findings
+
+**L9-01 · `manifest-gan-candidate` · P2 · §3a điểm 1–2; bảng lớp r3 ở §9.**
+- **Vấn đề:** §3a giao thứ tự "handoff, review offline, push, PR" cho protocol §13 `work-packet`. Chủ thể của chuỗi ấy là executor `work-packet` ("worker gate → handoff → review offline → đẩy → PR"). Nhưng ở điểm 1, worker chỉ giao đầu vào rồi thôi, còn C do Land Operator dựng ở điểm 2 và chỉ tồn tại cục bộ ở phía LO. Đặc tả không chỉ ra ai giữ C để:
+  - chạy bất biến (a) "trên đúng SHA sẽ đẩy";
+  - dựng bundle và đăng handoff M12 neo C;
+  - push C và đối chiếu PR head.
+
+  Đây đúng là phần L8-01a đã nêu ("chưa giao vai dựng bundle chứa commit M8 và đăng handoff trên #433"). Protocol không trả lời được câu này, vì chỗ lệch do chính packet sinh ra (LO tạo C).
+- **Bằng chứng:** r3 dòng 102–111 dùng câu bị động ("chạy trên C…", "handoff M12 neo C"). Protocol §13 nói "Phiên `work-packet` không chuyển vai sang reviewer hoặc land trong cùng run". Phép kiểm đóng lớp ở dòng 193 chỉ hỏi "không câu nào quy định… khác protocol", nên không đỏ khi thiếu vai.
+- **Câu thay thế:** "Land Operator giữ C từ điểm 2 tới khi PR draft mở. LO chạy bất biến (a) và N1–N4 trên C, dựng bundle C, đăng handoff §7 lên #433 với `head_sha == tested_sha == C`, nhận verdict, rồi đẩy C một lần và đối chiếu PR head theo ADR-0060 M5/M12. Worker không push và không giữ vai nào trên C."
+
+**L9-02 · `tieu-chi-khong-the-do` · P2 · N1 `trung_xuyen_manh`; §4b h.**
+- **Vấn đề:** fixture đòi "cùng một TEST_ID — khác hoa/thường, trùng sau NFC+casefold". Tên fragment buộc khớp `_FRAGMENT_NAME_RE = wp[1-9][0-9]*_[a-z0-9]+(?:_[a-z0-9]+)*[.]py`, tức chỉ chữ thường ASCII (`test_fragments.py:22–25`). Phép kiểm này chạy TỪNG entry, TRƯỚC kiểm trùng xuyên mảnh (base dòng 388–392; nguyên mẫu `_read_bundled_module`, mỗi mảnh). Hệ quả:
+  - Mọi biến thể hoa/thường đều ném `BUNDLED_MODULE_CONTRACT "source entry"` bất kể có kiểm trùng hay không. Dưới h, nhãn vẫn True, nên h sống và N2 không thể đạt 9/9.
+  - Vế NFC+casefold không bao giờ chạm tới được vì tên chỉ là ASCII thường.
+  - Bản thân câu "cùng một TEST_ID — khác hoa/thường" đã tự mâu thuẫn.
+- **Câu thay thế:** "`trung_xuyen_manh`: fixture riêng dựng tay hai mảnh, cùng một tên chữ thường hợp lệ (vd `wp9001_d.py`, `TEST_ID` khớp stem) là phần tử cuối mảnh k và đầu mảnh k+1. Thứ tự toàn chuỗi vẫn không giảm, khai báo đủ, không có mảnh lạc ⇒ `BUNDLED_MODULE_CONTRACT`. Dưới h, lỗi không còn là `BUNDLED_MODULE_CONTRACT` (nạp được hoặc `DUPLICATE_TEST_ID`) nên nhãn đỏ."
+
+**L9-03 · `tieu-chi-khong-the-do` · P2 · N2; §4b hàng c; M6.**
+- **Vấn đề:** N1 định nghĩa `kho_that` gồm vế "mọi mảnh thật ≤ 0,7·WARN" (200.704 B). Dưới c (generator bỏ hạn mảnh), kho thật sinh MỘT mảnh khoảng 290.985 B (`do-cuoi.txt`: 189.328 + 101.657). Như vậy `kho_that` phải đỏ, nhưng hàng c chỉ ghi `nhieu_manh`.
+- **Vì sao nguyên mẫu ra `['nhieu_manh']`:** fragment nguyên mẫu `return False` ở dòng 69–71, bỏ qua 8 nhãn còn lại; `dot-bien.txt` ghi `c_bo_han_manh (sau chot) False ['nhieu_manh']`. M6 còn coi chốt return sớm này là cách vá. Kết quả là một trong hai:
+  - fragment tính đủ nhãn ⇒ N2 đỏ trên triển khai đúng (đỏ thêm `kho_that`, và cả các nhãn dựng fixture bằng generator);
+  - hoặc vế "đỏ thêm nhãn ngoài cột" của N2 thành vô hiệu.
+- **Câu thay thế:** "Fragment tính đủ 9 nhãn trên mọi đường. Chỉ số chưa đủ thì ghi nhãn ấy False, không return sớm. N2 lấy tập nhãn đỏ trên đủ 9 khoá, khoá vắng tính là đỏ. Cột c ghi đúng tập đo được theo cách ấy, tối thiểu `nhieu_manh`, `kho_that`."
+
+**L9-04 · `tieu-chi-khong-the-do` · P2 · N1 `nhieu_manh` / `thieu_manh`; §4b; bảng lớp r3 ở §9.**
+- **Vấn đề:** N1 chỉ đo bằng cách chạy fragment, và N2 là phép đo duy nhất về độ có răng của fragment. Một fragment bỏ kiểm `2+2+2` (chỉ đòi ≥3 mảnh), hoặc bỏ kiểm đường mảnh thiếu (chỉ đòi mã lỗi), vẫn qua cả N1 lẫn N2: c đỏ vì dồn một mảnh, a đỏ vì không ném lỗi. Phép đóng lớp của L7 đòi "từng sai lệch L7-02a–e phải đỏ ở phép kiểm tương ứng". §9 r3 hạ nó xuống "mỗi nhãn ≥1 đột biến". Theo §8.3, cắt acceptance không được tính là vá.
+- **Câu thay thế (thêm hai hàng vào §4b):** "j — generator đóng mảnh sau mỗi fragment (6 mảnh ở hạn 100 KiB) ⇒ `nhieu_manh`. k — `BUNDLED_MODULE_MISSING` mang đường mảnh 1 thay vì mảnh thiếu ⇒ `thieu_manh`." N2 ghi "11/11".
+
+**L9-05 · `so-do-loi-thoi` (tái mở) · P3 · §0 dòng 38.**
+- **Vấn đề:** câu "đọc `RELEASE_MANIFEST.json` ĐÃ COMMIT" sai. Cả hai ca đọc tệp trên cây làm việc (`mf = root / "RELEASE_MANIFEST.json"`, `mf.read_text`; tl_selftest dòng 22574 và 22815). Nếu theo đúng câu §0, số đo chuẩn bị ở §3a điểm 1 (manifest tái sinh nhưng KHÔNG commit) sẽ làm r291/r357 đổi trạng thái, và điều kiện dừng ở §6 dòng 151 sẽ bắn trên đường đúng. Mã thật thì không bắn, nên chỉ có câu §0 sai.
+- **Câu thay thế:** "…đọc `RELEASE_MANIFEST.json` trên cây làm việc (không qua Git) và ghim `len(paths) == 185`…"
+
+## Phần còn lại đã quét, không thấy lỗi
+- **Số liệu:** numstat 261/45, +283/−60, 285.112 + 15.686 = 300.798, 192 KiB = 68,6% WARN, 0,7·WARN = 200.704 B, 186/187, N4 mảnh 2 101.657 + 15.686 = 117.343, `case_count` 19, `files_scanned` 74 (quét `scripts/*.py` không đệ quy, nên fragment trong `test_fragments/` không tính) đều khớp.
+- **Bảng phủ nhãn:** a–i phủ đủ 9 nhãn.
+- **Đối chiếu với protocol:** ADR-0060 áp mặc định theo ADR-0062 N1 dù đặc tả không khai dòng `dieu_kien_merge`. Không thấy câu nào trong r3 diễn đạt lại protocol theo hướng trái protocol.
+
+## Chưa đo
+Chưa chạy phản chứng nào cho L9-02 và L9-03; hai finding này dựa trên đọc mã base và nguyên mẫu. Cũng chưa chạy N1–N4, selftest, strict verify hay CI cho r3.
+
+KET_LUAN: request_changes

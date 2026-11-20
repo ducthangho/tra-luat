@@ -1,0 +1,38 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1446
+packet_id: px-ask
+revision: 5
+generation: 1
+lease_id: px-ask-r5-g1-operator
+role: operator
+reviewer: 'connector Codex tren PR; khong goi Codex offline (khong doi ma)'
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: ac9a06d442000417e37487e271c646aa6162e3c3
+target_hosts:
+- f7281f27-f79f-40a2-a2f5-b454b58a166a
+live_change: 'phien ghi cau hinh px + R5.ps1 vao thu muc lam viec tren VM (dung lai clone module 2.1.0 cua r4); chu kho tu chay 1 lenh admin: DUNG 1 px ask that voi model perplexity. Khong dich vu/tai khoan/ACL.'
+spec_path: ops/specs/px-ask-r5.md
+spec_hash: 5bbf85b8ec5b9393f836b7b366f74c8ce4c75422732194dcb806c2f887e1e2d5
+write_set:
+- ops/acceptance/px-ask/r5/RESULTS.md
+- ops/leases/px-ask-r5-g1-operator.yaml
+- ops/specs/px-ask-r5.md
+write_set_hash: 41004eac48143ee160d9d5026a4982462608600efdf5f60cd6fca8839651d073
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: ac9a06d442000417e37487e271c646aa6162e3c3
+module_source_commit: ac9a06d442000417e37487e271c646aa6162e3c3
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20/11 chon "Them 1 loi goi voi perplexity (Recommended)" sau ket qua r4 (HTTP 500 voi gemini:auto)'
+recorded_by: 'phiên điều phối Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T07:53:15Z'
+heartbeat_at: '2026-11-20T07:53:15Z'
+lease_until: '2026-11-20T11:53:15Z'
+lease_expires_at_utc: '2026-11-20T11:53:15Z'
+max_lease_hours: 4
+review_calls_limit: 0
+native_runs_limit_per_host: 1
+inference_calls_limit_per_host: 1

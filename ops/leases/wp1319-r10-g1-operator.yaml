@@ -1,0 +1,37 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: wp1319
+revision: 10
+generation: 1
+lease_id: wp1319-r10-g1-operator
+role: operator
+executor: none
+reviewer: 'connector Codex tren PR'
+review_class: routine
+target_hosts: []
+live_change: 'khong — chi ghi so quyet dinh chu kho cho cac hang con do; thu hoi lease r8/r9 da merge'
+spec_path: ops/specs/wp1319-r10.md
+spec_hash: adc36711306dadf7163273318aa493720ce632d1f17757901c7bcc226c355ed7
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r10/RESULTS.md
+- ops/leases/wp1319-r10-g1-operator.yaml
+- ops/leases/wp1319-r8-g1-operator.yaml
+- ops/leases/wp1319-r9-g1-operator.yaml
+- ops/specs/wp1319-r10.md
+write_set_hash: 6d5f9ed000ce0f637782d730581e672f6e70123eddeb0ddc97d85ee88172b4c9
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: dd1985be73d3cf65f3580f7049039ae3dab50d3d
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20/11: "1,2,3 dong y cac kien nghi. Xu ly tiep"'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T02:26:54Z'
+heartbeat_at: '2026-11-20T02:26:54Z'
+lease_until: '2026-11-20T05:26:54Z'
+lease_expires_at_utc: '2026-11-20T05:26:54Z'
+max_lease_hours: 3
+review_calls_limit: 0
+native_runs_limit_per_host: 0

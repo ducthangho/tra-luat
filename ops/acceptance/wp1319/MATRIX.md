@@ -257,14 +257,14 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 | # | Tiêu chí | Hiện trạng | Nguồn | Còn thiếu |
 |---|---|---|---|---|
 | 1 | Bốn lựa chọn cài; thiếu add-on không phá core | **passed (scoped Desktop)** | G (r3) | Chỉ Desktop; ASUS chỉ có raw cho lựa chọn Playwright (E) |
-| 2 | Đúng target; không fallback/retry inference | **partial** | A (r1), E, r9 | Chốt TargetId đạt trên cấu hình mẫu. Chưa đo trên gateway hay đích từ xa thật; chưa có bằng chứng 0 retry. Đường WinRM từ xa tới VM chưa được mở (r9: firewall IAP chỉ 3389), nên phần "đích từ xa" không đo được nếu không đổi hạ tầng |
-| 3 | WhatIf không mutation | **passed (scoped, backend giả)** | G | Chưa đo trên gateway thật |
+| 2 | Đúng target; không fallback/retry inference | **partial** · phần đích từ xa/gateway: **owner_waived (r10)** | A (r1), E, r9, r10 | Chốt TargetId đạt trên cấu hình mẫu. Chưa đo trên gateway hay đích từ xa thật; chưa có bằng chứng 0 retry. Đường WinRM từ xa tới VM chưa được mở (r9: firewall IAP chỉ 3389), nên phần "đích từ xa" không đo được nếu không đổi hạ tầng. Phần chưa đo được miễn theo quyết định chủ kho 20/11 (r10) |
+| 3 | WhatIf không mutation | **passed (scoped, backend giả)** · gateway thật: **owner_waived (r10)** | G, r10 | Chưa đo trên gateway thật; miễn theo quyết định chủ kho 20/11 (r10) |
 | 4 | Không secret/profile trong repo, báo cáo | **passed (scoped: các tệp bằng chứng có trong danh sách đích của từng lượt quét)** | G (r1/r2/r3/P3); quét secret rc 0 trên danh sách tệp đích của từng gói | Quét **không** phủ mọi thành viên của mọi zip đóng băng (`wp-u8/VERDICT.md`, `wp-pxl/VERDICT.md` ghi rõ giới hạn này). Toàn bộ nội dung gói: **chưa kiểm** |
-| 5 | Profile riêng; pin package/browser/cache | **passed (scoped Desktop + ASUS)** | G | Finding F1: dư lượng `ms-playwright\daemon` (P3-4) chưa quyết |
+| 5 | Profile riêng; pin package/browser/cache | **passed (scoped Desktop + ASUS)** · F1: **owner_accepted (r10)** | G, r10 | Finding F1: dư lượng `ms-playwright\daemon` (P3-4): **owner_accepted (r10)**, giữ nguyên, không dọn (quyết định chủ kho 20/11 (r10)) |
 | 6 | Artifact sai nguồn/hỏng không kích hoạt | **passed (scoped)** | H.3 | Chỉ có hiệu lực khi luồng kích hoạt gọi `Test-ProximaArtifactTree`; chưa luồng nào trong repo gọi |
 | 7 | Máy bận hoãn; updater trùng bị khoá | máy bận: **passed (scoped, theo quyết định "dừng")** · updater trùng: **partial (đã chấp nhận)** | H.1, H.3 | Proxima không có single-instance; mở bằng tay vẫn lọt |
 | 8 | Promotion fence | **passed (scoped, promote thật Desktop → VM)** | H.11 | Ca âm "máy đầu FAIL thì chặn máy sau" chỉ có ở mức test |
-| 9 | Phục hồi binary + dữ liệu | dữ liệu: **passed** · binary: **partial** | D, H.10 | "Rollback binary" chỉ là đổi sang thư mục baseline đặt song song |
+| 9 | Phục hồi binary + dữ liệu | dữ liệu: **passed** · binary: **partial** · **owner_waived (r10)** | D, H.10, r10 | "Rollback binary" chỉ là đổi sang thư mục baseline đặt song song; vế binary miễn theo quyết định chủ kho 20/11 (r10) |
 | 10 | File khoá / đĩa đầy / rollback thất bại | **partial** · **owner_waived ở mức fixture (r7)** | F, **r7** | Khoá: real_os mức primitive. Đĩa đầy, chép dở, rollback thất bại: chỉ fixture. Quyết định của chủ kho 19/11 (AskUserQuestion trong phiên điều phối; lời khai, không có bản ghi trên GitHub): *"Chấp nhận mức fixture"*; không làm đầy đĩa thật |
 | 11 | Healthcheck không inference | **passed (scoped soak P4)** | D | 180 mẫu `/v1/stats`, `totalRequests` 0; chỉ trên profile thử |
 | 12 | Review độc lập đúng head/tree + evidence | r1–r5 và mọi WP: **passed** (review độc lập trên gói đóng băng + connector) · P3–P6: **gioi_han** | D, E, H; `wp-*/VERDICT*.md` | Raw P5 và hồ sơ P6 không khôi phục được (H.2) |
@@ -272,14 +272,14 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 ### I.2 U1–U12
 | U | Hạng mục | Hiện trạng | Nguồn | Còn thiếu |
 |---|---|---|---|---|
-| U1 | PS5.1 endpoint | **passed (scoped, backend giả)** | G | Endpoint Proxima thật trên PS5.1 |
+| U1 | PS5.1 endpoint | **passed (scoped, backend giả)** · endpoint thật: **owner_waived (r10)** | G, r10 | Endpoint Proxima thật trên PS5.1: miễn theo quyết định chủ kho 20/11 (r10) |
 | U2 | Danh tính VM | **passed (scoped `f7281f27`)** | **r5** | `810f79bb` offline: chưa định danh được |
 | U3 | WhatIf | **passed (scoped)** | G | như §11 #3 |
-| U4 | Updater thực tế | **passed (scoped, chỉ nhánh sai integrity)** | H.1 | Cài thật khi bản tải hợp lệ; chữ ký; biến thể `repaired` |
+| U4 | Updater thực tế | **passed (scoped, chỉ nhánh sai integrity)** · phần còn lại: **owner_waived (r10)** | H.1, r10 | Cài thật khi bản tải hợp lệ; chữ ký; biến thể `repaired`; miễn theo quyết định chủ kho 20/11 (r10) |
 | U5 | Chữ ký/attestation/provenance artifact | **accepted_risk (chính sách chủ kho, r7)** · bộ cài **NotSigned** (đo được), không attestation | H.4/H.5, **r7** | Quyết định của chủ kho 19/11 (AskUserQuestion trong phiên điều phối; lời khai, không có bản ghi trên GitHub): *"Chấp nhận theo digest"*: chỉ cài bản có sha256 trùng digest đã ghim; thiếu chữ ký là rủi ro đã biết, chấp nhận vì dùng cá nhân, không thương mại. Dữ kiện đo giữ nguyên |
 | U6 | License | **passed (owner)** | B | — |
-| U7 | Retention/soak/theo dõi | **partial** | D | Ngưỡng, owner, cửa sổ theo dõi chưa ghi |
-| U8 | Restore profile/đăng nhập | dữ liệu: **passed (hẹp)** · đăng nhập: **quan_sat: giữ được** | H.10 | Không có PASS/FAIL cho vế đăng nhập theo đặc tả U8 |
+| U7 | Retention/soak/theo dõi | **partial** · **owner_waived (r10)** | D, r10 | Ngưỡng, owner, cửa sổ theo dõi chưa ghi; quyết định chủ kho 20/11 (r10): không đặt |
+| U8 | Restore profile/đăng nhập | dữ liệu: **passed (hẹp)** · đăng nhập: **quan_sat: giữ được** · **owner_accepted (r10)** | H.10, r10 | Không có PASS/FAIL cho vế đăng nhập theo đặc tả U8; chấp nhận quan sát của chủ kho theo quyết định chủ kho 20/11 (r10) |
 | U9 | Cache/ACL ổ D ASUS | **đo được (r5, r6)**: lúc đo r5 ổ D đầy (trống 8 192 byte); sau khi dọn theo duyệt của chủ kho, trống 2 003 MB (19/11 16:48Z), 2 100 563 968 byte lúc 21:18Z. **Cache add-on hiện có nằm trên ổ C** (r6): hai cache P3 `C:\Users\admin\tl-work\mission1238-asus-20261112-P3\addon-ps51\browsers` và `…\addon-ps7\browsers`, mỗi cache 315 tệp, ~467 MB, lock `0da56e1e…`; không có thư mục `browsers`/`ms-playwright` nào dưới `D:\tl-win` (độ sâu ≤ 4) | **r5**, **r6** | **Quyết định của chủ kho (19/11): dùng ổ C.** `TL_PW_ROOT` và `PLAYWRIGHT_BROWSERS_PATH` chưa đặt ở cả ba phạm vi Process (Desktop Commander), User, Machine; không đổi biến hay cấu hình nào. Thư mục mặc định `C:\Users\admin\AppData\Local\ms-playwright` chỉ có 18 tệp, 7 759 byte (`b`, `daemon`: dư lượng F1 của P3). **Sửa lời khai của bản trước (PR #1426):** câu "P3 ghi mỗi add-on trên ASUS có cache riêng dưới `D:\tl-win\…`" là sai; P3 chỉ ghi **nguồn seed** của cache nằm trên D (nay không còn), còn cache thật nằm trên C. **Còn chưa kiểm:** môi trường của các lượt khởi chạy add-on về sau (biến đặt trong tiến trình, không đo được trước). Mẫu `TL_PW_ROOT` trong `SKILL.md` vẫn ghi ổ D, nên lượt cài kế tiếp phải đặt `TL_PW_ROOT` trên C một cách tường minh |
 | U10 | Playwright CLI ghim | **passed (Desktop + ASUS)** | E, G | — |
 | U11 | Auth remote f728 | **owner_waived (r9)** · dữ kiện: not_evidenced | E, r7, r8, **r9** | Quyết định của chủ kho 20/11: *"Miễn U11"*. Kiến trúc thực tế chỉ vào VM bằng RDP qua IAP; WinRM từ xa không được dùng. Dữ kiện: r8 đo được ASUS không cùng mạng VM (`10.70.0.2`); r9 là lời khai của chủ kho: đường hầm IAP tới `5985`/`5986` lỗi `4003`, và luật firewall cho dải IAP chỉ thấy `tcp:3389` (`tra-luat-allow-iap-rdp`). Network và tag của instance chưa đo. **Không có bằng chứng xác thực WinRM**; mục này được miễn, không được chứng minh (`r9/RESULTS.md`) |
@@ -288,11 +288,11 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 ### I.3 Hạng mục chéo
 | Hạng mục | Hiện trạng | Nguồn |
 |---|---|---|
-| Kiểm release hằng ngày | **not_present** trên cả 3 máy (VM, Desktop: C; ASUS: **r5**, 0/209 tác vụ) | C, r5 |
+| Kiểm release hằng ngày | **not_present** trên cả 3 máy (VM, Desktop: C; ASUS: **r5**, 0/209 tác vụ) · **owner_accepted (r10)**: kiểm tay, không cài tác vụ lập lịch | C, r5, r10 |
 | NSIS cài per-user | **passed (scoped Desktop)** | H.5 |
 | NSIS gỡ của nhà cung cấp | **failed** (finding sản phẩm NSIS-2) | H.5, H.12 |
 | NSIS quy trình gỡ (tiêu chí H.7) | **passed (scoped Desktop, 1 lượt)** | H.12 |
-| Migration / nâng cấp / per-machine | **not_evidenced** | H.5 |
+| Migration / nâng cấp / per-machine | **not_evidenced** · **owner_waived (r10)** | H.5, r10 |
 | Runtime promotion / LIVE | **done (scoped: 2 module mới)** | H.11 |
 
 **Việc còn mở có thể làm tiếp, cần chủ kho chọn:**
@@ -301,3 +301,4 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 3. ~~U11~~: chủ kho miễn (r9, 20/11), vì kiến trúc chỉ dùng RDP qua IAP. §11 #2 phần đích từ xa vẫn `partial`; muốn đo phải mở luật firewall cho WinRM, tức đổi hạ tầng LIVE, cần chủ kho quyết riêng.
 4. ~~§11 #10~~: đã quyết (r7): chấp nhận mức fixture.
 5. ~~Đóng WP~~: đã đóng 19/11 21:42Z kèm miễn trừ. Biên bản M8 trên từng Issue, đọc lại khớp byte, `kiem-dong-wp` đạt: #1401 (`issuecomment-7022988362`), #1405 (`7022997734`), #1409 (`7023002175`), #1410 (`7023006731`), #1413 (`7023011613`).
+6. **Các hàng còn dở khác** (§11 #2 phần từ xa, §11 #3/U1 gateway thật, §11 #5 F1, §11 #9 binary, U4, U7, U8 đăng nhập, kiểm release hằng ngày, migration/per-machine): đã quyết theo chủ kho 20/11, miễn hoặc chấp nhận, không đo thêm (r10). **Mọi hàng mục I đã có kết quả đo hoặc quyết định của chủ kho.** Việc còn lại của #1319: review độc lập cuối và biên bản M8.

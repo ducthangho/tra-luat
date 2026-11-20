@@ -1,0 +1,36 @@
+## Review độc lập đặc tả N r1 · lượt 5
+
+Ba finding lượt 4 đã đóng ở cấp đặc tả. Có một P3 mới về hồi quy khi thư mục làm việc đã bị xóa. Không còn P0–P2. Các phép đo native ở §4c vẫn phải thực hiện trên bản thi công.
+
+**Mốc đo.** HEAD tách tại `8a72d28d7a413047733277545fc8547f32010593`, tree `df0bbe85dc230c595d44c197eae694fe41feecf8`, SHA-256 đặc tả `a993c6d670c95b6d0aefa1ea04795a1713961cfb4ada47bc2153dfb29f1cc060`. `origin/master` đi trước 3 commit. `git diff --quiet` và `git diff --cached --quiet` đều rc 0. Phiên `openai_codex / codex_cli / machine`, Linux Python 3.13.18, UID 0. Model và effort phục vụ chưa đo được. Các phép chạy dùng RAM hoặc bản sao trong `/dev/shm`, không gọi mạng.
+
+### Đóng finding lượt 4
+
+| Finding | Kết quả lượt 5 |
+|---|---|
+| P2 · M2/N2, HOME tương đối quy về gốc | **Đóng về đặc tả.** M2 áp ngoại lệ sau khi ghép thành phần và N2 buộc đo cả gốc viết trực tiếp lẫn `.` tại cwd gốc. Nguyên mẫu cũ trả `None` và gọi `lstat('/')` một lần cho `/`, nhưng từ chối `.` và `/.` với 0 lần gọi. Đây là phản chứng làm đỏ tiêu chí mới. Probe RAM dùng bộ phân loại C1 xác nhận `C:\`, `C:/` và `.` tại cwd `C:\` đều có thể quy về cùng gốc với tuple rỗng. Bộ đo giả loại 2/3 cho một lần `lstat` gốc, loại 4 cho 0 lần. |
+| P3 · N4, thiếu `notdir` | **Đóng.** Với hai kho lồng nhau, probe trúng marker trong đúng một lần ở mỗi lượt. Nguyên mẫu lan `PermissionError` và trả đúng kho cha cho cả `FileNotFoundError` lẫn `NotADirectoryError`. Bản chỉ bắt `FileNotFoundError` làm đỏ riêng `notdir`. |
+| P3 · §8, tổng lệch một dòng | **Đóng.** Tổng `36–40 + 2 + 201–248 + 2` là **241–292** dòng thêm. |
+
+### Bảng kiểm sự thật
+
+| Phép kiểm | Kết quả |
+|---|---|
+| Dựng lại từ Git | Hai cây từ `git archive HEAD`, áp `python -B ap_proto.py` rc 0. `python -B do_neo.py` rc 0 ở cả hai cwd. Theo thứ tự P2a, P2b, packet 1, C1, R, số neo/số chuỗi riêng là **40/27, 40/21, 36/28, 51/42, 6/4**. Mọi `lech` đều rỗng. |
+| Fragment kế thừa | `python -B chay_fr.py` rc 0 ở cả hai cwd. Cả năm `run()` True, stdout rỗng, `HONG 0`. Số ca chạy **11, 3, 18, 2, 1**, số đột biến giết đúng **37, 36, 30, 39, 2**. Các bộ đếm lượt và `chỉ_nt` giữ nguyên. |
+| Tái hiện §0 | `python -B tai_hien.py` trên nguyên mẫu cho hai fixture không ghi config và cả hai lệnh trả rc 3 ở bốn kiểu sai. Script kết thúc rc 1 tại `PermissionError` được tiêm vào `.git`, đúng hành vi lan lỗi cần đo. Hai dòng `lk` của fixture cũ đến từ W6 và W4 vì fixture cấp cả `gws_cred`. |
+| M2 · tổ tiên và `.git` | HOME tương đối thông thường được ghép với cwd rồi quét từ gốc. Khi POSIX `expanduser` giữ nguyên `~`, đích và helper cùng hiểu đó là thành phần tương đối dưới cwd. W6 kiểm tệp đích, jar kiểm `nbase` qua từng đích tệp, helper mới bổ sung phần phía trên. `_trong_kho_git` vẫn dò tổ tiên trên cả chuỗi từ vựng và `realpath`. Helper mới chỉ cần đo liên kết. Ngoại lệ gốc nt giữ điều kiện ổ chữ loại 2/3 của C1. |
+| M2/N2 · thứ tự đọc W6 | Với `env=chat`, loader cô lập và config đặt sẵn tại T, nguyên mẫu cho `exists / open / writer = 0 / 0 / 0`. Bỏ riêng điều kiện `ly_cfg is None` cho `1 / 1 / 0`, dù rc vẫn là 1 và dòng `lk` vẫn xuất hiện. Chốt đứng trước lượt đọc config để merge. Lượt `load_creds` phục vụ lấy bundle vẫn ở đầu lệnh theo M3. |
+| M2 · cụm lỗi W1–W3 | Lý do từ lần kiểm tệp đầu tiên vẫn được trả ngay. Probe cho thấy cả ba giữ cụm `kho` trên ca trong kho. Với tổ tiên symlink, W1/W2 từ gọi writer chuyển sang `lk`, còn W3 chuyển từ thông báo chống hạ cấp sang `lk` vì chốt đích chạy trước. Với HOME thường, probe giữ kết quả base, kể cả thông báo chống hạ cấp của W3. |
+| N2 và §4b · đột biến 1/4 | Hai neo nguyên dòng đều khớp **đúng một lần**, ở dòng **1932** và **1373** của nguyên mẫu. Đột biến 1 phục hồi ghi đúng config và đổi byte ở T. Đột biến 4 phục hồi ghi đúng jar của W2. W2 vẫn có thể trả rc 1 vì cảnh báo thiếu `gws_cred`, nên cặp bằng chứng mất `lk` và writer/byte đúng đích là cần thiết. N2 đặt hai lượt đích trước các lượt cùng bị ảnh hưởng. |
+| N3–N5 và §4b · đột biến 2/3/5 | Probe loader giả đạt **10/10** lượt sai kiểu. Bỏ từng guard cho `name=get`, `type(obj)=list`, frame cuối đúng `cmd_bootstrap` hoặc `cmd_nlm_auth_pull`. Hai lượt list đứng đầu và tự kiểm sai lượt chỉ đổi lượt khai báo. Đột biến 5 đỏ riêng ở `perm` vì trả kho cha thay vì lan lỗi. N5 có sổ độc lập, phân hạng theo ca/lượt/nhãn, kiểm stdout và chỉ cho bỏ qua theo lỗi 1314 của lượt liên kết tương ứng. Bộ phân hạng của N còn `not_run` vì fragment chưa có. EACCES thật nằm ngoài sổ fragment. |
+| D2–D4 | Hồ sơ Desktop cũ khớp SHA probe, ghi **17/18 → 18/18** và **30/30** ở cả hai vế. Thử trực tiếp M1 với `ntpath` và `posixpath` đều cho đích con khớp, tên anh em trượt, W6 khớp. D2 tách base, chỉ M1 và candidate. D3 có đối chứng riêng cho hai chốt và bit reparse, cùng số lần `lstat` gốc. D4 đối chiếu quy tắc bỏ qua của từng fragment trên máy đủ quyền. D2–D5 native, EACCES thật và gate candidate đều `not_run` trong phiên này. |
+| §8 · kích thước | `git apply --numstat` rc 0 và `git diff --no-index --numstat` rc 1 vì có khác biệt, cùng **+32/−2**. Fragment R trên Git đúng **234 dòng**. Phần **+4–8** cho ngoại lệ gốc ổ nt và docstring M4 là ước lượng. Gate vẫn dùng numstat thật của đủ bốn tệp. |
+
+### Finding mới
+
+**P3 · M2/N2 `W6.thuong` — HOME tuyệt đối phát sinh phụ thuộc vào cwd.** M2 truyền `os.getcwd()` vô điều kiện vào parser POSIX. Tôi chạy W6 với HOME tuyệt đối ngoài kho, config cũ `{"cu":1}`, tải giả và cwd là một thư mục scratch rỗng vừa bị xóa. Base trả rc 0 và merge giữ `cu`. Nguyên mẫu trả rc 1, in `ghi lỗi: FileNotFoundError` và giữ nguyên byte cũ. Lượt `W6.thuong` hiện dùng cwd hợp lệ nên vẫn xanh.
+
+**Câu thay thế.** “Chỉ lấy `os.getcwd()` khi đường thư mục cần ghép với cwd. Với HOME tuyệt đối thông thường, N2 đo thêm một lượt `os.getcwd()` ném `FileNotFoundError` trong cửa sổ chốt, kỳ vọng W6 vẫn merge, giữ `cu` và trả rc 0.”
+
+KET_LUAN: approve

@@ -1,0 +1,45 @@
+## Đóng finding lượt 1
+
+| Finding | Trạng thái lượt 2 | Bằng chứng và phần còn mở |
+|---|---|---|
+| P2-1 · M2 làm mất neo | **Đóng** | `do_neo.py` xác nhận mọi chuỗi neo giữ nguyên số lần khớp. Cả năm fragment cho cùng kết quả và bộ đếm trên base và nguyên mẫu. |
+| P2-2 · Jar làm đổi đường sinh lỗi trên nt | **Đóng về thiết kế** | `_dich_jar_nlm` giữ các lời gọi `_kiem_dich_ghi` và trả ngay lý do cũ nếu có, nên `N8.2b` vẫn đi qua `_trong_kho_git`. Probe Linux xác nhận `perm` trúng đúng một lần và lan lỗi, còn W6 đổi lỗi thành `ghi lỗi`. D2–D4 vẫn phải đo native. |
+| P2-3 · `load_creds` và mốc quan sát | **Đóng** | Chạy cả hai lệnh với loader thật và config giả. Cả năm kiểu bundle sai trả rc 3, stderr đúng một dòng, env khớp ảnh ngay sau loader, agent và writer đều 0 lần. Chốt W6 đứng trước `exists` và lần đọc để merge. |
+| P2-4 · Đích và phân hạng đột biến | **Còn mở** | Hai neo 1 và 4 đều khớp đúng một lần và giữ đích ghi. Thứ tự báo đỏ của R có thể làm sai lượt đích. Điều kiện nhận dạng `AttributeError` cũng lệch thông điệp thực tế. Xem P2-1 và P2-2 bên dưới. |
+| P2-5 · Thiếu phép đo jar trên Windows | **Đã bổ sung phép đo, còn vướng điều kiện chạy** | D3 có W1–W3, W6, đối chứng 1/4 và bản bỏ bit reparse. Linux xác nhận các vế symlink. D2 vẫn cần quyền tạo liên kết trên ít nhất một môi trường Windows, kể cả khi D3 dùng junction. |
+| P3-1 · D2 quy lỗi từ candidate đầy đủ về M1 | **Đóng về thiết kế** | D2 tách base, bản chỉ M1 và candidate. Probe Linux cho `18/18`, `30/30`, `HONG 0` ở cả `goc` và `chuan`. Phép so trực tiếp trên `ntpath` và `posixpath` nhận đích con, loại tên anh em và nhận đúng đích W6. |
+| P3-2 · HOME ở gốc | **Còn mở trên nt** | Nguyên mẫu nhận `/` trên Linux. Parser C1 trả `đường không hợp lệ` cho gốc ổ trước khi hỏi loại ổ. M2 yêu cầu ngoại lệ cho gốc, nhưng nguyên mẫu và D2–D4 chưa chứng minh nhánh đó. |
+
+## Bảng kiểm sự thật
+
+| Phép kiểm | Kết quả |
+|---|---|
+| Snapshot | HEAD tách `8a72d28d7a413047733277545fc8547f32010593`, tree `df0bbe85dc230c595d44c197eae694fe41feecf8`. Hai mục untracked đúng bàn giao. SHA-256 đặc tả `5f426ecc4540c7066074251ff00ee3794d345a9a453c723cf25c965137f81418`. Blob `tl_gws.py` `1acf4ef147466f63203409b43eb3a6d9433757eb`, fragment packet 1 `f7769ece5ff0ac9c04644ddc47e70cff612ffaec`. Ba commit ADR viện dẫn và merge R `b71f4459896dd04b8e3f8ee2ceb05082a2d87bb4` đều là tổ tiên của HEAD. |
+| Chạy lại theo bàn giao | `git archive HEAD` dựng hai bản sao trong `/dev/shm`. `python -B ap_proto.py` rc 0. `python -B do_neo.py` và `python -B chay_fr.py` chạy từ gốc từng bản sao, đều hoàn tất. Theo thứ tự P2a, P2b, packet 1, C1, R, số neo là **40 (27 chuỗi), 40 (21), 36 (28), 51 (42), 6 (4)**, mọi `lech []`. Cả năm `run()` trả `True`, stdout rỗng và `HONG 0`. Số ca chạy lần lượt **11, 3, 18, 2, 1**, số đột biến giết đúng **37, 36, 30, 39, 2**. C1 và R có lượt dành riêng cho nt. |
+| Tái hiện | `python -B tai_hien.py` trên nguyên mẫu trả **rc 1** tại `PermissionError` giả ở `.git`. Trước đó, cả hai fixture W6 đều không ghi config và bốn kiểu bundle của script đều trả rc 3 ở cả hai lệnh. Probe bổ sung dùng bundle tối thiểu xác nhận W1–W3 và W6 đều chặn HOME hoặc tổ tiên liên kết. Đột biến 1 ghi lại config. Đột biến 4 ghi lại jar qua cả ba entry point. |
+| M2 · Đường và thứ tự | Trên POSIX, HOME tương đối thông thường được ghép với cwd và quét từ `/`. Probe với HOME tương đối là symlink bắt đúng tiền tố. Nếu `expanduser` giữ nguyên `~`, `dirname` cho `~` và helper xét nó như thư mục tương đối dưới cwd, cùng đích mà writer hiện dùng. Chốt mới không lặp `.git`. Lời gọi kiểm tệp đã xét chuỗi từ vựng và chuỗi thật của tổ tiên đích. W6 có thể nạp config trước để tải bundle, còn chốt mới đứng trước lần đọc để merge. |
+| M2 · Lý do ở W1–W3 | Các lý do cũ từ kiểm jar và kiểm đích tệp vẫn được trả trước chốt mới. Sau khi chốt cũ cho qua, helper có thể trả thêm `là liên kết tượng trưng`, `đường không hợp lệ` từ parser, hoặc dẫn tới `ghi lỗi` khi `lstat` lỗi. Vì vậy W1–W3 có thể đổi từ ghi thành công sang `đường không hợp lệ` với HOME qua UNC hoặc ổ thuộc loại ngoài REMOVABLE/FIXED. Đây là hệ quả của điều kiện parser M2. Lượt Linux không phát hiện ca base kế thừa nào đổi thông báo ngoài các vế chủ đích. |
+| N4 · Ba trạng thái | Với hai marker `.git` lồng nhau, probe `PermissionError` chạm marker trong đúng một lần. Base nuốt lỗi và trả kho ngoài. Nguyên mẫu lan lỗi, còn W6 trả rc 1 với `ghi lỗi`. Đổi probe thành `FileNotFoundError` thì nguyên mẫu trả kho ngoài, xác nhận có đi tiếp. |
+| Phạm vi đo | `openai_codex / codex_cli / machine`, Linux, Python 3.13.18, UID 0. Không gọi mạng và không ghi checkout. Windows native, EACCES thật khi thiếu quyền và gate của candidate **chưa chạy**. Hồ sơ Desktop cũ khớp SHA-256 probe và ghi `goc=False`, `chuan=True`. |
+
+## Finding mới
+
+**P2-1 · N2, N5, §4b — Đột biến 1/4 có thể chết ở lượt khác trước đích đã khai.** Khuôn R ném `TinHieuChotCa` ngay ở lượt đỏ đầu tiên. Trên nguyên mẫu, đột biến 1 khôi phục ghi ở cả `W6.home_lk` và `W6.to_tien_lk`. Đột biến 4 khôi phục ghi ở cả W1, W2 và W3. Nếu thi hành theo thứ tự trình bày N2, đột biến 1 dừng tại `W6.home_lk` và đột biến 4 dừng tại `W1.to_tien_lk`. Cả hai sẽ là `TIN_DUNG_GIA` theo đúng bộ phân hạng R.  
+**Câu thay thế.** “Trong `to_tien`, chạy `W6.to_tien_lk` rồi `W2.to_tien_lk` trước các lượt symlink còn lại. Tại mỗi lượt đích, chỉ phát nhãn `lk` cho phản chứng đã xác định, gồm mất từ chối ở đường đang đo, writer gọi đúng đích và byte ở T thay đổi. Sai hậu điều khác có nhãn riêng. `tu_kiem_sai_luot` giữ nguyên ca và nhãn, chỉ khai sai lượt đích của một đột biến thực.”
+
+**P2-2 · N3, §4b đột biến 2/3 — Dấu nhận dạng `.get` không có trong thông điệp thật.** Chạy riêng hai bản bỏ guard đều cho `AttributeError: 'list' object has no attribute 'get'`. So chuỗi chứa `.get` nguyên văn sẽ không phát `rc3` và làm đỏ cả hai đột biến vì sai hạng.  
+**Câu thay thế.** “Chỉ đổi thành tín hiệu `rc3` khi `AttributeError.name == "get"`, `type(AttributeError.obj) is list`, và frame phát lỗi là lookup trên bundle trong chính lệnh đích của lượt. Ngoại lệ khác là lỗi giàn.”
+
+**P2-3 · N4–N5 — Lượt EACCES thật khi chạy root vừa được bỏ qua vừa bị cấm bỏ qua.** N4 đặt lượt này trong ca `ba_trang_thai` và cho bỏ qua khi UID 0. N5 yêu cầu sổ khớp và cấm bỏ qua mọi ID ngoài danh sách symlink. Môi trường review có UID 0, nên ghi `bỏ_qua` hoặc bỏ lượt khỏi sổ đều vướng một điều kiện nếu coi đây là lượt của fragment.  
+**Câu thay thế.** “EACCES POSIX thật là phép đo bổ sung ngoài sổ fragment. Khi chạy bằng root, ghi `not_run` và lý do. Lượt `perm` giả lập vẫn bắt buộc và được tính trong sổ.”
+
+**P2-4 · D2–D4 — Junction hoàn thành D3 nhưng không cung cấp quyền cần cho D2.** Khi probe liên kết của packet 1 thất bại, fragment bỏ sáu ca và chín đột biến. `run()` trên nt có thể vẫn `True` với **12/18 ca và 21/30 đột biến**, trong khi D2 bắt buộc **18/18 và 30/30**. D3 có thể đạt trên máy thiếu quyền, nhưng máy đó không thể tự hoàn thành hồ sơ native theo D2.  
+**Câu thay thế.** “D2 chạy trên Desktop hoặc VM Windows mà probe symlink và hardlink của packet 1 đều thành công. Nếu Desktop thiếu quyền, chạy cả ba vế D2 trên VM đủ quyền với cùng base và candidate được ghim. D3/D4 được đo riêng trên máy thiếu quyền. Danh sách bỏ qua N5 áp dụng cho fragment N.”
+
+**P3-1 · M2, N2, §4c — Ngoại lệ gốc ổ cần giữ kiểm loại ổ.** Probe parser C1 với `C:\` trả `đường không hợp lệ` và không gọi bộ đo loại ổ. `ntpath.expanduser` với `USERPROFILE` ở gốc cho `dirname` đúng là gốc ổ, nên W6 và jar đều đi vào trường hợp này. Nếu chỉ bỏ qua parser cho gốc, ổ ngoài FIXED/REMOVABLE có thể được chấp nhận và lượt `W6.goc` vẫn xanh.  
+**Câu thay thế.** “Ở nhánh nt, nhận gốc tuyệt đối có chữ ổ với tuple thành phần rỗng chỉ sau khi xác nhận loại ổ là REMOVABLE/FIXED, rồi `lstat` chính gốc. Giữ nguyên parser C1 cho W4/W5. N2 đo hai loại ổ bằng bộ đo giả, và D3 ghi một lượt gọi helper với gốc ổ native đang chứa fixture.”
+
+**P3-2 · §8 — Numstat nguyên mẫu là `+32/−2`.** `git diff --no-index --numstat` trên hai bản sao trả `32 2` với rc 1 vì có diff. `git apply --numstat` trên diff bàn giao cho cùng kết quả. Fragment R đúng **234 dòng**. Thay số đo vào các khoản còn lại của §8 cho **237–284 dòng thêm**, trước phần xử lý gốc nt và cập nhật docstring M4.  
+**Câu thay thế.** “Nguyên mẫu `tl_gws.py` đo `+32/−2`. Cộng với ước lượng fragment và bundled cho 237–284 dòng thêm trước phần còn thiếu của nguyên mẫu. Gate dùng numstat thực của đủ bốn tệp, tối đa 450 dòng thêm.”
+
+KET_LUAN: request_changes

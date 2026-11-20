@@ -1,0 +1,41 @@
+# Review đặc tả N r1 — lượt 4
+
+Còn một P2 ở M2/N2. Kiểm tổ tiên từ gốc là đúng hướng, nhưng ngoại lệ cho gốc chưa bao phủ HOME tương đối quy về gốc. Nguyên mẫu Linux giữ nguyên toàn bộ neo và kết quả của năm fragment kế thừa.
+
+**Snapshot.** HEAD tách `8a72d28d7a413047733277545fc8547f32010593`, tree `df0bbe85dc230c595d44c197eae694fe41feecf8`, SHA-256 đặc tả `d472d1d2fdc72f3fb466f7dc0c9763720265c7ecf059c8227f519923d2640938`. `git diff --quiet` và `git diff --cached --quiet` đều rc 0. `origin/master` đi trước base được giao 3 commit. Phiên OpenAI Codex, `codex_cli / machine`, Linux Python 3.13.18, UID 0. Model và effort phục vụ chưa đo được. Các phép chạy dùng RAM hoặc bản sao dưới `/dev/shm`, offline.
+
+## Đóng finding lượt 3
+
+| Finding | Kết quả lượt 4 |
+|---|---|
+| P2 · W6 có thể đọc config trước chốt | **Đóng.** Probe `env=chat` với config có sẵn và lý do từ chối được kiểm soát cho số lần `exists / open / writer` là `0 / 0 / 0`. Bỏ riêng điều kiện `ly_cfg is None` cho `1 / 1 / 0`, dù rc vẫn là 1 và dòng `lk` vẫn xuất hiện. N2 bắt được phản chứng này. |
+| P2 · Thứ tự đích của đột biến 2/3 | **Đóng về đặc tả.** Bỏ lần lượt hai guard trong RAM cho `AttributeError` có `name=get`, `type(obj)=list`, frame cuối đúng `cmd_bootstrap` hoặc `cmd_nlm_auth_pull`. Hai lượt list đứng đầu. Tự kiểm sai lượt giữ loại tín hiệu, ca và nhãn, nên phân biệt được bộ phân hạng có so lượt. |
+| P3 · Bằng chứng `lstat` gốc ổ | **Đóng về phép đo.** N2 đòi đúng một lần trên gốc ổ cố định và 0 lần trên ổ mạng. D3 đòi đối số và số lần gọi native. Nguyên mẫu chưa có nhánh gốc nt. Phạm vi đầu vào quy về gốc còn finding bên dưới. |
+| P3 · `notfound` thiếu mốc dương | **Đóng.** Probe hai kho lồng nhau chạm marker trong đúng một lần, rồi trả chính xác kho cha. Với `PermissionError`, nguyên mẫu lan lỗi còn đột biến 5 trả kho cha. |
+| P3 · D4 dùng chung quy tắc bỏ qua | **Đóng về đặc tả.** D4 dùng máy đủ quyền của D2, áp N5 cho N và đối chiếu quy tắc của từng fragment kế thừa. |
+
+## Bảng kiểm sự thật
+
+| Phép kiểm | Kết quả |
+|---|---|
+| Hai cây từ `git archive HEAD` | `python -B ap_proto.py` rc 0. `python -B do_neo.py` rc 0 ở cả hai cwd. Số neo/số chuỗi riêng theo thứ tự P2a, P2b, packet 1, C1, R là **40/27, 40/21, 36/28, 51/42, 6/4**. Cả năm đều `lech []`. |
+| Năm fragment kế thừa | `python -B chay_fr.py` rc 0 ở cả hai cwd. Mọi `run()` True, stdout rỗng, `HONG 0`. Số ca chạy **11, 3, 18, 2, 1**, số đột biến giết đúng **37, 36, 30, 39, 2**. Các lượt `chỉ_nt` của C1 và R giữ nguyên. |
+| Tái hiện §0 | `python -B tai_hien.py` trên nguyên mẫu từ chối ghi config ở cả hai fixture liên kết. Cả hai lệnh trả rc 3 cho bốn kiểu sai của script. Script rc 1 tại `PermissionError` được tiêm vào `.git`, xác nhận lỗi lan ra. Hai dòng `lk` trong fixture cũ đến từ W6 và W4 vì fixture cũng cấp `gws_cred`. |
+| M2 · tổ tiên, `.git`, thông báo | HOME tương đối thông thường được ghép với cwd rồi quét từ gốc. Nếu POSIX `expanduser` giữ nguyên `~`, đích ghi và chốt cùng hiểu `~` là thành phần tương đối dưới cwd. Kiểm `.git` vẫn ở lời gọi kiểm tệp, trên chuỗi từ vựng và `realpath`. Jar giữ lý do của lần kiểm tệp đầu tiên bị từ chối. Chốt mới chỉ đổi kết quả khi các kiểm tệp đã qua, kể cả ca base có thể ghi hoặc đi tiếp đến kiểm chống hạ cấp của W3. Không thấy đổi cụm trong các ca kế thừa chạy lại. |
+| M2 · C1 và gốc nt | Probe parser C1 nhận `C:\` và `C:/` ở bước phân loại với tuple rỗng, rồi từ chối trước khi hỏi loại ổ. M2 giữ chính sách C1 với loại 2/3 và đặt ngoại lệ trong helper mới. N2/D3 phân biệt được nhánh kiểm gốc với nhánh trả `None` sớm. |
+| N2–N5, §4b | Hai neo nguyên dòng 1/4 đều khớp **1 lần**, ở dòng 1932 và 1373 của nguyên mẫu. Probe RAM với writer giả xác nhận đột biến 1 chỉ phục hồi gọi writer config ở W6, đột biến 4 chỉ phục hồi gọi writer jar ở W2. W2 vẫn rc 1 ở cả hai vế, nên cần phân biệt bằng `lk` và writer/byte đích. Probe guard N3 đạt **10/10** lượt với loader giả, gồm `true`. Đột biến 2/3 có đích riêng theo frame, và đột biến 5 có đích riêng `perm`. N5 quy định sổ lượt độc lập, sai hạng, stdout và điều kiện bỏ qua. Bộ phân hạng của N chưa có để chạy. |
+| D2–D4 | Hồ sơ Desktop cũ khớp SHA probe và ghi **17/18 → 18/18**, cùng **30/30**. Hai biểu thức M1 chính xác cho **đích con khớp, tên anh em trượt, W6 khớp** với cả `ntpath` và `posixpath`. D2 tách được lỗi M1 khỏi hồi quy candidate. D3 yêu cầu junction, nhánh gốc và các đối chứng bỏ chốt/bỏ bit. D2–D5 native, EACCES POSIX thật và gate candidate đều `not_run`. |
+| §8 | `git apply --numstat` rc 0 và `git diff --no-index --numstat` rc 1 vì có diff, cùng **+32/−2**. R đúng **234 dòng**. Phần gốc nt và docstring M4 **+4–8** vẫn là ước lượng. |
+
+## Finding mới
+
+**P2 · M2, N2 — HOME tương đối quy về gốc bị từ chối dù M2 yêu cầu kiểm gốc.** Với `HOME='.'` và cwd giả lập `/`, `expanduser` cho W6 đích `./.tra_luat_config.json`, nên helper nhận `.`. Jar cũng truyền `.` làm cha của `nbase`. Probe có `lstat` giả cho thấy nguyên mẫu trả `None` và gọi `lstat('/')` một lần với `/`, nhưng trả `đường không hợp lệ` và gọi 0 lần với `.` hoặc `/.`. N2 chỉ gọi helper bằng gốc viết trực tiếp nên vẫn xanh. Probe parser C1 cũng cho thấy `.` tại cwd gốc ổ bị từ chối trước khi đo loại ổ.  
+**Câu thay thế.** “Áp ngoại lệ gốc khi đường hợp lệ quy về đúng gốc sau khi ghép thành phần với cwd và bỏ thành phần rỗng hoặc `.` theo parser. Trên nt, vẫn yêu cầu loại ổ 2 hoặc 3 trước khi `lstat`. N2 đo cả gốc viết trực tiếp và `.` với cwd giả lập ở gốc, đòi đúng một lần `lstat` trên gốc chuẩn. Dùng writer giả khi đo qua W6 và jar.”
+
+**P3 · N4 — Chưa có lượt phân biệt `NotADirectoryError` với lỗi phải lan.** Trong RAM, thay catch hai kiểu bằng `except FileNotFoundError` vẫn đạt hai probe `perm` và `notfound` của N4, nhưng làm lan `NotADirectoryError` ở cùng marker.  
+**Câu thay thế.** “Chạy thêm `notdir` trên fixture hai kho lồng nhau, tiêm `NotADirectoryError` tại marker kho trong, đòi đúng một lần trúng và trả đúng kho cha. Bản chỉ bắt `FileNotFoundError` phải đỏ ở `notdir`.”
+
+**P3 · §8 — Đầu trên của tổng lệch một dòng.** Các khoản đã ghi cho `36–40 + 2 + 201–248 + 2`, tức **241–292** dòng thêm.  
+**Câu thay thế.** “Tổng ước lượng khoảng 241–292 dòng thêm. Gate dùng numstat thật của đủ bốn tệp.”
+
+KET_LUAN: request_changes

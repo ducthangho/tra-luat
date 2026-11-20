@@ -1,0 +1,52 @@
+# do 2026-11-20 tren 8a72d28, Linux CPython 3.13.18, TMPDIR=/dev/shm; pcand = 8a72d28 + ap_proto.py
+## git diff --stat
+ scripts/tl_gws.py | 34 ++++++++++++++++++++++++++++++++--
+ 1 file changed, 32 insertions(+), 2 deletions(-)
+## do_neo.py pbase pcand
+wp433_gws_cred_dich_ngoai_kho so_neo 40 chuoi 27 lech []
+wp433_gws_cred_dich_ngoai_kho_b so_neo 40 chuoi 21 lech []
+wp433_nlm_gws_dich_ngoai_kho so_neo 36 chuoi 28 lech []
+wp433_gws_cred_win_duong so_neo 51 chuoi 42 lech []
+wp433_gws_cred_win_reparse so_neo 6 chuoi 4 lech []
+## chay_fr.py (pbase)
+wp433_gws_cred_dich_ngoai_kho True stdout_len 0 | [wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=11 chạy=11 đạt=11 bỏ_qua=0 chỉ_posix=0 · LUOT: dự_kiến=46 chạy=46 đạt=46 bỏ_qua=0 chỉ_posix=0 · DOT BIEN: dự_kiến=37 chạy=37 giết_đúng=37 bỏ_qua=0 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+wp433_gws_cred_dich_ngoai_kho_b True stdout_len 0 | [wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=3 đạt=3 chỉ_posix=0 · LUOT: dự_kiến=29 chạy=29 đạt=29 chỉ_posix=0 · DOT BIEN: dự_kiến=36 chạy=36 giết_đúng=36 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+wp433_nlm_gws_dich_ngoai_kho True stdout_len 0 | [wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=18 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0
+wp433_gws_cred_win_duong True stdout_len 0 | [wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3
+wp433_gws_cred_win_reparse True stdout_len 0 | [wp433_gws_cred_win_reparse] CA: dự_kiến=2 chạy=1 đạt=1 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=7 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=4 · DOT BIEN: dự_kiến=3 chạy=2 giết_đúng=2 bỏ_qua=0 chỉ_nt=1 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0
+## tai_hien.py (pbase)
+(2) home_la_lk: rc=1 config_ghi_vao_dich_that=True dong_config_ok=['[bootstrap] ✓ config (token + 1 khoá) → env + /dev/shm/wp433-zkzyvfxi/L-home_la_lk/.tra_luat_config.json (chmod 600)']
+    stderr=["[bootstrap] ✗ là liên kết tượng trưng: '/dev/shm/wp433-zkzyvfxi/L-home_la_lk'"]
+(2) to_tien_la_lk: rc=1 config_ghi_vao_dich_that=True dong_config_ok=['[bootstrap] ✓ config (token + 1 khoá) → env + /dev/shm/wp433-zkzyvfxi/L-to_tien_la_lk/home/.tra_luat_config.json (chmod 600)']
+    stderr=["[bootstrap] ✗ là liên kết tượng trưng: '/dev/shm/wp433-zkzyvfxi/L-to_tien_la_lk'"]
+[bootstrap] env=code · bundle giải mã OK (nguồn .enc: gia)
+(3) bundle=[1, 2]: W2 bootstrap -> NEM AttributeError: 'list' object has no attribute 'get' · W1 nlm-auth-pull -> NEM AttributeError: 'list' object has no attribute 'get'
+[bootstrap] env=code · bundle giải mã OK (nguồn .enc: gia)
+(3) bundle='chuoi': W2 bootstrap -> NEM AttributeError: 'str' object has no attribute 'get' · W1 nlm-auth-pull -> NEM AttributeError: 'str' object has no attribute 'get'
+[bootstrap] env=code · bundle giải mã OK (nguồn .enc: gia)
+(3) bundle=7: W2 bootstrap -> NEM AttributeError: 'int' object has no attribute 'get' · W1 nlm-auth-pull -> NEM AttributeError: 'int' object has no attribute 'get'
+[bootstrap] env=code · bundle giải mã OK (nguồn .enc: gia)
+(3) bundle=None: W2 bootstrap -> NEM AttributeError: 'NoneType' object has no attribute 'get' · W1 nlm-auth-pull -> NEM AttributeError: 'NoneType' object has no attribute 'get'
+(4a) truoc: _trong_kho_git('/dev/shm/wp433-wz91kn5d/K4/con') = '/dev/shm/wp433-wz91kn5d/K4'
+(4a) lstat(/dev/shm/wp433-wz91kn5d/K4/.git) nem PermissionError: _trong_kho_git = None · _kiem_dich_ghi = None
+## chay_fr.py (pcand)
+wp433_gws_cred_dich_ngoai_kho True stdout_len 0 | [wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=11 chạy=11 đạt=11 bỏ_qua=0 chỉ_posix=0 · LUOT: dự_kiến=46 chạy=46 đạt=46 bỏ_qua=0 chỉ_posix=0 · DOT BIEN: dự_kiến=37 chạy=37 giết_đúng=37 bỏ_qua=0 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+wp433_gws_cred_dich_ngoai_kho_b True stdout_len 0 | [wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=3 đạt=3 chỉ_posix=0 · LUOT: dự_kiến=29 chạy=29 đạt=29 chỉ_posix=0 · DOT BIEN: dự_kiến=36 chạy=36 giết_đúng=36 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+wp433_nlm_gws_dich_ngoai_kho True stdout_len 0 | [wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=18 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0
+wp433_gws_cred_win_duong True stdout_len 0 | [wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3
+wp433_gws_cred_win_reparse True stdout_len 0 | [wp433_gws_cred_win_reparse] CA: dự_kiến=2 chạy=1 đạt=1 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=7 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=4 · DOT BIEN: dự_kiến=3 chạy=2 giết_đúng=2 bỏ_qua=0 chỉ_nt=1 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0
+## tai_hien.py (pcand)
+    lua("n4", n4)
+    ~~~^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/spec433n/ops/reviews/wp433p2n-spec-r1/tai_hien.py", line 9, in lua
+    fn(r)
+    ~~^^^
+  File "/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/spec433n/ops/reviews/wp433p2n-spec-r1/tai_hien.py", line 56, in n4
+    in_(f"(4a) lstat({k}/.git) nem PermissionError: _trong_kho_git = {m._trong_kho_git(con)!r} · _kiem_dich_ghi = {m._kiem_dich_ghi(os.path.join(con, 'f'), '/', tuple(os.path.join(con, 'f').strip('/').split('/')))!r}")
+                                                                      ~~~~~~~~~~~~~~~~^^^^^
+  File "pcand/scripts/tl_gws.py", line 1132, in _trong_kho_git
+    os.lstat(g)
+    ~~~~~~~~^^^
+  File "/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/spec433n/ops/reviews/wp433p2n-spec-r1/tai_hien.py", line 52, in gia
+    raise PermissionError(13, "wp433-gia", p)
+PermissionError: [Errno 13] wp433-gia: '/dev/shm/wp433-4053vt6h/K4/.git'

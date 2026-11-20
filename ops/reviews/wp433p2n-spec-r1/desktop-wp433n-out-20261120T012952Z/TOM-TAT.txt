@@ -1,0 +1,10 @@
+bat_dau=2026-11-20T01:29:52Z python=3.12.10 platform=Windows-11-10.0.26300-SP0 TEMP=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433n-20261120T012952Z
+fetch rc=0 
+CHOT HEAD sha=8a72d28d7a413047733277545fc8547f32010593 tree=df0bbe85dc230c595d44c197eae694fe41feecf8 sach=[]
+sha256 probe 0ed46cdcd4ecaffa46716ed10d9bc6382489caba1fc7353e1c2476f8aca5a1f2
+goc rc=0 [2026-11-20T01:30:32Z->2026-11-20T01:32:00Z] === BIEN goc run() -> False
+log rc=0 [2026-11-20T01:32:00Z->2026-11-20T01:33:02Z] === BIEN log run() -> False
+chuan rc=0 [2026-11-20T01:33:02Z->2026-11-20T01:34:02Z] === BIEN chuan run() -> True
+sach_sau H=[]
+ket_thuc=2026-11-20T01:34:02Z
+XONG (khoa da nha)

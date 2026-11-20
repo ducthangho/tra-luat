@@ -1,0 +1,3 @@
+os.name nt sha256(fragment) 45ca89837e79798863030e8e11c9dfd22cb499969d28fbdb119f1626fc79b87f
+=== BIEN chuan run() -> True
+    [wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=18 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0

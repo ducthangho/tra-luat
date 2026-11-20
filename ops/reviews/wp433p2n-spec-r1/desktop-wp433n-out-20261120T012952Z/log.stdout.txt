@@ -1,0 +1,4 @@
+os.name nt sha256(fragment) 45ca89837e79798863030e8e11c9dfd22cb499969d28fbdb119f1626fc79b87f
+=== BIEN log run() -> False
+    [wp433_nlm_gws_dich_ngoai_kho] ĐỎ chung_hop_dong_loi: TinHieuChotCa("chung_hop_dong_loi: [('N8.4-W2', 'oserror_w2'), ('N8.4-W6', 'oserror_w6')]") (None)
+    [wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=17 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0

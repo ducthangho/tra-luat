@@ -1,0 +1,13 @@
+# 2026-11-20T01:35:19Z Linux Python 3.13.18 cwd=clone 8a72d28 (tree df0bbe85dc230c595d44c197eae694fe41feecf8)
+$ python -X utf8 -B ops/reviews/wp433p2n-spec-r1/tai_hien.py  (dong bat dau "[" la log cua lenh, da loc)
+(2) home_la_lk: rc=1 config_ghi_vao_dich_that=True dong_config_ok=['[bootstrap] ✓ config (token + 1 khoá) → env + /tmp/wp433-c6voz9u8/L-home_la_lk/.tra_luat_config.json (chmod 600)']
+    stderr=["[bootstrap] ✗ là liên kết tượng trưng: '/tmp/wp433-c6voz9u8/L-home_la_lk'"]
+(2) to_tien_la_lk: rc=1 config_ghi_vao_dich_that=True dong_config_ok=['[bootstrap] ✓ config (token + 1 khoá) → env + /tmp/wp433-c6voz9u8/L-to_tien_la_lk/home/.tra_luat_config.json (chmod 600)']
+    stderr=["[bootstrap] ✗ là liên kết tượng trưng: '/tmp/wp433-c6voz9u8/L-to_tien_la_lk'"]
+(3) bundle=[1, 2]: W2 bootstrap -> NEM AttributeError: 'list' object has no attribute 'get' · W1 nlm-auth-pull -> NEM AttributeError: 'list' object has no attribute 'get'
+(3) bundle='chuoi': W2 bootstrap -> NEM AttributeError: 'str' object has no attribute 'get' · W1 nlm-auth-pull -> NEM AttributeError: 'str' object has no attribute 'get'
+(3) bundle=7: W2 bootstrap -> NEM AttributeError: 'int' object has no attribute 'get' · W1 nlm-auth-pull -> NEM AttributeError: 'int' object has no attribute 'get'
+(3) bundle=None: W2 bootstrap -> NEM AttributeError: 'NoneType' object has no attribute 'get' · W1 nlm-auth-pull -> NEM AttributeError: 'NoneType' object has no attribute 'get'
+(4a) truoc: _trong_kho_git('/tmp/wp433-b7tu4qkl/K4/con') = '/tmp/wp433-b7tu4qkl/K4'
+(4a) lstat(/tmp/wp433-b7tu4qkl/K4/.git) nem PermissionError: _trong_kho_git = None · _kiem_dich_ghi = None
+rc=0

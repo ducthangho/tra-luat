@@ -1,0 +1,50 @@
+# Review đặc tả N r1 — lượt 3
+
+**Còn P2 ở phép đo thứ tự đọc config W6 và thứ tự lượt đích của đột biến 2/3.** Nguyên mẫu giữ nguyên toàn bộ số lần khớp neo và kết quả của năm fragment kế thừa trên Linux.
+
+Snapshot review là HEAD tách `8a72d28d7a413047733277545fc8547f32010593`, tree `df0bbe85dc230c595d44c197eae694fe41feecf8`, SHA-256 đặc tả `5d2c14a8800b2e8b108c0cd8f7ed9a6a2c2842a47b7c43fe75a27f8de3381875`. `git diff --quiet` và `git diff --cached --quiet` đều rc 0. Phiên `openai_codex / codex_cli / machine`, sandbox chỉ đọc, Linux Python 3.13.18, UID 0. Các phép chạy dùng bản sao và fixture dưới `/dev/shm`, offline. Model và effort phục vụ `KHONG_DO_DUOC`.
+
+## Đóng finding lượt 2
+
+| Finding | Kết quả lượt 3 |
+|---|---|
+| P2-1 · Đột biến 1/4 chết sai lượt | **Đóng.** N2 đã đặt `W6.to_tien_lk`, rồi `W2.to_tien_lk` lên đầu. Mỗi neo trọn dòng khớp đúng một lần. Bỏ chốt W6 gọi writer đúng đích config và tạo tệp ở T. Bỏ chốt jar gọi writer đúng đích jar và tạo tệp ở T. W2 trả rc 1 ở cả hai vế vì còn cảnh báo thiếu `gws_cred`, nên tín hiệu phải dựa vào dòng `lk`, writer và byte như N2 quy định. |
+| P2-2 · Nhận dạng `AttributeError` | **Đóng về nhận dạng.** Hai phép bỏ guard thực tế cho `name=get`, `type(obj)=list`, frame cuối lần lượt là `cmd_bootstrap` và `cmd_nlm_auth_pull`. Thứ tự để tới đúng ngoại lệ ấy còn một P2 bên dưới. |
+| P2-3 · EACCES thật ngoài sổ | **Đóng.** N4 đã tách phép đo thật khỏi sổ. Probe giả bắt buộc chạm đúng một lần, nguyên mẫu lan `PermissionError`, đột biến 5 nuốt lỗi. EACCES thật `not_run` ở UID 0. |
+| P2-4 · D2 cần máy đủ quyền | **Đóng về thiết kế D2.** D2 yêu cầu cả probe symlink lẫn hardlink thành công trước khi chạy ba vế. Hồ sơ Desktop cũ có `17/18 → 18/18`, cùng `30/30`. D2 vẫn cần chạy native với đúng M1 có `+ os.sep` và candidate. D4 còn điểm cần làm rõ bên dưới. |
+| P3-1 · Gốc ổ phải qua kiểm loại ổ | **Đóng về thiết kế, chưa đo native.** M2 yêu cầu loại 2/3. Probe `ntpath` cho thấy cả gốc viết bằng `\` và `/` đều được C1 phân loại thành ổ tuyệt đối với tuple rỗng, rồi parser C1 từ chối trước khi đo loại ổ. Nguyên mẫu chưa có ngoại lệ này. D3 còn thiếu bằng chứng dương về lần `lstat` gốc. |
+| P3-2 · Numstat | **Đóng.** Hai phép đo đều cho `+32/−2`. Cộng các khoản §8 cho **241–292** dòng thêm. `~241–291` sai một dòng ở đầu trên, vẫn là ước lượng dưới trần 450. |
+
+Phần còn mở từ lượt 1 về **đích đột biến 1/4** đã đóng trên nguyên mẫu Linux. Phần **junction Windows** đã có đối chứng trong D3 và vẫn `not_run`. Phần **HOME ở gốc ổ** đã có quy tắc riêng và vẫn cần phép đo native. Các kết luận trước về neo kế thừa, thứ tự ưu tiên lý do jar và guard sau `load_creds` được xác nhận lại trong phạm vi dưới đây.
+
+## Bảng kiểm sự thật
+
+| Phép kiểm | Kết quả |
+|---|---|
+| Hai bản sao `git archive HEAD` | `python -B ap_proto.py` rc 0. `python -B do_neo.py` rc 0 từ cả hai cwd. Theo thứ tự P2a, P2b, packet 1, C1, R, số neo và số chuỗi khác nhau là **40/27, 40/21, 36/28, 51/42, 6/4**. Cả năm đều `lech []`. |
+| Năm fragment kế thừa | `python -B chay_fr.py` rc 0 ở cả hai cây. Mọi `run()` trả `True`, stdout rỗng, `HONG 0`. Số ca chạy **11, 3, 18, 2, 1**. Số đột biến giết đúng **37, 36, 30, 39, 2**. C1 và R có lượt riêng cho nt. |
+| `tai_hien.py` | Trên nguyên mẫu, cả hai fixture W6 không ghi config. Hai lệnh trả rc 3 với cả bốn kiểu sai của script. Script rc **1** tại `PermissionError` giả ở `.git`, đúng đường lan lỗi cần quan sát. Hai dòng `lk` của script W6 đến từ hai đường ghi vì fixture cũ cũng cấp `gws_cred`. |
+| M2 · tổ tiên và `.git` | HOME POSIX tương đối được ghép với cwd và quét từ `/`. Probe W1/W3 với HOME tương đối có tổ tiên liên kết chặn đúng tiền tố. Khi `expanduser` giữ nguyên `~`, parser coi `~` là tên tương đối dưới cwd, cùng cách đường ghi được hiểu. Gốc `/` trả `None` trên nguyên mẫu. Kiểm `.git` vẫn thuộc lời gọi kiểm đích tệp và quét cả chuỗi từ vựng lẫn `realpath`. Chốt thư mục chỉ bổ sung luật liên kết. |
+| M2 · thứ tự và thông báo | Chốt W6 trong nguyên mẫu đứng trước `exists` và lần đọc phục vụ merge. `load_creds` có thể đọc cấu hình sớm hơn để tải bundle, đúng M3. Jar trả lý do cũ ngay nếu kiểm từng đích từ chối. Sau khi các kiểm đó qua, helper có thể đổi một lần ghi base thành từ chối `lk`, `đường không hợp lệ` theo chính sách đường C1, hoặc `ghi lỗi` khi `lstat` lỗi. Trên Linux, bỏ chốt jar làm cả W1, W2, W3 ghi lại. Các ca kế thừa cho cùng kết quả trên hai cây. |
+| N3 và N4 | Probe N3 dùng loader thật với config giả, **10/10** lượt đạt. rc 3, stderr đúng một dòng, stdout rỗng, toàn bộ env bằng ảnh ngay sau loader, writer và agent đều 0. Với hai marker `.git` lồng nhau, `PermissionError` chạm đúng một lần rồi lan ở nguyên mẫu. `FileNotFoundError` chạm đúng một lần rồi trả kho ngoài. Đột biến 5 trả kho ngoài trong cả hai vế. |
+| D2 và §8 | M1 đúng hai biểu thức trong RAM trên nguyên mẫu Linux cho `18/18`, `30/30`, `HONG 0`. Probe `posixpath` và `ntpath` cho **đích con khớp, tên anh em trượt, W6 khớp**. `git diff --no-index --numstat` rc 1 vì có diff, `git apply --numstat` rc 0, cùng `32 2`. Fragment R **234 dòng**. Phần gốc nt và docstring M4 **+4–8** vẫn là ước lượng. |
+| Chưa chạy | D2–D5 native, EACCES thật và gate của candidate `not_run`. Đối chứng 1–5 chạy trên nguyên mẫu trong RAM. Fragment N chưa có để chạy sổ hay bộ phân hạng của chính nó. |
+
+## Finding còn mở và mới
+
+**P2 · N2, W6 — Fixture được phép xanh ngay cả khi đọc config trước chốt.** Trong RAM, tôi bỏ riêng điều kiện `ly_cfg is None` khỏi nhánh `if ... os.path.exists(cfgp)`. Với config chưa tồn tại, bản sai vẫn có rc 1, đúng một dòng `lk`, 0 lần mở, 0 writer và byte giữ nguyên. Đặt sẵn config ở T làm chính bản sai mở tệp một lần. Ngoài ra, với bundle chỉ có `token`, probe `env=code` sinh thêm cảnh báo thiếu `gws_cred`, còn `env=chat` cho đúng một dòng W6.  
+**Câu thay thế.** “Chạy các lượt W6 bằng `env=chat`, vô hiệu cài đặt và cô lập `load_creds` khỏi đích merge. Với cả hai fixture symlink, đặt sẵn config JSON ở T. Đếm riêng `exists(cfgp)` và lần mở đọc `cfgp` trong W6, cả hai phải bằng 0. Đối chứng bỏ điều kiện `ly_cfg is None` trước `exists` phải đỏ ở phép đo thứ tự đọc. Giữ đột biến 1 và nhãn `lk` như §4b.”
+
+**P2 · N3, §4b, N5 — Lượt list cần được ghim trước các lượt kiểu sai cùng lệnh.** Bỏ guard làm mọi kiểu sai của lệnh tương ứng đi tới `.get`. Chỉ ngoại lệ của `list` được đổi thành `rc3`. Nếu chạy một scalar của cùng lệnh trước lượt list thì bản đột biến dừng ở lỗi giàn, dù dấu nhận dạng của lượt list đã đúng. N3 liệt kê `list` đầu tiên trong danh sách giá trị nhưng chưa ghim thứ tự chạy như N2 và N4.  
+**Câu thay thế.** “Hai lượt đầu của `bundle_kieu` lần lượt là `bootstrap.list` và `pull.list`, rồi mới chạy các kiểu còn lại. `tu_kiem_sai_luot` dùng đột biến 2, khai `pull.list` thay cho `bootstrap.list`, giữ nguyên kiểu tín hiệu, ca và nhãn `rc3`. Phép tự kiểm này chạy cả khi các lượt symlink bị bỏ qua.”
+
+**P3 · N2, D3 — Kỳ vọng `None` ở gốc ổ chưa chứng minh đã `lstat` gốc.** Một nhánh chỉ đo loại ổ rồi trả `None` cho ổ cố định đáp ứng cả kỳ vọng gốc ổ thường và gốc ổ native hiện ghi.  
+**Câu thay thế.** “Ở lượt gốc ổ cố định, bọc `lstat` bằng bộ đếm chuyển tiếp. Đòi đúng một lần trên gốc chuẩn. Khi bộ đo loại ổ trả 4, đòi 0 lần `lstat`. D3 ghi cả đối số và số lần gọi trên gốc ổ native.”
+
+**P3 · N4 — `notfound` cần một mốc dương cho việc đi tiếp.** Với riêng một kho K và kỳ vọng `None` sau khi che marker, bản dừng ngay khi gặp `FileNotFoundError` cũng đạt. Probe hai kho lồng nhau phân biệt được bằng chính giá trị trả về.  
+**Câu thay thế.** “Dựng K nằm trong một kho cha ngoài K. Lượt `notfound` đòi probe marker của K trúng đúng một lần và `_trong_kho_git` trả đúng đường kho cha.”
+
+**P3 · D4 — Điều kiện bỏ qua cần ghi theo từng fragment.** D4 hiện áp câu “mọi `bỏ_qua` … theo N5” cho danh sách sáu fragment. N5 chỉ liệt kê ID của N. Ví dụ R có hai lượt symlink mang ID riêng, còn P2a có quy tắc hardlink riêng với `winerror` 1/50.  
+**Câu thay thế.** “Chạy D4 trên máy đủ quyền của D2. Áp N5 cho fragment N. Với mỗi fragment kế thừa, ghi bộ đếm và đối chiếu quy tắc bỏ qua của chính fragment đó.”
+
+KET_LUAN: request_changes

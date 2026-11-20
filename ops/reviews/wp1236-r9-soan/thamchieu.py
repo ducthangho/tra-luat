@@ -14,8 +14,15 @@ CHECK_BAT_BUOC = ["gate (ubuntu-latest)", "gate-packet-loop (ubuntu-latest)", "g
                   "gate-registry (ubuntu-latest)", "gate-cong-cu-gop (ubuntu-latest)"]
 
 def doc_danh_gia(p):
-    dong = p.read_text(encoding="utf-8").split("\n")
-    if dong and dong[-1] == "": dong.pop()
+    b = p.read_bytes()
+    try: t = b.decode("utf-8")
+    except UnicodeDecodeError: return None, ["khong_phai_utf8"]
+    if t.endswith("\n"): t = t[:-1]
+    dong = t.split("\n")
+    if any(d.endswith("\r") for d in dong):
+        if not all(d.endswith("\r") for d in dong): return None, ["xuong_dong_tron"]
+        dong = [d[:-1] for d in dong]
+    if any("\r" in d for d in dong): return None, ["cr_le"]
     m = RE_DAU.fullmatch(dong[0]) if dong else None
     if not m: return None, ["dau_tep_sai"]
     dau = dict(run=int(m[1]), attempt=int(m[2]), head=m[3], bo_sinh=m[4])
@@ -52,6 +59,11 @@ def kiem_tep(p, goc):
     if len(pv) != 1: return "not_measured", ly + [f"provenance_{len(pv)}"]
     y = pv[0][1]; r = y["moc"]["run"]
     if not (r.get("event") == "push" and r.get("loi_khai_rest_path") == ".github/workflows/ci.yml"): ly.append("khong_phai_run_land")
+    go = y["moc"].get("gate_output") or {}
+    if not (r.get("trang_thai") == "passed" and (go.get("tap_jobs") or {}).get("trang_thai") == "passed"
+            and all(isinstance(c, dict) and c.get("trang_thai") in ("passed", "skipped") for c in y["moc"].get("checkout") or [None])
+            and all(c.get("trang_thai") == "passed" for c in y["moc"].get("checkout") if c.get("trang_thai") != "skipped" or c.get("job_id") not in {q.get("job_id") for q in y["moc"]["gate_output"]["jobs"] if isinstance(q, dict) and q.get("conclusion") == "skipped"})):
+        ly.append("provenance_chua_du")
     pj = {j["job_id"]: j for j in y["moc"]["gate_output"]["jobs"] if isinstance(j, dict)}
     khong_skip = {k for k, j in pj.items() if j.get("conclusion") != "skipped"}
     if set(d["jobs"]) != khong_skip: ly.append(f"tap_job_lech:{len(d['jobs'])}/{len(khong_skip)}")
@@ -62,6 +74,7 @@ def kiem_tep(p, goc):
         if q is None: continue
         if q.get("name") != j["name"] or q.get("conclusion") != j["conclusion"] or ",".join(q.get("labels") or []) != j["labels"]: ly.append(f"job_lech:{k}")
         if str((ldd.get(k) or {}).get("sha256")) != j["sha"]: ly.append(f"log_sha_lech:{k}")
+        if (j["tt"] == "passed" and j["conclusion"] != "success") or (j["conclusion"] != "success" and j["tt"] != "failed"): ly.append(f"ket_luan_lech:{k}")
     if d["moc"] is None: ly.append("thieu_moc")
     if ly: return "not_measured", ly
     v3 = BO_SINH[dau["bo_sinh"]] == "v3"

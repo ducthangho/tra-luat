@@ -1,0 +1,94 @@
+PROXIMA REVIEW RECEIPT
+Requested provider/model: chatgpt:gpt-6-instant
+Gateway reported model: chatgpt
+Attempts: 1
+HTTP status: 200
+HTTP elapsed: 43.91 seconds
+Desktop Commander process runtime: 56.80 seconds
+Started UTC: 2026-11-03T01:32:52.6049800Z
+Finished UTC: 2026-11-03T01:33:37.3378409Z
+Scope: hypothetical public mutation-audit policy; no source code, VM configuration, accounts or customer data sent.
+Attestation: gateway routing and actual returned text are verified; upstream model identity is not independently attested.
+No repository, gate, schedule, service, login or ACL changes were made. No retry or Claude request.
+Remote receipt prefix: ProximaGateway/results/mutation-policy-review-20261103T013252Z
+
+ACTUAL RETURNED CRITIQUE (VERBATIM)
+
+**Tôi nghiêng về phương án A (audit toàn diện hằng tuần, PR chạy kiểm thử nhanh có chọn lọc), nhưng chỉ như một chính sách có điều kiện.** Phương án B (hoãn đến khi hoàn thành tính năng) không nên là chính sách mặc định. Chưa có dữ liệu thực nghiệm nên chưa thể khẳng định kiểm thử vài phút đủ hiệu quả.
+
+### 1. Phản biện hai phương án
+
+| | Lập luận mạnh nhất ủng hộ | Phản biện mạnh nhất |
+|---|---|---|
+| **A – Audit hằng tuần** | Giảm chi phí CI, phản hồi PR nhanh, vẫn duy trì kiểm tra toàn hệ thống định kỳ. | Lỗi phát hiện muộn, khó quy trách nhiệm giữa nhiều PR; sửa lỗi tốn kém hơn. |
+| **B – Hoãn đến khi hoàn thành tính năng** | Phù hợp giai đoạn phát triển biến động mạnh, khi mutation testing có chi phí cao và kết quả dễ lỗi thời. | Tích lũy nợ chất lượng, không xác định được thời điểm kết thúc tính năng; audit cuối kỳ có thể phát hiện lỗi kiến trúc rất khó sửa. |
+
+**Rủi ro nghiêm trọng của A** là khả năng định vị lỗi (*fault localization*).
+
+Nếu 50 PR được merge trước audit Chủ nhật, một lỗi có thể xuất phát từ bất kỳ PR nào. Git bisect chỉ hiệu quả khi các phiên bản trung gian có thể build, chạy test ổn định và lỗi có thể tái hiện.
+
+Ngoài ra, thay đổi B có thể vô tình che lỗi của thay đổi A (*cross-change masking*). Audit trên HEAD có thể xanh dù một trạng thái trung gian từng sai. Vì vậy, audit tuần không thay thế được kiểm chứng tại thời điểm merge.
+
+### 2. Những rủi ro không được bỏ qua
+
+**CI starvation:** Audit kéo dài nhiều giờ có thể liên tục bị hủy bởi các commit mới nếu dùng chung concurrency group với PR.
+
+Yêu cầu:
+- Audit có concurrency group riêng, không tự động hủy.
+- Phân biệt rõ `passed`, `failed`, `cancelled`, `timed_out`, `infrastructure_error`.
+- Audit bị hủy hoặc chưa hoàn tất tuyệt đối không được tính là xanh.
+- Có cơ chế retry có giới hạn và cảnh báo khi quá hạn hoàn thành.
+
+**Kiểm thử chính hệ thống kiểm thử:** Mutation engine không mặc nhiên phát hiện lỗi trong test harness, assertions, bộ chọn mutant hoặc result parser.
+
+Cần có kiểm thử độc lập bằng fixture, lỗi cố ý cài vào và kiểm tra đầu ra kỳ vọng.
+
+**Phân loại mutant:** Phải tách `killed`, `survived`, `equivalent`, `timeout`, `infrastructure_error`, `not_run`. Không được tính các trường hợp chưa có kết luận như mutant đã bị tiêu diệt. Equivalent mutant cần căn cứ đánh giá, không tự động loại bỏ để làm đẹp điểm số.
+
+### 3. Khi nào bắt buộc audit rộng trước merge?
+
+Dù áp dụng fast-default, tôi đề xuất bắt buộc kiểm thử rộng hơn, đến full audit nếu không thể khoanh vùng đáng tin cậy, đối với:
+
+1. Thay đổi authentication, authorization, bảo mật, phân quyền hoặc xử lý dữ liệu nhạy cảm.
+2. Thay đổi migration, schema, tính toàn vẹn dữ liệu hoặc nghiệp vụ có hậu quả lớn.
+3. Thay đổi lõi dùng chung, dependency quan trọng, concurrency hoặc giao tiếp giữa nhiều module.
+4. Thay đổi test harness, assertions, mutation selection, parser hoặc cấu hình CI.
+5. PR sửa lỗi nghiêm trọng, lỗi từng lọt qua fast lane hoặc thay đổi có phạm vi ảnh hưởng không xác định.
+
+### 4. Weekly, nightly hay event-triggered?
+
+| Cơ chế | Khuyến nghị |
+|---|---|
+| Weekly | Audit nền, tiết kiệm tài nguyên |
+| Nightly | Phù hợp khi tốc độ merge cao và đủ tài nguyên |
+| Event-triggered | Bắt buộc với thay đổi rủi ro cao |
+| Release gate | Full audit bắt buộc trước phát hành, trừ ngoại lệ được phê duyệt và ghi nhận |
+
+**Nếu audit main thất bại:** Lưu commit SHA, phân loại nguyên nhân, mở issue có người phụ trách; khoanh vùng bằng audit các commit/PR liên quan. Tạm dừng merge các thay đổi ảnh hưởng cùng vùng nếu chưa kiểm soát được rủi ro.
+
+**Nếu audit release thất bại:** Chặn phát hành cho đến khi sửa và kiểm chứng lại, hoặc có quyết định chấp nhận rủi ro được phê duyệt.
+
+### 5. Chứng minh fast lane thực sự hiệu quả
+
+Không được lấy mutation score cao trên mutant dễ làm bằng chứng.
+
+Cần chạy **paired full/targeted audit trên cùng commit**, đối chiếu:
+- Lỗi lịch sử mà mỗi lane phát hiện.
+- Mutant holdout và seeded faults không dùng để tối ưu selector.
+- False-negative rate trên tập lỗi có ý nghĩa, kèm khoảng tin cậy.
+- Thời gian thực thi p50/p95 và tỷ lệ lỗi hạ tầng.
+- Hiệu quả khi code thay đổi và selector bị cập nhật.
+
+Phải đo cả trường hợp lỗi bị bỏ sót, không chỉ tỷ lệ mutant bị tiêu diệt.
+
+### 6. Chính sách triển khai đề xuất
+
+**Giai đoạn 1 – Đo chuẩn:** Chạy song song full và targeted trên các commit đại diện; chưa cho fast lane thay thế full.
+
+**Giai đoạn 2 – Thử nghiệm:** Fast-default cho PR rủi ro thấp; audit nightly hoặc weekly và event-triggered.
+
+**Giai đoạn 3 – Chính thức:** Chỉ áp dụng khi đạt tiêu chí được thống nhất trước: p95 trong ngân sách vài phút, không bỏ sót lỗi nghiêm trọng trong bộ kiểm chứng, false-negative rate và khoảng tin cậy nằm trong mức chấp nhận, audit định kỳ hoàn thành đúng hạn.
+
+Nếu dữ liệu không đủ để ước lượng tỷ lệ bỏ sót đáng tin cậy, tiếp tục thử nghiệm.
+
+**Kết luận:** Chọn A có điều kiện, kết hợp audit theo rủi ro và release gate. Không chọn B làm mặc định. Quan trọng nhất là chứng minh fast lane phát hiện được lỗi có giá trị, chứ không chỉ chạy nhanh.

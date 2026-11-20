@@ -1,0 +1,207 @@
+{
+  "verdict": "changes_requested",
+  "findings": [
+    {
+      "id": "R3-02",
+      "severity": "P2",
+      "section": "§3 G5; PR1(3); PR4 acceptance",
+      "summary": "PR4 requires the diagnostic difference it is designed to expose to disappear.",
+      "evidence": "PLAN.md:131-132 defines the flag as old classification != new classification and :64-66 retains the old rule for comparison. PR4:205-210 requires a stale-base documentation PR to change from day_du to duong_nhanh, but also requires that same flag to become zero after merge; G5:74 repeats zero flips. For the required positive case, a correct implementation necessarily leaves old != new true. The old comparison is visible in ops/ci_duong_nhanh.py:191-210,305-325,618-635. The shared-context repair is now specified correctly; its success criterion is contradictory.",
+      "suggested_fix": "In G5 and PR4, retain old/new disagreement as the benefit counter and use a separate residual-error counter: production classification differs from the validated new-context oracle. Require the latter to be zero. The stale-base positive case must have old/new disagreement=true and residual error=false; malformed-parent cases must remain fail-closed. Preserve the frozen old-rule population for G1-G3."
+    },
+    {
+      "id": "R3-03",
+      "severity": "P2",
+      "section": "I5; PR3 skip predicate and activation condition (4)",
+      "summary": "The shadow skip population still includes existing fast-lane changes, making the promised full post-merge witness inconsistent.",
+      "evidence": "PLAN.md:172-177 permits shadow bo_qua for a clean, nonempty PR diff outside the conservative closure, explicitly excluding the four ops record prefixes from that closure. A plain edit to ops/reviews/example.md satisfies these stated conditions. Yet ops/ci_duong_nhanh.py:115,392-403 classifies such a diff as duong_nhanh, and ci.yml:570-572 skips G5 on its push. Thus it cannot satisfy PR3:182, which requires every shadow-bo_qua PR to have eight successful post-merge shards, or I5:96-98, which says every new reduction has a non-allowlisted diff. The activation cohort also does not distinguish final merged heads from still-open or superseded shadow observations.",
+      "suggested_fix": "Make the new skip predicate explicitly require current che_do=day_du and a verified non-allowlisted merge contribution; label existing fast-lane skips separately. Apply the post-merge witness check to mapped final merged candidates and report pending/superseded observations separately. Add documentation-only, eligible nondependency, and stale-base cases proving the distinction. Preserve the existing push policy rather than expanding it implicitly."
+    },
+    {
+      "id": "R3-06",
+      "severity": "P2",
+      "section": "§3 G4 and PR1 collector acceptance",
+      "summary": "G4 still conflates a planned full mode with completed full-radius evidence and leaves incomplete runs undefined.",
+      "evidence": "PLAN.md:73 declares full=100% and unknown=0 by design, then requires unknown<=2%, but does not define eligible runs or how cancelled/incomplete runs enter its four categories. Lines 77-79 correctly add planned mode, actual mode, completion and positive evidence, without defining their reduction into G4. Re-reading the recent 184-run snapshot finds 95 final-attempt inventories without eight successful G5 jobs; run 44126854175 has all eight cancelled. This does not prove 95 unknown results, but proves that a planned full mode cannot establish the claimed completed coverage. ops/cong_cu_test.py:8116-8141 emits a shard receipt only after complete success; :8189-8207 requires the complete partition.",
+      "suggested_fix": "Define G4 with an explicit denominator and a classification table covering cancellation before classification, interruption during full/targeted execution, valid skip evidence, and missing receipts. Separate mode-selection shares from completed-coverage shares; label 100% as policy-only and leave historical completed coverage unmeasured unless reconstructed. Apply the 2% threshold to a stated population/quantity. Keep cancelled costs in G1/G2, and require collector fixtures to prevent interrupted full mode from becoming completed full evidence."
+    },
+    {
+      "id": "R3-10",
+      "severity": "P2",
+      "section": "§9 DX-2; §2.3; §5 savings inputs",
+      "summary": "DX-2 changes the file selection to recursive pages but retains the old nonrecursive results.",
+      "evidence": "The prior plan uses jobs/*/p*.json; PLAN.md:365 now uses jobs/**/p*.json. The nested c30 pages for runs 40527993854 and 40528783769 add 104 PR day_du rows and 217025 seconds. The stated revised method yields 5914 rows, 6113166 seconds, 69 failure rows and 8102 total raw G5 rows, rather than 5810,5896141,62,7998. Cancelled rows/seconds and push totals still match. Recursive raw G5 time is 9019102 seconds versus the deduplicated BASELINE total 8542030, an overstatement of 5.585%, not at most approximately 2%. Applying the collector carry-forward rules reproduces BASELINE exactly and gives PR day_du=5706598 seconds and push day_du=2568875 seconds.",
+      "suggested_fix": "Prefer one complete, deduplicated DX-2 using the existing collector rules, then regenerate V, the rounded summaries and dependent savings table. The smaller alternative is restoring the old glob, explicitly declaring the two omitted runs and correcting the overstatement claim; do not describe that subset as the complete cohort. Lock the calculation with checks that nested fallback pages are included and carry-forward jobs are counted once. No test or mutation execution is needed for this correction."
+    },
+    {
+      "id": "R3-09",
+      "severity": "P3",
+      "section": "§5 joint savings model",
+      "summary": "The joint model arithmetic is correct at its stated inputs, but its factors still mix run fractions, step savings and whole-job costs.",
+      "evidence": "PLAN.md:297-299 defines V as whole G5 job seconds from DX-2, s as the fraction of step seconds removed, and f as a fraction of PR runs. All nine table cells and the combined rounded ranges reproduce using V=5.90,A=0.46. However, ci.yml:594-635 includes checkout, installation and artifact work outside the timed G5 step; targeting does not remove all of that work. A run-count skip fraction also need not equal the share of job seconds saved, particularly with 101/184 recent runs cancelled. The K7 coverage assumption is now correctly labelled an upper bound.",
+      "suggested_fix": "Use PR1 to measure cost-weighted skip savings and targeted savings on the remaining eligible runs. Either redefine s as whole-job fractional reduction with an explicit equal-cost assumption for f, or sum avoided job cost and saved step cost separately, then subtract complete incremental audit cost. Check a scenario with unequal skipped/non-skipped costs and nonzero setup overhead. Retain the present table only as a labelled illustrative scenario, not a measured forecast."
+    }
+  ],
+  "prior_findings": [
+    {
+      "id": "R3-01",
+      "status": "closed",
+      "evidence": "Plan-level dependency repair is explicit at PR1:129-130 and PR3:169-188: conservative directory/path/mode/Git-read coverage, hash invalidation, 14-day shadowing, adversarial cases and Q1 before activation. This addresses the t16 scan in ops/cong_cu_test.py:2697-2735. DX-8 independently reproduces 201/381. Skip-population inconsistency is tracked separately under R3-03."
+    },
+    {
+      "id": "R3-02",
+      "status": "partially",
+      "evidence": "PR4:198-207 now propagates one validated context through the classifier, raw/mode checks and kiem-re outputs, covering the existing consumers at ops/ci_duong_nhanh.py:305-325,618-635,813-821. The newly specified old/new flag still contradicts zero-flip acceptance; see R3-02."
+    },
+    {
+      "id": "R3-03",
+      "status": "partially",
+      "evidence": "§2.9, I5 and PR2 now accurately disclose push fast-lane and NHE exceptions, consistent with ci.yml:572 and ci_dang_ky_test.py:864-897. PR3 does not yet restrict its shadow population to the new reductions covered by the narrowed compensation claim; see R3-03."
+    },
+    {
+      "id": "R3-04",
+      "status": "closed",
+      "evidence": "PR5:221-232 adds a separate G5 receipt path, exact head/hash/mode/run/attempt checks, independent expected inventory, identity preservation and negative cases; PR6:245-253 requires the full audit first. This directly addresses packet_loop.py:3637-3641, ci_dang_ky_test.py:1088-1145,1193-1205 and cong_cu_test.py:8137-8207. Closure is of the plan contract, not implementation validation."
+    },
+    {
+      "id": "R3-05",
+      "status": "closed",
+      "evidence": "PR1:125-139 separates parent wall, worker intervals/CPU, setup, target and other cases, reconciles overlap and preserves verdict records. PR6:245-253 requires same-head full/targeted benchmarking and all current IDs. These fit the existing full-case loop at cong_cu_test.py:2586-2598 and process launcher at :7657-7740."
+    },
+    {
+      "id": "R3-06",
+      "status": "partially",
+      "evidence": "§3:64-79 and PR1:133-140 add the missing per-run collector in an explicit write set and freeze the old-classifier comparison population, addressing thu_thap.py:1341-1342,1393-1397. The G4 denominator and reduction of mode/completion evidence remain unresolved; see R3-06."
+    },
+    {
+      "id": "R3-07",
+      "status": "closed",
+      "evidence": "PR7c:265-269 defaults to unchanged nightly execution and requires a separate closure including CA_DAI, positive evidence for all 16 shards, actual-execution witnesses, expiry, forced weekly execution and fail-closed reads. This covers packet-loop-dot-bien.yml:3-17 and packet_loop_test_manh.py:10-14,26-27."
+    },
+    {
+      "id": "R3-08",
+      "status": "closed",
+      "evidence": "PR8:284-289 separates achieved, measured failure and explicit owner exception; §5:111-114 supplies the declined-PR6 dependency branch and G1/G2 provide alternate targets. PR5/PR6 are recorded as not performed by decision. This respects the protocol distinction between measurement completion and Mission success."
+    },
+    {
+      "id": "R3-09",
+      "status": "partially",
+      "evidence": "§5:110-116 now starts with observation and PR2; PR5 precedes PR6. G1-G3 mark independence assumptions heuristic and require PR-clustered uncertainty. The joint savings formula includes audit cost and its table arithmetic passes. Remaining unit/weighting caveat is P3; the newly changed DX-2 scope is R3-10."
+    }
+  ],
+  "number_checks": {
+    "checked": 171,
+    "mismatches": [
+      {
+        "source": "DX-2",
+        "line": 366,
+        "metric": "pull_request rows",
+        "claimed": 5810,
+        "actual": 5914
+      },
+      {
+        "source": "DX-2",
+        "line": 366,
+        "metric": "pull_request seconds",
+        "claimed": 5896141,
+        "actual": 6113166.0
+      },
+      {
+        "source": "DX-2",
+        "line": 367,
+        "metric": "PR failure rows",
+        "claimed": 62,
+        "actual": 69
+      },
+      {
+        "source": "DX-2",
+        "line": 368,
+        "metric": "all raw rows",
+        "claimed": 7998,
+        "actual": 8102
+      },
+      {
+        "source": "DX-2",
+        "line": 31,
+        "metric": "PR million seconds",
+        "claimed": 5.9,
+        "actual": 6.113166
+      },
+      {
+        "source": "DX-2",
+        "line": 368,
+        "metric": "raw seconds overstatement upper bound percent",
+        "claimed": "at most approximately 2",
+        "actual": 5.584995604089427
+      }
+    ]
+  },
+  "overall_assessment": "Substantially improved, but not yet the best approvable owner-facing plan.\nFive prior findings are closed at plan level; four are partially closed.\nFour P2 findings block approval; the remaining savings-model caveat is P3.\nAll direct B values match; DX-1 and DX-3 through DX-8 reproduce. DX-2 fails its revised recursive method.\nBoth carried-over values are verified: 101/184 cancelled runs and 201/381 t16-sensitive logs.\nThe savings table arithmetic passes at its declared constants; that does not validate the input scope or cost model.\nMinimal revision: repair PR4 residual-error acceptance, restrict PR3 eligibility/witness scope, define G4 completion accounting, and reconcile DX-2 plus dependent figures.\nKeep the staged sequence, conservative closure, additive full audit, nightly default and explicit outcome disposition.\nRound 2 of 2 is complete; unresolved items go to the coordinator/owner checkpoint without another model round.",
+  "notes": {
+    "anchors": {
+      "plan": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan2/PLAN.md",
+      "plan_sha256": "7fe0545b82c564f8766248b3b6998b245482c1170aee6518a5765eba7191e9fa",
+      "baseline": "ops/specs/wp1434-r3/do/BASELINE.json",
+      "baseline_sha256": "6100c8e18907f59b1abbdc44195861cc2310c654ce8dcfa2e74ca4ffa155f54c",
+      "reviewed_sha": "5e5d2cc192758b5a372a875827987b6f471704c0",
+      "reviewed_tree": "ebf56f757e7f0c6432f91dcc8ec9414137d8e17d"
+    },
+    "identity": {
+      "provider": "openai_codex",
+      "execution_surface": "codex_cli",
+      "transport": "machine",
+      "model_family": "openai",
+      "served_model_and_effort": "KHONG_DO_DUOC",
+      "run_id": "33ff1ea45d4d4605a074cb7c26e5bb59",
+      "source": "revplan2/runs/33ff1ea4/run.json",
+      "sandbox": "workspace-write; reviewer operated read-only"
+    },
+    "number_evidence": {
+      "command": "python -B /tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan2/review_numbers.py",
+      "exit_code": 0,
+      "ledger": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan2/number_checks.json",
+      "passed": 165,
+      "failed_comparisons": 6,
+      "coverage": "44 B-marker occurrences: 41 data citations, one notation example, one acceptance placeholder, one gap-table heading. Comparisons include repeated values and retained source controls; all DX methods were re-derived. MODEL records check arithmetic at the stated inputs, not empirical validity of those inputs.",
+      "methods": "No repository modules or suites were executed. DX-2 uses recursive raw pages as revised; an additional independent carry-forward calculation matches BASELINE row/time totals. DX-3/DX-8 use final classifier log markers. DX-4 uses sample SD, nearest-rank p25, seed 0 and 4000 percentile-bootstrap resamples. The raw-page scope change was missed by the initial retained round-one calculation and is corrected in the final ledger.",
+      "carried_over_verified": {
+        "cancelled_runs": 101,
+        "recent_runs": 184,
+        "t16_sensitive_logs": 201,
+        "narrow_non_touch_logs": 381,
+        "remaining_logs": 180,
+        "remaining_fraction_percent": 22.69861286254729
+      }
+    },
+    "snapshot_integrity": {
+      "command": "Python hashlib verification of snapshot jobs/log entries against MANIFEST.json",
+      "exit_code": 0,
+      "files_checked": 4780,
+      "mismatches": 0,
+      "manifest_sha256": "117fabacb5ac4bfad37f7c0feedcd6e3eba465657dd2d2c6a82dd59b75dd6a17",
+      "artifact": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan2/snapshot_integrity.json"
+    },
+    "validation": {
+      "passed": [
+        "Frozen plan and BASELINE hashes; exact repository HEAD/tree unchanged",
+        "165 numerical comparisons; 4780 snapshot file hashes",
+        "Tracked/index diffs empty; no nonignored untracked files"
+      ],
+      "failed": [
+        "Six DX-2 numeric comparisons and the four P2 plan contracts"
+      ],
+      "skipped": [],
+      "not_run": [
+        "Test suites",
+        "Mutation suites",
+        "CI or Windows runs",
+        "Ruff",
+        "Runtime counterexample execution"
+      ],
+      "environment": "Linux; Python 3.13.18; Git 2.43.0. Code-path counterexamples are static analysis. Ignored .codex/ support files were present when inspected; an initial complete ignored-file content snapshot was not taken."
+    },
+    "scope": "Independent review of the frozen proposed plan under the direct user assignment. Closed means the planning defect is addressed; it does not approve unimplemented code, confer assurance labels, or authorize merge/land.",
+    "actions": "No repository edits, GitHub writes, network requests, pushes, comments, dispatches or reruns. Only review artifacts outside the checkout were written.",
+    "output": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan2/verdict.json"
+  }
+}

@@ -1,0 +1,208 @@
+{
+  "verdict": "changes_requested",
+  "findings": [
+    {
+      "id": "R3-06",
+      "severity": "P2",
+      "section": "§3 G4a/G4b, PLAN.md:73-91; PR1:159-160; PR4:231-239",
+      "summary": "The new G4 classification still cannot account correctly for all runs in its frozen denominator.",
+      "evidence": "The denominator at lines 77-79 includes every classified PR run that the OLD rule calls day_du. The required PR4 positive case at lines 231-236 has old=day_du and production=duong_nhanh. It therefore remains in that denominator, but cannot have the new cong_cu=bo_qua output: PR3 lines 192-194 reserve that output for production day_du. G4a has no existing-fast-lane category; G4b accepts a skip only with cong_cu=bo_qua. The valid fast-lane result is consequently unclassified or falsely counted as thieu_bang_chung against the 2% ceiling. The existing behavior is explicit in ci.yml:572,678-682 and ops/cong_cu_test.py:8228: fast lane skips shards and the successful collector says KHONG DO. The table also has no explicit outcome for eight valid receipts followed by a cancelled/failed collector. Snapshot run 44443875641 has eight successful G5 shard jobs and collector job 135300180039 cancelled; receipt contents were not independently reconstructed. These are completion-accounting gaps, not evidence that a full-radius run passed.",
+      "suggested_fix": "Keep the frozen denominator. In §3, distinguish existing fast-lane skips from new PR3 skips in G4a, and accept their separately validated reason/collector evidence in G4b without crediting them toward the new-skip target. Define an ordered, exhaustive G4b reduction including collector failure/cancellation after eight receipts and interrupted skip collection; none may become completed coverage. Extend PR1 fixtures with the PR4 stale-base positive case, all-eight-receipts/collector-cancelled, and skip-selected/collector-cancelled. Avoid fixing this by dropping reclassified or interrupted runs from the denominator, which would reintroduce selection bias."
+    },
+    {
+      "id": "R3-09",
+      "severity": "P3",
+      "section": "§5 joint savings model, PLAN.md:327-348",
+      "summary": "The illustrative model now separates job and step costs, but still applies the job-cost skip share to step costs.",
+      "evidence": "f_c is defined as the share of JOB seconds avoided, while the targeted term uses (1-f_c)*V_b. Equal job costs do not imply the same skipped share of STEP seconds. Arithmetic counterexample: two jobs cost 100 seconds each, with step costs 10 and 90; skip the first. f_c=0.5, but the step share skipped is 0.1. At s_b=0.6, the stated term predicts 30 seconds saved on the remaining step instead of 54. All 12 table cells do reproduce at V=5.71, V_b=5.44, A=0.46 and the stated f_c values. The explicit illustrative label and requirement to replace estimates with PR1 measurements keep this advisory.",
+      "suggested_fix": "Use measured remaining eligible step cost V_b_remaining*s_b, or define a separate step-cost share f_b. If retaining this illustrative table, explicitly assume f_b=f_c as well as equal job cost. Add the unequal-step-cost example to the calculation checks; retain setup overhead and subtract the complete incremental audit cost. This preserves the useful scenario table without making its extra proportionality assumption look measured."
+    },
+    {
+      "id": "R3-11",
+      "severity": "P3",
+      "section": "§9 DX-2:408-412; §5:334,346",
+      "summary": "The revised numerical presentation has small reconciliation and citation omissions.",
+      "evidence": "The three listed deduplicated groups contain 5694+1923+205=7822 rows, while the correct total is 7832. The omitted group is 10 pull_request rows with unknown lane and valid zero-second duration; it contributes no seconds. The no-PR6 upper scenario is 0.35*5.71+0.70+0.15=2.8485 million seconds, whereas line 346 retains approximately 2.9; nearest-one-decimal rounding gives 2.8, although 2.9 is a defensible outward bound. The newly introduced 13-second collector input is correct: M2.theo_job.bang[\"gate-cong-cu-gop | ubuntu-latest | day_du\"].trung_vi=13, n=726, but has no citation. None changes the strategy or the corrected DX-2 second totals.",
+      "suggested_fix": "List the residual 10 unknown-lane/zero-second rows, cite the collector median, and either label 2.9 as an outward-rounded bound or consistently round the computed range. Check that displayed row groups sum to 7832 and that rounding conventions are stated. Preserve zero-duration measured rows; do not replace unknown lane with day_du or alter BASELINE."
+    }
+  ],
+  "prior_findings": [
+    {
+      "id": "R3-01",
+      "status": "closed",
+      "evidence": "PLAN.md:146-147,189-208 retains conservative path/directory/mode/Git-read closure, hash invalidation, shadow period, adversarial cases and Q1. Round-3 edits narrow eligibility and do not remove any round-1 repair. DX-8 independently reproduces 201/381 affected logs and 180/793 remaining."
+    },
+    {
+      "id": "R3-02",
+      "status": "closed",
+      "evidence": "Lines 74,148-151,224-239 preserve the shared validated context and separate old/new benefit from production/oracle residual error. The positive case explicitly requires benefit=true and residual=false; only residual must become zero. Malformed-parent/Git-error cases remain fail-closed. The old-rule comparison cohort at 64-66 is unchanged."
+    },
+    {
+      "id": "R3-03",
+      "status": "closed",
+      "evidence": "Lines 109-115,192-208 now require production day_du plus a verified non-allowlisted merge contribution for new skips. Existing fast-lane skips are distinct. Witnesses map final merged head to merge commit and push; open/superseded observations are separate. The round-1 push/NHE exceptions and Q3 remain intact. Their remaining G4 reporting interaction is R3-06."
+    },
+    {
+      "id": "R3-04",
+      "status": "closed",
+      "evidence": "PR5:244-265 is unchanged from 7fe0545b. It preserves the separate G5 receipt path, exact identity/mode/attempt checks, independent expected inventory, original item identities and negative cases. PR6 still requires this full audit first. No round-3 regression found."
+    },
+    {
+      "id": "R3-05",
+      "status": "closed",
+      "evidence": "PR1:142-145 retains parent wall, worker intervals/CPU, setup/target/other-case measurements and overlap reconciliation. PR6:274-282 retains same-head full/targeted benchmarking and complete current identities. Round-3 telemetry additions and the G4 reference change do not weaken these contracts."
+    },
+    {
+      "id": "R3-06",
+      "status": "partially",
+      "evidence": "Lines 73-96 and 159-160 now provide the denominator, selection/completion distinction, policy-only historical 100%, explicit missing-evidence threshold and interrupted-full fixture. The collector/write set and frozen old-rule cohort remain. However, valid PR4 fast-lane transitions and collector interruption still lack correct exhaustive classification; see the remaining P2 finding."
+    },
+    {
+      "id": "R3-07",
+      "status": "closed",
+      "evidence": "PR7c:294-298 is unchanged from 7fe0545b: nightly execution remains the default, with separate complete closure including CA_DAI, actual-execution witnesses, expiry, forced weekly execution and fail-closed reads."
+    },
+    {
+      "id": "R3-08",
+      "status": "closed",
+      "evidence": "The dependency graph at 127-135 and PR8:308-322 are unchanged. Achieved, measured-not-achieved and owner exception remain distinct; declining PR6 leaves an executable PR7/PR8 branch and explicit alternate targets."
+    },
+    {
+      "id": "R3-09",
+      "status": "partially",
+      "evidence": "The staged ordering, clustered uncertainty and audit-before-targeting repair remain unchanged. Lines 324-348 now label scenarios illustrative, separate setup from G5 step cost, include the whole-job audit allowance and add unequal job costs. Remaining job-share/step-share proportionality is P3 only; all 12 table cells match."
+    },
+    {
+      "id": "R3-10",
+      "status": "closed",
+      "evidence": "Independent recursive-page reconstruction with collector carry-forward rules reproduces 7832 rows/8542030 seconds; PR day_du=5694 rows/5706598 job seconds/5443208 step seconds; push day_du=1923/2568875/2510857. Both nested c30 runs are included and retained job IDs are unique. Raw totals 8102/9019102 and 5.585% inflation also match. Dependent V/push values and table cells were updated. The small presentation issues are advisory R3-11."
+    }
+  ],
+  "number_checks": {
+    "checked": 198,
+    "mismatches": [
+      {
+        "source": "§5 joint savings summary",
+        "line": 346,
+        "metric": "no-PR6 upper scenario, million seconds",
+        "claimed": 2.9,
+        "actual": 2.8485,
+        "nearest_one_decimal": 2.8,
+        "severity": "P3",
+        "qualification": "Only a rounding discrepancy; 2.9 is acceptable if explicitly treated as an outward upper bound."
+      }
+    ]
+  },
+  "overall_assessment": "The plan is substantially improved, but I would not put this exact hash forward as ready for approval.\nThree of four round-2 P2 findings are closed; R3-06 still blocks because G4 is not an exhaustive, correct accounting contract.\nAll five findings closed after round 1 remain closed; no regression in those safeguards was found.\nThe diff stays within the five assigned repairs, their dependent figures and revision notes.\nAll direct B values and DX-1 through DX-8 reproduce; the 12 savings-table cells match their constants.\nG1=10659 seconds is already the deduplicated result; unfiltered raw pages would give 10717 seconds.\nThe savings proportionality assumption and minor numeric presentation issues are P3 advisories.\nI would approve with advisories after the focused G4 correction; no strategic redesign is needed.\nKeep the staged sequence, conservative closure, additive audit, nightly default and explicit owner outcome decisions.\nThis is round 3 of 3 under Mission r78; remaining disposition belongs at the coordinator/owner checkpoint, without another model round.",
+  "notes": {
+    "anchors": {
+      "mission": "ducthangho/tra-luat #1172, r78; source plan r3, revision 3; final review round 3/3",
+      "authority": "Direct user assignment; read-only planning review, no implementation or GitHub-write authority.",
+      "plan": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan3/PLAN.md",
+      "plan_sha256": "43137d53a4451dfc8adb45c83d06c6314353ab7c393e77da2e3e0d1dee467cf4",
+      "previous_plan_sha256": "7fe0545b82c564f8766248b3b6998b245482c1170aee6518a5765eba7191e9fa",
+      "baseline": "ops/specs/wp1434-r3/do/BASELINE.json",
+      "baseline_sha256": "6100c8e18907f59b1abbdc44195861cc2310c654ce8dcfa2e74ca4ffa155f54c",
+      "reviewed_sha": "5e5d2cc192758b5a372a875827987b6f471704c0",
+      "reviewed_tree": "ebf56f757e7f0c6432f91dcc8ec9414137d8e17d",
+      "checkout": "Prepared detached HEAD at the assigned master commit; origin is https://github.com/ducthangho/tra-luat.git."
+    },
+    "identity": {
+      "provider": "openai_codex",
+      "execution_surface": "codex_cli",
+      "transport": "machine",
+      "model_family": "openai",
+      "served_model_and_effort": "KHONG_DO_DUOC",
+      "run_id": "19a38239d42c47bea550d02b15b5b287",
+      "source": "revplan3/runs/19a38239/run.json",
+      "sandbox": "workspace-write; operated read-only on checkout/snapshot",
+      "review_class": "sensitive subject matter; plan review only, no implementation assurance or land approval"
+    },
+    "number_evidence": {
+      "command": "python -B /tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan3/review_numbers.py",
+      "exit_code": 0,
+      "ledger": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan3/number_checks.json",
+      "passed": 197,
+      "failed_comparisons": 1,
+      "coverage": "46 B-marker occurrences: 42 data citations and four generic/example/heading references. All cited source values match. 198 assertions include repeated values and retained source controls, all eight DX derivations, and model arithmetic; this is not 198 distinct plan facts.",
+      "methods": "Inspected and adapted prior reviewer arithmetic, then independently reconstructed every measured M2 run total from frozen raw pages using the collector rules. No repository modules, test suites or mutation suites were executed.",
+      "g1": {
+        "n": 184,
+        "raw_total": 1971860.0,
+        "raw_mean": 10716.630434782608,
+        "raw_sd": 4694.42122742404,
+        "dedup_total": 1961281.0,
+        "dedup_mean": 10659.135869565218,
+        "dedup_sd": 4603.364867911477,
+        "affected_runs": [
+          {
+            "run_id": 44522844747,
+            "raw": 23300.0,
+            "dedup": 12721.0
+          }
+        ],
+        "baseline_differences": []
+      },
+      "gom_median": {
+        "value_seconds": 13,
+        "n": 726,
+        "source": "M2.theo_job.bang[\"gate-cong-cu-gop | ubuntu-latest | day_du\"].trung_vi",
+        "citation_in_plan": "missing"
+      },
+      "dx2_unlisted_residual": {
+        "event": "pull_request",
+        "lane": "khong_do_duoc",
+        "rows": 10,
+        "seconds": 0
+      },
+      "dx4_final_status": {
+        "eight_success_jobs": 89,
+        "not_eight_success_jobs": 95
+      }
+    },
+    "snapshot_integrity": {
+      "checked": 5539,
+      "mismatches": [],
+      "manifest_sha256": "117fabacb5ac4bfad37f7c0feedcd6e3eba465657dd2d2c6a82dd59b75dd6a17"
+    },
+    "validation": {
+      "passed": [
+        "Plan/prior-plan/BASELINE SHA-256 anchors match",
+        "197 numerical comparisons; all 12 scenario-table cells",
+        "All measured M2 run totals match the independent raw-page reconstruction",
+        "5539 snapshot file hashes match MANIFEST.json",
+        "HEAD/tree unchanged; tracked/index diffs empty; no nonignored untracked files"
+      ],
+      "failed": [
+        "G4 exhaustive completion-accounting contract (P2)",
+        "One minor scenario-summary rounding comparison (P3)"
+      ],
+      "skipped": [],
+      "not_run": [
+        "Test suites",
+        "Mutation suites",
+        "CI/Windows runs",
+        "Ruff",
+        "Runtime execution of proposed classifier/collector counterexamples"
+      ],
+      "commands": [
+        {
+          "command": "diff -u ../plan-r3-work/KE_HOACH_7fe0545b.bak ../revplan3/PLAN.md",
+          "exit_code": 1,
+          "meaning": "Expected: candidate differs from previous frozen plan."
+        },
+        {
+          "command": "python -B ../revplan3/review_numbers.py",
+          "exit_code": 0,
+          "meaning": "Completed arithmetic/hash audit; comparison outcomes are recorded separately."
+        }
+      ],
+      "environment": "Linux; Python 3.13.18; Git 2.43.0. Static contract analysis and numerical recomputation only. Ignored .codex/ is an empty support directory; no initial exhaustive content snapshot was taken. End-state observations do not prove the full historical absence of writes."
+    },
+    "new_defects": "R3-11 is a new advisory about revised numeric presentation. R3-06 and R3-09 retain their prior IDs for residual defects in the newly edited contracts. No unrelated or closed-finding regression is asserted.",
+    "scope": "Closed means repaired at plan level, not validated implementation. User severity rule applied: P0-P2 block; P3 advisory. No assurance label or owner hash approval is conferred.",
+    "skill": "cross-review: /tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/rv1c/.agents/skills/cross-review/SKILL.md",
+    "actions": "No repository edits, GitHub writes, network requests, pushes, comments, dispatches or reruns. Only review artifacts outside the checkout were written.",
+    "output": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan3/verdict.json"
+  }
+}

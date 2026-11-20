@@ -1,0 +1,146 @@
+{
+  "verdict": "changes_requested",
+  "findings": [
+    {
+      "id": "R3-01",
+      "severity": "P2",
+      "section": "PR1; I2/I3; DX-3",
+      "summary": "A filesystem access trace is not yet a sufficient dependency contract for skipping G5, and the guessed saving materially overstates the observed nondependency set.",
+      "evidence": "PLAN.md:113-131 proposes inotify-derived dependencies and permits missed radius regressions to surface only after merge; PR5 has not yet installed a full G5 audit at this point. ops/cong_cu_test.py:2697-2735 scans all immediate Python files in ops/ and .claude/dev/, and uses scripts/*.py filenames to identify internal modules. Thus new files and directory membership matter, not just files opened during one trace. ops/ci_duong_nhanh.py:134-136 explicitly says the wp1343 precedent did NOT measure Git-object reads or CA_DAI. The review_numbers.py closure_sensitivity calculation finds 201 of DX-3's 381 guessed non-touch logs change files read by the existing t16 scan. This is a sensitivity calculation, not a measured final skip rate.",
+      "suggested_fix": "Before enabling skips, define a conservative closure covering directory membership, additions/deletions/renames, configuration and indirect Git reads, with invalidation when its producers change. Require an execution-mode-specific shadow comparison and adversarial dependency cases. Keep full G5 where independence is unproved, or install an enforceable full audit on the final head first. Recalculate skip and saving estimates from the resulting PR-only cohort; decide any remaining pre-merge assurance reduction before activation, not at PR8."
+    },
+    {
+      "id": "R3-02",
+      "severity": "P2",
+      "section": "PR3",
+      "summary": "Changing only doc_diff's third term breaks the downstream fast-lane consistency check in the very positive case PR3 promises to fix.",
+      "evidence": "PLAN.md:160-166 changes only base-to-merge in doc_diff and requires an unrelated master code addition to let a documentation PR use duong_nhanh. ops/ci_duong_nhanh.py:305-325 still builds raw diffs using (goc, hop); kiem_mode_git at :618-635 independently uses that same old pair and rejects when its path union differs from doi. Therefore the proposed classifier can exclude the master-only file while kiem-re includes it and returns KHONG DO DUOC. main at :813-821 exports only the existing goc/dau/hop context. Also, the PR1 diagnostic at PLAN.md:118 measures base inequality, not whether classification actually flips, so it cannot establish PR3's 2% cancellation threshold or zero-flip acceptance.",
+      "suggested_fix": "Define one validated comparison context, preserving the original event base and the verified merge parent separately, and use it consistently in classification, raw/mode validation and exported readback. Add an end-to-end positive case through both classifier and kiem-re, plus rename, criss-cross, mode, malformed-parent and Git-error cases. Log old/new classification results and their input OIDs, not merely whether the bases differ."
+    },
+    {
+      "id": "R3-03",
+      "severity": "P2",
+      "section": "I5; PR1/PR2/PR6; savings model",
+      "summary": "The promise that every master push runs the full radius and full suite conflicts with both existing lane selection and the proposed reuse of NHE.",
+      "evidence": "PLAN.md:88-89 makes I5 unconditional; :115 and :223 repeat the push guarantee. Yet .github/workflows/ci.yml:570-572 skips the entire G5 matrix whenever che_do is duong_nhanh, including push. BASELINE M2.moi_luot.theo_su_kien_va_lan[\"push | duong_nhanh\"].so_luot is 88. Returning cong_cu=chay does not by itself override that outer condition. .claude/dev/ci_dang_ky_test.py:864-897 also allows push diffs to select NHE, and PLAN.md:139 reuses that mechanism for ci_provenance_test. The wp1353 change at ops/ci_duong_nhanh.py:406-418 guarantees packet-loop cases on push; it does not establish the claimed global invariant.",
+      "suggested_fix": "Choose and state the exact invariant. If all master pushes must run full G5 and full mutation suites, explicitly override both the workflow fast lane and registry NHE on push, test documentation-only and unrelated pushes, and include the added cost. Otherwise enumerate the existing approved exceptions and narrow I5 and the compensation claims consistently; do not describe selective post-merge coverage as universally full."
+    },
+    {
+      "id": "R3-04",
+      "severity": "P2",
+      "section": "PR5/PR6; I1/I2/I6; G6",
+      "summary": "The compensation gate needs an explicit coverage and mode contract; all existing jobs being green and a nondecreasing count do not prove that full G5 or the original M9 matrix ran.",
+      "evidence": "PLAN.md:205-210 relies on K7 automatically covering the new group and accepts >=321 audit items; :90-91 preserves only table cardinalities; :229 compares killed sets without separately requiring a complete successful measurement. .claude/dev/packet_loop.py:3637-3641 checks a nonempty returned job list with all statuses success, without an expected G5 job inventory. The existing workflow shape guard at .claude/dev/ci_dang_ky_test.py:1193-1205 pins exactly three old jobs and must be extended deliberately. Its receipt selector at :1088-1131 accepts nhanh_don_duoc JSON receipts, whereas ops/cong_cu_test.py:8137-8140 emits MANH/BKCON text, and :8167-8207 enforces a different schema and complete partition. There is no already-compatible G5 PR0 receipt path to reuse unchanged.",
+      "suggested_fix": "Make PR5 explicitly deliver a G5-compatible receipt selection/validation path and an independently checked expected inventory of all original audit jobs plus eight G5 shards and the collector. Preserve original mutant/case identities and full matrix coverage, not merely counts; require all expected targets to be measured and killed correctly. Test missing/disabled groups, missing/duplicate items, wrong mode, unknown or red baseline, false-credit kills, wrong SHA and stale/mixed-attempt receipts. PR6 may activate only after these negative cases and a complete exact-head full audit pass. The guard may enforce this without changing K7 if its positive evidence and coverage are proved."
+    },
+    {
+      "id": "R3-05",
+      "severity": "P2",
+      "section": "PR4 measurement contract; PR6 estimate prerequisite",
+      "summary": "PR4 conflates summed mutant elapsed time with step wall time and does not collect enough detail to derive the promised targeted-mode saving.",
+      "evidence": "PLAN.md:182-190 asks for per-mutant construction/execution timings whose sum matches step duration within 10%. ops/cong_cu_test.py:7657-7672 defaults to up to four child processes; :9113-9118 runs the shard through those concurrent children. Summed child elapsed durations therefore overlap and need not equal the parent step wall duration. Timing the entire 61-case execution phase also does not identify the target case's cost, although PLAN.md:234 requires replacing PR6's 60-90% estimate with PR4 data. The fixed 490-item acceptance at :189-190 also omits any new G5 mutants required by earlier PRs.",
+      "suggested_fix": "Specify separate parent wall, worker elapsed/CPU, setup, target-case and other-case measurements, including overlap and unallocated overhead. Reconcile wall time using worker intervals or the critical path, not their sum. Compare complete current mutant IDs, including additions. Before authorizing PR6, obtain a same-head full-versus-targeted benchmark preserving the baseline and kill oracle; report job-second savings separately from elapsed latency."
+    },
+    {
+      "id": "R3-06",
+      "severity": "P2",
+      "section": "G4 and measurement procedure; G1-G3/G5 interpretation",
+      "summary": "The prescribed collector output cannot measure G4, and after PR6 a running G5 job no longer means a full radius was measured.",
+      "evidence": "PLAN.md:69 defines a rate of PR day_du runs with radius execution, but :74-75 derives it from so_bo_qua in M2.theo_job[\"gate-cong-cu | _ | day_du\"]. thu_thap.py:1341-1342 and :1393-1395 aggregate job rows by job/platform/lane, without event or run identity; rows include attempts and cannot distinguish authorized skips from dependency skips/cancellations. The same non-skipped G5 job becomes targeted in PR6 (:221-225). Consequently the stated method cannot provide either the PR-run denominator or the full/targeted distinction. PR3 also changes the population conditioned on day_du, affecting before/after G1 and G2 comparisons.",
+      "suggested_fix": "Add per-run/attempt/event/head telemetry with planned mode, actual mode, skip reason, execution/completion status and positive coverage evidence. Define separate full-radius, targeted, authorized-skip and unknown rates, counting each eligible PR run once. Extend the collector in an explicit write set before the 14-day acceptance. Freeze a comparison population or standardize content/conclusion mix so classifier changes do not masquerade as runtime improvements; state how cancelled and unknown runs enter each metric."
+    },
+    {
+      "id": "R3-07",
+      "severity": "P2",
+      "section": "PR7(b)",
+      "summary": "The nightly fingerprint policy lacks a dependency scope and successful-execution witness suitable for the nightly workload.",
+      "evidence": "PLAN.md:247-252 says to hash the dependency set and reuse the latest success, but does not define which dependency set or distinguish an actually executed success from a successful skip. The available PHU_THUOC_PACKET_LOOP precedent explicitly excludes Git-object reads and CA_DAI (ops/ci_duong_nhanh.py:134-136). Those long cases are part of the nightly workload: .github/workflows/packet-loop-dot-bien.yml:3-5 and .claude/dev/packet_loop_test_manh.py:10-12,26-27. The workflow currently has no aggregate full-run receipt or cache witness. Hashing only previously observed file blobs also misses additions, path/mode changes and history-dependent inputs.",
+      "suggested_fix": "Define and measure a separate closure for all nightly mutants and CA_DAI, including the workflow, harness, paths/modes and relevant non-file inputs. Require a complete successfully executed run with positive shard/case evidence as the reuse witness; a skip must not refresh it. Specify receipt storage/read permissions, expiry, weekly forced execution and fail-closed handling. If those inputs cannot be bounded, retain nightly execution and limit PR7 to its independent matrix/measurement improvements."
+    },
+    {
+      "id": "R3-08",
+      "severity": "P3",
+      "section": "PR8; conditional dependency graph",
+      "summary": "Distinguish completing the measurement from achieving the optimization outcome, and make the rejected-PR6 branch executable.",
+      "evidence": "PLAN.md:268 accepts every metric being recorded as not achieved, while the packet title promises mission closure. Owner disposition is required, but acceptance of missed performance goals is not stated explicitly. PR7 depends on PR6 (:257), while Q2 allows PR6 to be omitted (:304-306); the no-code completion rule at :105-106 names PR3/PR4/PR7, not that omitted branch.",
+      "suggested_fix": "Define achieved, measured-but-not-achieved and owner-accepted-exception outcomes separately. Require an explicit owner disposition of missed goals before declaring Mission success. State dependency satisfaction and the revised targets when PR5/PR6 are declined, so PR7/PR8 can proceed without inventing a completed implementation."
+    },
+    {
+      "id": "R3-09",
+      "severity": "P3",
+      "section": "Ordering; targets; rejected options",
+      "summary": "Prefer measurement and the proven NHE extension before broad G5 skipping; the current ordering and statistical precision exceed the evidence.",
+      "evidence": "PLAN.md:103-106 and :300-302 prioritize PR1 largely from its guessed 48% saving, although PR4 instrumentation and nightly measurement occur later. DX-4/DX-7 arithmetic is correct, but 184 workflow runs are not established to be independent observations, and the recent cohort contains 101 cancelled runs. The bootstrap interval width is not itself a two-sample median minimum detectable effect (G3 at :68). The summed saving range at :274-275 also treats PR1 and PR6 estimates independently even though both depend on the same skip fraction.",
+      "suggested_fix": "Recommend one staged sequence: observational instrumentation and dependency shadowing, PR2, then validated PR1, PR5 before PR6, independent useful PR7 parts, and PR8. Recalculate savings jointly as a function of skip fraction and targeted-mode speedup, including audit costs. Use PR-clustered uncertainty or label the current power estimates heuristic. Keep the rejection of mutant sampling and M9 replacement; do not reopen those solely to meet a timing target."
+    }
+  ],
+  "number_checks": {
+    "checked": 130,
+    "mismatches": []
+  },
+  "overall_assessment": "Not yet the best approvable plan: the numerical foundation is sound, but several execution and assurance contracts need revision.\nAll 130 scripted comparisons passed; all seven DX methods were independently re-derived from BASELINE or snapshot data.\nThe document correctly identifies r3 as a replacement and does not impersonate the lost r2.\nPR2 is the strongest immediate implementation candidate; retain its baseline cases and classification self-checks.\nMeasure and shadow dependency selection before enabling PR1, and repair the complete PR3 comparison pipeline.\nPR5/PR6 can be a good design if the full exact-head compensation audit has explicit coverage, mode and receipt guarantees.\nCorrect the push invariant, parallel timing accounting and per-run metrics before accepting savings targets.\nKeep the original M9 matrix, reject sampling, and permit mission closure only with a clear outcome disposition.",
+  "notes": {
+    "anchors": {
+      "plan": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan1/PLAN.md",
+      "plan_sha256": "c9090f7780706a8e90f07f2444e7e86cf717e16bd2319f8c240c7f3523973ba4",
+      "baseline": "ops/specs/wp1434-r3/do/BASELINE.json",
+      "baseline_sha256": "6100c8e18907f59b1abbdc44195861cc2310c654ce8dcfa2e74ca4ffa155f54c",
+      "reviewed_sha": "5e5d2cc192758b5a372a875827987b6f471704c0",
+      "tree": "ebf56f757e7f0c6432f91dcc8ec9414137d8e17d"
+    },
+    "identity": {
+      "provider": "openai_codex",
+      "execution_surface": "codex_cli",
+      "transport": "machine",
+      "model_family": "openai",
+      "served_model_and_effort": "KHONG_DO_DUOC; not inferred from account or task wording",
+      "source": "revplan1/runs/91a3a845/run.json records provider/surface/transport"
+    },
+    "number_evidence": {
+      "command": "python -B /tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan1/review_numbers.py",
+      "exit_code": 0,
+      "ledger": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan1/number_checks.json",
+      "coverage": "44 B-marker occurrences indexed: 42 data citations, one notation example and one gap-table heading. All associated numerical claims and DX-1 through DX-7 are covered by 130 comparison records; shorthand/wildcard citations are resolved explicitly. Display rounding is respected.",
+      "method_details": "DX-2 uses jobs/*/p*.json without deduplication, includes bare cancelled job names, and excludes invalid negative durations. DX-3 includes nested jobs/**/p*.json pages and 1491 logs with classifier markers; omitting the two nested run directories gives a false mismatch. DX-4 uses sample SD, nearest-rank p25 and a 4000-resample percentile bootstrap with seed 0, reproducing 1688-1865; the plan should publish that seed/method.",
+      "limits": "Matching a quoted value does not validate its causal interpretation, future target or independence assumption. The collection itself was not rerun."
+    },
+    "per_pr_feasibility": {
+      "PR1": "Existing classifier and collector seams are available; dependency proof and post-merge semantics need R3-01/R3-03.",
+      "PR2": "NHE, MAU_DAY_DU, MAU_NHE and VUNG_THEM mechanisms exist. The suite needs the proposed new light flag; preserve its base cases and TU_KIEM classification checks. Scope is realistic subject to push policy.",
+      "PR3": "The two-file scope can contain the repair, but changing only the stated doc_diff term is insufficient.",
+      "PR4": "Instrumentation and scheduling changes fit the stated files after correcting timing semantics and dynamic inventory.",
+      "PR5": "Additive workflow is feasible, but G5 text artifacts need a new compatible receipt path and explicit shape/coverage guards.",
+      "PR6": "Targeted execution does not yet exist for G5 and must be implemented, including mode-specific producer/consumer validation; the existing full-record collector cannot simply accept reduced records.",
+      "PR7": "Matrix reduction is feasible. Nightly reuse needs a separate closure/witness; gate-ops work remains contingent on measurement.",
+      "PR8": "Read-only collection and documentation updates are feasible; distinguish measured failure from achieved performance."
+    },
+    "invariants": {
+      "I1": "Appropriate intent; preserve original identity/matrix coverage and prove the added full audit actually executes.",
+      "I2": "Correct intent; retain typed kill classification, positive baseline and complete expected target IDs in both modes.",
+      "I3": "Appropriate allow-only default; dependency completeness and consumer consistency still need explicit proofs.",
+      "I4": "Distinct KHONG DO reporting is appropriate; job success alone must not be interpreted as executed mutation evidence.",
+      "I5": "Contradicted by current fast-lane and NHE behavior; resolve before approval.",
+      "I6": "Cardinality is a useful coarse check, not a preservation proof; compare identities and required execution coverage."
+    },
+    "validation": {
+      "passed": [
+        "Frozen plan and BASELINE SHA-256 checks",
+        "130/130 numerical comparison records",
+        "Repository URL and exact detached HEAD/tree checks",
+        "Clean tracked/untracked worktree before and after review"
+      ],
+      "failed": [
+        "Plan-contract checks described in the P2 findings"
+      ],
+      "skipped": [],
+      "not_run": [
+        "Test suites",
+        "Mutation suites",
+        "CI, Windows and runtime counterexample execution"
+      ],
+      "environment": "Linux workspace; Python 3.13.18; Git 2.43.0. Code-path counterexamples are static analyses, not claims of executed tests. git symbolic-ref -q HEAD returned 1 as expected for detached HEAD."
+    },
+    "actions": "No repository files changed; no GitHub/network writes, dispatches, reruns, comments or pushes. Only review artifacts outside the checkout were written. This is a plan verdict, not implementation approval or merge authority.",
+    "output": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan1/verdict.json"
+  }
+}

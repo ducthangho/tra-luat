@@ -1,0 +1,117 @@
+{
+ "author": {
+  "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+  "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+  "followers_url": "https://api.github.com/users/ducthangho/followers",
+  "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+  "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+  "gravatar_id": "",
+  "html_url": "https://github.com/ducthangho",
+  "id": 12748935,
+  "login": "ducthangho",
+  "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+  "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+  "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+  "repos_url": "https://api.github.com/users/ducthangho/repos",
+  "site_admin": false,
+  "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+  "type": "User",
+  "url": "https://api.github.com/users/ducthangho",
+  "user_view_type": "public"
+ },
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/00ee83998487d289324566f230b67b5923a9a9d9/comments",
+ "commit": {
+  "author": {
+   "date": "2026-11-20T09:30:42Z",
+   "email": "ducthangho@gmail.com",
+   "name": "ducthangho"
+  },
+  "comment_count": 0,
+  "committer": {
+   "date": "2026-11-20T09:30:42Z",
+   "email": "noreply@github.com",
+   "name": "GitHub"
+  },
+  "message": "Merge pull request #1453 from ducthangho/agent/wp433-r7-g1-claude\n\ntest(wp433 P2BW): bộ quan sát fragment P2b so đường config sau chuẩn hoá (#433 r7 g1)",
+  "tree": {
+   "sha": "d509c77727c4d1fa20e039220f5da2c06f611a86",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/d509c77727c4d1fa20e039220f5da2c06f611a86"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/00ee83998487d289324566f230b67b5923a9a9d9",
+  "verification": {
+   "payload": "tree d509c77727c4d1fa20e039220f5da2c06f611a86\nparent 45bae8d07a8cdf06a1ca9a7a2e015a6258169379\nparent 4e9306b668cac7797b9cd952b8699c4da603df55\nauthor ducthangho <ducthangho@gmail.com> 1795167042 +0700\ncommitter GitHub <noreply@github.com> 1795167042 +0700\n\nMerge pull request #1453 from ducthangho/agent/wp433-r7-g1-claude\n\ntest(wp433 P2BW): bộ quan sát fragment P2b so đường config sau chuẩn hoá (#433 r7 g1)",
+   "reason": "valid",
+   "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJrABNCCRC1aQ7uu5UhlAAAFKwQABcTAj2PweBn7NtNbwF/AYkC\nQGn3iHaqJ2mKCEYkO9bWcpswkNqkGfCyeqMxLFOXInr4F+WNAiRAvIivI6qdQrWY\nM2+L3rYoj1W4+ynbqqCvwGKUj/8sjsJ0VvTb1qJYGOV+x3qlz7rk3ZHABr4MRV25\ngshpijEzxPpHxuN5S4kaGcYJpewnaDwNJIKFpXO+WjZip8S+Qp8nxHP+9WIRv6bF\nmtJpbMkevyypWVCAT+YmZ8sy5UjzGpZ8G8qxY4RUOZgZC5sFpfrzEwUDuFXm+MtX\nsUy9NmQxaNwIWUD61iK7FpDfIHFbDkjAyS+7UVh+WXS9GYF3jDfyU9RCn1p0hBU6\nDHpyWvuzWNM5HyN+9QC52238HoCHKLtwjMI6OJbR/808sAM4+xW6N26qh8P38Xsk\nd+oZH0TLF3gtaVNMcgLrZr7hz4cloqAZGXEx9/G3M28QyaH57+JdMKP81Rz350KZ\nF8LkIx4zlMQa5O/sWcpdoCyosPThcMpKQtuKOWa7ae/s/QpKDKw0L3DtMsBMcyp5\nUvGwvCo0Id09XzBGY6az5BvAEeyLH1e+ezC77vTPiLNEzIOy96NyWQcIPk5Rjg8e\nAz8IvTfizGD8gRcj8ROs/+pSr6pecz/X6n/8gOP6ZJQvto5Sc7W1brVuo/Pz7QAn\nl6IhWDfQXT7ofOun+xWM\n=N053\n-----END PGP SIGNATURE-----\n",
+   "verified": true,
+   "verified_at": "2026-11-20T09:30:42Z"
+  }
+ },
+ "committer": {
+  "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+  "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+  "followers_url": "https://api.github.com/users/web-flow/followers",
+  "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+  "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+  "gravatar_id": "",
+  "html_url": "https://github.com/web-flow",
+  "id": 19864447,
+  "login": "web-flow",
+  "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+  "organizations_url": "https://api.github.com/users/web-flow/orgs",
+  "received_events_url": "https://api.github.com/users/web-flow/received_events",
+  "repos_url": "https://api.github.com/users/web-flow/repos",
+  "site_admin": false,
+  "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+  "type": "User",
+  "url": "https://api.github.com/users/web-flow",
+  "user_view_type": "public"
+ },
+ "files": [
+  {
+   "additions": 5,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/00ee83998487d289324566f230b67b5923a9a9d9/scripts%2Ftest_fragments%2Fwp433_gws_cred_dich_ngoai_kho_b.py",
+   "changes": 9,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/scripts%2Ftest_fragments%2Fwp433_gws_cred_dich_ngoai_kho_b.py?ref=00ee83998487d289324566f230b67b5923a9a9d9",
+   "deletions": 4,
+   "filename": "scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py",
+   "patch": "@@ -46,6 +46,7 @@ def f(*a, **k):\n     gia(\"_imp\", lambda n: types.SimpleNamespace(gws_exe=lambda: \"gws-gia\") if n == \"gws_bridge\" else that_imp(n))\n     m.AGENT_CREDS_FILEID = \"\"          # biến rỗng rơi về hằng baked ⇒ xoá cả hằng (agent giả KHÔNG CẤU HÌNH)\n     return m\n+_nc = lambda p: os.path.normcase(os.path.normpath(os.fspath(p)))   # WP433 nợ p2b-w6-windows: `expanduser(\"~/…\")` giữ '/' trên nt\n _env = lambda: (os.environ.get(\"TL_TOKEN\"), os.environ.get(\"TL_WEBAPP\"))\n _ac = lambda out: sum(d.startswith(\"[bootstrap] agent_creds:\") for d in out.splitlines()) == 1\n _x = lambda err: [d for d in err if d.startswith(\"[bootstrap] ✗ \")]\n@@ -86,19 +87,19 @@ def goi(self, luot, fn, fsenc=None, agent=None):\n         \"\"\"Một LƯỢT GỌI. Cửa sổ: chặn tiến trình con/mạng (`MANG_BI_CHAN`), stdout/stderr RIÊNG; bộ quan sát `self.dem` đếm cho ĐƯỜNG CONFIG:\n         lời gọi chốt đích (`chot`), lần mở ĐỌC qua `builtins.open` (`doc`), lời gọi writer (`ghi`). `fsenc` giả lập giá trị M1 đọc từ\n         `sys.getfilesystemencoding`; `agent` thay `_bootstrap_agent_creds`. Ngoại lệ khớp tập khai CỦA LƯỢT ⇒ nhãn khai; ngoài tập ⇒ `ngoai_le_la`.\"\"\"\n-        out, err, m, cfg, dem = io.StringIO(), io.StringIO(), self.m, self.cfg, {\"chot\": 0, \"doc\": 0, \"ghi\": 0}\n+        out, err, m, cfg, dem = io.StringIO(), io.StringIO(), self.m, _nc(self.cfg), {\"chot\": 0, \"doc\": 0, \"ghi\": 0}\n         self.dem = dem\n         cu = (subprocess.run, subprocess.Popen, urllib.request.urlopen, builtins.open, m._kiem_dich_ghi, m._ghi_nguyen_tu_0600, sys.getfilesystemencoding, m._bootstrap_agent_creds)\n         subprocess.run = subprocess.Popen = urllib.request.urlopen = lambda *a, **k: _nem(RuntimeError(\"MANG_BI_CHAN\"))\n         def op(f, *a, **k):\n-            if f == cfg and not any(c in (a[0] if a else k.get(\"mode\", \"r\")) for c in \"wax+\"):\n+            if isinstance(f, (str, os.PathLike)) and _nc(f) == cfg and not any(c in (a[0] if a else k.get(\"mode\", \"r\")) for c in \"wax+\"):\n                 dem[\"doc\"] += 1\n             return cu[3](f, *a, **k)\n         def kd(dich, goc, tp):\n-            dem[\"chot\"] += dich == cfg\n+            dem[\"chot\"] += _nc(dich) == cfg\n             return cu[4](dich, goc, tp)\n         def gh(path, data):\n-            dem[\"ghi\"] += path == cfg\n+            dem[\"ghi\"] += _nc(path) == cfg\n             return cu[5](path, data)\n         builtins.open, m._kiem_dich_ghi, m._ghi_nguyen_tu_0600 = op, kd, gh\n         if fsenc:",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/00ee83998487d289324566f230b67b5923a9a9d9/scripts%2Ftest_fragments%2Fwp433_gws_cred_dich_ngoai_kho_b.py",
+   "sha": "8b2c705b631888e6b5f1a2283ef3ad7c4d48da5e",
+   "status": "modified"
+  },
+  {
+   "additions": 1,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/00ee83998487d289324566f230b67b5923a9a9d9/scripts%2Ftl_test_fragments_bundled.py",
+   "changes": 2,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/scripts%2Ftl_test_fragments_bundled.py?ref=00ee83998487d289324566f230b67b5923a9a9d9",
+   "deletions": 1,
+   "filename": "scripts/tl_test_fragments_bundled.py",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/00ee83998487d289324566f230b67b5923a9a9d9/scripts%2Ftl_test_fragments_bundled.py",
+   "sha": "996c8ebb9e6239410630a0834bccbe3835079e5e",
+   "status": "modified"
+  }
+ ],
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/00ee83998487d289324566f230b67b5923a9a9d9",
+ "node_id": "C_kwDOTNeRjdoAKDAwZWU4Mzk5ODQ4N2QyODkzMjQ1NjZmMjMwYjY3YjU5MjNhOWE5ZDk",
+ "parents": [
+  {
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/45bae8d07a8cdf06a1ca9a7a2e015a6258169379",
+   "sha": "45bae8d07a8cdf06a1ca9a7a2e015a6258169379",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/45bae8d07a8cdf06a1ca9a7a2e015a6258169379"
+  },
+  {
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/4e9306b668cac7797b9cd952b8699c4da603df55",
+   "sha": "4e9306b668cac7797b9cd952b8699c4da603df55",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4e9306b668cac7797b9cd952b8699c4da603df55"
+  }
+ ],
+ "sha": "00ee83998487d289324566f230b67b5923a9a9d9",
+ "stats": {
+  "additions": 6,
+  "deletions": 5,
+  "total": 11
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/00ee83998487d289324566f230b67b5923a9a9d9"
+}

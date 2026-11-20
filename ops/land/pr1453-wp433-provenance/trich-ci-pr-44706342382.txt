@@ -1,0 +1,7 @@
+# trich log CI PR run 44706342382 (pull_request, head 4e9306b): dong selftest / GOM / error, kem log_sha256 tung job
+## job 136186878041 gate (ubuntu-latest) conclusion=success log_sha256=d3204c9e7fb0453180179adaae292fbd5d6d8d8a2bf2ece7dd0f08644fbd3d6e
+3806: == tl selftest 1784/1784 ==
+## job 136186878755 gate-packet-loop (ubuntu-latest) conclusion=success log_sha256=5787ea0acbaaa7ca8bddf46a689b548c92536d16a25192fbfcddd3ad1ef73819
+213: GOM: KHÔNG ĐO - packet_loop=bo_qua (diff không chạm tập phụ thuộc của bộ ca, hoặc push nhánh mặc định; lý do ở bước phân loại của job chuan-bi) · job mảnh: 'skipped' (phải là 'skipped')
+## job 136196955101 gate-cong-cu-gop (ubuntu-latest) conclusion=success log_sha256=8f4a23eab9bf512aa5f07611c2f1b27023309f05dd13f17e814c48ef712fcb33
+766: SỐ LIỆU GOM: ca=61 · đột biến=490 · lỗi đột biến=0

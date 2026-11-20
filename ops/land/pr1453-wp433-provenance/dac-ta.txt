@@ -1,0 +1,6 @@
+# do 2026-11-20T10:51:24Z kho chinh sau fetch --prune
+origin/ops/wp433-p2bw-spec = b2659f845ca64c12542d86f0959654bbe11dd144
+blob ops/specs/GWS-CRED-DICH-NGOAI-KHO-P2BW-r1.md = 40af2862ed9ca44e13d280b2688c9b45fd24b803
+sha256 = eb128ce5626233a68130be066e86eadace35888e217e46d6df4026b0fcc0bbdd
+tren master c27e6dc: khong
+lease spec_hash: spec_hash: eb128ce5626233a68130be066e86eadace35888e217e46d6df4026b0fcc0bbdd

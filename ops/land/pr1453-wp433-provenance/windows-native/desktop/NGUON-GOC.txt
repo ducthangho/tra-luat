@@ -1,0 +1,25 @@
+# Nguon goc: Desktop DESKTOP-T9R33P2, thu muc F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\ (mot luot do native D1+D2, keo ve qua Remote Desktop Commander).
+# Luot (dac ta P2BW r1, head 4e9306b): wp433pw-out-20261120T085828Z, khoa KHOA.txt 08:58:28Z->09:09:46Z; rig do433pw.py sha256 d33ed84c (comment PR 7034939817); ket qua comment PR 7035419629 (D1 + D2 DAT, rc_rig 0).
+# Zip dung tren Desktop, keo ve container dang base64, so khop bam hai dau; ban ma hoa: wp433pw-out-20261120T085828Z.zip.b64. Giai nen nguyen byte.
+# Khong tep nao UTF-16 (kiem BOM + mau byte NUL xen ke tren moi tep); khong can chuyen ma.
+# sha256 tung tep (tinh lai tu zip trong container):
+# zip wp433pw-out-20261120T085828Z.zip sha256 fc7d12600a83701b4edf1f5f1c3752a57c3c7d3d014fab7ff03d16a952ed84fd (6923 byte, 19 tep)
+8c045f260c71450d497c576ea9983afff5b10056b3501ae880152f366b30d056  wp433pw-out-20261120T085828Z/TOM-TAT.txt
+500c9e1bdb32b48ddc6e43fc0e70caa747f79fd19076ae349316aecf1d00c549  wp433pw-out-20261120T085828Z/d1-base-lan1.stderr.txt
+12626797884303911ddfd94e9ab99c8206f811cd3a30757092f6bb344dd96505  wp433pw-out-20261120T085828Z/d1-base-lan1.stdout.txt
+500c9e1bdb32b48ddc6e43fc0e70caa747f79fd19076ae349316aecf1d00c549  wp433pw-out-20261120T085828Z/d1-base-lan2.stderr.txt
+12626797884303911ddfd94e9ab99c8206f811cd3a30757092f6bb344dd96505  wp433pw-out-20261120T085828Z/d1-base-lan2.stdout.txt
+8847dae3f8312be789ec8515c70471f68b700eb8c6b37dd35315730bc97a0778  wp433pw-out-20261120T085828Z/d1-head-lan1.stderr.txt
+26c2e154dfdfeed2e31151ddcdc10ec241040f076a8902f90119643fa392dbbc  wp433pw-out-20261120T085828Z/d1-head-lan1.stdout.txt
+8847dae3f8312be789ec8515c70471f68b700eb8c6b37dd35315730bc97a0778  wp433pw-out-20261120T085828Z/d1-head-lan2.stderr.txt
+26c2e154dfdfeed2e31151ddcdc10ec241040f076a8902f90119643fa392dbbc  wp433pw-out-20261120T085828Z/d1-head-lan2.stdout.txt
+2d71eb2b7218caec53a891a3d189c456bb5a1b02e38daee0100049898e4251ae  wp433pw-out-20261120T085828Z/d2-wp433_gws_cred_dich_ngoai_kho.stderr.txt
+26c2e154dfdfeed2e31151ddcdc10ec241040f076a8902f90119643fa392dbbc  wp433pw-out-20261120T085828Z/d2-wp433_gws_cred_dich_ngoai_kho.stdout.txt
+a77665ed5fa92ec2e7a68e221281bf6ad23426233ec0f7fa9401762dbd4377d2  wp433pw-out-20261120T085828Z/d2-wp433_gws_cred_no.stderr.txt
+26c2e154dfdfeed2e31151ddcdc10ec241040f076a8902f90119643fa392dbbc  wp433pw-out-20261120T085828Z/d2-wp433_gws_cred_no.stdout.txt
+9ee51cd3e1117586fd3bcdcc06a1c477a9874741031cca7b639e3221a91b7288  wp433pw-out-20261120T085828Z/d2-wp433_gws_cred_win_duong.stderr.txt
+26c2e154dfdfeed2e31151ddcdc10ec241040f076a8902f90119643fa392dbbc  wp433pw-out-20261120T085828Z/d2-wp433_gws_cred_win_duong.stdout.txt
+cef16b92a0738fbd22d0a1dd4095e17dda9001f53b0efd91536e0c0f34bb0dac  wp433pw-out-20261120T085828Z/d2-wp433_gws_cred_win_reparse.stderr.txt
+26c2e154dfdfeed2e31151ddcdc10ec241040f076a8902f90119643fa392dbbc  wp433pw-out-20261120T085828Z/d2-wp433_gws_cred_win_reparse.stdout.txt
+903fd9a1d225c4526f3d95912ed5c8d26d9402971ac6d837a069cb60748757b7  wp433pw-out-20261120T085828Z/d2-wp433_nlm_gws_dich_ngoai_kho.stderr.txt
+26c2e154dfdfeed2e31151ddcdc10ec241040f076a8902f90119643fa392dbbc  wp433pw-out-20261120T085828Z/d2-wp433_nlm_gws_dich_ngoai_kho.stdout.txt

@@ -308,6 +308,8 @@ def a109_check_bat_buoc():
 def a110_dong_tong():
     ky(kt("T-v2-pass", lambda t: doi_tong(t, "MOC_GATE_OUTPUT: passed (38/39 job co dau hieu duong)")), "not_measured", ["moc_lech"], "v2")
     ky(kt("T-fail", lambda t: doi_tong(t, "MOC_GATE_OUTPUT: passed (39/39 job co dau hieu duong)")), "not_measured", ["moc_lech"], "fail")
+    for moi in ("passed (39/40", "failed (39/39"):   # H01 lượt 3: đổi ĐÚNG một thành phần của bộ ba
+        ky(kt("T-v3-pass", lambda t: doi_tong(t, f"MOC_GATE_OUTPUT: {moi} job co dau hieu duong)")), "not_measured", ["moc_lech"], moi)
 
 
 def _them_skip(dang, tong):
@@ -355,6 +357,8 @@ def a113_ket_luan():
         x = sua_dong(x, i, lambda d: d.split(" -> ")[0] + " -> passed: x")
         return doi_tong(x, "MOC_GATE_OUTPUT: passed (39/39 job co dau hieu duong)")
     ky(kt("T-fail", f), "not_measured", [f"ket_luan_lech:{k}"], "lat failure thanh passed")
+    ky(kt("T-fail", lambda x: sua_dong(x, i, lambda d: d.split(" -> ")[0] + " -> not_measured: x")),   # H01 lượt 3: vế thứ hai
+       "not_measured", [f"ket_luan_lech:{k}", "moc_lech"], "failure ma not_measured")
 
 
 @ca
@@ -558,6 +562,8 @@ def a210_cli():
         bang(rc == {"passed": 0, "failed": 1}.get(tt, 3) and "Traceback" not in ra, f"kiem-tep {ten}: rc={rc} {ra[-200:]}")
     rc, ra = cli("kiem-tep", "/khong/co.txt", "--provenance", str(ROOT))
     bang(rc == 2 and "Traceback" not in ra, f"kiem-tep vang: {rc}")
+    rc, ra = cli("kiem-tep", "/tmp/" + "x" * 300, "--provenance", str(ROOT))   # H02 lượt 3: ENAMETOOLONG
+    bang(rc == 2 and "Traceback" not in ra, f"kiem-tep ten qua dai: {rc} {ra[-150:]}")
     with tempfile.TemporaryDirectory(prefix="godc cli ") as thu:
         hs = Path(thu) / "pr9001 thu-land-evidence.yaml"
         hs.write_text("moc_gate_output: 'measured — kiem-gate.txt'\n", encoding="utf-8")
@@ -697,6 +703,10 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m59_nuot_loi_duyet", "os.walk(thu_muc, followlinks=False, onerror=_nem)", "os.walk(thu_muc, followlinks=False)", "a117"),
     ("m60_bo_job_trung_prov", '        ly += ["job_id_trung_provenance"] if q.get("job_id") in P else []\n', "", "a117"),
     ("m61_nhan_nhieu_readback", "    if len(rb) != 1:\n        return [\"readback\"]", "    if not rb:\n        return [\"readback\"]", "a209"),
+    ("m62_bo_so_tong_job", '    if d["moc"] != (moc_tu, tts.count("passed"), len(tts)):', '    if d["moc"][:2] != (moc_tu, tts.count("passed")):', "a110"),
+    ("m63_bo_so_trang_thai_tong", '    if d["moc"] != (moc_tu, tts.count("passed"), len(tts)):', '    if d["moc"][1:] != (tts.count("passed"), len(tts)):', "a110"),
+    ("m64_bo_ve_hai_ket_luan", ' or (j["conclusion"] != "success" and j["tt"] != "failed")', "", "a113"),
+    ("m65_cli_khong_bat_stat", "        except OSError:\n            vang = True\n", "        except KeyError:\n            vang = True\n", "a210"),
     ("m58_cli_chi_bat_OSError", "        except Exception as e:   # gồm vòng", "        except OSError as e:   # gồm vòng", "a214"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

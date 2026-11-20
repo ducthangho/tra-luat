@@ -308,8 +308,12 @@ def main(argv=None):
     except SystemExit as e:
         return 2 if e.code else 0
     if a.lenh == "kiem-tep":
-        if not Path(a.tep).is_file() or not Path(a.provenance).is_dir():
-            print("LỖI THAM SỐ: tệp hoặc thư mục provenance vắng", file=sys.stderr)
+        try:   # H02 lượt 3: stat có thể ném OSError (vd ENAMETOOLONG) ⇒ lỗi tham số, không traceback
+            vang = not Path(a.tep).is_file() or not Path(a.provenance).is_dir()
+        except OSError:
+            vang = True
+        if vang:
+            print("LỖI THAM SỐ: tệp hoặc thư mục provenance vắng/không đọc được", file=sys.stderr)
             return 2
         tt, ly = kiem_tep(a.tep, a.provenance)
         print(f"{tt} {a.tep} {','.join(ly) or '-'}\nGIỚI HẠN: không đọc log thật; tệp đánh giá và provenance sửa tay được")

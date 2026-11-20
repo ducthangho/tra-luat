@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+    "sinh",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+    "--ra",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/m1.jsonl"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+  "rc": 0,
+  "seconds": 36.98322909499984,
+  "stdout_sha256": "560f93146e1e9d9c9b1ea7a8172a59e07caadef68c6832f9dcce19f2f2a18dd8",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

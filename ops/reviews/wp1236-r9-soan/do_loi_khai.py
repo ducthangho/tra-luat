@@ -33,6 +33,13 @@ def kiem_mien(v, thu_muc):
     return []
 sys.path.insert(0, str(Path.cwd() / "ops"))
 import land_evidence_nguon as LEN
+RE_KHOI = re.compile(r"landed_\d{8}")
+def la_landed(doc):
+    """Dinh nghia landed CUA ops/kiem_ho_so_land.py (kieu a: trang_thai_packet.landed neu co khoa, khong thi landed muc goc;
+    kieu b: khoi goc landed_<8 so> mang landed is True)."""
+    if not isinstance(doc, dict): return False
+    a = doc["trang_thai_packet"].get("landed") if isinstance(doc.get("trang_thai_packet"), dict) else (None if "trang_thai_packet" in doc else doc.get("landed"))
+    return a is True or any(isinstance(k, str) and RE_KHOI.fullmatch(k) and isinstance(v, dict) and v.get("landed") is True for k, v in doc.items())
 root = Path(sys.argv[1]); tk = collections.Counter(); ly_tk = collections.Counter(); out = []
 for hs in sorted((root / "ops/land").glob("*-land-evidence.yaml")):
     b = hs.read_bytes()
@@ -40,7 +47,7 @@ for hs in sorted((root / "ops/land").glob("*-land-evidence.yaml")):
         tk["MIEN_CUTOVER"] += 1; out.append(f"MIEN_CUTOVER {hs.name}"); continue
     doc = yaml.safe_load(b.decode("utf-8"))
     thu_muc = root / "ops/land" / (hs.name[:-len("-land-evidence.yaml")] + "-provenance")
-    vp, n, co_duong = [], 0, False
+    vp, n, co_duong = [], 0, False   # co_duong: co >= 1 loi khai duong/owner_waived KHONG sinh vi pham nao
     for duong, v in loi_khai(doc):
         n += 1
         m = RE_TOK.match(v.casefold()) if isinstance(v, str) else None
@@ -54,15 +61,15 @@ for hs in sorted((root / "ops/land").glob("*-land-evidence.yaml")):
             continue
         tep = RE_DG.findall(v)
         if tok in ("passed", "measured") and not tep: vp.append((duong, "duong_khong_tep_danh_gia")); continue
+        truoc = len(vp)
         for t in tep:
             p = thu_muc / t
             if ".." in Path(t).parts or t.startswith("/") or not p.is_file() or p.is_symlink(): vp.append((duong, "tep_danh_gia_khong_hop_le")); continue
             tt, _ = kiem_tep(p, thu_muc); can = "passed" if tok in ("passed", "measured") else "failed"
             if tt != can: vp.append((duong, f"danh_gia_khong_{can}:{tt}"))
-        if tok in ("passed", "measured"): co_duong = True
-    tp = doc.get("trang_thai_packet") if isinstance(doc, dict) else None
-    if isinstance(tp, dict) and tp.get("landed") is True and not co_duong and not vp:
-        vp.append(("$", "landed_khong_loi_khai_gate_output_duong"))
+        if tok in ("passed", "measured") and len(vp) == truoc: co_duong = True
+    if la_landed(doc) and not co_duong:
+        vp.append(("$", "landed_khong_loi_khai_gate_output"))
     kq = "DO" if vp else ("DAT" if n else "KHONG_LOI_KHAI")
     tk[kq] += 1
     for _, l in vp: ly_tk[l.split(":")[0]] += 1

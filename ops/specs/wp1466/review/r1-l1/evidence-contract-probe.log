@@ -1,0 +1,37 @@
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv1.ysch/cay-kho/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+FUNCTION cmd_init LINES 792 855 session_id 0 authorization 0 attempts 4 review_rounds 4
+FUNCTION cmd_kiem_merge LINES 3551 3659 session_id 0 authorization 0 attempts 0 review_rounds 0
+K0_SOURCE def k0():
+        if a.base == h or _git_do(root, "merge-base", "--is-ancestor", a.base, h)[0] or _git_do(root, "merge-base", "--is-ancestor", a.base, "refs/remotes/origin/master")[0]:
+            _die(RC_GATE, "base không phải tổ tiên của head và của origin/master, hoặc base = head")
+        x = _git_do(root, "ls-remote", "origin", f"refs/pull/{a.pr}/head")
+        if x[0] or x[1].split()[:1] != [h.encode()]:
+            _die(RC_GATE, f"PR head hiện hành ≠ {h}")
+FUNCTION cmd_kiem_dong_wp LINES 3662 3702 session_id 0 authorization 0 attempts 0 review_rounds 0
+FUNCTION cmd_record_codex_call LINES 1339 1355 session_id 0 authorization 0 attempts 0 review_rounds 0
+FUNCTION _che_khong_render LINES 1874 1915 session_id 0 authorization 0 attempts 0 review_rounds 0
+MASK_BRANCHES {'fence': True, 'html_comment': True, 'html_block_parser': False}
+SELECTOR docs/PROTOCOL_DA_PHIEN.md chay PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: 'docs/PROTOCOL_DA_PHIEN.md'
+SELECTOR docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md chay PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: 'docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md'
+SELECTOR .claude/dev/packet_loop.py chay PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: '.claude/dev/packet_loop.py'
+SELECTOR .claude/dev/packet_loop_test.py chay PACKET_LOOP: chay vi diff cham 1 tep phu thuoc cua bo ca: '.claude/dev/packet_loop_test.py'
+SELECTOR .claude/dev/launcher_test.py bo_qua PACKET_LOOP: bo_qua vi 1 tep doi khong cham tap phu thuoc cua bo ca
+SELECTOR .githooks/eol_policy_test.py bo_qua PACKET_LOOP: bo_qua vi 1 tep doi khong cham tap phu thuoc cua bo ca
+SELECTOR ops/bien_nhan_v2_test.py bo_qua PACKET_LOOP: bo_qua vi 1 tep doi khong cham tap phu thuoc cua bo ca
+SELECTOR ops/lease_publish_test.py bo_qua PACKET_LOOP: bo_qua vi 1 tep doi khong cham tap phu thuoc cua bo ca
+DOCTRINE_WITHOUT_8_3 0 doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine 
+DEBT_REFERENCES {'INV-09-DIFF-NGOAI-WRITE-SET': 1, 'INV-10-HANDOFF-KHONG-CO-CONG': 1, 'INV-12-CONG-VERDICT-THEO-LOP': 1, 'INV-17-DANH-SACH-DONG-0-CONG': 1, 'INV-18-DUONG-GHI-REGISTRY-0-CONG': 1}
+G8_SCOPE | G8 | tên nợ có mặt trong tệp ADR-0068 dưới dạng `` `<TÊN-NỢ>` `` | `r1466_no_khong_co_trong_adr` | — | `r1466_adr_0068_vang` · `r1466_hai_tep_0068` | `inv_bo_kiem_no` · `inv_adr_vang_la_dat` |
+AUDIT_COVERAGE_ROWS ['B7 — trường hợp đồng verdict §7, §8 (provider, `model_family`, `session_id`, `review_axes`, `assurance`, tính độc lập); gợi ý vá bốn phần', 'B14 — nhãn đối chiếu tự đặt', 'B6 — `stdout_sha256` không nối với tệp verdict', 'A1, B1 — dòng khai `tran_loi_goi_codex`, `tran_kich_thuoc_sensitive` bắt buộc', 'B5 — nhãn ghi hộ của `ADR-0067`', 'B2 — mã E và sổ uỷ quyền', 'B12 — miễn Windows phải là dòng của chủ kho', 'B8 — ghim `core.abbrev 7` trong clone reviewer', 'B15 — không dùng state máy']
+EPILOG_MATCH 1
+EXISTING_FUNCTION_CHANGED_NUMSTAT 1 2	1	/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv1.ysch/out/{numstat-before.py.txt => numstat-after.py.txt}
+SCHEMA_V1_PROVIDER ['claude', 'codex', 'human'] GENERATION_TYPE {'type': 'integer', 'minimum': 1}
+CUTOVER_TRUTH_TABLE review_before,head_before,ADR_apply,KN1_union_apply,KN1_intersection_apply
+CUTOVER True True False False False
+CUTOVER True False False True False
+CUTOVER False True True True False
+CUTOVER False False True True True
+CA_COUNT_REGISTRY 1582 UNIQUE 1582
+CA_COUNT_LINUX 1581
+DECLARED_MISSING_WINDOWS {'wp1174_windows_claim_rejected'}

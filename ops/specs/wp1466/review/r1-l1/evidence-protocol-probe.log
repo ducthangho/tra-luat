@@ -1,0 +1,26 @@
+P1..P5_ANCHOR_COUNTS [1, 1, 1, 1, 1]
+P6_ANCHOR_COUNT 1
+PROTO_NUMSTAT 39	2	/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv1.ysch/out/{protocol-before.md => protocol-after.md} rc 1
+NEO 1 FULL 1 CONTAINS 1 PARA_LENGTH [50] NEEDLE_LENGTH 50
+NEO 2 FULL 0 CONTAINS 1 PARA_LENGTH [510] NEEDLE_LENGTH 26
+NEO 3 FULL 0 CONTAINS 1 PARA_LENGTH [544] NEEDLE_LENGTH 54
+NEO 4 FULL 0 CONTAINS 1 PARA_LENGTH [1633] NEEDLE_LENGTH 195
+NEO 5 FULL 0 CONTAINS 1 PARA_LENGTH [1633] NEEDLE_LENGTH 152
+NEO 6 FULL 1 CONTAINS 1 PARA_LENGTH [92] NEEDLE_LENGTH 92
+NEO 7 FULL 0 CONTAINS 1 PARA_LENGTH [4494] NEEDLE_LENGTH 136
+NEO 8 FULL 0 CONTAINS 1 PARA_LENGTH [487] NEEDLE_LENGTH 80
+MASK_ERRORS []
+SEMANTIC_REMOVAL delete_search_class SOURCE_COUNT 1 ALL_EIGHT_SUBSTRING_PRESENT True ERR []
+SEMANTIC_REMOVAL delete_convergence SOURCE_COUNT 1 ALL_EIGHT_SUBSTRING_PRESENT True ERR []
+SEMANTIC_REMOVAL delete_repeat_history SOURCE_COUNT 1 ALL_EIGHT_SUBSTRING_PRESENT True ERR []
+SEMANTIC_REMOVAL delete_checkpoint_journal SOURCE_COUNT 1 ALL_EIGHT_SUBSTRING_PRESENT True ERR []
+CELL_GRAMMAR_COUNTS {0: 15, 2: 1, 1: 5}
+GATE cay-kho adr-song RC 0 STDOUT adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']) STDERR 
+GATE cay-kho doctrine-scan RC 0 STDOUT doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine STDERR 
+GATE cay-kho bat-bien RC 2 STDOUT  STDERR usage: packet_loop.py [-h] [--state-dir STATE_DIR]
+                      {init,record-lease,begin-attempt,void-attempt,chup-anh-doctor,record-review,record-codex-call,nang-tran,record-rescue,transition,record-post,next-comment,guard,ghi-uy-quyen,doi-chieu-uy-quyen,doctrine-scan,adr-song,kiem-gate,ac
+GATE proposed-tree adr-song RC 0 STDOUT adr-song: sạch — 67 ADR trên đĩa, 67 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016']) STDERR 
+GATE proposed-tree doctrine-scan RC 0 STDOUT doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine STDERR 
+GATE proposed-tree bat-bien RC 2 STDOUT  STDERR usage: packet_loop.py [-h] [--state-dir STATE_DIR]
+                      {init,record-lease,begin-attempt,void-attempt,chup-anh-doctor,record-review,record-codex-call,nang-tran,record-rescue,transition,record-post,next-comment,guard,ghi-uy-quyen,doi-chieu-uy-quyen,doctrine-scan,adr-song,kiem-gate,ac
+REGISTRY_ENTRIES 1582 UNIQUE 1582 DUPLICATES []

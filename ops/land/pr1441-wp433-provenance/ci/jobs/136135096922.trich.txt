@@ -1,0 +1,9 @@
+2026-11-20T06:51:06.2485274Z Image: ubuntu-26.04
+2026-11-20T06:51:06.9751130Z ##[group]Run git config --global core.autocrlf false
+2026-11-20T06:51:07.0243089Z ##[group]Run actions/checkout@v4
+2026-11-20T06:51:12.0714612Z [command]/usr/bin/git log -1 --format=%H
+2026-11-20T06:51:12.0752374Z 64fa5156794dfb6a2dd9e8f257ee759ab07c9c35
+2026-11-20T06:51:12.0987775Z ##[group]Run actions/setup-python@v5
+2026-11-20T06:51:12.2734648Z ##[group]Run python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+2026-11-20T06:51:13.9557140Z ##[group]Run actions/download-artifact@v4
+2026-11-20T06:51:14.4942228Z ##[group]Run python ops/cong_cu_test.py --gop manh

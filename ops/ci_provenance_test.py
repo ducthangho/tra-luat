@@ -1584,14 +1584,16 @@ def c66_mien_sai_chan_truoc_moi_ca():   # #1322 A2: giá trị lạ ⇒ rc≠0 T
             contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as loi:
         rc = main([])
     bang(rc == 2 and cc.call_count == 0 and BIEN_TIEN_TRINH in loi.getvalue(), f"rc={rc}, số ca đã chạy {cc.call_count}")
-    # review lượt 1 F3: bộ gom trả THIẾU kết quả ⇒ TONG: DO, không tự điền tử số từ số việc
-    for cat, rc_mong in ((0, 0), (1, 1)):
+    # review lượt 1 F3 + lượt 5 F3b/F3c: kết quả phải khớp KẾ HOẠCH (tên, thứ tự, số lần) — thiếu, lặp, đảo, rỗng ⇒ TONG: DO
+    for ten_kq, rc_mong in ((("m1", "m2"), 0), (("m2",), 1), (("m1",), 1), ((), 1), (("m1", "m1"), 1), (("m2", "m1"), 1),
+                            (("m1", "m2", "m2"), 1)):
         with mock.patch.dict(os.environ, {BIEN_TIEN_TRINH: "2"}), mock.patch(__name__ + ".chay_ca", return_value=(0, "")), \
-                mock.patch(__name__ + ".TU_KIEM", ()), mock.patch(__name__ + ".chay_vong_dot_bien", return_value=(
-                    [(None, ("m1",)), (None, ("m2",))], [("GIET", ""), ("GIET", "")][cat:])), \
+                mock.patch(__name__ + ".TU_KIEM", ()), mock.patch(__name__ + ".DOT_BIEN", (("m1",),)), \
+                mock.patch(__name__ + ".DOT_BIEN_TEST", (("m2",),)), \
+                mock.patch(__name__ + ".chay_vong_dot_bien", return_value=[(t, "GIET", "") for t in ten_kq]), \
                 contextlib.redirect_stdout(io.StringIO()) as ra:
             rc = main([])
-        bang(rc == rc_mong and ra.getvalue().endswith(f"TONG: {'DO' if cat else 'DAT'}\n"), f"thiếu {cat} kết quả: rc={rc}")
+        bang(rc == rc_mong and ra.getvalue().endswith(f"TONG: {'DO' if rc_mong else 'DAT'}\n"), f"kết quả {ten_kq!r} cho kế hoạch m1,m2: rc={rc}")
 
 @ca
 def c67_lam_nong_truoc_vong_dot_bien():   # #1322 M2, review lượt 1 F2: bản gốc của MỌI ca đích (cả `DOT_BIEN_TEST`) xong TRƯỚC đột biến đầu tiên, mỗi khoá một lần
@@ -1608,13 +1610,14 @@ def c67_lam_nong_truoc_vong_dot_bien():   # #1322 M2, review lượt 1 F2: bản
                 mock.patch(__name__ + ".DOT_BIEN_TEST", DOT_BIEN_TEST[:1]), \
                 mock.patch(__name__ + ".chay_con", side_effect=lambda t, ma: con(t, "goc" if Path(ma).name == "goc.py" else "db")), \
                 mock.patch(__name__ + ".chay_con_ban_test", side_effect=lambda t, ban: con(t, "db")):
-            viec, hang = chay_vong_dot_bien(n)
+            viec = [(chay_dot_bien, d) for d in nhom] + [(chay_dot_bien_test, d) for d in DOT_BIEN_TEST[:1]]
+            kq = chay_vong_dot_bien(n, viec)
         goc = [t for loai, t in nhat_ky if loai == "goc"]
         dau = [loai for loai, _ in nhat_ky].index("db")
         bang(sorted(goc) == sorted(dich), f"n={n}: mỗi ca đích chạy bản gốc ĐÚNG một lần: {goc}")
         bang({loai for loai, _ in nhat_ky[:dau]} == {"goc"} and "goc" not in {loai for loai, _ in nhat_ky[dau:]},
              f"n={n}: mọi bản gốc phải xong TRƯỚC đột biến đầu tiên: {nhat_ky}")
-        bang([h for h, _ in hang] == ["GIET"] * len(viec) == ["GIET"] * 4, f"n={n}: {hang}")
+        bang([(t, h) for t, h, _ in kq] == [(d[0], "GIET") for _, d in viec] and len(viec) == 4, f"n={n}: mỗi việc đúng một kết quả, đúng tên: {kq}")
 
 class LoiHaTangLong(RuntimeError):   # #1322 review lượt 4 F4c: lỗi hạ tầng CÓ CHỦ ĐÍCH của c68 — c70 chỉ bắt đúng lớp này
     pass
@@ -2103,9 +2106,9 @@ DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — s
     ("T4_bo_song_song", 'if n <= 1:' + _XD + '        return [ham(x)', 'if True:' + _XD + '        return [ham(x)', "c65"),
     ("T5_kiem_mien_sau_ca", 'file=sys.stderr)' + _XD + '        return 2' + _XD + '    print(f"TIEN TRINH',
      'file=sys.stderr)' + _XD + '        n = 1' + _XD + '    print(f"TIEN TRINH', "c66"),
-    ("T6_bo_lam_nong", '    lam_nong_nen(n)' + _XD + '    viec = [', '    pass' + _XD + '    viec = [', "c67"),
+    ("T6_bo_lam_nong", '    lam_nong_nen(n)' + _XD + '    return chay_theo_thu_tu(', '    pass' + _XD + '    return chay_theo_thu_tu(', "c67"),
     ("T7_lam_nong_bo_sot_dot_bien_test", 'DOT_BIEN + TU_KIEM + ' + 'DOT_BIEN_TEST:', 'DOT_BIEN + TU_KIEM:', "c67"),
-    ("T8_bo_kiem_du_ket_qua", ' and len(hang) == ' + 'len(viec)', '', "c66"),
+    ("T8_bo_kiem_du_ket_qua", 'len(DOT_BIEN) > 0 and ' + 'du and', 'len(DOT_BIEN) > 0 and', "c66"),
     ("T9_c65_nuot_loi_luong", 'if "loi" in ' + 'kq:' + _XD + '        raise', 'if False:' + _XD + '        raise', "c68"),   # review lượt 2 F4
     ("T10_c68_ha_tang_thanh_chot", 'if xet == "HA_' + 'TANG":', 'if False:', "c70"),   # review lượt 3 F4b: mỗi đường vào một chốt riêng
     ("T11_xet_c68_moi_thu_la_nuot_loi", '    return "HA_' + 'TANG"' + _XD, '    return "NUOT_LOI"' + _XD, "c69"),
@@ -2114,6 +2117,8 @@ DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — s
     ("T14_c68_ha_tang_sai_lop", 'raise LoiHaTang' + 'Long(f"{TIEN_TO', 'raise RuntimeError(f"{TIEN_TO', "c70"),   # review lượt 4 F4c
     ("T15_c68_boc_loi_vo_can", '    xet = xet_c68(' + 'hang, ra)' + _XD, '    try:' + _XD + '        xet = xet_c68(' + 'hang, ra)' + _XD + '    except RuntimeError:' + _XD + '        xet = "HA_TANG"' + _XD, "c70"),
     ("T16_c70_bo_chot_seam", 'return da_goi[0] and ' + 'type(e) is lop', 'return type(e) is lop', "c71"),   # review lượt 5 F4d
+    ("T18_du_chi_dem_so_luong", '[t for t, _, _ in kq_db] == ' + 'ten_kh', 'len(kq_db) == len(ten_kh)', "c66"),   # review lượt 5 F3c
+    ("T19_ke_hoach_tu_ket_qua", 'ten_kh = [d[0] for _, d in ' + 'viec]', 'ten_kh = [d[0] for _, d in ' + 'viec][:0]', "c66"),
 )
 
 def chay_con(ten_ca, ma):
@@ -2172,11 +2177,11 @@ def lam_nong_nen(n):
             dich.add(khop[0])
     chay_theo_thu_tu(lambda ten_ca: nen_cua(ten_ca, goc), sorted(dich), n)
 
-def chay_vong_dot_bien(n):
-    """#1322 M2: làm nóng `_NEN` rồi chạy `DOT_BIEN` + `DOT_BIEN_TEST` bằng `n` luồng. Trả `(việc, hạng)` theo thứ tự việc."""
+def chay_vong_dot_bien(n, viec):
+    """#1322 M2: làm nóng `_NEN` rồi chạy `viec` bằng `n` luồng. `viec` do NGƯỜI GỌI sở hữu (review lượt 5 F3b/F3c: kế hoạch
+    phải độc lập với hàm bị kiểm). Trả mỗi việc một bộ `(tên, hạng, chi tiết)` theo thứ tự việc — tên để người gọi đối chiếu."""
     lam_nong_nen(n)
-    viec = [(chay_dot_bien, d) for d in DOT_BIEN] + [(chay_dot_bien_test, d) for d in DOT_BIEN_TEST]
-    return viec, chay_theo_thu_tu(lambda v: v[0](*v[1]), viec, n)
+    return chay_theo_thu_tu(lambda v: (v[1][0], *v[0](*v[1])), viec, n)
 
 def chay_con_ban_test(ten_ca, ban_test):
     """#1322 M4: chạy MỘT ca trên bản sao (đã đột biến) của CHÍNH tệp test; mã sản phẩm là bản thật."""
@@ -2401,17 +2406,22 @@ def main(argv):
     print("".join(f"[{dong}]\n" for rc, dong in kq if rc), end="")
     dat = sum(rc == 0 for rc, _ in kq)
     print(f"CA: {dat}/{len(CA)} dat")
-    viec, hang = chay_vong_dot_bien(n)
-    xau = [f"{d[0]}: {h} {ct}" for (_, d), (h, ct) in zip(viec, hang) if h != "GIET"]
+    viec = [(chay_dot_bien, d) for d in DOT_BIEN] + [(chay_dot_bien_test, d) for d in DOT_BIEN_TEST]   # kế hoạch ĐỘC LẬP (review lượt 5 F3b/F3c)
+    ten_kh = [d[0] for _, d in viec]
+    kq_db = chay_vong_dot_bien(n, list(viec))   # bản sao: hàm bị kiểm không đổi được kế hoạch của người gọi
+    du = len(set(ten_kh)) == len(ten_kh) and [t for t, _, _ in kq_db] == ten_kh   # đúng tên, đúng thứ tự, đúng số lần — không chỉ đếm
+    if not du:
+        print(f"[DOT BIEN THIEU/LAP/DAO VIEC] ke hoach {len(ten_kh)} viec, ket qua {len(kq_db)}")
+    xau = [f"{t}: {h} {ct}" for t, h, ct in kq_db if h != "GIET"]
     for x in xau:
         print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
-    print(f"DOT BIEN: {sum(h == 'GIET' for h, _ in hang)}/{len(viec)} bi giet dung ly do")   # tử số từ KẾT QUẢ thật (F3)
+    print(f"DOT BIEN: {sum(h == 'GIET' for _, h, _ in kq_db)}/{len(ten_kh)} bi giet dung ly do")   # tử số từ KẾT QUẢ thật (F3), mẫu số từ KẾ HOẠCH
     loi_tk = [f"{ten}: mong {mong}, duoc {h}" for ten, cu, moi, dich, mong in TU_KIEM
               for h in [chay_dot_bien(ten, cu, moi, dich)[0]] if h != mong]
     for x in loi_tk:
         print(f"[TU KIEM] {x}")
     print(f"TU KIEM PHAN HANG: {'DAT' if not loi_tk else 'DO'} ({len(TU_KIEM)} dot bien)")
-    ok = dat == len(CA) > 0 and len(DOT_BIEN) > 0 and len(hang) == len(viec) and not xau and not loi_tk
+    ok = dat == len(CA) > 0 and len(DOT_BIEN) > 0 and du and not xau and not loi_tk
     print(f"TONG: {'DAT' if ok else 'DO'}")
     return 0 if ok else 1
 

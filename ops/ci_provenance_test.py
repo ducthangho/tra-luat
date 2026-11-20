@@ -1493,12 +1493,23 @@ def c65_chay_theo_thu_tu():   # #1322 M2/A3: n > 1 thì chạy CHỒNG thật; k
             dem[0] += 1
             cv.notify_all()
         return i
-    t = threading.Thread(target=lambda: kq.setdefault("r", chay_theo_thu_tu(ham, range(6), 4)))
+    def dieu_phoi():   # review lượt 2 F4: thu cả NGOẠI LỆ của luồng — lỗi vô can không được thành `kq["r"] = None` rồi bị `bang` đọc là lỗi thứ tự
+        try:
+            kq["r"] = chay_theo_thu_tu(ham, range(6), 4)
+        except BaseException as e:   # noqa: BLE001 — ném lại nguyên văn ở luồng ca, ngoài `bang`
+            kq["loi"] = e
+    t = threading.Thread(target=dieu_phoi, daemon=True)
     t.start()
-    with cv:
-        chong = cv.wait_for(lambda: dem[0] == 5, timeout=10)
-    tha0.set()
-    t.join(90)
+    try:
+        with cv:
+            chong = cv.wait_for(lambda: dem[0] == 5, timeout=10)
+    finally:
+        tha0.set()
+        t.join(90)
+    if "loi" in kq:
+        raise kq["loi"]
+    if t.is_alive():
+        raise RuntimeError("c65: luồng điều phối chưa xong sau 90 s")   # quá hạn là lỗi hạ tầng, không phải tín hiệu chốt
     bang(chong, "n=4 phải chạy chồng: việc 1..5 xong trong lúc việc 0 còn bị giữ")
     bang(kq.get("r") == ["giu", 1, 2, 3, 4, 5], f"kết quả phải theo thứ tự việc, được {kq.get('r')!r}")
     bang(chay_theo_thu_tu(lambda i: i * i, range(5), 1) == [0, 1, 4, 9, 16], "n=1 tuần tự, đúng thứ tự")
@@ -1542,6 +1553,12 @@ def c67_lam_nong_truoc_vong_dot_bien():   # #1322 M2, review lượt 1 F2: bản
         bang({loai for loai, _ in nhat_ky[:dau]} == {"goc"} and "goc" not in {loai for loai, _ in nhat_ky[dau:]},
              f"n={n}: mọi bản gốc phải xong TRƯỚC đột biến đầu tiên: {nhat_ky}")
         bang([h for h, _ in hang] == ["GIET"] * len(viec) == ["GIET"] * 4, f"n={n}: {hang}")
+
+@ca
+def c68_loi_luong_nen_la_tin_dung_gia():   # #1322 review lượt 2 F4: bộ gom chạy ĐỦ việc rồi ném lỗi vô can ⇒ c65 phải ra TIN_DUNG_GIA, không GIET
+    neo = 'return list(ex.' + 'map(ham, viec))'   # ghép hai mảnh: neo phải xuất hiện ĐÚNG MỘT lần trong tệp
+    hang, ra = chay_dot_bien_test("F4_loi_luong_nen", neo, 'list(ex.' + 'map(ham, viec)); raise RuntimeError("c68_loi_vo_can")', "c65")
+    bang(hang == "TIN_DUNG_GIA" and "c68_loi_vo_can" in ra, f"lỗi vô can ở luồng điều phối của c65 phải là TIN_DUNG_GIA, được {hang}: {ra!r}")
 
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
@@ -1951,6 +1968,7 @@ DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — s
     ("T6_bo_lam_nong", '    lam_nong_nen(n)' + _XD + '    viec = [', '    pass' + _XD + '    viec = [', "c67"),
     ("T7_lam_nong_bo_sot_dot_bien_test", 'DOT_BIEN + TU_KIEM + ' + 'DOT_BIEN_TEST:', 'DOT_BIEN + TU_KIEM:', "c67"),
     ("T8_bo_kiem_du_ket_qua", ' and len(hang) == ' + 'len(viec)', '', "c66"),
+    ("T9_c65_nuot_loi_luong", 'if "loi" in ' + 'kq:' + _XD + '        raise', 'if False:' + _XD + '        raise', "c68"),   # review lượt 2 F4
 )
 
 def chay_con(ten_ca, ma):

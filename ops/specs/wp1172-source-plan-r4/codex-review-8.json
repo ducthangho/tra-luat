@@ -1,0 +1,82 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "673edc547a492ee5e98a1f8e6d80c466ac96ff2c",
+  "reviewed_file_sha256": "427108692ff4e5e56fbe5345fe6a4201fd451e44c86c2c2086564b026d665680",
+  "findings": [
+    {
+      "id": "R4-32-b3-heartbeat-read-omitted-from-endpoint-contract",
+      "severity": "P3",
+      "location": "§5 B2 heartbeat, lines 268–270; §5 B3 deployment capability table, lines 298–301",
+      "claim": "B2 requires B3 to read the watchdog timestamp from its tracking Issue, but B3 says it only calls Actions, Checks and Contents endpoints. The Issue read is absent from that supposedly exhaustive endpoint list and therefore from the stated deployment-host endpoint probes. This is a documentation inconsistency in the promised cross-monitoring path, not a demonstrated authorization failure: the repository is public.",
+      "evidence": [
+        {
+          "cmd": "nl -ba ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md | sed -n '258,301p'",
+          "observed": "B2 explicitly assigns the Issue heartbeat read and >24-hour warning to B3. B3 enumerates only workflow runs/jobs/artifacts, commit checks and commit contents/comparisons, then requires testing each endpoint on both deploy hosts. No Issue or Issue-comment endpoint is listed."
+        },
+        {
+          "cmd": "mcp__codex_apps__github_get_repo(repository_full_name=\"ducthangho/tra-luat\")",
+          "observed": "Successful read-only response: visibility=public. Therefore this finding does not assert that an additional Issues:read grant is necessarily required."
+        },
+        {
+          "cmd": "web.open https://docs.github.com/en/rest/issues/issues#get-an-issue",
+          "observed": "GitHub documents GET /repos/{owner}/{repo}/issues/{issue_number} separately from the listed APIs; public resources can be read without authentication or the Issues:read permission. See [Get an issue](https://docs.github.com/en/rest/issues/issues#get-an-issue)."
+        }
+      ],
+      "suggested_fix": "Add the actual Issue/body or Issue-comment GET path to B3’s capability and endpoint-probe list, using the public-read route or the chosen read-only credential. Include unavailable/malformed heartbeat reads in its failure contract and distinguish them from a valid but stale heartbeat. Keep both deploy-host probes. No authorization store or additional write permission is needed."
+    }
+  ],
+  "tests": [
+    {
+      "cmd": "git rev-parse HEAD HEAD^{tree}",
+      "rc": 0,
+      "summary": "Passed exact head/tree check: assigned HEAD; tree 59e1a2847f688ae766d90d2e90a0c03afcfdd993."
+    },
+    {
+      "cmd": "git diff ffdd7bb795523b31d031e9380520560597972a57 HEAD -- ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+      "rc": 0,
+      "summary": "Inspected every round-8 change. Only revision/history text and the two round-7 corrections changed. R4-32 was already present before this editorial revision."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round8/probes.py numbers (initial invocation)",
+      "rc": 1,
+      "summary": "Reviewer probe setup error: used duong_nhanh instead of the actual M2b mode key nhe. Corrected only the scratch probe; this was not a plan or repository failure."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round8/probes.py numbers",
+      "rc": 0,
+      "summary": "57 numeric checks passed. Recomputed 4.7%, 52.8%, 13716 seconds, recent-cohort 10659 seconds, G9 n=71/median=1775/p25=1590, 26564 shard-seconds, A+5 48+8=56 executions, 3.51–5.18 million gross switch-off delta and other quoted arithmetic/history counts."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round8/probes.py pr0",
+      "rc": 0,
+      "summary": "Existing master workflow validators pass. Negative probes reject moving refs, SHA-based concurrency, cancellation, five incomplete/non-pass outcomes, wrong H, missing shard and a bad newest producer. Healthy baseline and permitted mixed-attempt shard lineage pass. Audit triggers are schedule and workflow_dispatch only."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round8/probes.py beta",
+      "rc": 0,
+      "summary": "Executed the actual _cham_m9 predicate with a controlled diff reader: ci.yml and ci_duong_nhanh.py both fall inside M9. This supports the corrected distinction between PR3 exclusion and conditional PR6 eligibility; it does not claim the future B4 gate is implemented."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round8/probes.py hook",
+      "rc": 0,
+      "summary": "Actual hook returns ask for Bash --apply and a GitHub API write command string, no decision for gh variable or non-Bash input, and deny for the read-only agent. Command strings were input data only; none was executed."
+    },
+    {
+      "cmd": "git --no-optional-locks diff --check ffdd7bb795523b31d031e9380520560597972a57 HEAD -- ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+      "rc": 0,
+      "summary": "Passed whitespace check."
+    },
+    {
+      "cmd": "git config --get core.abbrev",
+      "rc": 1,
+      "summary": "Unset. No configuration was changed and no abbreviation-dependent release gate was run."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round8/integrity.py",
+      "rc": 0,
+      "summary": "Passed assigned/source/previous-round hash checks and final integrity observation: HEAD/tree/refs unchanged, tracked/index diffs empty, status unchanged with only pre-existing ignored .codex/. Ignored contents and transient historical writes were not monitored."
+    }
+  ],
+  "numbers_checked": 57,
+  "notes": "Round 8: 0 P0, 0 P1, 0 P2, 1 P3. The owner requires zero findings, so approval is withheld. R4-32 continues the endpoint/capability-completeness class related to R4-15/R4-24; it is newly detected, not introduced by the round-8 edits.\n\nPrevious round: R4-30 CLOSED (real fix). The combined PR3/PR6 gross reduction is 3.5086–5.1809 million seconds under r3’s illustrative assumptions; PR5 cost 0.462078 million is shared by enabled/disabled states and cancels. Section 13 now gives 3.51–5.18. R4-31 CLOSED (real fix). Section 4 now correctly says closure membership excludes PR3 skipping but can leave PR6 eligible subject to trusted classification, its live class-specific allow value and exact-H full audit. Evidence: the complete previous-head diff and numbers/beta probes above.\n\nEarlier closure audit at plan level: R4-01 remains closed: §8.2 separates PR0 code delivery from original acceptance still unverified/not_run/not_measured. R4-02’s substantive traceability repairs remain: overhead, runtime/dependency identity, release ref/checks, current-master comparison, audit-red SLA and bounded study have destinations; rollback prerequisites are restored. R4-03 remains closed through separate execution/case/mutant/aggregate fields and justified equivalence. R4-04 remains closed through per-child wait4 plus separate concurrent-memory measurement. R4-05 remains closed: two audit receipts plus one separate push observation. R4-06 remains closed: B1 precedes B2; registry registration is assigned and serialized. R4-07’s timing/delivery overclaims remain corrected by best-effort timing, notification verification and observers; the B3 observer’s endpoint list needs R4-32. R4-08/R4-25/R4-26 remain closed: trusted master-side recomputation, current REST read without historical-log fallback, exact per-class allow values, conservative unknowns, measured writer set and explicit human reactivation prerequisites. R4-09/R4-10 remain closed: mandatory measured definition identity, expected inventory, attempt/artifact checks and package-byte binding. R4-11 remains closed by explicit owner emergency procedure and separate G8 accounting, subject to Q7. R4-12 remains closed by real Windows parity or a specific waiver. R4-13 remains closed by the correct G9 population. R4-14/R4-18/R4-28 remain closed by paired same-snapshot measurements, all-eight-shard coverage and consistent repetition/budget arithmetic. R4-15 remains closed: an authorized operator produces A4 first; B3 reads it. R4-16/R4-27 remain closed: B4 owns packet_loop changes, B3 owns hook/test changes and deploy-test registration, and coordinator heartbeat checking is manual. R4-17/R4-29 remain closed: canary cost is explicitly a shard subtotal and conservative-mode/new-test costs are disclosed. R4-19–R4-23 remain closed for the removed grant-store mechanisms; no mutable-comment grant, ordinary-merge grant, push-actor inference, generation resurrection or master-stored waiver cycle remains. R4-24’s original admin/PR permission defect is removed; the remaining endpoint-list inconsistency is R4-32. No previously closed functional mechanism was reintroduced by the round-8 corrections. No removed authorization mechanism is requested back.\n\nSources/order/authority: Read recovered r2, PR0 draft A1–A6, Proxima, installed r3, Mission r82, frozen PR1 spec/lease and governing repository rules. No further silent source omission was established. A/B retain r3 I1–I6 and its nine rejected options; C1 research and C2 policy change remain separate Q8a/Q8b decisions. B1 precedes PR5; shared registry writes are serialized; B4 packet_loop and B3 hook/deploy paths require fresh lease exclusion. PR1 spec hash remains 5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e, revision 2/generation 1; its effective lease excludes ci_dang_ky_test.py. r4 does not expand it. Q6–Q9 appropriately reserve owner decisions on monitoring, exclusions, emergency procedure, writers, availability costs and residual human controls. Recommendations are not installed policy or execution authority.\n\nPR0 readback: [PR #1412](https://github.com/ducthangho/tra-luat/pull/1412) confirms H3 b79cbf56a1696b44c38529275312287ca78ba91d merged as f8b9cdd81879f25c22709c60e62b69a9c314a472. [Accepted rev12](https://github.com/ducthangho/tra-luat/issues/1166#issuecomment-7008546621) and [M8](https://github.com/ducthangho/tra-luat/issues/1166#issuecomment-7009869906) retain landed:false and unmeasured provenance/cross-attempt live behavior. The narrower wp1166 spec forbade a new full-M9 run. Local validator probes prove delivered checks, not completion of every original draft criterion.\n\nTechnical scope: github.workflow_sha and unset-vars empty-string behavior are documented by [GitHub contexts](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts). Repository collaborators and Variables:write credentials are separate writer paths; reads use Variables:read, as described in [variable administration](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables#creating-configuration-variables-for-a-repository) and the [variables API](https://docs.github.com/en/rest/actions/variables#get-a-repository-variable). Reading vars in PR code does not enforce policy. B4’s trusted consumer is the proposed enforcement point; actual writer/host measurements remain future prerequisites. B2 imports r2’s 36-hour deadline/eight-day original-snapshot age; retries do not renew freshness. Shared scheduling risk is explicitly best-effort, consistent with [GitHub schedule behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). B3 binds candidate/package bytes, requires exact-H checks and per-run provenance, preserves force-older as version-only override, and distinguishes human emergency procedure from machine identity proof. A4 exists and returns not_measured for unavailable identity; no live GraphQL or deploy-host capability measurement was performed.\n\nNumbers: 700504/15057171=4.6522949%; 7955967/15057171=52.8383918%; 9669927/705=13716.2085 seconds. G9 filters reproduce 1775/1590. A+5 durations are explicitly conditional estimates. The r82 outward-rounded 3.4–5.6 million correction is consistent. Raw-data-only r3 DX-2/DX-3/DX-8 were not independently reconstructed. The 57 checks include arithmetic, baseline fields and review-history counts; policy thresholds are requirements, not measured achievements.\n\nProvenance/limits: provider=openai_codex; execution_surface=codex_service; transport=machine. API-hosted independent reviewer; no Codex CLI invocation. Served model/effort and external launcher session identity=KHONG_DO_DUOC. Sensitive plan review using .agents/skills/cross-review/SKILL.md. Linux 6.18.44, Python 3.13.18, managed workspace-write sandbox with read-only review discipline. origin/master snapshot=45bae8d07a8cdf06a1ca9a7a2e015a6258169379. NOT_RUN: full mutation/registry suites, actionlint, bare Ruff lint, Windows execution, CI dispatch, deploy and live variable/host-capability probes. No repository edits, commits, pushes, comments, GitHub writes, secret reads or LIVE calls. Scratch is /tmp/rv-r4-round8; sole deliverable is REVIEW_OUT. Integrity observations show unchanged observed checkout state, not proof against every possible transient write."
+}

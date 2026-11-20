@@ -1,4 +1,4 @@
-# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 8
+# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 9
 
 ## 1. Trạng thái và nguồn
 
@@ -16,7 +16,7 @@
   lớp: uỷ quyền chủ kho do máy kiểm). **Bản sửa 6 BỎ lớp ấy** thay vì vá tiếp (xem §11) và đã qua review lượt 6
   (`wp1172-plan-r4-review-6`, trên `bf16c5d`, tệp `a7fea4f3…`): còn 1 P1 + 2 P2 + 2 P3 (R4-25…R4-29).
 - **Bản sửa 7** xử lý cả năm finding ấy, GIỮ quyết định không có kho uỷ quyền do máy kiểm; review lượt 7 còn 2 P3
-  biên tập. **Bản sửa 8** sửa hai P3 ấy và CHƯA được review lại.
+  biên tập. Bản sửa 8 sửa hai P3 ấy; review lượt 8 còn 1 P3. **Bản sửa 9** sửa P3 ấy và CHƯA được review lại.
   Chủ kho đã quyết định tiếp tục review cho tới khi còn 0 finding P0–P3. Điểm đổi chính: công tắc A+1 trở lại MẶC ĐỊNH
   ĐÓNG (chỉ đúng một chuỗi cho phép mới giảm G5 — r3 I3, r2 §5.5); bên tiêu dùng `kiem-merge` đọc giá trị HIỆN TẠI của
   công tắc, không dùng log cũ; và chỗ nào chỉ là quy trình của người thì được gọi đúng tên là quy trình, kèm rủi ro tồn
@@ -296,8 +296,10 @@ quyết định đặt biến; phần ấy là quy trình của chủ kho, khai 
   cũ, GraphQL null hoặc hết giờ ⇒ chặn, không hạ xuống cảnh báo sau khi chế độ chặn đã bật), SHA = H, mọi job kỳ vọng có mặt và `success`, kết cục `xanh`, artifact digest khớp, dòng
   attempt hợp lệ. Bất kỳ trường bắt buộc nào vắng/lạ/không đọc được ⇒ chặn.
 - **Xác thực trên máy deploy — bảng năng lực:** B3 chỉ gọi: danh sách lượt + job + artifact của workflow (Actions:
-  read), check run của commit (Checks: read), nội dung/so sánh commit (Contents: read). Không cần quyền PR metadata, bảo
-  vệ nhánh, biến hay dispatch. Đo TỪNG endpoint từ CẢ HAI máy deploy (403/404, phân trang thiếu, chuyển hướng artifact)
+  read), check run của commit (Checks: read), nội dung/so sánh commit (Contents: read), và comment của Issue theo dõi B2
+  để đọc nhịp tim watchdog (Issues: read). Không cần quyền PR metadata, bảo vệ nhánh, biến hay dispatch. Nhịp tim cũ hơn
+  24 giờ hoặc không đọc được chỉ làm B3 IN cảnh báo, không chặn deploy (nhịp tim là giám sát chéo, không phải bằng chứng
+  audit); bằng chứng audit vẫn là biên nhận B1. Đo TỪNG endpoint từ CẢ HAI máy deploy (403/404, phân trang thiếu, chuyển hướng artifact)
   trước khi bật chế độ chặn; chưa đo ⇒ `warning_only`, ghi rõ; sau khi bật chặn, mọi lỗi đọc ⇒ chặn.
 - **Không có ngoại lệ do máy cấp.** Thiếu biên nhận audit trên H ⇒ đường bình thường là chạy full audit trên H (dispatch
   bởi người có quyền) rồi deploy. Trường hợp khẩn cấp: CHỈ chủ kho, tự tay chạy deploy trên máy của mình với cờ khẩn cấp
@@ -567,6 +569,12 @@ Review lượt 7 (`wp1172-plan-r4-review-7`, trên `ffdd7bb`): không P0–P2; 2
 |---|---|---|
 | R4-30 chênh lệch chi phí khi đóng công tắc dùng số ròng | P3 | §13: 3,51–5,18 triệu s (cộng lại 0,46 chi phí audit PR5 vì triệt tiêu khi so hai trạng thái) |
 | R4-31 giải thích sai rằng chạm bao đóng loại cả nhánh PR6 | P3 | §4 A+1 "Trong CI": chạm bao đóng chỉ loại nhánh PR3; chốt thật là tính lại bằng mã master + công tắc đọc sống + audit đủ trên H cho PR6 |
+
+Review lượt 8 (`wp1172-plan-r4-review-8`, trên `673edc5`): R4-30, R4-31 đóng; không P0–P2; 1 P3 mới.
+
+| Finding | Mức | Xử lý ở bản sửa 9 |
+|---|---|---|
+| R4-32 B3 đọc nhịp tim B2 nhưng bảng endpoint không có Issue | P3 | Bảng năng lực B3 thêm comment Issue theo dõi (Issues: read) và đo endpoint ấy cùng các endpoint khác; nhịp tim cũ/không đọc được chỉ cảnh báo, không chặn |
 
 ## 12. Phương án loại
 

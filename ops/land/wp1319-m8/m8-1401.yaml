@@ -1,0 +1,45 @@
+packet: WP-PXA
+revision: 2
+generation: 1
+spec_hash: 99abe98869caa7f4cfa2e12822a9c46e21099c96657e95f8fe433dc12bc0c73f
+packet_issue: 1401
+head_da_review: 1cf535fddbd81f343872c81582b301f08bd79f45
+tree_h: efbd119cea400cca706cdcb7791c3204214fdf1c
+review:
+  code: 'ops/acceptance/wp-pxa/VERDICT-code.md: approve_with_fixes, khong P0; fixes da lam truoc review run'
+  run: 'ops/acceptance/wp-pxa/VERDICT-run.md: approve_scoped, 2/2'
+  r2_k4: 'ops/acceptance/wp-pxa/VERDICT-r2.md: KET_LUAN approve 2/2 tren 1cf535f (run b4dcb23d); P3 offline-k4b-P3-1 mien boi chu kho (mien_p3)'
+  connector: 'PR #1378 sach tren 1cf535f (issue comment 7006080824); P2 review 5972629197 da sua o 9a495967'
+windows:
+  k6: 'ops/land/pr1378-wp1319-provenance/windows-k6-1cf535f.json: Desktop PS7 36/36 + PS5.1 36/36 duoi tr-TR, phan chung rc 2'
+  ci_pr: run 44502793274 success tren 1cf535f
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1378#issuecomment-7006185095
+merge_commit: 96b6a33d770f7539a3eacbebdc215f87ded4ea7f
+merge_parents:
+- 4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd
+- 1cf535fddbd81f343872c81582b301f08bd79f45
+tree_m: d007b41f5b17c47c04150a56680081ec79f2ac5b
+ci_master:
+  run_id: 44507921722
+  conclusion: success
+  jobs: 39/39 success (ubuntu-latest)
+nghiem_thu:
+  '§11 #6 ve am (Test-ProximaArtifactTree)': passed
+  '§11 #7 updater chay trung': owner_waived
+  '§11 #8 promotion fence (muc ham va test)': passed
+  'r2: truyen va kiem culture cho tien trinh con phan chung': passed
+mien_tru_chi_tiet:
+  '§11 #7 updater chay trung': 'partial (MATRIX H.3): chot profile chi phoi hop cac ben goi guard; Proxima khong co single-instance, mo bang tay van lot'
+  '§11 #6 ve am': passed scoped; chi co hieu luc khi luong kich hoat goi module, hien chua co luong nao trong repo goi (ghi ro, khong mien)
+mien_tru_chu_kho: 'Chu kho chon ''Dong kem mien tru (Recommended)'' trong phien dieu phoi session_015GtxrapMSm976JLC7Fp1HM, 19/11 khoang 21:3xZ (AskUserQuestion; loi khai cua phien dieu phoi, khong co ban
+  ghi tren GitHub). Mien tru KHONG nang muc bang chung: moi hang owner_waived giu nguyen ket qua do va ly do trong mien_tru_chi_tiet.'
+lease_cuoi: wp-pxa-r2-g1-executor
+nha_lease: lease_until da qua (xem tep lease cuoi)
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+nguon_land: 'ops/land/pr1378-wp1319-land-evidence.yaml (PR #1378 gom cac packet con; ghi so qua PR #1419 36848f1b)'
+ghi_chu: Bien ban M8 (ADR-0060) la diem cuoi. Sua thi dang ban moi tro ban cu.

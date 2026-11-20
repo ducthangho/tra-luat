@@ -1,0 +1,42 @@
+packet: WP-U8
+revision: 1
+generation: 2
+spec_hash: 80b91bc878d0aa20213ff665e867e0e21b521151094f1bbf592485585f7dc34d
+packet_issue: 1410
+head_da_review: 1cf535fddbd81f343872c81582b301f08bd79f45
+tree_h: efbd119cea400cca706cdcb7791c3204214fdf1c
+review:
+  u8: 'ops/acceptance/wp-u8/VERDICT.md: approve_with_fixes 2 luot (khong P0/P1); fixes la ghi gioi han, da ghi trong RESULTS/MATRIX H.10'
+  connector: 'PR #1378 sach tren 1cf535f'
+windows:
+  desktop: backup/restore tren Desktop (zip eb1688b7, 3310b4d7)
+  ci_pr: run 44502793274 success tren 1cf535f
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1378#issuecomment-7006185095
+merge_commit: 96b6a33d770f7539a3eacbebdc215f87ded4ea7f
+merge_parents:
+- 4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd
+- 1cf535fddbd81f343872c81582b301f08bd79f45
+tree_m: d007b41f5b17c47c04150a56680081ec79f2ac5b
+ci_master:
+  run_id: 44507921722
+  conclusion: success
+  jobs: 39/39 success (ubuntu-latest)
+nghiem_thu:
+  U8 ve du lieu (sao chep, khoi phuc, mo lai): passed
+  U8 ve dang nhap: owner_waived
+  /v1/stats totalRequests=0 trong U8: owner_waived
+mien_tru_chi_tiet:
+  U8 ve dang nhap: 'quan_sat cua chu kho: phien giu duoc (Claude doi verify human); co loggedIn khong phan anh; chi cung may cung duong dan; khong co PASS/FAIL theo dac ta'
+  /v1/stats totalRequests=0 trong U8: 'not_measured: REST tat mac dinh'
+mien_tru_chu_kho: 'Chu kho chon ''Dong kem mien tru (Recommended)'' trong phien dieu phoi session_015GtxrapMSm976JLC7Fp1HM, 19/11 khoang 21:3xZ (AskUserQuestion; loi khai cua phien dieu phoi, khong co ban
+  ghi tren GitHub). Mien tru KHONG nang muc bang chung: moi hang owner_waived giu nguyen ket qua do va ly do trong mien_tru_chi_tiet.'
+lease_cuoi: wp-u8-r1-g2-operator
+nha_lease: lease_until da qua (xem tep lease cuoi)
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+nguon_land: 'ops/land/pr1378-wp1319-land-evidence.yaml (PR #1378 gom cac packet con; ghi so qua PR #1419 36848f1b)'
+ghi_chu: Bien ban M8 (ADR-0060) la diem cuoi. Sua thi dang ban moi tro ban cu.

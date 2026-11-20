@@ -1,0 +1,52 @@
+packet: WP-NSIS
+revision: 1
+generation: 3
+spec_hash: 04f2e4eb26811031e9c8f45400ec14bb9a1e544c23bc0dcca2ce6822efc760a9
+packet_issue: 1405
+head_da_review: 1cf535fddbd81f343872c81582b301f08bd79f45
+tree_h: efbd119cea400cca706cdcb7791c3204214fdf1c
+review:
+  n2: 'ops/acceptance/wp-nsis/VERDICT.md luot N2: request_changes'
+  n3: 'ops/acceptance/wp-nsis/VERDICT.md luot N3: request_changes (verdict goc sha256 2113f51d)'
+  xu_ly_finding: 'P1-1 tieu chi go sach: chu kho sua tieu chi thanh quy trinh go 3 buoc (MATRIX H.7), do passed o WP-PXR (H.12) · P1-2 InstallLocation: chu kho bo yeu cau (H.7) · P1-3 tien kiem hep hon
+    dac ta: owner_waived · P1-4 buoc don driver khong an toan truoc dua: thay bang Remove-ProximaUninstallResidue cua WP-PXU (approve_scoped) · P2 lay mau tien trinh, per-machine/nang cap/rollback chua
+    do: owner_waived'
+  connector: 'PR #1378 sach tren 1cf535f'
+windows:
+  native: Desktop N1b/N2/N3 (ops/acceptance/wp-nsis/RESULTS.md)
+  ci_pr: run 44502793274 success tren 1cf535f
+duyet_chu_kho: https://github.com/ducthangho/tra-luat/pull/1378#issuecomment-7006185095
+merge_commit: 96b6a33d770f7539a3eacbebdc215f87ded4ea7f
+merge_parents:
+- 4eda94e9effc6cfe7fcc0b3e3fb4151ad437ecbd
+- 1cf535fddbd81f343872c81582b301f08bd79f45
+tree_m: d007b41f5b17c47c04150a56680081ec79f2ac5b
+ci_master:
+  run_id: 44507921722
+  conclusion: success
+  jobs: 39/39 success (ubuntu-latest)
+nghiem_thu:
+  NSIS cai per-user (/S /currentuser): passed
+  NSIS go cua nha cung cap (NSIS-2): owner_waived
+  NSIS quy trinh go 3 buoc (tieu chi sua H.7): passed
+  Chu ky bo cai: owner_waived
+  Per-machine / nang cap / rollback / lan chay dau: owner_waived
+  Tien kiem S0 day du theo dac ta: owner_waived
+mien_tru_chi_tiet:
+  NSIS go cua nha cung cap (NSIS-2): 'failed (hanh vi san pham, 3 luot N1b/N2/N3): luon con thu muc cai rong va proxima-updater/installer.exe; giu nhu finding san pham, khong xoa'
+  Chu ky bo cai: 'NotSigned (do duoc); chinh sach chu kho 19/11: chap nhan theo digest da ghim (U5/U12 accepted_risk)'
+  Per-machine / nang cap / rollback / lan chay dau: not_evidenced
+  Tien kiem S0 day du theo dac ta: 'not_measured: driver tien kiem hep hon dac ta (VERDICT N3 P1-3)'
+  NSIS quy trinh go 3 buoc: passed scoped Desktop 5.5.0 per-user 1 luot (H.12); bam Proxima.exe khong do lai ngay truoc go
+mien_tru_chu_kho: 'Chu kho chon ''Dong kem mien tru (Recommended)'' trong phien dieu phoi session_015GtxrapMSm976JLC7Fp1HM, 19/11 khoang 21:3xZ (AskUserQuestion; loi khai cua phien dieu phoi, khong co ban
+  ghi tren GitHub). Mien tru KHONG nang muc bang chung: moi hang owner_waived giu nguyen ket qua do va ly do trong mien_tru_chi_tiet.'
+lease_cuoi: wp-nsis-r1-g3-operator
+nha_lease: lease_until da qua (xem tep lease cuoi)
+landed: true
+moc_10_2_2:
+  run: passed
+  checkout: passed
+  workflow_definition: passed
+  gate_output: passed
+nguon_land: 'ops/land/pr1378-wp1319-land-evidence.yaml (PR #1378 gom cac packet con; ghi so qua PR #1419 36848f1b)'
+ghi_chu: Bien ban M8 (ADR-0060) la diem cuoi. Sua thi dang ban moi tro ban cu.

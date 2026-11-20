@@ -15,12 +15,11 @@ TEST_ID = "wp433_bundled_tach_manh"
 _WARN = 280 * 1024
 # sha256 của `generate_bundled_module_bytes` trên base 0f9aa2a cho fixture `wp9001_a.py` (216 B); KHÔNG tính lại từ mã sau sửa.
 _MOT_MANH_SHA256 = "73ad44659b63aea9b2f66fb1104c4c82deaa1ad1218e94adb80dcf38384441d7"
-_NHAN = ("P1_mot_manh", "P2_nhieu_manh", "P3_chi_nap_manh_khai", "P4_cong_bao_manh_lac", "P5_ghi_xoa_lac",
-         "P6_thieu_manh", "P7_thu_tu_xuyen_manh", "P8_trung_xuyen_manh", "P9_manh_tu_khai", "P10_kho_that")
+_KHOA = tuple(f"V{i}" for i in range(1, 18))   # V1–V17 của đặc tả §4, mỗi vế một khoá
 _KQ = {}
 _M1 = "tl_test_fragments_bundled.py"
 _M2, _M3, _M9 = (f"tl_test_fragments_bundled_{k}.py" for k in (2, 3, 9))
-_CONTRACT = "BUNDLED_MODULE_CONTRACT"
+_CONTRACT, _MISSING, _STALE = "BUNDLED_MODULE_CONTRACT", "BUNDLED_MODULE_MISSING", "GENERATED_BUNDLE_STALE"
 
 
 def _nguon(name, pad=0):
@@ -32,7 +31,7 @@ def _frag(root, name, pad=0):
 
 
 def _manh(path, names, khai=None):
-    """Viết TAY một mảnh data-only (không qua generator) để P3, P6–P9 không phụ thuộc generator."""
+    """Viết TAY một mảnh data-only (không qua generator) để các vế loader V7–V13 không phụ thuộc generator."""
     text = "BUNDLED_FRAGMENT_SOURCES = (\n" + "".join(
         f"    ({json.dumps(n)}, {json.dumps(_nguon(n))}),\n" for n in names) + ")\n"
     if khai is not None:
@@ -60,16 +59,15 @@ def _check(tl_module, root):
         return rc, {}
 
 
-def _khai_cua(data):
-    """Giá trị tuple BUNDLED_FRAGMENT_SHARDS của một mảnh (None nếu không có phép gán ấy)."""
-    for node in ast.parse(data.decode("utf-8")).body:
-        if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", "") == "BUNDLED_FRAGMENT_SHARDS":
-            return ast.literal_eval(node.value)
-    return None
+def _gan(data):
+    """Đọc ĐỘC LẬP (AST) một mảnh sinh ra: (danh sách tên fragment, giá trị SHARDS hoặc None)."""
+    gan = {node.targets[0].id: ast.literal_eval(node.value)
+           for node in ast.parse(data.decode("utf-8")).body if isinstance(node, ast.Assign)}
+    return [n for n, _ in gan["BUNDLED_FRAGMENT_SOURCES"]], gan.get("BUNDLED_FRAGMENT_SHARDS")
 
 
 def _do(base, tf, tl_module):
-    """Trả 10 hàm đo, mỗi hàm một tính chất; hàm nào văng thì nhãn ấy False, các nhãn khác vẫn được tính."""
+    """Trả 17 hàm đo theo thứ tự V1–V17; hàm nào văng thì khoá ấy False, các khoá khác vẫn được tính."""
     names = [f"wp9001_f{i}.py" for i in range(6)]
     ids = [n[:-3] for n in names]
     r2 = base / "r2" / "scripts"          # fixture qua generator: 6 × 40 KiB, hạn 100 KiB
@@ -90,97 +88,135 @@ def _do(base, tf, tl_module):
             fr.mkdir(parents=True)
             for n in names:
                 _frag(fr, n, pad=40 * 1024)
-        return han(lambda: tf.write_bundled_modules(fr, r2))
+        if stray.exists():
+            stray.unlink()
+        han(lambda: tf.write_bundled_modules(fr, r2))
+        return han(lambda: tf.generate_bundled_modules(fr))
 
-    def dung_r3():
+    def dung_r3(khai=(_M2, _M3)):
         r3.mkdir(parents=True, exist_ok=True)
-        _manh(r3 / _M1, names[:2], (_M2, _M3))
+        _manh(r3 / _M1, names[:2], khai)
         _manh(r3 / _M2, names[2:4])
         _manh(r3 / _M3, names[4:])
         if (r3 / _M9).exists():
             (r3 / _M9).unlink()
 
-    def p1():
+    def loi_r3():
+        return _nap(tf, r3)[1]
+
+    def v1():
         root = base / "r1" / "test_fragments"
         root.mkdir(parents=True)
         _frag(root, "wp9001_a.py")
         mods = tf.generate_bundled_modules(root)
         cu = tf.generate_bundled_module_bytes(root)
-        return (len(mods) == 1 and _khai_cua(mods[0][1]) is None
+        return (len(mods) == 1 and _gan(mods[0][1])[1] is None
                 and hashlib.sha256(mods[0][1]).hexdigest() == _MOT_MANH_SHA256
                 and hashlib.sha256(cu).hexdigest() == _MOT_MANH_SHA256)
 
-    def p2():
-        written = dung_r2()
-        mods = han(lambda: tf.generate_bundled_modules(fr))
-        dich = r2.parent / "nap"           # bản sao chỉ gồm các mảnh ⇒ topology bundle
-        dich.mkdir()
-        for name in written:
-            (dich / name).write_bytes((r2 / name).read_bytes())
-        got, err, _ = _nap(tf, dich)
-        return (tuple(written) == (_M1, _M2, _M3) == tuple(n for n, _ in mods)
-                and [d.count(b'\n    ("wp9001_f') for _, d in mods] == [2, 2, 2]
-                and _khai_cua(mods[0][1]) == (_M2, _M3)
-                and all(_khai_cua(d) is None for _, d in mods[1:])
-                and err is None and got == ids)
+    def v2():
+        mods = dung_r2()
+        return ([n for n, _ in mods] == [_M1, _M2, _M3]
+                and [_gan(d)[0] for _, d in mods] == [names[:2], names[2:4], names[4:]])
 
-    def p3():
+    def v3():
+        return _gan(dung_r2()[0][1])[1] == (_M2, _M3)
+
+    def v4():
+        root = base / "r4" / "test_fragments"
+        root.mkdir(parents=True)
+        lon = ["wp9001_g0.py", "wp9001_g1.py", "wp9001_g2.py"]
+        _frag(root, lon[0], pad=150 * 1024)   # một fragment đơn vượt hạn 100 KiB, đứng ĐẦU
+        _frag(root, lon[1])
+        _frag(root, lon[2])
+        mods = han(lambda: tf.generate_bundled_modules(root))
+        return [sorted(_gan(d)[0]) for _, d in mods] == [lon[:1], lon[1:]]   # V4 đo RANH mảnh; thứ tự trong mảnh là V2
+
+    def v5():
+        mods = dung_r2()
+        return len(mods) > 1 and han(lambda: tf.generate_bundled_module_bytes(fr)) == mods[0][1]
+
+    def v6():
+        mods = dung_r2()
+        stray.write_bytes(b"BUNDLED_FRAGMENT_SOURCES = ()\n")
+        han(lambda: tf.write_bundled_modules(fr, r2))
+        return not stray.exists() and all((r2 / n).read_bytes() == d for n, d in mods)
+
+    def v7():
         dung_r3()
         truoc = _nap(tf, r3)
         _manh(r3 / _M9, ["wp9001_f6.py"])
         sau = _nap(tf, r3)
         return truoc[:2] == (ids, None) and sau[:2] == (ids, None)
 
-    def p4():
-        dung_r2()
-        stray.write_bytes((r2 / _M1).read_bytes())
-        rc, j = han(lambda: _check(tl_module, r2.parent))
-        return rc != 0 and j.get("error") == "GENERATED_BUNDLE_STALE" and j.get("extra_shards") == [_M9]
-
-    def p5():
-        dung_r2()
-        stray.write_bytes(b"BUNDLED_FRAGMENT_SOURCES = ()\n")
-        han(lambda: tf.write_bundled_modules(fr, r2))
-        rc, j = han(lambda: _check(tl_module, r2.parent))
-        return not stray.exists() and rc == 0 and j.get("ok") is True
-
-    def p6():
+    def v8():
         dung_r3()
         (r3 / _M2).unlink()
         _, err, msg = _nap(tf, r3)
-        return err == "BUNDLED_MODULE_MISSING" and f"scripts/{_M2}" in msg
+        return err == _MISSING and f"scripts/{_M2}" in msg
 
-    def p7():
+    def v9():
         dung_r3()
         _manh(r3 / _M2, names[4:])
         _manh(r3 / _M3, names[2:4])
-        return _nap(tf, r3)[1] == _CONTRACT
+        return loi_r3() == _CONTRACT
 
-    def p8():
+    def v10():
         dung_r3()
         _manh(r3 / _M3, names[3:])         # f3 là cuối mảnh 2 VÀ đầu mảnh 3; thứ tự toàn chuỗi không giảm
-        return _nap(tf, r3)[1] == _CONTRACT
+        return loi_r3() == _CONTRACT
 
-    def p9():
+    def v11():
         dung_r3()
         _manh(r3 / _M3, names[4:], (_M2,))
-        return _nap(tf, r3)[1] == _CONTRACT
+        return loi_r3() == _CONTRACT
 
-    def p10():
+    def v12():
+        dung_r3(khai=())
+        return loi_r3() == _CONTRACT
+
+    def v13():
+        dung_r3(khai=(_M3,))               # khai không liên tục: bỏ qua _2
+        return loi_r3() == _CONTRACT
+
+    def v14():
+        mods = dung_r2()
+        stray.write_bytes(mods[0][1])
+        rc, j = han(lambda: _check(tl_module, r2.parent))
+        return rc != 0 and j.get("error") == _STALE and j.get("extra_shards") == [_M9]
+
+    def v15():
+        mods = dung_r2()
+        (r2 / _M2).write_bytes(mods[1][1] + b"# sua\n")
+        rc, j = han(lambda: _check(tl_module, r2.parent))
+        return len(mods) == 3 and rc != 0 and j.get("error") == _STALE and j.get("extra_shards") == []
+
+    def v16():
+        mods = dung_r2()
+        rc, j = han(lambda: _check(tl_module, r2.parent))
+        bam = hashlib.sha256(b"".join(n.encode() + b"\0" + d for n, d in mods)).hexdigest()
+        (r2 / _M1).unlink()
+        rc2, j2 = han(lambda: _check(tl_module, r2.parent))
+        return (len(mods) == 3 and rc == 0 and j.get("ok") is True
+                and [s.get("name") for s in j.get("shards") or []] == [_M1, _M2, _M3]
+                and j.get("expected_sha256") == bam == j.get("actual_sha256")
+                and rc2 != 0 and j2.get("error") == _MISSING)
+
+    def v17():
         repo = Path(tf.__file__).resolve().parent.parent / "test_fragments"
         real = tf.generate_bundled_modules(repo) if repo.is_dir() else ()
         return tf._BUNDLED_SHARD_LIMIT == 196608 and all(len(d) <= 0.7 * _WARN for _, d in real)
 
-    return (p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
+    return (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17)
 
 
 def run(tl_module):
     tf = importlib.import_module("tl_core.test_fragments")
     _KQ.clear()
     with tempfile.TemporaryDirectory(prefix="wp433_bt_") as tmp:
-        for nhan, fn in zip(_NHAN, _do(Path(tmp), tf, tl_module)):
+        for khoa, fn in zip(_KHOA, _do(Path(tmp), tf, tl_module)):
             try:
-                _KQ[nhan] = fn() is True
-            except Exception:  # noqa: BLE001 — văng ⇒ nhãn False, không bỏ dở các nhãn sau
-                _KQ[nhan] = False
-    return len(_KQ) == 10 and all(value is True for value in _KQ.values())
+                _KQ[khoa] = fn() is True
+            except Exception:  # noqa: BLE001 — văng ⇒ khoá False, không bỏ dở các khoá sau
+                _KQ[khoa] = False
+    return len(_KQ) == 17 and all(value is True for value in _KQ.values())

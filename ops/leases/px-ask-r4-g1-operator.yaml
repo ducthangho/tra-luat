@@ -31,9 +31,12 @@ recorded_by: 'phiên điều phối Mission #1238 session_015GtxrapMSm976JLC7Fp1
 thay_the_cho: []
 leased_at_utc: '2026-11-20T07:40:32Z'
 heartbeat_at: '2026-11-20T07:40:32Z'
-lease_until: '2026-11-20T11:40:32Z'
-lease_expires_at_utc: '2026-11-20T11:40:32Z'
+lease_until: '2026-11-20T07:49:38Z'
+lease_expires_at_utc: '2026-11-20T07:49:38Z'
 max_lease_hours: 4
 review_calls_limit: 0
 native_runs_limit_per_host: 2
 inference_calls_limit_per_host: 1
+withdrawn_at_utc: '2026-11-20T07:49:38Z'
+withdrawn_by: 'phien dieu phoi Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r4 xong: R4.ps1 chay 1/1 boi chu kho; 1/1 loi goi px ask that (gemini:auto) da gui, gateway HTTP 500, outcome unknown; ket qua ops/acceptance/px-ask/r4/RESULTS.md'

@@ -1,4 +1,4 @@
-# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 7
+# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 8
 
 ## 1. Trạng thái và nguồn
 
@@ -15,7 +15,8 @@
   đã qua review lượt 4 (`wp1172-plan-r4-review-4`, còn 1 P1 R4-19). Bản sửa 5 qua review lượt 5 (2 P1 + 3 P2, cùng một
   lớp: uỷ quyền chủ kho do máy kiểm). **Bản sửa 6 BỎ lớp ấy** thay vì vá tiếp (xem §11) và đã qua review lượt 6
   (`wp1172-plan-r4-review-6`, trên `bf16c5d`, tệp `a7fea4f3…`): còn 1 P1 + 2 P2 + 2 P3 (R4-25…R4-29).
-- **Bản sửa 7** xử lý cả năm finding ấy, GIỮ quyết định không có kho uỷ quyền do máy kiểm, và CHƯA được review lại.
+- **Bản sửa 7** xử lý cả năm finding ấy, GIỮ quyết định không có kho uỷ quyền do máy kiểm; review lượt 7 còn 2 P3
+  biên tập. **Bản sửa 8** sửa hai P3 ấy và CHƯA được review lại.
   Chủ kho đã quyết định tiếp tục review cho tới khi còn 0 finding P0–P3. Điểm đổi chính: công tắc A+1 trở lại MẶC ĐỊNH
   ĐÓNG (chỉ đúng một chuỗi cho phép mới giảm G5 — r3 I3, r2 §5.5); bên tiêu dùng `kiem-merge` đọc giá trị HIỆN TẠI của
   công tắc, không dùng log cũ; và chỗ nào chỉ là quy trình của người thì được gọi đúng tên là quy trình, kèm rủi ro tồn
@@ -119,8 +120,11 @@ quyết định đặt biến; phần ấy là quy trình của chủ kho, khai 
     giá trị nó thấy, chỉ để truy vết.
   - **Trong CI (gợi ý, không phải thẩm quyền).** `chuan-bi` đọc ngữ cảnh `vars`; biến của lớp nào đúng `CHO_PHEP` thì bộ
     phân loại mới được xuất quyết định giảm của lớp ấy; rỗng, lạ, vắng ⇒ `chay`. Đọc `vars` trong `ci.yml` không trao
-    quyền gì cho tác giả PR: họ thấy giá trị (không bí mật) và có thể sửa `ci.yml` của chính PR để lờ nó đi, nhưng diff
-    ấy chạm bao đóng nên `kiem-merge` không nhận trường hợp (β). Không dùng `pull_request_target` chạy mã PR.
+    quyền gì cho tác giả PR: họ thấy giá trị (không bí mật) và có thể sửa `ci.yml` của chính PR để lờ nó đi. Chốt ở đây
+    KHÔNG phải "chạm bao đóng": chạm bao đóng chỉ loại nhánh PR3 của (β), còn nhánh PR6 (diff trọn trong vùng K7) vẫn có
+    thể hợp lệ. Chốt thật là ba điều kiện của `kiem-merge` ở trên: phân loại tính lại bằng mã master (không bằng mã PR),
+    công tắc của đúng lớp đọc SỐNG bằng `CHO_PHEP`, và với PR6 thì audit đủ trên đúng H; mã PR lờ công tắc trong CI không
+    thay đổi được cả ba. Không dùng `pull_request_target` chạy mã PR.
   - **Giá phải trả về tính sẵn sàng (nói trước).** Máy chạy `kiem-merge` không đọc được biến ⇒ mọi PR thuộc trường hợp
     (β) bị đòi một lượt G5 đủ trên H cuối trước merge; lợi ích của PR3/PR6 khi ấy chỉ còn ở các lần đẩy trung gian. Lối
     ra chỉ có hai: cấp cho máy ấy quyền CHỈ ĐỌC biến (Variables: read), hoặc chủ kho chấp nhận mất phần lợi ích đó
@@ -557,6 +561,13 @@ Bốn thay đổi có chủ đích NGOÀI chữ của năm finding, nêu ra đ�
    theo tệp protocol/adapter.
 
 
+Review lượt 7 (`wp1172-plan-r4-review-7`, trên `ffdd7bb`): không P0–P2; 2 P3. Bản sửa 8 do phiên điều phối sửa (biên tập):
+
+| Finding | Mức | Xử lý ở bản sửa 8 |
+|---|---|---|
+| R4-30 chênh lệch chi phí khi đóng công tắc dùng số ròng | P3 | §13: 3,51–5,18 triệu s (cộng lại 0,46 chi phí audit PR5 vì triệt tiêu khi so hai trạng thái) |
+| R4-31 giải thích sai rằng chạm bao đóng loại cả nhánh PR6 | P3 | §4 A+1 "Trong CI": chạm bao đóng chỉ loại nhánh PR3; chốt thật là tính lại bằng mã master + công tắc đọc sống + audit đủ trên H cho PR6 |
+
 ## 12. Phương án loại
 
 Giữ chín phương án của r3 §6. Thêm: (10) khôi phục nguyên r2 — nhắm khoản 4,7 % và đổi lấy M9; (11) sửa spec PR1 đang
@@ -586,7 +597,7 @@ tăng, hoặc làm mất phần tiết kiệm:
 | Nguồn | So với HÔM NAY | So với trạng thái đã bật (sau PR3/PR6) |
 |---|---|---|
 | Công tắc ở `CHO_PHEP` (vận hành bình thường) | +0 job; thêm một lần đọc `vars` ở `chuan-bi` | — |
-| Công tắc KHÔNG giảm: mặc định trước khi chủ kho bật; sau sự cố; gõ sai hoặc xoá nhầm biến | +0, `ci.yml` chạy đúng luật hôm nay (không kể overhead phần đo của PR1, xét ở A+5) | mất phần tiết kiệm G5 chừng nào còn ở trạng thái ấy. r3 §5 minh hoạ, chưa đo: 0,57–2,00 triệu s/30 ngày khi chỉ có PR3; 3,05–4,72 khi có PR6 (đã trừ 0,46 chi phí audit thêm của PR5; khoản ấy vẫn chi khi công tắc đóng) |
+| Công tắc KHÔNG giảm: mặc định trước khi chủ kho bật; sau sự cố; gõ sai hoặc xoá nhầm biến | +0, `ci.yml` chạy đúng luật hôm nay (không kể overhead phần đo của PR1, xét ở A+5) | mất phần tiết kiệm G5 chừng nào còn ở trạng thái ấy. r3 §5 minh hoạ, chưa đo: 0,57–2,00 triệu s/30 ngày khi chỉ có PR3; 3,51–5,18 khi có PR6 (con số GỘP: lấy khoảng 3,05–4,72 của r3 — vốn là tiết kiệm RÒNG sau khi trừ 0,46 chi phí audit thêm của PR5 — cộng lại 0,46, vì khoản audit ấy vẫn chi ở cả hai trạng thái nên triệt tiêu khi so đóng với bật) |
 | PR đang mở có lượt CI gần nhất đã giảm, rồi công tắc đóng | — | mỗi PR cần MỘT lượt `ci.yml` nữa trên H trước merge, ≈ 13 716 s giây thực thi (trung bình lượt PR `day_du` của cohort; mốc sau 17-11: 10 659 s); số PR như vậy tại một thời điểm: CHƯA ĐO |
 | Máy chạy `kiem-merge` không đọc được biến | +0 | mỗi PR thuộc trường hợp (β) cần một lượt G5 đủ trên H cuối trước merge, cùng đơn giá; lợi ích chỉ còn ở các lần đẩy trung gian; phần mất: CHƯA ĐO (tuỳ số lần đẩy mỗi PR) |
 | PR hồ sơ (`duong_nhanh`), ở mọi trạng thái công tắc | +0 giây `ci.yml`: CI của chúng không đọc công tắc; cổng merge thêm phép tính lại (α), không phải job CI | như cột bên |

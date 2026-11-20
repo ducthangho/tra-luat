@@ -1,0 +1,36 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: null
+packet_id: px-gemini-500
+revision: 1
+generation: 1
+lease_id: px-gemini-500-r1-g1-operator
+role: operator
+reviewer: 'connector Codex tren PR; khong goi Codex offline (khong doi ma)'
+review_class: sensitive
+effective_review_class: sensitive
+target_hosts:
+- f7281f27-f79f-40a2-a2f5-b454b58a166a
+live_change: 'CHI DOC log Proxima tren VM (tai khoan tlcommander, khong admin). 0 loi goi inference; khong doi cau hinh/dich vu/tai khoan/ACL; khong doc profile/cookie/token.'
+spec_path: ops/specs/px-gemini-500-r1.md
+spec_hash: ad26cfd56be1f59d62a0c29255f2040edfc473ff287c370b889715698e597c12
+write_set:
+- ops/acceptance/px-gemini-500/r1/RESULTS.md
+- ops/leases/px-gemini-500-r1-g1-operator.yaml
+- ops/specs/px-gemini-500-r1.md
+write_set_hash: 7c2c644ea952ecea01ba70945e011bcfbc069576247441a1c43d65cf50d1b5f3
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ops/px-gemini-500-r1
+base_sha: 8048551a9b1eb886c126d2a1a4df0f95fb285964
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20-11-2026 yeu cau mo phien chan doan HTTP 500 gemini:auto qua phien dieu phoi session_015GtxrapMSm976JLC7Fp1HM; cho phep doc log Proxima tren VM'
+recorded_by: 'phien chan doan session_015GtxraqxgU6x1GshxzYCF4'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T11:17:00Z'
+heartbeat_at: '2026-11-20T11:17:00Z'
+lease_until: '2026-11-20T15:17:00Z'
+lease_expires_at_utc: '2026-11-20T15:17:00Z'
+max_lease_hours: 4
+review_calls_limit: 0
+native_runs_limit_per_host: 0
+inference_calls_limit_per_host: 0

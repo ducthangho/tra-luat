@@ -2,6 +2,29 @@
 
 **Căn cứ:** đặc tả `ops/specs/wp1319-r11.md`, lease `ops/leases/wp1319-r11-g1-operator.yaml`. Ngân sách: tối đa 2 lời gọi Codex, do chủ kho cấp ngày 20/11.
 
+## Sandbox và effort lúc chạy (cả hai lượt)
+Nguồn: `run.json` do `launcher.py run` ghi.
+- Lượt 1: `runs/c0939197/run.json`, sha256 `c7c8b188d9762ed1c0d0fc3b22c162fca8934302026c79c07b260ab932b7719c`.
+- Lượt 2: `runs/71689c97/run.json`, sha256 `4c8f6c525d5d17a9f4af2f392f9d502fdebd8fc4dc098af51f491caef5fe4c3a`.
+- Hai tệp nằm trong thư mục làm việc của phiên điều phối, không đưa vào kho. Các giá trị dưới đây chép từ đó.
+
+| Mục | Lượt 1 (`c0939197`) | Lượt 2 (`71689c97`) |
+|---|---|---|
+| Chế độ yêu cầu | `codex exec --sandbox workspace-write -C <thư mục review riêng>` | như lượt 1 |
+| `sandbox_trang_thai` | **`DO_DUOC`** | **`DO_DUOC`** |
+| `sandbox_quan_sat` | `codex-linux-sandbox` với profile `managed`: `file_system: restricted` (gốc: chỉ đọc; ghi được cwd, `/tmp`, `TMPDIR`), `network: restricted`. Thấy 9 lần, thêm 3 lần với `--apply-seccomp-then-exec`. `bwrap` 5 lần với `--unshare-net --unshare-pid --unshare-user --unshare-ipc --cap-drop=ALL --die-with-parent --new-session`, `--ro-bind /` | `codex-linux-sandbox`, cùng profile `restricted`/`network restricted`, 1 lần. `bwrap` 1 lần, cùng bộ cờ `--unshare-*`, chỉ có `--ro-bind` |
+| `sandbox_lech` | mọi bộ đếm = 0 | mọi bộ đếm = 0 |
+| Effort phục vụ | `medium` (`DO_DUOC`) | `medium` (`DO_DUOC`) |
+| Provider, bề mặt | `openai_codex`, `codex_cli`, transport `machine` | như lượt 1 |
+
+Giới hạn (nguyên văn `sandbox_gioi_han`):
+- Phép đo lấy mẫu `/proc` mỗi 0,2 s, nên lệnh ngắn hơn chu kỳ có thể lọt.
+- `DO_DUOC` nghĩa là đã **thấy** cơ chế sandbox với các cờ nói trên. Nó **không** chứng minh mọi lệnh đều chạy trong sandbox.
+
+Chế độ là `workspace-write`, không phải `read-only`:
+- reviewer ghi được vào thư mục review riêng và `/tmp` (đó là nơi `VERDICT.md` và `hash-checks.json` được ghi);
+- bản clone của kho chỉ đọc được trong sandbox, vì gốc hệ tệp được gắn `--ro-bind`.
+
 ## Lượt 1/2
 | Mục | Giá trị |
 |---|---|

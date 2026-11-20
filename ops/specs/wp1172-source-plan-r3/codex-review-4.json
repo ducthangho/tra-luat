@@ -1,0 +1,177 @@
+{
+  "verdict": "approve",
+  "findings": [
+    {
+      "id": "R3-11",
+      "severity": "P3",
+      "section": "PLAN.md:371-374, rounding convention and combined savings range",
+      "summary": "The PR6 lower endpoint still disagrees with the newly stated outward-rounding rule.",
+      "evidence": "Using the table constants, 0.10*5.71 + 0.90*5.44*0.60 - 0.46 + 0.40 + 0.05 = 3.4986 million seconds. Outward rounding to 0.1 gives 3.4, whereas the plan displays 3.5 after first rounding the intermediate result to 3.50. The other three endpoints and all 12 table cells match. This is an illustrative presentation issue, not a blocking defect.",
+      "suggested_fix": "In the summary at lines 371-374, change the PR6 range to 3.4-5.6 million seconds under the stated convention. Calculate endpoints from unrounded expressions and round once; retain the 3.4986 boundary as an arithmetic check. Avoid deriving percentages from prematurely rounded cells. No model, scope or acceptance change is needed."
+    }
+  ],
+  "prior_findings": [
+    {
+      "id": "R3-06",
+      "status": "closed",
+      "evidence": "PLAN.md:78-106 and 173-178 retain old-rule eligibility, separate existing fast-lane skips from new PR3 skips, and use first-match rows 0-10 with a final missing-evidence fallback. The PR4 positive case now selects duong_nhanh_dang_chay and reaches row 3 without receiving bo_moi credit. Eight valid receipts plus failed/cancelled collection, and interrupted skip collection, reach row 7; incomplete execution reaches row 8. None receives completed-coverage credit. Independent snapshot accounting covers all 216 completed recent PR runs exactly once: 3 before classification, 29 old fast lane, 95 incomplete, 89 lacking archived G5 proof. The denominator remains 184. Excluding verified cancellation before classification is consistent with both PREV and the frozen definition."
+    },
+    {
+      "id": "R3-09",
+      "status": "closed",
+      "evidence": "PLAN.md:349-369 defines a distinct step-cost share f_b and uses f_c*V + (1-f_b)*V_b*s_b - A. The table explicitly assumes f_b=f_c; all 12 cells reproduce. The unequal-step example correctly gives f_c=0.5, f_b=0.1 and 54 seconds saved, versus the incorrect 30 seconds. Whole-job audit allowance remains included."
+    },
+    {
+      "id": "R3-11",
+      "status": "partially",
+      "evidence": "The four DX-2 groups independently reproduce 5694+1923+205+10=7832 rows and 8542030 seconds; the unknown-lane group has 10 measured zero-second rows. The added collector citation resolves to median 13 seconds, n=726. Outward rounding correctly explains the no-PR6 upper bound 2.8485 -> 2.9. Only the PR6 lower endpoint remains inconsistent, as the P3 finding describes."
+    }
+  ],
+  "number_checks": {
+    "checked": 64,
+    "mismatches": [
+      {
+        "metric": "PR6 lower endpoint under outward rounding",
+        "section": "PLAN.md:371-374",
+        "unrounded_million_seconds": 3.4986,
+        "displayed": 3.5,
+        "expected": 3.4,
+        "severity": "P3"
+      }
+    ]
+  },
+  "overall_assessment": "Approve source plan r3 revision 4, exact SHA-256 2e9fb13f1ab3f299c2d2dc1e5a6e407ff0aadb8aee1f6ffd00d88fc02b146f89, for owner consideration.\nNo P0-P2 findings remain; R3-06 and R3-09 are closed at plan level.\nR3-11 retains one minor rounding advisory, permitted by the assigned severity rule.\nThe diff stays within the three assigned repairs and their revision notes; no unrelated substantive change was found.\nAll 216 completed recent PR runs have one accounting category; two additional listed runs were still in progress at snapshot collection.\nHistorical completed G5 coverage remains unmeasured because this snapshot does not contain its receipts or collector logs.\nNo new blocking defect or regression was found.\nThis is the final authorized review round; this verdict does not authorize implementation, merge, land or another model round.",
+  "notes": {
+    "anchors": {
+      "mission": "ducthangho/tra-luat #1172, r80; round 4, final",
+      "authority": "Direct user assignment: independent read-only planning review.",
+      "plan": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan4/PLAN.md",
+      "plan_sha256": "2e9fb13f1ab3f299c2d2dc1e5a6e407ff0aadb8aee1f6ffd00d88fc02b146f89",
+      "previous_plan_sha256": "43137d53a4451dfc8adb45c83d06c6314353ab7c393e77da2e3e0d1dee467cf4",
+      "prior_verdict_sha256": "5d3bb36c80ca1a0a1c04ad48464cc2b48f34c5f5249a4300259bfeadc27e47d7",
+      "baseline": "ops/specs/wp1434-r3/do/BASELINE.json",
+      "baseline_sha256": "6100c8e18907f59b1abbdc44195861cc2310c654ce8dcfa2e74ca4ffa155f54c",
+      "reviewed_sha": "5e5d2cc192758b5a372a875827987b6f471704c0",
+      "reviewed_tree": "ebf56f757e7f0c6432f91dcc8ec9414137d8e17d",
+      "checkout": "Prepared detached HEAD at the assigned master commit; origin https://github.com/ducthangho/tra-luat.git."
+    },
+    "identity": {
+      "provider": "openai_codex",
+      "execution_surface": "codex_cli",
+      "transport": "machine",
+      "model_family": "openai",
+      "served_model_and_effort": "KHONG_DO_DUOC",
+      "run_id": "551637d23487497bbb1685bb07710600",
+      "identity_source": "revplan4/runs/551637d2/run.json",
+      "sandbox": "workspace-write; checkout and snapshot operated read-only",
+      "review_class": "Sensitive subject matter; source-plan review only."
+    },
+    "diff_scope": "12 changed blocks: revision title/history, G4 and its PR1 acceptance cases, savings formula/assumptions/example/citation/rounding, DX-2 fourth group, and finding-resolution notes. Safety invariants, PR2-PR8 packet sections, rejected alternatives, owner questions and limitations are byte-identical between PREV and PLAN. No broader redesign or scope expansion.",
+    "recent_cohort": {
+      "window": "created_at >= 2026-11-17T00:00:00Z within the frozen snapshot ending 2026-11-20T01:16:24Z",
+      "raw_listed_pr_runs": 218,
+      "completed_baseline_runs": 216,
+      "frozen_denominator": 184,
+      "not_final_at_snapshot": {
+        "run_ids": [44651629936, 44651966417],
+        "status": "in_progress",
+        "treatment": "Excluded by the original BASELINE completed-run cohort rule. Snapshot has no jobs for them; final G4 membership/outcome is not measurable."
+      },
+      "g4a": "All 184 eligible historical runs selected du under the existing policy. This is selection accounting, not proof of completed G5 coverage.",
+      "g4b_counts": {
+        "huy_truoc_phan_loai": 3,
+        "ngoai_mau_so": 29,
+        "dang_do": 95,
+        "thieu_bang_chung": 89,
+        "du_hoan_tat_verified_from_snapshot": 0,
+        "dich_hoan_tat": 0,
+        "gom_hong_verified_from_snapshot": 0
+      },
+      "run_ids_by_category": {
+        "huy_truoc_phan_loai": [44279205446, 44292639424, 44420696024],
+        "ngoai_mau_so": [43988370346, 44007945600, 44017352463, 44020593571, 44053945122, 44055200918, 44063044617, 44074041944, 44080030047, 44099181654, 44209245721, 44223066291, 44277961978, 44284475223, 44295088386, 44300911276, 44301355138, 44333904523, 44336348941, 44341009759, 44342754912, 44348198483, 44431890982, 44453109325, 44500830445, 44513143412, 44513695633, 44547560850, 44623501287],
+        "dang_do": [44126854175, 44127880217, 44270135340, 44271198893, 44271495781, 44277278949, 44277693785, 44279287583, 44279616834, 44279790528, 44280681629, 44285081883, 44286549733, 44288156721, 44288459684, 44289387685, 44290113498, 44290497024, 44295656118, 44297573174, 44298367218, 44299131376, 44300299080, 44301071613, 44315105159, 44317390242, 44320281468, 44321426206, 44322741778, 44324551182, 44325557778, 44327127335, 44328357076, 44329057440, 44330175700, 44332008917, 44334922898, 44335347007, 44336838187, 44339480036, 44347295196, 44348873734, 44350258342, 44350996520, 44355810250, 44356207824, 44358498604, 44359968089, 44362172770, 44413181819, 44413435609, 44414093174, 44414231310, 44416024897, 44417509386, 44420761031, 44422499558, 44427221546, 44439214841, 44439445343, 44439852375, 44440532929, 44441374064, 44441844677, 44443213462, 44446613035, 44447785192, 44448191082, 44449973184, 44450186521, 44451767264, 44452085273, 44459388562, 44460628545, 44462850601, 44464743742, 44470847759, 44473397113, 44474037082, 44488491255, 44489080731, 44489357416, 44491451348, 44493653298, 44493864683, 44499631646, 44500261180, 44500562104, 44500838361, 44512752318, 44513702230, 44528931387, 44571682208, 44574585221, 44617822063],
+        "thieu_bang_chung": [43990493496, 43992824714, 44003576497, 44012110465, 44012456239, 44025323003, 44031632448, 44032372399, 44035143726, 44048471002, 44052857404, 44056555207, 44060730259, 44070029731, 44088347776, 44131003499, 44192897176, 44204674069, 44207104342, 44209179131, 44209564392, 44212586431, 44214157922, 44238861357, 44241831212, 44242149405, 44242311153, 44248137616, 44266311953, 44271514512, 44272811824, 44273937391, 44280000302, 44283274593, 44284264020, 44288388211, 44292071207, 44292662668, 44295440423, 44295784307, 44301685192, 44310863172, 44322892175, 44332768445, 44341522730, 44341576848, 44346645764, 44349224264, 44351924019, 44363867705, 44413724212, 44421243202, 44423404706, 44428013859, 44429751912, 44434785081, 44440428474, 44443875641, 44452474659, 44461296571, 44465673321, 44474540300, 44475834857, 44481912757, 44481936560, 44483852156, 44488618410, 44491442271, 44494037742, 44494135012, 44495380793, 44495623756, 44502793274, 44513042547, 44514096057, 44515530919, 44522844747, 44530217852, 44533804447, 44537327519, 44549085747, 44552554465, 44553589203, 44569333006, 44575248658, 44618249822, 44625011865, 44639277080, 44645110618]
+      },
+      "partition_check": "3 + 29 + 95 + 89 = 216; no repeated or unassigned run ID. Inside denominator: 95 + 89 = 184. The 89 missing-proof outcomes are archival limits, not a prospective failure of the 2% target.",
+      "proof_limits": "95 incomplete runs have at least one shard with no execution steps or a skipped artifact-upload step. The other 89 have eight successful shard job records: 88 successful collectors and one cancelled collector. Their receipt contents and collector logs were not archived, so successful job metadata is not promoted to completed coverage. Rows 9/10 retain these 89 as thieu_bang_chung for this snapshot-only exercise.",
+      "zero_job_boundary": "Run 44292639424 has workflow conclusion cancelled and a complete jobs response with total_count=0. Read row 0 together with the explicit eligibility definition: cancellation before preparation is created is outside the denominator. Include this observed boundary in PR1 fixtures. Missing logs or an unavailable jobs API must not be treated as equivalent evidence.",
+      "rerun_boundary": "Run 44522844747 uses final attempt 2. Preparation metadata carries attempt-1 timestamps; its original classification log says day_du. Only two G5 shards executed anew. No attempt-1 receipt is presumed to satisfy final-attempt validity."
+    },
+    "requested_cases": {
+      "PR4_positive": "old=day_du, current=duong_nhanh, successful collector with matching KHONG DO evidence -> G4a duong_nhanh_dang_chay, G4b row 3 duong_nhanh_co_bang_chung; remains in denominator, contributes zero to bo_moi. Contract evaluation only: PR4 is not implemented in this snapshot.",
+      "44126854175": "Preparation 134192893344 succeeded and logged day_du. All eight G5 shards were cancelled; their upload steps were skipped. Collector 134196721409 was cancelled. Row 8 dang_do, inside denominator, never completed.",
+      "44443875641": "All eight shard jobs and upload steps succeeded; collector 135300180039 was cancelled. Snapshot-only result is row 10 thieu_bang_chung because receipts are unavailable. With eight independently validated receipts, row 7 yields gom_hong, never du_hoan_tat. Successful upload metadata alone does not prove that precondition.",
+      "interrupted_skip": "A validated existing-fast-lane or PR3 skip selection with failed/cancelled/not-started collector reaches row 7 gom_hong. Missing selection evidence reaches row 2 instead. No skip interruption becomes completed coverage."
+    },
+    "numerical_evidence": {
+      "passed": 63,
+      "failed": 1,
+      "table_cells": "12/12 match",
+      "four_groups": {
+        "pull_request | day_du": {
+          "rows": 5694,
+          "job_seconds": 5706598,
+          "step_seconds": 5443208
+        },
+        "pull_request | duong_nhanh": {
+          "rows": 205,
+          "job_seconds": 266557,
+          "step_seconds": 247594
+        },
+        "push | day_du": {
+          "rows": 1923,
+          "job_seconds": 2568875,
+          "step_seconds": 2510857
+        },
+        "pull_request | khong_do_duoc": {
+          "rows": 10,
+          "job_seconds": 0,
+          "step_seconds": 0
+        }
+      },
+      "collector_median_seconds": 13,
+      "collector_median_n": 726,
+      "audit_allowance_seconds": 462078,
+      "unrounded_combined_bounds_million_seconds": [1.021, 2.8485, 3.4986, 5.5709],
+      "scope": "64 numerical/count comparisons, including repeated controls; snapshot hashes are counted separately."
+    },
+    "artifacts": {
+      "script": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan4/review_round4.py",
+      "script_sha256": "6192dc95de43eb89b36ef53799ebc55aae995cdb421952ba936f08021153b472",
+      "ledger": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan4/round4-evidence.json",
+      "ledger_sha256": "e7c2517abff6a609e4fcf0d2c577a79e463a5c5307e41ebd9e56baebe796f698",
+      "ledger_contents": "Every recent completed run, final attempt, preparation/log source, shard/collector status, missing-upload evidence, category and reason; arithmetic comparisons and diff scope."
+    },
+    "validation": {
+      "command": "python -B ../revplan4/review_round4.py",
+      "exit_code": 0,
+      "positive_evidence": "70 recorded comparisons: 69 pass, one rounding mismatch; 5539 snapshot file hashes match MANIFEST.json; all plan/base hashes match. Exit code 0 means analysis completed, not that every comparison passed.",
+      "diff_command": "diff -u ../revplan4/PREV.md ../revplan4/PLAN.md",
+      "diff_exit_code": 1,
+      "diff_meaning": "Expected differences, inspected in full.",
+      "passed": [
+        "Frozen artifact hashes",
+        "All 12 scenario cells",
+        "DX-2 raw-page reconstruction and four-group reconciliation",
+        "Recent run partition and frozen denominator",
+        "HEAD/tree unchanged; tracked/index diffs empty; no nonignored untracked files"
+      ],
+      "failed": [
+        "One P3 outward-rounding comparison"
+      ],
+      "skipped": [],
+      "not_run": [
+        "Test suites",
+        "Mutation suites",
+        "Ruff",
+        "CI or Windows runs",
+        "Execution of proposed classifier/collector implementation"
+      ],
+      "read_only_limit": "Initial and final Git observations match, including ignored .codex/. No initial exhaustive hash of the entire checkout was taken; endpoint observations do not prove the complete historical absence of writes."
+    },
+    "actions": "No repository edits, GitHub requests or writes, push, comment, dispatch, rerun or test/mutation suite. Only review artifacts outside the checkout were written.",
+    "skill": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/rv1c/.agents/skills/cross-review/SKILL.md",
+    "output": "/tmp/claude-0/-home-user-tra-luat/b73e5ff5-7ccc-5493-a1be-73d6ecd346f8/scratchpad/revplan4/verdict.json"
+  }
+}

@@ -1,4 +1,4 @@
-# KẾ HOẠCH NGUỒN r3 — tối ưu mutation testing (Mission #1172, PR1–PR8) — bản sửa 3
+# KẾ HOẠCH NGUỒN r3 — tối ưu mutation testing (Mission #1172, PR1–PR8) — bản sửa 4
 
 ## 1. Trạng thái
 
@@ -9,7 +9,8 @@
   `6100c8e18907f59b1abbdc44195861cc2310c654ce8dcfa2e74ca4ffa155f54c`, tại merge commit
   `5e5d2cc192758b5a372a875827987b6f471704c0` (băm đã đo lại: khớp). Cohort `meta.T0` = 2026-10-21T01:16:24Z,
   `meta.T1` = 2026-11-20T01:16:24Z, `meta.sha_master` = `711cb190…`. Mọi số dòng mã trích dưới đây đọc tại `5e5d2cc`.
-- **Bản này sửa bản `7fe0545b…`** (bản ấy sửa `c9090f77…`) sau hai lượt review Codex, cả hai `changes_requested`. Vòng
+- **Bản này sửa bản `43137d53…`** (chuỗi: `c9090f77…` → `7fe0545b…` → `43137d53…`) sau ba lượt review Codex; vòng 3b còn
+  1 P2 (G4) + 2 P3, đều xử lý ở đây, không đổi thiết kế. Vòng
   2: 5/9 finding vòng 1 đã đóng, 4 đóng một phần, thêm R3-10; mọi giá trị `[B: …]` khớp. Nền số GIỮ NGUYÊN trừ `[DX-2]`
   (tính lại, khử trùng). Thứ tự, bao đóng bảo thủ, audit cộng thêm, mặc định hằng đêm, kết cục PR8 giữ nguyên. Mục 10.
 - PR0 (#1166, ghim SHA cho full audit) đã xong; r3 không đổi gì của PR0.
@@ -70,26 +71,39 @@ ba dòng: mọi kết luận · `success` · `cancelled`. Lượt không đọc 
 | G1 | Giây thực thi trung bình mỗi lượt PR `day_du` (luật cũ), mọi kết luận | cohort 13 716 s (9 669 927 / 705) `[B: …"pull_request \| day_du".giay_thuc_thi]`; mốc sau 17-11: 10 659 s, n=184, lệch chuẩn 4603 `[DX-4]` | sau PR3: ≤ 9 600 s (−10 %); sau PR6: ≤ 7 500 s (−30 %); PR6 bị từ chối ⇒ dừng ở ≤ 9 600 | ≈ 1 070–1 340 s nếu coi các lượt là độc lập `[DX-7]`; chúng KHÔNG độc lập (nhiều lượt/PR, 101/184 lượt mốc bị huỷ) nên nghiệm thu dùng bootstrap theo CỤM PR |
 | G2 | Tổng giây `ci.yml` / 30 ngày, quy về khối lượng cohort | 15 057 171 s `[B: M2.moi_luot.tat_ca.giay_thuc_thi.tong]` | sau PR3: ≤ 13,8 triệu; sau PR6+PR7: ≤ 12,0 triệu; PR6 bị từ chối ⇒ ≤ 13,8 triệu | suy từ trung bình theo (sự kiện, làn luật cũ) × số lượt cohort; không so tổng thô |
 | G3 | Đầu-cuối trung vị, lượt PR `day_du` `success` một attempt | cohort 2742 s; mốc sau 17-11: 1775 s, n=71, p25 1590 `[DX-4]` | sau PR3: p25 ≤ 1 300 s; sau PR6: trung vị ≤ 1 500 s | chưa có phép tính lực cho trung vị; khoảng bootstrap 1688–1865 chỉ là độ bất định của MỐC. Đòi n ≥ 150 lượt mỗi vế và khoảng bootstrap theo cụm PR của HIỆU hai trung vị không chứa 0 |
-| G4 | **G4a** tỷ lệ CHỌN chế độ G5 (đủ · đích · bỏ mới · không phân loại được) và **G4b** tỷ lệ PHỦ HOÀN TẤT (năm loại, bảng dưới), cùng một mẫu số | G4a: đủ = 100 % theo CHÍNH SÁCH; G4b: CHƯA ĐO | sau PR3: G4a "bỏ mới" ≥ 10 % (trung tâm 23 %); G4b `thieu_bang_chung` ≤ 2 % mẫu số; `dang_do` chỉ báo cáo; sau PR6: mọi lượt của mẫu số rơi vào đúng một loại | ±3–4 điểm % ở n≈700 nếu độc lập; báo kèm khoảng theo cụm PR |
+| G4 | **G4a** tỷ lệ CHỌN chế độ G5 (đường nhanh đang chạy · bỏ mới PR3 · đích · đủ · không phân loại được) và **G4b** tỷ lệ PHỦ HOÀN TẤT (phép quy có thứ tự dưới bảng), cùng một mẫu số | G4a: đủ = 100 % theo CHÍNH SÁCH; G4b: CHƯA ĐO | sau PR3: G4a `bo_moi` ≥ 10 % (trung tâm 23 %), không tính `duong_nhanh_dang_chay`; G4b `thieu_bang_chung` ≤ 2 % mẫu số; `dang_do`, `gom_hong` chỉ báo cáo; mọi lượt của mẫu số rơi vào đúng một loại | ±3–4 điểm % ở n≈700 nếu độc lập; báo kèm khoảng theo cụm PR |
 | G5 | Tỷ lệ làn `day_du` | 945/1573 = 60,1 % `[B: M2.theo_lan]`; PR 705/1187 = 59,4 % | KHÔNG đặt mục tiêu giảm. Sau PR4: bộ đếm SAI SÓT TỒN DƯ (phân loại đang chạy ≠ oracle ngữ cảnh mới) = 0; bộ đếm LỢI ÍCH (luật cũ ≠ ngữ cảnh mới) chỉ báo cáo, kỳ vọng > 0 | ±2,4 điểm % (nhị thức, n=1573) |
 | G6 | Full audit M9: DANH TÍNH mục và job | 321 khoá `[B: M1.muc_ket_qua_theo_khoa.so_khoa]`; job `dot-bien-du`, 8 `dot-bien-manh`, `dot-bien-gop` `[B: M1.theo_job]` | tập khoá sau ⊇ tập khoá trước (so TÊN, không so số đếm); sau PR5 thêm đúng 8 mảnh G5 + gom G5 | đếm chính xác |
 
-**Bảng phân loại G4.** Mẫu số: lượt `pull_request`, attempt cuối của mỗi `run_id`, mà `chuan-bi` hoàn tất và luật cũ xếp
-`day_du`. Lượt bị huỷ hoặc hỏng TRƯỚC khi có phân loại nằm ngoài mẫu số, đếm riêng (`huy_truoc_phan_loai`); chi phí của
-chúng vẫn nằm trong G1/G2.
+**Mẫu số G4 (đóng băng, không đổi).** Lượt `pull_request`, attempt cuối của mỗi `run_id`, mà `chuan-bi` hoàn tất và luật
+CŨ xếp `day_du`. Lượt được luật đang chạy xếp lại (ca dương của PR4) và lượt dang dở VẪN nằm trong mẫu số; không loại
+chúng ra, vì loại là tạo thiên lệch chọn mẫu.
 
-| Bằng chứng ở attempt cuối | Loại phủ hoàn tất (G4b) |
-|---|---|
-| 8 biên nhận mảnh hợp lệ chế độ `du` + job gom `success` | `du_hoan_tat` |
-| 8 biên nhận mảnh hợp lệ chế độ `dich` + job gom `success` (từ PR6) | `dich_hoan_tat` |
-| output `cong_cu=bo_qua` hợp lệ + job gom `success` in dấu "KHÔNG ĐO" của đúng lý do | `bo_co_bang_chung` |
-| bị huỷ/đỏ khi đang chạy đủ hoặc đích, thiếu ít nhất một biên nhận | `dang_do` (kèm chế độ dự định) |
-| job báo `success` nhưng thiếu biên nhận, biên nhận sai chế độ, hoặc log/artifact không đọc được | `thieu_bang_chung` |
+**G4a — chế độ ĐƯỢC CHỌN** (mỗi lượt của mẫu số đúng một loại): `duong_nhanh_dang_chay` (luật đang chạy xếp
+`duong_nhanh`; G5 bị bỏ theo luật SẴN CÓ của wp892) · `bo_moi` (`che_do` đang chạy = `day_du` và `cong_cu=bo_qua` của PR3)
+· `dich` (từ PR6) · `du` · `khong_phan_loai_duoc`. Mục tiêu "bỏ mới ≥ 10 %" chỉ đếm `bo_moi`.
 
-G4a đếm chế độ ĐƯỢC CHỌN; G4b đếm thứ ĐÃ HOÀN TẤT có bằng chứng. "100 % đủ" hôm nay là phát biểu CHÍNH SÁCH (điều kiện
-job), không phải phép đo: trong 184 lượt mốc, 95 attempt cuối không có đủ 8 job G5 `success` (số của reviewer; không suy ra
-95 lượt "không rõ", chỉ chứng minh chọn đủ ≠ hoàn tất đủ). Phủ hoàn tất lịch sử để CHƯA ĐO, trừ khi PR1 dựng lại được từ
-artifact.
+**Phép quy G4b — phủ HOÀN TẤT, CÓ THỨ TỰ và VÉT CẠN.** Xét từ trên xuống, bước ĐẦU TIÊN khớp quyết định loại; bước 10
+nhận mọi thứ còn lại, nên mỗi lượt rơi vào đúng một loại. Bước 0–1 áp cho MỌI lượt PR và đưa lượt ra ngoài mẫu số.
+
+| Bước | Điều kiện ở attempt cuối | Loại | Trong mẫu số | Tính vào trần 2 % |
+|---|---|---|---|---|
+| 0 | `chuan-bi` bị huỷ/hỏng trước khi in phân loại | `huy_truoc_phan_loai` | không (đếm riêng) | không |
+| 1 | luật cũ KHÔNG xếp `day_du` | `ngoai_mau_so` | không | không |
+| 2 | không đọc được chế độ đang chạy (log/output thiếu) | `thieu_bang_chung` | có | CÓ |
+| 3 | đang chạy `duong_nhanh` + job gom `success` in "KHÔNG ĐO" với dấu của `duong_nhanh` | `duong_nhanh_co_bang_chung` | có | không; KHÔNG tính vào "bỏ mới" |
+| 4 | `cong_cu=bo_qua` (PR3) + job gom `success` in "KHÔNG ĐO" với dấu của bỏ mới | `bo_moi_co_bang_chung` | có | không |
+| 5 | 8 biên nhận mảnh hợp lệ chế độ `du` + job gom `success` | `du_hoan_tat` | có | không |
+| 6 | 8 biên nhận mảnh hợp lệ chế độ `dich` + job gom `success` (từ PR6) | `dich_hoan_tat` | có | không |
+| 7 | job gom `failure`/`cancelled`/không khởi động, khi mọi biên nhận cần có đã đủ HOẶC chế độ chọn là bỏ (bước 3–4 dang dở) | `gom_hong` | có | không; báo riêng |
+| 8 | chọn `du` hoặc `dich`, bị huỷ/đỏ, thiếu ít nhất một biên nhận | `dang_do` (kèm chế độ) | có | không; báo riêng |
+| 9 | job báo `success` nhưng biên nhận thiếu, sai chế độ, sai head, hoặc dấu "KHÔNG ĐO" không khớp chế độ đã chọn | `thieu_bang_chung` | có | CÓ |
+| 10 | mọi trường hợp còn lại | `thieu_bang_chung` | có | CÓ |
+
+Chỉ bước 5 và 6 là phủ hoàn tất; bước 7 và 8 KHÔNG bao giờ thành hoàn tất. Trần: `thieu_bang_chung` (bước 2, 9, 10) ≤ 2 %
+mẫu số. "100 % đủ" hôm nay là phát biểu CHÍNH SÁCH (điều kiện job), không phải phép đo: trong 184 lượt mốc, 95 attempt
+cuối không có đủ 8 job G5 `success` (số của reviewer; không suy ra 95 lượt "không rõ", chỉ chứng minh chọn đủ ≠ hoàn tất
+đủ). Phủ hoàn tất lịch sử để CHƯA ĐO, trừ khi PR1 dựng lại được từ artifact. Chi phí của mọi loại vẫn nằm trong G1/G2.
 
 **Cách đo lại.** Bộ thu MỞ RỘNG của PR1 (bản mới, không sửa `ops/specs/wp1434-r3/**`), cùng quy tắc `meta.quy_tac`, thêm
 bản ghi theo (run_id, attempt, sự kiện, head): chế độ dự định, chế độ thực chạy, lý do bỏ, trạng thái hoàn tất, dấu hiệu
@@ -156,8 +170,12 @@ PR4, PR7 mang tiêu chí huỷ đo được; khi kích hoạt, packet đóng ở
 - **Nghiệm thu.** Năm phép của mục 4; A/B một lệnh cùng SHA: bản ghi phán quyết của mọi định danh đột biến hiện hành
   giống hệt trước/sau; đột biến "dòng bóng lọt vào `GITHUB_OUTPUT`" phải làm ca đỏ; hợp các khoảng con khớp thời gian
   tường của bước trong ±10 %, phần lệch báo thành "không phân bổ"; bộ thu mới chạy lại trên ảnh chụp #1434 tái lập các
-  khoá `[B: …]` trích ở mục 2 và hai phép khoá của `[DX-2]`; fixture của bộ thu cho đủ năm loại của bảng G4, trong đó lượt
-  chế độ đủ bị huỷ giữa chừng (như run 44126854175: cả 8 mảnh `cancelled`) KHÔNG được thành `du_hoan_tat`.
+  khoá `[B: …]` trích ở mục 2 và hai phép khoá của `[DX-2]`; fixture của bộ thu cho ĐỦ mười bước của phép quy G4b, mỗi
+  fixture rơi vào đúng một loại, trong đó bắt buộc có: lượt chế độ đủ bị huỷ giữa chừng (như run 44126854175: cả 8 mảnh
+  `cancelled`) KHÔNG thành `du_hoan_tat`; ca dương của PR4 (luật cũ `day_du`, đang chạy `duong_nhanh`, job gom `success` in
+  "KHÔNG ĐO") ra `duong_nhanh_co_bang_chung`, KHÔNG ra `thieu_bang_chung` và KHÔNG được tính vào mục tiêu "bỏ mới"; đủ 8
+  biên nhận nhưng job gom `cancelled` (như run 44443875641, job 135300180039) ra `gom_hong`; chọn bỏ mà job gom
+  `cancelled` ra `gom_hong`.
 - **Tiết kiệm kỳ vọng.** 0 (thêm vài giây mỗi mảnh). **Rủi ro.** Trung bình (đụng tệp test nóng và bộ phân loại, nhưng
   không đổi quyết định nào). **Hoàn tác:** revert.
 - **Phụ thuộc:** PR0. **Windows:** một lượt dispatch `windows-only` (Windows chạy mảnh 0 ca nền). **Full M9:** có (K7).
@@ -328,23 +346,32 @@ PR3 và PR6 cùng phụ thuộc phần G5 được bỏ, nên không cộng đ�
   checkout/cài đặt/tải artifact (`ci.yml`:594-635); job bị bỏ thì mất trọn. `f_c` là phần GIÂY JOB nằm trong các lượt được
   bỏ. Bảng dưới dùng **giả định bằng chi phí** `f_c = f` (lượt được bỏ tốn bằng lượt trung bình); giả định này chưa đo, và
   101/184 lượt mốc bị huỷ `[DX-4]` cho thấy chi phí mỗi lượt rất không đều.
-- **Chi phí BƯỚC cắt được (PR6):** `(1 − f_c) · V_b · s_b`. `V_b` = 5,44 triệu s là giây riêng BƯỚC G5 `[DX-2]`; phần ngoài
-  bước (`V − V_b` ≈ 0,26 triệu s, khoảng 46 s mỗi job) chế độ đích KHÔNG cắt. `s_b` = phần giây bước mà chế độ đích cắt.
+- **Chi phí BƯỚC cắt được (PR6):** `(1 − f_b) · V_b · s_b`. `V_b` = 5,44 triệu s là giây riêng BƯỚC G5 `[DX-2]`; phần ngoài
+  bước (`V − V_b` ≈ 0,26 triệu s, khoảng 46 s mỗi job) chế độ đích KHÔNG cắt. `f_b` là phần GIÂY BƯỚC nằm trong các lượt
+  được bỏ, một đại lượng KHÁC `f_c` (tỷ trọng bước trong job không đều giữa các lượt); `(1 − f_b)·V_b` chính là giây bước
+  còn lại đủ điều kiện, PR1 đo trực tiếp. `s_b` = phần giây bước mà chế độ đích cắt.
 - **Trừ trọn chi phí audit thêm (chỉ khi có PR6):** `A` = 54 lượt `[DX-5]` × (8 × 1068 s trung vị JOB
-  `[B: M2.theo_job.bang."gate-cong-cu | ubuntu-latest | day_du".trung_vi]` + 13 s job gom) ≈ 0,46 triệu s.
+  `[B: M2.theo_job.bang."gate-cong-cu | ubuntu-latest | day_du".trung_vi]` + 13 s trung vị job gom
+  `[B: M2.theo_job.bang."gate-cong-cu-gop | ubuntu-latest | day_du".trung_vi]`, n=726) ≈ 0,46 triệu s.
 
-**Tiết kiệm = f_c·V + (1 − f_c)·V_b·s_b − A** (triệu s / 30 ngày, khối lượng cohort). Giả định mọi PR chạm bao đóng đều
-nằm trong vùng K7 là cận TRÊN cho khoản thứ hai.
+**Tiết kiệm = f_c·V + (1 − f_b)·V_b·s_b − A** (triệu s / 30 ngày, khối lượng cohort). Bảng dưới dùng HAI giả định chưa đo:
+bằng chi phí job (`f_c = f`) và `f_b = f_c`. Giả định mọi PR chạm bao đóng đều nằm trong vùng K7 là cận TRÊN cho khoản thứ hai.
 
 | Kịch bản | không PR6 | PR6, `s_b` = 0,6 | PR6, `s_b` = 0,9 |
 |---|---|---|---|
 | `f` = 0,10, bằng chi phí | 0,57 | 3,05 | 4,52 |
 | `f` = 0,23 (trung tâm), bằng chi phí | 1,31 | 3,37 | 4,62 |
 | `f` = 0,35, bằng chi phí | 2,00 | 3,66 | 4,72 |
-| `f` = 0,23 nhưng lượt được bỏ chỉ tốn NỬA lượt trung bình (`f_c` = 0,115) | 0,66 | 3,09 | 4,53 |
+| `f` = 0,23 nhưng lượt được bỏ chỉ tốn NỬA lượt trung bình (`f_c` = `f_b` = 0,115) | 0,66 | 3,09 | 4,53 |
 
-Cộng PR2 (0,4–0,7) và PR7a (0,05–0,15): **không PR6 ≈ 1,0–2,9 triệu s (7–19 % của 15,06 triệu), trung tâm 2,0**; kịch bản
-chi phí không đều kéo điểm trung tâm xuống ≈ 1,3. **Có PR6 ≈ 3,5–5,6 triệu s (23–37 %).** Mọi ô là ước lượng, sẽ được
+**Vì sao `f_b` phải tách khỏi `f_c` (phép kiểm tính toán).** Hai job cùng 100 s, bước G5 lần lượt 10 s và 90 s; bỏ job thứ
+nhất: `f_c` = 100/200 = 0,5 nhưng `f_b` = 10/100 = 0,1. Với `s_b` = 0,6, phần bước còn lại cắt được là (1 − 0,1)·100·0,6
+= 54 s; dùng nhầm `f_c` sẽ ra (1 − 0,5)·100·0,6 = 30 s. Bảng trên KHÔNG đo `f_b`; nó giả định `f_b = f_c`.
+
+**Quy ước làm tròn:** ô trong bảng làm tròn gần nhất tới 0,01; ĐẦU MÚT của khoảng tổng làm tròn RA NGOÀI tới 0,1 (cận
+dưới xuống, cận trên lên); phần trăm làm tròn gần nhất. Cộng PR2 (0,4–0,7) và PR7a (0,05–0,15): **không PR6 ≈ 1,0–2,9 triệu
+s (7–19 % của 15,06 triệu), trung tâm 2,0** (cận trên tính ra 2,85, ghi 2,9 theo quy ước ra ngoài; cận dưới 1,02); kịch bản
+chi phí không đều kéo điểm trung tâm xuống ≈ 1,3. **Có PR6 ≈ 3,5–5,6 triệu s (23–37 %)** (tính ra 3,50 và 5,57). Mọi ô là ước lượng, sẽ được
 THAY bằng số đo có trọng số chi phí của PR1 (giây job theo lượt, ca đích so với ca khác); mục tiêu G1/G2 đặt thận trọng hơn
 điểm trung tâm tương ứng. Phần G5 ở push (2,57 triệu s `[DX-2]`) không đổi.
 
@@ -406,11 +433,11 @@ THAY bằng số đo có trọng số chi phí của PR1 (giây job theo lượt
   40528783769), ghép `run_id` với `su_kien`/làn của `M2.luot[]`, áp ĐÚNG quy tắc của bộ thu (`meta.quy_tac.phan_loai_dong`:
   bỏ `skipped`, mỗi `job_id` đếm một lần, dòng mang sang không tính lại, loại thời lượng âm). Kết quả tái lập
   `top5_giay_thuc_thi[0]`: 7832 dòng, 8 542 030 s. Tách: PR `day_du` 5694 dòng, 5 706 598 s (riêng bước G5 5 443 208 s);
-  push `day_du` 1923 dòng, 2 568 875 s (bước 2 510 857 s); PR `duong_nhanh` 205 dòng, 266 557 s. Hai phép khoá: tổng dòng
-  và tổng giây phải bằng khoá BASELINE; hai lượt có trang lồng phải có mặt và mỗi `job_id` xuất hiện đúng một lần. Số
+  push `day_du` 1923 dòng, 2 568 875 s (bước 2 510 857 s); PR `duong_nhanh` 205 dòng, 266 557 s; PR KHÔNG RÕ LÀN 10 dòng,
+  0 s (thời lượng 0 là số ĐO ĐƯỢC, giữ nguyên; không gán các dòng này vào `day_du`). Bốn nhóm cộng: 5694 + 1923 + 205 +
+  10 = 7832 dòng. Hai phép khoá: tổng dòng và tổng giây phải bằng khoá BASELINE; hai lượt có trang lồng phải có mặt và mỗi `job_id` xuất hiện đúng một lần. Số
   TRANG THÔ, không khử trùng, chỉ để tham khảo: 8102 dòng, 9 019 102 s (đội 5,585 % so với BASELINE); PR `day_du` thô 5914
-  dòng, 6 113 166 s, gồm `cancelled` 1771 dòng / 953 603 s và `failure` 69 dòng. (Bản trước ghi 5810/5 896 141/62/7998
-  và "đội tối đa 2 %": đó là kết quả của phép liệt kê KHÔNG đệ quy, bỏ sót hai lượt trên; đã rút.)
+  dòng, 6 113 166 s, gồm `cancelled` 1771 dòng / 953 603 s và `failure` 69 dòng. (Số 5810/5 896 141/62/7998 của bản `7fe0545b` đã rút.)
 - **[DX-3]** Từ 1491 log `chuan-bi`, dòng `DUONG_NHANH:` cuối: 793 lượt "DAY_DU vì diff có N tệp ngoài allowlist" (in tối
   đa 5 tên; 261 lượt bị cắt). So với tập ĐOÁN hẹp (`ops/bash_nen.py`, `ops/cong_cu*`, `ops/cai_cong_cu.sh`,
   `ops/cai_actionlint.sh`, `.github/workflows/`, `ops/lease_publish_test.py`, `.claude/dev/launcher.py`): 277 chạm · 381
@@ -426,7 +453,7 @@ THAY bằng số đo có trọng số chi phí của PR1 (giây job theo lượt
   chạm" của DX-3, 201 đổi tệp mà phép quét `t16` (`_goi_ngoai`) đọc ⇒ còn 180/793 = 22,7 %. Là phép nhạy, không phải tỷ
   lệ bỏ đã đo; bao đóng của PR3 còn rộng hơn phép quét ấy.
 
-## 10. Thay đổi so với bản c9090f77 (vòng 1) và bản 7fe0545b (vòng 2)
+## 10. Thay đổi so với bản c9090f77 (vòng 1), 7fe0545b (vòng 2), 43137d53 (vòng 3b)
 
 | Finding | Mức | Chỗ xử lý | Cách đóng |
 |---|---|---|---|
@@ -445,5 +472,9 @@ THAY bằng số đo có trọng số chi phí của PR1 (giây job theo lượt
 | R3-06 (vòng 2) | P2 | Mục 3 dòng G4 + bảng phân loại G4, PR1 nghiệm thu | Mẫu số tường minh; tách tỷ lệ CHỌN chế độ khỏi tỷ lệ PHỦ hoàn tất; năm loại kết cục; "100 %" chỉ là phát biểu chính sách, phủ hoàn tất lịch sử để "chưa đo"; ngưỡng 2 % áp cho `thieu_bang_chung` trên mẫu số; fixture chặn lượt đủ dang dở thành hoàn tất |
 | R3-10 (vòng 2) | P2 | DX-2, mục 2.3, PR3 tiết kiệm, bảng tiết kiệm, phương án loại 1 | DX-2 tính lại theo quy tắc khử trùng/mang sang của bộ thu, tái lập đúng BASELINE (7832 dòng, 8 542 030 s): PR `day_du` 5 706 598 s, push 2 568 875 s; `V` 5,90 → 5,71; số trang thô nêu riêng với mức đội 5,585 %; có hai phép khoá |
 | R3-09 (vòng 2) | P3 | "Tiết kiệm G5 tính CHUNG" | Tách chi phí JOB tránh được (`f_c`·`V`) khỏi chi phí BƯỚC cắt được ((1−`f_c`)·`V_b`·`s_b`), trừ trọn chi phí audit; nêu giả định bằng chi phí; thêm kịch bản chi phí không đều; gắn nhãn minh hoạ, thay bằng số PR1 |
+
+| R3-06 (vòng 3b) | P2 | Mục 3 dòng G4 + "Phép quy G4b", PR1 nghiệm thu | Giữ mẫu số đóng băng; G4a thêm loại "đường nhanh đang chạy" tách khỏi "bỏ mới PR3"; G4b là phép quy CÓ THỨ TỰ, vét cạn, mười bước, mỗi lượt đúng một loại (gồm huỷ trước phân loại, đường nhanh có bằng chứng, gom hỏng/huỷ sau đủ biên nhận, thu bỏ-qua dang dở); nêu loại nào tính vào trần 2 %; thêm ba fixture |
+| R3-09 (vòng 3b) | P3 | "Tiết kiệm G5 tính CHUNG" | Tách `f_b` (phần giây BƯỚC trong lượt được bỏ) khỏi `f_c`; bảng nêu rõ giả định `f_b = f_c`; thêm ví dụ hai job 100 s với bước 10 s và 90 s |
+| R3-11 (vòng 3b) | P3 | DX-2, "Tiết kiệm G5 tính CHUNG" | Liệt kê nhóm thứ tư (10 dòng PR không rõ làn, 0 s) để bốn nhóm cộng đủ 7832; trích khoá BASELINE cho trung vị 13 s của job gom; nêu quy ước làm tròn (đầu mút khoảng làm tròn RA NGOÀI) |
 
 Thay đổi đồ thị phụ thuộc so với mặc định: đúng hai điểm (i) và (ii) ở đầu mục 5; không thay đổi nào khác.

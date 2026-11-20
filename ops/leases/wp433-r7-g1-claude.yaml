@@ -78,8 +78,8 @@ leased_at_utc: '2026-11-20T08:25:00Z'
 heartbeat_at: '2026-11-20T08:25:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-21T08:25:00Z'
-lease_expires_at_utc: '2026-11-21T08:25:00Z'
+lease_until: '2026-11-20T09:50:58Z'
+lease_expires_at_utc: '2026-11-20T09:50:58Z'
 lease_until_ghi_chu: '24h; rut han ngay sau land.'
 attempts_used: 0
 attempts_limit: 2
@@ -95,3 +95,13 @@ budget:
 budget_ghi_chu: 'Codex PR <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 3 (BAT BUOC). Ngoai ngan sach PR: probe Desktop chan doan va nguyen mau luc soan dac ta (08:08-08:15Z).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex PR 1/10: connector sach tren 4e9306b (7034980060). CI Ubuntu 1/2: tren 4e9306b (25 success, 1 skipped). Windows native 1/3: Desktop 08:58-09:09Z (D1 base/head x2, D2 nam fragment), comment 7035419629. Ngoai ngan sach PR: probe Desktop chan doan va nguyen mau 08:08-08:15Z. Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-21T08:25:00Z'
+  han_moi_utc: '2026-11-20T09:50:58Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet P2BW cua #433 da MERGE: PR #1453 (head 4e9306b668cac7797b9cd952b8699c4da603df55) merge commit 00ee83998487d289324566f230b67b5923a9a9d9, human audit chu kho issuecomment-7035862456. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem cho write set nay luc rut.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 2 duong dan write set sau han moi phai ra NGUOI_GIU 0.'

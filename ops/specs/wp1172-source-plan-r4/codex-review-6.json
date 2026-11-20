@@ -1,0 +1,126 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "bf16c5db32e731e8c4aee55d83f58a336fbdf60b",
+  "reviewed_file_sha256": "a7fea4f3c8f80998bf4ce56c4e7f0c5a4b1735c41dd34b702a2dd30349982de3",
+  "findings": [
+    {
+      "id": "R4-25-stale-ci-log-cannot-observe-current-kill-switch",
+      "severity": "P1",
+      "location": "§4 A+1, lines 80–92; §11 closure of R4-08",
+      "claim": "The new log fallback can admit previously green skip/targeted evidence after the owner sets FULL. REST is optional when the consumer lacks permission, and FULL is required only when both sources are unreadable or disagree. A readable old CI log therefore suffices when the current variable cannot be read. Trustworthy historical bytes do not establish the current switch value. This contradicts the required B4 test that setting FULL after CI completed must block merge.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-round6/probes.py models",
+          "observed": "rc=0: with an old empty-value CI log, current server value FULL and REST unavailable, the written fallback selects MERGED_CODE. Controls with readable REST=FULL, both sources missing, or a closure hit select FULL. This is a counterexample to the proposed algorithm, not a production exploit."
+        },
+        {
+          "cmd": "sed -n '80,93p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+          "observed": "Lines 81–84 permit the historical log plus optional REST; lines 85–92 require immediate invalidation and a read at merge time. The contract cannot satisfy both when only the old log is available."
+        }
+      ],
+      "suggested_fix": "Make a fresh authoritative read mandatory for permitting reduced evidence at merge; unavailable, incomplete or ambiguous current state must require full evidence even if the old log is readable. Keep logs for provenance and disagreement checks. B4 must test a post-CI FULL change with REST denied, timeout, deleted variable and restart, alongside a healthy current read. Require Variables:read on the trusted consumer or explicitly accept loss of optimization there. This needs no authorization-record store and does not change PR1."
+    },
+    {
+      "id": "R4-26-removed-authority-store-also-removes-fail-closed-default",
+      "severity": "P2",
+      "location": "§1 lines 7–9; §4 A+1 lines 70–88; §8.1 rollback mapping; §10 Q9; §11 lines 350–355",
+      "claim": "Removal of the authorization store also changes the source rollback contract without an explicit disposition. An absent, empty or unknown switch value now restores merged-code behavior, which can skip G5 or select targeted execution. r2 §5.5 explicitly requires absent/error/ambiguous state to force full M9, and r3 I3 requires an exact allow value before reducing coverage. r4 simultaneously claims to preserve I1–I6 and calls this unchanged fail-closed behavior. It also maps owner removal of FULL to the complete r2 reactivation requirement while omitting the investigation and affected-H full audit required before reactivation. Q9 describes the new mechanism but does not identify these source requirements as rejected or residual risks.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-round6/probes.py models",
+          "observed": "rc=0: empty, full, FUL and corrupt all select MERGED_CODE under the stated switch rule; only exact FULL forces full coverage. A valid independent PR3 skip decision can therefore remain effective for malformed or absent control state."
+        },
+        {
+          "cmd": "Read recovered r2 §5.5, /tmp/rv-r4-round6/r3.txt §4 I3, and r4 A+1/Q9/§8.1",
+          "observed": "r2 requires absent/error/ambiguous=full and investigation + full audit of affected H + a new owner decision before reenabling. r3 I3 retains empty/unknown/absent=full. r4 replaces these with every other value or absence=merged code and owner variable-write authority."
+        },
+        {
+          "cmd": "web__run open GitHub contexts reference, vars context",
+          "observed": "An unset configuration variable resolves to an empty string, so absence reaches this branch in real workflow syntax. [GitHub contexts reference](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#vars-context)."
+        }
+      ],
+      "suggested_fix": "Preserve the simple owner-controlled switch without restoring the removed record machinery: require one explicit normal-mode value and send absent/empty/unknown/read-error states to FULL. Retain investigation and affected-H audit as explicit human runbook prerequisites for removing FULL. Alternatively present the precise relaxation of r2 and r3 I3 as a separate owner decision and amend the preservation/traceability claims; do not describe it as unchanged safety. Test deletion, empty value, typo, unknown value, valid normal mode and incident reactivation. The tradeoff is conservative extra audit work after configuration mistakes."
+    },
+    {
+      "id": "R4-27-emergency-agent-guard-has-no-assigned-write-set",
+      "severity": "P2",
+      "location": "§5 B3 lines 184–197; §7 dependencies; related prior class R4-16",
+      "claim": "B3 promises to add the emergency flag to PreToolUse protection, but its write set includes only the two deploy scripts, their tests and procedural documentation. Neither B3 nor B4 owns the hook and hook tests. Implementing the stated safeguard would therefore require an unassigned security-path change. In addition, the cited --apply precedent asks for approval; it is not the hard prohibition implied by AI NEVER uses this flag. The plan must distinguish procedural prohibition from the specific hook behavior it promises.",
+      "evidence": [
+        {
+          "cmd": "sed -n '184,197p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; sed -n '1,20p' .claude/hooks/pretooluse_guard.py; sed -n '1005,1043p' .claude/hooks/pretooluse_guard.py",
+          "observed": "The hook path is .claude/hooks/pretooluse_guard.py, with .claude/hooks/pretooluse_guard_test.py and registration in .claude/settings.json. B3 does not list these paths; B4 owns packet_loop.py and its tests. The existing RISKY list returns ask and the entry point only handles Bash payloads."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-round6/probes.py models",
+          "observed": "rc=0: feeding a synthetic --apply command to the actual hook returns permissionDecision=ask. No mutation command is executed. This is a probe of the existing analogy, not of an emergency flag that has not been implemented."
+        }
+      ],
+      "suggested_fix": "Assign the hook and its tests to a sensitive packet with fresh lease exclusion and a dependency before emergency mode is offered, or explicitly remove the machine-hook promise and retain an owner-approved procedural restriction with its limits. If implemented, define deny versus ask and the execution surfaces covered; test both shell flag spellings, interactive/noninteractive invocation and ordinary deploy controls. Do not claim one Claude Bash hook enforces every AI surface. No new grant store is needed, but the added security paths require explicit scope."
+    },
+    {
+      "id": "R4-28-overhead-minimum-and-run-budget-disagree",
+      "severity": "P3",
+      "location": "§4 A+5, lines 112–119",
+      "claim": "A+5 retains at least five pairs on one shard and also requires at least three pairs on every one of eight shards, but budgets approximately 48 shard runs without explaining whether the five-pair requirement was superseded. Satisfying both minima needs at least 52 runs. The approximately ten container-hours remain an unmeasured estimate, not a BASELINE-derived duration.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-round6/probes.py numbers",
+          "observed": "rc=0: 8×3×2=48, while (7×3+5)×2=52. Using the historical 1057-second G5 step median only as a sanity check gives 14.09 and 15.27 step-hours respectively; these are not forecasts for the fixed container."
+        }
+      ],
+      "suggested_fix": "State a single repetition contract. If both minima remain, budget at least 52 shard runs and label the container duration with its assumption; if five pairs was replaced, remove that obsolete minimum explicitly. Check the count arithmetically and estimate duration from the chosen environment before freezing PR3. Preserve coverage of all eight shards and the weighted paired estimator."
+    },
+    {
+      "id": "R4-29-zero-ci-cost-claim-excludes-conservative-mode",
+      "severity": "P3",
+      "location": "§13 final sentence, line 373; §4 A+1 lines 70–72",
+      "claim": "The unconditional claim that no addition increases ci.yml execution seconds contradicts FULL forcing G5 on every PR regardless of classification. Existing passive-document PRs skip the eight G5 shard jobs; under the proposed FULL mode they run them. This is a legitimate safety cost, but it must not be described as zero additional CI cost.",
+      "evidence": [
+        {
+          "cmd": "sed -n '560,583p' .github/workflows/ci.yml; sed -n '69,72p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; sed -n '368,373p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+          "observed": "Current gate-cong-cu runs only when che_do differs from duong_nhanh and has eight shard indices. r4 FULL explicitly applies to every PR, while §13 states no addition increases ci.yml seconds."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-round6/probes.py models",
+          "observed": "rc=0: the passive-document/FULL policy comparison changes required G5 shard jobs from zero to eight. No CI was dispatched."
+        }
+      ],
+      "suggested_fix": "Limit the cost statement to the intended normal operating mode and explicitly budget/report the extra conservative-mode work, including its effect on existing document-only PRs. Preserve FULL safety behavior; do not weaken the switch to make the cost statement true. Verify both modes in the packet cost table and Q9 decision."
+    }
+  ],
+  "tests": [
+    {
+      "cmd": "git rev-parse HEAD HEAD^{tree}; git status --short; Python SHA-256 probes of r4, recovered sources and git-show references",
+      "rc": 0,
+      "summary": "Exact candidate and all five source hashes match. Tree=e804871bff5f84a2e6f406d9490e51de188ead1e. PR1 spec=5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e; Mission r82=24d089b02c3c6b7fb734b417de4be5a46577e1501ca63c7d848a9f3cdabbbc20. Tracked worktree clean."
+    },
+    {
+      "cmd": "git diff c7cf78dfc6d3159ec0ed2622edfaa7cefc8a77fa HEAD -- ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+      "rc": 0,
+      "summary": "Reviewed every round-5 delta and all prior verdicts; the git authorization store, direct-push proof and generation selection were removed. The review was not limited to this diff."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round6/probes.py source",
+      "rc": 0,
+      "summary": "PASSED focused probes using real origin/master validators: current workflow accepted; SHA-only concurrency, cancellation, moving checkout ref and missing shard rejected. Healthy 8/8 synthetic receipts accepted; invalid newest producer rejected without falling back to old valid evidence. This is not A2/A3/A4 runtime certification."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round6/probes.py numbers",
+      "rc": 0,
+      "summary": "PASSED 23 numerical checks/recomputations. Principal percentages, G9 population/quantiles, inherited mean, canary shard subtotal and outward rounding match. The probe also exposes the 48-versus-52 planning discrepancy."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round6/probes.py models",
+      "rc": 0,
+      "summary": "PASSED counterexample probes: stale-log fallback and absent/unknown defaults select merged-code behavior; controls require FULL. Actual existing --apply hook returns ask. Conservative-mode CI cost increases. These are written-contract models plus the existing hook probe, not tests of unimplemented B4/B3 code."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round6/final_integrity.py",
+      "rc": 0,
+      "summary": "PASSED final integrity: same HEAD/tree/file hash, empty tracked/index diffs, unchanged initial status and 17,185 file hashes unchanged since the content snapshot. Pre-existing ignored .codex/ directory remains; no tracked/untracked review artifacts were added."
+    }
+  ],
+  "numbers_checked": 23,
+  "notes": "Round 6: 1 P1, 2 P2, 2 P3; no P0. Approval is withheld because the owner requires zero findings of every severity. New IDs continue after R4-24. Root-cause continuity: R4-25/R4-26 are new manifestations of the R4-08 switch class and the R4-02 source-fidelity class; R4-27 reopens R4-16 unassigned enforcement paths. R4-28/R4-29 are budget/reporting defects; they do not invalidate the repaired paired measurement design.\n\nPRIOR ROUND, EACH CLAIMED CLOSURE: R4-20 closed for the specific ordinary-merge-as-grant mechanism: §4 removes the grant store entirely; ordinary owner merges no longer authenticate separate grants. This does not close the remaining switch requirements in R4-25/R4-26. R4-21 closed: the commits API direct-push proof route is gone. R4-22 closed: there is no current-tree generation selection or deleted grant to resurrect. R4-23 closed: emergency use no longer requires a new authorization commit on master, so that specific exact-H/behind-master cycle is removed. Existing deployment freshness guards still apply; ancestor membership alone is not permission to bypass them. R4-24 closed at plan level: B3 removes PR-merger and live-protection reads from its runtime capability contract; initial/monthly administrative protection measurement and intervening drift are explicitly submitted to Q7. These closures were verified by the c7cf78d..bf16c5d diff and current text, not by trusting §11. No removed grant mechanism is requested back.\n\nEARLIER CLOSURES: R4-01 remains closed: PR0 code delivery is separated from unverified A1/A2/A5, A3 not_run, A4 not_measured and A6 incomplete. R4-02 is partial again because the new switch drops source rollback defaults/reactivation prerequisites; the earlier protected-ref, required-CI and master-versus-snapshot repairs remain. R4-03/R4-04 remain closed: four outcome layers and per-child wait4 plus separate concurrent memory measurement. R4-05/R4-06 remain closed: two audit receipts plus separate push observation; B1 precedes B2 and shared registry work is serialized. R4-07 remains closed at plan level: notification delivery test, heartbeat observers and explicitly best-effort timing. R4-08 is open in the new manifestations above. R4-09/R4-10 remain closed: mandatory measured provenance, inventory and byte-bound release candidate. R4-11's machine-waiver defect is removed in favor of a disclosed human procedure pending Q7; the promised agent guard is incomplete under R4-27. R4-12/R4-13 remain closed: real Windows parity or explicit waiver, and the correct G9 cohort. R4-14/R4-18 remain closed for paired measurement and all-shard coverage; repetition accounting needs the P3 correction. R4-15 remains closed: an authorized operator produces A4 first and deployment reads it. R4-16 is reopened for the new hook path, although the B4 packet_loop allocation remains fixed. R4-17 remains closed: 26,564 seconds is explicitly only the eight-shard subtotal. R4-19's mutable-comment/ordinary-merge grant mechanisms are removed, with human limitations disclosed rather than claimed as machine proof. Therefore it is not true that all previously closed classes stayed closed.\n\nFIDELITY AND ORDER: Read recovered r2, all PR0 A1–A6, the Proxima critique, installed r3, Mission r82 and frozen PR1 spec/lease. No further source-destination omission was established beyond the rollback issue reported above. r3's M9, inventory, correct-kill and post-merge invariants and nine rejected options remain the A/B baseline, except the I3 contradiction in R4-26. C1 research and C2 M9 change remain separate Q8a/Q8b decisions; do not interpret a research budget as permission to change M9. B1 precedes PR5; B1/B2/PR2 share ci_dang_ky_test.py and are serialized. B4 requires repository-wide lease exclusion for packet_loop.py. B3 includes both deploy scripts but omits its promised hook. PR1 r2/g1 remains frozen and prospective r4 additions do not expand its lease; that lease explicitly excludes ci_dang_ky_test.py. Q6–Q9 are appropriate owner checkpoints, but Q9 must expose the default/reactivation tradeoff, and Q7 must accurately describe procedural versus hook enforcement. Proposed packet budgets are not leases or activation authority.\n\nLANE B: Actual master code has event-SHA checkout, run-ID concurrency, eight shards, and latest-producer validation. These focused probes support delivered code, not completion of the original broader PR0 acceptance. The Mission snapshot records accepted rev12 H3 b79cbf5, merge f8b9cdd and M8 landed:false; no fresh remote lifecycle audit was performed. B1's github.workflow_sha field is documented; actual per-run provenance remains future acceptance. A4 exists and emits wd.json, but GraphQL availability was not exercised. [GitHub workflow context](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context). B2 imports r2's 36-hour slot deadline and eight-day original-snapshot age, with no retry refresh; six-hour polling and heartbeat observers share GitHub failure modes, now disclosed as best-effort. B3 retains exact-H checks, byte binding, endpoint probes on both deploy hosts, fail-closed blocking after activation, and real Windows parity. force-older/ForceOlder remain version-rollback options, not audit exceptions. No TTY check proves a person's identity; Q7 correctly calls this a human procedure, not machine authorization.\n\nVARIABLE CAPABILITY: The owner-only personal-repository hypothesis is not established. GitHub documents repository collaborators as able to create repository variables, and Variables:write credentials are another writer path; B4 must enumerate actual principals and usable credentials rather than infer authority from repository ownership. Reads require Variables:read. [GitHub variable administration](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables#creating-configuration-variables-for-a-repository), [GitHub repository-variable API](https://docs.github.com/en/rest/actions/variables#get-a-repository-variable). Reading vars in a candidate workflow is not authoritative; the retained master-side recomputation is necessary. It does not solve stale reads.\n\nNUMBERS: 700504/15057171=4.6522949%→4.7%; 7955967/15057171=52.8383918%→52.8%; 9669927/705=13716.2085 seconds. G9 n=71, median=1775, nearest-rank p25=1590. Complete-audit eight-shard median=13282 and two-run subtotal=26564. Mission r82's outward-rounded 3.4–5.6 million-second correction is consistent. Thresholds such as 14/30 days, 36h/8d and research budgets are source/proposed requirements, not measured achievements. Approximately ten container-hours are unmeasured. Historical raw snapshots were not recollected; inherited raw-data-only DX-2/DX-3/DX-8 claims were not independently reconstructed.\n\nPROVENANCE AND LIMITS: Independent read-only review under the user's exact-file assignment. provider=openai_codex; model_family=openai; execution_surface=codex_service; transport=machine. API-hosted run; no Codex CLI invocation. Served model/effort and external launcher session ID=KHONG_DO_DUOC. Linux 6.18.44, Python 3.13.18; managed workspace-write sandbox with read-only review discipline. Review treated as sensitive because it concerns gate/authority design. Skill used: .agents/skills/cross-review/SKILL.md. origin/master snapshot=45bae8d07a8cdf06a1ca9a7a2e015a6258169379; r3 ref=c032656d6e9107c7d0d570afe374fd78b6424e93; PR1 metadata ref=a0ca10060174bb22264c5a71e2a6e7ad4eeddcca. core.abbrev was unset (probe rc1); no configuration was changed and no abbreviation-dependent release gate was run. NOT_RUN: full audit, full registry suite, actionlint, Ruff lint, Windows execution, CI dispatch, deploy and live REST capability/variable-writer probes. Those are not claimed passed or owner-waived. No subagents, repository edits, commits, pushes, comments, workflow dispatches, GitHub writes, secret reads or deployments. Scratch is /tmp/rv-r4-round6; deliverable is REVIEW_OUT. Integrity observations prove unchanged observed state, not a historical proof that no transient write could ever occur."
+}

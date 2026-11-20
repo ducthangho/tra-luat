@@ -1,0 +1,6 @@
+{
+  "cases": 36,
+  "pass": 36,
+  "seconds": 59.203094765998685,
+  "loader": "yaml.safe_load unchanged"
+}

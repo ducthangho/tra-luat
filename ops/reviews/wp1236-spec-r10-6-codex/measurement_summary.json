@@ -1,0 +1,58 @@
+{
+  "independent_counts": {
+    "GIET": 93,
+    "SONG": 34
+  },
+  "equivalent": [
+    "identity_126_7",
+    "identity_131_7",
+    "identity_154_11",
+    "identity_262_25",
+    "identity_271_11",
+    "identity_285_19",
+    "identity_72_67",
+    "identity_85_11",
+    "ref_no_boundary"
+  ],
+  "p2_survivors": [
+    "waiver_partial",
+    "landed_partial",
+    "ref_any_run",
+    "ref_txt_wild",
+    "key_alpha_only",
+    "token_expand",
+    "token_delimiter_8212",
+    "token_delimiter_45",
+    "token_delimiter_44",
+    "token_delimiter_46",
+    "token_delimiter_59",
+    "identity_219_11",
+    "identity_219_107",
+    "token_delimiter_40",
+    "phi_substring",
+    "phi_skip_descendants",
+    "waiver_no_strip",
+    "waiver_head_truthy",
+    "url_zero_indexerror",
+    "url_zero_optional"
+  ],
+  "p3_survivors": [
+    "skip_v3_partial",
+    "waiver_order_os_sha",
+    "waiver_order_author_url",
+    "waiver_order_line_author",
+    "waiver_order_os_date"
+  ],
+  "old_ast": {
+    "total": 381,
+    "no_valid_kill": 51,
+    "clean": 45,
+    "incidental": 6
+  },
+  "current_ast": {
+    "total": 368,
+    "valid_kills_native": 362,
+    "incidental": 6
+  },
+  "snapshot_files": 17333
+}

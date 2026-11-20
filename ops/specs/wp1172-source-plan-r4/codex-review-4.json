@@ -1,0 +1,92 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "b764ed66f688fd42320b58b26fb30477ee9ca7fa",
+  "reviewed_file_sha256": "cdbd5ef96516dbd42f8b65638c2d21d5c3544c1e5a41e8d1f67c66ea23ab5989",
+  "findings": [
+    {
+      "id": "R4-19-mutable-owner-comment-is-not-authorization",
+      "severity": "P1",
+      "location": "§5 B3 — Ngoại lệ; §4 A+1; §10 Q7/Q9",
+      "claim": "B3 accepts a release exception by checking the comment's original OWNER author, H, package digest and expiry, without protecting the approved body against edits. A repository writer can edit someone else's comment: replacing an old owner waiver's H/digest/expiry satisfies the written predicate without a new owner decision. This can authorize an unaudited release. The related A+1 claim that updated_at == created_at proves 'never edited' also lacks a reliable edit-history predicate; equality of timestamps alone cannot establish immutability. The B3 bypass does not depend on same-second timing and is sufficient for P1. This is a new comment-integrity manifestation affecting the R4-08/R4-11 authority closures.",
+      "evidence": [
+        {
+          "cmd": "Read ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md §5 B3 and §4 A+1",
+          "observed": "B3 requires OWNER authorship and H/digest/reason/expiry, but no edit validation or independently protected body binding. A+1 equates equal created_at/updated_at with never edited."
+        },
+        {
+          "cmd": "web.run: official GitHub comment-moderation and issue-comment REST documentation",
+          "observed": "Repository writers can delete others' comments; permitted moderators/writers can edit them. REST returns the comment author and mutable body/timestamps, so original authorship alone is insufficient authorization for the current body. [GitHub comment moderation](https://docs.github.com/en/communities/moderating-comments-and-conversations/managing-disruptive-comments), [issue-comment API](https://docs.github.com/en/rest/issues/comments#update-an-issue-comment)."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-round4/probes.py counterexamples",
+          "observed": "rc=0. B3 model: an OWNER waiver for A/digest-a expiring at 30 rejects candidate B at time 40; editing its body to B/digest-b/expiry 300 while retaining author=OWNER makes the stated predicate accept. No live comment was edited. The A+1 same-second-edit model also accepts modified content when timestamp equality survives; that API timing behavior was not measured live."
+        }
+      ],
+      "suggested_fix": "In B3 and B4, bind the exact owner-approved authorization body and identity to evidence that delegated comment writers cannot rewrite. Use a trustworthy no-edit indicator/history check or independently protected owner authorization, not timestamp equality alone; reject missing, edited or unverifiable records. Define revocation/latest-record behavior without silently resurrecting obsolete authority. Q7/Q9 must approve the resulting authority boundary and future packet scope. Test a non-owner edit changing H, digest, expiry and activation generation; same-second edits; deletion/latest-record fallback; variable off/on and delete/recreate across restart; REST denial. Positive controls must accept a genuinely new owner authorization. Preserve full-on-unknown for A+1 and blocking-on-unknown for B3. Stronger validation may reduce availability when evidence endpoints fail; provision and test the read-only route on each consumer host before activation, without changing frozen PR1."
+    }
+  ],
+  "tests": [
+    {
+      "cmd": "pwd; git status --short; git rev-parse HEAD HEAD^{tree}; sha256sum target and source files; pinned git-show extraction",
+      "rc": 0,
+      "summary": "passed: exact reviewed SHA/tree/file hash; r2, PR0 draft, Proxima, r3 and BASELINE hashes match. PR1 spec and Mission r82 hashes match their frozen records."
+    },
+    {
+      "cmd": "git diff a6f7195e b764ed66 -- ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; read r2/r3/PR0/Proxima/r82/spec/lease and prior verdicts",
+      "rc": 0,
+      "summary": "completed plan-level fidelity, dependency, authority and prior-finding comparison. No retroactive PR1 change found."
+    },
+    {
+      "cmd": "Initial /tmp/rv-r4-round4/probes.py numbers attempts",
+      "rc": 1,
+      "summary": "failed reviewer probe setup: first attempted arithmetic on a null unmeasured duration, then misread the unknown-lane representation. Scratch probe corrected to filter measured durations and use lane status; these were probe defects, not repository failures."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round4/probes.py numbers",
+      "rc": 0,
+      "summary": "passed: 45 checks; detailed ledger /tmp/rv-r4-round4/numbers.json. Production overhead and the fixed-container 10h estimate were not measured."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round4/probes.py counterexamples",
+      "rc": 0,
+      "summary": "completed positive/negative models: original variable replay denied; restart/delete-recreate denied; fresh owner activation accepted; REST failure selects full. Eight-shard estimator closes R4-18. B3 edited-waiver counterexample accepts without a new owner action. Models are not live GitHub mutation tests."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round4/probes.py legacy",
+      "rc": 0,
+      "summary": "passed focused probes of actual origin/master PR0 functions: healthy workflow/8-shard receipt accepted; moving checkout, shared concurrency, wrong SHA, missing shard and seven non-success statuses rejected. This is not the full registry suite or B1 v1 acceptance."
+    },
+    {
+      "cmd": "GitHub read-only get_pr_info(1412), fetch_issue_comments(1166)",
+      "rc": null,
+      "summary": "completed: PR1412 merged f8b9cdd81879f25c22709c60e62b69a9c314a472 from b79cbf56a1696b44c38529275312287ca78ba91d. M8 comment7009869906 confirms accepted rev12, landed:false and unmeasured checkout/definition/gate-output provenance. Initial comments call had an argument-schema error; corrected read succeeded. Connector has no shell rc."
+    },
+    {
+      "cmd": "web.run official GitHub variables, contexts, comment API and moderation documentation",
+      "rc": null,
+      "summary": "completed platform-contract checks: repository-variable updated_at and github.workflow_sha exist; variable access requires Variables permissions; comments are editable/deletable. No live ACL, monotonic-clock or timestamp-resolution guarantee was measured. [Variables API](https://docs.github.com/en/rest/actions/variables#get-a-repository-variable), [contexts](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context)."
+    },
+    {
+      "cmd": "Python urllib.request GET https://api.github.com/repos/ducthangho/tra-luat/actions/workflows/ci-dot-bien-du.yml/runs?per_page=1",
+      "rc": 2,
+      "summary": "not_measured: URLError [Errno 1] Operation not permitted in this reviewer sandbox. This does not establish connectivity from either deployment host."
+    },
+    {
+      "cmd": "Full repository gates, live A3/A4 dispatch, variable/comment mutation, notification delivery, ACL enumeration, deployment and production timing benchmarks",
+      "rc": null,
+      "summary": "not_run: outside this read-only document review. No full-suite pass, live authority enforcement, Windows parity or production overhead is claimed."
+    },
+    {
+      "cmd": "Python compare /tmp/rv-r4-round4/snapshot-start.json with final git/file snapshot",
+      "rc": 0,
+      "summary": "passed: 17181 tracked hashes, HEAD/tree, index/diffs and tracked/untracked/ignored path status unchanged. Only pre-existing ignored .codex/ reported; its contents were not inspected."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round4/write_verdict.py",
+      "rc": 0,
+      "summary": "passed: exact object rechecked, output schema/count verified, REVIEW_OUT written and byte/JSON readback matched."
+    }
+  ],
+  "numbers_checked": 45,
+  "notes": "Round 4, independently reviewed; one P1 finding, no P0/P2/P3 findings. This verdict does not authorize implementation, merge, deployment or another review round.\n\nROUND-3 CLOSURES: R4-08's specific delegated variable off/on replay is fixed by the strict timestamp inequality under fresh, monotonically ordered server observations: true -> false -> false, including restart and delete/recreate. An owner record created in the same timestamp unit as the variable is rejected, which is conservative. However, the broader owner-only authority claim is not fully established: see new R4-19 about mutable authorization comments. REST documents updated_at for repository variables; field availability is not the problem. Its documentation does not establish a cross-resource causal-order guarantee or that every no-op PATCH advances the timestamp. B4 must measure ordering, no-op writes, parsing and freshness as well as field presence. No live variable was read or changed.\nR4-18 is closed at plan level. A+5 covers all eight shards and uses sum(median paired differences)/sum(median off times). The previous 0% sampled-shard / 17.5% overall counterexample now estimates 17.5%; a heavy-shard example estimates 9.3458%, and controlled 0%, 4%, 20% cases are correct. These are synthetic estimator checks, not production timings.\n\nPRIOR FINDINGS: R4-01 remains closed: delivered PR0 code is distinguished from unverified A1/A2/A5, not_run A3, not_measured A4 and incomplete A6. R4-02 remains closed for source traceability: metadata, overhead, protected release ref, exact-H required checks, master-versus-audit display, audit-red SLA/reproduction, study ceilings and separate Q8a/Q8b are present. R4-03 retains four outcome layers, reviewed equivalence and compatibility fixtures. R4-04 retains per-child wait4 and separate concurrent memory measurement. R4-05 retains two audit receipts plus a separate overlapping push observation. R4-06 retains B1-before-B2 and registry registration/serialization. R4-07 retains subscription/delivery verification, heartbeat observers and an explicitly best-effort deadline. R4-09 retains B1 v1 provenance and fail-closed B3 consumption. R4-10 retains immutable H/tree/package-byte binding and a final check. R4-11's self-written override is removed, but its replacement owner-comment authority is insufficient; this newly identified manifestation is tracked as R4-19. R4-12 retains real Windows-local parity or a written waiver. R4-13 retains the correct G9 population. R4-14 retains same-snapshot paired measurement. R4-15 retains operator-produced A4 with read-only deployment consumption. R4-16 retains sensitive B4 for packet_loop.py and a manual heartbeat runbook. R4-17 correctly labels 26,564 s as the shard-only subtotal. Thus I cannot certify that every previously closed authority issue remains closed; other prior repairs remain intact.\n\nFIDELITY AND CONSISTENCY: Reviewed r2, PR0 draft A1-A6 and receipt requirements, Proxima, pinned r3, Mission r82 and PR1 spec/lease. Section 8 supplies destinations, conditional destinations or explicit exclusions for the source obligations; no additional silent omission was identified. r3 I1-I6 and nine rejected options remain the A/B default; C requires separate owner decisions. PR1 spec SHA-256 remains 5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e and its lease excludes the registry. Draft 4 assigns future work instead of amending PR1. B1/PR5 and B1/B2/PR2 overlaps are serialized; B4 still needs a fresh repository-wide lease check. B3 covers both deploy scripts. Q6-Q9 are appropriate pending decisions; Q7/Q9 must resolve the authority defect before activation. Proposed packet budgets are not current execution grants.\n\nLANE B: workflow_sha is documented and the existing A4 workflow supplies a possible separate definition measurement; actual runner provenance and GraphQL success remain unmeasured. The real full-audit workflow has schedule/dispatch only, run-ID concurrency and eight shards. B2's r2 section-4 reference supplies the 36h completion deadline, 8d snapshot-age ceiling and three states; retry does not refresh an old snapshot. Six-hour polling and a 24h heartbeat are best-effort on shared GitHub scheduling, not independent infrastructure. API failure cannot produce fresh; Issue-write failure is a failed notification attempt. B3 has a feasible proposed read-only REST route plus pre-produced A4, but neither deploy host was tested. After blocking mode is enabled, unreachable REST or missing provenance must block, not revert to warning_only. Existing force-older/ForceOlder flags must remain version overrides only. Preserve the existing no-behind-master guard in addition to protected-ref membership. Real Linux/Windows parity and ACL/protection measurements remain future acceptance work.\n\nCOMMENT/FAILURE PROBES: Deleting the sole activation record or the newest record in a normal variable-before-record sequence denies activation. A synthetic mismatching newer generation followed by its deletion falls back to an older matching record; this requires that mismatching intermediate history and is not claimed as a bypass of a normal completed activation sequence. Same-second comment mutation is a timestamp-resolution model, not a measured GitHub write. Missing variable/comment, unknown writers and REST failure all select full execution in the stated A+1 predicate. Consumer-host REST availability remains unmeasured; this review host's direct REST probe was denied by the sandbox.\n\nNUMBERS: 45 ledger checks passed against pinned BASELINE/r3 and derived arithmetic. 700,504/15,057,171 = 4.6523%, rounded 4.7%; 7,955,967/15,057,171 = 52.8384%, rounded 52.8%; 9,669,927/705 = 13,716.2085 s. G9 n=71, median=1775 s, nearest-rank p25=1590 s. Eight-shard median=13,282 s; two-run subtotal=26,564 s. The r82 outward-rounding correction to 3.4-5.6 million seconds is consistent with the illustrative rounded inputs. Policy thresholds are requirements, not observations. A+5's 48 runs count only three pairs per shard; retaining five pairs on one shard gives at least 52. Its approximately 10 fixed-container hours are unvalidated: multiplying the historical 1057 s shard-step median gives 14.1 or 15.3 step-hours respectively, not a measured container forecast. Resolve the repetition wording and re-estimate on the chosen host when budgeting PR3. Raw historical job/log snapshots were not recollected; DX-2/DX-3/DX-8 are inherited source claims rather than independently reconstructed raw measurements.\n\nPROVENANCE: reviewed tree=376d7609e0083f27c47e0b44911616760e1e7ad8; origin/master=45bae8d07a8cdf06a1ca9a7a2e015a6258169379; r3 ref=c032656d6e9107c7d0d570afe374fd78b6424e93; PR1 metadata ref=a0ca10060174bb22264c5a71e2a6e7ad4eeddcca. provider=openai_codex; execution_surface=codex_service; transport=machine; model_family=openai. API-hosted review; no Codex CLI invocation. Served model/effort and external launcher run identity KHONG_DO_DUOC. Linux 6.18.44, Python 3.13.18, managed workspace-write sandbox with read-only reviewer discipline. Skill used: .agents/skills/cross-review/SKILL.md. No subagents, repository edits, commits, pushes, comments, workflow dispatches, GitHub writes, secret reads or deployment. Scratch: /tmp/rv-r4-round4. Snapshot equality covers 17,181 tracked-file hashes, HEAD/tree, index/diffs and tracked/untracked/ignored path status; pre-existing ignored .codex contents were not inspected. Equality at observation points does not prove historical non-writing."
+}

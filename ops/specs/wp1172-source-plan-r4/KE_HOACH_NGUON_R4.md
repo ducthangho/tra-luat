@@ -1,4 +1,4 @@
-# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 4
+# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 5
 
 ## 1. Trạng thái và nguồn
 
@@ -12,7 +12,8 @@
 - **Bản sửa 2** xử lý 13 finding của review Codex `wp1172-plan-r4-review-1` (2 P1, 11 P2) trên bản sửa 1 (`76b836fa…`,
   `d5bc154`). **Bản sửa 3** xử lý 6 P2 + 1 P3 của `wp1172-plan-r4-review-2` trên bản sửa 2 (`5a34f1e9…`, `3f3f4ab`);
   **Bản sửa 4** xử lý 1 P1 + 1 P2 của `wp1172-plan-r4-review-3` trên bản sửa 3 (`1082c645…`, `a6f7195`); bản sửa 4
-  CHƯA được review lại (đã dùng hết ba lượt review chủ kho cho phép cho kế hoạch). Bảng xử lý ở §11.
+  đã qua review lượt 4 (`wp1172-plan-r4-review-4`, còn 1 P1 R4-19). **Bản sửa 5** xử lý R4-19 và CHƯA được review lại.
+  Bảng xử lý ở §11.
 - **Nguồn (lưu nguyên byte tại `ops/specs/wp1172-source-plan-r4/nguon/`, `.gitattributes` `-text`):**
 
 | Nguồn | sha256 | Vai trò |
@@ -57,23 +58,36 @@ hai cửa (Q8a cho NGHIÊN CỨU, Q8b cho ĐỔI M9 chỉ sau kết quả C1).
 
 ## 4. Làn A — giảm chi phí (r3) + năm chốt siết
 
-PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm chốt áp vào đặc tả packet tương ứng khi tới lượt:
+PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm chốt áp vào đặc tả packet tương ứng khi tới lượt.
+
+**Bản ghi uỷ quyền của chủ kho (dùng chung cho A+1 và B3).** Comment GitHub KHÔNG được dùng làm bằng chứng uỷ quyền: người
+có quyền ghi kho sửa được comment của người khác, và hai mốc thời gian bằng nhau không chứng minh "chưa sửa". Bản ghi uỷ
+quyền là một **tệp JSON trong `ops/uy_quyen/` trên `master`**, bất biến theo băm commit, vào `master` qua một PR mà REST
+`pulls/{n}` cho `merged_by` = OWNER (hoặc commit do OWNER đẩy, xác minh qua REST `commits/{sha}` khi không có PR); tham
+chiếu bằng SHA commit + đường dẫn + sha256 nội dung. Mốc thời gian của bản ghi = `merged_at` của PR (máy chủ đặt). Điều
+kiện tin: nhánh `master` cấm force-push và cấm xoá (đo cấu hình bảo vệ, ghi hồ sơ); không đo được ⇒ không tin bản ghi nào
+(A+1 chạy đủ, B3 chặn). Bản ghi sau thay bản ghi trước theo số thế hệ; xoá tệp ở commit sau KHÔNG làm sống lại bản ghi cũ
+(bên tiêu dùng chỉ nhận bản ghi có thế hệ lớn nhất còn trên master và hợp lệ). Write set `ops/uy_quyen/` thuộc B4; bộ tiêu
+dùng đọc qua REST chỉ đọc trên mọi máy tiêu dùng, kiểm trước khi bật.
 
 - **A+1 (PR3, PR6, C2) — công tắc bảo thủ có thẩm quyền đo được.**
-  - Nguồn: một Actions repository variable (tên đóng băng trong đặc tả B4) cộng một **bản ghi kích hoạt của chủ kho**:
-    comment trên một Issue điều khiển cố định, tác giả = OWNER (đọc qua REST), chưa từng bị sửa (`updated_at` =
-    `created_at`), mang số thế hệ N và giá trị cho phép.
+  - Nguồn: một Actions repository variable (tên đóng băng trong đặc tả B4) cộng một **bản ghi kích hoạt** — một bản ghi
+    uỷ quyền của chủ kho (định nghĩa ở đầu mục này) mang số thế hệ N và giá trị cho phép.
   - **Vị từ bật (không trạng thái, sống qua khởi động lại):** biến tồn tại, giá trị = đúng chuỗi cho phép kèm thế hệ N
     của bản ghi OWNER mới nhất, VÀ `updated_at` của biến (do máy chủ GitHub đặt, đọc qua REST
-    `GET /repos/{kho}/actions/variables/{tên}`) SỚM HƠN `created_at` của bản ghi OWNER ấy. Mọi lần ghi biến sau bản ghi —
+    `GET /repos/{kho}/actions/variables/{tên}`) SỚM HƠN NGHIÊM NGẶT `merged_at` của bản ghi kích hoạt ấy. Mọi lần ghi biến sau bản ghi —
     tắt rồi đặt lại đúng giá trị cũ, xoá rồi tạo lại, kể cả xảy ra giữa hai lần đọc — đều đẩy `updated_at` qua mốc bản
     ghi ⇒ thế hệ N bị TIÊU THỤ, cổng coi là tắt cho tới khi chủ kho đăng bản ghi mới (thế hệ N+1) SAU lần ghi biến cuối.
     Người ghi được biến (collaborator, GitHub App có Variables:write — tập này đo và ghi hồ sơ, Q9) vì thế chỉ TẮT được,
     không bật lại được. Không đọc được biến, `updated_at`, hoặc bản ghi OWNER; hoặc không đo được tập người ghi ⇒ chạy đủ.
   - Nghiệm thu B4 phải có: phát lại tắt/bật bởi người được uỷ quyền (giữa hai lần đọc và sau khởi động lại bộ tiêu dùng)
-    ⇒ tắt; xoá-tạo lại biến ⇒ tắt; bản ghi OWNER bị sửa ⇒ tắt; bản ghi do người khác OWNER ⇒ tắt; chủ kho đăng bản ghi mới
-    sau lần ghi biến ⇒ bật; REST lỗi ⇒ chạy đủ. Trước khi đóng băng spec B4, đo rằng REST thật sự trả `updated_at` cho
-    biến (không đo được ⇒ thiết kế này không dùng được, B4 phải chọn cơ chế thu hồi bền khác và chủ kho duyệt lại).
+    ⇒ tắt; xoá-tạo lại biến ⇒ tắt; bản ghi do PR không phải OWNER merge ⇒ tắt; tệp bị sửa ở commit sau mà không qua
+    OWNER ⇒ không thay được thế hệ; xoá tệp thế hệ mới nhất ⇒ không sống lại thế hệ cũ (tắt); chủ kho merge bản ghi mới
+    sau lần ghi biến ⇒ bật; REST lỗi ⇒ chạy đủ. Trước khi đóng băng spec B4 phải ĐO: REST trả `updated_at` của biến; thứ
+    tự giữa `updated_at` của biến và `merged_at` của PR là đáng tin (cùng nguồn đồng hồ máy chủ, không đảo); một lần ghi
+    biến không đổi giá trị có đẩy `updated_at` không (nếu không, coi lần ghi ấy là không quan sát được và B4 phải bổ sung
+    phép phát hiện khác); cấu hình bảo vệ `master`. Đo không được ⇒ thiết kế này không dùng được, B4 phải chọn cơ chế khác
+    và chủ kho duyệt lại.
   - Tiêu dùng có thẩm quyền KHÔNG phải job trong cây PR (trên `pull_request`, PR có thể sửa chính `ci.yml` hay bộ phân
     loại). Thẩm quyền nằm ở cổng merge chạy từ cây TIN CẬY: `kiem-merge` (từ master, không từ head PR) đọc lại công tắc
     tại thời điểm xét merge và TÍNH LẠI yêu cầu từ diff: công tắc không đúng chuỗi cho phép, vắng, hoặc không đọc được ⇒
@@ -169,9 +183,10 @@ PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm 
 - **Xác thực trên máy deploy:** chỉ cần token ĐỌC (Actions, checks, contents) trên CẢ HAI máy deploy, không cần quyền
   dispatch; đo được trước khi bật chế độ chặn; chưa có
   ⇒ chế độ cảnh báo (`warning_only`), ghi rõ.
-- **Ngoại lệ:** KHÔNG chấp nhận "cờ + lý do tự ghi". Ngoại lệ hợp lệ = một bản ghi do CHỦ KHO đăng (comment Issue/PR, tác
-  giả = OWNER đọc qua REST) mang H, digest gói, lý do, hạn; hoặc một uỷ quyền thường trực có phạm vi do chủ kho ban hành.
-  Sai H, sai digest, hết hạn ⇒ chặn.
+- **Ngoại lệ:** KHÔNG chấp nhận "cờ + lý do tự ghi" và KHÔNG chấp nhận comment. Ngoại lệ hợp lệ = một bản ghi uỷ quyền
+  của chủ kho (§4, tệp trong `ops/uy_quyen/` trên `master`, `merged_by` = OWNER) mang H, digest gói, lý do, hạn; hoặc một
+  uỷ quyền thường trực có phạm vi, cũng ở dạng ấy. Sai H, sai digest, hết hạn, bản ghi không xác minh được ⇒ chặn. Ca:
+  người không phải OWNER sửa H/digest/hạn ở commit sau ⇒ chặn; xoá bản ghi mới nhất ⇒ không sống lại bản cũ.
 - **Hai nền:** chạy thật `sh` trên Linux và `ps1` trên **Windows thật** (máy Windows của chủ kho), đối chiếu parity cùng đầu
   vào, base và candidate (bài học r244). `pwsh` trong container Linux chỉ là bằng chứng phụ. Không dùng Windows CI (quy
   tắc thường trực); hoặc chủ kho miễn Windows-local cho B3 bằng văn bản, nêu rủi ro tồn dư.
@@ -277,12 +292,12 @@ Q1–Q5 giữ nguyên r3 §7. Thêm:
 - **Q6.** Chấp nhận làn B và A+2…A+5; chấp nhận G7 là best-effort có giám sát chéo; chấp nhận loại `packet_loop_test`/
   `nhanh_don_duoc_test` khỏi A/B? Khuyến nghị: CÓ.
 - **Q7.** B3: chặn hay cảnh báo 30 ngày đầu; AI được ban ngoại lệ release và theo khuôn nào? Khuyến nghị: chặn khi đã có
-  token trên cả hai máy deploy; ngoại lệ chỉ do chủ kho, khuôn §5 B3.
+  token trên cả hai máy deploy; ngoại lệ chỉ do chủ kho, dạng bản ghi uỷ quyền trong git (§4), không dùng comment.
 - **Q8a / Q8b.** Cho nghiên cứu C1 sau PR8 (Q8a)? Đổi M9 chỉ sau C1 (Q8b)? Khuyến nghị: quyết Q8a sau PR8, Q8b sau C1.
 - **Q9.** Phạm vi đầy đủ những ai ghi được biến công tắc (người và GitHub App, đo được) và cơ chế A+1: mọi lần ghi biến
   sau bản ghi OWNER đều tiêu thụ thế hệ, nên người ghi chỉ TẮT được; BẬT chỉ bằng bản ghi OWNER mới đăng sau lần ghi biến
-  cuối. Khuyến nghị: tắt — bất kỳ người ghi được nào, kể cả điều phối; bật — chỉ chủ kho. Ràng buộc MÁY (dấu thời gian do
-  máy chủ đặt), không chỉ là quy ước.
+  cuối. Khuyến nghị: tắt — bất kỳ người ghi được nào, kể cả điều phối; bật — chỉ chủ kho, bằng bản ghi uỷ quyền trong git
+  do chủ kho merge. Ràng buộc MÁY (băm commit + `merged_by` + dấu thời gian do máy chủ đặt), không chỉ là quy ước.
 
 ## 11. Xử lý review `wp1172-plan-r4-review-1`
 
@@ -320,6 +335,12 @@ Review lượt 3 (`wp1172-plan-r4-review-3`, trên `a6f7195`): 16 finding trư�
 |---|---|---|
 | R4-08 (phần còn lại) bản ghi kích hoạt bị phát lại sau tắt/bật | P1 | A+1: vị từ bật đòi `updated_at` của biến (do máy chủ đặt) sớm hơn `created_at` của bản ghi OWNER; mọi lần ghi biến tiêu thụ thế hệ; không trạng thái nên sống qua khởi động lại; ca phát lại bắt buộc ở B4; đo trước rằng REST trả `updated_at` |
 | R4-18 overhead chỉ đo một mảnh | P2 | A+5 phủ cả 8 mảnh × ≥ 3 cặp, ước lượng có trọng số, ca mảnh không đồng nhất, ngân sách ~10 giờ máy trong PR3; thiếu phủ ⇒ `khong_do_duoc` |
+
+Review lượt 4 (`wp1172-plan-r4-review-4`, trên `b764ed6`): R4-08 và R4-18 đóng; mọi finding trước giữ đóng; thêm R4-19.
+
+| Finding | Mức | Xử lý ở bản sửa 5 |
+|---|---|---|
+| R4-19 comment của OWNER sửa được, không phải uỷ quyền | P1 | Bản ghi uỷ quyền chuyển thành tệp git bất biến trong `ops/uy_quyen/` trên `master`, `merged_by` = OWNER, mốc `merged_at`; điều kiện tin = `master` cấm force-push/xoá (đo); thế hệ lớn nhất thắng, xoá không làm sống lại bản cũ; áp cho cả A+1 và B3; B4 đo thêm thứ tự đồng hồ, ghi không đổi giá trị và cấu hình bảo vệ trước khi đóng băng |
 
 ## 12. Phương án loại
 

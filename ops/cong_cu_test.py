@@ -2463,6 +2463,7 @@ def _chay_1_ca(fn):
     """
     global _CA_DANG_CHAY
     _CA_DANG_CHAY = fn.__name__
+    _g5_p = _g5_moc()
     try:
         fn()
         return "qua", None
@@ -2491,6 +2492,7 @@ def _chay_1_ca(fn):
         return "tin_dung_gia", f"{type(ex).__name__}: {ex}"
     finally:
         _CA_DANG_CHAY = None
+        _g5_ca(fn, _g5_p)
 
 def _bao_cao_nen_do(do_o_nen):
     """(dòng in, số lỗi) — báo MỘT LẦN các ca đã ĐỎ Ở NỀN, trước vòng lặp đột biến. Hàm THUẦN.
@@ -2587,7 +2589,9 @@ def _do_ban_kinh(ten_dot_bien, bo_qua_ca=()):
     """`bo_qua_ca`: ca đã ĐỎ Ở NỀN — không chạy lại dưới đột biến (chúng chết vì nền, chạy chỉ
     thêm nhiễu); `_ket_luan_ban_kinh` vẫn tự loại chúng nếu có mặt, nên hai lớp không mâu thuẫn."""
     tep, tim, thay, bp, phu_thuoc, ca_dich = DOT_BIEN[ten_dot_bien]
+    _g5_mo(ten_dot_bien, ca_dich)
     cay, dich = _dung_cay_dot_bien(ten_dot_bien, tep, tim, thay, phu_thuoc)
+    _g5_dung_xong()
     g, cu = globals(), globals()[bp]
     g[bp] = cay if bp == "GOC" else dich
     try:
@@ -2595,7 +2599,9 @@ def _do_ban_kinh(ten_dot_bien, bo_qua_ca=()):
                 if fn.__name__ not in set(bo_qua_ca)}, ca_dich
     finally:
         g[bp] = cu
+        _g5_ca_xong()
         shutil.rmtree(cay, ignore_errors=True)
+        _g5_dong()
 
 
 # --------------------------------------------------------------- T21/T22 (#445 gen 4)
@@ -7374,6 +7380,18 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
         g["_ket_thuc_manh"] = cu
     cam = [ascii(p)[:40] for p in goi if any(ord(c) < 32 or c in '"*:?|<>' + chr(92) for c in p)]
     bang(ra_nt == [0, [], 0] and not cam, f"khối #698 M2b trên `nt` gọi bộ ghi với tên Windows cấm: {ra_nt} {cam[:3]}")
+    # wp1448 (QUAN-SAT-G5): dòng `G5_THOI_GIAN` chỉ là LOG. Bộ nhận bỏ nó (bản ghi nhận được Y HỆT bản ghi gửi), tệp
+    # mảnh do bộ ghi dựng KHÔNG mang nó, và tệp mảnh mang nó thì gom ĐỎ đúng thẻ `[G-dong-la]`. Kèm: hợp các khoảng
+    # con ≠ tổng, phần không phân bổ, và ba trạng thái của bản ghi `dot_bien` (đủ · thiếu ca đích · vắng số đo).
+    g5 = kq.get("g5_thoi_gian") or {}
+    mong_g5 = {"tien_to": [True, True], "nhan": [True, None], "doc_lai": [len(_phan_manh(0, 3)) + 1, True],
+               "du": ["do_duoc", 1.5, 2.0, 5.5, 2, 0.5, 9.5], "thieu": ["khong_do_duoc", False, True],
+               "vang": ["khong_do_duoc"], "hop": [20.0, 0.0, 0.0],
+               "cha": ["do_duoc", 40.0, 20.0, 25.0, 20.0, 10.0, 5.0, 5.0, 13.0, 0, 3], "cha_rong": ["khong_do_duoc"],
+               "in_cha": [3, True, "cha", ""], "tep": [True, False, ["BKCON", "MANH"]], "gom_sach": 0, "gom_lot": [1, True]}
+    sai_g5 = {t: g5.get(t) for t, m in mong_g5.items() if g5.get(t) != m}
+    bang(not sai_g5 and set(g5) == set(mong_g5),
+         f"dòng thời gian G5 phải ở NGOÀI bộ nhận và tệp mảnh, hợp ≠ tổng, ba trạng thái (ô lệch: {sai_g5}; khoá {sorted(g5)})")
 
 
 @ca
@@ -7625,6 +7643,271 @@ def _cong_tren_cay_that(goc, bo_quet=None):
                f"    {str(bao.get('ly_do'))[:400]}"]
 
 
+# wp1448 (PR1 kế hoạch nguồn r3, QUAN-SAT-G5) — ĐO THỜI GIAN G5, CHỈ ĐỂ BÁO CÁO. Không đổi phán quyết nào.
+# Mỗi dòng in ra là `G5_THOI_GIAN ` + JSON MỘT dòng (ASCII), tiền tố RIÊNG, tách khỏi `MANH`/`BKCON`:
+#   · `dot_bien` — con in sau bản ghi `BKCON` của từng đột biến: dựng cây · ca ĐÍCH · tổng các ca KHÁC · dọn cây;
+#   · `con`      — con in lúc thoát: khoảng [bắt đầu, kết thúc] (epoch) và CPU user+sys (kể cả cháu đã thu hồi);
+#   · `cha`      — cha in lúc thoát, CHỈ ở chế độ mảnh: thời gian tường, HỢP các khoảng con (không phải tổng), phần
+#                  không phân bổ được và cách nó chia ra (trước con đầu · khe giữa các con · sau con cuối).
+# Đường đi: con in ra stdout của nó; `_nhan_ket_qua_con` bỏ MỌI dòng không mở đầu `BKCON `, nên các dòng này không
+# vào `ket`; `_ket_thuc_manh` chỉ ghi tệp mảnh từ `ket`, nên tệp job gom đọc không mang chúng; `_gom_manh` còn từ
+# chối mọi dòng lạ (`[G-dong-la]`). Cha gom lại các dòng của con rồi in ra LOG của bước — `t52` (ô `g5_thoi_gian` của
+# cửa `--tu-kiem-gom`) khoá cả ba vế. FAIL-SAFE: mọi hàm `_g5_*` nuốt lỗi của chính nó; đo hỏng thì dòng mang
+# `khong_do_duoc` kèm lý do, phán quyết và mã thoát không đổi.
+_G5_TIEN_TO = "G5_THOI_GIAN "
+_G5 = {"t0": time.time(), "db": None, "xong": {}, "so_db": 0, "con": None, "hen_con": False, "hen_cha": False}
+
+
+def _g5_moc():
+    """Mốc `perf_counter`, hoặc `None` khi đồng hồ hỏng — không bao giờ ném."""
+    try:
+        return time.perf_counter()
+    except Exception:  # noqa: BLE001 — phép đo phụ, không được làm đổi phán quyết
+        return None
+
+
+def _g5_mo(ten, ca_dich):
+    try:
+        _G5["db"] = {"ten": ten, "ca_dich": ca_dich, "bat_dau": time.time(), "p0": time.perf_counter(), "ca": {}}
+    except Exception:  # noqa: BLE001
+        _G5["db"] = None
+
+
+def _g5_dung_xong():
+    try:
+        db = _G5["db"]
+        db["p1"] = time.perf_counter()
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _g5_ca(fn, p):
+    try:
+        db = _G5["db"]
+        if db is not None and p is not None and "p2" not in db:
+            db["ca"][fn.__name__] = db["ca"].get(fn.__name__, 0.0) + (time.perf_counter() - p)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _g5_ca_xong():
+    try:
+        _G5["db"]["p2"] = time.perf_counter()
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _g5_dong():
+    try:
+        db, _G5["db"] = _G5["db"], None
+        db["p3"], db["ket_thuc"] = time.perf_counter(), time.time()
+        _G5["xong"][db["ten"]] = db
+    except Exception:  # noqa: BLE001
+        _G5["db"] = None
+
+
+def _g5_ban_ghi_dot_bien(ten, db):
+    """Bản ghi `dot_bien` từ số đo thô `db` (hoặc `None`). Hàm THUẦN. Thiếu MỘT trong ba thành phần ⇒ `khong_do_duoc`."""
+    bg = {"loai": "dot_bien", "ten": ten}
+    try:
+        if not isinstance(db, dict):
+            raise ValueError("khong co so do cho dot bien nay")
+        ca, dich = db["ca"], db["ca_dich"]
+        bg.update({"ca_dich": dich, "bat_dau": round(db["bat_dau"], 3), "ket_thuc": round(db["ket_thuc"], 3),
+                   "dung_cay_s": round(db["p1"] - db["p0"], 4), "so_ca_khac": len([t for t in ca if t != dich]),
+                   "ca_khac_s": round(sum(v for t, v in ca.items() if t != dich), 4),
+                   "don_cay_s": round(db["p3"] - db["p2"], 4), "tong_s": round(db["p3"] - db["p0"], 4)})
+        if dich not in ca:
+            raise ValueError("ca dich khong chay duoi dot bien nay")
+        bg["ca_dich_s"] = round(ca[dich], 4)
+        bg["trang_thai"] = "do_duoc"
+    except Exception as ex:  # noqa: BLE001
+        bg["trang_thai"], bg["ly_do"] = "khong_do_duoc", f"{type(ex).__name__}: {ex}"[:200]
+    return bg
+
+
+def _g5_dong_in(bg):
+    """Dòng in của MỘT bản ghi thời gian: tiền tố riêng + JSON một dòng, ASCII."""
+    return _G5_TIEN_TO + json.dumps(bg, ensure_ascii=True, sort_keys=True)
+
+
+def _g5_in_dot_bien(ten):
+    """Con: in dòng `dot_bien` của `ten` (ngay sau `BKCON` của nó) và hẹn dòng `con` lúc thoát."""
+    try:
+        db = _G5["xong"].pop(ten, None)
+        if db is None and isinstance(_G5["db"], dict) and _G5["db"].get("ten") == ten:
+            db, _G5["db"] = None, None   # `_dung_cay_dot_bien` ném trước khi đo ca nào
+        _G5["so_db"] += 1
+        print(_g5_dong_in(_g5_ban_ghi_dot_bien(ten, db)), flush=True)
+        if not _G5["hen_con"]:
+            import atexit
+            _G5["hen_con"] = True
+            atexit.register(_g5_in_con)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _g5_in_con():
+    try:
+        bg = {"loai": "con", "pid": os.getpid(), "bat_dau": round(_G5["t0"], 3), "ket_thuc": round(time.time(), 3),
+              "so_dot_bien": _G5["so_db"]}
+        try:
+            bg["cpu_s"] = round(sum(os.times()[:4]), 3)
+        except Exception as ex:  # noqa: BLE001
+            bg["cpu_s"], bg["ly_do_cpu"] = "khong_do_duoc", type(ex).__name__
+        print(_g5_dong_in(bg), flush=True)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _g5_hop(khoang):
+    """Độ dài HỢP của các khoảng [a, b] — con chạy chồng nhau nên KHÔNG cộng thẳng. Hàm THUẦN."""
+    tong, cuoi = 0.0, None
+    for a, b in sorted((float(a), float(b)) for a, b in khoang if b >= a):
+        if cuoi is None or a > cuoi:
+            tong, cuoi = tong + (b - a), b
+        elif b > cuoi:
+            tong, cuoi = tong + (b - cuoi), b
+    return tong
+
+
+def _g5_doc_dong(van_ban):
+    """[bản ghi] của mọi dòng `G5_THOI_GIAN ` trong đầu ra của một con; dòng hỏng thành bản ghi `khong_do_duoc`."""
+    kq = []
+    for dong in van_ban.split("\n"):
+        dong = dong.rstrip("\r")
+        if not dong.startswith(_G5_TIEN_TO):
+            continue
+        try:
+            bg = json.loads(dong[len(_G5_TIEN_TO):])
+            if not isinstance(bg, dict):
+                raise ValueError("khong phai doi tuong")
+        except ValueError as ex:
+            bg = {"loai": "hong", "trang_thai": "khong_do_duoc", "ly_do": f"dong hong: {ex}"[:120]}
+        kq.append(bg)
+    return kq
+
+
+def _g5_ban_ghi_cha(t0, t1, cac_con, manh=None):
+    """Bản ghi `cha`: tường = t1 − t0; HỢP các khoảng con; phần KHÔNG PHÂN BỔ = tường − hợp, chia ba. Hàm THUẦN."""
+    bg = {"loai": "cha", "bat_dau": round(t0, 3), "ket_thuc": round(t1, 3), "tuong_s": round(t1 - t0, 3),
+          "so_con": len(cac_con)}
+    if manh is not None:
+        bg["manh"], bg["so_manh"] = manh
+    try:
+        khoang = [(c["bat_dau"], c["ket_thuc"]) for c in cac_con]
+        if not khoang or any(type(x) not in (int, float) for k in khoang for x in k):
+            raise ValueError("khong co khoang con doc duoc")
+        hop, dau, cuoi = _g5_hop(khoang), min(a for a, _ in khoang), max(b for _, b in khoang)
+        bg.update({"hop_con_s": round(hop, 3), "tong_con_s": round(sum(b - a for a, b in khoang), 3),
+                   "khong_phan_bo_s": round((t1 - t0) - hop, 3), "truoc_con_s": round(dau - t0, 3),
+                   "sau_con_s": round(t1 - cuoi, 3), "khe_giua_con_s": round((cuoi - dau) - hop, 3),
+                   "trang_thai": "do_duoc"})
+        cpu = [c.get("cpu_s") for c in cac_con]
+        bg["cpu_con_s"] = round(sum(cpu), 3) if all(type(x) in (int, float) for x in cpu) else "khong_do_duoc"
+    except Exception as ex:  # noqa: BLE001
+        bg["trang_thai"], bg["ly_do"] = "khong_do_duoc", f"{type(ex).__name__}: {ex}"[:200]
+    return bg
+
+
+def _g5_thu_con(kq):
+    """Cha: giữ lại các dòng thời gian trong đầu ra của con và hẹn in lúc thoát. KHÔNG chạm `kq`."""
+    try:
+        if _G5["con"] is None:
+            _G5["con"] = []
+        for _n, _rc, ra in kq:
+            _G5["con"].extend(_g5_doc_dong(ra))
+        if not _G5["hen_cha"]:
+            import atexit
+            _G5["hen_cha"] = True
+            atexit.register(_g5_in_cha)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _g5_in_cha():
+    """Cha, lúc thoát: CHỈ ở chế độ mảnh — in lại dòng của con rồi dòng `cha`. Chế độ khác: không in gì."""
+    try:
+        che_do, tham_so = _doc_che_do(os.environ)
+        if che_do != "manh" or not _G5["con"]:
+            return
+        for bg in _G5["con"]:
+            print(_g5_dong_in(bg))
+        print(_g5_dong_in(_g5_ban_ghi_cha(_G5["t0"], time.time(), [c for c in _G5["con"] if c.get("loai") == "con"],
+                                          manh=tham_so[:2])), flush=True)
+    except Exception as ex:  # noqa: BLE001
+        try:
+            print(_g5_dong_in({"loai": "cha", "trang_thai": "khong_do_duoc", "ly_do": type(ex).__name__}), flush=True)
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def _g5_tu_kiem():
+    """Ô `g5_thoi_gian` của cửa `--tu-kiem-gom` (ca `t52`): dòng thời gian KHÔNG vào bộ nhận, KHÔNG vào tệp mảnh, và
+    tệp mảnh mang nó thì gom ĐỎ `[G-dong-la]`; hợp ≠ tổng; ba trạng thái của bản ghi `dot_bien`."""
+    n = 3
+    vt, cac = {"sha256_test": "a" * 64, "head": "b" * 40}, _phan_manh(0, n)
+    ban_ghi = {t: _ban_ghi_du_gia(t) for t in cac}
+    db = {"ca_dich": DOT_BIEN[cac[0]][5], "bat_dau": 100.0, "ket_thuc": 109.5, "p0": 0.0, "p1": 1.5, "p2": 9.0, "p3": 9.5,
+          "ca": {DOT_BIEN[cac[0]][5]: 2.0, "ca_khac_a": 3.0, "ca_khac_b": 2.5}}
+    du = _g5_ban_ghi_dot_bien(cac[0], db)
+    thieu = _g5_ban_ghi_dot_bien(cac[0], {**db, "ca": {"ca_khac_a": 3.0}})
+    dong_tg = [_g5_dong_in(du), _g5_dong_in({"loai": "con", "pid": 1, "bat_dau": 100.0, "ket_thuc": 110.0, "cpu_s": 7.0})]
+    ra = "".join("BKCON " + json.dumps(ban_ghi[t], ensure_ascii=True) + "\n" + dong_tg[0] + "\n" for t in cac) + dong_tg[1] + "\n"
+    nhan, ly = _nhan_ket_qua_con(cac, 0, ra, ())
+    kq = {"tien_to": [d.startswith("G5_THOI_GIAN {") and "\n" not in d for d in dong_tg],
+          "nhan": [nhan == ban_ghi, ly], "doc_lai": [len(_g5_doc_dong(ra)), _g5_doc_dong(ra)[0] == du],
+          "du": [du.get("trang_thai"), du.get("dung_cay_s"), du.get("ca_dich_s"), du.get("ca_khac_s"), du.get("so_ca_khac"),
+                 du.get("don_cay_s"), du.get("tong_s")],
+          "thieu": [thieu.get("trang_thai"), "ca_dich_s" in thieu, "ca dich khong chay" in str(thieu.get("ly_do"))],
+          "vang": [_g5_ban_ghi_dot_bien("x", None).get("trang_thai")],
+          "hop": [_g5_hop([(0, 10), (5, 15), (20, 25)]), _g5_hop([]), _g5_hop([(3, 1)])]}
+    cha = _g5_ban_ghi_cha(90.0, 130.0, [{"bat_dau": 100.0, "ket_thuc": 110.0, "cpu_s": 7.0},
+                                         {"bat_dau": 105.0, "ket_thuc": 115.0, "cpu_s": 5.0},
+                                         {"bat_dau": 120.0, "ket_thuc": 125.0, "cpu_s": 1.0}], manh=(0, n))
+    kq["cha"] = [cha.get(x) for x in ("trang_thai", "tuong_s", "hop_con_s", "tong_con_s", "khong_phan_bo_s", "truoc_con_s",
+                                      "sau_con_s", "khe_giua_con_s", "cpu_con_s", "manh", "so_manh")]
+    kq["cha_rong"] = [_g5_ban_ghi_cha(0.0, 1.0, []).get("trang_thai")]
+    with tempfile.TemporaryDirectory(prefix="g5tg_") as d:
+        thu = Path(d) / "manh"
+        for k in range(n):
+            ck = _phan_manh(k, n)
+            _ket_thuc_manh(k, n, str(thu / f"manh-{k}.txt"), ck, nhan if (k == 0 and nhan) else {t: _ban_ghi_du_gia(t) for t in ck},
+                           None, vt)
+        # Cha in dòng thời gian ra STDOUT (log của bước), không vào tệp mảnh đang khai ở biến môi trường; ngoài chế độ mảnh: im lặng.
+        import contextlib
+        import io
+        cu_env = {b: os.environ.get(b) for b in (_BIEN_BAN_KINH, _BIEN_MANH, _BIEN_MANH_RA)}
+        cu_con, _G5["con"] = _G5["con"], [json.loads(d[len(_G5_TIEN_TO):]) for d in dong_tg if d.startswith(_G5_TIEN_TO)]
+        dem, dem_ngoai = io.StringIO(), io.StringIO()
+        try:
+            for b in cu_env:
+                os.environ.pop(b, None)
+            with contextlib.redirect_stdout(dem_ngoai):
+                _g5_in_cha()
+            os.environ[_BIEN_MANH], os.environ[_BIEN_MANH_RA] = f"0/{n}", str(thu / "manh-0.txt")
+            with contextlib.redirect_stdout(dem):
+                _g5_in_cha()
+        finally:
+            _G5["con"] = cu_con
+            for b, v in cu_env.items():
+                os.environ.pop(b, None)
+                if v is not None:
+                    os.environ[b] = v
+        in_cha = [x for x in dem.getvalue().split("\n") if x]
+        kq["in_cha"] = [len(in_cha), all(x.startswith("G5_THOI_GIAN {") for x in in_cha),
+                        json.loads(in_cha[-1].partition(" ")[2]).get("loai") if in_cha else None, dem_ngoai.getvalue()]
+        than0 = (thu / "manh-0.txt").read_text(encoding="utf-8") if (thu / "manh-0.txt").is_file() else ""
+        kq["tep"] = [bool(than0), "G5_THOI_GIAN" in than0,
+                     sorted({d.split(" ", 1)[0] for d in than0.split("\n") if d})]
+        kq["gom_sach"] = _gom_manh(str(thu), vt)[1]
+        if than0:
+            (thu / "manh-0.txt").write_text(than0 + dong_tg[0] + "\n", encoding="utf-8", newline="\n")
+        dong, loi = _gom_manh(str(thu), vt)
+        kq["gom_lot"] = [loi, "[G-dong-la]" in dong[0] and "G5_THOI_GIAN" in dong[0]]
+    return kq
+
+
 def _do_mot(ten_db, do_o_nen):
     """BẢN GHI ĐO của MỘT đột biến — DỮ LIỆU, không phải văn bản báo cáo.
 
@@ -7732,6 +8015,7 @@ def _phong_con(cac_ten, do_o_nen, so):
         tep_ra.seek(0)
         kq.append((n, rc, tep_ra.read().decode("utf-8", "replace")))
         tep_ra.close()
+    _g5_thu_con(kq)
     return kq
 
 
@@ -7863,6 +8147,7 @@ def _in_ban_kinh_con():
         kieu = _GIA_BAT_THUONG.get(ten)
         if not _la_ten_gia(ten):
             in_(_do_mot(ten, do_o_nen))
+            _g5_in_dot_bien(ten)
             continue
         if ten == _TEN_GIA_PHAN_DONG:
             bg = _ban_ghi_gia(ten, do_o_nen)
@@ -8062,6 +8347,23 @@ if not _CO_SYMLINK:
 # F43: tên đăng ký theo năng lực = HIỆU hai ảnh — quan sát KHÔNG lọc theo oracle, tên mới ngoài oracle ⇒ t52 ĐỎ.
 # F45: tên THÊM, BỚT hay ĐỔI định nghĩa giữa hai ảnh — hiệu tập khoá bỏ sót xoá/ghi đè trong cửa sổ.
 _TEN_NANG_LUC = frozenset(t for t in DOT_BIEN.keys() | _TRUOC_NANG_LUC.keys() if DOT_BIEN.get(t) != _TRUOC_NANG_LUC.get(t))
+# wp1448 (QUAN-SAT-G5) — đột biến RIÊNG cho chốt mới của dòng thời gian, đích `t52` (ô `g5_thoi_gian`). Đăng ký SAU mọi
+# mục cũ: chỉ số của các đột biến có sẵn — tức phân hoạch mảnh của chúng — không đổi.
+for _ten, _tim, _thay in (
+    # dòng thời gian mang tiền tố của bản ghi ⇒ lọt vào bộ nhận của cha và của job gom
+    ("wp1448_g5_dong_mang_tien_to_bkcon", '_G5_TIEN_TO = "G5_THOI_GIAN "\n', '_G5_TIEN_TO = "BKCON "\n'),
+    # cha chép dòng thời gian vào TỆP MẢNH (thứ job gom đọc) thay vì in ra log của bước
+    ("wp1448_g5_cha_ghi_dong_thoi_gian_vao_tep_manh", '            print(_g5_dong_in(bg))\n',
+     '            open(tham_so[2], "a", encoding="utf-8").write(_g5_dong_in(bg) + "\\n")\n'),
+    # đối chiếu thời gian tường bằng TỔNG thay cho HỢP
+    ("wp1448_g5_hop_thanh_tong", '        elif b > cuoi:\n            tong, cuoi = tong + (b - cuoi), b\n',
+     '        else:\n            tong, cuoi = tong + (b - a), max(b, cuoi)\n'),
+    # thiếu thành phần ca đích mà vẫn khai `do_duoc`
+    ("wp1448_g5_thieu_ca_dich_van_do_duoc",
+     '        if dich not in ca:\n            raise ValueError("ca dich khong chay duoi dot bien nay")\n        bg["ca_dich_s"] = round(ca[dich], 4)\n',
+     '        bg["ca_dich_s"] = round(ca.get(dich, 0.0), 4)\n'),
+):
+    DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
 # NỢ (KHÔNG ĐO ĐƯỢC): nền VẮNG thuộc tính `os.symlink` (nhánh AttributeError của `_do_co_symlink`) không được đo trong bộ này —
 # quyết định chủ kho sau review lượt 17 (F39); runner chuẩn Ubuntu/Windows có `os.symlink`; không mô phỏng.
 
@@ -8616,6 +8918,7 @@ def _in_tu_kiem_gom():
             _ket_thuc_manh(0, n, str(gay), cac, None, "giả", vt)
             kq["ghi_gay"] = [gay.exists() or gay.is_symlink()]
     # Chủ kho sau review lượt 17: MỘT ô — năng lực symlink ↔ tên đột biến symlink đã đăng ký (không nạp lại, không mô phỏng).
+    kq["g5_thoi_gian"] = _g5_tu_kiem()
     kq["nang_luc"] = [_CO_SYMLINK, sorted(_TEN_NANG_LUC)]
     print("KQ " + json.dumps(kq, ensure_ascii=True))
 

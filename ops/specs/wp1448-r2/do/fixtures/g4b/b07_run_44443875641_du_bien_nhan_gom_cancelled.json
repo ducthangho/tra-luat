@@ -1,0 +1,300 @@
+{
+ "mo_ta": "luot THAT 44443875641: du 8 manh success, job gom 135300180039 cancelled (log chuan-bi rut gon)",
+ "mo_phong": false,
+ "run": {
+  "id": 44443875641,
+  "event": "pull_request",
+  "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a",
+  "run_attempt": 1,
+  "conclusion": "cancelled",
+  "created_at": "2026-11-19T02:22:49Z"
+ },
+ "dong": [
+  {
+   "ten": "chuan-bi",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291252823,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate (ubuntu-latest)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291356786,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 0)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291356928,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 0)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291356940,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 2)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291356942,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 3)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291356962,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-ops (ubuntu-latest)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291356967,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 4)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291356970,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 6)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291356980,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 2)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291356986,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 1)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291356997,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 5)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357000,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 3)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357011,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 1)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357017,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 5)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357020,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 7)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357026,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 7)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357057,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 4)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357062,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 6)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357095,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 1)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357159,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 8)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357162,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 0)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357178,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 5)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357179,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 3)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357191,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 6)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357195,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 4)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357200,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 11)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357209,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 14)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357212,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 15)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357214,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 9)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357221,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 10)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357248,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 12)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357271,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 13)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357272,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 2)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357283,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop-manh (ubuntu-latest, 7)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135291357369,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-nhanh-gop (ubuntu-latest)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135292019150,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-registry (ubuntu-latest)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 135292213657,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-packet-loop (ubuntu-latest)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 135293372143,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  },
+  {
+   "ten": "gate-cong-cu-gop (ubuntu-latest)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 135300180039,
+   "head_sha": "22865d8dc3b964e5e1aeb35c6f22be610e69d18a"
+  }
+ ],
+ "log": {
+  "chuan_bi": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n",
+  "gom": null
+ },
+ "artifact": null,
+ "ghi_de": null,
+ "mong": {
+  "g4b": [
+   "gom_hong",
+   7
+  ],
+  "g4a": "du"
+ }
+}

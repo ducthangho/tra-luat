@@ -3636,6 +3636,580 @@ def t103_packet_loop_bo_boc_giu_chot_main_goc():
 
 
 # ---------------------------------------------------------------- chạy ca và đột biến
+# ---------------------------------------------------------------- wp1448 (QUAN-SAT-G5): hai dong bong
+P1_GIA = "d" * 40   # cha THU NHAT gia cua merge ref gia
+TEP_BAO_DONG_CHUAN = "ops/specs/wp1448-r2/do/BAO_DONG.json"   # LUAT cua bo test: noi ghi van tay luc dung bao dong
+TEP_THU_THAP = "ops/specs/wp1448-r2/do/thu_thap.py"
+KHOA_OUTPUT = ("che_do", "goc", "dau", "hop", "packet_loop")   # LUAT: dung nam khoa job khac doc, dung thu tu nay
+
+
+def chay_gia_bong(cha=None, to_tien=0, dong_gop=(0, b""), ls_tree=(0, b""), log=None, **kw):
+    """Do gia cho MA BONG: `rev-list --parents` (mac dinh: hai cha P1_GIA + GOC_B), `merge-base --is-ancestor`, diff
+    cha mot -> cay/merge ref va `ls-tree`; moi lenh khac giao `chay_gia`. `log` ghi argv cua CA hai lop."""
+    trong = chay_gia(log=log, **kw)
+
+    def chay(argv, **k2):
+        a = bo_attr_source(argv)
+        rieng = None
+        if a[:3] == ["git", "rev-list", "--parents"]:
+            rieng = cha if cha is not None else (0, f"{HOP_GIA} {P1_GIA} {GOC_B}\n".encode())
+        elif a[:3] == ["git", "merge-base", "--is-ancestor"]:
+            rieng = to_tien if isinstance(to_tien, BaseException) else (to_tien, b"")
+        elif a[:2] == ["git", "ls-tree"]:
+            rieng = ls_tree
+        elif a[:4] == ["git", "diff", "--no-renames", "--name-only"] and a[-2] == P1_GIA:
+            rieng = dong_gop
+        if rieng is None:
+            return trong(argv, **k2)
+        if log is not None:
+            log.append(list(argv))
+        return _tra_gia(rieng)
+    return chay
+
+
+def tach_bong(log):
+    """{ten dong: {khoa: gia tri}} cua hai dong bong trong stdout; moi dong phai co DUNG MOT lan."""
+    kq = {}
+    for dong in log.splitlines():
+        for ten in ("BONG_CONG_CU", "BONG_PHAN_LOAI"):
+            if dong.startswith(ten + ": "):
+                bang(ten not in kq, f"dong {ten} in hai lan: {log!r}")
+                tp = dong[len(ten) + 2:].split(" ")
+                kq[ten] = dict(x.split("=", 1) for x in tp if "=" in x)
+                if ten == "BONG_CONG_CU":
+                    kq[ten]["quyet_dinh"] = tp[0]
+    bang(set(kq) == {"BONG_CONG_CU", "BONG_PHAN_LOAI"}, f"stdout phai co du hai dong bong, thay {sorted(kq)}: {log!r}")
+    return kq
+
+
+def main_bong(m, env, chay, kho=None, co_output=True):
+    """(rc, byte cua GITHUB_OUTPUT | None, stdout, hai dong bong da tach) cua MOT lan goi `main` that."""
+    tam = Path(tempfile.mkdtemp(prefix="cdn_bong_"))
+    try:
+        ra = tam / "out.txt"
+        if co_output:
+            env = dict(env, GITHUB_OUTPUT=str(ra))
+        bo_dem = io.StringIO()
+        rc = m.main([], env, chay, kho or ROOT_THAT, bo_dem)
+        return rc, (ra.read_bytes() if ra.exists() else None), bo_dem.getvalue(), tach_bong(bo_dem.getvalue())
+    finally:
+        shutil.rmtree(tam, ignore_errors=True)
+
+
+def output_mong(che_do, pl, cap=None):
+    goc, dau, hop = cap or ("", "", "")
+    return f"che_do={che_do}\ngoc={goc}\ndau={dau}\nhop={hop}\npacket_loop={pl}\n".encode()
+
+
+@ca
+def t110_dong_bong_khong_bao_gio_vao_output():
+    """wp1448: `GITHUB_OUTPUT` giu NGUYEN tung byte (dung nam khoa job khac doc), hai dong bong chi ra stdout. Luoi su kien x
+    loai diff: pull_request / push / workflow_dispatch / su kien la, toan ho so, ngoai allowlist, diff khong do duoc, diff rong."""
+    m = nap_module()
+    cap_pr, cap_push = (GOC_A, GOC_B, HOP_GIA), (GOC_A, HOP_GIA, HOP_GIA)
+    ho_so, ma, tai_lieu = nul("ops/land/x.yaml"), nul("scripts/tl.py"), nul("docs/a.md")
+    push = lambda **kw: env_pr("push", dau="", **kw)
+    luoi = {
+        "pr_ho_so": (env_pr(), chay_gia_bong(out=ho_so), output_mong("duong_nhanh", "bo_qua", cap_pr)),
+        "pr_ma": (env_pr(), chay_gia_bong(out=ma, dong_gop=ma), output_mong("day_du", "bo_qua")),
+        "pr_tai_lieu_bo_moi": (env_pr(), chay_gia_bong(out=tai_lieu, dong_gop=tai_lieu), output_mong("day_du", "bo_qua")),
+        "pr_cham_packet_loop": (env_pr(), chay_gia_bong(out=nul("CLAUDE.md"), dong_gop=nul("CLAUDE.md")), output_mong("day_du", "chay")),
+        "pr_khong_do_duoc": (env_pr(), chay_gia_bong(out=ho_so, rc=128), output_mong("day_du", "chay")),
+        "pr_git_nem": (env_pr(), chay_gia_bong(out=ho_so, nem=SuDoGia("git no")), output_mong("day_du", "chay")),
+        "pr_diff_rong": (env_pr(), chay_gia_bong(out=b""), output_mong("duong_nhanh", "chay", cap_pr)),
+        "pr_thieu_sha": (env_pr(goc=""), chay_gia_bong(out=ho_so), output_mong("day_du", "chay")),
+        "pr_goc_cu_ho_so": (env_pr(), chay_gia_bong(out=ho_so, merge_ref=nul("ops/land/x.yaml", "scripts/y.py"), dong_gop=ho_so),
+                            output_mong("day_du", "bo_qua")),
+        "push_ho_so": (push(), chay_gia_bong(out=ho_so, merge_ref=ho_so), output_mong("duong_nhanh", "chay", cap_push)),
+        "push_ma": (push(), chay_gia_bong(out=ma, merge_ref=ma), output_mong("day_du", "chay")),
+        "push_khong_do_duoc": (push(goc="0" * 40), chay_gia_bong(out=ho_so), output_mong("day_du", "chay")),
+        "dispatch_day_du": (env_pr("workflow_dispatch", CI_DUONG_NHANH_CHE_DO_VAO="day_du"), chay_gia_bong(out=ho_so),
+                            output_mong("day_du", "chay")),
+        "dispatch_tu_dong_ho_so": (env_pr("workflow_dispatch", dau="", CI_DUONG_NHANH_NHANH_MAC_DINH="master"),
+                                   chay_gia_bong(out=ho_so, merge_ref=ho_so), output_mong("duong_nhanh", "chay", cap_push)),
+        "su_kien_la": (env_pr("schedule"), chay_gia_bong(out=ho_so), output_mong("day_du", "chay")),
+    }
+    bang(len(luoi) >= 12 and {e[0]["CI_DUONG_NHANH_SU_KIEN"] for e in luoi.values()} >= {"pull_request", "push", "workflow_dispatch"},
+         "luoi phai co it nhat 12 o va phu ca ba su kien duoc phan loai")
+    for ten, (env, chay, mong) in luoi.items():
+        env = dict(env, GITHUB_RUN_ID="4412", GITHUB_RUN_ATTEMPT="3")
+        rc, out, log, bong = main_bong(m, env, chay)
+        bang(rc == 0, f"{ten}: main phai thoat 0, duoc {rc}")
+        bang(out == mong, f"{ten}: GITHUB_OUTPUT phai dung tung byte {mong!r}, duoc {out!r}")
+        bang(b"BONG" not in out and [x.split(b"=")[0].decode() for x in out.splitlines()] == list(KHOA_OUTPUT),
+             f"{ten}: GITHUB_OUTPUT chi duoc mang nam khoa {KHOA_OUTPUT}: {out!r}")
+        bang(bong["BONG_CONG_CU"]["quyet_dinh"] in ("chay", "bo_qua", "khong_do_duoc") and bong["BONG_CONG_CU"].get("run") == "4412/3",
+             f"{ten}: dong BONG_CONG_CU phai mang quyet dinh ba trang thai va danh tinh luot: {bong['BONG_CONG_CU']}")
+        bang(bong["BONG_PHAN_LOAI"].get("cu") == mong.split(b"\n")[0].split(b"=")[1].decode(),
+             f"{ten}: `cu` cua BONG_PHAN_LOAI phai la phan loai dang chay: {bong['BONG_PHAN_LOAI']}")
+        # khong co GITHUB_OUTPUT: van hai dong bong, khong tep nao duoc tao
+        rc2, out2, _log2, _b2 = main_bong(m, env, chay, co_output=False)
+        bang(rc2 == 0 and out2 is None, f"{ten}: khong co GITHUB_OUTPUT thi khong duoc tao tep nao (rc={rc2}, {out2!r})")
+    bang(main_bong(m, env_pr(), chay_gia_bong(out=tai_lieu, dong_gop=tai_lieu, ls_tree=SuDoGia("x")))[3]["BONG_CONG_CU"]["duong_dan"]
+         == "bo_qua", "doi chung: o `pr_tai_lieu_bo_moi` phai di toi nhanh bo moi (khong thi luoi khong do nhanh ay)")
+
+
+def _cong_cu_gia(m, duong, che_do="day_du", su_kien="pull_request", doi="nhu_dong_gop", **kw):
+    """`bong_cong_cu` tren do gia: diff cua bo phan loai va dong gop merge deu la `duong` (tru khi `doi` ghi de)."""
+    env = env_pr(su_kien)
+    doi = set(duong) if doi == "nhu_dong_gop" else doi
+    kw.setdefault("ls_tree", (0, b"100644 blob " + b"1" * 40 + b"\tops/a.py\0"))
+    kw.setdefault("dong_gop", nul(*duong))
+    return m.bong_cong_cu(su_kien, che_do, doi, env, chay_gia_bong(**kw), _cay_van_tay_gia(m))
+
+
+_CAY_VAN_TAY: dict = {}
+
+
+def _cay_van_tay_gia(m):
+    """Thu muc tam mang `BAO_DONG.json` KHOP dau van tay cua `ls_tree` gia mac dinh (dung chung trong mot tien trinh)."""
+    if "kho" not in _CAY_VAN_TAY:
+        kho = Path(tempfile.mkdtemp(prefix="cdn_vt_"))
+        vt, ly = m.van_tay_bao_dong(HOP_GIA, chay_gia_bong(ls_tree=(0, b"100644 blob " + b"1" * 40 + b"\tops/a.py\0")), kho)
+        if vt is None:
+            raise RuntimeError(f"ha tang: khong tinh duoc van tay gia: {ly}")
+        (kho / TEP_BAO_DONG_CHUAN).parent.mkdir(parents=True)
+        (kho / TEP_BAO_DONG_CHUAN).write_text(json.dumps({"phien_ban": 1, "van_tay": vt}), encoding="utf-8")
+        _CAY_VAN_TAY["kho"] = kho
+    return _CAY_VAN_TAY["kho"]
+
+
+THANH_PHAN_BAO_DONG = {   # LUAT (dac ta wp1448, muc bong tap phu thuoc): duong dan -> the thanh phan; "" = NGOAI bao dong
+    "ops/cong_cu.yaml": "ops", "ops/moi/x.txt": "ops", "ops/cong_cu_test.py": "ops",
+    ".claude/dev/fixtures/a.json": "claude_dev", ".claude/dev/launcher.py": "claude_dev",
+    "scripts/tl.py": "scripts_ten", "scripts/moi.py": "scripts_ten",
+    ".github/workflows/x.yml": "github", ".github/CODEOWNERS": "github",
+    "pyproject.toml": "cau_hinh_goc", "setup.cfg": "cau_hinh_goc", "requirements.txt": "cau_hinh_goc",
+    "requirements-dev.txt": "cau_hinh_goc", ".gitattributes": "cau_hinh_goc", ".gitignore": "cau_hinh_goc",
+    "docs/x.py": "git_quet_py", "ops/specs/a/b.PY": "git_quet_py", "ops/land/c.pyw": "git_quet_py", "scripts/con/d.py": "git_quet_py",
+    "docs/a.md": "", "data/d.txt": "", "ops/land/x.yaml": "", "ops/specs/a/SPEC.md": "", "references/x.json": "",
+    "scripts/tl.sh": "", "docs/pyproject.toml": "", ".claude/hooks/h.sh": "", ".claude/skills/a/SKILL.md": "", "CLAUDE.md": "",
+    "opsx/a.txt": "", "requirements.md": "", "x.pyc": "",
+}
+
+
+@ca
+def t111_bong_cong_cu_hai_chieu_va_ba_trang_thai():
+    """wp1448: `bo_qua` (bo MOI) CHI khi moi dieu kien dat; tung dieu kien sai => `chay`; khong do duoc => `khong_do_duoc`.
+    Tung thanh phan cua bao dong bao thu mang THE rieng."""
+    m = nap_module()
+    sai = {d: m.thanh_phan_bao_dong(d) for d, the in THANH_PHAN_BAO_DONG.items() if m.thanh_phan_bao_dong(d) != the}
+    bang(not sai, f"thanh phan bao dong lech luat (duong dan: the thay): {sai}")
+    bang(_cong_cu_gia(m, ["docs/a.md", "data/d.txt"]) == ("bo_qua", "ngoai_bao_dong", "bo_qua", "khop"),
+         f"diff ngoai bao dong va ngoai allowlist, van tay khop: phai bo_qua, duoc {_cong_cu_gia(m, ['docs/a.md', 'data/d.txt'])}")
+    for duong, the in THANH_PHAN_BAO_DONG.items():
+        kq = _cong_cu_gia(m, ["docs/a.md", duong])
+        if the:
+            bang(kq == ("chay", f"cham_bao_dong:{the}=1", "chay", "-"), f"{duong!r} thuoc bao dong ({the}): phai chay, duoc {kq}")
+        else:
+            bang(kq[0] == "bo_qua", f"{duong!r} ngoai bao dong: phai bo_qua, duoc {kq}")
+    cac = {
+        "push": (dict(su_kien="push"), ("chay", "push")),
+        "dispatch": (dict(su_kien="workflow_dispatch"), ("chay", "su_kien_khong_phai_pull_request")),
+        "che do duong_nhanh (nhan bo san co, khong phai bo moi)": (dict(che_do="duong_nhanh"), ("chay", "che_do_dang_chay_khong_phai_day_du")),
+        "che do la": (dict(che_do=""), ("chay", "che_do_dang_chay_khong_phai_day_du")),
+        "diff khong do duoc": (dict(doi=None), ("khong_do_duoc", "diff_khong_do_duoc")),
+        "diff rong": (dict(doi=set()), ("chay", "diff_rong")),
+        "merge ref mot cha": (dict(cha=(0, f"{HOP_GIA} {P1_GIA}\n".encode())), ("khong_do_duoc", "ngu_canh_merge:so_cha_1")),
+        "dong gop nem": (dict(dong_gop=SuDoGia("x")), ("khong_do_duoc", "dong_gop_merge_khong_do_duoc")),
+        "dong gop rc": (dict(dong_gop=(128, b"")), ("khong_do_duoc", "dong_gop_merge_khong_do_duoc")),
+        "van tay lech": (dict(ls_tree=(0, b"100644 blob " + b"2" * 40 + b"\tops/a.py\0")), ("chay", "van_tay_lech", "bo_qua", "lech")),
+        "van tay them tep": (dict(ls_tree=(0, b"100644 blob " + b"1" * 40 + b"\tops/a.py\0100644 blob " + b"1" * 40 + b"\tops/b.py\0")),
+                             ("chay", "van_tay_lech", "bo_qua", "lech")),
+        "ls-tree nem": (dict(ls_tree=SuDoGia("x")), ("khong_do_duoc", "van_tay:ls_tree_nem_SuDoGia", "bo_qua", "khong_do_duoc")),
+        "ls-tree rc": (dict(ls_tree=(128, b"")), ("khong_do_duoc",)),
+        "ls-tree rc khac 0 ma dau ra day du": (dict(ls_tree=(128, b"100644 blob " + b"1" * 40 + b"\tops/a.py\0")), ("khong_do_duoc",)),
+        "ls-tree cut": (dict(ls_tree=(0, b"100644 blob " + b"1" * 40 + b"\tops/a.py")), ("khong_do_duoc",)),
+        "ls-tree la": (dict(ls_tree=(0, b"rac\0")), ("khong_do_duoc", "van_tay:ls_tree_ban_ghi_la", "bo_qua", "khong_do_duoc")),
+    }
+    for ten, (kw, mong) in cac.items():
+        try:
+            kq = _cong_cu_gia(m, ["docs/a.md"], **kw)
+        except SuDoGia as e:
+            raise TinHieuChotCa(f"{ten}: git nem ma bong_cong_cu KHONG bat: {e}") from e
+        bang(kq[:len(mong)] == mong, f"{ten}: mong {mong}, duoc {kq}")
+    # dong gop merge CHI ho so (goc cu: nhanh dich them tep ngoai allowlist) va duong dan la => chay, khong bao gio bo_qua
+    kq = m.bong_cong_cu("pull_request", "day_du", {"ops/land/x.yaml", "docs/khac.md"}, env_pr(),
+                        chay_gia_bong(dong_gop=nul("ops/land/x.yaml")), _cay_van_tay_gia(m))
+    bang(kq[:2] == ("chay", "dong_gop_merge_chi_ho_so"), f"dong gop merge chi ho so: phai chay, duoc {kq}")
+    for la in ("docs/a\tb.md", "docs/../x.md", "docs//x.md", "/docs/x.md", "docs\\x.md"):
+        kq = _cong_cu_gia(m, ["docs/a.md", la])
+        bang(kq[:2] == ("chay", "duong_dan_la"), f"duong dan la {la!r}: phai chay, duoc {kq}")
+    # tep van tay vang / hong / sai dang => khong_do_duoc (khong bao gio bo_qua)
+    tam = Path(tempfile.mkdtemp(prefix="cdn_vt2_"))
+    try:
+        for ten, nd in (("vang", None), ("khong phai JSON", "{"), ("thieu khoa", "{}"), ("van tay la", '{"van_tay": "abc"}'),
+                        ("van tay khong phai chuoi", '{"van_tay": 5}')):
+            tep = tam / TEP_BAO_DONG_CHUAN
+            tep.parent.mkdir(parents=True, exist_ok=True)
+            if nd is None:
+                tep.unlink(missing_ok=True)
+            else:
+                tep.write_text(nd, encoding="utf-8")
+            kq = m.bong_cong_cu("pull_request", "day_du", {"docs/a.md"}, env_pr(), chay_gia_bong(dong_gop=nul("docs/a.md")), tam)
+            bang(kq[0] == "khong_do_duoc" and kq[2:] == ("bo_qua", "khong_do_duoc"), f"tep van tay {ten}: mong khong_do_duoc, duoc {kq}")
+    finally:
+        shutil.rmtree(tam, ignore_errors=True)
+
+
+NEN_BONG = {"README.md": "x\n", "ops/cong_cu_test.py": "# ca\n", "ops/cong_cu.yaml": "a: 1\n", ".claude/dev/launcher.py": "print(1)\n",
+            ".claude/hooks/h.sh": "echo 1\n", "scripts/tl.py": "print(1)\n", ".github/workflows/ci.yml": "name: x\n",
+            "pyproject.toml": "[x]\n", "docs/a.md": "a\n", "data/d.txt": "1\n", "ops/land/x.yaml": "a: 1\n"}
+
+
+def _ghi_van_tay(m, kho):
+    """DUNG (lai) bao dong tren HEAD cua kho that: ghi `BAO_DONG.json` bang CHINH ham duoi do roi commit. Tra commit moi."""
+    vt, ly = m.van_tay_bao_dong("HEAD", chay_that, kho)
+    if vt is None:
+        raise RuntimeError(f"ha tang: khong tinh duoc van tay tren kho that: {ly}")
+    viet(kho, TEP_BAO_DONG_CHUAN, json.dumps({"phien_ban": 1, "van_tay": vt}) + "\n")
+    git(kho, "add", "-A")
+    git(kho, "commit", "-q", "-m", "dung bao dong")
+    return git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+
+
+def _nhanh(kho, ten, tu, sua):
+    """Nhanh `ten` re tu `tu`, ap `sua(kho)` roi commit moi thay doi. Tra commit dau nhanh."""
+    git(kho, "checkout", "-q", "-B", ten, tu)
+    sua(kho)
+    git(kho, "add", "-A")
+    git(kho, "commit", "-q", "--allow-empty", "-m", ten)
+    return git(kho, "rev-parse", "HEAD").stdout.decode().strip()
+
+
+def _bong_that(m, kho, goc, dau, hop, su_kien="pull_request"):
+    """Hai dong bong + che_do cua `main` THAT tren kho that, cay lam viec = merge ref (nhu buoc phan loai tren CI)."""
+    git(kho, "checkout", "-q", "--detach", hop)
+    env = env_pr(su_kien, goc=goc, dau=dau if su_kien == "pull_request" else "", CI_DUONG_NHANH_MERGE=hop)
+    rc, out, _log, bong = main_bong(m, env, chay_that, kho)
+    bang(rc == 0 and out is not None, f"main tren kho that phai thoat 0 va ghi output (rc={rc})")
+    return out.split(b"\n")[0].decode().split("=")[1], bong["BONG_CONG_CU"], bong["BONG_PHAN_LOAI"]
+
+
+def _sua(tep):
+    return lambda kho: [viet(kho, d, nd) for d, nd in tep.items()]
+
+
+@contextlib.contextmanager
+def kho_bong(m):
+    """Kho that: `main` = nen `NEN_BONG` + bao dong DA DUNG (van tay ghi tren chinh commit ay). Tra (kho, commit nen)."""
+    with kho_that(nen=NEN_BONG) as (kho, _goc, _dau):
+        git(kho, "checkout", "-q", "main")
+        yield kho, _ghi_van_tay(m, kho)
+
+
+@ca
+def t112_bong_cong_cu_ca_doi_khang_tren_kho_that():
+    """wp1448 (dieu kien (3) cua PR3 trong ke hoach nguon): moi KIEU muc cua diff trong bao dong => `chay`; diff CHI ho so => khong
+    phai bo moi; goc cu => `chay`; diff ngoai bao dong va ngoai allowlist => `bo_qua`, va luot push cua chinh merge ay la `day_du`."""
+    m = nap_module()
+    with kho_bong(m) as (kho, nen):
+        def pr(ten, sua, goc_su_kien=nen, dich=nen):
+            dau = _nhanh(kho, ten, nen, sua)
+            hop = merge_ref_that(kho, dich, dau)
+            return (hop,) + _bong_that(m, kho, goc_su_kien, dau, hop)
+
+        hop, che_do, cc, _pl = pr("duong", _sua({"docs/a.md": "b\n", "data/d.txt": "2\n"}))
+        bang((che_do, cc["quyet_dinh"], cc["ly_do"], cc["duong_dan"], cc["van_tay"]) == ("day_du", "bo_qua", "ngoai_bao_dong", "bo_qua", "khop"),
+             f"diff ngoai bao dong + ngoai allowlist, van tay khop: phai bo_qua (bo MOI), duoc {che_do} {cc}")
+        che_do_push, cc_push, _ = _bong_that(m, kho, nen, hop, hop, su_kien="push")
+        bang((che_do_push, cc_push["quyet_dinh"], cc_push["ly_do"]) == ("day_du", "chay", "push"),
+             f"luot push cua merge mang bong bo_qua phai la day_du va bong `chay`: {che_do_push} {cc_push}")
+
+        def doi_mode(kho):
+            os.chmod(kho / ".github" / "workflows" / "ci.yml", 0o755)
+
+        def lien_ket(kho):
+            _symlink(kho / "ops" / "lk", "../docs/a.md")
+
+        doi_khang = {
+            "tep moi trong ops": (_sua({"ops/moi.yaml": "a: 1\n", "docs/a.md": "b\n"}), "ops=1"),
+            "tep moi .py ngoai moi thu muc bao dong": (_sua({"docs/moi.py": "print(1)\n"}), "git_quet_py=1"),
+            "doi ten ra khoi bao dong": (lambda kho: git(kho, "mv", ".claude/dev/launcher.py", "docs/launcher.txt"), "claude_dev=1"),
+            "xoa tep trong bao dong": (lambda kho: git(kho, "rm", "-q", "ops/cong_cu.yaml"), "ops=1"),
+            "sua cau hinh goc": (_sua({"pyproject.toml": "[y]\n", "docs/a.md": "b\n"}), "cau_hinh_goc=1"),
+            "sua scripts": (_sua({"scripts/tl.py": "print(2)\n"}), "scripts_ten=1"),
+        }
+        if os.name != "nt":   # mode thuc thi va symlink: nen nay khong dung duoc tren Windows khong dac quyen
+            doi_khang.update({"doi mode tep trong bao dong": (doi_mode, "github=1"), "symlink moi trong ops": (lien_ket, "ops=1")})
+        for i, (ten, (sua, the)) in enumerate(doi_khang.items()):
+            _hop, che_do, cc, _pl = pr(f"dk{i}", sua)
+            bang(che_do == "day_du" and cc["quyet_dinh"] == "chay" and cc["ly_do"] == "cham_bao_dong:" + the,
+                 f"{ten}: phai chay vi cham_bao_dong:{the}, duoc {che_do} {cc}")
+        if os.name != "nt":   # ten tep co ky tu dieu khien: nen nay khong tao duoc tren Windows
+            _hop, che_do, cc, _pl = pr("la", lambda kho: viet(kho, "docs/a\tb.md", "x\n"))
+            bang(che_do == "day_du" and (cc["quyet_dinh"], cc["ly_do"]) == ("chay", "duong_dan_la"),
+                 f"duong dan co ky tu la: phai chay, duoc {che_do} {cc}")
+        _hop, che_do, cc, _pl = pr("hoso", _sua({"ops/land/y.yaml": "a: 2\n"}))
+        bang(che_do == "duong_nhanh" and (cc["quyet_dinh"], cc["ly_do"]) == ("chay", "che_do_dang_chay_khong_phai_day_du"),
+             f"diff CHI ho so: duong_nhanh (nhan bo san co), bong KHONG duoc la bo moi: {che_do} {cc}")
+        # goc cu: nhanh dich them tep TRONG bao dong sau base.sha => chay
+        tien = _nhanh(kho, "main", nen, _sua({"ops/them.yaml": "a: 1\n"}))
+        _hop, che_do, cc, _pl = pr("goccu", _sua({"docs/a.md": "c\n"}), goc_su_kien=nen, dich=tien)
+        bang(che_do == "day_du" and cc["quyet_dinh"] == "chay" and cc["ly_do"] == "cham_bao_dong:ops=1" and cc["van_tay"] == "-",
+             f"goc cu (nhanh dich them tep trong bao dong): phai chay, duoc {che_do} {cc}")
+        # goc cu, nhanh dich chi them tep NGOAI bao dong; PR chi ho so => luat cu day_du, dong gop merge chi ho so => chay
+        tien2 = _nhanh(kho, "main", nen, _sua({"docs/khac.md": "k\n"}))
+        _hop, che_do, cc, _pl = pr("goccu2", _sua({"ops/land/z.yaml": "a: 3\n"}), goc_su_kien=nen, dich=tien2)
+        bang(che_do == "day_du" and (cc["quyet_dinh"], cc["ly_do"]) == ("chay", "dong_gop_merge_chi_ho_so"),
+             f"goc cu + PR chi ho so: phai chay (dong gop merge chi ho so), duoc {che_do} {cc}")
+
+
+@ca
+def t113_bong_cong_cu_hai_thay_doi_lien_tiep_va_van_tay():
+    """wp1448 (ca HAI THAY DOI LIEN TIEP cua dac ta): lan mot sua `.claude/dev/launcher.py` cho no doc mot tep du lieu ngoai bao
+    dong; lan hai CHI sua tep du lieu ay => van `chay` vi dau van tay lech. Dung lai bao dong thi `bo_qua` tro lai."""
+    m = nap_module()
+    with kho_bong(m) as (kho, nen):
+        dau1 = _nhanh(kho, "pr1", nen, _sua({".claude/dev/launcher.py": "print(open('data/d.txt').read())\n"}))
+        hop1 = merge_ref_that(kho, nen, dau1)
+        _cd, cc1, _pl = _bong_that(m, kho, nen, dau1, hop1)
+        bang((cc1["quyet_dinh"], cc1["ly_do"]) == ("chay", "cham_bao_dong:claude_dev=1"), f"lan mot (sua bo doc): phai chay, duoc {cc1}")
+        git(kho, "branch", "-f", "main", hop1)
+        dau2 = _nhanh(kho, "pr2", hop1, _sua({"data/d.txt": "2\n"}))
+        hop2 = merge_ref_that(kho, hop1, dau2)
+        _cd, cc2, _pl = _bong_that(m, kho, hop1, dau2, hop2)
+        bang((cc2["quyet_dinh"], cc2["ly_do"], cc2["duong_dan"], cc2["van_tay"]) == ("chay", "van_tay_lech", "bo_qua", "lech"),
+             f"lan hai (chi sua tep du lieu): theo duong dan la bo_qua nhung van tay LECH => phai chay, duoc {cc2}")
+        git(kho, "checkout", "-q", "-B", "main", hop1)
+        dung_lai = _ghi_van_tay(m, kho)
+        dau3 = _nhanh(kho, "pr3", dung_lai, _sua({"data/d.txt": "3\n"}))
+        hop3 = merge_ref_that(kho, dung_lai, dau3)
+        _cd, cc3, _pl = _bong_that(m, kho, dung_lai, dau3, hop3)
+        bang((cc3["quyet_dinh"], cc3["van_tay"]) == ("bo_qua", "khop"), f"sau khi DUNG LAI bao dong: phai bo_qua, duoc {cc3}")
+        # thanh vien cua van tay: them tep duoi `.claude/hooks/`, them TEN duoi `scripts/` (khong phai .py), sua noi dung duoi ops/
+        goc_vt = m.van_tay_bao_dong(dung_lai, chay_that, kho)[0]
+        for ten, sua, doi in (("them hook", _sua({".claude/hooks/moi.sh": "echo 2\n"}), True),
+                              ("them ten duoi scripts", _sua({"scripts/moi.sh": "echo 2\n"}), True),
+                              ("sua noi dung duoi ops", _sua({"ops/cong_cu.yaml": "a: 2\n"}), True),
+                              ("sua noi dung scripts (chi TEN duoc bam)", _sua({"scripts/tl.py": "print(3)\n"}), False),
+                              ("sua ho so duoi ops/land", _sua({"ops/land/x.yaml": "a: 9\n"}), False),
+                              ("sua tai lieu", _sua({"docs/a.md": "z\n"}), False)):
+            c = _nhanh(kho, "vt", dung_lai, sua)
+            vt = m.van_tay_bao_dong(c, chay_that, kho)[0]
+            bang(vt is not None and (vt != goc_vt) == doi, f"van tay sau khi {ten}: mong {'DOI' if doi else 'GIU'}, duoc {vt} so voi {goc_vt}")
+
+
+@ca
+def t114_bong_phan_loai_ngu_canh_moi():
+    """wp1448: `moi` chi dung cha thu nhat cua merge ref khi merge ref co DUNG hai cha, cha hai = dau va goc su kien la to tien cua
+    cha mot; sai mot dieu kien hay git loi => `khong_do_duoc`. Ca duong cua PR4: nhanh dich chi them tep ma khong lien quan sau
+    base.sha, PR chi ho so => cu `day_du`, moi `duong_nhanh`."""
+    m = nap_module()
+    with kho_bong(m) as (kho, nen):
+        dau = _nhanh(kho, "pr", nen, _sua({"ops/land/y.yaml": "a: 2\n"}))
+        tien = _nhanh(kho, "main", nen, _sua({"scripts/y.py": "print(1)\n"}))
+        hop = merge_ref_that(kho, tien, dau)
+        che_do, _cc, pl = _bong_that(m, kho, nen, dau, hop)
+        bang(che_do == "day_du" and (pl["cu"], pl["moi"], pl["kiem_moi"]) == ("day_du", "duong_nhanh", "dat")
+             and (pl["goc_su_kien"], pl["goc_so"], pl["dau"], pl["hop"]) == (nen, tien, dau, hop),
+             f"ca duong PR4: cu=day_du, moi=duong_nhanh, bon OID dung; duoc che_do={che_do} {pl}")
+        # doi chung: nhanh dich khong tien => hai ngu canh trung nhau
+        hop0 = merge_ref_that(kho, nen, dau)
+        _cd, _cc, pl0 = _bong_that(m, kho, nen, dau, hop0)
+        bang((pl0["cu"], pl0["moi"], pl0["goc_so"]) == ("duong_nhanh", "duong_nhanh", nen), f"goc khong cu: cu = moi = duong_nhanh, duoc {pl0}")
+        # PR ma: ca hai ngu canh deu day_du
+        dau_ma = _nhanh(kho, "prma", nen, _sua({"scripts/z.py": "print(2)\n"}))
+        _cd, _cc, pl_ma = _bong_that(m, kho, nen, dau_ma, merge_ref_that(kho, tien, dau_ma))
+        bang((pl_ma["cu"], pl_ma["moi"]) == ("day_du", "day_du"), f"PR ma: cu = moi = day_du, duoc {pl_ma}")
+        # cha di dang
+        cay = git(kho, "rev-parse", hop + "^{tree}").stdout.decode().strip()
+        ba_cha = git(kho, "commit-tree", cay, "-p", tien, "-p", dau, "-p", dau_ma, "-m", "ba cha").stdout.decode().strip()
+        khac = merge_ref_that(kho, tien, dau_ma)
+        le = _nhanh(kho, "le", nen, _sua({"docs/a.md": "le\n"}))
+        di_dang = {"mot cha": (nen, dau, dau, "ngu_canh_merge:so_cha_1"), "ba cha": (nen, dau, ba_cha, "ngu_canh_merge:so_cha_3"),
+                   "cha hai khac dau": (nen, dau, khac, "ngu_canh_merge:cha_hai_khac_dau"),
+                   "goc su kien khong la to tien cua cha mot": (le, dau, hop, "ngu_canh_merge:goc_su_kien_khong_la_to_tien_cha_mot"),
+                   "merge ref khong ton tai": (nen, dau, "f" * 40, "ngu_canh_merge:rev_list_rc_128")}
+        for ten, (g, d, h, ly) in di_dang.items():
+            git(kho, "checkout", "-q", "--detach", hop)
+            rc, _out, _log, bong = main_bong(m, env_pr(goc=g, dau=d, CI_DUONG_NHANH_MERGE=h), chay_that, kho)
+            pl = bong["BONG_PHAN_LOAI"]
+            bang(rc == 0 and (pl["moi"], pl["goc_so"], pl["ly_do"]) == ("khong_do_duoc", "-", ly), f"{ten}: mong khong_do_duoc vi {ly}, duoc {pl}")
+            bang(bong["BONG_CONG_CU"]["quyet_dinh"] != "bo_qua", f"{ten}: BONG_CONG_CU khong duoc bo_qua: {bong['BONG_CONG_CU']}")
+    # git loi o TUNG lenh cua ngu canh (do gia) => khong_do_duoc, khong nem
+    ho_so = nul("ops/land/x.yaml")
+    loi = {
+        "rev-list nem": (dict(cha=SuDoGia("x")), "ngu_canh_merge:rev_list_nem_SuDoGia"),
+        "rev-list rc": (dict(cha=(128, b"")), "ngu_canh_merge:rev_list_rc_128"),
+        "rev-list rac": (dict(cha=(0, b"rac\n")), "ngu_canh_merge:rev_list_dau_ra_la"),
+        "rev-list commit khac": (dict(cha=(0, f"{GOC_A} {P1_GIA} {GOC_B}\n".encode())), "ngu_canh_merge:rev_list_dau_ra_la"),
+        "rev-list cut": (dict(cha=(0, f"{HOP_GIA} {P1_GIA} {GOC_B}".encode())), "ngu_canh_merge:rev_list_dau_ra_la"),
+        "khong cha": (dict(cha=(0, f"{HOP_GIA}\n".encode())), "ngu_canh_merge:so_cha_0"),
+        "is-ancestor nem": (dict(to_tien=SuDoGia("x")), "ngu_canh_merge:is_ancestor_nem_SuDoGia"),
+        "is-ancestor rc 128": (dict(to_tien=128), "ngu_canh_merge:is_ancestor_rc_128"),
+        "is-ancestor rc 1": (dict(to_tien=1), "ngu_canh_merge:goc_su_kien_khong_la_to_tien_cha_mot"),
+        "diff ngu canh moi rc": (dict(dong_gop=(128, b"")), "diff_ngu_canh_moi_khong_do_duoc"),
+        "diff ngu canh moi nem": (dict(dong_gop=SuDoGia("x")), "diff_ngu_canh_moi_khong_do_duoc"),
+    }
+    for ten, (kw, ly) in loi.items():
+        kw.setdefault("dong_gop", ho_so)
+        try:
+            kq = m.bong_phan_loai("pull_request", "day_du", env_pr(), chay_gia_bong(out=ho_so, **kw), ROOT_THAT)
+        except SuDoGia as e:
+            raise TinHieuChotCa(f"{ten}: git nem ma bong_phan_loai KHONG bat: {e}") from e
+        bang(kq[1] == "khong_do_duoc" and kq[3] == ly, f"{ten}: mong khong_do_duoc vi {ly}, duoc {kq}")
+    kq = m.bong_phan_loai("pull_request", "day_du", env_pr(), chay_gia_bong(out=ho_so, dong_gop=ho_so, merge_ref=nul("scripts/y.py")), ROOT_THAT)
+    bang(kq[:4] == ("day_du", "duong_nhanh", P1_GIA, "-"), f"doi chung do gia: ngu canh dung duoc thi `moi` phai do duoc, duoc {kq}")
+    for su_kien in ("push", "workflow_dispatch"):
+        kq = m.bong_phan_loai(su_kien, "day_du", env_pr(su_kien), chay_gia_bong(out=ho_so), ROOT_THAT)
+        bang(kq[1:4] == ("khong_do_duoc", None, "su_kien_khong_phai_pull_request"), f"{su_kien}: `moi` khong ap dung, duoc {kq}")
+
+
+def nap_thu_thap():
+    """Bo thu v2 cua CAY duoi do (ban dot bien neu co), nap bang duong dan."""
+    spec = importlib.util.spec_from_file_location("thu_thap_v2_duoi_test", CAY / TEP_THU_THAP)
+    tt = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tt)
+    return tt
+
+
+@ca
+def t115_bo_dem_loi_ich_va_ton_du_tu_dong_bong_that():
+    """wp1448: dong bong THAT cua `main` di qua bo thu v2 (`trich_bong`, oracle tinh lai DOC LAP tu OID, `dem_bong`). Ca duong cua
+    PR4 o packet nay: phan loai dang chay van la luat cu => CA bo dem LOI ICH lan bo dem SAI SOT TON DU deu bat. MO PHONG sau PR4
+    (dang chay = moi) => loi ich bat, ton du tat. Cac bo dem khong duoc tron vao nhau."""
+    m, tt = nap_module(), nap_thu_thap()
+    with kho_bong(m) as (kho, nen):
+        dau = _nhanh(kho, "pr", nen, _sua({"ops/land/y.yaml": "a: 2\n"}))
+        tien = _nhanh(kho, "main", nen, _sua({"scripts/y.py": "print(1)\n"}))
+
+        def do(goc, dich):
+            hop = merge_ref_that(kho, dich, dau)
+            git(kho, "checkout", "-q", "--detach", hop)
+            rc, _out, log, _bong = main_bong(m, dict(env_pr(goc=goc, dau=dau, CI_DUONG_NHANH_MERGE=hop), GITHUB_RUN_ID="9", GITHUB_RUN_ATTEMPT="1"),
+                                             chay_that, kho)
+            bang(rc == 0, f"main phai thoat 0, duoc {rc}")
+            tb = tt.trich_bong("".join("2026-11-20T00:00:00.0000000Z " + x + "\n" for x in log.splitlines()))
+            pl = tb["bong_phan_loai"] or {}
+            oracle = tt.oracle_moi(kho, pl.get("goc_su_kien"), pl.get("goc_so"), pl.get("dau"), chay_that)
+            return tb, oracle
+
+        tb, oracle = do(nen, tien)
+        bang((tb["che_do_chay"], tb["bong_phan_loai"]["cu"], tb["bong_phan_loai"]["moi"], oracle) == ("day_du", "day_du", "duong_nhanh", "duong_nhanh"),
+             f"ca duong PR4: dang chay/cu = day_du, moi = oracle = duong_nhanh; duoc {tb} oracle={oracle}")
+        d = tt.dem_bong(tb["che_do_chay"], tb["bong_phan_loai"], oracle)
+        bang(d == {"loi_ich": 1, "ton_du": 1}, f"ca duong PR4 o PR1 (tich hop bong that): loi ich = 1 va ton du = 1, duoc {d}")
+        d_mo_phong = tt.dem_bong(tb["bong_phan_loai"]["moi"], tb["bong_phan_loai"], oracle)
+        bang(d_mo_phong == {"loi_ich": 1, "ton_du": 0}, f"MO PHONG sau PR4 (dang chay = moi): loi ich = 1, ton du = 0, duoc {d_mo_phong}")
+        tb0, oracle0 = do(nen, nen)
+        d0 = tt.dem_bong(tb0["che_do_chay"], tb0["bong_phan_loai"], oracle0)
+        bang(oracle0 == "duong_nhanh" and d0 == {"loi_ich": 0, "ton_du": 0}, f"goc khong cu: ca hai bo dem = 0, duoc {d0} oracle={oracle0}")
+        dau_ma = _nhanh(kho, "prma", nen, _sua({"scripts/z.py": "print(2)\n"}))
+        bang(tt.oracle_moi(kho, nen, tien, dau_ma, chay_that) == "day_du" and tt.oracle_moi(kho, nen, tien, "f" * 40, chay_that) == "khong_do_duoc"
+             and tt.oracle_moi(kho, dau_ma, tien, dau, chay_that) == "khong_do_duoc",
+             "oracle: PR ma => day_du; thieu object hay goc su kien khong la to tien => khong_do_duoc")
+    bang(tt.dem_bong("day_du", {"cu": "day_du", "moi": "khong_do_duoc"}, "khong_do_duoc") == {"loi_ich": None, "ton_du": None},
+         "khong du du lieu thi khong dem (None), khong ep ve 0")
+
+
+class LoiBongGia(RuntimeError):
+    """Loi do CHINH ca tiem vao ma bong; ca chi bat dung lop nay."""
+
+
+@ca
+def t117_loi_trong_ma_bong_khong_doi_output_va_ma_thoat():
+    """wp1448 (fail-safe cua bong): moi loi trong ma bong — ham bong nem, git treo qua han, luong ra tu choi dong bong — chi
+    thanh `khong_do_duoc` kem ly do; `GITHUB_OUTPUT` va ma thoat giu NGUYEN nhu khi khong co loi."""
+    m = nap_module()
+    tai_lieu = nul("docs/a.md")
+    chay = chay_gia_bong(out=tai_lieu, dong_gop=tai_lieu)
+    rc0, out0, _log, bong0 = main_bong(m, env_pr(), chay)
+    bang(rc0 == 0 and out0 == output_mong("day_du", "bo_qua"), f"nen: output sai {out0!r}")
+
+    def nem(*a, **k):
+        raise LoiBongGia("loi gia trong ma bong")
+
+    for ten_ham, dong, khoa in (("bong_cong_cu", "BONG_CONG_CU", "quyet_dinh"), ("bong_phan_loai", "BONG_PHAN_LOAI", "moi"),
+                                ("ngu_canh_merge", "BONG_PHAN_LOAI", "moi"), ("_chay_co_han", "BONG_CONG_CU", "quyet_dinh"),
+                                ("dong_bong", "BONG_CONG_CU", "quyet_dinh")):
+        cu = getattr(m, ten_ham)
+        setattr(m, ten_ham, nem)
+        try:
+            tam = Path(tempfile.mkdtemp(prefix="cdn_loi_"))
+            bo_dem = io.StringIO()
+            try:
+                rc = m.main([], dict(env_pr(), GITHUB_OUTPUT=str(tam / "o.txt")), chay, ROOT_THAT, bo_dem)
+            except LoiBongGia as e:
+                raise TinHieuChotCa(f"{ten_ham} nem ma loi lot ra ngoai main: {e}") from e
+            out = (tam / "o.txt").read_bytes()
+            shutil.rmtree(tam, ignore_errors=True)
+        finally:
+            setattr(m, ten_ham, cu)
+        bang(rc == 0 and out == out0, f"{ten_ham} nem: ma thoat va GITHUB_OUTPUT phai giu nguyen (rc={rc}, {out!r})")
+        dong_in = [x for x in bo_dem.getvalue().splitlines() if x.startswith(dong + ": ")]
+        if ten_ham != "dong_bong":   # loi cua MOT dong khong duoc lam mat dong kia
+            bang(sorted(x.split(": ")[0] for x in bo_dem.getvalue().splitlines() if x.startswith("BONG_")) == ["BONG_CONG_CU", "BONG_PHAN_LOAI"],
+                 f"{ten_ham} nem: van phai in DU hai dong bong, duoc {bo_dem.getvalue()!r}")
+        bang(len(dong_in) == 1 and "khong_do_duoc" in dong_in[0] and "LoiBongGia" in dong_in[0],
+             f"{ten_ham} nem: dong {dong} phai in khong_do_duoc kem ten lop loi, duoc {bo_dem.getvalue()!r}")
+    # het ngan sach thoi gian: moi lenh git cua ma bong bi tu choi => khong_do_duoc, khong goi git nao
+    goi = []
+    gia_dong_ho = iter([0.0] + [10 ** 6] * 50)
+    chay_han = m._chay_co_han(lambda argv, **kw: goi.append(argv) or KQ(0, b""), han=5, dong_ho=lambda: next(gia_dong_ho))
+    kq = m.bong_cong_cu("pull_request", "day_du", {"docs/a.md"}, env_pr(), chay_han, ROOT_THAT)
+    bang(kq[0] == "khong_do_duoc" and "HetHanBong" in kq[1] and not goi, f"het han: mong khong_do_duoc vi HetHanBong, khong goi git; duoc {kq} {goi}")
+    han = []
+    m._chay_co_han(lambda argv, **kw: han.append(kw.get("timeout")) or KQ(0, b""))(["git", "x"])
+    bang(len(han) == 1 and isinstance(han[0], (int, float)) and 0 < han[0] <= 30, f"moi lenh git cua ma bong phai mang han rieng, duoc {han}")
+
+    class RaTuChoiBong(io.StringIO):
+        def write(self, s):
+            if "BONG" in s:
+                raise LoiBongGia("luong ra tu choi dong bong")
+            return super().write(s)
+
+    tam = Path(tempfile.mkdtemp(prefix="cdn_loi_"))
+    try:
+        try:
+            rc = m.main([], dict(env_pr(), GITHUB_OUTPUT=str(tam / "o.txt")), chay, ROOT_THAT, RaTuChoiBong())
+        except LoiBongGia as e:
+            raise TinHieuChotCa(f"luong ra tu choi dong bong ma loi lot ra ngoai main: {e}") from e
+        bang(rc == 0 and (tam / "o.txt").read_bytes() == out0, "luong ra tu choi dong bong: ma thoat va output phai giu nguyen")
+    finally:
+        shutil.rmtree(tam, ignore_errors=True)
+    bang(bong0["BONG_CONG_CU"]["quyet_dinh"] == "khong_do_duoc" or bong0["BONG_CONG_CU"]["duong_dan"] == "bo_qua",
+         f"nen cua ca phai di toi nhanh bo moi theo duong dan: {bong0['BONG_CONG_CU']}")
+
+
+def _lenh_git_trong_nguon(nguon):
+    """Tap lenh con `git` xuat hien trong cac list MO DAU bang hang `"git"` cua mot tep nguon: phan tu hang chuoi dau tien
+    khong phai co (`-…`) va khong phai gia tri cua `-C`/`-c`."""
+    kq = set()
+    for nut in ast.walk(ast.parse(nguon)):
+        if isinstance(nut, ast.List) and nut.elts and isinstance(nut.elts[0], ast.Constant) and nut.elts[0].value == "git":
+            bo = False
+            for pt in nut.elts[1:]:
+                if bo:
+                    bo = False
+                    continue
+                if not isinstance(pt, ast.Constant) or not isinstance(pt.value, str):
+                    continue
+                if pt.value in ("-C", "-c"):
+                    bo = True
+                elif not pt.value.startswith("-"):
+                    kq.add(pt.value)
+                    break
+    return kq
+
+
+@ca
+def t116_ra_tinh_loi_goi_git_cua_bo_ca_cong_cu():
+    """wp1448: hang `GIT_CONG_CU_DA_RA` (ra tinh cac loi goi git cua bo ca cong cu) phai khop phep quet AST tren CHINH cac tep
+    nguon ay; lenh con moi xuat hien => DO cho toi khi ra lai va cap nhat bao dong. Lenh doc INDEX (`ls-files`) keo theo duoi tep
+    ma bo quet doc noi dung: moi duong dan mang duoi ay thuoc bao dong, o moi thu muc."""
+    m = nap_module()
+    thay = {tep: tuple(sorted(_lenh_git_trong_nguon((ROOT_THAT / tep).read_text(encoding="utf-8")))) for tep in m.GIT_CONG_CU_DA_RA}
+    bang(thay == m.GIT_CONG_CU_DA_RA and set(thay) == {"ops/cong_cu_test.py", "ops/bash_nen.py"},
+         f"lenh con git trong nguon lech hang da ra (phai ra lai roi cap nhat bao dong): {thay} != {m.GIT_CONG_CU_DA_RA}")
+    bash_nen = (ROOT_THAT / "ops" / "bash_nen.py").read_text(encoding="utf-8")
+    duoi = re.search(r"^_DUOI_PY = (\(.*\))$", bash_nen, re.M)
+    bang(duoi is not None and tuple(ast.literal_eval(duoi.group(1))) == m.BAO_DONG_DUOI_GIT_QUET,
+         f"duoi tep ma bo quet INDEX doc phai khop `BAO_DONG_DUOI_GIT_QUET`: {duoi and duoi.group(1)} != {m.BAO_DONG_DUOI_GIT_QUET}")
+    for duong in ("docs/x.py", "a/b/c/D.PYW", "ops/reviews/r/x.py"):
+        bang(m.thanh_phan_bao_dong(duong) != "", f"{duong!r} mang duoi bo quet doc: phai thuoc bao dong")
+
+
 def phan_hoach_ca():
     """Phan hoach `CA` thanh cac nhom KHONG GIAO NHAU (nguon duy nhat cho moi bang kiem ke; `goi/kiem_ke.py` goi ham nay)."""
     nhom = {"hanh_vi": [], "cau_truc_yaml": [], "so_dang_ky": [], "tu_kiem": []}
@@ -3699,7 +4273,8 @@ def chay_con(ten_ca, cay, thoi_han=120):
 def dung_cay_tam(thay):
     """Bản sao TỐI THIỂU của cây: chỉ những tệp mà các ca đọc. `thay` = {đường dẫn: văn bản mới}."""
     goc = Path(tempfile.mkdtemp(prefix="cdn_cay_"))
-    for dp in ("ops/ci_duong_nhanh.py", "ops/ci_duong_nhanh_test.py", ".claude/dev/ci_dang_ky_test.py", "ops/lease_publish.py", DUONG_MANH):
+    for dp in ("ops/ci_duong_nhanh.py", "ops/ci_duong_nhanh_test.py", ".claude/dev/ci_dang_ky_test.py", "ops/lease_publish.py", DUONG_MANH,
+               TEP_THU_THAP):
         (goc / dp).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT_THAT / dp, goc / dp)
     (goc / ".github/workflows").mkdir(parents=True, exist_ok=True)
@@ -3746,6 +4321,7 @@ MA, YML, DK = "ops/ci_duong_nhanh.py", ".github/workflows/ci.yml", ".claude/dev/
 TEST = "ops/ci_duong_nhanh_test.py"
 LW = ".github/workflows/launcher-windows.yml"   # #1132: chi dot bien khoi concurrency
 LP = "ops/lease_publish.py"   # chi dot bien PHAM VI bia mo ma docstring D2 khai (t21b), tren ban sao tam
+TT_V2 = "ops/specs/wp1448-r2/do/thu_thap.py"   # wp1448: bo thu v2 — chi dot bien hai bo dem cua dong bong (t115)
 
 
 def _test(cu, moi):
@@ -3758,6 +4334,10 @@ def _ma(cu, moi):
 
 def _lp(cu, moi):
     return (LP, lambda vb: thay_mot(vb, cu, moi))
+
+
+def _tt(cu, moi):
+    return (TT_V2, lambda vb: thay_mot(vb, cu, moi))
 
 
 def _yml(cu, moi):
@@ -4295,6 +4875,52 @@ DOT_BIEN += [   # wp1343: N1 (phan loai), N2/M7 (phan hoach), N3 (gom), M6 (chot
     ("pl_carrier_chay_moi_manh", _manh("if dem[0] != 2 or can <= manh:", "if True:"), _T103),
     ("pl_carrier_bi_xe_van_xanh", _manh('- ĐỎ")\n            return False', '- ĐỎ")\n            return True'), _T103),
     ("pl_lot_ca_khong_chay", _manh(" or set(da_chay) != manh:", ":"), _T103),
+    # wp1448 (QUAN-SAT-G5) — dot bien RIENG cho tung chot moi cua hai dong bong (dac ta wp1448 r2, nghiem thu 3)
+    ('bong_lot_vao_github_output', _ma('            print(dong, file=ra)\n', '            print(dong, file=open(env["GITHUB_OUTPUT"], "a", encoding="utf-8") if env.get("GITHUB_OUTPUT") else ra)\n'), ("t110_dong_bong_khong_bao_gio_vao_output",)),
+    ('bong_output_them_khoa_thu_sau', _ma('+ f"packet_loop={pl}\\n")\n', '+ f"packet_loop={pl}\\n" + "cong_cu=chay\\n")\n'), ("t110_dong_bong_khong_bao_gio_vao_output",)),
+    ('bong_bo_dieu_kien_che_do_day_du', _ma('    if che_do != DAY_DU:\n        return BONG_CHAY, "che_do_dang_chay_khong_phai_day_du", BONG_CHAY, "-"\n', ''), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_push_khong_con_chay', _ma('    if su_kien == "push":\n        return BONG_CHAY, "push", BONG_CHAY, "-"\n    if su_kien != "pull_request":\n        return BONG_CHAY, "su_kien_khong_phai_pull_request", BONG_CHAY, "-"\n', ''), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_diff_khong_do_duoc_thanh_rong', _ma('    if doi is None:\n        return BONG_KDD, "diff_khong_do_duoc", BONG_KDD, "-"\n', '    if doi is None:\n        doi = {"docs/x.md"}\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_bo_kiem_duong_dan_sach', _ma('    if not all(type(x) is str and _duong_dan_sach(x) for x in tat_ca):\n        return BONG_CHAY, "duong_dan_la", BONG_CHAY, "-"\n', ''), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_bo_dieu_kien_dong_gop_ngoai_allowlist', _ma('    if not any(not khop_allowlist(x) for x in dong_gop):\n        return BONG_CHAY, "dong_gop_merge_chi_ho_so", BONG_CHAY, "-"\n', ''), ("t112_bong_cong_cu_ca_doi_khang_tren_kho_that",)),
+    ('bong_bao_dong_chi_xet_dong_gop', _ma('    tat_ca = set(doi) | dong_gop\n', '    tat_ca = set(dong_gop)\n'), ("t112_bong_cong_cu_ca_doi_khang_tren_kho_that",)),
+    ('bong_bo_thanh_phan_ops', _ma('        return "ops"\n', '        pass   # dot bien: bo thanh phan ops\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_thanh_phan_ops_khong_tru_ho_so', _ma('    if duong.startswith(BAO_DONG_OPS) and not duong.startswith(ALLOWLIST_TIEN_TO):\n', '    if duong.startswith(BAO_DONG_OPS):\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_bo_thanh_phan_claude_dev', _ma('        return "claude_dev"\n', '        pass   # dot bien: bo thanh phan claude_dev\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_bo_thanh_phan_scripts', _ma('        return "scripts_ten"\n', '        pass   # dot bien: bo thanh phan scripts_ten\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_bo_thanh_phan_github', _ma('        return "github"\n', '        pass   # dot bien: bo thanh phan github\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_bo_thanh_phan_cau_hinh_goc', _ma('        return "cau_hinh_goc"\n', '        pass   # dot bien: bo thanh phan cau_hinh_goc\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_cau_hinh_goc_bo_gitignore', _ma('(".gitattributes", ".gitignore")', '(".gitattributes",)'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_cau_hinh_goc_bo_requirements', _ma(' or duong in BAO_DONG_CAU_HINH_TEN\n                         or (duong.startswith(BAO_DONG_CAU_HINH_REQ[0]) and duong.endswith(BAO_DONG_CAU_HINH_REQ[1]))):\n', ' or duong in BAO_DONG_CAU_HINH_TEN):\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_cau_hinh_goc_moi_thu_muc', _ma('    if len(tp) == 1 and (duong.endswith(BAO_DONG_CAU_HINH_DUOI)', '    if (duong.endswith(BAO_DONG_CAU_HINH_DUOI)'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_bo_thanh_phan_git_quet_py', _ma('        return "git_quet_py"\n', '        pass   # dot bien: bo thanh phan git_quet_py\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_git_quet_py_bo_pyw', _ma('BAO_DONG_DUOI_GIT_QUET = (".py", ".pyw")', 'BAO_DONG_DUOI_GIT_QUET = (".py",)'), ("t116_ra_tinh_loi_goi_git_cua_bo_ca_cong_cu",)),
+    ('bong_git_quet_py_phan_biet_hoa_thuong', _ma('    if duong.casefold().endswith(BAO_DONG_DUOI_GIT_QUET):\n', '    if duong.endswith(BAO_DONG_DUOI_GIT_QUET):\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_git_da_ra_bo_mot_lenh', _ma('"hash-object", "ls-files", "rev-parse", "update-index"),', '"hash-object", "rev-parse", "update-index"),'), ("t116_ra_tinh_loi_goi_git_cua_bo_ca_cong_cu",)),
+    ('bong_bo_vo_hieu_hoa_theo_van_tay', _ma('    if hien != da_dung:\n        return BONG_CHAY, "van_tay_lech", BONG_BO_QUA, "lech"\n', ''), ("t113_bong_cong_cu_hai_thay_doi_lien_tiep_va_van_tay",)),
+    ('bong_van_tay_khong_doc_duoc_van_bo_qua', _ma('    if da_dung is None:\n        return BONG_KDD, "van_tay:" + ly_d, BONG_BO_QUA, BONG_KDD\n', '    if da_dung is None:\n        return BONG_BO_QUA, "ngoai_bao_dong", BONG_BO_QUA, "khop"\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_van_tay_hien_khong_do_duoc_van_bo_qua', _ma('    if hien is None:\n        return BONG_KDD, "van_tay:" + ly_h, BONG_BO_QUA, BONG_KDD\n', '    if hien is None:\n        return BONG_BO_QUA, "ngoai_bao_dong", BONG_BO_QUA, "khop"\n'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_thu_hep_van_tay_ve_ba_tep_cu', _ma('VAN_TAY_NOI_DUNG, VAN_TAY_TEN = ("ops/", ".claude/dev/", ".claude/hooks/"), ("scripts/",)', 'VAN_TAY_NOI_DUNG, VAN_TAY_TEN = ("ops/cong_cu_test.py", "ops/cong_cu.py", "ops/bash_nen.py"), ("scripts/",)'), ("t113_bong_cong_cu_hai_thay_doi_lien_tiep_va_van_tay",)),
+    ('bong_van_tay_bo_hooks', _ma('VAN_TAY_NOI_DUNG, VAN_TAY_TEN = ("ops/", ".claude/dev/", ".claude/hooks/"), ("scripts/",)', 'VAN_TAY_NOI_DUNG, VAN_TAY_TEN = ("ops/", ".claude/dev/"), ("scripts/",)'), ("t113_bong_cong_cu_hai_thay_doi_lien_tiep_va_van_tay",)),
+    ('bong_van_tay_bo_ten_scripts', _ma('            dong.append("ten " + duong)\n', '            pass\n'), ("t113_bong_cong_cu_hai_thay_doi_lien_tiep_va_van_tay",)),
+    ('bong_van_tay_bo_noi_dung', _ma('            dong.append(f"{mode} {oid} {duong}")\n', '            dong.append(f"{duong}")\n'), ("t113_bong_cong_cu_hai_thay_doi_lien_tiep_va_van_tay",)),
+    ('bong_van_tay_gom_ca_ho_so', _ma('        elif duong.startswith(VAN_TAY_NOI_DUNG) and not duong.startswith(ALLOWLIST_TIEN_TO):\n', '        elif duong.startswith(VAN_TAY_NOI_DUNG):\n'), ("t113_bong_cong_cu_hai_thay_doi_lien_tiep_va_van_tay",)),
+    ('bong_van_tay_ls_tree_rc_khong_kiem', _ma('    if getattr(r, "returncode", None) != 0 or not isinstance(ra, (bytes, bytearray)) or not ra or not bytes(ra).endswith(b"\\0"):\n        return None, f"ls_tree_rc_', '    if not isinstance(ra, (bytes, bytearray)) or not ra or not bytes(ra).endswith(b"\\0"):\n        return None, f"ls_tree_rc_'), ("t111_bong_cong_cu_hai_chieu_va_ba_trang_thai",)),
+    ('bong_noi_allowlist_them_docs', _ma('"ops/reviews/", "ops/specs/")\nMAU_SHA', '"ops/reviews/", "ops/specs/", "docs/")\nMAU_SHA'), ("t112_bong_cong_cu_ca_doi_khang_tren_kho_that",)),
+    ('bong_dung_goc_so_khi_cha_hai_khac_dau', _ma('    if cha[1] != dau:\n        return None, "cha_hai_khac_dau"\n', ''), ("t114_bong_phan_loai_ngu_canh_moi",)),
+    ('bong_dung_goc_so_khi_khong_dung_hai_cha', _ma('    if len(cha) != 2:\n        return None, f"so_cha_{len(cha)}"\n', '    if len(cha) < 2:\n        return None, f"so_cha_{len(cha)}"\n'), ("t114_bong_phan_loai_ngu_canh_moi",)),
+    ('bong_dung_goc_so_khi_goc_su_kien_khong_la_to_tien', _ma('    if rc == 1:\n        return None, "goc_su_kien_khong_la_to_tien_cha_mot"\n    if rc != 0:\n        return None, f"is_ancestor_rc_{rc}"\n', ''), ("t114_bong_phan_loai_ngu_canh_moi",)),
+    ('bong_rev_list_khong_kiem_commit', _ma('    if not k or k.group(1).decode("ascii") != hop:\n', '    if not k:\n'), ("t114_bong_phan_loai_ngu_canh_moi",)),
+    ('bong_rev_list_nem_lot_ra', _ma('    except Exception as e:\n        return None, f"rev_list_nem_{type(e).__name__}"\n', '    except ZeroDivisionError as e:\n        return None, f"rev_list_nem_{type(e).__name__}"\n'), ("t114_bong_phan_loai_ngu_canh_moi",)),
+    ('bong_moi_dung_goc_su_kien', _ma('    env_moi = {**env2, BIEN_GOC: goc_so}\n', '    env_moi = {**env2}\n'), ("t114_bong_phan_loai_ngu_canh_moi",)),
+    ('bong_moi_khong_do_duoc_thanh_day_du', _ma('    if doi_m is None:\n        return che_do, BONG_KDD, goc_so, "diff_ngu_canh_moi_khong_do_duoc", "-"\n', ''), ("t114_bong_phan_loai_ngu_canh_moi",)),
+    ('bong_loi_noi_bo_lot_ra_cong_cu', _ma('    except Exception as e:\n        qd, ly, theo_duong, vt = BONG_KDD, f"loi_noi_bo:{type(e).__name__}", BONG_KDD, "-"\n', '    except ZeroDivisionError as e:\n        qd, ly, theo_duong, vt = BONG_KDD, f"loi_noi_bo:{type(e).__name__}", BONG_KDD, "-"\n'), ("t117_loi_trong_ma_bong_khong_doi_output_va_ma_thoat",)),
+    ('bong_loi_in_lot_ra_main', _ma('    except Exception as e:\n        try:\n            print(f"BONG_CONG_CU: {BONG_KDD} ly_do=loi_in:', '    except ZeroDivisionError as e:\n        try:\n            print(f"BONG_CONG_CU: {BONG_KDD} ly_do=loi_in:'), ("t117_loi_trong_ma_bong_khong_doi_output_va_ma_thoat",)),
+    ('bong_bo_han_thoi_gian', _ma('        if con <= 0:\n            raise HetHanBong("het ngan sach thoi gian cua ma bong")\n', ''), ("t117_loi_trong_ma_bong_khong_doi_output_va_ma_thoat",)),
+    ('bong_bo_han_moi_lenh', _ma('        return chay(argv, timeout=min(con, HAN_BONG_MOT_LENH), **kw)\n', '        return chay(argv, **kw)\n'), ("t117_loi_trong_ma_bong_khong_doi_output_va_ma_thoat",)),
+    ('bong_dem_loi_ich_bang_ton_du', _tt('    return {"loi_ich": loi_ich, "ton_du": ton_du}\n', '    return {"loi_ich": ton_du, "ton_du": ton_du}\n'), ("t115_bo_dem_loi_ich_va_ton_du_tu_dong_bong_that",)),
+    ('bong_dem_ton_du_bang_loi_ich', _tt('    return {"loi_ich": loi_ich, "ton_du": ton_du}\n', '    return {"loi_ich": loi_ich, "ton_du": loi_ich}\n'), ("t115_bo_dem_loi_ich_va_ton_du_tu_dong_bong_that",)),
+    ('bong_ton_du_so_voi_luat_cu', _tt('    ton_du = int(che_do_chay != oracle) if che_do_chay', '    ton_du = int(pl.get("cu") != oracle) if che_do_chay'), ("t115_bo_dem_loi_ich_va_ton_du_tu_dong_bong_that",)),
 ] + [(f"pl_bo_phu_thuoc_{i:02d}", (MA, lambda vb, p=p: thay_regex(vb, r'(PHU_THUOC_PACKET_LOOP = \([^)]*)"' + re.escape(p) + '"', r'\1"-"')), _T100)
      for i, p in enumerate(PL_PHU_THUOC)]
 TEN_DOT_BIEN = [d[0] for d in DOT_BIEN]

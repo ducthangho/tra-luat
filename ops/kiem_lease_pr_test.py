@@ -14,6 +14,7 @@ import importlib.util
 import io
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -159,9 +160,20 @@ def ca_xoa_lease_thi_dat(m, wf):
 
 
 def ca_khong_lease_thi_dat(m, wf):
-    with diff_gia(m, {"scripts/tl.py", "ops/leases/README.md"}):
+    # Review r1 luot 2 P3: `ops/leases-extra/…` KHONG la lease (tien to phai co `/`).
+    with diff_gia(m, {"scripts/tl.py", "ops/leases/README.md", "ops/leases-extra/a.yaml"}):
         rc, out = chay_m(m, PR, kho=ROOT)
-    bang(rc == 0 and "DAT (0 lease doi trong 2 tep doi" in out, f"khong lease phai rc 0, 0 lease: rc={rc} {out!r}")
+    bang(rc == 0 and "DAT (0 lease doi trong 3 tep doi" in out, f"khong lease phai rc 0, 0 lease: rc={rc} {out!r}")
+
+
+def ca_cli_that(m, wf):
+    """Review r1 luot 2 P3: chay DUNG diem vao CLI (`python <tep>`), khong chi ham import: push => rc 0, PR thieu SHA => rc 1."""
+    tep = Path(m.__file__)
+    env = {k: v for k, v in os.environ.items() if not k.startswith("CI_DUONG_NHANH_")}
+    r1 = subprocess.run([sys.executable, "-B", str(tep)], env={**env, "CI_DUONG_NHANH_SU_KIEN": "push"}, capture_output=True, text=True)
+    r2 = subprocess.run([sys.executable, "-B", str(tep)], env={**env, "CI_DUONG_NHANH_SU_KIEN": "pull_request"}, capture_output=True, text=True)
+    bang(r1.returncode == 0 and "bo qua" in r1.stdout, f"CLI push phai rc 0: rc={r1.returncode} {r1.stdout!r} {r1.stderr[-200:]!r}")
+    bang(r2.returncode == 1 and "KHONG DO DUOC" in r2.stdout, f"CLI PR thieu SHA phai rc 1: rc={r2.returncode} {r2.stdout!r}")
 
 
 def ca_lease_con_han_goi_check(m, wf):
@@ -198,6 +210,8 @@ def ca_cau_truc_workflow(m, wf):
     d = yaml.safe_load(wf)
     on = d.get("on", d.get(True))
     bang(isinstance(on, dict) and set(on) == {"pull_request"}, f"workflow chi `on: pull_request`, duoc {on!r}")
+    # Review r1 luot 2 P3: KHONG bo loc (paths/branches/types) — gate phai chay tren MOI PR mac dinh.
+    bang(on["pull_request"] in (None, {}), f"`pull_request` khong duoc co bo loc, duoc {on['pull_request']!r}")
     bang(d.get("permissions") == {"contents": "read"}, f"permissions phai dung contents: read, duoc {d.get('permissions')!r}")
     jobs = d.get("jobs") or {}
     bang(list(jobs) == ["kiem-lease-pr"], f"dung mot job kiem-lease-pr, duoc {list(jobs)}")
@@ -221,7 +235,8 @@ def ca_cau_truc_workflow(m, wf):
 
 
 CA = [ca_push_khong_goi_git, ca_sha_hong_thi_do, ca_lease_hong_that_thi_do, ca_lease_tot_that_thi_dat, ca_actor_la,
-      ca_muc_khong_phai_tep_thuong, ca_xoa_lease_thi_dat, ca_khong_lease_thi_dat, ca_lease_con_han_goi_check, ca_cau_truc_workflow]
+      ca_muc_khong_phai_tep_thuong, ca_xoa_lease_thi_dat, ca_khong_lease_thi_dat, ca_cli_that, ca_lease_con_han_goi_check,
+      ca_cau_truc_workflow]
 
 # (ten, tep, chuoi goc, chuoi thay, ca phai do)
 DOT_BIEN = [
@@ -234,6 +249,9 @@ DOT_BIEN = [
      "ca_lease_con_han_goi_check"),
     ("if_false_buoc_kiem", "wf", "        run: python ops/kiem_lease_pr.py\n", "        if: false\n        run: python ops/kiem_lease_pr.py\n",
      "ca_cau_truc_workflow"),
+    ("tien_to_thieu_gach", "ma", 'duong.startswith("ops/leases/")', 'duong.startswith("ops/leases")', "ca_khong_lease_thi_dat"),
+    ("loc_paths", "wf", "  pull_request:\n", "  pull_request:\n    paths: [\"ops/leases/**\"]\n", "ca_cau_truc_workflow"),
+    ("cli_luon_0", "ma", "raise SystemExit(chay())", "raise SystemExit(0)", "ca_cli_that"),
     ("coe_selftest", "wf", "        run: python ops/kiem_lease_pr_test.py\n",
      "        continue-on-error: true\n        run: python ops/kiem_lease_pr_test.py\n", "ca_cau_truc_workflow"),
 ]

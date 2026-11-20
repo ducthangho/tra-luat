@@ -39,8 +39,11 @@ recorded_by: 'phiên điều phối Mission #1238 session_015GtxrapMSm976JLC7Fp1
 thay_the_cho: []
 leased_at_utc: '2026-11-20T09:40:54Z'
 heartbeat_at: '2026-11-20T09:40:54Z'
-lease_until: '2026-11-20T17:40:54Z'
-lease_expires_at_utc: '2026-11-20T17:40:54Z'
+lease_until: '2026-11-20T09:51:35Z'
+lease_expires_at_utc: '2026-11-20T09:51:35Z'
 max_lease_hours: 8
 review_calls_limit: 2
 inference_calls_limit: 0
+withdrawn_at_utc: '2026-11-20T09:51:35Z'
+withdrawn_by: 'phien dieu phoi Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r1 xong: ma + test, review Codex 2/2 (luot 2 approve), P3 da dong bang test; ops/acceptance/lease-pr/r1/VERDICT.md. Thu hoi truoc merge vi khong con ghi them.'

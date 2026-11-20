@@ -98,12 +98,11 @@ def chon_provenance(thu_muc, run, attempt, head):
             if p.is_symlink():
                 ly.append("symlink")
                 continue
-            try:
-                y = yaml.safe_load(p.read_bytes().decode("utf-8"))
-            except Exception:
+            y = yaml.safe_load(p.read_bytes().decode("utf-8"))   # lỗi đọc/parse ⇒ ngoại lệ lên kiem_tep ⇒ not_measured (F02 lượt 1)
+            if not (isinstance(y, dict) and y.get("schema") == "ci_provenance/1"):   # F01 lượt 1: lọc kiểu/schema trước
                 continue
-            r = y.get("moc", {}).get("run") if isinstance(y, dict) and isinstance(y.get("moc"), dict) else None
-            if (y.get("schema") == "ci_provenance/1" and isinstance(r, dict) and _la_so(r.get("run_id")) and r.get("run_id") == run
+            r = y["moc"].get("run") if isinstance(y.get("moc"), dict) else None
+            if (isinstance(r, dict) and _la_so(r.get("run_id")) and r.get("run_id") == run
                     and _la_so(y.get("attempt_yeu_cau")) and y.get("attempt_yeu_cau") == attempt and r.get("head_sha") == head):
                 khop.append(y)
     if len(khop) != 1:
@@ -128,7 +127,7 @@ def _kiem_tep(tep, thu_muc):
     y, ly = chon_provenance(thu_muc, d["run"], d["attempt"], d["head"])                       # K2
     if y is None:
         return "not_measured", ly
-    ly, moc = [], y["moc"]
+    moc = y["moc"]   # giữ lý do `symlink` của K2 (F02 lượt 1)
     r = moc["run"]
     if not (r.get("event") == "push" and r.get("loi_khai_rest_path") == ".github/workflows/ci.yml"):     # K3
         ly.append("khong_phai_run_land")
@@ -180,16 +179,19 @@ def _chuan(k):
     return "".join(c for c in str(k).casefold() if c.isalnum())
 
 
-def loi_khai(doc, duong="$"):
-    """Mọi (đường dẫn JSON, giá trị) có tên khoá chuẩn hoá chứa `gateoutput`, trừ ba tên phi-lời-khai; mọi độ sâu, kể cả list."""
-    kq = []
+def loi_khai(doc, duong="$", _dang=()):
+    """Mọi (đường dẫn JSON, giá trị) có tên khoá chuẩn hoá chứa `gateoutput`, trừ ba tên phi-lời-khai; mọi độ sâu, kể cả list.
+    Vòng tham chiếu (alias YAML) ⇒ ValueError (F03 lượt 1)."""
+    if id(doc) in _dang:
+        raise ValueError(f"vong_tham_chieu tại {duong}")
+    kq, _dang = [], (_dang + (id(doc),) if isinstance(doc, (dict, list)) else _dang)
     for k, v in (doc.items() if isinstance(doc, dict) else enumerate(doc) if isinstance(doc, list) else ()):
         d = f"{duong}.{k}" if isinstance(doc, dict) else f"{duong}[{k}]"
         if isinstance(doc, dict):
             c = _chuan(k)
             if "gateoutput" in c and c not in PHI_LOI_KHAI:
                 kq.append((d, v))
-        kq += loi_khai(v, d)
+        kq += loi_khai(v, d, _dang)
     return kq
 
 
@@ -311,13 +313,12 @@ def main(argv=None):
     import yaml
     rc = 0
     for hs in map(Path, a.ho_so):
+        ten = hs.name[:-len("-land-evidence.yaml")] if hs.name.endswith("-land-evidence.yaml") else hs.stem
         try:
-            du_lieu = yaml.safe_load(hs.read_bytes().decode("utf-8"))
-        except Exception as e:
+            vp = kiem_ho_so(yaml.safe_load(hs.read_bytes().decode("utf-8")), hs.parent / f"{ten}-provenance")
+        except Exception as e:   # gồm vòng tham chiếu (F03 lượt 1)
             print(f"LỖI THAM SỐ: {hs}: không đọc được ({type(e).__name__})", file=sys.stderr)
             return 2
-        ten = hs.name[:-len("-land-evidence.yaml")] if hs.name.endswith("-land-evidence.yaml") else hs.stem
-        vp = kiem_ho_so(du_lieu, hs.parent / f"{ten}-provenance")
         print("".join(f"VI_PHAM {hs} {x}\n" for x in vp) + f"{'DO' if vp else 'DAT'} {hs} ({len(vp)} vi phạm)")
         rc = rc or (1 if vp else 0)
     return rc

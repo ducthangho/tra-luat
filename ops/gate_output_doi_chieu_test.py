@@ -23,6 +23,8 @@ import tarfile
 import tempfile
 from pathlib import Path
 
+import yaml
+
 sys.dont_write_bytecode = True
 for _s in (sys.stdout, sys.stderr):
     if hasattr(_s, "reconfigure"):
@@ -80,11 +82,6 @@ def G():
     return _M[0]
 
 
-def yaml():
-    import yaml as y
-    return y
-
-
 @contextlib.contextmanager
 def mini(ten, sua_tep=None, sua_prov=None):
     """Thư mục tạm chỉ chứa `dg.txt` (bản sao tệp đánh giá) và `prov.yaml` (bản sao provenance), sau khi áp hai hàm sửa."""
@@ -92,13 +89,13 @@ def mini(ten, sua_tep=None, sua_prov=None):
     with tempfile.TemporaryDirectory(prefix="godc_") as thu:
         t = Path(thu)
         b = (ROOT / tep).read_bytes()
-        y = yaml().safe_load((ROOT / prov).read_bytes().decode("utf-8"))
+        y = yaml.safe_load((ROOT / prov).read_bytes().decode("utf-8"))
         if sua_tep:
             b = sua_tep(b.decode("utf-8")).encode("utf-8") if not isinstance(sua_tep, bytes) else sua_tep
         if sua_prov:
             sua_prov(y)
         (t / "dg.txt").write_bytes(b)
-        (t / "prov.yaml").write_text(yaml().safe_dump(y, allow_unicode=True, sort_keys=False), encoding="utf-8", newline="")
+        (t / "prov.yaml").write_text(yaml.safe_dump(y, allow_unicode=True, sort_keys=False), encoding="utf-8", newline="")
         yield t / "dg.txt", t
 
 
@@ -170,8 +167,6 @@ def a102_ca_kho_tai_base():
 def a103_bo_phan_tich():
     def them(x):
         return lambda t: t + x
-    j = None
-
     def lap(t):
         d = t.split("\n")
         i = dong_job(t, 3)
@@ -205,7 +200,6 @@ def a103_bo_phan_tich():
         tep.write_bytes(tep.read_bytes() + b"\xff\xfe")
         ky(G().kiem_tep(tep, thu), "not_measured", ["khong_phai_utf8"], "khong_phai_utf8")
     ky(kt("T-v3-pass", toan_crlf), "passed", [], "doi chung toan CRLF")
-    del j
 
 
 @ca
@@ -268,38 +262,19 @@ def a107_tap_job():
     ky(kt("T-v3-pass", thanh_skip), "not_measured", ["tap_job_lech", "tap_skip_lech"], "doi thanh skipped")
 
 
-def _neo(ten, f):
-    return kt(ten, None, f)
-
-
 @ca
 def a108_neo():
-    def at(y):
-        y["attempt_yeu_cau"] = 2
-
-    def nhieu(y):
-        pass
-    ky(_neo("T-v3-pass", at), "not_measured", ["provenance_0"], "(a) attempt")
+    ky(kt("T-v3-pass", None, lambda y: y.update(attempt_yeu_cau=2)), "not_measured", ["provenance_0"], "(a) attempt")
     with mini("T-v3-pass") as (tep, thu):
         shutil.copy(thu / "prov.yaml", thu / "prov2.yaml")
         ky(G().kiem_tep(tep, thu), "not_measured", ["provenance_nhieu"], "(b) hai ban cung bo ba")
-
-    def ev(y):
-        y["moc"]["run"]["event"] = "workflow_dispatch"
-
-    def pth(y):
-        y["moc"]["run"]["loi_khai_rest_path"] = ".github/workflows/launcher-windows.yml"
-
-    def fl(y):
-        y["moc"]["run"]["run_id"] = float(y["moc"]["run"]["run_id"])
-
-    def bo(y):
-        y["attempt_yeu_cau"] = True
-    ky(_neo("T-v3-pass", ev), "not_measured", ["khong_phai_run_land"], "(c) event")
-    ky(_neo("T-v3-pass", pth), "not_measured", ["khong_phai_run_land"], "(d) path")
-    ky(_neo("T-v3-pass", fl), "not_measured", ["provenance_0"], "(e) run_id float")
-    ky(_neo("T-v3-pass", bo), "not_measured", ["provenance_0"], "(f) attempt bool")
-    del nhieu
+    ky(kt("T-v3-pass", None, lambda y: y["moc"]["run"].update(event="workflow_dispatch")), "not_measured", ["khong_phai_run_land"], "(c)")
+    ky(kt("T-v3-pass", None, lambda y: y["moc"]["run"].update(loi_khai_rest_path=".github/workflows/launcher-windows.yml")),
+       "not_measured", ["khong_phai_run_land"], "(d) path")
+    ky(kt("T-v3-pass", None, lambda y: y["moc"]["run"].update(run_id=float(y["moc"]["run"]["run_id"]))), "not_measured", ["provenance_0"], "(e)")
+    ky(kt("T-v3-pass", None, lambda y: y.update(attempt_yeu_cau=True)), "not_measured", ["provenance_0"], "(f) attempt bool")
+    ky(kt("T-v3-pass", None, lambda y: y["moc"]["run"].update(head_sha="0" * 40)), "not_measured", ["provenance_0"], "(g) head")
+    ky(kt("T-v3-pass", None, lambda y: y.update(schema="ci_provenance/2")), "not_measured", ["provenance_0"], "(h) schema")
 
 
 def _bo_job(ten_job):
@@ -404,6 +379,20 @@ def a115_skipped_mat_passed():
     ft, fp = _them_skip("cu", "MOC_GATE_OUTPUT: passed (39/39 job co dau hieu duong)")
     ky(kt("T-v2-pass", ft, fp), "not_measured", ["co_job_skipped"], "v2 them job skipped ngoai CHECK")
     ky(kt("T-v2-pass"), "passed", [], "doi chung")
+
+
+@ca
+def a116_yaml_la_trong_thu_muc():   # review lượt 1 F01/F02: YAML ngoài schema bỏ qua; YAML hỏng và symlink KHÔNG bị nuốt
+    with mini("T-v3-pass") as (tep, thu):
+        (thu / "x.yaml").write_text("- a\n- b\n", encoding="utf-8")
+        ky(G().kiem_tep(tep, thu), "passed", [], "(a) YAML list")
+        (thu / "y.yaml").write_text("a: [\n", encoding="utf-8")
+        ky(G().kiem_tep(tep, thu), "not_measured", ["ParserError"], "(b) YAML hong")
+    if os.name == "posix":
+        with mini("T-v3-pass") as (tep, thu), tempfile.TemporaryDirectory(prefix="godc_ng_") as ng:
+            (Path(ng) / "z.yaml").write_text("a: 1\n", encoding="utf-8")
+            os.symlink(Path(ng) / "z.yaml", thu / "lk.yaml")
+            ky(G().kiem_tep(tep, thu), "not_measured", ["symlink"], "(c) symlink canh provenance that")
 
 
 # ---------------------------------------------------------------- A2 — lời khai, miễn, hồ sơ
@@ -533,6 +522,10 @@ def a209_mien():
         bang(G().kiem_mien(f"owner_waived — {URL}", Path(thu), SHA) == [], "head bang SHA")
         bang(G().kiem_mien(f"owner_waived — {URL}", Path(thu), "0" * 40) == ["sha"], "head khac SHA")
         bang(G().kiem_mien(f"owner_waived — {URL} {URL.replace('123', '9')}", Path(thu), SHA) == ["url"], "hai URL")
+        bang(G().kiem_ho_so({"moc_gate_output": f"owner_waived — {URL} {SHA}"}, Path(thu)) == [], "(j) kiem_ho_so hop le")
+        (Path(thu) / "readback-duyet-issuecomment-123.json").write_text(json.dumps(rb(DONG, author_association="MEMBER")), encoding="utf-8")
+        vp = G().kiem_ho_so({"moc_gate_output": f"owner_waived — {URL} {SHA}"}, Path(thu))
+        bang(vp == ["$.moc_gate_output: waiver_khong_co_can_cu:tac_gia"], f"(j) kiem_ho_so MEMBER: {vp}")
 
 
 def cli(*a):
@@ -565,7 +558,7 @@ def a210_cli():
 def a211_ho_so_1127():
     for commit in ("bb47274", "7f22121"):
         with cay_tai(commit, "ops/land/pr1127-wp1120-land-evidence.yaml", "ops/land/pr1127-wp1120-provenance") as goc:
-            d = yaml().safe_load((goc / "ops/land/pr1127-wp1120-land-evidence.yaml").read_bytes().decode("utf-8"))
+            d = yaml.safe_load((goc / "ops/land/pr1127-wp1120-land-evidence.yaml").read_bytes().decode("utf-8"))
             vp = G().kiem_ho_so(d, goc / "ops/land/pr1127-wp1120-provenance")
             bang(any(x.endswith(": duong_khong_tep_danh_gia") for x in vp)
                  and not any("danh_gia_khong_" in x or "tep_danh_gia_khong_hop_le" in x for x in vp), f"#1127 @{commit}: {vp}")
@@ -595,11 +588,25 @@ def a213_la_landed_khop_kiem_ho_so_land():
     with cay_tai(BASE, "ops/land") as goc:
         n = landed = lech = 0
         for p in sorted((goc / "ops/land").glob("*-land-evidence.yaml")):
-            _, _, la = k._xet_mot_tep(p, yaml())
+            _, _, la = k._xet_mot_tep(p, yaml)
             n += 1
             landed += la
-            lech += la != G().la_landed(yaml().safe_load(p.read_bytes().decode("utf-8")))
+            lech += la != G().la_landed(yaml.safe_load(p.read_bytes().decode("utf-8")))
         bang((n, landed, lech) == (170, 94, 0), f"la_landed vs kiem_ho_so_land: {n} ho so, {landed} landed, {lech} lech")
+
+
+@ca
+def a214_vong_tham_chieu():   # review lượt 1 F03
+    d = yaml.safe_load("a: &x\n  - b: *x\n")
+    try:
+        G().loi_khai(d)
+        bang(False, "loi_khai khong nem tren vong")
+    except ValueError as e:
+        bang("vong_tham_chieu" in str(e), f"ValueError: {e}")
+    with tempfile.TemporaryDirectory(prefix="godc_vong_") as thu:
+        (Path(thu) / "v-land-evidence.yaml").write_text("a: &x\n  - b: *x\n", encoding="utf-8")
+        rc, ra = cli("kiem-ho-so", str(Path(thu) / "v-land-evidence.yaml"))
+        bang(rc == 2 and "Traceback" not in ra, f"CLI vong: rc={rc} {ra[-200:]}")
 
 
 # ---------------------------------------------------------------- đột biến
@@ -643,8 +650,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m34_bo_os", '    if "ubuntu-latest" not in m[2].split(","):\n        return ["os"]\n', "", "a209"),
     ("m35_bo_sha", '    if (m[1] != head) if head is not None else (m[1] not in gia_tri):\n        return ["sha"]\n', "", "a209"),
     ("m36_cli_rc0", '{"passed": 0, "failed": 1}.get(tt, 3)', '{"passed": 0, "failed": 1}.get(tt, 0)', "a210"),
-    ("m37_khong_prov_lay_dong_tong", '    if y is None:\n        return "not_measured", ly\n    ly, moc',
-     '    if y is None:\n        return d["moc"][0], []\n    ly, moc', "a102"),
+    ("m37_khong_prov_lay_dong_tong", '    if y is None:\n        return "not_measured", ly\n    moc = y["moc"]',
+     '    if y is None:\n        return d["moc"][0], []\n    moc = y["moc"]', "a102"),
     ("m38_cam_moi_cr", '    if any(d.endswith("\\r") for d in dong):',
      '    if any("\\r" in d for d in dong):\n        return None, ["cr_le"]\n    if False:', "a103"),
     ("m39_nhan_ten_tom", 'RE_TEP_DG = re.compile(r"(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt")',
@@ -662,6 +669,15 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m48_bo_dang_khoi", "    return a is True or any(", "    return a is True or False and any(", "a212"),
     ("m49_duong_vi_pham_van_hop_le", '        if tk != "failed" and len(vp) == truoc:', '        if tk != "failed":', "a212"),
     ("m50_cho_checkout_rong", "            and isinstance(co, list) and co\n", "            and isinstance(co, list)\n", "a114"),
+    ("m51_bo_head", ' and r.get("head_sha") == head', "", "a108"),
+    ("m52_bo_schema", ' and y.get("schema") == "ci_provenance/1"', "", "a108"),
+    ("m53_bo_goi_kiem_mien", '            vp += [f"{duong}: waiver_khong_co_can_cu:{x}" for x in kiem_mien(v, thu_muc, None)]', "            pass", "a209"),
+    ("m54_yaml_khong_mapping", "if not (isinstance(y, dict) and y.get", "if not (y.get", "a116"),
+    ("m55_nuot_yaml_hong", '            y = yaml.safe_load(p.read_bytes().decode("utf-8"))',
+     '            try:\n                y = yaml.safe_load(p.read_bytes().decode("utf-8"))\n            except Exception:\n                continue', "a116"),
+    ("m56_xoa_ly_do_symlink", '    moc = y["moc"]   # giữ', '    ly, moc = [], y["moc"]   # giữ', "a116"),
+    ("m57_bo_chot_vong", '    if id(doc) in _dang:\n        raise ValueError(f"vong_tham_chieu tại {duong}")\n', "", "a214"),
+    ("m58_cli_chi_bat_OSError", "        except Exception as e:   # gồm vòng", "        except OSError as e:   # gồm vòng", "a214"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_KeyError", "def la_landed(du_lieu):\n", "def la_landed(du_lieu):\n    raise KeyError('vo can')\n", "a212", "TIN_DUNG_GIA"),

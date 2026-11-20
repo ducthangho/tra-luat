@@ -1,0 +1,22 @@
+You are an INDEPENDENT REVIEWER (Codex) for Mission #1172 of repo ducthangho/tra-luat. Read-only review: do not edit, commit, push, comment, dispatch workflows or call any GitHub write API. You may run read-only git/python probes and write scratch files under /tmp only, plus the single output file named below.
+
+Object under review (exact): file ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md at HEAD 3f3f4abecac2def1eae4a67e80a9a57a88a35822 of this checkout (sha256 5a34f1e920243900536f94d0d7dc301405634c43c0db7a77020cb21c20f8e6ae). It is a proposed MERGED source plan "r4" combining:
+- the recovered original plan r2: ops/specs/wp1172-source-plan-r4/nguon/KE_HOACH_TOI_UU_MUTATION_TESTING_r2_2026-11-03.md (sha256 f4611b0f…),
+- the PR0 packet draft: ops/specs/wp1172-source-plan-r4/nguon/PACKET_DRAFT_CI_FULL_AUDIT_PIN_SHA_2026-11-03.md,
+- an external generic policy critique: ops/specs/wp1172-source-plan-r4/nguon/proxima-mutation-policy-review-20261103.txt,
+- the currently installed plan r3: `git show origin/ops/wp1172-plan-r3:ops/specs/wp1172-source-plan-r3/KE_HOACH_NGUON_R3.md` (sha256 2e9fb13f…, installed at Mission r81),
+- the baseline ops/specs/wp1434-r3/do/BASELINE.json on master (sha256 6100c8e1…).
+Context: Mission r82 is installed (JSON at `git show origin/ops/wp1448-r1:ops/specs/wp1448-r2/mission-r82.json`); PR1 (#1448, spec `git show origin/ops/wp1448-r1:ops/specs/wp1448-r2/SPEC.md`) is being executed under a lease and must not be changed retroactively. Repo rules: CLAUDE.md, docs/PROTOCOL_DA_PHIEN.md, docs/adr/0060-*.
+
+Review goals (be adversarial, measure rather than trust):
+1. Fidelity: every requirement of r2, every acceptance item A1–A6 of the PR0 draft and every substantive point of the Proxima critique has a correct destination in r4 §8 (or an explicit, justified rejection). Report anything silently dropped, misrepresented, or claimed "done" without evidence (e.g. check what PR0 #1166/#1412 actually delivered on origin/master: .github/workflows/ci-dot-bien-du.yml, .claude/dev/ci_dang_ky_test.py, ops/specs/wp1166-r4-g4.md).
+2. Consistency with r3: r4 claims to keep r3 unchanged except additions A+1..A+4 and lanes B/C. Check that no addition weakens r3 invariants I1–I6, contradicts r3's rejected options §6, or retroactively changes PR1's frozen spec/lease. Check dependency/order claims and write-set conflicts (B1 vs PR5, B2, B3 vs deploy scripts).
+3. Technical soundness of lane B: B1 receipt (github.workflow_sha availability, A3 concurrency canary design, A4 via ops-do-workflow-definition.yml), B2 watchdog (independence, 36h/8d semantics, three-state, permissions, failure modes), B3 release gate on scripts/deploy-package.sh and .ps1 (feasibility from the deploy environment, REST reachability, override flag, sh/ps1 parity), A+1 kill switch via Actions repository variable (who can write it, fail-closed default, does reading vars from ci.yml leak control to PR authors?).
+4. Numbers: verify every number quoted in r4 against BASELINE.json/r3 (e.g. 700 504 s = 4.7 %, 52.8 %, 1775 s, 13 716 s). Recompute where possible.
+5. Decision hygiene: are Q6–Q9 the right owner questions; anything requiring owner authority that r4 treats as decided.
+
+Severity: P0 (blocks safety), P1 (plan would cause wrong gate/evidence), P2 (material gap or incorrect claim that must be fixed before approval), P3 (editorial/minor). Each finding: id, severity, location (section), claim, evidence (command + observed result), suggested_fix.
+
+Write your verdict as JSON to the path in env var REVIEW_OUT (also print it as your final message): {"verdict": "approve"|"changes_requested", "reviewed_sha": "3f3f4abecac2def1eae4a67e80a9a57a88a35822", "reviewed_file_sha256": "5a34f1e920243900536f94d0d7dc301405634c43c0db7a77020cb21c20f8e6ae", "findings": [...], "tests": [{"cmd","rc","summary"}], "numbers_checked": N, "notes": "..."}. Approve only if there are no P0–P2 findings.
+
+This is review round 2. Round 1 (same reviewer family, verdict file ops/specs/wp1172-source-plan-r4/codex-review-1.json in this checkout) found 2 P1 + 11 P2 on the previous draft (sha256 76b836fa…, commit d5bc154). Section §11 of the new draft claims how each finding was handled. Verify each claimed closure by reading the new text (mark each R4-01..R4-13 closed / partially closed / open with evidence), check that the fixes did not introduce new problems, and re-verify the numbers. Report new findings with new ids R4-14 onward.

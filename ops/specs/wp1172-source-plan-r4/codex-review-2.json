@@ -1,0 +1,203 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "3f3f4abecac2def1eae4a67e80a9a57a88a35822",
+  "reviewed_file_sha256": "5a34f1e920243900536f94d0d7dc301405634c43c0db7a77020cb21c20f8e6ae",
+  "findings": [
+    {
+      "id": "R4-02-lossy-source-traceability",
+      "severity": "P2",
+      "location": "§5 B3; §8.1 rows for r2 §3 PR5 and §4 release; §11 R4-02",
+      "claim": "Partially closed. The new table restores many requirements, but still drops the protected release ref/tag and exact-H required CI checks from r2 §4 Release. B3 checks a clean H/package and a full-audit receipt; neither proves H is an authorized release revision or has passed the other required CI checks. The table maps only candidate/definition identity and component exceptions, without retaining or explicitly rejecting these two requirements. The r2 dashboard requirement to show current master versus the audited snapshot also has no explicit destination.",
+      "evidence": [
+        {
+          "cmd": "sed -n '49,72p' ops/specs/wp1172-source-plan-r4/nguon/KE_HOACH_TOI_UU_MUTATION_TESTING_r2_2026-11-03.md",
+          "observed": "r2 §4 requires H/tree plus a protected tag/ref, required CI checks on H, and current-master/audited-H drift display."
+        },
+        {
+          "cmd": "sed -n '127,150p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; sed -n '179,206p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+          "observed": "B3 and the trace rows contain no protected-ref or required-CI predicate; B2 records snapshot age without the requested master drift display."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-round2/probes.py structure; sed -n '150,178p' scripts/deploy-package.ps1",
+          "observed": "The actual checkout is 0 commits behind origin/master and 2 ahead. Thus the existing PowerShell not-behind check accepts an unmerged revision; it is not a protected-ref membership check. The shell deploy script has no equivalent remote CI check."
+        }
+      ],
+      "suggested_fix": "Restore these source obligations explicitly in B3/B2 and §8, or give an explicit owner-approved rejection and rationale. B3 should resolve the authorized protected release ref, bind it to H/tree/package, and verify all required CI contexts on the correct provenance before push. Test a clean ahead-of-master candidate with a successful audit but a failed/missing required CI check, and a moved release ref. Keep waivers separate; do not confuse not-behind with authorized-for-release or turn unknown API results into pass."
+    },
+    {
+      "id": "R4-07-watchdog-sla-and-delivery-gap",
+      "severity": "P2",
+      "location": "§5 B2 lines 116–121; §11 R4-07",
+      "claim": "Partially closed. Six-hour polling, readback, heartbeat and an explicitly best-effort deadline fix the original timing overclaim. The replacement failure path still incorrectly asserts that a failed scheduled watchdog automatically notifies the repository owner. GitHub notification routing depends on the workflow/cron actor and notification settings. If Issue writes fail, the claimed fallback recipient is therefore unproved.",
+      "evidence": [
+        {
+          "cmd": "sed -n '112,125p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+          "observed": "Line 117 says GitHub reports the failed scheduled run to the owner; no recipient/subscription verification is specified."
+        },
+        {
+          "cmd": "web.run open https://docs.github.com/en/actions/concepts/workflows-and-actions/notifications-for-workflow-runs",
+          "observed": "Scheduled notifications follow the workflow creator, a later cron editor, or the re-enabling user; delivery also depends on enabled notification settings. Owner status alone does not select the recipient. [GitHub notification contract](https://docs.github.com/en/actions/concepts/workflows-and-actions/notifications-for-workflow-runs)."
+        }
+      ],
+      "suggested_fix": "Make notification ownership/subscription and a verified fallback delivery path part of B2 activation, or mark delivery unmeasured and rely on an explicitly assigned external observer. Test failed Issue writes and a missing watchdog with the intended recipient. Retain the best-effort qualification; merely making the Actions job red must not be reported as owner notification delivered."
+    },
+    {
+      "id": "R4-08-switch-authority-not-established",
+      "severity": "P2",
+      "location": "§4 A+1 lines 61–71; §10 Q9",
+      "claim": "Partially closed. The trusted merge-side consumer and invalidation of previously green targeted evidence are sound improvements. However, collaborator/role enumeration does not establish the complete variable-writer set: GitHub App installation credentials can also have Variables:write. Moreover, the same write permission permits both disabling and re-enabling, while Q9 reserves re-enabling to the owner. Reading an allowed string and a collaborator list does not demonstrate that the owner authorized the current enable transition.",
+      "evidence": [
+        {
+          "cmd": "sed -n '60,71p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; sed -n '237,245p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+          "observed": "A+1 specifies REST collaborator/role measurement and string-based enablement; Q9 permits delegated switch-off but owner-only switch-on. No enable-transition authority record or App-writer disposition is specified."
+        },
+        {
+          "cmd": "web.run open https://docs.github.com/en/rest/actions/variables",
+          "observed": "Repository variable updates support App installation tokens with Variables:write. The update endpoint accepts a value without an off-only permission, and the read response supplies value/timestamps, not the author of the current value. [GitHub variable API](https://docs.github.com/en/rest/actions/variables#update-a-repository-variable)."
+        }
+      ],
+      "suggested_fix": "Have Q9 decide the complete principal/credential scope, including Apps, and distinguish procedural trust from machine enforcement. Either constrain actual writers appropriately or require a durable owner-authorized activation generation which the trusted consumer validates; delegated disablement must invalidate old activation evidence. Test an App writer and an off-authorized operator attempting to re-enable. Unknown writer coverage must require full execution. No variable or credential changes are authorized by this review."
+    },
+    {
+      "id": "R4-14-overhead-is-confounded",
+      "severity": "P2",
+      "location": "§4 A+5 lines 88–90; §8.1 instrumentation-overhead row",
+      "claim": "The new seventh activation condition calls a before/after cohort difference instrumentation overhead. Even with day_du/success filtering and PR clustering, product changes, mutant inventory and runner load can change G5 duration. This can approve instrumentation whose real overhead exceeds 5%, or remove acceptable instrumentation. Clustering estimates dependence; it does not provide the missing counterfactual.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-round2/probes.py counterexamples",
+          "observed": "Executed deterministic witness: before=100 s; after underlying work=75 s plus 20% instrumentation gives 90 s. The plan reports -10% and passes the 5% threshold despite true overhead=20%. Conversely underlying work=120 s and zero instrumentation overhead reports +20% and fails. Repetition within PR clusters preserves both errors."
+        },
+        {
+          "cmd": "sed -n '88,90p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+          "observed": "A+5 uses pre/post PR1 merge step durations from the 14-day shadow cohort, without paired instrumentation-on/off measurements on identical inputs."
+        }
+      ],
+      "suggested_fix": "Use paired on/off measurements on the same immutable product/test/mutant snapshot and environment, with repeated/interleaved runs and a declared estimator. Keep the 14-day cohort as operational monitoring. Assign the measurement to a successor or future PR3 prerequisite without changing frozen PR1. Add the two confounding witnesses and positive controlled-overhead cases to the measurement acceptance; do not claim synthetic examples are production timings."
+    },
+    {
+      "id": "R4-15-a4-dispatch-permission-gap",
+      "severity": "P2",
+      "location": "§5 B1 A4 and B3 lines 134–138; §13",
+      "claim": "The B3 fallback says to invoke A4 for the release run when definition identity is not_measured, but its deployment capability contract only requires Actions-read. ops-do-workflow-definition.yml is workflow_dispatch-only. Its internal read-only permissions do not grant a caller permission to start it. The advertised fallback is therefore unavailable to a minimally provisioned deploy host; silently obtaining write credentials would also expand the authority boundary.",
+      "evidence": [
+        {
+          "cmd": "cat .github/workflows/ops-do-workflow-definition.yml; python -B /tmp/rv-r4-round2/probes.py structure",
+          "observed": "The existing A4 workflow has only workflow_dispatch with run_id input. Its job has contents:read/actions:read; these are execution permissions, not dispatch authorization."
+        },
+        {
+          "cmd": "web.run open https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event",
+          "observed": "A fine-grained caller token needs Actions:write to create the dispatch event. [GitHub dispatch permissions](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)."
+        },
+        {
+          "cmd": "Python urllib.request GET https://api.github.com/repos/ducthangho/tra-luat/actions/workflows/ci-dot-bien-du.yml/runs?per_page=1",
+          "observed": "This review environment returned URLError: Operation not permitted. This is not a measurement of either deployment host and does not prove their REST/artifact/GraphQL capabilities."
+        }
+      ],
+      "suggested_fix": "Choose an explicit read-only deploy route: an authorized operator pre-produces the exact-run A4 artifact and B3 verifies/consumes it, blocking if absent. Alternatively ask Q7 for scoped dispatch authority and budget the asynchronous run, polling and artifact retrieval. Verify actual REST, artifact redirect and provenance access on both deploy hosts. Test read-only credentials, absent/stale A4 artifacts, GraphQL null and timeout; missing provenance must remain blocked rather than becoming warning_only after blocking activation."
+    },
+    {
+      "id": "R4-16-unassigned-trusted-consumer-paths",
+      "severity": "P2",
+      "location": "§4 A+1; §5 B2 write set; §7; inherited r3 PR3/PR6 write sets",
+      "claim": "The repairs introduce executable enforcement without assigning all implementing paths. A+1 requires new trusted kiem-merge behavior, but inherited PR3/PR6 write sets omit packet_loop.py and its tests. B2 now requires the coordinator doctor to consume heartbeat state, but its write set contains only a new workflow, new ops script/tests and ci_dang_ky_test.py. The original R4-06 B1 dependency and registry omissions are fixed; this is a new manifestation of the same incomplete-scope class.",
+      "evidence": [
+        {
+          "cmd": "git show origin/ops/wp1172-plan-r3:ops/specs/wp1172-source-plan-r3/KE_HOACH_NGUON_R3.md",
+          "observed": "PR3/PR6 planned write sets cover the classifier, ci.yml, cong_cu_test.py and ci_dang_ky_test.py, not the trusted merge consumer."
+        },
+        {
+          "cmd": "rg -n 'doctor' .claude/dev/launcher.py; sed -n '60,71p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; sed -n '112,125p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+          "observed": "The existing doctor implementation is in launcher.py. r4 newly promises its heartbeat read, without assigning that path or declaring a manual runbook instead."
+        },
+        {
+          "cmd": "git show origin/ops/wp1448-r1:ops/leases/wp1448-r2-g1-claude.yaml",
+          "observed": "PR1 effective write set excludes these paths and even excludes the registry still held by PR0. Its frozen scope cannot absorb the new enforcement."
+        }
+      ],
+      "suggested_fix": "Assign the trusted consumer changes and tests to explicit future packet write sets, or add a successor that lands before activation; declare sensitive review and reconcile overlap before lease. If doctor means a manual coordination procedure, say so and name its runbook/delivery responsibility. Check every newly promised consumer against the final packet graph and write sets. Preserve PR1 spec/lease and do not silently extend a running executor."
+    },
+    {
+      "id": "R4-17-canary-cost-is-shards-only",
+      "severity": "P3",
+      "location": "§13 lines 275–276",
+      "claim": "13,282 s is the median for eight shard jobs, not the total full-audit cost. Presenting two complete audit runs as approximately 2 × 13,282 job-seconds omits the registry and aggregation jobs. The cited number itself is correct; its use as the complete canary budget is incomplete.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-round2/probes.py numbers",
+          "observed": "For the same 42 runs with eight successful shards, median shard sum=13,282 s, median full-run execution sum=15,205 s, median non-shard component=1,876.5 s. The quoted two-run subtotal is 26,564 s; twice the complete-run median is 30,410 s, before any A4/push-CI cost."
+        }
+      ],
+      "suggested_fix": "Label 26,564 s as the eight-shard subtotal, and budget registry/aggregation, A4 and the push observation separately. Use the complete-run estimate with its cohort and uncertainty rather than treating sums of component medians as an exact total. Recompute from the same run set after B1 without scheduling extra audits solely to improve the estimate."
+    }
+  ],
+  "tests": [
+    {
+      "cmd": "Python read-only hashlib/subprocess preflight using HEAD and git show on origin/master, origin/ops/wp1172-plan-r3, origin/ops/wp1448-r1",
+      "rc": 0,
+      "summary": "passed: exact HEAD/tree and r4 digest match; r2, PR0 draft, Proxima, r3 and BASELINE full SHA-256 match. PR1 immutable spec and r2/g1 lease inspected. Comparison refs: master=45bae8d07a8cdf06a1ca9a7a2e015a6258169379; r3=c032656d6e9107c7d0d570afe374fd78b6424e93; PR1 metadata=a0ca10060174bb22264c5a71e2a6e7ad4eeddcca."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round2/probes.py numbers (initial version)",
+      "rc": 1,
+      "summary": "failed reviewer probe: unknown lanes use a null value plus status, not the literal khong_do_duoc value. Corrected the reducer to preserve unknowns; no source defect inferred."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round2/probes.py numbers",
+      "rc": 0,
+      "summary": "passed 41 checks; 700504/15057171=4.6522949%; 7955967/15057171=52.8383918%; 9669927/705=13716.2085; G9 n=71 median=1775 p25=1590. Full-audit shard subtotal versus complete-run budget differs as reported in R4-17. Full ledger: /tmp/rv-r4-round2/numbers.json."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round2/probes.py structure",
+      "rc": 0,
+      "summary": "passed: real workflow pinning validator, bad SHA-based concurrency negative, healthy baseline receipt, four incomplete/failed outcome negatives; Ruff CI pin/probe contract 3/3. Confirmed A4 dispatch-only trigger. Bare Ruff lint and full registry suite not_run."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round2/probes.py counterexamples",
+      "rc": 0,
+      "summary": "passed deterministic counterexamples: 20% true instrumentation overhead appears as -10%, and zero true overhead appears as +20% under the proposed uncontrolled before/after comparison. Synthetic arithmetic, not real CI timing."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round2/probes.py rss",
+      "rc": 0,
+      "summary": "passed Linux wait4 probe: sequential child peaks 83044/25704 KiB remain separate. Concurrent cgroup memory and Windows behavior not_run."
+    },
+    {
+      "cmd": "Python line-range readback of r4 60–90,112–150,154–175,179–217,232–242,251–278; read r2, draft PR0, Proxima, r3 and round-1 verdict",
+      "rc": 0,
+      "summary": "completed manual source/closure audit. Individual R4-01 through R4-13 status and observed text evidence are recorded in notes; this is plan review, not an implementation conformance test."
+    },
+    {
+      "cmd": "GitHub get_pr_info(ducthangho/tra-luat,1412) and fetch_issue_comments(ducthangho/tra-luat,1166)",
+      "rc": null,
+      "summary": "read-only connector succeeded. PR1412 merged f8b9cdd81879f25c22709c60e62b69a9c314a472 from b79cbf56a1696b44c38529275312287ca78ba91d. M8 comment7009869906 explicitly says landed:false and checkout/workflow_definition/gate_output not_measured; cross-attempt full audit not yet measured in that historical record. No shell exit code supplied by connector."
+    },
+    {
+      "cmd": "web.run official GitHub contexts, variables, workflow-dispatch, schedule and notification documentation",
+      "rc": null,
+      "summary": "verified documented workflow_sha availability, variable token types, dispatch Actions:write and schedule notification routing. One initial notifications URL returned an internal error; the current official concepts URL succeeded. Documentation is not live repo ACL or deploy-host evidence."
+    },
+    {
+      "cmd": "Python urllib.request GET https://api.github.com/repos/ducthangho/tra-luat/actions/workflows/ci-dot-bien-du.yml/runs?per_page=1 without authentication",
+      "rc": 0,
+      "summary": "not_measured network capability: caught URLError, Operation not permitted. Diagnostic process rc0 is not an HTTP success. No credentials accessed."
+    },
+    {
+      "cmd": "git config --get core.abbrev",
+      "rc": 1,
+      "summary": "unset; no Git configuration changed. General repository gates needing the pinned abbreviation are not_run for this read-only plan review."
+    },
+    {
+      "cmd": "Full selftests, live concurrency canary, CI dispatch, Windows-local/Linux deploy, owner notification and live ACL validation",
+      "rc": null,
+      "summary": "not_run: not authorized or unnecessary for this source-plan review; none counted as passed."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round2/write_verdict.py (final snapshot and output validation)",
+      "rc": 0,
+      "summary": "passed: 17177 non-.git file hashes equal initial snapshot; HEAD 3f3f4abecac2def1eae4a67e80a9a57a88a35822, tree e13a8b2e2a66004d6423d64ea5f12a7ca833f5b2; no added/deleted paths; tracked/untracked clean with only pre-existing ignored .codex/. Output JSON readback matches serialized verdict."
+    }
+  ],
+  "numbers_checked": 41,
+  "notes": "Independent read-only source-plan review, round 2: 0 P0, 0 P1, 6 P2, 1 P3; changes_requested. Nine original findings closed at plan level; four partially closed; none wholly unaddressed. Closure does not claim future implementation/tests completed. ROUND-1 CLOSURE AUDIT (original d5bc154112d60b4b1b40b8cf802647da89170c49, file 76b836fa70a8d5f7b1cdc9ba1123e5ccad87307e09fdb0a05bd5e08b4a284ae8):\nR4-01: closed — §2/§8.2 now distinguish code delivery, not_run, not_measured, waiver and M8 landed:false. Read-only #1166 M8 comment 7009869906 and PR #1412 metadata confirm that distinction; no historical A2/A5/A6 pass was manufactured.\nR4-02: partially closed — §8 restores OS/Python/dependency metadata, SLA, minimal repro, merge-stop, C1 budget/zero serious misses and Q8a/b. Protected release ref/required CI and drift display still lack dispositions; see retained R4-02. A+5 introduces R4-14.\nR4-03: closed — §4 A+3 separates execution, case observation, mutant classification and aggregate verdict, retains reviewed equivalence without kill credit, preserves I2 and requires legacy compatibility/healthy and negative fixtures. Actual legacy receipt probe accepts passed baseline and rejects four non-success values.\nR4-04: closed — §4 A+4 replaces cumulative CHILDREN RSS with wait4 and separates concurrent cgroup demand. Executed wait4 probe returned 83044 and 25704 KiB for differently sized sequential children. Concurrent cgroup measurement remains future implementation acceptance.\nR4-05: closed — §5 B1 A3 now requires two audit receipts and one separately identified overlapping push observation. Actual workflow has only schedule/workflow_dispatch and run-ID concurrency. No live canary was run.\nR4-06: partially closed — Original defects fixed: §5 B2/§7 place B1 first and include registry registration. The new doctor heartbeat consumer is unassigned; see R4-16, the same scope/dependency class.\nR4-07: partially closed — §5 B2/§9 replace the hard 36h claim with six-hour polling plus declared schedule delay, readback and heartbeat. Failure notification to the owner remains unproved; see retained R4-07.\nR4-08: partially closed — §4 A+1 moves authority to the trusted merge consumer and invalidates old targeted evidence on switch-off. Writer enumeration and owner-only re-enable enforcement remain incomplete; see retained R4-08.\nR4-09: closed — §5 B1 v1 specifies expected jobs/items, provenance, per-producer attempts, digests and metadata; B3 requires measured definition for the actual run and rejects missing mandatory fields. New operational A4 permission mismatch is R4-15; schema closure is not deploy validation.\nR4-10: closed — §5 B3 binds clean source inventory/bytes to H/tree, requires snapshot or blob comparison, binds package digest and rechecks before push. The separate protected-ref/CI source omission is retained under R4-02. No package was built or uploaded.\nR4-11: closed — §5 B3 requires verified owner authority scoped to H/package/expiry or scoped standing delegation. §9 G8 separates audit_passed, owner_waived and warning_only; self-authored flags no longer suffice.\nR4-12: closed — §5 B3 explicitly requires real Windows-local base/candidate parity or a B3-specific written waiver, keeping Linux pwsh supplementary and PR1 exemption scoped. Windows tests were not run in this review.\nR4-13: closed — §9 G9 states event, old-lane, success, single-attempt, job-derived endpoint and date filters. Recomputed n=71, median=1775 s, nearest-rank p25=1590 s; cancellation/failure/queue are separate.\nConsistency: no direct retroactive change to PR1 spec 5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e or lease r2/g1 found. r3 I1–I6 and nine rejected options remain the A/B default; C remains closed behind Q8a and later Q8b, not present permission to relax M9. B1-before-PR5 and B1/B2/PR2 serialization are correct. Q6–Q9 are relevant, but Q7 must cover the A4 capability decision and Q9 complete writer/activation authority. The source plan remains proposed and cannot grant dispatch, merge or deploy authority.\nNumerical scope: 41 independently checked source/baseline values, counts and derived quantities; policy thresholds and estimates are not production measurements. Raw DX-2 job pages and historical DX-3/DX-8 logs were not re-collected; inherited claims requiring those raw inputs were not independently re-proved. r82 outward-rounding erratum 3.4–5.6 million s is retained. The current artifact/receipt/ACL/notification and deploy-host capabilities were not established by these offline probes.\nIdentity/environment: provider=openai_codex, execution_surface=codex_service (API-hosted tool session; no codex CLI invocation), transport=machine, model_family=openai. Served model/effort and external launcher session identity KHONG_DO_DUOC; this file establishes no cross-provider assurance or land authority. Linux 6.18.44-fc-v726, Python 3.13.18, managed workspace-write sandbox with reviewer read-only discipline. Direct user assignment authorizes this exact-file review and REVIEW_OUT only. No subagents, GitHub writes, dispatches, commits, pushes, deploys or secret reads. Scratch: /tmp/rv-r4-round2. core.abbrev was unset; no configuration changed and no abbreviation-sensitive gate was run. Snapshot comparison proves equality at the observed endpoints, not historical non-writing between them."
+}

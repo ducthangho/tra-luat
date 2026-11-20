@@ -1,4 +1,4 @@
-# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 2
+# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 3
 
 ## 1. Trạng thái và nguồn
 
@@ -9,8 +9,9 @@
   điều kiện. Câu nào của r3 không được nhắc ở đây là giữ nguyên.
 - **Không hồi tố.** PR1 (#1448, spec `5014de59…`, lease `wp1448-r2-g1-claude`) chạy đúng hợp đồng đóng băng của nó; mọi
   bổ sung của r4 áp từ packet KẾ TIẾP. Không bổ sung nào được nhét vào PR1.
-- **Bản sửa 2** xử lý 13 finding của review Codex `wp1172-plan-r4-review-1` (2 P1, 11 P2, không P0) trên bản sửa 1
-  (`76b836fa…`, commit `d5bc154`). Bảng xử lý ở §11.
+- **Bản sửa 2** xử lý 13 finding của review Codex `wp1172-plan-r4-review-1` (2 P1, 11 P2) trên bản sửa 1 (`76b836fa…`,
+  `d5bc154`). **Bản sửa 3** xử lý 6 P2 + 1 P3 của `wp1172-plan-r4-review-2` trên bản sửa 2 (`5a34f1e9…`, `3f3f4ab`);
+  bản sửa 3 CHƯA được review lại (đã hết hai lượt review dành cho kế hoạch). Bảng xử lý ở §11.
 - **Nguồn (lưu nguyên byte tại `ops/specs/wp1172-source-plan-r4/nguon/`, `.gitattributes` `-text`):**
 
 | Nguồn | sha256 | Vai trò |
@@ -58,14 +59,19 @@ hai cửa (Q8a cho NGHIÊN CỨU, Q8b cho ĐỔI M9 chỉ sau kết quả C1).
 PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm chốt áp vào đặc tả packet tương ứng khi tới lượt:
 
 - **A+1 (PR3, PR6, C2) — công tắc bảo thủ có thẩm quyền đo được.**
-  - Nguồn: một Actions repository variable (tên đóng băng trong đặc tả PR3). Trước khi dùng, ĐO tập người ghi được
-    (REST quyền collaborator/role, ghi danh sách vào hồ sơ) và chủ kho xác nhận ở Q9; tập ấy lệch thì công tắc không
-    được tin.
+  - Nguồn: một Actions repository variable (tên đóng băng trong đặc tả A+1). Biến chỉ là tín hiệu TẮT nhanh; nó
+    KHÔNG đủ để BẬT. Trạng thái bật hợp lệ khi và chỉ khi có một **bản ghi kích hoạt của chủ kho**: comment trên một
+    Issue cố định, tác giả = OWNER (đọc qua REST), mang số thế hệ tăng dần và đúng giá trị cho phép; biến phải mang
+    cùng số thế hệ. Bất kỳ ai ghi được biến (collaborator, GitHub App có Variables:write — tập này đo và ghi vào hồ sơ,
+    Q9) đều chỉ TẮT được: biến lệch giá trị/thế hệ so với bản ghi mới nhất của chủ kho ⇒ coi là tắt. Bật lại = chủ kho
+    đăng bản ghi thế hệ mới; bằng chứng kích hoạt cũ mất hiệu lực. Không đo được tập người ghi ⇒ chạy đủ.
   - Tiêu dùng có thẩm quyền KHÔNG phải job trong cây PR (trên `pull_request`, PR có thể sửa chính `ci.yml` hay bộ phân
     loại). Thẩm quyền nằm ở cổng merge chạy từ cây TIN CẬY: `kiem-merge` (từ master, không từ head PR) đọc lại công tắc
     tại thời điểm xét merge và TÍNH LẠI yêu cầu từ diff: công tắc không đúng chuỗi cho phép, vắng, hoặc không đọc được ⇒
     đòi G5 đủ `success` trên đúng H, bất kể job PR nói gì. Bằng chứng targeted/bỏ qua đã xanh TRƯỚC khi công tắc tắt
     trở nên KHÔNG đủ ngay lúc xét merge.
+  - Mã tiêu dùng tin cậy (`kiem-merge`: `.claude/dev/packet_loop.py` + test) KHÔNG nằm trong write set r3 của PR3/PR6,
+    nên thuộc một packet riêng **B4 — công tắc bảo thủ và tiêu dùng tin cậy** (sensitive), land TRƯỚC khi PR3 bật.
   - Job `chuan-bi` vẫn đọc công tắc để tiết kiệm (khi tắt thì chạy đủ ngay), nhưng output của nó chỉ là gợi ý.
   - Ca bắt buộc: PR sửa job tiêu dùng để bỏ qua công tắc ⇒ `kiem-merge` vẫn đòi đủ; tắt công tắc sau khi một lượt bỏ
     qua đã xanh ⇒ `kiem-merge` đỏ; đột biến "vắng ⇒ bỏ" phải đỏ. Không dùng `pull_request_target` chạy mã PR.
@@ -85,9 +91,11 @@ PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm 
   trên Linux, gồm cháu đã được con thu); nhu cầu ĐỒNG THỜI đo riêng qua cgroup (`memory.peak`) khi có. Không có ⇒
   `khong_do_duoc`. Không dùng `RUSAGE_CHILDREN` (giữ mức cao nhất qua các con đã thu). Ca: con tuần tự khác cỡ, con
   chồng nhau.
-- **A+5 (điều kiện bật PR3 thứ bảy) — overhead của PR1.** Từ bóng 14 ngày: so thời gian bước G5 mỗi mảnh trước/sau merge
-  PR1 trên lượt `day_du` `success`, theo cụm PR. Overhead ≤ 5 % ⇒ giữ; > 5 % ⇒ chuyển phần đo sang lấy mẫu ngoài cổng
-  (successor), không xoá tín hiệu (r2 §5.1).
+- **A+5 (điều kiện bật PR3 thứ bảy) — overhead của phần đo PR1.** Đo GHÉP CẶP bật/tắt trên CÙNG ảnh chụp bất biến (sản
+  phẩm, test, đột biến, môi trường), chạy xen kẽ lặp lại (≥ 5 cặp trên một mảnh), ước lượng = trung vị hiệu ghép cặp; cần
+  một công tắc môi trường tắt phần đo — thêm trong write set của PR3 (`ops/cong_cu_test.py`), không sửa PR1. Ca kiểm có
+  overhead nhân tạo biết trước. Overhead ≤ 5 % ⇒ giữ; > 5 % ⇒ chuyển phần đo sang lấy mẫu ngoài cổng, không xoá tín hiệu
+  (r2 §5.1). So sánh trước/sau theo cohort 14 ngày chỉ là giám sát vận hành, KHÔNG phải phép đo overhead.
 
 ## 5. Làn B — bảo đảm bằng chứng (không đổi quyết định cổng `ci.yml`, không nới M9)
 
@@ -113,10 +121,15 @@ PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm 
   giới hạn) các lượt `ci-dot-bien-du.yml`, kiểm biên nhận B1 theo hợp đồng v1.
 - Ba trạng thái như r2 §4: `fresh` · `due_in_progress` · `stale_or_missing`. Tuổi tính từ khung/snapshot gốc; chạy lại
   cùng SHA cũ KHÔNG làm mới. Đọc API lỗi ⇒ `khong_do_duoc` (không bao giờ thành `fresh`).
-- `stale_or_missing` hoặc `khong_do_duoc` ⇒ mở/cập nhật MỘT Issue theo dõi rồi ĐỌC LẠI Issue; ghi Issue lỗi ⇒ job đỏ
-  (GitHub báo lỗi lượt lịch cho chủ kho qua thông báo workflow).
-- Nhịp tim: mỗi lượt watchdog ghi dấu thời gian lên Issue theo dõi; lượt kế tiếp, `doctor` của phiên điều phối và B3 đều
-  đọc dấu ấy và báo khi cũ hơn 24 giờ. Đây là giám sát chéo, không phải SLA cứng (cùng chịu rủi ro lịch GitHub).
+- `stale_or_missing` hoặc `khong_do_duoc` ⇒ mở/cập nhật MỘT Issue theo dõi rồi ĐỌC LẠI Issue; ghi Issue lỗi ⇒ job đỏ.
+  Job đỏ KHÔNG đồng nghĩa chủ kho đã nhận tin (định tuyến thông báo phụ thuộc người kích hoạt lịch và cài đặt). Điều kiện
+  bật B2: chủ kho theo dõi (subscribe) Issue theo dõi và một lần thử giao tin thật được xác nhận; chưa xác nhận ⇒ kênh
+  giao tin ghi `chua_do`.
+- Nhịp tim: mỗi lượt watchdog ghi dấu thời gian lên Issue theo dõi; lượt kế tiếp và B3 đọc dấu ấy và báo khi cũ hơn 24
+  giờ; phiên điều phối kiểm nó bằng TAY ở đầu mỗi phiên theo một runbook dev-side (không sửa `doctor`). Đây là giám sát
+  chéo, không phải SLA cứng (cùng chịu rủi ro lịch GitHub).
+- Báo cáo hiện cả SHA đầu `master` hiện tại, SHA đã audit và khoảng cách giữa hai bên; không bao giờ ghi "master hiện tại
+  đã đủ" khi hai SHA khác nhau (r2 §4).
 - **G7 phát biểu đúng phạm vi:** cảnh báo trong ≤ khung + 36 h + 6 h (chu kỳ) + độ trễ lịch đã khai; là best-effort có
   giám sát chéo, chủ kho chấp nhận ở Q6.
 - **Thứ tự:** SAU B1 (cần hợp đồng v1). Ban đầu chỉ báo cáo, không chặn merge.
@@ -131,10 +144,17 @@ PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm 
   lọt vào tập phát hành; tệp trạng thái deploy bị ignore được phép nhưng không vào gói); build từ ảnh chụp đã kiểm của H
   (ví dụ `git archive H`) HOẶC so tập tệp + byte phát hành với blob tại H; tính digest gói và GẮN vào bằng chứng; ngay
   trước `drive-push` kiểm lại H, tree, digest.
-- **Kiểm biên nhận (bên tiêu dùng B1 v1):** đúng kho, đúng workflow, definition ĐO ĐƯỢC (gọi A4 cho chính lượt ấy khi
-  biên nhận ghi `not_measured`), SHA = H, mọi job kỳ vọng có mặt và `success`, kết cục `xanh`, artifact digest khớp, dòng
+- **Ref phát hành và CI bắt buộc:** ref phát hành = `master` (đo trạng thái bảo vệ của nhánh và ghi vào hồ sơ; không đo
+  được ⇒ chặn ở chế độ chặn); H phải là commit trên `master` (bằng đầu nhánh hoặc tổ tiên của nó, đo bằng git trên bản
+  sao đủ lịch sử); mọi check bắt buộc của lượt push `ci.yml` trên đúng H phải `success` (đọc REST, nguồn gốc khớp). "Không
+  tụt sau master" KHÔNG đồng nghĩa "được phép phát hành". Ca: H sạch, đi trước master, audit xanh nhưng một check bắt
+  buộc đỏ/vắng ⇒ chặn; ref di chuyển giữa lúc kiểm và lúc đẩy ⇒ chặn.
+- **Kiểm biên nhận (bên tiêu dùng B1 v1):** đúng kho, đúng workflow, definition ĐO ĐƯỢC (khi biên nhận ghi `not_measured`:
+  một người vận hành được uỷ quyền chạy A4 TRƯỚC cho đúng lượt ấy; B3 chỉ ĐỌC artifact A4 bằng quyền chỉ đọc; artifact vắng,
+  cũ, GraphQL null hoặc hết giờ ⇒ chặn, không hạ xuống cảnh báo sau khi chế độ chặn đã bật), SHA = H, mọi job kỳ vọng có mặt và `success`, kết cục `xanh`, artifact digest khớp, dòng
   attempt hợp lệ. Bất kỳ trường bắt buộc nào vắng/lạ/không đọc được ⇒ chặn.
-- **Xác thực trên máy deploy:** cần token đọc Actions trên CẢ HAI máy deploy; đo được trước khi bật chế độ chặn; chưa có
+- **Xác thực trên máy deploy:** chỉ cần token ĐỌC (Actions, checks, contents) trên CẢ HAI máy deploy, không cần quyền
+  dispatch; đo được trước khi bật chế độ chặn; chưa có
   ⇒ chế độ cảnh báo (`warning_only`), ghi rõ.
 - **Ngoại lệ:** KHÔNG chấp nhận "cờ + lý do tự ghi". Ngoại lệ hợp lệ = một bản ghi do CHỦ KHO đăng (comment Issue/PR, tác
   giả = OWNER đọc qua REST) mang H, digest gói, lý do, hạn; hoặc một uỷ quyền thường trực có phạm vi do chủ kho ban hành.
@@ -166,12 +186,14 @@ PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm 
 2. **B1** (hợp đồng v1 + canary A3/A4).
 3. **B2** (sau B1).
 4. **PR2** (Q3 quyết trước).
-5. **PR3** (sau ≥ 14 ngày bóng, Q1, Q9, A+1, A+2, A+5).
-6. **B3** (sau B1; Q7).
-7. **PR4** → **PR5** (sau B1) → **PR6** → **PR7** → **PR8**.
-8. **Làn C** chỉ khi Q8a/Q8b mở.
+5. **B4** (công tắc A+1 + tiêu dùng tin cậy trong `kiem-merge`; sau Q9).
+6. **PR3** (sau ≥ 14 ngày bóng, Q1, B4 đã land, A+2, A+5).
+7. **B3** (sau B1; Q7).
+8. **PR4** → **PR5** (sau B1) → **PR6** → **PR7** → **PR8**.
+9. **Làn C** chỉ khi Q8a/Q8b mở.
 
-Ba packet chung tệp `.claude/dev/ci_dang_ky_test.py` (B1, B2, PR2) xếp nối tiếp; effective write set đo lại trước mỗi
+Ba packet chung tệp `.claude/dev/ci_dang_ky_test.py` (B1, B2, PR2) xếp nối tiếp; B4 đụng `.claude/dev/packet_loop.py`
+(tệp nóng, sensitive) nên kiểm lease toàn kho trước khi cấp; effective write set đo lại trước mỗi
 lease. B1/B2/PR2 lấp khoảng chờ bóng 14 ngày. Chủ kho từ chối làn B ⇒ làn A chạy đúng r3, chỉ giữ A+2…A+5 nếu Q6 cho phép.
 
 ## 8. Truy vết đầy đủ
@@ -184,7 +206,7 @@ lease. B1/B2/PR2 lấp khoảng chờ bóng 14 ngày. Chủ kho từ chối làn
 | §3 PR1 | đo theo ca/mutant/tiến trình con, wall/CPU | PR1 (chỉ G5) | đang thực thi |
 | §3 PR1 | RSS đỉnh | A+4 | đích |
 | §3 PR1 | runner OS/Python/digest phụ thuộc | trường của B1 v1 | đích |
-| §3 PR1 | overhead ≤ 5 % hoặc tách khỏi cổng | A+5 | đích |
+| §3 PR1 | overhead ≤ 5 % hoặc tách khỏi cổng | A+5 (ghép cặp bật/tắt, cùng ảnh chụp) | đích |
 | §3 PR1 | 1 full + 3 targeted cùng SHA, khớp ID/kết cục | PR1 nghiệm thu 1 (A/B 8 mảnh hai vế, toàn bộ định danh) cho G5; phần targeted thuộc C1 | thu hẹp, có lý do: chưa có làn targeted |
 | §3 PR1 | phủ `packet_loop_test`, `nhanh_don_duoc_test` | Không đưa vào làn A/B: hai bộ đã có làn riêng (wp1353 hằng đêm; WP748 đích/đủ) và ngoài khoản lớn; C1 có thể gồm | loại khỏi A/B — chủ kho xác nhận ở Q6 |
 | §3 PR1/§4 | tách kết cục; tương đương có xét duyệt | A+3 | đích |
@@ -196,11 +218,13 @@ lease. B1/B2/PR2 lấp khoảng chờ bóng 14 ngày. Chủ kho từ chối làn
 | §3 PR4 | selector theo phụ thuộc/rủi ro; không biết ⇒ rộng; manifest quyết định | r3 PR3 (bao đóng bảo thủ, dòng bóng có lý do) + PR4 + PR6 | đích; manifest ID chọn chỉ ở PR6 |
 | §3 PR4 | PR sửa chính bộ chọn không tự xếp làn nhẹ | bao đóng bảo thủ gồm `ops/`, `.github/` + A+1 ở `kiem-merge` | đích |
 | §3 PR5/§4 | freshness 36 h/8 ngày, watchdog độc lập, retry hạ tầng ≤ 1 | B2 + B3 quy trình | đích (G7 best-effort, Q6) |
-| §3 PR5 | release đúng candidate, definition OID | B3 + B1 | đích |
+| §3 PR5 | release đúng candidate, definition OID | B3 + B1 (A4 do người vận hành chạy trước, B3 chỉ đọc) | đích |
+| §4 release | ref phát hành được bảo vệ + check bắt buộc trên H | B3 (ref = `master`, đo bảo vệ, check push `ci.yml` trên H) | đích |
+| §4 thời gian | bảng điều khiển hiện SHA master hiện tại so với SHA đã audit | B2 báo cáo | đích |
 | §3 PR6 | trigger rộng theo rủi ro | mặc định làn A: chạm bao đóng ⇒ đủ | đích |
 | §3 PR6/§5 | audit đỏ: owner, 2 giờ, 1 ngày, tái hiện, bisect, chặn cả candidate | B3 quy trình | đích |
 | §3 PR7/§5.2–5.3 | shadow cặp, holdout, seeded, bỏ sót tương đối, trần 10 cặp/50 h, 30/150 | C1 (Q8a) + A+2 | có điều kiện |
-| §3 PR8/§5.4–5.5 | M9 theo rủi ro, công tắc bảo thủ, cutover cho Packet mới, không hồi tố | A+1 + C2 (Q8b) | có điều kiện |
+| §3 PR8/§5.4–5.5 | M9 theo rủi ro, công tắc bảo thủ, cutover cho Packet mới, không hồi tố | A+1/B4 + C2 (Q8b) | công tắc: đích; M9: có điều kiện |
 | §4 release | ngoại lệ thành phần cần manifest + audit thành phần hoặc waiver cụ thể | B3 ngoại lệ do chủ kho; ngoại lệ thành phần: không áp (gói là một khối) | đích |
 | §6 | ngưỡng p95 ≤ 5 phút, 0 P0/P1 lọt | làn C | có điều kiện |
 | §6 mục 3 | ai được tắt ngay targeted, ai được waiver | Q7, Q9 | chờ quyết |
@@ -242,7 +266,9 @@ Q1–Q5 giữ nguyên r3 §7. Thêm:
 - **Q7.** B3: chặn hay cảnh báo 30 ngày đầu; AI được ban ngoại lệ release và theo khuôn nào? Khuyến nghị: chặn khi đã có
   token trên cả hai máy deploy; ngoại lệ chỉ do chủ kho, khuôn §5 B3.
 - **Q8a / Q8b.** Cho nghiên cứu C1 sau PR8 (Q8a)? Đổi M9 chỉ sau C1 (Q8b)? Khuyến nghị: quyết Q8a sau PR8, Q8b sau C1.
-- **Q9.** Tập người ghi công tắc A+1 (đo được) và quyền: tắt — chủ kho và điều phối dưới uỷ quyền; bật lại — chỉ chủ kho.
+- **Q9.** Phạm vi đầy đủ những ai ghi được biến công tắc (người và GitHub App, đo được) và cơ chế: biến chỉ TẮT được;
+  BẬT chỉ bằng bản ghi kích hoạt có thế hệ của chủ kho (A+1). Khuyến nghị: tắt — bất kỳ người ghi được nào, kể cả điều phối;
+  bật — chỉ chủ kho. Đây là ràng buộc MÁY (thế hệ do chủ kho đăng), không chỉ là quy ước.
 
 ## 11. Xử lý review `wp1172-plan-r4-review-1`
 
@@ -262,6 +288,18 @@ Q1–Q5 giữ nguyên r3 §7. Thêm:
 | R4-12 pwsh Linux không phải Windows | P2 | B3 parity trên Windows thật hoặc miễn văn bản |
 | R4-13 quần thể G9 | P2 | G9 nêu đủ bộ lọc, báo riêng huỷ/đỏ/xếp hàng |
 
+Review lượt 2 (`wp1172-plan-r4-review-2`, trên `3f3f4ab`): 9 finding lượt 1 đóng, 4 đóng một phần; thêm 4 finding mới.
+
+| Finding | Mức | Xử lý ở bản sửa 3 |
+|---|---|---|
+| R4-02 (phần còn lại) ref phát hành, CI bắt buộc, hiển thị master so snapshot | P2 | B3 "Ref phát hành và CI bắt buộc"; B2 báo cáo hai SHA; hai dòng mới ở §8.1 |
+| R4-07 (phần còn lại) job đỏ ≠ đã báo chủ kho | P2 | B2: điều kiện bật = chủ kho subscribe + thử giao tin thật; chưa xác nhận ⇒ `chua_do` |
+| R4-08 (phần còn lại) App ghi được biến; bật lại không do chủ kho | P2 | A+1: biến chỉ tắt; bật = bản ghi thế hệ của OWNER; Q9 gồm App; không đo được ⇒ đủ |
+| R4-14 overhead bị nhiễu | P2 | A+5 ghép cặp bật/tắt cùng ảnh chụp, xen kẽ lặp, ca overhead nhân tạo; cohort chỉ giám sát |
+| R4-15 B3 thiếu quyền gọi A4 | P2 | A4 do người vận hành chạy trước; B3 chỉ đọc; thiếu ⇒ chặn |
+| R4-16 bên tiêu dùng chưa có write set | P2 | Packet B4 (`packet_loop.py` + test) trước PR3; nhịp tim ở phiên điều phối là runbook thủ công, không sửa `doctor` |
+| R4-17 chi phí canary chỉ là mảnh | P3 | §13 ghi rõ là tổng phụ 8 mảnh, phần còn lại ước sau |
+
 ## 12. Phương án loại
 
 Giữ chín phương án của r3 §6. Thêm: (10) khôi phục nguyên r2 — nhắm khoản 4,7 % và đổi lấy M9; (11) sửa spec PR1 đang
@@ -271,8 +309,9 @@ quyền cho mã chưa duyệt.
 
 ## 13. Ngân sách và rủi ro
 
-Làn B ước ba packet nhỏ; mỗi packet 1–3 lượt thực thi, 1–3 review Codex, 1–3 CI PR Ubuntu, K7 khi chạm vùng M9, 0
-Windows CI; B3 thêm một lần chạy Windows-local trên máy chủ kho (hoặc miễn). Canary A3 = 2 lượt full audit thêm (~2 ×
-13 282 s giây job `[B: M1.luot_du_8_manh_success…]`). Chi phí thường xuyên: B1 vài giây mỗi lượt audit; B2 4 job nhỏ/ngày;
+Làn B ước bốn packet nhỏ (B1–B4); mỗi packet 1–3 lượt thực thi, 1–3 review Codex, 1–3 CI PR Ubuntu, K7 khi chạm vùng M9, 0
+Windows CI; B3 thêm một lần chạy Windows-local trên máy chủ kho (hoặc miễn). Canary A3 = 2 lượt full audit thêm; riêng 8 job mảnh ≈ 2 ×
+13 282 = 26 564 s giây job (trung vị 8 mảnh `[B: M1.luot_du_8_manh_success.tong_giay_8_job_manh_moi_luot]`, CHƯA gồm job
+registry, job gom, A4 và quan sát push — ước lại từ cùng tập lượt sau B1, không chạy thêm audit chỉ để ước). Chi phí thường xuyên: B1 vài giây mỗi lượt audit; B2 4 job nhỏ/ngày;
 B3 vài lời gọi REST mỗi lần deploy. Rủi ro: B1 đụng workflow M9 (sensitive, chỉ siết); B3 có thể chặn deploy khi chưa có
 audit trên H — chủ đích, có ngoại lệ của chủ kho. Không bổ sung nào tăng giây CI của `ci.yml`.

@@ -124,3 +124,6 @@ budget:
 budget_ghi_chu: 'Codex PR <= 10 (ADR-0055); Codex review dac ta 11/14 (Q8); CI Ubuntu <= 3; Windows native 0 (Q4).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+da_bi_thay_the: wp433-r9-g3-claude
+da_bi_thay_the_ly_do: 'g2 neo r7 (07a9123c); r7 co mau thuan V31 voi N3 (executor do); g3 neo r8 (9fb283ce) chu kho duyet bam.'
+da_bi_thay_the_luc_utc: '2026-11-20T18:49:54Z'

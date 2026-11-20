@@ -1,0 +1,126 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 433
+packet_id: wp433
+spec_packet_id: BUNDLED-TACH-MANH
+revision: 9
+generation: 3
+lease_id: wp433-r9-g3-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-fable-5-2
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+risk: sensitive
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: human_audited
+assurance_ghi_chu: 'packet BUNDLED-TACH-MANH cua #433: tach scripts/tl_test_fragments_bundled.py thanh nhieu manh <= 192 KiB, giu nguyen bo canh kich thuoc; go chan SECRETS-SET-BUNDLE-KIEU. Executor Claude Fable 5.2, reviewer Codex connector; mien do Windows (Q4); human_audited tren exact head truoc merge.'
+depends_on: [1441, 1453]
+spec_path: ops/specs/BUNDLED-TACH-MANH-r8.md
+spec_ref: refs/heads/ops/bundled-tach-manh-spec
+spec_nguon: 'dac ta tren nhanh lease nay; dinh danh theo grammar ADR-0063. Ghim bang spec_hash.'
+spec_sha256_required: 9fb283ceb3633aeeffa20a16610b6f3be3caa785809410c8795dd9ea9666eba4
+spec_hash: 9fb283ceb3633aeeffa20a16610b6f3be3caa785809410c8795dd9ea9666eba4
+spec_duyet: 'chu kho duyet bam 9fb283ce (r8) 20-11 truc tiep (sua V31 mau thuan N3 do executor do, chot nghia V28); r7 07a9123c duyet theo Q9 sau Codex 11/14. Ngoai le bundled + manifest (Q7) + nang_tran tai https://github.com/ducthangho/tra-luat/issues/433#issuecomment-7047878267; thay 7047227815 (r7).'
+prompt_path: ops/specs/BUNDLED-TACH-MANH-r8.md
+prompt_sha256_required: 9fb283ceb3633aeeffa20a16610b6f3be3caa785809410c8795dd9ea9666eba4
+write_set:
+- .githooks/eol_policy_test.py
+- references/golden/workflow_audit.json
+- RELEASE_MANIFEST.json
+- scripts/test_fragments/wp433_bundled_tach_manh.py
+- scripts/tl_core/release.py
+- scripts/tl_core/test_fragments.py
+- scripts/tl_selftest.py
+- scripts/tl_test_fragments_bundled.py
+- scripts/tl_test_fragments_bundled_2.py
+write_set_hash: 947eac15926d6f5fb1da46304b167c74dcd5f381b9b7540493d7e11f2fc3bb5d
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+change_policy_sha: null
+effective_write_set:
+- .githooks/eol_policy_test.py
+- references/golden/workflow_audit.json
+- RELEASE_MANIFEST.json
+- scripts/test_fragments/wp433_bundled_tach_manh.py
+- scripts/tl_core/release.py
+- scripts/tl_core/test_fragments.py
+- scripts/tl_selftest.py
+- scripts/tl_test_fragments_bundled.py
+- scripts/tl_test_fragments_bundled_2.py
+effective_write_set_nguon: khai_bao_trong_spec
+ngoai_le_manifest:
+  tep: RELEASE_MANIFEST.json
+  uy_quyen: https://github.com/ducthangho/tra-luat/issues/433#issuecomment-7047878267
+  dieu_kien: 'Q7: executor commit, chi sinh bang `python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json`, la commit cuoi cua moi SHA ung vien (ngoai le so voi protocol §9)'
+ngoai_le_bundled:
+  tep:
+  - scripts/tl_test_fragments_bundled.py
+  - scripts/tl_test_fragments_bundled_2.py
+  uy_quyen: https://github.com/ducthangho/tra-luat/issues/433#issuecomment-7047878267
+  dieu_kien: 'chi sinh bang write_bundled_modules(scripts/test_fragments, scripts), khong sua tay'
+nang_tran:
+  truc: kich_thuoc_packet
+  ai_nang: ducthangho
+  tran_cu: '<= 6 tep, <= 450 dong them (ADR-0053, packet sensitive)'
+  tran_moi: '<= 9 tep (gom RELEASE_MANIFEST.json theo ngoai le Q7), <= 450 dong them'
+  can_cu: 'Chu kho 2026-11-20 phien #1206: Q2 7 tep, Q5 manifest trong candidate, Q6 tl_selftest, Q7 manifest do executor => 9 tep; vuot 450 dong => DUNG, hoi chu kho (E2), khong tu bot ve V1-V31.'
+chi_doi_qua_merge: []
+merge_conditions:
+- {id: M-1, dieu_kien: 'N1-N4 cua dac ta BUNDLED-TACH-MANH r7 (V1-V31, ma tran dot bien N2) dat tren exact SHA ung vien (commit cuoi la manifest); numstat base..H <= 9 tep, <= 450 dong them; release-verify RELEASE_MANIFEST.json --strict ok, expected_file_count == checked_file_count == 186.'}
+- {id: M-2, dieu_kien: 'ADR-0060: CI required xanh tren exact head; 0 P0-P2 mo; connector da review dung commit; human audit human_exact_head_audit.v1 tren H'}
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chi cap quyen thi cong; merge/land do chu kho duyet dung SHA.'
+branch: agent/wp433-r9-g3-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 0f9aa2a2cc697129e1f5be72feddf60986286865
+start_from_sha: 0f9aa2a2cc697129e1f5be72feddf60986286865
+start_from_ghi_chu: 'origin/master luc cap lease (0f9aa2a). Dac ta do §0 tren 0f9aa2a. Executor do lai §0.'
+reviewed_sha_required: 0f9aa2a2cc697129e1f5be72feddf60986286865
+reviewed_sha_required_nghia: 'Chua co head ung vien; moi verdict neo exact SHA ung vien THAT (commit cuoi la manifest).'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/433
+granted_on_instruction_readback: 'chu kho 20-11 (phien #1206): duyet bam r8 9fb283ce; dang comment uy quyen bundled + manifest + nang_tran 7047878267.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: false
+executor_ghi_chu: 'Executor la phien Claude Code cloud do phien dieu phoi mo (create_session, model claude-fable-5-2); phien dieu phoi khong tu thi cong.'
+recorder_ghi_chu: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS ghi lease, KHONG phai executor.'
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-20T18:49:54Z'
+  goc_quet: 'kho chinh phien #1206, fetch --prune +refs/heads/*:refs/remotes/origin/*'
+  ket_qua: 'chi wp433-r9-g2-claude con han giu write set => bia mo hai chieu (g2 da_bi_thay_the).'
+thay_the_cho:
+- wp433-r9-g2-claude
+thay_the_cho_ghi_chu: 'g2 neo r7 (07a9123c) co mau thuan V31/N3; g3 neo r8. Executor chua push; commit cuc bo chuyen sang nhanh g3.'
+leased_at_utc: '2026-11-20T18:49:54Z'
+heartbeat_at: '2026-11-20T18:49:54Z'
+heartbeat_required_minutes: 360
+heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
+lease_until: '2026-11-21T18:49:54Z'
+lease_expires_at_utc: '2026-11-21T18:49:54Z'
+lease_until_ghi_chu: '24h; rut han ngay sau land.'
+attempts_used: 0
+attempts_limit: 2
+attempts_basis: '<= 2 phien executor.'
+budget:
+  codex_review_calls:
+    pr_wp433_r9_g3: {used: 0, reserved: 0, limit: 10}
+  codex_review_calls_dac_ta:
+    BUNDLED-TACH-MANH: {used: 11, reserved: 0, limit: 14}
+  ci_ubuntu_runs:
+    pr_wp433_r9_g3: {used: 0, reserved: 0, limit: 3}
+  windows_native_runs:
+    pr_wp433_r9_g3: {used: 0, reserved: 0, limit: 0}
+  khong_reset_theo_generation: true
+budget_ghi_chu: 'Codex PR <= 10 (ADR-0055); Codex review dac ta 11/14 (Q8); CI Ubuntu <= 3; Windows native 0 (Q4).'
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien

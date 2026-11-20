@@ -49,9 +49,18 @@ def chay(env=os.environ, chay_lenh=subprocess.run, kho=cdn.ROOT, ra=None, bay_gi
         print(f"{TIEN_TO}KHONG DO DUOC tap tep doi cua PR (SHA vang/hong, git loi, nhieu merge-base hoac dau ra cut) - DO", file=ra)
         return 1
     lease = sorted(x for x in doi if la_lease(x))
+    loi = []
     for x in lease:
-        print(f"{TIEN_TO}lease doi: {x!r}" + ("" if (Path(kho) / x).is_file() else " (da xoa - bo qua)"), file=ra)
-    loi = cdn.kiem_lease(doi, kho, chay_lenh, bay_gio, ra)
+        p = Path(kho) / x
+        # Review r1 F2: `kiem_lease` bỏ qua mọi thứ không phải `is_file()` như thể đã xoá — một symlink TREO (hay thư mục) đặt
+        # đúng tên lease sẽ lọt xanh. Chỉ "không còn gì ở đường dẫn" (lexists sai) mới là xoá; symlink/thư mục/mục lạ là LỖI.
+        if not os.path.lexists(p):
+            print(f"{TIEN_TO}lease doi: {x!r} (da xoa - bo qua)", file=ra)
+        elif p.is_symlink() or not p.is_file():
+            loi.append(f"lease khong phai tep thuong (symlink/thu muc/muc la): {x!r}")
+        else:
+            print(f"{TIEN_TO}lease doi: {x!r}", file=ra)
+    loi += cdn.kiem_lease(doi, kho, chay_lenh, bay_gio, ra)
     for x in loi:
         print(f"{TIEN_TO}LOI - {x}", file=ra)
     print(f"{TIEN_TO}{'DO' if loi else 'DAT'} ({len(lease)} lease doi trong {len(doi)} tep doi, {len(loi)} loi)", file=ra)

@@ -77,10 +77,15 @@ r4 cho phép NỚI một cổng bằng một bản ghi ngoài mã.
     cũng bỏ được `FULL`; không chấp nhận ⇒ PR3/PR6 chỉ hoàn tác bằng revert (r3 gốc).
   - **Điều phối không cần quyền ghi biến để siết:** `kiem-merge` LUÔN được phép đòi G5 đủ cho một PR (siết là việc ai cũng
     được làm); điều phối dưới uỷ quyền dùng đường ấy khi có sự cố, rồi báo chủ kho đặt `FULL`.
-  - Không đọc được biến ⇒ hành vi mã đã merge (vì công tắc chỉ siết, mất đọc không thể nới); ghi rõ trong log lượt.
+  - Không đọc được biến ⇒ coi như `FULL` (I3: không đo được ⇒ chạy đủ). Trong CI, job đọc qua ngữ cảnh `vars` sẵn có và
+    IN giá trị vào log lượt. `kiem-merge` đọc giá trị ấy từ log job của lượt CI trên H (đáng tin khi diff không chạm bao
+    đóng — vì khi ấy `ci.yml` và bộ phân loại là của master; diff chạm bao đóng thì đã buộc đủ), cộng đọc REST trực tiếp
+    nếu máy tiêu dùng có quyền; cả hai không đọc được, hoặc hai nguồn lệch ⇒ `FULL`. Giá phải trả: máy tiêu dùng không đọc
+    được thì lợi ích PR3 mất ở bước merge — B4 đo khả năng đọc trước khi đóng băng.
   - Nghiệm thu B4: `FULL` ⇒ đủ ở cả job PR lẫn `kiem-merge`; PR sửa job tiêu dùng để bỏ qua `FULL` ⇒ `kiem-merge` vẫn
     đòi đủ; đặt `FULL` sau khi lượt bỏ qua đã xanh ⇒ `kiem-merge` đỏ; mọi giá trị khác ⇒ không đổi hành vi; đột biến "giá trị
-    lạ ⇒ bỏ" phải đỏ. Trước khi đóng băng spec B4: đo tập người ghi và quyền đọc biến từ máy chạy `kiem-merge`.
+    lạ ⇒ bỏ" phải đỏ; không đọc được ⇒ `FULL`; log và REST lệch ⇒ `FULL`. Trước khi đóng băng spec B4: đo tập người ghi và
+    quyền đọc biến từ máy chạy `kiem-merge`.
   - Tiêu dùng có thẩm quyền KHÔNG phải job trong cây PR (trên `pull_request`, PR có thể sửa chính `ci.yml` hay bộ phân
     loại). Thẩm quyền nằm ở cổng merge chạy từ cây TIN CẬY: `kiem-merge` (từ master, không từ head PR) đọc lại công tắc
     tại thời điểm xét merge và TÍNH LẠI yêu cầu từ diff bằng bao đóng của mã trên master: diff chạm bao đóng, hoặc công tắc

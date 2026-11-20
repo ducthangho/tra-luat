@@ -573,7 +573,7 @@
    "so_lay":62,
    "du":true
   },
-  "manifest_sha256":"fc95bc3b8bdec1e3121b971531d34e2207edf32c75080fa9a8e07814144ffee3",
+  "manifest_sha256":"d2e8d47220bf194639bb865a0b837b624b0223f6008571d33f3c07e7a9d3338a",
   "cohort":{
    "ci-dot-bien-du.yml":{
     "so_luot":62,
@@ -595,6 +595,8 @@
    "thong_ke":"chi tren phan do_duoc; trung_vi = statistics.median; p90 = sorted[ceil(0.9*n)-1]; so_loai = so phan tu bi loai",
    "lan":"doc tu log job chuan-bi thuc_thi: dong `che_do=duong_nhanh|day_du` cuoi cung; khong co thi dong `DUONG_NHANH: khong phan loai - ... luon DAY_DU` -> day_du; khong co ca hai hoac thieu log -> khong_do_duoc (KHONG suy tu gia tri mac dinh cua workflow)",
    "nen":"nhan runner cua dong job (labels); `khong_ro` = labels rong (job bi huy truoc khi duoc cap runner)",
+   "M3":"so phan tu CUOI CUNG cua bang (len() sau khi module import xong, gom .update/gan chi so/append), doc o buoc su kien kho cua --thu trong tien trinh con KHONG chay bo (ten module khac __main__); --tinh chi doc kho/m3_import.json cua anh chup; khong import duoc -> khong_do_duoc",
+   "M4":"moi dong khop hai regex o tep kho/tep/* cua anh chup; loi khai co phep do trong M1-M3 duoc so (khop|lech); khong_do_duoc CHI khi thieu mot nguon cu the, ghi o ly_do ('nguon thieu: ...'); dong khong phai loi khai ghi rieng o M4.dong_khong_phai_loi_khai",
    "rerun":"so_luot_co_rerun = so luot co run_attempt > 1; so_job_hong_o_attempt_truoc = so dong thuc_thi conclusion==failure o attempt < attempt cuoi (KHONG goi la flaky)"
   }
  },
@@ -28094,139 +28096,155 @@
   }
  },
  "M3":{
-  "import":{
-   ".claude/dev/ci_dang_ky_test.py":{
-    "DANG_KY":{"gia_tri":29,"trang_thai":"do_duoc","nguon":".claude/dev/ci_dang_ky_test.py@711cb190daaa (import, len() cua bang)"},
-    "MOI":{"gia_tri":15,"trang_thai":"do_duoc","nguon":".claude/dev/ci_dang_ky_test.py@711cb190daaa (import, len() cua bang)"},
-    "NHE":{"gia_tri":3,"trang_thai":"do_duoc","nguon":".claude/dev/ci_dang_ky_test.py@711cb190daaa (import, len() cua bang)"},
-    "MOI_WINDOWS":{"gia_tri":1,"trang_thai":"do_duoc","nguon":".claude/dev/ci_dang_ky_test.py@711cb190daaa (import, len() cua bang)"},
-    "CACH_LY":{"gia_tri":0,"trang_thai":"do_duoc","nguon":".claude/dev/ci_dang_ky_test.py@711cb190daaa (import, len() cua bang)"},
-    "DA_NOI":{"gia_tri":14,"trang_thai":"do_duoc","nguon":".claude/dev/ci_dang_ky_test.py@711cb190daaa (import, len() cua bang)"}
-   },
-   "ops/nhanh_don_duoc_test.py":{
-    "CA":{"gia_tri":8,"trang_thai":"do_duoc","nguon":"ops/nhanh_don_duoc_test.py@711cb190daaa (import, len() cua bang)"},
-    "TU_KIEM":{"gia_tri":56,"trang_thai":"do_duoc","nguon":"ops/nhanh_don_duoc_test.py@711cb190daaa (import, len() cua bang)"},
-    "DOT_BIEN":{"gia_tri":10,"trang_thai":"do_duoc","nguon":"ops/nhanh_don_duoc_test.py@711cb190daaa (import, len() cua bang)"},
-    "DOT_BIEN_TU_KIEM":{"gia_tri":255,"trang_thai":"do_duoc","nguon":"ops/nhanh_don_duoc_test.py@711cb190daaa (import, len() cua bang)"}
-   }
-  },
-  "tinh_ast":{
+  "nguon":"kho/m3_import.json cua anh chup (len() cuoi cung sau import, chup o buoc su kien kho cua --thu)",
+  "bang":{
    ".claude/dev/chon_reviewer_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"khong phai literal tinh (chi sinh khi chay/import)","nguon":".claude/dev/chon_reviewer_test.py:215@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":45,"trang_thai":"do_duoc","nguon":".claude/dev/chon_reviewer_test.py:225@711cb190daaa"}
+    "CA":{"gia_tri":28,"trang_thai":"do_duoc","nguon":"import .claude/dev/chon_reviewer_test.py@711cb190daaa (blob 5590b12017dd)"},
+    "DOT_BIEN":{"gia_tri":45,"trang_thai":"do_duoc","nguon":"import .claude/dev/chon_reviewer_test.py@711cb190daaa (blob 5590b12017dd)"}
    },
    ".claude/dev/ci_dang_ky_test.py":{
-    "_tep":{"gia_tri":null,"trang_thai":"khong_ap_dung","ly_do":"khong co bang ten DOT_BIEN/TU_KIEM/CA/MUTANT* o muc module"}
+    "CACH_LY":{"gia_tri":0,"trang_thai":"do_duoc","nguon":"import .claude/dev/ci_dang_ky_test.py@711cb190daaa (blob 50c8da639650)"},
+    "DANG_KY":{"gia_tri":29,"trang_thai":"do_duoc","nguon":"import .claude/dev/ci_dang_ky_test.py@711cb190daaa (blob 50c8da639650)"},
+    "DA_NOI":{"gia_tri":14,"trang_thai":"do_duoc","nguon":"import .claude/dev/ci_dang_ky_test.py@711cb190daaa (blob 50c8da639650)"},
+    "MOI":{"gia_tri":15,"trang_thai":"do_duoc","nguon":"import .claude/dev/ci_dang_ky_test.py@711cb190daaa (blob 50c8da639650)"},
+    "MOI_WINDOWS":{"gia_tri":1,"trang_thai":"do_duoc","nguon":"import .claude/dev/ci_dang_ky_test.py@711cb190daaa (blob 50c8da639650)"},
+    "NHE":{"gia_tri":3,"trang_thai":"do_duoc","nguon":"import .claude/dev/ci_dang_ky_test.py@711cb190daaa (blob 50c8da639650)"}
    },
    ".claude/dev/codex_cred_test.py":{
-    "CA":{"gia_tri":18,"trang_thai":"do_duoc","nguon":".claude/dev/codex_cred_test.py:504@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":18,"trang_thai":"do_duoc","nguon":".claude/dev/codex_cred_test.py:516@711cb190daaa"}
+    "CA":{"gia_tri":18,"trang_thai":"do_duoc","nguon":"import .claude/dev/codex_cred_test.py@711cb190daaa (blob b08b00f05f61)"},
+    "DOT_BIEN":{"gia_tri":18,"trang_thai":"do_duoc","nguon":"import .claude/dev/codex_cred_test.py@711cb190daaa (blob b08b00f05f61)"}
    },
    ".claude/dev/doc_receipt_thu_hoi_test.py":{
-    "CA":{"gia_tri":47,"trang_thai":"do_duoc","nguon":".claude/dev/doc_receipt_thu_hoi_test.py:121@711cb190daaa"}
+    "CA":{"gia_tri":178,"trang_thai":"do_duoc","nguon":"import .claude/dev/doc_receipt_thu_hoi_test.py@711cb190daaa (blob a40935262454)"}
    },
    ".claude/dev/gate_lifecycle_test.py":{
-    "_tep":{"gia_tri":null,"trang_thai":"khong_ap_dung","ly_do":"khong co bang ten DOT_BIEN/TU_KIEM/CA/MUTANT* o muc module"}
+    "CASES":{"gia_tri":28,"trang_thai":"do_duoc","nguon":"import .claude/dev/gate_lifecycle_test.py@711cb190daaa (blob 39472f738bdc)"}
    },
    ".claude/dev/gh_readback_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"literal RONG luc dinh nghia: bang duoc dien khi chay (decorator/append)","nguon":".claude/dev/gh_readback_test.py:19@711cb190daaa"}
+    "CA":{"gia_tri":8,"trang_thai":"do_duoc","nguon":"import .claude/dev/gh_readback_test.py@711cb190daaa (blob fd30150e3f5a)"}
    },
    ".claude/dev/idiom_py_test.py":{
-    "CA":{"gia_tri":7,"trang_thai":"do_duoc","nguon":".claude/dev/idiom_py_test.py:259@711cb190daaa"}
+    "CA":{"gia_tri":7,"trang_thai":"do_duoc","nguon":"import .claude/dev/idiom_py_test.py@711cb190daaa (blob b65c6d5a3fb0)"},
+    "DOT_BIEN_CHINH_NO":{"gia_tri":5,"trang_thai":"do_duoc","nguon":"import .claude/dev/idiom_py_test.py@711cb190daaa (blob b65c6d5a3fb0)"},
+    "DOT_BIEN_TAI_LIEU":{"gia_tri":4,"trang_thai":"do_duoc","nguon":"import .claude/dev/idiom_py_test.py@711cb190daaa (blob b65c6d5a3fb0)"}
    },
    ".claude/dev/launcher_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"literal RONG luc dinh nghia: bang duoc dien khi chay (decorator/append)","nguon":".claude/dev/launcher_test.py:55@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":572,"trang_thai":"do_duoc","nguon":".claude/dev/launcher_test.py:15495@711cb190daaa"}
+    "CA":{"gia_tri":428,"trang_thai":"do_duoc","nguon":"import .claude/dev/launcher_test.py@711cb190daaa (blob 0ca0e626324a)"},
+    "DOT_BIEN":{"gia_tri":572,"trang_thai":"do_duoc","nguon":"import .claude/dev/launcher_test.py@711cb190daaa (blob 0ca0e626324a)"},
+    "DOT_BIEN_HARNESS":{"gia_tri":79,"trang_thai":"do_duoc","nguon":"import .claude/dev/launcher_test.py@711cb190daaa (blob 0ca0e626324a)"},
+    "DOT_BIEN_HOOK":{"gia_tri":107,"trang_thai":"do_duoc","nguon":"import .claude/dev/launcher_test.py@711cb190daaa (blob 0ca0e626324a)"}
    },
    ".claude/dev/mcp_gh_test.py":{
-    "_tep":{"gia_tri":null,"trang_thai":"khong_ap_dung","ly_do":"khong co bang ten DOT_BIEN/TU_KIEM/CA/MUTANT* o muc module"}
+    "CASES":{"gia_tri":42,"trang_thai":"do_duoc","nguon":"import .claude/dev/mcp_gh_test.py@711cb190daaa (blob f1db9ba1c794)"}
    },
    ".claude/dev/mcp_github_doc_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"literal RONG luc dinh nghia: bang duoc dien khi chay (decorator/append)","nguon":".claude/dev/mcp_github_doc_test.py:21@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":20,"trang_thai":"do_duoc","nguon":".claude/dev/mcp_github_doc_test.py:463@711cb190daaa"}
+    "CA":{"gia_tri":18,"trang_thai":"do_duoc","nguon":"import .claude/dev/mcp_github_doc_test.py@711cb190daaa (blob 0c9c94cbcfc4)"},
+    "DOT_BIEN":{"gia_tri":20,"trang_thai":"do_duoc","nguon":"import .claude/dev/mcp_github_doc_test.py@711cb190daaa (blob 0c9c94cbcfc4)"}
    },
    ".claude/dev/packet_loop_test.py":{
-    "MUTANTS":{"gia_tri":88,"trang_thai":"do_duoc","nguon":".claude/dev/packet_loop_test.py:3592@711cb190daaa"}
+    "CASES":{"gia_tri":1582,"trang_thai":"do_duoc","nguon":"import .claude/dev/packet_loop_test.py@711cb190daaa (blob 30ccc2219d3b)"},
+    "MUTANTS":{"gia_tri":1864,"trang_thai":"do_duoc","nguon":"import .claude/dev/packet_loop_test.py@711cb190daaa (blob 30ccc2219d3b)"},
+    "MUTANTS_NHAM_TEST":{"gia_tri":54,"trang_thai":"do_duoc","nguon":"import .claude/dev/packet_loop_test.py@711cb190daaa (blob 30ccc2219d3b)"},
+    "_WP1303_LINUX_CASES":{"gia_tri":9,"trang_thai":"do_duoc","nguon":"import .claude/dev/packet_loop_test.py@711cb190daaa (blob 30ccc2219d3b)"},
+    "_WP1303_R4_MUTANTS":{"gia_tri":10,"trang_thai":"do_duoc","nguon":"import .claude/dev/packet_loop_test.py@711cb190daaa (blob 30ccc2219d3b)"},
+    "_WP1370_ACTIVITY_CASES":{"gia_tri":23,"trang_thai":"do_duoc","nguon":"import .claude/dev/packet_loop_test.py@711cb190daaa (blob 30ccc2219d3b)"}
    },
    ".claude/dev/probe_mang_test.py":{
-    "DOT_BIEN":{"gia_tri":5,"trang_thai":"do_duoc","nguon":".claude/dev/probe_mang_test.py:98@711cb190daaa"}
+    "DOT_BIEN":{"gia_tri":5,"trang_thai":"do_duoc","nguon":"import .claude/dev/probe_mang_test.py@711cb190daaa (blob b1ab6dd89615)"}
    },
    ".claude/hooks/pretooluse_guard_test.py":{
-    "CA":{"gia_tri":44,"trang_thai":"do_duoc","nguon":".claude/hooks/pretooluse_guard_test.py:930@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":43,"trang_thai":"do_duoc","nguon":".claude/hooks/pretooluse_guard_test.py:970@711cb190daaa"}
+    "CA":{"gia_tri":44,"trang_thai":"do_duoc","nguon":"import .claude/hooks/pretooluse_guard_test.py@711cb190daaa (blob b5d0c3a3fce5)"},
+    "DOT_BIEN":{"gia_tri":43,"trang_thai":"do_duoc","nguon":"import .claude/hooks/pretooluse_guard_test.py@711cb190daaa (blob b5d0c3a3fce5)"}
    },
    ".claude/hooks/subagent_ghi_detect_test.py":{
-    "CA":{"gia_tri":45,"trang_thai":"do_duoc","nguon":".claude/hooks/subagent_ghi_detect_test.py:1254@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":25,"trang_thai":"do_duoc","nguon":".claude/hooks/subagent_ghi_detect_test.py:1292@711cb190daaa"}
+    "CA":{"gia_tri":45,"trang_thai":"do_duoc","nguon":"import .claude/hooks/subagent_ghi_detect_test.py@711cb190daaa (blob b0855649d7b0)"},
+    "DOT_BIEN":{"gia_tri":25,"trang_thai":"do_duoc","nguon":"import .claude/hooks/subagent_ghi_detect_test.py@711cb190daaa (blob b0855649d7b0)"},
+    "DOT_BIEN_NHAM_TEST":{"gia_tri":11,"trang_thai":"do_duoc","nguon":"import .claude/hooks/subagent_ghi_detect_test.py@711cb190daaa (blob b0855649d7b0)"},
+    "DOT_BIEN_SETTINGS":{"gia_tri":1,"trang_thai":"do_duoc","nguon":"import .claude/hooks/subagent_ghi_detect_test.py@711cb190daaa (blob b0855649d7b0)"}
    },
    ".githooks/eol_policy_test.py":{
-    "_tep":{"gia_tri":null,"trang_thai":"khong_ap_dung","ly_do":"khong co bang ten DOT_BIEN/TU_KIEM/CA/MUTANT* o muc module"}
+    "CASES":{"gia_tri":32,"trang_thai":"do_duoc","nguon":"import .githooks/eol_policy_test.py@711cb190daaa (blob c162f447a039)"}
    },
    ".githooks/pre_push_test.py":{
-    "_tep":{"gia_tri":null,"trang_thai":"khong_ap_dung","ly_do":"khong co bang ten DOT_BIEN/TU_KIEM/CA/MUTANT* o muc module"}
+    "CASES":{"gia_tri":9,"trang_thai":"do_duoc","nguon":"import .githooks/pre_push_test.py@711cb190daaa (blob bee6c3abc477)"}
    },
    ".github/checks/ci_phamvi_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"literal RONG luc dinh nghia: bang duoc dien khi chay (decorator/append)","nguon":".github/checks/ci_phamvi_test.py:28@711cb190daaa"}
+    "CA":{"gia_tri":7,"trang_thai":"do_duoc","nguon":"import .github/checks/ci_phamvi_test.py@711cb190daaa (blob 36ec75e28469)"}
    },
    "ops/bien_nhan_v2_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"literal RONG luc dinh nghia: bang duoc dien khi chay (decorator/append)","nguon":"ops/bien_nhan_v2_test.py:136@711cb190daaa"}
+    "CA":{"gia_tri":98,"trang_thai":"do_duoc","nguon":"import ops/bien_nhan_v2_test.py@711cb190daaa (blob ab1d5a104d89)"},
+    "_TAM_DOT_BIEN":{"gia_tri":0,"trang_thai":"do_duoc","nguon":"import ops/bien_nhan_v2_test.py@711cb190daaa (blob ab1d5a104d89)"}
    },
    "ops/ci_duong_nhanh_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"literal RONG luc dinh nghia: bang duoc dien khi chay (decorator/append)","nguon":"ops/ci_duong_nhanh_test.py:104@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":351,"trang_thai":"do_duoc","nguon":"ops/ci_duong_nhanh_test.py:3774@711cb190daaa"}
+    "CA":{"gia_tri":122,"trang_thai":"do_duoc","nguon":"import ops/ci_duong_nhanh_test.py@711cb190daaa (blob 69ec92d4fdec)"},
+    "DAU_HIEU_TU_KIEM":{"gia_tri":11,"trang_thai":"do_duoc","nguon":"import ops/ci_duong_nhanh_test.py@711cb190daaa (blob 69ec92d4fdec)"},
+    "DOT_BIEN":{"gia_tri":465,"trang_thai":"do_duoc","nguon":"import ops/ci_duong_nhanh_test.py@711cb190daaa (blob 69ec92d4fdec)"},
+    "PL_CA_DAI":{"gia_tri":2,"trang_thai":"do_duoc","nguon":"import ops/ci_duong_nhanh_test.py@711cb190daaa (blob 69ec92d4fdec)"},
+    "TEN_DOT_BIEN":{"gia_tri":465,"trang_thai":"do_duoc","nguon":"import ops/ci_duong_nhanh_test.py@711cb190daaa (blob 69ec92d4fdec)"},
+    "TU_KIEM_DOT_BIEN":{"gia_tri":3,"trang_thai":"do_duoc","nguon":"import ops/ci_duong_nhanh_test.py@711cb190daaa (blob 69ec92d4fdec)"},
+    "TU_KIEM_KHAI":{"gia_tri":15,"trang_thai":"do_duoc","nguon":"import ops/ci_duong_nhanh_test.py@711cb190daaa (blob 69ec92d4fdec)"}
    },
    "ops/ci_provenance_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"literal RONG luc dinh nghia: bang duoc dien khi chay (decorator/append)","nguon":"ops/ci_provenance_test.py:53@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"khong phai literal tinh (chi sinh khi chay/import)","nguon":"ops/ci_provenance_test.py:1469@711cb190daaa"},
-    "TU_KIEM":{"gia_tri":2,"trang_thai":"do_duoc","nguon":"ops/ci_provenance_test.py:1858@711cb190daaa"}
+    "CA":{"gia_tri":63,"trang_thai":"do_duoc","nguon":"import ops/ci_provenance_test.py@711cb190daaa (blob c6dba138bc27)"},
+    "DOT_BIEN":{"gia_tri":398,"trang_thai":"do_duoc","nguon":"import ops/ci_provenance_test.py@711cb190daaa (blob c6dba138bc27)"},
+    "TU_KIEM":{"gia_tri":2,"trang_thai":"do_duoc","nguon":"import ops/ci_provenance_test.py@711cb190daaa (blob c6dba138bc27)"}
    },
    "ops/cloud_agent_creds_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"khong phai literal tinh (chi sinh khi chay/import)","nguon":"ops/cloud_agent_creds_test.py:706@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":91,"trang_thai":"do_duoc","nguon":"ops/cloud_agent_creds_test.py:715@711cb190daaa"},
-    "TU_KIEM":{"gia_tri":2,"trang_thai":"do_duoc","nguon":"ops/cloud_agent_creds_test.py:809@711cb190daaa"}
+    "CA":{"gia_tri":60,"trang_thai":"do_duoc","nguon":"import ops/cloud_agent_creds_test.py@711cb190daaa (blob 974efe2c874b)"},
+    "DOT_BIEN":{"gia_tri":91,"trang_thai":"do_duoc","nguon":"import ops/cloud_agent_creds_test.py@711cb190daaa (blob 974efe2c874b)"},
+    "TU_KIEM":{"gia_tri":2,"trang_thai":"do_duoc","nguon":"import ops/cloud_agent_creds_test.py@711cb190daaa (blob 974efe2c874b)"}
    },
    "ops/codex_cloud_setup_test.py":{
-    "DOT_BIEN":{"gia_tri":13,"trang_thai":"do_duoc","nguon":"ops/codex_cloud_setup_test.py:258@711cb190daaa"},
-    "CA":{"gia_tri":13,"trang_thai":"do_duoc","nguon":"ops/codex_cloud_setup_test.py:307@711cb190daaa"}
+    "CA":{"gia_tri":13,"trang_thai":"do_duoc","nguon":"import ops/codex_cloud_setup_test.py@711cb190daaa (blob 7a191a144edf)"},
+    "DOT_BIEN":{"gia_tri":13,"trang_thai":"do_duoc","nguon":"import ops/codex_cloud_setup_test.py@711cb190daaa (blob 7a191a144edf)"}
    },
    "ops/cong_cu_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"literal RONG luc dinh nghia: bang duoc dien khi chay (decorator/append)","nguon":"ops/cong_cu_test.py:116@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":254,"trang_thai":"do_duoc","nguon":"ops/cong_cu_test.py:546@711cb190daaa"}
+    "CA":{"gia_tri":61,"trang_thai":"do_duoc","nguon":"import ops/cong_cu_test.py@711cb190daaa (blob 385bd95ebba7)"},
+    "DOT_BIEN":{"gia_tri":490,"trang_thai":"do_duoc","nguon":"import ops/cong_cu_test.py@711cb190daaa (blob 385bd95ebba7)"}
    },
    "ops/kiem_ho_so_land_test.py":{
-    "CA":{"gia_tri":11,"trang_thai":"do_duoc","nguon":"ops/kiem_ho_so_land_test.py:401@711cb190daaa"}
+    "CA":{"gia_tri":11,"trang_thai":"do_duoc","nguon":"import ops/kiem_ho_so_land_test.py@711cb190daaa (blob 45874c6be628)"},
+    "DOT_BIEN_WP981":{"gia_tri":11,"trang_thai":"do_duoc","nguon":"import ops/kiem_ho_so_land_test.py@711cb190daaa (blob 45874c6be628)"}
    },
    "ops/kiem_nhan_hint_test.py":{
-    "CA":{"gia_tri":6,"trang_thai":"do_duoc","nguon":"ops/kiem_nhan_hint_test.py:201@711cb190daaa"}
+    "CA":{"gia_tri":6,"trang_thai":"do_duoc","nguon":"import ops/kiem_nhan_hint_test.py@711cb190daaa (blob d41b297b30c1)"},
+    "_MA_TRAN_TU_KIEM":{"gia_tri":4,"trang_thai":"do_duoc","nguon":"import ops/kiem_nhan_hint_test.py@711cb190daaa (blob d41b297b30c1)"}
    },
    "ops/land_evidence_nguon_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"literal RONG luc dinh nghia: bang duoc dien khi chay (decorator/append)","nguon":"ops/land_evidence_nguon_test.py:51@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":116,"trang_thai":"do_duoc","nguon":"ops/land_evidence_nguon_test.py:539@711cb190daaa"},
-    "TU_KIEM":{"gia_tri":2,"trang_thai":"do_duoc","nguon":"ops/land_evidence_nguon_test.py:680@711cb190daaa"}
+    "CA":{"gia_tri":23,"trang_thai":"do_duoc","nguon":"import ops/land_evidence_nguon_test.py@711cb190daaa (blob 914a74048349)"},
+    "DOT_BIEN":{"gia_tri":116,"trang_thai":"do_duoc","nguon":"import ops/land_evidence_nguon_test.py@711cb190daaa (blob 914a74048349)"},
+    "TU_KIEM":{"gia_tri":2,"trang_thai":"do_duoc","nguon":"import ops/land_evidence_nguon_test.py@711cb190daaa (blob 914a74048349)"}
    },
    "ops/lease_publish_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"literal RONG luc dinh nghia: bang duoc dien khi chay (decorator/append)","nguon":"ops/lease_publish_test.py:72@711cb190daaa"}
+    "CA":{"gia_tri":307,"trang_thai":"do_duoc","nguon":"import ops/lease_publish_test.py@711cb190daaa (blob d4e6e230d59d)"},
+    "_AMB_DOT_BIEN":{"gia_tri":33,"trang_thai":"do_duoc","nguon":"import ops/lease_publish_test.py@711cb190daaa (blob d4e6e230d59d)"},
+    "_U8_DOT_BIEN":{"gia_tri":20,"trang_thai":"do_duoc","nguon":"import ops/lease_publish_test.py@711cb190daaa (blob d4e6e230d59d)"},
+    "_WP678_DOT_BIEN":{"gia_tri":12,"trang_thai":"do_duoc","nguon":"import ops/lease_publish_test.py@711cb190daaa (blob d4e6e230d59d)"}
    },
    "ops/nhanh_don_duoc_test.py":{
-    "CA":{"gia_tri":null,"trang_thai":"khong_do_duoc","ly_do":"khong phai literal tinh (chi sinh khi chay/import)","nguon":"ops/nhanh_don_duoc_test.py:799@711cb190daaa"},
-    "DOT_BIEN":{"gia_tri":10,"trang_thai":"do_duoc","nguon":"ops/nhanh_don_duoc_test.py:800@711cb190daaa"},
-    "TU_KIEM":{"gia_tri":56,"trang_thai":"do_duoc","nguon":"ops/nhanh_don_duoc_test.py:4551@711cb190daaa"},
-    "DOT_BIEN_TU_KIEM":{"gia_tri":255,"trang_thai":"do_duoc","nguon":"ops/nhanh_don_duoc_test.py:4615@711cb190daaa"}
+    "CA":{"gia_tri":8,"trang_thai":"do_duoc","nguon":"import ops/nhanh_don_duoc_test.py@711cb190daaa (blob 6348112ef06d)"},
+    "DOT_BIEN":{"gia_tri":10,"trang_thai":"do_duoc","nguon":"import ops/nhanh_don_duoc_test.py@711cb190daaa (blob 6348112ef06d)"},
+    "DOT_BIEN_TU_KIEM":{"gia_tri":255,"trang_thai":"do_duoc","nguon":"import ops/nhanh_don_duoc_test.py@711cb190daaa (blob 6348112ef06d)"},
+    "TU_KIEM":{"gia_tri":56,"trang_thai":"do_duoc","nguon":"import ops/nhanh_don_duoc_test.py@711cb190daaa (blob 6348112ef06d)"},
+    "_TU_KIEM_DAY_DU":{"gia_tri":56,"trang_thai":"do_duoc","nguon":"import ops/nhanh_don_duoc_test.py@711cb190daaa (blob 6348112ef06d)"}
    },
    "scripts/tl_core/command_registry_test.py":{
-    "_tep":{"gia_tri":null,"trang_thai":"khong_ap_dung","ly_do":"khong co bang ten DOT_BIEN/TU_KIEM/CA/MUTANT* o muc module"}
+    "_tep":{"gia_tri":null,"trang_thai":"khong_ap_dung","ly_do":"khong co bang ca/dot bien nao o muc module","nguon":"import scripts/tl_core/command_registry_test.py@711cb190daaa (blob 8279237e2d27)"}
    }
   }
  },
  "M4":{
-  "lenh":"rg -n -i 'đột biến|dot.bien|mutant|mutation|mảnh' .github/workflows CLAUDE.md docs ops/specs/wp1166* | rg -i \"<M4_RG2>\" (tuong duong: hai regex M4_RG1 roi M4_RG2 trong thu_thap.py, ap tren `git show <sha_master>:<tep>`)",
+  "lenh":"rg -n -i 'đột biến|dot.bien|mutant|mutation|mảnh' .github/workflows CLAUDE.md docs ops/specs/wp1166* | rg -i \"<M4_RG2>\" (tuong duong: hai regex M4_RG1 roi M4_RG2 trong thu_thap.py, ap tren cac tep kho/tep/* cua anh chup = `git show <sha_master>:<tep>`)",
   "regex_1":"(?i)đột biến|dot.bien|mutant|mutation|mảnh",
   "regex_2":"(?i)[0-9]+([.,][0-9]+)? ?(s|giây|giay|phút|phut|h|giờ|gio)\\b|~ ?[0-9]|[0-9]+ (tự đột biến|mutant|đột biến|dot bien|ca|mảnh|manh|muc|mục)\\b|[0-9]+/[0-9]+",
+  "trang_thai_nguon":"co",
   "so_dong_khop":36,
+  "so_dong_khong_phai_loi_khai":3,
+  "so_dong_chua_anh_xa":0,
   "theo_ket_luan":{
-   "khong_do_duoc":31,
-   "khop":3,
-   "lech":7
+   "khong_do_duoc":23,
+   "khop":8,
+   "lech":10
   },
   "loi_khai":[
    {
@@ -28235,7 +28253,7 @@
     "loi_khai":"52 ca",
     "so_do":56,
     "ket_luan":"lech",
-    "ly_do":"anh xa: '52 ca' <-> len(TU_KIEM), '239 tu dot bien' <-> len(DOT_BIEN_TU_KIEM), '10 dot bien san pham' <-> len(DOT_BIEN); import ops/nhanh_don_duoc_test.py@711cb190daaa; doi chieu phu: luot du moi nhat 43990524880 co 321 muc theo log, 321 theo artifact"
+    "ly_do":"len(TU_KIEM) cuoi cung cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import)"
    },
    {
     "vi_tri":".github/workflows/ci-dot-bien-du.yml:9@711cb190daaa",
@@ -28243,7 +28261,7 @@
     "loi_khai":"239 tu dot bien",
     "so_do":255,
     "ket_luan":"lech",
-    "ly_do":"anh xa: '52 ca' <-> len(TU_KIEM), '239 tu dot bien' <-> len(DOT_BIEN_TU_KIEM), '10 dot bien san pham' <-> len(DOT_BIEN); import ops/nhanh_don_duoc_test.py@711cb190daaa; doi chieu phu: luot du moi nhat 43990524880 co 321 muc theo log, 321 theo artifact"
+    "ly_do":"len(DOT_BIEN_TU_KIEM) cuoi cung cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import)"
    },
    {
     "vi_tri":".github/workflows/ci-dot-bien-du.yml:9@711cb190daaa",
@@ -28251,7 +28269,15 @@
     "loi_khai":"10 dot bien san pham",
     "so_do":10,
     "ket_luan":"khop",
-    "ly_do":"anh xa: '52 ca' <-> len(TU_KIEM), '239 tu dot bien' <-> len(DOT_BIEN_TU_KIEM), '10 dot bien san pham' <-> len(DOT_BIEN); import ops/nhanh_don_duoc_test.py@711cb190daaa; doi chieu phu: luot du moi nhat 43990524880 co 321 muc theo log, 321 theo artifact"
+    "ly_do":"len(DOT_BIEN) cuoi cung cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import)"
+   },
+   {
+    "vi_tri":".github/workflows/ci-dot-bien-du.yml:11@711cb190daaa",
+    "trich":"# `ci.yml` KHÔNG thay được. Ước tính g12: ~73 800 s nối tiếp ⇒ 8 mảnh ≈ 2,6 h/mảnh ⇒ trần 360 phút (trần job GitHub).",
+    "loi_khai":"dot-bien-manh: 8 manh",
+    "so_do":8,
+    "ket_luan":"khop",
+    "ly_do":"so job ma tran dot-bien-manh thuc_thi success (ubuntu-latest) o luot success mot attempt moi nhat co job ay: luot 43990524880 (2026-11-17T00:47:54Z); https://api.github.com/repos/ducthangho/tra-luat/actions/runs/43990524880/jobs?filter=all"
    },
    {
     "vi_tri":".github/workflows/ci-dot-bien-du.yml:11@711cb190daaa",
@@ -28264,7 +28290,7 @@
    {
     "vi_tri":".github/workflows/ci-dot-bien-du.yml:11@711cb190daaa",
     "trich":"# `ci.yml` KHÔNG thay được. Ước tính g12: ~73 800 s nối tiếp ⇒ 8 mảnh ≈ 2,6 h/mảnh ⇒ trần 360 phút (trần job GitHub).",
-    "loi_khai":"8 manh ≈ 2,6 h/manh (9 360 s)",
+    "loi_khai":"≈ 2,6 h/manh (9 360 s)",
     "so_do":"1621.5 s = trung vi 8 job manh (1531–1730 s)",
     "ket_luan":"lech",
     "ly_do":"khop neu trong ±20%; luot 43990524880 (luot du 8 manh success moi nhat cua cohort): https://api.github.com/repos/ducthangho/tra-luat/actions/runs/43990524880/jobs?filter=all"
@@ -28272,66 +28298,66 @@
    {
     "vi_tri":".github/workflows/ci.yml:186@711cb190daaa",
     "trich":"# #668: vòng bán kính đột biến (~93 % bước này, ~43 phút) giao cho `gate-cong-cu` (8 mảnh) + `gate-cong-cu-gop`.",
-    "loi_khai":null,
+    "loi_khai":"gate-cong-cu: 8 manh",
+    "so_do":8,
+    "ket_luan":"khop",
+    "ly_do":"so job ma tran gate-cong-cu thuc_thi success (ubuntu-latest) o luot success mot attempt moi nhat co job ay: luot 44649093178 (2026-11-20T00:50:54Z); https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44649093178/jobs?filter=all"
+   },
+   {
+    "vi_tri":".github/workflows/ci.yml:186@711cb190daaa",
+    "trich":"# #668: vòng bán kính đột biến (~93 % bước này, ~43 phút) giao cho `gate-cong-cu` (8 mảnh) + `gate-cong-cu-gop`.",
+    "loi_khai":"~93 % bước này, ~43 phút",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: luot do truoc #668 (28-09-2026) tao truoc T0: khong thuoc cohort"
    },
    {
     "vi_tri":".github/workflows/ci.yml:413@711cb190daaa",
     "trich":"#   `_test.py`   : chinh cong tren CO RANG khong. 6 dot bien tren `git worktree`",
-    "loi_khai":null,
+    "loi_khai":"6 dot bien tren `git worktree`",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: bang dot bien cua .github/checks/ci_phamvi_test.py khong o dang bang muc module (import chi thay CA): so chi sinh khi chay"
    },
    {
     "vi_tri":".github/workflows/ci.yml:561@711cb190daaa",
     "trich":"# #668 CI-G5-CONG-CU-CHIA-MANH — bán kính đột biến của `ops/cong_cu_test.py` chia 8 mảnh chạy song song. Đo",
-    "loi_khai":null,
-    "so_do":null,
-    "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "loi_khai":"gate-cong-cu: 8 manh",
+    "so_do":8,
+    "ket_luan":"khop",
+    "ly_do":"so job ma tran gate-cong-cu thuc_thi success (ubuntu-latest) o luot success mot attempt moi nhat co job ay: luot 44649093178 (2026-11-20T00:50:54Z); https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44649093178/jobs?filter=all"
    },
    {
     "vi_tri":".github/workflows/ci.yml:562@711cb190daaa",
     "trich":"# 28-09-2026: G5 45m56s (run 36362558889) mà ~93 % là vòng bán kính (mỗi đột biến chạy lại trọn bộ ca, runner 2 lõi),",
-    "loi_khai":null,
+    "loi_khai":"45m56s (run 36362558889)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: jobs cua luot 36362558889 khong co trong anh chup (luot khong thuoc cohort [T0, T1])"
    },
    {
     "vi_tri":".github/workflows/ci.yml:567@711cb190daaa",
     "trich":"# — 111/118 lượt mảnh Windows không xanh vì lý do của nền (#853), mỗi lượt 570–650 phút. Bán kính đo trên ubuntu-latest.",
-    "loi_khai":null,
+    "loi_khai":"111/118 lượt mảnh Windows",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: cac luot manh Windows truoc wp879 (#853) tao truoc T0: khong thuoc cohort"
    },
    {
     "vi_tri":".github/workflows/ci.yml:568@711cb190daaa",
     "trich":"# wp892 (#892): PR chỉ đổi hồ sơ (`che_do == duong_nhanh`, #674) thì 8 mảnh `skipped` (0 phút runner). Chỉ ĐÚNG chuỗi ấy",
     "loi_khai":"8 manh skipped (0 phut runner) o duong_nhanh",
-    "so_do":"517 luot duong_nhanh tao sau 2026-10-23T23:37:49Z: dong gate-cong-cu {'bo_qua': 521, 'thuc_thi_khong_runner': 2}; ca cohort (542 luot duong_nhanh): {'bo_qua': 521, 'thuc_thi': 205, 'mang_sang': 29}",
+    "so_do":"517 luot duong_nhanh tao sau 2026-10-23T23:37:49Z: dong gate-cong-cu {'bo_qua': 521, 'thuc_thi_khong_runner': 2}; ca cohort: {'bo_qua': 521, 'thuc_thi': 205, 'mang_sang': 29}",
     "ket_luan":"khop",
-    "ly_do":"chi tinh luot tao SAU committer-time cua dong loi khai (git blame --first-parent --porcelain -L 568,568 711cb190daaa -- .github/workflows/ci.yml); khop neu khong dong gate-cong-cu nao la thuc_thi CO runner (thuc_thi_khong_runner = dong bi huy truoc khi duoc cap runner: labels rong, khong buoc nao, khong phai skipped); lan doc tu log chuan-bi"
-   },
-   {
-    "vi_tri":".github/workflows/ci.yml:620@711cb190daaa",
-    "trich":"- name: G5 manh ban kinh dot bien (#668)",
-    "loi_khai":null,
-    "so_do":null,
-    "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"chi tinh luot tao SAU committer-time first-parent cua dong loi khai (kho/blame.json); khop neu khong dong gate-cong-cu nao la thuc_thi CO runner (thuc_thi_khong_runner = bi huy truoc khi duoc cap runner, khong phai skipped); lan doc tu log chuan-bi"
    },
    {
     "vi_tri":".github/workflows/ci.yml:679@711cb190daaa",
     "trich":"# wp892: gom là context BẮT BUỘC — với `duong_nhanh` + 0 mảnh nó in \"KHÔNG ĐO\" và XANH, không `skipped`.",
-    "loi_khai":null,
-    "so_do":null,
-    "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "loi_khai":"gate-cong-cu-gop o duong_nhanh: XANH, khong skipped",
+    "so_do":"517 luot duong_nhanh tao sau 2026-10-23T23:37:49Z: dong gate-cong-cu-gop theo loai:ket_luan {'bo_qua:skipped': 2, 'mang_sang:success': 2, 'thuc_thi:cancelled': 16, 'thuc_thi:failure': 2, 'thuc_thi:success': 499, 'thuc_thi_khong_runner:cancelled': 2}; luot co dong bo_qua/failure: [40254834212, 40255332274]",
+    "ket_luan":"lech",
+    "ly_do":"chi tinh luot tao SAU committer-time first-parent cua dong loi khai (kho/blame.json); khop neu khong dong nao la bo_qua va khong dong thuc_thi co runner nao failure"
    },
    {
     "vi_tri":".github/workflows/ci.yml:934@711cb190daaa",
@@ -28339,7 +28365,7 @@
     "loi_khai":"52 ca",
     "so_do":56,
     "ket_luan":"lech",
-    "ly_do":"anh xa: '52 ca' <-> len(TU_KIEM), '239 tu dot bien' <-> len(DOT_BIEN_TU_KIEM), '10 dot bien san pham' <-> len(DOT_BIEN); import ops/nhanh_don_duoc_test.py@711cb190daaa; doi chieu phu: luot du moi nhat 43990524880 co 321 muc theo log, 321 theo artifact"
+    "ly_do":"len(TU_KIEM) cuoi cung cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import)"
    },
    {
     "vi_tri":".github/workflows/ci.yml:934@711cb190daaa",
@@ -28347,215 +28373,224 @@
     "loi_khai":"239 tu dot bien",
     "so_do":255,
     "ket_luan":"lech",
-    "ly_do":"anh xa: '52 ca' <-> len(TU_KIEM), '239 tu dot bien' <-> len(DOT_BIEN_TU_KIEM), '10 dot bien san pham' <-> len(DOT_BIEN); import ops/nhanh_don_duoc_test.py@711cb190daaa; doi chieu phu: luot du moi nhat 43990524880 co 321 muc theo log, 321 theo artifact"
-   },
-   {
-    "vi_tri":".github/workflows/ci.yml:934@711cb190daaa",
-    "trich":"# WP748 r16 — `targeted_mutant_gate` (cổng PR, KHÔNG phải full mutant audit): 52 ca nền + 239 tự đột biến",
-    "loi_khai":"10 dot bien san pham",
-    "so_do":10,
-    "ket_luan":"khop",
-    "ly_do":"anh xa: '52 ca' <-> len(TU_KIEM), '239 tu dot bien' <-> len(DOT_BIEN_TU_KIEM), '10 dot bien san pham' <-> len(DOT_BIEN); import ops/nhanh_don_duoc_test.py@711cb190daaa; doi chieu phu: luot du moi nhat 43990524880 co 321 muc theo log, 321 theo artifact"
+    "ly_do":"len(DOT_BIEN_TU_KIEM) cuoi cung cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import)"
    },
    {
     "vi_tri":".github/workflows/ci.yml:935@711cb190daaa",
     "trich":"# (MỖI con chỉ chạy CA ĐÍCH đã khai) + 10 đột biến sản phẩm, chia 8 mảnh cân theo chi phí đo được; mỗi mảnh",
-    "loi_khai":null,
-    "so_do":null,
-    "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "loi_khai":"10 dot bien san pham",
+    "so_do":10,
+    "ket_luan":"khop",
+    "ly_do":"len(DOT_BIEN) cuoi cung cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import)"
+   },
+   {
+    "vi_tri":".github/workflows/ci.yml:935@711cb190daaa",
+    "trich":"# (MỖI con chỉ chạy CA ĐÍCH đã khai) + 10 đột biến sản phẩm, chia 8 mảnh cân theo chi phí đo được; mỗi mảnh",
+    "loi_khai":"gate-nhanh-manh: 8 manh",
+    "so_do":8,
+    "ket_luan":"khop",
+    "ly_do":"so job ma tran gate-nhanh-manh thuc_thi success (ubuntu-latest) o luot success mot attempt moi nhat co job ay: luot 44649093178 (2026-11-20T00:50:54Z); https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44649093178/jobs?filter=all"
    },
    {
     "vi_tri":".github/workflows/ci.yml:937@711cb190daaa",
     "trich":"# thành viên + đúng head + đường găng <= 540 s. full_mutant_audit (52 ca dưới MỖI đột biến) chạy riêng ở",
-    "loi_khai":null,
+    "loi_khai":"52 ca",
+    "so_do":56,
+    "ket_luan":"lech",
+    "ly_do":"len(TU_KIEM) cuoi cung cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import)"
+   },
+   {
+    "vi_tri":".github/workflows/ci.yml:937@711cb190daaa",
+    "trich":"# thành viên + đúng head + đường găng <= 540 s. full_mutant_audit (52 ca dưới MỖI đột biến) chạy riêng ở",
+    "loi_khai":"đường găng <= 540 s",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: bien nhan artifact cua gate-nhanh-manh (truong giay): dac ta §4 chi thu artifact cua ci-dot-bien-du.yml"
    },
    {
     "vi_tri":".github/workflows/ci.yml:1121@711cb190daaa",
     "trich":"# wp1343 (CI-PACKET-LOOP-NHANH r3): job này là các MẢNH, không còn là check bắt buộc (đo run 43845962754: một job 2 giờ",
-    "loi_khai":"run 43845962754: mot job 2 gio 21 phut",
-    "so_do":"job gate-packet-loop (ubuntu-latest) dai nhat cua luot: 8524 s = 2 gio 22 phut 4 giay; buoc dai nhat cua job ay: 8492 s",
+    "loi_khai":"run 43845962754: mot job 2 gio 21 phut (loi khai trai hai dong)",
+    "so_do":"job dai nhat cua luot 43845962754 (gate-packet-loop (ubuntu-latest)): 8524 s = 2 gio 22 phut 4 giay; buoc dai nhat cua job ay: 8492 s",
     "ket_luan":"lech",
     "ly_do":"khop neu thoi luong JOB cat hoac lam tron ve phut bang 141 phut; https://api.github.com/repos/ducthangho/tra-luat/actions/runs/43845962754/jobs?filter=all"
    },
    {
     "vi_tri":".github/workflows/ci.yml:1122@711cb190daaa",
     "trich":"# 21 phút). 16 mảnh chạy (sổ ca − `CA_DAI`) qua `.claude/dev/packet_loop_test_manh.py`; bảng đột biến và `CA_DAI` sang",
-    "loi_khai":null,
-    "so_do":null,
-    "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "loi_khai":"gate-packet-loop-manh: 16 manh",
+    "so_do":16,
+    "ket_luan":"khop",
+    "ly_do":"so job ma tran gate-packet-loop-manh thuc_thi success (ubuntu-latest) o luot success mot attempt moi nhat co job ay: luot 44649093178 (2026-11-20T00:50:54Z); https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44649093178/jobs?filter=all"
    },
    {
     "vi_tri":".github/workflows/packet-loop-dot-bien.yml:5@711cb190daaa",
     "trich":"# lịch và theo yêu cầu, KHÔNG chặn merge. Mảnh j: đột biến chỉ số k % 16 == j; riêng mảnh 0 chạy thêm `CA_DAI` (~45 phút).",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: luot cua packet-loop-dot-bien.yml: workflow khong thuoc cohort (dac ta §2 chi dinh hai workflow)"
    },
    {
     "vi_tri":"CLAUDE.md:409@711cb190daaa",
     "trich":"**40/40** trong khi một đột biến **XOÁ HẲN** lệnh `gh api -X DELETE` vẫn qua — vì `gh` giả DIỄN KỊCH",
-    "loi_khai":null,
+    "loi_khai":"**40/40**",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra bo test ops-don-ref tai thoi diem su co (bai hoc lich su): khong luu"
    },
    {
     "vi_tri":"CLAUDE.md:567@711cb190daaa",
     "trich":"bản vật hoá cho người gọi — nên `chay_dot_bien` vẫn bị tiêu thụ và in `|  | 0/0` cho một mutant ĐÃ",
-    "loi_khai":null,
+    "loi_khai":"`|  | 0/0`",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra chay_dot_bien cua packet #513 (12-09-2026): khong luu"
    },
    {
     "vi_tri":"CLAUDE.md:591@711cb190daaa",
     "trich":"8/8 mảnh (26 và 28 lỗi bán kính ở hai mảnh đọc được), và con số *\"13/13 giết đúng `t52`\"* tôi đã báo",
-    "loi_khai":null,
+    "loi_khai":"8/8 mảnh (26 và 28",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
-   },
-   {
-    "vi_tri":"CLAUDE.md:593@711cb190daaa",
-    "trich":"nó kiểm là sai. Chữa: neo vào **dấu riêng** của đường cần loại (`=duong_nhanh, 0 mảnh`), không vào một",
-    "loi_khai":null,
-    "so_do":null,
-    "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: log CI cua PR #895 (23-10-2026): loi khai khong neu run_id nen khong dinh vi duoc luot trong cohort"
    },
    {
     "vi_tri":"CLAUDE.md:658@711cb190daaa",
     "trich":"người vừa đọc nó. Phản chứng: `ops/don_ref_chot_test.sh` (105 ca; đột biến quay về REST DELETE làm",
-    "loi_khai":null,
+    "loi_khai":"(105 ca;",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: so ca cua ops/don_ref_chot_test.sh chi sinh khi CHAY script (khong co bang tinh; packet khong chay)"
    },
    {
     "vi_tri":"docs/AUDIT_LAUNCHER_VONG_3.md:5@711cb190daaa",
     "trich":"> t63…t67 + 5 đột biến; bộ phản chứng 67/67, đột biến 22/22. §1 vá làm HAI lớp vì",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo"
    },
    {
     "vi_tri":"docs/AUDIT_LAUNCHER_VONG_3.md:9@711cb190daaa",
     "trich":"> 75/75, đột biến 32/32. Phần GHI NHẬN giữ nguyên làm hồ sơ đo đạc; riêng §19 (tệp tạm",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo"
    },
    {
     "vi_tri":"docs/AUDIT_LAUNCHER_VONG_3.md:41@711cb190daaa",
     "trich":"| `python3 .claude/dev/launcher_test.py --dot-bien` | **17/17 đạt (1 không đo được)** — rc=0 |",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo"
    },
    {
     "vi_tri":"docs/AUDIT_LAUNCHER_VONG_3.md:68@711cb190daaa",
     "trich":"mọi đột biến đều không đo được in `0/0 đạt` và thoát **0**. Đúng cái doctrine trong CLAUDE.md",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo"
    },
    {
     "vi_tri":"docs/AUDIT_LAUNCHER_VONG_3.md:477@711cb190daaa",
     "trich":"## §11. Cổng đột biến không có **sàn**: `0/0 đạt` → thoát 0",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo"
    },
    {
     "vi_tri":"docs/AUDIT_LAUNCHER_VONG_4_POSIX.md:51@711cb190daaa",
     "trich":"đột biến `32/32` (1 không đo được); worktree sạch.",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo"
    },
    {
     "vi_tri":"docs/AUDIT_LAUNCHER_VONG_4_POSIX.md:78@711cb190daaa",
     "trich":"Cổng cuối sau bản vá: `76/76` ca, `33/33` đột biến, hỏng 0;",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo"
    },
    {
     "vi_tri":"docs/AUDIT_LAUNCHER_VONG_7.md:21@711cb190daaa",
     "trich":"5. Sàn đột biến chỉ đỏ khi không đo được ca nào. Một nền chỉ đo 5/35 vẫn có thể",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo"
    },
    {
     "vi_tri":"docs/AUDIT_LAUNCHER_VONG_7.md:51@711cb190daaa",
     "trich":"đột biến `34/34` (1 không đo được); ruff sạch.",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo"
    },
    {
     "vi_tri":"docs/AUDIT_LAUNCHER_VONG_7.md:76@711cb190daaa",
     "trich":"- Đột biến: **39/39** đạt (1 không đo được trên Linux), rc=0.",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo"
    },
    {
     "vi_tri":"docs/GOI_AGENT_DA_NEN.md:493@711cb190daaa",
     "trich":"python .claude/dev/launcher_test.py --dot-bien  # 31 đột biến, mỗi cái phải giết đúng ca chỉ định",
-    "loi_khai":null,
-    "so_do":null,
-    "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "loi_khai":".claude/dev/launcher_test.py: 31 dot bien",
+    "so_do":572,
+    "ket_luan":"lech",
+    "ly_do":"len(DOT_BIEN) cuoi cung cua .claude/dev/launcher_test.py@711cb190daaa (M3, import)"
    },
    {
     "vi_tri":"docs/adr/0009-dac-ta-the-thuc-nguon-su-that-thang-tham-quyen-3-bac.md:6@711cb190daaa",
     "trich":"cùng ghi\" mà ADR-0003 đã bác. Đo thực tế 2026-07-20: bộ kiểm chỉ bắt 1/5 đột biến vi phạm bảng;",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: ket qua thuc nghiem dot bien tay ngay 2026-07-20: khong co log trong kho hay anh chup"
    },
    {
     "vi_tri":"docs/adr/0009-dac-ta-the-thuc-nguon-su-that-thang-tham-quyen-3-bac.md:35@711cb190daaa",
     "trich":"sau refactor. Căn cứ thực nghiệm 2026-07-20: 5 đột biến tay → bộ kiểm hiện bắt 1/5. Đột biến là",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: ket qua thuc nghiem dot bien tay ngay 2026-07-20: khong co log trong kho hay anh chup"
    },
    {
     "vi_tri":"docs/adr/0009-dac-ta-the-thuc-nguon-su-that-thang-tham-quyen-3-bac.md:139@711cb190daaa",
     "trich":"không đột biến được trên văn bản mẫu chung, khoá ở r176 ca (e)/(f) thay thế.",
-    "loi_khai":null,
+    "loi_khai":"(ca dong)",
     "so_do":null,
     "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"nguon thieu: ket qua thuc nghiem dot bien tay ngay 2026-07-20: khong co log trong kho hay anh chup"
+   }
+  ],
+  "dong_khong_phai_loi_khai":[
+   {
+    "vi_tri":".github/workflows/ci.yml:620@711cb190daaa",
+    "trich":"- name: G5 manh ban kinh dot bien (#668)",
+    "ly_do":"ten buoc; con so la ma issue"
+   },
+   {
+    "vi_tri":"CLAUDE.md:593@711cb190daaa",
+    "trich":"nó kiểm là sai. Chữa: neo vào **dấu riêng** của đường cần loại (`=duong_nhanh, 0 mảnh`), không vào một",
+    "ly_do":"trich dau rieng cua mot dong log, khong phai loi khai so luong"
    },
    {
     "vi_tri":"docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md:22@711cb190daaa",
     "trich":"`kiem-merge` K1 thực hiện ba trạng thái dòng khai 0/1/≥2; `packet_loop_test.py` giữ ca OID hợp lệ và hai dòng, thêm ca không dòng cùng đột biến đối chứng. `adr-song` kiểm mốc ADR; `doctrine-scan` kiểm",
-    "loi_khai":null,
-    "so_do":null,
-    "ket_luan":"khong_do_duoc",
-    "ly_do":"khong co phep do tuong ung trong cohort M1-M3: loi khai ve bo/workflow/moc thoi gian ngoai hai workflow cua cohort, hoac la bien ban lich su co ngay, hoac con so chi sinh khi CHAY bo (packet khong chay)"
+    "ly_do":"ba trang thai dong khai cua kiem-merge, khong phai so dot bien"
    }
   ]
  },

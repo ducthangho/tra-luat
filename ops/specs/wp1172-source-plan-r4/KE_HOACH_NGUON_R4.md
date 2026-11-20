@@ -1,4 +1,4 @@
-# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 3
+# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 4
 
 ## 1. Trạng thái và nguồn
 
@@ -11,7 +11,8 @@
   bổ sung của r4 áp từ packet KẾ TIẾP. Không bổ sung nào được nhét vào PR1.
 - **Bản sửa 2** xử lý 13 finding của review Codex `wp1172-plan-r4-review-1` (2 P1, 11 P2) trên bản sửa 1 (`76b836fa…`,
   `d5bc154`). **Bản sửa 3** xử lý 6 P2 + 1 P3 của `wp1172-plan-r4-review-2` trên bản sửa 2 (`5a34f1e9…`, `3f3f4ab`);
-  bản sửa 3 CHƯA được review lại (đã hết hai lượt review dành cho kế hoạch). Bảng xử lý ở §11.
+  **Bản sửa 4** xử lý 1 P1 + 1 P2 của `wp1172-plan-r4-review-3` trên bản sửa 3 (`1082c645…`, `a6f7195`); bản sửa 4
+  CHƯA được review lại (đã dùng hết ba lượt review chủ kho cho phép cho kế hoạch). Bảng xử lý ở §11.
 - **Nguồn (lưu nguyên byte tại `ops/specs/wp1172-source-plan-r4/nguon/`, `.gitattributes` `-text`):**
 
 | Nguồn | sha256 | Vai trò |
@@ -59,12 +60,20 @@ hai cửa (Q8a cho NGHIÊN CỨU, Q8b cho ĐỔI M9 chỉ sau kết quả C1).
 PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm chốt áp vào đặc tả packet tương ứng khi tới lượt:
 
 - **A+1 (PR3, PR6, C2) — công tắc bảo thủ có thẩm quyền đo được.**
-  - Nguồn: một Actions repository variable (tên đóng băng trong đặc tả A+1). Biến chỉ là tín hiệu TẮT nhanh; nó
-    KHÔNG đủ để BẬT. Trạng thái bật hợp lệ khi và chỉ khi có một **bản ghi kích hoạt của chủ kho**: comment trên một
-    Issue cố định, tác giả = OWNER (đọc qua REST), mang số thế hệ tăng dần và đúng giá trị cho phép; biến phải mang
-    cùng số thế hệ. Bất kỳ ai ghi được biến (collaborator, GitHub App có Variables:write — tập này đo và ghi vào hồ sơ,
-    Q9) đều chỉ TẮT được: biến lệch giá trị/thế hệ so với bản ghi mới nhất của chủ kho ⇒ coi là tắt. Bật lại = chủ kho
-    đăng bản ghi thế hệ mới; bằng chứng kích hoạt cũ mất hiệu lực. Không đo được tập người ghi ⇒ chạy đủ.
+  - Nguồn: một Actions repository variable (tên đóng băng trong đặc tả B4) cộng một **bản ghi kích hoạt của chủ kho**:
+    comment trên một Issue điều khiển cố định, tác giả = OWNER (đọc qua REST), chưa từng bị sửa (`updated_at` =
+    `created_at`), mang số thế hệ N và giá trị cho phép.
+  - **Vị từ bật (không trạng thái, sống qua khởi động lại):** biến tồn tại, giá trị = đúng chuỗi cho phép kèm thế hệ N
+    của bản ghi OWNER mới nhất, VÀ `updated_at` của biến (do máy chủ GitHub đặt, đọc qua REST
+    `GET /repos/{kho}/actions/variables/{tên}`) SỚM HƠN `created_at` của bản ghi OWNER ấy. Mọi lần ghi biến sau bản ghi —
+    tắt rồi đặt lại đúng giá trị cũ, xoá rồi tạo lại, kể cả xảy ra giữa hai lần đọc — đều đẩy `updated_at` qua mốc bản
+    ghi ⇒ thế hệ N bị TIÊU THỤ, cổng coi là tắt cho tới khi chủ kho đăng bản ghi mới (thế hệ N+1) SAU lần ghi biến cuối.
+    Người ghi được biến (collaborator, GitHub App có Variables:write — tập này đo và ghi hồ sơ, Q9) vì thế chỉ TẮT được,
+    không bật lại được. Không đọc được biến, `updated_at`, hoặc bản ghi OWNER; hoặc không đo được tập người ghi ⇒ chạy đủ.
+  - Nghiệm thu B4 phải có: phát lại tắt/bật bởi người được uỷ quyền (giữa hai lần đọc và sau khởi động lại bộ tiêu dùng)
+    ⇒ tắt; xoá-tạo lại biến ⇒ tắt; bản ghi OWNER bị sửa ⇒ tắt; bản ghi do người khác OWNER ⇒ tắt; chủ kho đăng bản ghi mới
+    sau lần ghi biến ⇒ bật; REST lỗi ⇒ chạy đủ. Trước khi đóng băng spec B4, đo rằng REST thật sự trả `updated_at` cho
+    biến (không đo được ⇒ thiết kế này không dùng được, B4 phải chọn cơ chế thu hồi bền khác và chủ kho duyệt lại).
   - Tiêu dùng có thẩm quyền KHÔNG phải job trong cây PR (trên `pull_request`, PR có thể sửa chính `ci.yml` hay bộ phân
     loại). Thẩm quyền nằm ở cổng merge chạy từ cây TIN CẬY: `kiem-merge` (từ master, không từ head PR) đọc lại công tắc
     tại thời điểm xét merge và TÍNH LẠI yêu cầu từ diff: công tắc không đúng chuỗi cho phép, vắng, hoặc không đọc được ⇒
@@ -94,7 +103,11 @@ PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm 
 - **A+5 (điều kiện bật PR3 thứ bảy) — overhead của phần đo PR1.** Đo GHÉP CẶP bật/tắt trên CÙNG ảnh chụp bất biến (sản
   phẩm, test, đột biến, môi trường), chạy xen kẽ lặp lại (≥ 5 cặp trên một mảnh), ước lượng = trung vị hiệu ghép cặp; cần
   một công tắc môi trường tắt phần đo — thêm trong write set của PR3 (`ops/cong_cu_test.py`), không sửa PR1. Ca kiểm có
-  overhead nhân tạo biết trước. Overhead ≤ 5 % ⇒ giữ; > 5 % ⇒ chuyển phần đo sang lấy mẫu ngoài cổng, không xoá tín hiệu
+  overhead nhân tạo biết trước. **Phủ:** cả 8 mảnh, mỗi mảnh ≥ 3 cặp xen kẽ; ước lượng toàn cục = tổng trung vị hiệu ghép
+  cặp của 8 mảnh / tổng trung vị thời gian bản tắt của 8 mảnh (có trọng số theo thời gian từng mảnh); kèm ca kiểm "mảnh
+  không đồng nhất" (overhead tập trung ở một mảnh). Đo trong môi trường đo cố định (container), không dùng lượt CI thêm;
+  ước ~48 lượt mảnh ≈ 10 giờ máy, tính vào ngân sách của PR3. Đo không đủ 8 mảnh thì chỉ báo mảnh đã đo và ngưỡng toàn
+  cục là `khong_do_duoc` ⇒ điều kiện bật thứ bảy CHƯA đạt. Overhead ≤ 5 % ⇒ giữ; > 5 % ⇒ chuyển phần đo sang lấy mẫu ngoài cổng, không xoá tín hiệu
   (r2 §5.1). So sánh trước/sau theo cohort 14 ngày chỉ là giám sát vận hành, KHÔNG phải phép đo overhead.
 
 ## 5. Làn B — bảo đảm bằng chứng (không đổi quyết định cổng `ci.yml`, không nới M9)
@@ -266,9 +279,10 @@ Q1–Q5 giữ nguyên r3 §7. Thêm:
 - **Q7.** B3: chặn hay cảnh báo 30 ngày đầu; AI được ban ngoại lệ release và theo khuôn nào? Khuyến nghị: chặn khi đã có
   token trên cả hai máy deploy; ngoại lệ chỉ do chủ kho, khuôn §5 B3.
 - **Q8a / Q8b.** Cho nghiên cứu C1 sau PR8 (Q8a)? Đổi M9 chỉ sau C1 (Q8b)? Khuyến nghị: quyết Q8a sau PR8, Q8b sau C1.
-- **Q9.** Phạm vi đầy đủ những ai ghi được biến công tắc (người và GitHub App, đo được) và cơ chế: biến chỉ TẮT được;
-  BẬT chỉ bằng bản ghi kích hoạt có thế hệ của chủ kho (A+1). Khuyến nghị: tắt — bất kỳ người ghi được nào, kể cả điều phối;
-  bật — chỉ chủ kho. Đây là ràng buộc MÁY (thế hệ do chủ kho đăng), không chỉ là quy ước.
+- **Q9.** Phạm vi đầy đủ những ai ghi được biến công tắc (người và GitHub App, đo được) và cơ chế A+1: mọi lần ghi biến
+  sau bản ghi OWNER đều tiêu thụ thế hệ, nên người ghi chỉ TẮT được; BẬT chỉ bằng bản ghi OWNER mới đăng sau lần ghi biến
+  cuối. Khuyến nghị: tắt — bất kỳ người ghi được nào, kể cả điều phối; bật — chỉ chủ kho. Ràng buộc MÁY (dấu thời gian do
+  máy chủ đặt), không chỉ là quy ước.
 
 ## 11. Xử lý review `wp1172-plan-r4-review-1`
 
@@ -299,6 +313,13 @@ Review lượt 2 (`wp1172-plan-r4-review-2`, trên `3f3f4ab`): 9 finding lượt
 | R4-15 B3 thiếu quyền gọi A4 | P2 | A4 do người vận hành chạy trước; B3 chỉ đọc; thiếu ⇒ chặn |
 | R4-16 bên tiêu dùng chưa có write set | P2 | Packet B4 (`packet_loop.py` + test) trước PR3; nhịp tim ở phiên điều phối là runbook thủ công, không sửa `doctor` |
 | R4-17 chi phí canary chỉ là mảnh | P3 | §13 ghi rõ là tổng phụ 8 mảnh, phần còn lại ước sau |
+
+Review lượt 3 (`wp1172-plan-r4-review-3`, trên `a6f7195`): 16 finding trước đóng; R4-08 đóng một phần; thêm R4-18.
+
+| Finding | Mức | Xử lý ở bản sửa 4 |
+|---|---|---|
+| R4-08 (phần còn lại) bản ghi kích hoạt bị phát lại sau tắt/bật | P1 | A+1: vị từ bật đòi `updated_at` của biến (do máy chủ đặt) sớm hơn `created_at` của bản ghi OWNER; mọi lần ghi biến tiêu thụ thế hệ; không trạng thái nên sống qua khởi động lại; ca phát lại bắt buộc ở B4; đo trước rằng REST trả `updated_at` |
+| R4-18 overhead chỉ đo một mảnh | P2 | A+5 phủ cả 8 mảnh × ≥ 3 cặp, ước lượng có trọng số, ca mảnh không đồng nhất, ngân sách ~10 giờ máy trong PR3; thiếu phủ ⇒ `khong_do_duoc` |
 
 ## 12. Phương án loại
 

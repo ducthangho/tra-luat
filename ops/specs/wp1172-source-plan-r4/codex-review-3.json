@@ -1,0 +1,104 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "a6f7195e4318cb60f0676bf37b5e4c44785c2f7f",
+  "reviewed_file_sha256": "1082c6457668e58545c4c8b298528aecc01daec1396a9fb52f723cb5532abec4",
+  "findings": [
+    {
+      "id": "R4-08-switch-authority-not-established",
+      "severity": "P1",
+      "location": "§4 A+1, lines 62–77; §10 Q9, lines 269–271; §11 R4-08, line 297",
+      "claim": "Partially closed. App writers and the trusted B4 consumer are now explicit, but the owner-generation equality rule does not enforce owner-only reactivation. After owner activation enabled:7, a delegated writer can set off and then restore enabled:7. The latest owner record is still generation 7, so the stated necessary-and-sufficient predicate accepts again without a new owner decision. No durable revocation/latch invalidates generation 7 when the variable changes. An off/on sequence between consumer reads is also invisible. This is a demonstrated wrong-gate path, hence P1 in this round.",
+      "evidence": [
+        {
+          "cmd": "sed -n '61,77p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+          "observed": "Enablement requires the latest OWNER activation record and matching variable value/generation. The text asserts that writers can only disable, but specifies no state transition that revokes that activation on disablement."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-round3/probes.py counterexamples",
+          "observed": "rc=0. Executed model of the written predicate: enabled:7 -> off -> enabled:7 yields targeted_allowed=true,false,true while owner_generation remains 7. The first and last observations are indistinguishable to a consumer that missed the intermediate write. This is a plan counterexample, not a live GitHub mutation."
+        },
+        {
+          "cmd": "web.run open https://docs.github.com/en/rest/actions/variables#update-a-repository-variable",
+          "observed": "Variables:write permits supplying the replacement value, including restoring an old value; it has no off-only operation. The GET representation exposes current value/timestamps, not a revocation history. [GitHub variable API](https://docs.github.com/en/rest/actions/variables#update-a-repository-variable)."
+        }
+      ],
+      "suggested_fix": "In A+1/B4 and Q9, specify a trusted revocation mechanism that survives consumer restarts and cannot be undone by a variable writer. Either make disablement irrevocably consume an activation generation through a trusted durable control record, or restrict direct writes and provide an enforced off-only path. Do not rely solely on value equality or a consumer remembering an observed off value. Acceptance must reject delegated off/on replay, including between reads and after restart, and accept reactivation only after a fresh owner authorization. Freeze the resulting authority/state/write-set changes in B4 before PR3; preserve full-on-unknown and the existing PR1 contract."
+    },
+    {
+      "id": "R4-18-overhead-sample-does-not-cover-g5",
+      "severity": "P2",
+      "location": "§4 A+5, lines 94–98; §8.1 overhead row, line 209; §11 R4-14, line 298",
+      "claim": "The paired design fixes R4-14's before/after confounding, but its minimum acceptance is five pairs on one shard. That does not establish the <=5% overhead condition for the eight-shard G5 workload. No representative-shard justification, cross-shard coverage, weighting or restriction of the conclusion to the sampled shard is required. A compliant single-shard measurement can approve instrumentation whose aggregate overhead exceeds the limit.",
+      "evidence": [
+        {
+          "cmd": "sed -n '94,98p' ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; git show origin/ops/wp1448-r1:ops/specs/wp1448-r2/SPEC.md",
+          "observed": "A+5 requires >=5 paired repeats on one shard, then applies the keep/remove decision to the instrumentation. Frozen PR1 instruments all eight shards; its outcome-parity acceptance covers all eight, but supplies no representativeness guarantee for a future one-shard timing sample."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-round3/probes.py counterexamples",
+          "observed": "rc=0. Deterministic heterogeneous-shard witness: all eight off-times=100 s; on-times=[100,120,120,120,120,120,120,120] s. Five identical pairs on shard 0 estimate 0% and pass, while total time rises 800->940 s, or 17.5%. Controlled homogeneous 0%,4%,20% cases estimate correctly, isolating coverage from the already-fixed pairing problem. Synthetic timings, not production measurements."
+        }
+      ],
+      "suggested_fix": "Define A+5's workload and percentage estimator explicitly. Cover all affected shards/modes with paired measurements, or preregister and justify a representative sampling/weighting scheme before inspecting results; otherwise report only the sampled shard and leave the global threshold unmeasured. Add the heterogeneous-shard witness alongside the known-overhead fixture. Assign measurement and any sampling change to PR3 or a successor without changing PR1, and revise the measurement budget for the chosen coverage rather than silently adding CI runs."
+    }
+  ],
+  "tests": [
+    {
+      "cmd": "python -B /tmp/rv-r4-round3/probes.py preflight",
+      "rc": 0,
+      "summary": "passed: exact HEAD/tree and all seven pinned source/spec hashes match; reviewed workflow, validator, A4 and deploy scripts equal origin/master. PR1 spec 5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e and r2/g1 lease at Mission r82 verified; effective write set excludes packet_loop.py and ci_dang_ky_test.py."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round3/probes.py numbers",
+      "rc": 0,
+      "summary": "passed 54 checks. Recomputed 700504/15057171=4.6522949% ->4.7%; 7955967/15057171=52.8383918% ->52.8%; 9669927/705=13716.2085 s. G9 n=71, median=1775 s, nearest-rank p25=1590 s. Shard median=13282 s and two-run subtotal=26564 s; same-cohort whole-audit median=15205 s. r82 outward endpoints=3.4–5.6 million s. Ledger: /tmp/rv-r4-round3/numbers.json."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round3/probes.py structure",
+      "rc": 0,
+      "summary": "passed: actual PR0 pinning validator accepts master workflow and rejects SHA-based concurrency; receipt validator accepts the healthy fixture and rejects failed/cancelled/timed_out/infrastructure_error/not_run. Partial rerun selection preserves shard attempts 2/1 and rejects a newer failed producer. Ruff CI pin/probe contract 3/3; bare Ruff lint not_run. A4 confirmed workflow_dispatch-only."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round3/probes.py counterexamples",
+      "rc": 0,
+      "summary": "passed executable witnesses for activation-generation replay and one-shard overhead undercoverage. Homogeneous paired-overhead controls recover 0%,4%,20%. These are models of proposed requirements, not tests of an implemented B4/A+5. The separate protection-boolean toy probe was treated as an ambiguity only, not promoted to a finding because §8.1 retains the protected-ref obligation."
+    },
+    {
+      "cmd": "git diff 3f3f4abecac2def1eae4a67e80a9a57a88a35822 HEAD -- ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; source/r3/spec/lease/ADR readback",
+      "rc": 0,
+      "summary": "completed manual fidelity, dependency, write-set and closure audit. All prior findings received an individual disposition below. No direct retroactive PR1 modification found."
+    },
+    {
+      "cmd": "GitHub read-only get_pr_info(1412), fetch_issue_comments(1166), get_repo(ducthangho/tra-luat)",
+      "rc": null,
+      "summary": "completed. PR1412 merged f8b9cdd81879f25c22709c60e62b69a9c314a472 from b79cbf56a1696b44c38529275312287ca78ba91d; M8 comment7009869906 records landed:false and missing checkout/definition/gate-output provenance. Repository metadata reports public. Initial issue-comments call failed schema validation for the repository argument; corrected read succeeded. Connector supplies no shell exit code."
+    },
+    {
+      "cmd": "web.run official GitHub contexts, variables, branches/protection/rules, issue-comments, workflow-dispatch, schedule and notifications documentation",
+      "rc": null,
+      "summary": "completed documentation checks. workflow_sha is documented; variable write supports Apps and arbitrary replacement values; dispatch requires Actions:write; scheduled notification routing is actor/settings-dependent. Public comment/rules reads can be available without extra token permissions, so no unsupported blanket deploy-permission finding was raised. These are platform contracts, not measurements of live ACLs, subscriptions or deploy hosts."
+    },
+    {
+      "cmd": "git config --get core.abbrev",
+      "rc": 1,
+      "summary": "unset; configuration unchanged. No abbreviation-sensitive general gate was run."
+    },
+    {
+      "cmd": "Full repository selftests, live A3/A4 dispatch, watchdog notification delivery, ACL enumeration, Linux/Windows deploy and paired production benchmarks",
+      "rc": null,
+      "summary": "not_run: outside this read-only plan review or unnecessary for the document diff. No live capability, full-suite pass, Windows parity or production overhead is claimed."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round3/probes.py snapshot",
+      "rc": 0,
+      "summary": "passed: 17179 tracked-file hashes, HEAD/tree, index/diff and tracked/untracked/ignored status unchanged across the probe interval. Only pre-existing ignored .codex/ is reported; its contents were not inspected. Initial preflight and final status agree. Endpoint equality does not prove historical non-writing between observations."
+    },
+    {
+      "cmd": "Python final exact-SHA/hash, snapshot, JSON schema/count and REVIEW_OUT byte readback",
+      "rc": 0,
+      "summary": "passed: pinned object unchanged, 54-number ledger and two findings agree, output JSON written to REVIEW_OUT and byte/readback verified."
+    }
+  ],
+  "numbers_checked": 54,
+  "notes": "Independent read-only review, round 3: 0 P0, 1 P1, 1 P2, 0 P3. Sixteen previous IDs are closed at plan level; R4-08 remains partially closed. New R4-18 concerns measurement coverage, not the already-fixed before/after confounding. Closure of a plan requirement does not claim implementation acceptance.\nCLOSURE AUDIT (locations refer to draft 3):\nR4-01 closed — §2 and §8.2 distinguish delivered code, not_run, not_measured, waiver and unverified historical acceptance. PR1412 metadata and [PR0 M8](https://github.com/ducthangho/tra-luat/issues/1166#issuecomment-7009869906) confirm merged but landed:false. A1/A2/A5/A6 are not falsely certified.\nR4-02 closed for the previously reported source omissions — B3 lines 147–155 and §8.1 restore protected master/ref and exact-H required push-CI checks; B2 lines 131–132 restores current-master versus audited-SHA display. Earlier metadata, SLA, repro, merge-stop, finite C1 budget and Q8a/b repairs remain. Overhead acceptance still needs the separate R4-18 fix.\nR4-03 closed — A+3 lines 82–89 keeps execution, case observation, mutant classification and aggregate verdict separate, preserves I2 and reviewed equivalence, and requires compatibility/negative fixtures. Real legacy receipt predicates were probed.\nR4-04 closed — A+4 lines 90–93 retains per-child wait4 RSS and separates concurrent cgroup demand; unsupported measurement remains unknown. No new RSS or Windows execution claimed.\nR4-05 closed — B1 lines 110–113 requires two audit receipts plus one separately identified overlapping push observation. The actual audit workflow has schedule/dispatch only and run-ID concurrency. Live concurrency remains not_run.\nR4-06 closed — B2 follows B1 and includes registry registration; §7 serializes B1/B2/PR2. Its later unassigned-consumer manifestation is addressed by R4-16's B4/manual-runbook repair.\nR4-07 closed — B2 lines 124–134 removes the owner-notification assertion, requires subscription and a verified delivery trial, records unmeasured delivery, and supplies manual/next-run/B3 heartbeat observation. G7 remains explicitly best-effort under Q6, not a hard SLA. [GitHub notification routing](https://docs.github.com/en/actions/concepts/workflows-and-actions/notifications-for-workflow-runs).\nR4-08 partially closed — writer scope now includes Apps; trusted canonical consumption and stale targeted-evidence rejection remain. The new activation record is replayable, as shown in the retained finding.\nR4-09 closed — B1 v1 and B3 retain expected inventory, source/definition identity, per-producer attempts, digests and required positive evidence. Missing provenance blocks after activation. [workflow_sha documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context) supports availability; actual runner provenance was not measured.\nR4-10 closed — B3 lines 143–146 binds clean release bytes, H/tree, package digest and the final pre-push check. No package built.\nR4-11 closed — B3 requires an owner-authored H/digest/expiry waiver or scoped standing authority; G8 separates waived, audit-passed and warning-only outcomes. Existing force-older flags must not become audit waivers.\nR4-12 closed — B3 lines 162–164 requires real Windows-local base/candidate parity or a specific written waiver; Linux pwsh is supplementary.\nR4-13 closed — G9 retains the full cohort definition. Independent recomputation gives n=71, median1775, p25=1590.\nR4-14 closed for confounding — A+5 uses same-snapshot on/off pairing, interleaving, repeated measurements and a declared estimator. Its new one-shard minimum has the distinct R4-18 coverage defect.\nR4-15 closed — B3 lines 152–158 requires an authorized operator to produce A4 first; the deploy host only reads it and blocks if absent/stale/unmeasured. No deploy-side dispatch permission is silently assumed.\nR4-16 closed — A+1 lines 73–74 assigns packet_loop.py and tests to sensitive B4 before PR3. B2 replaces the executable doctor change with a manual coordination runbook. Per-lease overlap checks remain mandatory.\nR4-17 closed — §13 explicitly labels 26564 s as the eight-shard subtotal and excludes registry, aggregation, A4 and push observation. Arithmetic rechecked; it is not a total B1 budget.\nFIDELITY/CONSISTENCY: r2 requirements, PR0 A1–A6/receipt draft and substantive Proxima points have destinations, conditional destinations or explicit exclusions in §8; the two findings prevent certifying the affected destinations. Full/targeted work is confined to C1/C2 or r3's existing PR6 conditions; Q8a does not authorize M9 relaxation. I1–I6 and the nine rejected r3 options remain the A/B default. A+1's replay defect prevents certifying its rollback promise. PR1 remains bound to its frozen r2/g1 contract. B1-before-PR5 and shared-registry serialization are sound; B4's hot paths require a fresh repository-wide lease scan. B3's two script paths fit its proposed scope.\nDECISIONS: Q6–Q9 are relevant owner decisions and remain pending. Q9 must decide an enforceable activation/revocation design; Q6's measurement budget must cover the chosen A+5 workload. The B3 packet must preserve the existing no-behind-master deploy guard and explicitly test protected-ref/required-check failures; ancestry membership alone does not authorize removing that guard. The restored protected-ref obligation in §8.1 was read together with B3, not as permission to accept measured-unprotected master. No present live protection/check configuration was certified. Public repository metadata means missing Issues-read/Administration-read cannot be asserted as an unconditional deploy blocker without choosing and probing the actual endpoint route.\nNUMERICAL SCOPE: 54 checks include measured baseline quantities, derived arithmetic, source size and plan/review counts. Policy thresholds (14/30 days,36h/8d,6h/24h,5%,study ceilings) are proposed or inherited constraints, not production observations. r82's 3.4–5.6 rounding correction is correct. DX-2 savings inputs were read from pinned r3; raw job pages and DX-3/DX-8 logs were not recollected. No evidence supports treating one-shard timings as whole-workload overhead.\nPROVENANCE/LIMITS: reviewed tree=7dac829d8f37db6b4683afdaa1f19d3c6506c666; origin/master=45bae8d07a8cdf06a1ca9a7a2e015a6258169379; r3 ref=c032656d6e9107c7d0d570afe374fd78b6424e93; PR1 metadata ref=a0ca10060174bb22264c5a71e2a6e7ad4eeddcca. provider=openai_codex, execution_surface=codex_service, transport=machine, model_family=openai; API-hosted session, no codex CLI invocation. Served model/effort and external launcher session identity KHONG_DO_DUOC. Linux6.18.44, Python3.13.18, managed workspace-write sandbox with read-only reviewer discipline. This JSON grants no cross-provider assurance, merge or deploy authority.\nNo repository edits, commits, pushes, comments, workflow dispatches, GitHub writes, deploys, secret reads or subagents. Scratch is /tmp/rv-r4-round3; final output is only REVIEW_OUT. This is the last authorized review round; remaining findings go to the owner/coordinator checkpoint, without an implied additional review allowance."
+}

@@ -1543,37 +1543,12 @@ def _thu_tu_tat_dinh():
         raise RuntimeError("c65: bộ gom không chờ future nào trong 10 s — bộ giả không điều khiển được thứ tự")
     bang(r == [0, 10, 20, 30, 40, 50], f"bộ thực thi hoàn tất NGƯỢC 5..0: kết quả phải theo thứ tự việc, được {r!r}")
 
-HAN_CHONG_C65 = 10   # giây: hạn của MỌI lần chờ rào trong c65; bản gốc gặp nhau trong vài ms, bản mất song song trả sau đúng một hạn
-
 @ca
-def c65_chay_theo_thu_tu():   # #1322 M2/A3: n > 1 thì chạy CHỒNG thật; kết quả theo thứ tự việc, không theo thứ tự xong
-    import concurrent.futures, threading   # review lượt 5 (lớp F4, đổi cách làm): KHÔNG còn luồng điều phối phụ — `chay_theo_thu_tu` gọi THẲNG trên luồng của ca, nên
-    n = 4              # lỗi vô can của bộ gom hay của một việc tự bay về đây, NGOÀI `bang` ⇒ rc 4 ⇒ `TIN_DUNG_GIA`; không có `except` nào để nuốt
-    rao = threading.Barrier(n)   # n việc đầu phải CÙNG đứng ở rào thì mới qua: đủ n luồng chạy chồng, không chỉ "có hơn một"
-    chu, luong, cau_hinh = threading.get_ident(), {}, []   # review lượt 6–7 F4e/F4f: chứng cứ "mất song song" chỉ lấy từ ĐƯỜNG THỰC THI và CẤU HÌNH,
-    goc_tpe = concurrent.futures.ThreadPoolExecutor             # không suy từ thời gian chờ hay số luồng SAU khi rào vỡ (pool chậm/dùng lại luồng cũng cho ít luồng)
-    def ghi_cau_hinh(max_workers=None, *a, **k):   # ghi max_workers NGAY tại chỗ tạo executor rồi GỌI đúng thứ đang có — không kế thừa:
-        cau_hinh.append(max_workers)                 # kế thừa từ một đối tượng thay thế (vd. mock ném lỗi khi gọi) sẽ nuốt lỗi dựng pool (review lượt 7)
-        return goc_tpe(max_workers, *a, **k)
-    def ham(i):
-        if i < n:   # 6 việc mà n = 4: việc 4, 5 KHÔNG chờ rào (không bao giờ đủ người) — chúng chỉ để hàng đợi dài hơn số luồng
-            luong[i] = threading.get_ident()
-            try:
-                rao.wait(HAN_CHONG_C65)
-            except threading.BrokenBarrierError:   # rào vỡ (quá hạn ở việc này hay ở việc khác) trả GIÁ TRỊ, không ném: mất song song
-                return "vo"                        # là tín hiệu CHỐT (`bang` dưới), còn mọi ngoại lệ KHÁC vẫn bay ra nguyên văn
-        return i
-    with mock.patch("concurrent.futures.ThreadPoolExecutor", ghi_cau_hinh):
-        r = chay_theo_thu_tu(ham, range(6), n)
-    if "vo" in r:   # rào vỡ: CHỈ là chốt khi có chứng cứ — việc chạy trên chính luồng ca (đường tuần tự), HOẶC pool được TẠO với ít hơn n luồng
-        tuan_tu = chu in luong.values() or (len(cau_hinh) == 1 and isinstance(cau_hinh[0], int) and cau_hinh[0] < n)
-        if not tuan_tu:   # pool cấu hình đủ n mà rào vẫn vỡ (chậm, abort, lỗi vô can) ⇒ KHÔNG đo được, bay ra ngoài `bang` (rc 4)
-            raise RuntimeError(f"c65: rào vỡ mà pool cấu hình {cau_hinh!r} và không việc nào chạy trên luồng ca — không đo được chạy chồng: {r!r}")
-    bang("vo" not in r, f"n={n} phải chạy chồng: {n} việc đầu cùng đứng ở rào trong {HAN_CHONG_C65} s, được {r!r}, "
-                        f"luồng {sorted(set(luong.values()) - {chu})!r}{' + luồng ca' if chu in luong.values() else ''}")
-    bang(r == [0, 1, 2, 3, 4, 5], f"kết quả phải theo thứ tự việc, được {r!r}")
+def c65_chay_theo_thu_tu():   # #1322 M4/A3: thứ tự xong bị ĐẢO ⇒ đầu ra vẫn theo thứ tự việc; n = 1 tuần tự. Đúng phạm vi đặc tả:
     bang(chay_theo_thu_tu(lambda i: i * i, range(5), 1) == [0, 1, 4, 9, 16], "n=1 tuần tự, đúng thứ tự")
-    _thu_tu_tat_dinh()   # review lượt 4 F1: phép trên phụ thuộc lịch (T3 sống 1/5.000); phép này không
+    _thu_tu_tat_dinh()   # review lượt 4 F1: bộ thực thi điều khiển hoàn tất NGƯỢC, tất định. Phép đo "chạy chồng" (luồng phụ → Barrier →
+    # cấu hình pool, đột biến T4) đã GỠ sau Review Rescue Checkpoint thứ hai: nó nằm NGOÀI M4/A3 và là nơi lớp
+    # `loi-luong-nen-bi-tinh-la-giet-dung` tái diễn ở lượt 2–8 (sổ uỷ quyền #1322 comment 7046235668)
 
 @ca
 def c66_mien_sai_chan_truoc_moi_ca():   # #1322 A2: giá trị lạ ⇒ rc≠0 TRƯỚC khi chạy ca nào
@@ -2031,7 +2006,6 @@ DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — s
     ("T2_mac_dinh_ngoai_linux", '!= "Linux":' + _XD + '            return 1', '!= "Linux" and False:' + _XD + '            return 1', "c64"),
     ("T3_gom_theo_thu_tu_xong", 'return list(ex.' + 'map(ham, viec))',
      'return [f.result() for f in __import__("concurrent.futures").futures.as_completed([ex.submit(ham, x) for x in viec])]', "c65"),
-    ("T4_bo_song_song", 'if n <= 1:' + _XD + '        return [ham(x)', 'if True:' + _XD + '        return [ham(x)', "c65"),
     ("T5_kiem_mien_sau_ca", 'file=sys.stderr)' + _XD + '        return 2' + _XD + '    print(f"TIEN TRINH',
      'file=sys.stderr)' + _XD + '        n = 1' + _XD + '    print(f"TIEN TRINH', "c66"),
     ("T6_bo_lam_nong", '    lam_nong_nen(n)' + _XD + '    return chay_theo_thu_tu(', '    pass' + _XD + '    return chay_theo_thu_tu(', "c67"),

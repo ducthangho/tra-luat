@@ -236,9 +236,9 @@ def chung_hop_dong_loi(r):
     r.xs("N8.3", thu_tu_w3=ok is False and _ly(msg, "ds") and "HẠ CẤP" not in msg)
     r.home(); rc, _o, err = r.w1("N8.4-W1", _BA, thay=lambda d: d.endswith("cookies.json"))  # noqa: E702
     r.xs("N8.4-W1", oserror_w1=rc == 1 and _dung(err, "nlm-auth-pull", "ghi") and _tep(r.nlm) == ["auth.json"])
-    r.home(); nlm = r.nlm; rc, out, err = r.w2("N8.4-W2", {"nlm_auth": _BA}, thay=lambda d: d.startswith(nlm))  # noqa: E702
+    r.home(); nlm = r.nlm; rc, out, err = r.w2("N8.4-W2", {"nlm_auth": _BA}, thay=lambda d: os.path.normcase(os.path.normpath(d)).startswith(os.path.normcase(os.path.normpath(nlm)) + os.sep))  # noqa: E702
     r.xs("N8.4-W2", oserror_w2=rc == 1 and _dung(err, "bootstrap", "ghi") and _ac(out) and os.path.isfile(r.cfg))
-    r.home(); cfg = r.cfg; _ghi(cfg, '{"cu": 1}'); rc, out, err = r.w2("N8.4-W6", {}, thay=lambda d: d == cfg)  # noqa: E702
+    r.home(); cfg = r.cfg; _ghi(cfg, '{"cu": 1}'); rc, out, err = r.w2("N8.4-W6", {}, thay=lambda d: os.path.normcase(os.path.normpath(d)) == os.path.normcase(os.path.normpath(cfg)))  # noqa: E702
     r.xs("N8.4-W6", oserror_w6=rc == 1 and _dung(err, "bootstrap", "ghi") and "ghi config lỗi" not in out and os.environ.get("TL_TOKEN") == _TOK
          and _doc(cfg) == b'{"cu": 1}' and os.listdir(os.path.dirname(cfg)) == [os.path.basename(cfg)])
 def d5_khong_claude(r):

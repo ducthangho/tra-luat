@@ -167,3 +167,5 @@ M2 thuộc họ "khoá suy ra từ dữ liệu chưa kiểm kiểu": `str()` bi�
 - 2026-11-20T12:5xZ (phiên con của điều phối #1206): Codex lượt 2/10 `request_changes`: 4/5 finding lượt 1 đóng; còn mở P2 đột biến 1–2 nhận tín dụng từ
   `TypeError` vô can cùng lớp. Sửa: GIẾT của đột biến 1–2 đòi thêm VỊ TRÍ frame phát sinh (`_secrets_set_body`, câu gán `bundle["token"] = a.gas_token`),
   ghi qua bọc `_safe_exc` trong bộ nhớ; thêm tự kiểm (a2) `TypeError` vô can tại chốt ⇒ TÍN DỤNG GIẢ.
+- 2026-11-20T13:0xZ (phiên con của điều phối #1206): Codex lượt 3/10 `approve` trên bản `5e87538a…` (`rv/dac-ta-luot3.md`): P2 lượt 2 đóng (đột biến 1–2
+  thật vẫn GIẾT với điều kiện vị trí; `len(7)` tại chốt ra TÍN DỤNG GIẢ); không còn P0–P2, không P3 mới. Dòng nhật ký này thêm SAU approve, không đổi nội dung đặc tả.

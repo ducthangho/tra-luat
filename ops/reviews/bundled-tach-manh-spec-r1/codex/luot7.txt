@@ -1,0 +1,57 @@
+## Lượt 7 — BUNDLED-TACH-MANH r1
+
+**Còn 3 lớp mở với 8 biểu hiện, mức cao nhất P1.** M8 và §6 đã đặt commit manifest trước review và gate PR, nhưng chưa quy định cách chuyển từ worker head đỏ sang candidate cục bộ mà vẫn giữ đúng thứ tự trước push. N1/N2 còn cho phép một số triển khai sai hợp đồng đi qua phép nghiệm thu. N4 khớp dữ liệu đã đo ở thời điểm review, nhưng chỉ dẫn lấy đầu vào từ một ref có thể đổi.
+
+`reviewed_sha` `95d4eafb8772f7967bdfd926d5c574c9c379e618`, tree `a3c7edc5d351877a7eb2d8ddb7276149548b8b0a`, SHA-256 đặc tả `e38cc98644c6a4474e30b9527f0542fecd81c0fbedaacd7f77a266911afb59b6`. `git rev-parse`, `git merge-base`, `sha256sum` và `git diff --exit-code d5b79bb… HEAD -- ops/specs/BUNDLED-TACH-MANH-r1.md` trả rc 0. HEAD khớp ref được giao, merge-base khớp `0f9aa2a2cc697129e1f5be72feddf60986286865`, clone đầy đủ và checkout sạch.
+
+Reviewer độc lập họ OpenAI, `openai_codex / codex_service / machine`, Linux x86_64. Review tĩnh, chỉ đọc, ngoại tuyến. Model phục vụ và effort chưa có receipt thực thi để xác minh. Phán quyết áp dụng cho đặc tả `sensitive` tại SHA trên.
+
+## Bảng lớp lượt 7
+
+| class_slug | finding IDs/biểu hiện (chỗ) | mức cao nhất còn mở | nguồn lượt/SHA | cách vá chung | phép kiểm đóng lớp |
+|---|---|---|---|---|---|
+| `manifest-gan-candidate` | L7-01a: mốc bàn giao trước M8 chưa phân biệt với handoff dispatch review. L7-01b: M8/§6 chưa khóa đường push worker head đỏ. | P1 | L1–L4; L7 `95d4eafb…` | Mô tả một trình tự cục bộ từ bàn giao trung gian đến candidate đủ điều kiện review và push. | Walkthrough hai SHA theo §7/§12. Worker SHA chỉ đi tới bước M8. Candidate SHA có manifest, có evidence cùng SHA, qua review offline rồi mới được push. |
+| `tieu-chi-khong-the-do` | L7-02a: N1 không phân biệt gom tham lam và tách từng fragment. L7-02b: N1 không xác nhận đúng 192 KiB. L7-02c: N1 không đo tính duy nhất xuyên mảnh và đường trong lỗi thiếu mảnh. L7-02d: N2 không liệt kê nhãn sai hoặc dư trong điều kiện đỏ. L7-02e: N3 chỉ chốt hai trường con của audit. | P2 | L1/L4/L5; L7 `95d4eafb…` | Dùng kết quả kỳ vọng độc lập với triển khai và quy định điều kiện đỏ là phần bù của điều kiện đạt. Cần phép đối chứng riêng cho generator, loader và audit vì chúng trả các loại kết quả khác nhau. | Đối chứng xanh. Từng sai lệch tại L7-02a–e phải đỏ ở phép kiểm tương ứng, kèm đúng mã lỗi, trường dữ liệu hoặc tập nhãn. |
+| `dau-vao-phan-chung-khong-ghim` | L7-03: N4 lấy hai blob qua ref động, §7 và README gắn kết quả với nguyên mẫu đã đo. | P2 | L7 `95d4eafb…` | Ghim cùng một OID nguồn cho phép áp, phần kế thừa và mô tả bằng chứng. | Khi ref di chuyển, hai blob đầu vào vẫn lấy từ OID đã ghim. Thiếu object hoặc blob thì ghi phép đo chưa thực hiện được. |
+
+## Lịch sử lớp
+
+Đối chiếu cả sáu verdict được giao. Các mốc dưới đây là SHA của **đặc tả ở lượt tương ứng**. Phép kiểm lượt 7 là đọc lại đặc tả, protocol, diff và biên bản đã lưu. Các kết quả chạy dẫn từ lượt trước được ghi theo đúng cây của lượt đó.
+
+| class_slug | nguồn và phạm vi kiểm | nhãn | phép kiểm và kết quả |
+|---|---|---|---|
+| `manifest-gan-candidate` | L1 `98f1b102…`, L2 `d500dcd9…`, L3 `900a80c7…`; thêm biểu hiện §6 ở L4 `388c07ef…` | **VÁ MỘT PHẦN** | Đọc §0–§2, M8/M9, N3/N4, §6–§7, protocol §7/§9/§12 và workflow base. Biểu hiện cũ về manifest sau land, hai ratchet 185, vai ghi, phạm vi successor, review trước commit manifest và stop chặn bàn giao đều đã được xử lý trong câu chữ. L3 lưu đối chứng worker `1783/1785` và candidate `1785/1785`, strict verify `186/186`. L7-01a/b còn mở tại bước chuyển từ worker sang candidate. |
+| `so-do-loi-thoi` | L1 `98f1b102…` (ZIP và kích thước), L2 `d500dcd9…` (README), L3 `900a80c7…` và L4 `388c07ef…` (kiểm kê sau M9); thêm L6 `9c9c0b23…` (nguồn bằng chứng g) | **ĐÃ VÁ THẬT** | Đọc §0, `nang_tran.can_cu`, §4b, §8, README, `do-cuoi.txt`, `phan-chung-secrets-set.txt`, `dot-bien.txt` và verdict L1–L6. Các biểu hiện đã đóng: manifest 185→186 và ZIP 186→187, N4 `189.328 / 117.343 B`, năm tệp hiện hữu được băm lại, manifest `+18/−13`, tổng `+283/−60`, a–f quy về log nguyên mẫu và g quy về phép đo L6. L7-03 liên quan lựa chọn đầu vào cho lần chạy tương lai. |
+| `tieu-chi-khong-the-do` | L1 `98f1b102…` (N4), L5 `afc5be29…` (oracle một mảnh) | **VÁ MỘT PHẦN** | Đọc M1–M6, N1–N4, §4b, §6, `nguyen-mau.diff`, `dot-bien.txt` và phép đo g ở L6. Ba vế N4 đã có điều kiện đỏ tương ứng. `mot_manh` đã dùng hằng từ base cho cả hai API, và đối chứng L6 đo g chỉ làm đỏ `mot_manh`. Rà cùng cơ chế phân loại sai phát hiện L7-02a–e. |
+| `tran-khai-lech` | L1 `98f1b102…`, L3 `900a80c7…` | **ĐÃ VÁ THẬT** | Đọc §1, §6, §8–§10 và đối chiếu numstat L3. Khối nâng trần đủ trường. Trần áp dụng thống nhất 8 đường worker + 1 đường Land Operator, tối đa 450 dòng thêm. Mốc 7 và 8 đường nằm trong lịch sử Q2/Q5. |
+
+Giữ nguyên cả bốn slug đề xuất. Đối chiếu trên cùng tập finding đưa P2 về handoff ở L4 vào `manifest-gan-candidate`, vì điều kiện đó cản chuyển tiếp M8. P3 nguồn log g ở L6 thuộc `so-do-loi-thoi`, vì phép đo đúng nhưng câu dẫn chỉ sai nơi lưu bằng chứng. Không cần tách hoặc gộp slug.
+
+## Findings
+
+**L7-01a/b · `manifest-gan-candidate` · P1 · M8, N3, §6.** M8 nói Land Operator commit “lên nhánh PR” sau khi worker “bàn giao”. §6 chỉ hoãn *trình* review và gate PR. Với nghĩa handoff dispatch review ở protocol §7, handoff phải neo `head_sha == tested_sha` của candidate. Worker SHA ở đây còn manifest 185, và L3 đã đo selftest rc 1, `1783/1785`. Nếu nhánh PR được lập bằng cách push SHA worker trước M8, bước đó cũng vi phạm gate trước push của §12. Workflow base chạy selftest ở dòng 339–341, trước manifest tạm ở 521–532.
+
+> **Câu thay thế.** “Worker bàn giao trung gian nội bộ bằng SHA/tree cục bộ và evidence chuẩn bị, ghi rõ hai ca M9 đỏ dự kiến trên SHA worker. Land Operator được ủy quyền thêm commit manifest trên nhánh candidate cục bộ. Sau M8, hoàn tất preflight và N3 trên SHA candidate, cập nhật handoff để `head_sha == tested_sha`, lấy review offline trên SHA đó rồi mới push/mở PR và chạy gate PR.”
+
+**L7-02a–e · `tieu-chi-khong-the-do` · P2 · N1–N3, §4b.** Các biểu hiện sau có thể làm xanh một triển khai hoặc một phép chạy sai:
+
+- **a — Ranh mảnh.** Với sáu fragment khoảng 40 KiB ở hạn 100 KiB, M1 gom `2+2+2`. N1 chấp nhận `≥3` và nguyên mẫu chỉ kiểm thứ tự, khai báo có mặt và cận kích thước rộng. Sáu mảnh một fragment vẫn thỏa các vế này. Đột biến c chỉ kiểm cực kia là dồn hết vào một mảnh.
+- **b — Hạn sản xuất.** `kho_that` chỉ kiểm hằng `≤0,7·WARN`. Ví dụ `193 KiB` qua bất đẳng thức đó dù sai Q3. Fixture 100 KiB gán đè hằng nên không đo được giá trị sản xuất.
+- **c — Hợp đồng loader.** M2 yêu cầu duy nhất xuyên mảnh và lỗi thiếu mảnh kèm đúng đường. N1 và nguyên mẫu chỉ hoán đổi hai mảnh để kiểm thứ tự, rồi kiểm mã lỗi khi thiếu mảnh. Loader chỉ kiểm thứ tự, bỏ kiểm trùng, hoặc báo đường mảnh chính khi mảnh 2 thiếu vẫn có thể qua hai ca tương ứng. L1 có đối chứng trùng tên, nhưng đặc tả chưa đưa tính chất đó vào acceptance.
+- **d — Nhãn đột biến.** Cột đạt của N2 yêu cầu đúng nhãn. Cột “đỏ khi” chỉ nêu đột biến sống hoặc văng ngoại lệ, bỏ trường hợp `False` với nhãn sai hoặc nhãn dư. `dot-bien.txt` và L6 có đủ dữ liệu để phân biệt.
+- **e — Audit.** N3 đòi `warn=[]` và `files_scanned=74` nhưng chưa đòi `workflow-audit --strict` rc 0. `workflow.py` có thể giữ cả hai trường đó và trả rc 2 khi registry hoặc kernel làm `ok=false`. CI base gọi audit với `--strict`. Hai trường hiện ghi chưa đủ để quyết định gate audit đạt.
+
+> **Câu thay thế.** “N1 xác nhận hằng sản xuất bằng 196.608 B, fixture 100 KiB sinh đúng ba mảnh với nhóm `2+2+2` theo thứ tự, tên và danh sách khai đúng. Kiểm riêng tên trùng xuyên mảnh trên fixture vẫn giữ thứ tự, và kiểm mã cùng đường của mảnh bị thiếu. N2 đạt khi từng đột biến trả `False`, không văng và có tập nhãn đỏ đúng bằng hàng tương ứng của §4b. N3 yêu cầu `workflow-audit --strict --json` rc 0, `ok: true`, `py_size.warn == []`, `py_size.fail == []` và `files_scanned == 74`.”
+
+**L7-03 · `dau-vao-phan-chung-khong-ghim` · P2 · N4, §7, README bằng chứng.** `git rev-parse` xác nhận ref N4 đang trỏ `de341ed92f91f92d42b5db0f49223dde185f5f99`, có cùng tree `43aa5ab65a3862939f92b2da11744a94bc58c0e0` với `a8a3b3ca2fe5f48d8e6db64a8c6abacf97526b8c`. Số đo hiện có vì vậy khớp nguồn lúc review. Khi ref thay đổi, N4 có thể áp một fragment khác và vẫn xanh, trong khi con số `117.343 B` cùng kết luận về vị trí fragment ở §7 vẫn dẫn phép đo cũ.
+
+> **Câu thay thế.** “N4 lấy đúng hai blob tại `a8a3b3ca2fe5f48d8e6db64a8c6abacf97526b8c`. §7 và README dẫn cùng OID cho số đo N4. Nếu một object cần thiết vắng mặt, ghi N4 chưa đo được.”
+
+## Lớp mới, tái mở và điểm dừng
+
+- **Lớp mới:** `dau-vao-phan-chung-khong-ghim`.
+- **Lớp tái mở:** `manifest-gan-candidate` và `tieu-chi-khong-the-do` được báo mở lại so với trạng thái không còn P0–P2 ở verdict L6. `so-do-loi-thoi` đã đóng. Hai lớp mở lại không được tính vào tử số vá.
+- **Checkpoint §12:** `manifest-gan-candidate` đã xuất hiện ở L1, L2 và L3, rồi có biểu hiện tiếp nối ở L4. `so-do-loi-thoi` cũng xuất hiện qua ít nhất ba lượt. Chuyển bằng chứng tới Review Rescue Checkpoint và dừng vòng vá. Sáu verdict cũ vẫn tính vào ngân sách, nhưng không có bảng lớp cuối từng lượt đủ điều kiện để chứng nhận hai tỷ lệ chuyển tiếp theo §12. Lượt này dùng **7/10** lời gọi review đặc tả. Checkpoint do lớp lặp đã kích hoạt độc lập với trần đó.
+- **Chưa đo:** các phản chứng mới, N1–N4, strict verify và selftest đều `not_run` ở L7. CI GitHub và receipt runtime chưa xác minh trong phiên offline. Native Windows được miễn theo Q4. Các phép đo nguyên mẫu cũ chỉ là bằng chứng tham chiếu cho đặc tả. Mọi nghiệm thu triển khai và human audit vẫn cần evidence trên exact candidate SHA theo thẩm quyền của packet.
+
+KET_LUAN: request_changes

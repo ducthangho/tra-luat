@@ -1,0 +1,528 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf",
+  "reviewed_file_sha256": "4952e70fca6fb23de56703dc8022d7fd1f841f6514884ac8c70786e687b0277e",
+  "findings": [
+    {
+      "id": "B4-S05",
+      "class_slug": "b4-predicate-mutation-proof",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:57,65,75-76,98-102,176-178,199,205-234,245-248; acceptance 4",
+      "claim": "PARTIAL closure: G24 repairs the previous job-run-id hole, but the frozen matrix still does not prove every independent contract predicate. The remaining manifestations are missing REST UTF-8 coverage; missing assertions of the named measurement states; GET ordering after a failed audit; cleanup on timeout/SystemExit; and the unmeasurable branch of self-check 7b. A contradictory group-G instruction also assigns the wrong fixtures to G18-G24. Completing the 96 prescribed rows can therefore leave specified behavior unverified.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-r4-evidence/probe_h2.py; python3 -B /tmp/wp1462-r4-evidence/probe_contract_gaps.py; inspect all 96 matrix rows against sections 3-9",
+        "exit_code": 0,
+        "observed": [
+          "G01-G23 and the G24 layout all leave actual current-master K0-K7 green (24/24 rc=0). In the reference H2 predicate, G24 changes khac to du when only the J run_id filter is removed. The newly added T22-T25 pairs also distinguish their prescribed faults.",
+          "REST UTF-8 is an independent requirement at line 75. A valid permit response encoded as UTF-16 with BOM is refused by explicit UTF-8 decoding, but json.loads(body_bytes) autodetects UTF-16 and accepts it. Existing R targets contain no such body; T17 tests classifier stdout, a different decoder.",
+          "R01 and R07 require only CLI denial, not respectively khong_khop and vang_hoac_khong_quyen. Returning khong_doc_duoc for both still produces rc=12. O01/O02 check line presence/count, not these state values. The classifier diagnostic distinction la versus khong_giam likewise lacks a required exact-state assertion on its negative rows.",
+          "Moving GET to after condition (i) but before (ii) preserves D05: invalid dich evidence still produces zero requests. D02/D03/D04 still return red, which is all their rows require, while the moved GET is now sent on an invalid audit. The reference decision probe gives D02/D04: correct=(do,0), mutant=(do,1).",
+          "T20 observes cleanup only on success and T05/rc=1. A cleanup-only-on-normal-return countermodel passes both observations but leaks on timeout and SystemExit; section 5 explicitly promises both exceptional paths. T06 asserts the decision on timeout, not cleanup. The historical replay has 60 normal returns, so does not cover these paths.",
+          "Q05 tests only ls-remote/7a failure. Q06 tests a measured blob mismatch and Q08 a measured CRLF match; no row makes the 7b hash/blob measurement fail. This is a source/table coverage observation, not a measured production bypass.",
+          "Line 246 says every G row except G01-G06 measures du under the strict flag on DC-du. Rows G18-G23 instead require DC-delta/dich without that flag, and G24 requires DC-alpha. The following paragraph does not remove the conflicting instruction."
+        ]
+      },
+      "suggested_fix": {
+        "where": "The complete predicate-to-case-to-mutant matrix, GT-6/GT-7, group notes, and acceptance 4.",
+        "how": "Map each remaining independent predicate and observable state to a target and distinguishing fault. Add REST UTF-16 rejection; exact policy/classifier outcome assertions; a valid-dich/invalid-audit zero-GET case; timeout and SystemExit cleanup cases; and a 7b measurement-failure case. Correct the group-G fixture ranges. Keep one cause-class history rather than closing only G24.",
+        "test": "For each target, show a healthy control, the required correct result, and the prescribed mutant changing that exact result with ChotB4 raised by that target. State-collapse faults must fail exact-state assertions; cleanup/order faults must fail their resource/request assertions. Recount rows and mutants.",
+        "may_spawn": "Additional cases, mutants, evidence rows and measured size. Do not cut coverage, borrow another failing case, change old test expectations, or grant a size exception to accommodate them."
+      }
+    },
+    {
+      "id": "B4-S10",
+      "class_slug": "b4-sensitive-size-authority",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:278-281; mission-r86.json envelope.provider_budgets.size_rule",
+      "claim": "PARTIAL closure: the estimate-only exception is removed, but the operative stop rule still allows exceeding the authorized size before stopping. It measures at each local commit and stops when the measured delivery already exceeds the cap; r86 and this review assignment require stopping before exceeding. The same after-overflow rule is repeated for tran_moi.",
+      "evidence": {
+        "command": "Read mission-r86.json envelope.provider_budgets.size_rule; nl -ba ops/specs/wp1462-r1/SPEC.md | sed -n '275,287p'",
+        "exit_code": 0,
+        "observed": [
+          "r86 says: Default sensitive cap at lease; executor measures numstat and stops before exceeding; nang_tran only with measured numstat (ADR-0053), owner approval.",
+          "Line 279 measures at each local commit. Line 280 activates the stop when the measured full delivery exceeds the cap and requests that local commit SHA. Line 281 again says to stop if the subsequent measurement exceeds tran_moi. Thus an executor at +449 can commit another +2, measure +451, and comply with this text despite crossing the authorized +450 cap.",
+          "The activation line and five-file inventory are correct, and no effective estimated nang_tran remains. Those original manifestations are closed; the residual issue is the timing of the size-authority boundary."
+        ]
+      },
+      "suggested_fix": {
+        "where": "Kich thuoc, acceptance 9, and the pre-lease/resumption procedure.",
+        "how": "Make the before-overflow boundary operative: measure the in-cap implementation including new/staged delivery files, stop before applying the next increment that would cross the cap, and submit the measured partial numstat, exact base/local SHA and remaining work. Resume only after the measured exception is approved and installed in spec/Mission/lease. Do not require an already-over-cap local commit as the exception evidence.",
+        "test": "Walk through +449 followed by +2, exactly +450, and the corresponding boundary at tran_moi. The first must stop while the authorized implementation is still within its cap; exactly-at-cap is allowed, but further additions require the approved exception.",
+        "may_spawn": "A size revision and another author call/attempt, subject to the existing counters. The correction must not reintroduce an estimate-only exception or an unbudgeted sizing build."
+      }
+    },
+    {
+      "id": "B4-S13",
+      "class_slug": "b4-eligibility-permission-contract",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:53-59,62-68,141,259; plan r4 section 4 A+1 (lines 121-126 and 173-179)",
+      "claim": "H1 does not freeze the distinction between structural reduction eligibility and a switch-gated CI decision. Plan r4 requires chuan-bi to pass vars into the classifier and missing/unknown permission to yield chay. B4 removes every such permission input, yet expects the same entry point to emit bo_qua/dich before it reads the live switch. A producer implementing the stated CI fail-closed rule can therefore make beta unreachable, even with the correct live switch. The constant-output beta/delta fixtures conceal this integration ambiguity.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-r4-evidence/probe_contract_gaps.py; inspect ops/ci_duong_nhanh.py:794-827 and plan r4 A+1",
+        "exit_code": 0,
+        "observed": [
+          "The current producer prints its decision and writes the same decision to GITHUB_OUTPUT; it has no frozen separate eligibility interface. PR3/PR6 do not exist yet, so this is a specification integration counterexample, not a claim of a current production bug.",
+          "A stand-in producer following the plan rule emits cong_cu=bo_qua with the correct permission in its CI environment. Under B4 section 5’s fresh allowlisted environment, the same entry point emits cong_cu=chay with rc=0. The written H1 mapping yields khong_giam; section 4 rejects before GET, even though the live switch is stipulated correct.",
+          "The same dependency applies to g5_che_do=dich for PR6. H1 states names/framing but never says which outputs are raw eligibility and which are permission-filtered, nor how one entry point satisfies both consumers. GT-5/GT-7 use fixtures that print bo_qua/dich unconditionally, so the required tests do not resolve the producer contract."
+        ]
+      },
+      "suggested_fix": {
+        "where": "H1 producer/consumer contract, PR3/PR6 obligations, integration fixtures and any associated plan deviation.",
+        "how": "Freeze an explicit separation: for example, trusted stdout eligibility independent of switch state, with separately permission-gated CI exports. Specify both consumers and the fail-closed behavior when permission is absent; record any necessary plan interpretation/deviation for owner approval. Keep authorization in B4’s subsequent live GET and keep caller-controlled inputs unable to grant a reduction.",
+        "test": "Use a producer fixture implementing both eligibility and CI permission filtering. On the same eligible diff, missing/invalid CI permission must export the full CI decision; the trusted B4 call must still identify eligibility, then accept only a correct live switch. Exercise both bo_moi and che_do_dich and all switch states.",
+        "may_spawn": "An H1 revision and corresponding obligations in PR3/PR6. B4 must not edit their out-of-scope classifier/workflow files or reintroduce CI-log fallback, cached permission, or a caller-controlled allow switch."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "b4-ab-output-projection",
+      "finding_ids": [
+        "B4-S01"
+      ],
+      "manifestations": [
+        "Section 9 and acceptance 2 explicitly define projection P and allowed new diagnostics, with positive and negative comparator self-checks."
+      ],
+      "highest_open_severity": null,
+      "source_history": [
+        {
+          "round": 1,
+          "reviewed_sha": "7582454cff0563f22e0ca13fba9f1f0f04ad2485"
+        }
+      ],
+      "common_fix": "Keep the explicit output projection.",
+      "closing_check": "Verify every partition’s byte comparison and comparator self-checks."
+    },
+    {
+      "class_slug": "b4-future-workflow-shape",
+      "finding_ids": [
+        "B4-S02"
+      ],
+      "manifestations": [
+        "Acceptance 5 accepts full-only and full-plus-target YAML and rejects missing/duplicate steps and incomplete shard matrices."
+      ],
+      "highest_open_severity": null,
+      "source_history": [
+        {
+          "round": 1,
+          "reviewed_sha": "7582454cff0563f22e0ca13fba9f1f0f04ad2485"
+        }
+      ],
+      "common_fix": "Keep both allowed workflow shapes.",
+      "closing_check": "Six synthetic YAML cases plus the actual ci.yml."
+    },
+    {
+      "class_slug": "b4-real-transport-coverage",
+      "finding_ids": [
+        "B4-S03"
+      ],
+      "manifestations": [
+        "Sections 6a/6b and GT-2 require the actual transport for X01-X06; policy fakes are explicitly forbidden there."
+      ],
+      "highest_open_severity": null,
+      "source_history": [
+        {
+          "round": 1,
+          "reviewed_sha": "7582454cff0563f22e0ca13fba9f1f0f04ad2485"
+        }
+      ],
+      "common_fix": "Keep policy fake and real loopback transport tests separate.",
+      "closing_check": "Confirm X cases invoke _rest_get itself, including redirect destination count."
+    },
+    {
+      "class_slug": "b4-subprocess-network-isolation",
+      "finding_ids": [
+        "B4-S04"
+      ],
+      "manifestations": [
+        "GT-3 is the explicit instrumented subprocess exception; GT-4 retains the ban elsewhere; acceptance 6 requires fresh-process allow/deny controls and zero external connections."
+      ],
+      "highest_open_severity": null,
+      "source_history": [
+        {
+          "round": 1,
+          "reviewed_sha": "7582454cff0563f22e0ca13fba9f1f0f04ad2485"
+        }
+      ],
+      "common_fix": "Keep the instrumented-child exception and ordinary-child ban.",
+      "closing_check": "Four stateful child invocations and a banned-child control."
+    },
+    {
+      "class_slug": "b4-predicate-mutation-proof",
+      "finding_ids": [
+        "B4-S05"
+      ],
+      "manifestations": [
+        "REST UTF-8",
+        "state-oracle collapse",
+        "GET before failed audit",
+        "exceptional cleanup",
+        "7b unmeasurable path",
+        "contradictory group-G fixtures"
+      ],
+      "highest_open_severity": "P2",
+      "source_history": [
+        {
+          "round": 1,
+          "reviewed_sha": "7582454cff0563f22e0ca13fba9f1f0f04ad2485"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "0d80f45b72796af82899760fde20a15f2b108a37"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "6a0612fe4fe0e2bc9ad8cf674f70a794ac1f41d5"
+        }
+      ],
+      "common_fix": "Map each remaining independent predicate and observable state to a target and distinguishing fault. Add REST UTF-16 rejection; exact policy/classifier outcome assertions; a valid-dich/invalid-audit zero-GET case; timeout and SystemExit cleanup cases; and a 7b measurement-failure case. Correct the group-G fixture ranges. Keep one cause-class history rather than closing only G24.",
+      "closing_check": "For each target, show a healthy control, the required correct result, and the prescribed mutant changing that exact result with ChotB4 raised by that target. State-collapse faults must fail exact-state assertions; cleanup/order faults must fail their resource/request assertions. Recount rows and mutants."
+    },
+    {
+      "class_slug": "b4-replay-oracle-inputs",
+      "finding_ids": [
+        "B4-S06"
+      ],
+      "manifestations": [
+        "Acceptance 8 fixes code OID, historical parent pairs and an independent table hash. Re-executed the real producer: 60/60 rc=0, 42 day_du/18 duong_nhanh; hash aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a."
+      ],
+      "highest_open_severity": null,
+      "source_history": [
+        {
+          "round": 1,
+          "reviewed_sha": "7582454cff0563f22e0ca13fba9f1f0f04ad2485"
+        }
+      ],
+      "common_fix": "Keep offline replay separate from the live-M production call.",
+      "closing_check": "Exact per-row expected classes and no root-repository mutations in the future runner."
+    },
+    {
+      "class_slug": "b4-reenable-evidence-parity",
+      "finding_ids": [
+        "B4-S07"
+      ],
+      "manifestations": [
+        "Runbook item 3 and acceptance 10 retain full G5 on every affected H and current master until the full audit actually includes G5; owner/CI budgets remain explicit."
+      ],
+      "highest_open_severity": null,
+      "source_history": [
+        {
+          "round": 1,
+          "reviewed_sha": "7582454cff0563f22e0ca13fba9f1f0f04ad2485"
+        }
+      ],
+      "common_fix": "Keep the pre-PR5 evidence clause.",
+      "closing_check": "Human checklist covers affected heads, current master, and the transition after PR5."
+    },
+    {
+      "class_slug": "b4-prelease-mission-admission",
+      "finding_ids": [
+        "B4-S08"
+      ],
+      "manifestations": [
+        "The three pre-lease stages explicitly require hash approval, a separate installing Mission revision, then lease; r85 drafting authority is not treated as execution authority."
+      ],
+      "highest_open_severity": null,
+      "source_history": [
+        {
+          "round": 1,
+          "reviewed_sha": "7582454cff0563f22e0ca13fba9f1f0f04ad2485"
+        }
+      ],
+      "common_fix": "Keep distinct Mission installation and lease admission.",
+      "closing_check": "Read back installed packet/revision/generation/hash/base/write set/provider/budgets before lease."
+    },
+    {
+      "class_slug": "b4-classifier-line-framing",
+      "finding_ids": [
+        "B4-S09"
+      ],
+      "manifestations": [
+        "Section 5 specifies byte LF framing and stripping exactly one terminal CR. The actual producer under LF and simulated CRLF gives equal classes in 60/60; embedded CR is rejected. Native Windows remains a later qualification, not a claimed measurement here."
+      ],
+      "highest_open_severity": null,
+      "source_history": [
+        {
+          "round": 2,
+          "reviewed_sha": "0d80f45b72796af82899760fde20a15f2b108a37"
+        }
+      ],
+      "common_fix": "Keep exact one-CR framing and strict values.",
+      "closing_check": "T09-T11 plus real-producer LF/CRLF regression and separately authorized native qualification."
+    },
+    {
+      "class_slug": "b4-sensitive-size-authority",
+      "finding_ids": [
+        "B4-S10"
+      ],
+      "manifestations": [
+        "stop occurs after cap overflow, including tran_moi"
+      ],
+      "highest_open_severity": "P2",
+      "source_history": [
+        {
+          "round": 2,
+          "reviewed_sha": "0d80f45b72796af82899760fde20a15f2b108a37"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "6a0612fe4fe0e2bc9ad8cf674f70a794ac1f41d5"
+        }
+      ],
+      "common_fix": "Make the before-overflow boundary operative: measure the in-cap implementation including new/staged delivery files, stop before applying the next increment that would cross the cap, and submit the measured partial numstat, exact base/local SHA and remaining work. Resume only after the measured exception is approved and installed in spec/Mission/lease. Do not require an already-over-cap local commit as the exception evidence.",
+      "closing_check": "Walk through +449 followed by +2, exactly +450, and the corresponding boundary at tran_moi. The first must stop while the authorized implementation is still within its cap; exactly-at-cap is allowed, but further additions require the approved exception."
+    },
+    {
+      "class_slug": "b4-rest-transport-scope",
+      "finding_ids": [
+        "B4-S11"
+      ],
+      "manifestations": [
+        "Section 6b limits _rest_get to new switch REST requests and explicitly preserves existing Git transports and 7a ls-remote."
+      ],
+      "highest_open_severity": null,
+      "source_history": [
+        {
+          "round": 2,
+          "reviewed_sha": "0d80f45b72796af82899760fde20a15f2b108a37"
+        }
+      ],
+      "common_fix": "Keep the narrow REST scope.",
+      "closing_check": "Read all new and existing network call sites against B-6."
+    },
+    {
+      "class_slug": "b4-ab-population-partition",
+      "finding_ids": [
+        "B4-S12"
+      ],
+      "manifestations": [
+        "Acceptance 2 adds z/not_run. Current-code population probe executed 159 statically selected cases successfully; 146 actually call _c1106: z=4, a=3, b=104, c=35. The exact four named malformed-lease cases are z; no captured call is unclassified."
+      ],
+      "highest_open_severity": null,
+      "source_history": [
+        {
+          "round": 3,
+          "reviewed_sha": "6a0612fe4fe0e2bc9ad8cf674f70a794ac1f41d5"
+        }
+      ],
+      "common_fix": "Keep the complete four-way partition and early-exit byte equality.",
+      "closing_check": "Require all measured fixtures to belong to exactly one class; z forbids any K2b artifact."
+    },
+    {
+      "class_slug": "b4-eligibility-permission-contract",
+      "finding_ids": [
+        "B4-S13"
+      ],
+      "manifestations": [
+        "PR3 bo_moi eligibility versus CI permission",
+        "PR6 che_do_dich eligibility versus CI permission"
+      ],
+      "highest_open_severity": "P2",
+      "source_history": [
+        {
+          "round": 4,
+          "reviewed_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf"
+        }
+      ],
+      "common_fix": "Freeze an explicit separation: for example, trusted stdout eligibility independent of switch state, with separately permission-gated CI exports. Specify both consumers and the fail-closed behavior when permission is absent; record any necessary plan interpretation/deviation for owner approval. Keep authorization in B4’s subsequent live GET and keep caller-controlled inputs unable to grant a reduction.",
+      "closing_check": "Use a producer fixture implementing both eligibility and CI permission filtering. On the same eligible diff, missing/invalid CI permission must export the full CI decision; the trusted B4 call must still identify eligibility, then accept only a correct live switch. Exercise both bo_moi and che_do_dich and all switch states."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "b4-ab-output-projection",
+      "finding_ids": [
+        "B4-S01"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "Section 9 and acceptance 2 explicitly define projection P and allowed new diagnostics, with positive and negative comparator self-checks."
+    },
+    {
+      "class_slug": "b4-future-workflow-shape",
+      "finding_ids": [
+        "B4-S02"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "Acceptance 5 accepts full-only and full-plus-target YAML and rejects missing/duplicate steps and incomplete shard matrices."
+    },
+    {
+      "class_slug": "b4-real-transport-coverage",
+      "finding_ids": [
+        "B4-S03"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "Sections 6a/6b and GT-2 require the actual transport for X01-X06; policy fakes are explicitly forbidden there."
+    },
+    {
+      "class_slug": "b4-subprocess-network-isolation",
+      "finding_ids": [
+        "B4-S04"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "GT-3 is the explicit instrumented subprocess exception; GT-4 retains the ban elsewhere; acceptance 6 requires fresh-process allow/deny controls and zero external connections."
+    },
+    {
+      "class_slug": "b4-predicate-mutation-proof",
+      "finding_ids": [
+        "B4-S05"
+      ],
+      "status": "VA_MOT_PHAN",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "G24 and the added parser rows are feasible; remaining manifestations are detailed in B4-S05."
+    },
+    {
+      "class_slug": "b4-replay-oracle-inputs",
+      "finding_ids": [
+        "B4-S06"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "Acceptance 8 fixes code OID, historical parent pairs and an independent table hash. Re-executed the real producer: 60/60 rc=0, 42 day_du/18 duong_nhanh; hash aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a."
+    },
+    {
+      "class_slug": "b4-reenable-evidence-parity",
+      "finding_ids": [
+        "B4-S07"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "Runbook item 3 and acceptance 10 retain full G5 on every affected H and current master until the full audit actually includes G5; owner/CI budgets remain explicit."
+    },
+    {
+      "class_slug": "b4-prelease-mission-admission",
+      "finding_ids": [
+        "B4-S08"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "The three pre-lease stages explicitly require hash approval, a separate installing Mission revision, then lease; r85 drafting authority is not treated as execution authority."
+    },
+    {
+      "class_slug": "b4-classifier-line-framing",
+      "finding_ids": [
+        "B4-S09"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "Section 5 specifies byte LF framing and stripping exactly one terminal CR. The actual producer under LF and simulated CRLF gives equal classes in 60/60; embedded CR is rejected. Native Windows remains a later qualification, not a claimed measurement here."
+    },
+    {
+      "class_slug": "b4-sensitive-size-authority",
+      "finding_ids": [
+        "B4-S10"
+      ],
+      "status": "VA_MOT_PHAN",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "ADR activation/inventory and removal of estimated nang_tran are repaired; the operative after-overflow rule still contradicts r86."
+    },
+    {
+      "class_slug": "b4-rest-transport-scope",
+      "finding_ids": [
+        "B4-S11"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "Section 6b limits _rest_get to new switch REST requests and explicitly preserves existing Git transports and 7a ls-remote."
+    },
+    {
+      "class_slug": "b4-ab-population-partition",
+      "finding_ids": [
+        "B4-S12"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "frozen-spec contract, not future implementation acceptance",
+      "evidence": "Acceptance 2 adds z/not_run. Current-code population probe executed 159 statically selected cases successfully; 146 actually call _c1106: z=4, a=3, b=104, c=35. The exact four named malformed-lease cases are z; no captured call is unclassified."
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact-object-and-read-only-endpoints",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; sha256sum ops/specs/wp1462-r1/SPEC.md; compare /tmp/wp1462-r4-evidence/before.json and after.json",
+      "exit_code": 0,
+      "observed": "Exact assigned head/hash match; tree 05f5a46498dc6d1637a5f9cd31e822c19c7fc3da. Assigned HEAD/tree, tracked/index diffs and path inventories are identical at both endpoints. Tracked/index/untracked state is clean; ignored .codex/ exists at both endpoints. Its contents were not hashed."
+    },
+    {
+      "name": "current-code-and-authority",
+      "status": "passed",
+      "command": "GitHub fetch_commit(master, ops/wp1462-r1); git diff 0f9aa2a2cc697129e1f5be72feddf60986286865 origin/master -- the four relevant code/workflow paths; git show plan/mission r84-r86",
+      "exit_code": 0,
+      "observed": "GitHub confirms master 48d372e14f190dae83a75ccbca8ee9a0b25635c5 and candidate 0cfb9244c1c41548ca164368ea0a5754eeae4dcf, repeated at end. Product/test/classifier/ci.yml blobs are unchanged from the spec baseline. Plan hash 0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe. r86 permits 5 author/6 spec-review calls and carries the before-overflow size rule. API reads themselves have no shell rc; rc=0 is the local comparisons."
+    },
+    {
+      "name": "upstream-all-ref-freshness",
+      "status": "not_measured",
+      "command": "git fetch --all --prune in assigned checkout; scratch git fetch https://github.com/ducthangho/tra-luat '+refs/heads/*:refs/remotes/origin/*' --prune",
+      "exit_code": 128,
+      "observed": "Assigned .git is read-only; upstream scratch fetch cannot connect to proxy 127.0.0.1:36011. Separate fetches of all available local-mirror heads and remote-tracking refs succeeded. A first combined refspec attempt failed because duplicate source refs map to one destination; it was replaced by the two sequential fetches. GitHub branch search is partial and supplies names, not a complete current ref/OID attestation."
+    },
+    {
+      "name": "write-set-and-lease-scan",
+      "status": "passed",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <path>, in /tmp/wp1462-r4-fetch, separately for .claude/dev/packet_loop.py, .claude/dev/packet_loop_test.py, ops/specs/wp1462-r1/",
+      "exit_code": 0,
+      "observed": "All three scans report NGUOI_GIU 0 on fetched mirror refs; logs lease-product.txt, lease-tests.txt, lease-spec.txt. Five-file delivery fits r85 path scope and does not overlap the inspected B1/B3 delivery sets. This is not an all-upstream-ref freshness guarantee; recheck before lease."
+    },
+    {
+      "name": "H2-matrix-feasibility",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r4-evidence/probe_h2.py",
+      "exit_code": 0,
+      "observed": "24 actual current-CLI fixtures rc=0 with K0-K7 green. Reference H2 distinguishes G01-G23 and G24’s run-id counterexample. Reference model only; no future B4 implementation or production mutant was executed."
+    },
+    {
+      "name": "current-AB-population",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r4-evidence/probe_population.py; python3 -B /tmp/wp1462-r4-evidence/probe_early_exit.py",
+      "exit_code": 0,
+      "observed": "159 selected existing cases pass; 146 actually exercise _c1106, yielding z=4/a=3/b=104/c=35. All four original early exits are rc=2 with empty stdout. This verifies population/partition feasibility, not a future base/head A/B run."
+    },
+    {
+      "name": "remaining-matrix-and-countermodels",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r4-evidence/probe_remaining.py; python3 -B /tmp/wp1462-r4-evidence/probe_contract_gaps.py",
+      "exit_code": 0,
+      "observed": "96 unique rows, 11 shared-mutant rows, hence 85 declared mutants. Current CLI D02-D04 prerequisites pass. New T22-T25 pairs distinguish the specified faults. Reference probes reproduce UTF-16 acceptance without UTF-8 decoding, state collapse with unchanged denial, premature GET after valid dich/before invalid audit, exceptional cleanup leakage, and the H1 producer/consumer ambiguity. These are contract countermodels, not implemented B4 tests."
+    },
+    {
+      "name": "real-producer-replay-and-framing",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r4-evidence/probe_replay.py; python3 -B /tmp/wp1462-r4-evidence/probe_remaining.py",
+      "exit_code": 0,
+      "observed": "60/60 rc=0; 42 day_du/18 duong_nhanh; table hash aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a. LF/CRLF simulation classes equal in 60/60; embedded CR rejected. The reused legacy probe’s H1_exact_line_values_valid=false checks the obsolete unframed rule, not r4’s parser. No native Windows execution."
+    },
+    {
+      "name": "ruff-contract",
+      "status": "passed",
+      "command": "python3 -B: import ci_dang_ky_test; print(ci_dang_ky_test.loi_ruff_ci())",
+      "exit_code": 0,
+      "observed": "([], 3): three pin/probe contract checks, zero errors. This is separate from bare lint."
+    },
+    {
+      "name": "ruff-bare-F-baseline",
+      "status": "failed",
+      "command": "/root/.local/share/uv/tools/ruff/bin/python -m ruff check --no-cache --select F --output-format=json .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py",
+      "exit_code": 1,
+      "observed": "Ruff 0.16.9 reports 16 existing diagnostics; candidate product/test blobs equal current master, delta=0. This tool version is not CI pin 0.15.15. Raw evidence ruff-f.json."
+    },
+    {
+      "name": "doctrine-and-ADR-index",
+      "status": "passed",
+      "command": "python3 -B .claude/dev/packet_loop.py --state-dir <scratch> doctrine-scan --root .; python3 -B .claude/dev/packet_loop.py --state-dir <scratch> adr-song --root .",
+      "exit_code": 0,
+      "observed": "Scratch current-master: doctrine 12 files/0 copies; ADR index 66 files/66 rows, existing ADR-0016 exception."
+    },
+    {
+      "name": "future-implementation-and-external-gates",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "observed": "No future B4 source/mutant suite, full 1582-case suite, complete implementation A/B, native Windows qualification, live switch/W measurement, workflow dispatch, GitHub write, push, merge or LIVE action."
+    }
+  ],
+  "notes": "Round 4: three open P2 cause classes; no separate P0/P1 findings. The group-G wording manifestation is P3 within B4-S05. Slugs are assigned here to all 12 inherited finding IDs, preserving their original causes and source SHAs; no class is merged or renamed to reset history. Of the three classes open after round 3, only B4-S12 is fully closed at specification level: 1/3. B4-S05 and B4-S10 remain partial; B4-S13 is new and outside that denominator. B4-S05 has now appeared in four reviews and S10 in three: preserve the protocol section 12 checkpoint/history and r86 call counters; this report grants no new remediation calls. No removed authorization store, global FULL, CI-log fallback, updated_at predicate or pull_request_target mechanism was found reintroduced. D-6 still requires the future explicit owner/Mission disposition already required by the candidate. Model/provider identity: openai_codex, family openai, execution_surface codex_cli (shell/tool runtime), transport machine; exact served model/effort and launcher/service identity attestation KHONG_DO_DUOC. No cross_approved, human audit, execution lease or land authority is claimed. Runtime Linux/Python 3.13.18/Git 2.43.0; workspace-write sandbox with assigned Git metadata read-only. Scratch and disposable fixture repositories are under /tmp/wp1462-r4-evidence and /tmp/wp1462-r4-fetch; the assigned checkout was not edited. Endpoint equality does not attest every intermediate filesystem state or the source mirror’s contents. Upstream all-ref freshness and live owner budget counters were not independently measured; current master/candidate were checked by GitHub reads. All DA_VA_THAT labels mean the prior specification defect is closed, not that future implementation or CI acceptance passed. Final output validation initially used an overbroad assertion that ignored paths must be absent; it failed on the pre-existing .codex/ directory. Comparing against the recorded initial inventory confirms no path delta. This validation error was corrected; no repository file was changed or removed."
+}

@@ -1,0 +1,673 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1462",
+  "mission_id": "gh-1172",
+  "revision": 5,
+  "generation": null,
+  "generation_note": "Spec-drafting candidate;no execution generation is assigned in this SPEC or the B4 r85/r86 graph. Do not conflate revision5 or review round5 with a lease generation.",
+  "review_round": 5,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "session_id": "09c949c6524d4ccb9c972a8efa277d4c",
+  "model_reviewer_identity": {
+    "provider": "openai_codex",
+    "model_family": "openai",
+    "surface": "codex_cli",
+    "session_id": "09c949c6524d4ccb9c972a8efa277d4c",
+    "session_id_source": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/runs/09c949c6/run.json; exact head/workspace/name and prompt snapshot hash match",
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "xhigh",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "source": "Matching launcher run.json: executable /opt/node22/lib/node_modules/@openai/codex/bin/codex.js, provider openai_codex, surface codex_cli, transport machine. Served model/effort fields absent at read time."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+  "reviewed_tree": "8087269baea60f9e415a9fec32788e3622e562ef",
+  "reviewed_file": "ops/specs/wp1462-r1/SPEC.md",
+  "reviewed_file_sha256": "2fc80aa0ff20f0ba17c775807dfb7beb5dab21a5567820f7135fc557bd3f7416",
+  "current_master_sha": "48d372e14f190dae83a75ccbca8ee9a0b25635c5",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "changes_requested",
+  "assurance": "Independent read-only Codex CLI specification review with measured local evidence, a matching launcher run record, and GitHub readback of exact heads/checkpoint. No approval or land authority is asserted. Served model/effort remain KHONG_DO_DUOC; terminal launcher receipt must be finalized after this run.",
+  "evidence_url": null,
+  "findings": [
+    {
+      "id": "B4-S05",
+      "class_slug": "b4-predicate-mutation-proof",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:145-156,164-185,191-204,221-278,285-307,311-315,321",
+      "claim": "The inventory/rules do not close this cause class. They mix independent input guards, logically dependent guards, derived decisions and multi-part obligations, then impose the same single-input-change and single-mutant proof on all of them. Literally L-1/L-3 cannot be completed; interpreting them loosely as one passing row per ID can leave named contract behavior unproven. L-6 therefore either stops a correct executor or the executor must silently relax the frozen acceptance.",
+      "manifestations": [
+        {
+          "id": "S05-M1",
+          "location": "L-1/L-3/L-6; E07/E09/E21; P14/P15; Q and O groups",
+          "claim": "The promised independent predicates are not independent. P15 equality to the fixed JSON string implies P14 presence/string type. Removing only P14 while keeping P15 cannot change the policy result. E07 already quantifies over every shard, overlapping E09; changing a leaf also changes derived mode/decision observations, contrary to L-1 requiring every other predicate to keep its outcome. Positive invariants such as C01/C02/C30 and diagnostics O01-O10 are properties to observe under faults, not input predicates that a correct-code fixture can make false."
+        },
+        {
+          "id": "S05-M2",
+          "location": "GT-7; L-1; E01-E04; examples 312-314",
+          "claim": "The rule requires exactly one edit from one of four all-green fixtures, with K0-K7 still green. The examples themselves use non-green strict-mode setups or multiple preparatory changes. Actual current K2 rejects changing the sole run path/head/repository, masking E01-E03 before K2b. Alternate-run topology can solve masking, but L-1 must allow an explicit per-predicate healthy setup/control rather than pretending all such preparation is one edit of the fixed four fixtures."
+        },
+        {
+          "id": "S05-M3",
+          "location": "L-1/L-3/L-5; E04/E22; Q12; C04/C08/C15; P05/P17/P20; V06; O03/O08/O09",
+          "claim": "Several IDs bundle distinct branches, domains or observables while only one target/mutant is mandatory. L-5 does not define atomic decomposition or require all named alternatives in an existing row; its clause scan also starts at section 3 while exact-match variants originate in section 2. P17 can use uppercase input and kill removal of equality with ChotB4 while a strip-normalizing implementation passes that target and accepts a forbidden leading-space value. The plan explicitly requires empty, case, whitespace, cross-class and unreadable cases. Similar bundling includes three names in E22, two missing files in Q12, CR/space/tab in C15, connection/TLS in V06 and three independent fields in O08. This is a coverage counterexample, not a claim that a complete future B4 suite has been executed."
+        },
+        {
+          "id": "S05-M4",
+          "location": "Q14 versus P01/P02 and sections 6a/8",
+          "claim": "Q14 unconditionally requires one request when (i) and (ii) are true. P01/P02 require zero requests when the repository is wrong or the read-ban variable is set, including that same state. The inventory thus contradicts the operative decision contract. This is the same inventory-normalization cause, not a separate production finding."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1462-r5-evidence/probe_proof_rules.py",
+          "exit_code": 0,
+          "observed": "114 rows, groups E22/Q14/S8/C31/P21/V8/O10; arithmetic lower bound 131. P14/P15 probe: 13 JSON-domain representatives, 0 P14=false/P15=true witnesses and 0 output changes after dropping P14. Equality to the fixed string also proves the implication for the whole JSON value domain. Removing shard 7 changes both E07 and E09. Q14 has three suppressor combinations demanding 1 where sections 6/8 demand 0. P17 target: correct=khong_khop/no exception; remove-equality mutant=khop/ChotB4; strip fault=khong_khop/no exception. On leading-space input, correct=khong_khop but strip fault=khop."
+        },
+        {
+          "command": "python3 -B /tmp/wp1462-r5-evidence/probe_current.py",
+          "exit_code": 0,
+          "observed": "Actual current-master CLI: healthy fixture rc0; sole-run path/head/repository edits each rc12 with THIẾU K2 CI and no stdout. All 53 cong_m9_* cases pass. These runs establish masking and baseline behavior, not future B4 behavior."
+        },
+        {
+          "command": "Read all 114 rows against sections 2-9, GT-1..GT-7, L-1..L-6 and acceptance 4; inventory-audit.json",
+          "exit_code": 0,
+          "observed": "Whole-inventory scan identifies dependent/derived predicates, bundled obligations, fixture-domain mismatch and Q14 suppressors. All seven groups were inspected; row count alone is not acceptance evidence."
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC.md, inventory schema and L-1..L-6, then GT-7/examples and acceptance 4. The defect is the proof contract across the whole inventory; adding another isolated row cannot repair it.",
+        "how": "Keep the authorized inventory approach. Distinguish independent leaf guards from derived obligations and redundant implications; record dependencies and permitted domains. Require isolation of the chosen input/fault while allowing its downstream derived observations to change. Permit documented predicate-specific setup/control pairs with K0-K7 green. Remove the impossible independent-mutation requirement for P14 by documenting its implication from exact-name equality, preserving the product contract. Decompose every bundled row or require explicit coverage of each named branch/domain/observable, including two directions and unmeasurable outcomes. Qualify Q14 by P01/P02 or distinguish entry into the read stage from actual network requests. Keep ChotB4 credit tied to the actual target exception, and keep stop-on-unproven obligations.",
+        "locking_test": "Run probe_proof_rules.py and probe_current.py as review counterexamples, then have the executor produce actual case/mutant runs on H. Closure requires: a consistent dependency/implication treatment for P14/P15 and E07/E09; K2-green alternate-run controls for E01-E04; separate empty/case/whitespace/cross-class P17 targets with normalization faults killed by their own ChotB4; all named sub-obligations in bundled rows; and valid-dich/valid-audit controls with P01 or P02 blocking GET. A mutant sending GET despite P02 must die on the zero-request target. A fulfilled-ID count or a different failing case is insufficient.",
+        "may_spawn": "More cases, mutants and evidence rows; a revised lower-bound count and measured candidate size; another spec revision subject to the exhausted author budget. Over-correcting can introduce catch-all exception credit, artificial redundant product branches, weakened isolation or out-of-scope production changes. None is authorized by this suggestion."
+      }
+    },
+    {
+      "id": "B4-S14",
+      "class_slug": "b4-final-head-evidence-cycle",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:326,334-339,348-350",
+      "claim": "The final size receipt has a circular commit binding. KET_QUA.md is one of the five files delivered in H, but the size procedure requires measuring that exact H and recording both SHA values and its numstat in KET_QUA.md before submitting H. Committing that receipt produces a different head and potentially a different size; leaving it uncommitted means it is not the declared delivered evidence. No final external receipt or explicit two-stage binding is specified. This is a final-evidence feasibility defect, separate from the now-resolved cap timing interpretation in B4-S10.",
+      "manifestations": [
+        {
+          "id": "S14-M1",
+          "location": "write set item 5 plus size measurement and acceptance 9",
+          "claim": "Writing final-H measurements into a tracked file contained by final H invalidates the recorded H/numstat unless the attestation carrier is explicitly separated."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+          "exit_code": 0,
+          "observed": "Disposable documentation-only Git probe: measured H=09c3e3a5bcccdd52273e5914f204742210f55659; after recording H/base/numstat in tracked KET_QUA.md, delivered H=aed30c840989a1f8e141ef62cb3f2ed95dc404e2. Equality=false. Measured additions: KET_QUA.md=1, note.md=1; delivered additions: KET_QUA.md=4, note.md=1. No reviewed repository or product source was modified."
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC.md size procedure, write-set item 5 and acceptance 9; the existing do/do_b4.py measurement command is the natural output producer because it already owns the size/evidence report.",
+        "how": "Freeze the five-file candidate first, including its committed test report. Measure all five files on that final H and carry the final H/tree/base/numstat in an external handoff/receipt outside H. Explicitly distinguish that final attestation from earlier measurements stored in KET_QUA.md. Any change to a delivered file creates a new H and requires a new final measurement. Do not exclude KET_QUA.md from the size cap or enlarge the write set merely to evade the cycle.",
+        "locking_test": "A scratch measurement test accepts a receipt whose recorded head/tree and numstat match the frozen candidate, then changes and recommits KET_QUA.md and rejects the old receipt. The measurement-script mutant comparing the receipt to H’s parent, or ignoring changes in KET_QUA.md, must fail that target. This can be a test of the existing measurement script; no new product gate is required.",
+        "may_spawn": "A small handoff/schema clarification and external evidence artifact. Risks are accidentally measuring only product files, trusting a predecessor SHA, or changing the candidate after owner/reviewer approval. Keep the final receipt separate while counting every delivered file."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "b4-predicate-mutation-proof",
+      "finding_ids": [
+        "B4-S05"
+      ],
+      "manifestations": [
+        {
+          "id": "S05-M1",
+          "location": "L-1/L-3/L-6; E07/E09/E21; P14/P15; Q and O groups",
+          "claim": "The promised independent predicates are not independent. P15 equality to the fixed JSON string implies P14 presence/string type. Removing only P14 while keeping P15 cannot change the policy result. E07 already quantifies over every shard, overlapping E09; changing a leaf also changes derived mode/decision observations, contrary to L-1 requiring every other predicate to keep its outcome. Positive invariants such as C01/C02/C30 and diagnostics O01-O10 are properties to observe under faults, not input predicates that a correct-code fixture can make false."
+        },
+        {
+          "id": "S05-M2",
+          "location": "GT-7; L-1; E01-E04; examples 312-314",
+          "claim": "The rule requires exactly one edit from one of four all-green fixtures, with K0-K7 still green. The examples themselves use non-green strict-mode setups or multiple preparatory changes. Actual current K2 rejects changing the sole run path/head/repository, masking E01-E03 before K2b. Alternate-run topology can solve masking, but L-1 must allow an explicit per-predicate healthy setup/control rather than pretending all such preparation is one edit of the fixed four fixtures."
+        },
+        {
+          "id": "S05-M3",
+          "location": "L-1/L-3/L-5; E04/E22; Q12; C04/C08/C15; P05/P17/P20; V06; O03/O08/O09",
+          "claim": "Several IDs bundle distinct branches, domains or observables while only one target/mutant is mandatory. L-5 does not define atomic decomposition or require all named alternatives in an existing row; its clause scan also starts at section 3 while exact-match variants originate in section 2. P17 can use uppercase input and kill removal of equality with ChotB4 while a strip-normalizing implementation passes that target and accepts a forbidden leading-space value. The plan explicitly requires empty, case, whitespace, cross-class and unreadable cases. Similar bundling includes three names in E22, two missing files in Q12, CR/space/tab in C15, connection/TLS in V06 and three independent fields in O08. This is a coverage counterexample, not a claim that a complete future B4 suite has been executed."
+        },
+        {
+          "id": "S05-M4",
+          "location": "Q14 versus P01/P02 and sections 6a/8",
+          "claim": "Q14 unconditionally requires one request when (i) and (ii) are true. P01/P02 require zero requests when the repository is wrong or the read-ban variable is set, including that same state. The inventory thus contradicts the operative decision contract. This is the same inventory-normalization cause, not a separate production finding."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_rounds": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "source_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+      "previous_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf",
+      "common_fix": "Keep the authorized inventory approach. Distinguish independent leaf guards from derived obligations and redundant implications; record dependencies and permitted domains. Require isolation of the chosen input/fault while allowing its downstream derived observations to change. Permit documented predicate-specific setup/control pairs with K0-K7 green. Remove the impossible independent-mutation requirement for P14 by documenting its implication from exact-name equality, preserving the product contract. Decompose every bundled row or require explicit coverage of each named branch/domain/observable, including two directions and unmeasurable outcomes. Qualify Q14 by P01/P02 or distinguish entry into the read stage from actual network requests. Keep ChotB4 credit tied to the actual target exception, and keep stop-on-unproven obligations.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1462-r5-evidence/probe_proof_rules.py; python3 -B /tmp/wp1462-r5-evidence/probe_current.py",
+        "result": "Counterexample reproduced, rc 0; findings[].evidence records the observations. Not closed.",
+        "unmeasured": "Revised contract and future final-H case/mutant or receipt proofs have not been produced.",
+        "required_closure": "Run probe_proof_rules.py and probe_current.py as review counterexamples, then have the executor produce actual case/mutant runs on H. Closure requires: a consistent dependency/implication treatment for P14/P15 and E07/E09; K2-green alternate-run controls for E01-E04; separate empty/case/whitespace/cross-class P17 targets with normalization faults killed by their own ChotB4; all named sub-obligations in bundled rows; and valid-dich/valid-audit controls with P01 or P02 blocking GET. A mutant sending GET despite P02 must die on the zero-request target. A fulfilled-ID count or a different failing case is insufficient."
+      },
+      "source_history": [
+        {
+          "round": 1,
+          "reviewed_sha": "7582454cff0563f22e0ca13fba9f1f0f04ad2485"
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "0d80f45b72796af82899760fde20a15f2b108a37"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "6a0612fe4fe0e2bc9ad8cf674f70a794ac1f41d5"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6"
+        }
+      ]
+    },
+    {
+      "class_slug": "b4-final-head-evidence-cycle",
+      "finding_ids": [
+        "B4-S14"
+      ],
+      "manifestations": [
+        {
+          "id": "S14-M1",
+          "location": "write set item 5 plus size measurement and acceptance 9",
+          "claim": "Writing final-H measurements into a tracked file contained by final H invalidates the recorded H/numstat unless the attestation carrier is explicitly separated."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_rounds": [
+        5
+      ],
+      "source_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+      "previous_sha": null,
+      "common_fix": "Freeze the five-file candidate first, including its committed test report. Measure all five files on that final H and carry the final H/tree/base/numstat in an external handoff/receipt outside H. Explicitly distinguish that final attestation from earlier measurements stored in KET_QUA.md. Any change to a delivered file creates a new H and requires a new final measurement. Do not exclude KET_QUA.md from the size cap or enlarge the write set merely to evade the cycle.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+        "result": "Counterexample reproduced, rc 0; findings[].evidence records the observations. Not closed.",
+        "unmeasured": "Revised contract and future final-H case/mutant or receipt proofs have not been produced.",
+        "required_closure": "A scratch measurement test accepts a receipt whose recorded head/tree and numstat match the frozen candidate, then changes and recommits KET_QUA.md and rejects the old receipt. The measurement-script mutant comparing the receipt to H’s parent, or ignoring changes in KET_QUA.md, must fail that target. This can be a test of the existing measurement script; no new product gate is required."
+      },
+      "source_history": [
+        {
+          "round": 5,
+          "reviewed_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6"
+        }
+      ]
+    },
+    {
+      "class_slug": "b4-sensitive-size-authority",
+      "finding_ids": [
+        "B4-S10"
+      ],
+      "manifestations": [
+        "Cap timing/default and raised cap"
+      ],
+      "highest_open_severity": null,
+      "source_rounds": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "source_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+      "previous_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf",
+      "common_fix": "Retain the explicit checkpoint interpretation and boundary rule.",
+      "closing_check": {
+        "command": "GitHub fetch_issue_comments #1462; read ADR-0044 and SPEC lines 343-356; python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+        "result": "CLOSED at specification level: Read back comment 7046200733 authorizing the delivered-candidate interpretation. r5 forbids push/review/audit of an over-cap H and applies the same rule to tran_moi. Boundary walk: 449/450 allowed, 451 refused; for illustrative cap600:599/600 allowed,601 refused. Estimated nang_tran remains withdrawn; a future actual measured exception and author-budget decision are still required. API read has no shell rc; rc0 belongs to the local probe.",
+        "unmeasured": "No remaining measurement to close this spec defect; actual implementation, native host and authority installation are separate future gates."
+      },
+      "source_history": [
+        {
+          "round": 2,
+          "reviewed_sha": "0d80f45b72796af82899760fde20a15f2b108a37"
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "6a0612fe4fe0e2bc9ad8cf674f70a794ac1f41d5"
+        },
+        {
+          "round": 4,
+          "reviewed_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6"
+        }
+      ]
+    },
+    {
+      "class_slug": "b4-eligibility-permission-contract",
+      "finding_ids": [
+        "B4-S13"
+      ],
+      "manifestations": [
+        "Both PR3 bo_moi and PR6 che_do_dich producer/consumer channels"
+      ],
+      "highest_open_severity": null,
+      "source_rounds": [
+        4,
+        5
+      ],
+      "source_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+      "previous_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf",
+      "common_fix": "Retain independent structural stdout and permission-gated CI output with acceptance 11.",
+      "closing_check": {
+        "command": "Read SPEC section 5, GT-5, acceptance 11 and D-7; python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+        "result": "CLOSED at specification level: Two explicit channels: dk_* stdout independent of permission; GITHUB_OUTPUT gated by permission; trusted consumer omits caller permission and still uses live GET. Both classes required. Reference truth table:64 combinations,8 accepted,56 denied,0 GET on noneligible inputs. This checks contract consistency only; the future producer/consumer and Windows execution remain unimplemented/unrun, not open measurements required to close this specification ambiguity.",
+        "unmeasured": "No remaining measurement to close this spec defect; actual implementation, native host and authority installation are separate future gates."
+      },
+      "source_history": [
+        {
+          "round": 4,
+          "reviewed_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf"
+        },
+        {
+          "round": 5,
+          "reviewed_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6"
+        }
+      ]
+    }
+  ],
+  "class_mapping": [],
+  "counts": {
+    "open_findings": 2,
+    "open_classes": 2,
+    "open_manifestations": 5,
+    "P0": 0,
+    "P1": 0,
+    "P2": 2,
+    "P3": 0,
+    "prior_open_classes": 3,
+    "prior_classes_closed": 2,
+    "closure_ratio": "2/3",
+    "reviewed_classes": 4,
+    "listed_manifestations": 7
+  },
+  "prior_findings_check": [
+    {
+      "id": "B4-S05",
+      "class_slug": "b4-predicate-mutation-proof",
+      "status": "VÁ SINH LỖI MỚI",
+      "source_round": 4,
+      "source_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf",
+      "scope": "Specification contract only",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-r5-evidence/probe_proof_rules.py; python3 -B /tmp/wp1462-r5-evidence/probe_current.py; compare r4/r5 sections 3-9 and acceptance",
+        "exit_code": 0,
+        "observed": "Old manifestations have explicit destinations: P10 strict decode, P18-P20/Q05-Q06 exact states, Q14 order, C30/C31 four exits, S04/S05 failures; obsolete group-G instruction removed. But L-1/L-3 introduces unsatisfiable dependent-guard proofs; bundled rows and Q14 contradiction keep the cause class open. Actual future B4 cases/mutants do not exist yet."
+      }
+    },
+    {
+      "id": "B4-S10",
+      "class_slug": "b4-sensitive-size-authority",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf",
+      "scope": "Specification cap interpretation, not an implementation size approval",
+      "evidence": {
+        "command": "GitHub fetch_issue_comments #1462; read ADR-0044 and SPEC lines 343-356; python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+        "exit_code": 0,
+        "observed": "Read back comment 7046200733 authorizing the delivered-candidate interpretation. r5 forbids push/review/audit of an over-cap H and applies the same rule to tran_moi. Boundary walk: 449/450 allowed, 451 refused; for illustrative cap600:599/600 allowed,601 refused. Estimated nang_tran remains withdrawn; a future actual measured exception and author-budget decision are still required. API read has no shell rc; rc0 belongs to the local probe."
+      }
+    },
+    {
+      "id": "B4-S13",
+      "class_slug": "b4-eligibility-permission-contract",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf",
+      "scope": "Specification interface and acceptance, not future PR3/PR6 implementation",
+      "evidence": {
+        "command": "Read SPEC section 5, GT-5, acceptance 11 and D-7; python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+        "exit_code": 0,
+        "observed": "Two explicit channels: dk_* stdout independent of permission; GITHUB_OUTPUT gated by permission; trusted consumer omits caller permission and still uses live GET. Both classes required. Reference truth table:64 combinations,8 accepted,56 denied,0 GET on noneligible inputs. This checks contract consistency only; the future producer/consumer and Windows execution remain unimplemented/unrun, not open measurements required to close this specification ambiguity."
+      }
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "b4-predicate-mutation-proof",
+      "finding_ids": [
+        "B4-S05"
+      ],
+      "status": "VÁ SINH LỖI MỚI",
+      "source_round": 4,
+      "source_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-r5-evidence/probe_proof_rules.py; python3 -B /tmp/wp1462-r5-evidence/probe_current.py; compare r4/r5 sections 3-9 and acceptance",
+        "exit_code": 0,
+        "observed": "Old manifestations have explicit destinations: P10 strict decode, P18-P20/Q05-Q06 exact states, Q14 order, C30/C31 four exits, S04/S05 failures; obsolete group-G instruction removed. But L-1/L-3 introduces unsatisfiable dependent-guard proofs; bundled rows and Q14 contradiction keep the cause class open. Actual future B4 cases/mutants do not exist yet."
+      },
+      "unmeasured": "Future implementation is not reviewed;S05 revised proof contract remains required."
+    },
+    {
+      "class_slug": "b4-sensitive-size-authority",
+      "finding_ids": [
+        "B4-S10"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf",
+      "evidence": {
+        "command": "GitHub fetch_issue_comments #1462; read ADR-0044 and SPEC lines 343-356; python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+        "exit_code": 0,
+        "observed": "Read back comment 7046200733 authorizing the delivered-candidate interpretation. r5 forbids push/review/audit of an over-cap H and applies the same rule to tran_moi. Boundary walk: 449/450 allowed, 451 refused; for illustrative cap600:599/600 allowed,601 refused. Estimated nang_tran remains withdrawn; a future actual measured exception and author-budget decision are still required. API read has no shell rc; rc0 belongs to the local probe."
+      },
+      "unmeasured": "No remaining spec-level closing measurement;future implementation/external gates remain separate."
+    },
+    {
+      "class_slug": "b4-eligibility-permission-contract",
+      "finding_ids": [
+        "B4-S13"
+      ],
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "0cfb9244c1c41548ca164368ea0a5754eeae4dcf",
+      "evidence": {
+        "command": "Read SPEC section 5, GT-5, acceptance 11 and D-7; python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+        "exit_code": 0,
+        "observed": "Two explicit channels: dk_* stdout independent of permission; GITHUB_OUTPUT gated by permission; trusted consumer omits caller permission and still uses live GET. Both classes required. Reference truth table:64 combinations,8 accepted,56 denied,0 GET on noneligible inputs. This checks contract consistency only; the future producer/consumer and Windows execution remain unimplemented/unrun, not open measurements required to close this specification ambiguity."
+      },
+      "unmeasured": "No remaining spec-level closing measurement;future implementation/external gates remain separate."
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": 1,
+      "hypothesis": "The proof inventory may require equivalent mutants or mutually dependent fixture conditions.",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_proof_rules.py",
+      "real_output": "P14/P15:13 representatives; zero independent witness; zero changes from dropping P14. E07/E09 both change on missing shard7.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": 2,
+      "hypothesis": "One target per composite row may leave an explicitly prohibited normalization unproved.",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_proof_rules.py",
+      "real_output": "P17 uppercase target kills remove-equality by ChotB4; strip fault passes that same target yet accepts leading-space permit.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": 3,
+      "hypothesis": "A network-ordering inventory rule may contradict read suppressors.",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_proof_rules.py",
+      "real_output": "Q14 promises1 for all four i=true/ii=true suppressor combinations; operative sections6/8 promise0 for three of them.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": 4,
+      "hypothesis": "Existing K2 may mask a target before the new gate can execute.",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_current.py",
+      "real_output": "Healthy CLI rc0; sole run path/head/repository edits each rc12, THIẾU K2 CI. M9 baseline53/53.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": 5,
+      "hypothesis": "The eligibility/permission split may still make beta unreachable.",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py; read section5/acceptance11",
+      "real_output": "Reference64 combinations:8 accepted/56 denied;0 noneligible GET; both class contracts explicitly separate the two channels.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": 6,
+      "hypothesis": "The real historical classifier replay may disagree with the fixed oracle.",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_replay.py",
+      "real_output": "60/60 rc0;18 duong_nhanh,42 day_du;sha256 aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": 7,
+      "hypothesis": "The existing A/B fixture population may contain uncovered early-exit cases.",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_population.py",
+      "real_output": "159 selected pass;146 invoke _c1106; z4/a3/b104/c35; exact four malformed-lease cases are z; no unclassified invocation.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": 8,
+      "hypothesis": "Size authority may still permit delivery above the approved cap.",
+      "command": "GitHub read comment7046200733; python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+      "real_output": "Checkpoint confirms candidate-only cap.449/450 allowed,451 denied; raised-cap boundary checked analogously.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": 9,
+      "hypothesis": "A tracked final-H receipt may invalidate the exact head it claims to measure.",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+      "real_output": "Measured09c3e3a5 -> delivered aed30c84 after receipt commit; head differs and additions2 ->5.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": 10,
+      "hypothesis": "The effective B4 write set may overlap an active lease.",
+      "command": "Scratch fetch of mirror heads/remote refs; upstream fetch; python3 -B ops/lease_publish.py ai-dang-giu <each B4 path/prefix>",
+      "real_output": "428 available refs;3 path scans rc0/NGƯỜI_GIỮ0; B1/B3 sets disjoint from B4. Direct upstream fetch rc128: proxy127.0.0.1:36011 unavailable. All-upstream freshness not established.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "direction": 11,
+      "hypothesis": "Plan-removed authority stores or scope changes may have reappeared.",
+      "command": "Read plan-r4 sections4/10/12, Mission r84-r86, SPEC sections1-10/procedure/deviations and sibling write sets",
+      "real_output": "Plan hash matches0f287ce4...; no authorization store/global FULL/CI-log fallback/updated_at predicate/pull_request_target reintroduced. r85 drafting is separated from future Mission admission and lease. D-6/D-7 still require stated future dispositions.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "SPEC exact object",
+      "declared": "H a6ae5d1811bae77a804c0e93c6d35a9c0240bff6;sha2562fc80aa0...",
+      "measured": "H matches;full sha2562fc80aa0ff20f0ba17c775807dfb7beb5dab21a5567820f7135fc557bd3f7416",
+      "matches": true,
+      "command": "git rev-parse HEAD;sha256sum ops/specs/wp1462-r1/SPEC.md"
+    },
+    {
+      "claim": "Inventory and minimum targets",
+      "declared": "114 predicates;at least131 targets",
+      "measured": "E22+Q14+S8+C31+P21+V8+O10=114;114+11+6=131",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_proof_rules.py",
+      "limit": "Arithmetic only;the claimed independence/completeness is disproved in S05."
+    },
+    {
+      "claim": "Historical replay",
+      "declared": "60;18 fast/42 full;aa932267...",
+      "measured": "60/60 rc0,18/42,same full hash",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_replay.py"
+    },
+    {
+      "claim": "Registered baseline cases",
+      "declared": 1582,
+      "measured": 1582,
+      "matches": true,
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_current.py",
+      "limit": "Registry count;only selected cases executed."
+    },
+    {
+      "claim": "A/B fixture population",
+      "declared": "Recount by case,do not rely on119+5 line count",
+      "measured": "159 selected,146 actual,4/3/104/35 partition",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_population.py"
+    },
+    {
+      "claim": "Baseline M9",
+      "declared": "Keep all cong_m9_* behavior",
+      "measured": "53/53 baseline pass",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_current.py",
+      "limit": "No future candidate exists for parity."
+    },
+    {
+      "claim": "Sensitive cap",
+      "declared": "6 files/450 added;five-file delivery",
+      "measured": "Five declared paths;450 inside,451 outside;no implementation numstat yet",
+      "matches": true,
+      "command": "Read write set/ADR0044/0053/checkpoint;probe_contracts.py",
+      "limit": "No size-exception approval."
+    },
+    {
+      "claim": "Final receipt binds delivered H",
+      "declared": "Record exact H/base/numstat in delivered KET_QUA.md",
+      "measured": "Receipt commit changes H;sample additions2 ->5",
+      "matches": false,
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py"
+    },
+    {
+      "claim": "No active lease overlap",
+      "declared": "Fresh all-ref scan before lease",
+      "measured": "0 holders for3 scopes on428 fetched mirror refs",
+      "matches": null,
+      "command": "ai-dang-giu scans;upstream fetch",
+      "limit": "Complete upstream freshness failed;not a live all-ref attestation."
+    },
+    {
+      "claim": "Drafting/implementation budgets",
+      "declared": "Author5/review6;implementation3/3,Ubuntu3,M9=1,connector2,rerun1,WindowsCI0",
+      "measured": "r86 limits and r85 per-packet limits match;this assignment is review5/6;SPEC reports author5/5 and previous reviews4/6",
+      "matches": true,
+      "command": "Parse mission-r85.json/mission-r86.json;read assignment and SPEC procedure",
+      "limit": "No independently read live reservation ledger;no further calls authorized."
+    },
+    {
+      "claim": "Read-only endpoints",
+      "declared": "No repository edits",
+      "measured": "17332 file hashes+HEAD/tree/index/worktree identical",
+      "matches": true,
+      "command": "Compare before.json/after.json",
+      "limit": "Endpoint equality does not prove every intermediate state;source mirror contents were not snapshotted."
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact-object-and-snapshot",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; sha256sum SPEC; compare before.json/after.json",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "Exact H/hash match; tree8087269baea60f9e415a9fec32788e3622e562ef;17332 file-content hashes plus HEAD/tree/worktree/index equal at both endpoints."
+    },
+    {
+      "name": "remote-heads-and-checkpoint",
+      "status": "passed",
+      "command": "GitHub fetch_commit(master,ops/wp1462-r1), repeated at end; fetch_issue_comments1462",
+      "exit_code": null,
+      "positive_evidence_or_limit": "Both reads:master48d372e14f190dae83a75ccbca8ee9a0b25635c5,candidate=a6ae5d1811bae77a804c0e93c6d35a9c0240bff6; checkpoint7046200733 read. API success, no shell rc."
+    },
+    {
+      "name": "relevant-master-drift",
+      "status": "passed",
+      "command": "git diff 0f9aa2a2cc697129e1f5be72feddf60986286865 origin/master -- .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py ops/ci_duong_nhanh.py .github/workflows/ci.yml",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "Empty diff for all four paths; baseline/current blobs equal."
+    },
+    {
+      "name": "upstream-all-ref-fetch",
+      "status": "failed",
+      "command": "git -C /tmp/wp1462-r5-mirror fetch --no-write-fetch-head https://github.com/ducthangho/tra-luat +refs/heads/*:refs/remotes/github/*",
+      "exit_code": 128,
+      "positive_evidence_or_limit": "Failed to connect to proxy127.0.0.1:36011. Complete upstream lease freshness remains unmeasured, not a pass."
+    },
+    {
+      "name": "available-ref-lease-scan",
+      "status": "passed",
+      "command": "Fetch both mirror heads and its origin remote-tracking refs sequentially; ai-dang-giu .claude/dev/packet_loop.py; ai-dang-giu .claude/dev/packet_loop_test.py; ai-dang-giu ops/specs/wp1462-r1/",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "428 refs available;each scan NGƯỜI_GIỮ0. Limited to fetched mirror; rerun against fresh upstream before any lease."
+    },
+    {
+      "name": "proof-contract-countermodels",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_proof_rules.py",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "Counterexamples reproduced;114 rows and131 lower-bound arithmetic. These are reference/logic probes, not implemented B4 mutants."
+    },
+    {
+      "name": "current-K2-and-M9",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_current.py",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "Healthy CLI0,3 masking negatives12;53/53 existing M9 cases passed;1582 registered cases counted."
+    },
+    {
+      "name": "existing-AB-population",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_population.py",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "159 selected pass;146 actual fixture calls;z4/a3/b104/c35;zero failures. No future base/head A/B claim."
+    },
+    {
+      "name": "real-classifier-replay",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_replay.py",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "60/60 rc0;18/42;fixed hash matches. One actual producer stdout was additionally simulated with CRLF: terminal CR observed. Its legacy unframed-check flag=false is expected, not an R5 parser failure; full60 CRLF/native Windows were not run in this round."
+    },
+    {
+      "name": "interface-size-and-evidence-reference-probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r5-evidence/probe_contracts.py",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "64 interface combinations;candidate cap boundary walk;tracked receipt changes head/size in disposable doc-only repository. Reference checks only."
+    },
+    {
+      "name": "doctrine-and-ADR-index",
+      "status": "passed",
+      "command": "python3 -B .claude/dev/packet_loop.py --state-dir /tmp/wp1462-r5-evidence/state-doctrine doctrine-scan --root .; analogous adr-song",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "12 files/0 doctrine copies;66 ADR files/66 table rows,existing0016 exception."
+    },
+    {
+      "name": "Ruff-pin-probe-contract",
+      "status": "passed",
+      "command": "Import ci_dang_ky_test and call loi_ruff_ci()",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "([],3):three contract checks,zero errors;not bare lint."
+    },
+    {
+      "name": "Ruff-bare-F",
+      "status": "failed",
+      "command": "ruff check --no-cache --select F --output-format=json .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py",
+      "exit_code": 1,
+      "positive_evidence_or_limit": "Ruff0.16.9:16 existing diagnostics;product/test blobs unchanged from current master,delta0. Tool is not CI pin0.15.15;raw ruff.json retained."
+    },
+    {
+      "name": "future-code-and-external-gates",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "positive_evidence_or_limit": "No B4 product implementation/mutants,full1582-case run,final-H implementation A/B,native Windows,Q9 W/live switch measurement,CI/workflow dispatch,GitHub writes,push,merge or LIVE."
+    },
+    {
+      "name": "launcher-identity-and-verdict-schema",
+      "status": "passed",
+      "command": "Read selected fields of runs/09c949c6/run.json; hash prompt.snapshot; python3 -B ../kiem_verdict_lop.py \"$REVIEW_OUT\" --vong 5",
+      "exit_code": 0,
+      "positive_evidence_or_limit": "PROMPT_MATCH True; run wp1462-spec-review-5, head and workspace match; actual codex_cli/machine. HOP_LE (§8.3): 2 finding, 4 lop. Terminal run status/exit code and serving model/effort not yet measured."
+    }
+  ],
+  "notes": "Round5/6. B4-S05 recurs for the fifth review despite the authorized change of method;retain its class history and protocol section12 checkpoint. B4-S10 is closed under the read-back checkpoint interpretation,not under the superseded before-local-edit interpretation. B4-S14 is a distinct newly measured final-receipt self-reference cause,not a rename/reset of S10. B4-S13 is closed at contract level. No code-generation/lease is inferred from draft admission. The current author budget is reported exhausted5/5;this review grants no additional revision/call. Actual runtime Linux,Python3.13.18,Git2.43.0;workspace-write sandbox,reviewed repository treated read-only. All experiments and disposable repositories are under /tmp;output is at REVIEW_OUT. No source edit,commit,push,GitHub write,workflow dispatch or LIVE action was performed on the reviewed repository. The doc-only scratch Git commits demonstrate S14 and carry no authority. The direct upstream fetch failed;mirror scans and two GitHub head reads do not establish all-upstream-ref lease freshness. No failure/skipped/not_run is counted as a pass. Local tests report actual rc separately from API success. The schema includes null generation because the candidate has no assigned execution generation;The session identifier is now taken from matching launcher run 09c949c6; name, exact head, workspace and prompt hash match. Its status is still dang_chay and ma_thoat null while this review runs; coordinator must finalize terminal rc and stdout hash. The implementation reviewer surface named in the candidate does not describe this separately assigned specification-review invocation. JSON output is the requested review artifact;future external delivery/receipt validation belongs to the coordinator."
+}

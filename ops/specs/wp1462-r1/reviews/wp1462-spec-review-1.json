@@ -1,0 +1,197 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "7582454cff0563f22e0ca13fba9f1f0f04ad2485",
+  "reviewed_file_sha256": "3ca1c75001d96e46e342a042f343ca192fba5626298fc118e5ce0932a8c8661f",
+  "findings": [
+    {
+      "id": "B4-S01",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:82-83,106",
+      "claim": "The changed-surface A/B oracle contradicts the mandatory diagnostic output. Section 9 requires a real stdout LAN_G5 line after the full-G5 fast path is missed. Acceptance 2 permits only the K2b THIEU line and its name in the error summary for an existing non-K2 failure. No implementation can satisfy both for that fixture.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_current.py; nl -ba ops/specs/wp1462-r1/SPEC.md",
+        "exit_code": 0,
+        "observed": "On origin/master, the k4_red fixture has K2 passing, rc=12 and stdout=''; stderr contains only K4 and the summary. With its old no-shard shape, section 9 requires additional stdout, which acceptance 2 explicitly rejects."
+      },
+      "suggested_fix": "Revise acceptance 2 to permit and validate exactly the specified LAN_G5 diagnostic, while comparing the remaining output byte-for-byte; keep full-G5 and K2-red comparisons strictly unchanged. Add positive and negative oracle cases showing that the intended diagnostic is accepted but unrelated output drift is rejected."
+    },
+    {
+      "id": "B4-S02",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:113; H2 obligations at lines 38 and 61",
+      "claim": "The permanent structural test forbids the very PR6 step required by H2. Acceptance 9 makes packet_loop_test fail whenever ci.yml contains 'G5 manh che do dich (PR6)'. PR6 must add that step, and its inherited write set does not include packet_loop_test.py. This creates an unplanned blocking dependency or write-set expansion for PR6.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_contracts.py; sed -n '285,303p' /tmp/wp1462-review-tHXfho/KE_HOACH_NGUON_R3.md",
+        "exit_code": 0,
+        "observed": "Current workflow has full-step count=1, target-step count=0. Adding the H2-required target step gives counts 1/1 and B4_ACCEPTANCE9_PASS=False. PR6's inherited write set lists cong_cu_test.py, ci_duong_nhanh.py plus tests, ci.yml and ci_dang_ky_test.py, not packet_loop_test.py."
+      },
+      "suggested_fix": "Separate the pre-PR6 baseline observation from the lasting regression test. The lasting test should accept both the current full-only workflow and the valid future full/target workflow while rejecting missing, duplicate or ambiguous mode evidence. Test both valid shapes and their invalid counterparts now."
+    },
+    {
+      "id": "B4-S03",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:66,103,108-109,117",
+      "claim": "Replacing _rest_get itself leaves the actual urllib transport outside the mandatory tests. The required fake returns status/headers/body, so it cannot demonstrate the real request method, redirect policy, timeout or byte-read bound. In particular, the mandatory 'follow redirects' mutant can survive because the mutated transport is never invoked. A fake returning 302 tests response interpretation, not whether urllib followed the redirect before returning.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_evidence.py; sed -n '65,69p;103,109p;117p' ops/specs/wp1462-r1/SPEC.md",
+        "exit_code": 0,
+        "observed": "The specified seam has only url/headers/timeout inputs and replaces the entire transport. A no-network probe of Python 3.13 urllib.HTTPRedirectHandler.redirect_request produced a GET to https://example.invalid/redirect with Authorization copied. This is stdlib behavior, not a claim that unimplemented B4 currently leaks credentials."
+      },
+      "suggested_fix": "Require a separate test layer that executes the real _rest_get over an in-memory lower-level HTTP/opener fake or an isolated local server. Assert method, exact URL, no redirect follow-up or credential forwarding, bounded reads and timeout handling there; retain the stateful _rest_get fake for policy tests. Assign transport mutants to tests that actually execute the transport."
+    },
+    {
+      "id": "B4-S04",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:79,108",
+      "claim": "The fresh-process positive test conflicts with the blanket subprocess ban variable. Section 8 requires PACKET_LOOP_CAM_DOC_CONG_TAC to be nonempty for every subprocess invocation of kiem-merge, which must refuse reduction without making a GET. Acceptance 4 nevertheless requires a correct-switch beta fixture to remain successful in a new process.",
+      "evidence": {
+        "command": "sed -n '77,80p;103,109p' ops/specs/wp1462-r1/SPEC.md",
+        "exit_code": 0,
+        "observed": "Line 79 mandates the variable for MOI subprocess invocations. Line 108 requires correct value => DAT and the same result in a new process. Line 109 separately requires the ban variable to force DO with zero requests even when the switch is correct."
+      },
+      "suggested_fix": "Define an instrumented child-process harness that installs the stateful fake before invoking the real CLI entry point and independently forbids any real network access. Explicitly exempt only that harness from the ban variable, retaining the variable for ordinary subprocess cases. Require successful and denied fresh-process controls plus proof that no real transport was reached."
+    },
+    {
+      "id": "B4-S05",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:30-36,111-117",
+      "claim": "The enumerated acceptance cases and 28 dedicated mutants do not cover all new fail-closed predicates. Most critically, there are no dedicated stale-run, stale-attempt or wrong-head G5 cases/mutants, even though H2 depends on those bindings and existing K2 does not enforce them for G5 shards. The list also lacks dedicated checks for several independent H2 shape guards and for dropping the PR6 audit requirement outright. A reader can implement all listed cases and still accept stale full-G5 evidence.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_evidence.py; inspect SPEC acceptance 7-9 and the 28 semicolon-separated mutants in acceptance 13",
+        "exit_code": 0,
+        "observed": "The current real kiem-merge returned rc=0 for correctly formed required K2 jobs accompanied by eight G5 shards with a wrong head, an older attempt, a foreign run, or a duplicate job name. Acceptance 9 covers the duplicate-name case but omits the first three identities; acceptance 13 has only missing-shard and skipped-full-step G5 mutants. These probes establish that new H2 tests cannot rely on K2 to catch those defects."
+      },
+      "suggested_fix": "Replace the fixed 28-item inventory with a predicate-to-case-to-mutant table covering every new guard: exact workflow/run/attempt/head, job and step uniqueness/status/type, both du and dich, independent PR6 audit enforcement, and the REST/parser/resource/cleanup guards. Include healthy controls and counterexamples where all unrelated K0-K7 checks pass. Require semantic kill credit only from the target case's declared exception class, and self-test wrong-class/setup/timeout failures as false credit."
+    },
+    {
+      "id": "B4-S06",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:57-63,73-74,98,116",
+      "claim": "The historical replay is not defined consistently with the production K2b inputs and has no non-vacuous pass criterion. Section 5 fixes M to the live current master and requires the executing code to match M, but the cited 60-case replay uses historical first parents with today's classifier. Replaying already-merged heads against the current M collapses all changes to empty diffs; replaying historical M through the full self-check instead conflicts with the live-master/code checks. Merely requiring zero REST requests and no unexplained la can accept an unrepresentative or wholly refused replay.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_classifier.py",
+        "exit_code": 0,
+        "observed": "Using current classifier code on the last 60 historical first-parent/second-parent pairs reproduced 42 day_du and 18 duong_nhanh, all rc=0, maximum 0.1244 s. Using the contract's current M with the same 60 already-merged heads produced 60/60 duong_nhanh, all rc=0: the historical changes disappeared. Raw inputs and outputs are in /tmp/wp1462-review-tHXfho/classifier-replay.json."
+      },
+      "suggested_fix": "Specify the replay reconstruction, code OID, diff-base/head OIDs and which production helper is exercised. Use isolated unmerged scenarios or an explicitly offline historical harness; do not weaken production self-checks or add a caller-controlled M. Freeze independently derived expected classifications and require observed alpha successes, non-alpha refusals and zero REST, distinguishing self-check refusal from classifier success."
+    },
+    {
+      "id": "B4-S07",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:86,119",
+      "claim": "The minimum runbook drops plan r4's mandatory G5 evidence before re-enabling a switch prior to PR5. It requires successful full audits on affected heads and master, but omits the additional full G5 success on those same heads while ci-dot-bien-du does not yet contain G5. B4/PR3 are scheduled before PR5, so this omission affects the first operational recovery window.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_contracts.py; sed -n '152,159p' /tmp/wp1462-review-tHXfho/KE_HOACH_NGUON_R4.md; sed -n '85,86p' ops/specs/wp1462-r1/SPEC.md",
+        "exit_code": 0,
+        "observed": "CURRENT_FULL_AUDIT_G5_STEPS=[] on origin/master. Plan r4 explicitly requires full G5 success on the same affected heads and current master before PR5; the B4 runbook's enumerated reopening conditions omit that clause, and acceptance 15 only checks its ten listed items."
+      },
+      "suggested_fix": "Restore the pre-PR5 clause verbatim in the runbook contract and its human acceptance checklist: successful full audit plus full G5 on each scoped affected H and current master until the audit actually includes G5. Preserve the documented owner approval and workflow/Windows budget restrictions when obtaining that evidence."
+    },
+    {
+      "id": "B4-S08",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:128-133",
+      "claim": "The pre-lease procedure omits the separate Mission revision required by r85. It describes owner approval of the spec hash after Q9(a) and zero findings, followed by lease, while r85 only admits B4 for spec drafting and explicitly requires its own Mission revision before any lease. This leaves the executor admission transition incomplete.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_contracts.py; sed -n '128,133p' ops/specs/wp1462-r1/SPEC.md",
+        "exit_code": 0,
+        "observed": "r85 packet_graph[B4] is packet=null, status=admitted_spec_drafting, with prerequisite 'Own frozen spec approved by the owner (hash) and its own Mission revision before any lease.' The candidate procedure lists hash approval and audit but no installation of that revision."
+      },
+      "suggested_fix": "Add the distinct Mission-revision installation as a mandatory pre-lease condition, binding packet #1462, revision/generation, exact spec hash, implementation base, write set, provider/surface and budgets. Keep spec-review limits 3 author/4 Codex separate from execution's 3 attempts/3 source reviews and require current used/reserved/limit readback. Do not infer executor authority from spec-hash approval alone."
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact-object-and-read-only-snapshot",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; git status --porcelain=v1 --untracked-files=all --ignored=matching; git diff --exit-code; git diff --cached --exit-code; sha256(SPEC.md)",
+      "exit_code": 0,
+      "observed": "HEAD 7582454cff0563f22e0ca13fba9f1f0f04ad2485; tree 8257b24323d79b425d3baebce6cc75ac4b8f5c32; SPEC SHA-256 matches assignment. No tracked/index/untracked changes; pre-existing ignored .codex/ remains. The four inspected implementation/workflow blobs match origin/master."
+    },
+    {
+      "name": "plan-and-authority-hashes",
+      "status": "passed",
+      "command": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/{KE_HOACH_NGUON_R4.md,mission-r84.json,mission-r85.json}; hashlib.sha256",
+      "exit_code": 0,
+      "observed": "Plan 0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe; r84 a90f5df0746efcd3e92b8ff356806103a410fff71d3da4d7d4fd5e0f1dd96945; r85 6ccdce617409600a5f1f72b616d85381e404fce96853acc66cbef8f0f6861436."
+    },
+    {
+      "name": "github-current-master",
+      "status": "passed",
+      "command": "GitHub connector fetch_commit(repo_full_name='ducthangho/tra-luat', commit_sha='master')",
+      "exit_code": null,
+      "observed": "Successful read; current remote master is 0f9aa2a2cc697129e1f5be72feddf60986286865, matching the reviewed baseline."
+    },
+    {
+      "name": "direct-github-ref-refresh",
+      "status": "not_measured",
+      "command": "git fetch origin '+refs/heads/*:refs/remotes/origin/*' in scratch clone",
+      "exit_code": 128,
+      "observed": "Git HTTPS proxy unavailable: Failed to connect to 127.0.0.1 port 36011. Initial fetch in assigned checkout also failed because .git/FETCH_HEAD is read-only. No permission or transport controls were bypassed."
+    },
+    {
+      "name": "mirror-ref-fetch-and-lease-scan",
+      "status": "passed",
+      "command": "In /tmp/wp1462-review-tHXfho/repo: git fetch /home/user/tra-luat '+refs/heads/*:refs/remotes/origin/*'; git fetch /home/user/tra-luat '+refs/remotes/origin/*:refs/remotes/source-origin/*'; with scratch origin=/home/user/tra-luat, python3 -B ops/lease_publish.py ai-dang-giu <path>",
+      "exit_code": 0,
+      "observed": "392 remote refs available after importing source heads and source remote-tracking refs. All three paths (.claude/dev/packet_loop.py, .claude/dev/packet_loop_test.py, ops/specs/wp1462-r1/) report NGƯỜI_GIỮ 0. This is a mirror-scoped result; completeness/freshness of all GitHub refs could not be independently established. No overlap with B1 d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e or B3 b8b408d86b3f92a5ea3ae3596ef612481b940b27 write sets."
+    },
+    {
+      "name": "existing-cli-fixture-probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_current.py",
+      "exit_code": 0,
+      "observed": "Real base CLI: healthy rc=0; K4-invalid and K2-invalid fixtures rc=12 with their expected named conditions. Registered suite has 1582 cases. Workflow full G5 name and 0..7 matrix verified; 10 workflow files. No full-suite claim."
+    },
+    {
+      "name": "classifier-replay",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_classifier.py",
+      "exit_code": 0,
+      "observed": "120 classifier executions: historical pairs 42 day_du/18 duong_nhanh; current-M pairs 60 duong_nhanh; every rc=0. Synthetic objects confined to temporary object directory. See finding B4-S06 for the acceptance defect."
+    },
+    {
+      "name": "g5-identity-and-urllib-probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_evidence.py",
+      "exit_code": 0,
+      "observed": "Five real base CLI invocations establish K2's shard-identity coverage boundary; stdlib redirect probe demonstrates Authorization copying without performing any network request. These are baseline/stdlib observations, not tests of unimplemented B4."
+    },
+    {
+      "name": "contract-and-successor-checks",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-review-tHXfho/probe_contracts.py",
+      "exit_code": 0,
+      "observed": "Current and PR6-required step shapes compared; current full audit has no cong_cu_test.py step; r85 admission and budget fields read. Exact candidate contains only SPEC.md under wp1462-r1: Q9(a) measurement remains a declared pre-freeze prerequisite."
+    },
+    {
+      "name": "doctrine-scan",
+      "status": "passed",
+      "command": "python3 -B .claude/dev/packet_loop.py --state-dir /tmp/wp1462-review-tHXfho/state-doctrine doctrine-scan --root .",
+      "exit_code": 0,
+      "observed": "12 files checked, 0 doctrine copies; run on scratch origin/master."
+    },
+    {
+      "name": "adr-song",
+      "status": "passed",
+      "command": "python3 -B .claude/dev/packet_loop.py --state-dir /tmp/wp1462-review-tHXfho/state-adr adr-song --root .",
+      "exit_code": 0,
+      "observed": "66 ADR files and 66 protocol rows, 1:1; existing 0016 status exception."
+    },
+    {
+      "name": "ruff-availability",
+      "status": "not_measured",
+      "command": "python3 -B -m ruff --version",
+      "exit_code": 1,
+      "observed": "No module named ruff. Bare Ruff lint and Ruff pin/probe contract were not run."
+    },
+    {
+      "name": "implementation-and-external-gates",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "observed": "No B4 implementation exists at this spec-only commit. Full packet_loop suite, new B4 cases/mutants, full selftest, Windows, live Q9 variable measurements, CI, workflow dispatch, connector review requests and LIVE actions were not run."
+    }
+  ],
+  "notes": "Independent spec review: 8 P2 findings; no P0/P1/P3 findings identified. Each finding ID is a stable cause-class identifier for follow-up. The removed authorization-store, CI-log fallback, global FULL and updated_at-predicate mechanisms were not reintroduced. B4's listed execution budgets match r85; pre-freeze Q9(a) evidence is still pending and its absence alone is not counted as a defect in this proposed candidate. Provider=openai_codex, transport=machine; codex_service is the assigned surface, while launcher receipt, exact served model/effort and session identity were not independently measured. No assurance escalation is claimed. Runtime measured: Linux, Python 3.13.18, Git 2.43.0; sandbox workspace-write with assigned Git metadata read-only. All probes and fixture repositories are under /tmp/wp1462-review-tHXfho; the reviewed checkout was not edited, committed or pushed, and no GitHub writes or workflow dispatch occurred. Live all-ref freshness remains not_measured despite successful mirror fetches and connector verification of current master. Endpoint snapshots establish unchanged tracked/index state and ignored path inventory, not a hash audit of pre-existing ignored file contents or an assertion about all intermediate history."
+}

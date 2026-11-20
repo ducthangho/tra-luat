@@ -1,0 +1,157 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "6a0612fe4fe0e2bc9ad8cf674f70a794ac1f41d5",
+  "reviewed_file_sha256": "fcb2fc2c319b7652cfafe182927f13e4f68ae8321bc4c4cc4c6bda28f57eedf4",
+  "findings": [
+    {
+      "id": "B4-S05",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:35, 148-170, 237-247",
+      "claim": "PARTIAL closure: the revised prescribed G pairs are distinguishable, but the matrix still lacks a dedicated target/mutant for filtering J by job.run_id. Selecting the correct run R and selecting jobs belonging to R are separate predicates. Removing only the latter survives all 23 G targets; the specification therefore still does not require proof of every new H2 guard.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-r3-evidence/probe_h2.py\npython3 -B /tmp/wp1462-r3-evidence/verify_results.py",
+        "exit_code": 0,
+        "observed": [
+          "All 23 G input variants pass the actual current-master kiem-merge CLI: rc=0, empty stderr. A reference implementation of the written H2 predicates gives khac for each correct target and du (G01-G17) or dich (G18-G23) under its prescribed mutant. These are contract-feasibility probes, not execution of a future B4 implementation.",
+          "In the same reference predicate, deleting only the J run_id comparison leaves the result khac on every one of those 23 targets. G01/G04/G05/G06 retain eight skipped jobs in the correct run; combining them with foreign full jobs creates duplicate shard names, so the uniqueness guard still rejects. G02 changes attempt, not run identity. The other G targets do not mix runs.",
+          "A separate counterexample keeps the five required K2 jobs in selected ci.yml run 100, puts no G5 shards in that run, and puts eight successful full-G5 shards with matching H/attempt in unrelated workflow run 99. Actual current CLI returns rc=0. Correct H2 returns khac; deleting only the J run_id filter returns du. With --siet-g5-du this is precisely the missing red-to-green distinction.",
+          "The table contains 88 unique row IDs and no row assigning that independent J-filter fault a target. Raw observations are in h2-results.json."
+        ]
+      },
+      "suggested_fix": "Add a dedicated matrix row using the demonstrated layout: selected CI run retains its five required jobs but no G5 shards; another run supplies eight full shards with the same H/attempt. Under --siet-g5-du, require K0-K7 green and only K2b red; a mutant removing only the J run_id comparison must make that exact target raise ChotB4. Keep the existing R-selection and attempt cases, update row/mutant counts and estimates, and retain target-specific false-credit checks. Do not repair this by broadening accepted job provenance or borrowing a duplicate-name failure; those would hide the missing guard."
+    },
+    {
+      "id": "B4-S10",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:266-280; docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md:33-46",
+      "claim": "PARTIAL closure: ADR-0053 activation and the five-file delivery inventory are now explicit, but nang_tran is still not compliant with the literal exception contract. Its can_cu explicitly has no measured numstat, while ai_nang makes the 4,000-added-line exception effective on approval of this spec hash and the process copies that unchanged block into the installing Mission revision and lease. Measuring later before code review does not supply the evidence required in the approved spec/lease.",
+      "evidence": {
+        "command": "cat docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md\nsed -n '266,280p' ops/specs/wp1462-r1/SPEC.md\nRead GitHub ops/wp1460-r1:ops/specs/wp1460-r1/SPEC.md (saved as /tmp/wp1462-r3-evidence/B1-r3.md); compare its Kích thước section.",
+        "exit_code": 0,
+        "observed": [
+          "ADR-0053 requires can_cu to explain why splitting is impossible and include a measured git diff --numstat. B4 line 272 instead says ước lượng theo thành phần, CHƯA có numstat vì chưa có mã; line 271 grants effect on this hash approval, and line 277 requires copying the block unchanged.",
+          "The activation OID 8ab100793df9831505f495543a74044b91c2c9ab is valid against the measured master: ADR file present there (rc=0), absent at first parent (rc=128), OID on first-parent master; clone is not shallow. The residual problem is exception evidence, not the activation token or file count.",
+          "Sibling B1 r3 at commit 29c99e736fde5628f8f47689b80e2ec8ba253a8a, file blob 36177048995d90c741c8ab38077cf4d442c80ee6 and sha256 a90a948c396f13a2b8681f555a2017b2fe7fe7173f7038008873ff6083a70328, explicitly refuses an estimate-only exception. It defers lease until an authorized representative scratch build is measured and a subsequent size revision carries actual numstat. That directly addresses the same literal ADR requirement."
+        ]
+      },
+      "suggested_fix": "Revise Kích thước and the pre-lease process so this estimate does not grant an effective exception. A viable approach is B1 r3’s sequence: separately budget/authorize a representative scratch sizing build, measure the complete five-file delivery diff against its exact baseline, place that numstat and the non-splitting rationale into a subsequent approved spec revision, then copy the measured block into Mission/lease. Alternatively obtain an explicit owner disposition changing the ADR evidence requirement; ordinary spec-hash approval is not such a stated disposition. Before source review, remeasure against the approved cap. Preserve every acceptance target and mutant; the fix must not create an unbudgeted author call or shrink coverage to fit 450 lines."
+    },
+    {
+      "id": "B4-S12",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:244-246; current .claude/dev/packet_loop.py:3550-3558 and packet_loop_test.py:9433-9438",
+      "claim": "Acceptance 2 does not partition its required fixture population completely. Four existing _c1106 cases reject an invalid lease before K2 runs. They are neither K2-red, nor K2-passed/base-red, nor base-passed, so the three frozen A/B categories give no result rule for them. Treating absence of a K2 failure as K2 passed would incorrectly require new K2b output on these early exits, conflicting with unchanged argument handling and the ban on changing old expectations.",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1462-r3-evidence/probe_early_exit.py\nsed -n '3547,3559p' .claude/dev/packet_loop.py\nsed -n '243,246p' ops/specs/wp1462-r1/SPEC.md",
+        "exit_code": 0,
+        "observed": [
+          "Ran the actual existing cases cong_c_k1_anchor, cong_c_k1_yaml_hong, cong_c_k1_khoa_trung and cong_c_k1_tag_hong against current master. All four case assertions passed; each child CLI returned rc=2, empty stdout, and only a lease-parser error on stderr. No K2 failure or K2b output exists.",
+          "cmd_kiem_merge parses and rejects the lease before defining/executing its K0-K7 checks. Thus K2 is not_run on these cases, not passed. All four actually call _c1106 and belong to acceptance 1’s population, which acceptance 2 reuses without exclusion.",
+          "Raw child outputs, including the four distinct parser diagnostics, are saved in early-exit-results.json. The original B4-S01 projection correction does not define this additional early-exit category."
+        ]
+      },
+      "suggested_fix": "Extend acceptance 2 with an explicit early-rejection category, or expand (a) to cover K2 not_run as well as K2 failed: require identical rc/stdout/stderr and zero K2b diagnostics, with no projection. Enumerate these four existing cases in the A/B population and add comparator self-checks accepting their unchanged outputs and rejecting an added LAN_G5/K2b line or a changed parser diagnostic. Preserve argument-validation order and existing tests; distinguish not_run from passed instead of inferring success merely from absence of a THIẾU K2 line."
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact-object-and-read-only-endpoints",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; sha256sum ops/specs/wp1462-r1/SPEC.md; compare checkout-before.json and checkout-after.json",
+      "exit_code": 0,
+      "observed": "Head/file hash match assignment; tree=e0bb5fb75c80a63938d5a48b8bee9d91418f5344. HEAD/tree, tracked diff, index diff, untracked and ignored path inventory are equal at endpoints and clean."
+    },
+    {
+      "name": "live-reference-confirmation",
+      "status": "passed",
+      "command": "GitHub fetch_commit for master and ops/wp1462-r1, repeated at end; fetch_file/fetch_commit for sibling B1",
+      "exit_code": null,
+      "observed": "GitHub API confirms current master=0f9aa2a2cc697129e1f5be72feddf60986286865 and candidate branch=6a0612fe4fe0e2bc9ad8cf674f70a794ac1f41d5. API operations have no shell exit code. Sibling B1 r3 was read from GitHub because the local mirror had an older sibling spec."
+    },
+    {
+      "name": "all-upstream-refs-freshness",
+      "status": "not_measured",
+      "command": "git fetch https://github.com/ducthangho/tra-luat '+refs/heads/*:refs/remotes/origin/*' --prune (in /tmp/wp1462-r3-fetch)",
+      "exit_code": 128,
+      "observed": "Failed to connect to 127.0.0.1:36011 proxy. Fetch in assigned checkout was also refused by its read-only .git. Scratch clone and fetching all available heads plus refs/remotes/origin/* from /home/user/tra-luat succeeded (rc=0), but that does not prove upstream all-ref freshness. GitHub branch search returned a paginated partial list, not an all-ref attestation."
+    },
+    {
+      "name": "lease-scan-on-available-mirror-refs",
+      "status": "passed",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <path>, separately for .claude/dev/packet_loop.py, .claude/dev/packet_loop_test.py, ops/specs/wp1462-r1/; cwd=/tmp/wp1462-r3-fetch",
+      "exit_code": 0,
+      "observed": "All three scans returned NGƯỜI_GIỮ 0: không có; historical holders were marked HẾT_HẠN. Logs: lease-packet_loop.txt, lease-packet_loop_test.txt, lease-spec.txt. Scope is the fetched mirror refs only; this is not a current all-GitHub-ref no-overlap guarantee."
+    },
+    {
+      "name": "plan-owner-decisions-budget-and-write-set-readthrough",
+      "status": "passed",
+      "command": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; read mission-r84.json and mission-r85.json at that ref",
+      "exit_code": 0,
+      "observed": "Plan sha256=0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe. B4 five-file delivery stays within r85 path scope and does not overlap sibling B1/B3 delivery paths. No removed authorization-store, FULL-for-every-PR, updated_at predicate, CI-log fallback or pull_request_target mechanism reintroduced. Spec retains a separate installing Mission revision before lease, separate drafting/source budgets, and no CHO_PHEP writes. D-6 still needs the explicitly required future owner/Mission decision; this review does not grant it."
+    },
+    {
+      "name": "H2-row-feasibility-and-run-id-counterexample",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r3-evidence/probe_h2.py",
+      "exit_code": 0,
+      "observed": "23/23 revised G variants and the added run-id counterexample pass actual current K0-K7. Reference-contract H2 distinguishes all 23 prescribed mutants; the missing J run_id mutant survives those 23 and changes the added counterexample khac->du. No production B4 implementation exists to test."
+    },
+    {
+      "name": "remaining-matrix-feasibility",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r3-evidence/probe_remaining.py",
+      "exit_code": 0,
+      "observed": "88 unique rows. Actual current CLI: D02, D03 and D04 prerequisites all rc=0, confirming the repaired K7 isolation. Reference-parser T07-T17 all distinguish correct/prescribed-mutant results. Scalar-policy probes confirm the previously problematic empty/list/duplicate-JSON predicates are distinguishable. Other rows received source/contract readthrough; all 79 future production mutants were not executed."
+    },
+    {
+      "name": "real-classifier-history-and-line-framing",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r3-evidence/probe_replay.py; python3 -B /tmp/wp1462-r3-evidence/probe_remaining.py",
+      "exit_code": 0,
+      "observed": "60/60 direct historical executions rc=0: 42 day_du, 18 duong_nhanh; table hash aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a. The actual current producer under LF versus simulated Windows CRLF yields equal classes in 60/60 using the r3 reference framing rule; embedded CR is rejected. The legacy probe’s H1_exact_line_values_valid=false refers to the old no-framing comparison and is superseded by the explicit r3 framing comparison. This is Linux simulation, not native Windows or the future B4 runner."
+    },
+    {
+      "name": "early-exit-population-counterexample",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r3-evidence/probe_early_exit.py",
+      "exit_code": 0,
+      "observed": "4/4 existing test cases passed, each with child rc=2 before K2. Reproduces the unclassified A/B population in B4-S12."
+    },
+    {
+      "name": "observation-consistency-check",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-r3-evidence/verify_results.py",
+      "exit_code": 0,
+      "observed": "REVIEW_PROBE_OBSERVATIONS 46/46. Validates recorded probe outcomes, not implementation acceptance."
+    },
+    {
+      "name": "ruff-bare-F-baseline",
+      "status": "failed",
+      "command": "/root/.local/share/uv/tools/ruff/bin/python -m ruff check --no-cache --select F --output-format=json .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py",
+      "exit_code": 1,
+      "observed": "Ruff 0.16.9: 16 existing diagnostics (packet_loop.py: 3 F841; test: 8 F401, 2 F541, 3 F811). Candidate product/test blobs equal current master, so delta=0. Tool version is not CI pin 0.15.15. Raw JSON saved as ruff-f.json."
+    },
+    {
+      "name": "ruff-contract-and-current-case-inventory",
+      "status": "passed",
+      "command": "python3 -B: import ci_dang_ky_test; loi_ruff_ci(); import packet_loop_test; count CASES",
+      "exit_code": 0,
+      "observed": "RUFF_CONTRACT 3 []; CASES_COUNT 1582, unique 1582. This is contract/inventory evidence, not a full-suite execution."
+    },
+    {
+      "name": "doctrine-and-ADR-index",
+      "status": "passed",
+      "command": "python3 -B .claude/dev/packet_loop.py --state-dir /tmp/wp1462-r3-evidence/state-doctrine doctrine-scan --root .; python3 -B .claude/dev/packet_loop.py --state-dir /tmp/wp1462-r3-evidence/state-adr adr-song --root .",
+      "exit_code": 0,
+      "observed": "Scratch current master: doctrine-scan 12 files/0 copies; adr-song 66 ADR files/66 protocol rows, with the existing ADR-0016 exception."
+    },
+    {
+      "name": "implementation-and-external-acceptance",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "observed": "Spec-only review. No future B4 source, ChotB4 mutation runner, full 1582-case suite, complete A/B script, native Windows qualification, live Q9 variable measurement, workflow/CI dispatch, GitHub writes, commit/push/merge or LIVE action performed."
+    }
+  ],
+  "notes": "Round 3: 3 P2 findings, no P0/P1/P3 identified. B4-S05 remains partial (prescribed-pair feasibility repaired; independent job-run-id coverage still missing). B4-S10 remains partial (activation/inventory repaired; estimate-only exception still noncompliant). B4-S09 is closed at specification level by explicit single-CR framing and real-producer LF/CRLF simulation; native Windows remains unmeasured as the spec itself requires. B4-S11 is closed: _rest_get now covers only new switch REST traffic and preserves Git transports. Prior B4-S01-S04 and B4-S06-S08 original manifestations remain addressed at contract level; B4-S12 records a newly measured pre-K2 population hole adjacent to S01’s A/B area, preserving that history rather than treating the original projection correction as implementation proof. Author/source budget counters were not independently measured beyond the r3 declarations; any sizing work or next author revision must receive its own valid r85/Mission budget disposition. Provider=openai_codex, family=openai, execution_surface=codex_service, transport=machine. Served model/effort and launcher/session attestation: KHONG_DO_DUOC; no cross_approved, human audit or land authority is claimed. Runtime Linux, Python 3.13.18, Git 2.43.0; workspace-write sandbox with assigned Git metadata read-only. Evidence and disposable fixture repositories are under /tmp/wp1462-r3-evidence and /tmp/wp1462-r3-fetch, plus REVIEW_OUT. The assigned checkout was not edited. Endpoint snapshots do not prove every intermediate state or source-mirror content integrity; all-upstream-ref freshness remains not_measured. Contract-model results demonstrate specification feasibility/counterexamples only and are not future implementation or CI passes."
+}

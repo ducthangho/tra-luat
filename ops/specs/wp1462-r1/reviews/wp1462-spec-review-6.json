@@ -1,0 +1,545 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1462",
+  "mission_id": 1172,
+  "revision": 6,
+  "generation": null,
+  "generation_note": "Frozen-spec candidate; execution generation/base/lease are to be bound by the later installing Mission revision. No generation is invented.",
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "session_id": "1dfa94cae00549a2aad1ad8cb842f69e",
+  "model_reviewer_identity": {
+    "provider": "openai_codex",
+    "model_family": "openai",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "launcher_run_id": "1dfa94cae00549a2aad1ad8cb842f69e",
+    "codex_session_id": "01a1fa20-588c-7ff1-9d7b-d8573da4b1fe",
+    "identity_source": "Matching rvspec/runs/1dfa94ca/run.json: exact H, workspace, provider/surface/transport, executable codex. Environment CODEX_SESSION_ID supplies the inner session identifier.",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "sandbox": "workspace-write; network disabled for shell; task-enforced read-only source checkout",
+    "terminal_receipt": "Launcher was dang_chay while producing this artifact; coordinator must finalize terminal rc and stdout hash after run completion."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "612845e3b9ca6c3c4b06be719c172c7b1a425190",
+  "reviewed_tree": "534f79b54a610992037525b73eeb9fd750fcd6ef",
+  "reviewed_file": "ops/specs/wp1462-r1/SPEC.md",
+  "reviewed_file_sha256": "e31dffcadd028ff909feeb9de6d78409149a9ca122a1c2d1ffa5fe6de685761a",
+  "current_master_sha": "48d372e14f190dae83a75ccbca8ee9a0b25635c5",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "review_round": 6,
+  "review_round_limit": 6,
+  "findings": [
+    {
+      "id": "B4-S15",
+      "class_slug": "b4-codex-call-budget-authority",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/SPEC.md:2-4,193-194",
+      "claim": "The execution budget is not reconciled with the applicable aggregate Codex review-call ceiling. The candidate has no tran_loi_goi_codex activation declaration and no B4 call-axis nang_tran, so ADR-0052/0055 retain the total ceiling of two calls per PR. Section Quy trình nevertheless publishes three source reviews plus two connector requests and tells the coordinator to check each named axis. A third source call, or two source calls followed by the first connector call, can comply with those displayed allowances while exceeding the canonical total. Copying those numbers into the later Mission revision/lease does not supply the missing frozen opt-in. This concerns future implementation review, not the six specification reviews explicitly authorized by the owner.",
+      "manifestations": [
+        {
+          "id": "S15-M1",
+          "location": "ops/specs/wp1462-r1/SPEC.md:2-4,194",
+          "claim": "The three-call source-review allowance exceeds the undeclared packet’s two-call default; the only activation line present concerns sensitive size, a different axis."
+        },
+        {
+          "id": "S15-M2",
+          "location": "ops/specs/wp1462-r1/SPEC.md:193-194",
+          "claim": "Source-review and connector allowances are listed separately without reconciling their common Codex-call ceiling. The sequence 2 source + 1 connector is below each displayed sublimit but over the aggregate default."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1462-review-r6/probe_budget.py; python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+          "exit_code": 0,
+          "observed": "No ADR-0052 or ADR-0055 call-cap declaration in the exact candidate. ADR fallback total = 2, while the candidate lists source review = 3 and connector = 2. Example source_used=2, connector_used=1 is within both listed allowances but totals 3 > 2. Documentation probe: candidate -> ChotBudget; in-memory valid ADR-0055 declaration -> pass; remove declaration, duplicate declaration and invalid OID -> ChotBudget. These are specification probes, not a product gate or a B4 mutation-suite run."
+        },
+        {
+          "command": "git -C /tmp/wp1462-review-r6/repo cat-file -e d2e3052d479d140b7e7b91df41ec4914fab7d544:docs/adr/0055-tran-loi-goi-codex-len-muoi.md; repeat for ^1; git rev-list --first-parent origin/master; git rev-parse --is-shallow-repository",
+          "exit_code": 0,
+          "observed": "ADR-0055 land OID is d2e3052d479d140b7e7b91df41ec4914fab7d544: present rc=0, first-parent absent rc=128, OID present on master first-parent, shallow=false. ADR-0052/0055 require the frozen declaration or a separate owner nang_tran; per-axis budget numbers alone do not activate the larger canonical total."
+        },
+        {
+          "command": "Read mission-r85.json envelope.provider_budgets.per_new_packet and mission-r87.json b4_r87/pr1_r87 at origin/ops/wp1172-plan-r4@dda63524e1119d3b62bb2b80b6acc4d9354395fd",
+          "exit_code": 0,
+          "observed": "r85 allocates 3 source reviews and 2 connector requests to new packets. r87 b4_r87 authorizes the proof-scope change and one extra author call, not a B4 code-review cap override. Independently, r87 pr1_r87 explicitly applies the two-call ADR fallback to PR1 because its spec lacks tran_loi_goi_codex. The whole candidate has no call-cap declaration or operative call-axis exception; its nang_tran procedure concerns size only."
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1462-r1/SPEC.md header and Quy trình, then the installing Mission revision/lease and coordinator call ledger. The frozen spec selects the ADR ceiling, while the procedure must explain how source and connector usage consume it; changing packet_loop.py is unnecessary.",
+        "how": "The cheapest repair is one valid tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544 declaration in the next owner-approved spec revision, retaining the tighter r85 source=3 and connector=2 sublimits. Before every applicable call, check both the aggregate used/reserved/limit and the named sublimit; neither history nor failed calls that already generated output are reset. Alternatively retain the two-call total and reduce/reconcile the execution allowances, or obtain an explicit owner call-axis nang_tran. The runnable documentation probe is python3 -B /tmp/wp1462-review-r6/probe_budget.py; its amended variant exists only in memory and is not an approved change.",
+        "locking_test": "On the revised exact spec, independently remeasure the declaration’s byte grammar and all three land-OID conditions, then simulate source/connector sequences against aggregate and per-axis counters. The healthy valid opt-in must permit the planned within-budget sequence; the dedicated remove-opt-in mutant must fail that target with ChotBudget. Duplicate/invalid declarations must retain fallback=2. An accounting mutant that excludes connector usage must fail a sequence whose next connector crosses the aggregate cap. The first four declaration cases were run; the future coordinator-ledger mutant has not been run because that ledger implementation is outside this spec review.",
+        "may_spawn": "A further spec revision/hash and synchronized Mission/lease metadata require a new owner checkpoint because this is review 6/6 and the author allowance is 6/6. Activating the ADR ceiling must not enlarge the r85 source/connector sublimits, reset call history, reopen size authority, or authorize another review invocation automatically."
+      },
+      "confidence": "high",
+      "fix_attempted": "In-memory specification alternative only; no candidate edit."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "b4-predicate-mutation-proof",
+      "finding_ids": [
+        "B4-S05"
+      ],
+      "manifestations": [
+        "S05-M1 dependent/derived inventory predicates",
+        "S05-M2 fixed fixture domain masks K2b",
+        "S05-M3 bundled inventory obligations",
+        "S05-M4 Q14 contradicts request suppressors"
+      ],
+      "highest_open_severity": null,
+      "source_round": 5,
+      "source_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+      "history": "First reported round 1; recurred through round 5. History is retained.",
+      "common_fix": "Owner E1+E2 removed the contradictory inventory/proof rules as one contract change, retaining general case/mutant requirements and code-review adequacy.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+        "result": "Closed at the newly authorized specification boundary; all four manifestations scanned across the whole active candidate.",
+        "unmeasured": []
+      },
+      "status": "ĐÃ VÁ THẬT"
+    },
+    {
+      "slug": "b4-final-head-evidence-cycle",
+      "finding_ids": [
+        "B4-S14"
+      ],
+      "manifestations": [
+        "S14-M1 final-H receipt stored inside H"
+      ],
+      "highest_open_severity": null,
+      "source_round": 5,
+      "source_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+      "common_fix": "All final-H receipts move outside the committed candidate; in-tree results use code content hashes.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+        "result": "External write stable; report mutation invalidates old H/numstat; all five files remain counted.",
+        "unmeasured": []
+      },
+      "status": "ĐÃ VÁ THẬT"
+    },
+    {
+      "slug": "b4-codex-call-budget-authority",
+      "finding_ids": [
+        "B4-S15"
+      ],
+      "manifestations": [
+        "S15-M1 source allowance exceeds undeclared total",
+        "S15-M2 connector usage also consumes that total"
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 6,
+      "source_sha": "612845e3b9ca6c3c4b06be719c172c7b1a425190",
+      "common_fix": "Select an authorized canonical call ceiling in the frozen spec and enforce the aggregate together with source/connector sublimits in the operating ledger.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1462-review-r6/probe_budget.py; independently validate revised exact spec and its call ledger",
+        "result": "OPEN: actual candidate resolves to total=2; only the in-memory valid opt-in control supports its proposed 3+2 allocation.",
+        "unmeasured": [
+          "Revised frozen spec and installed authority do not exist.",
+          "Actual coordinator aggregate accounting has not been exercised."
+        ]
+      },
+      "status": "OPEN"
+    }
+  ],
+  "class_counts": {
+    "scope": "Open findings plus all classes in immediately preceding verdict; older closed classes checked for regression in hunt table.",
+    "tracked_classes": 3,
+    "tracked_manifestations": 7,
+    "open_classes": 1,
+    "open_manifestations": 2,
+    "prior_classes_closed": 2,
+    "prior_manifestations_closed": 5
+  },
+  "class_mapping": [],
+  "prior_findings_check": [
+    {
+      "id": "B4-S05",
+      "class_slug": "b4-predicate-mutation-proof",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 5,
+      "source_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+      "scope": "Specification consistency under the explicit owner E1+E2 decision; not a claim that future code tests already establish predicate coverage.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+          "exit_code": 0,
+          "observed": "Sections 2–9 byte-identical to r5; 0 operative inventory rows; 0 operative L-1…L-6 rules; all 7 GT provisions and 11 acceptance criteria retained; predicate adequacy explicitly checked by running code review on H; GT-7 allows a case-specific healthy setup. External receipt leaves H/tree/numstat unchanged; recommitting KET_QUA.md changes H and numstat and invalidates the old receipt."
+        },
+        {
+          "command": "Read the complete active candidate before ## Thay đổi and git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/mission-r87.json",
+          "exit_code": 0,
+          "observed": "All four r5 manifestations were checked: dependent inventory predicates and L-1/L-3 are removed; fixed-four-fixture restriction is removed; bundled inventory rows no longer define acceptance; Q14 no longer conflicts with P01/P02. Sections 6a/8 still suppress GET for wrong repo/read-ban. General two-direction/three-state/dedicated-mutant obligations and ChotB4 target-only credit remain. r87 b4_r87 explicitly records the owner-approved transfer of proof adequacy to code review on H."
+        }
+      ],
+      "authority": "Current user instruction E1+E2, corroborated by mission-r87.json b4_r87 at dda63524e1119d3b62bb2b80b6acc4d9354395fd. This is an authorized contract change, not a silent scope cut.",
+      "chua_do_duoc": [],
+      "implementation_obligation": "Future executor must supply actual cases/mutants on H and the code reviewer must run them; this remains acceptance work rather than evidence already earned."
+    },
+    {
+      "id": "B4-S14",
+      "class_slug": "b4-final-head-evidence-cycle",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 5,
+      "source_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+      "scope": "All final-H evidence carriers in the specification.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+          "exit_code": 0,
+          "observed": "Sections 2–9 byte-identical to r5; 0 operative inventory rows; 0 operative L-1…L-6 rules; all 7 GT provisions and 11 acceptance criteria retained; predicate adequacy explicitly checked by running code review on H; GT-7 allows a case-specific healthy setup. External receipt leaves H/tree/numstat unchanged; recommitting KET_QUA.md changes H and numstat and invalidates the old receipt."
+        },
+        {
+          "command": "Inspect SPEC write-set item 5, acceptance 9, Kích thước and Quy trình; run the receipt-toy portion of probe_contracts.py",
+          "exit_code": 0,
+          "observed": "Every operative final-H size receipt is external (handoff + Issue). KET_QUA.md is still counted among all five delivery files and binds measured code by two content hashes. Writing an external receipt preserves the frozen candidate; changing and committing the report changes H and numstat and makes the old receipt stale. No operative final-H receipt remains inside H."
+        }
+      ],
+      "chua_do_duoc": []
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "b4-predicate-mutation-proof",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 5,
+      "source_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+      "finding_ids": [
+        "B4-S05"
+      ],
+      "measured_scope": "Specification consistency under the explicit owner E1+E2 decision; not a claim that future code tests already establish predicate coverage.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+          "exit_code": 0,
+          "observed": "Sections 2–9 byte-identical to r5; 0 operative inventory rows; 0 operative L-1…L-6 rules; all 7 GT provisions and 11 acceptance criteria retained; predicate adequacy explicitly checked by running code review on H; GT-7 allows a case-specific healthy setup. External receipt leaves H/tree/numstat unchanged; recommitting KET_QUA.md changes H and numstat and invalidates the old receipt."
+        },
+        {
+          "command": "Read the complete active candidate before ## Thay đổi and git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/mission-r87.json",
+          "exit_code": 0,
+          "observed": "All four r5 manifestations were checked: dependent inventory predicates and L-1/L-3 are removed; fixed-four-fixture restriction is removed; bundled inventory rows no longer define acceptance; Q14 no longer conflicts with P01/P02. Sections 6a/8 still suppress GET for wrong repo/read-ban. General two-direction/three-state/dedicated-mutant obligations and ChotB4 target-only credit remain. r87 b4_r87 explicitly records the owner-approved transfer of proof adequacy to code review on H."
+        }
+      ],
+      "chua_do_duoc": []
+    },
+    {
+      "slug": "b4-final-head-evidence-cycle",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 5,
+      "source_sha": "a6ae5d1811bae77a804c0e93c6d35a9c0240bff6",
+      "finding_ids": [
+        "B4-S14"
+      ],
+      "measured_scope": "All final-H evidence carriers in the specification.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+          "exit_code": 0,
+          "observed": "Sections 2–9 byte-identical to r5; 0 operative inventory rows; 0 operative L-1…L-6 rules; all 7 GT provisions and 11 acceptance criteria retained; predicate adequacy explicitly checked by running code review on H; GT-7 allows a case-specific healthy setup. External receipt leaves H/tree/numstat unchanged; recommitting KET_QUA.md changes H and numstat and invalidates the old receipt."
+        },
+        {
+          "command": "Inspect SPEC write-set item 5, acceptance 9, Kích thước and Quy trình; run the receipt-toy portion of probe_contracts.py",
+          "exit_code": 0,
+          "observed": "Every operative final-H size receipt is external (handoff + Issue). KET_QUA.md is still counted among all five delivery files and binds measured code by two content hashes. Writing an external receipt preserves the frozen candidate; changing and committing the report changes H and numstat and makes the old receipt stale. No operative final-H receipt remains inside H."
+        }
+      ],
+      "chua_do_duoc": []
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": "Owner-authorized proof-scope correction",
+      "hypothesis": "The old inventory rules survive elsewhere or their removal silently weakens the accepted contract.",
+      "command": "python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+      "real_output": "contract_2_9_unchanged=true; active_inventory_rows=0; active_L_rules=0; gt_count=7; criteria=1..11; independent_healthy_setup=true. Whole active text and historical sections read separately.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Final-H evidence self-reference",
+      "hypothesis": "A required record still makes the final candidate invalidate its own SHA/size receipt.",
+      "command": "python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+      "real_output": "external_write_keeps_H_tree_numstat=true; report_change_invalidates_receipt=true; H_changed=true; numstat_changed=true.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Budget authority and shared accounting",
+      "hypothesis": "Per-phase allowances hide a lower aggregate canonical review-call ceiling.",
+      "command": "python3 -B /tmp/wp1462-review-r6/probe_budget.py; python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+      "real_output": "No ADR-0052 or ADR-0055 call-cap declaration in the exact candidate. ADR fallback total = 2, while the candidate lists source review = 3 and connector = 2. Example source_used=2, connector_used=1 is within both listed allowances but totals 3 > 2. Documentation probe: candidate -> ChotBudget; in-memory valid ADR-0055 declaration -> pass; remove declaration, duplicate declaration and invalid OID -> ChotBudget. These are specification probes, not a product gate or a B4 mutation-suite run.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "B4-S15"
+      ]
+    },
+    {
+      "direction": "Current K0–K7 behavior and early exits",
+      "hypothesis": "The revised fixture and A/B contract requires changing existing K2/K7 expectations or cannot classify pre-K2 failures.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1462-review-r6/probe_current.py",
+      "real_output": "53/53 cong_m9 cases passed; 4/4 named early-exit cases passed. Healthy CLI rc0; sole-run workflow/head/repository alterations each rc12 at K2 CI. r6 permits case-specific healthy controls, so K2 masking no longer contradicts a frozen one-edit proof rule.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Real historical classifier and Windows framing",
+      "hypothesis": "The pinned historical expectation or CRLF framing is infeasible with the unchanged classifier.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B /tmp/wp1462-review-r6/probe_replay.py",
+      "real_output": "60 cases: 42 day_du, 18 duong_nhanh; table sha256 aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a; real-main LF/CRLF pairs equal 60/60.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "limitations": "Linux simulation; future B4 runner/parser and native Windows remain untested."
+    },
+    {
+      "direction": "Lease overlap including prefixes and moving refs",
+      "hypothesis": "A live holder or sibling packet overlaps B4’s effective write set.",
+      "command": "python3 -B /tmp/wp1462-review-r6/probe_leases.py; python3 -B /tmp/wp1462-review-r6/probe_scope.py; GitHub GET matching-refs/heads and changed lease trees/blobs",
+      "real_output": "Raw ai-dang-giu commands rc12 because git transport cannot reach proxy. With discovery supplied from the independently read 380-name/OID REST map, canonical scanner returns NGƯỜI_GIỮ 0 for all three scopes. Prefix scan: 536 unique lease blob/path pairs, 136 matching records, 0 active overlap. Final two changed refs checked: one lease tree unchanged; wp1448 has two changed, hash-verified leases, neither touching B4. Current B1/B3 write sets also disjoint.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "limitations": "Transport-substituted read-only measurement is explicitly separate from the failed raw CLI invocation; future lease issuance must recheck."
+    },
+    {
+      "direction": "Plan r4 fidelity and prohibited mechanisms",
+      "hypothesis": "r6 reintroduces authority inventory, log fallback, FULL mode, pull_request_target, updated_at authority, or weakens the recovery runbook.",
+      "command": "Read verified plan r4 sections 4 A+1, 7, 10 and 12; candidate sections 1–10, deviations and scope; compare r5/r6 sections 2–9 in probe_contracts.py",
+      "real_output": "Plan sha256 0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe; operative sections 2–9 unchanged. Live GET only, exact class-specific permits, no log fallback/authority store/FULL/pull_request_target/updated_at predicate. Ten-item runbook retains pre-PR5 full-G5-on-affected-H-and-master clause. D-6/D-7/D-8/D-9 are disclosed, and installation/hash approval remains required.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Size authority and delivery scope regression",
+      "hypothesis": "The S14 repair drops the report from size accounting or reintroduces an estimate-only size exception.",
+      "command": "Inspect all five delivery paths and Kích thước; git cat-file ADR-0053 at 8ab100793df9831505f495543a74044b91c2c9ab and ^1; first-parent/nonshallow checks; read mission-r87 size_rule",
+      "real_output": "Five delivery files, including KET_QUA.md. ADR-0053 activation valid: present rc0, parent rc128, first-parent=true, shallow=false. Default 6 files/450 additions; no operative estimated exception; cap boundary applies to delivered candidate and is explicitly corroborated in r87.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "H1/H2 integration and workflow structure",
+      "hypothesis": "The trusted classifier cannot discover eligibility without CI permission, or B4’s structural test blocks PR6’s target step.",
+      "command": "Read sections 3/5, GT-5 and acceptance 5/11; probe_current.py workflow inspection; inspect current classifier main and ci.yml",
+      "real_output": "Existing workflow: shards [0,1,2,3,4,5,6,7], full-step count1, target-step count0. Lasting acceptance permits target count0 or1. Separate unconditional structural dk_* stdout and permission-gated GITHUB_OUTPUT are specified for both classes, with same-diff two-channel integration controls and four live-switch states.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Native execution capability",
+      "hypothesis": "Local Linux probes can be treated as proof of live Variables access, native Windows, future B4 mutants or implementation gates.",
+      "command": "python3 -m ruff --version; read environment and native-measurement requirements",
+      "real_output": "Python3.13.18/Linux, Git2.43.0; Ruff module unavailable (rc1). No B4 product code exists, no native Windows run or live switch probe was performed. Ruff pin/probe contract separately returns RUFF_CONTRACT 3 [].",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Frozen object",
+      "expected": "612845e3b9ca6c3c4b06be719c172c7b1a425190 / e31dffcadd028ff909feeb9de6d78409149a9ca122a1c2d1ffa5fe6de685761a",
+      "measured": "612845e3b9ca6c3c4b06be719c172c7b1a425190 / e31dffcadd028ff909feeb9de6d78409149a9ca122a1c2d1ffa5fe6de685761a",
+      "matches": true,
+      "command": "git rev-parse HEAD HEAD^{tree}; SHA-256 of exact SPEC blob and working file"
+    },
+    {
+      "claim": "Current master compatibility",
+      "expected": "Recheck rather than assume the historical 0f9aa2a base",
+      "measured": "48d372e14f190dae83a75ccbca8ee9a0b25635c5; all four relevant product/test/classifier/workflow blobs unchanged from 0f9aa2a2cc697129e1f5be72feddf60986286865",
+      "matches": true,
+      "command": "git rev-parse <old>:<path> origin/master:<path> for the four files"
+    },
+    {
+      "claim": "Registered cases",
+      "expected": 1582,
+      "measured": 1582,
+      "matches": true,
+      "command": "probe_current.py: import CASES, count names and unique names"
+    },
+    {
+      "claim": "Historical text-line counts (not runtime test counts)",
+      "expected": {
+        "_c1106_ca(": 119,
+        "_c1106(": 5
+      },
+      "measured": {
+        "_c1106_ca(": 119,
+        "_c1106(": 5
+      },
+      "matches": true,
+      "command": "probe_current.py; AST separately finds 119 and 4 calls"
+    },
+    {
+      "claim": "Historical replay",
+      "expected": {
+        "total": 60,
+        "day_du": 42,
+        "duong_nhanh": 18
+      },
+      "measured": {
+        "total": 60,
+        "day_du": 42,
+        "duong_nhanh": 18,
+        "CRLF_pairs": 60
+      },
+      "matches": true,
+      "command": "probe_replay.py"
+    },
+    {
+      "claim": "Replay table digest",
+      "expected": "aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a",
+      "measured": "aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a",
+      "matches": true,
+      "command": "probe_replay.py"
+    },
+    {
+      "claim": "Current shard/step structure",
+      "expected": "8 shards, one S_DU, zero S_DICH at baseline",
+      "measured": "8 / 1 / 0; 10 workflow YAML files; full-audit G5 steps=[]",
+      "matches": true,
+      "command": "probe_current.py"
+    },
+    {
+      "claim": "Delivery size allowance",
+      "expected": "5 files within 6-file default; additions measured on future H",
+      "measured": "5 declared files; 450-line cap activated; implementation numstat not available",
+      "matches": null,
+      "command": "Read write set and validate ADR-0053 OID; no implementation candidate exists"
+    },
+    {
+      "claim": "Execution Codex call budget",
+      "expected": "source3 + connector2 as advertised",
+      "measured": "canonical total2 without opt-in; 2 source +1 connector already totals3",
+      "matches": false,
+      "command": "probe_budget.py / probe_contracts.py"
+    },
+    {
+      "claim": "Live-lease overlap",
+      "expected": 0,
+      "measured": "0 on REST-verified 380 heads; 536 unique lease blob/path pairs; 136 prefix-matching historical records; final two changed lease blobs also disjoint",
+      "matches": true,
+      "command": "probe_leases.py / probe_scope.py / final-ref-delta.json / latest-lease-check.json"
+    },
+    {
+      "claim": "Round-5 classes closed at authorized spec boundary",
+      "expected": 2,
+      "measured": 2,
+      "matches": true,
+      "command": "Whole-spec scan + contract/receipt probes + owner E1+E2/r87 readback"
+    },
+    {
+      "claim": "Observed source checkout delta",
+      "expected": 0,
+      "measured": "0 across 17,332 tracked file hashes, HEAD/tree, index/worktree diff and status",
+      "matches": true,
+      "command": "snapshot-start.json vs snapshot-final.json",
+      "limitations": "Initial ignored-file content hashes were not captured; snapshots do not prove no transient writes."
+    }
+  ],
+  "tests": [
+    {
+      "name": "Exact object, plan hash and current-master blob checks",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Exact H/tree/spec hash match; plan hash matches; master externally confirmed at 48d372e14f190dae83a75ccbca8ee9a0b25635c5"
+    },
+    {
+      "name": "Current M9 and early-exit probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-review-r6/probe_current.py",
+      "exit_code": 0,
+      "evidence": "53/53 M9 and 4/4 early exits; healthy and three K2 rejection controls observed. current.json"
+    },
+    {
+      "name": "Historical real classifier and CRLF simulation",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-review-r6/probe_replay.py",
+      "exit_code": 0,
+      "evidence": "60/60 expected classifications and 60/60 LF/CRLF pairs; exact table hash. replay.json"
+    },
+    {
+      "name": "Specification changes and external receipt feasibility",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-review-r6/probe_contracts.py",
+      "exit_code": 0,
+      "evidence": "Sections 2–9 byte-identical to r5; 0 operative inventory rows; 0 operative L-1…L-6 rules; all 7 GT provisions and 11 acceptance criteria retained; predicate adequacy explicitly checked by running code review on H; GT-7 allows a case-specific healthy setup. External receipt leaves H/tree/numstat unchanged; recommitting KET_QUA.md changes H and numstat and invalidates the old receipt."
+    },
+    {
+      "name": "Budget defect reproduction and hint controls",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-review-r6/probe_budget.py",
+      "exit_code": 0,
+      "evidence": "Actual candidate rejected by ChotBudget; valid in-memory declaration passes; three malformed/missing declaration controls reject. A passed defect-reproduction probe does not mean the spec budget passes."
+    },
+    {
+      "name": "Direct upstream git fetch",
+      "status": "failed",
+      "command": "git -C /tmp/wp1462-review-r6/repo fetch --prune origin +refs/heads/*:refs/remotes/origin/*",
+      "exit_code": 128,
+      "evidence": "Cannot connect to 127.0.0.1:36011 proxy. Local source fetch succeeded; REST heads/objects were separately verified."
+    },
+    {
+      "name": "Raw ai-dang-giu CLI",
+      "status": "failed",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <each B4 scope> --root /tmp/wp1462-review-r6/repo",
+      "exit_codes": [
+        12,
+        12,
+        12
+      ],
+      "evidence": "Each reports KHÔNG_XÁC_ĐỊNH due to failed git ls-remote. These are not no-holder passes."
+    },
+    {
+      "name": "Canonical lease scan with independently verified discovery",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1462-review-r6/probe_leases.py; python3 -B /tmp/wp1462-review-r6/probe_scope.py",
+      "exit_code": 0,
+      "evidence": "380 server name/OID pairs matched scratch refs; only discovery function supplied from that REST map. Canonical scanning/expiry/tombstone logic unchanged. Three NGƯỜI_GIỮ 0 results; prefix scan 0 active overlaps."
+    },
+    {
+      "name": "Final ref freshness comparison",
+      "status": "failed",
+      "exit_code": 1,
+      "evidence": "Expected unchanged lease trees was disproved for wp1448; this correctly exposed a lease update during review. Supplemental exact tree/blob measurement below resolves it; no stale equality claim retained."
+    },
+    {
+      "name": "Supplemental final lease delta",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "380 final refs, no additions/deletions. Master/spec/plan unchanged. One changed branch has identical lease subtree; wp1448 has two changed lease blobs, both Git-hash verified and disjoint from B4. latest-lease-check.json"
+    },
+    {
+      "name": "Supplemental lease decoding setup",
+      "status": "failed",
+      "exit_code": 1,
+      "evidence": "First parser assumed an API content envelope and raised KeyError because connector returned decoded blob text. Corrected measurement hashes the returned raw text; both expected blob OIDs match. No candidate finding or passing credit from that setup failure."
+    },
+    {
+      "name": "Ruff pin/probe contract",
+      "status": "passed",
+      "exit_code": 0,
+      "command": "runpy .claude/dev/ci_dang_ky_test.py; loi_ruff_ci()",
+      "evidence": "RUFF_CONTRACT 3 []"
+    },
+    {
+      "name": "Bare Ruff lint",
+      "status": "not_run",
+      "exit_code": null,
+      "evidence": "Availability probe python3 -m ruff --version returned rc1: No module named ruff. No source edit and no claim of bare lint passing."
+    },
+    {
+      "name": "Implementation B4 cases/mutants, complete worker gate, PR CI, full M9 CI, native Windows and live Variables",
+      "status": "not_run",
+      "exit_code": null,
+      "evidence": "Specification review only; implementation absent. No workflow dispatched, no live switch request/write, no native Windows access. Future code-review acceptance remains mandatory."
+    },
+    {
+      "name": "Reviewed checkout final snapshot",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "17,332 tracked hashes unchanged; same head/tree; index/worktree diffs zero; ignored .codex status unchanged. Snapshot observational limitations recorded."
+    }
+  ],
+  "verdict": "changes_requested",
+  "assurance": "Independent read-only Codex CLI specification review with measured local evidence, matching launcher identity and read-only GitHub ref/object evidence. No cross_approved, human_audited, merge, land or execution authority is asserted. Served model/effort remain KHONG_DO_DUOC. This verdict requests changes to one newly identified budget-authority class.",
+  "evidence_url": null,
+  "evidence_directory": "/tmp/wp1462-review-r6",
+  "notes": "Round 6 of 6, last authorized specification review. B4-S05 is closed at the explicit owner-approved E1+E2 specification boundary, corroborated by mission-r87 b4_r87; this does not claim future code coverage was measured. B4-S14 is closed across every operative final-H evidence carrier. Earlier B4-S10 size and B4-S13 two-channel fixes remain intact. B4-S15 is a new Codex-call-axis authority class, not a rename or reopening of the size class. No further author/review call is authorized by this output; retain all history and return the exhausted budget to the owner checkpoint. The assigned repository was not edited, committed, pushed or fetched into; scratch clones/imported hash-verified objects, test fixtures and documentation-only toy commits stayed under /tmp. No GitHub writes, workflow dispatch, approval, merge, deploy or LIVE action occurred. Direct git network/lease CLI failures remain failed; separate verified REST discovery and canonical offline scanning plus final lease deltas established no observed B4 overlap. Read access was used to retrieve GitHub facts only. Source tracked bytes/head/tree and index remained unchanged; ignored-file content was not snapshotted at entry, so full ignored-content and transient-write history are not attested. Linux Python3.13.18/Git2.43.0; no bare Ruff/native Windows/implementation/full-CI pass is claimed. The output file is an external review artifact; any later delivery receipt belongs to the coordinator."
+}

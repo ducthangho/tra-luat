@@ -1,0 +1,40 @@
+# kieu: bundle không phải object × cờ
+kieu.list.gas_token        rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.list.webapp           rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.list.gws              rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.list.nlm              rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.list.khong_co         rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.str.gas_token         rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.str.webapp            rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.str.gws               rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.str.nlm               rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.str.khong_co          rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.int.gas_token         rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.int.webapp            rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.int.gws               rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.int.nlm               rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.int.khong_co          rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.null.gas_token        rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.null.webapp           rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.null.gws              rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.null.nlm              rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.null.khong_co         rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.true.gas_token        rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.true.webapp           rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.true.gws              rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.true.nlm              rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+kieu.true.khong_co         rc=3 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ✗ dữ liệu không hợp lệ: bundle
+# token_kieu: bundle object, token không phải str, không TL_TOKEN
+token_kieu.list.gws        rc=0 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 1, "nlm_refresh": 0, "stage_enc": 0, "upload": 1} khoa_public=[] | [secrets-set] ⚠ thiếu webapp token → KHÔNG đồng bộ được đường public (.enc khoá=token); chạy riêng `tl gws-auth-stage` / `tl nlm-auth-stage`.
+token_kieu.list.nlm        rc=0 dem={"canary": 1, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 1, "stage_enc": 0, "upload": 1} khoa_public=[] | [secrets-set] ⚠ thiếu webapp token → KHÔNG đồng bộ được đường public (.enc khoá=token); chạy riêng `tl gws-auth-stage` / `tl nlm-auth-stage`.
+token_kieu.dict.gws        rc=0 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 1, "nlm_refresh": 0, "stage_enc": 0, "upload": 1} khoa_public=[] | [secrets-set] ⚠ thiếu webapp token → KHÔNG đồng bộ được đường public (.enc khoá=token); chạy riêng `tl gws-auth-stage` / `tl nlm-auth-stage`.
+token_kieu.dict.nlm        rc=0 dem={"canary": 1, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 1, "stage_enc": 0, "upload": 1} khoa_public=[] | [secrets-set] ⚠ thiếu webapp token → KHÔNG đồng bộ được đường public (.enc khoá=token); chạy riêng `tl gws-auth-stage` / `tl nlm-auth-stage`.
+token_kieu.int.gws         rc=0 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 1, "nlm_refresh": 0, "stage_enc": 0, "upload": 1} khoa_public=[] | [secrets-set] ⚠ thiếu webapp token → KHÔNG đồng bộ được đường public (.enc khoá=token); chạy riêng `tl gws-auth-stage` / `tl nlm-auth-stage`.
+token_kieu.int.nlm         rc=0 dem={"canary": 1, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 1, "stage_enc": 0, "upload": 1} khoa_public=[] | [secrets-set] ⚠ thiếu webapp token → KHÔNG đồng bộ được đường public (.enc khoá=token); chạy riêng `tl gws-auth-stage` / `tl nlm-auth-stage`.
+# hoi_quy: bundle object hợp lệ
+hoi_quy.gas_token          rc=0 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 1} khoa_public=[] | 
+hoi_quy.webapp             rc=0 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 1} khoa_public=[] | 
+hoi_quy.gws                rc=0 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 1, "nlm_refresh": 0, "stage_enc": 1, "upload": 1} khoa_public=["'tok-cu'"] | 
+hoi_quy.nlm                rc=0 dem={"canary": 1, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 1, "stage_enc": 1, "upload": 1} khoa_public=["'tok-cu'"] | 
+hoi_quy.khong_co           rc=1 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 0, "nlm_refresh": 0, "stage_enc": 0, "upload": 0} khoa_public=[] | [secrets-set] ⚠ không có trường nào để đổi (--gas-token/--webapp/--gws/--nlm).
+hoi_quy.env_token.gws      rc=0 dem={"canary": 0, "fetch": 1, "gas": 0, "gws_export": 1, "nlm_refresh": 0, "stage_enc": 1, "upload": 1} khoa_public=["'tok-env'"] | 

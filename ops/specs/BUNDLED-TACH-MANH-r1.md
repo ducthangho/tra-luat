@@ -13,7 +13,7 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 | `review_class` | `sensitive`: chạm `scripts/tl_core/test_fragments.py` (hợp đồng nạp fragment, chạy trong gói phát hành) và `scripts/tl_core/release.py` (cổng `test-fragments-check` lane LAND). |
 | `base` | `0f9aa2a2cc697129e1f5be72feddf60986286865`. Phiên thi hành đo lại §0 trên base thật của lease và DỪNG nếu lệch. Đo trên clone ĐẦY ĐỦ: clone nông làm `wp1099_nlm_nap_lai` đỏ giả (thiếu object `358451e8`). |
 
-Các quyết định Q1–Q5 đã được chủ kho chốt 2026-11-20 (xem §9); mỗi chỗ ghi kèm nhãn Qn.
+Các quyết định Q1–Q6 đã được chủ kho chốt 2026-11-20 (xem §9); mỗi chỗ ghi kèm nhãn Qn.
 
 ## 0. Hiện trạng (đo trên `0f9aa2a`)
 
@@ -35,6 +35,7 @@ Bằng chứng ở `ops/reviews/bundled-tach-manh-spec-r1/` (README nêu từng 
   - `references/golden/workflow_audit.json:1196` `files_scanned: 73` ⇒ thêm một tệp `.py` thành 74.
   - `.claude/dev/gate_lifecycle.py:73` `_CATALOG_POLICY_PATHS` chứa đường bundled (dev-side, chỉ băm chính sách) — xem §2.
   - Tài liệu: `references/COMMANDS.md:60`, `docs/PROTOCOL_DA_PHIEN.md`, ADR-0031, nhiều `ops/specs/*` nhắc tên tệp — xem §2.
+  - `scripts/tl_selftest.py`: hai ca `r291_docs_ngoai_goi` (~22775) và `r357_agents_ngoai_goi` (~22836) đọc `RELEASE_MANIFEST.json` ĐÃ COMMIT và ghim `len(paths) == 185` kèm dòng KÊ KHAI SLOT ⇒ thêm mảnh 2 phải đổi thành 186 cùng lúc với manifest (reviewer lượt 2 đo: manifest 186 + ghim 185 ⇒ selftest 1783/1785).
   - Trần gói 200 tệp: `RELEASE_MANIFEST.json` liệt kê 185 tệp ⇒ 186; ZIP phát hành có thêm chính manifest nên 186 ⇒ 187 entry. Trần 200 đếm theo entry ZIP.
   - `RELEASE_MANIFEST.json` băm nội dung từng tệp gói: bản vá đổi 4 tệp đã có trong manifest (`release.py`, `test_fragments.py`, bundled mảnh 1, golden) và thêm mảnh 2 ⇒ nếu không tái sinh trong chính packet thì job `gate` (lane LAND `release-verify --strict`) trên master ĐỎ từ lúc merge tới lúc merge PR manifest. Đây là nếp các packet trước (đo: merge #1453 `00ee839` ⇒ run 44711337223 job `gate` failure, xanh lại sau #1454). Reviewer đo trên nguyên mẫu: `release-verify RELEASE_MANIFEST.json --strict` rc 2.
 
@@ -44,25 +45,31 @@ Bằng chứng ở `ops/reviews/bundled-tach-manh-spec-r1/` (README nêu từng 
 .githooks/eol_policy_test.py
 references/golden/workflow_audit.json
 scripts/test_fragments/wp433_bundled_tach_manh.py
-RELEASE_MANIFEST.json
 scripts/tl_core/release.py
 scripts/tl_core/test_fragments.py
+scripts/tl_selftest.py
 scripts/tl_test_fragments_bundled.py
 scripts/tl_test_fragments_bundled_2.py
 ```
 
-**8 tệp > trần 6 của ADR-0053 ⇒ nâng trần (Q2 + Q5, chủ kho chốt 2026-11-20; E2), khối dưới chép nguyên vào lease.** Không gộp được: golden phải đổi vì
-`files_scanned`; `eol_policy_test` phải đổi vì hai ca ghi bundled từ fragment thật; manifest phải đổi để master không đỏ (Q5). Hai tệp bundled CHỈ sinh bằng
-`write_bundled_modules(scripts/test_fragments, scripts)` (M1), `RELEASE_MANIFEST.json` CHỈ sinh bằng `python scripts/tl.py release-manifest --out
-RELEASE_MANIFEST.json` (M8) — không sửa tay.
+Ngoài write set của WORKER, candidate có thêm đúng MỘT đường do **Land Operator** (phiên điều phối) ghi — protocol §9 cấm worker sửa manifest:
+
+```
+RELEASE_MANIFEST.json
+```
+
+**Candidate 9 đường (worker 8 + Land Operator 1) > trần 6 của ADR-0053 ⇒ nâng trần (Q2 + Q5 + Q6, chủ kho; E2), khối dưới chép nguyên vào lease.**
+Không gộp được: golden phải đổi vì `files_scanned`; `eol_policy_test` phải đổi vì hai ca ghi bundled từ fragment thật; manifest phải đổi để master không đỏ
+(Q5); `tl_selftest.py` phải đổi vì hai ca ghim số tệp manifest (Q6). Hai tệp bundled CHỈ sinh bằng `write_bundled_modules(scripts/test_fragments, scripts)`
+(M1); `RELEASE_MANIFEST.json` CHỈ sinh bằng `python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json` (M8) — không sửa tay.
 
 ```yaml
 nang_tran:
   truc: kich_thuoc_packet
   ai_nang: ducthangho
   tran_cu: '<= 6 tep, <= 450 dong them (ADR-0053, packet sensitive)'
-  tran_moi: '<= 8 tep, <= 450 dong them'
-  can_cu: 'Chu kho 2026-11-20 trong phien dieu phoi #1206: Q2 nang len 7 tep, Q5 dua RELEASE_MANIFEST.json vao packet (8 tep). Numstat nguyen mau base 0f9aa2a, 7 tep khong ke manifest: eol_policy_test 2/4, golden 1/1, fragment 130/0, release.py 22/5, test_fragments.py 90/26, bundled 2/9, bundled_2 14/0 = +261/-45; manifest du toan <= 20 dong them (PR manifest #1449 7/7, #1454 5/5).'
+  tran_moi: '<= 9 duong dan trong candidate (worker 8 + Land Operator 1: RELEASE_MANIFEST.json), <= 450 dong them'
+  can_cu: 'Chu kho 2026-11-20 trong phien dieu phoi #1206: Q2 nang len 7 tep, Q5 dua RELEASE_MANIFEST.json vao candidate, Q6 them scripts/tl_selftest.py (2 ca ghim 185 -> 186) => 9 duong dan. Numstat nguyen mau base 0f9aa2a, 7 tep khong ke manifest: eol_policy_test 2/4, golden 1/1, fragment 130/0, release.py 22/5, test_fragments.py 90/26, bundled 2/9, bundled_2 14/0 = +261/-45; manifest do o review luot 2: +16/-11 (tong 8 tep +277/-56); tl_selftest du toan <= 6 dong them.'
 ```
 
 **Điều kiện cấp lease (E2):** comment chủ kho trên #433 cấp ngoại lệ
@@ -70,7 +77,7 @@ bundled nêu đúng `packet_id` `BUNDLED-TACH-MANH`, hai tệp bundled, sha256 �
 
 ## 2. `ngoai_pham_vi`
 
-- Không đổi ngưỡng, waiver hay vị từ của `_py_size_findings`; không sửa `r125_*` hay `scripts/tl_selftest.py`.
+- Không đổi ngưỡng, waiver hay vị từ của `_py_size_findings`; không sửa `r125_*`. Trong `scripts/tl_selftest.py` CHỈ được đổi hai chỗ ghim `== 185` → `== 186` của `r291_docs_ngoai_goi` / `r357_agents_ngoai_goi` và thêm một dòng KÊ KHAI SLOT cho mỗi ca (M9); không chạm ca nào khác.
 - Không sửa `.github/checks/bundle_fragment_check.py`, `scripts/tl.py`, `_RELEASE_REQUIRED_FILES` (chỉ tệp chính là bắt buộc; mảnh được `test-fragments-check`
   canh), `.claude/dev/gate_lifecycle.py` (đề xuất nợ riêng nếu muốn băm cả mảnh), tài liệu `references/COMMANDS.md` / `docs/**` / ADR (nợ tài liệu riêng:
   `bundled-tach-manh-tai-lieu`).
@@ -87,7 +94,8 @@ bundled nêu đúng `packet_id` `BUNDLED-TACH-MANH`, hai tệp bundled, sha256 �
 | M5 | Golden `workflow_audit.json`: `files_scanned` 73 → 74; không khoá nào khác đổi (`golden-test` ok). | golden |
 | M6 | Fragment `wp433_bundled_tach_manh.py`, 8 nhãn (§4). Fragment KHÔNG được văng ngoại lệ dưới đột biến: mọi chỉ số/độ dài phải chốt trước khi dùng (đột biến c lần đầu văng `IndexError` ⇒ tín dụng giả; đã thêm chốt). | fragment |
 | M7 | Tái sinh bằng `write_bundled_modules`; ra đúng hai mảnh trên base (mảnh 1 ≈ 189 KB, mảnh 2 ≈ 102 KB). | bundled |
-| M8 | Tái sinh `RELEASE_MANIFEST.json` bằng `python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json` SAU mọi thay đổi khác, commit trong cùng packet (Q5). Mọi commit sửa thêm sau đó (vá review) phải tái sinh lại manifest trong cùng commit hoặc commit kế tiếp, trước khi chốt SHA. | manifest |
+| M8 | **Land Operator** (phiên điều phối, không phải worker — protocol §9) tái sinh `RELEASE_MANIFEST.json` bằng `python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json` trên đầu nhánh PR SAU khi worker xong mọi commit và review đã approve, commit một commit riêng lên nhánh PR, rồi mới trình chủ kho duyệt exact SHA (Q5). Worker chỉ đo bằng manifest TẠM hoặc bản tái sinh KHÔNG commit trong cây làm việc (khôi phục trước khi commit). Có commit vá nào sau commit manifest ⇒ Land Operator tái sinh lại trước khi chốt SHA. | manifest |
+| M9 | `scripts/tl_selftest.py`: hai ca ghim số tệp manifest đổi `185` → `186` và thêm dòng `# KÊ KHAI SLOT (BUNDLED-TACH-MANH): 185 → **186** = + scripts/tl_test_fragments_bundled_2.py. Trần Package 200 (ZIP 187 entry).` cho mỗi ca (Q6). | `tl_selftest.py` |
 
 ## 4. `nghiem_thu`
 
@@ -95,7 +103,7 @@ bundled nêu đúng `packet_id` `BUNDLED-TACH-MANH`, hai tệp bundled, sha256 �
 |---|---|---|---|
 | N1 | fragment mới | `run()` True; 8 nhãn True: `mot_manh` (1 mảnh, không dòng SHARDS, = `generate_bundled_module_bytes`), `nhieu_manh` (hạn 100 KiB, 6×40 KiB ⇒ ≥3 mảnh, nạp đủ đúng thứ tự, mảnh 1 khai), `manh_lac` (tệp `_9` không khai: loader bỏ qua, cổng `GENERATED_BUNDLE_STALE` + `extra_shards == ["tl_test_fragments_bundled_9.py"]`), `ghi_xoa_lac`, `thieu_manh` (`BUNDLED_MODULE_MISSING`), `thu_tu_xuyen_manh` (đổi chỗ mảnh 2/3 ⇒ `BUNDLED_MODULE_CONTRACT`), `manh_tu_khai` (mảnh k≥2 có SHARDS ⇒ `BUNDLED_MODULE_CONTRACT`), `kho_that` (`_BUNDLED_SHARD_LIMIT ≤ 0,7·WARN`, mọi mảnh thật ≤ WARN). | nhãn nào khác True |
 | N2 | đột biến (§4b) | 6/6 đỏ ĐÚNG nhãn đích, `run()` trả False (không văng). | sống, hoặc chết do ngoại lệ |
-| N3 | gate trên head, clone đầy đủ | selftest N/N hai số bằng nhau, N = N_base + 1 (base 1784, nguyên mẫu 1785); `test-fragments-check` `ok: true` hai mảnh; `bundle_fragment_check` `ok: true`, `failed: []`, `case_count` 19; `release-verify RELEASE_MANIFEST.json --strict --json` trên CHÍNH tệp đã commit: `ok: true`, `expected == checked` = 186 (lane LAND; chốt land chỉ trên SHA thoả vế này); `workflow-audit` `py_size.warn == []`, `files_scanned` 74; `golden-test` ok; `.githooks/eol_policy_test.py` 32/32 (trên cây ĐÃ commit); ruff F delta 0; `git diff --check`, `doctrine-scan`, `adr-song` rc 0. | bất kỳ vế nào |
+| N3 | gate trên SHA candidate (sau commit manifest M8), clone đầy đủ; worker đo trước bằng manifest tái sinh không commit | selftest N/N hai số bằng nhau, N = N_base + 1 (base 1784, nguyên mẫu 1785); `test-fragments-check` `ok: true` hai mảnh; `bundle_fragment_check` `ok: true`, `failed: []`, `case_count` 19; `release-verify RELEASE_MANIFEST.json --strict --json` trên CHÍNH tệp đã commit: `ok: true`, `expected == checked` = 186 (lane LAND; chốt land chỉ trên SHA thoả vế này); `workflow-audit` `py_size.warn == []`, `files_scanned` 74; `golden-test` ok; `.githooks/eol_policy_test.py` 32/32 (trên cây ĐÃ commit); ruff F delta 0; `git diff --check`, `doctrine-scan`, `adr-song` rc 0. | bất kỳ vế nào |
 | N4 | phản chứng mục đích | Áp `scripts/test_fragments/wp433_secrets_set_bundle.py` + `scripts/tl_gws.py` của `origin/agent/wp433-r8-g1-claude` lên head, `write_bundled_modules`: `py_size.warn == []`, `test-fragments-check` ok, selftest N/N (đo nguyên mẫu: 1786/1786, mảnh 189.328 / 117.343 B). Không commit phần áp. | còn WARN; HOẶC `test-fragments-check` không phải rc 0 kèm `ok: true`; HOẶC selftest không phải rc 0 với số đạt = tổng |
 
 ### 4b. Đột biến (đã đo trên nguyên mẫu, `dot-bien.txt`)
@@ -133,23 +141,25 @@ Không chạm E4/E5: thư mục tạm, không mạng, không LIVE, không đẩy
   mọi packet thêm/sửa fragment phải khai write set gồm MỌI tệp `scripts/tl_test_fragments_bundled*.py` (kể cả mảnh mới có thể sinh), và ngoại lệ bundled phải
   nêu cả nhóm tệp, sinh bằng `write_bundled_modules` (không còn `generate_bundled_module_bytes`).
 - **SECRETS-SET-BUNDLE-KIEU cần revision r2 sau khi packet này land:** fragment `wp433_secrets_set_bundle.py` rơi vào mảnh 2 (đo N4) ⇒ write set thêm
-  `scripts/tl_test_fragments_bundled_2.py` (4 tệp), ngoại lệ bundled mới, lease mới; nhánh `a8a3b3c` phải merge master mới rồi tái sinh bằng
+  `scripts/tl_test_fragments_bundled_2.py` (4 tệp worker) cộng `RELEASE_MANIFEST.json` do Land Operator tái sinh trong candidate (5 đường; thiếu ⇒ strict verify rc 2, reviewer lượt 2 đo), ngoại lệ bundled mới, lease mới; nhánh `a8a3b3c` phải merge master mới rồi tái sinh bằng
   `write_bundled_modules`. Mã `tl_gws.py` và fragment của nó không đổi.
 
 ## 8. `chua_do_duoc` và dự toán
 
 - Numstat nguyên mẫu (đo, base `0f9aa2a`, bundled tái sinh bằng `write_bundled_modules`): `eol_policy_test.py` 2/4 · golden 1/1 · fragment mới 130/0 ·
   `release.py` 22/5 · `test_fragments.py` 90/26 · `tl_test_fragments_bundled.py` 2/9 · `tl_test_fragments_bundled_2.py` 14/0 ⇒ **7 tệp, 261 dòng thêm, 45 xoá**.
-- Chưa đo: Windows (miễn theo Q4); numstat thật của `RELEASE_MANIFEST.json` (dự toán ≤ 20 dòng thêm; tổng dự toán ≤ 281/450).
+- Chưa đo: Windows (miễn theo Q4). Đã đo (review lượt 2): manifest +16/−11, tổng 8 tệp +277/−56; cộng `tl_selftest.py` (≤ 6) ⇒ dự toán ≤ 283/450.
 
 ## 9. Lịch sử và quyết định
 
 - Chủ kho 2026-11-20: secrets-set bị chặn bởi WARN bundled ⇒ chọn "Tách bundled trước" (không nâng ngưỡng, không waiver, không đưa test ra ngoài bundle).
 - Chủ kho 2026-11-20 chốt Q1–Q4 theo khuyến nghị: #433 · nâng trần ADR-0053 lên 7 tệp/450 dòng · hạn mảnh 192 KiB · miễn đo Windows. Yêu cầu Codex review đặc tả trước khi duyệt băm.
 - Chủ kho 2026-11-20, sau Codex lượt 1 (P1 manifest): Q5 — đưa `RELEASE_MANIFEST.json` vào packet, trần 8 tệp / 450 dòng; bỏ PR manifest riêng sau land.
+- Sau Codex lượt 2 (P1 hai ca selftest ghim 185): Q6 — thêm `scripts/tl_selftest.py` vào write set worker (M9); manifest do Land Operator commit (M8, protocol §9). Candidate 9 đường / 450 dòng: CHỜ chủ kho xác nhận khi duyệt băm.
 
 ## 10. Nhật ký revision
 
 - 2026-11-20T15:1xZ (phiên con của điều phối #1206): bản 1, đo §0 và nguyên mẫu trên clone đầy đủ `0f9aa2a` (Linux).
 - 2026-11-20 (điều phối #1206): ghi quyết định Q1–Q4 của chủ kho; chưa đổi nội dung kỹ thuật.
 - 2026-11-20 (điều phối #1206): sửa theo Codex lượt 1 (run `402df797`, request_changes): P1 manifest vào packet (Q5, M8, N3) · P2 khối `nang_tran` · P2 N4 đỏ đủ ba vế · P3 đếm entry ZIP 186→187 · P3 số đo §0/N4.
+- 2026-11-20 (điều phối #1206): sửa theo Codex lượt 2 (run `1e18f41a`, request_changes): P1 `tl_selftest.py` vào write set (Q6, M9) · P2 manifest do Land Operator (M8) · P2 §7 secrets-set 5 đường · P3 README.

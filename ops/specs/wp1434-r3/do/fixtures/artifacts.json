@@ -1,0 +1,9 @@
+{
+ "_ghi_chu": "Du lieu TONG HOP: danh sach artifact co mot cai het han (expired=true) va mot cai con han; noi_dung_manh la bien nhan manh toi thieu (rc 1, giay 0, 3 muc trong do 2 passed). Khong co URL tai.",
+ "total_count": 2,
+ "artifacts": [
+  {"id": 1, "name": "dot-bien-manh-0", "size_in_bytes": 2364, "expired": true, "created_at": "2026-08-01T00:00:00Z", "expires_at": "2026-10-30T00:00:00Z"},
+  {"id": 2, "name": "dot-bien-manh-44000000002-1-5", "size_in_bytes": 2325, "expired": false, "created_at": "2026-11-17T01:16:36Z", "expires_at": "2027-02-15T00:47:56Z"}
+ ],
+ "noi_dung_manh": {"phien_ban": 1, "che_do": "full_mutant_audit", "manh": 5, "so_manh": 8, "head": "0000000000000000000000000000000000000002", "rc": 1, "bat_dau": "2026-11-17T00:48:04.612Z", "ket_thuc": "2026-11-17T00:48:04.612Z", "giay": 0, "ram_dinh_mb": 202.4, "so_lan_chay_lai": 0, "ket_qua": {"tk:a": "passed", "db:b": "passed", "ca:r546": "failed"}}
+}

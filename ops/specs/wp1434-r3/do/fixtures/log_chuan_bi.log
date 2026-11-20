@@ -1,0 +1,10 @@
+2026-11-19T12:19:44.1386039Z Current runner version: '2.338.2'
+2026-11-19T12:19:51.5607642Z ##[group]Run python3 ops/ci_duong_nhanh.py
+2026-11-19T12:19:51.5648866Z   CI_DUONG_NHANH_SU_KIEN: pull_request
+2026-11-19T12:19:51.5649794Z   CI_DUONG_NHANH_CHE_DO_VAO:
+2026-11-19T12:19:51.5650152Z ##[endgroup]
+2026-11-19T12:19:51.6027312Z DUONG_NHANH: toan bo 2 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh
+2026-11-19T12:19:51.6027795Z che_do=duong_nhanh
+2026-11-19T12:19:51.6060535Z PACKET_LOOP: bo_qua vi 2 tep doi khong cham tap phu thuoc cua bo ca
+2026-11-19T12:19:51.6060771Z packet_loop=bo_qua
+2026-11-19T12:19:51.6147922Z Post job cleanup.

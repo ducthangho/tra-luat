@@ -1,0 +1,20 @@
+{
+ "_ghi_chu": "Du lieu TONG HOP: bien cohort. Khoang DONG [T0, T1]. ci.yml: 101 truoc T0 1 giay (ngoai), 102 dung T0 (trong), 103 dung T1 (trong), 104 sau T1 1 giay (ngoai), 105 chua completed, 106 su kien schedule, 107 push nhanh khac master, 108 push master giua khoang. ci-dot-bien-du.yml: khong co can duoi (201 truoc T0 van trong), 203 sau T1 ngoai.",
+ "T0": "2026-10-21T01:00:00Z",
+ "T1": "2026-11-20T01:00:00Z",
+ "ci": [
+  {"id": 101, "event": "pull_request", "status": "completed", "head_branch": "x", "created_at": "2026-10-21T00:59:59Z"},
+  {"id": 102, "event": "pull_request", "status": "completed", "head_branch": "x", "created_at": "2026-10-21T01:00:00Z"},
+  {"id": 103, "event": "pull_request", "status": "completed", "head_branch": "x", "created_at": "2026-11-20T01:00:00Z"},
+  {"id": 104, "event": "pull_request", "status": "completed", "head_branch": "x", "created_at": "2026-11-20T01:00:01Z"},
+  {"id": 105, "event": "pull_request", "status": "in_progress", "head_branch": "x", "created_at": "2026-11-10T00:00:00Z"},
+  {"id": 106, "event": "schedule", "status": "completed", "head_branch": "master", "created_at": "2026-11-10T00:00:00Z"},
+  {"id": 107, "event": "push", "status": "completed", "head_branch": "ops/khac", "created_at": "2026-11-10T00:00:00Z"},
+  {"id": 108, "event": "push", "status": "completed", "head_branch": "master", "created_at": "2026-11-10T00:00:00Z"}
+ ],
+ "du": [
+  {"id": 201, "event": "schedule", "status": "completed", "head_branch": "master", "created_at": "2026-09-01T00:00:00Z"},
+  {"id": 202, "event": "workflow_dispatch", "status": "completed", "head_branch": "agent/x", "created_at": "2026-11-20T01:00:00Z"},
+  {"id": 203, "event": "workflow_dispatch", "status": "completed", "head_branch": "agent/x", "created_at": "2026-11-20T01:00:01Z"}
+ ]
+}

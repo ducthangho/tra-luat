@@ -1,0 +1,8 @@
+2026-11-17T00:47:58.7356166Z Current runner version: '2.338.2'
+2026-11-17T00:48:04.5305991Z full_mutant_audit MANH 3/8: 2 muc
+2026-11-17T00:48:05.4887292Z TIEN DO MANH 3/8 [1/2] tk:a ca=r520,r522,r545
+2026-11-17T00:48:52.8931116Z KET QUA tk:a: passed (47.4s)
+2026-11-17T00:48:52.8931464Z TIEN DO MANH 3/8 [2/2] db:b ca=T1
+2026-11-17T00:48:53.0931999Z KET QUA db:b: passed (0.2s)
+2026-11-17T00:48:53.0932100Z full_mutant_audit MANH 3/8: rc=0 · passed 2/2
+2026-11-17T00:48:54.0000000Z Cleaning up orphan processes

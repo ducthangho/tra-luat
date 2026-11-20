@@ -1,0 +1,6 @@
+2026-11-19T12:21:49.1386039Z Current runner version: '2.338.2'
+2026-11-19T12:21:55.0000000Z ##[group]Run python .claude/dev/ci_dang_ky_test.py --chay
+2026-11-19T12:21:55.0000001Z   CI_DANG_KY_WORKERS: 2
+2026-11-19T12:21:56.0000000Z ĐỎ: job gom mảnh nhanh_don_duoc chưa success
+2026-11-19T12:21:56.0000001Z TỔNG: ĐỎ
+2026-11-19T12:21:56.5000000Z ##[error]Process completed with exit code 2.

@@ -1,0 +1,133 @@
+{
+ "_ghi_chu": "Du lieu TONG HOP cho --tu-kiem: so muc theo tung manh (null = manh khong co nguon); dong job va artifact toi thieu cho bo gom nguon theo manh.",
+ "khong_nguon": [
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null
+ ],
+ "thieu_nguon": [
+  38,
+  null,
+  41,
+  40,
+  null,
+  41,
+  null,
+  41
+ ],
+ "du_nguon": [
+  41,
+  40,
+  40,
+  38,
+  40,
+  41,
+  40,
+  41
+ ],
+ "du_nguon_co_0": [
+  41,
+  40,
+  40,
+  38,
+  40,
+  41,
+  40,
+  0
+ ],
+ "job": [
+  {
+   "ten": "dot-bien-du",
+   "loai_dong": "thuc_thi",
+   "log": {
+    "trang_thai_log": "co",
+    "so_bo": 15
+   }
+  },
+  {
+   "ten": "dot-bien-manh (0)",
+   "loai_dong": "thuc_thi",
+   "log": {
+    "trang_thai_log": "co",
+    "so_dong_ket_qua": 38
+   }
+  },
+  {
+   "ten": "dot-bien-manh (1)",
+   "loai_dong": "thuc_thi",
+   "log": {
+    "trang_thai_log": "cat_cut",
+    "so_dong_ket_qua": 12
+   }
+  },
+  {
+   "ten": "dot-bien-manh (2)",
+   "loai_dong": "thuc_thi",
+   "log": {
+    "trang_thai_log": "loi"
+   }
+  },
+  {
+   "ten": "dot-bien-manh (3)",
+   "loai_dong": "thuc_thi",
+   "log": {
+    "trang_thai_log": "co",
+    "so_dong_ket_qua": 41
+   }
+  },
+  {
+   "ten": "dot-bien-manh (3)",
+   "loai_dong": "mang_sang"
+  },
+  {
+   "ten": "dot-bien-gop",
+   "loai_dong": "thuc_thi"
+  }
+ ],
+ "artifact": [
+  {
+   "id": 1,
+   "noi_dung": {
+    "trang_thai": "do_duoc",
+    "manh": 0,
+    "so_muc": 38
+   }
+  },
+  {
+   "id": 2,
+   "noi_dung": {
+    "trang_thai": "khong_do_duoc",
+    "ly_do": "artifact het_han (expired=true)"
+   }
+  },
+  {
+   "id": 3,
+   "noi_dung": {
+    "trang_thai": "do_duoc",
+    "manh": 2,
+    "so_muc": 41
+   }
+  },
+  {
+   "id": 4,
+   "noi_dung": {
+    "trang_thai": "do_duoc",
+    "manh": 2,
+    "so_muc": 41
+   }
+  },
+  {
+   "id": 5,
+   "noi_dung": {
+    "trang_thai": "do_duoc",
+    "manh": 3,
+    "so_muc": 40
+   }
+  }
+ ]
+}

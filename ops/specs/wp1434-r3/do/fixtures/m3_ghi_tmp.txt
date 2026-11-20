@@ -1,0 +1,17 @@
+# Du lieu TONG HOP cho --tu-kiem (ma Python, KHONG phai bo test that): module co TAC DUNG PHU luc import.
+# Ghi vao thu muc tam, HOME va cwd (phai roi vao hop cat duoi --ra); neu co bien WP1434_THOAT thi ghi THANG vao duong dan tuyet doi ay
+# (phan chung: thoat khoi hop cat => bo doc phai tu choi).
+import os
+import pathlib
+import tempfile
+
+DOT_BIEN = [("a", "goc", "thay"), ("b", "goc", "thay")]
+(pathlib.Path(tempfile.gettempdir()) / "wp1434_dau_vet_tmp.txt").write_text("ghi luc import", encoding="utf-8")
+(pathlib.Path(os.path.expanduser("~")) / "wp1434_dau_vet_home.txt").write_text("ghi luc import", encoding="utf-8")
+pathlib.Path("wp1434_dau_vet_cwd.txt").write_text("ghi luc import", encoding="utf-8")
+_thoat = os.environ.get("WP1434_THOAT")
+if _thoat:
+    (pathlib.Path(_thoat) / "wp1434_thoat.txt").write_text("thoat khoi hop cat", encoding="utf-8")
+
+if __name__ == "__main__":
+    raise SystemExit("mau nay khong duoc chay nhu chuong trinh")

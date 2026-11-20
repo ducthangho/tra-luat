@@ -1,0 +1,15 @@
+{
+ "_ghi_chu": "Du lieu TONG HOP cho --tu-kiem (khong phai phan hoi API that). Bon buoc: 0 giay, thieu started_at, thoi gian dao, skipped; va mot luot co dong job thieu moc + dao.",
+ "khong_giay": {"name": "Run actions/setup-python@v5", "status": "completed", "conclusion": "success", "number": 3, "started_at": "2026-11-17T00:48:03Z", "completed_at": "2026-11-17T00:48:03Z"},
+ "thieu_started_at": {"name": "buoc bi huy truoc khi chay", "status": "completed", "conclusion": "cancelled", "number": 4, "started_at": null, "completed_at": "2026-11-17T00:49:00Z"},
+ "dao": {"name": "buoc co moc dao", "status": "completed", "conclusion": "success", "number": 5, "started_at": "2026-11-17T00:50:10Z", "completed_at": "2026-11-17T00:50:03Z"},
+ "skipped": {"name": "test registry (phạm vi + các bộ chưa được nối)", "status": "completed", "conclusion": "skipped", "number": 6, "started_at": "2026-11-17T00:51:00Z", "completed_at": "2026-11-17T00:50:59Z"},
+ "luot_thieu": {
+  "run": {"id": 900, "run_attempt": 1, "event": "pull_request", "status": "completed", "conclusion": "cancelled", "created_at": "2026-11-17T00:47:56Z", "updated_at": "2026-11-17T00:52:00Z"},
+  "jobs": [
+   {"id": 901, "run_attempt": 1, "name": "gate (ubuntu-latest)", "conclusion": "success", "labels": ["ubuntu-latest"], "created_at": "2026-11-17T00:47:56Z", "started_at": "2026-11-17T00:47:58Z", "completed_at": "2026-11-17T00:48:28Z", "steps": []},
+   {"id": 902, "run_attempt": 1, "name": "gate-ops (ubuntu-latest)", "conclusion": "cancelled", "labels": ["ubuntu-latest"], "created_at": "2026-11-17T00:47:56Z", "started_at": null, "completed_at": "2026-11-17T00:48:30Z", "steps": []},
+   {"id": 903, "run_attempt": 1, "name": "gate-registry (ubuntu-latest)", "conclusion": "failure", "labels": ["ubuntu-latest"], "created_at": "2026-11-17T00:47:56Z", "started_at": "2026-11-17T00:48:40Z", "completed_at": "2026-11-17T00:48:31Z", "steps": []}
+  ]
+ }
+}

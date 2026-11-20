@@ -1,0 +1,6 @@
+2026-11-19T12:21:49.1386039Z Current runner version: '2.338.2'
+2026-11-19T12:25:20.7757024Z CI_DANG_KY_KE_HOACH ops/b_test.py: nhe — diff không chạm vùng đột biến
+2026-11-19T12:25:20.7799507Z TỔNG: ĐẠT
+2026-11-19T12:47:59.7325196Z CI_DANG_KY_THOI_GIAN {"ke_hoach": {"ops/b_test.py": {"che_do": "nhe", "ly_do": "diff không chạm vùng đột biến"}}, "N": 2, "so_lop_logic": 4, "so_lop_dung_duoc": 4, "bo": [{"duong_dan": "ops/a_test.py", "rc": 0, "giay": 174.381, "bat_dau_utc": "2026-11-19T12:22:26.384Z", "ket_thuc_utc": "2026-11-19T12:25:20.765Z", "che_do": "day_du"}, {"duong_dan": "ops/b_test.py", "rc": 0, "giay": 0, "bat_dau_utc": "2026-11-19T12:22:26.385Z", "ket_thuc_utc": "2026-11-19T12:22:26.385Z", "che_do": "nhe"}, {"duong_dan": "ops/c_test.py", "rc": 1, "bat_dau_utc": "2026-11-19T12:22:26.977Z", "ket_thuc_utc": "2026-11-19T12:22:27.065Z"}, {"duong_dan": "ops/d_test.py", "rc": 0, "giay": -1.5, "bat_dau_utc": "2026-11-19T12:22:27.065Z", "ket_thuc_utc": "2026-11-19T12:22:25.565Z", "che_do": "day_du"}]}
+2026-11-19T12:47:59.7336258Z TỔNG: ĐỎ
+2026-11-19T12:48:00.1107341Z Cleaning up orphan processes

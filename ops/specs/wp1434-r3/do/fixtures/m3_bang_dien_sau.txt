@@ -1,0 +1,44 @@
+# Du lieu TONG HOP cho --tu-kiem (ma Python, KHONG phai bo test that): bang co literal dau roi duoc dien tiep.
+# Dem literal dau cho MUTANTS=2, CA=0, DOT_BIEN=1, MUTATIONS=1; so CUOI CUNG sau import la MUTANTS=5, CA=3, DOT_BIEN=4, MUTATIONS=3.
+import os
+
+MUTANTS = {"a": ("goc", "thay"), "b": ("goc", "thay")}
+CA = []
+DOT_BIEN = [("m1", "goc", "thay")]
+thuong = [1, 2, 3]
+THUONG = [1]                      # IN HOA nhung khong phai bang ca/dot bien: khong duoc chon
+MUTATIONS = [("x1", "goc", "thay")]  # ten bang KHONG khop MUTANT: van phai duoc chon
+IMMUTABLE_TRUONG = ("a", "b")     # ten chua MUT ma khong phai bang dot bien: phai duoc BAO la khong chon
+TRAN_GIAY = 540
+
+
+def ca(f):
+    CA.append((f.__name__, f))
+    return f
+
+
+@ca
+def t1():
+    return True
+
+
+@ca
+def t2():
+    return True
+
+
+@ca
+def t3():
+    return True
+
+
+MUTANTS.update({"c": ("goc", "thay"), "d": ("goc", "thay")})
+MUTANTS["e"] = ("goc", "thay")
+DOT_BIEN += [("m2", "goc", "thay"), ("m3", "goc", "thay")]
+DOT_BIEN.append(("m4", "goc", "thay"))
+MUTATIONS.extend([("x2", "goc", "thay"), ("x3", "goc", "thay")])
+
+if __name__ == "__main__":
+    with os.fdopen(os.open("DA_CHAY_BO", os.O_WRONLY | os.O_CREAT), "w") as f:
+        f.write("khoi __main__ da chay")
+    raise SystemExit("mau nay khong duoc chay nhu chuong trinh")

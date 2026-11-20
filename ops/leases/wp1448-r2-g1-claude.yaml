@@ -104,5 +104,7 @@
       "verdict": "approve",
       "reviewed_spec_sha256": "5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e"
     }
-  ]
+  ],
+  "da_bi_thay_the": "wp1448-r3-g2-claude",
+  "da_bi_thay_the_note": "Owner approved spec r3 (nang_tran) and Mission r87 (https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7047032246); successor lease wp1448-r3-g2-claude."
 }

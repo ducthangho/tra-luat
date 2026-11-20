@@ -2,12 +2,17 @@
 """Bộ quét đột biến với TẬP TOÁN TỬ ĐÓNG cho wp1236 r10 (luật 3 mục *Ma trận chốt–ca–đột biến*). Công cụ ĐO dev-side, không phải mã
 thi công. Tất định: cùng tệp nguồn ⇒ cùng manifest (id, toán tử, vị trí, băm nguồn đột biến).
 
+  do    <module.py> <test.py> <kho.jsonl> --thu-muc-ra D [--song-song N]
+        ĐO CHÍNH THỨC (luật 3 + 5): tự sinh manifest từ <module>, tự áp <kho>, chạy, đối chiếu đủ inventory rồi mới in `HOAN_TAT`.
+        Không nhận manifest từ ngoài ⇒ không nộp thiếu mẫu số được. Chỉ chạy trên Python PYTHON_CHUAN (dạng chuẩn ast.unparse đổi giữa
+        các bản), không thì rc 2. Kết quả ở D/kq.jsonl; dòng đầu là neo (công cụ, test, gốc, manifest, kho, python), ca baseline.
   sinh  <module.py> [--ra manifest.jsonl]            sinh manifest (mỗi dòng một đột biến, kèm toàn văn nguồn)
   chay  <manifest.jsonl> <test.py> --goc <module gốc> [--ra kq.jsonl] [--song-song N]
         BASELINE trước: module gốc phải qua mọi ca, không thì rc 2 KHÔNG ĐO ĐƯỢC. Rồi chạy MỌI ca của <test.py> (biến
         GATE_OUTPUT_DOI_CHIEU_MA trỏ bản đột biến), dừng ở ca đầu tiên ném TinHieuChotCa; phân hạng GIET (kèm tên ca) · SONG ·
         VO_CAN (chỉ lỗi vô can) · LOI_CHAY (tiến trình con rc ≠ 0). Dòng đầu kq là neo sha256 (công cụ, test, gốc, manifest); resume chỉ
-        dùng kết quả cũ khi neo VÀ (id, sha256 đột biến) khớp. rc 0 + dòng `HOAN_TAT neo=…` chỉ khi đủ và không LOI_CHAY; rc 3 nếu có. Bộ nạp YAML là của SẢN PHẨM (PyYAML SafeLoader thuần); chỉ nhớ đệm theo nội dung
+        dùng kết quả cũ khi neo VÀ (id, sha256 đột biến) khớp. Dòng thiếu `src` (manifest bàn giao) ⇒ rc 2. `chay` là TẬP CON: in
+        `TAP_CON neo=…` chứ không bao giờ `HOAN_TAT`; chỉ `do` in `HOAN_TAT`. Có LOI_CHAY ⇒ rc 3. Tiến trình con phải in `XONG_CON`. Bộ nạp YAML là của SẢN PHẨM (PyYAML SafeLoader thuần); chỉ nhớ đệm theo nội dung
         và trả deepcopy (không đổi ngữ nghĩa — review mã lượt 6 đo C loader lệch, nên KHÔNG dùng C loader).
   hoi-quy <kho> <goc.py> <dich.py> [--ra manifest.jsonl]
         <kho> là .json {id: {src, kind}} (toàn văn trên <goc.py>) HOẶC .jsonl các cặp {id, kind, cu, moi} (dạng ghim trong kho,
@@ -242,9 +247,12 @@ m = importlib.util.module_from_spec(spec); sys.modules["godc_test"] = m; spec.lo
 for ten in m.CA:
     rc, dong = m.chay_ca(ten)
     if rc == 3:
-        print("GIET", ten); break
+        print("GIET", ten, dong[:300].replace("\n", " ")); break
     elif rc:
         print("HONG", ten, dong[:200].replace("\n", " "))
+    else:
+        print("DAT", ten)
+print("XONG_CON", len(m.CA))
 '''
 
 
@@ -261,26 +269,43 @@ def _mot(src, test, thu, mid="baseline"):
     p.unlink()
     giet = [x.split()[1] for x in ra if x.startswith("GIET ")]
     hong = [x for x in ra if x.startswith("HONG ")]
-    # Tiến trình con lỗi (rc ≠ 0: test không nạp được, vắng, ném ngoài chay_ca) ⇒ LOI_CHAY: không phải SỐNG, không phải GIẾT.
-    return {"id": mid, "rc": r.returncode, "giet": giet, "hong": hong,
-            "phan_hang": "LOI_CHAY" if r.returncode else "GIET" if giet else "VO_CAN" if hong else "SONG",
+    dat = [x.split()[1] for x in ra if x.startswith("DAT ")]
+    so_ca = next((int(x.split()[1]) for x in ra if x.startswith("XONG_CON ")), None)
+    xong = so_ca is not None
+    # Tiến trình con lỗi (rc ≠ 0) hay thiếu dấu kết thúc XONG_CON ⇒ LOI_CHAY: không phải SỐNG, không phải GIẾT.
+    loi = r.returncode != 0 or not xong or (mid == "baseline" and len(dat) != so_ca)   # baseline phải ĐẠT đủ mọi ca
+    return {"id": mid, "rc": r.returncode, "giet": giet, "hong": hong, "dat": dat if mid == "baseline" else len(dat),
+            "assertion": next((x.split(" ", 2)[2] for x in ra if x.startswith("GIET ")), ""),
+            "phan_hang": "LOI_CHAY" if loi else "GIET" if giet else "VO_CAN" if hong else "SONG",
             "stderr_cuoi": r.stderr.decode("utf-8", "replace")[-300:] if r.returncode else ""}
 
 
-def chay(manifest, test, ra, ss, goc):
+PYTHON_CHUAN = (3, 13)   # ast.unparse đổi cách viết (vd quote f-string) giữa các bản ⇒ dạng chuẩn và băm chỉ có nghĩa trên một bản
+
+
+def chay(manifest, test, ra, ss, goc, tap_con=True, kho=None):
     """Neo: (công cụ, test, module gốc, manifest) theo sha256. Baseline: module gốc phải qua MỌI ca (không GIẾT, không lỗi), không thì
     KHÔNG ĐO ĐƯỢC rc 2. Resume chỉ nhận kết quả cũ khi (id, sha256 đột biến) VÀ neo khớp. rc 0 chỉ khi đủ mọi đột biến, không LOI_CHAY."""
     test = Path(test).resolve()
     if not test.is_file() or not Path(goc).is_file():
         print("KHONG_DO_DUOC: test hoac module goc vang", file=sys.stderr)
         return 2
+    if sys.version_info[:2] != PYTHON_CHUAN:
+        print(f"KHONG_DO_DUOC: can Python {PYTHON_CHUAN}, dang chay {sys.version_info[:2]}", file=sys.stderr)
+        return 2
     ms = [json.loads(x) for x in Path(manifest).read_text(encoding="utf-8").splitlines() if x.strip()]
-    ms = [m for m in ms if m.get("src")]
+    # Dòng KHONG_AP_DUNG của hoi-quy là nghĩa vụ ledger, không phải đột biến; mọi dòng khác PHẢI mang src khớp sha256.
+    if any("src" not in m and m.get("trang_thai") != "KHONG_AP_DUNG" for m in ms):
+        print("KHONG_DO_DUOC: manifest co dong thieu src (manifest ban giao) — dung lenh `do` de tai dung", file=sys.stderr)
+        return 2
+    ms = [m for m in ms if "src" in m]
     if len({m["id"] for m in ms}) != len(ms) or any(_sha(m["src"]) != m["sha256"] for m in ms):
         print("KHONG_DO_DUOC: id trung hoac sha256 lech nguon trong manifest", file=sys.stderr)
         return 2
     neo = {"cong_cu": _sha(Path(__file__).read_bytes()), "test": _sha(test.read_bytes()), "goc": _sha(Path(goc).read_bytes()),
-           "manifest": _sha(Path(manifest).read_bytes())}
+           "manifest": _sha(Path(manifest).read_bytes()), "python": ".".join(map(str, sys.version_info[:3]))}
+    if kho:
+        neo["kho"] = _sha(Path(kho).read_bytes())
     cu = {}
     if Path(ra).exists():
         dong = [json.loads(x) for x in Path(ra).read_text(encoding="utf-8").splitlines() if x.strip()]
@@ -288,7 +313,7 @@ def chay(manifest, test, ra, ss, goc):
             cu = {(k["id"], k.get("sha256")): k for k in dong[1:] if k.get("phan_hang") != "LOI_CHAY"}
     with tempfile.TemporaryDirectory(prefix="quet_db_") as thu:
         bl = _mot(Path(goc).read_text(encoding="utf-8"), test, thu)
-        if bl["phan_hang"] != "SONG":
+        if bl["phan_hang"] != "SONG" or not bl["dat"]:
             print(f"KHONG_DO_DUOC: baseline khong xanh {bl}", file=sys.stderr)
             return 2
         lam = [m for m in ms if (m["id"], m["sha256"]) not in cu]
@@ -296,15 +321,21 @@ def chay(manifest, test, ra, ss, goc):
             moi = list(ex.map(lambda m: dict(_mot(m["src"], test, thu, m["id"]), op=m["op"], dong=m.get("dong"), sha256=m["sha256"]),
                               lam))
     kq = [cu.get((m["id"], m["sha256"])) or next(k for k in moi if k["id"] == m["id"]) for m in ms]
-    Path(ra).write_text(json.dumps({"neo": neo, "baseline": "SONG"}) + "\n" + "".join(json.dumps(k, ensure_ascii=False) + "\n"
+    if [k["id"] for k in kq] != [m["id"] for m in ms]:   # đối chiếu inventory: đủ, đúng thứ tự, không thừa
+        print("KHONG_DO_DUOC: ket qua khong khop inventory", file=sys.stderr)
+        return 2
+    Path(ra).write_text(json.dumps({"neo": neo, "baseline": "SONG", "baseline_ca_dat": bl["dat"], "tap_con": tap_con}) + "\n" + "".join(json.dumps(k, ensure_ascii=False) + "\n"
                                                                                        for k in kq), encoding="utf-8")
     dem = {h: sum(k["phan_hang"] == h for k in kq) for h in ("GIET", "SONG", "VO_CAN", "LOI_CHAY")}
     for k in kq:
         if k["phan_hang"] != "GIET":
             print(f"{k['phan_hang']} {k['id']} {k['hong'][0][:120] if k['hong'] else ''}")
     print(f"TONG {len(kq)} · GIET {dem['GIET']} · SONG_SACH {dem['SONG']} · CHI_LOI_VO_CAN {dem['VO_CAN']} · LOI_CHAY {dem['LOI_CHAY']}")
-    print(f"HOAN_TAT neo={json.dumps(neo, sort_keys=True)}" if not dem["LOI_CHAY"] else "CHUA_HOAN_TAT (co LOI_CHAY)")
-    return 0 if not dem["LOI_CHAY"] else 3
+    if dem["LOI_CHAY"]:
+        print("CHUA_HOAN_TAT (co LOI_CHAY)")
+        return 3
+    print(f"TAP_CON neo={json.dumps(neo, sort_keys=True)}" if tap_con else f"HOAN_TAT neo={json.dumps(neo, sort_keys=True)}")
+    return 0
 
 
 # ---------------------------------------------------------------- hồi quy kho cũ
@@ -355,12 +386,29 @@ def hoi_quy(kho, goc, dich, ra):
     return 0
 
 
+def do(module, test, kho, thu_ra, ss):
+    """Đo CHÍNH THỨC: tự sinh manifest từ <module> + áp <kho>, rồi chạy; không nhận manifest từ ngoài ⇒ không thể nộp thiếu mẫu số."""
+    if sys.version_info[:2] != PYTHON_CHUAN:
+        print(f"KHONG_DO_DUOC: can Python {PYTHON_CHUAN}, dang chay {sys.version_info[:2]}", file=sys.stderr)
+        return 2
+    thu_ra = Path(thu_ra)
+    thu_ra.mkdir(parents=True, exist_ok=True)
+    ms = sinh(Path(module).read_text(encoding="utf-8"))
+    (thu_ra / "manifest.jsonl").write_text("".join(json.dumps(m, ensure_ascii=False) + "\n" for m in ms), encoding="utf-8")
+    hoi_quy(kho, "-", module, thu_ra / "hoi_quy.jsonl")
+    tat = (thu_ra / "manifest.jsonl").read_text(encoding="utf-8") + (thu_ra / "hoi_quy.jsonl").read_text(encoding="utf-8")
+    (thu_ra / "tat_ca.jsonl").write_text(tat, encoding="utf-8")
+    return chay(thu_ra / "tat_ca.jsonl", test, thu_ra / "kq.jsonl", ss, module, tap_con=False, kho=kho)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     sp = ap.add_subparsers(dest="lenh", required=True)
     a = sp.add_parser("sinh"); a.add_argument("module"); a.add_argument("--ra", default="manifest.jsonl")
     b = sp.add_parser("chay"); b.add_argument("manifest"); b.add_argument("test"); b.add_argument("--ra", default="kq.jsonl")
     b.add_argument("--song-song", type=int, default=4); b.add_argument("--goc", required=True, help="module goc cho baseline")
+    e = sp.add_parser("do"); e.add_argument("module"); e.add_argument("test"); e.add_argument("kho"); e.add_argument("--thu-muc-ra", required=True)
+    e.add_argument("--song-song", type=int, default=4)
     c = sp.add_parser("hoi-quy"); c.add_argument("kho"); c.add_argument("goc"); c.add_argument("dich")
     c.add_argument("--ra", default="hoi_quy.jsonl")
     x = ap.parse_args(argv)
@@ -372,6 +420,8 @@ def main(argv=None):
             dem[m["op"]] = dem.get(m["op"], 0) + 1
         print(f"SINH {len(ms)} " + " ".join(f"{k}={dem.get(k, 0)}" for k in TOAN_TU))
         return 0
+    if x.lenh == "do":
+        return do(x.module, x.test, x.kho, x.thu_muc_ra, x.song_song)
     if x.lenh == "chay":
         return chay(x.manifest, x.test, x.ra, x.song_song, x.goc)
     return hoi_quy(x.kho, x.goc, x.dich, x.ra)

@@ -1,0 +1,87 @@
+```yaml
+verdict: changes_requested
+reviewed_sha: 4e74fe1c4001ec9c83935ef831d77330b23981b0
+tree: a45d67ba35d157e87960beb9185c0989daeeb07d
+packet: BUNDLED-TACH-MANH
+lease: wp433-r9-g3-claude
+review_class: sensitive
+provider: openai_codex
+execution_surface: codex_cli
+transport: machine
+```
+
+**Bốn P2 còn mở.** Ba đột biến mã sản phẩm giữ `wp433_bundled_tach_manh` ở 31/31 dù phép thử độc lập xác nhận hành vi sai. Đọc mã còn thấy loader, cổng freshness và writer đi theo symlink tại tên mảnh hợp lệ. N3 và N4 thiếu kết quả xanh bắt buộc. Các ca đỏ quan sát được cũng đỏ trên base.
+
+Đây là lượt **1/10 review mã**, tách khỏi 11/14 lượt review đặc tả. Preflight khớp base `0f9aa2a2cc697129e1f5be72feddf60986286865`, lease revision 9/generation 3, SHA ứng viên, tree, hash đặc tả r8, hash handoff và hash effective write set. Diff đúng **9 tệp, +398/−60**. Commit cuối chỉ chứa `RELEASE_MANIFEST.json`.
+
+Chạy trên bản sao đầy đủ dưới `/dev/shm`, Linux x86_64, Python 3.13.18, Git 2.43.0, Codex CLI 0.171.0. Tiến trình đầu thừa hưởng biến môi trường liên quan credential. Tôi không đọc giá trị các biến đó và đã chạy lại các gate, ma trận và phản chứng với `env -i`, `HOME` và `TMPDIR` riêng dưới `/dev/shm`. Bảng dùng kết quả chạy lại. Checkout được giao giữ nguyên. Phiên chạy offline, xuất verdict qua stdout. Model và effort cụ thể chưa có attestation của lượt chạy.
+
+## Bảng sự thật
+
+| Phạm vi | Lệnh | rc | Kết quả |
+|---|---|---:|---|
+| Base §0 | `wc -c scripts/tl_test_fragments_bundled.py`, đếm tuple bằng AST và đếm `files` trong manifest, `python scripts/tl.py workflow-audit --strict --json` | 0 | **285.112 B**, **18 fragment**, `files_scanned=73`, **185 tệp** manifest. Fixture một mảnh trên base cho SHA-256 `73ad44659b63aea9b2f66fb1104c4c82deaa1ad1218e94adb80dcf38384441d7`, đúng hằng V1/V2. |
+| M7 | `write_bundled_modules("scripts/test_fragments", scratch_scripts)` rồi `cmp` từng mảnh | 0 / 0 / 0 | Hai mảnh **195.706 B** và **101.657 B**, khớp byte. AST xác nhận cả 18 mục cũ giữ nguyên thứ tự và nội dung, thêm đúng `wp433_bundled_tach_manh.py`. |
+| M8 | `python scripts/tl.py release-manifest --out "$scratch/RELEASE_MANIFEST.json"` rồi `cmp` với manifest đã commit | 0 / 0 | Khớp byte. |
+| N1/N2 | `python -B "$scratch/matrix.py" "$PWD"` rồi `diff -u` với phần kết quả trong biên nhận | 0 / 0 | Đối chứng `run=True`, 31/31. Cả **36 đột biến executor** khớp tập đích, đủ 31 khóa, `sai=0`. Bản chạy chỉ thêm bộ lọc bỏ qua các tên tệp bị cấm khi sao cây. |
+| N3 selftest | `python scripts/tl.py --selftest` trên base và ứng viên | 1 / 1 | Base **1770/1784**, ứng viên **1771/1785**. So danh sách ID đỏ bằng `cmp` cho rc 0, cùng 14 ca. Ca mới xanh. |
+| N3 freshness | `python scripts/tl.py test-fragments-check --json` | 0 | `ok=true`, hai mảnh, byte kỳ vọng bằng byte thực tế. |
+| N3 manifest | `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` | 0 | `ok=true`, `expected_file_count=checked_file_count=186`, `failed=[]`. |
+| N3 workflow | `python scripts/tl.py workflow-audit --strict --json` | 0 | `ok=true`, `warn=[]`, `fail=[]`, `files_scanned=74`. |
+| N3 golden | `python scripts/tl.py golden-test --json` | 0 | `ok=true`, 20 ca. |
+| N3 EOL | `python .githooks/eol_policy_test.py` trên base và ứng viên | 1 / 1 | Cả hai **29/32**, cùng ba ca đỏ `case_driver_that_chay_probe_tren_bundle_giai_nen`, `case_cong_bao_dev_discovery_failed_truoc_mismatch`, `case_cong_bao_fragment_failed_khi_run_tra_false`. |
+| N3 gói | `python scripts/tl.py release-bundle --out "$scratch/review.zip" --json`, kiểm ZIP, rồi `python .github/checks/bundle_fragment_check.py --json` trên base và ứng viên | 0 / 0 / 1 / 1 | ZIP ứng viên **187 mục**. Checker tự dựng và giải nén gói, nạp **18/19 ca** tương ứng, tập ID dev và bundle khớp trên từng cây, `load_error=null`. Cùng sáu ca cũ đỏ. Ca mới chạy xanh trong gói ứng viên. |
+| N3 Ruff | `python -m ruff …`, sau đó `ruff check --no-cache --select F --statistics …` trên các tệp theo handoff và `ruff check --no-cache --select F scripts/test_fragments/wp433_bundled_tach_manh.py` | 1 / 1 trên mỗi cây / 0 | Python thiếu module Ruff. Binary cục bộ **0.16.9** cho **4480 → 4480**, delta 0. Fragment mới sạch. |
+| N3 kiểm kho | `git diff --check 0f9aa2a HEAD`, `python .claude/dev/packet_loop.py doctrine-scan --root .`, `python .claude/dev/packet_loop.py adr-song --root .` | 0 / 0 / 0 | Diff sạch, doctrine 0 vi phạm trên 12 tệp, ADR khớp 66/66. |
+| N4 | `bash do_n4.sh "$repo" 4e74fe1 a8a3b3ca2fe5f48d8e6db64a8c6abacf97526b8c "$scratch/n4"`; chạy lại `test-fragments-check --json`, `workflow-audit --strict --json` và `--selftest` trên cây đó | writer 0, manifest 0; 0 / 0 / 1 | Hai mảnh **195.706/117.343 B**, freshness `ok=true`, size `warn=[]`, `fail=[]`. Selftest **1772/1786**, cùng 14 ID đỏ của base, cả hai ca mới xanh. Điều kiện N/N của N4 chưa đạt. |
+| V31 trên gói giải nén | `python "$scratch/v31.py" "$scratch/clean/review.zip"` | 0 | Đối chứng `run=True`, tập đỏ rỗng. Khi mảnh phụ vượt trần bằng chú thích vô hại, `run=False`, tập đỏ đúng `['V31']`. |
+
+Ba đột biến reviewer được áp riêng bằng `python "$scratch/mutate.py" <mode>` trên ba clone. `python "$scratch/probe.py" <mode>` chạy đối chứng và từng đột biến trong tiến trình mới. Cả ba probe rc 0 và in `V True 31 []` ở cả hai phía. Trên từng cây đột biến, freshness rc 0, selftest rc 1 với **1771/1785** và cùng 14 ID đỏ của ứng viên, bundle checker rc 1 với cùng sáu ID đỏ và ca packet vẫn xanh. Các gate đỏ sẵn không phân biệt được ba đột biến này. [Probe](/dev/shm/wp433.SChHGv/probe.py), [script đột biến](/dev/shm/wp433.SChHGv/mutate.py), [ma trận chạy lại](/dev/shm/wp433.SChHGv/clean/matrix.out), [14 ID đỏ](/dev/shm/wp433.SChHGv/clean/self.fail-ids).
+
+## Đối chiếu M1–M9
+
+| Mục | Kết quả |
+|---|---|
+| M1 | Generator cộng byte UTF‑8 của dòng đã render và LF, cắt khi vượt 196.608 B, đặt tên theo thứ tự và giữ nguyên hash một mảnh. Writer ghi đủ và xóa mảnh đánh số lạc. Có lỗ tại đích ghi, F04. |
+| M2 | Adapter được đọc bằng `ast.parse` và `ast.literal_eval`. Danh sách khai phải bằng tuple tên chuẩn liên tục từ `_2`, nên chuỗi tuyệt đối, `..` và ký tự phân cách bị loại trước khi ghép đường. Loader bỏ qua mảnh không khai, báo `BUNDLED_MODULE_MISSING` kèm tên mảnh thiếu, kiểm thứ tự và duy nhất NFC+casefold xuyên mảnh. Sau bước đọc adapter, runtime mới chạy các ca qua hợp đồng fragment hiện hữu. Đường đọc vật lý còn lỗ F04. |
+| M3 | Mã hiện tại so byte từng mảnh và phát hiện `extra_shards`. Một mảnh băm byte tệp. Nhiều mảnh băm và đếm chuỗi `tên\0bytes` theo thứ tự. Đối chứng độc lập bắt được mảnh chính stale. Bộ nghiệm thu bỏ lọt đột biến làm cổng xanh giả, F03. Cổng cũng đi theo symlink, F04. |
+| M4 | Cả hai chỗ ghi bundle từ fragment thật đã chuyển sang `write_bundled_modules`. Suite EOL có cùng ba ca đỏ trên base và ứng viên. |
+| M5 | Golden chỉ đổi `files_scanned` từ 73 lên 74. Golden-test đạt 20/20. |
+| M6 | Ứng viên tính đủ 31 khóa, cô lập ngoại lệ từng phép đo và đối chứng xanh. Ma trận nộp đạt, nhưng các phép đo V5, V8 và freshness có phản chứng F01–F03. |
+| M7 | Tái sinh ra đúng hai mảnh, khớp byte với cây ứng viên. |
+| M8 | Manifest khớp byte khi tái sinh, là thay đổi duy nhất của commit cuối và verify strict kiểm đủ 186/186. |
+| M9 | `tl_selftest.py` chỉ đổi hai ghim 185 → 186 và thêm đúng hai dòng kê khai slot tương ứng. |
+
+## Bảng lớp §8.3
+
+**Lượt 1, không có U.** Tỷ lệ §12 là `N/A`. Có 4 lớp mới, 4 finding, 7 biểu hiện và 0 lớp tái mở.
+
+| class_slug | Finding IDs / biểu hiện (chỗ) | Mức cao nhất còn mở | Nguồn lượt/SHA | Cách vá chung | Phép kiểm đóng lớp |
+|---|---|---|---|---|---|
+| `shard-size-byte-oracle` | F01 · V5 chỉ dùng ASCII | P2 | Lượt 1 · `4e74fe1` | Đặt dữ liệu đa byte vào fixture sát ngưỡng và dựng kích thước kỳ vọng độc lập | Đối chứng xanh, đột biến đếm ký tự làm V5 đỏ |
+| `shard-ast-shape-oracle` | F02 · V8 bỏ qua mọi `ast.Expr` | P2 | Lượt 1 · `4e74fe1` | Kiểm toàn bộ thân AST sau docstring hợp lệ | `expr` làm V8 đỏ, AST hợp lệ và V3 vẫn xanh |
+| `bundle-gate-fixture-oracle` | F03 · V23–V29 dùng đầu ra generator làm fixture; nhánh so mảnh chính trong topology nhiều mảnh thiếu đối chứng stale | P2 | Lượt 1 · `4e74fe1` | Ghim fixture độc lập và tạo sai lệch byte trên từng vai trò mảnh | Gate thật từ chối mảnh chính stale, `primary` bị bắt, cây hợp lệ vẫn xanh |
+| `shard-symlink-follow` | F04 · loader đọc, gate đọc, writer ghi theo symlink | P2 | Lượt 1 · `4e74fe1` | Áp cùng quy tắc tệp vật lý cho cả ba đường I/O | Tệp thường đi qua; link bị chặn trước I/O, tệp lạc vẫn được xử lý theo hợp đồng |
+
+### Findings
+
+- **F01 · `shard-size-byte-oracle` · P2** — [V5 và phép tính cỡ dòng](/dev/shm/wp433.SChHGv/candidate/scripts/test_fragments/wp433_bundled_tach_manh.py:136), [generator](/dev/shm/wp433.SChHGv/candidate/scripts/tl_core/test_fragments.py:511). `probe.py unicode` cho ba mảnh đối chứng `[2305, 2305, 2305]` byte dòng nguồn. Thay phép đếm byte bằng phép đếm ký tự cho một mảnh **6915 B** ở hạn **4000 B**, trong khi fragment vẫn 31/31. V4 và V6 cũng dùng padding ASCII, nên các vế lân cận không phát hiện sai đơn vị. Gợi ý vá ở V5 vì đây là vế đo đơn vị: đưa ký tự đa byte vào fixture và giữ hai ranh đúng bằng hạn, vượt đúng 1 B. Khóa bằng `unicode` và hai đột biến V5 hiện có. Cần rà cách biểu diễn Unicode trong literal để fixture thực sự chạm đúng hai ranh.
+
+- **F02 · `shard-ast-shape-oracle` · P2** — [hàm `_gan`](/dev/shm/wp433.SChHGv/candidate/scripts/test_fragments/wp433_bundled_tach_manh.py:63), [V8](/dev/shm/wp433.SChHGv/candidate/scripts/test_fragments/wp433_bundled_tach_manh.py:214). `probe.py expr` in AST đối chứng `['Expr', 'Assign', 'Assign']`. Đột biến thêm biểu thức vô hại vào mảnh chính cho `['Expr', 'Assign', 'Assign', 'Expr']`. Loader đúng trả `BUNDLED_MODULE_CONTRACT`, còn fragment 31/31. V3 cũng dùng `_gan`; V21/V22 đo loader bằng fixture viết tay nên không nhìn đầu ra generator. Gợi ý vá tại phép quan sát hình dạng AST: cho phép đúng docstring đầu rồi kiểm toàn bộ thân còn lại. Khóa bằng `expr`, `v8_manh_1_them_phep_gan` và đối chứng một mảnh. Kiểm quá chặt có thể loại docstring hợp lệ hoặc làm lệch tập đích V3.
+
+- **F03 · `bundle-gate-fixture-oracle` · P2** — [fixture `cong`](/dev/shm/wp433.SChHGv/candidate/scripts/test_fragments/wp433_bundled_tach_manh.py:123), [cổng so byte](/dev/shm/wp433.SChHGv/candidate/scripts/tl_core/release.py:260). Cả V23–V29 lấy tên và byte từ generator, trái yêu cầu fixture cổng độc lập. V24/V25 chỉ làm hỏng hoặc xóa mảnh phụ. `probe.py primary` sửa byte mảnh chính trong cây nhiều mảnh. Đối chứng trả `ok=False`, `GENERATED_BUNDLE_STALE`. Đột biến bỏ phép so mảnh chính trả `ok=True` dù hai hash khác nhau, và fragment vẫn 31/31. Gợi ý vá ngay ở fixture cổng bằng một bộ nguồn/tên/byte nhỏ dựng độc lập, rồi thêm phép chạy stale mảnh chính bên cạnh đối chứng stale mảnh phụ. Hai sửa đổi cần thiết vì fixture độc lập vẫn có thể bỏ sót trạng thái stale, còn thêm trạng thái stale vẫn có thể dùng chung nguồn kỳ vọng. Khóa bằng `primary`, V23–V29 và đối chứng `current`. Fixture ghim cần cập nhật có chủ đích nếu định dạng sinh được phép đổi.
+
+- **F04 · `shard-symlink-follow` · P2** — [loader](/dev/shm/wp433.SChHGv/candidate/scripts/tl_core/test_fragments.py:361), [gate](/dev/shm/wp433.SChHGv/candidate/scripts/tl_core/release.py:235), [writer](/dev/shm/wp433.SChHGv/candidate/scripts/tl_core/test_fragments.py:534). Bằng chứng đọc mã: `is_file()` đi theo liên kết trước `read_text` hoặc `read_bytes`; `write_bytes()` cũng đi theo liên kết ở đích. Tuple tên chuẩn khóa được chuỗi khai báo, nhưng một mục vật lý mang đúng tên chuẩn vẫn có thể dẫn ra ngoài thư mục. `git ls-tree HEAD:scripts tl_test_fragments_bundled.py tl_test_fragments_bundled_2.py` rc 0, cả hai blob ứng viên là `100644`. Nhánh xóa mảnh lạc dùng `unlink()` trên chính mục lạc. Gợi ý áp quy tắc đọc tệp vật lý ở loader và gate, và dùng đường ghi không theo liên kết ở writer. Phép đóng lớp cần xác nhận từ chối trước khi đọc hoặc ghi, đồng thời giữ kết quả cho tệp thường, mảnh thiếu và mảnh lạc. Cần tránh khoảng đua giữa kiểm tra và mở tệp. Phản chứng đường dẫn được giới hạn ở đọc mã theo yêu cầu.
+
+## Sáu lựa chọn của executor
+
+1. **Đúng.** Fixture riêng cho V3 giữ được phép đo riêng. V1/V2 đã ghim byte đối chứng từ base, còn ma trận thực tế xác nhận đột biến V3 chỉ làm đỏ V3.
+2. **Sai.** Ghi thẳng byte generator tránh phụ thuộc writer nhưng vẫn dùng generator để dựng fixture cổng. R8 yêu cầu fixture độc lập. F03 cho thấy thiếu đối chứng stale mảnh chính.
+3. **Đúng về cách tách phép đo.** V5/V6 đo ranh, V4 đo thứ tự trên fixture đều. Ma trận xác nhận `v4` chỉ làm đỏ V4. Fixture V5 còn sai sót về đơn vị quan sát, F01.
+4. **Đúng.** Đột biến `c` cho đúng 13 khóa đỏ `V4–V11, V24, V25, V28, V29, V31`. §4b là tham khảo, N2 đòi khai đủ tập tác động thực tế.
+5. **Đúng về phân vai topology.** Ma trận executor chạy DEV. Checker nạp và chạy V31 trong bundle giải nén, và phép thử riêng trên gói xác nhận khi làm mảnh phụ vượt trần thì chỉ V31 đỏ.
+6. **Đúng.** Có bảy commit từ base. Diff cuối của `release.py` khớp các dòng thêm/xóa nguyên mẫu, gồm nghĩa V28 của r8. Commit cuối chỉ tái sinh manifest.
+
+**Chưa đo.** Windows native được miễn theo Q4. CI GitHub trên exact SHA, `kiem-github`, provenance đăng verdict và human audit chưa chạy trong phiên offline. Ruff pin CI 0.15.15 chưa đo. Chưa có kết quả N/N, EOL 32/32 hoặc bundle `failed=[]` trên môi trường này. F04 được xác minh bằng đọc mã, chưa chạy phản chứng đường dẫn.
+
+KET_LUAN: request_changes

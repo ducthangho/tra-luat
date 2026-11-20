@@ -189,13 +189,15 @@ def a103_bo_phan_tich():
         "moc_lap": them("MOC_GATE_OUTPUT: passed (39/39 job co dau hieu duong)\n"),
         "thieu_moc": lambda t: "\n".join(x for x in t.split("\n") if not x.startswith("MOC_GATE_OUTPUT")),
         "job_lap": lap,
+        "job_lap ": lambda t: doi_tong(t, "") .rstrip("\n") + "\n" + t.split("\n")[dong_job(t, 3)].split(" [")[0] + ": skipped (khong tinh)\n"
+        + [x for x in t.split("\n") if x.startswith("MOC_GATE_OUTPUT")][0] + "\n",
         "cr_le": cr_tu_do,
         "xuong_dong_tron": nua_crlf,
         "dau_tep_sai": lambda t: t.replace("sha256 0ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058faf",
                                           "sha256 0ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058fa", 1),
     }
     for ly, f in bien.items():
-        ky(kt("T-v3-pass", f), "not_measured", [ly], ly)
+        ky(kt("T-v3-pass", f), "not_measured", [ly.strip()], ly)
     with mini("T-v3-pass") as (tep, thu):
         tep.write_bytes(tep.read_bytes() + b"\xff\xfe")
         ky(G().kiem_tep(tep, thu), "not_measured", ["khong_phai_utf8"], "khong_phai_utf8")
@@ -374,7 +376,10 @@ def a114_provenance_tu_khai_du():
 
     def d(y):
         y["moc"]["checkout"] = []
-    for nhan, f in (("a", a), ("b", b), ("c", c), ("d", d)):
+
+    def e(y):   # J01 lượt 4: checkout `skipped` cho job KHÔNG skipped
+        y["moc"]["checkout"][1]["trang_thai"] = "skipped"
+    for nhan, f in (("a", a), ("b", b), ("c", c), ("d", d), ("e", e)):
         ky(kt("T-v3-pass", None, f), "not_measured", ["provenance_chua_du"], f"({nhan})")
 
 
@@ -412,6 +417,11 @@ def a116_yaml_la_trong_thu_muc():   # review lượt 1 F01/F02: YAML ngoài sche
             (Path(ng) / "z.yaml").write_text("a: 1\n", encoding="utf-8")
             os.symlink(Path(ng) / "z.yaml", thu / "lk.yaml")
             ky(G().kiem_tep(tep, thu), "not_measured", ["symlink"], "(c) symlink canh provenance that")
+        with mini("T-v3-pass") as (tep, thu), tempfile.TemporaryDirectory(prefix="godc_ng_") as ng:   # J01 lượt 4
+            os.symlink(ng, thu / "lkdir")
+            ky(G().kiem_tep(tep, thu), "not_measured", ["symlink"], "(d) symlink thu muc con")
+            os.symlink(thu, Path(ng) / "goc")
+            ky(G().kiem_tep(tep, Path(ng) / "goc"), "not_measured", ["symlink", "provenance_0"], "(e) thu muc provenance la symlink")
 
 
 # ---------------------------------------------------------------- A2 — lời khai, miễn, hồ sơ
@@ -447,6 +457,7 @@ def a203_duong_khong_tep():
     with ho_so_tam() as thu:
         vp = G().kiem_ho_so({"moc_gate_output": "measured — kiem-gate-output.txt"}, thu)
         bang(vp == ["$.moc_gate_output: duong_khong_tep_danh_gia"], f"vp: {vp}")
+        bang(G().kiem_ho_so({"gate_output": 5}, thu) == ["$.gate_output: dinh_dang_loi_khai"], "dinh dang")
 
 
 @ca
@@ -462,6 +473,9 @@ def a204_duong_dan():
                           ("d", "danh-gia-gate-output-1.txt")):
             vp = G().kiem_ho_so({"moc_gate_output": f"measured — {ref}"}, thu)
             bang(vp == [f"$.moc_gate_output: tep_danh_gia_khong_hop_le:{ref}"], f"({nhan}) {vp}")
+        ref = str(thu / t)   # J01 lượt 4: đường tuyệt đối tới tệp THẬT
+        vp = G().kiem_ho_so({"moc_gate_output": f"measured — {ref}"}, thu)
+        bang(vp == [f"$.moc_gate_output: tep_danh_gia_khong_hop_le:{ref}"], f"(e) tuyet doi {vp}")
 
 
 @ca
@@ -547,6 +561,14 @@ def a209_mien():
         bang(vp == ["$.moc_gate_output: waiver_khong_co_can_cu:tac_gia"], f"(j) kiem_ho_so MEMBER: {vp}")
         (Path(thu) / "readback-ban2-issuecomment-123.json").write_text(json.dumps(rb(DONG)), encoding="utf-8")
         bang(G().kiem_mien(f"owner_waived — {URL} {SHA}", Path(thu), None) == ["readback"], "(k) hai readback (G02 luot 2)")
+    with tempfile.TemporaryDirectory(prefix="godc_rb_") as thu, tempfile.TemporaryDirectory(prefix="godc_rb2_") as ngoai:
+        (Path(ngoai) / "r.json").write_text(json.dumps(rb(DONG)), encoding="utf-8")
+        if os.name == "posix":   # J01 lượt 4: readback là symlink
+            os.symlink(Path(ngoai) / "r.json", Path(thu) / "readback-duyet-issuecomment-123.json")
+            bang(G().kiem_mien(f"owner_waived — {URL} {SHA}", Path(thu), None) == ["readback"], "(l) readback symlink")
+            os.unlink(Path(thu) / "readback-duyet-issuecomment-123.json")
+        (Path(thu) / "readback-duyet-issuecomment-123.json").write_text("{khong phai json", encoding="utf-8")
+        bang(G().kiem_mien(f"owner_waived — {URL} {SHA}", Path(thu), None) == ["doc_readback"], "(m) JSON hong")
 
 
 def cli(*a):
@@ -707,6 +729,22 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m63_bo_so_trang_thai_tong", '    if d["moc"] != (moc_tu, tts.count("passed"), len(tts)):', '    if d["moc"][1:] != (tts.count("passed"), len(tts)):', "a110"),
     ("m64_bo_ve_hai_ket_luan", ' or (j["conclusion"] != "success" and j["tt"] != "failed")', "", "a113"),
     ("m65_cli_khong_bat_stat", "        except OSError:\n            vang = True\n", "        except KeyError:\n            vang = True\n", "a210"),
+    ("m66_bo_utf8", '        return None, ["khong_phai_utf8"]', '        txt = byte.decode("utf-8", "replace")', "a103"),
+    ("m67_dau_tep_63_hex", 'sha256 ([0-9a-f]{64})\\)")', 'sha256 ([0-9a-f]{63,64})\\)")', "a103"),
+    ("m68_bo_thieu_moc", '    if so_moc == 0:\n        ly.append("thieu_moc")\n', "    if False:\n        pass\n", "a103"),
+    ("m69_bo_job_lap_skip", '            ly += ["job_lap"] if int(s[1]) in kq["jobs"] or int(s[1]) in kq["skip"] else []\n', "", "a103"),
+    ("m70_bo_ly_do_symlink_thu_muc", '        ly += ["symlink" for t in thu if (Path(goc) / t).is_symlink()]\n', "", "a116"),
+    ("m71_goc_symlink", "    if thu_muc.is_symlink() or not thu_muc.is_dir():\n        return None, (", "    if not thu_muc.is_dir():\n        return None, (", "a116"),
+    ("m72_checkout_skip_ngoai_job_skip", ' and c.get("job_id") in skip_p', "", "a114"),
+    ("m73_bo_tap_skip", '    if set(d["skip"]) != skip_p:\n        ly.append("tap_skip_lech")\n', "", "a107"),
+    ("m74_bo_failed_truoc", '        return "failed", []\n', "        pass\n", "a101"),
+    ("m75_nhieu_url", "if isinstance(gia_tri, str) else []) != 1:", "if isinstance(gia_tri, str) else []) < 1:", "a209"),
+    ("m76_readback_symlink", '.json") if p.is_file() and not p.is_symlink()]', '.json") if p.is_file()]', "a209"),
+    ("m77_readback_hong_thanh_dat", '        return ["doc_readback"]', "        return []", "a209"),
+    ("m78_bo_nhanh_head", "    if (m[1] != head) if head is not None else (m[1] not in gia_tri):", "    if m[1] not in gia_tri:", "a209"),
+    ("m79_nhan_tuyet_doi", "if pp.is_absolute() or any(", "if any(", "a204"),
+    ("m80_bo_is_file", "    return p if p.is_file() else None", "    return p", "a204"),
+    ("m81_bo_dinh_dang", '            vp.append(f"{duong}: dinh_dang_loi_khai")\n            continue', "            continue", "a203"),
     ("m58_cli_chi_bat_OSError", "        except Exception as e:   # gồm vòng", "        except OSError as e:   # gồm vòng", "a214"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

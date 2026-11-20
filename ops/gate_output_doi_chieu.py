@@ -224,7 +224,7 @@ def la_landed(du_lieu):
 def _tep_trong(thu_muc, t):
     """Tệp trích `t` tương đối `thu_muc`: cấm tuyệt đối, `.`/`..`, symlink ở mọi thành phần; phải là tệp thường."""
     pp, p = PurePosixPath(t), Path(thu_muc)
-    if pp.is_absolute() or "\\" in t or any(x in ("..", ".") for x in pp.parts) or p.is_symlink():
+    if pp.is_absolute() or any(x in ("..", ".") for x in pp.parts) or p.is_symlink():
         return None
     for x in pp.parts:
         p = p / x

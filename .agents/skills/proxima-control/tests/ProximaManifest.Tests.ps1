@@ -11,7 +11,7 @@ param([Parameter(Mandatory = $true)][string]$AddonRoot, [Parameter(Mandatory = $
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
 $Ids = 'PM01', 'PM02', 'PM03', 'PM04', 'PM05', 'PM06', 'PM07'
-$Want = @{ RootModule = 'ProximaControl.psm1'; ModuleVersion = '2.0.0'; GUID = '7f7055d6-51e3-4fb8-bbeb-7851a739bfb6'; PowerShellVersion = '5.1' }
+$Want = @{ RootModule = 'ProximaControl.psm1'; ModuleVersion = '2.1.0'; GUID = '7f7055d6-51e3-4fb8-bbeb-7851a739bfb6'; PowerShellVersion = '5.1' }
 $WantArrays = [ordered]@{ CompatiblePSEditions = @('Desktop', 'Core'); FunctionsToExport = @('px', 'Invoke-ProximaOperation'); CmdletsToExport = @()
     VariablesToExport = @(); AliasesToExport = @() }
 $KeySet = [Collections.Generic.HashSet[string]]::new([string[]](@($Want.Keys) + @($WantArrays.Keys)), [StringComparer]::Ordinal)
@@ -360,7 +360,7 @@ $CxCases = @(@{ id = 'CX00'; file = ''; anchor = ''; replacement = ''; want = ''
     @{ id = 'CX02'; file = 'scripts/ProximaControl.psd1'; anchor = "@('px', 'Invoke-ProximaOperation')"; replacement = "@('*')"; want = 'PM02:WILDCARD_EXPORT[FunctionsToExport]'; before_import = $true },
     @{ id = 'CX03'; file = 'scripts/ProximaControl.psd1'; anchor = '    AliasesToExport'; want = 'PM02:UNEXPECTED_KEY[NestedModules]'; before_import = $true
         replacement = "    NestedModules        = @('ProximaConfig.psm1')`r`n    AliasesToExport" },
-    @{ id = 'CX04'; file = 'SKILL.md'; anchor = 'version: 2.0.0'; replacement = 'version: 2.0.1'; want = 'PM05:DOC_VERSION_MISMATCH[frontmatter'; before_import = $false })
+    @{ id = 'CX04'; file = 'SKILL.md'; anchor = 'version: 2.1.0'; replacement = 'version: 2.1.1'; want = 'PM05:DOC_VERSION_MISMATCH[frontmatter'; before_import = $false })
 # Credit only for child rc 1 with the named reason in the named case; CX01..CX03 also need ZERO runtime children (rejected before import).
 function Test-CxKill($Cx, $Rc, $Rep, $Rec) {
     $state = "rc=$Rc passed=$($Rep.passed)/$($Rep.total) setup_error=$($Rep.setup_error) evidence=$($Rep.evidence.check.status) runtime_children=$($Rep.runtime_children)"

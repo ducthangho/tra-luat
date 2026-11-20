@@ -38,8 +38,8 @@ $script:BadAttr = 0x441400
 $script:ReGuid = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z'
 $script:ReRecord = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json\z'
 $script:Help = @('px help', 'px config|status|start|stop|restart|connect|disconnect -ConfigPath <file> -RepositoryRoot <dir> -TargetId <id> [-Credential <PSCredential>] [-Force]',
-    'px models [<provider>] -ConfigPath ... -RepositoryRoot ... -TargetId ...', 'px use <provider> <provider/model> -ConfigPath ... -RepositoryRoot ... -TargetId ...',
-    'px ask <provider> <prompt> [-Model <provider/model>] -ConfigPath ... -RepositoryRoot ... -TargetId ...', 'Every action supports -WhatIf and -Confirm.')
+    'px models [<provider>] -ConfigPath ... -RepositoryRoot ... -TargetId ...', 'px use <provider> <model id: provider | provider:variant | provider/model> -ConfigPath ... -RepositoryRoot ... -TargetId ...',
+    'px ask <provider> <prompt> [-Model <model id>] -ConfigPath ... -RepositoryRoot ... -TargetId ...', 'Every action supports -WhatIf and -Confirm.')
 
 function Get-PxcSha256([byte[]]$Bytes) {
     $h = [Security.Cryptography.SHA256]::Create()
@@ -75,7 +75,12 @@ if ($null -eq $script:ReadConfig) { throw (New-PxcError 'DependencyMismatch') }
 
 function Test-PxcPath([string]$P) { return [bool](& $script:CfgMod { param($x) Test-PxPathSyntax $x } $P) }
 function Join-PxcPath([string]$Base, [string]$Rel) { if ($Base.Length -eq 3) { return $Base + $Rel }; return $Base + '\' + $Rel }
-function Test-PxcProvider([string]$P) { return $P.Length -gt 0 -and $P.IndexOf([char]'/') -lt 0 }
+function Test-PxcProvider([string]$P) { return $P.Length -gt 0 -and $P.IndexOf([char]'/') -lt 0 -and $P.IndexOf([char]':') -lt 0 }
+# r3 #1446 (VM gateway GET /v1/models, measured r2: ids 'chatgpt', 'gemini:auto', 'chatgpt:thinking', 'auto' - none with '/'): a model id
+# belongs to provider P when it IS P, or starts with 'P:' or 'P/' (legacy). Ordinal. One predicate for use/ask/endpoint ask/models filter.
+function Test-PxcModelOf([string]$Id, [string]$Provider) {
+    return [string]::Equals($Id, $Provider, [StringComparison]::Ordinal) -or $Id.StartsWith($Provider + ':', [StringComparison]::Ordinal) -or $Id.StartsWith($Provider + '/', [StringComparison]::Ordinal)
+}
 function Test-PxcEncodable([string]$S) { try { $null = $script:Utf8.GetBytes($S); return $true } catch { return $false } }
 function New-PxcCtx {
     return @{ Held = [Collections.Generic.List[IDisposable]]::new(); Recheck = [Collections.Generic.List[object]]::new()
@@ -211,7 +216,7 @@ function Get-PxcAdvertised([string]$Url) {
     return , $ids
 }
 function Test-PxcModel($Ids, [string]$Provider, [string]$Model) {
-    if (-not $Model.StartsWith($Provider + '/', [StringComparison]::Ordinal)) { return $false }
+    if (-not (Test-PxcModelOf $Model $Provider)) { return $false }
     foreach ($i in $Ids) { if ([string]::Equals($i, $Model, [StringComparison]::Ordinal)) { return $true } }
     return $false
 }
@@ -349,7 +354,7 @@ function Invoke-PxcCore([string]$Action, [string]$Base, [string]$Fp, [string]$Pr
         }
         'models' {
             $ids = Get-PxcAdvertised (Get-PxcGateway $Base)
-            $sel = @(foreach ($i in $ids) { if (-not $Provider -or $i.StartsWith($Provider + '/', [StringComparison]::Ordinal)) { $i } })
+            $sel = @(foreach ($i in $ids) { if (-not $Provider -or (Test-PxcModelOf $i $Provider)) { $i } })
             return (New-PxcResult $Action $Fp 'Endpoint' $false $true 'ok' ([ordered]@{ models = $sel; modelState = 'advertised_not_execution_tested' }))
         }
         'ask' { return (Invoke-PxcAsk $Base $Fp $Protected $Provider $Model $Prompt) }

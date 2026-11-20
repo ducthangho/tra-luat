@@ -3,7 +3,7 @@
 #   powershell.exe|pwsh.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <copy>\ProximaControl.Tests.ps1 `
 #     -ModulePath <tree>\.agents\skills\proxima-control\scripts\ProximaControl.psm1 -ScratchRoot <existing dir outside the tree> `
 #     -ReportPath <json outside the tree> [-EvidenceRoot <durable dir outside the tree>] [-Counterexamples] [-TestCulture en-US|tr-TR]
-# rc 0: all 26 mandatory IDs (with -Counterexamples also CX00-CX11) passed and cleanup was verified. rc 1: a case failed - an absent
+# rc 0: all 27 mandatory IDs (with -Counterexamples also CX00-CX12) passed and cleanup was verified. rc 1: a case failed - an absent
 # module fails EVERY case with API_ABSENT while every case still executes. rc 2: setup or cleanup error, never a test outcome.
 # Safety: every hazardous backend binding (session, remote invoke, HTTP, CIM process/service/TCP listener, service control, id) is
 # replaced in the module's private table BEFORE any product call, and the replacement is asserted. HTTP is re-bound to the real
@@ -15,7 +15,7 @@
 # process. Evidence (r3 F02): <EvidenceRoot or ScratchRoot>\pxctl-evid-<run> sits OUTSIDE the deleted fixture tree; every child's
 # script, serialized input, raw report and captured output are written/kept there in place, linked by role/path/hash, and re-verified
 # AFTER cleanup (missing/changed/inside a deleted or measured tree => rc 2); each CX child gets its own sibling <CXnn>.nested root.
-# -Counterexamples: CX00 unmodified control + CX01-CX11 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
+# -Counterexamples: CX00 unmodified control + CX01-CX12 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
 # each rerunning this harness; credit only for rc 1 with the named behavioural token in the named case (setup/import/wrong-rc
 # earn nothing; a surviving mutant is reported, never credited). Evidence is never deleted. Helpers are alias-free and no
 # automatic variable (args, PID, HOME, PROFILE) is assigned; setup refuses any inner binding that reuses a top-level name
@@ -27,7 +27,7 @@ param([Parameter(Mandatory = $true)][string]$ModulePath, [Parameter(Mandatory = 
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
 $Ids = 'X1-01', 'X1-02', 'X1-03', 'X2-01', 'X2-02', 'X2-03', 'X2-04', 'X2-05', 'X2-06', 'X2-07', 'X3-01', 'X3-02', 'X4-01', 'X4-02', 'X4-03',
-'X5-01', 'X5-02', 'X5-03', 'X5-04', 'X5-05', 'X5-06', 'X5-07', 'X5-08', 'X5-09', 'X6-01', 'X6-02'
+'X5-01', 'X5-02', 'X5-03', 'X5-04', 'X5-05', 'X5-06', 'X5-07', 'X5-08', 'X5-09', 'X5-10', 'X6-01', 'X6-02'
 $PrimKeys = 'GetProcess', 'GetService', 'GetTcpListener', 'Http', 'InvokeRemote', 'NewId', 'NewSession', 'RemoveSession', 'ServiceControl', 'UiSessions'
 $Results = [Collections.Generic.List[object]]::new()
 $Cleanup = [ordered]@{ status = 'not_run'; errors = [Collections.Generic.List[string]]::new(); tree_removed = $false; keep_sentinel_intact = $null; wire_servers_stopped = $null }
@@ -1043,6 +1043,27 @@ Invoke-Case 'X5-09' {
         }
     } finally { Set-RealHttp $false; Set-RealListen $false; Stop-WireServer $w; Set-RestPort $Tg.Pos.Base 4108 4108; [Environment]::SetEnvironmentVariable('PROXIMA_API_KEY', $savedKey); $T.Pids.Remove("$me") }
 }
+Invoke-Case 'X5-10' {
+    # r3 #1446: ids as the VM gateway advertised them (r2 GET /v1/models): '<provider>' and '<provider>:<variant>'; '<provider>/' is legacy.
+    $global:PxcT.Models = '{"data":[{"id":"gw"},{"id":"gw:fast"},{"id":"gwz"},{"id":"prov/m1"},{"id":"auto"}]}'
+    foreach ($c in @(@('bare', 'gw', 'gw'), @('variant', 'gw', 'gw:fast'), @('legacy slash', 'prov', 'prov/m1'), @('bare auto', 'auto', 'auto'))) {
+        Assert-Ok (Invoke-Px (New-PxArgs 'use' $Tg.L1 @{ Provider = $c[1]; Value = $c[2] })) "id form $($c[0])"
+    }
+    foreach ($c in @(@('prefix without separator', 'gw', 'gwz'), @('variant case alias', 'gw', 'gw:FAST'), @('variant not advertised', 'gw', 'gw:slow'), @('shorter provider', 'g', 'gw:fast'))) {
+        $x = Invoke-Px (New-PxArgs 'use' $Tg.L1 @{ Provider = $c[1]; Value = $c[2] })
+        if ($x.R -or $x.StateChanged) { Add-Fail "MODEL_ID_FORM_LOOSE[$($c[0])]" } else { Assert-Code $x 'ModelNotAdvertised' $c[0] }
+        $x = Invoke-Px (New-PxArgs 'ask' $Tg.L1 @{ Provider = $c[1]; Value = 'p'; Model = $c[2] })
+        if ($x.R -or (Get-CallCount $x 'Http:POST')) { Add-Fail "MODEL_ID_FORM_LOOSE[ask $($c[0])]" }
+    }
+    $x = Invoke-Px (New-PxArgs 'use' $Tg.L1 @{ Provider = 'gw:fast'; Value = 'gw:fast' })
+    if ($x.R) { Add-Fail 'PROVIDER_COLON_ACCEPTED' } else { Assert-Code $x 'ArgumentInvalid' 'provider with colon' }
+    $x = Invoke-Px (New-PxArgs 'models' $Tg.Pos @{ Provider = 'gw' })
+    if (-not $x.R -or (@($x.R.data.models) -join ',') -cne 'gw,gw:fast') { Add-Fail 'MODELS_FILTER_ID_FORM' }
+    $n0 = @($global:PxcT.HttpReqs | Where-Object { $_['Method'] -ceq 'POST' }).Count
+    $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'gw'; Value = 'p'; Model = 'gw:fast' }); Assert-Ok $x 'ask variant id'
+    $post = @($global:PxcT.HttpReqs | Where-Object { $_['Method'] -ceq 'POST' })
+    if ($post.Count - $n0 -ne 1 -or ([string]$post[-1]['Body'] | ConvertFrom-Json).model -cne 'gw:fast') { Add-Fail 'ASK_VARIANT_NOT_SENT' }
+}
 Invoke-Case 'X6-01' {
     $h = Invoke-Px @{ Action = 'help' }; if (-not $h.R -or @($h.R.data).Count -lt 3) { Add-Fail 'HELP_EMPTY' }
     $x = Invoke-Px (New-PxArgs 'config' $Tg.L1); if (-not $x.R -or "$($x.R.data.basePath)" -cne $Tg.L1.Base -or $x.Calls.Count) { Add-Fail 'CONFIG_POSITIVE' }
@@ -1112,7 +1133,8 @@ $Cx = @(@{ id = 'CX00'; file = ''; e = @(); red = @() },
     @{ id = 'CX08'; file = 'ProximaControl.psm1'; e = @('} catch { return $false } # malformed/unreadable record: never settled', '} catch { return $true } # malformed/unreadable record: never settled'); red = @('X5-03:PENDING_GUARD_BYPASS[malformed]') },
     @{ id = 'CX09'; file = 'ProximaControl.psm1'; e = @('if ($ok -ne $true) { Stop-Pxc ''ServiceIdentityUnverified'' }', '$null = $ok'); red = @('X5-07:SERVICE_BINDING_BYPASS[nssm wrapper start]') },
     @{ id = 'CX10'; file = 'ProximaControl.psm1'; e = @('if ([string]::IsNullOrEmpty($exePath)) { throw ''unreadable'' }', 'if ([string]::IsNullOrEmpty($exePath)) { $exePath = $expected }'); red = @('X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]') },
-    @{ id = 'CX11'; file = 'ProximaControl.psm1'; e = @('if ($own -ne $meta[''pid'']) { throw ''owner'' }', '$null = $own'); red = @('X5-09:LISTENER_OWNERSHIP_BYPASS[wrong owner px models]', 'X5-09:LISTENER_OWNERSHIP_BYPASS[wire px models]') })
+    @{ id = 'CX11'; file = 'ProximaControl.psm1'; e = @('if ($own -ne $meta[''pid'']) { throw ''owner'' }', '$null = $own'); red = @('X5-09:LISTENER_OWNERSHIP_BYPASS[wrong owner px models]', 'X5-09:LISTENER_OWNERSHIP_BYPASS[wire px models]') },
+    @{ id = 'CX12'; file = 'ProximaControl.psm1'; e = @('$Id.StartsWith($Provider + '':'', [StringComparison]::Ordinal)', '$Id.StartsWith($Provider, [StringComparison]::Ordinal)'); red = @('X5-10:MODEL_ID_FORM_LOOSE[prefix without separator]') })
 $Report.counterexample_ids = @($Cx | ForEach-Object { $_.id })
 function Get-Kill($Rep, [string[]]$Want) {
     $hit = [Collections.Generic.List[object]]::new()

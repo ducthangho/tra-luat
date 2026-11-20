@@ -1,0 +1,51 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1446
+packet_id: px-ask
+revision: 3
+generation: 1
+lease_id: px-ask-r3-g1-claude
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+reviewer_model_family: openai
+reviewer_execution_surface: codex_service
+reviewer_transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: b9ade4e2f3d489fe7e65c4ea928086fe627ec0c4
+spec_path: ops/specs/px-ask-r3.md
+spec_hash: 6f9738c2b1e884678a5eaf7c28e2530c763588a89b5da64cbff362271d74b210
+write_set:
+- .agents/skills/proxima-control/SKILL.md
+- .agents/skills/proxima-control/scripts/ProximaControl.psd1
+- .agents/skills/proxima-control/scripts/ProximaControl.psm1
+- .agents/skills/proxima-control/tests/ProximaControl.Tests.ps1
+- .agents/skills/proxima-control/tests/ProximaManifest.Tests.ps1
+- ops/acceptance/px-ask/r3/RESULTS.md
+- ops/acceptance/px-ask/r3/VERDICT.md
+- ops/leases/px-ask-r3-g1-claude.yaml
+- ops/specs/px-ask-r3.md
+write_set_hash: 461eaaefc573fbb06517d977cfaa107485e79c284ed88da5b98cf2ea644b6ce8
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: b9ade4e2f3d489fe7e65c4ea928086fe627ec0c4
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20/11 chon "Mo packet sua module (Recommended)" sau ket qua r2 (PR #1447, merge b9ade4e)'
+recorded_by: 'phiên điều phối Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T06:41:54Z'
+heartbeat_at: '2026-11-20T06:41:54Z'
+lease_until: '2026-11-20T12:41:54Z'
+lease_expires_at_utc: '2026-11-20T12:41:54Z'
+max_lease_hours: 6
+review_calls_limit: 2
+native_test_hosts:
+- 7404cfba-9034-4787-b46b-7c358126a411
+- a5f7076e-a491-4f84-829b-8d1fbcc1c767
+native_test_hosts_note: 'ASUS offline luc chay test (Desktop Commander, 20/11 ~06:42Z); test chay tren Desktop cung loai moi truong (PS 7 + PS 5.1). Ghi o ops/acceptance/px-ask/r3/RESULTS.md muc 2.'
+inference_calls_limit: 0

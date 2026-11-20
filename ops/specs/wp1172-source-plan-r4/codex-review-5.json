@@ -1,0 +1,151 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "c7cf78dfc6d3159ec0ed2622edfaa7cefc8a77fa",
+  "reviewed_file_sha256": "95209c24c486266ce1eff35643aaee0858f551642a966b9c6b00afc6b9949ce6",
+  "findings": [
+    {
+      "id": "R4-20-ordinary-owner-merge-is-not-scoped-authorization",
+      "severity": "P1",
+      "location": "§4 owner authorization record, lines 63–71; A+1; §5 B3 exceptions; §10 Q7/Q9",
+      "claim": "The replacement proves who merged a PR, but does not distinguish an explicit grant from ordinary integration. A non-owner can include an authorization JSON in an otherwise unrelated PR; the standing owner-clicks-every-merge process then supplies merged_by=OWNER. Every stated authorization check can pass without a separate decision granting that activation or release exception. A commit/content hash preserves those bytes; it does not establish their authorization scope. This leaves the R4-19/R4-08/R4-11 authority class open.",
+      "evidence": [
+        {
+          "cmd": "Read KE_HOACH_NGUON_R4.md §4 and §5; git show origin/ops/wp1448-r1:ops/leases/wp1448-r2-g1-claude.yaml; read docs/PROTOCOL_DA_PHIEN.md §2/§3.2.1",
+          "observed": "The record predicate requires OWNER merge and hashes, but no dedicated authorization transaction or explicit owner binding to the grant payload. The lease says the owner clicks merge; the protocol separates audit, approval, authorization and merge."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-round5/probes.py models",
+          "observed": "rc=0: a synthetic non-owner-authored record piggybacked on an unrelated OWNER-merged PR is accepted by both modeled waiver and activation predicates; the non-owner-merge negative control is rejected. This is a counterexample to the written contract, not a live GitHub exploit."
+        }
+      ],
+      "suggested_fix": "In §4 and Q7/Q9, define an explicit owner grant transaction binding repository, purpose, scope, generation, exact payload hash and expiry. A low-cost option is a dedicated authorization-only PR whose immutable final diff and owner grant action are validated; ordinary mixed-purpose merges must not qualify. An independently verified owner signature is another option. Test unrelated OWNER merges, non-owner payload insertion, changed final payload, squash/rebase publication, and a genuine new grant. Preserve conservative fallback. This adds operator work; do not hide it as an ordinary merge or alter frozen PR1."
+    },
+    {
+      "id": "R4-21-commit-api-cannot-prove-owner-push",
+      "severity": "P2",
+      "location": "§4 owner authorization record, lines 65–68",
+      "claim": "The direct-commit alternative cannot be verified through GET commits/{sha} as specified. That response identifies commit authors/committers and signature verification, not the authenticated actor who pushed the commit to master. It also supplies no PR merged_at, which the next sentence requires as the authorization timestamp. Substituting author/committer identity or a client-supplied commit date would create an unsafe authority/time fallback; failing closed makes this advertised route unusable.",
+      "evidence": [
+        {
+          "cmd": "web.run open https://docs.github.com/en/rest/commits/commits#get-a-commit",
+          "observed": "The documented response has author, committer, commit dates and verification; no pusher or merged_at. [GitHub commit API](https://docs.github.com/en/rest/commits/commits#get-a-commit)."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-round5/probes.py models",
+          "observed": "rc=0: two modeled histories with different actual push actors expose identical commit responses; the response has no merged_at. No commit was created or pushed."
+        }
+      ],
+      "suggested_fix": "Remove the direct-push alternative unless B4 defines an independently authenticated publication receipt and trustworthy server timestamp. Do not infer pusher from commit identity, signature alone, or commit dates. For the PR route, bind the actual canonical publication OID and payload across merge/squash/rebase. Test identical commit bytes pushed by different actors, unsigned/spoofed identities, absent timestamps and genuine owner publication. A PR-only route reduces availability but avoids inventing authority from unavailable fields."
+    },
+    {
+      "id": "R4-22-current-record-maximum-resurrects-old-authority",
+      "severity": "P1",
+      "location": "§4 lines 69–70 and A+1 deletion acceptance; §5 B3 deletion acceptance",
+      "claim": "The stated algorithm selects the greatest valid generation still present on master, while the acceptance text says deleting the newest file must not resurrect an older grant. These are incompatible when selection uses the current tree. Deleting generation 2 leaves generation 1 as the maximum, so an unexpired old release waiver becomes usable again. Filtering out expired/invalid latest records before choosing the maximum has the same fallback hazard. No-force-push preserves history but does not make a current-tree maximum remember deletions.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-round5/probes.py models",
+          "observed": "rc=0: generation 2 for H2 blocks generation 1 for H; deleting generation 2 makes the modeled consumer accept the old H waiver. An expired-newest variant also revives after deletion. Histories with and without a deleted higher generation have identical current record sets."
+        },
+        {
+          "cmd": "Read KE_HOACH_NGUON_R4.md lines 69–70, 83–85 and B3 exceptions",
+          "observed": "The selection rule explicitly says the largest generation remaining on master and valid; the required deletion tests demand the opposite outcome. No historical high-water rule or tombstone authority is defined."
+        }
+      ],
+      "suggested_fix": "Specify a per-purpose/scope monotonic high-water rule derived from complete authenticated canonical history, including deletion/revocation tombstones, or an equivalently protected durable witness. Determine the latest generation before evaluating validity; missing, revoked, expired, conflicting or unverifiable latest authority must deny, never fall back. Test deletion, expiry, invalid latest content, duplicate generations, restart on a new host and incomplete history. Include effective branch protection/bypass checks and state the administrator trust assumption. History collection adds cost and availability limits; bound it and return unknown conservatively."
+    },
+    {
+      "id": "R4-23-master-stored-waiver-invalidates-release-candidate",
+      "severity": "P2",
+      "location": "§4 canonical storage for grants; §5 B3 exact-H exception and platform parity",
+      "claim": "A new waiver for already-known candidate H must be committed after H onto master. That makes H behind master. The existing Windows deploy script rejects that checkout, or -Pull advances it to the authorization commit, whose SHA no longer matches the waiver. Reissuing an exact-H waiver on master repeats the cycle. The new storage choice therefore breaks the promised per-candidate exception path unless the plan explicitly changes publication topology or the existing deployment policy.",
+      "evidence": [
+        {
+          "cmd": "sed -n '157,175p' scripts/deploy-package.ps1; read CLAUDE.md deployment rule 2 and r4 B3",
+          "observed": "PowerShell computes HEAD..origin/master and exits 1 when behind without -Pull; -Pull fast-forwards before building. CLAUDE.md requires avoiding a behind-master build. B3 requires the waiver H and package digest to match the release candidate."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-round5/probes.py models",
+          "observed": "rc=0: for H -> authorization commit M, the waiver matches H but the Windows behind guard blocks; pulling to M makes the waiver fail exact-H matching. This is a source/DAG model, not a Windows deployment run."
+        }
+      ],
+      "suggested_fix": "Resolve this in B3/Q7 before freezing its spec. Prefer a protected authorization channel that does not advance the product release ref. Alternatively obtain an explicit owner decision for a narrowly defined ancestor-release policy with unchanged package-byte proof and anti-rollback safeguards. Do not silently delete the existing freshness guard or reinterpret force-older/ForceOlder as an audit waiver. Test the complete H -> grant -> deploy sequence on Linux and real Windows, with and without pull, plus intervening product changes. Altering ancestor-release policy can permit obsolete releases and needs separate authority."
+    },
+    {
+      "id": "R4-24-consumer-read-permissions-do-not-cover-new-authority",
+      "severity": "P2",
+      "location": "§4 shared record verification and protection measurement; §5 B3 deployment authentication; §10 Q7/Q9",
+      "claim": "B3 still says an Actions/checks/contents read token is sufficient on both deployment hosts, but the new authorization contract requires PR merger verification and master protection inspection. Those reads require additional permissions. With exactly the advertised fine-grained token, the new mandatory checks cannot complete; blocking mode then cannot use the promised owner exception. A recorded setup measurement also needs an explicit freshness/trust rule if it replaces a live protection read.",
+      "evidence": [
+        {
+          "cmd": "web.run open GitHub Get branch protection, Get a pull request and Get a repository variable documentation",
+          "observed": "Branch protection requires Administration:read; private PR metadata requires Pull requests:read; A+1 variable retrieval separately requires Variables:read. [Protection API](https://docs.github.com/en/rest/branches/branch-protection#get-branch-protection), [PR API](https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request), [Variables API](https://docs.github.com/en/rest/actions/variables#get-a-repository-variable)."
+        },
+        {
+          "cmd": "Read KE_HOACH_NGUON_R4.md §4 lines 65–71 and §5 B3 authentication",
+          "observed": "All consumers must verify the Git authorization record and protection condition, while B3 lists only Actions, checks and contents reads."
+        }
+      ],
+      "suggested_fix": "Add a consumer-by-endpoint capability table to B3/B4 and Q7/Q9, including PR metadata, protection/ruleset evidence, authorization contents/history and Variables for A+1. Provision only the necessary read permissions, or define a trustworthy separately produced protection receipt with freshness and revocation handling. Measure each endpoint from each actual consumer host before activation; test 403/404, incomplete pagination, stale protection and changed bypass configuration. Keep unknown blocking/full after activation. Do not grant administrative write or dispatch rights merely to satisfy read probes."
+    }
+  ],
+  "tests": [
+    {
+      "cmd": "Read-only git/hash preflight and git-show extraction to /tmp/rv-r4-round5",
+      "rc": 0,
+      "summary": "passed: exact HEAD/tree and target hash; r2, PR0 draft, Proxima, r3, BASELINE, Mission r82 and PR1 spec hashes verified. Clean tracked checkout; only pre-existing ignored .codex/."
+    },
+    {
+      "cmd": "git diff b764ed66f688fd42320b58b26fb30477ee9ca7fa HEAD -- ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; source/spec/lease/prior-verdict reads",
+      "rc": 0,
+      "summary": "completed: draft-4 to draft-5 comparison, source fidelity, r3 invariants/rejected options, packet ordering and previous-finding checks. No PR1 retroactive edit found."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round5/probes.py numbers",
+      "rc": 0,
+      "summary": "passed: 55 numeric checks; ledger /tmp/rv-r4-round5/numbers.json. Includes independent BASELINE arithmetic and derived counts; estimates are distinguished from measurements."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round5/probes.py models",
+      "rc": 0,
+      "summary": "counterexamples reproduced: mixed-purpose OWNER merge, deleted-latest waiver fallback, unavailable push identity/timestamp, and exact-H deployment cycle. Positive/negative timestamp replay controls pass. Models of the plan, not production or live GitHub mutation tests."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round5/probes.py legacy",
+      "rc": 0,
+      "summary": "passed: 13 focused checks of actual origin/master PR0 pure functions: healthy workflow/receipt accepted; moving ref, shared concurrency, missing shard, wrong H and seven non-success statuses rejected. Not a full suite or B1-v1 acceptance."
+    },
+    {
+      "cmd": "GitHub get_pr_info(1412) and fetch_issue_comments(1166), read-only",
+      "rc": null,
+      "summary": "completed: PR1412 merged f8b9cdd81879f25c22709c60e62b69a9c314a472 from b79cbf56a1696b44c38529275312287ca78ba91d. M8 comment7009869906 confirms accepted rev12 but landed:false and unmeasured provenance. Saved /tmp/rv-r4-round5/github-facts.json. Connector has no shell rc."
+    },
+    {
+      "cmd": "web.run official GitHub commit/PR/protection/variable/context API documentation",
+      "rc": null,
+      "summary": "completed platform-contract checks; documented workflow_sha and variable updated_at exist. Live writer ACL, effective protection, bypass configuration and cross-resource timestamp ordering remain unmeasured."
+    },
+    {
+      "cmd": "python urllib.request GET https://api.github.com/repos/ducthangho/tra-luat/branches/master/protection",
+      "rc": 2,
+      "summary": "not_measured: sandbox URLError, Operation not permitted. This says nothing about REST reachability from either deployment host."
+    },
+    {
+      "cmd": "Full repository gates; live A3/A4 dispatch; variable/record mutation; notification delivery; Linux/Windows deployment parity; production overhead measurement",
+      "rc": null,
+      "summary": "not_run: outside this read-only document review. No skipped or absent check is claimed passed."
+    },
+    {
+      "cmd": "Python compare /tmp/rv-r4-round5/snapshot-start.json and snapshot-end.json",
+      "rc": 0,
+      "summary": "passed: all 17,183 tracked-file hashes, HEAD/tree, status and staged/unstaged diffs unchanged. Ignored .codex contents were not inspected."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-round5/write_verdict.py",
+      "rc": 0,
+      "summary": "passed: exact object rechecked, REVIEW_OUT written, JSON and byte readback verified."
+    }
+  ],
+  "numbers_checked": 55,
+  "notes": "Round 5 authorized by the owner. Two P1 and three P2 findings; no approval. This verdict grants no implementation, merge, deployment or further-review authority. Reviewed tree da531f2b91192c07821d82fb49573dfed23113e4; origin/master 45bae8d07a8cdf06a1ca9a7a2e015a6258169379; r3 ref c032656d6e9107c7d0d570afe374fd78b6424e93; PR1 metadata ref a0ca10060174bb22264c5a71e2a6e7ad4eeddcca.\n\nPRIOR-ROUND DISPOSITION: R4-19 = VÁ SINH LỖI MỚI / partially repaired. Git-addressed bytes remove the mutable-comment mechanism, but the replacement authority is not yet sound; see R4-20 through R4-24. R4-08 and R4-11 cannot be certified closed as complete authority classes. Their narrower repairs remain: trusted master-side kiem-merge, invalidation of previously green targeted evidence, writer/App enumeration and refusal of self-written override reasons. Under trustworthy fresh server timestamps, ordinary variable off/on and delete/recreate after a grant remain denied, including after restart; same-timestamp activation is conservatively denied. Clock ordering and no-op-write behavior are correctly deferred to B4 measurement, with redesign/owner approval required if unavailable.\n\nOTHER CLOSURES PRESERVED: R4-01 separates delivered code from A1/A2/A5 unverified, A3 not_run, A4 not_measured and A6 incomplete. R4-02 retains explicit source destinations/exclusions, protected release ref, exact-H CI, master-versus-audit display and operational deadlines. R4-03 retains four outcome layers and reviewed equivalence; R4-04 retains per-child wait4 and separate concurrent memory measurement. R4-05 retains two audit receipts plus separate overlapping push evidence. R4-06 retains B1 before B2 and registry serialization. R4-07 retains delivery verification, heartbeat observers and best-effort timing. R4-09/R4-10 retain receipt provenance and package-byte binding. R4-12 retains real Windows validation or explicit waiver. R4-13 retains the correct G9 population. R4-14/R4-18 retain paired same-snapshot overhead across all eight shards. R4-15 retains operator-produced A4 and read-only deployment consumption, although the new authorization mechanism adds the distinct R4-24 capability gap. R4-16 retains B4 for trusted packet_loop changes; R4-17 labels canary time as a shard-only subtotal.\n\nFIDELITY/ORDER: Compared recovered r2, PR0 A1–A6, Proxima, installed r3 and Mission r82. No additional silent source omission identified beyond the authority/feasibility findings. I1–I6 and the nine rejected options remain the A/B defaults; research and M9 change require separate Q8a/Q8b decisions. B1 precedes PR5; B1/B2/PR2 share the registry and are serialized. B4 needs fresh repository-wide lease exclusion. B3 includes both deploy scripts. PR1 spec remains 5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e; its effective lease excludes the registry and all r4 additions remain prospective. Q6–Q9 are appropriate, but Q7/Q9 must explicitly resolve grant semantics, revocation, publication topology and reader capabilities before activation. Proposed budgets are not current leases.\n\nLANE B: github.workflow_sha is documented, but actual provenance must still be measured. Existing full audit is schedule/dispatch only, run-ID concurrency, eight shards. A3 now has a feasible trigger/count design. A4 exists and emits wd.json; its real GraphQL success is not established here. B2 imports the r2 36-hour completion and 8-day snapshot-age semantics; retry does not refresh old snapshots. Six-hour polling and 24-hour heartbeat share GitHub failure modes and are explicitly best-effort. B3 blocks missing mandatory provenance after activation; force-older/ForceOlder must remain version overrides. Consumer-host REST access, actual notification delivery, effective branch protection and Windows parity remain future acceptance work. Protection verification must cover administrator/ruleset bypass and freshness, not merely two false allow flags; no live bypass was demonstrated. Full defense against a malicious repository administrator is not claimed by the repository protocol. Squash/rebase require canonical publication OID/payload binding; neither merge method proves grant intent. [Workflow context](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context), [merge OID semantics](https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request), [protection bypass](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).\n\nNUMBERS: 700504/15057171 = 4.6522949% -> 4.7%; 7955967/15057171 = 52.8383918% -> 52.8%; 9669927/705 = 13716.2085 seconds. G9 n=71, median 1775, nearest-rank p25 1590. Complete-audit eight-shard median 13282; two-run subtotal 26564. The r82 outward-rounded 3.4–5.6 million-second correction is consistent. Policy thresholds are proposed requirements, not measured achievements. A+5 has a minor repetition/budget ambiguity: three pairs on each shard gives 48 runs, but retaining five pairs on one shard requires at least 52. The approximately 10 fixed-container hours are unmeasured; historical 1057-second shard-step medians give 14.1/15.3 step-hours for 48/52 runs, not a container forecast. Raw historical snapshots were not recollected; inherited DX-2/DX-3/DX-8 raw-data claims were not independently reconstructed.\n\nPROVENANCE: independent read-only Codex review; provider=openai_codex, model_family=openai, execution_surface=codex_service, transport=machine. API-hosted run, no Codex CLI invocation. Served model/effort and external launcher session identity KHONG_DO_DUOC. Linux 6.18.44, Python 3.13.18, managed workspace-write sandbox with read-only review discipline. Review treated as sensitive because it changes authority/gate design; no production approval is implied. Skill: .agents/skills/cross-review/SKILL.md. No subagents, repository edits, commits, pushes, comments, workflow dispatches, GitHub writes, secret reads or deployments. Scratch is /tmp/rv-r4-round5; the only deliverable write is REVIEW_OUT. Snapshot equality establishes unchanged observed state, not historical non-writing."
+}

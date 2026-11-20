@@ -8,6 +8,8 @@ vì văn bản không kiểm được còn tiến trình thì kiểm được.
 
 Ranh giới: KHÔNG chạm remote (không `git push`, không `gh`, không đọc secrets).
 Nó giữ state cục bộ và phát VĂN BẢN comment; phiên Claude mới là bên đăng.
+Ngoại lệ DUY NHẤT (#1462 B4): `kiem-merge` K2b gửi lời GET CHỈ ĐỌC một biến công tắc qua REST,
+kèm `GH_TOKEN` nếu biến ấy khác rỗng (không in giá trị); không lời gọi nào tạo, sửa hay xoá gì.
 
 Mã thoát
     0  ok
@@ -3548,6 +3550,159 @@ def _human_merge(a, root, lease, spec, p3):
         raise ValueError("transition owner/bindings/mốc first-parent/ADR0063 chưa land")
 
 
+# --- #1462 B4 (`ops/specs/wp1462-r1/SPEC.md`): điều kiện `K2b làn G5` — công tắc CHO PHÉP theo lớp giảm + tính lại bằng mã `master`. CHỈ SIẾT.
+B4_KHO, B4_S_DU, B4_S_DICH = "ducthangho/tra-luat", "G5 manh ban kinh dot bien (#668)", "G5 manh che do dich (PR6)"
+B4_LOP = {"bo_moi": ("TL_GIAM_G5_BO_MOI", "cho-phep-bo-moi-pr3"), "che_do_dich": ("TL_GIAM_G5_CHE_DO_DICH", "cho-phep-che-do-dich-pr6")}
+B4_TEP, B4_PL, B4_HAN_PL = ".claude/dev/packet_loop.py", "ops/ci_duong_nhanh.py", 120
+B4_BIEN_MT = ("PATH", "SYSTEMROOT", "TEMP", "TMP", "TMPDIR", "HOME", "USERPROFILE")
+
+
+class _B4Loi(Exception):
+    """Tầng vận chuyển 6b không lấy được phản hồi ⇒ tầng chính sách 6a đổi thành `khong_doc_duoc`."""
+
+
+def _b4_che_do(a, h: str) -> str:
+    """Mục 3 (H2): `du` | `dich` | `khac` từ ĐÚNG run R, attempt A và tập job J của H; MỘT hàm kiểm mảnh cho cả hai chế độ."""
+    runs = _trang_du(_doc_json(a.workflow_runs, RC_GATE)[0], "workflow_runs", "workflow_runs")
+    jobs = [j for f in a.workflow_jobs for j in _trang_du(_doc_json(f, RC_GATE)[0], "jobs", f"workflow_jobs {f}")]
+    ung = [r for r in runs if r.get("path") == ".github/workflows/ci.yml" and r.get("head_sha") == h and r["repository"].get("full_name") == a.repo]
+    if not ung:
+        return "khac"
+    R = max(ung, key=lambda r: r["id"])
+    J = [j for j in jobs if j["run_id"] == R["id"] and j["run_attempt"] == R.get("run_attempt")]
+
+    def manh(chinh: str, kia: str) -> bool:
+        for k in range(8):
+            jj = [j for j in J if j["name"] == f"gate-cong-cu (ubuntu-latest, {k})"]
+            st = jj[0].get("steps") if len(jj) == 1 else None
+            if type(st) is not list or not all(isinstance(s, dict) and type(s.get("name")) is str for s in st):
+                return False
+            if jj[0]["head_sha"] != h or jj[0]["status"] != "completed" or jj[0].get("conclusion") != "success":
+                return False
+            c = [s for s in st if s["name"] == chinh]
+            if len(c) != 1 or c[0].get("status") != "completed" or c[0].get("conclusion") != "success":
+                return False
+            if any(s["name"] == kia and s.get("conclusion") == "success" for s in st):
+                return False
+        return True
+    return "du" if manh(B4_S_DU, B4_S_DICH) else "dich" if manh(B4_S_DICH, B4_S_DU) else "khac"
+
+
+def _b4_tu_kiem(root: Path) -> tuple:
+    """Mục 7 ⇒ (M, None) | (None, lý do). 7a: `ls-remote` = `origin/master` cục bộ (KHÔNG tự fetch). 7b: tệp đang chạy cùng blob với M."""
+    m, xa = _git_do(root, "rev-parse", "--verify", "refs/remotes/origin/master^{commit}"), _git_do(root, "ls-remote", "origin", "refs/heads/master")
+    M = m[1].decode("ascii", "replace").strip()
+    if m[0] or xa[0] or xa[1].split()[:1] != [M.encode()]:
+        return None, "tự kiểm 7a: `origin/master` cục bộ lệch remote hoặc không đo được — `git fetch origin master` rồi chạy lại"
+    day, cay = _git_do(root, "hash-object", f"--path={B4_TEP}", str(Path(__file__).resolve())), _git_do(root, "rev-parse", "--verify", f"{M}:{B4_TEP}")
+    if day[0] or cay[0] or not SHA_RE.fullmatch(day[1].decode("ascii", "replace").strip()) or day[1] != cay[1]:
+        return None, f"tự kiểm 7b: `{B4_TEP}` đang chạy khác blob tại origin/master {M[:12]} hoặc không đo được — chạy từ cây trùng origin/master"
+    return M, None
+
+
+def _b4_doc_lop(rc: int, out: bytes) -> str:
+    """Mục 5 (H1), hàm THUẦN (rc, stdout dạng byte) -> lớp. Khung: tách tại LF, bỏ ĐÚNG MỘT CR cuối dòng; không cắt gì khác."""
+    try:
+        out.decode("utf-8")
+    except UnicodeDecodeError:
+        return "la"
+    dong = [d[:-1] if d.endswith(b"\r") else d for d in out.split(b"\n")]
+
+    def khoa(ten: bytes, tap: tuple):  # MỘT bộ đọc cho cả ba khoá: None = hỏng (lặp, giá trị ngoài tập) · b"" = vắng
+        v = [d[len(ten) + 1:] for d in dong if d.startswith(ten + b"=")]
+        return None if len(v) > 1 or any(x not in tap for x in v) else v[0] if v else b""
+    cd, bm, dd = khoa(b"che_do", (b"day_du", b"duong_nhanh")), khoa(b"dk_bo_moi", (b"co", b"khong")), khoa(b"dk_che_do_dich", (b"co", b"khong"))
+    if rc != 0 or not cd or bm is None or dd is None:
+        return "la"
+    if bm == dd == b"co" or (cd == b"duong_nhanh" and b"co" in (bm, dd)):
+        return "la"
+    return "duong_nhanh" if cd == b"duong_nhanh" else "bo_moi" if bm == b"co" else "che_do_dich" if dd == b"co" else "khong_giam"
+
+
+def _b4_tinh_lai(root: Path, cay_ma: str, goc: str, dau: str) -> str:
+    """Mục 5, HÀM CHẠY: bộ phân loại tại `cay_ma` chạy `python -I` trong cây tạm, với commit hợp C(goc, dau) nằm ở thư mục object TẠM.
+    Không để lại gì trong kho `root` (ref, worktree, object) và xoá mọi thư mục tạm ở mọi đường thoát."""
+    td = Path(tempfile.mkdtemp(prefix="pl1462-"))
+    try:
+        rc, gd = _git_do(root, "rev-parse", "--path-format=absolute", "--git-common-dir")
+        gd = os.fsdecode(gd).strip()
+        env = {k: os.environ[k] for k in B4_BIEN_MT if k in os.environ}
+        env.update(GIT_DIR=gd, GIT_OBJECT_DIRECTORY=str(td / "obj"), GIT_ALTERNATE_OBJECT_DIRECTORIES=os.path.join(gd, "objects"),
+                   GIT_INDEX_FILE=str(td / "idx"), GIT_WORK_TREE=str(td / "cay"))
+        ngay = {f"GIT_{v}_{k}": g for v in ("AUTHOR", "COMMITTER") for k, g in (("NAME", "pl1462"), ("EMAIL", "pl1462@invalid"), ("DATE", "2000-01-01T00:00:00Z"))}
+        (td / "obj").mkdir(), (td / "cay").mkdir()
+
+        def g(*lenh, them=None) -> tuple:
+            p = subprocess.run(["git", *lenh], env={**env, **(them or {})}, cwd=td / "cay", capture_output=True, stdin=subprocess.DEVNULL, timeout=B4_HAN_PL)
+            return p.returncode, p.stdout.decode("ascii", "replace").strip()
+        cay = g("merge-tree", "--write-tree", "--no-messages", goc, dau) if rc == 0 else (1, "")
+        C = g("commit-tree", cay[1], "-p", goc, "-p", dau, "-m", "pl1462", them=ngay) if cay[0] == 0 else (1, "")
+        if C[0] or not SHA_RE.fullmatch(C[1]) or g("read-tree", cay_ma)[0] or g("checkout-index", "-a")[0] or not (td / "cay" / B4_PL).is_file():
+            return "la"
+        p = subprocess.run([sys.executable, "-I", str(td / "cay" / B4_PL)], cwd=td / "cay", capture_output=True, stdin=subprocess.DEVNULL, timeout=B4_HAN_PL,
+                           env={**env, "CI_DUONG_NHANH_SU_KIEN": "pull_request", "CI_DUONG_NHANH_GOC": goc, "CI_DUONG_NHANH_DAU": dau, "CI_DUONG_NHANH_MERGE": C[1]})
+        return _b4_doc_lop(p.returncode, p.stdout)
+    except (subprocess.SubprocessError, OSError, ValueError):
+        return "la"
+    finally:
+        shutil.rmtree(td, **{"onexc" if sys.version_info >= (3, 12) else "onerror": lambda f, p, e: (os.chmod(p, 0o700), f(p))})
+
+
+def _rest_get(url: str, headers: dict, han: float) -> tuple:
+    """Mục 6b, tầng vận chuyển: MỘT yêu cầu GET không thân, KHÔNG theo chuyển hướng, đọc tối đa 65 537 byte, `han` là hạn mỗi thao tác
+    socket LẪN hạn tường của cả lời gọi, không thử lại. Trả (status, headers, body); mọi lỗi ⇒ `_B4Loi`."""
+    import http.client
+    import urllib.error
+    import urllib.request
+
+    class KhongChuyenHuong(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *a, **k):
+            return None
+    het, than = time.monotonic() + han, b""
+    try:
+        try:
+            r = urllib.request.build_opener(KhongChuyenHuong).open(urllib.request.Request(url, headers=headers, method="GET"), timeout=han)
+        except urllib.error.HTTPError as ex:  # 3xx/4xx/5xx: trả NGUYÊN mã cho tầng chính sách
+            r = ex
+        with r:
+            while len(than) < 65537:
+                if time.monotonic() > het:
+                    raise _B4Loi("quá hạn tường")
+                x = r.read1(65537 - len(than))
+                if not x:
+                    break
+                than += x
+            return r.status, dict(r.headers.items()), than
+    except (OSError, ValueError, http.client.HTTPException) as ex:
+        raise _B4Loi(type(ex).__name__) from None
+
+
+def _b4_cong_tac(lop: str, repo: str) -> tuple:
+    """Mục 6a, tầng chính sách ⇒ (trạng thái, [dòng `CONG_TAC`, (`HIEU_LUC`)]). CHỈ `khop` cho giảm; mọi thứ không đọc được ⇒ `khong_doc_duoc`."""
+    (ten, cho_phep), luc = B4_LOP[lop], datetime.now(timezone.utc).replace(microsecond=0)
+    tt, cap_nhat, rid, gia_tri, fmt = "khong_doc_duoc", "-", "-", "-", "%Y-%m-%dT%H:%M:%SZ"
+    if repo == B4_KHO and not os.environ.get("PACKET_LOOP_CAM_DOC_CONG_TAC"):
+        hd = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "packet-loop-kiem-merge"}
+        if os.environ.get("GH_TOKEN"):
+            hd["Authorization"] = "Bearer " + os.environ["GH_TOKEN"]
+        try:
+            st, hp, than = _rest_get(f"{API_GH}{B4_KHO}/actions/variables/{ten}", hd, 15)
+            hp = {str(k).lower(): str(v) for k, v in hp.items()}
+            co_gh = any(k.startswith("x-github-") for k in hp)
+            rid = hp["x-github-request-id"] if re.fullmatch(r"[\w:.-]{1,80}", hp.get("x-github-request-id", "")) else "-"
+            if st == 404 and co_gh:
+                tt = "vang_hoac_khong_quyen"
+            elif st == 200 and co_gh and len(than) <= 65536:
+                d = json.loads(than.decode("utf-8"), object_pairs_hook=_cam_khoa_trung, parse_constant=_cam_hang_ngoai_json)
+                if type(d) is dict and d.get("name") == ten and type(d.get("value")) is str:
+                    tt, gia_tri = "khop" if d["value"] == cho_phep else "khong_khop", json.dumps(d["value"])[:120]
+                    cap_nhat = d["updated_at"] if type(d.get("updated_at")) is str and re.fullmatch(r"[\w:.+-]{1,40}", d["updated_at"]) else "-"
+        except (_B4Loi, ValueError, RecursionError):  # UnicodeDecodeError là ValueError; trạng thái giữ `khong_doc_duoc`
+            pass
+    dong = [f"CONG_TAC lop={lop} bien={ten} trang_thai={tt} doc_luc={luc.strftime(fmt)} updated_at={cap_nhat} request_id={rid} gia_tri={gia_tri}"]
+    return tt, dong + ([f"HIEU_LUC den={datetime.fromtimestamp(luc.timestamp() + 1800, timezone.utc).strftime(fmt)}"] if tt == "khop" else [])
+
+
 def cmd_kiem_merge(a, state_dir: Path) -> int:
     if not (all(SHA_RE.fullmatch(x) for x in (a.head, a.base)) and re.fullmatch(r"[^/\s]+/[^/\s]+", a.repo)):
         _die(RC_ARG, "--head/--base phải là SHA 40 hex, --repo dạng chủ/kho")
@@ -3622,6 +3777,9 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
             mien = False
         if not _cham_m9(root, a.base, h) or mien:
             return
+        k7_run()
+
+    def k7_run():  # #1462 B-6: nhánh run của K7, tách nguyên văn để K2b (ii) dùng CHUNG một phép đo
         if not (a.dot_bien_du_runs and a.dot_bien_du_jobs):
             _die(RC_GATE, "diff chạm vùng M9 mà thiếu --dot-bien-du-runs/--dot-bien-du-jobs và dòng miễn `full_mutant_audit: H mien` của chủ kho")
         runs = _trang_du(_doc_json(a.dot_bien_du_runs, RC_GATE)[0], "workflow_runs", "--dot-bien-du-runs")
@@ -3650,7 +3808,37 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
         _dk("K5 P3", k5, thieu)
     if spec is not None:
         _dk("K6 Windows", lambda: k6(spec), thieu)
+    ra = []  # dòng chẩn đoán K2b (mục 9): in ra stdout THẬT sau `_dk`, vì `_dk` nuốt stdout của điều kiện
+
+    def k2b():  # #1462 B4 mục 4: `du` ⇒ ĐẠT im lặng (B-2); còn lại dừng ở bước đầu khớp, mọi nhánh không đo được ⇒ ĐỎ (B-5)
+        cd = _b4_che_do(a, h)
+        if cd == "du":
+            return
+        buoc, lop, M, dat, ly = "siet", "chua_tinh", "-", False, "cờ --siet-g5-du đòi G5 đủ trên đúng H"
+        try:
+            if not a.siet_g5_du:
+                buoc, (M0, ly) = "tu_kiem", _b4_tu_kiem(root)
+            if not a.siet_g5_du and M0:
+                M, lop, buoc = M0, _b4_tinh_lai(root, M0, M0, h), "tinh_lai"
+                dat, ly = lop == "duong_nhanh", f"mã origin/master xếp `{lop}` mà H không có G5 đủ"
+                if lop == "che_do_dich" and cd != "dich":
+                    buoc, ly = "bang_chung", "lớp che_do_dich đòi bằng chứng `dich` trên H"
+                elif lop == "che_do_dich" and (_dk("", k7_run, kq := []), kq)[1]:
+                    buoc, ly = "audit", f"lớp che_do_dich đòi run `{DOT_BIEN_DU_TEP}` success đúng H (dòng miễn không thay được)"
+                elif lop in B4_LOP:
+                    buoc, (tt, dong) = "cong_tac", _b4_cong_tac(lop, a.repo)
+                    dat, ly = tt == "khop", f"công tắc lớp {lop} ở trạng thái `{tt}`, H không có G5 đủ"
+                    ra.extend(dong)
+        finally:
+            ra.insert(0, f"LAN_G5 che_do_thuc_chay={cd} buoc={buoc} lop={lop} master={M} ket_qua={'dat' if dat else 'do'}")
+        if not dat:
+            _die(RC_GATE, ly)
+
     _dk("K7 full_mutant_audit", k7, thieu)
+    if not any(x.startswith("K2 CI") for x in thieu):
+        _dk("K2b làn G5", k2b, thieu)
+    for x in ra:
+        print(x)
     if thieu:
         for x in thieu:
             print(f"  THIẾU  {x}", file=sys.stderr)
@@ -7186,6 +7374,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--windows-json", help="{sha, os: Windows, tests: [{id, ket_qua}]} của lượt ứng viên")
     q.add_argument("--dot-bien-du-runs", help="#1120 K7: readback trang `actions/workflows/ci-dot-bien-du.yml/runs?head_sha=H`")
     q.add_argument("--dot-bien-du-jobs", action="append", help="#1120 K7: readback trang `actions/runs/<id>/jobs`; lặp")
+    q.add_argument("--siet-g5-du", action="store_true", help="#1462 K2b: đòi G5 đủ trên đúng H, tắt (α) lẫn (β); chỉ siết")
     q.set_defaults(fn=cmd_kiem_merge)
 
     q = sub.add_parser("adopt-state", help="scoped adoption management; recovery requires exact witness identity")

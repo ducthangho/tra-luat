@@ -9228,6 +9228,9 @@ def chay_suite(script: Path, tmp: Path, chi_chay=None):
             ket[ten] = (_TinDungGia(f"{type(ex).__name__}: {ex}") if _co_sap_do(ex) else
                         ex if isinstance(ex.__cause__, OSError) else f"BỎ QUA không có OSError đo được: {ex}")
         except Exception as ex:  # noqa: BLE001 — ca đỏ là dữ liệu, không phải sự cố
+            if ten.startswith("cong_b4_"):  # #1462 GT-6: GIẾT chỉ khi CHÍNH ca ấy ném `ChotB4`; mọi kết cục khác là TÍN DỤNG GIẢ
+                ket[ten] = (str if type(ex) is ChotB4 and ex.args[:1] == (ten,) and not _co_sap_do(ex) else _TinDungGia)(f"{type(ex).__name__}: {ex}")
+                continue
             if ten.startswith("wp1174_"):
                 ket[ten] = ex if isinstance(ex, AssertionError) and not _co_sap_do(ex) else CliSapDo(f"{type(ex).__name__}: {ex}")
             else:
@@ -9288,7 +9291,8 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi
              lease={"spec_hash": hashlib.sha256(x["spec"].encode()).hexdigest()}, cmt=None, win=None, p3off=[],
              # #1120 K7: mặc định CÓ một run `ci-dot-bien-du` xanh đúng H ⇒ mọi ca `cong_c_*` cũ giữ nguyên kết luận
              ddr=[{"id": 700, "path": ".github/workflows/ci-dot-bien-du.yml", "head_sha": h, "run_attempt": 1, "status": "completed", "conclusion": "success"}],
-             ddj=[{"id": 800 + i, "run_id": 700, "run_attempt": 1, "status": "completed", "conclusion": "success"} for i in range(2)])
+             ddj=[{"id": 800 + i, "run_id": 700, "run_attempt": 1, "status": "completed", "conclusion": "success"} for i in range(2)],
+             manh=_b4_manh(h))  # #1462 tiêu chí 1: bằng chứng `du` mặc định (8 job mảnh, bước S_DU success, đúng run/attempt/head) ⇒ ca cũ giữ nguyên kết luận
     (doi or (lambda *_: None))(x, w, h)
     trang = lambda k, v: {"total_count": len({i["id"] for i in v}), k: v}  # noqa: E731
     def fixture_repo(value):
@@ -9303,7 +9307,7 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi
     cn = {"repo": repo, "pr": 55, "head_sha": h, **{k: trang("items", x[k]) for k in ("reviews", "review_comments", "issue_comments")}}
     args = ["kiem-merge", "--root", w, "--repo", repo, "--pr", 55, "--head", h, "--base", x.get("base", L2), "--spec", spec_path,
             "--lease", f("l.yaml", x["lease"] if isinstance(x["lease"], str) else yaml.safe_dump(x["lease"])), "--workflow-runs", f("wr.json", trang("workflow_runs", x["runs"])),
-            "--workflow-jobs", f("wj.json", trang("jobs", x["jobs"])), "--check-runs", f("cr.json", trang("check_runs", x["cr"])),
+            "--workflow-jobs", f("wj.json", trang("jobs", x["jobs"] + x["manh"])), "--check-runs", f("cr.json", trang("check_runs", x["cr"])),
             "--connector", f("cn.json", cn),
             *(("--offline-run-json", f("run.json", x["run"])) if not x.get("no_model") and not x.get("missing_model_run") else ()),
             *(("--offline-stdout", f("out.log", x["out"])) if not x.get("no_model") and not x.get("missing_model_stdout") else ()),
@@ -9317,7 +9321,9 @@ def _c1106(c, them=None, spec_path="ops/specs/X.md", doi=None, env=None, git_loi
                *[a for i, v in enumerate(x.get("ddj_them", [])) for a in ("--dot-bien-du-jobs", f(f"ddj{i}.json", trang("jobs", v)))]) if x["ddr"] is not None else ())]
     if x.get("milestone1187"):
         return _transition_run1187(c.script, args, c.sd(), x["milestone1187"])
-    return (_rev_list_loi if git_loi else run)(c.script, args, c.sd(), env)
+    if x.get("chay"):  # #1462 GT-3: CHỈ trình bọc của `_b4_fx` chạy `kiem-merge` mà không đặt biến cấm đọc
+        return x["chay"](c.script, args, c.sd(), env)
+    return (_rev_list_loi if git_loi else run)(c.script, args, c.sd(), {"PACKET_LOOP_CAM_DOC_CONG_TAC": "1", **(env or {})})  # GT-4
 
 
 def _c1106_ca(rc_doi, phai="", cam=None, **kw):
@@ -19301,6 +19307,616 @@ CASES += [("wp1342_pure_spawn_fx_mo_rong", _wp1342a1ii_s6),
           ("wp1342_native_job_breakaway_tuong_minh", _native1342("wp1342_native_job_breakaway_tuong_minh", _wp1342a1ii_j4)),
           ("wp1342_native_job_breakaway_ngam", _native1342("wp1342_native_job_breakaway_ngam", _wp1342a1ii_j5)),
           ("wp1342_native_job_long", _native1342("wp1342_native_job_long", _wp1342a1ii_j12))]
+
+
+# --- #1462 B4 (`ops/specs/wp1462-r1/SPEC.md`): `K2b làn G5` — giàn GT-1…GT-7. Ca `cong_b4_*` khẳng định ĐÍCH bằng `ChotB4`; mọi kết cục
+# khác (CLI sập, lỗi dựng fixture, hết hạn, `AssertionError` thường) là TÍN DỤNG GIẢ (GT-6, nhánh `cong_b4_` của `chay_suite`).
+class ChotB4(AssertionError):
+    """args = (tên ca, lý do). Định nghĩa CHỈ ở tệp test: mã sản phẩm không ném được."""
+
+
+_B4_KHO, _B4_SDU, _B4_SDICH, _B4_HAN = "ducthangho/tra-luat", "G5 manh ban kinh dot bien (#668)", "G5 manh che do dich (PR6)", 90
+_B4_CP = {"bo_moi": ("TL_GIAM_G5_BO_MOI", "cho-phep-bo-moi-pr3"), "che_do_dich": ("TL_GIAM_G5_CHE_DO_DICH", "cho-phep-che-do-dich-pr6")}
+_B4_API = "https://api.github.com/repos/ducthangho/tra-luat/actions/variables/"
+# GT-1 + GT-3 + GT-4, MỘT nguồn: tiến trình MỚI nạp `packet_loop.py` đang thử, chặn + đếm kết nối ngoài loopback, thay `_rest_get` bằng đồ giả
+# GIỮ trạng thái trong TỆP (đọc lại ở MỖI yêu cầu, ghi nhật ký phương thức/URL/header), rồi gọi đúng `main`. `that` ⇒ giữ `_rest_get` thật.
+_B4_BOC = r'''
+import importlib.util, json, os, socket, sys
+script, tt, nk = sys.argv[1:4]
+sys.path.insert(0, os.path.dirname(script))
+sp = importlib.util.spec_from_file_location("pl1462", script); m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m)
+ngoai, noi_that = [0], socket.socket.connect
+class MangNgoai(Exception): pass
+def noi(s, dc, *a):
+    if not str(dc[0] if isinstance(dc, tuple) else dc).startswith(("127.", "::1")):
+        ngoai[0] += 1
+        raise MangNgoai(repr(dc))
+    return noi_that(s, dc, *a)
+socket.socket.connect = noi
+doc = lambda: json.load(open(tt, encoding="utf-8"))
+def gia(url, headers, han):
+    ten, d = url.rsplit("/", 1)[1], doc()
+    open(nk, "a", encoding="utf-8").write(json.dumps({"pt": "GET", "url": url, "h": headers}) + "\n")
+    x = d["bien"].get(ten)
+    if x is None:
+        return 404, {"X-GitHub-Request-Id": "rq404"}, b'{"message":"Not Found"}'
+    if x.get("nem"):
+        raise m._B4Loi("do gia nem")
+    than = bytes.fromhex(x["than"]) if "than" in x else json.dumps({"name": x.get("ten", ten), "value": x["gt"], "updated_at": "2026-11-20T00:00:00Z"}).encode()
+    return x.get("ma", 200), x.get("hd", {"X-GitHub-Request-Id": "rq1"}), than
+d0, git_that = doc(), m._git_do
+if not d0.get("that"):
+    m._rest_get = gia
+for k, v in d0.get("hang", {}).items():
+    setattr(m, k, v)
+def git(root, *a, **k):
+    for khoa, (rc, out) in d0.get("git", {}).items():
+        if khoa in " ".join(map(str, a)):
+            if rc == "thoat":
+                raise SystemExit(3)
+            r = git_that(root, *a, **k)
+            return (r[0] if rc is None else rc, r[1] if out is None else out.encode())
+    return git_that(root, *a, **k)
+m._git_do = git
+try:
+    rc = (exec(d0["ma"], {"m": m, "nk": nk, "MangNgoai": MangNgoai}) or 0) if "ma" in d0 else m.main(sys.argv[4:])
+except SystemExit as ex:
+    rc = ex.code
+finally:
+    open(nk + ".ngoai", "w").write(str(ngoai[0]))
+sys.exit(rc)
+'''
+# GT-5 bộ sinh HAI KÊNH: điều kiện cấu trúc từ diff (luật thư mục của fixture) ra stdout, KHÔNG phụ thuộc biến quyền; quyết định CI ra
+# `GITHUB_OUTPUT`, chỉ là giảm khi biến quyền (tên thay thế `FX_QUYEN_*`) mang đúng chuỗi cho phép. C phải là commit hai cha (goc, dau).
+_B4_SINH = r'''
+import os, subprocess, sys
+e = os.environ
+g = lambda *a: subprocess.run(["git", *a], capture_output=True, text=True).stdout.split()
+goc, dau, hop = (e.get("CI_DUONG_NHANH_" + k, "") for k in ("GOC", "DAU", "MERGE"))
+ds = [p for p in g("diff", "--name-only", "--no-renames", goc, hop) if not p.startswith("ops/specs/")]
+thu = {os.path.dirname(p) for p in ds}
+lop = {"docs/bm": "bo_moi", "docs/dd": "che_do_dich"}.get(thu.pop()) if len(thu) == 1 else None
+if e.get("CI_DUONG_NHANH_SU_KIEN") != "pull_request" or g("rev-parse", hop + "^1", hop + "^2") != [goc, dau]:
+    lop = None
+print("che_do=day_du\ndk_bo_moi=" + ("co" if lop == "bo_moi" else "khong") + "\ndk_che_do_dich=" + ("co" if lop == "che_do_dich" else "khong"))
+quyen = {"bo_moi": ("FX_QUYEN_BO_MOI", "cho-phep-bo-moi-pr3"), "che_do_dich": ("FX_QUYEN_CHE_DO_DICH", "cho-phep-che-do-dich-pr6")}
+if e.get("GITHUB_OUTPUT"):
+    open(e["GITHUB_OUTPUT"], "a").write("g5=" + (lop if lop and e.get(quyen[lop][0]) == quyen[lop][1] else "du") + "\n")
+'''
+_B4_A, _B4_KG = b"x\nche_do=duong_nhanh\ny\npacket_loop=chay\n", b"che_do=day_du\npacket_loop=chay\n"   # hình dạng HÔM NAY: không khoá `dk_*`
+_B4_BM, _B4_DD = b"che_do=day_du\ndk_bo_moi=co\ndk_che_do_dich=khong\n", b"che_do=day_du\ndk_bo_moi=khong\ndk_che_do_dich=co\n"
+_B4_CT = {k: {v[0]: {"gt": v[1]}} for k, v in _B4_CP.items()}
+
+
+def _b4_manh(h, buoc=(_B4_SDU,), run=100, att=1, kl="success", id0=250):
+    """Bằng chứng G5 trên H (mục 3): 8 job mảnh của đúng run/attempt/head; mặc định `du`. `_c1106` thêm mặc định này (tiêu chí 1)."""
+    return [{"id": id0 + k, "run_id": run, "run_attempt": att, "name": f"gate-cong-cu (ubuntu-latest, {k})", "head_sha": h, "status": "completed", "conclusion": kl,
+             "check_run_url": f"{_API834}check-runs/{id0 + 100 + k}", "steps": [{"name": b, "status": "completed", "conclusion": "success"} for b in buoc]} for k in range(8)]
+
+
+def _b4_anh(w):
+    return [_g(w, *x) for x in (("for-each-ref",), ("worktree", "list"), ("count-objects", "-v"))] + sorted(str(p) for p in (Path(w) / ".git").rglob("*") if "objects" in p.parts)
+
+
+def _b4_fx(c, pl=_B4_KG, manh="skip", ct=None, gia=None, them=None, repo=_B4_KHO, arg=(), env=None, truoc=None, sau=None, boc=True, luot=None, base_m=True):
+    """Fixture K2b trên `_c1106` (GT-7): `origin/master` mang bộ phân loại giả `pl` (bytes = stdout thô · str = mã nguồn · None = vắng) và ĐÚNG
+    blob `packet_loop.py` đang thử; chạy qua trình bọc GT-3 (`boc`) hoặc tiến trình con thường có biến cấm + proxy chết (GT-4)."""
+    d, kq = Path(tempfile.mkdtemp(prefix="b4-", dir=c.tmp)), {"luot": []}
+    nk, tam = d / "nk", d / "tam"
+    tam.mkdir()
+
+    def chay(script, args, sd, _env):
+        w = args[args.index("--root") + 1]
+        for bien in luot or [ct]:
+            (d / "tt").write_text(json.dumps({"bien": bien or {}, **(gia or {})}), encoding="utf-8")
+            nk.unlink(missing_ok=True)
+            truoc_anh = _b4_anh(w)
+            e = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1", BIEN_BC: anh_doctor(), "TMPDIR": str(tam), "TEMP": str(tam), "TMP": str(tam), "GH_TOKEN": "",
+                 **({} if boc else {"PACKET_LOOP_CAM_DOC_CONG_TAC": "1", "https_proxy": "http://127.0.0.1:9", "HTTPS_PROXY": "http://127.0.0.1:9", "no_proxy": "", "NO_PROXY": ""}),
+                 **{k: v.replace("{tmp}", str(d)) for k, v in (env or {}).items()}}
+            p = subprocess.run([sys.executable, *(("-c", _B4_BOC, str(script), str(d / "tt"), str(nk)) if boc else (str(script),)), "--state-dir", str(sd),
+                                *map(str, args), *arg], capture_output=True, env=e, timeout=_B4_HAN)
+            if _co_banner(p.stdout) or _co_banner(p.stderr):
+                raise CliSapDo(f"b4 SẬP: rc={p.returncode}; stderr={_txt(p.stderr)[-400:]!r}")
+            ngoai = int((d / "nk.ngoai").read_text()) if boc else 0
+            if ngoai:
+                raise AssertionError(f"GT-4: {ngoai} kết nối ngoài loopback")
+            kq["luot"].append(dict(rc=p.returncode, o=_txt(p.stdout).splitlines(), e=_txt(p.stderr).splitlines(), sach=_b4_anh(w) == truoc_anh and not list(tam.iterdir()),
+                                   nk=[json.loads(x) for x in nk.read_text(encoding="utf-8").splitlines()] if nk.exists() else []))
+        return p.returncode, p.stdout, p.stderr
+
+    def doi(x, w, h):
+        if h is None:
+            for p, b in (("ops/ci_duong_nhanh.py", pl if pl is None or isinstance(pl, str) else "import sys\nsys.stdout.buffer.write(%r)\n" % pl), (".claude/dev/packet_loop.py", c.script.read_bytes())):
+                if b is not None:
+                    (w / p).parent.mkdir(parents=True, exist_ok=True)
+                    (w / p).write_bytes(b.encode() if isinstance(b, str) else b)
+            (truoc or (lambda *_: None))(w)
+            _g(w, "add", "-A"), _g(w, "commit", "-qm", "M")
+            kq.update(M=_g(w, "rev-parse", "HEAD"), w=w, L2=x["L2"])
+            _ = base_m and x.update(base=kq["M"])
+            return
+        x.update(chay=chay, manh={"du": x["manh"], "skip": _b4_manh(h, (), kl="skipped"), "dich": _b4_manh(h, (_B4_SDICH,))}.get(manh) if isinstance(manh, str) else manh(x, h))
+        kq.update(h=h, x=x)
+        (sau or (lambda *_: None))(x, w, h)
+        kq.update(M=_g(w, "rev-parse", "refs/remotes/origin/master"))
+    _c1106(c, them=them, repo=repo, doi=doi)
+    return {**kq, **kq["luot"][-1], "d": d}
+
+
+def _b4_doi(c, dk, *vi):
+    if not dk:
+        raise ChotB4(c.b4, " · ".join(map(str, vi)))
+
+
+def _b4_kiem(c, r, k, rc_doi, lan=None, tt=None, yc=0, thieu="K2b làn G5", token=None):
+    """Khẳng định ĐÍCH của một lượt `k`: rc · ĐÚNG các dòng stdout của mục 9 theo thứ tự · dòng THIẾU + tổng kết · số yêu cầu, URL, header · kho sạch."""
+    lan = lan.split() if lan else None
+    mong = [f"LAN_G5 che_do_thuc_chay={lan[0]} buoc={lan[1]} lop={lan[2]} master={'-' if lan[1] in ('siet', 'tu_kiem') else r['M']} ket_qua={lan[3]}"] if lan else []
+    ten = _B4_CP[lan[2]][0] if tt else None
+    mong += [rf"CONG_TAC lop={lan[2]} bien={ten} trang_thai={tt} doc_luc=(\S+) updated_at=\S+ request_id=\S+ gia_tri=.{{1,120}}"] if tt else []
+    mong += [r"HIEU_LUC den=(\S+)"] * (tt == "khop") + [f"ĐỦ ĐIỀU KIỆN MERGE trên {r['h']}"] * (rc_doi == 0)
+    khop = [re.fullmatch(a if a.startswith(("CONG_TAC", "HIEU_LUC")) else re.escape(a), b) for a, b in zip(mong, k["o"])]
+    _b4_doi(c, k["rc"] == rc_doi and len(k["o"]) == len(mong) and all(khop), "rc/stdout", k["rc"], k["o"], "đòi", rc_doi, mong, k["e"][-3:])
+    if tt == "khop":
+        gio = [time.mktime(time.strptime(m[1], "%Y-%m-%dT%H:%M:%SZ")) for m in khop[1:3]]
+        _b4_doi(c, gio[1] - gio[0] == 1800, "HIEU_LUC phải = doc_luc + 30 phút", k["o"])
+    if rc_doi:
+        ds = thieu.split("; ")
+        _b4_doi(c, len(k["e"]) == len(ds) + 1 and all(e.strip().startswith(f"THIẾU  {t}: ") for t, e in zip(ds, k["e"])) and k["e"][-1].endswith(f"CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu {thieu}"),
+                "stderr", k["e"], "đòi", thieu)
+    hd = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "packet-loop-kiem-merge", **({"Authorization": "Bearer " + token} if token else {})}
+    _b4_doi(c, len(k["nk"]) == yc and all(q == {"pt": "GET", "url": _B4_API + str(ten), "h": hd} for q in k["nk"]), "yêu cầu REST", k["nk"], "đòi", yc, ten)
+    _b4_doi(c, k["sach"] and not (token and token in " ".join(k["o"] + k["e"])), "kho/thư mục tạm không sạch, hoặc token bị in", k["sach"])
+
+
+def _b4_ca(rc_doi, lan=None, tt=None, yc=0, thieu="K2b làn G5", them_kiem=None, token=None, **kw):
+    def ca(c):
+        r = _b4_fx(c, **{**kw, **({"env": {**(kw.get("env") or {}), "GH_TOKEN": token}} if token else {})})
+        _b4_kiem(c, r, r, rc_doi, lan, tt, yc, thieu, token)
+        _ = them_kiem and them_kiem(c, r)
+    return ca
+
+
+def _b4_bc(dat, sua):
+    """Ca bằng chứng mục 3, đo dưới `--siet-g5-du` (không cần tự kiểm cây): `dat` ⇒ `du` (đạt, im lặng); ngược lại ⇒ đỏ với `LAN_G5` đúng chế độ."""
+    return _b4_ca(0 if dat is True else 12, None if dat is True else f"{dat or 'khac'} siet chua_tinh do", arg=("--siet-g5-du",), manh=lambda x, h: (sua(x, h), x["manh"])[1])
+
+
+def _b4_run(x, h, **doi):   # thêm một run thứ hai (id 101) cùng các job bắt buộc của K2 KHÔNG đổi; trả run mới để ca dời mảnh sang
+    x["runs"].append({**x["runs"][0], "id": 101, **doi})
+
+
+def _b4_buoc(x, k, *buoc):
+    x["manh"][k]["steps"] = [b if isinstance(b, dict) else {"name": b, "status": "completed", "conclusion": "success"} for b in buoc]
+
+
+_B4_BUOC_DU = {"name": _B4_SDU, "status": "completed", "conclusion": "success"}
+_B4_CA = {
+    # GT-7 đối chứng khoẻ
+    "cong_b4_dc_du": _b4_ca(0, manh="du", pl=_B4_BM, ct={_B4_CP["bo_moi"][0]: {"nem": 1}}),
+    "cong_b4_dc_du_siet": _b4_ca(0, manh="du", arg=("--siet-g5-du",)),
+    "cong_b4_dc_alpha": _b4_ca(0, "khac tinh_lai duong_nhanh dat", pl=_B4_A, ct=_B4_CT["bo_moi"]),
+    "cong_b4_dc_beta": _b4_ca(0, "khac cong_tac bo_moi dat", "khop", 1, pl=_B4_BM, ct=_B4_CT["bo_moi"]),
+    "cong_b4_dc_delta": _b4_ca(0, "dich cong_tac che_do_dich dat", "khop", 1, pl=_B4_DD, manh="dich", ct=_B4_CT["che_do_dich"]),
+    "cong_b4_dc_delta_m9": _b4_ca(0, "dich cong_tac che_do_dich dat", "khop", 1, pl=_B4_DD, manh="dich", ct=_B4_CT["che_do_dich"], them=_GH, sau=_CMT("windows: H mien")),
+    # mục 3 — chọn R, lập J, hàm kiểm mảnh chung (hai chiều cho từng chốt)
+    "cong_b4_bc_run_path_qua": _b4_bc(True, lambda x, h: _b4_run(x, h, path=".github/workflows/khac.yml")),
+    "cong_b4_bc_run_path_chan": _b4_bc(None, lambda x, h: (_b4_run(x, h, path=".github/workflows/khac.yml"), [j.update(run_id=101) for j in x["manh"]])),
+    "cong_b4_bc_run_head_qua": _b4_bc(True, lambda x, h: _b4_run(x, h, head_sha="0" * 40)),
+    "cong_b4_bc_run_head_chan": _b4_bc(None, lambda x, h: (_b4_run(x, h, head_sha="0" * 40), [j.update(run_id=101) for j in x["manh"]])),
+    "cong_b4_bc_run_kho_qua": _b4_bc(True, lambda x, h: _b4_run(x, h, repository={"full_name": "khac/kho"})),
+    "cong_b4_bc_run_kho_chan": _b4_bc(None, lambda x, h: (_b4_run(x, h, repository={"full_name": "khac/kho"}), [j.update(run_id=101) for j in x["manh"]])),
+    "cong_b4_bc_run_id_lon_nhat_qua": _b4_bc(True, lambda x, h: x["runs"].append({**x["runs"][0], "id": 99})),
+    "cong_b4_bc_run_id_lon_nhat_chan": _b4_bc(None, lambda x, h: (x["runs"].append({**x["runs"][0], "id": 99}), [j.update(run_id=99) for j in x["manh"]])),
+    "cong_b4_bc_job_run_khac": _b4_bc(None, lambda x, h: [j.update(run_id=999) for j in x["manh"]]),
+    "cong_b4_bc_job_attempt_cu": _b4_bc(None, lambda x, h: (x["runs"][0].update(run_attempt=2), [j.update(run_attempt=2) for j in x["jobs"]])),
+    "cong_b4_bc_job_attempt_dung": _b4_bc(True, lambda x, h: (x["runs"][0].update(run_attempt=2), [j.update(run_attempt=2) for j in x["jobs"] + x["manh"]])),
+    "cong_b4_bc_thieu_manh_7": _b4_bc(None, lambda x, h: x["manh"].pop()),
+    "cong_b4_bc_dich_thieu_manh_7": _b4_bc(None, lambda x, h: (x.update(manh=_b4_manh(h, (_B4_SDICH,))), x["manh"].pop())),
+    "cong_b4_bc_dich_du_8": _b4_bc("dich", lambda x, h: x.update(manh=_b4_manh(h, (_B4_SDICH,)))),
+    "cong_b4_bc_manh_trung": _b4_bc(None, lambda x, h: x["manh"].append({**x["manh"][3], "id": 299})),
+    "cong_b4_bc_job_head_khac": _b4_bc(None, lambda x, h: x["manh"][2].update(head_sha="0" * 40)),
+    "cong_b4_bc_job_dang_chay": _b4_bc(None, lambda x, h: x["manh"][2].update(status="in_progress")),
+    "cong_b4_bc_job_failure": _b4_bc(None, lambda x, h: x["manh"][2].update(conclusion="failure")),
+    "cong_b4_bc_khong_steps": _b4_bc(None, lambda x, h: x["manh"][5].pop("steps")),
+    "cong_b4_bc_step_ten_khong_chuoi": _b4_bc(None, lambda x, h: _b4_buoc(x, 5, _B4_SDU, {"name": 5, "status": "completed", "conclusion": "success"})),
+    "cong_b4_bc_step_khong_object": _b4_bc(None, lambda x, h: _b4_buoc(x, 5, _B4_SDU) or x["manh"][5]["steps"].append("x")),
+    "cong_b4_bc_hai_buoc_du": _b4_bc(None, lambda x, h: _b4_buoc(x, 1, _B4_SDU, _B4_SDU)),
+    "cong_b4_bc_buoc_dang_chay": _b4_bc(None, lambda x, h: _b4_buoc(x, 1, {**_B4_BUOC_DU, "status": "in_progress"})),
+    "cong_b4_bc_buoc_failure": _b4_bc(None, lambda x, h: _b4_buoc(x, 1, {**_B4_BUOC_DU, "conclusion": "failure"})),
+    "cong_b4_bc_ca_hai_buoc_success": _b4_bc(None, lambda x, h: _b4_buoc(x, 1, _B4_SDU, _B4_SDICH)),
+    "cong_b4_bc_buoc_kia_skipped": _b4_bc(True, lambda x, h: [_b4_buoc(x, k, _B4_SDU, {"name": _B4_SDICH, "status": "completed", "conclusion": "skipped"}) for k in range(8)]),
+}
+
+
+def _b4_m2(nd):
+    """`master` đi TRƯỚC sau khi H rẽ nhánh (M2 thêm/sửa `nd`), đã đẩy và fetch: tự kiểm 7a vẫn khớp, commit hợp C khác cây của H."""
+    def sau(x, w, h):
+        _g(w, "checkout", "-q", "master")
+        for p, b in nd.items():
+            (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_text(b, encoding="utf-8", newline="\n")
+        _g(w, "add", "-A"), _g(w, "commit", "-qm", "M2"), _g(w, "push", "-q", "origin", "master"), _g(w, "fetch", "-q", "origin"), _g(w, "checkout", "-q", "pr")
+    return sau
+
+
+def _b4_cu(x, w, h):   # remote `master` tiến một commit, `origin/master` cục bộ ĐỨNG YÊN (7a)
+    cu = _g(w, "rev-parse", "refs/remotes/origin/master")
+    _g(w, "push", "-q", "origin", _g(w, "commit-tree", "-p", cu, "-m", "N", cu + "^{tree}") + ":refs/heads/master"), _g(w, "update-ref", "refs/remotes/origin/master", cu)
+
+
+_B4_T, _B4_C = _B4_CP["bo_moi"]
+_th = lambda v: {"than": (v if isinstance(v, bytes) else json.dumps(v).encode()).hex()}  # noqa: E731
+_b4_b = lambda tt, bien, rc=12, yc=1, **kw: _b4_ca(rc, f"khac cong_tac bo_moi {'do' if rc else 'dat'}", tt, yc, **{"pl": _B4_BM, "ct": None if bien is None else {_B4_T: bien}, **kw})  # noqa: E731
+_b4_pl = lambda lop, pl, rc=12, **kw: _b4_ca(rc, f"khac tinh_lai {lop} {'do' if rc else 'dat'}", **{"pl": pl, "ct": _B4_CT["bo_moi"], **kw})  # noqa: E731
+_b4_tk = lambda rc=12, **kw: _b4_ca(rc, "khac tu_kiem chua_tinh do" if rc else "khac tinh_lai duong_nhanh dat", pl=_B4_A, **kw)  # noqa: E731
+_B4_DUNG = {"name": _B4_T, "value": _B4_C}
+_B4_QUYEN = {"FX_QUYEN_BO_MOI": _B4_C, "FX_QUYEN_CHE_DO_DICH": _B4_CP["che_do_dich"][1], **{v[0]: v[1] for v in _B4_CP.values()}, "GITHUB_OUTPUT": "{tmp}/go"}
+_b4_khong_go = lambda c, r: _b4_doi(c, not (r["d"] / "go").exists(), "GITHUB_OUTPUT của người gọi tới được tiến trình con")  # noqa: E731
+_B4_NGU = "import sys, time\ntime.sleep(8)\nprint('che_do=duong_nhanh')\n"
+_B4_CA.update({
+    # mục 4 — thứ tự quyết định
+    "cong_b4_k2_do_thi_khong_chay": _b4_ca(12, thieu="K2 CI", pl=_B4_A, sau=lambda x, w, h: x["jobs"][0].update(conclusion="failure")),
+    "cong_b4_siet_beta": _b4_ca(12, "khac siet chua_tinh do", pl=_B4_BM, ct=_B4_CT["bo_moi"], arg=("--siet-g5-du",)),
+    "cong_b4_siet_alpha": _b4_ca(12, "khac siet chua_tinh do", pl=_B4_A, arg=("--siet-g5-du",)),
+    "cong_b4_khong_giam": _b4_pl("khong_giam", _B4_KG),
+    "cong_b4_pr_sua_bo_phan_loai": _b4_pl("khong_giam", _B4_KG, them={"ops/ci_duong_nhanh.py": "print('che_do=duong_nhanh')\n"}, sau=_CMT("windows: H mien", "windows: H not_required")),
+    "cong_b4_pr_sua_ci_yml": _b4_pl("khong_giam", _B4_SINH, them={"docs/bm/a.md": "x\n", ".github/workflows/ci.yml": "on: push\n"}, sau=_CMT("windows: H mien")),
+    "cong_b4_dich_thieu_bang_chung": _b4_ca(12, "khac bang_chung che_do_dich do", pl=_B4_DD, ct=_B4_CT["che_do_dich"]),
+    "cong_b4_dich_khong_audit": _b4_ca(12, "dich audit che_do_dich do", pl=_B4_DD, manh="dich", ct=_B4_CT["che_do_dich"], sau=_KHONG_DD),
+    "cong_b4_dich_audit_do": _b4_ca(12, "dich audit che_do_dich do", pl=_B4_DD, manh="dich", ct=_B4_CT["che_do_dich"], sau=_DD("ddr", conclusion="failure")),
+    "cong_b4_dich_mien_khong_thay": _b4_ca(12, "dich audit che_do_dich do", pl=_B4_DD, manh="dich", ct=_B4_CT["che_do_dich"], them=_GH,
+                                           sau=lambda x, w, h: (_CMT("windows: H mien", "full_mutant_audit: H mien")(x, w, h), _KHONG_DD(x, w, h))),
+    "cong_b4_dich_cong_tac_dong": _b4_ca(12, "dich cong_tac che_do_dich do", "vang_hoac_khong_quyen", 1, pl=_B4_DD, manh="dich"),
+    "cong_b4_bien_lop_khac": _b4_ca(12, "dich cong_tac che_do_dich do", "vang_hoac_khong_quyen", 1, pl=_B4_DD, manh="dich", ct=_B4_CT["bo_moi"]),
+    "cong_b4_bien_lop_khac_gia_tri": _b4_ca(12, "dich cong_tac che_do_dich do", "khong_khop", 1, pl=_B4_DD, manh="dich", ct={_B4_CP["che_do_dich"][0]: {"gt": _B4_C}}),
+    # mục 5 — hàm chạy, môi trường, khung dòng, bộ đọc khoá
+    "cong_b4_sinh_bo_moi": _b4_b("khop", {"gt": _B4_C}, 0, pl=_B4_SINH, them={"docs/bm/a.md": "x\n"}),
+    "cong_b4_goc_la_master": _b4_b("khop", {"gt": _B4_C}, 0, pl=_B4_SINH, them={"docs/bm/a.md": "x\n"}, base_m=False, sau=_CMT("windows: H mien")),
+    "cong_b4_master_di_truoc": _b4_b("khop", {"gt": _B4_C}, 0, pl=_B4_SINH, them={"docs/bm/a.md": "x\n"}, sau=_b4_m2({"docs/khac/z.md": "z\n"})),
+    "cong_b4_merge_xung_dot": _b4_pl("la", _B4_SINH, them={"docs/bm/a.md": "x\n"}, sau=_b4_m2({"docs/bm/a.md": "y\n"})),
+    "cong_b4_moi_truong_moi": _b4_b("khong_khop", {"gt": "khac"}, pl=_B4_SINH, them={"docs/bm/a.md": "x\n"}, env=_B4_QUYEN, them_kiem=_b4_khong_go),
+    "cong_b4_python_I": _b4_pl("la", "import anh_em\nprint('che_do=duong_nhanh')\n", truoc=lambda w: (w / "ops/anh_em.py").write_text("x = 1\n", encoding="utf-8")),
+    "cong_b4_het_han": _b4_pl("la", _B4_NGU, gia={"hang": {"B4_HAN_PL": 2}}),
+    "cong_b4_trong_han": _b4_pl("duong_nhanh", _B4_NGU, 0, gia={"hang": {"B4_HAN_PL": 60}}),
+    "cong_b4_git_loi": _b4_pl("la", _B4_A, gia={"git": {"--git-common-dir": [-15, None]}}),
+    "cong_b4_system_exit": _b4_ca(12, "khac tu_kiem chua_tinh do", pl=_B4_A, gia={"git": {"--git-common-dir": ["thoat", None]}}),
+    "cong_b4_khong_tep_phan_loai": _b4_pl("la", None),
+    "cong_b4_rc_khac_0": _b4_pl("la", "import sys\nprint('che_do=duong_nhanh')\nsys.exit(3)\n"),
+    "cong_b4_crlf_nhan": _b4_pl("duong_nhanh", b"che_do=duong_nhanh\r\npacket_loop=chay\r\n", 0),
+    "cong_b4_hai_cr": _b4_pl("la", b"che_do=duong_nhanh\r\r\n"),
+    "cong_b4_cr_giua_dong": _b4_pl("la", b"x\rche_do=duong_nhanh\n"),
+    "cong_b4_dau_cach_cuoi": _b4_pl("la", b"che_do=duong_nhanh \n"),
+    "cong_b4_khong_utf8": _b4_pl("la", b"che_do=duong_nhanh\n\xff\n"),
+    "cong_b4_thieu_che_do": _b4_pl("la", b"dk_bo_moi=khong\n"),
+    "cong_b4_che_do_lap": _b4_pl("la", b"che_do=duong_nhanh\nche_do=duong_nhanh\n"),
+    "cong_b4_dk_lap": _b4_pl("la", b"che_do=day_du\ndk_bo_moi=co\ndk_bo_moi=co\n"),
+    "cong_b4_che_do_ngoai_tap": _b4_pl("la", b"che_do=nhanh\n"),
+    "cong_b4_dk_ngoai_tap": _b4_pl("la", b"che_do=day_du\ndk_bo_moi=CO\n"),
+    "cong_b4_dk_dich_ngoai_tap": _b4_pl("la", b"che_do=day_du\ndk_che_do_dich=CO\n"),
+    "cong_b4_nhanh_kem_dk": _b4_pl("la", b"che_do=duong_nhanh\ndk_bo_moi=co\n"),
+    "cong_b4_ca_hai_dk": _b4_pl("la", b"che_do=day_du\ndk_bo_moi=co\ndk_che_do_dich=co\n"),
+    "cong_b4_dong_khac_bo_qua": _b4_b("khop", {"gt": _B4_C}, 0, pl=b"cong_cu=bo_qua\ndk_la=co\nche_do=day_du\ndk_bo_moi=co\n che_do=duong_nhanh\n"),
+    # mục 6a — bốn trạng thái công tắc
+    **{f"cong_b4_gia_tri_{k}": _b4_b("khong_khop", {"gt": v}) for k, v in (("khac", "khac"), ("rong", ""), ("sai_mot_ky_tu", _B4_C[:-1] + "4"), ("hoa_thuong", _B4_C.upper()),
+                                                                          ("thua_khoang_trang", _B4_C + " "), ("xuong_dong_dau", "\n" + _B4_C))},
+    "cong_b4_bien_vang": _b4_b("vang_hoac_khong_quyen", None),
+    "cong_b4_404_thieu_header": _b4_b("khong_doc_duoc", {"ma": 404, "hd": {"Server": "proxy"}, **_th(_B4_DUNG)}),
+    "cong_b4_403_tu_choi": _b4_b("khong_doc_duoc", {"ma": 403, **_th(_B4_DUNG)}),
+    "cong_b4_302": _b4_b("khong_doc_duoc", {"ma": 302, **_th(_B4_DUNG)}),
+    "cong_b4_200_thieu_header": _b4_b("khong_doc_duoc", {"hd": {"Server": "proxy"}, **_th(_B4_DUNG)}),
+    "cong_b4_header_hoa_thuong": _b4_b("khop", {"hd": {"x-GITHUB-media-type": "v3"}, **_th(_B4_DUNG)}, 0),
+    "cong_b4_rest_nem": _b4_b("khong_doc_duoc", {"nem": 1}),
+    "cong_b4_rest_nem_bien_nguoi_goi": _b4_b("khong_doc_duoc", {"nem": 1}, env=_B4_QUYEN),
+    "cong_b4_json_hong": _b4_b("khong_doc_duoc", _th(b'{"name": "' + _B4_T.encode())),
+    "cong_b4_json_sau": _b4_b("khong_doc_duoc", _th(b"[" * 60000)),
+    "cong_b4_than_la": _b4_b("khong_doc_duoc", _th({"message": "ok"})),
+    "cong_b4_goc_khong_object": _b4_b("khong_doc_duoc", _th([_B4_DUNG])),
+    "cong_b4_than_qua_dai": _b4_b("khong_doc_duoc", _th(json.dumps(_B4_DUNG).encode().ljust(65537))),
+    "cong_b4_than_dung_tran": _b4_b("khop", _th(json.dumps(_B4_DUNG).encode().ljust(65536)), 0),
+    "cong_b4_utf16": _b4_b("khong_doc_duoc", _th(json.dumps(_B4_DUNG).encode("utf-16-le"))),
+    "cong_b4_utf8_hong": _b4_b("khong_doc_duoc", _th(json.dumps({**_B4_DUNG, "x": "\x80"}, ensure_ascii=False).encode("latin-1"))),
+    "cong_b4_khoa_trung": _b4_b("khong_doc_duoc", _th(b'{"name": "%s", "value": "khac", "value": "%s"}' % (_B4_T.encode(), _B4_C.encode()))),
+    "cong_b4_name_khac": _b4_b("khong_doc_duoc", {"ten": "TL_KHAC", "gt": _B4_C}),
+    "cong_b4_value_khong_chuoi": _b4_b("khong_doc_duoc", _th({"name": _B4_T, "value": [_B4_C]})),
+    "cong_b4_repo_khac": _b4_b("khong_doc_duoc", {"gt": _B4_C}, yc=0, repo="o/r"),
+    "cong_b4_bien_cam_doc": _b4_b("khong_doc_duoc", {"gt": _B4_C}, yc=0, env={"PACKET_LOOP_CAM_DOC_CONG_TAC": "1"}),
+    "cong_b4_bien_cam_rong": _b4_b("khop", {"gt": _B4_C}, 0, env={"PACKET_LOOP_CAM_DOC_CONG_TAC": ""}),
+    "cong_b4_token": _b4_b("khop", {"gt": _B4_C}, 0, token="bimat-b4-123"),
+    "cong_b4_gia_tri_dai": _b4_b("khong_khop", {"gt": "a" * 300}),
+    "cong_b4_tien_trinh_thuong": _b4_b("khong_doc_duoc", {"gt": _B4_C}, yc=0, boc=False),
+    # mục 7 — tự kiểm cây
+    "cong_b4_7a_master_cu": _b4_tk(sau=_b4_cu),
+    "cong_b4_7a_du_khong_tu_kiem": _b4_ca(0, manh="du", pl=_B4_A, sau=_b4_cu),
+    "cong_b4_7a_ls_remote_loi": _b4_tk(gia={"git": {"ls-remote origin refs/heads/master": [-15, None]}}),
+    "cong_b4_7a_rev_parse_loi": _b4_tk(gia={"git": {"origin/master^{commit}": [-15, None]}}),
+    "cong_b4_7b_blob_khac": _b4_tk(truoc=lambda w: (w / ".claude/dev/packet_loop.py").write_bytes(b"# khac\n")),
+    "cong_b4_7b_khong_tep": _b4_tk(truoc=lambda w: (w / ".claude/dev/packet_loop.py").unlink()),
+    "cong_b4_7b_hash_object_loi": _b4_tk(gia={"git": {"hash-object": [-15, None]}}),
+    "cong_b4_7b_rev_parse_loi": _b4_tk(gia={"git": {":.claude/dev/packet_loop.py": [-15, None]}}),
+    "cong_b4_7b_khong_phai_oid": _b4_tk(gia={"git": {"hash-object": [0, "x\n"], ":.claude/dev/packet_loop.py": [0, "x\n"]}}),
+    "cong_b4_7_git_loi_vo_can": _b4_tk(0, gia={"git": {"khong-lenh-nao-khop": [-15, None]}}),
+    # tiêu chí 7 (nằm im trước PR3) và tiêu chí 11 (hai kênh, cả hai lớp)
+    "cong_b4_nam_im_khong_giam": _b4_pl("khong_giam", _B4_KG, ct={**_B4_CT["bo_moi"], **_B4_CT["che_do_dich"]}),
+})
+
+
+def _b4_tc6(c):
+    """Tiêu chí 6 (GT-3): bốn tiến trình RIÊNG nối tiếp trên CÙNG tệp trạng thái của ĐC-β — đúng chuỗi · đổi giá trị · xoá biến · đặt lại."""
+    r = _b4_fx(c, pl=_B4_BM, luot=[{_B4_T: {"gt": _B4_C}}, {_B4_T: {"gt": "khac"}}, {}, {_B4_T: {"gt": _B4_C}}])
+    for k, tt in zip(r["luot"], ("khop", "khong_khop", "vang_hoac_khong_quyen", "khop")):
+        _b4_kiem(c, r, k, 0 if tt == "khop" else 12, f"khac cong_tac bo_moi {'dat' if tt == 'khop' else 'do'}", tt, 1)
+    _b4_doi(c, len(r["luot"]) == 4, "phải đủ bốn lượt", len(r["luot"]))
+
+
+def _b4_tc11(lop, kieu):
+    """Tiêu chí 11 với bộ sinh hai kênh trên CÙNG một diff: (a) kiểu CI · (b) bốn trạng thái công tắc sống · (c) biến quyền của người gọi · (d) diff
+    KHÔNG đủ điều kiện cấu trúc."""
+    ten, cp = _B4_CP[lop]
+    thu, bc, dau = {"bo_moi": "docs/bm", "che_do_dich": "docs/dd"}[lop], "skip" if lop == "bo_moi" else "dich", "khac" if lop == "bo_moi" else "dich"
+
+    def ca(c):
+        for tt, bien in (("khop", {"gt": cp}), ("khong_khop", {"gt": cp + "x"}), ("vang_hoac_khong_quyen", None), ("khong_doc_duoc", {"nem": 1})) if kieu == "b" else ():
+            r = _b4_fx(c, pl=_B4_SINH, manh=bc, them={thu + "/a.md": "x\n"}, ct={ten: bien} if bien else {})
+            _b4_kiem(c, r, r, 0 if tt == "khop" else 12, f"{dau} cong_tac {lop} {'dat' if tt == 'khop' else 'do'}", tt, 1)
+        if kieu == "c":
+            r = _b4_fx(c, pl=_B4_SINH, manh=bc, them={thu + "/a.md": "x\n"}, ct={ten: {"gt": "khac"}}, env=_B4_QUYEN)
+            _b4_kiem(c, r, r, 12, f"{dau} cong_tac {lop} do", "khong_khop", 1), _b4_khong_go(c, r)
+        if kieu == "d":
+            r = _b4_fx(c, pl=_B4_SINH, manh=bc, them={"docs/khac/a.md": "x\n"}, ct={ten: {"gt": cp}})
+            _b4_kiem(c, r, r, 12, f"{dau} tinh_lai khong_giam do")
+        if kieu == "a":   # bộ sinh gọi kiểu CI trên đúng (M, C = H vì H rẽ từ M): stdout `dk_<lớp>=co` ở MỌI trạng thái biến quyền; output chỉ giảm khi đúng chuỗi
+            r = _b4_fx(c, pl=_B4_SINH, manh=bc, them={thu + "/a.md": "x\n"}, ct={ten: {"gt": cp}})
+            hop = _g(r["w"], "commit-tree", "-p", r["M"], "-p", r["h"], "-m", "C", r["h"] + "^{tree}")
+            for i, (gt, mong) in enumerate(((None, "du"), ("", "du"), (cp[:-1], "du"), (cp, lop))):
+                go = r["d"] / f"go-{i}"
+                p = subprocess.run([sys.executable, "-I", str(r["w"] / "ops/ci_duong_nhanh.py")], cwd=r["w"], capture_output=True, text=True, env={
+                    **os.environ, "GITHUB_OUTPUT": str(go), "CI_DUONG_NHANH_SU_KIEN": "pull_request", "CI_DUONG_NHANH_GOC": r["M"], "CI_DUONG_NHANH_DAU": r["h"],
+                    "CI_DUONG_NHANH_MERGE": hop, **({} if gt is None else {"FX_QUYEN_" + lop.upper(): gt})})
+                _b4_doi(c, p.returncode == 0 and f"dk_{lop}=co" in p.stdout.split() and go.read_text() == f"g5={mong}\n", "bộ sinh hai kênh", gt, p.stdout, p.stderr[-200:])
+    return ca
+
+
+_B4_CA.update({"cong_b4_tc6_bon_tien_trinh": _b4_tc6, **{f"cong_b4_tc11_{k}_{lop}": _b4_tc11(lop, k) for lop in _B4_CP for k in "abcd"}})
+# GT-2: tầng vận chuyển THẬT (`_rest_get` của tệp đang thử) tới máy chủ HTTP loopback do ca dựng; đồ giả GT-1 KHÔNG được cài (`that`).
+_B4_MAY = r'''
+import http.server, json, os, threading, time
+nhan = []
+class H(http.server.BaseHTTPRequestHandler):
+    def log_message(self, *a): pass
+    def do_POST(self): self.do_GET()
+    def do_GET(self):
+        nhan.append({"pt": self.command, "path": self.path, "h": {k.lower(): v for k, v in self.headers.items()}})
+        if "/chuyen" in self.path:
+            self.send_response(302), self.send_header("Location", "http://127.0.0.1:%d/dich" % cong), self.end_headers()
+            return
+        if "/treo" in self.path:
+            return time.sleep(6)
+        self.send_response(500 if "/500" in self.path else 404 if "/404" in self.path else 200), self.send_header("X-GitHub-Request-Id", "rq7")
+        if "/cham" in self.path:
+            self.end_headers()
+            for _ in range(8):
+                self.wfile.write(b"x"), self.wfile.flush(), time.sleep(0.5)
+            return
+        than = b"y" * 70000 if "/dai" in self.path else b"{}"
+        self.send_header("Content-Length", str(len(than))), self.end_headers(), self.wfile.write(than)
+may = http.server.ThreadingHTTPServer(("127.0.0.1", 0), H)
+cong = may.server_address[1]
+threading.Thread(target=may.serve_forever, daemon=True).start()
+def goi(path, han=5, url=None):
+    t = time.time()
+    try:
+        ma, h, than = m._rest_get(url or "http://127.0.0.1:%d%s" % (cong, path), {"Accept": "a/b", "Authorization": "Bearer t"}, han)
+        kq = {"ma": ma, "h": {k.lower(): v for k, v in h.items()}, "dai": len(than)}
+    except m._B4Loi as ex:
+        kq = {"loi": str(ex)}
+    open(nk + ".vc", "w").write(json.dumps({**kq, "giay": time.time() - t, "nhan": nhan}))
+'''
+
+
+def _b4_vc(ma, kiem, ngoai=0):
+    def ca(c):
+        d = Path(tempfile.mkdtemp(prefix="b4vc-", dir=c.tmp))
+        (d / "tt").write_text(json.dumps({"bien": {}, "that": 1, "ma": _B4_MAY + ma}), encoding="utf-8")
+        p = subprocess.run([sys.executable, "-c", _B4_BOC, str(c.script), str(d / "tt"), str(d / "nk")], capture_output=True, timeout=_B4_HAN, env={
+            **{k: v for k, v in os.environ.items() if not k.lower().endswith("_proxy")}, "no_proxy": "127.0.0.1", "PYTHONDONTWRITEBYTECODE": "1"})
+        if p.returncode or not (d / "nk.vc").exists():
+            raise CliSapDo(f"b4 vận chuyển SẬP: rc={p.returncode}; stderr={_txt(p.stderr)[-400:]!r}")
+        kq = json.loads((d / "nk.vc").read_text())
+        _b4_doi(c, kiem(kq) and int((d / "nk.ngoai").read_text()) == ngoai, "tầng vận chuyển", kq, (d / "nk.ngoai").read_text())
+    return ca
+
+
+_b4_mot = lambda k, ma: k.get("ma") == ma and len(k["nhan"]) == 1 and k["nhan"][0]["pt"] == "GET"  # noqa: E731
+_B4_CA.update({
+    "cong_b4_vc_get_header": _b4_vc("goi('/ok')", lambda k: _b4_mot(k, 200) and k["h"].get("x-github-request-id") == "rq7" and k["dai"] == 2 and k["nhan"][0]["path"] == "/ok"
+                                    and (k["nhan"][0]["h"].get("accept"), k["nhan"][0]["h"].get("authorization")) == ("a/b", "Bearer t") and "content-length" not in k["nhan"][0]["h"]),
+    "cong_b4_vc_khong_chuyen_huong": _b4_vc("goi('/chuyen')", lambda k: _b4_mot(k, 302)),
+    "cong_b4_vc_404_nguyen_ma": _b4_vc("goi('/404')", lambda k: _b4_mot(k, 404)),
+    "cong_b4_vc_500_khong_thu_lai": _b4_vc("goi('/500')", lambda k: _b4_mot(k, 500)),
+    "cong_b4_vc_tran_byte": _b4_vc("goi('/dai')", lambda k: _b4_mot(k, 200) and k["dai"] == 65537),
+    "cong_b4_vc_han_tuong": _b4_vc("goi('/cham', 1.5)", lambda k: "loi" in k and k["giay"] < 3.5),
+    "cong_b4_vc_trong_han_tuong": _b4_vc("goi('/cham', 30)", lambda k: _b4_mot(k, 200) and k["dai"] == 8),
+    "cong_b4_vc_han_socket": _b4_vc("goi('/treo', 1)", lambda k: "loi" in k and k["giay"] < 4),
+    "cong_b4_vc_loi_ket_noi": _b4_vc("may.server_close()\ngoi('/ok', 2, 'http://127.0.0.1:1/x')", lambda k: "loi" in k and not k["nhan"]),
+    "cong_b4_vc_proxy": _b4_vc("os.environ.update(http_proxy='http://127.0.0.1:%d' % cong, no_proxy='')\ngoi('', 5, 'http://b4.invalid/qua')",
+                               lambda k: _b4_mot(k, 200) and k["nhan"][0]["path"] == "http://b4.invalid/qua"),
+    "cong_b4_gt4_chan_va_dem": _b4_vc("import socket\ntry:\n    socket.create_connection(('192.0.2.1', 9), 1)\nexcept MangNgoai:\n    goi('/ok')", lambda k: _b4_mot(k, 200), ngoai=1),
+})
+
+
+def _b4_ci_ok(van_ban: str) -> bool:
+    """Tiêu chí 5: job `gate-cong-cu` có ma trận `manh` đúng 0..7, ĐÚNG MỘT bước S_DU và 0 hoặc 1 bước S_DICH (PR6 thêm bước đích không phải sửa tệp này)."""
+    import yaml
+    j = ((yaml.safe_load(van_ban) or {}).get("jobs") or {}).get("gate-cong-cu") or {}
+    ten = [s.get("name") for s in j.get("steps") or []]
+    return ((j.get("strategy") or {}).get("matrix") or {}).get("manh") == list(range(8)) and ten.count(_B4_SDU) == 1 and ten.count(_B4_SDICH) in (0, 1)
+
+
+def _b4_tc5(c):
+    y = lambda buoc, manh=8: "jobs:\n  gate-cong-cu:\n    strategy:\n      matrix:\n        manh: %s\n    steps:\n%s" % (  # noqa: E731
+        list(range(manh)), "".join(f"      - name: {b}\n        run: x\n" for b in ("khac", *buoc)))
+    for ten, vb, mong in (("chi_du", y([_B4_SDU]), True), ("du_va_dich", y([_B4_SDU, _B4_SDICH]), True), ("khong_du", y([_B4_SDICH]), False), ("hai_du", y([_B4_SDU] * 2), False),
+                          ("hai_dich", y([_B4_SDU, _B4_SDICH, _B4_SDICH]), False), ("thieu_manh_7", y([_B4_SDU], 7), False)):
+        _b4_doi(c, _b4_ci_ok(vb) is mong, "YAML tổng hợp", ten, mong)
+    that = ROOT / ".github/workflows/ci.yml"
+    _b4_doi(c, that.is_file() and _b4_ci_ok(that.read_text(encoding="utf-8")), "ci.yml THẬT vắng hoặc lệch hợp đồng H2 (không bỏ qua)", that)
+
+
+_b4_hang = lambda v: "GIET" if _phan_loai_giet(v) == "GIET" else "TIN_DUNG_GIA"  # noqa: E731
+
+
+def _b4_gt6(kieu):
+    """GT-6 tự kiểm bộ phân hạng: bốn kết cục GIẢ (CLI sập · dựng fixture ném · quá hạn · ca KHÁC đỏ) đều ra TÍN DỤNG GIẢ cho ca đích; đối chứng:
+    đột biến thật `b4_bo_co_siet` trên đúng ca của nó ra GIẾT."""
+    def ca(c):
+        goc, dich, khac, tim = c.script.read_text(encoding="utf-8"), "cong_b4_dc_alpha", "cong_b4_siet_alpha", "        cd = _b4_che_do(a, h)\n"
+        thay = {"sap": (tim, tim + "        raise RuntimeError('b4')\n"), "han": (tim, tim + "        time.sleep(30)\n"), "ca_khac": MUTANTS["b4_bo_co_siet"][:2]}.get(kieu, (tim, tim))
+        cap = _cap_thay_the(*thay)
+        if any(goc.count(t) != 1 for t, _ in cap):
+            raise AssertionError(f"mỏ neo phải khớp đúng một chỗ: {cap}")
+        d = c.tmp / kieu
+        d.mkdir()
+        for t, th in cap:
+            goc = goc.replace(t, th)
+        (d / "packet_loop.py").write_text(goc, encoding="utf-8", newline="\n")
+        (d / "launcher.py").write_text((HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
+        cu = {k: globals()[k] for k in ("_c1106", "_B4_HAN")}
+        try:
+            globals().update(_B4_HAN=3 if kieu == "han" else _B4_HAN, _c1106=(lambda *a, **k: (_ for _ in ()).throw(OSError("dựng fixture"))) if kieu == "dung" else _c1106)
+            ket = chay_suite(d / "packet_loop.py", c.tmp / "luot", chi_chay={dich, khac})
+        finally:
+            globals().update(cu)
+        mong = {dich: "TIN_DUNG_GIA", khac: "GIET" if kieu == "ca_khac" else "TIN_DUNG_GIA"}
+        _b4_doi(c, {k: _b4_hang(ket.get(k)) for k in mong} == mong, "phân hạng", kieu, {k: (_phan_loai_giet(v), str(v)[:160]) for k, v in ket.items()}, "đòi", mong)
+    return ca
+
+
+_B4_CA.update({"cong_b4_tc5_ci_yml": _b4_tc5, **{f"cong_b4_gt6_{k}": _b4_gt6(k) for k in ("sap", "dung", "han", "ca_khac")}})
+CASES += [(k, (lambda f, k: lambda c: (setattr(c, "b4", k), f(c))[1])(f, k)) for k, f in _B4_CA.items()]
+_B4_NEO = {k: v for k, v in (
+    ("ung", 'r.get("path") == ".github/workflows/ci.yml" and r.get("head_sha") == h and r["repository"].get("full_name") == a.repo]'),
+    ("J", 'j["run_id"] == R["id"] and j["run_attempt"] == R.get("run_attempt")]'),
+    ("job", 'if jj[0]["head_sha"] != h or jj[0]["status"] != "completed" or jj[0].get("conclusion") != "success":'),
+    ("buoc", 'if len(c) != 1 or c[0].get("status") != "completed" or c[0].get("conclusion") != "success":'),
+    ("kia", 'if any(s["name"] == kia and s.get("conclusion") == "success" for s in st):'),
+    ("goi", "_b4_tinh_lai(root, M0, M0, h)"), ("dong", 'dong = [d[:-1] if d.endswith(b"\\r") else d for d in out.split(b"\\n")]'),
+    ("khoa", "return None if len(v) > 1 or any(x not in tap for x in v) else"), ("la1", "if rc != 0 or not cd or bm is None or dd is None:"),
+    ("la2", 'if bm == dd == b"co" or (cd == b"duong_nhanh" and b"co" in (bm, dd)):'), ("dat", 'dat, ly = tt == "khop", f"công tắc'),
+    ("200", "elif st == 200 and co_gh and len(than) <= 65536:"), ("json", 'd = json.loads(than.decode("utf-8"), object_pairs_hook=_cam_khoa_trung, '),
+    ("d", 'if type(d) is dict and d.get("name") == ten and type(d.get("value")) is str:'), ("doc", 'if repo == B4_KHO and not os.environ.get("PACKET_LOOP_CAM_DOC_CONG_TAC"):'),
+    ("7a", "if m[0] or xa[0] or xa[1].split()[:1] != [M.encode()]:"), ("7b", 'if day[0] or cay[0] or not SHA_RE.fullmatch(day[1].decode("ascii", "replace").strip()) or day[1] != cay[1]:'),
+    ("mo", 'r = urllib.request.build_opener(KhongChuyenHuong).open(urllib.request.Request(url, headers=headers, method="GET"), timeout=han)'),
+    ("tra", "return r.status, dict(r.headers.items()), than"), ("lop_dat", 'dat, ly = lop == "duong_nhanh", f"mã'))}
+_b4_mut = lambda neo, cu, moi, *dich: (_B4_NEO[neo], _B4_NEO[neo].replace(cu, moi), list(dich))  # noqa: E731
+MUTANTS.update({
+    # mục 3
+    "b4_bc_bo_path": _b4_mut("ung", 'r.get("path") == ".github/workflows/ci.yml" and ', "", "cong_b4_bc_run_path_qua", "cong_b4_bc_run_path_chan"),
+    "b4_bc_bo_head": _b4_mut("ung", 'r.get("head_sha") == h and ', "", "cong_b4_bc_run_head_qua", "cong_b4_bc_run_head_chan"),
+    "b4_bc_bo_kho": _b4_mut("ung", ' and r["repository"].get("full_name") == a.repo', "", "cong_b4_bc_run_kho_qua", "cong_b4_bc_run_kho_chan"),
+    "b4_bc_run_nho_nhat": ('R = max(ung, key=lambda r: r["id"])', 'R = min(ung, key=lambda r: r["id"])', ["cong_b4_bc_run_id_lon_nhat_qua", "cong_b4_bc_run_id_lon_nhat_chan"]),
+    "b4_bc_bo_run_id": _b4_mut("J", 'j["run_id"] == R["id"] and ', "", "cong_b4_bc_job_run_khac"),
+    "b4_bc_bo_attempt": _b4_mut("J", ' and j["run_attempt"] == R.get("run_attempt")', "", "cong_b4_bc_job_attempt_cu"),
+    "b4_bc_bay_manh": ("for k in range(8):\n            jj = ", "for k in range(7):\n            jj = ", ["cong_b4_bc_thieu_manh_7", "cong_b4_bc_dich_thieu_manh_7"]),
+    "b4_bc_nhan_trung": ("if len(jj) == 1 else None", "if len(jj) >= 1 else None", ["cong_b4_bc_manh_trung"]),
+    "b4_bc_bo_kieu_list": ("if type(st) is not list or not all(", "if not all(", ["cong_b4_bc_khong_steps"]),
+    "b4_bc_bo_kieu_buoc": (' or not all(isinstance(s, dict) and type(s.get("name")) is str for s in st):', ":", ["cong_b4_bc_step_ten_khong_chuoi", "cong_b4_bc_step_khong_object"]),
+    "b4_bc_bo_job_head": _b4_mut("job", 'jj[0]["head_sha"] != h or ', "", "cong_b4_bc_job_head_khac"),
+    "b4_bc_bo_job_status": _b4_mut("job", 'jj[0]["status"] != "completed" or ', "", "cong_b4_bc_job_dang_chay"),
+    "b4_bc_bo_job_conclusion": _b4_mut("job", ' or jj[0].get("conclusion") != "success"', "", "cong_b4_bc_job_failure"),
+    "b4_bc_nhieu_buoc": _b4_mut("buoc", "len(c) != 1", "len(c) < 1", "cong_b4_bc_hai_buoc_du"),
+    "b4_bc_bo_buoc_status": _b4_mut("buoc", 'c[0].get("status") != "completed" or ', "", "cong_b4_bc_buoc_dang_chay"),
+    "b4_bc_bo_buoc_conclusion": _b4_mut("buoc", ' or c[0].get("conclusion") != "success"', "", "cong_b4_bc_buoc_failure"),
+    "b4_bc_bo_buoc_kia": _b4_mut("kia", 'any(s["name"] == kia and s.get("conclusion") == "success" for s in st)', "False", "cong_b4_bc_ca_hai_buoc_success"),
+    "b4_bc_buoc_kia_moi_ket_luan": _b4_mut("kia", ' and s.get("conclusion") == "success"', "", "cong_b4_bc_buoc_kia_skipped"),
+    # mục 4
+    "b4_chay_khi_k2_do": ('    if not any(x.startswith("K2 CI") for x in thieu):\n        _dk("K2b', '    if True:\n        _dk("K2b', ["cong_b4_k2_do_thi_khong_chay"]),
+    "b4_bo_co_siet": (("            if not a.siet_g5_du:\n", "            if not a.siet_g5_du and M0:\n"), ("            if True:\n", "            if M0:\n"), ["cong_b4_siet_beta", "cong_b4_siet_alpha"]),
+    "b4_khong_giam_dat": _b4_mut("lop_dat", 'lop == "duong_nhanh"', 'lop in ("duong_nhanh", "khong_giam")', "cong_b4_khong_giam", "cong_b4_nam_im_khong_giam", "cong_b4_tc11_d_bo_moi", "cong_b4_tc11_d_che_do_dich"),
+    "b4_la_dat": _b4_mut("lop_dat", 'lop == "duong_nhanh"', 'lop in ("duong_nhanh", "la")', "cong_b4_khong_tep_phan_loai"),
+    "b4_bo_tinh_lai": _b4_mut("goi", _B4_NEO["goi"], '"duong_nhanh"', "cong_b4_khong_giam", "cong_b4_pr_sua_ci_yml"),
+    "b4_ma_cua_pr": _b4_mut("goi", "(root, M0, M0, h)", "(root, h, M0, h)", "cong_b4_pr_sua_bo_phan_loai"),
+    "b4_goc_la_base": _b4_mut("goi", "(root, M0, M0, h)", "(root, M0, a.base, h)", "cong_b4_goc_la_master"),
+    "b4_bo_bang_chung_dich": ('if lop == "che_do_dich" and cd != "dich":', "if False:", ["cong_b4_dich_thieu_bang_chung"]),
+    "b4_bo_audit": ('elif lop == "che_do_dich" and (_dk("", k7_run, kq := []), kq)[1]:', "elif False:", ["cong_b4_dich_khong_audit", "cong_b4_dich_audit_do"]),
+    "b4_audit_nhan_mien": ('(_dk("", k7_run, kq := []), kq)[1]', '(_dk("", k7, kq := []), kq)[1]', ["cong_b4_dich_mien_khong_thay"]),
+    "b4_gia_tri_la_giam": _b4_mut("dat", 'tt == "khop"', 'tt in ("khop", "khong_khop")', "cong_b4_gia_tri_khac", "cong_b4_gia_tri_rong", "cong_b4_gia_tri_sai_mot_ky_tu"),
+    "b4_vang_giam": _b4_mut("dat", 'tt == "khop"', 'tt in ("khop", "vang_hoac_khong_quyen")', "cong_b4_bien_vang", "cong_b4_dich_cong_tac_dong"),
+    "b4_khong_doc_duoc_giam": _b4_mut("dat", 'tt == "khop"', 'tt in ("khop", "khong_doc_duoc")', "cong_b4_rest_nem", "cong_b4_json_hong", "cong_b4_json_sau", "cong_b4_than_la", "cong_b4_tien_trinh_thuong"),
+    # mục 5
+    "b4_merge_la_dau": ('"CI_DUONG_NHANH_MERGE": C[1]}', '"CI_DUONG_NHANH_MERGE": dau}', ["cong_b4_master_di_truoc"]),
+    "b4_bo_rc_merge": (('goc, "-p", dau, "-m", "pl1462", them=ngay) if cay[0] == 0 else', 'g("commit-tree", cay[1], '), ('goc, "-p", dau, "-m", "pl1462", them=ngay) if True else', 'g("commit-tree", cay[1].split()[0], '),
+                       ["cong_b4_merge_xung_dot"]),
+    "b4_bo_rc_git_dir": ('goc, dau) if rc == 0 else (1, "")', 'goc, dau) if True else (1, "")', ["cong_b4_git_loi"]),
+    "b4_moi_truong_ke_thua": ("env = {k: os.environ[k] for k in B4_BIEN_MT if k in os.environ}", "env = dict(os.environ)", ["cong_b4_moi_truong_moi", "cong_b4_tc11_c_bo_moi", "cong_b4_tc11_c_che_do_dich"]),
+    "b4_bo_I": ('[sys.executable, "-I", str(td / "cay" / B4_PL)]', '[sys.executable, str(td / "cay" / B4_PL)]', ["cong_b4_python_I"]),
+    "b4_bo_han_phan_loai": ('capture_output=True, stdin=subprocess.DEVNULL, timeout=B4_HAN_PL,\n', "capture_output=True, stdin=subprocess.DEVNULL,\n", ["cong_b4_het_han"]),
+    "b4_su_kien_khac": ('"CI_DUONG_NHANH_SU_KIEN": "pull_request"', '"CI_DUONG_NHANH_SU_KIEN": "push"', ["cong_b4_sinh_bo_moi"]),
+    "b4_hop_mot_cha": ('"-p", goc, "-p", dau, "-m", "pl1462"', '"-p", dau, "-m", "pl1462"', ["cong_b4_sinh_bo_moi", "cong_b4_tc11_b_che_do_dich"]),
+    "b4_khong_don": ("        shutil.rmtree(td, **{", "        (lambda *a, **k: None)(td, **{", ["cong_b4_dc_alpha", "cong_b4_khong_tep_phan_loai", "cong_b4_het_han", "cong_b4_system_exit"]),
+    "b4_object_vao_kho": ('GIT_OBJECT_DIRECTORY=str(td / "obj"), ', "", ["cong_b4_dc_alpha", "cong_b4_master_di_truoc"]),
+    "b4_bo_cr": _b4_mut("dong", _B4_NEO["dong"], 'dong = out.split(b"\\n")', "cong_b4_crlf_nhan"),
+    "b4_cat_moi_cr": _b4_mut("dong", _B4_NEO["dong"], 'dong = [d.rstrip(b"\\r") for d in out.split(b"\\n")]', "cong_b4_hai_cr"),
+    "b4_tach_moi_kieu_dong": _b4_mut("dong", _B4_NEO["dong"], "dong = out.splitlines()", "cong_b4_cr_giua_dong"),
+    "b4_cat_khoang_trang": ("v = [d[len(ten) + 1:] for d in dong", "v = [d[len(ten) + 1:].strip() for d in dong", ["cong_b4_dau_cach_cuoi"]),
+    "b4_bo_utf8": ('    except UnicodeDecodeError:\n        return "la"\n    dong', "    except UnicodeDecodeError:\n        pass\n    dong", ["cong_b4_khong_utf8"]),
+    "b4_bo_rc_phan_loai": _b4_mut("la1", "rc != 0 or ", "", "cong_b4_rc_khac_0"),
+    "b4_bo_thieu_che_do": _b4_mut("la1", "not cd", "cd is None", "cong_b4_thieu_che_do"),
+    "b4_bo_dk_bo_moi_hong": _b4_mut("la1", " or bm is None", "", "cong_b4_dk_ngoai_tap"),
+    "b4_bo_dk_dich_hong": _b4_mut("la1", " or dd is None", "", "cong_b4_dk_dich_ngoai_tap"),
+    "b4_nhan_khoa_lap": _b4_mut("khoa", "len(v) > 1 or ", "", "cong_b4_che_do_lap", "cong_b4_dk_lap"),
+    "b4_nhan_ngoai_tap": _b4_mut("khoa", " or any(x not in tap for x in v)", "", "cong_b4_che_do_ngoai_tap", "cong_b4_dk_ngoai_tap"),
+    "b4_nhanh_kem_dk_dat": _b4_mut("la2", ' or (cd == b"duong_nhanh" and b"co" in (bm, dd))', "", "cong_b4_nhanh_kem_dk"),
+    "b4_ca_hai_dk_dat": _b4_mut("la2", 'bm == dd == b"co" or ', "", "cong_b4_ca_hai_dk"),
+    # mục 6a + 8
+    "b4_so_khop_long": ('"khop" if d["value"] == cho_phep else', '"khop" if d["value"].strip().lower() == cho_phep else', ["cong_b4_gia_tri_hoa_thuong", "cong_b4_gia_tri_thua_khoang_trang", "cong_b4_gia_tri_xuong_dong_dau"]),
+    "b4_bien_lop_khac": ("(ten, cho_phep), luc = B4_LOP[lop], ", '(ten, cho_phep), luc = B4_LOP["bo_moi"], ', ["cong_b4_bien_lop_khac"]),
+    "b4_chuoi_lop_khac": ("(ten, cho_phep), luc = B4_LOP[lop], ", '(ten, cho_phep), luc = (B4_LOP[lop][0], B4_LOP["bo_moi"][1]), ', ["cong_b4_bien_lop_khac_gia_tri"]),
+    "b4_404_moi_nguon": ("if st == 404 and co_gh:", "if st == 404:", ["cong_b4_404_thieu_header"]),
+    "b4_ma_khac_200": _b4_mut("200", "st == 200 and ", "", "cong_b4_403_tu_choi", "cong_b4_302"),
+    "b4_200_khong_header": _b4_mut("200", "co_gh and ", "", "cong_b4_200_thieu_header"),
+    "b4_header_phan_biet_hoa_thuong": ("hp = {str(k).lower(): str(v) for k, v in hp.items()}", "hp = {str(k): str(v) for k, v in hp.items()}", ["cong_b4_header_hoa_thuong"]),
+    "b4_bo_tran_than": _b4_mut("200", " and len(than) <= 65536", "", "cong_b4_than_qua_dai"),
+    "b4_tran_than_chat_hon": _b4_mut("200", "<= 65536", "< 65536", "cong_b4_than_dung_tran"),
+    "b4_json_tu_byte": _b4_mut("json", 'than.decode("utf-8")', "than", "cong_b4_utf16"),
+    "b4_utf8_thay_the": _b4_mut("json", 'than.decode("utf-8")', 'than.decode("utf-8", "replace")', "cong_b4_utf8_hong"),
+    "b4_nhan_khoa_trung": _b4_mut("json", "object_pairs_hook=_cam_khoa_trung, ", "", "cong_b4_khoa_trung"),
+    "b4_bo_goc_object": _b4_mut("d", "type(d) is dict and ", "", "cong_b4_goc_khong_object"),
+    "b4_bo_name": _b4_mut("d", 'd.get("name") == ten and ', "", "cong_b4_name_khac"),
+    "b4_bo_kieu_value": _b4_mut("d", 'type(d.get("value")) is str', '"value" in d', "cong_b4_value_khong_chuoi"),
+    "b4_rest_loi_lay_bien_nguoi_goi": ("trạng thái giữ `khong_doc_duoc`\n            pass\n", 'trạng thái giữ `khong_doc_duoc`\n            tt = "khop" if os.environ.get(ten) == cho_phep else tt\n',
+                                       ["cong_b4_rest_nem_bien_nguoi_goi"]),
+    "b4_bo_hang_kho": _b4_mut("doc", "repo == B4_KHO and ", "", "cong_b4_repo_khac"),
+    "b4_bo_bien_cam": _b4_mut("doc", ' and not os.environ.get("PACKET_LOOP_CAM_DOC_CONG_TAC")', "", "cong_b4_bien_cam_doc"),
+    "b4_bien_cam_ca_khi_rong": _b4_mut("doc", 'not os.environ.get("PACKET_LOOP_CAM_DOC_CONG_TAC")', '"PACKET_LOOP_CAM_DOC_CONG_TAC" not in os.environ', "cong_b4_bien_cam_rong"),
+    "b4_token_luon_gui": ('        if os.environ.get("GH_TOKEN"):\n            hd["Authorization"] = "Bearer " + os.environ["GH_TOKEN"]', '        if True:\n            hd["Authorization"] = "Bearer " + os.environ.get("GH_TOKEN", "")',
+                          ["cong_b4_dc_beta"]),
+    "b4_token_khong_gui": ('        if os.environ.get("GH_TOKEN"):', "        if False:", ["cong_b4_token"]),
+    "b4_bo_header_phien_ban": ('"X-GitHub-Api-Version": "2022-11-28", ', "", ["cong_b4_dc_beta"]),
+    "b4_gia_tri_khong_cat": ('json.dumps(d["value"])[:120]', 'json.dumps(d["value"])', ["cong_b4_gia_tri_dai"]),
+    "b4_hieu_luc_60_phut": ("luc.timestamp() + 1800", "luc.timestamp() + 3600", ["cong_b4_dc_beta"]),
+    "b4_hai_yeu_cau": ("            st, hp, than = _rest_get(", "            _rest_get(f\"{API_GH}{B4_KHO}/actions/variables/{ten}\", hd, 15)\n            st, hp, than = _rest_get(", ["cong_b4_tc6_bon_tien_trinh"]),
+    # mục 7
+    "b4_7a_bo_so": _b4_mut("7a", " or xa[1].split()[:1] != [M.encode()]", "", "cong_b4_7a_master_cu"),
+    "b4_7a_bo_rc_ls_remote": _b4_mut("7a", " or xa[0]", "", "cong_b4_7a_ls_remote_loi"),
+    "b4_7a_bo_rc_rev_parse": _b4_mut("7a", "m[0] or ", "", "cong_b4_7a_rev_parse_loi"),
+    "b4_7b_bo_so": _b4_mut("7b", " or day[1] != cay[1]", "", "cong_b4_7b_blob_khac"),
+    "b4_7b_bo_rc_hash_object": _b4_mut("7b", "day[0] or ", "", "cong_b4_7b_hash_object_loi"),
+    "b4_7b_bo_rc_rev_parse": _b4_mut("7b", "cay[0] or ", "", "cong_b4_7b_rev_parse_loi"),
+    "b4_7b_bo_oid": _b4_mut("7b", ' or not SHA_RE.fullmatch(day[1].decode("ascii", "replace").strip())', "", "cong_b4_7b_khong_phai_oid"),
+    "b4_7b_bo_tep_vang": (_B4_NEO["7b"], 'if day[0] or not SHA_RE.fullmatch(day[1].decode("ascii", "replace").strip()):', ["cong_b4_7b_khong_tep"]),
+    # mục 6b (GT-2)
+    "b4_vc_post": _b4_mut("mo", 'method="GET"', 'method="POST"', "cong_b4_vc_get_header"),
+    "b4_vc_theo_chuyen_huong": _b4_mut("mo", "build_opener(KhongChuyenHuong)", "build_opener()", "cong_b4_vc_khong_chuyen_huong"),
+    "b4_vc_bo_proxy": _b4_mut("mo", "build_opener(KhongChuyenHuong)", "build_opener(KhongChuyenHuong, urllib.request.ProxyHandler({}))", "cong_b4_vc_proxy"),
+    "b4_vc_bo_han_socket": _b4_mut("mo", ", timeout=han)", ")", "cong_b4_vc_han_socket"),
+    "b4_vc_bo_tran_byte": (("while len(than) < 65537:", "x = r.read1(65537 - len(than))"), ("while True:", "x = r.read1(65537)"), ["cong_b4_vc_tran_byte"]),
+    "b4_vc_bo_han_tuong": ('                if time.monotonic() > het:\n                    raise _B4Loi("quá hạn tường")\n', "", ["cong_b4_vc_han_tuong"]),
+    "b4_vc_nuot_loi": ("        raise _B4Loi(type(ex).__name__) from None", '        return 0, {}, b""', ["cong_b4_vc_loi_ket_noi"]),
+    "b4_vc_thu_lai": ("            r = ex\n", "            r = " + _B4_NEO["mo"][4:] + " if ex.code >= 500 else ex\n", ["cong_b4_vc_500_khong_thu_lai"]),
+    "b4_vc_ma_200": _b4_mut("tra", "r.status", "200", "cong_b4_vc_404_nguyen_ma", "cong_b4_vc_khong_chuyen_huong"),
+    "b4_vc_bo_header": _b4_mut("tra", "dict(r.headers.items())", "{}", "cong_b4_vc_get_header"),
+})
 
 
 if __name__ == "__main__":

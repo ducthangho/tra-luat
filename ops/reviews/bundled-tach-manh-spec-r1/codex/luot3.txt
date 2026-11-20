@@ -1,0 +1,58 @@
+## Review đặc tả BUNDLED-TACH-MANH r1 — lượt 3
+
+Đã xác minh HEAD `900a80c70c9dc3726e005d0600c8ac10cc6014a2` khớp ref đặc tả, tree `772fe25668c6cee959a4aad2de7a4024ffa23ae5`, và SHA-256 đặc tả `5ecc1c4f5caf4e40beaef6566b017ded05a294c53ed8e58138de8dcaac51cfb6`. Reviewer độc lập họ OpenAI, Codex qua API, transport `machine`. Phép thử chạy trên Linux/Python 3.13.18 trong bản sao có đủ lịch sử dưới `/dev/shm`, với HOME và TMPDIR tạm, `core.abbrev=7`, không gọi mạng. Checkout được giao giữ nguyên.
+
+**KHÔNG ĐO ĐƯỢC** việc đọc lại biên bản lượt 2 vì `/dev/shm/bt3/luot2-ket-qua.txt` vắng trong môi trường này. Bảng dưới đối chiếu bốn finding người dùng cung cấp với diff sửa đặc tả và phép đo mới.
+
+### Xác minh finding lượt 2
+
+| Finding | Trạng thái | Bằng chứng |
+|---|---|---|
+| P1 — Hai ca selftest ghim `185` | **Đóng trên candidate** | Áp đúng M9, `r291_docs_ngoai_goi` và `r357_agents_ngoai_goi` đều xanh với manifest 186. Full selftest đạt 1785/1785, rc 0. Rà `file_count`, `len(paths)` và các ca đọc manifest thật không thấy mốc tổng số tệp nào khác cần sửa. Worker head trước M8 có lỗi trình tự riêng bên dưới. |
+| P2 — Ai commit manifest theo protocol §9 | **Đóng về phân quyền** | §1, M8 và §7 giao manifest cho Land Operator. Bản sao có hai commit riêng, worker 8 đường rồi manifest 1 đường. N3 đo candidate sau M8. Trình tự đóng băng SHA và review vẫn còn lỗi riêng bên dưới. |
+| P2 — §7 phải tính manifest cho secrets-set | **Đóng** | §7 ghi 4 đường worker + 1 đường Land Operator. N4 giữ nguyên số tệp 186 nhưng strict verify với manifest cũ trả rc 2 vì lệch `tl_gws.py` và mảnh 2. Tái sinh manifest cho rc 0, `ok: true`, 186/186. |
+| P3 — README ghi 189.145 B | **Đóng** | README đã ghi 189.328 / 117.343 B, khớp `wc -c` và `test-fragments-check` trên N4. |
+
+### Số đo
+
+Base `0f9aa2a2cc697129e1f5be72feddf60986286865` có bundled 285.112 B và manifest 185 tệp. Worker head `4a04fd6c11458711f1aefbbbe2527cb1cb1f3fa6`, tree `1c6f2f909fe0e672fa196f5de908fc6737694640`. Candidate `7a2f21b00e8539e9ee5f2899c5ef8572dd022663`, tree `fd9ffc2c340bdaa2e8bab5adb49fa96bd561d689`. N4 dùng hai tệp từ `a8a3b3ca2fe5f48d8e6db64a8c6abacf97526b8c`, có tree `43aa5ab65a3862939f92b2da11744a94bc58c0e0` trùng đầu nhánh `de341ed92f91f92d42b5db0f49223dde185f5f99`. Lượt selftest N4 chạy trên bản sao khác có cùng tree candidate, với lớp chồng N4 chưa commit.
+
+| Lệnh | Worker head | Candidate | N4 |
+|---|---|---|---|
+| `python scripts/tl.py --selftest` | **rc 1**, 1783/1785, đỏ đúng hai ca M9 | **rc 0**, 1785/1785 | **rc 0**, 1786/1786 |
+| `python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json` | Manifest base 185 | **rc 0**, 186 tệp, commit riêng | **rc 0**, 186 tệp |
+| `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` | Không chạy | **rc 0**, `ok: true`, 186/186 | Manifest cũ **rc 2**, `ok: false`, 186/186. Manifest tái sinh **rc 0**, `ok: true`, 186/186 |
+| `python scripts/tl.py test-fragments-check` | Không chạy | **rc 0**, `ok: true`, 189.328 / 101.657 B | **rc 0**, `ok: true`, 189.328 / 117.343 B |
+| `python scripts/tl.py workflow-audit --json` | Không chạy | **rc 0**, `warn: []`, `files_scanned: 74` | **rc 0**, `warn: []`, `files_scanned: 74` |
+| `python scripts/tl.py golden-test` | Không chạy | **rc 0**, `ok: true`, 20 ca | Không chạy |
+
+| `git diff --numstat 0f9aa2a` trên candidate | Thêm | Xóa |
+|---|---:|---:|
+| `.githooks/eol_policy_test.py` | 2 | 4 |
+| `RELEASE_MANIFEST.json` | 18 | 13 |
+| `references/golden/workflow_audit.json` | 1 | 1 |
+| `scripts/test_fragments/wp433_bundled_tach_manh.py` | 130 | 0 |
+| `scripts/tl_core/release.py` | 22 | 5 |
+| `scripts/tl_core/test_fragments.py` | 90 | 26 |
+| `scripts/tl_selftest.py` | 4 | 2 |
+| `scripts/tl_test_fragments_bundled.py` | 2 | 9 |
+| `scripts/tl_test_fragments_bundled_2.py` | 14 | 0 |
+| **Tổng 9 đường** | **283** | **60** |
+
+Candidate chạm đúng dự toán `≤283` và còn 167 dòng trước trần 450. **KHÔNG ĐO ĐƯỢC** run GitHub Actions thực tế trong lượt offline này. Kết luận về lane PR dựa trên workflow và kết quả chạy đúng lệnh selftest của bước PR trên cây worker.
+
+### Finding mới
+
+**P1 — M8/N3/§6 đặt commit manifest sau review, khiến worker head đỏ và verdict cũ mất hiệu lực.** Worker head đạt 1783/1785 vì hai ca M9 đọc trực tiếp `RELEASE_MANIFEST.json` còn 185. Với PR mở trên worker head và base đã đo, `.github/workflows/ci.yml:339–341` chạy selftest trên cây merge tổng hợp. Diff `scripts/**` đi lane đầy đủ, và bước tạo manifest tạm ở dòng 521 trở đi chạy sau selftest. N3 chỉ quy định phép đo xanh trên candidate và phép thử cục bộ với manifest tái sinh. §6 chưa xử lý trạng thái worker head đỏ. Khi Land Operator thêm commit theo M8, protocol dòng 619 làm verdict và CI của SHA cũ mất hiệu lực.
+
+> **Câu thay thế cho M8/N3/§6:** “Sau handoff worker, Land Operator được điều phối ủy quyền tạo commit manifest riêng trước khi đóng băng candidate để review và chạy gate PR. Selftest worker dùng manifest tái sinh trong bản sao tạm là phép đo chuẩn bị. Worker head với manifest 185 sẽ đỏ đúng hai ca M9 và chưa đủ điều kiện trình gate PR. Chạy N3, lấy verdict độc lập và trình duyệt trên exact SHA có commit manifest. Nếu head đổi, tái sinh manifest khi cần và đo, review lại trên SHA mới.”
+
+**P2 — §6 vẫn chặn candidate đúng theo Q6.** §6 dòng 130 ghi `8 tệp / 450 dòng thêm` và yêu cầu dừng khi vượt. Candidate thực đo có 9 đường, đúng `nang_tran` §1.
+
+> **Câu thay thế:** “Sau khi chủ kho xác nhận trần tại E2, áp dụng `nang_tran` §1: candidate tối đa 9 đường, gồm 8 đường worker và 1 đường Land Operator, cùng tối đa 450 dòng thêm theo `git diff --numstat`. Vượt trần thì dừng.”
+
+**P3 — §0, `nang_tran.can_cu` và §8 dùng số đo manifest trước M9 để giải thích candidate sau M9.** Manifest có thêm hai dòng thay thế cho kích thước và SHA-256 của `scripts/tl_selftest.py`. Số đo manifest chuyển từ +16/−11 sang +18/−13. Tổng +283 vẫn nằm trong dự toán đã ghi.
+
+> **Câu thay thế:** “Candidate đổi 5 tệp đã có trong manifest và thêm mảnh 2. Numstat trên base `0f9aa2a`: 7 đường nguyên mẫu +261/−45, M9 +4/−2, manifest tái sinh sau M9 +18/−13. Tổng 9 đường, +283/−60.”
+
+KET_LUAN: request_changes

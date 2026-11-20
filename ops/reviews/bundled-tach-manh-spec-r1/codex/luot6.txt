@@ -1,0 +1,22 @@
+Review lượt 6 trên HEAD `9c9c0b237ef5c38e8729b2f4e872caeff4d52b47`, tree `aeaffa71ef4bff1cab55209797da1aed2f64dfd9`. SHA-256 đặc tả khớp `9fb430e289e3d4f57f3d9129db4d9c9fadef6557418fdd15f8d2cfcf94b8167e`. Phiên Codex họ OpenAI dùng shell Linux qua công cụ, ngoại tuyến. Mọi thay đổi và phép chạy nằm trong bản sao dưới `/dev/shm`, với `HOME` và `TMPDIR` riêng tại đó.
+
+| Finding lượt 5 | Trạng thái | Bằng chứng |
+|---|---|---|
+| P2 — `mot_manh` có thể xanh khi cả hai API cùng đổi bytes | **Đóng** | N1 yêu cầu đúng một mảnh, không có dòng `BUNDLED_FRAGMENT_SHARDS`, và SHA-256 đầu ra của từng API đều khớp hằng ghim từ `generate_bundled_module_bytes` trên base `0f9aa2a` với cùng fixture. §4b thêm g, N2 yêu cầu 7/7. Phép đo độc lập cho thấy g chỉ làm đỏ `mot_manh`. |
+
+**Phép đo g.** Trên base, `python -B measure.py base` trả rc 0 và đo được 216 byte cho fixture `wp9001_a.py`, SHA-256 `73ad44659b63aea9b2f66fb1104c4c82deaa1ad1218e94adb80dcf38384441d7`. Sau khi `git apply nguyen-mau.diff` trả rc 0, tôi ghim hằng này vào fragment và kiểm riêng đầu ra của cả hai API.
+
+| Phép chạy trên Python 3.13.18 | Kết quả |
+|---|---|
+| `python -B measure.py control` | rc 0, `run()` trả `True`, cả 8 nhãn `True`. |
+| `python -B measure.py g` sau khi sửa một dòng chú thích đầu tệp sinh ra | rc 0, `run()` trả `False` theo kỳ vọng, chỉ `mot_manh` đỏ, 7 nhãn còn lại `True`. |
+
+Hai phép chạy đạt kỳ vọng. Đột biến a–f, N3, N4 và CI GitHub ở lượt này là `not_run`.
+
+**P3 — §4b dòng 109 gán nhầm bằng chứng cho đột biến g.** Tiêu đề “đã đo trên nguyên mẫu, `dot-bien.txt`” bao trùm cả hàng g mới, trong khi `dot-bien.txt` chỉ ghi a–f. Phép đo g ở lượt 6 dùng bản sao có fragment đã bổ sung hằng ghim. Câu thay thế cho tiêu đề:
+
+> `### 4b. Đột biến (bằng chứng nguyên mẫu cho a–f trong dot-bien.txt)`
+
+Không còn chỗ ghi 6/6 hoặc mâu thuẫn mới với các mục được yêu cầu đối chiếu. Không có finding P0–P2 mới.
+
+KET_LUAN: approve

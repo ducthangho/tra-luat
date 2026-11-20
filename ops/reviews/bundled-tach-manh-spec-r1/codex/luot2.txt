@@ -1,0 +1,37 @@
+**Manifest mới qua strict verify 186/186, nhưng làm đỏ hai ca selftest đang ghim số tệp ở 185.** Nguyên mẫu đã commit đạt **1783/1785**, nên N3 chưa thể đạt với write set hiện tại.
+
+Review độc lập họ OpenAI trên đặc tả tại `d500dcd9ca4349c5fc709dfc6e1ccf9b0feee0f3`, tree `462b74e0ff0d9c36634c0b65cd3a3795917015a4`. SHA-256 đặc tả khớp `ee369b93374367f5779959151872a35d48aacbcba276e63acb22b2ba0aa1a499`. Base khớp `origin/master` và merge-base tại `0f9aa2a2cc697129e1f5be72feddf60986286865`. Các phép đo chạy trên Linux x86_64, Python 3.13.18, với mạng cô lập, HOME và TMPDIR tạm dưới `/dev/shm`. Checkout review sạch sau khi đo.
+
+### Xác minh finding lượt 1
+
+| Finding | Trạng thái | Bằng chứng |
+|---|---|---|
+| P1 · Manifest trong cùng packet | **Đóng về strict verify** | M8 yêu cầu sinh manifest sau cùng. N3 và §6 buộc kiểm manifest đã commit trước khi land. Lệnh `release-verify RELEASE_MANIFEST.json --strict --json` trả rc 0, `ok: true`, `expected_file_count = checked_file_count = 186`. Selftest và thẩm quyền ghi phát sinh finding bên dưới. |
+| P2 · Khối `nang_tran` | **Đóng** | Đủ `ai_nang`, `can_cu`, `tran_cu`, `tran_moi`. Bảy tệp ngoài manifest đúng từng dòng numstat, tổng `+261/−45`. Manifest `+16/−11`, toàn bộ 8 tệp `+277/−56`, trong cả dự toán `≤281` và trần `450` dòng thêm. Đối chiếu Git xác nhận #1449 `+7/−7`, #1454 `+5/−5`. |
+| P2 · Ba điều kiện đỏ của N4 | **Đóng** | Cột “đỏ khi” có đủ WARN, cổng byte và selftest. Lượt N4 trên head Q5 cho `warn=[]` và cổng byte xanh, nhưng selftest rc 1. Tiêu chí sửa nay phân loại đúng lượt này là đỏ. |
+| P3 · Số entry ZIP | **Đóng** | `release-bundle` rc 0 trên cả hai cây. Manifest **185 → 186 tệp**, ZIP **186 → 187 entry**. |
+| P3 · Số đo §0/N4 | **Đóng trong đặc tả** | Base **285.112 B**, còn **1.608 B** trước WARN. Bundle cũ tại `a8a3b3c` **300.798 B**, tăng **15.686 B**. N4 cho **189.328 / 117.343 B**. `de341ed` và `a8a3b3c` có cùng tree. |
+
+### Số đo mới
+
+Nguyên mẫu gồm patch, fragment và hai mảnh tái sinh bằng `write_bundled_modules`, sau đó sinh manifest với `core.abbrev=7` và commit cục bộ. HEAD nguyên mẫu `c3ba64df18c8d704e341ec2dfd214a48d1a8a9b7`, tree `02ad673d96dae6173bacf62d63e3b1664f4405e4`.
+
+| Phép đo | Kết quả |
+|---|---|
+| `release-manifest --out RELEASE_MANIFEST.json` và hai lần sinh lại | rc 0. Bản trước commit và hai bản sau commit giống từng byte, SHA-256 `72d7cf23b35b7ad13a287bb530a687acb9b881e8e20156a9034e95ff4f3e0f79`. |
+| `workflow-audit --json` và `golden-test --json` sau Q5 | Cả hai rc 0. Audit quét **73 → 74** tệp `.py`, `warn=[]`, `fail=[]`. Golden đạt 20 ca và diff golden chỉ đổi `files_scanned`. Audit lấy kích thước từ các tệp `.py`, còn manifest băm golden và loại chính manifest khỏi tập băm. Trình tự **bundled và golden hoàn tất → manifest** không có vòng phụ thuộc. |
+| `test-fragments-check --json` và `bundle_fragment_check.py --json` | Cả hai rc 0, `ok: true`. Hai mảnh khớp byte, **189.328 / 101.657 B**. Bundle đạt **19 ca**, `failed=[]`. |
+| `python scripts/tl.py --selftest` | Base **1784/1784**, rc 0. Nguyên mẫu Q5 **1783/1785**, rc 1. N4 giữ manifest Q5 **1784/1786**, rc 1. Cả hai lượt đỏ đúng `r291_docs_ngoai_goi` và `r357_agents_ngoai_goi`. Đối chứng N4 giữ manifest base 185 tệp đạt **1786/1786**, rc 0. |
+| Strict verify sau khi chồng secrets-set | Manifest của head Q5 trả rc 2, lệch kích thước và SHA-256 đúng ở `scripts/tl_gws.py` và mảnh 2. Manifest tạm tái sinh cho cây đã chồng trả rc 0, `ok: true`, **186/186**. |
+| Các cổng còn lại đã đo | EOL **32/32**, rc 0. `git diff --check`, `doctrine-scan`, `adr-song`, `ci_phamvi.py --kiem-bam` và `release-check --full --json` đều rc 0. `python -m ruff` **KHÔNG ĐO ĐƯỢC** vì Python thiếu module. Lệnh `ruff check --no-cache --select F scripts/tl.py` đo được 12 chẩn đoán giống hệt nhau, rc 1 ở cả hai cây, delta 0. |
+
+### Finding mới
+
+| Mức · Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|
+| **P1 · §1, §2, N3/N4, §6** | Q5 làm N3 và N4 đỏ với write set hiện tại. `scripts/tl_selftest.py:22775` và `:22836` đọc **manifest đã commit** và buộc `file_count == len(paths) == 185`. Lane LAND băm và đối chiếu manifest với cây, nên N3 đồng thời cần đúng 186. §2 loại chính tệp chứa hai ratchet khỏi phạm vi. Strict verify và golden xanh không giải quyết lỗi này. | “Giữ Q5 và write set 8 tệp. Trước khi cấp lease, yêu cầu base đã có thay đổi được duyệt để hai ratchet `r291` và `r357` chấp nhận gói 186 tệp, đồng thời giữ các kiểm tra loại trừ hiện có. Ghim lại base và đo lại §0, N3, N4 trên manifest đã commit.” |
+| **P2 · §1 E2, M8** | E2 chỉ nêu ngoại lệ cho bundled, còn M8 yêu cầu commit manifest mà chưa chỉ rõ vai được ghi. Protocol §9 cấm worker sửa `RELEASE_MANIFEST.json`. Đưa tệp vào write set xác định phạm vi packet, nhưng câu hiện tại chưa xác định ai thực hiện bước Q5 theo quyền của vai đó. | “Giữ manifest trong cùng packet theo Q5. Land Operator được ủy quyền tái sinh và commit manifest vào candidate sau bundled, golden và mọi bản vá, trước khi chốt SHA chạy N3. Worker kiểm manifest tạm theo §10.2.4.” |
+| **P2 · §7, secrets-set r2** | Write set bốn đường dẫn được mô tả chưa bao gồm manifest. Phản chứng trên head Q5 trả rc 2 vì `tl_gws.py` và mảnh 2 lệch băm. Nếu r2 chốt candidate nguyên tử theo cách Q5, cần thêm `RELEASE_MANIFEST.json` vào phạm vi candidate được duyệt, thành **năm đường dẫn** nếu giữ nguyên bốn đường dẫn đã khai. | “r2 khai mảnh 2 trong write set và khai `RELEASE_MANIFEST.json` trong phạm vi candidate LAND. Người có quyền LAND tái sinh manifest sau bundled và xác minh strict trên cùng SHA trước khi land.” |
+| **P3 · README bằng chứng, dòng 14** | README còn ghi mảnh 1 N4 là **189.145 B**, lệch với §4 và phép đo lại trên `a8a3b3c`. | “Trên nguyên mẫu cuối, N4 cho **189.328 / 117.343 B**. Số selftest 1786/1786 thuộc đối chứng giữ manifest base.” |
+
+KET_LUAN: request_changes

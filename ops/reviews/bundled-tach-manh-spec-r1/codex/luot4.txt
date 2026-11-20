@@ -1,0 +1,23 @@
+## Lượt 4 — Review đặc tả BUNDLED-TACH-MANH r1
+
+Đã đối chiếu đặc tả SHA-256 `c7c17d189bd0df38339a5102193bca6280c1d0210a01e4a5e0ee83425ded99a3` tại HEAD `388c07ef1f4517a417b5511ef5993eaa7f6dd178`, tree `5b184082c76fd60c718cc7e7e253ad9c5defb012`. HEAD tách khớp ref `origin/ops/bundled-tach-manh-spec` trong clone đầy đủ. `git rev-parse`, `git status --porcelain`, `sha256sum` và `git merge-base` đều trả rc 0. Mỏ neo ADR-0053 khớp lịch sử first-parent của `origin/master` tại chỗ.
+
+Reviewer độc lập thuộc họ OpenAI, dùng phiên Codex có shell cục bộ và trả verdict qua phiên giao việc. Review tĩnh, chỉ đọc, không gọi mạng. Số đo candidate dẫn dưới đây lấy từ lượt 3. Selftest, strict verify và N4 không chạy lại. CI GitHub thật **KHÔNG ĐO ĐƯỢC** trong phiên offline.
+
+| Finding lượt 3 | Trạng thái | Bằng chứng |
+|---|---|---|
+| P1 — Commit manifest sau review | **Đóng về thứ tự và exact SHA** | M8 đặt commit manifest sau handoff và trước freeze, khai worker head đỏ đúng hai ca M9 (`1783/1785`), rồi neo N3, verdict và lần trình chủ kho vào SHA đã có manifest. N3 xác nhận mốc đó. §7 cũng đặt manifest của packet kế tiếp trong candidate. Khi head đổi, M8 yêu cầu đo và review lại, phù hợp protocol dòng 619. Quy tắc dừng ở §6 còn xung đột với handoff như nêu dưới đây. |
+| P2 — §6 chặn candidate 9 đường | **Đóng** | §1 và §6 cùng ghi tối đa 9 đường, gồm 8 worker và 1 Land Operator, cùng tối đa 450 dòng thêm sau xác nhận E2. Mốc 8 tệp ở §9 là lịch sử Q5. |
+| P3 — Dùng số manifest trước M9 | **Chưa đóng hết** | §1 `nang_tran.can_cu` và §8 đã khớp số đo lượt 3, `+261/−45` cộng `+4/−2` cộng `+18/−13`, tổng 9 đường `+283/−60`. §0 dòng 40 vẫn mô tả bốn tệp đã có trong manifest và bỏ sót `scripts/tl_selftest.py`. |
+
+## Finding còn lại
+
+**P2 — Quy tắc dừng §6 dòng 134 chặn handoff mà M8 cần.** §6 yêu cầu dừng nếu bất kỳ ca selftest hiện hữu nào đổi trạng thái. M8 dự kiến worker head đã commit đỏ đúng hai ca M9 và cần bàn giao head đó để Land Operator commit manifest. Bản manifest tái sinh phục vụ phép đo chuẩn bị phải được khôi phục trước khi worker commit. CI PR cũng chạy selftest trước bước sinh manifest tạm, lần lượt tại `.github/workflows/ci.yml` dòng 339–341 và 521 trở đi. Áp §6 lên worker head theo nguyên văn sẽ dừng ở hai lỗi dự kiến, trước bước xử lý chúng.
+
+> **Câu thay thế cho §6 dòng 134.** “Áp điều kiện selftest không đổi trạng thái các ca hiện hữu và chỉ thêm một ca mới cho phép đo chuẩn bị của worker với manifest tái sinh và cho N3 trên candidate đã commit manifest. Khi bàn giao worker head trước M8, chấp nhận đúng hai ca M9 đỏ do manifest còn 185. Nếu có ca đỏ khác thì dừng. Chỉ trình review và gate PR sau commit manifest M8.”
+
+**P3 — §0 dòng 40 còn kiểm kê manifest trước M9.** M9 sửa `scripts/tl_selftest.py`, vốn đã có trong manifest. Candidate vì vậy đổi năm mục đã có, rồi thêm mục mảnh 2. Số đo `+18/−13` ở §1 và §8 đã tính thay đổi này.
+
+> **Câu thay thế cho câu đầu §0 dòng 40.** “Candidate đổi năm tệp đã có trong `RELEASE_MANIFEST.json` (`release.py`, `test_fragments.py`, `tl_selftest.py`, bundled mảnh 1 và golden), rồi thêm mảnh 2. Land Operator tái sinh và commit manifest theo M8 trước khi đóng băng candidate.”
+
+KET_LUAN: request_changes

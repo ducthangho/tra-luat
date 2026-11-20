@@ -106,7 +106,7 @@ bundled nêu đúng `packet_id` `BUNDLED-TACH-MANH`, hai tệp bundled, sha256 �
 | N3 | gate trên SHA candidate (sau commit manifest M8), clone đầy đủ; worker đo trước bằng manifest tái sinh không commit | selftest N/N hai số bằng nhau, N = N_base + 1 (base 1784, nguyên mẫu 1785); `test-fragments-check` `ok: true` hai mảnh; `bundle_fragment_check` `ok: true`, `failed: []`, `case_count` 19; `release-verify RELEASE_MANIFEST.json --strict --json` trên CHÍNH tệp đã commit: `ok: true`, `expected == checked` = 186 (lane LAND; chốt land chỉ trên SHA thoả vế này); `workflow-audit` `py_size.warn == []`, `files_scanned` 74; `golden-test` ok; `.githooks/eol_policy_test.py` 32/32 (trên cây ĐÃ commit); ruff F delta 0; `git diff --check`, `doctrine-scan`, `adr-song` rc 0. | bất kỳ vế nào |
 | N4 | phản chứng mục đích | Áp `scripts/test_fragments/wp433_secrets_set_bundle.py` + `scripts/tl_gws.py` của `origin/agent/wp433-r8-g1-claude` lên head, `write_bundled_modules`: `py_size.warn == []`, `test-fragments-check` ok, selftest N/N (đo nguyên mẫu: 1786/1786, mảnh 189.328 / 117.343 B). Không commit phần áp. | còn WARN; HOẶC `test-fragments-check` không phải rc 0 kèm `ok: true`; HOẶC selftest không phải rc 0 với số đạt = tổng |
 
-### 4b. Đột biến (đã đo trên nguyên mẫu, `dot-bien.txt`)
+### 4b. Đột biến (bằng chứng nguyên mẫu cho a–f trong `dot-bien.txt`; g đo ở Codex lượt 6: đối chứng 8/8 True, áp g chỉ `mot_manh` đỏ)
 
 | # | đột biến | nhãn đỏ |
 |---|---|---|
@@ -167,3 +167,4 @@ Không chạm E4/E5: thư mục tạm, không mạng, không LIVE, không đẩy
 - 2026-11-20 (điều phối #1206): sửa theo Codex lượt 3 (run `c2cd2a0c`, request_changes): P1 commit manifest TRƯỚC đóng băng candidate (M8) · P2 §6 trần 9 đường · P3 numstat đo lại +283/−60.
 - 2026-11-20 (điều phối #1206): sửa theo Codex lượt 4 (run `5d47c36d`, request_changes): P2 §6 ngoại lệ hai ca M9 trước M8 · P3 §0 năm tệp trong manifest.
 - 2026-11-20 (điều phối #1206): sửa theo Codex lượt 5 (run `ee85d37a`, request_changes): P2 `mot_manh` neo sha256 ghim từ base, thêm đột biến g (N2 7/7). Đột biến g chưa đo trên nguyên mẫu — executor đo.
+- 2026-11-20 (điều phối #1206): Codex lượt 6 (run `c19b4c3d`) **approve** trên sha256 `9fb430e2…`; sửa P3 duy nhất (tiêu đề §4b). Hằng ghim đo được cho fixture `wp9001_a.py` (216 B) trên base: `73ad44659b63aea9b2f66fb1104c4c82deaa1ad1218e94adb80dcf38384441d7`.

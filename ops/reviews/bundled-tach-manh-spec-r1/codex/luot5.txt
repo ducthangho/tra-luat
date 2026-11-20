@@ -1,0 +1,12 @@
+Review đặc tả lượt 5 trên HEAD `afc5be293cb0856304ae5723b7b542b1ede71263`, tree `e630596655fa43702f937e87838d63f59bfb078a`. SHA-256 đặc tả khớp `74c9d752d60e4bc94a62c7c6fdfa57d5f8edaf1d1e6596806baccccc1f6629d5`. Phiên Codex họ OpenAI dùng shell Linux qua công cụ, chỉ đọc và ngoại tuyến. Tôi đối chiếu số đo đã lưu. Các phép chạy nguyên mẫu và CI GitHub ở lượt này ở trạng thái `not_run`.
+
+| Finding lượt 4 | Trạng thái | Bằng chứng |
+|---|---|---|
+| P2 — §6 chặn handoff trước M8 | Đóng | §6 dòng 134 áp điều kiện giữ trạng thái các ca hiện hữu cho phép đo chuẩn bị với manifest tái sinh và N3 trên candidate đã commit manifest. Khi bàn giao worker head trước M8, chỉ chấp nhận đúng `r291_docs_ngoai_goi` và `r357_agents_ngoai_goi` đỏ vì manifest còn 185. Có ca đỏ khác thì dừng. M8 và §6 đều đặt review và gate PR sau commit manifest. CI chạy selftest ở dòng 339–341, trước bước sinh manifest tạm ở dòng 521–532. |
+| P3 — §0 kiểm kê thiếu `tl_selftest.py` | Đóng | §0 dòng 40 liệt kê đúng năm tệp đã có trong manifest, gồm `tl_selftest.py`, rồi thêm mảnh 2. Cả năm đường đều có trong manifest của base. §1 và §8 khớp 8 đường worker cộng 1 đường Land Operator, tổng `+283/−60`. |
+
+**P2 mới — N1 `mot_manh` có thể xanh khi byte đầu ra khác bản cũ mà M1 cam kết.** M1 ở dòng 90 yêu cầu đầu ra một mảnh giống từng byte với generator trên base. N1 ở dòng 104 so với `generate_bundled_module_bytes` sau khi sửa. Trong nguyên mẫu, hàm này trả trực tiếp bytes mảnh 1 từ `generate_bundled_modules` (`nguyen-mau.diff` dòng 390–393). Nếu generator đổi một dòng chú thích trong phần đầu tệp, hai vế cùng đổi, vẫn bằng nhau và vẫn không có `SHARDS`. Nhãn `mot_manh` vì thế vẫn xanh dù M1 sai.
+
+> **Câu thay thế cho tiêu chí `mot_manh` ở N1.** “`mot_manh` sinh đúng một mảnh, không có dòng `BUNDLED_FRAGMENT_SHARDS`, và cả hai API trả bytes trùng với đầu ra kỳ vọng đã cố định từ `generate_bundled_module_bytes` trên base `0f9aa2a` cho cùng fixture. Đổi một dòng chú thích trong phần đầu tệp sinh ra phải làm nhãn này đỏ.”
+
+KET_LUAN: request_changes

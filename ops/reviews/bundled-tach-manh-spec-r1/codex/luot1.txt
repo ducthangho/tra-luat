@@ -1,0 +1,32 @@
+Nguyên mẫu đạt các gate đã chạy lại và gỡ được cảnh báo kích thước khi chồng thay đổi SECRETS-SET-BUNDLE-KIEU. Đặc tả r1 cần sửa trình tự cập nhật manifest ở lane LAND, khai ngoại lệ ADR-0053 đúng hợp đồng, và thống nhất điều kiện đỏ của N4.
+
+**Mốc review.** `openai_codex / codex_cli / machine`, Linux x86_64, Python 3.13.18. Đặc tả tại HEAD `98f1b102ecdafe0af595f8ade2226cc0e902f764`, tree `a16b5173b6e0f6ef0f86df0c873198cfe4b8f3b5`, SHA-256 `3f1375bba627206d5359fd1f42f447e0eba27c344031635a77dc5e086a4ea93a`. Bản sao nguyên mẫu có HEAD `92e638157365df25e52f95164679adeecb4cfadb`, tree `5bf6b343a1e8186b3e78255cf592a8f5258cee36`. Phép đo dùng HOME tạm, chặn mạng và bỏ qua các đường dẫn bị cấm khi dựng bản sao. Checkout review vẫn sạch.
+
+### Bảng kiểm sự thật
+
+| Hạng mục | Kết quả đo lại ngày 20-11-2026 |
+|---|---|
+| Base và ADR | `HEAD~2` và `origin/master` cùng trỏ `0f9aa2a2cc697129e1f5be72feddf60986286865`. Hai OID ADR khai trong đặc tả là commit land và là tổ tiên của base. Blob ADR-0053 `cbc514aca5c9a482406f6fdb5fd591b6da497219`, ADR-0055 `91456530ee28ed773c64f6a1ddee3a3e425e0155`, khớp giữa commit land và base. |
+| §0 và ngưỡng | Blob bundled base `996c8ebb9e6239410630a0834bccbe3835079e5e`, **285.112 B**, 18 dòng fragment đã mã hóa, tổng 285.000 B. Dòng lớn nhất 35.219 B, nhỏ nhất 245 B. WARN khi `> 286.720 B`, FAIL khi `> 327.680 B`. Blob bundled trên nhánh secrets-set là **300.798 B**, vượt WARN. |
+| Neo và người gọi | `test_fragments.py` dòng 31, 352–400, 439 và 464 lần lượt là tên module, reader, topology và generator. Caller trên base gồm `release.py:224`, `.githooks/eol_policy_test.py:886,934,979` và `tl_selftest.py:31896,31897,31953,32033`. Hai điểm EOL dùng fragment thật đã chuyển sang writer nhiều mảnh. Các caller còn lại dùng fixture nhỏ. `wp47` dùng bytes fixture cố định. |
+| Dựng nguyên mẫu và §6 | `git apply --check`, `git apply`, `cmp` fragment và `git diff --check` đều rc 0. `core.abbrev=7`. Numstat trong write set đúng **7 tệp, +261/−45**. Áp generator mới lên nguồn fragment của base cho đúng hai mảnh, 183.629 và 101.657 B. Head cho 189.328 và 101.657 B, đều dưới mốc dừng **200.704 B**. |
+| Gate head | `--selftest` rc 0, **1784/1784 → 1785/1785**. `test-fragments-check --json` rc 0, hai mảnh khớp byte. `workflow-audit --json` rc 0, `files_scanned` **73→74**, `warn=[]`, `fail=[]`. `golden-test --json` rc 0, 20 ca. EOL trên bản sao đã commit rc 0, **32/32**. `doctrine-scan` và `adr-song` rc 0. Ruff F trên `scripts/tl.py` rc 1 ở cả hai cây, cùng 12 chẩn đoán, delta 0. |
+| Gói và loader | `release-bundle` và `bundle_fragment_check.py --json` rc 0, **19 ca**, `failed=[]`. ZIP và manifest đều chứa hai mảnh, ZIP loại `scripts/test_fragments/`. `release-manifest` và `release-verify <manifest-tạm> --strict --json` rc 0, **186/186**. Dev và bundle cho cùng thứ tự ID. Trùng tên xuyên mảnh bị chặn bằng `BUNDLED_MODULE_CONTRACT`, lặp ID dưới tên khác bằng `PATH_ID_MISMATCH`. Một mảnh khớp byte với generator base. Ca `wp43_bundled_generator_byte_canonical` đỏ khi đổi header. |
+| §4b | Dựng lại sáu đột biến trong RAM vì `dot-bien.txt` lưu kết quả. Mỗi neo khớp đúng một lần trên nguồn nguyên mẫu. Cả sáu trả `False`, đúng nhãn và không văng ngoại lệ. **a** `manh_lac`, `thieu_manh`; **b** `thu_tu_xuyen_manh`; **c** `nhieu_manh`; **d** `manh_lac`; **e** `ghi_xoa_lac`; **f** `manh_tu_khai`. |
+| N4 và §7 | Chồng hai tệp nguồn từ `a8a3b3ca2fe5f48d8e6db64a8c6abacf97526b8c`, tái sinh và chạy lại. Audit, `test-fragments-check` và selftest đều rc 0, `warn=[]`, **1786/1786**. Mảnh 1 giữ nguyên blob, mảnh 2 lên **117.343 B** và chứa fragment secrets-set. Revision r2 cần thêm mảnh 2 vào write set, thành bốn đường dẫn được phép ghi. |
+
+Lượt đầu dưới `/tmp` có cùng sáu ca bundle đỏ và cùng 14 ca selftest đỏ ở base lẫn nguyên mẫu. Lượt với thư mục tạm dưới `/dev/shm` cho các kết quả xanh trong bảng. Native Windows được miễn theo Q4.
+
+Ngoài các tệp trong write set, thay đổi bắt buộc nằm ở **manifest của phiên LAND**. `ci.yml` đã gọi phép kiểm bundle giải nén. `.github/checks/`, `_RELEASE_REQUIRED_FILES` và hai script deploy có thể giữ nguyên. `gate_lifecycle.py` kiểm exact head/tree, nên thay đổi riêng mảnh 2 vẫn làm đổi danh tính cây. Các chỗ mô tả một tệp trong tài liệu và workflow card thuộc nợ tài liệu đã khai.
+
+### Findings
+
+| Mức | Chỗ | Vấn đề và bằng chứng | Câu thay thế |
+|---|---|---|---|
+| **P1** | §1, §8 | “PR manifest sau land” để canonical đi qua một SHA đỏ. Trên nguyên mẫu, `release-verify RELEASE_MANIFEST.json --strict --json` trả **rc 2**, báo mảnh 2 là `extra_files` và bốn tệp lệch hash. `ci.yml` chạy đúng lệnh này trên master. | “Worker dùng manifest tạm. Phiên LAND tái sinh và commit `RELEASE_MANIFEST.json` vào candidate trước khi chốt SHA chạy land gate. Chỉ land khi strict verify trên SHA đó trả `ok=true` và `expected_file_count == checked_file_count == 186`.” |
+| **P2** | §1, §6 | Quyết định Q2 đã ghi trong văn xuôi, nhưng ADR-0053 yêu cầu khối `nang_tran` đủ bốn trường trong đặc tả và lease. Numstat xác nhận ngoại lệ thực sự được dùng vì packet có bảy tệp. | “Khai `nang_tran` với `ai_nang` là chủ kho theo Q2, `can_cu` là bảy đường dẫn bắt buộc và numstat `+261/−45`, `tran_cu` là 6 tệp/450 dòng thêm, `tran_moi` là 7 tệp/450 dòng thêm. Chép nguyên khối vào lease.” |
+| **P2** | §4, N4 | Cột “đỏ khi” chỉ ghi còn WARN, trong khi cột nghiệm thu còn đòi cổng byte và selftest xanh. Lượt `/tmp` đã cho đúng trường hợp hai cột bất đồng, `warn=[]` nhưng selftest rc 1. | “N4 đỏ nếu audit có WARN, `test-fragments-check` khác rc 0 hoặc `ok` khác `true`, hoặc selftest khác rc 0 hay số ca đạt khác tổng số ca.” |
+| **P3** | §0 | `185→186` là số tệp **trong manifest**. Hai ZIP thực tế có **186→187 entry** vì mỗi ZIP chứa thêm chính manifest. Bộ canh 200 dùng số entry. | “Manifest có 185→186 tệp. ZIP có 186→187 entry, dưới trần 200 entry.” |
+| **P3** | §0, N4 | “Mọi fragment mới đều vượt” sai. Thêm một fixture nhỏ vào bộ sinh cũ cho **285.236 B**. N4 cũng ghi mảnh 1 là 189.145 B, trong khi nguyên mẫu cuối cho **189.328 B** cả trước lẫn sau khi chồng. | “Base còn 1.608 B trước WARN. Fragment secrets-set thêm 15.686 B đã mã hóa vào bundle cũ. Khi chồng lên nguyên mẫu cuối, hai mảnh đo được là 189.328 và 117.343 B.” |
+
+KET_LUAN: request_changes

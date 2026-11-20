@@ -1,0 +1,15 @@
+# do 2026-11-20T00:59:29Z: base lease 20eac11 -> cha thu nhat cua merge 574c8ae
+## merge-base --is-ancestor 20eac11 574c8ae
+rc=0
+## first-parent 20eac11..574c8ae
+574c8ae Merge pull request #1430 from ducthangho/ops/land-1425
+90816bc Merge PR #1429: wp1319 r6 - vi tri cache add-on Playwright tren ASUS (do chi doc)
+3bd9728 Merge pull request #1428 from ducthangho/ops/manifest-433-c1
+b99658b Merge PR #1426: wp1319 r5 - do U2/U9/lich ASUS, hop nhat MATRIX muc I
+b830d47 Merge pull request #1427 from ducthangho/agent/wp1422-r1-g1-claude
+## diff --stat 20eac11..574c8ae -- write set
+(rong = khong cham write set)
+## diff --stat 20eac11..574c8ae
+ ops/specs/wp1319-r5.md                             |   51 +
+ ops/specs/wp1319-r6.md                             |   34 +
+ 183 files changed, 54709 insertions(+), 10 deletions(-)

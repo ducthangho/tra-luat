@@ -1,0 +1,16 @@
+bat_dau=2026-11-19T23:26:45Z python=3.12.10 platform=Windows-11-10.0.26300-SP0 admin=0 TEMP=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433r-20261119T232645Z
+fetch rc=0 
+CHOT HEAD sha=e5e118483792981addb30006c900b10fd2e3b72f tree=4d710fbb62be7b82c4b3f4308ed2a4ada6d952b0 sach=[] git_la_thu_muc=True
+sha256 rig 4ada07de1abe7ff17b14df6751fef9fff1490c0fa44abd5f935e32fa83c9b894
+D1 rc=0 [2026-11-19T23:27:26Z->2026-11-19T23:27:26Z] KET LUAN D1: DAT — chi ghi lai
+D2 rc=0 [2026-11-19T23:27:26Z->2026-11-19T23:27:28Z] KET LUAN D2: DAT
+D4 rc=0 [2026-11-19T23:27:28Z->2026-11-19T23:27:29Z] KET LUAN D4: DAT
+D5 rc=1 [2026-11-19T23:27:29Z->2026-11-19T23:29:22Z] KET LUAN D5: DO — packet 1 do san N8.4-W2/W6 tren Windows la no da khai (#433 issuecomment-7015527750)
+D5-hang rc=0 [2026-11-19T23:29:22Z->2026-11-19T23:29:26Z] KET LUAN D5-hang: DAT — chi ghi lai
+D5-u1 rc=0 [2026-11-19T23:29:26Z->2026-11-19T23:29:31Z] KET LUAN D5-u1: DAT — doi chung xanh u>=1, h==0
+D3-truoc rc=0 [2026-11-19T23:29:31Z->2026-11-19T23:29:32Z] KET LUAN D3-truoc: DAT — T duoc GIU; don bang D3-don sau khi [ADMIN] mountvol /D
+D3 T='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp433r-20261119T232645Z\\wp433r-232932-6q2_3u3x' (khong gan mountvol: phan [ADMIN] tuy chon, bo qua)
+D3-don rc=0 [2026-11-19T23:29:32Z->2026-11-19T23:29:34Z] KET LUAN D3-don: DAT
+sach_sau H=[]
+ket_thuc=2026-11-19T23:29:34Z
+XONG (khoa da nha)

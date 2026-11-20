@@ -1,0 +1,6 @@
+git rev-parse origin/ops/wp433-p2r-spec:ops/specs/GWS-CRED-DICH-NGOAI-KHO-R-r1b.md = 27a14195b898128ba961c780aa8462fb1dae036e
+sha256(git show ...) = 43d60d7c8fa66f559c4754bf45d152bb0a2362bb6179fe49c557c9a71491fb78
+lease g2 spec_hash: 43d60d7c8fa66f559c4754bf45d152bb0a2362bb6179fe49c557c9a71491fb78
+spec r1 (ban thay the) sha256 = 4d4b31812788ab2f824d4e990074d9d4fdd0b3451095ccb8cc00af31155468f5
+nhanh ops/wp433-p2r-spec = 5129f4835df45eb15f183da30b43b8b4191f551c
+spec r1b tren master 9311ccf: KHONG

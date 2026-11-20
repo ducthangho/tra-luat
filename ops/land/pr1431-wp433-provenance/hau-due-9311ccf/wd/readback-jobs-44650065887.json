@@ -1,0 +1,89 @@
+{
+ "jobs": [
+  {
+   "check_run_url": "https://api.github.com/repos/ducthangho/tra-luat/check-runs/136002451655",
+   "completed_at": "2026-11-20T00:58:44Z",
+   "conclusion": "success",
+   "created_at": "2026-11-20T00:58:30Z",
+   "head_branch": "master",
+   "head_sha": "711cb190daaa267cb919c10f4030d38172a37a93",
+   "html_url": "https://github.com/ducthangho/tra-luat/actions/runs/44650065887/job/136002451655",
+   "id": 136002451655,
+   "labels": [
+    "ubuntu-latest"
+   ],
+   "name": "do-wd",
+   "node_id": "CR_kwDOTNeRjc8AAAAfqmC4xw",
+   "run_attempt": 1,
+   "run_id": 44650065887,
+   "run_url": "https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44650065887",
+   "runner_group_id": 0,
+   "runner_group_name": "GitHub Actions",
+   "runner_id": 1000054146,
+   "runner_name": "GitHub Actions 1000054146",
+   "started_at": "2026-11-20T00:58:32Z",
+   "status": "completed",
+   "steps": [
+    {
+     "completed_at": "2026-11-20T00:58:33Z",
+     "conclusion": "success",
+     "name": "Set up job",
+     "number": 1,
+     "started_at": "2026-11-20T00:58:33Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-20T00:58:38Z",
+     "conclusion": "success",
+     "name": "Run actions/checkout@v4",
+     "number": 2,
+     "started_at": "2026-11-20T00:58:33Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-20T00:58:40Z",
+     "conclusion": "success",
+     "name": "cài PyYAML",
+     "number": 3,
+     "started_at": "2026-11-20T00:58:38Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-20T00:58:41Z",
+     "conclusion": "success",
+     "name": "đo Workflow definition",
+     "number": 4,
+     "started_at": "2026-11-20T00:58:40Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-20T00:58:42Z",
+     "conclusion": "success",
+     "name": "Run actions/upload-artifact@v4",
+     "number": 5,
+     "started_at": "2026-11-20T00:58:41Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-20T00:58:42Z",
+     "conclusion": "success",
+     "name": "Post Run actions/checkout@v4",
+     "number": 10,
+     "started_at": "2026-11-20T00:58:42Z",
+     "status": "completed"
+    },
+    {
+     "completed_at": "2026-11-20T00:58:42Z",
+     "conclusion": "success",
+     "name": "Complete job",
+     "number": 11,
+     "started_at": "2026-11-20T00:58:42Z",
+     "status": "completed"
+    }
+   ],
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/actions/jobs/136002451655",
+   "workflow_name": "ops — đo mốc Workflow definition (chỉ đọc)"
+  }
+ ],
+ "total_count": 1
+}

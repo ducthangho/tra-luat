@@ -1,0 +1,12 @@
+UTC 2026-11-19T23:27:30Z · python 3.12.10 · os.name=nt · HEAD=e5e118483792981addb30006c900b10fd2e3b72f · tree=4d710fbb62be7b82c4b3f4308ed2a4ada6d952b0 · status_rong=True
+--- wp433_gws_cred_win_reparse rc=0 stdout='RUN True'
+[wp433_gws_cred_win_reparse] CA: dự_kiến=2 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=7 chạy=7 đạt=7 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=3 chạy=3 giết_đúng=3 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0
+--- wp433_gws_cred_win_duong rc=0 stdout='RUN True'
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=76 đạt=76 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=47 giết_đúng=47 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+--- wp433_gws_cred_dich_ngoai_kho rc=0 stdout='RUN True'
+[wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=11 chạy=4 đạt=4 bỏ_qua=0 chỉ_posix=7 · LUOT: dự_kiến=46 chạy=19 đạt=19 bỏ_qua=0 chỉ_posix=27 · DOT BIEN: dự_kiến=37 chạy=16 giết_đúng=16 bỏ_qua=0 chỉ_posix=21 · HONG: 0 · TU_KIEM: 3/3
+--- wp433_nlm_gws_dich_ngoai_kho rc=0 stdout='RUN False'
+[wp433_nlm_gws_dich_ngoai_kho] ĐỎ chung_hop_dong_loi: TinHieuChotCa("chung_hop_dong_loi: [('N8.4-W2', 'oserror_w2'), ('N8.4-W6', 'oserror_w6')]") (None)
+[wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=17 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0
+run(): {'wp433_gws_cred_win_reparse': True, 'wp433_gws_cred_win_duong': True, 'wp433_gws_cred_dich_ngoai_kho': True, 'wp433_nlm_gws_dich_ngoai_kho': False}
+KET LUAN D5: DO — packet 1 do san N8.4-W2/W6 tren Windows la no da khai (#433 issuecomment-7015527750)

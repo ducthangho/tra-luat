@@ -1,0 +1,32 @@
+# do 2026-11-20T00:59:12Z, clone rieng scratchpad (git clone /home/user/tra-luat), core.abbrev 7
+## rev-parse merge, tree, cha
+b71f4459896dd04b8e3f8ee2ceb05082a2d87bb4
+021a01dddbe8a1b9ddf8ff0562c9a8befcd50f15
+574c8ae2bdcb3bd0a1a4542f16834f9501e3d273
+e5e118483792981addb30006c900b10fd2e3b72f
+## rev-parse head, tree
+e5e118483792981addb30006c900b10fd2e3b72f
+4d710fbb62be7b82c4b3f4308ed2a4ada6d952b0
+## numstat b71f4459896dd04b8e3f8ee2ceb05082a2d87bb4^1..b71f4459896dd04b8e3f8ee2ceb05082a2d87bb4 (= phan PR dua vao)
+234	0	scripts/test_fragments/wp433_gws_cred_win_reparse.py
+4	3	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled.py
+## numstat 20eac11..e5e118483792981addb30006c900b10fd2e3b72f (base lease..head)
+234	0	scripts/test_fragments/wp433_gws_cred_win_reparse.py
+4	3	scripts/tl_gws.py
+1	0	scripts/tl_test_fragments_bundled.py
+## merge-base base head
+20eac111b1f95567bf2ec87260888f77222eea3b
+## blob 3 tep tai head / merge
+scripts/tl_gws.py head=1acf4ef147466f63203409b43eb3a6d9433757eb merge=1acf4ef147466f63203409b43eb3a6d9433757eb
+scripts/test_fragments/wp433_gws_cred_win_reparse.py head=c27deefb8125a296d92a7db88659522886689bb0 merge=c27deefb8125a296d92a7db88659522886689bb0
+scripts/tl_test_fragments_bundled.py head=0939a320f8e7f9670f4d8b1b96354b615278cf5d merge=0939a320f8e7f9670f4d8b1b96354b615278cf5d
+## git diff --check b71f4459896dd04b8e3f8ee2ceb05082a2d87bb4^1 b71f4459896dd04b8e3f8ee2ceb05082a2d87bb4
+rc=0
+## release-verify --strict tai b71f4459896dd04b8e3f8ee2ceb05082a2d87bb4
+rc=2
+ok False 185 185 ['scripts/tl_gws.py', 'scripts/tl_test_fragments_bundled.py']
+## sha256 3 tep tai merge
+f2acadef0707db563ce190c774e67e8289a10d425f6859d87fb19292d1572e54  scripts/tl_gws.py
+e5cc6331569f741c316881edb807f7e829f39507689a773eb0bebf01ae7ff7b0  scripts/test_fragments/wp433_gws_cred_win_reparse.py
+d3da9b56cfb7ae34822f90d95ab77f962d910980dcc145a1c512d71d8afeba0e  scripts/tl_test_fragments_bundled.py

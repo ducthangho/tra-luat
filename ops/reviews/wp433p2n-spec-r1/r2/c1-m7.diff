@@ -1,0 +1,21 @@
+diff --git a/scripts/test_fragments/wp433_gws_cred_win_duong.py b/scripts/test_fragments/wp433_gws_cred_win_duong.py
+index e21c2e4ea..82b4cf398 100644
+--- a/scripts/test_fragments/wp433_gws_cred_win_duong.py
++++ b/scripts/test_fragments/wp433_gws_cred_win_duong.py
+@@ -164,11 +164,14 @@ def tich_hop_nt(r):
+     with _thay(r.m, "_loai_o_nt", loi_o):
+         kq, _o, _e = r.w("W5.loai_o_loi", p("c2"))
+     r.xs("W5.loai_o_loi", hop_dong=kq == (False, "ghi lỗi: OSError") and r.tu_choi())
++    c6 = pathlib.Path(os.path.expanduser("~/.tra_luat_config.json")); c6_truoc = c6.read_bytes() if os.path.lexists(c6) else None  # noqa: E702
+     with _thay(r.m, "_loai_o_nt", loi_o):
+         kq, out, err = r.w("W4.loai_o_loi", p("c2"))
+-    r.xs("W4.loai_o_loi", hop_dong=kq == 1 and err == [_W4 + "ghi lỗi: OSError"] and "✓ gws cred" not in out and r.tu_choi())
++    r.xs("W4.loai_o_loi", hop_dong=kq == 1 and err == [_W4 + "ghi lỗi: OSError"] * 2 and "✓ gws cred" not in out and r.tu_choi(),   # WP433 N: W6 cũng từ chối
++         w6=" ✓ config " not in out and (c6.read_bytes() if os.path.lexists(c6) else None) == c6_truoc)
+     os.makedirs(p("pk", ".git"))
+-    kq, _o, _e = r.w("W5.git_loi", p("pk", "gws"), lambda q: q == p("pk", ".git") and _nem(PermissionError("wp433-c1-git")))
++    mot = []   # WP433 N: lỗi CHỈ ở lần `lstat` ĐẦU (của `_co_git_nt`) — `_trong_kho_git` (M4) cũng lan lỗi, nên ném mọi lần thì đột biến không đo được
++    kq, _o, _e = r.w("W5.git_loi", p("pk", "gws"), lambda q: q == p("pk", ".git") and not mot and (mot.append(q) or _nem(PermissionError("wp433-c1-git"))))
+     r.xs("W5.git_loi", hop_dong=kq == (False, "ghi lỗi: PermissionError") and r.tu_choi())
+     os.makedirs(p("rp")); truoc, that = not os.path.lexists(p("rp", "gws")), os.path.realpath  # noqa: E702
+     with _thay(os.path, "realpath", lambda q, *a, **kw: _nem(PermissionError("wp433-c1-rp")) if kw.get("strict") is True and q == p("rp") else that(q, *a, **kw)):

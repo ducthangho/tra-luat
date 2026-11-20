@@ -1,0 +1,18 @@
+=== linux-head-goc cay=L/head bien_the=goc sha=b1f64a8b7e2828ae
+run=True
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3
+=== linux-head-moi2 cay=L/head bien_the=moi2 sha=5c59ae5bd9c3ab93
+run=True
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3
+=== linux-head-moi3 cay=L/head bien_the=moi3 sha=fa87f58b6bb4e064
+run=True
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3
+=== linux-base-goc cay=L/base bien_the=goc sha=b1f64a8b7e2828ae
+run=True
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3
+=== linux-base-moi2 cay=L/base bien_the=moi2 sha=5c59ae5bd9c3ab93
+run=True
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3
+=== linux-base-moi3 cay=L/base bien_the=moi3 sha=fa87f58b6bb4e064
+run=True
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3

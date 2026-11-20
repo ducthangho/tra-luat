@@ -1,6 +1,6 @@
 {
- "mo_ta": "8 bien nhan hop le + gom success",
- "mo_phong": false,
+ "mo_ta": "MO PHONG: 8 job manh success, danh sach artifact du, job gom success in GOM MẢNH 8/8 (bang chung gom duong)",
+ "mo_phong": true,
  "run": {
   "id": 9005,
   "event": "pull_request",

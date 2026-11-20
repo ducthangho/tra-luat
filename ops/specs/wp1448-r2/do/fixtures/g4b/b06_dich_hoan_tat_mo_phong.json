@@ -1,5 +1,5 @@
 {
- "mo_ta": "MO PHONG sau PR6: che do dich, 8 bien nhan + gom success",
+ "mo_ta": "MO PHONG (tu PR6): noi dung 8 bien nhan hop le che do `dich` + gom success",
  "mo_phong": true,
  "run": {
   "id": 9006,
@@ -83,18 +83,9 @@
  ],
  "log": {
   "chuan_bi": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n",
-  "gom": "2026-11-01T00:10:00.0Z GOM MẢNH 8/8\n2026-11-01T00:10:01.0Z SỐ LIỆU GOM: ca=61 · đột biến=490 · lỗi đột biến=0\n"
+  "gom": null
  },
- "artifact": [
-  "gate-cong-cu-manh-ubuntu-latest-0",
-  "gate-cong-cu-manh-ubuntu-latest-1",
-  "gate-cong-cu-manh-ubuntu-latest-2",
-  "gate-cong-cu-manh-ubuntu-latest-3",
-  "gate-cong-cu-manh-ubuntu-latest-4",
-  "gate-cong-cu-manh-ubuntu-latest-5",
-  "gate-cong-cu-manh-ubuntu-latest-6",
-  "gate-cong-cu-manh-ubuntu-latest-7"
- ],
+ "artifact": null,
  "ghi_de": {
   "che_do_g5": "dich"
  },
@@ -104,5 +95,18 @@
    6
   ],
   "g4a": "dich"
+ },
+ "bien_nhan": {
+  "tao": {
+   "head": "cccccccccccccccccccccccccccccccccccccccc",
+   "so_dot_bien": 20,
+   "che_do": "dich"
+  }
+ },
+ "cmt": {
+  "cccccccccccccccccccccccccccccccccccccccc": [
+   "dddddddddddddddddddddddddddddddddddddddd",
+   "1111111111111111111111111111111111111111"
+  ]
  }
 }

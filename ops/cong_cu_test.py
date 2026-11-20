@@ -7388,7 +7388,17 @@ def t52_gom_manh_phai_DO_khi_thieu_trung_lech_va_moi_chot_co_THE_RIENG():
                "du": ["do_duoc", 1.5, 2.0, 5.5, 2, 0.5, 9.5], "thieu": ["khong_do_duoc", False, True],
                "vang": ["khong_do_duoc"], "hop": [20.0, 0.0, 0.0],
                "cha": ["do_duoc", 40.0, 20.0, 25.0, 20.0, 10.0, 5.0, 5.0, 13.0, 0, 3], "cha_rong": ["khong_do_duoc"],
-               "in_cha": [3, True, "cha", ""], "tep": [True, False, ["BKCON", "MANH"]], "gom_sach": 0, "gom_lot": [1, True]}
+               "in_cha": [3, True, "cha", ""], "tep": [True, False, ["BKCON", "MANH"]], "gom_sach": 0, "gom_lot": [1, True],
+               # review F4: đồng hồ hỏng ở một lần đọc ⇒ `khong_do_duoc` nêu ĐÚNG ca/bước; cờ lỗi dính; số ca đo < số lần thử
+               "dong_ho": {"sach": ["do_duoc", 1, ""],
+                           "dung_cay": ["khong_do_duoc", None, "ValueError: do hong: dung cay: OSError"],
+                           "dich_dau": ["khong_do_duoc", None, "ValueError: do hong: ca ca_dich_gia: ValueError"],
+                           "dich_cuoi": ["khong_do_duoc", None, "ValueError: do hong: ca ca_dich_gia: OSError"],
+                           "khac_dau": ["khong_do_duoc", None, "ValueError: do hong: ca ca_khac_gia: ValueError"],
+                           "khac_cuoi": ["khong_do_duoc", None, "ValueError: do hong: ca ca_khac_gia: OSError"],
+                           "dong_vong": ["khong_do_duoc", None, "ValueError: do hong: dong vong ca: OSError"]},
+               "loi_dinh": ["khong_do_duoc", "ValueError: do hong: ca y: OSError"],
+               "lech_dem": ["khong_do_duoc", "ValueError: so ca do duoc 2/3 lan thu"]}
     sai_g5 = {t: g5.get(t) for t, m in mong_g5.items() if g5.get(t) != m}
     bang(not sai_g5 and set(g5) == set(mong_g5),
          f"dòng thời gian G5 phải ở NGOÀI bộ nhận và tệp mảnh, hợp ≠ tổng, ba trạng thái (ô lệch: {sai_g5}; khoá {sorted(g5)})")
@@ -7655,20 +7665,33 @@ def _cong_tren_cay_that(goc, bo_quet=None):
 # cửa `--tu-kiem-gom`) khoá cả ba vế. FAIL-SAFE: mọi hàm `_g5_*` nuốt lỗi của chính nó; đo hỏng thì dòng mang
 # `khong_do_duoc` kèm lý do, phán quyết và mã thoát không đổi.
 _G5_TIEN_TO = "G5_THOI_GIAN "
-_G5 = {"t0": time.time(), "db": None, "xong": {}, "so_db": 0, "con": None, "hen_con": False, "hen_cha": False}
+# `dong_ho`: CỬA đồng hồ của phép đo (mặc định `time.perf_counter`) — để ca tự kiểm làm hỏng đúng MỘT lần đọc mà không vá
+# `time` của cả tiến trình. Review F4 (wp1448 r2 lần 2): mỗi lần đo một ca dưới đột biến là một lần THỬ (`so_thu`); đo được thì
+# `so_do` tăng, hỏng (mốc đầu `None`, đồng hồ cuối ném) thì cờ lỗi DÍNH `loi` nêu tên ca — bản ghi thành `khong_do_duoc`.
+_G5 = {"t0": time.time(), "db": None, "xong": {}, "so_db": 0, "con": None, "hen_con": False, "hen_cha": False,
+       "dong_ho": time.perf_counter}
 
 
 def _g5_moc():
-    """Mốc `perf_counter`, hoặc `None` khi đồng hồ hỏng — không bao giờ ném."""
+    """Mốc bắt đầu của MỘT ca, hoặc `None` khi đồng hồ hỏng (`_g5_ca` sẽ ghi lỗi dính) — không bao giờ ném."""
     try:
-        return time.perf_counter()
+        return _G5["dong_ho"]()
     except Exception:  # noqa: BLE001 — phép đo phụ, không được làm đổi phán quyết
         return None
 
 
+def _g5_ghi_loi(db, nhan, ex):
+    """Cờ lỗi DÍNH của đột biến đang đo: giữ lỗi ĐẦU TIÊN. Không bao giờ ném."""
+    try:
+        if isinstance(db, dict) and not db.get("loi"):
+            db["loi"] = f"{nhan}: {type(ex).__name__}"[:160]
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def _g5_mo(ten, ca_dich):
     try:
-        _G5["db"] = {"ten": ten, "ca_dich": ca_dich, "bat_dau": time.time(), "p0": time.perf_counter(), "ca": {}}
+        _G5["db"] = {"ten": ten, "ca_dich": ca_dich, "bat_dau": time.time(), "p0": _G5["dong_ho"](), "ca": {}}
     except Exception:  # noqa: BLE001
         _G5["db"] = None
 
@@ -7676,42 +7699,56 @@ def _g5_mo(ten, ca_dich):
 def _g5_dung_xong():
     try:
         db = _G5["db"]
-        db["p1"] = time.perf_counter()
-    except Exception:  # noqa: BLE001
-        pass
+        db["p1"] = _G5["dong_ho"]()
+    except Exception as ex:  # noqa: BLE001
+        _g5_ghi_loi(_G5.get("db"), "dung cay", ex)
 
 
 def _g5_ca(fn, p):
+    """Cộng thời gian của ca `fn` (mốc đầu `p`) vào đột biến đang đo. Chỉ ghi khi có đột biến đang đo và vòng ca chưa đóng."""
     try:
         db = _G5["db"]
-        if db is not None and p is not None and "p2" not in db:
-            db["ca"][fn.__name__] = db["ca"].get(fn.__name__, 0.0) + (time.perf_counter() - p)
+        if not isinstance(db, dict) or "p2" in db:
+            return
     except Exception:  # noqa: BLE001
-        pass
+        return
+    try:
+        db["so_thu"] = db.get("so_thu", 0) + 1
+        if p is None:
+            raise ValueError("moc bat dau hong")
+        db["ca"][fn.__name__] = db["ca"].get(fn.__name__, 0.0) + (_G5["dong_ho"]() - p)
+        db["so_do"] = db.get("so_do", 0) + 1
+    except Exception as ex:  # noqa: BLE001
+        _g5_ghi_loi(db, "ca " + str(getattr(fn, "__name__", "?")), ex)
 
 
 def _g5_ca_xong():
     try:
-        _G5["db"]["p2"] = time.perf_counter()
-    except Exception:  # noqa: BLE001
-        pass
+        _G5["db"]["p2"] = _G5["dong_ho"]()
+    except Exception as ex:  # noqa: BLE001
+        _g5_ghi_loi(_G5.get("db"), "dong vong ca", ex)
 
 
 def _g5_dong():
     try:
         db, _G5["db"] = _G5["db"], None
-        db["p3"], db["ket_thuc"] = time.perf_counter(), time.time()
+        db["p3"], db["ket_thuc"] = _G5["dong_ho"](), time.time()
         _G5["xong"][db["ten"]] = db
     except Exception:  # noqa: BLE001
         _G5["db"] = None
 
 
 def _g5_ban_ghi_dot_bien(ten, db):
-    """Bản ghi `dot_bien` từ số đo thô `db` (hoặc `None`). Hàm THUẦN. Thiếu MỘT trong ba thành phần ⇒ `khong_do_duoc`."""
+    """Bản ghi `dot_bien` từ số đo thô `db` (hoặc `None`). Hàm THUẦN. Thiếu MỘT trong ba thành phần ⇒ `khong_do_duoc`: kể cả khi
+    MỘT ca nào (đích hay khác) đo hỏng — cờ lỗi dính `loi`, hoặc số ca đo được `so_do` khác số lần thử `so_thu` (review F4)."""
     bg = {"loai": "dot_bien", "ten": ten}
     try:
         if not isinstance(db, dict):
             raise ValueError("khong co so do cho dot bien nay")
+        if db.get("loi"):
+            raise ValueError("do hong: " + str(db["loi"]))
+        if db.get("so_thu", 0) != db.get("so_do", 0):
+            raise ValueError(f"so ca do duoc {db.get('so_do', 0)}/{db.get('so_thu', 0)} lan thu")
         ca, dich = db["ca"], db["ca_dich"]
         bg.update({"ca_dich": dich, "bat_dau": round(db["bat_dau"], 3), "ket_thuc": round(db["ket_thuc"], 3),
                    "dung_cay_s": round(db["p1"] - db["p0"], 4), "so_ca_khac": len([t for t in ca if t != dich]),
@@ -7862,6 +7899,37 @@ def _g5_tu_kiem():
           "thieu": [thieu.get("trang_thai"), "ca_dich_s" in thieu, "ca dich khong chay" in str(thieu.get("ly_do"))],
           "vang": [_g5_ban_ghi_dot_bien("x", None).get("trang_thai")],
           "hop": [_g5_hop([(0, 10), (5, 15), (20, 25)]), _g5_hop([]), _g5_hop([(3, 1)])]}
+    # Review F4: đồng hồ hỏng ở ĐÚNG một lần đọc — mốc đầu / mốc cuối của ca ĐÍCH hay ca KHÁC, dựng cây, đóng vòng ca — đi qua
+    # chính các hàm đo thật ⇒ bản ghi `khong_do_duoc` nêu tên ca, không lặng lẽ bỏ ca ấy rồi khai đủ ba thành phần.
+    import types
+
+    def vong_doi(hong_lan):
+        dem = [0]
+
+        def dong_ho():
+            dem[0] += 1
+            if dem[0] == hong_lan:
+                raise OSError("dong ho gia hong")
+            return float(dem[0])
+        cu = (_G5["dong_ho"], _G5["db"], _G5["xong"].pop("g5_gia", None))
+        try:
+            _G5["dong_ho"] = dong_ho
+            _g5_mo("g5_gia", "ca_dich_gia")                      # lần đọc 1: mốc đầu đột biến
+            _g5_dung_xong()                                      # 2: dựng cây xong
+            for ten_ca in ("ca_dich_gia", "ca_khac_gia"):        # ca đích 3 (đầu) + 4 (cuối); ca khác 5 + 6 khi không hỏng
+                _g5_ca(types.SimpleNamespace(__name__=ten_ca), _g5_moc())
+            _g5_ca_xong()                                        # 7
+            _g5_dong()                                           # 8
+            bg = _g5_ban_ghi_dot_bien("g5_gia", _G5["xong"].pop("g5_gia", None))
+        finally:
+            _G5["dong_ho"], _G5["db"] = cu[0], cu[1]
+            if cu[2] is not None:
+                _G5["xong"]["g5_gia"] = cu[2]
+        return [bg.get("trang_thai"), bg.get("so_ca_khac"), bg.get("ly_do", "")]
+    kq["dong_ho"] = {ten: vong_doi(n) for ten, n in (("sach", 0), ("dung_cay", 2), ("dich_dau", 3), ("dich_cuoi", 4),
+                                                       ("khac_dau", 5), ("khac_cuoi", 6), ("dong_vong", 7))}
+    kq["loi_dinh"] = [_g5_ban_ghi_dot_bien(cac[0], {**db, "loi": "ca y: OSError"}).get(x) for x in ("trang_thai", "ly_do")]
+    kq["lech_dem"] = [_g5_ban_ghi_dot_bien(cac[0], {**db, "so_thu": 3, "so_do": 2}).get(x) for x in ("trang_thai", "ly_do")]
     cha = _g5_ban_ghi_cha(90.0, 130.0, [{"bat_dau": 100.0, "ket_thuc": 110.0, "cpu_s": 7.0},
                                          {"bat_dau": 105.0, "ket_thuc": 115.0, "cpu_s": 5.0},
                                          {"bat_dau": 120.0, "ket_thuc": 125.0, "cpu_s": 1.0}], manh=(0, n))
@@ -8362,6 +8430,13 @@ for _ten, _tim, _thay in (
     ("wp1448_g5_thieu_ca_dich_van_do_duoc",
      '        if dich not in ca:\n            raise ValueError("ca dich khong chay duoi dot bien nay")\n        bg["ca_dich_s"] = round(ca[dich], 4)\n',
      '        bg["ca_dich_s"] = round(ca.get(dich, 0.0), 4)\n'),
+    # review F4 (wp1448 r2 lần 2): mỗi chốt mới của phép đo thời gian ca có đột biến riêng
+    ("wp1448_g5_bo_co_loi_dinh", '        if db.get("loi"):\n            raise ValueError("do hong: " + str(db["loi"]))\n', ''),
+    ("wp1448_g5_bo_doi_chieu_so_lan_thu",
+     '        if db.get("so_thu", 0) != db.get("so_do", 0):\n            raise ValueError(f"so ca do duoc {db.get(\'so_do\', 0)}/{db.get(\'so_thu\', 0)} lan thu")\n', ''),
+    ("wp1448_g5_ca_nuot_loi_khong_ghi_co", '        _g5_ghi_loi(db, "ca " + str(getattr(fn, "__name__", "?")), ex)\n', '        pass\n'),
+    ("wp1448_g5_moc_dau_hong_bo_qua_im", '        if p is None:\n            raise ValueError("moc bat dau hong")\n', '        if p is None:\n            return\n'),
+    ("wp1448_g5_khong_dem_lan_thu", '        db["so_thu"] = db.get("so_thu", 0) + 1\n', ''),
 ):
     DOT_BIEN[_ten] = ("ops/cong_cu_test.py", _tim, _thay, "TEP_TEST", _KEM_TEP_TEST, _CA_668["t52_"])
 # NỢ (KHÔNG ĐO ĐƯỢC): nền VẮNG thuộc tính `os.symlink` (nhánh AttributeError của `_do_co_symlink`) không được đo trong bộ này —

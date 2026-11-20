@@ -3659,6 +3659,10 @@ def chay_gia_bong(cha=None, to_tien=0, dong_gop=(0, b""), ls_tree=(0, b""), log=
             rieng = ls_tree
         elif a[:4] == ["git", "diff", "--no-renames", "--name-only"] and a[-2] == P1_GIA:
             rieng = dong_gop
+        elif a[:3] == ["git", "diff", "--raw"] and a[-2] == P1_GIA:   # review F3: `--raw` cua ngu canh moi CUNG nguon voi diff ten
+            if log is not None:
+                log.append(list(argv))
+            return _raw_tu_ten(_tra_gia(dong_gop))
         if rieng is None:
             return trong(argv, **k2)
         if log is not None:
@@ -4082,7 +4086,7 @@ def t115_bo_dem_loi_ich_va_ton_du_tu_dong_bong_that():
             bang(rc == 0, f"main phai thoat 0, duoc {rc}")
             tb = tt.trich_bong("".join("2026-11-20T00:00:00.0000000Z " + x + "\n" for x in log.splitlines()))
             pl = tb["bong_phan_loai"] or {}
-            oracle = tt.oracle_moi(kho, pl.get("goc_su_kien"), pl.get("goc_so"), pl.get("dau"), chay_that)
+            oracle = tt.oracle_moi(kho, pl.get("goc_su_kien"), pl.get("goc_so"), pl.get("dau"), pl.get("hop"), chay_that)
             return tb, oracle
 
         tb, oracle = do(nen, tien)
@@ -4096,8 +4100,10 @@ def t115_bo_dem_loi_ich_va_ton_du_tu_dong_bong_that():
         d0 = tt.dem_bong(tb0["che_do_chay"], tb0["bong_phan_loai"], oracle0)
         bang(oracle0 == "duong_nhanh" and d0 == {"loi_ich": 0, "ton_du": 0}, f"goc khong cu: ca hai bo dem = 0, duoc {d0} oracle={oracle0}")
         dau_ma = _nhanh(kho, "prma", nen, _sua({"scripts/z.py": "print(2)\n"}))
-        bang(tt.oracle_moi(kho, nen, tien, dau_ma, chay_that) == "day_du" and tt.oracle_moi(kho, nen, tien, "f" * 40, chay_that) == "khong_do_duoc"
-             and tt.oracle_moi(kho, dau_ma, tien, dau, chay_that) == "khong_do_duoc",
+        hop_ma = merge_ref_that(kho, tien, dau_ma)
+        bang(tt.oracle_moi(kho, nen, tien, dau_ma, hop_ma, chay_that) == "day_du"
+             and tt.oracle_moi(kho, nen, tien, "f" * 40, hop_ma, chay_that) == "khong_do_duoc"
+             and tt.oracle_moi(kho, dau_ma, tien, dau_ma, hop_ma, chay_that) == "khong_do_duoc",
              "oracle: PR ma => day_du; thieu object hay goc su kien khong la to tien => khong_do_duoc")
     bang(tt.dem_bong("day_du", {"cu": "day_du", "moi": "khong_do_duoc"}, "khong_do_duoc") == {"loi_ich": None, "ton_du": None},
          "khong du du lieu thi khong dem (None), khong ep ve 0")
@@ -4170,6 +4176,158 @@ def t117_loi_trong_ma_bong_khong_doi_output_va_ma_thoat():
         shutil.rmtree(tam, ignore_errors=True)
     bang(bong0["BONG_CONG_CU"]["quyet_dinh"] == "khong_do_duoc" or bong0["BONG_CONG_CU"]["duong_dan"] == "bo_qua",
          f"nen cua ca phai di toi nhanh bo moi theo duong dan: {bong0['BONG_CONG_CU']}")
+
+
+class LoiGitGia(OSError):
+    """Loi git do CHINH ca tiem vao mot lenh cua ngu canh moi (review F3)."""
+
+
+def _loai_lenh_git(a):
+    """Loai cua mot argv git (da bo `--attr-source`) — de tiem loi theo TUNG loai lenh."""
+    for loai, dau in (("is-ancestor", "--is-ancestor"), ("merge-base-all", "--all"), ("merge-tree", "merge-tree"), ("raw", "--raw"),
+                      ("check", "--check"), ("numstat", "--numstat"), ("ten", "--name-only")):
+        if dau in a:
+            return loai
+    return None
+
+
+def _chay_tiem(oid, loai, lan, cach):
+    """`chay_that` nhung lenh git thu `lan` cua loai `loai` CO MANG `oid` (ngu canh moi) loi: rc=128 hoac nem `LoiGitGia`."""
+    dem = [0]
+
+    def chay(argv, **kw):
+        a = bo_attr_source(argv)
+        if _loai_lenh_git(a) == loai and any(oid in str(x) for x in a):
+            dem[0] += 1
+            if dem[0] == lan:
+                if cach == "nem":
+                    raise LoiGitGia(f"loi gia {loai}#{lan}")
+                return KQ(128, b"")
+        return chay_that(argv, **kw)
+    return chay
+
+
+@ca
+def t118_bong_phan_loai_loi_doc_ngu_canh_moi_la_khong_do_duoc():
+    """wp1448 r2 lan 2 (review F3): MOI lan doc cua ngu canh moi — merge-base, diff ten, merge-tree, `--raw` (ca ba cap, ca o bo
+    phan loai lan o kiem mode), `diff --check`, `--numstat` — tra rc=128 hay NEM => `moi=khong_do_duoc` kem ly do DUNG buoc, KHONG
+    BAO GIO thanh `day_du`/`duong_nhanh`; `GITHUB_OUTPUT` va ma thoat giu nguyen tung byte. Phan loai DANG CHAY la fail-close =>
+    `cu_do=khong_do_duoc` va BONG_CONG_CU `khong_do_duoc`. Doi chung: khong tiem loi => `moi` do duoc va BANG `phan_loai_day_du`."""
+    m = nap_module()
+    with kho_bong(m) as (kho, nen):
+        dau = _nhanh(kho, "pr", nen, _sua({"ops/land/y.yaml": "a: 2\n"}))
+        tien = _nhanh(kho, "main", nen, _sua({"scripts/y.py": "print(1)\n"}))
+        hop = merge_ref_that(kho, tien, dau)
+        git(kho, "checkout", "-q", "--detach", hop)
+        env = dict(env_pr(goc=nen, dau=dau, CI_DUONG_NHANH_MERGE=hop), GITHUB_RUN_ID="7", GITHUB_RUN_ATTEMPT="1")
+        kq0 = m.bong_phan_loai("pull_request", "day_du", env, chay_that, kho)
+        bang(kq0 == ("day_du", "duong_nhanh", tien, "-", "dat"), f"doi chung: ngu canh moi do duoc, duoc {kq0}")
+        rc0, out0, _log0, b0 = main_bong(m, env, chay_that, kho)
+        bang(rc0 == 0 and out0 == output_mong("day_du", "bo_qua") and b0["BONG_PHAN_LOAI"]["cu_do"] == "do_duoc",
+             f"doi chung main: {rc0} {out0!r} {b0}")
+        mong = {("merge-base-all", 1): "diff_ngu_canh_moi_khong_do_duoc", ("ten", 1): "diff_ngu_canh_moi_khong_do_duoc",
+                ("merge-tree", 1): "diff_ngu_canh_moi_khong_do_duoc", ("ten", 2): "diff_ngu_canh_moi_khong_do_duoc",
+                ("ten", 3): "diff_ngu_canh_moi_khong_do_duoc", ("merge-tree", 2): "raw_ngu_canh_moi_khong_do_duoc",
+                ("raw", 1): "raw_ngu_canh_moi_khong_do_duoc", ("raw", 2): "raw_ngu_canh_moi_khong_do_duoc",
+                ("raw", 3): "raw_ngu_canh_moi_khong_do_duoc", ("merge-tree", 3): "kiem_mode_khong_do_duoc",
+                ("raw", 4): "kiem_mode_khong_do_duoc", ("raw", 5): "kiem_mode_khong_do_duoc", ("raw", 6): "kiem_mode_khong_do_duoc",
+                ("check", 1): "kiem_diff_check_khong_do_duoc", ("numstat", 1): "kiem_nhi_phan_khong_do_duoc"}
+        for (loai, lan), ly in mong.items():
+            for cach in ("rc", "nem"):
+                try:
+                    kq = m.bong_phan_loai("pull_request", "day_du", env, _chay_tiem(tien, loai, lan, cach), kho)
+                except LoiGitGia as e:
+                    raise TinHieuChotCa(f"{loai}#{lan} {cach}: loi git lot ra khoi bong_phan_loai: {e}") from e
+                bang(kq[1] == "khong_do_duoc" and kq[3] == ly, f"{loai}#{lan} {cach}: mong moi=khong_do_duoc vi {ly}, duoc {kq}")
+            if loai != "ten":   # bong_cong_cu cung doc diff ten cua cha mot => dem lan cua `main` lech; da do truc tiep o tren
+                rc, out, _log, b = main_bong(m, env, _chay_tiem(tien, loai, lan, "rc"), kho)
+                pl = b["BONG_PHAN_LOAI"]
+                bang(rc == 0 and out == out0 and (pl["moi"], pl["ly_do"], pl["cu_do"]) == ("khong_do_duoc", ly, "do_duoc"),
+                     f"main {loai}#{lan}: output/ma thoat giu nguyen, moi=khong_do_duoc vi {ly}; duoc rc={rc} {out!r} {pl}")
+        # phan loai DANG CHAY la fail-close (raw cua ngu canh CU loi) => cu_do khong do duoc, BONG_CONG_CU khong do duoc
+        hop0 = merge_ref_that(kho, nen, dau)
+        git(kho, "checkout", "-q", "--detach", hop0)
+        env0 = env_pr(goc=nen, dau=dau, CI_DUONG_NHANH_MERGE=hop0)
+        _rc, out_dc, _l, b_dc = main_bong(m, env0, chay_that, kho)
+        bang(out_dc == output_mong("duong_nhanh", "bo_qua", (nen, dau, hop0)) and b_dc["BONG_PHAN_LOAI"]["cu_do"] == "do_duoc",
+             f"doi chung fail-close: luat cu do duoc => duong_nhanh, cu_do=do_duoc; duoc {out_dc!r} {b_dc}")
+        rc, out, _log, b = main_bong(m, env0, _chay_tiem(nen, "raw", 1, "rc"), kho)
+        # chi lan doc DAU (cua phan loai dang chay) loi: ngu canh moi (cung OID) do duoc => cu=day_du (fail-close) khac moi=duong_nhanh
+        # — chinh cap ma bo dem LOI ICH khong duoc tinh (`cu_do=khong_do_duoc`).
+        bang(rc == 0 and out == output_mong("day_du", "bo_qua") and b["BONG_PHAN_LOAI"]["cu_do"] == "khong_do_duoc"
+             and (b["BONG_PHAN_LOAI"]["cu"], b["BONG_PHAN_LOAI"]["moi"]) == ("day_du", "duong_nhanh")
+             and (b["BONG_CONG_CU"]["quyet_dinh"], b["BONG_CONG_CU"]["ly_do"]) == ("khong_do_duoc", "che_do_dang_chay_la_fail_close"),
+             f"fail-close cua luat cu: output that day_du nhu cu, bong khong dem no la do duoc; duoc rc={rc} {out!r} {b}")
+        # bong KHONG troi khoi bo phan loai that: tren moi dau vao do duoc, `phan_loai_bong` = `phan_loai_day_du`
+        nen2 = _nhanh(kho, "nen2", nen, _sua({"ops/specs/s.md": "a\n"}))
+
+        def thuc_thi(k):
+            viet(k, "ops/land/chay.sh", "echo 1\n")
+            os.chmod(Path(k) / "ops/land/chay.sh", 0o755)
+        for ten, goc, sua in (("ho so thuong", nen, _sua({"ops/land/z.yaml": "b: 1\n"})), ("tep thuc thi trong ho so", nen, thuc_thi),
+                              ("sua dac ta da co", nen2, _sua({"ops/specs/s.md": "b\n"})), ("ma", nen, _sua({"scripts/q.py": "1\n"}))):
+            d = _nhanh(kho, "dong_" + str(abs(hash(ten)) % 997), goc, sua)
+            h = merge_ref_that(kho, goc, d)
+            git(kho, "checkout", "-q", "--detach", h)
+            e = env_pr(goc=goc, dau=d, CI_DUONG_NHANH_MERGE=h)
+            bong, that = m.phan_loai_bong(e, chay_that, kho), m.phan_loai_day_du(e, chay_that, kho)
+            bang(bong[1] == that[1] and bong[0] == that[0] and bong[2] is None, f"{ten}: bong {bong[1:]} phai bang luat that {that[1:]}")
+    # kiem_bong: danh sach CHO PHEP cua phat hien
+    for loi, dau_ph, mong_k in (([], None, "dat"), (["tep ho so nhi phan: 'x'"], None, "do"), (["KHONG DO DUOC: x"], None, "khong_do_duoc"),
+                                (["tep ho so khong phai tep thuong", "KHONG DO DUOC: lech"], None, "khong_do_duoc"),
+                                (["git diff --check rc=2: a.md:1: trailing whitespace."], m.DAU_PHAT_HIEN_DIFF_CHECK, "do"),
+                                (["git diff --check rc=128: fatal: bad revision"], m.DAU_PHAT_HIEN_DIFF_CHECK, "khong_do_duoc")):
+        bang(m.kiem_bong(loi, dau_ph) == mong_k, f"kiem_bong({loi}, {dau_ph}) mong {mong_k}, duoc {m.kiem_bong(loi, dau_ph)}")
+    # cu_do: CHI tien to cua phan loai do duoc; fail-close/loi noi bo/vang => khong do duoc (ten tep khong gia mao duoc)
+    for ly_do, che_do, mong_c in (("DUONG_NHANH: toan bo 1 tep doi khop allowlist ops/x", "duong_nhanh", "do_duoc"),
+                                  ("DUONG_NHANH: DAY_DU vi diff co 1 tep ngoai allowlist: 'a'", "day_du", "do_duoc"),
+                                  ("DUONG_NHANH: diff RONG (khong tep nao doi) - x", "duong_nhanh", "do_duoc"),
+                                  ("DUONG_NHANH: KHONG DO DUOC: git diff --raw x rc=128 - fail-close ve DAY_DU", "day_du", "khong_do_duoc"),
+                                  ("DUONG_NHANH: KHONG DO DUOC diff (x) - fail-close ve DAY_DU", "day_du", "khong_do_duoc"),
+                                  ("DUONG_NHANH: LOI NOI BO (KeyError) - fail-close ve DAY_DU", "day_du", "khong_do_duoc"),
+                                  (None, "day_du", "khong_do_duoc")):
+        b = m.dong_bong(env_pr(), che_do, env_pr(), {"ops/land/x.yaml"}, chay_gia_bong(out=nul("ops/land/x.yaml")), ROOT_THAT, ly_do)
+        bang(f" cu_do={mong_c} " in b[1], f"ly do {ly_do!r}: mong cu_do={mong_c}, duoc {b[1]}")
+
+
+@ca
+def t119_oracle_bon_oid_doc_lap_voi_dong_bong():
+    """wp1448 r2 lan 2 (review F2): oracle ngu canh moi tinh lai tu BON OID va tu dan xuat cha cua merge ref: DUNG hai cha, cha hai =
+    head, `goc_so` cua dong bong phai bang cha mot (sai => khong_do_duoc; vang => tu dan xuat), goc su kien la to tien cua cha mot;
+    tap ban ghi gom ca diff cha mot -> merge ref THAT (merge that mang them tep ma => `day_du`, nhu dong bong). Git loi => khong_do_duoc."""
+    m, tt = nap_module(), nap_thu_thap()
+    with kho_bong(m) as (kho, nen):
+        dau = _nhanh(kho, "pr", nen, _sua({"ops/land/y.yaml": "a: 2\n"}))
+        tien = _nhanh(kho, "main", nen, _sua({"scripts/y.py": "print(1)\n"}))
+        dau_ma = _nhanh(kho, "prma", nen, _sua({"scripts/z.py": "print(2)\n"}))
+        le = _nhanh(kho, "le", nen, _sua({"docs/a.md": "le\n"}))
+        hop = merge_ref_that(kho, tien, dau)
+        cay = git(kho, "rev-parse", hop + "^{tree}").stdout.decode().strip()
+        ba_cha = git(kho, "commit-tree", cay, "-p", tien, "-p", dau, "-p", dau_ma, "-m", "ba cha").stdout.decode().strip()
+        git(kho, "checkout", "-q", "--detach", hop)
+        viet(kho, "scripts/merge-only.py", "print(3)\n")
+        git(kho, "add", "-A")
+        cay_x = git(kho, "write-tree").stdout.decode().strip()
+        hop_x = git(kho, "commit-tree", cay_x, "-p", tien, "-p", dau, "-m", "merge that lech merge mo phong").stdout.decode().strip()
+        git(kho, "reset", "-q", "--hard", hop)
+        def o(gs, g, d, h, c=chay_that):
+            try:
+                return tt.oracle_moi(kho, gs, g, d, h, c)
+            except LoiGitGia as e:   # CHI lop loi ma ca tiem: oracle phai tra khong_do_duoc, khong duoc nem (t99: khong bat rong)
+                raise TinHieuChotCa(f"oracle nem loi git thay vi tra khong_do_duoc: {e}") from e
+        bang(o(nen, tien, dau, hop) == "duong_nhanh" and o(nen, "-", dau, hop) == "duong_nhanh" and o(nen, None, dau, hop) == "duong_nhanh",
+             "doi chung: bon OID nhat quan => duong_nhanh (goc_so vang thi tu dan xuat)")
+        for ten, kq in (("goc_so sai (khong phai cha mot)", o(nen, nen, dau, hop)), ("mot cha", o(nen, None, dau, dau)),
+                        ("ba cha", o(nen, tien, dau, ba_cha)), ("cha hai khac head", o(nen, tien, dau, merge_ref_that(kho, tien, dau_ma))),
+                        ("goc su kien khong la to tien cha mot", o(le, tien, dau, hop)), ("merge ref khong ton tai", o(nen, tien, dau, "f" * 40)),
+                        ("goc_so khong phai OID", o(nen, "xyz", dau, hop)),
+                        ("git nem", o(nen, tien, dau, hop, lambda *a, **k: (_ for _ in ()).throw(LoiGitGia("git vang")))),
+                        ("git rc 128", o(nen, tien, dau, hop, lambda *a, **k: KQ(128, b"")))):
+            bang(kq == "khong_do_duoc", f"oracle {ten}: mong khong_do_duoc, duoc {kq}")
+        bang(o(nen, tien, dau, hop_x) == "day_du", "merge THAT mang them scripts/merge-only.py => oracle phai thay (day_du)")
+        git(kho, "checkout", "-q", "--detach", hop_x)
+        _rc, _out, _log, b = main_bong(m, env_pr(goc=nen, dau=dau, CI_DUONG_NHANH_MERGE=hop_x), chay_that, kho)
+        bang(b["BONG_PHAN_LOAI"]["moi"] == "day_du", f"dong bong cung thay merge that: moi=day_du, duoc {b['BONG_PHAN_LOAI']}")
 
 
 def _lenh_git_trong_nguon(nguon):
@@ -4338,6 +4496,9 @@ def _lp(cu, moi):
 
 def _tt(cu, moi):
     return (TT_V2, lambda vb: thay_mot(vb, cu, moi))
+
+
+_T118, _T119 = ("t118_bong_phan_loai_loi_doc_ngu_canh_moi_la_khong_do_duoc",), ("t119_oracle_bon_oid_doc_lap_voi_dong_bong",)
 
 
 def _yml(cu, moi):
@@ -4913,13 +5074,34 @@ DOT_BIEN += [   # wp1343: N1 (phan loai), N2/M7 (phan hoach), N3 (gom), M6 (chot
     ('bong_rev_list_khong_kiem_commit', _ma('    if not k or k.group(1).decode("ascii") != hop:\n', '    if not k:\n'), ("t114_bong_phan_loai_ngu_canh_moi",)),
     ('bong_rev_list_nem_lot_ra', _ma('    except Exception as e:\n        return None, f"rev_list_nem_{type(e).__name__}"\n', '    except ZeroDivisionError as e:\n        return None, f"rev_list_nem_{type(e).__name__}"\n'), ("t114_bong_phan_loai_ngu_canh_moi",)),
     ('bong_moi_dung_goc_su_kien', _ma('    env_moi = {**env2, BIEN_GOC: goc_so}\n', '    env_moi = {**env2}\n'), ("t114_bong_phan_loai_ngu_canh_moi",)),
-    ('bong_moi_khong_do_duoc_thanh_day_du', _ma('    if doi_m is None:\n        return che_do, BONG_KDD, goc_so, "diff_ngu_canh_moi_khong_do_duoc", "-"\n', ''), ("t114_bong_phan_loai_ngu_canh_moi",)),
+    ('bong_moi_khong_do_duoc_thanh_day_du', _ma('        return None, BONG_KDD, "diff_ngu_canh_moi_khong_do_duoc"\n', '        return None, DAY_DU, None\n'), ("t114_bong_phan_loai_ngu_canh_moi",)),
     ('bong_loi_noi_bo_lot_ra_cong_cu', _ma('    except Exception as e:\n        qd, ly, theo_duong, vt = BONG_KDD, f"loi_noi_bo:{type(e).__name__}", BONG_KDD, "-"\n', '    except ZeroDivisionError as e:\n        qd, ly, theo_duong, vt = BONG_KDD, f"loi_noi_bo:{type(e).__name__}", BONG_KDD, "-"\n'), ("t117_loi_trong_ma_bong_khong_doi_output_va_ma_thoat",)),
     ('bong_loi_in_lot_ra_main', _ma('    except Exception as e:\n        try:\n            print(f"BONG_CONG_CU: {BONG_KDD} ly_do=loi_in:', '    except ZeroDivisionError as e:\n        try:\n            print(f"BONG_CONG_CU: {BONG_KDD} ly_do=loi_in:'), ("t117_loi_trong_ma_bong_khong_doi_output_va_ma_thoat",)),
     ('bong_bo_han_thoi_gian', _ma('        if con <= 0:\n            raise HetHanBong("het ngan sach thoi gian cua ma bong")\n', ''), ("t117_loi_trong_ma_bong_khong_doi_output_va_ma_thoat",)),
     ('bong_bo_han_moi_lenh', _ma('        return chay(argv, timeout=min(con, HAN_BONG_MOT_LENH), **kw)\n', '        return chay(argv, **kw)\n'), ("t117_loi_trong_ma_bong_khong_doi_output_va_ma_thoat",)),
     ('bong_dem_loi_ich_bang_ton_du', _tt('    return {"loi_ich": loi_ich, "ton_du": ton_du}\n', '    return {"loi_ich": ton_du, "ton_du": ton_du}\n'), ("t115_bo_dem_loi_ich_va_ton_du_tu_dong_bong_that",)),
     ('bong_dem_ton_du_bang_loi_ich', _tt('    return {"loi_ich": loi_ich, "ton_du": ton_du}\n', '    return {"loi_ich": loi_ich, "ton_du": loi_ich}\n'), ("t115_bo_dem_loi_ich_va_ton_du_tu_dong_bong_that",)),
+    # wp1448 r2 lan 2 — review F3: moi lan doc loi cua ngu canh moi / phan loai dang chay fail-close KHONG thanh phan loai do duoc
+    ('bong_raw_loi_thanh_day_du', _ma('        return doi, BONG_KDD, "raw_ngu_canh_moi_khong_do_duoc"\n', '        return doi, DAY_DU, None\n'), _T118),
+    ('bong_kiem_khong_do_duoc_van_giu_moi', _ma('                return che_do, BONG_KDD, goc_so, ten + "_khong_do_duoc", BONG_KDD\n', '                kiem = BONG_KDD\n'), _T118),
+    ('bong_kiem_bong_bo_tien_to_khong_do_duoc', _ma('    if any(x.startswith("KHONG DO DUOC") for x in loi):\n        return BONG_KDD\n', ''), _T118),
+    ('bong_kiem_bong_bo_danh_sach_phat_hien', _ma('    if dau_phat_hien is not None and not all(x.startswith(dau_phat_hien) for x in loi):\n        return BONG_KDD\n', ''), _T118),
+    ('bong_diff_check_moi_rc_la_phat_hien', _ma('DAU_PHAT_HIEN_DIFF_CHECK = "git diff --check rc=2:"', 'DAU_PHAT_HIEN_DIFF_CHECK = "git diff --check rc="'), _T118),
+    ('bong_cu_do_luon_do_duoc', _ma('        cu_do = BONG_DO_DUOC if che_do in (DAY_DU, DUONG_NHANH) and type(ly_do) is str and ly_do.startswith(LY_DO_CU_DO_DUOC) else BONG_KDD\n',
+                                    '        cu_do = BONG_DO_DUOC\n'), _T118),
+    ('bong_cu_do_tien_to_mo_rong', _ma('LY_DO_CU_DO_DUOC = ("DUONG_NHANH: DAY_DU vi ", ', 'LY_DO_CU_DO_DUOC = ("DUONG_NHANH: ", "DUONG_NHANH: DAY_DU vi ", '), _T118),
+    ('bong_cong_cu_nhan_fail_close_la_day_du', _ma('    if cu_do != BONG_DO_DUOC:\n        return BONG_KDD, "che_do_dang_chay_la_fail_close", BONG_KDD, "-"\n', ''), _T118),
+    ('bong_main_khong_truyen_ly_do', _ma('    in_bong(env, che_do, env2, doi[0] if doi else None, chay, kho, ra, ly_do)\n',
+                                         '    in_bong(env, che_do, env2, doi[0] if doi else None, chay, kho, ra)\n'), _T118),
+    ('bong_phan_loai_bong_bo_buoc_raw', _ma('    raw = doc_raw_ba_cap(env, chay, kho)\n    if isinstance(raw, str):\n        return doi, BONG_KDD, "raw_ngu_canh_moi_khong_do_duoc"\n'
+                                            '    return doi, (DAY_DU if ly_do_ve_day_du(doi, raw) else DUONG_NHANH), None\n', '    return doi, DUONG_NHANH, None\n'), _T118),
+    # review F2: oracle bon OID doc lap voi dong bong
+    ('oracle_bo_kiem_dung_hai_cha', _tt('        if len(cha) != 2:\n            return KHONG_DO_DUOC\n', ''), _T119),
+    ('oracle_bo_kiem_cha_hai_la_head', _tt('        if cha[1] != dau:\n            return KHONG_DO_DUOC\n', ''), _T119),
+    ('oracle_tin_goc_so_cua_dong_bong', _tt('        if goc_so not in (None, "-") and goc_so != cha[0]:\n            return KHONG_DO_DUOC\n', ''), _T119),
+    ('oracle_bo_kiem_goc_su_kien_to_tien', _tt('        if _git(kho, "merge-base", "--is-ancestor", goc_su_kien, p1, chay=chay)[0] != 0:\n            return KHONG_DO_DUOC\n', ''), _T119),
+    ('oracle_bo_diff_merge_that', _tt(', (p1, cay.decode().strip()), (p1, hop)):', ', (p1, cay.decode().strip())):'), _T119),
+    ('oracle_git_nem_lot_ra', _tt('    except Exception:  # noqa: BLE001 — git vang/loi/dau ra la', '    except RuntimeError:  # noqa: BLE001 — git vang/loi/dau ra la'), _T119),
     ('bong_ton_du_so_voi_luat_cu', _tt('    ton_du = int(che_do_chay != oracle) if che_do_chay', '    ton_du = int(pl.get("cu") != oracle) if che_do_chay'), ("t115_bo_dem_loi_ich_va_ton_du_tu_dong_bong_that",)),
 ] + [(f"pl_bo_phu_thuoc_{i:02d}", (MA, lambda vb, p=p: thay_regex(vb, r'(PHU_THUOC_PACKET_LOOP = \([^)]*)"' + re.escape(p) + '"', r'\1"-"')), _T100)
      for i, p in enumerate(PL_PHU_THUOC)]

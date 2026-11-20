@@ -436,6 +436,14 @@ def phan_loai(env=os.environ, chay=subprocess.run, kho=ROOT, tra_env=False, ra_d
 # KHONG BAO GIO vao `GITHUB_OUTPUT` (ca `t110` do tung byte), va moi loi trong ma bong chi thanh `khong_do_duoc` kem ly do
 # (ca `t117`). Dinh nghia cua bao dong va cua ngu canh so sanh moi o dac ta `ops/specs/wp1448-r2/SPEC.md`.
 BONG_CHAY, BONG_BO_QUA, BONG_KDD = "chay", "bo_qua", "khong_do_duoc"
+BONG_DO_DUOC = "do_duoc"
+# review F3: phan loai DANG CHAY co DO DUOC khong (khong phai fail-close). Danh sach CHO PHEP cac tien to ly do ma CHINH bo phan loai
+# viet khi da do xong (`phan_loai_tu_diff`, `phan_loai_day_du`); moi ly do khac — `KHONG DO DUOC`, `LOI NOI BO`, `khong phan loai` —
+# la khong do duoc. Ten tep chi xuat hien SAU cac tien to nay, nen tien to khong bi noi dung diff gia mao.
+LY_DO_CU_DO_DUOC = ("DUONG_NHANH: DAY_DU vi ", "DUONG_NHANH: toan bo ", "DUONG_NHANH: diff RONG (khong tep nao doi)")
+# Phat hien DO DUOC cua `kiem_diff_check`: git tra rc=2 khi thay loi khoang trang / dau xung dot (do 20-11-2026: loi khoang trang
+# rc=2, dau xung dot rc=2, revision hong rc=128, sach rc=0). Moi rc khac la git LOI, khong phai phat hien.
+DAU_PHAT_HIEN_DIFF_CHECK = "git diff --check rc=2:"
 BIEN_RUN, BIEN_ATTEMPT = "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT"
 HAN_BONG_GIAY, HAN_BONG_MOT_LENH = 90, 30
 # BAO DONG BAO THU cua bo ca cong cu (`ops/cong_cu_test.py`), tung THANH PHAN mot the rieng de dot bien bo mot thanh phan lo ra.
@@ -571,16 +579,18 @@ def doc_van_tay_da_dung(kho=ROOT):
     return vt, None
 
 
-def bong_cong_cu(su_kien, che_do, doi, env2, chay=subprocess.run, kho=ROOT):
+def bong_cong_cu(su_kien, che_do, doi, env2, chay=subprocess.run, kho=ROOT, cu_do=BONG_DO_DUOC):
     """(quyet dinh, ly do, quyet dinh THEO DUONG DAN, trang thai van tay) cua output `cong_cu` DU KIEN. `bo_qua` (bo MOI) chi khi
     MOI dieu kien cua dac ta dat; push va moi truong hop do duoc khac => `chay`; khong do duoc => `khong_do_duoc`. Khong bao gio
-    `bo_qua` theo mac dinh."""
+    `bo_qua` theo mac dinh. `cu_do`: phan loai dang chay `day_du` ma la FAIL-CLOSE (do loi) thi khong phai `day_du` do duoc."""
     if su_kien == "push":
         return BONG_CHAY, "push", BONG_CHAY, "-"
     if su_kien != "pull_request":
         return BONG_CHAY, "su_kien_khong_phai_pull_request", BONG_CHAY, "-"
     if che_do != DAY_DU:
         return BONG_CHAY, "che_do_dang_chay_khong_phai_day_du", BONG_CHAY, "-"
+    if cu_do != BONG_DO_DUOC:
+        return BONG_KDD, "che_do_dang_chay_la_fail_close", BONG_KDD, "-"
     if doi is None:
         return BONG_KDD, "diff_khong_do_duoc", BONG_KDD, "-"
     if not doi:
@@ -614,29 +624,68 @@ def bong_cong_cu(su_kien, che_do, doi, env2, chay=subprocess.run, kho=ROOT):
     return BONG_BO_QUA, "ngoai_bao_dong", BONG_BO_QUA, "khop"
 
 
+def phan_loai_bong(env, chay=subprocess.run, kho=ROOT):
+    """(doi, moi, ly do khong do duoc | None) — CUNG cac buoc cua `phan_loai_day_du` (`doc_diff` -> `phan_loai_tu_diff` ->
+    `doc_raw_ba_cap` -> `ly_do_ve_day_du`) tren env da chuan hoa cua su kien `pull_request`, nhung GIU trang thai khong do duoc thay
+    vi fail-close ve `day_du` (review F3): bo phan loai that PHAI fail-close, con bong phai biet no KHONG do duoc. `t118` doi khop
+    voi `phan_loai_day_du` tren moi dau vao do duoc."""
+    doi = doc_diff(env, chay, kho)
+    if doi is None:
+        return None, BONG_KDD, "diff_ngu_canh_moi_khong_do_duoc"
+    che_do, _ly = phan_loai_tu_diff(doi)
+    if che_do != DUONG_NHANH or not doi:
+        return doi, che_do, None
+    raw = doc_raw_ba_cap(env, chay, kho)
+    if isinstance(raw, str):
+        return doi, BONG_KDD, "raw_ngu_canh_moi_khong_do_duoc"
+    return doi, (DAY_DU if ly_do_ve_day_du(doi, raw) else DUONG_NHANH), None
+
+
+def kiem_bong(loi, dau_phat_hien=None):
+    """`dat` | `do` | `khong_do_duoc` cua MOT phep kiem tren ngu canh moi. Rong => dat. Moi dong la PHAT HIEN do duoc (khong mo dau
+    `KHONG DO DUOC`; khi `dau_phat_hien` co mat thi phai mo dau bang dung dau ay — danh sach CHO PHEP) => do. Con lai => khong do duoc."""
+    if not loi:
+        return "dat"
+    if any(x.startswith("KHONG DO DUOC") for x in loi):
+        return BONG_KDD
+    if dau_phat_hien is not None and not all(x.startswith(dau_phat_hien) for x in loi):
+        return BONG_KDD
+    return "do"
+
+
 def bong_phan_loai(su_kien, che_do, env2, chay=subprocess.run, kho=ROOT):
     """(cu, moi, goc_so | None, ly do, kiem) — `cu` la phan loai theo luat dang chay; `moi` la CUNG bo phan loai (diff, raw, mode)
     tren ngu canh so sanh moi (goc = cha thu nhat cua merge ref), cong ba phep kiem mode / diff-check / nhi phan khi `moi` ra
-    duong nhanh. Ngu canh khong dung duoc => `moi` = `khong_do_duoc`."""
+    duong nhanh. Ngu canh khong dung duoc, hay MOT lan doc nao (diff, raw, mode, noi dung) khong do duoc => `moi` = `khong_do_duoc`
+    kem ly do — khong bao gio thanh mot phan loai do duoc (review F3)."""
     if su_kien != "pull_request":
         return che_do, BONG_KDD, None, "su_kien_khong_phai_pull_request", "-"
     goc_so, ly = ngu_canh_merge(env2 or {}, chay, kho)
     if goc_so is None:
         return che_do, BONG_KDD, None, "ngu_canh_merge:" + ly, "-"
     env_moi = {**env2, BIEN_GOC: goc_so}
-    doi_m, moi, _ = phan_loai_day_du(env_moi, chay, kho)
-    if doi_m is None:
-        return che_do, BONG_KDD, goc_so, "diff_ngu_canh_moi_khong_do_duoc", "-"
+    doi_m, moi, ly_kdd = phan_loai_bong(env_moi, chay, kho)
+    if moi == BONG_KDD:
+        return che_do, BONG_KDD, goc_so, ly_kdd, "-"
     kiem = "-"
     if moi == DUONG_NHANH and doi_m:
-        loi = kiem_mode_git(env_moi, chay, kho, doi_m) + kiem_diff_check(env_moi, chay, kho) + kiem_nhi_phan(env_moi, chay, kho)
-        kiem = BONG_KDD if any("KHONG DO DUOC" in x for x in loi) else ("do" if loi else "dat")
+        kiem = "dat"
+        for ten, phep, dau in (("kiem_mode", lambda: kiem_mode_git(env_moi, chay, kho, doi_m), None),
+                               ("kiem_diff_check", lambda: kiem_diff_check(env_moi, chay, kho), DAU_PHAT_HIEN_DIFF_CHECK),
+                               ("kiem_nhi_phan", lambda: kiem_nhi_phan(env_moi, chay, kho), None)):
+            kq = kiem_bong(phep(), dau)
+            if kq == BONG_KDD:
+                return che_do, BONG_KDD, goc_so, ten + "_khong_do_duoc", BONG_KDD
+            if kq == "do":
+                kiem = "do"
     return che_do, moi, goc_so, "-", kiem
 
 
-def dong_bong(env, che_do, env2, doi, chay=subprocess.run, kho=ROOT):
-    """Hai dong bong (danh sach chuoi). Moi loi cua TUNG dong thanh `khong_do_duoc` kem ten lop loi; khong nem ra ngoai."""
+def dong_bong(env, che_do, env2, doi, chay=subprocess.run, kho=ROOT, ly_do=None):
+    """Hai dong bong (danh sach chuoi). Moi loi cua TUNG dong thanh `khong_do_duoc` kem ten lop loi; khong nem ra ngoai. `ly_do`: ly
+    do cua phan loai DANG CHAY — chi tien to trong `LY_DO_CU_DO_DUOC` moi la phan loai do duoc (`cu_do`); vang => khong do duoc."""
     try:
+        cu_do = BONG_DO_DUOC if che_do in (DAY_DU, DUONG_NHANH) and type(ly_do) is str and ly_do.startswith(LY_DO_CU_DO_DUOC) else BONG_KDD
         su_kien = env.get(BIEN_SU_KIEN) or ""
         run, att = (x if type(x) is str and MAU_SO.fullmatch(x) else "-" for x in (env.get(BIEN_RUN), env.get(BIEN_ATTEMPT)))
         o = {k: _oid((env2 or env).get(b)) or "-" for k, b in (("goc", BIEN_GOC), ("dau", BIEN_DAU), ("hop", BIEN_MERGE))}
@@ -646,9 +695,10 @@ def dong_bong(env, che_do, env2, doi, chay=subprocess.run, kho=ROOT):
         chay_bong = _chay_co_han(chay)
     except Exception as e:
         return [f"BONG_CONG_CU: {BONG_KDD} ly_do=loi_noi_bo:{type(e).__name__} run=-/- head=-",
-                f"BONG_PHAN_LOAI: cu={che_do} moi={BONG_KDD} goc_su_kien=- goc_so=- dau=- hop=- ly_do=loi_noi_bo:{type(e).__name__} run=-/-"]
+                f"BONG_PHAN_LOAI: cu={che_do} moi={BONG_KDD} goc_su_kien=- goc_so=- dau=- hop=- ly_do=loi_noi_bo:{type(e).__name__} "
+                f"cu_do={BONG_KDD} run=-/-"]
     try:
-        qd, ly, theo_duong, vt = bong_cong_cu(su_kien, che_do, doi, env2, chay_bong, kho)
+        qd, ly, theo_duong, vt = bong_cong_cu(su_kien, che_do, doi, env2, chay_bong, kho, cu_do)
     except Exception as e:
         qd, ly, theo_duong, vt = BONG_KDD, f"loi_noi_bo:{type(e).__name__}", BONG_KDD, "-"
     try:
@@ -657,13 +707,13 @@ def dong_bong(env, che_do, env2, doi, chay=subprocess.run, kho=ROOT):
         cu, moi, goc_so, ly_pl, kiem = che_do, BONG_KDD, None, f"loi_noi_bo:{type(e).__name__}", "-"
     return [f"BONG_CONG_CU: {qd} ly_do={ly} {duoi} duong_dan={theo_duong} van_tay={vt} su_kien={su_kien_in} che_do={che_do}",
             f"BONG_PHAN_LOAI: cu={cu} moi={moi} goc_su_kien={goc_su_kien} goc_so={goc_so or '-'} dau={o['dau']} hop={o['hop']} "
-            f"ly_do={ly_pl} kiem_moi={kiem} run={run}/{att} su_kien={su_kien_in}"]
+            f"ly_do={ly_pl} cu_do={cu_do} kiem_moi={kiem} run={run}/{att} su_kien={su_kien_in}"]
 
 
-def in_bong(env, che_do, env2, doi, chay, kho, ra):
+def in_bong(env, che_do, env2, doi, chay, kho, ra, ly_do=None):
     """In hai dong bong ra `ra`. KHONG tra gi, KHONG nem: ma thoat va output that cua `main` khong phu thuoc ham nay."""
     try:
-        for dong in dong_bong(env, che_do, env2, doi, chay, kho):
+        for dong in dong_bong(env, che_do, env2, doi, chay, kho, ly_do):
             print(dong, file=ra)
     except Exception as e:
         try:
@@ -1076,7 +1126,7 @@ def main(argv=None, env=os.environ, chay=subprocess.run, kho=ROOT, ra=None) -> i
             print(f"DUONG_NHANH: khong ghi duoc GITHUB_OUTPUT ({type(e).__name__}) - DO", file=sys.stderr)
             return 1
     # wp1448: hai dong bong in SAU khi output that da ghi xong; chung khong doi ma thoat, khong cham `GITHUB_OUTPUT`.
-    in_bong(env, che_do, env2, doi[0] if doi else None, chay, kho, ra)
+    in_bong(env, che_do, env2, doi[0] if doi else None, chay, kho, ra, ly_do)
     return 0
 
 

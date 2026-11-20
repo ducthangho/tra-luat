@@ -1543,36 +1543,23 @@ def _thu_tu_tat_dinh():
         raise RuntimeError("c65: bộ gom không chờ future nào trong 10 s — bộ giả không điều khiển được thứ tự")
     bang(r == [0, 10, 20, 30, 40, 50], f"bộ thực thi hoàn tất NGƯỢC 5..0: kết quả phải theo thứ tự việc, được {r!r}")
 
+HAN_CHONG_C65 = 10   # giây: hạn của MỌI lần chờ rào trong c65; bản gốc gặp nhau trong vài ms, bản mất song song trả sau đúng một hạn
+
 @ca
 def c65_chay_theo_thu_tu():   # #1322 M2/A3: n > 1 thì chạy CHỒNG thật; kết quả theo thứ tự việc, không theo thứ tự xong
-    import threading   # review lượt 1 F1: việc 0 bị GIỮ tới khi việc 1..5 đã TRẢ VỀ ⇒ nó luôn xong cuối, mọi cách gom theo thứ tự xong đều đặt nó cuối
-    tha0, cv, dem, kq = threading.Event(), threading.Condition(), [0], {}
+    import threading   # review lượt 5 (lớp F4, đổi cách làm): KHÔNG còn luồng điều phối phụ — `chay_theo_thu_tu` gọi THẲNG trên luồng của ca, nên
+    n = 4              # lỗi vô can của bộ gom hay của một việc tự bay về đây, NGOÀI `bang` ⇒ rc 4 ⇒ `TIN_DUNG_GIA`; không có `except` nào để nuốt
+    rao = threading.Barrier(n)   # n việc đầu phải CÙNG đứng ở rào thì mới qua: đủ n luồng chạy chồng, không chỉ "có hơn một"
     def ham(i):
-        if i == 0:
-            return "giu" if tha0.wait(60) else "het_han"   # dài hơn hạn 10 s của luồng kiểm ⇒ hai hạn không chạy đua
-        with cv:
-            dem[0] += 1
-            cv.notify_all()
+        if i < n:   # 6 việc mà n = 4: việc 4, 5 KHÔNG chờ rào (không bao giờ đủ người) — chúng chỉ để hàng đợi dài hơn số luồng
+            try:
+                rao.wait(HAN_CHONG_C65)
+            except threading.BrokenBarrierError:   # rào vỡ (quá hạn ở việc này hay ở việc khác) trả GIÁ TRỊ, không ném: mất song song
+                return "vo"                        # là tín hiệu CHỐT (`bang` dưới), còn mọi ngoại lệ KHÁC vẫn bay ra nguyên văn
         return i
-    def dieu_phoi():   # review lượt 2 F4: thu cả NGOẠI LỆ của luồng — lỗi vô can không được thành `kq["r"] = None` rồi bị `bang` đọc là lỗi thứ tự
-        try:
-            kq["r"] = chay_theo_thu_tu(ham, range(6), 4)
-        except BaseException as e:   # noqa: BLE001 — ném lại nguyên văn ở luồng ca, ngoài `bang`
-            kq["loi"] = e
-    t = threading.Thread(target=dieu_phoi, daemon=True)
-    t.start()
-    try:
-        with cv:
-            chong = cv.wait_for(lambda: dem[0] == 5, timeout=10)
-    finally:
-        tha0.set()
-        t.join(90)
-    if "loi" in kq:
-        raise kq["loi"]
-    if t.is_alive():
-        raise RuntimeError("c65: luồng điều phối chưa xong sau 90 s")   # quá hạn là lỗi hạ tầng, không phải tín hiệu chốt
-    bang(chong, "n=4 phải chạy chồng: việc 1..5 xong trong lúc việc 0 còn bị giữ")
-    bang(kq.get("r") == ["giu", 1, 2, 3, 4, 5], f"kết quả phải theo thứ tự việc, được {kq.get('r')!r}")
+    r = chay_theo_thu_tu(ham, range(6), n)
+    bang("vo" not in r, f"n={n} phải chạy chồng: {n} việc đầu cùng đứng ở rào trong {HAN_CHONG_C65} s, được {r!r}")
+    bang(r == [0, 1, 2, 3, 4, 5], f"kết quả phải theo thứ tự việc, được {r!r}")
     bang(chay_theo_thu_tu(lambda i: i * i, range(5), 1) == [0, 1, 4, 9, 16], "n=1 tuần tự, đúng thứ tự")
     _thu_tu_tat_dinh()   # review lượt 4 F1: phép trên phụ thuộc lịch (T3 sống 1/5.000); phép này không
 
@@ -1618,88 +1605,6 @@ def c67_lam_nong_truoc_vong_dot_bien():   # #1322 M2, review lượt 1 F2: bản
         bang({loai for loai, _ in nhat_ky[:dau]} == {"goc"} and "goc" not in {loai for loai, _ in nhat_ky[dau:]},
              f"n={n}: mọi bản gốc phải xong TRƯỚC đột biến đầu tiên: {nhat_ky}")
         bang([(t, h) for t, h, _ in kq] == [(d[0], "GIET") for _, d in viec] and len(viec) == 4, f"n={n}: mỗi việc đúng một kết quả, đúng tên: {kq}")
-
-class LoiHaTangLong(RuntimeError):   # #1322 review lượt 4 F4c: lỗi hạ tầng CÓ CHỦ ĐÍCH của c68 — c70 chỉ bắt đúng lớp này
-    pass
-TIEN_TO_HA_TANG_C68 = "c68: tiến trình lồng không đo được"
-
-@ca
-def c68_loi_luong_nen_la_tin_dung_gia():   # #1322 review lượt 2 F4: bộ gom chạy ĐỦ việc rồi ném lỗi vô can ⇒ c65 phải ra TIN_DUNG_GIA, không GIET
-    neo = 'return list(ex.' + 'map(ham, viec))'   # ghép hai mảnh: neo phải xuất hiện ĐÚNG MỘT lần trong tệp
-    hang, ra = chay_dot_bien_test("F4_loi_luong_nen", neo, 'list(ex.' + 'map(ham, viec)); raise RuntimeError("c68_loi_vo_can")', "c65")
-    xet = xet_c68(hang, ra)
-    if xet == "HA_TANG":   # review lượt 3 F4b: quá hạn / lỗi vô can KHÁC / bản gốc đỏ trong tiến trình lồng ⇒ lỗi hạ tầng, KHÔNG phải tín hiệu chốt
-        raise LoiHaTangLong(f"{TIEN_TO_HA_TANG_C68} ({hang}): {ra!r}")
-    bang(xet == "DAT", f"c65 đã nuốt lỗi vô can của luồng điều phối thành lỗi thứ tự (GIET): {ra!r}")
-
-def xet_c68(hang, ra):   # #1322 F4b: chỉ ĐÚNG MỘT dạng là chốt c68 phải bắt — c65 đổi lỗi vô can thành `DO:c65_...`
-    if hang == "TIN_DUNG_GIA" and "c68_loi_vo_can" in ra:
-        return "DAT"
-    if hang == "GIET" and "DO:c65_chay_theo_thu_tu:" in ra:
-        return "NUOT_LOI"
-    return "HA_TANG"
-
-@ca
-def c69_xet_c68_tach_ha_tang():   # #1322 review lượt 3 F4b: bảng phân xử của c68, mỗi đường vào một dòng
-    for hang, ra, mong in (("TIN_DUNG_GIA", "RuntimeError: c68_loi_vo_can", "DAT"),
-                           ("GIET", "DO:c65_chay_theo_thu_tu:kết quả phải theo thứ tự việc, được None", "NUOT_LOI"),
-                           ("HONG", "QUA_HAN:c65_chay_theo_thu_tu: tien trinh con qua 300 s", "HA_TANG"),
-                           ("HONG", "ca đích không xanh trên bản gốc (rc=4): x", "HA_TANG"),
-                           ("TIN_DUNG_GIA", "RuntimeError: loi khac", "HA_TANG"),
-                           ("SONG_SOT", "", "HA_TANG"),
-                           ("GIET", "DO:c64_so_tien_trinh_mien: x", "HA_TANG"),
-                           ("TIN_DUNG_GIA", "DO:c65_chay_theo_thu_tu: x", "HA_TANG"),   # review lượt 4: hạng sai + dấu c65
-                           ("HONG", "DO:c65_chay_theo_thu_tu: x", "HA_TANG")):
-        bang(xet_c68(hang, ra) == mong, f"xet_c68({hang!r}, {ra!r}) phải {mong}, được {xet_c68(hang, ra)}")
-
-def _loi_cua_c68(e, lop, tien_to, da_goi):   # #1322 review lượt 5 F4d: CHỈ nhận lỗi c68 tự ném — đúng lớp CHÍNH XÁC, đúng tiền tố, và SAU khi đã qua seam `xet_c68`
-    return da_goi[0] and type(e) is lop and str(e).startswith(tien_to)
-
-def _chay_c68_qua_seam(gia, xet=None):   # chạy CHÍNH c68 với kết quả lồng giả; trả lớp lỗi c68 tự ném (hoặc None); mọi lỗi khác bay ra NGUYÊN VĂN
-    goc, da_goi = xet_c68, [False]
-    def gian(hang, ra):
-        da_goi[0] = True
-        return (xet or goc)(hang, ra)
-    with mock.patch(__name__ + ".chay_dot_bien_test", return_value=gia), mock.patch(__name__ + ".xet_c68", side_effect=gian):
-        try:
-            c68_loi_luong_nen_la_tin_dung_gia()
-            return None
-        except (TinHieuChotCa, RuntimeError) as e:
-            for lop, tien_to in ((TinHieuChotCa, "c65 đã nuốt lỗi vô can"), (LoiHaTangLong, TIEN_TO_HA_TANG_C68), (RuntimeError, TIEN_TO_HA_TANG_C68)):
-                if _loi_cua_c68(e, lop, tien_to, da_goi):
-                    return lop
-            raise
-
-@ca
-def c70_c68_ha_tang_khong_thanh_chot():   # #1322 F4b/F4c/F4d: hạ tầng ⇒ LoiHaTangLong, nuốt lỗi ⇒ TinHieuChotCa; lỗi vô can bay ra ngoài `bang`
-    for gia, mong in ((("HONG", "QUA_HAN:c65_chay_theo_thu_tu: tien trinh con qua 300 s"), LoiHaTangLong),
-                      (("TIN_DUNG_GIA", "RuntimeError: loi khac"), LoiHaTangLong),
-                      (("GIET", "DO:c65_chay_theo_thu_tu: được None"), TinHieuChotCa),
-                      (("TIN_DUNG_GIA", "RuntimeError: c68_loi_vo_can"), None)):
-        duoc = _chay_c68_qua_seam(gia)
-        bang(duoc is mong, f"c68 với kết quả lồng {gia!r} phải ra {mong}, được {duoc}")
-    vo_can = RuntimeError("c70_vo_can")   # lỗi vô can NGAY TẠI seam phải bay ra NGUYÊN VĂN, không bị c68 bọc thành LoiHaTangLong
-    def nem(hang, ra):
-        raise vo_can
-    try:
-        duoc = _chay_c68_qua_seam(("GIET", "x"), xet=nem)
-    except RuntimeError as e:
-        if e is not vo_can:
-            raise
-    else:
-        bang(False, f"lỗi vô can tại seam của c68 phải bay ra nguyên văn, c68 lại trả {duoc}")
-
-@ca
-def c71_c70_khong_nhan_loi_truoc_seam():   # #1322 review lượt 5 F4d: lỗi MANG đúng lớp + tiền tố nhưng ném TRƯỚC seam ⇒ c70 phải để nó bay ra nguyên văn
-    for gai in (LoiHaTangLong(TIEN_TO_HA_TANG_C68 + " gai"), TinHieuChotCa("c65 đã nuốt lỗi vô can gai"), RuntimeError(TIEN_TO_HA_TANG_C68 + " gai")):
-        with mock.patch(__name__ + ".c68_loi_luong_nen_la_tin_dung_gia", side_effect=gai):
-            try:
-                c70_c68_ha_tang_khong_thanh_chot()
-            except BaseException as e:   # noqa: BLE001 — chỉ cho qua ĐÚNG lỗi đã gài; mọi thứ khác ném lại nguyên văn
-                if e is not gai:
-                    raise
-            else:
-                bang(False, f"c70 đã nhận lỗi gài trước seam {gai!r} như lỗi của c68")
 
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
@@ -2109,14 +2014,6 @@ DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — s
     ("T6_bo_lam_nong", '    lam_nong_nen(n)' + _XD + '    return chay_theo_thu_tu(', '    pass' + _XD + '    return chay_theo_thu_tu(', "c67"),
     ("T7_lam_nong_bo_sot_dot_bien_test", 'DOT_BIEN + TU_KIEM + ' + 'DOT_BIEN_TEST:', 'DOT_BIEN + TU_KIEM:', "c67"),
     ("T8_bo_kiem_du_ket_qua", 'len(DOT_BIEN) > 0 and ' + 'du and', 'len(DOT_BIEN) > 0 and', "c66"),
-    ("T9_c65_nuot_loi_luong", 'if "loi" in ' + 'kq:' + _XD + '        raise', 'if False:' + _XD + '        raise', "c68"),   # review lượt 2 F4
-    ("T10_c68_ha_tang_thanh_chot", 'if xet == "HA_' + 'TANG":', 'if False:', "c70"),   # review lượt 3 F4b: mỗi đường vào một chốt riêng
-    ("T11_xet_c68_moi_thu_la_nuot_loi", '    return "HA_' + 'TANG"' + _XD, '    return "NUOT_LOI"' + _XD, "c69"),
-    ("T12_xet_c68_giet_khong_doi_dau_c65", 'if hang == "GIET" and "DO:c65_' + 'chay_theo_thu_tu:" in ra:', 'if hang == "GIET":', "c69"),
-    ("T13_xet_c68_khong_doi_hang_giet", 'if hang == "GIET" and "DO:c65_' + 'chay_theo_thu_tu:" in ra:', 'if "DO:c65_' + 'chay_theo_thu_tu:" in ra:', "c69"),   # review lượt 4
-    ("T14_c68_ha_tang_sai_lop", 'raise LoiHaTang' + 'Long(f"{TIEN_TO', 'raise RuntimeError(f"{TIEN_TO', "c70"),   # review lượt 4 F4c
-    ("T15_c68_boc_loi_vo_can", '    xet = xet_c68(' + 'hang, ra)' + _XD, '    try:' + _XD + '        xet = xet_c68(' + 'hang, ra)' + _XD + '    except RuntimeError:' + _XD + '        xet = "HA_TANG"' + _XD, "c70"),
-    ("T16_c70_bo_chot_seam", 'return da_goi[0] and ' + 'type(e) is lop', 'return type(e) is lop', "c71"),   # review lượt 5 F4d
     ("T18_du_chi_dem_so_luong", '[t for t, _, _ in kq_db] == ' + 'ten_kh', 'len(kq_db) == len(ten_kh)', "c66"),   # review lượt 5 F3c
     ("T19_ke_hoach_tu_ket_qua", 'ten_kh = [d[0] for _, d in ' + 'viec]', 'ten_kh = [d[0] for _, d in ' + 'viec][:0]', "c66"),
 )

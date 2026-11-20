@@ -1649,40 +1649,54 @@ def c69_xet_c68_tach_ha_tang():   # #1322 review lượt 3 F4b: bảng phân x�
                            ("HONG", "DO:c65_chay_theo_thu_tu: x", "HA_TANG")):
         bang(xet_c68(hang, ra) == mong, f"xet_c68({hang!r}, {ra!r}) phải {mong}, được {xet_c68(hang, ra)}")
 
+def _loi_cua_c68(e, lop, tien_to, da_goi):   # #1322 review lượt 5 F4d: CHỈ nhận lỗi c68 tự ném — đúng lớp CHÍNH XÁC, đúng tiền tố, và SAU khi đã qua seam `xet_c68`
+    return da_goi[0] and type(e) is lop and str(e).startswith(tien_to)
+
+def _chay_c68_qua_seam(gia, xet=None):   # chạy CHÍNH c68 với kết quả lồng giả; trả lớp lỗi c68 tự ném (hoặc None); mọi lỗi khác bay ra NGUYÊN VĂN
+    goc, da_goi = xet_c68, [False]
+    def gian(hang, ra):
+        da_goi[0] = True
+        return (xet or goc)(hang, ra)
+    with mock.patch(__name__ + ".chay_dot_bien_test", return_value=gia), mock.patch(__name__ + ".xet_c68", side_effect=gian):
+        try:
+            c68_loi_luong_nen_la_tin_dung_gia()
+            return None
+        except (TinHieuChotCa, RuntimeError) as e:
+            for lop, tien_to in ((TinHieuChotCa, "c65 đã nuốt lỗi vô can"), (LoiHaTangLong, TIEN_TO_HA_TANG_C68), (RuntimeError, TIEN_TO_HA_TANG_C68)):
+                if _loi_cua_c68(e, lop, tien_to, da_goi):
+                    return lop
+            raise
+
 @ca
-def c70_c68_ha_tang_khong_thanh_chot():   # #1322 F4b/F4c: chạy CHÍNH c68 với kết quả lồng giả. CHỈ bắt đúng lớp/thông điệp c68 tự ném; mọi lỗi khác bay ra NGOÀI `bang`
+def c70_c68_ha_tang_khong_thanh_chot():   # #1322 F4b/F4c/F4d: hạ tầng ⇒ LoiHaTangLong, nuốt lỗi ⇒ TinHieuChotCa; lỗi vô can bay ra ngoài `bang`
     for gia, mong in ((("HONG", "QUA_HAN:c65_chay_theo_thu_tu: tien trinh con qua 300 s"), LoiHaTangLong),
                       (("TIN_DUNG_GIA", "RuntimeError: loi khac"), LoiHaTangLong),
                       (("GIET", "DO:c65_chay_theo_thu_tu: được None"), TinHieuChotCa),
                       (("TIN_DUNG_GIA", "RuntimeError: c68_loi_vo_can"), None)):
-        with mock.patch(__name__ + ".chay_dot_bien_test", return_value=gia):
-            try:
-                c68_loi_luong_nen_la_tin_dung_gia()
-                duoc = None
-            except TinHieuChotCa as e:
-                if not str(e).startswith("c65 đã nuốt lỗi vô can"):
-                    raise
-                duoc = TinHieuChotCa
-            except LoiHaTangLong as e:
-                if not str(e).startswith(TIEN_TO_HA_TANG_C68):
-                    raise
-                duoc = LoiHaTangLong
-            except RuntimeError as e:   # chỉ nhận đúng thông điệp của c68 ném SAI lớp; RuntimeError vô can bay ra nguyên văn
-                if not str(e).startswith(TIEN_TO_HA_TANG_C68):
-                    raise
-                duoc = RuntimeError
+        duoc = _chay_c68_qua_seam(gia)
         bang(duoc is mong, f"c68 với kết quả lồng {gia!r} phải ra {mong}, được {duoc}")
-    vo_can = RuntimeError("c70_vo_can")   # lỗi vô can BÊN TRONG c68 phải bay ra NGUYÊN VĂN, không bị bọc thành LoiHaTangLong
-    with mock.patch(__name__ + ".chay_dot_bien_test", return_value=("GIET", "x")), mock.patch(__name__ + ".xet_c68", side_effect=vo_can):
-        try:
-            c68_loi_luong_nen_la_tin_dung_gia()
-        except LoiHaTangLong as e:
-            bang(False, f"lỗi vô can trong c68 bị bọc thành LoiHaTangLong: {e}")
-        except RuntimeError as e:
-            if e is not vo_can:
-                raise
-        else:
-            bang(False, "lỗi vô can trong c68 bị nuốt")
+    vo_can = RuntimeError("c70_vo_can")   # lỗi vô can NGAY TẠI seam phải bay ra NGUYÊN VĂN, không bị c68 bọc thành LoiHaTangLong
+    def nem(hang, ra):
+        raise vo_can
+    try:
+        duoc = _chay_c68_qua_seam(("GIET", "x"), xet=nem)
+    except RuntimeError as e:
+        if e is not vo_can:
+            raise
+    else:
+        bang(False, f"lỗi vô can tại seam của c68 phải bay ra nguyên văn, c68 lại trả {duoc}")
+
+@ca
+def c71_c70_khong_nhan_loi_truoc_seam():   # #1322 review lượt 5 F4d: lỗi MANG đúng lớp + tiền tố nhưng ném TRƯỚC seam ⇒ c70 phải để nó bay ra nguyên văn
+    for gai in (LoiHaTangLong(TIEN_TO_HA_TANG_C68 + " gai"), TinHieuChotCa("c65 đã nuốt lỗi vô can gai"), RuntimeError(TIEN_TO_HA_TANG_C68 + " gai")):
+        with mock.patch(__name__ + ".c68_loi_luong_nen_la_tin_dung_gia", side_effect=gai):
+            try:
+                c70_c68_ha_tang_khong_thanh_chot()
+            except BaseException as e:   # noqa: BLE001 — chỉ cho qua ĐÚNG lỗi đã gài; mọi thứ khác ném lại nguyên văn
+                if e is not gai:
+                    raise
+            else:
+                bang(False, f"c70 đã nhận lỗi gài trước seam {gai!r} như lỗi của c68")
 
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
@@ -2099,6 +2113,7 @@ DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — s
     ("T13_xet_c68_khong_doi_hang_giet", 'if hang == "GIET" and "DO:c65_' + 'chay_theo_thu_tu:" in ra:', 'if "DO:c65_' + 'chay_theo_thu_tu:" in ra:', "c69"),   # review lượt 4
     ("T14_c68_ha_tang_sai_lop", 'raise LoiHaTang' + 'Long(f"{TIEN_TO', 'raise RuntimeError(f"{TIEN_TO', "c70"),   # review lượt 4 F4c
     ("T15_c68_boc_loi_vo_can", '    xet = xet_c68(' + 'hang, ra)' + _XD, '    try:' + _XD + '        xet = xet_c68(' + 'hang, ra)' + _XD + '    except RuntimeError:' + _XD + '        xet = "HA_TANG"' + _XD, "c70"),
+    ("T16_c70_bo_chot_seam", 'return da_goi[0] and ' + 'type(e) is lop', 'return type(e) is lop', "c71"),   # review lượt 5 F4d
 )
 
 def chay_con(ten_ca, ma):

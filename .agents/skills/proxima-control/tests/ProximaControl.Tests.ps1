@@ -3,7 +3,7 @@
 #   powershell.exe|pwsh.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <copy>\ProximaControl.Tests.ps1 `
 #     -ModulePath <tree>\.agents\skills\proxima-control\scripts\ProximaControl.psm1 -ScratchRoot <existing dir outside the tree> `
 #     -ReportPath <json outside the tree> [-EvidenceRoot <durable dir outside the tree>] [-Counterexamples] [-TestCulture en-US|tr-TR]
-# rc 0: all 27 mandatory IDs (with -Counterexamples also CX00-CX12) passed and cleanup was verified. rc 1: a case failed - an absent
+# rc 0: all 27 mandatory IDs (with -Counterexamples also CX00-CX13) passed and cleanup was verified. rc 1: a case failed - an absent
 # module fails EVERY case with API_ABSENT while every case still executes. rc 2: setup or cleanup error, never a test outcome.
 # Safety: every hazardous backend binding (session, remote invoke, HTTP, CIM process/service/TCP listener, service control, id) is
 # replaced in the module's private table BEFORE any product call, and the replacement is asserted. HTTP is re-bound to the real
@@ -15,7 +15,7 @@
 # process. Evidence (r3 F02): <EvidenceRoot or ScratchRoot>\pxctl-evid-<run> sits OUTSIDE the deleted fixture tree; every child's
 # script, serialized input, raw report and captured output are written/kept there in place, linked by role/path/hash, and re-verified
 # AFTER cleanup (missing/changed/inside a deleted or measured tree => rc 2); each CX child gets its own sibling <CXnn>.nested root.
-# -Counterexamples: CX00 unmodified control + CX01-CX12 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
+# -Counterexamples: CX00 unmodified control + CX01-CX13 single-anchor mutants of COPIES in <EvidenceRoot>\pxctl-evid-<run>,
 # each rerunning this harness; credit only for rc 1 with the named behavioural token in the named case (setup/import/wrong-rc
 # earn nothing; a surviving mutant is reported, never credited). Evidence is never deleted. Helpers are alias-free and no
 # automatic variable (args, PID, HOME, PROFILE) is assigned; setup refuses any inner binding that reuses a top-level name
@@ -1049,7 +1049,8 @@ Invoke-Case 'X5-10' {
     foreach ($c in @(@('bare', 'gw', 'gw'), @('variant', 'gw', 'gw:fast'), @('legacy slash', 'prov', 'prov/m1'), @('bare auto', 'auto', 'auto'))) {
         Assert-Ok (Invoke-Px (New-PxArgs 'use' $Tg.L1 @{ Provider = $c[1]; Value = $c[2] })) "id form $($c[0])"
     }
-    foreach ($c in @(@('prefix without separator', 'gw', 'gwz'), @('variant case alias', 'gw', 'gw:FAST'), @('variant not advertised', 'gw', 'gw:slow'), @('shorter provider', 'g', 'gw:fast'))) {
+    foreach ($c in @(@('prefix without separator', 'gw', 'gwz'), @('variant case alias', 'gw', 'gw:FAST'), @('variant not advertised', 'gw', 'gw:slow'), @('shorter provider', 'g', 'gw:fast'),
+            @('provider case bare', 'GW', 'gw'), @('provider case variant', 'GW', 'gw:fast'), @('provider case slash', 'Prov', 'prov/m1'), @('provider case auto', 'AUTO', 'auto'))) {
         $x = Invoke-Px (New-PxArgs 'use' $Tg.L1 @{ Provider = $c[1]; Value = $c[2] })
         if ($x.R -or $x.StateChanged) { Add-Fail "MODEL_ID_FORM_LOOSE[$($c[0])]" } else { Assert-Code $x 'ModelNotAdvertised' $c[0] }
         $x = Invoke-Px (New-PxArgs 'ask' $Tg.L1 @{ Provider = $c[1]; Value = 'p'; Model = $c[2] })
@@ -1059,6 +1060,8 @@ Invoke-Case 'X5-10' {
     if ($x.R) { Add-Fail 'PROVIDER_COLON_ACCEPTED' } else { Assert-Code $x 'ArgumentInvalid' 'provider with colon' }
     $x = Invoke-Px (New-PxArgs 'models' $Tg.Pos @{ Provider = 'gw' })
     if (-not $x.R -or (@($x.R.data.models) -join ',') -cne 'gw,gw:fast') { Add-Fail 'MODELS_FILTER_ID_FORM' }
+    $x = Invoke-Px (New-PxArgs 'models' $Tg.Pos @{ Provider = 'GW' })
+    if (-not $x.R -or @($x.R.data.models).Count -ne 0) { Add-Fail 'MODELS_FILTER_CASE_LOOSE' }
     $n0 = @($global:PxcT.HttpReqs | Where-Object { $_['Method'] -ceq 'POST' }).Count
     $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'gw'; Value = 'p'; Model = 'gw:fast' }); Assert-Ok $x 'ask variant id'
     $post = @($global:PxcT.HttpReqs | Where-Object { $_['Method'] -ceq 'POST' })
@@ -1134,7 +1137,8 @@ $Cx = @(@{ id = 'CX00'; file = ''; e = @(); red = @() },
     @{ id = 'CX09'; file = 'ProximaControl.psm1'; e = @('if ($ok -ne $true) { Stop-Pxc ''ServiceIdentityUnverified'' }', '$null = $ok'); red = @('X5-07:SERVICE_BINDING_BYPASS[nssm wrapper start]') },
     @{ id = 'CX10'; file = 'ProximaControl.psm1'; e = @('if ([string]::IsNullOrEmpty($exePath)) { throw ''unreadable'' }', 'if ([string]::IsNullOrEmpty($exePath)) { $exePath = $expected }'); red = @('X5-08:UNVERIFIED_RUNTIME_USED[unreadable status]') },
     @{ id = 'CX11'; file = 'ProximaControl.psm1'; e = @('if ($own -ne $meta[''pid'']) { throw ''owner'' }', '$null = $own'); red = @('X5-09:LISTENER_OWNERSHIP_BYPASS[wrong owner px models]', 'X5-09:LISTENER_OWNERSHIP_BYPASS[wire px models]') },
-    @{ id = 'CX12'; file = 'ProximaControl.psm1'; e = @('$Id.StartsWith($Provider + '':'', [StringComparison]::Ordinal)', '$Id.StartsWith($Provider, [StringComparison]::Ordinal)'); red = @('X5-10:MODEL_ID_FORM_LOOSE[prefix without separator]') })
+    @{ id = 'CX12'; file = 'ProximaControl.psm1'; e = @('$Id.StartsWith($Provider + '':'', [StringComparison]::Ordinal)', '$Id.StartsWith($Provider, [StringComparison]::Ordinal)'); red = @('X5-10:MODEL_ID_FORM_LOOSE[prefix without separator]') },
+    @{ id = 'CX13'; file = 'ProximaControl.psm1'; e = @('$Id.StartsWith($Provider + '':'', [StringComparison]::Ordinal)', '$Id.StartsWith($Provider + '':'', [StringComparison]::OrdinalIgnoreCase)'); red = @('X5-10:MODEL_ID_FORM_LOOSE[provider case variant]', 'X5-10:MODELS_FILTER_CASE_LOOSE') })
 $Report.counterexample_ids = @($Cx | ForEach-Object { $_.id })
 function Get-Kill($Rep, [string[]]$Want) {
     $hit = [Collections.Generic.List[object]]::new()

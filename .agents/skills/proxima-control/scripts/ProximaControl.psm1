@@ -18,7 +18,8 @@
 #   isolated test harness replaces through module scope. There is no public callback/executor.
 # - r4 (F03): before ANY gateway HTTP the metadata port must be LISTENed on by the already validated Proxima PID (read-only CIM
 #   MSFT_NetTCPConnection snapshot; rules at Get-PxcGateway). Query failure/denial is fail-closed, never a fallback.
-# - Model ids: an advertised id belongs to provider P only if it starts with 'P/' (Ordinal) and is advertised verbatim.
+# - Model ids (r3 #1446): an id belongs to provider P only if it IS P, or starts with 'P:' or legacy 'P/' (Ordinal, Test-PxcModelOf),
+#   and it must be advertised verbatim. Providers contain neither '/' nor ':'.
 # Not proven: runtime provenance/version/quota, real WinRM auth, model identity (answers are untrusted data), installed
 # service wrapper layouts (NSSM and the like fail closed), admin ABA races, outward junctions elsewhere in a repository, and
 # atomic listener ownership: the port check is a snapshot, so a process/port swap between it and the HTTP send is a declared race.

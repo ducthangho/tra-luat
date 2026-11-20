@@ -1,0 +1,12 @@
+{
+  "hash": "e348a0aec274cc000368e7b728a9a70423434e000ace619fbc059383907fb2f5",
+  "match": true,
+  "actual_paths": [
+    ".claude/dev/ci_dang_ky_test.py",
+    "ops/gate_output_doi_chieu.py",
+    "ops/gate_output_doi_chieu_test.py"
+  ],
+  "revision": 9,
+  "generation": 1,
+  "lease_until": "2026-11-22T15:35:00Z"
+}

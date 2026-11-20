@@ -1,0 +1,211 @@
+[
+  {
+    "finding_cu": "F04",
+    "class_slug": "test-thieu-chot",
+    "mutants": [
+      {
+        "id": "m51_bo_head",
+        "target": "a108_neo",
+        "rc": 3,
+        "stdout": "DO:a108_neo:(g) head: mong ('not_measured', ['provenance_0']), được ('passed', [])\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m52_bo_schema",
+        "target": "a108_neo",
+        "rc": 3,
+        "stdout": "DO:a108_neo:(h) schema: mong ('not_measured', ['provenance_0']), được ('passed', [])\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m53_bo_goi_kiem_mien",
+        "target": "a209_mien",
+        "rc": 3,
+        "stdout": "DO:a209_mien:(j) kiem_ho_so MEMBER: []\n",
+        "stderr": "",
+        "classification": "GIET"
+      }
+    ],
+    "note": "Biểu hiện cũ có tín hiệu đúng ca đích; không suy đóng toàn lớp."
+  },
+  {
+    "finding_cu": "G02",
+    "class_slug": "test-thieu-chot",
+    "mutants": [
+      {
+        "id": "m60_bo_job_trung_prov",
+        "target": "a117_loi_duyet_va_job_trung",
+        "rc": 3,
+        "stdout": "DO:a117_loi_duyet_va_job_trung:G02 job_id trung: mong ('not_measured', ['job_id_trung_provenance']), được ('passed', [])\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m61_nhan_nhieu_readback",
+        "target": "a209_mien",
+        "rc": 3,
+        "stdout": "DO:a209_mien:(k) hai readback (G02 luot 2)\n",
+        "stderr": "",
+        "classification": "GIET"
+      }
+    ],
+    "note": "Biểu hiện cũ có tín hiệu đúng ca đích; không suy đóng toàn lớp."
+  },
+  {
+    "finding_cu": "H01",
+    "class_slug": "test-thieu-chot",
+    "mutants": [
+      {
+        "id": "m62_bo_so_tong_job",
+        "target": "a110_dong_tong",
+        "rc": 3,
+        "stdout": "DO:a110_dong_tong:passed (39/40: mong ('not_measured', ['moc_lech']), được ('passed', [])\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m63_bo_so_trang_thai_tong",
+        "target": "a110_dong_tong",
+        "rc": 3,
+        "stdout": "DO:a110_dong_tong:failed (39/39: mong ('not_measured', ['moc_lech']), được ('passed', [])\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m64_bo_ve_hai_ket_luan",
+        "target": "a113_ket_luan",
+        "rc": 3,
+        "stdout": "DO:a113_ket_luan:failure ma not_measured: mong ('not_measured', ['ket_luan_lech:136203672900', 'moc_lech']), được ('not_measured', ['moc_lech'])\n",
+        "stderr": "",
+        "classification": "GIET"
+      }
+    ],
+    "note": "Biểu hiện cũ có tín hiệu đúng ca đích; không suy đóng toàn lớp."
+  },
+  {
+    "finding_cu": "J01",
+    "class_slug": "test-thieu-chot",
+    "mutants": [
+      {
+        "id": "m72_checkout_skip_ngoai_job_skip",
+        "target": "a114_provenance_tu_khai_du",
+        "rc": 3,
+        "stdout": "DO:a114_provenance_tu_khai_du:(e): mong ('not_measured', ['provenance_chua_du']), được ('passed', [])\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m79_nhan_tuyet_doi",
+        "target": "a204_duong_dan",
+        "rc": 3,
+        "stdout": "DO:a204_duong_dan:(e) tuyet doi ['$.moc_gate_output: danh_gia_khong_passed:/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/work/tmp/godc_hs_79kn4v4y/pr9001-thu-provenance/danh-gia-gate-output-44669622916.txt:not_measured:symlink']\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m76_readback_symlink",
+        "target": "a209_mien",
+        "rc": 3,
+        "stdout": "DO:a209_mien:(l) readback symlink\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m70_bo_ly_do_symlink_thu_muc",
+        "target": "a116_yaml_la_trong_thu_muc",
+        "rc": 3,
+        "stdout": "DO:a116_yaml_la_trong_thu_muc:(d) symlink thu muc con: mong ('not_measured', ['symlink']), được ('passed', [])\n",
+        "stderr": "",
+        "classification": "GIET"
+      }
+    ],
+    "note": "Biểu hiện cũ có tín hiệu đúng ca đích; không suy đóng toàn lớp."
+  },
+  {
+    "finding_cu": "J02",
+    "class_slug": "test-thieu-chot",
+    "mutants": [
+      {
+        "id": "m69_bo_job_lap_skip",
+        "target": "a103_bo_phan_tich",
+        "rc": 3,
+        "stdout": "DO:a103_bo_phan_tich:job_lap : mong ('not_measured', ['job_lap']), được ('not_measured', ['tap_skip_lech', 'dong_skip_sai_phien_ban', 'moc_lech'])\n",
+        "stderr": "",
+        "classification": "GIET"
+      }
+    ],
+    "note": "Biểu hiện cũ có tín hiệu đúng ca đích; không suy đóng toàn lớp."
+  },
+  {
+    "finding_cu": "K01",
+    "class_slug": "test-thieu-chot",
+    "mutants": [
+      {
+        "id": "m82_token_am_la_hop_le",
+        "target": "a212_landed_khong_loi_khai",
+        "rc": 3,
+        "stdout": "DO:a212_landed_khong_loi_khai:(e) mong ['$: landed_khong_loi_khai_gate_output'], được []\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m83_bo_phi_gioi_han",
+        "target": "a201_loi_khai",
+        "rc": 3,
+        "stdout": "DO:a201_loi_khai:loi_khai: ['$.a[0].gate_output', '$.b.Gate-Output', '$.gate_output_nguon_va_gioi_han', '$.moc_gate_output']\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m84_bo_phi_disposition",
+        "target": "a201_loi_khai",
+        "rc": 3,
+        "stdout": "DO:a201_loi_khai:loi_khai: ['$.a[0].gate_output', '$.b.Gate-Output', '$.moc_gate_output', '$.moc_gate_output_rc_disposition']\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m85_dau_tep_match",
+        "target": "a103_bo_phan_tich",
+        "rc": 3,
+        "stdout": "DO:a103_bo_phan_tich:dau_tep_sai : mong ('not_measured', ['dau_tep_sai']), được ('passed', [])\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m86_tong_match",
+        "target": "a103_bo_phan_tich",
+        "rc": 3,
+        "stdout": "DO:a103_bo_phan_tich:dong_la : mong ('not_measured', ['dong_la']), được ('not_measured', ['moc_lap'])\n",
+        "stderr": "",
+        "classification": "GIET"
+      }
+    ],
+    "note": "Biểu hiện cũ có tín hiệu đúng ca đích; không suy đóng toàn lớp."
+  },
+  {
+    "finding_cu": "K02",
+    "class_slug": "test-thieu-chot",
+    "mutants": [
+      {
+        "id": "m87_check_khong_loc_passed",
+        "target": "a109_check_bat_buoc",
+        "rc": 3,
+        "stdout": "DO:a109_check_bat_buoc:gate-registry not_measured: mong ('not_measured', ['check_bat_buoc:gate-registry (ubuntu-latest)']), được ('not_measured', [])\n",
+        "stderr": "",
+        "classification": "GIET"
+      },
+      {
+        "id": "m88_skip_cu_match",
+        "target": "a103_bo_phan_tich",
+        "rc": 3,
+        "stdout": "DO:a103_bo_phan_tich:dong_la  : mong ('not_measured', ['dong_la']), được ('not_measured', ['tap_skip_lech', 'dong_skip_sai_phien_ban', 'moc_lech'])\n",
+        "stderr": "",
+        "classification": "GIET"
+      }
+    ],
+    "note": "Biểu hiện cũ có tín hiệu đúng ca đích; không suy đóng toàn lớp."
+  }
+]

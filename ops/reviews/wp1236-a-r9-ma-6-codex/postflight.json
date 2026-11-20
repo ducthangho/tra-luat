@@ -1,0 +1,48 @@
+[
+  {
+    "command": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "--untracked-files=all",
+      "--ignored=matching"
+    ],
+    "rc": 0,
+    "stdout": "!! .codex/\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "0f9aa2a",
+      "HEAD"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--cached",
+      "--binary"
+    ],
+    "rc": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--numstat",
+      "0f9aa2a...HEAD"
+    ],
+    "rc": 0,
+    "stdout": "1\t0\t.claude/dev/ci_dang_ky_test.py\n335\t0\tops/gate_output_doi_chieu.py\n988\t0\tops/gate_output_doi_chieu_test.py\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,103 @@
+{
+  "test_rc": 0,
+  "test_message": "",
+  "calls": [
+    {
+      "args": [
+        "kiem-tep",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt",
+        "--provenance",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1440-wp1319-provenance"
+      ],
+      "rc": 0,
+      "output": "passed /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt -\nGIỚI HẠN: không đọc log thật; tệp đánh giá và provenance sửa tay được\n"
+    },
+    {
+      "args": [
+        "kiem-tep",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1453-wp433-provenance/hau-due-66eae51/danh-gia-gate-output-44717155521.txt",
+        "--provenance",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1453-wp433-provenance"
+      ],
+      "rc": 0,
+      "output": "passed /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1453-wp433-provenance/hau-due-66eae51/danh-gia-gate-output-44717155521.txt -\nGIỚI HẠN: không đọc log thật; tệp đánh giá và provenance sửa tay được\n"
+    },
+    {
+      "args": [
+        "kiem-tep",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1231-wp1105-provenance/danh-gia-gate-output-42032872356.txt",
+        "--provenance",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1231-wp1105-provenance"
+      ],
+      "rc": 0,
+      "output": "passed /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1231-wp1105-provenance/danh-gia-gate-output-42032872356.txt -\nGIỚI HẠN: không đọc log thật; tệp đánh giá và provenance sửa tay được\n"
+    },
+    {
+      "args": [
+        "kiem-tep",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1453-wp433-provenance/danh-gia-gate-output-44711337223.txt",
+        "--provenance",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1453-wp433-provenance"
+      ],
+      "rc": 1,
+      "output": "failed /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1453-wp433-provenance/danh-gia-gate-output-44711337223.txt -\nGIỚI HẠN: không đọc log thật; tệp đánh giá và provenance sửa tay được\n"
+    },
+    {
+      "args": [
+        "kiem-tep",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1344-wp1343-provenance/danh-gia-gate-output-43969906464.txt",
+        "--provenance",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1344-wp1343-provenance"
+      ],
+      "rc": 3,
+      "output": "not_measured /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1344-wp1343-provenance/danh-gia-gate-output-43969906464.txt co_job_skipped\nGIỚI HẠN: không đọc log thật; tệp đánh giá và provenance sửa tay được\n"
+    },
+    {
+      "args": [
+        "kiem-tep",
+        "/khong/co.txt",
+        "--provenance",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo"
+      ],
+      "rc": 2,
+      "output": "LỖI THAM SỐ: tệp hoặc thư mục provenance vắng/không đọc được\n"
+    },
+    {
+      "args": [
+        "kiem-tep",
+        "/tmp/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "--provenance",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo"
+      ],
+      "rc": 2,
+      "output": "LỖI THAM SỐ: tệp hoặc thư mục provenance vắng/không đọc được\n"
+    },
+    {
+      "args": [
+        "kiem-ho-so",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/work/tmp/godc cli 9mrdsccx/pr9001 thu-land-evidence.yaml"
+      ],
+      "rc": 1,
+      "output": "VI_PHAM /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/work/tmp/godc cli 9mrdsccx/pr9001 thu-land-evidence.yaml $.moc_gate_output: duong_khong_tep_danh_gia\nDO /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/work/tmp/godc cli 9mrdsccx/pr9001 thu-land-evidence.yaml (1 vi phạm)\n"
+    },
+    {
+      "args": [
+        "kiem-ho-so",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/work/tmp/godc cli 9mrdsccx/hong-land-evidence.yaml"
+      ],
+      "rc": 2,
+      "output": "LỖI THAM SỐ: /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/work/tmp/godc cli 9mrdsccx/hong-land-evidence.yaml: không đọc được (ParserError)\n"
+    },
+    {
+      "args": [
+        "kiem-ho-so",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/work/tmp/godc cli 9mrdsccx/vang-land-evidence.yaml"
+      ],
+      "rc": 2,
+      "output": "LỖI THAM SỐ: /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/work/tmp/godc cli 9mrdsccx/vang-land-evidence.yaml: không đọc được (FileNotFoundError)\n"
+    }
+  ],
+  "sixth_fixture_called": false,
+  "sixth_cli_rc": 3,
+  "sixth_cli_output": "not_measured /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a-6-codex/repo/ops/land/pr1130-wp1122-provenance/danh-gia-gate-output-41365578430.txt provenance_0\nGIỚI HẠN: không đọc log thật; tệp đánh giá và provenance sửa tay được\n"
+}

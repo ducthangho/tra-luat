@@ -1,0 +1,27 @@
+body:None PASS ['dong_mien']
+body:False PASS ['dong_mien']
+body:0 PASS ['dong_mien']
+body:'' PASS ['dong_mien']
+body:[] PASS ['dong_mien']
+body:{} PASS ['dong_mien']
+body:'mien_gate_output: d8cf2ab57f9f25a93cefedcebfb315826b6b78fe os=ubuntu-latest ly_do=job huy theo chi thi han=2026-12-31' PASS []
+glob:tmpoh8nwugx PASS ['readback']
+glob:absent PASS ['readback']
+glob:file PASS ['readback']
+glob:link PASS ['readback']
+walk skip symlink PASS ('not_measured', ['symlink'])
+K5:passed/success PASS False
+K5:passed/failure PASS True
+K5:passed/cancelled PASS True
+K5:passed/skipped PASS True
+K5:passed/ PASS True
+K5:failed/success PASS False
+K5:failed/failure PASS False
+K5:failed/cancelled PASS False
+K5:failed/skipped PASS False
+K5:failed/ PASS False
+K5:not_measured/success PASS False
+K5:not_measured/failure PASS True
+K5:not_measured/cancelled PASS True
+K5:not_measured/skipped PASS True
+K5:not_measured/ PASS True

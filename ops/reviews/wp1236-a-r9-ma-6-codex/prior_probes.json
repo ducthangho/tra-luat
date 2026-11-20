@@ -1,0 +1,184 @@
+[
+  {
+    "name": "F01:[]",
+    "value": [
+      "passed",
+      []
+    ],
+    "expected": [
+      "passed",
+      []
+    ],
+    "ok": true
+  },
+  {
+    "name": "F01:None",
+    "value": [
+      "passed",
+      []
+    ],
+    "expected": [
+      "passed",
+      []
+    ],
+    "ok": true
+  },
+  {
+    "name": "F01:5",
+    "value": [
+      "passed",
+      []
+    ],
+    "expected": [
+      "passed",
+      []
+    ],
+    "ok": true
+  },
+  {
+    "name": "F01:'other'",
+    "value": [
+      "passed",
+      []
+    ],
+    "expected": [
+      "passed",
+      []
+    ],
+    "ok": true
+  },
+  {
+    "name": "F01:{'unrelated': 'value'}",
+    "value": [
+      "passed",
+      []
+    ],
+    "expected": [
+      "passed",
+      []
+    ],
+    "ok": true
+  },
+  {
+    "name": "F02:yaml",
+    "value": [
+      "not_measured",
+      [
+        "ParserError"
+      ]
+    ],
+    "expected": [
+      "not_measured",
+      [
+        "ParserError"
+      ]
+    ],
+    "ok": true
+  },
+  {
+    "name": "F02:utf8",
+    "value": [
+      "not_measured",
+      [
+        "UnicodeDecodeError"
+      ]
+    ],
+    "expected": [
+      "not_measured",
+      [
+        "UnicodeDecodeError"
+      ]
+    ],
+    "ok": true
+  },
+  {
+    "name": "F02:symlink",
+    "value": [
+      "not_measured",
+      [
+        "symlink"
+      ]
+    ],
+    "expected": [
+      "not_measured",
+      [
+        "symlink"
+      ]
+    ],
+    "ok": true
+  },
+  {
+    "name": "G01:two",
+    "value": [
+      "not_measured",
+      [
+        "provenance_nhieu"
+      ]
+    ],
+    "expected": [
+      "not_measured",
+      [
+        "provenance_nhieu"
+      ]
+    ],
+    "ok": true
+  },
+  {
+    "name": "G01:walkerror",
+    "value": [
+      "not_measured",
+      [
+        "PermissionError"
+      ]
+    ],
+    "expected": [
+      "not_measured",
+      [
+        "PermissionError"
+      ]
+    ],
+    "ok": true
+  },
+  {
+    "name": "F03:shared_alias",
+    "value": 2,
+    "expected": 2,
+    "ok": true
+  },
+  {
+    "name": "F03:cycle",
+    "value": [
+      2,
+      false
+    ],
+    "expected": [
+      2,
+      false
+    ],
+    "ok": true
+  },
+  {
+    "name": "H02:file",
+    "value": [
+      2,
+      false
+    ],
+    "expected": [
+      2,
+      false
+    ],
+    "ok": true
+  },
+  {
+    "name": "H02:directory",
+    "value": [
+      2,
+      false
+    ],
+    "expected": [
+      2,
+      false
+    ],
+    "ok": true
+  }
+]

@@ -1,0 +1,214 @@
+[
+  {
+    "name": "body:None",
+    "value": [
+      "dong_mien"
+    ],
+    "expected": [
+      "dong_mien"
+    ],
+    "ok": true
+  },
+  {
+    "name": "body:False",
+    "value": [
+      "dong_mien"
+    ],
+    "expected": [
+      "dong_mien"
+    ],
+    "ok": true
+  },
+  {
+    "name": "body:0",
+    "value": [
+      "dong_mien"
+    ],
+    "expected": [
+      "dong_mien"
+    ],
+    "ok": true
+  },
+  {
+    "name": "body:''",
+    "value": [
+      "dong_mien"
+    ],
+    "expected": [
+      "dong_mien"
+    ],
+    "ok": true
+  },
+  {
+    "name": "body:[]",
+    "value": [
+      "dong_mien"
+    ],
+    "expected": [
+      "dong_mien"
+    ],
+    "ok": true
+  },
+  {
+    "name": "body:{}",
+    "value": [
+      "dong_mien"
+    ],
+    "expected": [
+      "dong_mien"
+    ],
+    "ok": true
+  },
+  {
+    "name": "body:'mien_gate_output: d8cf2ab57f9f25a93cefedcebfb315826b6b78fe os=ubuntu-latest ly_do=job huy theo chi thi han=2026-12-31'",
+    "value": [],
+    "expected": [],
+    "ok": true
+  },
+  {
+    "name": "glob:tmpoh8nwugx",
+    "value": [
+      "readback"
+    ],
+    "expected": [
+      "readback"
+    ],
+    "ok": true
+  },
+  {
+    "name": "glob:absent",
+    "value": [
+      "readback"
+    ],
+    "expected": [
+      "readback"
+    ],
+    "ok": true
+  },
+  {
+    "name": "glob:file",
+    "value": [
+      "readback"
+    ],
+    "expected": [
+      "readback"
+    ],
+    "ok": true
+  },
+  {
+    "name": "glob:link",
+    "value": [
+      "readback"
+    ],
+    "expected": [
+      "readback"
+    ],
+    "ok": true
+  },
+  {
+    "name": "walk skip symlink",
+    "value": [
+      "not_measured",
+      [
+        "symlink"
+      ]
+    ],
+    "expected": [
+      "not_measured",
+      [
+        "symlink"
+      ]
+    ],
+    "ok": true
+  },
+  {
+    "name": "K5:passed/success",
+    "value": false,
+    "expected": false,
+    "ok": true
+  },
+  {
+    "name": "K5:passed/failure",
+    "value": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "K5:passed/cancelled",
+    "value": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "K5:passed/skipped",
+    "value": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "K5:passed/",
+    "value": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "K5:failed/success",
+    "value": false,
+    "expected": false,
+    "ok": true
+  },
+  {
+    "name": "K5:failed/failure",
+    "value": false,
+    "expected": false,
+    "ok": true
+  },
+  {
+    "name": "K5:failed/cancelled",
+    "value": false,
+    "expected": false,
+    "ok": true
+  },
+  {
+    "name": "K5:failed/skipped",
+    "value": false,
+    "expected": false,
+    "ok": true
+  },
+  {
+    "name": "K5:failed/",
+    "value": false,
+    "expected": false,
+    "ok": true
+  },
+  {
+    "name": "K5:not_measured/success",
+    "value": false,
+    "expected": false,
+    "ok": true
+  },
+  {
+    "name": "K5:not_measured/failure",
+    "value": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "K5:not_measured/cancelled",
+    "value": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "K5:not_measured/skipped",
+    "value": true,
+    "expected": true,
+    "ok": true
+  },
+  {
+    "name": "K5:not_measured/",
+    "value": true,
+    "expected": true,
+    "ok": true
+  }
+]

@@ -1,0 +1,106 @@
+{
+  "fixture": "ops/land/pr1340-wp1315-provenance/readback-chu-kho-mien-gate-packet-loop-issuecomment-6938174089.json",
+  "fixture_sha256": "9c2fa9a7e9fd6f2b94e658c4636b0651f4888c99d9e4b74f9ca71c8a2e04824a",
+  "rows": [
+    {
+      "id": "control",
+      "original": [],
+      "mutant": [],
+      "different": false
+    },
+    {
+      "id": "waiver_partial",
+      "original": [
+        "dong_mien"
+      ],
+      "mutant": [],
+      "different": true
+    },
+    {
+      "id": "waiver_no_strip",
+      "original": [],
+      "mutant": [
+        "dong_mien"
+      ],
+      "different": true
+    },
+    {
+      "id": "waiver_head_truthy",
+      "original": [
+        "sha"
+      ],
+      "mutant": [],
+      "different": true
+    },
+    {
+      "id": "waiver_order_os_sha",
+      "original": [
+        "os"
+      ],
+      "mutant": [
+        "sha"
+      ],
+      "different": true
+    },
+    {
+      "id": "waiver_order_author_url",
+      "original": [
+        "html_url"
+      ],
+      "mutant": [
+        "tac_gia"
+      ],
+      "different": true
+    },
+    {
+      "id": "waiver_order_line_author",
+      "original": [
+        "tac_gia"
+      ],
+      "mutant": [
+        "dong_mien"
+      ],
+      "different": true
+    },
+    {
+      "id": "waiver_order_os_date",
+      "original": [
+        "han"
+      ],
+      "mutant": [
+        "os"
+      ],
+      "different": true
+    },
+    {
+      "id": "url_zero_indexerror",
+      "original": [
+        "url"
+      ],
+      "mutant": {
+        "exception": "TypeError"
+      },
+      "different": true,
+      "original_consumer": [
+        "$.gate_output: waiver_khong_co_can_cu:url",
+        "$: landed_khong_loi_khai_gate_output"
+      ],
+      "mutant_consumer": {
+        "exception": "TypeError"
+      }
+    },
+    {
+      "id": "url_zero_optional",
+      "original": [
+        "url"
+      ],
+      "mutant": [],
+      "different": true,
+      "original_consumer": [
+        "$.gate_output: waiver_khong_co_can_cu:url",
+        "$: landed_khong_loi_khai_gate_output"
+      ],
+      "mutant_consumer": []
+    }
+  ]
+}

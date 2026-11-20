@@ -1,0 +1,58 @@
+[
+  {
+    "name": "66 files",
+    "value": {
+      "not_measured": 9,
+      "passed": 47,
+      "failed": 10
+    },
+    "expected": {
+      "passed": 47,
+      "failed": 10,
+      "not_measured": 9
+    },
+    "ok": true
+  },
+  {
+    "name": "170 records",
+    "value": {
+      "MIEN_CUTOVER": 25,
+      "KHONG_LOI_KHAI": 50,
+      "DO": 56,
+      "DAT": 39
+    },
+    "expected": {
+      "MIEN_CUTOVER": 25,
+      "DO": 56,
+      "DAT": 39,
+      "KHONG_LOI_KHAI": 50
+    },
+    "ok": true
+  },
+  {
+    "name": "landed",
+    "value": [
+      94,
+      0
+    ],
+    "expected": [
+      94,
+      0
+    ],
+    "ok": true
+  },
+  {
+    "name": "BO_SINH set",
+    "value": [
+      "0ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058faf",
+      "539fed68fdd6bdeadb3b70b4ce998419b19afc408ba82bc4152b337d28010a24",
+      "b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd"
+    ],
+    "expected": [
+      "0ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058faf",
+      "539fed68fdd6bdeadb3b70b4ce998419b19afc408ba82bc4152b337d28010a24",
+      "b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd"
+    ],
+    "ok": true
+  }
+]

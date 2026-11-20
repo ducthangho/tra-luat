@@ -1,0 +1,56 @@
+[
+  {
+    "name": "original",
+    "safe": "ok",
+    "c_safe": "ok",
+    "same": true
+  },
+  {
+    "name": "tab_after_colon",
+    "safe": "ScannerError",
+    "c_safe": "ok",
+    "same": false
+  },
+  {
+    "name": "tab_trailing",
+    "safe": "ScannerError",
+    "c_safe": "ok",
+    "same": false
+  },
+  {
+    "name": "invalid_unicode_escape",
+    "safe": "ValueError",
+    "c_safe": "ScannerError",
+    "same": false
+  },
+  {
+    "name": "surrogate_escape",
+    "safe": "ok",
+    "c_safe": "ScannerError",
+    "same": false
+  },
+  {
+    "name": "unicode_nextline",
+    "safe": "ok",
+    "c_safe": "ok",
+    "same": true
+  },
+  {
+    "name": "crlf",
+    "safe": "ok",
+    "c_safe": "ok",
+    "same": true
+  },
+  {
+    "name": "duplicate_schema",
+    "safe": "ok",
+    "c_safe": "ok",
+    "same": true
+  },
+  {
+    "name": "truncated",
+    "safe": "ScannerError",
+    "c_safe": "ScannerError",
+    "same": true
+  }
+]

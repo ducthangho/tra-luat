@@ -1,0 +1,14 @@
+[
+  {
+    "suite": "suite",
+    "rc": 0,
+    "matches_registration": true,
+    "skipped": false
+  },
+  {
+    "suite": "suite312",
+    "rc": 0,
+    "matches_registration": true,
+    "skipped": false
+  }
+]

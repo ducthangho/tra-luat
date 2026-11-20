@@ -1,0 +1,5 @@
+66 files PASS {'not_measured': 9, 'passed': 47, 'failed': 10}
+170 records PASS {'MIEN_CUTOVER': 25, 'KHONG_LOI_KHAI': 50, 'DO': 56, 'DAT': 39}
+landed PASS (94, 0)
+BO_SINH set PASS {'539fed68fdd6bdeadb3b70b4ce998419b19afc408ba82bc4152b337d28010a24', 'b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd', '0ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058faf'}
+scripts {'539fed68fdd6bdeadb3b70b4ce998419b19afc408ba82bc4152b337d28010a24': 28, '0ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058faf': 2, 'b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd': 20}

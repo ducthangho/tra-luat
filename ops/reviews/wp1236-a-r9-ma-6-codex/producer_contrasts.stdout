@@ -1,0 +1,3 @@
+{'id': 'producer_version_0', 'original': ('not_measured', ['co_job_skipped']), 'mutant': ('not_measured', ['dong_skip_sai_phien_ban', 'moc_lech']), 'different': True}
+{'id': 'producer_version_1', 'original': ('not_measured', ['co_job_skipped']), 'mutant': ('not_measured', ['dong_skip_sai_phien_ban', 'moc_lech']), 'different': True}
+{'id': 'producer_version_2', 'original': ('not_measured', ['co_job_skipped']), 'mutant': ('not_measured', ['dong_skip_sai_phien_ban', 'moc_lech']), 'different': True}

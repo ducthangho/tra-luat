@@ -1,0 +1,172 @@
+[
+  {
+    "name": "control",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "name": "head",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "run",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "attempt",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "schema",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "event",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:khong_phai_run_land",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "path",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:khong_phai_run_land",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "run_flag",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_chua_du",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "jobs_flag",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_chua_du",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "checkout_empty",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_chua_du",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "jobs_missing",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:tap_job_lech",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "job_name",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:job_lech:136067207297",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "job_conclusion",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:job_lech:136067207297",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "job_labels",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:job_lech:136067207297",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "log_hash",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:log_sha_lech:136067207297",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "duplicate_job",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:job_id_trung_provenance",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "missing_prov:passed",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "missing_prov:measured",
+    "violations": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "missing_prov:not_measured",
+    "violations": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "missing_prov:not_run",
+    "violations": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "missing_prov:skipped",
+    "violations": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  },
+  {
+    "name": "missing_prov:failed",
+    "violations": [
+      "$.gate_output: danh_gia_khong_failed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0",
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "ok": true
+  }
+]

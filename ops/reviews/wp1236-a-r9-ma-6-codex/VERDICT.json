@@ -1,0 +1,223 @@
+{
+  "reviewed_sha": "c2d606bb6fc230c288200b8f1dd79715462c172b",
+  "spec_sha256": "e3efa593c6dbbd15a0850702dfbc927ce51c3f1361642292e2f0b235c1bee6a8",
+  "vong": 6,
+  "findings": [
+    {
+      "id": "L01",
+      "class_slug": "test-thieu-chot",
+      "severity": "P2",
+      "vi_tri": "ops/gate_output_doi_chieu_test.py:437; :445; :545; :712",
+      "van_de": "Bộ ca còn để 20 đột biến làm nhận sai, chặn oan hoặc ném ngoại lệ qua đủ 36/36 ca; lớp test-thieu-chot chưa đóng.",
+      "bang_chung": "REVIEW_NO_CACHE=1 python3 -B ../work/run_scan.py ../work/semantic_survivors.jsonl ../work/semantic_native_full.jsonl native; cùng lệnh với order_url_mutants.jsonl/order_url_results.jsonl: rc=0, các ID P2 trong measurement_summary.json đều 36 ca rc=0. python3 -B ../work/independent_contrasts.py, consumer_matrix.py, real_waiver_matrix.py: rc=0; bỏ yêu cầu URL làm hồ sơ landed owner_waived thiếu URL từ hai vi phạm thành []; nới fullmatch dòng miễn hoặc grammar tệp/token nhận sai; đổi is True thành == True và bỏ dấu phân cách chặn oan; bỏ nhánh URL=0 khác làm kiem_ho_so ném TypeError. Các đối chứng trên HEAD xử lý đúng.",
+      "de_xuat": "Tại a201/a202/a209/a215 và ca trích tệp, dựng một ma trận nghĩa từ hợp đồng đóng băng: so đủ tập TOKEN/PHI_LOI_KHAI, giữ chữ số khi chuẩn hoá, duyệt con của metadata, grammar tên tệp/dòng miễn, từng dấu phân cách, True so với 1 ở ba dạng landed, 0/1/2 URL và head None/chuỗi rỗng/SHA. Đo các biến thể từ fixture thật qua helper và kiem_ho_so, giữ đối chứng hợp lệ; thêm các toán tử trong all_independent_results.json và đòi chết đúng chốt. Dùng SafeLoader sản phẩm, phân riêng tương đương/lỗi vô can. Nguy cơ cần giữ: không siết grammar sản phẩm để làm ca xanh, không để lỗi setup hoặc một chốt khác cấp tín dụng cho chốt đang đo."
+    },
+    {
+      "id": "L02",
+      "class_slug": "test-thieu-chot",
+      "severity": "P3",
+      "vi_tri": "ops/gate_output_doi_chieu_test.py:167; :545; :590",
+      "van_de": "Năm đột biến đổi chẩn đoán/thứ tự điều kiện miễn còn sống, và A2-10 chưa chạy fixture CLI thứ sáu T-khong-prov.",
+      "bang_chung": "Cùng quét native của L01: skip_v3_partial và bốn waiver_order_* đều 36/36 ca rc=0. independent_contrasts.py: dong_la → co_job_skipped. real_waiver_matrix.py: html_url → tac_gia, tac_gia → dong_mien, han → os, os → sha khi hai điều kiện cùng sai. cli_acceptance.py rc=0: a210_rc 0 real_fixtures 5 sixth_called False sixth_direct_rc 3. Trạng thái từ chối không đổi trong năm biến thể chẩn đoán.",
+      "de_xuat": "Ở a103 thêm hậu tố thừa riêng cho skipped v3; ở a209 dùng bảng lỗi đồng thời của các cặp điều kiện độc lập, so lý do đầu theo thứ tự đóng băng, kèm từng lỗi đơn và đối chứng sạch; ở a210 chạy đủ sáu fixture, gồm T-khong-prov. Thêm đột biến fullmatch v3 và hoán vị các cặp trên. Tránh phụ thuộc thứ tự tệp hoặc đổi thứ tự luật sản phẩm cho vừa oracle; phân rõ kiểm tên lý do với kiểm trạng thái."
+    },
+    {
+      "id": "L03",
+      "class_slug": "mo-ta-duong-dan-lech-hop-dong",
+      "severity": "P3",
+      "vi_tri": "ops/gate_output_doi_chieu.py:224",
+      "van_de": "Docstring _tep_trong khai cấm thành phần dấu chấm, nhưng PurePosixPath chuẩn hoá dấu chấm và ./tệp vẫn được nhận theo đặc tả đợt A.",
+      "bang_chung": "TMPDIR=../work/tmp python3 -B ../work/probes.py dotpath rc=0: cả tên tệp thật và ./danh-gia-gate-output-44669622916.txt đều kiem_ho_so=[]; dotpath_probes.json. Đã rà toàn bộ docstring và mô tả ràng buộc của module; biểu hiện lệch đo được là câu ở dòng 224.",
+      "de_xuat": "Sửa mô tả tại _tep_trong để ghi đúng cấm tuyệt đối, .. và symlink; giữ quy tắc đợt A. Đối chứng đóng: ./tệp vẫn hợp lệ, ../ và symlink vẫn bị chặn, docstring không còn khai cấm dấu chấm. Nguy cơ: sửa mã để cấm ./ theo docstring cũ sẽ tự siết đầu vào ngoài đặc tả; không mang luật đường dẫn D2b của đợt C sang A."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_ids": [],
+      "manifestations": [
+        "F01: probes.py prior: cả năm YAML ngoài schema giữ passed; m54 chết đúng a116."
+      ],
+      "highest_open_severity": null,
+      "nguon": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b",
+      "common_fix": "Lọc kiểu/schema trước khi đọc trường.",
+      "closing_check": "probes.py prior: cả năm YAML ngoài schema giữ passed; m54 chết đúng a116."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_ids": [],
+      "manifestations": [
+        "F02, G01: prior: YAML/UTF-8/symlink/PermissionError chặn đúng; kiểm 0/1/2 provenance; a116/a117 và các đột biến m55/m56/m59/m70 đạt."
+      ],
+      "highest_open_severity": null,
+      "nguon": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 2 @6f7ccf10f2441d0c97b779cfa77ff2839b56fc47",
+      "common_fix": "Giữ lý do K2 và truyền lỗi đọc/duyệt về biên kiem_tep.",
+      "closing_check": "prior: YAML/UTF-8/symlink/PermissionError chặn đúng; kiểm 0/1/2 provenance; a116/a117 và các đột biến m55/m56/m59/m70 đạt."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_ids": [],
+      "manifestations": [
+        "F03, H02: prior: cycle và hai đường stat quá dài rc=2 không traceback; alias chia sẻ vẫn duyệt hai đường; a214/m57/m58 và a210/m65 đạt."
+      ],
+      "highest_open_severity": null,
+      "nguon": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 3 @e323bd4dfb4fe422016c4fd010fa964b6cb748b0",
+      "common_fix": "Phát hiện vòng và đặt đọc/kiểm filesystem trong biên lỗi CLI.",
+      "closing_check": "prior: cycle và hai đường stat quá dài rc=2 không traceback; alias chia sẻ vẫn duyệt hai đường; a214/m57/m58 và a210/m65 đạt."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_ids": [
+        "L01",
+        "L02"
+      ],
+      "manifestations": [
+        "waiver_partial: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "landed_partial: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "ref_any_run: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "ref_txt_wild: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "key_alpha_only: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "token_expand: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "token_delimiter_8212: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "token_delimiter_45: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "token_delimiter_44: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "token_delimiter_46: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "token_delimiter_59: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "identity_219_11: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "identity_219_107: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "token_delimiter_40: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "phi_substring: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "phi_skip_descendants: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "waiver_no_strip: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "waiver_head_truthy: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "url_zero_indexerror: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "url_zero_optional: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "skip_v3_partial: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "waiver_order_os_sha: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "waiver_order_author_url: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "waiver_order_line_author: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "waiver_order_os_date: SỐNG 36/36 trên thước native; đối chứng phân biệt được",
+        "A2-10: a210 chỉ chạy 5/6 fixture thật; T-khong-prov chưa nằm trong ca CLI"
+      ],
+      "highest_open_severity": "P2",
+      "nguon": "F04 lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; G02 lượt 2 @6f7ccf10f2441d0c97b779cfa77ff2839b56fc47; H01 lượt 3 @e323bd4dfb4fe422016c4fd010fa964b6cb748b0; J01/J02 lượt 4 @b533028656dc2c4ac8de8751a9730f2d8b60d116; K01/K02 lượt 5 @028f8b3681edf41386ce6d89858505993b4ac82c; L01/L02 lượt 6 @c2d606bb6fc230c288200b8f1dd79715462c172b",
+      "common_fix": "Ma trận hợp đồng độc lập bao phủ tập giá trị, grammar, kiểu, đường đi và ưu tiên lỗi; đột biến theo nghĩa, qua đúng consumer, với dương/âm và phân hạng lỗi vô can/tương đương.",
+      "closing_check": "Tất cả biểu hiện cũ giữ ca đích đỏ khi gỡ chốt; 25 mutant không tương đương hiện sống phải bị giết đúng ca và đúng tính chất, cùng đối chứng không chặn oan; A2-10 đủ sáu fixture. Quét lại toàn bộ miền toán tử đã công bố, native loader, rồi kiểm corpus/gate/trần trên SHA mới."
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_ids": [
+        "L03"
+      ],
+      "manifestations": [
+        "_tep_trong docstring cấm . nhưng ./tệp được nhận"
+      ],
+      "highest_open_severity": "P3",
+      "nguon": "lượt 6 @c2d606bb6fc230c288200b8f1dd79715462c172b",
+      "common_fix": "Đồng bộ mô tả helper với đặc tả A và ngữ nghĩa PurePosixPath đã đo.",
+      "closing_check": "probes.py dotpath giữ ./tệp đạt, ca đường dẫn ../ và symlink đạt chốt, câu mô tả hết lệch."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "probes.py prior: cả năm YAML ngoài schema giữ passed; m54 chết đúng a116.; probes.py prior rc=0; suite 36/36 và audit từng ca trên exact HEAD.",
+      "chua_do_duoc": ""
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior: YAML/UTF-8/symlink/PermissionError chặn đúng; kiểm 0/1/2 provenance; a116/a117 và các đột biến m55/m56/m59/m70 đạt.; probes.py prior rc=0; suite 36/36 và audit từng ca trên exact HEAD.",
+      "chua_do_duoc": ""
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior: cycle và hai đường stat quá dài rc=2 không traceback; alias chia sẻ vẫn duyệt hai đường; a214/m57/m58 và a210/m65 đạt.; probes.py prior rc=0; suite 36/36 và audit từng ca trên exact HEAD.",
+      "chua_do_duoc": ""
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02"
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "20 đột biến đại diện các biểu hiện F04/G02/H01/J01/J02/K01/K02 trong audit_mutants.jsonl đều GIET đúng ca; bộ đối chứng mới 127 mutant còn 25 không tương đương SỐNG 36/36, gồm 20 biểu hiện L01 và 5 L02. A2-10 còn thiếu một fixture CLI. Lớp xuất hiện cả sáu lượt.",
+      "chua_do_duoc": ""
+    }
+  ],
+  "bang_noi_slug": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "ly_do_gop": "Lọc YAML ngoài schema trước truy cập trường."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "ly_do_gop": "Lỗi đọc/duyệt hoặc lý do K2 bị bỏ mất."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "ly_do_gop": "Ngoại lệ đầu vào thoát biên CLI."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02"
+      ],
+      "ly_do_gop": "Chốt đặc tả không được ca/đột biến bảo vệ độc lập."
+    }
+  ],
+  "da_do_khop": [
+    "Preflight passed: repo ducthangho/tra-luat, checkout detached sạch; reviewed_sha c2d606bb6fc230c288200b8f1dd79715462c172b; tree 9b78e9e0b1e1d445e19747e65ab4f65ea4016511; baseline 0f9aa2a2cc697129e1f5be72feddf60986286865.",
+    "Spec local và blob refs/remotes/origin/claude/spec-1236-r9 @176feba3a09a4e86c6d8b06487f3e4224571be51 cùng sha256 e3efa593c6dbbd15a0850702dfbc927ce51c3f1361642292e2f0b235c1bee6a8; revision 9/generation 1; lease tới 2026-11-22T15:35:00Z; write_set_hash e348a0aec274cc000368e7b728a9a70423434e000ace619fbc059383907fb2f5 khớp.",
+    "passed: python3 -B ops/gate_output_doi_chieu_test.py rc=0: CA 36/36 dat; DOT BIEN 124/124 bi giet dung ly do; TU KIEM PHAN HANG DAT (2); TONG DAT. Python 3.12 cũng cùng kết quả rc=0, stdout cả hai khớp MOI.",
+    "passed: audit_mutants.py rc=0, 124/124 đúng TinHieuChotCa ở ca đích; một số chỉ kiểm chẩn đoán (m6→KeyError; m22/m23/m79 còn K2 symlink; m80→FileNotFoundError; m96–m100 kiểm tên lỗi kiểu). Không nâng chúng thành bằng chứng lật trạng thái cổng.",
+    "passed: python3 -B -m ruff check --no-cache --select F trên đúng 3 tệp rc=0 (Ruff 0.15.15); python3 -B .claude/dev/ci_dang_ky_test.py rc=0:31/31, Ruff CI contract3/3,1226/1226 phản chứng.",
+    "passed: probes.py corpus trên immutable base 0f9aa2a rc=0: 66=47 passed/10 failed/9 not_measured;170=25 cutover/56 đỏ/39 đạt/50 không lời khai;94 landed,0 lệch;BO_SINH khớp50script=20/28/2.",
+    "passed: consumer_matrix.py rc=0: đối chứng dương cùng 21 biến thể, mọi lệch run/attempt/head/schema/event/path/cờ/job/log/thiếu provenance đều bị chặn trên HEAD; không tìm thấy lời khai dương lọt ngoài giới hạn đã khai.",
+    "passed: bốn rút gọn so 89fb99b qua probes.py simplifications rc=0,27 đối chứng khớp; K5 tương đương đại số; walk không theo symlink; glob vắng/tệp/link; body JSON falsy/valid giữ kết quả.",
+    "Quét executor đo lại:89fb99b sinh381,51 không bị giết hợp lệ (45 sống sạch/6 lỗi vô can);HEAD sinh368,362 giết/6 lỗi vô can. 362 giết được xác nhận bằng ca đích native không patch/cache YAML; sáu bản còn lại chạy đủ36ca bằng SafeLoader có memo/deepcopy (không đổi sang C loader). M124 giết k339 ở a217.",
+    "Bộ quét C loader không giữ ngữ nghĩa: yaml_parity.py rc=0 trên bản sao provenance thật, tab sau colon/tab cuối dòng SafeLoader→ScannerError nhưng CSafeLoader nhận; escape Unicode cũng đổi kết quả/lớp ngoại lệ. chay.py không ghi child rc và không có baseline tự kiểm; chay_ca.py chỉ nhìn rc3, dừng ở ca đầu. Không coi bảng này tự chứng minh đóng lớp.",
+    "failed (nghiệm thu lớp):127 mutant độc lập=93 GIET,34 SỐNG;9 tương đương trong miền đầu vào,25 có đối chứng làm khác hành vi. Cả25 chạy đủ36ca không patch hoặc cache YAML. Bộ102 ban đầu dùng SafeLoader có memo/deepcopy để tăng tốc; hai lỗi riêng của script đo (ID trùng/ngoặc regex) đã loại và chạy lại, không lấy tín dụng từ output đó.",
+    "K1–K8, BO_SINH/CHECK_BAT_BUOC_TEN, loi_khai/token/tep_danh_gia/la_landed/kiem_mien/kiem_ho_so/CLI đã đối chiếu toàn bộ với Module mới. Sai lệch còn mở:độ phủ nghiệm thu và docstring L03. L8/D2b thuộc B/C, không nằm trong diff A.",
+    "passed:git diff --numstat 0f9aa2a...HEAD=3tệp,+1324/-0≤1400;git diff --check 0f9aa2a HEAD rc=0; snapshot 17333 tệp đầu/cuối (kể ignored .codex) khớp,HEAD/tree/index diff không đổi; không đo lịch sử ghi rồi hoàn nguyên hoặc repo nguồn ngoài checkout.",
+    "Môi trường:Linux;Python3.13.18/PyYAML6.0.3 vàPython3.12.3/PyYAML6.0.1. CI khaiPython3.12,PyYAML6.0.3,fetch-depth0; các ca archive dùng OID sẵn trong ancestry và symlink POSIX, không thấy phụ thuộc ngoài CI. skipped:0 trênLinux;not_run:Windows,CI từ xa,full release/land gate (ngoài phạm vi review A).",
+    "Reviewer openai_codex/codex_cli/machine,model_family openai theo identity provider,run887066e7bed94b84824ef0613a0acaf4;model/effort phục vụ KHONG_DO_DUOC. Sandbox khaiworkspace-write,giữ repo read-only bằng thao tác;không GitHub/mạng/commit/push. Executor theoLEASE:anthropic_claude/claude_code/machine/local,session_015GtxrYsNDbfLo32S39f5uY. Source receipt không được nâng thành authority land."
+  ],
+  "verdict": "changes_requested"
+}

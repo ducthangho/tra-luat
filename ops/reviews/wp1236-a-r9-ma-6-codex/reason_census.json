@@ -1,0 +1,260 @@
+[
+  {
+    "line": 78,
+    "col": 18,
+    "reason": "thieu_moc",
+    "previously_measured": false
+  },
+  {
+    "line": 99,
+    "col": 15,
+    "reason": "symlink",
+    "previously_measured": false
+  },
+  {
+    "line": 136,
+    "col": 18,
+    "reason": "khong_phai_run_land",
+    "previously_measured": false
+  },
+  {
+    "line": 147,
+    "col": 18,
+    "reason": "provenance_chua_du",
+    "previously_measured": false
+  },
+  {
+    "line": 149,
+    "col": 18,
+    "reason": "tap_job_lech",
+    "previously_measured": false
+  },
+  {
+    "line": 151,
+    "col": 18,
+    "reason": "tap_skip_lech",
+    "previously_measured": false
+  },
+  {
+    "line": 165,
+    "col": 18,
+    "reason": "dong_skip_sai_phien_ban",
+    "previously_measured": false
+  },
+  {
+    "line": 169,
+    "col": 18,
+    "reason": "moc_lech",
+    "previously_measured": false
+  },
+  {
+    "line": 177,
+    "col": 15,
+    "reason": "check_bat_buoc:",
+    "previously_measured": true
+  },
+  {
+    "line": 238,
+    "col": 16,
+    "reason": "url",
+    "previously_measured": true
+  },
+  {
+    "line": 243,
+    "col": 16,
+    "reason": "readback",
+    "previously_measured": true
+  },
+  {
+    "line": 249,
+    "col": 16,
+    "reason": "html_url",
+    "previously_measured": true
+  },
+  {
+    "line": 251,
+    "col": 16,
+    "reason": "tac_gia",
+    "previously_measured": true
+  },
+  {
+    "line": 254,
+    "col": 16,
+    "reason": "dong_mien",
+    "previously_measured": true
+  },
+  {
+    "line": 261,
+    "col": 16,
+    "reason": "os",
+    "previously_measured": true
+  },
+  {
+    "line": 263,
+    "col": 16,
+    "reason": "sha",
+    "previously_measured": true
+  },
+  {
+    "line": 294,
+    "col": 18,
+    "reason": "$: landed_khong_loi_khai_gate_output",
+    "previously_measured": false
+  },
+  {
+    "line": 58,
+    "col": 22,
+    "reason": "cr_le",
+    "previously_measured": true
+  },
+  {
+    "line": 60,
+    "col": 22,
+    "reason": "dau_tep_sai",
+    "previously_measured": true
+  },
+  {
+    "line": 80,
+    "col": 18,
+    "reason": "moc_lap",
+    "previously_measured": false
+  },
+  {
+    "line": 129,
+    "col": 32,
+    "reason": "bo_sinh_la",
+    "previously_measured": true
+  },
+  {
+    "line": 140,
+    "col": 15,
+    "reason": "job_id_trung_provenance",
+    "previously_measured": true
+  },
+  {
+    "line": 175,
+    "col": 32,
+    "reason": "co_job_skipped",
+    "previously_measured": true
+  },
+  {
+    "line": 247,
+    "col": 16,
+    "reason": "doc_readback",
+    "previously_measured": true
+  },
+  {
+    "line": 259,
+    "col": 16,
+    "reason": "han",
+    "previously_measured": true
+  },
+  {
+    "line": 51,
+    "col": 22,
+    "reason": "khong_phai_utf8",
+    "previously_measured": true
+  },
+  {
+    "line": 55,
+    "col": 26,
+    "reason": "xuong_dong_tron",
+    "previously_measured": true
+  },
+  {
+    "line": 68,
+    "col": 26,
+    "reason": "job_lap",
+    "previously_measured": false
+  },
+  {
+    "line": 97,
+    "col": 70,
+    "reason": "provenance_0",
+    "previously_measured": true
+  },
+  {
+    "line": 102,
+    "col": 26,
+    "reason": "symlink",
+    "previously_measured": false
+  },
+  {
+    "line": 158,
+    "col": 24,
+    "reason": "job_lech:",
+    "previously_measured": true
+  },
+  {
+    "line": 160,
+    "col": 24,
+    "reason": "ket_luan_lech:",
+    "previously_measured": true
+  },
+  {
+    "line": 162,
+    "col": 24,
+    "reason": "log_sha_lech:",
+    "previously_measured": true
+  },
+  {
+    "line": 272,
+    "col": 31,
+    "reason": ": dinh_dang_loi_khai",
+    "previously_measured": false
+  },
+  {
+    "line": 278,
+    "col": 28,
+    "reason": ": waiver_khong_co_can_cu:",
+    "previously_measured": false
+  },
+  {
+    "line": 71,
+    "col": 19,
+    "reason": "job_lap",
+    "previously_measured": true
+  },
+  {
+    "line": 76,
+    "col": 22,
+    "reason": "dong_la",
+    "previously_measured": false
+  },
+  {
+    "line": 97,
+    "col": 23,
+    "reason": "symlink",
+    "previously_measured": true
+  },
+  {
+    "line": 112,
+    "col": 40,
+    "reason": "provenance_0",
+    "previously_measured": false
+  },
+  {
+    "line": 112,
+    "col": 72,
+    "reason": "provenance_nhieu",
+    "previously_measured": false
+  },
+  {
+    "line": 282,
+    "col": 35,
+    "reason": ": duong_khong_tep_danh_gia",
+    "previously_measured": false
+  },
+  {
+    "line": 286,
+    "col": 39,
+    "reason": ": tep_danh_gia_khong_hop_le:",
+    "previously_measured": false
+  },
+  {
+    "line": 290,
+    "col": 39,
+    "reason": ": danh_gia_khong_",
+    "previously_measured": false
+  }
+]

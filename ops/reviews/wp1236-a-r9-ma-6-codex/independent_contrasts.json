@@ -1,0 +1,204 @@
+[
+  {
+    "id": "identity_219_11:root",
+    "original": [],
+    "mutant": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "different": true
+  },
+  {
+    "id": "identity_219_11:packet",
+    "original": [],
+    "mutant": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "different": true
+  },
+  {
+    "id": "identity_219_11:block",
+    "original": [],
+    "mutant": [],
+    "different": false
+  },
+  {
+    "id": "identity_219_11:suffix",
+    "original": [],
+    "mutant": [],
+    "different": false
+  },
+  {
+    "id": "identity_219_107:root",
+    "original": [],
+    "mutant": [],
+    "different": false
+  },
+  {
+    "id": "identity_219_107:packet",
+    "original": [],
+    "mutant": [],
+    "different": false
+  },
+  {
+    "id": "identity_219_107:block",
+    "original": [],
+    "mutant": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "different": true
+  },
+  {
+    "id": "identity_219_107:suffix",
+    "original": [],
+    "mutant": [],
+    "different": false
+  },
+  {
+    "id": "landed_partial:root",
+    "original": [],
+    "mutant": [],
+    "different": false
+  },
+  {
+    "id": "landed_partial:packet",
+    "original": [],
+    "mutant": [],
+    "different": false
+  },
+  {
+    "id": "landed_partial:block",
+    "original": [],
+    "mutant": [],
+    "different": false
+  },
+  {
+    "id": "landed_partial:suffix",
+    "original": [],
+    "mutant": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "different": true
+  },
+  {
+    "id": "waiver_partial",
+    "original": [
+      "dong_mien"
+    ],
+    "mutant": [],
+    "different": true
+  },
+  {
+    "id": "waiver_order_os_sha",
+    "original": [
+      "os"
+    ],
+    "mutant": [
+      "sha"
+    ],
+    "different": true
+  },
+  {
+    "id": "ref_any_run",
+    "original": [
+      "$.gate_output: duong_khong_tep_danh_gia"
+    ],
+    "mutant": [],
+    "different": true
+  },
+  {
+    "id": "ref_txt_wild",
+    "original": [
+      "$.gate_output: duong_khong_tep_danh_gia"
+    ],
+    "mutant": [],
+    "different": true
+  },
+  {
+    "id": "token_expand",
+    "original": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "mutant": [],
+    "different": true
+  },
+  {
+    "id": "key_alpha_only",
+    "original": [],
+    "mutant": [
+      "$.gate1output: duong_khong_tep_danh_gia"
+    ],
+    "different": true
+  },
+  {
+    "id": "token_delimiter_8212",
+    "original": [],
+    "mutant": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "different": true
+  },
+  {
+    "id": "token_delimiter_45",
+    "original": [],
+    "mutant": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "different": true
+  },
+  {
+    "id": "token_delimiter_58",
+    "original": [],
+    "mutant": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "different": true
+  },
+  {
+    "id": "token_delimiter_40",
+    "original": [],
+    "mutant": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "different": true
+  },
+  {
+    "id": "token_delimiter_44",
+    "original": [],
+    "mutant": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "different": true
+  },
+  {
+    "id": "token_delimiter_46",
+    "original": [],
+    "mutant": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "different": true
+  },
+  {
+    "id": "token_delimiter_59",
+    "original": [],
+    "mutant": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "different": true
+  },
+  {
+    "id": "skip_v3_partial",
+    "original": [
+      "not_measured",
+      [
+        "dong_la"
+      ]
+    ],
+    "mutant": [
+      "not_measured",
+      [
+        "co_job_skipped"
+      ]
+    ],
+    "different": true
+  }
+]

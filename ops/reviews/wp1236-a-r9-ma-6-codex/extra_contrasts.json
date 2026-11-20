@@ -1,0 +1,34 @@
+[
+  {
+    "id": "phi_substring",
+    "original": [
+      "$.moc_gate_output_nguon: duong_khong_tep_danh_gia"
+    ],
+    "mutant": [],
+    "different": true
+  },
+  {
+    "id": "phi_skip_descendants",
+    "original": [
+      "$.gate_output_nguon.gate_output: duong_khong_tep_danh_gia"
+    ],
+    "mutant": [],
+    "different": true
+  },
+  {
+    "id": "waiver_no_strip",
+    "original": [],
+    "mutant": [
+      "dong_mien"
+    ],
+    "different": true
+  },
+  {
+    "id": "waiver_head_truthy",
+    "original": [
+      "sha"
+    ],
+    "mutant": [],
+    "different": true
+  }
+]

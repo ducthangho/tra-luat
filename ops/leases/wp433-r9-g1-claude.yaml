@@ -119,3 +119,6 @@ budget:
 budget_ghi_chu: 'Codex PR <= 10 (ADR-0055); CI Ubuntu <= 3 (worker head du kien do 2 ca M9 truoc M8, them 1 lan sau M8); Windows native 0 (mien, Q4). Ngoai ngan sach PR: 6 loi goi Codex review dac ta.'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+da_bi_thay_the: wp433-r9-g2-claude
+da_bi_thay_the_ly_do: 'g1 neo dac ta r1 (e38cc986) chua dong bang hop le (verdict thieu bang lop §8.3); g2 neo r7 (07a9123c) chu kho duyet bam theo Q9, them RELEASE_MANIFEST.json theo Q7.'
+da_bi_thay_the_luc_utc: '2026-11-20T18:40:23Z'

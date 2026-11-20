@@ -85,8 +85,8 @@ leased_at_utc: '2026-11-20T05:10:00Z'
 heartbeat_at: '2026-11-20T05:10:00Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-21T05:10:00Z'
-lease_expires_at_utc: '2026-11-21T05:10:00Z'
+lease_until: '2026-11-20T06:46:53Z'
+lease_expires_at_utc: '2026-11-20T06:46:53Z'
 lease_until_ghi_chu: '24h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
@@ -102,3 +102,13 @@ budget:
 budget_ghi_chu: 'Ngan sach khong reset theo generation. Da dung tren g1: Codex PR 1/10 (connector sach tren 143115a, 7030059275); CI Ubuntu 1/2 (24 success, 1 skipped tren 143115a); Windows native 1/3 (Desktop 03:57-04:22Z, comment 7030452526). Ngoai ngan sach PR: 5 loi goi Codex review dac ta r1; probe Desktop chan doan no (1) va chan doan/nguyen mau r2 (04:44-04:57Z).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex PR 2/10: connector sach tren 143115a (7030059275) va adda58d (7032135465). CI Ubuntu 2/2: 143115a va adda58d (moi luot 24 success, 1 skipped). Windows native 2/3: Desktop 03:57-04:22Z tren 143115a (comment 7030452526, bat hoi quy C1) va 06:01-06:19Z tren adda58d (comment 7032232129, D1-D4 dat). Ngoai ngan sach PR: 5 loi goi review dac ta r1; probe Desktop chan doan no (1) va nguyen mau r2. Loi khai co neo cua phien dieu phoi.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-21T05:10:00Z'
+  han_moi_utc: '2026-11-20T06:46:53Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet N cua #433 da MERGE: PR #1441 (head adda58d59f259475a925d8b61a554f732455978b) merge commit 64fa5156794dfb6a2dd9e8f257ee759ab07c9c35, human audit chu kho issuecomment-7032248877. P2b do san tren Windows mien tru (no wp433-p2b-w6-windows, issuecomment-7030544194). Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem cho write set nay luc rut.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu 5 duong dan write set sau han moi phai ra NGUOI_GIU 0.'

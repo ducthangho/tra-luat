@@ -1,0 +1,29 @@
+## Bảng kiểm sự thật
+
+| Hạng mục | Kết quả lượt 2 |
+|---|---|
+| Định danh | `HEAD` và `origin/master` cùng trỏ `0f9aa2a2cc697129e1f5be72feddf60986286865`, tree `da48b7d3aa2c430499461a35c82f52a96ff5e07f`. SHA-256 đặc tả là `036af79c2e7811f0115c3a079557545738346a48651d10b583f2654bdf4570a9`. Blob `tl_gws.py` là `fbeb9421edd0a7e451534a92c89d090c4de4b3a4`, trùng tại `8048551`. SHA-256 nguồn khớp đặc tả. Nhánh đặc tả N trỏ `b91fa78d90ec17fa597b7ed77633eed72525d50b` và §2 ghi đúng nợ. |
+| §0, N1–N3 | **Passed.** `python -B ops/reviews/wp433-secrets-set-spec-r1/tai_hien.py .` và cùng lệnh với đối số cuối `ops/reviews/wp433-secrets-set-spec-r1/nguyen-mau.diff` đều rc 0, đủ 37 lượt mỗi vế. Hai phép `cmp` với log bàn giao đều rc 0. Base có 20 lượt sai kiểu rc 5 và 5 lượt `kieu.*.khong_co` rc 1. Nguyên mẫu cho cả 25 lượt rc 3. Sáu lượt N2 giữ rc 0 và một lần upload bundle, giảm upload public từ 1 xuống 0 và phát cảnh báo thiếu token. Sáu lượt N3 khớp bảng ở cả hai vế, gồm đủ bảy bộ đếm và danh sách khoá public. `hoi_quy.khong_co` giữ rc 1. |
+| M1–M2 | **Đúng Q1 và Q2.** Chốt M1 nằm sau giải mã ở 1014–1017, trước xử lý cờ, export, refresh, canary, mã hoá và cả hai đường upload. `load_creds` và fetch ở trước chốt. `_secrets_fetch` tại 678 ưu tiên `--secrets-file` khi tệp tồn tại. Wrapper ở 996 là chỗ gọi duy nhất của `_secrets_set_body`; chốt N ở 1870 và 1922. Đo thêm trên nguyên mẫu cho thấy token chuỗi rỗng phát cảnh báo và bỏ public, `--gas-token` cùng `--gws` dùng chuỗi mới, và `TL_TOKEN` thắng khi có cả hai. |
+| §4b, neo và đích | **Passed trên nguyên mẫu.** Dùng nguyên khối hoặc nguyên dòng làm neo, mỗi neo khớp đúng một lần. Bốn đích theo thứ tự là `kieu.list.gas_token/rc3`, `kieu.str.gas_token/rc3`, `kieu.list.gas_token/dong` và `token_kieu.list.gws/khong_public`. PC1 giữ rc 3 và thêm một dòng thường, đỏ `dong`. PC2 giữ nguyên rc và stderr, tăng `gws_export` lên 1, đỏ `khong_goi` ở `kieu.list.gws`; lượt `kieu.list.gas_token` vẫn xanh. |
+| N4, N5 và §6 | N4 có các điều kiện đỏ theo kết quả, số đếm và delta; gate candidate **not_run** vì fragment chưa có. D1 có vế candidate xanh và vế base đỏ đúng đích, kèm phép tách N2 và N3. N5 và §6 đều chặn khi thiếu đầu ra, sai SHA/tree hoặc `KHÔNG ĐO ĐƯỢC`. T3 đặt đúng tại `land prepare` trên SHA tích hợp theo §10.1. Windows D1 và T3 **not_run**. |
+| §8 và ADR | Nguyên mẫu `+5/−1`. Fragment N dài 359 dòng, fragment `_b` của P2BW dài 311 dòng và delta P2BW là `+5/−4`, bundled `+1/−1`. Dự toán 180–250 dòng thêm hợp lý với rig gọn. ADR-0053 quy định 6 tệp và 450 dòng thêm; ba đường là write set riêng. Hai OID khai trần đều chứa ADR ở commit khai, vắng ở cha thứ nhất và xuất hiện trên lịch sử cha thứ nhất khi đọc các object sẵn có qua `GIT_SHALLOW_FILE=/dev/null`. Checkout có shallow marker, nên chưa xác minh điều kiện clone không shallow và ref vừa fetch của ADR-0055. Blob ADR-0067 tại HEAD là `f8fb8c7d2a868eda656e265c747e71d4a78c6034`. |
+| Môi trường | Reviewer độc lập họ OpenAI, `openai_codex / codex_cli / machine`. Linux, Python 3.13.18, HOME tạm, thử nguồn trong RAM và scratch ngoài checkout. Git status cuối phiên chỉ có hai đầu vào chưa commit đã bàn giao. |
+
+## Đối chiếu findings lượt 1
+
+| Finding | Trạng thái |
+|---|---|
+| P2 — N1 lọt stderr thừa và thiếu phép đỏ cho tác dụng phụ | **Đóng.** PC1 và PC2 đỏ đúng hai nhãn trên nguyên mẫu đã đột biến. |
+| P2 — Đột biến 1–2 nhận tín dụng từ lỗi vô can | **Còn mở.** Điều kiện mới loại được `AttributeError`. Phản chứng cùng lớp `TypeError` vẫn qua điều kiện ghi nhận GIẾT. |
+| P2 — N5 và thời điểm D2, thiếu `KHÔNG ĐO ĐƯỢC` | **Đóng ở cấp đặc tả.** D1 và T3 có checkpoint riêng, cả N5 và §6 xử lý thiếu bằng chứng. |
+| P3 — §0(3) thiếu bộ đếm | **Đóng.** Các bộ đếm N3 khớp số đo ở cả sáu lượt. |
+| P3 — §0 bỏ sót `--secrets-file`, §6 gán nhầm trần | **Đóng.** Đường fetch khớp mã nguồn và hai giới hạn được ghi đúng. |
+
+## Finding
+
+**P2 — §4b, đột biến 1–2 vẫn có thể nhận tín dụng từ `TypeError` vô can.** Trong RAM, đột biến 1 thật và bản thay chốt bằng `len(7)` đều cho `kieu.list.gas_token/rc3`, rc 5, cùng một dòng stderr giống từng byte và cùng bộ đếm. Khi quan sát traceback trong bộ nhớ tại `_safe_exc`, đột biến 1 và 2 thật cùng phát sinh ở `bundle["token"] = a.gas_token`, còn phản chứng phát sinh ở `len(7)`. Điều kiện hiện tại chỉ thấy lớp lỗi nên cho phép ghi GIẾT cả khi đích cần đo chưa chạy tới.
+
+**Câu thay thế** — “Đột biến 1 và 2 chỉ tính GIẾT khi khớp tuple, có rc 5 và đúng một dòng chẩn đoán `TypeError` của wrapper, đồng thời rig xác nhận frame phát sinh lỗi thuộc `_secrets_set_body` của chính nguồn đang chạy và trỏ tới câu gán `bundle["token"] = a.gas_token`. Chỉ giữ dấu vị trí trong bộ nhớ. Thêm tự kiểm một `TypeError` vô can tại chốt, cho cùng rc, stderr và tuple nhưng phải ra TÍN DỤNG GIẢ.”
+
+KET_LUAN: request_changes

@@ -98,11 +98,15 @@ Phép đo base/head dựng hai clone trong MỘT lệnh (CLAUDE.md). Fragment ch
 
 Phân hạng như fragment N: GIẾT chỉ khi tín hiệu là `TinHieuChotCa` khớp đúng (ca, lượt, nhãn); chết vì lý do khác là TÍN DỤNG GIẢ; neo không khớp đúng một
 lần là HỎNG. Vì `_nlm_contained` biến MỌI ngoại lệ trong thân lệnh thành rc 5 (một lỗi vô can cũng sinh đúng tuple `rc3` của đột biến 1), đột biến 1 và 2
-chỉ tính GIẾT khi khớp tuple VÀ lượt đích quan sát được rc 5 kèm đúng một dòng `[secrets-set] ✗ dừng vì lỗi TypeError …` (đúng cơ chế đã đo ở §0);
-rc 5 với lớp khác (vd `AttributeError`) ⇒ TÍN DỤNG GIẢ. Đột biến 1 và 2 cùng nhãn `rc3` nhưng khác LƯỢT đích (đột biến 2 để `list` qua đúng, chỉ đỏ ở `str`); đột biến 3 giữ rc 3 nên chỉ nhãn `dong`
+chỉ tính GIẾT khi ĐỦ ba điều: khớp tuple; lượt đích quan sát được rc 5 kèm đúng một dòng `[secrets-set] ✗ dừng vì lỗi TypeError …` (đúng cơ chế đã đo ở
+§0); VÀ VỊ TRÍ phát sinh lỗi đúng — rig thay `_safe_exc` của module đang chạy bằng một bọc chỉ GHI (trong bộ nhớ, không in) frame cuối của
+`exc.__traceback__` (tên hàm, nguyên văn dòng nguồn đã `strip`) rồi gọi bản gốc; frame ấy phải là `_secrets_set_body` của CHÍNH nguồn đang chạy, dòng
+`bundle["token"] = a.gas_token; changed.append("token")` (câu gán đầu tiên vào bundle ở cờ `--gas-token`, đo ở §0). rc 5 với lớp khác (vd
+`AttributeError`), hoặc `TypeError` phát sinh ở dòng khác ⇒ TÍN DỤNG GIẢ. Đột biến 1 và 2 cùng nhãn `rc3` nhưng khác LƯỢT đích (đột biến 2 để `list` qua đúng, chỉ đỏ ở `str`); đột biến 3 giữ rc 3 nên chỉ nhãn `dong`
 bắt được — ba đột biến phân biệt được bằng đầu vào. Dời kiểm M1 xuống sau các cờ KHÔNG phải đột biến riêng: mọi vị trí sau cờ đầu tiên vỡ `TypeError` ở
-lượt đầu (`kieu.list.gas_token`, rc 5) y như đột biến 1. Tự kiểm bộ phân hạng ≥ 3 ca: (a) một đột biến giả ném `AttributeError` tại vị trí chốt — bị chính
-`_nlm_contained` bắt, cùng ca, lượt `kieu.list.gas_token` và nhãn `rc3` — phải ra TÍN DỤNG GIẢ; (b) một đột biến giả chết vì `AttributeError` qua `except`
+lượt đầu (`kieu.list.gas_token`, rc 5) y như đột biến 1. Tự kiểm bộ phân hạng ≥ 4 ca: (a) một đột biến giả ném `AttributeError` tại vị trí chốt — bị chính
+`_nlm_contained` bắt, cùng ca, lượt `kieu.list.gas_token` và nhãn `rc3` — phải ra TÍN DỤNG GIẢ; (a2) một đột biến giả thay chốt M1 bằng một `TypeError`
+VÔ CAN tại chính chỗ chốt (vd `len(7)`) — cùng rc 5, cùng stderr từng byte, cùng bộ đếm, cùng tuple — phải ra TÍN DỤNG GIẢ nhờ phép kiểm vị trí; (b) một đột biến giả chết vì `AttributeError` qua `except`
 đổi kiểu ⇒ TÍN DỤNG GIẢ; (c) một đột biến chú thích vô hại ⇒ SỐNG SÓT.
 
 **Phản chứng bộ đo** (không thuộc `_DB`, chạy trong `run()`; mỗi cái phải ĐỎ đúng chỗ, còn nguồn thật đạt lượt ấy): (PC1) thêm một dòng stderr THƯỜNG
@@ -160,3 +164,6 @@ M2 thuộc họ "khoá suy ra từ dữ liệu chưa kiểm kiểu": `str()` bi�
   bộ đo PC1 (dòng stderr thừa) và PC2 (export trước khi từ chối); đột biến 1–2 chỉ GIẾT khi thấy đúng `TypeError` qua `_nlm_contained` + tự kiểm
   `AttributeError` bị wrapper bắt; N5 chỉ D1, T3 chuyển về `land prepare` (§10.1), §6 thêm `KHÔNG ĐO ĐƯỢC`; §0(3) chép đủ bộ đếm; §0 nêu `--secrets-file`;
   §6 trần ADR-0053 đúng là 6 tệp/450 dòng, write set 3 đường.
+- 2026-11-20T12:5xZ (phiên con của điều phối #1206): Codex lượt 2/10 `request_changes`: 4/5 finding lượt 1 đóng; còn mở P2 đột biến 1–2 nhận tín dụng từ
+  `TypeError` vô can cùng lớp. Sửa: GIẾT của đột biến 1–2 đòi thêm VỊ TRÍ frame phát sinh (`_secrets_set_body`, câu gán `bundle["token"] = a.gas_token`),
+  ghi qua bọc `_safe_exc` trong bộ nhớ; thêm tự kiểm (a2) `TypeError` vô can tại chốt ⇒ TÍN DỤNG GIẢ.

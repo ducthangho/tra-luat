@@ -3,19 +3,21 @@
 thi công. Tất định: cùng tệp nguồn ⇒ cùng manifest (id, toán tử, vị trí, băm nguồn đột biến).
 
   sinh  <module.py> [--ra manifest.jsonl]            sinh manifest (mỗi dòng một đột biến, kèm toàn văn nguồn)
-  chay  <manifest.jsonl> <test.py> [--ra kq.jsonl] [--song-song N]
-        chạy MỌI ca của <test.py> (biến GATE_OUTPUT_DOI_CHIEU_MA trỏ bản đột biến), dừng ở ca đầu tiên ném TinHieuChotCa;
-        ghi {id, giet: [ca] | [], hong: [...], rc}. Bộ nạp YAML là của SẢN PHẨM (PyYAML SafeLoader thuần); chỉ nhớ đệm theo nội dung
+  chay  <manifest.jsonl> <test.py> --goc <module gốc> [--ra kq.jsonl] [--song-song N]
+        BASELINE trước: module gốc phải qua mọi ca, không thì rc 2 KHÔNG ĐO ĐƯỢC. Rồi chạy MỌI ca của <test.py> (biến
+        GATE_OUTPUT_DOI_CHIEU_MA trỏ bản đột biến), dừng ở ca đầu tiên ném TinHieuChotCa; phân hạng GIET (kèm tên ca) · SONG ·
+        VO_CAN (chỉ lỗi vô can) · LOI_CHAY (tiến trình con rc ≠ 0). Dòng đầu kq là neo sha256 (công cụ, test, gốc, manifest); resume chỉ
+        dùng kết quả cũ khi neo VÀ (id, sha256 đột biến) khớp. rc 0 + dòng `HOAN_TAT neo=…` chỉ khi đủ và không LOI_CHAY; rc 3 nếu có. Bộ nạp YAML là của SẢN PHẨM (PyYAML SafeLoader thuần); chỉ nhớ đệm theo nội dung
         và trả deepcopy (không đổi ngữ nghĩa — review mã lượt 6 đo C loader lệch, nên KHÔNG dùng C loader).
   hoi-quy <kho> <goc.py> <dich.py> [--ra manifest.jsonl]
         <kho> là .json {id: {src, kind}} (toàn văn trên <goc.py>) HOẶC .jsonl các cặp {id, kind, cu, moi} (dạng ghim trong kho,
         `kho_dot_bien_reviewer_luot6.jsonl`; khi ấy <goc.py> không được đọc, có thể ghi `-`); áp từng cặp lên <dich.py>; cặp không áp được (neo không xuất hiện đúng một lần) ghi
         KHONG_AP_DUNG kèm lý do, không bỏ im.
 
-Toán tử (mã ổn định, xem TOAN_TU): a so_sanh_phu_dinh · a2 dieu_kien_phu_dinh · b bo_ve_boolop · c xoa_cau_ghi · c2 return_thanh_pass ·
+Toán tử (mã ổn định, xem TOAN_TU): a so_sanh_phu_dinh · a2 dieu_kien_phu_dinh (kể cả bỏ hẳn từng `if` của comprehension) · b bo_ve_boolop · c xoa_cau_ghi · c2 return_thanh_pass ·
 d lat_bool · e so_nguyen_cong_1 · f return_none · g chuoi_doi (+"~") · h1 tap_bo_phan_tu · h2 tap_them_phan_tu ("~them~") ·
-i1 lop_ky_tu_bo_mot · i2 lop_ky_tu_thanh_cham · i3 nhanh_alternation_bo · i4 luong_tu_noi (+→*, {m,n}→*) · i5 escape_thanh_wildcard
-(\\. \\( \\d \\s… → .) · i6 lookaround_bo · i7 khop_tron_noi (fullmatch→match, match→search) · j1 is_thanh_bang · j2 is_True_thanh_truthy ·
+i1 lop_ky_tu_bo_mot · i2 lop_ky_tu_thanh_cham · i3 nhanh_alternation_bo · i4 luong_tu_noi (+→*, {m,n}→*) · i5 escape_thanh_cham
+(\\. \\( \\d \\s… → `.`; ngoài lớp ký tự là wildcard, TRONG lớp ký tự là dấu chấm literal) · i6 lookaround_bo · i7 khop_tron_noi (fullmatch→match, match→search) · j1 is_thanh_bang · j2 is_True_thanh_truthy ·
 k1 bo_chuan_hoa (strip/casefold/lower) · k2 doi_phuong_thuc (isalnum↔isalpha, startswith↔endswith) · k3 thuoc_tap_thanh_chuoi_con ·
 l doi_thu_tu_hai_chot (hai `if …: return` liền nhau).
 """
@@ -246,76 +248,110 @@ for ten in m.CA:
 '''
 
 
-def _mot(m, test, thu):
+def _sha(b):
+    return hashlib.sha256(b if isinstance(b, bytes) else b.encode("utf-8")).hexdigest()
+
+
+def _mot(src, test, thu, mid="baseline"):
     p = Path(tempfile.mkdtemp(dir=thu)) / "gate_output_doi_chieu.py"   # thư mục riêng từng đột biến: không đụng tên, không đụng .pyc
-    p.write_text(m["src"], encoding="utf-8")
+    p.write_text(src, encoding="utf-8")
     r = subprocess.run([sys.executable, "-B", "-c", _CHAY_CA, str(test)], capture_output=True, timeout=1800,
                        env=dict(os.environ, GATE_OUTPUT_DOI_CHIEU_MA=str(p), PYTHONDONTWRITEBYTECODE="1"))
     ra = r.stdout.decode("utf-8", "replace").splitlines()
     p.unlink()
-    return {"id": m["id"], "op": m["op"], "dong": m.get("dong"), "sha256": m.get("sha256"), "rc": r.returncode,
-            "giet": [x.split()[1] for x in ra if x.startswith("GIET ")], "hong": [x for x in ra if x.startswith("HONG ")],
+    giet = [x.split()[1] for x in ra if x.startswith("GIET ")]
+    hong = [x for x in ra if x.startswith("HONG ")]
+    # Tiến trình con lỗi (rc ≠ 0: test không nạp được, vắng, ném ngoài chay_ca) ⇒ LOI_CHAY: không phải SỐNG, không phải GIẾT.
+    return {"id": mid, "rc": r.returncode, "giet": giet, "hong": hong,
+            "phan_hang": "LOI_CHAY" if r.returncode else "GIET" if giet else "VO_CAN" if hong else "SONG",
             "stderr_cuoi": r.stderr.decode("utf-8", "replace")[-300:] if r.returncode else ""}
 
 
-def chay(manifest, test, ra, ss):
+def chay(manifest, test, ra, ss, goc):
+    """Neo: (công cụ, test, module gốc, manifest) theo sha256. Baseline: module gốc phải qua MỌI ca (không GIẾT, không lỗi), không thì
+    KHÔNG ĐO ĐƯỢC rc 2. Resume chỉ nhận kết quả cũ khi (id, sha256 đột biến) VÀ neo khớp. rc 0 chỉ khi đủ mọi đột biến, không LOI_CHAY."""
+    test = Path(test).resolve()
+    if not test.is_file() or not Path(goc).is_file():
+        print("KHONG_DO_DUOC: test hoac module goc vang", file=sys.stderr)
+        return 2
     ms = [json.loads(x) for x in Path(manifest).read_text(encoding="utf-8").splitlines() if x.strip()]
     ms = [m for m in ms if m.get("src")]
-    if len({m["id"] for m in ms}) != len(ms):
-        raise SystemExit("id trung trong manifest")
-    xong = {json.loads(x)["id"] for x in Path(ra).read_text(encoding="utf-8").splitlines()} if Path(ra).exists() else set()
-    ms = [m for m in ms if m["id"] not in xong]
-    with tempfile.TemporaryDirectory(prefix="quet_db_") as thu, cf.ThreadPoolExecutor(ss) as ex, open(ra, "a", encoding="utf-8") as f:
-        for kq in ex.map(lambda m: _mot(m, Path(test).resolve(), thu), ms):
-            f.write(json.dumps(kq, ensure_ascii=False) + "\n")
-            f.flush()
-    kq = [json.loads(x) for x in Path(ra).read_text(encoding="utf-8").splitlines()]
-    song = [k for k in kq if not k["giet"]]
-    print(f"TONG {len(kq)} · GIET {len(kq) - len(song)} · SONG_SACH {sum(not k['hong'] for k in song)} · CHI_LOI_VO_CAN "
-          f"{sum(bool(k['hong']) for k in song)}")
-    for k in song:
-        print(f"SONG {k['id']} {'(loi vo can) ' + k['hong'][0][:120] if k['hong'] else ''}")
-    return 0
+    if len({m["id"] for m in ms}) != len(ms) or any(_sha(m["src"]) != m["sha256"] for m in ms):
+        print("KHONG_DO_DUOC: id trung hoac sha256 lech nguon trong manifest", file=sys.stderr)
+        return 2
+    neo = {"cong_cu": _sha(Path(__file__).read_bytes()), "test": _sha(test.read_bytes()), "goc": _sha(Path(goc).read_bytes()),
+           "manifest": _sha(Path(manifest).read_bytes())}
+    cu = {}
+    if Path(ra).exists():
+        dong = [json.loads(x) for x in Path(ra).read_text(encoding="utf-8").splitlines() if x.strip()]
+        if dong and dong[0].get("neo") == neo:
+            cu = {(k["id"], k.get("sha256")): k for k in dong[1:] if k.get("phan_hang") != "LOI_CHAY"}
+    with tempfile.TemporaryDirectory(prefix="quet_db_") as thu:
+        bl = _mot(Path(goc).read_text(encoding="utf-8"), test, thu)
+        if bl["phan_hang"] != "SONG":
+            print(f"KHONG_DO_DUOC: baseline khong xanh {bl}", file=sys.stderr)
+            return 2
+        lam = [m for m in ms if (m["id"], m["sha256"]) not in cu]
+        with cf.ThreadPoolExecutor(ss) as ex:
+            moi = list(ex.map(lambda m: dict(_mot(m["src"], test, thu, m["id"]), op=m["op"], dong=m.get("dong"), sha256=m["sha256"]),
+                              lam))
+    kq = [cu.get((m["id"], m["sha256"])) or next(k for k in moi if k["id"] == m["id"]) for m in ms]
+    Path(ra).write_text(json.dumps({"neo": neo, "baseline": "SONG"}) + "\n" + "".join(json.dumps(k, ensure_ascii=False) + "\n"
+                                                                                       for k in kq), encoding="utf-8")
+    dem = {h: sum(k["phan_hang"] == h for k in kq) for h in ("GIET", "SONG", "VO_CAN", "LOI_CHAY")}
+    for k in kq:
+        if k["phan_hang"] != "GIET":
+            print(f"{k['phan_hang']} {k['id']} {k['hong'][0][:120] if k['hong'] else ''}")
+    print(f"TONG {len(kq)} · GIET {dem['GIET']} · SONG_SACH {dem['SONG']} · CHI_LOI_VO_CAN {dem['VO_CAN']} · LOI_CHAY {dem['LOI_CHAY']}")
+    print(f"HOAN_TAT neo={json.dumps(neo, sort_keys=True)}" if not dem["LOI_CHAY"] else "CHUA_HOAN_TAT (co LOI_CHAY)")
+    return 0 if not dem["LOI_CHAY"] else 3
 
 
 # ---------------------------------------------------------------- hồi quy kho cũ
+def _chuan(src):
+    """Dạng chuẩn để neo cặp hồi quy: ast.unparse (bỏ khác biệt định dạng/chú thích; đột biến của reviewer vốn sinh bằng ast.unparse)."""
+    return ast.unparse(ast.parse(src))
+
+
+def _cap_toi_thieu(a, b, d):
+    """Cặp (cũ, mới) nhỏ nhất theo DÒNG trên dạng chuẩn sao cho `cũ` xuất hiện đúng một lần trong `d`."""
+    a, b = a.splitlines(keepends=True), b.splitlines(keepends=True)
+    ops = [o for o in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes() if o[0] != "equal"]
+    if not ops:
+        return None
+    i1, i2, j1, j2 = ops[0][1], ops[-1][2], ops[0][3], ops[-1][4]
+    for k in range(len(a) + 1):
+        cu = "".join(a[max(0, i1 - k):min(len(a), i2 + k)])
+        moi = "".join(a[max(0, i1 - k):i1]) + "".join(b[j1:j2]) + "".join(a[i2:min(len(a), i2 + k)])
+        if cu and d.count(cu) == 1:
+            return cu, moi
+    return None
+
+
 def hoi_quy(kho, goc, dich, ra):
-    d = Path(dich).read_text(encoding="utf-8")
-    out = []
+    """Áp kho lên <dich> trên DẠNG CHUẨN. .jsonl: cặp {id, kind, cu, moi} đã chuẩn hoá. .json: {id: {src, kind}} toàn văn trên <goc>."""
+    d = _chuan(Path(dich).read_text(encoding="utf-8"))
     if str(kho).endswith(".jsonl"):
-        for x in (json.loads(y) for y in Path(kho).read_text(encoding="utf-8").splitlines() if y.strip()):
-            if d.count(x["cu"]) != 1:
-                out.append({"id": f"kho:{x['id']}", "op": "kho", "trang_thai": "KHONG_AP_DUNG", "ly_do": f"neo xuat hien {d.count(x['cu'])} lan"})
-                continue
-            s = d.replace(x["cu"], x["moi"])
-            out.append({"id": f"kho:{x['id']}", "op": "kho", "kind": x.get("kind"), "cu": x["cu"], "moi": x["moi"],
-                        "sha256": hashlib.sha256(s.encode()).hexdigest(), "src": s})
-        Path(ra).write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in out), encoding="utf-8")
-        print(f"HOI_QUY {len(out)} · AP_DUNG {sum('src' in x for x in out)} · KHONG_AP_DUNG {sum('src' not in x for x in out)}")
-        return 0
-    g = Path(goc).read_text(encoding="utf-8")
-    for mid, v in sorted(json.loads(Path(kho).read_text(encoding="utf-8")).items()):
-        a, b = g.splitlines(keepends=True), v["src"].splitlines(keepends=True)
-        sm = difflib.SequenceMatcher(None, a, b, autojunk=False)
-        ops = [o for o in sm.get_opcodes() if o[0] != "equal"]
-        if not ops:
-            out.append({"id": f"kho:{mid}", "op": "kho", "trang_thai": "KHONG_AP_DUNG", "ly_do": "trung goc"})
+        cap = [json.loads(y) for y in Path(kho).read_text(encoding="utf-8").splitlines() if y.strip()]
+    else:
+        g = _chuan(Path(goc).read_text(encoding="utf-8"))
+        cap = []
+        for mid, v in sorted(json.loads(Path(kho).read_text(encoding="utf-8")).items()):
+            c = _cap_toi_thieu(g, _chuan(v["src"]), g)
+            cap.append({"id": mid, "kind": v.get("kind"), "cu": c[0], "moi": c[1]} if c else {"id": mid, "kind": v.get("kind")})
+    out = []
+    for x in cap:
+        if "cu" not in x or d.count(x["cu"]) != 1:
+            out.append({"id": f"kho:{x['id']}", "op": "kho", "kind": x.get("kind"), "trang_thai": "KHONG_AP_DUNG",
+                        "ly_do": "khong co cap" if "cu" not in x else f"neo xuat hien {d.count(x['cu'])} lan"})
             continue
-        i1, i2, j1, j2 = ops[0][1], ops[-1][2], ops[0][3], ops[-1][4]
-        cu, moi = "".join(a[i1:i2]), "".join(b[j1:j2])
-        k = 0
-        while d.count(cu) != 1 and (i1 - k > 0 or i2 + k < len(a)):   # nới ngữ cảnh tới khi neo duy nhất
-            k += 1
-            cu = "".join(a[max(0, i1 - k):min(len(a), i2 + k)])
-            moi = "".join(a[max(0, i1 - k):i1]) + "".join(b[j1:j2]) + "".join(a[i2:min(len(a), i2 + k)])
-        if d.count(cu) != 1:
-            out.append({"id": f"kho:{mid}", "op": "kho", "trang_thai": "KHONG_AP_DUNG", "ly_do": f"neo xuat hien {d.count(cu)} lan"})
-            continue
-        s = d.replace(cu, moi)
-        out.append({"id": f"kho:{mid}", "op": "kho", "kind": v.get("kind"), "cu": cu, "moi": moi,
-                    "sha256": hashlib.sha256(s.encode()).hexdigest(), "src": s})
+        s = d.replace(x["cu"], x["moi"])
+        out.append({"id": f"kho:{x['id']}", "op": "kho", "kind": x.get("kind"), "cu": x["cu"], "moi": x["moi"], "sha256": _sha(s), "src": s})
     Path(ra).write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in out), encoding="utf-8")
     print(f"HOI_QUY {len(out)} · AP_DUNG {sum('src' in x for x in out)} · KHONG_AP_DUNG {sum('src' not in x for x in out)}")
+    for x in out:
+        if "src" not in x:
+            print(f"KHONG_AP_DUNG {x['id']} {x['ly_do']} — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo")
     return 0
 
 
@@ -324,7 +360,7 @@ def main(argv=None):
     sp = ap.add_subparsers(dest="lenh", required=True)
     a = sp.add_parser("sinh"); a.add_argument("module"); a.add_argument("--ra", default="manifest.jsonl")
     b = sp.add_parser("chay"); b.add_argument("manifest"); b.add_argument("test"); b.add_argument("--ra", default="kq.jsonl")
-    b.add_argument("--song-song", type=int, default=4)
+    b.add_argument("--song-song", type=int, default=4); b.add_argument("--goc", required=True, help="module goc cho baseline")
     c = sp.add_parser("hoi-quy"); c.add_argument("kho"); c.add_argument("goc"); c.add_argument("dich")
     c.add_argument("--ra", default="hoi_quy.jsonl")
     x = ap.parse_args(argv)
@@ -337,7 +373,7 @@ def main(argv=None):
         print(f"SINH {len(ms)} " + " ".join(f"{k}={dem.get(k, 0)}" for k in TOAN_TU))
         return 0
     if x.lenh == "chay":
-        return chay(x.manifest, x.test, x.ra, x.song_song)
+        return chay(x.manifest, x.test, x.ra, x.song_song, x.goc)
     return hoi_quy(x.kho, x.goc, x.dich, x.ra)
 
 

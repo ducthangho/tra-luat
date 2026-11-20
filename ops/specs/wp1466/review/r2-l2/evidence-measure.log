@@ -1,0 +1,67 @@
+UTC 2026-11-20T19:56:18.731598+00:00
+SHA256 d25a0c2445ebeff97d94381ed24d998d23d6a9e792ba4db2cdd23108a7a6f64c
+GIT ['69bf08715d9bd43643b72f5a6da0d8daac174e67', '36df108a0bee3af05d2d9cc2d434472f123dc9ab', '48d372e14f190dae83a75ccbca8ee9a0b25635c5'] SHALLOW false ABBREV 7
+REFS 385
+OPT_IN 0055 [0, 128] True
+OPT_IN 0053 [0, 128] True
+NUMSTAT 79	1	.claude/dev/packet_loop.py
+18	1	.claude/dev/packet_loop_test.py
+46	2	docs/PROTOCOL_DA_PHIEN.md
+ADR_LINES 127 ADR_DISK_LINES 127
+INV 28 GATE 15 DEBT_GATE 11 DISCIPLINE 12 UNMEASURED 1
+DEBTS 23 TABLE_DEBTS 21 TEST_REFS 18
+NEO_HASH 14 True
+TABLE_HASH 30 a022ca600b71d79322dde5e5b91db3c6e672e46a604f16cad690ce54df640a4c
+ANCHOR_MATCHES [('N01', 1), ('N02', 1), ('N03', 1), ('N04', 1), ('N05', 1), ('N06', 1), ('N07', 1), ('N08', 1), ('N09', 1), ('N10', 1), ('N11', 1), ('N12', 1), ('N13', 1), ('N14', 1)] MASK_ERRORS [] HTML_REMAIN 0
+PROTOTYPE_CLI adr-song (0, "adr-song: sạch — 67 ADR trên đĩa, 67 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])", '')
+BASE_CLI adr-song (0, "adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])", '')
+PROTOTYPE_CLI doctrine-scan (0, 'doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine', '')
+BASE_CLI doctrine-scan (0, 'doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine', '')
+KN0 ([], {'cổng': 15, 'còn nợ': 11, 'kỷ luật': 12, 'chưa đo': 1})
+KN0_REFS 18 FAKE False
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv2.v4RC/out/prototype/.claude/dev/packet_loop_test.py:3803: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+REGISTRY 1582 1582 LINUX 1581 DIFF ['wp1174_windows_claim_rejected']
+CASES {'adr_song': 40, 'doctrine_scan': 17, 'doctrine_family': 132, 'r1466': 0} MUTANTS 1864 OLD_RELEVANT 21
+SPEC_TESTS_MUTANTS 40 25
+RECEIPTS 352 BANG_LOP 0
+SCHEMA_REQUIRED 16 PROVIDER ['claude', 'codex', 'human'] ASSURANCE ['cross_approved', 'same_provider_approved', 'human_audited', 'review_deferred']
+SIX bang_lop [0, 7, 0, 0, 0, 0]
+SIX class_slug [0, 0, 0, 0, 0, 0]
+SIX doi_chieu_luot [0, 0, 0, 0, 0, 0]
+SIX review_verdict [0, 0, 0, 0, 0, 0]
+SIX KET_LUAN [0, 2, 0, 0, 0, 0]
+SIX ai-dang-giu|ai_dang_giu|RC_DANG_GIU [11, 5, 0, 0, 0, 0]
+SIX refs/pull: [0, 0, 0, 0, 0, 0]
+SIX eol|EOL|gitattributes [0, 0, 0, 0, 24, 0]
+SIX RC_PROVIDER [0, 9, 0, 0, 0, 0]
+SIX reviewed_sha|reviewing_head_sha [4, 49, 0, 0, 0, 0]
+SIX spec_hash|spec_sha256 [0, 28, 0, 0, 0, 0]
+SIX model_family|ho_model [15, 33, 0, 0, 0, 0]
+SIX effective_review_class|_kiem_lop_review|RC_LOP [15, 0, 0, 0, 0, 0]
+SIX chup-workspace|chup_workspace|ghi_workspace [0, 0, 21, 0, 0, 0]
+SIX MOC_10_2_2|moc_10_2_2 [0, 3, 0, 0, 0, 0]
+SIX codex_review_calls|RC_TRAN [0, 34, 0, 0, 0, 0]
+SIX NGUOI_CO_THAM_QUYEN|RC_TU_CAP [13, 15, 0, 0, 0, 1]
+SIX doctrine [1, 27, 5, 0, 5, 1]
+SIX mien_p3 [0, 3, 0, 0, 0, 0]
+SIX \bLIVE\b [0, 0, 0, 0, 0, 0]
+SIX changed_paths [0, 0, 0, 0, 0, 0]
+SIX (diff|changed).*write_set|write_set.*(diff|changed) [0, 0, 0, 0, 0, 0]
+SIX tested_sha [0, 0, 0, 0, 0, 0]
+SIX ADR-0067|uy_quyen_quyet_dinh [0, 0, 0, 0, 0, 0]
+SIX Drive MCP|Sheets MCP [0, 0, 0, 0, 0, 0]
+SIX integration [0, 1, 0, 0, 0, 0]
+SIX label|assignee|board [1, 2, 8, 6, 1, 0]
+SIX diff --check [0, 0, 0, 0, 1, 0]
+SIX push_them|so_lan_push|M5 [0, 5, 3, 0, 0, 0]
+SIX writer_slot|hai writer|max_writers|executor_writers [0, 0, 1, 0, 0, 0]
+SIX numstat [0, 0, 0, 0, 0, 0]
+SIX ghi hộ|ghi_ho [0, 1, 0, 1, 0, 0]
+SIX heartbeat [0, 0, 0, 0, 0, 0]
+GATE_LINES [2732, 7284, 6220, 1688, 1221, 277]
+SCHEMA_REVIEW_LINES 9 HOOK_LINES 392
+WORKFLOWS 10 KIEM_MERGE_ADR_SONG [0, 0]
+1172_LINES 8
+CUTOVER [{'start_ge_T': False, 'H_ge_T': False, 'AP': False}, {'start_ge_T': False, 'H_ge_T': True, 'AP': False}, {'start_ge_T': True, 'H_ge_T': False, 'AP': True}, {'start_ge_T': True, 'H_ge_T': True, 'AP': True}]
+ADR_COUNT 66 MAX 0067

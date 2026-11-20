@@ -1,0 +1,39 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1446
+packet_id: px-ask
+revision: 1
+generation: 1
+lease_id: px-ask-r1-g1-operator
+role: operator
+reviewer: 'connector Codex tren PR; khong goi Codex offline (khong doi ma)'
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: a995f0b7b292a9695e7ad9ce10a1e4f908026b5e
+target_hosts:
+- a5f7076e-a491-4f84-829b-8d1fbcc1c767
+- f7281f27-f79f-40a2-a2f5-b454b58a166a
+- 7404cfba-9034-4787-b46b-7c358126a411
+live_change: 'Pha B: chep 4 tep module 2.0.0 + cau hinh px vao thu muc lam viec cua phien tren may du dieu kien; dung 1 loi goi px ask that moi may. Khong dich vu/tai khoan/ACL.'
+spec_path: ops/specs/px-ask-r1.md
+spec_hash: 97e6d6176549a62581ca7803aab57978833991f13efce95893c990e7157f4718
+write_set:
+- ops/acceptance/px-ask/r1/RESULTS.md
+- ops/leases/px-ask-r1-g1-operator.yaml
+- ops/specs/px-ask-r1.md
+write_set_hash: 551727bed44987b458a5c164b3b2b2a54a2e468abcf8b5d7d651b36343425141
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: a995f0b7b292a9695e7ad9ce10a1e4f908026b5e
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20/11: "Đồng ý làm đi. Ưu tiên thử trên các máy desktop, VM và Asus." (tra loi Issue #1446)'
+recorded_by: 'phiên điều phối Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T05:45:04Z'
+heartbeat_at: '2026-11-20T05:45:04Z'
+lease_until: '2026-11-20T09:45:04Z'
+lease_expires_at_utc: '2026-11-20T09:45:04Z'
+max_lease_hours: 4
+review_calls_limit: 0
+native_runs_limit_per_host: 2
+inference_calls_limit_per_host: 1

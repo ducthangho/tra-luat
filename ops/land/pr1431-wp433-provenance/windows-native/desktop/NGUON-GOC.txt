@@ -1,0 +1,27 @@
+# Nguon goc: Desktop DESKTOP-T9R33P2, thu muc F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\ (doc 2026-11-20T01:0xZ qua Remote Desktop Commander).
+# Zip dung TRONG BO NHO tren Desktop, ghi base64 ra F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\win1431.zip.b64 (thu muc phien), doc ve bang read_file; giai ma trong container va so khop bam.
+# zip sha256 414208c524a37b207596d6e7844d62c818de0e0360277e5e05ee21528c698391 (15318 byte, 21 tep) = dong ZIP Desktop in ra. Ban ma hoa: win1431.zip.b64.
+# Doi chieu: rig433r.b64 sha256 76907df9 = khoi base64 comment PR 7023504175 (dong 'khoi base64 76907df9' trong comment do native 7025233459); rig .py sau giai nen 4ada07de (TOM-TAT.txt dong 'sha256 rig'); probe_db2.py 93d92dbb = blob 87e79576 tren nhanh ops/wp433-p2r-spec (ops/reviews/wp433p2r-spec-r1/r1b/probe_db2.py).
+# Khong tep nao UTF-16 (luot nay khong co D10); moi tep log la UTF-8/ASCII, giai nen nguyen byte. rig433r.b64 chi con trong zip.
+# sha256 tung tep (tinh lai tu zip trong container):
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  wp433r-out-20261119T232645Z/D1.stderr.txt
+8470d63d875ab9e74394663909a8aee7c2a11387f2b004914eb31acd8c426f3c  wp433r-out-20261119T232645Z/D1.stdout.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  wp433r-out-20261119T232645Z/D2.stderr.txt
+94496cf5ef410f34f733a83889b1528fc93254fca81f08443c473cbbd680701e  wp433r-out-20261119T232645Z/D2.stdout.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  wp433r-out-20261119T232645Z/D3-don.stderr.txt
+eb6ea738a27c2cf5748b38b0d816a67708941016a8d9395f1af9c3eebda7bc5d  wp433r-out-20261119T232645Z/D3-don.stdout.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  wp433r-out-20261119T232645Z/D3-truoc.stderr.txt
+6c4136ab5d305e5bce8c397ee8de9371400a69549b3ea3716842ae56a637eb4b  wp433r-out-20261119T232645Z/D3-truoc.stdout.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  wp433r-out-20261119T232645Z/D4.stderr.txt
+2678bbc79263439f6e200fc205206c473d068d10e714a396c4b1c5416eaf60a9  wp433r-out-20261119T232645Z/D4.stdout.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  wp433r-out-20261119T232645Z/D5-hang.stderr.txt
+8b73e6f2771121df0646b2c7ac0e882082a80068910f87b79b425afef29e52a9  wp433r-out-20261119T232645Z/D5-hang.stdout.txt
+50aeaa33ccef3ea7bd5c8cdad46230ae3538123db9e0145755309a4c2ee90a6c  wp433r-out-20261119T232645Z/D5-u1.stderr.txt
+4d05139972454e3985005b61f7500123da9385ae84f5b27041afc54823924548  wp433r-out-20261119T232645Z/D5-u1.stdout.txt
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  wp433r-out-20261119T232645Z/D5.stderr.txt
+7c9a1f75b1de9c6524ce9d8ff9fc98a835ad4c045c1b6fb7b8c088913137fff6  wp433r-out-20261119T232645Z/D5.stdout.txt
+994450caee7328ee0c94401c94de9e96f62fb9b9eb2ca39638dc572b6fdb45a4  wp433r-out-20261119T232645Z/TOM-TAT.txt
+0860fc797cf96091bdea742ae952986eea67a652d41074181d69298c90ab68be  do1431.py
+b437a7d54b9b7abc06b3f513c693b90009eb129d3af4115b986745f4ee0b7d92  chay-1431.ps1
+76907df9a403f81492cf5c5c08fc529896e93a55b3cde00087951cd7599b5638  rig433r.b64
+93d92dbb70d4296969e1912fbdbf8a7ec8e2d7e5996ba4289db7f4cf0c7ed28c  probe_db2.py

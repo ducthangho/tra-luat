@@ -1,0 +1,166 @@
+[
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4fe32bc04cb6c9afea6b9f45476ae31d3ed394bf/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-19T17:22:28Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-19T17:22:28Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "wp433 P2c-R: _kiem_dich_ghi coi reparse point (junction, mount point, symlink) la lien ket\n\nDac ta GWS-CRED-DICH-NGOAI-KHO-R r1 (sha256 4d4b31812788...), lease wp433-r5-g1-claude, Issue #433.\n\n- M1 than `_kiem_dich_ghi`: dong nhan dien thanh `st = os.lstat(tien_to)` va dieu kien\n  `stat.S_ISLNK(st.st_mode) or getattr(st, \"st_file_attributes\", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT`;\n  cum `la lien ket tuong trung`, chi tiet, dong vong, chu ky, thu tu luat, nhanh FileNotFoundError /\n  NotADirectoryError giu nguyen; docstring neu ve moi. POSIX khong doi hanh vi (stat_result khong co\n  `st_file_attributes`). Ap cho moi nguoi goi (W1-W3, W4/W5, W6) tren dung cac tien to ho truyen.\n- M2 fragment wp433_gws_cred_win_reparse: 2 ca / 7 luot (3 + 4), 3 dot bien (2 moi nen, 1 chi nt),\n  3 tu kiem phan hang, phan chung bo do `pc_truc_tiep` (moi nen) va `pc_chi_kiem_cfgdir` (nt), so luot\n  va danh sach ID viet rieng, `os.lstat` da boc khoi phuc trong `finally` va duoc kiem sau `run`.\n- M3: tai sinh scripts/tl_test_fragments_bundled.py bang generate_bundled_module_bytes.\n\nCa `lien_ket_nt`, dot bien `db_bo_reparse_nt` va `pc_chi_kiem_cfgdir` CHUA chay tren Windows that (do\nnative §4c do phien dieu phoi chay).\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYN8oeEszoAzSfeQFV",
+   "tree": {
+    "sha": "bb82c542cf3747911fea0b7a3bbc8dcde3a3a1ff",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/bb82c542cf3747911fea0b7a3bbc8dcde3a3a1ff"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/4fe32bc04cb6c9afea6b9f45476ae31d3ed394bf",
+   "verification": {
+    "payload": "tree bb82c542cf3747911fea0b7a3bbc8dcde3a3a1ff\nparent 20eac111b1f95567bf2ec87260888f77222eea3b\nauthor Claude <noreply@anthropic.com> 1795108948 +0000\ncommitter Claude <noreply@anthropic.com> 1795108948 +0000\n\nwp433 P2c-R: _kiem_dich_ghi coi reparse point (junction, mount point, symlink) la lien ket\n\nDac ta GWS-CRED-DICH-NGOAI-KHO-R r1 (sha256 4d4b31812788...), lease wp433-r5-g1-claude, Issue #433.\n\n- M1 than `_kiem_dich_ghi`: dong nhan dien thanh `st = os.lstat(tien_to)` va dieu kien\n  `stat.S_ISLNK(st.st_mode) or getattr(st, \"st_file_attributes\", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT`;\n  cum `la lien ket tuong trung`, chi tiet, dong vong, chu ky, thu tu luat, nhanh FileNotFoundError /\n  NotADirectoryError giu nguyen; docstring neu ve moi. POSIX khong doi hanh vi (stat_result khong co\n  `st_file_attributes`). Ap cho moi nguoi goi (W1-W3, W4/W5, W6) tren dung cac tien to ho truyen.\n- M2 fragment wp433_gws_cred_win_reparse: 2 ca / 7 luot (3 + 4), 3 dot bien (2 moi nen, 1 chi nt),\n  3 tu kiem phan hang, phan chung bo do `pc_truc_tiep` (moi nen) va `pc_chi_kiem_cfgdir` (nt), so luot\n  va danh sach ID viet rieng, `os.lstat` da boc khoi phuc trong `finally` va duoc kiem sau `run`.\n- M3: tai sinh scripts/tl_test_fragments_bundled.py bang generate_bundled_module_bytes.\n\nCa `lien_ket_nt`, dot bien `db_bo_reparse_nt` va `pc_chi_kiem_cfgdir` CHUA chay tren Windows that (do\nnative §4c do phien dieu phoi chay).\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYN8oeEszoAzSfeQFV\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQLiPOo6+\nXRdXKhCKpTOwOfFavF2St/3oqX2B1L0UrQr/AVF6s4rzDl+JdkUTdCNxDPTEBp7ZuQf9lm7lvjJQ\n8wU=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-19T22:02:59Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/4fe32bc04cb6c9afea6b9f45476ae31d3ed394bf",
+  "node_id": "C_kwDOTNeRjdoAKDRmZTMyYmMwNGNiNmM5YWZlYTZiOWY0NTQ3NmFlMzFkM2VkMzk0YmY",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/20eac111b1f95567bf2ec87260888f77222eea3b",
+    "sha": "20eac111b1f95567bf2ec87260888f77222eea3b",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/20eac111b1f95567bf2ec87260888f77222eea3b"
+   }
+  ],
+  "sha": "4fe32bc04cb6c9afea6b9f45476ae31d3ed394bf",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4fe32bc04cb6c9afea6b9f45476ae31d3ed394bf"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/e5e118483792981addb30006c900b10fd2e3b72f/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-19T21:36:13Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-19T21:36:13Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "wp433 P2c-R: dot bien 2 cua fragment reparse theo dac ta r1b (mat na mo rong, a = 528)\n\nDac ta GWS-CRED-DICH-NGOAI-KHO-R r1b (sha256 43d60d7c8fa6...), Issue #433.\n\nPhep thay cu cua `db_reparse_moi_thu` (ve thuoc tinh thanh `!= 0`) chet SAI LUOT tren Windows: `os.lstat`\ndat `st_file_attributes` khac 0 cho moi entry that (thu muc 16, goc o 22), nen o luot `W5.bit` vong tien to\nchan tai goc o thay vi tai cfgdir. Do: mo phong Linux (moi entry that mang attr 16 => run False) va probe\nnative tren Desktop do phien dieu phoi chay.\n\n- `db_reparse_moi_thu`: mat na thanh `stat.FILE_ATTRIBUTE_REPARSE_POINT | stat.FILE_ATTRIBUTE_SPARSE_FILE`.\n- Luot `W5.khong_bit` gia lap `FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SPARSE_FILE` (528).\n- Tai sinh scripts/tl_test_fragments_bundled.py bang generate_bundled_module_bytes.\n\n`scripts/tl_gws.py` khong doi so voi commit truoc.\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYN8oeEszoAzSfeQFV",
+   "tree": {
+    "sha": "4d710fbb62be7b82c4b3f4308ed2a4ada6d952b0",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/4d710fbb62be7b82c4b3f4308ed2a4ada6d952b0"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/e5e118483792981addb30006c900b10fd2e3b72f",
+   "verification": {
+    "payload": "tree 4d710fbb62be7b82c4b3f4308ed2a4ada6d952b0\nparent 4fe32bc04cb6c9afea6b9f45476ae31d3ed394bf\nauthor Claude <noreply@anthropic.com> 1795124173 +0000\ncommitter Claude <noreply@anthropic.com> 1795124173 +0000\n\nwp433 P2c-R: dot bien 2 cua fragment reparse theo dac ta r1b (mat na mo rong, a = 528)\n\nDac ta GWS-CRED-DICH-NGOAI-KHO-R r1b (sha256 43d60d7c8fa6...), Issue #433.\n\nPhep thay cu cua `db_reparse_moi_thu` (ve thuoc tinh thanh `!= 0`) chet SAI LUOT tren Windows: `os.lstat`\ndat `st_file_attributes` khac 0 cho moi entry that (thu muc 16, goc o 22), nen o luot `W5.bit` vong tien to\nchan tai goc o thay vi tai cfgdir. Do: mo phong Linux (moi entry that mang attr 16 => run False) va probe\nnative tren Desktop do phien dieu phoi chay.\n\n- `db_reparse_moi_thu`: mat na thanh `stat.FILE_ATTRIBUTE_REPARSE_POINT | stat.FILE_ATTRIBUTE_SPARSE_FILE`.\n- Luot `W5.khong_bit` gia lap `FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SPARSE_FILE` (528).\n- Tai sinh scripts/tl_test_fragments_bundled.py bang generate_bundled_module_bytes.\n\n`scripts/tl_gws.py` khong doi so voi commit truoc.\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYN8oeEszoAzSfeQFV\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQGL08Vep\nXTbe4qB+7ixuonj9HNdBgb3ZfGQWnI5qbzV+wDCe9dLy4pnun88JZYjlvDxZK169IdgnmuRspmOs\nvwc=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-19T22:02:59Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/e5e118483792981addb30006c900b10fd2e3b72f",
+  "node_id": "C_kwDOTNeRjdoAKGU1ZTExODQ4Mzc5Mjk4MWFkZGIzMDAwNmM5MDBiMTBmZDJlM2I3MmY",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/4fe32bc04cb6c9afea6b9f45476ae31d3ed394bf",
+    "sha": "4fe32bc04cb6c9afea6b9f45476ae31d3ed394bf",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4fe32bc04cb6c9afea6b9f45476ae31d3ed394bf"
+   }
+  ],
+  "sha": "e5e118483792981addb30006c900b10fd2e3b72f",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/e5e118483792981addb30006c900b10fd2e3b72f"
+ }
+]

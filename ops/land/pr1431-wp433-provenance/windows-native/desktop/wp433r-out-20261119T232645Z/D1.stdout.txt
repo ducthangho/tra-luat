@@ -1,0 +1,8 @@
+UTC 2026-11-19T23:27:26Z · python 3.12.10 · os.name=nt · HEAD=e5e118483792981addb30006c900b10fd2e3b72f · tree=4d710fbb62be7b82c4b3f4308ed2a4ada6d952b0 · status_rong=True
+cmd /c ver -> rc=0 Microsoft Windows [Version 10.0.26300.9711]
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock /v AllowDevelopmentWithoutDevLicense -> rc=0 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock
+    AllowDevelopmentWithoutDevLicense    REG_DWORD    0x1
+git config --get core.symlinks -> rc=0 true
+T=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433r-20261119T232645Z\wp433r-232726-bwx5vccg · o=F:\ · he tep=NTFS · attr(goc o)=22 · attr(T)=16
+don: da xoa F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp433r-20261119T232645Z\wp433r-232726-bwx5vccg (con ton tai=False)
+KET LUAN D1: DAT — chi ghi lai

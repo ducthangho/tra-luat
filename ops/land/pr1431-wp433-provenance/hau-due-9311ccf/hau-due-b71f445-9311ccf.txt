@@ -1,0 +1,22 @@
+# do 2026-11-20T00:59:15Z, cung clone; core.abbrev 7
+## merge-base --is-ancestor b71f4459896dd04b8e3f8ee2ceb05082a2d87bb4 9311ccf6554b210cc84c7a88b0cf1195ba6646ea
+rc=0
+## rev-list --first-parent b71f445..9311ccf
+9311ccf6554b210cc84c7a88b0cf1195ba6646ea
+## rev-list b71f445..9311ccf (moi commit)
+9311ccf6554b210cc84c7a88b0cf1195ba6646ea b71f4459896dd04b8e3f8ee2ceb05082a2d87bb4 b0166982733dff9e4abd8c447a30713a6f951476 Merge pull request #1432 from ducthangho/ops/manifest-433-r
+b0166982733dff9e4abd8c447a30713a6f951476 b71f4459896dd04b8e3f8ee2ceb05082a2d87bb4 release: tai sinh RELEASE_MANIFEST.json sau land #1431 (#433 P2c-R)
+## diff --stat b71f445..9311ccf
+ RELEASE_MANIFEST.json | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+## numstat 9311ccf^1..9311ccf (PR #1432)
+7	7	RELEASE_MANIFEST.json
+## blob 3 tep write set tai merge / hau due
+scripts/tl_gws.py merge=1acf4ef147466f63203409b43eb3a6d9433757eb hau_due=1acf4ef147466f63203409b43eb3a6d9433757eb
+scripts/test_fragments/wp433_gws_cred_win_reparse.py merge=c27deefb8125a296d92a7db88659522886689bb0 hau_due=c27deefb8125a296d92a7db88659522886689bb0
+scripts/tl_test_fragments_bundled.py merge=0939a320f8e7f9670f4d8b1b96354b615278cf5d hau_due=0939a320f8e7f9670f4d8b1b96354b615278cf5d
+## tree hau due
+5d4dcbb6ba60e51ea237a2596b22f54aaab79e6e
+## release-verify --strict tai 9311ccf6554b210cc84c7a88b0cf1195ba6646ea
+rc=0
+ok True 185 185 []

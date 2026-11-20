@@ -1,0 +1,8 @@
+2026-11-20T00:38:43.7549367Z Image: ubuntu-26.04
+2026-11-20T00:38:44.8164934Z ##[group]Run git config --global core.autocrlf false
+2026-11-20T00:38:44.8735670Z ##[group]Run actions/checkout@v4
+2026-11-20T00:38:50.3460659Z [command]/usr/bin/git log -1 --format=%H
+2026-11-20T00:38:50.3487755Z 9311ccf6554b210cc84c7a88b0cf1195ba6646ea
+2026-11-20T00:38:50.3709180Z ##[group]Run actions/setup-python@v5
+2026-11-20T00:38:50.5349606Z ##[group]Run actions/download-artifact@v4
+2026-11-20T00:38:51.3694397Z ##[group]Run python .claude/dev/packet_loop_test_manh.py --gom manh --n 16

@@ -1,0 +1,3 @@
+UTC 2026-11-19T23:29:26Z · python 3.12.10 · os.name=nt · HEAD=e5e118483792981addb30006c900b10fd2e3b72f · tree=4d710fbb62be7b82c4b3f4308ed2a4ada6d952b0 · status_rong=True
+run() voi W5.sl_dir ep bo qua 1314: True
+KET LUAN D5-u1: DAT — doi chung xanh u>=1, h==0

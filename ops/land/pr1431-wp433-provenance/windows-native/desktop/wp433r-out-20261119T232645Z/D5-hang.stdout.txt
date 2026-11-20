@@ -1,0 +1,8 @@
+UTC 2026-11-19T23:29:22Z · python 3.12.10 · os.name=nt · HEAD=e5e118483792981addb30006c900b10fd2e3b72f · tree=4d710fbb62be7b82c4b3f4308ed2a4ada6d952b0 · status_rong=True
+db_bo_reparse          dich=('reparse_gia_lap', 'W5.bit', 'reparse') hang=GIET tin_hieu=('reparse_gia_lap', 'W5.bit', 'reparse')
+db_reparse_moi_thu     dich=('reparse_gia_lap', 'W5.khong_bit', 'khong_bit') hang=GIET tin_hieu=('reparse_gia_lap', 'W5.khong_bit', 'khong_bit')
+db_bo_reparse_nt       dich=('lien_ket_nt', 'W5.jn_cfg', 'lien_ket') hang=GIET tin_hieu=('lien_ket_nt', 'W5.jn_cfg', 'lien_ket')
+tu_kiem_doi_kieu       dich=('reparse_gia_lap', 'W5.bit', 'reparse') hang=TIN_DUNG_GIA tin_hieu=('reparse_gia_lap', 'W5.bit', 'reparse')
+tu_kiem_chu_thich      dich=('reparse_gia_lap', 'W5.bit', 'reparse') hang=SONG_SOT tin_hieu=None
+tu_kiem_sai_luot       dich=('reparse_gia_lap', 'truc_tiep', 'reparse') hang=TIN_DUNG_GIA tin_hieu=('reparse_gia_lap', 'W5.bit', 'reparse')
+KET LUAN D5-hang: DAT — chi ghi lai

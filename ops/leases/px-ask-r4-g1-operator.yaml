@@ -1,0 +1,42 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1446
+packet_id: px-ask
+revision: 4
+generation: 1
+lease_id: px-ask-r4-g1-operator
+role: operator
+reviewer: 'connector Codex tren PR; khong goi Codex offline (khong doi ma)'
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: ac9a06d442000417e37487e271c646aa6162e3c3
+target_hosts:
+- f7281f27-f79f-40a2-a2f5-b454b58a166a
+live_change: 'phien clone module 2.1.0 tai ac9a06d442000417e37487e271c646aa6162e3c3 + cau hinh px + R4.ps1 vao thu muc lam viec tren VM; chu kho tu chay 1 lenh admin: px config/status/models, ask -WhatIf, DUNG 1 ask that; nhat ky px.active.v1 duoi basePath. Khong dich vu/tai khoan/ACL.'
+spec_path: ops/specs/px-ask-r4.md
+spec_hash: aef77c7a16272adeb278c2815c55189daf969e56f23d10de03d1742d11633c12
+write_set:
+- ops/acceptance/px-ask/r4/RESULTS.md
+- ops/leases/px-ask-r3-g1-claude.yaml
+- ops/leases/px-ask-r4-g1-operator.yaml
+- ops/specs/px-ask-r4.md
+write_set_hash: 607a84864c3c62c2e56ac9d99099f6c9a959698c85a2a552ed867985c8693585
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: ac9a06d442000417e37487e271c646aa6162e3c3
+module_source_commit: ac9a06d442000417e37487e271c646aa6162e3c3
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20/11: "Đồng ý làm đi. Ưu tiên thử trên các máy desktop, VM và Asus." + chon "VM: anh tu chay 1 lenh admin" (r2) + "Mo packet sua module" (r3, merge PR #1450)'
+recorded_by: 'phiên điều phối Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T07:40:32Z'
+heartbeat_at: '2026-11-20T07:40:32Z'
+lease_until: '2026-11-20T07:49:38Z'
+lease_expires_at_utc: '2026-11-20T07:49:38Z'
+max_lease_hours: 4
+review_calls_limit: 0
+native_runs_limit_per_host: 2
+inference_calls_limit_per_host: 1
+withdrawn_at_utc: '2026-11-20T07:49:38Z'
+withdrawn_by: 'phien dieu phoi Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r4 xong: R4.ps1 chay 1/1 boi chu kho; 1/1 loi goi px ask that (gemini:auto) da gui, gateway HTTP 500, outcome unknown; ket qua ops/acceptance/px-ask/r4/RESULTS.md'

@@ -382,6 +382,21 @@ def a115_skipped_mat_passed():
 
 
 @ca
+def a117_loi_duyet_va_job_trung():   # review lượt 2 G01 (lỗi os.scandir không bị nuốt), G02 (job_id trùng trong provenance)
+    from unittest import mock
+    goc_scandir = os.scandir
+    with mini("T-v3-pass") as (tep, thu):
+        (thu / "con").mkdir()
+        shutil.copy(thu / "prov.yaml", thu / "con" / "prov.yaml")
+        ky(G().kiem_tep(tep, thu), "not_measured", ["provenance_nhieu"], "doi chung hai provenance")
+        loi = lambda p, *a: (_ for _ in ()).throw(PermissionError(p)) if str(p).endswith("con") else goc_scandir(p, *a)  # noqa: E731
+        with mock.patch.object(os, "scandir", loi):
+            ky(G().kiem_tep(tep, thu), "not_measured", ["PermissionError"], "G01 loi duyet")
+    ky(kt("T-v3-pass", None, lambda y: y["moc"]["gate_output"]["jobs"].append(dict(y["moc"]["gate_output"]["jobs"][0]))),
+       "not_measured", ["job_id_trung_provenance"], "G02 job_id trung")
+
+
+@ca
 def a116_yaml_la_trong_thu_muc():   # review lượt 1 F01/F02: YAML ngoài schema bỏ qua; YAML hỏng và symlink KHÔNG bị nuốt
     with mini("T-v3-pass") as (tep, thu):
         (thu / "x.yaml").write_text("- a\n- b\n", encoding="utf-8")
@@ -526,6 +541,8 @@ def a209_mien():
         (Path(thu) / "readback-duyet-issuecomment-123.json").write_text(json.dumps(rb(DONG, author_association="MEMBER")), encoding="utf-8")
         vp = G().kiem_ho_so({"moc_gate_output": f"owner_waived — {URL} {SHA}"}, Path(thu))
         bang(vp == ["$.moc_gate_output: waiver_khong_co_can_cu:tac_gia"], f"(j) kiem_ho_so MEMBER: {vp}")
+        (Path(thu) / "readback-ban2-issuecomment-123.json").write_text(json.dumps(rb(DONG)), encoding="utf-8")
+        bang(G().kiem_mien(f"owner_waived — {URL} {SHA}", Path(thu), None) == ["readback"], "(k) hai readback (G02 luot 2)")
 
 
 def cli(*a):
@@ -677,6 +694,9 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
      '            try:\n                y = yaml.safe_load(p.read_bytes().decode("utf-8"))\n            except Exception:\n                continue', "a116"),
     ("m56_xoa_ly_do_symlink", '    moc = y["moc"]   # giữ', '    ly, moc = [], y["moc"]   # giữ', "a116"),
     ("m57_bo_chot_vong", '    if id(doc) in _dang:\n        raise ValueError(f"vong_tham_chieu tại {duong}")\n', "", "a214"),
+    ("m59_nuot_loi_duyet", "os.walk(thu_muc, followlinks=False, onerror=_nem)", "os.walk(thu_muc, followlinks=False)", "a117"),
+    ("m60_bo_job_trung_prov", '        ly += ["job_id_trung_provenance"] if q.get("job_id") in P else []\n', "", "a117"),
+    ("m61_nhan_nhieu_readback", "    if len(rb) != 1:\n        return [\"readback\"]", "    if not rb:\n        return [\"readback\"]", "a209"),
     ("m58_cli_chi_bat_OSError", "        except Exception as e:   # gồm vòng", "        except OSError as e:   # gồm vòng", "a214"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

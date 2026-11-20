@@ -85,13 +85,17 @@ def _la_so(x):
     return type(x) is int
 
 
+def _nem(loi):   # G01 lượt 2: lỗi duyệt thư mục KHÔNG được bỏ qua ⇒ lên kiem_tep ⇒ not_measured
+    raise loi
+
+
 def chon_provenance(thu_muc, run, attempt, head):
     """Đúng MỘT tệp `ci_provenance/1` khớp (run, attempt, head) dưới `thu_muc`; không theo symlink. Trả (dict | None, lý do)."""
     import yaml
     thu_muc, ly, khop = Path(thu_muc), [], []
     if thu_muc.is_symlink() or not thu_muc.is_dir():
         return None, (["symlink"] if thu_muc.is_symlink() else []) + ["provenance_0"]
-    for goc, thu, tep in os.walk(thu_muc, followlinks=False):
+    for goc, thu, tep in os.walk(thu_muc, followlinks=False, onerror=_nem):
         ly += ["symlink" for t in thu if (Path(goc) / t).is_symlink()]
         thu[:] = [t for t in thu if not (Path(goc) / t).is_symlink()]
         for p in (Path(goc) / t for t in sorted(tep) if t.endswith(".yaml")):

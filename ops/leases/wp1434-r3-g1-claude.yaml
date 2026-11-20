@@ -64,9 +64,9 @@
   "lease_until": "2026-11-22T02:00:00Z",
   "lease_expires_at_utc": "2026-11-22T02:00:00Z",
   "limits": {
-    "Claude_author": 3,
-    "Codex_source_review": 3,
-    "source_push": 2,
+    "Claude_author": 4,
+    "Codex_source_review": 4,
+    "source_push": 3,
     "draft_PR": 1,
     "connector": 2,
     "PR_Ubuntu_CI": 2,
@@ -128,5 +128,16 @@
         "verdict": "changes_requested"
       }
     ]
+  },
+  "nang_tran_r76": {
+    "mission_revision": 76,
+    "owner_approval": "owner approved Mission r76 fa161675 in the coordinator chat 2026-11-20",
+    "delta": {
+      "Claude_author": "3->4",
+      "Codex_source_review": "3->4",
+      "source_push": "2->3"
+    },
+    "reason": "connector review 5986843693 on 70eafc1: two P2 in thu_thap.py",
+    "authority_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7028948296"
   }
 }

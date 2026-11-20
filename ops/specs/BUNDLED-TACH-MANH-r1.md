@@ -7,13 +7,13 @@ tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
 | trường | giá trị |
 |---|---|
-| `packet_issue` | **[QUYẾT ĐỊNH Q1 — khuyến nghị: #433]** (packet này mở để gỡ chặn packet SECRETS-SET-BUNDLE-KIEU của #433; TEST_ID fragment mới mang tiền tố `wp433_`). Phương án khác: issue mới, khi ấy đổi tên fragment theo số issue. |
+| `packet_issue` | **#433** (Q1, chủ kho chốt 2026-11-20). Packet này mở để gỡ chặn packet SECRETS-SET-BUNDLE-KIEU của #433; TEST_ID fragment mới mang tiền tố `wp433_`. |
 | `nguon_cap_viec` | Chủ kho 2026-11-20 (phiên điều phối #1206): "Tách bundled trước" — packet riêng, làm TRƯỚC secrets-set, giữ nguyên bộ canh (không nâng ngưỡng, không waiver). |
 | `phu_thuoc` | Không. Chặn: SECRETS-SET-BUNDLE-KIEU (nhánh `agent/wp433-r8-g1-claude` `a8a3b3c`, đang giữ). |
 | `review_class` | `sensitive`: chạm `scripts/tl_core/test_fragments.py` (hợp đồng nạp fragment, chạy trong gói phát hành) và `scripts/tl_core/release.py` (cổng `test-fragments-check` lane LAND). |
 | `base` | `0f9aa2a2cc697129e1f5be72feddf60986286865`. Phiên thi hành đo lại §0 trên base thật của lease và DỪNG nếu lệch. Đo trên clone ĐẦY ĐỦ: clone nông làm `wp1099_nlm_nap_lai` đỏ giả (thiếu object `358451e8`). |
 
-Các mục **[QUYẾT ĐỊNH Qn]** ghi phương án KHUYẾN NGHỊ; chủ kho chọn khác thì đặc tả revision trước khi đóng băng.
+Các quyết định Q1–Q4 đã được chủ kho chốt 2026-11-20 (xem §9); mỗi chỗ ghi kèm nhãn Qn.
 
 ## 0. Hiện trạng (đo trên `0f9aa2a`)
 
@@ -49,7 +49,7 @@ scripts/tl_test_fragments_bundled.py
 scripts/tl_test_fragments_bundled_2.py
 ```
 
-**7 tệp > trần 6 của ADR-0053 ⇒ [QUYẾT ĐỊNH Q2 — khuyến nghị: nâng trần lên 7 tệp, 450 dòng giữ nguyên] (E2).** Không gộp được: golden phải đổi vì
+**7 tệp > trần 6 của ADR-0053 ⇒ trần nâng lên 7 tệp, 450 dòng giữ nguyên (Q2, chủ kho chốt 2026-11-20; E2).** Không gộp được: golden phải đổi vì
 `files_scanned`; `eol_policy_test` phải đổi vì hai ca ghi bundled từ fragment thật. Hai tệp bundled CHỈ sinh bằng `write_bundled_modules(scripts/test_fragments,
 scripts)` (M1), không sửa tay. KHÔNG `RELEASE_MANIFEST.json` (PR manifest sau land). **Điều kiện cấp lease (E2):** comment chủ kho trên #433 cấp ngoại lệ
 bundled nêu đúng `packet_id` `BUNDLED-TACH-MANH`, hai tệp bundled, sha256 đặc tả đã đóng băng, và trần đã nâng.
@@ -66,7 +66,7 @@ bundled nêu đúng `packet_id` `BUNDLED-TACH-MANH`, hai tệp bundled, sha256 �
 
 | # | mục tiêu | tệp |
 |---|---|---|
-| M1 | **Sinh mảnh.** `generate_bundled_modules(root) -> tuple[(tên, bytes), …]`: xếp fragment theo thứ tự ổn định hiện có, gom tham lam, mảnh mới khi tổng byte dòng nguồn vượt `_BUNDLED_SHARD_LIMIT` **[QUYẾT ĐỊNH Q3 — khuyến nghị: 192 KiB = 196.608 B ≈ 68,6% WARN]** (một fragment đơn lớn hơn hạn vẫn đứng riêng một mảnh). Mảnh 1 tên `tl_test_fragments_bundled.py`; mảnh k≥2 tên `tl_test_fragments_bundled_<k>.py`. Khi >1 mảnh, mảnh 1 thêm đúng MỘT phép gán `BUNDLED_FRAGMENT_SHARDS = ("tl_test_fragments_bundled_2.py", …)` sau `BUNDLED_FRAGMENT_SOURCES`; khi 1 mảnh, byte Y HỆT `generate_bundled_module_bytes` hiện nay. `generate_bundled_module_bytes(root)` giữ chữ ký, trả bytes mảnh 1. `write_bundled_modules(root, scripts_dir)` ghi mọi mảnh và XOÁ mảnh đánh số lạc; là đường tái sinh duy nhất được phép. | `test_fragments.py` |
+| M1 | **Sinh mảnh.** `generate_bundled_modules(root) -> tuple[(tên, bytes), …]`: xếp fragment theo thứ tự ổn định hiện có, gom tham lam, mảnh mới khi tổng byte dòng nguồn vượt `_BUNDLED_SHARD_LIMIT` **192 KiB = 196.608 B ≈ 68,6% WARN (Q3, chủ kho chốt 2026-11-20)** (một fragment đơn lớn hơn hạn vẫn đứng riêng một mảnh). Mảnh 1 tên `tl_test_fragments_bundled.py`; mảnh k≥2 tên `tl_test_fragments_bundled_<k>.py`. Khi >1 mảnh, mảnh 1 thêm đúng MỘT phép gán `BUNDLED_FRAGMENT_SHARDS = ("tl_test_fragments_bundled_2.py", …)` sau `BUNDLED_FRAGMENT_SOURCES`; khi 1 mảnh, byte Y HỆT `generate_bundled_module_bytes` hiện nay. `generate_bundled_module_bytes(root)` giữ chữ ký, trả bytes mảnh 1. `write_bundled_modules(root, scripts_dir)` ghi mọi mảnh và XOÁ mảnh đánh số lạc; là đường tái sinh duy nhất được phép. | `test_fragments.py` |
 | M2 | **Nạp mảnh.** `_read_bundled_sources(primary)` đọc mảnh 1 rồi ĐÚNG các mảnh mảnh 1 khai trong `BUNDLED_FRAGMENT_SHARDS`, theo thứ tự khai; tệp đánh số không khai thì KHÔNG nạp. Hợp đồng mỗi mảnh vẫn data-only: mảnh 1 cho phép `[SOURCES]` hoặc `[SOURCES, SHARDS]`; mảnh k≥2 chỉ `[SOURCES]`. Danh sách khai phải là `("…_2.py", …, "…_N.py")` liên tục, không rỗng. Thứ tự và tính duy nhất (NFC+casefold) kiểm XUYÊN mảnh. Mảnh khai mà thiếu ⇒ `BUNDLED_MODULE_MISSING` (mã lỗi giữ nguyên, kèm đường mảnh). | `test_fragments.py` |
 | M3 | **Cổng `test-fragments-check`.** So từng mảnh kỳ vọng theo byte, cộng phát hiện tệp `tl_test_fragments_bundled_<k>.py` lạc trên đĩa (`extra_shards`) ⇒ `GENERATED_BUNDLE_STALE`. Thiếu mảnh 1 ⇒ `BUNDLED_MODULE_MISSING` như nay. Một mảnh: `expected_sha256`/`actual_sha256`/`*_bytes` giữ nguyên nghĩa (băm tệp). Nhiều mảnh: băm trên chuỗi `tên\0bytes` nối theo thứ tự. Thêm khoá `shards`. | `release.py` |
 | M4 | `eol_policy_test.py`: hai chỗ ghi bundled từ fragment thật (`_tai_sinh_bundled`, ca driver) đổi sang `write_bundled_modules`. | `.githooks/eol_policy_test.py` |
@@ -96,8 +96,7 @@ bundled nêu đúng `packet_id` `BUNDLED-TACH-MANH`, hai tệp bundled, sha256 �
 
 ### 4c. Đo native Windows
 
-**[QUYẾT ĐỊNH Q4 — khuyến nghị: miễn]** Mã chỉ là `pathlib` iterdir/write/unlink và AST/JSON; không API riêng nền, không ký tự đường đặc biệt. Nếu chủ kho
-muốn: một lượt D1 nhẹ trên Desktop — chạy fragment mới và `test-fragments-check` trên clone exact head (`git -c core.longpaths=true`), kỳ vọng như N1.
+**MIỄN (Q4, chủ kho chốt 2026-11-20).** Mã chỉ là `pathlib` iterdir/write/unlink và AST/JSON; không API riêng nền, không ký tự đường đặc biệt. Không có lượt D1; ngân sách Windows của lease = 0.
 
 ## 5. `pham_vi_e`
 
@@ -125,13 +124,14 @@ Không chạm E4/E5: thư mục tạm, không mạng, không LIVE, không đẩy
 
 - Numstat nguyên mẫu (đo, base `0f9aa2a`, bundled tái sinh bằng `write_bundled_modules`): `eol_policy_test.py` 2/4 · golden 1/1 · fragment mới 130/0 ·
   `release.py` 22/5 · `test_fragments.py` 90/26 · `tl_test_fragments_bundled.py` 2/9 · `tl_test_fragments_bundled_2.py` 14/0 ⇒ **7 tệp, 261 dòng thêm, 45 xoá**.
-- Chưa đo: Windows (Q4); `RELEASE_MANIFEST.json` lane LAND (PR manifest sau land, 186 tệp).
+- Chưa đo: Windows (miễn theo Q4); `RELEASE_MANIFEST.json` lane LAND (PR manifest sau land, 186 tệp).
 
 ## 9. Lịch sử và quyết định
 
 - Chủ kho 2026-11-20: secrets-set bị chặn bởi WARN bundled ⇒ chọn "Tách bundled trước" (không nâng ngưỡng, không waiver, không đưa test ra ngoài bundle).
-- Q1–Q4 chờ chủ kho (đầu tệp và §1, §3, §4c).
+- Chủ kho 2026-11-20 chốt Q1–Q4 theo khuyến nghị: #433 · nâng trần ADR-0053 lên 7 tệp/450 dòng · hạn mảnh 192 KiB · miễn đo Windows. Yêu cầu Codex review đặc tả trước khi duyệt băm.
 
 ## 10. Nhật ký revision
 
 - 2026-11-20T15:1xZ (phiên con của điều phối #1206): bản 1, đo §0 và nguyên mẫu trên clone đầy đủ `0f9aa2a` (Linux).
+- 2026-11-20 (điều phối #1206): ghi quyết định Q1–Q4 của chủ kho; chưa đổi nội dung kỹ thuật.

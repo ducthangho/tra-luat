@@ -1,0 +1,30 @@
+bat_dau=2026-11-20T03:57:39Z python=3.12.10 platform=Windows-11-10.0.26300-SP0 admin=0 TEMP=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tmp441-20261120T035739Z
+fetch +refs/heads/agent/wp433-r6-g1-claude rc=0 
+fetch +refs/heads/master rc=0 
+base co mat trong SRC: rc=0
+CHOT HEAD sha=143115a2b43a42f483db8cb0b3aa0a75b68e1d94 tree=3b200640563c8673fa7faebdc49a41b3028061ee sach=[] git_la_thu_muc=True base_trong_H=0
+sha256 rig f5bbdb4d141ea917297da2b232447c515776f654cd18372dfb30f2fd86bf39a1 (12870 byte)
+D1 rc=0 [2026-11-20T03:58:18Z->2026-11-20T03:58:19Z] KET LUAN D1: DAT
+D2 rc=1 [2026-11-20T03:58:19Z->2026-11-20T03:59:32Z] (khong co KET LUAN) rocess.args,
+subprocess.CalledProcessError: Command '['git', 'clone', '-q', '--no-hardlinks', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\c441-20261120T035739Z', 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\tmp441-20261120T035739Z\\wp433n-rig-9z1yhbz5\\base']' returned non-zero exit status 128.
+D3 rc=0 [2026-11-20T03:59:32Z->2026-11-20T03:59:59Z] KET LUAN D3: DAT
+D4 rc=1 [2026-11-20T03:59:59Z->2026-11-20T04:04:04Z] KET LUAN D4: DO
+sach_sau H=[]
+ket_thuc=2026-11-20T04:04:04Z
+XONG (khoa da nha)
+D2-lai bat_dau=2026-11-20T04:05:44Z rig=f5bbdb4d141ea917297da2b232447c515776f654cd18372dfb30f2fd86bf39a1 TEMP=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\t441b-20261120T040544Z env them: GIT_CONFIG core.longpaths=true (rig khong doi)
+D2-lai H=143115a2b43a42f483db8cb0b3aa0a75b68e1d94 sach=[]
+D2-lai rc=0 [2026-11-20T04:05:45Z->2026-11-20T04:12:14Z] KET LUAN D2: DAT
+base git clone rc=0 
+base git checkout rc=0 
+BASE checkout=dd1985be73d3cf65f3580f7049039ae3dab50d3d dir=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\b441-20261120T040544Z
+D4-doi-chung base lan1 wp433_gws_cred_win_duong run=True
+D4-doi-chung base lan1 wp433_gws_cred_dich_ngoai_kho_b run=False
+D4-doi-chung base lan2 wp433_gws_cred_win_duong run=True
+D4-doi-chung base lan2 wp433_gws_cred_dich_ngoai_kho_b run=False
+D4-doi-chung head lan1 wp433_gws_cred_win_duong run=False
+D4-doi-chung head lan1 wp433_gws_cred_dich_ngoai_kho_b run=False
+D4-doi-chung head lan2 wp433_gws_cred_win_duong run=False
+D4-doi-chung head lan2 wp433_gws_cred_dich_ngoai_kho_b run=False
+D2-lai ket_thuc=2026-11-20T04:22:00Z
+D2-lai XONG (khoa da nha)

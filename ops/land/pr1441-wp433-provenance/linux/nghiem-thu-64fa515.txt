@@ -1,0 +1,42 @@
+# do 2026-11-20T07:37:13Z, clone rieng scratchpad (git clone /home/user/tra-luat), core.abbrev 7
+## rev-parse merge, tree, cha
+64fa5156794dfb6a2dd9e8f257ee759ab07c9c35
+46f93dec4bdb0196388f662c98130f3531a0b67d
+a995f0b7b292a9695e7ad9ce10a1e4f908026b5e
+adda58d59f259475a925d8b61a554f732455978b
+## rev-parse head, tree
+adda58d59f259475a925d8b61a554f732455978b
+1cd7d44e13bee1bb88101ffeb258a0bbd4c51630
+## numstat 64fa5156794dfb6a2dd9e8f257ee759ab07c9c35^1..64fa5156794dfb6a2dd9e8f257ee759ab07c9c35 (= phan PR dua vao)
+359	0	scripts/test_fragments/wp433_gws_cred_no.py
+5	2	scripts/test_fragments/wp433_gws_cred_win_duong.py
+2	2	scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py
+44	3	scripts/tl_gws.py
+3	2	scripts/tl_test_fragments_bundled.py
+## numstat dd1985b..adda58d59f259475a925d8b61a554f732455978b (base lease..head)
+359	0	scripts/test_fragments/wp433_gws_cred_no.py
+5	2	scripts/test_fragments/wp433_gws_cred_win_duong.py
+2	2	scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py
+44	3	scripts/tl_gws.py
+3	2	scripts/tl_test_fragments_bundled.py
+## merge-base base head
+dd1985be73d3cf65f3580f7049039ae3dab50d3d
+## base..cha thu nhat: tep thuoc write set bi cham
+(het)
+## blob 5 tep tai head / merge
+scripts/tl_gws.py head=fbeb9421edd0a7e451534a92c89d090c4de4b3a4 merge=fbeb9421edd0a7e451534a92c89d090c4de4b3a4
+scripts/test_fragments/wp433_gws_cred_no.py head=fc70a54a9eb4b56bcbff711ed4a920fbd3d7ddaf merge=fc70a54a9eb4b56bcbff711ed4a920fbd3d7ddaf
+scripts/test_fragments/wp433_gws_cred_win_duong.py head=82b4cf398ef550bd82a75a0fe20540d6bcd00537 merge=82b4cf398ef550bd82a75a0fe20540d6bcd00537
+scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py head=b0a6acbef5ce3a1d50d3c37137d8da2f9f1a22f5 merge=b0a6acbef5ce3a1d50d3c37137d8da2f9f1a22f5
+scripts/tl_test_fragments_bundled.py head=2fac15eb2d7b96185052f6f58fa7188ec8b9247e merge=2fac15eb2d7b96185052f6f58fa7188ec8b9247e
+## git diff --check 64fa5156794dfb6a2dd9e8f257ee759ab07c9c35^1 64fa5156794dfb6a2dd9e8f257ee759ab07c9c35
+rc=0
+## release-verify --strict tai 64fa5156794dfb6a2dd9e8f257ee759ab07c9c35
+rc=2
+ok False 185 185 ['scripts/tl_gws.py', 'scripts/tl_test_fragments_bundled.py']
+## sha256 5 tep tai merge
+7c31d2b3f37bd1ac93a546eeda50fb07fd17e836414c3ce17b35ab8a7f291941  scripts/tl_gws.py
+eb25b7cb81dfe5319d92f07f5c8cb496f3c35976b20db16762e03c789bf9433c  scripts/test_fragments/wp433_gws_cred_no.py
+fa87f58b6bb4e064684a2d61f88d96eedce7844b648ad74e145f8abe17f26e4c  scripts/test_fragments/wp433_gws_cred_win_duong.py
+d63e7f80a49796e25fdbd29ce46d7bff2740377582507ac0eecb118907d4e1cd  scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py
+b20c5043169fa67498ff7afcac2844ceee53518c81e95a8d48aefbbe67a7a6b1  scripts/tl_test_fragments_bundled.py

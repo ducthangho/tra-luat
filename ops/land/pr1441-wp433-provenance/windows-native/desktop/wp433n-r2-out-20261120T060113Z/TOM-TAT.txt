@@ -1,0 +1,13 @@
+bat_dau=2026-11-20T06:01:13Z python=3.12.10 platform=Windows-11-10.0.26300-SP0 admin=0 TEMP=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\t2-060113 env them: GIT_CONFIG core.longpaths=true
+fetch +refs/heads/agent/wp433-r6-g1-claude rc=0 
+fetch +refs/heads/master rc=0 
+CHOT HEAD sha=adda58d59f259475a925d8b61a554f732455978b tree=1cd7d44e13bee1bb88101ffeb258a0bbd4c51630 sach=[] git_la_thu_muc=True base_trong_H=0
+sha256 rig 7a5e4acf89f52b1cef3eaa5085ef9b346b8ab4a0006abaf72c118afc9e6bb699 (15495 byte)
+D1 rc=0 [2026-11-20T06:01:55Z->2026-11-20T06:01:56Z] KET LUAN D1: DAT
+D2 rc=0 [2026-11-20T06:01:56Z->2026-11-20T06:09:37Z] KET LUAN D2: DAT
+D3 rc=0 [2026-11-20T06:09:37Z->2026-11-20T06:10:03Z] KET LUAN D3: DAT
+D4 rc=0 [2026-11-20T06:10:03Z->2026-11-20T06:18:49Z] KET LUAN D4: DAT
+C1-lan2 head run=True [2026-11-20T06:18:50Z->2026-11-20T06:19:27Z]
+sach_sau H=[]
+ket_thuc=2026-11-20T06:19:27Z
+XONG (khoa da nha)

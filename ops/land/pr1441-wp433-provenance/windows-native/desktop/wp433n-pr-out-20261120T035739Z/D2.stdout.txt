@@ -1,0 +1,3 @@
+DINH DANH: utc=2026-11-20T03:58:19Z python=3.12.10 os.name=nt platform=Windows-11-10.0.26300-SP0
+DINH DANH: HEAD=143115a2b43a42f483db8cb0b3aa0a75b68e1d94 tree=3b200640563c8673fa7faebdc49a41b3028061ee cay_sach=True cwd=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\c441-20261120T035739Z
+PROBE: [('symlink', True, 'ok'), ('hardlink', True, 'ok')]

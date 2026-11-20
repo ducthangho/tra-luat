@@ -1,0 +1,77 @@
+# do 2026-11-20T07:39:52Z, kho chinh /home/user/tra-luat sau fetch --prune +refs/heads/*:refs/remotes/origin/* va ff master cuc bo (a31c680)
+may chu 362 ref · cuc bo thieu 0 · thua 0
+## ai-dang-giu scripts/tl_gws.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp710-r3-g1-codex	refs/heads/claude/busy-brown-x1np9m-tam:ops/leases/wp710-r3-g1-codex.yaml
+HẾT_HẠN	wp710-r4-g2-codex	refs/heads/claude/busy-brown-x1np9m-tam:ops/leases/wp710-r4-g2-codex.yaml
+HẾT_HẠN	wp710-r4-g3-claude	refs/heads/claude/busy-brown-x1np9m-tam:ops/leases/wp710-r4-g3-claude.yaml
+HẾT_HẠN	wp710-r4-g4-claude-windows	refs/heads/claude/busy-brown-x1np9m-tam:ops/leases/wp710-r4-g4-claude-windows.yaml
+HẾT_HẠN	wp710-r4-g5-claude-windows	refs/heads/claude/busy-brown-x1np9m-tam:ops/leases/wp710-r4-g5-claude-windows.yaml
+HẾT_HẠN	wp1334-r2-g1-claude	refs/heads/ops/wp1334-r2-g1-lease:ops/leases/wp1334-r2-g1-claude.yaml
+HẾT_HẠN	wp433-r2-g1-claude	refs/heads/ops/wp433-p2a-spec:ops/leases/wp433-r2-g1-claude.yaml
+HẾT_HẠN	wp433-r3-g1-claude	refs/heads/ops/wp433-p2b-spec:ops/leases/wp433-r3-g1-claude.yaml
+HẾT_HẠN	wp433-r4-g1-claude	refs/heads/ops/wp433-p2c-spec:ops/leases/wp433-r4-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp433-r6-g1-claude	refs/heads/ops/wp433-p2n-spec:ops/leases/wp433-r6-g1-claude.yaml
+HẾT_HẠN	wp433-r6-g2-claude	refs/heads/ops/wp433-p2n-spec:ops/leases/wp433-r6-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp433-r5-g1-claude	refs/heads/ops/wp433-p2r-spec:ops/leases/wp433-r5-g1-claude.yaml
+HẾT_HẠN	wp433-r5-g2-claude	refs/heads/ops/wp433-p2r-spec:ops/leases/wp433-r5-g2-claude.yaml
+HẾT_HẠN	wp433-r1-g1-claude	refs/heads/ops/wp433-r1-g1-lease:ops/leases/wp433-r1-g1-claude.yaml
+HẾT_HẠN	wp1009-cloud-setup-p1-r2-g1-claude	refs/remotes/origin/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r2-g1-claude.yaml
+HẾT_HẠN	wp1009-cloud-setup-p1-r3-g2-claude	refs/remotes/origin/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r3-g2-claude.yaml
+HẾT_HẠN	wp1009-cloud-setup-p1-r3-g3-claude	refs/remotes/origin/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r3-g3-claude.yaml
+HẾT_HẠN	wp1009-cloud-setup-p1-r4-g4-claude	refs/remotes/origin/ops/cap-lease-1009-g1:ops/leases/wp1009-cloud-setup-p1-r4-g4-claude.yaml
+HẾT_HẠN	wp1038-cloud-setup-p2a-r1-g1-claude	refs/remotes/origin/ops/cap-lease-1038-g1:ops/leases/wp1038-cloud-setup-p2a-r1-g1-claude.yaml
+HẾT_HẠN	wp1170-r3-g1-codex-20261104	refs/remotes/origin/ops/wp1170-r3-g1-lease:ops/leases/wp1170-r3-g1-codex-20261104.yaml
+HẾT_HẠN	wp1170-r3-g2-codex-20261104	refs/remotes/origin/ops/wp1170-r3-g2-lease:ops/leases/wp1170-r3-g2-codex-20261104.yaml
+HẾT_HẠN	wp1170-r4-g3-codex-20261104	refs/remotes/origin/ops/wp1170-r4-g3-lease:ops/leases/wp1170-r4-g3-codex-20261104.yaml
+HẾT_HẠN	wp1170-r5-g4-codex-20261104	refs/remotes/origin/ops/wp1170-r5-g4-lease:ops/leases/wp1170-r5-g4-codex-20261104.yaml
+HẾT_HẠN	wp1170-r6-g5-codex-20261104	refs/remotes/origin/ops/wp1170-r6-g5-lease:ops/leases/wp1170-r6-g5-codex-20261104.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu scripts/test_fragments/wp433_gws_cred_no.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp433-r6-g1-claude	refs/heads/ops/wp433-p2n-spec:ops/leases/wp433-r6-g1-claude.yaml
+HẾT_HẠN	wp433-r6-g2-claude	refs/heads/ops/wp433-p2n-spec:ops/leases/wp433-r6-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu scripts/test_fragments/wp433_gws_cred_win_duong.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp433-r4-g1-claude	refs/heads/ops/wp433-p2c-spec:ops/leases/wp433-r4-g1-claude.yaml
+HẾT_HẠN	wp433-r6-g2-claude	refs/heads/ops/wp433-p2n-spec:ops/leases/wp433-r6-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp433-r6-g1-claude	refs/heads/ops/wp433-p2n-spec:ops/leases/wp433-r6-g1-claude.yaml
+HẾT_HẠN	wp433-r6-g2-claude	refs/heads/ops/wp433-p2n-spec:ops/leases/wp433-r6-g2-claude.yaml
+HẾT_HẠN	wp433-r1-g1-claude	refs/heads/ops/wp433-r1-g1-lease:ops/leases/wp433-r1-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu scripts/tl_test_fragments_bundled.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	doc-claims-dau-cham-r3-g2-claude	refs/heads/ops/doc-claims-dau-cham-g2-lease:ops/leases/doc-claims-dau-cham-r3-g2-claude.yaml
+HẾT_HẠN	doc-claims-dau-cham-r3-g1-claude	refs/heads/ops/doc-claims-dau-cham-lease:ops/leases/doc-claims-dau-cham-r3-g1-claude.yaml
+HẾT_HẠN	wp433-r2-g1-claude	refs/heads/ops/wp433-p2a-spec:ops/leases/wp433-r2-g1-claude.yaml
+HẾT_HẠN	wp433-r3-g1-claude	refs/heads/ops/wp433-p2b-spec:ops/leases/wp433-r3-g1-claude.yaml
+HẾT_HẠN	wp433-r4-g1-claude	refs/heads/ops/wp433-p2c-spec:ops/leases/wp433-r4-g1-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp433-r6-g1-claude	refs/heads/ops/wp433-p2n-spec:ops/leases/wp433-r6-g1-claude.yaml
+HẾT_HẠN	wp433-r6-g2-claude	refs/heads/ops/wp433-p2n-spec:ops/leases/wp433-r6-g2-claude.yaml
+CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ	wp433-r5-g1-claude	refs/heads/ops/wp433-p2r-spec:ops/leases/wp433-r5-g1-claude.yaml
+HẾT_HẠN	wp433-r5-g2-claude	refs/heads/ops/wp433-p2r-spec:ops/leases/wp433-r5-g2-claude.yaml
+HẾT_HẠN	wp433-r1-g1-claude	refs/heads/ops/wp433-r1-g1-lease:ops/leases/wp433-r1-g1-claude.yaml
+HẾT_HẠN	wp1099-cloud-setup-p3b-r10-g1-claude	refs/remotes/origin/ops/cap-lease-1099-g1:ops/leases/wp1099-cloud-setup-p3b-r10-g1-claude.yaml
+HẾT_HẠN	wp1099-cloud-setup-p3b-r11-g1-claude	refs/remotes/origin/ops/cap-lease-1099-g1:ops/leases/wp1099-cloud-setup-p3b-r11-g1-claude.yaml
+HẾT_HẠN	wp1099-cloud-setup-p3b-r9-g1-claude	refs/remotes/origin/ops/cap-lease-1099-g1:ops/leases/wp1099-cloud-setup-p3b-r9-g1-claude.yaml
+HẾT_HẠN	wp1030-r4-g1-claude	refs/remotes/origin/ops/wp1030-r4-g1-lease:ops/leases/wp1030-r4-g1-claude.yaml
+HẾT_HẠN	wp1030-r5-g1-claude	refs/remotes/origin/ops/wp1030-r4-g1-lease:ops/leases/wp1030-r5-g1-claude.yaml
+HẾT_HẠN	wp1030-r6-g1-claude	refs/remotes/origin/ops/wp1030-r4-g1-lease:ops/leases/wp1030-r6-g1-claude.yaml
+HẾT_HẠN	wp1121-r4-g1-claude	refs/remotes/origin/ops/wp1121-r4-g1-lease:ops/leases/wp1121-r4-g1-claude.yaml
+HẾT_HẠN	wp1121-r5-g1-claude	refs/remotes/origin/ops/wp1121-r4-g1-lease:ops/leases/wp1121-r5-g1-claude.yaml
+HẾT_HẠN	wp1134-r2-g1-claude	refs/remotes/origin/ops/wp1134-r2-g1-lease:ops/leases/wp1134-r2-g1-claude.yaml
+HẾT_HẠN	wp1325-r2-g2-claude	refs/remotes/origin/ops/wp1325-r2-g2:ops/leases/wp1325-r2-g2-claude.yaml
+HẾT_HẠN	wp1325-r3-g3-claude	refs/remotes/origin/ops/wp1325-r3-g3:ops/leases/wp1325-r3-g3-claude.yaml
+HẾT_HẠN	wp1325-r4-g4-claude	refs/remotes/origin/ops/wp1325-r4-g4:ops/leases/wp1325-r4-g4-claude.yaml
+HẾT_HẠN	wp1325-r5-g5-claude	refs/remotes/origin/ops/wp1325-r5-g5:ops/leases/wp1325-r5-g5-claude.yaml
+HẾT_HẠN	wp1325-r6-g6-claude	refs/remotes/origin/ops/wp1325-r6-g6:ops/leases/wp1325-r6-g6-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

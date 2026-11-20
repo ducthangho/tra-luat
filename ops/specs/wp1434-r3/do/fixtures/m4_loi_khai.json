@@ -1,5 +1,5 @@
 {
- "_ghi_chu": "Du lieu TONG HOP cho --tu-kiem: dong loi khai (trich hinh dang dong that) + phep do GIA. (a) loi khai do duoc ngoai quy tac cu (so dot bien cua launcher_test trong docs); (b) bien ban audit lich su phai o lai khong_do_duoc kem nguon thieu.",
+ "_ghi_chu": "Du lieu TONG HOP cho --tu-kiem: dong loi khai (trich hinh dang dong that) + phep do GIA. (a) loi khai do duoc ngoai quy tac cu (so dot bien cua launcher_test trong docs); (b) bien ban audit lich su phai o lai khong_do_duoc kem nguon thieu. Lan 3: them loi khai TACH (CLAUDE.md:591 — ve 8/8 do duoc qua anh xa PR -> nhanh, hai ve con lai thieu nguon; packet-loop-dot-bien.yml:5), ci.yml:413 doc tu ten phan tu CA, nguong duong gang so voi hang so.",
  "dong": [
   ["docs/GOI_AGENT_DA_NEN.md", 493, "python .claude/dev/launcher_test.py --dot-bien  # 31 đột biến, mỗi cái phải giết đúng ca chỉ định"],
   ["docs/vi_du.md", 7, "chạy ops/x_test.py — có 5 đột biến"],
@@ -11,24 +11,141 @@
   [".github/workflows/ci.yml", 935, "# (MỖI con chỉ chạy CA ĐÍCH đã khai) + 10 đột biến sản phẩm, chia 8 mảnh cân theo chi phí đo được; mỗi mảnh"],
   [".github/workflows/ci.yml", 937, "# thành viên + đúng head + đường găng <= 540 s. full_mutant_audit (52 ca dưới MỖI đột biến) chạy riêng ở"],
   [".github/workflows/ci.yml", 1121, "# wp1343 (CI-PACKET-LOOP-NHANH r3): job này là các MẢNH, không còn là check bắt buộc (đo run 43845962754: một job 2 giờ"],
-  ["docs/la.md", 1, "một dòng có 3 mảnh không rõ nghĩa"]
+  ["docs/la.md", 1, "một dòng có 3 mảnh không rõ nghĩa"],
+  ["CLAUDE.md", 591, "8/8 mảnh (26 và 28 lỗi bán kính ở hai mảnh đọc được), và con số *\"13/13 giết đúng `t52`\"* tôi đã báo"],
+  [".github/workflows/ci.yml", 413, "#   `_test.py`   : chinh cong tren CO RANG khong. 6 dot bien tren `git worktree`"],
+  [".github/workflows/packet-loop-dot-bien.yml", 5, "# lịch và theo yêu cầu, KHÔNG chặn merge. Mảnh j: đột biến chỉ số k % 16 == j; riêng mảnh 0 chạy thêm `CA_DAI` (~45 phút)."]
  ],
  "do": {
   "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "co_tep_kho": true,
   "m3": {
-   ".claude/dev/launcher_test.py": {"CA": 428, "DOT_BIEN": 572},
-   "ops/x_test.py": {"MUTANTS": 5},
-   "ops/nhanh_don_duoc_test.py": {"CA": 8, "TU_KIEM": 56, "DOT_BIEN": 10, "DOT_BIEN_TU_KIEM": 255}
+   ".claude/dev/launcher_test.py": {
+    "CA": 428,
+    "DOT_BIEN": 572
+   },
+   "ops/x_test.py": {
+    "MUTANTS": 5
+   },
+   "ops/nhanh_don_duoc_test.py": {
+    "CA": 8,
+    "TU_KIEM": 56,
+    "DOT_BIEN": 10,
+    "DOT_BIEN_TU_KIEM": 255
+   }
   },
   "moi_nhat_du": null,
-  "so_manh": {"ci.yml|gate-nhanh-manh": {"so": 8, "run_id": 44000000009, "created_at": "2026-11-19T00:00:00Z", "nguon": "(gia)"}},
+  "so_manh": {
+   "ci.yml|gate-nhanh-manh": {
+    "so": 8,
+    "run_id": 44000000009,
+    "created_at": "2026-11-19T00:00:00Z",
+    "nguon": "(gia)"
+   }
+  },
   "luot_nhanh": [
-   {"run_id": 1, "created_at": "2026-10-23T10:00:00Z", "cc": {"thuc_thi": 8}, "gop": {"thuc_thi:success": 1}},
-   {"run_id": 2, "created_at": "2026-10-24T10:00:00Z", "cc": {"bo_qua": 1, "thuc_thi_khong_runner": 1}, "gop": {"thuc_thi:success": 1}}
+   {
+    "run_id": 1,
+    "created_at": "2026-10-23T10:00:00Z",
+    "cc": {
+     "thuc_thi": 8
+    },
+    "gop": {
+     "thuc_thi:success": 1
+    }
+   },
+   {
+    "run_id": 2,
+    "created_at": "2026-10-24T10:00:00Z",
+    "cc": {
+     "bo_qua": 1,
+     "thuc_thi_khong_runner": 1
+    },
+    "gop": {
+     "thuc_thi:success": 1
+    }
+   }
   ],
-  "cc_ca_cohort": {"bo_qua": 1, "thuc_thi": 9, "mang_sang": 0},
-  "blame": {"sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "dong": {".github/workflows/ci.yml:568": {"commit": "cccccccccccccccccccccccccccccccccccccccc", "committer_time": "2026-10-23T23:37:49Z"}}},
-  "job_dai_nhat": {"43845962754": {"ten": "gate-packet-loop (ubuntu-latest)", "giay": 8524, "buoc_dai_nhat": 8492, "nguon": "(gia)"}}
+  "cc_ca_cohort": {
+   "bo_qua": 1,
+   "thuc_thi": 9,
+   "mang_sang": 0
+  },
+  "blame": {
+   "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "dong": {
+    ".github/workflows/ci.yml:568": {
+     "commit": "cccccccccccccccccccccccccccccccccccccccc",
+     "committer_time": "2026-10-23T23:37:49Z"
+    }
+   }
+  },
+  "job_dai_nhat": {
+   "43845962754": {
+    "ten": "gate-packet-loop (ubuntu-latest)",
+    "giay": 8524,
+    "buoc_dai_nhat": 8492,
+    "nguon": "(gia)"
+   }
+  },
+  "m3_ten": {
+   ".github/checks/ci_phamvi_test.py": {
+    "CA": [
+     "t1_sach_thi_xanh",
+     "n1_a",
+     "n2_b",
+     "n3_c",
+     "n4_d",
+     "n5_e",
+     "n6_f"
+    ]
+   }
+  },
+  "m3_hang_so": {
+   "ops/nhanh_don_duoc_test.py": {
+    "TRAN_DUONG_GANG_GIAY": 540
+   }
+  },
+  "pr_nhanh": {
+   "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "pr": {
+    "895": {
+     "commit": "cccccccccccccccccccccccccccccccccccccccc",
+     "nhanh": "agent/wp892-g1-claude"
+    }
+   }
+  },
+  "nhanh_luot": {
+   "agent/wp892-g1-claude": [
+    {
+     "run_id": 39965923045,
+     "created_at": "2026-10-23T14:00:17Z",
+     "cc": {
+      "success": 8
+     }
+    },
+    {
+     "run_id": 39974321599,
+     "created_at": "2026-10-23T14:59:12Z",
+     "cc": {
+      "failure": 8
+     }
+    }
+   ],
+   "agent/khac": [
+    {
+     "run_id": 5,
+     "created_at": "2026-10-23T15:00:00Z",
+     "cc": {
+      "failure": 8
+     }
+    }
+   ]
+  },
+  "ma_tran_pldb": 16,
+  "cc_windows": {
+   "so_dong": 4,
+   "giay_lon_nhat": 199
+  }
  }
 }

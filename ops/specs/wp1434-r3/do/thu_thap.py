@@ -18,6 +18,7 @@ import math
 import os
 import pathlib
 import re
+import shutil
 import statistics
 import subprocess
 import sys
@@ -717,15 +718,31 @@ def git_ds(sha, tien_to):
 
 
 M3_GOC = (".claude/dev/", ".claude/hooks/", ".githooks/", ".github/checks/", "scripts/tl_core/", "ops/")
-M3_RE = re.compile(r"DOT_BIEN|MUTANT|TU_KIEM|CASES|^CA$|CA_DAI")
+# Tap mau TUONG MINH cho bang ca/dot bien. Khong tin rieng tap nay: `m3_nghi_bo_sot` bao MOI bang da import co ten chua MUT/DOT_BIEN ma khong duoc
+# chon; ten nao bi loai co chu dich phai nam trong M3_LOAI kem ly do, con lai la `nghi_bo_sot` (hien trong BASELINE va BAO_CAO).
+M3_RE = re.compile(r"MUTANT|MUTATION|DOT_BIEN|TU_KIEM|CASES|^CA$|CA_DAI")
 M3_THEM = {".claude/dev/ci_dang_ky_test.py": ("DANG_KY", "MOI", "NHE", "MOI_WINDOWS", "CACH_LY", "DA_NOI")}
+M3_LOAI = {"_WP1393_IMMUTABLE": "ten chua chuoi MUT vi la IMMUTABLE (tap truong bat bien), khong phai bang dot bien"}
 M3_RE_CHOT = re.compile(r"^if __name__ == ['\"]__main__['\"]", re.M)
 M3_MA = ("import importlib.util,json,sys,os\n"
          "p=sys.argv[1]; sys.path.insert(0,os.path.dirname(os.path.abspath(p)))\n"
          "s=importlib.util.spec_from_file_location('wp1434_m3_doc_bang',p); m=importlib.util.module_from_spec(s)\n"
          "sys.modules['wp1434_m3_doc_bang']=m; s.loader.exec_module(m)\n"
-         "o={n:len(v) for n,v in sorted(vars(m).items()) if n.isupper() and isinstance(v,(list,tuple,dict,set,frozenset))}\n"
-         "print('WP1434_M3 '+json.dumps(o))\n")
+         "def ten(x):\n"
+         "    if isinstance(x,str): return x\n"
+         "    if isinstance(x,(tuple,list)) and x and isinstance(x[0],str): return x[0]\n"
+         "    return getattr(x,'__name__',None) if callable(x) else None\n"
+         "b,t,h={},{},{}\n"
+         "for n,v in sorted(vars(m).items()):\n"
+         "    if not n.isupper(): continue\n"
+         "    if isinstance(v,(list,tuple,dict,set,frozenset)):\n"
+         "        b[n]=len(v)\n"
+         "        ds=[ten(x) for x in v]\n"
+         "        if len(ds)<=5000 and all(isinstance(x,str) for x in ds): t[n]=sorted(ds) if isinstance(v,(set,frozenset)) else ds\n"
+         "    elif isinstance(v,(int,float)) and not isinstance(v,bool): h[n]=v\n"
+         "print('WP1434_M3 '+json.dumps({'bang':b,'ten':t,'hang_so':h}))\n")
+M3_HOP = ("tmp", "home", "cwd", "xdg/cache", "xdg/config", "xdg/data", "xdg/state", "xdg/run")
+M4_PR = (895,)                      # PR ma loi khai M4 nhac toi: can anh xa PR -> nhanh (tu merge commit first-parent, khong mang)
 
 
 def la_bo_test_song(tep):
@@ -734,31 +751,90 @@ def la_bo_test_song(tep):
             and not (tep.startswith("ops/") and tep.count("/") != 1))
 
 
-def doc_bang_import(duong_tep, han=180):
-    """len() CUOI CUNG cua moi bang muc module (ten IN HOA, kieu list/tuple/dict/set) sau khi IMPORT xong tep trong tien trinh con.
-    Module duoc nap duoi ten khac `__main__` nen khoi `if __name__ == "__main__"` KHONG chay; tep thieu chot ay bi tu choi (khong import).
-    Tra (dict | None, ly_do | None)."""
+def chup_thu_muc(d, sau):
+    """Anh cua mot thu muc canh gac. `sau`=False: ten cac muc muc dinh; True: de quy (duong dan, kich thuoc, mtime_ns). Khong doc duoc -> None."""
+    try:
+        if not sau:
+            return sorted(os.listdir(d))
+        kq = []
+        for goc, ds, tep in os.walk(d):
+            for x in sorted(ds + tep):
+                p = os.path.join(goc, x)
+                st = os.lstat(p)
+                kq.append((os.path.relpath(p, d), st.st_size, st.st_mtime_ns))
+        return sorted(kq)
+    except OSError:
+        return None
+
+
+def moi_truong_hop_cat(hop):
+    """Bien moi truong ep MOI tac dung phu luc import vao hop cat `hop` (duoi --ra): thu muc tam, HOME, XDG_*."""
+    h = str(hop)
+    j = lambda x: os.path.join(h, *x.split("/"))
+    return {"TMPDIR": j("tmp"), "TMP": j("tmp"), "TEMP": j("tmp"), "HOME": j("home"), "USERPROFILE": j("home"), "APPDATA": j("home"),
+            "LOCALAPPDATA": j("home"), "XDG_CACHE_HOME": j("xdg/cache"), "XDG_CONFIG_HOME": j("xdg/config"), "XDG_DATA_HOME": j("xdg/data"),
+            "XDG_STATE_HOME": j("xdg/state"), "XDG_RUNTIME_DIR": j("xdg/run"),
+            "PYTHONDONTWRITEBYTECODE": "1", "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+
+
+def xoa_hop_cat(goc, tuong_doi):
+    """Don hop cat: chi xoa khi no la thu muc THAT (khong symlink) nam duoi `goc`."""
+    goc_that = pathlib.Path(os.path.realpath(goc))
+    p = goc_that.joinpath(*tuong_doi.split("/"))
+    q = goc_that
+    for x in tuong_doi.split("/"):
+        q = q / x
+        if q.is_symlink():
+            raise GhiBiTuChoi(f"hop cat co thanh phan la symlink: {tuong_doi!r}")
+    if p.is_dir():
+        shutil.rmtree(p)
+
+
+def doc_bang_import(duong_tep, goc_hop, ten_hop, canh_gac=(), han=180):
+    """Doc bang muc module (ten IN HOA) sau khi IMPORT xong tep trong tien trinh con: len() CUOI CUNG, ten phan tu, hang so nguyen/thuc.
+    - Module nap duoi ten khac `__main__` => khoi `if __name__ == "__main__"` khong chay; tep thieu chot ay bi tu choi.
+    - GIAM GIU: cwd, TMPDIR/TMP/TEMP, HOME, XDG_* cua tien trinh con deu la thu muc moi duoi `goc_hop`/kho/_import_sandbox/<ten_hop>/, xoa sau khi doc.
+    - KIEM: chup thu muc tam THAT va HOME THAT cua tien trinh nay (ten muc dinh) + moi thu muc `canh_gac` (de quy) truoc va sau; doi => tu choi
+      (fail-closed, thu lai mot lan de loai nhieu cua tien trinh khac).
+    Tra (du lieu | None, ly_do | None, so tep con lai trong hop cat truoc khi don)."""
     duong_tep = pathlib.Path(duong_tep)
     try:
         nguon = duong_tep.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as e:
-        return None, f"khong doc duoc tep ({type(e).__name__})"
+        return None, f"khong doc duoc tep ({type(e).__name__})", 0
     if not M3_RE_CHOT.search(nguon):
-        return None, "tep khong co chot `if __name__ == \"__main__\"` o muc module: khong import (co the chay bo luc import)"
-    with tempfile.TemporaryDirectory(prefix="wp1434-m3-") as tam:
+        return None, "tep khong co chot `if __name__ == \"__main__\"` o muc module: khong import (co the chay bo luc import)", 0
+    rel = "kho/_import_sandbox/" + re.sub(r"[^A-Za-z0-9_.-]", "_", ten_hop)
+    xem = [(os.environ.get("TMPDIR") or tempfile.gettempdir(), False), (os.path.expanduser("~"), False)] + [(str(d), True) for d in canh_gac]
+    ly, con_lai = None, 0
+    for lan in range(2):
+        xoa_hop_cat(goc_hop, rel)
+        for sub in M3_HOP:
+            duong_an_toan(goc_hop, f"{rel}/{sub}/.giu")              # tao thu muc con qua chot khong-symlink
+        hop = pathlib.Path(os.path.realpath(goc_hop)).joinpath(*rel.split("/"))
+        truoc = [chup_thu_muc(d, s) for d, s in xem]
         try:
-            r = subprocess.run([sys.executable, "-c", M3_MA, str(duong_tep.resolve())], cwd=tam, capture_output=True, text=True, timeout=han,
-                               stdin=subprocess.DEVNULL,
-                               env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"})
+            r = subprocess.run([sys.executable, "-c", M3_MA, str(duong_tep.resolve())], cwd=str(hop / "cwd"), capture_output=True, text=True,
+                               timeout=han, stdin=subprocess.DEVNULL, env={**os.environ, **moi_truong_hop_cat(hop)})
         except subprocess.TimeoutExpired:
-            return None, f"import qua {han}s"
-    dong = [l for l in r.stdout.splitlines() if l.startswith("WP1434_M3 ")]
-    if r.returncode != 0 or not dong:
-        return None, f"import khong thanh (rc={r.returncode})"
-    try:
-        return json.loads(dong[-1][len("WP1434_M3 "):]), None
-    except ValueError:
-        return None, "dau ra import khong phai JSON"
+            r = None
+        sau = [chup_thu_muc(d, s) for d, s in xem]
+        con_lai = sum(len(tep) for _, _, tep in os.walk(hop))
+        xoa_hop_cat(goc_hop, rel)
+        doi = [d for (d, _), a, b in zip(xem, truoc, sau) if a is None or a != b]
+        if doi:
+            ly = "import lam doi thu muc NGOAI hop cat (hoac khong chup duoc): " + ", ".join(doi)
+            continue                                                  # fail-closed; thu lai mot lan
+        if r is None:
+            return None, f"import qua {han}s", con_lai
+        dong = [l for l in r.stdout.splitlines() if l.startswith("WP1434_M3 ")]
+        if r.returncode != 0 or not dong:
+            return None, f"import trong hop cat khong thanh (rc={r.returncode})", con_lai
+        try:
+            return json.loads(dong[-1][len("WP1434_M3 "):]), None, con_lai
+        except ValueError:
+            return None, "dau ra import khong phai JSON", con_lai
+    return None, ly, con_lai
 
 
 def m3_chon_bang(tep, bang):
@@ -766,10 +842,18 @@ def m3_chon_bang(tep, bang):
     return {n: v for n, v in sorted(bang.items()) if M3_RE.search(n) or n in M3_THEM.get(tep, ())}
 
 
+def m3_nghi_bo_sot(tep, bang):
+    """Chot DOC LAP voi M3_RE: moi bang da import co ten chua MUT hoac DOT_BIEN ma KHONG duoc chon. Tra [(ten, so, ly do loai | None)];
+    ly do None = nghi bo sot (khong ai giai thich)."""
+    chon = m3_chon_bang(tep, bang)
+    return [(n, v, M3_LOAI.get(n)) for n, v in sorted(bang.items()) if ("MUT" in n or "DOT_BIEN" in n) and n not in chon]
+
+
 def thu_su_kien_kho(ra, sha):
     """Su kien KHO ma --tinh can, chup vao anh chup de --tinh khong phu thuoc lich su git cua clone dang chay:
     (1) kho/tep/<duong dan>: noi dung tep pham vi M4 o `sha`; (2) kho/blame.json: commit first-parent + committer-time cua moi dong
-    workflow khop regex M4; (3) kho/m3_import.json: len() cuoi cung cua bang o moi bo test song (import, khong chay bo).
+    workflow khop regex M4; (3) kho/pr_nhanh.json: nhanh nguon cua cac PR trong M4_PR, doc tu merge commit first-parent;
+    (4) kho/m3_import.json: bang cua moi bo test song (import GIAM GIU trong hop cat duoi anh chup, khong chay bo).
     Khong goi mang. Doi kho DAY DU (khong nong) va cay lam viec trung blob voi `sha` o cac tep duoc import."""
     def git(*a):
         return subprocess.run(["git"] + list(a), cwd=ROOT, capture_output=True, text=True)
@@ -783,6 +867,9 @@ def thu_su_kien_kho(ra, sha):
         ghi_tep(ra, khoa, du_lieu)
         muc.append({"khoa": khoa, "loai": "kho", "url": None, "http": None, "duong_dan": khoa, "sha256": sha256_bytes(du_lieu),
                     "kich_thuoc": len(du_lieu), "nguon": nguon})
+
+    def ghi_json(khoa, o, nguon):
+        ghi(khoa, (json.dumps(o, ensure_ascii=False, indent=1, sort_keys=True) + "\n").encode("utf-8"), nguon)
 
     tep_kho = {}
     for tep in git_ds(sha, M4_TEP):
@@ -801,8 +888,15 @@ def thu_su_kien_kho(ra, sha):
                 raise SystemExit(f"su kien kho: git blame {tep}:{dong} loi")
             blame[f"{tep}:{dong}"] = {"commit": r.stdout.split()[0],
                                       "committer_time": iso(datetime.datetime.fromtimestamp(int(m.group(1)), datetime.timezone.utc))}
-    ghi("kho/blame.json", (json.dumps({"sha": sha, "lenh": "git blame --first-parent --porcelain -L <n>,<n> <sha> -- <tep>", "dong": blame},
-                                      ensure_ascii=False, indent=1, sort_keys=True) + "\n").encode("utf-8"), "git blame --first-parent (xem truong lenh)")
+    ghi_json("kho/blame.json", {"sha": sha, "lenh": "git blame --first-parent --porcelain -L <n>,<n> <sha> -- <tep>", "dong": blame},
+             "git blame --first-parent (xem truong lenh)")
+    pr = {}
+    for so in M4_PR:
+        r = git("log", "--first-parent", "--format=%H%x09%s", f"--grep=^Merge pull request #{so} from ", sha)
+        m = re.match(rf"([0-9a-f]{{40}})\tMerge pull request #{so} from [^/\s]+/(\S+)$", r.stdout.strip().splitlines()[0]) if r.stdout.strip() else None
+        pr[str(so)] = {"commit": m.group(1), "nhanh": m.group(2)} if m and len(r.stdout.strip().splitlines()) == 1 else None
+    ghi_json("kho/pr_nhanh.json", {"sha": sha, "lenh": "git log --first-parent --format=%H%x09%s --grep='^Merge pull request #<n> from ' <sha>", "pr": pr},
+             "git log --first-parent (xem truong lenh)")
     bo = {}
     for tep in git_ds(sha, M3_GOC):
         if not la_bo_test_song(tep):
@@ -811,17 +905,24 @@ def thu_su_kien_kho(ra, sha):
         if blob != git("hash-object", "--", tep).stdout.strip():
             bo[tep] = {"blob": blob, "bang": None, "ly_do": "tep tren cay lam viec khac blob o sha_master"}
             continue
-        bang, ly = doc_bang_import(ROOT / tep)
-        bo[tep] = {"blob": blob, "bang": bang, "ly_do": ly}
-    ghi("kho/m3_import.json", (json.dumps({"sha": sha, "lenh": "import tep duoi ten khac __main__ trong tien trinh con, doc len() bang IN HOA", "bo": bo},
-                                          ensure_ascii=False, indent=1, sort_keys=True) + "\n").encode("utf-8"), "import (xem truong lenh)")
-    print(f"su kien kho: {len(tep_kho)} tep M4, {len(blame)} dong blame, {len(bo)} bo test ({sum(1 for x in bo.values() if x['bang'] is None)} khong import duoc)")
+        truoc = git("status", "--porcelain", "--ignored").stdout
+        dl, ly, con_lai = doc_bang_import(ROOT / tep, ra, tep)
+        if git("status", "--porcelain", "--ignored").stdout != truoc:
+            dl, ly = None, "import lam doi cay lam viec cua kho (git status --porcelain --ignored khac truoc/sau)"
+        bo[tep] = dict(dl or {"bang": None}, blob=blob, ly_do=ly, so_tep_trong_hop_cat=con_lai)
+    xoa_hop_cat(ra, "kho/_import_sandbox")
+    ghi_json("kho/m3_import.json", {"sha": sha, "bo": bo,
+                                    "lenh": "import tep duoi ten khac __main__ trong tien trinh con GIAM GIU (cwd/TMPDIR/HOME/XDG_* duoi <anh chup>/kho/_import_sandbox/, "
+                                            "da xoa); doc len(), ten phan tu va hang so cua bien IN HOA"}, "import giam giu (xem truong lenh)")
+    print(f"su kien kho: {len(tep_kho)} tep M4, {len(blame)} dong blame, {len(pr)} PR, {len(bo)} bo test "
+          f"({sum(1 for x in bo.values() if x['bang'] is None)} khong import duoc; {sum(x.get('so_tep_trong_hop_cat', 0) for x in bo.values())} tep roi vao hop cat)")
     return muc
 
 
 def m3_tu_anh_chup(du_lieu, sha):
     """M3 tu kho/m3_import.json cua anh chup. Thieu tep -> moi thu khong_do_duoc (KHONG doc cay lam viec thay the)."""
-    kq = {"nguon": "kho/m3_import.json cua anh chup (len() cuoi cung sau import, chup o buoc su kien kho cua --thu)", "bang": {}}
+    kq = {"nguon": "kho/m3_import.json cua anh chup (len() cuoi cung sau import giam giu, chup o buoc su kien kho cua --thu)", "bang": {},
+          "ten_chua_MUT_hoac_DOT_BIEN_khong_chon": [], "so_bang_nghi_bo_sot": 0}
     if not du_lieu or du_lieu.get("sha") != sha:
         kq["trang_thai"], kq["ly_do"] = KHONG_DO_DUOC, "anh chup thieu kho/m3_import.json (hoac lech sha_master)"
         return kq
@@ -832,6 +933,10 @@ def m3_tu_anh_chup(du_lieu, sha):
             continue
         chon = m3_chon_bang(tep, x["bang"])
         kq["bang"][tep] = {n: gt(v, nguon) for n, v in chon.items()} or {"_tep": kad("khong co bang ca/dot bien nao o muc module", nguon)}
+        for n, v, ly in m3_nghi_bo_sot(tep, x["bang"]):
+            kq["ten_chua_MUT_hoac_DOT_BIEN_khong_chon"].append({"tep": tep, "bang": n, "so": v, "ly_do_loai": ly,
+                                                                "trang_thai": "da_giai_thich" if ly else "nghi_bo_sot"})
+            kq["so_bang_nghi_bo_sot"] += 0 if ly else 1
     return kq
 
 
@@ -841,6 +946,12 @@ M4_RG2 = (r"(?i)[0-9]+([.,][0-9]+)? ?(s|giây|giay|phút|phut|h|giờ|gio)\b|~ ?
           r"[0-9]+ (tự đột biến|mutant|đột biến|dot bien|ca|mảnh|manh|muc|mục)\b|[0-9]+/[0-9]+")
 M4_LENH = ("rg -n -i 'đột biến|dot.bien|mutant|mutation|mảnh' .github/workflows CLAUDE.md docs ops/specs/wp1166* | rg -i \"<M4_RG2>\" "
            "(tuong duong: hai regex M4_RG1 roi M4_RG2 trong thu_thap.py, ap tren cac tep kho/tep/* cua anh chup = `git show <sha_master>:<tep>`)")
+
+
+def doc_ma_tran_manh(van_ban):
+    """So phan tu cua `manh: [a, b, ...]` (ma tran workflow) trong noi dung YAML; khong co dung MOT dong nhu the -> None."""
+    ds = re.findall(r"^\s*manh:\s*\[([0-9,\s]+)\]\s*$", van_ban or "", re.M)
+    return len([x for x in ds[0].split(",") if x.strip()]) if len(ds) == 1 else None
 
 
 def m4_quet(tep_kho):
@@ -1113,6 +1224,7 @@ def lenh_tinh(ns):
 
     # ── M2
     m2_luot, job_g, buoc_g, cc_nhanh, cc_luot = [], {}, {}, {"bo_qua": 0, "thuc_thi": 0, "mang_sang": 0}, []
+    nhanh_luot = {}
     for r in co_ci:
         lu = tinh_mot(WF_CI, r)
         if lu is None:
@@ -1131,6 +1243,10 @@ def lenh_tinh(ns):
         lan_k = lan or "khong_do_duoc"
         cong_nhom(WF_CI, lu)
         ghi_them(WF_CI, lu)
+        nhanh_luot.setdefault(str(r.get("head_branch")), []).append({
+            "run_id": r["id"], "created_at": lu["created_at"],
+            "cc": dem_theo([m for m in lu["dong"] if m["ten_goc"] == "gate-cong-cu" and m["loai_dong"] == THUC_THI and m["nen"] != "khong_ro"],
+                           lambda m: str(m["ket_luan"]))})
         if lan == "duong_nhanh":
             co_runner = lambda m: "thuc_thi_khong_runner" if m["loai_dong"] == THUC_THI and m["nen"] == "khong_ro" else m["loai_dong"]
             cc_luot.append({"run_id": r["id"], "created_at": lu["created_at"],
@@ -1211,14 +1327,21 @@ def lenh_tinh(ns):
                                               "che_do": {c: thong_ke(v) for c, v in sorted(o["che_do"].items())}}
 
     # ── M3, M4
-    b_m3, b_bl = doc("kho/m3_import.json"), doc("kho/blame.json")
-    m3 = m3_tu_anh_chup(json.loads(b_m3) if b_m3 else None, sha)
+    b_m3, b_bl, b_pr = doc("kho/m3_import.json"), doc("kho/blame.json"), doc("kho/pr_nhanh.json")
+    tho_m3 = json.loads(b_m3) if b_m3 else None
+    m3 = m3_tu_anh_chup(tho_m3, sha)
+    bo_m3 = (tho_m3 or {}).get("bo") or {}
+    win = [v for (ten, nen, _), o in job_g.items() if ten == "gate-cong-cu" and nen == "windows-latest" for v in o["v"]]
     tep_kho = {k[len("kho/tep/"):]: doc(k).decode("utf-8", errors="replace") for k in sorted(theo_khoa) if k.startswith("kho/tep/") and doc(k) is not None}
     m4 = m4_doi_chieu(m4_quet(tep_kho), {
         "sha": sha, "m3": {t: {n: x["gia_tri"] for n, x in bg.items() if x["trang_thai"] == DO_DUOC} for t, bg in m3["bang"].items()},
         "moi_nhat_du": m1["luot_du_8_manh_success"]["moi_nhat"], "so_manh": so_manh, "luot_nhanh": cc_luot,
         "cc_ca_cohort": m2["gate_cong_cu_o_luot_duong_nhanh"], "blame": json.loads(b_bl) if b_bl else None, "job_dai_nhat": job_dai_nhat,
-        "co_tep_kho": bool(tep_kho)})
+        "co_tep_kho": bool(tep_kho),
+        "m3_ten": {t: x.get("ten") or {} for t, x in bo_m3.items()}, "m3_hang_so": {t: x.get("hang_so") or {} for t, x in bo_m3.items()},
+        "pr_nhanh": json.loads(b_pr) if b_pr else None, "nhanh_luot": nhanh_luot,
+        "cc_windows": {"so_dong": len(win), "giay_lon_nhat": max(win) if win else None},
+        "ma_tran_pldb": doc_ma_tran_manh(tep_kho.get(M4_PLDB))})
 
     # ── top 5
     top = sorted(({"workflow": wf, "job_goc": ten, "tong_giay_thuc_thi": sum(v), "so_dong_thuc_thi": len(v),
@@ -1301,13 +1424,10 @@ M4_NGUON_THIEU = (
     ("docs/adr/0009-", None, "ket qua thuc nghiem dot bien tay ngay 2026-07-20: khong co log trong kho hay anh chup"),
     ("CLAUDE.md", "**40/40**", "dau ra bo test ops-don-ref tai thoi diem su co (bai hoc lich su): khong luu"),
     ("CLAUDE.md", "`|  | 0/0`", "dau ra chay_dot_bien cua packet #513 (12-09-2026): khong luu"),
-    ("CLAUDE.md", "8/8 mảnh (26 và 28", "log CI cua PR #895 (23-10-2026): loi khai khong neu run_id nen khong dinh vi duoc luot trong cohort"),
     ("CLAUDE.md", "(105 ca;", "so ca cua ops/don_ref_chot_test.sh chi sinh khi CHAY script (khong co bang tinh; packet khong chay)"),
     (M4_CI, "~93 % bước này, ~43 phút", "luot do truoc #668 (28-09-2026) tao truoc T0: khong thuoc cohort"),
     (M4_CI, "111/118 lượt mảnh Windows", "cac luot manh Windows truoc wp879 (#853) tao truoc T0: khong thuoc cohort"),
-    (M4_CI, "6 dot bien tren `git worktree`", "bang dot bien cua .github/checks/ci_phamvi_test.py khong o dang bang muc module (import chi thay CA): so chi sinh khi chay"),
-    (M4_CI, "đường găng <= 540 s", "bien nhan artifact cua gate-nhanh-manh (truong giay): dac ta §4 chi thu artifact cua ci-dot-bien-du.yml"),
-    (".github/workflows/packet-loop-dot-bien.yml", None, "luot cua packet-loop-dot-bien.yml: workflow khong thuoc cohort (dac ta §2 chi dinh hai workflow)"),
+    (".github/workflows/packet-loop-dot-bien.yml", "(~45 phút)", "thoi luong luot cua packet-loop-dot-bien.yml: workflow khong thuoc cohort (dac ta §2 chi dinh hai workflow)"),
 )
 # (tien to tep, chuoi trong dong, vi sao KHONG phai loi khai so luong/thoi gian ve dot bien)
 M4_KHONG_PHAI = (
@@ -1315,6 +1435,8 @@ M4_KHONG_PHAI = (
     ("CLAUDE.md", "`=duong_nhanh, 0 mảnh`", "trich dau rieng cua mot dong log, khong phai loi khai so luong"),
     ("docs/adr/0062-", "0/1/≥2", "ba trang thai dong khai cua kiem-merge, khong phai so dot bien"),
 )
+M4_PHAMVI = ".github/checks/ci_phamvi_test.py"
+M4_PLDB = ".github/workflows/packet-loop-dot-bien.yml"
 M4_RE_BO = re.compile(r"((?:[\w.-]+/)*[\w.-]*\w_test\.py)\b[^\n]*?\b(\d+) đột biến")
 M4_RE_RUN = re.compile(r"(\d+)m(\d+)s \(run (\d+)\)")
 
@@ -1400,6 +1522,44 @@ def m4_doi_chieu(dong, do):
                      f"khop neu thoi luong JOB cat hoac lam tron ve phut bang {khai_phut} phut; {j['nguon']}")]
         return [(nhan, mo_ta, "khop" if g == khai_giay else "lech", f"khop neu thoi luong job dai nhat bang {khai_giay} s; {j['nguon']}")]
 
+    def c_phamvi():
+        nhan = "ci_phamvi_test: 6 dot bien (ca phan chung n*)"
+        ten = ((do.get("m3_ten") or {}).get(M4_PHAMVI) or {}).get("CA")
+        if ten is None:
+            return [thieu(nhan, f"M3 khong co danh sach ten phan tu cua bang CA trong {M4_PHAMVI}")]
+        n = sorted(x for x in ten if re.match(r"n\d+_", x))
+        return [so_sanh(nhan, 6, len(n), f"so phan tu cua CA trong {M4_PHAMVI}@{sha12} co ten dang n<so>_ (ca dot bien/phan chung; con lai la ca nen "
+                                         f"{sorted(set(ten) - set(n))}); doc ten bang import giam giu, khong chay: {n}")]
+
+    def c_pr_895():
+        kq1 = "PR #895: CI do 8/8 manh gate-cong-cu"
+        thieu_log = "log job gate-cong-cu cua luot do (dac ta §4: voi ci.yml chi thu log gate-registry va chuan-bi)"
+        ra2 = []
+        x = ((do.get("pr_nhanh") or {}).get("pr") or {}).get("895") if do.get("pr_nhanh") else None
+        if not x:
+            ra2.append(thieu(kq1, "kho/pr_nhanh.json cua anh chup khong co anh xa PR #895 -> nhanh"))
+        else:
+            ds = sorted((do.get("nhanh_luot") or {}).get(x["nhanh"]) or [], key=lambda y: (y["created_at"], y["run_id"]))
+            if not ds:
+                ra2.append(thieu(kq1, f"cohort khong co luot ci.yml nao tren nhanh {x['nhanh']} (nhanh cua PR #895 theo merge commit {x['commit'][:12]})"))
+            else:
+                do8 = [y["run_id"] for y in ds if y["cc"] == {"failure": 8}]
+                ra2.append((kq1, f"nhanh {x['nhanh']} (merge commit {x['commit'][:12]}): {len(ds)} luot trong cohort, dong gate-cong-cu thuc_thi co runner theo ket luan: "
+                                 + "; ".join(f"{y['run_id']} ({y['created_at']}) {y['cc']}" for y in ds) + f"; luot 8/8 failure: {do8}",
+                            "khop" if do8 else "lech", "khop neu co it nhat mot luot cua nhanh ay co dung 8 dong gate-cong-cu thuc_thi, ca 8 failure; "
+                                                       "anh xa PR -> nhanh tu kho/pr_nhanh.json (git log --first-parent)"))
+        ra2.append(thieu("26 va 28 loi ban kinh o hai manh doc duoc", thieu_log))
+        ra2.append(thieu("13/13 giet dung t52", "dau ra luot dot bien tai cho cua executor packet #892 (23-10-2026): khong luu trong kho hay anh chup"))
+        return ra2
+
+    def tham_khao(t, mau):
+        if t == "docs/AUDIT_LAUNCHER_":
+            b = m3.get(".claude/dev/launcher_test.py") or {}
+            return f"; tham khao, KHONG so (bien ban ghi so cua ngay audit): bang hien hanh DOT_BIEN={b.get('DOT_BIEN')}, CA={b.get('CA')} (M3)"
+        if mau == "111/118 lượt mảnh Windows":
+            return f"; tham khao, KHONG so (mau so 118 luot nam truoc T0): dong gate-cong-cu thuc_thi tren windows-latest trong cohort: {do.get('cc_windows')}"
+        return ""
+
     for tep, so, van in dong:
         vt = f"{tep}:{so}@{sha12}"
         kp = [ly for t, mau, ly in M4_KHONG_PHAI if tep.startswith(t) and mau in van]
@@ -1420,8 +1580,8 @@ def m4_doi_chieu(dong, do):
             if len(ung) != 1:
                 ra.append(thieu(nhan, f"M3 khong co (hoac co {len(ung)}) bo test khop ten {ten!r}"))
                 continue
-            bang = next((b for b in ("DOT_BIEN", "MUTANTS") if b in m3[ung[0]]), None)
-            ra.append(thieu(nhan, f"M3 khong co bang DOT_BIEN/MUTANTS cua {ung[0]}") if bang is None else
+            bang = next((b for b in ("DOT_BIEN", "MUTANTS", "MUTATIONS") if b in m3[ung[0]]), None)
+            ra.append(thieu(nhan, f"M3 khong co bang DOT_BIEN/MUTANTS/MUTATIONS cua {ung[0]}") if bang is None else
                       so_sanh(nhan, khai, m3[ung[0]][bang], f"len({bang}) cuoi cung cua {ung[0]}@{sha12} (M3, import)"))
         for t, mau, wf, job in M4_MANH:
             m = re.search(mau, van) if t == tep else None
@@ -1441,9 +1601,26 @@ def m4_doi_chieu(dong, do):
             ra += c_run(int(m.group(3)), f"{m.group(1)}m{m.group(2)}s (run {m.group(3)})", khai_giay=int(m.group(1)) * 60 + int(m.group(2)))
         if tep == M4_CI and "đo run 43845962754: một job 2 giờ" in van:
             ra += c_run(43845962754, "run 43845962754: mot job 2 gio 21 phut (loi khai trai hai dong)", khai_phut=141)
+        if tep == M4_CI and "6 dot bien tren `git worktree`" in van:
+            ra += c_phamvi()
+        m = re.search(r"đường găng <= (\d+) s", van) if tep == M4_CI else None
+        if m:
+            v = ((do.get("m3_hang_so") or {}).get(M4_NHANH) or {}).get("TRAN_DUONG_GANG_GIAY")
+            nhan = f"duong gang <= {m.group(1)} s (nguong cua buoc gom)"
+            ra.append(thieu(nhan, f"M3 khong co hang so TRAN_DUONG_GANG_GIAY cua {M4_NHANH}") if v is None else
+                      so_sanh(nhan, int(m.group(1)), v, f"hang so TRAN_DUONG_GANG_GIAY cua {M4_NHANH}@{sha12} (M3, import): loi khai la NGUONG cua cong, so voi "
+                                                        "nguong trong ma; duong gang thuc te cua tung luot nam o bien nhan gate-nhanh (ngoai nguon thu §4)"))
+        if tep == "CLAUDE.md" and "8/8 mảnh (26 và 28" in van:
+            ra += c_pr_895()
+        m = re.search(r"k % (\d+) == j", van) if tep == M4_PLDB else None
+        if m:
+            v = do.get("ma_tran_pldb")
+            nhan = f"packet-loop-dot-bien: {m.group(1)} manh (k % {m.group(1)})"
+            ra.append(thieu(nhan, f"anh chup khong co ma tran `manh: [...]` doc duoc trong kho/tep/{M4_PLDB}") if v is None else
+                      so_sanh(nhan, int(m.group(1)), v, f"so phan tu cua `matrix.manh` trong kho/tep/{M4_PLDB} (tep workflow o {sha12}; doc tinh, khong can luot chay)"))
         for t, mau, ly in M4_NGUON_THIEU:
             if tep.startswith(t) and (mau is None or mau in van):
-                ra.append(thieu(mau or "(ca dong)", ly))
+                ra.append(thieu(mau or "(ca dong)", ly + tham_khao(t, mau)))
         if not ra:
             chua += 1
             ra.append(thieu("(chua anh xa)", "chua co quy tac anh xa cho dong nay"))
@@ -1567,6 +1744,9 @@ def bao_cao(b, cohort):
         else:
             hang.append([f"`{t}`", " · ".join(f"{n}={v(x)}" for n, x in bg.items())])
     bang(["bộ", "bảng (len cuối cùng)"], hang)
+    kc = m3.get("ten_chua_MUT_hoac_DOT_BIEN_khong_chon") or []
+    w(f"\nBảng đã import có tên chứa `MUT`/`DOT_BIEN` nhưng không được chọn: {len(kc)}, trong đó nghi bỏ sót (không có lý do loại): {m3.get('so_bang_nghi_bo_sot')}. "
+      + "; ".join(f"`{x['tep']}` {x['bang']}={x['so']} ({x['ly_do_loai'] or 'NGHI BO SOT'})" for x in kc))
     w("\n## 5 điểm tốn thời gian nhất theo giây thực thi (nhóm job, cả cohort)\n")
     bang(["#", "workflow", "job gốc", "tổng giây thực thi", "số dòng thực thi", "trung vị s"],
          [[i, x["workflow"], x["job_goc"], x["tong_giay_thuc_thi"], x["so_dong_thuc_thi"], x["trung_vi_giay"]] for i, x in enumerate(b["top5_giay_thuc_thi"], 1)])
@@ -1779,18 +1959,29 @@ def lenh_tu_kiem():
     def _():
         with tempfile.TemporaryDirectory(prefix="wp1434-tk-") as d:
             ghi_tep(d, "mau_bang.py", T("m3_bang_dien_sau.txt").encode("utf-8"))
-            bg, ly = doc_bang_import(pathlib.Path(d) / "mau_bang.py")
+            dl, ly, _ = doc_bang_import(pathlib.Path(d) / "mau_bang.py", d, "mau_bang")
             bang(ly, None, "import mau")
-            bang((bg.get("MUTANTS"), bg.get("CA"), bg.get("DOT_BIEN")), (5, 3, 4), "len cuoi cung (literal dau: 2, 0, 1)")
-            assert not (pathlib.Path(d) / "DA_CHAY_BO").exists(), "import khong duoc chay khoi __main__"
+            bg = dl["bang"]
+            bang((bg.get("MUTANTS"), bg.get("CA"), bg.get("DOT_BIEN"), bg.get("MUTATIONS")), (5, 3, 4, 3), "len cuoi cung (literal dau: 2, 0, 1, 1)")
+            bang((dl["ten"]["CA"], dl["ten"]["MUTATIONS"], dl["hang_so"].get("TRAN_GIAY")), (["t1", "t2", "t3"], ["x1", "x2", "x3"], 540), "ten phan tu + hang so")
+            assert not [x for x in pathlib.Path(d).rglob("DA_CHAY_BO")], "import khong duoc chay khoi __main__"
             ghi_tep(d, "khong_chot.py", b"MUTANTS = {1: 1}\n")
-            bg2, ly2 = doc_bang_import(pathlib.Path(d) / "khong_chot.py")
+            bg2, ly2, _ = doc_bang_import(pathlib.Path(d) / "khong_chot.py", d, "khong_chot")
             assert bg2 is None and "chot" in ly2, "tep khong co chot __main__ phai bi tu choi, khong import"
+            chon_mau = m3_chon_bang("x/mau.py", bg)
+            assert "MUTATIONS" in chon_mau and "IMMUTABLE_TRUONG" not in chon_mau and "THUONG" not in chon_mau, f"chon bang: {sorted(chon_mau)}"
+            bang(m3_nghi_bo_sot("x/mau.py", bg), [("IMMUTABLE_TRUONG", 2, None)], "ten chua MUT khong duoc chon phai bi BAO (chua co ly do loai => nghi bo sot)")
         chon = m3_chon_bang(".claude/dev/ci_dang_ky_test.py", {"MUTANTS": 5, "CA": 3, "GOC": 9, "DANG_KY": 29, "DOT_BIEN_HOOK": 2, "CACH_LY": 0})
         bang(chon, {"CA": 3, "CACH_LY": 0, "DANG_KY": 29, "DOT_BIEN_HOOK": 2, "MUTANTS": 5}, "chon bang (giu bang 0 phan tu, bo bang khong lien quan)")
         m3 = m3_tu_anh_chup({"sha": "a" * 40, "bo": {"x/a_test.py": {"blob": "b" * 40, "bang": {"MUTANTS": 5, "GOC": 1}, "ly_do": None},
                                                   "x/b_test.py": {"blob": "c" * 40, "bang": None, "ly_do": "import khong thanh (rc=1)"}}}, "a" * 40)
         bang(m3["bang"]["x/a_test.py"]["MUTANTS"]["gia_tri"], 5, "M3 tu anh chup")
+        m3b = m3_tu_anh_chup({"sha": "a" * 40, "bo": {"x/a_test.py": {"blob": "b" * 40, "ly_do": None,
+                                                   "bang": {"MUTATIONS": 65, "_WP1393_IMMUTABLE": 14, "BANG_MUTX": 2}}}}, "a" * 40)
+        bang(m3b["bang"]["x/a_test.py"]["MUTATIONS"]["gia_tri"], 65, "MUTATIONS song sot qua buoc chon")
+        bang([(x["bang"], x["trang_thai"]) for x in m3b["ten_chua_MUT_hoac_DOT_BIEN_khong_chon"]],
+             [("BANG_MUTX", "nghi_bo_sot"), ("_WP1393_IMMUTABLE", "da_giai_thich")], "bang khong chon co ten chua MUT duoc bao, tach da giai thich / nghi bo sot")
+        bang(m3b["so_bang_nghi_bo_sot"], 1, "dem bang nghi bo sot")
         bang(m3["bang"]["x/b_test.py"]["_tep"]["trang_thai"], KHONG_DO_DUOC, "bo khong import duoc -> khong_do_duoc")
         bang(m3_tu_anh_chup(None, "a" * 40).get("trang_thai"), KHONG_DO_DUOC, "anh chup thieu su kien M3 -> khong_do_duoc")
 
@@ -1815,6 +2006,16 @@ def lenh_tu_kiem():
         bang(theo[".github/workflows/ci.yml:1121"][0][2], "lech", "job 8524 s khong phai 141 phut")
         bang((kq["so_dong_khong_phai_loi_khai"], kq["so_dong_chua_anh_xa"]), (1, 1), "dong khong phai loi khai + dong chua anh xa duoc dem rieng")
         assert all(x["ket_luan"] != KHONG_DO_DUOC or x["ly_do"].startswith("nguon thieu: ") for x in kq["loi_khai"]), "moi khong_do_duoc phai co nguon thieu"
+        bang(theo["CLAUDE.md:591"], [("PR #895: CI do 8/8 manh gate-cong-cu", "chuoi", "khop"), ("26 va 28 loi ban kinh o hai manh doc duoc", None, KHONG_DO_DUOC),
+                                     ("13/13 giet dung t52", None, KHONG_DO_DUOC)], "loi khai TACH: mot ve do duoc, hai ve thieu nguon")
+        bang(theo[".github/workflows/ci.yml:413"], [("ci_phamvi_test: 6 dot bien (ca phan chung n*)", 6, "khop")], "6 dot bien doc tu ten phan tu cua CA")
+        bang(theo[".github/workflows/ci.yml:937"][1:], [("duong gang <= 540 s (nguong cua buoc gom)", 540, "khop")], "nguong so voi hang so trong ma")
+        bang(theo[".github/workflows/packet-loop-dot-bien.yml:5"], [("packet-loop-dot-bien: 16 manh (k % 16)", 16, "khop"), ("(~45 phút)", None, KHONG_DO_DUOC)],
+             "loi khai TACH: so manh doc tu ma tran workflow, thoi luong thieu nguon")
+        mat_pr = m4_doi_chieu([tuple(x) for x in d["dong"]], dict(do, pr_nhanh=None))
+        bang([x["ket_luan"] for x in mat_pr["loi_khai"] if x["vi_tri"].startswith("CLAUDE.md:591")], [KHONG_DO_DUOC] * 3, "thieu anh xa PR -> nhanh thi ve 8/8 khong_do_duoc")
+        bang(doc_ma_tran_manh("    strategy:\n      matrix:\n        manh: [0, 1, 2]\n"), 3, "doc ma tran")
+        bang(doc_ma_tran_manh("khong co"), None, "khong co ma tran -> None")
         mat = m4_doi_chieu([tuple(x) for x in d["dong"]], dict(do, blame=None))
         bang([x["ket_luan"] for x in mat["loi_khai"] if x["vi_tri"].startswith(".github/workflows/ci.yml:568")], [KHONG_DO_DUOC], "thieu blame trong anh chup -> khong_do_duoc")
 
@@ -1869,6 +2070,50 @@ def lenh_tu_kiem():
             pass
         else:
             raise AssertionError("bang_md phai tu choi hang lech so o")
+
+    @kiem("m3_hop_cat: tac dung phu luc import roi VAO hop cat duoi --ra, thu muc ngoai khong doi; module ghi thang ra ngoai bi TU CHOI")
+    def _():
+        with tempfile.TemporaryDirectory(prefix="wp1434-tk-") as d:
+            d = pathlib.Path(d)
+            ra, ngoai = d / "ra", d / "ngoai"
+            ra.mkdir()
+            ngoai.mkdir()
+            ghi_tep(ngoai, "canh_gac.txt", b"KHONG DUOC DOI")
+            ghi_tep(d, "mau_ghi.py", T("m3_ghi_tmp.txt").encode("utf-8"))
+            mt = moi_truong_hop_cat(ra / "kho" / "_import_sandbox" / "x")
+            for k in ("TMPDIR", "TMP", "TEMP", "HOME", "XDG_CACHE_HOME", "XDG_CONFIG_HOME", "XDG_DATA_HOME", "XDG_STATE_HOME", "XDG_RUNTIME_DIR"):
+                assert str(ra) + os.sep in mt.get(k, ""), f"bien {k} cua tien trinh con phai tro vao hop cat duoi --ra"
+            cu = {k: os.environ.get(k) for k in ("TMPDIR", "HOME", "WP1434_THOAT")}
+            try:
+                # Tien trinh nay gia vo co TMPDIR/HOME la thu muc NGOAI: khong giam giu thi module se ghi vao do.
+                os.environ["TMPDIR"], os.environ["HOME"] = str(ngoai), str(ngoai)
+                os.environ.pop("WP1434_THOAT", None)
+                truoc = chup_thu_muc(ngoai, True)
+                dl, ly, con_lai = doc_bang_import(d / "mau_ghi.py", ra, "mau_ghi", canh_gac=[ngoai])
+                bang(ly, None, "import giam giu")
+                bang(dl["bang"].get("DOT_BIEN"), 2, "bang doc duoc sau import giam giu")
+                bang(con_lai, 3, "ba tep module ghi luc import (tmp, home, cwd) phai roi vao hop cat duoi --ra")
+                bang(chup_thu_muc(ngoai, True), truoc, "thu muc ngoai (TMPDIR/HOME that) khong doi")
+                assert not (ra / "kho" / "_import_sandbox" / "mau_ghi").exists(), "hop cat phai duoc don sau khi doc"
+                os.environ["WP1434_THOAT"] = str(ngoai)            # phan chung: module ghi THANG ra ngoai bang duong dan tuyet doi
+                dl2, ly2, _ = doc_bang_import(d / "mau_ghi.py", ra, "mau_ghi", canh_gac=[ngoai])
+                assert dl2 is None and "NGOAI hop cat" in (ly2 or ""), f"ghi ra ngoai phai bi tu choi (fail-closed), co: {dl2!r} / {ly2!r}"
+                assert (ngoai / "wp1434_thoat.txt").exists(), "phan chung phai that su ghi ra ngoai (neu khong, ca nay khong do gi)"
+            finally:
+                for k, v in cu.items():
+                    if v is None:
+                        os.environ.pop(k, None)
+                    else:
+                        os.environ[k] = v
+            os.symlink(ngoai, ra / "kho" / "_import_sandbox" / "lk") if (ra / "kho" / "_import_sandbox").is_dir() else None
+            if (ra / "kho" / "_import_sandbox" / "lk").is_symlink():
+                try:
+                    doc_bang_import(d / "mau_ghi.py", ra, "lk")
+                except GhiBiTuChoi:
+                    pass
+                else:
+                    raise AssertionError("hop cat la symlink phai bi tu choi")
+                bang((ngoai / "canh_gac.txt").read_bytes(), b"KHONG DUOC DOI", "canh gac sau hop cat symlink")
 
     dat = 0
     for ten, f in ca:

@@ -1,6 +1,6 @@
 # wp1434 r3 — Báo cáo đo nền mutation testing (chỉ đọc)
 
-Sinh bởi `thu_thap.py --tinh` từ ảnh chụp (MANIFEST sha256 `d2e8d47220bf194639bb865a0b837b624b0223f6008571d33f3c07e7a9d3338a`). Đặc tả sha256 `0247845e6dd643388f7219781ebff553b605e59d731481d10a024e80ae8232b4`.
+Sinh bởi `thu_thap.py --tinh` từ ảnh chụp (MANIFEST sha256 `117fabacb5ac4bfad37f7c0feedcd6e3eba465657dd2d2c6a82dd59b75dd6a17`). Đặc tả sha256 `0247845e6dd643388f7219781ebff553b605e59d731481d10a024e80ae8232b4`.
 Cohort đóng băng: T0 `2026-10-21T01:16:24Z` · T1 `2026-11-20T01:16:24Z` · master `711cb190daaa267cb919c10f4030d38172a37a93` · 62 khoảng con liệt kê `ci.yml`.
 - `ci-dot-bien-du.yml`: 62 lượt, 64 cặp (run_id, run_attempt); bị loại khỏi cohort: không
 - `ci.yml`: 1573 lượt, 1647 cặp (run_id, run_attempt); bị loại khỏi cohort: {'chua_completed_luc_thu': 2}
@@ -136,7 +136,7 @@ Bước của `gate-cong-cu*`, `gate-nhanh-*`, `gate-registry`, `gate-packet-loo
 | `.claude/dev/gh_readback_test.py` | CA=8 |
 | `.claude/dev/idiom_py_test.py` | CA=7 · DOT_BIEN_CHINH_NO=5 · DOT_BIEN_TAI_LIEU=4 |
 | `.claude/dev/launcher_test.py` | CA=428 · DOT_BIEN=572 · DOT_BIEN_HARNESS=79 · DOT_BIEN_HOOK=107 |
-| `.claude/dev/mcp_gh_test.py` | CASES=42 |
+| `.claude/dev/mcp_gh_test.py` | CASES=42 · MUTATIONS=65 |
 | `.claude/dev/mcp_github_doc_test.py` | CA=18 · DOT_BIEN=20 |
 | `.claude/dev/packet_loop_test.py` | CASES=1582 · MUTANTS=1864 · MUTANTS_NHAM_TEST=54 · _WP1303_LINUX_CASES=9 · _WP1303_R4_MUTANTS=10 · _WP1370_ACTIVITY_CASES=23 |
 | `.claude/dev/probe_mang_test.py` | DOT_BIEN=5 |
@@ -158,6 +158,8 @@ Bước của `gate-cong-cu*`, `gate-nhanh-*`, `gate-registry`, `gate-packet-loo
 | `ops/nhanh_don_duoc_test.py` | CA=8 · DOT_BIEN=10 · DOT_BIEN_TU_KIEM=255 · TU_KIEM=56 · _TU_KIEM_DAY_DU=56 |
 | `scripts/tl_core/command_registry_test.py` | khong_ap_dung (khong co bang ca/dot bien nao o muc module) |
 
+Bảng đã import có tên chứa `MUT`/`DOT_BIEN` nhưng không được chọn: 1, trong đó nghi bỏ sót (không có lý do loại): 0. `.claude/dev/packet_loop_test.py` _WP1393_IMMUTABLE=14 (ten chua chuoi MUT vi la IMMUTABLE (tap truong bat bien), khong phai bang dot bien)
+
 ## 5 điểm tốn thời gian nhất theo giây thực thi (nhóm job, cả cohort)
 
 | # | workflow | job gốc | tổng giây thực thi | số dòng thực thi | trung vị s |
@@ -172,7 +174,7 @@ Nguồn: tổng `completed_at − started_at` của mọi dòng `thuc_thi` cùng
 
 ## M4 — đối chiếu lời khai
 
-Lệnh: `rg -n -i 'đột biến|dot.bien|mutant|mutation|mảnh' .github/workflows CLAUDE.md docs ops/specs/wp1166* | rg -i "<M4_RG2>" (tuong duong: hai regex M4_RG1 roi M4_RG2 trong thu_thap.py, ap tren cac tep kho/tep/* cua anh chup = `git show <sha_master>:<tep>`)`. 36 dòng khớp (3 dòng không phải lời khai, 0 dòng chưa ánh xạ); 41 lời khai, kết luận: {'khong_do_duoc': 23, 'khop': 8, 'lech': 10}. Vị trí đọc ở `@711cb190daaa`.
+Lệnh: `rg -n -i 'đột biến|dot.bien|mutant|mutation|mảnh' .github/workflows CLAUDE.md docs ops/specs/wp1166* | rg -i "<M4_RG2>" (tuong duong: hai regex M4_RG1 roi M4_RG2 trong thu_thap.py, ap tren cac tep kho/tep/* cua anh chup = `git show <sha_master>:<tep>`)`. 36 dòng khớp (3 dòng không phải lời khai, 0 dòng chưa ánh xạ); 44 lời khai, kết luận: {'khong_do_duoc': 22, 'khop': 12, 'lech': 10}. Vị trí đọc ở `@711cb190daaa`.
 
 | vị trí | lời khai | số đo | kết luận | ghi chú / nguồn thiếu |
 |---|---|---|---|---|
@@ -184,10 +186,10 @@ Lệnh: `rg -n -i 'đột biến|dot.bien|mutant|mutation|mảnh' .github/workfl
 | `.github/workflows/ci-dot-bien-du.yml:11` | ≈ 2,6 h/manh (9 360 s) | 1621.5 s = trung vi 8 job manh (1531–1730 s) | lech | khop neu trong ±20%; luot 43990524880 (luot du 8 manh success moi nhat cua cohort): https://api.github.com/repos/ducthangho/tra-luat/actions/runs/43990524880/jobs?filter=all |
 | `.github/workflows/ci.yml:186` | gate-cong-cu: 8 manh | 8 | khop | so job ma tran gate-cong-cu thuc_thi success (ubuntu-latest) o luot success mot attempt moi nhat co job ay: luot 44649093178 (2026-11-20T00:50:54Z); https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44649093178/jobs… |
 | `.github/workflows/ci.yml:186` | ~93 % bước này, ~43 phút | — | khong_do_duoc | nguon thieu: luot do truoc #668 (28-09-2026) tao truoc T0: khong thuoc cohort |
-| `.github/workflows/ci.yml:413` | 6 dot bien tren `git worktree` | — | khong_do_duoc | nguon thieu: bang dot bien cua .github/checks/ci_phamvi_test.py khong o dang bang muc module (import chi thay CA): so chi sinh khi chay |
+| `.github/workflows/ci.yml:413` | ci_phamvi_test: 6 dot bien (ca phan chung n*) | 6 | khop | so phan tu cua CA trong .github/checks/ci_phamvi_test.py@711cb190daaa co ten dang n<so>_ (ca dot bien/phan chung; con lai la ca nen ['t1_sach_thi_xanh']); doc ten bang import giam giu, khong chay: ['n1_ma_bo_ops_thi_do', 'n2_nh… |
 | `.github/workflows/ci.yml:561` | gate-cong-cu: 8 manh | 8 | khop | so job ma tran gate-cong-cu thuc_thi success (ubuntu-latest) o luot success mot attempt moi nhat co job ay: luot 44649093178 (2026-11-20T00:50:54Z); https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44649093178/jobs… |
 | `.github/workflows/ci.yml:562` | 45m56s (run 36362558889) | — | khong_do_duoc | nguon thieu: jobs cua luot 36362558889 khong co trong anh chup (luot khong thuoc cohort [T0, T1]) |
-| `.github/workflows/ci.yml:567` | 111/118 lượt mảnh Windows | — | khong_do_duoc | nguon thieu: cac luot manh Windows truoc wp879 (#853) tao truoc T0: khong thuoc cohort |
+| `.github/workflows/ci.yml:567` | 111/118 lượt mảnh Windows | — | khong_do_duoc | nguon thieu: cac luot manh Windows truoc wp879 (#853) tao truoc T0: khong thuoc cohort; tham khao, KHONG so (mau so 118 luot nam truoc T0): dong gate-cong-cu thuc_thi tren windows-latest trong cohort: {'so_dong': 4, 'giay_lon_n… |
 | `.github/workflows/ci.yml:568` | 8 manh skipped (0 phut runner) o duong_nhanh | 517 luot duong_nhanh tao sau 2026-10-23T23:37:49Z: dong gate-cong-cu {'bo_qua': 521, 'thuc_thi_khong_runner': 2}; ca cohort: {'bo_qua': 521, 'thuc_thi': 205, 'mang_sang': 29} | khop | chi tinh luot tao SAU committer-time first-parent cua dong loi khai (kho/blame.json); khop neu khong dong gate-cong-cu nao la thuc_thi CO runner (thuc_thi_khong_runner = bi huy truoc khi duoc cap runner, khong phai skipped); la… |
 | `.github/workflows/ci.yml:679` | gate-cong-cu-gop o duong_nhanh: XANH, khong skipped | 517 luot duong_nhanh tao sau 2026-10-23T23:37:49Z: dong gate-cong-cu-gop theo loai:ket_luan {'bo_qua:skipped': 2, 'mang_sang:success': 2, 'thuc_thi:cancelled': 16, 'thuc_thi:failure': 2, 'thuc_thi:success': 499, 'thuc_thi_khong… | lech | chi tinh luot tao SAU committer-time first-parent cua dong loi khai (kho/blame.json); khop neu khong dong nao la bo_qua va khong dong thuc_thi co runner nao failure |
 | `.github/workflows/ci.yml:934` | 52 ca | 56 | lech | len(TU_KIEM) cuoi cung cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import) |
@@ -195,17 +197,20 @@ Lệnh: `rg -n -i 'đột biến|dot.bien|mutant|mutation|mảnh' .github/workfl
 | `.github/workflows/ci.yml:935` | 10 dot bien san pham | 10 | khop | len(DOT_BIEN) cuoi cung cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import) |
 | `.github/workflows/ci.yml:935` | gate-nhanh-manh: 8 manh | 8 | khop | so job ma tran gate-nhanh-manh thuc_thi success (ubuntu-latest) o luot success mot attempt moi nhat co job ay: luot 44649093178 (2026-11-20T00:50:54Z); https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44649093178/j… |
 | `.github/workflows/ci.yml:937` | 52 ca | 56 | lech | len(TU_KIEM) cuoi cung cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import) |
-| `.github/workflows/ci.yml:937` | đường găng <= 540 s | — | khong_do_duoc | nguon thieu: bien nhan artifact cua gate-nhanh-manh (truong giay): dac ta §4 chi thu artifact cua ci-dot-bien-du.yml |
+| `.github/workflows/ci.yml:937` | duong gang <= 540 s (nguong cua buoc gom) | 540 | khop | hang so TRAN_DUONG_GANG_GIAY cua ops/nhanh_don_duoc_test.py@711cb190daaa (M3, import): loi khai la NGUONG cua cong, so voi nguong trong ma; duong gang thuc te cua tung luot nam o bien nhan gate-nhanh (ngoai nguon thu §4) |
 | `.github/workflows/ci.yml:1121` | run 43845962754: mot job 2 gio 21 phut (loi khai trai hai dong) | job dai nhat cua luot 43845962754 (gate-packet-loop (ubuntu-latest)): 8524 s = 2 gio 22 phut 4 giay; buoc dai nhat cua job ay: 8492 s | lech | khop neu thoi luong JOB cat hoac lam tron ve phut bang 141 phut; https://api.github.com/repos/ducthangho/tra-luat/actions/runs/43845962754/jobs?filter=all |
 | `.github/workflows/ci.yml:1122` | gate-packet-loop-manh: 16 manh | 16 | khop | so job ma tran gate-packet-loop-manh thuc_thi success (ubuntu-latest) o luot success mot attempt moi nhat co job ay: luot 44649093178 (2026-11-20T00:50:54Z); https://api.github.com/repos/ducthangho/tra-luat/actions/runs/4464909… |
-| `.github/workflows/packet-loop-dot-bien.yml:5` | (ca dong) | — | khong_do_duoc | nguon thieu: luot cua packet-loop-dot-bien.yml: workflow khong thuoc cohort (dac ta §2 chi dinh hai workflow) |
+| `.github/workflows/packet-loop-dot-bien.yml:5` | packet-loop-dot-bien: 16 manh (k % 16) | 16 | khop | so phan tu cua `matrix.manh` trong kho/tep/.github/workflows/packet-loop-dot-bien.yml (tep workflow o 711cb190daaa; doc tinh, khong can luot chay) |
+| `.github/workflows/packet-loop-dot-bien.yml:5` | (~45 phút) | — | khong_do_duoc | nguon thieu: thoi luong luot cua packet-loop-dot-bien.yml: workflow khong thuoc cohort (dac ta §2 chi dinh hai workflow) |
 | `CLAUDE.md:409` | **40/40** | — | khong_do_duoc | nguon thieu: dau ra bo test ops-don-ref tai thoi diem su co (bai hoc lich su): khong luu |
 | `CLAUDE.md:567` | `\|  \| 0/0` | — | khong_do_duoc | nguon thieu: dau ra chay_dot_bien cua packet #513 (12-09-2026): khong luu |
-| `CLAUDE.md:591` | 8/8 mảnh (26 và 28 | — | khong_do_duoc | nguon thieu: log CI cua PR #895 (23-10-2026): loi khai khong neu run_id nen khong dinh vi duoc luot trong cohort |
+| `CLAUDE.md:591` | PR #895: CI do 8/8 manh gate-cong-cu | nhanh agent/wp892-g1-claude (merge commit 76cf4c51a6b1): 4 luot trong cohort, dong gate-cong-cu thuc_thi co runner theo ket luan: 39965923045 (2026-10-23T14:00:17Z) {'success': 8}; 39974321599 (2026-10-23T14:59:12Z) {'failure':… | khop | khop neu co it nhat mot luot cua nhanh ay co dung 8 dong gate-cong-cu thuc_thi, ca 8 failure; anh xa PR -> nhanh tu kho/pr_nhanh.json (git log --first-parent) |
+| `CLAUDE.md:591` | 26 va 28 loi ban kinh o hai manh doc duoc | — | khong_do_duoc | nguon thieu: log job gate-cong-cu cua luot do (dac ta §4: voi ci.yml chi thu log gate-registry va chuan-bi) |
+| `CLAUDE.md:591` | 13/13 giet dung t52 | — | khong_do_duoc | nguon thieu: dau ra luot dot bien tai cho cua executor packet #892 (23-10-2026): khong luu trong kho hay anh chup |
 | `CLAUDE.md:658` | (105 ca; | — | khong_do_duoc | nguon thieu: so ca cua ops/don_ref_chot_test.sh chi sinh khi CHAY script (khong co bang tinh; packet khong chay) |
-| `docs/AUDIT_LAUNCHER_VONG_3.md:5,9,41,68,477` | (ca dong) | — | khong_do_duoc | nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo |
-| `docs/AUDIT_LAUNCHER_VONG_4_POSIX.md:51,78` | (ca dong) | — | khong_do_duoc | nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo |
-| `docs/AUDIT_LAUNCHER_VONG_7.md:21,51,76` | (ca dong) | — | khong_do_duoc | nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo |
+| `docs/AUDIT_LAUNCHER_VONG_3.md:5,9,41,68,477` | (ca dong) | — | khong_do_duoc | nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo; tham khao, KHONG so (bien ban ghi so cua ngay audit): bang hien hanh DOT_BIEN=572, … |
+| `docs/AUDIT_LAUNCHER_VONG_4_POSIX.md:51,78` | (ca dong) | — | khong_do_duoc | nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo; tham khao, KHONG so (bien ban ghi so cua ngay audit): bang hien hanh DOT_BIEN=572, … |
+| `docs/AUDIT_LAUNCHER_VONG_7.md:21,51,76` | (ca dong) | — | khong_do_duoc | nguon thieu: dau ra cua luot chay launcher_test tai thoi diem audit (bien ban co ngay): khong luu trong kho hay anh chup, packet khong chay bo; tham khao, KHONG so (bien ban ghi so cua ngay audit): bang hien hanh DOT_BIEN=572, … |
 | `docs/GOI_AGENT_DA_NEN.md:493` | .claude/dev/launcher_test.py: 31 dot bien | 572 | lech | len(DOT_BIEN) cuoi cung cua .claude/dev/launcher_test.py@711cb190daaa (M3, import) |
 | `docs/adr/0009-dac-ta-the-thuc-nguon-su-that-thang-tham-quyen-3-bac.md:6,35,139` | (ca dong) | — | khong_do_duoc | nguon thieu: ket qua thuc nghiem dot bien tay ngay 2026-07-20: khong co log trong kho hay anh chup |
 
@@ -239,17 +244,17 @@ Dòng khớp regex nhưng không phải lời khai: `.github/workflows/ci.yml:62
 - 12 × log job <id> (chuan-bi, ket luan job cancelled) — loi (HTTP 404)
 - 8 × log job <id> (dot-bien-manh, ket luan job failure) — loi (HTTP 404)
 - … và 13 dạng khác (xem `khong_do_duoc.tom_tat`)
-- Lời khai M4 `khong_do_duoc`: 23, mỗi cái ghi nguồn thiếu ở bảng M4.
+- Lời khai M4 `khong_do_duoc`: 22, mỗi cái ghi nguồn thiếu ở bảng M4.
 - M3: bộ không import được ghi `khong_do_duoc` kèm lý do; packet không chạy bộ để lấy số.
 - Thời điểm workflow hoàn tất: API attempt không trả `completed_at`; chỉ có `dau_cuoi_suy_ra_tu_job`.
 - Workflow đột biến ngoài cohort (vd. `packet-loop-dot-bien.yml`) không được thu: đặc tả §2 chỉ định hai workflow.
 
 ## Kết quả hai bộ phân loại §6 (trên tập đường dẫn của packet)
 
-Tập đường dẫn (mọi tệp là `A`, mode `100644`): `ops/specs/wp1434-r3/do/BAO_CAO.md`, `ops/specs/wp1434-r3/do/BASELINE.json`, `ops/specs/wp1434-r3/do/COHORT.json`, `ops/specs/wp1434-r3/do/fixtures/artifacts.json`, `ops/specs/wp1434-r3/do/fixtures/attempt_cuoi_rong.json`, `ops/specs/wp1434-r3/do/fixtures/buoc.json`, `ops/specs/wp1434-r3/do/fixtures/cohort_bien.json`, `ops/specs/wp1434-r3/do/fixtures/log_chuan_bi.log`, `ops/specs/wp1434-r3/do/fixtures/log_chuan_bi_cu.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_cat_cut.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_con.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_thieu.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_cat_cut.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_con.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_thieu.log`, `ops/specs/wp1434-r3/do/fixtures/luot_hai_attempt.json`, `ops/specs/wp1434-r3/do/fixtures/m3_bang_dien_sau.txt`, `ops/specs/wp1434-r3/do/fixtures/m4_loi_khai.json`, `ops/specs/wp1434-r3/do/fixtures/mang_sang_cung_job_id.json`, `ops/specs/wp1434-r3/do/thu_thap.py`
-- `phan_loai_tu_diff` ⇒ `["duong_nhanh", "DUONG_NHANH: toan bo 20 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh"]`
+Tập đường dẫn (mọi tệp là `A`, mode `100644`): `ops/specs/wp1434-r3/do/BAO_CAO.md`, `ops/specs/wp1434-r3/do/BASELINE.json`, `ops/specs/wp1434-r3/do/COHORT.json`, `ops/specs/wp1434-r3/do/fixtures/artifacts.json`, `ops/specs/wp1434-r3/do/fixtures/attempt_cuoi_rong.json`, `ops/specs/wp1434-r3/do/fixtures/buoc.json`, `ops/specs/wp1434-r3/do/fixtures/cohort_bien.json`, `ops/specs/wp1434-r3/do/fixtures/log_chuan_bi.log`, `ops/specs/wp1434-r3/do/fixtures/log_chuan_bi_cu.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_cat_cut.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_con.log`, `ops/specs/wp1434-r3/do/fixtures/log_dang_ky_thieu.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_cat_cut.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_con.log`, `ops/specs/wp1434-r3/do/fixtures/log_manh_thieu.log`, `ops/specs/wp1434-r3/do/fixtures/luot_hai_attempt.json`, `ops/specs/wp1434-r3/do/fixtures/m3_bang_dien_sau.txt`, `ops/specs/wp1434-r3/do/fixtures/m3_ghi_tmp.txt`, `ops/specs/wp1434-r3/do/fixtures/m4_loi_khai.json`, `ops/specs/wp1434-r3/do/fixtures/mang_sang_cung_job_id.json`, `ops/specs/wp1434-r3/do/thu_thap.py`
+- `phan_loai_tu_diff` ⇒ `["duong_nhanh", "DUONG_NHANH: toan bo 21 tep doi khop allowlist ops/{land,leases,reviews,specs}/** - dung duong nhanh"]`
 - `ly_do_ve_day_du` ⇒ `[]`
-- `phan_loai_packet_loop` ⇒ `["bo_qua", "PACKET_LOOP: bo_qua vi 20 tep doi khong cham tap phu thuoc cua bo ca"]`
+- `phan_loai_packet_loop` ⇒ `["bo_qua", "PACKET_LOOP: bo_qua vi 21 tep doi khong cham tap phu thuoc cua bo ca"]`
 - `tim` ⇒ `{"so_test_song": 29, "so_hien_vat": 2, "vi_tri_la": [], "tep_packet_trong_ket_qua": []}`
 
 Làn của PR phải được đo lại trên log CI thật trước merge (đặc tả §6); kết quả trên là phép chạy tại chỗ của hai hàm phân loại.

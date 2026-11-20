@@ -1,0 +1,38 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: wp1319
+revision: 7
+generation: 1
+lease_id: wp1319-r7-g1-operator
+role: operator
+executor: none
+reviewer: 'connector Codex tren PR'
+review_class: routine
+target_hosts:
+- f7281f27-f79f-40a2-a2f5-b454b58a166a
+- a5f7076e-a491-4f84-829b-8d1fbcc1c767
+- 7404cfba-9034-4787-b46b-7c358126a411
+live_change: 'khong — ghi so quyet dinh chu kho va tien kiem chi doc cho U11 (khong xac thuc, khong goi Proxima)'
+spec_path: ops/specs/wp1319-r7.md
+spec_hash: 3f44db517e230c5dfca7b47a0f8b7d1ef2bacc49c703477d8e2d2e78237315b4
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r7/RESULTS.md
+- ops/leases/wp1319-r7-g1-operator.yaml
+- ops/specs/wp1319-r7.md
+write_set_hash: e9c89a52ff7a9a1fc201bccf805d1bd8604bf60c75ee3fef8bde1d5e04d515ff
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: 90816bc291b0c99aa8c1c8daf6e25af744fe94cf
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 19/11 (AskUserQuestion): U5/U12 chap nhan theo digest; U11 cap do chi doc tren f728; §11 #10 chap nhan muc fixture; dong WP kem mien tru'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-19T21:50:21Z'
+heartbeat_at: '2026-11-19T21:50:21Z'
+lease_until: '2026-11-20T00:50:21Z'
+lease_expires_at_utc: '2026-11-20T00:50:21Z'
+max_lease_hours: 3
+review_calls_limit: 0
+native_runs_limit_per_host: 2

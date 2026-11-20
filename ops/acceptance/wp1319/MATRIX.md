@@ -265,7 +265,7 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 | 7 | Máy bận hoãn; updater trùng bị khoá | máy bận: **passed (scoped, theo quyết định "dừng")** · updater trùng: **partial (đã chấp nhận)** | H.1, H.3 | Proxima không có single-instance; mở bằng tay vẫn lọt |
 | 8 | Promotion fence | **passed (scoped, promote thật Desktop → VM)** | H.11 | Ca âm "máy đầu FAIL thì chặn máy sau" chỉ có ở mức test |
 | 9 | Phục hồi binary + dữ liệu | dữ liệu: **passed** · binary: **partial** | D, H.10 | "Rollback binary" chỉ là đổi sang thư mục baseline đặt song song |
-| 10 | File khoá / đĩa đầy / rollback thất bại | **partial** | F | Khoá: real_os mức primitive. Đĩa đầy, chép dở, rollback thất bại: chỉ fixture |
+| 10 | File khoá / đĩa đầy / rollback thất bại | **partial** · **owner_waived ở mức fixture (r7)** | F, **r7** | Khoá: real_os mức primitive. Đĩa đầy, chép dở, rollback thất bại: chỉ fixture. Quyết định của chủ kho 19/11 (AskUserQuestion trong phiên điều phối; lời khai, không có bản ghi trên GitHub): *"Chấp nhận mức fixture"*; không làm đầy đĩa thật |
 | 11 | Healthcheck không inference | **passed (scoped soak P4)** | D | 180 mẫu `/v1/stats`, `totalRequests` 0; chỉ trên profile thử |
 | 12 | Review độc lập đúng head/tree + evidence | r1–r5 và mọi WP: **passed** (review độc lập trên gói đóng băng + connector) · P3–P6: **gioi_han** | D, E, H; `wp-*/VERDICT*.md` | Raw P5 và hồ sơ P6 không khôi phục được (H.2) |
 
@@ -276,14 +276,14 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 | U2 | Danh tính VM | **passed (scoped `f7281f27`)** | **r5** | `810f79bb` offline: chưa định danh được |
 | U3 | WhatIf | **passed (scoped)** | G | như §11 #3 |
 | U4 | Updater thực tế | **passed (scoped, chỉ nhánh sai integrity)** | H.1 | Cài thật khi bản tải hợp lệ; chữ ký; biến thể `repaired` |
-| U5 | Chữ ký/attestation/provenance artifact | **not_evidenced** · bộ cài **NotSigned** (đo được) | H.4/H.5 | Cần attestation hoặc quyết định chính sách ghi rõ (người giữ) |
+| U5 | Chữ ký/attestation/provenance artifact | **accepted_risk (chính sách chủ kho, r7)** · bộ cài **NotSigned** (đo được), không attestation | H.4/H.5, **r7** | Quyết định của chủ kho 19/11 (AskUserQuestion trong phiên điều phối; lời khai, không có bản ghi trên GitHub): *"Chấp nhận theo digest"*: chỉ cài bản có sha256 trùng digest đã ghim; thiếu chữ ký là rủi ro đã biết, chấp nhận vì dùng cá nhân, không thương mại. Dữ kiện đo giữ nguyên |
 | U6 | License | **passed (owner)** | B | — |
 | U7 | Retention/soak/theo dõi | **partial** | D | Ngưỡng, owner, cửa sổ theo dõi chưa ghi |
 | U8 | Restore profile/đăng nhập | dữ liệu: **passed (hẹp)** · đăng nhập: **quan_sat: giữ được** | H.10 | Không có PASS/FAIL cho vế đăng nhập theo đặc tả U8 |
 | U9 | Cache/ACL ổ D ASUS | **đo được (r5, r6)**: lúc đo r5 ổ D đầy (trống 8 192 byte); sau khi dọn theo duyệt của chủ kho, trống 2 003 MB (19/11 16:48Z), 2 100 563 968 byte lúc 21:18Z. **Cache add-on hiện có nằm trên ổ C** (r6): hai cache P3 `C:\Users\admin\tl-work\mission1238-asus-20261112-P3\addon-ps51\browsers` và `…\addon-ps7\browsers`, mỗi cache 315 tệp, ~467 MB, lock `0da56e1e…`; không có thư mục `browsers`/`ms-playwright` nào dưới `D:\tl-win` (độ sâu ≤ 4) | **r5**, **r6** | **Quyết định của chủ kho (19/11): dùng ổ C.** `TL_PW_ROOT` và `PLAYWRIGHT_BROWSERS_PATH` chưa đặt ở cả ba phạm vi Process (Desktop Commander), User, Machine; không đổi biến hay cấu hình nào. Thư mục mặc định `C:\Users\admin\AppData\Local\ms-playwright` chỉ có 18 tệp, 7 759 byte (`b`, `daemon`: dư lượng F1 của P3). **Sửa lời khai của bản trước (PR #1426):** câu "P3 ghi mỗi add-on trên ASUS có cache riêng dưới `D:\tl-win\…`" là sai; P3 chỉ ghi **nguồn seed** của cache nằm trên D (nay không còn), còn cache thật nằm trên C. **Còn chưa kiểm:** môi trường của các lượt khởi chạy add-on về sau (biến đặt trong tiến trình, không đo được trước). Mẫu `TL_PW_ROOT` trong `SKILL.md` vẫn ghi ổ D, nên lượt cài kế tiếp phải đặt `TL_PW_ROOT` trên C một cách tường minh |
 | U10 | Playwright CLI ghim | **passed (Desktop + ASUS)** | E, G | — |
-| U11 | Auth remote f728 | **not_evidenced** | E | Chưa có bằng chứng auth thực tới f728 |
-| U12 | Binary ↔ upstream | **partial** | D, H.4 | Chỉ có digest bộ cài; không chữ ký, không provenance tới commit |
+| U11 | Auth remote f728 | **not_evidenced** | E, **r7** (tiền kiểm) | Chưa có bằng chứng auth thực tới f728. Chủ kho cấp đo chỉ đọc (19/11); r7 mới tiền kiểm, chưa xác thực (`r7/RESULTS.md`) |
+| U12 | Binary ↔ upstream | **accepted_risk (chính sách chủ kho, r7)** · dữ kiện: partial | D, H.4, **r7** | Chỉ có digest bộ cài; không chữ ký, không provenance tới commit. Cùng quyết định với U5: chấp nhận theo digest đã ghim |
 
 ### I.3 Hạng mục chéo
 | Hạng mục | Hiện trạng | Nguồn |
@@ -297,7 +297,7 @@ Các mục A–H ghi theo thứ tự thời gian và mục sau thay mục trư�
 
 **Việc còn mở có thể làm tiếp, cần chủ kho chọn:**
 1. Ổ D của ASUS: đã dọn lên 2 003 MB trống (r5, phần sau dọn). Chủ kho chọn ổ C cho cache trình duyệt Playwright (U9); r6 đo được hai cache add-on hiện có đều nằm trên C. Lượt cài kế tiếp phải đặt `TL_PW_ROOT` trên C tường minh, vì mẫu trong `SKILL.md` ghi ổ D.
-2. U5/U12: chính sách khi bộ cài không ký.
-3. U11 và §11 #2: đo auth và target thật tới VM. Có rủi ro chạm gateway LIVE nên cần cấp riêng.
-4. §11 #10: ca đĩa đầy thật hoặc rollback thất bại trên OS thật.
-5. Đóng các Issue WP (#1401, #1405, #1409, #1410, #1413) bằng `kiem-dong-wp`. Mỗi WP cần một biên bản M8; các tiêu chí còn `not_measured` hay `partial` của từng WP phải được chủ kho miễn thì mới qua được D2.
+2. ~~U5/U12~~: đã quyết (r7): chấp nhận theo digest đã ghim.
+3. U11 và §11 #2: chủ kho đã cấp đo chỉ đọc (19/11). r7 tiền kiểm xong (`r7/RESULTS.md`); lượt xác thực thật cần đặc tả riêng và chủ kho tự nhập thông tin đăng nhập.
+4. ~~§11 #10~~: đã quyết (r7): chấp nhận mức fixture.
+5. ~~Đóng WP~~: đã đóng 19/11 21:42Z kèm miễn trừ. Biên bản M8 trên từng Issue, đọc lại khớp byte, `kiem-dong-wp` đạt: #1401 (`issuecomment-7022988362`), #1405 (`7022997734`), #1409 (`7023002175`), #1410 (`7023006731`), #1413 (`7023011613`).

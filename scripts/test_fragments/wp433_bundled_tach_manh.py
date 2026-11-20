@@ -183,7 +183,8 @@ def _do(base, tf, tl_module):
 
     def v28():
         mods, rc, j = cong(deu)
-        bam, tong = _bam(b"".join(n.encode() + b"\0" + d for n, d in mods)), sum(len(d) for _, d in mods)
+        chuoi = b"".join(n.encode("utf-8") + b"\0" + d for n, d in mods)   # băm VÀ độ dài đều của chính chuỗi này
+        bam, tong = _bam(chuoi), len(chuoi)
         return (len(mods) > 1 and rc == 0 and [j.get(k) for k in ("expected_sha256", "actual_sha256", "expected_bytes",
                                                                  "actual_bytes")] == [bam, bam, tong, tong])
 
@@ -198,8 +199,9 @@ def _do(base, tf, tl_module):
         if repo.is_dir():                                  # cây dev: đo CẢ đầu ra generator LẪN tệp trên đĩa
             real = tf.generate_bundled_modules(repo)
             sizes = [len(d) for _, d in real] + [len((scripts / n).read_bytes()) for n, _ in real]
-        else:                                              # gói phát hành: không có thư mục fragment, đo tệp mảnh của gói
-            sizes = [len(p.read_bytes()) for p in scripts.glob("tl_test_fragments_bundled*.py")]
+        else:                                              # gói phát hành: đo mảnh 1 và mọi mảnh nó KHAI; thiếu ⇒ văng ⇒ False
+            khai = _gan((scripts / _M1).read_bytes())[2] or ()
+            sizes = [len((scripts / n).read_bytes()) for n in (_M1, *khai)]
         return bool(sizes) and all(size <= _TRAN for size in sizes)
 
     return (

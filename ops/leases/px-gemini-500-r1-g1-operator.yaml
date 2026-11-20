@@ -35,3 +35,6 @@ max_lease_hours: 4
 review_calls_limit: 0
 native_runs_limit_per_host: 0
 inference_calls_limit_per_host: 0
+withdrawn_at_utc: '2026-11-20T11:19:45Z'
+withdrawn_by: 'phien chan doan session_015GtxraqxgU6x1GshxzYCF4'
+withdrawn_reason: 'r1 xong: doc log Proxima tren VM, nguyen nhan HTTP 500 = gemini chua dang nhap Google; 0 loi goi inference; ket qua ops/acceptance/px-gemini-500/r1/RESULTS.md'

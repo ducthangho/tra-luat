@@ -27,8 +27,9 @@ Runner nạp `scripts/tl_gws.py` vào module MỚI trong bộ nhớ, thay MỌI 
   `bundle = json.loads(store.decrypt(blob, master)…)` (1014; lỗi giải mã ⇒ rc 3, 1015–1017) → cờ theo thứ tự `--gas-token` (1021) · `--webapp` ·
   `--gws` (gọi `_gws_export_cred`) · `--nlm` (gọi `_refresh_nlm_auth` rồi canary SỐNG `_nlm_files_after_live_canary`) → `if not changed` (rc 1) →
   `_nlm_bundle_guard` → `_secrets_upload` (bundle) → đồng bộ public: khoá `_tok = os.environ.get("TL_TOKEN") or str(bundle.get("token") or "")` (1062),
-  mã hoá `gws_cred.enc` / `nlm_cred.enc` bằng `_tok`. Bundle KHÔNG do người dùng truyền mà là bundle mã hoá trên Drive (cùng nguồn với `bootstrap`,
-  `nlm-auth-pull`); đây là chỗ giải mã bundle DUY NHẤT trong `tl_gws.py` còn thiếu kiểm kiểu (1870, 1922 đã có từ packet N).
+  mã hoá `gws_cred.enc` / `nlm_cred.enc` bằng `_tok`. `secrets-set` giải mã cùng định dạng bundle với `bootstrap` và `nlm-auth-pull`; `_secrets_fetch` (678) lấy bytes từ
+  `--secrets-file` nếu có, không thì thử đường tải (webapp, direct-media). Đồ giả đặt ở ranh giới `_secrets_fetch` nên đo SỐ LẦN tải, không đo I/O nội
+  bộ của nó. Đây là chỗ giải mã bundle DUY NHẤT trong `tl_gws.py` còn thiếu kiểm kiểu (1870, 1922 đã có từ packet N).
 - **(1) Bundle không phải object** (`[1,2]`, `"chuoi"`, `7`, `null`, `true`) × cờ (`--gas-token`, `--webapp`, `--gws`, `--nlm`, không cờ) = 25 lượt:
   - 20 lượt có cờ: **rc 5**, đúng một dòng `[secrets-set] ✗ dừng vì lỗi TypeError — … Kiểm Drive trước khi coi là chưa upload gì.`; `upload = 0`,
     `stage_enc = 0` (không ghi một phần lên Drive — câu "Kiểm Drive…" chỉ ngược thực tế). Tác dụng phụ TRƯỚC khi vỡ: `--gws` ⇒ `gws_export = 1`;
@@ -36,8 +37,10 @@ Runner nạp `scripts/tl_gws.py` vào module MỚI trong bộ nhớ, thay MỌI 
   - 5 lượt không cờ: rc 1, `⚠ không có trường nào để đổi` (không lộ kiểu sai).
 - **(2) Bundle object, `token` không phải str, không `TL_TOKEN`** (`[1]`, `{"a": 1}`, `7`) × (`--gws`, `--nlm`) = 6 lượt: **rc 0**, `upload = 1`,
   `stage_enc = 1`, tệp public mã hoá bằng khoá `'[1]'` / `"{'a': 1}"` / `'7'` (repr của giá trị), KHÔNG cảnh báo nào.
-- **(3) Hồi quy, bundle object hợp lệ** (`{"token": "tok-cu", "webappUrl": "u"}`): `--gas-token`/`--webapp` rc 0 `upload 1` `stage_enc 0`; `--gws`/`--nlm`
-  rc 0 `upload 1` `stage_enc 1` khoá `'tok-cu'`; không cờ rc 1; `TL_TOKEN=tok-env` + token `[1]` + `--gws` ⇒ khoá `'tok-env'`.
+- **(3) Hồi quy, bundle object hợp lệ** (`{"token": "tok-cu", "webappUrl": "u"}`), sáu lượt theo thứ tự `gas_token`, `webapp`, `gws`, `nlm`, `khong_co`,
+  `env_token.gws` (lượt cuối: `TL_TOKEN=tok-env`, token `[1]`, `--gws`): `rc = (0, 0, 0, 0, 1, 0)`; mọi lượt `fetch = 1`, `gas = 0`;
+  `upload = (1, 1, 1, 1, 0, 1)`; `stage_enc = (0, 0, 1, 1, 0, 1)`; `gws_export = (0, 0, 1, 0, 0, 1)`; `nlm_refresh = canary = (0, 0, 0, 1, 0, 0)`;
+  khoá public `([], [], ['tok-cu'], ['tok-cu'], [], ['tok-env'])`. Số lần `encrypt` không chép cứng (runner chỉ in khoá khác khoá master).
 - **Nguyên mẫu** (`nguyen-mau.diff`, `tl_gws.py` +5/−1, đo cùng runner): (1) cả 25 lượt rc 3, đúng một dòng `[secrets-set] ✗ dữ liệu không hợp lệ: bundle`,
   `fetch = 1` và MỌI bộ đếm khác 0 (kể cả `canary`); (2) cả 6 lượt rc 0, `upload = 1`, `stage_enc = 0`, không khoá public, một dòng
   `⚠ thiếu webapp token → KHÔNG đồng bộ được đường public …` (cảnh báo SẴN CÓ); (3) y hệt base.
@@ -75,11 +78,11 @@ scripts/tl_test_fragments_bundled.py
 
 | # | ca | tiêu chí (mỗi lượt một hậu điều đầy đủ, nhãn đỏ ĐẦU TIÊN thành tín hiệu) | phép đo làm nó ĐỎ |
 |---|---|---|---|
-| N1 | `kieu` — 25 lượt theo thứ tự `list, str, int, null, true` × `gas_token, webapp, gws, nlm, khong_co` | nhãn `rc3`: rc == 3; `dong`: đúng một dòng có `✗` và nó `fullmatch` `\[secrets-set\] ✗ dữ liệu không hợp lệ: bundle`; `khong_goi`: `fetch == 1` và mọi bộ đếm khác (`upload`, `stage_enc`, `gws_export`, `nlm_refresh`, `canary`, `gas`, số lần `encrypt`) == 0 | Base: lượt đầu `kieu.list.gas_token` đỏ ở `rc3` (rc 5, đã đo). |
+| N1 | `kieu` — 25 lượt theo thứ tự `list, str, int, null, true` × `gas_token, webapp, gws, nlm, khong_co` | nhãn `rc3`: rc == 3; `dong`: TOÀN BỘ `stderr.splitlines()` bằng đúng danh sách một phần tử `["[secrets-set] ✗ dữ liệu không hợp lệ: bundle"]` (không dòng nào khác, kể cả dòng thường); `khong_goi`: `fetch == 1` và mọi bộ đếm khác (`upload`, `stage_enc`, `gws_export`, `nlm_refresh`, `canary`, `gas`, số lần `encrypt`) == 0 | Base: lượt đầu `kieu.list.gas_token` đỏ ở `rc3` (rc 5, đã đo). |
 | N2 | `token_kieu` — 6 lượt: token `[1]`, `{"a": 1}`, `7` × `gws`, `nlm`; không `TL_TOKEN` | `rc0`: rc == 0; `upload1`: `upload == 1`; `khong_public`: `stage_enc == 0` và không khoá nào ngoài `TL_MASTER_KEY` được dùng cho `encrypt`; `canh_bao`: đúng một dòng chứa `thiếu webapp token`, không dòng `✗` | Base: `token_kieu.list.gws` đỏ ở `khong_public` (khoá `'[1]'`, đã đo). |
-| N3 | `hoi_quy` — 6 lượt: bundle object hợp lệ × 5 cờ, cộng `TL_TOKEN=tok-env` + token `[1]` + `--gws` | rc, bộ đếm và danh sách khoá public BẰNG bảng §0 (3), chép cứng trong fragment | Bất kỳ lệch nào (base phải ĐẠT ca này). |
+| N3 | `hoi_quy` — 6 lượt: bundle object hợp lệ × 5 cờ, cộng `TL_TOKEN=tok-env` + token `[1]` + `--gws` | rc, MỌI bộ đếm (`fetch`, `gas`, `upload`, `stage_enc`, `gws_export`, `nlm_refresh`, `canary`) và danh sách khoá public BẰNG bảng §0 (3), chép cứng trong fragment | Bất kỳ lệch nào (base phải ĐẠT ca này). |
 | N4 | gate | selftest N/N hai số bằng nhau, N = N_base + 1; `test-fragments-check --json` `ok: true`; `bundle_fragment_check.py --json` `ok: true`, `failed: []`; lane worker `release-manifest` tạm + `release-verify --strict` `ok: true`; `git diff --check` sạch; `doctrine-scan`, `adr-song` rc 0; ruff F delta 0; các fragment #433 đã có (`wp433_*`) `run()` True với bộ đếm BẰNG base. | Bất kỳ vế nào khác. |
-| N5 | đo native (§4c) | Hồ sơ PR ghi lệnh, shell, exact head/tree, đầu ra thô, rc và kết luận của MỌI phép bắt buộc ở §4c. | Thiếu, trái kỳ vọng hoặc `KHÔNG ĐO ĐƯỢC` ⇒ không land. |
+| N5 | đo native D1 (§4c) | Hồ sơ PR packet ghi lệnh, shell, exact head/tree base và candidate đã ghim, đầu ra thô, rc và kết luận của D1 (cả hai vế). | Thiếu, sai SHA/tree, không chạy được (`KHÔNG ĐO ĐƯỢC`) hoặc trái kỳ vọng ⇒ không land. |
 
 Phép đo base/head dựng hai clone trong MỘT lệnh (CLAUDE.md). Fragment chạy trên `tl_gws.py` của base phải ĐỎ (`run()` False) đúng ở N1 rồi N2 —
 đo bằng cách nạp nguồn base vào fragment của candidate (không sửa base).
@@ -94,10 +97,17 @@ Phép đo base/head dựng hai clone trong MỘT lệnh (CLAUDE.md). Fragment ch
 | 4 | `db_token_repr` | dòng `_tok` của M2 về `str(bundle.get("token") or "")` | `token_kieu` · `token_kieu.list.gws` | `khong_public` |
 
 Phân hạng như fragment N: GIẾT chỉ khi tín hiệu là `TinHieuChotCa` khớp đúng (ca, lượt, nhãn); chết vì lý do khác là TÍN DỤNG GIẢ; neo không khớp đúng một
-lần là HỎNG. Đột biến 1 và 2 cùng nhãn `rc3` nhưng khác LƯỢT đích (đột biến 2 để `list` qua đúng, chỉ đỏ ở `str`); đột biến 3 giữ rc 3 nên chỉ nhãn `dong`
+lần là HỎNG. Vì `_nlm_contained` biến MỌI ngoại lệ trong thân lệnh thành rc 5 (một lỗi vô can cũng sinh đúng tuple `rc3` của đột biến 1), đột biến 1 và 2
+chỉ tính GIẾT khi khớp tuple VÀ lượt đích quan sát được rc 5 kèm đúng một dòng `[secrets-set] ✗ dừng vì lỗi TypeError …` (đúng cơ chế đã đo ở §0);
+rc 5 với lớp khác (vd `AttributeError`) ⇒ TÍN DỤNG GIẢ. Đột biến 1 và 2 cùng nhãn `rc3` nhưng khác LƯỢT đích (đột biến 2 để `list` qua đúng, chỉ đỏ ở `str`); đột biến 3 giữ rc 3 nên chỉ nhãn `dong`
 bắt được — ba đột biến phân biệt được bằng đầu vào. Dời kiểm M1 xuống sau các cờ KHÔNG phải đột biến riêng: mọi vị trí sau cờ đầu tiên vỡ `TypeError` ở
-lượt đầu (`kieu.list.gas_token`, rc 5) y như đột biến 1. Tự kiểm bộ phân hạng ≥ 2 ca (một đột biến giả chết vì `AttributeError` qua `except` đổi kiểu ⇒
-TÍN DỤNG GIẢ; một đột biến chú thích vô hại ⇒ SỐNG SÓT).
+lượt đầu (`kieu.list.gas_token`, rc 5) y như đột biến 1. Tự kiểm bộ phân hạng ≥ 3 ca: (a) một đột biến giả ném `AttributeError` tại vị trí chốt — bị chính
+`_nlm_contained` bắt, cùng ca, lượt `kieu.list.gas_token` và nhãn `rc3` — phải ra TÍN DỤNG GIẢ; (b) một đột biến giả chết vì `AttributeError` qua `except`
+đổi kiểu ⇒ TÍN DỤNG GIẢ; (c) một đột biến chú thích vô hại ⇒ SỐNG SÓT.
+
+**Phản chứng bộ đo** (không thuộc `_DB`, chạy trong `run()`; mỗi cái phải ĐỎ đúng chỗ, còn nguồn thật đạt lượt ấy): (PC1) thêm một dòng stderr THƯỜNG
+(không `✗`) ngay trước `return 3` của M1 ⇒ đỏ `kieu.list.gas_token` · `dong`; (PC2) khi có `--gws`, gọi `_gws_export_cred()` (giả) ngay TRƯỚC khi từ chối
+bundle sai kiểu, rc và stderr vẫn đúng ⇒ đỏ `kieu.list.gws` · `khong_goi` (trong khi `kieu.list.gas_token` vẫn đạt). Phản chứng không đỏ đúng chỗ ⇒ `run()` False.
 
 ### 4c. Đo native Windows — **[ĐÃ CHỐT Q3: đo một lượt D1 nhẹ]** (`DESKTOP-T9R33P2`, dự phòng VM)
 
@@ -106,8 +116,8 @@ chạy dưới thư mục phiên; dọn đúng thứ mình tạo; offline (fragm
 
 | # | bắt buộc | dựng / lệnh | kỳ vọng |
 |---|---|---|---|
-| D1 | có | `run(tl)` fragment `wp433_secrets_set_bundle` của candidate, mỗi vế một tiến trình, mỗi vế MỘT lần: (a) candidate; (b) nguồn `tl_gws.py` của base nạp vào fragment candidate | (a) `True`, bộ đếm `CA 3/3 · LUOT 37/37 · DOT BIEN 4/4 · HONG 0 · TU_KIEM …` BẰNG lượt Linux; (b) `False`, đỏ ĐÚNG ca `kieu` lượt `kieu.list.gas_token` nhãn `rc3`, và khi chạy riêng ca `token_kieu` đỏ đúng `token_kieu.list.gws` · `khong_public`; không ca `hoi_quy` nào đỏ |
-| D2 | có (T3) | Tái sinh manifest trong PR manifest sau land, selftest + gate lane LAND | xanh |
+| D1 | có | `run(tl)` fragment `wp433_secrets_set_bundle` của candidate, mỗi vế một tiến trình, mỗi vế MỘT lần: (a) candidate; (b) nguồn `tl_gws.py` của base nạp vào fragment candidate | (a) `True`, bộ đếm `CA 3/3 · LUOT 37/37 · DOT BIEN 4/4 · HONG 0 · TU_KIEM …` BẰNG lượt Linux; (b) `run=False`, đỏ ĐÚNG ca `kieu` lượt `kieu.list.gas_token` nhãn `rc3`; chạy riêng ca `token_kieu` đỏ đúng `token_kieu.list.gws` · `khong_public`; chạy riêng ca `hoi_quy` đạt đủ 6/6 lượt. Rig chạy (a) và (b) thành HAI tiến trình, mỗi cái một lần |
+| — | (T3, ngoài §4c) | Theo `docs/PROTOCOL_DA_PHIEN.md` §10.1: T3 đo trên SHA tích hợp đã đóng băng ở `land prepare` (selftest + gate lane LAND, kèm PR tái sinh manifest); bằng chứng ghi ở checkpoint land/hồ sơ land, KHÔNG thuộc N5 của PR packet | xanh |
 
 ## 5. `pham_vi_e`
 
@@ -116,11 +126,12 @@ Không chạm E4, E5: chỉ đổi kiểm kiểu và chọn khoá trước các 
 
 ## 6. `luat_dung`
 
-- Trần lời gọi Codex theo `ADR-0055`; trần kích thước `ADR-0053` (≤ 3 tệp, ≤ 450 dòng thêm) đo bằng numstat thật trước khi công bố; vượt ⇒ DỪNG, nâng trần là **E2**.
+- Trần lời gọi Codex theo `ADR-0055`; trần kích thước `ADR-0053` (≤ 6 tệp, ≤ 450 dòng thêm) đo bằng numstat thật trước khi công bố; tập đường diff phải
+  bằng ĐÚNG ba đường của §1 (write set của packet); vượt hoặc lệch ⇒ DỪNG, nâng trần là **E2**.
 - §0 lệch trên base thật (dòng 1014–1017, 1062; hành vi (1)(2)(3)) ⇒ dừng, revision.
 - Fragment trên nguồn base không đỏ đúng N1/N2, hoặc `hoi_quy` lệch bảng §0 (3) ⇒ dừng.
 - Một fragment #433 đã có đổi bộ đếm so base ⇒ dừng.
-- D1 (a) không `True`, hoặc (b) không đỏ đúng đích ⇒ dừng, revision.
+- D1 (a) không `True`, hoặc (b) không đỏ đúng đích, hoặc thiếu đầu ra / sai SHA-tree / không khởi chạy được (`KHÔNG ĐO ĐƯỢC`) ⇒ dừng; trái kỳ vọng ⇒ revision.
 - Chưa có comment ngoại lệ bundled đúng `packet_id` ⇒ không cấp lease (**E2**). Đặc tả chờ chủ kho duyệt băm theo `ADR-0067` (**E2**).
 
 ## 7. `hinh_dang_ke_thua`
@@ -145,3 +156,7 @@ M2 thuộc họ "khoá suy ra từ dữ liệu chưa kiểm kiểu": `str()` bi�
 ## 10. Nhật ký revision
 
 - 2026-11-20T12:5xZ (phiên con của điều phối #1206): bản 1 soạn lại, đo §0 trên `0f9aa2a` (Linux), ghi Q1–Q3 đã chốt.
+- 2026-11-20T12:4xZ (phiên con của điều phối #1206): Codex lượt 1/10 `request_changes` (3 P2, 2 P3), sửa hết: N1 `dong` so TOÀN BỘ stderr; hai phản chứng
+  bộ đo PC1 (dòng stderr thừa) và PC2 (export trước khi từ chối); đột biến 1–2 chỉ GIẾT khi thấy đúng `TypeError` qua `_nlm_contained` + tự kiểm
+  `AttributeError` bị wrapper bắt; N5 chỉ D1, T3 chuyển về `land prepare` (§10.1), §6 thêm `KHÔNG ĐO ĐƯỢC`; §0(3) chép đủ bộ đếm; §0 nêu `--secrets-file`;
+  §6 trần ADR-0053 đúng là 6 tệp/450 dòng, write set 3 đường.

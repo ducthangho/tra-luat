@@ -101,8 +101,8 @@ bundled nêu đúng `packet_id` `BUNDLED-TACH-MANH`, hai tệp bundled, sha256 �
 
 | # | ca | tiêu chí | đỏ khi |
 |---|---|---|---|
-| N1 | fragment mới | `run()` True; 8 nhãn True: `mot_manh` (1 mảnh, không dòng SHARDS, = `generate_bundled_module_bytes`), `nhieu_manh` (hạn 100 KiB, 6×40 KiB ⇒ ≥3 mảnh, nạp đủ đúng thứ tự, mảnh 1 khai), `manh_lac` (tệp `_9` không khai: loader bỏ qua, cổng `GENERATED_BUNDLE_STALE` + `extra_shards == ["tl_test_fragments_bundled_9.py"]`), `ghi_xoa_lac`, `thieu_manh` (`BUNDLED_MODULE_MISSING`), `thu_tu_xuyen_manh` (đổi chỗ mảnh 2/3 ⇒ `BUNDLED_MODULE_CONTRACT`), `manh_tu_khai` (mảnh k≥2 có SHARDS ⇒ `BUNDLED_MODULE_CONTRACT`), `kho_that` (`_BUNDLED_SHARD_LIMIT ≤ 0,7·WARN`, mọi mảnh thật ≤ WARN). | nhãn nào khác True |
-| N2 | đột biến (§4b) | 6/6 đỏ ĐÚNG nhãn đích, `run()` trả False (không văng). | sống, hoặc chết do ngoại lệ |
+| N1 | fragment mới | `run()` True; 8 nhãn True: `mot_manh` (fixture nhỏ ⇒ đúng 1 mảnh, không dòng SHARDS; bytes của CẢ `generate_bundled_modules` lẫn `generate_bundled_module_bytes` có sha256 bằng HẰNG ghim trong fragment — hằng ấy đo bằng `generate_bundled_module_bytes` trên base `0f9aa2a` cho CÙNG fixture, không tính lại từ mã sau sửa), `nhieu_manh` (hạn 100 KiB, 6×40 KiB ⇒ ≥3 mảnh, nạp đủ đúng thứ tự, mảnh 1 khai), `manh_lac` (tệp `_9` không khai: loader bỏ qua, cổng `GENERATED_BUNDLE_STALE` + `extra_shards == ["tl_test_fragments_bundled_9.py"]`), `ghi_xoa_lac`, `thieu_manh` (`BUNDLED_MODULE_MISSING`), `thu_tu_xuyen_manh` (đổi chỗ mảnh 2/3 ⇒ `BUNDLED_MODULE_CONTRACT`), `manh_tu_khai` (mảnh k≥2 có SHARDS ⇒ `BUNDLED_MODULE_CONTRACT`), `kho_that` (`_BUNDLED_SHARD_LIMIT ≤ 0,7·WARN`, mọi mảnh thật ≤ WARN). | nhãn nào khác True |
+| N2 | đột biến (§4b) | 7/7 đỏ ĐÚNG nhãn đích, `run()` trả False (không văng). | sống, hoặc chết do ngoại lệ |
 | N3 | gate trên SHA candidate (sau commit manifest M8), clone đầy đủ; worker đo trước bằng manifest tái sinh không commit | selftest N/N hai số bằng nhau, N = N_base + 1 (base 1784, nguyên mẫu 1785); `test-fragments-check` `ok: true` hai mảnh; `bundle_fragment_check` `ok: true`, `failed: []`, `case_count` 19; `release-verify RELEASE_MANIFEST.json --strict --json` trên CHÍNH tệp đã commit: `ok: true`, `expected == checked` = 186 (lane LAND; chốt land chỉ trên SHA thoả vế này); `workflow-audit` `py_size.warn == []`, `files_scanned` 74; `golden-test` ok; `.githooks/eol_policy_test.py` 32/32 (trên cây ĐÃ commit); ruff F delta 0; `git diff --check`, `doctrine-scan`, `adr-song` rc 0. | bất kỳ vế nào |
 | N4 | phản chứng mục đích | Áp `scripts/test_fragments/wp433_secrets_set_bundle.py` + `scripts/tl_gws.py` của `origin/agent/wp433-r8-g1-claude` lên head, `write_bundled_modules`: `py_size.warn == []`, `test-fragments-check` ok, selftest N/N (đo nguyên mẫu: 1786/1786, mảnh 189.328 / 117.343 B). Không commit phần áp. | còn WARN; HOẶC `test-fragments-check` không phải rc 0 kèm `ok: true`; HOẶC selftest không phải rc 0 với số đạt = tổng |
 
@@ -116,6 +116,7 @@ bundled nêu đúng `packet_id` `BUNDLED-TACH-MANH`, hai tệp bundled, sha256 �
 | d | cổng bỏ `extra_shards` | `manh_lac` |
 | e | `write_bundled_modules` không xoá mảnh lạc | `ghi_xoa_lac` |
 | f | mảnh k≥2 được đọc như mảnh 1 (cho phép SHARDS) | `manh_tu_khai` |
+| g | đổi một dòng chú thích đầu tệp sinh ra (cả hai API cùng đổi) | `mot_manh` |
 
 ### 4c. Đo native Windows
 
@@ -165,3 +166,4 @@ Không chạm E4/E5: thư mục tạm, không mạng, không LIVE, không đẩy
 - 2026-11-20 (điều phối #1206): sửa theo Codex lượt 2 (run `1e18f41a`, request_changes): P1 `tl_selftest.py` vào write set (Q6, M9) · P2 manifest do Land Operator (M8) · P2 §7 secrets-set 5 đường · P3 README.
 - 2026-11-20 (điều phối #1206): sửa theo Codex lượt 3 (run `c2cd2a0c`, request_changes): P1 commit manifest TRƯỚC đóng băng candidate (M8) · P2 §6 trần 9 đường · P3 numstat đo lại +283/−60.
 - 2026-11-20 (điều phối #1206): sửa theo Codex lượt 4 (run `5d47c36d`, request_changes): P2 §6 ngoại lệ hai ca M9 trước M8 · P3 §0 năm tệp trong manifest.
+- 2026-11-20 (điều phối #1206): sửa theo Codex lượt 5 (run `ee85d37a`, request_changes): P2 `mot_manh` neo sha256 ghim từ base, thêm đột biến g (N2 7/7). Đột biến g chưa đo trên nguyên mẫu — executor đo.

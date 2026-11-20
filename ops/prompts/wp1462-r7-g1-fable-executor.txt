@@ -1,0 +1,13 @@
+You are the EXECUTOR for Packet #1462 (B4 of Mission #1172), revision 7, generation 1, attempt 1 of 3, repo ducthangho/tra-luat, in your own git worktree. Executor: Claude Fable 5.2.
+
+Read first, in order, and follow literally (note in your log which sections you read): CLAUDE.md; docs/PROTOCOL_DA_PHIEN.md §4, §5, §7, §8, §8.3, §10, §12, §13; .claude/skills/work-packet/SKILL.md; docs/adr/0044, 0053, 0055, 0060, 0067.
+
+Authority (verify after `git fetch origin ops/wp1462-r1 master`): lease ops/leases/wp1462-r7-g1-claude.yaml; frozen spec ops/specs/wp1462-r1/SPEC.md sha256 b4520d256b0df5b4942462900570522fc7e9d9c0ee5ee6c0c19786013df7dbb3 (commit 9aac5aa); Mission r88 (https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7047934753). Follow the spec exactly; where unclear, stop and report rather than guess.
+
+Start: `git checkout -B agent/wp1462-r7-g1-claude 48d372e14f190dae83a75ccbca8ee9a0b25635c5` (origin/master at lease time). `git config core.abbrev 7`. Write set ONLY: .claude/dev/packet_loop.py, .claude/dev/packet_loop_test.py, ops/specs/wp1462-r1/ (new files; the spec itself is frozen — do not edit SPEC.md). One local commit (more only if needed, never rewrite). No push, no PR, no comments, no dispatch, no GitHub writes, no CI-skip marker, never set any Actions variable (B4 must not set CHO_PHEP). Do not self-review.
+
+Size (ADR-0044/0053; spec "Kích thước"): before finishing, measure `git diff --numstat 48d372e..HEAD`. If the delivered candidate exceeds 6 files or 450 added lines, STOP before review and report per-file numstat and the remaining work; do not cut cases or mutants to fit.
+
+Measure (positive evidence, not rc): python .claude/dev/packet_loop_test.py (N/N cases, mutants killed by their own case's exception class), the spec's acceptance items you can run locally (A/B byte-identity on existing kiem-merge cases, transport tests on loopback, etc.), Ruff F delta 0 vs 48d372e on changed .py, doctrine-scan / adr-song if touched. Long suites: run in background with logs outside the repo; poll; keep context small. Note: another writer (PR1) may be using CPU on this machine.
+
+Deliver the executor handoff YAML exactly per protocol §7 (status needs_followup, next_role reviewer, tested_sha = head, changed_paths = git diff --name-only 48d372e..HEAD, tests with command/rc/N/N, test_selection, §3.2.1 three-milestone table, start/end SHA/tree) saved OUTSIDE the repo at /tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/HANDOFF-attempt1.yaml; the size receipt (numstat per file, base, H, tree) also outside H. Final answer: commit SHA, diff stat, numstat totals, handoff path + sha256, acceptance table (command, rc, N/N), anything khong_do_duoc.

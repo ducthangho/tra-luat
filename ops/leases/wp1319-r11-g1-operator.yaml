@@ -29,8 +29,11 @@ recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-20T02:58:21Z'
 heartbeat_at: '2026-11-20T02:58:21Z'
-lease_until: '2026-11-20T06:58:21Z'
-lease_expires_at_utc: '2026-11-20T06:58:21Z'
+lease_until: '2026-11-20T04:11:15Z'
+lease_expires_at_utc: '2026-11-20T04:11:15Z'
 max_lease_hours: 4
 review_calls_limit: 2
 native_runs_limit_per_host: 0
+withdrawn_at_utc: '2026-11-20T04:11:15Z'
+withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r11 da merge (PR #1440, d8cf2ab), 4 moc §10.2.2 do xong; thu hoi som theo yeu cau chu kho 20/11 ("Sao khong thu hoi, rut ngan lease de lam tiep") de lap M8 dong #1319'

@@ -8,8 +8,8 @@
   "lease_id": "wp1166-r4-g5-claude",
   "granted_by": "ducthangho",
   "granted_on_instruction": "https://github.com/ducthangho/tra-luat/issues/1166#issuecomment-7004945240",
-  "lease_expires_at_utc": "2026-11-21T09:17:00Z",
-  "lease_until": "2026-11-21T09:17:00Z",
+  "lease_expires_at_utc": "2026-11-20T07:17:50Z",
+  "lease_until": "2026-11-20T07:17:50Z",
   "reviewed_sha_required": "417b59397669e6966da2b546537279d15e2ba0c0",
   "branch": "ops/wp1166-r4-g4",
   "role": "executor",
@@ -49,5 +49,18 @@
   "spec_hash": "565d2892b7c5656e8b97ac19fa71419077cfd0495f1ae4058d4994b7450c9097",
   "prompt_path": "ops/prompts/wp1166-r4-g5.txt",
   "prompt_sha256_required": "7cca780d34aee9bceb0dc7cdfc538fd3017bcf4f1d4ad4f640c9144aa5cdfbaa",
-  "branch_note": "H3 continues on PR #1412 (branch ops/wp1166-r4-g4, on top of H2 18d48b6 and the g4 tombstone f66373a); g5 metadata lives on ops/wp1166-r4-g5."
+  "branch_note": "H3 continues on PR #1412 (branch ops/wp1166-r4-g4, on top of H2 18d48b6 and the g4 tombstone f66373a); g5 metadata lives on ops/wp1166-r4-g5.",
+  "merge": {
+    "pr": 1412,
+    "merge_commit": "f8b9cdd81879f25c22709c60e62b69a9c314a472",
+    "accepted_sha": "b79cbf56a1696b44c38529275312287ca78ba91d"
+  },
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-21T09:17:00Z",
+    "han_moi_utc": "2026-11-20T07:17:50Z",
+    "nguoi_rut": "Claude Code coordinator (session 015GtxrYrYrjwBfHspZtYwc1) theo chi thi chu kho 2026-11-20",
+    "chi_thi": "Chu kho trong phien chat 2026-11-20: 'Rut lease som di'",
+    "ly_do": "PR0 #1166 da accepted (rev12) va PR #1412 da merge tai f8b9cdd tu 2026-11-19; lease con giu .github/workflows/ci-dot-bien-du.yml va .claude/dev/ci_dang_ky_test.py, trung write set co dieu kien cua PR1 #1448.",
+    "gioi_han": "Chi rut han; lich su va so lieu giu nguyen."
+  }
 }

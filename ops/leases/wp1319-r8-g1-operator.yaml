@@ -1,0 +1,37 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: wp1319
+revision: 8
+generation: 1
+lease_id: wp1319-r8-g1-operator
+role: operator
+executor: none
+reviewer: 'connector Codex tren PR'
+review_class: routine
+target_hosts:
+- f7281f27-f79f-40a2-a2f5-b454b58a166a
+- 7404cfba-9034-4787-b46b-7c358126a411
+live_change: 'khong — do chi doc duong mang ASUS -> VM va ten endpoint (khong xac thuc, khong goi HTTP)'
+spec_path: ops/specs/wp1319-r8.md
+spec_hash: 63201732be584ef90e9b4bcf0f5ae1fcb64461498b043ef22af496556c538df3
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r8/RESULTS.md
+- ops/leases/wp1319-r8-g1-operator.yaml
+- ops/specs/wp1319-r8.md
+write_set_hash: d95f4d634f232c4dadd1403dcb17d8bdb7d99bac501d5b628138698eaebdfd24
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: 711cb190daaa267cb919c10f4030d38172a37a93
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20/11: "Thu dung may ASUS di" (U11, tren cap do chi doc 19/11)'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T01:05:43Z'
+heartbeat_at: '2026-11-20T01:05:43Z'
+lease_until: '2026-11-20T05:05:43Z'
+lease_expires_at_utc: '2026-11-20T05:05:43Z'
+max_lease_hours: 4
+review_calls_limit: 0
+native_runs_limit_per_host: 2

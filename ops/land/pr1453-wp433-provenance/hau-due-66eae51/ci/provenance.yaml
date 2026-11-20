@@ -1,0 +1,2750 @@
+schema: ci_provenance/1
+cong_cu: ops/ci_provenance.py
+nguon: REST
+attempt_yeu_cau: 1
+moc:
+  run:
+    repo: ducthangho/tra-luat
+    run_id: 44717155521
+    run_attempt: 1
+    event: push
+    head_sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    loi_khai_rest_path: .github/workflows/ci.yml
+    check_suite_id: 121037440830
+    nguon: https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44717155521
+    thieu: []
+    lech: []
+    trang_thai: passed
+  checkout:
+  - job_id: 136223360130
+    name: chuan-bi
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482258
+    name: gate-ops (ubuntu-latest)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482355
+    name: gate-nhanh-manh (ubuntu-latest, 2)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482377
+    name: gate (ubuntu-latest)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482408
+    name: gate-nhanh-manh (ubuntu-latest, 5)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482439
+    name: gate-cong-cu (ubuntu-latest, 0)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482441
+    name: gate-cong-cu (ubuntu-latest, 2)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482444
+    name: gate-nhanh-manh (ubuntu-latest, 0)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482447
+    name: gate-cong-cu (ubuntu-latest, 3)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482473
+    name: gate-cong-cu (ubuntu-latest, 6)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482474
+    name: gate-cong-cu (ubuntu-latest, 5)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482475
+    name: gate-nhanh-manh (ubuntu-latest, 7)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482480
+    name: gate-cong-cu (ubuntu-latest, 4)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482515
+    name: gate-cong-cu (ubuntu-latest, 7)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482516
+    name: gate-cong-cu (ubuntu-latest, 1)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482535
+    name: gate-nhanh-manh (ubuntu-latest, 1)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482549
+    name: gate-nhanh-manh (ubuntu-latest, 3)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482550
+    name: gate-packet-loop-manh (ubuntu-latest, 3)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482553
+    name: gate-nhanh-manh (ubuntu-latest, 6)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482563
+    name: gate-packet-loop-manh (ubuntu-latest, 4)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482582
+    name: gate-packet-loop-manh (ubuntu-latest, 10)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482610
+    name: gate-packet-loop-manh (ubuntu-latest, 13)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482612
+    name: gate-packet-loop-manh (ubuntu-latest, 5)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482648
+    name: gate-packet-loop-manh (ubuntu-latest, 2)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482677
+    name: gate-packet-loop-manh (ubuntu-latest, 12)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482688
+    name: gate-packet-loop-manh (ubuntu-latest, 6)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482697
+    name: gate-packet-loop-manh (ubuntu-latest, 8)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482700
+    name: gate-packet-loop-manh (ubuntu-latest, 0)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482710
+    name: gate-packet-loop-manh (ubuntu-latest, 9)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482718
+    name: gate-packet-loop-manh (ubuntu-latest, 7)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482767
+    name: gate-packet-loop-manh (ubuntu-latest, 11)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482773
+    name: gate-packet-loop-manh (ubuntu-latest, 1)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482814
+    name: gate-packet-loop-manh (ubuntu-latest, 14)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482833
+    name: gate-nhanh-manh (ubuntu-latest, 4)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136223482885
+    name: gate-packet-loop-manh (ubuntu-latest, 15)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136224246657
+    name: gate-nhanh-gop (ubuntu-latest)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136224389545
+    name: gate-registry (ubuntu-latest)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136226229347
+    name: gate-packet-loop (ubuntu-latest)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  - job_id: 136234010610
+    name: gate-cong-cu-gop (ubuntu-latest)
+    dong_sha:
+    - 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    sha: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    parents:
+    - 00ee83998487d289324566f230b67b5923a9a9d9
+    - 31d68ef2ff399692f20a86b0abf5db1064b21f01
+    tree: fd7311b450cad385835161665dbeb63e17418933
+    trang_thai: passed
+    doi_chieu: sha_bang_head_sha
+  gate_output:
+    jobs:
+    - job_id: 136223360130
+      name: chuan-bi
+      check_run_id: '136223360130'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055432
+      runner_name: GitHub Actions 1000055432
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: phan loai diff (duong nhanh ho so)
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python3 ops/ci_duong_nhanh.py
+        duong_dan: ops/ci_duong_nhanh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 2
+      kich_ban:
+        buoc_xac_thuc: 1
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482258
+      name: gate-ops (ubuntu-latest)
+      check_run_id: '136223482258'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055440
+      runner_name: GitHub Actions 1000055440
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-ops)
+        conclusion: skipped
+      - name: DUONG_NHANH - kiem re thay cho buoc bi bo (doctrine-scan, YAML, diff
+          --check, lease check)
+        conclusion: skipped
+      - name: ci-duong-nhanh selftest (phan loai diff + khoa cau truc if)
+        conclusion: success
+      - name: bien-nhan v2 selftest
+        conclusion: success
+      - name: lease-publish selftest (đo lại setup sau G5)
+        conclusion: success
+      - name: don-nhanh selftest (chốt xoá nhánh)
+        conclusion: success
+      - name: bo ca gate chay TRONG cgroup duoc uy quyen (Linux)
+        conclusion: success
+      - name: gate lifecycle selftest (nen khong co cgroup)
+        conclusion: skipped
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python ops/ci_duong_nhanh_test.py
+        duong_dan: ops/ci_duong_nhanh_test.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      - lenh: python ops/bien_nhan_v2_test.py
+        duong_dan: ops/bien_nhan_v2_test.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 11
+      kich_ban:
+        buoc_xac_thuc: 9
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482355
+      name: gate-nhanh-manh (ubuntu-latest, 2)
+      check_run_id: '136223482355'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055443
+      runner_name: GitHub Actions 1000055443
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)
+        conclusion: skipped
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python ops/nhanh_don_duoc_test.py
+        duong_dan: ops/nhanh_don_duoc_test.py
+        trang_thai: not_measured
+        ly_do: che_do_khong_xac_dinh
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 5
+      kich_ban:
+        buoc_xac_thuc: 2
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482377
+      name: gate (ubuntu-latest)
+      check_run_id: '136223482377'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055446
+      runner_name: GitHub Actions 1000055446
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 kiem ban ke cong cu + T1..T8 (packet
+        conclusion: success
+      - name: cài Ruff 0.15.15 và in probe dương
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate)
+        conclusion: skipped
+      - name: PR head contains required EOL base
+        conclusion: skipped
+      - name: py_compile
+        conclusion: success
+      - name: 'codex credential selftest (packet #300)'
+        conclusion: success
+      - name: idiom-ba-ten selftest
+        conclusion: success
+      - name: eol-policy selftest
+        conclusion: success
+      - name: pre-push selftest
+        conclusion: success
+      - name: eol-policy survey
+        conclusion: success
+      - name: bundled-fragment check (topology gói)
+        conclusion: success
+      - name: gen_instructions selftest
+        conclusion: success
+      - name: command-registry unit test (AG-T0-03)
+        conclusion: success
+      - name: tl selftest (luot PR — khong sinh bang chung)
+        conclusion: skipped
+      - name: tl selftest (co bang chung exact-identity)
+        conclusion: success
+      - name: tai len gate-evidence
+        conclusion: success
+      - name: workflow-audit strict
+        conclusion: success
+      - name: golden-test
+        conclusion: success
+      - name: doc-claims-check strict
+        conclusion: success
+      - name: determinism-audit strict
+        conclusion: success
+      - name: ci-phamvi guard (bang phu thuoc khop ma)
+        conclusion: success
+      - name: ci-phamvi selftest (phan chung — cong co rang)
+        conclusion: success
+      - name: release-check full
+        conclusion: success
+      - name: release-verify strict (lane LAND — manifest committed)
+        conclusion: success
+      - name: release-verify strict (lane WORKER — manifest TẠM ngoài repo)
+        conclusion: skipped
+      - name: release-bundle x2 cùng SHA-256
+        conclusion: success
+      - name: tl_boot smoke
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/codex_cred_test.py
+        duong_dan: .claude/dev/codex_cred_test.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      - lenh: python .claude/dev/idiom_py_test.py
+        duong_dan: .claude/dev/idiom_py_test.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      - lenh: python .githooks/eol_policy_test.py
+        duong_dan: .githooks/eol_policy_test.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      - lenh: python .githooks/pre_push_test.py
+        duong_dan: .githooks/pre_push_test.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      - lenh: python scripts/tl_core/command_registry_test.py
+        duong_dan: scripts/tl_core/command_registry_test.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      - lenh: python .github/checks/ci_phamvi_test.py
+        duong_dan: .github/checks/ci_phamvi_test.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 30
+      kich_ban:
+        buoc_xac_thuc: 27
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482408
+      name: gate-nhanh-manh (ubuntu-latest, 5)
+      check_run_id: '136223482408'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055445
+      runner_name: GitHub Actions 1000055445
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)
+        conclusion: skipped
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python ops/nhanh_don_duoc_test.py
+        duong_dan: ops/nhanh_don_duoc_test.py
+        trang_thai: not_measured
+        ly_do: che_do_khong_xac_dinh
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 5
+      kich_ban:
+        buoc_xac_thuc: 2
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482439
+      name: gate-cong-cu (ubuntu-latest, 0)
+      check_run_id: '136223482439'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055454
+      runner_name: GitHub Actions 1000055454
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 manh ban kinh dot bien (#668)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 9
+      kich_ban:
+        buoc_xac_thuc: 6
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482441
+      name: gate-cong-cu (ubuntu-latest, 2)
+      check_run_id: '136223482441'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055456
+      runner_name: GitHub Actions 1000055456
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 manh ban kinh dot bien (#668)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 9
+      kich_ban:
+        buoc_xac_thuc: 6
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482444
+      name: gate-nhanh-manh (ubuntu-latest, 0)
+      check_run_id: '136223482444'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055434
+      runner_name: GitHub Actions 1000055434
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)
+        conclusion: skipped
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python ops/nhanh_don_duoc_test.py
+        duong_dan: ops/nhanh_don_duoc_test.py
+        trang_thai: not_measured
+        ly_do: che_do_khong_xac_dinh
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 5
+      kich_ban:
+        buoc_xac_thuc: 2
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482447
+      name: gate-cong-cu (ubuntu-latest, 3)
+      check_run_id: '136223482447'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055433
+      runner_name: GitHub Actions 1000055433
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 manh ban kinh dot bien (#668)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 9
+      kich_ban:
+        buoc_xac_thuc: 6
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482473
+      name: gate-cong-cu (ubuntu-latest, 6)
+      check_run_id: '136223482473'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055441
+      runner_name: GitHub Actions 1000055441
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 manh ban kinh dot bien (#668)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 9
+      kich_ban:
+        buoc_xac_thuc: 6
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482474
+      name: gate-cong-cu (ubuntu-latest, 5)
+      check_run_id: '136223482474'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055442
+      runner_name: GitHub Actions 1000055442
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 manh ban kinh dot bien (#668)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 9
+      kich_ban:
+        buoc_xac_thuc: 6
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482475
+      name: gate-nhanh-manh (ubuntu-latest, 7)
+      check_run_id: '136223482475'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055436
+      runner_name: GitHub Actions 1000055436
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)
+        conclusion: skipped
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python ops/nhanh_don_duoc_test.py
+        duong_dan: ops/nhanh_don_duoc_test.py
+        trang_thai: not_measured
+        ly_do: che_do_khong_xac_dinh
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 5
+      kich_ban:
+        buoc_xac_thuc: 2
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482480
+      name: gate-cong-cu (ubuntu-latest, 4)
+      check_run_id: '136223482480'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055455
+      runner_name: GitHub Actions 1000055455
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 manh ban kinh dot bien (#668)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 9
+      kich_ban:
+        buoc_xac_thuc: 6
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482515
+      name: gate-cong-cu (ubuntu-latest, 7)
+      check_run_id: '136223482515'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055435
+      runner_name: GitHub Actions 1000055435
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 manh ban kinh dot bien (#668)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 9
+      kich_ban:
+        buoc_xac_thuc: 6
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482516
+      name: gate-cong-cu (ubuntu-latest, 1)
+      check_run_id: '136223482516'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055439
+      runner_name: GitHub Actions 1000055439
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 manh ban kinh dot bien (#668)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 9
+      kich_ban:
+        buoc_xac_thuc: 6
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482535
+      name: gate-nhanh-manh (ubuntu-latest, 1)
+      check_run_id: '136223482535'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055458
+      runner_name: GitHub Actions 1000055458
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)
+        conclusion: skipped
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python ops/nhanh_don_duoc_test.py
+        duong_dan: ops/nhanh_don_duoc_test.py
+        trang_thai: not_measured
+        ly_do: che_do_khong_xac_dinh
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 5
+      kich_ban:
+        buoc_xac_thuc: 2
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482549
+      name: gate-nhanh-manh (ubuntu-latest, 3)
+      check_run_id: '136223482549'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055457
+      runner_name: GitHub Actions 1000055457
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)
+        conclusion: skipped
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python ops/nhanh_don_duoc_test.py
+        duong_dan: ops/nhanh_don_duoc_test.py
+        trang_thai: not_measured
+        ly_do: che_do_khong_xac_dinh
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 5
+      kich_ban:
+        buoc_xac_thuc: 2
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482550
+      name: gate-packet-loop-manh (ubuntu-latest, 3)
+      check_run_id: '136223482550'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055438
+      runner_name: GitHub Actions 1000055438
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482553
+      name: gate-nhanh-manh (ubuntu-latest, 6)
+      check_run_id: '136223482553'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055444
+      runner_name: GitHub Actions 1000055444
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)
+        conclusion: skipped
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python ops/nhanh_don_duoc_test.py
+        duong_dan: ops/nhanh_don_duoc_test.py
+        trang_thai: not_measured
+        ly_do: che_do_khong_xac_dinh
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 5
+      kich_ban:
+        buoc_xac_thuc: 2
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482563
+      name: gate-packet-loop-manh (ubuntu-latest, 4)
+      check_run_id: '136223482563'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055448
+      runner_name: GitHub Actions 1000055448
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482582
+      name: gate-packet-loop-manh (ubuntu-latest, 10)
+      check_run_id: '136223482582'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055450
+      runner_name: GitHub Actions 1000055450
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482610
+      name: gate-packet-loop-manh (ubuntu-latest, 13)
+      check_run_id: '136223482610'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055437
+      runner_name: GitHub Actions 1000055437
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482612
+      name: gate-packet-loop-manh (ubuntu-latest, 5)
+      check_run_id: '136223482612'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055451
+      runner_name: GitHub Actions 1000055451
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482648
+      name: gate-packet-loop-manh (ubuntu-latest, 2)
+      check_run_id: '136223482648'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055453
+      runner_name: GitHub Actions 1000055453
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482677
+      name: gate-packet-loop-manh (ubuntu-latest, 12)
+      check_run_id: '136223482677'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055466
+      runner_name: GitHub Actions 1000055466
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482688
+      name: gate-packet-loop-manh (ubuntu-latest, 6)
+      check_run_id: '136223482688'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055461
+      runner_name: GitHub Actions 1000055461
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482697
+      name: gate-packet-loop-manh (ubuntu-latest, 8)
+      check_run_id: '136223482697'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055447
+      runner_name: GitHub Actions 1000055447
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482700
+      name: gate-packet-loop-manh (ubuntu-latest, 0)
+      check_run_id: '136223482700'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055462
+      runner_name: GitHub Actions 1000055462
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482710
+      name: gate-packet-loop-manh (ubuntu-latest, 9)
+      check_run_id: '136223482710'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055460
+      runner_name: GitHub Actions 1000055460
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482718
+      name: gate-packet-loop-manh (ubuntu-latest, 7)
+      check_run_id: '136223482718'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055449
+      runner_name: GitHub Actions 1000055449
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482767
+      name: gate-packet-loop-manh (ubuntu-latest, 11)
+      check_run_id: '136223482767'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055465
+      runner_name: GitHub Actions 1000055465
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482773
+      name: gate-packet-loop-manh (ubuntu-latest, 1)
+      check_run_id: '136223482773'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055463
+      runner_name: GitHub Actions 1000055463
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482814
+      name: gate-packet-loop-manh (ubuntu-latest, 14)
+      check_run_id: '136223482814'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055452
+      runner_name: GitHub Actions 1000055452
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482833
+      name: gate-nhanh-manh (ubuntu-latest, 4)
+      check_run_id: '136223482833'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055459
+      runner_name: GitHub Actions 1000055459
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-manh)
+        conclusion: skipped
+      - name: chạy mảnh nhanh_don_duoc (targeted_mutant_gate)
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python ops/nhanh_don_duoc_test.py
+        duong_dan: ops/nhanh_don_duoc_test.py
+        trang_thai: not_measured
+        ly_do: che_do_khong_xac_dinh
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 5
+      kich_ban:
+        buoc_xac_thuc: 2
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136223482885
+      name: gate-packet-loop-manh (ubuntu-latest, 15)
+      check_run_id: '136223482885'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055464
+      runner_name: GitHub Actions 1000055464
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: packet-loop selftest
+        conclusion: success
+      - name: Run actions/upload-artifact@v4
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong:
+      - lenh: python .claude/dev/packet_loop_test_manh.py
+        duong_dan: .claude/dev/packet_loop_test_manh.py
+        trang_thai: not_measured
+        ly_do: khong_co_trong_MOI
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 7
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136224246657
+      name: gate-nhanh-gop (ubuntu-latest)
+      check_run_id: '136224246657'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055467
+      runner_name: GitHub Actions 1000055467
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: DUONG_NHANH - gom KHONG DO (job gate-nhanh-gop)
+        conclusion: skipped
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-nhanh-gop)
+        conclusion: skipped
+      - name: Run actions/download-artifact@v4
+        conclusion: success
+      - name: gộp mảnh nhanh_don_duoc (targeted_mutant_gate)
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 5
+      kich_ban:
+        buoc_xac_thuc: 2
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136224389545
+      name: gate-registry (ubuntu-latest)
+      check_run_id: '136224389545'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055468
+      runner_name: GitHub Actions 1000055468
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: DUONG_NHANH - liet ke buoc bo qua (job gate-registry)
+        conclusion: skipped
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: cài actionlint cho G5
+        conclusion: success
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: cài rg cho G5 (cài xong đo lại)
+        conclusion: success
+      - name: G5 probe ban ke cong cu (#290; selftest T1..T8 chi o job gate, chot
+          M6
+        conclusion: success
+      - name: cài Ruff 0.15.15 và in probe dương
+        conclusion: success
+      - name: test registry (phạm vi + các bộ chưa được nối)
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 10
+      kich_ban:
+        buoc_xac_thuc: 8
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136226229347
+      name: gate-packet-loop (ubuntu-latest)
+      check_run_id: '136226229347'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055507
+      runner_name: GitHub Actions 1000055507
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: Run actions/download-artifact@v4
+        conclusion: success
+      - name: gom manh packet-loop (so TAP ca; wp1343)
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 5
+      kich_ban:
+        buoc_xac_thuc: 2
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    - job_id: 136234010610
+      name: gate-cong-cu-gop (ubuntu-latest)
+      check_run_id: '136234010610'
+      labels:
+      - ubuntu-latest
+      runner_id: 1000055511
+      runner_name: GitHub Actions 1000055511
+      conclusion: success
+      buoc:
+      - name: Set up job
+        conclusion: success
+      - name: Force LF checkout (hash parity với manifest)
+        conclusion: success
+      - name: Run actions/checkout@v4
+        conclusion: success
+      - name: Run actions/setup-python@v5
+        conclusion: success
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        conclusion: success
+      - name: Run actions/download-artifact@v4
+        conclusion: success
+      - name: G5 gom manh ban kinh dot bien (#668)
+        conclusion: success
+      - name: Post Run actions/setup-python@v5
+        conclusion: success
+      - name: Post Run actions/checkout@v4
+        conclusion: success
+      - name: Complete job
+        conclusion: success
+      image: ubuntu-26.04
+      dau_duong: []
+      thieu: []
+      ghep_buoc:
+        trang_thai: passed
+        so_buoc: 6
+      kich_ban:
+        buoc_xac_thuc: 3
+        trang_thai: passed
+        nguon: run_tai_sha_checkout
+      trang_thai: not_measured
+    tap_jobs:
+      trang_thai: passed
+      total_count: 39
+      so_id: 39
+      truong_sai: []
+    tap_artifacts:
+      trang_thai: passed
+      total_count: 33
+      so_id: 33
+      truong_sai: []
+    artifacts:
+    - id: 14621251387
+      name: gate-cong-cu-manh-ubuntu-latest-7
+      digest: sha256:40443760e5466671ac6a385ec352d4f03df74ce3a1b30024ec77614c74cb7f2b
+      size_in_bytes: 22790
+      expired: false
+    - id: 14621157340
+      name: gate-evidence-ubuntu-latest-1
+      digest: sha256:420748b7cfc3681325baec6efbac796062defa27a489a484042ecadd52cd4eea
+      size_in_bytes: 25402
+      expired: false
+    - id: 14621096401
+      name: gate-cong-cu-manh-ubuntu-latest-4
+      digest: sha256:082e54f0239a14986b41e7ec1598275bb61357244b4e22f9028b78277d01fe56
+      size_in_bytes: 26340
+      expired: false
+    - id: 14620952714
+      name: gate-cong-cu-manh-ubuntu-latest-1
+      digest: sha256:8d231de9e813b6ca2e1377624b1f76e1beb4d69d439078b48a74866deab2e9d7
+      size_in_bytes: 24358
+      expired: false
+    - id: 14620948871
+      name: gate-cong-cu-manh-ubuntu-latest-2
+      digest: sha256:c0a28cf7bf18f0b80da4b0ffbaf2f15762bab31c9990285ec19d5251bbc8adc6
+      size_in_bytes: 15826
+      expired: false
+    - id: 14620885235
+      name: gate-packet-loop-manh-ubuntu-latest-11
+      digest: sha256:efde54119efb20691ffb6516c45ed0d59236aac4a780c8d2547bf59f752a6239
+      size_in_bytes: 1416
+      expired: false
+    - id: 14620875607
+      name: gate-packet-loop-manh-ubuntu-latest-0
+      digest: sha256:d1dfc728f84c572ef6652881e94e24925b03c885954944a05bd25bf51332e31e
+      size_in_bytes: 1115
+      expired: false
+    - id: 14620862188
+      name: gate-cong-cu-manh-ubuntu-latest-5
+      digest: sha256:96440c3f7747f511d469c4251a9bccd63c141298829a6cc52417e533e26feb43
+      size_in_bytes: 28018
+      expired: false
+    - id: 14620797605
+      name: gate-cong-cu-manh-ubuntu-latest-3
+      digest: sha256:f5b055d53f0797bfe143c518e557b02e7ff0cb089d34d372202c6dbc349918de
+      size_in_bytes: 24561
+      expired: false
+    - id: 14620780741
+      name: gate-packet-loop-manh-ubuntu-latest-13
+      digest: sha256:6a27c6cf8fb56af4ebeac6df98209190381ced4339fc30c80a544675c848b077
+      size_in_bytes: 1365
+      expired: false
+    - id: 14620775645
+      name: gate-packet-loop-manh-ubuntu-latest-1
+      digest: sha256:b0f1a054fe21b605875bcc2505bdc2c2fc55339e00189f0e9f30104971c5194e
+      size_in_bytes: 573
+      expired: false
+    - id: 14620735531
+      name: gate-packet-loop-manh-ubuntu-latest-10
+      digest: sha256:71a09844a2edab7f631e418fe638920fbabc6d5b0284f165c61d15adf4df91d0
+      size_in_bytes: 1350
+      expired: false
+    - id: 14620710678
+      name: gate-packet-loop-manh-ubuntu-latest-12
+      digest: sha256:561f7de7e2d54f328c1d054af38cb9cc35f17e9e6f1460ee8f5b6a2d8f4d0400
+      size_in_bytes: 1386
+      expired: false
+    - id: 14620695434
+      name: gate-nhanh-ubuntu-latest-7
+      digest: sha256:097dae0347273539d8321a7149d12d52e7a85f28d2186568aa447b2e326aee4a
+      size_in_bytes: 2479
+      expired: false
+    - id: 14620675213
+      name: gate-nhanh-ubuntu-latest-3
+      digest: sha256:6411128bb0412c735a9aabed49ca683f8ed508a0f976e5b6bccf1b835e7a0146
+      size_in_bytes: 2431
+      expired: false
+    - id: 14620500708
+      name: gate-nhanh-ubuntu-latest-5
+      digest: sha256:c1e85dac610cb403d65a9f40682f713d9a559fecf626ec5d7a4e961a7f6ec584
+      size_in_bytes: 2521
+      expired: false
+    - id: 14620473728
+      name: gate-cong-cu-manh-ubuntu-latest-6
+      digest: sha256:77bef8c4ba990129202ac080cde4d51737c9c4661cc1bbbdb7e9a1556cabaac6
+      size_in_bytes: 16752
+      expired: false
+    - id: 14620430922
+      name: gate-packet-loop-manh-ubuntu-latest-7
+      digest: sha256:d215dd4e0320885b4b8cbe904e308076fa5ec0dfce83f414f354356b219f1670
+      size_in_bytes: 1365
+      expired: false
+    - id: 14620244121
+      name: gate-cong-cu-manh-ubuntu-latest-0
+      digest: sha256:e3467226701abcb822f38b74659454c8e273d7802a5d2ff0cb9b9bea17abb757
+      size_in_bytes: 20885
+      expired: false
+    - id: 14620127012
+      name: gate-packet-loop-manh-ubuntu-latest-14
+      digest: sha256:6058dcb1ebb4e7148667ad6dcdc9fdccb5998c76eeb54bd37f63a673274beb48
+      size_in_bytes: 1406
+      expired: false
+    - id: 14620121770
+      name: gate-packet-loop-manh-ubuntu-latest-15
+      digest: sha256:32d9969cf44cd3f14be5ed3a6496a176cd5361f0a10687cff491550be5ba848c
+      size_in_bytes: 1391
+      expired: false
+    - id: 14620081671
+      name: gate-nhanh-ubuntu-latest-6
+      digest: sha256:e1caa79862456cd5af67294d793a0d3d2302cf8b55e3dba8c2f571e3a1e68558
+      size_in_bytes: 2423
+      expired: false
+    - id: 14619807801
+      name: gate-packet-loop-manh-ubuntu-latest-2
+      digest: sha256:10fb75c9bbf684ec981404d22c62ed67b6b6ef18969e36e5490534290fa03460
+      size_in_bytes: 1433
+      expired: false
+    - id: 14619569116
+      name: gate-packet-loop-manh-ubuntu-latest-5
+      digest: sha256:9f330599b2384bf6dcc0391f4ede309ba1cf6cba2a77c2ebf02fb66c391f663b
+      size_in_bytes: 1406
+      expired: false
+    - id: 14619489292
+      name: gate-packet-loop-manh-ubuntu-latest-6
+      digest: sha256:d97591428689e661a247302ce5da6c95cdb4bae7843ab23343fcbde9bf2022d5
+      size_in_bytes: 1378
+      expired: false
+    - id: 14619484451
+      name: gate-packet-loop-manh-ubuntu-latest-8
+      digest: sha256:9618eb98a304e5461934d4b1c37edc7a184a3f88b6795b0b158817b5120933a3
+      size_in_bytes: 1351
+      expired: false
+    - id: 14619473622
+      name: gate-packet-loop-manh-ubuntu-latest-9
+      digest: sha256:82e346a2198a9c5c28a889d474c3c58b1afb5b9e647e112826345c2e92fe4485
+      size_in_bytes: 1398
+      expired: false
+    - id: 14619438774
+      name: gate-packet-loop-manh-ubuntu-latest-3
+      digest: sha256:225ea8579774f7d8304c2c4101c6022812b9e117d77ff3115412197437c05c48
+      size_in_bytes: 1378
+      expired: false
+    - id: 14619429938
+      name: gate-packet-loop-manh-ubuntu-latest-4
+      digest: sha256:e8a463e982990b98aaa705688e02a7240fa99568baa57918d87ac3af4f64a24e
+      size_in_bytes: 1391
+      expired: false
+    - id: 14619419373
+      name: gate-nhanh-ubuntu-latest-0
+      digest: sha256:4fde44aaf26ce391447fba9f8950beac1632382feb6262ede6e67b5163c1d063
+      size_in_bytes: 2301
+      expired: false
+    - id: 14619309794
+      name: gate-nhanh-ubuntu-latest-4
+      digest: sha256:d4dc2af108bf46d87f5bb2afeb402d1f6f5dbd026a1956888555f60a5f196328
+      size_in_bytes: 2351
+      expired: false
+    - id: 14619249974
+      name: gate-nhanh-ubuntu-latest-2
+      digest: sha256:7be86a03db6f06ccdfd58ca7d5621b2c4600cb522f2c232b5ba9dab524c8b3e8
+      size_in_bytes: 2355
+      expired: false
+    - id: 14619144190
+      name: gate-nhanh-ubuntu-latest-1
+      digest: sha256:76e4aa66d28156a0d37a6798a8e48c4255391ed9dedb017fef56d3c861fc2ffb
+      size_in_bytes: 2466
+      expired: false
+  workflow_definition:
+    trang_thai: passed
+    path: .github/workflows/ci.yml
+    oid: 66eae513b5e7a2263038ebce7e009e8d2fe52578
+    blob: a1db88d9433fd548e36dcd598a63135f5fac7b73
+    sha256: d1201a7691f1ece1de20f7616c0f2034ec14a9d8632ae23584091291407182f5
+    wd_run_id: 44722152863
+    artifact_id: 14621054848
+    artifact_sha256: 0162d773b08ddeead03eb454ec9589a6c702810045f397ae36cc2e998ced10ae
+    nguon: https://api.github.com/repos/ducthangho/tra-luat/actions/runs/44722152863
+log_day_du:
+  136223360130:
+    sha256: a5ff9574623863fe3c082ec1be1c133a5eec7db22c83be68203f69da53cba584
+    bytes: 141033
+    trich: jobs/136223360130.trich.txt
+  136223482258:
+    sha256: 1689cab8323f6667fb2692952887db1351476b83b9d2ba4463ae7bbf7e8ec770
+    bytes: 536764
+    trich: jobs/136223482258.trich.txt
+  136223482355:
+    sha256: 6953400608d7de1b09dc40d35fb9afa5024a41fff479475a7ef1800ca3eb577b
+    bytes: 152345
+    trich: jobs/136223482355.trich.txt
+  136223482377:
+    sha256: edfd816c5dc8698a1a70877ee1a1de5149f88ac31fd89ed63f31c0fb285b88ba
+    bytes: 741165
+    trich: jobs/136223482377.trich.txt
+  136223482408:
+    sha256: c8749997f71cead23b4d61af6ac0c570780c5ddfc1e9133573e648fbf776aafa
+    bytes: 153012
+    trich: jobs/136223482408.trich.txt
+  136223482439:
+    sha256: c2ceba6eccade69abc93bacbc8c2cbc924c99165bfe4833b7e0d39ef6326fb73
+    bytes: 164780
+    trich: jobs/136223482439.trich.txt
+  136223482441:
+    sha256: d61a2b3cdbe4f86bf364f88ffc1b6f89aefbe18c8b371aa87cccf5bc4d787cf5
+    bytes: 165766
+    trich: jobs/136223482441.trich.txt
+  136223482444:
+    sha256: 31d2138ee3a52a088e2e7d0ae49fad6c877b820c661ef7827a285ab5a9da150f
+    bytes: 152532
+    trich: jobs/136223482444.trich.txt
+  136223482447:
+    sha256: 00f6523ff9730bbd4c16b0ba1295bcc8fab14c8854161348cb1012a2521e9883
+    bytes: 164156
+    trich: jobs/136223482447.trich.txt
+  136223482473:
+    sha256: 2e75b0e5ee9dfdda521aa2aabca4e1779bcbe074c6758a3db3e191382fe788a7
+    bytes: 164469
+    trich: jobs/136223482473.trich.txt
+  136223482474:
+    sha256: 71d0badb5a09419c382fc70c8137b4863cb6f9e700322ba38b9103a1bade5a00
+    bytes: 164048
+    trich: jobs/136223482474.trich.txt
+  136223482475:
+    sha256: bf88181dea53bc1dc909aaa5db537fb78e9a0d2ef691b5c47b2ffaff552cf9d3
+    bytes: 153720
+    trich: jobs/136223482475.trich.txt
+  136223482480:
+    sha256: 360fdbb227004334f10c9bba7113a67b9f7f1c1fc686a66a367c91f31b8af9b3
+    bytes: 164199
+    trich: jobs/136223482480.trich.txt
+  136223482515:
+    sha256: a2bbd33c5064542ea11e0bb007537d2c3a5378a3ab05a7a8eebd267881d793ff
+    bytes: 164370
+    trich: jobs/136223482515.trich.txt
+  136223482516:
+    sha256: f8b2edea83fad41e775350fbd995325a4d864304023c7a4b7dc0b45d68f61a86
+    bytes: 164904
+    trich: jobs/136223482516.trich.txt
+  136223482535:
+    sha256: 78f3d8f3885d6efa90e284cba1edd8e17f5ca85d627f2a242156bc8af7e115f0
+    bytes: 154418
+    trich: jobs/136223482535.trich.txt
+  136223482549:
+    sha256: 36641a7212a632d1307d68802068c4c61d3ced33937ff6061704b7ff82c564d4
+    bytes: 153656
+    trich: jobs/136223482549.trich.txt
+  136223482550:
+    sha256: d141e065fae8d9a21b094a18c76fe8177f3d1add006741078ba2da8e7148cafd
+    bytes: 158512
+    trich: jobs/136223482550.trich.txt
+  136223482553:
+    sha256: 9771efcc9c0c0a154f8b80537a290841e79a8dcd6e727010ff1208e2bc8d49db
+    bytes: 152719
+    trich: jobs/136223482553.trich.txt
+  136223482563:
+    sha256: 698fbfed68ef7f95232c9aa5f5dc8d86ae8e856e4e7774657e7abf5a59f7c0f3
+    bytes: 158658
+    trich: jobs/136223482563.trich.txt
+  136223482582:
+    sha256: c5f35f23a09ca34ffee44e0e121d528dafd92fe32099c762a84e20ea0caa68c0
+    bytes: 157676
+    trich: jobs/136223482582.trich.txt
+  136223482610:
+    sha256: 7e3734105fa5d9fd191411f35d7f8e5ad0e1ecadd6b1c68bdb1caeb5d474b1ac
+    bytes: 157690
+    trich: jobs/136223482610.trich.txt
+  136223482612:
+    sha256: 394b5d8a7ea9f2e2acf8275890c889eb422a31a0073e8cd220f8f0ff2e3123dd
+    bytes: 158319
+    trich: jobs/136223482612.trich.txt
+  136223482648:
+    sha256: 2b46333610d10204a0029a5886f9b2bbe728ae285a50f655a9f582578427650c
+    bytes: 156830
+    trich: jobs/136223482648.trich.txt
+  136223482677:
+    sha256: b43bf0d999ad7093b17c2b02b4b322f3049d96154c67de2283cad47796477c77
+    bytes: 157258
+    trich: jobs/136223482677.trich.txt
+  136223482688:
+    sha256: 1dbcd768d031f0b1b0fe87e5e62ec8341a4a9057c5675bc0525ea61637e4c8be
+    bytes: 157382
+    trich: jobs/136223482688.trich.txt
+  136223482697:
+    sha256: c93118687d0a9e28c7581d8812631da3fbb8cdc72211cf52bde22a36ac0d84d3
+    bytes: 158927
+    trich: jobs/136223482697.trich.txt
+  136223482700:
+    sha256: 75f3dcc9085d48115d5e35e9435de67239b26ea5702de0c4001b187a32962200
+    bytes: 176834
+    trich: jobs/136223482700.trich.txt
+  136223482710:
+    sha256: 0f2987d72a5e86fc30f709aa936ff69b1b74e9a81f57b054ad8f0f0c995b2bbe
+    bytes: 157706
+    trich: jobs/136223482710.trich.txt
+  136223482718:
+    sha256: 2301c4078e1d1fdcdd99cf09ca1a12d969fd55031434b9090a0c86b94b793565
+    bytes: 158600
+    trich: jobs/136223482718.trich.txt
+  136223482767:
+    sha256: 3e02d2a7f97e2a032f86837706269d7727c84a85c04dedc852d22336897f6a61
+    bytes: 157116
+    trich: jobs/136223482767.trich.txt
+  136223482773:
+    sha256: a77a090b1111b7d9537e6bea2142beea37887255219bfe7cd81e50d9bf9094ce
+    bytes: 158529
+    trich: jobs/136223482773.trich.txt
+  136223482814:
+    sha256: 5da2b1f37e115270e65e8dc1306a90b69e73181bf494ce3f3f2f3cc3ff020b0f
+    bytes: 157529
+    trich: jobs/136223482814.trich.txt
+  136223482833:
+    sha256: d7eb1ca8c36a1775173d929b8252b6312a3f6a27dfd1e43be67b73bd2fd2de0f
+    bytes: 152650
+    trich: jobs/136223482833.trich.txt
+  136223482885:
+    sha256: 478222a1a3e5de8bfb6a4911a68e2438954eb96e8aadf0fad268a727dee35780
+    bytes: 157295
+    trich: jobs/136223482885.trich.txt
+  136224246657:
+    sha256: 9b7629d6461af6470ccf8dbeba8e4b236ed6ed7bc55896378b8f01ca140eccba
+    bytes: 149573
+    trich: jobs/136224246657.trich.txt
+  136224389545:
+    sha256: bbfec8e08d67e81775d98ff504b14bb8a9a25c7dbac405a4848be5d6d29ca947
+    bytes: 306644
+    trich: jobs/136224389545.trich.txt
+  136226229347:
+    sha256: 065e83207fc383d971cade88544dfec1e65b10342a51cfae530aafe21d6905b3
+    bytes: 29975
+    trich: jobs/136226229347.trich.txt
+  136234010610:
+    sha256: 335900f003574e396ab48dd5cd5f5816fd22d6b49961ae971ee1300bf2d3757f
+    bytes: 99499
+    trich: jobs/136234010610.trich.txt

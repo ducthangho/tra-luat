@@ -1,0 +1,29 @@
+# do 2026-11-20T10:50:57Z, clone moi tu origin; core.abbrev 7
+## rev-parse merge / tree / cha
+00ee83998487d289324566f230b67b5923a9a9d9
+d509c77727c4d1fa20e039220f5da2c06f611a86
+45bae8d07a8cdf06a1ca9a7a2e015a6258169379 4e9306b668cac7797b9cd952b8699c4da603df55
+## head / tree
+4e9306b668cac7797b9cd952b8699c4da603df55
+f12aed5bbd4fc9c36d46ab15af468993def0fad3
+## base..cha thu nhat cham write set
+(het)
+## numstat 00ee83998487d289324566f230b67b5923a9a9d9^1..00ee83998487d289324566f230b67b5923a9a9d9
+5	4	scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py
+1	1	scripts/tl_test_fragments_bundled.py
+## numstat 94cbb3688427a820de746df60a929e264981d248..4e9306b668cac7797b9cd952b8699c4da603df55
+5	4	scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py
+1	1	scripts/tl_test_fragments_bundled.py
+## blob write set merge / head
+scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py merge=8b2c705b631888e6b5f1a2283ef3ad7c4d48da5e head=8b2c705b631888e6b5f1a2283ef3ad7c4d48da5e
+scripts/tl_test_fragments_bundled.py merge=996c8ebb9e6239410630a0834bccbe3835079e5e head=996c8ebb9e6239410630a0834bccbe3835079e5e
+## sha256 tai merge
+8b0904d961e14fb8ed5a9fef315c620430cacd18093d2a50c954b74536bd8b53  scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py
+b294378d7e6e57f3c1d610ca8b33a33b99e58e30c04b5f98f2d54385d2e56f69  scripts/tl_test_fragments_bundled.py
+## tl_gws.py khong doi
+B=fbeb9421edd0a7e451534a92c89d090c4de4b3a4 M=fbeb9421edd0a7e451534a92c89d090c4de4b3a4
+## diff --check
+rc=0
+## release-verify --strict tai 00ee83998487d289324566f230b67b5923a9a9d9
+rc=2
+ok False 185 185 ['scripts/tl_test_fragments_bundled.py']

@@ -1,0 +1,33 @@
+bat_dau=2026-11-20T08:58:28Z python=3.12.10 exe=C:\Program Files\Python312\python.exe platform=Windows-11-10.0.26300-SP0 os.name=nt admin=0 TEMP=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\tpw-085828
+rig_sha256=d33ed84c2245bd4865c878d090654a71b7ed737f21aae30935697ee0eebab881 BASE=94cbb3688427a820de746df60a929e264981d248 HEAD=4e9306b668cac7797b9cd952b8699c4da603df55 TREE=f12aed5bbd4fc9c36d46ab15af468993def0fad3
+fetch rc=0 
+CHOT base sha=94cbb3688427a820de746df60a929e264981d248 tree=2a38dae886836b7122bd8502d78251c46ff267a5 sach=[] sha256_p2b=0175e598ffc3b653b41b37e2e8be0dce918ab5c93237610d015afc4eaaa5dde2
+CHOT head sha=4e9306b668cac7797b9cd952b8699c4da603df55 tree=f12aed5bbd4fc9c36d46ab15af468993def0fad3 sach=[] sha256_p2b=8b0904d961e14fb8ed5a9fef315c620430cacd18093d2a50c954b74536bd8b53
+numstat base..head: 5	4	scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py | 1	1	scripts/tl_test_fragments_bundled.py
+== D1
+d1-base-lan1 rc=1 [2026-11-20T08:59:47Z->2026-11-20T09:02:09Z] [wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_chot: SONG_SOT || [wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_doc: SONG_SOT || [wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_ghi_lai: SONG_SOT || [wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_encode_ghi_cu: SONG_SOT || [wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=2 đạt=2 chỉ_posix=1 · LUOT: dự_kiến=29 chạy=27 đạt=27 chỉ_posix=2 · DOT BIEN: dự_kiến=36 chạy=32 giết_đúng=28 chỉ_posix=4 · HONG: 0 · TU_KIEM: 3/3 || [wp433_gws_cred_dich_ngoai_kho_b] VẾ SAI: giet_dung || RUN False
+d1-head-lan1 rc=0 [2026-11-20T09:02:09Z->2026-11-20T09:03:44Z] [wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=2 đạt=2 chỉ_posix=1 · LUOT: dự_kiến=29 chạy=27 đạt=27 chỉ_posix=2 · DOT BIEN: dự_kiến=36 chạy=32 giết_đúng=32 chỉ_posix=4 · HONG: 0 · TU_KIEM: 3/3 || RUN True
+d1-head-lan2 rc=0 [2026-11-20T09:03:44Z->2026-11-20T09:05:14Z] [wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=2 đạt=2 chỉ_posix=1 · LUOT: dự_kiến=29 chạy=27 đạt=27 chỉ_posix=2 · DOT BIEN: dự_kiến=36 chạy=32 giết_đúng=32 chỉ_posix=4 · HONG: 0 · TU_KIEM: 3/3 || RUN True
+d1-base-lan2 rc=1 [2026-11-20T09:05:14Z->2026-11-20T09:07:02Z] [wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_chot: SONG_SOT || [wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_doc: SONG_SOT || [wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_ghi_lai: SONG_SOT || [wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_encode_ghi_cu: SONG_SOT || [wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=2 đạt=2 chỉ_posix=1 · LUOT: dự_kiến=29 chạy=27 đạt=27 chỉ_posix=2 · DOT BIEN: dự_kiến=36 chạy=32 giết_đúng=28 chỉ_posix=4 · HONG: 0 · TU_KIEM: 3/3 || [wp433_gws_cred_dich_ngoai_kho_b] VẾ SAI: giet_dung || RUN False
+  KY VONG d1-base-lan1: DAT — base False, giết_đúng=28, dung bon SONG_SOT (phan chung)
+  KY VONG d1-base-lan2: DAT — base False, giết_đúng=28, dung bon SONG_SOT (phan chung)
+  KY VONG d1-head-lan1: DAT — head True, dong tong ket khop: CA: dự_kiến=3 chạy=2 đạt=2 chỉ_posix=1 · LUOT: dự_kiến=29 chạy=27 đạt=27 chỉ_posix=2 · DOT BIEN: dự_kiến=36 chạy=32 giết_đúng=32 chỉ_posix=4 · HONG: 0 · TU_KIEM: 3/3
+  KY VONG d1-head-lan2: DAT — head True, dong tong ket khop: CA: dự_kiến=3 chạy=2 đạt=2 chỉ_posix=1 · LUOT: dự_kiến=29 chạy=27 đạt=27 chỉ_posix=2 · DOT BIEN: dự_kiến=36 chạy=32 giết_đúng=32 chỉ_posix=4 · HONG: 0 · TU_KIEM: 3/3
+  KY VONG d1-hai-lan-y-het: DAT — hai lan cua moi ve cho cung cac dong ket qua
+== D2 (HEAD)
+d2-wp433_gws_cred_dich_ngoai_kho rc=0 [2026-11-20T09:07:02Z->2026-11-20T09:07:16Z] [wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=11 chạy=4 đạt=4 bỏ_qua=0 chỉ_posix=7 · LUOT: dự_kiến=46 chạy=19 đạt=19 bỏ_qua=0 chỉ_posix=27 · DOT BIEN: dự_kiến=37 chạy=16 giết_đúng=16 bỏ_qua=0 chỉ_posix=21 · HONG: 0 · TU_KIEM: 3/3 || RUN True
+  KY VONG d2-wp433_gws_cred_dich_ngoai_kho: DAT — run(tl) True
+d2-wp433_gws_cred_no rc=0 [2026-11-20T09:07:16Z->2026-11-20T09:07:26Z] [wp433_gws_cred_no] CA: dự_kiến=3 chạy=3 đạt=3 · LUOT: dự_kiến=27 chạy=27 đạt=27 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=5 chạy=5 giết_đúng=5 bỏ_qua=0 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0 || RUN True
+  KY VONG d2-wp433_gws_cred_no: DAT — run(tl) True
+d2-wp433_gws_cred_win_duong rc=0 [2026-11-20T09:07:26Z->2026-11-20T09:07:49Z] [wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=76 đạt=76 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=47 giết_đúng=47 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3 || RUN True
+  KY VONG d2-wp433_gws_cred_win_duong: DAT — run(tl) True
+d2-wp433_gws_cred_win_reparse rc=0 [2026-11-20T09:07:49Z->2026-11-20T09:07:55Z] [wp433_gws_cred_win_reparse] CA: dự_kiến=2 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=7 chạy=7 đạt=7 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=3 chạy=3 giết_đúng=3 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0 || RUN True
+  KY VONG d2-wp433_gws_cred_win_reparse: DAT — run(tl) True
+d2-wp433_nlm_gws_dich_ngoai_kho rc=0 [2026-11-20T09:07:55Z->2026-11-20T09:08:54Z] [wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=18 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0 || RUN True
+  KY VONG d2-wp433_nlm_gws_dich_ngoai_kho: DAT — run(tl) True
+sach_sau base=[]
+sach_sau head=[]
+KET LUAN: DAT — moi ky vong D1 + D2 dat
+con_lai_sau_don=;
+ket_thuc=2026-11-20T09:09:46Z rc_rig=0
+XONG (khoa da nha)

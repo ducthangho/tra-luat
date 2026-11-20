@@ -1,0 +1,10 @@
+# do 2026-11-20T10:51:24Z kho chinh, fetch --prune +refs/heads/*, master cuc bo = c27e6dc
+may chu 367 ref; cuc bo thieu 0, thua 0
+## ai-dang-giu scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py
+HẾT_HẠN	wp433-r7-g1-claude	refs/heads/ops/wp433-p2bw-spec:ops/leases/wp433-r7-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ai-dang-giu scripts/tl_test_fragments_bundled.py
+HẾT_HẠN	wp433-r7-g1-claude	refs/heads/ops/wp433-p2bw-spec:ops/leases/wp433-r7-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

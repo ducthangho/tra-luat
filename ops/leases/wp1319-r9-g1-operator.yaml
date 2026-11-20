@@ -1,0 +1,35 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: wp1319
+revision: 9
+generation: 1
+lease_id: wp1319-r9-g1-operator
+role: operator
+executor: none
+reviewer: 'connector Codex tren PR'
+review_class: routine
+target_hosts: []
+live_change: 'khong — chi ghi so quyet dinh mien U11 va loi khai cua chu kho (khong chay gi tren host)'
+spec_path: ops/specs/wp1319-r9.md
+spec_hash: 25821fbabbf93b1607680440b55fe8c7e1fb671ede511ab36aa6a8765959791b
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r9/RESULTS.md
+- ops/leases/wp1319-r9-g1-operator.yaml
+- ops/specs/wp1319-r9.md
+write_set_hash: 6c9b8521b14a6d634d0be759cebadffa665a400908174ed157a51732d95be30b
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: 3b256271a7c079f665c7fe45abd6d05089041c10
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20/11 (AskUserQuestion): "Mien U11"'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T01:36:30Z'
+heartbeat_at: '2026-11-20T01:36:30Z'
+lease_until: '2026-11-20T04:36:30Z'
+lease_expires_at_utc: '2026-11-20T04:36:30Z'
+max_lease_hours: 3
+review_calls_limit: 0
+native_runs_limit_per_host: 0

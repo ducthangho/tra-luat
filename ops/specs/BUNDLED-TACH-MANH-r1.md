@@ -37,7 +37,7 @@ Bằng chứng ở `ops/reviews/bundled-tach-manh-spec-r1/` (README nêu từng 
   - Tài liệu: `references/COMMANDS.md:60`, `docs/PROTOCOL_DA_PHIEN.md`, ADR-0031, nhiều `ops/specs/*` nhắc tên tệp — xem §2.
   - `scripts/tl_selftest.py`: hai ca `r291_docs_ngoai_goi` (~22775) và `r357_agents_ngoai_goi` (~22836) đọc `RELEASE_MANIFEST.json` ĐÃ COMMIT và ghim `len(paths) == 185` kèm dòng KÊ KHAI SLOT ⇒ thêm mảnh 2 phải đổi thành 186 cùng lúc với manifest (reviewer lượt 2 đo: manifest 186 + ghim 185 ⇒ selftest 1783/1785).
   - Trần gói 200 tệp: `RELEASE_MANIFEST.json` liệt kê 185 tệp ⇒ 186; ZIP phát hành có thêm chính manifest nên 186 ⇒ 187 entry. Trần 200 đếm theo entry ZIP.
-  - `RELEASE_MANIFEST.json` băm nội dung từng tệp gói: bản vá đổi 4 tệp đã có trong manifest (`release.py`, `test_fragments.py`, bundled mảnh 1, golden) và thêm mảnh 2 ⇒ nếu không tái sinh trong chính packet thì job `gate` (lane LAND `release-verify --strict`) trên master ĐỎ từ lúc merge tới lúc merge PR manifest. Đây là nếp các packet trước (đo: merge #1453 `00ee839` ⇒ run 44711337223 job `gate` failure, xanh lại sau #1454). Reviewer đo trên nguyên mẫu: `release-verify RELEASE_MANIFEST.json --strict` rc 2.
+  - `RELEASE_MANIFEST.json` băm nội dung từng tệp gói: candidate đổi 5 tệp đã có trong manifest (`release.py`, `test_fragments.py`, `tl_selftest.py`, bundled mảnh 1, golden) và thêm mảnh 2; Land Operator tái sinh và commit manifest theo M8 trước khi đóng băng candidate ⇒ nếu không tái sinh trong chính packet thì job `gate` (lane LAND `release-verify --strict`) trên master ĐỎ từ lúc merge tới lúc merge PR manifest. Đây là nếp các packet trước (đo: merge #1453 `00ee839` ⇒ run 44711337223 job `gate` failure, xanh lại sau #1454). Reviewer đo trên nguyên mẫu: `release-verify RELEASE_MANIFEST.json --strict` rc 2.
 
 ## 1. `write_set`
 
@@ -131,7 +131,7 @@ Không chạm E4/E5: thư mục tạm, không mạng, không LIVE, không đẩy
 - `release-verify RELEASE_MANIFEST.json --strict` trên SHA ứng viên không `ok: true` ⇒ không trình land.
 - §0 lệch trên base thật (kích thước bundled, `files_scanned`, các điểm chạm) ⇒ DỪNG, revision.
 - Một mảnh bất kỳ trên head > 0,7·WARN, hoặc số mảnh trên base ≠ 2 ⇒ DỪNG, báo (Q3 sai giả định).
-- Bất kỳ ca selftest nào khác ngoài +1 ca mới đổi trạng thái ⇒ DỪNG.
+- Đo chuẩn bị của worker (manifest tái sinh KHÔNG commit) và N3 trên candidate đã commit manifest: bất kỳ ca selftest nào khác ngoài +1 ca mới đổi trạng thái ⇒ DỪNG. Bàn giao worker head TRƯỚC commit M8: chấp nhận ĐÚNG hai ca M9 (`r291_docs_ngoai_goi`, `r357_agents_ngoai_goi`) đỏ vì manifest còn ghi 185; có ca đỏ khác ⇒ DỪNG. Review và gate PR chỉ trình sau commit manifest M8.
 - Đo trên clone nông ⇒ KHÔNG ĐO ĐƯỢC cho N3, không được báo đạt.
 - Chưa có comment ngoại lệ bundled đúng `packet_id` + trần nâng ⇒ không cấp lease (**E2**). Đặc tả chờ chủ kho duyệt băm (ADR-0067, **E2**).
 
@@ -164,3 +164,4 @@ Không chạm E4/E5: thư mục tạm, không mạng, không LIVE, không đẩy
 - 2026-11-20 (điều phối #1206): sửa theo Codex lượt 1 (run `402df797`, request_changes): P1 manifest vào packet (Q5, M8, N3) · P2 khối `nang_tran` · P2 N4 đỏ đủ ba vế · P3 đếm entry ZIP 186→187 · P3 số đo §0/N4.
 - 2026-11-20 (điều phối #1206): sửa theo Codex lượt 2 (run `1e18f41a`, request_changes): P1 `tl_selftest.py` vào write set (Q6, M9) · P2 manifest do Land Operator (M8) · P2 §7 secrets-set 5 đường · P3 README.
 - 2026-11-20 (điều phối #1206): sửa theo Codex lượt 3 (run `c2cd2a0c`, request_changes): P1 commit manifest TRƯỚC đóng băng candidate (M8) · P2 §6 trần 9 đường · P3 numstat đo lại +283/−60.
+- 2026-11-20 (điều phối #1206): sửa theo Codex lượt 4 (run `5d47c36d`, request_changes): P2 §6 ngoại lệ hai ca M9 trước M8 · P3 §0 năm tệp trong manifest.

@@ -30,11 +30,8 @@ recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-20T01:05:43Z'
 heartbeat_at: '2026-11-20T01:05:43Z'
-lease_until: '2026-11-20T01:36:30Z'
-lease_expires_at_utc: '2026-11-20T01:36:30Z'
+lease_until: '2026-11-20T05:05:43Z'
+lease_expires_at_utc: '2026-11-20T05:05:43Z'
 max_lease_hours: 4
 review_calls_limit: 0
 native_runs_limit_per_host: 2
-withdrawn_at_utc: '2026-11-20T01:36:30Z'
-withdrawn_by: 'phien dieu phoi #1319 session_015GtxrapMSm976JLC7Fp1HM'
-withdrawn_reason: 'r8 da merge (PR #1435, 3b25627); khong con viec'

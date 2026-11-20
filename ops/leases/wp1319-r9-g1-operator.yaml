@@ -12,7 +12,7 @@ review_class: routine
 target_hosts: []
 live_change: 'khong — chi ghi so quyet dinh mien U11 va loi khai cua chu kho (khong chay gi tren host)'
 spec_path: ops/specs/wp1319-r9.md
-spec_hash: 25821fbabbf93b1607680440b55fe8c7e1fb671ede511ab36aa6a8765959791b
+spec_hash: 94d7d888cf4a8fbf01f6218b00e66ba87503adc83fb49dad7587e1996959493c
 write_set:
 - ops/acceptance/wp1319/MATRIX.md
 - ops/acceptance/wp1319/r9/RESULTS.md

@@ -1,6 +1,6 @@
 # PX-GEMINI-500 r1 — tìm nguyên nhân HTTP 500 của `px ask gemini:auto` (chỉ đọc log Proxima trên VM; đặc tả đóng băng)
 
-- **Packet:** px-gemini-500. Revision 1, generation 1. Role `operator`. Review Class `sensitive`.
+- **Packet:** #1457 (`px-gemini-500`). Revision 1, generation 1. Role `operator`. Review Class `sensitive`.
 - **Căn cứ:**
   - `ops/acceptance/px-ask/r4/RESULTS.md`: module 2.1.0 gửi đúng 1 `POST /v1/chat/completions` model `gemini:auto`
     lúc ~2026-11-20T07:48:21Z, gateway trả HTTP 500, `outcome: unknown`, không thân lỗi.

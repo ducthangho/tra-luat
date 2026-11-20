@@ -1,6 +1,6 @@
 schema_version: 2
 event: operator_lease_granted
-packet_issue: null
+packet_issue: 1457
 packet_id: px-gemini-500
 revision: 1
 generation: 1
@@ -9,11 +9,12 @@ role: operator
 reviewer: 'connector Codex tren PR; khong goi Codex offline (khong doi ma)'
 review_class: sensitive
 effective_review_class: sensitive
+reviewed_sha_required: 8048551a9b1eb886c126d2a1a4df0f95fb285964
 target_hosts:
 - f7281f27-f79f-40a2-a2f5-b454b58a166a
 live_change: 'CHI DOC log Proxima tren VM (tai khoan tlcommander, khong admin). 0 loi goi inference; khong doi cau hinh/dich vu/tai khoan/ACL; khong doc profile/cookie/token.'
 spec_path: ops/specs/px-gemini-500-r1.md
-spec_hash: ad26cfd56be1f59d62a0c29255f2040edfc473ff287c370b889715698e597c12
+spec_hash: f6cacebe4e25b3b22138b278330077865219c00e3b637375f07d3983ef50c703
 write_set:
 - ops/acceptance/px-gemini-500/r1/RESULTS.md
 - ops/leases/px-gemini-500-r1-g1-operator.yaml

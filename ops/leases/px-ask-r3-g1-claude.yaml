@@ -40,8 +40,8 @@ recorded_by: 'phiên điều phối Mission #1238 session_015GtxrapMSm976JLC7Fp1
 thay_the_cho: []
 leased_at_utc: '2026-11-20T06:41:54Z'
 heartbeat_at: '2026-11-20T06:41:54Z'
-lease_until: '2026-11-20T12:41:54Z'
-lease_expires_at_utc: '2026-11-20T12:41:54Z'
+lease_until: '2026-11-20T07:40:32Z'
+lease_expires_at_utc: '2026-11-20T07:40:32Z'
 max_lease_hours: 6
 review_calls_limit: 2
 native_test_hosts:
@@ -49,3 +49,6 @@ native_test_hosts:
 - a5f7076e-a491-4f84-829b-8d1fbcc1c767
 native_test_hosts_note: 'ASUS offline luc chay test (Desktop Commander, 20/11 ~06:42Z); test chay tren Desktop cung loai moi truong (PS 7 + PS 5.1). Ghi o ops/acceptance/px-ask/r3/RESULTS.md muc 2.'
 inference_calls_limit: 0
+withdrawn_at_utc: '2026-11-20T07:40:32Z'
+withdrawn_by: 'phien dieu phoi Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r3 da merge (PR #1450, ac9a06d): test Windows dat, review Codex 2/2 approve, connector sach, CI 41/41; thu hoi trong r4'

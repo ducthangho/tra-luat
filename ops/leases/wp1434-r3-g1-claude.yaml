@@ -64,8 +64,8 @@
   "lease_until": "2026-11-22T02:00:00Z",
   "lease_expires_at_utc": "2026-11-22T02:00:00Z",
   "limits": {
-    "Claude_author": 2,
-    "Codex_source_review": 2,
+    "Claude_author": 3,
+    "Codex_source_review": 3,
     "source_push": 2,
     "draft_PR": 1,
     "connector": 2,
@@ -103,5 +103,30 @@
       "reviewed_spec_sha256": "2495c613151a00fc75f6d3a776b69e24b1fa8ecf4de053f4593909fb61860c41"
     }
   ],
-  "spec_review_note": "Owner chose no third spec review; r3 fixes verified by source-review mutants (spec §8)."
+  "spec_review_note": "Owner chose no third spec review; r3 fixes verified by source-review mutants (spec §8).",
+  "nang_tran": {
+    "mission_revision": 75,
+    "authority_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7028440169",
+    "owner_approval": "owner approved Mission r75 c0fdff64 in the coordinator chat 2026-11-20",
+    "delta": {
+      "Claude_author": "2->3",
+      "Codex_source_review": "2->3"
+    },
+    "used_before": {
+      "Claude_author": 2,
+      "Codex_source_review": 2
+    },
+    "source_reviews": [
+      {
+        "run": "wp1434-source-review-1",
+        "head": "484d41656ab3f237b87cfe3b0f581c403debce9f",
+        "verdict": "changes_requested"
+      },
+      {
+        "run": "wp1434-source-review-2",
+        "head": "07330ed90662faed5479c3d186cb72363ffba355",
+        "verdict": "changes_requested"
+      }
+    ]
+  }
 }

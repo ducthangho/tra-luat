@@ -97,3 +97,6 @@ budget:
 budget_ghi_chu: 'Codex PR <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 2 (D1 nhe, chu kho chon Q3). Ngoai ngan sach PR: 3 loi goi Codex review dac ta.'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+da_bi_thay_the: wp433-r9-g1-claude
+da_bi_thay_the_ly_do: 'Chu kho 20-11 chon "Tach bundled truoc": packet SECRETS-SET-BUNDLE-KIEU tam dung (nhanh agent/wp433-r8-g1-claude de341ed, cay = a8a3b3c; commit waiver 5eab294 khong duoc duyet, da revert). Lease nay nha scripts/tl_test_fragments_bundled.py cho packet BUNDLED-TACH-MANH (lease wp433-r9-g1-claude). Secrets-set chay tiep bang dac ta r2 + lease moi sau khi BUNDLED-TACH-MANH land.'
+da_bi_thay_the_luc_utc: '2026-11-20T16:56:00Z'

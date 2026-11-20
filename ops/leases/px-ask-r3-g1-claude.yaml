@@ -46,4 +46,6 @@ max_lease_hours: 6
 review_calls_limit: 2
 native_test_hosts:
 - 7404cfba-9034-4787-b46b-7c358126a411
+- a5f7076e-a491-4f84-829b-8d1fbcc1c767
+native_test_hosts_note: 'ASUS offline luc chay test (Desktop Commander, 20/11 ~06:42Z); test chay tren Desktop cung loai moi truong (PS 7 + PS 5.1). Ghi o ops/acceptance/px-ask/r3/RESULTS.md muc 2.'
 inference_calls_limit: 0

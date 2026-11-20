@@ -1,0 +1,5 @@
+2026-10-22T06:45:58.1386039Z Current runner version: '2.338.2'
+2026-10-22T06:45:59.5489826Z ##[group]Run echo "DUONG_NHANH: khong phan loai - su_kien=${SU_KIEN} khong phai pull_request, luon DAY_DU"
+2026-10-22T06:45:59.5788323Z DUONG_NHANH: khong phan loai - su_kien=push khong phai pull_request, luon DAY_DU
+2026-10-22T06:45:59.5958371Z Set output 'che_do'
+2026-10-22T06:45:59.6147922Z Cleaning up orphan processes

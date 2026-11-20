@@ -1,0 +1,18 @@
+{
+ "_ghi_chu": "Du lieu TONG HOP theo HINH DANG luot 44522844747 (ci.yml, 2 attempt): job hong o attempt 1, dong mang_sang o attempt 2 (job_id MOI, started_at som hon created_at cua attempt 2), job skipped o ca hai attempt (completed_at < started_at), phan hoi attempt KHONG co completed_at, updated_at cua run (13:15:21Z) KHAC max(completed_at) cua job (13:15:20Z).",
+ "run": {"id": 44000000001, "run_attempt": 2, "event": "pull_request", "status": "completed", "conclusion": "success", "head_branch": "agent/vi-du", "head_sha": "0000000000000000000000000000000000000001", "created_at": "2026-11-19T12:19:42Z", "run_started_at": "2026-11-19T13:00:11Z", "updated_at": "2026-11-19T13:15:21Z"},
+ "attempts": {
+  "1": {"run_attempt": 1, "status": "completed", "conclusion": "failure", "created_at": "2026-11-19T12:19:42Z", "run_started_at": "2026-11-19T12:19:42Z", "updated_at": "2026-11-19T12:48:03Z"},
+  "2": {"run_attempt": 2, "status": "completed", "conclusion": "success", "created_at": "2026-11-19T13:00:14Z", "run_started_at": "2026-11-19T13:00:11Z", "updated_at": "2026-11-19T13:15:21Z"}
+ },
+ "jobs": [
+  {"id": 1, "run_attempt": 1, "name": "chuan-bi", "conclusion": "success", "labels": ["ubuntu-latest"], "created_at": "2026-11-19T12:19:42Z", "started_at": "2026-11-19T12:19:44Z", "completed_at": "2026-11-19T12:19:53Z", "steps": []},
+  {"id": 2, "run_attempt": 1, "name": "gate-cong-cu (ubuntu-latest, 3)", "conclusion": "failure", "labels": ["ubuntu-latest"], "created_at": "2026-11-19T12:19:53Z", "started_at": "2026-11-19T12:19:55Z", "completed_at": "2026-11-19T12:23:16Z", "steps": []},
+  {"id": 3, "run_attempt": 1, "name": "gate-packet-loop-manh", "conclusion": "skipped", "labels": [], "created_at": "2026-11-19T12:19:54Z", "started_at": "2026-11-19T12:19:54Z", "completed_at": "2026-11-19T12:19:53Z", "steps": []},
+  {"id": 4, "run_attempt": 1, "name": "gate-cong-cu-gop (ubuntu-latest)", "conclusion": "failure", "labels": ["ubuntu-latest"], "created_at": "2026-11-19T12:42:20Z", "started_at": "2026-11-19T12:42:21Z", "completed_at": "2026-11-19T12:42:33Z", "steps": []},
+  {"id": 5, "run_attempt": 2, "name": "chuan-bi", "conclusion": "success", "labels": ["ubuntu-latest"], "created_at": "2026-11-19T13:00:15Z", "started_at": "2026-11-19T12:19:44Z", "completed_at": "2026-11-19T12:19:53Z", "steps": []},
+  {"id": 6, "run_attempt": 2, "name": "gate-cong-cu (ubuntu-latest, 3)", "conclusion": "success", "labels": ["ubuntu-latest"], "created_at": "2026-11-19T13:00:15Z", "started_at": "2026-11-19T13:00:35Z", "completed_at": "2026-11-19T13:15:03Z", "steps": []},
+  {"id": 7, "run_attempt": 2, "name": "gate-packet-loop-manh", "conclusion": "skipped", "labels": [], "created_at": "2026-11-19T13:00:15Z", "started_at": "2026-11-19T13:00:15Z", "completed_at": "2026-11-19T12:19:53Z", "steps": []},
+  {"id": 8, "run_attempt": 2, "name": "gate-cong-cu-gop (ubuntu-latest)", "conclusion": "success", "labels": ["ubuntu-latest"], "created_at": "2026-11-19T13:15:03Z", "started_at": "2026-11-19T13:15:05Z", "completed_at": "2026-11-19T13:15:20Z", "steps": []}
+ ]
+}

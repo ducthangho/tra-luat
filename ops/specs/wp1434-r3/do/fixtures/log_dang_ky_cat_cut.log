@@ -1,0 +1,3 @@
+2026-11-19T12:21:49.1386039Z Current runner version: '2.338.2'
+2026-11-19T12:25:20.7799507Z TỔNG: ĐẠT
+2026-11-19T12:47:59.7325196Z CI_DANG_KY_THOI_GIAN {"ke_hoach": {}, "N": 2, "so_lop_logic": 4, "bo": [{"duong_dan": "ops/a_test.py", "rc": 0, "giay": 174.381, "bat_dau_utc": "2026-11-19T12:22:26.384Z", "ket_thuc_utc": "2026-11-19T12:25:2

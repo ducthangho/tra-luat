@@ -599,10 +599,10 @@ def a213_la_landed_khop_kiem_ho_so_land():
 def a214_vong_tham_chieu():   # review lượt 1 F03
     d = yaml.safe_load("a: &x\n  - b: *x\n")
     try:
-        G().loi_khai(d)
-        bang(False, "loi_khai khong nem tren vong")
-    except ValueError as e:
-        bang("vong_tham_chieu" in str(e), f"ValueError: {e}")
+        loi = G().loi_khai(d) and None
+    except Exception as e:   # RecursionError (bỏ chốt vòng) phải ĐỎ ở đây, không thoát ra thành lỗi vô can
+        loi = e
+    bang(isinstance(loi, ValueError) and "vong_tham_chieu" in str(loi), f"loi_khai tren vong: {loi!r}")
     with tempfile.TemporaryDirectory(prefix="godc_vong_") as thu:
         (Path(thu) / "v-land-evidence.yaml").write_text("a: &x\n  - b: *x\n", encoding="utf-8")
         rc, ra = cli("kiem-ho-so", str(Path(thu) / "v-land-evidence.yaml"))

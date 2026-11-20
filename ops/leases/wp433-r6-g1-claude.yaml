@@ -99,3 +99,5 @@ budget:
 budget_ghi_chu: 'Codex PR <= 10 (ADR-0055); CI Ubuntu <= 2; Windows native <= 3 (BAT BUOC). Ngoai ngan sach PR: 5 loi goi Codex offline review dac ta r1; probe Desktop chan doan no (1) luc soan dac ta.'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+da_bi_thay_the: wp433-r6-g2-claude
+da_bi_thay_the_ly_do: 'chu kho 20-11 duyet dac ta r2 (72aaa5a4) sau khi do native PR #1441 bat hoi quy C1 tren Windows; g2 mo rong write set them fragment C1, cung nhanh thi cong va cung executor.'

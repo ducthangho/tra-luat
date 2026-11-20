@@ -189,6 +189,9 @@ def a103_bo_phan_tich():
         "moc_lap": them("MOC_GATE_OUTPUT: passed (39/39 job co dau hieu duong)\n"),
         "thieu_moc": lambda t: "\n".join(x for x in t.split("\n") if not x.startswith("MOC_GATE_OUTPUT")),
         "job_lap": lap,
+        "dau_tep_sai ": lambda t: t.replace("\n", " thua\n", 1),   # K01 lượt 5: header khớp TRỌN
+        "dong_la ": them("MOC_GATE_OUTPUT: passed (39/39 job co dau hieu duong) thua\n"),   # dòng tổng khớp TRỌN
+        "dong_la  ": them("JOB 777 x: skipped (khong tinh) thua\n"),   # K02 lượt 5: dòng skipped khớp TRỌN
         "job_lap ": lambda t: doi_tong(t, "") .rstrip("\n") + "\n" + t.split("\n")[dong_job(t, 3)].split(" [")[0] + ": skipped (khong tinh)\n"
         + [x for x in t.split("\n") if x.startswith("MOC_GATE_OUTPUT")][0] + "\n",
         "cr_le": cr_tu_do,
@@ -298,6 +301,11 @@ def _bo_job(ten_job):
 def a109_check_bat_buoc():
     ft, fp = _bo_job("gate-registry (ubuntu-latest)")
     ky(kt("T-v3-pass", ft, fp), "not_measured", ["check_bat_buoc:gate-registry (ubuntu-latest)"], "bo gate-registry")
+    t = (ROOT / FX["T-v3-pass"][0]).read_text(encoding="utf-8")   # K02 lượt 5: job bắt buộc có mặt nhưng not_measured
+    i = [n for n, d in enumerate(t.split("\n")) if d.startswith("JOB ") and " gate-registry (ubuntu-latest) [" in d][0]
+    ky(kt("T-v3-pass", lambda x: doi_tong(sua_dong(x, i, lambda d: d.split(" -> ")[0] + " -> not_measured: x"),
+                                          "MOC_GATE_OUTPUT: not_measured (38/39 job co dau hieu duong)")),
+       "not_measured", ["check_bat_buoc:gate-registry (ubuntu-latest)"], "gate-registry not_measured")
     cay = ast.parse((ROOT / ".claude/dev/packet_loop.py").read_text(encoding="utf-8"))
     nut = [n for n in cay.body if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "CHECK_BAT_BUOC" for t in n.targets)]
     bang(len(nut) == 1, f"CHECK_BAT_BUOC: {len(nut)} nút gán")
@@ -427,7 +435,8 @@ def a116_yaml_la_trong_thu_muc():   # review lượt 1 F01/F02: YAML ngoài sche
 # ---------------------------------------------------------------- A2 — lời khai, miễn, hồ sơ
 @ca
 def a201_loi_khai():
-    doc = {"moc_gate_output": "x", "a": [{"gate_output": "y"}], "b": {"Gate-Output": "z"}, "gate_output_nguon": "w"}
+    doc = {"moc_gate_output": "x", "a": [{"gate_output": "y"}], "b": {"Gate-Output": "z"}, "gate_output_nguon": "w",
+           "gate_output_nguon_va_gioi_han": "w", "moc_gate_output_rc_disposition": "w"}   # K01 lượt 5: đủ ba tên phi-lời-khai
     kq = sorted(d for d, _ in G().loi_khai(doc))
     bang(kq == ["$.a[0].gate_output", "$.b.Gate-Output", "$.moc_gate_output"], f"loi_khai: {kq}")
 
@@ -619,6 +628,8 @@ def a212_landed_khong_loi_khai():
             ("c", {"trang_thai_packet": {"landed": False}, "landed_20261120": {"landed": True}, **vx}, ["$: landed_khong_loi_khai_gate_output"]),
             ("d", {"trang_thai_packet": {"landed": True}, "moc_gate_output": "measured — kiem-gate-output.txt"},
              ["$.moc_gate_output: duong_khong_tep_danh_gia", "$: landed_khong_loi_khai_gate_output"]),
+            ("e", {"trang_thai_packet": {"landed": True}, "moc_gate_output": "not_measured — run khong do", "g": {"gate_output": "skipped — x"},
+                   "h": {"gate_output": "not_run — x"}}, ["$: landed_khong_loi_khai_gate_output"]),   # K01 lượt 5: chỉ token âm
             ("doi chung", {"trang_thai_packet": {"landed": False}, **vx}, []),
         ):
             vp = G().kiem_ho_so(d, thu)
@@ -745,6 +756,14 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m79_nhan_tuyet_doi", "if pp.is_absolute() or any(", "if any(", "a204"),
     ("m80_bo_is_file", "    return p if p.is_file() else None", "    return p", "a204"),
     ("m81_bo_dinh_dang", '            vp.append(f"{duong}: dinh_dang_loi_khai")\n            continue', "            continue", "a203"),
+    ("m82_token_am_la_hop_le", '        if tk in ("not_measured", "skipped", "not_run"):\n            continue\n',
+     '        if tk in ("not_measured", "skipped", "not_run"):\n            hop_le = True\n            continue\n', "a212"),
+    ("m83_bo_phi_gioi_han", '"gateoutputnguonvagioihan", ', "", "a201"),
+    ("m84_bo_phi_disposition", ', "mocgateoutputrcdisposition"', "", "a201"),
+    ("m85_dau_tep_match", "    if not (m := RE_DAU.fullmatch(dong[0])):", "    if not (m := RE_DAU.match(dong[0])):", "a103"),
+    ("m86_tong_match", "        elif mm := RE_MOC.fullmatch(d):", "        elif mm := RE_MOC.match(d):", "a103"),
+    ("m87_check_khong_loc_passed", ' for j in d["jobs"].values() if j["tt"] == "passed"}', ' for j in d["jobs"].values()}', "a109"),
+    ("m88_skip_cu_match", "        elif s := (RE_SKIP_CU.fullmatch(d) or", "        elif s := (RE_SKIP_CU.match(d) or", "a103"),
     ("m58_cli_chi_bat_OSError", "        except Exception as e:   # gồm vòng", "        except OSError as e:   # gồm vòng", "a214"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

@@ -67,7 +67,7 @@ write_set_hash: e348a0aec274cc000368e7b728a9a70423434e000ace619fbc059383907fb2f5
 write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
 write_set_ghi_chu: '.claude/dev/ci_dang_ky_test.py CHI THEM dung mot muc cho tep test moi; hai tep ops/ la tep MOI'
 closure_status: 'holder scan 2026-11-20T15:28:46Z: fetch +refs/heads/*:refs/heads/*, ls-remote vs for-each-ref thieu 0 thua 0; 3/3 duong dan NGUOI_GIU 0 (ci_dang_ky_test.py co wp1166-r4-g4-claude CON_HAN DA_BI_THAY_THE, khong tinh; wp1166-r4-g5-claude het han 2026-11-20T07:17:50Z)'
-tran_kich_thuoc: '<= 3 tep / <= 800 dong them, do git diff --numstat origin/master...<head A> (nang_tran dac ta r9, chu kho duyet issuecomment-7043381576); vuot => DUNG truoc review (E2)'
+tran_kich_thuoc: '<= 3 tep / <= 1100 dong them, do git diff --numstat origin/master...<head A> (nang_tran lan 1 dot A, chu kho duyet issuecomment-7043702814; dac ta r9 cho 800); vuot => DUNG truoc review (E2)'
 tran_loi_goi_codex: 'doc tu dong tran_loi_goi_codex cua spec (ADR-0055@d2e3052d, dem theo PR); dem truoc MOI loi goi; luot bi cat van tinh mot loi goi (ADR-0052)'
 windows: 'khong bat buoc cho dot A (Q7: OS_BAT_BUOC ubuntu-latest); ca symlink A1-12 bo qua co ghi tren Windows; KHONG workflow_dispatch'
 coordination_paths:
@@ -87,8 +87,14 @@ prohibited_actions:
 - sua_ci_yml
 land_authority_note: 'chu kho audit va duyet SHA cu the truoc merge (E5); dieu phoi merge khi kiem-merge rc=0'
 nang_tran:
-  tran_cu: <= 6 tep / <= 450 dong them (ADR-0053)
-  tran_moi: <= 3 tep / <= 800 dong them (git diff --numstat origin/master...<head A>)
-  can_cu: 'uoc ~760 dong them (module ~200, test ~560, dang ky 1) — bang kich_thuoc cua dac ta r9'
+  tran_cu: <= 3 tep / <= 800 dong them (nang_tran dac ta r9, issuecomment-7043381576)
+  tran_moi: <= 3 tep / <= 1100 dong them (git diff --numstat origin/master...<head A>)
+  can_cu: 'numstat 953b8d9 (cuc bo, chua push, chua review) = +1077 (module 327, test 749, dang ky 1); uoc dac ta ~760 hut ~40%; tach A1/A2 khong dua ve tran 450 (A1 rieng ~600)'
   ai_nang: ducthangho
-  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7043381576
+  can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7043702814
+  lich_su:
+  - tran_cu: <= 6 tep / <= 450 dong them (ADR-0053)
+    tran_moi: <= 3 tep / <= 800 dong them
+    can_cu: 'uoc ~760 dong them (module ~200, test ~560, dang ky 1) — bang kich_thuoc cua dac ta r9'
+    ai_nang: ducthangho
+    can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7043381576

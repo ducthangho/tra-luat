@@ -1,0 +1,36 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1319
+packet_id: wp1319
+revision: 11
+generation: 1
+lease_id: wp1319-r11-g1-operator
+role: operator
+executor: none
+reviewer: 'Codex CLI offline gpt-6-astra qua launcher.py run (toi da 2 loi goi); connector Codex tren PR'
+review_class: routine
+target_hosts: []
+live_change: 'khong — review doc lap cuoi tren master, chi ghi so'
+spec_path: ops/specs/wp1319-r11.md
+spec_hash: 664d12c808d6373a5e46d9229bdbc8afe168ebf38f7832bef2cab1d0595d7fd8
+write_set:
+- ops/acceptance/wp1319/MATRIX.md
+- ops/acceptance/wp1319/r11/VERDICT.md
+- ops/leases/wp1319-r10-g1-operator.yaml
+- ops/leases/wp1319-r11-g1-operator.yaml
+- ops/specs/wp1319-r11.md
+write_set_hash: a7c7a139b4929b2dcd3debfc35f429c781a35dcad1c2857090647d1b68ece49a
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: c3ab4aa5bfd9f1f5494e2efab1718fc2095f908c
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20/11: "1,2,3 dong y cac kien nghi. Xu ly tiep" (muc 2: review cuoi, toi da 2 loi goi Codex)'
+recorded_by: 'phiên điều phối #1319 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T02:58:21Z'
+heartbeat_at: '2026-11-20T02:58:21Z'
+lease_until: '2026-11-20T06:58:21Z'
+lease_expires_at_utc: '2026-11-20T06:58:21Z'
+max_lease_hours: 4
+review_calls_limit: 2
+native_runs_limit_per_host: 0

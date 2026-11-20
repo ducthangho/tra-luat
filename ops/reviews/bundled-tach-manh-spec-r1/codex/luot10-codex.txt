@@ -1,0 +1,52 @@
+# Review đặc tả BUNDLED-TACH-MANH r5 · Codex 10/10
+
+**Còn 1 lớp mở với 6 biểu hiện, mức cao nhất P2.** Q7 đã giải quyết quyền tạo manifest và bàn giao SHA ứng viên. Nghiệm thu vẫn có thể báo đạt khi generator, loader hoặc cổng trả kết quả sai một số hành vi bắt buộc trong M1–M3.
+
+`reviewed_sha` `4ed45e074f2c8bf3358ddb39892692e0bb92b1ed`, tree `90c43e624198bb9e5e0bbad23c8d8d7d846cd6ae`, SHA-256 r5 `291a17c63128bc03a4b05834db41227fcb7ee72a9bfbb820681225cec0e1cfb1`. `git rev-parse`, `git merge-base`, `git --no-optional-locks status --porcelain` và `sha256sum` trả rc 0. HEAD khớp ref giao review, merge-base đúng `0f9aa2a2cc697129e1f5be72feddf60986286865`, clone đầy đủ và worktree sạch. `git symbolic-ref -q HEAD` trả rc 1 do HEAD tách. `git diff --no-index --stat` r4/r5 trả rc 1 với diff dự kiến.
+
+Review tĩnh trên Linux/Bash, chỉ đọc, ngoại tuyến. Provider `openai_codex`, bề mặt quan sát được là phiên Codex qua API có shell cục bộ, transport `machine`. Model phục vụ, effort và receipt runtime chưa xác minh. Verdict áp dụng cho **đặc tả** `sensitive` tại SHA trên.
+
+## Bảng lớp
+
+| class_slug | finding IDs/biểu hiện (chỗ) | mức cao nhất còn mở | nguồn lượt/SHA | cách vá chung | phép kiểm đóng lớp |
+|---|---|---|---|---|---|
+| `manifest-gan-candidate` | L10-01a/b của lượt 9 đã đóng (§0–§8, nhất là §1, M8, §3a, N3) | Đóng | Codex 9 `0c66e6d8…` → Codex 10 `4ed45e07…` | Q7 đưa manifest vào write set Executor và dùng luồng `work-packet` chuẩn. | Lần theo manifest → SHA ứng viên → cổng → handoff → run kế nhiệm → push/draft. Đối chiếu nhánh request changes và stop condition với §12. |
+| `tieu-chi-khong-the-do` | R5-01 phân ranh/thứ tự; R5-02 tên tệp và bố cục khai báo; R5-03 ghi đủ mảnh; R5-04 hợp đồng data-only; R5-05 so byte và JSON cổng; R5-06 phản chứng cho từng hành vi trong khoá gộp (§3–§4) | P2 | Codex 7 `95d4eafb…`, 8 `f55a0e1c…`, Claude 9 `ecd4ed03…`, Codex 9 `0c66e6d8…`, Codex 10 `4ed45e07…` | Ánh xạ mỗi hành vi bắt buộc tới phép quan sát và phản chứng. Quan sát generator, tệp trên đĩa, loader và JSON cổng tại đúng đầu ra của từng thành phần. | Chạy đối chứng xanh và từng sai lệch R5-01–06 trên SHA ứng viên. Xác nhận đủ khoá và đúng tập đỏ. Với JSON cổng, tính kỳ vọng độc lập từ byte nguồn và byte trên đĩa. |
+
+Tổng còn mở **1 lớp, 6 biểu hiện**. Các biểu hiện dùng chung cách vá ở tầng nghiệm thu. Mỗi thành phần cần phép quan sát riêng vì đầu ra đúng của thành phần khác có thể che lỗi.
+
+## Lịch sử lớp · Codex 9 → 10
+
+| class_slug | Nhãn | Phép kiểm và kết quả |
+|---|---|---|
+| `manifest-gan-candidate` | **ĐÃ VÁ THẬT** | Đọc §0–§8, diff r4/r5 và `git show 48d372e:docs/PROTOCOL_DA_PHIEN.md` §12–§13 cùng ADR-0060 M5/M12. Executor tạo manifest trước cổng trên exact candidate, bàn giao theo M12 và kết thúc run theo §12. Run kế nhiệm đo lại head, lease, state và drift trước khi xử lý verdict. Approve và cổng trên đúng SHA đi trước push chính, sau đó đối chiếu PR head. Request changes và push thêm vẫn chịu §12. Câu nhắc Land Operator ở §3a xác nhận vai này đã được bỏ khỏi thi công. §0–§8 không còn C do LO dựng hoặc câu giao LO giữ C. |
+| `tieu-chi-khong-the-do` | **VÁ MỘT PHẦN** | Đọc từng hàng M1–M3 và V1–V17, đối chiếu `nguyen-mau.diff`, `dot-bien.txt`, N1–N4, mã cổng và các ca bundle sẵn có. V2 đã ghim `2+2+2`, V8 ghim đường mảnh thiếu, V5 đo wrapper nhiều mảnh, V12–V13 đo danh sách khai lỗi, V15–V16 bổ sung kiểm tra cổng. N2 buộc đủ khoá và N3 dùng đúng schema. V4 đã nêu trường hợp quá hạn, nhưng thiếu đối chứng buộc phân mảnh cạnh fragment khác. M3 và các hành vi còn thiếu trong M1/M2 được liệt kê dưới đây. |
+
+**Tỷ lệ `|F|/|U| = 1/2 = 50%`**, với `F = {manifest-gan-candidate}`. Chuyển tiếp này không dưới 50%. Lớp nghiệm thu vẫn tái diễn sau checkpoint và lời gọi Codex thứ **10/10** đã dùng hết. Dừng tại Review Rescue Checkpoint theo §12 và ADR-0055. Verdict này không cấp thêm lượt hoặc approval.
+
+## Findings
+
+1. **R5-01 · `tieu-chi-khong-the-do` · P2 · M1, V2, V4, N3–N4.** V2 chỉ dùng một phân bố đồng đều, nên có thể đạt với cách chia cố định hai fragment một mảnh hoặc điều kiện cắt sai ngay tại điểm bằng hạn. V4 có thể đạt với fixture chỉ chứa fragment quá hạn, kể cả khi generator sẽ ghép fragment đó với hàng xóm. `nguyen-mau.diff` tính byte từng dòng và chỉ mở nhóm mới khi `used + size > limit`; N3–N4 dùng corpus cố định và cổng lấy kỳ vọng từ chính generator. **Câu thay thế đề xuất.** “Kiểm phân nhóm tham lam và thứ tự tên bằng fixture kích thước không đều, gồm tổng đúng hạn và tổng vượt hạn. Đặt fragment đơn quá hạn cạnh fragment nhỏ và kiểm fragment quá hạn là thành viên duy nhất của mảnh, thứ tự vẫn đúng và không sinh mảnh rỗng.”
+
+2. **R5-02 · `tieu-chi-khong-the-do` · P2 · M1, V2–V3, N3–N4.** V2 quy định đối chiếu tên fragment theo nhóm và V3 so giá trị tuple. Hai vế có thể qua dù tên trả về của mảnh thứ ba sai, hoặc mảnh chính đặt `SHARDS` trước `SOURCES` hay lặp phép gán khi có ba mảnh. M1 yêu cầu tên từng mảnh và đúng một phép gán sau `SOURCES`. Nguyên mẫu có nhánh riêng dựng tên trả về và nối phép gán. N3–N4 đều chỉ đo hai mảnh, nên sai lệch riêng ở đầu ra ba mảnh lọt qua. **Câu thay thế đề xuất.** “Trên fixture ba mảnh, đối chiếu chính xác thứ tự tên tệp trả về, tên fragment từng mảnh, và cấu trúc AST mảnh chính gồm `SOURCES` rồi đúng một `SHARDS` có tuple tên hai mảnh phụ.”
+
+3. **R5-03 · `tieu-chi-khong-the-do` · P2 · M1, V6, N3–N4.** V6 có thể xanh khi writer xoá mảnh lạc nhưng bỏ ghi hoặc giữ byte cũ ở mảnh thứ ba. Nguyên mẫu có vòng `write_bytes` riêng trước vòng `unlink`. Ngay cả phép đo nguyên mẫu `ghi_xoa_lac` còn kiểm cổng xanh sau ghi lại, còn V6 chỉ bắt buộc quan sát việc xoá. N3–N4 xác nhận ghi đủ cho corpus hai mảnh; chúng không bắt được sai lệch chỉ ở mảnh thứ ba. **Câu thay thế đề xuất.** “Từ thư mục đích có mảnh cần cập nhật và một mảnh đánh số lạc, gọi writer trên fixture ba mảnh; kiểm tên và byte cả ba tệp trên đĩa khớp đầu ra generator, đồng thời tệp lạc biến mất.”
+
+4. **R5-04 · `tieu-chi-khong-the-do` · P2 · M2, V7–V13, N3–N4.** V11 chỉ bắt mảnh phụ có `SHARDS`. Loader có thể chấp nhận câu lệnh hay phép gán thừa khác ở mảnh chính hoặc phụ và vẫn từ chối đúng các ca hiện liệt kê. Nguyên mẫu kiểm hình dạng AST và danh sách đích phép gán trước `ast.literal_eval`; N3–N4 chạy với bundle hợp lệ, nên không đo ranh giới từ chối này. **Câu thay thế đề xuất.** “Với đầu vào còn lại hợp lệ, kiểm loader chấp nhận hai bố cục hợp lệ của mảnh chính, và trả `BUNDLED_MODULE_CONTRACT` khi mảnh chính hoặc phụ có câu lệnh hay phép gán thừa ngoài bố cục cho phép. Giữ các ca SHARDS sai vị trí, rỗng và không liên tục.”
+
+5. **R5-05 · `tieu-chi-khong-the-do` · P2 · M3, V14–V16, N3–N4.** V15 đo đổi byte mảnh phụ nhưng không đo thiếu mảnh phụ trong **cổng**. V8 đo lỗi thiếu mảnh qua **loader**, qua đường khác. V16 đo `expected_sha256` nhiều mảnh và “`shards` đúng danh sách”, nhưng không ràng buộc `actual_sha256`, hai số byte, nghĩa của bốn trường ở chế độ một mảnh, hoặc giá trị `expected_bytes`/`actual_bytes` của từng mục `shards`. Nguyên mẫu tính riêng các trường này và biểu diễn mảnh phụ vắng bằng `actual_bytes: null`. N3–N4 chỉ đòi cổng báo xanh, còn hash của V1 thuộc generator. **Câu thay thế đề xuất.** “Đo cổng trên đầu ra một và nhiều mảnh, đối chiếu độc lập hai digest và hai số byte. Ở chế độ nhiều mảnh, đối chiếu từng mục `shards` theo tên, thứ tự và số byte kỳ vọng/thực tế. Xoá riêng một mảnh phụ và kiểm `GENERATED_BUNDLE_STALE` cùng mục tương ứng có `actual_bytes: null`.”
+
+6. **R5-06 · `tieu-chi-khong-the-do` · P2 · V16–V17, N1–N2.** Ma trận có thể đạt bằng một mutant chỉ phá nhánh thiếu mảnh chính của V16 và một mutant chỉ đổi hằng 196608 của V17. Hai mutant này để nguyên kết quả của các kiểm tra `shards`, digest nhiều mảnh và kích thước mảnh thật, nên không chứng minh các kiểm tra đó nhạy với sai lệch của chính chúng. Đây là biểu hiện cũ “một mutant mỗi nhãn” khi một khoá gộp nhiều hành vi. **Câu thay thế đề xuất.** “Mỗi hành vi bắt buộc trong một khoá gộp phải có phản chứng riêng. Mỗi lần chạy phải trả đủ và đúng tập khoá; tập giá trị `False` phải bằng tập đích đã khai cho phản chứng đó.”
+
+## Kiểm riêng N1–N4
+
+- **N1/N2.** Không thấy cặp V nào buộc phải đỏ cùng nhau. Có thể phá V2 bằng đổi cách chia nhưng giữ ba mảnh và tuple tên, phá V3 qua khai báo trên fixture generator mà giữ fixture loader độc lập, và phá V17 qua hằng sản xuất trong khi giữ override 100 KiB cho V2. Dùng fixture dựng độc lập cho V7–V13 và V14–V16 để mutant generator không làm hỏng khâu dựng ca. Với V10, tên ASCII thường lặp nguyên văn sau khi giữ thứ tự không giảm là đầu vào hợp lệ để đo trùng tên, theo `_FRAGMENT_NAME_RE`. Đột biến c và kết quả return sớm trong `dot-bien.txt` không chứng minh tập đỏ của r5. Khả năng tách đích ở đây là kết luận từ đọc mã, chưa phải ma trận đã chạy.
+- **N3.** `release.py` dòng 940–941 trả `expected_file_count` và `checked_file_count`; `cmd_release_verify` trả rc 0 khi `ok` đúng. `.github/checks/bundle_fragment_check.py` trả `ok`, `failed`, `case_count`. `workflow.py` đặt `files_scanned`, `fail`, `warn` dưới `py_size`. Cổng `test-fragments-check` có `ok`, còn danh sách `shards` thuộc phần M3 sẽ triển khai, có trong nguyên mẫu. Không còn sai tên khoá đã nêu ở lượt 9.
+
+## Lớp mới, tái mở và phần chưa đo
+
+- **Lớp mới:** Không có. Sáu biểu hiện giữ slug `tieu-chi-khong-the-do`.
+- **Lớp tái mở:** Không có. `so-do-loi-thoi` vẫn đóng: `git show 0f9aa2a:scripts/tl_selftest.py` xác nhận cả hai ca đọc manifest trên cây làm việc và ghim 185. `dau-vao-phan-chung-khong-ghim` vẫn đóng: N4, §7 và README cùng ghim `a8a3b3ca2fe5f48d8e6db64a8c6abacf97526b8c`; hai phép `git show <OID>:<đường> | sha256sum` trả `0/0` và khớp hash `780c289d…`, `be4054ad…`. `tran-khai-lech` vẫn đóng: §1, §6 và §8 nhất quán với 9 đường Executor và tối đa 450 dòng thêm. Số `+283/−60` là số đo nguyên mẫu được dẫn lại.
+- **Chưa đo (`not_run`):** Chưa chạy N1–N4, ma trận thực tế, numstat triển khai, gate hoặc CI vì lượt này chỉ có đặc tả và bằng chứng nguyên mẫu. Chưa xác minh độc lập các số đo h/i từ cây Executor, trạng thái GitHub, authority/lease r5 hay audit exact SHA triển khai. Windows được miễn theo Q4. Không có kết quả gate runtime nào được tính `passed`.
+
+KET_LUAN: request_changes

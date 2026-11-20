@@ -1,9 +1,9 @@
-# wp1462 r5 — B4 của kế hoạch nguồn r4: công tắc CHO PHÉP theo lớp giảm và bên tiêu dùng tin cậy trong `kiem-merge` (CONG-TAC-G5)
+# wp1462 r6 — B4 của kế hoạch nguồn r4: công tắc CHO PHÉP theo lớp giảm và bên tiêu dùng tin cậy trong `kiem-merge` (CONG-TAC-G5)
 packet_id: wp1462
-revision: 5
+revision: 6
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 
-Trạng thái: `proposed`, CHƯA đóng băng. Thay r4 (cùng đường dẫn, commit `0cfb924`, sha256 `4952e70fca6fb23de56703dc8022d7fd1f841f6514884ac8c70786e687b0277e`); r4 thay r3 (commit `6a0612f`, sha256 `fcb2fc2c319b7652cfafe182927f13e4f68ae8321bc4c4cc4c6bda28f57eedf4`); r3 thay r2 (commit `0d80f45`, sha256 `f16c00227d7643554fe00116deef53cf6367d9c094bfd9ebd4419c3e95d69621`), bản ấy thay r1 (commit `7582454`, sha256 `3ca1c75001d96e46e342a042f343ca192fba5626298fc118e5ce0932a8c8661f`). Review đặc tả Codex lượt 1 (`wp1462-spec-review-1`): 8 finding P2 (B4-S01…B4-S08), r2 sửa. Lượt 2 (`wp1462-spec-review-2`): 7/8 đóng, B4-S05 đóng một phần, thêm B4-S09, B4-S10 (P2) và B4-S11 (P3); r3 sửa cả bốn. Lượt 3 (`wp1462-spec-review-3`): B4-S09, B4-S11 đóng; B4-S05 và B4-S10 đóng một phần; thêm B4-S12 (P2); r4 sửa cả ba. Lượt 4 (`wp1462-spec-review-4`, có slug lớp theo protocol §8.3): B4-S12 đóng; còn ba lớp P2 — `b4-predicate-mutation-proof` (B4-S05, lượt thứ tư), `b4-sensitive-size-authority` (B4-S10), `b4-eligibility-permission-contract` (B4-S13, mới); r5 sửa THEO LỚP, theo quyết định checkpoint §12 của điều phối tại `https://github.com/ducthangho/tra-luat/issues/1462#issuecomment-7046200733`. Bảng đối chiếu ở mục "Thay đổi". Dòng `tran_kich_thuoc_sensitive` ở đầu tệp kích hoạt trần `ADR-0053`; OID đã đo lúc soạn r3 (16:55Z 20-11-2026): tệp ADR có ở OID ấy, vắng ở cha thứ nhất `25cda362`, và OID nằm trên chuỗi first-parent của `origin/master` (kho không shallow). Đặc tả Packet #1462, vai B4 của Mission #1172 theo **kế hoạch nguồn r4** (`ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md`, nhánh `ops/wp1172-plan-r4`, sha256 `0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe`). Quyết định chủ kho: Mission r84 (`owner_decisions.Q9`: (a)–(d) theo khuyến nghị); thẩm quyền soạn đặc tả và trần: Mission r85 (`packet_graph` vai B4, `envelope.provider_budgets.per_new_packet`, `r85_constraints`). Mọi tham chiếu "§" là mục của kế hoạch r4; nơi đặc tả này và kế hoạch khác nhau thì **đặc tả này thắng** cho packet này, và mọi chỗ khác chữ kế hoạch được liệt kê ở mục "Chỗ khác chữ kế hoạch". Rủi ro: nhạy cảm (tệp nóng `.claude/dev/packet_loop.py`, cổng merge). Nền đo: `origin/master` = `0f9aa2a2cc697129e1f5be72feddf60986286865` (đo 16:10Z 20-11-2026); blob `.claude/dev/packet_loop.py` = `3db1abae`, `ops/ci_duong_nhanh.py` = `e43f514c`, `.github/workflows/ci.yml` = `a1db88d9` tại commit ấy.
+Trạng thái: `proposed`, CHƯA đóng băng. Thay r5 (cùng đường dẫn, commit `a6ae5d1`, sha256 `2fc80aa0ff20f0ba17c775807dfb7beb5dab21a5567820f7135fc557bd3f7416`); r5 thay r4 (commit `0cfb924`, sha256 `4952e70fca6fb23de56703dc8022d7fd1f841f6514884ac8c70786e687b0277e`); r4 thay r3 (commit `6a0612f`, sha256 `fcb2fc2c319b7652cfafe182927f13e4f68ae8321bc4c4cc4c6bda28f57eedf4`); r3 thay r2 (commit `0d80f45`, sha256 `f16c00227d7643554fe00116deef53cf6367d9c094bfd9ebd4419c3e95d69621`), bản ấy thay r1 (commit `7582454`, sha256 `3ca1c75001d96e46e342a042f343ca192fba5626298fc118e5ce0932a8c8661f`). Review đặc tả Codex lượt 1 (`wp1462-spec-review-1`): 8 finding P2 (B4-S01…B4-S08), r2 sửa. Lượt 2 (`wp1462-spec-review-2`): 7/8 đóng, B4-S05 đóng một phần, thêm B4-S09, B4-S10 (P2) và B4-S11 (P3); r3 sửa cả bốn. Lượt 3 (`wp1462-spec-review-3`): B4-S09, B4-S11 đóng; B4-S05 và B4-S10 đóng một phần; thêm B4-S12 (P2); r4 sửa cả ba. Lượt 4 (`wp1462-spec-review-4`, có slug lớp theo protocol §8.3): B4-S12 đóng; còn ba lớp P2 — `b4-predicate-mutation-proof` (B4-S05, lượt thứ tư), `b4-sensitive-size-authority` (B4-S10), `b4-eligibility-permission-contract` (B4-S13, mới); r5 sửa THEO LỚP, theo quyết định checkpoint §12 của điều phối tại `https://github.com/ducthangho/tra-luat/issues/1462#issuecomment-7046200733`. Lượt 5 (`wp1462-spec-review-5`): `b4-sensitive-size-authority` và `b4-eligibility-permission-contract` đóng; `b4-predicate-mutation-proof` tái diễn lần thứ năm dù đã đổi sang kiểm kê vị từ; thêm `b4-final-head-evidence-cycle` (B4-S14, P2). r6 theo quyết định chủ kho [E1+E2] (chat 20-11-2026, "Rút về luật protocol"): RÚT kiểm kê vị từ, sáu luật L-1…L-6 và mọi ma trận khỏi đặc tả, và sửa B4-S14. Bảng đối chiếu ở mục "Thay đổi". Dòng `tran_kich_thuoc_sensitive` ở đầu tệp kích hoạt trần `ADR-0053`; OID đã đo lúc soạn r3 (16:55Z 20-11-2026): tệp ADR có ở OID ấy, vắng ở cha thứ nhất `25cda362`, và OID nằm trên chuỗi first-parent của `origin/master` (kho không shallow). Đặc tả Packet #1462, vai B4 của Mission #1172 theo **kế hoạch nguồn r4** (`ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md`, nhánh `ops/wp1172-plan-r4`, sha256 `0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe`). Quyết định chủ kho: Mission r84 (`owner_decisions.Q9`: (a)–(d) theo khuyến nghị); thẩm quyền soạn đặc tả và trần: Mission r85 (`packet_graph` vai B4, `envelope.provider_budgets.per_new_packet`, `r85_constraints`). Mọi tham chiếu "§" là mục của kế hoạch r4; nơi đặc tả này và kế hoạch khác nhau thì **đặc tả này thắng** cho packet này, và mọi chỗ khác chữ kế hoạch được liệt kê ở mục "Chỗ khác chữ kế hoạch". Rủi ro: nhạy cảm (tệp nóng `.claude/dev/packet_loop.py`, cổng merge). Nền đo: `origin/master` = `0f9aa2a2cc697129e1f5be72feddf60986286865` (đo 16:10Z 20-11-2026); blob `.claude/dev/packet_loop.py` = `3db1abae`, `ops/ci_duong_nhanh.py` = `e43f514c`, `.github/workflows/ci.yml` = `a1db88d9` tại commit ấy.
 
 Đặc tả này KHÔNG dựng lại cơ chế nào kế hoạch đã rút: không kho uỷ quyền do máy kiểm (biến có thế hệ, comment của chủ kho, tệp git do chủ kho merge — R4-08, R4-19…R4-24, §12 (15)); không lấy log CI làm nguồn giá trị công tắc (R4-25, §12 (17)); không trạng thái `FULL` buộc mọi PR chạy đủ (§12 (16), Q9(c)); không `pull_request_target` (§12 (14)); không vị từ theo `updated_at`.
 
@@ -136,194 +136,32 @@ Luật đóng băng (theo quyết định điều phối sau review lượt 1; c
 ## Nghiệm thu
 
 ### Giàn thử (bắt buộc, tự nó có ca kiểm)
-- **GT-1 Đồ giả chính sách.** Thay `_rest_get` (tầng 6b, chỉ phục vụ đọc công tắc) trong tiến trình bằng đồ giả GIỮ trạng thái (đổi được giá trị giữa hai lần đọc; trạng thái nằm trong TỆP để sống qua tiến trình; ghi nhật ký mọi yêu cầu: phương thức, URL, tên header). Dùng cho mọi ca của nhóm Q, C, P, O.
-- **GT-2 Tầng vận chuyển THẬT.** Các ca nhóm V gọi chính hàm `_rest_get` thật tới máy chủ HTTP cục bộ trên `127.0.0.1` do ca dựng (không TLS, không proxy cho loopback, không kết nối ra ngoài); máy chủ ghi nhật ký yêu cầu nhận được. Đồ giả GT-1 KHÔNG được dùng ở nhóm V.
+- **GT-1 Đồ giả chính sách.** Thay `_rest_get` (tầng 6b, chỉ phục vụ đọc công tắc) trong tiến trình bằng đồ giả GIỮ trạng thái (đổi được giá trị giữa hai lần đọc; trạng thái nằm trong TỆP để sống qua tiến trình; ghi nhật ký mọi yêu cầu: phương thức, URL, tên header). Dùng cho mọi ca về quyết định của K2b và về chính sách đọc công tắc (mục 4, 5, 6a).
+- **GT-2 Tầng vận chuyển THẬT.** Các ca về tầng vận chuyển (mục 6b) gọi chính hàm `_rest_get` thật tới máy chủ HTTP cục bộ trên `127.0.0.1` do ca dựng (không TLS, không proxy cho loopback, không kết nối ra ngoài); máy chủ ghi nhật ký yêu cầu nhận được. Đồ giả GT-1 KHÔNG được dùng ở các ca ấy.
 - **GT-3 Tiến trình con có giàn.** Một trình bọc chạy ở tiến trình MỚI: nạp `packet_loop.py` đang thử, cài đồ giả GT-1 đọc trạng thái từ tệp, rồi gọi đúng điểm vào CLI (`main`) với đối số `kiem-merge`. CHỈ trình bọc này được chạy `kiem-merge` ở tiến trình con mà không đặt biến cấm đọc.
 - **GT-4 Cấm mạng thật.** Mọi lượt `kiem-merge` bằng tiến trình con KHÁC GT-3 đều đặt `PACKET_LOOP_CAM_DOC_CONG_TAC=1`. Trong các ca trong-tiến-trình và trong GT-3, mọi kết nối socket tới địa chỉ không phải loopback ném một lớp lỗi riêng và được đếm; ĐỎ khi bộ đếm ấy khác 0 ở bất kỳ ca nào. Ca tự kiểm: một lời gọi cố ý tới địa chỉ ngoài loopback phải bị chặn và được đếm.
-- **GT-5 Bộ phân loại của fixture** là tệp `ops/ci_duong_nhanh.py` do ca test đặt vào `origin/master` của kho fixture. Bộ test KHÔNG đọc `ops/ci_duong_nhanh.py` thật (tệp ấy ngoài `PHU_THUOC_PACKET_LOOP`). Ngoài các bản giả tối giản cho từng vị từ, phải có MỘT **bộ sinh hai kênh** làm đúng cả hai nghĩa vụ của mục 5: nó tính điều kiện cấu trúc từ diff (theo một luật đường dẫn đơn giản của fixture), in `dk_*` trên stdout không phụ thuộc biến quyền, và ghi quyết định CI vào `GITHUB_OUTPUT` chỉ là giảm khi biến quyền (tên thay thế của fixture) mang đúng chuỗi cho phép. Tiêu chí 11 dùng bộ sinh này.
-- **GT-6 Tín dụng giết.** Ca mới mang tiền tố `cong_b4_`; khẳng định đích của mỗi ca ném lớp riêng `ChotB4(AssertionError)`, định nghĩa trong tệp test và không mã sản phẩm nào ném được. Một đột biến của ma trận chỉ được tính GIẾT khi ca đích của nó đỏ bằng `ChotB4` do chính ca ấy ném; mọi kết cục khác — CLI sập, `AssertionError` thường, lỗi dựng fixture, hết hạn, ca khác đỏ — là TÍN DỤNG GIẢ. Bốn ca tự kiểm bộ phân hạng, mỗi ca một kết cục giả: đột biến làm CLI sập; đột biến làm bước dựng fixture ném; đột biến làm ca quá hạn; đột biến làm đỏ một ca KHÁC ca đích — cả bốn phải ra TÍN DỤNG GIẢ. Cách phân hạng của các đột biến cũ không đổi.
-- **GT-7 Đối chứng khoẻ.** Bốn fixture chuẩn, mỗi cái đạt rc 0 với mọi K0–K7 đạt: ĐC-du (8 mảnh `du`); ĐC-α (mảnh `skipped`, M xếp `duong_nhanh`); ĐC-β (mảnh `skipped`, M in `dk_bo_moi=co`, công tắc `bo_moi` khớp); ĐC-δ (bằng chứng `dich`, M in `dk_che_do_dich=co`, có run audit `success` đúng H, công tắc `che_do_dich` khớp). Điều kiện chung của bốn fixture: `--repo` và mọi readback mang kho `ducthangho/tra-luat` (bộ dựng `_c1106` có tham số `repo`); `origin/master` của kho fixture chứa bộ phân loại giả (GT-5) và đúng blob `packet_loop.py` đang thử (cho 7b); diff của PR NẰM NGOÀI vùng M9 và không kích hoạt K6 (chỉ tệp tài liệu), nên K7 đạt mà không cần run audit hay dòng miễn — lớp do bộ phân loại giả quyết định, không do diff. Riêng ĐC-δ có thêm biến thể ĐC-δ-M9: diff chạm vùng M9, kèm run audit và dòng miễn Windows, vẫn đạt. Mỗi ca đích của ma trận là MỘT thay đổi so với đúng một fixture chuẩn (luật L-1), nên kết cục của nó chỉ do vị từ đang thử.
+- **GT-5 Bộ phân loại của fixture** là tệp `ops/ci_duong_nhanh.py` do ca test đặt vào `origin/master` của kho fixture. Bộ test KHÔNG đọc `ops/ci_duong_nhanh.py` thật (tệp ấy ngoài `PHU_THUOC_PACKET_LOOP`). Ngoài các bản giả tối giản cho từng ca, phải có MỘT **bộ sinh hai kênh** làm đúng cả hai nghĩa vụ của mục 5: nó tính điều kiện cấu trúc từ diff (theo một luật đường dẫn đơn giản của fixture), in `dk_*` trên stdout không phụ thuộc biến quyền, và ghi quyết định CI vào `GITHUB_OUTPUT` chỉ là giảm khi biến quyền (tên thay thế của fixture) mang đúng chuỗi cho phép. Tiêu chí 11 dùng bộ sinh này.
+- **GT-6 Tín dụng giết.** Ca mới mang tiền tố `cong_b4_`; khẳng định đích của mỗi ca ném lớp riêng `ChotB4(AssertionError)`, định nghĩa trong tệp test và không mã sản phẩm nào ném được. Một đột biến mới của packet này chỉ được tính GIẾT khi ca đích của nó đỏ bằng `ChotB4` do chính ca ấy ném; mọi kết cục khác — CLI sập, `AssertionError` thường, lỗi dựng fixture, hết hạn, ca khác đỏ — là TÍN DỤNG GIẢ. Bốn ca tự kiểm bộ phân hạng, mỗi ca một kết cục giả: đột biến làm CLI sập; đột biến làm bước dựng fixture ném; đột biến làm ca quá hạn; đột biến làm đỏ một ca KHÁC ca đích — cả bốn phải ra TÍN DỤNG GIẢ. Cách phân hạng của các đột biến cũ không đổi.
+- **GT-7 Đối chứng khoẻ.** Bốn fixture chuẩn, mỗi cái đạt rc 0 với mọi K0–K7 đạt: ĐC-du (8 mảnh `du`); ĐC-α (mảnh `skipped`, M xếp `duong_nhanh`); ĐC-β (mảnh `skipped`, M in `dk_bo_moi=co`, công tắc `bo_moi` khớp); ĐC-δ (bằng chứng `dich`, M in `dk_che_do_dich=co`, có run audit `success` đúng H, công tắc `che_do_dich` khớp). Điều kiện chung của bốn fixture: `--repo` và mọi readback mang kho `ducthangho/tra-luat` (bộ dựng `_c1106` có tham số `repo`); `origin/master` của kho fixture chứa bộ phân loại giả (GT-5) và đúng blob `packet_loop.py` đang thử (cho 7b); diff của PR NẰM NGOÀI vùng M9 và không kích hoạt K6 (chỉ tệp tài liệu), nên K7 đạt mà không cần run audit hay dòng miễn — lớp do bộ phân loại giả quyết định, không do diff. Riêng ĐC-δ có thêm biến thể ĐC-δ-M9: diff chạm vùng M9, kèm run audit và dòng miễn Windows, vẫn đạt. Bốn fixture này là điểm xuất phát, không phải khuôn bắt buộc: ca nào cần dựng khác (ví dụ thêm một run thứ hai để K2 vẫn đạt) thì dựng, miễn nó có đối chứng khoẻ của chính nó.
 
-### Kiểm kê vị từ hợp đồng (chuẩn tắc) và luật chứng minh
-Từ r5, đặc tả KHÔNG đóng băng ma trận ca–đột biến. Bốn lượt review liên tiếp tìm ra lỗ trong ma trận liệt kê sẵn (lớp `b4-predicate-mutation-proof`, lượt 1–4), nên theo quyết định checkpoint §12 của điều phối (`https://github.com/ducthangho/tra-luat/issues/1462#issuecomment-7046200733`) cách làm đổi: đặc tả đóng băng **KIỂM KÊ các vị từ độc lập** của hợp đồng và **LUẬT chứng minh**; executor dựng ma trận cụ thể và chứng minh từng cặp bằng CHẠY; reviewer mã kiểm ma trận trên H. Bảng 96 hàng của r4 bị RÚT khỏi phần chuẩn tắc.
+### Luật chung về ca và đột biến (không liệt kê trong đặc tả)
+Theo quyết định chủ kho [E1+E2] (chat 20-11-2026, "Rút về luật protocol"), đặc tả này KHÔNG đóng băng danh sách ca, ma trận ca–đột biến hay kiểm kê vị từ nào. Lớp `b4-predicate-mutation-proof` đã tái diễn ở cả năm lượt review đặc tả, qua ba hình thức (danh sách 28 đột biến ở r1, bảng hàng ở r2–r4, kiểm kê 114 vị từ cùng sáu luật ở r5); cả ba đều bị rút. Thứ áp dụng là luật chung của kho cho mọi chốt mới:
+- mỗi chốt mới mà hợp đồng ở mục 2–9 đặt ra có ca HAI CHIỀU (một ca chốt phải chặn, một đối chứng khoẻ nó phải cho qua);
+- nơi phép đo có ba kết cục thì có ca cho cả BA trạng thái (đạt · không đạt · không đo được), và hai trạng thái cùng dẫn về đỏ được phân biệt bằng dòng chẩn đoán của mục 9;
+- mỗi chốt mới có một ĐỘT BIẾN RIÊNG trong bảng `MUTANTS`, phải làm đúng ca của chốt ấy đỏ, phân hạng bằng lớp ngoại lệ riêng của ca (GT-6).
 
-**Luật chứng minh (áp cho MỖI vị từ trong kiểm kê):**
-- **L-1 Một ca đích riêng.** Mỗi vị từ có ít nhất một ca đích `cong_b4_*` dành riêng cho nó: một fixture chuẩn (GT-7) sửa ĐÚNG MỘT chỗ làm vị từ ấy đổi giá trị, trong khi mọi vị từ khác và mọi điều kiện K0–K7 giữ nguyên kết cục (ca ghi lại kết cục K0–K7 và đòi chúng đạt, trừ vị từ Q01). Vị từ ghi "×2 chế độ" cần hai ca (một `du`, một `dich`); vị từ ghi "×4 đường thoát" cần bốn ca (trả thường · kết cục `la` · hết hạn · `SystemExit` hoặc ngoại lệ giữa chừng).
-- **L-2 Khẳng định TRẠNG THÁI, không chỉ rc.** Ca đích khẳng định đúng giá trị quan sát được ghi ở cột "quan sát" (`LAN_G5.che_do_thuc_chay`, `LAN_G5.buoc`, `LAN_G5.lop`, `CONG_TAC.trang_thai`, số yêu cầu trong nhật ký, trạng thái hệ tệp/kho), cộng rc. Hai trạng thái cùng dẫn về đỏ (ví dụ `khong_khop` và `khong_doc_duoc`, `la` và `khong_giam`) phải được phân biệt bằng khẳng định ấy.
-- **L-3 Một đột biến riêng.** Mỗi vị từ có một mục riêng trong bảng `MUTANTS`, gỡ hoặc đảo ĐÚNG vị từ ấy. Dưới đột biến, (mọi) ca đích của vị từ phải đổi giá trị quan sát và ném `ChotB4` (GT-6). Đột biến của vị từ này không được dùng làm bằng chứng cho vị từ khác.
-- **L-4 Chứng minh bằng CHẠY.** Với từng cặp, executor chạy ca đích dưới mã đúng và dưới đột biến, rồi ghi vào `do/KET_QUA.md` một dòng: ID vị từ · tên ca · fixture nền · giá trị quan sát dưới mã đúng · tên đột biến · giá trị quan sát dưới đột biến · lớp ngoại lệ · phân hạng. Đó là ma trận của packet. Reviewer mã chạy lại độc lập trên H và đối chiếu ma trận với kiểm kê: thiếu vị từ, thiếu ca, thiếu đột biến, đột biến không đổi được giá trị quan sát, hay chỉ có tín dụng giả đều là finding.
-- **L-5 Kiểm kê là SÀN.** Câu chuẩn tắc nào ở mục 3–9 chứa một điều kiện mà gỡ riêng nó ra làm đổi một giá trị quan sát được thì là một vị từ, dù có tên trong bảng dưới hay không. Executor gặp vị từ như thế thì THÊM vào ma trận (ID tiếp theo của nhóm) và báo điều phối; không vì thế mà sửa hợp đồng. Reviewer mã rà chiều ngược lại.
-- **L-6 Không lối tắt.** Vị từ không chứng minh được (đột biến tương đương, không dựng được ca cô lập) ⇒ executor DỪNG và báo; không bỏ vị từ, không mượn ca khác, không đổi kỳ vọng ca cũ, không nới chốt sản xuất.
-
-**Quan sát được** = rc; ba loại dòng chẩn đoán của mục 9; nhật ký yêu cầu của GT-1; nhật ký máy chủ của GT-2; số lượt chạy bộ phân loại và số lời git của tự kiểm (đếm trong tiến trình); trạng thái thư mục tạm và kho fixture. Ký hiệu: H = `--head`; R, J, N_k, S_DU, S_DICH như mục 3; M, C như mục 5.
-
-**Nhóm E — bằng chứng G5 (mục 3).** Nguồn: `--workflow-runs`, `--workflow-jobs`, `--head`, `--repo`. Quan sát: dưới `--siet-g5-du`, rc và `LAN_G5.che_do_thuc_chay` (`du` ⇒ đạt, không dòng nào).
-
-| ID | Vị từ (đúng khi) |
-|---|---|
-| E01 | run là ứng viên chỉ khi `path == ".github/workflows/ci.yml"` |
-| E02 | … và `head_sha == H` (của RUN) |
-| E03 | … và `repository.full_name == --repo` |
-| E04 | R là ứng viên có `id` LỚN nhất; không có ứng viên ⇒ `khac` |
-| E05 | job ∈ J chỉ khi `job.run_id == R.id` |
-| E06 | job ∈ J chỉ khi `job.run_attempt == R.run_attempt` |
-| E07 | với mỗi k, số job trong J tên N_k ≥ 1 |
-| E08 | với mỗi k, số job trong J tên N_k ≤ 1 |
-| E09 | lượng từ là MỌI k ∈ {0,…,7}: đủ tám chỉ số |
-| E10 | `job.head_sha == H` (×2 chế độ) |
-| E11 | `job.status == "completed"` (×2 chế độ) |
-| E12 | `job.conclusion == "success"` (×2 chế độ) |
-| E13 | `job.steps` có mặt và là list (×2 chế độ) |
-| E14 | mọi phần tử của `steps` là object (×2 chế độ) |
-| E15 | mọi phần tử của `steps` có `name` kiểu chuỗi (×2 chế độ) |
-| E16 | số bước mang tên bước chính ≥ 1 (×2 chế độ) |
-| E17 | số bước mang tên bước chính ≤ 1 (×2 chế độ) |
-| E18 | bước chính có `status == "completed"` (×2 chế độ) |
-| E19 | bước chính có `conclusion == "success"` (×2 chế độ) |
-| E20 | không bước nào mang tên bước kia có `conclusion == "success"` (×2 chế độ) |
-| E21 | ánh xạ chế độ: `du` ⇔ thoả E07–E20 với (chính, kia) = (S_DU, S_DICH); `dich` ⇔ thoả với (S_DICH, S_DU); còn lại `khac` |
-| E22 | N_k, S_DU, S_DICH so đúng từng ký tự với hằng của mục 3 (tên lệch một ký tự không khớp) |
-
-**Nhóm Q — thứ tự quyết định (mục 4, 8).** Nguồn: kết quả K2, cờ `--siet-g5-du`, nhóm E, lớp của nhóm C, trạng thái của nhóm P, `--dot-bien-du-*`, `--chu-kho-comment`.
-
-| ID | Vị từ (đúng khi) | Quan sát |
-|---|---|---|
-| Q01 | K2b chạy ⇔ K2 không có dòng thiếu | có/không hiện vật K2b |
-| Q02 | `du` ⇒ đạt và không làm gì thêm | rc 0; 0 dòng chẩn đoán; 0 lời git tự kiểm; 0 lượt phân loại; 0 yêu cầu |
-| Q03 | không `du` và có cờ siết ⇒ đỏ ngay | `buoc=siet`; 0 tự kiểm; 0 lượt phân loại; 0 yêu cầu |
-| Q04 | tự kiểm chạy TRƯỚC bộ phân loại; tự kiểm không đạt ⇒ đỏ | `buoc=tu_kiem`, `lop=chua_tinh`; 0 lượt phân loại; 0 yêu cầu |
-| Q05 | lớp `la` ⇒ đỏ | `lop=la`, `buoc=tinh_lai`; 0 yêu cầu |
-| Q06 | lớp `khong_giam` ⇒ đỏ | `lop=khong_giam`, `buoc=tinh_lai`; 0 yêu cầu |
-| Q07 | lớp `duong_nhanh` ⇒ đạt, không đọc công tắc | rc 0; `lop=duong_nhanh`; 0 yêu cầu |
-| Q08 | lớp `bo_moi` ⇒ đạt ⇔ trạng thái công tắc là `khop` | `buoc=cong_tac`; `CONG_TAC.trang_thai` |
-| Q09 | `che_do_dich` (i): `che_do_thuc_chay == dich` | sai ⇒ `buoc=bang_chung`; 0 yêu cầu |
-| Q10 | `che_do_dich` (ii): có run `ci-dot-bien-du.yml` `success` với `head_sha == H` theo phép đo của K7 nhánh run | sai ⇒ `buoc=audit`; 0 yêu cầu |
-| Q11 | (ii) KHÔNG được thoả bằng dòng miễn `full_mutant_audit: <H> mien` | `buoc=audit` dù K7 đạt nhờ dòng miễn |
-| Q12 | (ii) không thoả khi thiếu `--dot-bien-du-runs` hoặc `--dot-bien-du-jobs` | `buoc=audit` |
-| Q13 | `che_do_dich` (iii): trạng thái công tắc của lớp là `khop` | sai ⇒ `buoc=cong_tac` |
-| Q14 | yêu cầu đọc công tắc của `che_do_dich` được gửi ⇔ (i) ∧ (ii) | số yêu cầu: 0 khi (i) sai; 0 khi (i) đúng mà (ii) sai; 1 khi cả hai đúng |
-
-**Nhóm S — tự kiểm cây (mục 7).** Nguồn: git của kho `--root`, tệp `packet_loop.py` đang chạy. Quan sát: `buoc=tu_kiem` và rc; với S07 là rc 0.
-
-| ID | Vị từ (đúng khi) |
-|---|---|
-| S01 | `git ls-remote origin refs/heads/master` thoát rc 0 |
-| S02 | đầu ra của nó là đúng một dòng và OID bằng OID cục bộ |
-| S03 | `git rev-parse refs/remotes/origin/master^{commit}` thoát rc 0 |
-| S04 | `git hash-object --path=…` trên tệp đang chạy thoát rc 0 (không đo được ⇒ từ chối) |
-| S05 | `git rev-parse M:.claude/dev/packet_loop.py` thoát rc 0 (không đo được ⇒ từ chối) |
-| S06 | hai OID của S04 và S05 bằng nhau |
-| S07 | băm của S04 đi qua bộ lọc git theo đường dẫn (bản CRLF của đúng blob vẫn khớp) |
-| S08 | tự kiểm không fetch và không đổi ref nào |
-
-**Nhóm C — hàm chạy và đọc đầu ra (mục 5).** Nguồn: object git của kho `--root`; rc và stdout dạng byte của tiến trình con. Quan sát: `LAN_G5.lop`; với C30, C31 là thư mục tạm và kho.
-
-| ID | Vị từ (đúng khi) |
-|---|---|
-| C01 | điểm gọi sản xuất truyền `cay_ma == goc == M` (không phải `--base`) |
-| C02 | điểm gọi sản xuất truyền `dau == H` |
-| C03 | `merge-tree` của (`goc`, `dau`) thoát rc 0; xung đột hoặc lỗi ⇒ `la` |
-| C04 | C có đúng hai cha (`goc`, `dau`) theo thứ tự ấy và cây là kết quả của C03 |
-| C05 | tệp được chạy là blob `cay_ma:ops/ci_duong_nhanh.py` (không phải cây làm việc, không phải H) |
-| C06 | blob ấy vắng ⇒ `la` |
-| C07 | cây tạm là cây của `cay_ma` (bộ phân loại đọc tệp anh em thì đọc bản tại M) |
-| C08 | môi trường tiến trình con = danh sách cho phép ∪ bốn biến `CI_DUONG_NHANH_*` của mục 5 |
-| C09 | tiến trình con chạy với `-I` |
-| C10 | quá hạn 120 s ⇒ `la` |
-| C11 | rc của tiến trình con == 0; khác ⇒ `la` |
-| C12 | stdout là UTF-8 hợp lệ; không ⇒ `la` |
-| C13 | dòng được tách tại byte LF |
-| C14 | đúng một byte CR ở cuối dòng được bỏ (khung CRLF được nhận) |
-| C15 | không byte nào khác bị cắt (CR thứ hai, dấu cách, tab thuộc giá trị) |
-| C16 | khoá chỉ khớp ở đầu dòng và giá trị là phần còn lại của trọn dòng |
-| C17 | số dòng `che_do` ≥ 1; không ⇒ `la` |
-| C18 | số dòng `che_do` ≤ 1; không ⇒ `la` |
-| C19 | giá trị `che_do` ∈ {`day_du`, `duong_nhanh`}; không ⇒ `la` |
-| C20 | số dòng `dk_bo_moi` ≤ 1; không ⇒ `la` |
-| C21 | giá trị `dk_bo_moi` ∈ {`co`, `khong`}; không ⇒ `la` |
-| C22 | số dòng `dk_che_do_dich` ≤ 1; không ⇒ `la` |
-| C23 | giá trị `dk_che_do_dich` ∈ {`co`, `khong`}; không ⇒ `la` |
-| C24 | `duong_nhanh` và không khoá `dk_*` nào bằng `co` ⇒ lớp `duong_nhanh` |
-| C25 | `duong_nhanh` kèm một khoá `dk_*` bằng `co` ⇒ `la` |
-| C26 | `day_du`, `dk_bo_moi=co`, `dk_che_do_dich` khác `co` ⇒ `bo_moi` |
-| C27 | `day_du`, `dk_che_do_dich=co`, `dk_bo_moi` khác `co` ⇒ `che_do_dich` |
-| C28 | `day_du` và cả hai khoá bằng `co` ⇒ `la` |
-| C29 | `day_du` và không khoá nào bằng `co` (vắng hoặc `khong`) ⇒ `khong_giam` |
-| C30 | sau lượt gọi không còn thư mục tạm nào của nó (×4 đường thoát) |
-| C31 | sau lượt gọi kho `--root` không thêm ref, worktree, object (×4 đường thoát) |
-
-**Nhóm P — chính sách đọc công tắc (mục 2, 6a, 8).** Nguồn: hằng của mục 2; `--repo`; biến môi trường `GH_TOKEN` và `PACKET_LOOP_CAM_DOC_CONG_TAC`; bộ ba (mã, header, thân) do tầng 6b trả. Quan sát: `CONG_TAC.trang_thai`, nhật ký GT-1, rc.
-
-| ID | Vị từ (đúng khi) |
-|---|---|
-| P01 | `--repo == "ducthangho/tra-luat"`; không ⇒ `khong_doc_duoc`, 0 yêu cầu |
-| P02 | `PACKET_LOOP_CAM_DOC_CONG_TAC` rỗng hoặc vắng; không ⇒ `khong_doc_duoc`, 0 yêu cầu |
-| P03 | mỗi lượt đọc gửi đúng một yêu cầu |
-| P04 | URL bằng đúng hằng của mục 6a với tên biến của ĐÚNG lớp (bảng mục 2) |
-| P05 | có header `Authorization: Bearer <GH_TOKEN>` ⇔ `GH_TOKEN` khác rỗng |
-| P06 | giá trị `GH_TOKEN` không xuất hiện trong stdout và stderr |
-| P07 | mã == 200 |
-| P08 | có ít nhất một header mà tên, sau khi hạ chữ thường, bắt đầu bằng `x-github-` |
-| P09 | độ dài thân ≤ 65 536 byte |
-| P10 | thân giải mã được bằng UTF-8 CHẶT, và việc giải mã ấy xảy ra TRƯỚC khi phân tích JSON (thân UTF-16 hay UTF-32, có BOM hay không, không qua) |
-| P11 | chuỗi đã giải mã là JSON hợp lệ |
-| P12 | không object nào trong JSON có khoá trùng |
-| P13 | giá trị gốc của JSON là object |
-| P14 | `name` có mặt và kiểu chuỗi |
-| P15 | `name` == tên biến của lớp |
-| P16 | `value` có mặt và kiểu chuỗi |
-| P17 | `value` == chuỗi cho phép của ĐÚNG lớp, so bằng `==` (không hạ hoa thường, không cắt khoảng trắng; chuỗi rỗng và chuỗi của lớp khác không khớp) |
-| P18 | P07–P16 đúng và P17 đúng ⇒ `khop`; P07–P16 đúng và P17 sai ⇒ `khong_khop` |
-| P19 | mã == 404 và P08 đúng ⇒ `vang_hoac_khong_quyen` |
-| P20 | mọi trường hợp còn lại, kể cả tầng 6b ném lỗi ⇒ `khong_doc_duoc` |
-| P21 | khi không `khop`, không nguồn nào khác (readback, comment, biến môi trường, tệp) được dùng để suy ra giá trị |
-
-**Nhóm V — tầng vận chuyển (mục 6b).** Nguồn: đối số của `_rest_get`; phản hồi của máy chủ loopback (GT-2). Quan sát: nhật ký máy chủ, giá trị trả về hoặc lỗi ném.
-
-| ID | Vị từ (đúng khi) |
-|---|---|
-| V01 | phương thức là GET |
-| V02 | yêu cầu không có thân |
-| V03 | phản hồi 3xx được trả nguyên mã; đích chuyển hướng nhận 0 yêu cầu |
-| V04 | số byte thân đọc về ≤ 65 537 |
-| V05 | tổng thời gian tường của lời gọi ≤ `han`; quá ⇒ ném lỗi vận chuyển |
-| V06 | lỗi kết nối hoặc TLS ⇒ ném lỗi vận chuyển (không trả bộ ba giả) |
-| V07 | mọi header truyền vào tới máy chủ nguyên giá trị |
-| V08 | không thử lại: máy chủ nhận đúng một yêu cầu kể cả khi trả 5xx |
-
-**Nhóm O — dòng chẩn đoán (mục 9).** Nguồn: trạng thái nội bộ của K2b. Quan sát: stdout.
-
-| ID | Vị từ (đúng khi) |
-|---|---|
-| O01 | có đúng một dòng `LAN_G5` ⇔ K2b đã chạy và `che_do_thuc_chay` ≠ `du` |
-| O02 | trường `che_do_thuc_chay` bằng giá trị của nhóm E |
-| O03 | trường `buoc` bằng bước ra quyết định theo bảng của mục 9 |
-| O04 | trường `lop` bằng lớp của nhóm C, hoặc `chua_tinh` khi dừng trước bước 4 |
-| O05 | trường `master` bằng M, hoặc `-` khi dừng trước bước 4 |
-| O06 | trường `ket_qua` là `dat` ⇔ K2b đạt |
-| O07 | có đúng một dòng `CONG_TAC` ⇔ K2b đã tới bước đọc công tắc (kể cả khi P01 hoặc P02 chặn việc gửi) |
-| O08 | `CONG_TAC.trang_thai`, `lop`, `bien` bằng trạng thái, lớp và tên biến thật |
-| O09 | có đúng một dòng `HIEU_LUC` ⇔ K2b đạt nhờ trạng thái `khop`; `den` = `doc_luc` + 30 phút |
-| O10 | ba loại dòng đi ra stdout thật và đứng trước dòng `ĐỦ ĐIỀU KIỆN MERGE` |
-
-Kiểm kê có 114 vị từ (đếm HÀNG mang ID: E 22, Q 14, S 8, C 31, P 21, V 8, O 10). Số ca đích tối thiểu theo L-1 là 114 + 11 (ca thứ hai của E10–E20) + 6 (ba ca thêm cho mỗi vị từ C30, C31) = 131. Việc "chỉ `khop` mới cho giảm" không phải vị từ riêng của nhóm P: nó là Q08 và Q13.
-
-**Ví dụ minh hoạ, KHÔNG chuẩn tắc** (để thấy hình dạng một dòng ma trận; executor không bị buộc theo đúng fixture này):
-- E05: nền ĐC-α + cờ siết; run R giữ năm job bắt buộc và không có job mảnh; một run khác giữ 8 mảnh `du` cùng attempt và H. Mã đúng: rc 12, `che_do_thuc_chay=khac`. Đột biến "bỏ so `run_id` khi lập J": rc 0.
-- P10: nền ĐC-β; thân là đúng JSON hợp lệ của biến nhưng mã hoá UTF-16 có BOM. Mã đúng: `trang_thai=khong_doc_duoc`. Đột biến "đưa thẳng byte cho bộ phân tích JSON": `trang_thai=khop`.
-- Q14: nền ĐC-δ; run audit mang `head_sha` khác H. Mã đúng: `buoc=audit`, 0 yêu cầu. Đột biến "gửi yêu cầu ngay sau (i)": 1 yêu cầu.
-- C30 (đường hết hạn): bộ phân loại giả treo quá hạn. Mã đúng: thư mục tạm của ca rỗng sau lượt gọi. Đột biến "chỉ dọn ở đường trả thường": còn thư mục.
+Việc bộ ca và bộ đột biến của executor có ĐỦ cho hợp đồng hay không được thẩm định ở REVIEW MÃ trên đúng H, bằng CHẠY: reviewer chạy ca và đột biến, đối chiếu với mục 2–9, và mọi chốt thiếu ca, thiếu đột biến hay chỉ có tín dụng giả là finding của review mã. Đặc tả không cam kết trước một con số ca hay đột biến nào.
 
 ### Tiêu chí
 1. **A/B không đổi hành vi (B-2), dựng trong MỘT lệnh.** Base = merge-base của H với `origin/master`. Tập fixture = MỌI ca hiện có đi qua bộ dựng `_c1106` (tại nền: 119 dòng chứa `_c1106_ca(` và 5 dòng chứa `_c1106(`, đếm DÒNG bằng `grep -c`, 16:10Z 20-11-2026; executor đếm lại theo CA tại base và báo con số cùng danh sách tên). Bộ dựng dùng chung chỉ được thêm bằng chứng `du` mặc định (8 job mảnh có bước S_DU `success`, đúng run/attempt/head), theo tiền lệ K7 của #1120. Mỗi fixture dựng MỘT lần, hai vế (`packet_loop.py` của base và của head, mỗi vế kèm `launcher.py` của chính nó) chạy trên cùng thư mục fixture. ĐỎ khi: một ca có rc, stdout hoặc stderr lệch một byte; hoặc số ca được so nhỏ hơn số ca đếm tại base.
 2. **A/B bề mặt đổi, với phép chiếu có định nghĩa và phân hoạch ĐỦ.** Cùng tập fixture của tiêu chí 1 ở HÌNH DẠNG CŨ (không job mảnh). Phép chiếu P bỏ khỏi đầu ra của head ĐÚNG các hiện vật của K2b: dòng stdout bắt đầu bằng `LAN_G5 `, `CONG_TAC ` hoặc `HIEU_LUC `; dòng stderr `THIẾU  K2b làn G5: …`; và tên `K2b làn G5` cùng dấu phân cách của nó trong dòng tổng kết. Mỗi ca thuộc ĐÚNG MỘT trong bốn lớp, xếp theo đầu ra của BASE bằng hai dấu hiệu đọc được (dòng stdout `ĐỦ ĐIỀU KIỆN MERGE trên …` và dòng tổng kết stderr `CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu …`), không suy "K2 đạt" từ việc vắng một dòng: (z) base KHÔNG có cả hai dòng ấy — lệnh thoát trước khi chạy điều kiện nào, K2 `not_run` (tại nền có ít nhất bốn ca: `cong_c_k1_anchor`, `cong_c_k1_yaml_hong`, `cong_c_k1_khoa_trung`, `cong_c_k1_tag_hong`, đều rc 2 vì lease hỏng; review lượt 3 đo) ⇒ head trùng byte với base ở rc, stdout, stderr, KHÔNG qua P, không hiện vật K2b nào; (a) base có dòng tổng kết và dòng ấy nêu `K2 CI` ⇒ head trùng byte với base, KHÔNG qua P; (b) base có dòng tổng kết và dòng ấy không nêu `K2 CI` ⇒ rc bằng nhau, P(head) trùng byte với base, và head có đúng một dòng `LAN_G5`, đúng một dòng `THIẾU` của K2b; (c) base có dòng `ĐỦ ĐIỀU KIỆN MERGE` ⇒ head rc 12, stdout là đúng một dòng `LAN_G5`, stderr là đúng dòng `THIẾU` của K2b và dòng tổng kết chỉ nêu K2b. Ca có cả hai dòng, hoặc không xếp được, ⇒ ĐỎ. Executor báo số ca từng lớp và tên các ca lớp (z); bốn ca nêu trên phải nằm trong (z). ĐỎ khi có lệch nào ngoài bốn khuôn ấy, hoặc có ca base đỏ mà head đạt (B-1). Bộ so có tự kiểm chạy cùng lệnh, ĐỎ nếu một ca tự kiểm sai: CHẤP NHẬN đúng hiện vật dự định ở (b) và (c), và đầu ra không đổi ở (z) và (a); TỪ CHỐI khi head thêm một dòng stdout không thuộc ba loại, khi có hai dòng `LAN_G5`, khi dòng `THIẾU` của một điều kiện khác đổi một ký tự, khi rc lệch ở (b), khi ca lớp (a) có bất kỳ hiện vật K2b nào, khi ca lớp (z) có thêm dòng `LAN_G5` hoặc dòng `THIẾU` của K2b, và khi thông báo lỗi lease của một ca lớp (z) đổi một ký tự. Thứ tự kiểm đối số và lease của `cmd_kiem_merge` không đổi: K2b không chạy trước chúng.
 3. **Mọi ca cũ giữ kỳ vọng.** Không ca nào của `packet_loop_test.py` bị xoá hay đổi rc/lý do kỳ vọng; thay đổi duy nhất ở phần cũ là bộ dựng dùng chung ở tiêu chí 1 và phần mở rộng bộ phân hạng ở GT-6. ĐỎ khi diff của tệp test chạm kỳ vọng của một ca cũ.
-4. **Ma trận vị từ.** Executor nộp trong `do/KET_QUA.md` ma trận theo luật L-1…L-6, phủ MỌI vị từ của kiểm kê (114 hàng tại r5) và mọi vị từ thêm theo L-5. ĐỎ khi: một vị từ không có ca đích riêng hoặc không có đột biến riêng; một ca đích chỉ khẳng định rc mà không khẳng định giá trị quan sát của vị từ (L-2); đột biến không đổi được giá trị quan sát của ca đích; tín dụng chỉ là tín dụng giả (GT-6); hoặc thiếu ca cho một chế độ / một đường thoát mà vị từ đòi. Tín dụng của một đột biến chỉ tính trên (các) ca đích của vị từ ấy; ca khác đỏ theo là bán kính, không tính và không bị cấm. Reviewer mã chạy lại độc lập trên H và đối chiếu ma trận với kiểm kê. Bảng đột biến của `packet_loop_test.py` KHÔNG thuộc `ci-dot-bien-du.yml`; nó chạy ở `packet-loop-dot-bien.yml` theo lịch sau merge, đọc kết quả lượt đầu tiên sau merge là việc ghi ở M8, không chặn merge.
+4. **Ca và đột biến theo luật chung.** Bộ ca `cong_b4_*` và các mục mới của bảng `MUTANTS` theo đúng mục "Luật chung về ca và đột biến". Các ca và đột biến mà §4 A+1 "Nghiệm thu B4" của kế hoạch nêu ĐÍCH DANH là mức tối thiểu phải có (đọc theo tên khoá và cấu trúc của đặc tả này; nơi kế hoạch nói "REST lỗi thì lấy log" thì đột biến tương ứng là lấy giá trị từ một nguồn do người gọi đưa). Executor nộp kết quả chạy từng cặp (tên đột biến · tên ca · lớp ngoại lệ · phân hạng) trong `do/KET_QUA.md`; reviewer mã chạy lại độc lập trên H. ĐỎ ở review mã khi một chốt của mục 2–9 không có ca hai chiều, không có đột biến riêng, hoặc đột biến của nó chỉ có tín dụng giả. Bảng đột biến của `packet_loop_test.py` KHÔNG thuộc `ci-dot-bien-du.yml`; nó chạy ở `packet-loop-dot-bien.yml` theo lịch sau merge, đọc kết quả lượt đầu tiên sau merge là việc ghi ở M8, không chặn merge.
 5. **Ca cấu trúc `ci.yml`, bền qua PR6.** Một hàm kiểm nhận văn bản YAML và trả đạt/không: trong job `gate-cong-cu`, ma trận `manh` đúng 0..7, số bước tên S_DU = 1, số bước tên S_DICH ∈ {0, 1}. Chạy trên sáu YAML tổng hợp: chỉ bước đủ (hình dạng hôm nay) ⇒ đạt; bước đủ + một bước đích (hình dạng PR6 phải có) ⇒ đạt; không bước đủ ⇒ không đạt; hai bước đủ ⇒ không đạt; hai bước đích ⇒ không đạt; ma trận thiếu mảnh 7 ⇒ không đạt. Và chạy trên `.github/workflows/ci.yml` THẬT ⇒ đạt; trong kho có `.git` mà thiếu tệp ⇒ ĐỎ, không bỏ qua. Ca này KHÔNG cấm bước đích: PR6 thêm bước ấy mà không phải sửa `packet_loop_test.py`.
 6. **Tiến trình mới (GT-3), bốn lượt nối tiếp trên cùng tệp trạng thái của ĐC-β:** đúng chuỗi ⇒ ĐẠT; đổi giá trị ⇒ ĐỎ; xoá biến ⇒ ĐỎ; đặt lại đúng chuỗi ⇒ ĐẠT. Mỗi lượt là một tiến trình riêng; nhật ký ghi đúng một yêu cầu mỗi lượt; bộ đếm kết nối ngoài loopback bằng 0. Đối chứng: cùng ĐC-β chạy bằng tiến trình con THƯỜNG (có biến cấm, GT-4) ⇒ ĐỎ với 0 yêu cầu.
 7. **Nằm im trước PR3.** Với bộ phân loại fixture chỉ in `che_do` và `packet_loop` (hình dạng hôm nay, không khoá `dk_*`), mọi ca ghi 0 yêu cầu REST: ĐC-α đạt với `lop=duong_nhanh`, và fixture mảnh `skipped` mà M in `day_du` thì đỏ với `lop=khong_giam`.
 8. **Phát lại ngoại tuyến trên lịch sử thật (ngoài bộ ca, lệnh con của `ops/specs/wp1462-r1/do/do_b4.py`).** Mục đích hẹp: chứng minh HÀM CHẠY của mục 5 (dựng commit hợp, cây tạm, môi trường, đọc đầu ra) cho cùng kết quả với đường trực tiếp trên dữ liệu thật; nó KHÔNG đi qua tự kiểm cây, KHÔNG dùng M sống và không thay các ca fixture của K2b. Định nghĩa: tập = 60 merge của `git log --first-parent --merges -60 0f9aa2a2cc697129e1f5be72feddf60986286865`; với mỗi merge gọi hàm chạy với `cay_ma` = `0f9aa2a2cc697129e1f5be72feddf60986286865` (blob bộ phân loại `e43f514c`), `goc` = cha một, `dau` = cha hai, đồ giả GT-1 đếm yêu cầu. Kỳ vọng độc lập: bảng 60 dòng sinh bằng đường trực tiếp (merge commit thật, không qua hàm chạy), executor sinh lại và sha256 phải bằng `aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a`. ĐẠT khi và chỉ khi: 60/60 lượt của hàm chạy trả đúng lớp tương ứng từng dòng (`duong_nhanh` ⇒ `duong_nhanh`; `day_du` ⇒ `khong_giam`), tức đúng 18 và 42; 0 lượt `la`; 0 yêu cầu REST; kho không thêm ref, worktree, object. Thêm phép hồi quy khung dòng trên BỘ SINH THẬT: với cùng 60 bộ ba, lấy stdout dạng byte của bộ phân loại thật theo hai cách — (a) như nó in trên Linux (LF); (b) chạy `main` của chính blob ấy với stdout là một `TextIOWrapper` đặt `newline="\r\n"` (mô phỏng lớp dịch của Windows) — rồi đưa cả hai vào hàm đọc đầu ra của sản xuất; 60/60 ở (b) phải ra đúng lớp như (a). Đối chứng hỏng: chèn một CR vào GIỮA giá trị `che_do` của một lượt ⇒ hàm phải trả `la`. Lệch dù một dòng ⇒ ĐỎ: executor dừng và báo OID, không tự giải thích cho qua. Đây là mô phỏng; chạy trên Windows thật vẫn là điều kiện riêng trước khi dùng máy ấy cho (α)/(β) (mục Quy trình).
-9. **Cổng kho:** `packet_loop_test` N/N với hai số BẰNG NHAU (CI: 16 mảnh + job gom đạt; N sau = N trước + số ca mới, báo cả ba số; sổ ca tại nền: 1582 ca, review lượt 1 đo); Ruff F delta = 0 so với base trên hai tệp `.py` của write set và 0 lỗi F trên tệp `.py` mới (nền Ruff của hai tệp CHƯA ĐO ở lượt soạn đặc tả và ở review lượt 1: cả hai máy không có Ruff); `doctrine-scan` và `adr-song` rc 0; CI PR Ubuntu xanh trên H; một lượt `ci-dot-bien-du.yml` `success` trên đúng H với mọi job `success` (K7, vì diff chạm `.claude/dev/**`); `git diff --numstat` của đúng H so base, đo trước mỗi lần đẩy và mỗi lần xin review, nằm trong trần đang hiệu lực theo mục "Kích thước" (trần `ADR-0053`, hoặc `tran_moi` của khối `nang_tran` đã được chủ kho duyệt bằng số đo); đọc lượt push sau merge theo nhãn job. Báo delta thời gian của `gate-packet-loop-manh` (tổng 16 mảnh) trước/sau.
+9. **Cổng kho:** `packet_loop_test` N/N với hai số BẰNG NHAU (CI: 16 mảnh + job gom đạt; N sau = N trước + số ca mới, báo cả ba số; sổ ca tại nền: 1582 ca, review lượt 1 đo); Ruff F delta = 0 so với base trên hai tệp `.py` của write set và 0 lỗi F trên tệp `.py` mới (nền Ruff của hai tệp CHƯA ĐO ở lượt soạn đặc tả và ở review lượt 1: cả hai máy không có Ruff); `doctrine-scan` và `adr-song` rc 0; CI PR Ubuntu xanh trên H; một lượt `ci-dot-bien-du.yml` `success` trên đúng H với mọi job `success` (K7, vì diff chạm `.claude/dev/**`); `git diff --numstat` của đúng H so base, đo trước mỗi lần đẩy và mỗi lần xin review, ghi ở biên nhận kích thước NGOÀI H (handoff và Issue #1462), nằm trong trần đang hiệu lực theo mục "Kích thước" (trần `ADR-0053`, hoặc `tran_moi` của khối `nang_tran` đã được chủ kho duyệt bằng số đo); đọc lượt push sau merge theo nhãn job. Báo delta thời gian của `gate-packet-loop-manh` (tổng 16 mảnh) trước/sau.
 10. **Runbook:** tệp ở mục 10 có đủ mười mục, trong đó mục 3 có nguyên văn điều khoản G5 đủ trước PR5; nghiệm thu là lời duyệt của chủ kho theo danh sách ấy, không có ca máy.
 
 11. **Tích hợp hai kênh (điều kiện cấu trúc khác quyết định CI), với bộ sinh hai kênh của GT-5, cho CẢ `bo_moi` lẫn `che_do_dich`.** Trên CÙNG một diff đủ điều kiện cấu trúc: (a) gọi bộ sinh kiểu CI (có `GITHUB_OUTPUT`) với biến quyền vắng, rỗng, sai một ký tự ⇒ tệp output ghi quyết định chạy đủ, còn stdout vẫn in `dk_<lớp>=co`; với biến quyền đúng chuỗi ⇒ output ghi quyết định giảm; (b) lượt `kiem-merge` trên fixture ấy — không truyền biến quyền nào — nhận ra đúng lớp (`LAN_G5.lop`), rồi ĐẠT khi và chỉ khi công tắc sống `khop`: thử đủ bốn trạng thái của mục 6a, ba trạng thái kia phải ĐỎ với đúng `CONG_TAC.trang_thai`; (c) người gọi `kiem-merge` đặt sẵn biến quyền đúng chuỗi trong môi trường của mình trong khi công tắc sống KHÔNG `khop` ⇒ vẫn ĐỎ (biến của người gọi không tới tiến trình con và không thay được lời GET); (d) trên một diff KHÔNG đủ điều kiện cấu trúc, công tắc sống `khop` ⇒ ĐỎ với `lop=khong_giam` và 0 yêu cầu. ĐỎ khi bất kỳ ô nào của (a)–(d) lệch, ở bất kỳ lớp nào trong hai lớp.
@@ -336,7 +174,7 @@ Kiểm kê có 114 vị từ (đếm HÀNG mang ID: E 22, Q 14, S 8, C 31, P 21,
   2. `.claude/dev/packet_loop_test.py`
   3. `ops/specs/wp1462-r1/RUNBOOK_CONG_TAC.md`
   4. `ops/specs/wp1462-r1/do/do_b4.py` — MỘT script, ba lệnh con: A/B của tiêu chí 1–2 kèm tự kiểm bộ so; phát lại và hồi quy khung dòng của tiêu chí 8 (tự sinh bảng kỳ vọng rồi đối chiếu sha256, không commit bảng); in bảng kết quả. Không phải `*_test.py`.
-  5. `ops/specs/wp1462-r1/do/KET_QUA.md` — kết quả đo của executor: A/B, phát lại, MA TRẬN vị từ → ca đích → đột biến của tiêu chí 4, numstat, delta thời gian.
+  5. `ops/specs/wp1462-r1/do/KET_QUA.md` — kết quả đo của executor: A/B, phát lại, kết quả từng cặp (đột biến, ca) của tiêu chí 4, delta thời gian. Tệp này nằm TRONG H nên KHÔNG ghi SHA của H, cây của H hay numstat của H; kết quả trong nó được neo bằng sha256 của `packet_loop.py` và `packet_loop_test.py` đã chạy (hai băm ấy không phụ thuộc tệp này).
 
 Không tệp thứ sáu. Cần tệp thứ sáu ⇒ DỪNG và báo. Đã rà (16:10Z 20-11-2026): chuỗi "K0–K7" có ở `docs/adr/0060-dieu-kien-merge-va-moc-ready.md`:158, `docs/adr/0067-danh-sach-dong-va-uy-quyen-thuong-truc.md`:159, `docs/PROTOCOL_DA_PHIEN.md`:1643, `.claude/skills/land-packets/SKILL.md`:64 và dòng trợ giúp của lệnh; điều kiện mới mang tên `K2b` nên bốn tệp tài liệu ấy vẫn đúng chữ và KHÔNG vào write set. Không tài liệu nào liệt kê cờ của `kiem-merge` ngoài `--dot-bien-du-*` ở adapter `land-packets`; cờ `--siet-g5-du` được ghi ở trợ giúp lệnh và runbook. `.claude/dev/packet_loop_test_manh.py` chia mảnh theo thứ tự đăng ký, không có bảng trọng số ⇒ không cần sửa. `ops/ci_duong_nhanh.py`, `.github/workflows/ci.yml`, `.claude/dev/ci_dang_ky_test.py` KHÔNG thuộc B4 (phần đọc `vars` ở `chuan-bi` thuộc PR3). Nợ có tên, không làm ở đây: adapter `land-packets` chưa trỏ tới runbook và chưa nói "chạy `kiem-merge` từ cây `origin/master`".
 
@@ -345,17 +183,17 @@ Quyết định của chủ kho (chat 20-11-2026, ghi ở Mission r86): đặc t
 
 - **Trần** là trần mặc định của lớp `sensitive` theo `ADR-0053`: ≤ 6 tệp và ≤ 450 dòng thêm theo `git diff --numstat`. Dòng `tran_kich_thuoc_sensitive` ở đầu tệp được GIỮ: theo mục "Hiệu lực" của ADR ấy, thiếu dòng khai thì trần lùi về ≤ 3 tệp / ≤ 300 dòng thêm, mà PR giao nộp có 5 tệp. Lease và Mission revision cài B4 ghi đúng cặp 6 tệp / 450 dòng thêm, không kèm ngoại lệ.
 - **Trần áp vào CÁI GÌ.** Theo `ADR-0044` — luật mà `ADR-0053` chỉ thay một cặp số — "vượt một trong hai ngưỡng thì dừng TRƯỚC review". Vậy đối tượng bị trần là **ứng viên giao nộp**: diff base..H của đúng commit H sắp được ĐẨY hoặc sắp được đưa đi REVIEW (review mã Codex, audit exact-H của chủ kho, connector). Bản nháp trong cây làm việc và commit cục bộ chưa đẩy, chưa xin review KHÔNG phải ứng viên và không bị trần. Câu của Mission r86 ("executor measures numstat and stops before exceeding") được đọc theo đúng nghĩa ấy: dừng trước khi một ứng viên vượt trần được giao nộp; đây là quyết định checkpoint §12 của điều phối (`https://github.com/ducthangho/tra-luat/issues/1462#issuecomment-7046200733`), chủ kho xác nhận khi duyệt băm.
-- **Đo ở đâu.** Trước MỖI lần đẩy H và trước MỖI lần xin review hay audit, executor đo `git diff --numstat <base> <H>` trên đúng năm tệp giao nộp và ghi số đo cùng hai SHA vào `do/KET_QUA.md`. Số tệp ≤ 6 và tổng dòng thêm ≤ 450 ⇒ được đẩy và xin review. Bằng đúng trần (450) là TRONG trần.
-- **Vượt ⇒ DỪNG TRƯỚC review.** Số đo của H vượt trần (ví dụ 451 dòng thêm, hoặc tệp thứ bảy) ⇒ executor KHÔNG đẩy H, KHÔNG xin review hay audit nào, không cắt ca, đột biến hay bằng chứng để vừa trần, không tách PR. Nó nộp cho điều phối: numstat từng tệp của H, SHA của H và của base. Không ứng viên vượt trần nào tới tay reviewer hay lên remote.
+- **Đo ở đâu.** Trước MỖI lần đẩy H và trước MỖI lần xin review hay audit, executor đo `git diff --numstat <base> <H>` trên đúng năm tệp giao nộp (kể cả `do/KET_QUA.md`) SAU khi H đã được commit xong, và ghi **biên nhận kích thước** — SHA của H, cây của H, SHA của base, numstat từng tệp — ở NGOÀI H: trong handoff của executor (protocol §7) và trong một comment trên Packet Issue #1462. Không tệp giao nộp nào mang biên nhận ấy hay bất kỳ bản ghi nào phải nêu SHA của H: ghi nó vào một tệp của H sẽ sinh ra một H khác (review lượt 5 đo: SHA đổi và số dòng thêm đổi từ 2 lên 5). Sửa bất kỳ tệp giao nộp nào sau khi đo ⇒ H mới ⇒ biên nhận cũ hết hiệu lực, đo và đăng lại. Điều phối và reviewer đo lại trên đúng H và so với biên nhận; lệch ⇒ finding. Số tệp ≤ 6 và tổng dòng thêm ≤ 450 ⇒ được đẩy và xin review. Bằng đúng trần (450) là TRONG trần.
+- **Vượt ⇒ DỪNG TRƯỚC review.** Số đo của H vượt trần (ví dụ 451 dòng thêm, hoặc tệp thứ bảy) ⇒ executor KHÔNG đẩy H, KHÔNG xin review hay audit nào, không cắt ca, đột biến hay bằng chứng để vừa trần, không tách PR. Nó nộp cho điều phối, qua handoff, biên nhận kích thước của H chưa đẩy ấy (SHA và cây của H, SHA của base, numstat từng tệp). Không ứng viên vượt trần nào tới tay reviewer hay lên remote.
 - **Xin nâng bằng số đo.** Điều phối soạn khối `nang_tran` đủ bốn trường của `ADR-0053` — `ai_nang` (chủ kho), `can_cu` (vì sao không tách được, kèm NGUYÊN numstat đã đo và hai SHA), `tran_cu` (6 tệp / 450 dòng thêm), `tran_moi` — và trình chủ kho. Khối chỉ có hiệu lực khi chủ kho duyệt và nó đã được cài vào đặc tả (một revision chỉ thêm khối ấy, băm mới do chủ kho duyệt), vào Mission revision tương ứng và vào lease. Sau đó cùng luật áp với `tran_moi`: H có số đo ≤ `tran_moi` thì được đẩy và review; lớn hơn thì DỪNG TRƯỚC review lần nữa.
-- **Điều đặc tả này KHÔNG khẳng định.** Ước lượng của tác giả (không phải số đo, không có thẩm quyền nào): 114 vị từ với ít nhất 131 ca đích, 114 đột biến và giàn thử khó nằm trong 450 dòng thêm, nên nhiều khả năng luật dừng sẽ được dùng ở lần đo đầu tiên. Con số ấy không cấp trước ngoại lệ nào.
+- **Điều đặc tả này KHÔNG khẳng định.** Ước lượng của tác giả (không phải số đo, không có thẩm quyền nào): bộ ca hai chiều, đột biến riêng và giàn thử cho hợp đồng ở mục 2–9 khó nằm trong 450 dòng thêm, nên nhiều khả năng luật dừng sẽ được dùng ở lần đo đầu tiên. Con số ấy không cấp trước ngoại lệ nào.
 - Không cổng máy nào canh trần này (`ADR-0044` và `ADR-0053` đều được §20 ghi là 0 cổng); executor, người cấp lease và reviewer đo bằng tay.
 
 ## Quy trình và quyền
 - **Trước lease — ba bước tách rời, đúng thứ tự.** (1) Chủ kho duyệt BĂM đặc tả, sau khi review đặc tả Codex không còn finding P0–P3. (2) Một **Mission revision** riêng do điều phối soạn và chủ kho duyệt được CÀI: nó nhận Packet #1462 vào thi công và ràng buộc số packet, revision và generation, đúng băm đặc tả đã duyệt, base thi công, write set, provider và bề mặt chạy của executor và reviewer, các trần ở gạch dưới, trần kích thước mặc định của mục Kích thước (KHÔNG kèm khối `nang_tran` nào ở bước này), và quyết định về `depends_on` ở mục phép đo. (3) Sau đó mới cấp lease; trước khi cấp chạy `ai-dang-giu` trên mọi ref cho hai tệp `.claude/dev/` và thư mục đặc tả. Duyệt băm KHÔNG tự nó trao quyền thi công: Mission r85 chỉ nhận B4 ở mức soạn đặc tả (`admitted_spec_drafting`).
-- **Hai bộ trần tách nhau.** Soạn đặc tả: Mission r85 (`per_new_packet`) cho tác giả 3 lượt, review đặc tả Codex 4 lượt; chủ kho nâng mỗi trục thêm 2 cho B4 (chat 20-11-2026, điều phối ghi vào Mission r86) ⇒ 5 và 6. Tại lúc soạn r5 đã dùng 5/5 và 4/6: r5 là lượt tác giả CUỐI trong trần. Cả quyết định nâng lẫn bộ đếm đều theo thông báo của điều phối, không phải số tác giả tự đo; mọi revision tiếp theo của đặc tả này, kể cả revision chỉ thêm khối `nang_tran` theo mục "Kích thước", cần chủ kho quyết về trần tác giả trước. Thi công: attempts 3; review mã Codex 3; CI PR Ubuntu 3; `ci-dot-bien-du.yml` 1; connector 2; CI rerun 1; Windows CI 0. Trước MỖI lời gọi, điều phối đọc lại bộ đếm đã dùng / đã giữ chỗ / trần của đúng trục ấy; chạm trần thì dừng và hỏi.
-- Executor: Claude Code (Fable 5.2), phiên cloud riêng. Reviewer: Codex service gpt-6-astra, mức xhigh, phiên độc lập, chỉ đọc; reviewer CHẠY ca và đột biến có sẵn, đối chiếu ma trận trong `do/KET_QUA.md` với kiểm kê vị từ trên đúng H (luật L-4, L-5); hướng thử cần soạn nội dung nhạy cảm thì mô tả bằng lời cho điều phối.
-- Chủ kho tự audit exact-H trước LẦN ĐẨY ĐẦU của H; điều phối không ký thay. Merge do chủ kho bấm.
+- **Hai bộ trần tách nhau.** Soạn đặc tả: Mission r85 (`per_new_packet`) cho tác giả 3 lượt, review đặc tả Codex 4 lượt; chủ kho nâng mỗi trục thêm 2 cho B4 (chat 20-11-2026, điều phối ghi vào Mission r86) ⇒ 5 và 6. Chủ kho cho thêm 1 lượt tác giả cho B4 (chat 20-11-2026, quyết định [E1+E2], điều phối ghi vào Mission revision kế tiếp) ⇒ 6. Tại lúc soạn r6 đã dùng 6/6 và 5/6. Cả quyết định nâng lẫn bộ đếm đều theo thông báo của điều phối, không phải số tác giả tự đo; mọi revision tiếp theo của đặc tả này, kể cả revision chỉ thêm khối `nang_tran` theo mục "Kích thước", cần chủ kho quyết về trần tác giả trước. Thi công: attempts 3; review mã Codex 3; CI PR Ubuntu 3; `ci-dot-bien-du.yml` 1; connector 2; CI rerun 1; Windows CI 0. Trước MỖI lời gọi, điều phối đọc lại bộ đếm đã dùng / đã giữ chỗ / trần của đúng trục ấy; chạm trần thì dừng và hỏi.
+- Executor: Claude Code (Fable 5.2), phiên cloud riêng. Reviewer: Codex service gpt-6-astra, mức xhigh, phiên độc lập, chỉ đọc; reviewer CHẠY ca và đột biến có sẵn và thẩm định độ đủ của chúng so với hợp đồng ở mục 2–9 trên đúng H; hướng thử cần soạn nội dung nhạy cảm thì mô tả bằng lời cho điều phối.
+- Chủ kho tự audit exact-H trước LẦN ĐẨY ĐẦU của H; điều phối không ký thay. Merge do chủ kho bấm. Mọi bản ghi phải nêu SHA của H (biên nhận kích thước, kết quả gate trên H, lời xin audit) nằm ở handoff §7 và Packet Issue, không nằm trong tệp giao nộp.
 - **Windows:** diff chạm `.claude/dev/` nên K6 xếp `required`; khung dòng CRLF của bộ phân loại (mục 5) mới chỉ được mô phỏng trên Linux; theo quy tắc thường trực "không Windows CI" và r85 (chạy Windows tại chỗ chỉ cho B3), packet này MIỄN Windows bằng dòng miễn của chủ kho. Máy đọc công tắc được chỉ định là máy bàn Windows của chủ kho; nó chỉ được dùng cho phán quyết (β) sau khi phép đo (ii) đạt VÀ các ca `cong_b4_*` đã chạy xanh tại chỗ trên máy ấy dưới một thẩm quyền riêng. Trước PR3 không phán quyết (β) nào tồn tại, nên điều này không chặn B4; phán quyết (α) chạy được từ phiên cloud Linux.
 - Trước khi đẩy H: cập nhật nhánh lên `master` mới nhất và đo lại làn; PR này là `day_du`. Lượt `kiem-merge` cho chính PR này chạy bằng mã của `master` TRƯỚC B4.
 - Không ai đặt `CHO_PHEP` trong packet này. Sau khi land: B4 nằm im cho tới khi PR3 land VÀ chủ kho tự đặt biến sau khi Q9(a) đạt.
@@ -368,6 +206,7 @@ Quyết định của chủ kho (chat 20-11-2026, ghi ở Mission r86): đặc t
 - **D-5 (iv) và (v)** của phép đo không đo được trong B4 và chuyển sang đặc tả PR3.
 - **D-7 Điều kiện cấu trúc tách khỏi quyết định CI.** §4 A+1 nói `chuan-bi` truyền `vars` cho bộ phân loại và B4 đóng băng "đầu ra của bộ phân loại (giá trị nào thuộc lớp giảm nào)" mà không nói đầu ra ấy đã qua công tắc hay chưa. Đặc tả này đọc như sau và đóng băng cách đọc ấy (mục 5): stdout mang ĐIỀU KIỆN CẤU TRÚC `dk_*`, không phụ thuộc công tắc; quyết định CI qua `GITHUB_OUTPUT` mới bị công tắc chặn. Chủ kho xác nhận khi duyệt băm.
 - **D-8 Trần kích thước áp cho ứng viên giao nộp.** Câu "stops before exceeding" của Mission r86 được đọc theo `ADR-0044` ("vượt ngưỡng thì dừng TRƯỚC review"), theo quyết định checkpoint §12 của điều phối; xem mục "Kích thước".
+- **D-9 Nghiệm thu không liệt kê ca.** §4 A+1 "Nghiệm thu B4" liệt kê ca và tám đột biến; đặc tả này giữ danh sách ấy làm mức tối thiểu bằng tham chiếu, không chép lại và không mở rộng thành ma trận; độ đủ thẩm định ở review mã (quyết định chủ kho [E1+E2]).
 - **D-6 Đóng băng khi W chưa đo xong** (luật đóng băng (1)): khác chữ §7 "phép đo chuẩn bị → Q9 → đóng băng"; lệnh cấm đặt `CHO_PHEP` là thứ giữ an toàn, và Mission revision cài B4 phải ghi quyết định này.
 
 ## Thay đổi
@@ -412,6 +251,14 @@ Thay đổi ngoài chữ của ba finding: trần soạn đặc tả ghi theo qu
 | `b4-eligibility-permission-contract` (B4-S13; mới) | H1 không tách điều kiện cấu trúc khỏi quyết định CI đã qua công tắc; fixture in hằng che mất điều đó | Mục 5: hai kênh — stdout mang `dk_bo_moi` / `dk_che_do_dich` (điều kiện cấu trúc, không phụ thuộc biến quyền, bên đọc là `kiem-merge`), `GITHUB_OUTPUT` mang quyết định CI đã qua công tắc (bên đọc là `ci.yml`); bốn nghĩa vụ của PR3/PR6; vị từ C20–C29 dùng khoá mới; GT-5 thêm bộ sinh hai kênh; tiêu chí 11 thử cả hai lớp, mọi trạng thái công tắc, biến quyền của người gọi; D-7 ghi cách đọc §4 A+1 |
 
 Thay đổi ngoài chữ của ba lớp: hai khoá mà `kiem-merge` đọc đổi tên từ `cong_cu` / `g5_che_do` (r1–r4) sang `dk_bo_moi` / `dk_che_do_dich`, hệ quả trực tiếp của lớp thứ ba; bộ đếm trần soạn đặc tả cập nhật (tác giả 5/5, review 4/6). Các bảng "Thay đổi" của r2–r4 bên trên là lịch sử và còn nhắc bảng hàng cùng tên khoá cũ.
+
+### r6 so với r5 (review lượt 5) — sửa THEO LỚP
+| Lớp (finding) | Biểu hiện review lượt 5 nêu | Một cách sửa chung ở r6 |
+|---|---|---|
+| `b4-predicate-mutation-proof` (B4-S05; lượt 1–5) | kiểm kê trộn vị từ độc lập với vị từ suy ra và hệ quả (P14/P15, E07/E09); luật "một chỗ sửa từ bốn fixture" không làm được (K2 che E01–E03); hàng gộp nhiều nhánh (P17, E22, Q12, C15, V06, O08); Q14 mâu thuẫn P01/P02 | Theo quyết định chủ kho [E1+E2]: RÚT cả kiểm kê 114 vị từ, sáu luật L-1…L-6 và mọi ma trận. Mục "Luật chung về ca và đột biến" chỉ nêu luật chung (ca hai chiều, ba trạng thái, đột biến riêng phân hạng bằng lớp ngoại lệ của ca) và giao việc thẩm định độ đủ cho review mã trên H bằng chạy; tiêu chí 4 viết lại theo đó, lấy danh sách của §4 A+1 làm mức tối thiểu bằng tham chiếu. Mọi chỗ còn nhắc kiểm kê, nhóm vị từ hay ma trận (GT-1, GT-2, GT-5, GT-6, GT-7, write set, Kích thước, Quy trình) đã sửa. Hợp đồng ở mục 2–9 không đổi |
+| `b4-final-head-evidence-cycle` (B4-S14; mới) | biên nhận kích thước của H nằm trong `KET_QUA.md`, tức trong chính H ⇒ ghi xong thì H đổi | Biên nhận kích thước và mọi bản ghi phải nêu SHA của H nằm NGOÀI H: handoff của executor (§7) và comment trên Issue #1462. `KET_QUA.md` không ghi SHA/cây/numstat của H, và neo kết quả bằng sha256 của hai tệp mã. Sửa một tệp giao nộp ⇒ H mới ⇒ đo và đăng lại. Numstat vẫn đếm đủ năm tệp. Sửa ở Write set, Kích thước, tiêu chí 9, Quy trình |
+
+Thay đổi ngoài chữ của hai lớp: GT-7 nói rõ bốn fixture chuẩn là điểm xuất phát, không phải khuôn bắt buộc; bộ đếm trần soạn đặc tả cập nhật (tác giả 6/6 sau khi chủ kho cho thêm 1, review 5/6); thêm D-9. Bảng "r5 so với r4" bên trên là lịch sử và còn nhắc kiểm kê đã rút.
 
 ## Ngoài phạm vi
 Đặt, đổi, xoá biến công tắc thật; đọc `vars` ở `chuan-bi` và mọi sửa `ci.yml`, `ops/ci_duong_nhanh.py`, `ops/cong_cu_test.py` (PR3, PR6); cặp biến của C2 và mọi thay đổi K7/M9; sửa K0–K7, ADR, protocol, adapter; cổng phía máy chủ đọc biến tại lúc merge; cơ chế chứng minh ai đã đặt biến; Windows CI; B1, B2, B3, PR2–PR8; route production, LIVE.

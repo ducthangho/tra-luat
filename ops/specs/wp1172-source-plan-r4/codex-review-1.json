@@ -1,0 +1,309 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "d5bc154112d60b4b1b40b8cf802647da89170c49",
+  "reviewed_file_sha256": "76b836fa70a8d5f7b1cdc9ba1123e5ccad87307e09fdb0a05bd5e08b4a284ae8",
+  "findings": [
+    {
+      "id": "R4-01-pr0-acceptance-overclaim",
+      "severity": "P2",
+      "location": "§2 row PR0; §8 draft PR0 mapping (lines 24, 174)",
+      "claim": "A2, A5 and A6 are declared closed by #1166/#1412, although these are execution/land criteria, not code-only criteria. Acceptance of the later, narrower PR0 spec does not prove the original draft acceptance.",
+      "evidence": [
+        {
+          "cmd": "git show origin/master:ops/specs/wp1166-r4-g4.md",
+          "observed": "The frozen envelope says: No Windows CI, no new full M9 run. Original draft A2 requires an exact-H dispatch with all jobs successful and K7; A5 requires the applicable Windows/M9 evidence."
+        },
+        {
+          "cmd": "git show origin/ops/wp1448-r1:ops/specs/wp1448-r2/mission-r82.json",
+          "observed": "Inherited r69 records PR0 accepted at b79cbf56a1696b44c38529275312287ca78ba91d, merged f8b9cdd, but M8 landed:false and checkout/workflow_definition/gate_output not_measured. A6 requires post-merge readback, which this record expressly does not establish."
+        }
+      ],
+      "suggested_fix": "Replace the closed labels with criterion-level delivered, waived, not_run and not_measured dispositions, each tied to exact evidence. Assign the remaining A2/A5/A6 proof to B1 or an explicit owner-approved successor; preserve the historical acceptance and waivers. Closure check: every draft A1–A6 row has its own positive evidence or an explicit changed requirement. Do not manufacture a retrospective PR0 pass."
+    },
+    {
+      "id": "R4-02-lossy-source-traceability",
+      "severity": "P2",
+      "location": "§4 B1/B3/lane C; §7 Q6/Q8; §8 rows PR1/PR2/PR6/PR7 (lines 83–113, 158–179)",
+      "claim": "The claim that every source requirement has a destination is not satisfied. Several acceptance constraints are omitted or weakened without a justified disposition: measured instrumentation overhead ≤5% becomes an estimate of a few seconds; OS/Python/dependency digests are assigned to B1 but absent from its field contract; the audit acknowledgement SLA changes from ≤2 working hours to 1 day; the minimal-repro and uncontrolled-region merge-stop requirements disappear. C1 also loses the finite sampling budget/checkpoints and zero serious misses criterion, while Q8 is decided before C1 produces detection evidence.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py trace",
+          "observed": "The trace inspection shows B1 has no digest field, B3 says acknowledgement within 1 day, and C1 has no 10-pair/50-runner-hour, 30-pair/150-hour or checkpoint contract."
+        },
+        {
+          "cmd": "cat ops/specs/wp1172-source-plan-r4/nguon/KE_HOACH_TOI_UU_MUTATION_TESTING_r2_2026-11-03.md",
+          "observed": "PR1 requires a full plus three targeted runs and ≤5% overhead; §5 requires ≤2 working-hour acknowledgement and a repro/disposition within one working day; PR7/§5.2 bound the study and PR8 requires a subsequent owner decision based on it."
+        },
+        {
+          "cmd": "cat ops/specs/wp1172-source-plan-r4/nguon/proxima-mutation-policy-review-20261103.txt",
+          "observed": "The critique requires stopping affected-region merges while risk is uncontrolled and validating serious-error detection before adoption, not merely requesting broad selection."
+        }
+      ],
+      "suggested_fix": "Expand §8 to individual normative requirements with exact destinations or explicit rejection/rationale. Separate permission to study lane C from permission to change M9 after C1 and its acceptance thresholds. Explicitly decide SLA changes, exclusions and budget; Q6 must not serve as implicit acceptance of unrelated omissions. Put additional measurements in successors, never in frozen PR1. Check the revised mapping against all source sections; avoid reopening rejected cache work accidentally."
+    },
+    {
+      "id": "R4-03-outcome-schema-conflates-levels",
+      "severity": "P2",
+      "location": "§4 A+3; §8 eight-state schema mapping (lines 73–75, 160)",
+      "claim": "A+3 does not preserve the source outcome model: its seven-value enum lacks baseline passed/failed and equivalent_reviewed, and the blanket rule that every non-giet value is not green conflates case outcome, mutant classification and aggregate success. Normal baseline passes and non-target survival are not mutant kills. The proposed mapping can either reject healthy full audits or mislabel passes as kills.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py structure",
+          "observed": "The existing _loi_mot_bien_nhan accepts a baseline receipt containing ca:healthy=passed, and rejects failed/cancelled/timed_out/not_run. This is a distinct aggregate outcome contract."
+        },
+        {
+          "cmd": "sed -n '2450,2495p' ops/cong_cu_test.py; sed -n '6200,6230p' ops/nhanh_don_duoc_test.py",
+          "observed": "G5 distinguishes qua, bo_qua, giet_that and tin_dung_gia. Full-audit receipts contain both ca:* baseline entries and mutant entries represented by passed/failed/not_measured/inconclusive."
+        },
+        {
+          "cmd": "cat ops/specs/wp1172-source-plan-r4/nguon/KE_HOACH_TOI_UU_MUTATION_TESTING_r2_2026-11-03.md",
+          "observed": "PR1 requires eight distinct outcomes; §4 requires separate raw/aggregate metrics and an independently justified equivalent_reviewed disposition."
+        }
+      ],
+      "suggested_fix": "Specify separate typed fields for execution status, per-case observation, mutant kill classification and aggregate verdict. Retain equivalent_reviewed with reason/reviewer, or explicitly reject equivalence without converting it to a kill. Keep existing I2 classifiers intact. Require fixtures for a healthy baseline, expected non-target survival, a genuine target kill, false credit, reviewed equivalence and infrastructure/timeout outcomes. Verify both legacy consumer compatibility and unchanged kill counts."
+    },
+    {
+      "id": "R4-04-rss-is-not-per-child",
+      "severity": "P2",
+      "location": "§4 A+4 (lines 76–77)",
+      "claim": "resource.getrusage(RUSAGE_CHILDREN).ru_maxrss cannot measure peak RSS of each child or simultaneous memory demand as promised. It retains a high-water value across reaped children, so subsequent small children inherit the earlier peak.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py rss",
+          "observed": "Linux probe: a 64 MiB allocation produced child RSS 76388 KiB; the next 8 MiB allocation produced child RSS 19052 KiB, but parent RUSAGE_CHILDREN remained 76388 KiB. SECOND_CHILD_RSS_MISATTRIBUTED=True."
+        },
+        {
+          "cmd": "web.run: Python resource documentation",
+          "observed": "RUSAGE_CHILDREN covers terminated and waited-for children: [Python resource reference](https://docs.python.org/3/library/resource.html#resource.RUSAGE_CHILDREN)."
+        }
+      ],
+      "suggested_fix": "Use per-child reporting or per-child wait4 accounting with a defined unit and descendant policy; measure concurrent process-group/cgroup demand separately if it constrains parallelism. Preserve khong_do_duoc when unavailable. Test differently sized sequential children and overlapping children. Do not sum cumulative maxima or present them as per-child measurements."
+    },
+    {
+      "id": "R4-05-canary-has-only-two-audit-triggers",
+      "severity": "P2",
+      "location": "§4 B1 A3 (lines 86–87)",
+      "claim": "Two dispatches plus a master push cannot produce three B1 full-audit receipts under the retained workflow triggers. A master push starts ordinary CI, not ci-dot-bien-du.yml. The acceptance count is impossible or would count the wrong workflow as audit evidence.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py structure",
+          "observed": "FULL_AUDIT_TRIGGERS=['schedule','workflow_dispatch']; DISPATCH_PLUS_PUSH_FULL_RUNS=2. The current group is dot-bien-du-${{ github.run_id }} with cancel-in-progress:false."
+        }
+      ],
+      "suggested_fix": "Define two full-audit completion receipts plus a separately identified push-CI observation, with run IDs, overlap, queue/start/end and executed-job counts. If three audit runs are intended, explicitly use a third dispatch and account for its budget. Test the expected-trigger ledger. Do not add a push trigger merely to satisfy the count: that would change audit frequency and cost."
+    },
+    {
+      "id": "R4-06-b2-dependency-and-write-set",
+      "severity": "P2",
+      "location": "§4 B2; §5 ordering and independence (lines 90–98, 118–126)",
+      "claim": "The proposed order installs B2 before its required B1 receipt producer/schema. Its claimed independent write set also omits the normal registration path for the new watchdog test. This leaves either a watchdog unable to demonstrate fresh receipts or a packet that must expand its write set to pass repository CI.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py trace",
+          "observed": "B2_REQUIRES_B1=True and B2_BEFORE_B1=True."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py registry",
+          "observed": "The real registry discovers scratch ops/audit_watchdog_test.py as a live test and returns test sống chưa đăng ký: ops/audit_watchdog_test.py. Registration resides in .claude/dev/ci_dang_ky_test.py, shared with PR2/PR3/B1/PR5."
+        }
+      ],
+      "suggested_fix": "Freeze and land the B1 producer contract before B2 activation, or explicitly split B2 into a disabled bootstrap and a later activation/readback. Declare test registration/invocation: either include and serialize the registry path, or specify a supported self-test route in the new workflow. Recompute effective write sets before leasing. Verify fresh/due/stale fixtures and a real B1 receipt without treating the pre-B1 period as accepted coverage; keep PR1 unchanged."
+    },
+    {
+      "id": "R4-07-watchdog-sla-and-delivery-gap",
+      "severity": "P2",
+      "location": "§4 B2; §6 G7; §10 daily job (lines 90–98, 136, 192)",
+      "claim": "A once-daily watchdog does not establish G7 zero missed alerts within 36 hours of the cron slot. Its failure path also promises to open an Issue when API reads fail without specifying what happens when Issue writes or the watchdog itself fail. A separate workflow is independent of the audit job, but still shares GitHub scheduling/API failure modes.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py trace",
+          "observed": "Deterministic timing witness: polls at slot+0h,+24h,+48h; audit fails at +35h; first alert is +48h, so G7_within_36h=False."
+        },
+        {
+          "cmd": "web.run: GitHub workflow troubleshooting",
+          "observed": "GitHub documents delayed schedules and dropped queued jobs: [Troubleshooting workflows](https://docs.github.com/en/actions/how-tos/troubleshoot-workflows)."
+        }
+      ],
+      "suggested_fix": "Define whether the alert deadline starts at the slot or failure, and design deadline-aligned/event-driven checks plus a declared scheduling allowance, or revise G7 for owner approval. Specify bounded API pagination, Issue readback, write-failure escalation and watchdog-heartbeat coverage; absent observations remain unknown. Test boundary times, missing slots, old-SHA retries, API denial, failed Issue writes and missing watchdog runs. Do not claim a hard delivery SLA from best-effort cron alone."
+    },
+    {
+      "id": "R4-08-switch-authority-not-established",
+      "severity": "P2",
+      "location": "§4 A+1; §7 Q9; §4 C2 (lines 65–68, 111–112, 147–148)",
+      "claim": "An Actions repository variable is outside the PR tree, but that alone does not make it owner-only or make the candidate-side consumer authoritative. The plan does not establish the actual writer ACL, protect the consumer from PR-side replacement, or define what happens to already-green targeted evidence after the switch is turned off. Reading vars does not itself grant PR authors permission to update variables; these are separate trust questions.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py structure",
+          "observed": "ci.yml chuan-bi uses actions/checkout without a protected immutable policy ref; its consumer is in the PR execution path."
+        },
+        {
+          "cmd": "web.run: GitHub variables/context references",
+          "observed": "Repository collaborators can manage variables; API updates require Variables:write. Context values are inputs, not an external enforcement point. [Variable access](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables#creating-configuration-variables-for-a-repository), [Variable update permissions](https://docs.github.com/en/rest/actions/variables#update-a-repository-variable), [Contexts](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts)."
+        }
+      ],
+      "suggested_fix": "Make Q9 bind the measured writer principals and a trusted read/consumer path. Preserve exact-allow-value/full-on-unknown semantics and prove a PR cannot substitute or omit the switch input. For C2, re-read trusted policy at the acceptance gate or explicitly invalidate older targeted evidence when disabled. Test an edited PR consumer and a switch-off after a targeted run has already passed. Do not add a privileged pull_request_target job that executes PR code as a shortcut."
+    },
+    {
+      "id": "R4-09-release-receipt-proof-is-incomplete",
+      "severity": "P1",
+      "location": "§4 B1/B3; §8 draft §3.5; §10 REST cost (lines 83–105, 175, 192)",
+      "claim": "B3 accepts a B1 success receipt matching HEAD, while B1 permits workflow identity to remain not_measured and measures A4 on only one example run. There is no release acceptance predicate requiring measured definition identity, independently expected job/item inventory, artifact identity/hash and remote run/attempt completion for each consumed receipt. Therefore a receipt can meet the stated B3 rule while lacking evidence required by r2 and protocol §10.2.2.",
+      "evidence": [
+        {
+          "cmd": "git show origin/master:.github/workflows/ops-do-workflow-definition.yml; sed -n '423,481p' ops/ci_provenance.py",
+          "observed": "The existing A4 path is reusable and read-only, but manual per run. It returns rc=3/not_measured for null GraphQL file, HTTP errors or missing provenance; it is not an always-successful provenance source."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py structure",
+          "observed": "Existing audit artifacts are shard receipts, not the proposed complete B1 proof. Current workflow permissions are contents:read; collecting remote jobs requires an explicit read capability."
+        },
+        {
+          "cmd": "web.run: GitHub context/artifact documentation",
+          "observed": "github.workflow_sha is documented, but storing it alone does not verify workflow bytes. Artifact retrieval requires discovery/authentication and a redirect, not generally one REST call. [Context identity](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context), [Artifact API](https://docs.github.com/en/rest/actions/artifacts#download-an-artifact)."
+        }
+      ],
+      "suggested_fix": "Freeze one versioned producer/consumer contract before B2/B3: repository, workflow path/definition OID/blob/hash, source H/tree, run and producer attempts, expected jobs/items, terminal conclusions, artifact IDs/digests, runtime/dependency metadata and positive markers. B3 must reject unknown required provenance; invoke/consume A4 for the actual release run when needed. Specify Actions-read authentication, bounded REST retrieval and redirect handling on both deploy hosts before enabling blocking mode. Test forged/incomplete/wrong-workflow/mixed-attempt/expired receipts and API failures. Keep the existing allowed shard-rerun lineage explicit rather than accidentally banning or blindly trusting carried-forward shards."
+    },
+    {
+      "id": "R4-10-head-does-not-bind-package-bytes",
+      "severity": "P1",
+      "location": "§4 B3 candidate check (lines 99–102)",
+      "claim": "Matching an audit receipt to git HEAD does not prove that the Package being uploaded was built from that commit. Both deploy scripts build from the filesystem; release-bundle hashes current files and creates a fresh manifest. B3 adds no clean/snapshot binding or recheck of the packaged bytes. An uncommitted change, or a HEAD change between build and push, can therefore be labelled audited even though the uploaded content was not measured.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py release",
+          "observed": "Executed the actual release manifest helpers on two scratch trees differing only in scripts/tl.py: both manifests ok=True, same file count, different content_hash. The helper does not read Git; checkout HEAD remained d5bc154112d60b4b1b40b8cf802647da89170c49."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py structure",
+          "observed": "Both deploy scripts invoke release-bundle on the worktree and have no git status --porcelain cleanliness check."
+        }
+      ],
+      "suggested_fix": "Capture immutable H/tree before build and build from a verified snapshot of H, or verify the exact release file inventory and bytes against H. Bind the resulting package digest to that evidence and recheck before drive-push; include the protected ref and required-check constraints from r2 or explicitly disposition them. Test dirty tracked files, included untracked files, and HEAD/file changes between build and push in both shells. Preserve legitimate ignored deployment-state files without permitting them into the package."
+    },
+    {
+      "id": "R4-11-override-is-not-owner-waiver",
+      "severity": "P2",
+      "location": "§4 B3; §6 G8; §7 Q7 (lines 101–103, 137, 145)",
+      "claim": "The override contract accepts any explicit flag with a reason printed to a local log. That does not establish the source requirement for a specific owner-approved release exception. G8 counts such a bypass as compliant, and Q7 asks blocking versus warning without deciding who may waive a failed or unmeasured audit and on what exact candidate.",
+      "evidence": [
+        {
+          "cmd": "cat ops/specs/wp1172-source-plan-r4/nguon/KE_HOACH_TOI_UU_MUTATION_TESTING_r2_2026-11-03.md",
+          "observed": "§4 Release requires an owner-specific waiver or independently proven component isolation and exact-component audit."
+        },
+        {
+          "cmd": "sed -n '986,1005p' docs/PROTOCOL_DA_PHIEN.md",
+          "observed": "owner_waived is a separate disposition requiring durable owner source/actor, exact SHA, scope/reason and conditions; it never rewrites missing/skipped evidence as passed."
+        },
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py trace",
+          "observed": "B3 specifies only an explicit flag and reason/log; no owner waiver identity or durable evidence reference."
+        }
+      ],
+      "suggested_fix": "Extend Q7 to decide the waiver authority and record schema. Require a verified exact-H/package exception reference or an explicit, scoped standing delegation; keep audit_passed, owner_waived and warning_only separate in G8. Test a self-authored reason, wrong-H/expired waiver and authorized exact-H waiver. Avoid granting every deploy-script caller an implicit authority to waive safety evidence."
+    },
+    {
+      "id": "R4-12-container-pwsh-is-not-windows-proof",
+      "severity": "P2",
+      "location": "§10 platform budget; §4 B3 parity (lines 102–103, 190–191)",
+      "claim": "The zero-Windows budget conflates a standing no-Windows-CI instruction with exemption from Windows local validation. B3 changes both deploy shells; pwsh in a Linux container exercises PowerShell syntax/runtime but not the Windows filesystem, native command handling or deploy environment. No applicable Windows-local waiver for B3 is identified.",
+      "evidence": [
+        {
+          "cmd": "cat docs/adr/0060-dieu-kien-merge-va-moc-ready.md",
+          "observed": "M3 explicitly makes *.ps1, *.sh and scripts/deploy-* changes Windows-required and distinguishes Windows local execution from Windows CI."
+        },
+        {
+          "cmd": "git show origin/ops/wp1448-r1:ops/specs/wp1448-r2/SPEC.md",
+          "observed": "The frozen PR1 exemption is scoped to that packet. It cannot be reused as authority for future B3."
+        },
+        {
+          "cmd": "sed -n '1,45p' scripts/deploy-package.ps1",
+          "observed": "The deploy interface targets the Windows development environment, including the Windows script path and native deployment invocation."
+        }
+      ],
+      "suggested_fix": "Keep the no-Windows-CI policy if authorized, but budget Windows-local base/candidate parity for B3 or obtain an explicit B3 waiver with stated residual risk. Include real HTTP/authentication and failure fixtures on the intended Linux and Windows deploy hosts. Retain Linux pwsh tests as useful additional evidence, not Windows evidence. This must not reopen or amend the frozen PR1 exemption."
+    },
+    {
+      "id": "R4-13-g9-baseline-population",
+      "severity": "P2",
+      "location": "§3 current median; §6 G9 (lines 39–40, 138)",
+      "claim": "The value 1775 seconds is numerically correct only for successful, single-attempt day_du PR runs after 17 November. G9 labels it as the baseline for code-PR end-to-end p50/p95 without preserving those filters or the job-derived endpoint definition. Using that baseline for the broader labelled population gives a materially wrong comparison.",
+      "evidence": [
+        {
+          "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py numbers",
+          "observed": "All 184 recent day_du PR runs have measured median 1111.5 seconds; the 71 success/single-attempt runs have median 1775 seconds. r3 DX-4/G3 explicitly identify the narrower population."
+        }
+      ],
+      "suggested_fix": "State the exact event/lane/classification, conclusion, attempt and job-derived-time filters in G9. Report cancelled/failed and queue time separately; add a baseline for the broader population if intended. Verify the same reducer/population on both cohorts and preserve r3 G1–G6 definitions. Do not interpret reduced cancellation time as a successful-run latency improvement."
+    }
+  ],
+  "tests": [
+    {
+      "cmd": "git status --porcelain=v1 --untracked-files=all --ignored=matching; Python SHA-256 and snapshot preflight",
+      "rc": 1,
+      "summary": "failed reviewer assertion: pre-existing ignored .codex/ was initially treated as a dirty worktree. No edit was made; the corrected snapshot records it explicitly."
+    },
+    {
+      "cmd": "Python read-only source/hash and snapshot probes using git show HEAD/origin/master/origin/ops/wp1172-plan-r3/origin/ops/wp1448-r1",
+      "rc": 0,
+      "summary": "passed: requested HEAD/tree and r4 hash verified; r2, draft, Proxima, r3 and BASELINE hashes match; PR1 spec hash 5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e matches lease revision 2/generation 1. Tracked/untracked worktree clean; ignored .codex/ pre-existed."
+    },
+    {
+      "cmd": "Initial inline Python BASELINE sum probe",
+      "rc": 1,
+      "summary": "failed reviewer probe: nullable unmeasured durations caused TypeError. Corrected reducer preserves unknowns rather than replacing them with zero."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py numbers",
+      "rc": 0,
+      "summary": "passed 34 numerical checks; 700504/15057171=4.6522949%, 7955967/15057171=52.8383918%, 9669927/705=13716.2085; 1775 median is correct only for n=71 successful single-attempt runs. Broader recent n=184 median is 1111.5."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py structure",
+      "rc": 0,
+      "summary": "passed read-only structural/validator probes: two audit triggers, unique run-ID concurrency, existing positive receipt accepted, four non-success outcomes rejected; A4 manual collector and deploy integration inspected. This is not a live concurrency or full-audit test."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py trace",
+      "rc": 0,
+      "summary": "passed source comparison probe; exposed B2-before-B1 order, missing receipt metadata and source acceptance details, changed SLA, and daily-poll alert counterexample."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py registry",
+      "rc": 0,
+      "summary": "passed counterexample: actual registry discovers new ops/audit_watchdog_test.py and identifies it as unregistered. Scratch only."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py rss",
+      "rc": 0,
+      "summary": "passed counterexample: actual child peaks 76388/19052 KiB; parent RUSAGE_CHILDREN remains 76388 KiB after both."
+    },
+    {
+      "cmd": "python -B /tmp/rv-r4-codex-independent/probes.py release",
+      "rc": 0,
+      "summary": "passed counterexample using actual manifest helpers: changed scratch package content still yields valid manifests while repository HEAD is unchanged. No deploy or package push ran."
+    },
+    {
+      "cmd": "Python urllib.request GET https://api.github.com/repos/ducthangho/tra-luat/actions/workflows/ci-dot-bien-du.yml/runs?per_page=1 (no authentication)",
+      "rc": 0,
+      "summary": "not_measured network capability: caught URLError, Operation not permitted. Diagnostic process exited 0; HTTP/REST reachability did not pass. Actual deploy-host connectivity and authentication remain unmeasured; no credentials read."
+    },
+    {
+      "cmd": "GitHub get_repo read-only connector; web.run official GitHub/Python documentation reads",
+      "rc": null,
+      "summary": "Read-only tools succeeded: repository metadata says public; verified documented workflow_sha, variable writer permissions, artifact transport and cron limitations. These tools provide no shell exit code and do not prove deploy-host reachability."
+    },
+    {
+      "cmd": "Python before/after checkout snapshot comparison; git rev-parse HEAD HEAD^{tree}; git status --porcelain=v1 --untracked-files=all --ignored=matching",
+      "rc": 0,
+      "summary": "passed: all 17175 observed non-.git file hashes unchanged, no added/deleted paths, identical HEAD/tree/status; only the same pre-existing ignored .codex/ entry. Snapshot comparison is not proof of historical non-writing between snapshots."
+    },
+    {
+      "cmd": "Full runtime/selftest suites, CI dispatch, live concurrency canary, Linux/Windows deploy and Drive push",
+      "rc": null,
+      "summary": "not_run: source-plan read-only review; no workflow dispatch, write API, comment, commit, push or deployment authorized or attempted."
+    }
+  ],
+  "numbers_checked": 34,
+  "notes": "Independent content review of the exact requested document; changes_requested, with 2 P1 and 11 P2 findings, no P0. HEAD d5bc154112d60b4b1b40b8cf802647da89170c49; tree e3e83ace0906a6a3d24a218288cecd29060bcfba. Comparison refs observed: origin/master=45bae8d07a8cdf06a1ca9a7a2e015a6258169379; r3=c032656d6e9107c7d0d570afe374fd78b6424e93; PR1 metadata=a0ca10060174bb22264c5a71e2a6e7ad4eeddcca. No direct retroactive change to PR1 was found; preserve its 5014de59 spec and effective lease write set. B1-before-PR5 is the correct serialization. Lane C must remain closed pending explicit post-study policy authority; r3 rejected options remain binding in lanes A/B. The arithmetic checked out; G9 population labelling did not. The 34 checks cover source quantitative claims and relevant inherited baseline values, not policy thresholds, estimates, IDs or hashes as statistical measurements. Mission r82 also carries the existing r3 savings-rounding erratum (3.4–5.6 million seconds). Environment: Linux 6.18.44-fc-v726, Python 3.13.18; managed workspace-write sandbox, read-only reviewer discipline; scratch under /tmp. Provider=openai_codex; transport=machine; session identifier from CODEX_THREAD_ID/run environment=01a1f81d-ef6f-7013-9d9c-ba3475224778. Enclosing execution surface and served model/effort were not independently measured (KHONG_DO_DUOC); this JSON does not establish cross-provider assurance or land authority. No subagents, GitHub writes or secret reads. Actual repository variable writer ACL, live CI receipts, deploy-host API/authentication and Windows execution remain unmeasured. Original source bytes and probes are under /tmp/rv-r4-codex-independent."
+}

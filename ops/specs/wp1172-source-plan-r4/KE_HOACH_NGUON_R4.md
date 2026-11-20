@@ -1,194 +1,278 @@
-# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 1
+# KẾ HOẠCH NGUỒN r4 — hợp nhất r2 gốc, r3, nháp PR0 và phản biện Proxima (Mission #1172) — bản sửa 2
 
 ## 1. Trạng thái và nguồn
 
 - **Trạng thái: `proposed`.** Chưa duyệt, chưa cài. Băm do phiên điều phối ghi khi đóng băng; chỉ có hiệu lực khi chủ
   kho duyệt băm và một Mission revision cài nó. Cho tới lúc ấy **r3 vẫn là kế hoạch hiện hành** (Mission r81/r82).
-- **r4 không xoá r3 và không hồi sinh r2.** r4 = r3 (giữ nguyên tám packet, bất biến, số nền, mục tiêu G1–G6) **cộng**
-  một làn bảo đảm mới (làn B) lấy từ r2/nháp/Proxima, **cộng** một làn chính sách có điều kiện (làn C) chỉ mở khi chủ
-  kho quyết. Mọi câu của r3 không được nhắc ở đây là giữ nguyên.
-- **Nguồn (lưu nguyên byte tại `ops/specs/wp1172-source-plan-r4/nguon/`):**
+- **r4 không xoá r3 và không hồi sinh r2.** r4 = r3 (giữ nguyên tám packet, bất biến I1–I6, chín phương án loại, số nền,
+  G1–G6) **cộng** các chốt siết A+1…A+5 cho packet làn A CHƯA mở, **cộng** làn bảo đảm B, **cộng** làn chính sách C có
+  điều kiện. Câu nào của r3 không được nhắc ở đây là giữ nguyên.
+- **Không hồi tố.** PR1 (#1448, spec `5014de59…`, lease `wp1448-r2-g1-claude`) chạy đúng hợp đồng đóng băng của nó; mọi
+  bổ sung của r4 áp từ packet KẾ TIẾP. Không bổ sung nào được nhét vào PR1.
+- **Bản sửa 2** xử lý 13 finding của review Codex `wp1172-plan-r4-review-1` (2 P1, 11 P2, không P0) trên bản sửa 1
+  (`76b836fa…`, commit `d5bc154`). Bảng xử lý ở §11.
+- **Nguồn (lưu nguyên byte tại `ops/specs/wp1172-source-plan-r4/nguon/`, `.gitattributes` `-text`):**
 
 | Nguồn | sha256 | Vai trò |
 |---|---|---|
-| r2 gốc `KE_HOACH_TOI_UU_MUTATION_TESTING_r2_2026-11-03.md` (31 028 byte) | `f4611b0f0c79f33d56b293f5fcb854eeeae2fcbb6acbdfd59d6134dcbfbdcb8f` | Khớp `source_plan_status.r2_sha256` của Mission; chủ kho tìm lại và nộp ngày 2026-11-20 |
+| r2 gốc `KE_HOACH_TOI_UU_MUTATION_TESTING_r2_2026-11-03.md` (31 028 byte) | `f4611b0f0c79f33d56b293f5fcb854eeeae2fcbb6acbdfd59d6134dcbfbdcb8f` | Khớp `source_plan_status.r2_sha256` của Mission; chủ kho tìm lại và nộp 2026-11-20 |
 | Nháp PR0 `PACKET_DRAFT_CI_FULL_AUDIT_PIN_SHA_2026-11-03.md` | `621026692cda1be04d8f1df1a47828d19d01c087dcb484f7c3b2fbf58a900e8e` | Tiêu chí A1–A6 của PR0 |
 | Phản biện Proxima `proxima-mutation-policy-review-20261103.txt` | `122fadcab2dbf34303edafc3cd6e93ae08aeba7f3593ce715eeba7ef1d05cec8` | Tư vấn chính sách tổng quát, KHÔNG phải audit kho |
-| r3 `ops/specs/wp1172-source-plan-r3/KE_HOACH_NGUON_R3.md` (nhánh `ops/wp1172-plan-r3`@`c032656`) | `2e9fb13f1ab3f299c2d2dc1e5a6e407ff0aadb8aee1f6ffd00d88fc02b146f89` | Xương sống; cài ở r81 |
+| r3 `ops/specs/wp1172-source-plan-r3/KE_HOACH_NGUON_R3.md` (nhánh `ops/wp1172-plan-r3`@`c032656`) | `2e9fb13f1ab3f299c2d2dc1e5a6e407ff0aadb8aee1f6ffd00d88fc02b146f89` | Xương sống; cài ở r81 (kèm đính chính làm tròn 3,4–5,6 triệu s của r82) |
 | BASELINE #1434 `ops/specs/wp1434-r3/do/BASELINE.json` @ `5e5d2cc` | `6100c8e18907f59b1abbdc44195861cc2310c654ce8dcfa2e74ca4ffa155f54c` | Nền số |
 
-## 2. Kế thừa — việc đã làm và nơi nó được dùng tiếp (không bỏ công nào)
+## 2. Kế thừa — việc đã làm và nơi nó được dùng tiếp
 
-| Việc đã xong / đang chạy | Trạng thái đo được | Dùng tiếp ở r4 |
+| Việc | Trạng thái đo được | Dùng tiếp ở r4 |
 |---|---|---|
-| PR0 #1166 (ghim SHA, group theo `run_id`, `cancel-in-progress: false`, chọn biên nhận mảnh) | accepted rev12 H3 `b79cbf5`; merged `f8b9cdd` (PR #1412); M8 `landed: false` | Là nền của làn B. Đóng r2-PR0 mục 1–4 và nháp A1, A2, A5, A6 ở mức mã. **A3** (canary hai dispatch cùng SHA + một push) và **A4** (đọc định danh workflow definition) CHƯA có hồ sơ đo ⇒ chuyển vào B1 |
-| `ops-do-workflow-definition.yml` (#1094, CI-PROVENANCE-WD) | trên master | B1 dùng nó cho A4 thay vì dựng đường mới |
-| Đo nền #1434 | merged `5e5d2cc`; ảnh chụp thô thu lại 2026-11-20 tại cùng T0/T1 | Nền số của r3 và mục tiêu G1–G6; ảnh chụp dùng cho nghiệm thu PR1 mục 5 |
-| r3 (4 vòng review Codex, cài r81) | installed | Làn A giữ nguyên |
-| PR1 #1448 (spec r2 `5014de59…`, lease `wp1448-r2-g1-claude`) | đang thực thi lượt 1/3 | **Không đổi spec, không đổi lease.** Làn A tiếp tục; dữ liệu bóng 14 ngày của nó là đầu vào cho PR3/PR4 |
-| Canary #1308, #1370, #1393, #1422 | accepted/merged | Sửa vòng đời, admission, biên nhận công bố. KHÔNG tính là tiết kiệm thời gian; chỉ là hạ tầng để chạy packet |
-| #1143/PR #1155 (đường nhanh hồ sơ), wp892, wp1343/wp1353 (packet-loop 16 mảnh + hằng đêm), WP748 (`nhanh_don_duoc` đích/đủ) | landed | Tiền lệ và cơ chế mà r3 PR3/PR6 mở rộng; không làm lại |
+| PR0 #1166 → PR #1412 | accepted rev12 H3 `b79cbf5`; merged `f8b9cdd`; M8 `landed: false` | Nền của làn B. Đối chiếu từng tiêu chí của nháp ở bảng §8.2 — KHÔNG coi là "nháp đã đạt" |
+| `ops-do-workflow-definition.yml` (#1094) | trên master | B1/B3 dùng để đo định danh workflow definition, không dựng đường mới |
+| Đo nền #1434 | merged `5e5d2cc`; ảnh chụp thô thu lại 2026-11-20 cùng T0/T1 | Nền G1–G6; đầu vào nghiệm thu PR1 mục 5 |
+| r3 (4 vòng review Codex) | installed r81 | Làn A |
+| PR1 #1448 | leased, đang thực thi lượt 1/3 | Giữ nguyên; bóng 14 ngày của nó là đầu vào PR3/PR4 và phép đo overhead A+5 |
+| #1308, #1370, #1393, #1422 | accepted/merged | Sửa vòng đời, admission, biên nhận công bố. KHÔNG tính là tiết kiệm thời gian |
+| #1143/#1155, wp892, wp1343/wp1353, WP748 | landed | Tiền lệ và cơ chế mà r3 PR3/PR6 mở rộng; không làm lại |
 
 ## 3. Phản biện ba nguồn
 
-**r2 đúng ở đâu, sai ở đâu.** Đúng: bằng chứng full audit phải ghim SHA và không bị thay chỗ; phân loại kết cục phải tách
-`cancelled`/`timed_out`/`infrastructure_error`/`not_run` khỏi `passed`; harness phải được tự kiểm bằng lỗi cài cố ý;
-cần watchdog ĐỘC LẬP cho lịch vắng; release phải kiểm đúng candidate; rollback phải tức thời, không chờ PR. Sai (đo ra
-sau): r2 coi chi phí lớn là full audit và nhắm cắt M9. BASELINE cho thấy full audit chỉ 700 504 s = 4,7 % `[r3 DX-5]`,
-còn bước G5 trên từng lượt `ci.yml` là 52,8 % `[B: M2.theo_buoc…G5]`. Cắt M9 đánh vào khoản nhỏ và đánh đổi bảo đảm lớn.
-Mục tiêu "preflight p50 ≤ 2 phút" của r2 không có phép đo nền; trung vị đầu-cuối lượt PR `day_du` hiện là 1775 s `[r3
-DX-4]`, chủ yếu do G5, nên 120 s là mục tiêu cho MỘT làn mới chưa tồn tại, không phải cho CI hiện hành.
+**r2.** Đúng: bằng chứng full audit ghim SHA và không bị thay chỗ; tách `cancelled`/`timed_out`/`infrastructure_error`/
+`not_run` khỏi đạt; tự kiểm harness bằng lỗi cài cố ý; watchdog ĐỘC LẬP; release kiểm đúng candidate; rollback tức
+thời, không chờ PR. Sai theo số đo về sau: r2 coi khoản lớn là full audit và nhắm cắt M9; full audit chỉ 700 504 s = 4,7 %
+`[r3 DX-5]`, còn bước G5 trên lượt `ci.yml` là 52,8 % `[B: M2.theo_buoc…G5]`. Mục tiêu "preflight p50 ≤ 2 phút" của r2
+không có phép đo nền và là mục tiêu cho MỘT làn mới chưa tồn tại.
 
-**r3 đúng ở đâu, thiếu ở đâu.** Đúng: dựng trên số đo; nhắm đúng khoản lớn (G5 theo diff, registry); giữ M9 (I1); fail-closed
-ba trạng thái; bóng ≥ 14 ngày trước khi bật. Thiếu (vì soạn khi r2 bị coi là mất): (a) không có watchdog/freshness cho
-full audit, trong khi I1 dựa vào chính lượt audit ấy làm lớp bù; (b) không có cổng release đúng candidate; (c) không có
-quy trình audit đỏ (owner, SLA); (d) hoàn tác của PR3/PR6 là "công tắc một dòng" trong MÃ, tức cần một PR — đúng cái r2
-§5.5 cảnh báo; (e) điều kiện bật PR3 không có lỗi cài cố ý (seeded fault) để chứng minh bao đóng bắt được lỗi thật; (f) kết
-cục mutant chỉ phân giết/sống/tín dụng giả, không có `timed_out`/`infrastructure_error` tường minh; (g) không đo RSS.
+**r3.** Đúng: dựng trên số đo; nhắm khoản lớn; giữ M9 (I1); fail-closed ba trạng thái; bóng ≥ 14 ngày trước khi bật.
+Thiếu (soạn khi r2 bị coi là mất): watchdog/freshness cho full audit mà I1/I5 dựa vào; cổng release; quy trình audit đỏ;
+rollback của PR3/PR6 cần một PR; điều kiện bật PR3 không có lỗi cài cố ý; kết cục không có tầng thực thi tường minh;
+không đo RSS và overhead.
 
-**Proxima.** Tổng quát, không đọc kho, nên chỉ dùng làm danh mục kiểm. Bốn điểm có giá trị và chưa nằm trong r3: (1)
-"audit bị huỷ hoặc chưa hoàn tất tuyệt đối không được tính là xanh" kèm cảnh báo quá hạn; (2) kiểm thử chính hệ thống kiểm
-thử bằng lỗi cài cố ý; (3) release gate; (4) đo cả lỗi bị BỎ SÓT bằng holdout/seeded, không chỉ điểm mutant. Proxima cũng
-nói "audit tuần không thay được kiểm chứng tại thời điểm merge" — điều này ỦNG HỘ r3 (giữ M9), không ủng hộ phần cắt M9 của r2.
+**Proxima.** Chỉ dùng làm danh mục kiểm. Bốn điểm chưa có trong r3: audit dở không bao giờ xanh + cảnh báo quá hạn; tự
+kiểm harness; release gate; đo cả lỗi BỎ SÓT bằng holdout/seeded. Proxima cũng nói "audit tuần không thay được kiểm chứng
+tại thời điểm merge" — ủng hộ I1 của r3.
 
-**Xung đột và cách giải.** Một xung đột thật: r2 PR8 (M9 theo rủi ro) ↔ r3 §6 phương án loại 3. r4 giải: **giữ I1 của r3
-mặc định**; phần cắt M9 của r2 thành làn C, chỉ mở khi có số đo của làn A (PR8) và quyết định văn bản của chủ kho (Q8).
-Không có xung đột nào khác: các yêu cầu bảo đảm của r2 chỉ THÊM, không làm yếu bất biến nào của r3.
+**Xung đột duy nhất:** r2 PR8 (M9 theo rủi ro) ↔ r3 §6 phương án loại 3. Giải: giữ I1 mặc định; phần của r2 thành làn C
+hai cửa (Q8a cho NGHIÊN CỨU, Q8b cho ĐỔI M9 chỉ sau kết quả C1).
 
-## 4. Thiết kế hợp nhất: ba làn
+## 4. Làn A — giảm chi phí (r3) + năm chốt siết
 
-### Làn A — giảm chi phí (r3, giữ nguyên, ghép bốn bổ sung)
+PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng r3 §5. Năm chốt áp vào đặc tả packet tương ứng khi tới lượt:
 
-PR1 → PR2 → PR3 → PR4 → PR5 → PR6 → PR7 → PR8 đúng như r3 §5, bất biến I1–I6 và năm phép chứng minh của r3 §4. Bốn bổ
-sung chỉ SIẾT, áp vào đặc tả của packet khi tới lượt (không áp hồi tố cho PR1 đang chạy):
+- **A+1 (PR3, PR6, C2) — công tắc bảo thủ có thẩm quyền đo được.**
+  - Nguồn: một Actions repository variable (tên đóng băng trong đặc tả PR3). Trước khi dùng, ĐO tập người ghi được
+    (REST quyền collaborator/role, ghi danh sách vào hồ sơ) và chủ kho xác nhận ở Q9; tập ấy lệch thì công tắc không
+    được tin.
+  - Tiêu dùng có thẩm quyền KHÔNG phải job trong cây PR (trên `pull_request`, PR có thể sửa chính `ci.yml` hay bộ phân
+    loại). Thẩm quyền nằm ở cổng merge chạy từ cây TIN CẬY: `kiem-merge` (từ master, không từ head PR) đọc lại công tắc
+    tại thời điểm xét merge và TÍNH LẠI yêu cầu từ diff: công tắc không đúng chuỗi cho phép, vắng, hoặc không đọc được ⇒
+    đòi G5 đủ `success` trên đúng H, bất kể job PR nói gì. Bằng chứng targeted/bỏ qua đã xanh TRƯỚC khi công tắc tắt
+    trở nên KHÔNG đủ ngay lúc xét merge.
+  - Job `chuan-bi` vẫn đọc công tắc để tiết kiệm (khi tắt thì chạy đủ ngay), nhưng output của nó chỉ là gợi ý.
+  - Ca bắt buộc: PR sửa job tiêu dùng để bỏ qua công tắc ⇒ `kiem-merge` vẫn đòi đủ; tắt công tắc sau khi một lượt bỏ
+    qua đã xanh ⇒ `kiem-merge` đỏ; đột biến "vắng ⇒ bỏ" phải đỏ. Không dùng `pull_request_target` chạy mã PR.
+- **A+2 (điều kiện bật PR3 thứ sáu) — lỗi cài cố ý.** Tập lỗi KHÓA TRƯỚC bởi oracle độc lập (không do bộ phân loại sinh),
+  mỗi lỗi ở một thành phần bao đóng (`ops/` thường, `.claude/dev/`, `scripts/*.py`, `.github/`, cấu hình gốc, tệp đọc qua
+  object git) ⇒ bóng phải `chay` cho 100 %. Cộng các PR lịch sử trong cohort có G5 đỏ không do hạ tầng (ghi đúng số tìm
+  được; tìm được 0 thì ghi 0, không bịa) ⇒ bóng `chay`.
+- **A+3 (PR2, PR5, B1) — kết cục theo tầng, không gộp.** Bốn trường tách biệt:
+  `trang_thai_thuc_thi` ∈ {`hoan_tat`, `timed_out`, `infrastructure_error`, `cancelled`, `not_run`} ·
+  `quan_sat_ca` (mỗi ca: `passed`/`failed`) · `phan_hang_dot_bien` ∈ {`giet`, `song`, `tin_dung_gia`,
+  `equivalent_reviewed` (bắt buộc `ly_do` + `nguoi_xac_nhan`; không bao giờ đếm là giết)} · `ket_luan_tong` ∈ {`xanh`,
+  `do`, `khong_ket_luan`}. Luật: `ket_luan_tong = xanh` chỉ khi mọi mục `hoan_tat`, ca nền `passed`, và mọi đột biến
+  được phân hạng theo đúng bộ phân hạng hiện có (I2, không đổi); ca KHÔNG phải đích sống sót là bình thường, không làm
+  đỏ. Fixture bắt buộc: nền khoẻ · ca không đích sống · giết đúng đích · tín dụng giả · tương đương có xét duyệt ·
+  timeout/hạ tầng. Kiểm hai chiều: bên đọc cũ vẫn đọc được; số giết không đổi trên cùng SHA.
+- **A+4 (PR7b) — bộ nhớ.** RSS đỉnh theo TỪNG tiến trình con bằng `os.wait4` (rusage riêng của con vừa thu, đơn vị KiB
+  trên Linux, gồm cháu đã được con thu); nhu cầu ĐỒNG THỜI đo riêng qua cgroup (`memory.peak`) khi có. Không có ⇒
+  `khong_do_duoc`. Không dùng `RUSAGE_CHILDREN` (giữ mức cao nhất qua các con đã thu). Ca: con tuần tự khác cỡ, con
+  chồng nhau.
+- **A+5 (điều kiện bật PR3 thứ bảy) — overhead của PR1.** Từ bóng 14 ngày: so thời gian bước G5 mỗi mảnh trước/sau merge
+  PR1 trên lượt `day_du` `success`, theo cụm PR. Overhead ≤ 5 % ⇒ giữ; > 5 % ⇒ chuyển phần đo sang lấy mẫu ngoài cổng
+  (successor), không xoá tín hiệu (r2 §5.1).
 
-- **A+1 (PR3, PR6) — công tắc bảo thủ ngoài cây PR.** Ngoài hoàn tác bằng revert, `chuan-bi` đọc một biến kho (Actions
-  repository variable, ví dụ `MISSION1172_CONG_TAC`) do chủ kho giữ. Chỉ đúng chuỗi cho phép mới mở bỏ/giảm G5; vắng,
-  rỗng, lạ, đọc lỗi ⇒ chạy đủ (I3). Lật công tắc có hiệu lực ở lượt kế tiếp, không cần PR. Nghiệm thu: ca hai chiều + đột
-  biến "công tắc vắng ⇒ bỏ" phải đỏ; một lượt CI thật với công tắc tắt in dấu hiệu dương "chạy đủ vì công tắc".
-- **A+2 (điều kiện bật PR3 thứ sáu) — lỗi cài cố ý.** Trước commit bật: một tập lỗi cài cố ý KHÓA TRƯỚC (oracle độc lập,
-  không do bộ phân loại sinh), mỗi lỗi nằm ở một thành phần của bao đóng (`ops/` thường, `.claude/dev/`, `scripts/*.py`,
-  `.github/`, cấu hình gốc, tệp đọc qua object git) ⇒ bóng phải ra `chay` cho 100 %; cộng ít nhất 5 PR lịch sử ĐÃ có G5 đỏ
-  vì lý do không phải hạ tầng (nếu tìm được trong cohort) ⇒ bóng `chay`. Thiếu PR lịch sử thì ghi số tìm được, không bịa.
-- **A+3 (PR2, PR5) — kết cục tường minh.** Bản ghi mảnh/biên nhận mang `ket_cuc` ∈ {`giet`, `song`, `tin_dung_gia`,
-  `timed_out`, `infrastructure_error`, `cancelled`, `not_run`}; chỉ `giet` được cộng vào số bị giết; mọi giá trị khác hoặc
-  vắng ⇒ không xanh. Không đổi phân hạng hiện có (I2), chỉ thêm trường và phép kiểm.
-- **A+4 (PR7b) — RSS.** Khi cân mảnh, đo thêm RSS đỉnh mỗi tiến trình con (`resource.getrusage(RUSAGE_CHILDREN)` trên
-  Linux; `khong_do_duoc` nơi khác), dùng làm ràng buộc song song.
+## 5. Làn B — bảo đảm bằng chứng (không đổi quyết định cổng `ci.yml`, không nới M9)
 
-### Làn B — bảo đảm bằng chứng (mới, từ r2 PR0/PR5/PR6, nháp A3/A4, Proxima)
+### B1 — Hợp đồng biên nhận full audit (bên sản xuất) + canary A3 + A4
 
-Làn B không đổi quyết định cổng nào của `ci.yml` và không nới M9. Nó làm cho lớp bù mà I1/I5 dựa vào trở nên KIỂM ĐƯỢC.
+- **Hợp đồng `bien_nhan_audit.v1` (đóng băng TRƯỚC B2/B3).** Trường: kho; đường dẫn workflow; định danh definition
+  (`github.workflow_sha` + blob/sha256 của tệp tại OID ấy, hoặc `not_measured`); sự kiện; khung cron (nếu `schedule`);
+  SHA sự kiện; SHA/tree checkout từng job; run_id, attempt của lượt và attempt của TỪNG bên sản xuất mảnh (giữ dòng
+  chạy-lại-mảnh đang được phép từ PR0, không cấm cũng không tin mù); danh sách job/mục KỲ VỌNG lập độc lập từ mã tại
+  SHA ấy và tập thực có; kết luận cuối từng job; artifact id + digest; Python/OS/digest phụ thuộc (`requirements*.txt`,
+  phiên bản công cụ); kết cục theo A+3; giây và bộ nhớ từng mảnh; dấu hiệu dương.
+- **A3 — canary concurrency.** Hai `workflow_dispatch` khác run_id trên CÙNG SHA, chồng thời gian ⇒ HAI biên nhận audit
+  hoàn tất, không lượt nào `cancelled` vì concurrency; cộng một quan sát RIÊNG: một lượt push `ci.yml` chạy trong lúc ấy
+  (ghi run_id, queue/start/end, số job chạy thật) không huỷ lượt audit nào. Push không kích hoạt `ci-dot-bien-du.yml`;
+  không thêm trigger push. (Muốn ba lượt audit thì phải là dispatch thứ ba, tính vào ngân sách.)
+- **A4.** Gọi `ops-do-workflow-definition.yml` cho mỗi lượt canary; hợp đồng cho phép `not_measured` ở bên sản xuất, nhưng
+  bên tiêu dùng B3 thì không (xem B3).
+- Write set: `.github/workflows/ci-dot-bien-du.yml`, `.claude/dev/ci_dang_ky_test.py`, đặc tả mới. Trước PR5 (cùng write set).
 
-- **B1 — Biên nhận full audit + đóng A3/A4 của PR0.** Job cuối của `ci-dot-bien-du.yml` ghi một biên nhận JSON (artifact):
-  sự kiện, khung cron (nếu `schedule`), SHA sự kiện, SHA/tree checkout của mọi job, `github.workflow_sha` nếu có (vắng ⇒
-  `not_measured`, không suy từ checkout), run_id/attempt, kết luận từng job, kết cục theo A+3, giây và RSS từng mảnh.
-  Đo A3 bằng canary: hai `workflow_dispatch` khác run_id trên CÙNG SHA + một push master trong lúc lượt đầu chạy ⇒ ba
-  biên nhận kết thúc, không lượt nào `cancelled` vì concurrency. Đo A4 bằng `ops-do-workflow-definition.yml` trên một
-  lượt. Write set: `.github/workflows/ci-dot-bien-du.yml`, `.claude/dev/ci_dang_ky_test.py`, thư mục đặc tả mới.
-  Phải land TRƯỚC PR5 (cùng write set; PR5 mở rộng đúng biên nhận này).
-- **B2 — Watchdog freshness độc lập.** Workflow MỚI chạy theo lịch riêng (không phải bước trong full audit) + `workflow_dispatch`,
-  quyền chỉ đọc Actions và ghi Issue. Đọc REST các lượt `ci-dot-bien-du.yml`, phân ba trạng thái theo r2 §4: `fresh` (lượt
-  cron gần nhất `success` đủ biên nhận B1, tuổi snapshot ≤ 8 ngày, không khung nào quá 36 giờ chưa đóng) · `due_in_progress`
-  · `stale_or_missing` (khung vắng, quá 36 giờ chưa `success`, > 8 ngày, hoặc kết cục `failure`/`cancelled`/`timed_out`
-  /`infrastructure_error` chưa được thay bằng biên nhận hợp lệ). Tuổi tính từ khung/snapshot gốc; chạy lại cùng SHA cũ
-  KHÔNG làm mới. `stale_or_missing` ⇒ mở hoặc cập nhật MỘT Issue theo dõi, gắn nhãn, nêu SHA, run, kết cục. Ba trạng thái
-  ĐO: lỗi đọc API ⇒ `khong_do_duoc`, cũng mở Issue, không im lặng. Ban đầu CHỈ BÁO CÁO, không chặn merge. Write set: tệp
-  workflow mới, một script `ops/` mới + test (tệp mới, không giao write set làn A). Có thể chạy song song thời gian với
-  14 ngày bóng của PR1.
-- **B3 — Cổng release đúng candidate + quy trình audit đỏ.** "Release" của dự án là đẩy Package (`scripts/deploy-package.sh`
-  `--push`, `scripts/deploy-package.ps1 -Push`). Thêm bước trước `drive-push`: đòi một biên nhận B1 `success` cho đúng
-  HEAD đang đóng gói (khớp 40 ký tự), đọc qua REST; vắng, sai SHA, đỏ, không đọc được ⇒ dừng với mã riêng. Ghi đè chỉ bằng
-  cờ tường minh kèm lý do (giống `--force-older`), in ra log. Parity hai nền theo bài học r244 (chạy thật cả `sh` và `ps1`,
-  so cùng đầu vào). Quy trình audit đỏ (tài liệu `ops/` hoặc `docs/`): owner = chủ kho; nhận trong 1 ngày; Issue nêu SHA,
-  ID đỏ, phân loại code/test/hạ tầng; tối đa 1 lần chạy lại hạ tầng, giữ cả attempt đỏ; bisect chỉ trên commit dựng được,
-  không dựng được ghi `not_testable`. Phụ thuộc B1. Write set: hai script deploy + test của chúng, tài liệu quy trình.
+### B2 — Watchdog freshness (bên tiêu dùng đọc báo cáo)
 
-### Làn C — chính sách M9 (từ r2 PR7/PR8), CÓ ĐIỀU KIỆN, mặc định ĐÓNG
+- Workflow MỚI, lịch riêng **mỗi 6 giờ** + `workflow_dispatch`; quyền: đọc Actions, ghi Issue. Đọc REST (phân trang có
+  giới hạn) các lượt `ci-dot-bien-du.yml`, kiểm biên nhận B1 theo hợp đồng v1.
+- Ba trạng thái như r2 §4: `fresh` · `due_in_progress` · `stale_or_missing`. Tuổi tính từ khung/snapshot gốc; chạy lại
+  cùng SHA cũ KHÔNG làm mới. Đọc API lỗi ⇒ `khong_do_duoc` (không bao giờ thành `fresh`).
+- `stale_or_missing` hoặc `khong_do_duoc` ⇒ mở/cập nhật MỘT Issue theo dõi rồi ĐỌC LẠI Issue; ghi Issue lỗi ⇒ job đỏ
+  (GitHub báo lỗi lượt lịch cho chủ kho qua thông báo workflow).
+- Nhịp tim: mỗi lượt watchdog ghi dấu thời gian lên Issue theo dõi; lượt kế tiếp, `doctor` của phiên điều phối và B3 đều
+  đọc dấu ấy và báo khi cũ hơn 24 giờ. Đây là giám sát chéo, không phải SLA cứng (cùng chịu rủi ro lịch GitHub).
+- **G7 phát biểu đúng phạm vi:** cảnh báo trong ≤ khung + 36 h + 6 h (chu kỳ) + độ trễ lịch đã khai; là best-effort có
+  giám sát chéo, chủ kho chấp nhận ở Q6.
+- **Thứ tự:** SAU B1 (cần hợp đồng v1). Ban đầu chỉ báo cáo, không chặn merge.
+- Write set: workflow mới, script `ops/` mới + test, VÀ `.claude/dev/ci_dang_ky_test.py` (đăng ký bộ test mới vào
+  registry theo đường thông thường) — nên xếp nối tiếp với B1/PR2. Ca: biên thời gian, khung vắng, chạy lại SHA cũ, API
+  bị từ chối, ghi Issue lỗi, lượt watchdog vắng.
 
-Chỉ mở khi: làn A PR8 đã đo xong 30 ngày, B1–B3 đã land, và chủ kho quyết Q8 bằng văn bản. Khi mở: C1 shadow cặp đủ/đích
-trên CÙNG snapshot với lỗi lịch sử, lỗi cài cố ý và holdout khoá trước; báo bỏ sót tương đối theo cụm PR/nguyên nhân gốc
-(r2 §5.3), không công bố khoảng tin cậy khi giả định lấy mẫu không đạt. C2 sửa ADR-0060/K7 theo rủi ro, kèm công tắc bảo
-thủ A+1 và rollback không cần PR. Mục tiêu preflight p50 ≤ 2 phút / p95 ≤ 5 phút của r2 thuộc làn C và chỉ là mục tiêu
-cho một làn mới; trước đó nó là chỉ số CHỈ BÁO CÁO (G9).
+### B3 — Cổng release đúng candidate + quy trình audit đỏ
 
-## 5. Thứ tự và phụ thuộc (một executor tại một thời điểm, theo envelope)
+- **"Release"** = đẩy Package (`scripts/deploy-package.sh --push`, `scripts/deploy-package.ps1 -Push`).
+- **Ràng buộc byte:** trước khi build, ghi H và tree; đòi cây sạch (không tệp theo dõi bị sửa, không tệp chưa theo dõi
+  lọt vào tập phát hành; tệp trạng thái deploy bị ignore được phép nhưng không vào gói); build từ ảnh chụp đã kiểm của H
+  (ví dụ `git archive H`) HOẶC so tập tệp + byte phát hành với blob tại H; tính digest gói và GẮN vào bằng chứng; ngay
+  trước `drive-push` kiểm lại H, tree, digest.
+- **Kiểm biên nhận (bên tiêu dùng B1 v1):** đúng kho, đúng workflow, definition ĐO ĐƯỢC (gọi A4 cho chính lượt ấy khi
+  biên nhận ghi `not_measured`), SHA = H, mọi job kỳ vọng có mặt và `success`, kết cục `xanh`, artifact digest khớp, dòng
+  attempt hợp lệ. Bất kỳ trường bắt buộc nào vắng/lạ/không đọc được ⇒ chặn.
+- **Xác thực trên máy deploy:** cần token đọc Actions trên CẢ HAI máy deploy; đo được trước khi bật chế độ chặn; chưa có
+  ⇒ chế độ cảnh báo (`warning_only`), ghi rõ.
+- **Ngoại lệ:** KHÔNG chấp nhận "cờ + lý do tự ghi". Ngoại lệ hợp lệ = một bản ghi do CHỦ KHO đăng (comment Issue/PR, tác
+  giả = OWNER đọc qua REST) mang H, digest gói, lý do, hạn; hoặc một uỷ quyền thường trực có phạm vi do chủ kho ban hành.
+  Sai H, sai digest, hết hạn ⇒ chặn.
+- **Hai nền:** chạy thật `sh` trên Linux và `ps1` trên **Windows thật** (máy Windows của chủ kho), đối chiếu parity cùng đầu
+  vào, base và candidate (bài học r244). `pwsh` trong container Linux chỉ là bằng chứng phụ. Không dùng Windows CI (quy
+  tắc thường trực); hoặc chủ kho miễn Windows-local cho B3 bằng văn bản, nêu rủi ro tồn dư.
+- **Quy trình audit đỏ** (tài liệu dev-side): owner = chủ kho; xác nhận ≤ 2 giờ làm việc; ≤ 1 ngày làm việc có Issue nêu
+  H, ID đỏ, phân loại code/test/hạ tầng, tái hiện tối thiểu hoặc lý do chưa tái hiện; tối đa 1 lần chạy lại hạ tầng, giữ
+  attempt đỏ; bisect chỉ trên commit dựng được, không dựng được ghi `not_testable`; trong lúc chưa khoanh được vùng, lật
+  công tắc A+1 về chạy đủ (khi A+1 đã có) và không merge thay đổi cùng vùng; release bị chặn tới khi có audit xanh đúng
+  candidate hoặc ngoại lệ hợp lệ.
+- Phụ thuộc B1. Write set: hai script deploy + test của chúng, tài liệu quy trình.
 
-1. **PR1** (đang chạy) → land.
-2. **B2** (write set độc lập; lấp khoảng chờ 14 ngày bóng).
-3. **PR2** (Q3 quyết trước).
-4. **B1** (sau PR0; trước PR5).
-5. **PR3** (sau ≥ 14 ngày bóng của PR1, Q1, A+1, A+2).
-6. **B3** (sau B1).
+## 6. Làn C — chính sách M9 (r2 PR7/PR8), mặc định ĐÓNG, hai cửa
+
+- **Cửa Q8a — được NGHIÊN CỨU** (chỉ khi làn A PR8 đo xong 30 ngày và B1–B3 đã land). C1: shadow cặp đủ/đích trên CÙNG
+  snapshot (sản phẩm, đầu vào, kiểm kê, môi trường); lỗi lịch sử, lỗi cài cố ý và holdout KHÓA TRƯỚC khi chỉnh bộ chọn;
+  vòng 1 = 6 replay lịch sử + 4 PR mã live (10 cặp), trần 50 runner giờ, mốc sau 5 cặp; vòng 2 cần quyết định mới, tối
+  đa 30 cặp / 150 runner giờ hoặc 2 tuần; đơn vị đếm = cụm nguyên nhân gốc/PR; báo bỏ sót tương đối so với đủ theo tầng
+  rủi ro; tiêu chí: **0 P0/P1 lịch sử/seeded bị bỏ sót**; khoảng tin cậy chỉ khi giả định lấy mẫu đạt (r2 §5.2–§5.3).
+- **Cửa Q8b — được ĐỔI M9** chỉ sau kết quả C1 và quyết định văn bản của chủ kho. C2 sửa ADR-0060/K7 theo rủi ro, dùng
+  A+1 làm công tắc, mất đọc = full M9, kiểm âm trước merge khi PR rollback chưa land (r2 PR8).
+- Mục tiêu preflight p50 ≤ 2 phút / p95 ≤ 5 phút chỉ thuộc làn C.
+
+## 7. Thứ tự và phụ thuộc (một executor tại một thời điểm)
+
+1. **PR1** (đang chạy) → land; bóng 14 ngày bắt đầu.
+2. **B1** (hợp đồng v1 + canary A3/A4).
+3. **B2** (sau B1).
+4. **PR2** (Q3 quyết trước).
+5. **PR3** (sau ≥ 14 ngày bóng, Q1, Q9, A+1, A+2, A+5).
+6. **B3** (sau B1; Q7).
 7. **PR4** → **PR5** (sau B1) → **PR6** → **PR7** → **PR8**.
-8. **Làn C** chỉ khi Q8 = mở.
+8. **Làn C** chỉ khi Q8a/Q8b mở.
 
-Lý do đặt B2/B1 sớm: (i) chúng không giao write set với PR2/PR3 trừ `ci_dang_ky_test.py` của B1, nên xếp nối tiếp; (ii)
-PR3 chuyển một phần bảo đảm sang lượt push và full audit — lớp bù ấy phải KIỂM ĐƯỢC trước khi bật PR3; (iii) thời gian
-chờ bóng 14 ngày vốn rảnh. Nếu chủ kho từ chối làn B, làn A chạy đúng như r3 và kế hoạch quay về r3 nguyên vẹn.
-
-## 6. Chỉ số
-
-G1–G6 giữ nguyên r3 §3 (định nghĩa, mẫu số, phép quy G4b). Thêm:
-
-| # | Chỉ số | Nền | Mục tiêu |
-|---|---|---|---|
-| G7 | Khung cron full audit bị vắng/đỏ mà watchdog không mở Issue trong 36 giờ | CHƯA ĐO (không có watchdog) | 0 sau B2; kiểm bằng fixture lịch vắng và một lần đọc lại thật |
-| G8 | Tỷ lệ lần đẩy Package có biên nhận full audit `success` đúng HEAD hoặc ghi đè có lý do | CHƯA ĐO | 100 % sau B3 |
-| G9 | Đầu-cuối p50/p95 lượt PR mã (CHỈ BÁO CÁO) | mốc sau 17-11: trung vị 1775 s `[r3 DX-4]` | Không đặt mục tiêu ở làn A/B; mục tiêu 120 s / 300 s chỉ thuộc làn C |
-
-## 7. Câu hỏi chủ kho
-
-Q1–Q5 giữ nguyên r3 §7. Thêm:
-- **Q6.** Chấp nhận làn B (B1, B2, B3) như phần của Mission #1172? Khuyến nghị: CÓ — chi phí nhỏ, không đổi cổng `ci.yml`,
-  và là điều kiện để lớp bù của PR3/PR6 kiểm được.
-- **Q7.** B3: cổng release CHẶN (mặc định) hay chỉ CẢNH BÁO trong 30 ngày đầu? Khuyến nghị: CHẶN, có cờ ghi đè kèm lý do.
-- **Q8.** Làn C (nới M9 theo rủi ro) mở sau PR8 hay đóng hẳn? Khuyến nghị: quyết SAU PR8 trên số đo; tới lúc ấy giữ I1.
-- **Q9.** Ai được lật công tắc A+1 (chỉ chủ kho, hay cả điều phối dưới uỷ quyền)? Khuyến nghị: tắt (về chạy đủ) — cả hai;
-  bật lại — chỉ chủ kho.
+Ba packet chung tệp `.claude/dev/ci_dang_ky_test.py` (B1, B2, PR2) xếp nối tiếp; effective write set đo lại trước mỗi
+lease. B1/B2/PR2 lấp khoảng chờ bóng 14 ngày. Chủ kho từ chối làn B ⇒ làn A chạy đúng r3, chỉ giữ A+2…A+5 nếu Q6 cho phép.
 
 ## 8. Truy vết đầy đủ
 
-**r2 → r4** (mọi yêu cầu có đích):
+### 8.1 r2 → r4 (từng yêu cầu chuẩn tắc)
 
-| Yêu cầu r2 | Đích r4 | Trạng thái |
+| Mục r2 | Yêu cầu | Đích r4 | Trạng thái |
+|---|---|---|---|
+| §3 PR0 | ghim SHA, group theo run, không huỷ, chốt cấu trúc | PR0 (mã) + bảng §8.2 + B1 | mã có; đo còn nợ |
+| §3 PR1 | đo theo ca/mutant/tiến trình con, wall/CPU | PR1 (chỉ G5) | đang thực thi |
+| §3 PR1 | RSS đỉnh | A+4 | đích |
+| §3 PR1 | runner OS/Python/digest phụ thuộc | trường của B1 v1 | đích |
+| §3 PR1 | overhead ≤ 5 % hoặc tách khỏi cổng | A+5 | đích |
+| §3 PR1 | 1 full + 3 targeted cùng SHA, khớp ID/kết cục | PR1 nghiệm thu 1 (A/B 8 mảnh hai vế, toàn bộ định danh) cho G5; phần targeted thuộc C1 | thu hẹp, có lý do: chưa có làn targeted |
+| §3 PR1 | phủ `packet_loop_test`, `nhanh_don_duoc_test` | Không đưa vào làn A/B: hai bộ đã có làn riêng (wp1353 hằng đêm; WP748 đích/đủ) và ngoài khoản lớn; C1 có thể gồm | loại khỏi A/B — chủ kho xác nhận ở Q6 |
+| §3 PR1/§4 | tách kết cục; tương đương có xét duyệt | A+3 | đích |
+| §3 PR2 | fixture âm cho runner/parser/selector/aggregator | PR1 fixture G4b · PR5 ca âm · A+2 · A+3 fixture · B1/B3 ca âm | đích, phân tán theo packet |
+| §3 PR3 | cache | r3 §6 mục 7 | loại, giữ |
+| §3 PR3 | fixture bất biến, giảm startup, cô lập state | Q4 (r3 khuyến nghị không) | chờ quyết |
+| §3 PR3 | cân mảnh theo runtime, ràng buộc RSS | PR7b + A+4 | đích |
+| §3 PR3/§4 | reference đóng băng, cold/warm, hai runner, oracle seeded | Chỉ cần khi tối ưu harness (Q4); A+2 dùng oracle khóa trước | phụ thuộc Q4 |
+| §3 PR4 | selector theo phụ thuộc/rủi ro; không biết ⇒ rộng; manifest quyết định | r3 PR3 (bao đóng bảo thủ, dòng bóng có lý do) + PR4 + PR6 | đích; manifest ID chọn chỉ ở PR6 |
+| §3 PR4 | PR sửa chính bộ chọn không tự xếp làn nhẹ | bao đóng bảo thủ gồm `ops/`, `.github/` + A+1 ở `kiem-merge` | đích |
+| §3 PR5/§4 | freshness 36 h/8 ngày, watchdog độc lập, retry hạ tầng ≤ 1 | B2 + B3 quy trình | đích (G7 best-effort, Q6) |
+| §3 PR5 | release đúng candidate, definition OID | B3 + B1 | đích |
+| §3 PR6 | trigger rộng theo rủi ro | mặc định làn A: chạm bao đóng ⇒ đủ | đích |
+| §3 PR6/§5 | audit đỏ: owner, 2 giờ, 1 ngày, tái hiện, bisect, chặn cả candidate | B3 quy trình | đích |
+| §3 PR7/§5.2–5.3 | shadow cặp, holdout, seeded, bỏ sót tương đối, trần 10 cặp/50 h, 30/150 | C1 (Q8a) + A+2 | có điều kiện |
+| §3 PR8/§5.4–5.5 | M9 theo rủi ro, công tắc bảo thủ, cutover cho Packet mới, không hồi tố | A+1 + C2 (Q8b) | có điều kiện |
+| §4 release | ngoại lệ thành phần cần manifest + audit thành phần hoặc waiver cụ thể | B3 ngoại lệ do chủ kho; ngoại lệ thành phần: không áp (gói là một khối) | đích |
+| §6 | ngưỡng p95 ≤ 5 phút, 0 P0/P1 lọt | làn C | có điều kiện |
+| §6 mục 3 | ai được tắt ngay targeted, ai được waiver | Q7, Q9 | chờ quyết |
+
+### 8.2 Nháp PR0 → r4 (từng tiêu chí; không suy "đạt" từ accept của spec hẹp hơn)
+
+| ID | Điều kiện của nháp | Hiện trạng | Đích |
+|---|---|---|---|
+| A1 | actionlint, registry, test workflow đạt trên H | mã và chốt tĩnh (`loi_ghim_sha_du`, `chon_bien_nhan_du`, `loi_bien_nhan_du`) có trên master; kết quả trên H3 nằm trong hồ sơ accept rev12, r4 CHƯA đối chiếu từng mục | B1 ghi lại |
+| A2 | dispatch trên H: mọi checkout/artifact = H, 10/10 job, K7 rc 0 | CHƯA XÁC MINH trong r4 (cần đọc hồ sơ accept rev12 và #1412) | B1 canary tạo bằng chứng mới |
+| A3 | hai dispatch cùng SHA + một push, không lượt nào bị thay chỗ | `not_run` | B1 (thiết kế đã sửa) |
+| A4 | definition OID tách khỏi source OID | `not_measured` | B1/B3 |
+| A5 | Windows exact H, full audit, CI PR, `kiem-merge` | Windows: MIỄN theo quy tắc thường trực (r67); phần còn lại CHƯA XÁC MINH trong r4 | ghi lại trong hồ sơ B1 |
+| A6 | review độc lập, land, hậu merge readback | merged; M8 `landed: false` (§10.2.2 không đo được) | nợ đo, B1 ghi lại |
+| §3.5 | biên nhận máy đọc | chưa có | B1 v1 |
+
+### 8.3 Proxima → r4
+
+Concurrency riêng không huỷ (PR0, B1 A3) · tách kết cục (A+3) · audit dở không xanh + cảnh báo quá hạn (B2) · tự kiểm
+harness (A+2, A+3, PR5) · nhóm rủi ro buộc rộng (bao đóng bảo thủ) · release gate (B3) · audit đỏ mở Issue có owner, tạm
+dừng merge cùng vùng (B3) · paired full/targeted + holdout + seeded + bỏ sót (A+2, C1) · ba giai đoạn (bóng → bật có kiểm
+chứng → làn C có điều kiện).
+
+## 9. Chỉ số
+
+G1–G6 giữ nguyên r3 §3. Thêm:
+
+| # | Chỉ số | Nền | Mục tiêu |
+|---|---|---|---|
+| G7 | Khung cron vắng/đỏ được cảnh báo trong ≤ khung + 36 h + 6 h + độ trễ lịch | CHƯA ĐO | 100 % sau B2, best-effort có giám sát chéo (Q6) |
+| G8 | Lần đẩy Package, báo TÁCH ba dòng: `audit_passed` · `owner_waived` · `warning_only` | CHƯA ĐO | sau B3 chế độ chặn: `warning_only` = 0; `audit_passed` + `owner_waived` = 100 % |
+| G9 | Đầu-cuối p50/p95 (CHỈ BÁO CÁO) | quần thể: `pull_request`, luật cũ `day_du`, `success`, một attempt, đầu-cuối suy từ job, sau 17-11: trung vị 1775 s, p25 1590 `[r3 DX-4]` | không mục tiêu ở A/B; báo riêng `cancelled`/`failure` và thời gian xếp hàng; quần thể rộng hơn cần nền riêng |
+
+## 10. Câu hỏi chủ kho
+
+Q1–Q5 giữ nguyên r3 §7. Thêm:
+- **Q6.** Chấp nhận làn B và A+2…A+5; chấp nhận G7 là best-effort có giám sát chéo; chấp nhận loại `packet_loop_test`/
+  `nhanh_don_duoc_test` khỏi A/B? Khuyến nghị: CÓ.
+- **Q7.** B3: chặn hay cảnh báo 30 ngày đầu; AI được ban ngoại lệ release và theo khuôn nào? Khuyến nghị: chặn khi đã có
+  token trên cả hai máy deploy; ngoại lệ chỉ do chủ kho, khuôn §5 B3.
+- **Q8a / Q8b.** Cho nghiên cứu C1 sau PR8 (Q8a)? Đổi M9 chỉ sau C1 (Q8b)? Khuyến nghị: quyết Q8a sau PR8, Q8b sau C1.
+- **Q9.** Tập người ghi công tắc A+1 (đo được) và quyền: tắt — chủ kho và điều phối dưới uỷ quyền; bật lại — chỉ chủ kho.
+
+## 11. Xử lý review `wp1172-plan-r4-review-1`
+
+| Finding | Mức | Xử lý |
 |---|---|---|
-| PR0 ghim SHA, group riêng, không huỷ | PR0 #1166 (xong) + B1 (A3 canary, A4 definition) | mã xong; đo A3/A4 còn nợ |
-| PR1 đo theo ca/mutant/tiến trình con, wall/CPU | Làn A PR1 (đang chạy, chỉ G5) | đang thực thi |
-| PR1 RSS, digest OS/Python/deps, overhead ≤ 5 % | A+4 (RSS); digest vào biên nhận B1; overhead: PR1 báo "thêm vài giây mỗi mảnh" (r3) | thu hẹp, có đích |
-| PR1 phạm vi `packet_loop_test`, `nhanh_don_duoc_test` | Không đưa vào: hai bộ đã có làn riêng (wp1353 hằng đêm, WP748 đích/đủ) và nằm ngoài khoản lớn | loại, cần Q6 xác nhận ngầm |
-| PR1/§4 schema kết cục tám trạng thái | A+3 (PR2, PR5) + B1 | có đích |
-| PR2 harness tự kiểm, lỗi cài cố ý, thiếu mảnh, sai SHA | PR1 fixture G4b + PR5 ca âm + A+2 + B1 | có đích |
-| PR3 cache | Loại (r3 §6 mục 7) | loại, giữ |
-| PR3 fixture bất biến, giảm startup, cân mảnh theo runtime, cô lập state | PR7b (cân mảnh) + A+4; phần còn lại thuộc Q4 (khuyến nghị không) | thu hẹp |
-| PR4 selector phụ thuộc/rủi ro, không biết ⇒ đủ | Làn A PR3 (bao đóng bảo thủ) + PR4 + PR6 | có đích |
-| PR5 freshness ba trạng thái, watchdog độc lập | B2 | có đích |
-| PR5 release đúng candidate, workflow definition OID | B3 + B1 (A4) | có đích |
-| PR6 trigger rộng theo rủi ro | Mặc định của làn A: mọi diff chạm bao đóng ⇒ đủ | có đích |
-| PR6 audit đỏ, owner, SLA, bisect | B3 (quy trình) | có đích |
-| PR7 shadow cặp, seeded, holdout, relative miss | A+2 (cho PR3) + làn C1 | một phần, phần còn lại có điều kiện |
-| PR8 M9 theo rủi ro, công tắc bảo thủ, cutover toàn dự án | A+1 (công tắc) + làn C2 | có điều kiện (Q8) |
-| §5 cutover cho Packet đủ điều kiện, không hồi tố | Giữ: mọi bổ sung áp từ packet kế tiếp; PR1 không đổi | giữ |
-| Mục tiêu p50 ≤ 2 phút / p95 ≤ 5 phút | G9 (chỉ báo cáo) → làn C | hạ thành chỉ báo, cần Q8 |
+| R4-01 khai quá về A2/A5/A6 | P2 | §2, bảng §8.2 từng tiêu chí: delivered/not_run/not_measured/miễn/chưa xác minh |
+| R4-02 truy vết mất mát | P2 | §8.1 tách từng yêu cầu; overhead ⇒ A+5; digest ⇒ B1; SLA 2 giờ/1 ngày, tái hiện tối thiểu, dừng merge cùng vùng ⇒ B3; C1 giữ trần và tiêu chí 0 P0/P1; Q8 tách a/b |
+| R4-03 kết cục gộp tầng | P2 | A+3 bốn trường, giữ `equivalent_reviewed`, fixture và kiểm tương thích |
+| R4-04 RSS không theo từng con | P2 | A+4 dùng `os.wait4` + cgroup; bỏ `RUSAGE_CHILDREN` |
+| R4-05 canary ba biên nhận bất khả | P2 | B1 A3: hai biên nhận audit + một quan sát push riêng |
+| R4-06 B2 trước B1, thiếu đăng ký test | P2 | B2 sau B1; write set gồm `ci_dang_ky_test.py`; xếp nối tiếp |
+| R4-07 SLA watchdog | P2 | chu kỳ 6 h, đọc lại Issue, ghi lỗi ⇒ đỏ, nhịp tim chéo; G7 best-effort |
+| R4-08 thẩm quyền công tắc | P2 | A+1: đo người ghi, tiêu dùng có thẩm quyền ở `kiem-merge` từ cây tin cậy, vô hiệu bằng chứng cũ khi tắt |
+| R4-09 biên nhận release thiếu provenance | P1 | B1 hợp đồng v1 đóng băng trước B2/B3; B3 từ chối mọi trường bắt buộc vắng; A4 cho chính lượt; token đo trước khi chặn |
+| R4-10 HEAD không ràng buộc byte gói | P1 | B3 ràng buộc byte: cây sạch, build từ ảnh chụp H, digest gói, kiểm lại trước push |
+| R4-11 cờ ghi đè không phải waiver | P2 | B3 ngoại lệ chỉ do chủ kho, kiểm REST; G8 ba dòng |
+| R4-12 pwsh Linux không phải Windows | P2 | B3 parity trên Windows thật hoặc miễn văn bản |
+| R4-13 quần thể G9 | P2 | G9 nêu đủ bộ lọc, báo riêng huỷ/đỏ/xếp hàng |
 
-**Nháp PR0 → r4:** A1, A2, A5, A6 đóng bởi #1166/#1412 (theo hồ sơ accept và merge; M8 `landed: false`); A3, A4 ⇒ B1.
-§3.5 biên nhận máy đọc ⇒ B1.
+## 12. Phương án loại
 
-**Proxima → r4:** concurrency riêng, không huỷ (PR0); tách kết cục (A+3); audit dở không xanh + cảnh báo quá hạn (B2);
-tự kiểm harness (A+2, PR5 ca âm); nhóm rủi ro buộc audit rộng (bao đóng bảo thủ PR3, mặc định đủ); release gate (B3); audit
-đỏ mở Issue có owner (B3); paired full/targeted + holdout + seeded + bỏ sót (A+2, làn C1); triển khai ba giai đoạn (làn A
-bóng → bật có kiểm chứng → làn C có điều kiện).
+Giữ chín phương án của r3 §6. Thêm: (10) khôi phục nguyên r2 — nhắm khoản 4,7 % và đổi lấy M9; (11) sửa spec PR1 đang
+chạy — hồi tố; (12) watchdog là một bước trong full audit — lượt vắng không chạy được bước của nó; (13) thêm trigger push
+cho full audit chỉ để đủ canary — đổi tần suất và chi phí; (14) `pull_request_target` chạy mã PR để đọc công tắc — mở
+quyền cho mã chưa duyệt.
 
-## 9. Phương án loại
+## 13. Ngân sách và rủi ro
 
-Giữ chín phương án loại của r3 §6. Thêm: (10) **khôi phục nguyên r2** — loại: nhắm khoản 4,7 % và đổi lấy M9; (11) **sửa
-spec PR1 đang chạy để nhét yêu cầu r2** — loại: hồi tố một packet đã đóng băng/lease; yêu cầu ấy có đích ở A+3/A+4/B1;
-(12) **watchdog là một bước trong chính full audit** — loại (r2 §4): lượt vắng không chạy được bước của nó.
-
-## 10. Ngân sách và rủi ro
-
-Làn B ước ba packet nhỏ, mỗi packet: 1–2 lượt thực thi, 1–2 review Codex, 1–2 CI PR Ubuntu, 0 Windows (theo quy tắc
-thường trực, trừ B3 cần kiểm `ps1` — chạy `pwsh` trong container như r244, không cần Windows CI), K7 khi chạm vùng M9.
-Chi phí chạy thêm: B1 vài giây mỗi lượt audit; B2 một job nhỏ mỗi ngày; B3 một lời gọi REST mỗi lần đẩy Package. Rủi ro
-chính: B1 đụng workflow M9 (sensitive, chỉ siết); B3 có thể chặn deploy khi full audit chưa chạy trên HEAD — đó là chủ
-đích, có cờ ghi đè. Không bổ sung nào làm tăng giây CI của `ci.yml`.
+Làn B ước ba packet nhỏ; mỗi packet 1–3 lượt thực thi, 1–3 review Codex, 1–3 CI PR Ubuntu, K7 khi chạm vùng M9, 0
+Windows CI; B3 thêm một lần chạy Windows-local trên máy chủ kho (hoặc miễn). Canary A3 = 2 lượt full audit thêm (~2 ×
+13 282 s giây job `[B: M1.luot_du_8_manh_success…]`). Chi phí thường xuyên: B1 vài giây mỗi lượt audit; B2 4 job nhỏ/ngày;
+B3 vài lời gọi REST mỗi lần deploy. Rủi ro: B1 đụng workflow M9 (sensitive, chỉ siết); B3 có thể chặn deploy khi chưa có
+audit trên H — chủ đích, có ngoại lệ của chủ kho. Không bổ sung nào tăng giây CI của `ci.yml`.

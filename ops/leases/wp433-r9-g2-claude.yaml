@@ -36,7 +36,7 @@ prompt_sha256_required: 07a9123c486bfc61ee2c317548746ebdbb3640f892df709ad591dd31
 write_set:
 - .githooks/eol_policy_test.py
 - references/golden/workflow_audit.json
-- release_manifest.json
+- RELEASE_MANIFEST.json
 - scripts/test_fragments/wp433_bundled_tach_manh.py
 - scripts/tl_core/release.py
 - scripts/tl_core/test_fragments.py
@@ -49,7 +49,7 @@ change_policy_sha: null
 effective_write_set:
 - .githooks/eol_policy_test.py
 - references/golden/workflow_audit.json
-- release_manifest.json
+- RELEASE_MANIFEST.json
 - scripts/test_fragments/wp433_bundled_tach_manh.py
 - scripts/tl_core/release.py
 - scripts/tl_core/test_fragments.py

@@ -1,0 +1,18 @@
+Bạn là phiên điều phối Claude Code tiếp quản Mission #1172 của repo ducthangho/tra-luat, bắt đầu từ PR1 = Packet #1448. Luôn trả lời chủ kho bằng tiếng Việt và hỏi ít nhất có thể.
+
+Trước khi làm gì khác, đọc theo thứ tự:
+1. CLAUDE.md của repo, rồi chạy `python3 .claude/dev/launcher.py doctor`.
+2. Tệp bàn giao `ops/specs/wp1448-r2/HANDOFF.md` trên nhánh `ops/wp1448-r1` (`git fetch origin ops/wp1448-r1`).
+3. Mission đang hiệu lực r82: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7032189767 (Plan SHA256 24d089b02c3c6b7fb734b417de4be5a46577e1501ca63c7d848a9f3cdabbbc20).
+4. Spec PR1 `ops/specs/wp1448-r2/SPEC.md` (sha256 5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e). Chủ kho đã duyệt băm; review spec Codex lượt 2 đã approve.
+5. Kế hoạch nguồn r3 `ops/specs/wp1172-source-plan-r3/KE_HOACH_NGUON_R3.md` trên nhánh `ops/wp1172-plan-r3` (sha256 2e9fb13f…). Kế hoạch này thay cho bản r2 đã mất; nó không phải bản gốc.
+
+Việc tiếp theo: theo r82, cấp lease `wp1448-r2-g1-claude` rồi giao executor Fable 5.2 ngay, không cần hỏi lại chủ kho. Sau đó làm đúng trình tự ở mục 4 của HANDOFF.md:
+- Codex gpt-6-astra (xhigh) review mã.
+- Chủ kho audit exact-H TRƯỚC lần đẩy đầu của H (qua PR nháp bootstrap).
+- Cập nhật nhánh lên master trước khi đẩy.
+- Connector, K7 (một lượt ci-dot-bien-du trên H), miễn K6, kiem-merge rc=0.
+- Chủ kho tự bấm merge.
+- Ghi M8 `landed: false`, rút hạn lease, cài một revision chỉ ghi sổ.
+
+Giữ mọi quy tắc thường trực ở mục 1 của HANDOFF.md. Không vượt trần r82; còn P0–P2 khi đã hết trần thì dừng và hỏi chủ kho. Phiên cũ đã dừng, nên chỉ phiên của bạn giữ vai điều phối.

@@ -1,0 +1,108 @@
+{
+  "verdict": "approve",
+  "findings": [],
+  "tests": [
+    {
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1448-review-probes.py",
+      "rc": 0,
+      "summary": "passed: reran the r1 counterexamples. Genuine MANH provenance differs while fixed-data BKCON matches; inventory is 61 cases and 490 mutants; the original three-file fingerprint misses the launcher dependency change; pre-PR4 counters are 1/1; worker parsing ignores the timing prefix."
+    },
+    {
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1448-r2-review/probes.py",
+      "rc": 0,
+      "summary": "passed: real t18 on the two-successive-change fixture; r2 directory fingerprint remains mismatched after both changes and therefore requires chay. Real-Git stale-base classifier probe yields day_du/duong_nhanh, benefit=1/residual=1; new-context raw/mode/diff-check/binary checks pass. Separate timing lines are ignored by the worker receiver and rejected inside gom receipts. No mutation suite ran."
+    },
+    {
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 python -B - (inline runpy: cong_cu_test.t16_moi_goi_ben_thu_ba_phai_duoc_khai_trong_ban_ke; t18_inventory_bat_buoc_cua_launcher_phai_nam_trong_ban_ke; ci_dang_ky_test.loi_g5_workflow on ci.yml)",
+      "rc": 0,
+      "summary": "passed: both current-tree cases passed; the current G5 workflow shape returned no errors. Existing invalid-escape SyntaxWarnings were emitted."
+    },
+    {
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 python -B ops/specs/wp1434-r3/do/thu_thap.py --tu-kiem",
+      "rc": 0,
+      "summary": "passed: existing collector self-checks 21/21. This validates the inherited collector baseline, not the unimplemented v2 reduction."
+    },
+    {
+      "cmd": "git diff --name-status a995f0b7b292a9695e7ad9ce10a1e4f908026b5e HEAD && git status --short --untracked-files=all && git diff --exit-code && git diff --cached --exit-code",
+      "rc": 0,
+      "summary": "passed: candidate adds only the r1/r2 spec files relative to the acceptance baseline; working-tree and index diffs are empty; no unignored untracked files."
+    },
+    {
+      "cmd": "full ordinary suites; mutation suites; implementation A/B; CI dispatch; Windows; real-run timing reconciliation; v2 historical-snapshot replay",
+      "rc": null,
+      "summary": "not_run: frozen-spec review only. No r2 implementation exists in this checkout. Focused probes do not establish these acceptance results."
+    }
+  ],
+  "notes": {
+    "reviewed_sha": "190008d05c89330312f6235541418b735016104b",
+    "reviewed_tree": "e9869059d0b3d08be1d8942472baa58adc81e3ce",
+    "immutable_acceptance_baseline": "a995f0b7b292a9695e7ad9ce10a1e4f908026b5e",
+    "spec": {
+      "path": "ops/specs/wp1448-r2/SPEC.md",
+      "revision": 2,
+      "sha256": "5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e"
+    },
+    "authority": {
+      "source": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7032189767",
+      "summary": "Read-only GitHub readback confirms installed Mission r82 names this spec hash and authorizes one independent spec review. Packet #1448 remains proposed without an executor lease; this review does not require or create that lease."
+    },
+    "source_plan": {
+      "source": "ops/wp1172-plan-r3@c032656d6e9107c7d0d570afe374fd78b6424e93:ops/specs/wp1172-source-plan-r3/KE_HOACH_NGUON_R3.md",
+      "local_copy": "/tmp/wp1448-review-source-plan.md",
+      "sha256": "2e9fb13f1ab3f299c2d2dc1e5a6e407ff0aadb8aee1f6ffd00d88fc02b146f89",
+      "verification": "Rehashed the existing external copy; exact match to the assignment and installed r82 source-plan record."
+    },
+    "identity": {
+      "provider": "openai_codex",
+      "execution_surface": "codex_service",
+      "transport": "machine",
+      "model_effort": "KHONG_DO_DUOC: no independent served-model/effort evidence inspected; requested model is not asserted as measured.",
+      "sandbox": "workspace-write, approval never; review kept repository read-only and used external scratch."
+    },
+    "prior_findings": [
+      {
+        "id": "WP1448-R1-01",
+        "status": "closed",
+        "evidence": "R2 acceptance 1(b), line 30, explicitly validates each side's genuine head/test hash separately and compares a narrow semantic verdict projection. The rerun still demonstrates why raw MANH bytes differ; that difference is now expressly handled. Acceptance 1(c) checks BKCON serialization on identical verdict data."
+      },
+      {
+        "id": "WP1448-R1-02",
+        "status": "closed",
+        "evidence": "Line 30 requires all eight shards on both sides and rejects missing mandatory comparisons. Independent inventory gives [62,62,61,61,61,61,61,61], totaling 490; one shard can no longer satisfy acceptance."
+      },
+      {
+        "id": "WP1448-R1-03",
+        "status": "closed",
+        "evidence": "Line 31 requires PR1 benefit=1/residual=1 and labels the 1/0 collector fixture as simulated post-PR4. Real Git objects reproduced old=day_du, new=duong_nhanh, with the new raw/mode/diff-check/binary pipeline passing."
+      },
+      {
+        "id": "WP1448-R1-04",
+        "status": "closed",
+        "evidence": "Lines 21 and 31 require directory-content/membership invalidation and the successive-change test. In the rerun, changing launcher.py to read docs/tool-inventory.json preserved t18 success; changing only that JSON then failed real t18. The old three hashes stayed fixed, but r2's fingerprint differed from the pre-reader-change baseline after BOTH changes, requiring chay until rederivation. This tests the specified algorithm, not nonexistent production shadow code."
+      },
+      {
+        "id": "WP1448-R1-05",
+        "status": "closed",
+        "evidence": "Line 33 now requires measured build/target/other components for at least 95% of mutant identities on a successful reference run, with missing counts reported. For the 490-item baseline that requires at least 466 complete records; all-unknown output cannot pass."
+      }
+    ],
+    "questions": {
+      "1": "No remaining blocking defect. Read sections 1/2 together with the explicit provenance exception in acceptance 1(b): production output channels and verdict semantics are preserved, while genuine provenance is checked per side. ci.yml:78-90 consumes chuan-bi outputs; :630-682 consumes shard artifacts. _nhan_ket_qua_con (:7741-7775) ignores the distinct timing prefix, whereas _gom_manh (:8178-8180) rejects it inside a shard file. No step-summary consumer was found in the inspected workflow, registry guards or collector. The specified A/B is constructible, with all legacy identities compared and added identities reported separately; it has not been executed.",
+      "2": "No concrete omitted current dependency was established. _goi_ngoai (:2697-2735) reads ops/.claude/dev Python contents and scripts/*.py names; the listed closure covers those sets and directory membership. Current t16/t18 passed. The wider reader fingerprint closes the demonstrated future-dependency hole, including imported/runpy readers. Git-object reads still require the executor's explicit static-path inventory and tests as specified. No exhaustive process-tree file-access trace was performed.",
+      "3": "Consistent with PR4 while leaving real classification unchanged. The parent-count, second-parent=head and ancestor conditions match the plan. A copied comparison environment can feed doc_diff, doc_raw_ba_cap, kiem_mode_git, kiem_diff_check and kiem_nhi_phan without replacing main's real environment or PHU_THUOC_PACKET_LOOP decision. The real-Git probe confirms the positive case. Classification and kiem-re validation remain separate results; collection must retain independently recomputed oracle evidence so offline --tinh need not call git.",
+      "4": "Implementable without changing verdict records or scheduling. _do_ban_kinh (:2586-2600) provides build and per-case boundaries. _phong_con (:7714-7737) starts workers concurrently but waits in launch order, so observation after wait is not necessarily a child's actual finish time; child timestamps/CPU should supply those measurements. Union, not sum, accounts for overlap. Baseline/preflight work (:9063-9113), cleanup and the preceding probe in ci.yml:626-628 belong in the reported remainder. The +/-10% target remains an empirical acceptance condition, not a verified result; it must not be manufactured by redefining the step or padding intervals.",
+      "5": "Feasible and the ordered G4 contract is incorporated explicitly. Implement all table rows 0 through 10 despite the shorthand 'ten steps'; rows 0-1 are outside the denominator, and first match wins. The required cancellation and simulated-PR4 fixtures cover the previously problematic precedence cases. The inherited collector passes 21/21. V2 must extend can_log (:326-338), artifact selection (:737-751), and the JSON-only artifact reader (:306-323) for G5 MANH/BKCON evidence. Historical coverage may remain unknown where receipts are absent; neither selected mode nor job success alone proves completion.",
+      "6": "A complete implementation is possible within the write set, without changing ci.yml: existing event variables and standard run metadata are available. No mandatory outside file was identified. If optional G5 environment changes are chosen, ci_dang_ky_test.py:1418-1421 and :1499-1518 enforce exact dictionaries as well as other shape constraints; the hash-only permission is not blanket authority to relax them. Mission r82 explicitly budgets zero Windows runs, consistent with the scoped waiver; K6 still needs the owner's exact-H waiver receipt. K7 retains one successful exact-H ci-dot-bien-du run and does not replace G5's separate eight-shard A/B.",
+      "7": "The previous one-shard and all-unknown shortcuts are closed. Missing comparisons fail explicitly; benefit cannot be substituted for residual; fingerprint mismatch persists across later data-only changes; selected full mode cannot count as completed coverage. Read the specific append-only permission in acceptance 6 as preserving existing mutation entries. No further concrete trivial-compliance defect was demonstrated."
+    },
+    "artifacts": {
+      "probe": "/tmp/wp1448-r2-review/probes.py",
+      "probe_sha256": "1b0d914ae0253c4e1cea2ed99eb9ef8bd0863643da6e9a04042d570628f53fb2",
+      "results": "/tmp/wp1448-r2-review/probe-results.json",
+      "results_sha256": "71040a5a73729e9d94d44ad6222888eb5f0225fd2c7f98ef2f4070ebab048022",
+      "collector_log": "/tmp/wp1448-r2-review/collector-selftest.log"
+    },
+    "environment": "Linux, Python 3.13.18, Git 2.43.0, core.abbrev=7.",
+    "scope_and_limits": "Approval is for the SPEC only; all five prior findings are closed at the specification level. Implementation correctness, timing accuracy and CI acceptance remain to be demonstrated. No repository edits, push, comments, dispatch or GitHub writes occurred. HEAD/tree stayed fixed and observed tracked/index/untracked status stayed clean; the pre-existing ignored .codex/ entry remained present, but its byte history was not audited."
+  }
+}

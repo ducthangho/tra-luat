@@ -1,0 +1,110 @@
+{
+  "verdict": "changes_requested",
+  "findings": [
+    {
+      "id": "WP1448-R1-01",
+      "severity": "P2",
+      "file": "ops/specs/wp1448-r1/SPEC.md",
+      "line": 30,
+      "summary": "The byte-for-byte MANH A/B acceptance cannot pass across base and head.",
+      "evidence": "Section 1 requires unchanged verdict bytes, and acceptance 1 explicitly compares MANH/BKCON on base versus head. ops/cong_cu_test.py:8103-8113 derives head and sha256_test from the running checkout and test file; :8137-8140 embeds both in MANH. This packet necessarily changes that file. The isolated probe invoked the existing writer with identical verdict data: BKCON matched, MANH differed solely because provenance differed. Even placing both runs at one Git SHA does not make the changed test-file hashes equal.",
+      "suggested_fix": "Define the A/B inputs and comparison projection explicitly. Validate each run's genuine HEAD/test hash separately; compare legacy mutant/case verdicts using a narrowly specified projection that excludes provenance and any declared volatile diagnostics. Keep GITHUB_OUTPUT byte comparison on identical event/OID fixtures. Do not falsify production fingerprints to make A/B pass."
+    },
+    {
+      "id": "WP1448-R1-02",
+      "severity": "P2",
+      "file": "ops/specs/wp1448-r1/SPEC.md",
+      "line": 30,
+      "summary": "One completed shard does not establish the required whole-inventory equivalence.",
+      "evidence": "Acceptance 1(b) permits comparing the identities of 'at least one shard'. At reviewed HEAD, import-only inventory inspection found 490 mutants and eight shard sizes [62,62,61,61,61,61,61,61] (_phan_manh, ops/cong_cu_test.py:8098-8100). An executor can therefore satisfy this clause while leaving at least 428 legacy mutants uncompared. Source plan section 4(d) and PR1 acceptance require every existing mutant identity. Green head CI is not a base/head equivalence check.",
+      "suggested_fix": "Require the union of A/B results to cover every legacy mutant identity, normally all eight shards, with complete legacy case verdicts for each. Report missing, duplicate and additional identities separately; any missing required comparison must fail acceptance."
+    },
+    {
+      "id": "WP1448-R1-03",
+      "severity": "P2",
+      "file": "ops/specs/wp1448-r1/SPEC.md",
+      "line": 31,
+      "summary": "The PR4 positive counter expectation contradicts PR1's unchanged real classifier.",
+      "evidence": "Section 4 defines benefit as cu != moi and residual as the running classification != the independently recomputed moi. Before PR4, the running classifier is cu by sections 1 and 4. For the stale-base positive case cu=day_du and moi=duong_nhanh, both counters must therefore be 1. Acceptance 2 instead requires benefit=yes/residual=no. The source plan's zero-residual positive case belongs to PR4, after the real classifier changes.",
+      "suggested_fix": "Separate the two fixtures: PR1's real shadow integration must expect benefit=1/residual=1 for this case; a clearly labelled simulated post-PR4 collector fixture may expect benefit=1/residual=0. Preserve the actual classifier and the stated counter definitions."
+    },
+    {
+      "id": "WP1448-R1-04",
+      "severity": "P2",
+      "file": "ops/specs/wp1448-r1/SPEC.md",
+      "line": 21,
+      "summary": "The closure can remain marked valid after an unpinned executable reader gains a dependency.",
+      "evidence": "Only cong_cu_test.py, cong_cu.py and bash_nen.py invalidate the closure. However, t18 executes .claude/dev/launcher.py through runpy (ops/cong_cu_test.py:2824-2835), and the suite also imports ops/lease_publish_test.py (:93-94). Neither reader is fingerprinted. A prior launcher edit is itself inside the closure, but does not force a new closure measurement; a later edit to its newly introduced data dependency can then receive bo_qua. An external synthetic-tree probe ran the real t18 body with a launcher reading docs/tool-inventory.json: changing only that JSON changed t18 from pass to failure while all three specified hashes stayed identical. This demonstrates an invalidation defect across successive PRs, not a claim that today's launcher already reads that JSON.",
+      "suggested_fix": "Bind closure validity to every executable reader that can expand its dependencies, including imported/runpy-loaded modules, or conservatively fingerprint the relevant reader directories and their membership. Any reader change must force chay until the closure is re-derived. Add the two-successive-change counterexample to acceptance."
+    },
+    {
+      "id": "WP1448-R1-05",
+      "severity": "P3",
+      "file": "ops/specs/wp1448-r1/SPEC.md",
+      "line": 33,
+      "summary": "Timing acceptance permits zero usable per-mutant decomposition.",
+      "evidence": "Acceptance 4 allows every mutant to report khong_do_duoc with a reason. An implementation could measure worker intervals sufficiently to meet the wall-time tolerance while returning unknown for every build/target/other component, and still meet the written clause. The packet would deliver no measured target-versus-other cost for the stated PR6 decision.",
+      "suggested_fix": "Add a minimum usable-data requirement for the successful reference CI run and report the missing-data denominator. Keep measurement failures harmless to production verdicts, but distinguish a green job from successful acceptance of the measurement deliverable."
+    }
+  ],
+  "tests": [
+    {
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1448-review-probes.py",
+      "rc": 0,
+      "summary": "passed: exact source-plan SHA-256; receipt-writer provenance counterexample; 61-case/490-mutant inventory and all shard sizes; real t18 on an external dependency-invalidation fixture; pre-PR4 counter arithmetic; worker parser ignores the separate timing prefix. No mutation suite was run."
+    },
+    {
+      "cmd": "git --attr-source=HEAD diff --name-only HEAD HEAD",
+      "rc": 0,
+      "summary": "passed: the installed Git accepts the classifier's attribute-source option for this read-only probe."
+    },
+    {
+      "cmd": "git diff --exit-code",
+      "rc": 0,
+      "summary": "passed: no tracked working-tree changes."
+    },
+    {
+      "cmd": "git diff --cached --exit-code",
+      "rc": 0,
+      "summary": "passed: no index changes."
+    },
+    {
+      "cmd": "git status --short --untracked-files=all",
+      "rc": 0,
+      "summary": "passed: empty output; no unignored untracked files."
+    },
+    {
+      "cmd": "ordinary full case suites; mutation suites; CI dispatch; real timing reconciliation",
+      "rc": null,
+      "summary": "not_run: this was a frozen-spec review. Focused probes do not establish full-suite, CI, Windows or performance acceptance."
+    }
+  ],
+  "notes": {
+    "reviewed_sha": "2f7fb9e454673c4809076e679c4dbf5455b5c8ac",
+    "reviewed_tree": "93bc5dfa8ad26b7a825aa44c9b621788e45ac0b6",
+    "spec_commit_parent": "a995f0b7b292a9695e7ad9ce10a1e4f908026b5e",
+    "spec_sha256": "a2e264f07bd552193a07e24a54a009be8105116934387f0f8f746de73befadd7",
+    "source_plan": {
+      "source": "https://github.com/ducthangho/tra-luat/blob/ops/wp1172-plan-r3/ops/specs/wp1172-source-plan-r3/KE_HOACH_NGUON_R3.md",
+      "sha256": "2e9fb13f1ab3f299c2d2dc1e5a6e407ff0aadb8aee1f6ffd00d88fc02b146f89",
+      "verification": "Fetched through read-only REST tooling; decoded source bytes matched the assigned digest. Saved outside the checkout."
+    },
+    "identity": {
+      "provider": "openai_codex",
+      "execution_surface": "codex_service",
+      "transport": "machine",
+      "model_effort": "KHONG_DO_DUOC: no independent served-model/effort evidence supplied; the requested model is not asserted as measured identity."
+    },
+    "scope": "Independent read-only SPEC review, authorized directly by the user. Issue #1448 still states proposed/no lease. No repository edits, push, comment, dispatch or GitHub write. Scratch probes and verdict are outside the checkout.",
+    "environment": "Linux; Python 3.13.18; Git reports 2.43.0. No Windows or real runner timing measured.",
+    "questions": {
+      "1": "The output-channel prohibition is explicit, but A/B is both unsatisfiable as raw receipt bytes and incomplete in coverage (01/02). Existing ci.yml consumes chuan-bi outputs at lines 78-90 and G5 artifact files at 630-682. The worker receiver ignores non-BKCON lines (7741-7775), while the gom file parser rejects extra lines (8178-8180). No step-summary consumer was found in the inspected workflow/registry/collector. Separate stdout prefixes are viable; timing lines must never enter shard files.",
+      "2": "The named directory/name sets cover the observed _goi_ngoai scans (2697-2735); focused t16/t18 checks passed. I did not establish an omitted current concrete input outside those sets. The demonstrated completeness defect is future validity after an unpinned reader changes (04). No exhaustive process-tree access trace was performed.",
+      "3": "The parent-count, second-parent=head and ancestor requirements match PR4's design. A copied shadow context can consistently supply doc_diff, doc_raw_ba_cap, kiem_mode_git, diff-check and binary checks while preserving the real env/output and PHU_THUOC_PACKET_LOOP decision. Classifier results and kiem-re validation outcomes remain distinct phases in current code (phan_loai_day_du versus lenh_kiem_re). Fix the counter contradiction in 03. Independent oracle evidence must be captured during collection if --tinh is to remain offline and git-free.",
+      "4": "Timing is implementable without adding fields to verdicts. _phong_con launches workers concurrently but waits in launch order (7714-7735); time observed after p.wait is not necessarily that child's true finish time. Define CPU scope, including whether nested test subprocesses count. Baseline cases and preflight run before workers (9063-9113), and ci.yml:626-628 includes a separate probe command, so they belong in the reconciliation remainder. The +/-10% threshold is unverified here; report measured components and remainder rather than manufacturing equality.",
+      "5": "Collector v2 is feasible, but needs a G5-specific artifact reader and expanded log/artifact collection: #1434 can_log excludes G5 CI logs (326-338), artifact fetching selects dot-bien-manh only (737-751), and its artifact decoder expects JSON rather than MANH/BKCON (306-323). The incorporated ordered G4 table is explicit; evaluate rows 0 through 10, with 0-1 outside the denominator. The mandatory cancellation fixtures match the plan. Also test precedence overlaps, reruns/carried jobs, invalid/missing receipts and checkout-merge OID versus PR head when implementing 'valid receipts'. No collector v2 implementation exists here to certify.",
+      "6": "No mandatory file outside the write set was identified. Standard GITHUB_* environment already supplies run identity, allowing no workflow edit. If extra G5 environment is introduced, ci_dang_ky_test.py uses exact G5_ENV/shape comparisons (1418-1421, 1499-1518), not merely hashes; line 46's hash-only permission would need clarification for that optional route. K7 matches ADR-0060 M9. The Windows exception is conditional on an actual owner waiver: packet_loop.py K6 requires 'windows: <exact H> mien'; approving this spec hash alone is not that receipt. 'No Windows CI' alone does not waive Windows-local rules.",
+      "7": "The one-shard shortcut is blocking (02); all-unknown decomposition is advisory (05). Existing-inventory preservation should be read together with acceptance 6's explicit permission to append new guards, not as permission to remove or redefine old identities."
+    }
+  }
+}

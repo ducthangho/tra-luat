@@ -126,5 +126,7 @@
       "verdict": "changes_requested",
       "note": "ran without executor handoff (audit A2)"
     }
-  ]
+  ],
+  "da_bi_thay_the": "wp1448-r4-g3-claude",
+  "da_bi_thay_the_note": "Owner approved spec r4 and Fable attempt 3 (ghi hộ 7047654570)."
 }

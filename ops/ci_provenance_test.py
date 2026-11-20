@@ -1558,7 +1558,44 @@ def c67_lam_nong_truoc_vong_dot_bien():   # #1322 M2, review lượt 1 F2: bản
 def c68_loi_luong_nen_la_tin_dung_gia():   # #1322 review lượt 2 F4: bộ gom chạy ĐỦ việc rồi ném lỗi vô can ⇒ c65 phải ra TIN_DUNG_GIA, không GIET
     neo = 'return list(ex.' + 'map(ham, viec))'   # ghép hai mảnh: neo phải xuất hiện ĐÚNG MỘT lần trong tệp
     hang, ra = chay_dot_bien_test("F4_loi_luong_nen", neo, 'list(ex.' + 'map(ham, viec)); raise RuntimeError("c68_loi_vo_can")', "c65")
-    bang(hang == "TIN_DUNG_GIA" and "c68_loi_vo_can" in ra, f"lỗi vô can ở luồng điều phối của c65 phải là TIN_DUNG_GIA, được {hang}: {ra!r}")
+    xet = xet_c68(hang, ra)
+    if xet == "HA_TANG":   # review lượt 3 F4b: quá hạn / lỗi vô can KHÁC / bản gốc đỏ trong tiến trình lồng ⇒ lỗi hạ tầng, KHÔNG phải tín hiệu chốt
+        raise RuntimeError(f"c68: tiến trình lồng không đo được ({hang}): {ra!r}")
+    bang(xet == "DAT", f"c65 đã nuốt lỗi vô can của luồng điều phối thành lỗi thứ tự (GIET): {ra!r}")
+
+def xet_c68(hang, ra):   # #1322 F4b: chỉ ĐÚNG MỘT dạng là chốt c68 phải bắt — c65 đổi lỗi vô can thành `DO:c65_...`
+    if hang == "TIN_DUNG_GIA" and "c68_loi_vo_can" in ra:
+        return "DAT"
+    if hang == "GIET" and "DO:c65_chay_theo_thu_tu:" in ra:
+        return "NUOT_LOI"
+    return "HA_TANG"
+
+@ca
+def c69_xet_c68_tach_ha_tang():   # #1322 review lượt 3 F4b: bảng phân xử của c68, mỗi đường vào một dòng
+    for hang, ra, mong in (("TIN_DUNG_GIA", "RuntimeError: c68_loi_vo_can", "DAT"),
+                           ("GIET", "DO:c65_chay_theo_thu_tu:kết quả phải theo thứ tự việc, được None", "NUOT_LOI"),
+                           ("HONG", "QUA_HAN:c65_chay_theo_thu_tu: tien trinh con qua 300 s", "HA_TANG"),
+                           ("HONG", "ca đích không xanh trên bản gốc (rc=4): x", "HA_TANG"),
+                           ("TIN_DUNG_GIA", "RuntimeError: loi khac", "HA_TANG"),
+                           ("SONG_SOT", "", "HA_TANG"),
+                           ("GIET", "DO:c64_so_tien_trinh_mien: x", "HA_TANG")):
+        bang(xet_c68(hang, ra) == mong, f"xet_c68({hang!r}, {ra!r}) phải {mong}, được {xet_c68(hang, ra)}")
+
+@ca
+def c70_c68_ha_tang_khong_thanh_chot():   # #1322 F4b: chạy CHÍNH c68 với kết quả lồng giả — hạ tầng ⇒ RuntimeError, nuốt lỗi ⇒ TinHieuChotCa
+    for gia, mong in ((("HONG", "QUA_HAN:c65_chay_theo_thu_tu: tien trinh con qua 300 s"), RuntimeError),
+                      (("TIN_DUNG_GIA", "RuntimeError: loi khac"), RuntimeError),
+                      (("GIET", "DO:c65_chay_theo_thu_tu: được None"), TinHieuChotCa),
+                      (("TIN_DUNG_GIA", "RuntimeError: c68_loi_vo_can"), None)):
+        with mock.patch(__name__ + ".chay_dot_bien_test", return_value=gia):
+            try:
+                c68_loi_luong_nen_la_tin_dung_gia()
+                duoc = None
+            except TinHieuChotCa:
+                duoc = TinHieuChotCa
+            except RuntimeError:
+                duoc = RuntimeError
+        bang(duoc is mong, f"c68 với kết quả lồng {gia!r} phải ra {mong}, được {duoc}")
 
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
@@ -1969,6 +2006,9 @@ DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — s
     ("T7_lam_nong_bo_sot_dot_bien_test", 'DOT_BIEN + TU_KIEM + ' + 'DOT_BIEN_TEST:', 'DOT_BIEN + TU_KIEM:', "c67"),
     ("T8_bo_kiem_du_ket_qua", ' and len(hang) == ' + 'len(viec)', '', "c66"),
     ("T9_c65_nuot_loi_luong", 'if "loi" in ' + 'kq:' + _XD + '        raise', 'if False:' + _XD + '        raise', "c68"),   # review lượt 2 F4
+    ("T10_c68_ha_tang_thanh_chot", 'if xet == "HA_' + 'TANG":', 'if False:', "c70"),   # review lượt 3 F4b: mỗi đường vào một chốt riêng
+    ("T11_xet_c68_moi_thu_la_nuot_loi", '    return "HA_' + 'TANG"' + _XD, '    return "NUOT_LOI"' + _XD, "c69"),
+    ("T12_xet_c68_giet_khong_doi_dau_c65", 'if hang == "GIET" and "DO:c65_' + 'chay_theo_thu_tu:" in ra:', 'if hang == "GIET":', "c69"),
 )
 
 def chay_con(ten_ca, ma):

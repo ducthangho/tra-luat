@@ -25,9 +25,9 @@ def _frag(root, name, pad=0):
 
 def _nap(tf, scripts):
     try:
-        return [c.test_id for c in tf.load_runtime_fragment_cases(scripts)], None
+        return [c.test_id for c in tf.load_runtime_fragment_cases(scripts)], None, ""
     except Exception as exc:  # noqa: BLE001
-        return None, getattr(exc, "code", type(exc).__name__)
+        return None, getattr(exc, "code", type(exc).__name__), str(exc)
 
 
 def _check(tl_module, root):
@@ -71,20 +71,22 @@ def run(tl_module):
             mods2 = tf.generate_bundled_modules(fr)
         finally:
             tf._BUNDLED_SHARD_LIMIT = old
-        if len(written) < 3 or len(mods2) < 3:   # chốt: không đủ mảnh thì đỏ, không văng IndexError
+        if len(written) != 3 or len(mods2) != 3:   # chốt: không đúng 3 mảnh thì đỏ, không văng IndexError
             _KQ["nhieu_manh"] = False
             return False
         fr_moved = r2.parent / "src"
         fr.rename(fr_moved)   # topology bundle: không còn test_fragments/
-        ids, err = _nap(tf, r2)
-        _KQ["nhieu_manh"] = (len(written) >= 3 and err is None
+        ids, err, _ = _nap(tf, r2)
+        khai = b'BUNDLED_FRAGMENT_SHARDS = ("tl_test_fragments_bundled_2.py", "tl_test_fragments_bundled_3.py",)\n'
+        _KQ["nhieu_manh"] = (written == tuple(n for n, _ in mods2) and err is None
                              and ids == [n[:-3] for n in names]
-                             and all(len(d) <= 100 * 1024 + 42 * 1024 for _, d in mods2)
-                             and b"BUNDLED_FRAGMENT_SHARDS" in mods2[0][1])
+                             and [d.count(b'\n    ("wp9001_f') for _, d in mods2] == [2, 2, 2]
+                             and mods2[0][1].endswith(b")\n" + khai)
+                             and all(b"BUNDLED_FRAGMENT_SHARDS" not in d for _, d in mods2[1:]))
         # (3) mảnh lạc không khai: loader bỏ qua, cổng báo stale + extra_shards
         stray = r2 / "tl_test_fragments_bundled_9.py"
         stray.write_bytes(mods2[1][1])
-        ids3, err3 = _nap(tf, r2)
+        ids3, err3, _ = _nap(tf, r2)
         fr_moved.rename(fr)
         tf._BUNDLED_SHARD_LIMIT = 100 * 1024
         try:
@@ -107,29 +109,38 @@ def run(tl_module):
         m2 = r2 / written[1]
         keep = m2.read_bytes()
         m2.unlink()
-        _, err5 = _nap(tf, r2)
+        _, err5, msg5 = _nap(tf, r2)
         m2.write_bytes(keep)
         # (6) thứ tự xuyên mảnh sai ⇒ hợp đồng; (7) mảnh k>=2 tự khai mảnh ⇒ hợp đồng
         m3 = r2 / written[2]
         keep3 = m3.read_bytes()
         m2.write_bytes(keep3)
         m3.write_bytes(keep)
-        _, err6 = _nap(tf, r2)
+        _, err6, _ = _nap(tf, r2)
         m2.write_bytes(keep)
         m3.write_bytes(keep3 + b'BUNDLED_FRAGMENT_SHARDS = ("tl_test_fragments_bundled_2.py",)\n')
-        _, err7 = _nap(tf, r2)
+        _, err7, _ = _nap(tf, r2)
+        # (8) mảnh 3 chép lại một fragment của mảnh 2 (thứ tự vẫn đúng) ⇒ trùng xuyên mảnh ⇒ hợp đồng
+        dong = [x for x in keep.split(b"\n") if x.startswith(b'    ("wp9001_f3.py"')]
+        dau = b"BUNDLED_FRAGMENT_SOURCES = (\n"
+        if len(dong) == 1 and keep3.count(dau) == 1:
+            m3.write_bytes(keep3.replace(dau, dau + dong[0] + b"\n"))
+            _, err8, _ = _nap(tf, r2)
+        else:
+            err8 = None
         m3.write_bytes(keep3)
-        _KQ["thieu_manh"] = err5 == "BUNDLED_MODULE_MISSING"
+        _KQ["thieu_manh"] = err5 == "BUNDLED_MODULE_MISSING" and f"scripts/{written[1]}" in msg5
         _KQ["thu_tu_xuyen_manh"] = err6 == "BUNDLED_MODULE_CONTRACT"
         _KQ["manh_tu_khai"] = err7 == "BUNDLED_MODULE_CONTRACT"
-    # (8) kho thật: mọi mảnh dưới WARN, hạn mảnh <= 70% WARN
+        _KQ["trung_xuyen_manh"] = err8 == "BUNDLED_MODULE_CONTRACT"
+    # (9) kho thật: hạn mảnh đúng 192 KiB, mọi mảnh <= 70% WARN
     repo = Path(tf.__file__).resolve().parent.parent / "test_fragments"
     if repo.is_dir():
         real = tf.generate_bundled_modules(repo)
-        _KQ["kho_that"] = (tf._BUNDLED_SHARD_LIMIT <= 0.7 * _WARN
-                           and all(len(d) <= _WARN for _, d in real))
+        _KQ["kho_that"] = (tf._BUNDLED_SHARD_LIMIT == 196608
+                           and all(len(d) <= 0.7 * _WARN for _, d in real))
     else:
-        _KQ["kho_that"] = True
+        _KQ["kho_that"] = tf._BUNDLED_SHARD_LIMIT == 196608
     for value in _KQ.values():
         ok = ok and value is True
-    return ok
+    return ok and len(_KQ) == 9

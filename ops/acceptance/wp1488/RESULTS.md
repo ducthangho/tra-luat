@@ -3,7 +3,7 @@
 Base `8656dc0176ed108e12c209ba55c91a1f6f9d612f`. Đặc tả hiện hành: `ops/specs/wp1488-r4.md` (sha256 `a4888c7e…d1ad`),
 lease `wp1488-r4-g4-claude` (thay r3-g3, bia mộ hai chiều). Mã r1 đã đo: `ab298a8`, `b7a280e`; mã r2: `42b5386`; mã r3:
 `f8747c4`, `7a8823b` (sau Codex lượt 4). Mã r4 (trả nợ `WP1488-WIN-THEO-LENH`):
-`ab83dd363` (40 hex ở §9); các commit sau nó chỉ đổi tệp hồ sơ.
+`ab83dd363` (40 hex ở §9); sau Codex lượt 5 (P3, chỉ đổi ca test): `22a7ad1`; các commit sau nó chỉ đổi tệp hồ sơ.
 
 ## 1. Tái hiện lỗi trên base
 
@@ -120,6 +120,13 @@ dạng: 33/34, ca đỏ duy nhất là `r858_hinh_dang_cong_thuc_cai`.
 
 ## 7. Nợ có tên
 
+- CÒN MỞ: `WP1488-NUL-KENH` (Codex lượt 5 P2; chủ kho chọn ghi nợ ở Review Rescue Checkpoint, 21-11-2026 ~14:10Z). Lần đọc
+  kênh `KQ="$(cat -- "$KENH_KQ" && printf x)"` để Bash bỏ byte NUL (chỉ in cảnh báo `ignored null byte`), nên kênh
+  `<nhãn>\0\n<dir>` được nhận như `<nhãn>\n<dir>`. Đo (VERDICT lượt 5): `DICH\0` được nhận ở base `8656dc0`, r3 và r4
+  (lớp có từ wp868); `DICH_WIN\0` trả 7 ở base/r3 chỉ vì nhãn chưa tồn tại, r4 nhận và ghi `W:<dir>`. Chỉ chạm tới khi
+  chính công thức trong `ops/cong_cu.yaml` ghi NUL vào kênh. Chữa đúng là đổi cách đọc kênh (phát hiện NUL ngay trong lần
+  đọc duy nhất), mà dòng ấy là neo của nhiều ca/đột biến wp868 — việc của packet riêng.
+
 - ĐÃ TRẢ ở r4 (§9). `WP1488-WIN-THEO-LENH` (Codex lượt 4 P2; chủ kho chọn ghi nợ ở Review Rescue Checkpoint, 21-11-2026 ~12:10Z): chế độ
   Windows nhận bằng chuỗi `chon_thu_muc_chay_duoc --win ` trong `LENH`. Năm công thức Windows trong `ops/cong_cu.yaml` viết
   đúng literal nên chạy đúng (`r858_cai_windows…` đạt). Sai khi `"--win"` có nháy, tab thay dấu cách, chuỗi nằm trong dữ
@@ -167,11 +174,19 @@ Chạy cả ca `r1488_…` với script `7a8823b` ⇒ ĐỎ ở (N-nhay). `--lap
 
 | Đột biến | Thay đổi | Chết ở |
 |---|---|---|
-| `wp1488_sh_bo_chon_luon_dich` | bộ chọn luôn ghi nhãn `DICH` | (W-rong) |
+| `wp1488_sh_bo_chon_luon_dich` | bộ chọn luôn ghi nhãn `DICH` | (I-win) |
 | `wp1488_sh_quyet_theo_lenh` | hàm quyết định theo `$LENH` (thiết kế r3) | (N-nhay) |
 | `wp1488_sh_path_bo_nhanh_dich_win` | bỏ nhánh `DICH_WIN` của phép đọc PATH | (N-nhay) rc 7; `r858_cai_windows…` rc 7 |
-| `wp1488_sh_dich_win_khong_doi` | nhánh `DICH_WIN` gọi hàm với chế độ rỗng | (W-rong); `r858_cai_windows…` |
+| `wp1488_sh_dich_win_khong_doi` | nhánh `DICH_WIN` gọi hàm với chế độ rỗng | (I-win); `r858_cai_windows…` |
 | `wp1488_sh_dich_win_loi_khong_dat_rc` | bỏ `\|\| RC_CAI=1` ở nhánh `DICH_WIN` | (I-win) |
+| `wp1488_sh_path_nhan_hau_to` (Codex lượt 5) | phép đọc PATH nhận thêm `DICH_WINx*` | (Q-win-hau-to) rc 3 |
+| `wp1488_sh_ghi_nhan_long` | phía ghi nhận `DICH_WIN*` (bỏ đòi LF ngay sau nhãn) | (Q-win-hau-to) rc 1, có gọi `cygpath` |
+
+Bản đầu của bảng này (commit `377a0cb`) ghi (W-rong) cho hai dòng đầu vì đo TRƯỚC khi thêm (I-win), mà (I-win) chạy trước
+(W); Codex lượt 5 (P3) bắt được, đo lại ở `22a7ad1` cho cột trên.
+
+Kịch bản (Q) (Codex lượt 5 P3, thêm ở `22a7ad1`): công thức tự ghi kênh `DICH_WINx\n<dir>`, `DICHx\n<dir>`, `DICH_WIN\n`,
+`DICH\n` ⇒ cả bốn rc 7, stderr `kenh ket qua hong`, tệp = `b""`, `cygpath` giả không được gọi (tệp log vắng).
 
 Ghi chú đo được: `wp1488_sh_dich_win_loi_khong_dat_rc` SỐNG ở bản đầu của r4 (chưa có I-win) — cùng lý do như
 `wp1488_sh_chep_loi_khong_dat_rc` ở §4: ngoài lượt `source`, hàm trả 1 không kèm `||` thì `set -e` cũng thoát. Thêm (I-win)

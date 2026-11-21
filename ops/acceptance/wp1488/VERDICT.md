@@ -422,3 +422,17 @@ Cả ba vế đều in cảnh báo `ignored null byte`. Nghĩa là: Bash bỏ NU
 r4 không tạo lớp ấy mà mở nó sang nhãn mới. Chỉ công thức tự ghi byte NUL vào kênh mới chạm tới; công thức nằm trong
 `ops/cong_cu.yaml` của kho. P3 thứ hai đúng: bảng đột biến §9 đo TRƯỚC khi thêm (I-win), mà (I-win) đứng trước (W) nên
 nay chết ở (I-win).
+
+### Review Rescue Checkpoint sau lượt 5
+
+Trần Codex (5) hết; lượt 5 không có P0/P1. Chủ kho chọn qua AskUserQuestion (21-11-2026 ~14:10Z) **"Sửa 2 P3, nợ P2"**:
+sửa hai P3, ghi P2 thành nợ có tên, KHÔNG gọi thêm Codex; chủ kho duyệt merge trên bằng chứng của executor + CI.
+
+### Executor xử lý (sửa ở `22a7ad1`, đặc tả r4)
+
+| Finding | Xử lý |
+|---|---|
+| P3 thiếu ca cho nhãn gần đúng / thiếu đường dẫn | Kịch bản (Q): `DICH_WINx\n<dir>`, `DICHx\n<dir>`, `DICH_WIN\n`, `DICH\n` ⇒ rc 7, `kenh ket qua hong`, tệp rỗng, không gọi `cygpath`. Đột biến của reviewer thành `wp1488_sh_path_nhan_hau_to` (chết ở Q-win-hau-to, rc 3); thêm `wp1488_sh_ghi_nhan_long` cho phía ghi (chết ở Q-win-hau-to, rc 1, có gọi `cygpath`). |
+| P3 bảng đột biến §9 ghi sai ca chết đầu tiên | Đo lại trên `22a7ad1`: `wp1488_sh_bo_chon_luon_dich` và `wp1488_sh_dich_win_khong_doi` chết ở (I-win). Bảng §9 sửa, kèm câu nêu vì sao bản đầu sai (đo trước khi thêm I-win). |
+| **P2 Bash bỏ byte NUL khi đọc kênh** | **Nợ có tên `WP1488-NUL-KENH`** (chủ kho chọn; chi tiết RESULTS §7). Lớp lỗi có từ wp868 với nhãn `DICH`; r4 mở nó sang `DICH_WIN`. |
+

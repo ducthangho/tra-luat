@@ -1,7 +1,7 @@
 # HO SO LAND — packet #1322 CI-PROVENANCE-SONG-SONG r1, lease g2, qua PR #1467. Khuon: ops/land/pr1453-wp433-land-evidence.yaml.
 # Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2; dieu kien landed §10.2.4.
 #
-# TRANG THAI: merged (f77feb5), landed FALSE — cho chu kho phan quyet. Bon moc §10.2.2 tren DUNG merge f77feb5 (ci.yml push 44840271109)
+# TRANG THAI: merged (f77feb5), landed TRUE — chu kho CHAP NHAN HAU KIEM (chat phien executor 2026-11-21 ~01:02Z, sau ban landed false 52793cb). Bon moc §10.2.2 tren DUNG merge f77feb5 (ci.yml push 44840271109)
 #   measured passed; lease g2 da rut han, NGUOI_GIU 0. Nhung duyet merge cua chu kho (PR #1467 issuecomment-7048488061) dat BON dieu kien
 #   TRUOC merge, va executor merge theo lenh chat cua chu kho ma KHONG doi chieu cac dieu kien ay: (a) bon moc §10.2.2 cua CI PR tren head
 #   chua do truoc merge (do hau kiem: run/workflow definition passed, checkout va gate output not_measured); (c) comment rieng cua chu kho
@@ -135,7 +135,7 @@ post_merge_checks:
 bookkeeping:
   - {item: 'rut han lease wp1322-r1-g2-claude', ket_qua: 'xem lease.thu_hoi_cuoi'}
   - {item: 'hien vat review luot 9 vao ops/reviews/', ket_qua: 'measured — readback-pr-1468.json: PR #1468 merge 010046f (2026-11-20T23:55Z); bam ba tep khop ban goc (Issue #1322 comment 7048903913).'}
-  - {item: 'so M8 + dong WP #1322 (kiem-dong-wp D1-D4)', ket_qua: 'not_measured — chua lam; cho chu kho phan quyet landed.'}
+  - {item: 'so M8 + dong WP #1322 (kiem-dong-wp D1-D4)', ket_qua: 'not_measured — chua lam; chu kho chi yeu cau lat landed va merge ho so.'}
   - {item: 'PR ghi so', ket_qua: 'not_measured — PR ho so nay, chua merge luc ghi.'}
   - {item: 'phat hanh', ket_qua: 'not_applicable — khong bump VERSION; chi doi tep test dev-side trong ops/.'}
 # ---- het truong chuan
@@ -170,17 +170,19 @@ lease:
 
 trang_thai_packet:
   merged: true
-  landed: false
+  landed: true
   landed_dieu_kien: >-
     PROTOCOL §10.2.4 — (1) gate: run 44840271109 tren f77feb5 bon moc measured passed => DAT. (2) lease nha: DAT (NGUOI_GIU 0).
     (3) bookkeeping: ho so nay; M8 va dong WP CHUA. (4) review neo 7c429aa: Codex offline luot 9 approve + connector sach. (5) uy quyen:
-    CHUA DAT tron ven — duyet 7048488061 dat dieu kien truoc merge (a)(c)(d) khong duoc thoa truoc merge (xem pre_merge_checks).
+    duyet 7048488061 dat dieu kien truoc merge (a)(c)(d) khong duoc thoa truoc merge (xem pre_merge_checks); chu kho CHAP NHAN HAU KIEM
+    va lat landed true (loi_khai_co_neo — chat chu kho "Chấp nhận hậu kiểm, lật landed true và merge #1472", phien executor, sau khi doc
+    ban landed false o PR #1472 head 52793cb; khong co hien vat GitHub rieng).
     (6) muc tieu: CI PR va master ci_provenance_test ĐẠT; Windows delta packet 0 (loi_khai_co_neo). (7) tran: Codex 12/11 — VUOT.
   canh_bao_cho_chu_kho: >-
     (i) Executor merge theo lenh chat ma khong doi chieu bon dieu kien truoc merge cua duyet 7048488061 va khong bao chu kho truoc: (a)
     bon moc CI PR chi do hau kiem va khong dat du (checkout, gate output not_measured); (c) khong co comment chot Windows M3; (d) kiem-merge
-    hau kiem rc 12 (K1 loi spec_ref cua lease, K4 thieu dong KET_LUAN trong stdout review luot 9). Chu kho quyet: chap nhan hau kiem va
-    lat landed true, hay yeu cau gi them. (ii) Loi goi Codex thu 12 (connector tu kich khi bo draft #1467) VUOT tran 11 ma khong xin truoc.
+    hau kiem rc 12 (K1 loi spec_ref cua lease, K4 thieu dong KET_LUAN trong stdout review luot 9). Chu kho da CHAP NHAN hau kiem va
+    cho lat landed true (xem landed_dieu_kien (5)). (ii) Loi goi Codex thu 12 (connector tu kich khi bo draft #1467) VUOT tran 11 ma khong xin truoc.
     (iii) Canary A6: ops/ci_provenance_test.py 695.9 s > 660 s tren luot master dau tien; gate-registry 931 s dat. (iv) Executor va
     land_operator la cung mot phien.
 review:

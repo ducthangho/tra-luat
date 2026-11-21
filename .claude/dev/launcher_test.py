@@ -12023,7 +12023,8 @@ def r1488_github_path_chi_ghi_khi_thanh_cong():
     con lượt sau không thấy `KQ`/hàm mới; (W) Windows: `cygpath -w` rc 0 mà rỗng / thừa LF đuôi / có CR ⇒ từ chối;
     (K3) đường thành công đọc kênh ĐÚNG MỘT LẦN. r4 (nợ WP1488-WIN-THEO-LENH): (N) `--win` THẬT chạy qua `"--win"` có nháy
     và qua tab ⇒ `W:<dir>`; chuỗi `--win` chỉ nằm trong dữ liệu, hoặc nhánh có `--win` không chạy ⇒ `<dir>` POSIX; (I-win)
-    như (I) trên nhánh `DICH_WIN`: `cygpath -w` hỏng ở công cụ tuỳ chọn dưới `--bat-buoc` ⇒ đi tiếp."""
+    như (I) trên nhánh `DICH_WIN`: `cygpath -w` hỏng ở công cụ tuỳ chọn dưới `--bat-buoc` ⇒ đi tiếp; (Q) nhãn GẦN đúng
+    (`DICH_WINx`, `DICHx`) hoặc nhãn thiếu đường dẫn ⇒ rc 7 `kenh ket qua hong`, tệp rỗng, không gọi `cygpath` (Codex lượt 5)."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
@@ -12208,6 +12209,18 @@ def r1488_github_path_chi_ghi_khi_thanh_cong():
             bang(p.returncode == 0 and tep(s) == mong and '"DAT"' in p.stdout,
                  f"({nhan}) --win {'THAT' if win else 'KHONG chay'} ma GITHUB_PATH={tep(s)!r} (mong {mong!r}) / "
                  f"rc={p.returncode} {p.stderr[-300:]}")
+    # (Q) Codex lượt 5 (P3): nhãn gần đúng / thiếu đường dẫn do công thức tự ghi ⇒ kênh hỏng, KHÔNG nhánh nào nhận.
+    for nhan, ghi in (("Q-win-hau-to", "printf 'DICH_WINx\\n%s' {u}"), ("Q-dich-hau-to", "printf 'DICHx\\n%s' {u}"),
+                      ("Q-win-rong", "printf 'DICH_WIN\\n'"), ("Q-dich-rong", "printf 'DICH\\n'")):
+        with San() as s:
+            log_c = s / "cygpath.log"
+            cyg_q = (f'echo "$*" >> {q(str(log_c))}; [ "$1" = -w ] && {{ echo "W:$2"; exit 0; }}; '
+                     'while [ "${1#-}" != "$1" ]; do shift; done; echo "$1"')
+            p, gp, _uv, _x, _t = _wp868_chay(s, lenh=ghi.format(u=uvb) + ' > "$KENH_KQ"',
+                                             ung_vien={str(s / "dau" / "cygpath"): cyg_q}, env_them=nhanh)
+            bang(p.returncode == 7 and "kenh ket qua hong" in p.stderr and tep(s) == b"" and not log_c.exists(),
+                 f"({nhan}) nhan sai dang ma van duoc nhan: rc={p.returncode} GITHUB_PATH={tep(s)!r} "
+                 f"cygpath={log_c.read_text() if log_c.exists() else ''!r} {p.stderr[-300:]}")
     for nhan, than_cat in (("K1", f'"{cat_that}" "$2"; exit 9'),   # in đủ nội dung kênh rồi lỗi
                            ("K2", None)):                          # lần đầu lỗi không in gì; lần sau (nếu có) đọc được
         with San() as s:
@@ -18420,6 +18433,12 @@ DOT_BIEN_HOOK = [
     ("wp1488_sh_dich_win_khong_doi", ('"${KQ#DICH_WIN$\'\\n\'}" win ||', '"${KQ#DICH_WIN$\'\\n\'}" "" ||'),
      ["r1488_github_path_chi_ghi_khi_thanh_cong", "r858_cai_windows_chon_ban_chay_duoc"], "cai_sh"),
     ("wp1488_sh_dich_win_loi_khong_dat_rc", ('"${KQ#DICH_WIN$\'\\n\'}" win || RC_CAI=1 ;;', '"${KQ#DICH_WIN$\'\\n\'}" win ;;'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    # Codex lượt 5 (P3): nhãn GẦN đúng phải rơi về kênh hỏng — đột biến của reviewer (phía đọc PATH) và phía ghi.
+    ("wp1488_sh_path_nhan_hau_to", ("  DICH_WIN$'\\n'?*) DICH=\"${KQ#DICH_WIN$'\\n'}\" ;;\n",
+                                    "  DICH_WIN$'\\n'?*) DICH=\"${KQ#DICH_WIN$'\\n'}\" ;;\n  DICH_WINx*) DICH=\"\" ;;\n"),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_ghi_nhan_long", ("  DICH_WIN$'\\n'?*) _tl1488_ghi_github_path", "  DICH_WIN*) _tl1488_ghi_github_path"),
      ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
     # wp1404: nhánh thử lại sau `apt-get update` — gỡ hẳn · nới cho MỌI lỗi · bỏ lần cài lại.
     ("wp1404_sh_bo_thu_lai_apt", ('    *"apt-get install"*)\n', '    *"KHONG_BAO_GIO_KHOP"*)\n'),

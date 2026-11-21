@@ -105,8 +105,8 @@ leased_at_utc: '2026-11-21T03:29:20Z'
 heartbeat_at: '2026-11-21T03:29:20Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-22T03:29:20Z'
-lease_expires_at_utc: '2026-11-22T03:29:20Z'
+lease_until: '2026-11-21T06:41:41Z'
+lease_expires_at_utc: '2026-11-21T06:41:41Z'
 lease_until_ghi_chu: '24h; rut han ngay sau land.'
 attempts_used: 1
 attempts_limit: 2
@@ -124,3 +124,13 @@ budget:
 budget_ghi_chu: 'Codex review PR 2/10 da dung (luot 1 5ec3b197 tren 4e74fe1, luot 2 3a0f4046 tren 36dc91a; khong reset theo generation); Codex review dac ta 11/14 (Q8); CI Ubuntu <= 3; Windows native 0 (Q4).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex review dac ta 11/14 (Q8). Codex review PR offline 3/10 (luot 1 5ec3b197 tren 4e74fe1, luot 2 3a0f4046 tren 36dc91a, luot 3 738246b5 tren 5293a85). CI Ubuntu 1/3 tren 5293a85 (25 success, 1 skipped). Windows native 0 (Q4). Phien executor 2/2 (Fable g1-g4 het han muc; Opus g5). Ngoai ngan sach: 1 review doc lap Claude (luot 9 dac ta).'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-22T03:29:20Z'
+  han_moi_utc: '2026-11-21T06:41:41Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet BUNDLED-TACH-MANH cua #433 da MERGE: PR #1485 (head 5293a855564e8966092d49542be3bb29d5ed3787) merge commit 96cd0120d2aa0ba555641fdde90c9d4fbd8b9c89, human audit chu kho issuecomment-7058495018 tren PR #1485. No F10 bundled-gate-oracle-freshness, F11 bundled-tach-manh-do-min-ve (issuecomment-7058076373).
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem cho write set nay luc rut.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu cac duong dan write set sau han moi phai ra NGUOI_GIU 0.'

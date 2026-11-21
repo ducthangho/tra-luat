@@ -1,0 +1,65 @@
+VERSION ruff 0.16.9 RC 0
+COMMAND base ruff check --no-cache --isolated --select F --output-format json .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py RC 1 COUNT 16 CODES {'F841': 3, 'F401': 8, 'F541': 2, 'F811': 3} STDERR 
+COMMAND prototype ruff check --no-cache --isolated --select F --output-format json .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py RC 1 COUNT 16 CODES {'F841': 3, 'F401': 8, 'F541': 2, 'F811': 3} STDERR 
+DELTA_NEW [(('packet_loop_test.py', 'F811', 'Redefinition of unused `lock_fd` from line 12397: `lock_fd` redefined here'), 1), (('packet_loop_test.py', 'F811', 'Redefinition of unused `lock_fd` from line 12873: `lock_fd` redefined here'), 1), (('packet_loop_test.py', 'F811', 'Redefinition of unused `lock_fd` from line 13021: `lock_fd` redefined here'), 1)]
+DELTA_REMOVED [(('packet_loop_test.py', 'F811', 'Redefinition of unused `lock_fd` from line 12372: `lock_fd` redefined here'), 1), (('packet_loop_test.py', 'F811', 'Redefinition of unused `lock_fd` from line 12848: `lock_fd` redefined here'), 1), (('packet_loop_test.py', 'F811', 'Redefinition of unused `lock_fd` from line 12996: `lock_fd` redefined here'), 1)]
+DIAGNOSTIC base packet_loop.py 1901 F841 Local variable `n` is assigned to but never used
+DIAGNOSTIC base packet_loop.py 6294 F841 Local variable `current_lock` is assigned to but never used
+DIAGNOSTIC base packet_loop.py 6375 F841 Local variable `spec` is assigned to but never used
+DIAGNOSTIC base packet_loop_test.py 11615 F401 `copy` imported but unused
+DIAGNOSTIC base packet_loop_test.py 12120 F541 f-string without any placeholders
+DIAGNOSTIC base packet_loop_test.py 12125 F541 f-string without any placeholders
+DIAGNOSTIC base packet_loop_test.py 12382 F811 Redefinition of unused `lock_fd` from line 12372: `lock_fd` redefined here
+DIAGNOSTIC base packet_loop_test.py 12858 F811 Redefinition of unused `lock_fd` from line 12848: `lock_fd` redefined here
+DIAGNOSTIC base packet_loop_test.py 13005 F811 Redefinition of unused `lock_fd` from line 12996: `lock_fd` redefined here
+DIAGNOSTIC base packet_loop_test.py 13428 F401 `copy` imported but unused
+DIAGNOSTIC base packet_loop_test.py 13765 F401 `unittest.mock.patch` imported but unused
+DIAGNOSTIC base packet_loop_test.py 14021 F401 `contextlib` imported but unused
+DIAGNOSTIC base packet_loop_test.py 14021 F401 `io` imported but unused
+DIAGNOSTIC base packet_loop_test.py 15540 F401 `copy` imported but unused
+DIAGNOSTIC base packet_loop_test.py 15767 F401 `argparse` imported but unused
+DIAGNOSTIC base packet_loop_test.py 16843 F401 `contextlib` imported but unused
+DIAGNOSTIC prototype packet_loop.py 1976 F841 Local variable `n` is assigned to but never used
+DIAGNOSTIC prototype packet_loop.py 6369 F841 Local variable `current_lock` is assigned to but never used
+DIAGNOSTIC prototype packet_loop.py 6450 F841 Local variable `spec` is assigned to but never used
+DIAGNOSTIC prototype packet_loop_test.py 11640 F401 `copy` imported but unused
+DIAGNOSTIC prototype packet_loop_test.py 12145 F541 f-string without any placeholders
+DIAGNOSTIC prototype packet_loop_test.py 12150 F541 f-string without any placeholders
+DIAGNOSTIC prototype packet_loop_test.py 12407 F811 Redefinition of unused `lock_fd` from line 12397: `lock_fd` redefined here
+DIAGNOSTIC prototype packet_loop_test.py 12883 F811 Redefinition of unused `lock_fd` from line 12873: `lock_fd` redefined here
+DIAGNOSTIC prototype packet_loop_test.py 13030 F811 Redefinition of unused `lock_fd` from line 13021: `lock_fd` redefined here
+DIAGNOSTIC prototype packet_loop_test.py 13453 F401 `copy` imported but unused
+DIAGNOSTIC prototype packet_loop_test.py 13790 F401 `unittest.mock.patch` imported but unused
+DIAGNOSTIC prototype packet_loop_test.py 14046 F401 `contextlib` imported but unused
+DIAGNOSTIC prototype packet_loop_test.py 14046 F401 `io` imported but unused
+DIAGNOSTIC prototype packet_loop_test.py 15565 F401 `copy` imported but unused
+DIAGNOSTIC prototype packet_loop_test.py 15792 F401 `argparse` imported but unused
+DIAGNOSTIC prototype packet_loop_test.py 16868 F401 `contextlib` imported but unused
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3786: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3811: SyntaxWarning: invalid escape sequence '\d'
+STABLE_DELTA_NEW []
+STABLE_DELTA_REMOVED []

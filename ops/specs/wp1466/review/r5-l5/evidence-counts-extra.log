@@ -1,0 +1,44 @@
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv5.2eOI/out/prototype/.claude/dev/packet_loop_test.py:3811: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+REGISTRY 1639 1639 1638 1890
+NEW 57 MUTANTS 26 SOURCE 25 TEST 1
+ALL_NEW_TARGETED True MISSING []
+MARKER inv_bo_kiem_duoi_goc 1
+MARKER inv_bo_che_khong_render 1
+MARKER inv_bo_chan_html 1
+MARKER inv_bo_kiem_mot_muc 1
+MARKER inv_bo_dia_chi 1
+MARKER inv_bo_hien_o_dia_chi 1
+MARKER inv_bo_kiem_duy_nhat 1
+MARKER inv_duy_nhat_lech_so 1
+MARKER inv_dem_ban_ca_vung_che 1
+MARKER inv_doc_qua_text 1
+MARKER inv_tach_dong_splitlines 1
+MARKER inv_cat_cuoi_muc 1
+MARKER inv_dong_trang_la_khoang_trang 1
+MARKER inv_khoi_rong_tinh_la_khoi 1
+MARKER inv_bo_kiem_id_ngoai 1
+MARKER inv_id_chi_dang_chuan 1
+MARKER inv_id_khong_chuan_hoa 1
+MARKER inv_doctrine_scan_bo_goi 1
+MARKER inv_bo_khoa_K01 1
+MARKER inv_bo_khoa_K02 1
+MARKER inv_bo_khoa_K03 1
+MARKER inv_bo_khoa_K04 1
+MARKER inv_bo_khoa_K05 1
+MARKER inv_bo_khoa_K06 1
+MARKER inv_bo_khoa_K07 1
+MARKER t1466_fixture_ve_trung_tinh 1
+LINUX_EXCLUDED ['wp1174_windows_claim_rejected']
+UNUSUAL packet_loop.py [0, 0] True
+UNUSUAL packet_loop_test.py [7, 7] True
+LEASE_AT 2026-11-21T02:57:49+00:00 550 18 12 6
+ACTIVE_IDS ['cai-apt-backoff-r1-g1-claude', 'wp433-r9-g5-claude', 'wp1236-a-r10-g1-claude-20261121', 'wp1448-r4-g5-claude', 'wp1462-r8-g2-claude', 'wp1475-r1-g1-claude']
+LEASE_AT 2026-11-21T03:24:55+00:00 550 17 12 5
+ACTIVE_IDS ['wp433-r9-g5-claude', 'wp1236-a-r10-g1-claude-20261121', 'wp1448-r4-g5-claude', 'wp1462-r8-g2-claude', 'wp1475-r1-g1-claude']
+LEASE_AT 2026-11-21T03:47:29.664037+00:00 550 17 12 5
+ACTIVE_IDS ['wp433-r9-g5-claude', 'wp1236-a-r10-g1-claude-20261121', 'wp1448-r4-g5-claude', 'wp1462-r8-g2-claude', 'wp1475-r1-g1-claude']
+NEW_LEASE_ORIGIN refs/remotes/origin/ops/bundled-tach-manh-spec ops/leases/wp433-r9-g5-claude.yaml 9f11ed7c9dca23617465755ff28a3de61daeb5eb 2026-11-21T03:29:37+00:00 ops: lease g5 ghi attempts_used 1
+S8_ADAPTERS 4
+S8_WORKFLOW 1
+S8_CLI_IN_TEST 21

@@ -1,0 +1,29 @@
+LEASE_COUNTS 550 18 12 6 AT 2026-11-21T02:57:00+00:00
+ACTIVE {"lease_id": "cai-apt-backoff-r1-g1-claude", "packet_issue": 1479, "write_set": [".claude/dev/launcher_test.py", "ops/acceptance/cai-apt-backoff/r1/VERDICT.md", "ops/cai_cong_cu.sh", "ops/leases/cai-apt-backoff-r1-g1-claude.yaml", "ops/specs/cai-apt-backoff-r1.md"], "effective_write_set": null, "lease_expires_at_utc": "2026-11-21T03:17:23Z", "spec_path": "ops/specs/cai-apt-backoff-r1.md", "branch": "ccr-8ee03d7f-vnmqk0", "base_sha": "5a152c18dfb0890a9031bf05c31ab7cab534a652"}
+ACTIVE {"lease_id": "wp433-r9-g5-claude", "packet_issue": 433, "write_set": [".githooks/eol_policy_test.py", "references/golden/workflow_audit.json", "RELEASE_MANIFEST.json", "scripts/test_fragments/wp433_bundled_tach_manh.py", "scripts/tl_core/release.py", "scripts/tl_core/test_fragments.py", "scripts/tl_selftest.py", "scripts/tl_test_fragments_bundled.py", "scripts/tl_test_fragments_bundled_2.py"], "effective_write_set": [".githooks/eol_policy_test.py", "references/golden/workflow_audit.json", "RELEASE_MANIFEST.json", "scripts/test_fragments/wp433_bundled_tach_manh.py", "scripts/tl_core/release.py", "scripts/tl_core/test_fragments.py", "scripts/tl_selftest.py", "scripts/tl_test_fragments_bundled.py", "scripts/tl_test_fragments_bundled_2.py"], "lease_expires_at_utc": "2026-11-22T03:29:20Z", "spec_path": "ops/specs/BUNDLED-TACH-MANH-r9.md", "branch": "agent/wp433-r9-g5-claude", "base_sha": "0f9aa2a2cc697129e1f5be72feddf60986286865"}
+ACTIVE {"lease_id": "wp1236-a-r10-g1-claude-20261121", "packet_issue": 1236, "write_set": [".claude/dev/ci_dang_ky_test.py", "ops/gate_output_doi_chieu.py", "ops/gate_output_doi_chieu_test.py"], "effective_write_set": null, "lease_expires_at_utc": "2026-11-23T00:15:00Z", "spec_path": "ops/specs/wp1236-r10.md", "branch": "claude/wp1236-r10-a-g1", "base_sha": "010046f2141799ec6ffc9cfa1322d49df3f3f680"}
+ACTIVE {"lease_id": "wp1448-r4-g5-claude", "packet_issue": 1448, "write_set": [".github/workflows/ci.yml", "ops/ci_duong_nhanh.py", "ops/ci_duong_nhanh_test.py", "ops/cong_cu_test.py", "ops/specs/wp1448-r2/do/"], "effective_write_set": [".github/workflows/ci.yml", "ops/ci_duong_nhanh.py", "ops/ci_duong_nhanh_test.py", "ops/cong_cu_test.py", "ops/specs/wp1448-r2/do/"], "lease_expires_at_utc": "2026-11-25T08:00:00Z", "spec_path": "ops/specs/wp1448-r4/SPEC.md", "branch": "agent/wp1448-r4-g5-claude", "base_sha": "64fa5156794dfb6a2dd9e8f257ee759ab07c9c35"}
+ACTIVE {"lease_id": "wp1462-r8-g2-claude", "packet_issue": 1462, "write_set": [".claude/dev/packet_loop.py", ".claude/dev/packet_loop_test.py", "ops/specs/wp1462-r1/"], "effective_write_set": [".claude/dev/packet_loop.py", ".claude/dev/packet_loop_test.py", "ops/specs/wp1462-r1/"], "lease_expires_at_utc": "2026-11-24T08:00:00Z", "spec_path": "ops/specs/wp1462-r1/SPEC.md", "branch": "agent/wp1462-r7-g1-claude", "base_sha": "48d372e14f190dae83a75ccbca8ee9a0b25635c5"}
+ACTIVE {"lease_id": "wp1475-r1-g1-claude", "packet_issue": 1475, "write_set": ["ops/ci_provenance.py", "ops/ci_provenance_test.py"], "effective_write_set": null, "lease_expires_at_utc": "2026-11-23T01:57:05Z", "spec_path": "ops/specs/CI-PROVENANCE-WIN-THU-LAI-r1.md", "branch": "agent/wp1475-g1-claude", "base_sha": "e02d748d29cd5165fc29fa1a5a8e9b94593874c7"}
+PACKET_LEASES 1460 0 []
+PACKET_LEASES 1462 2 ['wp1462-r7-g1-claude', 'wp1462-r8-g2-claude']
+ACTIVE_SPEC_SOURCE 1462 refs/remotes/origin/ops/wp1462-r1 ops/specs/wp1462-r1/SPEC.md
+PACKET_LEASES 1469 0 []
+PACKET_LEASES 1470 0 []
+POLICY_EXISTS False
+LEASE_MATCH exact True
+LEASE_MATCH prefix False
+LEASE_MATCH case False
+LEASE_MATCH effective_only False
+LEASE_MATCH_SOURCE def _lease_cham_duong(lease: dict, duong: str) -> bool:
+    write_set = lease.get("write_set")
+    return isinstance(write_set, list) and any(
+        isinstance(x, str) and x.strip().removeprefix("planned:") == duong
+        for x in write_set)
+
+CLOSURE_READER False
+RECORD_LEASE_SOURCE 975 def cmd_record_lease(a, state_dir: Path) -> int:
+RECORD_LEASE_SOURCE 2737         for duong in l["write_set"]:  # I2(Đ): sau fetch đủ ref, lease này là người giữ DUY NHẤT từng đường dẫn KHAI BÁO…
+RECORD_LEASE_SOURCE 2740                 _die(RC_GUARD, f"I2(Đ): ai-dang-giu {duong} không trả {lid} là người giữ duy nhất (rc={p.returncode})")
+RECORD_LEASE_SOURCE 2763             _die(RC_GUARD, f"I2(Đ): KHÔNG_XÁC_ĐỊNH khi quét lease toàn kho: {type(ex).__name__}: {str(ex)[:300]}")
+RECORD_LEASE_SOURCE 2765             _die(RC_GUARD, f"I2(Đ): lease khác còn hiệu lực giao write set của {lid}: {giao_nhau}")

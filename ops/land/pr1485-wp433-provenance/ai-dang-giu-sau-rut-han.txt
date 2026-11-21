@@ -1,0 +1,37 @@
+# ai-dang-giu sau rut han, kho chinh sau fetch --prune +refs/heads/* va ff master 96cd0120d, 2026-11-21T07:05:47Z
+## .githooks/eol_policy_test.py
+HẾT_HẠN	wp433-r9-g5-claude	refs/heads/ops/bundled-tach-manh-spec:ops/leases/wp433-r9-g5-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## references/golden/workflow_audit.json
+HẾT_HẠN	wp433-r9-g5-claude	refs/heads/ops/bundled-tach-manh-spec:ops/leases/wp433-r9-g5-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/test_fragments/wp433_bundled_tach_manh.py
+HẾT_HẠN	wp433-r9-g5-claude	refs/heads/ops/bundled-tach-manh-spec:ops/leases/wp433-r9-g5-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/tl_core/release.py
+HẾT_HẠN	wp433-r9-g5-claude	refs/heads/ops/bundled-tach-manh-spec:ops/leases/wp433-r9-g5-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/tl_core/test_fragments.py
+HẾT_HẠN	wp433-r9-g5-claude	refs/heads/ops/bundled-tach-manh-spec:ops/leases/wp433-r9-g5-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/tl_selftest.py
+HẾT_HẠN	wp433-r9-g5-claude	refs/heads/ops/bundled-tach-manh-spec:ops/leases/wp433-r9-g5-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/tl_test_fragments_bundled.py
+HẾT_HẠN	wp433-r9-g5-claude	refs/heads/ops/bundled-tach-manh-spec:ops/leases/wp433-r9-g5-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/tl_test_fragments_bundled_2.py
+HẾT_HẠN	wp433-r9-g5-claude	refs/heads/ops/bundled-tach-manh-spec:ops/leases/wp433-r9-g5-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## RELEASE_MANIFEST.json
+HẾT_HẠN	wp433-r9-g5-claude	refs/heads/ops/bundled-tach-manh-spec:ops/leases/wp433-r9-g5-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

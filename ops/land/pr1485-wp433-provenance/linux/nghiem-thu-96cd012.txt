@@ -1,0 +1,47 @@
+# nghiem thu tai cho tren merge 96cd012 (worktree sach tu origin/master), 2026-11-21T07:05:32Z
+## git rev-parse
+96cd0120d2aa0ba555641fdde90c9d4fbd8b9c89
+3240c4cf487611ac1ff8355f9a0359d011bd9331
+4e56f005785db1b04e043bb71fc694a674a8dc9f
+5293a855564e8966092d49542be3bb29d5ed3787
+761eaebc2ac723bcecae8a408902892099e85268
+## numstat HEAD^1..HEAD
+2	4	.githooks/eol_policy_test.py
+18	13	RELEASE_MANIFEST.json
+1	1	references/golden/workflow_audit.json
+287	0	scripts/test_fragments/wp433_bundled_tach_manh.py
+22	5	scripts/tl_core/release.py
+96	27	scripts/tl_core/test_fragments.py
+4	2	scripts/tl_selftest.py
+2	10	scripts/tl_test_fragments_bundled.py
+15	0	scripts/tl_test_fragments_bundled_2.py
+## numstat 0f9aa2a..5293a85 (base lease..head)
+2	4	.githooks/eol_policy_test.py
+18	13	RELEASE_MANIFEST.json
+1	1	references/golden/workflow_audit.json
+287	0	scripts/test_fragments/wp433_bundled_tach_manh.py
+22	5	scripts/tl_core/release.py
+96	27	scripts/tl_core/test_fragments.py
+4	2	scripts/tl_selftest.py
+2	10	scripts/tl_test_fragments_bundled.py
+15	0	scripts/tl_test_fragments_bundled_2.py
+TONG 9 tep +447/-62
+## base lease 0f9aa2a la to tien HEAD^1
+rc=0
+## diff 0f9aa2a..HEAD^1 cham write set?
+(het)
+## blob write set tai merge vs head
+.githooks/eol_policy_test.py 40a75bc35327c4504485cf1fbf24cbdd7465e5b1 BANG
+references/golden/workflow_audit.json 405c7bb4ffd69cefdae905161cd8fb98bf4508a4 BANG
+scripts/test_fragments/wp433_bundled_tach_manh.py d64f9617c6e29d508aae0b5a92eec42ea57085fb BANG
+scripts/tl_core/release.py f1e7621efb649cc0b7cc71b408199cd65197a748 BANG
+scripts/tl_core/test_fragments.py 507131bfbb0257773f91e116b62514cad0e4e749 BANG
+scripts/tl_selftest.py 64a87fae3f9f386ad8ad0afc43a498c568a04ea2 BANG
+scripts/tl_test_fragments_bundled.py 81096d8a66c327761828e5f543375f6e957f3e01 BANG
+scripts/tl_test_fragments_bundled_2.py 5a1eeba8d3ae4e01827117733241cb41bbb0a6d4 BANG
+RELEASE_MANIFEST.json 1b25e8b7d611c2c9a2a844e90b7a936279216218 BANG
+## release-verify --strict tren merge
+rc=0
+ok True expected 186 checked 186 failed []
+## git diff --check HEAD^1 HEAD
+rc=0

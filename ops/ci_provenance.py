@@ -10,7 +10,7 @@ bước của mỗi nhóm log được ĐỊNH DANH qua REST `steps[]` + vị tr
 Thoát: 0 không mốc nào `failed` · 12 có `failed` · 2 sai đối số · 3 REST khác 2xx (in nguyên mã). LUÔN in `NOT_MEASURED: <n>`;
 rc 2/3 không sinh provenance nên cả bốn mốc là chưa đo (`NOT_MEASURED: 4` kèm `PROVENANCE: khong_sinh`).
 """
-import argparse, base64, binascii, datetime, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tempfile, urllib.error, urllib.parse, urllib.request, zipfile
+import argparse, base64, binascii, datetime, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tempfile, time, urllib.error, urllib.parse, urllib.request, zipfile
 from pathlib import Path
 
 import yaml
@@ -550,8 +550,30 @@ def ghi_tep(p, byte):
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_bytes(byte)
 
+# #1475 (phát hiện Windows của #1322, comment 7049377019): `os.replace` một THƯ MỤC trên Windows bị từ chối (WinError 5)
+# khi tiến trình khác — nghi Defender quét thời gian thực — còn giữ handle một tệp bên trong. Thử lại có giới hạn, CHỈ
+# `PermissionError`, CHỈ Windows; nền khác và lỗi khác ném ngay. Ba hằng/hàm dưới là chỗ test tiêm (không vá `os.name`).
+LA_WINDOWS = os.name == "nt"
+SO_LAN_THU_LAI = 5            # tối đa 5 lần thử lại ⇒ 6 lời gọi
+CHO_GOC = 0.05               # chờ trước lần thử lại thứ k (k = 0..4): CHO_GOC · 2^k ⇒ tổng 1,55 s
+_thay_the = os.replace
+ngu_thu_lai = time.sleep
+
+def doi_ten_thu_lai(nguon, dich):
+    """`os.replace` có thử lại (#1475); hết lượt thì ném CHÍNH `PermissionError` của lần cuối."""
+    for k in range(SO_LAN_THU_LAI + 1):
+        try:
+            return _thay_the(nguon, dich)
+        except PermissionError:
+            if not LA_WINDOWS:   # chỉ Windows
+                raise
+            if k == SO_LAN_THU_LAI:   # hết lượt: ném chính lỗi cuối
+                raise
+            ngu_thu_lai(CHO_GOC * 2 ** k)
+
 def ghi_nguyen_tu(out, tep):
-    """Ghi vào thư mục tạm CÙNG CẤP rồi `os.replace`: lỗi giữa chừng ⇒ `out` vắng hoặc giữ nguyên bản trước."""
+    """Ghi vào thư mục tạm CÙNG CẤP rồi `os.replace`: lỗi giữa chừng ⇒ `out` vắng hoặc giữ nguyên bản trước.
+    Cả ba lần đổi tên (cất bản trước · đưa tạm vào chỗ · hoàn tác) đi qua `doi_ten_thu_lai` (#1475)."""
     out = Path(out).resolve()
     out.parent.mkdir(parents=True, exist_ok=True)
     tam = Path(tempfile.mkdtemp(prefix=f".{out.name}.tam-", dir=out.parent))
@@ -560,11 +582,11 @@ def ghi_nguyen_tu(out, tep):
         for ten, byte in tep.items():
             ghi_tep(tam / ten, byte)
         if out.exists():
-            os.replace(out, cu)
-        os.replace(tam, out)
+            doi_ten_thu_lai(out, cu)
+        doi_ten_thu_lai(tam, out)
     except BaseException:
         if cu.exists() and not out.exists():
-            os.replace(cu, out)
+            doi_ten_thu_lai(cu, out)
         shutil.rmtree(tam, ignore_errors=True)
         raise
     shutil.rmtree(cu, ignore_errors=True)

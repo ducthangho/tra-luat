@@ -67,7 +67,7 @@ Nguyên nhân, đọc trên `scripts/test_fragments/wp433_bundled_tach_manh.py` 
 | W3 | `scripts/tl_test_fragments_bundled_2.py` | CHỈ sinh bằng `write_bundled_modules` (ngoại lệ bundled, E2). Dự kiến không đổi: reviewer r1 đo bản vá tương đương thì W3 giữ nguyên. Ranh mảnh trôi thì được phép đổi. |
 | W4 | `RELEASE_MANIFEST.json` | CHỈ sinh bằng `python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json`, và là commit CUỐI của C (ngoại lệ manifest, E2) |
 
-- Trần theo `ADR-0053` cho `sensitive`. Đo trên nguyên mẫu `va.py` r4 (15:5xZ 21-11): W1 +33/−13. Reviewer r2 đo trên bản r2: W2 +1/−1, W4 +5/−5, W3 không đổi. Ước tính 3 đến 4 đường, khoảng 39 dòng thêm.
+- Trần theo `ADR-0053` cho `sensitive`. Đo trên nguyên mẫu `va.py` r4 (15:52Z 21-11): W1 +33/−13. Reviewer r2 đo trên bản r2: W2 +1/−1, W4 +5/−5, W3 không đổi. Ước tính 3 đến 4 đường, khoảng 39 dòng thêm.
 - Reviewer r1 đo bản vá tương đương: selftest 1786/1786 và các cổng xanh mà không cần đổi tệp nào ngoài W1–W4.
 
 ## 2. `ngoai_pham_vi`

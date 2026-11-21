@@ -181,8 +181,11 @@ Hồi quy (N3), hai vế dựng trong CÙNG một lệnh (clone + checkout + `co
 
 | Phép đo | `7a8823b` | `ab83dd3` |
 |---|---|---|
-| `launcher_test.py` | đang đo — chưa có số | đang đo — chưa có số |
-| `launcher_test.py --dot-bien` | đang đo — chưa có số | đang đo — chưa có số |
+| `launcher_test.py` | 453/453 (tổng 455, bỏ qua 2) | 453/453 (tổng 455, bỏ qua 2) |
+| `launcher_test.py --dot-bien` | 798/798 (7 không đo được trên nền này) | 803/803 (cùng 7) |
+
+Hai ca bỏ qua và 7 đột biến không đo được giống hệt nhau ở hai vế. Số ca không đổi vì (N), (I-win) là kịch bản trong ca
+`r1488_…` sẵn có. Delta = +5 đột biến, 0 hồi quy. Hai vế chạy song song trong cùng một lệnh, 13:1xZ–13:4xZ.
 
 Ruff `--select F` trên `launcher_test.py`: 5 F841 ở cả hai vế (delta 0). `shellcheck ops/cai_cong_cu.sh`: một SC1090 ở cả
 hai vế (delta 0). `doctrine-scan`: rc 0.

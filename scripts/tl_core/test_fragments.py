@@ -474,7 +474,7 @@ def _runtime_fragment_topology(scripts_root: str | Path) -> tuple[str, Path | No
     if fragment_root.exists() and _discover_fragment_paths(fragment_root):
         return "dev", fragment_root
     bundled_path = scripts / _BUNDLED_MODULE_NAME
-    if bundled_path.exists():
+    if bundled_path.exists() or bundled_path.is_symlink():   # symlink ĐỨT tại tên mảnh 1 vẫn qua chốt hợp đồng của loader
         return "bundle", bundled_path
     return "none", None
 

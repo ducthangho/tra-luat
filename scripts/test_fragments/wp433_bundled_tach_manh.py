@@ -15,7 +15,7 @@ TEST_ID = "wp433_bundled_tach_manh"
 _TRAN = 0.7 * 280 * 1024   # 0,7·WARN của `_py_size_findings` = 200.704 B
 # sha256 của `generate_bundled_module_bytes` trên base 0f9aa2a cho fixture `wp9001_a.py` (216 B); KHÔNG tính lại từ mã sau sửa.
 _MOT_MANH_SHA256 = "73ad44659b63aea9b2f66fb1104c4c82deaa1ad1218e94adb80dcf38384441d7"
-_KQ = {}   # V1–V32 của đặc tả §4, mỗi vế một khoá
+_KQ, _LY_DO = {}, {}   # V1–V32 của đặc tả §4, mỗi vế một khoá; khoá văng ⇒ False kèm lý do (vd nền từ chối symlink, V32)
 _SRC, _SHA = "BUNDLED_FRAGMENT_SOURCES", "BUNDLED_FRAGMENT_SHARDS"
 _M1 = "tl_test_fragments_bundled.py"
 _M2, _M3, _M9 = (f"tl_test_fragments_bundled_{k}.py" for k in (2, 3, 9))
@@ -69,9 +69,10 @@ def _gan(data):
     body = ast.parse(data.decode("utf-8")).body
     if body and isinstance(body[0], ast.Expr) and isinstance(getattr(body[0].value, "value", None), str):
         body = body[1:]
-    gan = {n.targets[0].id: ast.literal_eval(n.value) for n in body if isinstance(n, ast.Assign)}
-    hinh = [n.targets[0].id if isinstance(n, ast.Assign) else type(n).__name__ for n in body]   # câu lệnh lạ vẫn được đếm
-    return hinh, [n for n, _ in gan[_SRC]], gan.get(_SHA)
+    ten = [n.targets[0].id if type(n) is ast.Assign and [type(t) for t in n.targets] == [ast.Name] else type(n).__name__ for n in body]
+    gan = {t.id: ast.literal_eval(n.value) for n in body for t in getattr(n, "targets", [getattr(n, "target", None)])
+           if isinstance(t, ast.Name)}                     # GIÁ TRỊ đọc rộng; HÌNH DẠNG (`ten`) mới theo luật loader
+    return ten, [n for n, _ in gan[_SRC]], gan.get(_SHA)
 
 
 def _bam(data):
@@ -129,17 +130,22 @@ def _do(base, tf, tl_module):
         return _nap(tf, r3)
 
     def cong(nhom, sua=None):
-        """Cây cổng dựng TAY, độc lập generator: mỗi mảnh do `_van` render từ nhóm khai sẵn; `sua(scripts)` làm hỏng.
-        Trả (đầu ra generator = vế KỲ VỌNG của cổng, {tên: bytes tệp thường trên đĩa}, rc, json)."""
-        root, mods = sinh((f"cong{len(nhom)}", [m for g in nhom for m in g]))
-        scripts, ten = root.parent, [_M1, _M2, _M3][:len(nhom)]
+        """Cây cổng dựng TAY: mảnh do `_van` render; vế KỲ VỌNG GHIM ở biên gọi generator (cùng bytes), nên đột biến định dạng
+        generator không lan sang khoá cổng. `sua(scripts)` làm hỏng. Trả (vế kỳ vọng, {tên: bytes tệp thường}, rc, json)."""
+        scripts, ten = base / f"cong{len(nhom)}" / "scripts", [_M1, _M2, _M3][:len(nhom)]
+        mods = tuple((ten[k], _van(g, tuple(ten[1:]) if k == 0 and len(nhom) > 1 else None)) for k, g in enumerate(nhom))
+        (scripts / "test_fragments").mkdir(parents=True, exist_ok=True)
         for p in scripts.glob("tl_test_fragments_bundled*.py"):
             p.unlink()
-        for k, g in enumerate(nhom):
-            (scripts / ten[k]).write_bytes(_van(g, tuple(ten[1:]) if k == 0 and len(nhom) > 1 else None))
+        for n, d in mods:
+            (scripts / n).write_bytes(d)
         if sua:
             sua(scripts)
-        rc, j = han(lambda: _check(tl_module, scripts.parent))
+        goc, tf.generate_bundled_modules = tf.generate_bundled_modules, lambda *a, **k: mods
+        try:
+            rc, j = _check(tl_module, scripts.parent)
+        finally:
+            tf.generate_bundled_modules = goc
         dia = {p.name: p.read_bytes() for p in scripts.glob("tl_test_fragments_bundled*.py") if not p.is_symlink()}
         return mods, dia, rc, j
 
@@ -176,8 +182,8 @@ def _do(base, tf, tl_module):
             _manh(r3 / _M3, names[2:4])
         return loi(sua=doi)[1] == _CONTRACT
 
-    def hong(t):                                           # sửa bytes mảnh `t` của cây cổng ba mảnh ⇒ mã lỗi của cổng
-        return cong(ba, lambda s: (s / t).write_bytes((s / t).read_bytes() + b"# sua\n"))[3].get("error")
+    def hong(t, nhom=ba):                                  # sửa bytes mảnh `t` của cây cổng ⇒ mã lỗi của cổng
+        return cong(nhom, lambda s: (s / t).write_bytes((s / t).read_bytes() + b"# sua\n"))[3].get("error")
 
     def v23():
         mods, dia, rc, j = cong(ba, lambda s: (s / _M9).write_bytes(b"x = 0\n"))
@@ -189,15 +195,17 @@ def _do(base, tf, tl_module):
         return rc != 0 and j.get("error") == _STALE and j["shards"][1]["actual_bytes"] is None
 
     def v27():
-        mods, dia, _, j = cong([mot[1]])
+        mods, dia, rc, j = cong([mot[1]])                  # một mảnh: current ⇒ ok (rc 0) VÀ stale ⇒ GENERATED_BUNDLE_STALE
         g, d = mods[0][1], dia[_M1]
-        return len(mods) == 1 and truong(j) == [_bam(g), _bam(d), len(g), len(d)]
+        return (len(mods) == 1 and truong(j) == [_bam(g), _bam(d), len(g), len(d)]
+                and (rc, j.get("ok"), j.get("status")) == (0, True, "current") and hong(_M1, [mot[1]]) == _STALE)
 
     def v28():                                             # băm VÀ độ dài đều của chính chuỗi tên + NUL + bytes
-        mods, dia, _, j = cong(ba)
+        mods, dia, rc, j = cong(ba)                         # nhiều mảnh: current ⇒ ok (rc 0)
         e = b"".join(n.encode("utf-8") + b"\0" + d for n, d in mods)
         a = b"".join(n.encode("utf-8") + b"\0" + dia.get(n, b"") for n, _ in mods)
-        return len(mods) > 1 and truong(j) == [_bam(e), _bam(a), len(e), len(a)]
+        return (len(mods) > 1 and truong(j) == [_bam(e), _bam(a), len(e), len(a)]
+                and (rc, j.get("ok"), j.get("status")) == (0, True, "current"))
 
     def v29():
         mods, dia, _, j = cong(ba)
@@ -216,23 +224,25 @@ def _do(base, tf, tl_module):
         return bool(sizes) and all(size <= _TRAN for size in sizes)
 
     def v32():
-        ngoai = base / "ngoai.py"                          # đích symlink nằm NGOÀI thư mục mảnh
+        ngoai, dut = base / "ngoai.py", base / "dut.py"    # đích symlink NGOÀI thư mục mảnh; `dut` không tồn tại (symlink ĐỨT)
 
-        def lien(path, data):                              # nền không tạo được symlink ⇒ văng ⇒ khoá False
-            ngoai.write_bytes(data)
+        def lien(path, data):                              # data None ⇒ symlink đứt; nền không tạo được symlink ⇒ văng ⇒ False + lý do
+            if data is not None:
+                ngoai.write_bytes(data)
             path.unlink(missing_ok=True)
-            path.symlink_to(ngoai)
-        nap = [loi(sua=lambda: lien(r3 / t, (r3 / t).read_bytes()))[1] for t in (_M1, _M2)]
-        ok = [cong(ba, lambda s: lien(s / t, (s / t).read_bytes()))[3].get("ok") for t in (_M1, _M2)]
+            path.symlink_to(ngoai if data is not None else dut)
+        hai = [(t, x) for t in (_M1, _M2) for x in (1, None)]   # mảnh 1 / mảnh phụ × symlink trỏ đúng / symlink đứt
+        nap = [loi(sua=lambda: lien(r3 / t, x and (r3 / t).read_bytes()))[1] for t, x in hai]
+        ok = [cong(ba, lambda s: lien(s / t, x and (s / t).read_bytes()))[3].get("ok") for t, x in hai]
         giu = []
-        for t in (_M1, _M2):
-            dest = base / f"w32{t}"
+        for t, x in hai:
+            dest = base / f"w32{t}{x}"
             dest.mkdir()
-            lien(dest / t, b"giu nguyen\n")
+            lien(dest / t, x and b"giu nguyen\n")
             with contextlib.suppress(Exception):
                 han(lambda: tf.write_bundled_modules(sinh(deu)[0], dest))
-            giu.append(ngoai.read_bytes())
-        return nap == [_CONTRACT] * 2 and ok == [False] * 2 and giu == [b"giu nguyen\n"] * 2
+            giu.append(ngoai.read_bytes() if x else dut.exists())
+        return nap == [_CONTRACT] * 4 and ok == [False] * 4 and giu == [b"giu nguyen\n", False] * 2
 
     return (
         lambda: [_bam(d) for _, d in sinh(mot)[1]] == [_MOT_MANH_SHA256],                                  # V1
@@ -241,7 +251,7 @@ def _do(base, tf, tl_module):
         lambda: [_gan(d)[1] for _, d in sinh(deu)[1]] == [names[:2], names[2:4], names[4:]],               # V4
         v5, v6,
         lambda: [n for n, _ in sinh(deu)[1]] == [_M1, _M2, _M3],                                           # V7
-        lambda: _gan(sinh(deu)[1][0][1])[0] == [_SRC, _SHA],                                               # V8
+        lambda: [_gan(d)[0] for _, d in sinh(deu)[1]] == [[_SRC, _SHA], [_SRC], [_SRC]],                   # V8 (+ mảnh phụ)
         lambda: _gan(sinh(deu)[1][0][1])[2] == (_M2, _M3),                                                 # V9
         v10, v11,
         lambda: not (ghi("w12", truoc=(_M9,))[1] / _M9).exists(),                                          # V12
@@ -267,11 +277,11 @@ def _do(base, tf, tl_module):
 
 def run(tl_module):
     tf = importlib.import_module("tl_core.test_fragments")
-    _KQ.clear()
+    _KQ.clear(), _LY_DO.clear()
     with tempfile.TemporaryDirectory(prefix="wp433_bt_") as tmp:
         for so, fn in enumerate(_do(Path(tmp), tf, tl_module), start=1):
             try:
                 _KQ[f"V{so}"] = fn() is True
-            except Exception:  # noqa: BLE001 — văng ⇒ khoá False, không bỏ dở các khoá sau
-                _KQ[f"V{so}"] = False
+            except Exception as exc:  # noqa: BLE001 — văng ⇒ khoá False, không bỏ dở các khoá sau
+                _KQ[f"V{so}"], _LY_DO[f"V{so}"] = False, f"{type(exc).__name__}: {exc}"
     return len(_KQ) == 32 and all(value is True for value in _KQ.values())

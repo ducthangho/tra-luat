@@ -42,10 +42,31 @@ Băm hiện vật dùng khi đo (`do/hv-bam.txt`): `ma_tran_r11.py` `9314f531…
 - **RV5-F2:** `gan.setdefault(k, literal_eval(...))` tính giá trị trước khi kiểm. Base văng y như vậy, nên không phải hồi quy.
 - **RV5-F3:** §7 đặc tả ghi "chín chốt", A3 có mười. Răng của phần mở rộng V8 được đo gián tiếp qua các ca `r11_rv4_s*`.
 
+## Review và CI trên exact head `4f648e5` (cập nhật 19:36Z 21-11)
+
+**CI GitHub** (PR #1496): 26 check run, 25 thành công, 1 bỏ qua (`gate-packet-loop-manh`, bỏ qua theo điều kiện của workflow), 0 đỏ.
+- CI chạy trên merge `bac598d`, có cha là `e2f28fb` và `4f648e5`.
+- Cây của `bac598d` là `33f7b418…`, TRÙNG cây của C.
+
+**Codex lượt 1** (`launcher.py run` `4341bdc9`): model `gpt-6.2-sol`, effort `xhigh`, cả hai đo được (`DO_DUOC`); chạy 1700 s.
+- Kết luận: `changes_requested`, chỉ một finding chặn là R11-A4 (P2).
+- R11-A4 là lỗ BẰNG CHỨNG A4, không phải lỗi mã: trong sandbox có `.git` chỉ đọc gắn lên thư mục tổ tiên của `TMPDIR`, nên ba cổng đỏ y hệt nhau trên base lẫn C.
+- Các tiêu chí A0–A3, A5, A6 đạt. 13 hướng săn không có hồi quy. R11-C1..C4 là nợ P3 theo Q7.
+- Hồ sơ: `ops/reviews/bundled-gate-oracle-freshness-pr1496/luot1/`.
+
+**Codex lượt 2, xác minh** (`873e0a10`): effort `xhigh`, chạy 350 s.
+- Kết luận: `approve`. R11-A4 **ĐÃ VÁ THẬT**, dựa trên log CI trên cây trùng C và số đo của executor ngoài sandbox.
+- 0 finding P0–P2 còn mở.
+- Hồ sơ: `ops/reviews/bundled-gate-oracle-freshness-pr1496/luot2/`.
+
+**Budget đã dùng:**
+- Codex review PR: 2/10 (ADR-0055).
+- CI Ubuntu: 1/3.
+- Windows native: 0 (miễn).
+- Phiên executor: 1/2.
+
 ## Chưa làm
-- CI trên exact head `4f648e5`.
-- Codex review trên exact SHA (Q5).
-- Chủ kho audit `human_exact_head_audit.v1` và duyệt merge.
+- Chủ kho audit `human_exact_head_audit.v1` trên `4f648e5` và duyệt merge.
 - Rút hạn lease sau land.
 
 Không merge, không deploy, không ghi LIVE.

@@ -33,6 +33,7 @@ Thu vang, khong doc duoc, khong kiem duoc hay mau thuan KHONG BAO GIO duoc bu ba
       bang chung khong bao gio la giay phep DUA mot luot RA KHOI mau so G4 — chi bang chung duong o buoc 0/1 moi loai duoc.
   (2) `--tinh` khong bao gio phong `git` (`cam_git` tu choi va GHI lai moi lan thu; co lan thu => rc 5, khong ghi ket qua v2). Muc §6 cua
       bao cao #1434 la phep chay tren CAY SONG, khong co trong anh chup: ban tinh lai ghi `khong_do_duoc` cho muc ay (`s6_khong_cay_song`).
+  (3) r7: ke hoach ghi kiem TRON truoc khi tao gi (`kiem_ke_hoach_ghi`), moi tep qua `ghi_tep` ke thua; MANIFEST kiem TUNG muc tho truoc khi gom.
 """
 import argparse
 import contextlib
@@ -128,8 +129,13 @@ def kdd(ly_do):
 
 
 def tach_khoa(than):
-    """`a=1 b=2 …` -> dict; phan tu khong co `=` bi bo. Gia tri co the mang `=` (chi tach o dau `=` dau tien)."""
-    return dict(x.split("=", 1) for x in than.split(" ") if "=" in x)
+    """`a=1 b=2 …` -> dict; phan tu khong co `=` bi bo. Gia tri co the mang `=` (chi tach o dau `=` dau tien). r7 (WP1448-R6-F14, quet moi phep
+    gom danh sach -> dict cua dau vao khong tin): khoa LAP voi gia tri KHAC => None (dong mau thuan, KHONG chon ben nao); lap y het van nhan."""
+    d = {}
+    for k, v in (x.split("=", 1) for x in than.split(" ") if "=" in x):
+        if d.setdefault(k, v) != v:
+            return None
+    return d
 
 
 def trich_bong(van_ban):
@@ -149,7 +155,9 @@ def trich_bong(van_ban):
         if m:
             than = m.group(2)
             d = tach_khoa(than)
-            if m.group(1) == "BONG_CONG_CU":
+            if d is None:
+                kq["bong_cong_cu" if m.group(1) == "BONG_CONG_CU" else "bong_phan_loai"] = {"quyet_dinh": KHONG_DO_DUOC, "ly_do": "khoa_lap_mau_thuan"}
+            elif m.group(1) == "BONG_CONG_CU":
                 d["quyet_dinh"] = than.split(" ", 1)[0]
                 kq["bong_cong_cu"] = d if d["quyet_dinh"] in ("chay", "bo_qua", KHONG_DO_DUOC) else {"quyet_dinh": KHONG_DO_DUOC, "ly_do": "dong_la"}
             else:
@@ -630,6 +638,53 @@ class AnhChupHong(Exception):
     """Anh chup DA DUOC CHI DINH ma khong dung duoc: thieu MANIFEST, tep lech/vang so voi MANIFEST, duong dan thoat khoi anh chup."""
 
 
+def json_mot_nghia(b):
+    """`json.loads` ma mot object co khoa LAP => ValueError (khong lang le lay gia tri sau). Cho MANIFEST va kiem ke (dau vao khong tin)."""
+    def cap(ds):
+        if len({k for k, _ in ds}) != len(ds):
+            raise ValueError("object JSON co khoa lap")
+        return dict(ds)
+    return json.loads(b, object_pairs_hook=cap)
+
+
+class GhiBiChan(Exception):
+    """Ke hoach ghi bi tu choi TRUOC khi tao bat ky thu muc / tep nao (rc 4)."""
+
+
+def goc_git(p):
+    """Thu muc to tien GAN NHAT (ke ca `p`) co `.git` — goc checkout chua `p`, KHONG goi git — hoac None."""
+    return next((q for q in (p, *p.parents) if (q / ".git").exists()), None)
+
+
+def kiem_ke_hoach_ghi(ra, dich, dau_vao=(), nguon=()):
+    """r7 (WP1448-R6-F11, lop collector-bounded-output-writes): kiem TOAN BO ke hoach ghi TRUOC khi tao gi, khong tao / sua gi. `ra` da resolve
+    (bi danh cua CHINH `ra` duoc phep). Tu choi (GhiBiChan): `ra` trung, nam trong hay CHUA mot dau vao (`dau_vao`: anh chup, kiem ke,
+    cohort); `ra` nam trong kho chua bo thu (ROOT) hay cay nguon da chi dinh (`nguon`, ke ca goc checkout `goc_git` cua no); `ra` co ma
+    khong phai thu muc; voi moi dich tuong doi (`dich`): BAT KY thanh phan nao da co la symlink, thu muc trung gian khong phai thu muc that,
+    la khong phai tep thuong. Tep thuong da co van ghi de duoc (qua `ghi_tep` ke thua: tep tam + os.replace)."""
+    for p in (pathlib.Path(x).resolve() for x in dau_vao if x):
+        if p == ra or p in ra.parents or ra in p.parents:
+            raise GhiBiChan(f"--ra {ra} chong lan dau vao {p}")
+    for q in (ROOT, *(pathlib.Path(x).resolve() for x in nguon if x)):
+        for r in {q, goc_git(q)} - {None}:
+            if r == ra or r in ra.parents:
+                raise GhiBiChan(f"--ra {ra} nam trong cay nguon {r}")
+    if os.path.lexists(ra) and not ra.is_dir():
+        raise GhiBiChan(f"--ra {ra} da co ma khong phai thu muc")
+    for rel in dich:
+        p, ph = ra, pathlib.PurePosixPath(rel).parts
+        for i, x in enumerate(ph):
+            p = p / x
+            if os.path.islink(p):
+                raise GhiBiChan(f"thanh phan dich la symlink: {rel} ({x})")
+            if os.path.lexists(p) and not (p.is_file() if i == len(ph) - 1 else p.is_dir()):
+                raise GhiBiChan(f"thanh phan dich sai loai: {rel} ({x})")
+
+
+DICH_TINH = ("nen/BASELINE.json", "nen/COHORT.json", "nen/BAO_CAO.md", "BASELINE_V2.json", "BAO_CAO_V2.md")
+DICH_THU = ("META.json", "MANIFEST.json", "MANIFEST.partial.jsonl")
+
+
 def doc_anh_chup(ac):
     """(doc(khoa) -> bytes | None, manifest theo khoa) cua mot anh chup da dong MANIFEST. Kiem TOAN VEN TRUOC khi tra (cung
     hanh vi voi `--tinh` cua #1434, review F5): moi muc co `duong_dan` phai nam TRONG anh chup, ton tai, va sha256 khop MANIFEST;
@@ -640,16 +695,22 @@ def doc_anh_chup(ac):
     if not f.is_file():
         raise AnhChupHong(f"{ac}: khong co MANIFEST.json (anh chup chua dong)")
     try:
-        theo_khoa = {m["khoa"]: m for m in json.loads(f.read_bytes())["tep"]}
+        tep = json_mot_nghia(f.read_bytes())["tep"]
+        if not isinstance(tep, list) or not all(isinstance(m, dict) and isinstance(m.get("khoa"), str) for m in tep):
+            raise TypeError("muc MANIFEST khong phai object co `khoa` chuoi")
     except (ValueError, KeyError, TypeError) as e:
         raise AnhChupHong(f"{ac}: MANIFEST.json khong doc duoc ({type(e).__name__})") from e
-    hong = []
-    for khoa, m in sorted(theo_khoa.items()):
-        if not m.get("duong_dan"):
-            continue
-        p = (ac / m["duong_dan"]).resolve()
-        if ac not in p.parents or not p.is_file() or hashlib.sha256(p.read_bytes()).hexdigest() != m.get("sha256"):
-            hong.append(khoa)
+    # r7 (WP1448-R6-F14, VA HO cua R1-F5): kiem TUNG muc THO truoc moi phep gom theo khoa — mot muc sau cung khoa (hop le hay vang tep)
+    # khong bao gio che duoc muc hong truoc no; hai muc cung khoa ma KHAC nhau la mau thuan (lap y het van nhan: chi giu mot).
+    hong, theo_khoa = [], {}
+    for m in tep:
+        dd = m.get("duong_dan")
+        if dd:
+            p = (ac / dd).resolve() if isinstance(dd, str) else ac
+            if ac not in p.parents or not p.is_file() or hashlib.sha256(p.read_bytes()).hexdigest() != m.get("sha256"):
+                hong.append(m["khoa"])
+        if theo_khoa.setdefault(m["khoa"], m) != m:
+            hong.append(m["khoa"] + " (lap mau thuan)")
     if hong:
         raise AnhChupHong(f"{ac}: {len(hong)} muc lech MANIFEST: {hong[:10]}")
 
@@ -680,7 +741,7 @@ def doc_kiem_ke(thu_muc):
     kq = []
     for tep in sorted(pathlib.Path(thu_muc).glob("*.json")) if thu_muc else ():
         try:
-            kk = json.loads(tep.read_bytes())
+            kk = json_mot_nghia(tep.read_bytes())
             ten = [t for t, _ in kk["dot_bien"]]
             if not (RE_SHA256.fullmatch(kk["sha256_test"]) and ten and len(set(ten)) == len(ten) and len(set(kk["ca"])) == len(kk["ca"])
                     and all(isinstance(x, str) for x in ten + kk["ca"] + [d for _, d in kk["dot_bien"]])):
@@ -694,13 +755,16 @@ def doc_kiem_ke(thu_muc):
 
 
 def lenh_xuat_kiem_ke(ns):
-    ra = pathlib.Path(ns.ra).resolve()
-    if ROOT == ra or ROOT in ra.parents:
-        print("TU CHOI GHI: thu muc --ra phai nam NGOAI kho")
+    ra, g = pathlib.Path(ns.ra).resolve(), nap_goc()
+    try:                                                     # r7 F11: --ra NGOAI kho va NGOAI cay nguon --kho, kiem truoc khi nap / tao gi
+        kiem_ke_hoach_ghi(ra, (), nguon=(ns.kho,))
+        kk = nap_cong_cu(ns.kho)[1]
+        kiem_ke_hoach_ghi(ra, (kk["sha256_test"] + ".json",))
+        ra.mkdir(parents=True, exist_ok=True)
+        g.ghi_tep(ra, kk["sha256_test"] + ".json", xuat_json(kk))
+    except (GhiBiChan, g.GhiBiTuChoi) as e:
+        print("TU CHOI GHI:", e)
         return 4
-    kk = nap_cong_cu(ns.kho)[1]
-    ra.mkdir(parents=True, exist_ok=True)
-    (ra / (kk["sha256_test"] + ".json")).write_bytes(xuat_json(kk))
     print(f"KIEM KE {kk['sha256_test']}: {len(kk['dot_bien'])} dot bien, {len(kk['ca'])} ca (ma cua {pathlib.Path(ns.kho).resolve()})")
     return 0
 
@@ -765,19 +829,23 @@ def lenh_tinh(ns):
 
 def _tinh(ns, goi):
     ac, ra = pathlib.Path(ns.anh_chup).resolve(), pathlib.Path(ns.ra).resolve()
-    if ROOT == ra or ROOT in ra.parents:
-        print("TU CHOI GHI: thu muc --ra phai nam NGOAI kho")
+    try:                                                     # r7 F11: TOAN BO ke hoach ghi kiem TRUOC moi viec (ke ca nen/ cua #1434)
+        kiem_ke_hoach_ghi(ra, DICH_TINH, (ac, ns.anh_chup_v2, ns.kiem_ke, ns.cohort_goc))
+    except GhiBiChan as e:
+        print("TU CHOI GHI:", e)
         return 4
     # review F5: anh chup v2 DA CHI DINH thi kiem toan ven TRUOC moi tinh toan (va truoc ca bo thu #1434); vang `--anh-chup-v2`
-    # la "khong co v2" hop le, con chi dinh ma hong thi TU CHOI (rc 3, cung ma voi anh chup #1434 lech MANIFEST).
+    # la "khong co v2" hop le, con chi dinh ma hong thi TU CHOI (rc 3, cung ma voi anh chup #1434 lech MANIFEST). r7 F14: anh chup #1434
+    # cung qua `doc_anh_chup` (muc tho, lap mau thuan) TRUOC bo thu #1434.
     doc2, theo_khoa2, man2 = None, {}, None
     try:
         cac_kk = doc_kiem_ke(ns.kiem_ke)
         if ns.anh_chup_v2:
             doc2, theo_khoa2 = doc_anh_chup(ns.anh_chup_v2)
             man2 = hashlib.sha256((pathlib.Path(ns.anh_chup_v2).resolve() / "MANIFEST.json").read_bytes()).hexdigest()
+        doc, _ = doc_anh_chup(ac)
     except AnhChupHong as e:
-        print("ANH CHUP V2 / KIEM KE HONG:", e)
+        print("ANH CHUP / KIEM KE HONG:", e)
         return 3
     g = nap_goc()
     g.phan_loai_s6 = s6_khong_cay_song
@@ -792,17 +860,16 @@ def _tinh(ns, goi):
             return ([r for r in trong if r.get("id") in cohort_goc],
                     loai + [(r.get("id"), "ngoai_cohort_goc") for r in trong if r.get("id") not in cohort_goc])
         g.loc_cohort = loc_theo_cohort_goc
-    rc = g.lenh_tinh(argparse.Namespace(anh_chup=str(ac), ra=str(ra / "nen")))
+    try:
+        rc = g.lenh_tinh(argparse.Namespace(anh_chup=str(ac), ra=str(ra / "nen")))
+    except g.GhiBiTuChoi as e:
+        print("TU CHOI GHI:", e)
+        return 4
     if rc != 0:
         print("bo thu #1434 --tinh tra rc =", rc)
         return rc
     nen_moi = json.loads((ra / "nen" / "BASELINE.json").read_bytes())
     nen_goc = json.loads(NEN_GOC.read_bytes())
-    try:
-        doc, theo_khoa = doc_anh_chup(ac)
-    except AnhChupHong as e:
-        print("ANH CHUP #1434 HONG:", e)
-        return 3
     meta = json.loads((ac / "META.json").read_bytes())
 
     def van_ban(khoa, nguon=doc):
@@ -897,8 +964,12 @@ def _tinh(ns, goi):
         print(f"TU CHOI: --tinh da thu goi git {len(goi)} lan (dac ta muc 5), khong ghi ket qua v2: {goi[:3]}")
         return 5
     b = xuat_json(v2)
-    (ra / "BASELINE_V2.json").write_bytes(b)
-    (ra / "BAO_CAO_V2.md").write_bytes(bao_cao(v2).encode("utf-8"))
+    try:                                                     # r7 F11: moi tep qua bo ghi co gioi han ke thua (khong theo symlink / hard link)
+        g.ghi_tep(ra, "BASELINE_V2.json", b)
+        g.ghi_tep(ra, "BAO_CAO_V2.md", bao_cao(v2).encode("utf-8"))
+    except g.GhiBiTuChoi as e:
+        print("TU CHOI GHI:", e)
+        return 4
     print("BASELINE_V2.json sha256", hashlib.sha256(b).hexdigest())
     for d in v2["tai_lap_khoa"]:
         print(f"  {d['ket_luan']:14} {d['khoa']}")
@@ -971,14 +1042,16 @@ def lenh_thu(ns, g=None):
         raise SystemExit("thieu bien moi truong GITHUB_PAT")
     g = g or nap_goc()
     ac = pathlib.Path(ns.anh_chup).resolve()
+    try:                                                     # r7 F11: anh chup v2 RIENG, ngoai kho / --kho, kiem TRUOC khi dung bo ghi
+        kiem_ke_hoach_ghi(pathlib.Path(ns.ra).resolve(), DICH_THU, (ac,), (ns.kho,))
+    except GhiBiChan as e:
+        raise SystemExit(f"TU CHOI GHI: {e}") from e
     try:
         doc, _ = doc_anh_chup(ac)
     except AnhChupHong as e:
         raise SystemExit(f"anh chup #1434 khong dung duoc: {e}") from e
     meta = json.loads((ac / "META.json").read_bytes())
     t = g.Thu(ns.ra, ns.han_giay, ns.so_luong)
-    if t.ra == ac or ac in t.ra.parents:
-        raise SystemExit("anh chup v2 phai la thu muc RIENG, khong nam trong anh chup #1434")
     g.ghi_tep(t.ra, "META.json", xuat_json({"packet": "wp1448", "revision": 2, "anh_chup_goc": {k: meta.get(k) for k in ("T0", "T1", "sha_master")}}))
     ds_ci = []
     for k in meta["khoang_con"]:
@@ -1093,11 +1166,43 @@ def cac_ca_tu_kiem():
         ca.append(f)
         return f
 
+    def ghi_anh_chup(thu_muc, tep):                   # anh chup tu dung: moi khoa -> `<khoa>.json`, MANIFEST dung tung byte
+        muc = []
+        for khoa, b in tep.items():
+            b, p = b if isinstance(b, bytes) else json.dumps(b).encode(), thu_muc / (khoa + ".json")
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_bytes(b)
+            muc.append({"khoa": khoa, "loai": "x", "url": None, "http": 200, "duong_dan": khoa + ".json", "sha256": hashlib.sha256(b).hexdigest(), "kich_thuoc": len(b)})
+        (thu_muc / "MANIFEST.json").write_text(json.dumps({"tep": muc}), encoding="utf-8")
+        return muc
+
+    def anh_chup_nho(goc, **v2):
+        """r7: anh chup #1434 TOI THIEU (khong qua --thu): MOT luot pull_request 501 — `chuan-bi` (dong bong cu=day_du moi=duong_nhanh), `gate`,
+        `gate-ops`, MOI job MOT buoc do duoc (60 s, 60 s, 120 s). `v2` (khoa -> noi dung) => anh chup v2 `goc/v2`. Tra (ac, v2 | None)."""
+        T, H = "2026-11-01T00:%02d:00Z", "a" * 40
+        run = {"id": 501, "run_attempt": 1, "event": "pull_request", "head_sha": H, "head_branch": "f", "status": "completed", "conclusion": "success", "created_at": T % 1}
+        job = lambda i, ten, a, b: {"id": 50100 + i, "name": ten, "conclusion": "success", "run_attempt": 1, "head_sha": H, "created_at": T % 1, "started_at": T % 1,
+                                    "completed_at": T % 9, "steps": [{"name": "buoc " + ten[:4], "conclusion": "success", "number": 1, "started_at": T % a, "completed_at": T % b}]}
+        ghi_anh_chup(goc / "ac", {"META": {"T0": T % 0, "T1": T % 59, "sha_master": H, "kho": "o/r", "spec_sha256": "0" * 64,
+                                           "khoang_con": [{"su_kien": "pull_request", "nhan": "x", "tu": T % 0, "den": T % 59}]},
+                                  "list/ci/pull_request/x/p1": {"total_count": 1, "workflow_runs": [run]}, "list/du/p1": {"total_count": 0, "workflow_runs": []},
+                                  "jobs/501/p1": {"total_count": 3, "jobs": [job(0, JOB_CHUAN_BI, 2, 3), job(1, "gate (ubuntu-latest)", 3, 4), job(2, "gate-ops (ubuntu-latest)", 4, 6)]},
+                                  "log/50100": b"che_do=day_du\nBONG_PHAN_LOAI: cu=day_du moi=duong_nhanh cu_do=do_duoc kiem_moi=dat\n"})
+        if v2:
+            ghi_anh_chup(goc / "v2", {"META": {}, **v2})
+        return goc / "ac", (goc / "v2" if v2 else None)
+
+    def tinh_nho(ac, ra, v2=None, **doi):                # -> rc cua `lenh_tinh` THAT (toan phan: loi doi so / hinh dang => TuKiemDo)
+        ns = argparse.Namespace(**{"anh_chup": str(ac), "ra": str(ra), "anh_chup_v2": v2 and str(v2), "cohort_goc": None, "kiem_ke": None, **doi})
+        with contextlib.redirect_stdout(io.StringIO()):
+            return khong_nem(lambda: lenh_tinh(ns))
+
     def dau_cuoi(goc):
         """`--thu` THAT (lop `Thu` cua #1434, van chuyen GIA — khong mang) tren anh chup #1434 tu dung trong `goc/ac` -> anh chup v2 `goc/v2`.
         Ba luot cua cohort: 101 pull_request (checkout = merge c*40, cha [d*40, a*40]), 102 push, 103 pull_request ma anh chup KHONG co trang
         job (bang chung vang). API phuc vu DAY DU dau vao ma ma `d0ccd1f` chung nhan thoi gian G5 (log manh `G5_THOI_GIAN` du ba thanh phan cho
-        moi dinh danh, bien nhan hop le); bo thu sau cat (r6) khong duoc doc log manh. Tra {g, rc_thu, tinh(ra, v2=None) -> BASELINE_V2, log_manh}."""
+        moi dinh danh, bien nhan hop le); bo thu sau cat (r6) khong duoc doc log manh. r7: `--kho` RIENG, dong bong cua 101 khong mang OID.
+        Tra {g, rc_thu, thu() -> rc, tinh(ra, v2=None) -> rc, ket_qua(ra) -> BASELINE_V2, log_manh}."""
         mod = nap_cong_cu()[0]
         T = "2026-11-01T00:%02d:00Z"
         luot = {101: ("pull_request", "a" * 40, "c" * 40), 102: ("push", "b" * 40, "b" * 40), 103: ("pull_request", "9" * 40, None)}
@@ -1124,7 +1229,7 @@ def cac_ca_tu_kiem():
             tep1[f"jobs/{rid}/p1"] = json.dumps({"total_count": len(ten), "jobs": [
                 {"id": rid * 100 + i, "name": t_, "conclusion": "success", "run_attempt": 1, "head_sha": head, "created_at": T % 1, "started_at": T % 2,
                  "completed_at": T % 9, "steps": []} for i, t_ in enumerate(ten)]}).encode()
-            tep1[f"log/{rid * 100}"] = (T % 3 + " che_do=day_du\n").encode()
+            tep1[f"log/{rid * 100}"] = (T % 3 + " che_do=day_du\n" + "BONG_PHAN_LOAI: cu=day_du moi=day_du cu_do=do_duoc\n" * (rid == 101)).encode()
             api[f"actions/runs/{rid}/artifacts"] = json.dumps({"total_count": SO_MANH_G5, "artifacts": [
                 {"id": rid * 10 + k, "name": TEN_ART_MANH + str(k), "expired": False} for k in range(SO_MANH_G5)]}).encode()
             for k, nd in tao_bien_nhan(checkout).items():
@@ -1134,13 +1239,7 @@ def cac_ca_tu_kiem():
         tep1.update({f"list/ci/{sk}/x/p1": json.dumps({"total_count": len(r), "workflow_runs": r}).encode() for sk, r in ds.items()})
         meta = {"T0": T % 0, "T1": T % 59, "sha_master": "f" * 40, "spec_sha256": "0" * 64, "kho": "o/r",
                 "khoang_con": [{"su_kien": sk, "nhan": "x", "tu": T % 0, "den": T % 59} for sk in ("pull_request", "push")]}
-        muc = []
-        for khoa, b in {"META": json.dumps(meta).encode(), **tep1}.items():
-            p = goc / "ac" / (khoa + ".json")
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_bytes(b)
-            muc.append({"khoa": khoa, "loai": "x", "url": None, "http": 200, "duong_dan": khoa + ".json", "sha256": hashlib.sha256(b).hexdigest(), "kich_thuoc": len(b)})
-        (goc / "ac" / "MANIFEST.json").write_text(json.dumps({"tep": muc}), encoding="utf-8")
+        ghi_anh_chup(goc / "ac", {"META": meta, **tep1})
         g = nap_goc()
 
         class ThuGia(g.Thu):
@@ -1148,13 +1247,17 @@ def cac_ca_tu_kiem():
                 b = api.get(duong.split("?")[0])
                 return (200, b, None) if b is not None else (404, None, "HTTP 404")
         g.Thu = ThuGia
-        with contextlib.redirect_stdout(io.StringIO()):
-            rc_thu = lenh_thu(argparse.Namespace(anh_chup=str(goc / "ac"), ra=str(goc / "v2"), han_giay=60, so_luong=1, kho=None), g)
+        (goc / "kho" / ".git").mkdir(parents=True)          # --kho RIENG (dong bong 101 khong mang OID: oracle khong do duoc, KHONG goi git)
+
+        def thu():
+            with contextlib.redirect_stdout(io.StringIO()):
+                return lenh_thu(argparse.Namespace(anh_chup=str(goc / "ac"), ra=str(goc / "v2"), han_giay=60, so_luong=1, kho=str(goc / "kho")), g)
+        rc_thu = thu()
 
         def tinh(ra, v2=None):                              # -> rc cua `lenh_tinh`; ket qua doc bang `ket_qua(ra)`
             with contextlib.redirect_stdout(io.StringIO()):
                 return lenh_tinh(argparse.Namespace(anh_chup=str(goc / "ac"), ra=str(goc / ra), anh_chup_v2=str(v2 or goc / "v2"), cohort_goc=None, kiem_ke=None))
-        return {"g": g, "rc_thu": rc_thu, "tinh": tinh, "ket_qua": lambda ra: json.loads((goc / ra / "BASELINE_V2.json").read_bytes()), "log_manh": lm}
+        return {"g": g, "rc_thu": rc_thu, "thu": thu, "tinh": tinh, "ket_qua": lambda ra: json.loads((goc / ra / "BASELINE_V2.json").read_bytes()), "log_manh": lm}
 
     @kiem
     def g4b_moi_fixture_dung_mot_loai_va_du_muoi_buoc():
@@ -1211,6 +1314,11 @@ def cac_ca_tu_kiem():
             d = dem_bong(tb["che_do_chay"], tb["bong_phan_loai"], ca_["oracle"])
             bang([d["loi_ich"], d["ton_du"]] == ca_["mong"], f"{ca_['ten']}: mong [loi ich, ton du] = {ca_['mong']}, duoc {[d['loi_ich'], d['ton_du']]}")
             bang((tb["bong_cong_cu"] or {}).get("quyet_dinh") == ca_.get("cong_cu"), f"{ca_['ten']}: quyet dinh BONG_CONG_CU doc sai: {tb['bong_cong_cu']}")
+        bang([tach_khoa("cu=duong_nhanh moi=day_du cu=day_du"), tach_khoa("cu=day_du cu=day_du moi=x")] == [None, {"cu": "day_du", "moi": "x"}],
+             "r7: khoa LAP gia tri KHAC => None (khong chon ben nao); lap y het van nhan")
+        tb = khong_nem(lambda: trich_bong("BONG_PHAN_LOAI: cu=duong_nhanh moi=day_du cu_do=do_duoc cu=day_du\nBONG_CONG_CU: chay duong_dan=a duong_dan=b\n"))
+        bang(tb["bong_phan_loai"] == tb["bong_cong_cu"] == {"quyet_dinh": KHONG_DO_DUOC, "ly_do": "khoa_lap_mau_thuan"}
+             and dem_bong(DAY_DU, tb["bong_phan_loai"], DUONG_NHANH) == {"loi_ich": None, "ton_du": None}, f"r7: dong bong khoa lap mau thuan => khong du du lieu: {tb}")
         ten = {c["ten"]: c for c in fx["ca"]}
         bang(ten["ca duong PR4 o PR1 (tich hop bong that)"]["mong"] == [1, 1] and ten["MO PHONG sau PR4 (phan loai dang chay = moi)"]["mong"] == [1, 0],
              "ca duong PR4: o PR1 loi ich=1/ton du=1; mo phong sau PR4 loi ich=1/ton du=0")
@@ -1368,6 +1476,7 @@ def cac_ca_tu_kiem():
             bang(doc_kiem_ke(d) == [kk2] and doc_kiem_ke(None) == [], "doi chung: thu muc --kiem-ke doc duoc")
             for ten, xau, b in (("hai tep cung mot van tay", d, xuat_json({**kk2, "ca": ["ca_a", "ca_b", "ca_c", "ca_d"]})),
                                 ("ten dot bien trung", d, xuat_json({**kk2, "sha256_test": "cd" * 32, "dot_bien": kk2["dot_bien"] + [["db0", "ca_a"]]})),
+                                ("khoa JSON lap (r7)", d, ('{"sha256_test": "' + "ef" * 32 + '", "ca": ["x"], "dot_bien": [["q", "x"]], "ca": ["y"]}').encode()),
                                 ("thu muc vang", str(pathlib.Path(d) / "khong_co"), b"")):
                 (pathlib.Path(d) / "b.json").write_bytes(b)
                 try:
@@ -1475,6 +1584,210 @@ def cac_ca_tu_kiem():
             ra = goc / "ra"
             rc = lenh_tinh(argparse.Namespace(anh_chup=str(goc / "khong_co_anh_chup_1434"), ra=str(ra), anh_chup_v2=str(ac), cohort_goc=None, kiem_ke=None))
             bang(rc == 3 and not ra.exists(), f"--tinh voi anh chup v2 lech MANIFEST phai tu choi rc 3 TRUOC moi tinh toan, duoc rc={rc}")
+
+    @kiem
+    def manifest_moi_muc_tho_truoc_khi_gom():
+        """r7, WP1448-R6-F14 (lop snapshot-manifest-integrity, VA HO cua R1-F5): MOI muc THO cua MANIFEST duoc kiem TRUOC khi gom theo khoa. Muc
+        sau cung khoa (tot hay vang tep) khong che duoc muc hong truoc no; hai muc cung khoa KHAC nhau, khoa JSON lap, muc sai hinh dang => tu
+        choi. Doi chung: lap Y HET, muc vang tep hop le. Dau-cuoi: `--tinh` THAT tren anh chup v2 / #1434 hong => rc 3, KHONG ghi gi."""
+        with tempfile.TemporaryDirectory(prefix="wp1448_mf_") as d:
+            goc = pathlib.Path(d)
+            ac, v2 = anh_chup_nho(goc, **{"oracle/501": {"oracle": DUONG_NHANH, "phien_ban_oracle": 2}})
+            con = json.loads((v2 / "MANIFEST.json").read_bytes())["tep"]
+            m = next(x for x in con if x["khoa"] == "oracle/501")
+            con.remove(m)
+            b = (v2 / m["duong_dan"]).read_bytes()
+            for ten, nd in (("xau.json", b"XAU"), ("khac.json", b + b" "), ("../ngoai.json", b)):
+                (v2 / ten).write_bytes(nd)
+            xau, vang = {**m, "duong_dan": "xau.json"}, {"khoa": m["khoa"], "duong_dan": None, "http": 410, "loi": "HTTP 410"}
+            khac = {**m, "duong_dan": "khac.json", "sha256": hashlib.sha256(b + b" ").hexdigest()}
+
+            def thu(muc, tho=None):
+                (v2 / "MANIFEST.json").write_bytes(tho or json.dumps({"tep": muc}).encode())
+                try:
+                    return khong_nem(lambda: doc_anh_chup(v2))[0](m["khoa"])
+                except AnhChupHong:
+                    return None
+            sai = (("hong truoc, tot sau", [xau, m]), ("tot truoc, hong sau", [m, xau]), ("hong truoc, vang tep sau", [xau, vang]),
+                   ("ngoai anh chup truoc, tot sau", [{**m, "duong_dan": "../ngoai.json"}, m]), ("hai muc hop le KHAC nhau cung khoa", [m, khac]),
+                   ("tot va vang tep cung khoa", [m, vang]), ("doi chung khac khoa: muc hong khoa rieng", [m, {**xau, "khoa": "khac"}]),
+                   ("muc khong phai object", [m, 5]), ("khoa khong phai chuoi", [m, {**m, "khoa": 7}]), ("duong_dan khong phai chuoi", [{**m, "duong_dan": 7}]))
+            for ten, muc in sai:
+                bang(thu(con + muc) is None, f"{ten}: MANIFEST phai bi TU CHOI (AnhChupHong), khong nem loi khac")
+            tho = json.dumps({"tep": con + [m]})[:-3] + f', "duong_dan": "xau.json", "duong_dan": "{m["duong_dan"]}"}}]}}'
+            bang(thu(None, tho.encode()) is None, f"khoa JSON lap trong mot muc: tu choi, khong lang le lay gia tri sau: {tho[-120:]}")
+            bang(thu(con + [m, m]) == b and thu(con + [m, {**vang, "khoa": "arts/9/p1"}]) == b and thu(con + [{**m, "duong_dan": None}]) is None,
+                 "doi chung: lap Y HET van nhan; muc vang tep (khoa rieng) hop le")
+            for i, (ten, muc) in enumerate(sai[:4]):
+                thu(con + muc)
+                bang(tinh_nho(ac, goc / f"ra{i}", v2) == 3 and not (goc / f"ra{i}").exists(), f"dau-cuoi {ten}: --tinh phai rc 3, KHONG ghi gi")
+            thu(con + [m])
+            bang(tinh_nho(ac, goc / "ra_tot", v2) == 0, "doi chung dau-cuoi: anh chup v2 dung => rc 0")
+            muc1 = json.loads((ac / "MANIFEST.json").read_bytes())["tep"]
+            l1 = next(x for x in muc1 if x["khoa"] == "log/50100")
+            (ac / "khac.log").write_bytes(b"che_do=duong_nhanh\n")
+            (ac / "MANIFEST.json").write_text(json.dumps({"tep": muc1 + [{**l1, "duong_dan": "khac.log", "sha256": hashlib.sha256(b"che_do=duong_nhanh\n").hexdigest()}]}))
+            bang(tinh_nho(ac, goc / "ra1434", v2) == 3 and not (goc / "ra1434").exists(),
+                 "anh chup #1434 co hai muc HOP LE khac nhau cung khoa: bo thu tu choi rc 3 TRUOC bo thu #1434, KHONG ghi gi")
+
+    @kiem
+    def ghi_co_gioi_han_moi_dich_cua_bo_thu():
+        """r7, WP1448-R6-F11 (lop collector-bounded-output-writes): MOI dich ghi cua `--tinh`, `--xuat-kiem-ke`, `--thu` duoc kiem TRON truoc khi
+        tao gi, roi di qua `ghi_tep` ke thua. Doi chung: ghi lan dau va ghi DE tep thuong da co => rc 0. Am: symlink o la / o `nen` / o
+        `nen/...`, la la thu muc, `--ra` la tep, hard link (tep thuong tro inode NGOAI --ra: phai THAY muc, khong ghi xuyen), `--ra` trung /
+        trong / chua mot dau vao, trong kho (ROOT) hay trong cay nguon `--kho` (ke ca goc checkout) => rc 4 (`--thu`: SystemExit) TRUOC moi
+        byte ngoai va moi muc moi trong cay."""
+        cu = b"CANH GAC NGOAI --ra\n"
+        with tempfile.TemporaryDirectory(prefix="wp1448_ghi_") as d:
+            goc = pathlib.Path(d)
+            ac, v2 = anh_chup_nho(goc, **{"oracle/501": {"oracle": DUONG_NHANH, "phien_ban_oracle": 2}})
+            ngoai = goc / "ngoai"
+            ngoai.mkdir()
+
+            def canh(ten):
+                (ngoai / ten).write_bytes(cu)
+                return ngoai / ten
+
+            def cay(p):
+                return sorted((str(x.relative_to(p)), x.is_symlink() or not x.is_file() or x.read_bytes()) for x in p.rglob("*"))
+            ra = goc / "ra"
+            bang(tinh_nho(ac, ra, v2) == 0 and tinh_nho(ac, ra, v2) == 0 and (ra / "BASELINE_V2.json").is_file() and (ra / "nen" / "BASELINE.json").is_file(),
+                 "doi chung: --tinh ghi lan dau va ghi DE tep thuong da co => rc 0")
+            for i, (ten, dung) in enumerate((
+                    ("BAO_CAO_V2.md la symlink", lambda r: (r / "BAO_CAO_V2.md").symlink_to(canh("bc"))),
+                    ("BASELINE_V2.json la symlink", lambda r: (r / "BASELINE_V2.json").symlink_to(canh("bl"))),
+                    ("nen la symlink thu muc", lambda r: (r / "nen").symlink_to(ngoai, target_is_directory=True)),
+                    ("nen/BASELINE.json la symlink", lambda r: ((r / "nen").mkdir(), (r / "nen" / "BASELINE.json").symlink_to(canh("nb")))),
+                    ("BASELINE_V2.json la thu muc", lambda r: (r / "BASELINE_V2.json").mkdir()))):
+                r = goc / f"ra_sl{i}"
+                r.mkdir()
+                dung(r)
+                truoc = cay(goc)
+                bang(tinh_nho(ac, r, v2) == 4 and cay(goc) == truoc, f"{ten}: --tinh phai rc 4 TRUOC moi lan ghi (khong byte nao ngoai, khong muc moi)")
+            r = goc / "ra_la_tep"
+            r.write_bytes(cu)
+            try:
+                rc = tinh_nho(ac, r, v2)
+            except OSError as e:
+                rc = f"nem {type(e).__name__}"
+            bang(rc == 4 and r.read_bytes() == cu, f"--ra la tep thuong: rc 4, duoc {rc!r}")
+            r = goc / "ra_hl"
+            r.mkdir()
+            for t in ("BASELINE_V2.json", "BAO_CAO_V2.md"):
+                os.link(canh("hl_" + t), r / t)
+            bang(tinh_nho(ac, r, v2) == 0 and all((ngoai / ("hl_" + t)).read_bytes() == cu and (r / t).read_bytes() != cu for t in ("BASELINE_V2.json", "BAO_CAO_V2.md")),
+                 "hard link: tep o --ra duoc THAY (tep tam + os.replace), inode ngoai --ra giu nguyen")
+            (goc / "kk_dir").mkdir()
+            (goc / "coh").mkdir()
+            (goc / "coh" / "c.json").write_text(json.dumps({"cap_run_attempt": {"ci.yml": [[501, 1]]}}))
+            for ten, r, doi in (("--ra = anh chup #1434", ac, {}), ("--ra trong anh chup #1434", ac / "con", {}), ("--ra chua anh chup #1434", goc, {}),
+                                ("--ra trong anh chup v2", v2 / "con", {}), ("--ra = --kiem-ke", goc / "kk_dir", {"kiem_ke": str(goc / "kk_dir")}),
+                                ("--ra chua --cohort-goc", goc / "coh", {"cohort_goc": str(goc / "coh" / "c.json")})):
+                truoc = cay(goc)
+                bang(tinh_nho(ac, r, v2, **doi) == 4 and cay(goc) == truoc, f"{ten}: --tinh phai rc 4, cay khong doi")
+            kk, nap_that, goc_kho = nap_cong_cu()[1], globals()["nap_cong_cu"], globals()["ROOT"]
+            la, src = kk["sha256_test"] + ".json", goc / "src"
+            (src / ".git").mkdir(parents=True)
+            (src / "con").mkdir()
+
+            def xuat(r, kho):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    return lenh_xuat_kiem_ke(argparse.Namespace(ra=str(r), kho=str(kho)))
+            try:
+                globals()["nap_cong_cu"] = lambda goc=None: (None, kk)       # khong nap ma cua `src` (cay gia): kiem ke cua cay nay
+                bang(xuat(goc / "kk", src) == 0 and xuat(goc / "kk", src) == 0 and (goc / "kk" / la).read_bytes() == xuat_json(kk),
+                     "doi chung: --xuat-kiem-ke ghi lan dau va ghi de => rc 0")
+                (goc / "kk2").mkdir()
+                (goc / "kk2" / la).symlink_to(canh("kk_sl"))
+                (goc / "kk3").mkdir()
+                os.link(canh("kk_hl"), goc / "kk3" / la)
+                bang(xuat(goc / "kk2", src) == 4 and (ngoai / "kk_sl").read_bytes() == cu and (goc / "kk2" / la).is_symlink(), "--xuat-kiem-ke la symlink: rc 4")
+                bang(xuat(goc / "kk3", src) == 0 and (ngoai / "kk_hl").read_bytes() == cu and (goc / "kk3" / la).read_bytes() == xuat_json(kk),
+                     "--xuat-kiem-ke hard link: thay muc, inode ngoai giu nguyen")
+                for ten, r, kho in (("trong --kho", src / "ra", src), ("trong goc checkout cua --kho", src / "ra2", src / "con")):
+                    bang(xuat(r, kho) == 4 and not r.exists(), f"--xuat-kiem-ke --ra {ten}: rc 4, khong tao gi")
+                globals()["ROOT"] = goc / "kho_gia"
+                (goc / "kho_gia").mkdir()
+                truoc = cay(goc)
+                bang(tinh_nho(ac, goc / "kho_gia" / "ra", v2) == 4 and xuat(goc / "kho_gia" / "kk", src) == 4 and cay(goc) == truoc,
+                     "--ra trong kho chua bo thu (ROOT): --tinh va --xuat-kiem-ke rc 4, khong tao gi")
+            finally:
+                globals()["nap_cong_cu"], globals()["ROOT"] = nap_that, goc_kho
+            g = nap_goc()
+
+            class ThuGia(g.Thu):
+                def _goi(self, duong):
+                    return 404, None, "HTTP 404"
+            g.Thu = ThuGia
+            for ten, r, kho in (("--ra = anh chup", ac, None), ("--ra trong anh chup", ac / "con", None), ("--ra trong --kho", src / "v2", src)):
+                truoc = cay(goc)
+                try:
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        thoat = lenh_thu(argparse.Namespace(anh_chup=str(ac), ra=str(r), han_giay=1, so_luong=1, kho=kho and str(kho)), g)
+                except SystemExit as e:
+                    thoat = str(e)
+                bang(str(thoat).startswith("TU CHOI GHI") and cay(goc) == truoc, f"--thu {ten}: SystemExit TRUOC khi dung bo ghi, cay khong doi: {thoat!r}")
+
+    @kiem
+    def tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort():
+        """r7, WP1448-R6-F12 (lop new-guard-mutation-coverage; ranh gioi la base 64fa515 — TOAN BO bo thu moi o PR1): `--tinh` THAT tren anh chup
+        TOI THIEU, ky vong DOC LAP (literal). Oracle v2 => ton du DEM duoc, oracle ba OID (phien_ban 1) => khong du du lieu; buoc do duoc cua
+        `gate` / `gate-ops` — va CHI hai job ay — vao thoi gian buoc; danh sach artifact het han => ly do tung vi tri; khong v2 => van chay;
+        `--cohort-goc` loc luot; khong co muc `khong_do_duoc` vo co."""
+        art = {"total_count": 8, "artifacts": [{"id": i, "name": TEN_ART_MANH + str(i), "expired": True} for i in range(SO_MANH_G5)]}
+        tk = lambda s: {"lon_nhat": s, "n": 1, "nho_nhat": s, "p90": s, "so_khong_ap_dung": 0, "so_loai": 0, "tong": s, "trang_thai": DO_DUOC, "trung_vi": s}
+        dem_ = lambda c, d: {"loi_ich": {"0": 0, "1": 1, "khong_du_du_lieu": 0}, "ton_du": {"0": 0, "1": c, "khong_du_du_lieu": d}}
+        kq = {}
+        with tempfile.TemporaryDirectory(prefix="wp1448_f12_") as d:
+            goc = pathlib.Path(d)
+            for ten, pb in (("v2", 2), ("ba_oid", 1), ("khong_v2", None)):
+                ac, v2 = anh_chup_nho(goc / ten, **({"oracle/501": {"oracle": DUONG_NHANH, "phien_ban_oracle": pb}, "arts/501/p1": art,
+                                                      "list/pl/p1": {"total_count": 0, "workflow_runs": []}} if pb else {}))
+                kq[ten] = (tinh_nho(ac, goc / ten / "ra", v2), json.loads((goc / ten / "ra" / "BASELINE_V2.json").read_bytes()))
+            (goc / "c.json").write_text(json.dumps({"cap_run_attempt": {"ci.yml": []}}))
+            kq["cohort"] = (tinh_nho(ac, goc / "ra_c", cohort_goc=str(goc / "c.json")), json.loads((goc / "ra_c" / "BASELINE_V2.json").read_bytes()))
+        bang([kq[k][0] for k in kq] == [0, 0, 0, 0], f"bon lan --tinh phai rc 0: {[(k, kq[k][0]) for k in kq]}")
+        o, l = kq["v2"][1], kq["v2"][1]["luot"][0]
+        bang(o["bong"]["bo_dem_pull_request"] == dem_(1, 0), f"oracle v2 (phien_ban 2) hop le => ton du DEM: {o['bong']['bo_dem_pull_request']}")
+        bang(kq["ba_oid"][1]["bong"]["bo_dem_pull_request"] == dem_(0, 1), f"oracle ba OID (phien_ban 1) KHONG duoc dung: {kq['ba_oid'][1]['bong']['bo_dem_pull_request']}")
+        bang(o["thoi_gian_buoc_gate_gate_ops"] == {"gate | khong_ro | khong_do_duoc | buoc gate": tk(60), "gate-ops | khong_ro | khong_do_duoc | buoc gate": tk(120)},
+             f"buoc do duoc cua gate (60 s) va gate-ops (120 s), KHONG buoc cua chuan-bi: {o['thoi_gian_buoc_gate_gate_ops']}")
+        bang(l["manh"]["ly_do"] == ["artifact_het_han"] * SO_MANH_G5 and l["manh"]["nguon_bien_nhan"] == "khong_co_noi_dung+danh_sach_artifact"
+             and o["khong_do_duoc"] == [] and o["packet_loop_dot_bien"]["trang_thai"] == DO_DUOC and o["packet_loop_dot_bien"]["so_luot"] == 0,
+             f"danh sach artifact het han, khong noi dung, packet-loop do duoc, khong muc khong_do_duoc vo co: {l['manh']} {o['khong_do_duoc']} {o['packet_loop_dot_bien']}")
+        o = kq["khong_v2"][1]
+        bang(o["luot"][0]["manh"]["ly_do"] == ["job_khong_success"] * SO_MANH_G5 and o["luot"][0]["manh"]["nguon_bien_nhan"] == "khong_co_noi_dung"
+             and o["packet_loop_dot_bien"] == kdd("chua thu (can --thu cua bo thu v2 vao --anh-chup-v2)") and o["bong"]["bo_dem_pull_request"] == dem_(0, 1),
+             f"khong anh chup v2: van chay, khong bien nhan / oracle / packet-loop: {o['luot'][0]['manh']} {o['packet_loop_dot_bien']}")
+        bang(kq["cohort"][1]["luot"] == [] and kq["cohort"][1]["G4"]["so_luot_pull_request"] == 0, f"--cohort-goc rong => khong luot nao: {kq['cohort'][1]['G4']}")
+
+    @kiem
+    def oracle_moi_chot_fail_close_git_gia():
+        """r7, WP1448-R6-F12: cac chot cua `oracle_moi` ma ca that t115/t118/t119 cua ops/ci_duong_nhanh_test.py KHONG giet khi go (do bang
+        oracle_t119.py, handoff r7), tren git GIA (doi so `chay`, KHONG phong tien trinh): OID sai dang, dong rev-list cua commit KHAC, nhieu
+        merge-base, merge-tree hong, diff khong ket thuc NUL / ban ghi la => khong_do_duoc; tep ma cap nong, mode thuc thi, sua dac ta => day_du.
+        Doi chung: cung dau vao hop le => duong_nhanh; THEM dac ta moi (A) van duong_nhanh."""
+        P1, D, HOP = "b" * 40, "c" * 40, "e" * 40
+
+        def hoi(sua=(), gs="a" * 40):
+            tra = {"rev-list": (0, f"{HOP} {P1} {D}\n"), "--is-ancestor": (0, ""), "--all": (0, "f" * 40 + "\n"), "merge-tree": (0, "9" * 40 + "\n"),
+                   "diff": (0, ":100644 100644 1 2 M\0ops/land/x.yaml\0"), **dict(sua)}
+
+            def chay(lenh, **k):
+                rc, ra = tra[next(x for x in tra if x in lenh)]
+                return types.SimpleNamespace(returncode=rc, stdout=ra.encode())
+            return khong_nem(lambda: oracle_moi("/kho_gia", gs, None, D, HOP, chay))
+        bang(hoi() == hoi([("diff", (0, ":000000 100644 0 2 A\0ops/specs/y.md\0"))]) == DUONG_NHANH, "doi chung: ho so hop le / them dac ta moi => duong_nhanh")
+        for ten, sua, mong in (
+                ("goc su kien khong phai OID", "x", KHONG_DO_DUOC), ("rev-list tra commit KHAC merge ref", [("rev-list", (0, f"{'d' * 40} {P1} {D}\n"))], KHONG_DO_DUOC),
+                ("hai merge-base", [("--all", (0, "f" * 40 + "\n" + "8" * 40 + "\n"))], KHONG_DO_DUOC), ("merge-tree in them dong", [("merge-tree", (0, "9" * 40 + "\nxung dot\n"))], KHONG_DO_DUOC),
+                ("diff khong ket thuc NUL", [("diff", (0, ":100644 100644 1 2 M\0ops/land/x.yaml"))], KHONG_DO_DUOC),
+                ("ban ghi diff la", [("diff", (0, ":100644 100644 1 2 X\0ops/land/x.yaml\0"))], KHONG_DO_DUOC),
+                ("tep ma cap nong trong ho so", [("diff", (0, ":100644 100644 1 2 M\0ops/land/x.py\0"))], DAY_DU),
+                ("mode moi thuc thi", [("diff", (0, ":100644 100755 1 2 M\0ops/land/x.yaml\0"))], DAY_DU),
+                ("sua dac ta da co", [("diff", (0, ":100644 100644 1 2 M\0ops/specs/x.md\0"))], DAY_DU)):
+            kq = hoi(gs=sua) if isinstance(sua, str) else hoi(sua)
+            bang(kq == mong, f"oracle_moi {ten}: mong {mong}, duoc {kq}")
 
     @kiem
     def g4_vang_bang_chung_khong_ra_khoi_mau_so():
@@ -1648,6 +1961,12 @@ def cac_ca_tu_kiem():
             bang({"arts/101/p1", "log/10109", "log/10209"} <= khoa_v2 and not {k for k in khoa_v2 if k.startswith("arts/102") or k in {f"log/{j}" for j in dc["log_manh"]}}
                  and "run_g5" not in json.loads((goc / "v2" / "META.json").read_bytes()),
                  f"--thu (r6 K2): bien nhan chi cho pull_request, log chi job gom (KHONG log manh), META khong run_g5: {sorted(khoa_v2)}")
+            o101 = json.loads((goc / "v2" / "oracle" / "101.json").read_bytes()) if "oracle/101" in khoa_v2 else {}
+            bang([o101.get("oracle"), o101.get("phien_ban_oracle")] == [KHONG_DO_DUOC, 2] and "g4b" not in next(l for l in v2["luot"] if l["run_id"] == 102)
+                 and sum(v2["bong"]["bo_dem_pull_request"]["loi_ich"].values()) == 2,
+                 f"r7: --thu co --kho ghi oracle cho luot pull_request co dong bong; luot push KHONG vao G4 / bo dem: {o101} {v2['bong']['bo_dem_pull_request']}")
+            bang(dc["thu"]() == 0 and dc["tinh"]("ra3") == 0 and dc["ket_qua"]("ra3")["G4"] == v2["G4"],
+                 "r7: tiep tuc --thu tren anh chup v2 DA dong (ghi de tep thuong) roi --tinh: rc 0, G4 nhu cu")
             pat = os.environ.get("GITHUB_PAT")
             try:
                 os.environ.pop("GITHUB_PAT", None)
@@ -1855,6 +2174,64 @@ DOT_BIEN_TU_KIEM = (
     ('thu_khong_doi_token', '    if g is None and not os.environ.get("GITHUB_PAT"):\n', '    if False:\n', 'thu_roi_tinh_khong_goi_git_va_pull_request_du_hoan_tat'),
     ('thu_bien_nhan_moi_su_kien', '        if kh["bien_nhan"]:\n', '        if True:\n', 'thu_roi_tinh_khong_goi_git_va_pull_request_du_hoan_tat'),
     ('thu_tai_log_manh', '           if (ten or "").startswith(JOB_GOM + " (ubuntu-latest") and d.get("conclusion") not in ("skipped", None)]\n', '           if ((ten or "").startswith(JOB_GOM + " (ubuntu-latest") or chi_so_manh(ten) is not None) and d.get("conclusion") not in ("skipped", None)]\n', 'thu_roi_tinh_khong_goi_git_va_pull_request_du_hoan_tat'),
+    ('ghi_tinh_baseline_v2_ghi_thang', '        g.ghi_tep(ra, "BASELINE_V2.json", b)\n', '        (ra / "BASELINE_V2.json").write_bytes(b)\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_tinh_bao_cao_v2_ghi_thang', '        g.ghi_tep(ra, "BAO_CAO_V2.md", bao_cao(v2).encode("utf-8"))\n', '        (ra / "BAO_CAO_V2.md").write_bytes(bao_cao(v2).encode("utf-8"))\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_xuat_kiem_ke_ghi_thang', '        g.ghi_tep(ra, kk["sha256_test"] + ".json", xuat_json(kk))\n', '        (ra / (kk["sha256_test"] + ".json")).write_bytes(xuat_json(kk))\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_tinh_bo_ke_hoach', '        kiem_ke_hoach_ghi(ra, DICH_TINH, (ac, ns.anh_chup_v2, ns.kiem_ke, ns.cohort_goc))\n', '        pass\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_tinh_nhan_nen_symlink', 'DICH_TINH = ("nen/BASELINE.json", "nen/COHORT.json", "nen/BAO_CAO.md", ', 'DICH_TINH = (', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_ke_hoach_bo_kiem_symlink', '            if os.path.islink(p):\n', '            if False:\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_ke_hoach_chi_kiem_la', '        p, ph = ra, pathlib.PurePosixPath(rel).parts\n', '        p, ph = ra / pathlib.PurePosixPath(rel).parent, (pathlib.PurePosixPath(rel).name,)\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_ke_hoach_bo_kiem_sai_loai', '            if os.path.lexists(p) and not (p.is_file() if i == len(ph) - 1 else p.is_dir()):\n', '            if False:\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_ra_la_tep_van_nhan', '    if os.path.lexists(ra) and not ra.is_dir():\n', '    if False:\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_bo_chong_lan_dau_vao', '        if p == ra or p in ra.parents or ra in p.parents:\n', '        if False:\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_chong_lan_bo_chieu_ra_chua_dau_vao', ' or p in ra.parents or ra in p.parents:\n', ' or p in ra.parents:\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_chong_lan_bo_chieu_ra_trong_dau_vao', '        if p == ra or p in ra.parents or ra', '        if p == ra or ra', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_bo_kiem_root', '    for q in (ROOT, *(', '    for q in (*(), *(', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_bo_goc_git_cua_nguon', '        for r in {q, goc_git(q)} - {None}:\n', '        for r in {q}:\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_xuat_kiem_ke_bo_nguon_kho', '        kiem_ke_hoach_ghi(ra, (), nguon=(ns.kho,))\n', '        kiem_ke_hoach_ghi(ra, ())\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_thu_kiem_sau_khi_dung_writer', '    try:                                                     # r7 F11: anh chup v2 RIENG, ngoai kho / --kho, kiem TRUOC khi dung bo ghi\n        kiem_ke_hoach_ghi(pathlib.Path(ns.ra).resolve(), DICH_THU, (ac,), (ns.kho,))\n    except GhiBiChan as e:\n        raise SystemExit(f"TU CHOI GHI: {e}") from e\n    try:\n        doc, _ = doc_anh_chup(ac)\n    except AnhChupHong as e:\n        raise SystemExit(f"anh chup #1434 khong dung duoc: {e}") from e\n    meta = json.loads((ac / "META.json").read_bytes())\n    t = g.Thu(ns.ra, ns.han_giay, ns.so_luong)\n', '    try:\n        doc, _ = doc_anh_chup(ac)\n    except AnhChupHong as e:\n        raise SystemExit(f"anh chup #1434 khong dung duoc: {e}") from e\n    meta = json.loads((ac / "META.json").read_bytes())\n    t = g.Thu(ns.ra, ns.han_giay, ns.so_luong)\n    try:                                                     # r7 F11: anh chup v2 RIENG, ngoai kho / --kho, kiem TRUOC khi dung bo ghi\n        kiem_ke_hoach_ghi(pathlib.Path(ns.ra).resolve(), DICH_THU, (ac,), (ns.kho,))\n    except GhiBiChan as e:\n        raise SystemExit(f"TU CHOI GHI: {e}") from e\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_thu_bo_nguon_kho', ' DICH_THU, (ac,), (ns.kho,))\n', ' DICH_THU, (ac,), ())\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_thu_bo_dau_vao_anh_chup', ' DICH_THU, (ac,), (ns.kho,))\n', ' DICH_THU, (), (ns.kho,))\n', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_tinh_bo_dau_vao_v2', '(ac, ns.anh_chup_v2, ns.kiem_ke, ns.cohort_goc)', '(ac, ns.kiem_ke, ns.cohort_goc)', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_tinh_bo_dau_vao_kiem_ke', '(ac, ns.anh_chup_v2, ns.kiem_ke, ns.cohort_goc)', '(ac, ns.anh_chup_v2, ns.cohort_goc)', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('ghi_tinh_bo_dau_vao_cohort', '(ac, ns.anh_chup_v2, ns.kiem_ke, ns.cohort_goc)', '(ac, ns.anh_chup_v2, ns.kiem_ke)', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    ('manifest_gom_truoc_khi_kiem', '    for m in tep:\n        dd = m.get("duong_dan")\n', '    for m in {x["khoa"]: x for x in tep}.values():\n        dd = m.get("duong_dan")\n', 'manifest_moi_muc_tho_truoc_khi_gom'),
+    ('manifest_lap_mau_thuan_lay_sau', '        if theo_khoa.setdefault(m["khoa"], m) != m:\n            hong.append(m["khoa"] + " (lap mau thuan)")\n', '        theo_khoa[m["khoa"]] = m\n', 'manifest_moi_muc_tho_truoc_khi_gom'),
+    ('manifest_khoa_json_lap_im_lang', '        tep = json_mot_nghia(f.read_bytes())["tep"]\n', '        tep = json.loads(f.read_bytes())["tep"]\n', 'manifest_moi_muc_tho_truoc_khi_gom'),
+    ('json_mot_nghia_nhan_khoa_lap', '            raise ValueError("object JSON co khoa lap")\n', '            pass\n', 'manifest_moi_muc_tho_truoc_khi_gom'),
+    ('manifest_bo_kiem_hinh_dang_muc', '        if not isinstance(tep, list) or not all(isinstance(m, dict) and isinstance(m.get("khoa"), str) for m in tep):\n', '        if False:\n', 'manifest_moi_muc_tho_truoc_khi_gom'),
+    ('manifest_duong_dan_khong_kiem_kieu', '            p = (ac / dd).resolve() if isinstance(dd, str) else ac\n', '            p = (ac / dd).resolve()\n', 'manifest_moi_muc_tho_truoc_khi_gom'),
+    ('tinh_anh_chup_1434_gom_khong_kiem', '        doc, _ = doc_anh_chup(ac)\n    except AnhChupHong as e:\n        print("ANH CHUP / KIEM KE HONG:"', '        doc = lambda k, _m={x["khoa"]: x for x in json.loads((ac / "MANIFEST.json").read_bytes())["tep"]}: (ac / _m[k]["duong_dan"]).read_bytes() if k in _m and _m[k].get("duong_dan") else None\n    except AnhChupHong as e:\n        print("ANH CHUP / KIEM KE HONG:"', 'manifest_moi_muc_tho_truoc_khi_gom'),
+    ('kk_khoa_json_lap_im_lang', '            kk = json_mot_nghia(tep.read_bytes())\n', '            kk = json.loads(tep.read_bytes())\n', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
+    ('bong_khoa_lap_lay_sau', '        if d.setdefault(k, v) != v:\n            return None\n', '        d[k] = v\n', 'bong_hai_bo_dem_tach_rieng'),
+    ('bong_khoa_lap_van_doc', '            if d is None:\n                kq[', '            if False:\n                kq[', 'bong_hai_bo_dem_tach_rieng'),
+    ('bn_khai_moi_tep_ke_ca_hong', '            if vt:\n', '            if True:\n', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
+    ('tinh_oracle_ba_oid_duoc_dung', '                if b and json.loads(b).get("phien_ban_oracle") != 2:', '                if False:', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_oracle_v2_bi_bo', '                if b and json.loads(b).get("phien_ban_oracle") != 2:', '                if True:', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_bo_oracle_khi_co_v2', '            if doc2:\n', '            if False:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_doc_oracle_khi_khong_v2', '            if doc2:\n', '            if True:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_bo_buoc_gate', '                if m["loai_dong"] == g.THUC_THI and m["ten_goc"] in JOB_BUOC_V2:\n', '                if False:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_buoc_moi_job', '                if m["loai_dong"] == g.THUC_THI and m["ten_goc"] in JOB_BUOC_V2:\n', '                if True:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_bo_cohort_goc', '    if ns.cohort_goc:\n', '    if False:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_khong_do_khong_ly_do', '        if ly:\n            khong_do.append(', '        if True:\n            khong_do.append(', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_bo_danh_sach_artifact', '            if doc2 and f"arts/{rid}/p1" in theo_khoa2:\n', '            if False:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_bien_nhan_vang_van_ghi', '                if nd is not None:\n                    bn[k] = nd\n', '                if True:\n                    bn[k] = nd\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_g4_moi_su_kien', '        if l["su_kien"] == "pull_request":\n            oracle = None\n', '        if True:\n            oracle = None\n', 'thu_roi_tinh_khong_goi_git_va_pull_request_du_hoan_tat'),
+    ('tinh_bo_packet_loop', '    if doc2 and "list/pl/p1" in theo_khoa2:\n', '    if False:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_packet_loop_khong_v2', '    if doc2 and "list/pl/p1" in theo_khoa2:\n', '    if True:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('tinh_v2_vang_van_doc', '        if ns.anh_chup_v2:\n', '        if True:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('luot_bo_danh_sach_artifact', '    if artifact is not None:\n', '    if False:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('luot_ten_artifact_khong_doc', '            if isinstance(ten, str) and ten.startswith(TEN_ART_MANH) and ten[len(TEN_ART_MANH):].isdigit():\n', '            if False:\n', 'tinh_dau_cuoi_oracle_v2_buoc_gate_artifact_cohort'),
+    ('thu_bo_oracle_khi_co_kho', '        if pl:\n            oracle.append(', '        if False:\n            oracle.append(', 'thu_roi_tinh_khong_goi_git_va_pull_request_du_hoan_tat'),
+    ('oracle_bo_kiem_dang_oid', '    if not all(isinstance(x, str) and RE_OID.fullmatch(x) for x in (goc_su_kien, dau, hop)):\n', '    if False:\n', 'oracle_moi_chot_fail_close_git_gia'),
+    ('oracle_rev_list_khong_doi_chieu_hop', '        if not k or k.group(1).decode("ascii") != hop:\n', '        if not k:\n', 'oracle_moi_chot_fail_close_git_gia'),
+    ('oracle_nhan_nhieu_merge_base', '        if rc != 0 or not re.fullmatch(rb"[0-9a-f]{40}\\n", mb):\n', '        if rc != 0:\n', 'oracle_moi_chot_fail_close_git_gia'),
+    ('oracle_nhan_merge_tree_hong', '        if rc != 0 or not re.fullmatch(rb"[0-9a-f]{40}\\n", cay):\n', '        if rc != 0:\n', 'oracle_moi_chot_fail_close_git_gia'),
+    ('oracle_nhan_diff_khong_nul', '            if rc != 0 or muc[-1] != "" or len(muc) % 2 != 1:\n', '            if rc != 0:\n', 'oracle_moi_chot_fail_close_git_gia'),
+    ('oracle_nhan_ban_ghi_la', '        if not m:\n            return KHONG_DO_DUOC\n        cu, moi, tt', '        if False:\n            return KHONG_DO_DUOC\n        cu, moi, tt', 'oracle_moi_chot_fail_close_git_gia'),
+    ('oracle_bo_ma_cap_nong', '        if len(tp) == 3 and tp[2].lower().endswith(DUOI_MA_CAP_NONG):\n', '        if False:\n', 'oracle_moi_chot_fail_close_git_gia'),
+    ('oracle_bo_mode_thuc_thi', '        if moi in MODE_VE_DAY_DU or (cu != "000000" and moi != "000000" and cu != moi):\n', '        if False:\n', 'oracle_moi_chot_fail_close_git_gia'),
+    ('oracle_bo_sua_dac_ta', '        if duong.startswith("ops/specs/") and tt in ("M", "D", "T"):\n', '        if False:\n', 'oracle_moi_chot_fail_close_git_gia'),
 )
 
 

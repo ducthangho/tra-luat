@@ -328,3 +328,97 @@ executor.
 
 Hai neo `wp858_sh_nuot_loi_cygpath_w` và `wp858_sh_github_path_khong_qua_cygpath` dời theo dòng `cygpath -w` mới. Bảng `cai_sh`
 (mọi packet): 96/96.
+
+## Lượt 5 — Codex (OpenAI), `codex_cli`, read-only · lời gọi 5/5 (hết trần cả packet) · đặc tả r4, chỉ xét delta r4
+
+- Exact head được review: `7b35edcc8cfbb562ef2cfad6edee5a9c3db22d6b` (mã trùng `ab83dd3`). Chạy 2026-11-21T13:59:36Z → 14:04:03Z, rc 0.
+- sha256 `scratch/VERDICT.md`: `7d5bc9bc14f540bccef7c26a2c235c8534938a80841d2e4fa3726afbd5ff4b2e`.
+- Kết luận: `request_changes` (1 P2, 2 P3).
+
+### Nguyên văn
+
+> reviewed_sha: 7b35edcc8cfbb562ef2cfad6edee5a9c3db22d6b
+> verdict: request_changes
+> reviewer: codex (OpenAI), codex_cli, read-only
+> reviewed_tree: 605ac8b0256a5811b36653f6c18ef6038b1e9b29
+>
+> # Packet #1488 r4 · lượt 5
+>
+> HEAD khớp `HEAD_SHA.txt`, worktree sạch trước và sau review. SHA-256 của spec là `a4888c7e5aae5cf1057cd93db754a1e16acacf52e841fb7398d35afc0454d1ad`, khớp yêu cầu và lease revision 4 generation 4. So với mã `ab83dd3638ae0bc8a6f2aec35ae789c06dd7c66f` trong §9, HEAD chỉ đổi `RESULTS.md`. Phép đo chạy trong clone dưới `scratch/`, với Linux, Bash 5.2.21, Python 3.13.18 và `cygpath` giả.
+>
+> ## Findings
+>
+> - **P2 — Kênh sai dạng kích hoạt nhánh Windows.** Tại `ops/cai_cong_cu.sh:243`, Bash bỏ byte NUL trong command substitution. Công thức thử ghi các byte `DICH_WIN\x00\n<dir POSIX tốt>` rồi trả 0. r4 cảnh báo `ignored null byte in input`, nhưng gọi `cygpath -w`, ghi một dòng `W:<dir>`, dùng PATH đã chọn và trả 0. Cùng đầu vào trên r3 trả 7 và giữ tệp đích rỗng. Theo B5, nhãn hỏng phải trả 7. Kiểm tra byte ngay trong lần đọc duy nhất, trước khi chuyển dữ liệu vào biến Bash, giữ nguyên xử lý lỗi đọc và LF cuối. Thêm ca ghi nhãn có NUL, đòi rc 7, tệp rỗng và log `cygpath` rỗng. Probe `bad-nul-tag` đã đỏ trên HEAD.
+> - **P3 — Các ca r4 bỏ lọt nhãn sai gần với nhãn hợp lệ.** Tại `.claude/dev/launcher_test.py:12197` và `:12797`, ca hành vi (N) dùng kênh hợp lệ và ca hình dạng chỉ tìm nhánh hợp lệ. Đột biến riêng thêm `DICH_WINx*) DICH="" ;;` sau nhánh PATH hợp lệ sống qua cả bốn ca đích. Với kênh `DICH_WINx\n<dir>`, HEAD trả 7, đột biến đi tới hậu kiểm và trả 3. Thêm ca ghi trực tiếp nhãn có hậu tố và nhãn thiếu payload, chốt rc 7, chẩn đoán kênh hỏng, tệp rỗng và không có lần gọi đổi đường dẫn. Probe `bad-prefix` đã xanh trên HEAD và đỏ trên bản đột biến.
+> - **P3 — Hai dòng trong bảng đột biến §9 ghi nhầm assertion đầu tiên.** Tại `ops/acceptance/wp1488/RESULTS.md:170` và `:173`, `wp1488_sh_bo_chon_luon_dich` và `wp1488_sh_dich_win_khong_doi` được ghi chết ở (W-rong). Chạy từng đột biến trên mã tương đương cho thấy cả hai chết ở (I-win), trước (W-rong), với rc 0 và hai dòng trong tệp đích. Đột biến thứ hai cũng chết ở ca Windows riêng như lời khai. Sửa bảng theo kết quả của các lượt chạy riêng có in nội dung `TinHieuChotCa`.
+>
+> ## Đối chiếu B1, B2, B5
+>
+> - Bộ chọn đánh dấu theo đối số đầu đã phân tích của lần gọi thực. Khi tên trần đã DAT, `GIU_PATH` vẫn được ghi. Probe với hai lần gọi liên tiếp theo cả hai thứ tự xác nhận lần ghi cuối quyết định chế độ. Công thức tự ghi đè kênh theo cả hai chiều cũng cho kết quả theo nhãn cuối. Vì công thức có quyền ghi kênh, nó có thể tự khai `DICH_WIN` dù không hề gọi bộ chọn với `--win`. Đây là hệ quả của B2 lấy chính nội dung cuối làm nguồn cho cả hai nhánh. Hai probe đổi chế độ giữa lần thử thất bại và lần #1479 thành công đều lấy kết quả của lần thành công.
+> - Kênh được đọc sau retry, khi `RC_CAI=0`. Hai mẫu `DICH` và `DICH_WIN` đòi LF ngay sau nhãn và payload có ít nhất một ký tự. `DICH_WINx` và `DICH_WIN` thiếu payload trả 7 trong probe. `GIU_PATH` không ghi và giữ PATH. Kênh rỗng dùng dòng cuối stdout, không ghi. Nhánh `DICH_WIN` dùng đường POSIX cho PATH nội bộ và đường đã đổi cho tệp đích. Ngoại lệ với byte NUL nêu ở P2.
+> - Hàm ghi dùng hai đối số, `GITHUB_PATH` và lệnh `cygpath` tra qua PATH. Hàm không đọc `LENH`. Tệp đích rỗng/vắng làm hàm trả 0 trước khi đổi đường dẫn. Khi đổi lỗi, nhánh Windows đặt `RC_CAI=1`. (I-win) đã đo lượt `source` của công cụ tùy chọn đi tiếp. Ca Windows riêng đo lỗi khi gọi trực tiếp. Việc gỡ export và dọn thư mục vẫn qua các chốt cũ.
+> - (N) chốt byte chính xác và JSON DAT. Fixture dùng thư mục POSIX và `cygpath` giả là nơi duy nhất trong công thức thử sinh ra `W:`. Probe ghi log xác nhận hai ca dương gọi đúng `-u` rồi `-w`, hai ca âm không gọi. (I-win) chốt chẩn đoán từ nhánh lỗi, thông báo đi tiếp và đúng một dòng của công cụ bắt buộc. Probe độc lập còn xác nhận hai lời gọi đều nhận thư mục của công cụ tùy chọn và lời gọi `-w` giả trả 37.
+> - Năm đột biến r4 có chốt cho phát nhãn, bỏ suy từ văn bản, nhận nhãn trong PATH, truyền chế độ đổi và truyền lỗi. Chưa có đột biến riêng cho ranh giới nhãn hỏng, hai lần gọi trái chế độ, công thức ghi đè nhãn Windows, thay đổi chế độ giữa các retry, hay nhánh `DICH_WIN` khi vắng `GITHUB_PATH`. Chốt hình dạng đếm đúng một dòng `cat -- "$KENH_KQ"`, nhưng K3 đo lượt thành công POSIX. Đếm bằng stub trong một ca thành công `DICH_WIN` sẽ phủ lượt đọc phụ chỉ xảy ra ở nhánh mới.
+>
+> ## Lệnh và mã thoát
+>
+> Các lệnh clone, `git -C repo rev-parse HEAD`, `git -C repo status --porcelain`, `sha256sum repo/ops/specs/wp1488-r4.md`, `git -C repo rev-parse 'HEAD^{tree}'`, `git -C repo diff 7a8823b..HEAD -- ops/cai_cong_cu.sh .claude/dev/launcher_test.py`, `git -C repo diff --check 7a8823b..HEAD` và `git -C repo diff --exit-code ab83dd3 HEAD -- ops/cai_cong_cu.sh .claude/dev/launcher_test.py` đều rc 0. Clone bằng `git clone --no-hardlinks repo scratch/clone`. Các phép thử dùng thư mục tạm dưới `scratch/`.
+>
+> | Lệnh trong `scratch/clone` | rc | Kết quả |
+> |---|---:|---|
+> | `python .claude/dev/launcher_test.py --lap-ca r1488_github_path_chi_ghi_khi_thanh_cong --lan 2` | 0 | 2/2, 0 bỏ qua |
+> | `python .claude/dev/launcher_test.py --lap-ca r858_hinh_dang_cong_thuc_cai --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r868_hinh_dang_kenh_ket_qua --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r868_ghi_kenh_hong_thi_dung --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r858_cai_windows_chon_ban_chay_duoc --lan 1` | 0 | 1/1 |
+> | `python .claude/dev/launcher_test.py --lap-ca r868_kenh_rieng_khong_doc_stdout_trinh_cai --lan 1` | 0 | 1/1 |
+> | `bash -n ops/cai_cong_cu.sh` | 0 | Cú pháp đạt |
+> | `python .claude/dev/packet_loop.py doctrine-scan --root .` | 0 | 12 tệp, 0 chỗ chép doctrine |
+>
+> `python scratch/review_mutants.py` và `python scratch/review_mutants.py --detail` gọi harness một lần cho từng đột biến, mỗi lần chọn đúng một mục `DOT_BIEN_HOOK`. Wrapper chỉ ghi kết quả và trả rc 0. Số giết bên dưới do harness phân loại theo `TinHieuChotCa`.
+>
+> | Đột biến | Giết | Assertion đầu tiên đo được |
+> |---|---:|---|
+> | `wp1488_sh_bo_chon_luon_dich` | 1/1 | (I-win), §9 ghi (W-rong) |
+> | `wp1488_sh_quyet_theo_lenh` | 1/1 | (N-nhay) |
+> | `wp1488_sh_path_bo_nhanh_dich_win` | 2/2 | (N-nhay) và ca Windows riêng, đều rc 7 |
+> | `wp1488_sh_dich_win_khong_doi` | 2/2 | (I-win), §9 ghi (W-rong), và ca Windows riêng |
+> | `wp1488_sh_dich_win_loi_khong_dat_rc` | 1/1 | (I-win), rc 1 và tệp rỗng |
+> | `wp868_sh_ham_in_stdout_thay_kenh` | 2/2 | ca hình dạng và writer muộn không tới điểm đánh dấu vì không có dòng GITHUB_PATH |
+> | `wp868_sh_ghi_dich_nuot_loi` | 2/2 | ca ghi kênh lỗi (nhãn DICH) và ca hình dạng |
+> | `wp1488_sh_bo_chon_ghi_thang` | 1/1 | (A) |
+> | `wp1488_sh_chep_loi_khong_dat_rc` | 1/1 | (I) |
+> | `wp1488_sh_chep_loi_thoat_ngay` | 1/1 | (I) |
+> | `wp1488_sh_doc_kenh_rieng_truoc` | 1/1 | (L-LF) |
+> | `review_accept_dich_winx` | 0/4 | Đột biến reviewer sống |
+>
+> | Phép đo bổ sung từ thư mục workspace | rc | Kết quả |
+> |---|---:|---|
+> | `python scratch/review_probes.py` | 1 | 13/14 kỳ vọng đạt, đỏ ở `bad-nul-tag` |
+> | `REVIEW_R3=1 python scratch/review_probes.py N-nhay N-tab N-data N-dead` | 1 | r3 sai cả bốn như §9, r4 đạt cả bốn |
+> | `REVIEW_R3=1 python scratch/review_probes.py bad-nul-tag` | 0 | script r3 trả 7, tệp đích rỗng |
+> | Gọi ca r1488 hiện hành qua `python -` với `CAI_SH_DANG_DUNG` trỏ script r3 lấy bằng `git show` | 1 | `TinHieuChotCa` tại (N-nhay), khớp §9 |
+> | `REVIEW_MUTANT=1 python scratch/review_probes.py bad-prefix` | 1 | đột biến riêng trả 3 thay vì 7 |
+> | `python scratch/review_iwin.py` | 0 | xác nhận độc lập (I-win) |
+> | `ruff check --no-cache --select F --output-format concise <launcher_test.py>` trên từng vế | 1 mỗi vế | 5 F841 trên mỗi vế, delta 0 như §9 |
+> | `shellcheck <cai_cong_cu.sh>` trên từng vế | 1 mỗi vế | 1 SC1090 trên mỗi vế, delta 0 như §9 |
+> | `test ! -e /tmp/.git` | 1 | Môi trường reviewer có `/tmp/.git` |
+>
+> ## Chưa đo
+>
+> Chưa tái chạy toàn bộ suite hai vế `453/453` (455 đăng ký, 2 bỏ qua), toàn bộ mutation `798/798 → 803/803` (7 không đo được mỗi vế), hoặc xác minh danh tính các ca bỏ qua và các đột biến không đo được. Delta +5 mục đột biến đối chiếu được từ diff. Phép đo này chỉ chạy lại 5 mục mới và 6 mục đổi neo, nên lời khai về toàn bộ các đột biến r1–r3 ngoài tập đó, thời gian chạy và delta hồi quy toàn suite vẫn chưa được xác nhận độc lập. Fixture trung gian trước khi có (I-win) và CI PR chưa được đo. Kiểm tra Windows dùng stub trên Linux. Log và mã probe nằm trong `scratch/`.
+
+### Executor đo lại P2 (trước Review Rescue Checkpoint)
+
+Cùng fixture `_wp868_chay`, công thức tự ghi kênh `<nhãn>\0\n<dir>`; chỉ đổi `ops/cai_cong_cu.sh`:
+
+| Script | `DICH\0` | `DICH_WIN\0` |
+|---|---|---|
+| `8656dc0` (base) | rc 0, nhận `DICH` (base ghi `$GITHUB_PATH` trong bộ chọn nên tệp rỗng) | rc 7 (nhãn lạ) |
+| `7a8823b` (r3) | rc 0, tệp = `<dir>` | rc 7 (nhãn lạ) |
+| `ab83dd3` (r4) | rc 0, tệp = `<dir>` | rc 0, tệp = `W:<dir>` |
+
+Cả ba vế đều in cảnh báo `ignored null byte`. Nghĩa là: Bash bỏ NUL khi đọc kênh là lớp có từ wp868 (base nhận `DICH\0\n…`);
+r4 không tạo lớp ấy mà mở nó sang nhãn mới. Chỉ công thức tự ghi byte NUL vào kênh mới chạm tới; công thức nằm trong
+`ops/cong_cu.yaml` của kho. P3 thứ hai đúng: bảng đột biến §9 đo TRƯỚC khi thêm (I-win), mà (I-win) đứng trước (W) nên
+nay chết ở (I-win).

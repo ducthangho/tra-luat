@@ -12,6 +12,8 @@ generation: 1
 lease_id: wp1236-a-r10-g1-claude-20261121
 thay_the_cho:
 - wp1236-a-r9-g1-claude-20261120
+da_bi_thay_the: wp1236-a-r11-g1-claude-20261121
+da_bi_thay_the_ghi_chu: 'dac ta r11 (sha 30386131, chu kho duyet issuecomment-7058143773) thay r10; lease nay CON HAN toi 2026-11-23T00:15Z nen phai co bia mo hai chieu (CLAUDE.md 28-08)'
 thay_the_cho_ghi_chu: 'lease r9 (con han toi 2026-11-22T15:35Z) mang bia mo da_bi_thay_the tro sang lease nay (ops/wp1236-r9-a-lease @0ea857e); hai chieu'
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7053833153

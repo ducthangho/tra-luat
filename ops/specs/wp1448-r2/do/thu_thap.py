@@ -109,6 +109,7 @@ CHE_DO_G5 = ("du", "dich")
 BN_HOP_LE, BN_HONG, BN_THIEU = "hop_le", "khong_hop_le", "thieu"                    # + KHONG_DO_DUOC: ba trang thai + thieu
 SU_KIEN_HEAD_LUOT = ("push", "workflow_dispatch", "schedule")                   # su kien ma `github.sha` la CHINH head cua luot
 RE_SHA256 = re.compile(r"[0-9a-f]{64}")
+TRAN_ATTEMPT = 50                                                               # GitHub cho chay lai mot luot toi da 50 lan: ban ghi attempt CO TRAN
 
 
 def nap_goc():
@@ -214,8 +215,16 @@ def trich_g5(van_ban):
 
 
 def so_do(x):
-    """So dung duoc lam PHEP DO: int/float (khong bool), HUU HAN, KHONG AM. NaN, vo cung, so am, chuoi => False."""
-    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x) and x >= 0
+    """So dung duoc lam PHEP DO: int/float (khong bool), HUU HAN, KHONG AM; khac => False. TOAN PHAN (review 4 F6): so nguyen qua lon => False."""
+    try:
+        return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(float(x)) and x >= 0
+    except OverflowError:
+        return False
+
+
+def so_lan(x):
+    """`run_attempt` -> so nguyen 1..`TRAN_ATTEMPT` | None (chuoi, bool, float, ngoai tran: khong nem, khong doan); vang / null => 1 (nhu #1434)."""
+    return 1 if x is None else (x if type(x) is int and 1 <= x <= TRAN_ATTEMPT else None)
 
 
 def khoang_do(b):
@@ -425,16 +434,18 @@ def kiem_cau_truc(nd, k):
 
 
 def doi_chieu_head(h, head_run, su_kien, hop=None, cmt=None):
-    """TANG 3 — head ma bien nhan KHAI co phai commit luot nay da checkout: True | False | None (khong do duoc, khong doan).
-    Co merge ref `hop` cua dong bong (`github.sha` cua chinh luot): phai BANG no. Khong co: luot `pull_request` checkout commit MERGE, nen head
-    khai phai la commit co DUNG hai cha va cha hai = head cua luot (`cmt`, REST; chua co => None); luot `SU_KIEN_HEAD_LUOT` checkout chinh
-    head cua luot, nen phai BANG no (khong ep luat cha-merge cua PR len push/dispatch). Su kien khac => None."""
-    if hop:
-        return h == hop
-    if su_kien == "pull_request":
-        cha = (cmt or {}).get(h)
-        return (len(cha) == 2 and cha[1] == head_run) if isinstance(cha, list) else None
-    return h == head_run if su_kien in SU_KIEN_HEAD_LUOT else None
+    """TANG 3 — head bien nhan KHAI co phai commit luot nay da checkout: True | False | None (khong do duoc). Review 4 F1: KHONG nguon nao la
+    tham quyen mot minh — MOI bang chung doc lap CO SAN bo mot phieu: `hop` cua dong bong (`github.sha`; `False` = dong bong mau thuan voi luot,
+    xem `dung_luot`): h == hop; luot `SU_KIEN_HEAD_LUOT`: h == head luot (khong ep luat cha-merge len push/dispatch); `pull_request` (checkout
+    commit MERGE): cha REST cua h DUNG hai, cha hai = head luot. Mot phieu `False` o BAT KY dau => False; khong phieu nao => None; con lai True."""
+    co_run = isinstance(head_run, str) and RE_OID.fullmatch(head_run) is not None
+    phieu = [] if hop is None else [hop is not False and h == hop]
+    if su_kien in SU_KIEN_HEAD_LUOT and co_run:
+        phieu.append(h == head_run)
+    cha = (cmt or {}).get(h) if su_kien == "pull_request" else None
+    if isinstance(cha, list) and (co_run or len(cha) != 2):          # so cha sai la mau thuan ke ca khi chua biet head luot
+        phieu.append(len(cha) == 2 and cha[1] == head_run)
+    return False if False in phieu else (True if phieu else None)
 
 
 def kiem_bien_nhan(nd, k, head_run, su_kien, hop=None, cmt=None, cac_kiem_ke=()):
@@ -476,7 +487,7 @@ def bien_nhan_luot(manh_job, artifact, noi_dung, head_run, hop=None, cmt=None, c
     for k in range(SO_MANH_G5):
         d, nd = manh_job.get(k), (noi_dung or {}).get(k)
         art = None if artifact is None else artifact.get(k, "vang")
-        if d is not None and d.get("head_sha") not in (None, head_run):
+        if d is not None and head_run is not None and d.get("head_sha") not in (None, head_run):
             tt[k], ly[k] = BN_HONG, "job_mang_head_khac_luot"
         elif isinstance(nd, (bytes, bytearray)):
             tt[k], ly[k], vt = kiem_bien_nhan(nd, k, head_run, su_kien, hop, cmt, cac_kiem_ke)
@@ -510,10 +521,10 @@ def dung_luot(run, dong, log=None, artifact=None, bien_nhan=None, cmt=None, kiem
     `kiem_ke` (kiem ke them ngoai kiem ke cua cay nay).
     Dong cua attempt cuoi duoc uu tien; job khong chay lai o attempt cuoi lay dong moi nhat cua no (mang sang)."""
     log = log or {}
-    so_att = int(run.get("run_attempt") or 1)
+    so_att = so_lan(run.get("run_attempt"))
     moi_nhat = {}
-    for d in sorted(dong, key=lambda d: (int(d.get("run_attempt") or 1), d.get("job_id") or 0)):
-        if int(d.get("run_attempt") or 1) <= so_att:
+    for d in sorted(dong, key=lambda d: (so_lan(d.get("run_attempt")) or 0, d.get("job_id") or 0)):
+        if so_att and (so_lan(d.get("run_attempt")) or so_att + 1) <= so_att:      # attempt khong hop le: khong bao gio la dong moi nhat
             moi_nhat[d.get("ten")] = d
     cb = next((d for t, d in moi_nhat.items() if t == JOB_CHUAN_BI), None)
     gom = next((d for t, d in moi_nhat.items() if (t or "").startswith(JOB_GOM + " (ubuntu-latest")), None)
@@ -536,6 +547,8 @@ def dung_luot(run, dong, log=None, artifact=None, bien_nhan=None, cmt=None, kiem
                 k = int(ten[len(TEN_ART_MANH):])
                 art[k] = "co" if not het or art.get(k) == "co" else "het_han"
     hop = pl.get("hop") if isinstance(pl.get("hop"), str) and RE_OID.fullmatch(pl.get("hop")) else None
+    if RE_OID.fullmatch(str(pl.get("dau"))) and RE_OID.fullmatch(str(head)) and pl["dau"] != head:
+        hop = False                                         # review 4 F1: dong bong khai head KHAC luot => mau thuan DA BIET, phu quyet
     bn = bien_nhan_luot(manh, art, bien_nhan, head, hop, cmt, kiem_ke, run.get("event"))
     return {"run_id": run.get("id"), "attempt": so_att, "su_kien": run.get("event"), "head": head, "ket_luan": run.get("conclusion"),
             "chuan_bi": cb.get("ket_luan") if cb else None, "co_log_chuan_bi": isinstance(log.get("chuan_bi"), str),
@@ -831,6 +844,24 @@ def s6_khong_cay_song():
     return {"tap_duong_dan": [], "ci_duong_nhanh": ly, "tim": ly}
 
 
+def phan_loai_luot(g, r, nguon, dong_tho):
+    """(`tinh_luot` cua #1434 | None, ly do thoi gian G5 cua CA luot khong do duoc | None) — chung cho `--thu` (chon log manh) va `--tinh` (review 4
+    F6). Attempt doc duoi CHINH khoa `att/<id>/<k>` ma `--thu` ghi; `run_attempt` sai, attempt thieu, dong job sai kieu => ly do NEU TEN, khong nem."""
+    n = so_lan(r.get("run_attempt"))
+    if n is None:
+        return None, f"run_attempt khong phai so nguyen 1..{TRAN_ATTEMPT}: {r.get('run_attempt')!r}"
+    tao = {1: r.get("created_at")}
+    for k in range(1, n + 1) if n > 1 else ():
+        d = json.loads(nguon(f"att/{r['id']}/{k}") or b"null")
+        tao[k] = d.get("created_at") if isinstance(d, dict) else None
+    try:
+        lu = g.tinh_luot(r, tao, dong_tho)
+    except (ValueError, TypeError, OverflowError, AttributeError) as e:
+        return None, f"dong job cua luot khong phan loai duoc ({type(e).__name__})"
+    return lu, (f"thieu ban ghi attempt {thieu} cua luot: khong tach duoc dong thuc thi / mang sang"
+                if (thieu := [k for k, v in tao.items() if v is None and n > 1]) else None)
+
+
 def lenh_tinh(ns):
     with cam_git() as goi:
         return _tinh(ns, goi)
@@ -892,17 +923,15 @@ def _tinh(ns, goi):
     # `--thu` da thu rieng `run/<id>` + `jobs/<id>` vao anh chup v2. Chung CHI vao phan thoi gian G5, khong vao G4 / bong / thoi gian buoc.
     chon = [x for x in (json.loads(doc2("META") or b"{}").get("run_g5") or [] if doc2 else []) if type(x) is int]
     ngoai = [json.loads(doc2(f"run/{x}")) for x in chon if x not in {r["id"] for r in co_ci} and doc2(f"run/{x}")]
+    ly_luot = {}                                            # rid -> ly do thoi gian G5 cua CA luot khong do duoc (review 4 F6)
     for r, nguon in [(r, doc) for r in co_ci] + [(r, doc2) for r in ngoai]:
-        rid, n = r["id"], int(r.get("run_attempt") or 1)
-        dong_tho, du, _, ly = g.chon_chuoi_trang(nguon, f"jobs/{rid}")
-        if not du:
-            khong_do.append({"doi_tuong": f"jobs cua luot {rid}", "ly_do": ly})
+        rid, (dong_tho, du, _, ly) = r["id"], g.chon_chuoi_trang(nguon, f"jobs/{r['id']}")
+        lu, ly = phan_loai_luot(g, r, nguon, dong_tho) if du else (None, ly or "danh sach job khong du")
+        if ly:
+            ly_luot[rid] = ly
+            khong_do.append({"doi_tuong": f"luot {rid}", "ly_do": ly})
+        if lu is None:
             continue
-        tao = {1: r.get("created_at")} if n == 1 else {}
-        for k in range(1, n + 1) if n > 1 else ():
-            b = nguon(f"att/{rid}/{k}")
-            tao[k] = json.loads(b).get("created_at") if b else None
-        lu = g.tinh_luot(r, tao, dong_tho)
         dong = [{"ten": m["ten"], "ket_luan": m["ket_luan"], "run_attempt": m["run_attempt"], "job_id": m["job_id"],
                  "head_sha": m["_tho"].get("head_sha")} for m in lu["dong"]]
         cb = [m for m in lu["dong"] if m["ten_goc"] == JOB_CHUAN_BI]
@@ -934,7 +963,7 @@ def _tinh(ns, goi):
             # MOI manh co log DA THU (`--run-g5`) deu vao bao cao — ke ca log khong con dong `G5_THOI_GIAN` nao hay log khong lay duoc;
             # attempt MOI NHAT cua tung manh. Mau so = dinh danh mong doi theo kiem ke cua CHINH luot (bo bien nhan `hop_le` cua no, moi
             # su kien); luot chua co kiem ke thi manh `khong_do_duoc` va `ly_do_kiem_ke` neu trang thai tung bien nhan.
-            if (doc2 and m["loai_dong"] == g.THUC_THI and k is not None and f"log/{m['job_id']}" in theo_khoa2
+            if (doc2 and m["loai_dong"] == g.THUC_THI and k is not None and f"log/{m['job_id']}" in theo_khoa2 and rid not in ly_luot
                     and (m["run_attempt"], m["job_id"]) >= g5.get((rid, k), {}).get("_moi", (0, 0))):
                 vb = van_ban(f"log/{m['job_id']}", doc2)
                 b_g5 = next((g.thoi_luong_buoc(b) for b in m["_tho"].get("steps") or [] if str(b.get("name", "")).startswith("G5 manh")), None)
@@ -986,8 +1015,8 @@ def _tinh(ns, goi):
                    "bo_dem_pull_request": bo_dem},
           "thoi_gian_buoc_gate_gate_ops": {k: dict(g.thong_ke(o["v"], o["loai"]), so_khong_ap_dung=o["kad"]) for k, o in sorted(buoc.items())},
           "g5_thoi_gian": ({"so_manh_co_log": len(g5), "manh": [{k: v for k, v in g5[x].items() if k != "_moi"} for x in sorted(g5)],
-                            "theo_luot": {str(rid): (tong_hop_g5_luot([m for (r_, _), m in sorted(g5.items()) if r_ == rid]) if rid in {x[0] for x in g5}
-                                                     else kdd("luot duoc chon (--run-g5) nhung anh chup v2 khong co log manh nao cua no"))
+                            "theo_luot": {str(rid): (kdd(ly_luot[rid]) if rid in ly_luot else tong_hop_g5_luot([m for (r_, _), m in sorted(g5.items()) if r_ == rid])
+                                                     if rid in {x[0] for x in g5} else kdd("luot duoc chon (--run-g5) nhung anh chup v2 khong co log manh nao cua no"))
                                           for rid in sorted({x[0] for x in g5} | set(chon))}}
                            if doc2 else kdd("chua thu log manh G5 (--thu --run-g5 …)")),
           "packet_loop_dot_bien": pl, "khong_do_duoc": khong_do, "luot": luot}
@@ -1004,10 +1033,8 @@ def _tinh(ns, goi):
 
 
 def dem(ds):
-    kq = {}
-    for x in ds:
-        kq[str(x)] = kq.get(str(x), 0) + 1
-    return dict(sorted(kq.items()))
+    s = [str(x) for x in ds]
+    return {k: s.count(k) for k in sorted(set(s))}
 
 
 def bao_cao(v2):
@@ -1081,7 +1108,7 @@ def lenh_thu(ns, g=None):
     t = g.Thu(ns.ra, ns.han_giay, ns.so_luong)
     if t.ra == ac or ac in t.ra.parents:
         raise SystemExit("anh chup v2 phai la thu muc RIENG, khong nam trong anh chup #1434")
-    run_g5 = sorted({int(x) for x in (ns.run_g5 or "").split(",") if x.strip().isdigit()})
+    run_g5 = sorted({int(x) for x in (ns.run_g5 or "").split(",") if x.strip().isdecimal()})
     g.ghi_tep(t.ra, "META.json", xuat_json({"packet": "wp1448", "revision": 2, "run_g5": run_g5,
                                             "anh_chup_goc": {k: meta.get(k) for k in ("T0", "T1", "sha_master")}}))
     ds_ci = []
@@ -1094,8 +1121,11 @@ def lenh_thu(ns, g=None):
         return (t.ra / t.muc[k]["duong_dan"]).read_bytes() if k in t.muc and t.muc[k].get("duong_dan") else None
     ngoai = [x for x in run_g5 if x not in {r["id"] for r in co_ci}]      # duoc chon ma ngoai cohort #1434 (vd workflow_dispatch): thu chinh luot ay
     for x in ngoai:
-        t.lay(f"run/{x}", f"actions/runs/{x}", f"run/{x}.json", "run")
+        d = t.doc(t.lay(f"run/{x}", f"actions/runs/{x}", f"run/{x}.json", "run"))
         t.trang(f"jobs/{x}", f"actions/runs/{x}/jobs?filter=all", f"jobs/{x}", "jobs", "jobs")
+        n = so_lan(d.get("run_attempt")) if isinstance(d, dict) else None    # review 4 F6: ban ghi attempt ma `--tinh` can, co tran
+        for k in range(1, n + 1) if n and n > 1 else ():
+            t.lay(f"att/{x}/{k}", f"actions/runs/{x}/attempts/{k}", f"att/{x}/{k}.json", "attempt")
     viec, oracle, co_bn = [], [], []
     for r, nguon in [(r, doc) for r in co_ci] + [(json.loads(doc_t(f"run/{x}")), doc_t) for x in ngoai if doc_t(f"run/{x}")]:
         rid = r["id"]
@@ -1103,8 +1133,11 @@ def lenh_thu(ns, g=None):
         if not du:
             continue
         cuoi = {}
-        for d in sorted(dong, key=lambda d: (int(d.get("run_attempt") or 1), d.get("id") or 0)):
+        for d in sorted(dong, key=lambda d: (so_lan(d.get("run_attempt")) or 0, d.get("id") or 0)):
             cuoi[d.get("name")] = d
+        # review 4 F6: log manh = dong THUC_THI MOI NHAT theo CHINH phep phan loai `--tinh` doc (ban mang sang co id moi, khong mang log that)
+        lu = phan_loai_luot(g, r, nguon, dong)[0] if rid in run_g5 else None
+        cuoi.update({m["ten"]: m["_tho"] for m in (lu or {}).get("dong", ()) if m["loai_dong"] == g.THUC_THI and chi_so_manh(m["ten"]) is not None})
         kh = ke_hoach_thu(r.get("event"), cuoi, rid in run_g5, bool(ns.kho) and nguon is doc)
         viec += [lambda j=j: t.lay(f"log/{j}", f"actions/jobs/{j}/logs", f"log/{j}.log", "log") for j in kh["log"]]
         b = doc(f"log/{kh['oracle']}") if kh["oracle"] else None
@@ -1141,6 +1174,13 @@ class TuKiemDo(AssertionError):
 def bang(dieu_kien, nhan):
     if not dieu_kien:
         raise TuKiemDo(nhan)
+
+
+def khong_nem(f):                                    # phep TOAN PHAN (review 4 F6): DUNG hai loi doi so khong an toan -> `TuKiemDo`
+    try:
+        return f()
+    except (OverflowError, ValueError) as e:
+        raise TuKiemDo(f"nem {type(e).__name__} thay vi tra trang thai khong do duoc / thieu: {e}") from e
 
 
 def tao_bien_nhan(head, kk=None, so_manh=SO_MANH_G5, **sua):
@@ -1421,6 +1461,7 @@ def cac_ca_tu_kiem():
             ("push: head khai = head luot", bien_nhan_luot({}, co, tot, H, su_kien="push"), [BN_HOP_LE, "-"]),
             ("workflow_dispatch: head khai = head luot", bien_nhan_luot({}, co, tot, H, su_kien="workflow_dispatch"), [BN_HOP_LE, "-"]),
             ("push: head khai khac head luot du cha hai khop", bien_nhan_luot({}, co, tot, R, cmt={H: [P, R]}, su_kien="push"), [BN_HONG, ko]),
+            ("push: commit thuong MOT cha, khong ep luat cha-merge", bien_nhan_luot({}, co, tot, H, cmt={H: [P]}, su_kien="push"), [BN_HOP_LE, "-"]),
             ("su kien la", bien_nhan_luot({}, co, tot, H, su_kien="issue_comment"), [KHONG_DO_DUOC, "head_bien_nhan_chua_doi_chieu_duoc"]),
         ):
             bang(kq["trang_thai"] == [mong[0]] * 8 and kq["ly_do"] == [mong[1]] * 8 and kq["du_noi_dung"] is (mong[0] == BN_HOP_LE), f"{ten}: mong {mong}: {kq}")
@@ -1470,6 +1511,25 @@ def cac_ca_tu_kiem():
                 except AnhChupHong:
                     continue
                 raise TuKiemDo(f"{ten}: kiem ke hong ma van doc duoc")
+
+    @kiem
+    def head_moi_bang_chung_co_san_phai_khop():
+        """review 4 F1 (g4-receipt-authority): `hop` KHONG con la tham quyen som; mau thuan DA BIET o bat ky dau phu quyet; vang KHAC sai."""
+        H, R, P, X = "c" * 40, "1" * 40, "d" * 40, "e" * 40
+        for sk, head, hop, cmt, mong in (
+                *(("pull_request", r, hop, c, m) for r, hop, c, m in ((R, H, {H: [P, R]}, True), (R, H, None, True), (R, None, {H: [P, R]}, True),
+                  (R, H, {H: [P, X]}, False), (R, H, {H: [R]}, False), (R, X, {H: [P, R]}, False), (R, False, {H: [P, R]}, False),
+                  (R, None, None, None), (None, H, {H: [R]}, False), (None, None, {H: [P, R]}, None))), ("issue_comment", R, H, None, True),
+                ("issue_comment", R, None, None, None), *((sk, r, hop, c, m) for sk in SU_KIEN_HEAD_LUOT for r, hop, c, m in ((H, H, None, True),
+                  (H, None, {H: [P]}, True), (H, X, None, False), (H, False, None, False), (H, H, {H: [P, X]}, True), (R, H, {H: [P, R]}, False),
+                  (None, H, None, True), (None, None, None, None)))):              # (R, H, ...): hop khop KHONG vuot qua head goc KHAC cua luot
+            bang(doi_chieu_head(H, head, sk, hop, cmt) is mong, f"{sk} head={head} hop={hop} cmt={cmt}: mong {mong}")
+        kq = bien_nhan_luot({k: {"ket_luan": "success", "head_sha": R} for k in range(8)}, {k: "co" for k in range(8)}, tao_bien_nhan(H), None, hop=H, su_kien="push")
+        bang(kq["trang_thai"] == [BN_HOP_LE] * 8, f"head luot VANG: head cua job khong phai mau thuan, `hop` van la bang chung duong: {kq['ly_do']}")
+        fx, bong = J("g4b/b05_du_hoan_tat.json"), "BONG_PHAN_LOAI: cu=day_du moi=day_du goc_su_kien={0} goc_so={0} dau={1} hop={2} ly_do=- cu_do=do_duoc kiem_moi=- run=9005/1\n"
+        for dau, cmt, mong in ((R, {H: [P, R]}, 5), (R, None, 5), (R, {H: [P, X]}, 9), (R, {H: [R]}, 9), (X, {H: [P, R]}, 9), (X, None, 9)):
+            l = luot_fixture({**fx, "log": {**fx["log"], "chuan_bi": fx["log"]["chuan_bi"] + bong.format(P, dau, H)}, "cmt": cmt})
+            bang(quy_g4b(l)[1] == mong and (l["manh"]["bien_nhan"] == [BN_HOP_LE] * 8) is (mong == 5), f"dau={dau[:1]} cmt={cmt}: mong buoc {mong}: {l['manh']}")
 
     @kiem
     def kiem_ke_cua_run_that_khop_bien_nhan_that():
@@ -1569,17 +1629,19 @@ def cac_ca_tu_kiem():
             ("khoang con dao nguoc", thay_con(bat_dau=con[0]["ket_thuc"] + 1)),
             ("khoang con NaN", thay_con(ket_thuc=float("nan"))),
             ("khoang con vo cung", thay_con(ket_thuc=float("inf"))),
+            ("khoang con la so nguyen qua lon de doi ra float (review 4 F6)", thay_con(ket_thuc=10 ** 400)),
             ("so_dot_bien cua con la bool", thay_con(so_dot_bien=True)),
             ("tong dung nhung phan chia sai (mot con khai 0, con khac khai 2)", db + [{**con[0], "so_dot_bien": 0}, {**con[1], "so_dot_bien": 2}, con[2]] + cha),
             ("hai ban ghi cha", db + con + cha * 2),
         ):
-            bang(dc(ds)["trang_thai"] == KHONG_DO_DUOC, f"{ten}: tap con khong phai bang chung day du => khong_do_duoc, duoc {dc(ds)}")
+            bang(khong_nem(lambda: dc(ds))["trang_thai"] == KHONG_DO_DUOC, f"{ten}: tap con khong phai bang chung day du => khong_do_duoc, duoc {dc(ds)}")
         tuong_xau = db + con + [{**cha[0], "tuong_s": float("nan")}]
         bang(dc(tuong_xau, None)["trang_thai"] == KHONG_DO_DUOC and dc(tuong_xau)["trang_thai"] == DO_DUOC and dc(bg, float("inf"))["trang_thai"] == DO_DUOC,
              "thoi gian tuong: so do cua API truoc, khong co thi `tuong_s` cua cha; ca hai khong huu han => khong_do_duoc")
-        for khoa in ("dung_cay_s", "ca_dich_s", "ca_khac_s", "bat_dau"):
-            for xau in (-1, float("nan"), float("inf"), True, "1.0"):
-                dd = tong_hop_g5([{**b, khoa: xau} if b.get("ten") == "db_a" else b for b in bg], 40, M)["do_day_du"]
+        bang([so_lan(x) for x in (None, 1, 50, 0, 51, 10 ** 400, True, 1.0, "2", float("nan"))] == [1, 1, 50] + [None] * 7, "so lan attempt: 1..50, khac => None")
+        for khoa in ("dung_cay_s", "ca_dich_s", "ca_khac_s", "bat_dau", "ket_thuc"):
+            for xau in (-1, float("nan"), float("inf"), True, "1.0", 10 ** 400):
+                dd = khong_nem(lambda: tong_hop_g5([{**b, khoa: xau} if b.get("ten") == "db_a" else b for b in bg], 40, M)["do_day_du"])
                 bang(dd["so_du_ba_thanh_phan"] == 1 and dd["ten_thieu"] == ["db_a", "db_thieu"], f"{khoa}={xau!r} khong phai so do: dinh danh ay la thieu: {dd}")
         dao = tong_hop_g5([{**b, "ket_thuc": b["bat_dau"] - 1} if b.get("ten") == "db_a" else b for b in bg], 40, M)["do_day_du"]
         bang(dao["so_du_ba_thanh_phan"] == 1 and "db_a" in dao["ten_thieu"], f"khoang cua dot bien dao nguoc: thieu: {dao}")
@@ -1595,15 +1657,16 @@ def cac_ca_tu_kiem():
         import zipfile
         mod, cay = nap_cong_cu()
         T, popen = "2026-11-01T00:%02d:00Z", subprocess.Popen
-        luot = {101: ("pull_request", "a" * 40, "c" * 40), 102: ("push", "b" * 40, "b" * 40), 103: ("workflow_dispatch", "e" * 40, "e" * 40)}
+        luot = {101: ("pull_request", "a" * 40, "c" * 40, 1), 102: ("push", "b" * 40, "b" * 40, 1), 103: ("workflow_dispatch", "e" * 40, "e" * 40, 1),
+                104: ("workflow_dispatch", "e" * 40, "e" * 40, 2), 105: ("workflow_dispatch", "e" * 40, "e" * 40, 2)}   # review 4 F6: attempt 2
         kh = lambda sk, chon: ke_hoach_thu(sk, {JOB_MANH + " (ubuntu-latest, 0)": {"id": 5, "conclusion": "success"}}, chon)
         bang([kh("push", True), kh("push", False), kh("pull_request", False)] == [{"log": [5], "bien_nhan": True, "oracle": None},
              {"log": [], "bien_nhan": False, "oracle": None}, {"log": [], "bien_nhan": True, "oracle": None}],
              "ke hoach thu: luot DUOC CHON thu bien nhan o moi su kien; push khong duoc chon thi khong; pull_request luon thu (G4)")
 
-        def log_manh(k):
+        def log_manh(k, lon=False):                       # `lon`: dong dau mang so nguyen JSON 401 chu so (review 4 F6)
             ten = mod["_phan_manh"](k, SO_MANH_G5)
-            bg = [{"loai": "dot_bien", "ten": t_, "trang_thai": DO_DUOC, "bat_dau": 1.0, "ket_thuc": 2.0, "dung_cay_s": 0.1, "ca_dich_s": 0.2, "ca_khac_s": 0.3} for t_ in ten]
+            bg = [{"loai": "dot_bien", "ten": t_, "trang_thai": DO_DUOC, "bat_dau": 1.0, "ket_thuc": 2.0, "dung_cay_s": 10 ** 400 if lon and t_ == ten[0] else 0.1, "ca_dich_s": 0.2, "ca_khac_s": 0.3} for t_ in ten]
             bg += [{"loai": "con", "pid": 7, "bat_dau": 0.0, "ket_thuc": 9.0, "so_dot_bien": len(ten)}, {"loai": "cha", "so_con": 1, "tuong_s": 9.5}]
             return "".join("G5_THOI_GIAN " + json.dumps(b) + "\n" for b in bg).encode()
 
@@ -1614,12 +1677,15 @@ def cac_ca_tu_kiem():
             return b.getvalue()
         api, tep1 = {"commits/" + "c" * 40: json.dumps({"parents": [{"sha": "d" * 40}, {"sha": "a" * 40}]}).encode(),
                      f"actions/workflows/{WF_PL}/runs": b'{"total_count": 0, "workflow_runs": []}'}, {}
-        for rid, (sk, head, checkout) in luot.items():
-            run = {"id": rid, "run_attempt": 1, "event": sk, "head_sha": head, "head_branch": "master", "status": "completed", "conclusion": "success", "created_at": T % 1}
+        for rid, (sk, head, checkout, n) in luot.items():
+            run = {"id": rid, "run_attempt": n, "event": sk, "head_sha": head, "head_branch": "master", "status": "completed", "conclusion": "success", "created_at": T % 1}
             ten = [JOB_CHUAN_BI] + [f"{JOB_MANH} (ubuntu-latest, {k})" for k in range(SO_MANH_G5)] + [JOB_GOM + " (ubuntu-latest)"]
-            trang = json.dumps({"total_count": len(ten), "jobs": [
-                {"id": rid * 100 + i, "name": t_, "conclusion": "success", "run_attempt": 1, "head_sha": head, "created_at": T % 1, "started_at": T % 2,
-                 "completed_at": T % 9, "steps": []} for i, t_ in enumerate(ten)]}).encode()
+            jobs = [(rid * 100 + i, t_, 1, 2, 9) for i, t_ in enumerate(ten)] + [    # attempt 2: manh 0-3 + gom CHAY LAI; con lai la MANG SANG
+                (rid * 100 + 20 + i, t_, 2, *((21, 29) if 1 <= i <= 4 or i == 9 else (2, 9))) for i, t_ in enumerate(ten) if n == 2]
+            trang = json.dumps({"total_count": len(jobs), "jobs": [{"id": j, "name": t_, "conclusion": "success", "run_attempt": a, "head_sha": head,
+                                "created_at": T % 1, "started_at": T % s, "completed_at": T % e, "steps": []} for j, t_, a, s, e in jobs]}).encode()
+            if rid == 104:                               # 105: cung cac dong ay nhung API khong tra ban ghi attempt
+                api.update({f"actions/runs/{rid}/attempts/{a}": json.dumps({"created_at": T % c}).encode() for a, c in ((1, 1), (2, 20))})
             if sk == "workflow_dispatch":                # ngoai cohort cua #1434: `--thu` phai tu lay luot + job cua no
                 api[f"actions/runs/{rid}"], api[f"actions/runs/{rid}/jobs"] = json.dumps(run).encode(), trang
             else:
@@ -1628,8 +1694,9 @@ def cac_ca_tu_kiem():
             api[f"actions/runs/{rid}/artifacts"] = json.dumps({"total_count": SO_MANH_G5, "artifacts": [
                 {"id": rid * 10 + k, "name": TEN_ART_MANH + str(k), "expired": False} for k in range(SO_MANH_G5)]}).encode()
             for k, nd in tao_bien_nhan(checkout).items():
-                api[f"actions/artifacts/{rid * 10 + k}/zip"], api[f"actions/jobs/{rid * 100 + 1 + k}/logs"] = zip_manh(nd, k), log_manh(k)
-            api[f"actions/jobs/{rid * 100 + 9}/logs"] = "GOM MẢNH 8/8\n".encode()
+                api[f"actions/artifacts/{rid * 10 + k}/zip"] = zip_manh(nd, k)
+                api.update({f"actions/jobs/{rid * 100 + d + k}/logs": log_manh(k, rid == 102 and k == 0) for d in (1, 21)})
+            api.update({f"actions/jobs/{rid * 100 + j}/logs": "GOM MẢNH 8/8\n".encode() for j in (9, 29)})
         with cam_git() as goi:
             for lenh in (["git", "--version"], "git --version", ["/usr/bin/git", "status"]):
                 try:
@@ -1657,11 +1724,12 @@ def cac_ca_tu_kiem():
                     b = api.get(duong.split("?")[0])
                     return (200, b, None) if b is not None else (404, None, "HTTP 404")
             g.Thu = ThuGia
+            bang(phan_loai_luot(g, {"id": 1, "run_attempt": 10 ** 400}, None, [])[0] is None and str(khong_nem(lambda: phan_loai_luot(g, {"id": 1, "run_attempt": 1}, None, [{"run_attempt": "x"}]))[1]).startswith("dong job"), "phan loai luot TOAN PHAN")
             tinh = lambda ra: lenh_tinh(argparse.Namespace(anh_chup=str(goc / "ac"), ra=str(goc / ra), anh_chup_v2=str(goc / "v2"), cohort_goc=None, kiem_ke=None))
             s6_dung = globals()["s6_khong_cay_song"]
             try:
                 with contextlib.redirect_stdout(io.StringIO()):
-                    rc_thu = lenh_thu(argparse.Namespace(anh_chup=str(goc / "ac"), ra=str(goc / "v2"), han_giay=60, so_luong=1, run_g5="101,102,103,999", kho=None), g)
+                    rc_thu = lenh_thu(argparse.Namespace(anh_chup=str(goc / "ac"), ra=str(goc / "v2"), han_giay=60, so_luong=1, run_g5="101,102,103,104,105,999", kho=None), g)
                     rc = tinh("ra")
                     globals()["s6_khong_cay_song"] = g.phan_loai_s6     # ban GOC cua #1434 (cay song, goi git): `--tinh` phai TU CHOI
                     rc_git = tinh("ra2")
@@ -1673,11 +1741,13 @@ def cac_ca_tu_kiem():
             tl, n = v2["g5_thoi_gian"]["theo_luot"], len(cay["dot_bien"])
             bang(v2["meta"]["so_lan_thu_goi_git"] == 0 and "khong_do_duoc (--tinh v2" in (goc / "ra" / "nen" / "BAO_CAO.md").read_text(encoding="utf-8"),
                  "--tinh: 0 lan thu goi git; muc §6 cua bao cao nen ghi khong_do_duoc, khong phai du lieu cay song")
-            bang(all(tl[str(r)]["trang_thai"] == DO_DUOC and [tl[str(r)]["so_mong"], tl[str(r)]["so_du_ba_thanh_phan"]] == [n, n] for r in luot),
-                 f"cung log + bien nhan dung: ca pull_request, push va workflow_dispatch phai co mau so {n}/{n}: {tl}")
-            bang(tl.get("999", {}).get("trang_thai") == KHONG_DO_DUOC and len(v2["g5_thoi_gian"]["manh"]) == 24
+            dung = lambda r, du=n: tl[str(r)]["trang_thai"] == DO_DUOC and [tl[str(r)]["so_mong"], tl[str(r)]["so_du_ba_thanh_phan"]] == [n, du]
+            bang(all(dung(r) for r in (101, 103, 104)) and dung(102, n - 1) and tl["102"]["ten_thieu"] == mod["_phan_manh"](0, SO_MANH_G5)[:1],
+                 f"cung log + bien nhan dung: pull_request, push, dispatch attempt 1 VA 2 (co ban mang sang) {n}/{n}; so qua lon chi mat dinh danh ay: {tl}")
+            bang(tl.get("105", {}).get("trang_thai") == KHONG_DO_DUOC and "thieu ban ghi attempt [1, 2]" in tl["105"]["ly_do"], f"vang ban ghi attempt => NEU TEN: {tl.get('105')}")
+            bang(tl.get("999", {}).get("trang_thai") == KHONG_DO_DUOC and len(v2["g5_thoi_gian"]["manh"]) == 32
                  and all(m["doi_chieu"]["trang_thai"] == DO_DUOC and m["kiem_ke"] == cay["sha256_test"] for m in v2["g5_thoi_gian"]["manh"]),
-                 f"luot duoc chon ma khong thu duoc phai hien dien la khong_do_duoc; 24 manh doi chieu duoc: {tl.get('999')}")
+                 f"luot duoc chon ma khong thu duoc phai hien dien la khong_do_duoc; 32 manh doi chieu duoc: {tl.get('999')}")
             bang([l["run_id"] for l in v2["luot"]] == [101, 102] and v2["G4"]["so_luot_pull_request"] == 1 and v2["G4"]["G4b"]["du_hoan_tat"] == 1,
                  f"luot ngoai cohort chi vao phan thoi gian G5; luot pull_request co du tam bien nhan that => du_hoan_tat: {v2['G4']}")
 
@@ -1727,7 +1797,7 @@ DOT_BIEN_TU_KIEM = (
      "g4b_bon_fixture_bat_buoc_cua_dac_ta"),
     ("bn_job_success_la_bien_nhan", '            tt[k], ly[k] = KHONG_DO_DUOC, "artifact_het_han" if art == "het_han" else "noi_dung_chua_lay"\n',
      '            tt[k], ly[k] = BN_HOP_LE, "-"\n', "bien_nhan_ba_tang_moi_tep_mot_minh"),
-    ("bn_job_sai_head_bo_qua", '        if d is not None and d.get("head_sha") not in (None, head_run):\n            tt[k], ly[k] = BN_HONG, "job_mang_head_khac_luot"\n',
+    ("bn_job_sai_head_bo_qua", '        if d is not None and head_run is not None and d.get("head_sha") not in (None, head_run):\n            tt[k], ly[k] = BN_HONG, "job_mang_head_khac_luot"\n',
      '        if False:\n            pass\n', "bien_nhan_ba_tang_moi_tep_mot_minh"),
     ("kk_bang_cua_cay_cho_dinh_danh_mong_doi", '(k, SO_MANH_G5, [t for t, _ in kk["dot_bien"]])', '(k, SO_MANH_G5)', "kiem_ke_cua_run_that_khop_bien_nhan_that"),
     ("kk_nhan_kiem_ke_sai_hinh_dang", '                raise ValueError("sai hinh dang kiem ke")\n', '                pass\n', "bien_nhan_ba_tang_moi_tep_mot_minh"),
@@ -1749,10 +1819,10 @@ DOT_BIEN_TU_KIEM = (
     ('bn_khong_kiem_ke_van_hop_le', '    if kk is None or khop is None:\n', '    if khop is None:\n', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
     ('bn_head_chua_doi_chieu_thanh_hop_le', '    if kk is None or khop is None:\n', '    if kk is None:\n', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
     ('bn_head_sai_khong_hong', '    if loi or khop is False:\n', '    if loi:\n', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
-    ('bn_bo_doi_chieu_merge_ref', '    if hop:\n        return h == hop\n', '    if hop:\n        return True\n', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
-    ('bn_bo_doi_chieu_cha_hai', '(len(cha) == 2 and cha[1] == head_run) if isinstance(cha, list)', '(len(cha) == 2) if isinstance(cha, list)', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
-    ('bn_push_bi_ep_luat_cha_merge', '    if su_kien == "pull_request":\n        cha = ', '    if True:\n        cha = ', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
-    ('bn_su_kien_la_duoc_tin_head', ' if su_kien in SU_KIEN_HEAD_LUOT else None\n', '\n', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
+    ('bn_bo_doi_chieu_merge_ref', '[hop is not False and h == hop]', '[hop is not False]', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
+    ('bn_bo_doi_chieu_cha_hai', 'phieu.append(len(cha) == 2 and cha[1] == head_run)', 'phieu.append(len(cha) == 2)', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
+    ('bn_push_bi_ep_luat_cha_merge', ' if su_kien == "pull_request" else None\n', ' if True else None\n', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
+    ('bn_su_kien_la_duoc_tin_head', '    if su_kien in SU_KIEN_HEAD_LUOT and co_run:\n', '    if co_run:\n', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
     ('bn_bo_buoc_tap', '    if len(set(khai.values())) > 1:\n', '    if False:\n', 'bien_nhan_ba_tang_moi_tep_mot_minh'),
     ('g5_nhan_dinh_danh_nhieu_dong', ' if len(theo_ten.get(t, ())) == 1 and theo_ten[t][0].get("trang_thai")', ' if theo_ten.get(t) and theo_ten[t][0].get("trang_thai")', 'g5_mau_so_la_dinh_danh_mong_doi'),
     ('g5_bo_doi_chieu_so_con', '    if type(cha[0].get("so_con")) is not int or cha[0]["so_con"] != len(con) or not con:\n', '    if False:\n', 'g5_mau_so_la_dinh_danh_mong_doi'),
@@ -1763,9 +1833,9 @@ DOT_BIEN_TU_KIEM = (
     ('g5_bo_kiem_khoang_con', ' and b["pid"] > 0 and khoang_do(b) and type(', ' and b["pid"] > 0 and type(', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
     ('g5_bo_kiem_so_dot_bien_cua_con', ' and type(b.get("so_dot_bien")) is int)]\n', ')]\n', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
     ('g5_nhan_nhieu_ban_ghi_cha', '    if len(cha) != 1:\n        return f"can DUNG MOT ban ghi cha, co {len(cha)}"\n', '', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
-    ('g5_so_do_khong_can_huu_han', ' and math.isfinite(x) and x >= 0\n', ' and x >= 0\n', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
-    ('g5_so_do_nhan_so_am', ' and math.isfinite(x) and x >= 0\n', ' and math.isfinite(x)\n', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
-    ('g5_so_do_nhan_bool', ' and not isinstance(x, bool) and math.isfinite(x)', ' and math.isfinite(x)', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
+    ('g5_so_do_khong_can_huu_han', ' and math.isfinite(float(x)) and x >= 0\n', ' and x >= 0\n', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
+    ('g5_so_do_nhan_so_am', ' and math.isfinite(float(x)) and x >= 0\n', ' and math.isfinite(float(x))\n', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
+    ('g5_so_do_nhan_bool', ' and not isinstance(x, bool) and math.isfinite(float(x))', ' and math.isfinite(float(x))', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
     ('g5_dot_bien_khong_can_khoang', ' == DO_DUOC and khoang_do(theo_ten[t][0])\n', ' == DO_DUOC\n', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
     ('g5_khoang_khong_can_thu_tu', ' and b["ket_thuc"] >= b["bat_dau"]\n', '\n', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
     ('g5_tuong_khong_can_so_do', '(None if so_do(tuong) and tuong > 0 else ', '(None if tuong else ', 'g5_tap_con_duy_nhat_va_so_do_huu_han'),
@@ -1789,6 +1859,19 @@ DOT_BIEN_TU_KIEM = (
     # review F3: phan loai khong do duoc khong vao bo dem
     ("bong_dem_nhan_cu_fail_close", '    cu_do = pl.get("cu_do") == DO_DUOC\n', '    cu_do = True\n', "bong_hai_bo_dem_tach_rieng"),
     ("bong_dem_nhan_kiem_moi_khong_do_duoc", '    moi_do = pl.get("kiem_moi") != KHONG_DO_DUOC\n', '    moi_do = True\n', "bong_hai_bo_dem_tach_rieng"),
+    ("bn_hop_som_la_tham_quyen", "    phieu = [] if hop is None else [", "    if hop:\n        return h == hop\n    phieu = [] if hop is None else [", "head_moi_bang_chung_co_san_phai_khop"),
+    ("bn_phieu_dung_thang_phieu_sai", "    return False if False in phieu else (", "    return True if True in phieu else (False if False in phieu else None) or (", "head_moi_bang_chung_co_san_phai_khop"),
+    ("bn_vang_head_luot_la_mau_thuan", " and RE_OID.fullmatch(head_run) is not None\n", " or True\n", "head_moi_bang_chung_co_san_phai_khop"),
+    ("bn_job_vang_head_luot_la_mau_thuan", "d is not None and head_run is not None and d.get", "d is not None and d.get", "head_moi_bang_chung_co_san_phai_khop"),
+    ("bn_so_cha_sai_bo_qua_khi_vang_head", " and (co_run or len(cha) != 2):", " and co_run:", "head_moi_bang_chung_co_san_phai_khop"),
+    ("bn_dong_bong_khai_head_khac_bo_qua", "        hop = False      ", "        hop = hop        ", "head_moi_bang_chung_co_san_phai_khop"),
+    ("so_do_doi_float_nem", "    except OverflowError:\n        return False\n", "    except ZeroDivisionError:\n        return False\n", "g5_tap_con_duy_nhat_va_so_do_huu_han"),
+    ("so_lan_khong_tran", " and 1 <= x <= TRAN_ATTEMPT else None)", " and 1 <= x else None)", "g5_tap_con_duy_nhat_va_so_do_huu_han"),
+    ("phan_loai_luot_nem_loi_dong_job", "    except (ValueError, TypeError, OverflowError, AttributeError) as e:", "    except ZeroDivisionError as e:", "thu_roi_tinh_moi_luot_duoc_chon_va_khong_goi_git"),
+    ("thu_bo_ban_ghi_attempt_ngoai_cohort", '            t.lay(f"att/{x}/{k}", ', '            0 and t.lay(f"att/{x}/{k}", ', "thu_roi_tinh_moi_luot_duoc_chon_va_khong_goi_git"),
+    ("thu_log_manh_theo_dong_moi_nhat_theo_ten", "[0] if rid in run_g5 else None\n", "[0] if False else None\n", "thu_roi_tinh_moi_luot_duoc_chon_va_khong_goi_git"),
+    ("tinh_attempt_thieu_khong_neu_ten", "(kdd(ly_luot[rid]) if rid in ly_luot else ", "(", "thu_roi_tinh_moi_luot_duoc_chon_va_khong_goi_git"),
+    ("tinh_g5_nhan_manh_cua_luot_thieu_attempt", " in theo_khoa2 and rid not in ly_luot", " in theo_khoa2", "thu_roi_tinh_moi_luot_duoc_chon_va_khong_goi_git"),
 )
 
 

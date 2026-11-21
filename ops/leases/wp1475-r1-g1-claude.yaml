@@ -1,0 +1,83 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1475
+packet_id: CI-PROVENANCE-WIN-THU-LAI
+mission_ghi_chu: 'khong thuoc Mission; nguon cap viec: phat hien Windows cua packet #1322 (comment 7049377019), chu kho chon phuong an 1 (sua ma)'
+revision: 1
+generation: 1
+lease_id: wp1475-r1-g1-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'packet moi, khong co lease truoc tren write set nay; ai-dang-giu hai duong dan NGUOI_GIU 0 (01:37Z 21-11)'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1475#issuecomment-7055508887
+authority_url: https://github.com/ducthangho/tra-luat/issues/1475#issuecomment-7055508887
+authority_ghi_chu: 'chu kho duyet bam ed2dcf2b va cap lease trong chat phien executor 21-11-2026 ("Duyet bam ed2dcf2b, cap lease va bat tay lam"), ghi ho; tham quyen la quyet dinh cua chu kho, comment chi ghi lai'
+recorded_by: anthropic_claude_executor
+recorder_is_dispatcher: false
+recorder_ghi_chu: 'phien Claude Code remote soan dac ta va se thi cong ghi lease theo quyet dinh truc tiep cua chu kho; tham quyen la authority_url, khong phai lease nay'
+leased_at_utc: '2026-11-21T01:57:05Z'
+heartbeat_at: '2026-11-21T01:57:05Z'
+lease_until: '2026-11-23T01:57:05Z'
+lease_expires_at_utc: '2026-11-23T01:57:05Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+reviewer_model: gpt-6-astra
+reviewer_independence: 'Codex CLI phien va context moi, chi doc, neo exact SHA tung luot, chay qua .claude/dev/launcher.py run; khac ho model voi executor. Dac ta khai cham E5 nen chu kho duyet merge neo exact SHA.'
+spec_path: ops/specs/CI-PROVENANCE-WIN-THU-LAI-r1.md
+spec_ref: refs/heads/claude/wp1475-spec@4bea05af32c60aca9c347f0824591674b3bb279a
+spec_ref_ghi_chu: 'ghim OID40 (bai hoc K1 cua kiem-merge hau kiem #1322); spec o PR #1476 chua merge; thu dinh danh la BAM'
+spec_hash: ed2dcf2ba6a530d90dd6b5de959ba545c872a732822cf108e45698c4becb11ab
+spec_sha256: ed2dcf2ba6a530d90dd6b5de959ba545c872a732822cf108e45698c4becb11ab
+spec_sha256_required: ed2dcf2ba6a530d90dd6b5de959ba545c872a732822cf108e45698c4becb11ab
+spec_blob: 741249a0a7bb302877d264353be6f0069a140c9d
+branch: agent/wp1475-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: e02d748d29cd5165fc29fa1a5a8e9b94593874c7
+start_from_sha: e02d748d29cd5165fc29fa1a5a8e9b94593874c7
+reviewed_sha_required: e02d748d29cd5165fc29fa1a5a8e9b94593874c7
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; moi luot review neo dung SHA cua luot; so loi goi Codex 0 luc cap'
+write_set:
+- ops/ci_provenance.py
+- ops/ci_provenance_test.py
+write_set_hash: 7e13bbe22a90719aadb9b5e1ac993b13eb043caddb81229b9f8c209d7af293eb
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan 2026-11-21T01:37Z: clone moi refs/heads = may chu, thieu 0 thua 0; ops/ci_provenance.py va ops/ci_provenance_test.py NGUOI_GIU 0'
+tran_kich_thuoc: 'sensitive, ADR-0053 (<= 6 tep, <= 450 dong them); spec du kien 2 tep, ~25 + 50-120 dong them'
+tran_loi_goi_codex: 'ADR-0055 theo dong khai cua spec'
+dieu_kien_merge_bo_sung: 'ADR-0060 (dong khai cua spec), windows required theo A6 cua dac ta (chu kho mien luot ca bo M3); spec khai cham E5 nen chu kho duyet merge neo exact SHA; chay kiem-merge K0-K7 TRUOC khi bo draft'
+coordination_paths:
+- ops/leases/wp1475-r1-g1-claude.yaml
+- ops/specs/CI-PROVENANCE-WIN-THU-LAI-r1.md
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- kill_other_session_process
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate

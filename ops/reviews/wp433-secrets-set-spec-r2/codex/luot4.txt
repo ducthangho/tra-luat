@@ -1,0 +1,71 @@
+Lượt 4/10 phát hiện **3 finding P2 và 2 finding P3**. Điểm chặn chính nằm ở N4. Bốn đột biến bắt buộc được kế thừa với đích là lỗi đầu tiên, trong khi r2 yêu cầu đối chiếu toàn bộ tập đỏ. Chạy đủ các lượt cho thấy tập đỏ thực tế gồm 60, 12, 25 và 12 cặp lượt–nhãn.
+
+### Định danh và bằng chứng
+
+Review đặc tả `22a1be3915168e82b164ed11f43834b595bbafc8223e4c66834f2ce02b852091` tại HEAD `18abdc50dcab7e7541909378113fd5b6b1176362`, tree `dcbe96ea746bb7f6bcf9ed429bf777ff4ef05edf`. `origin/master` cục bộ trỏ đúng base `1e397c89d69f451694a2252103ea97ec274ab43f`, tree `b1b95b504e4a64cc6470dfed2081da6d778f4499`. Blob `tl_gws.py` khớp r1 và lịch sử giữa hai base không có commit chạm tệp. Hai OID opt-in ADR nằm trên lịch sử cha thứ nhất của ref cục bộ. Phiên độc lập `openai_codex / codex_cli / machine`, Linux x86-64, Python 3.13.18, HOME tạm, offline. Worktree được giao sạch sau review.
+
+Hai lượt chạy `python -B ops/reviews/wp433-secrets-set-spec-r1/tai_hien.py .`, một lượt với base và một lượt thêm diff r2, đều rc 0, mỗi lượt có 37 ca con và `cmp` khớp log r1 từng byte. Phép đo bổ sung xác nhận token rỗng vẫn cảnh báo, `--gas-token` cấp khóa mới khi thiếu `TL_TOKEN`, và `TL_TOKEN` thắng khi có cả hai. §3a khớp hình thức của packet anh em và giữ commit manifest cuối theo quyết định đã chốt.
+
+Tôi dựng nguyên mẫu riêng với commit manifest cuối `1f2a96924fcf431fd0b353a41b047096ea733b64`. Tree `8d23a5eabc6c0d419298a249a84c133bdc9afff2` khớp hồ sơ §0b, numstat đúng 4 tệp, `+211/−8`. Commit `0a3f3edc…` của hồ sơ vắng trong object store cục bộ, nên phép đo dưới đây neo vào commit dựng lại.
+
+| Trạng thái | Phép đo trên nguyên mẫu dựng lại |
+|---|---|
+| `passed` | `test-fragments-check --json` rc 0, `ok=true`, 170.024 / 146.627 B. `release-verify RELEASE_MANIFEST.json --strict --json` rc 0, `ok=true`, 186/186. `workflow-audit --strict --json` rc 0, `ok=true`, 74 tệp, `warn=[]`, `fail=[]`. `git diff --check 1e397c8 HEAD` rc 0. |
+| `failed` | `--selftest` rc 1, 1772/1786, cùng 14 ID đỏ với phép áp ghim trong verdict packet anh em. `bundle_fragment_check.py --json` rc 1 trên cả base và nguyên mẫu, 19 → 20 ca, cùng sáu ID đỏ, ca mới xanh. Kết quả này chưa tái lập suite xanh của §0b. |
+| `skipped` | Không có phép đã khởi chạy báo `skipped`. |
+| `not_run` | N4 sau khi executor mở rộng ma trận, D1 Windows, T3, CI exact SHA, EOL, golden, Ruff, doctrine và `adr-song` độc lập trong lượt này. Độ mới của ref, readback mục sổ và ngoại lệ E2 chưa xác minh ngoại tuyến. |
+
+### Bảng lớp lượt 4
+
+Trong các bảng, L1–L3 trỏ tới `rv/dac-ta-luot1.md` đến `rv/dac-ta-luot3.md` và verdict tương ứng, cùng base `0f9aa2a2cc697129e1f5be72feddf60986286865`. L4 trỏ tới r2 tại HEAD đầy đủ nêu trên.
+
+| `class_slug` | Finding IDs / biểu hiện và chỗ | Mức cao nhất còn mở | Nguồn lượt/SHA | Cách vá chung | Phép kiểm đóng lớp |
+|---|---|---|---|---|---|
+| `mutation-target-accounting` | F01 · nhãn gộp, đích dừng ở lỗi đầu, thiếu hợp đồng bản đồ kết quả đầy đủ (§4 N1–N4) | P2 | L4 | Đóng danh mục khóa, phân biệt đột biến đơn đích với đột biến nhiều đích và tự kiểm phân hạng | Đủ khóa trên đối chứng và từng tiến trình. Mỗi khóa có phép đỏ riêng. Tập đỏ thực bằng tập khai. |
+| `regression-oracle-baseline` | F02 · N3 yêu cầu mọi bộ đếm nhưng thiếu kỳ vọng `encrypt` (§0a, N3) | P3 | L1 → L4 | Ghim cùng bảng kỳ vọng cho mọi quan sát bắt buộc | Base và nguyên mẫu khớp sáu lượt. Thay riêng số lần `encrypt` làm đỏ khóa tương ứng. |
+| `native-gate-evidence` | F03 · mô tả D1 rút mất N2/N3, chưa phân biệt đỏ hành vi với neo `HONG` (§4c, N6, §6) | P2 | L1 → L4 | Viết một điều kiện D1 đầy đủ cho hai tiến trình, ghi rõ kết quả hành vi và điều kiện thiếu bằng chứng | Windows trả đủ vế dương, âm và hồi quy đúng SHA/tree. Thiếu N2/N3 hoặc chỉ có lỗi setup thì N6 đỏ. |
+| `candidate-diff-gate-scope` | F04 · lệnh `git diff --check` để trống phạm vi (N5) | P2 | L4 | Ghim khoảng từ base đến SHA ứng viên | Commit lỗi whitespace trên cây sạch vẫn làm cổng đỏ. |
+| `prevalidation-io-boundary` | F05 · §7 nói chặn trước mọi tác dụng phụ, bỏ qua tải trước chốt (§0a, §7) | P3 | L1 → L4 | Mô tả cùng một ranh giới nạp, tải, giải mã và xử lý cờ | Đọc luồng nguồn và đối chiếu `fetch=1`, các bộ đếm sau chốt bằng 0 ở ca sai kiểu. |
+
+**Tổng cộng 5 lớp mở, 8 biểu hiện.** Lớp mới gồm `mutation-target-accounting` và `candidate-diff-gate-scope`. Ba lớp tái mở gồm `regression-oracle-baseline`, `native-gate-evidence` và `prevalidation-io-boundary`.
+
+### Lịch sử lớp §8.3
+
+L1 gộp mô tả đường fetch và trần tệp vào một finding. Tôi nối hai biểu hiện đó với hai lớp, vì một lớp được đóng bằng kiểm luồng I/O, lớp kia bằng đối chiếu ADR và write set.
+
+| `class_slug` | Finding cũ và đối chiếu từng biểu hiện | Nhãn lớp trên r2 | Phép kiểm độc lập |
+|---|---|---|---|
+| `rejection-output-effects-oracle` | L1 P2 · stderr thừa và export trước chốt. Cả hai **ĐÃ VÁ THẬT** ở cấp đặc tả. | **ĐÃ VÁ THẬT** | Nguồn sạch xanh. PC1 đỏ `dong` ở 25 lượt. PC2 đỏ `khong_goi` ở 5 lượt `gws`, giữ `gas_token` xanh. Cả hai được fragment ghim nhận diện. |
+| `mutation-exception-provenance` | L1/L2 P2 · `AttributeError` và `TypeError` vô can. Cả hai **ĐÃ VÁ THẬT** ở cấp đặc tả. | **ĐÃ VÁ THẬT** | Hai đột biến thật đến phép gán trong `_secrets_set_body`. Phản chứng đến `None.missing` hoặc `len(7)`. Bộ phân hạng ghim cho hai đột biến thật `GIET`, (a), (a2), (b) `TIN_DUNG_GIA`, (c) `SONG_SOT`. F01 đo tập đỏ, độc lập với nhận diện nguồn ngoại lệ. |
+| `native-gate-evidence` | L1 P2 · T3 sai checkpoint **ĐÃ VÁ THẬT** nhờ §3a và protocol §10.1. Điều kiện bằng chứng D1 **VÁ MỘT PHẦN**. | **VÁ MỘT PHẦN** | N6 chặn thiếu dữ liệu, sai SHA/tree và `KHÔNG ĐO ĐƯỢC`. Trên Linux, rig ghim báo đúng hai lỗi đầu và hồi quy 6/6, đồng thời báo `HONG 4` khi chạy ma trận ứng viên trên nguồn base. Windows chưa đo. |
+| `regression-oracle-baseline` | L1 P3 · bảy bộ đếm cũ **ĐÃ VÁ THẬT**. Phạm vi “MỌI bộ đếm” của r2 còn thiếu kỳ vọng `encrypt`. | **VÁ MỘT PHẦN** | Sáu lượt base và nguyên mẫu có cùng rc, bộ đếm và khóa public. Đo trực tiếp `encrypt` cho dãy `(1,1,2,2,0,2)` trên cả hai. |
+| `prevalidation-io-boundary` | L1 P3 · đường `--secrets-file` đã được ghi ở r1 sau L1. R2 bỏ mô tả đó và §7 lại mở rộng tuyên bố quá ranh giới. | **CHƯA VÁ** | Đọc dòng 678–694 và 1007–1017. Stub xác nhận mỗi lượt N1 gọi fetch đúng một lần, còn các thao tác sau chốt bằng 0 trên nguyên mẫu. |
+| `sensitive-write-set-cap` | L1 P3 · gán nhầm ba tệp cho ADR-0053 **ĐÃ VÁ THẬT**. | **ĐÃ VÁ THẬT** | §1 và §6 phân biệt năm đường được khai với trần sáu tệp/450 dòng. Numstat nguyên mẫu nằm trong cả hai giới hạn. |
+
+L3 kết thúc với `U=∅` theo verdict lưu, nên tỷ lệ L3→L4 là **N/A**. Các lớp mới và tái mở ở L4 không vào tử số. Chưa có bằng chứng kích hoạt checkpoint theo hai chuyển tiếp liên tiếp dưới 50% hoặc ba lượt báo cùng một lớp. Phép đóng các lớp trên mã ứng viên, D1 và authority E2 vẫn thuộc các bước sau review đặc tả.
+
+### Findings
+
+**F01 · `mutation-target-accounting` · P2 · §4, N1–N4.** `khong_goi` gộp fetch, upload, refresh và các lời gọi độc lập. `khong_public` gộp số lần stage với khóa mã hóa. `canh_bao` gộp sự hiện diện của cảnh báo với sự vắng mặt của dòng lỗi. N3 chưa định danh khóa cho từng quan sát. Ngoài ra, N4 viện dẫn bốn đích dừng sớm của r1 nhưng yêu cầu tập đỏ đầy đủ. Fragment ghim trả `True`, `DOT BIEN 4/4`, `TU_KIEM 6/6` dù `_hang` chỉ xét lỗi đầu tiên của một ca. `run()` trả boolean, nên bằng chứng phân hạng đó chưa chứng minh được danh mục khóa, khóa vắng hoặc các vế ngoài đích.
+
+**Bằng chứng chạy được.** Với `s=/dev/shm/wp433-rv.ZdYo9b`, chạy từ checkout `env -i PATH="$PATH" HOME="$s" TMPDIR="$s" python -B "$s/probe.py" "$PWD" "$s/tree" db1` và lặp cho `clean`, `db2`, `db3`, `db4`, `pc1`, `pc2`. Mọi probe rc 0. Số cặp đỏ lần lượt là `0` cho `clean`, `60/12/25/12` cho bốn đột biến và `25/5` cho hai phản chứng. Riêng `db4` làm đỏ cả `khong_public` và `canh_bao` ở cả sáu lượt. [Probe](/dev/shm/wp433-rv.ZdYo9b/probe.py)
+
+**Câu thay thế.** “Định danh khóa theo ca, lượt và từng quan sát trực tiếp của N1–N3, với fixture và kỳ vọng dựng độc lập. Giữ `run(tl)` trả boolean và xuất bản đồ đầy đủ của chính lần chạy qua kênh rig. Khóa thiếu làm hỏng phép đo. Mỗi khóa có ít nhất một đột biến đơn đích. Với bốn đột biến kế thừa và PC1/PC2, khai đủ tập đích thực tế, giữ kiểm vị trí frame của đột biến 1–2 và chạy từng đột biến trong tiến trình riêng. Tự kiểm bộ phân hạng dùng kết quả kỳ vọng riêng, gồm (c) phải sống.”
+
+**F02 · `regression-oracle-baseline` · P3 · §0a(3), N3.** N3 yêu cầu “MỌI bộ đếm”, nhưng bảng được viện dẫn nói rõ số lần `encrypt` chưa chép cứng. `probe.py` với `base` và `clean` cho cùng dãy `(1,1,2,2,0,2)`, rc 0 cho cả hai phép đo.
+
+**Câu thay thế.** “Chép cứng bảng sáu lượt §0(3) của r1 và số lần `encrypt = (1,1,2,2,0,2)` theo đúng thứ tự lượt của bảng. Đối chiếu từng giá trị trực tiếp trên base và ứng viên.”
+
+**F03 · `native-gate-evidence` · P2 · N6, §4c, §6.** §4c vừa dẫn chiếu giữ nguyên r1, vừa nêu kỳ vọng vế base chỉ có lỗi đầu N1. N6 và §6 dẫn về bản mô tả rút gọn, nên người nghiệm thu có thể chấp nhận hồ sơ chỉ ghi `False` và `rc3`, dù thiếu đối chứng N2/N3 hoặc `False` còn do neo đột biến hỏng. Gọi `_run(tl, nguồn_base)` trên fragment ghim cho `False`, lỗi đầu N1/N2 đúng và N3 đạt 6/6, đồng thời `HONG 4`. Đối chứng `run(tl)` trên nguyên mẫu cho `True`, 37/37, `HONG 0`. Đây là phép đo Linux về thiết kế, Windows còn `not_run`.
+
+**Câu thay thế.** “D1 giữ hai tiến trình Windows, mỗi vế chạy một lần. Vế ứng viên trả `True` với kết quả hành vi khớp Linux. Vế base dùng cùng bộ đo hành vi và ghi riêng bằng chứng N1 tại `kieu.list.gas_token/rc3`, N2 tại `token_kieu.list.gws/khong_public` và N3 đạt 6/6. Chạy ma trận đột biến trên nguồn ứng viên. Thiếu bất kỳ bằng chứng nào, sai SHA/tree hoặc không chạy được thì N6 đỏ và dừng theo §6. T3 theo protocol §10.1.”
+
+**F04 · `candidate-diff-gate-scope` · P2 · N5.** Trên checkout sạch đã commit, `git diff --check` kiểm diff của worktree. Trong repo tạm, commit một dòng văn bản kết thúc bằng dấu cách rồi chạy lệnh N5 cho rc 0. `git diff --check HEAD^ HEAD` bắt đúng dòng và trả rc 2. Với manifest là commit cuối, khoảng kiểm phải bao gồm cả các commit mã trước nó.
+
+**Câu thay thế.** “Trên checkout sạch của ứng viên, chạy `git diff --check <base_sha> <candidate_sha>` và yêu cầu rc 0, với hai OID đầy đủ đã ghi trong bằng chứng N5.”
+
+**F05 · `prevalidation-io-boundary` · P3 · §0a, §7.** “Từ chối TRƯỚC mọi tác dụng phụ” đặt ranh giới sớm hơn Q1. `git show 1e397c8:scripts/tl_gws.py` cho thấy `load_creds` và `_secrets_fetch` chạy trước giải mã. `_secrets_fetch` có thể đọc `--secrets-file` hoặc đi qua đường tải. Probe `clean` xác nhận `fetch=1` ở cả 25 lượt sai kiểu.
+
+**Câu thay thế.** “Nguồn bundle có thể là `--secrets-file` hoặc đường tải. M1 từ chối ngay sau giải mã và trước mọi cờ, export, refresh, canary, mã hóa lại và upload. Bộ đếm fetch đo lời gọi tại ranh giới stub.”
+
+KET_LUAN: request_changes

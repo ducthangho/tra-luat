@@ -1,0 +1,21 @@
+# ai-dang-giu sau rut han (han moi 2026-11-21T12:47:06Z), kho chinh sau fetch --prune +refs/heads/* va ff master 29c22f7, 2026-11-21T13:02:23Z
+## RELEASE_MANIFEST.json
+HẾT_HẠN	wp433-r10-g1-claude	refs/heads/ops/wp433-secrets-set-spec:ops/leases/wp433-r10-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/test_fragments/wp433_secrets_set_bundle.py
+HẾT_HẠN	wp433-r10-g1-claude	refs/heads/ops/wp433-secrets-set-spec:ops/leases/wp433-r10-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/tl_gws.py
+HẾT_HẠN	wp433-r10-g1-claude	refs/heads/ops/wp433-secrets-set-spec:ops/leases/wp433-r10-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/tl_test_fragments_bundled.py
+HẾT_HẠN	wp433-r10-g1-claude	refs/heads/ops/wp433-secrets-set-spec:ops/leases/wp433-r10-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## scripts/tl_test_fragments_bundled_2.py
+HẾT_HẠN	wp433-r10-g1-claude	refs/heads/ops/wp433-secrets-set-spec:ops/leases/wp433-r10-g1-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

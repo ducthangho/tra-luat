@@ -1,0 +1,11 @@
+# dac ta + lease + verdict tren nhanh ops/wp433-secrets-set-spec (29e5ee847d7a6f1918b9f323d445a6ab72da0a67), 2026-11-21T13:03:43Z
+spec blob d7d165954641951ccf9e329b7425e10eacfef29a sha256 417c894eb94224ca542a924b284523fd3b9e28c16c0f0f4f3120552a148db083
+spec tren master? KHONG
+verdict luot1-codex-26fbacd.txt sha256 f1e2b43427c8070f512efae9f9a2c81f8e8e13a8da01d14b009b4ec3ab215853 KET_LUAN: request_changes
+verdict luot2-codex-26fbacd.txt sha256 6e796acfdc18d7755d3a183c2dc3012ce18866d95d6ca7a323c7bbe1e95a3945 Lượt 2 xác minh log N5 đã lưu và giữ kết quả tái sinh cùng phản chứng từ lượt 1. Selftest, bundle checker và EOL không được chạy lại trong sandbox. Thời điểm lập ma trận ban đầu và model/effort cụ thể của lượt này chưa có biên nhận độc lập. Windows native được miễn theo Q4′. CI, connector review và human audit trên exact head nằm ngoài verdict offline này.
+verdict n5-rig-sach.txt sha256 0054e99989ef52aeedb4e2760f760c52b2e62da8f0936886d105bb24ad84a262 
+verdict-dac-ta luot4.txt sha256 5d1b1ddee0fcf79c2856cad5c80d695c7933903f207fb4b6d47a6b0ddef98280
+verdict-dac-ta luot5.txt sha256 9ab4f2fe9317e59aace6ff692dc34cf0bca0b30a18c034b1b67d036f58137b7f
+verdict-dac-ta luot6.txt sha256 c19b917093faf60ffba2231517bd04b72928835258a063456c4fe01f2e626478
+lease rut han commit: 29e5ee847d7a6f1918b9f323d445a6ab72da0a67
+lease spec_hash: spec_nguon: 'dac ta tren nhanh lease nay; dinh danh theo grammar ADR-0063. Ghim bang spec_hash.'

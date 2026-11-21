@@ -2122,6 +2122,17 @@ def c75_doi_ten_va_ngat():   # #1475 review lượt 7: F2.p phân hoạch/chuy�
                         bang(r["loi"] is mong_loi and r["out"] == (MOI_BYTE if k_nem is None else CU_BYTE) and _ten_sot(r) == [], mo_ta)
                     so_o += 1
     bang(so_o == (len(_DOI_TEN_C75) + 20) * 3 * 2 * 3, f"số ô đổi tên: {so_o}")
+    so_du = 0   # TÍCH HỢP qua ghi_nguyen_tu: canh rollback + dọn tạm cho MỌI kiểu lỗi (review lượt 11 F2.u — không được bỏ khối này)
+    for ten, tao, nhan, _ in _bang_du():   # danh mục TOÀN BỘ ở (b), Windows tiêm, lỗi một lần rồi thành công (review lượt 9 F2.s)
+        da = []
+        r = _ghi_voi_doi_ten_gia({"b": lambda i, da=da, tao=tao: (da.append(tao()) or da[-1]) if i == 0 else None}, windows=True, co_cu=True)
+        if nhan == "PE":
+            ok = r["goi"].count("b") == 2 and r["ngu"] == [0.05] and r["loi"] is None and r["out"] == MOI_BYTE
+        else:
+            ok = r["goi"].count("b") == 1 and r["ngu"] == [] and r["loi"] is da[0] and r["out"] == CU_BYTE
+        bang(ok and _ten_sot(r) == [], f"danh mục đủ đổi tên: {ten} (nhãn {nhan}): được {r}")
+        so_du += 1
+    bang(so_du == len(_kieu_oserror_du()) * (len(errno.errorcode) + 1), f"số ô danh mục đủ đổi tên (tích hợp): {so_du}")
     m, so_du, trang, ngu = nap(), 0, {}, []   # danh mục ĐỦ ở MỌI vị trí retry (review lượt 10 F2.t): j lần PE rồi lỗi đang xét
 
     def thay(nguon, dich):
@@ -2622,6 +2633,9 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ('K2_doi_ten_EAGAIN_sau_PE', '        except PermissionError:\n', '        except (PermissionError, BlockingIOError) as e:\n            if k == 0 and not isinstance(e, PermissionError):\n                raise\n', 'c75'),
     ('K3_don_EINTR_sau_PE', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', 'isinstance(e, OSError) and (e.errno == errno.ENOTEMPTY or (k > 0 and e.errno == errno.EINTR))', 'c74'),
     ('K4_don_EAGAIN_sau_PE', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', 'isinstance(e, OSError) and (e.errno == errno.ENOTEMPTY or (k > 0 and e.errno == errno.EAGAIN))', 'c74'),
+    ('L1_ghi_bo_khoi_phuc_InterruptedError', '    except BaseException:\n        try:\n', '    except InterruptedError:\n        raise\n    except BaseException:\n        try:\n', 'c75'),   # #1475 lượt 11 F2.u: tích hợp danh mục đủ qua ghi_nguyen_tu
+    ('L2_ghi_bo_khoi_phuc_BlockingIOError', '    except BaseException:\n        try:\n', '    except BlockingIOError:\n        raise\n    except BaseException:\n        try:\n', 'c75'),
+    ('L3_ghi_bo_khoi_phuc_TimeoutError', '    except BaseException:\n        try:\n', '    except TimeoutError:\n        raise\n    except BaseException:\n        try:\n', 'c75'),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_AttributeError_qua_except_doi_kieu", "def than(dong):\n",

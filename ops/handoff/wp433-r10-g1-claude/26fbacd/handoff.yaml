@@ -1,0 +1,86 @@
+schema_version: 1
+packet_id: wp433
+spec_packet_id: SECRETS-SET-BUNDLE-KIEU
+revision: 10
+generation: 1
+lease_id: wp433-r10-g1-claude
+spec_path: ops/specs/SECRETS-SET-BUNDLE-KIEU-r5.md
+spec_ref: refs/heads/ops/wp433-secrets-set-spec   # lease tại fdb03372
+spec_hash: 417c894eb94224ca542a924b284523fd3b9e28c16c0f0f4f3120552a148db083
+provider: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+role: executor
+session_id: session_015Gtxrc7bYsQV8yrj7rsD1S
+base_sha: 8656dc0176ed108e12c209ba55c91a1f6f9d612f
+head_sha: 26fbacd9d4ba73f8e83359e9af060a76b32cae08
+head_tree: see `git rev-parse 26fbacd9^{tree}` in bundle
+tested_sha: 26fbacd9d4ba73f8e83359e9af060a76b32cae08
+head_sha_bang_tested_sha: true
+commits:
+  - {sha: cd876e5, noi_dung: 'M1 + M2 (tl_gws.py), M3 fragment, M4 bundled (write_bundled_modules)'}
+  - {sha: 26fbacd9d4ba73f8e83359e9af060a76b32cae08, noi_dung: 'M5 RELEASE_MANIFEST.json (tl.py release-manifest --out), commit CUOI'}
+pushed: false        # nhánh code agent/wp433-r10-g1-claude CHƯA push; ứng viên giao bằng bundle
+bundle:
+  path: ops/handoff/wp433-r10-g1-claude/26fbacd/wp433-r10-g1-claude-26fbacd.bundle
+  sha256: ab27262a764f5effe90ea064909e32c9612d04c970dbe0e7252b29412ec37a17
+  range: 8656dc0176ed108e12c209ba55c91a1f6f9d612f..refs/heads/agent/wp433-r10-g1-claude
+  dung: 'git fetch <bundle> agent/wp433-r10-g1-claude:agent/wp433-r10-g1-claude  (cần base 8656dc0 trong kho)'
+status: needs_followup
+summary: >-
+  secrets-set: bundle giải mã không phải object => rc 3 + đúng một dòng stderr, ngay sau giải mã, trước mọi cờ;
+  token không phải str (không TL_TOKEN) => coi như thiếu, rơi vào cảnh báo sẵn có, không lấy repr làm khoá public.
+  Fragment viết lại theo quy tắc vế r5 (346 khoá, bản đồ qua WP433_SS_BAN_DO); N4 ở rig ngoài fragment, mỗi mục một tiến trình.
+changed_paths:
+  - RELEASE_MANIFEST.json
+  - scripts/test_fragments/wp433_secrets_set_bundle.py
+  - scripts/tl_gws.py
+  - scripts/tl_test_fragments_bundled_2.py
+changed_paths_ghi_chu: 'tl_test_fragments_bundled.py thuộc write set nhưng write_bundled_modules sinh ra không đổi byte (mảnh 1 = 170024 B cả hai vế).'
+numstat: {lenh: 'git diff --numstat 8656dc0176ed108e12c209ba55c91a1f6f9d612f 26fbacd9d4ba73f8e83359e9af060a76b32cae08', tep: 4, them: 164, xoa: 8, tran: '<= 6 tệp, <= 450 dòng thêm (ADR-0053)'}
+tests:   # gate/gate.log; hai clone đầy đủ dựng trong MỘT lệnh (rig/gate_n5.sh), core.abbrev 7, HOME/TMPDIR tạm; Linux, Python 3.13.18
+  - {name: N1 kieu, status: passed, evidence: 'ban_do_ung_vien.json: kieu 250/250 True'}
+  - {name: N2 token_kieu, status: passed, evidence: 'token_kieu 36/36 True'}
+  - {name: N3 hoi_quy, status: passed, evidence: 'hoi_quy 60/60 True; 346 khoá == danh mục; RUN_UNG_VIEN True'}
+  - {name: 'N1-N3 trên nguồn tl_gws.py base', status: passed, evidence: 'mục do_nen_tl_gws_base: 83 khoá False == tập khai (65 kieu + 18 token_kieu), hoi_quy xanh'}
+  - {name: N4 ma trận đột biến, status: passed, evidence: 'rig_n4.py rc 0: ok=True, 30/30 mục đạt, 30 tiến trình riêng (pid khác nhau), khoá chưa phủ 0/346; ma-tran-n4.json sha256 2d6f40110d9d9e5b5cfae41804ca2436692aa3de876e946a30cd06c1842c7ff0'}
+  - {name: 'N5 selftest', status: passed, evidence: 'nen 1785/1785 rc 0; sau 1786/1786 rc 0 (= base + 1)'}
+  - {name: 'N5 test-fragments-check --json', status: passed, evidence: 'sau ok true, status current; mảnh 1 170024/170024 B, mảnh 2 142890/142890 B'}
+  - {name: 'N5 bundle_fragment_check.py --json', status: passed, evidence: 'ok true, failed [], case_count 20 (base 19)'}
+  - {name: 'N5 release-verify RELEASE_MANIFEST.json --strict --json', status: passed, evidence: 'tệp đã commit: ok true, expected 186 == checked 186'}
+  - {name: 'N5 workflow-audit --strict --json', status: passed, evidence: 'rc 0, ok true, py_size.fail [], py_size.warn []'}
+  - {name: 'N5 golden-test --json', status: passed, evidence: 'rc 0, ok true, 20/20 ca'}
+  - {name: 'N5 eol_policy_test', status: passed, evidence: '32/32 dat, rc 0'}
+  - {name: 'N5 ruff F delta', status: passed, evidence: 'python3 -m ruff 0.15.15 (bản ghim CI), cùng số hai vế: tl.py 12, tl_gws.py 95, bundled 0/0, tl_selftest.py 4392; scripts/test_fragments/ All checks passed. Delta = 0'}
+  - {name: 'N5 git diff --check 8656dc0176ed108e12c209ba55c91a1f6f9d612f 26fbacd9d4ba73f8e83359e9af060a76b32cae08', status: passed, evidence: 'rc 0'}
+  - {name: 'N5 doctrine-scan, adr-song', status: passed, evidence: 'rc 0 cả hai vế'}
+  - {name: 'N5 fragment wp433_* đã có', status: passed, evidence: '7 fragment cũ run() True cả hai vế, số đếm giống hệt nen/sau (gate/{nen,sau}.wp433.txt)'}
+  - {name: 'N6 Windows native', status: not_run, evidence: 'MIỄN theo Q4'' (spec r5 §4c); ngân sách Windows 0'}
+  - {name: 'Bất biến (a) §12', status: passed, evidence: 'selftest 1786/1786 + cổng đặc tả + diff --check trên đúng 26fbacd9d4ba73f8e83359e9af060a76b32cae08'}
+test_selection:
+  gate_tier: T2
+  selector_policy_sha: 417c894eb94224ca542a924b284523fd3b9e28c16c0f0f4f3120552a148db083   # tập cổng N1-N5 lấy từ đặc tả
+  tested_sha: 26fbacd9d4ba73f8e83359e9af060a76b32cae08
+  selected_groups: [N1, N2, N3, N4, N5]
+  full_fallback_reason: 'selftest đầy đủ đã chạy (N5); CI chưa chạy vì chưa push'
+remaining_work:
+  - 'review offline Codex trên 26fbacd9 (ngân sách PR 0/10 đã dùng)'
+  - 'sau approve: push agent/wp433-r10-g1-claude, mở PR draft, CI Ubuntu (<= 3), human audit trên exact head'
+no_khai_bao:
+  - 'secrets-set-do-min-ve (P3, Q5''): phản chứng đơn khoá không làm; nhiều đột biến khai tập đích nhiều khoá (cho phép theo quy tắc 4 + Q5'')'
+cong_khai_trung_thuc:
+  - 'Container worker khởi động lại giữa run (~08:46Z), xoá /dev/shm; mất hai commit cục bộ chưa push 561c4e5 / d6a6cd9. Dựng lại cùng nội dung => cd876e5 / 26fbacd. ma-tran-n4.json dựng lại ra ĐÚNG băm cũ 2d6f4011.'
+  - 'Commit mã đầu tiên lỡ nêu tên model ở Co-Authored-By; đã reset --soft + commit lại TRƯỚC mọi test/handoff (trái chữ "không amend", không có SHA nào bị test hay giao trước khi sửa).'
+  - 'Phép đo nguồn base (83 khoá đỏ) chạy ad-hoc TRƯỚC khi ghi tệp ma trận (ma trận ghi 08:35:03Z). Tập đích viết từ đọc _secrets_set_body; chưa có biên nhận máy chứng minh thứ tự suy luận.'
+  - 'Một lượt rig thử trên SHA cũ (đã mất) cho 30/30; không dùng làm bằng chứng.'
+  - 'Ruff: đặc tả §0b ghi "ruff F 4 tệp = 0"; đo bằng --select F từng tệp ra tl_gws.py 95 ở CẢ base và ứng viên (tên stub do bind() chèn). Tiêu chí CLAUDE.md là delta = 0: đạt.'
+lich_su_push_packet:
+  - 'r8 (agent/wp433-r8-g1-claude): 3 push chưa review a8a3b3c, 5eab294, de341ed (spec §9). r10: 0 push nhánh code; 1 push nhánh sổ sách claude/handoff-wp433-26fbacd (chỉ ops/handoff/**, bất biến (c)).'
+hint_provenance: []
+next_role: reviewer
+manual_next_action: 'Điều phối gọi review offline Codex (§8.3, class_slug) trên 26fbacd9 lấy từ bundle; reviewer chạy lại rig/gate_n5.sh và rig_n4.py.'
+copyable_prompt: null
+failure: {fingerprint: null, category: null}
+successors: []

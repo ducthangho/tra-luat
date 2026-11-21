@@ -1,0 +1,26 @@
+[wp433_secrets_set_bundle] ĐỎ ca kieu: văng AssertionError
+[wp433_secrets_set_bundle] ĐỎ ca token_kieu: văng AssertionError
+[wp433_secrets_set_bundle] ĐỎ ca hoi_quy: văng AssertionError
+[wp433_secrets_set_bundle] ca kieu: khoá đạt 0/250
+[wp433_secrets_set_bundle] ca token_kieu: khoá đạt 0/36
+[wp433_secrets_set_bundle] ca hoi_quy: khoá đạt 0/60
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.canary: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.encrypt: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.fetch: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.gas: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.gws_export: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.khoa_public: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.nlm_refresh: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.rc: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.stage_enc: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.upload: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.canary: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.encrypt: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.fetch: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.gas: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.gws_export: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.khoa_public: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.nlm_refresh: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.rc: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.stage_enc: vắng
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.upload: vắng

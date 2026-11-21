@@ -1,0 +1,14 @@
+FRAG wp433_bundled_tach_manh.py True
+[wp433_gws_cred_dich_ngoai_kho] CA: dự_kiến=11 chạy=11 đạt=11 bỏ_qua=0 chỉ_posix=0 · LUOT: dự_kiến=46 chạy=46 đạt=46 bỏ_qua=0 chỉ_posix=0 · DOT BIEN: dự_kiến=37 chạy=37 giết_đúng=37 bỏ_qua=0 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+FRAG wp433_gws_cred_dich_ngoai_kho.py True
+[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=3 đạt=3 chỉ_posix=0 · LUOT: dự_kiến=29 chạy=29 đạt=29 chỉ_posix=0 · DOT BIEN: dự_kiến=36 chạy=36 giết_đúng=36 chỉ_posix=0 · HONG: 0 · TU_KIEM: 3/3
+FRAG wp433_gws_cred_dich_ngoai_kho_b.py True
+[wp433_gws_cred_no] CA: dự_kiến=3 chạy=3 đạt=3 · LUOT: dự_kiến=27 chạy=25 đạt=25 bỏ_qua=0 chỉ_nt=2 · DOT BIEN: dự_kiến=5 chạy=5 giết_đúng=5 bỏ_qua=0 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0
+FRAG wp433_gws_cred_no.py True
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=76 chạy=65 đạt=65 bỏ_qua=0 chỉ_nt=11 · DOT BIEN: dự_kiến=47 chạy=39 giết_đúng=39 bỏ_qua=0 chỉ_nt=8 · HONG: 0 · TU_KIEM: 3/3
+FRAG wp433_gws_cred_win_duong.py True
+[wp433_gws_cred_win_reparse] CA: dự_kiến=2 chạy=1 đạt=1 bỏ_qua=0 chỉ_nt=1 · LUOT: dự_kiến=7 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=4 · DOT BIEN: dự_kiến=3 chạy=2 giết_đúng=2 bỏ_qua=0 chỉ_nt=1 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0
+FRAG wp433_gws_cred_win_reparse.py True
+[wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=18 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0
+FRAG wp433_nlm_gws_dich_ngoai_kho.py True
+rc=0

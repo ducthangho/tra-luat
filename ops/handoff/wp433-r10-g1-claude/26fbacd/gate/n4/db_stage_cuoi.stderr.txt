@@ -1,0 +1,23 @@
+[wp433_secrets_set_bundle] ca kieu: khoá đạt 250/250
+[wp433_secrets_set_bundle] ca token_kieu: khoá đạt 24/36
+[wp433_secrets_set_bundle] ca hoi_quy: khoá đạt 45/60
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.encrypt: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.khoa_public: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.stage_enc: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.encrypt: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.khoa_public: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.stage_enc: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gws.encrypt: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gws.khoa_public: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gws.stage_enc: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.nlm.encrypt: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.nlm.khoa_public: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.nlm.stage_enc: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.webapp.encrypt: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.webapp.khoa_public: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.webapp.stage_enc: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.dict.gws.khoa_public_rong: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.dict.gws.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.dict.nlm.khoa_public_rong: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.dict.nlm.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.int.gws.khoa_public_rong: sai

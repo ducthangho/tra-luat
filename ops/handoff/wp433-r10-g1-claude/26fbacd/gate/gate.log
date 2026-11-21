@@ -1,0 +1,8 @@
+2026-11-21T08:49:28Z nen=8656dc0176ed108e12c209ba55c91a1f6f9d612f sau=26fbacd9d4ba73f8e83359e9af060a76b32cae08 shallow=false gitdir_la_thu_muc=1
+2026-11-21T09:03:14Z selftest nen: == tl selftest 1785/1785 == rc=0 
+2026-11-21T09:03:14Z selftest sau: == tl selftest 1786/1786 == rc=0 
+2026-11-21T09:03:14Z diff --check 8656dc0176ed108e12c209ba55c91a1f6f9d612f 26fbacd9d4ba73f8e83359e9af060a76b32cae08 rc=0
+2026-11-21T09:03:14Z numstat 8656dc0176ed108e12c209ba55c91a1f6f9d612f 26fbacd9d4ba73f8e83359e9af060a76b32cae08: 4 tep +164/-8
+2026-11-21T09:03:19Z n123 ung vien: RUN_UNG_VIEN True
+2026-11-21T09:06:02Z N4 rc=0 N4: ok=True · mục đạt 30/30 · tiến trình riêng 30 · khoá chưa phủ 0/346
+2026-11-21T09:06:02Z XONG

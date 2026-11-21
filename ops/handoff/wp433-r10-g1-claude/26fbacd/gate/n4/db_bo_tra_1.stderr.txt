@@ -1,0 +1,6 @@
+[wp433_secrets_set_bundle] ca kieu: khoá đạt 250/250
+[wp433_secrets_set_bundle] ca token_kieu: khoá đạt 36/36
+[wp433_secrets_set_bundle] ca hoi_quy: khoá đạt 57/60
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.khong_co.encrypt: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.khong_co.rc: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.khong_co.upload: sai

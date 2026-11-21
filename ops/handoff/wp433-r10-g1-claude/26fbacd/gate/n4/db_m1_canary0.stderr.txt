@@ -1,0 +1,23 @@
+[wp433_secrets_set_bundle] ca kieu: khoá đạt 225/250
+[wp433_secrets_set_bundle] ca token_kieu: khoá đạt 36/36
+[wp433_secrets_set_bundle] ca hoi_quy: khoá đạt 60/60
+[wp433_secrets_set_bundle] ĐỎ kieu.int.gas_token.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.gws.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.khong_co.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.nlm.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.webapp.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.gas_token.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.gws.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.khong_co.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.nlm.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.webapp.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.gas_token.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.gws.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.khong_co.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.nlm.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.webapp.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.gas_token.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.gws.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.khong_co.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.nlm.canary0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.webapp.canary0: sai

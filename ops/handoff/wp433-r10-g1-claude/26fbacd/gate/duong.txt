@@ -1,0 +1,4 @@
+RELEASE_MANIFEST.json
+scripts/test_fragments/wp433_secrets_set_bundle.py
+scripts/tl_gws.py
+scripts/tl_test_fragments_bundled_2.py

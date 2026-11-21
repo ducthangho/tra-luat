@@ -1,0 +1,5 @@
+  [OK] wp44_missing_bundled_module_named
+  [OK] r332_registry_coverage_duong_san_xuat
+  [OK] wp42_complete_runtime_test_ids_unique
+== tl selftest 1786/1786 ==
+rc=0

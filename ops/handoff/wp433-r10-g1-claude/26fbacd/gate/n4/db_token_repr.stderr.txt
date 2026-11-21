@@ -1,0 +1,21 @@
+[wp433_secrets_set_bundle] ca kieu: khoá đạt 250/250
+[wp433_secrets_set_bundle] ca token_kieu: khoá đạt 18/36
+[wp433_secrets_set_bundle] ca hoi_quy: khoá đạt 60/60
+[wp433_secrets_set_bundle] ĐỎ token_kieu.dict.gws.canh_bao_co: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.dict.gws.khoa_public_rong: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.dict.gws.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.dict.nlm.canh_bao_co: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.dict.nlm.khoa_public_rong: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.dict.nlm.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.int.gws.canh_bao_co: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.int.gws.khoa_public_rong: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.int.gws.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.int.nlm.canh_bao_co: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.int.nlm.khoa_public_rong: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.int.nlm.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.list.gws.canh_bao_co: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.list.gws.khoa_public_rong: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.list.gws.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.list.nlm.canh_bao_co: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.list.nlm.khoa_public_rong: sai
+[wp433_secrets_set_bundle] ĐỎ token_kieu.list.nlm.stage_enc0: sai

@@ -1,0 +1,23 @@
+[wp433_secrets_set_bundle] ca kieu: khoá đạt 225/250
+[wp433_secrets_set_bundle] ca token_kieu: khoá đạt 36/36
+[wp433_secrets_set_bundle] ca hoi_quy: khoá đạt 60/60
+[wp433_secrets_set_bundle] ĐỎ kieu.int.gas_token.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.gws.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.khong_co.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.nlm.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.webapp.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.gas_token.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.gws.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.khong_co.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.nlm.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.webapp.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.gas_token.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.gws.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.khong_co.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.nlm.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.webapp.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.gas_token.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.gws.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.khong_co.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.nlm.stage_enc0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.webapp.stage_enc0: sai

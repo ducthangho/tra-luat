@@ -1,0 +1,23 @@
+[wp433_secrets_set_bundle] ca kieu: khoá đạt 225/250
+[wp433_secrets_set_bundle] ca token_kieu: khoá đạt 36/36
+[wp433_secrets_set_bundle] ca hoi_quy: khoá đạt 60/60
+[wp433_secrets_set_bundle] ĐỎ kieu.int.gas_token.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.gws.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.khong_co.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.nlm.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.int.webapp.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.gas_token.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.gws.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.khong_co.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.nlm.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.list.webapp.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.gas_token.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.gws.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.khong_co.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.nlm.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.null.webapp.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.gas_token.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.gws.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.khong_co.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.nlm.nlm_refresh0: sai
+[wp433_secrets_set_bundle] ĐỎ kieu.str.webapp.nlm_refresh0: sai

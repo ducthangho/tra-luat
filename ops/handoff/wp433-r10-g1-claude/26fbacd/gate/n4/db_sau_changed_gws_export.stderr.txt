@@ -1,0 +1,9 @@
+[wp433_secrets_set_bundle] ca kieu: khoá đạt 250/250
+[wp433_secrets_set_bundle] ca token_kieu: khoá đạt 36/36
+[wp433_secrets_set_bundle] ca hoi_quy: khoá đạt 54/60
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.env_token.gws.gws_export: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gas_token.gws_export: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.gws.gws_export: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.khong_co.gws_export: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.nlm.gws_export: sai
+[wp433_secrets_set_bundle] ĐỎ hoi_quy.webapp.gws_export: sai

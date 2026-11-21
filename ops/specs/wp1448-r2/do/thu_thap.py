@@ -667,8 +667,8 @@ def kiem_ke_hoach_ghi(ra, dich, dau_vao=(), nguon=()):
             raise GhiBiChan(f"--ra {ra} chong lan dau vao {p}")
     for q in (ROOT, *(pathlib.Path(x).resolve() for x in nguon if x)):
         for r in {q, goc_git(q)} - {None}:
-            if r == ra or r in ra.parents:
-                raise GhiBiChan(f"--ra {ra} nam trong cay nguon {r}")
+            if r == ra or r in ra.parents or ra in r.parents:      # r8: `--ra` CHUA mot cay nguon (vd checkout ten `nen`) cung bi chan
+                raise GhiBiChan(f"--ra {ra} nam trong / chua cay nguon {r}")
     if os.path.lexists(ra) and not ra.is_dir():
         raise GhiBiChan(f"--ra {ra} da co ma khong phai thu muc")
     for rel in dich:
@@ -1230,8 +1230,12 @@ def cac_ca_tu_kiem():
                 {"id": rid * 100 + i, "name": t_, "conclusion": "success", "run_attempt": 1, "head_sha": head, "created_at": T % 1, "started_at": T % 2,
                  "completed_at": T % 9, "steps": []} for i, t_ in enumerate(ten)]}).encode()
             tep1[f"log/{rid * 100}"] = (T % 3 + " che_do=day_du\n" + "BONG_PHAN_LOAI: cu=day_du moi=day_du cu_do=do_duoc\n" * (rid == 101)).encode()
-            api[f"actions/runs/{rid}/artifacts"] = json.dumps({"total_count": SO_MANH_G5, "artifacts": [
+            la = [{"id": rid * 10 + 8, "name": "x" * len(TEN_ART_MANH) + "3", "expired": False}, {"id": rid * 10 + 9, "name": TEN_ART_MANH + "4", "expired": True},
+                  {"id": rid * 10 + 5000, "name": TEN_ART_MANH + "x", "expired": False}]   # r8: KHONG phai manh / manh HET HAN / duoi khong phai so: bo qua
+            api[f"actions/runs/{rid}/artifacts"] = json.dumps({"total_count": SO_MANH_G5 + 3, "artifacts": la + [   # TRUOC manh that: lay nham la thang
                 {"id": rid * 10 + k, "name": TEN_ART_MANH + str(k), "expired": False} for k in range(SO_MANH_G5)]}).encode()
+            for a, k in ((la[0], 3), (la[1], 4)):               # noi dung GIA (bien nhan khai head khac): lay nham => 101 mat du_hoan_tat
+                api[f"actions/artifacts/{a['id']}/zip"] = zip_manh(tao_bien_nhan("0" * 40)[k], k)
             for k, nd in tao_bien_nhan(checkout).items():
                 api[f"actions/artifacts/{rid * 10 + k}/zip"] = zip_manh(nd, k)
                 lm[rid * 100 + 1 + k] = api[f"actions/jobs/{rid * 100 + 1 + k}/logs"] = log_manh(k)
@@ -1251,7 +1255,7 @@ def cac_ca_tu_kiem():
 
         def thu():
             with contextlib.redirect_stdout(io.StringIO()):
-                return lenh_thu(argparse.Namespace(anh_chup=str(goc / "ac"), ra=str(goc / "v2"), han_giay=60, so_luong=1, kho=str(goc / "kho")), g)
+                return khong_nem(lambda: lenh_thu(argparse.Namespace(anh_chup=str(goc / "ac"), ra=str(goc / "v2"), han_giay=60, so_luong=1, kho=str(goc / "kho")), g))
         rc_thu = thu()
 
         def tinh(ra, v2=None):                              # -> rc cua `lenh_tinh`; ket qua doc bang `ket_qua(ra)`
@@ -1711,6 +1715,11 @@ def cac_ca_tu_kiem():
                 truoc = cay(goc)
                 bang(tinh_nho(ac, goc / "kho_gia" / "ra", v2) == 4 and xuat(goc / "kho_gia" / "kk", src) == 4 and cay(goc) == truoc,
                      "--ra trong kho chua bo thu (ROOT): --tinh va --xuat-kiem-ke rc 4, khong tao gi")
+                globals()["ROOT"] = goc / "ngoai_ra" / "nen"                 # r8 (hunt a review 7): --ra NGOAI chua checkout trung ten dich `nen`
+                (goc / "ngoai_ra" / "nen" / ".git").mkdir(parents=True)
+                (goc / "ngoai_thu" / "log" / ".git").mkdir(parents=True)
+                truoc = cay(goc)
+                bang(tinh_nho(ac, goc / "ngoai_ra", v2) == 4 and cay(goc) == truoc, "--ra CHUA checkout ten `nen` (ROOT): --tinh rc 4, khong ghi vao checkout")
             finally:
                 globals()["nap_cong_cu"], globals()["ROOT"] = nap_that, goc_kho
             g = nap_goc()
@@ -1719,7 +1728,8 @@ def cac_ca_tu_kiem():
                 def _goi(self, duong):
                     return 404, None, "HTTP 404"
             g.Thu = ThuGia
-            for ten, r, kho in (("--ra = anh chup", ac, None), ("--ra trong anh chup", ac / "con", None), ("--ra trong --kho", src / "v2", src)):
+            for ten, r, kho in (("--ra = anh chup", ac, None), ("--ra trong anh chup", ac / "con", None), ("--ra trong --kho", src / "v2", src),
+                                ("--ra chua --kho ten `log`", goc / "ngoai_thu", goc / "ngoai_thu" / "log")):
                 truoc = cay(goc)
                 try:
                     with contextlib.redirect_stdout(io.StringIO()):
@@ -1990,6 +2000,36 @@ def cac_ca_tu_kiem():
             l = dung_luot({"id": 7, "event": su_kien, "head_sha": head, "run_attempt": 1}, manh, None, None, tao_bien_nhan(H))
             bang(l["manh"]["bien_nhan"] == [mong] * SO_MANH_G5, f"{su_kien}: bien nhan khai head {H[:1]}, head luot {head[:1]} => {mong}: {l['manh']['ly_do']}")
 
+    @kiem
+    def chia_doi_trang_con_vang_khong_dung_trang_cha():
+        """r8, WP1448-R6-F12 (lop new-guard-mutation-coverage): khoang CHIA DOI ma trang cha CON trong anh chup, trang con VANG (con_vang) hay
+        chep du trang cha (con_du). `--tinh` (thanh vien luot) va `--thu` (khoa MANIFEST v2) KHONG duoc dung trang cha: ky vong DOC LAP o
+        fixture `chia_doi_trang_con.json`; doi chung khong chia = `dau_cuoi` (101, 102, 103)."""
+        fx = J("chia_doi_trang_con.json")
+        with tempfile.TemporaryDirectory(prefix="wp1448_cd_") as d:
+            goc = pathlib.Path(d)
+            dc = dau_cuoi(goc)
+            bang((dc["rc_thu"], dc["tinh"]("ra"), [l["run_id"] for l in dc["ket_qua"]("ra")["luot"]]) == (0, 0, [101, 102, 103]), "doi chung khong chia")
+            goc_tep = {m["khoa"]: (goc / "ac" / m["duong_dan"]).read_bytes() for m in json.loads((goc / "ac" / "MANIFEST.json").read_bytes())["tep"]}
+            for ten, bt in fx["bien_the"].items():
+                tep, meta = dict(goc_tep), json.loads(goc_tep["META"])
+                cha = next(k for k in meta["khoang_con"] if k["su_kien"] == "pull_request")
+                cha["chia_doi"] = True
+                meta["khoang_con"].append({**cha, **fx["khoang_con_them"]})
+                tep["META"] = json.dumps(meta).encode()
+                if bt["trang_con"]:
+                    tep[f"list/ci/pull_request/{fx['khoang_con_them']['nhan']}/p1"] = tep[f"list/ci/pull_request/{cha['nhan']}/p1"]
+                ghi_anh_chup(goc / ("ac_" + ten), tep)
+                with contextlib.redirect_stdout(io.StringIO()):
+                    rc_t = lenh_tinh(argparse.Namespace(anh_chup=str(goc / ("ac_" + ten)), ra=str(goc / ("t_" + ten)), anh_chup_v2=None, cohort_goc=None, kiem_ke=None))
+                    rc_u = lenh_thu(argparse.Namespace(anh_chup=str(goc / ("ac_" + ten)), ra=str(goc / ("v_" + ten)), han_giay=60, so_luong=1,
+                                                       kho=str(goc / "kho")), dc["g"])
+                v = json.loads((goc / ("t_" + ten) / "BASELINE_V2.json").read_bytes())
+                khoa = sorted(m["khoa"] for m in json.loads((goc / ("v_" + ten) / "MANIFEST.json").read_bytes())["tep"])
+                bang((rc_t, [l["run_id"] for l in v["luot"]], v["G4"]["so_luot_pull_request"]) == (0, bt["tinh_run_ids"], bt["tinh_so_luot_pull_request"]),
+                     f"{ten}: --tinh khong dung trang cha chia doi: rc {rc_t}, luot {[l['run_id'] for l in v['luot']]}, PR {v['G4']['so_luot_pull_request']}")
+                bang((rc_u, khoa) == (0, bt["thu_khoa"]), f"{ten}: --thu khong thu bang chung tu trang cha chia doi: rc {rc_u}, khoa {khoa}")
+
     return ca
 
 
@@ -2232,6 +2272,19 @@ DOT_BIEN_TU_KIEM = (
     ('oracle_bo_ma_cap_nong', '        if len(tp) == 3 and tp[2].lower().endswith(DUOI_MA_CAP_NONG):\n', '        if False:\n', 'oracle_moi_chot_fail_close_git_gia'),
     ('oracle_bo_mode_thuc_thi', '        if moi in MODE_VE_DAY_DU or (cu != "000000" and moi != "000000" and cu != moi):\n', '        if False:\n', 'oracle_moi_chot_fail_close_git_gia'),
     ('oracle_bo_sua_dac_ta', '        if duong.startswith("ops/specs/") and tt in ("M", "D", "T"):\n', '        if False:\n', 'oracle_moi_chot_fail_close_git_gia'),
+    # r8 (WP1448-R6-F12): HAI chot chia doi (dong `if` giong het nhau -> neo kem dong dung truoc de MOI dot bien sua DUNG MOT cho)
+    ('tinh_dung_trang_cha_chia_doi', 'errors="replace")\n\n    ds_ci = []\n    for k in meta["khoang_con"]:\n        if not k.get("chia_doi"):\n',
+     'errors="replace")\n\n    ds_ci = []\n    for k in meta["khoang_con"]:\n        if True:\n', 'chia_doi_trang_con_vang_khong_dung_trang_cha'),
+    ('thu_dung_trang_cha_chia_doi', '"sha_master")}}))\n    ds_ci = []\n    for k in meta["khoang_con"]:\n        if not k.get("chia_doi"):\n',
+     '"sha_master")}}))\n    ds_ci = []\n    for k in meta["khoang_con"]:\n        if True:\n', 'chia_doi_trang_con_vang_khong_dung_trang_cha'),
+    ('ghi_nguon_bo_ra_chua_cay_nguon', ' or ra in r.parents:      # r8:', ':      # r8:', 'ghi_co_gioi_han_moi_dich_cua_bo_thu'),
+    # r8: ba ve cua chot chon artifact o lenh_thu (truoc la "tuong duong" khong fixture) + chot bo qua luot jobs khong du
+    ('thu_artifact_bo_kiem_ten', '            if ten.startswith(TEN_ART_MANH) and ten[len(', '            if ten[len(', 'thu_roi_tinh_khong_goi_git_va_pull_request_du_hoan_tat'),
+    ('thu_artifact_lay_het_han', ' and not a.get("expired"):\n                viec.append(', ':\n                viec.append(', 'thu_roi_tinh_khong_goi_git_va_pull_request_du_hoan_tat'),
+    ('thu_artifact_duoi_khong_so', ' and ten[len(TEN_ART_MANH):].isdigit() and not a.get("expired"):\n', ' and not a.get("expired"):\n',
+     'thu_roi_tinh_khong_goi_git_va_pull_request_du_hoan_tat'),
+    ('thu_lay_bang_chung_khi_jobs_khong_du', '        dong, du, _, _ = g.chon_chuoi_trang(doc, f"jobs/{rid}")\n        if not du:\n            continue\n',
+     '        dong, du, _, _ = g.chon_chuoi_trang(doc, f"jobs/{rid}")\n', 'chia_doi_trang_con_vang_khong_dung_trang_cha'),
 )
 
 

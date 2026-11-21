@@ -5102,6 +5102,7 @@ DOT_BIEN += [   # wp1343: N1 (phan loai), N2/M7 (phan hoach), N3 (gom), M6 (chot
     ('oracle_bo_kiem_goc_su_kien_to_tien', _tt('        if _git(kho, "merge-base", "--is-ancestor", goc_su_kien, p1, chay=chay)[0] != 0:\n            return KHONG_DO_DUOC\n', ''), _T119),
     ('oracle_bo_diff_merge_that', _tt(', (p1, cay.decode().strip()), (p1, hop)):', ', (p1, cay.decode().strip())):'), _T119),
     ('oracle_git_nem_lot_ra', _tt('    except Exception:  # noqa: BLE001 — git vang/loi/dau ra la', '    except RuntimeError:  # noqa: BLE001 — git vang/loi/dau ra la'), _T119),
+    ('oracle_bo_allowlist', _tt('        if not duong.startswith(ALLOWLIST) or any(', '        if any('), _T119),   # r8 (WP1448-R6-F12): chot allowlist rieng
     ('bong_ton_du_so_voi_luat_cu', _tt('    ton_du = int(che_do_chay != oracle) if che_do_chay', '    ton_du = int(pl.get("cu") != oracle) if che_do_chay'), ("t115_bo_dem_loi_ich_va_ton_du_tu_dong_bong_that",)),
 ] + [(f"pl_bo_phu_thuoc_{i:02d}", (MA, lambda vb, p=p: thay_regex(vb, r'(PHU_THUOC_PACKET_LOOP = \([^)]*)"' + re.escape(p) + '"', r'\1"-"')), _T100)
      for i, p in enumerate(PL_PHU_THUOC)]

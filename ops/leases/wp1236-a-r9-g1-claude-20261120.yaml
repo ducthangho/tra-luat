@@ -11,6 +11,8 @@ revision: 9
 generation: 1
 lease_id: wp1236-a-r9-g1-claude-20261120
 thay_the_cho: []
+da_bi_thay_the: wp1236-a-r10-g1-claude-20261121
+da_bi_thay_the_ghi_chu: 'dac ta r10 (sha 3ee83173, chu kho duyet issuecomment-7053833153) thay r9; lease nay CON HAN toi 2026-11-22T15:35Z nen phai co bia mo hai chieu (CLAUDE.md 28-08). Commit c2d606b cua r9 khong push.'
 thay_the_cho_ghi_chu: 'lease cu cua packet (wp1236-a1-r7-g1-claude-remote-20261106, r7, dot A1) da HET HAN tu 2026-11-08T04:33Z, write-set exclusion da nha; khong viet bia mo vao lease da chet (bai hoc CLAUDE.md 20-09-2026). r9 la revision moi, generation 1.'
 granted_by: ducthangho
 granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7043381576

@@ -363,6 +363,8 @@ def _read_bundled_module(bundled_path: str | Path, *, primary: bool
     """Read one generated data-only shard without importing or executing it."""
     path = Path(bundled_path)
     rel = _BUNDLED_RELATIVE_PATH if primary else f"scripts/{path.name}"
+    if path.is_symlink():   # không đọc xuyên symlink tại tên mảnh (cùng chốt với `_candidate_path`)
+        raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "symlink")
     if not path.is_file():
         raise FragmentReadError("BUNDLED_MODULE_MISSING", rel)
     try:
@@ -536,6 +538,9 @@ def write_bundled_modules(fragment_root: str | Path, scripts_dir: str | Path) ->
     scripts = Path(scripts_dir)
     modules = generate_bundled_modules(fragment_root)
     names = {name for name, _ in modules}
+    for name in sorted(names):   # từ chối TRƯỚC khi ghi bất kỳ mảnh nào: không ghi xuyên symlink tại tên mảnh
+        if (scripts / name).is_symlink():
+            raise FragmentPathError("BUNDLED_MODULE_CONTRACT", f"scripts/{name}", "symlink")
     for name, data in modules:
         (scripts / name).write_bytes(data)
     for stale in sorted(scripts.iterdir()):

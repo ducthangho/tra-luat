@@ -235,7 +235,7 @@ def _test_fragments_check(root: str | Path) -> dict:
     try:
         for name, _ in expected_modules:
             p = scripts_dir / name
-            actual_modules.append((name, p.read_bytes() if p.is_file() else None))
+            actual_modules.append((name, p.read_bytes() if p.is_file() and not p.is_symlink() else None))   # không đọc xuyên symlink
         extra = sorted(p.name for p in scripts_dir.iterdir()
                        if _BUNDLED_SHARD_NAME_RE.fullmatch(p.name)
                        and p.name not in {n for n, _ in expected_modules})

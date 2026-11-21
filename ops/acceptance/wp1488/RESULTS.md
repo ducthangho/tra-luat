@@ -202,5 +202,15 @@ Hồi quy (N3), hai vế dựng trong CÙNG một lệnh (clone + checkout + `co
 Hai ca bỏ qua và 7 đột biến không đo được giống hệt nhau ở hai vế. Số ca không đổi vì (N), (I-win) là kịch bản trong ca
 `r1488_…` sẵn có. Delta = +5 đột biến, 0 hồi quy. Hai vế chạy song song trong cùng một lệnh, 13:1xZ–13:4xZ.
 
+Đo lại sau Codex lượt 5 (thêm Q và 2 đột biến), hai vế dựng lại trong CÙNG một lệnh, chạy 2026-11-21T14:11:58Z → 14:38:34Z,
+`/tmp/.git` không tồn tại:
+
+| Phép đo | `7a8823b` | `22a7ad1` |
+|---|---|---|
+| `launcher_test.py` | 453/453 (tổng 455, bỏ qua 2) | 453/453 (tổng 455, bỏ qua 2) |
+| `launcher_test.py --dot-bien` | 798/798 (7 không đo được) | 805/805 (cùng 7) |
+
+Delta = +7 đột biến (5 r4 + 2 sau lượt 5), 0 hồi quy. Ruff `--select F`: 5 F841 ở hai vế (delta 0).
+
 Ruff `--select F` trên `launcher_test.py`: 5 F841 ở cả hai vế (delta 0). `shellcheck ops/cai_cong_cu.sh`: một SC1090 ở cả
 hai vế (delta 0). `doctrine-scan`: rc 0.

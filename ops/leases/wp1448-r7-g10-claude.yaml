@@ -62,8 +62,8 @@
   "audit_label_if_delegated": "owner audits exact H personally (human_exact_head_audit.v1); coordinator never signs",
   "recorded_by": "Claude Code coordinator session; not author or reviewer",
   "recorder_is_executor": false,
-  "lease_until": "2026-11-26T08:00:00Z",
-  "lease_expires_at_utc": "2026-11-26T08:00:00Z",
+  "lease_until": "2026-11-21T17:17:31Z",
+  "lease_expires_at_utc": "2026-11-21T17:17:31Z",
   "limits": {
     "executor_attempts": 8,
     "executor_attempts_used": 8,
@@ -195,5 +195,11 @@
   ],
   "size": "nang_tran r7: 32 files / 7000 added on the delivered candidate vs base 64fa515",
   "candidate_head": "7dcaa20f8e100d47b17f04ac5841fc36bce1e4c0",
-  "candidate_tree": "242907967208889bed9e2f29459eac9c838bcf27"
+  "candidate_tree": "242907967208889bed9e2f29459eac9c838bcf27",
+  "thu_hoi_bang_rut_han": {
+    "han_goc_utc": "2026-11-26T08:00:00Z",
+    "han_moi_utc": "2026-11-21T17:17:31Z",
+    "chi_thi": "HANDOFF Mission #1172 §4 muc 9: sau merge ghi M8 va rut han lease.",
+    "ly_do": "Packet #1448 PR1 da MERGE (PR #1492 merge commit e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8, 2026-11-21T16:07:05Z, H 7dcaa20f8e100d47b17f04ac5841fc36bce1e4c0, CI master 39/39); M8 https://github.com/ducthangho/tra-luat/issues/1448#issuecomment-7065823063 (landed: false)."
+  }
 }

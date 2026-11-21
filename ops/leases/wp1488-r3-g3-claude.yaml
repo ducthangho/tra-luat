@@ -80,3 +80,5 @@ nang_tran:
 requires_live: false
 uy_quyen_merge: false
 uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'
+da_bi_thay_the: wp1488-r4-g4-claude
+da_bi_thay_the_ghi_chu: 'đặc tả đổi sang r4 (ops/specs/wp1488-r4.md) lúc 2026-11-21T13:25:05Z; lease r3 hết hiệu lực từ đây.'

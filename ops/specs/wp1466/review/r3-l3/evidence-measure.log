@@ -1,0 +1,86 @@
+MEASURED_AT 2026-11-21T00:24:16.449729+00:00
+HEAD_TREE b0079956d230ccb09b1c1d48f5a2633aaf09a173
+adf0abe3ff1368437ca16dc62b9010badb6a293f
+HASH 7b6457fda836f740e0d491bd0940532107fa9b4518c0eadf93522e4eb46ee454
+SHALLOW false ABBREV 7
+REFS 385
+MASTER 010046f2141799ec6ffc9cfa1322d49df3f3f680
+MASTER_COMMITS 14
+MASTER_DIFF ops/ci_provenance_test.py
+ops/reviews/pr1467-review-9-codex/VERDICT.md
+ops/reviews/pr1467-review-9-codex/run.json
+ops/reviews/pr1467-review-9-codex/stdout.log
+OPT_IN 0055 [0, 128] True
+OPT_IN 0053 [0, 128] True
+ADR_BASE 66 67
+ADR_0068_PLUS 0
+ADR_LINES 135 135
+INV 28 GATES 15 WITH_DEBT 15 DISCIPLINE 12 UNMEASURED 1 CASE_REFS 18 DEBTS 26 REFERENCED_DEBTS 24 MISSING []
+INV_SOURCE 1 1 True
+INV_SOURCE 2 1 True
+INV_SOURCE 3 1 True
+INV_SOURCE 4 1 True
+INV_SOURCE 5 1 True
+INV_SOURCE 6 1 True
+INV_SOURCE 7 1 True
+INV_SOURCE 8 1 True
+INV_SOURCE 9 1 True
+INV_SOURCE 10 1 True
+LOCK K01 muc 1 207e46db4d20dcd159321412c4e31dca6517437a35c8b9687374eb5c4d61f7ea
+LOCK K02 khoi 1 88a6e03e47ff4e1f5d4cf24437ffb0f0ececfa54c3d6ae56dbb481a50668bf62
+LOCK K03 muc 1 0468e4be4bac0d1bee16e6df0954bbdbd44e690c9bfa21bf182346e8b5db536c
+LOCK K04 khoi 1 1851ecb140623a5c260d022f6bfbf0b3328d3c574c6cde6b095cd9b56862eb6c
+LOCK K05 khoi 1 518397d12118baa2e9948b8af77804d091d24fe8ade74102917f5145493c52da
+LOCK K06 khoi 1 d48737a4a822e0c432a549a49b26e50e126ae8115fc965ecdcd4515bcd7e51d5
+LOCK K07 khoi 1 a96ca1f2aebbe32f853db74125de4eb6750050ee651d2853c5dbfc5882233c4e
+N8_NONBLANK 47
+VECTOR bang_lop [0, 7, 0, 0, 0, 0]
+VECTOR class_slug [0, 0, 0, 0, 0, 0]
+VECTOR review_verdict [0, 0, 0, 0, 0, 0]
+VECTOR KET_LUAN [0, 2, 0, 0, 0, 0]
+VECTOR numstat [0, 0, 0, 0, 0, 0]
+VECTOR ADR-0068|INV_|_inv_ [0, 0, 0, 0, 0, 0]
+VECTOR ai-dang-giu|ai_dang_giu|RC_DANG_GIU [11, 5, 0, 0, 0, 0]
+VECTOR refs/pull/ [0, 1, 1, 0, 0, 0]
+VECTOR eol|EOL|gitattributes [0, 0, 0, 0, 24, 0]
+VECTOR RC_PROVIDER [0, 9, 0, 0, 0, 0]
+VECTOR reviewed_sha|reviewing_head_sha [4, 49, 0, 0, 0, 0]
+VECTOR spec_hash|spec_sha256 [0, 28, 0, 0, 0, 0]
+VECTOR model_family|ho_model [15, 33, 0, 0, 0, 0]
+VECTOR effective_review_class|_kiem_lop_review|RC_LOP [15, 0, 0, 0, 0, 0]
+VECTOR chup-workspace|chup_workspace|ghi_workspace [0, 0, 21, 0, 0, 0]
+VECTOR MOC_10_2_2|moc_10_2_2 [0, 3, 0, 0, 0, 0]
+VECTOR codex_review_calls|RC_TRAN [0, 34, 0, 0, 0, 0]
+VECTOR NGUOI_CO_THAM_QUYEN|RC_TU_CAP [13, 15, 0, 0, 0, 1]
+VECTOR doctrine [1, 27, 5, 0, 5, 1]
+VECTOR mien_p3 [0, 3, 0, 0, 0, 0]
+VECTOR \bLIVE\b [0, 0, 0, 0, 0, 0]
+VECTOR changed_paths [0, 0, 0, 0, 0, 0]
+VECTOR tested_sha [0, 0, 0, 0, 0, 0]
+VECTOR ADR-0067|uy_quyen_quyet_dinh [0, 0, 0, 0, 0, 0]
+VECTOR Drive MCP|Sheets MCP [0, 0, 0, 0, 0, 0]
+VECTOR integration [0, 1, 0, 0, 0, 0]
+VECTOR label|assignee|board [1, 2, 8, 6, 1, 0]
+VECTOR diff --check [0, 0, 0, 0, 1, 0]
+VECTOR push_them|so_lan_push|M5 [0, 5, 3, 0, 0, 0]
+VECTOR writer_slot|hai writer|max_writers|executor_writers [0, 0, 1, 0, 0, 0]
+LABEL_READ .claude/dev/launcher.py 620 hoặc Windows không có job thì trả ngay từ đầu (không dò, không ngủ). `KeyboardInterrupt` KHÔNG bị hàm này
+LABEL_READ .claude/dev/launcher.py 2301 "--chdir", "--unsetenv", "--lock-file", "--sync-fd", "--remount-ro", "--exec-label",
+LABEL_READ .claude/dev/launcher.py 2302 "--file-label", "--proc", "--dev", "--tmpfs", "--mqueue", "--dir", "--seccomp",
+LABEL_READ .claude/dev/launcher.py 2845 except KeyboardInterrupt:      # Codex F5: ngắt khi chụp đầu ⇒ chưa sinh con, sổ phải KẾT THÚC
+LABEL_READ .claude/dev/launcher.py 2887 # Keep the requested label for audit, not as a machine-void certificate.
+LABEL_READ .claude/dev/launcher.py 2935 except KeyboardInterrupt:
+LABEL_READ .claude/dev/launcher.py 2975 except KeyboardInterrupt:
+LABEL_READ .claude/dev/launcher.py 3002 except KeyboardInterrupt:
+LABEL_READ .claude/dev/gate_lifecycle.py 62 chỉ khác lối vào: bản vá cũ chỉ che `KeyboardInterrupt` (SIGINT). Biến tín
+LABEL_READ .claude/dev/gate_lifecycle.py 498 `KeyboardInterrupt` rơi vào đúng quãng giữa thì cgroup ở lại vĩnh viễn — nên
+LABEL_READ .claude/dev/gate_lifecycle.py 1325 # Khối trên chỉ bắt `TimeoutExpired`, nên `proc.wait()` ném `KeyboardInterrupt`
+LABEL_READ .claude/dev/gate_lifecycle.py 1331 # `BaseException` chứ KHÔNG phải `Exception`: `KeyboardInterrupt` và
+LABEL_READ .claude/dev/gate_lifecycle.py 1510 for label, value in (
+LABEL_READ .claude/dev/gate_lifecycle.py 1516 raise ValueError("%s must be a lowercase 40-character SHA" % label)
+LABEL_READ .github/workflows/ci.yml 83 || contains(github.event.pull_request.labels.*.name, 'windows'))
+RECEIPTS 352 BANG_LOP 0
+PROTO_DIFF 72	1	.claude/dev/packet_loop.py
+115	1	.claude/dev/packet_loop_test.py
+46	2	docs/PROTOCOL_DA_PHIEN.md ADR 135
+TOTAL_ADDED 368

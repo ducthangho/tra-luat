@@ -1,0 +1,4 @@
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv3.oBfQ/out/prototype/.claude/dev/packet_loop_test.py:3802: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+SELECTED {'r812_r8_symlink_hoa_thuong_doi_chung', 'r812_nguoi_giu_prefix_giao_nhau'} FOUND {'r812_r8_symlink_hoa_thuong_doi_chung', 'r812_nguoi_giu_prefix_giao_nhau'}
+RESULT {'r812_nguoi_giu_prefix_giao_nhau': None, 'r812_r8_symlink_hoa_thuong_doi_chung': None}

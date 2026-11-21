@@ -1,0 +1,42 @@
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv3.oBfQ/out/prototype/.claude/dev/packet_loop_test.py:3802: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+COUNTS {"new": 24, "old": 132, "mut_new": 17, "mut_old": 21, "cases": 1606, "mutants": 1881}
+nền: 26/26 đạt · BỎ QUA: 0
+
+AC 19 — ánh xạ lớp lách → ca bắt-oan:
+  ok  78/78 lớp lách đều có ca bắt-oan (33 ca riêng biệt)
+
+tự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):
+  ok  inv_bo_kiem_duoi_goc → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_che_khong_render → giết 3 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_chan_html → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_khoi_thut_khong_danh_dau → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_khong_gop_dong → giết 3 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bang_gop_dong → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_kiem_khoa → giết 16 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_dem_dong_inv → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_doctrine_scan_bo_goi → giết 20 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K01 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K02 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K03 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K04 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K05 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K06 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  inv_bo_khoa_K07 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv3.oBfQ/out/tmp/new_mutants/packet_loop_test_4nwfbj42/mut_c04b5dc35cac52f2/packet_loop_test.py:3802: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+  ok  t1466_fixture_ve_trung_tinh → giết 2 ca đích · 3 đối chứng khác họ còn sống
+
+AC 18 — mỗi LỚP LÁCH phải có đột biến của nó:
+  ok  78 lớp lách đều có đột biến giết · 37 đột biến PHỐI HỢP · 0 ngoại lệ
+
+SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+  ca               : 1605
+  đột biến         : 1881
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+WP1174 carrier: KHÔNG chạy ở mảnh này (cả nhóm wp1174_* ở mảnh 0; job gom đòi đúng một mảnh đã chạy)
+
+TỔNG: ĐẠT
+REAL_RESULT (0, 26, False, 16)

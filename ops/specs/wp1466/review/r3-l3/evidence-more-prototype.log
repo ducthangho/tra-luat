@@ -1,0 +1,26 @@
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv3.oBfQ/out/prototype/.claude/dev/packet_loop_test.py:3802: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+prototype REGISTER 1606 1606 LINUX 1605 DIFF ['wp1174_windows_claim_rejected']
+OLD_CASES_BYTE_MATCH True
+NEW_MUTANT inv_bo_kiem_duoi_goc matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_che_khong_render matches [1] targets 3 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_chan_html matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_khoi_thut_khong_danh_dau matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_khong_gop_dong matches [1] targets 3 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bang_gop_dong matches [1] targets 2 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_kiem_khoa matches [1] targets 16 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_dem_dong_inv matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_doctrine_scan_bo_goi matches [1] targets 20 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_khoa_K01 matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_khoa_K02 matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_khoa_K03 matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_khoa_K04 matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_khoa_K05 matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_khoa_K06 matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT inv_bo_khoa_K07 matches [1] targets 1 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+NEW_MUTANT t1466_fixture_ve_trung_tinh matches [2] targets 2 control ('lease_hop_le_thi_mo_duoc_luot', 'transition_hop_le_rc0', 'cap_lan_4_thoat_3')
+TARGET_COVERAGE 24 24 MISSING []
+CASE_LIST ['doctrine_inv_bang_tach_dong_trong', 'doctrine_inv_bang_them_khoang_trang_van_xanh', 'doctrine_inv_chep_doctrine_van_rc_6', 'doctrine_inv_doi_mot_ky_tu', 'doctrine_inv_dong_html', 'doctrine_inv_dong_inv_ngoai_tieu_muc', 'doctrine_inv_fixture_trung_tinh_thuan', 'doctrine_inv_khoi_thut_bon', 'doctrine_inv_khoi_trong_comment_html', 'doctrine_inv_khoi_trong_rao_ma', 'doctrine_inv_lien_ket_noi_bo_van_xanh', 'doctrine_inv_lien_ket_ra_ngoai', 'doctrine_inv_ngat_dong_lai_van_xanh', 'doctrine_inv_rao_khong_dong', 'doctrine_inv_xoa_K01', 'doctrine_inv_xoa_K02', 'doctrine_inv_xoa_K03', 'doctrine_inv_xoa_K04', 'doctrine_inv_xoa_K05', 'doctrine_inv_xoa_K06', 'doctrine_inv_xoa_K07', 'doctrine_inv_xoa_cau_bang_noi_slug', 'doctrine_inv_xoa_cau_cat_scope', 'doctrine_inv_xoa_cau_hai_chuyen_tiep']
+AST_NEW_CALLS all doctrine_inv fixtures use CLI doctrine-scan; two direct tests also run doctrine-scan
+GATE prototype doctrine-scan 0 doctrine-scan: sạch — đã quét 12 tệp, 0 chỗ chép doctrine
+GATE prototype adr-song 0 adr-song: sạch — 67 ADR trên đĩa, 67 dòng trong §20, khớp 1–1 (tha thiếu trạng thái: ['0016'])

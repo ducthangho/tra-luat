@@ -1,0 +1,81 @@
+```yaml
+verdict: changes_requested
+reviewed_sha: 36dc91a5d70df511721745d057a2eb0d0c0e37df
+tree: 02c26a52bfc95696682e7dbe2705247140cb272e
+packet: BUNDLED-TACH-MANH
+lease: wp433-r9-g4-claude
+review_class: sensitive
+provider: openai_codex
+execution_surface: codex_cli
+transport: machine
+```
+
+**Ba P2 còn mở.** V8 xanh khi generator sinh phép gán nhiều đích mà loader từ chối. Bộ nghiệm thu vẫn xanh dưới hai đột biến làm cổng một mảnh xử lý sai. Loader runtime bỏ qua symlink đứt tại tên mảnh chính và trả về 0 ca. Selftest, EOL và bundle checker còn đỏ trên cả base lẫn ứng viên, với cùng tập ca đỏ trên từng phép đo.
+
+Đây là lượt **2/10 review mã**, tách khỏi 11/14 lượt review đặc tả. Preflight khớp revision 9, generation 4, base `0f9aa2a2cc697129e1f5be72feddf60986286865`, SHA/tree ứng viên, hash đặc tả và handoff, cùng hash effective write set `947eac15926d6f5fb1da46304b167c74dcd5f381b9b7540493d7e11f2fc3bb5d`. Diff đúng **9 tệp, +436/−61**. Commit cuối chỉ đổi manifest.
+
+Các phép đo chạy offline trên bản sao dưới `/dev/shm`, Linux x86_64, Python 3.13.18, Git 2.43.0, Codex CLI 0.171.0. Selftest giữ môi trường tiến trình, gồm `PATH`, locale và cấu hình UTF‑8, với `HOME` và `TMPDIR` tạm cùng chế độ tắt bytecode. Tôi dùng sparse checkout để loại các tên tệp bị cấm và phục hồi các ref cần đọc từ clone cục bộ. Checkout được giao giữ nguyên. Model và effort của phiên chưa có attestation độc lập.
+
+## Bảng sự thật
+
+| Phạm vi | Lệnh | rc | Kết quả |
+|---|---|---:|---|
+| Base §0, M1–M2 | `wc -c`, so tuple bằng `ast.literal_eval`, đếm manifest, `python scripts/tl.py workflow-audit --strict --json` | 0 | Base **285.112 B**, 18 fragment, 185 tệp manifest, `files_scanned=73`. Cả 18 mục cũ giữ nguyên nội dung và thứ tự tương đối. Ứng viên thêm đúng fragment của packet. |
+| V1–V2, M7 | Trên base, băm `generate_bundled_module_bytes` với fixture `wp9001_a.py`. Trên ứng viên, chạy `write_bundled_modules` vào thư mục riêng rồi `cmp` từng mảnh | 0 / 0 / 0 / 0 | Fixture base 216 B, SHA‑256 `73ad44659b63aea9b2f66fb1104c4c82deaa1ad1218e94adb80dcf38384441d7`. Hai mảnh ứng viên **168.748 / 130.941 B**, khớp byte. |
+| M8 | `python scripts/tl.py release-manifest --out "$scratch/RELEASE_MANIFEST.json"` rồi `cmp` | 0 / 0 | Manifest tái sinh khớp byte với commit. |
+| N1–N2 nộp | `python -B ma_tran_dot_bien.py "$repo"` rồi `diff -u` với các dòng kết quả biên nhận | 0 / 0 | Đối chứng `True`, 32/32. **43 đột biến**, `sai=0`, đủ đích đơn cho 32 khóa. Phản chứng bổ sung phát hiện F05–F07. [Ma trận](/dev/shm/wp433.c4mLuT/matrix.out) |
+| N3 selftest | `python scripts/tl.py --selftest` trên base và ứng viên, rồi `diff -u` danh sách đỏ | 1 / 1 / 0 | **1768/1784 → 1769/1785**. Cùng 16 ID đỏ, ca packet mới xanh. Điều kiện N/N chưa đạt. [ID đỏ](/dev/shm/wp433.c4mLuT/candidate.fail-ids) |
+| N3 freshness | `python scripts/tl.py test-fragments-check --json` | 0 | `ok=true`, hai mảnh, byte thực tế bằng byte kỳ vọng. |
+| N3 manifest | `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` | 0 | `ok=true`, `expected_file_count=checked_file_count=186`, `failed=[]`. |
+| N3 workflow | `python scripts/tl.py workflow-audit --strict --json` | 0 | `ok=true`, 74 tệp, `warn=[]`, `fail=[]`. |
+| N3 golden | `python scripts/tl.py golden-test --json` trên base và ứng viên. Chạy lại trên bản sao sạch theo `core.abbrev=7` của rig executor | 2 / 2 / 0 | Git mặc định làm `doc_claims_check_fixture` đỏ trên cả hai cây. Với `core.abbrev=7`, ứng viên **20/20**. Hai lượt selftest chính dùng cấu hình Git mặc định. [Golden chạy lại](/dev/shm/wp433.c4mLuT/golden.abbrev7) |
+| N3 EOL | `python .githooks/eol_policy_test.py` trên base và ứng viên | 1 / 1 | Cả hai **29/32**, cùng ba ca đỏ. [Base](/dev/shm/wp433.c4mLuT/early.base.eol), [ứng viên](/dev/shm/wp433.c4mLuT/early.c.eol) |
+| N3 gói | `python scripts/tl.py release-bundle --out "$scratch/early.zip" --json` và `python .github/checks/bundle_fragment_check.py --json` trên base và ứng viên | 0 / 1 / 1 | ZIP ứng viên có **187 mục**, `reproducible=true`. Checker nạp 18/19 ca, ID dev và bundle khớp trên từng cây, `load_error=null`. Cùng sáu ca cũ đỏ, ca packet mới xanh. [Base](/dev/shm/wp433.c4mLuT/early.base.bundlecheck), [ứng viên](/dev/shm/wp433.c4mLuT/early.c.bundlecheck) |
+| V31 gói giải nén | `python -B "$scratch/v31.py" "$scratch/early.zip"` | 0 | Đối chứng `True`, tập đỏ rỗng. Thêm chú thích vô hại để mảnh phụ vượt trần cho `False`, đỏ đúng `V31`. Lần đầu probe đọc nhầm globals của wrapper và rc 1. Kết quả dùng probe đã sửa. [Probe](/dev/shm/wp433.c4mLuT/v31.py) |
+| N3 Ruff | `python -m ruff --version`, probe `loi_ruff_ci()`, rồi `ruff check --no-cache --select F --statistics` trên 5 tệp handoff và `ruff check --no-cache --select F` trên fragment mới | 1 / 0 / 1 và 1 / 0 | Python thiếu module Ruff. Contract có 3 điểm kiểm, 0 lỗi. Binary 0.16.9 cho **4480 → 4480**, delta 0, fragment mới sạch. |
+| N3 kiểm kho | `git diff --check 0f9aa2a HEAD`, `python .claude/dev/packet_loop.py doctrine-scan --root .`, `python .claude/dev/packet_loop.py adr-song --root .` | 0 / 0 / 0 | Diff sạch, doctrine 0 vi phạm trên 12 tệp, ADR khớp 66/66. |
+| N4 | Lấy hai tệp từ exact OID `a8a3b3ca2fe5f48d8e6db64a8c6abacf97526b8c`, chạy writer, tái sinh manifest, chạy freshness, workflow và selftest trên bản sao | 0 / 0 / 0 / 0 / 1 | **168.748 / 146.627 B**, freshness `ok=true`, `warn=[]`, `fail=[]`. Selftest **1770/1786** với cùng 16 ID đỏ của base, cả hai ca mới xanh. Điều kiện N/N chưa đạt. [Selftest N4](/dev/shm/wp433.c4mLuT/n4.self) |
+
+**Đối chiếu M1–M9.** M1 giữ byte một mảnh, cắt theo byte UTF‑8 và LF, writer tái sinh hai mảnh và xóa mục đánh số lạc. M2 kiểm adapter bằng AST và literal, giới hạn tên khai theo tuple chuẩn liên tục trước khi ghép đường, kiểm thứ tự và trùng NFC+casefold xuyên mảnh, bỏ qua mảnh lạc và báo đúng tên mảnh khai bị thiếu. Đường chọn topology còn F07. M3 trả đúng kết quả trên các đối chứng hiện tại, gồm stale ở mảnh chính và mảnh phụ, hash/độ dài tệp đơn và chuỗi `tên\0bytes` nhiều mảnh. Bằng chứng nghiệm thu M3 còn F06. M4 đã chuyển đúng hai chỗ gọi writer. M5 chỉ đổi `files_scanned` từ 73 lên 74. M6 tính đủ 32 khóa trên đối chứng và ma trận nộp, còn các biểu hiện trong bảng lớp. M7 và M8 khớp byte khi tái sinh. M9 đổi đúng hai ghim 185 → 186 và hai dòng kê khai slot.
+
+## Lịch sử lớp §8.3
+
+Phép đóng lớp executor được chạy lại trên `4e74fe1` và `36dc91a` qua `python -B closure.py "$repo" 4e74fe1 HEAD`, rc 0. Bản chạy giữ logic đột biến, dùng checkout có lọc và đổi đích symlink của probe thành tệp vô hại trong cùng thư mục mảnh. Các phép bổ sung chạy mỗi biến thể trong tiến trình mới. [Phép đóng lớp](/dev/shm/wp433.c4mLuT/closure.out), [script đột biến](/dev/shm/wp433.c4mLuT/mutate.py)
+
+| Slug | Finding lượt 1 | Nhãn từng finding | Nhãn lớp | Phép kiểm đã chạy | Chưa đo |
+|---|---|---|---|---|---|
+| `shard-size-byte-oracle` | F01 | ĐÃ VÁ THẬT | **ĐÃ VÁ THẬT** | `closure.py`: đếm ký tự lọt ở bản cũ, đỏ đúng V5 ở bản mới. `mutate.py probe.py unicode threshold`: rc 0 từng tiến trình. Fixture chữ 3/4 byte có cỡ dòng `[454,454,454,455]`, hạn 908, nhóm `2+1+1`. Đột biến `>=` cho `1+1+1+1`, đỏ đúng V5. | Không còn phần cần đo để đóng F01. |
+| `shard-ast-shape-oracle` | F02 | ĐÃ VÁ THẬT với biểu thức thừa đã báo | **VÁ MỘT PHẦN** | `closure.py`: biểu thức thừa đỏ đúng V8 ở bản mới. `mutate.py probe.py chain statement`: rc 0 từng tiến trình. Gán nhiều đích ở mảnh chính và `AnnAssign` ở mảnh phụ đều làm loader từ chối, fragment vẫn 32/32. | F05 còn mở ở mảnh chính. |
+| `bundle-gate-fixture-oracle` | F03 | ĐÃ VÁ THẬT với fixture dùng chung generator và stale mảnh chính nhiều mảnh đã báo | **VÁ MỘT PHẦN** | `closure.py`: bỏ so mảnh chính đỏ đúng V24 ở bản mới. `mutate.py probe-extra.py one_control one_skip one_red bytes`: rc 0 từng tiến trình. Hai đột biến trạng thái cổng một mảnh sống. Lệch `actual_bytes` làm đỏ đúng V27/V28. | F06 còn mở ở đối chứng một mảnh. |
+| `shard-symlink-follow` | F04 | VÁ MỘT PHẦN | **VÁ MỘT PHẦN** | `closure.py`: cả ba đường chặn symlink chính trỏ tới tệp thường. `mutate.py probe_gate.py links primary_precheck`: rc 0 từng tiến trình. Đo mảnh 1, 2, 3, link cùng nội dung, đích writer giữ nguyên. Link đứt mảnh chính cho lỗi ở loader trực tiếp, runtime trả 0 ca. | F07 còn mở. Khoảng đua đọc mã, chưa dựng phản chứng. Windows native miễn theo Q4. |
+
+**Tỷ lệ lượt 1→2 là `|F|/|U| = 1/4 = 25%`.** Ba lớp cũ còn mở, không có lớp tái mở sau khi đã đóng. Hai lớp mới là `v32-symlink-denial-diagnostic` và `lease-acceptance-version-drift`. Tổng lượt 2 có **5 lớp, 7 biểu hiện**, gồm ba lớp có P2.
+
+## Bảng lớp lượt 2
+
+| `class_slug` | Finding IDs / biểu hiện | Mức cao nhất còn mở | Nguồn lượt/SHA | Cách vá chung | Phép kiểm đóng lớp |
+|---|---|---|---|---|---|
+| `shard-ast-shape-oracle` | F05 · gán nhiều đích ở mảnh chính, `AnnAssign` ở mảnh phụ | P2 | F02 lượt 1 `4e74fe1` → lượt 2 `36dc91a` | Quan sát đầy đủ hình dạng và số đích của phép gán | Đối chứng xanh, đột biến gán nhiều đích đỏ V8, biểu thức thừa vẫn bị bắt |
+| `bundle-gate-fixture-oracle` | F06 · mảnh đơn current bị từ chối, mảnh đơn stale được chấp nhận | P2 | F03 lượt 1 `4e74fe1` → lượt 2 `36dc91a` | Đối chứng cổng một mảnh trên byte ghim, đo quyết định bên cạnh hash/độ dài | `one_red` và `one_skip` bị bắt, các đột biến generator giữ tập đích đã khai |
+| `shard-symlink-follow` | F07 · topology runtime bỏ qua symlink chính bị đứt | P2 | F04 lượt 1 `4e74fe1` → lượt 2 `36dc91a` | Đưa mục symlink tại tên chính qua kiểm tra hợp đồng của loader | Cả link hợp lệ và link đứt trả `BUNDLED_MODULE_CONTRACT`, tệp thường vẫn nạp |
+| `v32-symlink-denial-diagnostic` | F08 · V32 đỏ khi nền từ chối tạo link, mất lý do | P3 | Lượt 2 `36dc91a` | Giữ chẩn đoán cục bộ của lỗi dựng fixture | Giả lập từ chối quyền, đủ 32 khóa, chỉ V32 đỏ và có lý do |
+| `lease-acceptance-version-drift` | F09 · M‑1 ghi r7/V1–V31 dưới hash r9 | P3 | Lượt 2, lease g4 | Đồng bộ câu M‑1 tại nguồn lease | Đọc lại M‑1, revision và hash cùng neo r9/V1–V32 |
+
+## Findings
+
+- **F05 · `shard-ast-shape-oracle` · P2.** `_gan` chỉ lấy `targets[0]`, nên `BUNDLED_FRAGMENT_SHARDS = EXTRA = (...)` có cùng hình dạng theo V8 với một phép gán hợp lệ. `python -B mutate.py probe.py chain` cho rc 0, `fragment True 32 []`, trong khi loader trả `BUNDLED_MODULE_CONTRACT`. Probe `statement` cho cùng kết quả với `AnnAssign` ở mảnh phụ. Biến thể mảnh phụ là độ mịn P3 theo Q9 vì V8 chỉ định mảnh chính và V22 đã đo loader. Gợi ý vá V8 bằng cách quan sát đúng một đích `ast.Name` cho mỗi `ast.Assign` sau docstring. [V8 và `_gan`](/dev/shm/wp433.c4mLuT/c/scripts/test_fragments/wp433_bundled_tach_manh.py:67), [đầu ra](/dev/shm/wp433.c4mLuT/probe.out)
+- **F06 · `bundle-gate-fixture-oracle` · P2.** V27 quan sát đúng bốn trường hash/độ dài của ca một mảnh và bỏ trạng thái cổng. `python -B mutate.py probe-extra.py one_control one_skip one_red` cho rc 0 trên cả ba tiến trình. Đối chứng current xanh, stale đỏ. `one_skip` chấp nhận mảnh đơn stale, còn `one_red` từ chối mảnh đơn current. Cả hai vẫn `fragment True 32 []` và freshness cây thật hai mảnh vẫn `ok=true`. Gợi ý cô lập fixture cổng khỏi đột biến định dạng generator bằng đầu ra kỳ vọng ghim ở biên gọi generator, rồi đo cả quyết định current/stale trên cây một mảnh. [V24–V29](/dev/shm/wp433.c4mLuT/c/scripts/test_fragments/wp433_bundled_tach_manh.py:179), [đầu ra](/dev/shm/wp433.c4mLuT/extra.out)
+- **F07 · `shard-symlink-follow` · P2.** `_runtime_fragment_topology` gọi `exists()` trước khi chuyển sang loader. Với symlink chính bị đứt, runtime chọn topology `none` và trả về 0 ca, trong khi loader trực tiếp trả lỗi hợp đồng. `python -B mutate.py probe_gate.py links` cho rc 0 và `dangling direct BUNDLED_MODULE_CONTRACT runtime 0`. Gợi ý nhận diện `is_symlink()` tại bước chọn topology để đưa mục này qua chốt hợp đồng sẵn có. [Chọn topology](/dev/shm/wp433.c4mLuT/c/scripts/tl_core/test_fragments.py:470), [đầu ra](/dev/shm/wp433.c4mLuT/precheck.out)
+- **F08 · `v32-symlink-denial-diagnostic` · P3.** `python -B mutate.py probe.py denied` giả lập `PermissionError`, rc 0, `fragment False 32 ['V32']`, stderr rỗng. V32 fail-closed đúng yêu cầu. Vòng `except` làm mất lý do mà r9 yêu cầu kèm theo. Gợi ý giữ thông tin chẩn đoán ngắn tại bước dựng link. [V32](/dev/shm/wp433.c4mLuT/c/scripts/test_fragments/wp433_bundled_tach_manh.py:218), [đầu ra](/dev/shm/wp433.c4mLuT/probe.out)
+- **F09 · `lease-acceptance-version-drift` · P3.** `rg -n 'merge_conditions|N1-N4|spec_hash' "$scratch/lease"` rc 0, dòng 32 neo hash r9, dòng 78 vẫn ghi r7/V1–V31. Gợi ý điều phối cập nhật M‑1 theo đúng revision và tập nghiệm thu đã duyệt. [Lease](/dev/shm/wp433.c4mLuT/lease:78)
+
+## Bốn điểm executor khai
+
+1. **Đúng về tương tác với ma trận, kết luận đủ đối chứng còn sai · P2 F06.** Với fixture dùng generator thật làm phía kỳ vọng, đổi byte định dạng có thể làm mất `current` và lan sang khóa cổng. N3 đo đúng cây thật hai mảnh. Hai đột biến một mảnh ở F06 lọt cả fragment lẫn đối chứng hai mảnh, nên phép đo vẫn có đường xanh giả.
+2. **Đúng với link trỏ tới tệp thường, thiếu trường hợp link đứt · P2 F07.** Trong `primary_precheck`, biến thể giữ symlink lại cho vòng đọc chung vẫn cho 32/32, cả ba link trỏ tới tệp thường đều STALE với `shards[i].actual_bytes=null`. Link chính bị đứt đổi chẩn đoán cổng từ MISSING sang STALE giữa hai biến thể, cả hai đều từ chối. Vì vậy chốt riêng ở cổng là thừa cho quyết định từ chối trên các ca đã đo, nhưng ảnh hưởng dạng chẩn đoán link đứt. Khoảng đua kiểm-rồi-mở còn thấy qua đọc mã. Tôi chưa xác lập P2 riêng cho khoảng đua đó.
+3. **Đúng về hệ quả trên nền thiếu quyền · P3 F08 cho phần chẩn đoán.** Giả lập từ chối quyền làm đỏ đúng V32. Vì fragment chạy trong gói, suy ra selftest người dùng mất một ca nếu gặp cùng điều kiện. Windows native được miễn theo Q4. Quy tắc fail-closed của r9 vẫn được áp dụng.
+4. **Đúng · P3 F09.** M‑1 là chữ cũ trong sổ lease. Exact SHA đã được review theo r9/V1–V32 neo bởi `spec_hash`.
+
+CI GitHub trên exact SHA, receipt đăng verdict, human audit, Ruff binary theo pin CI, Windows native và khoảng đua symlink chưa đo. N3 và N4 vẫn thiếu kết quả xanh bắt buộc trên rig reviewer dù các ca đỏ quan sát được có cùng ID trên base. Lượt offline này kết thúc với ba P2 mở.
+
+KET_LUAN: request_changes

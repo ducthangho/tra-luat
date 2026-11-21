@@ -557,6 +557,7 @@ LA_WINDOWS = os.name == "nt"
 SO_LAN_THU_LAI = 5            # tối đa 5 lần thử lại ⇒ 6 lời gọi
 CHO_GOC = 0.05               # chờ trước lần thử lại thứ k (k = 0..4): CHO_GOC · 2^k ⇒ tổng 1,55 s
 _thay_the = os.replace
+_xoa_cay = shutil.rmtree
 ngu_thu_lai = time.sleep
 
 def doi_ten_thu_lai(nguon, dich):
@@ -571,9 +572,28 @@ def doi_ten_thu_lai(nguon, dich):
                 raise
             ngu_thu_lai(CHO_GOC * 2 ** k)
 
+def don_thu_muc(p):
+    """Xoá cây thư mục tạm, cùng chính sách thử lại (#1475 review lượt 1 F1): mọi lỗi xoá được GOM (không nuốt câm như
+    `ignore_errors=True`); còn sót mà mọi lỗi đều là `PermissionError` trên Windows thì thử lại. Không bao giờ ném — dọn
+    dẹp không được đổi kết quả của lần ghi — nhưng còn sót thì in `KHONG_DON_DUOC` ra stderr và trả False."""
+    for k in range(SO_LAN_THU_LAI + 1):
+        loi = []
+        _xoa_cay(p, onexc=lambda ham, duong, e: loi.append(e)) if sys.version_info >= (3, 12) else \
+            _xoa_cay(p, onerror=lambda ham, duong, tt: loi.append(tt[1]))
+        if not os.path.lexists(p):
+            return True
+        if not (LA_WINDOWS and loi and all(isinstance(e, PermissionError) for e in loi)):   # dọn: chỉ thử lại PermissionError trên Windows
+            break
+        if k == SO_LAN_THU_LAI:   # dọn: hết lượt
+            break
+        ngu_thu_lai(CHO_GOC * 2 ** k)
+    print(f"KHONG_DON_DUOC {p}: {[f'{type(e).__name__}: {e}' for e in loi][:3]}", file=sys.stderr)
+    return False
+
 def ghi_nguyen_tu(out, tep):
     """Ghi vào thư mục tạm CÙNG CẤP rồi `os.replace`: lỗi giữa chừng ⇒ `out` vắng hoặc giữ nguyên bản trước.
-    Cả ba lần đổi tên (cất bản trước · đưa tạm vào chỗ · hoàn tác) đi qua `doi_ten_thu_lai` (#1475)."""
+    Cả ba lần đổi tên (cất bản trước · đưa tạm vào chỗ · hoàn tác) đi qua `doi_ten_thu_lai`; cả hai lần dọn qua
+    `don_thu_muc` (#1475). Hoàn tác hỏng thì bản trước GIỮ NGUYÊN ở `<tam>.cu` để phục hồi tay, còn thư mục tạm vẫn được dọn."""
     out = Path(out).resolve()
     out.parent.mkdir(parents=True, exist_ok=True)
     tam = Path(tempfile.mkdtemp(prefix=f".{out.name}.tam-", dir=out.parent))
@@ -585,11 +605,15 @@ def ghi_nguyen_tu(out, tep):
             doi_ten_thu_lai(out, cu)
         doi_ten_thu_lai(tam, out)
     except BaseException:
-        if cu.exists() and not out.exists():
-            doi_ten_thu_lai(cu, out)
-        shutil.rmtree(tam, ignore_errors=True)
+        try:
+            if cu.exists() and not out.exists():
+                doi_ten_thu_lai(cu, out)
+        finally:   # dọn thư mục tạm KỂ CẢ khi hoàn tác ném
+            if os.path.lexists(tam):
+                don_thu_muc(tam)
         raise
-    shutil.rmtree(cu, ignore_errors=True)
+    if os.path.lexists(cu):
+        don_thu_muc(cu)
 
 def cac_trang_thai(prov):
     m = prov["moc"]

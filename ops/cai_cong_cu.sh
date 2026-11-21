@@ -219,7 +219,10 @@ fi
 # thang trong luc chay cong thuc, nen cong thuc goi bo chon roi mot buoc sau loi de lai thu muc cua lan LOI cho moi buoc CI
 # sau (no WP1404-GITHUB-PATH-LAN-LOI, Codex wp1404 luot 2 P3). Tep cho theo KENH_KQ HIEN HANH: tep cua cac luot truoc (ke ca
 # tien trinh nen ghi muon) khong bao gio duoc doc (B4). Chep loi => coi nhu cai loi, di dung nhanh loi ben duoi (B3).
-if [ "$RC_CAI" -eq 0 ] && [ -s "$KENH_KQ.github_path" ] && [ -n "${GITHUB_PATH:-}" ]; then
+# Codex wp1488 luot 1 (P2): chi chep khi kenh CUOI la `DICH` — cong thuc goi bo chon roi ket thuc o `GIU_PATH` hay roi ve
+# stdout (kenh rong) thi tep cho con la dong cu, khong duoc ghi (B5). Ham, khong bien: luot `source` khong de lai bien.
+_tl1488_kenh_la_dich() { case "$(cat -- "$KENH_KQ" 2>/dev/null)" in DICH$'\n'?*) return 0 ;; esac; return 1; }
+if [ "$RC_CAI" -eq 0 ] && [ -s "$KENH_KQ.github_path" ] && [ -n "${GITHUB_PATH:-}" ] && _tl1488_kenh_la_dich; then
   cat -- "$KENH_KQ.github_path" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \$GITHUB_PATH" >&2; RC_CAI=1; }
 fi
 if [ "$RC_CAI" -ne 0 ]; then

@@ -1,0 +1,73 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1488
+packet_id: wp1488
+spec_packet_id: CAI-GITHUB-PATH-HOAN-GHI
+revision: 1
+generation: 1
+lease_id: wp1488-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_fallback: 'claude, context đọc-chỉ độc lập, khai same-provider'
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+review_class: sensitive
+effective_review_class: sensitive
+risk: sensitive
+access: read-write
+depends_on: []
+spec_path: ops/specs/wp1488-r1.md
+spec_hash: 1661834fbec3076d9c354999f42cb140594deb1140f1f4cdae18ab400cd0c0c8
+spec_sha256_required: 1661834fbec3076d9c354999f42cb140594deb1140f1f4cdae18ab400cd0c0c8
+spec_duyet: 'chủ kho duyệt băm 1661834f qua AskUserQuestion 21-11-2026 ~08:27Z trong phiên session_015GtxrazyAyLwN5BiEB52Sq, lựa chọn "Duyệt, cấp lease (Recommended)"; chỉ thị gốc "Mở packet sửa nợ GITHUB_PATH".'
+write_set:
+- .claude/dev/launcher_test.py
+- ops/acceptance/wp1488/RESULTS.md
+- ops/acceptance/wp1488/VERDICT.md
+- ops/cai_cong_cu.sh
+- ops/leases/wp1488-r1-g1-claude.yaml
+- ops/specs/wp1488-r1.md
+write_set_hash: 91326f7df2f8781a6d7d62eeb753767ffecd5a3f390977183699da91f91876f7
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp (LC_ALL=C), nối bằng LF, kết thúc bằng LF
+effective_write_set_nguon: khai_bao_trong_spec
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-21T08:27:56Z'
+  goc_quet: 'fetch đủ refs/heads/* (ls-remote so tập với refs/remotes/origin: thiếu 0); master cục bộ = origin/master 8656dc017'
+  ket_qua: 'ops/cai_cong_cu.sh, .claude/dev/launcher_test.py, ops/cong_cu.yaml: ai-dang-giu NGƯỜI_GIỮ 0 (chỉ lease HẾT_HẠN)'
+branch: claude/ci-github-path-hoan-ghi
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 8656dc0176ed108e12c209ba55c91a1f6f9d612f
+start_from_sha: 8656dc0176ed108e12c209ba55c91a1f6f9d612f
+reviewed_sha_required: 8656dc0176ed108e12c209ba55c91a1f6f9d612f
+reviewed_sha_required_nghia: 'Chưa có head ứng viên; mọi verdict neo exact head THẬT của nhánh thi công.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1488
+granted_on_instruction_readback: 'chủ kho 21-11: "Mở packet sửa nợ GITHUB_PATH. Cập nhật thay đổi, kiểm tra trạng thái"; duyệt spec và cấp lease qua AskUserQuestion.'
+granted_on_instruction_note: 'không cấp: merge/land, deploy, LIVE, sửa cong_cu.yaml/launcher.py/hook/workflow.'
+recorded_by: 'phiên session_015GtxrazyAyLwN5BiEB52Sq'
+recorder_is_executor: true
+recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị trực tiếp của chủ kho; lease KHÔNG tự cấp — chủ kho duyệt qua AskUserQuestion.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
+leased_at_utc: '2026-11-21T08:27:56Z'
+heartbeat_at: '2026-11-21T09:22:28Z'
+lease_until: '2026-11-21T14:27:56Z'
+lease_expires_at_utc: '2026-11-21T14:27:56Z'
+lease_until_ghi_chu: '6h; rút hạn sau land.'
+attempts_used: 1
+attempts_limit: 2
+budget:
+  codex_review_calls: {used: 2, reserved: 0, limit: 2}
+  codex_review_calls_ghi_chu: 'lượt 1 ở 2847860, lượt 2 ở e21001f: request_changes (VERDICT.md). Hết ngân sách: Review Rescue Checkpoint.'
+requires_live: false
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'
+da_bi_thay_the: wp1488-r2-g2-claude
+da_bi_thay_the_ghi_chu: 'đặc tả đổi sang r2 (ops/specs/wp1488-r2.md) lúc 2026-11-21T09:56:13Z; lease r1 hết hiệu lực từ đây.'

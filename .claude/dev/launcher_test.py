@@ -11553,8 +11553,12 @@ def _wp858_chay_cai(s, ten, nen, tot, dau="hong", bang_ke=None, them=None, truc_
     apt = f'case " $* " in *" bash "*) printf %s {shlex.quote(cai_in)};; esac; exit 0' if cai_in else "exit 0"
     tep = {bin_ / "sudo": f'n="$1"; shift; exec \'{bin_}\'/"$n" "$@"', bin_ / "apt-get": apt,
            bin_ / "choco": "exit 0", bin_ / "brew": f"[ \"$1\" = --prefix ] && echo '{s / 'brew'}'; exit 0",
-           # `-w` → `W:<đường>`; `-u` ánh xạ `V:` về `<sân>/v`; `CYGPATH_{W,U}_HONG` ⇒ thoát 37 (`-u` vẫn in đường đúng).
-           bin_ / "cygpath": ('[ "$1" = -w ] && { [ -n "${CYGPATH_W_HONG:-}" ] && exit 37; echo "W:$2"; exit 0; }; '
+           # `-w` → `W:<đường>`; `-u` ánh xạ `V:` về `<sân>/v`; `CYGPATH_{W,U}_HONG` ⇒ IN đường rồi thoát 37 (wp1488 r3: phải đo
+           # được việc xét mã thoát, không chỉ việc thấy chuỗi rỗng); `CYGPATH_W_RONG` ⇒ `-w` rc 0 mà không in gì;
+           # `CYGPATH_W_KIEU=du_lf|cr` ⇒ rc 0, in thừa một LF ở đuôi / CR trước LF (Codex wp1488 lượt 4).
+           bin_ / "cygpath": ('[ "$1" = -w ] && { [ -n "${CYGPATH_W_RONG:-}" ] && exit 0; '
+                              'case "${CYGPATH_W_KIEU:-}" in du_lf) printf "W:%s\\n\\n" "$2"; exit 0;; '
+                              'cr) printf "W:%s\\r\\n" "$2"; exit 0;; esac; echo "W:$2"; exit ${CYGPATH_W_HONG:+37}; }; '
                               'while [ "${1#-}" != "$1" ]; do shift; done; '
                               f'case "$1" in V:*) echo "{s / "v"}${{1#V:}}";; *) echo "$1";; esac; '
                               'exit ${CYGPATH_U_HONG:+37}')}
@@ -12003,6 +12007,229 @@ esac
 
 
 @ca
+def r1488_github_path_chi_ghi_khi_thanh_cong():
+    """wp1488 (ops/specs/wp1488-r3.md N1): chỉ lượt CUỐI thành công mới thêm dòng vào $GITHUB_PATH. Mỗi kịch bản chốt
+    nội dung $GITHUB_PATH theo DÒNG. (A) lượt đầu gọi bộ chọn tới `tot2` rồi lỗi, lượt thử lại qua stdout ⇒ không có `tot2`
+    · (A') lượt thử lại gọi bộ chọn tới thư mục tốt ⇒ đúng MỘT dòng · (B) công thức không apt gọi bộ chọn rồi lỗi ⇒ rỗng
+    · (C) tiến trình nền của lượt đầu gọi bộ chọn SAU khi lượt thử lại xong ⇒ dòng của nó không vào · (D) `--bat-buoc`
+    thật, công cụ tuỳ chọn gọi bộ chọn rồi lỗi ⇒ chỉ dòng của công cụ bắt buộc · (E) $GITHUB_PATH không ghi được ⇒ ≠ 0,
+    có dòng báo · (F) tệp chờ không ghi được ⇒ bộ chọn lỗi, ≠ 0. Codex lượt 1: so NGUYÊN BYTE của tệp đích (P3); (C) writer
+    cũ ghi ĐÚNG LÚC script đọc kênh cuối, tức sau khi lượt thử lại đã thoát (P2); (G) kết quả cuối `GIU_PATH` · (H) rơi về
+    stdout ⇒ không ghi (P2, B5); (I) lượt `source` của `--bat-buoc`: chép lỗi ở công cụ tuỳ chọn ⇒ đi tiếp (B3).
+    r2 (Codex lượt 2): so BYTE (`read_bytes`, bắt CRLF); móc của (C) khớp ĐÚNG đối số lần đọc kênh cuối; (J) công thức tự
+    ghi DICH cho thư mục khác ⇒ không ghi, có cảnh báo, PATH nội bộ dùng thư mục ấy; (K1) lần đọc kênh in đủ rồi lỗi ·
+    (K2) lần đọc kênh lỗi không in gì ⇒ cả hai rc 7, không ghi. r3 (bỏ tệp chờ, Codex lượt 3): (F) bỏ; (J) PATH nội bộ VÀ
+    $GITHUB_PATH cùng là DICH công thức tự ghi; (L) DICH có `\\n`/`\\r` ⇒ từ chối; (M) `--bat-buoc` dưới `bash -a`: tiến trình
+    con lượt sau không thấy `KQ`/hàm mới; (W) Windows: `cygpath -w` rc 0 mà rỗng / thừa LF đuôi / có CR ⇒ từ chối;
+    (K3) đường thành công đọc kênh ĐÚNG MỘT LẦN. r4 (nợ WP1488-WIN-THEO-LENH): (N) `--win` THẬT chạy qua `"--win"` có nháy
+    và qua tab ⇒ `W:<dir>`; chuỗi `--win` chỉ nằm trong dữ liệu, hoặc nhánh có `--win` không chạy ⇒ `<dir>` POSIX; (I-win)
+    như (I) trên nhánh `DICH_WIN`: `cygpath -w` hỏng ở công cụ tuỳ chọn dưới `--bat-buoc` ⇒ đi tiếp."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()                       # PyYAML vắng ⇒ ĐỎ, không bỏ qua
+    q = shlex.quote
+    nhanh = {"CAI_CONG_CU_CHO_GIAY": "0"}   # #1479: bỏ thời gian chờ giữa các lượt thử lại
+
+    def dong(gp):
+        return gp.splitlines()
+
+    def tep(s):   # NGUYÊN BYTE của $GITHUB_PATH giả (`read_bytes`: không strip/split, không chuẩn hoá CRLF — Codex lượt 1–2)
+        return (s / "github_path").read_bytes()
+
+    cat_that = shutil.which("cat")
+    bang(cat_that is not None, "KHONG DO DUOC: khong co cat")
+
+    for kieu in ("stdout", "bo_chon"):   # (A) / (A')
+        with San() as s:
+            co, tot2 = s / "da-update", s / "tot2"
+            apt = f'case "$1" in update) : > {q(str(co))}; exit 0;; esac; exit 0'
+            lai = ('echo "${CONG_CU_GOC:-}/usr/bin"' if kieu == "stdout"
+                   else 'chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin"')
+            lenh = (f'if [ -f {q(str(co))} ]; then {lai}; else apt-get install -y ripgrep '
+                    f'&& chon_thu_muc_chay_duoc rg {q(str(tot2))} && false; fi')
+            p, gp, uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh, env_them=nhanh, ung_vien={str(tot2): (
+                f"[ -f {q(str(co))} ] && exit 1; echo 'ripgrep 14.1.0'")})
+            mong = b"" if kieu == "stdout" else f"{uv}\n".encode()
+            bang(co.exists() and p.returncode == 0 and '"DAT"' in p.stdout and tep(s) == mong,
+                 f"({'A' if kieu == 'stdout' else "A'"}) GITHUB_PATH sai sau luot dau loi: rc={p.returncode} "
+                 f"GITHUB_PATH={tep(s)!r} mong={mong!r} {p.stderr[-200:]}")
+    with San() as s:   # (B)
+        tot = s / "tot"
+        p, gp, _uv, _x, _t = _wp868_chay(s, lenh=f"chon_thu_muc_chay_duoc rg {q(str(tot))} && false",
+                                         ung_vien={str(tot): "echo 'ripgrep 14.1.0'"})
+        bang(p.returncode != 0 and tep(s) == b"",
+             f"(B) cong thuc loi sau bo chon ma GITHUB_PATH van co dong: rc={p.returncode} GITHUB_PATH={tep(s)!r}")
+    with San() as s:   # (C) writer cũ ghi ĐÚNG LÚC script đọc kênh CUỐI (sau khi lượt thử lại đã thoát) — Codex lượt 1–2
+        uv, muon = s / "goc" / "usr" / "bin", s / "muon"
+        co, di, xong = (q(str(s / t)) for t in ("da-update", "di", "xong"))
+        # `cat` giả ĐẦU PATH, khớp ĐÚNG đối số của lần đọc kênh cuối (`cat -- <TAM_CAI>/kq-thu-lai-1`): phát dấu `di`, chờ writer
+        # ghi xong rồi mới đọc. Không khớp lần nào ⇒ `di` vắng ⇒ ca ĐỎ báo điểm đồng bộ đã đổi (không âm thầm đo sai chỗ).
+        cat_gia = (f'if [ "$#" -eq 2 ] && [ "$1" = -- ]; then case "$2" in */kq-thu-lai-1) if [ ! -f {di} ]; then : > {di}; '
+                   f'i=0; while [ ! -f {xong} ] && [ "$i" -lt 500 ]; do sleep 0.01; i=$((i + 1)); done; fi ;; esac; fi; '
+                   f'exec {q(cat_that)} "$@"')
+        lenh = (f'if [ -f {co} ]; then chon_thu_muc_chay_duoc rg "${{CONG_CU_GOC:-}}/usr/bin"; '
+                f'else ( i=0; while [ ! -f {di} ] && [ "$i" -lt 500 ]; do sleep 0.01; i=$((i + 1)); done; '
+                f'[ -f {di} ] || exit 96; chon_thu_muc_chay_duoc rg {q(str(muon))} && : > {xong} ) >/dev/null 2>&1 & '
+                f'apt-get install -y ripgrep; fi')
+        apt = f'if [ "$1" = update ]; then : > {co}; exit 0; fi; exit 100'
+        p, gp, _uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh, env_them=nhanh,
+                                         ung_vien={str(muon): "echo 'ripgrep 14.1.0'", str(s / "dau" / "cat"): cat_gia})
+        bang((s / "di").exists(), "(C) diem dong bo da doi: moc `cat -- <kenh kq-thu-lai-1>` khong kich hoat")
+        bang((s / "xong").exists(), "(C) fixture ro: writer cu chua ghi o thoi diem doc kenh cuoi (phep do khong xay ra)")
+        bang(p.returncode == 0 and tep(s) == f"{uv}\n".encode(),
+             f"(C) tep cho cua luot truoc bi doc: rc={p.returncode} GITHUB_PATH={tep(s)!r} mong={str(uv)!r} "
+             f"{p.stderr[-200:]}")
+    with San() as s:   # (D)
+        tuy, bb = _WP1045_TUY, _WP1045_BB
+        p, gp, uv = _wp1045_chay(s, "--bat-buoc", {tuy: False, bb: True},
+                                 tep={tuy: s / f"uv_{tuy}", bb: s / f"uv_{bb}"},
+                                 lenh_rieng={tuy: f'chon_thu_muc_chay_duoc {tuy} "$UV_{tuy.upper()}" && false'})
+        bang(p.returncode == 0 and tep(s) == f"{uv[bb]}\n".encode(),
+             f"(D) --bat-buoc: cong cu tuy chon loi sau bo chon ma van ghi GITHUB_PATH: rc={p.returncode} "
+             f"GITHUB_PATH={tep(s)!r} {p.stderr[-300:]}")
+    with San() as s:   # (E) $GITHUB_PATH trỏ vào một THƯ MỤC ⇒ `>>` lỗi (root vẫn lỗi, khác chmod)
+        dich_hong = s / "gp-la-thu-muc"; dich_hong.mkdir()
+        goc_run = subprocess.run
+
+        def run_doi_gp(args, **kw):
+            if len(args) > 1 and str(args[-2]).endswith("cai_cong_cu.sh"):
+                kw["env"] = dict(kw["env"], GITHUB_PATH=str(dich_hong))
+            return goc_run(args, **kw)
+        subprocess.run = run_doi_gp
+        try:
+            p, _gp, _uv, _x, _t = _wp868_chay(s)
+        finally:
+            subprocess.run = goc_run
+        bang(p.returncode != 0 and "khong ghi duoc $GITHUB_PATH" in p.stderr,
+             f"(E) ghi GITHUB_PATH hong ma rc={p.returncode} / thieu dong bao: {p.stderr[-300:]}")
+    uvb = '"${CONG_CU_GOC:-}/usr/bin"'
+    with San() as s:   # (G) bộ chọn ra DICH, công thức sửa `rg` đầu PATH, gọi lại ⇒ kết quả cuối GIU_PATH
+        lenh = (f'chon_thu_muc_chay_duoc rg {uvb} && cp -- {uvb}/rg {q(str(s / "dau" / "rg"))} '
+                f'&& chon_thu_muc_chay_duoc rg {uvb}')
+        p, gp, _uv, _x, _t = _wp868_chay(s, lenh=lenh)
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and "giu nguyen PATH" in p.stderr and tep(s) == b"",
+             f"(G) ket qua cuoi GIU_PATH ma GITHUB_PATH co dong: rc={p.returncode} GITHUB_PATH={tep(s)!r} "
+             f"{p.stderr[-200:]}")
+    with San() as s:   # (H) bộ chọn ra DICH rồi công thức làm rỗng kênh, in thư mục ⇒ rơi về stdout (không ghi, như cũ)
+        lenh = f'chon_thu_muc_chay_duoc rg {uvb} && : > "$KENH_KQ" && echo {uvb}'
+        p, gp, _uv, _x, _t = _wp868_chay(s, lenh=lenh)
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and tep(s) == b"",
+             f"(H) roi ve stdout ma GITHUB_PATH co dong: rc={p.returncode} GITHUB_PATH={tep(s)!r} {p.stderr[-200:]}")
+    with San() as s:   # (I) `--bat-buoc`, $GITHUB_PATH là thư mục: công cụ tuỳ chọn chép lỗi ⇒ đi tiếp; bắt buộc ⇒ ≠ 0
+        tuy, bb = _WP1045_TUY, _WP1045_BB
+        hong = s / "gp-la-thu-muc"; hong.mkdir()
+        goc_run = subprocess.run
+
+        def run_doi_gp(args, **kw):
+            if len(args) > 1 and str(args[-2]).endswith("cai_cong_cu.sh"):
+                kw["env"] = dict(kw["env"], GITHUB_PATH=str(hong))
+            return goc_run(args, **kw)
+        subprocess.run = run_doi_gp
+        try:
+            p, _gp, _uv = _wp1045_chay(s, "--bat-buoc", {tuy: False, bb: True},
+                                       tep={tuy: s / f"uv_{tuy}", bb: s / f"uv_{bb}"})
+        finally:
+            subprocess.run = goc_run
+        bang(p.returncode != 0 and f"'{tuy}' (bat_buoc: false) khong cai duoc" in p.stderr
+             and p.stderr.count("khong ghi duoc $GITHUB_PATH") == 2,
+             f"(I) --bat-buoc: loi chep o cong cu tuy chon khong di tiep / cong cu bat buoc khong dung: "
+             f"rc={p.returncode} {p.stderr[-400:]}")
+    with San() as s:   # (I-win) r4: như (I) trên nhánh `DICH_WIN` — `cygpath -w` hỏng ở công cụ tuỳ chọn ⇒ đi tiếp
+        tuy, bb = _WP1045_TUY, _WP1045_BB
+        dau = s / "dau"; dau.mkdir()
+        (dau / "cygpath").write_text('#!/bin/sh\n[ "$1" = -w ] && { echo "W:$2"; exit 37; }\n'
+                                     'while [ "${1#-}" != "$1" ]; do shift; done; echo "$1"\n')
+        (dau / "cygpath").chmod(0o755)
+        p, _gp, uv = _wp1045_chay(s, "--bat-buoc", {tuy: False, bb: True}, dau=dau,
+                                  tep={tuy: s / f"uv_{tuy}", bb: s / f"uv_{bb}"},
+                                  lenh_rieng={tuy: f'chon_thu_muc_chay_duoc --win {tuy} "$UV_{tuy.upper()}"'})
+        bang(p.returncode == 0 and f"'{tuy}' (bat_buoc: false) khong cai duoc" in p.stderr
+             and "cygpath -w hong" in p.stderr and tep(s) == f"{uv[bb]}\n".encode(),
+             f"(I-win) --bat-buoc: cygpath -w hong o cong cu tuy chon khong di tiep: rc={p.returncode} "
+             f"GITHUB_PATH={tep(s)!r} {p.stderr[-400:]}")
+    with San() as s:   # (J) công thức tự ghi DICH cho Y (cũng chạy được) ⇒ PATH nội bộ VÀ $GITHUB_PATH cùng là Y (một nguồn)
+        khac = s / "khac"
+        lenh = (f'chon_thu_muc_chay_duoc rg {uvb} && printf \'DICH\\n%s\' {q(str(khac))} > "$KENH_KQ"')
+        p, gp, _uv, _x, _t = _wp868_chay(s, lenh=lenh, ung_vien={str(khac): "echo 'ripgrep 9.9.9'"})
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and '"9.9.9"' in p.stdout and tep(s) == f"{khac}\n".encode(),
+             f"(J) PATH noi bo va GITHUB_PATH khong cung mot DICH: rc={p.returncode} GITHUB_PATH={tep(s)!r} "
+             f"{p.stdout[-200:]} {p.stderr[-200:]}")
+    for nhan, ky in (("L-LF", "\n"), ("L-CR", "\r")):   # (L) DICH có ký tự xuống dòng ⇒ từ chối ghi $GITHUB_PATH
+        with San() as s:
+            # Qua biến môi trường: công thức trong bản kê là MỘT dòng, nhúng LF thẳng vào thì `eval` lỗi cú pháp.
+            p, gp, _uv, _x, _t = _wp868_chay(
+                s, lenh=f'chon_thu_muc_chay_duoc rg {uvb} && printf \'DICH\\n%s\' "$DUONG_LA" > "$KENH_KQ"',
+                env_them={"DUONG_LA": str(s / "goc" / "usr" / "bin") + ky + "x"})
+            bang(p.returncode != 0 and tep(s) == b"" and "ky tu xuong dong" in p.stderr,
+                 f"({nhan}) DICH co ky tu xuong dong ma van ghi / khong bao: rc={p.returncode} GITHUB_PATH={tep(s)!r} "
+                 f"{p.stderr[-200:]}")
+    with San() as s:   # (M) `bash -a` + `--bat-buoc`: tiến trình con của lượt sau không thấy KQ / hàm mới (Codex lượt 3 P3)
+        tuy, bb = _WP1045_TUY, _WP1045_BB
+        moi_truong = s / "moi-truong.txt"
+        goc_run = subprocess.run
+
+        def run_a(args, **kw):
+            if len(args) > 1 and str(args[-2]).endswith("cai_cong_cu.sh"):
+                args = [args[0], "-a"] + list(args[1:])
+            return goc_run(args, **kw)
+        subprocess.run = run_a
+        try:
+            p, _gp, uv = _wp1045_chay(s, "--bat-buoc", {tuy: False, bb: True},
+                                      tep={tuy: s / f"uv_{tuy}", bb: s / f"uv_{bb}"},
+                                      lenh_rieng={bb: f'env > {q(str(moi_truong))} && chon_thu_muc_chay_duoc {bb} '
+                                                      f'"$UV_{bb.upper()}"'})
+        finally:
+            subprocess.run = goc_run
+        lo = [d for d in (moi_truong.read_text(encoding="utf-8", errors="replace").splitlines() if moi_truong.exists() else [])
+              if d.startswith("KQ=") or "_tl1488" in d]
+        bang(moi_truong.exists() and p.returncode == 0 and lo == []
+             and tep(s) == f"{uv[tuy]}\n{uv[bb]}\n".encode(),
+             f"(M) bash -a: KQ/ham lo sang tien trinh con luot sau: rc={p.returncode} lo={lo} GITHUB_PATH={tep(s)!r} "
+             f"{p.stderr[-300:]}")
+    for nhan, env_w in (("W-rong", {"CYGPATH_W_RONG": "1"}),   # (W) Windows (cygpath giả): rc 0 mà RỖNG
+                        ("W-du-lf", {"CYGPATH_W_KIEU": "du_lf"}),   # rc 0, thừa một LF ở đuôi (Codex lượt 4 P3)
+                        ("W-cr", {"CYGPATH_W_KIEU": "cr"})):        # rc 0, CR trước LF
+        with San() as s:
+            p, gp, _uv, _d = _wp858_chay_cai(s, "git", "windows", _WP858_TOT["git"], env_them=env_w)
+            bang(p.returncode != 0 and tep(s) == b"" and ("rong" in p.stderr or "xuong dong" in p.stderr),
+                 f"({nhan}) dau ra cygpath -w sai dang ma van ghi / rc={p.returncode} GITHUB_PATH={tep(s)!r} "
+                 f"{p.stderr[-200:]}")
+    # (N) r4: chế độ Windows lấy từ NHÃN kênh do bộ chọn tự ghi, không đoán từ văn bản `$LENH` (r3 sai cả bốn biến thể).
+    cyg_n = '[ "$1" = -w ] && { echo "W:$2"; exit 0; }; while [ "${1#-}" != "$1" ]; do shift; done; echo "$1"'
+    for nhan, mau, win in (("N-nhay", 'chon_thu_muc_chay_duoc "--win" rg {u}', True),
+                           ("N-tab", 'chon_thu_muc_chay_duoc\t--win rg {u}', True),
+                           ("N-du-lieu", ": 'chon_thu_muc_chay_duoc --win rg' && chon_thu_muc_chay_duoc rg {u}", False),
+                           ("N-nhanh-khong-chay",
+                            "if false; then chon_thu_muc_chay_duoc --win rg x; fi; chon_thu_muc_chay_duoc rg {u}", False)):
+        with San() as s:
+            p, gp, uv, _x, _t = _wp868_chay(s, lenh=mau.format(u=uvb), ung_vien={str(s / "dau" / "cygpath"): cyg_n},
+                                            env_them=nhanh)
+            mong = (("W:" if win else "") + str(uv) + "\n").encode()
+            bang(p.returncode == 0 and tep(s) == mong and '"DAT"' in p.stdout,
+                 f"({nhan}) --win {'THAT' if win else 'KHONG chay'} ma GITHUB_PATH={tep(s)!r} (mong {mong!r}) / "
+                 f"rc={p.returncode} {p.stderr[-300:]}")
+    for nhan, than_cat in (("K1", f'"{cat_that}" "$2"; exit 9'),   # in đủ nội dung kênh rồi lỗi
+                           ("K2", None)):                          # lần đầu lỗi không in gì; lần sau (nếu có) đọc được
+        with San() as s:
+            dem = q(str(s / "dem-cat"))
+            if than_cat is None:
+                than_cat = f'if [ ! -f {dem} ]; then : > {dem}; exit 9; fi; exec {q(cat_that)} "$@"'
+            cat_gia = (f'if [ "$#" -eq 2 ] && [ "$1" = -- ]; then case "$2" in */kq) {than_cat} ;; esac; fi; '
+                       f'exec {q(cat_that)} "$@"')
+            p, gp, _uv, _x, _t = _wp868_chay(s, ung_vien={str(s / "dau" / "cat"): cat_gia})
+            bang(p.returncode == 7 and tep(s) == b"" and "khong doc duoc kenh ket qua" in p.stderr,
+                 f"({nhan}) doc kenh cuoi loi ma rc={p.returncode} / GITHUB_PATH={tep(s)!r} {p.stderr[-300:]}")
+    with San() as s:   # (K3) đường THÀNH CÔNG: kênh được đọc ĐÚNG MỘT LẦN (Codex lượt 4 P3)
+        dem = s / "dem-doc-kenh"
+        cat_gia = (f'if [ "$#" -eq 2 ] && [ "$1" = -- ]; then case "$2" in */kq) echo x >> {q(str(dem))} ;; esac; fi; '
+                   f'exec {q(cat_that)} "$@"')
+        p, gp, uv, _x, _t = _wp868_chay(s, ung_vien={str(s / "dau" / "cat"): cat_gia})
+        so_lan = len(dem.read_text().split()) if dem.exists() else 0
+        bang(p.returncode == 0 and so_lan == 1 and tep(s) == f"{uv}\n".encode(),
+             f"(K3) duong thanh cong doc kenh {so_lan} lan (phai 1) / rc={p.returncode} GITHUB_PATH={tep(s)!r}")
+
+
+@ca
 def r858_cai_macos_chon_ban_chay_duoc():
     """N1/N3: như Linux, ứng viên `$(brew --prefix)/bin`."""
     return _wp858_cai_chon_ban_chay_duoc("macos")
@@ -12278,13 +12505,36 @@ def r858_hinh_dang_cong_thuc_cai():
     than = than[:than.index("\n}\n")]
     for can in ('if cong_cu_dat "$ten"; then',   # wp1045: DAT theo trang thai, khong theo rc
                 'PATH="$d:$PATH" cong_cu_dat "$ten"',
-                'd="$(cygpath -u "$d")" || {', 'w="$(cygpath -w "$dich")" || {', "printf 'GIU_PATH' > \"$KENH_KQ\" || {",
-                '  if [ -n "${GITHUB_PATH:-}" ]; then', "printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || {",
+                'd="$(cygpath -u "$d")" || {', "printf 'GIU_PATH' > \"$KENH_KQ\" || {",
+                "printf '%s\\n%s' \"$nhan\" \"$dich\" > \"$KENH_KQ\" || {",
+                'nhan=DICH; if [ -n "$win" ]; then nhan=DICH_WIN; fi',   # wp1488 r4 B1: nhãn kênh theo `--win` THẬT
                 'for d in "$@"; do', 'cong_cu_dat "$ten"; then dich="$d"; break; fi',
                 '    if [ -n "$win" ]; then\n      d="$(cygpath -u "$d")"',
                 'd="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua \'$ten\'" >&2; return 1; }',
-                'printf \'%s\\n\' "$w" >> "$GITHUB_PATH" || {', '\'$ten\' chay duoc" >&2; return 1; }'):
+                '\'$ten\' chay duoc" >&2; return 1; }'):
         bang(can in than, f"ham chon_thu_muc_chay_duoc thieu {can!r}")
+    # wp1488: bộ chọn KHÔNG ghi thẳng $GITHUB_PATH; script chính chép tệp chờ khi lượt cuối thành công, chép lỗi ⇒ cài lỗi.
+    ma_chon = "\n".join(d for d in than.splitlines() if not d.lstrip().startswith("#"))   # bỏ dòng chú thích
+    bang(all(k not in ma_chon for k in ('GITHUB_PATH', 'github_path', 'cygpath -w')),
+         "bo chon van dung $GITHUB_PATH / tep cho / cygpath -w (wp1488 r3 B1)")
+    ham = sh[sh.index("_tl1488_ghi_github_path() {"):]
+    ham = ham[:ham.index("\n}\n")]
+    for can in ('  [ -n "${GITHUB_PATH:-}" ] || return 0',
+                '  case "$2" in\n    win)',   # wp1488 r4 B2: chế độ từ nhãn kênh, KHÔNG từ `$LENH`
+                '_tl1488_w="$(cygpath -w "$1" && printf x)" || { echo "cai_cong_cu: cygpath -w hong cho \'$1\'" >&2; return 1; }',
+                '_tl1488_w="${_tl1488_w%x}"; _tl1488_w="${_tl1488_w%$\'\\n\'}" ;;',
+                '  case "$1$_tl1488_w" in', "    *$'\\n'*|*$'\\r'*) echo",
+                '  [ -n "$_tl1488_w" ] || {',
+                'printf \'%s\\n\' "$_tl1488_w" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \\$GITHUB_PATH" >&2; return 1; }'):
+        bang(can in ham, f"ham _tl1488_ghi_github_path thieu {can!r}")
+    bang("LENH" not in ham, "ham _tl1488_ghi_github_path con doc $LENH (wp1488 r4 B2: no WP1488-WIN-THEO-LENH)")
+    bang('if [ "$RC_CAI" -eq 0 ]; then\nKQ="$(cat -- "$KENH_KQ" && printf x)" || {' in sh
+         and ('KQ="${KQ%x}"\nexport -n KQ\ncase "$KQ" in\n'
+              '  DICH$\'\\n\'?*) _tl1488_ghi_github_path "${KQ#DICH$\'\\n\'}" "" || RC_CAI=1 ;;\n'
+              '  DICH_WIN$\'\\n\'?*) _tl1488_ghi_github_path "${KQ#DICH_WIN$\'\\n\'}" win || RC_CAI=1 ;;\nesac\nfi\n') in sh
+         and "}\nexport -nf _tl1488_ghi_github_path\n" in sh
+         and sh.count('cat -- "$KENH_KQ"') == 1 and sh.count('>> "$GITHUB_PATH"') == 1,
+         "cai_cong_cu.sh: dong $GITHUB_PATH phai dung tu KQ cua lan doc kenh DUY NHAT (wp1488 r3/r4 B2/B3/B5)")
 
 
 @ca
@@ -12464,8 +12714,9 @@ def r868_ghi_kenh_hong_thi_dung():
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     _wp802_rg_yaml()
-    ham = ("() { case \"$1\" in GIU_PATH|'DICH\\n%s') echo 'printf: loi ghi gia' >&2; return 74;; esac; "
-           "builtin printf \"$@\"; }")
+    # wp1488 r4: dòng ghi kênh DICH đổi sang `printf '%s\\n%s' "$nhan" "$dich"` ⇒ khớp định dạng ấy KÈM nhãn ở $2.
+    ham = ("() { case \"$1|${2:-}\" in GIU_PATH\\|*|'DICH\\n%s|'*|'%s\\n%s|DICH'|'%s\\n%s|DICH_WIN') "
+           "echo 'printf: loi ghi gia' >&2; return 74;; esac; builtin printf \"$@\"; }")
     for nhanh in ("GIU_PATH", "DICH"):
         for gia in (False, True):
             with San() as s:
@@ -12546,6 +12797,7 @@ def r868_hinh_dang_kenh_ket_qua():
                 'KQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }\n',
                 "    DICH=\"${DICH%$'\\r'}\" ;;",
                 '  GIU_PATH) DICH="" ;;\n', "  DICH$'\\n'?*) DICH=\"${KQ#DICH$'\\n'}\" ;;\n",
+                "  DICH_WIN$'\\n'?*) DICH=\"${KQ#DICH_WIN$'\\n'}\" ;;\n",   # wp1488 r4 B5
                 '    KET_QUA_CAI="$(cat -- "$TAM_CAI/stdout")"\n', '  *) echo "cai_cong_cu: kenh ket qua hong',
                 'rm -rf -- "$TAM_CAI"\n[ -d "$DICH" ] && export PATH="$DICH:$PATH"\n'):
         bang(can in than, f"cai_cong_cu.sh thieu chot kenh ket qua {can!r}")
@@ -12553,7 +12805,7 @@ def r868_hinh_dang_kenh_ket_qua():
     bang(re.findall(r"^\s*trap\b.*$", sh, re.M) == ["trap 'rm -rf -- \"$TAM_CAI\"' EXIT"],
          "trap EXIT don kenh phai la DUY NHAT, khong bi go/ghi de")
     for can in ("printf 'GIU_PATH' > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
-                "printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
+                "printf '%s\\n%s' \"$nhan\" \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
                 "printf '%q' \"$KQ\")\" >&2; exit 7 ;;"):
         bang(can in sh, f"cai_cong_cu.sh thieu chot ghi/doc kenh {can!r}")
 
@@ -18097,21 +18349,78 @@ DOT_BIEN_HOOK = [
      ("chay duoc\" >&2; return 1; }", "chay duoc\" >&2; return 0; }"),
      ["r858_cai_macos_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_github_path_khong_qua_cygpath",
-     ('      w="$(cygpath -w "$dich")" || { echo "cai_cong_cu: cygpath -w hong cho \'$dich\'" >&2; return 1; }',
-      '      w="$dich"'),
+     ('_tl1488_w="$(cygpath -w "$1" && printf x)" || { echo "cai_cong_cu: cygpath -w hong cho \'$1\'" >&2; return 1; }\n'
+      '      _tl1488_w="${_tl1488_w%x}"; _tl1488_w="${_tl1488_w%$\'\\n\'}" ;;',   # wp1488 r3
+      '_tl1488_w="$1" ;;'),
      ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp858_sh_bo_cygpath_u",
      ('      d="$(cygpath -u "$d")" || { echo "cai_cong_cu: cygpath -u hong cho ung vien cua \'$ten\'" >&2; return 1; }',
       '      :'),
      ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
-    ("wp858_sh_nuot_loi_cygpath_w",
-     ('w="$(cygpath -w "$dich")" || { echo "cai_cong_cu: cygpath -w hong cho \'$dich\'" >&2; return 1; }',
-      'w="$(cygpath -w "$dich")"'),
+    ("wp858_sh_nuot_loi_cygpath_w",   # wp1488 r3: `cygpath -w` dời từ bộ chọn sang `_tl1488_ghi_github_path`
+     ('_tl1488_w="$(cygpath -w "$1" && printf x)" || { echo "cai_cong_cu: cygpath -w hong cho \'$1\'" >&2; return 1; }',
+      '_tl1488_w="$(cygpath -w "$1"; printf x)"'),
      ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    # wp1488: phép ghi $GITHUB_PATH dời từ bộ chọn sang script chính (chép tệp chờ khi lượt cuối thành công).
     ("wp858_sh_nuot_loi_ghi_github_path",
-     ('printf \'%s\\n\' "$w" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \\$GITHUB_PATH" >&2; return 1; }',
-      'printf \'%s\\n\' "$w" >> "$GITHUB_PATH"'),
+     ('printf \'%s\\n\' "$_tl1488_w" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \\$GITHUB_PATH" >&2; return 1; }',
+      'printf \'%s\\n\' "$_tl1488_w" >> "$GITHUB_PATH" || :'),
      ["r858_cai_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
+    # wp1488 (ops/specs/wp1488-r3.md N2): mỗi chốt của bước ghi $GITHUB_PATH có đột biến riêng.
+    ("wp1488_sh_bo_chon_ghi_thang", ("  printf '%s\\n%s' \"$nhan\" \"$dich\" > \"$KENH_KQ\" ||",
+                                     "  [ -z \"${GITHUB_PATH:-}\" ] || printf '%s\\n' \"$dich\" >> \"$GITHUB_PATH\"; printf '%s\\n%s' \"$nhan\" \"$dich\" > \"$KENH_KQ\" ||"),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_chep_khong_xet_rc", ('if [ "$RC_CAI" -eq 0 ]; then\nKQ="$(cat', 'if :; then\nKQ="$(cat'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_chep_loi_khong_dat_rc", ('"${KQ#DICH$\'\\n\'}" "" || RC_CAI=1 ;;', '"${KQ#DICH$\'\\n\'}" "" ;;'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_chep_hai_lan", ('printf \'%s\\n\' "$_tl1488_w" >> "$GITHUB_PATH"', 'printf \'%s\\n%s\\n\' "$_tl1488_w" "$_tl1488_w" >> "$GITHUB_PATH"'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_dong_trang", ('printf \'%s\\n\' "$_tl1488_w" >> "$GITHUB_PATH"', 'printf \'%s\\n\\n\' "$_tl1488_w" >> "$GITHUB_PATH"'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_crlf", ('printf \'%s\\n\' "$_tl1488_w" >> "$GITHUB_PATH"', 'printf \'%s\\r\\n\' "$_tl1488_w" >> "$GITHUB_PATH"'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_chep_loi_thoat_ngay", ('"${KQ#DICH$\'\\n\'}" "" || RC_CAI=1 ;;', '"${KQ#DICH$\'\\n\'}" "" || exit 1 ;;'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    # Codex lượt 1 (P2, ca C): đọc kênh của lượt đầu CHỈ khi writer muộn đã ghi vào đó ⇒ chỉ (C) bắt được.
+    ("wp1488_sh_doc_kenh_cu_ghi_muon", ('KQ="$(cat -- "$KENH_KQ" && printf x)"',
+                                        # đọc một lần (móc của C kích hoạt, writer muộn ghi), RỒI mới chọn tệp
+                                        'KQ="$(cat -- "$KENH_KQ" >/dev/null; cat -- "$(grep -l muon "$TAM_CAI/kq" 2>/dev/null || echo "$KENH_KQ")" && printf x)"'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    # Codex lượt 2 (P2): quyết định ghi bằng một lần đọc kênh RIÊNG, trước lần đọc có xét lỗi (thiết kế r1) ⇒ K1 bắt.
+    ("wp1488_sh_doc_kenh_rieng_truoc",
+     ('if [ "$RC_CAI" -eq 0 ]; then\nKQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }\nKQ="${KQ%x}"\nexport -n KQ\ncase "$KQ" in\n'
+      '  DICH$\'\\n\'?*) _tl1488_ghi_github_path "${KQ#DICH$\'\\n\'}" "" || RC_CAI=1 ;;\n',
+      'if [ "$RC_CAI" -eq 0 ]; then\ncase "$(cat -- "$KENH_KQ" 2>/dev/null)" in DICH$\'\\n\'?*) _tl1488_ghi_github_path "$(sed -n 2p "$KENH_KQ" 2>/dev/null)" "" || RC_CAI=1 ;; esac\nKQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }\nKQ="${KQ%x}"\nexport -n KQ\ncase "$KQ" in\n'
+      '  DICHX$\'\\n\'?*) :;;\n'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    # Codex lượt 3 (r3): xuống dòng · export dưới allexport · `cygpath -w` rỗng.
+    ("wp1488_sh_bo_tu_choi_xuong_dong", ("    *$'\\n'*|*$'\\r'*) echo", "    *KHONG_BAO_GIO_KHOP*) echo"),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_kq_lo_export", ('KQ="${KQ%x}"\nexport -n KQ\n', 'KQ="${KQ%x}"\n'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_ham_lo_export", ("}\nexport -nf _tl1488_ghi_github_path\n", "}\n"),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    # Codex lượt 4 (P3): `$( )` ăn LF đuôi · chỉ xét DICH, bỏ xét dòng đã đổi · đọc kênh lần hai sau lần đầu thành công.
+    ("wp1488_sh_cygpath_an_lf", ('"$(cygpath -w "$1" && printf x)" ||', '"$(cygpath -w "$1")" ||'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_chi_xet_dich", ('  case "$1$_tl1488_w" in', '  case "$1" in'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_doc_kenh_hai_lan", ('KQ="$(cat -- "$KENH_KQ" && printf x)"', 'KQ="$(cat -- "$KENH_KQ" >/dev/null && cat -- "$KENH_KQ" && printf x)"'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_bo_tu_choi_dong_rong", ('  [ -n "$_tl1488_w" ] || {', '  [ -n "x$_tl1488_w" ] || {'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    # wp1488 r4 (ops/specs/wp1488-r4.md N2, nợ WP1488-WIN-THEO-LENH): `--win` đi qua NHÃN kênh, không đoán từ `$LENH`.
+    ("wp1488_sh_bo_chon_luon_dich", ('nhan=DICH; if [ -n "$win" ]; then nhan=DICH_WIN; fi', 'nhan=DICH'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_quyet_theo_lenh", ('  case "$2" in\n    win)', '  case "$LENH" in\n    *"chon_thu_muc_chay_duoc --win "*)'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
+    ("wp1488_sh_path_bo_nhanh_dich_win", ("  DICH_WIN$'\\n'?*) DICH=\"${KQ#DICH_WIN$'\\n'}\" ;;\n", ""),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong", "r858_cai_windows_chon_ban_chay_duoc"], "cai_sh"),
+    ("wp1488_sh_dich_win_khong_doi", ('"${KQ#DICH_WIN$\'\\n\'}" win ||', '"${KQ#DICH_WIN$\'\\n\'}" "" ||'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong", "r858_cai_windows_chon_ban_chay_duoc"], "cai_sh"),
+    ("wp1488_sh_dich_win_loi_khong_dat_rc", ('"${KQ#DICH_WIN$\'\\n\'}" win || RC_CAI=1 ;;', '"${KQ#DICH_WIN$\'\\n\'}" win ;;'),
+     ["r1488_github_path_chi_ghi_khi_thanh_cong"], "cai_sh"),
     # wp1404: nhánh thử lại sau `apt-get update` — gỡ hẳn · nới cho MỌI lỗi · bỏ lần cài lại.
     ("wp1404_sh_bo_thu_lai_apt", ('    *"apt-get install"*)\n', '    *"KHONG_BAO_GIO_KHOP"*)\n'),
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
@@ -18203,11 +18512,11 @@ DOT_BIEN_HOOK = [
     ("wp858_sh_cygpath_u_chi_khi_ghi_path",
      ('    if [ -n "$win" ]; then\n      d="$(cygpath -u', '    if [ -n "$win" ] && [ -n "${GITHUB_PATH:-}" ]; then\n      d="$(cygpath -u'),
      ["r858_cai_windows_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
-    ("wp858_sh_github_path_vang_khong_mac_dinh", ('  if [ -n "${GITHUB_PATH:-}" ]; then', '  if [ -n "$GITHUB_PATH" ]; then'),
+    ("wp858_sh_github_path_vang_khong_mac_dinh", ('  [ -n "${GITHUB_PATH:-}" ] || return 0', '  [ -n "$GITHUB_PATH" ] || return 0'),
      ["r858_cai_linux_chon_ban_chay_duoc", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     # wp868 (N1–N5): mỗi đột biến kèm ca hình dạng thuần Python để đo được cả Windows.
     ("wp868_sh_ham_in_stdout_thay_kenh",
-     ("  printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
+     ("  printf '%s\\n%s' \"$nhan\" \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
       "  printf '\\n%s\\n' \"$dich\""),
      ["r868_kenh_rieng_khong_doc_stdout_trinh_cai", "r858_hinh_dang_cong_thuc_cai"], "cai_sh"),
     ("wp868_sh_doc_stdout_thay_kenh", ("  DICH$'\\n'?*) DICH=\"${KQ#DICH$'\\n'}\" ;;", "  DICH$'\\n'?*) DICH=\"$(tail -n 1 \"$TAM_CAI/stdout\")\" ;;"),
@@ -18231,8 +18540,8 @@ DOT_BIEN_HOOK = [
       "printf 'GIU_PATH' > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 0; }"),
      ["r868_ghi_kenh_hong_thi_dung", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_ghi_dich_nuot_loi",
-     ("printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
-      "printf 'DICH\\n%s' \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 0; }"),
+     ("printf '%s\\n%s' \"$nhan\" \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 1; }",
+      "printf '%s\\n%s' \"$nhan\" \"$dich\" > \"$KENH_KQ\" || { echo \"cai_cong_cu: khong ghi duoc kenh ket qua\" >&2; return 0; }"),
      ["r868_ghi_kenh_hong_thi_dung", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),
     ("wp868_sh_kenh_rac_rc0", ("printf '%q' \"$KQ\")\" >&2; exit 7 ;;", "printf '%q' \"$KQ\")\" >&2; exit 0 ;;"),
      ["r868_doc_kenh_hong_thi_dung", "r868_hinh_dang_kenh_ket_qua"], "cai_sh"),

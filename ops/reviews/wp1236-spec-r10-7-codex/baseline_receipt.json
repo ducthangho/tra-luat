@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/usr/local/bin/python3",
+    "-B",
+    "-c",
+    "import importlib.util,json,sys,time\np=sys.argv[1]\ns=importlib.util.spec_from_file_location(\"godc_native\",p);m=importlib.util.module_from_spec(s);sys.modules[s.name]=m;s.loader.exec_module(m)\nrows=[]\nfor c in m.CA:\n st=time.monotonic();rc,out=m.chay_ca(c);rows.append({\"case\":c,\"rc\":rc,\"output\":out,\"seconds\":time.monotonic()-st})\nprint(json.dumps(rows,ensure_ascii=False))\nsys.exit(0 if rows and all(x[\"rc\"]==0 for x in rows) else 1)\n",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py"
+  ],
+  "rc": 0,
+  "stdout_sha256": "a4d888be63157e9ea7f2cb92ecd0065776649f250972d7254e3e66416231baf2"
+}

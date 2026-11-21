@@ -1,0 +1,587 @@
+{
+  "spec_sha256": "e3efa593c6dbbd15a0850702dfbc927ce51c3f1361642292e2f0b235c1bee6a8",
+  "vong": 4,
+  "findings": [
+    {
+      "id": "U01",
+      "class_slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "severity": "P3",
+      "vi_tri": "SPEC.md:156–179,333–339 (D2b owner_waived, success marker, C6)",
+      "van_de": "Nhánh owner_waived chưa có hợp đồng thành công xác định: mẫu stdout dùng <tep> không tồn tại trong nhánh này, còn C6 yêu cầu không có dòng D2b mà không giới hạn vào thieu/stderr.",
+      "bang_chung": "SPEC:156–158 chỉ định gate_output_mien={oid,chuoi,readback_thu_muc}; 173–174 gọi kiem_mien; 175 yêu cầu mọi ca đạt in đúng một dòng D2b ĐẠT <tep>@<oid>. C6:338 lại ghi miễn hợp lệ ⇒ không dòng D2b, trong khi C1:333 tách rõ thieu và stdout. Rà toàn mục D2b, CLI và bảng C không có cách gán <tep> hay mẫu success riêng cho waiver. Bản sửa3 đã chốt failed:- và attempt passed-only, nhưng chưa giải quyết nhánh success này.",
+      "de_xuat": "Trong mục D2b chốt riêng đầu ra success cho passed và owner_waived, dùng đường dẫn có trong nhánh (ví dụ readback_thu_muc hoặc tên readback được chọn); sửa C6 thành không D2b trong thieu và đúng một dòng stdout cụ thể, với ca âm tac_gia vẫn rc12. Giữ mã lỗi và semantics waiver; tránh ghi ĐẠT giả khi nhánh không thực thi. Quét chung mọi nhánh CLI/API có mẫu tên biến/lý do để executor không tự đặt hợp đồng."
+    },
+    {
+      "id": "U02",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "severity": "P3",
+      "vi_tri": "SPEC.md:70–75,88–90,284,288,295,354 (nghiệm thu chống job_id trùng)",
+      "van_de": "Ma trận nghiệm thu chưa bắt buộc ca phân biệt riêng việc nuốt ID trùng trong provenance và trong nhánh dòng skipped, dù hợp đồng đã cấm cả hai.",
+      "bang_chung": "python3 -B ../work/audit_r4.py rc0, AUDIT_R4_COMPLETE: bản sao T-v3-pass thêm một phần tử job có ID 136067207297 đã có trong provenance ⇒ tham chiếu vẫn (passed,[]); đúng đặc tả K4 phải not_measured/job_id_trung_provenance. Bản sao T-skip lặp dòng skipped ID 133659160050 ⇒ doc_danh_gia trả reasons=[], kiem_tep chỉ co_job_skipped; đặc tả đòi job_lap. Quét bảng A/B/C: job_id_trung_provenance không có ca/đột biến; A1-3 chỉ ghi job_id lặp và m5 chung, không buộc kiểm riêng job-job, skip-skip, job-skip hai thứ tự. Bộ kiểm dùng dict có thể mất dòng skipped mà ca lặp dòng job vẫn đỏ. Đây là khoảng trống nghiệm thu; không coi tham chiếu sai là đường lọt của implementation tuân thủ K4.",
+      "de_xuat": "Bổ sung một ma trận chống mất phần tử trước khi dựng dict: các tổ hợp dòng job/skipped trùng ID và một ID lặp trong jobs provenance, mỗi vế có đúng lý do, đối chứng không trùng, đột biến gỡ riêng nhánh tương ứng. Khi skipped vốn not_measured, phải so job_lap thay vì chỉ trạng thái. Quét cả parser/K2–K8/L8/D2b bằng ma trận chốt–ca–đột biến trước vòng kế; cập nhật số ca/đột biến và ước lượng từ số thực, không nới cổng để khớp tham chiếu."
+    },
+    {
+      "id": "U03",
+      "class_slug": "pham-vi-kiem-chung-trai-adr-windows",
+      "severity": "P2",
+      "vi_tri": "SPEC.md:220–222,293,398 (write_set A/C và giới hạn Windows)",
+      "van_de": "Đặc tả loại Windows CI cho toàn packet mà không giữ nghĩa vụ Windows bắt buộc của các đợt sửa .claude/dev/** theo ADR-0060 đang hiệu lực.",
+      "bang_chung": "SPEC:398: “Không chạy Windows CI cho packet này.” A sửa .claude/dev/ci_dang_ky_test.py và C sửa packet_loop.py/test.py (220,222). ADR-0060 M3 bước2 ghi required khi diff chạm .claude/dev/**; đoạn sau đòi Windows local và nói “Lượt này cộng thêm vào Windows CI, không thay”; test bắt buộc skipped/not_run không xanh. ADR-0062 N1 (dòng12) áp ADR-0060 mặc định cho mọi packet chưa merge. Issue Q7 chỉ chốt OS_BAT_BUOC=ubuntu-latest cho luật đọc gate-output; r8 còn tách rõ nghĩa vụ Windows test ở dòng1169 và luật job Windows ngoài phạm vi ở dòng1177. Không có miễn nghĩa vụ kiểm mã A/C trong ISSUE.md hoặc đặc tả.",
+      "de_xuat": "Tách OS của bằng chứng được L8/D2b chấp nhận khỏi OS kiểm mã của packet. Bỏ miễn Windows CI chung; ghi A/C required theo M3, Windows local và CI đúng phạm vi/nonce SHA, B phân loại theo diff thật. Chỉ giữ symlink skip như giới hạn phép đo POSIX, không tính skipped là evidence Windows đạt; quyền miễn ngoại lệ nếu cần phải có căn cứ riêng. Không gọi CI trong lượt review offline này. Kiểm đóng bằng đối chiếu toàn write_set với M3/M9 và acceptance từng đợt, tránh tăng quyền hoặc đổi Q7."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_ids": [
+        "U01"
+      ],
+      "manifestations": [
+        "owner_waived không có biến tep cho mẫu stdout D2b ĐẠT",
+        "C6 không phân thieu/stderr với stdout thành công; mâu thuẫn câu Đạt chung"
+      ],
+      "highest_open_severity": "P3",
+      "nguon": "vòng4/spec e3efa593c6dbbd15a0850702dfbc927ce51c3f1361642292e2f0b235c1bee6a8; nối lớp cũ trong bang_noi_slug nếu có",
+      "common_fix": "Trong mục D2b chốt riêng đầu ra success cho passed và owner_waived, dùng đường dẫn có trong nhánh (ví dụ readback_thu_muc hoặc tên readback được chọn); sửa C6 thành không D2b trong thieu và đúng một dòng stdout cụ thể, với ca âm tac_gia vẫn rc12. Giữ mã lỗi và semantics waiver; tránh ghi ĐẠT giả khi nhánh không thực thi. Quét chung mọi nhánh CLI/API có mẫu tên biến/lý do để executor không tự đặt hợp đồng.",
+      "closing_check": "Bảng nhánh passed/owner_waived/error có mẫu rc/stdout/stderr hoàn chỉnh, không biến chưa gán; C1/C6 so success marker riêng và âm tac_gia; đọc toàn bảng C không còn câu trái nhau."
+    },
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_ids": [
+        "U02"
+      ],
+      "manifestations": [
+        "K4 job_id_trung_provenance có luật nhưng không có ca/đột biến riêng",
+        "A1-3 không ghim phân biệt nhánh skipped trùng/cross-kind trùng, m5 chung có thể bị nhánh job bắt thay"
+      ],
+      "highest_open_severity": "P3",
+      "nguon": "vòng4/spec e3efa593c6dbbd15a0850702dfbc927ce51c3f1361642292e2f0b235c1bee6a8; nối lớp cũ trong bang_noi_slug nếu có",
+      "common_fix": "Bổ sung một ma trận chống mất phần tử trước khi dựng dict: các tổ hợp dòng job/skipped trùng ID và một ID lặp trong jobs provenance, mỗi vế có đúng lý do, đối chứng không trùng, đột biến gỡ riêng nhánh tương ứng. Khi skipped vốn not_measured, phải so job_lap thay vì chỉ trạng thái. Quét cả parser/K2–K8/L8/D2b bằng ma trận chốt–ca–đột biến trước vòng kế; cập nhật số ca/đột biến và ước lượng từ số thực, không nới cổng để khớp tham chiếu.",
+      "closing_check": "Mỗi ca trùng ID có healthy control và target/non-target; mutant bỏ riêng chốt trùng provenance/skip chết vì TinHieuChotCa đúng ID, không vì K8 skipped hoặc lỗi setup; tổng N/M không thay receipt này."
+    },
+    {
+      "slug": "pham-vi-kiem-chung-trai-adr-windows",
+      "finding_ids": [
+        "U03"
+      ],
+      "manifestations": [
+        "Câu loại Windows CI áp chung, dù A/C thuộc .claude/dev/**",
+        "Chưa tách Windows OS của luật gate-output/Q7 khỏi nghĩa vụ kiểm triển khai M3; skip symlink không thay evidence Windows"
+      ],
+      "highest_open_severity": "P2",
+      "nguon": "vòng4/spec e3efa593c6dbbd15a0850702dfbc927ce51c3f1361642292e2f0b235c1bee6a8; nối lớp cũ trong bang_noi_slug nếu có",
+      "common_fix": "Tách OS của bằng chứng được L8/D2b chấp nhận khỏi OS kiểm mã của packet. Bỏ miễn Windows CI chung; ghi A/C required theo M3, Windows local và CI đúng phạm vi/nonce SHA, B phân loại theo diff thật. Chỉ giữ symlink skip như giới hạn phép đo POSIX, không tính skipped là evidence Windows đạt; quyền miễn ngoại lệ nếu cần phải có căn cứ riêng. Không gọi CI trong lượt review offline này. Kiểm đóng bằng đối chiếu toàn write_set với M3/M9 và acceptance từng đợt, tránh tăng quyền hoặc đổi Q7.",
+      "closing_check": "Mỗi đợt có phân loại Windows khớp write_set/diff và ADR-0060/0062; không blanket exemption; required evidence/skip disposition rõ. Ở review code sau mới đo trên Windows thật, không cần giả đã chạy ở review spec."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "xuong-dong-khong-khop-byte-that",
+      "finding_cu": [
+        "codex:R01",
+        "claude:R01"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:65–75,201,284 nhận LF/CRLF đồng nhất, loại CR lẻ/trộn; audit_r4.json parser_ab: LF và CRLF passed; CR lẻ -> cr_le, CR trộn -> xuong_dong_tron; m45/m46 chỉ lật đúng ca. Census 66 giữ 47/10/9.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Không còn phần đo cần thiết để đóng lỗi đặc tả đã nêu."
+    },
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "codex:R02",
+        "claude:R03",
+        "claude:R06",
+        "codex:S01",
+        "codex:S03",
+        "claude:S03",
+        "claude:S05",
+        "claude:S06",
+        "codex:T01",
+        "claude:T01"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "SPEC:283–309,333–341 đã sửa m13/m20/m22/m23/mC1/C3–C5, B8, m45/m46/m50. audit_r4.json xác nhận C5 regex [true,false] -> [true,true], CR target/non-target, B8 byte thật. Còn hai biểu hiện thiếu ca độc lập cho job_id trùng ở provenance và nhánh skipped (U02); không đóng lớp từ tổng 50 mutant.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Lớp còn mở theo finding vòng4."
+    },
+    {
+      "slug": "nang-tran-thieu-hop-dong-authority",
+      "finding_cu": [
+        "codex:R03",
+        "claude:R11"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:343–364 có ai_nang/can_cu/tran_cu/tran_moi, ghi CHỜ duyệt; 6/450 -> đề nghị A 3/800, ước ~760. audit_r4.json adrs: OID land 0053/0055 tồn tại, cha chưa có, thuộc first-parent ref được cấp. Chưa có mã nên numstat thật vẫn là nghĩa vụ trước review mã, không coi ước lượng là authority.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Không còn phần đo cần thiết để đóng lỗi đặc tả đã nêu."
+    },
+    {
+      "slug": "d2b-thieu-neo-attempt",
+      "finding_cu": [
+        "codex:R04"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:159–160,171–172,204,335 bắt attempt int không bool >=1 và bằng header, chỉ nhánh passed; C3 có lệch/thiếu/bool và mC9/mC10. audit_r4.json attempt_types xác nhận 1/2 hợp kiểu, None/True/1.0/0 sai; phép bằng header1 loại attempt2. Mã D2b chưa có, kết luận này về hợp đồng đặc tả.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Không còn phần đo cần thiết để đóng lỗi đặc tả đã nêu."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_cu": [
+        "codex:R05",
+        "claude:R05",
+        "codex:S02",
+        "claude:S04",
+        "claude:T05"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "Hai script tham chiếu rc0 byte-match output trong kho: 47/10/9; 25/56/39/50; 93=39+36+12+2+2+2. audit_r4.json: 170/94/0 lệch, 62 cặp hồ sơ-token/60 phân giải đúng, đúng hai hồ sơ pr1392/pr1406; 28 ca A/50 ID m1..m50 không trùng. generator_inventory.json: 50=20/28/2. SPEC bảng phan_bien giữ số cũ dưới nhãn vòng lịch sử, không là census hiện tại.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Không còn phần đo cần thiết để đóng lỗi đặc tả đã nêu."
+    },
+    {
+      "slug": "trang-thai-job-khong-khop-conclusion",
+      "finding_cu": [
+        "claude:R02"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:91–94 và A1-13: non-success phải failed, passed phải success. audit_r4.json conclusion_control: chỉ sửa bản sao T-fail -> not_measured/ket_luan_lech:136203672900; sáu fixture gốc giữ đúng trạng thái. Cả ba bộ sinh có nhánh ép failed khi conclusion != success.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Không còn phần đo cần thiết để đóng lỗi đặc tả đã nêu."
+    },
+    {
+      "slug": "landed-khong-buoc-loi-khai-hop-le",
+      "finding_cu": [
+        "claude:R04",
+        "claude:S01"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:122–128,199–200,243–245 và A2-12/A2-13/B7 phủ ba dạng landed, lời khai vi phạm không tính là hợp lệ. audit_r4.json landed_parity: 170 hồ sơ, 94/94 landed, 0 lệch _xet_mot_tep. Luật không còn bỏ sót hai dạng gốc/landed_ngay. Văn xuôi ở hồ sơ không landed là giới hạn được ghi, không dùng giới hạn này để đóng một hồ sơ landed.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Không còn phần đo cần thiết để đóng lỗi đặc tả đã nêu."
+    },
+    {
+      "slug": "l8-chua-chot-thu-tu-cutover",
+      "finding_cu": [
+        "claude:R07"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:147,181–188,320,325: L8 sau cutover, MIEN_TRU_L8 loại hồ sơ đã miễn cutover. audit_r4.json cutover: pr680 sha256 964742fe... khớp hằng, cổng hiện hành rc0/1 trên 1 miễn; bản tham chiếu L8 trên nội dung vẫn vi phạm. B8 đã ghim nguyên byte; lỗi fixture B8 nối lớp oracle riêng do nguyên nhân ca không phân biệt.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Không còn phần đo cần thiết để đóng lỗi đặc tả đã nêu."
+    },
+    {
+      "slug": "khong-kiem-co-toan-ven-provenance",
+      "finding_cu": [
+        "claude:R08"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:84–87,295: ba cờ passed, checkout list khác rỗng, ngoại lệ skipped đúng job. audit_r4.json k3: cả run/tap/checkout/empty đều not_measured/provenance_chua_du, v3 gốc passed; không chỉ dựa tổng census.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Không còn phần đo cần thiết để đóng lỗi đặc tả đã nêu."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "claude:R09",
+        "claude:S07",
+        "codex:T02",
+        "claude:T03"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "SPEC đã chốt lý do parser/CLI, base đường dẫn, checkout không rỗng, phạm vi attempt và fallback failed:- (135–140,159–170). Còn success của owner_waived: dữ liệu nhánh chỉ có oid/chuoi/readback_thu_muc nhưng mẫu chung đòi <tep>; C6 nói không dòng D2b (156–175,338), chưa phân stdout/thieu. Xem U01. Claude S07 có hai biểu hiện trong một ID; giữ nguyên ID ở lớp hợp đồng vì cả hai là tiền/hậu điều chưa nói rõ, không tách ID để tăng/giảm lịch sử.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Lớp còn mở theo finding vòng4."
+    },
+    {
+      "slug": "nguon-doc-khong-neo-cung-snapshot",
+      "finding_cu": [
+        "claude:R12",
+        "claude:S02"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:109–111 L8 dùng du_lieu từ nap_yaml cùng lần đọc; 150–179 D2b tách code master và dữ liệu commit O trên origin/*, mode trên cây O, git archive O. Hệ quả 203–207 giữ đóng WP trước PR lưu trữ merge, khớp ADR-0060 M8. audit_r4.json archive: rc0, byte_match true, v3 passed. Không cần đồng bộ cây làm việc để đọc O.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Không còn phần đo cần thiết để đóng lỗi đặc tả đã nêu."
+    },
+    {
+      "slug": "he-qua-gioi-han-khai-thieu",
+      "finding_cu": [
+        "claude:R10",
+        "claude:T02",
+        "claude:T04"
+      ],
+      "vong_xuat_hien": [
+        1,
+        3
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "SPEC:190–212 nêu run PR/dispatch không được, trích trong chuỗi, khoá M8, hậu duệ và waiver cũ; 234–245 khai L8 không neo H/waiver và lệch Issue mục3; 389–397 nói readback/provenance sửa tay được. Finding cũ yêu cầu khai giới hạn, không yêu cầu đóng cơ chế forgery; chỉ đóng nghĩa vụ công bố, không tuyên bố đã đo authenticity/neo H của L8.",
+      "chua_do_duoc": "Không có mã r9; các kết luận đóng ở đây chỉ đóng lỗi ĐẶC TẢ, không chứng nhận production L8/D2b hoặc CI. Không còn phần đo cần thiết để đóng lỗi đặc tả đã nêu."
+    }
+  ],
+  "bang_noi_slug": [
+    {
+      "slug": "xuong-dong-khong-khop-byte-that",
+      "finding_cu": [
+        "codex:R01",
+        "claude:R01"
+      ],
+      "ly_do_gop": "Chốt một ngữ pháp byte cho parser và fixture, dùng cùng oracle dương/âm.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "codex:R02",
+        "claude:R03",
+        "claude:R06",
+        "codex:S01",
+        "codex:S03",
+        "claude:S03",
+        "claude:S05",
+        "claude:S06",
+        "codex:T01",
+        "claude:T01"
+      ],
+      "ly_do_gop": "Lập ma trận từng chốt -> fixture âm chỉ nhắm chốt ấy -> đối chứng dương/non-target -> đột biến và TinHieuChotCa có ID; không dùng tổng rc hoặc tổng suite.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "nang-tran-thieu-hop-dong-authority",
+      "finding_cu": [
+        "codex:R03",
+        "claude:R11"
+      ],
+      "ly_do_gop": "Giữ đủ khối nâng trần và phân biệt đề nghị với quyết định; đo numstat thật ở đợt code.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "d2b-thieu-neo-attempt",
+      "finding_cu": [
+        "codex:R04"
+      ],
+      "ly_do_gop": "Neo run/attempt/head và kiểm kiểu ở cùng giao diện M8; mọi chốt có lý do riêng.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_cu": [
+        "codex:R05",
+        "claude:R05",
+        "codex:S02",
+        "claude:S04",
+        "claude:T05"
+      ],
+      "ly_do_gop": "Mỗi số gắn đơn vị, nguồn/băm/thời điểm; quét tất cả chỗ dùng cùng số sau khi đổi luật, giữ lịch sử có nhãn.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "trang-thai-job-khong-khop-conclusion",
+      "finding_cu": [
+        "claude:R02"
+      ],
+      "ly_do_gop": "Kiểm quan hệ conclusion/trạng thái độc lập với log hash và dòng tổng; ca lật failure->passed + đối chứng non-success failed.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "landed-khong-buoc-loi-khai-hop-le",
+      "finding_cu": [
+        "claude:R04",
+        "claude:S01"
+      ],
+      "ly_do_gop": "Dùng đúng predicate landed của consumer và buộc ít nhất một lời khai dương/miễn đã kiểm; kiểm parity cùng dữ liệu và ba dạng riêng.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "l8-chua-chot-thu-tu-cutover",
+      "finding_cu": [
+        "claude:R07"
+      ],
+      "ly_do_gop": "Chốt thứ tự miễn trước L8, snapshot đúng tập chưa miễn; ca chứng minh đổi thứ tự làm khác kết quả.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "khong-kiem-co-toan-ven-provenance",
+      "finding_cu": [
+        "claude:R08"
+      ],
+      "ly_do_gop": "Đòi cờ hoàn chỉnh trước so tập job; fail-closed khi thiếu/không đủ, có đối chứng cả bốn vế.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "claude:R09",
+        "claude:S07",
+        "codex:T02",
+        "claude:T03"
+      ],
+      "ly_do_gop": "Định nghĩa hợp đồng theo từng nhánh: dữ liệu bắt buộc, thứ tự lỗi, rc/stdout/stderr; ca so đúng đầu ra của từng nhánh.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "nguon-doc-khong-neo-cung-snapshot",
+      "finding_cu": [
+        "claude:R12",
+        "claude:S02"
+      ],
+      "ly_do_gop": "Neo một snapshot byte/commit cho từng nguồn; kiểm đường dẫn/mode trên chính nguồn đọc và giữ làn lưu trữ độc lập.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    },
+    {
+      "slug": "he-qua-gioi-han-khai-thieu",
+      "finding_cu": [
+        "claude:R10",
+        "claude:T02",
+        "claude:T04"
+      ],
+      "ly_do_gop": "Đồng bộ phạm vi bảo đảm và hệ quả với mỗi nhánh, phân biệt L8/D2b, đọc offline với authenticity; không coi khai giới hạn là vá runtime.",
+      "quy_tac": "Mỗi ID gốc có đúng một lớp; namespace reviewer giữ nguyên R/S/T. Finding nhiều biểu hiện giữ một ID; đối chiếu từng biểu hiện trong evidence."
+    }
+  ],
+  "hoi_tu": {
+    "vong1_sang_2": "KHONG_DO_DUOC theo §8.3: verdict cũ không có bảng lớp/phạm vi quét lớp; 12 lớp nguồn vòng1 được dựng lại từ 17 finding, nhưng nhãn ĐÓNG từng ID không xác nhận mọi biểu hiện của lớp tại sha 18da18c4. Không lấy tỷ lệ ID làm |F|/|U|.",
+    "vong2_sang_3": "KHONG_DO_DUOC theo §8.3: vòng2–3 tiếp tục dùng ĐÓNG/CÒN MỞ, còn tách biểu hiện thành T01 và approve khi P3 mở; thiếu bằng chứng quét toàn lớp ở sha 50269a88. Không suy tử số F từ lời approve.",
+    "vong3_sang_4": "2/4 = 50% trên U dựng lại từ 7 finding P3 vòng3: nghiem-thu-khong-co-lap-chot-dich, hop-dong-dau-vao-dau-ra-chua-chot, he-qua-gioi-han-khai-thieu, so-do-khong-cung-pham-vi-nguon. F = hai lớp cuối; hai lớp đầu VA_MOT_PHAN. Đây là chuyển tiếp được vòng4 kiểm lại, không hợp thức hoá approval vòng3.",
+    "lop_lap_lan_ba": [
+      "nghiem-thu-khong-co-lap-chot-dich",
+      "so-do-khong-cung-pham-vi-nguon",
+      "hop-dong-dau-vao-dau-ra-chua-chot"
+    ]
+  },
+  "da_do_khop": [
+    "SHA-256 SPEC ngoài kho = blob HEAD = e3efa593c6dbbd15a0850702dfbc927ce51c3f1361642292e2f0b235c1bee6a8; ba sha lịch sử khớp commit đã ghim.",
+    "Tham chiếu rc0: 66 = 47 passed + 10 failed + 9 not_measured; sáu fixture đúng trạng thái/lý do; output trùng byte do_tep.txt.",
+    "Lời khai rc0: 170 = 25 cutover + 56 đỏ + 39 đạt + 50 không lời khai; 93 vi phạm = 39/36/12/2/2/2; output trùng byte do_loi_khai.txt.",
+    "50 script = 20 v1/28 v2/2 v3, đúng ba sha256 BO_SINH. Diff ba bản chỉ thêm luật packet-loop mảnh/gom rồi sửa skipped; đều ép failed khi conclusion không success.",
+    "la_landed: 170 hồ sơ, 94/94 landed, 0 lệch với consumer; dữ liệu ops/land không đổi so base8048551.",
+    "60/62 cặp hồ sơ-token dưới khoá gateoutput phân giải đúng; hai ngoại lệ đúng pr1392/pr1406. Bản sửa3 sửa số có căn cứ.",
+    "28 ca A, 50 mutant m1..m50, không trùng; đủ ai_nang/can_cu/tran_cu/tran_moi; OID ADR0053/0055 đúng land trên ref được cấp. Không kiểm remote freshness vì cấm mạng.",
+    "CRLF/LF healthy controls, CR lẻ/trộn và m45/m46 đúng target/non-target; K3 a–d và K5 conclusion mismatch bị chặn; archive giữ byte fixture và passed.",
+    "B8 pr680 nguyên byte khớp cutover, cổng thật rc0 1/1 miễn; literal mC6 mới giữ C1 và nhận C5(c), mC12 chỉ đòi mất duong_dan_sai là sửa đúng.",
+    "Bản sửa3 thêm fallback failed:-, giới hạn attempt cho passed, khai hậu duệ/waiver cũ và readback sửa tay được là phù hợp; riêng hợp đồng success owner_waived còn U01.",
+    "m50 mới chỉ làm A1-14(d) checkout rỗng đổi not_measured -> passed; healthy và a/b/c không đổi (audit_targets_r4.py rc0). 48 M8, 0 run_attempt, 4 owner_waived và ba M8 hậu duệ khớp."
+  ],
+  "verdict": "changes_requested",
+  "review_state": "complete",
+  "history_count": {
+    "old_findings": 34,
+    "prior_classes": 12,
+    "repeated_at_least_3_rounds": 3,
+    "count_method": "Chỉ đếm vòng có finding mở/biểu hiện mới của lớp, không tăng số vòng vì một dòng nhắc lại ID đã đóng; hợp cả hai reviewer trong một vòng."
+  },
+  "reviewed_sha": "176feba3a09a4e86c6d8b06487f3e4224571be51",
+  "reviewed_tree": "3befda03f3bb668cb31c1dad4e651356a4fec9dd",
+  "base_sha": "8048551a9b1eb886c126d2a1a4df0f95fb285964",
+  "review_class": "sensitive",
+  "review_identity": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_service",
+    "transport": "machine",
+    "model_family": "openai",
+    "model_served": "KHONG_DO_DUOC",
+    "effort_served": "KHONG_DO_DUOC",
+    "session_id": "KHONG_DO_DUOC",
+    "surface_evidence": "Phiên Codex qua API với công cụ shell; không có launcher receipt để khai codex_cli. Không suy identity từ tên thư mục r9-4-codex hoặc tài khoản GitHub.",
+    "independence": "Context chỉ nhận assignment và tài liệu review; không làm Executor, không fork hay dùng context Executor; không tạo subagent.",
+    "assurance": "Không tự tạo cross_approved/human_audited hoặc quyền land từ verdict này."
+  },
+  "authority": {
+    "source": "Chỉ thị trực tiếp của user ở lượt này: review spec r9 bản sửa3 vòng4 theo §8.3",
+    "spec_revision": 9,
+    "spec_edit": 3,
+    "generation": "Không có generation thi công được cấp; đây là review đặc tả trước lease A/B/C, không thực thi code",
+    "write_set": [
+      "../work/"
+    ],
+    "repo_policy": "read-only; không mạng/GitHub/commit/push",
+    "observed_sandbox": "workspace-write; ràng buộc chỉ đọc kho được giữ bằng thao tác và snapshot, không khai sandbox tự chặn mọi ghi"
+  },
+  "new_classes": [
+    "pham-vi-kiem-chung-trai-adr-windows"
+  ],
+  "reopened_classes": [],
+  "history_sources": [
+    {
+      "vong": 1,
+      "spec_sha256": "ba466e72bb86c33462847c9ab92469d44acbf6bcc81b4443179d33c2e00940e7",
+      "spec_commit": "89c07bc3fac42b059395f2947dd8992982e77161",
+      "reviewers": [
+        "lich_su/VERDICT_vong1_codex.md",
+        "lich_su/VERDICT_vong1_claude.md"
+      ]
+    },
+    {
+      "vong": 2,
+      "spec_sha256": "18da18c417a446284e7c40bf6c60070206891be88837bc4d88ad81d49c2c2e65",
+      "spec_commit": "d81f3590a772cce167e62df455272de31e77d6ae",
+      "reviewers": [
+        "lich_su/VERDICT_vong2_codex.md",
+        "lich_su/VERDICT_vong2_claude.md"
+      ]
+    },
+    {
+      "vong": 3,
+      "spec_sha256": "50269a88976968f60f50f714c882ab88cba6f597ff0249bd19b5ce157342b496",
+      "spec_commit": "9e05aaca7d0413c845117ca8f9b04beffc159048",
+      "reviewers": [
+        "lich_su/VERDICT_vong3_codex.md",
+        "lich_su/VERDICT_vong3_claude.md"
+      ]
+    }
+  ],
+  "issue_1_2_assessment": "Không tìm thấy lời khai passed/measured lọt qua thiết kế L8/D2b mà thiếu tệp danh-gia khớp provenance run push ci.yml, ngoài giới hạn đã khai. Theo chuỗi điều kiện: positive L8 buộc >=1 tệp, mọi tệp qua K1–K8; D2b còn neo run/attempt/head. Waiver hợp lệ, cutover băm, L8 chưa neo H, authenticity log/provenance/readback đều giữ đúng phạm vi đã công bố. Hai phản chứng ID trùng cho thấy tham chiếu/acceptance thiếu, không chứng minh một triển khai đúng chữ K4 lọt. Đây là kết luận trong phạm vi phép đo offline, không là chứng minh tổng quát hoặc xác thực run GitHub.",
+  "checkpoint": "3 lớp đã xuất hiện ở ba vòng r9: phải xét lại cách làm theo §12 trước lượt vá kế, không tiếp tục vá từng ví dụ. Lịch sử r7/r8/F12 và A14-S0 giữ nguyên ở hinh_dang_ke_thua; không reset ngân sách. Đây là kết quả review được user cấp riêng; không tự mở review/vòng vá mới và không tạo câu hỏi chủ kho ngoài E1–E5.",
+  "validation_scope": {
+    "passed": [
+      "sha/spec history",
+      "reference corpus scans",
+      "audit_r4.py fixture/contract probes",
+      "history coverage 34/34",
+      "audit_targets_r4.py targeted probes"
+    ],
+    "failed": [
+      "Các yêu cầu đặc tả U01–U03; không phải full suite triển khai"
+    ],
+    "skipped": [],
+    "not_run": [
+      "Production r9/L8/D2b chưa có",
+      "full CI",
+      "Windows local/CI",
+      "Ruff lint và Ruff pin/probe — review spec, không sửa code",
+      "GitHub/API/readback trực tuyến"
+    ],
+    "setup_observation": [
+      "Một lệnh đọc sed nhắm nhầm ci/provenance.yaml pr1440 báo file vắng; đã tìm đúng ci-provenance-44669622916 bằng rg. Không dùng lỗi dò đường dẫn làm finding."
+    ],
+    "limits": [
+      "Hai mốc snapshot chỉ chứng minh không có delta quan sát được, không chứng minh toàn lịch sử chưa từng ghi/hoàn nguyên.",
+      "Chỉ checkout được giao trong phạm vi quan sát; repo nguồn của executor không truy cập.",
+      "KHONG_DO_DUOC model/effort/session từ receipt; không suy từ tên tài khoản hoặc thư mục."
+    ]
+  },
+  "environment": {
+    "os": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "network": "not_used",
+    "scratch": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r9-4-codex/work"
+  },
+  "read_only_snapshot": {
+    "files_before": 17357,
+    "files_after": 17357,
+    "changed_paths": [],
+    "commands": [
+      {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD",
+          "HEAD^{tree}"
+        ],
+        "rc": 0,
+        "stdout": "176feba3a09a4e86c6d8b06487f3e4224571be51\n3befda03f3bb668cb31c1dad4e651356a4fec9dd\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all",
+          "--ignored=matching"
+        ],
+        "rc": 0,
+        "stdout": "!! .codex/\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--cached",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "scope": "Mọi file thường/symlink đọc được dưới checkout trừ .git; gồm ignored .codex/ tồn tại trước lượt. Diff/index kiểm bằng git. Repo nguồn executor ngoài phạm vi quan sát."
+  },
+  "execution_receipts": [
+    {
+      "command": "python3 -B ops/reviews/wp1236-r9-soan/thamchieu.py .",
+      "rc": 0,
+      "output_file": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r9-4-codex/work/thamchieu.txt",
+      "sha256": "3f47032b137318ecab965197abadd9f162cf3f2e30f0350e36f92f09b3816d18",
+      "positive_evidence": "47 passed / 10 failed / 9 not_measured",
+      "scope": "Đo offline dữ liệu thật/bản sao fixture và điều kiện đặc tả; không phải production r9"
+    },
+    {
+      "command": "python3 -B ops/reviews/wp1236-r9-soan/do_loi_khai.py .",
+      "rc": 0,
+      "output_file": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r9-4-codex/work/do_loi_khai.txt",
+      "sha256": "1befd6837c7840dd962af700b6f5c84bae9ae107e346ba72b92f6ec91b7275d2",
+      "positive_evidence": "25/56/39/50; 93 vi phạm",
+      "scope": "Đo offline dữ liệu thật/bản sao fixture và điều kiện đặc tả; không phải production r9"
+    },
+    {
+      "command": "python3 -B ../work/audit_r4.py",
+      "rc": 0,
+      "output_file": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r9-4-codex/work/audit_r4.txt",
+      "sha256": "38949f0871d22a6443fc97d99b08cf2869ffa2f060d5e2ff208343a7a76099c4",
+      "positive_evidence": "AUDIT_R4_COMPLETE",
+      "scope": "Đo offline dữ liệu thật/bản sao fixture và điều kiện đặc tả; không phải production r9"
+    },
+    {
+      "command": "python3 -B ../work/audit_targets_r4.py",
+      "rc": 0,
+      "output_file": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r9-4-codex/work/audit_targets_r4.txt",
+      "sha256": "30ce0e8788a0dba1144f7425772dcb928da86943803864d739ac73630428c4d3",
+      "positive_evidence": "TARGETS_R4_COMPLETE",
+      "scope": "Đo offline dữ liệu thật/bản sao fixture và điều kiện đặc tả; không phải production r9"
+    }
+  ]
+}

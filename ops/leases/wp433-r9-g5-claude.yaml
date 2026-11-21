@@ -108,9 +108,9 @@ heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lea
 lease_until: '2026-11-22T03:29:20Z'
 lease_expires_at_utc: '2026-11-22T03:29:20Z'
 lease_until_ghi_chu: '24h; rut han ngay sau land.'
-attempts_used: 0
+attempts_used: 1
 attempts_limit: 2
-attempts_basis: '<= 2 phien executor.'
+attempts_basis: '<= 2 phien executor; phien 1 (Fable, session_015GtxrbWXRVpeaJ4iY1zhVn, g1-g4) da dung; g5 la phien 2.'
 budget:
   codex_review_calls:
     pr_wp433_r9_g5: {used: 2, reserved: 0, limit: 10}

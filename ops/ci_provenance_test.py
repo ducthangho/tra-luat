@@ -1931,6 +1931,34 @@ class _KhacCoErrno(ValueError):
         super().__init__("không phải OSError, có errno")
         self.errno = so
 
+def _loi_kieu_errno(cls, so):
+    """Đối tượng đúng KIỂU `cls` (không để OSError tự đổi kiểu theo errno) mang errno `so` (None = không errno)."""
+    e = cls("giả")
+    if so is not None:
+        e.errno = so
+    return e
+
+_KIEU_C76 = (("PermissionError", PermissionError), ("lớp con PermissionError", _PEcon),
+             ("lớp con OSError", _OSErrorCon), ("OSError", OSError))
+_ERRNO_C76 = (("không errno", None), ("EACCES", errno.EACCES), ("EPERM", errno.EPERM), ("ENOTEMPTY", errno.ENOTEMPTY), ("EIO", errno.EIO))
+_NHAN_DON_C76 = """\
+PermissionError         | không errno PE | EACCES PE   | EPERM PE   | ENOTEMPTY PE        | EIO PE
+lớp con PermissionError | không errno PE | EACCES PE   | EPERM PE   | ENOTEMPTY PE        | EIO PE
+lớp con OSError         | không errno khac | EACCES khac | EPERM khac | ENOTEMPTY ENOTEMPTY | EIO khac
+OSError                 | không errno khac | EACCES khac | EPERM khac | ENOTEMPTY ENOTEMPTY | EIO khac
+"""   # nhãn DỌN viết tay theo luật đã duyệt: kiểu PE ⇒ PE (mọi errno); không phải PE mà errno ENOTEMPTY ⇒ ENOTEMPTY; còn lại khac
+_NHAN_DOI_TEN_C76 = {"PermissionError": "PE", "lớp con PermissionError": "PE", "lớp con OSError": "khac", "OSError": "khac"}   # SPEC M1/M2: theo KIỂU
+
+def _bang_c76(nhan_cua):
+    """Tích ĐỦ kiểu × errno (review lượt 8 F2.r): mọi giao kiểu/errno đều có một dòng, nhãn lấy từ bảng viết tay `nhan_cua`."""
+    return tuple((f"{tk} errno={te}", (lambda c=c, s=s: _loi_kieu_errno(c, s)), nhan_cua(tk, te)) for tk, c in _KIEU_C76 for te, s in _ERRNO_C76)
+
+def _nhan_don_c76(tk, te):
+    dong = {d.split("|")[0].strip(): d.split("|")[1:] for d in _NHAN_DON_C76.splitlines()}[tk]
+    o = [x.strip() for x in dong if x.strip().startswith(te + " ")]
+    assert len(o) == 1, (tk, te)
+    return o[0].rsplit(" ", 1)[1]
+
 _PHAN_LOAI_C74 = (   # (đối tượng lỗi, NHÃN KỲ VỌNG viết tay — không suy bằng isinstance/getattr của bộ phân loại)
     ("PermissionError(EACCES)", lambda: OSError(errno.EACCES, "giả"), "PE"),
     ("lớp con PermissionError", lambda: _PEcon(errno.EACCES, "giả"), "PE"),
@@ -1950,7 +1978,7 @@ _PHAN_LOAI_C74 = (   # (đối tượng lỗi, NHÃN KỲ VỌNG viết tay — 
 def c74_phan_loai_doi_tuong_loi():   # #1475 review lượt 6 F2.o: ranh giới kiểu/lớp con/errno của bước ánh xạ lỗi → loại
     m = nap()
     nhanh, so_o = sorted({False, sys.version_info >= (3, 12)}), 0
-    for ten, tao, nhan in _PHAN_LOAI_C74:
+    for ten, tao, nhan in _PHAN_LOAI_C74 + _bang_c76(_nhan_don_c76):
         for kem_pe in (False, True):   # một mình: chỉ PE mới thử lại · kèm PE: PE/ENOTEMPTY thử lại, khac dừng
             s = frozenset({nhan, "PE"} if kem_pe else {nhan})
             for windows in (True, False):
@@ -1977,7 +2005,7 @@ def c74_phan_loai_doi_tuong_loi():   # #1475 review lượt 6 F2.o: ranh giới 
                              f"{ten} (nhãn {nhan}) kèm_PE={kem_pe} windows={windows} onexc={onexc}: mong ({n}, {ngu_mong}, {sach}); "
                              f"được ({kq}, {len(goi)}, {ngu})")
                     so_o += 1
-    bang(so_o == len(_PHAN_LOAI_C74) * 2 * 2 * len(nhanh), f"số ô: {so_o}")
+    bang(so_o == (len(_PHAN_LOAI_C74) + 20) * 2 * 2 * len(nhanh), f"số ô: {so_o}")
     cau = ((lambda: {"x": lambda j: _PEcon(errno.EACCES, "giả") if j < 1 else None}, 2),   # cầu nối rmtree THẬT
            (lambda: {"x": lambda j: _OSErrorCon(errno.EACCES, "giả") if j < 1 else None}, 1),
            (lambda: {"x": lambda j: PE() if j < 1 else None, "@d": lambda j: _OSErrorCon(errno.ENOTEMPTY, "giả") if j < 1 else None}, 2))
@@ -2015,7 +2043,7 @@ def _mong_doi_ten(nhan, windows):
 def c75_doi_ten_va_ngat():   # #1475 review lượt 7: F2.p phân hoạch/chuyển tiếp lỗi ĐỔI TÊN · F2.q dọn tạm khi bị ngắt (BaseException)
     pe0 = _DOI_TEN_C75[0]
     so_o = 0
-    for ten, tao, nhan in _DOI_TEN_C75:
+    for ten, tao, nhan in _DOI_TEN_C75 + _bang_c76(lambda tk, te: _NHAN_DOI_TEN_C76[tk]):
         for kieu, lich in (("một lần", ((ten, tao, nhan),)), ("kéo dài", ((ten, tao, nhan),) * 6), ("PE rồi lỗi này", (pe0, (ten, tao, nhan)))):
             for windows in (True, False):
                 n, ngu, k_nem = _mong_doi_ten([x[2] for x in lich], windows)
@@ -2040,7 +2068,7 @@ def c75_doi_ten_va_ngat():   # #1475 review lượt 7: F2.p phân hoạch/chuy�
                         mong_loi = None if k_nem is None else da_tao[k_nem]
                         bang(r["loi"] is mong_loi and r["out"] == (MOI_BYTE if k_nem is None else CU_BYTE) and _ten_sot(r) == [], mo_ta)
                     so_o += 1
-    bang(so_o == len(_DOI_TEN_C75) * 3 * 2 * 3, f"số ô đổi tên: {so_o}")
+    bang(so_o == (len(_DOI_TEN_C75) + 20) * 3 * 2 * 3, f"số ô đổi tên: {so_o}")
     for ngat in (lambda: KeyboardInterrupt(), lambda: SystemExit(7)):   # F2.q: ngắt giữa (a)/(b) ⇒ ném lại ĐÚNG đối tượng, dọn tạm
         for cho, co_cu in (("a", True), ("b", True), ("b", False)):
             for windows in (True, False):
@@ -2504,6 +2532,10 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ('U4_doi_ten_loi_khac_sau_PE', '        except PermissionError:\n', '        except OSError as e:\n            if k == 0 and not isinstance(e, PermissionError):\n                raise\n', "c75"),
     ('U13_ngat_khong_don_tam', '    except BaseException:\n        try:\n', '    except Exception:\n        try:\n', "c75"),
     ('U9_sach_theo_callback', '        if not os.path.lexists(p):\n            return True', '        if not loi:\n            return True', "c75"),
+    ('V1_doi_ten_PE_errno_cho_phep', '        except PermissionError:\n', '        except PermissionError as e:\n            if e.errno not in (None, errno.EACCES, errno.EPERM):\n                raise\n', 'c75'),   # #1475 lượt 8 F2.r: tích kiểu × errno
+    ('V2_doi_ten_OSError_EPERM_la_PE', '        except PermissionError:\n', '        except OSError as e:\n            if not isinstance(e, PermissionError) and e.errno != errno.EPERM:\n                raise\n', 'c75'),
+    ('V3_don_PE_errno_cho_phep', 'loai = {"PE" if isinstance(e, PermissionError) else', 'loai = {"PE" if isinstance(e, PermissionError) and getattr(e, "errno", None) in (None, errno.EACCES, errno.EPERM) else', 'c74'),
+    ('V4_don_OSError_EPERM_la_PE', 'loai = {"PE" if isinstance(e, PermissionError) else', 'loai = {"PE" if isinstance(e, PermissionError) or getattr(e, "errno", None) == errno.EPERM else', 'c74'),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_AttributeError_qua_except_doi_kieu", "def than(dong):\n",

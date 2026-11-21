@@ -1,0 +1,67 @@
+**Verdict `blocked`** · `reviewed_sha` `26fbacd9d4ba73f8e83359e9af060a76b32cae08`
+
+M1–M5 khớp r5 và phép đo độc lập N1–N4 đạt. Không phát hiện lỗi P0–P2 trong mã sản phẩm. N5 bị chặn trong sandbox reviewer: selftest, bundle checker và EOL đỏ trên cùng tập ca ở cả base lẫn ứng viên. Delta hồi quy bằng 0, nhưng r5 yêu cầu các cổng này xanh trên exact SHA.
+
+| Neo review | Giá trị |
+|---|---|
+| Base | `8656dc0176ed108e12c209ba55c91a1f6f9d612f` |
+| Tree ứng viên | `4583e5bd5d3b7d1efdd2aec8f39da878776f03bd` |
+| Packet | #433 `SECRETS-SET-BUNDLE-KIEU` r5, lease `wp433-r10-g1-claude`, sensitive |
+| Reviewer | `openai_codex / codex_cli / machine`, Codex CLI 0.171.0 |
+| Runtime | Linux, Python 3.13.18, Git 2.43.0, Ruff 0.15.15, sandbox `workspace-write`. Hai clone đầy đủ dưới `/dev/shm`, `core.abbrev=7`, HOME giả, môi trường giữ nguyên ngoài các biến phục vụ cô lập. |
+| Ngân sách | Review mã 1/10. §12 `N/A`, tập lớp mở từ lượt review mã trước rỗng. |
+
+### Spec và ranh giới ghi
+
+- **M1.** Chốt `dict` nằm ngay sau khối giải mã, trước `changed` và mọi cờ. Cả 25 lượt bundle sai kiểu trả rc 3, đúng một dòng stderr, fetch một lần và không export, refresh, canary, mã hóa lại hay upload. `load_creds` và fetch vẫn nằm trước giải mã theo r5. `tai_hien.py` trả rc 0 trên cả hai cây. Log base khớp từng byte log r1, sáu dòng hồi quy khớp giữa hai cây. [Base](/dev/shm/review433.mcmzdK/tai-nen.log) · [Ứng viên](/dev/shm/review433.mcmzdK/tai-sau.log)
+- **M2.** Với token sai kiểu và thiếu `TL_TOKEN`, sáu lượt GWS/NLM đều rc 0, upload bundle một lần, phát cảnh báo thiếu token và không đồng bộ public. Không có đường ghi mới. Tám lượt kiểm thêm với chuỗi rỗng xác nhận `TL_TOKEN` có giá trị được ưu tiên, `--gas-token` có giá trị thay token trong bundle và cấp khóa public khi chạy cùng GWS/NLM nếu thiếu `TL_TOKEN`. Khi thiếu cả hai, chuỗi rỗng đi vào nhánh cảnh báo.
+- **M3–M5.** Spec hash, handoff hash, bundle ref và write-set hash đều khớp. Diff ghim hai OID đầy đủ có **4 tệp, +164/−8**. Commit cuối chỉ đổi manifest. `write_bundled_modules` sinh hai mảnh **170.024 / 142.890 B**. Lệnh `python scripts/tl.py release-manifest --out <tệp tạm>` và ba phép `cmp` đều rc 0. Fragment mới nằm ở mảnh 2. Mảnh 1 tái sinh khớp cả base lẫn ứng viên.
+
+### N1–N4 và Q5′
+
+`rig_n4.py` trả rc 0, đạt **30/30 mục trong 30 tiến trình riêng**, phủ **346/346 khóa**. Phép đối chiếu độc lập đọc trực tiếp từng bản đồ và xác nhận tập `False` bằng đúng tập đích cho các đột biến nghiệm thu. Đối chứng ứng viên xanh **250/250, 36/36, 60/60**. Nạp nguồn base vào fragment ứng viên làm đỏ đúng **65 khóa N1 + 18 khóa N2**, N3 xanh **60/60**. Hai đột biến bắt buộc kiểm frame đều đạt. Tự kiểm (a), (a2), (b) bị phân loại `TIN_DUNG_GIA` theo kỳ vọng. Tự kiểm (c) `SONG_SOT` với cả 346 khóa xanh. Tự kiểm (d) `LECH_TAP` vì đúng `kieu.list.gws.gws_export0` chuyển từ đỏ sang xanh. [Log N4](/dev/shm/review433.mcmzdK/n4-independent.log) · [Đối chiếu độc lập](/dev/shm/review433.mcmzdK/check-n4.py)
+
+Các đột biến tôi đặt trực tiếp vào `scripts/tl_gws.py` trên bản sao cho kết quả sau. Đối chứng nguyên vẹn trả rc 0 và xanh 346/346. [Mã chạy phản chứng](/dev/shm/review433.mcmzdK/extra.py)
+
+| Phản chứng | rc | Kết quả |
+|---|---:|---|
+| Bỏ chốt M1 | 1 | 65 khóa đỏ |
+| Dời chốt sau export GWS | 1 | Đỏ đúng 5 khóa `gws_export0` |
+| Dời chốt sau refresh NLM | 1 | Đỏ đúng 5 khóa `nlm_refresh0` |
+| Bỏ kiểm kiểu token | 1 | Vắng 36 khóa N2 do lỗi của phép đo, xem F01 |
+| Ép token qua `str()` | 1 | 18 khóa N2 đỏ, đủ 346 khóa |
+
+**Thứ tự lập ma trận.** `sinh_ma_tran.py` sinh lại đúng từng byte của ma trận đã nộp, SHA-256 `2d6f40110d9d9e5b5cfae41804ca2436692aa3de876e946a30cd06c1842c7ff0`. Script khai tập đích từ từng cơ chế và không đọc bản đồ đo. Mục nguồn base là đối chứng và không được tính vào độ phủ. Ma trận xuất hiện trong commit handoff `04fcfbdf105e780c48f25d43a77541f4996eaea3` sau lượt đo. Commit đó xác nhận nội dung đã nộp, còn thứ tự soạn ban đầu dựa trên khai báo của Executor. Phép đo base chạy sớm không tạo tín dụng phủ khóa, và tôi không thấy bằng chứng tập đích được suy từ bản đồ lỗi hay tạo kết quả xanh giả.
+
+### N5 trên exact SHA
+
+| Cổng | Base → ứng viên | Trạng thái |
+|---|---|---|
+| `python scripts/tl.py --selftest` | **1771/1785 → 1772/1786**, rc 1 / 1. Cùng 14 ID đỏ, ca mới xanh. | `failed` |
+| `test-fragments-check --json` | 2 mảnh `current` trên cả hai cây, rc 0 / 0 | `passed` |
+| `bundle_fragment_check.py --json` | **13/19 → 14/20**, rc 1 / 1. Cùng sáu ID đỏ, fragment mới xanh. | `failed` |
+| `release-verify RELEASE_MANIFEST.json --strict --json` | **186/186 → 186/186** trên manifest đã commit, rc 0 / 0 | `passed` |
+| `workflow-audit --strict --json` | 74 tệp, `py_size.warn=[]`, `py_size.fail=[]`, rc 0 / 0 | `passed` |
+| `golden-test --json` | **20/20 → 20/20**, rc 0 / 0 | `passed` |
+| `.githooks/eol_policy_test.py` | **29/32 → 29/32**, rc 1 / 1. Cùng ba ca đỏ, đều phụ thuộc bundle checker. | `failed` |
+| Ruff F, năm tệp theo handoff | **4499 → 4499**, rc 1 / 1, delta 0. Thư mục fragment rc 0 / 0. Kiểm pin/contract rc 0 / 0. | Lint thô `failed`, tiêu chí delta `passed` |
+| `doctrine-scan`, `adr-song` | 0 vi phạm trên 12 tệp, 66/66 ADR, rc 0 / 0 cho cả hai lệnh | `passed` |
+| `git diff --check <base> <candidate>` và `--numstat` cùng phạm vi | Diff sạch, rc 0. Kích thước trong trần lease. | `passed` |
+
+Probe trên thư mục giả xác nhận `_trong_kho_git` trả `/dev/shm` khi gặp `/dev/shm/.git` và trả `/tmp` khi gặp `/tmp/.git`. Các fragment WP433 cũ giữ nguyên bộ đếm giữa hai SHA, nhưng năm fragment đỏ trên cả hai cây. Điều này giải thích khác biệt với môi trường Executor và để lại N5 chưa đạt trong phép chạy độc lập. [ID selftest đỏ](/dev/shm/review433.mcmzdK/sau.fail) · [Bundle checker](/dev/shm/review433.mcmzdK/gate/sau.bfc.json) · [EOL](/dev/shm/review433.mcmzdK/fast-gates/sau/eol.log)
+
+### Bảng lớp và finding
+
+| class_slug | Finding IDs/biểu hiện (chỗ) | Mức cao nhất còn mở | Nguồn lượt/SHA | Cách vá chung | Phép kiểm đóng lớp |
+|---|---|---|---|---|---|
+| `secrets-set-do-min-ve` | F01, `token_kieu`: phép quan sát khóa dùng `set(q.khoa)` | P3 | Review mã 1/10, `26fbacd9d4ba73f8e83359e9af060a76b32cae08` | So từng khóa với khóa master để xử lý cả giá trị không hash được | Bỏ chốt kiểu trong mã sản phẩm cho từng kiểu list, dict và int. Bản đồ vẫn đủ 346 khóa, lệch khóa public hiện thành `False`. |
+
+**F01 · `secrets-set-do-min-ve` · P3.** `scripts/test_fragments/wp433_secrets_set_bundle.py:108` dựng `set(q.khoa)`. Nếu đột biến đưa list hoặc dict qua chốt kiểu, phép đo ném `TypeError` và cắt phần còn lại của ca N2. Bỏ chốt toàn bộ làm vắng 36 khóa, chỉ cho dict lọt làm vắng 24 khóa, còn chỉ cho int lọt giữ đủ bản đồ và đỏ bốn khóa. Các lượt đó đều bị từ chối. Quét cùng cơ chế cho thấy N1 dùng độ dài danh sách khóa, N3 dùng so sánh danh sách, nên hai ca đó không gặp lỗi hash này. Có thể thay phép tạo tập bằng so sánh từng phần tử với `_MK`. Đây là nợ độ mịn theo Q5′. [Log bỏ chốt](/dev/shm/review433.mcmzdK/extra/remove-type-check.log) · [Log riêng cho dict](/dev/shm/review433.mcmzdK/extra/dict-only-type-omission.log)
+
+Có **1 lớp, 1 biểu hiện mở**, không có lớp tái mở. Đã quét các lớp lịch sử về oracle xanh giả, khóa gộp/vắng, đích ma trận tự xác nhận, manifest cuối và phạm vi diff. Ba nhóm quan sát có kỳ vọng chép cứng, và phép chạy trên exact SHA bắt được khóa vắng, sai frame và ép xanh.
+
+### Chưa đo
+
+N5 xanh đầy đủ cần một môi trường offline mà thư mục fixture tạm nằm ngoài mọi tổ tiên có `.git`. Thời điểm lập ma trận ban đầu và model/effort phục vụ cụ thể chưa có biên nhận máy độc lập. Windows native **miễn** theo Q4′. CI GitHub, connector review và human audit trên exact SHA **chưa chạy** trong lượt offline này.
+
+KET_LUAN: request_changes

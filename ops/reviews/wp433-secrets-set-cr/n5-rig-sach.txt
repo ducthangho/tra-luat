@@ -1,0 +1,22 @@
+# N5 do lai tren rig sach (phien dieu phoi #1206), 2026-11-21
+# /dev/shm/.git rong (do sandbox Codex luot 1 de lai luc 09:11Z) da rmdir; /tmp/.git khong co.
+# Hai clone day du (unshallow tu GitHub), core.abbrev=7, HOME/TMPDIR rieng duoi /dev/shm/n5ss, cung mot phien shell.
+## nen 8656dc0176ed108e12c209ba55c91a1f6f9d612f
+== nen 8656dc0 09:23:07Z
+  [OK] wp42_complete_runtime_test_ids_unique
+== tl selftest 1785/1785 ==
+rc=0
+bfc True 19 []
+## sau 26fbacd9d4ba73f8e83359e9af060a76b32cae08 + eol hai ve
+== sau 26fbacd 09:33:17Z
+== tl selftest 1786/1786 ==
+rc=0
+bfc True 20 []
+== eol nen 09:39:48Z
+
+32/32 dat
+rc=0
+== eol sau 09:44:59Z
+
+32/32 dat
+rc=0

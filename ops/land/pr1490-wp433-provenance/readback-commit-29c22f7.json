@@ -1,0 +1,141 @@
+{
+ "author": {
+  "avatar_url": "https://avatars.githubusercontent.com/u/12748935?v=4",
+  "events_url": "https://api.github.com/users/ducthangho/events{/privacy}",
+  "followers_url": "https://api.github.com/users/ducthangho/followers",
+  "following_url": "https://api.github.com/users/ducthangho/following{/other_user}",
+  "gists_url": "https://api.github.com/users/ducthangho/gists{/gist_id}",
+  "gravatar_id": "",
+  "html_url": "https://github.com/ducthangho",
+  "id": 12748935,
+  "login": "ducthangho",
+  "node_id": "MDQ6VXNlcjEyNzQ4OTM1",
+  "organizations_url": "https://api.github.com/users/ducthangho/orgs",
+  "received_events_url": "https://api.github.com/users/ducthangho/received_events",
+  "repos_url": "https://api.github.com/users/ducthangho/repos",
+  "site_admin": false,
+  "starred_url": "https://api.github.com/users/ducthangho/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/ducthangho/subscriptions",
+  "type": "User",
+  "url": "https://api.github.com/users/ducthangho",
+  "user_view_type": "public"
+ },
+ "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/29c22f7d1f92321978d4d1dff16bd80d9ea744e0/comments",
+ "commit": {
+  "author": {
+   "date": "2026-11-21T12:26:54Z",
+   "email": "ducthangho@gmail.com",
+   "name": "ducthangho"
+  },
+  "comment_count": 0,
+  "committer": {
+   "date": "2026-11-21T12:26:54Z",
+   "email": "noreply@github.com",
+   "name": "GitHub"
+  },
+  "message": "Merge PR #1490: wp433 r10 — secrets-set bundle kiểu (#433)\n\nChủ kho duyệt merge đúng head 26fbacd9d4ba73f8e83359e9af060a76b32cae08; human_exact_head_audit.v1 tại issuecomment-7062218542. F01 (secrets-set-do-min-ve, P3) là nợ đã chấp nhận.",
+  "tree": {
+   "sha": "d0aae59f7a8cf0154085229cda3cbc53cc15829a",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/d0aae59f7a8cf0154085229cda3cbc53cc15829a"
+  },
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/29c22f7d1f92321978d4d1dff16bd80d9ea744e0",
+  "verification": {
+   "payload": "tree d0aae59f7a8cf0154085229cda3cbc53cc15829a\nparent 5f461a599059c525235abbfd081345fc6cd03586\nparent 26fbacd9d4ba73f8e83359e9af060a76b32cae08\nauthor ducthangho <ducthangho@gmail.com> 1795264014 +0700\ncommitter GitHub <noreply@github.com> 1795264014 +0700\n\nMerge PR #1490: wp433 r10 — secrets-set bundle kiểu (#433)\n\nChủ kho duyệt merge đúng head 26fbacd9d4ba73f8e83359e9af060a76b32cae08; human_exact_head_audit.v1 tại issuecomment-7062218542. F01 (secrets-set-do-min-ve, P3) là nợ đã chấp nhận.",
+   "reason": "valid",
+   "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJrAY4OCRC1aQ7uu5UhlAAABw4QAIuzo3+QvMCNvl0FIYNRGhiN\n6Iv0vMqlcCcHpZ1m7pkgs6INZFRsouGGTGWcIos8KmcbGL0g6XQRyx8LEajX8q6B\nAWti7koC6vEuBuo/OHdwsAlkjcfDcgxdKxiz8UbjS0b2FMJ+rsCcdoeRpJA/g29V\nU1TJS1L4Cq3VFboWJiQMmKR7KL601530aSyX0IlgTaz3JfuH7nmTl+t8rs/J3Ox0\nGAiAtMDyKZjf0v9GZYB00qowxZRD2TmVQlhRdNbkmLtWKvrc7jE9YbgtXq1mE9wJ\nadjB3KrCRxunApxQvmbRcE0jN85dD/w0CoFbld237tgvtJ31cjAe0pO1zNRx5wlY\nPGHdC89JG8vKw0X7Bk3PtFh3iy52oPSeMD+FFWJdZMEGCtqT9QNt7W9qtHxHRyDU\nFUaIWgSYO8+b5HOClsV/kRLOdEMgJgzl7SgvNiqFjjxQ2m6rekqOuNxAiYl0MJTo\n0JO8z6q52aTnDnNlq0T8yeprQL1NWtP1Mvdq532dvnNM+r3BRL3rg7isZ5X3KWY8\nRS4k68apdzoI64Ec7adVK3j4tguydAolxnhaTQKxd0xQbWbtI2Z2/LmRDyUm5Re1\nmxfmO2ZYwaeVnG3vSTeYtQ/9xomgCK16aBNpicr8oouoY9sxVQ15EvJDHrM8yyb9\nPwrYES/B0msCqx9JBJ4p\n=g6+G\n-----END PGP SIGNATURE-----\n",
+   "verified": true,
+   "verified_at": "2026-11-21T12:26:55Z"
+  }
+ },
+ "committer": {
+  "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+  "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+  "followers_url": "https://api.github.com/users/web-flow/followers",
+  "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+  "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+  "gravatar_id": "",
+  "html_url": "https://github.com/web-flow",
+  "id": 19864447,
+  "login": "web-flow",
+  "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+  "organizations_url": "https://api.github.com/users/web-flow/orgs",
+  "received_events_url": "https://api.github.com/users/web-flow/received_events",
+  "repos_url": "https://api.github.com/users/web-flow/repos",
+  "site_admin": false,
+  "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+  "type": "User",
+  "url": "https://api.github.com/users/web-flow",
+  "user_view_type": "public"
+ },
+ "files": [
+  {
+   "additions": 7,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/29c22f7d1f92321978d4d1dff16bd80d9ea744e0/RELEASE_MANIFEST.json",
+   "changes": 14,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/RELEASE_MANIFEST.json?ref=29c22f7d1f92321978d4d1dff16bd80d9ea744e0",
+   "deletions": 7,
+   "filename": "RELEASE_MANIFEST.json",
+   "patch": "@@ -6,9 +6,9 @@\n   \"webapp_target\": \"2.21.2q\",\n   \"root_name\": \"tra-luat\",\n   \"file_count\": 186,\n-  \"total_bytes\": 9366127,\n-  \"package_hash\": \"bff4fd5ee25707e2cac13e4f72e490f1a15669f6d27bbf98aed55de025e3f8a9\",\n-  \"content_hash\": \"bff4fd5ee25707e2cac13e4f72e490f1a15669f6d27bbf98aed55de025e3f8a9\",\n+  \"total_bytes\": 9378466,\n+  \"package_hash\": \"4d78ebbb5c4e87b6e0238984b1a34d85d8ad39776a673c9cd56fae39d38f97a4\",\n+  \"content_hash\": \"4d78ebbb5c4e87b6e0238984b1a34d85d8ad39776a673c9cd56fae39d38f97a4\",\n   \"required_missing\": [],\n   \"files\": [\n     {\n@@ -878,8 +878,8 @@\n     },\n     {\n       \"path\": \"scripts/tl_gws.py\",\n-      \"size\": 169705,\n-      \"sha256\": \"7c31d2b3f37bd1ac93a546eeda50fb07fd17e836414c3ce17b35ab8a7f291941\"\n+      \"size\": 170095,\n+      \"sha256\": \"be4054ad5cccc2bcdefe13a84f279e9d743caaec528a993b27e34d2ebce7a7b4\"\n     },\n     {\n       \"path\": \"scripts/tl_selftest.py\",\n@@ -893,8 +893,8 @@\n     },\n     {\n       \"path\": \"scripts/tl_test_fragments_bundled_2.py\",\n-      \"size\": 130941,\n-      \"sha256\": \"144253c0c32724a988e814d628b21c27688d44a47a6b33c57ca72f02e26ecc2f\"\n+      \"size\": 142890,\n+      \"sha256\": \"ef6f8368d411519031eaa312301a092053d694444f190ea5e431922af25d3a11\"\n     },\n     {\n       \"path\": \"scripts/tra_cuu.py\",",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/29c22f7d1f92321978d4d1dff16bd80d9ea744e0/RELEASE_MANIFEST.json",
+   "sha": "603890caf8f7bd2740a0f5f3c9f569ce97219ba2",
+   "status": "modified"
+  },
+  {
+   "additions": 151,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/29c22f7d1f92321978d4d1dff16bd80d9ea744e0/scripts%2Ftest_fragments%2Fwp433_secrets_set_bundle.py",
+   "changes": 151,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/scripts%2Ftest_fragments%2Fwp433_secrets_set_bundle.py?ref=29c22f7d1f92321978d4d1dff16bd80d9ea744e0",
+   "deletions": 0,
+   "filename": "scripts/test_fragments/wp433_secrets_set_bundle.py",
+   "patch": "@@ -0,0 +1,151 @@\n+# -*- coding: utf-8 -*-\n+\"\"\"wp433 — `secrets-set` (`tl_gws.py`): bundle giải mã không phải object ⇒ rc 3 ngay sau giải mã, TRƯỚC mọi cờ/export/canary;\n+`token` không phải str ⇒ coi như thiếu, không lấy repr làm khoá public (spec SECRETS-SET-BUNDLE-KIEU r5).\n+Mọi lượt chạy trên bản `tl_gws` nạp TRONG BỘ NHỚ (nguồn của cây, hoặc nguồn truyền vào `run(tl, nguon)`), HOME/TL_* tạm, dữ liệu GIẢ;\n+mọi hàm tải/ghi/mạng là đồ giả CÓ ĐẾM (`_gas` giả ném lỗi), `encrypt` bọc để ghi khoá.\n+Quy tắc vế r5 §4: danh mục khoá ĐÓNG `ca.luot.quan_sat` (346), mỗi khoá MỘT hành vi, kỳ vọng chép cứng; `run()` trả True/False và\n+ghi BẢN ĐỒ ĐẦY ĐỦ `{khoa: bool}` của chính lần chạy ra tệp `$WP433_SS_BAN_DO` (không có biến thì không ghi). Khoá vắng = ĐỎ.\n+Ma trận đột biến N4 (mỗi đột biến một tiến trình MỚI) nằm ở rig ngoài fragment; fragment chỉ cung cấp bản đồ.\"\"\"\n+import argparse, contextlib, io, json, os, pathlib, shutil, subprocess, sys, tempfile, types, urllib.request  # noqa: E401\n+TEST_ID = \"wp433_secrets_set_bundle\"\n+_MK = \"wp433-ss-master-gia-0123456789abcdefghijklmnop\"   # >= 32 ký tự; KHÔNG phải khoá thật\n+_DONG = \"[secrets-set] ✗ dữ liệu không hợp lệ: bundle\"\n+_GAN = 'bundle[\"token\"] = a.gas_token; changed.append(\"token\")'      # câu gán ĐẦU TIÊN vào bundle ở cờ --gas-token (cơ chế đột biến 1–2)\n+_GIA = ((\"fetch\", \"_secrets_fetch\"), (\"upload\", \"_secrets_upload\"), (\"stage_enc\", \"_stage_enc_upload\"), (\"gws_export\", \"_gws_export_cred\"),\n+        (\"nlm_refresh\", \"_refresh_nlm_auth\"), (\"canary\", \"_nlm_files_after_live_canary\"), (\"gas\", \"_gas\"))\n+_KIEU = ((\"list\", [1, 2]), (\"str\", \"chuoi\"), (\"int\", 7), (\"null\", None), (\"true\", True))\n+_TOKEN = ((\"list\", [1]), (\"dict\", {\"a\": 1}), (\"int\", 7))\n+_CO = {\"gas_token\": dict(gas_token=\"tok-moi\"), \"webapp\": dict(webapp=\"https://gia.invalid/exec\"), \"gws\": dict(gws=True), \"nlm\": dict(nlm=True), \"khong_co\": {}}\n+_HOP_LE = {\"token\": \"tok-cu\", \"webappUrl\": \"u\"}\n+# ---- danh mục khoá ĐÓNG, chép cứng (spec r5 §4): lượt theo ca, loại quan sát theo ca\n+_LUOT = {\n+    \"kieu\": tuple(\"kieu.%s.%s\" % (k, c) for k in (\"list\", \"str\", \"int\", \"null\", \"true\") for c in (\"gas_token\", \"webapp\", \"gws\", \"nlm\", \"khong_co\")),\n+    \"token_kieu\": tuple(\"token_kieu.%s.%s\" % (k, c) for k in (\"list\", \"dict\", \"int\") for c in (\"gws\", \"nlm\")),\n+    \"hoi_quy\": (\"hoi_quy.gas_token\", \"hoi_quy.webapp\", \"hoi_quy.gws\", \"hoi_quy.nlm\", \"hoi_quy.khong_co\", \"hoi_quy.env_token.gws\"),\n+}\n+_QS = {\n+    \"kieu\": (\"rc3\", \"dong\", \"fetch1\", \"upload0\", \"stage_enc0\", \"gws_export0\", \"nlm_refresh0\", \"canary0\", \"gas0\", \"encrypt0\"),\n+    \"token_kieu\": (\"rc0\", \"upload1\", \"stage_enc0\", \"khoa_public_rong\", \"canh_bao_co\", \"khong_dong_loi\"),\n+    \"hoi_quy\": (\"rc\", \"fetch\", \"gas\", \"upload\", \"stage_enc\", \"gws_export\", \"nlm_refresh\", \"canary\", \"encrypt\", \"khoa_public\"),\n+}\n+_DANH_MUC = frozenset(\"%s.%s\" % (luot, qs) for ca in _LUOT for luot in _LUOT[ca] for qs in _QS[ca])\n+_SO_KHOA = 346                                                         # 250 + 36 + 60\n+_HQ = {  # bảng kỳ vọng `hoi_quy` (spec r5 §4), theo thứ tự lượt _LUOT[\"hoi_quy\"]\n+    \"rc\": (0, 0, 0, 0, 1, 0), \"fetch\": (1, 1, 1, 1, 1, 1), \"gas\": (0, 0, 0, 0, 0, 0), \"upload\": (1, 1, 1, 1, 0, 1),\n+    \"stage_enc\": (0, 0, 1, 1, 0, 1), \"gws_export\": (0, 0, 1, 0, 0, 1), \"nlm_refresh\": (0, 0, 0, 1, 0, 0), \"canary\": (0, 0, 0, 1, 0, 0),\n+    \"encrypt\": (1, 1, 2, 2, 0, 2), \"khoa_public\": ([], [], [\"tok-cu\"], [\"tok-cu\"], [], [\"tok-env\"]),\n+}\n+def _nem(e):\n+    raise e\n+def _nap(nguon, tl_module, goc, store):\n+    \"\"\"`compile`+`exec` nguồn vào module MỚI rồi `bind`; thay đường tải/ghi/mạng bằng đồ giả CÓ ĐẾM (`m.dem`), `encrypt` ghi khoá vào\n+    `m.khoa`, `_safe_exc` bọc để GHI frame cuối của ngoại lệ (tên hàm, có thuộc module này không, dòng nguồn đã strip) vào `m.vt`.\"\"\"\n+    m = types.ModuleType(\"wp433ss_tl_gws\"); m.__file__ = goc.__file__  # noqa: E702\n+    exec(compile(nguon, goc.__file__, \"exec\"), m.__dict__)\n+    m.bind(tl_module)\n+    m.dem, m.khoa, m.vt, m.blob, dong, that_imp, that_safe = {}, [], [], None, nguon.splitlines(), m._imp, m._safe_exc\n+    tra = {\"fetch\": lambda a, fid: (m.blob, \"gia\"), \"upload\": (\"fid-gia\", None), \"stage_enc\": None, \"gws_export\": b'{\"cred\":\"gia\"}', \"nlm_refresh\": True,\n+           \"canary\": ({\"auth.json\": \"gia\"}, 0, None), \"gas\": lambda *a, **k: _nem(RuntimeError(\"MANG_BI_CHAN\"))}\n+    def gia(ten, ham):\n+        def f(*a, **k):\n+            m.dem[ten] += 1\n+            return tra[ten](*a, **k) if callable(tra[ten]) else tra[ten]\n+        setattr(m, ham, f)\n+    for ten, ham in _GIA:\n+        gia(ten, ham)\n+    def safe(exc):\n+        tb = exc.__traceback__\n+        while tb is not None and tb.tb_next is not None:\n+            tb = tb.tb_next\n+        if tb is not None:\n+            m.vt.append((tb.tb_frame.f_code.co_name, tb.tb_frame.f_globals is m.__dict__, dong[tb.tb_lineno - 1].strip()))\n+        return that_safe(exc)\n+    proxy = types.SimpleNamespace(encrypt=lambda data, key: (m.khoa.append(key), store.encrypt(data, key))[1], decrypt=store.decrypt)\n+    m._safe_exc, m._imp = safe, lambda n: proxy if n == \"gws_cred_store\" else that_imp(n)\n+    m._nlm_auth_files, m._nlm_auth_age_days, m.load_creds = (lambda: {\"auth.json\": 1}), (lambda n: None), (lambda *a, **k: None)\n+    return m\n+class _Rig:\n+    \"\"\"Các lượt trên một bản nạp `m`; mỗi LƯỢT có thư mục tạm, HOME/USERPROFILE/TL_*/cwd riêng, khôi phục khi ra. `ghi` đưa quan sát\n+    của lượt vào bản đồ chung: khoá = `<lượt>.<loại quan sát>`, giá trị = đạt hay không.\"\"\"\n+    def __init__(self, m, store, ban_do):\n+        self.m, self.store, self.ban_do = m, store, ban_do\n+    def luot(self, ten, bundle_obj, co, env_token=None):\n+        \"\"\"Một lượt `cmd_secrets_set`: chặn tiến trình con/mạng (`MANG_BI_CHAN`), stdout/stderr RIÊNG; trả quan sát (rc, bộ đếm, khoá, stderr, vt).\"\"\"\n+        m = self.m\n+        m.dem, m.khoa, m.vt = dict.fromkeys((t for t, _h in _GIA), 0), [], []\n+        m.blob = self.store.encrypt(json.dumps(bundle_obj).encode(\"utf-8\"), _MK)\n+        td, cu_env, cu_cwd, out, err = tempfile.mkdtemp(prefix=\"wp433ss-\"), dict(os.environ), os.getcwd(), io.StringIO(), io.StringIO()\n+        cu = (subprocess.run, subprocess.Popen, urllib.request.urlopen)\n+        try:\n+            for k in [k for k in os.environ if k.startswith(\"TL_\")]:\n+                os.environ.pop(k)\n+            os.environ.update(HOME=td, USERPROFILE=td, TL_MASTER_KEY=_MK, **({\"TL_TOKEN\": env_token} if env_token else {}))\n+            os.chdir(td)\n+            subprocess.run = subprocess.Popen = urllib.request.urlopen = lambda *a, **k: _nem(RuntimeError(\"MANG_BI_CHAN\"))\n+            a = argparse.Namespace(secrets_id=\"fid-gia\", config=None, profile=None, gas_token=None, webapp=None, gws=False, nlm=False,\n+                                   no_public=False, folder=None, secrets_file=None, env=None)\n+            for k, v in co.items():\n+                setattr(a, k, v)\n+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):\n+                rc = m.cmd_secrets_set(a)\n+        finally:\n+            subprocess.run, subprocess.Popen, urllib.request.urlopen = cu\n+            os.chdir(cu_cwd); os.environ.clear(); os.environ.update(cu_env); shutil.rmtree(td, ignore_errors=True)  # noqa: E702\n+        return types.SimpleNamespace(rc=rc, dem=dict(m.dem), khoa=list(m.khoa), err=err.getvalue().splitlines(), vt=list(m.vt))\n+    def ghi(self, luot, qs):\n+        for k, v in qs.items():\n+            self.ban_do[\"%s.%s\" % (luot, k)] = v is True\n+def kieu(r):\n+    for luot in _LUOT[\"kieu\"]:\n+        _ca, kt, ct = luot.split(\".\")\n+        q = r.luot(luot, dict(_KIEU)[kt], _CO[ct])\n+        d = q.dem\n+        r.ghi(luot, dict(rc3=q.rc == 3, dong=q.err == [_DONG], fetch1=d[\"fetch\"] == 1, upload0=d[\"upload\"] == 0, stage_enc0=d[\"stage_enc\"] == 0,\n+                         gws_export0=d[\"gws_export\"] == 0, nlm_refresh0=d[\"nlm_refresh\"] == 0, canary0=d[\"canary\"] == 0, gas0=d[\"gas\"] == 0,\n+                         encrypt0=len(q.khoa) == 0))\n+def token_kieu(r):\n+    for luot in _LUOT[\"token_kieu\"]:\n+        _ca, tt, ct = luot.split(\".\")\n+        q = r.luot(luot, {\"token\": dict(_TOKEN)[tt], \"webappUrl\": \"u\"}, _CO[ct])\n+        r.ghi(luot, dict(rc0=q.rc == 0, upload1=q.dem[\"upload\"] == 1, stage_enc0=q.dem[\"stage_enc\"] == 0, khoa_public_rong=set(q.khoa) <= {_MK},\n+                         canh_bao_co=sum(\"thiếu webapp token\" in d for d in q.err) == 1, khong_dong_loi=not any(\"✗\" in d for d in q.err)))\n+def hoi_quy(r):\n+    for i, luot in enumerate(_LUOT[\"hoi_quy\"]):\n+        if luot == \"hoi_quy.env_token.gws\":\n+            q = r.luot(luot, {\"token\": [1], \"webappUrl\": \"u\"}, _CO[\"gws\"], env_token=\"tok-env\")\n+        else:\n+            q = r.luot(luot, dict(_HOP_LE), _CO[luot.split(\".\")[1]])\n+        do = dict(q.dem, rc=q.rc, encrypt=len(q.khoa), khoa_public=[k for k in q.khoa if k != _MK])\n+        r.ghi(luot, {t: do[t] == _HQ[t][i] for t in _QS[\"hoi_quy\"]})\n+_CA = (kieu, token_kieu, hoi_quy)\n+def _dung_co_che(q):\n+    \"\"\"Đột biến 1–2 (§4 N4 ii): rc 5 qua `_nlm_contained` với đúng một dòng `TypeError`, và frame phát sinh là `_secrets_set_body` của\n+    CHÍNH nguồn đang chạy, câu `_GAN`. Rig N4 gọi hàm này trong tiến trình của chính đột biến.\"\"\"\n+    return (q is not None and q.rc == 5 and len(q.err) == 1 and q.err[0].startswith(\"[secrets-set] ✗ dừng vì lỗi TypeError \")\n+            and q.vt == [(\"_secrets_set_body\", True, _GAN)])\n+def _do(tl_module, nguon=None):\n+    \"\"\"Chạy ba ca, trả bản đồ `{khoa: bool}`. `nguon=None` ⇒ nguồn `tl_gws.py` của chính cây; ca văng ngoại lệ thì các khoá chưa ghi VẮNG.\"\"\"\n+    goc = tl_module._imp(\"tl_gws\"); goc.bind(tl_module)  # noqa: E702\n+    store = tl_module._imp(\"gws_cred_store\")\n+    nguon = pathlib.Path(goc.__file__).read_text(encoding=\"utf-8\") if nguon is None else nguon\n+    m, ban_do = _nap(nguon, tl_module, goc, store), {}\n+    for ca in _CA:\n+        try:\n+            ca(_Rig(m, store, ban_do))\n+        except Exception as e:  # noqa: BLE001\n+            print(\"[%s] ĐỎ ca %s: văng %s\" % (TEST_ID, ca.__name__, type(e).__name__), file=sys.stderr)\n+    return ban_do\n+def run(tl_module, nguon=None):\n+    ra = io.StringIO()                      # fragment in mọi thứ ra STDERR (driver bundle đọc stdout làm JSON)\n+    with contextlib.redirect_stdout(ra):\n+        ban_do = _do(tl_module, nguon)\n+    p = os.environ.get(\"WP433_SS_BAN_DO\")\n+    if p:\n+        pathlib.Path(p).write_text(json.dumps(ban_do, ensure_ascii=False, sort_keys=True), encoding=\"utf-8\")\n+    sai, thua = sorted(k for k in _DANH_MUC if ban_do.get(k) is not True), sorted(set(ban_do) - _DANH_MUC)\n+    for ca in _LUOT:\n+        n = sum(k.startswith(ca + \".\") for k in _DANH_MUC)\n+        print(\"[%s] ca %s: khoá đạt %d/%d\" % (TEST_ID, ca, n - sum(k.startswith(ca + \".\") for k in sai), n), file=sys.stderr)\n+    for k in (sai + thua)[:20]:\n+        print(\"[%s] ĐỎ %s: %s\" % (TEST_ID, k, \"thừa\" if k in thua else \"vắng\" if k not in ban_do else \"sai\"), file=sys.stderr)\n+    return len(_DANH_MUC) == _SO_KHOA and not sai and not thua and not ra.getvalue()",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/29c22f7d1f92321978d4d1dff16bd80d9ea744e0/scripts%2Ftest_fragments%2Fwp433_secrets_set_bundle.py",
+   "sha": "0dc0e47593fb2a02dad0ab0263f0abbe30394eff",
+   "status": "added"
+  },
+  {
+   "additions": 5,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/29c22f7d1f92321978d4d1dff16bd80d9ea744e0/scripts%2Ftl_gws.py",
+   "changes": 6,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/scripts%2Ftl_gws.py?ref=29c22f7d1f92321978d4d1dff16bd80d9ea744e0",
+   "deletions": 1,
+   "filename": "scripts/tl_gws.py",
+   "patch": "@@ -1015,6 +1015,9 @@ def _secrets_set_body(a, entry_notebook) -> int:\n     except Exception as e:  # noqa: BLE001\n         print(f\"[secrets-set] ✗ giải mã lỗi: {_safe_exc(e)}\", file=sys.stderr)   # WP714: chỉ tên lớp\n         return 3\n+    if not isinstance(bundle, dict):   # WP433 SS: không phải object ⇒ từ chối như giải mã lỗi, TRƯỚC mọi cờ/export/canary\n+        print(\"[secrets-set] ✗ dữ liệu không hợp lệ: bundle\", file=sys.stderr)\n+        return 3\n     changed = []\n     nlm_confirmed = None\n     if getattr(a, \"gas_token\", None):\n@@ -1059,7 +1062,8 @@ def _secrets_set_body(a, entry_notebook) -> int:\n     # GWS_CRED_FILEID/NLM_CRED_FILEID → Chat đường public tự nhận). Lỗi public chỉ WARN (bundle ĐÃ tươi,\n     # rc vẫn 0); --no-public để bỏ qua chủ đích.\n     if not getattr(a, \"no_public\", False):\n-        _tok = os.environ.get(\"TL_TOKEN\") or str(bundle.get(\"token\") or \"\")\n+        _bt = bundle.get(\"token\")   # WP433 SS: token không phải str ⇒ coi như thiếu (không lấy repr làm khoá public)\n+        _tok = os.environ.get(\"TL_TOKEN\") or (_bt if isinstance(_bt, str) else \"\")\n         _folder = getattr(a, \"folder\", None) or HOPNAP_FOLDER_ID\n         _pub = []\n         if (\"gws_cred\" in changed or \"nlm_auth\" in changed) and not _tok:",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/29c22f7d1f92321978d4d1dff16bd80d9ea744e0/scripts%2Ftl_gws.py",
+   "sha": "96642590a5f76e3d644bd39df11d99fbc60c7178",
+   "status": "modified"
+  },
+  {
+   "additions": 1,
+   "blob_url": "https://github.com/ducthangho/tra-luat/blob/29c22f7d1f92321978d4d1dff16bd80d9ea744e0/scripts%2Ftl_test_fragments_bundled_2.py",
+   "changes": 1,
+   "contents_url": "https://api.github.com/repos/ducthangho/tra-luat/contents/scripts%2Ftl_test_fragments_bundled_2.py?ref=29c22f7d1f92321978d4d1dff16bd80d9ea744e0",
+   "deletions": 0,
+   "filename": "scripts/tl_test_fragments_bundled_2.py",
+   "raw_url": "https://github.com/ducthangho/tra-luat/raw/29c22f7d1f92321978d4d1dff16bd80d9ea744e0/scripts%2Ftl_test_fragments_bundled_2.py",
+   "sha": "1a5913dd5a9116e3b3ba78e1d05a267fdc04cef7",
+   "status": "modified"
+  }
+ ],
+ "html_url": "https://github.com/ducthangho/tra-luat/commit/29c22f7d1f92321978d4d1dff16bd80d9ea744e0",
+ "node_id": "C_kwDOTNeRjdoAKDI5YzIyZjdkMWY5MjMyMTk3OGQ0ZDFkZmYxNmJkODBkOWVhNzQ0ZTA",
+ "parents": [
+  {
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/5f461a599059c525235abbfd081345fc6cd03586",
+   "sha": "5f461a599059c525235abbfd081345fc6cd03586",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/5f461a599059c525235abbfd081345fc6cd03586"
+  },
+  {
+   "html_url": "https://github.com/ducthangho/tra-luat/commit/26fbacd9d4ba73f8e83359e9af060a76b32cae08",
+   "sha": "26fbacd9d4ba73f8e83359e9af060a76b32cae08",
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/26fbacd9d4ba73f8e83359e9af060a76b32cae08"
+  }
+ ],
+ "sha": "29c22f7d1f92321978d4d1dff16bd80d9ea744e0",
+ "stats": {
+  "additions": 164,
+  "deletions": 8,
+  "total": 172
+ },
+ "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/29c22f7d1f92321978d4d1dff16bd80d9ea744e0"
+}

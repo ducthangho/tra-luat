@@ -1,0 +1,166 @@
+[
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/cd876e5a600134d39b90de637702a42a05df53fe/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-21T08:48:50Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-21T08:48:50Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "wp433: secrets-set kiem kieu bundle va token (SECRETS-SET-BUNDLE-KIEU r5)\n\n- M1: bundle giai ma khong phai object => rc 3, mot dong stderr, ngay sau\n  giai ma va truoc moi co/export/canary/upload.\n- M2: token khong phai str (khi thieu TL_TOKEN) => coi nhu thieu, roi vao\n  nhanh canh bao san co, khong lay repr lam khoa public.\n- M3: fragment wp433_secrets_set_bundle viet lai theo quy tac ve r5:\n  danh muc khoa dong 346 khoa ca.luot.quan_sat, ky vong chep cung,\n  ban do {khoa: bool} ghi ra $WP433_SS_BAN_DO; ma tran dot bien N4 chay o\n  rig ngoai fragment, moi dot bien mot tien trinh moi.\n- M4: tai sinh bundled bang write_bundled_modules.\n\nLease wp433-r10-g1-claude, issue #433.\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015Gtxrc7bYsQV8yrj7rsD1S",
+   "tree": {
+    "sha": "63f0ba4f1da1e25cc49290c0d563d2ffb2d5d433",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/63f0ba4f1da1e25cc49290c0d563d2ffb2d5d433"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/cd876e5a600134d39b90de637702a42a05df53fe",
+   "verification": {
+    "payload": "tree 63f0ba4f1da1e25cc49290c0d563d2ffb2d5d433\nparent 8656dc0176ed108e12c209ba55c91a1f6f9d612f\nauthor Claude <noreply@anthropic.com> 1795250930 +0000\ncommitter Claude <noreply@anthropic.com> 1795250930 +0000\n\nwp433: secrets-set kiem kieu bundle va token (SECRETS-SET-BUNDLE-KIEU r5)\n\n- M1: bundle giai ma khong phai object => rc 3, mot dong stderr, ngay sau\n  giai ma va truoc moi co/export/canary/upload.\n- M2: token khong phai str (khi thieu TL_TOKEN) => coi nhu thieu, roi vao\n  nhanh canh bao san co, khong lay repr lam khoa public.\n- M3: fragment wp433_secrets_set_bundle viet lai theo quy tac ve r5:\n  danh muc khoa dong 346 khoa ca.luot.quan_sat, ky vong chep cung,\n  ban do {khoa: bool} ghi ra $WP433_SS_BAN_DO; ma tran dot bien N4 chay o\n  rig ngoai fragment, moi dot bien mot tien trinh moi.\n- M4: tai sinh bundled bang write_bundled_modules.\n\nLease wp433-r10-g1-claude, issue #433.\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015Gtxrc7bYsQV8yrj7rsD1S\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQJnsaVyd\n6oXUjvdKQ8DOyeM4dobFchg5J+kqWQpsAvMO+qHgeKubMEr10SNf5meoyKhEkGfK5uk6zXA01dZ/\nOw8=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-21T09:54:17Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/cd876e5a600134d39b90de637702a42a05df53fe",
+  "node_id": "C_kwDOTNeRjdoAKGNkODc2ZTVhNjAwMTM0ZDM5YjkwZGU2Mzc3MDJhNDJhMDVkZjUzZmU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/8656dc0176ed108e12c209ba55c91a1f6f9d612f",
+    "sha": "8656dc0176ed108e12c209ba55c91a1f6f9d612f",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/8656dc0176ed108e12c209ba55c91a1f6f9d612f"
+   }
+  ],
+  "sha": "cd876e5a600134d39b90de637702a42a05df53fe",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/cd876e5a600134d39b90de637702a42a05df53fe"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/26fbacd9d4ba73f8e83359e9af060a76b32cae08/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-21T08:48:52Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-21T08:48:52Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "wp433: tai sinh RELEASE_MANIFEST.json (commit cuoi, SECRETS-SET-BUNDLE-KIEU r5 M5)\n\nSinh bang `python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json`\ntheo ngoai le cua chu kho (#433 issuecomment-7059899882).\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015Gtxrc7bYsQV8yrj7rsD1S",
+   "tree": {
+    "sha": "4583e5bd5d3b7d1efdd2aec8f39da878776f03bd",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/4583e5bd5d3b7d1efdd2aec8f39da878776f03bd"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/26fbacd9d4ba73f8e83359e9af060a76b32cae08",
+   "verification": {
+    "payload": "tree 4583e5bd5d3b7d1efdd2aec8f39da878776f03bd\nparent cd876e5a600134d39b90de637702a42a05df53fe\nauthor Claude <noreply@anthropic.com> 1795250932 +0000\ncommitter Claude <noreply@anthropic.com> 1795250932 +0000\n\nwp433: tai sinh RELEASE_MANIFEST.json (commit cuoi, SECRETS-SET-BUNDLE-KIEU r5 M5)\n\nSinh bang `python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json`\ntheo ngoai le cua chu kho (#433 issuecomment-7059899882).\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015Gtxrc7bYsQV8yrj7rsD1S\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQDo3chR3\njRndi02r+I+7/CftNvHP0xRJ2PQILIAqZz+Q5gHQNGrRXKvI55nlYLhomc3B/c3UwIIjOCUfODoR\nQgI=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-21T09:54:17Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/26fbacd9d4ba73f8e83359e9af060a76b32cae08",
+  "node_id": "C_kwDOTNeRjdoAKDI2ZmJhY2Q5ZDRiYTczZjhlODMzNTllOWFmMDYwYTc2YjMyY2FlMDg",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/cd876e5a600134d39b90de637702a42a05df53fe",
+    "sha": "cd876e5a600134d39b90de637702a42a05df53fe",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/cd876e5a600134d39b90de637702a42a05df53fe"
+   }
+  ],
+  "sha": "26fbacd9d4ba73f8e83359e9af060a76b32cae08",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/26fbacd9d4ba73f8e83359e9af060a76b32cae08"
+ }
+]

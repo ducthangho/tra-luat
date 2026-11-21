@@ -1,0 +1,41 @@
+{"id": "j1:_la_so:85:11", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "j1:_kiem_tep:126:7", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "k3:_kiem_tep:128:7", "phan_loai": "TUONG_DUONG", "ly_do": "bo_sinh la dung 64 hex (RE_DAU) va moi khoa BO_SINH 64 hex: chuoi con <=> bang"}
+{"id": "j1:_kiem_tep:131:7", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "j1:_kiem_tep:154:11", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "j1:kiem_mien:264:25", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "j1:kiem_ho_so:273:11", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "i7:doc_danh_gia:66:16", "phan_loai": "TUONG_DUONG", "ly_do": "RE_JOB ket thuc (.*) va dong da tach theo \\n: match == fullmatch"}
+{"id": "g:main:301:45", "phan_loai": "TUONG_DUONG", "ly_do": "chuoi thong bao ngoai hop dong dau ra (description argparse, duoi thong diep LOI THAM SO / GIOI HAN, thong diep ValueError): hop dong chi chot tien to"}
+{"id": "g:loi_khai:190:27", "phan_loai": "TUONG_DUONG", "ly_do": "chuoi thong bao ngoai hop dong dau ra (description argparse, duoi thong diep LOI THAM SO / GIOI HAN, thong diep ValueError): hop dong chi chot tien to"}
+{"id": "j1:kiem_ho_so:287:19", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "g:main:317:18", "phan_loai": "TUONG_DUONG", "ly_do": "chuoi thong bao ngoai hop dong dau ra (description argparse, duoi thong diep LOI THAM SO / GIOI HAN, thong diep ValueError): hop dong chi chot tien to"}
+{"id": "g:main:320:50", "phan_loai": "TUONG_DUONG", "ly_do": "chuoi thong bao ngoai hop dong dau ra (description argparse, duoi thong diep LOI THAM SO / GIOI HAN, thong diep ValueError): hop dong chi chot tien to"}
+{"id": "j1:doc_danh_gia:72:53", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "g:doc_danh_gia:72:77", "phan_loai": "DA_RUT_GON", "ly_do": "nhan skip doi thanh bool \"v3\" o f4f17bc"}
+{"id": "g:main:329:20", "phan_loai": "TUONG_DUONG", "ly_do": "chuoi thong bao ngoai hop dong dau ra (description argparse, duoi thong diep LOI THAM SO / GIOI HAN, thong diep ValueError): hop dong chi chot tien to"}
+{"id": "g:main:329:41", "phan_loai": "TUONG_DUONG", "ly_do": "chuoi thong bao ngoai hop dong dau ra (description argparse, duoi thong diep LOI THAM SO / GIOI HAN, thong diep ValueError): hop dong chi chot tien to"}
+{"id": "g:main:329:85", "phan_loai": "TUONG_DUONG", "ly_do": "chuoi thong bao ngoai hop dong dau ra (description argparse, duoi thong diep LOI THAM SO / GIOI HAN, thong diep ValueError): hop dong chi chot tien to"}
+{"id": "h2:BO_SINH", "phan_loai": "TUONG_DUONG", "ly_do": "phan tu \"~them~\" khong bao gio khop: BO_SINH khoa 64 hex, _chuan chi giu chu/so, RE_TOKEN chi [a-z_]"}
+{"id": "h2:PHI_LOI_KHAI", "phan_loai": "TUONG_DUONG", "ly_do": "phan tu \"~them~\" khong bao gio khop: BO_SINH khoa 64 hex, _chuan chi giu chu/so, RE_TOKEN chi [a-z_]"}
+{"id": "h2:TOKEN", "phan_loai": "TUONG_DUONG", "ly_do": "phan tu \"~them~\" khong bao gio khop: BO_SINH khoa 64 hex, _chuan chi giu chu/so, RE_TOKEN chi [a-z_]"}
+{"id": "i4:RE_TOKEN:luong_tu@10 +→*", "phan_loai": "TUONG_DUONG", "ly_do": "[a-z_]* rong => token \"\" khong thuoc TOKEN => None nhu ban goc"}
+{"id": "i1:RE_TEP_DG:lop@4 bo 'A-Z'", "phan_loai": "DA_RUT_GON", "ly_do": "lookbehind thua da bo khoi RE_TEP_DG o f4f17bc"}
+{"id": "i1:RE_TEP_DG:lop@4 bo 'a-z'", "phan_loai": "DA_RUT_GON", "ly_do": "lookbehind thua da bo khoi RE_TEP_DG o f4f17bc"}
+{"id": "i1:RE_TEP_DG:lop@4 bo '0-9'", "phan_loai": "DA_RUT_GON", "ly_do": "lookbehind thua da bo khoi RE_TEP_DG o f4f17bc"}
+{"id": "i1:RE_TEP_DG:lop@4 bo '_'", "phan_loai": "DA_RUT_GON", "ly_do": "lookbehind thua da bo khoi RE_TEP_DG o f4f17bc"}
+{"id": "i1:RE_TEP_DG:lop@4 bo '.'", "phan_loai": "DA_RUT_GON", "ly_do": "lookbehind thua da bo khoi RE_TEP_DG o f4f17bc"}
+{"id": "i1:RE_TEP_DG:lop@4 bo '/'", "phan_loai": "DA_RUT_GON", "ly_do": "lookbehind thua da bo khoi RE_TEP_DG o f4f17bc"}
+{"id": "i1:RE_TEP_DG:lop@4 bo '-'", "phan_loai": "DA_RUT_GON", "ly_do": "lookbehind thua da bo khoi RE_TEP_DG o f4f17bc"}
+{"id": "i6:RE_TEP_DG:lookaround@0 bo", "phan_loai": "DA_RUT_GON", "ly_do": "lookbehind thua da bo khoi RE_TEP_DG o f4f17bc"}
+{"id": "i5:RE_MIEN:escape@76 \\d→.", "phan_loai": "DA_THEM_CA", "ly_do": "a122: thang/ngay co chu => dong_mien"}
+{"id": "i5:RE_MIEN:escape@82 \\d→.", "phan_loai": "DA_THEM_CA", "ly_do": "a122: thang/ngay co chu => dong_mien"}
+{"id": "kho:identity_126_7", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "kho:identity_131_7", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "kho:identity_154_11", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "kho:identity_262_25", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "kho:identity_271_11", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "kho:identity_285_19", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "kho:identity_85_11", "phan_loai": "TUONG_DUONG", "ly_do": "is/== tren None, type, Pattern: khong lop nao dinh nghia __eq__ khac dong nhat"}
+{"id": "kho:ref_no_boundary", "phan_loai": "DA_RUT_GON", "ly_do": "lookbehind thua da bo khoi RE_TEP_DG o f4f17bc"}
+{"id": "kho:token_expand", "phan_loai": "DA_THEM_CA", "ly_do": "a121: \"pass — x\" => dinh_dang_loi_khai"}

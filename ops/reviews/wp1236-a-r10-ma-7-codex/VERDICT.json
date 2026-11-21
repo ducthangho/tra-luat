@@ -1,0 +1,714 @@
+{
+  "reviewed_sha": "f4f17bc4237a5362117f37b56e65209b92465f64",
+  "reviewed_tree": "b78a198f57d217c6f27a081316c04040fa120a52",
+  "spec_sha256": "3ee831738c70c5eabb27720e295b4953c9a9bdd1ac29a03cc7b964d28658fcdc",
+  "vong": 7,
+  "findings": [
+    {
+      "id": "M01",
+      "class_slug": "test-thieu-chot",
+      "severity": "P2",
+      "vi_tri": "ops/gate_output_doi_chieu_test.py:591-613, 749-850; luật 1/4 r10",
+      "van_de": "Nghiệm thu r10 chưa đóng lớp: 14/15 đột biến độc lập không tương đương sống qua đủ 40/40 ca native; ma trận mới chưa đưa từng phần tử qua kiem_ho_so theo luật 4. A2-10 vẫn chỉ có 5/6 fixture CLI (phần L02 còn nguyên). Mã HEAD xử lý đúng các đối chứng; finding này là lỗ bảo vệ hồi quy/acceptance, không phải lời khẳng định HEAD đang mắc các lỗi giả lập.",
+      "bang_chung": "python3 -B ../work/independent_scan.py rc=0: baseline 40/40; 15 mutants x 40 ca, 14 SONG, 1 GIET, 0 lỗi vô can/chạy; Python 3.13.18 + SafeLoader nguyên bản, không memo/cache/CSafeLoader. independent_contrasts.py rc=0: cả 14 SONG có đối chứng làm đổi hành vi. Ví dụ labels [a,b] so provenance [b,a] hoặc [a,b,b]: HEAD not_measured/job_lech, mutant passed; qua kiem_ho_so HEAD vi phạm, mutant []. Lặp cùng một URL miễn: HEAD url + landed_khong_loi_khai_gate_output, mutant []; token passed;file / đường ./file: HEAD [], mutant chặn; CLI tên plain.yaml: HEAD rc0, mutant rc1. Chuỗi GIỚI HẠN đổi chữ: mutant vẫn 40/40. matrix_routes.json: a120=34 kiem_tep, 0 kiem_ho_so; a121 chỉ 1 kiem_ho_so với pass — x; a122 chỉ 1 consumer với không URL. cli_probe.json: a210 rc0, fixture_count=5, sixth_called=false; gọi fixture thứ sáu độc lập rc3. Kho 14 cặp unique/exact ast.unparse: kho_dot_bien_reviewer_luot7.jsonl.",
+      "de_xuat": "Viết bảng miền từ đặc tả rồi chạy cùng từng phần tử qua hàm lá và kiem_ho_so(head=None), có đối chứng dương/âm; nhánh head khác None vẫn đo trực tiếp kiem_mien. Giữ thứ tự/tính trùng của labels và URL, giá trị danh tính chính xác, dấu phân cách token và đường dẫn ./; đo grammar qua consumer. Bổ sung đủ sáu fixture CLI, tiền tố stdout/stderr, fallback stem. Ghim cặp đột biến độc lập vào kho và đo từng mutant chết đúng TinHieuChotCa. Đây là lớp lặp >=3 lượt: handoff về Review Rescue Checkpoint để xét lại phương pháp, không vá từng ví dụ và không reset lịch sử; tránh siết sản phẩm cho vừa test hoặc dùng lỗi setup làm GIET.",
+      "bieu_hien": [
+        {
+          "id": "r7_event_casefold",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_workflow_strip",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_schema_strip",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_name_casefold",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_labels_order",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_labels_dedup",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_run_status_casefold",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_author_casefold",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_association_casefold",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_url_dedup",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_consumer_delimiter",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_dotpath_raw",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_cli_limit_prefix",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        },
+        {
+          "id": "r7_cli_fallback_stem",
+          "ca_dat": 40,
+          "khong_tuong_duong": true,
+          "nguon": "independent_results.jsonl + independent_contrasts.json"
+        }
+      ]
+    },
+    {
+      "id": "M02",
+      "class_slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "severity": "P3",
+      "vi_tri": "ops/gate_output_doi_chieu.py:300-310; ops/gate_output_doi_chieu_test.py:751-757; SPEC.md:152",
+      "van_de": "Các nhánh lỗi cú pháp argparse không tuân mẫu stderr bắt đầu LỖI THAM SỐ: của r10; rc 2 đúng nhưng đầu ra vẫn usage:.",
+      "bang_chung": "work/cli_probe.json: không lệnh con, thiếu --provenance, kiem-ho-so thiếu hồ sơ, lệnh lạ đều rc=2, prefix_ok=false; đối chứng tệp vắng rc=2 prefix_ok=true; --help rc=0. Đo qua subprocess trên exact HEAD.",
+      "de_xuat": "Tại main/ArgumentParser xử lý chung lỗi cú pháp để stderr bắt đầu tiền tố đã đóng băng, giữ rc 2 và help rc 0. Ở a217/ma trận CLI so riêng stdout và stderr cho mọi nhánh lỗi; thêm đột biến đổi/bỏ tiền tố chết đúng ca. Tránh đổi help hoặc biến lỗi dữ liệu not_measured thành lỗi tham số."
+    },
+    {
+      "id": "M03",
+      "class_slug": "test-thieu-chot",
+      "severity": "P3",
+      "vi_tri": "bang_chung/ledger_kho_127_f4f17bc.jsonl:32,88; SPEC.md:337-342",
+      "van_de": "Hai mục KHONG_AP_DUNG chưa đáp ứng nhánh kết thúc của luật 5: identity_72_67 trỏ thay thế TUONG_DUONG, không GIET; ref_no_boundary ghi CHOT_DA_BO nhưng lookbehind vẫn nằm trong hợp đồng tep_danh_gia của r10. Tương đương hành vi có thể chứng minh, song không phải chốt đã bị bỏ khỏi đặc tả.",
+      "bang_chung": "ledger_anchor_audit.json kiểm đủ 127 ID và neo, ledger_tail_audit.json: thay thế identity_72_67 SONG; re.fullmatch pattern equality có miền đóng. simplifications.json: 20.000 chuỗi findall không lệch; bằng chứng tương đương không thay điều kiện CHOT_DA_BO. Ba KHONG_AP_DUNG còn lại được tái dẫn xuất và GIET đúng ca.",
+      "de_xuat": "Tái phân loại hai ID này ở ledger thành TUONG_DUONG với chứng minh trên HEAD và cặp/địa chỉ hiện hành, giữ ID gốc và lý do neo cũ không còn. Chỉ dùng CHOT_DA_BO khi có chứng minh chốt không còn trong đặc tả. Kiểm lại đủ 127 ID, mỗi mục chỉ một nhãn cuối theo luật 5; không sửa production regex hay cố tạo ca giết mutant tương đương."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "test-thieu-chot",
+      "finding_ids": [
+        "M01",
+        "M03"
+      ],
+      "highest_open_severity": "P2",
+      "source": "F04/G02/H01/J01/J02/K01/K02/L01/L02 các lượt 1–6; nối nghiệm-thu ở đặc tả r10",
+      "common_fix": "Bảng miền một nguồn đưa cùng dữ liệu qua helper và consumer, oracle đúng contract, mutant riêng; kiểm ledger theo semantic mapping trên exact HEAD.",
+      "closing_check": "Luật 1/2/4/5 đầy đủ; mọi đột biến sống không tương đương bị giết đúng ca, giữ đối chứng hợp lệ, fixture CLI 6/6, từng ledger kết thúc hợp lệ.",
+      "manifestations": [
+        "r7_event_casefold",
+        "r7_workflow_strip",
+        "r7_schema_strip",
+        "r7_name_casefold",
+        "r7_labels_order",
+        "r7_labels_dedup",
+        "r7_run_status_casefold",
+        "r7_author_casefold",
+        "r7_association_casefold",
+        "r7_url_dedup",
+        "r7_consumer_delimiter",
+        "r7_dotpath_raw",
+        "r7_cli_limit_prefix",
+        "r7_cli_fallback_stem",
+        "A2-10 chỉ 5/6 fixture",
+        "Hai nhãn ledger không kết thúc theo luật 5"
+      ]
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_ids": [
+        "M02"
+      ],
+      "highest_open_severity": "P3",
+      "source": "Đặc tả r10 U01; candidate f4f17bc4237a5362117f37b56e65209b92465f64",
+      "common_fix": "Cố định đầu ra CLI ở mọi nhánh parser/đọc dữ liệu; kiểm stdout và stderr riêng.",
+      "closing_check": "Các lỗi argparse rc 2 đều stderr.startswith(LỖI THAM SỐ:), --help rc 0, và mutant tiền tố chết đúng ca."
+    },
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_ids": [],
+      "manifestations": [
+        "F01: probes.py prior: cả năm YAML ngoài schema giữ passed; m54 chết đúng a116."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b",
+      "common_fix": "Lọc kiểu/schema trước khi đọc trường.",
+      "closing_check": "prior_and_duplicates.json: 5 YAML ngoài schema vẫn passed; a116 native rc0; ledger delete_return97 GIET đúng a116.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_ids": [],
+      "manifestations": [
+        "F02, G01: prior: YAML/UTF-8/symlink/PermissionError chặn đúng; kiểm 0/1/2 provenance; a116/a117 và các đột biến m55/m56/m59/m70 đạt."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 2 @6f7ccf10f2441d0c97b779cfa77ff2839b56fc47",
+      "common_fix": "Giữ lý do K2 và truyền lỗi đọc/duyệt về biên kiem_tep.",
+      "closing_check": "prior_and_duplicates.json: YAML hỏng -> ParserError, byte sai UTF8 -> UnicodeDecodeError; a116/a117 native rc0 bao symlink/PermissionError; ledger reason symlink/provenance GIET đúng ca.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_ids": [],
+      "manifestations": [
+        "F03, H02: prior: cycle và hai đường stat quá dài rc=2 không traceback; alias chia sẻ vẫn duyệt hai đường; a214/m57/m58 và a210/m65 đạt."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 3 @e323bd4dfb4fe422016c4fd010fa964b6cb748b0",
+      "common_fix": "Phát hiện vòng và đặt đọc/kiểm filesystem trong biên lỗi CLI.",
+      "closing_check": "prior_and_duplicates.json: a214 native rc0, alias dùng chung vẫn 2 đường; cli_probe.json a210 rc0 bao path ENAMETOOLONG; luật vòng ném ValueError và CLI rc2 không traceback. Lỗi mẫu stderr M02 thuộc lớp khác.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_ids": [
+        "L03"
+      ],
+      "manifestations": [
+        "_tep_trong docstring cấm . nhưng ./tệp được nhận"
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 6 @c2d606bb6fc230c288200b8f1dd79715462c172b",
+      "common_fix": "Đồng bộ mô tả helper với đặc tả A và ngữ nghĩa PurePosixPath đã đo.",
+      "closing_check": "Docstring _tep_trong dòng 225 khai ./tệp HỢP LỆ; simplifications.json: ./tệp giải quyết được và consumer [] trên HEAD; tuyệt đối/../symlink bị chặn. Không còn mô tả cấm dấu chấm.",
+      "status": "DA_VA_THAT"
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [],
+      "luot_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_and_duplicates.json: 5 YAML ngoài schema vẫn passed; a116 native rc0; ledger delete_return97 GIET đúng a116.",
+      "chua_do_duoc": ""
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [],
+      "luot_xuat_hien": [
+        1,
+        2
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_and_duplicates.json: YAML hỏng -> ParserError, byte sai UTF8 -> UnicodeDecodeError; a116/a117 native rc0 bao symlink/PermissionError; ledger reason symlink/provenance GIET đúng ca.",
+      "chua_do_duoc": ""
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [],
+      "luot_xuat_hien": [
+        1,
+        3
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_and_duplicates.json: a214 native rc0, alias dùng chung vẫn 2 đường; cli_probe.json a210 rc0 bao path ENAMETOOLONG; luật vòng ném ValueError và CLI rc2 không traceback. Lỗi mẫu stderr M02 thuộc lớp khác.",
+      "chua_do_duoc": ""
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02",
+        "L01",
+        "L02"
+      ],
+      "luot_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "115/115 GIET ledger đo lại đúng TinHieuChotCa ở ca khai; 25 mutant sống lượt 6 được ghim đều nay GIET. L01 VA_MOT_PHAN: 14 mutant không tương đương mới sống 40/40, ma trận chưa qua consumer. L02 VA_MOT_PHAN: bốn thứ tự miễn/skipped v3 được giết (ledger), nhưng cli_probe xác nhận A2-10 vẫn chỉ 5/6. Luật 5 còn hai mục kết thúc sai nhãn (M03). Không còn phần chưa đo cần thiết để quyết changes_requested; không suy đóng lớp từ tổng suite xanh.",
+      "chua_do_duoc": "",
+      "per_finding": [
+        {
+          "id": "L01",
+          "status": "VA_MOT_PHAN",
+          "evidence": "ledger_remeasure.jsonl và independent_results.jsonl/independent_contrasts.json; xem M01."
+        },
+        {
+          "id": "L02",
+          "status": "VA_MOT_PHAN",
+          "evidence": "ledger_remeasure chứa skip_v3_partial, waiver_order_* GIET; cli_probe a210 sixth_called=false."
+        }
+      ]
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_cu": [
+        "L03"
+      ],
+      "luot_xuat_hien": [
+        6
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "Docstring _tep_trong dòng 225 khai ./tệp HỢP LỆ; simplifications.json: ./tệp giải quyết được và consumer [] trên HEAD; tuyệt đối/../symlink bị chặn. Không còn mô tả cấm dấu chấm.",
+      "chua_do_duoc": "",
+      "per_finding": [
+        {
+          "id": "L03",
+          "status": "DA_VA_THAT",
+          "evidence": "Docstring _tep_trong dòng 225 khai ./tệp HỢP LỆ; simplifications.json: ./tệp giải quyết được và consumer [] trên HEAD; tuyệt đối/../symlink bị chặn. Không còn mô tả cấm dấu chấm."
+        }
+      ]
+    }
+  ],
+  "bang_noi_slug": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "ly_do_gop": "Lọc YAML ngoài schema trước truy cập trường."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "ly_do_gop": "Lỗi đọc/duyệt hoặc lý do K2 bị bỏ mất."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "ly_do_gop": "Ngoại lệ đầu vào thoát biên CLI."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02"
+      ],
+      "ly_do_gop": "Chốt đặc tả không được ca/đột biến bảo vệ độc lập."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "slug_spec": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02",
+        "L01",
+        "L02"
+      ],
+      "finding_moi": [
+        "M01",
+        "M03"
+      ],
+      "ly_do": "Cùng cơ chế thiếu thước khóa chốt/consumer; mapping r10, không reset lịch sử."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "U01 (đặc tả r9 vòng 4/r10)"
+      ],
+      "finding_moi": [
+        "M02"
+      ],
+      "ly_do": "Hợp đồng đã đóng ở đặc tả; mã chưa áp cho mọi nhánh lỗi CLI. Lớp mới trong chuỗi review MÃ, không cộng vào F/U lượt 6."
+    }
+  ],
+  "hoi_tu": {
+    "luot6_sang_7": "1/2",
+    "luot4_sang_5": "KHONG_DO_DUOC",
+    "lop_lap_lan_ba": [
+      "test-thieu-chot"
+    ],
+    "F": [
+      "mo-ta-duong-dan-lech-hop-dong"
+    ],
+    "U": [
+      "test-thieu-chot",
+      "mo-ta-duong-dan-lech-hop-dong"
+    ],
+    "ty_le": 0.5,
+    "lop_moi_trong_chuoi_ma": [
+      "hop-dong-dau-vao-dau-ra-chua-chot"
+    ],
+    "lop_tai_mo": [],
+    "ghi_chu": "F chỉ gồm mo-ta-duong-dan-lech-hop-dong. test-thieu-chot giữ slug, nối nghiem-thu-khong-co-lap-chot-dich ở spec; đã lặp >=3 vòng, yêu cầu Review Rescue Checkpoint xét lại phương pháp. Không tự cấp review call/lease hoặc sửa code."
+  },
+  "da_do_khop": [
+    "Exact HEAD f4f17bc4237a5362117f37b56e65209b92465f64; tree b78a198f57d217c6f27a081316c04040fa120a52, giữ nguyên đầu/cuối. Spec local và blob nguồn cùng hash 3ee831738c70c5eabb27720e295b4953c9a9bdd1ac29a03cc7b964d28658fcdc; lease r10 g1 đúng scope.",
+    "passed: python3 -B ops/gate_output_doi_chieu_test.py rc0: CA 40/40, DOT BIEN 145/145, TU KIEM PHAN HANG DAT (2), TONG DAT. stdout được ghim hash ở tests.",
+    "passed: Ruff 0.15.15 bare lint --no-cache --select F đúng 3 tệp rc0; CI registration rc0: 31/31, Ruff pin/probe contract 3/3, phản chứng 1226/1226. Hai scope Ruff tách biệt.",
+    "passed: corpus tại 8048551a9b1eb886c126d2a1a4df0f95fb285964: 66 tệp=47 passed/10 failed/9 not_measured; 170 hồ sơ=25 cutover/56 đỏ/39 đạt/50 không lời khai; 94 landed, lệch0. Từng tệp/hồ sơ ở corpus_probe.json. Không hồi tố hồ sơ cũ.",
+    "passed: 40 lý do nghiệp vụ đều có bằng chứng target/control và GIET đúng ca (mandatory_reasons/controls); 5 ô trùng ID và mutant riêng đạt. failed: mẫu đầu ra CLI/consumer coverage và 2 mục ledger, xem M01–M03.",
+    "Ledger 127 ID: 115 GIET đo lại đúng ca; 7 TUONG_DUONG kiểm từng miền kiểu và đối chứng; 5 KAD kiểm từng mục, ba thay thế GIET, hai cần sửa phân loại. Không dùng kết quả head 1db0ae5 làm pass cho f4f17bc.",
+    "Quét độc lập completed rc0: baseline40/40; 15 mutant x40 ca, 14 sống không tương đương, 1 GIET, 0 lỗi. 14 cặp ast.unparse ghim mới và cộng dồn với kho cũ thành141 ID trong work/.",
+    "Các rút gọn RE_TEP_DG/bool skip/decode mặc định/.. trong parts/moc None/moc theo n-so_pass giữ nghĩa trong proof và phép đo đã khai; L03 đóng.",
+    "passed: git diff --numstat 010046f...HEAD=3 tệp,+1454/-0<=1700; git diff --check base HEAD và git diff --check đều rc0. Snapshot 17339 tệp tracked/untracked/ignored đầu/cuối byte hashes không delta; diff/index rỗng; .codex ignored có sẵn giữ nguyên.",
+    "Hội tụ6→7=1/2; 4→5=KHONG_DO_DUOC, không đổi thành0/1. test-thieu-chot vẫn VA_MOT_PHAN và lặp >=3 lượt, cần checkpoint; không tự sửa/approve/merge/land.",
+    "Linux Python3.13.18/PyYAML6.0.3; skipped0 trong kiểm đã chạy. Windows local, remote CI, LIVE và full release gate not_run. Không mạng/GitHub/commit/push; toàn bộ nháp/mutant/evidence trong work/."
+  ],
+  "verdict": "changes_requested",
+  "review_status": "complete",
+  "preflight": {
+    "repository": "ducthangho/tra-luat",
+    "review_root": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/repo",
+    "branch": "DETACHED",
+    "base_sha": "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+    "reviewed_sha": "f4f17bc4237a5362117f37b56e65209b92465f64",
+    "reviewed_tree": "b78a198f57d217c6f27a081316c04040fa120a52",
+    "origin_master_observed": "e02d748d29cd5165fc29fa1a5a8e9b94593874c7",
+    "base_resolution": "Lease.base_sha và OID cụ thể trong assignment cùng 010046f...; theo §3.2.1 dùng immutable OID, không dùng ref origin/master đã trôi và không sửa ref. Đã báo trong commentary.",
+    "spec_source_oid": "81dc1eb73925babe638ed50222e0354bf7488248",
+    "spec_path": "ops/specs/wp1236-r10.md",
+    "spec_blob": "a13845128f7217719fa93405a205203424d4b97a",
+    "spec_sha256": "3ee831738c70c5eabb27720e295b4953c9a9bdd1ac29a03cc7b964d28658fcdc",
+    "local_spec": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/SPEC.md",
+    "source_local_hash_match": true,
+    "revision": 10,
+    "generation": 1,
+    "lease_id": "wp1236-a-r10-g1-claude-20261121",
+    "lease_until": "2026-11-23T00:15:00Z",
+    "effective_review_class": "sensitive",
+    "write_set": [
+      ".claude/dev/ci_dang_ky_test.py",
+      "ops/gate_output_doi_chieu.py",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "write_set_sha256": "e348a0aec274cc000368e7b728a9a70423434e000ace619fbc059383907fb2f5",
+    "numstat": {
+      "files": 3,
+      "added": 1454,
+      "deleted": 0,
+      "max_added": 1700
+    },
+    "git_core_abbrev": 7,
+    "origin_url": "https://github.com/ducthangho/tra-luat.git",
+    "authority_scope": "Offline assignment + supplied LEASE/SPEC; không gọi GitHub/mạng. Không tự chứng nhận authority server-side hay tạo transition."
+  },
+  "identity": {
+    "reviewer": {
+      "provider": "openai_codex",
+      "model_family": "openai",
+      "execution_surface": "codex_cli",
+      "transport": "machine",
+      "session_id": "01a1fbda-3e4c-7b40-8cde-1c315ab71ea3",
+      "session_source": "CODEX_SESSION_ID environment in current run",
+      "model_served": "KHONG_DO_DUOC",
+      "effort_served": "KHONG_DO_DUOC",
+      "model_family_source": "provider identity fallback ADR-0065",
+      "sandbox": "workspace-write, .git và agent/config paths read-only theo permission profile; repo read-only bằng thao tác; scratch chỉ work/",
+      "independence": "Context reviewer mới được user giao, không fork/reuse executor context, không spawn agent."
+    },
+    "executor_from_lease": {
+      "provider": "anthropic_claude",
+      "model_family": "claude",
+      "execution_surface": "claude_code",
+      "transport": "machine/local",
+      "session_id": "session_015GtxrYsNDbfLo32S39f5uY",
+      "model_claim": "claude-opus-5-5",
+      "status": "lời khai LEASE, không đo runtime executor"
+    },
+    "environment": {
+      "os": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+      "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+      "pyyaml": "6.0.3",
+      "ruff": "0.15.15"
+    },
+    "github_submitter": "not_used"
+  },
+  "acceptance": {
+    "law1": {
+      "status": "failed",
+      "positive_evidence": "mandatory_reasons.json: 40 lý do nghiệp vụ (chín điều kiện miễn tách riêng) đều có ca baseline rc0, lý do quan sát được, mutant GIET đúng ca; mandatory_controls.json + a205 và independent_contrasts giữ đối chứng sạch. Suite xác nhận các mutant mã thoát 0/1/2/3.",
+      "gap": "Mẫu CLI chưa đủ: prefix GIỚI HẠN không được ca khóa (r7_cli_limit_prefix sống); stderr lỗi argparse sai ngay trên HEAD (M02); plain stem consumer chưa khóa."
+    },
+    "law2": {
+      "status": "passed",
+      "positive_evidence": "prior_and_duplicates.json có 5 ô + đối chứng không trùng; duplicate_mutants.json: m60/m5/m69/m90/m91 đều GIET vì đúng TinHieuChotCa; ô skipped so job_lap, không dùng trạng thái vốn not_measured."
+    },
+    "law3": {
+      "status": "not_run",
+      "reason": "Bộ quét executor đầy đủ là công cụ khuyến nghị r10; không chạy lại lượt do ~90 phút, không chuyển 916 kết quả ở 1db0ae5 thành evidence HEAD. Reviewer chạy quét riêng 15 toán tử, xong."
+    },
+    "law4": {
+      "status": "failed",
+      "positive_evidence": "matrix_routes.json ghi lời gọi thực tế a120/a121/a122; kiem_mien head None/SHA đúng/SHA sai/rỗng có ca native đạt; L02 thứ tự hai lỗi đã có ca.",
+      "gap": "Không chạy cùng các phần tử miền qua helper và kiem_ho_so: grammar 34 phần tử a120 không consumer; a121 chỉ consumer pass — x; a122 chỉ consumer thiếu URL. 14 non-equivalent survivors có đối chứng độc lập, M01."
+    },
+    "law5": {
+      "status": "failed",
+      "counts": {
+        "submitted_GIET": 115,
+        "submitted_TUONG_DUONG": 7,
+        "submitted_KHONG_AP_DUNG": 5,
+        "total": 127
+      },
+      "positive_evidence": "ledger_anchor_audit kiểm 127 ID đầy đủ/duy nhất, 115 neo áp đúng và GIET ca khai; 7 tương đương được chứng minh theo kiểu và đo cặp ca; 3 KAD tái dẫn xuất đúng nghĩa rồi GIET.",
+      "gap": "identity_72_67 và ref_no_boundary có thể kết luận tương đương trên HEAD, nhưng nhãn kết thúc trong ledger chưa đáp ứng luật 5 (M03); không buộc giết mutant tương đương."
+    },
+    "module_contract": {
+      "status": "failed",
+      "positive_evidence": "BO_SINH đúng 3 băm và 50 script 20/28/2; CHECK_BAT_BUOC đúng 5 tên bằng AST packet_loop; K1–K8, claim/waiver/landed trên corpus và đối chứng đúng.",
+      "gap": "M02: stderr của argparse không bắt đầu LỖI THAM SỐ:. Không phát hiện sai hành vi K1–K8 trong các phép đo đã chạy."
+    },
+    "independent_scan": {
+      "status": "completed",
+      "baseline_cases": 40,
+      "mutants": 15,
+      "cases_per_mutant": 40,
+      "killed": 1,
+      "survived_non_equivalent": 14,
+      "incidental_errors": 0,
+      "run_errors": 0,
+      "cache": "none",
+      "loader": "product yaml.SafeLoader",
+      "manifest": "independent_manifest.jsonl",
+      "results": "independent_results.jsonl",
+      "contrasts": "independent_contrasts.json",
+      "new_regression_pool": "kho_dot_bien_reviewer_luot7.jsonl",
+      "pool_sha256": "9e10ad7aecf3d02643751943dced7e47e1129e8e8da4181b0a08751f3c32386d",
+      "cumulative_pool": {
+        "path": "kho_dot_bien_reviewer_luot6_va7.jsonl",
+        "ids": 141,
+        "sha256": "d8be14a27330f44154dbbb57c986815ff6990d498b88c9fc9e2eddc1104a8510"
+      }
+    },
+    "simplifications": {
+      "status": "passed_in_measured_scope",
+      "evidence": "simplifications.json: 20000 regex findall samples delta0; 968 combinations moc_tu/count delta0; valid/invalid UTF8/CRLF/header-only parser comparisons delta0; ./ path accepted, absolute/../symlink blocked. Bool skip consumed only at version check; missing moc returns None before caller accesses moc. Seven numeric/None identities and Pattern identity checked in ledger_tail_audit.",
+      "limit": "Phép đo hữu hạn kèm lập luận tương đương; không tuyên bố proof exhaustive input strings."
+    }
+  },
+  "tests": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "rc": 0,
+      "seconds": 233.3,
+      "name": "suite",
+      "status": "passed",
+      "stdout": "suite.stdout",
+      "stdout_sha256": "92850d4db6e6af79c0803868a1b69cd4dbad5dc84d3a4caf516fe6fea276cacc",
+      "stderr": "suite.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/gate_output_doi_chieu.py",
+        "ops/gate_output_doi_chieu_test.py",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "rc": 0,
+      "seconds": 0.06,
+      "name": "ruff",
+      "status": "passed",
+      "stdout": "ruff.stdout",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr": "ruff.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "rc": 0,
+      "seconds": 8.5,
+      "name": "ci_registration",
+      "status": "passed",
+      "stdout": "ci_registration.stdout",
+      "stdout_sha256": "2773d93effe692afc1bbaa77e7c1f2f22fbac4488eb9765385a5b3ed1c3183dd",
+      "stderr": "ci_registration.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.01,
+      "name": "diff_check",
+      "status": "passed",
+      "stdout": "diff_check.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "diff_check.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ledger",
+      "command": "python3 -B ../work/measure_jobs.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/repo",
+      "environment": "PYTHONDONTWRITEBYTECODE=1, TMPDIR=/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/work",
+      "rc": 0,
+      "status": "passed (measurement completed; see acceptance/findings for failed conditions)",
+      "output": "ledger_remeasure.jsonl",
+      "output_sha256": "69792ed5c816b2b7ea6a24826d3c6f170c693e6d09014a3bb982064ec8e38673"
+    },
+    {
+      "name": "ledger_tail",
+      "command": "python3 -B ../work/ledger_tail.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/repo",
+      "environment": "PYTHONDONTWRITEBYTECODE=1, TMPDIR=/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/work",
+      "rc": 0,
+      "status": "passed (measurement completed; see acceptance/findings for failed conditions)",
+      "output": "ledger_tail.stdout",
+      "output_sha256": "3bb09bd5a21f5b3e0c6254f1f8bec634d6c6cd0329fc431e11d66ef7b2a13979"
+    },
+    {
+      "name": "probes",
+      "command": "python3 -B ../work/probes.py cli simple prior corpus",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/repo",
+      "environment": "PYTHONDONTWRITEBYTECODE=1, TMPDIR=/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/work",
+      "rc": 0,
+      "status": "passed (measurement completed; see acceptance/findings for failed conditions)",
+      "output": "probes.stdout",
+      "output_sha256": "60e74f03c3001f5e63c07a95c8b429b5b8539b5bdf2aa4917ae594dfd53e96b6"
+    },
+    {
+      "name": "independent_scan",
+      "command": "python3 -B ../work/independent_scan.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/repo",
+      "environment": "PYTHONDONTWRITEBYTECODE=1, TMPDIR=/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/work",
+      "rc": 0,
+      "status": "passed (measurement completed; see acceptance/findings for failed conditions)",
+      "output": "independent_results.jsonl",
+      "output_sha256": "7a6cf1360372880abd45de06bdae15837c58d9dc61bf4e33fb8acc4cbf2e4aea"
+    },
+    {
+      "name": "independent_contrasts",
+      "command": "python3 -B ../work/independent_contrasts.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/repo",
+      "environment": "PYTHONDONTWRITEBYTECODE=1, TMPDIR=/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/work",
+      "rc": 0,
+      "status": "passed (measurement completed; see acceptance/findings for failed conditions)",
+      "output": "independent_contrasts.stdout",
+      "output_sha256": "c34418750ecfd24213323f8db56c4490ceaca87b45509b334994ad14fe892371"
+    },
+    {
+      "name": "mandatory_reasons",
+      "command": "python3 -B ../work/mandatory_audit.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/repo",
+      "environment": "PYTHONDONTWRITEBYTECODE=1, TMPDIR=/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/work",
+      "rc": 0,
+      "status": "passed (measurement completed; see acceptance/findings for failed conditions)",
+      "output": "mandatory_audit.stdout",
+      "output_sha256": "06ffd48f616c3124142ed056bead8ef21d7f1976678523caef30c4bce05e7069"
+    },
+    {
+      "name": "matrix_routes",
+      "command": "python3 -B ../work/route_audit.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/repo",
+      "environment": "PYTHONDONTWRITEBYTECODE=1, TMPDIR=/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/work",
+      "rc": 0,
+      "status": "passed (measurement completed; see acceptance/findings for failed conditions)",
+      "output": "route_audit.stdout",
+      "output_sha256": "b6bb2de709528817646f14c3556251344237bbc8d9b0aae8803957ca0ac64bc4"
+    },
+    {
+      "name": "Windows local",
+      "status": "not_run",
+      "reason": "Phiên offline Linux, user cấm mạng; nghĩa vụ M3 exact head/base còn dành cho lane chủ kho. Windows CI waiver trong spec không tự thay Windows local."
+    },
+    {
+      "name": "Remote CI/GitHub/LIVE/full release gate",
+      "status": "not_run",
+      "reason": "Không thuộc các lệnh review A được giao; không dùng làm pass hoặc authority land."
+    },
+    {
+      "name": "skipped cases in executed Linux checks",
+      "status": "passed",
+      "count": 0,
+      "evidence": "Không có BO QUA trong stdout suite/native scan; các phép symlink POSIX đã chạy."
+    },
+    {
+      "name": "verdict_schema",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/kiem_verdict_lop.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-7-codex/work/VERDICT.json",
+        "--vong",
+        "7"
+      ],
+      "rc": 0,
+      "status": "passed",
+      "output": "kiem_verdict.txt",
+      "positive_evidence": "HOP_LE (§8.3): 3 finding, 6 lop"
+    }
+  ],
+  "limitations": [
+    "Không đo thực thi Windows local hoặc CI từ xa; chưa có bằng chứng máy của model/effort executor/reviewer.",
+    "Snapshot chỉ chứng minh không delta quan sát được hai mốc, không chứng minh lịch sử chưa từng ghi rồi hoàn nguyên; repo nguồn ngoài checkout không nằm trong phạm vi.",
+    "Không đọc log CI thật hay xác thực chữ ký provenance/readback; giới hạn này đã chấp nhận trong r10, không tạo finding mới.",
+    "Không chạy toàn bộ bộ quét khuyến nghị của executor; quét riêng hữu hạn 15 mutant đã hoàn tất, đủ chứng minh các finding, không tuyên bố vét cạn mọi đột biến."
+  ]
+}

@@ -112,7 +112,15 @@ Hệ quả cho packet khác: không có. Ranh mảnh trôi (r9 §7) vẫn áp: W
 
 ## 8. `chua_do_duoc` và số đo
 
-- Số nền A8 trên `29c22f7d` (clone đầy đủ, `core.abbrev 7`): **ĐANG ĐO** lúc đóng bản nháp này. Điền trước khi đóng băng, kèm giờ đo.
+- Số nền A8 trên `29c22f7d`, đo 13:15–13:29Z 21-11. Phép đo dùng clone đầy đủ (`shallow=false`), `core.abbrev 7`, `PYTHONDONTWRITEBYTECODE=1`, mỗi lệnh chạy riêng và ghi rc. Cả tám lệnh rc 0:
+  - `.githooks/eol_policy_test.py`: **32/32 dat**.
+  - `scripts/tl.py --selftest`: **1786/1786**, nên N_base = 1786.
+  - `test-fragments-check --json`: `ok: true`, `status: current`, 2 mảnh.
+  - `.github/checks/bundle_fragment_check.py --json`: `ok: true`, `failed: []`, `case_count` **20**.
+  - `workflow-audit --strict --json`: `ok: true`, `py_size.fail == []`, `py_size.warn == []`, `files_scanned` **74**.
+  - `release-verify RELEASE_MANIFEST.json --strict --json`: `ok: true`, `expected_file_count == checked_file_count == 186`.
+  - `golden-test --json`: `ok: true`, 20 ca.
+  - `ruff check --select F` trên W1: `All checks passed!`.
 - CI GitHub trên exact SHA C: chưa đo (chỉ đo được sau push).
 - Windows native: miễn (§2).
 - Numstat thật: chưa đo. Ước tính 4 đường, khoảng 20 dòng thêm, theo nguyên mẫu §0.

@@ -1,0 +1,24 @@
+# luot 1 cua chay_het (bi dung o han 30 phut cua tac vu nen); giu de doi chieu tao tac rig
+nen-eol | rc=0 | 2026-11-21T03:44:30Z | python .githooks/eol_policy_test.py
+nen-selftest-worker | rc=1 | 2026-11-21T03:50:25Z | python scripts/tl.py --selftest
+nen-ruff | rc=1 | 2026-11-21T03:55:48Z | python -m ruff check --select F --statistics scripts/tl.py scripts/tl_core/test_fragments.py scripts/tl_core/release.py scripts/tl_selftest.py .githooks/eol_policy_test.py
+nen-tfc | rc=0 | 2026-11-21T03:55:48Z | python scripts/tl.py test-fragments-check --json
+nen-bfc | rc=0 | 2026-11-21T03:55:48Z | python .github/checks/bundle_fragment_check.py --json
+nen-wa | rc=0 | 2026-11-21T03:57:40Z | python scripts/tl.py workflow-audit --strict --json
+nen-golden | rc=0 | 2026-11-21T03:57:41Z | python scripts/tl.py golden-test --json
+nen-diffcheck | rc=0 | 2026-11-21T03:58:06Z | git diff --check 0f9aa2a2cc697129e1f5be72feddf60986286865 HEAD
+nen-doctrine | rc=0 | 2026-11-21T03:58:06Z | python .claude/dev/packet_loop.py doctrine-scan --root .
+nen-adr | rc=0 | 2026-11-21T03:58:07Z | python .claude/dev/packet_loop.py adr-song --root .
+nen-status | rc=0 | 2026-11-21T03:58:07Z | git status --short
+sau-eol | rc=0 | 2026-11-21T03:58:07Z | python .githooks/eol_policy_test.py
+sau-selftest-worker | rc=1 | 2026-11-21T04:04:11Z | python scripts/tl.py --selftest
+sau-ruff | rc=1 | 2026-11-21T04:09:42Z | python -m ruff check --select F --statistics scripts/tl.py scripts/tl_core/test_fragments.py scripts/tl_core/release.py scripts/tl_selftest.py .githooks/eol_policy_test.py
+sau-ruff-frag | rc=0 | 2026-11-21T04:09:42Z | python -m ruff check --select F scripts/test_fragments/wp433_bundled_tach_manh.py
+sau-manifest | rc=0 | 2026-11-21T04:09:43Z | python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json
+  [FAIL] wp1099_nlm_nap_lai
+== tl selftest 1783/1784 ==
+  [FAIL] wp1099_nlm_nap_lai
+== tl selftest 1784/1785 ==
+[wp1099_nlm_nap_lai] FAIL TinHieuChotCa: D1: không đọc được base references/RASOAT_HOSO_LOOP.md
+[wp1099_nlm_nap_lai] FAIL TinHieuChotCa: D1: không đọc được base references/RASOAT_HOSO_LOOP.md
+[wp1099_nlm_nap_lai] FAIL TinHieuChotCa: D1: không đọc được base references/RASOAT_HOSO_LOOP.md

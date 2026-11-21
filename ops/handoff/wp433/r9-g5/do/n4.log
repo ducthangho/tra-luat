@@ -1,0 +1,14 @@
+('tl_test_fragments_bundled.py', 'tl_test_fragments_bundled_2.py')
+write rc=0
+170024 scripts/tl_test_fragments_bundled.py
+146627 scripts/tl_test_fragments_bundled_2.py
+316651 total
+manifest rc=0
+tfc rc=0 2026-11-21T04:52:10Z
+wa rc=0
+selftest rc=0 2026-11-21T04:57:58Z
+ M RELEASE_MANIFEST.json
+ M scripts/tl_gws.py
+ M scripts/tl_test_fragments_bundled_2.py
+?? scripts/test_fragments/wp433_secrets_set_bundle.py
+XONG

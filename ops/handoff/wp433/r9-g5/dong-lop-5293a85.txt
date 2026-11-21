@@ -1,0 +1,19 @@
+2026-11-21T03:51:19Z
+DAT F05 chinh_gan_nhieu_dich [CU LOT] | CU 36dc91a {"run": true, "n": 32, "do": [], "loader": "BUNDLED_MODULE_CONTRACT"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"}
+DAT F05 chinh_dich_tuple [CU da bat] | CU 36dc91a {"run": false, "n": 32, "do": ["V4", "V5", "V6", "V8", "V9"], "loader": "BUNDLED_MODULE_CONTRACT"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"}
+DAT F05 chinh_annassign [CU da bat] | CU 36dc91a {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"}
+DAT F05 phu_gan_nhieu_dich [CU LOT] | CU 36dc91a {"run": true, "n": 32, "do": [], "loader": "BUNDLED_MODULE_CONTRACT"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"}
+DAT F05 phu_dich_tuple [CU da bat] | CU 36dc91a {"run": false, "n": 32, "do": ["V4", "V5", "V6"], "loader": "BUNDLED_MODULE_CONTRACT"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"}
+DAT F05 phu_annassign [CU LOT] | CU 36dc91a {"run": true, "n": 32, "do": [], "loader": "BUNDLED_MODULE_CONTRACT"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"}
+DAT F05 phu_augassign [CU LOT] | CU 36dc91a {"run": true, "n": 32, "do": [], "loader": "BUNDLED_MODULE_CONTRACT"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"}
+DAT F05 phu_expr [CU LOT] | CU 36dc91a {"run": true, "n": 32, "do": [], "loader": "BUNDLED_MODULE_CONTRACT"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"}
+DAT F05 phu_import [CU LOT] | CU 36dc91a {"run": true, "n": 32, "do": [], "loader": "BUNDLED_MODULE_CONTRACT"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"}
+DAT F05 phu_if [CU LOT] | CU 36dc91a {"run": true, "n": 32, "do": [], "loader": "BUNDLED_MODULE_CONTRACT"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V8"], "loader": "BUNDLED_MODULE_CONTRACT"}
+DAT F06 one_skip_chap_nhan_mot_manh_stale [CU LOT] | CU 36dc91a {"run": true, "n": 32, "do": [], "loader": 6} | MOI 5293a85 {"run": false, "n": 32, "do": ["V27"], "loader": 6}
+DAT F06 one_red_tu_choi_mot_manh_current [CU LOT] | CU 36dc91a {"run": true, "n": 32, "do": [], "loader": 6} | MOI 5293a85 {"run": false, "n": 32, "do": ["V27"], "loader": 6}
+DAT F06 multi_red_tu_choi_nhieu_manh_current [CU LOT] | CU 36dc91a {"run": true, "n": 32, "do": [], "loader": 6} | MOI 5293a85 {"run": false, "n": 32, "do": ["V28"], "loader": 6}
+DAT F07 symlink_tai_ten_manh_1 | CU 36dc91a {"runtime_dut": 0, "index_dut": "TEST_ID_INDEX_READ", "runtime_tro_dung": "BUNDLED_MODULE_CONTRACT", "index_tro_dung": "TEST_ID_INDEX_READ", "cong_ok_manh_1_dut": false} | MOI 5293a85 {"runtime_dut": "BUNDLED_MODULE_CONTRACT", "index_dut": "TEST_ID_INDEX_READ", "runtime_tro_dung": "BUNDLED_MODULE_CONTRACT", "index_tro_dung": "TEST_ID_INDEX_READ", "cong_ok_manh_1_dut": false}
+DAT F08 nen_tu_choi_symlink | CU 36dc91a {"run": false, "n": 32, "do": ["V32"], "ly_do": "KHONG CO"} | MOI 5293a85 {"run": false, "n": 32, "do": ["V32"], "ly_do": {"V32": "PermissionError: [Errno 1] nen tu choi tao symlink (gia lap)"}}
+TONG: sai=0
+rc=0
+2026-11-21T03:54:19Z

@@ -1,0 +1,4 @@
+PASS case_chan_doan_mac_dinh_khong_lo_bi_mat
+PASS case_chan_doan_co_tho_chi_cuc_bo
+
+32/32 dat

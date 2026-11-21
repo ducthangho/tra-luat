@@ -101,7 +101,7 @@ Nguyên nhân, đọc trên `scripts/test_fragments/wp433_bundled_tach_manh.py` 
 | M3 | Tái sinh bundle bằng `write_bundled_modules` trên cây đã sửa. | W2, W3 |
 | M4 | Tái sinh manifest làm commit cuối. | W4 |
 
-- Cài đặt M1/M2 bằng đúng văn bản của `va.py` (chín thay thế, mỗi thay thế khớp đúng một lần trên base), vì các ca `a7_` của ma trận ghim theo chuỗi ấy.
+- Cài đặt M1/M2 bằng đúng văn bản của `va.py` (mười một thay thế, mỗi thay thế khớp đúng một lần trên base), vì các ca `a7_` của ma trận ghim theo chuỗi ấy.
 - Lệch khỏi `va.py` là được, nhưng phải: giữ nghĩa M1/M2; sửa các ca `a7_` cho cùng ý nghĩa gỡ chốt; và nêu lý do trong handoff. Ma trận đã sửa phải đặt trong handoff và neo băm.
 
 ## 4. `nghiem_thu`

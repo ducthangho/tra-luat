@@ -1,0 +1,80 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1488
+packet_id: wp1488
+spec_packet_id: CAI-GITHUB-PATH-HOAN-GHI
+revision: 2
+generation: 2
+lease_id: wp1488-r2-g2-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+reviewer: codex
+reviewer_fallback: 'claude, context đọc-chỉ độc lập, khai same-provider'
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+review_class: sensitive
+effective_review_class: sensitive
+risk: sensitive
+access: read-write
+depends_on: []
+spec_path: ops/specs/wp1488-r2.md
+spec_hash: 692325c7cd0dc50aee52a92b36ffb5075f585f5a285375a0a0a2686b73fcadd0
+spec_sha256_required: 692325c7cd0dc50aee52a92b36ffb5075f585f5a285375a0a0a2686b73fcadd0
+spec_duyet: 'chủ kho duyệt băm 692325c7 (đặc tả r2) qua AskUserQuestion 21-11-2026 ~09:56Z trong phiên session_015GtxrazyAyLwN5BiEB52Sq, lựa chọn "Duyệt, cấp lease r2 (Recommended)"; trước đó ở Review Rescue Checkpoint chọn "Thiết kế lại, Codex lượt 3 (Recommended)".'
+write_set:
+- .claude/dev/launcher_test.py
+- ops/acceptance/wp1488/RESULTS.md
+- ops/acceptance/wp1488/VERDICT.md
+- ops/cai_cong_cu.sh
+- ops/leases/wp1488-r1-g1-claude.yaml
+- ops/leases/wp1488-r2-g2-claude.yaml
+- ops/specs/wp1488-r1.md
+- ops/specs/wp1488-r2.md
+write_set_hash: 5ba0e5ac3da44e9e3c2f0d58d5df4efa45cec6fdb8690396aa0dd47ebfd0c29e
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp (LC_ALL=C), nối bằng LF, kết thúc bằng LF
+effective_write_set_nguon: khai_bao_trong_spec
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-21T08:27:56Z'
+  goc_quet: 'fetch đủ refs/heads/* (ls-remote so tập với refs/remotes/origin: thiếu 0); master cục bộ = origin/master 8656dc017'
+  ket_qua: 'ops/cai_cong_cu.sh, .claude/dev/launcher_test.py, ops/cong_cu.yaml: ai-dang-giu NGƯỜI_GIỮ 0 (chỉ lease HẾT_HẠN)'
+branch: claude/ci-github-path-hoan-ghi
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 8656dc0176ed108e12c209ba55c91a1f6f9d612f
+start_from_sha: 8656dc0176ed108e12c209ba55c91a1f6f9d612f
+reviewed_sha_required: 8656dc0176ed108e12c209ba55c91a1f6f9d612f
+reviewed_sha_required_nghia: 'Chưa có head ứng viên; mọi verdict neo exact head THẬT của nhánh thi công.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1488
+granted_on_instruction_readback: 'chủ kho 21-11: "Mở packet sửa nợ GITHUB_PATH. Cập nhật thay đổi, kiểm tra trạng thái"; duyệt spec và cấp lease qua AskUserQuestion.'
+granted_on_instruction_note: 'không cấp: merge/land, deploy, LIVE, sửa cong_cu.yaml/launcher.py/hook/workflow.'
+recorded_by: 'phiên session_015GtxrazyAyLwN5BiEB52Sq'
+recorder_is_executor: true
+recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị trực tiếp của chủ kho; lease KHÔNG tự cấp — chủ kho duyệt qua AskUserQuestion.'
+thay_the_cho:
+  - wp1488-r1-g1-claude
+thay_the_cho_ghi_chu: 'r1 mất hiệu lực vì đặc tả đổi (revision 2); lease r1 còn hạn tới 14:27:56Z nên mang bia mộ da_bi_thay_the.'
+leased_at_utc: '2026-11-21T09:56:13Z'
+heartbeat_at: '2026-11-21T09:56:13Z'
+lease_until: '2026-11-21T15:56:13Z'
+lease_expires_at_utc: '2026-11-21T15:56:13Z'
+lease_until_ghi_chu: '6h; rút hạn sau land.'
+attempts_used: 1
+attempts_limit: 2
+budget:
+  codex_review_calls: {used: 2, reserved: 1, limit: 3}
+  codex_review_calls_ghi_chu: 'trần tính cho cả packet: r1 dùng 2 (2847860, e21001f, request_changes); lượt 3 cho head r2.'
+nang_tran:
+  truc: codex_review_calls
+  tran_cu: 2
+  tran_moi: 3
+  ai_nang: ducthangho
+  can_cu: 'AskUserQuestion 21-11-2026 ~09:35Z, Review Rescue Checkpoint sau Codex lượt 2 của r1: "Thiết kế lại, Codex lượt 3 (Recommended)".'
+requires_live: false
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'

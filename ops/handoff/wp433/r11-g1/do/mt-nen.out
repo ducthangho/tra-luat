@@ -1,0 +1,128 @@
+DON_DICH: 32/32 khoa co dot bien don dich
+DAT doi_chung run=True so_nhan=32 do= dich=
+DAT v1_generator_mot_manh_them_LF_wrapper_bu_lai run=False so_nhan=32 do=V1 dich=V1
+DAT v2_wrapper_mot_manh_them_LF run=False so_nhan=32 do=V2 dich=V2
+DAT v3_mot_manh_nhieu_fragment_van_khai_shards run=False so_nhan=32 do=V3 dich=V3
+DAT v4_dao_thu_tu_dong_trong_manh run=False so_nhan=32 do=V4 dich=V4
+DAT v5_cat_khi_bang_han run=False so_nhan=32 do=V5 dich=V5
+DAT v5b_don_vi_byte_bo_LF run=False so_nhan=32 do=V5 dich=V5
+DAT v6_hang_xom_ghep_vao_manh_qua_han run=False so_nhan=32 do=V6 dich=V6
+DAT v7_ten_manh_3_sai run=False so_nhan=32 do=V7 dich=V7
+DAT v8_manh_1_them_phep_gan run=False so_nhan=32 do=V8 dich=V8
+DAT v9_khai_thieu_manh_cuoi run=False so_nhan=32 do=V9 dich=V9
+DAT v10_wrapper_tra_manh_cuoi run=False so_nhan=32 do=V10 dich=V10
+DAT v11_writer_ghi_sai_bytes_manh_phu run=False so_nhan=32 do=V11 dich=V11
+DAT v12_writer_khong_xoa_lac run=False so_nhan=32 do=V12 dich=V12
+DAT v13_nap_them_tep_khong_khai run=False so_nhan=32 do=V13 dich=V13
+DAT v14_manh_phu_thieu_ma_loi_khac run=False so_nhan=32 do=V14 dich=V14
+DAT v15_duong_manh_thieu_sai run=False so_nhan=32 do=V15 dich=V15
+DAT v16_bo_thu_tu_xuyen_manh run=False so_nhan=32 do=V16 dich=V16
+DAT v17_bo_kiem_trung_o_loader run=False so_nhan=32 do=V17 dich=V17
+DAT v18_manh_k_duoc_mang_shards run=False so_nhan=32 do=V18 dich=V18
+DAT v19_nhan_shards_rong run=False so_nhan=32 do=V19 dich=V19
+DAT v20_nhan_shards_khong_lien_tuc run=False so_nhan=32 do=V20 dich=V20
+DAT v21_manh_1_bo_qua_cau_lenh_thua run=False so_nhan=32 do=V21 dich=V21
+DAT v22_manh_k_bo_qua_cau_lenh_thua run=False so_nhan=32 do=V22 dich=V22
+DAT v23_cong_bo_manh_lac run=False so_nhan=32 do=V23 dich=V23
+DAT v24_cong_chi_xet_manh_phu_co_mat run=False so_nhan=32 do=V24 dich=V24
+DAT v25_manh_phu_thieu_doc_thanh_rong run=False so_nhan=32 do=V25 dich=V25
+DAT v26_thieu_manh_1_bao_stale run=False so_nhan=32 do=V26 dich=V26
+DAT v27_mot_manh_bam_theo_chuoi_ten run=False so_nhan=32 do=V27 dich=V27
+SAI v28_bam_nhieu_manh_bo_ten run=False so_nhan=32 do=V28 dich=V24,V28
+DAT v29_shards_expected_bytes_lech run=False so_nhan=32 do=V29 dich=V29
+DAT v30_han_manh_200000 run=False so_nhan=32 do=V30 dich=V30
+DAT v31_manh_that_phinh_40000B run=False so_nhan=32 do=V31 dich=V31
+SAI f01_dem_ky_tu_thay_vi_byte run=False so_nhan=32 do=V5 dich=V5,V31
+DAT f02_manh_1_them_bieu_thuc run=False so_nhan=32 do=V8 dich=V8
+DAT f02b_mot_manh_nhieu_fragment_them_bieu_thuc run=False so_nhan=32 do=V3 dich=V3
+DAT f03_cong_bo_so_manh_chinh run=False so_nhan=32 do=V24,V27 dich=V24,V27
+DAT v32a_loader_doc_xuyen_symlink run=False so_nhan=32 do=V32 dich=V32
+DAT v32c_cong_doc_xuyen_symlink run=False so_nhan=32 do=V32 dich=V32
+DAT v32d_writer_ghi_xuyen_symlink run=False so_nhan=32 do=V32 dich=V32
+SAI f05_manh_1_gan_nhieu_dich run=False so_nhan=32 do=V8 dich=V8,V9
+DAT f05b_manh_phu_annassign run=False so_nhan=32 do=V8 dich=V8
+DAT f06_one_skip_chap_nhan_mot_manh_stale run=False so_nhan=32 do=V27 dich=V27
+DAT f06_one_red_tu_choi_mot_manh_current run=False so_nhan=32 do=V27 dich=V27
+DAT f06_multi_red_tu_choi_nhieu_manh_current run=False so_nhan=32 do=V28 dich=V28
+DAT f07_topology_bo_qua_symlink_dut run=False so_nhan=32 do=V32 dich=V32
+DAT g_doi_chu_thich_dau_tep run=False so_nhan=32 do=V1,V2 dich=V1,V2
+DAT a_nap_moi_tep_danh_so_bo_khai_bao run=False so_nhan=32 do=V13,V14,V15 dich=V13,V14,V15
+DAT q_cong_chi_so_manh_1 run=False so_nhan=32 do=V24,V25,V32 dich=V24,V25,V32
+DAT c_bo_han_manh run=False so_nhan=32 do=V4,V5,V6,V7,V8,V9,V10,V11,V31 dich=V4,V5,V6,V7,V8,V9,V10,V11,V31
+SAI r11_size_only run=True so_nhan=32 do= dich=V24,V27
+SAI r11_size_only_raw run=False so_nhan=32 do=V25,V32 dich=V24,V25,V27,V32
+SAI r11_one_stale_ok run=True so_nhan=32 do= dich=V27
+SAI r11_ann_empty run=False so_nhan=32 do=V4,V5,V6,V8,V9 dich=V8
+SAI r11_duplicate run=False so_nhan=32 do=V4,V5,V6,V8 dich=V8
+SAI r11_missing_ok_narrow run=True so_nhan=32 do= dich=V26
+SAI r11_missing_ok run=False so_nhan=32 do=V32 dich=V26,V32
+SAI r11_missing_status run=True so_nhan=32 do= dich=V26
+SAI r11_stale_rc1 run=True so_nhan=32 do= dich=V23,V24,V25,V26,V27
+SAI r11_stale_status_current run=True so_nhan=32 do= dich=V23,V24,V25,V27
+DAT r11_extra_ok run=False so_nhan=32 do=V23 dich=V23
+DAT r11_absent_ok run=False so_nhan=32 do=V25,V32 dich=V25,V32
+SAI r11_absent_status run=True so_nhan=32 do= dich=V25
+SAI r11_extra_status run=True so_nhan=32 do= dich=V23
+SAI r11_stale_sha_swap run=True so_nhan=32 do= dich=V24,V27
+SAI r11_stale_flip_only_firstbyte run=True so_nhan=32 do= dich=V24,V27
+SAI r11_stale_ignore_lastbyte_region run=True so_nhan=32 do= dich=V24,V27
+SAI r11_stale_head_only run=True so_nhan=32 do= dich=V24,V27
+SAI r11_stale_tail_only run=True so_nhan=32 do= dich=V24,V27
+SAI r11_stale_sha_len_cmp run=True so_nhan=32 do= dich=V24,V27
+DAT r11_m1_chi_so_tien_to run=False so_nhan=32 do=V24,V27 dich=V24,V27
+SAI r11_m2_chap_nhan_cat_cut run=True so_nhan=32 do= dich=V24,V27
+SAI r11_m3_chuan_hoa_crlf run=True so_nhan=32 do= dich=V24,V27
+SAI r11_m4_stale_expected_sha_sai run=True so_nhan=32 do= dich=V24,V27
+SAI r11_m5_stale_expected_bytes_sai run=True so_nhan=32 do= dich=V24,V27
+SAI r11_m6_stale_actual_bytes_sai run=True so_nhan=32 do= dich=V24,V27
+DAT r11_m7_doc_toi_da_len_ky_vong run=False so_nhan=32 do=V24,V27 dich=V24,V27
+SAI r11_m8_regex_lac_mot_chu_so run=True so_nhan=32 do= dich=V23
+DAT r11_rv3_bo_qua_dong_tron_noi_them run=False so_nhan=32 do=V24,V27 dich=V24,V27
+DAT r11_rv3_bo_qua_chu_thich_cuoi_tep run=False so_nhan=32 do=V24,V27 dich=V24,V27
+SAI r11_rv3_sources_annassign_gia_tri run=False so_nhan=32 do=V1,V2,V3,V8 dich=V1,V2,V3,V4,V5,V6,V8
+DAT r11_rv3_manh_phu_hai_docstring run=False so_nhan=32 do=V8 dich=V8
+DAT r11_rv3_shards_truoc_sources run=False so_nhan=32 do=V8 dich=V8
+SAI r11_rv4_s1_manh_don_trung_sources run=False so_nhan=32 do=V5,V6 dich=V8
+SAI r11_rv4_s2_manh_don_gan_khong_literal run=False so_nhan=32 do=V5,V6 dich=V8
+SAI r11_rv4_s3_manh_don_annassign_rong run=False so_nhan=32 do=V5,V6 dich=V8
+SAI r11_rv4_s4_manh_don_augassign_sources run=False so_nhan=32 do=V5,V6 dich=V8
+SAI r11_rv4_s5_manh_qua_co_trung_sources run=False so_nhan=32 do=V6 dich=V8
+SAI r11_rv4_s6_phi_ascii_annassign run=False so_nhan=32 do=V5 dich=V8
+SAI r11_rv4_s7_manh_don_for_loop run=False so_nhan=32 do=V5,V6 dich=V8
+DAT r11_rv4_g1_cong_bo_qua_noi_dong_chu_thich run=False so_nhan=32 do=V24,V27 dich=V24,V27
+DAT r11_rv4_g2_missing_bao_stale run=False so_nhan=32 do=V26 dich=V26
+DAT r11_rv4_g3_extra_chi_khi_khong_lech run=False so_nhan=32 do=V23 dich=V23
+DAT no_hai_manh_hong_ok run=True so_nhan=32 do= dich=
+DAT no_trao_noi_dung_giua_manh run=True so_nhan=32 do= dich=
+DAT no_hai_lac_ok run=True so_nhan=32 do= dich=
+DAT no_lac_chi_bao_dau run=True so_nhan=32 do= dich=
+DAT no_lac_mot_manh_bo_qua run=True so_nhan=32 do= dich=
+DAT no_lac_symlink_bo_qua run=True so_nhan=32 do= dich=
+DAT no_thieu_chinh_nhieu_manh_bao_stale run=True so_nhan=32 do= dich=
+DAT no_vung_mu_1_den_giua run=True so_nhan=32 do= dich=
+DAT no_thieu_phu_actual_bytes_sai run=True so_nhan=32 do= dich=
+DAT no_generator_loi_thanh_ok run=True so_nhan=32 do= dich=
+DAT no_regex_toi_da_hai_chu_so run=True so_nhan=32 do= dich=
+DAT no_regex_hai_chu_so_chi_1x run=True so_nhan=32 do= dich=
+DAT no_manh_phu_sources_la_list run=True so_nhan=32 do= dich=
+SAI a7_go_ho_doi_do_dai KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_ho_doi_do_dai__m7_song KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_ho_giu_do_dai KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_ho_giu_do_dai__size_only_song KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_moi_vi_tri_mot_fixture KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_moi_vi_tri__head_only_song KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_bon_truong_quyet_dinh KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_bon_truong_quyet_dinh__one_stale_ok_song KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_bon_truong_bam KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_bon_truong_bam__m6_song KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_lan_dau_thang KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_lan_dau_thang__duplicate_lan KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_phep_gan_chuan KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_phep_gan_chuan__ann_empty_van KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_lac_hai_chu_so KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_lac_hai_chu_so__m8_song KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_nhieu_loan_base KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_nhieu_loan_base__dong_tron_song KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_moi_lac_mot_fixture KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+SAI a7_go_moi_lac_mot_fixture__extra_ok_song KHONG_AP_DUOC ('scripts/test_fragments/wp433_bundled_tach_manh.py', 0)
+TONG: 125 dot bien + doi chung, sai=55

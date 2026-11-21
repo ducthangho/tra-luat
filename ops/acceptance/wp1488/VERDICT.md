@@ -217,6 +217,22 @@ với errexit. Bảng `cai_sh` (mọi packet): 92/92.
 > - `python scratch/run.py repo mut` rc 0. Wrapper lọc `DOT_BIEN_HOOK` trong bộ nhớ theo loại `cai_sh`, rồi gọi CLI `--dot-bien`. Dòng cuối `DOT BIEN: 92/92 dat`, khớp RESULTS. [Log cai_sh](head-mut.log)
 > - `python scratch/export-probe.py` rc 0. Hai installer rc 1 như dự kiến. Probe thứ hai dùng đầu ra phân cách bằng NUL để giữ nguyên giá trị KQ nhiều dòng. [Log allexport](export.log)
 
-### Trạng thái sau lượt 3
+### Review Rescue Checkpoint sau lượt 3 → revision 3
 
-Trần Codex của packet (3) đã hết. Executor dừng ở Review Rescue Checkpoint và chờ chủ kho quyết.
+Trần Codex (3) hết. Ba lượt liền ra ca biên mới quanh cùng một thứ: tệp chờ. Chủ kho chọn qua AskUserQuestion (21-11-2026
+~10:30Z) **"Bỏ tệp chờ (r3), Codex lượt 4"**, rồi duyệt đặc tả r3 `ops/specs/wp1488-r3.md` (sha256 `691a710c…16d7`). Lease
+`wp1488-r3-g3-claude` thay `wp1488-r2-g2-claude` (bia mộ hai chiều); trần Codex cả packet 4.
+
+### Executor xử lý (sửa ở `f8747c4`, đặc tả r3)
+
+| Finding | Xử lý |
+|---|---|
+| P2 LF trong đường dẫn phá phép so danh tính | Không còn phép so danh tính (bỏ tệp chờ). Dòng `$GITHUB_PATH` dựng thẳng từ `DICH` của lần đọc kênh duy nhất; `DICH` hay dòng đã đổi có `\n`/`\r` ⇒ từ chối, `RC_CAI=1`. Kịch bản L-LF, L-CR (đường dẫn qua biến môi trường); đột biến `wp1488_sh_bo_tu_choi_xuong_dong` chết ở (L-LF). |
+| P3 tệp chờ sai dạng; `cygpath -w` rc 0 mà rỗng | Không còn tệp chờ. Dòng đổi rỗng ⇒ từ chối. Kịch bản W (cygpath giả `CYGPATH_W_RONG`); đột biến `wp1488_sh_bo_tu_choi_dong_rong` chết ở (W). |
+| P3 thiếu đột biến cho đọc tệp chờ / thứ tự ghi | Không còn tệp chờ nên không còn hai điểm ấy. `cygpath` giả nay IN rồi mới thoát 37 khi hỏng, nên `wp858_sh_nuot_loi_cygpath_w` đo việc xét mã thoát chứ không nhờ chuỗi rỗng. |
+| P3 `KQ` và hàm mới lộ export dưới `bash -a` | `export -n KQ` sau lần gán cuối, `export -nf _tl1488_ghi_github_path` sau định nghĩa. Kịch bản M (`bash -a` + `--bat-buoc`, tiến trình con lượt sau chụp `env`); đột biến `wp1488_sh_kq_lo_export` và `wp1488_sh_ham_lo_export` chết ở (M). |
+
+Kèm theo: (J) đổi kỳ vọng — PATH nội bộ và `$GITHUB_PATH` cùng là `DICH` mà công thức tự ghi (một nguồn); script r2
+`42b5386` ĐỎ ở (J). Đột biến `wp1488_sh_doc_kenh_cu_ghi_muon` viết lại để đọc SAU khi móc của (C) kích hoạt (bản đầu chọn tệp
+trước lúc writer muộn ghi nên sống); nay chết ở (C). Ba đột biến wp858 (`nuot_loi_cygpath_w`, `github_path_khong_qua_cygpath`,
+`github_path_vang_khong_mac_dinh`) dời neo sang `_tl1488_ghi_github_path`. Bảng `cai_sh` (mọi packet): 93/93.

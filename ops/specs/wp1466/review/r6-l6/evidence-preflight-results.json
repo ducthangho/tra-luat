@@ -1,0 +1,36 @@
+[
+  {
+    "name": "fx33",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/fx_tien_kiem.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/base/ops/lease_publish.py"
+    ],
+    "utc": "2026-11-21T04:17:19.241478+00:00",
+    "rc": 0
+  },
+  {
+    "name": "extra-r5",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/preflight_extra.py"
+    ],
+    "utc": "2026-11-21T04:17:28.277436+00:00",
+    "rc": 0
+  },
+  {
+    "name": "mutants",
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/dot_bien.py",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out",
+      "/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/base/ops/lease_publish.py"
+    ],
+    "utc": "2026-11-21T04:17:30.904690+00:00",
+    "rc": 0
+  }
+]

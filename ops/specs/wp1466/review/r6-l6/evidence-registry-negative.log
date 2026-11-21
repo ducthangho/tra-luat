@@ -1,0 +1,5 @@
+SỔ ĐĂNG KÝ: KHÔNG ĐO ĐƯỢC — nạp out/registry-negative rc=1: ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['git', 'rev-parse', 'HEAD']' returned non-zero exit status 128.

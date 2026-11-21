@@ -1,0 +1,9 @@
+UTC 2026-11-21T04:30:30.641044+00:00
+REGISTRY_NEGATIVE COMMAND ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/so_dang_ky.py', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/base', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/registry-negative'] RC 1  SỔ ĐĂNG KÝ: KHÔNG ĐO ĐƯỢC — nạp /tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/registry-negative rc=1:                        output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['git', '--no-replace-objects', '-C', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/registry-negative', 'ls-files', '-z']' returned non-zero exit status 128.
+N8_SAME_NEGATIVE COMMAND ['/usr/local/bin/python3', '-B', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/sc/do_pham_vi.py', 'test', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/base/.claude/dev/packet_loop_test.py', '/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv6.0C91/out/registry-negative/.claude/dev/packet_loop_test.py'] RC 1 PHẠM VI [test]: KHÔNG ĐẠT
+  nút mới ở vị trí không được phép: dòng 19471 
+SOURCE_ENTRIES 17998 17998 SOURCE_DELTA 0 []
+SOURCE_GIT ['status', '--porcelain=v1', '--untracked-files=all'] RC 0 '' ''
+SOURCE_GIT ['rev-parse', 'HEAD', 'HEAD^{tree}'] RC 0 '6c4ffe998954c0801fa69eb68d0406a543eb53f0\na4785c5808428109b65b9f2654c41f830404bde8\n' ''
+SPEC_SHA256 fe67bfffe8cb0cb49bb31a945fcde5955f657669bd2d43ccb2de46ed05f75e45

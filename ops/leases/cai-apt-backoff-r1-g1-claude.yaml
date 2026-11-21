@@ -1,0 +1,44 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1479
+packet_id: cai-apt-backoff
+revision: 1
+generation: 1
+lease_id: cai-apt-backoff-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+reviewer_model_family: openai
+reviewer_execution_surface: codex_service
+reviewer_transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 5a152c18dfb0890a9031bf05c31ab7cab534a652
+spec_path: ops/specs/cai-apt-backoff-r1.md
+spec_hash: 5d46d51e3643db8a2f4edfc164744ad4a3937fd4010ced6a1d370f8ed59ce9e9
+write_set:
+- .claude/dev/launcher_test.py
+- ops/acceptance/cai-apt-backoff/r1/VERDICT.md
+- ops/cai_cong_cu.sh
+- ops/leases/cai-apt-backoff-r1-g1-claude.yaml
+- ops/specs/cai-apt-backoff-r1.md
+write_set_hash: e8f4f55b70dc9783b2c1164432cc4d77f85798beaded1a56012c7810c3fbd97c
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+write_set_note: 'Co y KHONG gom ops/cong_cu_test.py (lease wp1448-r4-g4-claude), ops/cong_cu.yaml, ops/cong_cu.py, ci.yml.'
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: 5a152c18dfb0890a9031bf05c31ab7cab534a652
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 21/11 trong phien dispatcher: "Dong y, mo packet retry backoff cho cai_cong_cu.sh" roi "Merge #1477 khi CI xanh roi lam tiep #1479"'
+recorded_by: 'phiên điều phối session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-21T02:44:46Z'
+heartbeat_at: '2026-11-21T02:44:46Z'
+lease_until: '2026-11-21T10:44:46Z'
+lease_expires_at_utc: '2026-11-21T10:44:46Z'
+max_lease_hours: 8
+review_calls_limit: 2
+inference_calls_limit: 0

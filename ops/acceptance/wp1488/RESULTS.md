@@ -1,8 +1,9 @@
 # WP1488 — kết quả đo (executor: phiên `session_015GtxrazyAyLwN5BiEB52Sq`, Linux, 21-11-2026)
 
-Base `8656dc0176ed108e12c209ba55c91a1f6f9d612f`. Đặc tả hiện hành: `ops/specs/wp1488-r3.md` (sha256 `691a710c…16d7`),
-lease `wp1488-r3-g3-claude`. Mã r1 đã đo: `ab298a8`, `b7a280e`; mã r2: `42b5386`; mã r3: `f8747c4`. Mã r3 sau Codex
-lượt 4 (hai P3): `7a8823b890ff09f8eb98c75e7bc10fc9f963b37a`; các commit sau nó chỉ đổi tệp hồ sơ.
+Base `8656dc0176ed108e12c209ba55c91a1f6f9d612f`. Đặc tả hiện hành: `ops/specs/wp1488-r4.md` (sha256 `a4888c7e…d1ad`),
+lease `wp1488-r4-g4-claude` (thay r3-g3, bia mộ hai chiều). Mã r1 đã đo: `ab298a8`, `b7a280e`; mã r2: `42b5386`; mã r3:
+`f8747c4`, `7a8823b` (sau Codex lượt 4). Mã r4 (trả nợ `WP1488-WIN-THEO-LENH`):
+`ab83dd363` (40 hex ở §9); các commit sau nó chỉ đổi tệp hồ sơ.
 
 ## 1. Tái hiện lỗi trên base
 
@@ -11,7 +12,7 @@ Bằng `_wp868_chay` (stub, không mạng), script của `8656dc0`:
   `$GITHUB_PATH` = `[<tot2>]`.
 - B: `chon_thu_muc_chay_duoc rg <tot> && false` ⇒ rc 1, `$GITHUB_PATH` = `[<tot>]`.
 
-## 2. Thay đổi (r3)
+## 2. Thay đổi (r3; r4 ở §9)
 
 - `ops/cai_cong_cu.sh`:
   - Bộ chọn chỉ ghi kênh kết quả: không ghi `$GITHUB_PATH`, không tệp chờ, không `cygpath -w` (B1).
@@ -117,9 +118,9 @@ dạng: 33/34, ca đỏ duy nhất là `r858_hinh_dang_cong_thuc_cai`.
 - Commit message của `f8747c4` ghi "15 đột biến wp1488_sh_*"; số đúng là 13 (bảng trên; 782 + 13 = 795).
 - CI của PR ducthangho/tra-luat#1489 và review Codex (N4, N5): `VERDICT.md`.
 
-## 7. Nợ có tên còn mở
+## 7. Nợ có tên
 
-- `WP1488-WIN-THEO-LENH` (Codex lượt 4 P2; chủ kho chọn ghi nợ ở Review Rescue Checkpoint, 21-11-2026 ~12:10Z): chế độ
+- ĐÃ TRẢ ở r4 (§9). `WP1488-WIN-THEO-LENH` (Codex lượt 4 P2; chủ kho chọn ghi nợ ở Review Rescue Checkpoint, 21-11-2026 ~12:10Z): chế độ
   Windows nhận bằng chuỗi `chon_thu_muc_chay_duoc --win ` trong `LENH`. Năm công thức Windows trong `ops/cong_cu.yaml` viết
   đúng literal nên chạy đúng (`r858_cai_windows…` đạt). Sai khi `"--win"` có nháy, tab thay dấu cách, chuỗi nằm trong dữ
   liệu hay ở nhánh không chạy. Sửa tận gốc phải mang chế độ `--win` qua kênh kết quả (đổi định dạng kênh đã đóng băng ở B5).
@@ -127,5 +128,61 @@ dạng: 33/34, ca đỏ duy nhất là `r858_hinh_dang_cong_thuc_cai`.
 ## 8. Không đo được
 
 - Runner CI thật với `$GITHUB_PATH` của GitHub Actions: chỉ đo bằng tệp giả.
-- macOS/Windows thật: `cygpath -w` nay chạy ở script chính, nhận biết bằng `LENH` có `chon_thu_muc_chay_duoc --win`; ca
-  `r858_cai_windows…` và (W) dùng cygpath giả trên Linux, chưa chạy trên Windows thật.
+- macOS/Windows thật: `cygpath -w` nay chạy ở script chính, chế độ lấy từ nhãn kênh `DICH_WIN` (r4); ca
+  `r858_cai_windows…`, (W), (N), (I-win) dùng cygpath giả trên Linux, chưa chạy trên Windows thật.
+
+## 9. Revision 4 — trả nợ `WP1488-WIN-THEO-LENH` (đặc tả `ops/specs/wp1488-r4.md`)
+
+Mã: `ab83dd363…` (`ab83dd3638ae0bc8a6f2aec35ae789c06dd7c66f`). Đổi so với `7a8823b`:
+- `ops/cai_cong_cu.sh`: bộ chọn ghi nhãn `DICH_WIN` khi THẬT SỰ chạy với `--win`, ngược lại `DICH` (B1). Lần đọc kênh duy
+  nhất chọn chế độ theo nhãn: `DICH` ⇒ `_tl1488_ghi_github_path "<dir>" ""`, `DICH_WIN` ⇒ `… win` (`cygpath -w`); hàm
+  không còn đọc `$LENH` (B2). Phép đọc PATH nhận thêm `DICH_WIN` (B5). Chú thích đầu tệp nêu định dạng kênh mới.
+- `.claude/dev/launcher_test.py`:
+  - Ca r1488 thêm (N) bốn biến thể qua `_wp868_chay` với `cygpath` giả ở đầu PATH (`-w` ⇒ `W:<dir>`): `"--win"` có nháy
+    và tab ⇒ tệp = `b"W:<dir>\n"`; chuỗi `--win` chỉ nằm trong dữ liệu (`: '…--win…'`) và nhánh `if false` có `--win` ⇒ tệp
+    = `b"<dir>\n"`; cả bốn rc 0, `DAT`. Thêm (I-win): như (I) trên nhánh `DICH_WIN` — `--bat-buoc`, công cụ tuỳ chọn chạy
+    bộ chọn `--win` với `cygpath -w` in rồi thoát 37, công cụ bắt buộc sau nó ⇒ rc 0, báo `cygpath -w hong`, công cụ tuỳ
+    chọn `--bat-buoc di tiep`, tệp = đúng dòng của công cụ bắt buộc.
+  - `r858_hinh_dang_cong_thuc_cai`: chốt dòng nhãn `nhan=DICH; if [ -n "$win" ]; then nhan=DICH_WIN; fi`, `case "$2" in win)`,
+    hàm không chứa `LENH`, khối gọi hai nhánh. `r868_hinh_dang_kenh_ket_qua`: chốt nhánh `DICH_WIN` của phép đọc PATH.
+    `printf` giả của `r868_ghi_kenh_hong_thi_dung` khớp định dạng mới (`'%s\n%s'` kèm nhãn ở `$2`); ca vẫn đòi dấu
+    `printf: loi ghi gia` trong stderr nên không đạt suông.
+  - Năm đột biến r4 (bảng dưới). Neo của `wp868_sh_ham_in_stdout_thay_kenh`, `wp868_sh_ghi_dich_nuot_loi`,
+    `wp1488_sh_bo_chon_ghi_thang`, `wp1488_sh_chep_loi_khong_dat_rc`, `wp1488_sh_chep_loi_thoat_ngay`,
+    `wp1488_sh_doc_kenh_rieng_truoc` đổi theo dòng ghi kênh và lời gọi mới; không xoá đột biến nào.
+
+Phản chứng (bốn biến thể của (N), cùng fixture, chỉ đổi `ops/cai_cong_cu.sh`):
+
+| Biến thể | Kỳ vọng | `7a8823b` (r3) | `ab83dd3` (r4) |
+|---|---|---|---|
+| `chon_thu_muc_chay_duoc "--win" rg <u>` | `W:<dir>` | `<dir>` — SAI | đúng |
+| `chon_thu_muc_chay_duoc<TAB>--win rg <u>` | `W:<dir>` | `<dir>` — SAI | đúng |
+| `: '…--win rg' && chon_thu_muc_chay_duoc rg <u>` | `<dir>` | `W:<dir>` — SAI | đúng |
+| `if false; then …--win rg x; fi; chon_thu_muc_chay_duoc rg <u>` | `<dir>` | `W:<dir>` — SAI | đúng |
+
+Chạy cả ca `r1488_…` với script `7a8823b` ⇒ ĐỎ ở (N-nhay). `--lap-ca r1488_github_path_chi_ghi_khi_thanh_cong`: 1/1 trên
+`ab83dd3`.
+
+Đột biến r4 (chạy riêng trên ca đích, mỗi cái chết bằng `TinHieuChotCa`):
+
+| Đột biến | Thay đổi | Chết ở |
+|---|---|---|
+| `wp1488_sh_bo_chon_luon_dich` | bộ chọn luôn ghi nhãn `DICH` | (W-rong) |
+| `wp1488_sh_quyet_theo_lenh` | hàm quyết định theo `$LENH` (thiết kế r3) | (N-nhay) |
+| `wp1488_sh_path_bo_nhanh_dich_win` | bỏ nhánh `DICH_WIN` của phép đọc PATH | (N-nhay) rc 7; `r858_cai_windows…` rc 7 |
+| `wp1488_sh_dich_win_khong_doi` | nhánh `DICH_WIN` gọi hàm với chế độ rỗng | (W-rong); `r858_cai_windows…` |
+| `wp1488_sh_dich_win_loi_khong_dat_rc` | bỏ `\|\| RC_CAI=1` ở nhánh `DICH_WIN` | (I-win) |
+
+Ghi chú đo được: `wp1488_sh_dich_win_loi_khong_dat_rc` SỐNG ở bản đầu của r4 (chưa có I-win) — cùng lý do như
+`wp1488_sh_chep_loi_khong_dat_rc` ở §4: ngoài lượt `source`, hàm trả 1 không kèm `||` thì `set -e` cũng thoát. Thêm (I-win)
+thì chết. Các đột biến r1–r3 đo lại trên `ab83dd3` (chạy riêng): chết ở đúng ca ghi trong §4.
+
+Hồi quy (N3), hai vế dựng trong CÙNG một lệnh (clone + checkout + `core.abbrev 7`), `/tmp/.git` không tồn tại:
+
+| Phép đo | `7a8823b` | `ab83dd3` |
+|---|---|---|
+| `launcher_test.py` | đang đo — chưa có số | đang đo — chưa có số |
+| `launcher_test.py --dot-bien` | đang đo — chưa có số | đang đo — chưa có số |
+
+Ruff `--select F` trên `launcher_test.py`: 5 F841 ở cả hai vế (delta 0). `shellcheck ops/cai_cong_cu.sh`: một SC1090 ở cả
+hai vế (delta 0). `doctrine-scan`: rc 0.

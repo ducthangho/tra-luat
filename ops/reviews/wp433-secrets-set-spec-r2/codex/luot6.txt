@@ -1,0 +1,63 @@
+**Lượt 6/10 của đặc tả r4 còn 3 finding P2 thuộc 3 lớp.** Hai trong bốn lớp mở từ lượt 5 đã đóng, nên tỷ lệ 5→6 là **2/4 = 50%**. `native-gate-evidence` còn mở ở **lần xuất hiện thứ tư** sau các lượt 1, 4 và 5. Tín hiệu lặp theo lớp của §12 vẫn áp dụng tại Review Rescue Checkpoint.
+
+### Định danh và bằng chứng
+
+Đặc tả có SHA-256 `be0974f908ef9f45ece2055c6b113e9a7b837260404b5c83b1d94ccaf438f814`. HEAD tách `cbdb99c43acdeeb9311c9905ac18034e2e0f2969` khớp `origin/ops/wp433-secrets-set-spec`, tree `8729e9dba3da3929a1083fab5c8ae4de7219fb5d`. Clone đầy đủ, checkout sạch trước và sau review. Base `1e397c89d69f451694a2252103ea97ec274ab43f` có tree `b1b95b504e4a64cc6470dfed2081da6d778f4499`. Hai OID ADR ghim có trên lịch sử cha thứ nhất của `origin/master` cục bộ. Blob `tl_gws.py` khớp base r1 và không có commit trung gian chạm tệp.
+
+Phiên độc lập `openai_codex / codex_cli / machine`, Linux x86_64, Python 3.13.18, Git 2.43.0. Phép thử dùng HOME tạm, nguồn chọn lọc dưới `/dev/shm`, stub đếm lời gọi và chặn kết nối socket trong tiến trình. Checkout được giữ chỉ đọc.
+
+| Trạng thái | Kết quả |
+|---|---|
+| `passed` | `replay.py tai_hien.py` rc 0 trên base và nguyên mẫu ghim, 37 lượt mỗi bên. Cả hai `cmp` với log r1 trả rc 0. `replay.py pinned.py` rc 0, fragment ghim cho `True/HONG 0` trên nguyên mẫu và `False/HONG 4` trên base. `contracts.py` và `singletons.py` rc 0, kết quả chi tiết ở các finding. Probe thứ tự PR trả rc 0 và tìm thấy chu trình. |
+| `failed` | Lần đầu `contracts.py` trả rc 1 vì bộ trích đọc thêm hai lần nhắc `encrypt` trong phần giải thích. Sau khi sửa bộ trích, probe trả rc 0 và đếm đúng 26 cặp, 25 tên, 346 khóa. |
+| `skipped` | Không có lệnh đã chạy báo `skipped`. |
+| `not_run` | D1 Windows, ma trận N4 hoàn chỉnh, T3, các cổng N5 và CI trên SHA ứng viên tương lai. Tôi đối chiếu số liệu N5 của nguyên mẫu với hồ sơ cục bộ, chưa dựng lại commit manifest hoặc chạy lại toàn bộ cổng. Readback thẩm quyền E2, độ mới của ref từ xa và danh tính model cụ thể chưa được xác minh độc lập. |
+
+### Lịch sử lớp 5→6
+
+L5 là r3 tại `6a0a13be4e66b4aa42a401ee5b045771636ddb89`, SHA-256 `593b82a7ba2abb3b24159176a37445e41dc723efce9dfdaa009ff6f828257a18`. Các nhãn dưới đây đánh giá hợp đồng của đặc tả. Phép chạy nguyên mẫu cung cấp đối chứng hành vi.
+
+| `class_slug` | Đối chiếu biểu hiện lượt 5 và phép kiểm độc lập | Nhãn |
+|---|---|---|
+| `mutation-target-accounting` | F01b đã được xử lý trong hợp đồng: tập đích khai độc lập trước phép chạy, khóa vắng bị loại, ép xanh một khóa làm phép so đỏ khi giữ nguyên tập khai. Số 26 cặp trên 25 tên đúng. F01a còn một phần: r4 cho một tập nhiều đích thay toàn bộ phép đo đơn đích. Probe cho 26 tập phủ đủ 346 khóa, với 0 tập một khóa, vẫn đạt điều kiện N4. | **VÁ MỘT PHẦN** |
+| `native-gate-evidence` | F02a đã ghi `run=False` cho base và tách nguồn đo khỏi nguồn ma trận. F02b đã định nghĩa lượt Windows là một lượt chạy rig gồm toàn bộ tiến trình. Probe xác nhận oracle phát hiện một khóa Windows đổi và một tiến trình vắng khi Linux đúng. Tuy nhiên N6 vẫn nhận hai bản cùng sai và bỏ qua một số kết quả bắt buộc của N4. | **VÁ MỘT PHẦN** |
+| `implementation-size-estimate` | F03 đã đóng. Probe xác nhận `211 + 200 = 411 ≤ 415 ≤ 450`. Numstat lưu trong hồ sơ cộng đúng `+211/−8` trên 4 tệp. Trần thực tế vẫn do N5/§6 quyết định trên ứng viên. | **ĐÃ VÁ THẬT** |
+| `review-budget-accounting` | F04 đã đóng. Probe tìm các vị trí `5/10` ở dòng 9, 190, 242, 252 và 262. Mốc trước r4 nhất quán là 5/10. Tính cả verdict này là 6/10. | **ĐÃ VÁ THẬT** |
+
+**Lớp mới:** `native-rig-handoff-order`. **Lớp tái mở:** không có. Ba lớp đã đóng ở lượt 5 (`candidate-diff-gate-scope`, `regression-oracle-baseline`, `prevalidation-io-boundary`) không có biểu hiện tái mở trong r4. Phần chưa đo gồm ma trận và ngân sách thực thi thực tế trên Windows, cùng bằng chứng exact-SHA và E2 nêu trên. [Đặc tả r4](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/ssrv-2/ops/specs/SECRETS-SET-BUNDLE-KIEU-r4.md)
+
+### Bảng lớp lượt 6
+
+| `class_slug` | Finding IDs / biểu hiện và chỗ | Mức cao nhất còn mở | Nguồn lượt/SHA | Cách vá chung | Phép kiểm đóng lớp |
+|---|---|---|---|---|---|
+| `mutation-target-accounting` | F01 · Phủ tập nhiều khóa được tính là đơn đích, §4 quy tắc 4 và N4. Một phép quan sát phụ thuộc trực tiếp vào bộ đếm khác, §4 bảng `hoi_quy`. | P2 | L4 `18abdc5` → L5 `6a0a13b` → L6 `cbdb99c` | Tách tín dụng phủ nhiều đích khỏi bằng chứng từng phép quan sát. Dùng phản chứng tại biên quan sát khi hai hành vi sản phẩm phụ thuộc nhau. | 26 nhóm đa đích không đủ qua N4. Kiểm từng phiên bản phản chứng trên danh mục đóng và giữ đối chứng ép xanh. |
+| `native-gate-evidence` | F02 · Bản chuẩn chưa bị ràng buộc với chính lần đo đạt N1–N4. So bằng bỏ qua bằng chứng nguồn theo dòng và kết quả phân hạng bắt buộc, §4c, N6, §6. | P2 | L1 → L4 `18abdc5` → L5 `6a0a13b` → L6 `cbdb99c` | Xác thực bản Linux theo N1–N4 rồi so những trường quyết định nghiệm thu đã chuẩn hóa. | Hai bản cùng sai bị loại trước khi so. Đổi một khóa, nguồn hoặc hạng ở Windows làm N6 đỏ. Thiếu bằng chứng bắt buộc làm N6 đỏ. |
+| `native-rig-handoff-order` | F03 · Rig lấy từ comment PR trong khi N6 phải đạt trước push tạo PR, §4c và §3a. | P2 | L6 `cbdb99c` | Giao rig trong handoff trước push theo M12. | Dựng được D1 từ handoff khi chưa có PR, trên đúng SHA/tree ứng viên. |
+
+### Findings
+
+**F01 — `mutation-target-accounting` — P2 — §4 quy tắc 4, bảng `hoi_quy` và N4**
+
+r4 khắc phục lỗi lượt mù đối với **tập đích đã khai**. Trong probe mô hình PC2, bản đồ đủ 346 khóa và đỏ đúng 5 khóa export thì đạt. Ép `kieu.list.gws.gws_export0=True` làm còn 4 khóa đỏ và phép so tập thất bại. Xóa khóa cũng thất bại. Khai lại tập đích từ bản đồ đã ép xanh làm phép so đạt, nhưng vi phạm trực tiếp câu cấm của r4. Băm tệp handoff xác nhận nội dung tệp nhận được. Riêng dấu băm đó không chứng minh cách khai tập hoặc thời điểm khai.
+
+Khe còn mở nằm ở chữ “đơn đích”. Probe dựng một tập nhiều khóa cho mỗi cặp `(ca, quan_sat)`. Cả 26 tập khớp chính xác và phủ 346 khóa, nên đạt điều kiện phủ của N4 dù không có phép nào cô lập một khóa. Tôi cũng dùng quan sát thô từ 37 lượt của nguyên mẫu để thử đổi từng trường. Có **345** phép đổi cho đúng một quan sát khác kỳ vọng tại biên đo. Riêng `hoi_quy.khong_co.khoa_public`, mốc gốc có **0** lời gọi `encrypt`. Thêm một khóa public vào danh sách lời gọi tất yếu làm đỏ cả `khoa_public` lẫn `encrypt`. Phản chứng đơn khóa này cần thực hiện ở phép quan sát khóa, hoặc cần nêu rõ cách chấp nhận cặp phụ thuộc. Con số 345 là phép thử trên quan sát thu được, chưa phải 345 đột biến mã sản phẩm. [Probe so tập](/dev/shm/wp433-r6.tfETOK/contracts.py) · [Probe cô lập quan sát](/dev/shm/wp433-r6.tfETOK/singletons.py)
+
+**Câu thay thế.** “Giữ tập khóa đích độc lập, khớp chính xác cho mọi đột biến nguồn, kể cả đột biến nhiều đích kế thừa. Với mỗi khóa, chứng minh riêng phép quan sát có thể làm đỏ đúng khóa ấy khi giữ nguyên các quan sát còn lại. Khi một thay đổi hành vi tất yếu kéo theo khóa khác, thực hiện phản chứng đơn khóa tại biên quan sát và giữ đột biến hành vi trong ma trận với toàn bộ tập đích của nó. Tự kiểm (d) giữ nguyên tập đích gốc khi ép xanh một khóa.”
+
+**F02 — `native-gate-evidence` — P2 — §4c, N6 và §6**
+
+So bằng nhau bắt được lỗi Windows **khi lỗi đổi trường đang so và bản Linux đã được xác thực**. r4 yêu cầu N1–N4 trong nghiệm thu chung. Điều kiện “đạt khi và chỉ khi” của §4c vẫn chưa buộc **chính các tiến trình sinh `d1-linux.json`** phải cung cấp bằng chứng đạt N1–N4 trước khi dùng tệp làm chuẩn. Probe cho thấy một dòng PC2 với tập False sai vẫn đạt N6 khi cả hai nền nộp cùng bản sai đó. Một kết quả N4 hợp lệ từ lần chạy khác không xác thực được dòng này.
+
+Phép so hiện hành dùng tập tên tiến trình, `run()`, `HONG` và bản đồ Boolean. Đường dẫn tuyệt đối, CRLF và thời gian đều nằm ngoài các trường so. Quan sát stderr N1 dùng `splitlines()`, nên khác biệt LF/CRLF đơn thuần không làm đỏ ở đó. Tuy nhiên nguồn mã được ghi theo dòng mà không nằm trong phép so. Phân hạng GIẾT, kiểm frame của hai đột biến đầu và các kết quả tự kiểm cũng chưa có trường so riêng. Probe giữ nguyên projection và đổi nguồn dòng hoặc hạng vẫn đạt. Với phép chạy ghim, `HONG 4` là kết quả thiết kế ở vế base. Nó không chứng thực phân hạng của từng dòng ma trận trên ứng viên.
+
+Nhánh **KHÔNG ĐO ĐƯỢC** đã tường minh và chặn N6 khi thiếu tiến trình, thiếu báo cáo Windows, rig không đến được `run()` hoặc sai SHA/tree. Cần áp cùng hậu quả khi thiếu hồ sơ chuẩn hợp lệ hoặc thiếu bằng chứng phân hạng bắt buộc. [Probe N6](/dev/shm/wp433-r6.tfETOK/contracts.py) · [Probe nguyên mẫu](/dev/shm/wp433-r6.tfETOK/pinned.py)
+
+**Câu thay thế.** “Chỉ dùng `d1-linux.json` làm chuẩn sau khi xác nhận chính các tiến trình trong tệp đạt N1–N4 trên ứng viên và đạt đối chứng base quy định ở §4c. Định danh mỗi dòng bằng nguồn fragment, nguồn sản phẩm và ID đột biến đã ghim. So theo dòng `run()`, `HONG`, bản đồ khóa và kết quả phân hạng, kiểm cơ chế hoặc tự kiểm áp dụng cho dòng đó. Thiếu hoặc không xác thực được bằng chứng bắt buộc làm N6 đỏ và dừng theo §6.”
+
+**F03 — `native-rig-handoff-order` — P2 — §4c dòng 179, §3a, protocol §12(a)/§13**
+
+§4c yêu cầu executor đăng rig qua comment PR. N6 cần rig và thuộc các cổng đặc tả bắt buộc trước push chính. Luồng §13 mở PR sau push. Probe trích hai điều kiện và xác nhận chu trình **PR → rig → N6 → push → PR**. Điểm giao rig hiện tại khiến điều kiện D1 không có đường thực hiện theo thứ tự đã được §3a dẫn chiếu. [Đặc tả §4c](/tmp/claude-0/-home-user-tra-luat/1adbda56-058d-5ab2-9b04-c994e35e8ec6/scratchpad/ssrv-2/ops/specs/SECRETS-SET-BUNDLE-KIEU-r4.md:179) · [Protocol §13](/dev/shm/wp433-r6.tfETOK/protocol.md:1195)
+
+**Câu thay thế.** “Giao rig gzip+base64 và SHA-256 qua handoff trên Packet Issue, neo exact SHA/tree ứng viên theo M12, trước lần đo D1 và trước push. Sau khi mở PR, dẫn lại cùng artifact và bằng chứng đo.”
+
+KET_LUAN: request_changes

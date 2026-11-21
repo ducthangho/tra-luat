@@ -1,0 +1,248 @@
+{"id": "delete_return_112", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "delete_return_127", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "delete_return_129", "ledger": "GIET", "ca": ["a104_bo_sinh_la"]}
+{"id": "delete_return_132", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "delete_return_171", "ledger": "GIET", "ca": ["a105_bam_log"]}
+{"id": "delete_return_173", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "delete_return_175", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "delete_return_214", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "delete_return_227", "ledger": "KHONG_AP_DUNG", "ly_do": "neo xuat hien 0 lan", "thay_the": ["c2:_tep_trong:234:4", "c2:_tep_trong:229:8", "c2:_tep_trong:233:12"], "ket_qua": [["c2:_tep_trong:234:4", "GIET", ["a205_duong_khop"]], ["c2:_tep_trong:229:8", "GIET", ["a204_duong_dan"]], ["c2:_tep_trong:233:12", "GIET", ["a204_duong_dan"]]]}
+{"id": "delete_return_231", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "delete_return_238", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "delete_return_243", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "delete_return_249", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "delete_return_251", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "delete_return_254", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "delete_return_261", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "delete_return_263", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "delete_return_316", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "delete_return_319", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "delete_return_55", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "delete_return_58", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "delete_return_60", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "delete_return_97", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "identity_126_7", "ledger": "TUONG_DUONG", "ly_do": "is None -> == None / type is int -> == : gia tri la None/dict/str/Path/type, khong lop nao dinh nghia __eq__ khac dong nhat => khong dau vao nao phan biet duoc"}
+{"id": "identity_131_7", "ledger": "TUONG_DUONG", "ly_do": "is None -> == None / type is int -> == : gia tri la None/dict/str/Path/type, khong lop nao dinh nghia __eq__ khac dong nhat => khong dau vao nao phan biet duoc"}
+{"id": "identity_154_11", "ledger": "TUONG_DUONG", "ly_do": "is None -> == None / type is int -> == : gia tri la None/dict/str/Path/type, khong lop nao dinh nghia __eq__ khac dong nhat => khong dau vao nao phan biet duoc"}
+{"id": "identity_219_107", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "identity_219_11", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "identity_262_25", "ledger": "TUONG_DUONG", "ly_do": "is None -> == None / type is int -> == : gia tri la None/dict/str/Path/type, khong lop nao dinh nghia __eq__ khac dong nhat => khong dau vao nao phan biet duoc"}
+{"id": "identity_271_11", "ledger": "TUONG_DUONG", "ly_do": "is None -> == None / type is int -> == : gia tri la None/dict/str/Path/type, khong lop nao dinh nghia __eq__ khac dong nhat => khong dau vao nao phan biet duoc"}
+{"id": "identity_285_19", "ledger": "TUONG_DUONG", "ly_do": "is None -> == None / type is int -> == : gia tri la None/dict/str/Path/type, khong lop nao dinh nghia __eq__ khac dong nhat => khong dau vao nao phan biet duoc"}
+{"id": "identity_72_67", "ledger": "KHONG_AP_DUNG", "ly_do": "neo xuat hien 0 lan", "thay_the": "j1:doc_danh_gia:72:43", "ket_qua": "TUONG_DUONG", "dang_r11": "KHONG_AP_DUNG → <id thay the> TUONG_DUONG <chung minh> (luat 5 r11)", "chung_minh": "s.re is RE_SKIP_V3 -> ==: hai Pattern bang nhau khi cung mau+co; RE_SKIP_CU khac mau => tuong duong (reviewer luot 6 cung xep tuong duong)"}
+{"id": "identity_85_11", "ledger": "TUONG_DUONG", "ly_do": "is None -> == None / type is int -> == : gia tri la None/dict/str/Path/type, khong lop nao dinh nghia __eq__ khac dong nhat => khong dau vao nao phan biet duoc"}
+{"id": "key_alpha_only", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "key_no_casefold", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "landed_partial", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "phi_skip_descendants", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "phi_substring", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "producer_version_0", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "producer_version_1", "ledger": "GIET", "ca": ["a111_skipped_theo_phien_ban"]}
+{"id": "producer_version_2", "ledger": "GIET", "ca": ["a107_tap_job"]}
+{"id": "reason_129_32", "ledger": "GIET", "ca": ["a104_bo_sinh_la"]}
+{"id": "reason_140_15", "ledger": "GIET", "ca": ["a117_loi_duyet_va_job_trung"]}
+{"id": "reason_158_24", "ledger": "GIET", "ca": ["a106_danh_tinh_job"]}
+{"id": "reason_160_24", "ledger": "GIET", "ca": ["a113_ket_luan"]}
+{"id": "reason_162_24", "ledger": "GIET", "ca": ["a105_bam_log"]}
+{"id": "reason_175_32", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "reason_177_15", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "reason_238_16", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "reason_243_16", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "reason_247_16", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "reason_249_16", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "reason_251_16", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "reason_254_16", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "reason_259_16", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "reason_261_16", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "reason_263_16", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "reason_51_22", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "reason_55_26", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "reason_58_22", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "reason_60_22", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "reason_71_19", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "reason_97_23", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "reason_97_70", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "reason_claim_failed", "ledger": "GIET", "ca": ["a206_duong_lech"]}
+{"id": "reason_complete_102_26", "ledger": "GIET", "ca": ["a112_symlink"]}
+{"id": "reason_complete_112_40", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "reason_complete_112_72", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "reason_complete_136_18", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "reason_complete_147_18", "ledger": "GIET", "ca": ["a114_provenance_tu_khai_du"]}
+{"id": "reason_complete_149_18", "ledger": "GIET", "ca": ["a107_tap_job"]}
+{"id": "reason_complete_151_18", "ledger": "GIET", "ca": ["a107_tap_job"]}
+{"id": "reason_complete_165_18", "ledger": "GIET", "ca": ["a111_skipped_theo_phien_ban"]}
+{"id": "reason_complete_169_18", "ledger": "GIET", "ca": ["a110_dong_tong"]}
+{"id": "reason_complete_272_31", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "reason_complete_278_28", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "reason_complete_282_35", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "reason_complete_286_39", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "reason_complete_290_39", "ledger": "GIET", "ca": ["a206_duong_lech"]}
+{"id": "reason_complete_294_18", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "reason_complete_68_26", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "reason_complete_76_22", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "reason_complete_78_18", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "reason_complete_80_18", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "reason_complete_99_15", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "reason_waiver", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "ref_any_run", "ledger": "KHONG_AP_DUNG", "ly_do": "neo xuat hien 0 lan", "thay_the": "DOT_BIEN m131_tep_run_chu (bo test, dich a121)", "ket_qua": "GIET a121_token_tep_khoa_landed (bo test 145/145)"}
+{"id": "ref_no_boundary", "ledger": "KHONG_AP_DUNG", "ly_do": "neo xuat hien 0 lan", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r11 muc Module moi: tep_danh_gia = token TOI DAI, lookbehind (?<![A-Za-z0-9_./-]) KHONG bat buoc (findall trai-nhat + lop tham lam cung tap ky tu); chot lookbehind khong con trong dac ta (N02 luot 8)"}
+{"id": "ref_txt_wild", "ledger": "KHONG_AP_DUNG", "ly_do": "neo xuat hien 0 lan", "thay_the": ["i5:RE_TEP_DG:escape@43 \\.→."], "ket_qua": [["i5:RE_TEP_DG:escape@43 \\.→.", "GIET", ["a121_token_tep_khoa_landed"]]]}
+{"id": "set_remove_BO_SINH_0", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "set_remove_BO_SINH_1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "set_remove_BO_SINH_2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "set_remove_CHECK_BAT_BUOC_TEN_0", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "set_remove_CHECK_BAT_BUOC_TEN_1", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "set_remove_CHECK_BAT_BUOC_TEN_2", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "set_remove_CHECK_BAT_BUOC_TEN_3", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "set_remove_CHECK_BAT_BUOC_TEN_4", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "set_remove_PHI_LOI_KHAI_0", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "set_remove_PHI_LOI_KHAI_1", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "set_remove_PHI_LOI_KHAI_2", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "set_remove_TOKEN_0", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "set_remove_TOKEN_1", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "set_remove_TOKEN_2", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "set_remove_TOKEN_3", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "set_remove_TOKEN_4", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "set_remove_TOKEN_5", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "set_remove_TOKEN_6", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "skip_v3_partial", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "token_delimiter_40", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_token_delimiter_40", "ket_qua": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "token_delimiter_44", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_token_delimiter_44", "ket_qua": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "token_delimiter_45", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_token_delimiter_45", "ket_qua": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "token_delimiter_46", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_token_delimiter_46", "ket_qua": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "token_delimiter_58", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_token_delimiter_58", "ket_qua": "GIET", "ca": ["a202_token"]}
+{"id": "token_delimiter_59", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_token_delimiter_59", "ket_qua": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "token_delimiter_8212", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_token_delimiter_8212", "ket_qua": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "token_expand", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "token_no_casefold", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "token_no_whitespace", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_token_no_whitespace", "ket_qua": "GIET", "ca": ["a202_token"]}
+{"id": "url_zero_indexerror", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "url_zero_optional", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "waiver_head_truthy", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "waiver_no_strip", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "waiver_order_author_url", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "waiver_order_line_author", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "waiver_order_os_date", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "waiver_order_os_sha", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "waiver_partial", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "r7_event_casefold", "ledger": "GIET", "ca": ["a124_danh_tinh_chinh_xac_provenance"]}
+{"id": "r7_workflow_strip", "ledger": "GIET", "ca": ["a124_danh_tinh_chinh_xac_provenance"]}
+{"id": "r7_schema_strip", "ledger": "GIET", "ca": ["a124_danh_tinh_chinh_xac_provenance"]}
+{"id": "r7_name_casefold", "ledger": "GIET", "ca": ["a124_danh_tinh_chinh_xac_provenance"]}
+{"id": "r7_labels_order", "ledger": "GIET", "ca": ["a125_day_url_va_ngu_phap_consumer"]}
+{"id": "r7_labels_dedup", "ledger": "GIET", "ca": ["a125_day_url_va_ngu_phap_consumer"]}
+{"id": "r7_run_status_casefold", "ledger": "GIET", "ca": ["a124_danh_tinh_chinh_xac_provenance"]}
+{"id": "r7_author_casefold", "ledger": "GIET", "ca": ["a125_day_url_va_ngu_phap_consumer"]}
+{"id": "r7_association_casefold", "ledger": "GIET", "ca": ["a125_day_url_va_ngu_phap_consumer"]}
+{"id": "r7_url_dedup", "ledger": "GIET", "ca": ["a125_day_url_va_ngu_phap_consumer"]}
+{"id": "r7_consumer_delimiter", "ledger": "GIET", "ca": ["a125_day_url_va_ngu_phap_consumer"]}
+{"id": "r7_dotpath_raw", "ledger": "GIET", "ca": ["a125_day_url_va_ngu_phap_consumer"]}
+{"id": "r7_cli_limit_prefix", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "r7_cli_fallback_stem", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "r8_schema_nfkc", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r8_event_nfkc", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r8_head_nfkc", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r8_name_nfkc", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r8_log_sha_nfkc", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r8_name_nfc", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r8_checkout_skipped_casefold", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r8_skip_partition_casefold", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r8_required_name_casefold", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r8_os_substring", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r8_required_name_prefix", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r9b_header_run_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_run_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r9b_header_attempt_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_attempt_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r9b_job_id_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_job_id_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r9b_skip_old_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_skip_old_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r9b_skip_new_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_skip_new_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r9b_moc_numerator_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_moc_tu_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r9b_moc_denominator_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_moc_mau_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r9b_landed_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_landed_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r9b_token_leading_space", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r9b_token_leading_space", "ket_qua": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r9b_token_separator_space", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r9b_token_separator_space", "ket_qua": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r9b_reason_no_spaces", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r9b_reason_no_spaces", "ket_qua": "GIET", "ca": ["a209_mien"]}
+{"id": "r9b_event_tab", "ledger": "GIET", "ca": ["a132_kho_lich_su_p03"]}
+{"id": "r9b_name_inner_spaces", "ledger": "GIET", "ca": ["a132_kho_lich_su_p03"]}
+{"id": "r9b_schema_case_control", "ledger": "GIET", "ca": ["a124_danh_tinh_chinh_xac_provenance"]}
+{"id": "r9b_log_nfkc_control", "ledger": "GIET", "ca": ["a126_tap_o_dong"]}
+{"id": "r10_url_digits_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_url_id_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_date_year_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_nam_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_date_month_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_thang_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_date_day_ascii", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_ngay_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_reason_ascii_nonspace", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r10_reason_ascii_nonspace", "ket_qua": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_url_ascii_nonspace", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r10_url_ascii_nonspace", "ket_qua": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_token_leading_horizontal", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r10_token_leading_horizontal", "ket_qua": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_token_separator_horizontal", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r10_token_separator_horizontal", "ket_qua": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_header_run_two_blocks", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_run_nguoc_toan_do", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_header_attempt_two_blocks", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_attempt_nguoc_toan_do", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_job_id_two_blocks", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_job_id_nguoc_toan_do", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_skip_old_two_blocks", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_skip_old_nguoc_toan_do", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_skip_new_two_blocks", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_skip_new_nguoc_toan_do", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_moc_numerator_two_blocks", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_moc_tu_nguoc_toan_do", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_moc_denominator_two_blocks", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_moc_mau_nguoc_toan_do", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_landed_two_blocks", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_landed_nguoc_toan_do", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r10_no_header_fullmatch", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "r10_consumer_ignores_measured", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "r10_schema_whitespace", "ledger": "GIET", "ca": ["a124_danh_tinh_chinh_xac_provenance"]}
+{"id": "r11_url_bmp_only", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_r11_url_nguoc", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_url_no_zero_width", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_r11_url_nguoc", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_url_no_combining", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_r11_url_nguoc", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_url_no_control", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_r11_url_nguoc", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_reason_bmp_only", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r11_reason_bmp_only", "ket_qua": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_reason_no_zero_width", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r11_reason_no_zero_width", "ket_qua": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_reason_no_combining", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r11_reason_no_combining", "ket_qua": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_reason_no_control", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r11_reason_no_control", "ket_qua": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_word_ascii_first", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_r11_word_nguoc", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_word_ascii_last", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_r11_word_nguoc", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_token_single_ws", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "p12_r11_token_single_ws", "ket_qua": "GIET", "ca": ["a202_token"]}
+{"id": "r11_token_no_nel", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_r11_token_no_nel_nguoc", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_run_no_arabic", "ledger": "KHONG_AP_DUNG", "ly_do": "neo r11 doi sang lop ASCII r12", "thay_the": "CHOT_DA_BO", "chung_minh": "dac ta r12 luat 8: nghia cua dot bien cu (thu hep ve ASCII / loai tap con Unicode) nay chinh la luat; khong con hanh vi nao de phan biet", "doi_chung_nguoc": "p12_so_run_nguoc_d", "ket_qua_doi_chung": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "r11_consumer_ascii_conclusion", "ledger": "TUONG_DUONG", "chung_minh": "r12: conclusion la [a-z_]+ (ASCII) => not isascii() luon False"}
+{"id": "r11_event_casefold", "ledger": "GIET", "ca": ["a124_danh_tinh_chinh_xac_provenance"]}
+{"id": "p12_token_delimiter_40", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "p12_token_delimiter_44", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "p12_token_delimiter_45", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "p12_token_delimiter_46", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "p12_token_delimiter_58", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "p12_token_delimiter_59", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "p12_token_delimiter_8212", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "p12_token_no_whitespace", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "p12_r9b_token_leading_space", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r9b_token_separator_space", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r10_token_leading_horizontal", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r10_token_separator_horizontal", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r11_token_single_ws", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "p12_r11_token_no_nel_nguoc", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r9b_reason_no_spaces", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "p12_r10_reason_ascii_nonspace", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r11_reason_bmp_only", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r11_reason_no_zero_width", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r11_reason_no_combining", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r11_reason_no_control", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r10_url_ascii_nonspace", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r11_url_nguoc", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_r11_word_nguoc", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_run_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_run_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_attempt_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_attempt_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_job_id_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_job_id_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_skip_old_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_skip_old_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_skip_new_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_skip_new_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_moc_tu_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_moc_tu_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_moc_mau_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_moc_mau_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_landed_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_landed_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_url_id_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_url_id_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_nam_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_nam_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_thang_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_thang_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_ngay_nguoc_d", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "p12_so_ngay_nguoc_toan_do", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}

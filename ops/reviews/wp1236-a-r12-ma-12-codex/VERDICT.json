@@ -1,0 +1,1513 @@
+{
+  "reviewed_sha": "9d8f6009a35727118015f26fc831e575c8103229",
+  "reviewed_tree": "cdf0b59ad2ff23677a8707b12be69585c1db6aae",
+  "spec_sha256": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+  "vong": 12,
+  "findings": [
+    {
+      "id": "T01",
+      "class_slug": "test-thieu-chot",
+      "severity": "P2",
+      "vi_tri": "ops/gate_output_doi_chieu_test.py:1250 (_vu_tru), :1300 (a131), :1319 (ba ca lazy), :1373 (consumer)",
+      "van_de": "Thiếu ca BẮT BUỘC của luật 8, độc lập với phân hạng đột biến luật 9: _vu_tru không bao mọi chữ/số Unicode; a131 không vét 128 ASCII tại các vị trí SHA (head/bộ sinh/log/miễn), OS và tên tệp; ba đối chứng lazy chỉ qua hàm lá; consumer văn bản tự do thiếu các category, ký tự ngoài BMP, nhãn/đuôi và tên skipped. Bộ test vẫn xanh không đóng các nghĩa vụ này.",
+      "bang_chung": {
+        "measurement": "coverage_a131.json + coverage_a131_inputs.json; a131 chạy đạt trong khi thiếu miền",
+        "VT": 878,
+        "VTJ": 879,
+        "nonascii_alnum_required": 138495,
+        "nonascii_alnum_present": 694,
+        "nonascii_alnum_missing": 137801,
+        "examples_absent": [
+          "U+00E9",
+          "U+4E2D",
+          "U+0416"
+        ],
+        "consumer_eval_calls": 57,
+        "consumer_head_distinct": 1,
+        "mien_sha_distinct": 1,
+        "os_distinct": 1,
+        "lazy_consumer": "0/3 ca explicit gọi consumer",
+        "regex_match": "regex_audit.json: 10/10 regex module nguyên văn SPEC; không quy lỗi sản phẩm",
+        "field_details": "coverage_a131.json: leaf head2 giá trị/14 ký tự ASCII; generator_sha2/16; log_sha40/16; mien_sha1/14; os1/9. Không có bảng tep_danh_gia trong a131/DAC_TA. Test cũ a120–a125 có ví dụ rời rạc, không lấp miền128 mỗi vị trí.",
+        "free_text_consumer": "a131 consumer name/labels/header-tail/job-tail đều không có ngoài BMP; labels chỉ2 giá trị, header-tail1. MOI_CAT lọc bỏ toàn bộ whitespace và chỉ giữ đại diện đầu theo category; bỏ Zs/Zl/Zp dù tuyến đánh giá cho phép. Hai tên skipped không có bảng category.",
+        "actual_product_controls": "regex_audit.json 10/10 nguyên văn; lazy_and_token_controls.json ba lazy qua consumer đều passed, casefold và LF đúng; không ghi lỗi hành vi module.",
+        "independence": "Oracle DAC_TA được đối chiếu regex trực tiếp từ SPEC, không suy từ module. _vu_tru đo trên Python3.13.18 Unicode15.1.0; coverage wrapper ghi input và trả nguyên kết quả module."
+      },
+      "de_xuat": "Sửa chung bộ sinh bảng: liệt kê mọi vị trí regex, vũ trụ âm đầy đủ theo loại và oracle toàn biểu thức sau tiền xử lý; tái dùng cùng hàng qua hàm lá và consumer. Thêm ba đối chứng lazy qua consumer; phủ mọi category hợp tuyến, Cs riêng JSON, ít nhất một ký tự ngoài BMP ở từng tuyến; giữ positive/negative controls và kết quả chính xác. Đo lại inventory vị trí/miền và luật 9. Rủi ro: thời gian chạy tăng và chốt sau bắt thay; dùng cache dữ liệu thuần và ghi projection chính xác, không mock bỏ consumer.",
+      "luat": "8; luật 9 đoạn cuối giữ ca bắt buộc của 1/2/4/6/7/8; đây không phải nâng mức mutant ngoài A∪B",
+      "ke_thua": "S01 ← Q01 ← P01/N01/M01; giữ slug"
+    },
+    {
+      "id": "T02",
+      "class_slug": "test-thieu-chot",
+      "severity": "P3",
+      "vi_tri": "ops/gate_output_doi_chieu_test.py:1300 và các bảng grammar/consumer",
+      "van_de": "5 đột biến độc lập sống không tương đương: cho head chữ hoa; loại chữ số7 khỏi OS; loại Z khỏi tiền tố tên tệp; ép tên skipped v1/v2 và v3 về ASCII. Mỗi ID qua đủ47 ca. Không thuộc (B) rồi (A), nên giữ P3 ngoai_bang_dong theo luật9; đây không phải lỗi hành vi của mã gốc.",
+      "bang_chung": {
+        "mutant_ids": [
+          "r12i_head_uppercase",
+          "r12i_os_digit7",
+          "r12i_filename_Z",
+          "r12i_skip_old_ascii_name",
+          "r12i_skip_v3_ascii_name"
+        ],
+        "run": "independent_results.jsonl; mỗi survivor qua đủ 47 ca, rc0, không HONG",
+        "witness": "independent_witnesses.json: HEAD/mutant khác nhau từng ID",
+        "pairs": "independent_pairs.jsonl: cặp canonical ast.unparse Python 3.13",
+        "classification_order": "Từng cặp canonical so với kho B248 và manifest A798 trên HEAD: không trùng; đọc delta từng vùng để loại port cùng nghĩa. B -> A -> ngoai_bang_dong.",
+        "manifestations": [
+          {
+            "id": "r12i_head_uppercase",
+            "scope": "ngoai_bang_dong",
+            "cases_passed": 47,
+            "rc": 0
+          },
+          {
+            "id": "r12i_os_digit7",
+            "scope": "ngoai_bang_dong",
+            "cases_passed": 47,
+            "rc": 0
+          },
+          {
+            "id": "r12i_filename_Z",
+            "scope": "ngoai_bang_dong",
+            "cases_passed": 47,
+            "rc": 0
+          },
+          {
+            "id": "r12i_skip_old_ascii_name",
+            "scope": "ngoai_bang_dong",
+            "cases_passed": 47,
+            "rc": 0
+          },
+          {
+            "id": "r12i_skip_v3_ascii_name",
+            "scope": "ngoai_bang_dong",
+            "cases_passed": 47,
+            "rc": 0
+          }
+        ]
+      },
+      "de_xuat": "Ghim các cặp vào kho hồi quy cho lượt sau. Đóng bằng ca độc lập theo miền tương ứng và đo TinHieuChotCa, hoặc chủ kho miễn slug/IDs trên exact SHA 9d8f6009a35727118015f26fc831e575c8103229. Giữ phân hạng P3, không coi đây là P2 chỉ vì chạm grammar; theo dõi rủi ro tăng thời gian và chốt khác bắt thay.",
+      "phan_hang": "ngoai_bang_dong",
+      "trang_thai_mien": "chờ miễn chủ kho"
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_ids": [],
+      "manifestations": [
+        "F01"
+      ],
+      "highest_open_severity": null,
+      "source": "Đo lại HEAD 9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e; lịch sử: lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "common_fix": "Lọc kiểu/schema trước đọc trường.",
+      "closing_check": "a116, a118 và independent_controls trong prior_audit.json: list/null/số/chuỗi/mapping/schema khác vẫn passed; đối chứng byte UTF8 lỗi trả UnicodeDecodeError.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_ids": [],
+      "manifestations": [
+        "F02",
+        "G01"
+      ],
+      "highest_open_severity": null,
+      "source": "Đo lại HEAD 9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e; lịch sử: lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 2 @6f7ccf10f2441d0c97b779cfa77ff2839b56fc47; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "common_fix": "Giữ lý do K2; mọi lỗi đọc/duyệt đi qua biên not_measured.",
+      "closing_check": "a116/a117/a118: ParserError, PermissionError duyệt thư mục, symlink tệp/thư mục/gốc, provenance0/nhiều đúng lý do; đối chứng tệp hợp lệ passed. Các chốt liên quan có replay GIET đúng ca.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_ids": [],
+      "manifestations": [
+        "F03",
+        "H02"
+      ],
+      "highest_open_severity": null,
+      "source": "Đo lại HEAD 9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e; lịch sử: lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 3 @e323bd4dfb4fe422016c4fd010fa964b6cb748b0; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "common_fix": "Giữ phát hiện vòng và biên ngoại lệ CLI.",
+      "closing_check": "a214: vòng YAML -> ValueError đúng đường, CLI rc2 đúng thông điệp không traceback; a128: stat OSError -> rc2; a217 mọi nhánh tham số/CLI đúng.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_ids": [],
+      "manifestations": [
+        "L03"
+      ],
+      "highest_open_severity": null,
+      "source": "Đo lại HEAD 9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e; lịch sử: lượt 6 @c2d606bb6fc230c288200b8f1dd79715462c172b; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "common_fix": "Docstring và kiểm đường dẫn cùng hợp đồng PurePosixPath.",
+      "closing_check": "prior_audit.json: ./tệp hợp lệ qua helper và consumer []; docstring ghi rõ ./ hợp lệ. a204/a125 có đối chứng tuyệt đối/.. /symlink/vắng bị chặn; hồi quy r7_dotpath_raw GIET.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_ids": [
+        "T01",
+        "T02"
+      ],
+      "manifestations": [
+        "T01: luật8 thiếu ca bắt buộc",
+        "T02:5 survivor ngoài A∪B"
+      ],
+      "highest_open_severity": "P2",
+      "source": "Mã lượt1–10; trước lượt9 @2719f81dd5c3f89e4986f6710ed2145cfd4c057b; hiện @9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "common_fix": "Sửa chung bộ sinh bảng: liệt kê mọi vị trí regex, vũ trụ âm đầy đủ theo loại và oracle toàn biểu thức sau tiền xử lý; tái dùng cùng hàng qua hàm lá và consumer. Thêm ba đối chứng lazy qua consumer; phủ mọi category hợp tuyến, Cs riêng JSON, ít nhất một ký tự ngoài BMP ở từng tuyến; giữ positive/negative controls và kết quả chính xác. Đo lại inventory vị trí/miền và luật 9. Rủi ro: thời gian chạy tăng và chốt sau bắt thay; dùng cache dữ liệu thuần và ghi projection chính xác, không mock bỏ consumer.",
+      "closing_check": "Đủ bảng luật 8 theo tuyến + A/B ledger đạt + mỗi P3 đóng/miễn exact SHA.",
+      "status": "VA_MOT_PHAN"
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_ids": [],
+      "manifestations": [
+        "M02",
+        "N03"
+      ],
+      "highest_open_severity": null,
+      "source": "Đo lại HEAD 9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e; lịch sử: lượt7 f4f17bc4237a5362117f37b56e65209b92465f64; lượt8 5a1bf33831bb4e3a227cfb25843cef8a922c634b; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "common_fix": "Giữ mẫu tổng/mẫu số và mẫu CLI khớp consumer.",
+      "closing_check": "a127: producer→chay_moi đạt ở posix/nt mô phỏng và bốn đối chứng đỏ mỗi chế độ; a217 CLI mẫu nguyên văn đạt. suite.stdout bốn dòng liền nhau; registration rc0.",
+      "status": "DA_VA_THAT"
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "luot_xuat_hien": [
+        1
+      ],
+      "source": "Đo lại HEAD 9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e; lịch sử: lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "previous_reviewed_sha": "0d814877e3acef6274a7f1c0e9a28531a24d0e65",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "status": "DA_VA_THAT",
+      "nhan_doi_chieu_tieng_viet": "ĐÃ VÁ THẬT",
+      "evidence": "a116, a118 và independent_controls trong prior_audit.json: list/null/số/chuỗi/mapping/schema khác vẫn passed; đối chứng byte UTF8 lỗi trả UnicodeDecodeError.",
+      "chua_do_duoc": "Windows native/CI not_run; nhãn áp cho biểu hiện đã kiểm độc lập trên Linux, không thay gate Windows."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "luot_xuat_hien": [
+        1,
+        2
+      ],
+      "source": "Đo lại HEAD 9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e; lịch sử: lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 2 @6f7ccf10f2441d0c97b779cfa77ff2839b56fc47; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "previous_reviewed_sha": "0d814877e3acef6274a7f1c0e9a28531a24d0e65",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "status": "DA_VA_THAT",
+      "nhan_doi_chieu_tieng_viet": "ĐÃ VÁ THẬT",
+      "evidence": "a116/a117/a118: ParserError, PermissionError duyệt thư mục, symlink tệp/thư mục/gốc, provenance0/nhiều đúng lý do; đối chứng tệp hợp lệ passed. Các chốt liên quan có replay GIET đúng ca.",
+      "chua_do_duoc": "Windows native/CI not_run; nhãn áp cho biểu hiện đã kiểm độc lập trên Linux, không thay gate Windows."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "luot_xuat_hien": [
+        1,
+        3
+      ],
+      "source": "Đo lại HEAD 9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e; lịch sử: lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 3 @e323bd4dfb4fe422016c4fd010fa964b6cb748b0; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "previous_reviewed_sha": "0d814877e3acef6274a7f1c0e9a28531a24d0e65",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "status": "DA_VA_THAT",
+      "nhan_doi_chieu_tieng_viet": "ĐÃ VÁ THẬT",
+      "evidence": "a214: vòng YAML -> ValueError đúng đường, CLI rc2 đúng thông điệp không traceback; a128: stat OSError -> rc2; a217 mọi nhánh tham số/CLI đúng.",
+      "chua_do_duoc": "Windows native/CI not_run; nhãn áp cho biểu hiện đã kiểm độc lập trên Linux, không thay gate Windows."
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_cu": [
+        "L03"
+      ],
+      "luot_xuat_hien": [
+        6
+      ],
+      "source": "Đo lại HEAD 9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e; lịch sử: lượt 6 @c2d606bb6fc230c288200b8f1dd79715462c172b; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "previous_reviewed_sha": "0d814877e3acef6274a7f1c0e9a28531a24d0e65",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "status": "DA_VA_THAT",
+      "nhan_doi_chieu_tieng_viet": "ĐÃ VÁ THẬT",
+      "evidence": "prior_audit.json: ./tệp hợp lệ qua helper và consumer []; docstring ghi rõ ./ hợp lệ. a204/a125 có đối chứng tuyệt đối/.. /symlink/vắng bị chặn; hồi quy r7_dotpath_raw GIET.",
+      "chua_do_duoc": "Windows native/CI not_run; nhãn áp cho biểu hiện đã kiểm độc lập trên Linux, không thay gate Windows."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02",
+        "L01",
+        "L02",
+        "M01",
+        "M03",
+        "N01",
+        "N02",
+        "P01",
+        "P02",
+        "P03",
+        "Q01",
+        "Q02",
+        "S01",
+        "S02"
+      ],
+      "luot_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "source": "Mã lượt1–10; trước lượt9 @2719f81dd5c3f89e4986f6710ed2145cfd4c057b; hiện @9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e",
+      "previous_reviewed_sha": "0d814877e3acef6274a7f1c0e9a28531a24d0e65",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "status": "VA_MOT_PHAN",
+      "nhan_doi_chieu_tieng_viet": "VÁ HỜ",
+      "evidence": "S02: r9b_event_tab và r9b_name_inner_spaces đều GIET bởi a132 (replay_summary.json). S01: reason BMP/zero-width bị p12 tương ứng giết; URL/word Unicode đã đổi acceptance theo r12, consumer_ascii_conclusion tương đương vì [a-z_]+. Tuy nhiên T01 thiếu nghĩa vụ luật8 và T02 ngoài bảng còn mở; không đóng lớp.",
+      "chua_do_duoc": "Windows native/CI not_run; nhãn áp cho biểu hiện đã kiểm độc lập trên Linux, không thay gate Windows. Không chứng minh mọi mutant; T02 chưa có miễn exactSHA. Thay đổi phạm vi r12 không reset lịch sử.",
+      "per_finding": [
+        {
+          "id": "S01",
+          "status": "VA_MOT_PHAN",
+          "nhan": "VÁ HỜ",
+          "evidence": "Bảo vệ được reason trên r12; một số yêu cầu Unicode cũ được bỏ có authority, không tính là vá theo§8.3. T01 cùng cơ chế thiếu bảng/consumer; cả lớp còn mở."
+        },
+        {
+          "id": "S02",
+          "status": "DA_VA_THAT",
+          "nhan": "ĐÃ VÁ THẬT",
+          "evidence": "Hai ID lịch sử đều GIET a132 đúng TinHieuChotCa; a132 gốc qua cả hàm lá và consumer. Không cần miễn cho S02 trên HEAD này."
+        },
+        {
+          "id": "P02 lịch sử",
+          "status": "DA_VA_THAT",
+          "nhan": "ĐÃ VÁ THẬT",
+          "evidence": "cells_verified.json: seed/projection/125 ô bằng tệp cung cấp với đúng hash, đọc qua chay_o hai tuyến; không đổi mã seed so lượt11."
+        }
+      ]
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "M02",
+        "N03"
+      ],
+      "luot_xuat_hien": [
+        7,
+        8
+      ],
+      "source": "Đo lại HEAD 9c17a34d4f9ae8a4adcb80d5592bc72f6748be5e; lịch sử: lượt7 f4f17bc4237a5362117f37b56e65209b92465f64; lượt8 5a1bf33831bb4e3a227cfb25843cef8a922c634b; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "previous_reviewed_sha": "0d814877e3acef6274a7f1c0e9a28531a24d0e65",
+      "reviewed_now": "9d8f6009a35727118015f26fc831e575c8103229",
+      "status": "DA_VA_THAT",
+      "nhan_doi_chieu_tieng_viet": "ĐÃ VÁ THẬT",
+      "evidence": "a127: producer→chay_moi đạt ở posix/nt mô phỏng và bốn đối chứng đỏ mỗi chế độ; a217 CLI mẫu nguyên văn đạt. suite.stdout bốn dòng liền nhau; registration rc0.",
+      "chua_do_duoc": "Windows native/CI not_run; nhãn áp cho biểu hiện đã kiểm độc lập trên Linux, không thay gate Windows."
+    }
+  ],
+  "bang_noi_slug": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "ly_do_gop": "Lọc YAML ngoài schema trước truy cập trường."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "ly_do_gop": "Lỗi đọc/duyệt hoặc lý do K2 bị bỏ mất."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "ly_do_gop": "Ngoại lệ đầu vào thoát biên CLI."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02"
+      ],
+      "ly_do_gop": "Chốt đặc tả không được ca/đột biến bảo vệ độc lập."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "slug_spec": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02",
+        "L01",
+        "L02"
+      ],
+      "finding_moi": [
+        "M01",
+        "M03"
+      ],
+      "ly_do": "Cùng cơ chế thiếu thước khóa chốt/consumer; mapping r10, không reset lịch sử."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "U01 (đặc tả r9 vòng 4/r10)"
+      ],
+      "finding_moi": [
+        "M02"
+      ],
+      "ly_do": "Hợp đồng đã đóng ở đặc tả; mã chưa áp cho mọi nhánh lỗi CLI. Lớp mới trong chuỗi review MÃ, không cộng vào F/U lượt 6."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "M01",
+        "M03"
+      ],
+      "finding_moi": [
+        "N01",
+        "N02"
+      ],
+      "ly_do": "Giữ lớp thiếu phép kiểm độc lập của chốt/consumer và nghĩa vụ ledger. R10 đổi spec không reset lịch sử."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "M02"
+      ],
+      "finding_moi": [
+        "N03"
+      ],
+      "ly_do": "M02 cụ thể đóng; cùng lớp hợp đồng đầu ra với consumer tái xuất hiện ở nhánh Windows của suite. Không tách slug để tính lớp cũ là đóng."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "N01",
+        "N02"
+      ],
+      "finding_moi": [
+        "P01",
+        "P02",
+        "P03"
+      ],
+      "slug_spec": "nghiem-thu-khong-co-lap-chot-dich",
+      "ly_do": "Giữ lớp thiếu bảo vệ chốt/consumer;P02 nối nghĩa vụ seed AA01 của r11, không mở slug để reset lịch sử;P03 là phân hạng6(b) cùng lớp."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "M02",
+        "N03"
+      ],
+      "finding_moi": [],
+      "ly_do": "Đã xác nhận đóng trên exact HEAD bằng producer-consumer hai chế độ và CLI controls."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "P01",
+        "P02",
+        "P03"
+      ],
+      "finding_moi": [
+        "Q01",
+        "Q02"
+      ],
+      "ly_do": "Giữ nguyên lớp: Q01 nối P01/N01/M01; P02 đóng biểu hiện nguồn hạt giống, không đóng cả lớp; Q02 nối P03 giữ P3 ngoài bảng, không đổi slug hay hạng."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "Q01",
+        "Q02"
+      ],
+      "finding_moi": [
+        "S01",
+        "S02"
+      ],
+      "ly_do": "S01 là biểu hiện ngữ pháp/consumer cùng cơ chế; S02 giữ nguyên Q02/P03 ngoài bảng. Không tách/gộp/đổi hạng để reset lịch sử."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "S01",
+        "S02"
+      ],
+      "finding_moi": [
+        "T01",
+        "T02"
+      ],
+      "ly_do": "S02 đóng bằng ca132; T01 nối nghĩa vụ bảng/consumer của S01, T02 là survivor mới ngoài A∪B theo luật9. Giữ slug, không reset lịch sử hoặc nâng P3 thànhP2.",
+      "authority_r12": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7"
+    }
+  ],
+  "hoi_tu": {
+    "luot11_sang_12": "0/1",
+    "U": [
+      "test-thieu-chot"
+    ],
+    "F": [],
+    "lop_lap_lan_ba": [
+      "test-thieu-chot"
+    ],
+    "luot_da_xuat_hien": {
+      "test-thieu-chot": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    "lop_moi": [],
+    "checkpoint": "Tiếp tục giữ Review Rescue Checkpoint theo§12; chưa hội tụ. Assignment cấp lượt13 theo issuecomment7063135049; không tự mở vòng vá/review kế tiếp. Revision12 không reset lịch sử; bỏ yêu cầu Unicode cũ không được tính F."
+  },
+  "da_do_khop": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 425.749,
+      "status": "passed",
+      "stdout_sha256": "203e4e75d6be78917ef8370e61d6f7a76ecf31b3db69f70cb125a80586fd8b55",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "suite",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/suite.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/suite.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "ruff",
+        "--version"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 0.109,
+      "status": "passed",
+      "stdout_sha256": "633fc4e8b8179891d1a9edd4e956e51bbcbbc4ab899ee530fb5690387e080dc4",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "ruff_version",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/ruff_version.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/ruff_version.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/gate_output_doi_chieu.py",
+        "ops/gate_output_doi_chieu_test.py",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 0.138,
+      "status": "passed",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "ruff",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/ruff.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/ruff.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-c",
+        "import runpy,sys; m=runpy.run_path(\".claude/dev/ci_dang_ky_test.py\"); errors,count=m[\"loi_ruff_ci\"](); print(\"RUFF_CONTRACT\",count,errors); sys.exit(bool(errors) or count == 0)"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 0.535,
+      "status": "passed",
+      "stdout_sha256": "1069744e64ae4de530c2eb1c699b614c5404f7a707ecc67a3853e39ed9929d4a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "ruff_contract",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/ruff_contract.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/ruff_contract.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 11.457,
+      "status": "passed",
+      "stdout_sha256": "2773d93effe692afc1bbaa77e7c1f2f22fbac4488eb9765385a5b3ed1c3183dd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "registration",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/registration.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/registration.stderr"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+        "HEAD"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 0.008,
+      "status": "passed",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "diff_check",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/diff_check.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/diff_check.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/coverage_audit.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 13.739,
+      "status": "passed",
+      "stdout_sha256": "75048722465a2d0d63948fb450823e21d75d62e9e3ab699a4c3d9827c1f9c8cd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "coverage",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/coverage.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/coverage.stderr",
+      "meaning": "Phép đo coverage thành công; acceptance luật8 FAILED (T01)."
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/prior_audit.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 11.545,
+      "status": "passed",
+      "stdout_sha256": "67e8880247422bf1e39f5664338ce6e6cfc36c2e3a25716c08da93b6c2c63429",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "prior",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/prior.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/prior.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/cells_audit.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 24.16,
+      "status": "passed",
+      "stdout_sha256": "9a641ac2d007e291b3cd2a518f12f3945a818f22fe0ca2434ec3765156ecf5c5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "cells",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/cells.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/cells.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/witnesses.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 4.885,
+      "status": "passed",
+      "stdout_sha256": "2af6b9027fd963a5f024d4558cbc5c158be4e744520820fab2d37294a22933b7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "witnesses",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/witnesses.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/witnesses.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/ledger_audit.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 0.348,
+      "status": "passed",
+      "stdout_sha256": "32029b536405433a39637fa134e44c3926ff5ccb0048cc31e88bb14ae688f083",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "ledger_semantics",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/ledger_semantics.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/ledger_semantics.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/removed_clause_checks.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 0.131,
+      "status": "passed",
+      "stdout_sha256": "2494fdb21a299f9539df03a62e55d8ea4202bd59e125891777d1ecd219e6cf63",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "removed_clauses",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/removed_clauses.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/removed_clauses.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/independent_scan.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 528.892,
+      "status": "passed",
+      "stdout_sha256": "b172a932dfd8a6f7de38fa4eeb7e5c8e9da34007d5259eb5e9963517be61c597",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "independent_scan",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/independent_scan.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/independent_scan.stderr",
+      "meaning": "Phép quét hoàn tất;5 SONG/3GIET, không phải mọi mutant đạt."
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/replay_fast.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 533.781,
+      "status": "passed",
+      "stdout_sha256": "694a7fc6921a4dc64b94b535509cf4f2d5e3b6ab2ec3ef0025e1faea70ac5836",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "replay",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/replay.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/replay.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/verify_replay.py"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/repo",
+      "rc": 0,
+      "seconds": 0.275,
+      "status": "passed",
+      "stdout_sha256": "f5b0c328059490667ff0c52b38e568fe473548a8512136ddb45a5ff4992d3e10",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "replay_verify",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/replay_verify.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/replay_verify.stderr"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/selftest_head_tree",
+      "rc": 1,
+      "seconds": 548.256,
+      "status": "failed",
+      "stdout_sha256": "449e3131273ec4ea90351cf5599e227f63c9f35b77dcbbb3456fac533f4359fa",
+      "stderr_sha256": "bf906890cc04a00aaee78d3dfcd52055d12e76540e58754846b543a37a0e4b3c",
+      "name": "selftest_head",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/selftest_head.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/selftest_head.stderr",
+      "meaning": "1768/1784; rc1 FAILED;16 ca đỏ cùng nền, delta0 không thành pass."
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/selftest_base_tree",
+      "rc": 1,
+      "seconds": 560.523,
+      "status": "failed",
+      "stdout_sha256": "449e3131273ec4ea90351cf5599e227f63c9f35b77dcbbb3456fac533f4359fa",
+      "stderr_sha256": "05cf32079564a30af04ecbef7925c43f7d6089f093ab65d619f622ed068d0d63",
+      "name": "selftest_base",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/selftest_base.stdout",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/selftest_base.stderr",
+      "meaning": "1768/1784; rc1 FAILED;16 ca đỏ cùng nền, delta0 không thành pass."
+    },
+    {
+      "name": "pinned_do_full",
+      "command": [
+        "python3",
+        "-B",
+        "../bang_chung/quet_dot_bien.py",
+        "do",
+        "ops/gate_output_doi_chieu.py",
+        "ops/gate_output_doi_chieu_test.py",
+        "../bang_chung/kho248.jsonl",
+        "--thu-muc-ra",
+        "../work/do",
+        "--song-song",
+        "6"
+      ],
+      "rc": 130,
+      "status": "not_completed",
+      "positive_evidence": "Manifest regenerated798, hoi_quy248 with195 applicable/53 NA; no HOAN_TAT or final kq. Reviewer stopped long full sweep and uses separately logged sufficient replay per user authorization.",
+      "scope": "Pinned do process group interrupted; rc130 from exec session. No pass claim."
+    },
+    {
+      "name": "numstat",
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "010046f2141799ec6ffc9cfa1322d49df3f3f680...HEAD"
+      ],
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "3 tệp, +2014/-0; base là merge-base; trần2100, dư86; registration chỉthêm1 mục."
+    },
+    {
+      "name": "Windows_native",
+      "status": "not_run",
+      "positive_evidence": null,
+      "reason": "Offline Linux assignment; không quyền mạng/remote desktop. M3 required, không tự miễn."
+    },
+    {
+      "name": "Windows_CI",
+      "status": "not_run",
+      "reason": "Không gọi mạng; miễn theo assignment/lease cần neo exactSHA tại audit trướcmerge, không xác minh live."
+    },
+    {
+      "name": "native_POSIX_skips",
+      "status": "passed",
+      "count": 0,
+      "positive_evidence": "146/146 thực đo; a127 nt chỉ mô phỏng, không chứng nhận Windows."
+    },
+    {
+      "name": "verdict_schema",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/kiem_verdict_lop.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/work/VERDICT.json",
+        "--vong",
+        "12"
+      ],
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "HOP_LE (§8.3): 2 finding, 6 lop",
+      "stdout_sha256": "05fcb6de235314153a5a074557da8e2552c93f26834867ea1635872c8ce7f1cd"
+    }
+  ],
+  "verdict": "changes_requested",
+  "review_progress": "complete",
+  "preflight": {
+    "utc": "2026-11-21T17:17:31.633296+00:00",
+    "head": "9d8f6009a35727118015f26fc831e575c8103229",
+    "tree": "cdf0b59ad2ff23677a8707b12be69585c1db6aae",
+    "base": "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+    "branch": "detached",
+    "origin": "https://github.com/ducthangho/tra-luat.git",
+    "core_abbrev": "7",
+    "spec_sha256": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+    "lease_id": "wp1236-a-r12-g1-claude-20261121",
+    "revision": 12,
+    "generation": 1,
+    "lease_until": "2026-11-23T13:45:00Z",
+    "review_class": "sensitive",
+    "write_set": [
+      ".claude/dev/ci_dang_ky_test.py",
+      "ops/gate_output_doi_chieu.py",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "source_branch": "claude/wp1236-r10-a-g1",
+    "write_set_hash": "e348a0aec274cc000368e7b728a9a70423434e000ace619fbc059383907fb2f5",
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "platform": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "runtime": {
+      "CODEX_SESSION_ID": "01a1ff1b-0c55-7f92-98a4-d683a7434ecf",
+      "CODEX_THREAD_ID": "01a1ff1b-0c55-7f92-98a4-d683a7434ecf",
+      "CODEX_VERSION": "0.170.0"
+    },
+    "spec_verification": {
+      "local_copy": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a12-12-codex/SPEC.md",
+      "sha256": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+      "blob_computed": "e5583bc042448517b94eadda57231dfc60e0a284",
+      "source_oid": "26436102171819ff5a11ecf4b2ff3a4b4d09daf1",
+      "source_path": "ops/specs/wp1236-r12.md",
+      "source_git_object": "unavailable in supplied clone; cat-file rc128",
+      "authority": "Direct assignment designates offline SPEC.md and exact SHA256; bytes match supplied hash and lease blob. No GitHub readback or claim source commit was verified."
+    }
+  },
+  "reviewer": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "model_family": "openai",
+    "model_phuc_vu": "KHONG_DO_DUOC",
+    "effort_phuc_vu": "KHONG_DO_DUOC",
+    "sandbox": "workspace-write; checkout treated read-only; network prohibited; approval never",
+    "runtime_id": {
+      "CODEX_SESSION_ID": "01a1ff1b-0c55-7f92-98a4-d683a7434ecf",
+      "CODEX_THREAD_ID": "01a1ff1b-0c55-7f92-98a4-d683a7434ecf",
+      "CODEX_VERSION": "0.170.0"
+    },
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "platform": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "model_identity_source": "Runtime/session/provider xác định từ môi trường Codex; model/effort phục vụ không đo được.",
+    "delegation": "tl_auditor chỉ tiêu hoá log selftest theo CLAUDE.md§Quy trình sửa code(5); root tự review mã, luật8–9 và kết luận."
+  },
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "executor": {
+    "provider": "anthropic_claude",
+    "execution_surface": "claude_code",
+    "transport": "machine/local",
+    "session_id": "session_015GtxrYsNDbfLo32S39f5uY",
+    "source": "LEASE.yaml; lời khai offline"
+  },
+  "counts": {
+    "findings": 2,
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 1,
+    "open_classes": 1,
+    "historical_classes": 6,
+    "independent_mutants": 8,
+    "independent_survivors": 5,
+    "independent_killed": 3,
+    "mandatory_manifest_A": 798,
+    "mandatory_B_original": 201,
+    "B_with_port_pairs": 248,
+    "measured_replay": 993,
+    "replay_killed": 970,
+    "replay_equivalent": 23
+  },
+  "law9": {
+    "status": "passed",
+    "baseline_cases": 47,
+    "measured_mutants": 993,
+    "counts": {
+      "GIET": 970,
+      "SONG": 23
+    },
+    "A_counts": {
+      "GIET": 783,
+      "TUONG_DUONG": 15
+    },
+    "B248_counts": {
+      "GIET": 187,
+      "KHONG_AP_DUNG": 53,
+      "TUONG_DUONG": 8
+    },
+    "B201_counts": {
+      "GIET": 140,
+      "KHONG_AP_DUNG": 53,
+      "TUONG_DUONG": 8
+    },
+    "S02": {
+      "r9b_event_tab": {
+        "id": "kho:r9b_event_tab",
+        "scope": "target_case",
+        "results": [
+          {
+            "ca": "a132_kho_lich_su_p03",
+            "rc": 3,
+            "message": "DO:a132_kho_lich_su_p03:event co TAB cuoi (ham la): mong ('not_measured', ['khong_phai_run_land']), được ('passed', [])"
+          }
+        ],
+        "phan_hang": "GIET"
+      },
+      "r9b_name_inner_spaces": {
+        "id": "kho:r9b_name_inner_spaces",
+        "scope": "target_case",
+        "results": [
+          {
+            "ca": "a132_kho_lich_su_p03",
+            "rc": 3,
+            "message": "DO:a132_kho_lich_su_p03:ten job hai khoang trang (ham la): mong ('not_measured', ['job_lech:136067289163']), được ('passed', [])"
+          }
+        ],
+        "phan_hang": "GIET"
+      }
+    },
+    "matches_submitted": true,
+    "scope": "970 claimed kills independently rerun at exact named target; 23 survivors each all47 cases; cached pure YAML and immutable archive; no claim pinned do reached HOAN_TAT"
+  },
+  "class_labels_contract": {
+    "source": "Protocol§8 bốn nhãn tiếng Việt; validator dùngDA_VA_THAT/VA_MOT_PHAN/CHUA_VA/KHONG_DO_DUOC",
+    "mapping": "VA_MOT_PHAN kèm nhãn VÁ HỜ; không quan sát VÁ SINH LỖI MỚI. Kết luận ngưỡngseverity tách bảngnhãn."
+  },
+  "limitations": [
+    "Offline: authority/budget/lease từ assignment và tệp cung cấp; không xác minh GitHub. Không commit/push/merge/land/LIVE.",
+    "Phép pinned do chính thức bị reviewer ngắt (exec rc130), không có HOAN_TAT riêng. Thay bằng phép đo đầy đủ993 nguồn nhưng giới hạn ca:970 cađích,23 survivor×47ca. Handoff executor có HOAN_TAT nhưng chỉ coi là lời khai đối chiếu.",
+    "Replay nhớ đệm pure yaml.safe_load theo byte và deepcopy, _vu_tru theo tham số, git archive bất biến; không sửa parser/module/consumer. Suite47/47 và146/146 chạy riêng nguyên bản.",
+    "Selftest ở hai clone riêng dướiwork, HEAD/nền đều1768/1784rc1; không tái hiện1770/1784. Delta0 không miễn bất biến(a).",
+    "Windows native/CI not_run; posix/nt của a127 chỉ mô phỏng hợp đồng đầu ra. D2b văn bản tự do thứ sáu thuộc đợtC, không thuộcwrite setA.",
+    "Finite scan không chứng minh mọi hành vi; T01 là nghĩa vụ ca bị thiếu, T02 là ngoài A∪B. Không nâng mức survivor ngoài bảng.",
+    "Snapshot chỉ chứng minh không có delta giữa hai mốc quan sát, không chứng minh toàn lịch sử chưa từng ghi rồi hoàn nguyên; sandboxworkspace-write, checkout được đối xửread-only."
+  ],
+  "snapshot": {
+    "before": "snapshot_before.json",
+    "after": "snapshot_after.json",
+    "file_count": 17339,
+    "changed": [],
+    "head_tree_unchanged": true,
+    "tracked_untracked_ignored_index_diff_unchanged": true
+  },
+  "completed_utc": "2026-11-21T17:36:49.293786+00:00",
+  "artifacts": [
+    {
+      "path": "VERDICT.md",
+      "bytes": 4607,
+      "sha256": "d5f132a426a75c7c902d0af5fc5aef06774b2e713deead333d81fe6ddbbdc03a"
+    },
+    {
+      "path": "cells.run.json",
+      "bytes": 422,
+      "sha256": "505ef81ba88c5b7819dfeb312e0648c2688533e566fa97db5c9d68fabfcdc000"
+    },
+    {
+      "path": "cells.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "cells.stdout",
+      "bytes": 74,
+      "sha256": "9a641ac2d007e291b3cd2a518f12f3945a818f22fe0ca2434ec3765156ecf5c5"
+    },
+    {
+      "path": "cells_audit.py",
+      "bytes": 1171,
+      "sha256": "c1a05fec4f0bac46ae02c714e3530edc059a403d71643b920b3fe128fe07de05"
+    },
+    {
+      "path": "cells_verified.json",
+      "bytes": 52386,
+      "sha256": "547fbb736dab44d72516f1806edf100a6899f01f52c209ca106eda89a6642572"
+    },
+    {
+      "path": "coverage.run.json",
+      "bytes": 426,
+      "sha256": "8a935c2a8b79a79586ac99be74b2195c29dc03f1db2cf844aca7dc29b4fdee7e"
+    },
+    {
+      "path": "coverage.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "coverage.stdout",
+      "bytes": 15010,
+      "sha256": "75048722465a2d0d63948fb450823e21d75d62e9e3ab699a4c3d9827c1f9c8cd"
+    },
+    {
+      "path": "coverage_a131.json",
+      "bytes": 14985,
+      "sha256": "582ab989b66dc29b2fe6f9085e73acdd3ab7ded3816222391979fc30dd99ebf4"
+    },
+    {
+      "path": "coverage_a131_inputs.json",
+      "bytes": 756899,
+      "sha256": "33eac7b9b34421da31b8385a073f9cba4a9e8894fb40d78da63c00632f81ab08"
+    },
+    {
+      "path": "coverage_audit.py",
+      "bytes": 4850,
+      "sha256": "cc16d9352b32ee4e4cb8869ca22ade7ad28b104ab771d0c67476f740bd296e64"
+    },
+    {
+      "path": "delta11.txt",
+      "bytes": 36114,
+      "sha256": "0c45ac656fb9f430826d8bbb6d3e45f744d6168fe42538480514c72981776589"
+    },
+    {
+      "path": "diff.txt",
+      "bytes": 130371,
+      "sha256": "b2b7e18e906eec9e2f4a04020164b8d8036b22e6b2db196c5fac1eb84899a52c"
+    },
+    {
+      "path": "diff_check.run.json",
+      "bytes": 465,
+      "sha256": "beaa66880e4299b4b0e24a630e18c73d441d70c110bc466e96791a9f4cbab6ab"
+    },
+    {
+      "path": "diff_check.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "diff_check.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "do.run.json",
+      "bytes": 619,
+      "sha256": "d7fb8d323c8cf3d8d522b594b4effbd51127192c3cafb4fb2f70c659c740b476"
+    },
+    {
+      "path": "do.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "do.stdout",
+      "bytes": 7221,
+      "sha256": "131c06096d19b994decafcc58f88de01d28bbf3255c05b87d71c0304ce057f0f"
+    },
+    {
+      "path": "finalize.py",
+      "bytes": 18242,
+      "sha256": "cac66cd7a809c6a584663c24279aa48279538ef9629f22db3bb1bbe7db593ed0"
+    },
+    {
+      "path": "independent_pairs.jsonl",
+      "bytes": 2705,
+      "sha256": "130920bfd1d22427e7f7eb423ea828a2cbd783c5bed5364c0bd5b526f3dc8016"
+    },
+    {
+      "path": "independent_results.jsonl",
+      "bytes": 2484,
+      "sha256": "82879a4465d18a5444e0ebd9789856ab7e30670bab2d6082be1aea9408a9ad88"
+    },
+    {
+      "path": "independent_scan.py",
+      "bytes": 2689,
+      "sha256": "0380858b5c549b46bd031ae669cdc4313e1d0c4c95b5400d12ccdc6dd13b6184"
+    },
+    {
+      "path": "independent_scan.run.json",
+      "bytes": 429,
+      "sha256": "bdbe2d3beb4bdca866c5a90bd6e8a33fb2c989bebd983dc11d0aff0a86846553"
+    },
+    {
+      "path": "independent_scan.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "independent_scan.stdout",
+      "bytes": 438,
+      "sha256": "b172a932dfd8a6f7de38fa4eeb7e5c8e9da34007d5259eb5e9963517be61c597"
+    },
+    {
+      "path": "independent_witnesses.json",
+      "bytes": 2907,
+      "sha256": "246fe0fe202792ce976051a6baeb52835d0320e69697e0b60c70059093af5d7c"
+    },
+    {
+      "path": "init_review.py",
+      "bytes": 3490,
+      "sha256": "7e02cd7c991e8df59802b0518e41f64cf2fb41c71d4601a13ac1c8adbb3d6829"
+    },
+    {
+      "path": "lazy_and_token_controls.json",
+      "bytes": 878,
+      "sha256": "7aa994da8ccfc2d47a52e56f8352f2292b1dd9629c0793d56602622d9e7b6636"
+    },
+    {
+      "path": "ledger_A_verified.json",
+      "bytes": 211165,
+      "sha256": "f51c6d260464bea174eea0fcef39d12a07363593ce6503649374aabcc831fad7"
+    },
+    {
+      "path": "ledger_B_201_verified.json",
+      "bytes": 80571,
+      "sha256": "2df847b6811ea69aeca2d08b3cb803bbe1731a761e4c605e684ba0c31590e17b"
+    },
+    {
+      "path": "ledger_B_248_verified.json",
+      "bytes": 87632,
+      "sha256": "5fbac00767d235df7dda6a44edbf107c9b2630491d37f7a17997ee706c1e6d61"
+    },
+    {
+      "path": "ledger_audit.py",
+      "bytes": 8086,
+      "sha256": "7f42642218f17e4782e51a5ea2c1454ec71f2ce8d92d1dd24370e64be7952c10"
+    },
+    {
+      "path": "ledger_semantic_audit.json",
+      "bytes": 66306,
+      "sha256": "2862f2a7908e11c40c6cfe0e97c4de59e2f505ab9e066caad0ce408d4974daaa"
+    },
+    {
+      "path": "ledger_semantics.run.json",
+      "bytes": 423,
+      "sha256": "cdc3e5791b5436608b6149568f0afa25b791074ffe8872fc2f26628fd02eb5af"
+    },
+    {
+      "path": "ledger_semantics.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ledger_semantics.stdout",
+      "bytes": 343,
+      "sha256": "32029b536405433a39637fa134e44c3926ff5ccb0048cc31e88bb14ae688f083"
+    },
+    {
+      "path": "numstat.txt",
+      "bytes": 111,
+      "sha256": "2762c6d5fc12fefc95115e5179873c1968ba4a75e588340827d99a61ac80408b"
+    },
+    {
+      "path": "polish_report.py",
+      "bytes": 5330,
+      "sha256": "61cdd3f0221dc4e633cdfd06c01363a0983d743d0062fde2c61f55b5eb3ce2a9"
+    },
+    {
+      "path": "preflight.json",
+      "bytes": 1133,
+      "sha256": "3dac3b5affb959680303ff634a3610553befd247859501e243438c6d142d0609"
+    },
+    {
+      "path": "prior.run.json",
+      "bytes": 423,
+      "sha256": "a31fbd7767d21920ee31d2e167b4d25f9410a8681ac5e306299f58b321e8cd0b"
+    },
+    {
+      "path": "prior.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "prior.stdout",
+      "bytes": 314,
+      "sha256": "67e8880247422bf1e39f5664338ce6e6cfc36c2e3a25716c08da93b6c2c63429"
+    },
+    {
+      "path": "prior_audit.json",
+      "bytes": 17319,
+      "sha256": "15435a6a9b9e51bf4b2f1218170b62db7c8970a3a18199415e27ecc5d7c6ebf2"
+    },
+    {
+      "path": "prior_audit.py",
+      "bytes": 2110,
+      "sha256": "98ef001f0b415d3548d92c1ed497cd3210392797c22622d2fa89351845f170ee"
+    },
+    {
+      "path": "regex_audit.json",
+      "bytes": 1824,
+      "sha256": "e76d3deca55fbaf8fb153e9c954b312a5908de8e88d9267613a4a314e2d843c4"
+    },
+    {
+      "path": "registration.run.json",
+      "bytes": 431,
+      "sha256": "d51464301aea32d7f9a6b634e0588a08cbf943d0fb49d8a080954e75023c123a"
+    },
+    {
+      "path": "registration.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "registration.stdout",
+      "bytes": 72120,
+      "sha256": "2773d93effe692afc1bbaa77e7c1f2f22fbac4488eb9765385a5b3ed1c3183dd"
+    },
+    {
+      "path": "removed_clause_checks.json",
+      "bytes": 65821,
+      "sha256": "50a96544056b6887359eeb9d88792d1397a379573e4bccd1b467695320d025b1"
+    },
+    {
+      "path": "removed_clause_checks.py",
+      "bytes": 2852,
+      "sha256": "837b036e61da13fa4ebc9f0947f6a4957353be0c9ba9ccd5ef344ba8fc8d883e"
+    },
+    {
+      "path": "removed_clauses.run.json",
+      "bytes": 432,
+      "sha256": "e47b1f202631eb945717e6659962ffd739e580a21e265afe542c4cc246179bb5"
+    },
+    {
+      "path": "removed_clauses.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "removed_clauses.stdout",
+      "bytes": 39,
+      "sha256": "2494fdb21a299f9539df03a62e55d8ea4202bd59e125891777d1ecd219e6cf63"
+    },
+    {
+      "path": "replay.run.json",
+      "bytes": 424,
+      "sha256": "bd4d69532d2f689e53677825870bdc4f8a336e21fbe34457cc64c37cc2b904f6"
+    },
+    {
+      "path": "replay.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "replay.stdout",
+      "bytes": 603,
+      "sha256": "694a7fc6921a4dc64b94b535509cf4f2d5e3b6ab2ec3ef0025e1faea70ac5836"
+    },
+    {
+      "path": "replay_fast.py",
+      "bytes": 2331,
+      "sha256": "9ba60a46cfcf0fa8c226b1128c643d92ed783c2ac4a8be8a00b59dd253278c4a"
+    },
+    {
+      "path": "replay_results.jsonl",
+      "bytes": 337108,
+      "sha256": "248ac0722873ad63baab2b550f93bf270b31969badecff588be199c0bcaf4dce"
+    },
+    {
+      "path": "replay_summary.json",
+      "bytes": 1357,
+      "sha256": "14af8d0b1610ce5a242611b77b8d20bdb31c1371c413683fab270296d374766b"
+    },
+    {
+      "path": "replay_verify.run.json",
+      "bytes": 424,
+      "sha256": "4c51224d91307a6b7e745fbd3d4bd0b49e269e7ff5dd441d9115a0ca0340d182"
+    },
+    {
+      "path": "replay_verify.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "replay_verify.stdout",
+      "bytes": 1096,
+      "sha256": "f5b0c328059490667ff0c52b38e568fe473548a8512136ddb45a5ff4992d3e10"
+    },
+    {
+      "path": "ruff.run.json",
+      "bytes": 585,
+      "sha256": "12676fce3fb9d76ee4b79928eca9823e77903e30a9c127d30b444b7315c792bd"
+    },
+    {
+      "path": "ruff.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ruff.stdout",
+      "bytes": 19,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "ruff_contract.run.json",
+      "bytes": 592,
+      "sha256": "108eeb9f11f7b65619f450d51f17b2776920f0247b63bc50ee0c7a9ef91f4dca"
+    },
+    {
+      "path": "ruff_contract.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ruff_contract.stdout",
+      "bytes": 19,
+      "sha256": "1069744e64ae4de530c2eb1c699b614c5404f7a707ecc67a3853e39ed9929d4a"
+    },
+    {
+      "path": "ruff_version.run.json",
+      "bytes": 431,
+      "sha256": "ab474a61ae77af3f653ea9f43482accd425dc81d8b5c58c6c061bd11f0705497"
+    },
+    {
+      "path": "ruff_version.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ruff_version.stdout",
+      "bytes": 13,
+      "sha256": "633fc4e8b8179891d1a9edd4e956e51bbcbbc4ab899ee530fb5690387e080dc4"
+    },
+    {
+      "path": "run_logged.py",
+      "bytes": 896,
+      "sha256": "aa51bb4e41a27d267363831f792da1ed404db0454a8111b1d98564445621e124"
+    },
+    {
+      "path": "selftest_base.run.json",
+      "bytes": 452,
+      "sha256": "9b24bfb62ba3a98830eb38262461b8e35a5f3221c116cd60b2aaf7cbb57f5549"
+    },
+    {
+      "path": "selftest_base.stderr",
+      "bytes": 19690,
+      "sha256": "05cf32079564a30af04ecbef7925c43f7d6089f093ab65d619f622ed068d0d63"
+    },
+    {
+      "path": "selftest_base.stdout",
+      "bytes": 72661,
+      "sha256": "449e3131273ec4ea90351cf5599e227f63c9f35b77dcbbb3456fac533f4359fa"
+    },
+    {
+      "path": "selftest_delta.json",
+      "bytes": 6303,
+      "sha256": "9f129f52c3aa4eb2b477945690ac699c914343b2d230b56d7e5f2f15e22f8f39"
+    },
+    {
+      "path": "selftest_head.run.json",
+      "bytes": 452,
+      "sha256": "34504bdcd75d4bae201840a4396b2ccfc953299aa8fbcfcd6682bb3b07691ca8"
+    },
+    {
+      "path": "selftest_head.stderr",
+      "bytes": 19690,
+      "sha256": "bf906890cc04a00aaee78d3dfcd52055d12e76540e58754846b543a37a0e4b3c"
+    },
+    {
+      "path": "selftest_head.stdout",
+      "bytes": 72661,
+      "sha256": "449e3131273ec4ea90351cf5599e227f63c9f35b77dcbbb3456fac533f4359fa"
+    },
+    {
+      "path": "selftest_pair.py",
+      "bytes": 1044,
+      "sha256": "a87db7067aba65e3783c99783346259622bfc6ce78382f24aaceb733ba6f3336"
+    },
+    {
+      "path": "selftest_pair.run.json",
+      "bytes": 425,
+      "sha256": "a2d09d8c170db8302f6ae6447ed95a3c6b2b026307896aee4e3357b2c6421271"
+    },
+    {
+      "path": "selftest_pair.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "selftest_pair.stdout",
+      "bytes": 902,
+      "sha256": "828b81b4b673327da935b7c4ee95b11db0c4a34795c99b6392f81a94d037022b"
+    },
+    {
+      "path": "selftest_provenance.json",
+      "bytes": 280,
+      "sha256": "4c294f5cf8da93e0fe41150ca3d3e15013bf15093b16b4487122e0b98759b0da"
+    },
+    {
+      "path": "snapshot_after.json",
+      "bytes": 2404080,
+      "sha256": "03916cdba405aca0923ba66fc291fc283f84b4736246d0d4eb1c55e8ef97d959"
+    },
+    {
+      "path": "snapshot_before.json",
+      "bytes": 2404080,
+      "sha256": "03916cdba405aca0923ba66fc291fc283f84b4736246d0d4eb1c55e8ef97d959"
+    },
+    {
+      "path": "suite.run.json",
+      "bytes": 435,
+      "sha256": "7084d3eb1bf040807d7b5c19fa8ed17d2ad79d8b2c4520d683fa6a3ab5a26e67"
+    },
+    {
+      "path": "suite.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "suite.stdout",
+      "bytes": 97,
+      "sha256": "203e4e75d6be78917ef8370e61d6f7a76ecf31b3db69f70cb125a80586fd8b55"
+    },
+    {
+      "path": "verify_replay.py",
+      "bytes": 4374,
+      "sha256": "c26fc2dbbadd03b3c998f5c8f810253fc2e26b22d628fee126a2b980a9fc125d"
+    },
+    {
+      "path": "witnesses.py",
+      "bytes": 3818,
+      "sha256": "ce5f8d178761bfb5f8aed91e4c8702d5ec8f66fb0e264607d52bbf9f43ef2e1f"
+    },
+    {
+      "path": "witnesses.run.json",
+      "bytes": 420,
+      "sha256": "1f8ab5a2201d0cc64e89b7bef8ae520ea93a74f726296824174683406a82177b"
+    },
+    {
+      "path": "witnesses.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "witnesses.stdout",
+      "bytes": 301,
+      "sha256": "2af6b9027fd963a5f024d4558cbc5c158be4e744520820fab2d37294a22933b7"
+    }
+  ]
+}

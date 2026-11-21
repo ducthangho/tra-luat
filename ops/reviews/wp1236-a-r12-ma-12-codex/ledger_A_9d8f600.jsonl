@@ -1,0 +1,798 @@
+{"id": "l:module:46:0:body4", "op": "l", "ledger": "GIET", "ca": ["a123_thu_tu_va_dinh_dang"]}
+{"id": "l:module:124:0:body1", "op": "l", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "l:module:124:0:body23", "op": "l", "ledger": "GIET", "ca": ["a106_danh_tinh_job"]}
+{"id": "l:module:124:0:body24", "op": "l", "ledger": "GIET", "ca": ["a123_thu_tu_va_dinh_dang"]}
+{"id": "l:module:237:0:body6", "op": "l", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "l:module:237:0:body12", "op": "l", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "a2:doc_danh_gia:53:4", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:doc_danh_gia:57:4", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:doc_danh_gia:59:4", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c2:doc_danh_gia:81:4", "op": "c2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "f:doc_danh_gia:81:4", "op": "f", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c2:_la_so:85:4", "op": "c2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "f:_la_so:85:4", "op": "f", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:chon_provenance:96:4", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c2:chon_provenance:113:4", "op": "c2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "f:chon_provenance:113:4", "op": "f", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:135:4", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:143:4", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:164:4", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:171:4", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:173:4", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:175:4", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c2:_kiem_tep:179:4", "op": "c2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "f:_kiem_tep:179:4", "op": "f", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c2:_chuan:183:4", "op": "c2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "f:_chuan:183:4", "op": "f", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "c2:loi_khai:199:4", "op": "c2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "f:loi_khai:199:4", "op": "f", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "c2:token:204:4", "op": "c2", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "f:token:204:4", "op": "f", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "c2:tep_danh_gia:208:4", "op": "c2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "f:tep_danh_gia:208:4", "op": "f", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "a2:la_landed:214:4", "op": "a2", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "c2:la_landed:220:4", "op": "c2", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "f:la_landed:220:4", "op": "f", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "a2:_tep_trong:228:4", "op": "a2", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "c2:_tep_trong:234:4", "op": "c2", "ledger": "GIET", "ca": ["a205_duong_khop"]}
+{"id": "f:_tep_trong:234:4", "op": "f", "ledger": "GIET", "ca": ["a205_duong_khop"]}
+{"id": "a2:kiem_mien:250:4", "op": "a2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a2:kiem_mien:252:4", "op": "a2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a2:kiem_mien:264:4", "op": "a2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "c2:kiem_mien:266:4", "op": "c2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "f:kiem_mien:266:4", "op": "f", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a2:kiem_ho_so:295:4", "op": "a2", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "c2:kiem_ho_so:297:4", "op": "c2", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "f:kiem_ho_so:297:4", "op": "f", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "c2:main:339:4", "op": "c2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "f:main:339:4", "op": "f", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "a2:doc_danh_gia:54:8", "op": "a2", "ledger": "GIET", "ca": ["a102_ca_kho_tai_base"]}
+{"id": "c2:doc_danh_gia:58:8", "op": "c2", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "f:doc_danh_gia:58:8", "op": "f", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "c2:doc_danh_gia:60:8", "op": "c2", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "f:doc_danh_gia:60:8", "op": "f", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "a2:doc_danh_gia:66:8", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:doc_danh_gia:77:7", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:doc_danh_gia:78:8", "op": "c", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "a:_la_so:85:11", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "j1:_la_so:85:11", "op": "j1", "ledger": "TUONG_DUONG", "chung_minh": "is -> ==: gia tri la None/int/type/Pattern; khong lop nao dinh nghia __eq__ khac dong nhat (Pattern bang nhau khi cung mau+co, RE_SKIP_CU khac mau)"}
+{"id": "b:chon_provenance:96:7:ve0", "op": "b", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "b:chon_provenance:96:7:ve1", "op": "b", "ledger": "GIET", "ca": ["a118_k1_k2_quet_he_thong"]}
+{"id": "c2:chon_provenance:97:8", "op": "c2", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "f:chon_provenance:97:8", "op": "f", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "c:chon_provenance:99:8", "op": "c", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "a:chon_provenance:111:7", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c2:chon_provenance:112:8", "op": "c2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "f:chon_provenance:112:8", "op": "f", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c2:kiem_tep:119:8", "op": "c2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "f:kiem_tep:119:8", "op": "f", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:126:7", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "j1:_kiem_tep:126:7", "op": "j1", "ledger": "TUONG_DUONG", "chung_minh": "is -> ==: gia tri la None/int/type/Pattern; khong lop nao dinh nghia __eq__ khac dong nhat (Pattern bang nhau khi cung mau+co, RE_SKIP_CU khac mau)"}
+{"id": "c2:_kiem_tep:127:8", "op": "c2", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "f:_kiem_tep:127:8", "op": "f", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "a:_kiem_tep:128:7", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "k3:_kiem_tep:128:7", "op": "k3", "ledger": "TUONG_DUONG", "chung_minh": "bo_sinh la 64 hex do RE_DAU dam bao; khoa BO_SINH dai 64 => chuoi con <=> bang nhau"}
+{"id": "c2:_kiem_tep:129:8", "op": "c2", "ledger": "GIET", "ca": ["a104_bo_sinh_la"]}
+{"id": "f:_kiem_tep:129:8", "op": "f", "ledger": "GIET", "ca": ["a104_bo_sinh_la"]}
+{"id": "a:_kiem_tep:131:7", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "j1:_kiem_tep:131:7", "op": "j1", "ledger": "TUONG_DUONG", "chung_minh": "is -> ==: gia tri la None/int/type/Pattern; khong lop nao dinh nghia __eq__ khac dong nhat (Pattern bang nhau khi cung mau+co, RE_SKIP_CU khac mau)"}
+{"id": "c2:_kiem_tep:132:8", "op": "c2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "f:_kiem_tep:132:8", "op": "f", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:_kiem_tep:136:8", "op": "c", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "a2:_kiem_tep:137:9", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:_kiem_tep:140:8", "op": "c", "ledger": "GIET", "ca": ["a117_loi_duyet_va_job_trung"]}
+{"id": "c:_kiem_tep:147:8", "op": "c", "ledger": "GIET", "ca": ["a114_provenance_tu_khai_du"]}
+{"id": "a:_kiem_tep:148:7", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:_kiem_tep:149:8", "op": "c", "ledger": "GIET", "ca": ["a107_tap_job"]}
+{"id": "a:_kiem_tep:150:7", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:_kiem_tep:151:8", "op": "c", "ledger": "GIET", "ca": ["a107_tap_job"]}
+{"id": "a2:_kiem_tep:152:10", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:156:8", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:159:8", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:161:8", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:163:9", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:_kiem_tep:165:8", "op": "c", "ledger": "GIET", "ca": ["a111_skipped_theo_phien_ban"]}
+{"id": "a2:_kiem_tep:168:13", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:169:7", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:_kiem_tep:170:8", "op": "c", "ledger": "GIET", "ca": ["a110_dong_tong"]}
+{"id": "c2:_kiem_tep:172:8", "op": "c2", "ledger": "GIET", "ca": ["a105_bam_log"]}
+{"id": "f:_kiem_tep:172:8", "op": "f", "ledger": "GIET", "ca": ["a105_bam_log"]}
+{"id": "c2:_kiem_tep:174:8", "op": "c2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "f:_kiem_tep:174:8", "op": "f", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c2:_kiem_tep:176:8", "op": "c2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "f:_kiem_tep:176:8", "op": "f", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:179:11", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:loi_khai:186:24", "op": "g", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "a:loi_khai:189:7", "op": "a", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "a2:loi_khai:192:17", "op": "a2", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "a2:loi_khai:194:8", "op": "a2", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "c:loi_khai:198:8", "op": "c", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "a2:token:203:8", "op": "a2", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "a2:token:204:11", "op": "a2", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "a2:tep_danh_gia:208:11", "op": "a2", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "c2:la_landed:215:8", "op": "c2", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "f:la_landed:215:8", "op": "f", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "a:la_landed:216:7", "op": "a", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "b:la_landed:220:11:ve0", "op": "b", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "b:la_landed:220:11:ve1", "op": "b", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "b:_tep_trong:228:7:ve0", "op": "b", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "b:_tep_trong:228:7:ve1", "op": "b", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "b:_tep_trong:228:7:ve2", "op": "b", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "c2:_tep_trong:229:8", "op": "c2", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "a2:_tep_trong:232:8", "op": "a2", "ledger": "GIET", "ca": ["a205_duong_khop"]}
+{"id": "a2:_tep_trong:234:11", "op": "a2", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "a:kiem_mien:239:7", "op": "a", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "c2:kiem_mien:240:8", "op": "c2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "f:kiem_mien:240:8", "op": "f", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a2:kiem_mien:242:10", "op": "a2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a:kiem_mien:244:7", "op": "a", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "c2:kiem_mien:245:8", "op": "c2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "f:kiem_mien:245:8", "op": "f", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "b:kiem_mien:250:7:ve0", "op": "b", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "b:kiem_mien:250:7:ve1", "op": "b", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "c2:kiem_mien:251:8", "op": "c2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "f:kiem_mien:251:8", "op": "f", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "c2:kiem_mien:253:8", "op": "c2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "f:kiem_mien:253:8", "op": "f", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a:kiem_mien:255:7", "op": "a", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "c2:kiem_mien:256:8", "op": "c2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "f:kiem_mien:256:8", "op": "f", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a:kiem_mien:262:7", "op": "a", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "c2:kiem_mien:263:8", "op": "c2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "f:kiem_mien:263:8", "op": "f", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "c2:kiem_mien:265:8", "op": "c2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "f:kiem_mien:265:8", "op": "f", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a2:kiem_ho_so:293:8", "op": "a2", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "b:kiem_ho_so:295:7:ve0", "op": "b", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "b:kiem_ho_so:295:7:ve1", "op": "b", "ledger": "GIET", "ca": ["a216_hop_le_theo_token"]}
+{"id": "c:kiem_ho_so:296:8", "op": "c", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "a:main:317:7", "op": "a", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "a2:main:322:8", "op": "a2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "c2:main:327:8", "op": "c2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "f:main:327:8", "op": "f", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "e:main:329:9", "op": "e", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "c2:doc_danh_gia:51:8", "op": "c2", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "f:doc_danh_gia:51:8", "op": "f", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:doc_danh_gia:52:59", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c2:doc_danh_gia:55:12", "op": "c2", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "f:doc_danh_gia:55:12", "op": "f", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:doc_danh_gia:61:10", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:61:28", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:61:50", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:61:64", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:61:81", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:61:93", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:62:21", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:doc_danh_gia:64:11", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:doc_danh_gia:67:12", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:doc_danh_gia:70:8", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:77:17", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:doc_danh_gia:79:9", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:doc_danh_gia:80:8", "op": "c", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "a2:doc_danh_gia:81:12", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:chon_provenance:101:12", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:chon_provenance:105:12", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:chon_provenance:108:12", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:chon_provenance:111:20", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c2:kiem_tep:121:8", "op": "c2", "ledger": "GIET", "ca": ["a117_loi_duyet_va_job_trung"]}
+{"id": "f:kiem_tep:121:8", "op": "f", "ledger": "GIET", "ca": ["a117_loi_duyet_va_job_trung"]}
+{"id": "g:_kiem_tep:133:12", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:134:12", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:_kiem_tep:135:12:ve0", "op": "b", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "b:_kiem_tep:135:12:ve1", "op": "b", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "a2:_kiem_tep:0:0:if0", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:0:0:bo_if0", "op": "a2", "ledger": "GIET", "ca": ["a119_k3_k6_du_lieu_di_dang"]}
+{"id": "b:_kiem_tep:143:12:ve0", "op": "b", "ledger": "GIET", "ca": ["a114_provenance_tu_khai_du"]}
+{"id": "b:_kiem_tep:143:12:ve1", "op": "b", "ledger": "GIET", "ca": ["a119_k3_k6_du_lieu_di_dang"]}
+{"id": "b:_kiem_tep:143:12:ve2", "op": "b", "ledger": "GIET", "ca": ["a114_provenance_tu_khai_du"]}
+{"id": "b:_kiem_tep:143:12:ve3", "op": "b", "ledger": "GIET", "ca": ["a119_k3_k6_du_lieu_di_dang"]}
+{"id": "b:_kiem_tep:143:12:ve4", "op": "b", "ledger": "GIET", "ca": ["a114_provenance_tu_khai_du"]}
+{"id": "b:_kiem_tep:143:12:ve5", "op": "b", "ledger": "GIET", "ca": ["a114_provenance_tu_khai_du"]}
+{"id": "a:_kiem_tep:154:11", "op": "a", "ledger": "GIET", "ca": ["a105_bam_log"]}
+{"id": "j1:_kiem_tep:154:11", "op": "j1", "ledger": "TUONG_DUONG", "chung_minh": "is -> ==: gia tri la None/int/type/Pattern; khong lop nao dinh nghia __eq__ khac dong nhat (Pattern bang nhau khi cung mau+co, RE_SKIP_CU khac mau)"}
+{"id": "b:_kiem_tep:156:12:ve0", "op": "b", "ledger": "GIET", "ca": ["a106_danh_tinh_job"]}
+{"id": "b:_kiem_tep:156:12:ve1", "op": "b", "ledger": "GIET", "ca": ["a106_danh_tinh_job"]}
+{"id": "b:_kiem_tep:156:12:ve2", "op": "b", "ledger": "GIET", "ca": ["a106_danh_tinh_job"]}
+{"id": "c:_kiem_tep:158:12", "op": "c", "ledger": "GIET", "ca": ["a106_danh_tinh_job"]}
+{"id": "b:_kiem_tep:159:11:ve0", "op": "b", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:_kiem_tep:159:11:ve1", "op": "b", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:_kiem_tep:160:12", "op": "c", "ledger": "GIET", "ca": ["a113_ket_luan"]}
+{"id": "c:_kiem_tep:162:12", "op": "c", "ledger": "GIET", "ca": ["a105_bam_log"]}
+{"id": "g:_kiem_tep:163:34", "op": "g", "ledger": "GIET", "ca": ["a107_tap_job"]}
+{"id": "b:_kiem_tep:168:25:ve0", "op": "b", "ledger": "GIET", "ca": ["a119_k3_k6_du_lieu_di_dang"]}
+{"id": "b:_kiem_tep:168:25:ve1", "op": "b", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:168:13", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:175:9", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:0:0:if0#1", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:0:0:bo_if0#1", "op": "a2", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "a2:_kiem_tep:0:0:if0#2", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:0:0:bo_if0#2", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:loi_khai:191:21", "op": "a2", "ledger": "GIET", "ca": ["a214_vong_tham_chieu"]}
+{"id": "a2:loi_khai:192:59", "op": "a2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "a2:loi_khai:193:12", "op": "a2", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "a2:loi_khai:196:12", "op": "a2", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "i7:token:203:8", "op": "i7", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "b:token:204:19:ve0", "op": "b", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "b:token:204:19:ve1", "op": "b", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "d:la_landed:215:15", "op": "d", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "g:la_landed:216:7", "op": "g", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "a2:la_landed:217:12", "op": "a2", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "a:la_landed:220:11", "op": "a", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "j1:la_landed:220:11", "op": "j1", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "j2:la_landed:220:11", "op": "j2", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "a:_tep_trong:228:27", "op": "a", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "c2:_tep_trong:233:12", "op": "c2", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "e:kiem_mien:239:83", "op": "e", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "e:kiem_mien:244:18", "op": "e", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "c2:kiem_mien:249:8", "op": "c2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "f:kiem_mien:249:8", "op": "f", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a:kiem_mien:250:34", "op": "a", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "b:kiem_mien:252:12:ve0", "op": "b", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "b:kiem_mien:252:12:ve1", "op": "b", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "b:kiem_mien:252:12:ve2", "op": "b", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a2:kiem_mien:0:0:if0", "op": "a2", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "a2:kiem_mien:0:0:bo_if0", "op": "a2", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "e:kiem_mien:255:20", "op": "e", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "e:kiem_mien:257:13", "op": "e", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "c2:kiem_mien:261:8", "op": "c2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "f:kiem_mien:261:8", "op": "f", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:262:7", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a:kiem_mien:264:25", "op": "a", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "j1:kiem_mien:264:25", "op": "j1", "ledger": "TUONG_DUONG", "chung_minh": "is -> ==: gia tri la None/int/type/Pattern; khong lop nao dinh nghia __eq__ khac dong nhat (Pattern bang nhau khi cung mau+co, RE_SKIP_CU khac mau)"}
+{"id": "a:kiem_mien:264:8", "op": "a", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a:kiem_mien:264:48", "op": "a", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "d:kiem_ho_so:271:21", "op": "d", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "a:kiem_ho_so:273:11", "op": "a", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "j1:kiem_ho_so:273:11", "op": "j1", "ledger": "TUONG_DUONG", "chung_minh": "is -> ==: gia tri la None/int/type/Pattern; khong lop nao dinh nghia __eq__ khac dong nhat (Pattern bang nhau khi cung mau+co, RE_SKIP_CU khac mau)"}
+{"id": "c:kiem_ho_so:274:12", "op": "c", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "a:kiem_ho_so:276:11", "op": "a", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "a:kiem_ho_so:279:11", "op": "a", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "c:kiem_ho_so:280:12", "op": "c", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a2:kiem_ho_so:283:12", "op": "a2", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "b:kiem_ho_so:293:11:ve0", "op": "b", "ledger": "GIET", "ca": ["a216_hop_le_theo_token"]}
+{"id": "b:kiem_ho_so:293:11:ve1", "op": "b", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "g:main:309:23", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:310:20", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:311:20", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:312:45", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "c2:main:316:8", "op": "c2", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "f:main:316:8", "op": "f", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "g:main:317:17", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "c2:main:324:12", "op": "c2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "f:main:324:12", "op": "f", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "a2:main:331:14", "op": "a2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "b:main:338:13:ve0", "op": "b", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "b:main:338:13:ve1", "op": "b", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "a2:doc_danh_gia:52:12", "op": "a2", "ledger": "GIET", "ca": ["a102_ca_kho_tai_base"]}
+{"id": "k2:doc_danh_gia:53:11", "op": "k2", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "a:doc_danh_gia:57:11", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i7:doc_danh_gia:59:17", "op": "i7", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "e:doc_danh_gia:61:60", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:61:77", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:63:18", "op": "e", "ledger": "GIET", "ca": ["a118_k1_k2_quet_he_thong"]}
+{"id": "i7:doc_danh_gia:66:16", "op": "i7", "ledger": "TUONG_DUONG", "chung_minh": "RE_JOB fullmatch->match: nhom cuoi (.*) tham lam toi het dong (dong da tach theo \\n, '.' khong khop \\n) => match luon phu ca dong"}
+{"id": "b:doc_danh_gia:67:15:ve0", "op": "b", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "b:doc_danh_gia:67:15:ve1", "op": "b", "ledger": "GIET", "ca": ["a118_k1_k2_quet_he_thong"]}
+{"id": "c:doc_danh_gia:68:16", "op": "c", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "c:doc_danh_gia:71:12", "op": "c", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "a2:doc_danh_gia:73:8", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:78:18", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "e:doc_danh_gia:79:18", "op": "e", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "d:chon_provenance:98:54", "op": "d", "ledger": "GIET", "ca": ["a118_k1_k2_quet_he_thong"]}
+{"id": "g:chon_provenance:99:15", "op": "g", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "a2:chon_provenance:0:0:if0", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:chon_provenance:0:0:bo_if0", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:chon_provenance:0:0:if0#1", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:chon_provenance:0:0:bo_if0#1", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:chon_provenance:102:16", "op": "c", "ledger": "GIET", "ca": ["a112_symlink"]}
+{"id": "a2:chon_provenance:107:16", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:chon_provenance:108:16:ve0", "op": "b", "ledger": "GIET", "ca": ["a118_k1_k2_quet_he_thong"]}
+{"id": "b:chon_provenance:108:16:ve1", "op": "b", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "b:chon_provenance:108:16:ve2", "op": "b", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:chon_provenance:108:16:ve3", "op": "b", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "b:chon_provenance:108:16:ve4", "op": "b", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "b:chon_provenance:108:16:ve5", "op": "b", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "c:chon_provenance:110:16", "op": "c", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:chon_provenance:113:16", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:127:15", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:_kiem_tep:128:9", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:129:15", "op": "g", "ledger": "GIET", "ca": ["a104_bo_sinh_la"]}
+{"id": "g:_kiem_tep:130:39", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:130:49", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:130:63", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:132:15", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:135:12", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:135:41", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:136:18", "op": "g", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "g:_kiem_tep:137:17", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:139:26", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:140:45", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:0:0:if0#3", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:0:0:bo_if0#3", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:142:92", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:142:112", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:143:12", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:143:73", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:147:18", "op": "g", "ledger": "GIET", "ca": ["a114_provenance_tu_khai_du"]}
+{"id": "g:_kiem_tep:149:18", "op": "g", "ledger": "GIET", "ca": ["a107_tap_job"]}
+{"id": "g:_kiem_tep:151:18", "op": "g", "ledger": "GIET", "ca": ["a107_tap_job"]}
+{"id": "g:_kiem_tep:152:16", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:156:12", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:156:42", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:157:19", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:159:11", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:159:44", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:_kiem_tep:161:16:ve0", "op": "b", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:_kiem_tep:161:16:ve1", "op": "b", "ledger": "GIET", "ca": ["a105_bam_log"]}
+{"id": "a:_kiem_tep:164:11", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:165:18", "op": "g", "ledger": "GIET", "ca": ["a111_skipped_theo_phien_ban"]}
+{"id": "g:_kiem_tep:166:13", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:_kiem_tep:167:29", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:167:69", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:168:31", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:168:62", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:168:50", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:168:83", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:169:9", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:170:18", "op": "g", "ledger": "GIET", "ca": ["a110_dong_tong"]}
+{"id": "g:_kiem_tep:172:15", "op": "g", "ledger": "GIET", "ca": ["a105_bam_log"]}
+{"id": "a:_kiem_tep:173:11", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:174:15", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:176:15", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:177:13", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:178:15", "op": "g", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "g:_kiem_tep:179:12", "op": "g", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "a2:_chuan:0:0:if0", "op": "a2", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "a2:_chuan:0:0:bo_if0", "op": "a2", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "b:loi_khai:196:15:ve0", "op": "b", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "b:loi_khai:196:15:ve1", "op": "b", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "c:loi_khai:197:16", "op": "c", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "k1:token:203:23", "op": "k1", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "a:token:204:25", "op": "a", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "k3:token:204:25", "op": "k3", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "e:token:204:13", "op": "e", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "g:la_landed:219:24", "op": "g", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "d:la_landed:220:16", "op": "d", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "g:_tep_trong:228:27", "op": "g", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "g:kiem_mien:240:16", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "e:kiem_mien:241:42", "op": "e", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a2:kiem_mien:0:0:if0#1", "op": "a2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a2:kiem_mien:0:0:bo_if0#1", "op": "a2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:245:16", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:251:16", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a:kiem_mien:252:48", "op": "a", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "a:kiem_mien:252:86", "op": "a", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:253:16", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:256:16", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:262:41", "op": "g", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "g:kiem_mien:263:16", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:265:16", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_ho_so:279:17", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "b:kiem_ho_so:283:15:ve0", "op": "b", "ledger": "GIET", "ca": ["a208_failed_nhat_quan"]}
+{"id": "b:kiem_ho_so:283:15:ve1", "op": "b", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "c:kiem_ho_so:284:16", "op": "c", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "a:kiem_ho_so:293:11", "op": "a", "ledger": "GIET", "ca": ["a216_hop_le_theo_token"]}
+{"id": "a:kiem_ho_so:293:30", "op": "a", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "d:kiem_ho_so:294:21", "op": "d", "ledger": "GIET", "ca": ["a216_hop_le_theo_token"]}
+{"id": "g:kiem_ho_so:296:18", "op": "g", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "e:error:303:25", "op": "e", "ledger": "TUONG_DUONG", "chung_minh": "SystemExit(2)->3 trong _ThamSo.error: main bat SystemExit va tra 2 if e.code else 0 => cung rc 2"}
+{"id": "g:main:307:29", "op": "g", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "g:main:308:32", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "d:main:308:49", "op": "d", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "d:main:311:45", "op": "d", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "g:main:312:60", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "a2:main:316:15", "op": "a2", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "b:main:319:19:ve0", "op": "b", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "b:main:319:19:ve1", "op": "b", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "e:main:324:19", "op": "e", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "e:main:327:50", "op": "e", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "k2:main:331:55", "op": "k2", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "c2:main:336:12", "op": "c2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "f:main:336:12", "op": "f", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "a2:main:338:20", "op": "a2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "k2:doc_danh_gia:52:24", "op": "k2", "ledger": "GIET", "ca": ["a102_ca_kho_tai_base"]}
+{"id": "g:doc_danh_gia:53:22", "op": "g", "ledger": "GIET", "ca": ["a102_ca_kho_tai_base"]}
+{"id": "g:doc_danh_gia:57:11", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:doc_danh_gia:58:22", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:doc_danh_gia:60:22", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "e:doc_danh_gia:61:23", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:61:45", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:doc_danh_gia:67:15", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:doc_danh_gia:67:42", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:69:37", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:69:51", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:69:67", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:69:87", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:69:100", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:doc_danh_gia:70:19:ve0", "op": "b", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:doc_danh_gia:70:19:ve1", "op": "b", "ledger": "GIET", "ca": ["a107_tap_job"]}
+{"id": "a2:doc_danh_gia:71:18", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "c:doc_danh_gia:76:12", "op": "c", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:doc_danh_gia:80:18", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "a2:chon_provenance:97:22", "op": "a2", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "k2:chon_provenance:100:56", "op": "k2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:chon_provenance:105:20:ve0", "op": "b", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "b:chon_provenance:105:20:ve1", "op": "b", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "a:chon_provenance:108:68", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:chon_provenance:109:61", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:chon_provenance:109:101", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:kiem_tep:121:15", "op": "g", "ledger": "GIET", "ca": ["a117_loi_duyet_va_job_trung"]}
+{"id": "g:_kiem_tep:129:32", "op": "g", "ledger": "GIET", "ca": ["a104_bo_sinh_la"]}
+{"id": "g:_kiem_tep:135:30", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:135:72", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:137:54", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:140:15", "op": "g", "ledger": "GIET", "ca": ["a117_loi_duyet_va_job_trung"]}
+{"id": "g:_kiem_tep:141:16", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:143:35", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:143:97", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:148:13", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:150:13", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:152:50", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:159:30", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:159:55", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:161:55", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:163:19", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:_kiem_tep:167:55", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:168:62", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:173:22", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:176:32", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:177:63", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "k1:_chuan:183:30", "op": "k1", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "k2:_chuan:183:51", "op": "k2", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "g:loi_khai:190:27", "op": "g", "ledger": "GIET", "ca": ["a214_vong_tham_chieu"]}
+{"id": "g:loi_khai:193:21", "op": "g", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "g:loi_khai:193:66", "op": "g", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "g:loi_khai:193:70", "op": "g", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "a:loi_khai:196:15", "op": "a", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "a:loi_khai:196:37", "op": "a", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "k3:loi_khai:196:37", "op": "k3", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "g:la_landed:217:45", "op": "g", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "b:la_landed:220:28:ve0", "op": "b", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "b:la_landed:220:28:ve1", "op": "b", "ledger": "GIET", "ca": ["a213_la_landed_khop_kiem_ho_so_land"]}
+{"id": "b:la_landed:220:28:ve2", "op": "b", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "b:la_landed:220:28:ve3", "op": "b", "ledger": "GIET", "ca": ["a213_la_landed_khop_kiem_ho_so_land"]}
+{"id": "a2:kiem_mien:239:19", "op": "a2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "b:kiem_mien:242:80:ve0", "op": "b", "ledger": "GIET", "ca": ["a215_landed_mien_di_dang"]}
+{"id": "b:kiem_mien:242:80:ve1", "op": "b", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:249:16", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:250:40", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:252:117", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i7:kiem_mien:254:64", "op": "i7", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "e:kiem_mien:259:38", "op": "e", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "g:kiem_mien:261:16", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "e:kiem_mien:264:10", "op": "e", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "e:kiem_mien:264:50", "op": "e", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_ho_so:276:18", "op": "g", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "g:kiem_ho_so:276:34", "op": "g", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "g:kiem_ho_so:276:45", "op": "g", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "a:kiem_ho_so:283:15", "op": "a", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "a:kiem_ho_so:285:30", "op": "a", "ledger": "GIET", "ca": ["a205_duong_khop"]}
+{"id": "g:kiem_ho_so:285:18", "op": "g", "ledger": "GIET", "ca": ["a208_failed_nhat_quan"]}
+{"id": "g:kiem_ho_so:285:50", "op": "g", "ledger": "GIET", "ca": ["a205_duong_khop"]}
+{"id": "a:kiem_ho_so:287:19", "op": "a", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "j1:kiem_ho_so:287:19", "op": "j1", "ledger": "TUONG_DUONG", "chung_minh": "is -> ==: gia tri la None/int/type/Pattern; khong lop nao dinh nghia __eq__ khac dong nhat (Pattern bang nhau khi cung mau+co, RE_SKIP_CU khac mau)"}
+{"id": "c:kiem_ho_so:288:20", "op": "c", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "a:kiem_ho_so:291:19", "op": "a", "ledger": "GIET", "ca": ["a205_duong_khop"]}
+{"id": "c:kiem_ho_so:292:20", "op": "c", "ledger": "GIET", "ca": ["a206_duong_lech"]}
+{"id": "g:kiem_ho_so:293:17", "op": "g", "ledger": "GIET", "ca": ["a216_hop_le_theo_token"]}
+{"id": "g:error:302:16", "op": "g", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "g:main:312:18", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "e:main:316:15", "op": "e", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "e:main:316:32", "op": "e", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "d:main:321:19", "op": "d", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:323:18", "op": "g", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "g:main:326:20", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:326:28", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:326:50", "op": "g", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "g:main:331:72", "op": "g", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "e:main:336:19", "op": "e", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "e:main:338:20", "op": "e", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "e:main:338:33", "op": "e", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:doc_danh_gia:51:22", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:doc_danh_gia:52:37", "op": "g", "ledger": "GIET", "ca": ["a102_ca_kho_tai_base"]}
+{"id": "k2:doc_danh_gia:54:19", "op": "k2", "ledger": "GIET", "ca": ["a102_ca_kho_tai_base"]}
+{"id": "g:doc_danh_gia:55:26", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "e:doc_danh_gia:59:39", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:68:26", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:doc_danh_gia:69:15", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:69:47", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:69:63", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:69:83", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:69:96", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:69:108", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i7:doc_danh_gia:70:19", "op": "i7", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "i7:doc_danh_gia:70:46", "op": "i7", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "b:doc_danh_gia:71:33:ve0", "op": "b", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "b:doc_danh_gia:71:33:ve1", "op": "b", "ledger": "GIET", "ca": ["a118_k1_k2_quet_he_thong"]}
+{"id": "g:doc_danh_gia:72:37", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:doc_danh_gia:72:43", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "j1:doc_danh_gia:72:43", "op": "j1", "ledger": "TUONG_DUONG", "chung_minh": "is -> ==: gia tri la None/int/type/Pattern; khong lop nao dinh nghia __eq__ khac dong nhat (Pattern bang nhau khi cung mau+co, RE_SKIP_CU khac mau)"}
+{"id": "i7:doc_danh_gia:73:19", "op": "i7", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:chon_provenance:97:70", "op": "g", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "g:chon_provenance:100:67", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:102:26", "op": "g", "ledger": "GIET", "ca": ["a112_symlink"]}
+{"id": "a:chon_provenance:105:44", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:107:29", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a2:chon_provenance:112:40", "op": "a2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:135:18", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:135:47", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:139:33", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:140:51", "op": "g", "ledger": "GIET", "ca": ["a117_loi_duyet_va_job_trung"]}
+{"id": "g:_kiem_tep:142:72", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:143:18", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:143:80", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:_kiem_tep:145:20:ve0", "op": "b", "ledger": "GIET", "ca": ["a119_k3_k6_du_lieu_di_dang"]}
+{"id": "b:_kiem_tep:145:20:ve1", "op": "b", "ledger": "GIET", "ca": ["a114_provenance_tu_khai_du"]}
+{"id": "g:_kiem_tep:153:25", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:156:18", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:156:31", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:156:48", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:156:67", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:_kiem_tep:157:28:ve0", "op": "b", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:_kiem_tep:157:28:ve1", "op": "b", "ledger": "GIET", "ca": ["a119_k3_k6_du_lieu_di_dang"]}
+{"id": "g:_kiem_tep:157:56", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:158:24", "op": "g", "ledger": "GIET", "ca": ["a106_danh_tinh_job"]}
+{"id": "g:_kiem_tep:159:13", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:159:46", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:160:24", "op": "g", "ledger": "GIET", "ca": ["a113_ket_luan"]}
+{"id": "g:_kiem_tep:162:24", "op": "g", "ledger": "GIET", "ca": ["a105_bam_log"]}
+{"id": "g:_kiem_tep:164:13", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:173:13", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:177:54", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:loi_khai:196:15", "op": "g", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "e:token:204:27", "op": "e", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "g:la_landed:217:77", "op": "g", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i7:la_landed:220:51", "op": "i7", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "a:la_landed:220:107", "op": "a", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "j1:la_landed:220:107", "op": "j1", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "j2:la_landed:220:107", "op": "j2", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "g:kiem_mien:252:29", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:252:62", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:252:92", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "k1:kiem_mien:254:82", "op": "k1", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "e:kiem_mien:262:32", "op": "e", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_ho_so:274:31", "op": "g", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "g:kiem_ho_so:280:28", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_ho_so:285:36", "op": "g", "ledger": "GIET", "ca": ["a208_failed_nhat_quan"]}
+{"id": "b:main:326:30:ve0", "op": "b", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "b:main:326:30:ve1", "op": "b", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "g:main:327:16", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:327:29", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "e:main:327:26", "op": "e", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "e:main:327:39", "op": "e", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:337:84", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:337:89", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:337:100", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:doc_danh_gia:54:30", "op": "g", "ledger": "GIET", "ca": ["a102_ca_kho_tai_base"]}
+{"id": "e:doc_danh_gia:56:20", "op": "e", "ledger": "GIET", "ca": ["a102_ca_kho_tai_base"]}
+{"id": "g:doc_danh_gia:67:31", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:67:58", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:69:29", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:doc_danh_gia:71:33", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:doc_danh_gia:71:60", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:71:19", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:doc_danh_gia:72:15", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:76:22", "op": "g", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "g:chon_provenance:97:23", "op": "g", "ledger": "GIET", "ca": ["a116_yaml_la_trong_thu_muc"]}
+{"id": "g:chon_provenance:105:63", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:107:56", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:108:53", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:108:74", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:109:37", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:109:67", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:109:107", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:112:40", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:112:72", "op": "g", "ledger": "GIET", "ca": ["a108_neo"]}
+{"id": "g:_kiem_tep:139:62", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:142:55", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:_kiem_tep:145:45:ve0", "op": "b", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:_kiem_tep:145:45:ve1", "op": "b", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:157:19", "op": "g", "ledger": "GIET", "ca": ["a123_thu_tu_va_dinh_dang"]}
+{"id": "g:_kiem_tep:161:82", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:166:30", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:167:35", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:177:32", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:la_landed:217:20", "op": "g", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "d:la_landed:220:126", "op": "d", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "g:kiem_mien:242:37", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_mien:242:69", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_ho_so:283:22", "op": "g", "ledger": "GIET", "ca": ["a123_thu_tu_va_dinh_dang"]}
+{"id": "g:kiem_ho_so:283:32", "op": "g", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "g:kiem_ho_so:284:35", "op": "g", "ledger": "GIET", "ca": ["a203_duong_khong_tep"]}
+{"id": "g:main:326:46", "op": "g", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "g:main:333:89", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:main:335:20", "op": "g", "ledger": "GIET", "ca": ["a214_vong_tham_chieu"]}
+{"id": "g:main:335:41", "op": "g", "ledger": "GIET", "ca": ["a214_vong_tham_chieu"]}
+{"id": "g:main:335:85", "op": "g", "ledger": "GIET", "ca": ["a214_vong_tham_chieu"]}
+{"id": "a2:main:337:62", "op": "a2", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "e:doc_danh_gia:52:18", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:67:21", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:67:48", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:72:29", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:74:23", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:74:41", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:105:50", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:chon_provenance:107:18", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:145:45", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "b:_kiem_tep:146:49:ve0", "op": "b", "ledger": "GIET", "ca": ["a119_k3_k6_du_lieu_di_dang"]}
+{"id": "b:_kiem_tep:146:49:ve1", "op": "b", "ledger": "GIET", "ca": ["a114_provenance_tu_khai_du"]}
+{"id": "g:_kiem_tep:157:34", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:161:66", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:164:36", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:173:42", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:la_landed:220:113", "op": "g", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "g:kiem_mien:252:50", "op": "g", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "g:kiem_mien:254:33", "op": "g", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "g:kiem_ho_so:288:39", "op": "g", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "g:kiem_ho_so:292:39", "op": "g", "ledger": "GIET", "ca": ["a206_duong_lech"]}
+{"id": "g:kiem_ho_so:292:61", "op": "g", "ledger": "GIET", "ca": ["a207_hai_tep"]}
+{"id": "g:kiem_ho_so:292:65", "op": "g", "ledger": "GIET", "ca": ["a206_duong_lech"]}
+{"id": "g:kiem_ho_so:292:70", "op": "g", "ledger": "GIET", "ca": ["a206_duong_lech"]}
+{"id": "g:main:331:28", "op": "g", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "g:main:337:24", "op": "g", "ledger": "GIET", "ca": ["a123_thu_tu_va_dinh_dang"]}
+{"id": "g:main:337:36", "op": "g", "ledger": "GIET", "ca": ["a123_thu_tu_va_dinh_dang"]}
+{"id": "g:main:337:40", "op": "g", "ledger": "GIET", "ca": ["a123_thu_tu_va_dinh_dang"]}
+{"id": "g:main:337:62", "op": "g", "ledger": "GIET", "ca": ["a217_cli_tham_so_va_ma_thoat"]}
+{"id": "g:main:337:78", "op": "g", "ledger": "GIET", "ca": ["a210_cli"]}
+{"id": "g:doc_danh_gia:71:49", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:doc_danh_gia:71:76", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:74:48", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:145:68", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:146:49", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "a:_kiem_tep:146:86", "op": "a", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:kiem_mien:242:66", "op": "e", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "e:kiem_mien:247:26", "op": "e", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "b:kiem_ho_so:292:72:ve0", "op": "b", "ledger": "GIET", "ca": ["a206_duong_lech"]}
+{"id": "b:kiem_ho_so:292:72:ve1", "op": "b", "ledger": "GIET", "ca": ["a206_duong_lech"]}
+{"id": "g:main:326:30", "op": "g", "ledger": "GIET", "ca": ["a123_thu_tu_va_dinh_dang"]}
+{"id": "e:doc_danh_gia:71:39", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:71:66", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:74:59", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "e:doc_danh_gia:74:71", "op": "e", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:145:51", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:146:72", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:kiem_ho_so:292:88", "op": "g", "ledger": "GIET", "ca": ["a206_duong_lech"]}
+{"id": "g:_kiem_tep:146:55", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:_kiem_tep:146:92", "op": "g", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "g:kiem_ho_so:292:72", "op": "g", "ledger": "GIET", "ca": ["a123_thu_tu_va_dinh_dang"]}
+{"id": "h1:BO_SINH:0", "op": "h1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "h1:BO_SINH:1", "op": "h1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "h1:BO_SINH:2", "op": "h1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "h2:BO_SINH", "op": "h2", "ledger": "TUONG_DUONG", "chung_minh": "them '~them~' vao tap: mien gia tri (hex 64 / token [a-z_]+ / khoa _chuan chi chu-so) khong bao gio chua '~'"}
+{"id": "h1:CHECK_BAT_BUOC_TEN:0", "op": "h1", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "h1:CHECK_BAT_BUOC_TEN:1", "op": "h1", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "h1:CHECK_BAT_BUOC_TEN:2", "op": "h1", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "h1:CHECK_BAT_BUOC_TEN:3", "op": "h1", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "h1:CHECK_BAT_BUOC_TEN:4", "op": "h1", "ledger": "GIET", "ca": ["a109_check_bat_buoc"]}
+{"id": "h2:CHECK_BAT_BUOC_TEN", "op": "h2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "h1:PHI_LOI_KHAI:0", "op": "h1", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "h1:PHI_LOI_KHAI:1", "op": "h1", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "h1:PHI_LOI_KHAI:2", "op": "h1", "ledger": "GIET", "ca": ["a201_loi_khai"]}
+{"id": "h2:PHI_LOI_KHAI", "op": "h2", "ledger": "TUONG_DUONG", "chung_minh": "them '~them~' vao tap: mien gia tri (hex 64 / token [a-z_]+ / khoa _chuan chi chu-so) khong bao gio chua '~'"}
+{"id": "h1:TOKEN:0", "op": "h1", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "h1:TOKEN:1", "op": "h1", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "h1:TOKEN:2", "op": "h1", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "h1:TOKEN:3", "op": "h1", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "h1:TOKEN:4", "op": "h1", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "h1:TOKEN:5", "op": "h1", "ledger": "GIET", "ca": ["a212_landed_khong_loi_khai"]}
+{"id": "h1:TOKEN:6", "op": "h1", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "h2:TOKEN", "op": "h2", "ledger": "TUONG_DUONG", "chung_minh": "them '~them~' vao tap: mien gia tri (hex 64 / token [a-z_]+ / khoa _chuan chi chu-so) khong bao gio chua '~'"}
+{"id": "i2:RE_DAU:lop@28 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i2:RE_DAU:lop@45 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i1:RE_DAU:lop@59 bo '0-9'", "op": "i1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i1:RE_DAU:lop@59 bo 'a-f'", "op": "i1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i2:RE_DAU:lop@59 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i1:RE_DAU:lop@105 bo '0-9'", "op": "i1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i1:RE_DAU:lop@105 bo 'a-f'", "op": "i1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i2:RE_DAU:lop@105 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i4:RE_DAU:luong_tu@33 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i4:RE_DAU:luong_tu@50 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i4:RE_DAU:luong_tu@67 {40}→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i4:RE_DAU:luong_tu@113 {64}→*", "op": "i4", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "i5:RE_DAU:escape@77 \\(→.", "op": "i5", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i5:RE_DAU:escape@92 \\.→.", "op": "i5", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i5:RE_DAU:escape@118 \\)→.", "op": "i5", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i2:RE_JOB:lop@5 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i1:RE_JOB:lop@22 bo '^'", "op": "i1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i1:RE_JOB:lop@22 bo '\\\\]'", "op": "i1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i2:RE_JOB:lop@22 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i1:RE_JOB:lop@44 bo 'a-z'", "op": "i1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i1:RE_JOB:lop@44 bo '_'", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i2:RE_JOB:lop@44 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i1:RE_JOB:lop@65 bo '0-9'", "op": "i1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i1:RE_JOB:lop@65 bo 'a-f'", "op": "i1", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i2:RE_JOB:lop@65 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i3:RE_JOB:nhanh@82 bo 'passed'", "op": "i3", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i3:RE_JOB:nhanh@82 bo 'failed'", "op": "i3", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i3:RE_JOB:nhanh@82 bo 'not_measured'", "op": "i3", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i4:RE_JOB:luong_tu@10 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i4:RE_JOB:luong_tu@15 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i4:RE_JOB:luong_tu@50 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i4:RE_JOB:luong_tu@73 {64}→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i5:RE_JOB:escape@19 \\[→.", "op": "i5", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i5:RE_JOB:escape@24 \\]→.", "op": "i5", "ledger": "GIET", "ca": ["a106_danh_tinh_job"]}
+{"id": "i5:RE_JOB:escape@29 \\]→.", "op": "i5", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i2:RE_SKIP_CU:lop@5 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a103_bo_phan_tich"]}
+{"id": "i4:RE_SKIP_CU:luong_tu@10 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i4:RE_SKIP_CU:luong_tu@15 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i5:RE_SKIP_CU:escape@28 \\(→.", "op": "i5", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i5:RE_SKIP_CU:escape@40 \\)→.", "op": "i5", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i2:RE_SKIP_V3:lop@5 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a107_tap_job"]}
+{"id": "i4:RE_SKIP_V3:luong_tu@10 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i4:RE_SKIP_V3:luong_tu@15 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i5:RE_SKIP_V3:escape@44 \\(→.", "op": "i5", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i5:RE_SKIP_V3:escape@60 \\)→.", "op": "i5", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i2:RE_MOC:lop@49 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i2:RE_MOC:lop@58 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i3:RE_MOC:nhanh@17 bo 'passed'", "op": "i3", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i3:RE_MOC:nhanh@17 bo 'failed'", "op": "i3", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i3:RE_MOC:nhanh@17 bo 'not_measured'", "op": "i3", "ledger": "GIET", "ca": ["a101_sau_fixture_that"]}
+{"id": "i4:RE_MOC:luong_tu@54 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i4:RE_MOC:luong_tu@63 +→*", "op": "i4", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i5:RE_MOC:escape@46 \\(→.", "op": "i5", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i5:RE_MOC:escape@87 \\)→.", "op": "i5", "ledger": "GIET", "ca": ["a120_ngu_phap_dong"]}
+{"id": "i1:RE_TOKEN:lop@0 bo ' '", "op": "i1", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "i1:RE_TOKEN:lop@0 bo '\\\\t'", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i2:RE_TOKEN:lop@0 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "i1:RE_TOKEN:lop@7 bo 'a-z'", "op": "i1", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "i1:RE_TOKEN:lop@7 bo '_'", "op": "i1", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i2:RE_TOKEN:lop@7 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "i1:RE_TOKEN:lop@20 bo ' '", "op": "i1", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "i1:RE_TOKEN:lop@20 bo '\\\\t'", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i1:RE_TOKEN:lop@20 bo '—'", "op": "i1", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i1:RE_TOKEN:lop@20 bo '\\\\-'", "op": "i1", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i1:RE_TOKEN:lop@20 bo ':'", "op": "i1", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "i1:RE_TOKEN:lop@20 bo '('", "op": "i1", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i1:RE_TOKEN:lop@20 bo ','", "op": "i1", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i1:RE_TOKEN:lop@20 bo '.'", "op": "i1", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i1:RE_TOKEN:lop@20 bo ';'", "op": "i1", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i2:RE_TOKEN:lop@20 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "i4:RE_TOKEN:luong_tu@13 +→*", "op": "i4", "ledger": "TUONG_DUONG", "chung_minh": "([a-z_]+)->([a-z_]*): nhom rong cho m[1]='' khong thuoc TOKEN => None, trung ket qua khi + khong khop"}
+{"id": "i6:RE_TOKEN:lookaround@15 bo", "op": "i6", "ledger": "GIET", "ca": ["a202_token"]}
+{"id": "i1:RE_TEP_DG:lop@0 bo 'A-Z'", "op": "i1", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i1:RE_TEP_DG:lop@0 bo 'a-z'", "op": "i1", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "i1:RE_TEP_DG:lop@0 bo '0-9'", "op": "i1", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "i1:RE_TEP_DG:lop@0 bo '_'", "op": "i1", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "i1:RE_TEP_DG:lop@0 bo '.'", "op": "i1", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "i1:RE_TEP_DG:lop@0 bo '/'", "op": "i1", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "i1:RE_TEP_DG:lop@0 bo '-'", "op": "i1", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "i2:RE_TEP_DG:lop@0 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a204_duong_dan"]}
+{"id": "i2:RE_TEP_DG:lop@37 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a207_hai_tep"]}
+{"id": "i4:RE_TEP_DG:luong_tu@42 +→*", "op": "i4", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i5:RE_TEP_DG:escape@43 \\.→.", "op": "i5", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i2:RE_KHOI_LANDED:lop@7 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i4:RE_KHOI_LANDED:luong_tu@12 {8}→*", "op": "i4", "ledger": "GIET", "ca": ["a121_token_tep_khoa_landed"]}
+{"id": "i1:RE_URL:lop@40 bo 'A-Z'", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i1:RE_URL:lop@40 bo 'a-z'", "op": "i1", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i1:RE_URL:lop@40 bo '0-9'", "op": "i1", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i1:RE_URL:lop@40 bo '.'", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i1:RE_URL:lop@40 bo '_'", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i1:RE_URL:lop@40 bo '~'", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i1:RE_URL:lop@40 bo '/'", "op": "i1", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i1:RE_URL:lop@40 bo '%'", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i1:RE_URL:lop@40 bo '-'", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i2:RE_URL:lop@40 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i2:RE_URL:lop@74 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i4:RE_URL:luong_tu@79 +→*", "op": "i4", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i5:RE_URL:escape@14 \\.→.", "op": "i5", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i1:RE_MIEN:lop@19 bo '0-9'", "op": "i1", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i1:RE_MIEN:lop@19 bo 'a-f'", "op": "i1", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i2:RE_MIEN:lop@19 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i1:RE_MIEN:lop@37 bo 'a-z'", "op": "i1", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i1:RE_MIEN:lop@37 bo '0-9'", "op": "i1", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i1:RE_MIEN:lop@37 bo ','", "op": "i1", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i1:RE_MIEN:lop@37 bo '.'", "op": "i1", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i1:RE_MIEN:lop@37 bo '-'", "op": "i1", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i2:RE_MIEN:lop@37 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i1:RE_MIEN:lop@58 bo '^'", "op": "i1", "ledger": "GIET", "ca": ["a209_mien"]}
+{"id": "i1:RE_MIEN:lop@58 bo ' '", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i1:RE_MIEN:lop@58 bo '\\\\t'", "op": "i1", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i2:RE_MIEN:lop@58 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a131_ngu_phap_ascii_dong"]}
+{"id": "i2:RE_MIEN:lop@74 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i2:RE_MIEN:lop@83 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i2:RE_MIEN:lop@92 thanh .", "op": "i2", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i4:RE_MIEN:luong_tu@27 {40}→*", "op": "i4", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i4:RE_MIEN:luong_tu@48 +→*", "op": "i4", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i4:RE_MIEN:luong_tu@79 {4}→*", "op": "i4", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i4:RE_MIEN:luong_tu@88 {2}→*", "op": "i4", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}
+{"id": "i4:RE_MIEN:luong_tu@97 {2}→*", "op": "i4", "ledger": "GIET", "ca": ["a122_mien_ma_tran"]}

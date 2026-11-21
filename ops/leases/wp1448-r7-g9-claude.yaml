@@ -190,5 +190,7 @@
       ]
     }
   ],
-  "size": "nang_tran r7: 32 files / 7000 added on the delivered candidate vs base 64fa515"
+  "size": "nang_tran r7: 32 files / 7000 added on the delivered candidate vs base 64fa515",
+  "da_bi_thay_the": "wp1448-r7-g10-claude",
+  "da_bi_thay_the_note": "New H 7dcaa20 + OID40 spec_ref (7064595262)."
 }

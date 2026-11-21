@@ -1,0 +1,15 @@
+M1_quet_trong_cay_lam_viec FAILED 6 EXPECTED_SET_MATCH True
+M2_bo_kiem_B_thuoc_anh_chup FAILED 3 EXPECTED_SET_MATCH True
+M3_nap_lp_tu_cay_lam_viec FAILED 1 EXPECTED_SET_MATCH True
+M4_bo_policy_tren_master_V FAILED 2 EXPECTED_SET_MATCH True
+M5_bo_policy_doi_trong_B_master FAILED 4 EXPECTED_SET_MATCH True
+M5b_bo_m_cua_log FAILED 2 EXPECTED_SET_MATCH True
+M6_bo_tu_chay_lai_voi_I FAILED 3 EXPECTED_SET_MATCH True
+M7_bo_kiem_vi_tri_pyyaml FAILED 2 EXPECTED_SET_MATCH True
+M8_bo_kiem_moi_module FAILED 1 EXPECTED_SET_MATCH True
+M9a_bo_kiem_git_truoc_T1 FAILED 1 EXPECTED_SET_MATCH True
+M9b_bo_kiem_git_sau_T1 FAILED 1 EXPECTED_SET_MATCH True
+M10_git_cuc_bo_dung_moi_truong_nguoi_goi FAILED 1 EXPECTED_SET_MATCH True
+M11_bo_T6 FAILED 1 EXPECTED_SET_MATCH True
+M12_kiem_to_tien_trong_clone FAILED 1 EXPECTED_SET_MATCH True
+TOTAL_MUTANTS 14 MATCH 14

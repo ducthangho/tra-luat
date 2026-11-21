@@ -1,0 +1,115 @@
+[
+  {
+    "name": "M1_quet_trong_cay_lam_viec",
+    "failed": [
+      "rieng_nhanh_cuc_bo",
+      "rieng_nhanh_cuc_bo_sau_dang",
+      "rieng_packed_refs",
+      "rieng_remote_phu",
+      "rieng_remote_phu_sau_dang",
+      "rieng_replace"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M2_bo_kiem_B_thuoc_anh_chup",
+    "failed": [
+      "b_la_sha_rieng",
+      "v_graft_qua_bien_moi_truong",
+      "v_graft_trong_clone"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M3_nap_lp_tu_cay_lam_viec",
+    "failed": [
+      "lp_cay_lam_viec_bi_sua"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M4_bo_policy_tren_master_V",
+    "failed": [
+      "policy_co_mat",
+      "schema_policy_co_mat"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M5_bo_policy_doi_trong_B_master",
+    "failed": [
+      "e_policy_qua_nhanh_phu_merge",
+      "e_policy_them_roi_xoa_sau_B",
+      "e_policy_xoa_sau_B",
+      "e_policy_xoa_trong_commit_gop"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M5b_bo_m_cua_log",
+    "failed": [
+      "e_policy_qua_nhanh_phu_merge",
+      "e_policy_xoa_trong_commit_gop"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M6_bo_tu_chay_lai_voi_I",
+    "failed": [
+      "f_khong_I_pyc_khong_nguon",
+      "f_khong_I_pythonpath_clone",
+      "f_khong_I_script_trong_clone"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M7_bo_kiem_vi_tri_pyyaml",
+    "failed": [
+      "f_pth_yaml_trong_clone",
+      "f_thieu_pyyaml"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M8_bo_kiem_moi_module",
+    "failed": [
+      "f_pth_import_module_clone"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M9a_bo_kiem_git_truoc_T1",
+    "failed": [
+      "g_git_trong_clone"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M9b_bo_kiem_git_sau_T1",
+    "failed": [
+      "g_git_cay_chinh_tu_worktree_phu"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M10_git_cuc_bo_dung_moi_truong_nguoi_goi",
+    "failed": [
+      "v_graft_qua_bien_moi_truong"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M11_bo_T6",
+    "failed": [
+      "t6_may_chu_doi_trong_luc_do"
+    ],
+    "expected_set_match": true
+  },
+  {
+    "name": "M12_kiem_to_tien_trong_clone",
+    "failed": [
+      "v_graft_trong_clone"
+    ],
+    "expected_set_match": true
+  }
+]

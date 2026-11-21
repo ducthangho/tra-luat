@@ -1,0 +1,46 @@
+RAW_MATCHER policy_co_mat 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER tien_to_thu_muc 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER tien_to_khong_gach 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER khac_kieu_chu 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER chi_effective 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER planned_gach_nguoc 0 NGƯỜI_GIỮ 0: không có
+RAW_MATCHER lien_ket_thu_muc 0 NGƯỜI_GIỮ 0: không có
+/tmp/claude-0/-home-user-tra-luat/1428173d-f5d8-5c81-a6c4-b24675398aaa/scratchpad/rv7.h8Ng/out/prototype/.claude/dev/packet_loop_test.py:3811: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+NEW_CASES 57 NEW_MUTANTS 26 TARGETED 57 MISSING []
+MARKER inv_bo_kiem_duoi_goc OCCURRENCES 1 TARGETS 1
+MARKER inv_bo_che_khong_render OCCURRENCES 1 TARGETS 2
+MARKER inv_bo_chan_html OCCURRENCES 1 TARGETS 1
+MARKER inv_bo_kiem_mot_muc OCCURRENCES 1 TARGETS 1
+MARKER inv_bo_dia_chi OCCURRENCES 1 TARGETS 1
+MARKER inv_bo_hien_o_dia_chi OCCURRENCES 1 TARGETS 1
+MARKER inv_bo_kiem_duy_nhat OCCURRENCES 1 TARGETS 1
+MARKER inv_duy_nhat_lech_so OCCURRENCES 1 TARGETS 5
+MARKER inv_dem_ban_ca_vung_che OCCURRENCES 1 TARGETS 1
+MARKER inv_doc_qua_text OCCURRENCES 1 TARGETS 9
+MARKER inv_tach_dong_splitlines OCCURRENCES 1 TARGETS 8
+MARKER inv_cat_cuoi_muc OCCURRENCES 1 TARGETS 5
+MARKER inv_dong_trang_la_khoang_trang OCCURRENCES 1 TARGETS 2
+MARKER inv_khoi_rong_tinh_la_khoi OCCURRENCES 1 TARGETS 1
+MARKER inv_bo_kiem_id_ngoai OCCURRENCES 1 TARGETS 6
+MARKER inv_id_chi_dang_chuan OCCURRENCES 1 TARGETS 2
+MARKER inv_id_khong_chuan_hoa OCCURRENCES 1 TARGETS 3
+MARKER inv_doctrine_scan_bo_goi OCCURRENCES 1 TARGETS 52
+MARKER inv_bo_khoa_K01 OCCURRENCES 1 TARGETS 8
+MARKER inv_bo_khoa_K02 OCCURRENCES 1 TARGETS 4
+MARKER inv_bo_khoa_K03 OCCURRENCES 1 TARGETS 6
+MARKER inv_bo_khoa_K04 OCCURRENCES 1 TARGETS 4
+MARKER inv_bo_khoa_K05 OCCURRENCES 1 TARGETS 9
+MARKER inv_bo_khoa_K06 OCCURRENCES 1 TARGETS 4
+MARKER inv_bo_khoa_K07 OCCURRENCES 1 TARGETS 3
+MARKER t1466_fixture_ve_trung_tinh OCCURRENCES 1 TARGETS 2
+MUTANT_LOG moi OK 26 PASSED_FINAL True KILL_COUNTS {'inv_bo_kiem_duoi_goc': '1', 'inv_bo_che_khong_render': '2', 'inv_bo_chan_html': '1', 'inv_bo_kiem_mot_muc': '1', 'inv_bo_dia_chi': '1', 'inv_bo_hien_o_dia_chi': '1', 'inv_bo_kiem_duy_nhat': '1', 'inv_duy_nhat_lech_so': '5', 'inv_dem_ban_ca_vung_che': '1', 'inv_doc_qua_text': '9', 'inv_tach_dong_splitlines': '8', 'inv_cat_cuoi_muc': '5', 'inv_dong_trang_la_khoang_trang': '2', 'inv_khoi_rong_tinh_la_khoi': '1', 'inv_bo_kiem_id_ngoai': '6', 'inv_id_chi_dang_chuan': '2', 'inv_id_khong_chuan_hoa': '3', 'inv_doctrine_scan_bo_goi': '52', 'inv_bo_khoa_K01': '8', 'inv_bo_khoa_K02': '4', 'inv_bo_khoa_K03': '6', 'inv_bo_khoa_K04': '4', 'inv_bo_khoa_K05': '9', 'inv_bo_khoa_K06': '4', 'inv_bo_khoa_K07': '3', 't1466_fixture_ve_trung_tinh': '2'}
+BASELINE moi ['nền: 60/60 đạt · BỎ QUA: 0']
+MUTANT_LOG cu OK 21 PASSED_FINAL True KILL_COUNTS {'tha_vo_dieu_kien_nhu_generation_4': '43', 'mo_lai_mien_tru_ngat_dong': '37', 'ha_NFKC_ve_NFC': '7', 'bo_loc_ky_tu_dinh_dang_Cf': '6', 'bo_giai_html_entity': '4', 'bo_gap_dong_tu': '4', 'bo_gap_mui_ten': '1', 'bo_bo_trang_tri_va_nhay': '1', 'bo_gop_phan_cach': '2', 'bo_go_tag_html': '5', 'bo_go_comment_html': '2', 'tra_regex_tag_ve_cam_ky_tu': '3', 'bo_ngoac_long_trong_link': '1', 'bo_rut_text_link_markdown': '1', 'bo_go_backslash_escape': '1', 'bo_go_dau_dong_khi_phang_hoa': '3', 'ha_NFKC_va_bo_moi_duong_gop_nbsp': '1', 'ha_NFKC_va_bo_casefold': '1', 'go_han_cum_khoi_danh_sach': '1', 'bo_kiem_chep_protocol': '3', 'nang_nguong_chep_protocol_len_50': '1'}
+BASELINE cu ['nền: 132/132 đạt · BỎ QUA: 0']
+HISTORICAL_CLASSES 18 18
+CJK code base 0 []
+CJK code prototype 0 []
+CJK test base 4 ['内', '容', '文', '書']
+CJK test prototype 4 ['内', '容', '文', '書']
+RUFF_VERSION ruff 0.16.9

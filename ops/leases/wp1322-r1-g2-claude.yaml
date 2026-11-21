@@ -17,8 +17,8 @@ recorder_is_dispatcher: false
 recorder_ghi_chu: 'phien Claude Code remote danh gia #1322 (cung phien se thi cong) ghi lease theo quyet dinh truc tiep cua chu kho trong chat; tham quyen la authority_url, khong phai lease nay'
 leased_at_utc: '2026-11-20T11:25:00Z'
 heartbeat_at: '2026-11-20T11:25:00Z'
-lease_until: '2026-11-22T11:25:00Z'
-lease_expires_at_utc: '2026-11-22T11:25:00Z'
+lease_until: '2026-11-21T00:43:31Z'
+lease_expires_at_utc: '2026-11-21T00:43:31Z'
 role: executor
 provider: anthropic_claude
 executor: anthropic_claude
@@ -79,3 +79,13 @@ prohibited_actions:
 - kill_other_session_process
 - write_outside_effective_write_set
 land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+budget_cuoi_ghi_chu: 'Ghi luc rut han (phien executor session_015GtxrcJ94fBLh2n3he2BcS). Codex: 12 loi goi tren tran 11 da nang (11 = 10 luot review offline g1+g2 tinh ca g1 luot 2 chet mang + connector 18:40Z; loi goi thu 12 = connector tu kich khi bo draft #1467 luc 23:55Z, VUOT TRAN, khong xin truoc; sach). CI Ubuntu PR: 1 luot ci.yml 44794899626 tren 7c429aa. Dot bien du: 1 luot ci-dot-bien-du.yml 44801327981 success. Windows native: Desktop DESKTOP-T9R33P2 ca bo N=1 hai ve (7c429aa, 8048551) + lap L4 5x, comment 7049377019. Loi khai co neo cua executor.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-22T11:25:00Z'
+  han_moi_utc: '2026-11-21T00:43:31Z'
+  chi_thi: 'https://github.com/ducthangho/tra-luat/pull/1467#issuecomment-7048488061 muc 4 (sau merge phien land duoc nha lease g2).'
+  ly_do: >-
+    Packet CI-PROVENANCE-SONG-SONG r1 da MERGE: PR #1467 (head 7c429aa7300ea9c5ff765521ca70bed49239a39e) merge commit f77feb5990fc4fcaa2c01c1e4cc1551328623836. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem cho write set nay luc rut.'
+  nguoi_rut: 'phien executor session_015GtxrcJ94fBLh2n3he2BcS (lap ho so land theo yeu cau chu kho trong chat)'
+  nghiem_thu: 'ai-dang-giu ops/ci_provenance_test.py sau han moi phai ra NGUOI_GIU 0.'

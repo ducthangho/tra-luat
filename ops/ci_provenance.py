@@ -574,18 +574,11 @@ def doi_ten_thu_lai(nguon, dich):
 
 _DUNG_ONEXC = sys.version_info >= (3, 12)   # `onexc` có từ 3.12; trước đó `onerror` (test chạy được cả hai nhánh)
 
-def _thu_cap(duong, e, goc):
-    """ENOTEMPTY của một thư mục mà BÊN DƯỚI có tệp vừa xoá hỏng vì `PermissionError` — hệ quả, không phải lỗi độc lập
-    (#1475 review lượt 2 F1: `rmtree` thật báo thêm lỗi này khi `unlink` một tệp con hỏng)."""
-    if not (isinstance(e, OSError) and e.errno == errno.ENOTEMPTY):
-        return False
-    cha = os.path.normcase(os.path.normpath(duong))
-    return any(os.path.normcase(os.path.normpath(d)).startswith(cha + os.sep) for d, _ in goc)
-
 def don_thu_muc(p):
     """Xoá cây thư mục tạm, cùng chính sách thử lại (#1475): mọi lỗi xoá được GOM (không nuốt câm như
-    `ignore_errors=True`); thử lại khi trên Windows có lỗi `PermissionError` và mọi lỗi còn lại chỉ là ENOTEMPTY thứ cấp của
-    chính nó (`_thu_cap`). Lỗi độc lập khác (EIO…) hay nền khác ⇒ dừng ngay. Không bao giờ ném — dọn dẹp không được đổi kết
+    `ignore_errors=True`); thử lại khi trên Windows lần dọn ấy có ≥1 `PermissionError` và mọi lỗi còn lại chỉ là ENOTEMPTY
+    (`rmtree` thật báo ENOTEMPTY ở thư mục cha khi một tệp con hỏng). Luật chỉ đọc LOẠI lỗi, không đọc hình dạng cây (sổ uỷ
+    quyền #1475, lần xét lại thứ hai). Lỗi khác (EIO…) hay nền khác ⇒ dừng ngay. Không bao giờ ném — dọn dẹp không được đổi kết
     quả của lần ghi — nhưng còn sót thì BÁO `KHONG_DON_DUOC` (lỗi của chính việc báo bị cô lập, review lượt 2 F3) và trả False."""
     for k in range(SO_LAN_THU_LAI + 1):
         loi = []
@@ -595,9 +588,9 @@ def don_thu_muc(p):
             _xoa_cay(p, onerror=lambda ham, duong, tt: loi.append((duong, tt[1])))
         if not os.path.lexists(p):
             return True
-        goc = [(d, e) for d, e in loi if isinstance(e, PermissionError)]
-        doc_lap = [(d, e) for d, e in loi if not isinstance(e, PermissionError) and not _thu_cap(d, e, goc)]
-        if not (LA_WINDOWS and goc and not doc_lap):   # dọn: chỉ thử lại PermissionError trên Windows
+        loai = {"PE" if isinstance(e, PermissionError) else "ENOTEMPTY" if isinstance(e, OSError) and e.errno == errno.ENOTEMPTY
+                else "khac" for _, e in loi}   # phân loại LẠI ở mỗi lần dọn (lỗi có thể đổi loại giữa các lần)
+        if not (LA_WINDOWS and "PE" in loai and "khac" not in loai):   # dọn: chỉ thử lại PermissionError trên Windows
             break
         if k == SO_LAN_THU_LAI:   # dọn: hết lượt
             break

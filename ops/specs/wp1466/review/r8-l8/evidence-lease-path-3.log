@@ -1,0 +1,4 @@
+COMMAND ['/usr/bin/python3', '-B', 'ops/lease_publish.py', 'ai-dang-giu', 'docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md', '--root', '.']
+rc=0
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có

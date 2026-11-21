@@ -1,0 +1,15 @@
+UTC 2026-11-21T05:53:23.516407+00:00
+SNAPSHOT_REF_PAIRS 394 394 missing 0 extra 0
+POLICY_PATHS []
+ADR_MASTER 66
+REFS_ADR_GE_0068 0 []
+LEASE .claude/dev/packet_loop.py rc 11 LAST NGƯỜI_GIỮ 1: wp1462-r8-g2-claude
+ACTIVE_LINES ['CÒN_HẠN\twp1462-r8-g2-claude\trefs/remotes/origin/ops/wp1462-r1:ops/leases/wp1462-r8-g2-claude.yaml']
+LEASE .claude/dev/packet_loop_test.py rc 11 LAST NGƯỜI_GIỮ 1: wp1462-r8-g2-claude
+ACTIVE_LINES ['CÒN_HẠN\twp1462-r8-g2-claude\trefs/remotes/origin/ops/wp1462-r1:ops/leases/wp1462-r8-g2-claude.yaml']
+LEASE docs/PROTOCOL_DA_PHIEN.md rc 0 LAST NGƯỜI_GIỮ 0: không có
+ACTIVE_LINES []
+LEASE docs/adr/0068-bat-bien-protocol-va-review-theo-lop.md rc 0 LAST NGƯỜI_GIỮ 0: không có
+ACTIVE_LINES []
+S18_TIME RECORDS 551 NOT_EXPIRED 17 TOMBSTONED 12 LIVE_RECORDS 5 LIVE_IDS ['wp1236-a-r10-g1-claude-20261121', 'wp1448-r6-g6-claude', 'wp1462-r8-g2-claude', 'wp1475-r1-g1-claude', 'wp433-r9-g5-claude']
+NOW RECORDS 551 NOT_EXPIRED 17 TOMBSTONED 12 LIVE_RECORDS 5 LIVE_IDS ['wp1236-a-r10-g1-claude-20261121', 'wp1448-r6-g6-claude', 'wp1462-r8-g2-claude', 'wp1475-r1-g1-claude', 'wp433-r9-g5-claude']

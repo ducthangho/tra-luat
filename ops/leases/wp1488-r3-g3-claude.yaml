@@ -62,15 +62,15 @@ thay_the_cho:
   - wp1488-r2-g2-claude
 thay_the_cho_ghi_chu: 'r2 mất hiệu lực vì đặc tả đổi (revision 3, bỏ tệp chờ); lease r2 còn hạn tới 15:56:13Z nên mang bia mộ da_bi_thay_the.'
 leased_at_utc: '2026-11-21T10:40:51Z'
-heartbeat_at: '2026-11-21T10:40:51Z'
+heartbeat_at: '2026-11-21T11:27:13Z'
 lease_until: '2026-11-21T16:40:51Z'
 lease_expires_at_utc: '2026-11-21T16:40:51Z'
 lease_until_ghi_chu: '6h; rút hạn sau land.'
 attempts_used: 1
 attempts_limit: 2
 budget:
-  codex_review_calls: {used: 3, reserved: 1, limit: 4}
-  codex_review_calls_ghi_chu: 'trần cả packet: r1 dùng 2 (2847860, e21001f), r2 dùng 1 (129d59b) — cả ba request_changes; lượt 4 cho head r3.'
+  codex_review_calls: {used: 4, reserved: 0, limit: 4}
+  codex_review_calls_ghi_chu: 'r1: 2847860, e21001f; r2: 129d59b; r3: 50a3566 — cả bốn request_changes (VERDICT.md). Hết trần: Review Rescue Checkpoint.'
 nang_tran:
   truc: codex_review_calls
   tran_cu: 3

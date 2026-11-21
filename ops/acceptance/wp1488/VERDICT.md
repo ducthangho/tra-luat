@@ -236,3 +236,82 @@ Kèm theo: (J) đổi kỳ vọng — PATH nội bộ và `$GITHUB_PATH` cùng l
 `42b5386` ĐỎ ở (J). Đột biến `wp1488_sh_doc_kenh_cu_ghi_muon` viết lại để đọc SAU khi móc của (C) kích hoạt (bản đầu chọn tệp
 trước lúc writer muộn ghi nên sống); nay chết ở (C). Ba đột biến wp858 (`nuot_loi_cygpath_w`, `github_path_khong_qua_cygpath`,
 `github_path_vang_khong_mac_dinh`) dời neo sang `_tl1488_ghi_github_path`. Bảng `cai_sh` (mọi packet): 93/93.
+
+## Lượt 4 — Codex (OpenAI), `codex_cli`, read-only · lời gọi 4/4 (hết trần cả packet) · đặc tả r3
+
+- Exact head được review: `50a3566c7b09c5bcfe5ea4071ec49a2aaeab265e` (mã trùng `f8747c4`). Chạy 2026-11-21T11:14:42Z → 11:26:54Z, rc 0.
+- sha256 `scratch/VERDICT.md`: `a7a82a2621877e6151e6e3be0649af01e12a456c3897c73ccc6b59c81217117a`.
+- Kết luận: `request_changes` (1 P2, 2 P3). Các finding lượt 3 reviewer xác nhận đã đóng (bảng probe trong nguyên văn).
+
+### Nguyên văn
+
+> # Review độc lập WP1488 r3 · lượt 4/4
+> 
+> reviewed_sha: 50a3566c7b09c5bcfe5ea4071ec49a2aaeab265e
+> verdict: request_changes
+> reviewer: codex (OpenAI), codex_cli, read-only
+> 
+> HEAD khớp `HEAD_SHA.txt`. Cây sạch và base `8656dc0176ed108e12c209ba55c91a1f6f9d612f` là tổ tiên. SHA-256 đặc tả khớp `691a710c1fea5309f677c2a7bf38815897befeb7bb248275b17c3df952f216d7`. Diff nằm trong write set. Sau `f8747c48b52573a8f64c4dc2a190031f67e1f83a` chỉ đổi RESULTS và VERDICT. Kiểm lease r3 cục bộ qua.
+> 
+> ## Findings
+> 
+> - **P2 · `ops/cai_cong_cu.sh:222–224` · Nhận nhầm lượt dùng `--win`.** Trên stub Windows, `chon_thu_muc_chay_duoc "--win" git …` hoặc dùng tab trước `--win` ghi đường dẫn POSIX, rc 0. Base ghi đường đã đổi `W:<dir>` vì bộ chọn nhận đối số thực. Với `: 'chon_thu_muc_chay_duoc --win git' && chon_thu_muc_chay_duoc git …`, hoặc nhánh `--win` không chạy, head vẫn đổi `W:<dir>`, còn base ghi `<dir>`. Một lần gọi thật ở giữa chuỗi, dạng literal như bản kê hiện tại, chạy đúng. Hãy lấy chế độ chuyển đổi từ thông tin gắn với **kết quả cuối thực sự được ghi**, qua cùng lần đọc kênh. Nếu cần metadata thì cập nhật hợp đồng định dạng đã đóng băng trước khi triển khai. Thêm ca stub Windows so byte cho đối số có nháy/tab và đối chứng chuỗi dữ liệu hoặc nhánh không chạy, giữ thêm ca công thức không dùng bộ chọn đi qua stdout. Năm công thức Windows hiện hành dùng đúng literal nên các ca hiện tại vẫn xanh. [Head](head-probes-final.log) · [Base](base-probes-final.log)
+> - **P3 · `ops/cai_cong_cu.sh:224–229` · Mất LF cuối trước khi kiểm dữ liệu đã đổi.** Stub `cygpath -w` trả 0 và in `W:<dir>\n\n`. Bash bỏ mọi LF ở đuôi khi lấy kết quả, helper chấp nhận và append `W:<dir>\n`. Kết quả hai dòng vượt kiểm tra B2. LF giữa hoặc CR còn nguyên thì head từ chối đúng. Hãy giữ stdout bằng sentinel trong khi kiểm mã thoát, bỏ tối đa một LF kết thúc dòng của giao thức, rồi từ chối LF/CR còn lại và payload rỗng. Mở rộng W với stub in thêm một LF ở đuôi, LF giữa và CR, chốt rc 1, stderr và tệp rỗng. [Probe](head-probes-final.log)
+> - **P3 · `.claude/dev/launcher_test.py:12052,12171–12185,18336` · Chưa khóa một lần đọc trên đường thành công và việc kiểm dữ liệu Windows sau đổi.** K1/K2 kiểm đường lỗi đọc đầu. C chốt writer muộn, không đếm lần đọc. Đột biến riêng đọc thêm đúng một lần chỉ sau lần đầu thành công sống qua r1488. Đột biến riêng chỉ kiểm LF/CR trong DICH, bỏ kiểm đầu ra `cygpath`, cũng sống. Hãy đếm lượt mở kênh ở đường thành công và thêm stub trả hai payload phân biệt, hoặc thành công lần đầu rồi lỗi lần hai. Bổ sung W như trên và gắn mỗi đột biến riêng vào ca đích. [Đột biến riêng](detail-own.log)
+> 
+> ## B1–B6
+> 
+> - B1/B2/B4. Trong `cai_cong_cu.sh` chỉ có một lệnh append, ở helper sau vòng retry và trong nhánh `RC_CAI=0`. Bộ chọn chỉ ghi kênh kết quả. `cat -- "$KENH_KQ"` chỉ đọc một lần, giữ LF qua sentinel, rồi hai nhánh dùng cùng `KQ`. Mỗi retry dùng tệp riêng. C đợi writer cũ ghi thành công trong lần đọc kênh cuối thật. Mỗi lượt source có `TAM_CAI` mới. Công thức thật của actionlint gọi `ops/cai_actionlint.sh:226`, tự append sau kiểm phiên bản. Đường ghi đó có từ base và nằm ngoài thay đổi stdout fallback theo §5. Các công thức selector hiện hành do helper ghi đúng một lần. Probe postcheck cho công thức rc 0 rồi kiểm cuối rc 3 ở cả base và head, với một dòng đã ghi. Điều kiện B2 là mã của công thức cuối.
+> - B3. Lỗi chuyển đổi, từ chối hoặc append thất bại đều báo stderr và đặt `RC_CAI=1` trước nhánh lỗi. E và I đo đích là thư mục. I đi tiếp qua công cụ tùy chọn và kết thúc khác 0 ở công cụ bắt buộc, với hai chẩn đoán. Lỗi đọc kênh trực tiếp giữ rc 7, kể cả nếu cat in đủ rồi lỗi. Các lệnh sau append nằm ngoài phạm vi chính sách đó.
+> - B5. G/H cho rc 0 và tệp rỗng trên head khi selector trước đó đã ghi DICH nhưng kết quả cuối là GIU_PATH hoặc kênh rỗng. Base từng append ở lần gọi selector đầu của chính fixture G/H. Công thức stdout thuần không gọi selector giữ rc 0, DAT và tệp rỗng ở cả hai vế. Windows không qua selector và đi qua stdout cũng giữ hành vi ấy. Một công thức tự ghi DICH được xử lý theo B2 như J. Guard đích vắng/rỗng trả trước kiểm đường dẫn hay chuyển đổi, để PATH nội bộ dùng giá trị nguyên văn. Đường dẫn dấu cách đầu/cuối, glob, dollar, nháy đơn và backslash ghi chính xác dưới `bash -a`. Cả M và probe lỗi append dưới allexport đều không thấy `KQ` hay helper trong môi trường con lượt sau. Biến local `_tl1488_w` được allexport trong phạm vi helper, nên tiến trình cygpath có thể thấy đường dẫn vốn đã có trong argv. Sau khi helper trả về, biến local hết phạm vi. Dọn tạm dùng nhánh cũ, stdout JSON do checker cũ phát.
+> - B6. YAML, launcher, hook phiên và workflow giữ nguyên theo diff.
+> 
+> ## Probe đối chứng
+> 
+> | Probe | RC installer head | Kết quả |
+> |---|---:|---|
+> | newline | 1 | Tệp rỗng, báo xuống dòng |
+> | newline-collision | 0 | DICH cuối là thư mục tiền tố `a`, ghi đúng `a\n`; rg ở đó là 8.8.8 |
+> | one-line / empty-line / extra-line / read-dir / no-staging | 0 mỗi ca | Can thiệp đúng tên staging r2 không tác động kết quả, mỗi ca ghi đúng DICH |
+> | odd | 0 | Giữ nguyên byte đường dẫn dưới allexport |
+> | missing / corrupt | 7 / 7 | Tệp rỗng, lỗi đọc / sai dạng |
+> | partial / transient | 7 / 7 | Tệp rỗng, đúng một lần cat ở mỗi ca |
+> | second-success | 0 | Một lần cat thành công, lần thứ hai nếu có sẽ lỗi, tệp đúng |
+> | postcheck | 3 | Ghi một dòng, có JSON checker; base cùng rc |
+> | Windows literal / có nháy / tab / khớp trong dữ liệu / nhánh không chạy | 0 mỗi ca | Chỉ literal đúng như base, bốn biến thể còn lại lệch như finding |
+> | Windows stdout / -w lỗi / -w rỗng / -w LF giữa / -w CR / -w LF thừa ở đuôi | 0 / 1 / 1 / 1 / 1 / 0 | Năm ca đầu tệp rỗng, ca cuối ghi đường dẫn đã đổi |
+> | allexport append-fail | 1 | Công cụ tùy chọn đi tiếp, no leak trong env của lượt sau, thư mục tạm rỗng |
+> 
+> `python scratch/probes.py head` và `python scratch/probes.py base` dùng fixture Linux và cygpath giả. Mã wrapper và mã installer nằm riêng trong log. Tôi chạy lại sau khi đổi fixture staging sang đúng tên dùng ở r2 và đặt hai executable vào đúng thư mục của công thức batch. [Head](head-probes-final.log) · [Base](base-probes-final.log)
+> 
+> ## Độ phủ và đối chiếu RESULTS.md
+> 
+> - A/A' có dấu update, rc, DAT và byte đích. B/D đo lỗi công thức và byte đích. C chốt cả hai dấu đồng bộ, rc và byte đích. E/I chốt stderr và rc ở đích là thư mục. G/H đo kết quả cuối. J chốt 9.9.9 và byte Y. L-LF/L-CR đo DICH có newline. M chốt môi trường con và hai dòng thành công. W đo stdout chuyển đổi rỗng. K1/K2 chốt rc 7, stderr và tệp rỗng. Không thấy kịch bản liệt kê nào chỉ dựng fixture rồi bỏ assertion. K1/K2 không đếm lượt đọc, A/J chỉ tìm chuỗi trong stdout thay cho parse JSON, và r1488 không chốt cleanup. Docstring và chẩn đoán C còn nhắc tệp chờ của r2 dù fixture đã đổi.
+> - **B1** có đột biến append trực tiếp và neo hình dạng. Thêm một ghi khác trong bộ chọn chưa được đo hành vi. **B2** có bỏ guard RC, ghi đôi, dòng trắng, CRLF, bỏ từ chối newline và đọc riêng trước. Còn thiếu ca đột biến đọc lần hai sau lần đầu thành công, bỏ kiểm riêng dữ liệu đã đổi, giữ sai một LF dư, phân loại nhầm cú pháp `--win`, và chỉ bỏ cổng chạy theo DICH. Ba neo wp858 đo conversion, rc của conversion và đích unset. **B3** có nuốt rc và thoát ngay, I phân biệt với errexit. Lỗi conversion hoặc từ chối riêng ở công cụ tùy chọn chưa có phép đo riêng. **B4** có đột biến chọn kênh lượt đầu sau writer muộn, chưa có mutant chọn kênh retry trung gian hoặc của source trước. **B5** có hai đột biến export và các ca G/H, chưa có mutant riêng phá GIU_PATH/stdout trong 13 mục mới. Cleanup optional có đột biến cũ wp1045. Ca cũ cũng đo đích vắng/rỗng, định dạng kênh và stdout JSON.
+> - RESULTS ghi ba đổi neo wp858 rồi liệt kê cả mục thứ tư `wp858_sh_nuot_loi_ghi_github_path`. Có bốn mục động đến helper mới. Mục thứ tư chết ở E khi gọi r1488 riêng, và có hai đích đăng ký là r858 Linux và hình dạng. Đột biến bỏ hẳn `cygpath -w` nằm ở wp858, tổng số wp1488 mới là 13.
+> - Phản chứng bằng script cũ với ca r3 hiện hành đỏ tại A trên `8656dc0`, G trên `2847860`, J trên `b7a280e` và J trên `42b5386`. Assertion ở `b7a280e` dùng kỳ vọng r3 trong phép chạy này. Lời khai lịch sử mô tả kỳ vọng r2. Probe A/B riêng tái lập base có một dòng từ lượt lỗi, head có tệp rỗng. Rc A/B lần lượt 0/1 ở cả hai vế. A parse JSON và thấy DAT. [Phản chứng](detail-old.log) · [Base](base-probes-final.log) · [Head](head-probes-final.log)
+> - 13 đột biến wp1488 đều chết bằng `TinHieuChotCa`. Theo đúng thứ tự bảng RESULTS, các chốt là A, B, I, A', A', A', I, C, L-LF, L-LF, M, M, W. Ba neo wp858 được nêu tên chết ở các đích đã khai, cả đích động lẫn hình dạng. Đột biến riêng thêm LF vật lý ở append đỏ tại A'. Hai đột biến riêng còn lại sống như nêu trong finding. [Chi tiết](detail-table.log) · [Đột biến riêng](detail-own.log)
+> - Bộ đăng ký có 454 ca và 789 đột biến trên base, 455 và 802 trên exact head. Delta +1/+13 khớp. Nếu cùng 7 mục không đo được như lời khai, số đo được tương ứng là 782 và 795. Đây là đối chiếu mẫu số đăng ký. [Base](base-registry.log) · [Head](head-registry.log)
+> 
+> ## Lệnh và mã thoát
+> 
+> - `bash scratch/preflight.sh` rc 0. Từng lệnh `rev-parse`, `cmp`, `status --porcelain`, `sha256sum -c`, `merge-base --is-ancestor`, hai lệnh diff theo yêu cầu và hai lệnh liệt kê tệp đều rc 0. `git diff --check 8656dc0..HEAD` rc 2 vì khoảng trắng cuối dòng trong trích dẫn verdict lịch sử. Cùng lệnh giới hạn ở hai tệp mã rc 0. Clone bằng `git clone -q --no-hardlinks repo scratch/<đích>`, checkout detached theo SHA và đặt `core.abbrev 7`, rc 0. `GIT_OPTIONAL_LOCKS=0 git -C repo status --porcelain` sau phép đo rc 0, rỗng. [Preflight](preflight.log)
+> - `python scratch/run.py head repeat 3` gọi `python .claude/dev/launcher_test.py --lap-ca r1488_github_path_chi_ghi_khi_thanh_cong --lan 3`. Rc 0, 3/3. Cùng wrapper trên `ab298a8`, `b7a280e`, `42b5386`, `f8747c4` với 3/2/2/2 lượt cho đúng 3/3, 2/2, 2/2, 2/2, đều rc 0. [Exact head](head-repeat.log) · [ab298a8](ab298a8-repeat.log) · [b7a280e](b7a280e-repeat.log) · [42b5386](42b5386-repeat.log) · [f8747c4](f8747c4-repeat.log)
+> - `python scratch/run.py head cases` và `python scratch/run.py base cases` chạy đủ sáu nhóm, từng ca bằng `--lap-ca TEN --lan 1`. Mỗi vế 33 lệnh rc 0 và một lệnh rc 1, wrapper rc 1. Ca lỗi duy nhất là `r858_goc_tam_tranh_to_tien_co_git`. Sandbox có `/tmp/.git`, nên ca chọn `/var/tmp` và gặp EROFS. Delta bằng 0 giữa hai vế tại đây. Executor khai 34/34 trên base khi `/tmp/.git` vắng. Bản dựng thử trước khi cập nhật neo có 33/34 theo lời khai, chưa được dựng lại. [Exact head](head-cases.log) · [Base](base-cases.log)
+> - `python scratch/run.py head checks` rc 0. `bash -n ops/cai_cong_cu.sh`, `python .claude/dev/packet_loop.py doctrine-scan --root .` và `python ops/lease_publish.py check ops/leases/wp1488-r3-g3-claude.yaml` đều rc 0. Doctrine quét 12 tệp, 0 chỗ chép, khớp RESULTS. Lease check chỉ đo cục bộ. [Log](head-checks.log)
+> - `python scratch/run.py {base,head} registry`, từng vế rc 0. `python scratch/probes.py {base,head}`, từng vế rc 0 ở cả lần đầu và lần đã sửa fixture. `python scratch/detail.py table`, `old` và `own`, mỗi wrapper rc 0. Trong log chi tiết, `rc_equiv=1` là ngoại lệ assertion được wrapper bắt, không phải mã thoát tiến trình wrapper.
+> - `python scratch/collision-json.py head` rc 1 ở lần đầu do probe đọc nhầm khóa JSON. Sau khi dùng `ban_thay.mac_dinh`, rc 0, xác nhận byte tệp đích và phiên bản 8.8.8. [Lần đầu](collision-json-initial.log) · [Lần đo](collision-json.log)
+> - `python scratch/edge.py` rc 0. Với đích unset/rỗng, installer rc 0, byte đích rỗng, PATH nội bộ tìm đúng rg 9.9.9 trong đường dẫn có LF. Ép GIU_PATH khi rg chưa DAT cho rc 3 và tệp rỗng. Kênh mất ở lượt tùy chọn thoát batch rc 7, lượt sau chưa chạy. Từ chối DICH có LF ở lượt tùy chọn cho batch rc 0, chỉ ghi dòng của công cụ bắt buộc. Hai probe batch dọn hết thư mục tạm. [Log](edge.log)
+> - `python scratch/run.py <clone> cai-sh` lọc `DOT_BIEN_HOOK` theo loại trong bộ nhớ rồi gọi `main` với `--dot-bien`. Trên `b7a280e`, `42b5386` và exact head, rc 0 mỗi vế, dòng cuối lần lượt là `DOT BIEN: 90/90 dat`, `DOT BIEN: 92/92 dat` và **`DOT BIEN: 93/93 dat`**, khớp RESULTS. Lần đầu gọi thẳng `chay_dot_bien` trên base và head cho 80/80 và 93/93, cả hai trả tuple `(0, 0)` nghĩa là 0 lỗi và 0 mục không đo được. Wrapper đầu truyền tuple vào `SystemExit` nên thoát 1, đã sửa ở lần gọi qua CLI. [Exact head](head-cai-sh.log) · [b7a280e](b7a280e-cai-sh.log) · [42b5386](42b5386-cai-sh.log) · [Base lần đầu](base-mut.log) · [Head lần đầu](head-mut.log)
+> - Probe shell `bash -a -c` định nghĩa một hàm với `local _tl1488_w="$1"` rồi so môi trường con trong và sau lời gọi, rc 0. Biến xuất hiện chỉ trong phạm vi hàm.
+> - GitHub connector đọc workflow theo exact SHA và đọc job của gate, cả hai trả thành công. Tại lần kiểm cuối, `lease-pr` success, workflow Windows skipped và `gate` in progress. Kết quả này chưa xác nhận N4 xanh. [Lease](https://github.com/ducthangho/tra-luat/actions/runs/44898169090) · [Windows](https://github.com/ducthangho/tra-luat/actions/runs/44898169109) · [Gate](https://github.com/ducthangho/tra-luat/actions/runs/44898169152)
+> - `python scratch/run.py base suite` và `python scratch/run.py head suite` gọi toàn bộ `python .claude/dev/launcher_test.py`, cả hai rc 1. Base **429/444 qua, 10 bỏ qua, 15 lỗi, tổng 454**. Head **430/445 qua, 10 bỏ qua, 15 lỗi, tổng 455**. `diff -u` trên danh sách tên ca lỗi/bỏ qua rc 0, hai danh sách giống hệt. Có hai ca POSIX/native Windows bỏ qua như lời khai và tám ca không dựng được venv/pip. Các lỗi trùng nhau ở hai vế gồm hai lỗi EROFS ở `/var/tmp`, nhóm Codex home/credential và hai ca r1335 phụ thuộc launcher khởi chạy được. Tôi đo delta +1 ca qua, 0 lỗi mới trong môi trường này. Số tuyệt đối 452/452 và 453/453 của executor không tái lập ở sandbox này. [Base](base-suite.log) · [Exact head](head-suite.log)
+> 
+> ## Không đo được
+> 
+> - Toàn bộ `--dot-bien` ngoài `cai_sh` chưa chạy. Các kết quả 782/782, 788/788, 792/792, 794/794, 795/795 và bảy trường hợp Windows không đo được là lời khai executor. Phép kiểm bộ đăng ký xác nhận delta +13 trên head. Số 15 trong commit message `f8747c4` lệch với 13 mục thực tế như RESULTS đã đính chính.
+> - Chưa chạy native macOS/Windows hay dùng `$GITHUB_PATH` thật trên runner. Các phép thử Windows dùng cygpath giả trên Linux. Gate trên exact SHA chưa trả kết luận ở lần đọc cuối.
+
+### Trạng thái sau lượt 4
+
+Trần Codex của packet (4) đã hết. Executor dừng ở Review Rescue Checkpoint và chờ chủ kho quyết.

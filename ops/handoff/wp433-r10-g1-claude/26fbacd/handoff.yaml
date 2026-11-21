@@ -16,7 +16,7 @@ role: executor
 session_id: session_015Gtxrc7bYsQV8yrj7rsD1S
 base_sha: 8656dc0176ed108e12c209ba55c91a1f6f9d612f
 head_sha: 26fbacd9d4ba73f8e83359e9af060a76b32cae08
-head_tree: see `git rev-parse 26fbacd9^{tree}` in bundle
+head_tree: 4583e5bd5d3b7d1efdd2aec8f39da878776f03bd
 tested_sha: 26fbacd9d4ba73f8e83359e9af060a76b32cae08
 head_sha_bang_tested_sha: true
 commits:

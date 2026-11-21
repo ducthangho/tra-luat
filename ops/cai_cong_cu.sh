@@ -75,7 +75,9 @@ chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
     if [ -n "$win" ]; then
       w="$(cygpath -w "$dich")" || { echo "cai_cong_cu: cygpath -w hong cho '$dich'" >&2; return 1; }
     fi
-    printf '%s\n' "$w" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \$GITHUB_PATH" >&2; return 1; }
+    # wp1488 (B1): KHONG ghi thang $GITHUB_PATH — luot nay chua biet cong thuc co thanh cong khong. Ghi vao tep CHO gan voi
+    # kenh cua CHINH luot nay; script chinh chep sang $GITHUB_PATH khi luot CUOI thanh cong (B2).
+    printf '%s\n' "$w" > "$KENH_KQ.github_path" || { echo "cai_cong_cu: khong ghi duoc tep cho cua \$GITHUB_PATH" >&2; return 1; }
   fi
   printf 'DICH\n%s' "$dich" > "$KENH_KQ" || { echo "cai_cong_cu: khong ghi duoc kenh ket qua" >&2; return 1; }
 }
@@ -212,6 +214,13 @@ if [ "$RC_CAI" -ne 0 ]; then
     *"apt-get install"*)
       _tl1479_thu_lai_apt "$@" ;;
   esac
+fi
+# wp1488 (B2/B3, ops/specs/wp1488-r1.md): chi luot CUOI thanh cong moi duoc them dong vao $GITHUB_PATH. Truoc day bo chon ghi
+# thang trong luc chay cong thuc, nen cong thuc goi bo chon roi mot buoc sau loi de lai thu muc cua lan LOI cho moi buoc CI
+# sau (no WP1404-GITHUB-PATH-LAN-LOI, Codex wp1404 luot 2 P3). Tep cho theo KENH_KQ HIEN HANH: tep cua cac luot truoc (ke ca
+# tien trinh nen ghi muon) khong bao gio duoc doc (B4). Chep loi => coi nhu cai loi, di dung nhanh loi ben duoi (B3).
+if [ "$RC_CAI" -eq 0 ] && [ -s "$KENH_KQ.github_path" ] && [ -n "${GITHUB_PATH:-}" ]; then
+  cat -- "$KENH_KQ.github_path" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \$GITHUB_PATH" >&2; RC_CAI=1; }
 fi
 if [ "$RC_CAI" -ne 0 ]; then
   if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && cong_cu_json_dung "$TEN" bat_buoc false; then

@@ -1,0 +1,737 @@
+{
+  "reviewed_sha": "5a1bf33831bb4e3a227cfb25843cef8a922c634b",
+  "reviewed_tree": "19fe7bd12a8a2e038a11ec230efb706be5756caa",
+  "spec_sha256": "3ee831738c70c5eabb27720e295b4953c9a9bdd1ac29a03cc7b964d28658fcdc",
+  "vong": 8,
+  "review_status": "complete",
+  "findings": [
+    {
+      "id": "N01",
+      "class_slug": "test-thieu-chot",
+      "severity": "P2",
+      "vi_tri": "ops/gate_output_doi_chieu_test.py:781-865, 889-992, 1160-1163",
+      "van_de": "M01 VA_MOT_PHAN: có đổi cách tổ chức thật (bảng dùng chung và hai tuyến), nhưng inventory miền chưa đầy đủ. 11/14 đột biến độc lập không tương đương sống qua đủ 42/42 ca. a124 chỉ biến đổi một fixture passed; chưa khóa nhánh skipped, tên check bắt buộc, OS membership và Unicode NFC/NFKC. a120/a121/a122 vẫn không đưa mọi hàng ngữ nghĩa qua kiem_ho_so theo luật 4. CHI_POSIX loại thêm hai thuộc tính đo được bằng seam độc lập OS (m65, m79). Đây là thiếu bảo vệ hồi quy/acceptance; không kết luận mã HEAD đã mắc lỗi của các bản đột biến.",
+      "bang_chung": "independent_scan.py: baseline42/42; 14x42 ca; 11 SONG, 3 GIET, 0 lỗi chạy/vô can. independent_contrasts.json: từng SONG có đối chứng âm/dương, qua cả hàm lá và consumer. NFC/NFKC: HEAD not_measured/job_lech hoặc provenance_0/khong_phai_run_land/log_sha_lech, mutant passed; tên check đổi đồng thời trong tệp và provenance: HEAD check_bat_buoc, mutant passed; OS là substring: HEAD os, mutant []. Hai biến thể skipped đổi lý do chính xác dù trạng thái vẫn not_measured. comparison_inventory.json tự liệt kê61 Compare nodes; comparison_coverage.json giải thích45 điểm chuỗi/miền. matrix_routes.json: a120=34 kiem_tep/0 consumer; a121 chỉ1 consumer; a122=21 direct kiem_mien/1 consumer thiếu URL. portable_property_probes.json: stat OSError HEAD rc2, m65 ném OSError; absolute path HEAD None, m79 nhận đường, đối chứng relative cả hai nhận. skip_controls.json: mẫu số0 đỏ; m65/m79 nằm trong tập bỏ qua nên không được dispatch và main nhánh nt vẫn TONG DAT dù gán kết quả sống cho chúng (mô phỏng điều khiển, không phải Windows thật).",
+      "de_xuat": "Tại các bảng a120–a125, lập inventory theo điểm so/nhánh và miền đặc tả rồi đưa cùng hàng dữ liệu qua hàm lá và kiem_ho_so; tách context passed/skipped, so tên bắt buộc khi hai nguồn cùng đổi, và exact OS element. Thêm các họ Unicode NFC/NFKC cạnh case/space/prefix/suffix; không chuẩn hóa thêm trong mã sản phẩm. Dùng mock stat và filesystem seam cho m65/m79, giữ các ca symlink cần OS có khai báo riêng. Đo mutant đúng TinHieuChotCa và giữ đối chứng hợp lệ; ghim kho mới theo luật5. Rủi ro vá: chốt khác bắt thay, đồng bộ hai nguồn chưa đúng, hoặc nới oracle. Lớp lặp>=3 lượt: checkpoint xét lại phương pháp, không tiếp tục vá từng ví dụ.",
+      "bieu_hien": [
+        "r8_schema_nfkc",
+        "r8_event_nfkc",
+        "r8_head_nfkc",
+        "r8_name_nfkc",
+        "r8_log_sha_nfkc",
+        "r8_name_nfc",
+        "r8_checkout_skipped_casefold",
+        "r8_skip_partition_casefold",
+        "r8_required_name_casefold",
+        "r8_os_substring",
+        "r8_required_name_prefix",
+        "grammar/waiver domain thiếu consumer",
+        "m65/m79 bị bỏ qua theo nền dù có phép đo portable"
+      ]
+    },
+    {
+      "id": "N02",
+      "class_slug": "test-thieu-chot",
+      "severity": "P3",
+      "vi_tri": "bang_chung/ledger_kho_141_5a1bf33.jsonl:32,88",
+      "van_de": "M03 CHUA_VA: identity_72_67 vẫn KHONG_AP_DUNG -> TUONG_DUONG; ref_no_boundary vẫn KHONG_AP_DUNG -> CHOT_DA_BO dù lookbehind còn trong r10. Cả hai chưa có nhãn kết thúc hợp lệ theo luật 5.",
+      "bang_chung": "ledger_anchors.json: đủ141 ID/duy nhất,136 neo áp được,5 neo mất. ledger_remeasure.jsonl:129/129 GIET đúng ca,14/14 r7 GIET. ledger_tail.json:7 TUONG_DUONG có lập luận miền kiểu cụ thể +14 ca đo;3 KHONG_AP_DUNG tái dẫn xuất cùng nghĩa và GIET. identity_72_67: compare Pattern còn tồn tại,2 ca qua, nhãn kết thúc phải TUONG_DUONG; ref_no_boundary:10.000 findall samples delta0 + lập luận trái-nhất/tham lam, regex vẫn có lookbehind trong SPEC.md nên CHOT_DA_BO sai. Hai dòng32,88 giữ nguyên lỗi M03 trên HEAD mới; waiver79b3c24 không áp.",
+      "de_xuat": "Giữ ID, tái phân loại hai mục thành TUONG_DUONG, ghi cặp hiện hành và chứng minh trên exact HEAD. Kiểm ledger đủ141 ID/duy nhất/nhãn cuối hợp lệ. Không sửa regex sản phẩm hoặc tạo ca giết biến thể tương đương."
+    },
+    {
+      "id": "N03",
+      "class_slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "severity": "P2",
+      "vi_tri": "ops/gate_output_doi_chieu_test.py:1232-1236; .claude/dev/ci_dang_ky_test.py:60",
+      "van_de": "Đầu ra nhánh Windows mới không khớp regex đã đăng ký. Dòng BO QUA chen giữa CA và DOT BIEN, còn dòng DOT BIEN có hậu tố mới; consumer chay_moi đánh ĐỎ ngay khi producer rc0/TONG DAT.",
+      "bang_chung": "windows_output_contract.json: gọi main với nhánh os.name=nt và kết quả ca được kiểm soát, rồi đưa chính stdout qua chay_moi(doc_nen_windows=True): producer rc0, consumer rc1. Đối chứng nhánh POSIX consumer rc0 trên cả hai chế độ. Đây là phép đo hợp đồng output độc lập OS; chưa chạy Windows thật.",
+      "de_xuat": "Giữ khối tổng kết liên tiếp và đúng mẫu đã đăng ký; đưa khai báo bỏ qua ra ngoài khối, vẫn ghi đủ11 mục và mẫu số thực đo. Thêm kiểm producer-consumer hai nền cùng các đối chứng ca đỏ, mutant sống, tên CHI_POSIX lạ và mẫu số0. Tránh nới regex để nhận TONG DAT bất chấp thiếu bằng chứng dương.",
+      "bieu_hien": [
+        "11 BO QUA lines chen giữa CA và DOT BIEN",
+        "Hậu tố (bo qua 11 chi POSIX) không khớp regex",
+        "chay_moi la_windows=True: rc1 với producer rc0/TONG DAT"
+      ]
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "test-thieu-chot",
+      "finding_ids": [
+        "N01",
+        "N02"
+      ],
+      "manifestations": [
+        "N01: M01 VA_MOT_PHAN: có đổi cách tổ chức thật (bảng dùng chung và hai tuyến), nhưng inventory miền chưa đầy đủ. 11/14 đột biến độc lập không tương đương sống qua đủ 42/42 ca. a124 chỉ biến đổi một fixture passed; chưa khóa nhánh skipped, tên check bắt buộc, OS membership và Unicode NFC/NFKC. a120/a121/a122 vẫn không đưa mọi hàng ngữ nghĩa qua kiem_ho_so theo luật 4. CHI_POSIX loại thêm hai thuộc tính đo được bằng seam độc lập OS (m65, m79). Đây là thiếu bảo vệ hồi quy/acceptance; không kết luận mã HEAD đã mắc lỗi của các bản đột biến.",
+        "N02: M03 CHUA_VA: identity_72_67 vẫn KHONG_AP_DUNG -> TUONG_DUONG; ref_no_boundary vẫn KHONG_AP_DUNG -> CHOT_DA_BO dù lookbehind còn trong r10. Cả hai chưa có nhãn kết thúc hợp lệ theo luật 5."
+      ],
+      "highest_open_severity": "P2",
+      "source": "lượt7 f4f17bc4237a5362117f37b56e65209b92465f64; lượt8 5a1bf33831bb4e3a227cfb25843cef8a922c634b",
+      "common_fix": "Tại các bảng a120–a125, lập inventory theo điểm so/nhánh và miền đặc tả rồi đưa cùng hàng dữ liệu qua hàm lá và kiem_ho_so; tách context passed/skipped, so tên bắt buộc khi hai nguồn cùng đổi, và exact OS element. Thêm các họ Unicode NFC/NFKC cạnh case/space/prefix/suffix; không chuẩn hóa thêm trong mã sản phẩm. Dùng mock stat và filesystem seam cho m65/m79, giữ các ca symlink cần OS có khai báo riêng. Đo mutant đúng TinHieuChotCa và giữ đối chứng hợp lệ; ghim kho mới theo luật5. Rủi ro vá: chốt khác bắt thay, đồng bộ hai nguồn chưa đúng, hoặc nới oracle. Lớp lặp>=3 lượt: checkpoint xét lại phương pháp, không tiếp tục vá từng ví dụ.",
+      "closing_check": "Luật1/2/4/5 đủ từng miền và từng consumer; các survivor không tương đương được giết đúng ca; ledger có nhãn cuối hợp lệ trên exact HEAD.",
+      "status": "VA_MOT_PHAN"
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_ids": [
+        "N03"
+      ],
+      "manifestations": [
+        "N03: Đầu ra nhánh Windows mới không khớp regex đã đăng ký. Dòng BO QUA chen giữa CA và DOT BIEN, còn dòng DOT BIEN có hậu tố mới; consumer chay_moi đánh ĐỎ ngay khi producer rc0/TONG DAT."
+      ],
+      "highest_open_severity": "P2",
+      "source": "lượt7 f4f17bc4237a5362117f37b56e65209b92465f64; lượt8 5a1bf33831bb4e3a227cfb25843cef8a922c634b",
+      "common_fix": "Giữ khối tổng kết liên tiếp và đúng mẫu đã đăng ký; đưa khai báo bỏ qua ra ngoài khối, vẫn ghi đủ11 mục và mẫu số thực đo. Thêm kiểm producer-consumer hai nền cùng các đối chứng ca đỏ, mutant sống, tên CHI_POSIX lạ và mẫu số0. Tránh nới regex để nhận TONG DAT bất chấp thiếu bằng chứng dương.",
+      "closing_check": "CLI lỗi giữ stderr đúng; cả nhánh POSIX/Windows producer đều qua consumer với evidence đủ, ca đỏ/đột biến sống/mẫu số0 bị từ chối.",
+      "status": "VA_MOT_PHAN"
+    },
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_ids": [],
+      "manifestations": [
+        "F01: prior_audit.json:5 YAML ngoài schema (list/null/int/string/mapping khác schema) đều passed; a116 đối chứng passed, YAML lỗi ParserError. Ledger delete_return_97 bị giết đúng a116."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b",
+      "common_fix": "Lọc kiểu/schema trước khi đọc trường.",
+      "closing_check": "prior_audit.json:5 YAML ngoài schema (list/null/int/string/mapping khác schema) đều passed; a116 đối chứng passed, YAML lỗi ParserError. Ledger delete_return_97 bị giết đúng a116.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_ids": [],
+      "manifestations": [
+        "F02,G01: prior_audit.json: UTF8 hỏng -> UnicodeDecodeError; a116 ParserError/symlink/symlink+provenance_0; a117 hai provenance -> provenance_nhieu, lỗi duyệt -> PermissionError; suite/ledger mutant lý do bị giết đúng ca."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 2 @6f7ccf10f2441d0c97b779cfa77ff2839b56fc47",
+      "common_fix": "Giữ lý do K2 và truyền lỗi đọc/duyệt về biên kiem_tep.",
+      "closing_check": "prior_audit.json: UTF8 hỏng -> UnicodeDecodeError; a116 ParserError/symlink/symlink+provenance_0; a117 hai provenance -> provenance_nhieu, lỗi duyệt -> PermissionError; suite/ledger mutant lý do bị giết đúng ca.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_ids": [],
+      "manifestations": [
+        "F03,H02: prior_audit.json: a214 kiểm vòng ValueError và CLI rc2 không traceback, alias dùng chung vẫn hai đường; a210 đường stat quá dài rc2. portable_property_probes.json đối chứng stat OSError HEAD rc2, mutant ném OSError; native m65 GIET trên POSIX."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 3 @e323bd4dfb4fe422016c4fd010fa964b6cb748b0",
+      "common_fix": "Phát hiện vòng và đặt đọc/kiểm filesystem trong biên lỗi CLI.",
+      "closing_check": "prior_audit.json: a214 kiểm vòng ValueError và CLI rc2 không traceback, alias dùng chung vẫn hai đường; a210 đường stat quá dài rc2. portable_property_probes.json đối chứng stat OSError HEAD rc2, mutant ném OSError; native m65 GIET trên POSIX.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_ids": [
+        "L03"
+      ],
+      "manifestations": [
+        "L03: prior_audit.json: docstring _tep_trong nói ./tệp HỢP LỆ, helper trả tệp và consumer []; a204 absolute/../symlink đều bị từ chối; r7_dotpath_raw GIET đúng a125."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 6 @c2d606bb6fc230c288200b8f1dd79715462c172b",
+      "common_fix": "Đồng bộ mô tả helper với đặc tả A và ngữ nghĩa PurePosixPath đã đo.",
+      "closing_check": "prior_audit.json: docstring _tep_trong nói ./tệp HỢP LỆ, helper trả tệp và consumer []; a204 absolute/../symlink đều bị từ chối; r7_dotpath_raw GIET đúng a125.",
+      "status": "DA_VA_THAT"
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "luot_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_audit.json:5 YAML ngoài schema (list/null/int/string/mapping khác schema) đều passed; a116 đối chứng passed, YAML lỗi ParserError. Ledger delete_return_97 bị giết đúng a116.",
+      "chua_do_duoc": "Không native Windows trong phiên offline; nhãn đóng này giữ đúng phạm vi hành vi POSIX/portable đã đo, không chứng nhận gate Windows."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "luot_xuat_hien": [
+        1,
+        2
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_audit.json: UTF8 hỏng -> UnicodeDecodeError; a116 ParserError/symlink/symlink+provenance_0; a117 hai provenance -> provenance_nhieu, lỗi duyệt -> PermissionError; suite/ledger mutant lý do bị giết đúng ca.",
+      "chua_do_duoc": "Không native Windows trong phiên offline; nhãn đóng này giữ đúng phạm vi hành vi POSIX/portable đã đo, không chứng nhận gate Windows."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "luot_xuat_hien": [
+        1,
+        3
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_audit.json: a214 kiểm vòng ValueError và CLI rc2 không traceback, alias dùng chung vẫn hai đường; a210 đường stat quá dài rc2. portable_property_probes.json đối chứng stat OSError HEAD rc2, mutant ném OSError; native m65 GIET trên POSIX.",
+      "chua_do_duoc": "Không native Windows trong phiên offline; nhãn đóng này giữ đúng phạm vi hành vi POSIX/portable đã đo, không chứng nhận gate Windows."
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_cu": [
+        "L03"
+      ],
+      "luot_xuat_hien": [
+        6
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_audit.json: docstring _tep_trong nói ./tệp HỢP LỆ, helper trả tệp và consumer []; a204 absolute/../symlink đều bị từ chối; r7_dotpath_raw GIET đúng a125.",
+      "chua_do_duoc": "Không native Windows trong phiên offline; nhãn đóng này giữ đúng phạm vi hành vi POSIX/portable đã đo, không chứng nhận gate Windows."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02",
+        "L01",
+        "L02",
+        "M01",
+        "M03"
+      ],
+      "luot_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "14 r7 đều GIET; A2-10 đủ6 fixture, tiền tố GIỚI HẠN và fallback stem đã khóa. Tuy nhiên 11 mutant độc lập mới không tương đương sống; grammar/waiver consumer matrix vẫn thiếu; M03 không sửa. Xem N01/N02.",
+      "chua_do_duoc": "Native Windows local; quét hữu hạn, không tuyên bố bao mọi đột biến. Không còn phần chưa đo cần để quyết changes_requested.",
+      "per_finding": [
+        {
+          "id": "M01",
+          "status": "VA_MOT_PHAN",
+          "evidence": "independent_results.jsonl, independent_contrasts.json, matrix_routes.json, ledger_remeasure.jsonl; N01."
+        },
+        {
+          "id": "M03",
+          "status": "CHUA_VA",
+          "evidence": "ledger dòng32/88 và ledger_tail.json; N02."
+        }
+      ]
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "M02"
+      ],
+      "luot_xuat_hien": [
+        7,
+        8
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "M02 riêng đã vá thật: cli_probe.json 5 lỗi rc2 stderr bắt đầu LỖI THAM SỐ, help rc0; native m146 GIET a217. Nhưng bản vá lượt8 sinh N03: output Windows không qua consumer regex. Theo §8.3 lớp chưa đóng.",
+      "chua_do_duoc": "Không chạy Windows thật; đã đo chính main nhánh nt bằng seam và chay_moi thật để quyết lỗi hợp đồng.",
+      "per_finding": [
+        {
+          "id": "M02",
+          "status": "DA_VA_THAT",
+          "evidence": "cli_probe.json; a217/m146 trong suite; phần sửa sản phẩm đúng tại79b3c24 và giữ nguyên byte trên HEAD."
+        }
+      ],
+      "nhan_doi_chieu_tieng_viet": "M02 ĐÃ VÁ THẬT; lớp có biểu hiện VÁ SINH LỖI MỚI N03 trong output bộ test."
+    }
+  ],
+  "bang_noi_slug": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "ly_do_gop": "Lọc YAML ngoài schema trước truy cập trường."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "ly_do_gop": "Lỗi đọc/duyệt hoặc lý do K2 bị bỏ mất."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "ly_do_gop": "Ngoại lệ đầu vào thoát biên CLI."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02"
+      ],
+      "ly_do_gop": "Chốt đặc tả không được ca/đột biến bảo vệ độc lập."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "slug_spec": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02",
+        "L01",
+        "L02"
+      ],
+      "finding_moi": [
+        "M01",
+        "M03"
+      ],
+      "ly_do": "Cùng cơ chế thiếu thước khóa chốt/consumer; mapping r10, không reset lịch sử."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "U01 (đặc tả r9 vòng 4/r10)"
+      ],
+      "finding_moi": [
+        "M02"
+      ],
+      "ly_do": "Hợp đồng đã đóng ở đặc tả; mã chưa áp cho mọi nhánh lỗi CLI. Lớp mới trong chuỗi review MÃ, không cộng vào F/U lượt 6."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "M01",
+        "M03"
+      ],
+      "finding_moi": [
+        "N01",
+        "N02"
+      ],
+      "ly_do": "Giữ lớp thiếu phép kiểm độc lập của chốt/consumer và nghĩa vụ ledger. R10 đổi spec không reset lịch sử."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "M02"
+      ],
+      "finding_moi": [
+        "N03"
+      ],
+      "ly_do": "M02 cụ thể đóng; cùng lớp hợp đồng đầu ra với consumer tái xuất hiện ở nhánh Windows của suite. Không tách slug để tính lớp cũ là đóng."
+    }
+  ],
+  "hoi_tu": {
+    "luot7_sang_8": "0/2",
+    "luot6_sang_7": "1/2",
+    "F": [],
+    "U": [
+      "test-thieu-chot",
+      "hop-dong-dau-vao-dau-ra-chua-chot"
+    ],
+    "ty_le": 0,
+    "lop_lap_lan_ba": [
+      "test-thieu-chot"
+    ],
+    "lop_moi": [],
+    "lop_tai_mo": [],
+    "ghi_chu": "Đếm lớp, không đếm finding. M02 đóng nhưng lớp còn N03 do bản vá nên không vào F. Hai lớp ở lượt7 đều chưa được đóng trên HEAD8; N03 là biểu hiện mới của lớp đã mở. Chuyển tiếp trước =50%, không tự suy hai tỷ lệ liên tiếp <50%; checkpoint vẫn cần vì test-thieu-chot lặp>=3 lượt."
+  },
+  "da_do_khop": [
+    "Exact HEAD 5a1bf33831bb4e3a227cfb25843cef8a922c634b; tree 19fe7bd12a8a2e038a11ec230efb706be5756caa; local spec and git blob hash match r10. Lease r10g1, base ancestor and only3 authorized files.",
+    "Product unchanged from79b3c24; f4f17bc->79b3c24 change is M02 parser subclass and r10 CLI description. Current round only suite diff.",
+    "passed: native suite rc0 CA42/42 DOT BIEN146/146 TU KIEM DAT(2) TONG DAT, POSIX skipped0.",
+    "passed: bare Ruff0.15.15 --no-cache --select F three files rc0; CI registration31/31, Ruff contract3/3,1226/1226 phản chứng, rc0.",
+    "passed: numstat3files +1592 <=1700; git diff --check base HEAD rc0.",
+    "Ledger141:129 GIET remeasured incl14 r7;7 equivalent proved on typed domains;3 KAD replacements GIET;2 invalid terminal labels remain (N02).",
+    "Independent14 operators x42cases completed: 11 survive non-equivalent, 3 killed,0 errors. Each survivor has helper+consumer contrasting witnesses and exact canonical pair; cumulative152IDs.",
+    "Method change is real for11 provenance fields x3 transformations plus3 readback fields, labels sequences and URL counts; incomplete inventory/consumer domain still fails N01.",
+    "M02 specific fix measured on5 error branches plus help; M03 unchanged; historical4 closed classes rechecked with target/control. Output Windows regression N03 prevents declaring output class closed.",
+    "Windows actual not_run. Modeled nt branch unknown name and surviving non-skipped mutant are red;9 symlink-dependent skips justified by fixture scope,2 portable properties unnecessarily excluded. Registry rejects new Windows summary.",
+    "Snapshot17339 files no delta; no checkout edits/commit/push/network. All artifacts under work/.",
+    "Convergence7->8=0/2; test-thieu-chot recurrence>=3 requires checkpoint/reconsider method. No waiver on old SHA applies; no approval/land authorization."
+  ],
+  "verdict": "changes_requested",
+  "identity": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "session_id": "01a1fc41-952e-7250-a25f-144dbc753b16",
+    "model_served": "KHONG_DO_DUOC",
+    "effort_served": "KHONG_DO_DUOC",
+    "environment": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "sandbox": "workspace-write; repo read-only by operation; scratch work/ only",
+    "session_source": "CODEX_SESSION_ID in current run",
+    "model_family": "openai",
+    "model_family_source": "provider fallback ADR-0065",
+    "independence": "Fresh reviewer context supplied by assignment; no reuse/fork executor context; no subagent.",
+    "github_submitter": "not_used",
+    "executor": {
+      "provider": "anthropic_claude",
+      "model_family": "claude",
+      "execution_surface": "claude_code",
+      "transport": "machine/local",
+      "session_id": "session_015GtxrYsNDbfLo32S39f5uY",
+      "source": "LEASE claim, not runtime measurement"
+    },
+    "ruff": "ruff 0.15.15",
+    "pyyaml": "6.0.3"
+  },
+  "preflight": {
+    "spec_blob_sha256": "3ee831738c70c5eabb27720e295b4953c9a9bdd1ac29a03cc7b964d28658fcdc",
+    "spec_local_sha256": "3ee831738c70c5eabb27720e295b4953c9a9bdd1ac29a03cc7b964d28658fcdc",
+    "product_equal_79b3c24": true,
+    "base_is_ancestor_rc": 0,
+    "product_sha256": "ac6d6253753deef360f9196dabdb149c19a654d88854536fb4572d65ca94c624",
+    "suite_sha256": "5d92baf025b54d9ed1af5f9834d83ca8777caf42f6f4082110af95ef91d3d5bd",
+    "ruff": "ruff 0.15.15",
+    "session_id": "01a1fc41-952e-7250-a25f-144dbc753b16",
+    "review_head": "5a1bf33831bb4e3a227cfb25843cef8a922c634b",
+    "numstat": "1\t0\t.claude/dev/ci_dang_ky_test.py\n343\t0\tops/gate_output_doi_chieu.py\n1248\t0\tops/gate_output_doi_chieu_test.py\n",
+    "base_sha": "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+    "branch": "DETACHED",
+    "revision": 10,
+    "generation": 1,
+    "lease_id": "wp1236-a-r10-g1-claude-20261121",
+    "lease_until": "2026-11-23T00:15:00Z",
+    "effective_review_class": "sensitive",
+    "write_set": [
+      ".claude/dev/ci_dang_ky_test.py",
+      "ops/gate_output_doi_chieu.py",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "added_lines": 1592,
+    "limit_added_lines": 1700,
+    "core_abbrev": 7,
+    "origin": "https://github.com/ducthangho/tra-luat.git",
+    "authority_scope": "User offline assignment + supplied lease/spec; no GitHub/network readback or authority transition."
+  },
+  "acceptance": {
+    "law1": {
+      "status": "failed",
+      "evidence": "Native146 mutants and target assertions passed on Linux, including m146 argparse. Windows skips include two portable properties; producer-consumer output contract fails (N01,N03)."
+    },
+    "law2": {
+      "status": "passed",
+      "evidence": "Native duplicate matrix all five cells plus controls; suite146/146 and ledger129/129 target signals. No reliance on skipped status alone."
+    },
+    "law3": {
+      "status": "not_run",
+      "reason": "Executor full scanner is optional under frozen r10; independently generated14 operators instead."
+    },
+    "law4": {
+      "status": "failed",
+      "evidence": "New a124/a125 are genuine generic tables for selected domains; required completeness not achieved, N01. a12034 leaves/0 consumers; a12221 direct waiver/1 missing-URL consumer."
+    },
+    "law5": {
+      "status": "failed",
+      "counts": {
+        "total": 141,
+        "GIET": 129,
+        "TUONG_DUONG": 7,
+        "KHONG_AP_DUNG": 5,
+        "valid_KAD": 3,
+        "invalid_terminal_labels": 2
+      },
+      "evidence": "ledger_anchors.json; ledger_remeasure.jsonl; ledger_tail.json. N02."
+    },
+    "independent_scan": {
+      "status": "completed",
+      "baseline": 42,
+      "mutants": 14,
+      "cases_per_mutant": 42,
+      "killed": 3,
+      "survived_non_equivalent": 11,
+      "run_errors": 0,
+      "incidental_errors": 0,
+      "survivors": [
+        "r8_schema_nfkc",
+        "r8_event_nfkc",
+        "r8_head_nfkc",
+        "r8_name_nfkc",
+        "r8_log_sha_nfkc",
+        "r8_name_nfc",
+        "r8_checkout_skipped_casefold",
+        "r8_skip_partition_casefold",
+        "r8_required_name_casefold",
+        "r8_os_substring",
+        "r8_required_name_prefix"
+      ],
+      "killed_ids": [
+        "r8_schema_prefix",
+        "r8_schema_suffix",
+        "r8_schema_substring"
+      ],
+      "cache": "none",
+      "yaml_loader": "SafeLoader original",
+      "new_pool": "kho_dot_bien_reviewer_luot8.jsonl",
+      "new_pool_sha256": "7a2f7c411e361f136904703c2ed246285872bb0c9abba9fbb4ff1e05019200b6",
+      "cumulative_pool": "kho_dot_bien_reviewer_luot6_7_8.jsonl",
+      "cumulative_ids": 152,
+      "cumulative_sha256": "f311a24c21693df4f291fe4cdb34c1c3575b4d646cfae6106b2d5e3b09a72d05"
+    },
+    "windows": {
+      "status": "not_run_native",
+      "evidence": "a117 conx not reserved under ntpath, native a117 callback still catches PermissionError. a204 modeled nt branch kills m22; m23/m79 survive because target branch is skipped. POSIX unknown CHI_POSIX name rc1 and all146 mutants run; nt branch135 mutants,11 declared skips; non-skipped forced survivor rc1. skip_controls.json: denominator0 -> rc1; current skip list excludes m65/m79 from dispatch and main can still print TONG DAT when a hypothetical survivor is assigned to either skipped ID. This is loop-control simulation, not a native Windows mutation run; portable witnesses show those properties are not OS-exclusive. m65/m79 have portable negative/control witnesses. Windows output rejected by real registry consumer N03.",
+      "skipped_mutants": [
+        "m105_goc_ho_so_symlink",
+        "m107_goc_readback_symlink",
+        "m17_theo_symlink",
+        "m23_bo_symlink_thanh_phan",
+        "m56_xoa_ly_do_symlink",
+        "m65_cli_khong_bat_stat",
+        "m70_bo_ly_do_symlink_thu_muc",
+        "m71_goc_symlink",
+        "m76_readback_symlink",
+        "m79_nhan_tuyet_doi",
+        "m93_theo_symlink_thu_muc"
+      ],
+      "native_limit": "Cannot prove full suite runs on Windows; no network/local-device access authorized."
+    }
+  },
+  "tests": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "rc": 0,
+      "seconds": 8.37,
+      "status": "passed",
+      "stdout": "ci_registration.stdout",
+      "stdout_sha256": "2773d93effe692afc1bbaa77e7c1f2f22fbac4488eb9765385a5b3ed1c3183dd",
+      "stderr": "ci_registration.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "ci_registration"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/contrasts.py"
+      ],
+      "rc": 0,
+      "seconds": 24.92,
+      "status": "passed",
+      "stdout": "contrasts.stdout",
+      "stdout_sha256": "77eff6509fcd2573a5a012019f73835bce795028347c1783dd38ea9492910a9a",
+      "stderr": "contrasts.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "contrasts"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.01,
+      "status": "passed",
+      "stdout": "diff_check.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "diff_check.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "diff_check"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/ledger_tail.py"
+      ],
+      "rc": 0,
+      "seconds": 16.93,
+      "status": "passed",
+      "stdout": "ledger_tail.stdout",
+      "stdout_sha256": "55574fb3f27d46c9948cfd8576127c2180eb3ddf8c07a31f041af7d2b5c5a4f3",
+      "stderr": "ledger_tail.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "ledger_tail"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/prior_audit.py"
+      ],
+      "rc": 0,
+      "seconds": 6.75,
+      "status": "passed",
+      "stdout": "prior_audit.stdout",
+      "stdout_sha256": "756f285be976d92665472920b7057862d36b2360409d0d9d72655acc2394cf40",
+      "stderr": "prior_audit.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "prior_audit"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/probes.py"
+      ],
+      "rc": 0,
+      "seconds": 7.79,
+      "status": "passed",
+      "stdout": "probes.stdout",
+      "stdout_sha256": "3c5154f45b4ae2cd7fd71263b1d57aa9a5a94978242a692d4284acd6d2a72c10",
+      "stderr": "probes.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "probes"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/gate_output_doi_chieu.py",
+        "ops/gate_output_doi_chieu_test.py",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "rc": 0,
+      "seconds": 0.06,
+      "status": "passed",
+      "stdout": "ruff.stdout",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr": "ruff.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "ruff"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "rc": 0,
+      "seconds": 254.46,
+      "status": "passed",
+      "stdout": "suite.stdout",
+      "stdout_sha256": "090bdff3c9dce7ad4f800a606a605cfac6466ee5225816f3625782ed5e452aac",
+      "stderr": "suite.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "suite"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "../work/windows_branches.py"
+      ],
+      "rc": 0,
+      "seconds": 0.81,
+      "status": "passed",
+      "stdout": "windows_branches.stdout",
+      "stdout_sha256": "bcfe1f0f3c7ea893b58db312e07bf854abf6ed7ebcf0f07bc7eaca859aec0753",
+      "stderr": "windows_branches.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "name": "windows_branches"
+    },
+    {
+      "name": "ledger_GIET",
+      "command": "python3 -B ../work/ledger_review.py",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "HOAN_TAT_LEDGER_GIET129; all129 exact target TinHieuChotCa; anchors136/141,5 KAD",
+      "output": "ledger_review.log"
+    },
+    {
+      "name": "independent_scan",
+      "command": "python3 -B ../work/independent_scan.py",
+      "rc": 0,
+      "status": "completed",
+      "positive_evidence": "HOAN_TAT_REVIEWER14; baseline42/42; 11 non-equivalent survivors => acceptance failed",
+      "output": "independent_scan.log"
+    },
+    {
+      "name": "numstat",
+      "command": "git diff --numstat 010046f2141799ec6ffc9cfa1322d49df3f3f680 HEAD",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "3 files,+1592/-0 <=1700; ci registration only one added item"
+    },
+    {
+      "name": "Ruff pin/probe contract",
+      "status": "passed",
+      "rc": 0,
+      "positive_evidence": "RUFF CI:3/3 hợp đồng within ci_registration.stdout; distinct from bare Ruff lint"
+    },
+    {
+      "name": "Windows local / Windows CI / remote CI / LIVE / release gate",
+      "status": "not_run",
+      "reason": "Offline read-only review scope; native Windows not available; not counted as pass"
+    },
+    {
+      "name": "POSIX skipped",
+      "status": "passed",
+      "count": 0,
+      "positive_evidence": "suite stdout no BO QUA,146/146 mutants measured"
+    },
+    {
+      "name": "skip_controls",
+      "command": "python3 -B ../work/skip_controls.py",
+      "rc": 0,
+      "status": "completed",
+      "positive_evidence": "all-skipped rc1; m65/m79 current skip never dispatched, controlled-loop rc0; not native OS testing",
+      "output": "skip_controls.json"
+    },
+    {
+      "name": "verdict_schema",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-8-codex/kiem_verdict_lop.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a10-8-codex/work/VERDICT.json",
+        "--vong",
+        "8"
+      ],
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "HOP_LE (§8.3): 3 finding, 6 lop",
+      "output": "kiem_verdict.txt"
+    }
+  ],
+  "snapshot": {
+    "files": 17339,
+    "delta": 0,
+    "head_unchanged": true,
+    "tree_unchanged": true,
+    "tracked_untracked_ignored": "byte hash and symlink target snapshot, diff/index empty; existing .codex ignored unchanged",
+    "limit": "Two observations only; no claim about transient writes between snapshots. Source repository outside supplied checkout not observed."
+  },
+  "limitations": [
+    "Native Windows local and remote CI not measured; branch simulations explicitly use Linux filesystem and controlled OS seam.",
+    "No model/effort server trace supplied; both KHONG_DO_DUOC, provider family fallback ADR-0065.",
+    "No external GitHub facts/authority readback; no log truth or signature verification beyond accepted r10 scope.",
+    "Finite independent mutation families, not exhaustive proof; no executor-scanner result reused as own measurement.",
+    "Snapshot only proves no observable byte delta at the two endpoints."
+  ]
+}

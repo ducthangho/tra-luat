@@ -1,0 +1,362 @@
+[
+  {
+    "function": "chon_provenance",
+    "line": 109,
+    "expr": "y.get('attempt_yeu_cau') == attempt",
+    "domain": "run.head_sha",
+    "native_cases": "a124",
+    "review": "covered for case/leading/trailing; NFKC gap"
+  },
+  {
+    "function": "chon_provenance",
+    "line": 109,
+    "expr": "r.get('head_sha') == head",
+    "domain": "run.head_sha",
+    "native_cases": "a124",
+    "review": "covered for case/leading/trailing; NFKC gap"
+  },
+  {
+    "function": "chon_provenance",
+    "line": 105,
+    "expr": "y.get('schema') == 'ci_provenance/1'",
+    "domain": "schema",
+    "native_cases": "a124",
+    "review": "covered for case/leading/trailing; NFKC gap"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 128,
+    "expr": "d['bo_sinh'] not in BO_SINH",
+    "domain": "generator SHA membership",
+    "native_cases": "a104/a101",
+    "review": "closed lowercase-hex parser domain + fixed BO_SINH"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 163,
+    "expr": "BO_SINH[d['bo_sinh']] == 'v3'",
+    "domain": "generator version == v3",
+    "native_cases": "a111",
+    "review": "fixed BO_SINH outputs v1/v2/v3"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 169,
+    "expr": "d['moc'] != (moc_tu, so_pass, n)",
+    "domain": "moc triple equality",
+    "native_cases": "a110/a120",
+    "review": "closed status + integer counts"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 135,
+    "expr": "r.get('event') == 'push'",
+    "domain": "event, workflow path",
+    "native_cases": "a124",
+    "review": "case/leading/trailing covered; NFKC gap"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 135,
+    "expr": "r.get('loi_khai_rest_path') == '.github/workflows/ci.yml'",
+    "domain": "event, workflow path",
+    "native_cases": "a124",
+    "review": "case/leading/trailing covered; NFKC gap"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 143,
+    "expr": "r.get('trang_thai') == 'passed'",
+    "domain": "run and tap_jobs status passed",
+    "native_cases": "a124",
+    "review": "case/leading/trailing covered"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 143,
+    "expr": "tj.get('trang_thai') == 'passed'",
+    "domain": "run and tap_jobs status passed",
+    "native_cases": "a124",
+    "review": "case/leading/trailing covered"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 156,
+    "expr": "q.get('name') != j['name']",
+    "domain": "job name + conclusion versus parsed line",
+    "native_cases": "a124",
+    "review": "case/leading/trailing covered; NFC/NFKC name gap"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 156,
+    "expr": "q.get('conclusion') != j['conclusion']",
+    "domain": "job name + conclusion versus parsed line",
+    "native_cases": "a124",
+    "review": "case/leading/trailing covered; NFC/NFKC name gap"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 157,
+    "expr": "','.join(q.get('labels') or []) != j['labels']",
+    "domain": "joined labels exact ordered string",
+    "native_cases": "a124/a125",
+    "review": "case/space/order/duplicate/missing tested, Unicode family not covered"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 159,
+    "expr": "j['conclusion'] != 'success'",
+    "domain": "parsed conclusion success, parsed tt failed",
+    "native_cases": "a113/a120",
+    "review": "failure/cancelled and closed status grammar, exact success vs other word domain"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 159,
+    "expr": "j['tt'] != 'failed'",
+    "domain": "parsed conclusion success, parsed tt failed",
+    "native_cases": "a113/a120",
+    "review": "failure/cancelled and closed status grammar, exact success vs other word domain"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 164,
+    "expr": "s['v3'] != v3",
+    "domain": "skip format bool",
+    "native_cases": "a111",
+    "review": "not string; derived parsed pattern identity"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 168,
+    "expr": "so_pass == n",
+    "domain": "failed in parsed states / aggregate",
+    "native_cases": "a110/a119/a123",
+    "review": "closed status grammar"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 168,
+    "expr": "'failed' in tts",
+    "domain": "failed in parsed states / aggregate",
+    "native_cases": "a110/a119/a123",
+    "review": "closed status grammar"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 173,
+    "expr": "j['tt'] == 'failed'",
+    "domain": "parsed state failed",
+    "native_cases": "a113/a123",
+    "review": "closed status grammar"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 177,
+    "expr": "j['tt'] == 'passed'",
+    "domain": "parsed state passed",
+    "native_cases": "a109",
+    "review": "closed status grammar"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 178,
+    "expr": "c not in dat",
+    "domain": "required job name membership",
+    "native_cases": "a109",
+    "review": "exact-name equivalence not covered by changing provenance only; case/prefix mutants survive"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 142,
+    "expr": "q.get('conclusion') == 'skipped'",
+    "domain": "conclusion == skipped partition",
+    "native_cases": "a111/a115/a119",
+    "review": "not covered by a124 passed-job comparison context"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 161,
+    "expr": "str(lg.get('sha256')) == j['sha']",
+    "domain": "log SHA str compared to parsed lowercase-hex",
+    "native_cases": "a124",
+    "review": "case/space covered; NFKC gap"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 145,
+    "expr": "c.get('trang_thai') == 'passed'",
+    "domain": "checkout status passed",
+    "native_cases": "a124",
+    "review": "case/leading/trailing covered"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 146,
+    "expr": "c.get('trang_thai') == 'skipped'",
+    "domain": "checkout status skipped + job id membership",
+    "native_cases": "a111/a114/a119",
+    "review": "skipped spelling exactness absent from table"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 146,
+    "expr": "c.get('job_id') in skip_p",
+    "domain": "checkout status skipped + job id membership",
+    "native_cases": "a111/a114/a119",
+    "review": "skipped spelling exactness absent from table"
+  },
+  {
+    "function": "loi_khai",
+    "line": 196,
+    "expr": "'gateoutput' in c",
+    "domain": "normalized key gateoutput substring and PHI_LOI_KHAI exact membership",
+    "native_cases": "a201/a121",
+    "review": "normalization allowed intentionally; most semantic rows not repeated through consumer"
+  },
+  {
+    "function": "loi_khai",
+    "line": 196,
+    "expr": "c not in PHI_LOI_KHAI",
+    "domain": "normalized key gateoutput substring and PHI_LOI_KHAI exact membership",
+    "native_cases": "a201/a121",
+    "review": "normalization allowed intentionally; most semantic rows not repeated through consumer"
+  },
+  {
+    "function": "token",
+    "line": 204,
+    "expr": "m[1] in TOKEN",
+    "domain": "parsed token membership",
+    "native_cases": "a202/a121",
+    "review": "helper domain; only limited consumer counterparts"
+  },
+  {
+    "function": "la_landed",
+    "line": 216,
+    "expr": "'trang_thai_packet' in du_lieu",
+    "domain": "landed key presence",
+    "native_cases": "a212/a121",
+    "review": "key dispatch; full domain consumer incomplete"
+  },
+  {
+    "function": "_tep_trong",
+    "line": 228,
+    "expr": "'..' in pp.parts",
+    "domain": ".. path segment membership",
+    "native_cases": "a204/a125",
+    "review": "a204 cross-platform branch tests ..; absolute variant skipped"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 262,
+    "expr": "'ubuntu-latest' not in m[2].split(',')",
+    "domain": "OS exact element in comma list",
+    "native_cases": "a209/a122",
+    "review": "prefix/suffix false membership not tested"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 250,
+    "expr": "d.get('html_url') != url",
+    "domain": "readback html_url exact",
+    "native_cases": "a125",
+    "review": "case/space tested"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 264,
+    "expr": "m[1] != head",
+    "domain": "head exact if provided; substring in claim if None",
+    "native_cases": "a209/a122",
+    "review": "matching/nonmatching/empty measured; contract permits substring for None"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 264,
+    "expr": "m[1] not in gia_tri",
+    "domain": "head exact if provided; substring in claim if None",
+    "native_cases": "a209/a122",
+    "review": "matching/nonmatching/empty measured; contract permits substring for None"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 252,
+    "expr": "d['user'].get('login') == CHU_KHO",
+    "domain": "readback login + association exact",
+    "native_cases": "a125",
+    "review": "case/space tested"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 252,
+    "expr": "d.get('author_association') == 'OWNER'",
+    "domain": "readback login + association exact",
+    "native_cases": "a125",
+    "review": "case/space tested"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 276,
+    "expr": "tk in ('not_measured', 'skipped', 'not_run')",
+    "domain": "negative tokens dispatch",
+    "native_cases": "a212",
+    "review": "closed token set"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 279,
+    "expr": "tk == 'owner_waived'",
+    "domain": "owner_waived dispatch",
+    "native_cases": "a209/a122/a125",
+    "review": "closed token set"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 293,
+    "expr": "tk != 'failed'",
+    "domain": "failed exclusion + no violations",
+    "native_cases": "a216",
+    "review": "closed token set"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 293,
+    "expr": "len(vp) == truoc",
+    "domain": "failed exclusion + no violations",
+    "native_cases": "a216",
+    "review": "closed token set"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 283,
+    "expr": "tk in ('passed', 'measured')",
+    "domain": "positive token membership",
+    "native_cases": "a203/a205/a123",
+    "review": "closed token set"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 285,
+    "expr": "tk == 'failed'",
+    "domain": "failed desired status",
+    "native_cases": "a208",
+    "review": "closed token set"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 291,
+    "expr": "tt != can",
+    "domain": "status from kiem_tep vs desired status",
+    "native_cases": "a206/a208",
+    "review": "closed status set"
+  },
+  {
+    "function": "main",
+    "line": 317,
+    "expr": "a.lenh == 'kiem-tep'",
+    "domain": "CLI command dispatch",
+    "native_cases": "a210/a217",
+    "review": "argparse choice domain"
+  }
+]

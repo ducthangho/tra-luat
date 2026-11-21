@@ -1,0 +1,30 @@
+[
+  {
+    "producer_branch": "posix",
+    "consumer_windows": false,
+    "producer_rc": 0,
+    "consumer_rc": 0,
+    "output": "CA: 42/42 dat\nDOT BIEN: 146/146 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT\nCI_DANG_KY ops/gate_output_doi_chieu_test.py: ĐẠT rc=0\n"
+  },
+  {
+    "producer_branch": "posix",
+    "consumer_windows": true,
+    "producer_rc": 0,
+    "consumer_rc": 0,
+    "output": "CA: 42/42 dat\nDOT BIEN: 146/146 bi giet dung ly do\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT\nCI_DANG_KY ops/gate_output_doi_chieu_test.py: ĐẠT rc=0\n"
+  },
+  {
+    "producer_branch": "nt",
+    "consumer_windows": false,
+    "producer_rc": 0,
+    "consumer_rc": 1,
+    "output": "CA: 42/42 dat\nBO QUA DOT BIEN m17_theo_symlink (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m23_bo_symlink_thanh_phan (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m56_xoa_ly_do_symlink (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m65_cli_khong_bat_stat (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m70_bo_ly_do_symlink_thu_muc (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m71_goc_symlink (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m76_readback_symlink (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m79_nhan_tuyet_doi (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m93_theo_symlink_thu_muc (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m105_goc_ho_so_symlink (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m107_goc_readback_symlink (ca dich chi do tren POSIX)\nDOT BIEN: 135/135 bi giet dung ly do (bo qua 11 chi POSIX)\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT\nCI_DANG_KY ops/gate_output_doi_chieu_test.py: ĐỎ rc=0\n"
+  },
+  {
+    "producer_branch": "nt",
+    "consumer_windows": true,
+    "producer_rc": 0,
+    "consumer_rc": 1,
+    "output": "CA: 42/42 dat\nBO QUA DOT BIEN m17_theo_symlink (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m23_bo_symlink_thanh_phan (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m56_xoa_ly_do_symlink (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m65_cli_khong_bat_stat (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m70_bo_ly_do_symlink_thu_muc (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m71_goc_symlink (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m76_readback_symlink (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m79_nhan_tuyet_doi (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m93_theo_symlink_thu_muc (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m105_goc_ho_so_symlink (ca dich chi do tren POSIX)\nBO QUA DOT BIEN m107_goc_readback_symlink (ca dich chi do tren POSIX)\nDOT BIEN: 135/135 bi giet dung ly do (bo qua 11 chi POSIX)\nTU KIEM PHAN HANG: DAT (2 dot bien)\nTONG: DAT\nCI_DANG_KY ops/gate_output_doi_chieu_test.py: ĐỎ rc=0\n"
+  }
+]

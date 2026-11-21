@@ -1,0 +1,467 @@
+[
+  {
+    "id": "r8_schema_nfkc",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "provenance_0"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0"
+          ]
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      }
+    }
+  },
+  {
+    "id": "r8_event_nfkc",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "khong_phai_run_land"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:khong_phai_run_land"
+          ]
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      }
+    }
+  },
+  {
+    "id": "r8_head_nfkc",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "provenance_0"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0"
+          ]
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      }
+    }
+  },
+  {
+    "id": "r8_name_nfkc",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "job_lech:136067289163"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:job_lech:136067289163"
+          ]
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      }
+    }
+  },
+  {
+    "id": "r8_log_sha_nfkc",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "log_sha_lech:136067289163"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:log_sha_lech:136067289163"
+          ]
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      }
+    }
+  },
+  {
+    "id": "r8_name_nfc",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "job_lech:136067289163"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:job_lech:136067289163"
+          ]
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      }
+    }
+  },
+  {
+    "id": "r8_checkout_skipped_casefold",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "provenance_chua_du"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_chua_du"
+          ]
+        ],
+        "control": [
+          [
+            "not_measured",
+            [
+              "co_job_skipped"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:co_job_skipped"
+          ]
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "co_job_skipped"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:co_job_skipped"
+          ]
+        ],
+        "control": [
+          [
+            "not_measured",
+            [
+              "co_job_skipped"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:co_job_skipped"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "id": "r8_skip_partition_casefold",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "provenance_chua_du",
+              "tap_job_lech",
+              "tap_skip_lech"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_chua_du,tap_job_lech,tap_skip_lech"
+          ]
+        ],
+        "control": [
+          [
+            "not_measured",
+            [
+              "co_job_skipped"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:co_job_skipped"
+          ]
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "co_job_skipped"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:co_job_skipped"
+          ]
+        ],
+        "control": [
+          [
+            "not_measured",
+            [
+              "co_job_skipped"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:co_job_skipped"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "id": "r8_required_name_casefold",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "check_bat_buoc:gate (ubuntu-latest)"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:check_bat_buoc:gate (ubuntu-latest)"
+          ]
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      }
+    }
+  },
+  {
+    "id": "r8_required_name_prefix",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "not_measured",
+            [
+              "check_bat_buoc:gate (ubuntu-latest)"
+            ]
+          ],
+          [
+            "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:check_bat_buoc:gate (ubuntu-latest)"
+          ]
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ],
+        "control": [
+          [
+            "passed",
+            []
+          ],
+          []
+        ]
+      }
+    }
+  },
+  {
+    "id": "r8_os_substring",
+    "contrast": {
+      "head": {
+        "negative": [
+          [
+            "os"
+          ],
+          [
+            "$.gate_output: waiver_khong_co_can_cu:os"
+          ]
+        ],
+        "control": [
+          [],
+          []
+        ]
+      },
+      "mutant": {
+        "negative": [
+          [],
+          []
+        ],
+        "control": [
+          [],
+          []
+        ]
+      }
+    }
+  }
+]

@@ -1,0 +1,307 @@
+[
+  {
+    "function": "doc_danh_gia",
+    "line": 77,
+    "expr": "so_moc == 0"
+  },
+  {
+    "function": "doc_danh_gia",
+    "line": 64,
+    "expr": "d == ''"
+  },
+  {
+    "function": "doc_danh_gia",
+    "line": 57,
+    "expr": "'\\r' in d"
+  },
+  {
+    "function": "doc_danh_gia",
+    "line": 67,
+    "expr": "int(j[1]) in kq['jobs']"
+  },
+  {
+    "function": "doc_danh_gia",
+    "line": 67,
+    "expr": "int(j[1]) in kq['skip']"
+  },
+  {
+    "function": "doc_danh_gia",
+    "line": 71,
+    "expr": "int(s[1]) in kq['jobs']"
+  },
+  {
+    "function": "doc_danh_gia",
+    "line": 71,
+    "expr": "int(s[1]) in kq['skip']"
+  },
+  {
+    "function": "chon_provenance",
+    "line": 111,
+    "expr": "len(khop) != 1"
+  },
+  {
+    "function": "chon_provenance",
+    "line": 108,
+    "expr": "r.get('run_id') == run"
+  },
+  {
+    "function": "chon_provenance",
+    "line": 109,
+    "expr": "y.get('attempt_yeu_cau') == attempt"
+  },
+  {
+    "function": "chon_provenance",
+    "line": 109,
+    "expr": "r.get('head_sha') == head"
+  },
+  {
+    "function": "chon_provenance",
+    "line": 105,
+    "expr": "y.get('schema') == 'ci_provenance/1'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 128,
+    "expr": "d['bo_sinh'] not in BO_SINH"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 148,
+    "expr": "set(d['jobs']) != set(P) - skip_p"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 150,
+    "expr": "set(d['skip']) != skip_p"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 163,
+    "expr": "BO_SINH[d['bo_sinh']] == 'v3'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 169,
+    "expr": "d['moc'] != (moc_tu, so_pass, n)"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 135,
+    "expr": "r.get('event') == 'push'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 135,
+    "expr": "r.get('loi_khai_rest_path') == '.github/workflows/ci.yml'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 140,
+    "expr": "q.get('job_id') in P"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 143,
+    "expr": "r.get('trang_thai') == 'passed'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 143,
+    "expr": "tj.get('trang_thai') == 'passed'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 156,
+    "expr": "q.get('name') != j['name']"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 156,
+    "expr": "q.get('conclusion') != j['conclusion']"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 157,
+    "expr": "','.join(q.get('labels') or []) != j['labels']"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 159,
+    "expr": "j['conclusion'] != 'success'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 159,
+    "expr": "j['tt'] != 'failed'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 164,
+    "expr": "s['v3'] != v3"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 168,
+    "expr": "so_pass == n"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 168,
+    "expr": "'failed' in tts"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 173,
+    "expr": "j['tt'] == 'failed'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 177,
+    "expr": "j['tt'] == 'passed'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 178,
+    "expr": "c not in dat"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 142,
+    "expr": "q.get('conclusion') == 'skipped'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 161,
+    "expr": "str(lg.get('sha256')) == j['sha']"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 145,
+    "expr": "c.get('trang_thai') == 'passed'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 146,
+    "expr": "c.get('trang_thai') == 'skipped'"
+  },
+  {
+    "function": "_kiem_tep",
+    "line": 146,
+    "expr": "c.get('job_id') in skip_p"
+  },
+  {
+    "function": "loi_khai",
+    "line": 189,
+    "expr": "id(doc) in _dang"
+  },
+  {
+    "function": "loi_khai",
+    "line": 196,
+    "expr": "'gateoutput' in c"
+  },
+  {
+    "function": "loi_khai",
+    "line": 196,
+    "expr": "c not in PHI_LOI_KHAI"
+  },
+  {
+    "function": "token",
+    "line": 204,
+    "expr": "m[1] in TOKEN"
+  },
+  {
+    "function": "la_landed",
+    "line": 216,
+    "expr": "'trang_thai_packet' in du_lieu"
+  },
+  {
+    "function": "_tep_trong",
+    "line": 228,
+    "expr": "'..' in pp.parts"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 239,
+    "expr": "len((urls := (RE_URL.findall(gia_tri) if isinstance(gia_tri, str) else []))) != 1"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 244,
+    "expr": "len(rb) != 1"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 255,
+    "expr": "len(dong) != 1"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 262,
+    "expr": "'ubuntu-latest' not in m[2].split(',')"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 250,
+    "expr": "d.get('html_url') != url"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 264,
+    "expr": "m[1] != head"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 264,
+    "expr": "m[1] not in gia_tri"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 252,
+    "expr": "d['user'].get('login') == CHU_KHO"
+  },
+  {
+    "function": "kiem_mien",
+    "line": 252,
+    "expr": "d.get('author_association') == 'OWNER'"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 276,
+    "expr": "tk in ('not_measured', 'skipped', 'not_run')"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 279,
+    "expr": "tk == 'owner_waived'"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 293,
+    "expr": "tk != 'failed'"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 293,
+    "expr": "len(vp) == truoc"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 283,
+    "expr": "tk in ('passed', 'measured')"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 285,
+    "expr": "tk == 'failed'"
+  },
+  {
+    "function": "kiem_ho_so",
+    "line": 291,
+    "expr": "tt != can"
+  },
+  {
+    "function": "main",
+    "line": 317,
+    "expr": "a.lenh == 'kiem-tep'"
+  }
+]

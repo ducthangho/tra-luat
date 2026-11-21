@@ -1,0 +1,830 @@
+{
+  "spec_sha256": "84e3c8f2fbee831be02e7623c8fc7fda43e3d7394802cc8b74df4ae9228b1bc1",
+  "vong": 10,
+  "reviewed_sha": "90cb0a69056f786aebebebb52033594185ef67fe",
+  "reviewed_tree": "6e7af40e7672e4b6f74425ea4909e3becf24d954",
+  "findings": [
+    {
+      "id": "AA01",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "severity": "P2",
+      "vi_tri": "ops/specs/wp1236-r11.md:366–386; ops/specs/wp1236-r11-bang-o.json: 36 ô mien; mã tham chiếu 9b7c1c51e7845b6633dfc46b9c9c7e5f1bfa292c ops/gate_output_doi_chieu_test.py:535–545,1086–1122",
+      "van_de": "Tập 125 ô chốt được ID/delta nhưng chưa chốt đầy đủ đầu vào và phép quan sát. 36 ô mien không khai seed readback/body/chuỗi lời khai; DONG và cách dựng chuỗi chỉ nằm trong mã thi công tham chiếu. ho_so cũng là kết quả đã chiếu bỏ JSON path/tên tệp/prefix, trong khi luật 6 chưa đặc tả phép chiếu. Vì băm chỉ bao bảng delta, cùng băm vẫn cho các tập đầu vào và tập ô phân biệt khác nhau. Z01 mới vá một phần ở mức ĐẶC TẢ; không phải lỗi mã sản phẩm hoặc yêu cầu mở rộng 125 ô.",
+      "bang_chung": [
+        "SPEC luật6 tuyên bố: Đổi tập ô là đổi đặc tả (duyệt lại băm). Phản chứng dưới đổi đầu vào thực chạy nhưng không đổi băm; branch tham chiếu được giao để đo tính thi công, không được đặc tả ghim như định nghĩa seed/projection có thẩm quyền.",
+        "cell_hash.json: 125 ID duy nhất; JSON chuẩn 6f1295850358676ad8db372c267eb550af110dded88938cf26cb78b85e14e7a1; bang_o() hai lần bằng JSON. a126 bản gốc và ast.unparse đều rc0.",
+        "seed_probe.json: hai seed chỉ khác han=2026-12-31 / han=2026-11-30, đều ngày hợp lệ, đều cho mã gốc khớp đủ36/36 ô mien; cùng băm125ô. Đột biến thêm điều kiện ngày phải31:36/36 so22/36. Không dùng seed hỏng để tạo tín dụng.",
+        "seed_full.jsonl: chạy chính a126 trên CÙNG đột biến ngày31; seed31 rc0, seed30 rc3 DO:a126_tap_o_dong tại mien.os:H6a (mong os, được han); cả hai vẫn cùng băm6f129585… . 89 ô fixture không phụ thuộc DONG. Phép đo chứng minh tập ô phân biệt chưa gắn duy nhất với băm; không tự kết luận đột biến ngày31 là P3 nếu nó đã vi phạm luật ưu tiên1/2/4/5.",
+        "output_projection.json: schema:H1 consumer thật trả [\"$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:provenance_0\"], còn ho_so của ô là [\"danh_gia_khong_passed:not_measured:provenance_0\"]. chay_o tự replace prefix/tên tệp và split prefix waiver; luật6 chỉ gọi nó là kỳ vọng kiem_ho_so, chưa định nghĩa mapping này.",
+        "semantic_derivations.json: 125/125 kỳ vọng suy được từ K2–K8/kiem_mien khi bổ sung seed/projection của mã tham chiếu. Các tiền đề bổ sung chính là phần đặc tả còn thiếu; không coi việc mã gốc khớp là nguồn của oracle."
+      ],
+      "de_xuat": {
+        "va_o_dau": "Luật6 và artifact ops/specs/wp1236-r11-bang-o.json; đây là nguồn acceptance, không sửa luật hoặc mã sản phẩm.",
+        "va_the_nao": "Cách rẻ: thêm một khối fixture mien dùng chung vào artifact được băm (URL, SHA, body, readback fields, claim/head, tên tệp hoặc mẫu tên, đường JSON caller), kèm định nghĩa các thao tác dong/readback/head/loi_khai_sha và output projection. Ghim các giá trị nghiệp vụ, để đường tạm vật lý là tham số môi trường. Đối chiếu output có cấu trúc hoặc mô tả chính xác phần được bỏ. Không chỉ chép thêm một băm cho bang_o mà tiếp tục để seed ngoài băm.",
+        "ca_test_khoa": "Đổi riêng ngày hợp lệ31→30 phải đổi contract hash hoặc bị từ chối vì trái fixture frozen; hai reader độc lập đọc cùng artifact phải dựng cùng bytes/arguments và projection. Giữ125 ID, baseline và đo lại25 mutant r7/r8; kiểm projection giữ lý do/trạng thái/thứ tự và không nuốt vi phạm thêm.",
+        "rui_ro": "Đóng cả absolute scratch path sẽ phá tính portable; projection quá rộng có thể che lỗi. Giữ input nghiệp vụ và mapping observation nhỏ, không dựng thêm cơ chế tự bảo vệ mã kiểu A14-S0."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_ids": [
+        "AA01"
+      ],
+      "manifestations": [
+        "36 ô mien còn seed ngoài băm",
+        "Kỳ vọng consumer dùng projection chưa có hợp đồng"
+      ],
+      "highest_open_severity": "P2",
+      "nguon": {
+        "vong9": "Z01",
+        "reviewed_sha9": "9f7fd71c7cd402603db7a319f0d3e3041d595437",
+        "current_sha": "90cb0a69056f786aebebebb52033594185ef67fe",
+        "aliases": [
+          "test-thieu-chot"
+        ]
+      },
+      "common_fix": "Băm chung seed, delta và định nghĩa observation; không cần hai hướng vá riêng.",
+      "closing_check": "Seed31/30 phải có hash khác hoặc bị guard từ chối; cùng contract dựng cùng input/observation;125 ô và regression25 đo lại.",
+      "ly_do_va_rieng": "Hai biểu hiện cùng cơ chế hợp đồng ô chưa tự đủ, giữ một lớp và một finding."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "xuong-dong-khong-khop-byte-that",
+      "finding_cu": [
+        "codex:R01",
+        "claude:R01"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "codex:R02",
+        "claude:R03",
+        "claude:R06",
+        "codex:S01",
+        "codex:S03",
+        "claude:S03",
+        "claude:S05",
+        "claude:S06",
+        "codex:T01",
+        "claude:T01",
+        "U02",
+        "V01",
+        "W01",
+        "X01",
+        "ma7:M01",
+        "ma7:M03",
+        "ma8:N01",
+        "ma8:N02",
+        "Z01"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        "ma7",
+        "ma8",
+        9
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "VA_MOT_PHAN",
+      "evidence": [
+        "Z01: tập hữu hạn125 ID/delta/hash và thứ tự ưu tiên đã có thật; semantic_derivations.json khớp125 theo interpretation tham chiếu.",
+        "AA01/seed_full.jsonl: input seed+projection còn ngoài hợp đồng frozen; chưa đóng Z01.",
+        "a126_results.jsonl: áp đúng25 cặp lịch sử, 20 chết đúng TinHieuChotCa/a126, 5 xanh có route ưu tiên luật1/4/5 (priority_routes.json). Không có survivor lịch sử nào có ô phân biệt theo chay_o tham chiếu mà a126 vẫn xanh.",
+        "N02 giữ closure ở mức spec: luật5 và tep_danh_gia không đổi so vòng9; không lấy code cũ/nhãn tương đương cũ làm chứng nhận ledger hiện tại.",
+        "Scope cut luật3/6 không được tính là vá scanner hay mọi mutant ngoài bảng; giữ lịch sử và nghĩa vụ hồi quy."
+      ],
+      "chua_do_duoc": "Cần revision đóng seed/projection để quyết closure Z01; full ledger152, full product suite, Windows native và scanner không thuộc phép review đặc tả này. Không claim chúng passed."
+    },
+    {
+      "slug": "nang-tran-thieu-hop-dong-authority",
+      "finding_cu": [
+        "codex:R03",
+        "claude:R11"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "d2b-thieu-neo-attempt",
+      "finding_cu": [
+        "codex:R04"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_cu": [
+        "codex:R05",
+        "claude:R05",
+        "codex:S02",
+        "claude:S04",
+        "claude:T05",
+        "V02",
+        "Z02 (tái mở bởi r11 tiếp nhận lượt mã7–8)"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        5,
+        9
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Z02: counts.json đếm152/152 ID, đúng hashf311a24c… và127+14+11; luật5 cộng dồn và đoạn Số tổng hiện hành đòi so đúng tập152.",
+        "cell_hash.json:125/125;30 ca sàn/7luật/50mutant sàn giữ; numstat tham chiếu1777=343+1433+1 (<2100); ≈1785 là ước sai8dòng, không phải claim exact và không đổi quyết định trần.",
+        "2100 được ghi rõ đề nghị CHỜ E2, không tự duyệt; không hồi tố claim ngân sách."
+      ],
+      "chua_do_duoc": "Không còn phép đo thiếu để đóng Z02 ở scope spec; quyền nâng trần/numstat ứng viên thi công cuối vẫn phải xác minh khi thực thi."
+    },
+    {
+      "slug": "trang-thai-job-khong-khop-conclusion",
+      "finding_cu": [
+        "claude:R02"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "landed-khong-buoc-loi-khai-hop-le",
+      "finding_cu": [
+        "claude:R04",
+        "claude:S01"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "l8-chua-chot-thu-tu-cutover",
+      "finding_cu": [
+        "claude:R07"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "khong-kiem-co-toan-ven-provenance",
+      "finding_cu": [
+        "claude:R08"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "claude:R09",
+        "claude:S07",
+        "codex:T02",
+        "claude:T03",
+        "U01",
+        "ma7:M02",
+        "ma8:N03"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        "ma7",
+        "ma8"
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử.",
+        "seams.json: a127 rc0 kiểm producer→consumer trên hai chế độposix/nt cùng4 đối chứng đỏ; luật7 giữ nguyên. Chế độnt mô phỏng không là Windows native."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "nguon-doc-khong-neo-cung-snapshot",
+      "finding_cu": [
+        "claude:R12",
+        "claude:S02"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "he-qua-gioi-han-khai-thieu",
+      "finding_cu": [
+        "claude:R10",
+        "claude:T02",
+        "claude:T04"
+      ],
+      "vong_xuat_hien": [
+        1,
+        3
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "pham-vi-kiem-chung-trai-adr-windows",
+      "finding_cu": [
+        "U03"
+      ],
+      "vong_xuat_hien": [
+        4
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "ma1:F04",
+        "ma2:G02",
+        "ma3:H01",
+        "ma4:J01",
+        "ma4:J02",
+        "ma5:K01",
+        "ma5:K02",
+        "ma6:L01",
+        "ma6:L02",
+        "ma7:M01",
+        "ma7:M03",
+        "ma8:N01",
+        "ma8:N02"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma2",
+        "ma3",
+        "ma4",
+        "ma5",
+        "ma6",
+        "ma7",
+        "ma8"
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "VA_MOT_PHAN",
+      "evidence": [
+        "Z01: tập hữu hạn125 ID/delta/hash và thứ tự ưu tiên đã có thật; semantic_derivations.json khớp125 theo interpretation tham chiếu.",
+        "AA01/seed_full.jsonl: input seed+projection còn ngoài hợp đồng frozen; chưa đóng Z01.",
+        "a126_results.jsonl: áp đúng25 cặp lịch sử, 20 chết đúng TinHieuChotCa/a126, 5 xanh có route ưu tiên luật1/4/5 (priority_routes.json). Không có survivor lịch sử nào có ô phân biệt theo chay_o tham chiếu mà a126 vẫn xanh.",
+        "N02 giữ closure ở mức spec: luật5 và tep_danh_gia không đổi so vòng9; không lấy code cũ/nhãn tương đương cũ làm chứng nhận ledger hiện tại.",
+        "Scope cut luật3/6 không được tính là vá scanner hay mọi mutant ngoài bảng; giữ lịch sử và nghĩa vụ hồi quy."
+      ],
+      "chua_do_duoc": "Cần revision đóng seed/projection để quyết closure Z01; full ledger152, full product suite, Windows native và scanner không thuộc phép review đặc tả này. Không claim chúng passed."
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_cu": [
+        "ma6:L03"
+      ],
+      "vong_xuat_hien": [
+        "ma6"
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "vong_xuat_hien": [
+        "ma1"
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma2"
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma3"
+      ],
+      "scope": "MỨC ĐẶC TẢ; không chứng nhận mã A hay ledger152 của executor.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ trạng thái reviewer vòng9; không tái mở vì delta sửa1 không chạm hợp đồng của lớp. unchanged_contracts.json so10 khối hợp đồng (Module mới, gates, rules1–5/7, tablesA/B/C, Windows, limits, ngoài phạm vi) đều byte-equal.",
+        "Mã sản phẩm ac6d6253… giữ nguyên so79b3c24. Không dùng lời này để nhận đã chạy lại mọi test lịch sử."
+      ],
+      "chua_do_duoc": "Không chạy lại phản chứng lịch sử không bị diff tác động; không phải phần cần đo thêm để phán delta spec này."
+    }
+  ],
+  "bang_noi_slug": [
+    {
+      "slug_nguon": "test-thieu-chot",
+      "slug_dich": "nghiem-thu-khong-co-lap-chot-dich",
+      "quan_he": "alias ở mức đặc tả, không gộp mới",
+      "ly_do": "Kế thừa đối chiếu vòng9; cùng lỗi acceptance/độ phủ. Giữ cả hai trong prior, đếm1 lần trongU."
+    },
+    {
+      "slug_nguon": "nghiem-thu-khong-co-lap-chot-dich",
+      "slug_dich": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding": "Z01→AA01",
+      "ly_do": "Còn phần input/observation của chính tập ô hữu hạn, không đổi slug để reset."
+    },
+    {
+      "slug_nguon": "so-do-khong-cung-pham-vi-nguon",
+      "slug_dich": "so-do-khong-cung-pham-vi-nguon",
+      "finding": "Z02→DA_VA_THAT",
+      "ly_do": "Băm/tập152 đã đo độc lập."
+    }
+  ],
+  "hoi_tu": {
+    "vong9_sang_10": "1/2",
+    "U": [
+      "nghiem-thu-khong-co-lap-chot-dich",
+      "so-do-khong-cung-pham-vi-nguon"
+    ],
+    "F": [
+      "so-do-khong-cung-pham-vi-nguon"
+    ],
+    "scope": "Mức đặc tả; alias test-thieu-chot không đếm hai lần; scope cut không tính vá.",
+    "lop_lap_lan_ba": [
+      "nghiem-thu-khong-co-lap-chot-dich",
+      "test-thieu-chot",
+      "so-do-khong-cung-pham-vi-nguon",
+      "hop-dong-dau-vao-dau-ra-chua-chot"
+    ],
+    "lop_moi": [],
+    "lop_tai_mo": [],
+    "checkpoint": "Giữ lịch sử§12 và yêu cầu xét lại cách làm. Chỉ thị hiện tại đã cấp review11/12; không tự mở vòng hoặc nâng budget. Lớp đã đóng trong danh sách lặp chỉ là lịch sử, không finding mới."
+  },
+  "da_do_khop": [
+    {
+      "phep_do": "preflight",
+      "command": "sha256sum ../SPEC.md; git rev-parse HEAD HEAD^{tree}; compare Git blob; snapshot",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "preflight.json",
+      "positive_evidence": "SHA256 đúng, blob trùng, exact head/tree; sạch tracked/index/untracked."
+    },
+    {
+      "phep_do": "structure/count/ledger",
+      "command": "python3 -B ../work/audit_structure.py",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": [
+        "counts.json",
+        "row_ledger.json",
+        "ast_audit.json",
+        "historical_families.json"
+      ],
+      "positive_evidence": "152 unique;125 cellIDs map20/45 rows;25 remaining rows individually routed to grammar/reasons/regression; product unchanged."
+    },
+    {
+      "phep_do": "a126 historical mutants",
+      "command": "python3 -B ../work/run_a126.py",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": [
+        "cell_hash.json",
+        "a126_results.jsonl",
+        "run_a126.log"
+      ],
+      "positive_evidence": "2 baseline rc0;25 anchors each unique;20 rc3 exact a126 signal;5 rc0;0 setup/inconsequential errors."
+    },
+    {
+      "phep_do": "expectations and seed counterexample",
+      "command": "python3 -B ../work/audit_cell_semantics.py; python3 -B ../work/audit_seed_full.py",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": [
+        "semantic_derivations.json",
+        "seed_probe.json",
+        "seed_full.jsonl",
+        "output_projection.json"
+      ],
+      "positive_evidence": "125 derived under stated reference interpretation;2 valid seeds same hash;baseline36/36 each;mutant fulla126 rc0/rc3 proves AA01."
+    },
+    {
+      "phep_do": "priority routing",
+      "command": "python3 -B ../work/audit_priority_routes.py",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "priority_routes.json",
+      "positive_evidence": "5 survivors outside125 killed by proper a125/a210 target;both target baselines rc0."
+    },
+    {
+      "phep_do": "output and portable seams",
+      "command": "python3 -B ../work/audit_seams.py",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "seams.json",
+      "positive_evidence": "a127/a128 originalrc0; m65/m79 eachrc3 correcta128 signal. No Windows-native claim."
+    },
+    {
+      "phep_do": "unchanged prior contracts",
+      "command": "Python compare 10 delimited blocks from git show9f7fd71:ops/specs/wp1236-r11.md to SPEC.md",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "unchanged_contracts.json",
+      "positive_evidence": "10/10 same; preserve previously closed classes."
+    },
+    {
+      "phep_do": "snapshot cuối + diff check",
+      "command": "python3 -B ../work/check_final.py",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "snapshot_final.json",
+      "positive_evidence": "17509 file hashes,delta0; HEAD/tree không đổi; diff/index sạch."
+    }
+  ],
+  "verdict": "changes_requested",
+  "revision": 11,
+  "scope": "specification_only",
+  "preflight": {
+    "checks": [
+      {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD",
+          "HEAD^{tree}"
+        ],
+        "rc": 0,
+        "stdout": "90cb0a69056f786aebebebb52033594185ef67fe\n6e7af40e7672e4b6f74425ea4909e3becf24d954\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all",
+          "--ignored=matching"
+        ],
+        "rc": 0,
+        "stdout": "!! .codex/\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--cached",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "config",
+          "--get",
+          "core.abbrev"
+        ],
+        "rc": 0,
+        "stdout": "7\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "remote",
+          "get-url",
+          "origin"
+        ],
+        "rc": 0,
+        "stdout": "https://github.com/ducthangho/tra-luat.git\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "rev-parse",
+          "ma-9b7c1c5",
+          "ma-9b7c1c5^{tree}",
+          "b6c0063",
+          "9f7fd71"
+        ],
+        "rc": 0,
+        "stdout": "9b7c1c51e7845b6633dfc46b9c9c7e5f1bfa292c\n099d65ecabaac5adc5236e3e82f58a82df5be2b5\nb6c0063ba05fafea6629b1b0af6a607897254a91\n9f7fd71c7cd402603db7a319f0d3e3041d595437\n",
+        "stderr": ""
+      }
+    ],
+    "spec_sha256": "84e3c8f2fbee831be02e7623c8fc7fda43e3d7394802cc8b74df4ae9228b1bc1",
+    "spec_matches_blob": true,
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "platform": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "files": 17509,
+    "generation": "N/A: review specification, not executor lease",
+    "write_set": [
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r11-10-codex/work"
+    ],
+    "repository_write_set": [],
+    "authority": "Direct user assignment, round 10, call 11/12; no network readback",
+    "session_id": "01a1fc75-cdad-7e50-b619-4d3a4621e970"
+  },
+  "source_product_sha": "9b7c1c51e7845b6633dfc46b9c9c7e5f1bfa292c",
+  "source_product_tree": "099d65ecabaac5adc5236e3e82f58a82df5be2b5",
+  "immutable_product_baseline": "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+  "prior_spec_sha": "9f7fd71c7cd402603db7a319f0d3e3041d595437",
+  "review_identity": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "model_family": "openai",
+    "model_family_source": "identity provider / ADR-0065",
+    "model_served": "KHONG_DO_DUOC",
+    "effort_served": "KHONG_DO_DUOC",
+    "run_id": "0b363962d8164bddb8bec9b6157986b6",
+    "session_id": "01a1fc75-cdad-7e50-b619-4d3a4621e970",
+    "identity_source": "../run/0b363962/run.json; CODEX_SESSION_ID",
+    "independence": "Reviewer context được giao riêng; không fork executor, không dùng subagent. Đây là khai báo theo assignment, không tự chứng nhận audit nền tảng.",
+    "sandbox": "workspace-write; repository giữ read-only bằng kỷ luật thao tác; không khai sandbox filesystem read-only.",
+    "assurance_limit": "Nội dung review offline trên exact SHA; không tạo lease/CI/cross_approved/human audit/merge/land. Launcher terminal receipt phải được kiểm sau run."
+  },
+  "counts_and_budget": {
+    "bank_count": 152,
+    "bank_unique": 152,
+    "bank_sha256": "f311a24c21693df4f291fe4cdb34c1c3575b4d646cfae6106b2d5e3b09a72d05",
+    "bank6_ids_preserved": true,
+    "by_round": {
+      "6": 127,
+      "7": 14,
+      "8": 11
+    },
+    "numstat": "1\t0\t.claude/dev/ci_dang_ky_test.py\n343\t0\tops/gate_output_doi_chieu.py\n1433\t0\tops/gate_output_doi_chieu_test.py\n",
+    "lines_added": 1777,
+    "new_limit_proposed": 2100,
+    "E2": "pending approval as explicitly marked in spec; not execution authorization",
+    "product_unchanged_from_79b3c24": true
+  },
+  "acceptance_assessment": {
+    "finite_ids": {
+      "count": 125,
+      "unique": 125,
+      "canonical_sha256": "6f1295850358676ad8db372c267eb550af110dded88938cf26cb78b85e14e7a1",
+      "generated_equal": true,
+      "generated_twice_equal": true,
+      "constant": "6f1295850358676ad8db372c267eb550af110dded88938cf26cb78b85e14e7a1"
+    },
+    "fully_frozen_execution_inputs": "failed AA01:36 mien defaults not frozen",
+    "expectations": "125/125 law-derived with reference seed/projection explicitly assumed; no incorrect numeric expected value found under those assumptions",
+    "precedence": "Order1/2/4/5 before6 explicit and resolves five r7 survivors; no finding about that order. Determining law6 distinguishing cells still depends on unspecified seed/observation.",
+    "historical_mutants": {
+      "total": 25,
+      "a126_killed": 20,
+      "a126_survived": 5,
+      "survivors": [
+        "r7_url_dedup",
+        "r7_consumer_delimiter",
+        "r7_dotpath_raw",
+        "r7_cli_limit_prefix",
+        "r7_cli_fallback_stem"
+      ],
+      "unexplained_survivors": 0,
+      "scope_limit": "No full152 regression or full code approval; r6 families remain explicit under laws1/2/4/5 and cumulative bank."
+    },
+    "row_coverage": {
+      "rows": 45,
+      "direct_rows": 20,
+      "without_direct_cells": 25,
+      "artifact": "row_ledger.json",
+      "note": "Per-row rationale is reviewer reconstruction, not executor handoff. Historical inventory61 is filtered (73 total ASTCompare,72 in functions); mislabel attempt as run.head_sha corrected by reading expression. Conclusion\\w+ is not literally a closed enum; grammar+K5/law1/4/5 route remains, no exemption."
+    },
+    "windows": "native not_run; only mocked two-mode contract + OS-independent seam probes",
+    "size_limit": "2100 proposed only; measured reference1777 not final implementation allowance"
+  },
+  "severity_decision": {
+    "open": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 1,
+      "P3": 0
+    },
+    "classes": 1,
+    "manifestations": 2,
+    "reason": "Sensitive requires0openP0/P1/P2 and closure/waiver ofeveryP3. AA01 P2 remains; Z02 closed; no waiver assumed."
+  },
+  "validation_scope": {
+    "passed": [
+      "hash/blob/head/tree",
+      "125 generator equality",
+      "25 historical mutant runs",
+      "5 priority-route controls",
+      "conditional law derivations",
+      "seed counterexample reproducible",
+      "output two-mode contract and seams",
+      "152 IDs/counts",
+      "prior contract equality"
+    ],
+    "failed": [
+      "law6 fully frozen inputs/observations (AA01)"
+    ],
+    "skipped": [],
+    "not_run": [
+      "native Windows",
+      "GitHub/network and owner authority readback",
+      "CI/fullselftest/release",
+      "full152 regression ledger/fullscanner",
+      "fullcode review",
+      "Ruff pin/probe contract",
+      "bare Ruff lint",
+      "LIVE/merge/deploy"
+    ],
+    "limit": "All scratch and temporary files are under work. These are specification probes, not product acceptance gates."
+  },
+  "read_only_snapshot": {
+    "checks": [
+      {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD",
+          "HEAD^{tree}"
+        ],
+        "rc": 0,
+        "stdout": "90cb0a69056f786aebebebb52033594185ef67fe\n6e7af40e7672e4b6f74425ea4909e3becf24d954\n",
+        "stderr": "",
+        "stdout_sha256": "e3f068f51f22fc82e995b4e91b48da5f8a0e84f996f01dbd17b8b08e45f37933"
+      },
+      {
+        "command": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all",
+          "--ignored=matching"
+        ],
+        "rc": 0,
+        "stdout": "!! .codex/\n",
+        "stderr": "",
+        "stdout_sha256": "7a26e2a87df7447fae58bdb1eb41dca70c4e41f40c2b821cb7466761d682cb52"
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": "",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--cached",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": "",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check",
+          "9f7fd71",
+          "90cb0a6",
+          "--",
+          "ops/specs/"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": "",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "files": 17509,
+    "delta": [],
+    "same_head_tree": true,
+    "limit": "Snapshot đầu/cuối chứng minh không có delta quan sát được, không chứng minh lịch sử ghi rồi hoàn nguyên. Repo executor nguồn ngoài phạm vi quan sát. Sandbox workspace-write; review thao tác read-only."
+  }
+}

@@ -52,3 +52,16 @@ là băm của tệp gốc trong sandbox review. Liên kết tương đối tron
 > - Toàn bộ suite và toàn bộ `--dot-bien` chưa chạy. Kiểm registry bằng import, rc 0 mỗi vế, xác nhận 454 → 455 ca và 789 → 795 đột biến tổng, tức +1/+6. Các tỷ lệ 452/452 → 453/453 và 782/782 → 788/788, danh tính hai ca bỏ qua và bảy đột biến Windows chưa được xác minh độc lập bằng lần chạy toàn bộ.
 > - GitHub connector đọc kết quả theo exact SHA. Workflow `gate` còn chạy khi chốt báo cáo, `lease-pr` đã thành công, workflow Windows bị bỏ qua. Đọc cấu hình required checks qua GitHub API trả 403. Trang Checks qua web báo cache miss. N4 chưa có kết luận CI xanh. [gate](https://github.com/ducthangho/tra-luat/actions/runs/44886577232), [lease-pr](https://github.com/ducthangho/tra-luat/actions/runs/44886577191), [Windows](https://github.com/ducthangho/tra-luat/actions/runs/44886577190)
 > - macOS/Windows thật và file command của runner GitHub Actions thật chưa được đo. Các phép đo hành vi dùng stub Linux và tệp đích giả.
+
+### Executor xử lý (sửa ở `b7a280e`)
+
+| Finding | Kiểm lại | Xử lý |
+|---|---|---|
+| P2 chép khi kết quả cuối là `GIU_PATH` hoặc rơi về stdout | Thật. Kịch bản G (bộ chọn ra `DICH`, sửa `rg` đầu PATH, gọi lại ⇒ `GIU_PATH`): head `2847860` rc 0 mà `$GITHUB_PATH` có dòng. | Thêm điều kiện kênh CUỐI là `DICH` (`_tl1488_kenh_la_dich`, hàm, không biến). Kịch bản G, H; đột biến `wp1488_sh_bo_xet_kenh_dich` chết ở (G). |
+| P2 ca C đo trước khi lượt thử lại thoát | Thật: dấu `di` phát từ trong công thức. | `cat` giả đầu PATH phát `di` lúc script đọc kênh `kq-thu-lai-*` (sau khi lượt thử lại đã thoát, trước bước chép) và chờ writer ghi xong. Fixture chốt cả `di` lẫn `xong`. Đột biến `wp1488_sh_doc_tep_cho_cu_ghi_muon` (đọc thêm tệp chờ của lượt đầu chỉ khi writer muộn đã ghi) chết ĐÚNG ở (C). |
+| P3 strip/split che dòng trắng | Thật: đột biến `printf '%s\n\n'` sống. | So nguyên byte của tệp `$GITHUB_PATH` ở mọi kịch bản. Đột biến `wp1488_sh_tep_cho_dong_trang` chết ở (A'). |
+| Độ phủ: lỗi chép ở lượt `source` (B3) | Đúng là thiếu. | Kịch bản I: `--bat-buoc`, `$GITHUB_PATH` là thư mục ⇒ công cụ tuỳ chọn báo đi tiếp, công cụ bắt buộc dừng, đúng hai dòng báo. Đột biến `wp1488_sh_chep_loi_thoat_ngay` chết ở (I). |
+
+Không làm (độ phủ reviewer liệt kê, ngoài các chốt trên): đột biến đổi thứ tự ghi tệp chờ/`DICH` trong bộ chọn và bỏ điều
+kiện `-s`/`-n` riêng lẻ. Lý do: thứ tự ấy chỉ đổi kết quả khi ghi `DICH` lỗi mà ghi tệp chờ được, vốn đã đi nhánh lỗi; hai
+điều kiện `-s`/`-n` là chốt rỗng của B5 mà `r858_*` (`$GITHUB_PATH` rỗng/vắng ⇒ vẫn DAT) đã đo ở mức hành vi.

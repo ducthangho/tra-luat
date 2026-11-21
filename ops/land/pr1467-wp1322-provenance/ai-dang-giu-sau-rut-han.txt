@@ -1,0 +1,16 @@
+# do 2026-11-21T00:44:20Z clone moi (refs/heads = may chu), origin/master = 010046f21, nhanh lease = 524ba7c3d
+may chu 385 ref; refs/heads cuc bo thieu 0, thua 0
+## ai-dang-giu ops/ci_provenance_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	ci-provenance-wd-r1-g1-claude-remote-20261101	refs/heads/ops/ci-provenance-wd-r1-lease:ops/leases/ci-provenance-wd-r1-g1-claude-remote-20261101.yaml
+HẾT_HẠN	ci-provenance-wd-r1-g2-claude-remote-20261101	refs/heads/ops/ci-provenance-wd-r1-lease:ops/leases/ci-provenance-wd-r1-g2-claude-remote-20261101.yaml
+HẾT_HẠN	ci-provenance-wd-r1-g3-claude-remote-20261101	refs/heads/ops/ci-provenance-wd-r1-lease:ops/leases/ci-provenance-wd-r1-g3-claude-remote-20261101.yaml
+HẾT_HẠN	wp1147-r1-g1-claude	refs/heads/ops/wp1147-r1-g1-lease:ops/leases/wp1147-r1-g1-claude.yaml
+HẾT_HẠN	wp1147-r2-g2-claude	refs/heads/ops/wp1147-r1-g1-lease:ops/leases/wp1147-r2-g2-claude.yaml
+HẾT_HẠN	wp1322-r1-g1-claude	refs/heads/ops/wp1322-r1-g1-lease:ops/leases/wp1322-r1-g1-claude.yaml
+HẾT_HẠN	wp1322-r1-g2-claude	refs/heads/ops/wp1322-r1-g1-lease:ops/leases/wp1322-r1-g2-claude.yaml
+HẾT_HẠN	wp978-r1-g1-claude	refs/heads/ops/wp978-r1-g1-lease:ops/leases/wp978-r1-g1-claude.yaml
+HẾT_HẠN	wp978-r2-g1-claude	refs/heads/ops/wp978-r1-g1-lease:ops/leases/wp978-r2-g1-claude.yaml
+HẾT_HẠN	wp978-r2-g2-claude	refs/heads/ops/wp978-r1-g1-lease:ops/leases/wp978-r2-g2-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

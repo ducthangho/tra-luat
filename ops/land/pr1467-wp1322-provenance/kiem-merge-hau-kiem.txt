@@ -1,0 +1,6 @@
+# kiem-merge K0-K7 chay HAU KIEM (sau merge f77feb5) 2026-11-21T00:41:42Z, cay 010046f, origin/master 010046f
+# review offline: run.json/stdout.log cua launcher run 5e31e2f1 (luot 9), = ops/reviews/pr1467-review-9-codex/
+  THIẾU  K1 hiệu lực M10: KHÔNG ĐO ĐƯỢC (ValueError: spec_ref phải ghim OID40 và spec_path đúng nguồn)
+  THIẾU  K4 review offline: review offline chưa approve đúng head (run.json head/trang_thai/ma_thoat/stdout_sha256 hoặc dòng KET_LUAN)
+CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu K1 hiệu lực M10; K4 review offline
+rc=12

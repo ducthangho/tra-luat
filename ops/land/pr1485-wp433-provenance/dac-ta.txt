@@ -1,0 +1,7 @@
+# dac ta + lease + verdict tren nhanh ops/bundled-tach-manh-spec (378b7f618552fc8f11dc08a55679e7fd1f9fa6e1), 2026-11-21T07:05:47Z
+spec blob 01fd342aa954a31c6409c328a097070e4decaf47 sha256 8b0f376c8f009bcad3df018be9d47f4737d669e8a52d364339e8611e4d837691
+spec tren master? KHONG
+verdict luot1-codex-4e74fe1 sha256 61e355e1113c701dbaed1788727b7a487844e70f8c03fc15bfcd3c70b03c43fb KET_LUAN: KET_LUAN: request_changes
+verdict luot2-codex-36dc91a sha256 83c8a2847a340a4d9eb444e61f4a9bd07ebb342782e14e833b69c41fbcd5a700 KET_LUAN: KET_LUAN: request_changes
+verdict luot3-codex-5293a85 sha256 360c8a4fe56a58a40e4bf8e6292ac03d297060db831ac3104b519e6b13cc4b12 KET_LUAN: KET_LUAN: request_changes
+lease rut han commit: 378b7f618552fc8f11dc08a55679e7fd1f9fa6e1

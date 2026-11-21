@@ -1,5 +1,10 @@
 # PX-GEMINI-500 r1 — vì sao `px ask gemini:auto` trả HTTP 500 (r4): **gateway chưa đăng nhập Google** (`cause_measured`)
 
+> **Đính chính (revision 5, #1457).** Hồ sơ này còn finding P2 chưa vá. Danh sách lớp và finding nằm ở các verdict review §8.3 đăng trên
+> Issue #1457: [V1](https://github.com/ducthangho/tra-luat/issues/1457#issuecomment-7048011072) · [V2](https://github.com/ducthangho/tra-luat/issues/1457#issuecomment-7048011557) · [r3](https://github.com/ducthangho/tra-luat/issues/1457#issuecomment-7048537156) · [r4](https://github.com/ducthangho/tra-luat/issues/1457#issuecomment-7053023177).
+> Đọc mọi kết luận trong hồ sơ này, kể cả kết luận và nhãn `cause_measured` ở tiêu đề, như lời khai chưa được xác minh trong kho.
+> Nợ chung về định danh vận hành và sổ ngân sách review ghi ở #1471. Nội dung dưới đây giữ nguyên bản đã merge, không sửa.
+
 **Căn cứ:** đặc tả `ops/specs/px-gemini-500-r1.md`, lease `ops/leases/px-gemini-500-r1-g1-operator.yaml`.
 Lượt gốc: `../../px-ask/r4/RESULTS.md` (HTTP 500, ~2026-11-20T07:48:21Z) và `../../px-ask/r5/RESULTS.md` (perplexity HTTP 200, ~07:56:43Z).
 

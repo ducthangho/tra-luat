@@ -10,7 +10,7 @@ bước của mỗi nhóm log được ĐỊNH DANH qua REST `steps[]` + vị tr
 Thoát: 0 không mốc nào `failed` · 12 có `failed` · 2 sai đối số · 3 REST khác 2xx (in nguyên mã). LUÔN in `NOT_MEASURED: <n>`;
 rc 2/3 không sinh provenance nên cả bốn mốc là chưa đo (`NOT_MEASURED: 4` kèm `PROVENANCE: khong_sinh`).
 """
-import argparse, base64, binascii, datetime, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tempfile, time, urllib.error, urllib.parse, urllib.request, zipfile
+import argparse, base64, binascii, datetime, errno, hashlib, importlib.util, io, json, os, re, shutil, subprocess, sys, tempfile, time, urllib.error, urllib.parse, urllib.request, zipfile
 from pathlib import Path
 
 import yaml
@@ -572,22 +572,40 @@ def doi_ten_thu_lai(nguon, dich):
                 raise
             ngu_thu_lai(CHO_GOC * 2 ** k)
 
+_DUNG_ONEXC = sys.version_info >= (3, 12)   # `onexc` có từ 3.12; trước đó `onerror` (test chạy được cả hai nhánh)
+
+def _thu_cap(duong, e, goc):
+    """ENOTEMPTY của một thư mục mà BÊN DƯỚI có tệp vừa xoá hỏng vì `PermissionError` — hệ quả, không phải lỗi độc lập
+    (#1475 review lượt 2 F1: `rmtree` thật báo thêm lỗi này khi `unlink` một tệp con hỏng)."""
+    if not (isinstance(e, OSError) and e.errno == errno.ENOTEMPTY):
+        return False
+    cha = os.path.normcase(os.path.normpath(duong))
+    return any(os.path.normcase(os.path.normpath(d)).startswith(cha + os.sep) for d, _ in goc)
+
 def don_thu_muc(p):
-    """Xoá cây thư mục tạm, cùng chính sách thử lại (#1475 review lượt 1 F1): mọi lỗi xoá được GOM (không nuốt câm như
-    `ignore_errors=True`); còn sót mà mọi lỗi đều là `PermissionError` trên Windows thì thử lại. Không bao giờ ném — dọn
-    dẹp không được đổi kết quả của lần ghi — nhưng còn sót thì in `KHONG_DON_DUOC` ra stderr và trả False."""
+    """Xoá cây thư mục tạm, cùng chính sách thử lại (#1475): mọi lỗi xoá được GOM (không nuốt câm như
+    `ignore_errors=True`); thử lại khi trên Windows có lỗi `PermissionError` và mọi lỗi còn lại chỉ là ENOTEMPTY thứ cấp của
+    chính nó (`_thu_cap`). Lỗi độc lập khác (EIO…) hay nền khác ⇒ dừng ngay. Không bao giờ ném — dọn dẹp không được đổi kết
+    quả của lần ghi — nhưng còn sót thì BÁO `KHONG_DON_DUOC` (lỗi của chính việc báo bị cô lập, review lượt 2 F3) và trả False."""
     for k in range(SO_LAN_THU_LAI + 1):
         loi = []
-        _xoa_cay(p, onexc=lambda ham, duong, e: loi.append(e)) if sys.version_info >= (3, 12) else \
-            _xoa_cay(p, onerror=lambda ham, duong, tt: loi.append(tt[1]))
+        if _DUNG_ONEXC:
+            _xoa_cay(p, onexc=lambda ham, duong, e: loi.append((duong, e)))
+        else:
+            _xoa_cay(p, onerror=lambda ham, duong, tt: loi.append((duong, tt[1])))
         if not os.path.lexists(p):
             return True
-        if not (LA_WINDOWS and loi and all(isinstance(e, PermissionError) for e in loi)):   # dọn: chỉ thử lại PermissionError trên Windows
+        goc = [(d, e) for d, e in loi if isinstance(e, PermissionError)]
+        doc_lap = [(d, e) for d, e in loi if not isinstance(e, PermissionError) and not _thu_cap(d, e, goc)]
+        if not (LA_WINDOWS and goc and not doc_lap):   # dọn: chỉ thử lại PermissionError trên Windows
             break
         if k == SO_LAN_THU_LAI:   # dọn: hết lượt
             break
         ngu_thu_lai(CHO_GOC * 2 ** k)
-    print(f"KHONG_DON_DUOC {p}: {[f'{type(e).__name__}: {e}' for e in loi][:3]}", file=sys.stderr)
+    try:   # báo là best-effort: stderr hỏng (đĩa đầy…) không được đổi kết quả ghi hay thay lỗi đang ném
+        print(f"KHONG_DON_DUOC {p}: {[f'{type(e).__name__}: {e}' for _, e in loi][:3]}", file=sys.stderr)
+    except Exception:
+        pass
     return False
 
 def ghi_nguyen_tu(out, tep):

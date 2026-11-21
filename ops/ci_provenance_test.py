@@ -1920,6 +1920,75 @@ def c73_bang_chan_tri_loai_loi():   # #1475 review lượt 5 F2.n: TOÀN BỘ b�
         bang(r["loi"] is None and r["xoa"] == ["cu"] and r["ngu"] == [] and con == {"x": b"x", "y": b"y"},
              f"onexc={onexc} PE + ENOSPC: ENOSPC là lỗi khác, phải dừng sau 1 lần; được {r}")
 
+class _PEcon(PermissionError):
+    pass
+
+class _OSErrorCon(OSError):
+    pass
+
+class _KhacCoErrno(ValueError):
+    def __init__(self, so):
+        super().__init__("không phải OSError, có errno")
+        self.errno = so
+
+_PHAN_LOAI_C74 = (   # (đối tượng lỗi, NHÃN KỲ VỌNG viết tay — không suy bằng isinstance/getattr của bộ phân loại)
+    ("PermissionError(EACCES)", lambda: OSError(errno.EACCES, "giả"), "PE"),
+    ("lớp con PermissionError", lambda: _PEcon(errno.EACCES, "giả"), "PE"),
+    ("PermissionError không errno", lambda: PermissionError("giả"), "PE"),
+    ("PermissionError errno ENOTEMPTY", lambda: PermissionError(errno.ENOTEMPTY, "giả"), "PE"),
+    ("OSError(ENOTEMPTY)", lambda: OSError(errno.ENOTEMPTY, "giả"), "ENOTEMPTY"),
+    ("lớp con OSError ENOTEMPTY", lambda: _OSErrorCon(errno.ENOTEMPTY, "giả"), "ENOTEMPTY"),
+    ("lớp con OSError EACCES (không phải PE)", lambda: _OSErrorCon(errno.EACCES, "giả"), "khac"),
+    ("OSError(EIO)", lambda: OSError(errno.EIO, "giả"), "khac"),
+    ("FileNotFoundError", lambda: FileNotFoundError(errno.ENOENT, "giả"), "khac"),
+    ("ValueError", lambda: ValueError("giả"), "khac"),
+    ("không phải OSError, errno ENOTEMPTY", lambda: _KhacCoErrno(errno.ENOTEMPTY), "khac"),
+    ("không phải OSError, errno EACCES", lambda: _KhacCoErrno(errno.EACCES), "khac"),
+)
+
+@ca
+def c74_phan_loai_doi_tuong_loi():   # #1475 review lượt 6 F2.o: ranh giới kiểu/lớp con/errno của bước ánh xạ lỗi → loại
+    m = nap()
+    nhanh, so_o = sorted({False, sys.version_info >= (3, 12)}), 0
+    for ten, tao, nhan in _PHAN_LOAI_C74:
+        for kem_pe in (False, True):   # một mình: chỉ PE mới thử lại · kèm PE: PE/ENOTEMPTY thử lại, khac dừng
+            s = frozenset({nhan, "PE"} if kem_pe else {nhan})
+            for windows in (True, False):
+                n, ngu_mong, sach = _mong_c73((s,), windows)
+                for onexc in nhanh:
+                    goi, ngu = [], []
+
+                    def xoa_gia(p, onexc=None, onerror=None):
+                        goi.append(1)
+                        if len(goi) > 1:
+                            return shutil.rmtree(p)
+                        for e in ([tao()] + ([OSError(errno.EACCES, "PE kèm")] if kem_pe else [])):
+                            if onexc is not None:
+                                onexc(os.unlink, f"{p}/x", e)
+                            else:
+                                onerror(os.unlink, f"{p}/x", (type(e), e, None))
+                    with tempfile.TemporaryDirectory() as thu, mock.patch.object(m, "_xoa_cay", xoa_gia), \
+                            mock.patch.object(m, "ngu_thu_lai", ngu.append), mock.patch.object(m, "LA_WINDOWS", windows), \
+                            mock.patch.object(m, "_DUNG_ONEXC", onexc), contextlib.redirect_stderr(io.StringIO()) as err:
+                        p = Path(thu) / "d"
+                        p.mkdir()
+                        kq = m.don_thu_muc(p)
+                        bang(kq is sach and len(goi) == n and ngu == ngu_mong and ("KHONG_DON_DUOC" in err.getvalue()) is not sach,
+                             f"{ten} (nhãn {nhan}) kèm_PE={kem_pe} windows={windows} onexc={onexc}: mong ({n}, {ngu_mong}, {sach}); "
+                             f"được ({kq}, {len(goi)}, {ngu})")
+                    so_o += 1
+    bang(so_o == len(_PHAN_LOAI_C74) * 2 * 2 * len(nhanh), f"số ô: {so_o}")
+    cau = ((lambda: {"x": lambda j: _PEcon(errno.EACCES, "giả") if j < 1 else None}, 2),   # cầu nối rmtree THẬT
+           (lambda: {"x": lambda j: _OSErrorCon(errno.EACCES, "giả") if j < 1 else None}, 1),
+           (lambda: {"x": lambda j: PE() if j < 1 else None, "@d": lambda j: _OSErrorCon(errno.ENOTEMPTY, "giả") if j < 1 else None}, 2))
+    for onexc in nhanh:
+        for i, (kh, n) in enumerate(cau):
+            r = _ghi_voi_doi_ten_gia({}, windows=True, onexc=onexc, co_cu=True, cu_cay={"d/x": b"x"},
+                                     xoa={"cu": lambda j, kh=kh: {"theo_ten": kh()}})
+            con = {k: v for d in r["sot"].values() for k, v in d.items()}
+            bang(r["loi"] is None and r["out"] == MOI_BYTE and r["xoa"] == ["cu"] * n and r["ngu"] == [0.05] * (n - 1)
+                 and con == ({} if n == 2 else {"d/x": b"x"}), f"cầu nối {i} onexc={onexc}: mong {n} lần; được {r}")
+
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
     ("A2_bo_so_attempt", 'if k not in thieu and r.get(k) != v]', "if False]", "c02"),
@@ -2347,6 +2416,12 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("T2_ENOTEMPTY_la_PE", '"PE" if isinstance(e, PermissionError) else', '"PE" if isinstance(e, PermissionError) or getattr(e, "errno", None) == errno.ENOTEMPTY else', "c73"),
     ("T3_ENOSPC_la_thu_cap", "isinstance(e, OSError) and e.errno == errno.ENOTEMPTY", "isinstance(e, OSError) and e.errno in (errno.ENOTEMPTY, errno.ENOSPC)", "c73"),
     ("T4_khac_can_ENOTEMPTY", 'and "khac" not in loai):', 'and ("khac" not in loai or "ENOTEMPTY" not in loai)):', "c73"),
+    ('S1_PE_dung_kieu', 'loai = {"PE" if isinstance(e, PermissionError) else', 'loai = {"PE" if type(e) is PermissionError else', "c74"),   # #1475 lượt 6 F2.o
+    ('S2_PE_theo_errno', 'loai = {"PE" if isinstance(e, PermissionError) else', 'loai = {"PE" if getattr(e, "errno", None) in (errno.EACCES, errno.EPERM) else', "c74"),
+    ('S3_ENOTEMPTY_dung_kieu', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', 'type(e) is OSError and e.errno == errno.ENOTEMPTY', "c74"),
+    ('S4_ENOTEMPTY_theo_errno', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', 'getattr(e, "errno", None) == errno.ENOTEMPTY', "c74"),
+    ('S5_bo_loi_khong_OSError', 'else "khac" for _, e in loi}', 'else "khac" for _, e in loi if isinstance(e, OSError)}', "c74"),
+    ('S6_khong_OSError_thu_cap', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', '(not isinstance(e, OSError) or e.errno == errno.ENOTEMPTY)', "c74"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_AttributeError_qua_except_doi_kieu", "def than(dong):\n",

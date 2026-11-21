@@ -1,0 +1,10 @@
+2026-11-21T00:13:45Z
+F01 shard-size-byte-oracle: dem ky tu thay vi byte | CU  4e74fe1 | rc=0 {"run": true, "n": 31, "do": []}
+F01 shard-size-byte-oracle: dem ky tu thay vi byte | MOI 36dc91a | rc=0 {"run": false, "n": 32, "do": ["V5"]}
+F02 shard-ast-shape-oracle: manh 1 them bieu thuc | CU  4e74fe1 | rc=0 {"run": true, "n": 31, "do": []}
+F02 shard-ast-shape-oracle: manh 1 them bieu thuc | MOI 36dc91a | rc=0 {"run": false, "n": 32, "do": ["V8"]}
+F03 bundle-gate-fixture-oracle: cong bo so manh chinh | CU  4e74fe1 | rc=0 {"run": true, "n": 31, "do": []}
+F03 bundle-gate-fixture-oracle: cong bo so manh chinh | MOI 36dc91a | rc=0 {"run": false, "n": 32, "do": ["V24"]}
+F04 shard-symlink-follow: phan chung symlink tai ten manh 1 | CU  4e74fe1 | rc=0 {"cong_ok_khi_manh_1_la_symlink": true, "loader": ["wp9001_a"], "writer": "khong loi", "dich_symlink_sau_writer": "# -*- coding: utf-8 "}
+F04 shard-symlink-follow: phan chung symlink tai ten manh 1 | MOI 36dc91a | rc=0 {"cong_ok_khi_manh_1_la_symlink": false, "loader": "BUNDLED_MODULE_CONTRACT", "writer": "BUNDLED_MODULE_CONTRACT", "dich_symlink_sau_writer": "giu nguyen\n"}
+rc=0

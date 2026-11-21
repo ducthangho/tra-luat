@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "schema": "test_fragments_check.v1",
+  "fragment_root": "scripts/test_fragments",
+  "bundled_module": "scripts/tl_test_fragments_bundled.py",
+  "status": "current",
+  "expected_sha256": "b294378d7e6e57f3c1d610ca8b33a33b99e58e30c04b5f98f2d54385d2e56f69",
+  "actual_sha256": "b294378d7e6e57f3c1d610ca8b33a33b99e58e30c04b5f98f2d54385d2e56f69",
+  "expected_bytes": 285112,
+  "actual_bytes": 285112
+}

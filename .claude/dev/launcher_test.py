@@ -10093,19 +10093,22 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
 # wp1474 (CONG-CU-HOOK r1, spec ops/specs/cong-cu-hook-r1.md §4): chạy RIÊNG khối `cong-cu-ban-ke` của hook trên cây tạm.
 # Đồ giả GIỮ TRẠNG THÁI: `ops/cong_cu.py` giả đọc trạng thái từ `tt.json`; `ops/cai_cong_cu.sh` giả ghi nhật ký và (nếu
 # `sua`) đổi trạng thái công cụ thành DAT; `PY` giả bắt `-m ruff`/`-m pip` (ghi nhật ký, pip ghi bản vào `ruff_mod`) và
-# chuyển mọi lời gọi khác cho Python thật. Kết luận của khối chỉ được dựa vào LẦN ĐO LẠI.
+# chuyển mọi lời gọi khác cho Python thật. Kết luận của khối chỉ được dựa vào LẦN ĐO LẠI. `ruff` trần (nếu có) chỉ nằm trên
+# PATH CỦA PHIÊN (`PATH_GOC`), không nằm trên PATH của hook — Codex lượt 1: fixture cũ để hai PATH trùng nhau.
 _R1474_BAN_KE = {"git": {"bat_buoc": True}, "shellcheck": {"bat_buoc": False, "chuan_bi": True},
                  "jsonschema": {"bat_buoc": True}, "tuy_chon": {"bat_buoc": False}}
 
 
-def _r1474_chay_khoi(s, tt, sua=True, ghim=("0.15.15",), ruff_mod="0.15.15", ruff_tran=None, kiem_tra_hong=False):
+def _r1474_chay_khoi(s, tt, sua=True, ghim=("0.15.15",), ruff_mod="0.15.15", ruff_tran=None, kiem_tra_hong=False,
+                     ban_ke=None, cai_than=None, env_them=None, han=120):
+    """Trả (rc khối, stdout, nhật ký, giây). `ruff_tran`: thân script `ruff` trần (chuỗi phiên bản ⇒ in `ruff <bản>`)."""
     than = HOOK_DANG_DUNG.read_text(encoding="utf-8")
     co = re.search(r"^co\(\) \{.*\}$", than, re.MULTILINE)
     khoi = re.search(r"^# >>> cong-cu-ban-ke \(wp1474\)\n.*?^# <<< cong-cu-ban-ke \(wp1474\)$", than, re.MULTILINE | re.DOTALL)
     bang(co and khoi, "khong tach duoc khoi cong-cu-ban-ke cua hook")
-    goc, bin_, ky = s / "goc", s / "bin", s / "ky.log"
-    (goc / "ops").mkdir(parents=True); (goc / ".github" / "workflows").mkdir(parents=True); bin_.mkdir()
-    (goc / "ops" / "cong_cu.yaml").write_text(json.dumps({"cong_cu": _R1474_BAN_KE}), encoding="utf-8")   # JSON là YAML hợp lệ
+    goc, bin_, tran, ky = s / "goc", s / "bin", s / "tran", s / "ky.log"
+    (goc / "ops").mkdir(parents=True); (goc / ".github" / "workflows").mkdir(parents=True); bin_.mkdir(); tran.mkdir()
+    (goc / "ops" / "cong_cu.yaml").write_text(json.dumps({"cong_cu": ban_ke or _R1474_BAN_KE}), encoding="utf-8")   # JSON là YAML
     (s / "tt.json").write_text(json.dumps(tt), encoding="utf-8")
     (goc / "ops" / "cong_cu.py").write_text(
         "import json, sys\n"
@@ -10114,7 +10117,7 @@ def _r1474_chay_khoi(s, tt, sua=True, ghim=("0.15.15",), ruff_mod="0.15.15", ruf
         "print(json.dumps({'cong_cu': [{'ten': t, 'trang_thai': v} for t, v in tt.items()]}))\n"
         "sys.exit(0 if all(v == 'DAT' for v in tt.values()) else 1)\n", encoding="utf-8")
     (goc / "ops" / "cai_cong_cu.sh").write_text(
-        f"#!/bin/sh\necho \"CAI $1\" >> '{ky}'\n"
+        f"#!/bin/sh\necho \"CAI $1\" >> '{ky}'\n" + (cai_than or "")
         + (f"{shlex.quote(PY)} -c 'import json,sys; p=sys.argv[1]; d=json.load(open(p)); d[sys.argv[2]]=\"DAT\"; "
            f"json.dump(d, open(p, \"w\"))' '{s / 'tt.json'}' \"$1\"\n" if sua else "")
         + "exit 0\n", encoding="utf-8")
@@ -10131,22 +10134,42 @@ def _r1474_chay_khoi(s, tt, sua=True, ghim=("0.15.15",), ruff_mod="0.15.15", ruf
         f"for a in \"$@\"; do case \"$a\" in ruff==*) printf '%s' \"${{a#ruff==}}\" > '{s / 'ruff_mod'}';; esac; done; exit 0; fi\n"
         f"exec {shlex.quote(PY)} \"$@\"\n", encoding="utf-8")
     if ruff_tran is not None:
-        (bin_ / "ruff").write_text(f"#!/bin/sh\necho 'ruff {ruff_tran}'\n", encoding="utf-8")
-    for f in bin_.iterdir():
-        f.chmod(0o755)
+        (tran / "ruff").write_text("#!/bin/sh\n" + (f"echo 'ruff {ruff_tran}'\n" if re.fullmatch(r"[0-9.]+", ruff_tran)
+                                                    else ruff_tran + "\n"), encoding="utf-8")
+    for d in (bin_, tran):
+        for f in d.iterdir():
+            f.chmod(0o755)
     vo, env = _wp802_bash_env()
-    path_goc = os.pathsep.join([str(bin_), env.get("PATH", "")])
+    path_hook = os.pathsep.join([str(bin_), env.get("PATH", "")])
     (s / "khoi.sh").write_text("set -euo pipefail\nPY=" + shlex.quote(str(pyfake)) + "\nGOC=" + shlex.quote(str(goc))
-                               + "\nPATH_GOC=" + shlex.quote(path_goc) + "\n" + co.group(0) + "\n" + khoi.group(0) + "\n",
-                               encoding="utf-8")
-    env["PATH"] = path_goc
-    p = subprocess.run([vo, str(s / "khoi.sh")], env=env, capture_output=True, text=True, timeout=120)
-    rc = re.findall(r"^\[session-start\] cong-cu-ban-ke: rc=(\d+)$", p.stdout, re.MULTILINE)
-    bang(p.returncode == 0 and len(rc) == 1, f"khoi phai chay het va in dung mot dong rc: rc={p.returncode} {p.stdout!r} {p.stderr!r}")
-    return int(rc[0]), p.stdout, (ky.read_text(encoding="utf-8").splitlines() if ky.exists() else [])
+                               + "\nPATH_GOC=" + shlex.quote(os.pathsep.join([str(tran), path_hook])) + "\n"
+                               + co.group(0) + "\n" + khoi.group(0) + "\n", encoding="utf-8")
+    env["PATH"] = path_hook
+    env.update(env_them or {})
+    t0 = time.monotonic()
+    p = subprocess.Popen([vo, str(s / "khoi.sh")], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                         start_new_session=True)
+    try:
+        out, err = p.communicate(timeout=han)
+    except subprocess.TimeoutExpired:
+        os.killpg(p.pid, signal.SIGKILL)
+        out, err = p.communicate()
+        bang(False, f"khoi chay qua {han}s (treo): {out!r}")
+    giay = time.monotonic() - t0
+    rc = re.findall(r"^\[session-start\] cong-cu-ban-ke: rc=(\d+)$", out, re.MULTILINE)
+    bang(p.returncode == 0 and len(rc) == 1, f"khoi phai chay het va in dung mot dong rc: rc={p.returncode} {out!r} {err!r}")
+    return int(rc[0]), out, (ky.read_text(encoding="utf-8").splitlines() if ky.exists() else []), giay
 
 
 _R1474_DU = {"git": "DAT", "shellcheck": "DAT", "jsonschema": "DAT", "tuy_chon": "DAT"}
+
+
+def _r1474_cai(ky):
+    return [x for x in ky if x.startswith("CAI ")]
+
+
+def _r1474_pip(ky):
+    return [x for x in ky if x.startswith("PIP ")]
 
 
 @ca
@@ -10155,19 +10178,20 @@ def r1474_thieu_chuan_bi_thi_cai_dung_mot_lan():
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     with San() as s:
-        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"))
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"))
         bang(ky == ["CAI shellcheck"], f"phai cai dung shellcheck mot lan: {ky}")
-        bang(rc == 0 and "cong-cu-ban-ke: DAT" in out, f"cai xong phai DAT: rc={rc} {out!r}")
+        bang(rc == 0 and "cong-cu-ban-ke: DAT (3 cong cu)" in out, f"cai xong phai DAT: rc={rc} {out!r}")
 
 
 @ca
 def r1474_du_het_khong_cai_gi():
-    """Ca 2: đủ hết, ruff đúng bản ⇒ 0 lần cài, 0 lần pip, rc 0."""
+    """Ca 2: đủ hết, ruff đúng bản ⇒ 0 lần cài, 0 lần pip, rc 0; dòng DAT đếm đúng 3 công cụ bat_buoc/chuan_bi (P3 lượt 1)."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     with San() as s:
-        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU))
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU))
         bang(ky == [] and rc == 0 and "ruff: DAT 0.15.15" in out, f"du het ma van cai/khong DAT: rc={rc} {ky} {out!r}")
+        bang("cong-cu-ban-ke: DAT (3 cong cu)" in out, f"dong DAT phai dem dung 3 cong cu: {out!r}")
 
 
 @ca
@@ -10176,7 +10200,7 @@ def r1474_trinh_cai_xanh_ma_do_lai_thieu_la_CHUA_DAT():
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     with San() as s:
-        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), sua=False)
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), sua=False)
         bang(ky == ["CAI shellcheck"], f"phai thu cai shellcheck: {ky}")
         bang(rc != 0 and "CHUA DAT shellcheck" in out and "cong-cu-ban-ke: DAT" not in out,
              f"trinh cai noi doi ma khoi bao DAT: rc={rc} {out!r}")
@@ -10188,7 +10212,7 @@ def r1474_cong_cu_tuy_chon_thieu_khong_cai():
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     with San() as s:
-        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU, tuy_chon="THIEU"))
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, tuy_chon="THIEU"))
         bang(ky == [] and rc == 0, f"cong cu tuy chon bi cai: rc={rc} {ky}")
 
 
@@ -10199,7 +10223,7 @@ def r1474_cong_cu_vang_khoi_ket_qua_do_la_thieu():
         return "BO QUA shell POSIX"
     with San() as s:
         tt = dict(_R1474_DU); del tt["jsonschema"]
-        rc, out, ky = _r1474_chay_khoi(s, tt)
+        rc, out, ky, _g = _r1474_chay_khoi(s, tt)
         bang(ky == ["CAI jsonschema"] and rc == 0, f"cong cu vang mat khong duoc cai: rc={rc} {ky} {out!r}")
 
 
@@ -10209,9 +10233,41 @@ def r1474_ket_qua_do_hong_la_KHONG_DO_DUOC():
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     with San() as s:
-        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), kiem_tra_hong=True)
-        bang(rc != 0 and "KHONG DO DUOC" in out and not [x for x in ky if x.startswith("CAI ")],
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), kiem_tra_hong=True)
+        bang(rc != 0 and "KHONG DO DUOC" in out and not _r1474_cai(ky),
              f"do hong ma van cai/van xanh: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_do_hong_khong_pip_ruff():
+    """Codex lượt 1 F1474-02: đo hỏng mà ruff lệch bản ⇒ KHÔNG cài gì, kể cả pip; rc khác 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), kiem_tra_hong=True, ruff_mod="0.16.9")
+        bang(rc != 0 and "KHONG DO DUOC" in out and not _r1474_cai(ky) and not _r1474_pip(ky),
+             f"do hong ma van cai/pip: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_ten_la_trong_ban_ke_la_KHONG_DO_DUOC():
+    """Codex lượt 1 (đột biến `name_regex` sống): tên công cụ ngoài `[A-Za-z0-9_.-]+` ⇒ `KHONG DO DUOC`, 0 lần cài."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        ban_ke = dict(_R1474_BAN_KE, **{"a b": {"bat_buoc": True}})
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, **{"a b": "THIEU"}), ban_ke=ban_ke)
+        bang(rc != 0 and "KHONG DO DUOC" in out and not _r1474_cai(ky), f"ten la ma van cai: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_hai_cong_cu_thieu_cai_ca_hai():
+    """Codex lượt 1 (đột biến `first_tool_only` sống): hai công cụ thiếu ⇒ cài cả hai, đúng thứ tự bản kê, rc 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, git="THIEU", jsonschema="THIEU"))
+        bang(ky == ["CAI git", "CAI jsonschema"] and rc == 0, f"phai cai ca hai cong cu thieu: rc={rc} {ky} {out!r}")
 
 
 @ca
@@ -10220,13 +10276,13 @@ def r1474_ruff_lech_ban_ghim_thi_pip_dung_ban():
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     with San() as s:
-        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_mod="0.16.9")
-        pip = [x for x in ky if x.startswith("PIP ")]
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_mod="0.16.9")
+        pip = _r1474_pip(ky)
         bang(len(pip) == 1 and "ruff==0.15.15" in pip[0].split(), f"phai pip dung ban ghim mot lan: {ky}")
         bang(rc == 0 and "ruff: DAT 0.15.15" in out, f"pip xong phai DAT: rc={rc} {out!r}")
     with San() as s:   # chưa có module ruff ⇒ cũng cài
-        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_mod=None)
-        bang(len([x for x in ky if x.startswith("PIP ")]) == 1 and rc == 0, f"thieu module ruff ma khong cai: {ky} {out!r}")
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_mod=None)
+        bang(len(_r1474_pip(ky)) == 1 and rc == 0, f"thieu module ruff ma khong cai: {ky} {out!r}")
 
 
 @ca
@@ -10235,25 +10291,60 @@ def r1474_hai_ban_ghim_ruff_la_KHONG_DO_DUOC():
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     with San() as s:
-        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU), ghim=("0.15.15", "0.16.0"), ruff_mod="0.1.0")
-        bang(rc != 0 and "ruff: KHONG DO DUOC" in out and not [x for x in ky if x.startswith("PIP ")],
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ghim=("0.15.15", "0.16.0"), ruff_mod="0.1.0")
+        bang(rc != 0 and "ruff: KHONG DO DUOC" in out and not _r1474_pip(ky),
              f"hai ban ghim ma van cai/xanh: rc={rc} {ky} {out!r}")
     with San() as s:   # không có bản ghim nào
-        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU), ghim=())
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ghim=())
         bang(rc != 0 and "ruff: KHONG DO DUOC" in out, f"khong co ban ghim ma van xanh: rc={rc} {out!r}")
 
 
 @ca
 def r1474_ruff_tran_lech_chi_canh_bao():
-    """Ca 9: `ruff` trần trên PATH lệch bản ghim ⇒ có cảnh báo, rc không đổi."""
+    """Ca 9: `ruff` trần trên PATH CỦA PHIÊN lệch bản ghim ⇒ có cảnh báo, rc không đổi."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
     with San() as s:
-        rc, out, _ky = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_tran="0.16.9")
+        rc, out, _ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_tran="0.16.9")
         bang(rc == 0 and "CANH BAO ruff" in out and "0.16.9" in out, f"thieu canh bao ruff tran: rc={rc} {out!r}")
     with San() as s:
-        rc, out, _ky = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_tran="0.15.15")
+        rc, out, _ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_tran="0.15.15")
         bang(rc == 0 and "CANH BAO ruff" not in out, f"ruff tran dung ban ma van canh bao: {out!r}")
+
+
+@ca
+def r1474_probe_ruff_tran_treo_bi_cat():
+    """Codex lượt 1 F1474-01: `ruff --version` trần treo ⇒ khối vẫn kết thúc trong trần probe, in dòng rc, rc 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, _ky, giay = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_tran="sleep 60", env_them={"TL_CC_TRAN_PROBE_GIAY": "1"},
+                                              han=45)
+        bang(rc == 0 and giay < 30, f"probe treo khong bi cat: rc={rc} {giay:.1f}s {out!r}")
+
+
+@ca
+def r1474_trinh_cai_lo_TERM_van_bi_giet():
+    """Codex lượt 1 F1474-01: trình cài lờ TERM ⇒ `timeout -k` vẫn giết; khối kết thúc sớm, `CHUA DAT`, rc khác 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, giay = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), sua=False,
+                                             cai_than="trap '' TERM\nsleep 60\n", env_them={"TL_CC_TRAN_CAI_GIAY": "1"}, han=45)
+        bang(ky == ["CAI shellcheck"] and rc != 0 and "CHUA DAT shellcheck" in out and giay < 30,
+             f"trinh cai lo TERM khong bi giet: rc={rc} {giay:.1f}s {ky} {out!r}")
+
+
+@ca
+def r1474_het_ngan_sach_khong_cai():
+    """Codex lượt 1 F1474-01: ngân sách của khối đã hết ⇒ không cài, không pip, nói rõ `HET NGAN SACH`, rc khác 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), ruff_mod="0.16.9",
+                                           env_them={"TL_CC_NGAN_SACH_GIAY": "0"})
+        bang(rc != 0 and out.count("HET NGAN SACH") == 2 and not _r1474_cai(ky) and not _r1474_pip(ky),
+             f"het ngan sach ma van cai: rc={rc} {ky} {out!r}")
 
 
 @ca
@@ -10263,8 +10354,10 @@ def r1474_cau_truc_hook_ban_ke_ci_that():
     bang(than.count("# >>> cong-cu-ban-ke (wp1474)\n") == 1 and than.count("# <<< cong-cu-ban-ke (wp1474)\n") == 1,
          "hook phai co dung mot cap dau khoi cong-cu-ban-ke")
     dau, cuoi = than.find("# >>> cong-cu-ban-ke"), than.find("# <<< cong-cu-ban-ke")
-    sau_ac, doctor = than.find("# <<< agent-creds"), than.find(".claude/dev/launcher.py doctor --doi-kha-dung")
-    bang(0 <= sau_ac < dau < cuoi < doctor, f"khoi phai nam sau agent-creds va truoc doctor: {sau_ac} {dau} {cuoi} {doctor}")
+    sau_ac, codex = than.find("# <<< agent-creds"), than.find("# --- Xác thực codex")
+    doctor = than.find(".claude/dev/launcher.py doctor --doi-kha-dung")
+    bang(0 <= sau_ac < dau < cuoi < codex < doctor,
+         f"khoi phai nam sau agent-creds, truoc xac thuc codex va doctor: {sau_ac} {dau} {cuoi} {codex} {doctor}")
     bang("MA_CC=0; cai_cong_cu_ban_ke || MA_CC=$?;" in than[dau:cuoi], "khoi phai duoc goi dang `|| MA_CC=$?` (khong chan hook)")
     nang_luc = re.search(r"^# hook-nang-luc: (.*)$", than, re.MULTILINE)
     bang(nang_luc and {"cong-cu-ban-ke", "ruff-ban-ghim-ci"} <= set(nang_luc.group(1).split()),
@@ -17639,21 +17732,36 @@ DOT_BIEN = [
 # wp802 (N6–N8): đột biến trên BẢN SAO TẠM của hook. Chỉ `TinHieuChotCa` của ca đích mới
 # tính là GIẾT — lỗi khác là tín dụng giả (CLAUDE.md, bài học 27-08).
 DOT_BIEN_HOOK = [
-    # wp1474 (CONG-CU-HOOK r1 §4): mỗi chốt của khối `cong-cu-ban-ke` một đột biến, đích là hook.
+    # wp1474 (CONG-CU-HOOK r1 §4 + Codex lượt 1): mỗi chốt của khối `cong-cu-ban-ke` một đột biến, đích là hook.
     ("wp1474_bo_ve_chuan_bi", ('v.get("bat_buoc") or v.get("chuan_bi")', 'v.get("bat_buoc")'),
      ["r1474_thieu_chuan_bi_thi_cai_dung_mot_lan"]),
     ("wp1474_vang_mat_coi_la_DAT", ('trang_thai.get(t) != "DAT"', 'trang_thai.get(t, "DAT") != "DAT"'),
      ["r1474_cong_cu_vang_khoi_ket_qua_do_la_thieu"]),
-    ("wp1474_ket_luan_theo_rc_trinh_cai", ('    elif [ -n "$thieu" ]; then\n', '    elif [ "$ma" -ne 0 ]; then\n'),
+    ("wp1474_ket_luan_theo_rc_trinh_cai", ('    if [ -n "$thieu" ]; then\n', '    if [ "$ma" -ne 0 ]; then\n'),
      ["r1474_trinh_cai_xanh_ma_do_lai_thieu_la_CHUA_DAT"]),
-    ("wp1474_do_hong_van_cai", ('  if ! thieu="$(_cc_thieu)"; then\n    echo',
-                                '  if ! thieu="$(_cc_thieu || echo shellcheck)"; then\n    echo'),
+    ("wp1474_do_hong_van_cai", ('  if ! kq="$(_cc_thieu)" || [ -z "$kq" ]; then\n    echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC (',
+                                '  if ! kq="$(_cc_thieu || echo 3 shellcheck)" || [ -z "$kq" ]; then\n    echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC ('),
      ["r1474_ket_qua_do_hong_la_KHONG_DO_DUOC"]),
+    ("wp1474_do_hong_van_di_tiep_ruff", ('— khong cai gi"\n    return 1\n', '— khong cai gi"\n    loi=1\n'),
+     ["r1474_do_hong_khong_pip_ruff"]),
+    ("wp1474_bo_kiem_ten", ("if not all(re.fullmatch", "if False and not all(re.fullmatch"),
+     ["r1474_ten_la_trong_ban_ke_la_KHONG_DO_DUOC"]),
+    ("wp1474_chi_cai_cong_cu_dau", ('  for t in $thieu; do\n', '  for t in ${thieu%% *}; do\n'),
+     ["r1474_hai_cong_cu_thieu_cai_ca_hai"]),
+    ("wp1474_dem_ca_ban_ke", ('[str(len(can))]', '[str(len(ban_ke))]'), ["r1474_du_het_khong_cai_gi"]),
     ("wp1474_bo_chot_ghim_duy_nhat", ('''if [ -z "$ghim" ] || [ "$(printf '%s\\n' "$ghim" | wc -l)" -ne 1 ]; then''',
                                       'if [ -z "$ghim" ]; then'),
      ["r1474_hai_ban_ghim_ruff_la_KHONG_DO_DUOC"]),
     ("wp1474_bo_so_ban_ruff", ('  if [ "$ban" != "ruff $ghim" ]; then\n', '  if false; then\n'),
      ["r1474_ruff_lech_ban_ghim_thi_pip_dung_ban"]),
+    ("wp1474_ruff_tran_doc_PATH_hook", ('PATH="$PATH_GOC" ruff --version', 'PATH="$PATH" ruff --version'),
+     ["r1474_ruff_tran_lech_chi_canh_bao"]),
+    ("wp1474_bo_tran_probe_ruff_tran", ('ban_tran="$(_cc_chay_tran "$CC_TRAN_PROBE" env -u PATH', 'ban_tran="$(env -u PATH'),
+     ["r1474_probe_ruff_tran_treo_bi_cat"]),
+    ("wp1474_bo_kill_after", ('timeout -k 5 "$giay" "$@"', 'timeout "$giay" "$@"'), ["r1474_trinh_cai_lo_TERM_van_bi_giet"]),
+    ("wp1474_bo_ngan_sach", ('    if [ "$con" -lt 15 ]; then\n      echo "[session-start] cong-cu-ban-ke: HET NGAN SACH',
+                             '    if false; then\n      echo "[session-start] cong-cu-ban-ke: HET NGAN SACH'),
+     ["r1474_het_ngan_sach_khong_cai"]),
     ("wp802_hook_co_thay_co_chay", ("  co_chay rg || { co cargo", "  co rg || { co cargo"),
      ["r802_hook_linux_rg_hong_van_thu_cargo"]),
     ("wp802_hook_windows_roi_vao_apt", ("MINGW*|MSYS*|CYGWIN*) RG_WIN=1", "KHONG_KHOP_NEN_NAO) RG_WIN=1"),

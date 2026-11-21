@@ -522,14 +522,17 @@ MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" cai-agy 2>&1 | sed 's/^/[session-
 # thuc cai moi: goi DUNG `ops/cai_cong_cu.sh <ten>` ma CI dung, va ket luan bang LAN DO LAI, khong bang rc trinh cai (r244).
 # Ruff: ban ghim DUY NHAT doc tu ci.yml (`ruff==X.Y.Z`), cai qua `$PY -m pip` — nguong ruff cua CLAUDE.md do bang `$PY -m ruff`.
 # Khoi KHONG BAO GIO lam hook dung: goi bang `|| MA_CC=$?`; `doctor` ben duoi van la cong duy nhat quyet dinh thoat 12.
-_cc_chay_tran() {   # <giay> <lenh...> — tran thoi gian neu co `timeout`, khong thi chay thang
+# Codex luot 1 (F1474-01): MOI lenh ngoai co tran — probe 30 giay, moi lan cai toi da 180 giay, ca khoi toi da 300 giay
+# (hook co 600), va `timeout -k 5` de trinh cai lo TERM van bi giet. Ba tran doc tu bien moi truong chi de test rut ngan.
+CC_TRAN_PROBE="${TL_CC_TRAN_PROBE_GIAY:-30}"; CC_TRAN_CAI="${TL_CC_TRAN_CAI_GIAY:-180}"; CC_NGAN_SACH="${TL_CC_NGAN_SACH_GIAY:-300}"
+_cc_chay_tran() {   # <giay> <lenh...> — tran thoi gian (TERM roi KILL sau 5 giay) neu co `timeout`, khong thi chay thang
   local giay="$1"; shift
-  if co timeout; then timeout "$giay" "$@"; else "$@"; fi
+  if co timeout; then timeout -k 5 "$giay" "$@"; else "$@"; fi
 }
-_cc_thieu() {   # in ten cong cu (bat_buoc|chuan_bi) CHUA DAT, cach nhau dau cach; doc duoc => rc 0, khong doc duoc => rc khac 0
+_cc_thieu() {   # in "<so cong cu can> <ten chua DAT…>"; doc duoc => rc 0, khong doc duoc => rc khac 0
   local json
-  json="$("$PY" "$GOC/ops/cong_cu.py" kiem-tra --json 2>/dev/null)" || true   # rc khac 0 dung khi co cong cu thieu
-  printf '%s' "$json" | "$PY" -c '
+  json="$(_cc_chay_tran "$CC_TRAN_PROBE" "$PY" "$GOC/ops/cong_cu.py" kiem-tra --json 2>/dev/null)" || true   # rc khac 0 khi co cong cu thieu
+  printf '%s' "$json" | _cc_chay_tran "$CC_TRAN_PROBE" "$PY" -c '
 import json, re, sys
 import yaml
 ban_ke = yaml.safe_load(open(sys.argv[1], encoding="utf-8"))["cong_cu"]
@@ -538,26 +541,36 @@ trang_thai = {c["ten"]: c.get("trang_thai") for c in do}
 can = [t for t, v in ban_ke.items() if v.get("bat_buoc") or v.get("chuan_bi")]
 if not all(re.fullmatch(r"[A-Za-z0-9_.-]+", t) for t in can):
     raise SystemExit(3)
-print(" ".join(t for t in can if trang_thai.get(t) != "DAT"))' "$GOC/ops/cong_cu.yaml" 2>/dev/null
+print(" ".join([str(len(can))] + [t for t in can if trang_thai.get(t) != "DAT"]))' "$GOC/ops/cong_cu.yaml" 2>/dev/null
 }
 cai_cong_cu_ban_ke() {
-  local thieu t ma ghim ban ban_tran loi=0
-  if ! thieu="$(_cc_thieu)"; then
+  local kq so thieu t ma con ghim ban ban_tran loi=0 bat_dau="$SECONDS"
+  # Codex luot 1 (F1474-02): do/ban ke hong => KHONG cai gi, ke ca ruff — tra ve NGAY.
+  if ! kq="$(_cc_thieu)" || [ -z "$kq" ]; then
     echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC (kiem-tra --json hoac ops/cong_cu.yaml khong doc duoc) — khong cai gi"
+    return 1
+  fi
+  read -r so thieu <<< "$kq"
+  for t in $thieu; do
+    con=$(( CC_NGAN_SACH - (SECONDS - bat_dau) ))
+    if [ "$con" -lt 15 ]; then
+      echo "[session-start] cong-cu-ban-ke: HET NGAN SACH ${CC_NGAN_SACH}s — bo qua cai $t"
+      continue
+    fi
+    [ "$con" -lt "$CC_TRAN_CAI" ] || con="$CC_TRAN_CAI"
+    ma=0; _cc_chay_tran "$con" bash "$GOC/ops/cai_cong_cu.sh" "$t" >/dev/null 2>&1 || ma=$?
+    echo "[session-start] cong-cu-ban-ke: cai $t — trinh cai rc=$ma (ket luan theo lan do lai)"
+  done
+  if ! kq="$(_cc_thieu)" || [ -z "$kq" ]; then
+    echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC sau khi cai"
     loi=1
   else
-    for t in $thieu; do
-      ma=0; _cc_chay_tran 180 bash "$GOC/ops/cai_cong_cu.sh" "$t" >/dev/null 2>&1 || ma=$?
-      echo "[session-start] cong-cu-ban-ke: cai $t — trinh cai rc=$ma (ket luan theo lan do lai)"
-    done
-    if ! thieu="$(_cc_thieu)"; then
-      echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC sau khi cai"
-      loi=1
-    elif [ -n "$thieu" ]; then
+    read -r so thieu <<< "$kq"
+    if [ -n "$thieu" ]; then
       echo "[session-start] cong-cu-ban-ke: CHUA DAT $thieu — thu tay: bash ops/cai_cong_cu.sh <ten>"
       loi=1
     else
-      echo "[session-start] cong-cu-ban-ke: DAT (moi cong cu bat_buoc/chuan_bi cua ops/cong_cu.yaml)"
+      echo "[session-start] cong-cu-ban-ke: DAT ($so cong cu)"
     fi
   fi
   ghim="$(grep -oE 'ruff==[0-9]+\.[0-9]+\.[0-9]+' "$GOC/.github/workflows/ci.yml" 2>/dev/null | sort -u || true)"
@@ -566,11 +579,17 @@ cai_cong_cu_ban_ke() {
     return 1
   fi
   ghim="${ghim#ruff==}"
-  ban="$("$PY" -m ruff --version 2>/dev/null || true)"
+  ban="$(_cc_chay_tran "$CC_TRAN_PROBE" "$PY" -m ruff --version 2>/dev/null || true)"
   if [ "$ban" != "ruff $ghim" ]; then
-    ma=0; _cc_chay_tran 180 "$PY" -m pip install --quiet "ruff==$ghim" >/dev/null 2>&1 || ma=$?
-    ban="$("$PY" -m ruff --version 2>/dev/null || true)"
-    echo "[session-start] ruff: cai ruff==$ghim — pip rc=$ma"
+    con=$(( CC_NGAN_SACH - (SECONDS - bat_dau) ))
+    if [ "$con" -lt 15 ]; then
+      echo "[session-start] ruff: HET NGAN SACH ${CC_NGAN_SACH}s — bo qua cai ruff==$ghim"
+    else
+      [ "$con" -lt "$CC_TRAN_CAI" ] || con="$CC_TRAN_CAI"
+      ma=0; _cc_chay_tran "$con" "$PY" -m pip install --quiet "ruff==$ghim" >/dev/null 2>&1 || ma=$?
+      ban="$(_cc_chay_tran "$CC_TRAN_PROBE" "$PY" -m ruff --version 2>/dev/null || true)"
+      echo "[session-start] ruff: cai ruff==$ghim — pip rc=$ma"
+    fi
   fi
   if [ "$ban" = "ruff $ghim" ]; then
     echo "[session-start] ruff: DAT $ghim ($PY -m ruff)"
@@ -578,7 +597,7 @@ cai_cong_cu_ban_ke() {
     echo "[session-start] ruff: CHUA DAT ban ghim $ghim (do duoc: '${ban:-khong chay}')"
     loi=1
   fi
-  ban_tran="$(env -u PATH PATH="$PATH_GOC" ruff --version 2>/dev/null || true)"
+  ban_tran="$(_cc_chay_tran "$CC_TRAN_PROBE" env -u PATH PATH="$PATH_GOC" ruff --version 2>/dev/null || true)"
   if [ -n "$ban_tran" ] && [ "$ban_tran" != "ruff $ghim" ]; then
     echo "[session-start] CANH BAO ruff: 'ruff' tren PATH la '$ban_tran', khac ban ghim CI $ghim — do nguong ruff bang: $PY -m ruff"
   fi

@@ -1,0 +1,1225 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1461",
+  "mission_issue": 1172,
+  "generation": 1,
+  "generation_basis": "Prospective g1 from spec lease template; direct user-authorized independent frozen-spec review, not execution-lease admission.",
+  "revision": 8,
+  "round": 8,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "session_id": "01a1fbab-2a92-7633-b429-b1354deb1dc7",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_service",
+    "transport": "machine",
+    "session_id": "01a1fbab-2a92-7633-b429-b1354deb1dc7",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "source": "Current API Codex agent with machine tools and CODEX_THREAD_ID. codex-cli 0.170.0 is installed; installed version alone does not prove the serving route/model. No GitHub actor is used as model identity."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "e21fed60ffe758c49654d1495de3159d831c7071",
+  "reviewed_tree": "aa51a92dee6ba5ae63a2741550d7f0ef20b8605c",
+  "reviewed_file": "ops/specs/wp1461-r1/SPEC.md",
+  "reviewed_file_sha256": "03b0750e7791e8825b261212309fe7eb43f0fc577e384f81f4368e4d872e0c1b",
+  "current_master_sha": "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+  "current_helper_blob": "086f416921c3df1b2e81d95f509e04c6a9d573ae",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "changes_requested",
+  "assurance": "review_deferred",
+  "assurance_detail": "Independent local spec review completed with one open P2; no approval assurance awarded. Context independence is supplied by this assignment; exact executor session/model was not independently measured. No human audit, implementation acceptance, merge/land/deploy authority or lease clearance asserted.",
+  "evidence_url": null,
+  "findings": [
+    {
+      "id": "WP1461-SPEC-22",
+      "class_slug": "a4-provenance-contract-incomplete",
+      "severity": "P2",
+      "location": "ops/specs/wp1461-r1/SPEC.md:145,161,251,257,379,383",
+      "claim": "R8 still classifies an external-input exception as a programming fault and forbids assigning it a K8 state. A normally returned JSON repository response with default_branch containing a lone surrogate makes current-master nhap_wd raise UnicodeEncodeError (a ValueError subclass) before constructing the ref URL. It is outside the frozen catch set. Thus the new iff rule for external-byte exceptions and the explicit exclusion are contradictory; a conforming executor would propagate this malformed-response failure instead of the required unknown-state/reason/mode result. The executor stop clause does not close the known gap: it names unexpected package/codec exceptions, not malformed REST data.",
+      "manifestations": [
+        {
+          "id": "22a",
+          "description": "REST repository.default_branch → URL encoding: high surrogate, low surrogate and surrogate embedded in an otherwise ordinary name all escape unchanged. These are three input variants of one boundary defect, not three cause classes."
+        }
+      ],
+      "whole_candidate_scan": {
+        "scope": "Entire candidate: I4/I5, U1–U7, K1–K8 graph, §4.3 list/phase mapping/stop rule, §4.5 composition, §5 J/R/S, §6 journal, acceptance 4/5/11/19 and historical closure text; unchanged helper lay_json/lay_trang/tai_noi_dung/nhap_wd; all four supported ZIP codecs on Python 3.11–3.13.",
+        "result": "ZIP decoder additions close 21a–21c. The remaining manifestation is the JSON-to-URL conversion of repository.default_branch; the specification’s path-surrogate measurement exercises a different, already caught phase-d path. Coverage/exclusion wording and the missing acceptance/mutant are manifestations of the same incomplete boundary policy, reported once."
+      },
+      "evidence": [
+        {
+          "command": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py",
+          "exit_code": 0,
+          "observed_output": "On all three runtimes, default_branch containing U+D800, U+DFFF or an embedded U+D800 produces UnicodeEncodeError in the unchanged nhap_wd, at urllib.parse.quote(default_branch). The transport returns (200, JSON bytes) normally. Healthy ASCII and Vietnamese Unicode branch controls return passed. The literal R8 boundary lets UnicodeEncodeError escape. Digest-matched ZIP controls remain valid."
+        },
+        {
+          "command": "python3 -B /tmp/wp1461-r8-independent/lock_unicode.py",
+          "exit_code": 0,
+          "observed_output": "r8=target_case_failed; probe_only_narrow_extension=passed; remove_extension_mutant=target_case_failed; unrelated_AttributeError=false_credit; unrelated_case_assertion=false_credit.",
+          "unmeasured": "The extension is an isolated boundary model, not B3 product code. No claim of actual deploy/journal acceptance."
+        },
+        {
+          "command": "python3 -B -c \"import sys; sys.path.insert(0,'/tmp/wp1461-r8-independent'); import probe; from collections import Counter; print(Counter(probe.observe(lambda i=i: probe.invoke(probe.archive(),branch=chr(i))).get('name') for i in range(0xd800,0xe000)))\"",
+          "exit_code": 0,
+          "observed_output": "UnicodeEncodeError: 2048/2048 surrogate code points on Python 3.13.18. master, nhanh-đo and nhanh-😀 controls return passed."
+        },
+        {
+          "command": "rg -n \"Exception|MemoryError|OSError|ValueError|surrogate|Tập bắt|DỪNG\" ops/specs/wp1461-r1/SPEC.md; sed -n '480,555p' /tmp/wp1461-r8-independent/ops/ci_provenance.py",
+          "exit_code": 0,
+          "observed_output": "The active exclusion at SPEC.md:145 calls ValueError and all other unlisted classes programming faults, while the same paragraph includes external REST bytes in the policy. Line 161 acknowledges finite coverage but only directs the executor to stop for a different codec class or an unlisted exception from a package. Acceptance 5/11 cover ZIP families and synthetic programming faults, not this REST-to-URL boundary."
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC.md §4.3 helper-call policy and measurement/stop paragraph, acceptance 5 and 11, and the r7→r8 closure statement. Eventual adaptation belongs at the nhap_wd call or validated REST boundary in ops/cong_phat_hanh.py, which B3 owns. Do not modify out-of-write-set ops/ci_provenance.py.",
+        "how": "Keep the measured codec families and exact-OSError distinction. Give the measured REST Unicode-encoding failure an explicit result policy, either by narrowly recognizing that input failure around the helper or by rejecting the invalid scalar at the owned REST boundary before URL construction. Reconcile the frozen list with the claim that every excluded class is a programming fault; do not turn a finite survey into that universal claim. Extend the executor stop rule to external REST responses as well as ZIP packages. Runnable reproducer and probe-only narrow alternative: probe.py and lock_unicode.py in this review directory. Product-code advice is directional only.",
+        "locking_test": "Add a named case using actual ASCII JSON response bytes whose default_branch contains an escaped lone high or low surrogate, with a healthy A4 archive and normally returning transport. Require the complete K8 vector, primary reason, chan rc6/no push and warning_only classification/journal; include valid ASCII, Vietnamese and supplementary-plane branch controls. The mutant removing the narrow input rule must fail that case’s own exception class. KeyError, FileNotFoundError and unrelated AttributeError must remain separate programming-fault/false-credit controls. lock_unicode.py executes the boundary-level distinction: a narrow extension passes, its removal fails UnicodeExternalCase, and unrelated failures earn no kill credit.",
+        "may_spawn": "Catching all ValueError, UnicodeError or Exception would hide unrelated defects; rejecting all non-ASCII branch names would reject valid Unicode. Duplicate REST reads could introduce snapshot drift. Preserve source-byte/digest binding, exact-OSError handling, phase truthfulness, and the distinction between local model probes and native B3 acceptance."
+      },
+      "scope_decision": "Malformed-response robustness is expressly in scope: §4.3 names external REST bytes and §5 J specifies malformed-response handling. This is not a claim that GitHub currently hosts an invalid Unicode branch, nor a request to repair the upstream helper. It is a measured contradiction in the new adapter contract.",
+      "implementation_fix_attempted": false,
+      "experiment_performed": "Unchanged current-master helper plus independent byte fixtures and isolated boundary/test models; no repository patch.",
+      "confidence": "high for the measured contract contradiction; live occurrence and actual B3 implementation remain unmeasured"
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "b1-consumer-contract-mismatch",
+      "finding_ids": [
+        "WP1461-SPEC-01",
+        "WP1461-SPEC-15",
+        "WP1461-SPEC-19"
+      ],
+      "manifestations": [
+        {
+          "id": "19a",
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Receipt ZIP file-domain projection",
+          "description": "Pinned schema, fixture and code hashes match. Receipt one-file+directory accepted, duplicate/extra file rejected. All 19 stamp/shard artifacts: healthy and directory variants -> []; duplicate/extra variants -> C8. U7: 22/22 raw role/direction ties change with order, 0/22 after sorting. Official fixture: 480/480, TONG DAT. The unchanged B1 probe was read, copied into this round’s scratch, re-bound to freshly extracted pinned blobs, and rerun."
+        },
+        {
+          "id": "19b",
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Stamp and shard ZIP file-domain projection",
+          "description": "Pinned schema, fixture and code hashes match. Receipt one-file+directory accepted, duplicate/extra file rejected. All 19 stamp/shard artifacts: healthy and directory variants -> []; duplicate/extra variants -> C8. U7: 22/22 raw role/direction ties change with order, 0/22 after sorting. Official fixture: 480/480, TONG DAT. The unchanged B1 probe was read, copied into this round’s scratch, re-bound to freshly extracted pinned blobs, and rerun."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Use the pinned B1a file domain at both K2 and K5: omit directory entries, read each actual file by ZipInfo, preserve duplicates as distinct files, and leave the separate release-package policy unchanged.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/probe_b1.py; python3 -B /tmp/wp1461-r8-independent/b1-command.py /tmp/wp1461-r8-independent",
+        "result": "Pinned schema, fixture and code hashes match. Receipt one-file+directory accepted, duplicate/extra file rejected. All 19 stamp/shard artifacts: healthy and directory variants -> []; duplicate/extra variants -> C8. U7: 22/22 raw role/direction ties change with order, 0/22 after sorting. Official fixture: 480/480, TONG DAT. The unchanged B1 probe was read, copied into this round’s scratch, re-bound to freshly extracted pinned blobs, and rerun.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "a4-provenance-contract-incomplete",
+      "finding_ids": [
+        "WP1461-SPEC-02",
+        "WP1461-SPEC-16",
+        "WP1461-SPEC-17",
+        "WP1461-SPEC-20",
+        "WP1461-SPEC-21",
+        "WP1461-SPEC-22"
+      ],
+      "manifestations": [
+        {
+          "id": "17-order",
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "REST job tie order across all 11 roles in both directions",
+          "description": "21a/21b/21c now map to unknown with the correct exception name. Seven c:zip shapes retain phase-c attribution; RuntimeError subclasses remain covered. The REST surrogate counterexample still escapes as UnicodeEncodeError on all three runtimes. SPEC-22 keeps the cause class open."
+        },
+        {
+          "id": "20a",
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Journal phase labels now represent actual helper phases",
+          "description": "21a/21b/21c now map to unknown with the correct exception name. Seven c:zip shapes retain phase-c attribution; RuntimeError subclasses remain covered. The REST surrogate counterexample still escapes as UnicodeEncodeError on all three runtimes. SPEC-22 keeps the cause class open."
+        },
+        {
+          "id": "20b-measured",
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Previously observed RuntimeError/NotImplementedError mapping",
+          "description": "21a/21b/21c now map to unknown with the correct exception name. Seven c:zip shapes retain phase-c attribution; RuntimeError subclasses remain covered. The REST surrogate counterexample still escapes as UnicodeEncodeError on all three runtimes. SPEC-22 keeps the cause class open."
+        },
+        {
+          "id": "21a",
+          "location": "ops/specs/wp1461-r1/SPEC.md:145",
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Digest-matched ZIP_DEFLATED member with invalid compressed blocks raises zlib.error; R7 explicitly leaves it outside K8.",
+          "description": "21a/21b/21c now map to unknown with the correct exception name. Seven c:zip shapes retain phase-c attribution; RuntimeError subclasses remain covered. The REST surrogate counterexample still escapes as UnicodeEncodeError on all three runtimes. SPEC-22 keeps the cause class open."
+        },
+        {
+          "id": "21b",
+          "location": "ops/specs/wp1461-r1/SPEC.md:145",
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Digest-matched ZIP_BZIP2 member with corrupt compressed data raises OSError: Invalid data stream; same forbidden normalization.",
+          "description": "21a/21b/21c now map to unknown with the correct exception name. Seven c:zip shapes retain phase-c attribution; RuntimeError subclasses remain covered. The REST surrogate counterexample still escapes as UnicodeEncodeError on all three runtimes. SPEC-22 keeps the cause class open."
+        },
+        {
+          "id": "21c",
+          "location": "ops/specs/wp1461-r1/SPEC.md:145",
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Digest-matched ZIP_LZMA member with invalid properties raises _lzma.LZMAError; same forbidden normalization.",
+          "description": "21a/21b/21c now map to unknown with the correct exception name. Seven c:zip shapes retain phase-c attribution; RuntimeError subclasses remain covered. The REST surrogate counterexample still escapes as UnicodeEncodeError on all three runtimes. SPEC-22 keeps the cause class open."
+        },
+        {
+          "id": "22a",
+          "description": "REST repository.default_branch → URL encoding: high surrogate, low surrogate and surrogate embedded in an otherwise ordinary name all escape unchanged. These are three input variants of one boundary defect, not three cause classes.",
+          "status": "open"
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Keep the measured codec families and exact-OSError distinction. Give the measured REST Unicode-encoding failure an explicit result policy, either by narrowly recognizing that input failure around the helper or by rejecting the invalid scalar at the owned REST boundary before URL construction. Reconcile the frozen list with the claim that every excluded class is a programming fault; do not turn a finite survey into that universal claim. Extend the executor stop rule to external REST responses as well as ZIP packages. Runnable reproducer and probe-only narrow alternative: probe.py and lock_unicode.py in this review directory. Product-code advice is directional only.",
+      "closing_check": {
+        "command": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py; python3 -B /tmp/wp1461-r8-independent/lock_unicode.py",
+        "result": "21a/21b/21c now map to unknown with the correct exception name. Seven c:zip shapes retain phase-c attribution; RuntimeError subclasses remain covered. The REST surrogate counterexample still escapes as UnicodeEncodeError on all three runtimes. SPEC-22 keeps the cause class open.",
+        "unmeasured": "SPEC-22 remains open. Actual B3 product/Windows/CI behavior is unmeasured."
+      }
+    },
+    {
+      "slug": "artifact-transport-response-shape",
+      "finding_ids": [
+        "WP1461-SPEC-03"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "§5 still separates J JSON, R redirect and S bytes; download completion, digest ownership and Authorization removal remain explicit. Byte comparison shows §5 unchanged. A4 decoder classification is accounted for only in SPEC-21.",
+          "description": "§5 is byte-identical to R7: J JSON, R redirects, S byte downloads remain separate; digest ownership, full-read requirements and Authorization stripping are unchanged."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Keep separate response contracts for GitHub JSON, redirect and storage bytes.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "result": "§5 is byte-identical to R7: J JSON, R redirects, S byte downloads remain separate; digest ownership, full-read requirements and Authorization stripping are unchanged.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "build-only-compatibility-conflict",
+      "finding_ids": [
+        "WP1461-SPEC-04"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "I2 and acceptance 2 retain diagnostic-only new behavior and A/B equality of build-only status/ZIP bytes, including dirty trees, archive/fetch failure and no-test. Existing sh build-only exit precedes Drive; ps1 preflight differences remain explicitly excluded. Invariants/package section unchanged.",
+          "description": "I2 and acceptance 2 are unchanged: build-only diagnostics cannot alter status or package bytes; A/B runs include dirty/archive/fetch failure/no-test. Existing scripts retain the insertion points and documented platform differences."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Keep new enforcement inside push while preserving build-only outputs/status.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py; sed -n '250,321p' scripts/deploy-package.sh; sed -n '150,180p;318,372p' scripts/deploy-package.ps1",
+        "result": "I2 and acceptance 2 are unchanged: build-only diagnostics cannot alter status or package bytes; A/B runs include dirty/archive/fetch failure/no-test. Existing scripts retain the insertion points and documented platform differences.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "master-ref-freshness-at-push",
+      "finding_ids": [
+        "WP1461-SPEC-05"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "A pins H=M; C and D fetch and require exactly M, including emergency mode. C pin precedes ID/API/journal; mode comes from M. These rules and their isolated mutant targets are unchanged.",
+          "description": "A/C/D pinning and H=M, C-before-API/journal and mode-from-M are unchanged. Acceptance 3 and 8 retain the two distinct master-drift cases and wrong-OID mode mutant."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Pin the release ref once and verify the same OID at every pre-push boundary.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "result": "A/C/D pinning and H=M, C-before-API/journal and mode-from-M are unchanged. Acceptance 3 and 8 retain the two distinct master-drift cases and wrong-OID mode mutant.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "sensitive-packet-size-authority",
+      "finding_ids": [
+        "WP1461-SPEC-06"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "11 expected changed files exceed default 6; measured numstat and owner nang_tran are required before delivery/review/Windows. R90 author cap is 7 and the spec explicitly requires a further owner grant for the anticipated eighth size-only revision. No estimated exception is granted.",
+          "description": "11 expected changed files exceed the 6-file default; size receipt must precede delivery/review/Windows. R8 author cap is 8 and used 8; the future size-only revision is call 9 and explicitly requires new owner authority. Review cap 9, this is round 8. No estimated nang_tran is introduced."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Retain the default cap and measured owner-approved exception; known eventual oversize is a scheduled checkpoint, not authority to exceed.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py; read mission-r88.json envelope.provider_budgets and owner-e2.json",
+        "result": "11 expected changed files exceed the 6-file default; size receipt must precede delivery/review/Windows. R8 author cap is 8 and used 8; the future size-only revision is call 9 and explicitly requires new owner authority. Review cap 9, this is round 8. No estimated nang_tran is introduced.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "lease-outside-discovery-namespace",
+      "finding_ids": [
+        "WP1461-SPEC-07"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Lease stays under ops/leases; admission requires no active overlap on any path. Fresh API-backed scan finds wp1236-a-r10-g1-claude-20261121 on ci_dang_ky_test.py until 2026-11-23T00:15:00Z. The named r9 example is historical but the universal no-overlap requirement still blocks r10. No active B3 execution lease is claimed.",
+          "description": "The lease namespace stays ops/leases and the unconditional no-live-overlap precondition remains. Independent current-ref scan finds wp1236-a-r10-g1-claude-20261121 on .claude/dev/ci_dang_ky_test.py until 2026-11-23T00:15:00Z. The old named r9 lease is not treated as clearance; the all-live-leases clause prevents execution."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Publish the authoritative lease in the scanner namespace and verify per-path discovery.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/lease_scan.py; read SPEC.md Write set and lease conditions",
+        "result": "The lease namespace stays ops/leases and the unconditional no-live-overlap precondition remains. Independent current-ref scan finds wp1236-a-r10-g1-claude-20261121 on .claude/dev/ci_dang_ky_test.py until 2026-11-23T00:15:00Z. The old named r9 lease is not treated as clearance; the all-live-leases clause prevents execution.",
+        "unmeasured": "Canonical ai-dang-giu returned rc12 on all 12 paths; no operational clearance is asserted. This is not missing measurement for the already repaired namespace defect."
+      }
+    },
+    {
+      "slug": "windows-preflight-parity-conflict",
+      "finding_ids": [
+        "WP1461-SPEC-08"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Current ps1 still has the two exit-1 preflight branches named by §3. Push changes their rc to 7; build-only retains 1; successful Pull precedes capture of H. No drift in these source files since 48d372e.",
+          "description": "Current ps1 still has both exit-1 preflight branches. The unchanged spec converts them to rc7 only for push, captures H after successful Pull, and preserves build-only behavior; parity cases remain required."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Align push preflight ordering and capture the post-Pull candidate.",
+      "closing_check": {
+        "command": "sed -n '150,180p' scripts/deploy-package.ps1; python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "result": "Current ps1 still has both exit-1 preflight branches. The unchanged spec converts them to rc7 only for push, captures H after successful Pull, and preserves build-only behavior; parity cases remain required.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "required-parity-cases-may-be-skipped",
+      "finding_ids": [
+        "WP1461-SPEC-09"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Acceptance 13 requires PB/DP pairs on desktop/5.1, desktop/7, vm/5.1, vm/7, and Linux/bash where applicable. Missing pairs fail, waivers are not passed tests, every Windows report is compared, and duplicate/overlapping records fail. This acceptance line is unchanged in R7.",
+          "description": "Acceptance 13 and 19 are byte-identical: required desktop/5.1, desktop/7, vm/5.1, vm/7 and linux/bash pairs; missing pair fails, a waiver is not a passed case, duplicate/conflicting records fail. All available Windows reports are compared."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Use explicit required runtime sets and separate owner waivers from measured passes.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "result": "Acceptance 13 and 19 are byte-identical: required desktop/5.1, desktop/7, vm/5.1, vm/7 and linux/bash pairs; missing pair fails, a waiver is not a passed case, duplicate/conflicting records fail. All available Windows reports are compared.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "wrapper-exit-code-documentation-debt",
+      "finding_ids": [
+        "WP1461-SPEC-10"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Wrapper transfers ERRORLEVEL. Spec permits rem-only edits, preserves every executable byte/CRLF, and requires the new 0–8 documentation table. No wrapper executable change is authorized.",
+          "description": "Wrapper still forwards ERRORLEVEL. Write set and acceptance 15 retain rem-only changes, executable-byte equality and CRLF; 0–8 documentation remains required."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Update wrapper return-code documentation without changing execution.",
+      "closing_check": {
+        "command": "cat scripts/deploy-package.cmd; python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "result": "Wrapper still forwards ERRORLEVEL. Write set and acceptance 15 retain rem-only changes, executable-byte equality and CRLF; 0–8 documentation remains required.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "acceptance-baseline-precedes-required-dependency",
+      "finding_ids": [
+        "WP1461-SPEC-11"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "B is installed jointly in Mission/lease after compatible B1a land, with schema/fixture hashes, workflow/job naming and dependencies verified. All A/B/diff/size measurements use B. Current master is only a feasibility baseline; no implementation lease or final B is invented.",
+          "description": "Write set/baseline sections are byte-identical. B must be installed jointly in Mission and lease after compatible B1a land, with pinned artifacts, receipt job and dependencies present. All diff/A-B measurements use B; current master is not misrepresented as that future B."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Use one durable post-dependency acceptance baseline for every whole-diff measurement.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "result": "Write set/baseline sections are byte-identical. B must be installed jointly in Mission and lease after compatible B1a land, with pinned artifacts, receipt job and dependencies present. All diff/A-B measurements use B; current master is not misrepresented as that future B.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "stale-mode-mutant-equivalent-under-pinned-oid",
+      "finding_ids": [
+        "WP1461-SPEC-12",
+        "WP1461-SPEC-18"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Four equivalent-mutant groups remain explicitly excluded. Exhaustive fold measurement: 87,380 vectors, skip->dat changes 0, skip->khong_dat changes 9,330. Emitted-state mutant remains separate; combined-(f), wrong-OID, isolated C-pin and byte-binding targets remain required. R7 added only SPEC-19/20 targets.",
+          "description": "87,380 fold vectors: skip->dat changes 0, skip->false changes 9,330. Four equivalent-mutant groups remain excluded. The wrong-OID mode mutant and isolated C-pin/byte-drift cases remain required. R8 only adds exception-family mutants to acceptance 11."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Explicitly exclude the fold-only identity mutant as equivalent, as already done for early mode reading. If the intended defect is false reporting, define the required mutant as replacing an emitted child state khong_danh_gia with dat. Keep the khong_dat fold mutant, which is distinguishable. The executed probe script is a runnable equivalence measurement.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "result": "87,380 fold vectors: skip->dat changes 0, skip->false changes 9,330. Four equivalent-mutant groups remain excluded. The wrong-OID mode mutant and isolated C-pin/byte-drift cases remain required. R8 only adds exception-family mutants to acceptance 11.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "three-state-composition-has-no-frozen-oracle",
+      "finding_ids": [
+        "WP1461-SPEC-13"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "False-dominant AND, true-dominant audit OR, incomplete-list rule and top-down primary-reason selection remain fixed. R7 changes the K8 wording to documented phase parts only. The unclassified input exceptions are the existing A4 cause class, SPEC-21, not a second composition finding.",
+          "description": "§4.5 is byte-identical: false-dominant AND, true-dominant audit OR and incomplete-list handling remain explicit. All nine P/Q state pairs follow the frozen table; all eight K8 parts remain defined. The exception coverage defect is attributed solely to the A4 cause class."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Keep explicit composition truth tables and deterministic reason selection.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "result": "§4.5 is byte-identical: false-dominant AND, true-dominant audit OR and incomplete-list handling remain explicit. All nine P/Q state pairs follow the frozen table; all eight K8 parts remain defined. The exception coverage defect is attributed solely to the A4 cause class.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    },
+    {
+      "slug": "journal-attempt-cardinality-conflict",
+      "finding_ids": [
+        "WP1461-SPEC-14"
+      ],
+      "manifestations": [
+        {
+          "status": "ĐÃ VÁ THẬT",
+          "historical_description": "Every attempt past opening C pin has phan_lop before push then ket_cuc; opening C-pin failure is consistently excluded. D failure retains two events; dem-g8 joins by ID, rejects duplicate/misordered events and counts a successful push once. This section is unchanged.",
+          "description": "§6 and acceptance 1/12/19 are unchanged: phan_lop before push, ket_cuc after outcome, same attempt ID, no event before failed opening C pin, D failure logged, dangling and duplicate events handled explicitly."
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        },
+        {
+          "round": 6,
+          "sha": "ad2c43b17ecb83f6f0015bb1940868db2ec7fe0f"
+        },
+        {
+          "round": 7,
+          "sha": "d613468b78101733d9b9a289a306e018f45c7f08"
+        },
+        {
+          "round": 8,
+          "sha": "e21fed60ffe758c49654d1495de3159d831c7071"
+        }
+      ],
+      "common_fix": "Use a consistent two-event attempt model and count completed joins only.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "result": "§6 and acceptance 1/12/19 are unchanged: phan_lop before push, ket_cuc after outcome, same attempt ID, no event before failed opening C pin, D failure logged, dangling and duplicate events handled explicitly.",
+        "unmeasured": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+      }
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "WP1461-SPEC-21",
+      "class_slug": "a4-provenance-contract-incomplete",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "label": "VÁ HỜ",
+      "manifestations": [
+        {
+          "id": "21a",
+          "label": "ĐÃ VÁ THẬT"
+        },
+        {
+          "id": "21b",
+          "label": "ĐÃ VÁ THẬT"
+        },
+        {
+          "id": "21c",
+          "label": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "evidence": {
+        "command": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py; python3 -B /tmp/wp1461-r8-independent/lock_unicode.py",
+        "exit_code": 0,
+        "observed_output": "21a/21b/21c now map to unknown with the correct exception name. Seven c:zip shapes retain phase-c attribution; RuntimeError subclasses remain covered. The REST surrogate counterexample still escapes as UnicodeEncodeError on all three runtimes. SPEC-22 keeps the cause class open."
+      },
+      "explanation": "All three previously reported codec examples are repaired. The same incomplete external-input exception policy remains for measured REST Unicode encoding, so the finding/class is only partially repaired under §8.3; see SPEC-22."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "b1-consumer-contract-mismatch",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/probe_b1.py; python3 -B /tmp/wp1461-r8-independent/b1-command.py /tmp/wp1461-r8-independent",
+        "exit_code": 0,
+        "observed_output": "Pinned schema, fixture and code hashes match. Receipt one-file+directory accepted, duplicate/extra file rejected. All 19 stamp/shard artifacts: healthy and directory variants -> []; duplicate/extra variants -> C8. U7: 22/22 raw role/direction ties change with order, 0/22 after sorting. Official fixture: 480/480, TONG DAT. The unchanged B1 probe was read, copied into this round’s scratch, re-bound to freshly extracted pinned blobs, and rerun."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "a4-provenance-contract-incomplete",
+      "label": "VÁ HỜ",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py; python3 -B /tmp/wp1461-r8-independent/lock_unicode.py",
+        "exit_code": 0,
+        "observed_output": "21a/21b/21c now map to unknown with the correct exception name. Seven c:zip shapes retain phase-c attribution; RuntimeError subclasses remain covered. The REST surrogate counterexample still escapes as UnicodeEncodeError on all three runtimes. SPEC-22 keeps the cause class open."
+      },
+      "chua_do_duoc": "SPEC-22 remains open. Actual B3 product/Windows/CI behavior is unmeasured."
+    },
+    {
+      "class_slug": "artifact-transport-response-shape",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "exit_code": 0,
+        "observed_output": "§5 is byte-identical to R7: J JSON, R redirects, S byte downloads remain separate; digest ownership, full-read requirements and Authorization stripping are unchanged."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "build-only-compatibility-conflict",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py; sed -n '250,321p' scripts/deploy-package.sh; sed -n '150,180p;318,372p' scripts/deploy-package.ps1",
+        "exit_code": 0,
+        "observed_output": "I2 and acceptance 2 are unchanged: build-only diagnostics cannot alter status or package bytes; A/B runs include dirty/archive/fetch failure/no-test. Existing scripts retain the insertion points and documented platform differences."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "master-ref-freshness-at-push",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "exit_code": 0,
+        "observed_output": "A/C/D pinning and H=M, C-before-API/journal and mode-from-M are unchanged. Acceptance 3 and 8 retain the two distinct master-drift cases and wrong-OID mode mutant."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "sensitive-packet-size-authority",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py; read mission-r88.json envelope.provider_budgets and owner-e2.json",
+        "exit_code": 0,
+        "observed_output": "11 expected changed files exceed the 6-file default; size receipt must precede delivery/review/Windows. R8 author cap is 8 and used 8; the future size-only revision is call 9 and explicitly requires new owner authority. Review cap 9, this is round 8. No estimated nang_tran is introduced."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "lease-outside-discovery-namespace",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/lease_scan.py; read SPEC.md Write set and lease conditions",
+        "exit_code": 0,
+        "observed_output": "The lease namespace stays ops/leases and the unconditional no-live-overlap precondition remains. Independent current-ref scan finds wp1236-a-r10-g1-claude-20261121 on .claude/dev/ci_dang_ky_test.py until 2026-11-23T00:15:00Z. The old named r9 lease is not treated as clearance; the all-live-leases clause prevents execution.",
+        "unmeasured": "Canonical ai-dang-giu returned rc12 on all 12 paths; no operational clearance is asserted. This is not missing measurement for the already repaired namespace defect."
+      },
+      "chua_do_duoc": "Canonical ai-dang-giu returned rc12 on all 12 paths; no operational clearance is asserted. This is not missing measurement for the already repaired namespace defect."
+    },
+    {
+      "class_slug": "windows-preflight-parity-conflict",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "sed -n '150,180p' scripts/deploy-package.ps1; python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "exit_code": 0,
+        "observed_output": "Current ps1 still has both exit-1 preflight branches. The unchanged spec converts them to rc7 only for push, captures H after successful Pull, and preserves build-only behavior; parity cases remain required."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "required-parity-cases-may-be-skipped",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "exit_code": 0,
+        "observed_output": "Acceptance 13 and 19 are byte-identical: required desktop/5.1, desktop/7, vm/5.1, vm/7 and linux/bash pairs; missing pair fails, a waiver is not a passed case, duplicate/conflicting records fail. All available Windows reports are compared."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "wrapper-exit-code-documentation-debt",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "cat scripts/deploy-package.cmd; python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "exit_code": 0,
+        "observed_output": "Wrapper still forwards ERRORLEVEL. Write set and acceptance 15 retain rem-only changes, executable-byte equality and CRLF; 0–8 documentation remains required."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "acceptance-baseline-precedes-required-dependency",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "exit_code": 0,
+        "observed_output": "Write set/baseline sections are byte-identical. B must be installed jointly in Mission and lease after compatible B1a land, with pinned artifacts, receipt job and dependencies present. All diff/A-B measurements use B; current master is not misrepresented as that future B."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "stale-mode-mutant-equivalent-under-pinned-oid",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "exit_code": 0,
+        "observed_output": "87,380 fold vectors: skip->dat changes 0, skip->false changes 9,330. Four equivalent-mutant groups remain excluded. The wrong-OID mode mutant and isolated C-pin/byte-drift cases remain required. R8 only adds exception-family mutants to acceptance 11."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "three-state-composition-has-no-frozen-oracle",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "exit_code": 0,
+        "observed_output": "§4.5 is byte-identical: false-dominant AND, true-dominant audit OR and incomplete-list handling remain explicit. All nine P/Q state pairs follow the frozen table; all eight K8 parts remain defined. The exception coverage defect is attributed solely to the A4 cause class."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    },
+    {
+      "class_slug": "journal-attempt-cardinality-conflict",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 7,
+      "source_sha": "d613468b78101733d9b9a289a306e018f45c7f08",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+        "exit_code": 0,
+        "observed_output": "§6 and acceptance 1/12/19 are unchanged: phan_lop before push, ket_cuc after outcome, same attempt ID, no event before failed opening C pin, D failure logged, dangling and duplicate events handled explicitly."
+      },
+      "chua_do_duoc": "Actual B3 product/Windows/CI acceptance is future work, not claimed by this spec review."
+    }
+  ],
+  "class_mapping": [],
+  "hunt_table": [
+    {
+      "direction": "Frozen object and revision scope",
+      "hypothesis": "R8 might change unrelated mechanisms or review a stale SHA.",
+      "command": "python3 -B /tmp/wp1461-r8-independent/measure.py; git diff d613468 e21fed6 -- ops/specs/wp1461-r1/SPEC.md",
+      "exit_code": 0,
+      "observed_output": "Exact spec hash matches; tree aa51a92dee6ba5ae63a2741550d7f0ef20b8605c. One file, +34/-9, nine changed spans. Only §4.3, acceptance 5/11, revision/history and E2 counters/next-author-call change. API readback still points to reviewed SHA.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Plan and owner authority",
+      "hypothesis": "Removed dispatch/exemption mechanisms or revised budgets might be reintroduced.",
+      "command": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; read mission-r84/r85/r88 and owner-e2.json",
+      "exit_code": 0,
+      "observed_output": "Plan hash 0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe. Q7, operator-only A4, warning_only enablement gates, no machine exception, B1a dependency and size stop preserved. Owner comment 7054738466 explicitly grants +1 author/+1 review and limits r8 to SPEC-21.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "ZIP codec families",
+      "hypothesis": "A supported codec might still escape R8.",
+      "command": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py",
+      "exit_code": 0,
+      "observed_output": "Stored/deflate/bzip2/lzma controls passed on 3 runtimes; corrupt streams raise error/OSError/LZMAError and are normalized. 96 unsupported method IDs per runtime raise NotImplementedError; installed _get_decompressor supports only methods 0/8/12/14. No uncovered ZIP codec class found in these probes.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "REST JSON-to-URL boundary",
+      "hypothesis": "External JSON may trigger an excluded exception.",
+      "command": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py; python3 -B /tmp/wp1461-r8-independent/lock_unicode.py",
+      "exit_code": 0,
+      "observed_output": "UnicodeEncodeError escapes unchanged for high/low/embedded surrogate default_branch on all three runtimes. 2048/2048 lone-surrogate values reproduce on 3.13. Three valid Unicode/ASCII controls pass. SPEC-22.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Exception precision and reason names",
+      "hypothesis": "Exact OSError or the unqualified zlib name might reject expected data or swallow program faults.",
+      "command": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py",
+      "exit_code": 0,
+      "observed_output": "bz2 produces type(e) is OSError; FileNotFoundError and KeyError propagate. a4_ham_nem:error equals type(zlib.error()).__name__. Seven mutants per runtime die in their designated case; unrelated fault controls are not credited. Exact-OSError and the reason spelling are correct for the measured policy.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Memory-dependent input errors",
+      "hypothesis": "MemoryError might be only a synthetic test invention.",
+      "command": "python3.11 -B /tmp/wp1461-r8-independent/probe.py memory 512\npython3.12 -B /tmp/wp1461-r8-independent/probe.py memory 512\npython3.13 -B /tmp/wp1461-r8-independent/probe.py memory 512\npython3.13 -B /tmp/wp1461-r8-independent/probe.py memory 2048",
+      "exit_code": 0,
+      "observed_output": "A small LZMA archive with 1-GiB dictionary metadata raises real MemoryError in unchanged helper at 512-MiB RLIMIT_AS on all 3 runtimes; same bytes return passed at 2048 MiB on 3.13. Inclusion is justified and test injection avoids unstable resource dependence. Recovery under process-wide exhaustion is not proven.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "B1 boundary and deterministic ordering",
+      "hypothesis": "R8 may regress the repaired ZIP file domain or U7 sorting.",
+      "command": "python3 -B /tmp/wp1461-r8-independent/probe_b1.py",
+      "exit_code": 0,
+      "observed_output": "19/19 healthy+directory artifact variants remain valid; 19/19 duplicate and extra-file variants produce C8. Receipt domain controls distinguish both mutants. 22 role/direction ties: raw order changes 22, sorted changes 0.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "State composition and mutant observability",
+      "hypothesis": "An exception fix might weaken the three-state or mutant oracle.",
+      "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+      "exit_code": 0,
+      "observed_output": "Composition/journal are byte-identical. 87,380 vectors confirm the stated skip equivalences; new mutants are case-named and independently killable. Acceptance requires all K8 parts and both modes. Only the uncovered REST class is missing.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Write-set feasibility and live leases",
+      "hypothesis": "A new implementation may collide with current leases or mutate release contents.",
+      "command": "python3 -B /tmp/wp1461-r8-independent/lease_scan.py; python3 -B /tmp/wp1461-r8-independent/ops/lease_publish.py ai-dang-giu <each path> --root /tmp/wp1461-r8-independent/refs",
+      "exit_code": 12,
+      "observed_output": "Current API snapshot: 387 heads, 545 unique YAML path/blob pairs after filtering .yaml/.yml; each blob OID verified. One active overlap: wp1236-a-r10 on ci_dang_ky_test.py. No manifest/write-set overlap (185 manifest entries). Admission already forbids overlap. Canonical CLI returned rc12 on all 12 paths; no clearance is claimed.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "direction": "Execution stop and delivery budget",
+      "hypothesis": "The revision may silently authorize another author call or over-limit implementation delivery.",
+      "command": "read SPEC.md:295-310; mission-r88.json envelope.provider_budgets; owner-e2.json",
+      "exit_code": 0,
+      "observed_output": "Default cap 6 files/450 additions; 11 expected changes require measured stop before delivery and an owner-approved size revision. R8 consumes author 8/8; another author call needs authorization. Reviewer call 8/9 is within owner extension. Unknown external REST exceptions must be included in the technical stop rule; this omission is part of SPEC-22.",
+      "conclusion": "LỖI"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "R8 scope",
+      "declared": "only SPEC-21 and required revision/budget bookkeeping",
+      "measured": "1 file +34/-9, 9 spans; acceptance changes only 5 and 11",
+      "matches": true,
+      "evidence": "python3 -B /tmp/wp1461-r8-independent/measure.py"
+    },
+    {
+      "claim": "Supported ZIP codecs on tested Python 3.11–3.13",
+      "declared": "stored, deflate, bzip2, lzma",
+      "measured": "4/4 controls passed per runtime; 96 other IDs in 0..99 raise NotImplementedError per runtime",
+      "matches": true,
+      "evidence": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py"
+    },
+    {
+      "claim": "SPEC-21 decoder manifestations",
+      "declared": "zlib.error, exact OSError, LZMAError now classified",
+      "measured": "3/3 per runtime; 9/9 observations match",
+      "matches": true,
+      "evidence": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py"
+    },
+    {
+      "claim": "New boundary mutants",
+      "declared": "7 killed",
+      "measured": "7/7 true kills per runtime, 21 total; named per-case signals",
+      "matches": true,
+      "evidence": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py"
+    },
+    {
+      "claim": "Unlisted external-input classes are programming faults",
+      "declared": "ValueError and every other unlisted class cannot arise solely from external bytes",
+      "measured": "UnicodeEncodeError subclass of ValueError; 3 variants × 3 runtimes; all 2048 surrogate code points on 3.13",
+      "matches": false,
+      "evidence": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py"
+    },
+    {
+      "claim": "MemoryError is reachable from bytes",
+      "declared": "memory-limit dependent",
+      "measured": "512-MiB limit: MemoryError on 3/3 runtimes; 2048-MiB limit: same archive passed on 3.13",
+      "matches": true,
+      "evidence": "memory-results.json"
+    },
+    {
+      "claim": "Author large survey size",
+      "declared": "614656 one-byte/truncated ZIPs + 160000 random ZIPs per runtime; 211 WD and 591 REST bodies",
+      "measured": "Not independently rerun; inspected author scripts and sampled mechanisms independently. This finite survey cannot exclude the measured Unicode case.",
+      "matches": null,
+      "evidence": "Author r8 directory + independent probe.py"
+    },
+    {
+      "claim": "Pinned B1 fixture/predicates",
+      "declared": "120 cases, 118 semantic cases, 56 vt predicates + C10",
+      "measured": "120 / 118 / 56 + 1; fixture 480/480",
+      "matches": true,
+      "evidence": "python3 -B /tmp/wp1461-r8-independent/measure.py"
+    },
+    {
+      "claim": "Pinned B1 full mutants",
+      "declared": "249/249 from historical B1 evidence",
+      "measured": "not completed this round: optional --dot-bien invocation interrupted with rc130 after fixture 480/480; no current 249/249 claim",
+      "matches": null,
+      "evidence": "python3 -B b1-command.py /tmp/wp1461-r8-independent --dot-bien"
+    },
+    {
+      "claim": "File-domain and U7 controls",
+      "declared": "directory entries omitted; ordering stabilized",
+      "measured": "19 artifact IDs × 4 variants; 22 role/direction ties, zero differences after sorting",
+      "matches": true,
+      "evidence": "probe_b1.py"
+    },
+    {
+      "claim": "Skip-fold equivalence",
+      "declared": "skip->dat equivalent, skip->khong_dat distinguishable",
+      "measured": "87380 vectors; 0 and 9330 changed results respectively",
+      "matches": true,
+      "evidence": "python3 -B /tmp/wp1461-r8-independent/measure.py"
+    },
+    {
+      "claim": "Package and size",
+      "declared": "185 manifest entries; 11 expected changed files; default 6-file/450-line cap",
+      "measured": "185, no duplicates, 0 write-set intersection; 11>6 and explicit measured-stop workflow",
+      "matches": true,
+      "evidence": "python3 -B /tmp/wp1461-r8-independent/measure.py"
+    },
+    {
+      "claim": "Review/author authority",
+      "declared": "author cap 8 used 8; review cap 9, 7 used before this review",
+      "measured": "E2 comment confirms +1/+1; this is review 8, not an extra author call",
+      "matches": true,
+      "evidence": "owner-e2.json"
+    },
+    {
+      "claim": "Lease snapshot coverage",
+      "declared": "all live write-set overlaps must block admission",
+      "measured": "387 API heads; 545 unique YAML path/blob pairs; 1 active overlap; canonical command not measured successfully",
+      "matches": null,
+      "evidence": "lease-results.json"
+    }
+  ],
+  "tests": [
+    {
+      "name": "Exact object/scope/current-code measurement",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1461-r8-independent/measure.py",
+      "exit_code": 0,
+      "observed_output": "Hashes match, drift empty, expected unchanged sections true; only acceptance 5/11 changed."
+    },
+    {
+      "name": "Python 3.11/3.12/3.13 real helper and exception boundary probes",
+      "status": "passed",
+      "command": "python3.11 -B /tmp/wp1461-r8-independent/probe.py; python3.12 -B /tmp/wp1461-r8-independent/probe.py; python3.13 -B /tmp/wp1461-r8-independent/probe.py",
+      "exit_code": 0,
+      "observed_output": "Four healthy codec controls, corruption classes, 96 unsupported IDs, deep JSON/REST, topology and program-fault controls measured per runtime. Seven designated mutants killed per runtime."
+    },
+    {
+      "name": "R8 external REST classification property",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1461-r8-independent/lock_unicode.py",
+      "exit_code": 0,
+      "observed_output": "Harness rc0 confirms the counterexample: R8 target_case_failed; probe-only narrow extension passed; removal failed own class; unrelated exceptions false_credit."
+    },
+    {
+      "name": "MemoryError real-input resource probe",
+      "status": "passed",
+      "command": "commands in /tmp/wp1461-r8-independent/memory-results.json",
+      "exit_code": 0,
+      "observed_output": "Four subprocesses rc0: low-limit real MemoryError on all three runtimes, larger-limit healthy control passed."
+    },
+    {
+      "name": "B1 ZIP-domain/U7 probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1461-r8-independent/probe_b1.py",
+      "exit_code": 0,
+      "observed_output": "19 artifacts × 4 variants; 22 ordering cases; directory and duplicate-collapse mutants detected."
+    },
+    {
+      "name": "B1 official fixture",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1461-r8-independent/b1-command.py /tmp/wp1461-r8-independent",
+      "exit_code": 0,
+      "observed_output": "FIXTURE: 480/480; hinh 120; ngu nghia 118; tu vung 79; doi tuong 163; luat 12/12; TONG: DAT."
+    },
+    {
+      "name": "B1 optional exhaustive mutant replay",
+      "status": "not_run",
+      "reason": "Started but not completed; interrupted to bound optional work. No result is credited.",
+      "command": "python3 -B /tmp/wp1461-r8-independent/b1-command.py /tmp/wp1461-r8-independent --dot-bien",
+      "exit_code": 130,
+      "observed_output": "Fixture 480/480 printed; no mutant total before explicit interruption."
+    },
+    {
+      "name": "Canonical live lease discovery",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1461-r8-independent/ops/lease_publish.py ai-dang-giu <each of 12 paths> --root /tmp/wp1461-r8-independent/refs",
+      "exit_code": 12,
+      "observed_output": "12/12 invocations returned rc12. GitHub fetch/ls-remote unavailable through configured proxy; never interpreted as no holder."
+    },
+    {
+      "name": "Independent current-ref lease scan",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1461-r8-independent/lease_scan.py",
+      "exit_code": 0,
+      "observed_output": "387 heads; 545 verified YAML path/blob pairs; active wp1236-a-r10 overlap on ci_dang_ky_test.py.",
+      "unmeasured": "Not a canonical ai-dang-giu pass or execution lease clearance."
+    },
+    {
+      "name": "Product gates / native Windows / deploy / Ruff",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "evidence": "Spec-only review; B3 does not exist yet. No workflow dispatch, GitHub write, LIVE call, full product test, Ruff contract or bare Ruff lint is asserted."
+    },
+    {
+      "name": "Read-only checkout final snapshot",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; git status --porcelain=v1 --untracked-files=all --ignored=matching; git diff --binary; git diff --cached --binary",
+      "exit_code": 0,
+      "observed_output": "Same HEAD/tree/status as start; tracked and index diffs empty. Existing ignored .codex/ remains."
+    }
+  ],
+  "counts": {
+    "total_classes": 14,
+    "open_classes": 1,
+    "closed_classes": 13,
+    "findings": 1,
+    "open_manifestations": 1,
+    "open_input_variants": 3,
+    "total_class_table_manifestations": 21
+  },
+  "execution_limits": {
+    "sandbox_mode": "workspace-write with repository .git/.agents/.codex read-only; review policy additionally forbids repository edits",
+    "network": "Shell proxy connection failed; GitHub connector GETs worked. Exact master/head and current remote heads verified through connector.",
+    "snapshot_scope": "Assigned checkout HEAD/tree/status at start/end and final empty tracked/index diffs. Initial ignored-file content hashes were not captured; no claim of historical absence of writes or changes by other sessions. Source repository was read for Git objects only.",
+    "scratch": "/tmp/wp1461-r8-independent"
+  },
+  "owner_authority": {
+    "url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7054738466",
+    "readback": "GET via GitHub connector; exact comment ID/body reviewed. Ghi hộ record does not establish submitter as decision-maker.",
+    "author_cap": 8,
+    "author_used": 8,
+    "spec_review_cap": 9,
+    "this_spec_review": 8
+  },
+  "notes": "R8 changes are limited to SPEC-21 plus required revision/budget bookkeeping. Exact-OSError, MemoryError inclusion and a4_ham_nem:error are supported by independent measurements. The known REST escape now requires a spec decision before execution; executor must not silently extend the catch set. Author budget is exhausted and no further author call is authorized here. Current lease overlap is an admission stop already required by the spec, not a new spec defect. No source edits, commits, pushes, GitHub writes, workflow dispatches or LIVE actions. No new class slug, split or merge; SPEC-22 continues the existing cause class. All full-size survey counts and Windows/actual B3 behavior not independently measured are explicitly uncredited."
+}

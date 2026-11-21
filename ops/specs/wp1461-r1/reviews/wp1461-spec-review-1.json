@@ -1,0 +1,256 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+  "reviewed_file_sha256": "7dba9814b224763e7daaf69f61d101d03e499cf575e51113042b5c62b33081e6",
+  "findings": [
+    {
+      "id": "WP1461-SPEC-01",
+      "severity": "P1",
+      "class_slug": "b1-consumer-contract-mismatch",
+      "location": "ops/specs/wp1461-r1/SPEC.md:53-71 (§4.2, L2/L7/L8/L13); acceptance 3; lease prerequisite 2",
+      "claim": "The requested JSON-path mapping cannot be implemented against B1 at d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e. B1 has a closed key set: kho is only owner/repo, with no repository ID (L2); expected item inventory is counts plus a key-set hash, not the requested expected-item list, and items are not REST jobs (L7); the collector's own ket_luan_rest is deliberately null, although it belongs to the expected job set (L8); the receipt artifact name and filename are contract constants, not fields inside the receipt (L13). Adding these fields to B1 v1 is itself forbidden by B1. The existing instruction to block later does not make this a freeze-ready consumer contract.",
+      "evidence": [
+        {
+          "command": "git show origin/ops/wp1460-r1:ops/specs/wp1460-r1/SPEC.md; sed -n '53,71p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "B1 §§2,4,5,6 explicitly define kho:string, kiem_ke_muc counts/hash, tu_than collector with null REST conclusion, artifact bien-nhan-audit-<run_id>-<run_attempt> and file bien_nhan_audit.json. B1 schema changes require v2; B3 demands an L1–L13 JSON-path mapping and a missing-field test for every L."
+        }
+      ],
+      "suggested_fix": "Freeze the actual mapping in the revised B3 spec before approval. Distinguish receipt fields, contract constants and independent REST evidence: repository ID comes from REST; collector success comes from final REST; inventory follows B1's exact rules; names follow B1's specified constants. Pin the B1 spec hash. Include a valid B1 receipt and a collector-only rerun retaining older shard producers as positive controls, plus separate missing/invalid-field and inventory mutants. Preserve B1's closed schema and latest-attempt rules; do not silently create a different v1."
+    },
+    {
+      "id": "WP1461-SPEC-02",
+      "severity": "P2",
+      "class_slug": "a4-provenance-contract-incomplete",
+      "location": "ops/specs/wp1461-r1/SPEC.md:73 (§4.3), 79-87 (endpoint allowlist), acceptance 3",
+      "claim": "The A4 fallback is specified as 'valid A4 for this run' without a frozen discovery and validation contract. B1 does not provide the promised A4 field mapping; it calls the existing collector/importer. A4 is an artifact of a separate ops-do-workflow-definition run, whose source head can differ from audit H. Checking only target run, age and non-null values leaves out the established collector provenance and recomputed definition checks. Reusing the existing importer unchanged also violates the declared endpoint allowlist.",
+      "evidence": [
+        {
+          "command": "cat .github/workflows/ops-do-workflow-definition.yml; sed -n '481,549p' ops/ci_provenance.py; git show origin/ops/wp1460-r1:ops/specs/wp1460-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "Current A4 artifact is workflow-definition-<target_run_id>/wd.json. nhap_wd requires a separate wd_run ID; checks collector workflow/event/conclusion/repository and default-branch ancestry, artifact digest, wd/1 closed keys and target identity, then recomputes blob/sha256. It calls repository metadata, git/ref/heads, compare and contents endpoints absent from B3 E1–E7. B1 §8 references thu --wd-run rather than defining a replacement A4 schema."
+        }
+      ],
+      "suggested_fix": "Specify how B3 locates the separate collector run and pin the existing wd/1/importer semantics. Either authorize the additional read-only endpoints required for reuse, or explicitly define equivalent checks using fetched Git objects. Require the recovered definition bytes to match H and validate the collector's provenance. Add positive evidence with collector head different from audit H, and dedicated mutants for wrong collector workflow/ref, wrong target, wrong digest/definition and stale attempt. Keep dispatch outside B3."
+    },
+    {
+      "id": "WP1461-SPEC-03",
+      "severity": "P2",
+      "class_slug": "artifact-transport-response-shape",
+      "location": "ops/specs/wp1461-r1/SPEC.md:84,90-92 (§5 E4 and common read rule)",
+      "claim": "The common 2xx rule requires a GitHub request ID and valid JSON for every response, but E4 ultimately downloads binary ZIP bytes from storage. The only stated E4 exception concerns 3xx responses, not the final 2xx body. Following this literally rejects every successful receipt/A4 download, so the positive artifact path and capability measurement cannot pass.",
+      "evidence": [
+        {
+          "command": "sed -n '79,92p' ops/specs/wp1461-r1/SPEC.md; sed -n '506,520p' ops/ci_provenance.py",
+          "exit_code": 0,
+          "observed_result": "B3 applies its JSON rule without a final-download exception. The current importer handles downloaded bytes as ZIP, hashes those bytes and opens zipfile.ZipFile."
+        },
+        {
+          "command": "web.open https://docs.github.com/en/rest/actions/artifacts#download-an-artifact",
+          "exit_code": null,
+          "observed_result": "Official GitHub documentation describes a redirect to download a ZIP archive, not a JSON success body. Source: https://docs.github.com/en/rest/actions/artifacts#download-an-artifact ."
+        }
+      ],
+      "suggested_fix": "Separate GitHub JSON responses, the authenticated E4 redirect, and the unauthenticated storage download. Define the ZIP response validation, bounded redirects/download size, digest check and error states without requiring GitHub JSON headers on the storage response. Add a successful real-shaped redirect→binary-ZIP fixture and dedicated mutants for digest enforcement and Authorization leakage. Retain fail-closed handling for malformed GitHub JSON."
+    },
+    {
+      "id": "WP1461-SPEC-04",
+      "severity": "P2",
+      "class_slug": "build-only-compatibility-conflict",
+      "location": "ops/specs/wp1461-r1/SPEC.md:22 (I2), 33 (step B), 44-46 (§3), acceptance 11",
+      "claim": "I2 guarantees unchanged build-only exit status and ZIP creation, but step B runs before the build-only exit and §3 makes byte-binding failures fatal without limiting them to push. A build-only invocation from a modified release file is currently valid and necessarily differs from H; the proposed step B would reject it. The contract therefore requires both preserving and changing this result.",
+      "evidence": [
+        {
+          "command": "In /tmp/wp1461-review-R8gxBp/repo at origin/master, append a harmless comment to references/WORKING_METHOD.md; bash scripts/deploy-package.sh --no-test --out /tmp/wp1461-review-R8gxBp/dirty-build.zip; compare the ZIP member with git show HEAD:references/WORKING_METHOD.md",
+          "exit_code": 0,
+          "observed_result": "Actual baseline script exited 0, printed XONG (build-only), and produced a verified 186-entry ZIP. The changed member SHA-256 was 040dcb2345fb5c5a7009c7e084800afcd978da80af8d23bbf94b5b52dc620834 versus H's 5ec49efa185d7cd45bf7dc5f19aa15d992ade9a06389c85ae4db058a4de48517. No Drive call occurred. Scratch change was subsequently restored."
+        }
+      ],
+      "suggested_fix": "Make B3 failures diagnostic only for build-only, including failures to obtain H/archive metadata, or move enforcement into the push branch while retaining informative output. Keep byte binding mandatory for push in both modes. Require base/candidate A/B controls for clean and dirty build-only, with and without --no-test/-NoTest, and a dedicated mutant that makes build-only fail on byte mismatch."
+    },
+    {
+      "id": "WP1461-SPEC-05",
+      "severity": "P1",
+      "class_slug": "master-ref-freshness-at-push",
+      "location": "ops/specs/wp1461-r1/SPEC.md:35,42,113; acceptance 2 (master advances normally)",
+      "claim": "Step D explicitly permits master to advance, whereas plan r4 B3 requires a moved release ref to block. This relaxation is missing from the declared deviations. It also defeats the stated mode freshness guarantee: C can authorize a warning_only push with missing audit evidence, master can then advance to the commit enabling chan, and D will still allow the push because H remains an ancestor. D does not re-evaluate the mode or C's authorization.",
+      "evidence": [
+        {
+          "command": "sed -n '280,297p' /tmp/wp1461-review-R8gxBp/plan.md; sed -n '29,46p' ops/specs/wp1461-r1/SPEC.md; sed -n '112,128p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "Plan r4 says ref movement between checking and pushing must block. B3 instead specifies ancestor rc=0→continue and explicitly tests forward movement→continue. The D checklist contains H/tree/cleanliness/digest/ancestry, not mode or authorization refresh. §8 says reading the latest master prevents an old H from lowering the mode."
+        }
+      ],
+      "suggested_fix": "Prefer pinning the fetched master OID used by C and rejecting any change at D, matching r4. If forward movement is deliberately retained, record the material plan change and require re-evaluating C, the mode and all policy inputs against the new OID before push. Add a stateful case moving master from warning_only to chan between C and D with missing audit evidence, plus a dedicated stale-mode mutant; require zero drive-push calls."
+    },
+    {
+      "id": "WP1461-SPEC-06",
+      "severity": "P2",
+      "class_slug": "sensitive-packet-size-authority",
+      "location": "ops/specs/wp1461-r1/SPEC.md:143-165 (write set and process budget)",
+      "claim": "The proposed implementation necessarily changes at least ten files, excluding the optional deploy-guard diff and all spec/evidence files. The sensitive packet has neither the ADR-0053 activation directive nor a nang_tran size block. Without that directive the older 3-file/300-added-line limit remains effective; even the activated 6-file limit would be exceeded. r85's per-packet invocation budgets and permission to draft an expanded write set do not grant this size exception.",
+      "evidence": [
+        {
+          "command": "Read docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md; extract bullet paths from SPEC's Write set; inspect mission-r85.json packet_graph[role=B3] and envelope.provider_budgets.per_new_packet",
+          "exit_code": 0,
+          "observed_result": "Ten mandatory changed files were counted: two deploy scripts, hook and hook tests, three ops/cong_phat_hanh files, CI registration, runbook and CLAUDE.md. SPEC contains no tran_kich_thuoc_sensitive or nang_tran. The B3 mission entry contains no size grant. ADR-0053 explicitly requires a four-field nang_tran block for an over-limit packet and retains the old limit when activation is absent."
+        }
+      ],
+      "suggested_fix": "Before freezing, either redesign into authorized slices or obtain and record a finite size exception in the spec and installing Mission revision, then copy it into the lease. Include ai_nang, can_cu, tran_cu and tran_moi, a file/line estimate and mandatory actual numstat validation before code review. If using ADR-0053, pin its valid landed OID. Preserve the requirement that emergency flags and hook protection land together."
+    },
+    {
+      "id": "WP1461-SPEC-07",
+      "severity": "P2",
+      "class_slug": "lease-outside-discovery-namespace",
+      "location": "ops/specs/wp1461-r1/SPEC.md:150 (ops/specs/wp1461-r1/ includes lease), 163",
+      "claim": "The only declared location for the B3 lease is inside ops/specs/wp1461-r1/, but the current lease scanner discovers leases only under ops/leases. Storing the authoritative lease where the spec directs would make B3 invisible to the very ai-dang-giu exclusion check it requires. No ops/leases path or separate coordination-path declaration resolves this.",
+      "evidence": [
+        {
+          "command": "sed -n '143,163p' ops/specs/wp1461-r1/SPEC.md; sed -n '713,779p' ops/lease_publish.py; git show origin/ops/wp1460-r1:ops/specs/wp1460-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "B3's directory annotation explicitly says SPEC, lease, do/. _quet_lease_toan_kho runs git ls-tree -r <ref> -- ops/leases and only accepts YAML there. B1 instead declares ops/leases/wp1460-r1-*.yaml on its coordination branch."
+        }
+      ],
+      "suggested_fix": "Declare the authoritative B3 lease under ops/leases with a concrete revision/generation filename, or as an explicit coordinator-owned coordination path, and remove 'lease' from the spec-directory description. Keep spec/evidence and implementation branches distinct. Before implementation, verify that the published lease is actually returned by ai-dang-giu for each effective path; do not change the scanner to accommodate a private namespace."
+    },
+    {
+      "id": "WP1461-SPEC-08",
+      "severity": "P2",
+      "class_slug": "windows-preflight-parity-conflict",
+      "location": "ops/specs/wp1461-r1/SPEC.md:13,32,42,102; acceptance 2 and 11",
+      "claim": "The mandatory identical-result parity conflicts with the prescribed Windows insertion point. For a clean H behind master with -Push and no -Pull, the existing PowerShell block exits 1 before B3 step A; Bash reaches the new equality check and must exit 7. The spec puts A after that PowerShell block while demanding matching exit codes for the non-head-master scenario. H is also defined as the commit at script start even though -Pull may change it before A records it.",
+      "evidence": [
+        {
+          "command": "sed -n '157,175p' scripts/deploy-package.ps1; sed -n '29,42p' ops/specs/wp1461-r1/SPEC.md; sed -n '126,137p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "The actual Windows block tests HEAD..origin/master and executes exit 1 when behind without -Pull; with -Pull it merges origin/master before the stipulated A position. B3 specifies rc 7 for H violations and equal per-scenario parity. This is source-level control-flow evidence; PowerShell/Windows execution was not available in this review."
+        }
+      ],
+      "suggested_fix": "Define H as the post-Pull candidate captured at A. Specify the push preflight ordering so both implementations return the agreed B3 code for behind/ahead/divergent H, while preserving the expressly exempted build-only behavior. Alternatively document a narrowly justified parity exception instead of demanding equality. Add separate behind-without-Pull, successful Pull, failed Pull and ahead/divergent scenarios, checked on real Windows."
+    },
+    {
+      "id": "WP1461-SPEC-09",
+      "severity": "P2",
+      "class_slug": "required-parity-cases-may-be-skipped",
+      "location": "ops/specs/wp1461-r1/SPEC.md:137 (acceptance 11), 166",
+      "claim": "Acceptance 11 allows matching skipped scenario names on both platforms, with only a reason. Those scenarios are explicitly the required script cases from acceptance 2, 3, 6 and 7. Thus both platforms could skip a required TTY or error-path case and still satisfy the parity rule, without the owner's Windows waiver required elsewhere. Matching absence of measurement is not acceptance evidence.",
+      "evidence": [
+        {
+          "command": "sed -n '126,138p' ops/specs/wp1461-r1/SPEC.md; cat docs/adr/0060-dieu-kien-merge-va-moc-ready.md; sed -n '986,1005p' docs/PROTOCOL_DA_PHIEN.md",
+          "exit_code": 0,
+          "observed_result": "SPEC permits skips when their names match on both sides. ADR-0060 M3 states that a required test skipped/not_run cannot be green. B3 §process itself requires real Windows evidence or an explicit owner waiver."
+        }
+      ],
+      "suggested_fix": "Require zero skipped/not_run cases for the mandatory matrix. Classify optional platform-only probes separately; their absence must not count toward mandatory parity. Record an owner waiver as a waiver, never as passed. Add a validator self-test/mutant where the same required scenario is skipped in both reports and ensure acceptance still fails."
+    },
+    {
+      "id": "WP1461-SPEC-10",
+      "severity": "P3",
+      "class_slug": "wrapper-exit-code-documentation-debt",
+      "location": "ops/specs/wp1461-r1/SPEC.md:102,160",
+      "claim": "The spec knowingly introduces undocumented exit codes through deploy-package.cmd and records the resulting documentation defect as debt. The wrapper forwards PowerShell's exit status, so users invoking the documented .cmd entry point will receive new codes 5–8 while its own rc contract still only documents 0–3. This is an explicit open P3 under the requested zero-finding approval standard.",
+      "evidence": [
+        {
+          "command": "cat scripts/deploy-package.cmd; sed -n '102p;160p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "The wrapper documents rc 0–3, saves ERRORLEVEL and exits with it. SPEC explicitly excludes the wrapper from the write set and calls its unchanged rc comment documentation debt."
+        }
+      ],
+      "suggested_fix": "Include a comment-only update to the wrapper in the revised write set and size allowance, documenting codes 4–8 or linking to one authoritative complete table. Verify that executable lines and exit forwarding remain byte-identical after normalizing the expected checkout EOL. Do not leave this as implicit accepted debt."
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact_object_and_read_only_checkout",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; sha256sum ops/specs/wp1461-r1/SPEC.md; git diff --exit-code; git diff --cached --exit-code; git status --porcelain=v1 --untracked-files=all; git diff --check",
+      "exit_code": 0,
+      "observed_result": "Start/end HEAD b8b408d86b3f92a5ea3ae3596ef612481b940b27, tree 189aa3c19bd3dad7694c1ebfebc77620add93f58; spec hash matches assignment; tracked/index/untracked clean. The commit changes only SPEC.md. Ignored .codex/ exists; no initial byte snapshot of ignored tool-owned files was taken."
+    },
+    {
+      "name": "current_master_and_spec_branch_readback",
+      "status": "passed",
+      "command": "GitHub read-only fetch_commit(master) and fetch_commit(ops/wp1461-r1), repository ducthangho/tra-luat",
+      "exit_code": null,
+      "observed_result": "Tool isError=false. GitHub master was 0f9aa2a2cc697129e1f5be72feddf60986286865 both when selected and at final readback; its local tree is da48b7d3aa2c430499461a35c82f52a96ff5e07f. Live spec branch matches the reviewed SHA."
+    },
+    {
+      "name": "plan_and_sibling_contract_pins",
+      "status": "passed",
+      "command": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md; git show origin/ops/wp1460-r1:ops/specs/wp1460-r1/SPEC.md; sha256 of the extracted bytes",
+      "exit_code": 0,
+      "observed_result": "Plan hash 0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe. B1 commit d7e89d98d1ca1e181dfb24a3ab7882bfd2ab678e, SPEC hash 23a9d6638280587cfbdcaf5d1aa33fb136dfbe4fce77ef6e1cba47f313b2aa99. B1 is a draft contract, not an assumed owner-approved implementation. No B4 spec was present on the supplied ops/wp1462-r1 ref."
+    },
+    {
+      "name": "fetch_review_checkout",
+      "status": "failed",
+      "command": "git fetch --all --prune",
+      "exit_code": 255,
+      "observed_result": "Review checkout .git is read-only: cannot open .git/FETCH_HEAD. No checkout mutation was performed."
+    },
+    {
+      "name": "fresh_all_refs_from_github",
+      "status": "failed",
+      "command": "In scratch clone: git fetch --all --prune with origin=https://github.com/ducthangho/tra-luat; python3 -B ops/lease_publish.py ai-dang-giu .claude/dev/ci_dang_ky_test.py",
+      "exit_code": 128,
+      "observed_result": "Fetch failed connecting to configured proxy 127.0.0.1:36011. The scanner separately returned rc=12 because git ls-remote failed. Fresh complete GitHub-ref coverage is NOT established; no clearance to grant a lease is asserted."
+    },
+    {
+      "name": "lease_scan_of_available_ref_snapshot",
+      "status": "passed",
+      "command": "Scratch: fetch /home/user/tra-luat heads and remote-tracking refs; run python3 -B ops/lease_publish.py ai-dang-giu <path> for all 12 declared paths",
+      "exit_code": null,
+      "observed_result": "With origin pointing to the supplied local source, the registry path returned rc=11 and NGƯỜI_GIỮ 1: wp1236-a-r9-g1-claude-20261120. The other 11 queried paths returned rc=0 and NGƯỜI_GIỮ 0. This is a snapshot scan, not a substitute for the failed complete live-ref scan. Output includes /tmp/wp1461-review-R8gxBp/lease-registry-snapshot.txt (sha256 7d4d6debe6e8e0ff4349ee6e9e9bae64cc7d7bd49e45b0edf39872065f6c14b5)."
+    },
+    {
+      "name": "live_known_lease_readback",
+      "status": "passed",
+      "command": "GitHub fetch_commit(ops/wp1236-r9-a-lease), then fetch_file(ops/leases/wp1236-a-r9-g1-claude-20261120.yaml, ref=cbfd8e665289206b476bd3aa5cb1f964efd0c844)",
+      "exit_code": null,
+      "observed_result": "Tool isError=false; latest lease blob 0e3e7b8e36ded4473e58474de72f0bff1136b979 still includes .claude/dev/ci_dang_ky_test.py and expiry 2026-11-22T15:35:00Z, with no withdrawal/tombstone field. Local snapshot ref was older (0aefec07...), demonstrating why a complete live-ref clearance must be rerun before any lease."
+    },
+    {
+      "name": "baseline_release_manifest",
+      "status": "passed",
+      "command": "python3 -B scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json",
+      "exit_code": 0,
+      "observed_result": "On isolated current-master checkout: ok=true, expected_file_count=185, checked_file_count=185, failed=[], extra_files=[]. Output /tmp/wp1461-review-R8gxBp/release-verify.json, sha256 8ebe8c9ded0a53a71275d95187ae57466796d733d76b844bdaa8897c52339e74."
+    },
+    {
+      "name": "real_bundle_and_git_archive_byte_binding",
+      "status": "passed",
+      "command": "python3 -B scripts/tl.py release-bundle --out /tmp/wp1461-review-R8gxBp/baseline.zip --json; git archive HEAD -- <manifest paths plus RELEASE_MANIFEST.json>; Python ZIP/TAR member comparison",
+      "exit_code": 0,
+      "observed_result": "release-bundle ok=true, file_count=185, reproducible=true, SHA-256 c3e9a44833ef302b2aae4f08e4a45a91aba4e72efa14b5787f545a5e733fd361. ZIP and git archive each contain 186 files; path differences=0, byte differences=0. git archive correctly materialized tl-setup.cmd CRLF in this environment; comparison to its raw Git blob alone would have been wrong. Comparison output sha256 d54ef912f494d2dfd1b2e03742108e0dadd2b9e21b886c484f3b828dab5abeb7."
+    },
+    {
+      "name": "dirty_build_only_counterexample",
+      "status": "passed",
+      "command": "Scratch-only harmless edit to references/WORKING_METHOD.md; bash scripts/deploy-package.sh --no-test --out /tmp/wp1461-review-R8gxBp/dirty-build.zip; compare member with H",
+      "exit_code": 0,
+      "observed_result": "Reproduced WP1461-SPEC-04: baseline built/verified ZIP and exited 0 while the edited release member differed from H. This is a successful counterexample reproduction, not a candidate B3 test pass. Log /tmp/wp1461-review-R8gxBp/dirty-build.log, sha256 da88f9e91a64896d5b4998da7f9719ef3897e2e4c0af03497a946fcca1d6317b. No push or LIVE call; scratch edit restored."
+    },
+    {
+      "name": "authority_budget_and_size_inspection",
+      "status": "passed",
+      "command": "Read mission-r84.json owner_decisions, mission-r85.json B3/envelope/r85_constraints, ADR-0053, and extract required changed paths from SPEC",
+      "exit_code": 0,
+      "observed_result": "Invocation caps match per_new_packet: author 3, spec review 4, executor 3, source review 3, Ubuntu PR CI 3, M9 1, connector 2, rerun 1, Windows CI 0. Size lower bound is 10 changed files; no applicable B3 size exception or activation directive. These are static measurements, not executed implementation gates."
+    },
+    {
+      "name": "windows_and_candidate_runtime_suites",
+      "status": "not_run",
+      "command": "Windows PowerShell 5.1/7 parity; candidate cong_phat_hanh_test.py; full hook suite/mutants; full selftest; CI/K7",
+      "exit_code": null,
+      "observed_result": "This review is of an unimplemented spec. No Windows runtime is available locally, and the new B3 files do not exist. No workflow was dispatched. Source-level Windows findings are explicitly distinguished from execution evidence."
+    },
+    {
+      "name": "ruff",
+      "status": "not_run",
+      "command": "Ruff pin/probe contract and bare Ruff lint",
+      "exit_code": null,
+      "observed_result": "The reviewed diff is SPEC.md only; no implementation lint claim is made."
+    }
+  ],
+  "notes": "Independent spec review, first supplied round: 10 open findings in 10 cause classes (2 P1, 7 P2, 1 P3; 0 P0). No prior finding was claimed closed. Reviewed tree=189aa3c19bd3dad7694c1ebfebc77620add93f58; implementation feasibility measured against GitHub-confirmed current master 0f9aa2a2cc697129e1f5be72feddf60986286865. Execution: openai_codex / codex_service / machine, Linux x86_64, Python 3.13.18, Git 2.43.0, workspace-write sandbox with the delivered repository's Git metadata read-only. Requested reviewer model/effort in the spec is gpt-6-astra/xhigh; served model/effort and launcher session identity were not independently measurable here (KHONG_DO_DUOC), and are not inferred from GitHub identity. Used the cross-review skill; no subagents, commits, pushes, GitHub writes, workflow dispatches or LIVE actions. Scratch and artifacts are confined to /tmp/wp1461-review-R8gxBp plus REVIEW_OUT. The fresh all-ref Git scan failed, so only the known live wp1236 overlap is confirmed; zero holders for other paths is limited to the fetched local-source snapshot. The spec correctly defers lease issuance until that overlap is gone and calls for serialization with B1; the overlap itself is not presented as a new defect. The helper/test/mode/runbook/CLAUDE additions are plausible dev-side extensions and do not require changing the 185-file release manifest, but they must be included in the approved installing Mission/lease and size allowance. The separate code change to activate chan, no machine-granted waiver, TTY plus hook-ask limits, procedural AI prohibition, heartbeat warning-only behavior and zero Windows-CI policy preserve the stated owner decisions. I found no reintroduction of the removed mutable waiver/authorization-store mechanisms. Required CHECK_BAT_BUOC values, B1 frozen approval and eventual host capability/protection measurements remain future prerequisites; they were not fabricated or counted as passed. The strongest established implementation failures are the B1 contract mismatch, build-only contradiction and stale-master/mode authorization; remaining findings make the acceptance and delivery contract concrete before freeze."
+}

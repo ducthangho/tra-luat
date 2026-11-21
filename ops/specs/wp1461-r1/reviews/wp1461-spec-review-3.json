@@ -1,0 +1,232 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "a3e91894d2a433777eee35c058830577213619d0",
+  "reviewed_file_sha256": "47b68b99309c26ba1acdf31e9f7dda1103aa7cc19f317a3743041613247a4df0",
+  "findings": [
+    {
+      "id": "WP1461-SPEC-06",
+      "severity": "P2",
+      "class_slug": "sensitive-packet-size-authority",
+      "disposition": "reopened",
+      "location": "ops/specs/wp1461-r1/SPEC.md:214-225,228 (nang_tran and lease admission)",
+      "claim": "The size exception remains incomplete under the ADR it activates. can_cu explicitly contains an estimate and says there is no numstat, yet the spec makes owner approval of this unchanged block plus its installing Mission revision sufficient to use a 12-file/+4200 limit and grant the lease. ADR-0053 requires measured git diff --numstat in can_cu. Measuring only before a later code review does not supply the missing evidence in the frozen exception that authorizes execution. Round 2's closure of SPEC-06 overlooked this requirement; the activation OID and four field names are correct, but they do not close the class.",
+      "evidence": [
+        {
+          "command": "sed -n '31,44p' docs/adr/0053-tran-kich-thuoc-sensitive-len-sau-tep.md; sed -n '214,228p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "ADR-0053 requires can_cu to include why the packet cannot be split AND a git diff --numstat measurement. SPEC can_cu says 'ước lượng theo thành phần, CHƯA có numstat vì chưa có mã'; ai_nang says the exception takes effect with hash approval/install. The lease prerequisites do not require a revised block with measured numstat."
+        },
+        {
+          "command": "python3 -B /tmp/wp1461-spec-r3-audit/inspect_contracts.py",
+          "exit_code": 0,
+          "observed_result": "B3_estimate_admits_no_numstat=true; ADR_requires_measured_numstat_in_can_cu=true. Per-component estimate totals +3967; proposed allowance is 12 files/+4200, versus the activated 6 files/+450. The 11 mandatory changed paths already exceed the file limit. No implementation numstat is present."
+        }
+      ],
+      "suggested_fix": "Before treating the exception as effective, attach measured numstat from an authorized representative scratch implementation and issue the spec revision that carries that evidence, then copy the approved block into Mission/lease. Alternatively obtain an explicit durable owner exception to the measurement requirement itself. Keep the current numbers labelled estimates and make lease admission wait for that resolution; do not silently treat later code-review measurement as evidence already in the approved frozen block."
+    },
+    {
+      "id": "WP1461-SPEC-15",
+      "severity": "P2",
+      "class_slug": "b1-consumer-contract-mismatch",
+      "disposition": "new manifestation of previously closed class",
+      "location": "ops/specs/wp1461-r1/SPEC.md:14,210,228 (B1 pin and baseline/lease conditions)",
+      "claim": "B3 still requires the exact B1 r2 contract, but the current sibling B1 spec explicitly replaces r2 with r3 and changes the closed receipt shape. This is a material dependency mismatch, not merely a newer documentation commit: the root loi field is replaced by chan_doan plus nguon_rest, dependency provenance has a different typed structure, and the validator return contract is made explicit. A producer delivered from current B1 cannot satisfy B3's exact-r2 baseline/lease predicate. B3 correctly stops if the approved B1 hash changes; that prevents silent drift, but also means this candidate must be revised before it can be frozen for execution against the current B1 plan. No B1 r3 owner approval is inferred from branch existence.",
+      "evidence": [
+        {
+          "command": "GitHub fetch_commit(repo_full_name='ducthangho/tra-luat', commit_sha='ops/wp1460-r1'); fetch_file(repository_full_name='ducthangho/tra-luat', ref='29c99e736fde5628f8f47689b80e2ec8ba253a8a', path='ops/specs/wp1460-r1/SPEC.md')",
+          "exit_code": null,
+          "observed_result": "Both read-only calls returned isError=false. Current B1 head=29c99e736fde5628f8f47689b80e2ec8ba253a8a; file blob=36177048995d90c741c8ab38077cf4d442c80ee6. Its status explicitly says r3 replaces r2 at 9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa."
+        },
+        {
+          "command": "python3 -B /tmp/wp1461-spec-r3-audit/inspect_contracts.py; git -C /tmp/wp1461-spec-r3-audit/repo show 29c99e736fde5628f8f47689b80e2ec8ba253a8a:ops/specs/wp1460-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "Pinned B1 SHA-256=4c1e8ae9c0983edbe26b6fa1ff62012a28cc46c874be372b02cce18118aba480; current B1 SHA-256=a90a948c396f13a2b8681f555a2017b2fe7fe7173f7038008873ff6083a70328. Textual root-bullet comparison finds added chan_doan/nguon_rest and removed loi; direct reading confirms PhuThuoc/Do and validator rc 0/1/3/4/2. The extractor intentionally omits inline and nested fields and is not a schema validator."
+        },
+        {
+          "command": "sed -n '14p;208,211p;228p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "All three authority points still require B1 hash 4c1e8ae9..., and line 14 expressly requires a B3 revision when the approved B1 hash differs."
+        }
+      ],
+      "suggested_fix": "Synchronize B3 with the finalized B1 contract before freezing: pin its full OID/hash, update every baseline/lease reference, recheck the shared validator return handling and all fixture expectations, and retain the stop-on-hash-change rule. If B1 needs a later size-only revision, pin that approved revision while proving its contract sections are unchanged. Keeping r2 instead requires a durable coordinator/owner decision to retain that producer contract, not an executor silently choosing between versions."
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact_review_object",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; SHA-256 of git show a3e91894d2a433777eee35c058830577213619d0:ops/specs/wp1461-r1/SPEC.md; git status --porcelain=v1 --untracked-files=all --ignored=matching",
+      "exit_code": 0,
+      "observed_result": "HEAD=a3e91894d2a433777eee35c058830577213619d0; tree=ecea590f3637948f5bd14cc3abf34092b0acebd3. Object and local spec bytes match the assigned hash. Branch ops/wp1461-r1; tracked/index/untracked clean. Ignored .codex/ exists."
+    },
+    {
+      "name": "source_plan_authority_and_budgets",
+      "status": "passed",
+      "command": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/{KE_HOACH_NGUON_R4.md,mission-r84.json,mission-r85.json}; inspect owner_decisions.Q7 and envelope.provider_budgets.per_new_packet",
+      "exit_code": 0,
+      "observed_result": "The three paths were read separately. Plan hash=0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe; r84=a90f5df0746efcd3e92b8ff356806103a410fff71d3da4d7d4fd5e0f1dd96945; r85=6ccdce617409600a5f1f72b616d85381e404fce96853acc66cbef8f0f6861436. Invocation caps agree: author 3, spec review 4, executor 3, code review 3, Ubuntu PR CI 3, M9 1, connector 2, rerun 1, Windows CI 0. r85 permits drafting, not an already granted implementation lease. This supplied review is round 3 of the 4-review cap; no additional model call was dispatched, and historical usage beyond the supplied record was not reconstructed."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-09",
+      "scope": "specification_closure",
+      "source_reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+      "status": "passed",
+      "closure": "ĐÃ VÁ THẬT",
+      "class_slug": "required-parity-cases-may-be-skipped",
+      "command": "Read SPEC §7, acceptance 13 and Windows process row",
+      "exit_code": null,
+      "observed_result": "PB-* and DP-* require both Windows PowerShell 5.1 and PowerShell 7 on the owner's desktop. Each required (ID,runtime) must be measured or have an owner-declared mien row; absent pairs fail and waivers do not count as dat. Only Linux pwsh is optional. The earlier required/optional-runtime contradiction is removed. This is spec closure, not Windows execution evidence."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-11",
+      "scope": "specification_closure",
+      "source_reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+      "status": "passed",
+      "closure": "ĐÃ VÁ THẬT",
+      "class_slug": "acceptance-baseline-precedes-required-dependency",
+      "command": "Read SPEC Baseline nghiệm thu, size calculation and lease admission against protocol §3.2.1 and the coordinator's current instruction",
+      "exit_code": null,
+      "observed_result": "B is now a first-parent master OID containing landed B1, recorded identically by the installing Mission revision and lease. Whole diff, size, A/B, Ruff, hook blob and package counts use B. The old drafting SHA is explicitly not the acceptance baseline. Future B is not fabricated. The separately reported B1 contract-pin drift does not reopen the baseline-accounting mechanism."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-12",
+      "scope": "specification_closure",
+      "source_reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+      "status": "passed",
+      "closure": "ĐÃ VÁ THẬT",
+      "class_slug": "stale-mode-mutant-equivalent-under-pinned-oid",
+      "command": "Read SPEC acceptance 8/11 and §3/§8",
+      "exit_code": null,
+      "observed_result": "The timing-only read-from-M-at-A mutant is explicitly excluded as equivalent. The replacement reads M's first parent; its dedicated case has M enabling chan and missing audit evidence, so the original blocks and the wrong-OID mutant pushes. C/D master-pin mutants remain. No future implementation mutant kill is claimed."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-13",
+      "scope": "specification_closure",
+      "source_reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+      "status": "passed",
+      "closure": "ĐÃ VÁ THẬT",
+      "class_slug": "three-state-composition-has-no-frozen-oracle",
+      "command": "Read SPEC §4.5 and acceptance 1/11",
+      "exit_code": null,
+      "observed_result": "False-dominant AND, true-dominant audit OR, incomplete-discovery behavior, newest-only push selection, deterministic reason ordering and complete evaluation are specified. Nine mixed cases require equal result/reason/list in both traversal orders; separate composition mutants are required. The former unspecified oracle is now frozen."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-14",
+      "scope": "specification_closure",
+      "source_reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+      "status": "passed",
+      "closure": "ĐÃ VÁ THẬT",
+      "class_slug": "journal-attempt-cardinality-conflict",
+      "command": "Read SPEC step E, §6 and acceptance 1/11",
+      "exit_code": null,
+      "observed_result": "Every attempt reaching C has phan_lop then ket_cuc under the same id. C-blocked and D-failed sequences are explicit. dem-g8 counts only joined da_day_khop_byte once; orphan phan_lop is dang_do and contributes no successful deployment. The old one-line-versus-two-line contradiction is removed."
+    },
+    {
+      "name": "older_closure_recheck",
+      "scope": "specification_closure",
+      "status": "passed",
+      "command": "Read round-1/round-2 verdicts and recheck SPEC I1/I2, §3-§8, acceptance 2-15, write set, pinned B1 r2 and current deploy/provenance code",
+      "exit_code": null,
+      "observed_result": "SPEC-02/03/04/05/07/08/10 remain closed at spec level: concrete A4 import; J/R/S response classes; diagnostic-only build-only behavior; fixed master OID; discoverable ops/leases path; post-Pull H plus push-only rc correction; comment-only wrapper rc documentation. SPEC-01's original L1-L13 mismatch is fixed for pinned B1 r2, but its class has a new current-B1 manifestation in SPEC-15. SPEC-06 is explicitly reopened, not silently carried as closed."
+    },
+    {
+      "name": "size_exception_recheck",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1461-spec-r3-audit/inspect_contracts.py; ADR-0053 object/first-parent/non-shallow checks",
+      "exit_code": 0,
+      "observed_result": "Inspection completed successfully and found the exception evidence defect in SPEC-06. The ADR activation itself is valid: file exists at 8ab100793df9831505f495543a74044b91c2c9ab (rc 0), is absent at its first parent (expected rc 128), OID is on master first-parent history, repository is not shallow. Correct activation does not substitute for measured numstat."
+    },
+    {
+      "name": "live_master_and_review_branch",
+      "status": "passed",
+      "command": "GitHub fetch_commit(master) and fetch_commit(ops/wp1461-r1), repeated at final readback",
+      "exit_code": null,
+      "observed_result": "All calls isError=false. Master remained 0f9aa2a2cc697129e1f5be72feddf60986286865 and reviewed branch remained a3e91894d2a433777eee35c058830577213619d0. The inspected existing deploy/hook/registry/provenance files are identical between reviewed checkout and this master."
+    },
+    {
+      "name": "fetch_delivered_checkout",
+      "status": "failed",
+      "command": "git fetch --all",
+      "exit_code": 255,
+      "observed_result": "cannot open .git/FETCH_HEAD: Read-only file system. No checkout-ref update succeeded."
+    },
+    {
+      "name": "scratch_all_ref_snapshot",
+      "status": "passed",
+      "command": "In /tmp/wp1461-spec-r3-audit/repo: git fetch --all --prune; git fetch origin +refs/remotes/origin/*:refs/remotes/origin/*",
+      "exit_code": 0,
+      "observed_result": "Both succeeded against the supplied local source /home/user/tra-luat, after creating a scratch clone. This fetched its heads and remote-tracking refs. It is not a complete live-GitHub freshness certificate."
+    },
+    {
+      "name": "fresh_all_github_refs",
+      "status": "failed",
+      "command": "git -C /tmp/wp1461-spec-r3-audit/repo fetch https://github.com/ducthangho/tra-luat +refs/heads/*:refs/remotes/live/*",
+      "exit_code": 128,
+      "observed_result": "Failed to connect to configured proxy 127.0.0.1:36011. No complete fresh live-ref clearance is asserted. Raw command results: /tmp/wp1461-spec-r3-audit/scratch-setup.json."
+    },
+    {
+      "name": "lease_scan_and_known_live_overlap",
+      "status": "passed",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <path> for all 12 declared implementation paths in the scratch snapshot; independent GitHub fetch_file of wp1236 lease",
+      "exit_code": null,
+      "observed_result": "ci_dang_ky_test.py returned rc 11 and NGƯỜI_GIỮ 1: wp1236-a-r9-g1-claude-20261120; other 11 paths returned rc 0 and NGƯỜI_GIỮ 0. Each real rc is stored in leases.json. GitHub independently returned lease blob 0e3e7b8e36ded4473e58474de72f0bff1136b979, including this path, expiry 2026-11-22T15:35:00Z and no withdrawal. The spec already makes its release/expiry and a full fresh scan prerequisites; the known overlap itself is not a new finding."
+    },
+    {
+      "name": "write_set_and_sibling_overlap",
+      "status": "passed",
+      "command": "Inspect all 12 B3 paths against RELEASE_MANIFEST.json, B1 Write set and current B4 Write set",
+      "exit_code": 0,
+      "observed_result": "11 mandatory changed files plus deploy-guard.ps1 expected unchanged; none is in the 185-file release manifest. B1 overlaps only ci_dang_ky_test.py, and B3 requires serialization after B1. Current B4 at 0d80f45b72796af82899760fde20a15f2b108a37 (SPEC hash f16c00227d7643554fe00116deef53cf6367d9c094bfd9ebd4419c3e95d69621) has no overlapping implementation path. Expanded B3 scope still needs the installing revision/lease."
+    },
+    {
+      "name": "current_B1_contract_sync",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1461-spec-r3-audit/inspect_contracts.py plus read-only GitHub B1 readback",
+      "exit_code": 0,
+      "observed_result": "The inspection command completed; contract synchronization failed as documented in SPEC-15. Local fetched B1 and GitHub agree on r3 OID/hash. No owner approval or landed producer is assumed."
+    },
+    {
+      "name": "baseline_release_verify",
+      "status": "passed",
+      "command": "At isolated current master: python3 -B scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json",
+      "exit_code": 0,
+      "observed_result": "ok=true, expected_file_count=checked_file_count=185, failed=[], extra_files=[]. Full output: /tmp/wp1461-spec-r3-audit/verify.out."
+    },
+    {
+      "name": "real_bundle_and_archive_binding",
+      "status": "passed",
+      "command": "python3 -B scripts/tl.py release-bundle --out /tmp/wp1461-spec-r3-audit/baseline.zip --json; git archive HEAD -- <all ZIP file paths>; Python ZIP/TAR member-byte comparison",
+      "exit_code": 0,
+      "observed_result": "Real bundle ok=true, file_count=185, SHA-256=c3e9a44833ef302b2aae4f08e4a45a91aba4e72efa14b5787f545a5e733fd361. ZIP and archive each contain 186 files including RELEASE_MANIFEST.json; path differences=0 and byte differences=0. This supports the proposed archive-binding method on current Linux baseline, not an unimplemented B3 pass. Artifact: binding.json."
+    },
+    {
+      "name": "existing_A4_reader_probes",
+      "status": "passed",
+      "command": "python3 -B inline probe importing scratch ops/ci_provenance_test.py and calling c53_wd_passed, c54_wd_not_measured, c55_wd_failed, c58_thu_wd_run; then thu_wd() and thu_wd(run={'run_attempt':2})",
+      "exit_code": 0,
+      "observed_result": "4/4 existing targeted cases passed. Healthy importer returned passed; stale target-attempt fixture also returned passed, confirming that B3 must perform its separately specified run_attempt_luc_do comparison using the validated wd.json bytes. Importer output lacks that field. This validates reuse feasibility and the need for the explicit extra check; it is not a B3 implementation test. Artifact: importer-probe.json."
+    },
+    {
+      "name": "candidate_windows_and_heavy_gates",
+      "status": "not_run",
+      "command": "B3 tests/mutants and A/B; Windows PowerShell 5.1/7 parity; full hook suite; full selftest; CI/K7",
+      "exit_code": null,
+      "observed_result": "The reviewed object is a specification, with no B3 implementation or landed B1 validator/fixture on master. Neither pwsh nor powershell is installed here. No heavy workflow was dispatched, no Windows host was used and no LIVE operation occurred. Required future evidence remains required or must have the owner's valid waiver; it is not recorded as passed or skipped."
+    },
+    {
+      "name": "ruff",
+      "status": "not_run",
+      "command": "Ruff pin/probe contract and bare implementation lint",
+      "exit_code": null,
+      "observed_result": "Only SPEC.md differs from master. No implementation lint claim is made."
+    },
+    {
+      "name": "final_read_only_integrity",
+      "status": "passed",
+      "command": "git diff --exit-code; git diff --cached --exit-code; git diff --check; git status --porcelain=v1 --untracked-files=all --ignored=matching; git rev-parse HEAD HEAD^{tree}; SHA-256 of SPEC.md",
+      "exit_code": 0,
+      "observed_result": "All commands succeeded; exact head/tree/hash unchanged; no tracked/index/untracked delta. Ignored path list remains .codex/. Ignored tool-owned bytes were not snapshotted initially, so byte-level immutability of those files is not claimed. No commits, pushes, GitHub writes, workflow dispatches, subagents or LIVE actions. All scratch/output artifacts are under /tmp."
+    }
+  ],
+  "notes": "Independent round-3 SPEC review: 2 P2 findings, 0 P0/P1/P3. ĐỐI CHIẾU LƯỢT TRƯỚC: all five previously open findings (SPEC-09,11,12,13,14) are ĐÃ VÁ THẬT at specification level; closure ratio for that prior open set is 5/5. Two historical classes are open again: sensitive-packet-size-authority (SPEC-06; previous closure corrected against ADR-0053) and b1-consumer-contract-mismatch (new manifestation SPEC-15 after the sibling producer changed). No IDs or class slugs were reset. The B1 hash-change stop is correct and must be retained; SPEC-15 does not allege a silent schema bypass or that r3 is already owner-approved. Current master=0f9aa2a2cc697129e1f5be72feddf60986286865; reviewed tree=ecea590f3637948f5bd14cc3abf34092b0acebd3. Plan r4 and Q7 remain respected: no machine-granted waiver store, emergency TTY plus hook ask with explicit coverage limits, procedural AI non-use, fixed master, warning-only landing, later blocking activation, and warning-only B2 heartbeat. Coordinator decisions on a post-B1 baseline and both desktop Windows runtimes are incorporated. Full live-ref coverage failed; the lease result is a local-source snapshot plus independent live readback of the known holder, not permission to issue a lease. Execution: openai_codex / codex_service / machine, Linux, Python 3.13.18, Git 2.43.0; workspace-write sandbox with the delivered Git metadata read-only. Served model/effort and launcher session identity were not independently measurable (KHONG_DO_DUOC); requested gpt-6-astra/xhigh is not asserted as served identity. Used .agents/skills/cross-review/SKILL.md. No implementation approval, merge readiness, new invocation allowance or owner authorization is conferred. Scratch/evidence: /tmp/wp1461-spec-r3-audit; final output: /tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1461-spec-review-3.json."
+}

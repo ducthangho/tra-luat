@@ -1,0 +1,536 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "bec7de7c59087891197156975f21107383a36a41",
+  "reviewed_file_sha256": "9ae5d3c75436890b24f2a8e37a3cb50ff3a6f99917f50087bec923cce1d08a58",
+  "findings": [
+    {
+      "id": "WP1461-SPEC-16",
+      "class_slug": "a4-provenance-contract-incomplete",
+      "severity": "P2",
+      "location": "ops/specs/wp1461-r1/SPEC.md:60,95,102-116,177,181-182,187",
+      "claim": "The new A4 discovery contract selects the collector run with the greatest created_at but leaves ties without a frozen oracle. Two distinct collector runs may have the same timestamp; the contract contains no uniqueness constraint or tie-breaker. With one valid and one fully invalid A4 artifact, either run is maximal under the stated rule, yielding different release decisions for the same evidence. The order-independent composition/reason rules do not choose between those maxima. Scanning the whole candidate finds the same missing total selection rule at the newest-only CI push selector in 4.1/4.5: no ordering key, tie rule, or distinguishing acceptance case is frozen there either. The existing A4 importer cannot supply this policy: it consumes a wd_run ID chosen by its caller. This is a remaining discovery-contract manifestation of SPEC-02, not a B1 schema mismatch.",
+      "evidence": [
+        {
+          "command": "nl -ba ops/specs/wp1461-r1/SPEC.md | sed -n '60p;95p;102,116p;181,182p'",
+          "exit_code": 0,
+          "observed_result": "A4 explicitly orders by collector run created_at only. CI says newest push only. The mixed-order cases cover aggregation, and the A4 case covers a strictly newer invalid run versus an older valid run; neither establishes an oracle for equal timestamps or a total selector key."
+        },
+        {
+          "command": "sed -n '481,549p' /tmp/wp1461-spec-r4-audit/repo/ops/ci_provenance.py",
+          "exit_code": 0,
+          "observed_result": "nhap_wd(goi, repo, run, r, wd_run) reads and validates the supplied collector run. It does not discover/select the latest collector. Thus reuse does not fill the missing selection rule."
+        },
+        {
+          "command": "python3 -B /tmp/wp1461-spec-r4-audit/probe_spec_oracles.py",
+          "exit_code": 0,
+          "observed_result": "For collector IDs 101 and 102 with identical created_at=2026-11-20T17:00:00Z, one valid and one invalid, first-maximum and last-maximum selection both obey the stated timestamp key but select opposite states. Reversing discovery order reverses a first-maximum result. Both records remain maxima. This is an executable specification countermodel, not a claim about existing B3 implementation or observed live runs."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Freeze total selection rules in 4.3 discovery and 4.1/4.5 CI selection, then add the corresponding acceptance 5/6 and mutation cases.",
+        "how": "For example, select the maximum (created_at, numeric run_id) after complete discovery, explicitly define malformed/missing selection metadata as khong_do_duoc, and retain no-fallback after selecting an invalid newest run. Another deterministic tie policy is possible, but its expected outcome must be stated. Keep discovery in B3; no ci_provenance.py write is needed.",
+        "locking_check": "Use two equal-timestamp runs with opposite validity/conclusions, in both API orders and across a page boundary. Assert the exact chosen run ID, state, reason and push count. Give the A4 and CI selectors dedicated case-owned exceptions and mutants that drop/reverse the tie-breaker or choose the first encountered maximum; also retain the strictly newer-invalid/older-valid case.",
+        "may_spawn": "A tie policy may reject evidence previously selected incidentally by API order. Do not turn unknown selection metadata into an old-run fallback, change audit OR aggregation, or reuse created_at as evidence age."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "class_slug": "b1-consumer-contract-mismatch",
+      "finding_ids": [
+        "WP1461-SPEC-01",
+        "WP1461-SPEC-15"
+      ],
+      "manifestations": [
+        "Recompute file/region hashes and compare all receipt mappings and validator return handling."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Keep one authoritative B1 pin and synchronize every consumer field and baseline/lease condition.",
+      "closing_check": "Recompute file/region hashes and compare all receipt mappings and validator return handling."
+    },
+    {
+      "class_slug": "a4-provenance-contract-incomplete",
+      "finding_ids": [
+        "WP1461-SPEC-02",
+        "WP1461-SPEC-16"
+      ],
+      "manifestations": [
+        "ops/specs/wp1461-r1/SPEC.md:60,95,102-116,177,181-182,187"
+      ],
+      "highest_open_severity": "P2",
+      "common_fix": "Freeze the complete discovery and selection contract while reusing the existing importer.",
+      "closing_check": "Equal-timestamp A4/CI runs with opposite outcomes must select a specified ID in either order; preserve all A4 identity/digest/attempt cases."
+    },
+    {
+      "class_slug": "artifact-transport-response-shape",
+      "finding_ids": [
+        "WP1461-SPEC-03"
+      ],
+      "manifestations": [
+        "A valid binary ZIP without GitHub JSON headers is accepted; malformed redirect, bad digest and Authorization leakage are rejected."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Keep separate response contracts for GitHub JSON, redirect and storage bytes.",
+      "closing_check": "A valid binary ZIP without GitHub JSON headers is accepted; malformed redirect, bad digest and Authorization leakage are rejected."
+    },
+    {
+      "class_slug": "build-only-compatibility-conflict",
+      "finding_ids": [
+        "WP1461-SPEC-04"
+      ],
+      "manifestations": [
+        "Base/candidate clean/dirty and injected-read-failure A/B must have equal exit and ZIP digest and zero pushes."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Keep new enforcement inside push while preserving build-only outputs/status.",
+      "closing_check": "Base/candidate clean/dirty and injected-read-failure A/B must have equal exit and ZIP digest and zero pushes."
+    },
+    {
+      "class_slug": "master-ref-freshness-at-push",
+      "finding_ids": [
+        "WP1461-SPEC-05"
+      ],
+      "manifestations": [
+        "Movement forward/backward/divergent, including a policy change after C, returns 7 with zero pushes."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Pin the release ref once and verify the same OID at every pre-push boundary.",
+      "closing_check": "Movement forward/backward/divergent, including a policy change after C, returns 7 with zero pushes."
+    },
+    {
+      "class_slug": "sensitive-packet-size-authority",
+      "finding_ids": [
+        "WP1461-SPEC-06"
+      ],
+      "manifestations": [
+        "Estimated preauthorized exception removed; default cap remains binding until a measured owner-approved spec/lease revision."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Retain the default cap and measured owner-approved exception; known eventual oversize is a scheduled checkpoint, not authority to exceed.",
+      "closing_check": "Before any crossing, record current measured numstat and remaining work, obtain the owner-approved four-field exception, and update spec/lease before continuation."
+    },
+    {
+      "class_slug": "lease-outside-discovery-namespace",
+      "finding_ids": [
+        "WP1461-SPEC-07"
+      ],
+      "manifestations": [
+        "Scanner must return the B3 lease for each effective path after a fresh complete-ref scan at lease admission."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Publish the authoritative lease in the scanner namespace and verify per-path discovery.",
+      "closing_check": "Scanner must return the B3 lease for each effective path after a fresh complete-ref scan at lease admission."
+    },
+    {
+      "class_slug": "windows-preflight-parity-conflict",
+      "finding_ids": [
+        "WP1461-SPEC-08"
+      ],
+      "manifestations": [
+        "Both platforms return the specified push status; Windows successful Pull records the new H. No Windows execution is claimed here."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Align push preflight ordering and capture the post-Pull candidate.",
+      "closing_check": "Both platforms return the specified push status; Windows successful Pull records the new H. No Windows execution is claimed here."
+    },
+    {
+      "class_slug": "required-parity-cases-may-be-skipped",
+      "finding_ids": [
+        "WP1461-SPEC-09"
+      ],
+      "manifestations": [
+        "Reject shared skipped/not_run cases and missing required pairs; a valid mien record is reported separately and does not increment pass counts."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Use explicit required runtime sets and separate owner waivers from measured passes.",
+      "closing_check": "Reject shared skipped/not_run cases and missing required pairs; a valid mien record is reported separately and does not increment pass counts."
+    },
+    {
+      "class_slug": "wrapper-exit-code-documentation-debt",
+      "finding_ids": [
+        "WP1461-SPEC-10"
+      ],
+      "manifestations": [
+        "Compare non-rem blob lines with B and verify the complete code table plus CRLF checkout."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Update wrapper return-code documentation without changing execution.",
+      "closing_check": "Compare non-rem blob lines with B and verify the complete code table plus CRLF checkout."
+    },
+    {
+      "class_slug": "acceptance-baseline-precedes-required-dependency",
+      "finding_ids": [
+        "WP1461-SPEC-11"
+      ],
+      "manifestations": [
+        "At admission verify identical exact B, B1 artifacts/validator and compatible contract, then prove predecessor changes are absent from B3 diff."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Use one durable post-dependency acceptance baseline for every whole-diff measurement.",
+      "closing_check": "At admission verify identical exact B, B1 artifacts/validator and compatible contract, then prove predecessor changes are absent from B3 diff."
+    },
+    {
+      "class_slug": "stale-mode-mutant-equivalent-under-pinned-oid",
+      "finding_ids": [
+        "WP1461-SPEC-12"
+      ],
+      "manifestations": [
+        "Wrong-OID and removed-ref-check mutants must have distinct behavioral counterexamples; do not credit the equivalent timing change."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Mutate policy identity or freshness guards, not successful read timing of the same immutable object.",
+      "closing_check": "Wrong-OID and removed-ref-check mutants must have distinct behavioral counterexamples; do not credit the equivalent timing change."
+    },
+    {
+      "class_slug": "three-state-composition-has-no-frozen-oracle",
+      "finding_ids": [
+        "WP1461-SPEC-13"
+      ],
+      "manifestations": [
+        "All mixed false/unknown/true and incomplete-discovery cases must preserve aggregate state and reason list under reordered traversal."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Keep explicit composition truth tables and deterministic reason selection.",
+      "closing_check": "All mixed false/unknown/true and incomplete-discovery cases must preserve aggregate state and reason list under reordered traversal."
+    },
+    {
+      "class_slug": "journal-attempt-cardinality-conflict",
+      "finding_ids": [
+        "WP1461-SPEC-14"
+      ],
+      "manifestations": [
+        "Assert the exact two-event sequence for success/failure/block, one successful count, and zero count for orphan phan_lop."
+      ],
+      "highest_open_severity": null,
+      "common_fix": "Use a consistent two-event attempt model and count completed joins only.",
+      "closing_check": "Assert the exact two-event sequence for success/failure/block, one successful count, and zero count for orphan phan_lop."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "b1-consumer-contract-mismatch",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-01"
+          ]
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "a3e91894d2a433777eee35c058830577213619d0",
+          "finding_ids": [
+            "WP1461-SPEC-15"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "GHIM-B1 pins the live B1 r4 file; recomputed region is 31216 bytes / fb9abb789422430971fb57bb95791d37cbdc7ea5cb10678bd79f9116a7b03c7e. The chan_doan/nguon_rest mapping, validator rc 0/1/3/4/2 and baseline/lease compatibility predicates agree with B1 sections 2-6. This closes specification synchronization, not future producer execution."
+    },
+    {
+      "class_slug": "a4-provenance-contract-incomplete",
+      "status": "VA_MOT_PHAN",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-02"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "Endpoint discovery, wd/1 validation, provenance reuse, stale-attempt/H/receipt comparisons and operator-only dispatch are now explicit. Current importer probes pass. A4 latest-run selection still lacks the tie oracle in SPEC-16; the same selector gap occurs for CI push."
+    },
+    {
+      "class_slug": "artifact-transport-response-shape",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-03"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "Section 5 distinguishes J JSON, R authenticated redirect and S unauthenticated binary ZIP. Acceptance 7 explicitly exercises 302-to-real-ZIP success and header/digest/credential-leak failures; acceptance 11 requires corresponding mutants. The former requirement for GitHub JSON headers on the storage body is absent."
+    },
+    {
+      "class_slug": "build-only-compatibility-conflict",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-04"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "I2, steps A/B and acceptance 2 consistently make B3 failures diagnostic-only in build-only, including dirty trees, unavailable H/archive and fetch failures. Dedicated fatal-build-only mutants remain. Existing real bundle/verify passed, but candidate A/B awaits implementation."
+    },
+    {
+      "class_slug": "master-ref-freshness-at-push",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-05"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "A pins M and requires H=M; C/D refetch and require the same M. Emergency does not exempt these checks. Acceptance 3 includes master movement to chan between C and D, and dedicated C/D pin mutants remain."
+    },
+    {
+      "class_slug": "sensitive-packet-size-authority",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-06"
+          ]
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "a3e91894d2a433777eee35c058830577213619d0",
+          "finding_ids": [
+            "WP1461-SPEC-06"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "ADR activation is valid. The estimated exception is removed; 6 files/+450 remains the binding default until measured numstat supports an owner-approved four-field exception recorded in a new spec revision and lease. The eventual 11-file delivery and certain stop are explicitly disclosed. The already-exceeded recovery wording is not authorization to cross the cap; read it under the binding default and r86 before-exceeding rule. The conservative remaining-work trigger can stop early with actual current numstat plus unfinished-work inventory. No measured future implementation or already-granted exception is claimed. Thus the old estimated-authority mechanism is closed, not reopened merely because an exception will be needed."
+    },
+    {
+      "class_slug": "lease-outside-discovery-namespace",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-07"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "The coordinator-owned lease now lives under ops/leases and the executor must verify it is returned for every delivery path. Current scanner discovery was exercised. Known wp1236 overlap is explicitly a lease-admission blocker. Complete fresh GitHub ref coverage remains unmeasured, so this is namespace-contract closure only, not lease clearance."
+    },
+    {
+      "class_slug": "windows-preflight-parity-conflict",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-08"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "H is captured after successful Pull. Section 3 explicitly changes the two Windows push-only behind/Pull-failure exits to 7 and preserves build-only 1. The current master block was read; acceptance 3 separately covers behind/ahead/divergent and both Pull results."
+    },
+    {
+      "class_slug": "required-parity-cases-may-be-skipped",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-09"
+          ]
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+          "finding_ids": [
+            "WP1461-SPEC-09"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "Sections 7/13/process consistently require PB and DP on Windows PowerShell 5.1 and 7; every required ID/runtime is measured or has an owner-supplied mien record, never counted as dat. Shared skips, absent pairs and counting waivers as passes have negative cases/mutants. Only Linux pwsh remains optional."
+    },
+    {
+      "class_slug": "wrapper-exit-code-documentation-debt",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-10"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "The wrapper is in scope for rem-only rc 0-8 documentation. Section 6 and acceptance 15 preserve executable blob lines and CRLF checkout policy. Current wrapper forwards ERRORLEVEL; the planned comment update is sufficient for the original defect."
+    },
+    {
+      "class_slug": "acceptance-baseline-precedes-required-dependency",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 2,
+          "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+          "finding_ids": [
+            "WP1461-SPEC-11"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "B is now installed identically in Mission/lease only after B1 lands on first-parent master. Whole diff, size, Ruff, A/B, hook base and package counts use B; the drafting SHA is explicitly not B. B1 compatibility is independently pinned by its region hash."
+    },
+    {
+      "class_slug": "stale-mode-mutant-equivalent-under-pinned-oid",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 2,
+          "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+          "finding_ids": [
+            "WP1461-SPEC-12"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "The timing-only same-M mutant is explicitly excluded as equivalent. The replacement reads M first-parent with a scenario where M enables chan and no audit exists; the correct result is 5/no push, while the wrong-OID variant pushes. C/D movement mutants remain."
+    },
+    {
+      "class_slug": "three-state-composition-has-no-frozen-oracle",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 2,
+          "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+          "finding_ids": [
+            "WP1461-SPEC-13"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "Section 4.5 freezes false-dominant AND, true-dominant audit OR, incomplete-discovery treatment, newest-only P and deterministic reason ordering. Nine mixed cases run in both traversal orders. The remaining choice among equally latest runs is tracked under the historical discovery-contract class SPEC-16; no aggregation-table ambiguity is asserted."
+    },
+    {
+      "class_slug": "journal-attempt-cardinality-conflict",
+      "status": "DA_VA_THAT",
+      "source_rounds": [
+        {
+          "round": 2,
+          "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+          "finding_ids": [
+            "WP1461-SPEC-14"
+          ]
+        }
+      ],
+      "scope": "frozen specification; not implementation acceptance",
+      "evidence": "Step E, section 6 and acceptance 1/11 agree on phan_lop then ket_cuc for one ID, including C block and D failure. dem-g8 counts only joined da_day_khop_byte once, and reports orphans as dang_do without counting them."
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact_object_and_read_only_integrity",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; git diff --exit-code; git diff --cached --exit-code; git status --porcelain=v1 --untracked-files=all --ignored=matching; sha256sum ops/specs/wp1461-r1/SPEC.md",
+      "exit_code": 0,
+      "observed_result": "Start/end HEAD=bec7de7c59087891197156975f21107383a36a41; tree=9e1025451d91730d0c97194e44f99e5719a7551a; spec hash=9ae5d3c75436890b24f2a8e37a3cb50ff3a6f99917f50087bec923cce1d08a58. Tracked/index/untracked unchanged. Ignored path list remains .codex/; its tool-owned contents were not snapshotted, so their byte-level immutability is not asserted."
+    },
+    {
+      "name": "live_ref_readback",
+      "status": "passed",
+      "command": "GitHub fetch_commit for master, ops/wp1460-r1, ops/wp1461-r1, ops/wp1462-r1, ops/wp1172-plan-r4",
+      "exit_code": null,
+      "observed_result": "All isError=false. Final refs: master 48d372e14f190dae83a75ccbca8ee9a0b25635c5; B1 9f09a12a53fb0fc032c4496728b49feef09d5c5e; B3 bec7de7c59087891197156975f21107383a36a41; B4 0cfb9244c1c41548ca164368ea0a5754eeae4dcf; plan b4a45179600d3527aa0f332492e3a8a43e2ccff0. Known refs match the fetched local-source snapshot. Artifact: github-readback.json."
+    },
+    {
+      "name": "source_plan_budgets_and_owner_decisions",
+      "status": "passed",
+      "command": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/{KE_HOACH_NGUON_R4.md,mission-r84.json,mission-r85.json,mission-r86.json} (four separate reads); Python JSON inspection",
+      "exit_code": 0,
+      "observed_result": "Plan hash=0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe. Q7, removal of machine-granted waivers, warning-only landing, later activation and operator-only A4 are preserved. r86 grants author 5/spec review 6; this is review 4. Executor/code-review/Ubuntu CI caps remain 3 each, K7 1, connector 2, rerun 1, Windows CI 0. The r86 default cap and measured-exception process remain binding; a known later exception is not itself a defect. No extra agent or workflow invocation was made."
+    },
+    {
+      "name": "GHIM_B1_hash_and_consumer_sync",
+      "status": "passed",
+      "command": "Python SHA-256 of git show 9f09a12a53fb0fc032c4496728b49feef09d5c5e:ops/specs/wp1460-r1/SPEC.md and LF-normalized section region from ### 2. through before ### 7.",
+      "exit_code": 0,
+      "observed_result": "File SHA-256=5bdd23707bdf2a0ebd995538fbf794a57e5bcbcf7368701585994167e519562d. Region=31216 bytes, SHA-256=fb9abb789422430971fb57bb95791d37cbdc7ea5cb10678bd79f9116a7b03c7e. Receipt fields, shared validator exit mapping and compatible-producer baseline/lease conditions match."
+    },
+    {
+      "name": "ADR_0053_activation",
+      "status": "passed",
+      "command": "git cat-file -e activation:path; git cat-file -e activation^:path; git rev-parse --is-shallow-repository; git rev-list --first-parent origin/master",
+      "exit_code": 0,
+      "observed_result": "ADR exists at 8ab100793df9831505f495543a74044b91c2c9ab (rc 0), is absent at its first parent (expected rc 128), is on current master first-parent, and repository is not shallow. Activation itself is valid. Per-command receipts: adr-activation.json."
+    },
+    {
+      "name": "scratch_all_local_source_refs",
+      "status": "passed",
+      "command": "In /tmp/wp1461-spec-r4-audit/repo: git fetch --all --prune; git fetch origin +refs/remotes/origin/*:refs/remotes/origin/*",
+      "exit_code": 0,
+      "observed_result": "Both returned 0 after a scratch clone from /home/user/tra-luat. The delivered review checkout was not fetched into or changed. This is all refs available in the supplied source, not complete live GitHub coverage. Raw records: setup.json."
+    },
+    {
+      "name": "complete_fresh_GitHub_ref_coverage",
+      "status": "failed",
+      "command": "git -C /tmp/wp1461-spec-r4-audit/repo ls-remote https://github.com/ducthangho/tra-luat; git -C /tmp/wp1461-spec-r4-audit/repo fetch https://github.com/ducthangho/tra-luat +refs/heads/*:refs/remotes/live/*",
+      "exit_code": 128,
+      "observed_result": "Both returned 128: could not connect to configured proxy 127.0.0.1:36011. No complete fresh-ref clearance or lease-admission approval is claimed."
+    },
+    {
+      "name": "lease_and_sibling_overlap_measurement",
+      "status": "passed",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <path> for all 12 implementation paths in scratch; GitHub fetch_file of ops/wp1236-r9-a-lease:ops/leases/wp1236-a-r9-g1-claude-20261120.yaml",
+      "exit_code": null,
+      "observed_result": "11 paths: rc 0 / NGUOI_GIU 0. ci_dang_ky_test.py: rc 11 / holder wp1236-a-r9-g1-claude-20261120. Live file blob=0e3e7b8e36ded4473e58474de72f0bff1136b979 confirms this path and expiry 2026-11-22T15:35:00Z, with no withdrawal field. SPEC already blocks admission until release/expiry plus complete fresh scan. B1 overlaps only this registry file and must land first; current B4 has no implementation overlap. Records: leases.json and github-readback.json."
+    },
+    {
+      "name": "current_code_and_release_feasibility",
+      "status": "passed",
+      "command": "Compare nine deploy/hook/registry/provenance files at drafting base, current origin/master and reviewed SHA; python3 -B scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json; python3 -B scripts/tl.py release-bundle --out /tmp/wp1461-spec-r4-audit/baseline.zip --json; git archive HEAD -- <ZIP paths>; ZIP/TAR byte comparison",
+      "exit_code": 0,
+      "observed_result": "All nine inspected existing files are byte-identical across the three OIDs. Release verify rc 0, ok=true, expected=checked=185, no failed/extra files. Real bundle rc 0, ok=true, file_count=185, SHA-256=c3e9a44833ef302b2aae4f08e4a45a91aba4e72efa14b5787f545a5e733fd361. ZIP/archive each contain 186 files including manifest, zero path or byte differences. Every B3 delivery path is dev-side/excluded from release. Artifacts: code-drift.json, release-verify.json, release-bundle.json, archive-binding.json."
+    },
+    {
+      "name": "existing_A4_importer_probes",
+      "status": "passed",
+      "command": "Import scratch ops/ci_provenance_test.py with python3 -B; execute c53_wd_passed, c54_wd_not_measured, c55_wd_failed, c58_thu_wd_run; call thu_wd with healthy/stale-attempt/multiple-invalid-field fixtures",
+      "exit_code": 0,
+      "observed_result": "4/4 existing targeted cases pass. Healthy import passes. Stale target attempt also passes the importer and its result omits run_attempt_luc_do, confirming why B3 must retain its explicit additional check against the validated wd.json bytes. The importer accepts a caller-selected wd_run and does not implement B3 discovery. Artifact: a4-probes.json. No network or product write occurred."
+    },
+    {
+      "name": "frozen_spec_countermodels",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1461-spec-r4-audit/probe_spec_oracles.py",
+      "exit_code": 0,
+      "observed_result": "Script completed successfully (rc 0). Equal timestamps leave more than one maximum and allow opposite selected validity without a frozen tie oracle: SPEC-16. The size-predicate walkthrough was also inspected, but is not a failed requirement: the default/r86 cap still prohibits an unauthorized crossing and an early checkpoint is allowed. These are models of prose, not implementation-test results. Artifact: spec-oracles.json."
+    },
+    {
+      "name": "ruff_pin_probe_contract",
+      "status": "passed",
+      "command": "python3 -B: import scratch .claude/dev/ci_dang_ky_test.py; call loi_ruff_ci()",
+      "exit_code": 0,
+      "observed_result": "RUFF_CONTRACT 3 [], rc 0. This checks the workflow pin/probe contract only; it is not bare lint. Artifact: ruff-contract.json."
+    },
+    {
+      "name": "candidate_runtime_acceptance_and_heavy_gates",
+      "status": "not_run",
+      "command": "Candidate B3 tests/mutants and A/B, full hook/selftest, Windows PowerShell 5.1/7 parity, CI/K7, live capability measurements, bare changed-code Ruff lint",
+      "exit_code": null,
+      "observed_result": "This candidate contains a spec, not B3 implementation; B and the landed B1 validator/fixture do not yet exist for acceptance. No pwsh/powershell runtime is installed here. No heavy tests, Windows access, workflow dispatch, LIVE call or deployment was performed. Future mandatory evidence remains mandatory; no not_run/skipped check is counted as passed."
+    }
+  ],
+  "notes": "Independent round-4 SPEC review: 1 P2, 0 P0/P1/P3; new ID WP1461-SPEC-16. Historical slugs preserved. The previous round omitted explicit class tables, so all 14 historical classes were reconstructed from rounds 1-3 findings and its closure test entries: 13 DA_VA_THAT, 1 VA_MOT_PHAN, at specification scope only. Previous-round open set U={sensitive-packet-size-authority,b1-consumer-contract-mismatch}; both close: 2/2 closure. a4-provenance-contract-incomplete is reopened and does not enter that numerator. The A4 class is retained for its original discovery-contract mechanism and generalized across both newest-run selectors; it is not merged with or used to erase the separately closed aggregation-oracle class. Size wording was challenged during review but is not reported: a binding default cap plus r86 does not authorize overrun, and the disclosed certain checkpoint is intentional. No approval of implementation, lease, merge or deployment is conferred. Known lease overlap and inability to obtain complete fresh GitHub refs remain admission limitations, not additional candidate findings because the spec already requires their resolution. Current master=48d372e14f190dae83a75ccbca8ee9a0b25635c5; reviewed tree=9e1025451d91730d0c97194e44f99e5719a7551a. Actual reviewer identity: openai_codex / codex_service / machine, Linux, Python 3.13.18, Git 2.43.0; workspace-write sandbox with delivered Git metadata read-only. Exact served model/effort and launcher session attestation were not independently measurable (KHONG_DO_DUOC); requested gpt-6-astra/xhigh is not asserted as measured served identity. Used .agents/skills/cross-review/SKILL.md. No repository edits, commits, pushes, GitHub writes, subagents or workflow dispatches. All scratch/output is under /tmp. Evidence directory: /tmp/wp1461-spec-r4-audit."
+}

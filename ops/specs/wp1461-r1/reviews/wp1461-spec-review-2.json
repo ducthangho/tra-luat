@@ -1,0 +1,303 @@
+{
+  "verdict": "changes_requested",
+  "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+  "reviewed_file_sha256": "13ee6edfa49120fa38bc5fb6cf6fd9bb20e07946daef320a12b9706dee76d4f6",
+  "findings": [
+    {
+      "id": "WP1461-SPEC-09",
+      "severity": "P2",
+      "class_slug": "required-parity-cases-may-be-skipped",
+      "location": "ops/specs/wp1461-r1/SPEC.md:130 (§7 layer 2), :163 (acceptance 13)",
+      "claim": "Partially closed. The general shared-skip loophole is fixed, but the required Windows coverage still has conflicting dispositions: §7 requires measuring parameter-prefix binding on BOTH Windows PowerShell 5.1 and PowerShell 7, while acceptance 13 makes the other Windows runtime an optional probe whose absence does not fail. A desktop with only one measured runtime can therefore satisfy the stated parity validator without satisfying §7. The spec does not distinguish a mandatory binding-only probe from optional full deployment parity on that second runtime.",
+      "evidence": [
+        {
+          "command": "sed -n '127,131p;159,164p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "Line 130 explicitly says to measure every prefix on Windows PowerShell 5.1 AND PowerShell 7. Line 163 lists the other runtime under optional probes and says its absence does not fail. The new zero-skipped rule only protects scenarios classified as mandatory; it does not resolve this conflicting classification. This is a static contract finding, not a claim of a Windows runtime failure."
+        }
+      ],
+      "suggested_fix": "Give the binding probes and deployment-parity probes distinct IDs and explicit required runtime sets. If prefix binding must be measured on both versions, retain those small probes as mandatory on both and make only the second full deployment suite optional. Otherwise explicitly revise §7 to the supported runtime scope, with the owner-approved limitation. Ensure the validator rejects any unmeasured mandatory runtime/ID pair; keep owner waivers separate from pass."
+    },
+    {
+      "id": "WP1461-SPEC-11",
+      "severity": "P2",
+      "class_slug": "acceptance-baseline-precedes-required-dependency",
+      "location": "ops/specs/wp1461-r1/SPEC.md:10, :166, :190, :203, :206",
+      "claim": "The frozen immutable acceptance baseline predates B1, but lease issuance now requires B1 to have landed. Measuring the whole B3 diff and numstat against that baseline necessarily includes B1 implementation files which B3 explicitly excludes, and exceeds the 12-file allowance even before unrelated master changes. The packet cannot simultaneously inherit B1, obey its declared diff boundary, and pass its required size check. A later Mission revision that merely installs this unchanged spec does not change the immutable baseline under protocol §3.2.1.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1461-r2-review-n0ydvjoi/probe_contracts.py",
+          "exit_code": 0,
+          "observed_result": "Mandatory B3 implementation paths=11; mandatory B1 implementation paths=4; union=14, versus tran_moi=12. Three B1 paths lie outside B3: .github/workflows/ci-dot-bien-du.yml and the B1 schema/fixture JSON files. The shared ci_dang_ky_test.py also contains predecessor changes beyond B3's registration-only scope."
+        },
+        {
+          "command": "sed -n '190,215p' docs/PROTOCOL_DA_PHIEN.md; sed -n '192,206p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "Protocol defines immutable baseline as the OID for the whole diff/acceptance and requires a durable decision plus Packet/Mission revision to move it. B3 fixes it to 0f9aa2a..., requires numstat against baseline before every review, and prohibits leasing before B1 lands."
+        }
+      ],
+      "suggested_fix": "Before authorizing execution, issue a revision that pins an exact post-B1 implementation/acceptance baseline and revalidates the measurements against it. Preserve the old baseline and review history in the record. Alternatively obtain an explicit, precisely defined predecessor-diff accounting rule and its authority; do not silently measure size against a different base or include B1 files in B3's writable scope."
+    },
+    {
+      "id": "WP1461-SPEC-12",
+      "severity": "P2",
+      "class_slug": "stale-mode-mutant-equivalent-under-pinned-oid",
+      "location": "ops/specs/wp1461-r1/SPEC.md:47, :135, :153, :161",
+      "claim": "Acceptance 11 still demands a genuine kill of the stale-mode mutant that reads the mode once at A and reuses it. Under the revised contract, A and C read the same immutable M; every observed master movement is independently rejected at C/D. Moving a successful read of M to A cannot produce stale policy at push. The specified master-to-chan scenario therefore rejects both the baseline and that timing-only mutant. Requiring a genuine stale-policy kill of this equivalent change invites a false-credit test or unnecessary implementation constraints.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1461-r2-review-n0ydvjoi/probe_contracts.py",
+          "exit_code": 0,
+          "observed_result": "A finite contract model evaluated 24 combinations of mode, master at C/D, and audit state: reading the same M at A versus C produced 0 different (exit code, drive-push count) results. Model and scope are saved in mode-model.json. This models successful reads of immutable Git objects; it is not execution of unimplemented B3."
+        },
+        {
+          "command": "sed -n '46,50p;134,136p;153,161p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "M is pinned at A, equality is enforced again at C and D, and the mode source is git show M:ops/cong_phat_hanh.che_do. The required mutant changes read timing, while keeping those guards. A transient read-error distinction would test error timing, not the claimed stale-mode defect."
+        }
+      ],
+      "suggested_fix": "Remove or classify this timing-only change as equivalent for the stale-policy criterion. Keep genuine mutants for reading the wrong policy source/OID and removing the C/D ref checks, with stateful counterexamples. If a separate timing or transient-read-failure requirement is intended, specify it and its own expected outcome explicitly instead of crediting it as proof against stale policy."
+    },
+    {
+      "id": "WP1461-SPEC-13",
+      "severity": "P2",
+      "class_slug": "three-state-composition-has-no-frozen-oracle",
+      "location": "ops/specs/wp1461-r1/SPEC.md:56-88 (§4), :115-122 (§6), :151, :154-158 (acceptance)",
+      "claim": "The spec defines three states for individual reads and different exit codes for the aggregate C result, but does not define how mixed failures compose. Examples left without a unique oracle are known-red CI plus an unreadable audit endpoint, or one fully invalid audit run plus another unreadable run with no valid run. A first-error implementation and an unknown-dominant implementation can produce different rc 5/6 and reason codes while satisfying the listed single-fault cases. This leaves the requested measurable, order-independent three-state contract incomplete.",
+      "evidence": [
+        {
+          "command": "rg -n 'khong_do_duoc|khong_dat|ưu tiên|thắng|MỘT lượt|Kết quả bước C' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "The spec gives per-read mappings, the rule that one valid audit is sufficient, and C→exit tables (khong_dat→5, khong_do_duoc→6). It has no AND/OR aggregation table, mixed-invalid/unreadable expected result, or reason-code precedence. Acceptance lists individual faults and red+valid audit, but not the mixed cases in this finding."
+        }
+      ],
+      "suggested_fix": "Freeze the composition rules and deterministic reason selection. For example, use false-dominant AND for required independent conditions and true-dominant OR across candidate audit runs, retaining unknown when an unreadable candidate could still satisfy the OR. Specify handling of incomplete discovery separately. Add the mixed-state combinations in both iteration orders and dedicated mutants that incorrectly collapse or prioritize unknown."
+    },
+    {
+      "id": "WP1461-SPEC-14",
+      "severity": "P3",
+      "class_slug": "journal-attempt-cardinality-conflict",
+      "location": "ops/specs/wp1461-r1/SPEC.md:41 (step E), :125 (§6 journal)",
+      "claim": "The insertion table says one journal line per attempt, whereas the detailed journal contract requires a pre-push classification line and a second outcome line with the same id. These are different append-only formats; following the table literally would either omit the pre-push record or omit the final outcome that G8 counts.",
+      "evidence": [
+        {
+          "command": "sed -n '39,43p;123,125p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_result": "Step E says \"một dòng nhật ký cho lần thử\". §6 says the class is written before drive-push and the outcome is \"dòng thứ hai cùng id\", with G8 counted from da_day_khop_byte."
+        }
+      ],
+      "suggested_fix": "Make step E explicitly append the outcome event for the existing attempt id and state the two-event contract consistently. Define the event sequence for a blocked attempt as well, and verify G8 counts a successful attempt once after joining its events."
+    }
+  ],
+  "tests": [
+    {
+      "name": "prior_finding_WP1461-SPEC-01",
+      "scope": "specification_closure",
+      "status": "passed",
+      "closure": "closed",
+      "class_slug": "b1-consumer-contract-mismatch",
+      "source_reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+      "command": "Read B1 r2 at 9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa (sha256 4c1e8ae9c0983edbe26b6fa1ff62012a28cc46c874be372b02cce18118aba480) §§2,6 and B3 §4.2",
+      "exit_code": null,
+      "observed_result": "The L1-L13 mapping now distinguishes receipt fields, constants and REST. kho_id exists in B1 r2; collector conclusion comes from final REST; receipt name is a constant; shared validator/fixture and collector-only rerun positive control are specified. Closure is at specification level; B1 implementation is not yet present."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-02",
+      "scope": "specification_closure",
+      "status": "passed",
+      "closure": "closed",
+      "class_slug": "a4-provenance-contract-incomplete",
+      "source_reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+      "command": "Read B3 §4.3/E8/E9; inspect ops/ci_provenance.py:481-549; run probe_contracts.py",
+      "exit_code": null,
+      "observed_result": "A4 discovery and validation are now concrete; all importer endpoints are authorized, collector head may differ from H, and extra attempt/hash checks are stated. Existing nhap_wd accepted its healthy fixture. It also accepted a stale target-attempt fixture and does not return run_attempt_luc_do, confirming B3 must inspect the already validated wd.json bytes to apply its explicitly required extra check. Reusing the importer alone is not sufficient; the revised spec does not claim that it is."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-03",
+      "scope": "specification_closure",
+      "status": "passed",
+      "closure": "closed",
+      "class_slug": "artifact-transport-response-shape",
+      "source_reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+      "command": "Read B3 §5 and acceptance 7/11",
+      "exit_code": null,
+      "observed_result": "Separate J/R/S contracts now allow the actual 302→binary ZIP path, omit GitHub JSON/header requirements on storage, bound downloads/redirects, check digests, and prohibit Authorization forwarding. Positive ZIP and dedicated transport mutants are required. No live artifact download was performed in this review."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-04",
+      "scope": "specification_closure",
+      "status": "passed",
+      "closure": "closed",
+      "class_slug": "build-only-compatibility-conflict",
+      "source_reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+      "command": "Read I2, steps A/B, acceptance 2/11; run scratch dirty-build probe",
+      "exit_code": null,
+      "observed_result": "A/B enforcement is now explicitly push-only; all B3 failures are diagnostic in build-only. Current-master Bash --no-test built the scratch dirty release file with rc 0 and ZIP bytes differing from H, reproducing the behavior the revision now preserves. Candidate implementation and full eight-gate A/B remain unexecuted."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-05",
+      "scope": "specification_closure",
+      "status": "passed",
+      "closure": "closed",
+      "class_slug": "master-ref-freshness-at-push",
+      "source_reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+      "command": "Read §3, §8 and acceptance 3/11",
+      "exit_code": null,
+      "observed_result": "H=M is explicit; M is fetched/pinned at A and checked at C/D; all observed ref movements block with rc 7, including emergency and warning_only. The formerly allowed forward movement is removed. The changed-mode stateful case now expects zero push calls. New SPEC-12 concerns mutation-test validity, not an open production freshness relaxation."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-06",
+      "scope": "specification_closure",
+      "status": "passed",
+      "closure": "closed",
+      "class_slug": "sensitive-packet-size-authority",
+      "source_reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+      "command": "git cat-file -e ADR-0053 land OID and first parent; git rev-list --first-parent origin/master; read nang_tran",
+      "exit_code": null,
+      "observed_result": "Activation OID is valid: ADR exists at 8ab100793df9831505f495543a74044b91c2c9ab, absent at its first parent, on master first-parent history, repository non-shallow. All four nang_tran fields are present, finite allowance is 12 files/+4200, per-component estimate sums to +3967, and owner approval/install/copy-to-lease and actual numstat are prerequisites. New SPEC-11 is the separate dependency-baseline accounting defect."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-07",
+      "scope": "specification_closure",
+      "status": "passed",
+      "closure": "closed",
+      "class_slug": "lease-outside-discovery-namespace",
+      "source_reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+      "command": "Read Write set and ops/lease_publish.py:713-779; run ai-dang-giu for all 12 paths in scratch",
+      "exit_code": null,
+      "observed_result": "Lease now belongs to ops/leases/wp1461-r2-g1-claude-<YYYYMMDD>.yaml on the coordinator branch, within the scanner namespace. Executor must verify it is returned for each path. The known wp1236 holder remains a declared prerequisite, not a silently waived overlap."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-08",
+      "scope": "specification_closure",
+      "status": "passed",
+      "closure": "closed",
+      "class_slug": "windows-preflight-parity-conflict",
+      "source_reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+      "command": "Read B3 H definition/§3/acceptance 3 and current scripts/deploy-package.ps1:157-175",
+      "exit_code": null,
+      "observed_result": "H is captured after successful Pull. The spec explicitly changes both existing Windows behind/failed-Pull exits from 1 to 7 only for push, preserves build-only behavior, and requires behind/ahead/diverged/successful-Pull/failed-Pull scenarios. This resolves the old source-level control-flow contradiction; no Windows execution is claimed."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-09",
+      "scope": "specification_closure",
+      "status": "failed",
+      "closure": "partial",
+      "class_slug": "required-parity-cases-may-be-skipped",
+      "source_reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+      "command": "Read B3 §7 layer 2 and acceptance 13",
+      "exit_code": null,
+      "observed_result": "Zero mandatory skipped/not_run cases, same-skip negative self-test and mutant, and separate waiver status close the old general loophole. The runtime classification conflict described in the remaining SPEC-09 still permits the required second-version measurement to be treated as optional."
+    },
+    {
+      "name": "prior_finding_WP1461-SPEC-10",
+      "scope": "specification_closure",
+      "status": "passed",
+      "closure": "closed",
+      "class_slug": "wrapper-exit-code-documentation-debt",
+      "source_reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+      "command": "Read B3 §6, Write set item 3 and acceptance 15; inspect deploy-package.cmd and .gitattributes",
+      "exit_code": null,
+      "observed_result": "The wrapper is included for comment-only documentation of codes 0-8; executable blob lines must stay unchanged and checkout CRLF is specified. This removes the knowingly retained documentation debt. Candidate wrapper bytes do not yet exist."
+    },
+    {
+      "name": "exact_review_object",
+      "status": "passed",
+      "command": "git status --porcelain=v1 --untracked-files=all; git rev-parse HEAD HEAD^{tree}; sha256sum ops/specs/wp1461-r1/SPEC.md; git diff origin/master HEAD --stat",
+      "exit_code": 0,
+      "observed_result": "Clean branch ops/wp1461-r1; HEAD=b031bebce687fdb669c250b6c55280b9920f526d; tree=376cbde04aa1f8171c33a2ac5a3b122734cf6293; spec SHA-256=13ee6edfa49120fa38bc5fb6cf6fd9bb20e07946daef320a12b9706dee76d4f6. Diff from current master is only SPEC.md, +227 lines."
+    },
+    {
+      "name": "source_plan_and_authority",
+      "status": "passed",
+      "command": "git show origin/ops/wp1172-plan-r4:<plan, mission-r84.json, mission-r85.json>; hash extracted bytes; inspect selected authority/budget fields",
+      "exit_code": 0,
+      "observed_result": "Plan SHA-256=0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe; r84=a90f5df0746efcd3e92b8ff356806103a410fff71d3da4d7d4fd5e0f1dd96945; r85=6ccdce617409600a5f1f72b616d85381e404fce96853acc66cbef8f0f6861436. Invocation caps match per_new_packet: author 3/spec review 4/executor 3/source review 3/Ubuntu PR CI 3/M9 1/connector 2/rerun 1/Windows CI 0. Expanded scope/size still needs owner hash approval and installing revision; no current lease authority is inferred."
+    },
+    {
+      "name": "live_master_and_b1_identity",
+      "status": "passed",
+      "command": "GitHub fetch_commit(master) and fetch_commit(ops/wp1460-r1), repository ducthangho/tra-luat",
+      "exit_code": null,
+      "observed_result": "Both connector calls isError=false. Live master=0f9aa2a2cc697129e1f5be72feddf60986286865; live B1 head=9f7010e0d7c9bda10c2b42dd9889e8a3d3ead9fa, matching the fetched local snapshot and pinned contract."
+    },
+    {
+      "name": "local_all_ref_snapshot_fetch",
+      "status": "passed",
+      "command": "In scratch repo: git fetch --all --prune; git fetch origin +refs/remotes/origin/*:refs/remotes/origin/*",
+      "exit_code": 0,
+      "observed_result": "Fetched heads and mirrored remote-tracking refs from /home/user/tra-luat without modifying the review checkout. B1 hash matches; B4 spec exists at 7582454cff0563f22e0ca13fba9f1f0f04ad2485 with SHA-256 3ca1c75001d96e46e342a042f343ca192fba5626298fc118e5ce0932a8c8661f. B1 shares the CI registry path; B4 implementation paths do not overlap B3."
+    },
+    {
+      "name": "fresh_all_refs_from_github",
+      "status": "failed",
+      "command": "git -C /tmp/wp1461-r2-review-n0ydvjoi/repo fetch https://github.com/ducthangho/tra-luat +refs/heads/*:refs/remotes/live/*",
+      "exit_code": 128,
+      "observed_result": "Failed to connect to configured proxy 127.0.0.1:36011. Complete fresh live-ref coverage is not established. Log: /tmp/wp1461-r2-review-n0ydvjoi/live-fetch.txt"
+    },
+    {
+      "name": "lease_scan_snapshot",
+      "status": "passed",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <path>, for all 12 declared implementation paths in fetched scratch mirror",
+      "exit_code": null,
+      "observed_result": "Registry path returned rc 11, NGƯỜI_GIỮ 1: wp1236-a-r9-g1-claude-20261120. Other 11 paths returned rc 0, NGƯỜI_GIỮ 0. Individual rc/logs are in /tmp/wp1461-r2-review-n0ydvjoi/lease-results.json. This is a successful overlap measurement against available refs, not live clearance."
+    },
+    {
+      "name": "known_live_lease_readback",
+      "status": "passed",
+      "command": "GitHub fetch_file ops/leases/wp1236-a-r9-g1-claude-20261120.yaml at ops/wp1236-r9-a-lease",
+      "exit_code": null,
+      "observed_result": "isError=false, blob=0e3e7b8e36ded4473e58474de72f0bff1136b979. Includes .claude/dev/ci_dang_ky_test.py; expiry 2026-11-22T15:35:00Z; no withdrawal field. B3 explicitly waits for expiration or proper withdrawal."
+    },
+    {
+      "name": "baseline_release_verify",
+      "status": "passed",
+      "command": "At isolated current master: python3 -B scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json",
+      "exit_code": 0,
+      "observed_result": "ok=true; expected_file_count=checked_file_count=185; failed=[]; extra_files=[]. Output: /tmp/wp1461-r2-review-n0ydvjoi/release-verify.json"
+    },
+    {
+      "name": "real_bundle_and_archive_binding",
+      "status": "passed",
+      "command": "python3 -B scripts/tl.py release-bundle --out /tmp/wp1461-r2-review-n0ydvjoi/baseline.zip --json; git archive HEAD -- <manifest paths plus RELEASE_MANIFEST.json>; Python ZIP/TAR member comparison",
+      "exit_code": 0,
+      "observed_result": "Bundle ok=true, file_count=185, reproducible=true, archive SHA-256=c3e9a44833ef302b2aae4f08e4a45a91aba4e72efa14b5787f545a5e733fd361. ZIP/archive each contain 186 files; path differences=0; byte differences=0. None of B3's 12 declared implementation paths is in the release manifest."
+    },
+    {
+      "name": "dirty_build_only_baseline",
+      "status": "passed",
+      "command": "Scratch-only harmless WORKING_METHOD.md edit; bash scripts/deploy-package.sh --no-test --out /tmp/wp1461-r2-review-n0ydvjoi/dirty-build.zip; compare member; restore scratch edit",
+      "exit_code": 0,
+      "observed_result": "rc 0; ZIP exists; member matches dirty working tree and differs from H. No push/Drive call. Scratch tracked bytes restored; this establishes baseline behavior, not a candidate implementation pass."
+    },
+    {
+      "name": "contract_feasibility_probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1461-r2-review-n0ydvjoi/probe_contracts.py",
+      "exit_code": 0,
+      "observed_result": "Measured mandatory dependency union=14 files against cap 12. Finite mode model: 24 cases, zero decision differences for timing-only read of M. Existing nhap_wd healthy and stale-attempt fixtures both return passed; B3 extra attempt comparison remains essential. Output SHA-256=8b31308929e803b056b184ebfef3dedcf40d4b395aecc8e1a5920c3c7e3191ad. Successful counterexample/model probes do not mean B3 tests passed."
+    },
+    {
+      "name": "candidate_and_windows_gates",
+      "status": "not_run",
+      "command": "B3 implementation tests/mutants, Windows PowerShell 5.1/7 parity, full hook suite, full selftest, CI/K7",
+      "exit_code": null,
+      "observed_result": "The reviewed object is an unimplemented spec; the new B3 files and B1 validator/fixture are not yet present on current master. No local PowerShell runtime is available. No workflow dispatch or LIVE action was performed."
+    },
+    {
+      "name": "ruff",
+      "status": "not_run",
+      "command": "Ruff pin/probe and bare implementation lint",
+      "exit_code": null,
+      "observed_result": "Reviewed diff is SPEC.md only. No implementation lint pass is asserted."
+    },
+    {
+      "name": "final_read_only_integrity",
+      "status": "passed",
+      "command": "git diff --check; git status --porcelain=v1 --untracked-files=all; git rev-parse HEAD HEAD^{tree}; sha256sum SPEC.md; scratch git status",
+      "exit_code": 0,
+      "observed_result": "Review checkout remains clean at the exact requested head/tree/hash; scratch tracked tree is restored. No commits, pushes, GitHub writes, workflow dispatches or subagents."
+    }
+  ],
+  "notes": "Independent round-2 spec review: 5 remaining findings in 5 cause classes (0 P0, 0 P1, 4 P2, 1 P3). Prior closure ledger: SPEC-01/02/03/04/05/06/07/08/10 closed; SPEC-09 partial; no prior finding silently dropped. Closure ratio for prior classes is 9/10; four new classes are reported separately as SPEC-11 through SPEC-14. All closures are specification-level and do not claim the future implementation passed. Reviewed tree=376cbde04aa1f8171c33a2ac5a3b122734cf6293. Feasibility checked against live-GitHub-confirmed master 0f9aa2a2cc697129e1f5be72feddf60986286865. Plan r4 owner decisions are preserved: no machine-granted waiver/authorization store reintroduced; emergency TTY plus hook ask and procedural AI non-use retain their stated limits; H strictly equals master; moving master blocks; CLAUDE.md is excluded; VM is parity-only; blocking activation is a later PR. The size exception is properly requested, not already granted. Waiting for B1 to land is justified by the shared registry/validator dependency, but the immutable baseline must be reconciled as SPEC-11 explains. Fresh full GitHub ref coverage failed, so the lease scan is a mirror snapshot plus independent readback of the known live holder; this report grants no lease clearance. Execution: openai_codex / codex_service / machine; Linux, Python 3.13.18, Git 2.43.0; workspace-write sandbox, delivered review repository kept read-only. The requested reviewer model/effort is gpt-6-astra/xhigh; served model/effort and launcher session identity were not independently measurable (KHONG_DO_DUOC) and are not inferred from GitHub identity. Used .agents/skills/cross-review/SKILL.md. No new model invocation was dispatched; this is supplied review round 2, and historical budget usage beyond the supplied record was not independently reconstructed. Scratch/evidence is confined to /tmp/wp1461-r2-review-n0ydvjoi plus REVIEW_OUT. No permission or additional authority is requested by this verdict."
+}

@@ -1,0 +1,1124 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1461",
+  "generation": 1,
+  "generation_basis": "Prospective g1 in the spec lease template; this is authorized independent spec review, not an active executor lease.",
+  "revision": 5,
+  "round": 5,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "session_id": "01a1fa7a-f5c0-7ab0-af6d-d0b0b64249f9",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "session_id": "01a1fa7a-f5c0-7ab0-af6d-d0b0b64249f9",
+    "observed_cli": "codex-cli 0.170.0",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "source": "Current run instructions, codex --version, CODEX_THREAD_ID. Requested model/effort are not asserted as measured."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2",
+  "reviewed_tree": "452ceecf8b2698edd4ec10593a8f8e041e9e1a96",
+  "reviewed_file_sha256": "b9003d6ae569636db25341cde3ee774db1d2d8ddca1180a1f6337edd78fa3976",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "changes_requested",
+  "assurance": "review_deferred",
+  "assurance_detail": "Completed independent read-only Codex spec review in a separate supplied context/checkout. No approval assurance is awarded because findings remain. No human audit, lease clearance, implementation acceptance, merge or deploy authority is claimed. Exact serving model/effort and executor session identity were not independently measured.",
+  "evidence_url": null,
+  "findings": [
+    {
+      "id": "WP1461-SPEC-17",
+      "class_slug": "a4-provenance-contract-incomplete",
+      "severity": "P2",
+      "location": "ops/specs/wp1461-r1/SPEC.md:67-72,108,113,128,143,162,211,226",
+      "claim": "The class-wide ordering repair still omits the input order for B1a latest-job selection. Distinct positive job IDs can share (name, run_attempt), so U2 passes. The pinned tieu_dung retains the first record at a tied maximum attempt. With a success record and a failure duplicate, reversing the REST job list changes vi_pham from C4 to C2+C4 and therefore the required K6 reason. B3 preserves page/item order, passes those jobs to the pinned consumer, and simultaneously requires the same complete reasons for every API order. The rejection decision remains khong_dat, but the frozen diagnostic/acceptance contract is not deterministic. This affects every job role, not only the collector. A4 and push run timestamp ties from SPEC-16 themselves are repaired.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1461-r5-review/probe_contracts.py",
+          "exit_code": 0,
+          "observed_output": "U2 unique_positive_ids=true in both directions; forward violations=[C4], K6_reason=luat_C:C4; reverse violations=[C2,C4], K6_reason=luat_C:C2+C4. All 11 job-role variants reproduce it. Existing 118 semantic fixtures have 0 order-sensitive cases; numeric-ID sorting changes 0/118 fixture outcomes."
+        },
+        {
+          "command": "sed -n '48,83p' /tmp/wp1461-r5-review/b1-command.py; sed -n '108,115p;128,144p;162p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_output": "Pinned consumer replaces moi[name] only for a strictly greater run_attempt; C4 rejects duplicate name/attempt pairs, but C2 and further checks still use the selected record. B3 K6 records all violated rule names; class J preserves API page/item order."
+        }
+      ],
+      "suggested_fix": {
+        "where": "B3 §4.0 and §4.2 K1-to-K6 adapter boundary, plus acceptance 4/19 and mutants 11. This is where B3 owns independently collected REST ordering; the pinned B1a contract must remain unchanged.",
+        "how": "Freeze a deterministic ordering of the complete, U2-valid jobs input before invoking the unchanged B1a consumer, for example ascending numeric ID. Continue to pass every record so C4 still rejects duplicate (name, attempt) pairs; do not deduplicate or change C1–C12. The executed probe script provides a reusable counterexample. Sorting was checked against all 118 current semantic fixtures with zero changed outcomes, but is a proposed adapter policy, not an implemented fix.",
+        "locking_test": "Add a case-owned test for same-name/same-attempt jobs with different IDs and opposite conclusions, both orders and across pages, covering collector, aggregate and shard roles. Assert identical complete violations, K6 reason, final state and zero pushes. A mutant removing the adapter ordering must die with that case’s own exception; retain the full 120/118 fixture contract.",
+        "may_spawn": "Sorting must not become deduplication, weaken C4, or select an older attempt. Define the direction explicitly so two implementations do not choose opposite tied records. Keep the approved B1a function/fixtures/schema hashes intact."
+      }
+    },
+    {
+      "id": "WP1461-SPEC-18",
+      "class_slug": "stale-mode-mutant-equivalent-under-pinned-oid",
+      "severity": "P2",
+      "location": "ops/specs/wp1461-r1/SPEC.md:115,128-144,218",
+      "claim": "Acceptance 11 again mandates killing a semantically equivalent aggregation mutant: counting khong_danh_gia as dat. Under §4.5 AND, dat is the identity. Replacing skipped children with dat only inside the fold, while retaining their recorded khong_danh_gia states and the reason filter, cannot change the result, reason or push count. Thus an n/n genuine-kill requirement is not achievable for that literal mutant. Changing the recorded status to dat is a different, observable mutant, but the spec does not distinguish the two. This is the same equivalent-mutant acceptance mechanism as SPEC-12; the old early-read mode mutant stays correctly excluded.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1461-r5-review/probe_contracts.py",
+          "exit_code": 0,
+          "observed_output": "Exhaustive vectors of length 1–8 over dat/khong_dat/khong_do_duoc/khong_danh_gia: 87,380 vectors; 0 output differences between excluding skipped values and replacing them with dat in the fold. Recorded states remain unchanged."
+        },
+        {
+          "command": "sed -n '115p;128,144p;218p' ops/specs/wp1461-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_output": "The fold excludes khong_danh_gia; reason selection excludes it separately; acceptance 11 requires a dedicated mutant “phép con khong_danh_gia bị tính là dat” and n/n real kills. The same paragraph explicitly excludes the older equivalent mode-read mutant."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Acceptance 11, beside the two khong_danh_gia mutants, and the exact-state assertions in acceptance 4. Repair the test contract rather than introducing artificial product behavior to kill an identity transformation.",
+        "how": "Explicitly exclude the fold-only identity mutant as equivalent, as already done for early mode reading. If the intended defect is false reporting, define the required mutant as replacing an emitted child state khong_danh_gia with dat. Keep the khong_dat fold mutant, which is distinguishable. The executed probe script is a runnable equivalence measurement.",
+        "locking_test": "Use a K5 transport-failure case with K7 skipped. A case-owned exception must detect changing K7’s recorded status to dat while the overall state remains khong_do_duoc. Mutate the recorded status, not merely the fold input; unrelated exceptions must still count as false credit.",
+        "may_spawn": "Do not remove the skipped-state assertions, count equivalent mutants as killed, or turn skipped work into a success claim. Updating the required mutant inventory must preserve the intended reporting property."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "b1-consumer-contract-mismatch",
+      "finding_ids": [
+        "WP1461-SPEC-01",
+        "WP1461-SPEC-15"
+      ],
+      "manifestations": [
+        {
+          "description": "GHIM-B1A spec/schema/fixture/command hashes match; 120 cases, 118 semantic, 78 valid/42 invalid, 56 vt predicates plus C10. K3 independently supplies job_ky_vong; K5 supplies archive hash and member name/hash/JSON; K6/K7 preserve the C8/C9/C11/C12 groups and C10 warning. No older receipt fields remain normative. Ordering at the adapter boundary is tracked under SPEC-17, not hidden as a producer-contract rewrite.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Keep one authoritative B1 pin and synchronize every consumer field and baseline/lease condition.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "GHIM-B1A spec/schema/fixture/command hashes match; 120 cases, 118 semantic, 78 valid/42 invalid, 56 vt predicates plus C10. K3 independently supplies job_ky_vong; K5 supplies archive hash and member name/hash/JSON; K6/K7 preserve the C8/C9/C11/C12 groups and C10 warning. No older receipt fields remain normative. Ordering at the adapter boundary is tracked under SPEC-17, not hidden as a producer-contract rewrite.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-01"
+          ]
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "a3e91894d2a433777eee35c058830577213619d0",
+          "finding_ids": [
+            "WP1461-SPEC-15"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "a4-provenance-contract-incomplete",
+      "finding_ids": [
+        "WP1461-SPEC-02",
+        "WP1461-SPEC-16",
+        "WP1461-SPEC-17"
+      ],
+      "manifestations": [
+        {
+          "description": "A4 run timestamp tie",
+          "status": "ĐÃ VÁ THẬT"
+        },
+        {
+          "description": "CI push run timestamp tie",
+          "status": "ĐÃ VÁ THẬT"
+        },
+        {
+          "description": "Same-name/same-attempt REST job tie across 11 roles",
+          "status": "VÁ HỜ",
+          "finding_id": "WP1461-SPEC-17"
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Freeze a deterministic ordering of the complete, U2-valid jobs input before invoking the unchanged B1a consumer, for example ascending numeric ID. Continue to pass every record so C4 still rejects duplicate (name, attempt) pairs; do not deduplicate or change C1–C12. The executed probe script provides a reusable counterexample. Sorting was checked against all 118 current semantic fixtures with zero changed outcomes, but is a proposed adapter policy, not an implemented fix.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r5-review/probe_contracts.py",
+        "result": "U3 resolves the two original run-selector ties (ID 102 wins in both orders, with reversed validity controls). Whole-candidate scan finds an additional latest-job tie in the imported consumer boundary; 11/11 role variants change K6 reasons. SPEC-17 remains open.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-02"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "artifact-transport-response-shape",
+      "finding_ids": [
+        "WP1461-SPEC-03"
+      ],
+      "manifestations": [
+        {
+          "description": "§5 separates authenticated JSON J, redirect R and unauthenticated binary S; K2/K5/K8 own digest/ZIP classification. Acceptance 7/11 retain real-ZIP positives, truncation/header/digest negatives and credential-leak mutants.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Keep separate response contracts for GitHub JSON, redirect and storage bytes.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "§5 separates authenticated JSON J, redirect R and unauthenticated binary S; K2/K5/K8 own digest/ZIP classification. Acceptance 7/11 retain real-ZIP positives, truncation/header/digest negatives and credential-leak mutants.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-03"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "build-only-compatibility-conflict",
+      "finding_ids": [
+        "WP1461-SPEC-04"
+      ],
+      "manifestations": [
+        {
+          "description": "I2 and steps A/B remain diagnostic-only in build-only. Acceptance 2 freezes clean/dirty and no-test A/B; archive/fetch failures are swallowed. Real baseline bundle was checked, but future B3 A/B is not claimed.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Keep new enforcement inside push while preserving build-only outputs/status.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "I2 and steps A/B remain diagnostic-only in build-only. Acceptance 2 freezes clean/dirty and no-test A/B; archive/fetch failures are swallowed. Real baseline bundle was checked, but future B3 A/B is not claimed.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-04"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "master-ref-freshness-at-push",
+      "finding_ids": [
+        "WP1461-SPEC-05"
+      ],
+      "manifestations": [
+        {
+          "description": "A pins H=M; C/D refetch and require identical M, including emergency. Acceptance 3/11 retain forward/backward movement and changed-mode tests; D follows C.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Pin the release ref once and verify the same OID at every pre-push boundary.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "A pins H=M; C/D refetch and require identical M, including emergency. Acceptance 3/11 retain forward/backward movement and changed-mode tests; D follows C.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-05"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "sensitive-packet-size-authority",
+      "finding_ids": [
+        "WP1461-SPEC-06"
+      ],
+      "manifestations": [
+        {
+          "description": "R88 size_rule applies to delivered candidate; default 6 files/+450 lines, measured numstat and owner E2 before review/push. Eleven expected changed paths and a certain stop are explicitly disclosed. No estimated exception is required; sixth author revision requires separate authority.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Retain the default cap and measured owner-approved exception; known eventual oversize is a scheduled checkpoint, not authority to exceed.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "R88 size_rule applies to delivered candidate; default 6 files/+450 lines, measured numstat and owner E2 before review/push. Eleven expected changed paths and a certain stop are explicitly disclosed. No estimated exception is required; sixth author revision requires separate authority.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-06"
+          ]
+        },
+        {
+          "round": 3,
+          "reviewed_sha": "a3e91894d2a433777eee35c058830577213619d0",
+          "finding_ids": [
+            "WP1461-SPEC-06"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "lease-outside-discovery-namespace",
+      "finding_ids": [
+        "WP1461-SPEC-07"
+      ],
+      "manifestations": [
+        {
+          "description": "Lease remains under ops/leases and admission requires per-path discovery. Scanner found the already-disclosed wp1236 registry overlap. Namespace defect is closed; complete fresh live lease clearance is not asserted.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Publish the authoritative lease in the scanner namespace and verify per-path discovery.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "Lease remains under ops/leases and admission requires per-path discovery. Scanner found the already-disclosed wp1236 registry overlap. Namespace defect is closed; complete fresh live lease clearance is not asserted.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-07"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "windows-preflight-parity-conflict",
+      "finding_ids": [
+        "WP1461-SPEC-08"
+      ],
+      "manifestations": [
+        {
+          "description": "§3 retains push-only Windows exit 1→7 changes and captures H after Pull. Current master block has the two expected exits. Build-only exit 1 remains unchanged; acceptance 3 distinguishes successful/failed Pull.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Align push preflight ordering and capture the post-Pull candidate.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "§3 retains push-only Windows exit 1→7 changes and captures H after Pull. Current master block has the two expected exits. Build-only exit 1 remains unchanged; acceptance 3 distinguishes successful/failed Pull.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-08"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "required-parity-cases-may-be-skipped",
+      "finding_ids": [
+        "WP1461-SPEC-09"
+      ],
+      "manifestations": [
+        {
+          "description": "Acceptance 13 requires desktop/5.1, desktop/7, vm/5.1, vm/7, every PB/DP pair measured or explicitly owner-waived. Duplicate results, overlapping waivers, absent pairs and skipped cases fail; waivers never count as passes.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Use explicit required runtime sets and separate owner waivers from measured passes.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "Acceptance 13 requires desktop/5.1, desktop/7, vm/5.1, vm/7, every PB/DP pair measured or explicitly owner-waived. Duplicate results, overlapping waivers, absent pairs and skipped cases fail; waivers never count as passes.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-09"
+          ]
+        },
+        {
+          "round": 2,
+          "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+          "finding_ids": [
+            "WP1461-SPEC-09"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "wrapper-exit-code-documentation-debt",
+      "finding_ids": [
+        "WP1461-SPEC-10"
+      ],
+      "manifestations": [
+        {
+          "description": "Wrapper rem-only edits and byte-preservation of executable lines remain in acceptance 15; current wrapper forwards ERRORLEVEL. No new executable wrapper changes are authorized.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Update wrapper return-code documentation without changing execution.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "Wrapper rem-only edits and byte-preservation of executable lines remain in acceptance 15; current wrapper forwards ERRORLEVEL. No new executable wrapper changes are authorized.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 1,
+          "reviewed_sha": "b8b408d86b3f92a5ea3ae3596ef612481b940b27",
+          "finding_ids": [
+            "WP1461-SPEC-10"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "acceptance-baseline-precedes-required-dependency",
+      "finding_ids": [
+        "WP1461-SPEC-11"
+      ],
+      "manifestations": [
+        {
+          "description": "B must be installed identically by Mission/lease after compatible B1a lands; schema/fixture/workflow/job/dependency checks are explicit. All diff, size, Ruff and A/B measurements use B. No implementation baseline is silently taken from the drafting SHA.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Use one durable post-dependency acceptance baseline for every whole-diff measurement.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "B must be installed identically by Mission/lease after compatible B1a lands; schema/fixture/workflow/job/dependency checks are explicit. All diff, size, Ruff and A/B measurements use B. No implementation baseline is silently taken from the drafting SHA.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 2,
+          "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+          "finding_ids": [
+            "WP1461-SPEC-11"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "stale-mode-mutant-equivalent-under-pinned-oid",
+      "finding_ids": [
+        "WP1461-SPEC-12",
+        "WP1461-SPEC-18"
+      ],
+      "manifestations": [
+        {
+          "description": "Early same-M mode-read mutant",
+          "status": "ĐÃ VÁ THẬT"
+        },
+        {
+          "description": "Skipped→dat fold-only mutant",
+          "status": "VÁ SINH LỖI MỚI",
+          "finding_id": "WP1461-SPEC-18"
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Explicitly exclude the fold-only identity mutant as equivalent, as already done for early mode reading. If the intended defect is false reporting, define the required mutant as replacing an emitted child state khong_danh_gia with dat. Keep the khong_dat fold mutant, which is distinguishable. The executed probe script is a runnable equivalence measurement.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1461-r5-review/probe_contracts.py",
+        "result": "The original timing-only mode-read mutant stays excluded, but acceptance 11 introduces the fold-only skipped→dat identity mutant. 87,380 vectors give zero differences. SPEC-18 reopens the same cause class without changing its slug.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 2,
+          "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+          "finding_ids": [
+            "WP1461-SPEC-12"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "three-state-composition-has-no-frozen-oracle",
+      "finding_ids": [
+        "WP1461-SPEC-13"
+      ],
+      "manifestations": [
+        {
+          "description": "§4.5 preserves false-dominant AND, true-dominant audit OR, incomplete discovery rules and mixed-state expected outcomes. The mathematical fold is defined; equivalent-mutation coverage is separately SPEC-18 and adapter ordering separately SPEC-17.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Keep explicit composition truth tables and deterministic reason selection.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "§4.5 preserves false-dominant AND, true-dominant audit OR, incomplete discovery rules and mixed-state expected outcomes. The mathematical fold is defined; equivalent-mutation coverage is separately SPEC-18 and adapter ordering separately SPEC-17.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 2,
+          "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+          "finding_ids": [
+            "WP1461-SPEC-13"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "journal-attempt-cardinality-conflict",
+      "finding_ids": [
+        "WP1461-SPEC-14"
+      ],
+      "manifestations": [
+        {
+          "description": "Step E, §6 and acceptance 1/19(f) agree on phan_lop then ket_cuc under one ID; completed pushes count once, orphans are dang_do, duplicates fail. This is spec closure, not a durability test of future code.",
+          "status": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        {
+          "round": 4,
+          "sha": "bec7de7c59087891197156975f21107383a36a41"
+        },
+        {
+          "round": 5,
+          "sha": "4a5edeafb97c5afb10b9949847141cc9e4eb2fc2"
+        }
+      ],
+      "common_fix": "Use a consistent two-event attempt model and count completed joins only.",
+      "closing_check": {
+        "command": "sed -n '1,273p' ops/specs/wp1461-r1/SPEC.md; git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; inspect /tmp/wp1461-r5-review/{hashes,adr,leases,code-binding,release-commands}.json",
+        "result": "Step E, §6 and acceptance 1/19(f) agree on phan_lop then ket_cuc under one ID; completed pushes count once, orphans are dang_do, duplicates fail. This is spec closure, not a durability test of future code.",
+        "unmeasured": "B3 runtime implementation and native Windows acceptance do not exist in this spec candidate."
+      },
+      "historical_sources": [
+        {
+          "round": 2,
+          "reviewed_sha": "b031bebce687fdb669c250b6c55280b9920f526d",
+          "finding_ids": [
+            "WP1461-SPEC-14"
+          ]
+        }
+      ]
+    }
+  ],
+  "class_counts": {
+    "tracked_classes": 14,
+    "open_classes": 2,
+    "closed_classes": 12,
+    "table_manifestations": 17,
+    "open_manifestations": 2,
+    "closed_manifestations": 15,
+    "unit": "A manifestation is a distinct spec mechanism/location; the 11 job-role counterexamples parameterize one manifestation."
+  },
+  "class_mapping": {
+    "split_or_merge": [],
+    "rule": "All historical slugs retained. SPEC-17 extends the existing selection/order cause; SPEC-18 reopens the existing semantically-equivalent-mutant cause. No renamed or merged class."
+  },
+  "prior_findings_check": [
+    {
+      "id": "WP1461-SPEC-16",
+      "class_slug": "a4-provenance-contract-incomplete",
+      "status": "VÁ HỜ",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1461-r5-review/probe_contracts.py",
+        "exit_code": 0,
+        "observed_output": "Original A4/push ties now deterministically choose 102 in both API orders; swapped conclusions produce the specified opposite states. Broader class remains open: all 11 duplicate latest-job role variants yield C4 versus C2+C4. U2 ID uniqueness does not reject those pairs."
+      },
+      "unmeasured": "No B3 implementation exists; this checks the frozen rules and actual pinned B1a consumer."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "b1-consumer-contract-mismatch",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "GHIM-B1A spec/schema/fixture/command hashes match; 120 cases, 118 semantic, 78 valid/42 invalid, 56 vt predicates plus C10. K3 independently supplies job_ky_vong; K5 supplies archive hash and member name/hash/JSON; K6/K7 preserve the C8/C9/C11/C12 groups and C10 warning. No older receipt fields remain normative. Ordering at the adapter boundary is tracked under SPEC-17, not hidden as a producer-contract rewrite.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "a4-provenance-contract-incomplete",
+      "status": "VÁ HỜ",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "U3 resolves the two original run-selector ties (ID 102 wins in both orders, with reversed validity controls). Whole-candidate scan finds an additional latest-job tie in the imported consumer boundary; 11/11 role variants change K6 reasons. SPEC-17 remains open.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": [
+        "Class remains open; no corrected B3 specification/implementation measured."
+      ]
+    },
+    {
+      "class_slug": "artifact-transport-response-shape",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "§5 separates authenticated JSON J, redirect R and unauthenticated binary S; K2/K5/K8 own digest/ZIP classification. Acceptance 7/11 retain real-ZIP positives, truncation/header/digest negatives and credential-leak mutants.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "build-only-compatibility-conflict",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "I2 and steps A/B remain diagnostic-only in build-only. Acceptance 2 freezes clean/dirty and no-test A/B; archive/fetch failures are swallowed. Real baseline bundle was checked, but future B3 A/B is not claimed.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "master-ref-freshness-at-push",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "A pins H=M; C/D refetch and require identical M, including emergency. Acceptance 3/11 retain forward/backward movement and changed-mode tests; D follows C.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "sensitive-packet-size-authority",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "R88 size_rule applies to delivered candidate; default 6 files/+450 lines, measured numstat and owner E2 before review/push. Eleven expected changed paths and a certain stop are explicitly disclosed. No estimated exception is required; sixth author revision requires separate authority.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "lease-outside-discovery-namespace",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "Lease remains under ops/leases and admission requires per-path discovery. Scanner found the already-disclosed wp1236 registry overlap. Namespace defect is closed; complete fresh live lease clearance is not asserted.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "windows-preflight-parity-conflict",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "§3 retains push-only Windows exit 1→7 changes and captures H after Pull. Current master block has the two expected exits. Build-only exit 1 remains unchanged; acceptance 3 distinguishes successful/failed Pull.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "required-parity-cases-may-be-skipped",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "Acceptance 13 requires desktop/5.1, desktop/7, vm/5.1, vm/7, every PB/DP pair measured or explicitly owner-waived. Duplicate results, overlapping waivers, absent pairs and skipped cases fail; waivers never count as passes.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "wrapper-exit-code-documentation-debt",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "Wrapper rem-only edits and byte-preservation of executable lines remain in acceptance 15; current wrapper forwards ERRORLEVEL. No new executable wrapper changes are authorized.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "acceptance-baseline-precedes-required-dependency",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "B must be installed identically by Mission/lease after compatible B1a lands; schema/fixture/workflow/job/dependency checks are explicit. All diff, size, Ruff and A/B measurements use B. No implementation baseline is silently taken from the drafting SHA.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "stale-mode-mutant-equivalent-under-pinned-oid",
+      "status": "VÁ SINH LỖI MỚI",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "The original timing-only mode-read mutant stays excluded, but acceptance 11 introduces the fold-only skipped→dat identity mutant. 87,380 vectors give zero differences. SPEC-18 reopens the same cause class without changing its slug.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": [
+        "Class remains open; no corrected B3 specification/implementation measured."
+      ]
+    },
+    {
+      "class_slug": "three-state-composition-has-no-frozen-oracle",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "§4.5 preserves false-dominant AND, true-dominant audit OR, incomplete discovery rules and mixed-state expected outcomes. The mathematical fold is defined; equivalent-mutation coverage is separately SPEC-18 and adapter ordering separately SPEC-17.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    },
+    {
+      "class_slug": "journal-attempt-cardinality-conflict",
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "bec7de7c59087891197156975f21107383a36a41",
+      "evidence": "Step E, §6 and acceptance 1/19(f) agree on phan_lop then ket_cuc under one ID; completed pushes count once, orphans are dang_do, duplicates fail. This is spec closure, not a durability test of future code.",
+      "scope": "frozen specification only",
+      "chua_do_duoc": []
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": "Frozen object and runtime",
+      "hypothesis": "Wrong/stale candidate could invalidate the review",
+      "command": "git rev-parse HEAD HEAD^{tree}; sha256sum ops/specs/wp1461-r1/SPEC.md; compare snapshot-start.json and snapshot-end.json",
+      "real_output": "HEAD/hash match assignment; tree 452ceecf8b2698edd4ec10593a8f8e041e9e1a96; tracked/index/untracked-file/ignored-file snapshots equal. Empty .codex/ observed at final status; initial empty-directory state was not measured.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "B1a contract remap",
+      "hypothesis": "New consumer shape or hashes could diverge from approved B1a",
+      "command": "git show d1b08c2:ops/specs/wp1460-r1/SPEC.md; extract Lệnh kiểm; SHA-256 three artifacts; execute b1-command.py",
+      "real_output": "All four hashes match; reviewed B1a round 7 approve/0 findings. job_ky_vong, tai_ve, C8/C9/C11/C12 and 12-rule grouping agree.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Total-order cause scan",
+      "hypothesis": "The 17-place repair could miss a selector inside a reused dependency",
+      "command": "python3 -B /tmp/wp1461-r5-review/probe_contracts.py",
+      "real_output": "Run ties fixed. All 11 job-role duplicate-pair probes change K6 reason; existing 118 semantic fixtures reveal none.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Mutation measurability",
+      "hypothesis": "A required mutant may be equivalent under the frozen algebra",
+      "command": "python3 -B /tmp/wp1461-r5-review/probe_contracts.py",
+      "real_output": "87,380 skipped→dat fold vectors; zero output differences.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Plan and owner fidelity",
+      "hypothesis": "Deviations 7–9 may restore removed mechanisms or contradict Q7",
+      "command": "Read plan §§B1–B3 and Q7; inspect mission-r84.json owner_decisions.Q7, mission-r87.json b1a_r87, mission-r88.json; SPEC deviations 7–9",
+      "real_output": "7 maps the owner-approved B1a split to ok:true and retains B1b as separate work. 8 explicitly defers advisory heartbeat selection/age to post-B2 work, never granting deploy authority. 9 selects newest master push without fallback. TTY emergency/ask/procedural boundary and warning-only landing remain. These are proposed scope deltas pending the required owner spec-hash/Mission installation, not already completed plan outcomes.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Budget and activation",
+      "hypothesis": "ADR OID or Mission limits may not activate the declared budget",
+      "command": "git cat-file -e ADR_OID:path and ADR_OID^1:path; git rev-list --first-parent origin/master; read R88 provider_budgets",
+      "real_output": "Both ADR activation triples match: rc0/rc128/on first-parent. R88 author5/spec-review6/code-review3/connector2; measured-size exception rule preserved.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Current code and package feasibility",
+      "hypothesis": "Insertion points or package binding may require forbidden changes",
+      "command": "Compare eleven touched/reference blobs with origin/master; release-verify; release-bundle; ZIP versus git archive",
+      "real_output": "11/11 blobs unchanged since drafting base; verify 185/185; real ZIP 186 members, zero byte mismatches, manifest set equality true.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "A4 importer reuse",
+      "hypothesis": "Unmodified importer may not expose the metadata B3 requires",
+      "command": "Run c53_wd_passed, c54_wd_not_measured, c55_wd_failed, c58_thu_wd_run; thu_wd stale-attempt probe",
+      "real_output": "4/4 pass. Valid importer result contains oid/blob/sha256/artifact_id/artifact_sha256. Stale attempt still passes importer, so B3’s explicit additional check remains necessary and specified.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Lease/write-set overlap",
+      "hypothesis": "Unseen live refs may hide another writer",
+      "command": "git fetch source heads/remotes into scratch; git ls-remote --heads https://github.com/ducthangho/tra-luat; python3 -B ops/lease_publish.py ai-dang-giu <each of 12 paths>",
+      "real_output": "Available refs: 11 paths rc0/NGƯỜI_GIỮ 0; registry rc11/holder wp1236-a-r9-g1-claude-20261120. B1a shares registry and is ordered before B3; B4 has no delivery-path intersection. Live ls-remote rc128 proxy unreachable; known five refs match connector readback, but complete live-ref freshness remains unmeasured.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "direction": "Compatibility/security/native acceptance",
+      "hypothesis": "New flags may silently weaken legacy behavior or skip required runtimes",
+      "command": "Read current deploy scripts, guard, hook and registration; compare SPEC I1/I2, §§3/5/7/8 and acceptance 2/3/7/9/10/13/15–18",
+      "real_output": "A/B, stateful fake push counters, both Windows versions on both hosts, token non-forwarding, bounded transport and case-owned mutation exceptions are explicitly required. No seam or machine-granted exception restored. Runtime proof awaits implementation.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Candidate SHA-256",
+      "candidate": "b9003d6a…3976",
+      "measured": "b9003d6ae569636db25341cde3ee774db1d2d8ddca1180a1f6337edd78fa3976",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Plan SHA-256",
+      "candidate": "0f287ce4…",
+      "measured": "0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "B1a spec/hash pins",
+      "candidate": "4 hashes match",
+      "measured": "See hashes.json: spec d53341fb…, schema 844b5218…, fixture ce859573…, command d9c78e70…",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Pinned command size",
+      "candidate": "254 lines / 14992 bytes",
+      "measured": "254 / 14992",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Fixture cardinality",
+      "candidate": "120 total / 118 semantic / 78 valid / 42 invalid",
+      "measured": "120 / 118 / 78 / 42",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Consumer predicates",
+      "candidate": "56 vt + C10 = 57",
+      "measured": "56 distinct vt names + C10 = 57; 12 rules covered",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Expected job fixture",
+      "candidate": "11",
+      "measured": "11; every role reproduced duplicate-pair order sensitivity",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Delivery paths",
+      "candidate": "11 intended changes + 1 guard unchanged",
+      "measured": "12 listed paths; all current existing delivery paths outside manifest",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Manifest and ZIP",
+      "candidate": "185 manifest entries",
+      "measured": "185 entries, no duplicate paths, no self-entry; ZIP 186 members; 186 match Git bytes",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Current-source line stability",
+      "candidate": "0 changed referenced files since 0f9aa2a",
+      "measured": "0/11 changed at master 48d372e",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Size/default budgets",
+      "candidate": "6 files / +450; author5, spec review6",
+      "measured": "ADR/R88 match; candidate implementation numstat not yet available",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Hook historical timing",
+      "candidate": "1009s full / 26s light",
+      "measured": "BASELINE.json M2b gate-registry Ubuntu: medians 1009.181 and 25.953; rounded values match. Historical record readback, not a fresh timing run.",
+      "matches": true,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "New ordering acceptance",
+      "candidate": "Reason independent of API order",
+      "measured": "C4 versus C2+C4 for 11/11 duplicated role variants",
+      "matches": false,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Skipped→dat fold mutant",
+      "candidate": "Dedicated genuine kill required",
+      "measured": "0 differences / 87380 vectors",
+      "matches": false,
+      "evidence_directory": "/tmp/wp1461-r5-review"
+    },
+    {
+      "claim": "Pinned B1a fixture positive evidence",
+      "candidate": "480/480 and TONG DAT",
+      "measured": "FIXTURE: 480/480 phep kiem dung ky vong · hinh 120 · ngu nghia 118 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nTONG: DAT",
+      "matches": true,
+      "command": "python3 -I -B /tmp/wp1461-r5-review/b1-command.py /tmp/wp1461-r5-review/hop_dong",
+      "exit_code": 0
+    }
+  ],
+  "tests": [
+    {
+      "name": "exact_object_and_read_only_snapshot",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; git diff --binary; git diff --cached --binary; git ls-files --others [--ignored] --exclude-standard -z; SHA-256 bytes",
+      "exit_code": 0,
+      "observed_output": "Assignment SHA and hash match; start/end tracked diff, index, untracked-file list, ignored-file list and spec bytes match. Final porcelain additionally reports an empty .codex/ directory: recursive inspection finds zero entries, and git ls-files --others --ignored returns zero files. Initial empty-directory existence was not separately snapshotted, so directory-level immutability is not asserted. Snapshot equality does not prove absence of every transient write. Original source /home/user/tra-luat was read for Git objects/refs but not fully byte-snapshotted."
+    },
+    {
+      "name": "known_live_ref_readback",
+      "status": "passed",
+      "command": "GitHub connector fetch_commit(master, ops/wp1460-r1, ops/wp1461-r1, ops/wp1462-r1, ops/wp1172-plan-r4)",
+      "exit_code": null,
+      "observed_output": "isError=false; refs respectively 48d372e14f190dae83a75ccbca8ee9a0b25635c5, 163ece8087bf38f864e49d59206af937b2421f47, 4a5edeafb97c5afb10b9949847141cc9e4eb2fc2, bbc2ba1ee9628be95dbf92f6f34c7a97a99966f2, c49b7bf992420231e1cbb402cdd9243c0d21eaee. Connector has no process exit code."
+    },
+    {
+      "name": "complete_live_ref_freshness",
+      "status": "failed",
+      "command": "git ls-remote --heads https://github.com/ducthangho/tra-luat; git fetch https://github.com/ducthangho/tra-luat +refs/heads/*:refs/remotes/live/*",
+      "exit_code": 128,
+      "observed_output": "Configured proxy 127.0.0.1:36011 unreachable. No complete fresh-ref or lease-clearance claim."
+    },
+    {
+      "name": "available_ref_lease_scan",
+      "status": "passed",
+      "command": "In scratch: fetch /home/user/tra-luat heads and origin remote refs separately, then python3 -B ops/lease_publish.py ai-dang-giu <each delivery path>",
+      "exit_code": 0,
+      "observed_output": "Scan completed for 12 paths; per-command RCs in leases.json: eleven rc0 and one rc11, the expected wp1236 registry holder. RC11 is positive conflict evidence, not a clearance pass. Initial combined refspec attempt failed because two namespaces mapped the same destination; sequential fetches resolved scratch setup without touching review checkout."
+    },
+    {
+      "name": "ADR_activation_and_budget",
+      "status": "passed",
+      "command": "cat-file/rev-list checks recorded in adr.json; JSON inspection of R86/R87/R88",
+      "exit_code": 0,
+      "observed_output": "ADR0053 and ADR0055 each rc0 at activation / rc128 at first parent, both on full master first-parent. Exactly one ADR0055 declaration, none for ADR0052. R88 governs current budget; no estimated nang_tran required."
+    },
+    {
+      "name": "contract_hashes_and_approved_B1a",
+      "status": "passed",
+      "command": "Extract exact B1a spec/schema/fixture/command via git show d1b08c2; SHA-256; read review7 receipt",
+      "exit_code": 0,
+      "observed_output": "All assigned hashes and 254-line/14992-byte command match. B1a review7: approve, zero findings, reviewed_sha=d1b08c219227d4b8925702029cd20d4e0febed54."
+    },
+    {
+      "name": "class_counterexamples",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1461-r5-review/probe_contracts.py",
+      "exit_code": 0,
+      "observed_output": "Measurement script completes normally; spec requirements fail: 11 job-role reason-order counterexamples, and fold-only mutant has zero distinguishing outcomes in 87380 vectors. Existing 118 semantic fixtures do not expose the job tie; numeric-ID input ordering preserves their outputs. These are spec countermodels, not B3 implementation test failures."
+    },
+    {
+      "name": "release_verify",
+      "status": "passed",
+      "command": "python3 -B scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json",
+      "exit_code": 0,
+      "observed_output": "{\"ok\": true, \"expected_file_count\": 185, \"checked_file_count\": 185}"
+    },
+    {
+      "name": "release_bundle",
+      "status": "passed",
+      "command": "python3 -B scripts/tl.py release-bundle --out /tmp/wp1461-r5-review/verified-bundle.zip --json",
+      "exit_code": 0,
+      "observed_output": "{\"ok\": true, \"file_count\": 185, \"archive_sha256\": \"c3e9a44833ef302b2aae4f08e4a45a91aba4e72efa14b5787f545a5e733fd361\", \"reproducible\": true}"
+    },
+    {
+      "name": "git_archive_byte_binding",
+      "status": "passed",
+      "command": "Python compare /tmp/wp1461-r5-review/baseline.zip with git archive origin/master and RELEASE_MANIFEST.json",
+      "exit_code": 0,
+      "observed_output": "186 ZIP members; all 186 byte-identical to Git; Z minus manifest equals F minus manifest; 185 manifest entries."
+    },
+    {
+      "name": "A4_importer_targeted_cases",
+      "status": "passed",
+      "command": "Import scratch ops/ci_provenance_test.py with python3 -B; run c53/c54/c55/c58 and thu_wd probes",
+      "exit_code": 0,
+      "observed_output": "4/4 cases pass; exact five output fields available; stale attempt requires the separately specified B3 check."
+    },
+    {
+      "name": "ruff_pin_probe_contract",
+      "status": "passed",
+      "command": "python3 -B: runpy.run_path(scratch/.claude/dev/ci_dang_ky_test.py); loi_ruff_ci()",
+      "exit_code": 0,
+      "observed_output": "RUFF_CONTRACT 3 []; checks workflow pin/probe only, not bare Ruff lint."
+    },
+    {
+      "name": "future_B3_runtime_and_native_gates",
+      "status": "not_run",
+      "command": "B3 implementation tests/mutants, A/B, full hook/selftest, Windows parity, CI/K7 and live deploy-host capability",
+      "exit_code": null,
+      "observed_output": "Spec-only candidate; dependent B1a implementation/baseline B and B3 code not present. No workflow dispatch, LIVE, Windows access or deployment. Bare changed-code Ruff lint not run: no product code diff."
+    },
+    {
+      "name": "B1a_frozen_fixture_execution",
+      "status": "passed",
+      "command": "python3 -I -B /tmp/wp1461-r5-review/b1-command.py /tmp/wp1461-r5-review/hop_dong",
+      "exit_code": 0,
+      "observed_output": "FIXTURE: 480/480 phep kiem dung ky vong · hinh 120 · ngu nghia 118 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nTONG: DAT\n"
+    }
+  ],
+  "notes": "Two P2 findings, zero P0/P1/P3. Revision 5 is the last authorized author revision; this review does not authorize a sixth. The original two run-tie instances are repaired, but their cause class is not closed. Findings cover the whole candidate and preserve prior slugs. All scratch is under /tmp/wp1461-r5-review; no reviewed-repository edits/commits/pushes, GitHub writes, workflow dispatch, LIVE calls or subagents. The supplied checkout and original source were only read; scratch refs/checkout were fetched/configured for measurement. No current B3 runtime, actual deploy-host endpoint capability, Windows parity or future implementation numstat is claimed.",
+  "environment": {
+    "os": "Linux",
+    "python": "3.13.18",
+    "git": "2.43.0",
+    "jsonschema": "4.26.0",
+    "PyYAML": "6.0.3",
+    "sandbox": "workspace-write; supplied .git/.agents/.codex metadata read-only; all requested writes confined to /tmp and REVIEW_OUT",
+    "capability_limitations": [
+      "GitHub direct Git transport unavailable through configured proxy",
+      "Exact serving model/effort not independently measurable",
+      "codex --version rc0 warned that PATH aliases could not be created on read-only filesystem; no permission bypass attempted",
+      "No Windows runtime or real deploy-host capability measurement"
+    ]
+  },
+  "supplemental_mutant_log": {
+    "command": "python3 -I -B /tmp/wp1461-r5-review/b1-command.py /tmp/wp1461-r5-review/hop_dong --dot-bien",
+    "output": "FIXTURE: 480/480 phep kiem dung ky vong · hinh 120 · ngu nghia 118 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\nDOT BIEN: giet 249/249 · vi tu 57 · noi long schema 192\nTONG: DAT",
+    "limitation": "Original shell invocation followed Python with tail; the Python process exit was not separately preserved. Positive output is reported, but this is not asserted as an independently captured child-exit receipt."
+  },
+  "evidence_directory": "/tmp/wp1461-r5-review"
+}

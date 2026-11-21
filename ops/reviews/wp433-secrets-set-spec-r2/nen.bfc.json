@@ -1,0 +1,172 @@
+{
+  "bundle_test_ids": [
+    "wp1030_pkg_secret_scan_duoi_la",
+    "wp1099_nlm_nap_lai",
+    "wp1121_doc_claims_xoa",
+    "wp1134_changelog_d_ngoai_goi",
+    "wp1326_doc_claims_dau_cham",
+    "wp433_bundled_tach_manh",
+    "wp433_gws_cred_dich_ngoai_kho",
+    "wp433_gws_cred_dich_ngoai_kho_b",
+    "wp433_gws_cred_no",
+    "wp433_gws_cred_win_duong",
+    "wp433_gws_cred_win_reparse",
+    "wp433_nlm_gws_dich_ngoai_kho",
+    "wp45_fragment_canary",
+    "wp47_generated_bundle_staleness",
+    "wp49_eol_policy_index_blobs",
+    "wp725_huong_dan_nlm",
+    "wp726_script_nlm_canary",
+    "wp727_tl_gws_refresh",
+    "wp88_worktree_recovery"
+  ],
+  "case_count": 19,
+  "cases": [
+    {
+      "error": null,
+      "name": "wp1030_pkg_secret_scan_duoi_la.py",
+      "ok": true,
+      "test_id": "wp1030_pkg_secret_scan_duoi_la"
+    },
+    {
+      "error": null,
+      "name": "wp1099_nlm_nap_lai.py",
+      "ok": true,
+      "test_id": "wp1099_nlm_nap_lai"
+    },
+    {
+      "error": null,
+      "name": "wp1121_doc_claims_xoa.py",
+      "ok": true,
+      "test_id": "wp1121_doc_claims_xoa"
+    },
+    {
+      "error": null,
+      "name": "wp1134_changelog_d_ngoai_goi.py",
+      "ok": true,
+      "test_id": "wp1134_changelog_d_ngoai_goi"
+    },
+    {
+      "error": null,
+      "name": "wp1326_doc_claims_dau_cham.py",
+      "ok": true,
+      "test_id": "wp1326_doc_claims_dau_cham"
+    },
+    {
+      "error": null,
+      "name": "wp433_bundled_tach_manh.py",
+      "ok": true,
+      "test_id": "wp433_bundled_tach_manh"
+    },
+    {
+      "error": null,
+      "name": "wp433_gws_cred_dich_ngoai_kho.py",
+      "ok": true,
+      "test_id": "wp433_gws_cred_dich_ngoai_kho"
+    },
+    {
+      "error": null,
+      "name": "wp433_gws_cred_dich_ngoai_kho_b.py",
+      "ok": true,
+      "test_id": "wp433_gws_cred_dich_ngoai_kho_b"
+    },
+    {
+      "error": null,
+      "name": "wp433_gws_cred_no.py",
+      "ok": true,
+      "test_id": "wp433_gws_cred_no"
+    },
+    {
+      "error": null,
+      "name": "wp433_gws_cred_win_duong.py",
+      "ok": true,
+      "test_id": "wp433_gws_cred_win_duong"
+    },
+    {
+      "error": null,
+      "name": "wp433_gws_cred_win_reparse.py",
+      "ok": true,
+      "test_id": "wp433_gws_cred_win_reparse"
+    },
+    {
+      "error": null,
+      "name": "wp433_nlm_gws_dich_ngoai_kho.py",
+      "ok": true,
+      "test_id": "wp433_nlm_gws_dich_ngoai_kho"
+    },
+    {
+      "error": null,
+      "name": "wp45_fragment_canary.py",
+      "ok": true,
+      "test_id": "wp45_fragment_canary"
+    },
+    {
+      "error": null,
+      "name": "wp47_generated_bundle_staleness.py",
+      "ok": true,
+      "test_id": "wp47_generated_bundle_staleness"
+    },
+    {
+      "error": null,
+      "name": "wp49_eol_policy_index_blobs.py",
+      "ok": true,
+      "test_id": "wp49_eol_policy_index_blobs"
+    },
+    {
+      "error": null,
+      "name": "wp725_huong_dan_nlm.py",
+      "ok": true,
+      "test_id": "wp725_huong_dan_nlm"
+    },
+    {
+      "error": null,
+      "name": "wp726_script_nlm_canary.py",
+      "ok": true,
+      "test_id": "wp726_script_nlm_canary"
+    },
+    {
+      "error": null,
+      "name": "wp727_tl_gws_refresh.py",
+      "ok": true,
+      "test_id": "wp727_tl_gws_refresh"
+    },
+    {
+      "error": null,
+      "name": "wp88_worktree_recovery.py",
+      "ok": true,
+      "test_id": "wp88_worktree_recovery"
+    }
+  ],
+  "dev_discovery_error": null,
+  "dev_test_ids": [
+    "wp1030_pkg_secret_scan_duoi_la",
+    "wp1099_nlm_nap_lai",
+    "wp1121_doc_claims_xoa",
+    "wp1134_changelog_d_ngoai_goi",
+    "wp1326_doc_claims_dau_cham",
+    "wp433_bundled_tach_manh",
+    "wp433_gws_cred_dich_ngoai_kho",
+    "wp433_gws_cred_dich_ngoai_kho_b",
+    "wp433_gws_cred_no",
+    "wp433_gws_cred_win_duong",
+    "wp433_gws_cred_win_reparse",
+    "wp433_nlm_gws_dich_ngoai_kho",
+    "wp45_fragment_canary",
+    "wp47_generated_bundle_staleness",
+    "wp49_eol_policy_index_blobs",
+    "wp725_huong_dan_nlm",
+    "wp726_script_nlm_canary",
+    "wp727_tl_gws_refresh",
+    "wp88_worktree_recovery"
+  ],
+  "failed": [],
+  "load_error": null,
+  "ok": true,
+  "schema": "bundle_fragment_check.v1",
+  "topology": {
+    "dev_fragments_absent": true,
+    "editorconfig_absent": true,
+    "gitattributes_present": true,
+    "has_bundled_module": true
+  }
+}

@@ -1,0 +1,24 @@
+diff --git a/scripts/tl_gws.py b/scripts/tl_gws.py
+index fbeb942..9664259 100644
+--- a/scripts/tl_gws.py
++++ b/scripts/tl_gws.py
+@@ -1015,6 +1015,9 @@ def _secrets_set_body(a, entry_notebook) -> int:
+     except Exception as e:  # noqa: BLE001
+         print(f"[secrets-set] ✗ giải mã lỗi: {_safe_exc(e)}", file=sys.stderr)   # WP714: chỉ tên lớp
+         return 3
++    if not isinstance(bundle, dict):   # WP433 SS: không phải object ⇒ từ chối như giải mã lỗi, TRƯỚC mọi cờ/export/canary
++        print("[secrets-set] ✗ dữ liệu không hợp lệ: bundle", file=sys.stderr)
++        return 3
+     changed = []
+     nlm_confirmed = None
+     if getattr(a, "gas_token", None):
+@@ -1059,7 +1062,8 @@ def _secrets_set_body(a, entry_notebook) -> int:
+     # GWS_CRED_FILEID/NLM_CRED_FILEID → Chat đường public tự nhận). Lỗi public chỉ WARN (bundle ĐÃ tươi,
+     # rc vẫn 0); --no-public để bỏ qua chủ đích.
+     if not getattr(a, "no_public", False):
+-        _tok = os.environ.get("TL_TOKEN") or str(bundle.get("token") or "")
++        _bt = bundle.get("token")   # WP433 SS: token không phải str ⇒ coi như thiếu (không lấy repr làm khoá public)
++        _tok = os.environ.get("TL_TOKEN") or (_bt if isinstance(_bt, str) else "")
+         _folder = getattr(a, "folder", None) or HOPNAP_FOLDER_ID
+         _pub = []
+         if ("gws_cred" in changed or "nlm_auth" in changed) and not _tok:

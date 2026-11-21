@@ -11719,6 +11719,48 @@ def r1479_gian_cach_va_so_lan():
 
 
 @ca
+def r1479_thu_tu_sleep_update_va_ten_kenh():
+    """Codex lượt 1 F1479-02: MỘT nhật ký có thứ tự cho `sleep`, `apt-get` và kênh của từng lần ⇒ đúng trình tự install → sleep
+    → update → install …, và kênh từng lần đúng tên `kq`, `kq-thu-lai-1`, `-2`, `-3`."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    q = shlex.quote
+    with San() as s:
+        ev = q(str(s / "ev.log"))
+        apt = f'echo "APT $1" >> {ev}; case "$1" in update) exit 0;; install) exit 100;; esac; exit 99'
+        lenh = (f'echo "KENH ${{KENH_KQ##*/}}" >> {ev}; apt-get install -y ripgrep '
+                '&& chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin"')
+        p, gp, _uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh, env_them={"CAI_CONG_CU_CHO_GIAY": ""},
+                                          ung_vien={str(s / "dau" / "sleep"): f'echo "SLEEP $1" >> {ev}'})
+        thay = (s / "ev.log").read_text().splitlines()
+        mong = ["KENH kq", "APT install"]
+        for k, giay in ((1, 15), (2, 30), (3, 60)):
+            mong += [f"SLEEP {giay}", "APT update", f"KENH kq-thu-lai-{k}", "APT install"]
+        bang(p.returncode == 100 and thay == mong, f"trinh tu/ten kenh sai: rc={p.returncode}\n thay={thay}\n mong={mong}")
+
+
+@ca
+def r1479_sleep_hong_van_cai_lai_va_giu_ma_lan_cuoi():
+    """Codex lượt 1 F1479-01: `sleep` lỗi (rc 23) hoặc không có lệnh (rc 127) ⇒ vẫn đủ 3 lần cài lại, có dòng báo, mã thoát
+    là của lần cài CUỐI (44), không phải của `sleep`."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    q = shlex.quote
+    for than_sleep in ("exit 23", "exit 127"):
+        with San() as s:
+            log = q(str(s / "apt.log"))
+            apt = (f'echo "$1" >> {log}; case "$1" in update) exit 0;; '
+                   f'install) n=$(grep -c install {log}); [ "$n" -eq 1 ] && exit 100; exit $((40 + n));; esac; exit 99')
+            p, _gp, _uv, _x, _t = _wp868_chay(s, apt=apt, ung_vien={str(s / "dau" / "sleep"): than_sleep})
+            nk = (s / "apt.log").read_text().split()
+            bang(p.returncode == 44 and nk == ["install"] + ["update", "install"] * 3
+                 and p.stderr.count("loi (rc=") >= 3 and "thu lai ngay" in p.stderr,
+                 f"sleep '{than_sleep}' lam hong vong thu lai: rc={p.returncode} apt={nk} {p.stderr[-400:]}")
+
+
+@ca
 def r1479_bien_hong_ve_mac_dinh():
     """Biến điều chỉnh hỏng ⇒ mặc định: `abc`/rỗng/quá 3 chữ số/ngoài khoảng. `08` là THẬP PHÂN 8, không làm chết script
     (bài học #1474 F1474-05). `THU_LAI=09` ⇒ 9 lần."""
@@ -17902,6 +17944,13 @@ DOT_BIEN = [
 
 # wp802 (N6–N8): đột biến trên BẢN SAO TẠM của hook. Chỉ `TinHieuChotCa` của ca đích mới
 # tính là GIẾT — lỗi khác là tín dụng giả (CLAUDE.md, bài học 27-08).
+# wp1479 (Codex lượt 1 F1479-02): hai khối NGUYÊN VĂN của vòng thử lại — đột biến đảo thứ tự sleep/update cần cả hai.
+_R1479_SLEEP = ('    sleep "$_tl1479_s" || echo "cai_cong_cu: sleep ${_tl1479_s}s loi (rc=$?) — thu lai ngay" >&2\n')
+_R1479_UPDATE = ('    case "$LENH" in\n'
+                 '      "sudo apt-get"*) sudo apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;\n'
+                 '      *) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;\n'
+                 '    esac\n')
+
 DOT_BIEN_HOOK = [
     # wp1474 (CONG-CU-HOOK r1 §4 + Codex lượt 1): mỗi chốt của khối `cong-cu-ban-ke` một đột biến, đích là hook.
     ("wp1474_bo_ve_chuan_bi", ('v.get("bat_buoc") or v.get("chuan_bi")', 'v.get("bat_buoc")'),
@@ -18075,7 +18124,15 @@ DOT_BIEN_HOOK = [
                                    '    _wp1404_chay_cong_thuc "$@"; _wp1404_chay_cong_thuc "$@"\n  done\n'),
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
     # wp1479: mỗi chốt của vòng thử lại có giãn cách một đột biến.
-    ("wp1479_bo_gian_cach", ('    sleep "$_tl1479_s"\n', '    :\n'), ["r1479_gian_cach_va_so_lan"], "cai_sh"),
+    # Codex wp1479 lượt 1: F1479-01 (sleep hỏng) + F1479-02 (thứ tự sleep/update, tên kênh).
+    ("wp1479_sleep_hong_lam_chet", ('    sleep "$_tl1479_s" || echo "cai_cong_cu: sleep ${_tl1479_s}s loi (rc=$?) — thu lai ngay" >&2\n',
+                                    '    sleep "$_tl1479_s"\n'),
+     ["r1479_sleep_hong_van_cai_lai_va_giu_ma_lan_cuoi"], "cai_sh"),
+    ("wp1479_update_truoc_sleep", (_R1479_SLEEP + _R1479_UPDATE, _R1479_UPDATE + _R1479_SLEEP),
+     ["r1479_thu_tu_sleep_update_va_ten_kenh"], "cai_sh"),
+    ("wp1479_sai_so_kenh", ('KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1479_k"\n', 'KENH_KQ="$TAM_CAI/kq-thu-lai-$((_tl1479_k + 10))"\n'),
+     ["r1479_thu_tu_sleep_update_va_ten_kenh"], "cai_sh"),
+    ("wp1479_bo_gian_cach", ('    sleep "$_tl1479_s" ||', '    : ||'), ["r1479_gian_cach_va_so_lan"], "cai_sh"),
     ("wp1479_gian_cach_hang_so", ('_tl1479_s=$(( _tl1479_cho << (_tl1479_k - 1) ))', '_tl1479_s=$_tl1479_cho'),
      ["r1479_gian_cach_va_so_lan"], "cai_sh"),
     ("wp1479_so_lan_co_dinh_1", ('_tl1479_n="$(_tl1479_so "${CAI_CONG_CU_THU_LAI:-}" 3 9)"', '_tl1479_n=1'),

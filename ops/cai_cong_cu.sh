@@ -192,7 +192,9 @@ _tl1479_thu_lai_apt() {
     _tl1479_k=$(( _tl1479_k + 1 ))
     _tl1479_s=$(( _tl1479_cho << (_tl1479_k - 1) ))
     echo "cai_cong_cu: '$TEN' cai loi (rc=$RC_CAI); cho ${_tl1479_s}s, apt-get update roi thu lai lan $_tl1479_k/$_tl1479_n" >&2
-    sleep "$_tl1479_s"
+    # Codex luot 1 F1479-01: `sleep` hong/vang duoi `set -e` tung lam script thoat NGAY voi ma cua sleep (127/23), bo qua lan
+    # cai lai va ma cua lan cai cuoi. Hong thi bao roi thu lai ngay (van trong tran N lan).
+    sleep "$_tl1479_s" || echo "cai_cong_cu: sleep ${_tl1479_s}s loi (rc=$?) — thu lai ngay" >&2
     case "$LENH" in
       "sudo apt-get"*) sudo apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
       *) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;

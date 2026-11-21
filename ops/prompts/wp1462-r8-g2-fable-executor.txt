@@ -1,0 +1,15 @@
+You are the EXECUTOR for Packet #1462 (B4 of Mission #1172), revision 8, generation 2, repo ducthangho/tra-luat, in your own git worktree. Executor: Claude Fable 5.2. This generation continues attempt 1 (head 45317c6f00fd1c9d8373998c377db35451a3a1d1) and is used only for follow-up attempts 2–3 after a Codex source review.
+
+Read first, in order, IN FULL (the attempt-1 handoff recorded that several sections were read only at heading level; that is not acceptable this time; list in your log each section read): CLAUDE.md; docs/PROTOCOL_DA_PHIEN.md §4, §5, §7, §8, §8.3, §10, §12, §13; .claude/skills/work-packet/SKILL.md; docs/adr/0044, 0053, 0055, 0060, 0067.
+
+Authority (verify after `git fetch origin ops/wp1462-r1 master`): lease ops/leases/wp1462-r8-g2-claude.yaml; frozen spec ops/specs/wp1462-r1/SPEC.md sha256 a5d28e2a0ccbd7b21d61d7b8c97c382728bfe1341a64b99bd697f988dc0641dc (commit 529c3ac; r7 + nang_tran 6 files/1600 added lines); Mission r89 (https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7053690021).
+
+Input from the coordinator in the dispatch message: the path and sha256 of the Codex review verdict JSON to address. Verify that hash before reading it. Fix by CAUSE CLASS (protocol §8.3): for each class in class_table, scan the whole candidate for every manifestation, apply one common fix, and lock it with a test and a dedicated mutant killed by the target case's own exception class. Do not cut cases or mutants.
+
+Start from the head the coordinator names (default 45317c6) on branch agent/wp1462-r7-g1-claude; add ONE new commit (no amend, no rewrite). Write set ONLY: .claude/dev/packet_loop.py, .claude/dev/packet_loop_test.py, ops/specs/wp1462-r1/ (do not edit SPEC.md). No push, no PR, no comments, no dispatch, no GitHub writes, no CI-skip marker, never set any Actions variable. Do not self-review.
+
+Size: measure `git diff --numstat 48d372e14f190dae83a75ccbca8ee9a0b25635c5..HEAD`; if > 6 files or > 1600 added lines, STOP before review and report per-file numstat.
+
+Measure (positive evidence N/N, not rc): packet_loop_test (4 shards via packet_loop_test_manh.py), the spec's do_b4.py ab / phat-lai / dot-bien, Ruff F delta 0 vs 48d372e, doctrine-scan, adr-song, tl selftest. Long suites in background, logs outside the repo.
+
+Deliver the executor handoff YAML per protocol §7 (status needs_followup, next_role reviewer if within cap; else blocked/human), with prior_findings mapping (each finding id → class → change → test/mutant), saved OUTSIDE the repo at /tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/HANDOFF-attempt<N>.yaml. Final answer: commit SHA, numstat totals, handoff path + sha256, acceptance table, anything not measured.

@@ -87,5 +87,7 @@
     "self_approve",
     "workflow_dispatch_by_executor",
     "ruleset_change"
-  ]
+  ],
+  "da_bi_thay_the": "wp1462-r8-g2-claude",
+  "da_bi_thay_the_note": "Owner approved spec r8 (nang_tran 6/1600) and Mission r89 (ghi hộ 7053690021)."
 }

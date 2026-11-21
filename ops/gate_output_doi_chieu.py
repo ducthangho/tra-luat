@@ -36,7 +36,7 @@ RE_MOC = re.compile(r"MOC_GATE_OUTPUT: (passed|failed|not_measured) \((\d+)/(\d+
 PHI_LOI_KHAI = frozenset({"gateoutputnguon", "gateoutputnguonvagioihan", "mocgateoutputrcdisposition"})
 TOKEN = frozenset({"passed", "measured", "not_measured", "failed", "skipped", "not_run", "owner_waived"})
 RE_TOKEN = re.compile(r"\s*([a-z_]+)(?=$|[\s—\-:(,.;])")
-RE_TEP_DG = re.compile(r"(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\.txt")
+RE_TEP_DG = re.compile(r"[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\.txt")   # findall trái-nhất + tham lam ⇒ không cần lookbehind
 RE_KHOI_LANDED = re.compile(r"landed_\d{8}")
 RE_URL = re.compile(r"https://github\.com/ducthangho/tra-luat/\S*?#issuecomment-(\d+)")
 RE_MIEN = re.compile(r"mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\S.*?) han=(\d{4}-\d{2}-\d{2})")
@@ -69,7 +69,7 @@ def doc_danh_gia(byte):
             kq["jobs"][int(j[1])] = {"name": j[2], "labels": j[3], "conclusion": j[4], "sha": j[5], "tt": j[6]}
         elif s := (RE_SKIP_CU.fullmatch(d) or RE_SKIP_V3.fullmatch(d)):
             ly += ["job_lap"] if int(s[1]) in kq["jobs"] or int(s[1]) in kq["skip"] else []
-            kq["skip"][int(s[1])] = {"dang": "v3" if s.re is RE_SKIP_V3 else "cu"}
+            kq["skip"][int(s[1])] = {"v3": s.re is RE_SKIP_V3}
         elif mm := RE_MOC.fullmatch(d):
             so_moc, kq["moc"] = so_moc + 1, (mm[1], int(mm[2]), int(mm[3]))
         else:
@@ -161,7 +161,7 @@ def _kiem_tep(tep, thu_muc):
         if not (isinstance(lg := ldd.get(k), dict) and str(lg.get("sha256")) == j["sha"]):         # K6
             ly.append(f"log_sha_lech:{k}")
     v3 = BO_SINH[d["bo_sinh"]] == "v3"                                                        # K7
-    if any((s["dang"] == "v3") != v3 for s in d["skip"].values()):
+    if any(s["v3"] != v3 for s in d["skip"].values()):
         ly.append("dong_skip_sai_phien_ban")
     tts = [j["tt"] for j in d["jobs"].values()]
     n, so_pass = len(tts) + (len(d["skip"]) if v3 else 0), tts.count("passed")   # v3 tính mỗi dòng skipped là một not_measured

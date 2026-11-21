@@ -801,7 +801,8 @@ def a120_ngu_phap_dong():   # r10 luật 4: ngữ pháp TỪNG dòng tệp đán
 @ca
 def a121_token_tep_khoa_landed():   # r10 luật 4: ngữ pháp token, tên tệp đánh giá, chuẩn hoá khoá, ba dạng landed
     bang([G().token("passed" + c + "x") for c in "—-(,.;: "] == ["passed"] * 8, "token: moi dau phan cach cho phep")
-    bang([G().token(v) for v in ("1 passed", "passedx", "x passed")] == [None] * 3, "token: khop tu DAU chuoi")
+    bang([G().token(v) for v in ("1 passed", "passedx", "x passed", "pass — x")] == [None] * 4, "token: khop tu DAU chuoi, dung tap TOKEN")
+    bang(G().kiem_ho_so({"gate_output": "pass — x"}, ROOT) == ["$.gate_output: dinh_dang_loi_khai"], "token ngoai tap la sai dinh dang")
     for v, mong in (("A/B_c.d-1/danh-gia-gate-output-1.txt", ["A/B_c.d-1/danh-gia-gate-output-1.txt"]), ("danh-gia-gate-output-.txt", []),
                     ("danh-gia-gate-output-1xtxt", []), ("danh-gia-gate-output-1a.txt", [])):
         bang(G().tep_danh_gia(v) == mong, f"tep_danh_gia({v!r}) = {G().tep_danh_gia(v)}")
@@ -831,6 +832,7 @@ def a122_mien_ma_tran():   # r10 luật 4: ngữ pháp dòng miễn, URL, head c
                 ("sha 39", f(DONG.replace(SHA, SHA[:39])), ["dong_mien"]),
                 ("nam 3 so", f(DONG.replace("2026-", "226-")), ["dong_mien"]), ("thang 1 so", f(DONG.replace("-12-", "-1-")), ["dong_mien"]),
                 ("ngay 1 so", f(DONG.replace("-31", "-3")), ["dong_mien"]), ("nam chu", f(DONG.replace("2026-", "abcd-")), ["dong_mien"]),
+                ("thang chu", f(DONG.replace("-12-", "-1a-")), ["dong_mien"]), ("ngay chu", f(DONG.replace("-31", "-3a")), ["dong_mien"]),
                 ("khong url", f(DONG, f"owner_waived — {SHA}"), ["url"]), ("url khong so", f(DONG, ok.replace("comment-123", "comment-")), ["url"]),
                 ("url sai host", f(DONG, ok.replace("github.com", "githubXcom")), ["url"]), ("head rong", f(DONG, ok, ""), ["sha"]),
                 ("html_url truoc tac_gia", f(DONG, html_url=URL + "9", author_association="MEMBER"), ["html_url"]),
@@ -888,7 +890,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m13_so_bang", "    return type(x) is int", "    return isinstance(x, (int, float))", "a108"),
     ("m14_bot_check", '"gate-packet-loop (ubuntu-latest)", "gate-registry (ubuntu-latest)")', '"gate-packet-loop (ubuntu-latest)",)', "a109"),
     ("m15_bo_K7", '    if d["moc"] != (moc_tu, so_pass, n):\n        ly.append("moc_lech")\n', "", "a110"),
-    ("m16_skip_moi_dang", '    if any((s["dang"] == "v3") != v3 for s in d["skip"].values()):', "    if False:", "a111"),
+    ("m16_skip_moi_dang", '    if any(s["v3"] != v3 for s in d["skip"].values()):', "    if False:", "a111"),
     ("m17_theo_symlink", '            if p.is_symlink():\n                ly.append("symlink")\n                continue\n', "", "a112"),
     ("m18_khong_chuan_hoa", "            c = _chuan(k)", "            c = str(k)", "a201"),
     ("m19_bo_phi_loi_khai", ' and c not in PHI_LOI_KHAI', "", "a201"),
@@ -916,8 +918,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
      '    if y is None:\n        return d["moc"][0], []\n    moc = y["moc"]', "a102"),
     ("m38_cam_moi_cr", '    if any(d.endswith("\\r") for d in dong):',
      '    if any("\\r" in d for d in dong):\n        return None, ["cr_le"]\n    if False:', "a103"),
-    ("m39_nhan_ten_tom", 'RE_TEP_DG = re.compile(r"(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt")',
-     'RE_TEP_DG = re.compile(r"(?<![A-Za-z0-9_./-])[A-Za-z0-9_./-]*gate-output-[0-9]+\\.txt")', "a211"),
+    ("m39_nhan_ten_tom", 'RE_TEP_DG = re.compile(r"[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\\.txt")',
+     'RE_TEP_DG = re.compile(r"[A-Za-z0-9_./-]*gate-output-[0-9]+\\.txt")', "a211"),
     ("m40_bo_ket_luan_khop", '            ly.append(f"ket_luan_lech:{k}")', "            pass", "a113"),
     ("m41_bo_ve_a", 'if not (r.get("trang_thai") == "passed" and isinstance(tj, dict)', "if not (isinstance(tj, dict)", "a114"),
     ("m42_bo_ve_b", 'isinstance(tj, dict) and tj.get("trang_thai") == "passed"\n', "isinstance(tj, dict)\n", "a114"),
@@ -1006,6 +1008,27 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m122_ten_ho_so", 'if hs.name.endswith("-land-evidence.yaml") else hs.stem', "if False else hs.stem", "a217"),
     ("m124_in_bo_ly_do", "{a.tep} {','.join(ly) or '-'}\\n", "{a.tep} {'-'}\\n", "a217"),
     ("m123_nhan_do_dat", "{'DO' if vp else 'DAT'}", "{'DAT'}", "a217"),
+    ("m125_dau_head_khong_hex", "head ([0-9a-f]{40})", "head (.{40})", "a120"),
+    ("m126_job_labels_ngoac", r"\[([^\]]*)\]", r"\[(.*)\]", "a120"),
+    ("m127_skip_v3_khop_dau", "RE_SKIP_V3.fullmatch(d)", "RE_SKIP_V3.match(d)", "a120"),
+    ("m128_moc_so_rong", r"\((\d+)/(\d+) job", r"\((\d*)/(\d+) job", "a120"),
+    ("m129_token_bo_gach_dai", r"[\s—\-:(,.;]", r"[\s\-:(,.;]", "a121"),
+    ("m130_token_search", "RE_TOKEN.match(gia_tri.casefold())", "RE_TOKEN.search(gia_tri.casefold())", "a121"),
+    ("m131_tep_run_chu", "output-[0-9]+", "output-[a-z0-9]+", "a121"),
+    ("m132_khoa_bo_so", "if c.isalnum()", "if c.isalpha()", "a121"),
+    ("m133_phi_chuoi_con", "c not in PHI_LOI_KHAI", "not any(p in c for p in PHI_LOI_KHAI)", "a121"),
+    ("m134_landed_truthy", "    return a is True or any(", "    return bool(a) or any(", "a121"),
+    ("m135_khoi_landed_khop_dau", "RE_KHOI_LANDED.fullmatch(k)", "RE_KHOI_LANDED.match(k)", "a121"),
+    ("m136_mien_bo_strip", "RE_MIEN.fullmatch(x.strip())", "RE_MIEN.fullmatch(x)", "a122"),
+    ("m137_mien_khop_dau", "RE_MIEN.fullmatch(x.strip())", "RE_MIEN.match(x.strip())", "a122"),
+    ("m138_mien_os_bo_so", "os=([a-z0-9,.-]+)", "os=([a-z,.-]+)", "a122"),
+    ("m139_url_khong_bat_buoc", '        return ["url"]', '        return ["url"] if urls else []', "a122"),
+    ("m140_head_truthy", "if head is not None else", "if head else", "a122"),
+    ("m141_doi_os_sha", '    if "ubuntu-latest" not in m[2].split(","):\n        return ["os"]\n    if (m[1] != head) if head is not None else (m[1] not in gia_tri):\n        return ["sha"]\n', '    if (m[1] != head) if head is not None else (m[1] not in gia_tri):\n        return ["sha"]\n    if "ubuntu-latest" not in m[2].split(","):\n        return ["os"]\n', "a122"),
+    ("m142_cr_sau_dau_tep", '    if any("\\r" in d for d in dong):\n        return None, ["cr_le"]\n    if not (m := RE_DAU.fullmatch(dong[0])):\n        return None, ["dau_tep_sai"]\n', '    if not (m := RE_DAU.fullmatch(dong[0])):\n        return None, ["dau_tep_sai"]\n    if any("\\r" in d for d in dong):\n        return None, ["cr_le"]\n', "a123"),
+    ("m143_skip_truoc_failed", '    if any(j["tt"] == "failed" for j in d["jobs"].values()):                                    # K8\n        return "failed", []\n    if d["skip"]:\n        return "not_measured", ["co_job_skipped"]\n', '    if d["skip"]:\n        return "not_measured", ["co_job_skipped"]\n    if any(j["tt"] == "failed" for j in d["jobs"].values()):\n        return "failed", []\n', "a123"),
+    ("m144_labels_noi_sai", '",".join(q.get("labels") or [])', '",~".join(q.get("labels") or [])', "a123"),
+    ("m145_ly_do_noi_sai", """{tt}:{','.join(ly) or '-'}\"""", """{tt}:{';'.join(ly) or '-'}\"""", "a123"),
     ("m58_cli_chi_bat_OSError", "        except Exception as e:   # gồm vòng", "        except OSError as e:   # gồm vòng", "a214"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

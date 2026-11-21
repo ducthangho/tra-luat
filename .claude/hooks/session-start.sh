@@ -524,7 +524,10 @@ MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" cai-agy 2>&1 | sed 's/^/[session-
 # Khoi KHONG BAO GIO lam hook dung: goi bang `|| MA_CC=$?`; `doctor` ben duoi van la cong duy nhat quyet dinh thoat 12.
 # Codex luot 1 (F1474-01): MOI lenh ngoai co tran — probe 30 giay, moi lan cai toi da 180 giay, ca khoi toi da 300 giay
 # (hook co 600), va `timeout -k 5` de trinh cai lo TERM van bi giet. Ba tran doc tu bien moi truong chi de test rut ngan.
-CC_TRAN_PROBE="${TL_CC_TRAN_PROBE_GIAY:-30}"; CC_TRAN_CAI="${TL_CC_TRAN_CAI_GIAY:-180}"; CC_NGAN_SACH="${TL_CC_NGAN_SACH_GIAY:-300}"
+# Bien khong phai so nguyen khong am => dung mac dinh: `$(( 1x ))` lam CHET CA HOOK, ke ca khi khoi chay duoi `||` (do 21-11).
+_cc_so() { case "$1" in ''|*[!0-9]*) echo "$2" ;; *) echo "$1" ;; esac; }
+CC_TRAN_PROBE="$(_cc_so "${TL_CC_TRAN_PROBE_GIAY:-}" 30)"; CC_TRAN_CAI="$(_cc_so "${TL_CC_TRAN_CAI_GIAY:-}" 180)"
+CC_NGAN_SACH="$(_cc_so "${TL_CC_NGAN_SACH_GIAY:-}" 300)"
 _cc_chay_tran() {   # <giay> <lenh...> — tran thoi gian (TERM roi KILL sau 5 giay) neu co `timeout`, khong thi chay thang
   local giay="$1"; shift
   if co timeout; then timeout -k 5 "$giay" "$@"; else "$@"; fi

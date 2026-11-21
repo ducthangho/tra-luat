@@ -10348,6 +10348,19 @@ def r1474_het_ngan_sach_khong_cai():
 
 
 @ca
+def r1474_bien_tran_khong_phai_so_dung_mac_dinh():
+    """Biến trần/ngân sách không phải số (`1x`, `abc`, rỗng) ⇒ dùng mặc định; khối vẫn chạy hết và DAT. `$(( 1x ))` từng làm
+    chết CẢ hook dù khối chạy dưới `||` (đo 21-11-2026)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), env_them={
+            "TL_CC_TRAN_PROBE_GIAY": "abc", "TL_CC_TRAN_CAI_GIAY": "", "TL_CC_NGAN_SACH_GIAY": "1x"})
+        bang(rc == 0 and ky == ["CAI shellcheck"] and "cong-cu-ban-ke: DAT (3 cong cu)" in out,
+             f"bien tran khong phai so lam hong khoi: rc={rc} {ky} {out!r}")
+
+
+@ca
 def r1474_cau_truc_hook_ban_ke_ci_that():
     """Ca 10: trên hook/bản kê/ci.yml THẬT — vị trí khối, cách gọi, tên năng lực, shellcheck thuộc tập cài, một bản ghim ruff."""
     than = HOOK_DANG_DUNG.read_text(encoding="utf-8")
@@ -17759,6 +17772,9 @@ DOT_BIEN_HOOK = [
     ("wp1474_bo_tran_probe_ruff_tran", ('ban_tran="$(_cc_chay_tran "$CC_TRAN_PROBE" env -u PATH', 'ban_tran="$(env -u PATH'),
      ["r1474_probe_ruff_tran_treo_bi_cat"]),
     ("wp1474_bo_kill_after", ('timeout -k 5 "$giay" "$@"', 'timeout "$giay" "$@"'), ["r1474_trinh_cai_lo_TERM_van_bi_giet"]),
+    ("wp1474_bo_loc_bien_so", ("""_cc_so() { case "$1" in ''|*[!0-9]*) echo "$2" ;; *) echo "$1" ;; esac; }""",
+                              """_cc_so() { echo "${1:-$2}"; }"""),
+     ["r1474_bien_tran_khong_phai_so_dung_mac_dinh"]),
     ("wp1474_bo_ngan_sach", ('    if [ "$con" -lt 15 ]; then\n      echo "[session-start] cong-cu-ban-ke: HET NGAN SACH',
                              '    if false; then\n      echo "[session-start] cong-cu-ban-ke: HET NGAN SACH'),
      ["r1474_het_ngan_sach_khong_cai"]),

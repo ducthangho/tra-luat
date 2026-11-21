@@ -1606,19 +1606,25 @@ def c68_moi_viec_dung_ket_qua_cua_no():   # #1322 review lượt 6 F3d: runner T
 
 CU_BYTE, MOI_BYTE = {"cu.txt": b"ban truoc"}, {"provenance.yaml": b"a", "run.json": b"c"}
 
-def _doc_cay(d):
-    return {x.name: x.read_bytes() for x in sorted(d.iterdir())} if d.is_dir() else None
+def _doc_cay(d):   # đọc ĐỆ QUY (review lượt 3 F2.f: cây lồng): đường dẫn tương đối dạng `a/x` → byte
+    return {x.relative_to(d).as_posix(): x.read_bytes() for x in sorted(d.rglob("*")) if x.is_file()} if d.is_dir() else None
 
 class _StderrHong(io.StringIO):
-    def write(self, s):
-        raise OSError(28, "stderr đầy (giả)")
+    def __init__(self, loi=None):
+        super().__init__()
+        self.loi = loi
 
-def _ghi_voi_doi_ten_gia(ke_hoach, *, windows=True, co_cu=False, xoa=None, onexc=None, stderr_hong=False):
+    def write(self, s):
+        raise self.loi if self.loi is not None else OSError(28, "stderr đầy (giả)")
+
+def _ghi_voi_doi_ten_gia(ke_hoach, *, windows=True, co_cu=False, xoa=None, onexc=None, stderr_hong=False, moi=None, cu_cay=None):
     """#1475: chạy `ghi_nguyen_tu` với `_thay_the`/`_xoa_cay`/`ngu_thu_lai` giả. `ke_hoach[cho]` (cho ∈ a cất bản trước ·
     b đưa tạm vào chỗ · c hoàn tác) là hàm nhận số thứ tự lời gọi ở chỗ ấy, trả ngoại lệ để ném hay None để đổi tên THẬT.
     `xoa[cho]` (cho ∈ tam · cu) nhận số thứ tự lần dọn, trả None (rmtree THẬT) hoặc {"unlink"|"rmdir": [lỗi…]}: rmtree THẬT
     chạy với `os.unlink`/`os.rmdir` ném lần lượt các lỗi ấy (None = gọi thật) — giữ nguyên chuỗi callback của stdlib, kể cả
-    ENOTEMPTY thứ cấp (review lượt 2 F2.d). `onexc` ép nhánh `_DUNG_ONEXC`. Trả một dict."""
+    ENOTEMPTY thứ cấp (review lượt 2 F2.d); hoặc {"theo_ten": {tên tệp: hàm(số thứ tự lần dọn) → lỗi | None}} tiêm theo TÊN,
+    không phụ thuộc thứ tự duyệt thư mục (lượt 3 F2.f). `onexc` ép nhánh `_DUNG_ONEXC`; `stderr_hong` là True (OSError) hay một
+    ngoại lệ để stream ném; `moi`/`cu_cay` là cây mới/cây bản trước (mặc định MOI_BYTE/CU_BYTE, khoá dạng `a/x`). Trả một dict."""
     m, goi, ngu, goi_xoa = nap(), [], [], []
 
     def gia(nguon, dich):
@@ -1644,19 +1650,27 @@ def _ghi_voi_doi_ten_gia(ke_hoach, *, windows=True, co_cu=False, xoa=None, onexc
         kh = (xoa or {}).get(cho, lambda i: None)(goi_xoa.count(cho) - 1)
         if kh is None:
             return shutil.rmtree(duong, **kw)
-        with mock.patch.object(os, "unlink", tiem(os.unlink, list(kh.get("unlink", [])))), \
+        lan, theo_ten, unlink_that = goi_xoa.count(cho) - 1, kh.get("theo_ten"), os.unlink
+
+        def unlink_ten(ten, *a, **k):
+            loi = theo_ten.get(os.path.basename(os.fspath(ten)), lambda i: None)(lan)
+            if loi is not None:
+                raise loi
+            return unlink_that(ten, *a, **k)
+        with mock.patch.object(os, "unlink", unlink_ten if theo_ten else tiem(os.unlink, list(kh.get("unlink", [])))), \
                 mock.patch.object(os, "rmdir", tiem(os.rmdir, list(kh.get("rmdir", [])))), warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
             return shutil.rmtree(duong, **kw)
     with tempfile.TemporaryDirectory() as thu, mock.patch.object(m, "_thay_the", gia), mock.patch.object(m, "_xoa_cay", xoa_gia), \
             mock.patch.object(m, "ngu_thu_lai", ngu.append), mock.patch.object(m, "LA_WINDOWS", windows), \
-            mock.patch.object(m, "_DUNG_ONEXC", m._DUNG_ONEXC if onexc is None else onexc), contextlib.redirect_stderr(_StderrHong() if stderr_hong else io.StringIO()) as err:
+            mock.patch.object(m, "_DUNG_ONEXC", m._DUNG_ONEXC if onexc is None else onexc), contextlib.redirect_stderr(_StderrHong(None if stderr_hong is True else stderr_hong) if stderr_hong else io.StringIO()) as err:
         o = Path(thu) / "out"
         if co_cu:
-            o.mkdir()
-            (o / "cu.txt").write_bytes(CU_BYTE["cu.txt"])
+            for ten, b in (cu_cay or CU_BYTE).items():
+                (o / ten).parent.mkdir(parents=True, exist_ok=True)
+                (o / ten).write_bytes(b)
         try:
-            m.ghi_nguyen_tu(o, dict(MOI_BYTE))
+            m.ghi_nguyen_tu(o, dict(moi or MOI_BYTE))
             loi = None
         except OSError as e:
             loi = e
@@ -1762,6 +1776,61 @@ def c71_don_thu_muc_thu_lai():   # #1475 review lượt 1 F1.b/c + lượt 2 F1/
              {"tam": lambda i: {"unlink": [hong]}}, True, lambda: hong_c[-1], None)):
         r = _ghi_voi_doi_ten_gia(ke, xoa=xoa, co_cu=co_cu, stderr_hong=True)
         bang(r["loi"] is mong_loi() and r["out"] == mong_out, f"stderr hỏng, {ten}: {r}")
+
+_CAY_C72 = {"phang": ("x", "y"), "long1": ("d/x", "y"), "long2": ("a/x", "b/y"), "sau": ("a/b/x", "c/y")}
+_LOI_C72 = ({"x": "PE1"}, {"x": "PEmai"}, {"x": "EIO"}, {"x": "PE1", "y": "PE1"}, {"x": "PE1", "y": "EIO"}, {"x": "PEmai", "y": "PE1"})
+
+def _mong_don_c72(ke, windows):
+    """Hậu điều dọn dẹp TÍNH TỪ ĐẶC TẢ, không từ mã: (số lần dọn, dãy ngủ, tên tệp còn sót). Thử lại ⇔ Windows, có ≥1 lỗi
+    PermissionError và KHÔNG có lỗi độc lập (EIO); PE1 hết ở lần 2, PEmai còn tới hết 6 lần."""
+    cho = [0.05 * 2 ** j for j in range(5)]
+    if not ke:
+        return 1, [], set()
+    if not windows or "EIO" in ke.values():
+        return 1, [], set(ke)
+    if "PEmai" in ke.values():
+        return 6, cho, {k for k, v in ke.items() if v == "PEmai"}
+    return 2, cho[:1], set()
+
+@ca
+def c72_ma_tran_don_dep():   # #1475 Review Rescue Checkpoint (sổ uỷ quyền 7059117700): ma trận hậu điều thay cho ca theo tình huống
+    hong = OSError(5, "EIO giả")
+    sinh = {"PE1": lambda i: PE() if i < 1 else None, "PEmai": lambda i: PE(), "EIO": lambda i: OSError(5, "EIO tệp") if i < 1 else None}
+    so_o = 0
+    for onexc in sorted({False, sys.version_info >= (3, 12)}):
+        for ten_cay, tep in _CAY_C72.items():
+            cay = {k: k.encode() for k in tep}
+            ten_cua = {k.rsplit("/", 1)[-1]: k for k in tep}
+            for ke in _LOI_C72:
+                for windows in (True, False):
+                    n, ngu, sot = _mong_don_c72(ke, windows)
+                    theo_ten = {"theo_ten": {k: sinh[v] for k, v in ke.items()}}
+                    for cho in ("tam", "cu"):
+                        if cho == "tam":   # dọn thư mục tạm sau (b) hỏng
+                            r = _ghi_voi_doi_ten_gia({"b": lambda i: hong}, windows=windows, onexc=onexc, moi=cay,
+                                                     xoa={"tam": lambda i, x=theo_ten: x})
+                            dung_ket_qua = r["loi"] is hong and r["out"] is None
+                        else:   # dọn bản trước sau commit
+                            r = _ghi_voi_doi_ten_gia({}, windows=windows, onexc=onexc, co_cu=True, cu_cay=cay,
+                                                     xoa={"cu": lambda i, x=theo_ten: x})
+                            dung_ket_qua = r["loi"] is None and r["out"] == MOI_BYTE
+                        con = {k: v for d in r["sot"].values() for k, v in d.items()}
+                        bang(dung_ket_qua and r["xoa"] == [cho] * n and r["ngu"] == ngu
+                             and _ten_sot(r) == ([cho] if sot else []) and con == {ten_cua[k]: cay[ten_cua[k]] for k in sot}
+                             and ("KHONG_DON_DUOC" in r["err"]) == bool(sot),
+                             f"onexc={onexc} cây={ten_cay} lỗi={ke} windows={windows} dọn={cho}: mong {n} lần, ngủ {ngu}, sót {sorted(sot)}; được {r}")
+                        so_o += 1
+    bang(so_o == len(_CAY_C72) * len(_LOI_C72) * 4 * len({False, sys.version_info >= (3, 12)}), f"số ô ma trận: {so_o}")
+    for loi in (OSError(28, "giả"), ValueError("giả"), KeyboardInterrupt(), SystemExit(7)):   # ranh giới báo cáo (lượt 3 F2.g)
+        bat = None
+        try:
+            r = _ghi_voi_doi_ten_gia({}, co_cu=True, xoa={"cu": lambda i: {"unlink": [PE()]}}, stderr_hong=loi)
+        except BaseException as e:
+            bat = e
+        if isinstance(loi, Exception):
+            bang(bat is None and r["loi"] is None and r["out"] == MOI_BYTE, f"stream ném {loi!r}: phải cô lập, được bat={bat!r}")
+        else:
+            bang(bat is loi, f"stream ném {loi!r}: BaseException phải đi qua đúng đối tượng, được {bat!r}")
 
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
@@ -2185,6 +2254,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("Y2_khong_co_loi_thu_cap", "    if not (isinstance(e, OSError) and e.errno == errno.ENOTEMPTY):\n        return False", "    if True:\n        return False", "c71"),   # F1
     ("Y3_moi_ENOTEMPTY_la_thu_cap", "    return any(os.path.normcase(os.path.normpath(d)).startswith(cha + os.sep) for d, _ in goc)", "    return True", "c71"),
     ("Y4_tien_to_khong_bien", "startswith(cha + os.sep) for d, _ in goc)", "startswith(cha) for d, _ in goc)", "c71"),
+    ("Z1_bao_nuot_BaseException", "    except Exception:\n        pass\n    return False", "    except BaseException:\n        pass\n    return False", "c72"),   # #1475 lượt 3 F2.g
+    ("Z2_thu_cap_doi_moi_PE", "    return any(os.path.normcase(os.path.normpath(d)).startswith", "    return all(os.path.normcase(os.path.normpath(d)).startswith", "c72"),   # F2.f
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_AttributeError_qua_except_doi_kieu", "def than(dong):\n",

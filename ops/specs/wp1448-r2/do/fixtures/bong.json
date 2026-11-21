@@ -1,0 +1,98 @@
+{
+ "ca": [
+  {
+   "ten": "ca duong PR4 o PR1 (tich hop bong that)",
+   "log": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n2026-11-01T00:00:01.1Z PACKET_LOOP: chay\n2026-11-01T00:00:01.1Z packet_loop=chay\n2026-11-01T00:00:01.2Z BONG_CONG_CU: chay ly_do=cham_bao_dong:scripts_ten=1 run=9100/1 head=1111111111111111111111111111111111111111 duong_dan=chay van_tay=- su_kien=pull_request che_do=day_du\n2026-11-01T00:00:01.2Z BONG_PHAN_LOAI: cu=day_du moi=duong_nhanh cu_do=do_duoc goc_su_kien=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa goc_so=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb dau=1111111111111111111111111111111111111111 hop=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ly_do=- kiem_moi=- run=9100/1 su_kien=pull_request\n",
+   "oracle": "duong_nhanh",
+   "mong": [
+    1,
+    1
+   ],
+   "cong_cu": "chay",
+   "ghi_chu": "o PR1 phan loai dang chay van la luat cu (day_du): loi ich=1 va ton du=1"
+  },
+  {
+   "ten": "MO PHONG sau PR4 (phan loai dang chay = moi)",
+   "log": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=duong_nhanh\n2026-11-01T00:00:01.1Z PACKET_LOOP: chay\n2026-11-01T00:00:01.1Z packet_loop=chay\n2026-11-01T00:00:01.2Z BONG_CONG_CU: chay ly_do=cham_bao_dong:scripts_ten=1 run=9100/1 head=1111111111111111111111111111111111111111 duong_dan=chay van_tay=- su_kien=pull_request che_do=duong_nhanh\n2026-11-01T00:00:01.2Z BONG_PHAN_LOAI: cu=day_du moi=duong_nhanh cu_do=do_duoc goc_su_kien=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa goc_so=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb dau=1111111111111111111111111111111111111111 hop=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ly_do=- kiem_moi=- run=9100/1 su_kien=pull_request\n",
+   "oracle": "duong_nhanh",
+   "mong": [
+    1,
+    0
+   ],
+   "cong_cu": "chay",
+   "ghi_chu": "MO PHONG: sau PR4 bo phan loai dung ngu canh moi nen dang chay = moi; loi ich=1, ton du=0"
+  },
+  {
+   "ten": "hai ngu canh trung nhau",
+   "log": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n2026-11-01T00:00:01.1Z PACKET_LOOP: chay\n2026-11-01T00:00:01.1Z packet_loop=chay\n2026-11-01T00:00:01.2Z BONG_CONG_CU: chay ly_do=cham_bao_dong:scripts_ten=1 run=9100/1 head=1111111111111111111111111111111111111111 duong_dan=chay van_tay=- su_kien=pull_request che_do=day_du\n2026-11-01T00:00:01.2Z BONG_PHAN_LOAI: cu=day_du moi=day_du cu_do=do_duoc goc_su_kien=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa goc_so=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb dau=1111111111111111111111111111111111111111 hop=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ly_do=- kiem_moi=- run=9100/1 su_kien=pull_request\n",
+   "oracle": "day_du",
+   "mong": [
+    0,
+    0
+   ],
+   "cong_cu": "chay"
+  },
+  {
+   "ten": "moi khong do duoc",
+   "log": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n2026-11-01T00:00:01.1Z PACKET_LOOP: chay\n2026-11-01T00:00:01.1Z packet_loop=chay\n2026-11-01T00:00:01.2Z BONG_CONG_CU: chay ly_do=cham_bao_dong:scripts_ten=1 run=9100/1 head=1111111111111111111111111111111111111111 duong_dan=chay van_tay=- su_kien=pull_request che_do=day_du\n2026-11-01T00:00:01.2Z BONG_PHAN_LOAI: cu=day_du moi=khong_do_duoc cu_do=do_duoc goc_su_kien=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa goc_so=- dau=1111111111111111111111111111111111111111 hop=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ly_do=- kiem_moi=- run=9100/1 su_kien=pull_request\n",
+   "oracle": "khong_do_duoc",
+   "mong": [
+    null,
+    null
+   ],
+   "cong_cu": "chay"
+  },
+  {
+   "ten": "khong co oracle",
+   "log": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n2026-11-01T00:00:01.1Z PACKET_LOOP: chay\n2026-11-01T00:00:01.1Z packet_loop=chay\n2026-11-01T00:00:01.2Z BONG_CONG_CU: chay ly_do=cham_bao_dong:scripts_ten=1 run=9100/1 head=1111111111111111111111111111111111111111 duong_dan=chay van_tay=- su_kien=pull_request che_do=day_du\n2026-11-01T00:00:01.2Z BONG_PHAN_LOAI: cu=day_du moi=duong_nhanh cu_do=do_duoc goc_su_kien=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa goc_so=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb dau=1111111111111111111111111111111111111111 hop=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ly_do=- kiem_moi=- run=9100/1 su_kien=pull_request\n",
+   "oracle": null,
+   "mong": [
+    1,
+    null
+   ],
+   "cong_cu": "chay"
+  },
+  {
+   "ten": "loi ich 0 nhung ton du 1 (oracle bac dong bong)",
+   "log": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n2026-11-01T00:00:01.1Z PACKET_LOOP: chay\n2026-11-01T00:00:01.1Z packet_loop=chay\n2026-11-01T00:00:01.2Z BONG_CONG_CU: bo_qua ly_do=ngoai_bao_dong run=9100/1 head=1111111111111111111111111111111111111111 duong_dan=chay van_tay=- su_kien=pull_request che_do=day_du\n2026-11-01T00:00:01.2Z BONG_PHAN_LOAI: cu=day_du moi=day_du cu_do=do_duoc goc_su_kien=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa goc_so=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb dau=1111111111111111111111111111111111111111 hop=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ly_do=- kiem_moi=- run=9100/1 su_kien=pull_request\n",
+   "oracle": "duong_nhanh",
+   "mong": [
+    0,
+    1
+   ],
+   "cong_cu": "bo_qua"
+  },
+  {
+   "ten": "log khong co dong bong (truoc PR1): khong biet phan loai dang chay co phai fail-close => khong dem",
+   "log": "2026-11-01T00:00:01.1Z che_do=day_du\n",
+   "oracle": "day_du",
+   "mong": [
+    null,
+    null
+   ],
+   "cong_cu": null
+  },
+  {
+   "ten": "phan loai dang chay la FAIL-CLOSE (cu_do=khong_do_duoc): khong dem ca hai",
+   "log": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n2026-11-01T00:00:01.1Z PACKET_LOOP: chay\n2026-11-01T00:00:01.1Z packet_loop=chay\n2026-11-01T00:00:01.2Z BONG_CONG_CU: chay ly_do=cham_bao_dong:scripts_ten=1 run=9100/1 head=1111111111111111111111111111111111111111 duong_dan=chay van_tay=- su_kien=pull_request che_do=day_du\n2026-11-01T00:00:01.2Z BONG_PHAN_LOAI: cu=day_du moi=duong_nhanh cu_do=khong_do_duoc goc_su_kien=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa goc_so=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb dau=1111111111111111111111111111111111111111 hop=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ly_do=- kiem_moi=- run=9100/1 su_kien=pull_request\n",
+   "oracle": "duong_nhanh",
+   "mong": [
+    null,
+    null
+   ],
+   "cong_cu": "chay",
+   "ghi_chu": "o PR1 phan loai dang chay van la luat cu (day_du): loi ich=1 va ton du=1"
+  },
+  {
+   "ten": "kiem ngu canh moi khong do duoc: khong dem loi ich",
+   "log": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n2026-11-01T00:00:01.1Z PACKET_LOOP: chay\n2026-11-01T00:00:01.1Z packet_loop=chay\n2026-11-01T00:00:01.2Z BONG_CONG_CU: chay ly_do=cham_bao_dong:scripts_ten=1 run=9100/1 head=1111111111111111111111111111111111111111 duong_dan=chay van_tay=- su_kien=pull_request che_do=day_du\n2026-11-01T00:00:01.2Z BONG_PHAN_LOAI: cu=day_du moi=duong_nhanh cu_do=do_duoc goc_su_kien=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa goc_so=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb dau=1111111111111111111111111111111111111111 hop=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee ly_do=- kiem_moi=khong_do_duoc run=9100/1 su_kien=pull_request\n",
+   "oracle": "duong_nhanh",
+   "mong": [
+    null,
+    1
+   ],
+   "cong_cu": "chay",
+   "ghi_chu": "o PR1 phan loai dang chay van la luat cu (day_du): loi ich=1 va ton du=1"
+  }
+ ]
+}

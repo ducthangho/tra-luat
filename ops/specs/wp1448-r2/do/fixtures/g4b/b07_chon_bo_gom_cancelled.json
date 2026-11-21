@@ -1,0 +1,41 @@
+{
+ "mo_ta": "MO PHONG: chon bo (cong_cu=bo_qua) ma job gom cancelled",
+ "mo_phong": true,
+ "run": {
+  "id": 9007,
+  "event": "pull_request",
+  "head_sha": "1111111111111111111111111111111111111111",
+  "run_attempt": 1,
+  "conclusion": "cancelled",
+  "created_at": "2026-11-01T00:00:00Z"
+ },
+ "dong": [
+  {
+   "ten": "chuan-bi",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 1,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu-gop (ubuntu-latest)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 30,
+   "head_sha": "1111111111111111111111111111111111111111"
+  }
+ ],
+ "log": {
+  "chuan_bi": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n2026-11-01T00:00:01.3Z cong_cu=bo_qua\n",
+  "gom": null
+ },
+ "artifact": null,
+ "ghi_de": null,
+ "mong": {
+  "g4b": [
+   "gom_hong",
+   7
+  ],
+  "g4a": "bo_moi"
+ }
+}

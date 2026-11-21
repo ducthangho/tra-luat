@@ -3624,7 +3624,7 @@ def _b4_tinh_lai(root: Path, cay_ma: str, goc: str, dau: str) -> str:
     """Mục 5, HÀM CHẠY: bộ phân loại tại `cay_ma` chạy `python -I` trong cây tạm, với commit hợp C(goc, dau) nằm ở thư mục object TẠM.
     Không để lại gì trong kho `root` (ref, worktree, object) và xoá mọi thư mục tạm ở mọi đường thoát.
     Git chạy trên một GIT_DIR TẠM, trống: kho `root` chỉ góp OBJECT (alternates). Cấu hình cục bộ/toàn cục, ref thay thế, graft,
-    `info/attributes` và hook của người gọi KHÔNG được đọc (không bộ lọc smudge nào chạy); symlink trong cây ra tệp thường, không trỏ ra ngoài."""
+    `info/attributes`, tệp thuộc tính toàn cục và hook của người gọi KHÔNG được đọc (không bộ lọc smudge nào chạy); symlink trong cây ra tệp thường, không trỏ ra ngoài."""
     td = Path(tempfile.mkdtemp(prefix="pl1462-"))
     try:
         rc, gd = _git_do(root, "rev-parse", "--path-format=absolute", "--git-common-dir")
@@ -3634,7 +3634,8 @@ def _b4_tinh_lai(root: Path, cay_ma: str, goc: str, dau: str) -> str:
                    GIT_INDEX_FILE=str(td / "idx"), GIT_WORK_TREE=str(td / "cay"), GIT_CONFIG_GLOBAL=str(td / "git" / "config"))
         ngay = {f"GIT_{v}_{k}": g for v in ("AUTHOR", "COMMITTER") for k, g in (("NAME", "pl1462"), ("EMAIL", "pl1462@invalid"), ("DATE", "2000-01-01T00:00:00Z"))}
         (td / "obj").mkdir(), (td / "cay").mkdir(), (td / "git" / "refs").mkdir(parents=True), (td / "git" / "HEAD").write_bytes(b"ref: refs/heads/pl1462\n")
-        (td / "git" / "config").write_bytes(b"[core]\n\tsymlinks = false\n")
+        # attributesFile: tệp thuộc tính toàn cục ($HOME/.config/git/attributes) không theo GIT_CONFIG_GLOBAL — trỏ nó vào tệp vắng trong td
+        (td / "git" / "config").write_bytes(b'[core]\n\tsymlinks = false\n\tattributesFile = "%s"\n' % os.fsencode((td / "git" / "attributes").as_posix()))
 
         def g(*lenh, them=None) -> tuple:
             p = subprocess.run(["git", *lenh], env={**env, **(them or {})}, cwd=td / "cay", capture_output=True, stdin=subprocess.DEVNULL, timeout=B4_HAN_PL)

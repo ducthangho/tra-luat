@@ -4,11 +4,11 @@ Tệp này nằm TRONG H nên KHÔNG ghi SHA của H, cây của H hay numstat c
 
 | tệp | sha256 |
 |---|---|
-| `.claude/dev/packet_loop.py` | `066eeb689a64fab7a06fce8a46fafaeb1e2ecd44deb550f3e9cada759e708d6e` |
-| `.claude/dev/packet_loop_test.py` | `bbff0c21a18d4b1498f0a0e129884c6223d75b58e88843b8601c6420abb247e2` |
+| `.claude/dev/packet_loop.py` | `320cd9dcfa3c0aec68995c6a4bea01aeb1fe14ceb0f0903d945cec64420224fc` |
+| `.claude/dev/packet_loop_test.py` | `f01978db555d4c5527c6b00ce9f702fa6bd146898a7bab3774f8914402dc19e6` |
 | `ops/specs/wp1462-r1/do/do_b4.py` | `de8a7ab54d91c160cb326aaf0aa5819376dc7f0b1cd2b5f65cb127f4a7771fbe` |
 
-Nền đo: phiên cloud Linux, 4 nhân, Python 3.13.18, git 2.43.0; base = `48d372e14f190dae83a75ccbca8ee9a0b25635c5` (merge-base với `origin/master`). Mọi lệnh chạy từ gốc kho; log thô nằm ngoài kho (đường dẫn ở handoff). Lượt đo này là attempt 2 (sau review mã Codex lượt 1); mọi số dưới đây đo lại, không chép từ lượt trước.
+Nền đo: phiên cloud Linux, 4 nhân, Python 3.13.18, git 2.43.0; base = `48d372e14f190dae83a75ccbca8ee9a0b25635c5` (merge-base với `origin/master`). Mọi lệnh chạy từ gốc kho; log thô nằm ngoài kho (đường dẫn ở handoff). Lượt đo này là attempt 2 (sau review mã Codex lượt 1); mọi số dưới đây đo lại, không chép từ lượt trước. Phiên attempt 2 đầu tiên chết trước khi đo xong; phiên hoàn tất đo trên một clone SẠCH (không phải worktree), commit đo cục bộ có cùng ba băm mã trên.
 
 ## Tiêu chí 1–2 — A/B (`python ops/specs/wp1462-r1/do/do_b4.py ab i/4`, i = 0..3 song song, mỗi lát rc 0 `KẾT QUẢ ab: ĐẠT`)
 
@@ -46,11 +46,11 @@ không lệch
 KẾT QUẢ phat-lai: ĐẠT
 ```
 
-Đo trên bản sao bare RIÊNG của kho, với hàm chạy đã cách ly git (GIT_DIR tạm, cấu hình toàn cục tạm, `core.symlinks=false`). Hồi quy khung dòng: 60/60 lượt CRLF mô phỏng (`TextIOWrapper(newline="\r\n")`) ra cùng lớp với LF; đối chứng hỏng (CR giữa giá trị `che_do`) ra `la`.
+Đo trên bản sao bare RIÊNG của kho, với hàm chạy đã cách ly git (GIT_DIR tạm, cấu hình toàn cục tạm, `core.symlinks=false`, `core.attributesFile` trỏ ra tệp vắng trong thư mục tạm). Hồi quy khung dòng: 60/60 lượt CRLF mô phỏng (`TextIOWrapper(newline="\r\n")`) ra cùng lớp với LF; đối chứng hỏng (CR giữa giá trị `che_do`) ra `la`.
 
 ## Tiêu chí 4 — từng cặp đột biến · ca (`python ops/specs/wp1462-r1/do/do_b4.py dot-bien`, rc 0)
 
-125 đột biến `b4_*`, 171 cặp, 171 GIẾT bằng `ChotB4` của chính ca đích, 0 TÍN DỤNG GIẢ, 0 sống sót, 0 đối chứng khác họ đỏ.
+126 đột biến `b4_*`, 172 cặp, 172 GIẾT bằng `ChotB4` của chính ca đích, 0 TÍN DỤNG GIẢ, 0 sống sót, 0 đối chứng khác họ đỏ.
 
 | đột biến | ca đích | lớp ngoại lệ | phân hạng |
 |---|---|---|---|
@@ -143,6 +143,7 @@ KẾT QUẢ phat-lai: ĐẠT
 | b4_doc_cau_hinh_toan_cuc | cong_b4_git_cau_hinh_la_van_nhanh | ChotB4 | GIET |
 | b4_lien_trong_cay_tam | cong_b4_lien_tep | ChotB4 | GIET |
 | b4_lien_trong_cay_tam | cong_b4_lien_thu_muc | ChotB4 | GIET |
+| b4_doc_thuoc_tinh_toan_cuc | cong_b4_git_thuoc_tinh_toan_cuc | ChotB4 | GIET |
 | b4_ngay_theo_dong_ho | cong_b4_ngay_co_dinh | ChotB4 | GIET |
 | b4_goc_la_dau | cong_b4_sinh_bo_moi | ChotB4 | GIET |
 | b4_hop_dao_cha | cong_b4_sinh_bo_moi | ChotB4 | GIET |
@@ -231,13 +232,15 @@ KẾT QUẢ phat-lai: ĐẠT
 | vế | ca đã chạy | đạt/đạt-được | BỎ QUA | tổng giây 4 mảnh | giây tường |
 |---|---|---|---|---|---|
 | base (đo ở attempt 1, cùng base) | 1579 | 1541/1541 | 38 | 3306 | 1469 |
-| head (cùng hai băm trên) | 1743 | 1705/1705 | 38 | 3690 | 1484 |
+| head (cùng ba băm trên, clone sạch) | 1745 | 1707/1707 | 38 | 3359 | 1352 |
 
-N sau = N trước + số ca mới: 1743 = 1579 + 164. Delta thời gian là `khong_do_duoc`: hai vế đo ở hai lượt khác nhau, máy có tiến trình khác chạy cùng lúc.
+N sau = N trước + số ca mới: 1745 = 1579 + 166 (166 ca `cong_b4_*`). Job gom (`--gom`, `KQ_MANH=success`): `GOM: ĐẠT · 4 mảnh · 1745 ca bắt buộc`. Delta thời gian là `khong_do_duoc`: hai vế đo ở hai lượt khác nhau, máy có tiến trình khác chạy cùng lúc.
 
 ## Chưa đo (`khong_do_duoc` ở lượt này)
 
 - CI PR Ubuntu, `gate-packet-loop-manh` 16 mảnh, `ci-dot-bien-du.yml` trên H: executor không đẩy, không dispatch.
 - Windows thật: khung CRLF mới chỉ mô phỏng trên Linux; các ca `cong_b4_*` chưa chạy trên Windows.
 - Cấu hình git HỆ THỐNG không được cách ly ở hàm chạy: nó không phải đầu vào của người gọi (B-4), và không ca nào trong bộ dựng được nó mà không cần quyền root, nên một chốt cho nó sẽ không có đột biến giết được.
+- Tính toàn vẹn của KHO OBJECT `--root`: hàm chạy đọc object của kho người gọi (đặc tả mục 5) và git không băm lại object khi đọc; một object rời bị ghi đè nội dung dưới đúng OID blob bộ phân loại vẫn đổi được lớp (đo bằng thăm dò ngoài bộ ca). Không chặn ở lượt này: đặc tả cho bộ phân loại đọc object của `--root`.
+- Tệp thuộc tính HỆ THỐNG (`$(prefix)/etc/gitattributes`): như cấu hình hệ thống, không cách ly, cùng lý do.
 - Bảng `MUTANTS` cũ (ngoài `b4_*`): chạy ở `packet-loop-dot-bien.yml` sau merge.

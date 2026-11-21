@@ -19568,6 +19568,9 @@ def _b4_git(kieu, ma="print('che_do=duong_nhanh')"):
     return {"truoc": lambda w: (w / ".gitattributes").write_text("ops/ci_duong_nhanh.py filter=b4\n", encoding="utf-8"), "sau": sau, "env": {"HOME": "{w}/.git"}}
 
 
+_B4_CRLF, _B4_EOL = "print('che_do=duong_nhanh' if b'\\r' in open(__file__, 'rb').read() else 'che_do=day_du')\n", "ops/ci_duong_nhanh.py text eol=crlf\n"
+
+
 def _b4_lien(muc):
     """`master` (M2) đổi bộ phân loại — hoặc cả thư mục `ops` — thành SYMLINK (120000 đi thẳng vào index) trỏ ra tệp NGOÀI cây in `duong_nhanh`."""
     def sau(x, w, h):
@@ -19628,6 +19631,10 @@ _B4_CA.update({
     "cong_b4_khong_tep_phan_loai": _b4_pl("la", None),
     **{f"cong_b4_git_{k}": _b4_pl("khong_giam", _B4_KG, **_b4_git(k)) for k in ("smudge_cuc_bo", "smudge_toan_cuc", "thay_the")},
     "cong_b4_git_cau_hinh_la_van_nhanh": _b4_pl("duong_nhanh", _B4_A, 0, **_b4_git("smudge_toan_cuc", "print('che_do=day_du')")),
+    # thuộc tính `eol=crlf` cho bộ phân loại nhạy byte: ở tệp toàn cục của người gọi ($HOME/.config/git/attributes) KHÔNG đổi lớp; trong cây M thì vẫn theo
+    "cong_b4_git_thuoc_tinh_toan_cuc": _b4_pl("khong_giam", _B4_CRLF, env={"HOME": "{w}/.git"},
+                                              sau=lambda x, w, h: (w / ".git/.config/git").mkdir(parents=True) or (w / ".git/.config/git/attributes").write_text(_B4_EOL)),
+    "cong_b4_git_thuoc_tinh_trong_cay": _b4_pl("duong_nhanh", _B4_CRLF, 0, truoc=lambda w: (w / ".gitattributes").write_text(_B4_EOL)),
     "cong_b4_lien_tep": _b4_pl("la", _B4_KG, sau=_b4_lien("ops/ci_duong_nhanh.py")),
     "cong_b4_lien_thu_muc": _b4_pl("la", _B4_KG, sau=_b4_lien("ops"), spec_path="docs/X.md"),
     "cong_b4_ngay_co_dinh": _b4_ngay,
@@ -19935,6 +19942,7 @@ MUTANTS.update({
     "b4_git_dir_cua_kho": ('GIT_DIR=str(td / "git"), ', "GIT_DIR=gd, ", ["cong_b4_git_smudge_cuc_bo", "cong_b4_git_thay_the"]),
     "b4_doc_cau_hinh_toan_cuc": (', GIT_CONFIG_GLOBAL=str(td / "git" / "config")', "", ["cong_b4_git_smudge_toan_cuc", "cong_b4_git_cau_hinh_la_van_nhanh"]),
     "b4_lien_trong_cay_tam": ("symlinks = false", "symlinks = true", ["cong_b4_lien_tep", "cong_b4_lien_thu_muc"]),
+    "b4_doc_thuoc_tinh_toan_cuc": (r'''\tattributesFile = "%s"\n' % os.fsencode((td / "git" / "attributes").as_posix())''', "'", ["cong_b4_git_thuoc_tinh_toan_cuc"]),
     "b4_ngay_theo_dong_ho": (', ("DATE", "2000-01-01T00:00:00Z")', "", ["cong_b4_ngay_co_dinh"]),
     "b4_goc_la_dau": ('"CI_DUONG_NHANH_GOC": goc', '"CI_DUONG_NHANH_GOC": dau', ["cong_b4_sinh_bo_moi"]),
     "b4_hop_dao_cha": ('"-p", goc, "-p", dau, "-m", "pl1462"', '"-p", dau, "-p", goc, "-m", "pl1462"', ["cong_b4_sinh_bo_moi"]),

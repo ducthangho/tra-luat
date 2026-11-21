@@ -1,5 +1,5 @@
 {
- "mo_ta": "MO PHONG chay lai MANG SANG: attempt 2 chi chay lai job gom (attempt 1 failure); 8 manh cua attempt 1 mang sang; gom attempt 2 success in GOM MẢNH 8/8",
+ "mo_ta": "MO PHONG chay lai MANG SANG: attempt 2 chi chay lai job gom (attempt 1 failure); 8 manh cua attempt 1 mang sang; gom attempt 2 success in GOM MẢNH 8/8 Lan 4: tam bien nhan co NOI DUNG hop le (phia ghi that, head doi chieu qua commit) — dau gom mot minh khong con du.",
  "mo_phong": true,
  "run": {
   "id": 9021,
@@ -109,5 +109,16 @@
    5
   ],
   "g4a": "du"
+ },
+ "bien_nhan": {
+  "tao": {
+   "head": "cccccccccccccccccccccccccccccccccccccccc"
+  }
+ },
+ "cmt": {
+  "cccccccccccccccccccccccccccccccccccccccc": [
+   "dddddddddddddddddddddddddddddddddddddddd",
+   "1111111111111111111111111111111111111111"
+  ]
  }
 }

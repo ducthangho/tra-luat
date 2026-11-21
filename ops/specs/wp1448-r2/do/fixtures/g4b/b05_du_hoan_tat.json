@@ -1,5 +1,5 @@
 {
- "mo_ta": "MO PHONG: 8 job manh success, danh sach artifact du, job gom success in GOM MẢNH 8/8 (bang chung gom duong)",
+ "mo_ta": "MO PHONG: 8 job manh success, danh sach artifact du, job gom success in GOM MẢNH 8/8 (bang chung gom duong) Lan 4: tam bien nhan co NOI DUNG hop le (phia ghi that, head doi chieu qua commit) — dau gom mot minh khong con du.",
  "mo_phong": true,
  "run": {
   "id": 9005,
@@ -102,5 +102,16 @@
    5
   ],
   "g4a": "du"
+ },
+ "bien_nhan": {
+  "tao": {
+   "head": "cccccccccccccccccccccccccccccccccccccccc"
+  }
+ },
+ "cmt": {
+  "cccccccccccccccccccccccccccccccccccccccc": [
+   "dddddddddddddddddddddddddddddddddddddddd",
+   "1111111111111111111111111111111111111111"
+  ]
  }
 }

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo/../work/contrasts.py", line 54, in <module>
+    assert a!=b,(d['id'],a,b)
+           ^^^^
+AssertionError: ('r9b_skip_new_ascii', {'leaf': ('not_measured', ['co_job_skipped']), 'consumer': ['$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:co_job_skipped']}, {'leaf': ('not_measured', ['co_job_skipped']), 'consumer': ['$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:co_job_skipped']})

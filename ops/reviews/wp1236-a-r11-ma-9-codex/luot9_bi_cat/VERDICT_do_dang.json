@@ -1,0 +1,15 @@
+{
+  "reviewed_sha": "2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+  "tree_sha": "612ebd0d81cb1b92f9bb19cea5adc670bbc8f987",
+  "spec_sha256": "30386131d8017bf982ca0be7707c8d5fd3035e9586c5f94a446f45c40fc863d1",
+  "vong": 9,
+  "findings": [],
+  "class_table": [],
+  "prior_class_status": [],
+  "bang_noi_slug": [],
+  "hoi_tu": {},
+  "da_do_khop": [
+    "Preflight complete; review in progress"
+  ],
+  "verdict": "in_progress"
+}

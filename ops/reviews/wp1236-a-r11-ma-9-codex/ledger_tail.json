@@ -1,0 +1,180 @@
+[
+  {
+    "id": "delete_return_227",
+    "status": "KHONG_AP_DUNG -> 3 same-meaning returns GIET",
+    "replacements": [
+      {
+        "line": 210,
+        "case": "a205_duong_khop",
+        "rc": 3,
+        "message": "DO:a205_duong_khop:vp: ['$.moc_gate_output: tep_danh_gia_khong_hop_le:danh-gia-gate-output-44669622916.txt']"
+      },
+      {
+        "line": 205,
+        "case": "a204_duong_dan",
+        "rc": 3,
+        "message": "DO:a204_duong_dan:(a) ['$.moc_gate_output: danh_gia_khong_passed:x/../danh-gia-gate-output-44669622916.txt:not_measured:symlink']"
+      },
+      {
+        "line": 209,
+        "case": "a204_duong_dan",
+        "rc": 3,
+        "message": "DO:a204_duong_dan:(c) ['$.moc_gate_output: danh_gia_khong_passed:lk/danh-gia-gate-output-44669622916.txt:not_measured:symlink']"
+      }
+    ]
+  },
+  {
+    "id": "identity_126_7",
+    "status": "TUONG_DUONG",
+    "cases": [
+      {
+        "case": "a103_bo_phan_tich",
+        "rc": 0,
+        "message": ""
+      },
+      {
+        "case": "a101_sau_fixture_that",
+        "rc": 0,
+        "message": ""
+      }
+    ],
+    "proof": "reachable operand is None or built-in dict/string/Path; equality with None is exactly identity on contracted inputs; head only str|None"
+  },
+  {
+    "id": "identity_131_7",
+    "status": "TUONG_DUONG",
+    "cases": [
+      {
+        "case": "a108_neo",
+        "rc": 0,
+        "message": ""
+      },
+      {
+        "case": "a101_sau_fixture_that",
+        "rc": 0,
+        "message": ""
+      }
+    ],
+    "proof": "reachable operand is None or built-in dict/string/Path; equality with None is exactly identity on contracted inputs; head only str|None"
+  },
+  {
+    "id": "identity_154_11",
+    "status": "TUONG_DUONG",
+    "cases": [
+      {
+        "case": "a107_tap_job",
+        "rc": 0,
+        "message": ""
+      }
+    ],
+    "proof": "reachable operand is None or built-in dict/string/Path; equality with None is exactly identity on contracted inputs; head only str|None"
+  },
+  {
+    "id": "identity_262_25",
+    "status": "TUONG_DUONG",
+    "cases": [
+      {
+        "case": "a209_mien",
+        "rc": 0,
+        "message": ""
+      },
+      {
+        "case": "a122_mien_ma_tran",
+        "rc": 0,
+        "message": ""
+      }
+    ],
+    "proof": "reachable operand is None or built-in dict/string/Path; equality with None is exactly identity on contracted inputs; head only str|None"
+  },
+  {
+    "id": "identity_271_11",
+    "status": "TUONG_DUONG",
+    "cases": [
+      {
+        "case": "a202_token",
+        "rc": 0,
+        "message": ""
+      },
+      {
+        "case": "a203_duong_khong_tep",
+        "rc": 0,
+        "message": ""
+      }
+    ],
+    "proof": "reachable operand is None or built-in dict/string/Path; equality with None is exactly identity on contracted inputs; head only str|None"
+  },
+  {
+    "id": "identity_285_19",
+    "status": "TUONG_DUONG",
+    "cases": [
+      {
+        "case": "a204_duong_dan",
+        "rc": 0,
+        "message": ""
+      },
+      {
+        "case": "a205_duong_khop",
+        "rc": 0,
+        "message": ""
+      }
+    ],
+    "proof": "reachable operand is None or built-in dict/string/Path; equality with None is exactly identity on contracted inputs; head only str|None"
+  },
+  {
+    "id": "identity_72_67",
+    "status": "KHONG_AP_DUNG -> j1:doc_danh_gia:72:43 TUONG_DUONG",
+    "proof": {
+      "patterns_distinct": true,
+      "v3_identity": true,
+      "cu_identity": true
+    },
+    "cases": [
+      {
+        "case": "a111_skipped_theo_phien_ban",
+        "rc": 0,
+        "message": ""
+      },
+      {
+        "case": "a115_skipped_mat_passed",
+        "rc": 0,
+        "message": ""
+      }
+    ]
+  },
+  {
+    "id": "identity_85_11",
+    "status": "TUONG_DUONG",
+    "cases": [
+      {
+        "case": "a108_neo",
+        "rc": 0,
+        "message": ""
+      }
+    ],
+    "proof": "type(x) yields built-in type for YAML types used; identity/equality of these types same"
+  },
+  {
+    "id": "ref_any_run",
+    "status": "KHONG_AP_DUNG -> m131 GIET",
+    "result": "GIET",
+    "evidence": "DO:a121_token_tep_khoa_landed:tep_danh_gia('danh-gia-gate-output-1a.txt') = ['danh-gia-gate-output-1a.txt']"
+  },
+  {
+    "id": "ref_no_boundary",
+    "status": "KHONG_AP_DUNG -> CHOT_DA_BO",
+    "proof": "r11 explicitly does not require lookbehind; greedy leftmost maximal token has same boundary",
+    "samples": 10000,
+    "delta": 0
+  },
+  {
+    "id": "ref_txt_wild",
+    "status": "KHONG_AP_DUNG -> i5 GIET",
+    "cases": [
+      {
+        "case": "a121_token_tep_khoa_landed",
+        "rc": 3,
+        "message": "DO:a121_token_tep_khoa_landed:tep_danh_gia('danh-gia-gate-output-1xtxt') = ['danh-gia-gate-output-1xtxt']"
+      }
+    ]
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "name": "ledger",
+  "command": [
+    "python3",
+    "-B",
+    "../work/ledger_review.py"
+  ],
+  "rc": 0,
+  "seconds": 336.85,
+  "status": "passed",
+  "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ledger.stdout",
+  "stdout_sha256": "f0359a242eb4964334a19e58f158d1a641ac75a601a88896ea702030767cc721",
+  "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ledger.stderr",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

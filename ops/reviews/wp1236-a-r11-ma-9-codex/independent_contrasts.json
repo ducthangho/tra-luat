@@ -1,0 +1,365 @@
+[
+  {
+    "id": "r9b_header_run_ascii",
+    "witness": "header_run",
+    "original": {
+      "leaf": [
+        "passed",
+        []
+      ],
+      "consumer": []
+    },
+    "mutant": {
+      "leaf": [
+        "not_measured",
+        [
+          "dau_tep_sai"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:dau_tep_sai"
+      ]
+    },
+    "differentiating_cells": [],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_header_attempt_ascii",
+    "witness": "header_attempt",
+    "original": {
+      "leaf": [
+        "passed",
+        []
+      ],
+      "consumer": []
+    },
+    "mutant": {
+      "leaf": [
+        "not_measured",
+        [
+          "dau_tep_sai"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:dau_tep_sai"
+      ]
+    },
+    "differentiating_cells": [],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_job_id_ascii",
+    "witness": "job_id",
+    "original": {
+      "leaf": [
+        "passed",
+        []
+      ],
+      "consumer": []
+    },
+    "mutant": {
+      "leaf": [
+        "not_measured",
+        [
+          "dong_la"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:dong_la"
+      ]
+    },
+    "differentiating_cells": [],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_skip_old_ascii",
+    "witness": "skip_old",
+    "original": {
+      "leaf": [
+        "not_measured",
+        [
+          "co_job_skipped"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:co_job_skipped"
+      ]
+    },
+    "mutant": {
+      "leaf": [
+        "not_measured",
+        [
+          "dong_la"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:dong_la"
+      ]
+    },
+    "differentiating_cells": [],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_skip_new_ascii",
+    "witness": "skip_new",
+    "original": {
+      "leaf": [
+        "not_measured",
+        [
+          "co_job_skipped"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:co_job_skipped"
+      ]
+    },
+    "mutant": {
+      "leaf": [
+        "not_measured",
+        [
+          "dong_la"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:dong_la"
+      ]
+    },
+    "differentiating_cells": [],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_moc_numerator_ascii",
+    "witness": "moc_numerator",
+    "original": {
+      "leaf": [
+        "passed",
+        []
+      ],
+      "consumer": []
+    },
+    "mutant": {
+      "leaf": [
+        "not_measured",
+        [
+          "dong_la",
+          "thieu_moc"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:dong_la,thieu_moc"
+      ]
+    },
+    "differentiating_cells": [],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_moc_denominator_ascii",
+    "witness": "moc_denominator",
+    "original": {
+      "leaf": [
+        "passed",
+        []
+      ],
+      "consumer": []
+    },
+    "mutant": {
+      "leaf": [
+        "not_measured",
+        [
+          "dong_la",
+          "thieu_moc"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:dong_la,thieu_moc"
+      ]
+    },
+    "differentiating_cells": [],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_landed_ascii",
+    "witness": "landed",
+    "original": {
+      "leaf": true,
+      "consumer": [
+        "$: landed_khong_loi_khai_gate_output"
+      ]
+    },
+    "mutant": {
+      "leaf": false,
+      "consumer": []
+    },
+    "differentiating_cells": [],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_token_leading_space",
+    "witness": "token_leading",
+    "original": {
+      "leaf": "passed",
+      "consumer": [
+        "$.gate_output: duong_khong_tep_danh_gia"
+      ]
+    },
+    "mutant": {
+      "leaf": null,
+      "consumer": [
+        "$.gate_output: dinh_dang_loi_khai"
+      ]
+    },
+    "differentiating_cells": [],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_token_separator_space",
+    "witness": "token_separator",
+    "original": {
+      "leaf": "passed",
+      "consumer": [
+        "$.gate_output: duong_khong_tep_danh_gia"
+      ]
+    },
+    "mutant": {
+      "leaf": null,
+      "consumer": [
+        "$.gate_output: dinh_dang_loi_khai"
+      ]
+    },
+    "differentiating_cells": [],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_reason_no_spaces",
+    "witness": "reason_spaces",
+    "original": {
+      "leaf": [],
+      "consumer": []
+    },
+    "mutant": {
+      "leaf": [
+        "dong_mien"
+      ],
+      "consumer": [
+        "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+      ]
+    },
+    "differentiating_cells": [
+      "mien.os:H6a",
+      "mien.os:H6b",
+      "mien.head:H1",
+      "mien.sha_loi_khai:H1",
+      "mien.head:H2",
+      "mien.sha_loi_khai:H2",
+      "mien.head:H3",
+      "mien.sha_loi_khai:H3",
+      "mien.head:H4",
+      "mien.sha_loi_khai:H4",
+      "mien.head:H6a",
+      "mien.sha_loi_khai:H6a",
+      "mien.head:H6b",
+      "mien.sha_loi_khai:H6b"
+    ],
+    "classification": "law4"
+  },
+  {
+    "id": "r9b_event_tab",
+    "witness": "event_tab",
+    "original": {
+      "leaf": [
+        "not_measured",
+        [
+          "khong_phai_run_land"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:khong_phai_run_land"
+      ]
+    },
+    "mutant": {
+      "leaf": [
+        "passed",
+        []
+      ],
+      "consumer": []
+    },
+    "differentiating_cells": [],
+    "classification": "ngoai_bang_dong_P3"
+  },
+  {
+    "id": "r9b_name_inner_spaces",
+    "witness": "name_inner_spaces",
+    "original": {
+      "leaf": [
+        "not_measured",
+        [
+          "job_lech:136067289163"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:job_lech:136067289163"
+      ]
+    },
+    "mutant": {
+      "leaf": [
+        "passed",
+        []
+      ],
+      "consumer": []
+    },
+    "differentiating_cells": [],
+    "classification": "ngoai_bang_dong_P3"
+  },
+  {
+    "id": "r9b_schema_case_control",
+    "witness": "schema_case",
+    "original": {
+      "leaf": [
+        "not_measured",
+        [
+          "provenance_0"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:provenance_0"
+      ]
+    },
+    "mutant": {
+      "leaf": [
+        "passed",
+        []
+      ],
+      "consumer": []
+    },
+    "differentiating_cells": [
+      "schema:H1"
+    ],
+    "classification": "control"
+  },
+  {
+    "id": "r9b_log_nfkc_control",
+    "witness": "log_nfkc",
+    "original": {
+      "leaf": [
+        "not_measured",
+        [
+          "log_sha_lech:136067289163"
+        ]
+      ],
+      "consumer": [
+        "$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-1.txt:not_measured:log_sha_lech:136067289163"
+      ]
+    },
+    "mutant": {
+      "leaf": [
+        "passed",
+        []
+      ],
+      "consumer": []
+    },
+    "differentiating_cells": [
+      "log.sha256:H4"
+    ],
+    "classification": "control"
+  }
+]

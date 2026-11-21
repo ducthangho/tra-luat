@@ -1,0 +1,1165 @@
+{
+  "reviewed_sha": "2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+  "reviewed_tree": "612ebd0d81cb1b92f9bb19cea5adc670bbc8f987",
+  "spec_sha256": "30386131d8017bf982ca0be7707c8d5fd3035e9586c5f94a446f45c40fc863d1",
+  "vong": 9,
+  "findings": [
+    {
+      "id": "P01",
+      "class_slug": "test-thieu-chot",
+      "severity": "P2",
+      "vi_tri": "ops/gate_output_doi_chieu_test.py:781-865; bang_chung/ledger_hang_45.jsonl",
+      "van_de": "Luật 4 chưa khóa đủ miền ngữ pháp và chưa đưa từng hàng qua consumer. 10 đột biến không tương đương sống qua 45/45 ca: bảy vị trí số Unicode trong dòng đánh giá, landed_<8 số>, khoảng trắng đầu token và dấu phân cách whitespace. Đây là nghĩa vụ luật 4, xét trước luật 6, nên P2 dù không ô nào trong tập125 phân biệt các biến thể này. Hàng ngữ pháp chỉ gọi helper hoặc một consumer không đại diện cho bảng. Ledger hàng có đủ45/125 về cấu trúc nhưng các con trỏ chưa đủ chứng minh cả hai phía.",
+      "bang_chung": "Fresh baseline45/45; 10 ID: r9b_header_run_ascii, r9b_header_attempt_ascii, r9b_job_id_ascii, r9b_skip_old_ascii, r9b_skip_new_ascii, r9b_moc_numerator_ascii, r9b_moc_denominator_ascii, r9b_landed_ascii, r9b_token_leading_space, r9b_token_separator_space. Mỗi ID có cặp canonical, toàn bộ45 outcomes, witness helper+consumer trong independent_contrasts.json và phân hạng trong ledger_kho_moi_luot9.jsonl. Ví dụ số run toàn độ: HEAD passed/consumer[], mutant not_measured[dau_tep_sai]/consumer lỗi; token TAB: HEAD passed, mutant None. seed_and_routes.json: a120=34 leaf/0 consumer; a121=1 consumer; a122=21 direct waiver +1 waiver từ consumer/1 consumer. row_grammar_audit.json:48 phép kiểm con trỏ,40 GIET đúng,7 sống ở ca được trỏ và1 lỗi vô can; row_followup.json chứng minh7 biến thể ấy bị ca KHÁC giết, không gọi chúng là survivor toàn suite.",
+      "de_xuat": "Dùng bảng theo từng thành phần regex/miền nghĩa và cùng hàng đầu vào cho helper lẫn kiem_ho_so; phủ các lớp ký tự Unicode của \\d/\\s, đối chứng dương và âm chính xác. Thêm10 cặp vào hồi quy; cập nhật con trỏ ledger tới ca thật sự khóa hai phía. Không đổi ngữ pháp sản phẩm để làm test xanh.",
+      "mutant_ids": [
+        "r9b_header_run_ascii",
+        "r9b_header_attempt_ascii",
+        "r9b_job_id_ascii",
+        "r9b_skip_old_ascii",
+        "r9b_skip_new_ascii",
+        "r9b_moc_numerator_ascii",
+        "r9b_moc_denominator_ascii",
+        "r9b_landed_ascii",
+        "r9b_token_leading_space",
+        "r9b_token_separator_space"
+      ],
+      "luat": "4; ưu tiên (1) trong luật6"
+    },
+    {
+      "id": "P02",
+      "class_slug": "test-thieu-chot",
+      "severity": "P2",
+      "vi_tri": "ops/gate_output_doi_chieu_test.py:1118-1137",
+      "van_de": "Luật 6 bản sửa 2 yêu cầu mọi đầu vào gốc đọc từ hat_giong; chay_o vẫn lấy byte từ FX qua kt/mini và THU_MUC_THAT qua ho_so_tam, tự dựng hồ sơ consumer thay vì đọc hai ho_so trong hat.",
+      "bang_chung": "probes.py rc0; seed_and_routes.json: thay fixture.tep hoặc fixture.provenance bằng bản có băm đúng, chỉ đổi run ID, chay_o vẫn passed trong khi phép đo từ seed ra not_measured/provenance_0; thay fixture.ho_so hoặc mien.ho_so thành {} không đổi consumer thực nhưng consumer từ seed trả []. Bốn probe là thước dependency, không thay đổi tập ô được phê duyệt. Replay bảng gốc 125/125 vẫn đúng.",
+      "de_xuat": "Đọc byte nguồn, tên tương đối, thư mục và cả hai mẫu hồ sơ consumer trực tiếp từ hat_giong đã băm rồi áp delta ô. Bỏ đường lấy cùng dữ liệu từ FX/THU_MUC_THAT hoặc literal riêng trong chay_o. Giữ tập ô, kỳ vọng và phép chiếu đã được duyệt; kiểm dependency bằng nguồn khác biệt có băm hợp lệ.",
+      "luat": "6: mọi đầu vào gốc đọc từ hat_giong; đây là vi phạm trực tiếp, không phải phân hạng mutant sản phẩm ngoài bảng"
+    },
+    {
+      "id": "P03",
+      "class_slug": "test-thieu-chot",
+      "severity": "P3",
+      "vi_tri": "ops/gate_output_doi_chieu_test.py:1003-1080; miền bảng đóng r11",
+      "van_de": "2 đột biến sống không tương đương thuộc ngoai_bang_dong: chấp nhận TAB cuối event và gom khoảng trắng bên trong tên job. Chúng không thuộc miền grammar của luật4/kho152 và không ô nào trong125 ô phân biệt được; phân hạng6(b) là P3, không nâng thànhP2. Chưa có miễn của chủ kho neo HEAD này.",
+      "bang_chung": "r9b_event_tab; r9b_name_inner_spaces: mỗi mutant45/45, không lỗi chạy/vô can; replay độc lập toàn125 ô có0 ô phân biệt. Witness cùng fixture qua helper+consumer: HEAD not_measured[ khong_phai_run_land hoặc job_lech ], mutant passed; chi tiết independent_contrasts.json. Cặp neo/thay ghim kho mới, ledger_kho_moi_luot9.jsonl ghi từng ID.",
+      "de_xuat": "Đóng bằng ca/phép đo hồi quy phù hợp và review trên SHA mới, hoặc xin quyết định miễn đúng slug+exact SHA theoADR0060 M1. Nếu đổi tập ô phải duyệt lại đặc tả; agent không tự đổi băm hay ghi nợ.",
+      "mutant_ids": [
+        "r9b_event_tab",
+        "r9b_name_inner_spaces"
+      ],
+      "phan_hang": "ngoai_bang_dong",
+      "luat": "6(b)",
+      "o_phan_biet": []
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "test-thieu-chot",
+      "finding_ids": [
+        "P01",
+        "P02",
+        "P03"
+      ],
+      "manifestations": [
+        "Luật 4 chưa khóa đủ miền ngữ pháp và chưa đưa từng hàng qua consumer. 10 đột biến không tương đương sống qua 45/45 ca: bảy vị trí số Unicode trong dòng đánh giá, landed_<8 số>, khoảng trắng đầu token và dấu phân cách whitespace. Đây là nghĩa vụ luật 4, xét trước luật 6, nên P2 dù không ô nào trong tập125 phân biệt các biến thể này. Hàng ngữ pháp chỉ gọi helper hoặc một consumer không đại diện cho bảng. Ledger hàng có đủ45/125 về cấu trúc nhưng các con trỏ chưa đủ chứng minh cả hai phía.",
+        "Luật 6 bản sửa 2 yêu cầu mọi đầu vào gốc đọc từ hat_giong; chay_o vẫn lấy byte từ FX qua kt/mini và THU_MUC_THAT qua ho_so_tam, tự dựng hồ sơ consumer thay vì đọc hai ho_so trong hat.",
+        "2 đột biến sống không tương đương thuộc ngoai_bang_dong: chấp nhận TAB cuối event và gom khoảng trắng bên trong tên job. Chúng không thuộc miền grammar của luật4/kho152 và không ô nào trong125 ô phân biệt được; phân hạng6(b) là P3, không nâng thànhP2. Chưa có miễn của chủ kho neo HEAD này."
+      ],
+      "highest_open_severity": "P2",
+      "source": "lượt7 f4f17bc4237a5362117f37b56e65209b92465f64; lượt8 5a1bf33831bb4e3a227cfb25843cef8a922c634b; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "common_fix": "Giữ một nguồn dữ liệu đã băm cho bảng đóng; dùng bảng grammar chung cho helper và consumer; ghim đột biến reviewer và ledger đúng ca. Hai cơ chế P01 (miền/tuyến) và P02 (nguồn dữ liệu) cần thay phần test tương ứng; P03 giữ phân hạng ngoài bảng.",
+      "closing_check": "Luật1/2/4/5/6/7 đạt trên exact HEAD; replay125 ô và dependency seed; từng mutant mới có hạng/ca hoặc miễnP3 đúng SHA; grammar cả hai tuyến có positive/negative controls.",
+      "status": "VA_MOT_PHAN"
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_ids": [],
+      "manifestations": [
+        "M02/N03: đóng qua CLI error controls và 10 kết quả producer→consumer ở HEAD9"
+      ],
+      "highest_open_severity": null,
+      "source": "lượt7 f4f17bc4237a5362117f37b56e65209b92465f64; lượt8 5a1bf33831bb4e3a227cfb25843cef8a922c634b; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "common_fix": "Giữ khối tổng kết liên tiếp và đúng mẫu đã đăng ký; đưa khai báo bỏ qua ra ngoài khối, vẫn ghi đủ11 mục và mẫu số thực đo. Thêm kiểm producer-consumer hai nền cùng các đối chứng ca đỏ, mutant sống, tên CHI_POSIX lạ và mẫu số0. Tránh nới regex để nhận TONG DAT bất chấp thiếu bằng chứng dương.",
+      "closing_check": "producer_consumer.json: main thật -> chay_moi thật,2 chế độ ×(1 xanh+4 đỏ),đủ10 outcomes; prior_audit.json CLI 5 lỗi rc2/prefix +help rc0.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_ids": [],
+      "manifestations": [
+        "F01: prior_audit.json:5 YAML ngoài schema (list/null/int/string/mapping khác schema) đều passed; a116 đối chứng passed, YAML lỗi ParserError. Ledger delete_return_97 bị giết đúng a116."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "common_fix": "Lọc kiểu/schema trước khi đọc trường.",
+      "closing_check": "prior_audit.json: đo mới trực tiếp target/control trên HEAD; các ca a116,a117,a214,a204,a125,a128,a217 rc0; kiểm riêng YAML ngoài schema,UTF8 hỏng,alias dùng chung,./path,CLI errors.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_ids": [],
+      "manifestations": [
+        "F02,G01: prior_audit.json: UTF8 hỏng -> UnicodeDecodeError; a116 ParserError/symlink/symlink+provenance_0; a117 hai provenance -> provenance_nhieu, lỗi duyệt -> PermissionError; suite/ledger mutant lý do bị giết đúng ca."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 2 @6f7ccf10f2441d0c97b779cfa77ff2839b56fc47; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "common_fix": "Giữ lý do K2 và truyền lỗi đọc/duyệt về biên kiem_tep.",
+      "closing_check": "prior_audit.json: đo mới trực tiếp target/control trên HEAD; các ca a116,a117,a214,a204,a125,a128,a217 rc0; kiểm riêng YAML ngoài schema,UTF8 hỏng,alias dùng chung,./path,CLI errors.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_ids": [],
+      "manifestations": [
+        "F03,H02: prior_audit.json: a214 kiểm vòng ValueError và CLI rc2 không traceback, alias dùng chung vẫn hai đường; a210 đường stat quá dài rc2. portable_property_probes.json đối chứng stat OSError HEAD rc2, mutant ném OSError; native m65 GIET trên POSIX."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 1 @1719d6efb61433d92bbfba38f0a4add20a97be2b; lượt 3 @e323bd4dfb4fe422016c4fd010fa964b6cb748b0; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "common_fix": "Phát hiện vòng và đặt đọc/kiểm filesystem trong biên lỗi CLI.",
+      "closing_check": "prior_audit.json: đo mới trực tiếp target/control trên HEAD; các ca a116,a117,a214,a204,a125,a128,a217 rc0; kiểm riêng YAML ngoài schema,UTF8 hỏng,alias dùng chung,./path,CLI errors.",
+      "status": "DA_VA_THAT"
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_ids": [
+        "L03"
+      ],
+      "manifestations": [
+        "L03: prior_audit.json: docstring _tep_trong nói ./tệp HỢP LỆ, helper trả tệp và consumer []; a204 absolute/../symlink đều bị từ chối; r7_dotpath_raw GIET đúng a125."
+      ],
+      "highest_open_severity": null,
+      "source": "lượt 6 @c2d606bb6fc230c288200b8f1dd79715462c172b; lượt9 2719f81dd5c3f89e4986f6710ed2145cfd4c057b",
+      "common_fix": "Đồng bộ mô tả helper với đặc tả A và ngữ nghĩa PurePosixPath đã đo.",
+      "closing_check": "prior_audit.json: đo mới trực tiếp target/control trên HEAD; các ca a116,a117,a214,a204,a125,a128,a217 rc0; kiểm riêng YAML ngoài schema,UTF8 hỏng,alias dùng chung,./path,CLI errors.",
+      "status": "DA_VA_THAT"
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "luot_xuat_hien": [
+        1
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_audit.json: đo mới trực tiếp target/control trên HEAD; các ca a116,a117,a214,a204,a125,a128,a217 rc0; kiểm riêng YAML ngoài schema,UTF8 hỏng,alias dùng chung,./path,CLI errors.",
+      "chua_do_duoc": "Không chạy Windows native hoặc CI; nhãn này chỉ đóng phạm vi đã đo, không chứng nhận gate Windows.",
+      "nhan_doi_chieu_tieng_viet": "ĐÃ VÁ THẬT"
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "luot_xuat_hien": [
+        1,
+        2
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_audit.json: đo mới trực tiếp target/control trên HEAD; các ca a116,a117,a214,a204,a125,a128,a217 rc0; kiểm riêng YAML ngoài schema,UTF8 hỏng,alias dùng chung,./path,CLI errors.",
+      "chua_do_duoc": "Không chạy Windows native hoặc CI; nhãn này chỉ đóng phạm vi đã đo, không chứng nhận gate Windows.",
+      "nhan_doi_chieu_tieng_viet": "ĐÃ VÁ THẬT"
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "luot_xuat_hien": [
+        1,
+        3
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_audit.json: đo mới trực tiếp target/control trên HEAD; các ca a116,a117,a214,a204,a125,a128,a217 rc0; kiểm riêng YAML ngoài schema,UTF8 hỏng,alias dùng chung,./path,CLI errors.",
+      "chua_do_duoc": "Không chạy Windows native hoặc CI; nhãn này chỉ đóng phạm vi đã đo, không chứng nhận gate Windows.",
+      "nhan_doi_chieu_tieng_viet": "ĐÃ VÁ THẬT"
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_cu": [
+        "L03"
+      ],
+      "luot_xuat_hien": [
+        6
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "prior_audit.json: đo mới trực tiếp target/control trên HEAD; các ca a116,a117,a214,a204,a125,a128,a217 rc0; kiểm riêng YAML ngoài schema,UTF8 hỏng,alias dùng chung,./path,CLI errors.",
+      "chua_do_duoc": "Không chạy Windows native hoặc CI; nhãn này chỉ đóng phạm vi đã đo, không chứng nhận gate Windows.",
+      "nhan_doi_chieu_tieng_viet": "ĐÃ VÁ THẬT"
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02",
+        "L01",
+        "L02",
+        "M01",
+        "M03",
+        "N01",
+        "N02"
+      ],
+      "luot_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "status": "VA_MOT_PHAN",
+      "evidence": "152 ID cũ đã hợp lệ;11 mutant r8 GIET;125 ô đúng;seam2/2 GIET. Tuy nhiên 10 survivor luật4, 2 ngoai_bang_dong và seed dependency sai; lớp VA_MOT_PHAN, xemP01–P03.",
+      "chua_do_duoc": "Không chạy Windows native hoặc CI; nhãn này chỉ đóng phạm vi đã đo, không chứng nhận gate Windows.",
+      "per_finding": [
+        {
+          "id": "N01",
+          "status": "VA_MOT_PHAN",
+          "nhan": "VÁ HỜ",
+          "evidence": "152 ID cũ đã hợp lệ;11 mutant r8 GIET;125 ô đúng;seam2/2 GIET. Tuy nhiên 10 survivor luật4, 2 ngoai_bang_dong và seed dependency sai; lớp VA_MOT_PHAN, xemP01–P03."
+        },
+        {
+          "id": "N02",
+          "status": "DA_VA_THAT",
+          "nhan": "ĐÃ VÁ THẬT",
+          "evidence": "ledger_tail.json:7 tương đương,5 KAD có nhãn cuối hợp lệ và chứng minh exact HEAD. ref_no_boundary đóng nghĩa vụ ledger nhờ r11 không bắt lookbehind; không gọi đây là sửa mã sản phẩm."
+        }
+      ],
+      "nhan_doi_chieu_tieng_viet": "VÁ HỜ"
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "M02",
+        "N03"
+      ],
+      "luot_xuat_hien": [
+        7,
+        8
+      ],
+      "status": "DA_VA_THAT",
+      "evidence": "producer_consumer.json: main thật -> chay_moi thật,2 chế độ ×(1 xanh+4 đỏ),đủ10 outcomes; prior_audit.json CLI 5 lỗi rc2/prefix +help rc0.",
+      "chua_do_duoc": "Không chạy Windows native hoặc CI; nhãn này chỉ đóng phạm vi đã đo, không chứng nhận gate Windows.",
+      "per_finding": [
+        {
+          "id": "N03",
+          "status": "DA_VA_THAT",
+          "evidence": "producer_consumer.json: main thật -> chay_moi thật,2 chế độ ×(1 xanh+4 đỏ),đủ10 outcomes; prior_audit.json CLI 5 lỗi rc2/prefix +help rc0.",
+          "nhan": "ĐÃ VÁ THẬT"
+        }
+      ],
+      "nhan_doi_chieu_tieng_viet": "ĐÃ VÁ THẬT"
+    }
+  ],
+  "bang_noi_slug": [
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "ly_do_gop": "Lọc YAML ngoài schema trước truy cập trường."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "ly_do_gop": "Lỗi đọc/duyệt hoặc lý do K2 bị bỏ mất."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "ly_do_gop": "Ngoại lệ đầu vào thoát biên CLI."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02"
+      ],
+      "ly_do_gop": "Chốt đặc tả không được ca/đột biến bảo vệ độc lập."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "slug_spec": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "F04",
+        "G02",
+        "H01",
+        "J01",
+        "J02",
+        "K01",
+        "K02",
+        "L01",
+        "L02"
+      ],
+      "finding_moi": [
+        "M01",
+        "M03"
+      ],
+      "ly_do": "Cùng cơ chế thiếu thước khóa chốt/consumer; mapping r10, không reset lịch sử."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "U01 (đặc tả r9 vòng 4/r10)"
+      ],
+      "finding_moi": [
+        "M02"
+      ],
+      "ly_do": "Hợp đồng đã đóng ở đặc tả; mã chưa áp cho mọi nhánh lỗi CLI. Lớp mới trong chuỗi review MÃ, không cộng vào F/U lượt 6."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "M01",
+        "M03"
+      ],
+      "finding_moi": [
+        "N01",
+        "N02"
+      ],
+      "ly_do": "Giữ lớp thiếu phép kiểm độc lập của chốt/consumer và nghĩa vụ ledger. R10 đổi spec không reset lịch sử."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "M02"
+      ],
+      "finding_moi": [
+        "N03"
+      ],
+      "ly_do": "M02 cụ thể đóng; cùng lớp hợp đồng đầu ra với consumer tái xuất hiện ở nhánh Windows của suite. Không tách slug để tính lớp cũ là đóng."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "N01",
+        "N02"
+      ],
+      "finding_moi": [
+        "P01",
+        "P02",
+        "P03"
+      ],
+      "slug_spec": "nghiem-thu-khong-co-lap-chot-dich",
+      "ly_do": "Giữ lớp thiếu bảo vệ chốt/consumer;P02 nối nghĩa vụ seed AA01 của r11, không mở slug để reset lịch sử;P03 là phân hạng6(b) cùng lớp."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "M02",
+        "N03"
+      ],
+      "finding_moi": [],
+      "ly_do": "Đã xác nhận đóng trên exact HEAD bằng producer-consumer hai chế độ và CLI controls."
+    }
+  ],
+  "hoi_tu": {
+    "luot8_sang_9": "1/2",
+    "U": [
+      "test-thieu-chot",
+      "hop-dong-dau-vao-dau-ra-chua-chot"
+    ],
+    "F": [
+      "hop-dong-dau-vao-dau-ra-chua-chot"
+    ],
+    "lop_lap_lan_ba": [
+      "test-thieu-chot"
+    ],
+    "ty_le": 0.5,
+    "ghi_chu": "R11 không reset lịch sử; lớp test còn mở nên N02 riêng đóng không tăng F."
+  },
+  "da_do_khop": [
+    "Exact HEAD 2719f81dd5c3f89e4986f6710ed2145cfd4c057b; tree 612ebd0d81cb1b92f9bb19cea5adc670bbc8f987; spec local and Git blob SHA256 match30386131…; lease revision11 generation1; authorized3-file diff.",
+    "Product byte-identical79b3c24;only test changed since5a1bf33.",
+    "Native suite45/45,146/146,TU KIEM DAT(2),TONG DAT,rc0.",
+    "Ruff0.15.15 bare F on3 files rc0;CI registration31/31,Ruff pin/probe3/3,negative controls1226/1226,rc0;diff checkrc0;size1795<=2100.",
+    "Frozen125-cell object and canonical hash match;independent leaf+consumer replay exact expected;45 row anchors/125 coverage verified.",
+    "Ledger152 exactID set/hash:140 target kills+7 equivalents+5 valid KAD;N02 terminal labels verified under r11.",
+    "N03 producer→consumer2 modes ×5 conditions passes; m65/m79 portable seam kills;4 older closed classes remeasured.",
+    "Independent15 mutants×45 cases:12 live non-equivalent,3 killed,0 errors;every live mutant classified and pinned.",
+    "Selftest on candidate is1768/1784 rc1; baseline comparison in selftest_comparison.json; do not claim executor1784/1784 reproduced.",
+    "Convergence1/2;test-thieu-chot remains recurrent >=3 rounds;Codex budget10/10 per assignment;checkpoint required, no new call authorized.",
+    "Final HEAD/tree and17339 initial file hashes match;intermediate snapshot exposed20 selftest-generated ignored files,retained as evidence and cleaned;not uninterrupted read-only."
+  ],
+  "verdict": "changes_requested",
+  "identity": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "session_id": "01a1fd30-ef65-7bf2-b73a-27b55931b50e",
+    "model_served": "KHONG_DO_DUOC",
+    "effort_served": "KHONG_DO_DUOC",
+    "sandbox": "workspace-write; candidate tracked files read-only by operation; selftest created20 ignored files, preserved under work and removed to restore endpoint; incident disclosed",
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "model_family": "openai",
+    "model_family_source": "provider fallback ADR-0065",
+    "session_source": "CODEX_SESSION_ID current process",
+    "environment": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "ruff": "ruff 0.15.15",
+    "execution_surface_source": "Codex CLI assignment, CODEX_SESSION_ID and codex --version probe; version probe warning: cannot create PATH aliases on read-only filesystem; no bypass",
+    "github_submitter": "not_used",
+    "executor": {
+      "provider": "anthropic_claude",
+      "execution_surface": "claude_code",
+      "transport": "machine/local",
+      "session_id": "session_015GtxrYsNDbfLo32S39f5uY",
+      "source": "Supplied lease claim; executor runtime not independently observed"
+    },
+    "independence": "Fresh review context; no executor context fork; no delegated agent; all candidate operations read-only"
+  },
+  "progress": "complete",
+  "preflight": {
+    "lease_id": "wp1236-a-r11-g1-claude-20261121",
+    "revision": 11,
+    "generation": 1,
+    "base_sha": "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+    "spec_hash": "30386131d8017bf982ca0be7707c8d5fd3035e9586c5f94a446f45c40fc863d1",
+    "spec_blob_observed_sha256": "30386131d8017bf982ca0be7707c8d5fd3035e9586c5f94a446f45c40fc863d1",
+    "write_set_hash": "e348a0aec274cc000368e7b728a9a70423434e000ace619fbc059383907fb2f5",
+    "write_set": [
+      ".claude/dev/ci_dang_ky_test.py",
+      "ops/gate_output_doi_chieu.py",
+      "ops/gate_output_doi_chieu_test.py"
+    ],
+    "lease_until": "2026-11-23T06:00:00Z",
+    "review_class": "sensitive",
+    "reviewer_provider": "openai_codex",
+    "branch": "DETACHED",
+    "environment": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "pyyaml": "6.0.3",
+    "code_base_ancestor_rc": 0,
+    "authority_scope": "Offline assignment and supplied lease; no network readback; no authority transition",
+    "added_lines": 1795,
+    "limit_added_lines": 2100
+  },
+  "acceptance": {
+    "law1": {
+      "status": "passed",
+      "evidence": "Native suite146/146 target kills; reason/CLI controls; native Windows not_run",
+      "scope": "Native Linux only"
+    },
+    "law2": {
+      "status": "passed",
+      "evidence": "Five duplicate-ID forms and controls in suite/ledger; job_lap reasons asserted, not only status"
+    },
+    "law3": {
+      "status": "not_run",
+      "reason": "Optional scanner not an acceptance gate; independent scan15 performed instead"
+    },
+    "law4": {
+      "status": "failed",
+      "evidence": "P01; grammar survivors and incomplete consumer routes"
+    },
+    "law5": {
+      "status": "passed",
+      "counts": {
+        "total": 152,
+        "GIET": 140,
+        "TUONG_DUONG": 7,
+        "KHONG_AP_DUNG": 5
+      },
+      "evidence": "ledger_remeasure.jsonl,ledger_tail.json;152 unique IDs exact frozen pool hash",
+      "scope": "Frozen152 IDs on reviewed HEAD; new live mutants remain open in new ledger"
+    },
+    "law6": {
+      "status": "failed",
+      "generated_equals_frozen": true,
+      "canonical_sha256": "628e27046ab4ba7a7b3cf31eb65ded9b88c718c5bfd067401d12b60d2c21b857",
+      "cells": 125,
+      "leaf_routes": 125,
+      "consumer_routes": 119,
+      "head_only_cells": 6,
+      "rows": 45,
+      "rows_with_cells": 21,
+      "rows_grammar": 24,
+      "evidence": "table_replay.json all expected;seed_and_routes.json P02;row_grammar_audit/row_followup show incomplete row references"
+    },
+    "law7": {
+      "status": "passed",
+      "evidence": "producer_consumer.json:10 observations,2 green+8 red;main output4 adjacent summary lines;9 symlink skips only in modeled nt"
+    },
+    "seams": {
+      "status": "passed",
+      "evidence": "m65,m79 targeted a128 GIET,neither inCHI_POSIX;9 remaining entries need real symlinks"
+    },
+    "independent_scan": {
+      "status": "failed",
+      "baseline": 45,
+      "mutants": 15,
+      "cases_per_mutant": 45,
+      "killed": 3,
+      "survived_non_equivalent": 12,
+      "P2_law4": [
+        "r9b_header_run_ascii",
+        "r9b_header_attempt_ascii",
+        "r9b_job_id_ascii",
+        "r9b_skip_old_ascii",
+        "r9b_skip_new_ascii",
+        "r9b_moc_numerator_ascii",
+        "r9b_moc_denominator_ascii",
+        "r9b_landed_ascii",
+        "r9b_token_leading_space",
+        "r9b_token_separator_space"
+      ],
+      "P3_ngoai_bang_dong": [
+        "r9b_event_tab",
+        "r9b_name_inner_spaces"
+      ],
+      "run_errors": 0,
+      "incidental_errors": 0,
+      "new_pool": "kho_dot_bien_reviewer_luot9.jsonl",
+      "new_pool_sha256": "76688f4245e6fde69d9aaedffff19fd2247fbbc71a81f5755cff21f009dedf20",
+      "cumulative_pool": "kho_dot_bien_luot6_7_8_9.jsonl",
+      "cumulative_ids": 167,
+      "measurement_cache": "Original SafeLoader parse cached by exact input with fresh deepcopy; native unmodified suite separately run. No exception cache. A prior aborted-run scaffold was inspected and reused only as code; no old results trusted.",
+      "execution_status": "completed; findings open"
+    },
+    "windows": {
+      "classification": "required",
+      "status": "not_run",
+      "evidence": "User offline scope; Linux modeled branch/seams do not certify Windows local; no network/desktop/CI requested"
+    },
+    "size": {
+      "status": "passed",
+      "files": 3,
+      "added": 1795,
+      "deleted": 0,
+      "limit_added": 2100,
+      "ci_registration_delta": "one added dictionary entry only"
+    },
+    "selftest": {
+      "status": "failed",
+      "candidate_rc": 1,
+      "candidate_summary": [
+        "== tl selftest 1768/1784 =="
+      ],
+      "candidate_failures": [
+        "r973_bootstrap_khong_kiem_khoa",
+        "r973_bootstrap_ba_trang_thai",
+        "r973_bootstrap_require_agent_creds",
+        "r973_bootstrap_giu_auth_json_moi_hon",
+        "r973_bootstrap_last_refresh_hong_khong_pha",
+        "r973_bootstrap_auth_json_nguyen_tu",
+        "r973_bootstrap_sai_dinh_dang_khong_nap",
+        "r973_bootstrap_khong_export_khong_ghi_gemini",
+        "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+        "r268_l2_trichotomy_theo_trang_thai_object",
+        "wp433_gws_cred_dich_ngoai_kho",
+        "wp433_gws_cred_dich_ngoai_kho_b",
+        "wp433_gws_cred_no",
+        "wp433_gws_cred_win_reparse",
+        "wp433_nlm_gws_dich_ngoai_kho",
+        "wp727_tl_gws_refresh"
+      ],
+      "baseline_sha": "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+      "baseline_rc": 1,
+      "baseline_summary": [
+        "== tl selftest 1768/1784 =="
+      ],
+      "baseline_failures": [
+        "r973_bootstrap_khong_kiem_khoa",
+        "r973_bootstrap_ba_trang_thai",
+        "r973_bootstrap_require_agent_creds",
+        "r973_bootstrap_giu_auth_json_moi_hon",
+        "r973_bootstrap_last_refresh_hong_khong_pha",
+        "r973_bootstrap_auth_json_nguyen_tu",
+        "r973_bootstrap_sai_dinh_dang_khong_nap",
+        "r973_bootstrap_khong_export_khong_ghi_gemini",
+        "r226_nguong_l2_troi_theo_abbrev_va_ci_ghim",
+        "r268_l2_trichotomy_theo_trang_thai_object",
+        "wp433_gws_cred_dich_ngoai_kho",
+        "wp433_gws_cred_dich_ngoai_kho_b",
+        "wp433_gws_cred_no",
+        "wp433_gws_cred_win_reparse",
+        "wp433_nlm_gws_dich_ngoai_kho",
+        "wp727_tl_gws_refresh"
+      ],
+      "new_failures": [],
+      "removed_failures": [],
+      "limitation": "Same sandbox, separate checkout under work. Ancestor .git markers observed. Red remains failed; delta0 is not1784/1784 and does not meet invariant(a)."
+    }
+  },
+  "tests": [
+    {
+      "name": "base_ancestor",
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.0,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/base_ancestor.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/base_ancestor.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "baseline_checkout",
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/baseline_repo",
+        "checkout",
+        "--detach",
+        "010046f2141799ec6ffc9cfa1322d49df3f3f680"
+      ],
+      "rc": 0,
+      "seconds": 5.0,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/baseline_checkout.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/baseline_checkout.stderr",
+      "stderr_sha256": "c0fe25000b6c60e8c6d7d62a3f3c88f831a304a6ce862bb360247f2f1dd78163",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "baseline_clone",
+      "command": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/baseline_repo"
+      ],
+      "rc": 0,
+      "seconds": 0.01,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/baseline_clone.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/baseline_clone.stderr",
+      "stderr_sha256": "e28acf22127ee4821c841652bddc4f9d8b7013dc77e54f925e9d2e8aa94f98e2",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "baseline_config",
+      "command": [
+        "git",
+        "-C",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/baseline_repo",
+        "config",
+        "core.abbrev",
+        "7"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo",
+      "rc": 0,
+      "seconds": 0.0,
+      "status": "passed",
+      "stdout": "baseline_config.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "baseline_config.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "ci_registration",
+      "command": [
+        "python3",
+        "-B",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "rc": 0,
+      "seconds": 8.83,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ci_registration.stdout",
+      "stdout_sha256": "2773d93effe692afc1bbaa77e7c1f2f22fbac4488eb9765385a5b3ed1c3183dd",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ci_registration.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "codex_version",
+      "command": [
+        "codex",
+        "--version"
+      ],
+      "rc": 0,
+      "seconds": 0.08,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/codex_version.stdout",
+      "stdout_sha256": "49bcf97ef847bee772d62cb10e2f37b103a8e532171c7d12b9015f8dc0392df9",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/codex_version.stderr",
+      "stderr_sha256": "d47a06d59aba2814c3fb7460049fc2ccbfc834196c956d6c6558e8be8b079e24",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "contrasts",
+      "command": [
+        "python3",
+        "-B",
+        "../work/contrasts.py"
+      ],
+      "rc": 1,
+      "seconds": 87.15,
+      "status": "failed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/contrasts.stdout",
+      "stdout_sha256": "3e1e864985093ba9eef564438d2f129e3c6980874d25f1e70105160908443f41",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/contrasts.stderr",
+      "stderr_sha256": "02e35b4dad5a2361244ba53f536f9a3446108f882bcaefae353e912cecf592d4",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "contrasts_resumed",
+      "command": [
+        "python3",
+        "-B",
+        "../work/contrasts.py"
+      ],
+      "rc": 0,
+      "seconds": 205.41,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/contrasts_resumed.stdout",
+      "stdout_sha256": "727250db6b7e2b705503dfc4aadcb051e48be879615174fb10a5c1b2111649ee",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/contrasts_resumed.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "diff_check",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.01,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/diff_check.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/diff_check.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "independent_scan",
+      "command": [
+        "python3",
+        "-B",
+        "../work/scan_run.py"
+      ],
+      "rc": 0,
+      "seconds": 728.37,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/independent_scan.stdout",
+      "stdout_sha256": "182c0c419d79abd13a68d51542846b7478010d61600a9bfe9824e066721589c9",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/independent_scan.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "ledger",
+      "command": [
+        "python3",
+        "-B",
+        "../work/ledger_review.py"
+      ],
+      "rc": 0,
+      "seconds": 336.85,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ledger.stdout",
+      "stdout_sha256": "f0359a242eb4964334a19e58f158d1a641ac75a601a88896ea702030767cc721",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ledger.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "ledger_tail",
+      "command": [
+        "python3",
+        "-B",
+        "../work/ledger_tail.py"
+      ],
+      "rc": 0,
+      "seconds": 19.42,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ledger_tail.stdout",
+      "stdout_sha256": "5c1d1635be836fdd01a71a1883904b736193d556163c3bccf0e67764e66bf305",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ledger_tail.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "origin",
+      "command": [
+        "git",
+        "remote",
+        "get-url",
+        "origin"
+      ],
+      "rc": 0,
+      "seconds": 0.0,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/origin.stdout",
+      "stdout_sha256": "fa4a2fd030a66e7d608dc855a410d957584362c56ffd465ca89db79483fd60ad",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/origin.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "preflight",
+      "command": [
+        "git",
+        "diff",
+        "--numstat",
+        "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.01,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/preflight.stdout",
+      "stdout_sha256": "2c92789a7b94561d1a97aa054d0b92e90ca0301dc3267e78295cb1d4d34d160e",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/preflight.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "prior_audit",
+      "command": [
+        "python3",
+        "-B",
+        "../work/prior_audit.py"
+      ],
+      "rc": 0,
+      "seconds": 12.23,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/prior_audit.stdout",
+      "stdout_sha256": "b891657d3849499ded71b4ed18fd1bf95d0a27fa1269519ca667f860d9207e65",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/prior_audit.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "prior_delta",
+      "command": [
+        "git",
+        "diff",
+        "--stat",
+        "5a1bf33",
+        "HEAD"
+      ],
+      "rc": 0,
+      "seconds": 0.01,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/prior_delta.stdout",
+      "stdout_sha256": "1c09c8667c8016b72ae1b7e0d9df8a990db63bdc49d2b9650a856c518985c6d1",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/prior_delta.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "probes",
+      "command": [
+        "python3",
+        "-B",
+        "../work/probes.py"
+      ],
+      "rc": 0,
+      "seconds": 12.43,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/probes.stdout",
+      "stdout_sha256": "47e8b6093003d1c4fdc47008b175b09c1f118a68f5ab78eaa03e7127873e1dc9",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/probes.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "product_delta",
+      "command": [
+        "git",
+        "diff",
+        "79b3c24",
+        "HEAD",
+        "--",
+        "ops/gate_output_doi_chieu.py"
+      ],
+      "rc": 0,
+      "seconds": 0.0,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/product_delta.stdout",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/product_delta.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "refs",
+      "command": [
+        "git",
+        "for-each-ref",
+        "--format=%(objectname) %(refname)"
+      ],
+      "rc": 0,
+      "seconds": 0.01,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/refs.stdout",
+      "stdout_sha256": "6a7c7e8bca15234676a85e5913e4cb3ee5b25fa0d4311d115ddea4905f4fa8f3",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/refs.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "row_followup",
+      "command": [
+        "python3",
+        "-B",
+        "../work/row_followup.py"
+      ],
+      "rc": 0,
+      "seconds": 8.54,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/row_followup.stdout",
+      "stdout_sha256": "4a25a42bc8c7b8f951a59eba37c0e6352f68d7f3b18c1b787271c9fe65faa213",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/row_followup.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "row_grammar",
+      "command": [
+        "python3",
+        "-B",
+        "../work/row_grammar_audit.py"
+      ],
+      "rc": 0,
+      "seconds": 56.2,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/row_grammar.stdout",
+      "stdout_sha256": "6dab5d8194d64f52d8aab35d7aa6f3b92bd40149b42775e20f77fde8f272f462",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/row_grammar.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "ruff",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "ruff",
+        "check",
+        "--no-cache",
+        "--select",
+        "F",
+        "ops/gate_output_doi_chieu.py",
+        "ops/gate_output_doi_chieu_test.py",
+        ".claude/dev/ci_dang_ky_test.py"
+      ],
+      "rc": 0,
+      "seconds": 1.11,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ruff.stdout",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ruff.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "ruff_version",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "--version"
+      ],
+      "rc": 0,
+      "seconds": 0.05,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ruff_version.stdout",
+      "stdout_sha256": "633fc4e8b8179891d1a9edd4e956e51bbcbbc4ab899ee530fb5690387e080dc4",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ruff_version.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "selftest",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "rc": 1,
+      "seconds": 396.23,
+      "status": "failed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/selftest.stdout",
+      "stdout_sha256": "449e3131273ec4ea90351cf5599e227f63c9f35b77dcbbb3456fac533f4359fa",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/selftest.stderr",
+      "stderr_sha256": "5eb95a4accbb02f22e43609b068a2b1207224ab632f98bd8798c162d49870d5f",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "selftest_baseline",
+      "command": [
+        "python3",
+        "-B",
+        "scripts/tl.py",
+        "--selftest"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/baseline_repo",
+      "rc": 1,
+      "seconds": 324.82,
+      "status": "failed",
+      "stdout": "selftest_baseline.stdout",
+      "stdout_sha256": "449e3131273ec4ea90351cf5599e227f63c9f35b77dcbbb3456fac533f4359fa",
+      "stderr": "selftest_baseline.stderr",
+      "stderr_sha256": "113da4552ea3894537d1a138fa74d41aa521f0ab5c51b1368ea1f907c74e36d5"
+    },
+    {
+      "status": "interrupted",
+      "rc": 130,
+      "reason": "Review runner defaulted cwd to candidate instead of baseline; interrupted and restarting with explicit baseline cwd; not used as test evidence",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo",
+      "name": "selftest_baseline_wrong_cwd_aborted",
+      "rc_scope": "interrupted outer runner; child completion not measured",
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/baseline_repo/scripts/tl.py",
+        "--selftest"
+      ]
+    },
+    {
+      "name": "spec_blob",
+      "command": [
+        "git",
+        "cat-file",
+        "blob",
+        "25ac41869eb4bdfb64ddb62ba40d086ddf952a59"
+      ],
+      "rc": 0,
+      "seconds": 0.01,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/spec_blob.stdout",
+      "stdout_sha256": "30386131d8017bf982ca0be7707c8d5fd3035e9586c5f94a446f45c40fc863d1",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/spec_blob.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "suite",
+      "command": [
+        "python3",
+        "-B",
+        "ops/gate_output_doi_chieu_test.py"
+      ],
+      "rc": 0,
+      "seconds": 417.88,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/suite.stdout",
+      "stdout_sha256": "ac551738d34ad5dffb83337949582365fd28c57e7949c08746b7a5e2b687ee7c",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/suite.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "table",
+      "command": [
+        "python3",
+        "-B",
+        "../work/table_replay.py"
+      ],
+      "rc": 0,
+      "seconds": 43.34,
+      "status": "passed",
+      "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/table.stdout",
+      "stdout_sha256": "e356bda7911897b034e74aaf6d734ac0298df1373e0ec09f148aaef311bcc99d",
+      "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/table.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "Native Windows / remote CI / LIVE / release gates",
+      "status": "not_run",
+      "reason": "Offline read-only review scope; not a pass",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "Native POSIX skipped mutants",
+      "status": "passed",
+      "count": 0,
+      "evidence": "suite146/146, no BO QUA lines",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "Modeled nt skipped mutants",
+      "status": "skipped",
+      "count": 9,
+      "evidence": "Only9 real symlink mutant IDs; native Windows not measured",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/repo"
+    },
+    {
+      "name": "verdict_schema",
+      "command": [
+        "python3",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/kiem_verdict_lop.py",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/VERDICT.json",
+        "--vong",
+        "9"
+      ],
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "HOP_LE (§8.3): 3 finding, 6 lop",
+      "output": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/kiem_verdict.txt",
+      "note": "Revalidated after final write; schema validity is not content approval"
+    }
+  ],
+  "limitations": [
+    "Native Windows not_run;OS-mode simulation is not native execution.",
+    "No GitHub/network authority readback or remote CI;lease/spec authority treated as supplied offline context.",
+    "Served model/effort KHONG_DO_DUOC;no inference from GitHub actor.",
+    "Finite mutation search;pure-Python YAML parse cache in reviewer workers disclosed;native candidate gate separately uncached.",
+    "Initial contrast probe picked legacy skipped fixture for v3;it failed before classification, corrected fixture and resumed with complete15 records. Initial baseline invocation used wrong cwd, interrupted rc130 and restarted explicitly in baseline checkout;aborted evidence not used.",
+    "Snapshot only proves observed endpoint byte equality;source checkout outside provided repo not observed.",
+    "M1 P3 must close or have owner waiver exactSHA;none supplied forP03. Review does not authorize merge/push/land.",
+    "Read-only incident: tl.py --selftest generated20 ignored files in candidate checkout; own new files were preserved under work/selftest_side_effects and removed after hash/absence checks. No tracked or pre-existing file changed. See read_only_incident.json."
+  ],
+  "snapshot": {
+    "files_before": 17339,
+    "files_observed_after_tests": 17359,
+    "files_after_cleanup": 17339,
+    "observed_added_ignored": 20,
+    "delta_after_cleanup": 0,
+    "head_unchanged": true,
+    "tree_unchanged": true,
+    "tracked_modified": 0,
+    "read_only_incident": "read_only_incident.json",
+    "limit": "Selftest did write20 ignored files; endpoint restored but no claim of uninterrupted read-only behavior."
+  },
+  "artifact_counts": {
+    "finding_count": 3,
+    "open_class_count": 1,
+    "historical_class_count": 6,
+    "P2_findings": 2,
+    "P3_findings": 1
+  }
+}

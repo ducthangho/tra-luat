@@ -1,0 +1,15 @@
+{
+  "name": "ledger_tail",
+  "command": [
+    "python3",
+    "-B",
+    "../work/ledger_tail.py"
+  ],
+  "rc": 0,
+  "seconds": 19.42,
+  "status": "passed",
+  "stdout": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ledger_tail.stdout",
+  "stdout_sha256": "5c1d1635be836fdd01a71a1883904b736193d556163c3bccf0e67764e66bf305",
+  "stderr": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/a11-9b-codex/work/ledger_tail.stderr",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

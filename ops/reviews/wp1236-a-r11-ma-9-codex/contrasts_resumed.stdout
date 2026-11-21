@@ -1,0 +1,12 @@
+r9b_skip_new_ascii law4 0
+r9b_moc_numerator_ascii law4 0
+r9b_moc_denominator_ascii law4 0
+r9b_landed_ascii law4 0
+r9b_token_leading_space law4 0
+r9b_token_separator_space law4 0
+r9b_reason_no_spaces law4 14
+r9b_event_tab ngoai_bang_dong_P3 0
+r9b_name_inner_spaces ngoai_bang_dong_P3 0
+r9b_schema_case_control control 1
+r9b_log_nfkc_control control 1
+HOAN_TAT_CONTRAST15

@@ -1,0 +1,9 @@
+OK  test pass_trong_ca_cu                     rc=1   nút mới ở vị trí không được phép: dòng 1600
+OK  test sua_mot_dot_bien_cu                  rc=1   nút mới ở vị trí không được phép: dòng 9928
+OK  test sua_them_trong_repo_gia              rc=1   _repo_gia: AST đổi ngoài đúng chỗ được phép
+OK  test gan_lai_ham_cu                       rc=1   nút mới gán một tên cũ hoặc tên ngoài họ cho phép: ['_doi'] dòng 19436
+OK  test gan_nhieu_dich_co_ten_cu             rc=1   nút mới gán một tên cũ hoặc tên ngoài họ cho phép: ['ROOT', '_INV_Y'] dò
+OK  test cau_lenh_vo_danh_la                  rc=1   câu lệnh mới không gán tên nào và không thuộc dạng cho phép: dòng 19436
+OK  test them_mot_ca_moi (dat)                rc=0 PHẠM VI [test]: ĐẠT
+TONG test: dung 7 sai 0
+01:21:30Z

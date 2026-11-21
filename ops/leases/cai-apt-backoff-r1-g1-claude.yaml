@@ -36,9 +36,12 @@ granted_on_instruction: 'chu kho 21/11 trong phien dispatcher: "Dong y, mo packe
 recorded_by: 'phiên điều phối session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-21T02:44:46Z'
-heartbeat_at: '2026-11-21T02:44:46Z'
-lease_until: '2026-11-21T10:44:46Z'
-lease_expires_at_utc: '2026-11-21T10:44:46Z'
+heartbeat_at: '2026-11-21T03:17:23Z'
+lease_until: '2026-11-21T03:17:23Z'
+lease_expires_at_utc: '2026-11-21T03:17:23Z'
 max_lease_hours: 8
 review_calls_limit: 2
 inference_calls_limit: 0
+withdrawn_at_utc: '2026-11-21T03:17:23Z'
+withdrawn_by: 'phien dieu phoi session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r1 xong: cai_cong_cu.sh + test, review Codex offline 2/2 (luot 2 approve, P2/P3 luot 1 da sua va khoa bang ca + dot bien); ops/acceptance/cai-apt-backoff/r1/VERDICT.md. Thu hoi truoc merge vi khong con ghi them.'

@@ -751,7 +751,7 @@ def a217_cli_tham_so_va_ma_thoat():
     for nhan, a, mong in (("khong doi so", (), 2), ("thieu --provenance", ("kiem-tep", tep), 2), ("--help", ("--help",), 0),
                           ("provenance vang", ("kiem-tep", tep, "--provenance", "/khong/co"), 2)):
         rc, ra = cli(*a)
-        bang(rc == mong and "Traceback" not in ra, f"{nhan}: rc={rc} {ra[-150:]}")
+        bang(rc == mong and "Traceback" not in ra and (mong == 0 or ra.startswith("LỖI THAM SỐ:")), f"{nhan}: rc={rc} {ra[-150:]}")
     rc, ra = cli("kiem-tep", tep, "--provenance", str(ROOT / L / THU_MUC_THAT["T-v3-pass"]))
     bang(ra.splitlines()[0] == f"passed {tep} -", f"dong ket qua: {ra.splitlines()[:1]}")
     rc, ra = cli("kiem-tep", str(ROOT / FX["T-skip"][0]), "--provenance", str(ROOT / L / THU_MUC_THAT["T-skip"]))
@@ -1029,6 +1029,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m143_skip_truoc_failed", '    if any(j["tt"] == "failed" for j in d["jobs"].values()):                                    # K8\n        return "failed", []\n    if d["skip"]:\n        return "not_measured", ["co_job_skipped"]\n', '    if d["skip"]:\n        return "not_measured", ["co_job_skipped"]\n    if any(j["tt"] == "failed" for j in d["jobs"].values()):\n        return "failed", []\n', "a123"),
     ("m144_labels_noi_sai", '",".join(q.get("labels") or [])', '",~".join(q.get("labels") or [])', "a123"),
     ("m145_ly_do_noi_sai", """{tt}:{','.join(ly) or '-'}\"""", """{tt}:{';'.join(ly) or '-'}\"""", "a123"),
+    ("m146_argparse_usage", "    def error(self, message):\n", "    def _error(self, message):\n", "a217"),
     ("m58_cli_chi_bat_OSError", "        except Exception as e:   # gồm vòng", "        except OSError as e:   # gồm vòng", "a214"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

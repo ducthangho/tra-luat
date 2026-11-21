@@ -297,8 +297,14 @@ def kiem_ho_so(du_lieu, thu_muc):
     return vp
 
 
+class _ThamSo(argparse.ArgumentParser):   # review mã r10 lượt 7 M02: lỗi cú pháp cũng theo mẫu stderr `LỖI THAM SỐ:`
+    def error(self, message):
+        print(f"LỖI THAM SỐ: {message}", file=sys.stderr)
+        raise SystemExit(2)
+
+
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Đối chiếu gate_output với tệp đánh giá và provenance (wp1236 r9).")
+    ap = _ThamSo(description="Đối chiếu gate_output với tệp đánh giá và provenance (wp1236 r10).")
     sp = ap.add_subparsers(dest="lenh", required=True)
     a1 = sp.add_parser("kiem-tep")
     a1.add_argument("tep")

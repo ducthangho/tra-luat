@@ -19336,7 +19336,7 @@ socket.socket.connect = noi
 doc = lambda: json.load(open(tt, encoding="utf-8"))
 def gia(url, headers, han):
     ten, d = url.rsplit("/", 1)[1], doc()
-    open(nk, "a", encoding="utf-8").write(json.dumps({"pt": "GET", "url": url, "h": headers}) + "\n")
+    open(nk, "a", encoding="utf-8").write(json.dumps({"pt": "GET", "url": url, "h": headers, "han": han}) + "\n")
     x = d["bien"].get(ten)
     if x is None:
         return 404, {"X-GitHub-Request-Id": "rq404"}, b'{"message":"Not Found"}'
@@ -19472,7 +19472,7 @@ def _b4_kiem(c, r, k, rc_doi, lan=None, tt=None, yc=0, thieu="K2b làn G5", toke
         _b4_doi(c, len(k["e"]) == len(ds) + 1 and all(e.strip().startswith(f"THIẾU  {t}: ") for t, e in zip(ds, k["e"])) and k["e"][-1].endswith(f"CHƯA ĐỦ ĐIỀU KIỆN MERGE: thiếu {thieu}"),
                 "stderr", k["e"], "đòi", thieu)
     hd = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "packet-loop-kiem-merge", **({"Authorization": "Bearer " + token} if token else {})}
-    _b4_doi(c, len(k["nk"]) == yc and all(q == {"pt": "GET", "url": _B4_API + str(ten), "h": hd} for q in k["nk"]), "yêu cầu REST", k["nk"], "đòi", yc, ten)
+    _b4_doi(c, len(k["nk"]) == yc and all(q == {"pt": "GET", "url": _B4_API + str(ten), "h": hd, "han": 15} for q in k["nk"]), "yêu cầu REST", k["nk"], "đòi", yc, ten)
     _b4_doi(c, k["sach"] and not (token and token in " ".join(k["o"] + k["e"])), "kho/thư mục tạm không sạch, hoặc token bị in", k["sach"])
 
 
@@ -19520,6 +19520,9 @@ _B4_CA = {
     "cong_b4_bc_job_attempt_dung": _b4_bc(True, lambda x, h: (x["runs"][0].update(run_attempt=2), [j.update(run_attempt=2) for j in x["jobs"] + x["manh"]])),
     "cong_b4_bc_thieu_manh_7": _b4_bc(None, lambda x, h: x["manh"].pop()),
     "cong_b4_bc_dich_thieu_manh_7": _b4_bc(None, lambda x, h: (x.update(manh=_b4_manh(h, (_B4_SDICH,))), x["manh"].pop())),
+    # lượt 3 (B4-S05): MỌI chỉ số mảnh 0..6 ở cả hai chế độ (7 ở hai ca trên) — mỗi chỉ số một đột biến `b4_bc_bo_manh_*` riêng
+    **{f"cong_b4_bc_{cd}_thieu_manh_{k}": _b4_bc(None, lambda x, h, b=b, k=k: (x.update(manh=_b4_manh(h, (b,))), x["manh"].pop(k)))
+       for cd, b in (("du", _B4_SDU), ("dich", _B4_SDICH)) for k in range(7)},
     "cong_b4_bc_dich_du_8": _b4_bc("dich", lambda x, h: x.update(manh=_b4_manh(h, (_B4_SDICH,)))),
     "cong_b4_bc_manh_trung": _b4_bc(None, lambda x, h: x["manh"].append({**x["manh"][3], "id": 299})),
     "cong_b4_bc_job_head_khac": _b4_bc(None, lambda x, h: x["manh"][2].update(head_sha="0" * 40)),
@@ -19542,11 +19545,11 @@ _B4_CA = {
 
 
 def _b4_m2(nd):
-    """`master` đi TRƯỚC sau khi H rẽ nhánh (M2 thêm/sửa `nd`), đã đẩy và fetch: tự kiểm 7a vẫn khớp, commit hợp C khác cây của H."""
+    """`master` đi TRƯỚC sau khi H rẽ nhánh (M2 thêm/sửa/xoá (None) `nd`), đã đẩy và fetch: tự kiểm 7a vẫn khớp, commit hợp C khác cây của H."""
     def sau(x, w, h):
         _g(w, "checkout", "-q", "master")
         for p, b in nd.items():
-            (w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_text(b, encoding="utf-8", newline="\n")
+            _ = (w / p).unlink() if b is None else ((w / p).parent.mkdir(parents=True, exist_ok=True), (w / p).write_text(b, encoding="utf-8", newline="\n"))
         _g(w, "add", "-A"), _g(w, "commit", "-qm", "M2"), _g(w, "push", "-q", "origin", "master"), _g(w, "fetch", "-q", "origin"), _g(w, "checkout", "-q", "pr")
     return sau
 
@@ -19568,6 +19571,42 @@ def _b4_git(kieu, ma="print('che_do=duong_nhanh')"):
     return {"truoc": lambda w: (w / ".gitattributes").write_text("ops/ci_duong_nhanh.py filter=b4\n", encoding="utf-8"), "sau": sau, "env": {"HOME": "{w}/.git"}}
 
 
+def _b4_cau_hinh(noi):
+    """Lượt 3 (B4-C01): cấu hình/thuộc tính git của NGƯỜI GỌI không được đổi ĐẦU VÀO bộ phân loại (commit hợp C). Đổi tên thư mục (M2 dời `docs/bm`, H
+    thêm tệp vào đó) là xung đột ⇒ `la`; `merge.directoryRenames=true` ở cấu hình cục bộ (`cuc_bo`) hay toàn cục qua HOME (`toan_cuc`) biến nó thành hợp
+    sạch. `thuoc_tinh`: hai bên sửa cùng dòng ⇒ `la`; tệp thuộc tính toàn cục (XDG) `merge=union` biến nó thành hợp sạch."""
+    def sau(x, w, h):
+        _b4_m2({"docs/bm/a.md": "1\nY\n3\n"} if noi == "thuoc_tinh" else {"docs/bm/a.md": None, "docs/bm2/a.md": "1\n2\n3\n"})(x, w, h)
+        if noi == "thuoc_tinh":
+            (w / ".git/.config/git").mkdir(parents=True), (w / ".git/.config/git/attributes").write_text("docs/bm/a.md merge=union\n", encoding="utf-8")
+        else:
+            _g(w, "config", *(("--file", str(w / ".git/.gitconfig")) if noi == "toan_cuc" else ()), "merge.directoryRenames", "true")
+    return {"truoc": lambda w: ((w / "docs/bm").mkdir(parents=True), (w / "docs/bm/a.md").write_text("1\n2\n3\n", encoding="utf-8", newline="\n")),
+            "them": {"docs/bm/" + ("a.md" if noi == "thuoc_tinh" else "b.md"): "1\nX\n3\n"}, "sau": sau, "env": {"HOME": "{w}/.git"}}
+
+
+def _b4_gia(loai):
+    """Lượt 3 (B4-C01): kho `--root` có object GIẢ dưới ĐÚNG OID của M (cây `ops` · `blob` bộ phân loại) — một object HỢP LỆ khác dẫn tới bộ phân loại in
+    `duong_nhanh`; `vang`: blob `docs/vang.md` của M bị xoá; `ra_ngoai`: M2 có mục cây `..` (dựng `--literally`). Git không băm lại khi đọc cây/blob: chỉ
+    phép kiểm băm, kiểm có mặt và kiểm đường dẫn của `_b4_anh_chup` chặn được ⇒ `la`. (Commit M giả thì tự kiểm 7a đã đỏ: `rev-parse …^{commit}` có băm lại.)"""
+    import zlib
+
+    def sau(x, w, h):
+        gv = lambda vao, *a: subprocess.run(["git", *a], cwd=w, input=vao, capture_output=True, check=True).stdout  # noqa: E731
+        oid = lambda vao, *a: gv(vao, *a).decode().strip()  # noqa: E731
+        M, gia = _g(w, "rev-parse", "origin/master"), oid(b"print('che_do=duong_nhanh')\n", "hash-object", "-w", "--stdin")
+        ops = oid(f"100644 blob {gia}\tci_duong_nhanh.py\n".encode(), "mktree")
+        if loai == "ra_ngoai":
+            t = oid(b"40000 ..\0" + bytes.fromhex(ops) + gv(None, "cat-file", "tree", M + "^{tree}"), "hash-object", "-t", "tree", "--literally", "-w", "--stdin")
+            return _g(w, "push", "-q", "origin", _g(w, "commit-tree", t, "-p", M, "-m", "M2") + ":refs/heads/master"), _g(w, "fetch", "-q", "origin")
+        that, gia = {"blob": (M + ":ops/ci_duong_nhanh.py", gia), "cay": (M + ":ops", ops), "vang": (M + ":docs/vang.md", None)}[loai]
+        f = w / ".git/objects" / (that := _g(w, "rev-parse", that))[:2] / that[2:]
+        f.chmod(0o644)
+        k = _g(w, "cat-file", "-t", that)
+        _ = f.unlink() if gia is None else f.write_bytes(zlib.compress(b"%s %d\0%s" % (k.encode(), len(r := gv(None, "cat-file", k, gia)), r)))
+    return {"sau": sau, "truoc": lambda w: (w / "docs/vang.md").write_text("v\n", encoding="utf-8")}
+
+
 _B4_CRLF, _B4_EOL = "print('che_do=duong_nhanh' if b'\\r' in open(__file__, 'rb').read() else 'che_do=day_du')\n", "ops/ci_duong_nhanh.py text eol=crlf\n"
 
 
@@ -19580,6 +19619,13 @@ def _b4_lien(muc):
         _g(w, "update-index", "--add", "--cacheinfo", f"120000,{_g(w, 'hash-object', '-w', str(w.parent / 'lien'))},{muc}")
         _g(w, "commit", "-qm", "M2"), _g(w, "push", "-q", "origin", "master"), _g(w, "fetch", "-q", "origin"), _g(w, "checkout", "-qf", "pr")
     return sau
+
+
+def _b4_hang_so(c):
+    """Lượt 3 (B4-S05, biên hằng): hạn bộ phân loại của điểm gọi sản xuất đúng 120 s (mục 5); các ca hết hạn chỉ đổi hằng này qua đồ giả."""
+    sys.path.insert(0, str(c.script.parent))
+    (m := importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1462_hang", c.script))), sp.loader.exec_module(m)
+    _b4_doi(c, m.B4_HAN_PL == 120, "B4_HAN_PL phải đúng 120", m.B4_HAN_PL)
 
 
 def _b4_ngay(c):
@@ -19634,7 +19680,14 @@ _B4_CA.update({
     # thuộc tính `eol=crlf` cho bộ phân loại nhạy byte: ở tệp toàn cục của người gọi ($HOME/.config/git/attributes) KHÔNG đổi lớp; trong cây M thì vẫn theo
     "cong_b4_git_thuoc_tinh_toan_cuc": _b4_pl("khong_giam", _B4_CRLF, env={"HOME": "{w}/.git"},
                                               sau=lambda x, w, h: (w / ".git/.config/git").mkdir(parents=True) or (w / ".git/.config/git/attributes").write_text(_B4_EOL)),
-    "cong_b4_git_thuoc_tinh_trong_cay": _b4_pl("duong_nhanh", _B4_CRLF, 0, truoc=lambda w: (w / ".gitattributes").write_text(_B4_EOL)),
+    # lượt 3: thuộc tính TRONG cây M cũng không đổi byte chạy — chạy ĐÚNG blob (§5), không checkout
+    "cong_b4_git_thuoc_tinh_trong_cay": _b4_pl("khong_giam", _B4_CRLF, truoc=lambda w: (w / ".gitattributes").write_text(_B4_EOL)),
+    **{f"cong_b4_git_{k}": _b4_pl("la", _B4_A, **_b4_cau_hinh(n)) for k, n in (("doi_ten_cuc_bo", "cuc_bo"), ("doi_ten_toan_cuc", "toan_cuc"), ("thuoc_tinh_hop", "thuoc_tinh"))},
+    "cong_b4_git_khong_he_thong": _b4_pl("duong_nhanh", "import os\nprint('che_do=' + ('duong_nhanh' if os.environ.get('GIT_CONFIG_NOSYSTEM') == os.environ.get('GIT_ATTR_NOSYSTEM') == '1' else 'day_du'))\n", 0),
+    **{f"cong_b4_gia_mao_{k}": _b4_pl("la", _B4_KG, spec_path="docs/X.md", **_b4_gia(k)) for k in ("blob", "cay")},
+    "cong_b4_object_vang": _b4_pl("la", _B4_A, **_b4_gia("vang")),
+    "cong_b4_cay_ra_ngoai": _b4_pl("la", _B4_A, **_b4_gia("ra_ngoai")),
+    "cong_b4_han_dac_ta": _b4_hang_so,
     "cong_b4_lien_tep": _b4_pl("la", _B4_KG, sau=_b4_lien("ops/ci_duong_nhanh.py")),
     "cong_b4_lien_thu_muc": _b4_pl("la", _B4_KG, sau=_b4_lien("ops"), spec_path="docs/X.md"),
     "cong_b4_ngay_co_dinh": _b4_ngay,
@@ -19891,6 +19944,10 @@ MUTANTS.update({
     "b4_bc_bo_run_id": _b4_mut("J", 'j["run_id"] == R["id"] and ', "", "cong_b4_bc_job_run_khac"),
     "b4_bc_bo_attempt": _b4_mut("J", ' and j["run_attempt"] == R.get("run_attempt")', "", "cong_b4_bc_job_attempt_cu"),
     "b4_bc_bay_manh": ("for k in range(8):\n            jj = ", "for k in range(7):\n            jj = ", ["cong_b4_bc_thieu_manh_7", "cong_b4_bc_dich_thieu_manh_7"]),
+    # lượt 3 (B4-S05): bỏ RIÊNG từng chỉ số mảnh — mảnh 0 (đột biến reviewer: range(1, 8)) tới 6; mảnh 7 là `b4_bc_bay_manh`
+    "b4_bc_bo_manh_dau": ("for k in range(8):\n            jj = ", "for k in range(1, 8):\n            jj = ", ["cong_b4_bc_du_thieu_manh_0", "cong_b4_bc_dich_thieu_manh_0"]),
+    **{f"b4_bc_bo_manh_{i}": ("for k in range(8):\n            jj = ", f"for k in {[k for k in range(8) if k != i]}:\n            jj = ", [f"cong_b4_bc_du_thieu_manh_{i}", f"cong_b4_bc_dich_thieu_manh_{i}"])
+       for i in range(1, 7)},
     "b4_bc_nhan_trung": ("if len(jj) == 1 else None", "if len(jj) >= 1 else None", ["cong_b4_bc_manh_trung"]),
     "b4_bc_bo_kieu_list": ("if type(st) is not list or not all(", "if not all(", ["cong_b4_bc_khong_steps"]),
     "b4_bc_bo_kieu_buoc": (' or not all(isinstance(s, dict) and type(s.get("name")) is str for s in st):', ":", ["cong_b4_bc_step_ten_khong_chuoi", "cong_b4_bc_step_khong_object"]),
@@ -19938,16 +19995,28 @@ MUTANTS.update({
     "b4_hop_mot_cha": ('"-p", goc, "-p", dau, "-m", "pl1462"', '"-p", dau, "-m", "pl1462"', ["cong_b4_sinh_bo_moi", "cong_b4_tc11_b_che_do_dich"]),
     "b4_khong_don": ("        shutil.rmtree(td, **{", "        (lambda *a, **k: None)(td, **{", ["cong_b4_dc_alpha", "cong_b4_khong_tep_phan_loai", "cong_b4_het_han", "cong_b4_system_exit"]),
     "b4_object_vao_kho": ('GIT_OBJECT_DIRECTORY=str(td / "obj"), ', 'GIT_OBJECT_DIRECTORY=os.path.join(gd, "objects"), ', ["cong_b4_dc_alpha", "cong_b4_master_di_truoc"]),
-    # cách ly git: GIT_DIR tạm (cấu hình cục bộ, ref thay thế), cấu hình toàn cục, symlink trong cây tạm; ngày cố định của C; DAU là H
-    "b4_git_dir_cua_kho": ('GIT_DIR=str(td / "git"), ', "GIT_DIR=gd, ", ["cong_b4_git_smudge_cuc_bo", "cong_b4_git_thay_the"]),
-    "b4_doc_cau_hinh_toan_cuc": (', GIT_CONFIG_GLOBAL=str(td / "git" / "config")', "", ["cong_b4_git_smudge_toan_cuc", "cong_b4_git_cau_hinh_la_van_nhanh"]),
-    "b4_lien_trong_cay_tam": ("symlinks = false", "symlinks = true", ["cong_b4_lien_tep", "cong_b4_lien_thu_muc"]),
-    "b4_doc_thuoc_tinh_toan_cuc": (r'''\tattributesFile = "%s"\n' % os.fsencode((td / "git" / "attributes").as_posix())''', "'", ["cong_b4_git_thuoc_tinh_toan_cuc"]),
+    # cách ly git (lượt 3: đo trên ĐẦU VÀO bộ phân loại — commit hợp C — vì cây chạy không còn qua checkout): GIT_DIR tạm (cấu hình cục bộ, ref thay
+    # thế), cấu hình toàn cục, thuộc tính toàn cục, cấu hình/thuộc tính hệ thống; ngày cố định của C; DAU là H
+    "b4_git_dir_cua_kho": ('GIT_DIR=str(td / "git"), ', "GIT_DIR=gd, ", ["cong_b4_git_doi_ten_cuc_bo", "cong_b4_git_thay_the"]),
+    "b4_doc_cau_hinh_toan_cuc": (', GIT_CONFIG_GLOBAL=str(td / "git" / "config")', "", ["cong_b4_git_doi_ten_toan_cuc"]),
+    "b4_doc_thuoc_tinh_toan_cuc": (r'''\tattributesFile = "%s"\n' % os.fsencode((td / "git" / "attributes").as_posix())''', "'", ["cong_b4_git_thuoc_tinh_hop"]),
+    "b4_doc_cau_hinh_he_thong": (', GIT_CONFIG_NOSYSTEM="1"', "", ["cong_b4_git_khong_he_thong"]),
+    "b4_doc_thuoc_tinh_he_thong": (', GIT_ATTR_NOSYSTEM="1"', "", ["cong_b4_git_khong_he_thong"]),
+    # lượt 3 (B4-C01): cây chạy CHỈ từ byte đã kiểm băm — không checkout · kiểm băm (chung và theo từng loại) · object vắng · đường dẫn ra ngoài · symlink
+    "b4_checkout_thay_anh_chup": ('_b4_anh_chup(lambda vao: g("cat-file", "--batch", vao=vao)[1], cay_ma, td / "cay")', 'g("read-tree", cay_ma), g("checkout-index", "-a")',
+                                  ["cong_b4_gia_mao_blob", "cong_b4_git_thuoc_tinh_trong_cay"]),
+    "b4_bo_kiem_bam": (".hexdigest() != o:", ".hexdigest() != o and False:", ["cong_b4_gia_mao_blob", "cong_b4_gia_mao_cay"]),
+    **{f"b4_bo_bam_{k}": (".hexdigest() != o:", f'.hexdigest() != o and kieu != b"{v}":', [f"cong_b4_gia_mao_{k}"]) for k, v in (("blob", "blob"), ("cay", "tree"))},
+    "b4_object_vang_bo_qua": ('                raise ValueError(f"object {o} không có")\n', '                ra.append(b"")\n                continue\n', ["cong_b4_object_vang"]),
+    "b4_ghi_ra_ngoai": ("if not os.path.abspath(dich / p).startswith(", "if False and not os.path.abspath(dich / p).startswith(", ["cong_b4_cay_ra_ngoai"]),
+    "b4_ghi_lien_that": ("(dich / p).write_bytes(b)", '(os.symlink(b.decode(), dich / p) if mode == b"120000" else (dich / p).write_bytes(b))', ["cong_b4_lien_tep", "cong_b4_lien_thu_muc"]),
+    "b4_han_khac_15": ('/actions/variables/{ten}", hd, 15)', '/actions/variables/{ten}", hd, 30)', ["cong_b4_dc_beta"]),
+    "b4_han_pl_khac_120": ('"ops/ci_duong_nhanh.py", 120\n', '"ops/ci_duong_nhanh.py", 1200\n', ["cong_b4_han_dac_ta"]),
     "b4_ngay_theo_dong_ho": (', ("DATE", "2000-01-01T00:00:00Z")', "", ["cong_b4_ngay_co_dinh"]),
     "b4_goc_la_dau": ('"CI_DUONG_NHANH_GOC": goc', '"CI_DUONG_NHANH_GOC": dau', ["cong_b4_sinh_bo_moi"]),
     "b4_hop_dao_cha": ('"-p", goc, "-p", dau, "-m", "pl1462"', '"-p", dau, "-p", goc, "-m", "pl1462"', ["cong_b4_sinh_bo_moi"]),
     "b4_cay_hop_la_dau": ('"--no-messages", goc, dau)', '"--no-messages", dau, dau)', ["cong_b4_master_di_truoc"]),
-    "b4_ma_tu_cay_hop": ('g("read-tree", cay_ma)', 'g("read-tree", C[1])', ["cong_b4_pr_sua_bo_phan_loai"]),
+    "b4_ma_tu_cay_hop": ('vao=vao)[1], cay_ma, td / "cay")', 'vao=vao)[1], C[1], td / "cay")', ["cong_b4_pr_sua_bo_phan_loai"]),
     "b4_khoa_khop_giua_dong": ('if d.startswith(ten + b"=")]', 'if ten + b"=" in d]', ["cong_b4_dong_khac_bo_qua"]),
     "b4_dao_hai_lop": ('"bo_moi" if bm == b"co" else "che_do_dich" if dd == b"co"', '"che_do_dich" if bm == b"co" else "bo_moi" if dd == b"co"', ["cong_b4_dc_beta", "cong_b4_dc_delta"]),
     "b4_dau_la_goc": ('"CI_DUONG_NHANH_DAU": dau', '"CI_DUONG_NHANH_DAU": goc', ["cong_b4_sinh_bo_moi"]),

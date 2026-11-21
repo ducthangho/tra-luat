@@ -3620,29 +3620,70 @@ def _b4_doc_lop(rc: int, out: bytes) -> str:
     return "duong_nhanh" if cd == b"duong_nhanh" else "bo_moi" if bm == b"co" else "che_do_dich" if dd == b"co" else "khong_giam"
 
 
+def _b4_anh_chup(doc, M: str, dich: Path) -> None:
+    """Mục 5, lượt 3 (B4-C01): cây tạm dựng CHỈ từ byte đã BĂM LẠI khớp OID — commit M → mọi cây → mọi blob, đọc thô bằng `cat-file --batch`
+    (`doc`: byte vào ⇒ byte ra) rồi TỰ ghi; không checkout nên không cấu hình, thuộc tính, bộ lọc nào đổi được byte. Symlink ra tệp thường, gitlink ra
+    thư mục rỗng. Object vắng, băm lệch, đường dẫn ra ngoài `dich` ⇒ ValueError (⇒ `la`). Kho người gọi chỉ là NGUỒN byte, không được tin."""
+    def lay(oids, kieu):
+        out, i, ra = doc(b"".join(o.encode() + b"\n" for o in oids)), 0, []
+        for o in oids:
+            j = out.index(b"\n", i)
+            dau, i = out[i:j].split(), j + 1
+            if len(dau) != 3:
+                raise ValueError(f"object {o} không có")
+            b, i = out[i:i + int(dau[2])], i + int(dau[2]) + 1
+            if hashlib.new("sha1" if len(o) == 40 else "sha256", b"%s %d\0" % (kieu, len(b)) + b).hexdigest() != o:
+                raise ValueError(f"object {o} lệch băm")
+            ra.append(b)
+        return ra
+    goc, tep = re.match(rb"tree ([0-9a-f]{40,64})\n", lay([M], b"commit")[0]), []
+    if not goc:
+        raise ValueError("commit M không có dòng tree")
+    tang = [("", goc[1].decode())]
+    while tang:
+        con = []
+        for (cha, _), b in zip(tang, lay([o for _, o in tang], b"tree")):
+            while b:
+                k = b.index(b"\0")
+                (mode, ten), o, b = b[:k].split(b" ", 1), b[k + 1:k + 1 + len(M) // 2].hex(), b[k + 1 + len(M) // 2:]
+                p = cha + ten.decode()
+                if not os.path.abspath(dich / p).startswith(os.path.join(os.path.abspath(dich), "")):
+                    raise ValueError(f"cây M có đường dẫn ra ngoài: {p!r}")
+                (con if mode == b"40000" else tep).append((p, o, mode))
+        tang = [(p + "/", o) for p, o, _ in con]
+    blob = [t for t in tep if t[2] != b"160000"]
+    for (p, _, mode), b in zip(blob, lay([o for _, o, _ in blob], b"blob")):
+        (dich / p).parent.mkdir(parents=True, exist_ok=True), (dich / p).write_bytes(b), mode == b"100755" and (dich / p).chmod(0o755)
+    for p, _, mode in tep:
+        _ = mode == b"160000" and (dich / p).mkdir(parents=True, exist_ok=True)
+
+
 def _b4_tinh_lai(root: Path, cay_ma: str, goc: str, dau: str) -> str:
     """Mục 5, HÀM CHẠY: bộ phân loại tại `cay_ma` chạy `python -I` trong cây tạm, với commit hợp C(goc, dau) nằm ở thư mục object TẠM.
     Không để lại gì trong kho `root` (ref, worktree, object) và xoá mọi thư mục tạm ở mọi đường thoát.
-    Git chạy trên một GIT_DIR TẠM, trống: kho `root` chỉ góp OBJECT (alternates). Cấu hình cục bộ/toàn cục, ref thay thế, graft,
-    `info/attributes`, tệp thuộc tính toàn cục và hook của người gọi KHÔNG được đọc (không bộ lọc smudge nào chạy); symlink trong cây ra tệp thường, không trỏ ra ngoài."""
+    Git chạy trên một GIT_DIR TẠM, trống: kho `root` chỉ góp OBJECT (alternates). Cấu hình hệ thống/cục bộ/toàn cục, ref thay thế, graft,
+    `info/attributes`, tệp thuộc tính hệ thống/toàn cục và hook của người gọi KHÔNG được đọc. Cây chạy dựng bằng `_b4_anh_chup` (byte đã kiểm băm)."""
     td = Path(tempfile.mkdtemp(prefix="pl1462-"))
     try:
         rc, gd = _git_do(root, "rev-parse", "--path-format=absolute", "--git-common-dir")
         gd = os.fsdecode(gd).strip()
         env = {k: os.environ[k] for k in B4_BIEN_MT if k in os.environ}
         env.update(GIT_DIR=str(td / "git"), GIT_OBJECT_DIRECTORY=str(td / "obj"), GIT_ALTERNATE_OBJECT_DIRECTORIES=os.path.join(gd, "objects"),
-                   GIT_INDEX_FILE=str(td / "idx"), GIT_WORK_TREE=str(td / "cay"), GIT_CONFIG_GLOBAL=str(td / "git" / "config"))
+                   GIT_INDEX_FILE=str(td / "idx"), GIT_WORK_TREE=str(td / "cay"), GIT_CONFIG_GLOBAL=str(td / "git" / "config"), GIT_CONFIG_NOSYSTEM="1", GIT_ATTR_NOSYSTEM="1")
         ngay = {f"GIT_{v}_{k}": g for v in ("AUTHOR", "COMMITTER") for k, g in (("NAME", "pl1462"), ("EMAIL", "pl1462@invalid"), ("DATE", "2000-01-01T00:00:00Z"))}
         (td / "obj").mkdir(), (td / "cay").mkdir(), (td / "git" / "refs").mkdir(parents=True), (td / "git" / "HEAD").write_bytes(b"ref: refs/heads/pl1462\n")
         # attributesFile: tệp thuộc tính toàn cục ($HOME/.config/git/attributes) không theo GIT_CONFIG_GLOBAL — trỏ nó vào tệp vắng trong td
-        (td / "git" / "config").write_bytes(b'[core]\n\tsymlinks = false\n\tattributesFile = "%s"\n' % os.fsencode((td / "git" / "attributes").as_posix()))
+        (td / "git" / "config").write_bytes(b'[core]\n\tattributesFile = "%s"\n' % os.fsencode((td / "git" / "attributes").as_posix()))
 
-        def g(*lenh, them=None) -> tuple:
-            p = subprocess.run(["git", *lenh], env={**env, **(them or {})}, cwd=td / "cay", capture_output=True, stdin=subprocess.DEVNULL, timeout=B4_HAN_PL)
-            return p.returncode, p.stdout.decode("ascii", "replace").strip()
+        def g(*lenh, them=None, vao=None) -> tuple:
+            p = subprocess.run(["git", *lenh], env={**env, **(them or {})}, cwd=td / "cay", capture_output=True, input=vao, stdin=None if vao else subprocess.DEVNULL, timeout=B4_HAN_PL)
+            return p.returncode, p.stdout if vao else p.stdout.decode("ascii", "replace").strip()
         cay = g("merge-tree", "--write-tree", "--no-messages", goc, dau) if rc == 0 else (1, "")
         C = g("commit-tree", cay[1], "-p", goc, "-p", dau, "-m", "pl1462", them=ngay) if cay[0] == 0 else (1, "")
-        if C[0] or not SHA_RE.fullmatch(C[1]) or g("read-tree", cay_ma)[0] or g("checkout-index", "-a")[0] or not (td / "cay" / B4_PL).is_file():
+        if C[0] or not SHA_RE.fullmatch(C[1]):
+            return "la"
+        _b4_anh_chup(lambda vao: g("cat-file", "--batch", vao=vao)[1], cay_ma, td / "cay")
+        if not (td / "cay" / B4_PL).is_file():
             return "la"
         p = subprocess.run([sys.executable, "-I", str(td / "cay" / B4_PL)], cwd=td / "cay", capture_output=True, stdin=subprocess.DEVNULL, timeout=B4_HAN_PL,
                            env={**env, "CI_DUONG_NHANH_SU_KIEN": "pull_request", "CI_DUONG_NHANH_GOC": goc, "CI_DUONG_NHANH_DAU": dau, "CI_DUONG_NHANH_MERGE": C[1]})

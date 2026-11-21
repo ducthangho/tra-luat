@@ -3,8 +3,9 @@
 
   ab        tiêu chí 1–2: ĐẾM quần thể bằng cách chạy CẢ sổ ca của base với máy đếm ở `_c1106` (không lọc tĩnh), rồi với mọi ca đã vào
             bộ dựng: dựng MỘT lần, chạy `packet_loop.py` của base (merge-base với origin/master) và của head trên CÙNG fixture, mỗi vế kèm
-            `launcher.py` của chính nó; kèm tự kiểm bộ so và tự kiểm phép đếm. Ca không có lời so được (dừng trước CLI, hoặc chạy script do
-            ca tự sửa) được so VẾT + kết cục, không so byte.
+            `launcher.py` của chính nó; kèm tự kiểm bộ so và tự kiểm phép đếm. Ca chạy script do CHÍNH nó sửa: dựng lại đúng phép sửa ấy trên
+            script của TỪNG vế, chạy ở cùng một chỗ, so BYTE (lượt 3). Ca vào bộ dựng mà KHÔNG tới CLI nào được liệt kê kèm vết (chuỗi ngoại lệ)
+            và là KHOẢNG TRỐNG nghiệm thu (tiêu chí 1: quần thể so nhỏ hơn quần thể đếm ⇒ ĐỎ) — không bao giờ in ĐẠT khi còn khoảng trống.
   phat-lai  tiêu chí 8: 60 merge của lịch sử thật qua HÀM CHẠY (`_b4_tinh_lai`) so với đường trực tiếp + hồi quy khung dòng LF/CRLF.
   dot-bien  tiêu chí 4: bảng (đột biến · ca · lớp ngoại lệ · phân hạng) cho mọi mục `b4_*` của bảng `MUTANTS`.
 `ab` và `dot-bien` nhận thêm lát `i/n` (chạy song song n tiến trình; quần thể = hợp các lát). Thoát 0 = đạt; 1 = có lệch (in từng dòng `ĐỎ`)."""
@@ -14,6 +15,7 @@ import importlib.util
 import io
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -75,19 +77,43 @@ def tu_kiem_bo_so():
 
 
 # --- tiêu chí 1–2 ---------------------------------------------------------------------------------------------------------------
+def bien_the(goc, sua, s):
+    """Phép sửa mà ca tự làm (`goc` → `sua`, byte), mở ra TRỌN DÒNG, dựng lại trên `s`; đoạn gốc không duy nhất ở `goc` hay `s` ⇒ None (ĐỎ ở bộ gọi)."""
+    p = len(os.path.commonprefix([goc, sua]))
+    q = min(len(os.path.commonprefix([goc[::-1], sua[::-1]])), len(goc) - p, len(sua) - p)
+    a, b = goc.rfind(b"\n", 0, p) + 1, (goc.find(b"\n", len(goc) - q) + 1 or len(goc)) if q else len(goc)
+    cu, moi = goc[a:b], sua[a:len(sua) - (len(goc) - b)]
+    return s.replace(cu, moi, 1) if goc.count(cu) == s.count(cu) == 1 else None
+
+
+def chuoi(ex):
+    """Vết ngoại lệ: lớp của mọi mắt trong chuỗi `__cause__`/`__context__`; mắt cuối kèm thông điệp (chứng cứ lỗi TIÊM của giàn trước CLI)."""
+    ra = []
+    while ex is not None and len(ra) < 8:
+        ra.append(type(ex).__name__ if (ex.__cause__ or ex.__context__) else f"{type(ex).__name__}({str(ex)[:40]!r})")
+        ex = ex.__cause__ or ex.__context__
+    return "<".join(ra)
+
+
 def do_ca(T, kich_ban, td, ten_ca):
     """Chạy các ca `ten_ca` của bộ test `T` với MÁY ĐẾM ở `_c1106`, ghi lần VÀO bộ dựng TRƯỚC khi nó chạy. Trả (ghi, vet). `ghi[ca]` = các lời `kiem-merge`
-    SO ĐƯỢC (cùng fixture, chạy trên từng script của `kich_ban`). `vet[ca]` = dãy sự kiện: `vao` (vào `_c1106`) · `so` (lời so được) · `la:<rc>` (ca đưa một
-    script KHÁC — bản do chính nó sửa — nên chạy ĐÚNG script ấy, không thay) · `nem:<lớp>` (ngoại lệ ra khỏi `_c1106`, kể cả do ca tiêm) · `ca:<dat|lớp>`."""
+    SO ĐƯỢC (cùng fixture, chạy trên từng script của `kich_ban`). `vet[ca]` = dãy sự kiện: `vao` (vào `_c1106`) · `so` (lời so được) · `la:<rc>:so:<dựng lại được>` (ca đưa một
+    script KHÁC — bản do chính nó sửa — nên chạy ĐÚNG script ấy, rồi dựng lại phép sửa trên từng vế và ghi lời so được) · `nem:<lớp>` (ngoại lệ ra khỏi `_c1106`, kể cả do ca tiêm) · `ca:<dat|lớp>`."""
     ghi, vet, trong, cu = {}, {}, [0, None], (T._c1106, T.run, T._rev_list_loi, T._transition_run1187)
 
     def boc(goc):
         def chay(script, args, *a, **k):   # CÙNG chữ ký với hàm gốc (`state_dir` tuỳ chọn): bọc sai chữ ký làm ca hỏng trước khi tới bộ dựng
             if not trong[0] or not args or str(args[0]) != "kiem-merge":
                 return goc(script, args, *a, **k)
-            if Path(script) != Path(kich_ban[-1]):
-                r = goc(script, args, *a, **k)
-                vet[trong[1]].append(f"la:{r[0]}")
+            if Path(script) != Path(kich_ban[-1]):   # lượt 3 (B4-C04): script do ca tự sửa — chạy nó, RỒI dựng lại phép sửa trên từng vế, so byte
+                r, d = goc(script, args, *a, **k), Path(script).parent / "ab-bien-the"
+                d.mkdir(exist_ok=True)
+                ra = []
+                for i, s in enumerate(kich_ban):
+                    bt = bien_the(Path(kich_ban[-1]).read_bytes(), Path(script).read_bytes(), Path(s).read_bytes())
+                    (d / "launcher.py").write_bytes((Path(s).parent / "launcher.py").read_bytes()), (d / "packet_loop.py").write_bytes(bt or b"raise SystemExit(99)\n")
+                    ra.append(goc(d / "packet_loop.py", args, *((Path(f"{a[0]}-b{i}"), *a[1:]) if a and a[0] is not None else a), **k)[:3] + (bt is not None,))
+                ghi.setdefault(trong[1], []).append([(x[0], bytes(x[1]), bytes(x[2])) for x in ra]), vet[trong[1]].append(f"la:{r[0]}:so:{all(x[3] for x in ra)}")
                 return r
             ra = [goc(s, args, *((Path(f"{a[0]}-{i}"), *a[1:]) if a and a[0] is not None else a), **k) for i, s in enumerate(kich_ban)]
             ghi.setdefault(trong[1], []).append([(r[0], bytes(r[1]), bytes(r[2])) for r in ra]), vet[trong[1]].append("so")
@@ -100,7 +126,7 @@ def do_ca(T, kich_ban, td, ten_ca):
         try:
             return cu[0](*a, **k)
         except BaseException as ex:
-            vet[trong[1]].append(f"nem:{type(ex).__name__}")
+            vet[trong[1]].append(f"nem:{chuoi(ex)}")
             raise
         finally:
             trong[0] -= 1
@@ -142,19 +168,29 @@ def quan_the(T, manh=(0, 1)):
             and (nen == "Linux" or t not in getattr(T, "_WP1303_LINUX_CASES", ()))}
 
 
+lech = lambda ghi: sorted({t for t, ds in ghi.items() for x in ds if len(set(x)) != 1})  # noqa: E731 — ca có lời mà các vế KHÁC byte
+khoang_trong = lambda vao, nen: sorted(t for t in vao if not nen.get(t))  # noqa: E731 — ca vào bộ dựng mà không có lời so được nào
+
+
 def tu_kiem_dem(td):
     """Tự kiểm phép đếm trên một sổ ca GIẢ: ca tới `_c1106` qua `dict(CASES)`, ngoại lệ lúc dựng, ngoại lệ ở runner và lượt chạy script do ca tự sửa đều
-    phải CÓ trong vết với đúng kết cục; ca không vào bộ dựng thì không có `vao`. Khôi phục bộ lọc tĩnh hay bỏ kết cục ngoại lệ ⇒ lệch ⇒ ĐỎ."""
+    phải CÓ trong vết với đúng kết cục; ca không vào bộ dựng thì không có `vao`. Khôi phục bộ lọc tĩnh hay bỏ kết cục ngoại lệ ⇒ lệch ⇒ ĐỎ. Lượt 3: script tự
+    sửa được dựng lại trên TỪNG vế và so byte — vế head in thừa MỘT byte thì phép so phải ĐỎ; ca không tới CLI phải ở danh sách khoảng trống."""
+    for v, than in (("a", b"x\n1\ny\n"), ("b", b"x\n1\ny\nthua\n"), ("sua", b"")):
+        Path(td, v).mkdir(), Path(td, v, "packet_loop.py").write_bytes(than), Path(td, v, "launcher.py").write_bytes(b"")
     G = types.SimpleNamespace(Ctx=lambda script, d: types.SimpleNamespace(script=script), _rev_list_loi=None, _transition_run1187=None)
-    G.run = lambda script, args, sd=None: (_ for _ in ()).throw(KeyError("runner")) if "nem" in args else (0, b"", b"")
-    G._c1106 = lambda c, kieu="": (_ for _ in ()).throw(OSError("dựng")) if kieu == "dung" else G.run(Path("khac.py") if kieu == "la" else c.script, ["kiem-merge", kieu], *("sd",) * (kieu != "khong_sd"))
+    G.run = lambda script, args, sd=None: (_ for _ in ()).throw(KeyError("runner")) if "nem" in args else (0, b"x" * (b"thua" in Path(script).read_bytes()), b"")
+    la = lambda c: (Path(td, "sua/packet_loop.py").write_bytes(Path(c.script).read_bytes().replace(b"1", b"2")), Path(td, "sua/packet_loop.py"))[1]  # noqa: E731
+    G._c1106 = lambda c, kieu="": (_ for _ in ()).throw(OSError("dựng")) if kieu == "dung" else G.run(la(c) if kieu == "la" else c.script, ["kiem-merge", kieu], *("sd",) * (kieu != "khong_sd"))
     G.CASES = [("thang", lambda c: G._c1106(c)), ("gian_tiep", lambda c: dict(G.CASES)["thang"](c)), ("dung_nem", lambda c: G._c1106(c, "dung")),
                ("runner_nem", lambda c: G._c1106(c, "nem")), ("script_la", lambda c: G._c1106(c, "la")), ("ngoai", lambda c: None), ("khong_sd", lambda c: G._c1106(c, "khong_sd")), ("cong_b4_x", lambda c: G._c1106(c))]
-    ghi, vet = do_ca(G, [Path("a.py")], td, quan_the(G))
-    mong = {"thang": ["vao", "so", "ca:dat"], "gian_tiep": ["vao", "so", "ca:dat"], "dung_nem": ["vao", "nem:OSError", "ca:OSError"],
-            "runner_nem": ["vao", "nem:KeyError", "ca:KeyError"], "script_la": ["vao", "la:0", "ca:dat"], "ngoai": ["ca:dat"],
+    ghi, vet = do_ca(G, [Path(td, "a/packet_loop.py")], td, quan_the(G))
+    mong = {"thang": ["vao", "so", "ca:dat"], "gian_tiep": ["vao", "so", "ca:dat"], "dung_nem": ["vao", "nem:OSError('dựng')", "ca:OSError"],
+            "runner_nem": ["vao", "nem:KeyError(\"'runner'\")", "ca:KeyError"], "script_la": ["vao", "la:0:so:True", "ca:dat"], "ngoai": ["ca:dat"],
             "khong_sd": ["vao", "so", "ca:dat"]}
-    return [] if vet == mong and sorted(ghi) == ["gian_tiep", "khong_sd", "thang"] else [f"tự kiểm phép đếm: vết {vet} ≠ {mong}"]
+    ghi2 = do_ca(G, [Path(td, "a/packet_loop.py"), Path(td, "b/packet_loop.py")], td, {"script_la"})[0]
+    return [] if (vet, sorted(ghi), khoang_trong({t for t, v in vet.items() if "vao" in v}, ghi), lech(ghi2), ghi2.get("script_la", [[0, 0]])[0][1]) == (
+        mong, ["gian_tiep", "khong_sd", "script_la", "thang"], ["dung_nem", "runner_nem"], ["script_la"], (0, b"x", b"")) else [f"tự kiểm phép đếm: vết {vet} ≠ {mong} hoặc so/khoảng trống lệch"]
 
 
 def lenh_ab(manh=(0, 1)):
@@ -184,7 +220,12 @@ def lenh_ab(manh=(0, 1)):
     loi += [f"quần thể: {t} vết head (hình dạng mới) {vh['moi'].get(t)} ≠ vết base {vet[t]}" for t in sorted(vao) if vh["moi"].get(t) != vet[t]]
     loi += [f"quần thể: {t} vết head (hình dạng cũ) {vh['cu'].get(t)} ≠ vết base {vet[t]} (không kể kết cục ca)" for t in sorted(vao) if bo(vh["cu"].get(t, [])) != bo(vet[t])]
     loi += [f"tiêu chí 1: thiếu ca {t} (base có {len(nen[t])} lời kiem-merge)" for h in ghi for t in nen if len(ghi[h].get(t, [])) != len(nen[t])]
-    loi += [f"tiêu chí 1 (hình dạng mới, B-2): {t} lời {i} lệch byte: rc {b[0]}/{h[0]}" for t, ds in ghi["moi"].items() for i, (b, h) in enumerate(ds) if b != h]
+    so_dong = lambda b: re.sub(rb', line [0-9]+, in ', b", line N, in ", b)  # noqa: E731 — CHỈ để chẩn đoán lệch; phép so vẫn là byte
+    loi += [f"tiêu chí 1 (hình dạng mới, B-2): {t} lệch byte (chỉ khác số dòng traceback: {all(tuple(map(so_dong, x[0][1:])) == tuple(map(so_dong, x[1][1:])) for x in ghi['moi'][t])}): "
+            + " | ".join(f"rc {x[0][0]}/{x[1][0]} · {x[0][2][-160:]!r} ≠ {x[1][2][-160:]!r}" for x in ghi["moi"][t] if x[0] != x[1]) for t in lech(ghi["moi"])]
+    kt = khoang_trong(vao, nen)
+    loi += [f"tiêu chí 1 — KHOẢNG TRỐNG nghiệm thu: {t} vào bộ dựng mà KHÔNG tới CLI nào (vết base: {' '.join(vet[t])}); quần thể so {len(vao) - len(kt)} < đếm {len(vao)}"
+            for t in kt]
     lop = {}
     for t, ds in ghi["cu"].items():
         for i, (b, h) in enumerate(ds):
@@ -199,6 +240,8 @@ def lenh_ab(manh=(0, 1)):
         kc[v[-1]] = kc.get(v[-1], 0) + 1
     print(f"base {base} · lát {manh[0]}/{manh[1]}\nsổ ca của base đã chạy có máy đếm: {len(vet)} · kết cục: {dict(sorted(kc.items()))}"
           f"\nca base kết cục không phải đạt/BoQua (vết): {sorted((t, ' '.join(v)) for t, v in vet.items() if v[-1] not in ('ca:dat', 'ca:BoQua'))}")
+    print(f"quần thể ĐẾM {len(vao)} = so byte {len(vao) - len(kt)} + không tới CLI {len(kt)} · ca so byte có lỗi ngoại lệ giàn hay script tự sửa: "
+          f"{sorted(t for t in rieng if t not in kt)}")
     print(f"ca VÀO _c1106 tại base: {len(vao)} = {len(vao) - len(rieng)} ca thường (mọi lần vào đều cho lời so được, ca đạt) + {len(rieng)} ca riêng · lần vào: {sum(v.count('vao') for v in vet.values())}"
           f" · lời kiem-merge so được: {sum(map(len, nen.values()))} · ở head: moi {len(ghi['moi'])} ca · cu {len(ghi['cu'])} ca")
     print("ca riêng (vết tại base; head hình dạng mới phải trùng vết):\n" + "\n".join(f"  {t}: {' '.join(v)}" for t, v in rieng.items()))

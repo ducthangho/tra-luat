@@ -90,8 +90,8 @@ leased_at_utc: '2026-11-21T08:27:04Z'
 heartbeat_at: '2026-11-21T08:27:04Z'
 heartbeat_required_minutes: 360
 heartbeat_cam_ket: 'Phien dieu phoi ghi heartbeat (executor khong push nhanh lease).'
-lease_until: '2026-11-22T08:27:04Z'
-lease_expires_at_utc: '2026-11-22T08:27:04Z'
+lease_until: '2026-11-21T12:47:06Z'
+lease_expires_at_utc: '2026-11-21T12:47:06Z'
 lease_until_ghi_chu: '24h; rut han ngay sau land.'
 attempts_used: 0
 attempts_limit: 2
@@ -109,3 +109,13 @@ budget:
 budget_ghi_chu: 'Codex review PR <= 10 (ADR-0055); Codex review dac ta 6/10 da dung; CI Ubuntu <= 3; Windows native 0 (Q4'').'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+budget_cuoi_ghi_chu: 'Ghi luc rut han (phien dieu phoi session_015GtxrZk6gmfQKo7g4BfMBS). Codex review dac ta 6/10. Codex review PR offline 2/10 (luot 1 f1e2b434 tren 26fbacd, luot 2 6e796acf approve tren 26fbacd). CI Ubuntu 1/3 tren 26fbacd (25 success, 1 skipped). Windows native 0 (Q4). Phien executor 1/2 (Opus).'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-22T08:27:04Z'
+  han_moi_utc: '2026-11-21T12:47:06Z'
+  chi_thi: 'lease_until_ghi_chu (rut han ngay sau land).'
+  ly_do: >-
+    Packet SECRETS-SET-BUNDLE-KIEU cua #433 da MERGE: PR #1490 (head 26fbacd9d4ba73f8e83359e9af060a76b32cae08) merge commit 29c22f7d1f92321978d4d1dff16bd80d9ea744e0, human audit chu kho issuecomment-7062218542 tren PR #1490. No F01 secrets-set-do-min-ve (P3, accepted_debt, issuecomment-7059922647).
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem cho write set nay luc rut.'
+  nguoi_rut: 'phien dieu phoi #1206 session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu cac duong dan write set sau han moi phai ra NGUOI_GIU 0.'

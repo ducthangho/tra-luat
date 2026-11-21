@@ -1,207 +1,50 @@
-# Kết quả đo của executor — wp1462 (B4), attempt 3
+# Kết quả đo của executor — wp1462 (B4), attempt 4
 
-Tệp này nằm TRONG H nên KHÔNG ghi SHA của H, cây của H hay numstat của H (handoff §7 và Issue #1462 giữ các số ấy). Kết quả neo bằng sha256 của mã đã chạy:
+Tệp nằm TRONG H nên không ghi SHA, cây hay numstat của H (ở handoff §7 và Issue #1462). Kết quả neo bằng sha256 của mã đã chạy:
+`.claude/dev/packet_loop.py` `816f77d10413bbaa744795c09a7e2a1f14b03d927cd0642737a353396cec934b` · `.claude/dev/packet_loop_test.py` `43e32fd96687218aed7b80dd9f96ead8fda88ea2e17544cedfe7f6e8c462ca0c` (cả hai không đổi so với attempt 3) · `ops/specs/wp1462-r1/do/do_b4.py` `1979b0b1a39cfa6253df2036151d13bee933dc0b91634b6ff61cb8550edaae55`.
+Nền: phiên cloud Linux, 4 nhân, Python 3.13.18, git 2.43.0, clone sạch (`.git` là thư mục), base `48d372e14f190dae83a75ccbca8ee9a0b25635c5` (merge-base với `origin/master`). Log thô ngoài kho, đường dẫn ở handoff.
 
-| tệp | sha256 |
+## Tiêu chí 1–2 — A/B (`do_b4.py ab i/n`; lát 0/8, 4/8, 1/4, 2/4, 3/4 — hợp = toàn sổ), mỗi lát rc 0, `KẾT QUẢ ab: ĐẠT`
+
+| đại lượng (hợp các lát) | số |
 |---|---|
-| `.claude/dev/packet_loop.py` | `816f77d10413bbaa744795c09a7e2a1f14b03d927cd0642737a353396cec934b` |
-| `.claude/dev/packet_loop_test.py` | `43e32fd96687218aed7b80dd9f96ead8fda88ea2e17544cedfe7f6e8c462ca0c` |
-| `ops/specs/wp1462-r1/do/do_b4.py` | `277be0adec490c635b74faa3929d6325839ada44b003bf2fd623f433e6ce9951` |
+| sổ ca base chạy có máy đếm | 1 581: `ca:dat` 1 543 · `ca:BoQua` 37 · `ca:OSError` 1 (`luong_canonical_chay_that`, tại base) |
+| quần thể ĐẾM (vào `_c1106` tại base) | 157 |
+| phân loại (r9, mỗi ca đúng MỘT nhóm) | 157 = (a) 147 + (b) 9 + (c) 1 — 0 lệch ở cả ba nhóm |
+| lời `kiem-merge` tại base | 154 = 148 có byte + 6 lời mà vế ném (ba ca `import`, ba ca `dispatch` của nhóm b) |
+| tiêu chí 2, hình dạng cũ (lời có byte) | (a) 3 · (b) 104 · (c) 36 · (z) 5, mọi lời đúng khuôn; lớp (z) = `cong_c_k1_anchor`, `cong_c_k1_khoa_trung`, `cong_c_k1_tag_hong`, `cong_c_k1_yaml_hong`, `r1187_overflow_crash_credit` |
 
-Nền đo: phiên cloud Linux, 4 nhân, Python 3.13.18, git 2.43.0, clone SẠCH (`.git` là thư mục, object dùng chung qua alternates), base `48d372e14f190dae83a75ccbca8ee9a0b25635c5` (merge-base với `origin/master`). Mọi số dưới đây đo lại ở attempt 3 (sau review mã Codex lượt 2); log thô ngoài kho, đường dẫn ở handoff.
+Cách xếp nhóm (đo, không suy từ tên): máy đếm CHẠM CLI = `sys.monitoring` (sự kiện `PY_START` của hàm `main` trong một tệp `packet_loop.py`) + audit hook (sinh tiến trình có `packet_loop.py` trong đối số), đếm trên TRỌN ca ở lượt base và lượt head. Mỗi lời `kiem-merge` chạy MỌI vế trên cùng fixture kể cả khi vế trước ném.
+- **(a) 147** — so rc/stdout/stderr từng byte: cong_c_fixture_crlf cong_c_k0_pr_head cong_c_k1_anchor cong_c_k1_git_loi cong_c_k1_hai_dong cong_c_k1_hash cong_c_k1_khoa_trung cong_c_k1_khong_dong cong_c_k1_l2 cong_c_k1_mot_dong_sai cong_c_k1_tag_hong cong_c_k1_yaml_hong cong_c_k2_ci_do cong_c_k3_original_tien_to cong_c_k3_p1 cong_c_k3_p2_commit_doi cong_c_k3_p2_original_head cong_c_k4_changes cong_c_k4_head cong_c_k4_ma_thoat cong_c_k4_stdout cong_c_k5_offline cong_c_k5_p3_khong_mien cong_c_k5_p3_mien cong_c_k5_phu_dinh cong_c_k5_sai_nguoi cong_c_k5_thua cong_c_k6_dev_thieu cong_c_k6_dev_xanh cong_c_k6_land_py_unknown cong_c_k6_luu_tru cong_c_k6_md_chu_khoa cong_c_k6_mien cong_c_k6_ps1_docs cong_c_k6_rong cong_c_k6_skipped cong_c_k6_symlink cong_c_k6_thieu_id cong_c_k6_tu_khoa_py cong_c_k6_unknown_chot cong_c_m6_hai_thieu cong_c_merge_du cong_m9_attempt_2 cong_m9_dev_khong_run cong_m9_dev_mien cong_m9_dev_run_xanh cong_m9_docs_khong_readback cong_m9_hai_run_hai_tep cong_m9_job_attempt_bool cong_m9_job_attempt_float cong_m9_job_attempt_khac cong_m9_job_dang_chay cong_m9_job_dau_dang_chay cong_m9_job_failure cong_m9_job_giua_dang_chay cong_m9_job_giua_float cong_m9_job_rong cong_m9_job_run_id_bool cong_m9_job_run_id_float cong_m9_job_run_khac cong_m9_job_sau_float cong_m9_job_sau_run_id_float cong_m9_job_thieu_run_id cong_m9_jobs_tron_run cong_m9_jobs_trung_tep cong_m9_m6_hai_thieu cong_m9_mien_crlf cong_m9_mien_dau_khoang_trang cong_m9_mien_duoi_tab cong_m9_mien_ky_tu_tach cong_m9_mien_sai_nguoi cong_m9_mien_sha_khac cong_m9_mien_sha_rut_gon cong_m9_nguoi_khac_run_xanh cong_m9_nhom_jobs_dung_run cong_m9_nhom_khac_do_van_dat cong_m9_ops_md_khong cong_m9_pham_vi_ops_py cong_m9_pham_vi_tep_sau cong_m9_pham_vi_workflow cong_m9_ranh_gioi_pham_vi cong_m9_run_attempt_bool cong_m9_run_attempt_float cong_m9_run_dang_chay cong_m9_run_do cong_m9_run_head_khac cong_m9_run_sai_tep cong_m9_run_thieu_attempt_truoc cong_m9_run_xanh_o_giua cong_m9_trang_jobs_thieu cong_m9_trang_thieu k3s_any_findings k3s_badge_ngoai_mien k3s_badge_p1 k3s_bot_khac k3s_bot_khac_marker_hong k3s_code_review_nhan_legacy k3s_code_review_sai_kieu k3s_comment_that_sach k3s_completed_null k3s_cu_vs_head k3s_flags_chuoi k3s_flags_so k3s_hai_neo_khop_cu k3s_hai_neo_khop_head k3s_hai_neo_mau_thuan k3s_json_hong k3s_json_sau k3s_legacy_hong k3s_nhieu_marker k3s_running k3s_running_badge_p1 k3s_running_co_ket_luan_khac k3s_running_null k3s_running_sai_kieu k3s_running_vs_head k3s_security_bo_qua k3s_security_nhan_legacy k3s_sha_cu k3s_sha_cu_khong_kiem_flags k3s_sha_hoa k3s_sha_khoang_trang k3s_sha_null k3s_sha_tien_to k3s_status_sai_kieu k3s_thieu_code_review k3s_unresolved r1187_cli_bad_human_good_model r1187_cli_both_valid r1187_cli_conflict r1187_cli_datetime_max r1187_cli_datetime_min r1187_cli_human r1187_cli_missing_model_run r1187_cli_missing_model_stdout r1187_cli_missing_remote r1187_cli_missing_transition r1187_cli_neither r1187_cli_p3_block r1187_cli_p3_waive r1187_cli_transition r1187_cli_transition_bad stdout_cp1252 stdout_cp1258 wp1254_cli_conversion wp1254_cli_late wp1254_cli_wrong_number (sha256 của danh sách tách dòng, sắp xếp: `3595032ff83e65090ac9cb9ff1bce9d48ca237d4bd5db4e67c24657301e1f9ce`).
+- **(b) 9** — `r1187_transition_dispatch_AssertionError`, `r1187_transition_dispatch_RuntimeError`, `r1187_transition_dispatch_TimeoutExpired`, `r1187_transition_import_AssertionError`, `r1187_transition_import_RuntimeError`, `r1187_transition_import_TimeoutExpired`, `r1187_transition_setup_AssertionError`, `r1187_transition_setup_RuntimeError`, `r1187_transition_setup_TimeoutExpired`: chạm CLI base 0 · head 0 ở cả chín; ba ca `setup` không có lời nào (bộ dựng ném trước runner), sáu ca `import`/`dispatch` có một lời, hai vế cùng chuỗi `packet_loop_test.CliSapDo('transition1187 setup/import crashed' | 'transition1187 dispatch crashed') < <lớp>('injected')`; chuỗi ra khỏi `_c1106` ở lượt base bằng ở lượt head.
+- **(c) 1** — `r1187_overflow_crash_credit`: phép sửa của ca dựng lại trên script của từng vế, chạy cùng thư mục, rc 1/1; stderr trùng sau ĐÚNG phép chuẩn hoá `File "…", line N` → `line ?` (chạm CLI base 2 · head 3).
 
-## Tiêu chí 1–2 — A/B (`python ops/specs/wp1462-r1/do/do_b4.py ab i/4`, i = 0..3)
+Tiêu chí 2 dùng cùng quy tắc: lời có vế ném (nhóm b) không có byte nên không xếp lớp được, được liệt kê (6); lời loại `c` so SAU cùng phép chuẩn hoá ấy — đây là cách đọc của executor cho tiêu chí 2 (r9 chỉ đổi câu "ĐỎ khi" của tiêu chí 1), để reviewer soi.
 
-**Kết quả: KHÔNG ĐẠT — khoảng trống nghiệm thu, không phải hồi quy của mã sản phẩm.** Bốn lát rc 1 (`KẾT QUẢ ab: 2 · 2 · 5 · 2 lỗi`). Quần thể đếm bằng máy đếm ở `_c1106` trên CẢ sổ ca bắt buộc của base (1 581 ca: `ca:dat` 1 543, `ca:BoQua` 37, `ca:OSError` 1 = `luong_canonical_chay_that` tại base), không lọc tĩnh. Mỗi lát còn chạy hai tự kiểm (bộ so 14 ca; phép đếm trên sổ ca giả, nay gồm: script tự sửa phải được dựng lại trên TỪNG vế và một byte thừa ở vế head phải làm phép so ĐỎ; ca không tới CLI phải nằm trong danh sách khoảng trống — gỡ một trong bốn chốt ấy làm tự kiểm ĐỎ, đã thử).
+Tự kiểm chạy cùng lệnh, mỗi lát: bộ so tiêu chí 2 (14 ca); bộ so theo nhóm (12 ca: (a) lệch đúng số dòng traceback ⇒ ĐỎ; (c) lời tự sửa chỉ lệch số dòng ⇒ đạt, lệch byte khác ⇒ ĐỎ; lời thường của ca (c) lệch số dòng ⇒ ĐỎ; (b) lệch thông điệp, lệch chuỗi ra khỏi bộ dựng, không có ngoại lệ, hay có vế cho byte ⇒ ĐỎ); phép đếm/nhóm trên sổ ca giả (ca CHẠM `main` rồi ném ⇒ (a) và ĐỎ; hai ca không chạm ⇒ (b); ca tự sửa ⇒ (c); byte thừa ở vế head của ca tự sửa ⇒ ĐỎ). Bốn đột biến của chính bộ so, mỗi lát đều GIẾT: `chuan_hoa_ap_cho_a` (2 dòng tự kiểm đỏ) · `ca_cham_cli_vao_b` (1) · `bo_nhom_b` (1) · `bo_nhom_c` (1).
 
-| đại lượng (hợp bốn lát) | số |
-|---|---|
-| ca VÀO `_c1106` tại base (quần thể ĐẾM) | 157 (38 · 39 · 43 · 37) |
-| có lời `kiem-merge` so được BYTE | 148 = 147 ca thường + `r1187_overflow_crash_credit` (script do ca tự sửa, nay dựng lại phép sửa trên script của từng vế, chạy cùng một chỗ) |
-| 147 ca thường, hai hình dạng fixture | trùng byte rc/stdout/stderr ở hình dạng mới; hình dạng cũ: (a) 3 · (b) 104 · (c) 36 · (z) 4, mọi lời đúng khuôn |
-| `r1187_overflow_crash_credit` | rc 1/1, LỆCH BYTE: stderr là traceback và CHỈ khác số dòng khung (`packet_loop.py` của head dài hơn); tiêu chí 1 và lớp (z) của tiêu chí 2 cùng ĐỎ |
-| vào bộ dựng mà KHÔNG tới CLI nào | 9 — KHOẢNG TRỐNG, quần thể so 148 < đếm 157 ⇒ ĐỎ |
-| lớp (z) | `cong_c_k1_anchor`, `cong_c_k1_khoa_trung`, `cong_c_k1_tag_hong`, `cong_c_k1_yaml_hong` (+ ca tự sửa ở trên) |
+## Tiêu chí 8 — phát lại 60 merge (`do_b4.py phat-lai`, rc 0)
 
-Chín ca không tới CLI, vết tại base = vết tại head ở cả hai hình dạng; chuỗi ngoại lệ kết thúc ở lỗi do CHÍNH giàn tiêm (`'injected'`) trước khi `main` của sản phẩm chạy: ba ca `setup` (bộ dựng ném lúc dựng fixture git, chưa có fixture), ba ca `import` (nạp module ném trước `main`), ba ca `dispatch` (`main` bị thay bằng lỗi):
+60 merge · bảng sha256 `aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a` · 42 `khong_giam` + 18 `duong_nhanh` qua `_b4_anh_chup` trên cây thật 17 529 blob · REST 0 · bản sao riêng sạch · CRLF mô phỏng 60/60 cùng lớp; CR giữa giá trị ⇒ `la`.
 
-- `r1187_transition_setup_{AssertionError,RuntimeError,TimeoutExpired}`: `vao nem:<lớp>('injected') ca:dat`
-- `r1187_transition_import_{AssertionError,RuntimeError,TimeoutExpired}` và `r1187_transition_dispatch_{…}`: `vao nem:CliSapDo<<lớp>('injected') ca:dat`
+## Tiêu chí 4 — đột biến · ca (`do_b4.py dot-bien i/4`, mỗi lát rc 0)
 
-Tiêu chí 1 đòi số ca được so không nhỏ hơn số ca đếm tại base. Chín ca trên không có đầu ra CLI nào ở CẢ base lẫn head, nên không thể so byte mà không đổi ca; ca tự sửa không thể trùng byte vì traceback mang số dòng. Đóng được hai khoảng trống này cần một quyết định đặc tả (tiêu chí 1 xử lý ca không tới CLI và đầu ra traceback thế nào); executor không tự nới tiêu chí.
+143 đột biến `b4_*`, 197 cặp; MỌI cặp: lớp ngoại lệ `ChotB4` của chính ca đích · phân hạng GIET. 0 tín dụng giả, 0 sống sót, 0 đối chứng khác họ đỏ. Mỗi mục `đột biến: các ca đích`:
+- `b4_bc_bo_path`: cong_b4_bc_run_path_qua, cong_b4_bc_run_path_chan · `b4_bc_bo_run_id`: cong_b4_bc_job_run_khac · `b4_bc_bo_manh_1`: cong_b4_bc_du_thieu_manh_1, cong_b4_bc_dich_thieu_manh_1 · `b4_bc_bo_manh_5`: cong_b4_bc_du_thieu_manh_5, cong_b4_bc_dich_thieu_manh_5 · `b4_bc_bo_kieu_buoc`: cong_b4_bc_step_ten_khong_chuoi, cong_b4_bc_step_khong_object · `b4_bc_nhieu_buoc`: cong_b4_bc_hai_buoc_du · `b4_bc_khong_gop_tep`: cong_b4_bc_du_tep_lap, cong_b4_bc_du_tep_hai_trang, cong_b4_bc_du_tep_chong, cong_b4_bc_dich_tep_lap, cong_b4_bc_dich_tep_hai_trang, cong_b4_bc_dich_tep_chong · `b4_chay_khi_k2_do`: cong_b4_k2_do_thi_khong_chay · `b4_du_cung_tu_kiem`: cong_b4_7a_du_khong_tu_kiem
+- `b4_la_dat`: cong_b4_khong_tep_phan_loai · `b4_bo_bang_chung_dich`: cong_b4_dich_thieu_bang_chung · `b4_vang_giam`: cong_b4_bien_vang, cong_b4_dich_cong_tac_dong · `b4_bo_rc_git_dir`: cong_b4_git_loi · `b4_su_kien_khac`: cong_b4_sinh_bo_moi · `b4_git_dir_cua_kho`: cong_b4_git_doi_ten_cuc_bo, cong_b4_git_thay_the · `b4_doc_thuoc_tinh_he_thong`: cong_b4_git_khong_he_thong · `b4_bo_bam_cay`: cong_b4_gia_mao_cay · `b4_han_khac_15`: cong_b4_dc_beta · `b4_hop_dao_cha`: cong_b4_sinh_bo_moi · `b4_dao_hai_lop`: cong_b4_dc_beta, cong_b4_dc_delta · `b4_tach_moi_kieu_dong`: cong_b4_cr_giua_dong · `b4_bo_thieu_che_do`: cong_b4_thieu_che_do
+- `b4_nhan_ngoai_tap`: cong_b4_che_do_ngoai_tap, cong_b4_dk_ngoai_tap · `b4_chuoi_cho_phep_lop_kia`: cong_b4_dc_beta · `b4_chuoi_lop_khac`: cong_b4_bien_lop_khac_gia_tri · `b4_header_phan_biet_hoa_thuong`: cong_b4_header_hoa_thuong · `b4_utf8_thay_the`: cong_b4_utf8_hong · `b4_bo_kieu_value`: cong_b4_value_khong_chuoi · `b4_bien_cam_chi_1`: cong_b4_bien_cam_khac_1 · `b4_bo_header_accept`: cong_b4_dc_beta · `b4_gia_tri_khong_cat`: cong_b4_gia_tri_dai · `b4_7a_bo_so`: cong_b4_7a_master_cu · `b4_7b_so_tien_to`: cong_b4_7b_oid_cung_tien_to · `b4_7b_bo_tep_vang`: cong_b4_7b_khong_tep · `b4_vc_bo_han_socket`: cong_b4_vc_han_socket · `b4_vc_thu_lai`: cong_b4_vc_500_khong_thu_lai
+- `b4_bc_bo_head`: cong_b4_bc_run_head_qua, cong_b4_bc_run_head_chan · `b4_bc_bo_attempt`: cong_b4_bc_job_attempt_cu · `b4_bc_bo_manh_2`: cong_b4_bc_du_thieu_manh_2, cong_b4_bc_dich_thieu_manh_2 · `b4_bc_bo_manh_6`: cong_b4_bc_du_thieu_manh_6, cong_b4_bc_dich_thieu_manh_6 · `b4_bc_bo_job_head`: cong_b4_bc_job_head_khac · `b4_bc_bo_buoc_status`: cong_b4_bc_buoc_dang_chay · `b4_bc_ten_job_long`: cong_b4_bc_ten_job_nen_khac · `b4_k2b_truoc_k7`: cong_b4_thu_tu_sau_k7 · `b4_bo_dong_cong_tac`: cong_b4_dc_beta, cong_b4_bien_vang · `b4_bo_tinh_lai`: cong_b4_khong_giam, cong_b4_pr_sua_ci_yml · `b4_bo_audit`: cong_b4_dich_khong_audit, cong_b4_dich_audit_do
+- `b4_khong_doc_duoc_giam`: cong_b4_rest_nem, cong_b4_json_hong, cong_b4_json_sau, cong_b4_than_la, cong_b4_tien_trinh_thuong · `b4_moi_truong_ke_thua`: cong_b4_moi_truong_moi, cong_b4_tc11_c_bo_moi, cong_b4_tc11_c_che_do_dich · `b4_hop_mot_cha`: cong_b4_sinh_bo_moi, cong_b4_tc11_b_che_do_dich · `b4_doc_cau_hinh_toan_cuc`: cong_b4_git_doi_ten_toan_cuc · `b4_checkout_thay_anh_chup`: cong_b4_gia_mao_blob, cong_b4_git_thuoc_tinh_trong_cay · `b4_object_vang_bo_qua`: cong_b4_object_vang · `b4_han_pl_khac_120`: cong_b4_han_dac_ta · `b4_cay_hop_la_dau`: cong_b4_master_di_truoc · `b4_dau_la_goc`: cong_b4_sinh_bo_moi · `b4_cat_khoang_trang`: cong_b4_dau_cach_cuoi
+- `b4_bo_dk_bo_moi_hong`: cong_b4_dk_ngoai_tap · `b4_nhanh_kem_dk_dat`: cong_b4_nhanh_kem_dk · `b4_updated_at_la_vi_tu`: cong_b4_updated_at_cu · `b4_404_moi_nguon`: cong_b4_404_thieu_header · `b4_bo_tran_than`: cong_b4_than_qua_dai · `b4_nhan_khoa_trung`: cong_b4_khoa_trung · `b4_rest_loi_lay_bien_nguoi_goi`: cong_b4_rest_nem_bien_nguoi_goi · `b4_bien_cam_ca_khi_rong`: cong_b4_bien_cam_rong · `b4_bo_header_user_agent`: cong_b4_dc_beta · `b4_hieu_luc_60_phut`: cong_b4_dc_beta · `b4_7a_bo_rc_ls_remote`: cong_b4_7a_ls_remote_loi · `b4_7b_bo_rc_hash_object`: cong_b4_7b_hash_object_loi · `b4_vc_post`: cong_b4_vc_get_header · `b4_vc_bo_tran_byte`: cong_b4_vc_tran_byte
+- `b4_vc_ma_200`: cong_b4_vc_404_nguyen_ma, cong_b4_vc_khong_chuyen_huong · `b4_bc_bo_kho`: cong_b4_bc_run_kho_qua, cong_b4_bc_run_kho_chan · `b4_bc_bay_manh`: cong_b4_bc_thieu_manh_7, cong_b4_bc_dich_thieu_manh_7 · `b4_bc_bo_manh_3`: cong_b4_bc_du_thieu_manh_3, cong_b4_bc_dich_thieu_manh_3 · `b4_bc_nhan_trung`: cong_b4_bc_manh_trung · `b4_bc_bo_job_status`: cong_b4_bc_job_dang_chay · `b4_bc_bo_buoc_conclusion`: cong_b4_bc_buoc_failure · `b4_bc_luon_du`: cong_b4_bc_job_run_khac, cong_b4_siet_alpha · `b4_audit_truoc_bang_chung`: cong_b4_dich_thieu_ca_hai · `b4_bo_co_siet`: cong_b4_siet_beta, cong_b4_siet_alpha · `b4_ma_cua_pr`: cong_b4_pr_sua_bo_phan_loai
+- `b4_audit_nhan_mien`: cong_b4_dich_mien_khong_thay · `b4_merge_la_dau`: cong_b4_master_di_truoc · `b4_bo_I`: cong_b4_python_I · `b4_khong_don`: cong_b4_dc_alpha, cong_b4_khong_tep_phan_loai, cong_b4_het_han, cong_b4_system_exit · `b4_doc_thuoc_tinh_toan_cuc`: cong_b4_git_thuoc_tinh_hop · `b4_bo_kiem_bam`: cong_b4_gia_mao_blob, cong_b4_gia_mao_cay · `b4_ghi_ra_ngoai`: cong_b4_cay_ra_ngoai · `b4_ngay_theo_dong_ho`: cong_b4_ngay_co_dinh · `b4_ma_tu_cay_hop`: cong_b4_pr_sua_bo_phan_loai · `b4_bo_cr`: cong_b4_crlf_nhan · `b4_bo_utf8`: cong_b4_khong_utf8 · `b4_bo_dk_dich_hong`: cong_b4_dk_dich_ngoai_tap · `b4_ca_hai_dk_dat`: cong_b4_ca_hai_dk · `b4_nhan_hang_ngoai_json`: cong_b4_hang_ngoai_json
+- `b4_ma_khac_200`: cong_b4_403_tu_choi, cong_b4_302 · `b4_tran_than_chat_hon`: cong_b4_than_dung_tran · `b4_bo_goc_object`: cong_b4_goc_khong_object · `b4_bo_hang_kho`: cong_b4_repo_khac · `b4_token_luon_gui`: cong_b4_dc_beta · `b4_gia_tri_khong_json`: cong_b4_gia_tri_xuong_dong_dau · `b4_hai_yeu_cau`: cong_b4_tc6_bon_tien_trinh · `b4_7a_bo_rc_rev_parse`: cong_b4_7a_rev_parse_loi · `b4_7b_bo_rc_rev_parse`: cong_b4_7b_rev_parse_loi · `b4_vc_theo_chuyen_huong`: cong_b4_vc_khong_chuyen_huong · `b4_vc_bo_han_tuong`: cong_b4_vc_han_tuong, cong_b4_vc_eof_tre, cong_b4_vc_khuc_cuoi_tre · `b4_vc_bo_header`: cong_b4_vc_get_header
+- `b4_bc_run_nho_nhat`: cong_b4_bc_run_id_lon_nhat_qua, cong_b4_bc_run_id_lon_nhat_chan · `b4_bc_bo_manh_dau`: cong_b4_bc_du_thieu_manh_0, cong_b4_bc_dich_thieu_manh_0 · `b4_bc_bo_manh_4`: cong_b4_bc_du_thieu_manh_4, cong_b4_bc_dich_thieu_manh_4 · `b4_bc_bo_kieu_list`: cong_b4_bc_khong_steps · `b4_bc_bo_job_conclusion`: cong_b4_bc_job_failure · `b4_bc_bo_buoc_kia`: cong_b4_bc_ca_hai_buoc_success · `b4_bc_buoc_kia_moi_ket_luan`: cong_b4_bc_buoc_kia_skipped · `b4_hai_dong_lan_g5`: cong_b4_dc_alpha, cong_b4_khong_giam · `b4_khong_giam_dat`: cong_b4_khong_giam, cong_b4_nam_im_khong_giam, cong_b4_tc11_d_bo_moi, cong_b4_tc11_d_che_do_dich · `b4_goc_la_base`: cong_b4_goc_la_master
+- `b4_gia_tri_la_giam`: cong_b4_gia_tri_khac, cong_b4_gia_tri_rong, cong_b4_gia_tri_sai_mot_ky_tu · `b4_bo_rc_merge`: cong_b4_merge_xung_dot · `b4_bo_han_phan_loai`: cong_b4_het_han · `b4_object_vao_kho`: cong_b4_dc_alpha, cong_b4_master_di_truoc · `b4_doc_cau_hinh_he_thong`: cong_b4_git_khong_he_thong · `b4_bo_bam_blob`: cong_b4_gia_mao_blob · `b4_ghi_lien_that`: cong_b4_lien_tep, cong_b4_lien_thu_muc · `b4_goc_la_dau`: cong_b4_sinh_bo_moi · `b4_khoa_khop_giua_dong`: cong_b4_dong_khac_bo_qua · `b4_cat_moi_cr`: cong_b4_hai_cr · `b4_bo_rc_phan_loai`: cong_b4_rc_khac_0 · `b4_nhan_khoa_lap`: cong_b4_che_do_lap, cong_b4_dk_lap
+- `b4_so_khop_long`: cong_b4_gia_tri_hoa_thuong, cong_b4_gia_tri_thua_khoang_trang, cong_b4_gia_tri_xuong_dong_dau · `b4_bien_lop_khac`: cong_b4_bien_lop_khac · `b4_200_khong_header`: cong_b4_200_thieu_header · `b4_json_tu_byte`: cong_b4_utf16 · `b4_bo_name`: cong_b4_name_khac · `b4_bo_bien_cam`: cong_b4_bien_cam_doc · `b4_token_khong_gui`: cong_b4_token · `b4_bo_header_phien_ban`: cong_b4_dc_beta · `b4_7a_master_cuc_bo`: cong_b4_7a_master_cuc_bo_khac · `b4_7b_bo_so`: cong_b4_7b_blob_khac · `b4_7b_bo_oid`: cong_b4_7b_khong_phai_oid · `b4_vc_bo_proxy`: cong_b4_vc_proxy · `b4_vc_nuot_loi`: cong_b4_vc_loi_ket_noi
 
+## Cổng kho, biên đã soát, chưa đo
 
-## Tiêu chí 8 — phát lại 60 merge (`python ops/specs/wp1462-r1/do/do_b4.py phat-lai`, rc 0)
-
-```
-phát lại: 60 merge · bảng sha256 aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a · lớp {'khong_giam': 42, 'duong_nhanh': 18} · REST 0 · kho (bản sao riêng) sạch: True
-KẾT QUẢ phat-lai: ĐẠT
-```
-
-Hàm chạy nay dựng cây tạm bằng `_b4_anh_chup` (byte đọc thô qua `cat-file --batch`, băm lại khớp OID, tự ghi; không checkout): 60/60 lượt khớp đường trực tiếp trên cây thật của `0f9aa2a` (17 529 blob). Hồi quy khung dòng: 60/60 lượt CRLF mô phỏng ra cùng lớp với LF; đối chứng hỏng (CR giữa giá trị) ra `la`.
-
-## Tiêu chí 4 — từng cặp đột biến · ca (`python ops/specs/wp1462-r1/do/do_b4.py dot-bien i/4`, i = 0..3, mỗi lát rc 0)
-
-143 đột biến, 197 cặp, 197 GIET bằng ChotB4; 0 TÍN DỤNG GIẢ, 0 sống sót, 0 đối chứng khác họ đỏ. Mỗi hàng là một đột biến; mọi ca đích của hàng đỏ bằng `ChotB4` của chính ca ấy (GIẾT), trừ khi hàng ghi khác.
-
-| đột biến | ca đích (mỗi ca: lớp ngoại lệ · phân hạng) |
-|---|---|
-| b4_bc_bo_path | cong_b4_bc_run_path_qua · cong_b4_bc_run_path_chan — ChotB4 · GIET |
-| b4_bc_bo_run_id | cong_b4_bc_job_run_khac — ChotB4 · GIET |
-| b4_bc_bo_manh_1 | cong_b4_bc_du_thieu_manh_1 · cong_b4_bc_dich_thieu_manh_1 — ChotB4 · GIET |
-| b4_bc_bo_manh_5 | cong_b4_bc_du_thieu_manh_5 · cong_b4_bc_dich_thieu_manh_5 — ChotB4 · GIET |
-| b4_bc_bo_kieu_buoc | cong_b4_bc_step_ten_khong_chuoi · cong_b4_bc_step_khong_object — ChotB4 · GIET |
-| b4_bc_nhieu_buoc | cong_b4_bc_hai_buoc_du — ChotB4 · GIET |
-| b4_bc_khong_gop_tep | cong_b4_bc_du_tep_lap · cong_b4_bc_du_tep_hai_trang · cong_b4_bc_du_tep_chong · cong_b4_bc_dich_tep_lap · cong_b4_bc_dich_tep_hai_trang · cong_b4_bc_dich_tep_chong — ChotB4 · GIET |
-| b4_chay_khi_k2_do | cong_b4_k2_do_thi_khong_chay — ChotB4 · GIET |
-| b4_du_cung_tu_kiem | cong_b4_7a_du_khong_tu_kiem — ChotB4 · GIET |
-| b4_la_dat | cong_b4_khong_tep_phan_loai — ChotB4 · GIET |
-| b4_bo_bang_chung_dich | cong_b4_dich_thieu_bang_chung — ChotB4 · GIET |
-| b4_vang_giam | cong_b4_bien_vang · cong_b4_dich_cong_tac_dong — ChotB4 · GIET |
-| b4_bo_rc_git_dir | cong_b4_git_loi — ChotB4 · GIET |
-| b4_su_kien_khac | cong_b4_sinh_bo_moi — ChotB4 · GIET |
-| b4_git_dir_cua_kho | cong_b4_git_doi_ten_cuc_bo · cong_b4_git_thay_the — ChotB4 · GIET |
-| b4_doc_thuoc_tinh_he_thong | cong_b4_git_khong_he_thong — ChotB4 · GIET |
-| b4_bo_bam_cay | cong_b4_gia_mao_cay — ChotB4 · GIET |
-| b4_han_khac_15 | cong_b4_dc_beta — ChotB4 · GIET |
-| b4_hop_dao_cha | cong_b4_sinh_bo_moi — ChotB4 · GIET |
-| b4_dao_hai_lop | cong_b4_dc_beta · cong_b4_dc_delta — ChotB4 · GIET |
-| b4_tach_moi_kieu_dong | cong_b4_cr_giua_dong — ChotB4 · GIET |
-| b4_bo_thieu_che_do | cong_b4_thieu_che_do — ChotB4 · GIET |
-| b4_nhan_ngoai_tap | cong_b4_che_do_ngoai_tap · cong_b4_dk_ngoai_tap — ChotB4 · GIET |
-| b4_chuoi_cho_phep_lop_kia | cong_b4_dc_beta — ChotB4 · GIET |
-| b4_chuoi_lop_khac | cong_b4_bien_lop_khac_gia_tri — ChotB4 · GIET |
-| b4_header_phan_biet_hoa_thuong | cong_b4_header_hoa_thuong — ChotB4 · GIET |
-| b4_utf8_thay_the | cong_b4_utf8_hong — ChotB4 · GIET |
-| b4_bo_kieu_value | cong_b4_value_khong_chuoi — ChotB4 · GIET |
-| b4_bien_cam_chi_1 | cong_b4_bien_cam_khac_1 — ChotB4 · GIET |
-| b4_bo_header_accept | cong_b4_dc_beta — ChotB4 · GIET |
-| b4_gia_tri_khong_cat | cong_b4_gia_tri_dai — ChotB4 · GIET |
-| b4_7a_bo_so | cong_b4_7a_master_cu — ChotB4 · GIET |
-| b4_7b_so_tien_to | cong_b4_7b_oid_cung_tien_to — ChotB4 · GIET |
-| b4_7b_bo_tep_vang | cong_b4_7b_khong_tep — ChotB4 · GIET |
-| b4_vc_bo_han_socket | cong_b4_vc_han_socket — ChotB4 · GIET |
-| b4_vc_thu_lai | cong_b4_vc_500_khong_thu_lai — ChotB4 · GIET |
-| b4_bc_bo_head | cong_b4_bc_run_head_qua · cong_b4_bc_run_head_chan — ChotB4 · GIET |
-| b4_bc_bo_attempt | cong_b4_bc_job_attempt_cu — ChotB4 · GIET |
-| b4_bc_bo_manh_2 | cong_b4_bc_du_thieu_manh_2 · cong_b4_bc_dich_thieu_manh_2 — ChotB4 · GIET |
-| b4_bc_bo_manh_6 | cong_b4_bc_du_thieu_manh_6 · cong_b4_bc_dich_thieu_manh_6 — ChotB4 · GIET |
-| b4_bc_bo_job_head | cong_b4_bc_job_head_khac — ChotB4 · GIET |
-| b4_bc_bo_buoc_status | cong_b4_bc_buoc_dang_chay — ChotB4 · GIET |
-| b4_bc_ten_job_long | cong_b4_bc_ten_job_nen_khac — ChotB4 · GIET |
-| b4_k2b_truoc_k7 | cong_b4_thu_tu_sau_k7 — ChotB4 · GIET |
-| b4_bo_dong_cong_tac | cong_b4_dc_beta · cong_b4_bien_vang — ChotB4 · GIET |
-| b4_bo_tinh_lai | cong_b4_khong_giam · cong_b4_pr_sua_ci_yml — ChotB4 · GIET |
-| b4_bo_audit | cong_b4_dich_khong_audit · cong_b4_dich_audit_do — ChotB4 · GIET |
-| b4_khong_doc_duoc_giam | cong_b4_rest_nem · cong_b4_json_hong · cong_b4_json_sau · cong_b4_than_la · cong_b4_tien_trinh_thuong — ChotB4 · GIET |
-| b4_moi_truong_ke_thua | cong_b4_moi_truong_moi · cong_b4_tc11_c_bo_moi · cong_b4_tc11_c_che_do_dich — ChotB4 · GIET |
-| b4_hop_mot_cha | cong_b4_sinh_bo_moi · cong_b4_tc11_b_che_do_dich — ChotB4 · GIET |
-| b4_doc_cau_hinh_toan_cuc | cong_b4_git_doi_ten_toan_cuc — ChotB4 · GIET |
-| b4_checkout_thay_anh_chup | cong_b4_gia_mao_blob · cong_b4_git_thuoc_tinh_trong_cay — ChotB4 · GIET |
-| b4_object_vang_bo_qua | cong_b4_object_vang — ChotB4 · GIET |
-| b4_han_pl_khac_120 | cong_b4_han_dac_ta — ChotB4 · GIET |
-| b4_cay_hop_la_dau | cong_b4_master_di_truoc — ChotB4 · GIET |
-| b4_dau_la_goc | cong_b4_sinh_bo_moi — ChotB4 · GIET |
-| b4_cat_khoang_trang | cong_b4_dau_cach_cuoi — ChotB4 · GIET |
-| b4_bo_dk_bo_moi_hong | cong_b4_dk_ngoai_tap — ChotB4 · GIET |
-| b4_nhanh_kem_dk_dat | cong_b4_nhanh_kem_dk — ChotB4 · GIET |
-| b4_updated_at_la_vi_tu | cong_b4_updated_at_cu — ChotB4 · GIET |
-| b4_404_moi_nguon | cong_b4_404_thieu_header — ChotB4 · GIET |
-| b4_bo_tran_than | cong_b4_than_qua_dai — ChotB4 · GIET |
-| b4_nhan_khoa_trung | cong_b4_khoa_trung — ChotB4 · GIET |
-| b4_rest_loi_lay_bien_nguoi_goi | cong_b4_rest_nem_bien_nguoi_goi — ChotB4 · GIET |
-| b4_bien_cam_ca_khi_rong | cong_b4_bien_cam_rong — ChotB4 · GIET |
-| b4_bo_header_user_agent | cong_b4_dc_beta — ChotB4 · GIET |
-| b4_hieu_luc_60_phut | cong_b4_dc_beta — ChotB4 · GIET |
-| b4_7a_bo_rc_ls_remote | cong_b4_7a_ls_remote_loi — ChotB4 · GIET |
-| b4_7b_bo_rc_hash_object | cong_b4_7b_hash_object_loi — ChotB4 · GIET |
-| b4_vc_post | cong_b4_vc_get_header — ChotB4 · GIET |
-| b4_vc_bo_tran_byte | cong_b4_vc_tran_byte — ChotB4 · GIET |
-| b4_vc_ma_200 | cong_b4_vc_404_nguyen_ma · cong_b4_vc_khong_chuyen_huong — ChotB4 · GIET |
-| b4_bc_bo_kho | cong_b4_bc_run_kho_qua · cong_b4_bc_run_kho_chan — ChotB4 · GIET |
-| b4_bc_bay_manh | cong_b4_bc_thieu_manh_7 · cong_b4_bc_dich_thieu_manh_7 — ChotB4 · GIET |
-| b4_bc_bo_manh_3 | cong_b4_bc_du_thieu_manh_3 · cong_b4_bc_dich_thieu_manh_3 — ChotB4 · GIET |
-| b4_bc_nhan_trung | cong_b4_bc_manh_trung — ChotB4 · GIET |
-| b4_bc_bo_job_status | cong_b4_bc_job_dang_chay — ChotB4 · GIET |
-| b4_bc_bo_buoc_conclusion | cong_b4_bc_buoc_failure — ChotB4 · GIET |
-| b4_bc_luon_du | cong_b4_bc_job_run_khac · cong_b4_siet_alpha — ChotB4 · GIET |
-| b4_audit_truoc_bang_chung | cong_b4_dich_thieu_ca_hai — ChotB4 · GIET |
-| b4_bo_co_siet | cong_b4_siet_beta · cong_b4_siet_alpha — ChotB4 · GIET |
-| b4_ma_cua_pr | cong_b4_pr_sua_bo_phan_loai — ChotB4 · GIET |
-| b4_audit_nhan_mien | cong_b4_dich_mien_khong_thay — ChotB4 · GIET |
-| b4_merge_la_dau | cong_b4_master_di_truoc — ChotB4 · GIET |
-| b4_bo_I | cong_b4_python_I — ChotB4 · GIET |
-| b4_khong_don | cong_b4_dc_alpha · cong_b4_khong_tep_phan_loai · cong_b4_het_han · cong_b4_system_exit — ChotB4 · GIET |
-| b4_doc_thuoc_tinh_toan_cuc | cong_b4_git_thuoc_tinh_hop — ChotB4 · GIET |
-| b4_bo_kiem_bam | cong_b4_gia_mao_blob · cong_b4_gia_mao_cay — ChotB4 · GIET |
-| b4_ghi_ra_ngoai | cong_b4_cay_ra_ngoai — ChotB4 · GIET |
-| b4_ngay_theo_dong_ho | cong_b4_ngay_co_dinh — ChotB4 · GIET |
-| b4_ma_tu_cay_hop | cong_b4_pr_sua_bo_phan_loai — ChotB4 · GIET |
-| b4_bo_cr | cong_b4_crlf_nhan — ChotB4 · GIET |
-| b4_bo_utf8 | cong_b4_khong_utf8 — ChotB4 · GIET |
-| b4_bo_dk_dich_hong | cong_b4_dk_dich_ngoai_tap — ChotB4 · GIET |
-| b4_ca_hai_dk_dat | cong_b4_ca_hai_dk — ChotB4 · GIET |
-| b4_nhan_hang_ngoai_json | cong_b4_hang_ngoai_json — ChotB4 · GIET |
-| b4_ma_khac_200 | cong_b4_403_tu_choi · cong_b4_302 — ChotB4 · GIET |
-| b4_tran_than_chat_hon | cong_b4_than_dung_tran — ChotB4 · GIET |
-| b4_bo_goc_object | cong_b4_goc_khong_object — ChotB4 · GIET |
-| b4_bo_hang_kho | cong_b4_repo_khac — ChotB4 · GIET |
-| b4_token_luon_gui | cong_b4_dc_beta — ChotB4 · GIET |
-| b4_gia_tri_khong_json | cong_b4_gia_tri_xuong_dong_dau — ChotB4 · GIET |
-| b4_hai_yeu_cau | cong_b4_tc6_bon_tien_trinh — ChotB4 · GIET |
-| b4_7a_bo_rc_rev_parse | cong_b4_7a_rev_parse_loi — ChotB4 · GIET |
-| b4_7b_bo_rc_rev_parse | cong_b4_7b_rev_parse_loi — ChotB4 · GIET |
-| b4_vc_theo_chuyen_huong | cong_b4_vc_khong_chuyen_huong — ChotB4 · GIET |
-| b4_vc_bo_han_tuong | cong_b4_vc_han_tuong · cong_b4_vc_eof_tre · cong_b4_vc_khuc_cuoi_tre — ChotB4 · GIET |
-| b4_vc_bo_header | cong_b4_vc_get_header — ChotB4 · GIET |
-| b4_bc_run_nho_nhat | cong_b4_bc_run_id_lon_nhat_qua · cong_b4_bc_run_id_lon_nhat_chan — ChotB4 · GIET |
-| b4_bc_bo_manh_dau | cong_b4_bc_du_thieu_manh_0 · cong_b4_bc_dich_thieu_manh_0 — ChotB4 · GIET |
-| b4_bc_bo_manh_4 | cong_b4_bc_du_thieu_manh_4 · cong_b4_bc_dich_thieu_manh_4 — ChotB4 · GIET |
-| b4_bc_bo_kieu_list | cong_b4_bc_khong_steps — ChotB4 · GIET |
-| b4_bc_bo_job_conclusion | cong_b4_bc_job_failure — ChotB4 · GIET |
-| b4_bc_bo_buoc_kia | cong_b4_bc_ca_hai_buoc_success — ChotB4 · GIET |
-| b4_bc_buoc_kia_moi_ket_luan | cong_b4_bc_buoc_kia_skipped — ChotB4 · GIET |
-| b4_hai_dong_lan_g5 | cong_b4_dc_alpha · cong_b4_khong_giam — ChotB4 · GIET |
-| b4_khong_giam_dat | cong_b4_khong_giam · cong_b4_nam_im_khong_giam · cong_b4_tc11_d_bo_moi · cong_b4_tc11_d_che_do_dich — ChotB4 · GIET |
-| b4_goc_la_base | cong_b4_goc_la_master — ChotB4 · GIET |
-| b4_gia_tri_la_giam | cong_b4_gia_tri_khac · cong_b4_gia_tri_rong · cong_b4_gia_tri_sai_mot_ky_tu — ChotB4 · GIET |
-| b4_bo_rc_merge | cong_b4_merge_xung_dot — ChotB4 · GIET |
-| b4_bo_han_phan_loai | cong_b4_het_han — ChotB4 · GIET |
-| b4_object_vao_kho | cong_b4_dc_alpha · cong_b4_master_di_truoc — ChotB4 · GIET |
-| b4_doc_cau_hinh_he_thong | cong_b4_git_khong_he_thong — ChotB4 · GIET |
-| b4_bo_bam_blob | cong_b4_gia_mao_blob — ChotB4 · GIET |
-| b4_ghi_lien_that | cong_b4_lien_tep · cong_b4_lien_thu_muc — ChotB4 · GIET |
-| b4_goc_la_dau | cong_b4_sinh_bo_moi — ChotB4 · GIET |
-| b4_khoa_khop_giua_dong | cong_b4_dong_khac_bo_qua — ChotB4 · GIET |
-| b4_cat_moi_cr | cong_b4_hai_cr — ChotB4 · GIET |
-| b4_bo_rc_phan_loai | cong_b4_rc_khac_0 — ChotB4 · GIET |
-| b4_nhan_khoa_lap | cong_b4_che_do_lap · cong_b4_dk_lap — ChotB4 · GIET |
-| b4_so_khop_long | cong_b4_gia_tri_hoa_thuong · cong_b4_gia_tri_thua_khoang_trang · cong_b4_gia_tri_xuong_dong_dau — ChotB4 · GIET |
-| b4_bien_lop_khac | cong_b4_bien_lop_khac — ChotB4 · GIET |
-| b4_200_khong_header | cong_b4_200_thieu_header — ChotB4 · GIET |
-| b4_json_tu_byte | cong_b4_utf16 — ChotB4 · GIET |
-| b4_bo_name | cong_b4_name_khac — ChotB4 · GIET |
-| b4_bo_bien_cam | cong_b4_bien_cam_doc — ChotB4 · GIET |
-| b4_token_khong_gui | cong_b4_token — ChotB4 · GIET |
-| b4_bo_header_phien_ban | cong_b4_dc_beta — ChotB4 · GIET |
-| b4_7a_master_cuc_bo | cong_b4_7a_master_cuc_bo_khac — ChotB4 · GIET |
-| b4_7b_bo_so | cong_b4_7b_blob_khac — ChotB4 · GIET |
-| b4_7b_bo_oid | cong_b4_7b_khong_phai_oid — ChotB4 · GIET |
-| b4_vc_bo_proxy | cong_b4_vc_proxy — ChotB4 · GIET |
-| b4_vc_nuot_loi | cong_b4_vc_loi_ket_noi — ChotB4 · GIET |
-
-## Cổng kho và delta thời gian
-
-`packet_loop_test` 4 mảnh, Ruff F, `doctrine-scan`, `adr-song`, tl selftest chạy trên ĐÚNG H nên số đo nằm ở handoff, không ở tệp này. Delta thời gian của `gate-packet-loop-manh` (16 mảnh, CI) là `khong_do_duoc`: executor không đẩy, không dispatch.
-
-## Biên đã soát (B4-S05, đặc tả mục 2–9)
-
-Mỗi biên có ca hai chiều và đột biến riêng ở bảng trên: chỉ số mảnh 0..7 ở cả `du` lẫn `dich` (`b4_bc_bo_manh_dau`, `_1`…`_6`, `b4_bc_bay_manh`) · run `id` lớn nhất · `len(jj) == 1` · `len(c) == 1` · trần thân 65 536 (hai phía) · trần đọc 65 537 · `HIEU_LUC` đúng 1 800 s · hạn REST đúng 15 s (`b4_han_khac_15`) · hạn bộ phân loại đúng 120 s (`b4_han_pl_khac_120`) · OID so trọn 40 ký tự (7b) · `ls-remote` lấy đúng OID đầu. Hai chỗ KHÔNG có đột biến riêng, có lý do: `gia_tri` cắt `[:120]` — đặc tả nói "tối đa 120 ký tự", cắt ngắn hơn vẫn đúng đặc tả; kiểm băm commit M theo riêng loại — `rev-parse …^{commit}` của tự kiểm 7a đã băm lại commit (đo: commit giả ⇒ 7a đỏ trước bước 4), nên bỏ riêng phép kiểm ấy là đột biến tương đương. Không còn `read-tree`/`checkout-index` nào trong hàm chạy, nên không còn chốt mã thoát của chúng.
-
-## Chưa đo (`khong_do_duoc` ở lượt này)
-
-- CI PR Ubuntu, `gate-packet-loop-manh` 16 mảnh, `ci-dot-bien-du.yml` trên H: executor không đẩy, không dispatch.
-- Windows thật: khung CRLF chỉ mô phỏng; `cong_b4_*` chưa chạy trên Windows (phép kiểm đường dẫn của `_b4_anh_chup` với tên chứa `\` hay ổ đĩa chưa đo trên Windows).
-- Cấu hình/thuộc tính git HỆ THỐNG thật: hàm chạy đặt `GIT_CONFIG_NOSYSTEM=1` và `GIT_ATTR_NOSYSTEM=1`; ca `cong_b4_git_khong_he_thong` đo hai biến tới được tiến trình bộ phân loại, KHÔNG đo bằng tệp hệ thống thật (cần quyền root).
-- Object của H và lịch sử (merge-base) mà git của bộ phân loại đọc qua alternates KHÔNG được băm lại; chỉ cây chạy (commit M → cây → blob) được dựng từ byte đã kiểm.
-- Bảng `MUTANTS` cũ (ngoài `b4_*`): chạy ở `packet-loop-dot-bien.yml` sau merge.
+- `packet_loop_test` 4 mảnh + gom, Ruff F, `doctrine-scan`, `adr-song`, tl selftest đo trên ĐÚNG H: số ở handoff. Delta thời gian `gate-packet-loop-manh` (16 mảnh, CI): `khong_do_duoc` (executor không đẩy, không dispatch).
+- Biên (B4-S05, mục 2–9), mỗi biên có ca hai chiều + đột biến riêng ở trên: mảnh 0..7 ở `du` và `dich` · run `id` lớn nhất · `len(jj) == 1` · `len(c) == 1` · trần thân 65 536 (hai phía) · trần đọc 65 537 · `HIEU_LUC` 1 800 s · hạn REST 15 s · hạn bộ phân loại 120 s · OID so trọn 40 ký tự (7b) · `ls-remote` lấy OID đầu. Không có đột biến riêng, có lý do: `gia_tri[:120]` (đặc tả: tối đa 120); băm riêng commit M (7a `rev-parse …^{commit}` đã băm lại: đột biến tương đương).
+- Chưa đo: CI PR Ubuntu, 16 mảnh, `ci-dot-bien-du.yml` trên H; Windows thật (CRLF chỉ mô phỏng; đường dẫn có `\` hay ổ đĩa trong `_b4_anh_chup`); tệp cấu hình/thuộc tính git HỆ THỐNG thật (chỉ đo hai biến `NOSYSTEM` tới được bộ phân loại); object của H và lịch sử mà git của bộ phân loại đọc KHÔNG được băm lại (chỉ cây chạy M → cây → blob); bảng `MUTANTS` cũ (`packet-loop-dot-bien.yml` sau merge); máy đếm chạm CLI không thấy CLI chạy qua đường khác `main`/sinh tiến trình (chưa có ca nào như thế trong quần thể).

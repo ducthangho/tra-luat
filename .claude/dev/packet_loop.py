@@ -3564,7 +3564,8 @@ class _B4Loi(Exception):
 def _b4_che_do(a, h: str) -> str:
     """Mục 3 (H2): `du` | `dich` | `khac` từ ĐÚNG run R, attempt A và tập job J của H; MỘT hàm kiểm mảnh cho cả hai chế độ."""
     runs = _trang_du(_doc_json(a.workflow_runs, RC_GATE)[0], "workflow_runs", "workflow_runs")
-    jobs = [j for f in a.workflow_jobs for j in _trang_du(_doc_json(f, RC_GATE)[0], "jobs", f"workflow_jobs {f}")]
+    tung_tep = [j for f in a.workflow_jobs for j in _trang_du(_doc_json(f, RC_GATE)[0], "jobs", f"workflow_jobs {f}")]
+    jobs = _trang_du({"total_count": len({j["id"] for j in tung_tep}), "jobs": tung_tep}, "jobs", "workflow_jobs (gộp các tệp)")  # như K2: MỘT bản mỗi id qua mọi tệp
     ung = [r for r in runs if r.get("path") == ".github/workflows/ci.yml" and r.get("head_sha") == h and r["repository"].get("full_name") == a.repo]
     if not ung:
         return "khac"
@@ -3621,16 +3622,19 @@ def _b4_doc_lop(rc: int, out: bytes) -> str:
 
 def _b4_tinh_lai(root: Path, cay_ma: str, goc: str, dau: str) -> str:
     """Mục 5, HÀM CHẠY: bộ phân loại tại `cay_ma` chạy `python -I` trong cây tạm, với commit hợp C(goc, dau) nằm ở thư mục object TẠM.
-    Không để lại gì trong kho `root` (ref, worktree, object) và xoá mọi thư mục tạm ở mọi đường thoát."""
+    Không để lại gì trong kho `root` (ref, worktree, object) và xoá mọi thư mục tạm ở mọi đường thoát.
+    Git chạy trên một GIT_DIR TẠM, trống: kho `root` chỉ góp OBJECT (alternates). Cấu hình cục bộ/toàn cục, ref thay thế, graft,
+    `info/attributes` và hook của người gọi KHÔNG được đọc (không bộ lọc smudge nào chạy); symlink trong cây ra tệp thường, không trỏ ra ngoài."""
     td = Path(tempfile.mkdtemp(prefix="pl1462-"))
     try:
         rc, gd = _git_do(root, "rev-parse", "--path-format=absolute", "--git-common-dir")
         gd = os.fsdecode(gd).strip()
         env = {k: os.environ[k] for k in B4_BIEN_MT if k in os.environ}
-        env.update(GIT_DIR=gd, GIT_OBJECT_DIRECTORY=str(td / "obj"), GIT_ALTERNATE_OBJECT_DIRECTORIES=os.path.join(gd, "objects"),
-                   GIT_INDEX_FILE=str(td / "idx"), GIT_WORK_TREE=str(td / "cay"))
+        env.update(GIT_DIR=str(td / "git"), GIT_OBJECT_DIRECTORY=str(td / "obj"), GIT_ALTERNATE_OBJECT_DIRECTORIES=os.path.join(gd, "objects"),
+                   GIT_INDEX_FILE=str(td / "idx"), GIT_WORK_TREE=str(td / "cay"), GIT_CONFIG_GLOBAL=str(td / "git" / "config"))
         ngay = {f"GIT_{v}_{k}": g for v in ("AUTHOR", "COMMITTER") for k, g in (("NAME", "pl1462"), ("EMAIL", "pl1462@invalid"), ("DATE", "2000-01-01T00:00:00Z"))}
-        (td / "obj").mkdir(), (td / "cay").mkdir()
+        (td / "obj").mkdir(), (td / "cay").mkdir(), (td / "git" / "refs").mkdir(parents=True), (td / "git" / "HEAD").write_bytes(b"ref: refs/heads/pl1462\n")
+        (td / "git" / "config").write_bytes(b"[core]\n\tsymlinks = false\n")
 
         def g(*lenh, them=None) -> tuple:
             p = subprocess.run(["git", *lenh], env={**env, **(them or {})}, cwd=td / "cay", capture_output=True, stdin=subprocess.DEVNULL, timeout=B4_HAN_PL)
@@ -3650,31 +3654,40 @@ def _b4_tinh_lai(root: Path, cay_ma: str, goc: str, dau: str) -> str:
 
 def _rest_get(url: str, headers: dict, han: float) -> tuple:
     """Mục 6b, tầng vận chuyển: MỘT yêu cầu GET không thân, KHÔNG theo chuyển hướng, đọc tối đa 65 537 byte, `han` là hạn mỗi thao tác
-    socket LẪN hạn tường của cả lời gọi, không thử lại. Trả (status, headers, body); mọi lỗi ⇒ `_B4Loi`."""
+    socket LẪN hạn tường của cả lời gọi, không thử lại. Trả (status, headers, body); mọi lỗi ⇒ `_B4Loi`.
+    Hạn tường phủ CẢ lời gọi (mở, mọi lần đọc, EOF, chạm trần byte): lời gọi chạy ở luồng phụ, luồng chính chờ ĐÚNG `han`; chưa xong ⇒ `_B4Loi`."""
     import http.client
+    import threading
     import urllib.error
     import urllib.request
 
     class KhongChuyenHuong(urllib.request.HTTPRedirectHandler):
         def redirect_request(self, *a, **k):
             return None
-    het, than = time.monotonic() + han, b""
-    try:
+    kq = []
+
+    def goi():
+        than = b""
         try:
-            r = urllib.request.build_opener(KhongChuyenHuong).open(urllib.request.Request(url, headers=headers, method="GET"), timeout=han)
-        except urllib.error.HTTPError as ex:  # 3xx/4xx/5xx: trả NGUYÊN mã cho tầng chính sách
-            r = ex
-        with r:
-            while len(than) < 65537:
-                if time.monotonic() > het:
-                    raise _B4Loi("quá hạn tường")
-                x = r.read1(65537 - len(than))
-                if not x:
-                    break
-                than += x
-            return r.status, dict(r.headers.items()), than
-    except (OSError, ValueError, http.client.HTTPException) as ex:
-        raise _B4Loi(type(ex).__name__) from None
+            try:
+                r = urllib.request.build_opener(KhongChuyenHuong).open(urllib.request.Request(url, headers=headers, method="GET"), timeout=han)
+            except urllib.error.HTTPError as ex:  # 3xx/4xx/5xx: trả NGUYÊN mã cho tầng chính sách
+                r = ex
+            with r:
+                while len(than) < 65537:
+                    x = r.read1(65537 - len(than))
+                    if not x:
+                        break
+                    than += x
+                kq.append((r.status, dict(r.headers.items()), than))
+        except (OSError, ValueError, http.client.HTTPException) as ex:
+            kq.append(type(ex).__name__)
+    luong = threading.Thread(target=goi, daemon=True, name="pl1462-rest")
+    luong.start(), luong.join(han)
+    xong = kq[:1]  # chụp NGAY khi hết `han`: kết quả tới sau mốc này không bao giờ được dùng
+    if not xong or type(xong[0]) is str:
+        raise _B4Loi(xong[0] if xong else "quá hạn tường")
+    return xong[0]
 
 
 def _b4_cong_tac(lop: str, repo: str) -> tuple:

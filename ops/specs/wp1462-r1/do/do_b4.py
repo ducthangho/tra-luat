@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
 """Phép đo của executor cho wp1462 (B4) — KHÔNG phải `*_test.py`, không nằm trong cổng nào. Chạy từ gốc kho, in kết quả ra stdout.
 
-  ab        tiêu chí 1–2: mọi ca hiện có đi qua bộ dựng `_c1106`, dựng MỘT lần, chạy `packet_loop.py` của base (merge-base với
-            origin/master) và của head trên CÙNG fixture, mỗi vế kèm `launcher.py` của chính nó; kèm tự kiểm bộ so.
+  ab        tiêu chí 1–2: ĐẾM quần thể bằng cách chạy CẢ sổ ca của base với máy đếm ở `_c1106` (không lọc tĩnh), rồi với mọi ca đã vào
+            bộ dựng: dựng MỘT lần, chạy `packet_loop.py` của base (merge-base với origin/master) và của head trên CÙNG fixture, mỗi vế kèm
+            `launcher.py` của chính nó; kèm tự kiểm bộ so và tự kiểm phép đếm. Ca không có lời so được (dừng trước CLI, hoặc chạy script do
+            ca tự sửa) được so VẾT + kết cục, không so byte.
   phat-lai  tiêu chí 8: 60 merge của lịch sử thật qua HÀM CHẠY (`_b4_tinh_lai`) so với đường trực tiếp + hồi quy khung dòng LF/CRLF.
   dot-bien  tiêu chí 4: bảng (đột biến · ca · lớp ngoại lệ · phân hạng) cho mọi mục `b4_*` của bảng `MUTANTS`.
-Thoát 0 = đạt; 1 = có lệch (in từng dòng `ĐỎ`)."""
+`ab` và `dot-bien` nhận thêm lát `i/n` (chạy song song n tiến trình; quần thể = hợp các lát). Thoát 0 = đạt; 1 = có lệch (in từng dòng `ĐỎ`)."""
 import contextlib
 import hashlib
 import importlib.util
 import io
 import os
+import platform
+import shutil
 import subprocess
 import sys
 import tempfile
+import types
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -71,22 +76,32 @@ def tu_kiem_bo_so():
 
 # --- tiêu chí 1–2 ---------------------------------------------------------------------------------------------------------------
 def do_ca(T, kich_ban, td, ten_ca):
-    """Chạy các ca `ten_ca` của bộ test `T`, bắt MỌI lời `kiem-merge` đi qua `_c1106`: mỗi lời chạy trên từng script của `kich_ban` (cùng fixture)."""
-    ghi, trong, cu = {}, [0], (T._c1106, T.run, T._rev_list_loi, T._transition_run1187)
+    """Chạy các ca `ten_ca` của bộ test `T` với MÁY ĐẾM ở `_c1106`, ghi lần VÀO bộ dựng TRƯỚC khi nó chạy. Trả (ghi, vet). `ghi[ca]` = các lời `kiem-merge`
+    SO ĐƯỢC (cùng fixture, chạy trên từng script của `kich_ban`). `vet[ca]` = dãy sự kiện: `vao` (vào `_c1106`) · `so` (lời so được) · `la:<rc>` (ca đưa một
+    script KHÁC — bản do chính nó sửa — nên chạy ĐÚNG script ấy, không thay) · `nem:<lớp>` (ngoại lệ ra khỏi `_c1106`, kể cả do ca tiêm) · `ca:<dat|lớp>`."""
+    ghi, vet, trong, cu = {}, {}, [0, None], (T._c1106, T.run, T._rev_list_loi, T._transition_run1187)
 
     def boc(goc):
-        def chay(script, args, sd, *a, **k):
+        def chay(script, args, *a, **k):   # CÙNG chữ ký với hàm gốc (`state_dir` tuỳ chọn): bọc sai chữ ký làm ca hỏng trước khi tới bộ dựng
             if not trong[0] or not args or str(args[0]) != "kiem-merge":
-                return goc(script, args, sd, *a, **k)
-            ra = [goc(s, args, Path(f"{sd}-{i}"), *a, **k) for i, s in enumerate(kich_ban)]
-            ghi.setdefault(trong[1], []).append([(r[0], bytes(r[1]), bytes(r[2])) for r in ra])
+                return goc(script, args, *a, **k)
+            if Path(script) != Path(kich_ban[-1]):
+                r = goc(script, args, *a, **k)
+                vet[trong[1]].append(f"la:{r[0]}")
+                return r
+            ra = [goc(s, args, *((Path(f"{a[0]}-{i}"), *a[1:]) if a and a[0] is not None else a), **k) for i, s in enumerate(kich_ban)]
+            ghi.setdefault(trong[1], []).append([(r[0], bytes(r[1]), bytes(r[2])) for r in ra]), vet[trong[1]].append("so")
             return ra[-1]
         return chay
 
     def c1106(*a, **k):
         trong[0] += 1
+        vet[trong[1]].append("vao")
         try:
             return cu[0](*a, **k)
+        except BaseException as ex:
+            vet[trong[1]].append(f"nem:{type(ex).__name__}")
+            raise
         finally:
             trong[0] -= 1
     def rev_list_loi(script, args, sd, env=None):   # như `_rev_list_loi` của bộ test (rev-list rc -15, stdout đúng) nhưng GIỮ stdout, vì bộ so cần dòng `LAN_G5`
@@ -100,35 +115,54 @@ def do_ca(T, kich_ban, td, ten_ca):
         return rc, ra.getvalue().encode(), loi.getvalue().encode()
     T._c1106, T.run, T._rev_list_loi, T._transition_run1187 = c1106, boc(cu[1]), boc(rev_list_loi), boc(cu[3])
     try:
-        for ten, fn in T.CASES:
+        for ten, fn in list(T.CASES):
             if ten in ten_ca:
-                trong[1:] = [ten]
-                d = Path(tempfile.mkdtemp(prefix="ca-", dir=td))
+                trong[1], vet[ten], d = ten, [], Path(tempfile.mkdtemp(prefix="ca-", dir=td))
                 try:
+                    if ten in getattr(T, "WINDOWS_ONLY", ()) and os.name != "nt":
+                        raise OSError("chỉ đo trên Windows")
                     fn(T.Ctx(kich_ban[-1], d))
-                except BaseException as ex:  # noqa: BLE001 — kỳ vọng của ca không phải phép đo ở đây; chỉ cần các lời gọi đã ghi
+                    vet[ten].append("ca:dat")
+                except BaseException as ex:  # noqa: BLE001 — kỳ vọng của ca không phải phép đo ở đây; kết cục được GHI, không bị bỏ
                     if isinstance(ex, KeyboardInterrupt):
                         raise
+                    vet[ten].append(f"ca:{type(ex).__name__}")
+                shutil.rmtree(d, ignore_errors=True)
     finally:
         T._c1106, T.run, T._rev_list_loi, T._transition_run1187 = cu
-    return ghi
+    return ghi, vet
 
 
-def cham_c1106(T, f, sau=3):
-    """Lọc TĨNH rẻ để khỏi chạy cả sổ ca (phép đếm thật là ĐỘNG, ở `do_ca`): mã của ca, closure của nó và các hàm mức module nó nhắc tên (≤ 3 tầng) có nhắc `_c1106`."""
-    co = getattr(f, "__code__", None)
-    if co is None or sau < 0:
-        return False
-    ten = set(co.co_names) | {n for k in co.co_consts if hasattr(k, "co_names") for n in k.co_names}
-    o = [c.cell_contents for c in getattr(f, "__closure__", None) or () if c.cell_contents is not f]
-    return bool(ten & {"_c1106", "_c1106_ca"}) or any(cham_c1106(T, g, sau - 1) for g in [*o, *(vars(T).get(n) for n in ten)] if callable(g))
+def quan_the(T, manh=(0, 1)):
+    """Quần thể ĐẾM = mọi ca BẮT BUỘC của sổ trên nền này (đúng bộ lọc nền của `main()` của bộ test) trừ ca `cong_b4_*` của chính packet, KHÔNG lọc
+    tĩnh (lọc theo tên hàm đã sót các ca tới `_c1106` qua `dict(CASES)`)."""
+    nen = platform.system()
+    ap = getattr(T, "WP1174_REQUIRED", set()) - {"wp1174_windows_claim_rejected"} if nen == "Linux" else getattr(T, "WP1174_BOTH", set()) if nen == "Windows" else set()
+    return {t for t, _ in T.CASES[manh[0]::manh[1]] if not t.startswith("cong_b4_") and (not t.startswith("wp1174_") or t in ap)
+            and (nen == "Linux" or t not in getattr(T, "_WP1303_LINUX_CASES", ()))}
 
 
-def lenh_ab():
+def tu_kiem_dem(td):
+    """Tự kiểm phép đếm trên một sổ ca GIẢ: ca tới `_c1106` qua `dict(CASES)`, ngoại lệ lúc dựng, ngoại lệ ở runner và lượt chạy script do ca tự sửa đều
+    phải CÓ trong vết với đúng kết cục; ca không vào bộ dựng thì không có `vao`. Khôi phục bộ lọc tĩnh hay bỏ kết cục ngoại lệ ⇒ lệch ⇒ ĐỎ."""
+    G = types.SimpleNamespace(Ctx=lambda script, d: types.SimpleNamespace(script=script), _rev_list_loi=None, _transition_run1187=None)
+    G.run = lambda script, args, sd=None: (_ for _ in ()).throw(KeyError("runner")) if "nem" in args else (0, b"", b"")
+    G._c1106 = lambda c, kieu="": (_ for _ in ()).throw(OSError("dựng")) if kieu == "dung" else G.run(Path("khac.py") if kieu == "la" else c.script, ["kiem-merge", kieu], *("sd",) * (kieu != "khong_sd"))
+    G.CASES = [("thang", lambda c: G._c1106(c)), ("gian_tiep", lambda c: dict(G.CASES)["thang"](c)), ("dung_nem", lambda c: G._c1106(c, "dung")),
+               ("runner_nem", lambda c: G._c1106(c, "nem")), ("script_la", lambda c: G._c1106(c, "la")), ("ngoai", lambda c: None), ("khong_sd", lambda c: G._c1106(c, "khong_sd")), ("cong_b4_x", lambda c: G._c1106(c))]
+    ghi, vet = do_ca(G, [Path("a.py")], td, quan_the(G))
+    mong = {"thang": ["vao", "so", "ca:dat"], "gian_tiep": ["vao", "so", "ca:dat"], "dung_nem": ["vao", "nem:OSError", "ca:OSError"],
+            "runner_nem": ["vao", "nem:KeyError", "ca:KeyError"], "script_la": ["vao", "la:0", "ca:dat"], "ngoai": ["ca:dat"],
+            "khong_sd": ["vao", "so", "ca:dat"]}
+    return [] if vet == mong and sorted(ghi) == ["gian_tiep", "khong_sd", "thang"] else [f"tự kiểm phép đếm: vết {vet} ≠ {mong}"]
+
+
+def lenh_ab(manh=(0, 1)):
     base = git("merge-base", "HEAD", "refs/remotes/origin/master").decode().strip()
     loi = tu_kiem_bo_so()
     with tempfile.TemporaryDirectory(prefix="b4ab-") as td:
         td = Path(td)
+        loi += tu_kiem_dem(td)
         for ve, lay in (("base", lambda p: git("show", f"{base}:.claude/dev/{p}")), ("head", lambda p: (DEV / p).read_bytes())):
             (td / ve).mkdir()
             for p in ("packet_loop.py", "launcher.py", "packet_loop_test.py"):
@@ -136,16 +170,19 @@ def lenh_ab():
         Tb, Th = nap("plt_base", td / "base/packet_loop_test.py"), nap("plt_head", td / "head/packet_loop_test.py")
         for T in (Tb, Th):   # như vòng đột biến của chính bộ test: fixture canonical đọc từ kho thật, `__file__` vẫn là bản sao
             T.HERE, T.ROOT = DEV, ROOT
-        ung = lambda T: {t for t, f in T.CASES if not t.startswith("cong_b4_") and cham_c1106(T, f)}  # noqa: E731
-        nen = do_ca(Tb, [td / "base/packet_loop.py"], td, ung(Tb))
-        ghi = {}
+        nen, vet = do_ca(Tb, [td / "base/packet_loop.py"], td, quan_the(Tb, manh))   # ĐẾM: cả sổ ca của base (lát `manh`), không lọc trước
+        vao = {t for t, v in vet.items() if "vao" in v}
+        ghi, vh = {}, {}
         for hinh, sua in (("moi", None), ("cu", lambda h, *a, **k: [])):
             goc = Th._b4_manh
             Th._b4_manh = sua or goc
             try:
-                ghi[hinh] = do_ca(Th, [td / "base/packet_loop.py", td / "head/packet_loop.py"], td, ung(Th))
+                ghi[hinh], vh[hinh] = do_ca(Th, [td / "base/packet_loop.py", td / "head/packet_loop.py"], td, vao)
             finally:
                 Th._b4_manh = goc
+    bo = lambda v: [x for x in v if not x.startswith("ca:")]  # noqa: E731
+    loi += [f"quần thể: {t} vết head (hình dạng mới) {vh['moi'].get(t)} ≠ vết base {vet[t]}" for t in sorted(vao) if vh["moi"].get(t) != vet[t]]
+    loi += [f"quần thể: {t} vết head (hình dạng cũ) {vh['cu'].get(t)} ≠ vết base {vet[t]} (không kể kết cục ca)" for t in sorted(vao) if bo(vh["cu"].get(t, [])) != bo(vet[t])]
     loi += [f"tiêu chí 1: thiếu ca {t} (base có {len(nen[t])} lời kiem-merge)" for h in ghi for t in nen if len(ghi[h].get(t, [])) != len(nen[t])]
     loi += [f"tiêu chí 1 (hình dạng mới, B-2): {t} lời {i} lệch byte: rc {b[0]}/{h[0]}" for t, ds in ghi["moi"].items() for i, (b, h) in enumerate(ds) if b != h]
     lop = {}
@@ -155,9 +192,17 @@ def lenh_ab():
             lop.setdefault(k, []).append(t)
             loi += [f"tiêu chí 2: {t} lời {i} lớp ({k}): {e}"] * bool(e)
     z = sorted(set(lop.get("z", [])))
-    loi += [f"tiêu chí 2: ca {t} phải thuộc lớp (z)" for t in ("cong_c_k1_anchor", "cong_c_k1_yaml_hong", "cong_c_k1_khoa_trung", "cong_c_k1_tag_hong") if t not in z]
-    print(f"base {base}\nca đi qua _c1106 tại base: {len(nen)} · tại head (so được): moi {len(ghi['moi'])} · cu {len(ghi['cu'])} · lời kiem-merge: {sum(map(len, nen.values()))}")
-    print("tiêu chí 2 — số lời theo lớp: " + " · ".join(f"({k}) {len(v)}" for k, v in sorted(lop.items())) + f"\nlớp (z): {z}\ntên ca: {sorted(nen)}")
+    loi += [f"tiêu chí 2: ca {t} phải thuộc lớp (z)" for t in ("cong_c_k1_anchor", "cong_c_k1_yaml_hong", "cong_c_k1_khoa_trung", "cong_c_k1_tag_hong") if t not in z and (manh[1] == 1 or t in vao)]
+    rieng = {t: vet[t] for t in sorted(vao) if set(vet[t]) - {"vao", "so", "ca:dat"}}   # ca có lần vào KHÔNG cho lời so được, hoặc kết cục không phải đạt
+    kc = {}
+    for v in vet.values():
+        kc[v[-1]] = kc.get(v[-1], 0) + 1
+    print(f"base {base} · lát {manh[0]}/{manh[1]}\nsổ ca của base đã chạy có máy đếm: {len(vet)} · kết cục: {dict(sorted(kc.items()))}"
+          f"\nca base kết cục không phải đạt/BoQua (vết): {sorted((t, ' '.join(v)) for t, v in vet.items() if v[-1] not in ('ca:dat', 'ca:BoQua'))}")
+    print(f"ca VÀO _c1106 tại base: {len(vao)} = {len(vao) - len(rieng)} ca thường (mọi lần vào đều cho lời so được, ca đạt) + {len(rieng)} ca riêng · lần vào: {sum(v.count('vao') for v in vet.values())}"
+          f" · lời kiem-merge so được: {sum(map(len, nen.values()))} · ở head: moi {len(ghi['moi'])} ca · cu {len(ghi['cu'])} ca")
+    print("ca riêng (vết tại base; head hình dạng mới phải trùng vết):\n" + "\n".join(f"  {t}: {' '.join(v)}" for t, v in rieng.items()))
+    print("tiêu chí 2 — số lời theo lớp: " + " · ".join(f"({k}) {len(v)}" for k, v in sorted(lop.items())) + f"\nlớp (z): {z}\ntên ca vào _c1106: {sorted(vao)}")
     return loi
 
 
@@ -203,12 +248,12 @@ def lenh_phat_lai():
 
 
 # --- tiêu chí 4 -----------------------------------------------------------------------------------------------------------------
-def lenh_dot_bien():
+def lenh_dot_bien(manh=(0, 1)):
     T, loi = nap("packet_loop_test", DEV / "packet_loop_test.py"), []
     goc = T.CANONICAL.read_text(encoding="utf-8")
     print("| đột biến | ca đích | lớp ngoại lệ | phân hạng |\n|---|---|---|---|")
     with tempfile.TemporaryDirectory(prefix="b4db-") as td:
-        for i, (ten, (tim, thay, dich)) in enumerate((k, v) for k, v in T.MUTANTS.items() if k.startswith("b4_")):
+        for i, (ten, (tim, thay, dich)) in enumerate([(k, v) for k, v in T.MUTANTS.items() if k.startswith("b4_")][manh[0]::manh[1]]):
             than, d = goc, Path(td, f"m{i}")
             d.mkdir()
             for t, th in T._cap_thay_the(tim, thay):
@@ -228,10 +273,10 @@ def lenh_dot_bien():
 if __name__ == "__main__":
     for s in (sys.stdout, sys.stderr):
         s.reconfigure(encoding="utf-8", errors="backslashreplace") if isinstance(s, io.TextIOWrapper) else None
-    lenh = {"ab": lenh_ab, "phat-lai": lenh_phat_lai, "dot-bien": lenh_dot_bien}.get(sys.argv[1] if len(sys.argv) == 2 else "")
-    if not lenh:
+    lenh = {"ab": lenh_ab, "phat-lai": lenh_phat_lai, "dot-bien": lenh_dot_bien}.get(sys.argv[1] if len(sys.argv) in (2, 3) else "")
+    if not lenh or (len(sys.argv) == 3 and lenh is lenh_phat_lai):
         sys.exit(__doc__)
-    ds = lenh()
+    ds = lenh(*([tuple(map(int, sys.argv[2].split("/")))] if len(sys.argv) == 3 else []))
     print("\n".join(f"ĐỎ  {x}" for x in ds) or "không lệch")
     print(f"KẾT QUẢ {sys.argv[1]}: {'ĐẠT' if not ds else str(len(ds)) + ' lỗi'}")
     sys.exit(int(bool(ds)))

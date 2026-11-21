@@ -2030,27 +2030,35 @@ def c74_phan_loai_doi_tuong_loi():   # #1475 review lượt 6 F2.o: ranh giới 
     ten_kieu = [tk for tk, _ in _kieu_oserror_du()]   # danh mục TOÀN BỘ: chỉ chạy ở cấu hình phân biệt được (Windows tiêm)
     bang(len(ten_kieu) >= 17 and {"InterruptedError", "BlockingIOError", "PermissionError", "FileNotFoundError"} <= set(ten_kieu),
          f"danh mục kiểu OSError dựng sẵn thiếu: {ten_kieu}")
-    so_du = 0
-    for ten, tao, _, nhan in _bang_du():
-        for kem_pe in (False, True):
-            n, ngu_mong, sach = _mong_c73((frozenset({nhan, "PE"} if kem_pe else {nhan}),), True)
-            goi, ngu = [], []
-
-            def xoa_du(p, onexc=None, onerror=None):
-                goi.append(1)
-                if len(goi) > 1:
-                    return shutil.rmtree(p)
-                for e in ([tao()] + ([OSError(errno.EACCES, "PE kèm")] if kem_pe else [])):
-                    (onexc(os.unlink, f"{p}/x", e) if onexc is not None else onerror(os.unlink, f"{p}/x", (type(e), e, None)))
-            with tempfile.TemporaryDirectory() as thu, mock.patch.object(m, "_xoa_cay", xoa_du), \
-                    mock.patch.object(m, "ngu_thu_lai", ngu.append), mock.patch.object(m, "LA_WINDOWS", True), \
-                    contextlib.redirect_stderr(io.StringIO()):
-                (Path(thu) / "d").mkdir()
-                kq = m.don_thu_muc(Path(thu) / "d")
-                bang(kq is sach and len(goi) == n and ngu == ngu_mong,
-                     f"danh mục đủ: {ten} (nhãn dọn {nhan}) kèm_PE={kem_pe}: mong ({n}, {ngu_mong}, {sach}); được ({kq}, {len(goi)}, {ngu})")
-            so_du += 1
-    bang(so_du == len(ten_kieu) * (len(errno.errorcode) + 1) * 2, f"số ô danh mục đủ: {so_du}")
+    so_du, trang = 0, {}   # danh mục ĐỦ ở MỌI vị trí retry (review lượt 10 F2.t): j lần {PE} rồi lỗi đang xét, j = 0..5
+    def xoa_du(p, onexc=None, onerror=None):
+        k = trang["k"]
+        trang["k"] += 1
+        loi = [OSError(errno.EACCES, "PE trước")] if k < trang["j"] else (trang["loi"] if k == trang["j"] else None)
+        if loi is None:
+            return os.rmdir(p)
+        for e in loi:
+            (onexc(os.unlink, f"{p}/x", e) if onexc is not None else onerror(os.unlink, f"{p}/x", (type(e), e, None)))
+    ngu = []
+    with tempfile.TemporaryDirectory() as thu, mock.patch.object(m, "_xoa_cay", xoa_du), mock.patch.object(m, "ngu_thu_lai", ngu.append), \
+            mock.patch.object(m, "LA_WINDOWS", True), contextlib.redirect_stderr(io.StringIO()):
+        p = Path(thu) / "d"
+        for ten, tao, _, nhan in _bang_du():
+            for j in range(6):
+                for kem_pe in (False, True):
+                    lich = (frozenset({"PE"}),) * j + (frozenset({nhan, "PE"} if kem_pe else {nhan}),)
+                    n, ngu_mong, sach = _mong_c73(lich, True)
+                    if p.exists():
+                        os.rmdir(p)
+                    p.mkdir()
+                    trang.update(k=0, j=j, loi=[tao()] + ([OSError(errno.EACCES, "PE kèm")] if kem_pe else []))
+                    del ngu[:]
+                    kq = m.don_thu_muc(p)
+                    bang(kq is sach and trang["k"] == n and ngu == ngu_mong,
+                         f"danh mục đủ: {ten} (nhãn dọn {nhan}) sau {j} lần PE, kèm_PE={kem_pe}: mong ({n}, {ngu_mong}, {sach}); "
+                         f"được ({kq}, {trang['k']}, {ngu})")
+                    so_du += 1
+    bang(so_du == len(ten_kieu) * (len(errno.errorcode) + 1) * 6 * 2, f"số ô danh mục đủ: {so_du}")
     cau = ((lambda: {"x": lambda j: _PEcon(errno.EACCES, "giả") if j < 1 else None}, 2),   # cầu nối rmtree THẬT
            (lambda: {"x": lambda j: _OSErrorCon(errno.EACCES, "giả") if j < 1 else None}, 1),
            (lambda: {"x": lambda j: PE() if j < 1 else None, "@d": lambda j: _OSErrorCon(errno.ENOTEMPTY, "giả") if j < 1 else None}, 2))
@@ -2114,17 +2122,31 @@ def c75_doi_ten_va_ngat():   # #1475 review lượt 7: F2.p phân hoạch/chuy�
                         bang(r["loi"] is mong_loi and r["out"] == (MOI_BYTE if k_nem is None else CU_BYTE) and _ten_sot(r) == [], mo_ta)
                     so_o += 1
     bang(so_o == (len(_DOI_TEN_C75) + 20) * 3 * 2 * 3, f"số ô đổi tên: {so_o}")
-    so_du = 0
-    for ten, tao, nhan, _ in _bang_du():   # danh mục TOÀN BỘ ở (b), Windows tiêm, lỗi một lần rồi thành công (review lượt 9 F2.s)
-        da = []
-        r = _ghi_voi_doi_ten_gia({"b": lambda i, da=da, tao=tao: (da.append(tao()) or da[-1]) if i == 0 else None}, windows=True, co_cu=True)
-        if nhan == "PE":
-            ok = r["goi"].count("b") == 2 and r["ngu"] == [0.05] and r["loi"] is None and r["out"] == MOI_BYTE
-        else:
-            ok = r["goi"].count("b") == 1 and r["ngu"] == [] and r["loi"] is da[0] and r["out"] == CU_BYTE
-        bang(ok and _ten_sot(r) == [], f"danh mục đủ đổi tên: {ten} (nhãn {nhan}): được {r}")
-        so_du += 1
-    bang(so_du == len(_kieu_oserror_du()) * (len(errno.errorcode) + 1), f"số ô danh mục đủ đổi tên: {so_du}")
+    m, so_du, trang, ngu = nap(), 0, {}, []   # danh mục ĐỦ ở MỌI vị trí retry (review lượt 10 F2.t): j lần PE rồi lỗi đang xét
+
+    def thay(nguon, dich):
+        k = trang["k"]
+        trang["k"] += 1
+        if k < trang["j"] or k == trang["j"]:
+            e = OSError(errno.EACCES, "PE trước") if k < trang["j"] else trang["tao"]()
+            trang["da"].append(e)
+            raise e
+    with mock.patch.object(m, "_thay_the", thay), mock.patch.object(m, "ngu_thu_lai", ngu.append), mock.patch.object(m, "LA_WINDOWS", True):
+        for ten, tao, nhan, _ in _bang_du():
+            for j in range(6):
+                n, ngu_mong, k_nem = _mong_doi_ten(["PE"] * j + [nhan], True)
+                trang.update(k=0, j=j, tao=tao, da=[])
+                del ngu[:]
+                try:
+                    m.doi_ten_thu_lai("nguon", "dich")
+                    loi = None
+                except OSError as e:
+                    loi = e
+                bang(trang["k"] == n and ngu == ngu_mong and (loi is None if k_nem is None else loi is trang["da"][k_nem]),
+                     f"danh mục đủ đổi tên: {ten} (nhãn {nhan}) sau {j} lần PE: mong ({n}, {ngu_mong}, ném #{k_nem}); "
+                     f"được ({trang['k']}, {ngu}, {loi!r})")
+                so_du += 1
+    bang(so_du == len(_kieu_oserror_du()) * (len(errno.errorcode) + 1) * 6, f"số ô danh mục đủ đổi tên: {so_du}")
     for ngat in (lambda: KeyboardInterrupt(), lambda: SystemExit(7)):   # F2.q: ngắt giữa (a)/(b) ⇒ ném lại ĐÚNG đối tượng, dọn tạm
         for cho, co_cu in (("a", True), ("b", True), ("b", False)):
             for windows in (True, False):
@@ -2596,6 +2618,10 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ('J2_doi_ten_thu_lai_EAGAIN', '        except PermissionError:\n', '        except (PermissionError, BlockingIOError):\n', 'c75'),
     ('J3_don_EINTR_thu_cap', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', 'isinstance(e, OSError) and e.errno in (errno.ENOTEMPTY, errno.EINTR)', 'c74'),
     ('J4_don_EAGAIN_thu_cap', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', 'isinstance(e, OSError) and e.errno in (errno.ENOTEMPTY, errno.EAGAIN)', 'c74'),
+    ('K1_doi_ten_EINTR_sau_PE', '        except PermissionError:\n', '        except (PermissionError, InterruptedError) as e:\n            if k == 0 and not isinstance(e, PermissionError):\n                raise\n', 'c75'),   # #1475 lượt 10 F2.t: danh mục đủ ở mọi vị trí retry
+    ('K2_doi_ten_EAGAIN_sau_PE', '        except PermissionError:\n', '        except (PermissionError, BlockingIOError) as e:\n            if k == 0 and not isinstance(e, PermissionError):\n                raise\n', 'c75'),
+    ('K3_don_EINTR_sau_PE', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', 'isinstance(e, OSError) and (e.errno == errno.ENOTEMPTY or (k > 0 and e.errno == errno.EINTR))', 'c74'),
+    ('K4_don_EAGAIN_sau_PE', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', 'isinstance(e, OSError) and (e.errno == errno.ENOTEMPTY or (k > 0 and e.errno == errno.EAGAIN))', 'c74'),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_AttributeError_qua_except_doi_kieu", "def than(dong):\n",

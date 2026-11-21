@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import rg-windows-khong-tu-cai rg-co-chay-truoc-cargo agent-creds-bootstrap agy-ghim
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import rg-windows-khong-tu-cai rg-co-chay-truoc-cargo agent-creds-bootstrap agy-ghim cong-cu-ban-ke ruff-ban-ghim-ci
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -514,6 +514,78 @@ fi
 MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" nap 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?; echo "[session-start] agent-creds-bootstrap: rc=$MA_AC"
 MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" cai-agy 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?; echo "[session-start] agy-ghim: rc=$MA_AC"
 # <<< agent-creds (wp1039)
+
+# >>> cong-cu-ban-ke (wp1474)
+# Spec ops/specs/cong-cu-hook-r1.md. VI SAO: hook chi co buoc cai rieng cho rg va actionlint; moi cong cu khac cua ban ke
+# `ops/cong_cu.yaml` chi co mat NEU anh container co san. Do 21-11-2026: `shellcheck` (chuan_bi, canary blocking) VANG o moi
+# phien remote, nen `actionlint` bo am tham ca lop luat SC* ma van rc=0 — phep do trong phien yeu hon CI. Khong viet cong
+# thuc cai moi: goi DUNG `ops/cai_cong_cu.sh <ten>` ma CI dung, va ket luan bang LAN DO LAI, khong bang rc trinh cai (r244).
+# Ruff: ban ghim DUY NHAT doc tu ci.yml (`ruff==X.Y.Z`), cai qua `$PY -m pip` — nguong ruff cua CLAUDE.md do bang `$PY -m ruff`.
+# Khoi KHONG BAO GIO lam hook dung: goi bang `|| MA_CC=$?`; `doctor` ben duoi van la cong duy nhat quyet dinh thoat 12.
+_cc_chay_tran() {   # <giay> <lenh...> — tran thoi gian neu co `timeout`, khong thi chay thang
+  local giay="$1"; shift
+  if co timeout; then timeout "$giay" "$@"; else "$@"; fi
+}
+_cc_thieu() {   # in ten cong cu (bat_buoc|chuan_bi) CHUA DAT, cach nhau dau cach; doc duoc => rc 0, khong doc duoc => rc khac 0
+  local json
+  json="$("$PY" "$GOC/ops/cong_cu.py" kiem-tra --json 2>/dev/null)" || true   # rc khac 0 dung khi co cong cu thieu
+  printf '%s' "$json" | "$PY" -c '
+import json, re, sys
+import yaml
+ban_ke = yaml.safe_load(open(sys.argv[1], encoding="utf-8"))["cong_cu"]
+do = json.load(sys.stdin)["cong_cu"]
+trang_thai = {c["ten"]: c.get("trang_thai") for c in do}
+can = [t for t, v in ban_ke.items() if v.get("bat_buoc") or v.get("chuan_bi")]
+if not all(re.fullmatch(r"[A-Za-z0-9_.-]+", t) for t in can):
+    raise SystemExit(3)
+print(" ".join(t for t in can if trang_thai.get(t) != "DAT"))' "$GOC/ops/cong_cu.yaml" 2>/dev/null
+}
+cai_cong_cu_ban_ke() {
+  local thieu t ma ghim ban ban_tran loi=0
+  if ! thieu="$(_cc_thieu)"; then
+    echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC (kiem-tra --json hoac ops/cong_cu.yaml khong doc duoc) — khong cai gi"
+    loi=1
+  else
+    for t in $thieu; do
+      ma=0; _cc_chay_tran 180 bash "$GOC/ops/cai_cong_cu.sh" "$t" >/dev/null 2>&1 || ma=$?
+      echo "[session-start] cong-cu-ban-ke: cai $t — trinh cai rc=$ma (ket luan theo lan do lai)"
+    done
+    if ! thieu="$(_cc_thieu)"; then
+      echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC sau khi cai"
+      loi=1
+    elif [ -n "$thieu" ]; then
+      echo "[session-start] cong-cu-ban-ke: CHUA DAT $thieu — thu tay: bash ops/cai_cong_cu.sh <ten>"
+      loi=1
+    else
+      echo "[session-start] cong-cu-ban-ke: DAT (moi cong cu bat_buoc/chuan_bi cua ops/cong_cu.yaml)"
+    fi
+  fi
+  ghim="$(grep -oE 'ruff==[0-9]+\.[0-9]+\.[0-9]+' "$GOC/.github/workflows/ci.yml" 2>/dev/null | sort -u || true)"
+  if [ -z "$ghim" ] || [ "$(printf '%s\n' "$ghim" | wc -l)" -ne 1 ]; then
+    echo "[session-start] ruff: KHONG DO DUOC ban ghim trong ci.yml (can dung mot gia tri, thay: $(printf '%s' "$ghim" | tr '\n' ' '))"
+    return 1
+  fi
+  ghim="${ghim#ruff==}"
+  ban="$("$PY" -m ruff --version 2>/dev/null || true)"
+  if [ "$ban" != "ruff $ghim" ]; then
+    ma=0; _cc_chay_tran 180 "$PY" -m pip install --quiet "ruff==$ghim" >/dev/null 2>&1 || ma=$?
+    ban="$("$PY" -m ruff --version 2>/dev/null || true)"
+    echo "[session-start] ruff: cai ruff==$ghim — pip rc=$ma"
+  fi
+  if [ "$ban" = "ruff $ghim" ]; then
+    echo "[session-start] ruff: DAT $ghim ($PY -m ruff)"
+  else
+    echo "[session-start] ruff: CHUA DAT ban ghim $ghim (do duoc: '${ban:-khong chay}')"
+    loi=1
+  fi
+  ban_tran="$(env -u PATH PATH="$PATH_GOC" ruff --version 2>/dev/null || true)"
+  if [ -n "$ban_tran" ] && [ "$ban_tran" != "ruff $ghim" ]; then
+    echo "[session-start] CANH BAO ruff: 'ruff' tren PATH la '$ban_tran', khac ban ghim CI $ghim — do nguong ruff bang: $PY -m ruff"
+  fi
+  return "$loi"
+}
+MA_CC=0; cai_cong_cu_ban_ke || MA_CC=$?; echo "[session-start] cong-cu-ban-ke: rc=$MA_CC"
+# <<< cong-cu-ban-ke (wp1474)
 
 # --- Xác thực codex, để nó chạy được trên NHIỀU môi trường
 #

@@ -10090,6 +10090,201 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
         bang(ky == ["RG 1"], f"Windows probe lai roi roi xuong installer: {ky}")
 
 
+# wp1474 (CONG-CU-HOOK r1, spec ops/specs/cong-cu-hook-r1.md §4): chạy RIÊNG khối `cong-cu-ban-ke` của hook trên cây tạm.
+# Đồ giả GIỮ TRẠNG THÁI: `ops/cong_cu.py` giả đọc trạng thái từ `tt.json`; `ops/cai_cong_cu.sh` giả ghi nhật ký và (nếu
+# `sua`) đổi trạng thái công cụ thành DAT; `PY` giả bắt `-m ruff`/`-m pip` (ghi nhật ký, pip ghi bản vào `ruff_mod`) và
+# chuyển mọi lời gọi khác cho Python thật. Kết luận của khối chỉ được dựa vào LẦN ĐO LẠI.
+_R1474_BAN_KE = {"git": {"bat_buoc": True}, "shellcheck": {"bat_buoc": False, "chuan_bi": True},
+                 "jsonschema": {"bat_buoc": True}, "tuy_chon": {"bat_buoc": False}}
+
+
+def _r1474_chay_khoi(s, tt, sua=True, ghim=("0.15.15",), ruff_mod="0.15.15", ruff_tran=None, kiem_tra_hong=False):
+    than = HOOK_DANG_DUNG.read_text(encoding="utf-8")
+    co = re.search(r"^co\(\) \{.*\}$", than, re.MULTILINE)
+    khoi = re.search(r"^# >>> cong-cu-ban-ke \(wp1474\)\n.*?^# <<< cong-cu-ban-ke \(wp1474\)$", than, re.MULTILINE | re.DOTALL)
+    bang(co and khoi, "khong tach duoc khoi cong-cu-ban-ke cua hook")
+    goc, bin_, ky = s / "goc", s / "bin", s / "ky.log"
+    (goc / "ops").mkdir(parents=True); (goc / ".github" / "workflows").mkdir(parents=True); bin_.mkdir()
+    (goc / "ops" / "cong_cu.yaml").write_text(json.dumps({"cong_cu": _R1474_BAN_KE}), encoding="utf-8")   # JSON là YAML hợp lệ
+    (s / "tt.json").write_text(json.dumps(tt), encoding="utf-8")
+    (goc / "ops" / "cong_cu.py").write_text(
+        "import json, sys\n"
+        f"if {kiem_tra_hong!r}:\n    print('khong phai json'); sys.exit(1)\n"
+        f"tt = json.load(open({str(s / 'tt.json')!r}))\n"
+        "print(json.dumps({'cong_cu': [{'ten': t, 'trang_thai': v} for t, v in tt.items()]}))\n"
+        "sys.exit(0 if all(v == 'DAT' for v in tt.values()) else 1)\n", encoding="utf-8")
+    (goc / "ops" / "cai_cong_cu.sh").write_text(
+        f"#!/bin/sh\necho \"CAI $1\" >> '{ky}'\n"
+        + (f"{shlex.quote(PY)} -c 'import json,sys; p=sys.argv[1]; d=json.load(open(p)); d[sys.argv[2]]=\"DAT\"; "
+           f"json.dump(d, open(p, \"w\"))' '{s / 'tt.json'}' \"$1\"\n" if sua else "")
+        + "exit 0\n", encoding="utf-8")
+    (goc / ".github" / "workflows" / "ci.yml").write_text(
+        "".join(f"      - run: python -m pip install --quiet ruff=={g}\n" for g in ghim), encoding="utf-8")
+    if ruff_mod is not None:
+        (s / "ruff_mod").write_text(ruff_mod, encoding="utf-8")
+    pyfake = bin_ / "pyfake"
+    pyfake.write_text(
+        "#!/bin/sh\n"
+        f"if [ \"$1\" = -m ] && [ \"$2\" = ruff ]; then [ -f '{s / 'ruff_mod'}' ] || exit 1; "
+        f"echo \"ruff $(cat '{s / 'ruff_mod'}')\"; exit 0; fi\n"
+        f"if [ \"$1\" = -m ] && [ \"$2\" = pip ]; then echo \"PIP $*\" >> '{ky}'; "
+        f"for a in \"$@\"; do case \"$a\" in ruff==*) printf '%s' \"${{a#ruff==}}\" > '{s / 'ruff_mod'}';; esac; done; exit 0; fi\n"
+        f"exec {shlex.quote(PY)} \"$@\"\n", encoding="utf-8")
+    if ruff_tran is not None:
+        (bin_ / "ruff").write_text(f"#!/bin/sh\necho 'ruff {ruff_tran}'\n", encoding="utf-8")
+    for f in bin_.iterdir():
+        f.chmod(0o755)
+    vo, env = _wp802_bash_env()
+    path_goc = os.pathsep.join([str(bin_), env.get("PATH", "")])
+    (s / "khoi.sh").write_text("set -euo pipefail\nPY=" + shlex.quote(str(pyfake)) + "\nGOC=" + shlex.quote(str(goc))
+                               + "\nPATH_GOC=" + shlex.quote(path_goc) + "\n" + co.group(0) + "\n" + khoi.group(0) + "\n",
+                               encoding="utf-8")
+    env["PATH"] = path_goc
+    p = subprocess.run([vo, str(s / "khoi.sh")], env=env, capture_output=True, text=True, timeout=120)
+    rc = re.findall(r"^\[session-start\] cong-cu-ban-ke: rc=(\d+)$", p.stdout, re.MULTILINE)
+    bang(p.returncode == 0 and len(rc) == 1, f"khoi phai chay het va in dung mot dong rc: rc={p.returncode} {p.stdout!r} {p.stderr!r}")
+    return int(rc[0]), p.stdout, (ky.read_text(encoding="utf-8").splitlines() if ky.exists() else [])
+
+
+_R1474_DU = {"git": "DAT", "shellcheck": "DAT", "jsonschema": "DAT", "tuy_chon": "DAT"}
+
+
+@ca
+def r1474_thieu_chuan_bi_thi_cai_dung_mot_lan():
+    """Ca 1: thiếu `shellcheck` (`chuan_bi`) ⇒ đúng 1 lần cài nó, 0 lần cài công cụ khác, `DAT`, rc 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"))
+        bang(ky == ["CAI shellcheck"], f"phai cai dung shellcheck mot lan: {ky}")
+        bang(rc == 0 and "cong-cu-ban-ke: DAT" in out, f"cai xong phai DAT: rc={rc} {out!r}")
+
+
+@ca
+def r1474_du_het_khong_cai_gi():
+    """Ca 2: đủ hết, ruff đúng bản ⇒ 0 lần cài, 0 lần pip, rc 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU))
+        bang(ky == [] and rc == 0 and "ruff: DAT 0.15.15" in out, f"du het ma van cai/khong DAT: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_trinh_cai_xanh_ma_do_lai_thieu_la_CHUA_DAT():
+    """Ca 3: trình cài rc 0 mà đo lại vẫn thiếu ⇒ `CHUA DAT shellcheck`, rc khác 0 (kết luận theo lần đo lại)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), sua=False)
+        bang(ky == ["CAI shellcheck"], f"phai thu cai shellcheck: {ky}")
+        bang(rc != 0 and "CHUA DAT shellcheck" in out and "cong-cu-ban-ke: DAT" not in out,
+             f"trinh cai noi doi ma khoi bao DAT: rc={rc} {out!r}")
+
+
+@ca
+def r1474_cong_cu_tuy_chon_thieu_khong_cai():
+    """Ca 4: công cụ không `bat_buoc` cũng không `chuan_bi` mà thiếu ⇒ không cài, rc 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU, tuy_chon="THIEU"))
+        bang(ky == [] and rc == 0, f"cong cu tuy chon bi cai: rc={rc} {ky}")
+
+
+@ca
+def r1474_cong_cu_vang_khoi_ket_qua_do_la_thieu():
+    """Ca 5: công cụ vắng khỏi kết quả đo ⇒ coi là thiếu và cài (fail-close)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        tt = dict(_R1474_DU); del tt["jsonschema"]
+        rc, out, ky = _r1474_chay_khoi(s, tt)
+        bang(ky == ["CAI jsonschema"] and rc == 0, f"cong cu vang mat khong duoc cai: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_ket_qua_do_hong_la_KHONG_DO_DUOC():
+    """Ca 6: kết quả đo không phải JSON ⇒ `KHONG DO DUOC`, 0 lần cài, rc khác 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), kiem_tra_hong=True)
+        bang(rc != 0 and "KHONG DO DUOC" in out and not [x for x in ky if x.startswith("CAI ")],
+             f"do hong ma van cai/van xanh: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_ruff_lech_ban_ghim_thi_pip_dung_ban():
+    """Ca 7: `-m ruff` lệch bản ghim ⇒ đúng 1 lần `pip install ruff==<ghim>`, đo lại ⇒ `ruff: DAT`."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_mod="0.16.9")
+        pip = [x for x in ky if x.startswith("PIP ")]
+        bang(len(pip) == 1 and "ruff==0.15.15" in pip[0].split(), f"phai pip dung ban ghim mot lan: {ky}")
+        bang(rc == 0 and "ruff: DAT 0.15.15" in out, f"pip xong phai DAT: rc={rc} {out!r}")
+    with San() as s:   # chưa có module ruff ⇒ cũng cài
+        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_mod=None)
+        bang(len([x for x in ky if x.startswith("PIP ")]) == 1 and rc == 0, f"thieu module ruff ma khong cai: {ky} {out!r}")
+
+
+@ca
+def r1474_hai_ban_ghim_ruff_la_KHONG_DO_DUOC():
+    """Ca 8: `ci.yml` có hai bản ghim ruff khác nhau ⇒ `KHONG DO DUOC`, 0 lần pip, rc khác 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU), ghim=("0.15.15", "0.16.0"), ruff_mod="0.1.0")
+        bang(rc != 0 and "ruff: KHONG DO DUOC" in out and not [x for x in ky if x.startswith("PIP ")],
+             f"hai ban ghim ma van cai/xanh: rc={rc} {ky} {out!r}")
+    with San() as s:   # không có bản ghim nào
+        rc, out, ky = _r1474_chay_khoi(s, dict(_R1474_DU), ghim=())
+        bang(rc != 0 and "ruff: KHONG DO DUOC" in out, f"khong co ban ghim ma van xanh: rc={rc} {out!r}")
+
+
+@ca
+def r1474_ruff_tran_lech_chi_canh_bao():
+    """Ca 9: `ruff` trần trên PATH lệch bản ghim ⇒ có cảnh báo, rc không đổi."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, _ky = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_tran="0.16.9")
+        bang(rc == 0 and "CANH BAO ruff" in out and "0.16.9" in out, f"thieu canh bao ruff tran: rc={rc} {out!r}")
+    with San() as s:
+        rc, out, _ky = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_tran="0.15.15")
+        bang(rc == 0 and "CANH BAO ruff" not in out, f"ruff tran dung ban ma van canh bao: {out!r}")
+
+
+@ca
+def r1474_cau_truc_hook_ban_ke_ci_that():
+    """Ca 10: trên hook/bản kê/ci.yml THẬT — vị trí khối, cách gọi, tên năng lực, shellcheck thuộc tập cài, một bản ghim ruff."""
+    than = HOOK_DANG_DUNG.read_text(encoding="utf-8")
+    bang(than.count("# >>> cong-cu-ban-ke (wp1474)\n") == 1 and than.count("# <<< cong-cu-ban-ke (wp1474)\n") == 1,
+         "hook phai co dung mot cap dau khoi cong-cu-ban-ke")
+    dau, cuoi = than.find("# >>> cong-cu-ban-ke"), than.find("# <<< cong-cu-ban-ke")
+    sau_ac, doctor = than.find("# <<< agent-creds"), than.find(".claude/dev/launcher.py doctor --doi-kha-dung")
+    bang(0 <= sau_ac < dau < cuoi < doctor, f"khoi phai nam sau agent-creds va truoc doctor: {sau_ac} {dau} {cuoi} {doctor}")
+    bang("MA_CC=0; cai_cong_cu_ban_ke || MA_CC=$?;" in than[dau:cuoi], "khoi phai duoc goi dang `|| MA_CC=$?` (khong chan hook)")
+    nang_luc = re.search(r"^# hook-nang-luc: (.*)$", than, re.MULTILINE)
+    bang(nang_luc and {"cong-cu-ban-ke", "ruff-ban-ghim-ci"} <= set(nang_luc.group(1).split()),
+         "dong hook-nang-luc thieu ten nang luc moi")
+    import yaml as _yaml
+    ban_ke = _yaml.safe_load((LAUNCHER.parents[2] / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"]
+    sc = ban_ke.get("shellcheck") or {}
+    bang(sc.get("bat_buoc") or sc.get("chuan_bi"), f"shellcheck khong con thuoc tap cai cua ban ke that: {sc}")
+    ci = (LAUNCHER.parents[2] / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    ghim = set(re.findall(r"ruff==[0-9]+\.[0-9]+\.[0-9]+", ci))
+    bang(len(ghim) == 1, f"ci.yml that phai co dung mot ban ghim ruff: {ghim}")
+
+
+@ca
+def r1474_skill_work_packet_probe_shellcheck_ruff():
+    """Ca 11: skill `work-packet` dặn probe `shellcheck --version` và `-m ruff --version`."""
+    sk = (LAUNCHER.parents[1] / "skills" / "work-packet" / "SKILL.md").read_text(encoding="utf-8")
+    bang("shellcheck --version" in sk and "-m ruff --version" in sk, "SKILL work-packet thieu probe shellcheck/ruff")
+
+
 def _wp831_chay_cai_rg(s, nen, tot, dau="hong", venv=False, batch=False, tiem=False,
                        allexport=None, thu_tu=("rg", "bash"), apt_get=None, brew=None):
     """NGUYÊN `rg.cai.<nen>`; installer là stub, `tot` là thân `rg` ở thư mục ứng viên của trình cài (`/usr/bin` dưới
@@ -17444,6 +17639,21 @@ DOT_BIEN = [
 # wp802 (N6–N8): đột biến trên BẢN SAO TẠM của hook. Chỉ `TinHieuChotCa` của ca đích mới
 # tính là GIẾT — lỗi khác là tín dụng giả (CLAUDE.md, bài học 27-08).
 DOT_BIEN_HOOK = [
+    # wp1474 (CONG-CU-HOOK r1 §4): mỗi chốt của khối `cong-cu-ban-ke` một đột biến, đích là hook.
+    ("wp1474_bo_ve_chuan_bi", ('v.get("bat_buoc") or v.get("chuan_bi")', 'v.get("bat_buoc")'),
+     ["r1474_thieu_chuan_bi_thi_cai_dung_mot_lan"]),
+    ("wp1474_vang_mat_coi_la_DAT", ('trang_thai.get(t) != "DAT"', 'trang_thai.get(t, "DAT") != "DAT"'),
+     ["r1474_cong_cu_vang_khoi_ket_qua_do_la_thieu"]),
+    ("wp1474_ket_luan_theo_rc_trinh_cai", ('    elif [ -n "$thieu" ]; then\n', '    elif [ "$ma" -ne 0 ]; then\n'),
+     ["r1474_trinh_cai_xanh_ma_do_lai_thieu_la_CHUA_DAT"]),
+    ("wp1474_do_hong_van_cai", ('  if ! thieu="$(_cc_thieu)"; then\n    echo',
+                                '  if ! thieu="$(_cc_thieu || echo shellcheck)"; then\n    echo'),
+     ["r1474_ket_qua_do_hong_la_KHONG_DO_DUOC"]),
+    ("wp1474_bo_chot_ghim_duy_nhat", ('''if [ -z "$ghim" ] || [ "$(printf '%s\\n' "$ghim" | wc -l)" -ne 1 ]; then''',
+                                      'if [ -z "$ghim" ]; then'),
+     ["r1474_hai_ban_ghim_ruff_la_KHONG_DO_DUOC"]),
+    ("wp1474_bo_so_ban_ruff", ('  if [ "$ban" != "ruff $ghim" ]; then\n', '  if false; then\n'),
+     ["r1474_ruff_lech_ban_ghim_thi_pip_dung_ban"]),
     ("wp802_hook_co_thay_co_chay", ("  co_chay rg || { co cargo", "  co rg || { co cargo"),
      ["r802_hook_linux_rg_hong_van_thu_cargo"]),
     ("wp802_hook_windows_roi_vao_apt", ("MINGW*|MSYS*|CYGWIN*) RG_WIN=1", "KHONG_KHOP_NEN_NAO) RG_WIN=1"),

@@ -1,0 +1,10 @@
+{
+ "mo_ta": "r8 WP1448-R6-F12: anh chup cua dau_cuoi, khoang pull_request CHIA DOI (chia_doi=true, trang cha CON trong anh chup) cong MOT khoang con. con_vang: trang con VANG; con_du: trang con chep dung trang cha. Ky vong doc lap: 101 va 103 (pull_request) chi co o trang cha, 102 (push) o khoang khong chia; khop phep do cua review 7 (split-result.json).",
+ "khoang_con_them": {"nhan": "con", "chia_doi": false},
+ "bien_the": {
+  "con_vang": {"trang_con": false, "tinh_run_ids": [102], "tinh_so_luot_pull_request": 0, "thu_khoa": ["META", "list/pl/p1", "log/10209"]},
+  "con_du": {"trang_con": true, "tinh_run_ids": [101, 102, 103], "tinh_so_luot_pull_request": 2,
+             "thu_khoa": ["META", "arts/101/p1", "bn/101/0", "bn/101/1", "bn/101/2", "bn/101/3", "bn/101/4", "bn/101/5", "bn/101/6", "bn/101/7",
+                          "cmt/cccccccccccccccccccccccccccccccccccccccc", "list/pl/p1", "log/10109", "log/10209", "oracle/101"]}
+ }
+}

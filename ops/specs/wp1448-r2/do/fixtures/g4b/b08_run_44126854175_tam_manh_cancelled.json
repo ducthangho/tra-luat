@@ -1,0 +1,195 @@
+{
+ "mo_ta": "luot THAT 44126854175: ca 8 manh cancelled (log chuan-bi rut gon)",
+ "mo_phong": false,
+ "run": {
+  "id": 44126854175,
+  "event": "pull_request",
+  "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa",
+  "run_attempt": 1,
+  "conclusion": "cancelled",
+  "created_at": "2026-11-17T16:32:06Z"
+ },
+ "dong": [
+  {
+   "ten": "chuan-bi",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134192893344,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-ops (ubuntu-latest)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134193109448,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate (ubuntu-latest)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134193109526,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 5)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134193109570,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 2)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134193109574,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 0)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134193109591,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 3)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134193109611,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 5)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134193109617,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 3)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134193109639,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 1)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134193109662,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 0)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134193109671,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 4)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134193109682,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 1)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134193109690,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 6)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134193109692,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 7)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134193109700,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 6)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134193109716,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-nhanh-manh (ubuntu-latest, 2)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134193109738,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 4)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134193109751,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 7)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134193109759,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-packet-loop (ubuntu-latest)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134193110196,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-packet-loop-manh",
+   "ket_luan": "skipped",
+   "run_attempt": 1,
+   "job_id": 134193112423,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-nhanh-gop (ubuntu-latest)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 134194131638,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-registry (ubuntu-latest)",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134194355361,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  },
+  {
+   "ten": "gate-cong-cu-gop",
+   "ket_luan": "cancelled",
+   "run_attempt": 1,
+   "job_id": 134196721409,
+   "head_sha": "4c7275185a2b9c2be20039693bc09cfb1147fafa"
+  }
+ ],
+ "log": {
+  "chuan_bi": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n",
+  "gom": null
+ },
+ "artifact": null,
+ "ghi_de": null,
+ "mong": {
+  "g4b": [
+   "dang_do",
+   8
+  ],
+  "g4a": "du"
+ }
+}

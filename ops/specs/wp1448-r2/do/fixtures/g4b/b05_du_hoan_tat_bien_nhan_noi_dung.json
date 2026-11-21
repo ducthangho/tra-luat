@@ -1,0 +1,108 @@
+{
+ "mo_ta": "MO PHONG: noi dung 8 bien nhan hop le (head doi chieu qua commit: cha hai = head luot) + gom success, khong co log gom",
+ "mo_phong": true,
+ "run": {
+  "id": 9020,
+  "event": "pull_request",
+  "head_sha": "1111111111111111111111111111111111111111",
+  "run_attempt": 1,
+  "conclusion": "success",
+  "created_at": "2026-11-01T00:00:00Z"
+ },
+ "dong": [
+  {
+   "ten": "chuan-bi",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 1,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 0)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 10,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 1)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 11,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 2)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 12,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 3)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 13,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 4)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 14,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 5)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 15,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 6)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 16,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu (ubuntu-latest, 7)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 17,
+   "head_sha": "1111111111111111111111111111111111111111"
+  },
+  {
+   "ten": "gate-cong-cu-gop (ubuntu-latest)",
+   "ket_luan": "success",
+   "run_attempt": 1,
+   "job_id": 30,
+   "head_sha": "1111111111111111111111111111111111111111"
+  }
+ ],
+ "log": {
+  "chuan_bi": "2026-11-01T00:00:01.0Z DUONG_NHANH: ly do\n2026-11-01T00:00:01.1Z che_do=day_du\n",
+  "gom": null
+ },
+ "artifact": null,
+ "ghi_de": null,
+ "mong": {
+  "g4b": [
+   "du_hoan_tat",
+   5
+  ],
+  "g4a": "du"
+ },
+ "bien_nhan": {
+  "tao": {
+   "head": "cccccccccccccccccccccccccccccccccccccccc"
+  }
+ },
+ "cmt": {
+  "cccccccccccccccccccccccccccccccccccccccc": [
+   "dddddddddddddddddddddddddddddddddddddddd",
+   "1111111111111111111111111111111111111111"
+  ]
+ }
+}

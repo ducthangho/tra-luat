@@ -1,0 +1,54 @@
+{
+  "hoi_quy_312": {
+    "command": [
+      "/usr/bin/python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-8-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+      "hoi-quy",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-8-codex/repo/ops/reviews/wp1236-r10-soan/kho_dot_bien_reviewer_luot6.jsonl",
+      "-",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-8-codex/work/gate_output_doi_chieu.py",
+      "--ra",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-8-codex/work/python312_regression.jsonl"
+    ],
+    "rc": 0,
+    "stdout": "HOI_QUY 127 · AP_DUNG 125 · KHONG_AP_DUNG 2\nKHONG_AP_DUNG kho:reason_claim_failed neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo\nKHONG_AP_DUNG kho:reason_complete_290_39 neo xuat hien 0 lan — ledger: phai co dot bien thay the + ca dich, hoac chung minh chot da bo\n",
+    "stderr": "",
+    "rows": 127,
+    "ids_match": true,
+    "applicable": 125,
+    "not_applicable": [
+      {
+        "id": "kho:reason_claim_failed",
+        "op": "kho",
+        "kind": "extended_contract",
+        "trang_thai": "KHONG_AP_DUNG",
+        "ly_do": "neo xuat hien 0 lan"
+      },
+      {
+        "id": "kho:reason_complete_290_39",
+        "op": "kho",
+        "kind": "reason_complete",
+        "trang_thai": "KHONG_AP_DUNG",
+        "ly_do": "neo xuat hien 0 lan"
+      }
+    ]
+  },
+  "runner_312": {
+    "command": [
+      "/usr/bin/python3.12",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-8-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+      "chay",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-8-codex/work/python312_regression.jsonl",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-8-codex/work/gate_output_doi_chieu_test.py",
+      "--goc",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-8-codex/work/gate_output_doi_chieu.py",
+      "--ra",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-8-codex/work/python312_kq.jsonl"
+    ],
+    "rc": 2,
+    "stdout": "",
+    "stderr": "KHONG_DO_DUOC: can Python (3, 13), dang chay (3, 12)\n"
+  }
+}

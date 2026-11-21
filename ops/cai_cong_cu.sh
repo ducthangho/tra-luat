@@ -75,9 +75,10 @@ chon_thu_muc_chay_duoc() {  # [--win] <ten> <ung vien>...
     if [ -n "$win" ]; then
       w="$(cygpath -w "$dich")" || { echo "cai_cong_cu: cygpath -w hong cho '$dich'" >&2; return 1; }
     fi
-    # wp1488 (B1): KHONG ghi thang $GITHUB_PATH — luot nay chua biet cong thuc co thanh cong khong. Ghi vao tep CHO gan voi
-    # kenh cua CHINH luot nay; script chinh chep sang $GITHUB_PATH khi luot CUOI thanh cong (B2).
-    printf '%s\n' "$w" > "$KENH_KQ.github_path" || { echo "cai_cong_cu: khong ghi duoc tep cho cua \$GITHUB_PATH" >&2; return 1; }
+    # wp1488 (B1, r2): KHONG ghi thang $GITHUB_PATH — luot nay chua biet cong thuc co thanh cong khong. Ghi tep CHO gan voi
+    # kenh cua CHINH luot nay, HAI dong: (1) duong dan POSIX da chon — danh tinh de doi chieu voi DICH cuoi; (2) dong se them
+    # (da `cygpath -w` tren Windows). Script chinh chep dong (2) khi luot CUOI thanh cong va (1) khop DICH (B2).
+    printf '%s\n%s\n' "$dich" "$w" > "$KENH_KQ.github_path" || { echo "cai_cong_cu: khong ghi duoc tep cho cua \$GITHUB_PATH" >&2; return 1; }
   fi
   printf 'DICH\n%s' "$dich" > "$KENH_KQ" || { echo "cai_cong_cu: khong ghi duoc kenh ket qua" >&2; return 1; }
 }
@@ -215,15 +216,29 @@ if [ "$RC_CAI" -ne 0 ]; then
       _tl1479_thu_lai_apt "$@" ;;
   esac
 fi
-# wp1488 (B2/B3, ops/specs/wp1488-r1.md): chi luot CUOI thanh cong moi duoc them dong vao $GITHUB_PATH. Truoc day bo chon ghi
-# thang trong luc chay cong thuc, nen cong thuc goi bo chon roi mot buoc sau loi de lai thu muc cua lan LOI cho moi buoc CI
-# sau (no WP1404-GITHUB-PATH-LAN-LOI, Codex wp1404 luot 2 P3). Tep cho theo KENH_KQ HIEN HANH: tep cua cac luot truoc (ke ca
-# tien trinh nen ghi muon) khong bao gio duoc doc (B4). Chep loi => coi nhu cai loi, di dung nhanh loi ben duoi (B3).
-# Codex wp1488 luot 1 (P2): chi chep khi kenh CUOI la `DICH` — cong thuc goi bo chon roi ket thuc o `GIU_PATH` hay roi ve
-# stdout (kenh rong) thi tep cho con la dong cu, khong duoc ghi (B5). Ham, khong bien: luot `source` khong de lai bien.
-_tl1488_kenh_la_dich() { case "$(cat -- "$KENH_KQ" 2>/dev/null)" in DICH$'\n'?*) return 0 ;; esac; return 1; }
-if [ "$RC_CAI" -eq 0 ] && [ -s "$KENH_KQ.github_path" ] && [ -n "${GITHUB_PATH:-}" ] && _tl1488_kenh_la_dich; then
-  cat -- "$KENH_KQ.github_path" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \$GITHUB_PATH" >&2; RC_CAI=1; }
+# wp1488 (r2, ops/specs/wp1488-r2.md B2/B3): chi luot CUOI thanh cong moi duoc them dong vao $GITHUB_PATH. Truoc day bo chon ghi
+# thang trong luc chay cong thuc (no WP1404-GITHUB-PATH-LAN-LOI, Codex wp1404 luot 2 P3). r1 co HAI nguon su that (tep cho va
+# kenh doc doc lap) va Codex wp1488 luot 1-2 tim ra ba duong lech; r2 doc kenh DUNG MOT LAN ngay day, khi `RC_CAI = 0`, va
+# chinh ket qua ay quyet ca buoc chep lan phan nhanh PATH ben duoi. Chep chi khi ket qua la `DICH` va dong (1) cua tep cho
+# bang DUNG `DICH` (cong thuc tu ghi DICH cho thu muc khac thi khong ghi). Tep cho theo KENH_KQ HIEN HANH: tep cua cac luot
+# truoc, ke ca tien trinh nen ghi muon, khong bao gio duoc doc (B4). Doc tep cho / ghi loi => coi nhu cai loi (B3).
+# Ham, bien `local`: luot `source` cua --bat-buoc khong de lai bien moi o shell goi.
+_tl1488_chep_github_path() {  # <DICH cua lan doc kenh duy nhat>
+  local _tl1488_p _tl1488_w
+  [ -n "${GITHUB_PATH:-}" ] && [ -e "$KENH_KQ.github_path" ] || return 0
+  { IFS= read -r _tl1488_p && IFS= read -r _tl1488_w; } < "$KENH_KQ.github_path" \
+    || { echo "cai_cong_cu: khong doc duoc tep cho cua \$GITHUB_PATH" >&2; return 1; }
+  if [ "$_tl1488_p" != "$1" ]; then
+    echo "cai_cong_cu: tep cho cua \$GITHUB_PATH khong khop DICH cuoi — khong ghi" >&2
+    return 0
+  fi
+  printf '%s\n' "$_tl1488_w" >> "$GITHUB_PATH" || { echo "cai_cong_cu: khong ghi duoc \$GITHUB_PATH" >&2; return 1; }
+}
+# F868-01 (Codex luot 1): `;` truoc `printf x` che loi doc kenh => kenh "rong" => roi ve stdout. Doc hong => DUNG.
+if [ "$RC_CAI" -eq 0 ]; then
+KQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }
+KQ="${KQ%x}"
+case "$KQ" in DICH$'\n'?*) _tl1488_chep_github_path "${KQ#DICH$'\n'}" || RC_CAI=1 ;; esac
 fi
 if [ "$RC_CAI" -ne 0 ]; then
   if [ "${CAI_CONG_CU_PY_CUA:-}" = "$$" ] && cong_cu_json_dung "$TEN" bat_buoc false; then
@@ -233,9 +248,7 @@ if [ "$RC_CAI" -ne 0 ]; then
   fi
   exit "$RC_CAI"
 fi
-# F868-01 (Codex luot 1): `;` truoc `printf x` che loi doc kenh => kenh "rong" => roi ve stdout. Doc hong => DUNG.
-KQ="$(cat -- "$KENH_KQ" && printf x)" || { echo "cai_cong_cu: khong doc duoc kenh ket qua" >&2; exit 7; }
-KQ="${KQ%x}"
+# wp1488 r2: KQ da doc DUNG MOT LAN o tren (truoc nhanh loi); khong doc kenh lan hai.
 case "$KQ" in
   GIU_PATH) DICH="" ;;
   DICH$'\n'?*) DICH="${KQ#DICH$'\n'}" ;;

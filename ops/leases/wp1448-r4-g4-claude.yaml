@@ -1,0 +1,150 @@
+{
+  "schema_version": 2,
+  "event": "executor_lease_granted",
+  "packet_issue": 1448,
+  "packet_id": "wp1448",
+  "mission_issue": 1172,
+  "mission_revision": 90,
+  "revision": 4,
+  "generation": 4,
+  "lease_id": "wp1448-r4-g4-claude",
+  "role": "executor",
+  "provider": "claude",
+  "executor": "claude",
+  "model_family": "claude",
+  "execution_surface": "claude_code",
+  "transport": "machine/local",
+  "environment": "cloud",
+  "model": "claude-fable-5-2 (attempts 4-5, owner decision r90)",
+  "reviewer": "codex",
+  "reviewer_model": "gpt-6-astra",
+  "reviewer_model_family": "openai",
+  "reviewer_execution_surface": "codex_cli",
+  "reviewer_transport": "machine/local",
+  "risk": "sensitive",
+  "review_class": "sensitive",
+  "effective_review_class": "sensitive",
+  "assurance_target": "human_audited",
+  "spec_ref": "refs/heads/ops/wp1448-r1@6d3b03a2111f2c3a34006c6f82d1d570ac9bf078",
+  "spec_path": "ops/specs/wp1448-r4/SPEC.md",
+  "spec_hash": "84db970805be977945cecff006a7a99ee0f01acb9d48ac74b004a763ef098c92",
+  "spec_sha256_required": "84db970805be977945cecff006a7a99ee0f01acb9d48ac74b004a763ef098c92",
+  "prompt_path": "ops/prompts/wp1448-r4-g4-fable-attempt4.txt",
+  "prompt_sha256_required": "baed37c1afbc37b94ab7fbcd08e0d2846484830ae24d85deada7cb13cc4f2656",
+  "write_set": [
+    ".github/workflows/ci.yml",
+    "ops/ci_duong_nhanh.py",
+    "ops/ci_duong_nhanh_test.py",
+    "ops/cong_cu_test.py",
+    "ops/specs/wp1448-r2/do/"
+  ],
+  "effective_write_set": [
+    ".github/workflows/ci.yml",
+    "ops/ci_duong_nhanh.py",
+    "ops/ci_duong_nhanh_test.py",
+    "ops/cong_cu_test.py",
+    "ops/specs/wp1448-r2/do/"
+  ],
+  "write_set_hash": "b5f18eb15b57bfad998adfc33a5dd9b97730cb64aa030b3799f5eec0efe2440b",
+  "write_set_hash_rule": "sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF",
+  "write_set_note": "Spec write set minus .claude/dev/ci_dang_ky_test.py (still held by lease wp1166-r4-g5-claude until 2026-11-21T09:17Z; the spec lists it only if a ci.yml change forces it). The executor must not make a ci.yml change that needs it. SPEC.md and this lease live on ops/wp1448-r1, outside the delivery PR.",
+  "branch": "agent/wp1448-r2-g1-claude",
+  "branch_ownership": "exclusive",
+  "target_branch_neu_land": "master",
+  "base_sha": "64fa5156794dfb6a2dd9e8f257ee759ab07c9c35",
+  "start_from_sha": "60ffc2b77653f14661721f032bf0c66a772a7be7",
+  "reviewed_sha_required": "60ffc2b77653f14661721f032bf0c66a772a7be7",
+  "granted_by": "ducthangho",
+  "granted_on_instruction": "Owner [E1+E2] 'Đổi thiết kế + 2 lượt' (ghi hộ 7054219300) and approved Mission r90 bfcf9728 (7054236094)",
+  "authority_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7054236094",
+  "owner_delegation": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6916538696",
+  "owner_spec_approval": "ghi hộ 7047654570",
+  "audit_label_if_delegated": "owner audits exact H personally (human_exact_head_audit.v1); coordinator never signs",
+  "recorded_by": "Claude Code coordinator session; not author or reviewer",
+  "recorder_is_executor": false,
+  "lease_until": "2026-11-25T08:00:00Z",
+  "lease_expires_at_utc": "2026-11-25T08:00:00Z",
+  "limits": {
+    "executor_attempts": 5,
+    "executor_attempts_used": 3,
+    "codex_calls_total_cap": "10 (ADR-0055 line in spec r4)",
+    "Codex_source_review": 5,
+    "Codex_source_review_used": 3,
+    "connector": 2,
+    "draft_PR": 1,
+    "PR_Ubuntu_CI": 3,
+    "full_M9": 1,
+    "CI_reruns": 1,
+    "Windows_CI": 0
+  },
+  "Windows_CI_owner_waived": false,
+  "thay_the_cho": [
+    "wp1448-r4-g3-claude"
+  ],
+  "merge_allowed": "owner clicks merge after kiem-merge rc0 and owner exact-H audit before the first push of H",
+  "target_activation_allowed": false,
+  "prohibited_actions": [
+    "LIVE",
+    "installation",
+    "PR2_PR8_dispatch",
+    "gate_decision_change",
+    "mutation_table_edit",
+    "workflow_dispatch_by_executor",
+    "rerun_by_executor",
+    "edit_real_credential",
+    "self_review",
+    "self_approve",
+    "write_outside_effective_write_set",
+    "ruleset_change"
+  ],
+  "spec_reviews": [
+    {
+      "run": "wp1448-spec-review-1",
+      "verdict": "changes_requested",
+      "reviewed_spec_sha256": "a2e264f07bd552193a07e24a54a009be8105116934387f0f8f746de73befadd7"
+    },
+    {
+      "run": "wp1448-spec-review-2",
+      "verdict": "approve",
+      "reviewed_spec_sha256": "5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e"
+    },
+    {
+      "run": "wp1448-source-review-3",
+      "reviewed_sha": "60ffc2b77653f14661721f032bf0c66a772a7be7",
+      "verdict": "changes_requested",
+      "open": [
+        "g4-receipt-authority P2 (third recurrence)",
+        "g5-collector-expected-id-accounting P2 (third recurrence)",
+        "offline-replay-executes-live-git P3"
+      ],
+      "verdict_sha256": "abffa9c92f1576ecf000012dfe08cd8afc82cd7306a396565e938763d2b20f09"
+    }
+  ],
+  "nang_tran": {
+    "ai_nang": "chủ kho — [E2] 'Nâng trần theo numstat', ghi hộ 7046422866 mục 5",
+    "can_cu": "numstat 64fa515..c5c03ae = 29 tệp +5771/-1",
+    "tran_cu": "6 tệp / 450 dòng thêm (ADR-0053)",
+    "tran_moi": "32 tệp / 6500 dòng thêm"
+  },
+  "windows_note": "K6 (ADR-0060) requires an owner line 'windows: <H> mien' on the PR anchored to the final H; no Windows CI per standing rule.",
+  "heartbeat_required_minutes": 360,
+  "heartbeat_at": null,
+  "thay_the_cho_note": "Spec r4 (ADR-0055 call cap) and attempt 3 executor Fable 5.2.",
+  "source_review": [
+    {
+      "run": "wp1448-source-review-1",
+      "reviewed_sha": "302f76b7f64e4809dc786851e81ee740c60681fc",
+      "verdict": "changes_requested",
+      "note": "ran without executor handoff (audit A2)"
+    },
+    {
+      "run": "wp1448-source-review-2",
+      "reviewed_sha": "c5c03ae07871fafaefc86a946405eca819c03e46",
+      "verdict": "changes_requested",
+      "open": [
+        "g4-receipt-authority P2",
+        "g5-collector-expected-id-accounting P2"
+      ]
+    }
+  ]
+}

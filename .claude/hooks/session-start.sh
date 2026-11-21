@@ -525,8 +525,15 @@ MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" cai-agy 2>&1 | sed 's/^/[session-
 # Codex luot 1 (F1474-01): MOI lenh ngoai co tran — probe 30 giay, moi lan cai toi da 180 giay, ca khoi toi da 300 giay
 # (hook co 600), va `timeout -k 5` de trinh cai lo TERM van bi giet. Ba tran doc tu bien moi truong chi de test rut ngan.
 # Bien khong phai so nguyen khong am => dung mac dinh: `$(( 1x ))` lam CHET CA HOOK, ke ca khi khoi chay duoi `||` (do 21-11).
-_cc_so() { case "$1" in ''|*[!0-9]*) echo "$2" ;; *) echo "$1" ;; esac; }
-CC_TRAN_PROBE="$(_cc_so "${TL_CC_TRAN_PROBE_GIAY:-}" 30)"; CC_TRAN_CAI="$(_cc_so "${TL_CC_TRAN_CAI_GIAY:-}" 180)"
+# Codex luot 2: F1474-04 — tran probe/cai bang 0 lam `timeout` TAT han (GNU: 0 = khong tran) => 0 ve mac dinh (`duong`);
+# F1474-05 — `018` la so BAT PHAN trong `$(( ))` => ep thap phan `10#`, toi da 6 chu so. Ngan sach 0 van hop le: bo qua cai.
+_cc_so() {   # <gia tri> <mac dinh> [duong] — in so nguyen thap phan da chuan hoa, hoac mac dinh
+  case "$1" in ''|*[!0-9]*) echo "$2"; return 0 ;; esac
+  [ "${#1}" -le 6 ] || { echo "$2"; return 0; }
+  local n=$(( 10#$1 ))
+  if [ "$n" -eq 0 ] && [ "${3:-}" = duong ]; then echo "$2"; else echo "$n"; fi
+}
+CC_TRAN_PROBE="$(_cc_so "${TL_CC_TRAN_PROBE_GIAY:-}" 30 duong)"; CC_TRAN_CAI="$(_cc_so "${TL_CC_TRAN_CAI_GIAY:-}" 180 duong)"
 CC_NGAN_SACH="$(_cc_so "${TL_CC_NGAN_SACH_GIAY:-}" 300)"
 _cc_chay_tran() {   # <giay> <lenh...> — tran thoi gian (TERM roi KILL sau 5 giay) neu co `timeout`, khong thi chay thang
   local giay="$1"; shift

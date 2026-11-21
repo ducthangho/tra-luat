@@ -10360,6 +10360,37 @@ def r1474_bien_tran_khong_phai_so_dung_mac_dinh():
              f"bien tran khong phai so lam hong khoi: rc={rc} {ky} {out!r}")
 
 
+def _r1474_bien_cc(env_them):
+    """Chạy RIÊNG các dòng gán `CC_*` (+ `_cc_so`) của khối thật; trả bộ ba (probe, cài, ngân sách) đã chuẩn hoá."""
+    than = HOOK_DANG_DUNG.read_text(encoding="utf-8")
+    dau, cuoi = than.find("\n_cc_so() {"), than.find("\n_cc_chay_tran() {")
+    bang(0 <= dau < cuoi, "khong tach duoc phan gan CC_* cua khoi cong-cu-ban-ke")
+    vo, env = _wp802_bash_env()
+    env = {k: v for k, v in env.items() if not k.startswith("TL_CC_")}
+    env.update(env_them)
+    p = subprocess.run([vo, "-c", "set -euo pipefail" + than[dau:cuoi] + '\necho "$CC_TRAN_PROBE $CC_TRAN_CAI $CC_NGAN_SACH"'],
+                       env=env, capture_output=True, text=True, timeout=30)
+    return p.returncode, p.stdout.strip(), p.stderr
+
+
+@ca
+def r1474_tran_bang_0_ve_mac_dinh_so_0_dau_la_thap_phan():
+    """Codex lượt 2 F1474-04/05: trần probe/cài bằng 0 TẮT `timeout` ⇒ về mặc định; `018` là thập phân 18, không phải bát
+    phân; quá 6 chữ số ⇒ mặc định; ngân sách 0 vẫn là 0 (bỏ qua cài)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    for vao, mong in (({"TL_CC_TRAN_PROBE_GIAY": "0", "TL_CC_TRAN_CAI_GIAY": "000", "TL_CC_NGAN_SACH_GIAY": "0"}, "30 180 0"),
+                      ({"TL_CC_TRAN_PROBE_GIAY": "08", "TL_CC_TRAN_CAI_GIAY": "0009", "TL_CC_NGAN_SACH_GIAY": "018"}, "8 9 18"),
+                      ({"TL_CC_TRAN_PROBE_GIAY": "1234567", "TL_CC_TRAN_CAI_GIAY": "7", "TL_CC_NGAN_SACH_GIAY": "99999999999999999999"},
+                       "30 7 300"),
+                      ({}, "30 180 300")):
+        rc, out, err = _r1474_bien_cc(vao)
+        bang(rc == 0 and out == mong, f"chuan hoa bien tran sai: vao={vao} ra={out!r} mong={mong!r} rc={rc} {err!r}")
+    with San() as s:   # ngân sách số 0 đầu đi trọn khối, đúng một dòng rc
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), env_them={"TL_CC_NGAN_SACH_GIAY": "018"})
+        bang(rc == 0 and ky == ["CAI shellcheck"], f"ngan sach 018 lam hong khoi: rc={rc} {ky} {out!r}")
+
+
 @ca
 def r1474_cau_truc_hook_ban_ke_ci_that():
     """Ca 10: trên hook/bản kê/ci.yml THẬT — vị trí khối, cách gọi, tên năng lực, shellcheck thuộc tập cài, một bản ghim ruff."""
@@ -17772,9 +17803,14 @@ DOT_BIEN_HOOK = [
     ("wp1474_bo_tran_probe_ruff_tran", ('ban_tran="$(_cc_chay_tran "$CC_TRAN_PROBE" env -u PATH', 'ban_tran="$(env -u PATH'),
      ["r1474_probe_ruff_tran_treo_bi_cat"]),
     ("wp1474_bo_kill_after", ('timeout -k 5 "$giay" "$@"', 'timeout "$giay" "$@"'), ["r1474_trinh_cai_lo_TERM_van_bi_giet"]),
-    ("wp1474_bo_loc_bien_so", ("""_cc_so() { case "$1" in ''|*[!0-9]*) echo "$2" ;; *) echo "$1" ;; esac; }""",
-                              """_cc_so() { echo "${1:-$2}"; }"""),
+    ("wp1474_bo_loc_bien_so", ("""  case "$1" in ''|*[!0-9]*) echo "$2"; return 0 ;; esac\n""", ""),
      ["r1474_bien_tran_khong_phai_so_dung_mac_dinh"]),
+    ("wp1474_tran_0_tat_timeout", ('  if [ "$n" -eq 0 ] && [ "${3:-}" = duong ]; then', '  if false; then'),
+     ["r1474_tran_bang_0_ve_mac_dinh_so_0_dau_la_thap_phan"]),
+    ("wp1474_so_0_dau_bat_phan", ('  local n=$(( 10#$1 ))\n', '  local n=$(( $1 ))\n'),
+     ["r1474_tran_bang_0_ve_mac_dinh_so_0_dau_la_thap_phan"]),
+    ("wp1474_bo_gioi_han_chu_so", ('  [ "${#1}" -le 6 ] || { echo "$2"; return 0; }\n', ''),
+     ["r1474_tran_bang_0_ve_mac_dinh_so_0_dau_la_thap_phan"]),
     ("wp1474_bo_ngan_sach", ('    if [ "$con" -lt 15 ]; then\n      echo "[session-start] cong-cu-ban-ke: HET NGAN SACH',
                              '    if false; then\n      echo "[session-start] cong-cu-ban-ke: HET NGAN SACH'),
      ["r1474_het_ngan_sach_khong_cai"]),

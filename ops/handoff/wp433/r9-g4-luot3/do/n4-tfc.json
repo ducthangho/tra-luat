@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "schema": "test_fragments_check.v1",
+  "fragment_root": "scripts/test_fragments",
+  "bundled_module": "scripts/tl_test_fragments_bundled.py",
+  "shards": [
+    {
+      "name": "tl_test_fragments_bundled.py",
+      "expected_bytes": 170163,
+      "actual_bytes": 170163
+    },
+    {
+      "name": "tl_test_fragments_bundled_2.py",
+      "expected_bytes": 146627,
+      "actual_bytes": 146627
+    }
+  ],
+  "status": "current",
+  "expected_sha256": "61471f1cd21307f5669a1a479d6ddac3f68a67f4fcaddb3115cc5279f36e331b",
+  "actual_sha256": "61471f1cd21307f5669a1a479d6ddac3f68a67f4fcaddb3115cc5279f36e331b",
+  "expected_bytes": 316850,
+  "actual_bytes": 316850
+}

@@ -1,0 +1,14 @@
+2026-11-21T01:22:55Z
+F05 shard-ast-shape-oracle: manh 1 gan nhieu dich | CU  36dc91a | rc=0 {"run": true, "n": 32, "do": []}
+F05 shard-ast-shape-oracle: manh 1 gan nhieu dich | MOI 6330653 | rc=0 {"run": false, "n": 32, "do": ["V8"]}
+F05 shard-ast-shape-oracle: manh phu them AnnAssign | CU  36dc91a | rc=0 {"run": true, "n": 32, "do": []}
+F05 shard-ast-shape-oracle: manh phu them AnnAssign | MOI 6330653 | rc=0 {"run": false, "n": 32, "do": ["V8"]}
+F06 bundle-gate-fixture-oracle: one_skip (mot manh stale duoc nhan) | CU  36dc91a | rc=0 {"run": true, "n": 32, "do": []}
+F06 bundle-gate-fixture-oracle: one_skip (mot manh stale duoc nhan) | MOI 6330653 | rc=0 {"run": false, "n": 32, "do": ["V24"]}
+F06 bundle-gate-fixture-oracle: one_red (mot manh current bi tu choi) | CU  36dc91a | rc=0 {"run": true, "n": 32, "do": []}
+F06 bundle-gate-fixture-oracle: one_red (mot manh current bi tu choi) | MOI 6330653 | rc=0 {"run": false, "n": 32, "do": ["V27"]}
+F07 shard-symlink-follow: manh 1 la symlink DUT tren duong runtime | CU  36dc91a | rc=0 {"runtime": [], "index": "TEST_ID_INDEX_READ"}
+F07 shard-symlink-follow: manh 1 la symlink DUT tren duong runtime | MOI 6330653 | rc=0 {"runtime": "BUNDLED_MODULE_CONTRACT", "index": "TEST_ID_INDEX_READ"}
+F08 v32-symlink-denial-diagnostic: nen tu choi tao symlink | CU  36dc91a | rc=0 {"run": false, "n": 32, "do": ["V32"], "ly_do": "KHONG CO _LY_DO"}
+F08 v32-symlink-denial-diagnostic: nen tu choi tao symlink | MOI 6330653 | rc=0 {"run": false, "n": 32, "do": ["V32"], "ly_do": {"V32": "PermissionError('nen tu choi tao symlink (gia lap)')"}}
+rc=0

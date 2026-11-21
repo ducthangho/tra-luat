@@ -1,0 +1,11 @@
+ev_discovery_failed_truoc_mismatch
+PASS case_cong_bao_fragment_failed_khi_run_tra_false
+PASS case_binary_nul_duoc_bo_qua
+PASS case_binary_khong_co_NUL_van_duoc_tha_nho_khai_text
+PASS case_moi_ho_binary_deu_duoc_tha
+PASS case_ho_binary_thieu_khai_thi_bi_bat
+PASS case_binary_giu_nguyen_byte_qua_renormalize
+PASS case_chan_doan_mac_dinh_khong_lo_bi_mat
+PASS case_chan_doan_co_tho_chi_cuc_bo
+
+32/32 dat

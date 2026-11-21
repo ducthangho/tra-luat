@@ -1,0 +1,10 @@
+_async_run
+  [OK] r285_khong_ro_ri_monkeypatch
+  [OK] wp43_bundled_generator_byte_canonical
+  [OK] wp43_release_excludes_only_canonical_fragment_prefix
+  [OK] wp44_dev_topology_prefers_fragments
+  [OK] wp44_release_bundle_topology_under_200
+  [OK] wp44_missing_bundled_module_named
+  [OK] r332_registry_coverage_duong_san_xuat
+  [OK] wp42_complete_runtime_test_ids_unique
+== tl selftest 1784/1784 ==

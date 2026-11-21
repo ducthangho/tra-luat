@@ -312,6 +312,19 @@ trước lúc writer muộn ghi nên sống); nay chết ở (C). Ba đột bi�
 > - Toàn bộ `--dot-bien` ngoài `cai_sh` chưa chạy. Các kết quả 782/782, 788/788, 792/792, 794/794, 795/795 và bảy trường hợp Windows không đo được là lời khai executor. Phép kiểm bộ đăng ký xác nhận delta +13 trên head. Số 15 trong commit message `f8747c4` lệch với 13 mục thực tế như RESULTS đã đính chính.
 > - Chưa chạy native macOS/Windows hay dùng `$GITHUB_PATH` thật trên runner. Các phép thử Windows dùng cygpath giả trên Linux. Gate trên exact SHA chưa trả kết luận ở lần đọc cuối.
 
-### Trạng thái sau lượt 4
+### Review Rescue Checkpoint sau lượt 4
 
-Trần Codex của packet (4) đã hết. Executor dừng ở Review Rescue Checkpoint và chờ chủ kho quyết.
+Trần Codex (4) hết; lượt 4 không có P0/P1. Chủ kho chọn qua AskUserQuestion (21-11-2026 ~12:10Z) **"Sửa 2 P3, nợ P2"**:
+sửa hai P3 trong phạm vi đặc tả r3, ghi P2 thành nợ có tên, KHÔNG gọi thêm Codex; chủ kho duyệt merge trên bằng chứng của
+executor.
+
+### Executor xử lý (sửa ở `7a8823b`, đặc tả r3)
+
+| Finding | Xử lý |
+|---|---|
+| P3 `$( )` ăn LF đuôi của `cygpath -w` | Đọc qua sentinel `x`, bỏ đúng một LF kết thúc dòng; LF/CR còn lại bị chốt xuống dòng từ chối. `cygpath` giả thêm `CYGPATH_W_KIEU=du_lf\|cr`; (W) chạy ba biến thể (rỗng, thừa LF đuôi, CR). Script `f8747c4` ĐỎ ở (W-du-lf). Đột biến `wp1488_sh_cygpath_an_lf` và `wp1488_sh_chi_xet_dich` (chỉ xét `DICH`, bỏ xét dòng đã đổi) chết ở (W-du-lf). |
+| P3 thiếu phép đếm một lần đọc trên đường thành công | (K3): `cat` giả đầu PATH đếm số lần mở kênh `*/kq`; đường thành công phải đúng 1 lần. Đột biến `wp1488_sh_doc_kenh_hai_lan` (đọc thêm một lần sau lần đầu thành công) chết ở (K3). |
+| **P2 nhận biết `--win` bằng chuỗi trong `LENH`** | **Nợ có tên `WP1488-WIN-THEO-LENH`** (chủ kho chọn). Script nhận chế độ Windows khi `LENH` chứa đúng chuỗi `chon_thu_muc_chay_duoc --win ` (có dấu cách). Năm công thức Windows hiện có trong `ops/cong_cu.yaml` viết đúng literal nên chạy đúng (`r858_cai_windows…` đạt). Sai khi: `"--win"` có nháy, tab thay dấu cách, chuỗi ấy nằm trong dữ liệu, hoặc nằm ở nhánh không chạy. Sửa tận gốc phải mang chế độ `--win` qua kênh kết quả, tức đổi định dạng kênh đã đóng băng (B5). |
+
+Hai neo `wp858_sh_nuot_loi_cygpath_w` và `wp858_sh_github_path_khong_qua_cygpath` dời theo dòng `cygpath -w` mới. Bảng `cai_sh`
+(mọi packet): 96/96.

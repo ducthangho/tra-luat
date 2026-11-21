@@ -1209,7 +1209,7 @@ def c21_fixture_bam():
     bang(bam == BAM_FIXTURE, f"fixture lệch bản cắt đã băm: {bam}")
 
 # ---- CI-PROVENANCE-WD r1 (Issue #1094): `do-wd`, `thu --wd-run`, workflow `ops-do-workflow-definition.yml` ----
-import base64, shutil, zipfile
+import base64, errno, shutil, zipfile
 WD_OID, WD_PATH, XOA = "c" * 40, ".github/workflows/ci.yml", object()
 WD_BYTES = b"name: ci\non: push\njobs: {}\n"
 WF_WD_TEP = ROOT_THAT / ".github/workflows/ops-do-workflow-definition.yml"
@@ -1854,6 +1854,72 @@ def c72_ma_tran_don_dep():   # #1475 sổ uỷ quyền 7059117700 + lần xét l
         else:
             bang(bat is loi, f"stream ném {loi!r}: BaseException phải đi qua đúng đối tượng, được {bat!r}")
 
+_TAP_LOAI = [frozenset(t for t, b in zip(("PE", "ENOTEMPTY", "khac"), (i & 1, i & 2, i & 4)) if b) for i in range(8)]
+
+def _mong_c73(lich, windows):
+    """Hậu điều TÍNH TỪ LUẬT ĐÃ DUYỆT (sổ 7060197691), không đọc mã: lần k có tập loại S; S rỗng ⇒ sạch; thử lại ⇔ Windows ∧ PE ∈ S
+    ∧ khac ∉ S, tối đa 6 lần. Trả (số lần dọn, dãy ngủ, sạch?)."""
+    ngu = []
+    for k in range(6):
+        s = lich[k] if k < len(lich) else frozenset()
+        if not s:
+            return k + 1, ngu, True
+        if not (windows and "PE" in s and "khac" not in s) or k == 5:
+            return k + 1, ngu, False
+        ngu.append(0.05 * 2 ** k)
+
+@ca
+def c73_bang_chan_tri_loai_loi():   # #1475 review lượt 5 F2.n: TOÀN BỘ bảng chân trị của luật tập loại (miền hữu hạn), không lấy mẫu
+    m = nap()
+    dai_dien = {"PE": (lambda: OSError(errno.EACCES, "PE giả"), lambda: OSError(errno.EPERM, "PE giả")),
+                "ENOTEMPTY": (lambda: OSError(errno.ENOTEMPTY, "ENOTEMPTY giả"),),
+                "khac": (lambda: OSError(errno.EIO, "EIO giả"), lambda: OSError(errno.ENOSPC, "ENOSPC giả"))}
+    lich_ds = ([(s,) for s in _TAP_LOAI] + [(s,) * 6 for s in _TAP_LOAI]
+               + [(s0, s1) for s0 in _TAP_LOAI for s1 in _TAP_LOAI])   # một lần · kéo dài · mọi chuyển tiếp hai bước
+    so_o, nhanh = 0, sorted({False, sys.version_info >= (3, 12)})
+    for lich in lich_ds:
+        for windows in (True, False):
+            n, ngu_mong, sach = _mong_c73(lich, windows)
+            for bien in range(2):   # đại diện thứ `bien` của mỗi loại (EACCES/EPERM · EIO/ENOSPC)
+                for onexc in nhanh:
+                    goi, ngu = [], []
+
+                    def xoa_gia(p, onexc=None, onerror=None):
+                        k = len(goi)
+                        goi.append(k)
+                        s = lich[k] if k < len(lich) else frozenset()
+                        for t in sorted(s):
+                            e = dai_dien[t][bien % len(dai_dien[t])]()
+                            if onexc is not None:
+                                onexc(os.unlink, f"{p}/{t}", e)
+                            else:
+                                onerror(os.unlink, f"{p}/{t}", (type(e), e, None))
+                        if not s:
+                            shutil.rmtree(p)
+                    with tempfile.TemporaryDirectory() as thu, mock.patch.object(m, "_xoa_cay", xoa_gia), \
+                            mock.patch.object(m, "ngu_thu_lai", ngu.append), mock.patch.object(m, "LA_WINDOWS", windows), \
+                            mock.patch.object(m, "_DUNG_ONEXC", onexc), contextlib.redirect_stderr(io.StringIO()) as err:
+                        p = Path(thu) / "d"
+                        p.mkdir()
+                        kq = m.don_thu_muc(p)
+                        bang(kq is sach and len(goi) == n and ngu == ngu_mong and p.exists() is not sach
+                             and ("KHONG_DON_DUOC" in err.getvalue()) is not sach,
+                             f"lịch={[sorted(s) for s in lich]} windows={windows} biến={bien} onexc={onexc}: mong ({n}, {ngu_mong}, "
+                             f"{sach}); được ({kq}, {len(goi)}, {ngu}, còn={p.exists()})")
+                    so_o += 1
+    bang(so_o == len(lich_ds) * 2 * 2 * len(nhanh), f"số ô bảng chân trị: {so_o}")
+    for onexc in nhanh:   # cầu nối rmtree THẬT: tập loại sinh bởi stdlib khớp mô hình callback ở hai tập review lượt 5 tìm ra
+        r = _ghi_voi_doi_ten_gia({}, windows=True, onexc=onexc, co_cu=True, cu_cay={"d/x": b"x"},   # chỉ ENOTEMPTY, không PE
+                                 xoa={"cu": lambda i: {"theo_ten": {"@d": lambda j: OSError(errno.ENOTEMPTY, "giả") if j < 1 else None}}})
+        bang(r["loi"] is None and r["out"] == MOI_BYTE and r["xoa"] == ["cu"] and r["ngu"] == [] and _ten_sot(r) == ["cu"],
+             f"onexc={onexc} rmdir chỉ ENOTEMPTY: phải dừng sau 1 lần, không ngủ; được {r}")
+        r = _ghi_voi_doi_ten_gia({}, windows=True, onexc=onexc, co_cu=True, cu_cay={"x": b"x", "y": b"y"},   # PE + ENOSPC
+                                 xoa={"cu": lambda i: {"theo_ten": {"x": lambda j: PE() if j < 1 else None,
+                                                                    "y": lambda j: OSError(errno.ENOSPC, "giả") if j < 1 else None}}})
+        con = {k: v for d in r["sot"].values() for k, v in d.items()}
+        bang(r["loi"] is None and r["xoa"] == ["cu"] and r["ngu"] == [] and con == {"x": b"x", "y": b"y"},
+             f"onexc={onexc} PE + ENOSPC: ENOSPC là lỗi khác, phải dừng sau 1 lần; được {r}")
+
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
     ("A2_bo_so_attempt", 'if k not in thieu and r.get(k) != v]', "if False]", "c02"),
@@ -2277,6 +2343,10 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("B5_bo_dieu_kien_nen_khi_don", 'if not (LA_WINDOWS and "PE" in loai and', 'if not ("PE" in loai and', "c72"),   # thay X4; F2.h
     ("B6_chi_PE_moi_thu_lai", 'if not (LA_WINDOWS and "PE" in loai and "khac" not in loai):', 'if not (LA_WINDOWS and loai == {"PE"}):', "c72"),
     ("Z1_bao_nuot_BaseException", "    except Exception:\n        pass\n    return False", "    except BaseException:\n        pass\n    return False", "c72"),   # #1475 lượt 3 F2.g
+    ("T1_bo_dieu_kien_co_PE", 'LA_WINDOWS and "PE" in loai and "khac"', 'LA_WINDOWS and "khac"', "c73"),   # #1475 lượt 5 F2.n
+    ("T2_ENOTEMPTY_la_PE", '"PE" if isinstance(e, PermissionError) else', '"PE" if isinstance(e, PermissionError) or getattr(e, "errno", None) == errno.ENOTEMPTY else', "c73"),
+    ("T3_ENOSPC_la_thu_cap", "isinstance(e, OSError) and e.errno == errno.ENOTEMPTY", "isinstance(e, OSError) and e.errno in (errno.ENOTEMPTY, errno.ENOSPC)", "c73"),
+    ("T4_khac_can_ENOTEMPTY", 'and "khac" not in loai):', 'and ("khac" not in loai or "ENOTEMPTY" not in loai)):', "c73"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_AttributeError_qua_except_doi_kieu", "def than(dong):\n",

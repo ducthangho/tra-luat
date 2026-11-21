@@ -124,3 +124,6 @@ budget:
 budget_ghi_chu: 'Codex review PR 1/10 da dung (review offline luot 1 run 5ec3b197 tren 4e74fe1, khong reset theo generation); Codex review dac ta 11/14 (Q8); CI Ubuntu <= 3; Windows native 0 (Q4).'
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+da_bi_thay_the: wp433-r9-g5-claude
+da_bi_thay_the_ly_do: 'executor Fable het han muc (reset 25-11); chu kho chon executor moi Opus 5.5 (E2); g5 va tu 36dc91a.'
+da_bi_thay_the_luc_utc: '2026-11-21T03:29:20Z'

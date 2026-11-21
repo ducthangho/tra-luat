@@ -221,7 +221,10 @@ _tl1488_ghi_github_path() {  # <DICH cua lan doc kenh duy nhat>
   [ -n "${GITHUB_PATH:-}" ] || return 0
   case "$LENH" in
     *"chon_thu_muc_chay_duoc --win "*)
-      _tl1488_w="$(cygpath -w "$1")" || { echo "cai_cong_cu: cygpath -w hong cho '$1'" >&2; return 1; } ;;
+      # Codex wp1488 luot 4 (P3): `$( )` an MOI LF o duoi, nen dau ra `W:<dir>\n\n` lot chot xuong dong. Giu nguyen bang
+      # sentinel `x`, bo DUNG MOT LF ket thuc dong cua giao thuc, phan con lai de chot `\n`/`\r` ben duoi xet.
+      _tl1488_w="$(cygpath -w "$1" && printf x)" || { echo "cai_cong_cu: cygpath -w hong cho '$1'" >&2; return 1; }
+      _tl1488_w="${_tl1488_w%x}"; _tl1488_w="${_tl1488_w%$'\n'}" ;;
   esac
   case "$1$_tl1488_w" in
     *$'\n'*|*$'\r'*) echo "cai_cong_cu: duong dan co ky tu xuong dong — tu choi ghi \$GITHUB_PATH" >&2; return 1 ;;

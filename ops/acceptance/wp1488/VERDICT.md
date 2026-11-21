@@ -133,6 +133,21 @@ kiện `-s`/`-n` riêng lẻ. Lý do: thứ tự ấy chỉ đổi kết quả k
 > - N4 chưa có bằng chứng CI xanh trên exact head. Connector GitHub trả thành công khi đọc workflow và job theo SHA. `lease-pr` success, Windows skipped, `gate` vẫn in progress ở lần đọc cuối. Combined status trả danh sách rỗng. [Gate](https://github.com/ducthangho/tra-luat/actions/runs/44888691485) · [Lease](https://github.com/ducthangho/tra-luat/actions/runs/44888691448) · [Windows](https://github.com/ducthangho/tra-luat/actions/runs/44888691422)
 > - macOS/Windows thật và tệp lệnh của runner GitHub Actions thật chưa được đo. Các ca nền tương ứng ở đây dùng stub trên Linux.
 
-### Trạng thái sau lượt 2
+### Review Rescue Checkpoint sau lượt 2 → revision 2
 
-Ngân sách Codex của lease đã hết (2/2). Executor dừng ở Review Rescue Checkpoint và chờ chủ kho quyết.
+Ngân sách Codex của lease r1 hết (2/2). Hai lượt cùng chỉ một gốc: HAI nguồn sự thật (tệp chờ và kênh đọc độc lập). Chủ kho
+chọn qua AskUserQuestion (21-11-2026 ~09:35Z) **"Thiết kế lại, Codex lượt 3"**, rồi duyệt đặc tả r2 `ops/specs/wp1488-r2.md`
+(sha256 `692325c7…add0`). Lease `wp1488-r2-g2-claude` thay `wp1488-r1-g1-claude` (bia mộ hai chiều); trần Codex cả packet 3.
+
+### Executor xử lý (sửa ở `42b5386`, đặc tả r2)
+
+| Finding | Kiểm lại | Xử lý |
+|---|---|---|
+| P2 đọc kênh hai lần | Thật. | Kênh đọc ĐÚNG MỘT LẦN khi `RC_CAI = 0` (đọc lỗi ⇒ 7); chính `KQ` ấy quyết bước chép và phân nhánh PATH (`sh.count('cat -- "$KENH_KQ"') == 1` được chốt trong `r858_hinh_dang…`). K1 (in đủ rồi lỗi) và K2 (lỗi không in) ⇒ rc 7, tệp rỗng. Đột biến `wp1488_sh_doc_kenh_rieng_truoc` (dựng lại thứ tự r1: quyết định chép bằng một lần đọc riêng trước) chết ở (K1). |
+| P2 DICH khác tệp chờ | Thật. Kịch bản J: script `b7a280e` ĐỎ (ghi thư mục X trong khi PATH nội bộ dùng Y). | Tệp chờ hai dòng (POSIX `$dich` + dòng sẽ thêm); chép chỉ khi dòng (1) bằng `DICH` của lần đọc duy nhất, khác thì cảnh báo. J chốt rc 0, `DAT`, phiên bản của Y trong JSON, tệp rỗng, có cảnh báo. Đột biến `wp1488_sh_bo_so_danh_tinh` chết ở (J). |
+| P3 móc thời điểm của C | Thật. | Móc khớp ĐÚNG `cat -- <…>/kq-thu-lai-1`; fixture chốt riêng móc ĐÃ kích hoạt ("điểm đồng bộ đã đổi" nếu không) và writer ĐÃ ghi. Đột biến `wp1488_sh_doc_tep_cho_cu_ghi_muon` chết ở (C). |
+| P3 "so nguyên byte" rộng hơn phép đo | Thật (CRLF qua `read_text`). | `read_bytes()` ở mọi kịch bản có tệp đích; E/I mô tả đúng là chốt rc + stderr. Đột biến `wp1488_sh_tep_cho_crlf` chết ở (A'). |
+
+Ghi chú đo được: `wp1488_sh_chep_loi_khong_dat_rc` (bỏ `|| RC_CAI=1`) chết ở (I), không ở (E). Ở lời gọi trực tiếp, hàm
+trả 1 không có `||` thì `set -e` cũng thoát 1, nên (E) không phân biệt được; chỉ lượt `source` (I) phân biệt đường `RC_CAI`
+với errexit. Bảng `cai_sh` (mọi packet): 92/92.

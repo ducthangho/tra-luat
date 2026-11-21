@@ -1,0 +1,46 @@
+**Verdict `approve`** · Review mã offline 2/10 · `openai_codex / codex_cli / machine`
+
+- `reviewed_sha` `26fbacd9d4ba73f8e83359e9af060a76b32cae08`
+- Tree `4583e5bd5d3b7d1efdd2aec8f39da878776f03bd`
+- Base `8656dc0176ed108e12c209ba55c91a1f6f9d612f`
+
+Không phát hiện P0–P2. Bằng chứng N5 trên rig sạch và log Executor khớp trên cả hai SHA. F01 vẫn mở ở P3 theo Q5′.
+
+### N5 trên exact SHA
+
+Đọc trực tiếp blob `ops/reviews/wp433-secrets-set-cr/n5-rig-sach.txt` tại `ba7a2191c68dab7f48231a9ddff7040bc072aa98`. SHA-256 tính lại khớp `0054e99989ef52aeedb4e2760f760c52b2e62da8f0936886d105bb24ad84a262`. `gate/gate.log` tại commit handoff `0c36fb9f383dc96fb735637208c38668273d04d5` ghi cùng hai OID đầy đủ. Các log `gate/nen.*` và `gate/sau.*` cho kết quả sau.
+
+| Cổng | Base → ứng viên | Đối chiếu |
+|---|---|---|
+| `python scripts/tl.py --selftest` | 1785/1785 → 1786/1786, rc 0 / 0 | Hai nguồn khớp |
+| `bundle_fragment_check.py --json` | `case_count` 19 → 20, cả hai `ok: true`, `failed: []` | Hai nguồn khớp. Log Executor ghi rc 0 / 0, log rig sạch ghi kết quả JSON |
+| `.githooks/eol_policy_test.py` | 32/32 → 32/32, rc 0 / 0 | Hai nguồn khớp |
+| Các vế N5 còn lại | Hai mảnh bundled đạt kiểm tra, release-verify 186/186 trên cả hai SHA, workflow audit rc 0 / 0 với `warn=[]` và `fail=[]`, golden 20/20 trên cả hai SHA, Ruff F delta 0, doctrine và ADR rc 0 / 0, các fragment WP433 cũ đều trả `True` | Đạt theo log Executor, nhất quán với bằng chứng lượt 1 ở các cổng tương ứng |
+
+Ba cổng từng đỏ trong sandbox lượt 1 đều xanh trên rig sạch. Tôi chạy lại `git diff --check` với hai OID đầy đủ, rc 0. `--numstat` xác nhận **4 tệp, +164/−8**, đều trong effective write set.
+
+### Spec và ranh giới ghi
+
+- [Chốt M1](scripts/tl_gws.py:1018) đứng ngay sau giải mã và parse JSON, trước `changed` và mọi cờ. Bundle ngoài `dict` in đúng dòng stderr của r5 rồi trả rc 3, trước export GWS, refresh NLM, canary, mã hóa lại và upload. `load_creds` và fetch vẫn đứng trước giải mã theo r5.
+- [Chọn khóa public](scripts/tl_gws.py:1065) ưu tiên `TL_TOKEN` có giá trị. Nếu biến này thiếu hoặc rỗng, chỉ chuỗi trong bundle mới được dùng. `--gas-token` có giá trị thay token trong bundle trước bước chọn khóa. Nếu giá trị hiệu lực vẫn rỗng, lượt GWS/NLM dùng nhánh cảnh báo hiện có sau khi upload bundle. Diff loại phép ép `str()` ở đường chọn khóa và không thêm đường ghi.
+- Fragment mới nằm ở bundled mảnh 2. Mảnh 1 byte-identical giữa hai SHA. Commit cuối chỉ đổi manifest. Bằng chứng lượt 1 trên cùng SHA xác nhận tái sinh hai mảnh và manifest khớp byte, cùng N1–N4 đạt. Quét lại các điểm oracle xanh giả, khóa gộp hoặc vắng, tập đích ma trận, manifest cuối và phạm vi diff không phát hiện biểu hiện P0–P2 mới.
+
+### Bảng lớp
+
+| class_slug | Finding ID và biểu hiện | Mức cao nhất còn mở | Nguồn lượt/SHA | Cách vá chung | Phép kiểm đóng lớp |
+|---|---|---|---|---|---|
+| `secrets-set-do-min-ve` | F01, tạo `set(q.khoa)` trong `token_kieu` | P3 | Review mã 1/10, `26fbacd9d4ba73f8e83359e9af060a76b32cae08` | So sánh từng khóa quan sát với `_MK` | Dùng stub lượt 1, lần lượt bỏ chốt kiểu cho list, dict và int trong bản sao. Bản đồ vẫn đủ 346 khóa và khóa public sai hiện thành `False`. |
+
+**F01 · `secrets-set-do-min-ve` · P3.** [Phép quan sát N2](scripts/test_fragments/wp433_secrets_set_bundle.py:110) có thể ném `TypeError` khi đột biến đưa list hoặc dict vào danh sách khóa. Phản chứng lượt 1 ghi nhận bỏ chốt toàn bộ làm vắng 36 khóa N2, chỉ cho dict lọt làm vắng 24 khóa, còn chỉ cho int lọt giữ đủ bản đồ và làm đỏ 4 khóa. Cả ba đều bị từ chối. N1 dùng bộ đếm và N3 so sánh danh sách nên hai nhóm đó tránh được lỗi hash này. Đây là nợ độ mịn đã được chấp nhận theo Q5′.
+
+| Lớp từ lượt 1 | Nhãn lượt 2 | Căn cứ |
+|---|---|---|
+| `secrets-set-do-min-ve` | **CHƯA VÁ** | Cùng SHA, phép tạo tập vẫn hiện diện tại dòng 110 |
+
+Theo §12, **0/1 lớp được xác minh đã vá thật**, tỷ lệ 0%. Có một lớp và một biểu hiện còn mở, không có lớp mới hay tái mở.
+
+### Chưa đo
+
+Lượt 2 xác minh log N5 đã lưu và giữ kết quả tái sinh cùng phản chứng từ lượt 1. Selftest, bundle checker và EOL không được chạy lại trong sandbox. Thời điểm lập ma trận ban đầu và model/effort cụ thể của lượt này chưa có biên nhận độc lập. Windows native được miễn theo Q4′. CI, connector review và human audit trên exact head nằm ngoài verdict offline này.
+
+KET_LUAN: approve

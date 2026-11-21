@@ -81,6 +81,7 @@ DA_NOI = {
     ".githooks/pre_push_test.py", ".github/checks/ci_phamvi_test.py",
     "ops/bien_nhan_v2_test.py",
     "ops/ci_duong_nhanh_test.py",
+    "ops/kiem_lease_pr_test.py",   # #1445 r1: goi truc tiep tu .github/workflows/lease-pr.yml
     "ops/cong_cu_test.py", "ops/lease_publish_test.py",
     "scripts/tl_core/command_registry_test.py",
 }

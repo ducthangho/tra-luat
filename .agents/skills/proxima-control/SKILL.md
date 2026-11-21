@@ -1,7 +1,7 @@
 ---
 name: proxima-control
 description: Điều khiển MỘT đích Proxima khai báo tường minh qua px hoặc Run-Px.ps1 (trợ giúp, cấu hình, trạng thái, model, hỏi, start/stop/restart, connect/disconnect), luôn kèm ConfigPath, RepositoryRoot, TargetId và dùng -WhatIf để xem trước.
-version: 2.0.0
+version: 2.1.0
 ---
 ## Phạm vi (Scope)
 - Add-on tùy chọn, độc lập, chỉ công bố trong repository để dễ tìm: không tự cài, không tự kích hoạt, không đổi endpoint, dịch vụ,
@@ -33,10 +33,12 @@ không dò môi trường hay thư mục hiện hành, không tự kết nối. 
 ```powershell
 px config -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<TargetId>'
 px models '<provider>' -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<TargetId>'
-px use '<provider>' '<provider>/<model>' -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<TargetId>'
+px use '<provider>' '<model id>' -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<TargetId>'
 px ask '<provider>' 'Nội dung câu hỏi' -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<TargetId>'
 px connect -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<TargetId>' -Credential (Get-Credential)
 ```
+- Model id lấy đúng nguyên văn từ `px models`. Id thuộc provider `P` khi nó bằng `P`, hoặc bắt đầu bằng `P:` (dạng Proxima quảng bá,
+  ví dụ `chatgpt`, `chatgpt:thinking`), hoặc bắt đầu bằng `P/` (dạng cũ). So Ordinal; provider không được chứa `/` hay `:`.
 - Chỉ `connect` nhận `-Credential` (PSCredential); hành động khác không hỏi và không đọc thông tin đăng nhập.
 - Không suy diễn: `ask` khi chưa `use` (và không có `-Model`) báo `NoModelSelected`; model không được quảng bá báo
   `ModelNotAdvertised`. Không fallback sang model hay đích khác, không tự thử lại.
@@ -51,7 +53,7 @@ px restart -ConfigPath '<ConfigPath>' -RepositoryRoot '<RepoRoot>' -TargetId '<T
 
 ## Phiên bản (Versions)
 Ba miền danh tính tách biệt, không suy miền này từ miền kia:
-1. Add-on trong repository: `ModuleVersion` 2.0.0 của manifest, cộng commit và tree Git chứa nó. Major 2 tách khỏi module 1.0.1
+1. Add-on trong repository: `ModuleVersion` 2.1.0 của manifest, cộng commit và tree Git chứa nó. Major 2 tách khỏi module 1.0.1
    đã thấy ở P0; không khẳng định module trên máy chủ đã được cập nhật.
 2. Module điều khiển đã cài trên endpoint: cặp băm `moduleSha256` + `configModuleSha256` do handshake trả về khi `connect`.
 3. Gateway runtime: `FileVersion` của `Proxima.exe` là NOT_MEASURED ở S2/S3; đo nó thuộc quan sát P4, không lén thêm vào S2.

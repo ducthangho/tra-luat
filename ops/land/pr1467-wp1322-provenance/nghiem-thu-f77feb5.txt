@@ -1,0 +1,16 @@
+# nghiem thu merge f77feb5 2026-11-21T00:43:10Z
+merge f77feb5990fc4fcaa2c01c1e4cc1551328623836
+parents 48d372e14f190dae83a75ccbca8ee9a0b25635c5 7c429aa7300ea9c5ff765521ca70bed49239a39e
+tree f7ece7bb9e66e7f0bd53e9e4aed3fcc66ecfab3a
+## numstat f77feb5^1..f77feb5
+248	4	ops/ci_provenance_test.py
+## diff base 8048551 .. cha thu nhat 48d372e (cham write set?)
+(rong = khong cham)
+## blob write set: head / merge / master
+7c429aa 21b23dbcdbab903bc840df70f95f7882a741118a
+f77feb5 21b23dbcdbab903bc840df70f95f7882a741118a
+origin/master 21b23dbcdbab903bc840df70f95f7882a741118a
+## merge-base --is-ancestor 7c429aa f77feb5
+rc=0
+## diff --check
+rc=0

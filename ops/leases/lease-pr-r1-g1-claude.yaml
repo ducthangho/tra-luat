@@ -1,0 +1,49 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1445
+packet_id: lease-pr
+revision: 1
+generation: 1
+lease_id: lease-pr-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+reviewer_model_family: openai
+reviewer_execution_surface: codex_service
+reviewer_transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 00ee83998487d289324566f230b67b5923a9a9d9
+spec_path: ops/specs/lease-pr-r1.md
+spec_hash: d78198f6ee899c14fa372c87381b77c08654d9e127d4cc3425a28d2946bdc5b2
+write_set:
+- .claude/dev/ci_dang_ky_test.py
+- .github/workflows/lease-pr.yml
+- ops/acceptance/lease-pr/r1/VERDICT.md
+- ops/kiem_lease_pr.py
+- ops/kiem_lease_pr_test.py
+- ops/leases/lease-pr-r1-g1-claude.yaml
+- ops/specs/lease-pr-r1.md
+write_set_hash: 94c46a676b71f60fb09c6bbe4c0ad2f73596da6929e552dd2b5e2dc4b55e2a55
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+write_set_note: 'Co y KHONG gom ci.yml, ops/ci_duong_nhanh.py, ops/ci_duong_nhanh_test.py: lease wp1448-r2-g1-claude giu toi 2026-11-23T08:00Z.'
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: 00ee83998487d289324566f230b67b5923a9a9d9
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20/11 chon "#1445: CI kiem lease moi duong (Recommended)" roi "Tach workflow rieng (Recommended)"'
+recorded_by: 'phiên điều phối Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T09:40:54Z'
+heartbeat_at: '2026-11-20T09:40:54Z'
+lease_until: '2026-11-20T09:51:35Z'
+lease_expires_at_utc: '2026-11-20T09:51:35Z'
+max_lease_hours: 8
+review_calls_limit: 2
+inference_calls_limit: 0
+withdrawn_at_utc: '2026-11-20T09:51:35Z'
+withdrawn_by: 'phien dieu phoi Mission #1238 session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r1 xong: ma + test, review Codex 2/2 (luot 2 approve), P3 da dong bang test; ops/acceptance/lease-pr/r1/VERDICT.md. Thu hoi truoc merge vi khong con ghi them.'

@@ -1,0 +1,76 @@
+===== base lan1 wp433_gws_cred_win_duong run=True [2026-11-20T04:13:07Z->2026-11-20T04:13:42Z]
+rc=0
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=76 đạt=76 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=47 giết_đúng=47 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+
+RUN wp433_gws_cred_win_duong True
+
+===== base lan1 wp433_gws_cred_dich_ngoai_kho_b run=False [2026-11-20T04:13:42Z->2026-11-20T04:15:31Z]
+rc=0
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_chot: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_doc: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_ghi_lai: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_encode_ghi_cu: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=2 đạt=2 chỉ_posix=1 · LUOT: dự_kiến=29 chạy=27 đạt=27 chỉ_posix=2 · DOT BIEN: dự_kiến=36 chạy=32 giết_đúng=28 chỉ_posix=4 · HONG: 0 · TU_KIEM: 3/3
+[wp433_gws_cred_dich_ngoai_kho_b] VẾ SAI: giet_dung
+
+RUN wp433_gws_cred_dich_ngoai_kho_b False
+
+===== base lan2 wp433_gws_cred_win_duong run=True [2026-11-20T04:15:31Z->2026-11-20T04:15:54Z]
+rc=0
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=3 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=76 đạt=76 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=47 giết_đúng=47 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+
+RUN wp433_gws_cred_win_duong True
+
+===== base lan2 wp433_gws_cred_dich_ngoai_kho_b run=False [2026-11-20T04:15:54Z->2026-11-20T04:17:43Z]
+rc=0
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_chot: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_doc: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_ghi_lai: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_encode_ghi_cu: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=2 đạt=2 chỉ_posix=1 · LUOT: dự_kiến=29 chạy=27 đạt=27 chỉ_posix=2 · DOT BIEN: dự_kiến=36 chạy=32 giết_đúng=28 chỉ_posix=4 · HONG: 0 · TU_KIEM: 3/3
+[wp433_gws_cred_dich_ngoai_kho_b] VẾ SAI: giet_dung
+
+RUN wp433_gws_cred_dich_ngoai_kho_b False
+
+===== head lan1 wp433_gws_cred_win_duong run=False [2026-11-20T04:17:43Z->2026-11-20T04:18:04Z]
+rc=0
+[wp433_gws_cred_win_duong] ĐỎ tich_hop_nt: TinHieuChotCa('tich_hop_nt · W4.loai_o_loi · hop_dong') (None)
+[wp433_gws_cred_win_duong] ĐỘT BIẾN db_nt_git_nuot_loi: TIN_DUNG_GIA
+[wp433_gws_cred_win_duong] ĐỘT BIẾN db_nt_realpath_khong_strict: TIN_DUNG_GIA
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=2 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=74 đạt=73 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=47 giết_đúng=45 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+[wp433_gws_cred_win_duong] VẾ SAI: ca_dat, luot_dat, giet_dung, so_luot
+
+RUN wp433_gws_cred_win_duong False
+
+===== head lan1 wp433_gws_cred_dich_ngoai_kho_b run=False [2026-11-20T04:18:04Z->2026-11-20T04:19:50Z]
+rc=0
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_chot: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_doc: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_ghi_lai: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_encode_ghi_cu: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=2 đạt=2 chỉ_posix=1 · LUOT: dự_kiến=29 chạy=27 đạt=27 chỉ_posix=2 · DOT BIEN: dự_kiến=36 chạy=32 giết_đúng=28 chỉ_posix=4 · HONG: 0 · TU_KIEM: 3/3
+[wp433_gws_cred_dich_ngoai_kho_b] VẾ SAI: giet_dung
+
+RUN wp433_gws_cred_dich_ngoai_kho_b False
+
+===== head lan2 wp433_gws_cred_win_duong run=False [2026-11-20T04:19:50Z->2026-11-20T04:20:12Z]
+rc=0
+[wp433_gws_cred_win_duong] ĐỎ tich_hop_nt: TinHieuChotCa('tich_hop_nt · W4.loai_o_loi · hop_dong') (None)
+[wp433_gws_cred_win_duong] ĐỘT BIẾN db_nt_git_nuot_loi: TIN_DUNG_GIA
+[wp433_gws_cred_win_duong] ĐỘT BIẾN db_nt_realpath_khong_strict: TIN_DUNG_GIA
+[wp433_gws_cred_win_duong] CA: dự_kiến=3 chạy=3 đạt=2 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=76 chạy=74 đạt=73 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=47 chạy=47 giết_đúng=45 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3
+[wp433_gws_cred_win_duong] VẾ SAI: ca_dat, luot_dat, giet_dung, so_luot
+
+RUN wp433_gws_cred_win_duong False
+
+===== head lan2 wp433_gws_cred_dich_ngoai_kho_b run=False [2026-11-20T04:20:12Z->2026-11-20T04:22:00Z]
+rc=0
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_chot: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_van_doc: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_tu_choi_ghi_lai: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] ĐỘT BIẾN db_w6_encode_ghi_cu: SONG_SOT
+[wp433_gws_cred_dich_ngoai_kho_b] CA: dự_kiến=3 chạy=2 đạt=2 chỉ_posix=1 · LUOT: dự_kiến=29 chạy=27 đạt=27 chỉ_posix=2 · DOT BIEN: dự_kiến=36 chạy=32 giết_đúng=28 chỉ_posix=4 · HONG: 0 · TU_KIEM: 3/3
+[wp433_gws_cred_dich_ngoai_kho_b] VẾ SAI: giet_dung
+
+RUN wp433_gws_cred_dich_ngoai_kho_b False
+

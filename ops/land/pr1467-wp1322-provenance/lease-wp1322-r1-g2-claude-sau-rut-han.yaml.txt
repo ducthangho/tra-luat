@@ -1,0 +1,91 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1322
+packet_id: CI-PROVENANCE-SONG-SONG
+mission_ghi_chu: 'khong thuoc Mission; nguon cap viec: chu kho yeu cau toi uu test CI dai (15-11-2026), bao cao ops/specs/CI-TOI-UU-THOI-GIAN-BAO-CAO-20261115.md (PR #1320)'
+revision: 1
+generation: 2
+lease_id: wp1322-r1-g2-claude
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 (wp1322-r1-g1-claude) da HET HAN 2026-11-17T03:36Z nen write-set exclusion da nha; khong khai bia mo vao lease da chet (CLAUDE.md: bia mo vao lease het han lam do lan dang)'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1322#issuecomment-7038265046
+authority_url: https://github.com/ducthangho/tra-luat/issues/1322#issuecomment-7038265046
+authority_ghi_chu: 'chu kho chon lam tiep theo khuyen nghi (a), chon executor la phien Claude Code remote danh gia #1322 va cho ghi ho (chat 20-11-2026, ghi ho); spec_hash r1 da duyet tai https://github.com/ducthangho/tra-luat/issues/1322#issuecomment-6887278971'
+recorded_by: anthropic_claude_executor
+recorder_is_dispatcher: false
+recorder_ghi_chu: 'phien Claude Code remote danh gia #1322 (cung phien se thi cong) ghi lease theo quyet dinh truc tiep cua chu kho trong chat; tham quyen la authority_url, khong phai lease nay'
+leased_at_utc: '2026-11-20T11:25:00Z'
+heartbeat_at: '2026-11-20T11:25:00Z'
+lease_until: '2026-11-21T00:43:31Z'
+lease_expires_at_utc: '2026-11-21T00:43:31Z'
+role: executor
+provider: anthropic_claude
+executor: anthropic_claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+transport_ghi_chu: claude_code chi khai machine/local (packet_loop); may la container cloud remote Linux
+environment: remote
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+reviewer: openai_codex
+reviewer_provider: openai_codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+reviewer_model: gpt-6-astra
+reviewer_independence: 'Codex CLI phien va context moi, chi doc, neo exact SHA tung luot, chay qua .claude/dev/launcher.py run voi --disable memories va cac co --disable khac; khac ho model voi executor. Chu kho audit SHA ung vien truoc merge (spec khai cham E5).'
+spec_path: ops/specs/CI-PROVENANCE-SONG-SONG-r1.md
+spec_ref: refs/heads/claude/ci-toi-uu-do-dac-20261115
+spec_ref_ghi_chu: 'spec o commit 24ecd84ad633a485c0bd8cbf4c2dfb89bd8ab757 (PR #1320, chua merge); thu dinh danh la BAM, khong phai ten nhanh'
+spec_hash: bd0a880b91d00a044247d4219dc2eefbf833de4958b0e2ff3d9a907588b1350e
+spec_sha256: bd0a880b91d00a044247d4219dc2eefbf833de4958b0e2ff3d9a907588b1350e
+spec_blob: ada89fe3e8917ab5f04d29ac21a989b3eb96411b
+branch: agent/wp1322-g2-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 8048551a9b1eb886c126d2a1a4df0f95fb285964
+start_from_sha: 8048551a9b1eb886c126d2a1a4df0f95fb285964
+reviewed_sha_required: 8048551a9b1eb886c126d2a1a4df0f95fb285964
+reviewed_sha_ghi_chu: 'chua co head code luc cap lease; g2 cherry-pick c2b00c7 + a35c649 (cua g1, nhanh do-ci/p2-a1-20261115) len base; moi luot review neo dung SHA cua luot; so loi goi Codex mang tu g1: 1/10 da dung'
+write_set:
+- ops/ci_provenance_test.py
+write_set_hash: 7d6e87aa40edc3ff1274a605a02bd5d4705d4a8870190959a7c372cb4d164084
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'holder scan 2026-11-20T11:1xZ: ls-remote so for-each-ref 368 ten, thieu 0; ops/ci_provenance_test.py NGUOI_GIU 0 (9 lease cu cham duong dan deu HET_HAN, gom wp1322-r1-g1-claude)'
+tran_kich_thuoc: 'sensitive, ADR-0053 (<= 6 tep, <= 450 dong them); spec du kien 1 tep'
+tran_loi_goi_codex: 'ADR-0055 theo dong khai cua spec'
+dieu_kien_merge_bo_sung: 'ADR-0060 (dong khai cua spec), windows required (do bang mot luot workflow_dispatch tap trung, khong full Windows mutant); spec khai cham E5 nen chu kho audit va duyet merge neo exact SHA'
+coordination_paths:
+- ops/leases/wp1322-r1-g2-claude.yaml
+- ops/specs/CI-PROVENANCE-SONG-SONG-r1.md
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- kill_other_session_process
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+budget_cuoi_ghi_chu: 'Ghi luc rut han (phien executor session_015GtxrcJ94fBLh2n3he2BcS). Codex: 12 loi goi tren tran 11 da nang (11 = 10 luot review offline g1+g2 tinh ca g1 luot 2 chet mang + connector 18:40Z; loi goi thu 12 = connector tu kich khi bo draft #1467 luc 23:55Z, VUOT TRAN, khong xin truoc; sach). CI Ubuntu PR: 1 luot ci.yml 44794899626 tren 7c429aa. Dot bien du: 1 luot ci-dot-bien-du.yml 44801327981 success. Windows native: Desktop DESKTOP-T9R33P2 ca bo N=1 hai ve (7c429aa, 8048551) + lap L4 5x, comment 7049377019. Loi khai co neo cua executor.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-22T11:25:00Z'
+  han_moi_utc: '2026-11-21T00:43:31Z'
+  chi_thi: 'https://github.com/ducthangho/tra-luat/pull/1467#issuecomment-7048488061 muc 4 (sau merge phien land duoc nha lease g2).'
+  ly_do: >-
+    Packet CI-PROVENANCE-SONG-SONG r1 da MERGE: PR #1467 (head 7c429aa7300ea9c5ff765521ca70bed49239a39e) merge commit f77feb5990fc4fcaa2c01c1e4cc1551328623836. Lease khong tu chet khi land.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem cho write set nay luc rut.'
+  nguoi_rut: 'phien executor session_015GtxrcJ94fBLh2n3he2BcS (lap ho so land theo yeu cau chu kho trong chat)'
+  nghiem_thu: 'ai-dang-giu ops/ci_provenance_test.py sau han moi phai ra NGUOI_GIU 0.'

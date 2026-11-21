@@ -1,0 +1,39 @@
+# do 2026-11-20T07:37:17Z, cung clone; core.abbrev 7
+## merge-base --is-ancestor 64fa5156794dfb6a2dd9e8f257ee759ab07c9c35 a31c680c8880786848f832a35554d9e84078b270
+rc=0
+## rev-list --first-parent 64fa515..a31c680
+a31c680c8880786848f832a35554d9e84078b270
+b9ade4e2f3d489fe7e65c4ea928086fe627ec0c4
+## rev-list 64fa515..a31c680 (moi commit)
+a31c680c8880786848f832a35554d9e84078b270 b9ade4e2f3d489fe7e65c4ea928086fe627ec0c4 50278595c732adc1906131ddc869e8e241c1bdd9 Merge pull request #1449 from ducthangho/ops/manifest-433-n
+b9ade4e2f3d489fe7e65c4ea928086fe627ec0c4 64fa5156794dfb6a2dd9e8f257ee759ab07c9c35 aa48902f5d3c2e36329999258203dfc84cb6dcf8 Merge PR #1447: px-ask #1446 r1+r2 - px ask chua chay duoc (hop dong model id); 0 loi goi model
+50278595c732adc1906131ddc869e8e241c1bdd9 64fa5156794dfb6a2dd9e8f257ee759ab07c9c35 release: tai sinh RELEASE_MANIFEST.json sau land #1441 (#433 packet N)
+aa48902f5d3c2e36329999258203dfc84cb6dcf8 4737617acdff8fd9518382b5cc0697a5d07a7aa2 ops(px-ask #1446): r2 - thu hoi lease r2 (viec xong)
+4737617acdff8fd9518382b5cc0697a5d07a7aa2 71b5bb56ea56210316805ee84fd9eed3bc86e3fe ops(px-ask #1446): r2 - VM duoi admin: gateway thong (status 200, models 13 id), dung o chon model; 0 loi goi model
+71b5bb56ea56210316805ee84fd9eed3bc86e3fe 37f19cacb2fbbb01e40686dbed7c9b2695a73f67 ops(px-ask #1446): r2 - dac ta + lease (VM, chu kho tu chay 1 lenh admin); thu hoi lease r1
+37f19cacb2fbbb01e40686dbed7c9b2695a73f67 718a257f803e929bd59458f1b1168b93bd3a20d1 ops(px-ask #1446): r1 - ca ba may blocked, 0 loi goi model
+718a257f803e929bd59458f1b1168b93bd3a20d1 a995f0b7b292a9695e7ad9ce10a1e4f908026b5e ops(px-ask #1446): r1 - dac ta + lease operator (do chi doc 3 may, dung 1 loi goi px ask that moi may du dieu kien)
+## diff --stat 64fa515..a31c680
+ RELEASE_MANIFEST.json                 | 14 +++----
+ ops/acceptance/px-ask/r1/RESULTS.md   | 76 +++++++++++++++++++++++++++++++++++
+ ops/acceptance/px-ask/r2/RESULTS.md   | 69 +++++++++++++++++++++++++++++++
+ ops/leases/px-ask-r1-g1-operator.yaml | 42 +++++++++++++++++++
+ ops/leases/px-ask-r2-g1-operator.yaml | 42 +++++++++++++++++++
+ ops/specs/px-ask-r1.md                | 61 ++++++++++++++++++++++++++++
+ ops/specs/px-ask-r2.md                | 53 ++++++++++++++++++++++++
+ 7 files changed, 350 insertions(+), 7 deletions(-)
+## tep write set bi cham 64fa515..a31c680
+(het)
+## numstat a31c680^1..a31c680 (PR #1449)
+7	7	RELEASE_MANIFEST.json
+## blob 5 tep write set tai merge / hau due
+scripts/tl_gws.py merge=fbeb9421edd0a7e451534a92c89d090c4de4b3a4 hau_due=fbeb9421edd0a7e451534a92c89d090c4de4b3a4
+scripts/test_fragments/wp433_gws_cred_no.py merge=fc70a54a9eb4b56bcbff711ed4a920fbd3d7ddaf hau_due=fc70a54a9eb4b56bcbff711ed4a920fbd3d7ddaf
+scripts/test_fragments/wp433_gws_cred_win_duong.py merge=82b4cf398ef550bd82a75a0fe20540d6bcd00537 hau_due=82b4cf398ef550bd82a75a0fe20540d6bcd00537
+scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py merge=b0a6acbef5ce3a1d50d3c37137d8da2f9f1a22f5 hau_due=b0a6acbef5ce3a1d50d3c37137d8da2f9f1a22f5
+scripts/tl_test_fragments_bundled.py merge=2fac15eb2d7b96185052f6f58fa7188ec8b9247e hau_due=2fac15eb2d7b96185052f6f58fa7188ec8b9247e
+## tree hau due
+97f445b3386216c98d6c329ae0d4a8ea4d19d3a2
+## release-verify --strict tai a31c680c8880786848f832a35554d9e84078b270
+rc=0
+ok True 185 185 []

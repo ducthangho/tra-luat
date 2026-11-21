@@ -9,8 +9,9 @@ can thoát 4 ⇒ TÍN DỤNG GIẢ. `TU_KIEM` kiểm chính bộ phân hạng. r
 r4: REST giả giữ `steps[]` dựng MỘT lần từ log + workflow đang giữ (`buoc_rest`, độc lập với `ten_du_kien`); ca lệch sửa state ấy.
 
 Ra: `CA: N/N dat` · `DOT BIEN: M/M bi giet dung ly do` · `TU KIEM PHAN HANG: DAT (k dot bien)` · `TONG: DAT`.
+#1322: dòng đầu `TIEN TRINH: n`; vòng đột biến chạy `n` luồng (`CI_PROVENANCE_TIEN_TRINH`), kết quả in theo thứ tự `DOT_BIEN`.
 """
-import ast, collections, contextlib, hashlib, importlib.util, io, json, os, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
+import ast, collections, contextlib, hashlib, importlib.util, io, json, os, platform, random, re, subprocess, sys, tempfile, types, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
 from unittest import mock
 
@@ -1466,6 +1467,143 @@ def c63_ban_goc_mot_lan_moi_ca():   # #997 hậu merge: bản gốc chạy MỘT
             rc, ra = None, "TimeoutExpired lọt khỏi chay_con"
     bang(rc == 124 and "QUA_HAN:c34_git_blob_that" in ra and phan_hang(rc, ra, "c34_git_blob_that") == "HONG", f"quá hạn ⇒ 124/HONG: {rc} {ra}")
 
+@ca
+def c64_so_tien_trinh_mien():   # #1322 M1/A2: vắng ⇒ min(4, cpu) trên Linux, 1 nơi khác; có biến ⇒ ĐÚNG một chữ số ASCII 1–8
+    bang(so_tien_trinh({}, "Linux", 8) == 4 and so_tien_trinh({}, "Linux", 2) == 2 and so_tien_trinh({}, "Linux", 0) == 1,
+         "vắng biến trên Linux ⇒ min(4, cpu), cpu 0/None ⇒ 1")
+    bang(so_tien_trinh({}, "Windows", 8) == 1 and so_tien_trinh({}, "Darwin", 8) == 1, "vắng biến ngoài Linux ⇒ 1 (#997)")
+    bang(all(so_tien_trinh({BIEN_TIEN_TRINH: str(k)}, "Windows", 2) == k for k in range(1, 9)), "1..8 nhận đúng số, mọi nền")
+    lot = []
+    for x in ("0", "9", "a", "", " 4", "4 ", "04", "4\n", "４", "+4", "4.0", "10"):
+        try:
+            so_tien_trinh({BIEN_TIEN_TRINH: x}, "Linux", 8)
+            lot.append(x)
+        except ValueError:
+            pass
+    bang(not lot, f"giá trị ngoài miền phải ValueError, lọt: {lot!r}")
+
+def _bo_thuc_thi_dieu_khien(tao):   # #1322 review lượt 4 F1: Future THẬT, chỉ hoàn tất SAU KHI bộ gom bắt đầu chờ, theo thứ tự NGƯỢC 5..0
+    import concurrent.futures, threading   # ⇒ `map` (chờ `result()` theo thứ tự) vẫn ra đúng thứ tự; `as_completed` (chờ qua `_waiters`) ra NGƯỢC — tất định, không sleep, không lặp
+    class _Cond(threading.Condition):
+        def __init__(self, bao):
+            super().__init__()
+            self._bao = bao
+        def wait(self, timeout=None):   # `Future.result()` chờ ở đây
+            self._bao.set()
+            return super().wait(timeout)
+    class _Ds(list):
+        def __init__(self, bao):
+            super().__init__()
+            self._bao = bao
+        def append(self, x):   # `as_completed` cài waiter ở đây
+            self._bao.set()
+            super().append(x)
+    class TuongLai(concurrent.futures.Future):
+        def __init__(self, bao, chi_so):
+            super().__init__()
+            self._condition, self._waiters, self._bam = _Cond(bao), _Ds(bao), (2, 0, 4, 1, 5, 3)[chi_so]
+        def __hash__(self):   # review lượt 4 F1: bộ gom "chờ hết rồi duyệt tập đã xong" đi theo thứ tự BĂM (hoặc ngược nó) ⇒ hoán vị không đơn điệu: cả hai chiều đều KHÁC thứ tự việc
+            return self._bam
+    class BoThucThi(concurrent.futures.Executor):
+        def __init__(self, *a, **k):
+            self.viec, self.bao, self.xong, self.qua_han = [], threading.Event(), [], False
+            tao.append(self)
+            self.luong = threading.Thread(target=self._hoan_tat, daemon=True)
+            self.luong.start()
+        def submit(self, fn, *a, **k):
+            f = TuongLai(self.bao, len(self.viec))
+            self.viec.append((f, fn, a, k))
+            return f
+        def _hoan_tat(self):
+            self.qua_han = not self.bao.wait(10)
+            for i in reversed(range(len(self.viec))):
+                f, fn, a, k = self.viec[i]
+                try:
+                    f.set_result(fn(*a, **k))
+                except BaseException as e:   # noqa: BLE001 — trả về qua Future, người gom tự ném lại
+                    f.set_exception(e)
+                self.xong.append(i)
+        def shutdown(self, wait=True, *, cancel_futures=False):
+            if wait:
+                self.luong.join(30)
+    return BoThucThi
+
+def _thu_tu_tat_dinh():
+    import concurrent.futures
+    tao = []
+    Bo = _bo_thuc_thi_dieu_khien(tao)
+    with Bo() as ex:   # đối chứng ÂM trên chính bộ giả: gom theo thứ tự xong PHẢI khác thứ tự việc, nếu không bộ giả hỏng (hạ tầng, không phải chốt)
+        fs = [ex.submit(lambda i: i, i) for i in range(6)]
+        doi = [f.result() for f in concurrent.futures.as_completed(fs)]
+    if sorted(doi) != list(range(6)) or doi == list(range(6)) or tao[0].qua_han:
+        raise RuntimeError(f"c65: bộ thực thi điều khiển không tất định: {doi!r}, quá hạn={tao[0].qua_han}")
+    with mock.patch("concurrent.futures.ThreadPoolExecutor", Bo):
+        r = chay_theo_thu_tu(lambda i: i * 10, range(6), 4)
+    if len(tao) > 1 and tao[1].qua_han:
+        raise RuntimeError("c65: bộ gom không chờ future nào trong 10 s — bộ giả không điều khiển được thứ tự")
+    bang(r == [0, 10, 20, 30, 40, 50], f"bộ thực thi hoàn tất NGƯỢC 5..0: kết quả phải theo thứ tự việc, được {r!r}")
+
+@ca
+def c65_chay_theo_thu_tu():   # #1322 M4/A3: thứ tự xong bị ĐẢO ⇒ đầu ra vẫn theo thứ tự việc; n = 1 tuần tự. Đúng phạm vi đặc tả:
+    bang(chay_theo_thu_tu(lambda i: i * i, range(5), 1) == [0, 1, 4, 9, 16], "n=1 tuần tự, đúng thứ tự")
+    _thu_tu_tat_dinh()   # review lượt 4 F1: bộ thực thi điều khiển hoàn tất NGƯỢC, tất định. Phép đo "chạy chồng" (luồng phụ → Barrier →
+    # cấu hình pool, đột biến T4) đã GỠ sau Review Rescue Checkpoint thứ hai: nó nằm NGOÀI M4/A3 và là nơi lớp
+    # `loi-luong-nen-bi-tinh-la-giet-dung` tái diễn ở lượt 2–8 (sổ uỷ quyền #1322 comment 7046235668)
+
+@ca
+def c66_mien_sai_chan_truoc_moi_ca():   # #1322 A2: giá trị lạ ⇒ rc≠0 TRƯỚC khi chạy ca nào
+    with mock.patch.dict(os.environ, {BIEN_TIEN_TRINH: "0"}), mock.patch(__name__ + ".chay_ca", return_value=(0, "")) as cc, \
+            mock.patch(__name__ + ".lam_nong_nen"), mock.patch(__name__ + ".chay_dot_bien", return_value=("GIET", "")), \
+            mock.patch(__name__ + ".chay_dot_bien_test", return_value=("GIET", "")), \
+            contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as loi:
+        rc = main([])
+    bang(rc == 2 and cc.call_count == 0 and BIEN_TIEN_TRINH in loi.getvalue(), f"rc={rc}, số ca đã chạy {cc.call_count}")
+    # review lượt 1 F3 + lượt 5 F3b/F3c: kết quả phải khớp KẾ HOẠCH (tên, thứ tự, số lần) — thiếu, lặp, đảo, rỗng ⇒ TONG: DO
+    for ten_kq, rc_mong in ((("m1", "m2"), 0), (("m2",), 1), (("m1",), 1), ((), 1), (("m1", "m1"), 1), (("m2", "m1"), 1),
+                            (("m1", "m2", "m2"), 1)):
+        with mock.patch.dict(os.environ, {BIEN_TIEN_TRINH: "2"}), mock.patch(__name__ + ".chay_ca", return_value=(0, "")), \
+                mock.patch(__name__ + ".TU_KIEM", ()), mock.patch(__name__ + ".DOT_BIEN", (("m1",),)), \
+                mock.patch(__name__ + ".DOT_BIEN_TEST", (("m2",),)), \
+                mock.patch(__name__ + ".chay_vong_dot_bien", return_value=[(t, "GIET", "") for t in ten_kq]), \
+                contextlib.redirect_stdout(io.StringIO()) as ra:
+            rc = main([])
+        bang(rc == rc_mong and ra.getvalue().endswith(f"TONG: {'DO' if rc_mong else 'DAT'}\n"), f"kết quả {ten_kq!r} cho kế hoạch m1,m2: rc={rc}")
+
+@ca
+def c67_lam_nong_truoc_vong_dot_bien():   # #1322 M2, review lượt 1 F2: bản gốc của MỌI ca đích (cả `DOT_BIEN_TEST`) xong TRƯỚC đột biến đầu tiên, mỗi khoá một lần
+    import threading
+    nhom = tuple([d for d in DOT_BIEN if d[3] == "c34"][:2] + [d for d in DOT_BIEN if d[3] == "c58"][:1])
+    dich = {[c for c in CA if c.split("_")[0] == p][0] for p in ("c34", "c58", DOT_BIEN_TEST[0][3])}
+    for n in (1, 4):
+        nhat_ky, khoa = [], threading.Lock()
+        def con(ten_ca, loai):
+            with khoa:
+                nhat_ky.append((loai, ten_ca))
+            return (0, "") if loai == "goc" else (3, f"DO:{ten_ca}: x")
+        with mock.patch.dict(_NEN, clear=True), mock.patch(__name__ + ".DOT_BIEN", nhom), mock.patch(__name__ + ".TU_KIEM", ()), \
+                mock.patch(__name__ + ".DOT_BIEN_TEST", DOT_BIEN_TEST[:1]), \
+                mock.patch(__name__ + ".chay_con", side_effect=lambda t, ma: con(t, "goc" if Path(ma).name == "goc.py" else "db")), \
+                mock.patch(__name__ + ".chay_con_ban_test", side_effect=lambda t, ban: con(t, "db")):
+            viec = [(co_ten(chay_dot_bien), d) for d in nhom] + [(co_ten(chay_dot_bien_test), d) for d in DOT_BIEN_TEST[:1]]
+            kq = chay_vong_dot_bien(n, viec)
+        goc = [t for loai, t in nhat_ky if loai == "goc"]
+        dau = [loai for loai, _ in nhat_ky].index("db")
+        bang(sorted(goc) == sorted(dich), f"n={n}: mỗi ca đích chạy bản gốc ĐÚNG một lần: {goc}")
+        bang({loai for loai, _ in nhat_ky[:dau]} == {"goc"} and "goc" not in {loai for loai, _ in nhat_ky[dau:]},
+             f"n={n}: mọi bản gốc phải xong TRƯỚC đột biến đầu tiên: {nhat_ky}")
+        bang([(t, h) for t, h, _ in kq] == [(d[0], "GIET") for _, d in viec] and len(viec) == 4, f"n={n}: mỗi việc đúng một kết quả, đúng tên: {kq}")
+
+@ca
+def c68_moi_viec_dung_ket_qua_cua_no():   # #1322 review lượt 6 F3d: runner THẬT, mỗi việc một kết quả RIÊNG (có SONG_SOT) — gắn tên đúng mà chạy nhầm việc ⇒ đỏ
+    def gia(ten, *_):
+        return ("SONG_SOT" if ten == "v5" else "GIET", f"chi tiet {ten}")
+    ke_hoach = [(co_ten(gia), (f"v{i}", "neo", "thay", "c00")) for i in range(6)]
+    mong = [(f"v{i}", "SONG_SOT" if i == 5 else "GIET", f"chi tiet v{i}") for i in range(6)]
+    for n in (1, 4):
+        with mock.patch(__name__ + ".lam_nong_nen"):
+            kq = chay_vong_dot_bien(n, list(ke_hoach))
+        bang(kq == mong, f"n={n}: mỗi việc phải mang ĐÚNG kết quả của chính nó, được {kq!r}")
+
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
     ("A2_bo_so_attempt", 'if k not in thieu and r.get(k) != v]', "if False]", "c02"),
@@ -1861,6 +1999,23 @@ TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
      "        raise AssertionError(f'doi kieu {type(e).__name__}')\n", "c03", "TIN_DUNG_GIA"),
     ("chi_them_chu_thich", "TRANG = 100\n", "TRANG = 100  # vo hai\n", "c20", "SONG_SOT"),
 )
+_XD = chr(10)   # xuống dòng dựng bằng mã: neo nhiều dòng của `DOT_BIEN_TEST` không được tự xuất hiện lần thứ hai trong tệp này
+DOT_BIEN_TEST = (   # #1322 M4: (tên, gốc, thay, TIỀN TỐ ca đích) — sửa CHÍNH tệp này để đo răng của bộ máy song song. Neo một dòng ghép
+                    # từ hai mảnh vì cùng lý do; `chay_dot_bien_test` vẫn đòi neo xuất hiện ĐÚNG MỘT lần.
+    ("T1_mien_nhan_khoang_trang", 're.fullmatch(r"[1-' + '8]", raw)', 're.fullmatch(r" *[0-9]+ *", raw)', "c64"),
+    ("T2_mac_dinh_ngoai_linux", '!= "Linux":' + _XD + '            return 1', '!= "Linux" and False:' + _XD + '            return 1', "c64"),
+    ("T3_gom_theo_thu_tu_xong", 'return list(ex.' + 'map(ham, viec))',
+     'return [f.result() for f in __import__("concurrent.futures").futures.as_completed([ex.submit(ham, x) for x in viec])]', "c65"),
+    ("T5_kiem_mien_sau_ca", 'file=sys.stderr)' + _XD + '        return 2' + _XD + '    print(f"TIEN TRINH',
+     'file=sys.stderr)' + _XD + '        n = 1' + _XD + '    print(f"TIEN TRINH', "c66"),
+    ("T6_bo_lam_nong", '    lam_nong_nen(n)' + _XD + '    return chay_theo_thu_tu(', '    pass' + _XD + '    return chay_theo_thu_tu(', "c67"),
+    ("T7_lam_nong_bo_sot_dot_bien_test", 'DOT_BIEN + TU_KIEM + ' + 'DOT_BIEN_TEST:', 'DOT_BIEN + TU_KIEM:', "c67"),
+    ("T8_bo_kiem_du_ket_qua", 'len(DOT_BIEN) > 0 and ' + 'du and', 'len(DOT_BIEN) > 0 and', "c66"),
+    ("T18_du_chi_dem_so_luong", '[t for t, _, _ in kq_db] == ' + 'ten_kh', 'len(kq_db) == len(ten_kh)', "c66"),   # review lượt 5 F3c
+    ("T19_ke_hoach_tu_ket_qua", 'ten_kh = [d[0] for _, d in ' + 'viec]', 'ten_kh = [d[0] for _, d in ' + 'viec][:0]', "c66"),
+    ("T20_chay_nham_viec_gan_dung_ten", 'chay_theo_thu_tu(lambda v: v[0](' + '*v[1]), viec, n)', 'chay_theo_thu_tu(lambda v: viec[0][0](*viec[0][1]), viec, n)', "c68"),   # review lượt 6 F3d
+    ("T21_ten_tu_runner_khong_tu_doi_so", '        return (ten, ' + '*ham(ten, *con_lai))', '        return (ten, *ham("v0", *con_lai))', "c68"),
+)
 
 def chay_con(ten_ca, ma):
     try:
@@ -1880,6 +2035,83 @@ def nen_cua(ten_ca, goc):
             ban_goc.write_text(goc, encoding="utf-8")
             _NEN[khoa] = chay_con(ten_ca, ban_goc)
     return _NEN[khoa]
+
+BIEN_TIEN_TRINH = "CI_PROVENANCE_TIEN_TRINH"
+
+def so_tien_trinh(env=None, he=None, cpu=None):
+    """#1322 M1: số luồng của vòng đột biến. Vắng biến ⇒ `min(4, cpu)` trên Linux, 1 ở nền khác (Windows giữ tuần tự, #997).
+    Có biến ⇒ ĐÚNG một chữ số ASCII 1–8; còn lại (rỗng, khoảng trắng, `04`, xuống dòng cuối, chữ số Unicode mà `int()` vẫn
+    nhận) ⇒ ValueError. Khớp TOÀN chuỗi với lớp ký tự liệt kê, không dùng neo cuối dòng hay lớp chữ số Unicode."""
+    raw = (os.environ if env is None else env).get(BIEN_TIEN_TRINH)
+    if raw is None:
+        if (platform.system() if he is None else he) != "Linux":
+            return 1
+        return min(4, (os.cpu_count() if cpu is None else cpu) or 1)
+    if not isinstance(raw, str) or not re.fullmatch(r"[1-8]", raw):
+        raise ValueError(f"{BIEN_TIEN_TRINH}={raw!r} ngoài miền 1–8")
+    return int(raw)
+
+def chay_theo_thu_tu(ham, viec, n):
+    """#1322 M2: `ham` trên từng phần tử của `viec` bằng `n` luồng (việc thật nằm ở tiến trình con nên luồng là đủ).
+    Kết quả trả theo THỨ TỰ `viec`, không theo thứ tự xong."""
+    viec = list(viec)
+    if n <= 1:
+        return [ham(x) for x in viec]
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(n) as ex:
+        return list(ex.map(ham, viec))
+
+def lam_nong_nen(n):
+    """#1322 M2: lượt bản gốc của mọi ca đích chạy TRƯỚC vòng đột biến, mỗi (ca, bản gốc) một lần, để các luồng đột biến chỉ
+    ĐỌC `_NEN` — không có hai luồng cùng tính và cùng ghi một khoá. Bản gốc đọc Ở ĐÂY (cùng cách `chay_dot_bien` đọc), không
+    truyền từ `main`: đối số tính trước lời gọi nên sẽ chạy cả khi hàm bị thay (c66)."""
+    goc = (HERE / "ci_provenance.py").read_text(encoding="utf-8")
+    dich = set()
+    for muc in DOT_BIEN + TU_KIEM + DOT_BIEN_TEST:
+        khop = [c for c in CA if c.split("_")[0] == muc[3]]
+        if len(khop) == 1:
+            dich.add(khop[0])
+    chay_theo_thu_tu(lambda ten_ca: nen_cua(ten_ca, goc), sorted(dich), n)
+
+def co_ten(ham):   # #1322 review lượt 6 F3d: tên trong kết quả lấy từ ĐỐI SỐ việc THẬT SỰ nhận, không do runner gắn
+    def boc(ten, *con_lai):
+        return (ten, *ham(ten, *con_lai))
+    return boc
+
+def chay_vong_dot_bien(n, viec):
+    """#1322 M2: làm nóng `_NEN` rồi chạy `viec` bằng `n` luồng. `viec` do NGƯỜI GỌI sở hữu (review lượt 5 F3b/F3c: kế hoạch
+    phải độc lập với hàm bị kiểm). Trả mỗi việc một bộ `(tên, hạng, chi tiết)` theo thứ tự việc — tên để người gọi đối chiếu."""
+    lam_nong_nen(n)
+    return chay_theo_thu_tu(lambda v: v[0](*v[1]), viec, n)
+
+def chay_con_ban_test(ten_ca, ban_test):
+    """#1322 M4: chạy MỘT ca trên bản sao (đã đột biến) của CHÍNH tệp test; mã sản phẩm là bản thật."""
+    try:
+        r = subprocess.run([sys.executable, "-B", str(ban_test), "--mot-ca", ten_ca], capture_output=True,
+                           env=dict(os.environ, CI_PROVENANCE_MA=str(HERE / "ci_provenance.py"), PYTHONDONTWRITEBYTECODE="1"),
+                           timeout=300)
+    except subprocess.TimeoutExpired:
+        return 124, f"QUA_HAN:{ten_ca}: tien trinh con qua 300 s"
+    return r.returncode, (r.stdout + r.stderr).decode("utf-8", "replace")
+
+def chay_dot_bien_test(ten, cu, moi, tien_to):
+    """Như `chay_dot_bien`, nhưng đột biến sửa `ci_provenance_test.py`; cùng phân hạng `phan_hang`, cùng đòi bản gốc XANH."""
+    khop = [c for c in CA if c.split("_")[0] == tien_to]
+    if len(khop) != 1:
+        return "HONG", f"tiền tố ca đích {tien_to!r} phải khớp ĐÚNG MỘT ca, khớp {khop}"
+    ten_ca = khop[0]
+    goc_test = (HERE / "ci_provenance_test.py").read_text(encoding="utf-8")
+    if goc_test.count(cu) != 1 or cu == moi:
+        return "HONG", f"neo phải xuất hiện đúng 1 lần trong tệp test và đột biến phải đổi mã (thấy {goc_test.count(cu)})"
+    rc, ra = nen_cua(ten_ca, (HERE / "ci_provenance.py").read_text(encoding="utf-8"))
+    if rc != 0:
+        return "HONG", f"ca đích không xanh trên bản gốc (rc={rc}): {ra[-200:]}"
+    with tempfile.TemporaryDirectory(prefix="cip_dbt_") as thu:   # bản sao test ĐỨNG CẠNH mã sản phẩm thật: ca nào đọc `HERE` cũng thấy nó
+        ban = Path(thu) / "ci_provenance_test.py"
+        ban.write_text(goc_test.replace(cu, moi), encoding="utf-8")
+        (Path(thu) / "ci_provenance.py").write_bytes((HERE / "ci_provenance.py").read_bytes())
+        rc, ra = chay_con_ban_test(ten_ca, ban)
+        return phan_hang(rc, ra, ten_ca), ra.strip()[-200:]
 
 def phan_hang(rc, ra, ten_ca):
     if rc == 0:
@@ -2065,20 +2297,32 @@ def main(argv):
     if argv:
         print("dung: ci_provenance_test.py [--mot-ca TEN | --dot-bien-dong [SONG_SONG]]", file=sys.stderr)
         return 2
+    try:   # #1322 M1: miền sai ⇒ dừng TRƯỚC ca nào; dòng TIEN TRINH đứng đầu để bốn dòng cuối của sổ `MOI` liền nhau (M3)
+        n = so_tien_trinh()
+    except ValueError as e:
+        print(f"CI_PROVENANCE: {e}", file=sys.stderr)
+        return 2
+    print(f"TIEN TRINH: {n}")
     kq = [chay_ca(ten) for ten in CA]
     print("".join(f"[{dong}]\n" for rc, dong in kq if rc), end="")
     dat = sum(rc == 0 for rc, _ in kq)
     print(f"CA: {dat}/{len(CA)} dat")
-    xau = [f"{ten}: {h} {ct}" for ten, cu, moi, dich in DOT_BIEN for h, ct in [chay_dot_bien(ten, cu, moi, dich)] if h != "GIET"]
+    viec = [(co_ten(chay_dot_bien), d) for d in DOT_BIEN] + [(co_ten(chay_dot_bien_test), d) for d in DOT_BIEN_TEST]   # kế hoạch ĐỘC LẬP (review lượt 5 F3b/F3c)
+    ten_kh = [d[0] for _, d in viec]
+    kq_db = chay_vong_dot_bien(n, list(viec))   # bản sao: hàm bị kiểm không đổi được kế hoạch của người gọi
+    du = len(set(ten_kh)) == len(ten_kh) and [t for t, _, _ in kq_db] == ten_kh   # đúng tên, đúng thứ tự, đúng số lần — không chỉ đếm
+    if not du:
+        print(f"[DOT BIEN THIEU/LAP/DAO VIEC] ke hoach {len(ten_kh)} viec, ket qua {len(kq_db)}")
+    xau = [f"{t}: {h} {ct}" for t, h, ct in kq_db if h != "GIET"]
     for x in xau:
         print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
-    print(f"DOT BIEN: {len(DOT_BIEN) - len(xau)}/{len(DOT_BIEN)} bi giet dung ly do")
+    print(f"DOT BIEN: {sum(h == 'GIET' for _, h, _ in kq_db)}/{len(ten_kh)} bi giet dung ly do")   # tử số từ KẾT QUẢ thật (F3), mẫu số từ KẾ HOẠCH
     loi_tk = [f"{ten}: mong {mong}, duoc {h}" for ten, cu, moi, dich, mong in TU_KIEM
               for h in [chay_dot_bien(ten, cu, moi, dich)[0]] if h != mong]
     for x in loi_tk:
         print(f"[TU KIEM] {x}")
     print(f"TU KIEM PHAN HANG: {'DAT' if not loi_tk else 'DO'} ({len(TU_KIEM)} dot bien)")
-    ok = dat == len(CA) > 0 and len(DOT_BIEN) > 0 and not xau and not loi_tk
+    ok = dat == len(CA) > 0 and len(DOT_BIEN) > 0 and du and not xau and not loi_tk
     print(f"TONG: {'DAT' if ok else 'DO'}")
     return 0 if ok else 1
 

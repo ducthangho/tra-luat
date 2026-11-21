@@ -220,8 +220,8 @@ def _test_fragments_check(root: str | Path) -> dict:
         return {**payload, "status": "missing", "error": "BUNDLED_MODULE_MISSING"}
 
     try:
-        from tl_core.test_fragments import generate_bundled_module_bytes
-        expected = generate_bundled_module_bytes(fragment_root)
+        from tl_core.test_fragments import _BUNDLED_SHARD_NAME_RE, generate_bundled_modules
+        expected_modules = generate_bundled_modules(fragment_root)
     except Exception as exc:  # noqa: BLE001 — gate converts generator/input faults to data
         return {
             **payload,
@@ -229,8 +229,16 @@ def _test_fragments_check(root: str | Path) -> dict:
             "error": "GENERATED_BUNDLE_INPUT_INVALID",
             "detail": f"{type(exc).__name__}: {exc}",
         }
+    # Bundle tách mảnh: so TỪNG mảnh theo byte, cộng phát hiện mảnh đánh số lạc trên đĩa.
+    scripts_dir = bundled_path.parent
+    actual_modules = []
     try:
-        actual = bundled_path.read_bytes()
+        for name, _ in expected_modules:
+            p = scripts_dir / name
+            actual_modules.append((name, p.read_bytes() if p.is_file() and not p.is_symlink() else None))   # không đọc xuyên symlink
+        extra = sorted(p.name for p in scripts_dir.iterdir()
+                       if _BUNDLED_SHARD_NAME_RE.fullmatch(p.name)
+                       and p.name not in {n for n, _ in expected_modules})
     except OSError as exc:
         return {
             **payload,
@@ -238,10 +246,18 @@ def _test_fragments_check(root: str | Path) -> dict:
             "error": "BUNDLED_MODULE_READ_FAILED",
             "detail": f"{type(exc).__name__}: {exc}",
         }
-
+    if len(expected_modules) == 1:   # một mảnh: giữ nguyên nghĩa băm/byte của bản một tệp
+        expected, actual = expected_modules[0][1], actual_modules[0][1] or b""
+    else:
+        expected = b"".join(n.encode() + b"\0" + d for n, d in expected_modules)
+        actual = b"".join(n.encode() + b"\0" + (d or b"") for n, d in actual_modules)
     expected_sha256 = hashlib.sha256(expected).hexdigest()
     actual_sha256 = hashlib.sha256(actual).hexdigest()
-    if actual != expected:
+    shards = [{"name": n, "expected_bytes": len(d),
+               "actual_bytes": (len(a) if a is not None else None)}
+              for (n, d), (_, a) in zip(expected_modules, actual_modules)]
+    payload["shards"] = shards
+    if extra or any(a != d for (_, d), (_, a) in zip(expected_modules, actual_modules)):
         return {
             **payload,
             "status": "stale",
@@ -250,6 +266,7 @@ def _test_fragments_check(root: str | Path) -> dict:
             "actual_sha256": actual_sha256,
             "expected_bytes": len(expected),
             "actual_bytes": len(actual),
+            "extra_shards": extra,
         }
     return {
         **payload,

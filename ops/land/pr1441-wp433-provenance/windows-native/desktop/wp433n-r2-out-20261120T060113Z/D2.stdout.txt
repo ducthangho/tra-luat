@@ -1,0 +1,34 @@
+DINH DANH: utc=2026-11-20T06:01:56Z python=3.12.10 os.name=nt platform=Windows-11-10.0.26300-SP0
+DINH DANH: HEAD=adda58d59f259475a925d8b61a554f732455978b tree=1cd7d44e13bee1bb88101ffeb258a0bbd4c51630 cay_sach=True cwd=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\c2-060113
+PROBE: [('symlink', True, 'ok'), ('hardlink', True, 'ok')]
+CLONE BASE 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-8v0xoqjc\\base': HEAD=dd1985be73d3cf65f3580f7049039ae3dab50d3d tree=4cc3d1a8a414ee946fbe77f7bef44053bd0bc6cf sach=True
+CLONE BASE 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-8v0xoqjc\\m1': HEAD=dd1985be73d3cf65f3580f7049039ae3dab50d3d tree=4cc3d1a8a414ee946fbe77f7bef44053bd0bc6cf sach=True
+VE M1: fragment candidate khác base ở các dòng [239, 241] (kỳ vọng [239, 241]); số dòng base=353 candidate=353
+VE M1: git status = 'M scripts/test_fragments/wp433_nlm_gws_dich_ngoai_kho.py'
+----- VE base: HEAD=dd1985be73d3cf65f3580f7049039ae3dab50d3d run=False
+rc=0
+[wp433_nlm_gws_dich_ngoai_kho] ĐỎ chung_hop_dong_loi: TinHieuChotCa("chung_hop_dong_loi: [('N8.4-W2', 'oserror_w2'), ('N8.4-W6', 'oserror_w6')]") (None)
+[wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=17 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0
+
+RUN wp433_nlm_gws_dich_ngoai_kho False
+
+----- VE m1: HEAD=dd1985be73d3cf65f3580f7049039ae3dab50d3d run=True
+rc=0
+[wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=18 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0
+
+RUN wp433_nlm_gws_dich_ngoai_kho True
+
+----- VE candidate: HEAD=adda58d59f259475a925d8b61a554f732455978b run=True
+rc=0
+[wp433_nlm_gws_dich_ngoai_kho] CA: dự_kiến=18 chạy=18 đạt=18 bỏ_qua=0 · DOT BIEN: dự_kiến=30 chạy=30 giết_đúng=30 bỏ_qua=0 · HONG: 0
+
+RUN wp433_nlm_gws_dich_ngoai_kho True
+
+BIEU THUC: W2 khớp đích con 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-8v0xoqjc\\h13/.notebooklm-mcp-cli\\auth.json' -> True
+BIEU THUC: W2 trượt anh em 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-8v0xoqjc\\h13\\.notebooklm-mcp-cli2\\x' -> True
+BIEU THUC: W6 khớp đích expanduser 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-8v0xoqjc\\h13/.tra_luat_config.json' -> True
+BIEU THUC: W6 trượt 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-8v0xoqjc\\h13/.tra_luat_config.json2' -> True
+BIEU THUC: (so chuỗi CŨ) W2 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-8v0xoqjc\\h13/.notebooklm-mcp-cli\\auth.json'.startswith('F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-8v0xoqjc\\h13\\.notebooklm-mcp-cli') -> False
+BIEU THUC: (so chuỗi CŨ) W6 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-8v0xoqjc\\h13/.tra_luat_config.json' == 'F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-8v0xoqjc\\h13\\.tra_luat_config.json' -> False
+KY VONG: base False (đúng hai lượt N8.4-W2/N8.4-W6), m1 True, candidate True; thực tế: {'base': False, 'm1': True, 'candidate': True}
+KET LUAN D2: DAT

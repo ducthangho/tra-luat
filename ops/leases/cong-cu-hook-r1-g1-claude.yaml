@@ -1,0 +1,48 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1474
+packet_id: cong-cu-hook
+revision: 1
+generation: 1
+lease_id: cong-cu-hook-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+reviewer_model_family: openai
+reviewer_execution_surface: codex_service
+reviewer_transport: machine
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: e02d748d29cd5165fc29fa1a5a8e9b94593874c7
+spec_path: ops/specs/cong-cu-hook-r1.md
+spec_hash: 51d928ee8006c2e16e33e5c28158c6e3503969c4da9f789e063b08ab1115ac90
+write_set:
+- .claude/dev/launcher_test.py
+- .claude/hooks/session-start.sh
+- .claude/skills/work-packet/SKILL.md
+- ops/acceptance/cong-cu-hook/r1/VERDICT.md
+- ops/leases/cong-cu-hook-r1-g1-claude.yaml
+- ops/specs/cong-cu-hook-r1.md
+write_set_hash: 00f910012016055284ba556dffbcb60bcf8546ea50a37db1ae3dae0b337e9276
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+write_set_note: 'Co y KHONG gom .claude/dev/ci_dang_ky_test.py (lease wp1236-a-r10-g1-claude-20261121 giu toi 2026-11-23T00:15Z), ops/cong_cu_test.py (wp1448-r4-g4-claude), ci.yml (chi DOC). Khong them tep *_test.py moi.'
+branch: ccr-8ee03d7f-vnmqk0
+base_sha: e02d748d29cd5165fc29fa1a5a8e9b94593874c7
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 21/11 trong phien dispatcher: "Dong y, mo packet do di. Tim not cac cong cu khac nhu rg,..., neu gap van de tuong tu thi xu ly luon"'
+recorded_by: 'phiên điều phối session_015GtxrapMSm976JLC7Fp1HM'
+thay_the_cho: []
+leased_at_utc: '2026-11-21T01:39:04Z'
+heartbeat_at: '2026-11-21T02:14:31Z'
+lease_until: '2026-11-21T02:14:31Z'
+lease_expires_at_utc: '2026-11-21T02:14:31Z'
+max_lease_hours: 8
+review_calls_limit: 2
+inference_calls_limit: 0
+withdrawn_at_utc: '2026-11-21T02:14:31Z'
+withdrawn_by: 'phien dieu phoi session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r1 xong: hook + test, review Codex offline 2/2 (P2/P3 cua ca hai luot da sua, khoa bang ca + dot bien); ops/acceptance/cong-cu-hook/r1/VERDICT.md. Thu hoi truoc merge vi khong con ghi them.'

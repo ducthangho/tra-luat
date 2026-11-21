@@ -1,0 +1,1 @@
+[wp433_gws_cred_no] CA: dự_kiến=3 chạy=3 đạt=3 · LUOT: dự_kiến=27 chạy=27 đạt=27 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=5 chạy=5 giết_đúng=5 bỏ_qua=0 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0

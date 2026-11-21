@@ -1209,7 +1209,7 @@ def c21_fixture_bam():
     bang(bam == BAM_FIXTURE, f"fixture lệch bản cắt đã băm: {bam}")
 
 # ---- CI-PROVENANCE-WD r1 (Issue #1094): `do-wd`, `thu --wd-run`, workflow `ops-do-workflow-definition.yml` ----
-import base64, errno, shutil, zipfile
+import base64, builtins, errno, shutil, zipfile
 WD_OID, WD_PATH, XOA = "c" * 40, ".github/workflows/ci.yml", object()
 WD_BYTES = b"name: ci\non: push\njobs: {}\n"
 WF_WD_TEP = ROOT_THAT / ".github/workflows/ops-do-workflow-definition.yml"
@@ -1959,6 +1959,27 @@ def _nhan_don_c76(tk, te):
     assert len(o) == 1, (tk, te)
     return o[0].rsplit(" ", 1)[1]
 
+def _kieu_oserror_du():
+    """MỌI lớp con OSError dựng sẵn của runtime (duyệt `__subclasses__`, không liệt kê tay) + OSError + hai lớp con tự định nghĩa
+    (review lượt 9 F2.s: danh mục âm phải là TOÀN BỘ, không phải vài đại diện)."""
+    def con(c):
+        for s in c.__subclasses__():
+            yield s
+            yield from con(s)
+    dung_san = {c.__name__: c for c in con(OSError) if getattr(builtins, c.__name__, None) is c}
+    return [("OSError", OSError)] + sorted(dung_san.items()) + [("_PEcon", _PEcon), ("_OSErrorCon", _OSErrorCon)]
+
+_KIEU_PE_DU = frozenset({"PermissionError", "_PEcon"})   # viết tay: CHỈ hai kiểu này là PermissionError (SPEC M1)
+
+def _bang_du():
+    """Tích TOÀN BỘ kiểu × (không errno + MỌI errno của runtime). Nhãn: đổi tên theo KIỂU (`_KIEU_PE_DU`); dọn theo luật đã duyệt
+    (kiểu PE ⇒ PE; không phải PE mà errno ENOTEMPTY ⇒ ENOTEMPTY; còn lại khac)."""
+    for tk, c in _kieu_oserror_du():
+        for so in [None] + sorted(errno.errorcode):
+            dt = "PE" if tk in _KIEU_PE_DU else "khac"
+            dd = "PE" if tk in _KIEU_PE_DU else ("ENOTEMPTY" if so == errno.ENOTEMPTY else "khac")
+            yield f"{tk} errno={so}", (lambda c=c, so=so: _loi_kieu_errno(c, so)), dt, dd
+
 _PHAN_LOAI_C74 = (   # (đối tượng lỗi, NHÃN KỲ VỌNG viết tay — không suy bằng isinstance/getattr của bộ phân loại)
     ("PermissionError(EACCES)", lambda: OSError(errno.EACCES, "giả"), "PE"),
     ("lớp con PermissionError", lambda: _PEcon(errno.EACCES, "giả"), "PE"),
@@ -2006,6 +2027,30 @@ def c74_phan_loai_doi_tuong_loi():   # #1475 review lượt 6 F2.o: ranh giới 
                              f"được ({kq}, {len(goi)}, {ngu})")
                     so_o += 1
     bang(so_o == (len(_PHAN_LOAI_C74) + 20) * 2 * 2 * len(nhanh), f"số ô: {so_o}")
+    ten_kieu = [tk for tk, _ in _kieu_oserror_du()]   # danh mục TOÀN BỘ: chỉ chạy ở cấu hình phân biệt được (Windows tiêm)
+    bang(len(ten_kieu) >= 17 and {"InterruptedError", "BlockingIOError", "PermissionError", "FileNotFoundError"} <= set(ten_kieu),
+         f"danh mục kiểu OSError dựng sẵn thiếu: {ten_kieu}")
+    so_du = 0
+    for ten, tao, _, nhan in _bang_du():
+        for kem_pe in (False, True):
+            n, ngu_mong, sach = _mong_c73((frozenset({nhan, "PE"} if kem_pe else {nhan}),), True)
+            goi, ngu = [], []
+
+            def xoa_du(p, onexc=None, onerror=None):
+                goi.append(1)
+                if len(goi) > 1:
+                    return shutil.rmtree(p)
+                for e in ([tao()] + ([OSError(errno.EACCES, "PE kèm")] if kem_pe else [])):
+                    (onexc(os.unlink, f"{p}/x", e) if onexc is not None else onerror(os.unlink, f"{p}/x", (type(e), e, None)))
+            with tempfile.TemporaryDirectory() as thu, mock.patch.object(m, "_xoa_cay", xoa_du), \
+                    mock.patch.object(m, "ngu_thu_lai", ngu.append), mock.patch.object(m, "LA_WINDOWS", True), \
+                    contextlib.redirect_stderr(io.StringIO()):
+                (Path(thu) / "d").mkdir()
+                kq = m.don_thu_muc(Path(thu) / "d")
+                bang(kq is sach and len(goi) == n and ngu == ngu_mong,
+                     f"danh mục đủ: {ten} (nhãn dọn {nhan}) kèm_PE={kem_pe}: mong ({n}, {ngu_mong}, {sach}); được ({kq}, {len(goi)}, {ngu})")
+            so_du += 1
+    bang(so_du == len(ten_kieu) * (len(errno.errorcode) + 1) * 2, f"số ô danh mục đủ: {so_du}")
     cau = ((lambda: {"x": lambda j: _PEcon(errno.EACCES, "giả") if j < 1 else None}, 2),   # cầu nối rmtree THẬT
            (lambda: {"x": lambda j: _OSErrorCon(errno.EACCES, "giả") if j < 1 else None}, 1),
            (lambda: {"x": lambda j: PE() if j < 1 else None, "@d": lambda j: _OSErrorCon(errno.ENOTEMPTY, "giả") if j < 1 else None}, 2))
@@ -2069,6 +2114,17 @@ def c75_doi_ten_va_ngat():   # #1475 review lượt 7: F2.p phân hoạch/chuy�
                         bang(r["loi"] is mong_loi and r["out"] == (MOI_BYTE if k_nem is None else CU_BYTE) and _ten_sot(r) == [], mo_ta)
                     so_o += 1
     bang(so_o == (len(_DOI_TEN_C75) + 20) * 3 * 2 * 3, f"số ô đổi tên: {so_o}")
+    so_du = 0
+    for ten, tao, nhan, _ in _bang_du():   # danh mục TOÀN BỘ ở (b), Windows tiêm, lỗi một lần rồi thành công (review lượt 9 F2.s)
+        da = []
+        r = _ghi_voi_doi_ten_gia({"b": lambda i, da=da, tao=tao: (da.append(tao()) or da[-1]) if i == 0 else None}, windows=True, co_cu=True)
+        if nhan == "PE":
+            ok = r["goi"].count("b") == 2 and r["ngu"] == [0.05] and r["loi"] is None and r["out"] == MOI_BYTE
+        else:
+            ok = r["goi"].count("b") == 1 and r["ngu"] == [] and r["loi"] is da[0] and r["out"] == CU_BYTE
+        bang(ok and _ten_sot(r) == [], f"danh mục đủ đổi tên: {ten} (nhãn {nhan}): được {r}")
+        so_du += 1
+    bang(so_du == len(_kieu_oserror_du()) * (len(errno.errorcode) + 1), f"số ô danh mục đủ đổi tên: {so_du}")
     for ngat in (lambda: KeyboardInterrupt(), lambda: SystemExit(7)):   # F2.q: ngắt giữa (a)/(b) ⇒ ném lại ĐÚNG đối tượng, dọn tạm
         for cho, co_cu in (("a", True), ("b", True), ("b", False)):
             for windows in (True, False):
@@ -2536,6 +2592,10 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ('V2_doi_ten_OSError_EPERM_la_PE', '        except PermissionError:\n', '        except OSError as e:\n            if not isinstance(e, PermissionError) and e.errno != errno.EPERM:\n                raise\n', 'c75'),
     ('V3_don_PE_errno_cho_phep', 'loai = {"PE" if isinstance(e, PermissionError) else', 'loai = {"PE" if isinstance(e, PermissionError) and getattr(e, "errno", None) in (None, errno.EACCES, errno.EPERM) else', 'c74'),
     ('V4_don_OSError_EPERM_la_PE', 'loai = {"PE" if isinstance(e, PermissionError) else', 'loai = {"PE" if isinstance(e, PermissionError) or getattr(e, "errno", None) == errno.EPERM else', 'c74'),
+    ('J1_doi_ten_thu_lai_EINTR', '        except PermissionError:\n', '        except (PermissionError, InterruptedError):\n', 'c75'),   # #1475 lượt 9 F2.s: danh mục OSError toàn bộ
+    ('J2_doi_ten_thu_lai_EAGAIN', '        except PermissionError:\n', '        except (PermissionError, BlockingIOError):\n', 'c75'),
+    ('J3_don_EINTR_thu_cap', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', 'isinstance(e, OSError) and e.errno in (errno.ENOTEMPTY, errno.EINTR)', 'c74'),
+    ('J4_don_EAGAIN_thu_cap', 'isinstance(e, OSError) and e.errno == errno.ENOTEMPTY', 'isinstance(e, OSError) and e.errno in (errno.ENOTEMPTY, errno.EAGAIN)', 'c74'),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_AttributeError_qua_except_doi_kieu", "def than(dong):\n",

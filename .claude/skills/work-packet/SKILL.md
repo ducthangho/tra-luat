@@ -127,7 +127,9 @@ git -C "$CANON" show -s --format=%B "$H" > "$SCRATCH/candidate-message.txt"
 
 Đọc output/receipt theo §10.2.1; ví dụ không tạo receipt workflow. Đo dependency trong runtime
 đích bằng `git --version`, `"$PY" --version`, import các module command dùng, `jq --version`,
-`actionlint -version` và phiên bản shell. Tập cần probe lấy từ command thật (§10.2.1).
+`actionlint -version`, `shellcheck --version`, `"$PY" -m ruff --version` và phiên bản shell. Tập cần
+probe lấy từ command thật (§10.2.1). Thiếu `shellcheck` thì `actionlint` bỏ luật SC* mà vẫn `rc=0`; ruff
+so với bản ghim trong `ci.yml`, đừng so với `ruff` trần trên PATH. Hook phiên cài cả hai (khối `cong-cu-ban-ke`).
 
 ### Ba chỗ làm cổng ĐỎ vì NƠI CHẠY, không vì mã — đo 21→24-09-2026
 

@@ -1,0 +1,5 @@
+**Changes requested:** 1 P1 and 8 P2 findings across 9 cause classes, covering 21 manifestations.
+
+[Review JSON](/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1494-spec-review-1.json)
+
+B1a checks passed: 480/480 fixtures and 249/249 mutants. Live lease overlap and schedule-delay history remain unmeasured. Repository unchanged.

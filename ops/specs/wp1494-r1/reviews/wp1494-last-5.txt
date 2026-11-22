@@ -1,0 +1,5 @@
+**Approve — 0 P0–P3 findings** on `8c68b39153a62ff26a982dc72add5f079277e051`.
+
+[JSON verdict saved and printed](/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1494-spec-review-5.json).
+
+Direct lease probes remain `rc=12`; the verdict explicitly relies on coordinator evidence, corroborated by the local scan. Approval covers the frozen spec only. Repository unchanged.

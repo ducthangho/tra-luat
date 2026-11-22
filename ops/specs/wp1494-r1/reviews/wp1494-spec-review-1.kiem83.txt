@@ -1,0 +1,20 @@
+KHONG_HOP_LE (§8.3):
+  - class_table[b1-consumer-contract-mismatch]: thieu cach va chung
+  - class_table[notification-dedup-before-delivery]: thieu cach va chung
+  - class_table[write-retries-violate-delivery-contract]: thieu cach va chung
+  - class_table[mutant-oracles-non-discriminating]: thieu cach va chung
+  - class_table[bounded-evaluation-order-dependent]: thieu cach va chung
+  - class_table[consumer-freshness-anchor-unverified]: thieu cach va chung
+  - class_table[freshness-forgets-overdue-obligations]: thieu cach va chung
+  - class_table[heartbeat-value-domain-incomplete]: thieu cach va chung
+  - class_table[workflow-step-controls-unconstrained]: thieu cach va chung
+  - finding WP1494-SPEC-01: goi y va thieu du bon phan §7
+  - finding WP1494-SPEC-02: goi y va thieu du bon phan §7
+  - finding WP1494-SPEC-03: goi y va thieu du bon phan §7
+  - finding WP1494-SPEC-04: goi y va thieu du bon phan §7
+  - finding WP1494-SPEC-05: goi y va thieu du bon phan §7
+  - finding WP1494-SPEC-06: goi y va thieu du bon phan §7
+  - finding WP1494-SPEC-07: goi y va thieu du bon phan §7
+  - finding WP1494-SPEC-08: goi y va thieu du bon phan §7
+  - finding WP1494-SPEC-09: goi y va thieu du bon phan §7
+kiem83 rc=1

@@ -1,0 +1,3 @@
+KHONG_HOP_LE (§8.3):
+  - vong >= 2 ma thieu prior_findings_check (doi chieu tung finding luot truoc)
+kiem83 rc=1

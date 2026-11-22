@@ -1,0 +1,5 @@
+`changes_requested`: **8 open classes** — 1 P1, 6 P2, 1 P3. Three round-1 classes are closed at specification scope.
+
+[Complete review JSON](</tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1494-spec-review-2.json>) saved and printed.
+
+Live lease status remains unverified because network fetches failed. Repository unchanged.

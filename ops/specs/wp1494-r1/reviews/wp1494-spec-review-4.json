@@ -1,0 +1,886 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1494",
+  "generation": null,
+  "generation_note": "Frozen-spec candidate, revision4, review round4; no execution lease/generation assigned. Revision is not generation.",
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "session_id": "wp1494-spec-review-4-8c68b39153a6",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "session_id": "wp1494-spec-review-4-8c68b39153a6",
+    "model": "KHONG_DO_DUOC",
+    "effort": "KHONG_DO_DUOC",
+    "identity_basis": "This independent Codex API/service review context with local command tools; no Executor context was supplied. No per-request serving-model telemetry available.",
+    "sandbox": "workspace-write; .git/.agents/.codex mounted read-only; network restricted; approvals never"
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "8c68b39153a62ff26a982dc72add5f079277e051",
+  "reviewed_tree": "e98d3de0340067b1a25f8651858b237812206618",
+  "reviewed_file": "ops/specs/wp1494-r1/SPEC.md",
+  "reviewed_file_sha256": "22d6a09277509c5462c955278da03696c6931ea8aa9fbcfe349df73c9e451740",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "blocked",
+  "findings": [],
+  "class_table": [
+    {
+      "class_slug": "notification-dedup-before-delivery",
+      "finding_ids": [
+        "WP1494-SPEC-02"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-02e"
+      ],
+      "highest_open_severity": null,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "common_fix": "One qualified delivery guarantee and first-match notification rules; no delivery migration added.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "retention_cases=9; rotation_warning=canh_bao/current warning; rotation_fresh=nhip_tim_gian_doan/current fresh; old_event_delivered_on_rotation=false; stale_heartbeat_recovery_priority=hoi_phuc.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No remaining measurement for this prose/spec defect. Real GitHub delivery is future implementation acceptance14."
+      }
+    },
+    {
+      "class_slug": "mutant-oracles-non-discriminating",
+      "finding_ids": [
+        "WP1494-SPEC-04"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-04i",
+        "WP1494-SPEC-04j",
+        "WP1494-SPEC-04k",
+        "WP1494-SPEC-04l",
+        "WP1494-SPEC-04m",
+        "WP1494-SPEC-04n",
+        "WP1494-SPEC-04o",
+        "WP1494-SPEC-04p"
+      ],
+      "highest_open_severity": null,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "common_fix": "Observe the firing guard, scope fault injection, add missing rows, require exact original observation and honest case-owned mutant failures across every shared call site.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "rows94/95: PATCH1, rc1 -> PATCH0, rc3 with exact m16/m9 writer diagnostic; row99: het_ngan_sach_danh_gia -> fresh; row106: 3 -> 1; row115: deliberate injected propagation classified giet; rows116/117/118/148: giet. One-shot W0: S=fresh, POST1, rc0; W2: S=fresh, PATCH0, POST0, rc3.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No remaining measurement for the eight round3 specification defects. This is not a claim that the future B2 implementation has killed its complete matrix. Its exact anchors and call-site pairs remain mandatory implementation evidence."
+      }
+    },
+    {
+      "class_slug": "merged-misreported-as-landed",
+      "finding_ids": [
+        "WP1494-SPEC-12"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-12a"
+      ],
+      "highest_open_severity": null,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "common_fix": "Use authoritative merged_landed_false wording without changing B2 drafting authority.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r4/integration.py",
+        "result": "r96_status=merged_landed_false; r96_landed=false; new_claim=true; old_affirmative_claim_present=false.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": null
+      }
+    },
+    {
+      "class_slug": "bounded-evaluation-order-dependent",
+      "finding_ids": [
+        "WP1494-SPEC-05"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-05b",
+        "WP1494-SPEC-05c"
+      ],
+      "highest_open_severity": null,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 2,
+      "source_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "closed_in_round": 3,
+      "common_fix": "Retain the round3 structural repair; r4 regression check only.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "Evaluation599.5=fresh,600=S1; write179.5=rc1,180=rc3. Final successful-I/O-plus-CPU probes reject overruns. R4 only clarifies which check fires; deadline policy retained.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      }
+    },
+    {
+      "class_slug": "consumer-freshness-anchor-unverified",
+      "finding_ids": [
+        "WP1494-SPEC-06"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-06b"
+      ],
+      "highest_open_severity": null,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 2,
+      "source_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "closed_in_round": 3,
+      "common_fix": "Retain the round3 structural repair; r4 regression check only.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "6 negative anchor/other-negative combinations return unknown; 6 valid-anchor controls retain the negative. Section4 byte-identical to round3.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      }
+    },
+    {
+      "class_slug": "freshness-forgets-overdue-obligations",
+      "finding_ids": [
+        "WP1494-SPEC-07"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-07d"
+      ],
+      "highest_open_severity": null,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 2,
+      "source_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "closed_in_round": 3,
+      "common_fix": "Retain the round3 structural repair; r4 regression check only.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "Manual frames removed before E: E=[3], P manual is not dat; section5 byte-identical to round3.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      }
+    },
+    {
+      "class_slug": "heartbeat-value-domain-incomplete",
+      "finding_ids": [
+        "WP1494-SPEC-08"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-08b",
+        "WP1494-SPEC-08c",
+        "WP1494-SPEC-08d"
+      ],
+      "highest_open_severity": null,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 2,
+      "source_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "closed_in_round": 3,
+      "common_fix": "Retain the round3 structural repair; r4 regression check only.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "m1..m33 table byte-identical; max makes pre-start range nonempty; ID1 and upper bound accepted, zero/leading-zero/overflow rejected; full Unicode reason becomes head before write.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      }
+    },
+    {
+      "class_slug": "unbounded-artifact-expansion",
+      "finding_ids": [
+        "WP1494-SPEC-10"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-10a"
+      ],
+      "highest_open_severity": null,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 2,
+      "source_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "closed_in_round": 3,
+      "common_fix": "Retain the round3 structural repair; r4 regression check only.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r4/extra_probes.py",
+        "result": "Real deflate ZIP:136 compressed/8192 expanded bytes; caps8191/8192/8193 -> goi_vuot_tran/dat/dat; aggregate overrun -> het_tai_nguyen_danh_gia. Resource-bound clauses unchanged.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      }
+    },
+    {
+      "class_slug": "markdown-state-table-column-drift",
+      "finding_ids": [
+        "WP1494-SPEC-11"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-11a"
+      ],
+      "highest_open_severity": null,
+      "status": "ĐÃ VÁ THẬT",
+      "source_round": 2,
+      "source_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "closed_in_round": 3,
+      "common_fix": "Retain the round3 structural repair; r4 regression check only.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "Whole current candidate:10 tables,246 rows,0 column mismatches.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      }
+    }
+  ],
+  "class_counts": {
+    "open_classes": 0,
+    "open_manifestations": 0,
+    "immediately_previous_open_classes_reviewed": 3,
+    "immediately_previous_manifestations_reviewed": 10,
+    "historical_closed_classes_regression_checked": 6,
+    "tracked_classes_total": 9,
+    "historical_closed_manifestations_regression_checked": 9,
+    "tracked_manifestations_total": 19
+  },
+  "class_slug_mapping": [],
+  "prior_findings_check": [
+    {
+      "finding_id": "WP1494-SPEC-02",
+      "class_slug": "notification-dedup-before-delivery",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "manifestation_checks": [
+        {
+          "id": "WP1494-SPEC-02e",
+          "label": "ĐÃ VÁ THẬT",
+          "result": "I6, G7, section7 allocation, section10, deviations10/12 and runbook2a now bound retention to unchanged Issue/readable heartbeat. Rotation abandons old delivery and reports current state; (a)/(b) precede (c). Bulletin note records the abandoned event without claiming delivery."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+          "exit_code": 0,
+          "observed_output": "retention_cases=9; rotation_warning=canh_bao/current warning; rotation_fresh=nhip_tim_gian_doan/current fresh; old_event_delivered_on_rotation=false; stale_heartbeat_recovery_priority=hoi_phuc.",
+          "scope": "Independent executable specification model; not B2 production code."
+        }
+      ],
+      "unmeasured": "No remaining measurement for this prose/spec defect. Real GitHub delivery is future implementation acceptance14."
+    },
+    {
+      "finding_id": "WP1494-SPEC-04",
+      "class_slug": "mutant-oracles-non-discriminating",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "manifestation_checks": [
+        {
+          "id": "WP1494-SPEC-04i",
+          "label": "ĐÃ VÁ THẬT",
+          "result": "row94 now observes W2 rejection: PATCH1/rc1 -> PATCH0/rc3/m16; no impossible second-run readback required."
+        },
+        {
+          "id": "WP1494-SPEC-04j",
+          "label": "ĐÃ VÁ THẬT",
+          "result": "row95 now observes W2 rejection: PATCH1/rc1 -> PATCH0/rc3/m9; full Unicode diagnostic remains in report."
+        },
+        {
+          "id": "WP1494-SPEC-04k",
+          "label": "ĐÃ VÁ THẬT",
+          "result": "row99 now uses successful T7 I/O plus final parsing crossing the deadline: S1 -> fresh. Old timeout control remains S1 even with final check removed."
+        },
+        {
+          "id": "WP1494-SPEC-04l",
+          "label": "ĐÃ VÁ THẬT",
+          "result": "row106 now uses successful W8 I/O plus parsing crossing deadline: rc3 -> rc1. Old timeout control remains rc3."
+        },
+        {
+          "id": "WP1494-SPEC-04m",
+          "label": "ĐÃ VÁ THẬT",
+          "result": "Acceptance2/row115 now scope fault once to W0; fresh remains fresh and POST1/rc0. Separate writer injection yields PATCH0/POST0/rc3; explicit propagation handling uses the case-owned signal."
+        },
+        {
+          "id": "WP1494-SPEC-04n",
+          "label": "ĐÃ VÁ THẬT",
+          "result": "New row116 removes the independent root key-set check; extra root key leaves field inputs unchanged: nhip_tim_tap_khoa -> moi."
+        },
+        {
+          "id": "WP1494-SPEC-04o",
+          "label": "ĐÃ VÁ THẬT",
+          "result": "New row117 removes expired-receipt check: bien_nhan_het_han -> dat, with otherwise valid bytes."
+        },
+        {
+          "id": "WP1494-SPEC-04p",
+          "label": "ĐÃ VÁ THẬT",
+          "result": "New row118 removes redirect cap: four redirects khong_do_duoc -> dat; three-redirect positive control remains allowed."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+          "exit_code": 0,
+          "observed_output": "rows94/95: PATCH1, rc1 -> PATCH0, rc3 with exact m16/m9 writer diagnostic; row99: het_ngan_sach_danh_gia -> fresh; row106: 3 -> 1; row115: deliberate injected propagation classified giet; rows116/117/118/148: giet. One-shot W0: S=fresh, POST1, rc0; W2: S=fresh, PATCH0, POST0, rc3.",
+          "scope": "Independent executable specification model; not B2 production code."
+        },
+        {
+          "command": "python3 -B /tmp/wp1494-review-r4/extra_probes.py",
+          "exit_code": 0,
+          "observed_output": "row96 W2 PATCH0 -> 1; W7 PATCH1 -> 2; row107 J/S both giet; classifier selftests=[giet,tin_dung_gia,tin_dung_gia,song,song].",
+          "scope": "Independent executable specification model; not B2 production code."
+        }
+      ],
+      "unmeasured": "No remaining measurement for the eight round3 specification defects. This is not a claim that the future B2 implementation has killed its complete matrix. Its exact anchors and call-site pairs remain mandatory implementation evidence."
+    },
+    {
+      "finding_id": "WP1494-SPEC-12",
+      "class_slug": "merged-misreported-as-landed",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "manifestation_checks": [
+        {
+          "id": "WP1494-SPEC-12a",
+          "label": "ĐÃ VÁ THẬT",
+          "result": "Status paragraph says PR1 merged, not yet landed; preserves independent r96 drafting authority. Whole-file active claim scan found no remaining affirmative PR1-landed claim."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r4/integration.py",
+          "exit_code": 0,
+          "observed_output": "r96_status=merged_landed_false; r96_landed=false; new_claim=true; old_affirmative_claim_present=false.",
+          "scope": "Actual candidate text and pinned Mission r96 JSON."
+        }
+      ],
+      "unmeasured": null
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "notification-dedup-before-delivery",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "previous_finding_ids": [
+        "WP1494-SPEC-02"
+      ],
+      "manifestations_checked": [
+        "WP1494-SPEC-02e"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "retention_cases=9; rotation_warning=canh_bao/current warning; rotation_fresh=nhip_tim_gian_doan/current fresh; old_event_delivered_on_rotation=false; stale_heartbeat_recovery_priority=hoi_phuc.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No remaining measurement for this prose/spec defect. Real GitHub delivery is future implementation acceptance14."
+      },
+      "same_mechanism_regressions_found": [],
+      "chua_do_duoc": null,
+      "scope": "Specification defects; future implementation acceptance remains separate."
+    },
+    {
+      "class_slug": "mutant-oracles-non-discriminating",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "previous_finding_ids": [
+        "WP1494-SPEC-04"
+      ],
+      "manifestations_checked": [
+        "WP1494-SPEC-04i",
+        "WP1494-SPEC-04j",
+        "WP1494-SPEC-04k",
+        "WP1494-SPEC-04l",
+        "WP1494-SPEC-04m",
+        "WP1494-SPEC-04n",
+        "WP1494-SPEC-04o",
+        "WP1494-SPEC-04p"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "rows94/95: PATCH1, rc1 -> PATCH0, rc3 with exact m16/m9 writer diagnostic; row99: het_ngan_sach_danh_gia -> fresh; row106: 3 -> 1; row115: deliberate injected propagation classified giet; rows116/117/118/148: giet. One-shot W0: S=fresh, POST1, rc0; W2: S=fresh, PATCH0, POST0, rc3.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No remaining measurement for the eight round3 specification defects. This is not a claim that the future B2 implementation has killed its complete matrix. Its exact anchors and call-site pairs remain mandatory implementation evidence."
+      },
+      "same_mechanism_regressions_found": [],
+      "chua_do_duoc": null,
+      "scope": "Specification defects; future implementation acceptance remains separate."
+    },
+    {
+      "class_slug": "merged-misreported-as-landed",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "previous_finding_ids": [
+        "WP1494-SPEC-12"
+      ],
+      "manifestations_checked": [
+        "WP1494-SPEC-12a"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r4/integration.py",
+        "result": "r96_status=merged_landed_false; r96_landed=false; new_claim=true; old_affirmative_claim_present=false.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": null
+      },
+      "same_mechanism_regressions_found": [],
+      "chua_do_duoc": null,
+      "scope": "Specification defects; future implementation acceptance remains separate."
+    },
+    {
+      "class_slug": "bounded-evaluation-order-dependent",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "previous_finding_ids": [
+        "WP1494-SPEC-05"
+      ],
+      "manifestations_checked": [
+        "WP1494-SPEC-05b",
+        "WP1494-SPEC-05c"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "Evaluation599.5=fresh,600=S1; write179.5=rc1,180=rc3. Final successful-I/O-plus-CPU probes reject overruns. R4 only clarifies which check fires; deadline policy retained.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      },
+      "same_mechanism_regressions_found": [],
+      "chua_do_duoc": null,
+      "scope": "Specification defects; future implementation acceptance remains separate.",
+      "previous_round_status": "already ĐÃ VÁ THẬT in round3",
+      "new_finding_in_round3": false
+    },
+    {
+      "class_slug": "consumer-freshness-anchor-unverified",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "previous_finding_ids": [
+        "WP1494-SPEC-06"
+      ],
+      "manifestations_checked": [
+        "WP1494-SPEC-06b"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "6 negative anchor/other-negative combinations return unknown; 6 valid-anchor controls retain the negative. Section4 byte-identical to round3.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      },
+      "same_mechanism_regressions_found": [],
+      "chua_do_duoc": null,
+      "scope": "Specification defects; future implementation acceptance remains separate.",
+      "previous_round_status": "already ĐÃ VÁ THẬT in round3",
+      "new_finding_in_round3": false
+    },
+    {
+      "class_slug": "freshness-forgets-overdue-obligations",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "previous_finding_ids": [
+        "WP1494-SPEC-07"
+      ],
+      "manifestations_checked": [
+        "WP1494-SPEC-07d"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "Manual frames removed before E: E=[3], P manual is not dat; section5 byte-identical to round3.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      },
+      "same_mechanism_regressions_found": [],
+      "chua_do_duoc": null,
+      "scope": "Specification defects; future implementation acceptance remains separate.",
+      "previous_round_status": "already ĐÃ VÁ THẬT in round3",
+      "new_finding_in_round3": false
+    },
+    {
+      "class_slug": "heartbeat-value-domain-incomplete",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "previous_finding_ids": [
+        "WP1494-SPEC-08"
+      ],
+      "manifestations_checked": [
+        "WP1494-SPEC-08b",
+        "WP1494-SPEC-08c",
+        "WP1494-SPEC-08d"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "m1..m33 table byte-identical; max makes pre-start range nonempty; ID1 and upper bound accepted, zero/leading-zero/overflow rejected; full Unicode reason becomes head before write.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      },
+      "same_mechanism_regressions_found": [],
+      "chua_do_duoc": null,
+      "scope": "Specification defects; future implementation acceptance remains separate.",
+      "previous_round_status": "already ĐÃ VÁ THẬT in round3",
+      "new_finding_in_round3": false
+    },
+    {
+      "class_slug": "unbounded-artifact-expansion",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "previous_finding_ids": [
+        "WP1494-SPEC-10"
+      ],
+      "manifestations_checked": [
+        "WP1494-SPEC-10a"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r4/extra_probes.py",
+        "result": "Real deflate ZIP:136 compressed/8192 expanded bytes; caps8191/8192/8193 -> goi_vuot_tran/dat/dat; aggregate overrun -> het_tai_nguyen_danh_gia. Resource-bound clauses unchanged.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      },
+      "same_mechanism_regressions_found": [],
+      "chua_do_duoc": null,
+      "scope": "Specification defects; future implementation acceptance remains separate.",
+      "previous_round_status": "already ĐÃ VÁ THẬT in round3",
+      "new_finding_in_round3": false
+    },
+    {
+      "class_slug": "markdown-state-table-column-drift",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 3,
+      "source_sha": "c22631484758ae12720d096c85aa727815a82d84",
+      "previous_finding_ids": [
+        "WP1494-SPEC-11"
+      ],
+      "manifestations_checked": [
+        "WP1494-SPEC-11a"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+        "result": "Whole current candidate:10 tables,246 rows,0 column mismatches.",
+        "unmeasured_for_closure": null,
+        "future_implementation_limit": "No B2 implementation, CI or LIVE behavior attested."
+      },
+      "same_mechanism_regressions_found": [],
+      "chua_do_duoc": null,
+      "scope": "Specification defects; future implementation acceptance remains separate.",
+      "previous_round_status": "already ĐÃ VÁ THẬT in round3",
+      "new_finding_in_round3": false
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": "exact_object",
+      "hypothesis": "Review could be on wrong bytes or head.",
+      "command": "git rev-parse HEAD HEAD^{tree}; sha256sum ops/specs/wp1494-r1/SPEC.md",
+      "exit_code": 0,
+      "observed_output": "HEAD=8c68b39153a62ff26a982dc72add5f079277e051; tree=e98d3de0340067b1a25f8651858b237812206618; file_sha256=22d6a09277509c5462c955278da03696c6931ea8aa9fbcfe349df73c9e451740; tracked/index clean.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "plan_owner_and_budgets",
+      "hypothesis": "R4 could restore removed mechanisms or spend beyond r85 without authority.",
+      "command": "python3 -B /tmp/wp1494-review-r4/integration.py; GitHub fetch_issue_comments(ducthangho/tra-luat,1172)",
+      "exit_code": null,
+      "observed_output": "plan sha256=0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe; r96 sha256=2d9a60a5eda9537475d7bb0901e882fef2d97d96a2ad4a4aa0d97c76862e73a9. Installed comment7066078931 admits B2 drafting and raises limits to5 author/6 spec review. Q6 best-effort/report-only retained; B1 prerequisite and future owner hash installation retained. No activation store, A4 integration or merge/release authority added.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "pinned_consumer_contract",
+      "hypothesis": "B2 may consume a different B1 contract or fixture.",
+      "command": "python3 -I -B /tmp/wp1494-review-r4/b1/consumer.py /tmp/wp1494-review-r4/b1",
+      "exit_code": 0,
+      "observed_output": "FIXTURE: 480/480 phep kiem dung ky vong · hinh 120 · ngu nghia 118 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12; TONG: DAT. Schema, fixture and254-line/14992-byte code block hashes match all3 pins.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "mutant_isolation_and_fault_propagation",
+      "hypothesis": "Other mandatory checks may still mask the repaired targets.",
+      "command": "python3 -B /tmp/wp1494-review-r4/probes.py; python3 -B /tmp/wp1494-review-r4/extra_probes.py",
+      "exit_code": 0,
+      "observed_output": "94/95 distinguish first writer boundary;99/106 distinguish CPU-after-success deadline check; W0 injection once leaves S=fresh and delivers gap; writer injection returns3; row96 covers W2/W7; row107 covers J/S; five classifier selftests distinguish real/wrapped/other-case/alive/equivalent outcomes.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "new_diagnostic_oracles",
+      "hypothesis": "The words different code may count unrelated failures or fail to distinguish a removed guard.",
+      "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+      "exit_code": 0,
+      "observed_output": "row130 job_ky_vong_trung -> job_ky_vong_trung_khoa; row131 hop_dong_vang -> danh_gia_nem:FileNotFoundError; row142 nhip_tim_khong_phai_object -> nhip_tim_tap_khoa; all fail the exact original-output assertion through their own case signal. These are product-model outputs, not unrelated harness exceptions. Full148-row semantic scan found no additional established contradiction; exact implementation pairs remain required before test freeze.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "leading_zero_exit_code",
+      "hypothesis": "Row148 may require rc2 for a cause omitted from section9.",
+      "command": "python3 -B /tmp/wp1494-review-r4/probes.py; sed -n '235,239p' ops/specs/wp1494-r1/SPEC.md",
+      "exit_code": 0,
+      "observed_output": "Section8 excludes leading zeros and says rc2; section9 expressly includes B2_RUN_* outside section8 domain. 0123: original2 -> permissive mutant0; healthy1 and maximal canonical decimal accepted. No missing cause.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "delivery_rotation_and_priority",
+      "hypothesis": "Recovery wording may still promise delivery of discarded historical events.",
+      "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+      "exit_code": 0,
+      "observed_output": "Nine pending-kind/state combinations preserve original event. Rotating to empty Issue: current warning -> canh_bao; current fresh -> nhip_tim_gian_doan; old event not delivered. Old-warning/current-fresh with stale readable heartbeat -> hoi_phuc. Runbook2a bulletin note records abandonment, not delivery.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "current_code_and_write_set",
+      "hypothesis": "The four-file change may require an unlisted integration edit.",
+      "command": "python3 -B /tmp/wp1494-review-r4/integration.py",
+      "exit_code": 0,
+      "observed_output": "Registry baseline [[],30,30]; adding registration without script gives exactly one missing-file error; required output pattern accepts valid positive output and rejects0/0,unequal counts,empty output. Current audit workflow has3 jobs and no B1 receipt job: spec explicitly waits for B1a and future B. Existing integration files and measured line counts match.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "workflow_security_shape",
+      "hypothesis": "Step controls or unlisted environment settings may disable the watchdog.",
+      "command": "python3 -B /tmp/wp1494-review-r4/integration.py",
+      "exit_code": 0,
+      "observed_output": "Closed-shape model accepts baseline and rejects16 independent step-key mutations. Reconstructed workflow actionlint1.7.7 syntax probe rc0, empty diagnostics; shellcheck unavailable, so required combined gate is not passed.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "prior_structural_classes",
+      "hypothesis": "R4 changes may reopen anchor, old-frame, heartbeat or decompression defects.",
+      "command": "python3 -B /tmp/wp1494-review-r4/probes.py; python3 -B /tmp/wp1494-review-r4/extra_probes.py",
+      "exit_code": 0,
+      "observed_output": "6 negative/6 positive anchor controls; E=[3] after manual closure; heartbeat domain unchanged; ZIP136/8192 bytes with exact boundary controls;10 Markdown tables/246 rows/0 column mismatches.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "equivalent_mutants",
+      "hypothesis": "New equivalent claims viii/ix might hide observable changes.",
+      "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+      "exit_code": 0,
+      "observed_output": "viii:35 valid-domain vectors have max(dong_den0,KHUNG_DAU-7d)==dong_den0; domain proof covers all values. ix: empty candidate set and presence of running candidate are mutually exclusive. These equivalences do not justify removing the reader bound or schedule sorting.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "live_lease_overlap",
+      "hypothesis": "Supplied refs may omit a live holder of the shared registry path.",
+      "command": "git --git-dir=/tmp/wp1494-review-r4/refs.git fetch --all --prune; python3 -B /tmp/wp1494-review-r4/current/ops/lease_publish.py ai-dang-giu <each of four paths> --root .",
+      "exit_code": null,
+      "observed_output": "Fetch rc128: cannot connect127.0.0.1:34023. All4 holder probes rc12 KHÔNG_XÁC_ĐỊNH. Supplied cache51 named remote branches; GitHub branch search405 names across5 pages, terminating empty page; names only, no all-ref OID map. Direct GitHub read of wp1236-a-r12 lease confirms registry path and expiry2026-11-23T13:45Z, but does not establish all-ref revocation/successor closure.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Candidate identity",
+      "claimed": "8c68b39153a62ff26a982dc72add5f079277e051",
+      "measured": "8c68b39153a62ff26a982dc72add5f079277e051",
+      "matches": true,
+      "evidence": "git rev-parse HEAD; sha256sum SPEC.md matches required hash"
+    },
+    {
+      "claim": "Pinned B1 contract block",
+      "claimed": "254 lines /14992 bytes / three matching hashes",
+      "measured": "254/14992; schema844b5218...; fixturece859573...; coded9c78e70...",
+      "matches": true,
+      "command": "python3 -I -B /tmp/wp1494-review-r4/b1/consumer.py /tmp/wp1494-review-r4/b1"
+    },
+    {
+      "claim": "B1 fixture positive evidence",
+      "claimed": "480/480;120 shape;118 semantic",
+      "measured": "480/480;120;118",
+      "matches": true
+    },
+    {
+      "claim": "Current master measured file lengths",
+      "claimed": {
+        "audit_workflow": 145,
+        "ci_provenance": 653,
+        "ci_provenance_test": 2330,
+        "registry": 2992,
+        "definition_workflow": 49
+      },
+      "measured": {
+        "audit_workflow": 145,
+        "ci_provenance": 653,
+        "ci_provenance_test": 2330,
+        "registry": 2992,
+        "definition_workflow": 49
+      },
+      "matches": true,
+      "source_sha": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8"
+    },
+    {
+      "claim": "Mutation inventory",
+      "claimed": "148 numbered rows; shared implementations may reduce multiplicity",
+      "measured": {
+        "rows": 148,
+        "split96_107": 217,
+        "shared96_107": 215
+      },
+      "matches": true,
+      "limitation": "These are declared table multiplicities, not executed B2 mutation results; call-site expansion may add cases."
+    },
+    {
+      "claim": "Round3 open classes/manifestations",
+      "claimed": "3 classes /10 manifestations",
+      "measured": "3 /10 in previous verdict; all10 rechecked",
+      "matches": true
+    },
+    {
+      "claim": "Review budgets",
+      "claimed": "r96 spec author5/spec review6",
+      "measured": "r85 was3/4; installed r96 explicitly5/6; this is review4. Source review3/connector2 remain separate.",
+      "matches": true,
+      "source": "Mission comment7066078931 plus pinned r85/r96 JSON"
+    },
+    {
+      "claim": "All-ref lease completeness",
+      "claimed": "Must be checked before lease",
+      "measured": {
+        "live_names": 405,
+        "cached_remote_names": 51,
+        "missing": 395,
+        "extra": 41,
+        "missing_examples": [
+          "agent/doc-claims-dau-cham-g2-claude",
+          "agent/giam-hoi-p1-g1-codex",
+          "agent/giam-hoi-p2-g1-codex",
+          "agent/k3-connector-state-v1-g1-codex",
+          "agent/windows-local-may-chu-kho-r3-bien-nhan"
+        ]
+      },
+      "matches": null,
+      "limitation": "GitHub search names do not supply exact head OIDs; fetch failed; no fresh all-ref lease result."
+    },
+    {
+      "claim": "Read-only tracked bytes",
+      "claimed": "No repository edits",
+      "measured": "17638 tracked regular files hashed at both endpoints;0 changed; same HEAD/tree; index/worktree clean; ignored .codex directory unchanged in listing only",
+      "matches": true,
+      "limitation": "Ignored bytes were not hashed at start; snapshots cannot prove no transient write in entire run."
+    }
+  ],
+  "tests": [
+    {
+      "name": "candidate_anchor",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; sha256sum ops/specs/wp1494-r1/SPEC.md",
+      "exit_code": 0,
+      "positive_evidence": "8c68b39153a62ff26a982dc72add5f079277e051 / e98d3de0340067b1a25f8651858b237812206618 / required spec hash"
+    },
+    {
+      "name": "B1_fixture",
+      "status": "passed",
+      "command": "python3 -I -B /tmp/wp1494-review-r4/b1/consumer.py /tmp/wp1494-review-r4/b1",
+      "exit_code": 0,
+      "positive_evidence": "FIXTURE480/480;TONG:DAT"
+    },
+    {
+      "name": "r4_spec_models",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1494-review-r4/probes.py",
+      "exit_code": 0,
+      "positive_evidence": "Eight repaired pairs classify giet; row115 propagation giet; three representative different-code pairs giet;9 retention cases;6 anchor pairs and6 controls.",
+      "scope": "Executable spec transcription only"
+    },
+    {
+      "name": "shared_sites_resource_and_classifier",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1494-review-r4/extra_probes.py",
+      "exit_code": 0,
+      "positive_evidence": "W2/W7 and J/S pairs giet;5 classifier controls exact;real ZIP bounds correct.",
+      "scope": "Executable spec transcription plus standard-library ZIP probe"
+    },
+    {
+      "name": "current_integration_and_authority",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1494-review-r4/integration.py",
+      "exit_code": 0,
+      "positive_evidence": "registry30/30,output oracles[true,false,false,false,false],16/16 shape perturbations rejected,three ADR introduction/first-parent checks valid,plan/r96 hashes match"
+    },
+    {
+      "name": "actionlint_syntax_probe",
+      "status": "passed",
+      "command": "actionlint -shellcheck= /tmp/wp1494-review-r4/canh-tuoi-audit.yml",
+      "exit_code": 0,
+      "positive_evidence": "actionlint1.7.7,empty diagnostics",
+      "scope": "Reconstructed normative workflow syntax only"
+    },
+    {
+      "name": "fetch_supplied_checkout",
+      "status": "failed",
+      "command": "git fetch --all --prune",
+      "exit_code": 255,
+      "observed_output": "error: cannot open '.git/FETCH_HEAD': Read-only file system",
+      "failure_category": "permission/bootstrap"
+    },
+    {
+      "name": "fetch_authorized_scratch_copy",
+      "status": "failed",
+      "command": "git --git-dir=/tmp/wp1494-review-r4/refs.git fetch --all --prune",
+      "exit_code": 128,
+      "observed_output": "Failed to connect to127.0.0.1 port34023",
+      "failure_category": "infrastructure"
+    },
+    {
+      "name": "live_holders_four_paths",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1494-review-r4/current/ops/lease_publish.py ai-dang-giu <path> --root .",
+      "exit_codes": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "observed_output": "All four paths: KHÔNG_XÁC_ĐỊNH; ls-remote rc128",
+      "evidence_file": "/tmp/wp1494-review-r4/lease-probes.json",
+      "interpretation": "Not measured; not zero holders."
+    },
+    {
+      "name": "required_actionlint_with_shellcheck",
+      "status": "not_run",
+      "reason": "shellcheck unavailable; implementation baseline B not yet exists"
+    },
+    {
+      "name": "bare_ruff_lint",
+      "status": "not_run",
+      "reason": "Spec-only candidate; no B2 implementation to lint. No Ruff pass claimed."
+    },
+    {
+      "name": "B2_suite_full_mutation_CI_Windows_LIVE",
+      "status": "not_run",
+      "reason": "B2 product code/B do not exist yet; no GitHub writes, dispatch or LIVE authorized."
+    },
+    {
+      "name": "B1_full_mutations",
+      "status": "not_run",
+      "reason": "Ran shared contract fixture only; no claim about249/249 mutations."
+    }
+  ],
+  "blockers": [
+    {
+      "id": "BOOTSTRAP-LIVE-REFS",
+      "kind": "required measurement unavailable; not a P0-P3 specification finding",
+      "claim": "The requested live all-ref lease audit cannot be completed from this runtime. A partial/stale ref cache plus four rc12 refusals cannot establish overlap closure.",
+      "evidence_files": [
+        "/tmp/wp1494-review-r4/lease-probes.json",
+        "/tmp/wp1494-review-r4/ref-map.json",
+        "/tmp/wp1494-review-r4/github-read-evidence.json"
+      ],
+      "required_next_step": "Bootstrap a scratch repository with the actual complete current heads/OIDs from origin, then run the trusted origin/master lease scanner for every effective path and applicable parent prefix. Recheck exact candidate head/hash. No change to the candidate spec is requested by this verdict."
+    }
+  ],
+  "assurance": "review_deferred",
+  "assurance_statement": "Independent Codex specification analysis was performed and no established open P0-P3 content finding remains. This is NOT approval: the mandatory live-ref/lease measurement is unavailable. No claim of B2 runtime correctness, full mutation success, CI, land, or delivered GitHub notification. Model serving identity/effort not independently measured.",
+  "evidence_url": null,
+  "environment": {
+    "python": "3.13.18",
+    "platform": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "PyYAML": "6.0.3",
+    "jsonschema": "4.26.0",
+    "git": "git version 2.43.0",
+    "actionlint": "1.7.7",
+    "shellcheck": "not installed"
+  },
+  "scope_limits": [
+    "No complete fresh Git ref/OID inventory or authoritative all-ref lease result.",
+    "B1a implementation is not landed on current master; future baseline B and runtime acceptance remain pending by design.",
+    "Rows119-148 were inspected semantically; representative different-code models were executed, not every future production mutant.",
+    "Models and scripts are reviewer scratch evidence, not a product patch or implementation of the whole watchdog.",
+    "Tracked-byte endpoint snapshots cover17638 files; ignored .codex bytes were not hashed at start."
+  ],
+  "notes": "Round4 review of the exact frozen-spec candidate. All10 round3 manifestations close at specification scope; six earlier classes remain closed in the inspected scope. Row148 is covered by section9 via section8; the new non-object heartbeat diagnostic and runbook2a bulletin note are internally consistent. Different-code oracles are discriminating when the original exact code is asserted and only the target case owns the failure; unexpected test/infrastructure exceptions remain fake credit. Spec retains paired behavior controls, three per-read outcomes, four aggregate states, shared-site mutation proof, and stop-on-unmeasured pairs. The known registry lease is explicitly a future execution prerequisite, not a newly discovered specification conflict. No repository edit/commit/push, GitHub write or workflow dispatch was performed. Output and scratch only."
+}

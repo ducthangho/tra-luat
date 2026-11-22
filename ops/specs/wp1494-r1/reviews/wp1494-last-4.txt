@@ -1,0 +1,3 @@
+[Verdict JSON saved and printed](/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1494-spec-review-4.json).
+
+**Blocked:** no open P0–P3 findings; all three round-3 classes are **ĐÃ VÁ THẬT** at spec scope. Approval remains blocked because full-ref fetch failed and all four live-lease probes returned rc 12 (`KHÔNG_XÁC_ĐỊNH`).

@@ -1,0 +1,5 @@
+KHONG_HOP_LE (§8.3):
+  - class_table[b1-consumer-contract-mismatch]: thieu bieu hien
+  - class_table[write-retries-violate-delivery-contract]: thieu bieu hien
+  - class_table[workflow-step-controls-unconstrained]: thieu bieu hien
+kiem83 rc=1

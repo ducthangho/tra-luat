@@ -1,0 +1,1363 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1494",
+  "mission_issue": 1172,
+  "revision": 2,
+  "generation": null,
+  "generation_note": "Authorized pre-lease spec-drafting review. No execution generation has been assigned; none invented.",
+  "review_round": 2,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "session_id": "01a1ff3b-80ec-7682-9404-1863b539cd18",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_service",
+    "transport": "machine",
+    "session_id": "01a1ff3b-80ec-7682-9404-1863b539cd18",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "identity_source": "Independent API/tool session; CODEX_SESSION_ID=CODEX_THREAD_ID. codex-cli0.170.0 availability does not prove the serving model or make this a CLI review. No GitHub actor is used as reviewer identity."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+  "reviewed_tree": "61b1addcff977361486e4dff99d2eb58f59a3c12",
+  "reviewed_file": "ops/specs/wp1494-r1/SPEC.md",
+  "reviewed_file_sha256": "c102e034adbe4fd95913fca43f60e41c5ff1d3afd21d59e5fa01f710fc57b7b8",
+  "current_master_sha": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "changes_requested",
+  "findings": [
+    {
+      "id": "WP1494-SPEC-02",
+      "class_slug": "notification-dedup-before-delivery",
+      "severity": "P1",
+      "location": {
+        "file": "ops/specs/wp1494-r1/SPEC.md",
+        "lines": [
+          78,
+          124,
+          208,
+          211,
+          212,
+          216,
+          238,
+          250
+        ]
+      },
+      "claim": "Pending delivery is still not a live invariant. The new allocation rule can erase an undelivered heartbeat-gap event, and reconciliation has a permanent history-size failure mode that can strand any warning or recovery despite healthy later HTTP responses.",
+      "manifestations": [
+        {
+          "id": "WP1494-SPEC-02c",
+          "claim": "After W2/W3 persist a nhip_tim_gian_doan event, a crash before W5 or a definite failed POST leaves cho_bao pending. At the next healthy iteration S/F/reason and the last acknowledged green state are unchanged, but the new heartbeat is moi. Rules (a)-(c) select no event and allocation clears cho_bao. Deviation 10 discusses changed states; no state changed in this trace. The claims at the objective, section 10 and I6 that the next healthy iteration delivers it are false."
+        },
+        {
+          "id": "WP1494-SPEC-02d",
+          "claim": "D14 always scans all comments from page 1 and must finish within 10 pages of 100. Once the single long-lived Issue has 1001 comments, the first pending event after any failed POST/readback can never reconcile: every subsequent iteration sees rel=next, locks sending, retains cho_bao, and returns 3. There is no bounded-history checkpoint, narrowed search or recovery procedure for this condition. This affects warning, recovery and gap events."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+          "exit_code": 0,
+          "observed_output": "pending-heartbeat-gap: durable id=100-1; next heartbeat=moi; next_POST=0; pending_after=null; delivered_comments=0. Controls pending-warning and pending-recovery retry id=100-1 once; acknowledged controls issue zero POSTs."
+        },
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+          "exit_code": 0,
+          "observed_output": "D14-history-cap: 1000 comments -> 10 pages, complete; 1001 and 1002 -> 11 pages, incomplete, POST=0, pending unchanged, rc=3."
+        },
+        {
+          "command": "web open https://docs.github.com/en/rest/issues/comments#list-issue-comments",
+          "observed_output": "The per-Issue endpoint orders by ascending ID, supports since (last-updated timestamp), and caps per_page at 100. No server-side event-id filter is documented.",
+          "source": "https://docs.github.com/en/rest/issues/comments#list-issue-comments"
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1494-r1/SPEC.md section 7 allocation/W1 and section 10; these own durable delivery, not the B1 consumer.",
+        "how": "Keep a still-relevant undelivered gap event independently of the newly written heartbeat age. Define a bounded reconciliation scope anchored before event creation, with explicit completeness semantics and an operational recovery path; merely raising 10 postpones the same failure. A time-bounded query is one option only after proving its boundary and update semantics.",
+        "locking_test": "python3 -B /tmp/wp1494-review-r2/probes.py contains pending-heartbeat-gap and D14-history-cap. Extend the stateful acceptance cases to crash after W3 for all three event kinds, recover after definite failure and ambiguous success, and cross 1000/1001 comments. Assert one delivered event, stable id, and no duplicate. Mutants clearing the pending gap on moi and scanning only the first fixed history prefix must die by their own case signal.",
+        "what_fix_may_spawn": "Retaining superseded events can send obsolete alerts; unsafe search cutoffs can miss accepted comments and duplicate them. Keep deviation 10 explicit and distinguish a complete event search from a truncated lifetime history."
+      },
+      "fix_attempted": false,
+      "confidence": "high"
+    },
+    {
+      "id": "WP1494-SPEC-04",
+      "class_slug": "mutant-oracles-non-discriminating",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1494-r1/SPEC.md",
+        "lines": [
+          153,
+          272,
+          279,
+          284,
+          288,
+          293,
+          308,
+          353,
+          344,
+          345,
+          346,
+          347,
+          348
+        ]
+      },
+      "claim": "The revised mutant contract still demands impossible or implementation-dependent observations, and does not give a dedicated mutant to every newly frozen boundary. An executor cannot truthfully produce the promised all-killed evidence by following this table literally.",
+      "manifestations": [
+        {
+          "id": "WP1494-SPEC-04e",
+          "claim": "Row 1 removes only T1.created_at binding, but T7 independently repeats that binding. On n5_lien_ket_created_at, T7 still returns lien_ket_lech:created_at, so the run and S remain khong_do_duoc, not the promised fresh. T1 itself changes, which is a usable narrower oracle; the stated final-state oracle is not."
+        },
+        {
+          "id": "WP1494-SPEC-04f",
+          "claim": "Row 16 demands that first encountered dat select the larger ID from API page 1. Section 3 first sorts the entire evaluation list by ID. A conforming implementation that retains results in evaluation order encounters the minimum dat ID first; this mutant is equivalent there. The table does not define a separate raw-API result iteration to mutate."
+        },
+        {
+          "id": "WP1494-SPEC-04g",
+          "claim": "Row 61 demands a separate kill for every heartbeat-domain condition with moi/zero-POST after removing one. The prescribed da_bao baseline is fresh, whose ma_ly_do must equal khung_xanh. Removing only its ASCII/length/whitespace condition still rejects every malformed reason through the exact state/reason relation. The promised moi/zero-POST cannot occur for that condition; analogous overlapping predicates need isolation or equivalence treatment."
+        },
+        {
+          "id": "WP1494-SPEC-04h",
+          "claim": "The 82-row inventory has no dedicated cap/timeout mutant for HAN_GOI, THU_LAI_GET expansion, TRAN_GOI, or a narrowed nap_thu_vien catch. Transport has an overbroad BaseException mutant, but no narrow-catch mutant. Timeout/oversize inputs are mentioned as cases, yet their enforcement and final-call exhaustion are not each locked as required by acceptance 11."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+          "exit_code": 0,
+          "observed_output": "anchor-row1-drop-T1-created_at: pinned B1 violations=[], T1=dat, T7=lien_ket_lech:created_at, S=khong_do_duoc. row16: API [9,2] and [2,9] both evaluate [2,9]; min=first=2. row61: malformed fresh acknowledgement reason rejected both with and without format check."
+        },
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+          "exit_code": 0,
+          "observed_output": "mutant-inventory: numbered_rows=82; HAN_GOI, THU_LAI_GET, TRAN_GOI, nap_thu_vien absent from the table. real-B1-U7 now correctly distinguishes [C4] from [C2,C4]."
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1494-r1/SPEC.md acceptance 1/8/11/15, rows 1/16/61 and the complete mutant inventory; fix the observations and case preconditions before product implementation.",
+        "how": "For row 1 assert the T1 subcheck, retaining T7 as a control. Treat first=min under sorted-result iteration as equivalent, or define the distinct selection seam actually under test. Isolate overlapping domain predicates with appropriate previous-state fixtures; do not mandate a POST change when another valid guard still rejects. Enumerate dedicated mutants for every frozen resource/retry/exception guard, including terminal deadlines.",
+        "locking_test": "python3 -B /tmp/wp1494-review-r2/probes.py and python3 -B /tmp/wp1494-review-r2/closure_probes.py reproduce the masked pairs. Before freeze, run each proposed original/mutant pair against its named observation. Require TinHieuChotCa with that exact case name; equivalent pairs must remain song and be excluded with evidence. Add a classifier control where a different guard still rejects the same input.",
+        "what_fix_may_spawn": "Changing the fixture can accidentally test another guard; counting arbitrary exceptions or weakening the denominator would recreate false credit. Do not remove T7 or relax production validation just to kill a mutant."
+      },
+      "fix_attempted": false,
+      "confidence": "high"
+    },
+    {
+      "id": "WP1494-SPEC-05",
+      "class_slug": "bounded-evaluation-order-dependent",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1494-r1/SPEC.md",
+        "lines": [
+          57,
+          91,
+          92,
+          93,
+          168,
+          288
+        ]
+      },
+      "claim": "Sorting fixes the original API-order counterexample, but the replacement all-or-nothing deadline is not enforced at completion. The concrete algorithm checks before physical calls only and does not clamp a call to remaining phase time or check after the final call/CPU work. Thus a successful result can escape after the frozen budget, contrary to S1 and the stated budget proof.",
+      "manifestations": [
+        {
+          "id": "WP1494-SPEC-05b",
+          "claim": "Final T7 starts at monotonic elapsed 599s and succeeds after 2s, within HAN_GOI=30. There is no next evaluation call at which the prescribed precheck notices 601>600. The specified loop can publish fresh and advance dong_den after budget exhaustion."
+        },
+        {
+          "id": "WP1494-SPEC-05c",
+          "claim": "The write-phase definition has the same terminal gap: final W8 can start at 179s and return at 181s without another precheck. Parsing/decompression after a completed HTTP call is also outside the explicitly listed budget checkpoints. timeout-minutes:20 is an external cancellation, not a substitute for completing heartbeat/error reporting under the 600+180 contract."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+          "exit_code": 0,
+          "observed_output": "deadline-terminal-call: evaluation 599+2=601 >600 and write 179+2=181 >180; both prechecks permit the call. ordered-evaluation control: both API orders execute [1,2] and explicit pre-call exhaustion yields khong_do_duoc in both."
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1494-r1/SPEC.md section 3 phase budgets, S1, acceptance 15 and the HTTP/parser boundaries; the end-of-phase contract must be specified here.",
+        "how": "Define absolute monotonic deadlines, give every attempt/sleep the lesser of its allowance and remaining time, and recheck after calls, parsing, and before publishing the evaluation result or write success. State equality semantics at the deadline. Preserve the separately accounted write budget and fail the whole evaluation if completion crosses its deadline.",
+        "locking_test": "python3 -B /tmp/wp1494-review-r2/probes.py provides terminal-call counterexamples. Add fake-clock cases ending the last T7 and last W8 just below, at, and above their deadlines, plus CPU/parsing time crossing a deadline. Dedicated mutants dropping the final check or passing the full 30s despite less remaining time must die; identical healthy inputs with sufficient time must remain unchanged.",
+        "what_fix_may_spawn": "Double-counting W0/evaluation can starve writes; treating a timed-out POST as definitely absent can duplicate delivery. Keep ambiguous write reconciliation intact."
+      },
+      "fix_attempted": false,
+      "confidence": "high"
+    },
+    {
+      "id": "WP1494-SPEC-06",
+      "class_slug": "consumer-freshness-anchor-unverified",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1494-r1/SPEC.md",
+        "lines": [
+          47,
+          145,
+          151,
+          152,
+          168,
+          169
+        ]
+      },
+      "claim": "The new identity binding has two incompatible reduction rules. Section 2 says a D1-to-D2 linkage failure contributes only khong_do_duoc, while the completed-run AND lets an earlier khong_dat override T7 linkage failure. The executor must choose between two frozen outcomes for the same inconsistent run snapshot.",
+      "manifestations": [
+        {
+          "id": "WP1494-SPEC-06b",
+          "claim": "T1 links successfully, T2 observes a missing receipt, then D2 at T7 has a different created_at (or any of the other eight immutable fields). Section 2 requires run unknown; section 4 returns khong_dat:bien_nhan_vang. The frame becomes do and S2 may report khung_do instead of khung_khong_do_duoc. The same conflict occurs with any earlier T2/T3/T6 negative and T7 identity mismatch."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+          "exit_code": 0,
+          "observed_output": "binding-red-precedence: T2=khong_dat:bien_nhan_vang; T7=khong_do_duoc:lien_ket_lech:created_at; section2_required=khong_do_duoc; section4_AND_result=khong_dat. Nine isolated identity fields are now rejected; original one-week false-fresh probe no longer produces fresh."
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1494-r1/SPEC.md section 2 frame assignment and section 4 completed-run reduction, with mixed-result acceptance cases; this is the join boundary B1 cannot validate.",
+        "how": "Choose and state one precedence rule. To preserve the new invariant, quarantine a run whose immutable linkage fails before reducing its other findings into a frame. Keep snapshot drift and immutable identity semantics explicit instead of silently relying on the generic AND.",
+        "locking_test": "Extend python3 -B /tmp/wp1494-review-r2/probes.py binding-red-precedence into cross-product cases: each T7 immutable mismatch with T2 missing/bad receipt, T3 invalid workflow and T6 violations; require one fixed run/frame state and reason. A mutant restoring negative-over-linkage precedence must die. Controls with valid linkage keep measured negative results.",
+        "what_fix_may_spawn": "Giving every unknown precedence over every negative would hide genuinely measured failures. Scope any override to the stated identity/snapshot validity boundary."
+      },
+      "fix_attempted": false,
+      "confidence": "high"
+    },
+    {
+      "id": "WP1494-SPEC-07",
+      "class_slug": "freshness-forgets-overdue-obligations",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1494-r1/SPEC.md",
+        "lines": [
+          49,
+          92,
+          160,
+          161,
+          162,
+          265,
+          250,
+          441
+        ]
+      },
+      "claim": "The new old-slot closure model restores the plan obligation, but its recovery mechanism conflicts with the mandatory evaluation schedule. Manually closed frames are forbidden from causing REST reads, while E includes every run in {F,P} union R without subtracting those frames.",
+      "manifestations": [
+        {
+          "id": "WP1494-SPEC-07d",
+          "claim": "With KHUNG_DONG_TAY containing P-7d and an actual historical run for that frame, section 3 schedules its T1-T7 calls, while sections 2/5 and acceptance n4_dong_tay require zero such calls. Marking P manually closed has the same conflict because P is unconditionally in E. Slow/expired manually closed runs can consume the evaluation budget and prevent the recovery the manual-closure path promises. The current acceptance uses a missing manually closed run, which masks this contradiction."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+          "exit_code": 0,
+          "observed_output": "manual-closure-reads: manual frame=2026-11-14T19:17; E contains it and schedules run id=1; section2_required_calls=0."
+        },
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+          "exit_code": 0,
+          "observed_output": "obligation-prefix: hole keeps frontier=0, repaired prefix advances to2, manual closure advances to2; six frames allowed, seven blocked, seven with oldest manually closed allowed. Old missing/unknown/red obligations now prevent fresh."
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1494-r1/SPEC.md sections 2/3/5 and n4_dong_tay, because the same resolved frame set must drive both obligations and I/O.",
+        "how": "Resolve manual closures before constructing the evaluation set and define how a manually closed F/P interacts with S9, reporting and sha_audit. Keep an explicit distinction between a manually discharged obligation and a measured current receipt; do not silently manufacture dat evidence.",
+        "locking_test": "Modify n4_dong_tay to include a real run for the manually closed historical frame, whose transport raises if called; require fresh from the other valid frames, correct frontier and zero calls for the closed frame. Repeat with P, with/without a receipt, and with the manual map empty. A mutant re-including closed frames in E must die.",
+        "what_fix_may_spawn": "Excluding P can make due_in_progress unavailable unless its semantics are settled. Treating manual closure as an audited SHA would create false freshness. Deviation 9 still needs the planned owner/hash approval."
+      },
+      "fix_attempted": false,
+      "confidence": "high"
+    },
+    {
+      "id": "WP1494-SPEC-08",
+      "class_slug": "heartbeat-value-domain-incomplete",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1494-r1/SPEC.md",
+        "lines": [
+          48,
+          96,
+          121,
+          159,
+          196,
+          197,
+          199,
+          203,
+          204,
+          205,
+          231,
+          398
+        ]
+      },
+      "claim": "The reader now validates values, but the writer/input domain is not closed under those validations. Valid executions can be required to write a heartbeat that the same spec requires the next iteration to reject, losing acknowledgement and obligation state.",
+      "manifestations": [
+        {
+          "id": "WP1494-SPEC-08b",
+          "claim": "Before the first required cron frame, dong_den has an empty legal range. B1a may merge Monday, giving KHUNG_DAU on the following Saturday; B2 may activate that Monday. Initial dong_den=KHUNG_DAU-7d, while reader maximum=khung(T)-7d=KHUNG_DAU-14d. No value satisfies both bounds; there is no activation wait or pre-start representation."
+        },
+        {
+          "id": "WP1494-SPEC-08c",
+          "claim": "The catch-all requires raw module.qualname diagnostic codes, including danh_gia_nem, but heartbeat ma_ly_do must be ASCII and <=200 characters. Python permits Unicode/long exception class names. Those allowed exceptions yield mandated codes outside the heartbeat domain; ensure_ascii escapes JSON serialization but does not change the parsed string."
+        },
+        {
+          "id": "WP1494-SPEC-08d",
+          "claim": "run_id/run_attempt and accepted B2_RUN_* context have only a positive-integer lower bound, whereas event id limits the decimal components to 20/10 digits. Accepted context run_id=10**20 produces a 21-digit id that cho_bao/da_bao must reject. This is a domain inconsistency, not a claim that GitHub currently emits such IDs."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+          "exit_code": 0,
+          "observed_output": "heartbeat-initial-range: merge=2026-11-23T12:00; T=13:00; KHUNG_DAU=2026-11-28T19:17; initial/min=2026-11-21T19:17, reader max=2026-11-14T19:17; representable=false. At KHUNG_DAU, representable=true."
+        },
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+          "exit_code": 0,
+          "observed_output": "heartbeat-exception-domain: ordinary ProbeError code accepted; Unicode class name rejected; a legal 210-character class name gives code length229, rejected."
+        },
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+          "exit_code": 0,
+          "observed_output": "old-heartbeat-corruption: all seven original malformed fields rejected, valid control accepted. event-id-writer-reader: accepted positive run_id=100000000000000000000; written id fails the reader regex."
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1494-r1/SPEC.md heartbeat schema, startup/frontier rules, context validation and diagnostic rendering. These must form one round-trippable wire contract for watchdog and future B3.",
+        "how": "Define a valid pre-KHUNG_DAU state or an explicit activation prerequisite. Specify a bounded stable heartbeat reason and carry full exception identity separately, or widen the wire domain consistently. Align input ID limits with generated event IDs. Validate generated heartbeats against the same domain before PATCH without discarding previously durable state.",
+        "locking_test": "python3 -B /tmp/wp1494-review-r2/probes.py and python3 -B /tmp/wp1494-review-r2/closure_probes.py provide the counterexamples. Require writer->JSON->reader round-trip tests before/at/after KHUNG_DAU, for Unicode/long exception identities and context ID boundaries. Dedicated mutants reintroducing each asymmetry must die; retain the seven malformed-reader controls and exact 24h boundary.",
+        "what_fix_may_spawn": "Changing schema/sentinels can invalidate existing heartbeat state and reopen all history; truncating diagnostics can collide event identities. Coordinate any wire change with B3 and define migration/recovery explicitly."
+      },
+      "fix_attempted": false,
+      "confidence": "high"
+    },
+    {
+      "id": "WP1494-SPEC-10",
+      "class_slug": "unbounded-artifact-expansion",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1494-r1/SPEC.md",
+        "lines": [
+          57,
+          83,
+          102,
+          105,
+          110,
+          111,
+          146,
+          149,
+          461
+        ]
+      },
+      "claim": "TRAN_GOI limits downloaded compressed bytes only. The mandated doc_zip primitive opens and reads every file before cardinality/schema checks, with no expanded-byte/member limit or interruptible parse budget. A small accepted download can allocate far beyond 50MiB and prevent the heartbeat write phase; catch Exception cannot guarantee recovery from process termination.",
+      "manifestations": [
+        {
+          "id": "WP1494-SPEC-10a",
+          "claim": "This applies to both T2 receipt ZIPs and every T5 evidence ZIP. The safe real probe compresses 8388608 bytes into 8296 bytes (1011.2x), well below TRAN_GOI. No constraint in the candidate bounds the subsequent expansion or accumulated decompressed content. The 20-minute job cap can cancel the process, but cannot produce the promised reported unknown and heartbeat."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+          "exit_code": 0,
+          "observed_output": "zip-expansion: compressed=8296; expanded=8388608; under_TRAN_GOI=true; ratio=1011.2. Only an 8MiB probe was allocated; no OOM or runner-kill claim is made."
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1494-r1/SPEC.md section 3 doc_zip/byte-budget contract and T2/T5 acceptance; the limit must act before allocation, not after consumer validation.",
+        "how": "Define and justify limits for expanded bytes, member count and cumulative retained data. Read bounded chunks under the remaining deadline; classify resource exhaustion as unmeasured rather than corrupt observed bytes. Measure representative B1 artifacts before freezing thresholds and retain a separate write allowance.",
+        "locking_test": "Use the bounded ZIP fixture in python3 -B /tmp/wp1494-review-r2/probes.py at an injectable small expansion limit, with below/at/above controls for T2 and T5. Verify refusal occurs before reading the excess bytes and that heartbeat reporting still executes. Mutants removing expanded-size or cumulative-size guards must die through their designated case class.",
+        "what_fix_may_spawn": "Overly small limits reject valid audits; checking only ZIP metadata trusts forged sizes; reclassifying resource refusal as invalid content can misreport an infrastructure limitation as an audit failure."
+      },
+      "fix_attempted": false,
+      "confidence": "high"
+    },
+    {
+      "id": "WP1494-SPEC-11",
+      "class_slug": "markdown-state-table-column-drift",
+      "severity": "P3",
+      "location": {
+        "file": "ops/specs/wp1494-r1/SPEC.md",
+        "lines": [
+          166,
+          167,
+          168
+        ]
+      },
+      "claim": "The S1 row uses unescaped cardinality bars inside a Markdown table, creating six cells under four headers. The normative state and reason columns therefore no longer align with their headings.",
+      "manifestations": [
+        {
+          "id": "WP1494-SPEC-11a",
+          "claim": "The two bars around R minus KHUNG_DONG_TAY split the condition into extra cells. A whole-file unescaped-delimiter scan finds this as the only mismatched row; it is the primary all-or-nothing failure rule, not an incidental prose table."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1494-review-r2/table_scan.py",
+          "exit_code": 0,
+          "observed_output": "Whole-candidate scan: line168 has6cells; header has4. Third cell is R minus KHUNG_DONG_TAY, fourth starts >6; the intended khong_do_duoc and reason are cells5/6.",
+          "scope": "Structural delimiter measurement; no Markdown rendering engine was available."
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1494-r1/SPEC.md S1 row in the aggregate-state table, because the cardinality notation introduces the extra delimiters.",
+        "how": "Escape both cardinality bars or spell the expression as a count without pipe characters; preserve the condition and priority exactly.",
+        "locking_test": "Run python3 -B /tmp/wp1494-review-r2/table_scan.py and require no mismatched rows. A scratch variant restoring an unescaped cardinality bar must be detected. No new product test is warranted for this documentation fix.",
+        "what_fix_may_spawn": "Escaping the set-difference operator or changing the expression while repairing Markdown could alter the six-frame condition; compare the text semantics as well as cell count."
+      },
+      "fix_attempted": false,
+      "confidence": "high"
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "b1-consumer-contract-mismatch",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "Revised normative contract closes all original spec manifestations; retain the controls listed in closing_check.",
+      "closing_check": {
+        "command": "python3 -I -B /tmp/wp1494-review-r2/b1_check.py /tmp/wp1494-review-r2 --dot-bien; python3 -B /tmp/wp1494-review-r2/probes.py",
+        "result": "480/480 pinned checks and 249/249 mutants pass. Real JSONDecodeError/UnicodeDecodeError/BOM/BadZipFile now have one T2 invalid/T5 null-or-empty projection; T3 explicitly excludes name overrides. All five prior manifestations are closed at specification scope.",
+        "unmeasured": "No remaining measurement for the original spec defect; future product acceptance and live platform behavior are separate, not attested."
+      }
+    },
+    {
+      "slug": "notification-dedup-before-delivery",
+      "finding_ids": [
+        "WP1494-SPEC-02"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-02c",
+        "WP1494-SPEC-02d"
+      ],
+      "highest_open_severity": "P1",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "Keep a still-relevant undelivered gap event independently of the newly written heartbeat age. Define a bounded reconciliation scope anchored before event creation, with explicit completeness semantics and an operational recovery path; merely raising 10 postpones the same failure. A time-bounded query is one option only after proving its boundary and update semantics.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+        "result": "Both original warning/recovery failures now retain id100-1 and retry once; acknowledged controls POST zero. New gap-event erasure and >1000-comment reconciliation deadlock leave the class open.",
+        "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+      }
+    },
+    {
+      "slug": "write-retries-violate-delivery-contract",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "Revised normative contract closes all original spec manifestations; retain the controls listed in closing_check.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py; python3 -B /tmp/wp1494-review-r2/probes.py",
+        "result": "GET 500->200 sends2; repeated500 sends3;404 sends1; PATCH/POST500 send1 each. Accepted-comment reconciliation sends zero duplicate POSTs for warning/recovery. Original two retry manifestations are closed at spec scope; GitHub visibility-delay caveat remains explicitly outside this claim.",
+        "unmeasured": "No remaining measurement for the original spec defect; future product acceptance and live platform behavior are separate, not attested."
+      }
+    },
+    {
+      "slug": "mutant-oracles-non-discriminating",
+      "finding_ids": [
+        "WP1494-SPEC-04"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-04e",
+        "WP1494-SPEC-04f",
+        "WP1494-SPEC-04g",
+        "WP1494-SPEC-04h"
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "For row 1 assert the T1 subcheck, retaining T7 as a control. Treat first=min under sorted-result iteration as equivalent, or define the distinct selection seam actually under test. Isolate overlapping domain predicates with appropriate previous-state fixtures; do not mandate a POST change when another valid guard still rejects. Enumerate dedicated mutants for every frozen resource/retry/exception guard, including terminal deadlines.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py; python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+        "result": "Old anchor substitution is no longer required; old mutually exclusive S2/S3 pair is replaced by overlapping conditions; U7 observes [C4] vs [C2,C4]; 12h/24h/36h guard distinction is stated correctly. New row1 is masked by T7, row16 can be equivalent, row61 has overlapping guards, and dedicated cap/catch mutants are missing.",
+        "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+      }
+    },
+    {
+      "slug": "bounded-evaluation-order-dependent",
+      "finding_ids": [
+        "WP1494-SPEC-05"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-05b",
+        "WP1494-SPEC-05c"
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "Define absolute monotonic deadlines, give every attempt/sleep the lesser of its allowance and remaining time, and recheck after calls, parsing, and before publishing the evaluation result or write success. State equality semantics at the deadline. Preserve the separately accounted write budget and fail the whole evaluation if completion crosses its deadline.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+        "result": "API orders [2,1]/[1,2] both evaluate [1,2], explicit exhaustion is unknown in both. New last-call probes finish601/181 after600/180 with no completion checkpoint.",
+        "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+      }
+    },
+    {
+      "slug": "consumer-freshness-anchor-unverified",
+      "finding_ids": [
+        "WP1494-SPEC-06"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-06b"
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "Choose and state one precedence rule. To preserve the new invariant, quarantine a run whose immutable linkage fails before reducing its other findings into a frame. Keep snapshot drift and immutable identity semantics explicit instead of silently relying on the generic AND.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+        "result": "Nine immutable-field mismatches reject; shifted D1.created_at no longer yields fresh. A T7 linkage failure plus earlier negative now has conflicting required run classifications.",
+        "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+      }
+    },
+    {
+      "slug": "freshness-forgets-overdue-obligations",
+      "finding_ids": [
+        "WP1494-SPEC-07"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-07d"
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "Resolve manual closures before constructing the evaluation set and define how a manually closed F/P interacts with S9, reporting and sha_audit. Keep an explicit distinction between a manually discharged obligation and a measured current receipt; do not silently manufacture dat evidence.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py; python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+        "result": "F valid plus older missing/red -> stale; older unknown -> unknown; all closed -> fresh. Prefix does not jump a hole; manual closure and six/seven-frame behavior measured. Mandatory E still schedules a run explicitly forbidden by manual closure.",
+        "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+      }
+    },
+    {
+      "slug": "heartbeat-value-domain-incomplete",
+      "finding_ids": [
+        "WP1494-SPEC-08"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-08b",
+        "WP1494-SPEC-08c",
+        "WP1494-SPEC-08d"
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "Define a valid pre-KHUNG_DAU state or an explicit activation prerequisite. Specify a bounded stable heartbeat reason and carry full exception identity separately, or widen the wire domain consistently. Align input ID limits with generated event IDs. Validate generated heartbeats against the same domain before PATCH without discarding previously durable state.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py; python3 -B /tmp/wp1494-review-r2/probes.py",
+        "result": "Seven original malformed fields reject and healthy control passes; 24h is moi,24h+1s cu. New pre-start frontier has empty domain; Unicode/long exception codes and oversized accepted IDs fail writer/reader round-trip.",
+        "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+      }
+    },
+    {
+      "slug": "workflow-step-controls-unconstrained",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "Revised normative contract closes all original spec manifestations; retain the controls listed in closing_check.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+        "result": "Exact recursive workflow grammar rejects16/16 injected if/continue-on-error/shell/working-directory step keys and accepts the allowed shape. Both prior manifestations closed. Syntax check rc0 is separate and does not claim shellcheck coverage.",
+        "unmeasured": "No remaining measurement for the original spec defect; future product acceptance and live platform behavior are separate, not attested."
+      }
+    },
+    {
+      "slug": "unbounded-artifact-expansion",
+      "finding_ids": [
+        "WP1494-SPEC-10"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-10a"
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 2,
+      "source_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "Define and justify limits for expanded bytes, member count and cumulative retained data. Read bounded chunks under the remaining deadline; classify resource exhaustion as unmeasured rather than corrupt observed bytes. Measure representative B1 artifacts before freezing thresholds and retain a separate write allowance.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+        "result": "OPEN: 8296 compressed bytes expand to8388608 with no specified expanded-size cap.",
+        "unmeasured": "No large allocation/OOM experiment; B1 production artifact distribution and future bounded implementation not measured."
+      }
+    },
+    {
+      "slug": "markdown-state-table-column-drift",
+      "finding_ids": [
+        "WP1494-SPEC-11"
+      ],
+      "manifestations": [
+        "WP1494-SPEC-11a"
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 2,
+      "source_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "current_sha": "1c692ccba157fe99c133074570197cadd3db0ef3",
+      "common_fix": "Escape both cardinality bars or spell the expression as a count without pipe characters; preserve the condition and priority exactly.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1494-review-r2/table_scan.py",
+        "result": "OPEN: one row has6cells under4headers.",
+        "unmeasured": "Rendered GitHub preview not measured; structural ambiguity directly measured."
+      }
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "WP1494-SPEC-01",
+      "class_slug": "b1-consumer-contract-mismatch",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "checked_manifestations": [
+        "WP1494-SPEC-01a",
+        "WP1494-SPEC-01b",
+        "WP1494-SPEC-01c",
+        "WP1494-SPEC-01d",
+        "WP1494-SPEC-01e"
+      ],
+      "evidence": {
+        "command": "python3 -I -B /tmp/wp1494-review-r2/b1_check.py /tmp/wp1494-review-r2 --dot-bien; python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "480/480 pinned checks and 249/249 mutants pass. Real JSONDecodeError/UnicodeDecodeError/BOM/BadZipFile now have one T2 invalid/T5 null-or-empty projection; T3 explicitly excludes name overrides. All five prior manifestations are closed at specification scope."
+      },
+      "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "id": "WP1494-SPEC-02",
+      "class_slug": "notification-dedup-before-delivery",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "checked_manifestations": [
+        "WP1494-SPEC-02a",
+        "WP1494-SPEC-02b"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "Both original warning/recovery failures now retain id100-1 and retry once; acknowledged controls POST zero. New gap-event erasure and >1000-comment reconciliation deadlock leave the class open."
+      },
+      "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "id": "WP1494-SPEC-03",
+      "class_slug": "write-retries-violate-delivery-contract",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "checked_manifestations": [
+        "WP1494-SPEC-03a",
+        "WP1494-SPEC-03b"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py; python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "GET 500->200 sends2; repeated500 sends3;404 sends1; PATCH/POST500 send1 each. Accepted-comment reconciliation sends zero duplicate POSTs for warning/recovery. Original two retry manifestations are closed at spec scope; GitHub visibility-delay caveat remains explicitly outside this claim."
+      },
+      "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "id": "WP1494-SPEC-04",
+      "class_slug": "mutant-oracles-non-discriminating",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "checked_manifestations": [
+        "WP1494-SPEC-04a",
+        "WP1494-SPEC-04b",
+        "WP1494-SPEC-04c",
+        "WP1494-SPEC-04d"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py; python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+        "exit_code": 0,
+        "observed_output": "Old anchor substitution is no longer required; old mutually exclusive S2/S3 pair is replaced by overlapping conditions; U7 observes [C4] vs [C2,C4]; 12h/24h/36h guard distinction is stated correctly. New row1 is masked by T7, row16 can be equivalent, row61 has overlapping guards, and dedicated cap/catch mutants are missing."
+      },
+      "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "id": "WP1494-SPEC-05",
+      "class_slug": "bounded-evaluation-order-dependent",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "checked_manifestations": [
+        "WP1494-SPEC-05a"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "API orders [2,1]/[1,2] both evaluate [1,2], explicit exhaustion is unknown in both. New last-call probes finish601/181 after600/180 with no completion checkpoint."
+      },
+      "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "id": "WP1494-SPEC-06",
+      "class_slug": "consumer-freshness-anchor-unverified",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "checked_manifestations": [
+        "WP1494-SPEC-06a"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "Nine immutable-field mismatches reject; shifted D1.created_at no longer yields fresh. A T7 linkage failure plus earlier negative now has conflicting required run classifications."
+      },
+      "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "id": "WP1494-SPEC-07",
+      "class_slug": "freshness-forgets-overdue-obligations",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "checked_manifestations": [
+        "WP1494-SPEC-07a",
+        "WP1494-SPEC-07b",
+        "WP1494-SPEC-07c"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py; python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+        "exit_code": 0,
+        "observed_output": "F valid plus older missing/red -> stale; older unknown -> unknown; all closed -> fresh. Prefix does not jump a hole; manual closure and six/seven-frame behavior measured. Mandatory E still schedules a run explicitly forbidden by manual closure."
+      },
+      "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "id": "WP1494-SPEC-08",
+      "class_slug": "heartbeat-value-domain-incomplete",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "checked_manifestations": [
+        "WP1494-SPEC-08a"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py; python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "Seven original malformed fields reject and healthy control passes; 24h is moi,24h+1s cu. New pre-start frontier has empty domain; Unicode/long exception codes and oversized accepted IDs fail writer/reader round-trip."
+      },
+      "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "id": "WP1494-SPEC-09",
+      "class_slug": "workflow-step-controls-unconstrained",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "checked_manifestations": [
+        "WP1494-SPEC-09a",
+        "WP1494-SPEC-09b"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+        "exit_code": 0,
+        "observed_output": "Exact recursive workflow grammar rejects16/16 injected if/continue-on-error/shell/working-directory step keys and accepts the allowed shape. Both prior manifestations closed. Syntax check rc0 is separate and does not claim shellcheck coverage."
+      },
+      "unmeasured": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "b1-consumer-contract-mismatch",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "original_manifestations": [
+        "WP1494-SPEC-01a",
+        "WP1494-SPEC-01b",
+        "WP1494-SPEC-01c",
+        "WP1494-SPEC-01d",
+        "WP1494-SPEC-01e"
+      ],
+      "new_manifestations": [],
+      "evidence": {
+        "command": "python3 -I -B /tmp/wp1494-review-r2/b1_check.py /tmp/wp1494-review-r2 --dot-bien; python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "480/480 pinned checks and 249/249 mutants pass. Real JSONDecodeError/UnicodeDecodeError/BOM/BadZipFile now have one T2 invalid/T5 null-or-empty projection; T3 explicitly excludes name overrides. All five prior manifestations are closed at specification scope."
+      },
+      "chua_do_duoc": "No remaining measurement for the original spec defect; future product acceptance and live platform behavior are separate, not attested."
+    },
+    {
+      "class_slug": "notification-dedup-before-delivery",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "original_manifestations": [
+        "WP1494-SPEC-02a",
+        "WP1494-SPEC-02b"
+      ],
+      "new_manifestations": [
+        "WP1494-SPEC-02c",
+        "WP1494-SPEC-02d"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "Both original warning/recovery failures now retain id100-1 and retry once; acknowledged controls POST zero. New gap-event erasure and >1000-comment reconciliation deadlock leave the class open."
+      },
+      "chua_do_duoc": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "class_slug": "write-retries-violate-delivery-contract",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "original_manifestations": [
+        "WP1494-SPEC-03a",
+        "WP1494-SPEC-03b"
+      ],
+      "new_manifestations": [],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py; python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "GET 500->200 sends2; repeated500 sends3;404 sends1; PATCH/POST500 send1 each. Accepted-comment reconciliation sends zero duplicate POSTs for warning/recovery. Original two retry manifestations are closed at spec scope; GitHub visibility-delay caveat remains explicitly outside this claim."
+      },
+      "chua_do_duoc": "No remaining measurement for the original spec defect; future product acceptance and live platform behavior are separate, not attested."
+    },
+    {
+      "class_slug": "mutant-oracles-non-discriminating",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "original_manifestations": [
+        "WP1494-SPEC-04a",
+        "WP1494-SPEC-04b",
+        "WP1494-SPEC-04c",
+        "WP1494-SPEC-04d"
+      ],
+      "new_manifestations": [
+        "WP1494-SPEC-04e",
+        "WP1494-SPEC-04f",
+        "WP1494-SPEC-04g",
+        "WP1494-SPEC-04h"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py; python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+        "exit_code": 0,
+        "observed_output": "Old anchor substitution is no longer required; old mutually exclusive S2/S3 pair is replaced by overlapping conditions; U7 observes [C4] vs [C2,C4]; 12h/24h/36h guard distinction is stated correctly. New row1 is masked by T7, row16 can be equivalent, row61 has overlapping guards, and dedicated cap/catch mutants are missing."
+      },
+      "chua_do_duoc": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "class_slug": "bounded-evaluation-order-dependent",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "original_manifestations": [
+        "WP1494-SPEC-05a"
+      ],
+      "new_manifestations": [
+        "WP1494-SPEC-05b",
+        "WP1494-SPEC-05c"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "API orders [2,1]/[1,2] both evaluate [1,2], explicit exhaustion is unknown in both. New last-call probes finish601/181 after600/180 with no completion checkpoint."
+      },
+      "chua_do_duoc": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "class_slug": "consumer-freshness-anchor-unverified",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "original_manifestations": [
+        "WP1494-SPEC-06a"
+      ],
+      "new_manifestations": [
+        "WP1494-SPEC-06b"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "Nine immutable-field mismatches reject; shifted D1.created_at no longer yields fresh. A T7 linkage failure plus earlier negative now has conflicting required run classifications."
+      },
+      "chua_do_duoc": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "class_slug": "freshness-forgets-overdue-obligations",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "original_manifestations": [
+        "WP1494-SPEC-07a",
+        "WP1494-SPEC-07b",
+        "WP1494-SPEC-07c"
+      ],
+      "new_manifestations": [
+        "WP1494-SPEC-07d"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/probes.py; python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+        "exit_code": 0,
+        "observed_output": "F valid plus older missing/red -> stale; older unknown -> unknown; all closed -> fresh. Prefix does not jump a hole; manual closure and six/seven-frame behavior measured. Mandatory E still schedules a run explicitly forbidden by manual closure."
+      },
+      "chua_do_duoc": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "class_slug": "heartbeat-value-domain-incomplete",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "original_manifestations": [
+        "WP1494-SPEC-08a"
+      ],
+      "new_manifestations": [
+        "WP1494-SPEC-08b",
+        "WP1494-SPEC-08c",
+        "WP1494-SPEC-08d"
+      ],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py; python3 -B /tmp/wp1494-review-r2/probes.py",
+        "exit_code": 0,
+        "observed_output": "Seven original malformed fields reject and healthy control passes; 24h is moi,24h+1s cu. New pre-start frontier has empty domain; Unicode/long exception codes and oversized accepted IDs fail writer/reader round-trip."
+      },
+      "chua_do_duoc": "B2 implementation does not exist on current master. State-machine probes execute independent transcriptions of the frozen prose, not product code. Product acceptance/CI and real delivery remain unmeasured."
+    },
+    {
+      "class_slug": "workflow-step-controls-unconstrained",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 1,
+      "source_sha": "1a758cbea0ec9fe9f8b9387f990ec8e0adb83fba",
+      "original_manifestations": [
+        "WP1494-SPEC-09a",
+        "WP1494-SPEC-09b"
+      ],
+      "new_manifestations": [],
+      "evidence": {
+        "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+        "exit_code": 0,
+        "observed_output": "Exact recursive workflow grammar rejects16/16 injected if/continue-on-error/shell/working-directory step keys and accepts the allowed shape. Both prior manifestations closed. Syntax check rc0 is separate and does not claim shellcheck coverage."
+      },
+      "chua_do_duoc": "No remaining measurement for the original spec defect; future product acceptance and live platform behavior are separate, not attested."
+    }
+  ],
+  "class_mapping_table": [],
+  "class_history_note": "No slug split/merge. Six prior classes remain open with new manifestations; three original classes close at spec scope; two new classes concern resource expansion and normative table structure. Original manifestations remain listed in prior checks; spec review does not attest a future implementation.",
+  "open_class_count": 8,
+  "open_manifestation_count": 15,
+  "class_count": 11,
+  "manifestation_count": 15,
+  "severity_counts": {
+    "P0": 0,
+    "P1": 1,
+    "P2": 6,
+    "P3": 1
+  },
+  "convergence": {
+    "prior_open_classes": 9,
+    "closed_classes": 3,
+    "closed_fraction": "3/9",
+    "new_classes": 2,
+    "note": "One measured B2 transition below50%; this alone is not the two-consecutive-transition stop condition. No budget reset inferred."
+  },
+  "hunt_table": [
+    {
+      "direction": "Frozen inputs and authority",
+      "hypothesis": "Candidate hashes or Mission budget differ from the grant.",
+      "command": "git show HEAD:ops/specs/wp1494-r1/SPEC.md; sha256sum; read mission-r84/r85/r96; GitHub fetch_issue_comments #1172",
+      "real_output": "Spec c102e034...7b7b8 matches; plan0f287ce4...3fbe matches. r96 hash2d9a60a5...73a9 and comment7066078931 admit B2 drafting,5 author/6 spec-review calls; r85 had3/4 before supersession. No execution generation/lease is yet assigned.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Plan fidelity and removed mechanisms",
+      "hypothesis": "Candidate reintroduces a removed gate/authority mechanism or ignores Q6.",
+      "command": "Read plan r4 sections5/7/10/12 and mission-r84.owner_decisions; compare all11 deviations",
+      "real_output": "Independent6h workflow remains report-only, no switch write/release gate/LIVE, no B1 or ci.yml modification. Q6 best-effort and subscription confirmation retained. Deviation9/manual closure is disclosed for future owner/hash approval; its scheduling contradiction is reported separately.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Current-master feasibility",
+      "hypothesis": "The four-file write set cannot integrate with current registry/B1.",
+      "command": "GitHub fetch_commit(master); git show origin/master:<paths>; runpy ci_dang_ky_test.py kiem()/loi_ruff_ci()",
+      "real_output": "Remote master=e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8; registry([],30,30), Ruff contract([],3); current full workflow145lines, cron matches,3jobs; B1 fixtures/new B2 paths absent(rc128), as the explicit B-after-B1 prerequisite anticipates.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Live lease overlap",
+      "hypothesis": "A live lease blocks the shared registry file.",
+      "command": "git fetch --all --prune; git ls-remote --heads origin; python3 -B ops/lease_publish.py ai-dang-giu <each of four write paths>",
+      "real_output": "Source fetch rc255(read-only FETCH_HEAD); scratch remote refresh/ls-remote rc128(unavailable127.0.0.1:33861 proxy); all four ai-dang-giu rc12 KHÔNG_XÁC_ĐỊNH. r96 reports wp1236-a-r12 holding registry until2026-11-23T13:45Z, but live full-ref inventory not verified.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "direction": "Pinned consumer and parser outcome agreement",
+      "hypothesis": "Same bytes still require conflicting B1/B3 adapter outcomes.",
+      "command": "python3 -I -B /tmp/wp1494-review-r2/b1_check.py /tmp/wp1494-review-r2 --dot-bien; python3 -B /tmp/wp1494-review-r2/probes.py",
+      "real_output": "480/480 checks,249/249 mutants; JSON/UTF8/BOM/ZIP projections now consistent. Name override explicitly invalid; valid no-name control accepted.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Durable notification and history growth",
+      "hypothesis": "A crash or long Issue history loses a pending notification.",
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+      "real_output": "Gap pending100-1 -> zero POST,null pending; at1001 comments D14 requires11pages and locks sending indefinitely. Warning/recovery retry and acknowledged no-duplicate controls work.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Identity composition",
+      "hypothesis": "The new linkage rule composes with measured negatives.",
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+      "real_output": "All9 isolated bindings reject; T2 negative plus T7 mismatch yields unknown by section2 but khong_dat by section4.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Obligation recovery",
+      "hypothesis": "Manual closure eliminates work for a discharged frame.",
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py; python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+      "real_output": "Historical missing/unknown no longer become fresh, prefix/growth controls work; mandatory E still schedules a manually closed run that sections2/5 forbid.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Heartbeat writer/reader domain",
+      "hypothesis": "Every allowed execution emits a readable heartbeat.",
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py; python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+      "real_output": "Pre-first-cron range empty; Unicode/long reason rejected; positive21-digit run ID produces invalid event ID. Seven original malformed values now reject.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Bounded I/O and terminal deadlines",
+      "hypothesis": "Budget crossing cannot escape as success.",
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+      "real_output": "Final calls permitted at599/179 finish601/181 with no next precheck; sorted-order controls agree.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Compressed versus expanded size",
+      "hypothesis": "50MiB download cap also bounds parser memory.",
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+      "real_output": "Real ZIP8296bytes expands to8388608bytes,1011.2x, within download cap; no expanded-byte cap in candidate.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Mutant observability and coverage",
+      "hypothesis": "Every assigned mutant can die for the stated observation.",
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py; python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+      "real_output": "Row1 still unknown viaT7; row16 first=min under mandated sorted evaluation; row61 acknowledgement reason checks overlap; four named guard families absent from82-row table.",
+      "conclusion": "LỖI"
+    },
+    {
+      "direction": "Workflow bypasses",
+      "hypothesis": "Steps can still suppress execution or swallow failures.",
+      "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+      "real_output": "Exact allowed shape accepted;16/16 step-control additions rejected. actionlint1.7.7 syntax rc0; shellcheck absent, so not a full gate pass.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "direction": "Normative table structure",
+      "hypothesis": "Cardinality notation shifts state-table columns.",
+      "command": "python3 -B /tmp/wp1494-review-r2/table_scan.py",
+      "real_output": "Whole-file table scan finds one mismatch: S1 line168 has6cells under4headers.",
+      "conclusion": "LỖI"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Spec bytes",
+      "declared": "c102e034adbe4fd95913fca43f60e41c5ff1d3afd21d59e5fa01f710fc57b7b8",
+      "measured": "c102e034adbe4fd95913fca43f60e41c5ff1d3afd21d59e5fa01f710fc57b7b8",
+      "matches": true,
+      "command": "sha256sum ops/specs/wp1494-r1/SPEC.md"
+    },
+    {
+      "claim": "B1 checker block",
+      "declared": "254lines/14992bytes/d9c78e70...f24e",
+      "measured": {
+        "lines": 254,
+        "bytes": 14992,
+        "sha256": "d9c78e708e18a211b7d8c7309638ffd1c73200578cf3128f9f0fc4275430f24e"
+      },
+      "matches": true,
+      "command": "Extract first python block after ## Lệnh kiểm per GHIM-B1A; count/hash bytes"
+    },
+    {
+      "claim": "B1 fixture/semantic predicates",
+      "declared": "480/480;120shape;118semantic;12rules;249mutants",
+      "measured": "480/480;120shape;118semantic;79lexical;163object;12/12rules;249/249mutants",
+      "matches": true,
+      "command": "python3 -I -B /tmp/wp1494-review-r2/b1_check.py /tmp/wp1494-review-r2 --dot-bien"
+    },
+    {
+      "claim": "Current-master lines ci-dot-bien-du.yml",
+      "declared": 145,
+      "measured": 145,
+      "matches": true,
+      "command": "git show origin/master:<path>; count splitlines"
+    },
+    {
+      "claim": "Current-master lines ci_provenance.py",
+      "declared": 653,
+      "measured": 653,
+      "matches": true,
+      "command": "git show origin/master:<path>; count splitlines"
+    },
+    {
+      "claim": "Current-master lines ci_provenance_test.py",
+      "declared": 2330,
+      "measured": 2330,
+      "matches": true,
+      "command": "git show origin/master:<path>; count splitlines"
+    },
+    {
+      "claim": "Current-master lines ci_dang_ky_test.py",
+      "declared": 2992,
+      "measured": 2992,
+      "matches": true,
+      "command": "git show origin/master:<path>; count splitlines"
+    },
+    {
+      "claim": "Current-master lines ops-do-workflow-definition.yml",
+      "declared": 49,
+      "measured": 49,
+      "matches": true,
+      "command": "git show origin/master:<path>; count splitlines"
+    },
+    {
+      "claim": "Eight U7 list categories",
+      "declared": 8,
+      "measured": 8,
+      "matches": true,
+      "command": "Inspect section3 U7 rows1-8"
+    },
+    {
+      "claim": "Write-set cardinality",
+      "declared": 4,
+      "measured": 4,
+      "matches": true,
+      "command": "Inspect Write set; git diff --name-only origin/master HEAD shows only the spec"
+    },
+    {
+      "claim": "Three ADR introduction pins",
+      "declared": "blob present,parent absent,first-parent for all3",
+      "measured": "rc0/rc128/true for all3; repository non-shallow",
+      "matches": true,
+      "command": "git cat-file -e OID:path; git cat-file -e OID^:path; git rev-list --first-parent origin/master"
+    },
+    {
+      "claim": "Mission spec/review caps",
+      "declared": "5/6 in r96",
+      "measured": "r85=3/4; r96=5/6; implementation3; source review3; connector2; fullM9=1; WindowsCI=0",
+      "matches": true,
+      "command": "Parse envelope.provider_budgets.per_new_packet in mission-r85/r96.json; read installation comment7066078931"
+    },
+    {
+      "claim": "Live lease count/overlap",
+      "declared": "must be measured across all refs",
+      "measured": "not measured;4queries each rc12",
+      "matches": null,
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <four paths>"
+    },
+    {
+      "claim": "Seven historical schedule delays",
+      "declared": "7runs;2h11m..3h41m;duration18..35min",
+      "measured": "not independently measured in this session; no suitable runs-list endpoint available and direct network unavailable",
+      "matches": null,
+      "command": "Tool discovery plus failed Git network probe; no live schedule-count query completed"
+    },
+    {
+      "claim": "Deadline completion bounds",
+      "declared": "evaluation600s;write180s",
+      "measured": "last calls599+2=601 and179+2=181 escape precheck-only algorithm",
+      "matches": false,
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py"
+    },
+    {
+      "claim": "Chosen numerical constants",
+      "declared": "HAN_GOI30s;GET retries2;600+180s;TRAN_GOI50MiB;frames6",
+      "measured": "Author explicitly says budget/byte values unmeasured. 780<1200 arithmetic true; sufficiency not measured. R6/R7 boundary tested; no production B1 artifacts yet.",
+      "matches": null,
+      "command": "Inspect sections2/3/size/decision-log13; python3 -B /tmp/wp1494-review-r2/closure_probes.py"
+    },
+    {
+      "claim": "Issue reconciliation capacity",
+      "declared": "10pages x100",
+      "measured": "1000complete;1001requires11pages and permanently locks pending delivery",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py"
+    },
+    {
+      "claim": "Expanded ZIP size bound",
+      "declared": "only compressed50MiB is specified",
+      "measured": "8296compressed ->8388608expanded (1011.2x); expanded/cumulative bound absent",
+      "matches": null,
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py"
+    },
+    {
+      "claim": "Required mutant inventory",
+      "declared": "82numbered rows with x8/xK/x18 expansions",
+      "measured": "82rows; no fixed total because K unspecified; listed masked/equivalent pairs and missing guard families",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py"
+    },
+    {
+      "claim": "Old classes/manifestations",
+      "declared": "9classes/21manifestations",
+      "measured": {
+        "classes": 9,
+        "manifestations": 21
+      },
+      "matches": true,
+      "command": "Parse wp1494-spec-review-1.json"
+    }
+  ],
+  "tests": [
+    {
+      "name": "frozen-object-and-pins",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; hash spec/plan/contract blobs",
+      "exit_code": 0,
+      "evidence": "Exact SHA/tree and all supplied immutable hashes match."
+    },
+    {
+      "name": "pinned-B1a-fixture-and-mutants",
+      "status": "passed",
+      "command": "python3 -I -B /tmp/wp1494-review-r2/b1_check.py /tmp/wp1494-review-r2 --dot-bien",
+      "exit_code": 0,
+      "evidence": "FIXTURE: 480/480 phep kiem dung ky vong · hinh 120 · ngu nghia 118 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12; DOT BIEN: giet 249/249 · vi tu 57 · noi long schema 192; TONG: DAT"
+    },
+    {
+      "name": "independent-counterexample-probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1494-review-r2/probes.py",
+      "exit_code": 0,
+      "evidence": "38 recorded probes; successful execution reproduces defects, not a B2 acceptance pass.",
+      "stdout_sha256": "4f0a07cb0789dee4258249909ee195f4f7e316b6a3102fa685df281ca176b526"
+    },
+    {
+      "name": "closure-and-current-contract-probes",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1494-review-r2/closure_probes.py",
+      "exit_code": 0,
+      "evidence": "11 records;16workflow variants reject;7original corrupt fields reject; method retry counts measured; real B1 U7 outcomes differ as expected.",
+      "stdout_sha256": "e6ea15afa9734db5b14ffe418d94b2650249550ed347d3451d02745720c22993"
+    },
+    {
+      "name": "current-master-registry",
+      "status": "passed",
+      "command": "runpy.run_path(/tmp/wp1494-review-r2-repo/.claude/dev/ci_dang_ky_test.py); kiem()",
+      "exit_code": 0,
+      "evidence": "([],30,30). Read-only static registry check; not --chay/full CI."
+    },
+    {
+      "name": "ruff-pin-probe-contract",
+      "status": "passed",
+      "command": "runpy.run_path(/tmp/wp1494-review-r2-repo/.claude/dev/ci_dang_ky_test.py); loi_ruff_ci()",
+      "exit_code": 0,
+      "evidence": "([],3). Workflow contract only; not bare lint."
+    },
+    {
+      "name": "bare-ruff-module-invocation",
+      "status": "failed",
+      "command": "python3 -m ruff --version",
+      "exit_code": 1,
+      "evidence": "No module named ruff; standalone executable exists separately."
+    },
+    {
+      "name": "bare-ruff-current-master",
+      "status": "failed",
+      "command": "ruff check --no-cache --select F /tmp/wp1494-review-r2-repo/scripts/tl.py",
+      "exit_code": 1,
+      "tool_version": "ruff0.16.9 (not CI pin0.15.15)",
+      "evidence": "Found12errors, all F821 on unchanged master. Candidate changes only SPEC.md; not a product lint regression or pinned CI pass."
+    },
+    {
+      "name": "synthetic-workflow-syntax",
+      "status": "passed",
+      "command": "actionlint -shellcheck= /tmp/wp1494-review-r2/watchdog-shape.yml",
+      "exit_code": 0,
+      "tool_version": "1.7.7",
+      "evidence": "Empty stdout/stderr. Shellcheck explicitly disabled because absent; syntax scope only."
+    },
+    {
+      "name": "actionlint-with-shellcheck-acceptance",
+      "status": "not_run",
+      "command": "actionlint .github/workflows/canh-tuoi-audit.yml with shellcheck present",
+      "exit_code": null,
+      "evidence": "B2 workflow not implemented; shellcheck absent."
+    },
+    {
+      "name": "fresh-all-ref-lease-inventory",
+      "status": "failed",
+      "command": "git -C /tmp/wp1494-review-r2-repo fetch --all --prune; ls-remote --heads origin; ai-dang-giu on4paths",
+      "exit_code": 12,
+      "component_exit_codes": {
+        "fetch": 128,
+        "ls_remote": 128,
+        "lease_queries": [
+          12,
+          12,
+          12,
+          12
+        ]
+      },
+      "evidence": "Network proxy unavailable. Scanner refuses to answer; this does not establish no overlap."
+    },
+    {
+      "name": "B2-runtime-CI-Windows-live-delivery",
+      "status": "not_run",
+      "command": null,
+      "exit_code": null,
+      "evidence": "Pre-lease spec review; no implementation, workflow dispatch, GitHub writes, Windows or live delivery authorized/performed."
+    }
+  ],
+  "assurance": {
+    "attested": "Independent read-only review of the exact spec, measured current-master contracts, pinned B1a checker and explicit prose counterexamples.",
+    "approval_state": null,
+    "limitations": "Changes requested; no cross_approved/same_provider_approved/human_audited state asserted. Full-ref live lease inventory and live schedule-history claims remain unmeasured. No future B2 implementation, CI, Windows, GitHub-token delivery or external launcher terminal receipt attested."
+  },
+  "evidence_url": null,
+  "authority": {
+    "mission_revision": 96,
+    "mission_json_sha256": "2d9a60a5eda9537475d7bb0901e882fef2d97d96a2ad4a4aa0d97c76862e73a9",
+    "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7066078931",
+    "readback": "Connector readback explicitly records B2 spec-drafting admission and5/6 caps. r84 decisions/r85 limits preserved except explicit later revisions."
+  },
+  "environment": {
+    "os": "Linux",
+    "python": "3.13.18",
+    "jsonschema": "4.26.0",
+    "PyYAML": "6.0.3",
+    "actionlint": "1.7.7",
+    "shellcheck": "absent",
+    "ruff_executable": "0.16.9",
+    "python_ruff_module": "absent",
+    "sandbox": "workspace-write; assigned .git/.agents/.codex read-only; network restricted",
+    "scratch": "/tmp/wp1494-review-r2"
+  },
+  "notes": "No repository file edited/committed/pushed; no GitHub write or workflow dispatch. Scratch only under /tmp and the requested output path. Source checkout remained read-only; its blocked fetch is recorded. B1a/implementation baseline B is legitimately pending, not an invented measured base. Plan deviations still need the specified owner/hash installation before any lease. Scope-specific closing claims concern specification defects, not nonexistent product acceptance.",
+  "read_only_evidence": {
+    "equal": true,
+    "file_count": 17638,
+    "head_start": "1c692ccba157fe99c133074570197cadd3db0ef3",
+    "head_end": "1c692ccba157fe99c133074570197cadd3db0ef3",
+    "tree_start": "61b1addcff977361486e4dff99d2eb58f59a3c12",
+    "tree_end": "61b1addcff977361486e4dff99d2eb58f59a3c12",
+    "status": "!! .codex/\n",
+    "scope": "Assigned checkout tracked/untracked/ignored file bytes, index/worktree diffs and HEAD/tree. Endpoints do not prove no transient write-and-restore. External /home/user/tra-luat was a read-only clone source, not snapshotted across this run."
+  }
+}

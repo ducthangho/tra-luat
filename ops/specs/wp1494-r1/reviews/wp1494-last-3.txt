@@ -1,0 +1,5 @@
+**changes_requested** — 3 cause classes: **1 P2, 2 P3**, covering 10 manifestations.
+
+All 8 round-2 findings were checked; 6 classes are closed. The recurring mutant-oracle class triggers the §12 checkpoint. Live lease clearance remains unmeasured because fetch/ls-remote failed.
+
+[Full JSON report](/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1494-spec-review-3.json) saved and printed. Reviewed checkout unchanged; no GitHub writes.

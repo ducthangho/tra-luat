@@ -1,0 +1,20 @@
+== .github/workflows/canh-tuoi-audit.yml
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/canh_tuoi_audit.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+== ops/canh_tuoi_audit_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+NGƯỜI_GIỮ 0: không có
+rc=0
+== .claude/dev/ci_dang_ky_test.py
+HẾT_HẠN	wp1343-r1-g1-claude	refs/remotes/origin/ops/wp1343-r1-g1-lease:ops/leases/wp1343-r1-g1-claude.yaml
+HẾT_HẠN	wp1343-r2-g1-claude	refs/remotes/origin/ops/wp1343-r1-g1-lease:ops/leases/wp1343-r2-g1-claude.yaml
+HẾT_HẠN	wp1343-r3-g1-claude	refs/remotes/origin/ops/wp1343-r1-g1-lease:ops/leases/wp1343-r3-g1-claude.yaml
+HẾT_HẠN	wp923-r2-g2-claude	refs/remotes/origin/ops/wp923-r2-g2-lease:ops/leases/wp923-r2-g2-claude.yaml
+HẾT_HẠN	wp923-r3-g3-claude	refs/remotes/origin/ops/wp923-r3-g3-lease:ops/leases/wp923-r3-g3-claude.yaml
+NGƯỜI_GIỮ 1: wp1236-a-r12-g1-claude-20261121
+rc=0

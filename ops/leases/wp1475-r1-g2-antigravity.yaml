@@ -42,12 +42,12 @@ reviewer_transport: machine
 reviewer_model: gpt-6-astra
 reviewer_independence: 'Codex CLI phien va context moi, chi doc, neo exact SHA tung luot, chay qua .claude/dev/launcher.py run; khac ho model voi executor. Dac ta khai cham E5 nen chu kho duyet merge neo exact SHA.'
 spec_path: ops/specs/CI-PROVENANCE-WIN-THU-LAI-r1-g2.md
-spec_ref: refs/heads/ops/wp1475-r1-g1-lease@e3e86e0c70815a9f62dcecde986953ad595fabf6
+spec_ref: refs/heads/ops/wp1475-r1-g1-lease@0ee689ced6e6c8fcb06b3a1a839dba75d2661c71
 spec_ref_ghi_chu: 'OID40 cua spec dong bang cho g2, base nghiem thu bat bien'
-spec_hash: 8abf5a2767206857122d1087a4e50557e78d23026e53086fdffad01f58f28257
-spec_sha256: 8abf5a2767206857122d1087a4e50557e78d23026e53086fdffad01f58f28257
-spec_sha256_required: 8abf5a2767206857122d1087a4e50557e78d23026e53086fdffad01f58f28257
-spec_blob: 62b06d4c371deba73ea1aefcf5850539a3199329
+spec_hash: 76a9016d33c68524ecb2e032408916d851ad4c989101a3d0b1f553290b2ba2b7
+spec_sha256: 76a9016d33c68524ecb2e032408916d851ad4c989101a3d0b1f553290b2ba2b7
+spec_sha256_required: 76a9016d33c68524ecb2e032408916d851ad4c989101a3d0b1f553290b2ba2b7
+spec_blob: 3b4c0ff87a27d8c4f19cc5789944a893e80b6489
 branch: agent/wp1475-g2-antigravity
 branch_ownership: exclusive
 target_branch_neu_land: master

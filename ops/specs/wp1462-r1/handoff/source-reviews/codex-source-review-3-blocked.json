@@ -1,0 +1,314 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1462",
+  "generation": 2,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine/local",
+  "session_id": "wp1462-source-review-3-preflight-20261121T181924Z",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_cli",
+    "transport": "machine/local",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "identity_basis": "Current Codex agent role and local shell tool access; no independent per-request model/effort receipt inspected.",
+    "sandbox": "workspace-write; approval policy never; checkout treated read-only"
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "724993bf23f16070f272ccd81b4fe16c111ce2eb",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "tests": [
+    {
+      "cmd": "git rev-parse HEAD HEAD^{tree}",
+      "rc": 0,
+      "status": "passed",
+      "summary": "724993bf23f16070f272ccd81b4fe16c111ce2eb\n75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12",
+      "stdout_sha256": "48b1cd0a1b7bc008fcd272ac05baff9832db2bb5b0b798642424352ac16fba8b"
+    },
+    {
+      "cmd": "git branch --show-current",
+      "rc": 0,
+      "status": "passed",
+      "summary": "agent/wp1462-r9-g3-opus",
+      "stdout_sha256": "46b146e9b547a46dad836a12cf7380e7bb7b452d7fc02ea7f1ca69bb15a24acf"
+    },
+    {
+      "cmd": "git config core.abbrev",
+      "rc": 0,
+      "status": "passed",
+      "summary": "7",
+      "stdout_sha256": "10159baf262b43a92d95db59dae1f72c645127301661e0a3ce4e38b295a97c58"
+    },
+    {
+      "cmd": "git diff --numstat 48d372e14f190dae83a75ccbca8ee9a0b25635c5 724993bf23f16070f272ccd81b4fe16c111ce2eb",
+      "rc": 0,
+      "status": "passed",
+      "summary": "244\t0\t.claude/dev/packet_loop.py\n793\t3\t.claude/dev/packet_loop_test.py\n30\t0\tops/specs/wp1462-r1/RUNBOOK_CONG_TAC.md\n50\t0\tops/specs/wp1462-r1/do/KET_QUA.md\n439\t0\tops/specs/wp1462-r1/do/do_b4.py",
+      "stdout_sha256": "c62c95ecdb5243acbc927bb451ff9cfbd22d2573dbd622b7f39dc6877ba405d4"
+    },
+    {
+      "cmd": "git show origin/ops/wp1462-r1:ops/specs/wp1462-r1/SPEC.md",
+      "rc": 0,
+      "status": "passed",
+      "summary": "sha256=e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d"
+    },
+    {
+      "cmd": "git show origin/ops/wp1462-r1:ops/leases/wp1462-r9-g3-claude.yaml",
+      "rc": 0,
+      "status": "passed",
+      "summary": "sha256=c024376e0c8e5025b480391b89dd38a42ea90ae4ae9cf13467473d802acdf824; {\"revision\": 9, \"generation\": 3, \"mission_revision\": 95, \"branch\": \"agent/wp1462-r9-g3-opus\", \"spec_hash\": \"e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d\", \"lease_until\": \"2026-11-26T08:00:00Z\"}"
+    },
+    {
+      "cmd": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/mission-r89.json",
+      "rc": 0,
+      "status": "passed",
+      "summary": "sha256=6dbaf8c2395caffb1f67d7482c1b99bc3d6be15bada48d354cbdd5bce42a1cf4; revision=89; ['Two executor writers at most (PR1 and B4); B3/B1a spec authoring is not an executor writer.', 'B4 lease successor issued only after the owner approves the r8 spec hash and this revision is installed.', 'Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged.']"
+    },
+    {
+      "cmd": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/mission-r95.json",
+      "rc": 128,
+      "status": "failed",
+      "summary": "fatal: path 'ops/specs/wp1172-source-plan-r4/mission-r95.json' does not exist in 'origin/ops/wp1172-plan-r4'"
+    },
+    {
+      "cmd": "git status --porcelain=v1 --untracked-files=all --ignored=matching",
+      "rc": 0,
+      "status": "passed",
+      "summary": "!! .codex/",
+      "stdout_sha256": "7a26e2a87df7447fae58bdb1eb41dca70c4e41f40c2b821cb7466761d682cb52"
+    },
+    {
+      "cmd": "git diff --binary",
+      "rc": 0,
+      "status": "passed",
+      "summary": "No output",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "cmd": "git diff --cached --binary",
+      "rc": 0,
+      "status": "passed",
+      "summary": "No output",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "cmd": "git ls-files --others --exclude-standard",
+      "rc": 0,
+      "status": "passed",
+      "summary": "No output",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "cmd": "git ls-files --others --ignored --exclude-standard",
+      "rc": 0,
+      "status": "passed",
+      "summary": "No output",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "cmd": "python3 -B .claude/dev/packet_loop_test_manh.py --manh 0/4",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Mandatory preflight stop: assignment generation/Mission conflict remains unresolved. No result inferred from executor evidence."
+    },
+    {
+      "cmd": "Committed cong_b4_* cases",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Mandatory preflight stop: assignment generation/Mission conflict remains unresolved. No result inferred from executor evidence."
+    },
+    {
+      "cmd": "python3 -B ops/specs/wp1462-r1/do/do_b4.py ab",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Mandatory preflight stop: assignment generation/Mission conflict remains unresolved. No result inferred from executor evidence."
+    },
+    {
+      "cmd": "python3 -B ops/specs/wp1462-r1/do/do_b4.py dot-bien",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Mandatory preflight stop: assignment generation/Mission conflict remains unresolved. No result inferred from executor evidence."
+    },
+    {
+      "cmd": "Reviewer mutations outside the committed mutant list",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Mandatory preflight stop: assignment generation/Mission conflict remains unresolved. No result inferred from executor evidence."
+    },
+    {
+      "cmd": "Ruff pin/probe and bare F lint delta",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Mandatory preflight stop: assignment generation/Mission conflict remains unresolved. No result inferred from executor evidence."
+    },
+    {
+      "cmd": "python3 -B .claude/dev/packet_loop.py doctrine-scan --root .",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Mandatory preflight stop: assignment generation/Mission conflict remains unresolved. No result inferred from executor evidence."
+    },
+    {
+      "cmd": "python3 -B .claude/dev/packet_loop.py adr-song --root .",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Mandatory preflight stop: assignment generation/Mission conflict remains unresolved. No result inferred from executor evidence."
+    },
+    {
+      "cmd": "Scratch merge of candidate into current origin/master and B4 rerun",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Mandatory preflight stop: assignment generation/Mission conflict remains unresolved. No result inferred from executor evidence."
+    }
+  ],
+  "findings": [
+    {
+      "id": "B4-PREFLIGHT-01",
+      "class_slug": "b4-review-assignment-identity",
+      "severity": "P2",
+      "location": "PROMPT-wp1462-source-review-3.md: Object/Mission and Output instructions; origin/ops/wp1462-r1:ops/leases/wp1462-r9-g3-claude.yaml; supplied origin/ops/wp1172-plan-r4",
+      "claim": "The prompt requires generation 2 (attempt 2) and names Mission r89, while the assigned r9-g3 lease and exact-H handoff both specify generation 3, attempt 4, Mission r95. The supplied Mission ref has no mission-r95.json (git show rc 128). AGENTS.md section 2 forbids silently correcting a preflight mismatch; protocol section 3.2.1 requires matching revision/generation and authoritative sources. An asynchronous clarification was requested; no response has been received.",
+      "evidence": [
+        "HEAD and tree match the assignment exactly. Frozen r9 spec SHA-256 matches e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d.",
+        "Lease bytes SHA-256 c024376e0c8e5025b480391b89dd38a42ea90ae4ae9cf13467473d802acdf824: revision 9, generation 3, mission_revision 95.",
+        "Handoff bytes SHA-256 946895b63fcfd6f2e2479ce2d2842e919bab24f58c3c60729e4ef41fd6d2ca1e: revision 9, generation 3, attempt 4, mission_revision 95, exact H.",
+        "Supplied spec ref OID 371e9edcba12172a53a772472620f380d63ba472; supplied Mission ref OID 0c4d94bbe80c080481c02dcf68b3b70a26ff56d4. The latter contains mission-r90.json through mission-r93.json but not mission-r95.json.",
+        "This is an assignment/bootstrap defect, not a newly established production-code defect."
+      ],
+      "suggested_fix": {
+        "where": "Coordinator review assignment and supplied authority snapshot outside the candidate checkout.",
+        "how": "Clarify whether this review must use the r9/g3/Mission-r95 tuple shown by the assigned lease and handoff, and provide the authoritative Mission-r95 OID/path/hash and installation evidence. Align the output metadata before continuing this same review task; preserve existing review budget history.",
+        "locking_test": "Repeat preflight and require agreement among assignment, lease, spec revision/hash, generation, Mission source and exact candidate H/tree.",
+        "what_the_fix_may_spawn": "Silently changing generations, conflating historical Mission r89 with r95, or resetting review budgets. Correct only the assignment/evidence tuple; do not alter candidate H."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "b4-review-assignment-identity",
+      "finding_ids": [
+        "B4-PREFLIGHT-01"
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": [
+        "724993bf23f16070f272ccd81b4fe16c111ce2eb"
+      ],
+      "common_fix_or_reason": "Align the review authority tuple and supply the referenced Mission revision before substantive review.",
+      "closing_check": "Repeat preflight and require agreement among assignment, lease, spec revision/hash, generation, Mission source and exact candidate H/tree."
+    }
+  ],
+  "prior_findings_check": [],
+  "prior_class_status": [],
+  "hunt_table": [
+    {
+      "hypothesis": "The trusted classifier materialization still accepts unverified execution or input objects.",
+      "command": "Run existing committed integrity cases and previously saved counterexamples; inspect spec section 5.",
+      "real_output": "not_run: preflight stopped before substantive review; no measurement output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "An independently weakened K2b guard survives the target case.",
+      "command": "Run committed mutants and fresh guard mutations with healthy controls and ChotB4 attribution.",
+      "real_output": "not_run: preflight stopped before substantive review; no measurement output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "The full existing-case population contains cases missed by the A/B census or CLI counter.",
+      "command": "Independently run the complete base case book and reconcile all counted/grouped cases.",
+      "real_output": "not_run: preflight stopped before substantive review; no measurement output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "Transport deadlines, response decoding or redirects violate the live-read contract.",
+      "command": "Run committed loopback transport cases and corresponding mutants.",
+      "real_output": "not_run: preflight stopped before substantive review; no measurement output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "K2b emits incorrect diagnostics or reads the switch before a reduction is established.",
+      "command": "Run committed ordering/default-closed/diagnostic cases and guard mutations.",
+      "real_output": "not_run: preflight stopped before substantive review; no measurement output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "Integration with the supplied current master changes B4 behavior.",
+      "command": "Merge into a private scratch copy and rerun B4 cases.",
+      "real_output": "not_run: preflight stopped before substantive review; no measurement output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Exact candidate",
+      "declared": "724993bf23f16070f272ccd81b4fe16c111ce2eb",
+      "measured": "724993bf23f16070f272ccd81b4fe16c111ce2eb",
+      "match": true
+    },
+    {
+      "claim": "Candidate tree",
+      "declared": "75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12",
+      "measured": "75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12",
+      "match": true
+    },
+    {
+      "claim": "Frozen spec SHA-256",
+      "declared": "e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d",
+      "measured": "e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d",
+      "match": true
+    },
+    {
+      "claim": "Review generation",
+      "declared": 2,
+      "measured": {
+        "lease": 3,
+        "handoff": 3
+      },
+      "match": false
+    },
+    {
+      "claim": "Mission revision",
+      "declared": 89,
+      "measured": {
+        "lease": 95,
+        "handoff": 95,
+        "mission_r95_at_supplied_ref": "missing"
+      },
+      "match": false
+    },
+    {
+      "claim": "Diff size",
+      "declared": {
+        "files": 5,
+        "added": 1556,
+        "deleted": 3
+      },
+      "measured": {
+        "files": 5,
+        "added": 1556,
+        "deleted": 3
+      },
+      "match": true
+    }
+  ],
+  "verdict": "blocked",
+  "assurance": "review_deferred",
+  "evidence_url": null,
+  "notes": [
+    "PREFLIGHT-ONLY BLOCKED RECORD. This is not a completed source review, approval, validation of executor tests, or authorization to merge.",
+    "generation=2 is retained solely to expose the exact requested output metadata; it is NOT a validated generation and conflicts with the observed generation 3. This artifact must not be admitted as a valid generation-2 review receipt.",
+    "No substantive code review, tests, mutations, hostile-input generation, scratch merge, GitHub writes, commits, push, workflow dispatch, variable updates or LIVE calls were performed.",
+    "Prior findings and classes were read but not independently rechecked on H. Their mandatory four-way labels are deliberately not fabricated; empty prior_findings_check/prior_class_status means NOT_RUN, not closed or no findings. This blocked record does not satisfy the completed-review comparison contract.",
+    "Prior findings awaiting recheck: B4-C01 / b4-trusted-classifier-materialization, B4-S05 / b4-predicate-mutation-proof, B4-C04 / b4-ab-population-coverage, B4-C05 / b4-handoff-evidence-contract. Additional inherited classes: b4-rest-total-deadline and b4-g5-readback-normalization.",
+    "Head/tree are unchanged; observed tracked diff and index diff are empty and there are no reported untracked files. Ignored status reports .codex/. A full before/after content snapshot of ignored runtime files was not captured; no claim of complete filesystem immutability is made.",
+    "The canonical spec is available only from the assigned authority ref; ops/specs/wp1462-r1/SPEC.md does not exist in the candidate checkout. Its absence was not repaired.",
+    "Executor handoff and prior verdict hashes were checked locally; GitHub publication bodies/receipts were not independently read back.",
+    "The clarification remains pending. Do not interpret elapsed time as authorization or reset the final-round review budget."
+  ]
+}

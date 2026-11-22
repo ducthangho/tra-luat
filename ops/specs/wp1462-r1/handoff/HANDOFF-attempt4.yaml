@@ -1,0 +1,163 @@
+schema_version: 1
+packet_id: wp1462
+packet_issue: 1462
+mission_issue: 1172
+mission_revision: 95
+revision: 9
+generation: 3
+attempt: 4            # LAST executor attempt (lease limits.executor_attempts 4)
+lease_id: wp1462-r9-g3-claude
+spec_hash: e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d
+provider: claude
+model_family: claude
+model: claude-opus-5-5   # lease: "claude-opus-5-5 highest effort (attempt 4 of 4)"; served model self-reported by the session, no launcher receipt
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+role: executor
+session_id: session_015Gtxrb3cuZ7Nm935R8yA5W/agent-a53f2aabab4e02d75
+branch: agent/wp1462-r9-g3-opus   # local only, worktree agent-a53f2aabab4e02d75. Nothing pushed.
+base_sha: 48d372e14f190dae83a75ccbca8ee9a0b25635c5
+continuation_base: 6767e377bc2bdf3b512c6641496e88f614eb8978   # attempt-3 head
+head_sha: 724993bf23f16070f272ccd81b4fe16c111ce2eb
+head_tree: 75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12
+commits_in_attempt_4: [724993bf23f16070f272ccd81b4fe16c111ce2eb]   # ONE commit on 6767e37, no amend
+status: needs_followup
+summary: >
+  Acceptance 1 of spec r9 implemented in ops/specs/wp1462-r1/do/do_b4.py `ab`: every counted case (157) goes into
+  exactly one group. (a) touches the CLI: rc/stdout/stderr byte-compared. (b) only when MEASURED: 0 CLI touches in the
+  whole case at the base run AND the head run (sys.monitoring PY_START of a `main` in a file named packet_loop.py, plus an
+  audit hook on process spawns naming packet_loop.py); compares the exception chain (module.qualname + message per layer,
+  __cause__ then __context__) of both sides of each kiem-merge call and of the exception leaving _c1106 at base vs head.
+  (c) self-modified script: the edit is re-applied to each side's script, run in the same directory, bytes compared after
+  ONLY `File "…", line N` -> `line ?`. Each kiem-merge call now runs every side even if an earlier side raised. Self-checks:
+  group comparator (12 cases, incl. (a) differing only in traceback line numbers => red), fake-book counting/grouping
+  (a case that enters `main` then raises => (a) and red), and 4 mutants of the comparator itself, all killed.
+  Measured on exact H: 147/9/1 = 157, 0 mismatches. Product code and packet_loop_test.py unchanged from attempt 3.
+  KET_QUA.md condensed 207 -> 50 lines, all numbers/verdicts kept (mutant table regrouped, every pair listed).
+changed_paths:   # git diff --name-only 48d372e..724993b
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - ops/specs/wp1462-r1/RUNBOOK_CONG_TAC.md
+  - ops/specs/wp1462-r1/do/KET_QUA.md
+  - ops/specs/wp1462-r1/do/do_b4.py
+size_receipt:
+  command: git diff --numstat 48d372e14f190dae83a75ccbca8ee9a0b25635c5 724993bf23f16070f272ccd81b4fe16c111ce2eb
+  numstat:
+    - [244, 0, .claude/dev/packet_loop.py]
+    - [793, 3, .claude/dev/packet_loop_test.py]
+    - [30, 0, ops/specs/wp1462-r1/RUNBOOK_CONG_TAC.md]
+    - [50, 0, ops/specs/wp1462-r1/do/KET_QUA.md]
+    - [439, 0, ops/specs/wp1462-r1/do/do_b4.py]
+  files: 5
+  added: 1556
+  deleted: 3
+  tran: {files: 6, added: 1600, nguon: "spec r9 nang_tran (unchanged from r8), lease field size"}
+  ket_luan: TRONG_TRAN
+  delta_vs_attempt3: "git diff --numstat 6767e37 724993b: KET_QUA.md +46/-203, do_b4.py +183/-69"
+  write_set_check: "both changed paths are under ops/specs/wp1462-r1/; SPEC.md untouched; packet_loop.py and packet_loop_test.py byte-identical to attempt 3 (sha256 816f77d1…, 43e32fd9…)"
+authority_checks:
+  prompt: {path: ops/prompts/wp1462-r9-g3-opus-attempt4.txt, ref: origin/ops/wp1462-r1, sha256: 3f5675c1294e0a699b01eefd5f870470cd174b0cf3fc57e6aac10a4bcc37310b, khop_lease: true}
+  spec: {path: ops/specs/wp1462-r1/SPEC.md, ref: origin/ops/wp1462-r1, sha256: e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d, khop_lease: true}
+  lease: {path: ops/leases/wp1462-r9-g3-claude.yaml, ref: origin/ops/wp1462-r1, lease_until: "2026-11-26T08:00:00Z", published: "https://github.com/ducthangho/tra-luat/issues/1462#issuecomment-7063528261 (not re-read by executor)"}
+  prior_verdict: {path: rv1462/codex-source-review-2.json, sha256: 646de32bea364a4e71339b2a044a5d47229cffffdeb47b6d5846cb1b5c3ef281}
+da_doc:
+  - CLAUDE.md (session context, full)
+  - "docs/PROTOCOL_DA_PHIEN.md §4, §5 (+5.1), §6, §7, §8 (+8.1, 8.2, 8.3), §10 (10.1, 10.2.1–10.2.4), §11, §12, §13 (+13.1, 13.2): lines 241–1261"
+  - .claude/skills/work-packet/SKILL.md (full)
+  - docs/adr/0044, 0053, 0055 (full); 0060 (full); 0067 (Bối cảnh, Quyết định, Sổ quyết định uỷ quyền; later sections skimmed by heading only)
+  - "SPEC r9: header/trạng thái r9, Hợp đồng §5–§7, Nghiệm thu (GT, luật chung, tiêu chí 1–11); other sections via r8 history in attempt 3"
+  - "codex-source-review-2.json: findings, class_table, prior_class_status, hunt_table, notes, unfinished_commands"
+three_marks: {base_sha: 48d372e14f190dae83a75ccbca8ee9a0b25635c5, start: 6767e377bc2bdf3b512c6641496e88f614eb8978, head: 724993bf23f16070f272ccd81b4fe16c111ce2eb}
+run_start: {sha: 6767e377bc2bdf3b512c6641496e88f614eb8978, tree: 2b14367581f64ae692be863c1bfe8389b148643a}
+run_end: {sha: 724993bf23f16070f272ccd81b4fe16c111ce2eb, tree: 75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12, working_tree: clean, commits_added_by_this_session: 1}
+acceptance_1_groups:
+  counted: 157
+  classified: 157
+  a: {count: 147, names_file: rv1462/a4/work/H_nhom_a.txt, names_sha256_sorted_lf: 3595032ff83e65090ac9cb9ff1bce9d48ca237d4bd5db4e67c24657301e1f9ce}
+  b: {count: 9, names: [r1187_transition_dispatch_AssertionError, r1187_transition_dispatch_RuntimeError, r1187_transition_dispatch_TimeoutExpired, r1187_transition_import_AssertionError, r1187_transition_import_RuntimeError, r1187_transition_import_TimeoutExpired, r1187_transition_setup_AssertionError, r1187_transition_setup_RuntimeError, r1187_transition_setup_TimeoutExpired], evidence: "CLI touches base 0 / head 0 for all nine; setup: no kiem-merge call; import/dispatch: one call, both sides raise the same chain packet_loop_test.CliSapDo(...) < <cls>('injected')"}
+  c: {count: 1, names: [r1187_overflow_crash_credit], evidence: "rc 1/1; equal after traceback line-number normalisation only; CLI touches base 2 / head 3"}
+  mismatches: 0
+  comparator_mutants: {chuan_hoa_ap_cho_a: GIET, ca_cham_cli_vao_b: GIET, bo_nhom_b: GIET, bo_nhom_c: GIET}
+tests:   # raw logs under rv1462/a4/log/
+  - name: packet_loop_test 4 shards + gom on EXACT H (clone a4/clone, .git is a directory, origin/master fetched, merge-base 48d372e), nothing else running in that checkout
+    command: "python3 -B .claude/dev/packet_loop_test_manh.py --manh i/4 --ra … (i=0..3); PACKET_LOOP=chay KQ_MANH=success python3 -B .claude/dev/packet_loop_test_manh.py --gom a4/log/mH --n 4"
+    status: passed
+    rc: [0, 0, 0, 0, 0]
+    evidence: "TỔNG: ĐẠT x4: 109/109 (carrier=có) + 43/43 + 808/808 + 808/808 = 1768/1768; GOM: ĐẠT · 4 mảnh · 1768 ca bắt buộc (sổ 1770 − CA_DAI). N before (base) 1579, after 1768 = 1579 + 189 cong_b4_* (unchanged from attempt 3: no test-file change). logs mH/manh-{0..3}.log sha256 1d6103a2…, 6b6fcec8…, a0e9ba41…, 5ce66fd2…; gom.log 79cc5fd1…"
+  - name: do_b4.py ab on EXACT H (criteria 1–2)
+    command: "python3 -B ops/specs/wp1462-r1/do/do_b4.py ab s for s in 0/8 4/8 1/4 2/4 3/4 (union = whole book; 0/4 split in two because it exceeds 90 min)"
+    status: passed
+    rc: [0, 0, 0, 0, 0]
+    evidence: "KẾT QUẢ ab: ĐẠT x5; base book 1581 (dat 1543, BoQua 37, OSError 1 = luong_canonical_chay_that at base); counted 157 = (a) 147 + (b) 9 + (c) 1; 154 kiem-merge calls at base (148 with bytes + 6 raising); criterion 2 old shape (a) 3 · (b) 104 · (c) 36 · (z) 5; group name lists identical to the pre-commit run. logs H/ab-{0_8,4_8,1_4,2_4,3_4}.log sha256 fa77a475…, d9c1b04b…, 15b979b5…, dabf6b9e…, df31dca7…"
+  - name: "do_b4.py ab pre-commit run on local measurement commit 36d9365 (do_b4.py identical to H, sha256 1979b0b1…; KET_QUA.md not yet condensed) — slice 0/4 KILLED"
+    status: failed
+    rc: khong_do_duoc
+    evidence: "slice 0/4 was killed by the 90-min background limit of the harness (rig, not code); log kept as a4/log/tam/ab-0.killed-90min.log sha256 a89b2e83…. Re-run as 0/8 + 4/8 (both rc 0, ĐẠT). Slices 1/4,2/4,3/4 rc 0 ĐẠT. These pre-commit numbers were written into KET_QUA.md and then re-measured identical on H (entry above)."
+  - name: do_b4.py dot-bien on EXACT H (criterion 4)
+    command: python3 -B ops/specs/wp1462-r1/do/do_b4.py dot-bien i/4 (i=0..3)
+    status: passed
+    rc: [0, 0, 0, 0]
+    evidence: "KẾT QUẢ dot-bien: ĐẠT x4; 143 b4_ mutants, 197 pairs, 197 ChotB4 · GIET, 0 false credit, 0 survivors, 0 red cross-family controls; grouped table identical (diff empty) to the one in KET_QUA.md. logs H/dotbien-{0..3}.log sha256 96343187…, 883ee30c…, 44afe4b5…, 7a49f1b5…"
+  - name: do_b4.py phat-lai on EXACT H (criterion 8)
+    status: passed
+    rc: 0
+    evidence: "60 merges · table sha256 aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a · khong_giam 42 + duong_nhanh 18 · REST 0 · private copy clean. log H/phatlai.log sha256 3da463c9…"
+  - name: Ruff F delta vs 48d372e (ruff 0.16.9, --isolated --select F --no-cache, files extracted with git show)
+    status: passed
+    evidence: "packet_loop.py 3/3 identical; packet_loop_test.py 13/13, same codes/messages except the 'from line N' numbers inside six F811 messages (line shift) => delta 0; do_b4.py 0 (All checks passed). Bare ruff is red pre-existing (rc 1 on both sides). logs a4/log/ruff/"
+  - {name: doctrine-scan (exact H), status: passed, rc: 0, evidence: "sạch — đã quét 12 tệp, 0 chỗ chép doctrine (mH/doctrine.log)"}
+  - {name: adr-song (exact H), status: passed, rc: 0, evidence: "66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1 (tha 0016) (mH/adr.log)"}
+  - name: tl selftest (exact H) and base 48d372e, same clone, sequential
+    status: failed
+    rc: {H: 1, base: 1}
+    evidence: "== tl selftest 1770/1784 == on both; the 14 failing IDs are identical (diff empty): r973_bootstrap_* (8), wp433_gws_cred_* (4), wp433_nlm_gws_dich_ngoai_kho, wp727_tl_gws_refresh — environment/credential tests. Delta = 0. logs mH/selftest.log, a4/log/selftest-base.log"
+  - {name: git diff --check 48d372e..H, status: passed, rc: 0, evidence: "no output"}
+  - {name: CI PR Ubuntu / gate-packet-loop-manh 16 shards / ci-dot-bien-du.yml on H, status: not_run, evidence: "executor does not push or dispatch (lease)"}
+  - {name: Windows, status: not_run, evidence: "cloud Linux; lease Windows_CI 0"}
+  - {name: old MUTANTS table (non-b4) and CA_DAI, status: not_run, evidence: "packet-loop-dot-bien.yml after merge"}
+test_selection:
+  gate_tier: T2
+  selector_policy_sha: 3f5675c1294e0a699b01eefd5f870470cd174b0cf3fc57e6aac10a4bcc37310b   # frozen executor prompt naming the measurement set (no automated selector active, protocol §10.1)
+  policy_source: "origin/ops/wp1462-r1:ops/prompts/wp1462-r9-g3-opus-attempt4.txt + SPEC r9 e14926d5 criteria 1-11"
+  catalog_identity: {packet_loop_test_py_blob_at_H: 54c8ed4be4036aa782cd30603cf18a16341a0fe6, case_count: 1770, b4_cases: 189, b4_mutants: 143}
+  tested_sha: 724993bf23f16070f272ccd81b4fe16c111ce2eb
+  selected_groups: [packet_loop_test 4 shards + gom, do_b4 ab / dot-bien / phat-lai, ruff F delta, doctrine-scan, adr-song, tl selftest (+ base), git diff --check]
+  full_fallback_reason: "sensitive packet: full component suite on exact H; repository full oracle runs on CI after a push"
+prior_findings:   # Codex source review 2 (reviewed b1c9e82); status as handed to reviewer 3
+  - id: B4-C04
+    class: b4-ab-population-coverage
+    severity: P2
+    attempt4_change: "spec r9 three-group rule implemented (summary above); population classified = counted = 157; (b) needs measured 0 CLI touches on both runs; (c) normalisation confined to `c` calls of group-(c) cases; comparator self-checks + 4 comparator mutants"
+    locking: "tu_kiem_nhom (12 cases), tu_kiem_dem (fake book incl. touch-then-raise case), DOT_BIEN_AB (4 mutants, all GIET every slice)"
+  - id: B4-C01
+    class: b4-trusted-classifier-materialization
+    severity: P1
+    attempt4_change: "none (attempt-3 fix kept byte-identical; packet_loop.py unchanged, so no regression)"
+    residual_for_reviewer: "classifier INPUT objects (H, history) read by the classifier's own git through the --root store are not re-hashed; spec §5 says the classifier reads objects of --root. Executed bytes (M commit -> trees -> blobs) are verified. Not closed by an authorized spec decision; reviewer to judge."
+  - {id: B4-S05, class: b4-predicate-mutation-proof, severity: P2, attempt4_change: "none (attempt-3 whole-domain cases/mutants kept); re-measured 197/197 GIET on H"}
+  - {id: B4-C05, class: b4-handoff-evidence-contract, severity: P3, attempt4_change: "this handoff keeps the killed slice as failed with rc khong_do_duoc and log; real selector identity"}
+  - {id: B4-C02, class: b4-rest-total-deadline, status_in_review_2: "VÁ HỜ (evidence limitation: socket EPERM in reviewer sandbox)", attempt4_change: none, note: "transport cases pass here (sockets available): part of 1768/1768"}
+hint_provenance: []
+stop_conditions_hit:
+  - "executor attempts: 4/4 used — no further executor attempt under this lease"
+  - "§12: b4-predicate-mutation-proof recurrence already flagged by attempt 3 for Review Rescue Checkpoint (coordinator decision)"
+remaining_work:
+  - "Codex source review 3 on exact H 724993b (lease cap Codex_source_review 3)"
+  - "Reviewer to judge: criterion 2 reading (below) and the B4-C01 input-object residual"
+  - "Then: owner exact-H audit before first push, PR CI Ubuntu, ci-dot-bien-du.yml on H, Windows classification/owner line if K6 needs it"
+  - "Coordinator posts this handoff + size receipt to Issue #1462 (executor makes no GitHub writes)"
+diem_can_reviewer_soi:
+  - "Criterion 2 (unchanged in r9) is applied to the same groups: calls where a side raised (6, group b) have no bytes and are listed, not classed; `c` calls are compared after the SAME single normalisation. r9 only rewrote criterion 1's 'ĐỎ khi'; this is the executor's reading, not a spec text."
+  - "CLI-touch meter: counts `main` in any file named packet_loop.py (in-process) and any spawn whose args mention packet_loop.py; it cannot see a CLI reached another way (none known in the population). Without sys.monitoring (Python < 3.12) nothing can enter (b) => red."
+  - "Test modules are now loaded sequentially under the same name `packet_loop_test` so full exception class names match across sides."
+  - "Each kiem-merge call runs every side even if an earlier side raised (before: the head side was skipped)."
+next_role: reviewer
+manual_next_action: "Coordinator: verify this handoff's sha256, post it to Issue #1462, dispatch Codex source review 3 on 724993bf23f16070f272ccd81b4fe16c111ce2eb (branch agent/wp1462-r9-g3-opus in worktree agent-a53f2aabab4e02d75, not pushed)."
+copyable_prompt: null
+failure: {fingerprint: null, category: null}
+successors: []
+temp_dirs_created:
+  - rv1462/a4/ (prompt.txt, SPEC.md copy, work/, log/, ruff copies under log/ruff)
+  - rv1462/a4/clone (the one extra clone, --shared from /home/user/tra-luat; local branch do-tam = measurement commit 36d9365, now detached at base 48d372e)
+  - "/tmp/b4ab-4dlz4r5t (21 MB): left by the killed slice 0/4 run; NOT removed (rm was denied by the permission system). Other /tmp/b4ab-*, b4db-*, b4pl-* dirs there predate this session"

@@ -1,0 +1,150 @@
+schema_version: 1
+packet_id: wp1462
+packet_issue: 1462
+mission_issue: 1172
+mission_revision: 88
+revision: 7
+generation: 1
+attempt: 1
+lease_id: wp1462-r7-g1-claude
+lease_comment: https://github.com/ducthangho/tra-luat/issues/1462#issuecomment-7048170825
+spec_hash: b4520d256b0df5b4942462900570522fc7e9d9c0ee5ee6c0c19786013df7dbb3
+provider: claude
+model_family: claude
+model: claude-fable-5-2
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+role: executor
+session_id: session_015Gtxrb3cuZ7Nm935R8yA5W/agent-a50d5a2fa7bfdf396
+base_sha: 48d372e14f190dae83a75ccbca8ee9a0b25635c5
+head_sha: 45317c6f00fd1c9d8373998c377db35451a3a1d1
+# LỆCH CÓ CHỦ Ý so với cặp mặc định của prompt (`needs_followup` + `next_role: reviewer`): cặp ấy là tổ hợp KÍCH HOẠT review (§7),
+# mà ứng viên H vượt trần kích thước ⇒ đặc tả mục "Kích thước" + ADR-0044/0053 buộc DỪNG TRƯỚC review. Executor không xin review.
+status: blocked
+summary: >
+  Thi công xong B4 theo đặc tả r7 trên MỘT commit cục bộ H (không đẩy, không PR, không comment, không dispatch, không đặt biến Actions nào).
+  `kiem-merge` có điều kiện mới `K2b làn G5` (chỉ siết): bằng chứng G5 đủ trên H ⇒ đạt im lặng, trùng byte với base; còn lại cờ
+  `--siet-g5-du` / tự kiểm cây 7a+7b / tính lại lớp bằng bộ phân loại của origin/master trong cây tạm / đọc SỐNG công tắc qua REST GET.
+  Mọi phép đo tại chỗ đều đạt trên đúng H. NHƯNG ứng viên vượt trần `sensitive` của ADR-0053 (≤ 6 tệp / ≤ 450 dòng thêm): 5 tệp, 1263 dòng
+  thêm. Theo luật dừng: KHÔNG đẩy H, KHÔNG xin review/audit, không cắt ca hay đột biến để vừa trần. Nộp biên nhận kích thước cho điều phối.
+changed_paths:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - ops/specs/wp1462-r1/RUNBOOK_CONG_TAC.md
+  - ops/specs/wp1462-r1/do/KET_QUA.md
+  - ops/specs/wp1462-r1/do/do_b4.py
+size_receipt:   # biên nhận kích thước, NGOÀI H (đặc tả mục "Kích thước"); đo SAU khi H đã commit
+  command: git diff --numstat 48d372e14f190dae83a75ccbca8ee9a0b25635c5 45317c6f00fd1c9d8373998c377db35451a3a1d1
+  base_sha: 48d372e14f190dae83a75ccbca8ee9a0b25635c5
+  head_sha: 45317c6f00fd1c9d8373998c377db35451a3a1d1
+  head_tree: 843627c372b0c39a4758d051618cd374fd4d7d93
+  numstat:   # thêm / xoá / tệp
+    - [189, 0, .claude/dev/packet_loop.py]
+    - [619, 3, .claude/dev/packet_loop_test.py]
+    - [30, 0, ops/specs/wp1462-r1/RUNBOOK_CONG_TAC.md]
+    - [188, 0, ops/specs/wp1462-r1/do/KET_QUA.md]
+    - [237, 0, ops/specs/wp1462-r1/do/do_b4.py]
+  files: 5
+  added: 1263
+  deleted: 3
+  tran_dang_hieu_luc: {files: 6, added: 450, nguon: "ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab (dòng khai đầu đặc tả); không có khối nang_tran"}
+  ket_luan: VUOT_TRAN_DONG_THEM (1263 > 450); số tệp TRONG trần (5 ≤ 6)
+  ghi_chu: >
+    Phân bổ 1263 dòng thêm: mã sản phẩm 189; test 619 (trong đó ~95 dòng là ba khối chuỗi nhiều dòng: trình bọc GT-1/3/4, bộ sinh hai
+    kênh GT-5, máy chủ loopback GT-2; ~150 dòng là 138 ca; ~100 dòng là 97 đột biến); do_b4.py 237; KET_QUA.md 188 (129 dòng là bảng
+    từng cặp mà tiêu chí 4 đòi nộp); runbook 30. Không phần nào cắt được mà không bỏ ca, đột biến hay bằng chứng đặc tả đòi.
+tests:   # mọi lệnh chạy trên clone sạch dựng tại ĐÚNG H (tools/mk.py: clone + checkout --detach H + core.abbrev 7); log ngoài kho, thư mục log/ cạnh tệp này
+  - name: packet_loop_test (4 mảnh, cổng bắt buộc không đột biến)
+    command: "python3 .claude/dev/packet_loop_test_manh.py --manh i/4 --ra … (i = 0..3, song song)"
+    status: passed
+    evidence: "rc 0/0/0/0; `TỔNG: ĐẠT` ×4; nền 109/109 + 43/43 + 763/763 + 764/764 = 1679/1679 đạt, BỎ QUA 38 (nền Linux), ca đã chạy 1717; carrier WP1174 chạy ở mảnh 0. log headH-manh-{0..3}.log sha256 299125d7…, 5d5fe555…, 8a97e0d0…, be685cfd…"
+  - name: packet_loop_test tại base (cùng quy trình clone)
+    command: như trên, clone tại 48d372e
+    status: passed
+    evidence: "rc 0 ×4; 1541/1541 đạt, BỎ QUA 38, ca đã chạy 1579 ⇒ N sau = N trước + ca mới: 1717 = 1579 + 138 (138 ca `cong_b4_*`)"
+  - name: tiêu chí 1–2 A/B (B-1, B-2)
+    command: python3 ops/specs/wp1462-r1/do/do_b4.py ab
+    status: passed
+    evidence: "rc 0; `KẾT QUẢ ab: ĐẠT`; 147 ca đi qua `_c1106` tại base, so được 147/147 ở cả hai hình dạng; tiêu chí 1: 0 lệch byte (rc, stdout, stderr); tiêu chí 2: (a) 3 · (b) 104 · (c) 36 · (z) 4, bốn ca lease hỏng nằm trong (z); tự kiểm bộ so 14/14. log headH-ab.log sha256 ee88c5a4…"
+  - name: tiêu chí 8 phát lại 60 merge + hồi quy khung dòng
+    command: python3 ops/specs/wp1462-r1/do/do_b4.py phat-lai
+    status: passed
+    evidence: "rc 0; `KẾT QUẢ phat-lai: ĐẠT`; bảng 60 dòng sha256 aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a (bằng số của đặc tả); hàm chạy 60/60 đúng lớp: 18 duong_nhanh + 42 khong_giam, 0 la; 0 yêu cầu REST; bản sao riêng của kho không thêm ref/worktree/object; CRLF mô phỏng 60/60 cùng lớp với LF; CR giữa giá trị ⇒ la. log headH-phat-lai.log sha256 3da463c9…"
+  - name: tiêu chí 4 đột biến b4_* (từng cặp)
+    command: python3 ops/specs/wp1462-r1/do/do_b4.py dot-bien
+    status: passed
+    evidence: "rc 0; `KẾT QUẢ dot-bien: ĐẠT`; 97 đột biến, 129 cặp, 129/129 GIẾT bằng `ChotB4` của chính ca đích; 0 tín dụng giả, 0 sống sót, 0 đối chứng khác họ đỏ; mọi mỏ neo khớp đúng 1 chỗ. log headH-dot-bien.log sha256 92797f64…"
+  - name: Ruff F delta
+    command: ruff check --select F .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py ops/specs/wp1462-r1/do/do_b4.py (ruff 0.16.9)
+    status: passed
+    evidence: "packet_loop.py base 3 / head 3; packet_loop_test.py base 13 / head 13 (tập thông điệp trùng, chỉ lệch số dòng); do_b4.py (mới) 0 lỗi ⇒ delta 0"
+  - name: doctrine-scan
+    command: python3 .claude/dev/packet_loop.py doctrine-scan --root .
+    status: passed
+    evidence: rc 0
+  - name: adr-song
+    command: python3 .claude/dev/packet_loop.py adr-song --root .
+    status: passed
+    evidence: "rc 0; `adr-song: sạch — 66 ADR trên đĩa, 66 dòng trong §20, khớp 1–1`"
+  - name: ci_dang_ky_test (không đòi bởi đặc tả; chạy thêm)
+    command: python3 .claude/dev/ci_dang_ky_test.py
+    status: passed
+    evidence: "rc 0; `PHẢN CHỨNG: 1226/1226 đỏ đúng`; `TỔNG: ĐẠT`. log headH-ci-dang-ky.log sha256 7de5fce0…"
+  - {name: CI PR Ubuntu trên H (5 check bắt buộc + 16 mảnh packet-loop), status: not_run, evidence: "executor không đẩy H (luật dừng kích thước; lease cấm push trước audit exact-H)"}
+  - {name: ci-dot-bien-du.yml trên H (K7), status: not_run, evidence: "cần H trên remote + dispatch; lease cấm workflow_dispatch_by_executor"}
+  - {name: bảng MUTANTS cũ (ngoài b4_*) + hai ca CA_DAI, status: not_run, evidence: "thuộc packet-loop-dot-bien.yml sau merge (đặc tả tiêu chí 4); ca `moc_dot_bien_phai_khop_DUNG_MOT_CHO` trong lượt nền xác nhận mọi mỏ neo cũ vẫn khớp đúng một chỗ"}
+  - {name: Windows (ca cong_b4_*, khung CRLF thật), status: not_run, evidence: "phiên cloud Linux; lease Windows_CI 0; CRLF mới chỉ mô phỏng"}
+  - name: tl selftest (protocol §12 bất biến (a), chạy trước để người đẩy khỏi chờ)
+    command: python3 scripts/tl.py --selftest
+    status: passed
+    evidence: "rc 0; `== tl selftest 1784/1784 ==` (hai số bằng nhau) trên clone tại H. log headH-tl-selftest.log sha256 3a6be15d…"
+  - name: git diff --check
+    command: git diff --check 48d372e14f190dae83a75ccbca8ee9a0b25635c5 45317c6f00fd1c9d8373998c377db35451a3a1d1
+    status: passed
+    evidence: rc 0, không dòng nào
+  - {name: "launcher_test, G5 cong_cu_test (8 mảnh bán kính đột biến), gate-ops, gate-registry", status: not_run, evidence: "write set không chạm tệp nào chúng đo trực tiếp; chờ CI trên H"}
+  - {name: đọc công tắc thật qua REST, status: not_run, evidence: "cố ý: bộ ca cấm mạng ngoài loopback (GT-4, bộ đếm = 0 ở mọi ca); phiên cloud loại này đã đo `khong_doc_duoc` ở đặc tả mục 6"}
+test_selection:
+  gate_tier: T2
+  selector_policy_sha: null   # chưa có selector (protocol §10.1 pre-selector): chọn tay
+  tested_sha: 45317c6f00fd1c9d8373998c377db35451a3a1d1
+  selected_groups: [packet_loop_test toàn bộ sổ trừ CA_DAI (4 mảnh), do_b4 ab, do_b4 phat-lai, do_b4 dot-bien, ruff F, doctrine-scan, adr-song, ci_dang_ky_test]
+  full_fallback_reason: "packet sensitive ⇒ chạy đủ bộ ca của thành phần bị chạm; full oracle của kho (CI) chưa có trên H vì chưa đẩy"
+spec_va_ba_moc:   # protocol §3.2.1
+  nguon_authoritative: {ref: "refs/heads/ops/wp1462-r1 (đo tại bbc2ba1ee9628be95dbf92f6f34c7a97a99966f2; lease ghi spec tại 9aac5aa)", path: ops/specs/wp1462-r1/SPEC.md, sha256: b4520d256b0df5b4942462900570522fc7e9d9c0ee5ee6c0c19786013df7dbb3, khop_lease: true}
+  ban_sao_cuc_bo: {path: "scratch ngoài checkout (rv1462/SPEC.md)", sha256: b4520d256b0df5b4942462900570522fc7e9d9c0ee5ee6c0c19786013df7dbb3, khop: true, trong_product_tree: false}
+  prompt: {path: ops/prompts/wp1462-r7-g1-fable-executor.txt, sha256: 5ae7aa57622f109a481e24cf1964da380dfa859d74a83bd87cc3b385b9fbe96a, khop_lease: true}
+  ke_hoach_nguon_r4: {sha256: 0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe, khop_dac_ta: true}
+  immutable_acceptance_baseline: 48d372e14f190dae83a75ccbca8ee9a0b25635c5
+  continuation_base: 48d372e14f190dae83a75ccbca8ee9a0b25635c5   # attempt 1: trùng baseline
+  reviewed_candidate: null   # H CHƯA là ứng viên review: vượt trần ⇒ dừng trước review
+  candidate_local_unpushed: {sha: 45317c6f00fd1c9d8373998c377db35451a3a1d1, tree: 843627c372b0c39a4758d051618cd374fd4d7d93, branch: agent/wp1462-r7-g1-claude, pushed: false}
+run_start: {sha: 48d372e14f190dae83a75ccbca8ee9a0b25635c5, tree_cmd: "git rev-parse 48d372e^{tree}"}
+run_end: {sha: 45317c6f00fd1c9d8373998c377db35451a3a1d1, tree: 843627c372b0c39a4758d051618cd374fd4d7d93, working_tree: clean, commits: 1}
+da_doc:   # theo prompt: ghi mục đã đọc
+  - CLAUDE.md (trong ngữ cảnh phiên)
+  - "docs/PROTOCOL_DA_PHIEN.md §3.2.1, §7, §10.1 (đọc trọn); §4, §5, §8, §8.3, §10.2, §12, §13 (CHƯA đọc trọn ở lượt này — chỉ tra mục lục)"
+  - ".claude/skills/work-packet/SKILL.md dòng 1–60"
+  - "docs/adr/0053 (đầu tệp + mục nang_tran), 0044 (dòng ngưỡng + cưỡng chế), 0060 (M5, M6, M12 — dòng tiêu đề); 0055, 0067: CHƯA đọc"
+  - "ops/specs/wp1462-r1/SPEC.md r7 (trọn); kế hoạch nguồn r4 §4 A+1 và §10 Q9(d)"
+remaining_work:
+  - "Điều phối: quyết đường đi cho trần kích thước — soạn khối `nang_tran` (ai_nang, can_cu kèm NGUYÊN numstat trên + hai SHA, tran_cu 6/450, tran_moi) trình chủ kho, cài vào đặc tả/Mission/lease; hoặc revision thiết kế. Executor không tự tách PR, không cắt ca."
+  - "Sau khi có trần hợp lệ: audit exact-H của chủ kho TRƯỚC lần đẩy đầu; review mã Codex trên đúng H; CI PR Ubuntu; một lượt ci-dot-bien-du.yml trên H; dòng `windows: <H> mien` của chủ kho (K6)."
+  - "Runbook mục 7: bảng W và bảng máy còn `khong_do_duoc` cho tới khi có `ops/specs/wp1462-r1/do/DO_Q9A.yaml` (hiện vật của điều phối); nghiệm thu runbook là lời duyệt của chủ kho."
+  - "Biên nhận kích thước này cần được điều phối đăng lên Issue #1462 (executor không được ghi GitHub)."
+diem_can_reviewer_soi:   # không phải tự review: chỗ executor đã CHỌN khi đặc tả để ngỏ, và giới hạn của phép đo
+  - "Chọn R/A/J của mục 3 dựa trên việc K2 đã xác thực lược đồ (K2b chỉ chạy khi K2 đạt); kiểu của `R.id` không được siết thêm (bằng mức K2)."
+  - "`cong_b4_system_exit`: đường `SystemExit` giữa hàm chạy in `LAN_G5 … buoc=tu_kiem lop=chua_tinh master=-` (chỉ tới được bằng tiêm lỗi)."
+  - "Chốt `không tệp bộ phân loại ⇒ la` và `7b tệp vắng ⇒ từ chối` được hai chốt con cùng phủ; đột biến của chúng (`b4_la_dat`, `b4_7b_bo_tep_vang`) là đột biến gộp."
+  - "Ba ca `khong_steps` / `step_khong_object` / `goc_khong_object` bị giết qua hợp đồng dòng chẩn đoán mục 9 (K2b ra `KHÔNG ĐO ĐƯỢC` thiếu `LAN_G5`/`CONG_TAC`), không qua đổi rc; vẫn là `ChotB4`, không phải CLI sập."
+  - "Đếm 147 ca của tiêu chí 1 là đếm ĐỘNG sau một bộ lọc tĩnh 160 ứng viên; chưa chạy cả sổ 1579 ca có gắn máy đếm để loại trừ ca nào gọi `_c1106` mà bộ lọc tĩnh sót."
+  - "Ca `log CI cũ in CHO_PHEP` của kế hoạch được hiện thực bằng nguồn do người gọi đưa (biến môi trường mang đúng tên/chuỗi + `GITHUB_OUTPUT`), vì `kiem-merge` không có đầu vào log nào."
+  - "Delta thời gian thật của gate-packet-loop-manh: khong_do_duoc (lượt base chạy chồng tải; trên H 4 mảnh tổng 2542 s, base 3306 s có tải)."
+next_role: human
+manual_next_action: "Điều phối đọc biên nhận kích thước (1263 dòng thêm / 5 tệp so với trần 450 / 6), KHÔNG đưa H đi review; soạn `nang_tran` bằng numstat đã đo và trình chủ kho (đặc tả mục Kích thước, ADR-0053). Nhánh cục bộ `agent/wp1462-r7-g1-claude` tại H nằm trong worktree agent-a50d5a2fa7bfdf396, chưa đẩy."
+copyable_prompt: null
+failure:
+  fingerprint: wp1462-r7-g1-size-cap-adr0053-1263-of-450
+  category: permission
+successors: []

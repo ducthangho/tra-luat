@@ -1,0 +1,1255 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1462",
+  "generation": 2,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine/local",
+  "session_id": "01a1fd1a-bca0-7b50-b8a9-11ff6c51f335",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "runtime": "OpenAI Codex CLI 0.170.0",
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "xhigh",
+    "served_model": "KHÔNG ĐO ĐƯỢC",
+    "served_effort": "KHÔNG ĐO ĐƯỢC",
+    "launcher_run_id": "5171dd1c09294a8aa0a468f765211d56",
+    "limitation": "Requested identity comes from the assignment, not an independently attested response header. Launcher terminal rc and final stdout hash must be attached by the coordinator after this writer exits."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "b1c9e826dac468de1cb1a4545bb8d1f866b035cb",
+  "reviewed_tree": "ed0260bd98657887e1da06f7c780a8cf98f8510c",
+  "base_sha": "48d372e14f190dae83a75ccbca8ee9a0b25635c5",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "tests": [
+    {
+      "cmd": "git rev-parse HEAD HEAD^{tree}; git diff --numstat 48d372e14f190dae83a75ccbca8ee9a0b25635c5 b1c9e826dac468de1cb1a4545bb8d1f866b035cb",
+      "rc": 0,
+      "summary": "H/tree exact; 5 paths, +1485/-3, within 6 files/1600 additions; changed paths equal the delivered handoff and effective write set.",
+      "status": "passed"
+    },
+    {
+      "cmd": "cd /tmp/wp1462-r2-cOE2t1ys/head && python -B .claude/dev/packet_loop_test_manh.py --manh 1/4 --ra /tmp/wp1462-r2-cOE2t1ys/shard.json",
+      "rc": 0,
+      "summary": "43/43 passed, 0 skipped; TỔNG: ĐẠT; shard 1/4, no carrier on this shard by design.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/shard.log"
+    },
+    {
+      "cmd": "cd /tmp/wp1462-r2-cOE2t1ys/head && python -B /tmp/wp1462-r2-cOE2t1ys/targeted.py /tmp/wp1462-r2-cOE2t1ys/head",
+      "rc": 1,
+      "summary": "166 attempted: 151 passed; 15 CliSapDo failures from socket creation EPERM. HTTP behavior for those 15 is not_measured; no false pass.",
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/targeted.log"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/targeted.py /tmp/wp1462-r2-cOE2t1ys/merged",
+      "rc": 1,
+      "summary": "Clean scratch merge of H into verified current master 1e397c89d69f451694a2252103ea97ec274ab43f; merged tree 3794efcc97c57032003bb8007af577e332e53504. Same 151 passed / same 15 socket-EPERM failures. Scratch removed after recording tree/status to relieve disk pressure.",
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/merged-targeted.log"
+    },
+    {
+      "cmd": "cd /tmp/wp1462-r2-cOE2t1ys/head && python -B ops/specs/wp1462-r1/do/do_b4.py dot-bien",
+      "rc": 1,
+      "summary": "126 mutants / 172 target pairs: 159 GIET (all ChotB4), 13 TIN_DUNG_GIA (transport socket EPERM); 0 survivors, 0 wrongly credited non-ChotB4 results, 0 red cross-family controls. The 13 blocked pairs are not_measured, not kills.",
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/mutants.log"
+    },
+    {
+      "cmd": "cd /tmp/wp1462-r2-cOE2t1ys/head && python -B ops/specs/wp1462-r1/do/do_b4.py phat-lai",
+      "rc": 0,
+      "summary": "60/60 expected classifications, 42 khong_giam + 18 duong_nhanh; table SHA-256 aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a; 60/60 LF/CRLF equivalence; corrupt-CR control rejects; REST0; private repository unchanged.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/replay.log"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/run.py ab0",
+      "rc": 130,
+      "summary": "Wrapper invoked python -B ops/specs/wp1462-r1/do/do_b4.py ab 0/4. Reviewer interrupted the still-running tool session using Ctrl-C to leave time for final evidence handling within the 90-minute run budget. Tool terminal exit_code=130; child rc was not collected separately. No complete census output or normal child result receipt; coverage not_measured. This is not a demonstrated product failure or an observed timeout.",
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/ab0.log"
+    },
+    {
+      "cmd": "cd /tmp/wp1462-r2-cOE2t1ys/head && python -B ops/specs/wp1462-r1/do/do_b4.py ab 1/4",
+      "rc": 0,
+      "summary": {
+        "slice": 1,
+        "book_cases": 395,
+        "outcomes": {
+          "ca:BoQua": 10,
+          "ca:dat": 385
+        },
+        "entering": 39,
+        "ordinary": 37,
+        "special": 2,
+        "entries": 39,
+        "comparisons": 37,
+        "head_new": 37,
+        "head_old": 37,
+        "classes": {
+          "a": 1,
+          "b": 25,
+          "c": 11
+        },
+        "names": [
+          "cong_c_k1_mot_dong_sai",
+          "cong_c_k3_original_tien_to",
+          "cong_c_k3_p1",
+          "cong_c_k4_changes",
+          "cong_c_k5_phu_dinh",
+          "cong_c_k6_dev_xanh",
+          "cong_c_k6_ps1_docs",
+          "cong_c_k6_thieu_id",
+          "cong_c_k6_unknown_chot",
+          "cong_c_m6_hai_thieu",
+          "cong_m9_job_attempt_bool",
+          "cong_m9_job_giua_float",
+          "cong_m9_job_run_khac",
+          "cong_m9_job_sau_float",
+          "cong_m9_mien_crlf",
+          "cong_m9_mien_dau_khoang_trang",
+          "cong_m9_ops_md_khong",
+          "cong_m9_pham_vi_ops_py",
+          "cong_m9_run_attempt_float",
+          "cong_m9_run_sai_tep",
+          "cong_m9_trang_thieu",
+          "k3s_any_findings",
+          "k3s_badge_p1",
+          "k3s_completed_null",
+          "k3s_hai_neo_khop_cu",
+          "k3s_json_hong",
+          "k3s_legacy_hong",
+          "k3s_security_nhan_legacy",
+          "k3s_sha_cu_khong_kiem_flags",
+          "k3s_sha_hoa",
+          "r1187_cli_both_valid",
+          "r1187_cli_datetime_max",
+          "r1187_cli_human",
+          "r1187_cli_missing_model_stdout",
+          "r1187_cli_transition",
+          "r1187_transition_dispatch_RuntimeError",
+          "r1187_transition_setup_AssertionError",
+          "stdout_cp1252",
+          "wp1254_cli_conversion"
+        ],
+        "error_lines": []
+      },
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/ab1.log"
+    },
+    {
+      "cmd": "cd /tmp/wp1462-r2-cOE2t1ys/head && python -B ops/specs/wp1462-r1/do/do_b4.py ab 2/4",
+      "rc": 0,
+      "summary": {
+        "slice": 2,
+        "book_cases": 395,
+        "outcomes": {
+          "ca:BoQua": 8,
+          "ca:dat": 387
+        },
+        "entering": 43,
+        "ordinary": 39,
+        "special": 4,
+        "entries": 43,
+        "comparisons": 39,
+        "head_new": 39,
+        "head_old": 39,
+        "classes": {
+          "b": 31,
+          "c": 7,
+          "z": 1
+        },
+        "names": [
+          "cong_c_k0_pr_head",
+          "cong_c_k1_anchor",
+          "cong_c_k1_git_loi",
+          "cong_c_k1_l2",
+          "cong_c_k3_p2_original_head",
+          "cong_c_k4_head",
+          "cong_c_k5_p3_khong_mien",
+          "cong_c_k5_sai_nguoi",
+          "cong_c_k6_md_chu_khoa",
+          "cong_c_k6_rong",
+          "cong_c_k6_tu_khoa_py",
+          "cong_m9_dev_khong_run",
+          "cong_m9_hai_run_hai_tep",
+          "cong_m9_job_failure",
+          "cong_m9_job_thieu_run_id",
+          "cong_m9_mien_duoi_tab",
+          "cong_m9_mien_ky_tu_tach",
+          "cong_m9_mien_sai_nguoi",
+          "cong_m9_nguoi_khac_run_xanh",
+          "cong_m9_nhom_khac_do_van_dat",
+          "cong_m9_pham_vi_workflow",
+          "cong_m9_run_attempt_bool",
+          "cong_m9_run_dang_chay",
+          "cong_m9_run_thieu_attempt_truoc",
+          "k3s_code_review_nhan_legacy",
+          "k3s_hai_neo_mau_thuan",
+          "k3s_running",
+          "k3s_running_badge_p1",
+          "k3s_security_bo_qua",
+          "k3s_sha_khoang_trang",
+          "k3s_status_sai_kieu",
+          "k3s_thieu_code_review",
+          "k3s_unresolved",
+          "r1187_cli_bad_human_good_model",
+          "r1187_cli_conflict",
+          "r1187_cli_missing_remote",
+          "r1187_cli_transition_bad",
+          "r1187_overflow_crash_credit",
+          "r1187_transition_dispatch_TimeoutExpired",
+          "r1187_transition_import_AssertionError",
+          "r1187_transition_setup_RuntimeError",
+          "stdout_cp1258",
+          "wp1254_cli_late"
+        ],
+        "error_lines": []
+      },
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/ab2.log"
+    },
+    {
+      "cmd": "cd /tmp/wp1462-r2-cOE2t1ys/head && python -B ops/specs/wp1462-r1/do/do_b4.py ab 3/4",
+      "rc": 0,
+      "summary": {
+        "slice": 3,
+        "book_cases": 395,
+        "outcomes": {
+          "ca:AssertionError": 1,
+          "ca:BoQua": 10,
+          "ca:OSError": 1,
+          "ca:dat": 383
+        },
+        "entering": 37,
+        "ordinary": 35,
+        "special": 2,
+        "entries": 37,
+        "comparisons": 35,
+        "head_new": 35,
+        "head_old": 35,
+        "classes": {
+          "b": 26,
+          "c": 7,
+          "z": 2
+        },
+        "names": [
+          "cong_c_fixture_crlf",
+          "cong_c_k1_hai_dong",
+          "cong_c_k1_hash",
+          "cong_c_k1_tag_hong",
+          "cong_c_k1_yaml_hong",
+          "cong_c_k4_ma_thoat",
+          "cong_c_k5_offline",
+          "cong_c_k5_p3_mien",
+          "cong_c_k6_luu_tru",
+          "cong_c_k6_skipped",
+          "cong_c_k6_symlink",
+          "cong_m9_dev_run_xanh",
+          "cong_m9_job_attempt_float",
+          "cong_m9_job_attempt_khac",
+          "cong_m9_job_dang_chay",
+          "cong_m9_job_sau_run_id_float",
+          "cong_m9_jobs_tron_run",
+          "cong_m9_mien_sha_khac",
+          "cong_m9_mien_sha_rut_gon",
+          "cong_m9_pham_vi_tep_sau",
+          "cong_m9_ranh_gioi_pham_vi",
+          "cong_m9_run_head_khac",
+          "cong_m9_run_xanh_o_giua",
+          "k3s_badge_ngoai_mien",
+          "k3s_bot_khac",
+          "k3s_code_review_sai_kieu",
+          "k3s_cu_vs_head",
+          "k3s_flags_so",
+          "k3s_json_sau",
+          "k3s_running_co_ket_luan_khac",
+          "k3s_running_null",
+          "k3s_sha_null",
+          "r1187_cli_missing_transition",
+          "r1187_cli_p3_block",
+          "r1187_transition_import_RuntimeError",
+          "r1187_transition_setup_TimeoutExpired",
+          "wp1254_cli_wrong_number"
+        ],
+        "error_lines": []
+      },
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/ab3.log"
+    },
+    {
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1462-r2-cOE2t1ys/known_entry_ab.py 0/4",
+      "rc": 0,
+      "summary": {
+        "measurement": {
+          "slice": 0,
+          "entering": 38,
+          "ordinary": 36,
+          "special": 2,
+          "comparisons": 36,
+          "classes": {
+            "a": 2,
+            "b": 22,
+            "c": 11,
+            "z": 1
+          },
+          "rc": 0
+        },
+        "scope": "Targeted disclosed entry cases only; not unfiltered population discovery."
+      },
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/known-ab0.log"
+    },
+    {
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1462-r2-cOE2t1ys/known_entry_ab.py 1/4",
+      "rc": 0,
+      "summary": {
+        "measurement": {
+          "slice": 1,
+          "entering": 39,
+          "ordinary": 37,
+          "special": 2,
+          "comparisons": 37,
+          "classes": {
+            "a": 1,
+            "b": 25,
+            "c": 11
+          },
+          "rc": 0
+        },
+        "scope": "Targeted disclosed entry cases only; not unfiltered population discovery."
+      },
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/known-ab1.log"
+    },
+    {
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1462-r2-cOE2t1ys/known_entry_ab.py 2/4",
+      "rc": 0,
+      "summary": {
+        "measurement": {
+          "slice": 2,
+          "entering": 43,
+          "ordinary": 39,
+          "special": 4,
+          "comparisons": 39,
+          "classes": {
+            "b": 31,
+            "c": 7,
+            "z": 1
+          },
+          "rc": 0
+        },
+        "scope": "Targeted disclosed entry cases only; not unfiltered population discovery."
+      },
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/known-ab2.log"
+    },
+    {
+      "cmd": "PYTHONDONTWRITEBYTECODE=1 python -B /tmp/wp1462-r2-cOE2t1ys/known_entry_ab.py 3/4",
+      "rc": 0,
+      "summary": {
+        "measurement": {
+          "slice": 3,
+          "entering": 37,
+          "ordinary": 35,
+          "special": 2,
+          "comparisons": 35,
+          "classes": {
+            "b": 26,
+            "c": 7,
+            "z": 2
+          },
+          "rc": 0
+        },
+        "scope": "Targeted disclosed entry cases only; not unfiltered population discovery."
+      },
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/known-ab3.log"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/end_to_end.py",
+      "rc": 0,
+      "summary": "Existing round-1 control/smudge/replace witnesses: rc12, khong_giam, REST0, repository clean.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/end_to_end.json"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/probes.py",
+      "rc": 0,
+      "summary": "Existing delayed-EOF healthy/over-budget controls and classifier local-filter/file-symlink probes. See probes.json.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/probes.json"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/tree_boundaries.py",
+      "rc": 0,
+      "summary": "Existing parent-symlink and literal traversal tree witnesses reject; no outside file and no object-store additions.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/tree_boundaries.json"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/duplicates_more.py",
+      "rc": 0,
+      "summary": "Existing two-mode, single/cross-file duplicate and distinct/conflicting-ID witnesses confirm repaired normalization.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/duplicates_more.json"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/policy_probe.py",
+      "rc": 0,
+      "summary": "Existing 66 policy probes: 66/66 matched, zero failures.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/policy_probe.json"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/deadline15.py",
+      "rc": 1,
+      "summary": "The old defect assertion fails because the defect is no longer reproduced: khong_doc_duoc at 15.000617s; one GET; no HIEU_LUC. This script rc1 is not a product regression.",
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/deadline15.json"
+    },
+    {
+      "cmd": "python -B /tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/a2/probe_obj.py /tmp/wp1462-r2-cOE2t1ys/head",
+      "rc": 0,
+      "summary": "Initial fixture attempt invalid: all fixture commits failed rc128 due to inherited signing configuration; no behavior credit. Corrected fixture setup is the separate next execution.",
+      "status": "not_measured"
+    },
+    {
+      "cmd": "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=commit.gpgsign GIT_CONFIG_VALUE_0=false PYTHONDONTWRITEBYTECODE=1 python -B /tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/a2/probe_obj.py /tmp/wp1462-r2-cOE2t1ys/head",
+      "rc": 0,
+      "summary": "healthy=khong_giam, forged_loose=duong_nhanh; both XDG attribute cases=khong_giam. Reproduces B4-C01 at helper level.",
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/probe_obj.log"
+    },
+    {
+      "cmd": "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=commit.gpgsign GIT_CONFIG_VALUE_0=false PYTHONDONTWRITEBYTECODE=1 python -B /tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/a2/probe_attr.py /tmp/wp1462-r2-cOE2t1ys/head",
+      "rc": 0,
+      "summary": "All 7 existing HOME attribute/control cases return khong_giam (UTF-7, UTF-16, ident and CRLF effects isolated).",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/probe_attr.log"
+    },
+    {
+      "cmd": "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=commit.gpgsign GIT_CONFIG_VALUE_0=false PYTHONDONTWRITEBYTECODE=1 python -B /tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/a2/probe_xdgcfg.py /tmp/wp1462-r2-cOE2t1ys/head",
+      "rc": 0,
+      "summary": "All 3 existing controls/XDG-config/dot-gitconfig cases return khong_giam.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/probe_xdgcfg.log"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/prior_rechecks.py",
+      "rc": 1,
+      "summary": "Order, metadata and date old mutants each killed by their intended ChotB4; paired healthy controls pass. Wrapper then stopped because the copied old mutation data JSON was missing; that setup error earns no credit.",
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/prior-rechecks.log"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/prior_rechecks_remaining.py",
+      "rc": 0,
+      "summary": "After copying the unchanged round-1 mutation data, ban-only-1 and short-OID old mutants each killed by their intended ChotB4; paired healthy controls pass. Five prior survivor checks are complete.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/prior-rechecks-remaining.log"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/fresh_mutants.py selected",
+      "rc": 0,
+      "summary": "Six fresh product mutations, six own-target ChotB4 kills, six healthy controls pass. §1 order is covered by the independently rerun old K7-order mutation.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/fresh-selected.log"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/fresh_mutants.py full",
+      "rc": 0,
+      "summary": {
+        "results": [
+          {
+            "name": "section3-ignore-first-shard",
+            "cases": 151,
+            "passed": 151,
+            "errors": {},
+            "seconds": 294.39698781600055
+          },
+          {
+            "name": "section5-drop-read-tree-status",
+            "cases": 151,
+            "passed": 151,
+            "errors": {},
+            "seconds": 266.20030155400127
+          },
+          {
+            "name": "section5-drop-checkout-status",
+            "cases": 151,
+            "passed": 151,
+            "errors": {},
+            "seconds": 222.87824087599984
+          }
+        ],
+        "interpretation": "Measurement runner completed rc0; coverage criterion fails because the non-equivalent skip-first-shard mutant survives. The two Git-status survivors remain unmeasured for non-equivalence."
+      },
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/fresh-full.log"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/diagnostic_three.py",
+      "rc": 0,
+      "summary": "All four target pairs for the three listed mutants: healthy passes, own ChotB4 GIET. Three pairs enforce the diagnostic contract despite normal gate rc12; the fourth catches rc0.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/diagnostic-three.json"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/measurement_guard_check.py",
+      "rc": 0,
+      "summary": "Committed comparator/census self-checks pass healthy. Accept-all comparator mutation yields 10 rejection errors; removing the existing indirect synthetic case yields a census error. These are measurement self-check failures, not ChotB4 credits.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/measurement-guard-check.json"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/census_omitted.py",
+      "rc": 0,
+      "summary": "Re-ran the unchanged round-1 census witness with scratch paths adapted, its saved omitted-name list, a private base clone and H. Per-case entry/CLI/exception evidence is in census_omitted.json; no new hostile inputs.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/census_omitted.json"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-r2-cOE2t1ys/ab_baseline_recheck.py",
+      "rc": 0,
+      "summary": "The unrelated begin_attempt_sau_khi_lease_HET_HAN_bi_chan case failed with AssertionError during the base census (slice3). Targeted rerun of the unchanged committed case passes on both base and H. Its fixture grants a lease only two wall-clock seconds ahead; the original failure remains recorded, with no demonstrated B4 regression.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/ab-baseline-recheck.json"
+    },
+    {
+      "cmd": "/root/.local/bin/ruff check --isolated --no-cache --select F --output-format json /tmp/wp1462-r2-cOE2t1ys/base-packet_loop.py",
+      "rc": 1,
+      "summary": {
+        "file": ".claude/dev/packet_loop.py",
+        "side": "base",
+        "diagnostics": 3,
+        "version": "0.16.9",
+        "interpretation": "Base/H normalized diagnostics equal: delta0. Bare lint remains failed for the two existing files; new script has zero diagnostics."
+      },
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/base-base-packet_loop.py.ruff.json"
+    },
+    {
+      "cmd": "/root/.local/bin/ruff check --isolated --no-cache --select F --output-format json /tmp/wp1462-r2-cOE2t1ys/head-packet_loop.py",
+      "rc": 1,
+      "summary": {
+        "file": ".claude/dev/packet_loop.py",
+        "side": "head",
+        "diagnostics": 3,
+        "version": "0.16.9",
+        "interpretation": "Base/H normalized diagnostics equal: delta0. Bare lint remains failed for the two existing files; new script has zero diagnostics."
+      },
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/head-head-packet_loop.py.ruff.json"
+    },
+    {
+      "cmd": "/root/.local/bin/ruff check --isolated --no-cache --select F --output-format json /tmp/wp1462-r2-cOE2t1ys/base-packet_loop_test.py",
+      "rc": 1,
+      "summary": {
+        "file": ".claude/dev/packet_loop_test.py",
+        "side": "base",
+        "diagnostics": 13,
+        "version": "0.16.9",
+        "interpretation": "Base/H normalized diagnostics equal: delta0. Bare lint remains failed for the two existing files; new script has zero diagnostics."
+      },
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/base-base-packet_loop_test.py.ruff.json"
+    },
+    {
+      "cmd": "/root/.local/bin/ruff check --isolated --no-cache --select F --output-format json /tmp/wp1462-r2-cOE2t1ys/head-packet_loop_test.py",
+      "rc": 1,
+      "summary": {
+        "file": ".claude/dev/packet_loop_test.py",
+        "side": "head",
+        "diagnostics": 13,
+        "version": "0.16.9",
+        "interpretation": "Base/H normalized diagnostics equal: delta0. Bare lint remains failed for the two existing files; new script has zero diagnostics."
+      },
+      "status": "failed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/head-head-packet_loop_test.py.ruff.json"
+    },
+    {
+      "cmd": "/root/.local/bin/ruff check --isolated --no-cache --select F --output-format json /tmp/wp1462-r2-cOE2t1ys/head-do_b4.py",
+      "rc": 0,
+      "summary": {
+        "file": "ops/specs/wp1462-r1/do/do_b4.py",
+        "side": "head",
+        "diagnostics": 0,
+        "version": "0.16.9",
+        "interpretation": "Base/H normalized diagnostics equal: delta0. Bare lint remains failed for the two existing files; new script has zero diagnostics."
+      },
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/head-head-do_b4.py.ruff.json"
+    },
+    {
+      "cmd": "python -B / runpy .claude/dev/ci_dang_ky_test.py -> loi_ruff_ci()",
+      "rc": 0,
+      "summary": "Pin/probe contract returns errors=[] and count=3. This is separate from bare lint.",
+      "status": "passed"
+    },
+    {
+      "cmd": "python -B .claude/dev/packet_loop.py doctrine-scan --root /tmp/wp1462-r2-cOE2t1ys/head",
+      "rc": 0,
+      "summary": "12 files, zero copied-doctrine occurrences.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/doctrine-scan.log"
+    },
+    {
+      "cmd": "python -B .claude/dev/packet_loop.py adr-song --root /tmp/wp1462-r2-cOE2t1ys/head",
+      "rc": 0,
+      "summary": "66 ADRs / 66 protocol §20 rows, one-to-one (exception 0016).",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/adr-song.log"
+    },
+    {
+      "cmd": "git diff --check 48d372e14f190dae83a75ccbca8ee9a0b25635c5 b1c9e826dac468de1cb1a4545bb8d1f866b035cb",
+      "rc": 0,
+      "summary": "No output.",
+      "status": "passed"
+    },
+    {
+      "cmd": "KQ_MANH=success PACKET_LOOP=chay python -B .claude/dev/packet_loop_test_manh.py --gom /tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/a2/mH --n 4",
+      "rc": 0,
+      "summary": "Independent validation of executor-supplied saved records: all four partitions reconcile; GOM ĐẠT, 1745 required cases. Does not independently rerun all four shards or validate CI job status.",
+      "status": "passed",
+      "artifact": "/tmp/wp1462-r2-cOE2t1ys/executor-gather-recheck.log"
+    },
+    {
+      "cmd": "git cat-file -e 7219df1^{commit}",
+      "rc": 128,
+      "summary": "Executor historical measurement commit is unavailable in the supplied source clone; a2/c clone no longer exists. H code hashes match the committed KET_QUA anchors; the current reviewer A/B runs are on exact H.",
+      "status": "not_measured"
+    },
+    {
+      "cmd": "Windows / PR CI / full CI mutation audit / owner exact-H audit",
+      "rc": null,
+      "summary": "Outside this read-only reviewer authorization; not dispatched. No pass or waiver inferred.",
+      "status": "not_run"
+    }
+  ],
+  "findings": [
+    {
+      "id": "B4-C01",
+      "class_slug": "b4-trusted-classifier-materialization",
+      "severity": "P1",
+      "location": ".claude/dev/packet_loop.py:3633-3656 (_b4_tinh_lai)",
+      "claim": "The isolated Git directory still executes bytes from an unverified caller object store as the exact master classifier. With the same referenced classifier OID, the existing executor probe changes the result from khong_giam to duong_nhanh. Reading objects from --root does not waive §5’s exact-blob/exact-tree requirement.",
+      "evidence": [
+        "Re-ran the existing rv1462/a2/probe_obj.py against the H copy, with commit.gpgsign=false only to make its fixture commits work: rc 0; healthy=khong_giam, forged_loose=duong_nhanh, xdg_attributes_encoding=khong_giam, xdg_attributes_ident=khong_giam. Evidence: /tmp/wp1462-r2-cOE2t1ys/probe_obj.log.",
+        "This is a helper-level classifier result, not a newly measured end-to-end merge acceptance. The production K2b mapping accepts duong_nhanh without a switch read. §7 excludes deliberate edits to the running tool; this counterexample keeps that tool unchanged and targets §5 classifier materialization.",
+        "Old local smudge/replace and file/parent symlink counterexamples are fixed: end_to_end.json has rc12/REST0 for control, smudge and replace; probes.json and tree_boundaries.json reject the symlink/escape cases. Those repairs do not close the object-integrity manifestation.",
+        "System gitconfig/gitattributes also remain outside the isolated settings. Their runtime effect was not measured; this review did not alter host system configuration. See the separate unmeasured hunt row.",
+        "Existing executor probe_attr.py and probe_xdgcfg.py also rerun unchanged: all 7 HOME-attribute cases and all 3 global-config cases return khong_giam."
+      ],
+      "suggested_fix": {
+        "where": "_b4_tinh_lai, where trusted Git objects become executable files and classifier input; fixing policy parsing afterward cannot restore the trust boundary.",
+        "how": "Use a private, verified object/tree snapshot for the objects needed by the classifier, verify content against the referenced Git OIDs, and prevent checkout/config/attribute transformations from changing the executable bytes. Fail closed on unavailable or inconsistent data. Either close the object-store boundary or obtain an explicit authorized spec decision; a disclosed residual alone is not that decision.",
+        "locking_test": "Promote the existing healthy/corrupt-object probe to a committed two-sided case, retain the old local/global configuration and symlink cases, and require mutations that skip integrity/isolation checks to die through the target case’s own ChotB4. Coordinator should supply any new corruption/config inputs.",
+        "what_the_fix_may_spawn": "A verify-then-reread race, incomplete validation of trees or packed objects, unacceptable whole-repository verification cost, newline transformations, or copying objects back into the caller repository. Validate the bytes actually executed in the private snapshot."
+      }
+    },
+    {
+      "id": "B4-S05",
+      "class_slug": "b4-predicate-mutation-proof",
+      "severity": "P2",
+      "location": ".claude/dev/packet_loop.py:3576; .claude/dev/packet_loop_test.py:19521-19522,19893",
+      "claim": "The test/mutation audit remains too narrow to lock the complete eight-shard predicate. Changing its loop from range(8) to range(1,8), so shard 0 is never checked, survives all 151 runnable non-HTTP B4 cases. The committed boundary mutant only omits shard 7.",
+      "evidence": [
+        "Independent fresh product mutation section3-ignore-first-shard: 151/151 passed, zero errors and zero ChotB4 kills, 294.397 seconds; healthy H also passes all of those 151 cases. Evidence: /tmp/wp1462-r2-cOE2t1ys/section3-ignore-first-shard.json.",
+        "This is non-equivalent by inspection: a set with valid shards 1..7 and missing/invalid shard 0 is accepted as du/dich by the mutant, contrary to §3’s exact indices 0..7. A new hostile readback for that witness was not composed; coordinator repro input is described in hunt_table.",
+        "All five old survivors (K7 order, updated_at as predicate, non-fixed date, ban only equal to 1, seven-character OID comparison) now die through their named target ChotB4, with a healthy control for each. Six additional focused mutants across §§2,4,6,7,8,9 also die through the target ChotB4.",
+        "The other 15 transport cases cannot establish a kill in this environment because their healthy versions fail with socket EPERM. No full 166-case mutant green claim is made."
+      ],
+      "suggested_fix": {
+        "where": "The H2 evidence-case family and MUTANTS table in packet_loop_test.py; the production eight-shard loop is currently correct.",
+        "how": "Generalize the evidence boundary tests across the complete required shard index domain and both du/dich modes, then audit equivalent omission/selection boundaries across §§2–9. Keep the stable class and its history; do not use the current mutant count as the coverage ceiling.",
+        "locking_test": "A healthy eight-shard control must pass; each missing/invalid required shard must be rejected with the specified diagnostic. Include a dedicated skip-first-shard mutant and prove its intended case raises its own ChotB4. Run transport baseline/targets in a socket-capable authorized environment.",
+        "what_the_fix_may_spawn": "A combinatorial test explosion, shared-fixture corruption, or false kills caused by setup/diagnostic accidents. Preserve independently healthy controls and test-name-bound exception classification."
+      }
+    },
+    {
+      "id": "B4-C04",
+      "class_slug": "b4-ab-population-coverage",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/do/do_b4.py:89-93,183-196; ops/specs/wp1462-r1/do/KET_QUA.md (A/B result)",
+      "claim": "The census removes the prefilter and accounts for the known omitted cases, but the command still declares criteria 1–2 passed with only 147 byte-compared cases out of 157 builder-entry cases. The ten special cases are reduced to traces/outcomes; a self-modified-script call retains only la:<rc>, discarding stdout/stderr. No authority changes the frozen acceptance rule that a smaller compared population is red.",
+      "evidence": [
+        "Spec acceptance criterion 1 explicitly requires every base _c1106 case, a single shared fixture, and exact rc/stdout/stderr comparison; fewer compared cases than counted at base is failure. Criterion 2 uses that same population.",
+        "do_ca records external/self-modified script calls only as la:<rc>; pre-CLI failures retain exception class, not a two-sided CLI byte comparison. lenh_ab checks comparable entries in nen, so the ten trace-only entries cannot trigger its missing-comparison check.",
+        "The revised full census and its self-check are real improvements. The factual 147/147 comparable-call claim is narrower than the declared acceptance result, even if every one of those 147 comparisons succeeds.",
+        "Round 1 already required explicit coverage or an authorized scope decision for the pre-CLI and modified-script cases. Neither a new census nor an executor residual declaration supplies that authority.",
+        "Independent targeted A/B on exact H completed all four slices: 157 named entries, 147/147 comparable calls byte-identical, 10 special traces match, old classes a=3/b=104/c=36/z=4. All four commands rc0. This verifies the disclosed comparison claim, not full unfiltered population completeness. Evidence: /tmp/wp1462-r2-cOE2t1ys/known-ab-summary.json.",
+        "Independent exact-H A/B output (completion status explicit): {\"book_cases\": 1185, \"entering\": 119, \"ordinary\": 111, \"special\": 8, \"entries\": 119, \"comparisons\": 111, \"head_new\": 111, \"head_old\": 111, \"classes\": {\"a\": 1, \"b\": 82, \"c\": 25, \"z\": 3}, \"outcomes\": {\"ca:BoQua\": 28, \"ca:dat\": 1155, \"ca:AssertionError\": 1, \"ca:OSError\": 1}, \"unique_entering_cases\": 119, \"duplicate_entering_cases\": 0, \"error_lines\": [], \"completed_slices\": [1, 2, 3], \"pending_slices\": [\"ab0\"]}. Raw logs and ab-summary.json retained."
+      ],
+      "suggested_fix": {
+        "where": "do_b4.py do_ca/lenh_ab and the external handoff acceptance claim, because this is a measurement/acceptance boundary rather than a demonstrated production behavior regression.",
+        "how": "Keep the full census. Preserve and compare bytes for every case that reaches a CLI, including comparable self-modified variants. Distinguish builder-entry cases that never reach a CLI, with explicit evidence and an authorized clarification of their acceptance treatment. Until the frozen criterion or an approved revision is met, report the acceptance gap rather than ĐẠT.",
+        "locking_test": "Countercheck that an extra output byte from a self-modified-script case makes the A/B measurement red, and that a counted but unaccounted case cannot vanish from the denominator. Retain the indirect dict(CASES), setup-failure and optional-state-dir self-checks.",
+        "what_the_fix_may_spawn": "Running base and head on separately built fixtures, accidentally executing H for both sides, weakening old case expectations, or laundering intentional pre-CLI failures as success. Keep population and comparison denominators explicit."
+      }
+    },
+    {
+      "id": "B4-C05",
+      "class_slug": "b4-handoff-evidence-contract",
+      "severity": "P3",
+      "location": "handoff2-for-review.yaml:140-153; Issue #1462 comment 7059377404",
+      "claim": "The delivered handoff does not preserve required evidence semantics: an actually failed diagnostic run is marked not_run, and selector_policy_sha is null despite §7 requiring policy/catalog identity.",
+      "evidence": [
+        "The read-back handoff says status:not_run for a run whose own evidence says six void_* cases plus the WP1174 carrier failed and were discarded. Protocol §§7,8.2 require observed failures to remain failed with their context.",
+        "test_selection has gate_tier:T2 and tested_sha:H, but selector_policy_sha:null. There is no replacement policy/catalog identity in that block.",
+        "The supplied a2/mH/gom.log records rc1 because KQ_MANH was empty, while the handoff claims a successful gather. Independent re-gather of the saved records with PACKET_LOOP=chay and KQ_MANH=success passes 1745-case partition validation. That proves the records are reconcilable; it does not turn the original failed log into a successful execution receipt."
+      ],
+      "suggested_fix": {
+        "where": "An append-only corrected handoff/transport receipt outside H, linked to the original Issue comment. Source code does not need changing for these metadata defects.",
+        "how": "Retain failed diagnostic and gather executions with their real rc and environmental explanation, link any successful rerun as a separate execution, and identify the exact selector/catalog policy used. Keep executor-produced evidence distinct from this reviewer’s measurements.",
+        "locking_test": "Re-read the correction and compare its UTF-8 body hash; mechanically reconcile each named command/status/rc with its referenced log and ensure policy identity resolves to the intended immutable source.",
+        "what_the_fix_may_spawn": "Overwriting delivered evidence, assigning reviewer results to the executor, or relabeling failed runs as skipped/not_run. A correction must preserve provenance and the original receipt."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "b4-trusted-classifier-materialization",
+      "finding_ids": [
+        "B4-C01"
+      ],
+      "highest_open_severity": "P1",
+      "source_round_sha": [
+        "45317c6f00fd1c9d8373998c377db35451a3a1d1",
+        "b1c9e826dac468de1cb1a4545bb8d1f866b035cb"
+      ],
+      "common_fix_or_reason": "Use a private, verified object/tree snapshot for the objects needed by the classifier, verify content against the referenced Git OIDs, and prevent checkout/config/attribute transformations from changing the executable bytes. Fail closed on unavailable or inconsistent data. Either close the object-store boundary or obtain an explicit authorized spec decision; a disclosed residual alone is not that decision.",
+      "closing_check": "Promote the existing healthy/corrupt-object probe to a committed two-sided case, retain the old local/global configuration and symlink cases, and require mutations that skip integrity/isolation checks to die through the target case’s own ChotB4. Coordinator should supply any new corruption/config inputs."
+    },
+    {
+      "slug": "b4-rest-total-deadline",
+      "finding_ids": [
+        "B4-C02"
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        "45317c6f00fd1c9d8373998c377db35451a3a1d1",
+        "b1c9e826dac468de1cb1a4545bb8d1f866b035cb"
+      ],
+      "common_fix_or_reason": "Existing round-1 delayed-EOF response seam: han=15 returns khong_doc_duoc at 15.000617s, one GET, no HIEU_LUC. The old reproducer exits 1 because its assertion that the defect still occurs is now false. A healthy response finishes in 1.305473s within a 2s budget; the 1s budget rejects at 1.000353s. This label concerns the measured prior manifestation, not unmeasured socket transport.",
+      "closing_check": "Re-run real transport targets and their healthy controls in an authorized socket-capable environment."
+    },
+    {
+      "slug": "b4-g5-readback-normalization",
+      "finding_ids": [
+        "B4-C03"
+      ],
+      "highest_open_severity": null,
+      "source_round_sha": [
+        "45317c6f00fd1c9d8373998c377db35451a3a1d1",
+        "b1c9e826dac468de1cb1a4545bb8d1f866b035cb"
+      ],
+      "common_fix_or_reason": "Existing duplicates_more.py: identical job IDs within/across files preserve du (rc0, silent, REST0) and dich (rc0, one switch GET); distinct same-name IDs and conflicting readbacks remain rejected. The six committed dedup target cases pass on H.",
+      "closing_check": "Single/duplicate/cross-file/conflicting-ID cases plus dedicated dedup mutations, with each target healthy first."
+    },
+    {
+      "slug": "b4-predicate-mutation-proof",
+      "finding_ids": [
+        "B4-S05"
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": [
+        "45317c6f00fd1c9d8373998c377db35451a3a1d1",
+        "b1c9e826dac468de1cb1a4545bb8d1f866b035cb"
+      ],
+      "common_fix_or_reason": "Generalize the evidence boundary tests across the complete required shard index domain and both du/dich modes, then audit equivalent omission/selection boundaries across §§2–9. Keep the stable class and its history; do not use the current mutant count as the coverage ceiling.",
+      "closing_check": "A healthy eight-shard control must pass; each missing/invalid required shard must be rejected with the specified diagnostic. Include a dedicated skip-first-shard mutant and prove its intended case raises its own ChotB4. Run transport baseline/targets in a socket-capable authorized environment."
+    },
+    {
+      "slug": "b4-ab-population-coverage",
+      "finding_ids": [
+        "B4-C04"
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": [
+        "45317c6f00fd1c9d8373998c377db35451a3a1d1",
+        "b1c9e826dac468de1cb1a4545bb8d1f866b035cb"
+      ],
+      "common_fix_or_reason": "Keep the full census. Preserve and compare bytes for every case that reaches a CLI, including comparable self-modified variants. Distinguish builder-entry cases that never reach a CLI, with explicit evidence and an authorized clarification of their acceptance treatment. Until the frozen criterion or an approved revision is met, report the acceptance gap rather than ĐẠT.",
+      "closing_check": "Countercheck that an extra output byte from a self-modified-script case makes the A/B measurement red, and that a counted but unaccounted case cannot vanish from the denominator. Retain the indirect dict(CASES), setup-failure and optional-state-dir self-checks."
+    },
+    {
+      "slug": "b4-handoff-evidence-contract",
+      "finding_ids": [
+        "B4-C05"
+      ],
+      "highest_open_severity": "P3",
+      "source_round_sha": [
+        "b1c9e826dac468de1cb1a4545bb8d1f866b035cb"
+      ],
+      "common_fix_or_reason": "Retain failed diagnostic and gather executions with their real rc and environmental explanation, link any successful rerun as a separate execution, and identify the exact selector/catalog policy used. Keep executor-produced evidence distinct from this reviewer’s measurements.",
+      "closing_check": "Re-read the correction and compare its UTF-8 body hash; mechanically reconcile each named command/status/rc with its referenced log and ensure policy identity resolves to the intended immutable source."
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "B4-C01",
+      "class_slug": "b4-trusted-classifier-materialization",
+      "label": "VÁ HỜ",
+      "evidence": "Old filters/replace/symlink witnesses are closed; the unchanged existing object-store probe still returns duong_nhanh for a classifier object whose healthy content returns khong_giam."
+    },
+    {
+      "id": "B4-C02",
+      "class_slug": "b4-rest-total-deadline",
+      "label": "ĐÃ VÁ THẬT",
+      "evidence": "Existing round-1 delayed-EOF response seam: han=15 returns khong_doc_duoc at 15.000617s, one GET, no HIEU_LUC. The old reproducer exits 1 because its assertion that the defect still occurs is now false. A healthy response finishes in 1.305473s within a 2s budget; the 1s budget rejects at 1.000353s. This label concerns the measured prior manifestation, not unmeasured socket transport."
+    },
+    {
+      "id": "B4-C03",
+      "class_slug": "b4-g5-readback-normalization",
+      "label": "ĐÃ VÁ THẬT",
+      "evidence": "Existing duplicates_more.py: identical job IDs within/across files preserve du (rc0, silent, REST0) and dich (rc0, one switch GET); distinct same-name IDs and conflicting readbacks remain rejected. The six committed dedup target cases pass on H."
+    },
+    {
+      "id": "B4-S05",
+      "class_slug": "b4-predicate-mutation-proof",
+      "label": "VÁ HỜ",
+      "evidence": "All five named old survivors are killed by their own target ChotB4 with healthy controls; an independent skip-first-shard mutant survives 151/151 runnable B4 cases. The cause class remains open."
+    },
+    {
+      "id": "B4-C04",
+      "class_slug": "b4-ab-population-coverage",
+      "label": "VÁ HỜ",
+      "evidence": "The whole-book counter now includes indirect/setup/self-modified cases, but 147 byte comparisons plus 10 trace-only cases still do not meet the frozen 157-case acceptance population or supply an authorized exception."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "b4-trusted-classifier-materialization",
+      "label": "VÁ HỜ",
+      "evidence": "Old filters/replace/symlink witnesses are closed; the unchanged existing object-store probe still returns duong_nhanh for a classifier object whose healthy content returns khong_giam."
+    },
+    {
+      "class_slug": "b4-rest-total-deadline",
+      "label": "VÁ HỜ",
+      "evidence": "The previously measured delayed-EOF manifestation is fixed. Class closure is withheld under §8.3 because real socket EOF/final-chunk/socket-timeout and proxy targets were denied in the healthy baseline; reader-thread lifetime remains unmeasured. This is an evidence limitation, not a newly proven P2 runtime defect."
+    },
+    {
+      "class_slug": "b4-g5-readback-normalization",
+      "label": "ĐÃ VÁ THẬT",
+      "evidence": "Existing duplicates_more.py: identical job IDs within/across files preserve du (rc0, silent, REST0) and dich (rc0, one switch GET); distinct same-name IDs and conflicting readbacks remain rejected. The six committed dedup target cases pass on H."
+    },
+    {
+      "class_slug": "b4-predicate-mutation-proof",
+      "label": "VÁ HỜ",
+      "evidence": "All five named old survivors are killed by their own target ChotB4 with healthy controls; an independent skip-first-shard mutant survives 151/151 runnable B4 cases. The cause class remains open."
+    },
+    {
+      "class_slug": "b4-ab-population-coverage",
+      "label": "VÁ HỜ",
+      "evidence": "The whole-book counter now includes indirect/setup/self-modified cases, but 147 byte comparisons plus 10 trace-only cases still do not meet the frozen 157-case acceptance population or supply an authorized exception."
+    }
+  ],
+  "hunt_table": [
+    {
+      "hypothesis": "Local filters, replacement refs, global attributes or symlinks still alter the master classifier.",
+      "command": "Re-run existing round-1 end_to_end.py, probes.py and tree_boundaries.py; existing executor probe_obj.py.",
+      "real_output": "Control/smudge/replace: rc12, khong_giam, REST0. File/parent symlinks: la. Literal tree escape: la, no escaped file. XDG attribute probes: khong_giam.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "Reading the caller object store is sufficient to guarantee exact master classifier bytes.",
+      "command": "GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=commit.gpgsign GIT_CONFIG_VALUE_0=false python -B /tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/a2/probe_obj.py /tmp/wp1462-r2-cOE2t1ys/head",
+      "real_output": "healthy=khong_giam; forged_loose=duong_nhanh; rc0. Existing input only; helper result.",
+      "conclusion": "LỖI"
+    },
+    {
+      "hypothesis": "Host system gitconfig/gitattributes can still change checkout semantics despite local/global isolation.",
+      "command": "Static inspection of _b4_tinh_lai; no host system-config mutation attempted.",
+      "real_output": "GIT_CONFIG_GLOBAL and core.attributesFile are isolated; system config and system attributes are not explicitly disabled. Runtime effect was not measured.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "coordinator_repro": "In a disposable authorized container or private Git installation, supply a system-level configuration/attribute fixture that affects classifier checkout. Keep tool, M/H and referenced objects fixed; compare healthy and configured runs, executed classifier bytes, result and source cleanliness. Do not alter shared host configuration."
+    },
+    {
+      "hypothesis": "Late EOF is still accepted after the 15s production budget.",
+      "command": "python -B /tmp/wp1462-r2-cOE2t1ys/deadline15.py; python -B /tmp/wp1462-r2-cOE2t1ys/probes.py",
+      "real_output": "Old defect assertion fails (script rc1): state=khong_doc_duoc at 15.000617s, one GET timeout15, no HIEU_LUC. In-budget control succeeds; shortened budget rejects.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "The new daemon worker also stops within a bounded interval under a sustained partial response, without accepting late completion.",
+      "command": "Targeted committed transport cases; static inspection of _rest_get.",
+      "real_output": "Healthy transport fixtures cannot create sockets: PermissionError EPERM. Parent join is bounded, worker cancellation is not explicit. No new response input composed.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "coordinator_repro": "Use a socket-capable isolated environment. Run committed late-EOF, late-final-chunk and socket-timeout cases first; then provide a response that continues delivering partial data within each socket idle timeout while exceeding the overall budget. Measure caller return, request count, worker lifetime and eventual cleanup. Include an in-budget control."
+    },
+    {
+      "hypothesis": "Duplicate readback pages can falsely suppress full/target G5 evidence.",
+      "command": "python -B /tmp/wp1462-r2-cOE2t1ys/duplicates_more.py",
+      "real_output": "Identical IDs preserve du/dich; distinct same-name IDs and conflicts reject. rc0 for the probe.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "The full B4 case family rejects every omission from the required shard set.",
+      "command": "python -B /tmp/wp1462-r2-cOE2t1ys/fresh_mutants.py full (section3-ignore-first-shard product mutation)",
+      "real_output": "151/151 runnable cases pass under range(1,8), no kills; healthy baseline also 151/151.",
+      "conclusion": "LỖI",
+      "coordinator_repro": "Supply otherwise-valid H2 readbacks containing valid shards 1 through 7 and no shard 0, then repeat with a failing or malformed shard 0, for both du and dich. Hold run/attempt/head fixed. Healthy production must reject; the skip-first mutant must die through the target ChotB4."
+    },
+    {
+      "hypothesis": "The three diagnostic-only kills are crashes being given mutation credit.",
+      "command": "python -B /tmp/wp1462-r2-cOE2t1ys/diagnostic_three.py",
+      "real_output": "Healthy targets pass. Missing-steps, non-object-step and non-object-JSON-root mutants return normal gate rc12 but omit/change required diagnostics; their target cases raise ChotB4. The fourth target (non-string step name) detects rc0. All four target pairs classify GIET.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "The full census automatically proves frozen A/B acceptance for every entry.",
+      "command": "Inspect do_ca/lenh_ab and run do_b4.py ab in four slices on exact H.",
+      "real_output": "The measurement separates comparable calls from entry traces; la:<rc> discards stdout/stderr and pre-CLI entries have no two-sided byte comparison. Exact run totals are recorded in tests/measure_table.",
+      "conclusion": "LỖI"
+    },
+    {
+      "hypothesis": "Wrong allowed string, target mode bypass, case-sensitive headers, wrong tool blob, tightening bypass or expiry drift escape the B4 tests.",
+      "command": "python -B /tmp/wp1462-r2-cOE2t1ys/fresh_mutants.py selected",
+      "real_output": "Six fresh product mutants each killed by the intended target ChotB4, with each unmutated target passing.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "Removing read-tree/checkout exit-status guards is another non-equivalent coverage gap.",
+      "command": "python -B /tmp/wp1462-r2-cOE2t1ys/fresh_mutants.py full",
+      "real_output": [
+        {
+          "name": "section5-drop-read-tree-status",
+          "cases": 151,
+          "passed": 151,
+          "errors": {}
+        },
+        {
+          "name": "section5-drop-checkout-status",
+          "cases": 151,
+          "passed": 151,
+          "errors": {}
+        }
+      ],
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "coordinator_repro": "Survival alone is not a proven defect: later checkout/file checks can be redundant. Supply an existing or newly authorized fixture with a real nonzero read-tree/checkout status and enough remaining classifier/tree material to continue, then compare healthy and mutated behavior. Until reachability/non-equivalence is measured, no extra finding or mutation-kill demand is asserted."
+    },
+    {
+      "hypothesis": "The delivered patch breaks current-master integration.",
+      "command": "Scratch git merge --no-commit --no-ff b1c9e826dac468de1cb1a4545bb8d1f866b035cb into 1e397c89d69f451694a2252103ea97ec274ab43f; targeted.py merged",
+      "real_output": "No conflicts; merged tree3794efcc97c57032003bb8007af577e332e53504. 151 pass, same15 socket EPERM as H.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "limitation": "No non-HTTP regression observed; transport integration not measured here."
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Independent targeted A/B of disclosed entry cases",
+      "declared": "157 named entries;147 comparable calls;10 special traces",
+      "measured": {
+        "entering": 157,
+        "ordinary": 147,
+        "special": 10,
+        "comparisons": 147,
+        "completed_slices": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "classes": {
+          "a": 3,
+          "b": 104,
+          "c": 36,
+          "z": 4
+        },
+        "rcs": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "match": true
+    },
+    {
+      "claim": "Exact head/tree",
+      "declared": "b1c9e826dac468de1cb1a4545bb8d1f866b035cb / ed0260bd98657887e1da06f7c780a8cf98f8510c",
+      "measured": "b1c9e826dac468de1cb1a4545bb8d1f866b035cb / ed0260bd98657887e1da06f7c780a8cf98f8510c",
+      "match": true
+    },
+    {
+      "claim": "Write set and size",
+      "declared": "5 files +1485/-3; cap 6 files/1600 additions",
+      "measured": "5 files +1485/-3; 115 additions below cap; no old test expectation changed",
+      "match": true
+    },
+    {
+      "claim": "B4 inventory",
+      "declared": "H handoff: 166 cases, 126 mutants, 172 pairs; prompt: 138/97/129",
+      "measured": "166/126/172 at H; prompt counts are stale",
+      "match": true
+    },
+    {
+      "claim": "Targeted B4 behavior on H",
+      "declared": "166 cases pass",
+      "measured": "151 passed; 15 socket-denied cases not_measured; command rc1",
+      "match": false
+    },
+    {
+      "claim": "Merge onto current master",
+      "declared": "Must rerun B4 after scratch merge",
+      "measured": "Tree 3794efcc97c57032003bb8007af577e332e53504 on master 1e397c89d69f451694a2252103ea97ec274ab43f: 151 passed; same 15 EPERM; no conflicts",
+      "match": null
+    },
+    {
+      "claim": "Committed mutant kills",
+      "declared": "172/172 GIET; 0 false credit",
+      "measured": "159 own ChotB4 GIET; 13 TIN_DUNG_GIA due to healthy-baseline socket denial; 0 credited crashes; 0 cross-family failures",
+      "match": null
+    },
+    {
+      "claim": "Named round-1 survivors repaired",
+      "declared": "5 repaired",
+      "measured": "5/5 killed by intended ChotB4, paired healthy controls pass",
+      "match": true
+    },
+    {
+      "claim": "Complete guard coverage",
+      "declared": "Every new guard locked",
+      "measured": "Fresh skip-first-shard mutant survives 151/151 runnable B4 cases; 15 transport cases unavailable",
+      "match": false
+    },
+    {
+      "claim": "Historical replay",
+      "declared": "60; 42 full/18 fast; expected hash; REST0; clean",
+      "measured": "Exact match; CRLF simulation also matches all 60",
+      "match": true
+    },
+    {
+      "claim": "Full base-book A/B census",
+      "declared": "1581 book cases; 157 enter =147 ordinary+10 special",
+      "measured": {
+        "book_cases": 1185,
+        "entering": 119,
+        "ordinary": 111,
+        "special": 8,
+        "entries": 119,
+        "comparisons": 111,
+        "head_new": 111,
+        "head_old": 111,
+        "classes": {
+          "a": 1,
+          "b": 82,
+          "c": 25,
+          "z": 3
+        },
+        "outcomes": {
+          "ca:BoQua": 28,
+          "ca:dat": 1155,
+          "ca:AssertionError": 1,
+          "ca:OSError": 1
+        },
+        "unique_entering_cases": 119,
+        "duplicate_entering_cases": 0,
+        "error_lines": [],
+        "completed_slices": [
+          1,
+          2,
+          3
+        ],
+        "pending_slices": [
+          "ab0"
+        ]
+      },
+      "match": null
+    },
+    {
+      "claim": "Base-book outcomes during census",
+      "declared": "1543 ca:dat;37 ca:BoQua;1 ca:OSError",
+      "measured": {
+        "ca:BoQua": 28,
+        "ca:dat": 1155,
+        "ca:AssertionError": 1,
+        "ca:OSError": 1
+      },
+      "match": null
+    },
+    {
+      "claim": "Unfiltered-run comparable calls byte-identical",
+      "declared": "147/147; old classes a3 b104 c36 z4",
+      "measured": {
+        "comparisons": 111,
+        "classes": {
+          "a": 1,
+          "b": 82,
+          "c": 25,
+          "z": 3
+        },
+        "errors": [],
+        "pending_slices": [
+          "ab0"
+        ]
+      },
+      "match": null
+    },
+    {
+      "claim": "Frozen acceptance criteria 1–2",
+      "declared": "Passed",
+      "measured": "147 byte-compared cases / 157 builder-entry cases; 10 trace-only; no authorized exception supplied",
+      "match": false
+    },
+    {
+      "claim": "A/B measurement commit equals H code",
+      "declared": "7219df1 has same 3 code files; only KET_QUA differs",
+      "measured": "7219df1 object unavailable. Three H SHA-256 values match KET_QUA. Independent A/B rerun now anchors behavior to H; no claim of verified historical tree identity",
+      "match": null
+    },
+    {
+      "claim": "Full component N/N",
+      "declared": "1707 passed,38 skipped,1745 run =1579 old+166 new",
+      "measured": "Executor logs have 109+43+777+778=1707 passing and 20+18=38 skipped; independent shard1 43/43 and partition gather1745 verified. Full four-shard execution not independently rerun",
+      "match": null
+    },
+    {
+      "claim": "Ruff F delta",
+      "declared": "0; new script 0",
+      "measured": "Base/H product3/3 and tests13/13, normalized diagnostics equal; new script0. Bare lint rc1, delta criterion met",
+      "match": true
+    },
+    {
+      "claim": "Pin/probe Ruff contract",
+      "declared": "Valid workflow pins/probes",
+      "measured": "3 checks, errors=[]; independent of bare lint",
+      "match": true
+    },
+    {
+      "claim": "Doctrine / ADR checks",
+      "declared": "Both pass",
+      "measured": "12 files / 0 copied doctrine; 66 ADR / 66 rows; both rc0",
+      "match": true
+    },
+    {
+      "claim": "Runbook",
+      "declared": "Ten required topics",
+      "measured": "All ten present, including full G5 before PR5 and no AI switch writes; owner acceptance itself not_run",
+      "match": true
+    },
+    {
+      "claim": "Handoff machine-readable evidence",
+      "declared": "§7 complete",
+      "measured": "Failed diagnostic labeled not_run; missing selector policy identity; saved original gather rc1, independent re-gather rc0",
+      "match": false
+    },
+    {
+      "claim": "Source unchanged",
+      "declared": "Reviewer read-only",
+      "measured": {
+        "equal": true,
+        "files": 17337,
+        "head": "b1c9e826dac468de1cb1a4545bb8d1f866b035cb",
+        "tree": "ed0260bd98657887e1da06f7c780a8cf98f8510c",
+        "tracked_diff_empty": true,
+        "index_diff_empty": true,
+        "status": "!! .codex/\n",
+        "limitations": "Ignored path list included at both endpoints; ignored content bytes were not captured initially. .codex is enforced read-only. No complete before/after content snapshot of the origin mirror was taken. Endpoint equality is not proof against transient writes by other actors."
+      },
+      "match": true
+    }
+  ],
+  "verdict": "changes_requested",
+  "assurance": "review_deferred",
+  "evidence_url": null,
+  "notes": [
+    "Review only. No source edits, commits, pushes, GitHub writes, workflow dispatches, Actions-variable changes, or LIVE calls. Tests and product mutations ran in owned /tmp copies. No new hostile inputs or exploit scripts were composed; existing round-1 files and the executor object-store probe were reused.",
+    "The assignment counts 138 B4 cases / 97 mutants / 129 pairs are stale. H registers 166 B4 cases / 126 mutants / 172 target pairs. The review uses H, not those stale counts.",
+    "Spec r8 SHA-256 a5d28e2a0ccbd7b21d61d7b8c97c382728bfe1341a64b99bd697f988dc0641dc and r8/g2 lease were read from origin/ops/wp1462-r1; Mission r89 from origin/ops/wp1172-plan-r4. Lease expiry is 2026-11-24T08:00:00Z. The explicit assignment pins the finish branch and H; the historical lease branch/model differences are disclosed, not silently repaired.",
+    "GitHub read-only readback of master matched 1e397c89d69f451694a2252103ea97ec274ab43f. The source origin URL is a local mirror with an older master, so it was not used as a claim of current GitHub master. No source ref was changed.",
+    "The posted handoff code-block bytes plus its terminal newline match handoff2-for-review.yaml exactly: SHA-256 16e5695d01cc21fae4bc26d79eb3d7d782615652141a8e3fbdf4f0bf4b693dd6. GitHub Issue comment 7059377404 was read back; no review was published.",
+    "Linux, Python 3.13.18, Git 2.43.0, Ruff 0.16.9. Sandbox is workspace-write with restricted networking and read-only source .git/.agents/.codex paths, not a blanket read-only filesystem. Socket creation was denied with EPERM. No permission escalation was requested.",
+    "Windows, PR Ubuntu CI, full CI mutation audit and owner exact-H audit are not_run here. Windows CI budget is zero; Windows-local authorization and owner waiver are separate obligations. Simulated CRLF is not Windows evidence.",
+    "The finishing executor disclosed incomplete required reading. The review can establish delivered evidence defects and acceptance gaps; it cannot establish that the reading omission caused them.",
+    "The b4-predicate-mutation-proof class retains its spec-review history and now recurs in source review. Protocol §12 requires a Review Rescue Checkpoint/reconsideration of method; another round of enumerating only the named survivors is not closure. No additional agent/reviewer invocation was made here. The two interrupted invocations earlier in this source round still belong in the coordinator call ledger.",
+    "To ensure the explicit 147-comparison claim was measured before the wall limit, a second A/B execution selected the existing 157 disclosed entry cases while the unfiltered census continued. Its result verifies those comparisons only, not population completeness. The initial name extractor counted the prose token _c1106, failed its 157-name setup assertion (rc1 in four slices), and was corrected before any cases ran; those setup failures earn no credit.",
+    "The A/B census runs the full platform-filtered base book, including long cases; its individual base-case outcomes are recorded separately from byte comparisons. A successful A/B command is not a full-suite pass and does not close the 10 trace-only acceptance gap.",
+    "Old counterexample copies differ only in their scratch root. targeted.py additionally updates the expected case count 138→166. Prior mutant wrappers select the old target plus a healthy control; they are targeted rechecks, not full-suite runs. Old scripts retain a stale historical text note about 11 excluded transports; actual current baseline has 15, as baseline-comparison.json records.",
+    "The first scratch setup attempted an already-existing /tmp/wp1462-review-r2 directory and clone creation refused its existing head directory. Setup/snapshot copies had been written there before that failure. The review then switched to the unique /tmp/wp1462-r2-cOE2t1ys directory; all findings and measurements here use that new directory, not prior-round-2 outputs.",
+    "Source-round class repair accounting: U=5. Only normalization is fully closed in this environment (1/5); the prior deadline manifestation is fixed but transport class closure is withheld pending measurements. The three carried product/acceptance findings remain open; one new evidence-contract class is P3. There is only one source-round transition here; no invented second low-ratio transition. Historical predicate-class recurrence independently triggers the checkpoint.",
+    "Review evidence is local and unpublished. The coordinator must retain this JSON and its artifact manifest, validate exact H/tree and final launcher rc/model evidence, and record any transport receipt separately. No cross_approved, land or merge authority is created by this verdict.",
+    "Partial A/B snapshot: full-book census remains incomplete in ab0. Terminal interruption receipts are recorded separately; only logs of still-running commands are excluded from the stable manifest. No unfiltered full-census pass is asserted. The completed targeted 147-comparison measurement is reported separately and does not prove population completeness. The already measured findings still require changes.",
+    "The final unfiltered census slice was still executing the second of seven legacy lifecycle variants after more than 13 minutes on that variant. With roughly 13 minutes left before the protocol 90-minute deadline, the reviewer interrupted its tool session (actual exit_code130; child rc not separately collected) and reserved the remaining budget for final evidence handling. This was a deliberate interruption before the deadline, not a measured timeout. The complete targeted 147-call A/B result is available; full unfiltered population completeness remains not_measured."
+  ],
+  "summary_counts": {
+    "open_findings": 4,
+    "open_finding_classes": 4,
+    "unresolved_classes_including_measurement_gap": 5,
+    "severity": {
+      "P0": 0,
+      "P1": 1,
+      "P2": 2,
+      "P3": 1
+    },
+    "prior_findings": 5,
+    "prior_classes_fully_closed": 1
+  },
+  "source_snapshot": {
+    "equal": true,
+    "files": 17337,
+    "head": "b1c9e826dac468de1cb1a4545bb8d1f866b035cb",
+    "tree": "ed0260bd98657887e1da06f7c780a8cf98f8510c",
+    "tracked_diff_empty": true,
+    "index_diff_empty": true,
+    "status": "!! .codex/\n",
+    "limitations": "Ignored path list included at both endpoints; ignored content bytes were not captured initially. .codex is enforced read-only. No complete before/after content snapshot of the origin mirror was taken. Endpoint equality is not proof against transient writes by other actors."
+  },
+  "test_selection": {
+    "gate_tier": "T2",
+    "selector_policy_sha": "3b18621bcfc502f75a98b585a09faa8e070be53b4a2a1a37d6b7b5f3647cee9a",
+    "policy_source": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/PROMPT-wp1462-source-review-2.md",
+    "catalog_sha": "8d6b5395b98ebaca7fa0b3335f513d8bba10a560",
+    "tested_sha": "b1c9e826dac468de1cb1a4545bb8d1f866b035cb",
+    "selected_groups": [
+      "one full shard",
+      "all166B4",
+      "all126B4mutants",
+      "prior reproductions",
+      "independent product mutations",
+      "full-book A/B",
+      "historical replay",
+      "Ruff delta and pin/probe",
+      "doctrine/ADR",
+      "scratch master integration"
+    ],
+    "full_fallback_reason": "Explicit source-review assignment chooses these measurements; full CI and Windows require separate authority."
+  },
+  "run_timing": {
+    "started_utc": "2026-11-21T07:55:50.060365+00:00",
+    "report_snapshot_utc": "2026-11-21T09:14:30.651109+00:00",
+    "wall_elapsed_seconds_at_snapshot": 4720.590744,
+    "protocol_max_run_minutes": 90,
+    "protocol_deadline_utc": "2026-11-21T09:25:50.060365+00:00",
+    "launcher_deadline_utc": null,
+    "working_elapsed_seconds": null,
+    "working_clock": "unavailable",
+    "final_launcher_rc": null,
+    "limitation": "This is a reviewer snapshot, not a terminal launcher receipt. The launcher record has no deadline installed; no claim of a verified launcher timeout or terminal exit is made."
+  },
+  "artifact_manifest": "/tmp/wp1462-r2-cOE2t1ys/artifact-manifest.json",
+  "unfinished_commands": [
+    {
+      "name": "ab0",
+      "tool_session_id": 48441,
+      "command": "python -B /tmp/wp1462-r2-cOE2t1ys/run.py ab0",
+      "child_command": "python -B ops/specs/wp1462-r1/do/do_b4.py ab 0/4",
+      "cwd": "/tmp/wp1462-r2-cOE2t1ys/head",
+      "state": "reviewer_interrupted",
+      "rc": 130,
+      "child_rc": null,
+      "log": "/tmp/wp1462-r2-cOE2t1ys/ab0.log",
+      "terminal_receipt": "/tmp/wp1462-r2-cOE2t1ys/ab0.interrupted.json",
+      "next_step": "Coordinator must complete the unfiltered census under an adequate authorized run budget before claiming population completeness. No pass or production regression is inferred from this interruption."
+    }
+  ]
+}

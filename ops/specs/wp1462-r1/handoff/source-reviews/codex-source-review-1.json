@@ -1,0 +1,561 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1462",
+  "revision": 8,
+  "generation": 2,
+  "source_review_round": 1,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine/local",
+  "session_id": "e2c9843142e24da189e1725ad1e0afd5",
+  "model_reviewer_identity": {
+    "provider": "openai_codex",
+    "model_family": "openai",
+    "execution_surface": "codex_cli",
+    "transport": "machine/local",
+    "launcher_run_id": "e2c9843142e24da189e1725ad1e0afd5",
+    "thread_id": "01a1fb71-058c-76f0-b9bb-97cf9722b393",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "evidence": "Matching rv1462/runs/e2c98431/run.json: name wp1462-source-review-1, workspace, exact H and prompt snapshot match; executable /opt/node22/lib/node_modules/@openai/codex/bin/codex.js. Launcher records transport machine; local shell execution is observed. Requested model/effort are not serving-model evidence."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "45317c6f00fd1c9d8373998c377db35451a3a1d1",
+  "reviewed_tree": "843627c372b0c39a4758d051618cd374fd4d7d93",
+  "base_sha": "48d372e14f190dae83a75ccbca8ee9a0b25635c5",
+  "spec_sha256": "a5d28e2a0ccbd7b21d61d7b8c97c382728bfe1341a64b99bd697f988dc0641dc",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "changes_requested",
+  "assurance": "Independent Codex CLI source review with measured local evidence on exact H. No approval, human audit, cross_approved receipt, merge or land authority is asserted. OpenAI family follows provider identity under ADR-0065; served model/effort are not measured.",
+  "evidence_url": null,
+  "evidence_directory": "/tmp/wp1462-review-r1",
+  "findings": [
+    {
+      "id": "B4-C01",
+      "class_slug": "b4-trusted-classifier-materialization",
+      "severity": "P1",
+      "location": ".claude/dev/packet_loop.py:3625-3640 (_b4_tinh_lai)",
+      "claim": "The trusted classifier is materialized through caller-controlled Git interpretation, rather than executing the exact blob and tree at M. Reusing the original GIT_DIR preserves replace refs, local attributes and smudge filters; checkout-index applies them, and is_file follows symlinks. A valid full-class classifier can therefore become duong_nhanh and allow rc 0 without a switch read, while the product-file and live-master self-checks still pass. This does not require editing packet_loop.py.",
+      "evidence": [
+        "python -B /tmp/wp1462-review-r1/end_to_end.py, rc 0: real kiem-merge control rc 12 / lop=khong_giam; local smudge filter and classifier-blob git replace each yield rc 0 / lop=duong_nhanh, REST_requests=0, fixture repository clean. Artifacts: end_to_end.json and end_to_end.py.",
+        "python -B /tmp/wp1462-review-r1/probes.py, rc 0: canonical classifier still prints che_do=day_du while filtered materialization returns duong_nhanh. A classifier stored as a symlink executes an external /tmp file; changing that file changes the result with identical M/H. Artifacts: probes.json and probes.py.",
+        "python -B /tmp/wp1462-review-r1/tree_boundaries.py, rc0: symlinked ops directory also follows an external classifier; changing only that file changes the result for the same M/H. Literal ../ tree entries return la, create no escaped file and leave object counts unchanged.",
+        "Violates frozen spec B-4 and section 5: exact master blob, exact temporary tree, no caller-controlled classification. Scanned materialization, Git object interpretation and symlink resolution as one cause class."
+      ],
+      "suggested_fix": {
+        "where": "_b4_tinh_lai and its Git/materialization boundary; add regression cases and mutants in packet_loop_test.py. Fix where trusted bytes become executable, rather than adding a later class-name check.",
+        "how": "Isolate Git configuration and object interpretation from the caller, including replacement/graft paths and checkout filters. Materialize verified canonical bytes and reject a classifier or parent path that resolves through a symlink outside the intended tree. Preserve required object access, temporary-object isolation and Windows normalization. Also inspect the self-check boundary for the same interpretation assumptions.",
+        "locking_test": "Keep a full-class control and a legitimate fast-class control. On identical M/H, inject local/global smudge configuration, a replacement classifier blob, and file/directory symlink escapes: none may authorize reduction or execute external classifier bytes. Re-enabling each mechanism must kill its own target case via ChotB4. Re-run the 60-merge replay and cleanup checks.",
+        "what_the_fix_may_spawn": "Over-sanitizing Git can break alternates, linked worktrees, legitimate attributes or CRLF checkouts; raw extraction can introduce traversal or permission bugs. Test those healthy configurations and all cleanup exits."
+      }
+    },
+    {
+      "id": "B4-C02",
+      "class_slug": "b4-rest-total-deadline",
+      "severity": "P2",
+      "location": ".claude/dev/packet_loop.py:3661-3678 (_rest_get)",
+      "claim": "The total HTTP deadline is checked only before read1. If a read begun within budget returns EOF after the deadline, the loop breaks and returns a successful response without another check. Each read also retains the original socket timeout instead of the remaining total budget. An over-budget response can therefore authorize a reduction, contrary to section 6b.",
+      "evidence": [
+        "python -B /tmp/wp1462-review-r1/deadline15.py, rc 0: unchanged production han=15, two reads of 7.6 seconds each, elapsed 15.200912 seconds; real _rest_get and _b4_cong_tac return khop and HIEU_LUC. Exactly one GET with timeout=15 was observed. Artifact: deadline15.json.",
+        "probes.py healthy control with budget 2 returns 200 in about 1.30 seconds; the identical response with budget 1 is also accepted after about 1.30 seconds. These use a deterministic urllib response seam because the sandbox denies socket creation; they are not claimed as real-network measurements."
+      ],
+      "suggested_fix": {
+        "where": "_rest_get deadline accounting and transport tests in packet_loop_test.py. Policy code should continue mapping a transport timeout to khong_doc_duoc.",
+        "how": "Enforce the remaining wall-clock budget across opening and every read, including EOF and the byte-limit exit; reject completion after the deadline. Keep the per-socket bound, one-request behavior and proxy support. Do not merely extend the permitted duration in the test.",
+        "locking_test": "Add delayed-EOF and late-final-chunk cases with valid switch JSON, plus within-budget controls. Past-deadline completion must raise _B4Loi and never emit khop/HIEU_LUC. A mutant removing the completion check must be killed by the target ChotB4 case. Run real loopback variants on a capable environment.",
+        "what_the_fix_may_spawn": "Remaining-budget changes can break HTTPError response handling, proxies, empty bodies and boundary-time behavior; avoid timing-flaky assertions and preserve response cleanup."
+      }
+    },
+    {
+      "id": "B4-C03",
+      "class_slug": "b4-g5-readback-normalization",
+      "severity": "P2",
+      "location": ".claude/dev/packet_loop.py:3565-3579 (_b4_che_do)",
+      "claim": "K2b deduplicates jobs within each file but not across workflow-jobs files. The same REST job ID supplied in two files is counted as two jobs, so otherwise valid du/dich evidence becomes khac. K2 already normalizes the union by ID. This makes results depend on file grouping and breaks the B-2 silent/full-G5 compatibility contract.",
+      "evidence": [
+        "python -B /tmp/wp1462-review-r1/duplicates.py, rc 0: base single/overlapping readback both rc 0; head single rc 0, overlapping rc 12 with LAN_G5 che_do_thuc_chay=khac.",
+        "python -B /tmp/wp1462-review-r1/duplicates_more.py, rc 0: for both du and dich, identical IDs duplicated inside one file pass, identical IDs in two files fail. Distinct IDs with the same shard name remain rejected; conflicting content for the same ID remains rejected by K2. Artifacts: duplicates_more.json and duplicates_more.py."
+      ],
+      "suggested_fix": {
+        "where": "The combined jobs construction in _b4_che_do, alongside the existing _trang_du normalization used by _kiem_ci. Leave K0-K7 semantics unchanged.",
+        "how": "Normalize the combined readback by job ID, with the existing identical-content and pagination checks, before constructing J and counting shard names. Deduplicate identities, not job names, so genuinely distinct duplicate shards still fail.",
+        "locking_test": "On the same fixture compare one file, repeated identical pages, two overlapping files and a repeated CLI path. Full G5 must remain byte-identical to base; dich must retain its audit/switch prerequisites. Add a mutant omitting union normalization and require its own ChotB4 kill; keep conflicting-ID and distinct-ID controls red.",
+        "what_the_fix_may_spawn": "Deduplicating by name or accepting conflicting IDs would admit forged evidence. Preserve total_count validation and exact run/attempt/head binding."
+      }
+    },
+    {
+      "id": "B4-S05",
+      "class_slug": "b4-predicate-mutation-proof",
+      "severity": "P2",
+      "location": ".claude/dev/packet_loop_test.py:19496-19919 (_B4_CA and B4 MUTANTS)",
+      "claim": "The source tests do not yet satisfy the spec requirement for two-sided cases and a dedicated mutant for every new contract guard. Independent non-equivalent mutations survive the executable B4 suite: K2b moved before K7, updated_at promoted into a permission predicate, fixed commit dates removed, treating only the literal 1 as a nonempty ban, and comparing only seven OID characters. The code implements these five rules correctly today, but its tests do not lock them. This is the historical B4-S05 cause class, not a new class or a reset of its five specification-review recurrences.",
+      "evidence": [
+        "python -B /tmp/wp1462-review-r1/own_mutants.py order|metadata|date (three separate commands), each rc 0: 127/127 executable cong_b4_* cases pass with the mutation; zero target kills. The 11 socket-dependent cases fail infrastructure on unmodified H and are excluded, not counted as passes.",
+        "python -B /tmp/wp1462-review-r1/locking_witnesses.py, rc 0: three new independent witness cases pass on H and each kills its corresponding mutation through that case's own ChotB4. Order witness has K7 and K2b both red; metadata witness uses a valid older updated_at; date witness inspects the synthetic commit's author/committer epoch. Artifacts: own-mutant-*.json and locking_witnesses.json.",
+        "python -B /tmp/wp1462-review-r1/extra_survivors.py ban-only-1 and 7b-short-oid (separate commands), rc0 each: both also survive 127/127 executable cases. independent_mutants.py supplies healthy controls and own-target ChotB4 kills for nonempty ban value yes and same-prefix/different-full-OID inputs.",
+        "The 11 excluded transport cases invoke _rest_get directly, outside these five changed boundaries. Existing diagnostic-line kills for missing steps, a non-object step and a non-object JSON root are valid own-ChotB4 kills and are not part of this finding."
+      ],
+      "suggested_fix": {
+        "where": "The B4 fixtures, _B4_CA and MUTANTS in packet_loop_test.py; update measured results in do/KET_QUA.md after execution. The runtime implementation need not be changed merely to make these mutants fail.",
+        "how": "Audit the actual section 2-9 obligations against observable cases, then add independent healthy/adverse cases and a dedicated mutation for each uncovered rule. Reuse the existing ChotB4 classification. Do not treat the current count of 97 mutants as a completeness proof.",
+        "locking_test": "Adopt equivalent assertions to locking_witnesses.py and the ban/OID cases in independent_mutants.py, with separately registered mutants. For dates, lock deterministic commit metadata across ambient clock/config changes rather than mandate the particular epoch used by the probe. Require healthy controls and own-case ChotB4 kills; crashes and unrelated failing cases remain TIN_DUNG_GIA. Re-run all B4 cases and pairs on a socket-capable host, and retain the historical class ID.",
+        "what_the_fix_may_spawn": "Over-specific fixtures can test implementation text rather than the contract, and broader exception catches can create false mutation credit. Keep varied valid inputs, diagnostic distinctions and independent healthy controls."
+      }
+    },
+    {
+      "id": "B4-C04",
+      "class_slug": "b4-ab-population-coverage",
+      "severity": "P2",
+      "location": "ops/specs/wp1462-r1/do/do_b4.py:117-143 (cham_c1106 and lenh_ab); ops/specs/wp1462-r1/do/KET_QUA.md:24-27",
+      "claim": "The static prefilter misses ten registered cases that enter _c1106 through indirect CASES lookups. Consequently the reported 147/147 is a complete count only of the selected ordinary/completed calls, not of the spec's entire _c1106 fixture population. The independent census finds 157 entering cases. Nine omitted cases intentionally fail during setup/import/dispatch; r1187_overflow_crash_credit actually launches an intentionally modified kiem-merge script. All ten pass independently on both base and H, so this is an acceptance-measurement completeness defect, not a demonstrated behavior regression in those cases.",
+      "evidence": [
+        "python -B /tmp/wp1462-review-r1/coverage_counter.py, rc0: all 1579 mandatory base registrations visited without the static prefilter; 157 unique _c1106 entries versus 160 static candidates, with 10 omitted entering cases. 38 native-Windows cases are skipped (one directly, 37 BoQua). One unrelated milestone probe initially failed because the scratch base lacked origin/master; after fixing that scratch ref, its isolated rerun passes and has no _c1106 entry.",
+        "python -B /tmp/wp1462-review-r1/census_omitted.py, rc0: preserved original _c1106 and test fault injection; 20/20 omitted-case runs pass across base/head. Trace: setup cases stop before runner; import/dispatch cases enter the transition runner then produce expected CliSapDo; overflow case executes kiem-merge and returns rc1 on its intentional mutated script. Exact names and traces are in census_omitted.json.",
+        "The original do_b4.py ab still returns rc0 and reports 147. Its matcher does not follow dict(CASES) indirection, and do_ca records only completed calls after the runner returns. Spec acceptance 1 requires all cases through _c1106 and rejects a compared count smaller than the base census."
+      ],
+      "suggested_fix": {
+        "where": "do_b4.py population discovery and outcome recording, with corrected measurements in do/KET_QUA.md and the external handoff. Leave product and old test expectations unchanged.",
+        "how": "Obtain the fixture population from an independently instrumented full-book run, or another demonstrably complete discovery method, and record entries and outcomes before invoking the runner. Preserve intentional fault/mutated-script semantics. Explicitly account for comparable calls and pre-CLI failures; do not silently drop the latter or relabel the 147 subset as every builder case. If a meta-case cannot meet the frozen comparison contract, report that limitation for an authorized scope decision.",
+        "locking_test": "Add discovery self-checks using a case reached through dict(CASES), a setup exception, a transition-runner exception and a nested modified-script run. The observed population/outcome accounting must include them; restoring the old prefilter or dropping exceptional outcomes must fail the dedicated measurement self-check. Reconcile the measured 157 entering cases with the 147 ordinary comparable cases and all ten special cases.",
+        "what_the_fix_may_spawn": "A broad call-graph scan can accidentally traverse every registry or run cases twice; instrumentation can suppress the intended injected failure or substitute the wrong product script. Keep exact case identities, preserve fault injection, and distinguish expected harness failures, infrastructure errors, skips and real A/B differences."
+      }
+    }
+  ],
+  "changed_paths": [
+    ".claude/dev/packet_loop.py",
+    ".claude/dev/packet_loop_test.py",
+    "ops/specs/wp1462-r1/RUNBOOK_CONG_TAC.md",
+    "ops/specs/wp1462-r1/do/KET_QUA.md",
+    "ops/specs/wp1462-r1/do/do_b4.py"
+  ],
+  "effective_write_set": [
+    ".claude/dev/packet_loop.py",
+    ".claude/dev/packet_loop_test.py",
+    "ops/specs/wp1462-r1/"
+  ],
+  "tests": [
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/preflight.py",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Exact H/tree/base, r8 spec hash, g2 lease, write-set hash and 5 files +1263/-3 verified; within 6 files/1600 added. All three code hashes match KET_QUA.md."
+    },
+    {
+      "cmd": "python -B .claude/dev/packet_loop_test_manh.py --manh 1/4 --ra /tmp/wp1462-review-r1/shard.json",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Scratch H: 43/43 passed, 0 skipped; TỔNG: ĐẠT; 556 seconds. This is one shard, not a full-suite pass."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/targeted.py /tmp/wp1462-review-r1/head",
+      "rc": 1,
+      "status": "failed",
+      "summary": "138 B4 cases attempted: 127 passed; 11 transport cases fail before assertions because socket creation raises PermissionError/EPERM. No infrastructure failure counted as a pass."
+    },
+    {
+      "cmd": "python -B ops/specs/wp1462-r1/do/do_b4.py dot-bien",
+      "rc": 1,
+      "status": "failed",
+      "summary": "97 mutants/129 pairs: 118 own-target ChotB4 kills; 11 socket-dependent pairs TIN_DUNG_GIA, not kills. All three diagnostic-line cases independently reproduced as valid kills. mutants.log."
+    },
+    {
+      "cmd": "python -B ops/specs/wp1462-r1/do/do_b4.py ab",
+      "rc": 0,
+      "status": "passed",
+      "summary": "147/147 in both fixture shapes; no byte differences in full-G5 shape; old-shape classes a=3,b=104,c=36,z=4. All 14 comparison self-checks pass. ab.log."
+    },
+    {
+      "cmd": "python -B ops/specs/wp1462-r1/do/do_b4.py phat-lai",
+      "rc": 0,
+      "status": "passed",
+      "summary": "60/60: 18 duong_nhanh, 42 khong_giam; expected hash aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a; REST 0; scratch repository clean; LF/CRLF simulation agrees. replay.log."
+    },
+    {
+      "cmd": "git merge --no-commit --no-ff 45317c6f00fd1c9d8373998c377db35451a3a1d1 (scratch on 010046f2141799ec6ffc9cfa1322d49df3f3f680)",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Clean merge into verified GitHub master; staged tree 603456e1db9914f0e97258adc522e87be32b8b0e. No merge commit created."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/targeted.py /tmp/wp1462-review-r1/merged",
+      "rc": 1,
+      "status": "failed",
+      "summary": "Merged tree: same 127 passes and 11 EPERM transport failures; no newly observed executable-case regression. merged-targeted.log."
+    },
+    {
+      "cmd": "ruff check --no-cache --select F --output-format json (base and H modified Python files; new do_b4.py at H)",
+      "rc": 1,
+      "status": "failed",
+      "summary": "Bare Ruff 0.16.9 returns 1 on each side: product 3 and tests 13 existing diagnostics; normalized diagnostic delta=0; new do_b4.py=0. Delta requirement passes; bare lint is not reported green. ruff-base.json/ruff-head.json."
+    },
+    {
+      "cmd": "ci_dang_ky_test.loi_ruff_ci() via runpy, bytecode disabled",
+      "rc": 0,
+      "status": "passed",
+      "summary": "RUFF_CONTRACT 3 []; pin/probe contract passes, separately from bare lint."
+    },
+    {
+      "cmd": "python -B .claude/dev/packet_loop.py doctrine-scan --root .",
+      "rc": 0,
+      "status": "passed",
+      "summary": "12 files, 0 copied doctrine."
+    },
+    {
+      "cmd": "python -B .claude/dev/packet_loop.py adr-song --root .",
+      "rc": 0,
+      "status": "passed",
+      "summary": "66 ADR files / 66 table rows; known ADR-0016 exception preserved."
+    },
+    {
+      "cmd": "git diff --check 48d372e14f190dae83a75ccbca8ee9a0b25635c5 45317c6f00fd1c9d8373998c377db35451a3a1d1",
+      "rc": 0,
+      "status": "passed",
+      "summary": "No whitespace errors; old test expectations are unchanged."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/policy_probe.py",
+      "rc": 0,
+      "status": "passed",
+      "summary": "66/66 policy checks: both classes, whitespace/CRLF/Unicode/cross-class values, non-200 responses and metadata-only changes. Fake REST seam, no network."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/independent_mutants.py",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Five fresh mutants killed by own-target ChotB4 with healthy controls: class constant, H2 result, H1 head input, nonempty ban value and full-OID comparison. The last two use reviewer-added cases."
+    },
+    {
+      "cmd": "python -B own_mutants.py order|metadata|date; python -B extra_survivors.py ban-only-1|7b-short-oid (five separate commands in /tmp/wp1462-review-r1)",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Five independent non-equivalent mutations each survive 127/127 executable B4 cases. This is a measured coverage failure, not a product pass; the 11 direct transport cases are excluded for baseline EPERM."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/diagnostic_mutant.py",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Fresh section-9 mutant duplicates LAN_G5; healthy alpha control passes and its own ChotB4 kills the mutant."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/locking_witnesses.py",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Three added contract witnesses pass on H and kill the order, metadata and date mutants that survive the existing executable B4 suite."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/end_to_end.py; probes.py; deadline15.py; duplicates.py; duplicates_more.py (separate invocations)",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Counterexample scripts complete and reproduce B4-C01/C02/C03. Their rc 0 means the defect was observed, not that the product met the contract."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/tree_boundaries.py",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Symlinked parent directory reproduces B4-C01; literal ../ pathname is rejected with la and no escaped file/object residue."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/check_snapshot.py",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Before/after snapshot hashes identical across 17,337 files, exact HEAD/tree, working/staged diffs and ignored listing. Initial comparison used a different ignored-list flag; corrected to the original matching mode before comparison."
+    },
+    {
+      "cmd": "Windows, full repository gates, exact-H PR CI/full M9, live Actions-variable reads",
+      "rc": null,
+      "status": "not_run",
+      "summary": "No Windows or remote workflow execution; no switch reads/writes, dispatch, push, comment, merge or deploy. Executor logs are inspected as claims, not substituted for independent runs."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/coverage_counter.py",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Census completed over 1579 mandatory registrations; 157 builder-entry cases, 10 absent from the prefilter. 38 Windows skips; one scratch-ref error resolved separately. Not a full-suite test-pass claim."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/census_omitted.py",
+      "rc": 0,
+      "status": "passed",
+      "summary": "All ten omitted cases pass on base and head; preserved original builder/fault semantics and recorded entry/runner/exception outcomes. Repaired scratch-only milestone probe also passes."
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/coverage_long.py wp1303_target_human_chain",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Independent counter: {'case': 'wp1303_target_human_chain', 'hits': [], 'outcome': 'completed', 'error': None, 'seconds': 1890.9853332089997}"
+    },
+    {
+      "cmd": "python -B /tmp/wp1462-review-r1/coverage_long.py wp1303_target_supported_pairs",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Independent counter: {'case': 'wp1303_target_supported_pairs', 'hits': [], 'outcome': 'completed', 'error': None, 'seconds': 468.0633814140001}"
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "b4-trusted-classifier-materialization",
+      "finding_ids": [
+        "B4-C01"
+      ],
+      "highest_open_severity": "P1",
+      "source_round_sha": "source round 1 / 45317c6f00fd1c9d8373998c377db35451a3a1d1",
+      "common_fix_or_reason": "Isolate Git configuration and object interpretation from the caller, including replacement/graft paths and checkout filters. Materialize verified canonical bytes and reject a classifier or parent path that resolves through a symlink outside the intended tree. Preserve required object access, temporary-object isolation and Windows normalization. Also inspect the self-check boundary for the same interpretation assumptions.",
+      "closing_check": "Keep a full-class control and a legitimate fast-class control. On identical M/H, inject local/global smudge configuration, a replacement classifier blob, and file/directory symlink escapes: none may authorize reduction or execute external classifier bytes. Re-enabling each mechanism must kill its own target case via ChotB4. Re-run the 60-merge replay and cleanup checks."
+    },
+    {
+      "slug": "b4-rest-total-deadline",
+      "finding_ids": [
+        "B4-C02"
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": "source round 1 / 45317c6f00fd1c9d8373998c377db35451a3a1d1",
+      "common_fix_or_reason": "Enforce the remaining wall-clock budget across opening and every read, including EOF and the byte-limit exit; reject completion after the deadline. Keep the per-socket bound, one-request behavior and proxy support. Do not merely extend the permitted duration in the test.",
+      "closing_check": "Add delayed-EOF and late-final-chunk cases with valid switch JSON, plus within-budget controls. Past-deadline completion must raise _B4Loi and never emit khop/HIEU_LUC. A mutant removing the completion check must be killed by the target ChotB4 case. Run real loopback variants on a capable environment."
+    },
+    {
+      "slug": "b4-g5-readback-normalization",
+      "finding_ids": [
+        "B4-C03"
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": "source round 1 / 45317c6f00fd1c9d8373998c377db35451a3a1d1",
+      "common_fix_or_reason": "Normalize the combined readback by job ID, with the existing identical-content and pagination checks, before constructing J and counting shard names. Deduplicate identities, not job names, so genuinely distinct duplicate shards still fail.",
+      "closing_check": "On the same fixture compare one file, repeated identical pages, two overlapping files and a repeated CLI path. Full G5 must remain byte-identical to base; dich must retain its audit/switch prerequisites. Add a mutant omitting union normalization and require its own ChotB4 kill; keep conflicting-ID and distinct-ID controls red."
+    },
+    {
+      "slug": "b4-predicate-mutation-proof",
+      "finding_ids": [
+        "B4-S05"
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": "source round 1 / 45317c6f00fd1c9d8373998c377db35451a3a1d1",
+      "common_fix_or_reason": "Audit the actual section 2-9 obligations against observable cases, then add independent healthy/adverse cases and a dedicated mutation for each uncovered rule. Reuse the existing ChotB4 classification. Do not treat the current count of 97 mutants as a completeness proof.",
+      "closing_check": "Adopt equivalent assertions to locking_witnesses.py and the ban/OID cases in independent_mutants.py, with separately registered mutants. For dates, lock deterministic commit metadata across ambient clock/config changes rather than mandate the particular epoch used by the probe. Require healthy controls and own-case ChotB4 kills; crashes and unrelated failing cases remain TIN_DUNG_GIA. Re-run all B4 cases and pairs on a socket-capable host, and retain the historical class ID."
+    },
+    {
+      "slug": "b4-ab-population-coverage",
+      "finding_ids": [
+        "B4-C04"
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": "source round 1 / 45317c6f00fd1c9d8373998c377db35451a3a1d1",
+      "common_fix_or_reason": "Obtain the fixture population from an independently instrumented full-book run, or another demonstrably complete discovery method, and record entries and outcomes before invoking the runner. Preserve intentional fault/mutated-script semantics. Explicitly account for comparable calls and pre-CLI failures; do not silently drop the latter or relabel the 147 subset as every builder case. If a meta-case cannot meet the frozen comparison contract, report that limitation for an authorized scope decision.",
+      "closing_check": "Add discovery self-checks using a case reached through dict(CASES), a setup exception, a transition-runner exception and a nested modified-script run. The observed population/outcome accounting must include them; restoring the old prefilter or dropping exceptional outcomes must fail the dedicated measurement self-check. Reconcile the measured 157 entering cases with the 147 ordinary comparable cases and all ten special cases."
+    }
+  ],
+  "hunt_table": [
+    {
+      "hypothesis": "Caller Git configuration/objects can change trusted classifier bytes.",
+      "command": "python -B /tmp/wp1462-review-r1/end_to_end.py",
+      "output": "Control rc12; smudge and git-replace each rc0, duong_nhanh, REST=0, clean=True.",
+      "conclusion": "LỖI"
+    },
+    {
+      "hypothesis": "A classifier symlink escapes the temporary tree.",
+      "command": "python -B /tmp/wp1462-review-r1/probes.py",
+      "output": "Changing only an external symlink target switches duong_nhanh/khong_giam for identical M/H.",
+      "conclusion": "LỖI"
+    },
+    {
+      "hypothesis": "Late EOF can bypass the total REST deadline.",
+      "command": "python -B /tmp/wp1462-review-r1/deadline15.py",
+      "output": "Production timeout=15; elapsed 15.200912 seconds; khop plus HIEU_LUC.",
+      "conclusion": "LỖI"
+    },
+    {
+      "hypothesis": "Full/target G5 classification depends on readback file grouping.",
+      "command": "python -B /tmp/wp1462-review-r1/duplicates_more.py",
+      "output": "Both du/dich: same ID within one file passes; same ID across two files fails; distinct IDs and conflicting contents still fail.",
+      "conclusion": "LỖI"
+    },
+    {
+      "hypothesis": "Required contract mutations can survive the existing suite.",
+      "command": "own_mutants.py order|metadata|date; extra_survivors.py ban-only-1|7b-short-oid; locking_witnesses.py and independent_mutants.py (separate invocations)",
+      "output": "Five mutations each survive 127/127 executable cases; added healthy witnesses kill all five with own-case ChotB4.",
+      "conclusion": "LỖI"
+    },
+    {
+      "hypothesis": "Whitespace, Unicode, another class value or response metadata can improperly open permission.",
+      "command": "python -B /tmp/wp1462-review-r1/policy_probe.py",
+      "output": "66/66 independent policy assertions pass; no normalization or metadata-based authorization observed.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "The listed three diagnostic-only mutant kills are crash credit.",
+      "command": "python -B ops/specs/wp1462-r1/do/do_b4.py dot-bien",
+      "output": "Missing steps, non-object step and non-object JSON root all classified ChotB4/GIET by their own target; diagnostics are part of the contract.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "Historical real classifiers diverge under temporary merge/tree execution or CRLF framing.",
+      "command": "python -B ops/specs/wp1462-r1/do/do_b4.py phat-lai",
+      "output": "60/60 expected results, LF/CRLF agree, REST=0, clean=True; expected table hash matches.",
+      "conclusion": "KHÔNG PHẢI LỖI"
+    },
+    {
+      "hypothesis": "The real HTTP redirect/proxy/socket-timeout tests can be validated here.",
+      "command": "python -B /tmp/wp1462-review-r1/targeted.py /tmp/wp1462-review-r1/head",
+      "output": "11/138 cases fail socket construction with EPERM before behavioral checks; real-network behavior remains unmeasured.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "The 160-candidate static prefilter covers every case entering _c1106.",
+      "command": "coverage_counter.py and census_omitted.py (python -B, separately)",
+      "output": "157 entering cases; 10 omitted via indirect CASES lookup. All ten existing tests pass on both sides, but original A/B omits their outcomes and still reports full coverage.",
+      "conclusion": "LỖI"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Candidate identity and scope",
+      "declared": "H 45317c6; tree 843627c; base 48d372e; 5 files +1263/-3; cap 6/1600",
+      "measured": "Exact full OIDs and all five paths match; 1263 additions and 3 deletions; r8/g2 spec and write-set hashes match.",
+      "match": true
+    },
+    {
+      "claim": "A/B comparison and population",
+      "declared": "147/147 in both shapes is the full _c1106 population; a3,b104,c36,z4; 14 self-checks",
+      "measured": "147/147 selected ordinary cases and 14 self-checks reproduced. Full census finds 157 entering cases; 10 indirect harness cases were omitted. All ten independently pass on base/H, but delivered discovery/outcome accounting remains incomplete (B4-C04).",
+      "match": false
+    },
+    {
+      "claim": "B4 cases",
+      "declared": "138/138 pass",
+      "measured": "127 passed; 11 infrastructure failures on H and scratch merged tree. No full pass independently established.",
+      "match": null
+    },
+    {
+      "claim": "Mutation pairs",
+      "declared": "97 mutants; 129/129 own-target kills",
+      "measured": "97/129 enumerated; 118 valid kills, 11 infrastructure false-credit classifications. Additional surviving mutations show completeness gaps.",
+      "match": null
+    },
+    {
+      "claim": "Replay",
+      "declared": "60/60; 18 fast/42 full; fixed expected hash; no REST/objects",
+      "measured": "Independently reproduced with exact expected hash and clean scratch repository.",
+      "match": true
+    },
+    {
+      "claim": "Whole mandatory case book",
+      "declared": "Base 1579=1541 passed+38 skipped; H1717=1679 passed+38 skipped; +138",
+      "measured": "Executor shard JSON/log counts and hashes are internally consistent; independently ran one H shard and targeted B4 cases. Skips are not passes; no independent full-suite pass asserted.",
+      "match": null
+    },
+    {
+      "claim": "Ruff F delta",
+      "declared": "3 product +13 test errors on both sides; new file 0",
+      "measured": "Same 16 diagnostics after normalizing shifted line references; delta0; new file0; bare lint rc1.",
+      "match": true
+    },
+    {
+      "claim": "Timing delta",
+      "declared": "Local four-shard totals -616 seconds, explicitly confounded; CI 16-shard delta not measured",
+      "measured": "No controlled before/after or CI timing measurement in this review.",
+      "match": null
+    },
+    {
+      "claim": "Code hashes anchoring KET_QUA.md",
+      "declared": "cf4a086c… / f9db55ff… / 21502e47…",
+      "measured": "All three full SHA-256 hashes match actual H files; see preflight.json.",
+      "match": true
+    }
+  ],
+  "notes": [
+    "Environment: Linux; Python 3.13.18; Git 2.43.0; Ruff 0.16.9; Codex CLI 0.170.0. Sandbox workspace-write with restricted network, approval never. Assigned checkout was treated read-only; this is not a claim that its mount is read-only. All mutations and commits used isolated /tmp fixtures.",
+    "The historical attempt-1 handoff is r7/g1 and correctly stopped on the former 450-line cap. Frozen r8/g2 explicitly admits the same H after raising the cap to 6 files/1600 added; do not treat the historical blocked handoff as current authorization or relabel its measurements as a fresh executor run.",
+    "GitHub readback: master remains 010046f2141799ec6ffc9cfa1322d49df3f3f680; spec/lease branch remains e859c72557e13d397dfdda3a3f363f62110b21e4. Mission branch advanced to r90 at 02d57ea563c539ca39c2cdec886ec325607d8e74 during review; fetched r90 preserves the entire B4 r8/g2 record, spec, continuation H, write set and limits unchanged.",
+    "The handoff admits incomplete protocol reading. No claim about the executor having read more is made. Scope, old-test preservation, size stop, no publication and evidence anchoring were checked; measured runtime and guard-coverage deviations are reported above. CI/Windows omissions remain explicitly not_run, not fabricated additional source findings.",
+    "B4-S05 retains its stable cause-class history. The earlier inventory/matrix obligations were withdrawn in r6; this review applies the remaining section 2-9 two-sided-case/dedicated-mutant requirement to actual source. Source round1 has no preceding source-verdict convergence denominator. This review does not grant another attempt or reset any review budget.",
+    "The five survivor measurements exclude 11 direct transport cases denied by the sandbox. Their source invokes _rest_get directly and cannot exercise the changed order/date/metadata/ban/OID rules. Every survivor has a separately executed healthy witness and own-target ChotB4 kill; no crash is counted as a kill.",
+    "Serving model and effort remain KHONG_DO_DUOC under ADR-0065. Launcher terminal rc/stdout hash cannot be attested while this run is active; the coordinator must finalize delivery provenance after completion. No GitHub actor is inferred from the model identity.",
+    "Full census completion: all 1581 base registrations accounted for (1579 mandatory plus two long cases). Both long cases complete without _c1106 entries. There are 38 native-Windows skips, not passes. The census records 157 entering cases; the ten omissions are retained in coverage_census.omitted_hits and B4-C04. This instrumentation is not claimed as an independent full-suite pass."
+  ],
+  "coverage_census": {
+    "book": 1581,
+    "mandatory": 1579,
+    "static": 160,
+    "counts": {
+      "ran": 1579,
+      "skipped": 1
+    },
+    "omitted_hits": [
+      "r1187_overflow_crash_credit",
+      "r1187_transition_dispatch_AssertionError",
+      "r1187_transition_dispatch_RuntimeError",
+      "r1187_transition_dispatch_TimeoutExpired",
+      "r1187_transition_import_AssertionError",
+      "r1187_transition_import_RuntimeError",
+      "r1187_transition_import_TimeoutExpired",
+      "r1187_transition_setup_AssertionError",
+      "r1187_transition_setup_RuntimeError",
+      "r1187_transition_setup_TimeoutExpired"
+    ],
+    "seconds": 2448.799617290497,
+    "builder_entries": 157,
+    "native_windows_skips": 38,
+    "non_skip_errors": {
+      "r1187_actual_milestone": "AssertionError: "
+    },
+    "error_resolution": "The sole non-skip error is reviewer scratch topology: missing base origin/master. After adding the verified ref only in /tmp, r1187_actual_milestone passes independently with zero builder entries; census_omitted.json. This is a census, not a full-suite pass."
+  },
+  "readonly_snapshot": {
+    "equal": true,
+    "changed": [],
+    "files": 17337,
+    "head": "45317c6f00fd1c9d8373998c377db35451a3a1d1",
+    "tree": "843627c372b0c39a4758d051618cd374fd4d7d93",
+    "tracked_diff_empty": true,
+    "staged_diff_empty": true,
+    "status": "!! .codex/\n",
+    "before_sha256": "b7207ca5299fe9c622efbd29874b25c48ceea7592e72544d954d2a9d80398c0a",
+    "after_sha256": "b7207ca5299fe9c622efbd29874b25c48ceea7592e72544d954d2a9d80398c0a"
+  },
+  "additional_mutation_measurements": [
+    {
+      "mutant": "ban-only-1",
+      "anchor": "not os.environ.get(\"PACKET_LOOP_CAM_DOC_CONG_TAC\")",
+      "replacement": "os.environ.get(\"PACKET_LOOP_CAM_DOC_CONG_TAC\") != \"1\"",
+      "cases": 127,
+      "pass": 127,
+      "killed": {},
+      "seconds": 153.50024289600015,
+      "transport_excluded": "11 cases denied socket creation in baseline"
+    },
+    {
+      "mutant": "7b-short-oid",
+      "anchor": "day[1] != cay[1]",
+      "replacement": "day[1].strip()[:7] != cay[1].strip()[:7]",
+      "cases": 127,
+      "pass": 127,
+      "killed": {},
+      "seconds": 152.1436152289998,
+      "transport_excluded": "11 cases denied socket creation in baseline"
+    }
+  ],
+  "long_case_census": [
+    {
+      "case": "wp1303_target_human_chain",
+      "hits": [],
+      "outcome": "completed",
+      "error": null,
+      "seconds": 1890.9853332089997
+    },
+    {
+      "case": "wp1303_target_supported_pairs",
+      "hits": [],
+      "outcome": "completed",
+      "error": null,
+      "seconds": 468.0633814140001
+    }
+  ],
+  "evidence_manifest": "/tmp/wp1462-review-r1/evidence-manifest.json",
+  "evidence_manifest_sha256": "1e3a8ed1a4b49ff616d6bd2888eece6e8fa5ed7f7395f1d89108c0f01e0e728e",
+  "completed_at_utc": "2026-11-21T01:23:03.929716+00:00"
+}

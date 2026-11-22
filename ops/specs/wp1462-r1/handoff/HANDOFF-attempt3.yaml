@@ -1,0 +1,217 @@
+schema_version: 1
+packet_id: wp1462
+packet_issue: 1462
+mission_issue: 1172
+mission_revision: 89
+revision: 8
+generation: 2
+attempt: 3            # LAST executor attempt under the lease (limits.executor_attempts 3)
+lease_id: wp1462-r8-g2-claude
+spec_hash: a5d28e2a0ccbd7b21d61d7b8c97c382728bfe1341a64b99bd697f988dc0641dc
+provider: claude
+model_family: claude
+# Lease and frozen prompt name claude-fable-5-2; owner decision E2 (Fable quota exhausted) superseded it. This attempt ran on Claude Opus 5.5, highest effort.
+model: claude-opus-5-5
+model_switch: {lease_model: claude-fable-5-2, actual_model: claude-opus-5-5, reason: "owner E2: Fable quota exhausted (stated in the coordinator dispatch)", served_model_evidence: "self-reported by the session; no launcher receipt"}
+execution_surface: claude_code
+transport: machine/local
+environment: cloud
+role: executor
+session_id: session_015Gtxrb3cuZ7Nm935R8yA5W/agent-a200d1c00085561f8
+branch: agent/wp1462-r8-g2-a3   # local only, in worktree agent-a200d1c00085561f8; lease names agent/wp1462-r7-g1-claude. Nothing pushed.
+base_sha: 48d372e14f190dae83a75ccbca8ee9a0b25635c5
+continuation_base: b1c9e826dac468de1cb1a4545bb8d1f866b035cb   # attempt-2 head (reviewed by Codex source review 2)
+head_sha: 6767e377bc2bdf3b512c6641496e88f614eb8978
+head_tree: 2b14367581f64ae692be863c1bfe8389b148643a
+commits_in_attempt_3: [6767e377bc2bdf3b512c6641496e88f614eb8978]   # ONE commit on b1c9e82, no amend/rewrite
+status: needs_followup
+summary: >
+  Attempt 3 addresses Codex source review 2 (rv1462/codex-source-review-2.json, sha256
+  646de32bea364a4e71339b2a044a5d47229cffffdeb47b6d5846cb1b5c3ef281, reviewed_sha b1c9e82) by cause class.
+  B4-C01: the classifier tree is no longer checked out; `_b4_anh_chup` reads commit M, every tree and every blob raw
+  through `git cat-file --batch`, re-hashes each object against its OID and writes the verified bytes itself.
+  Missing object, hash mismatch or a path outside the temp tree gives `la`. GIT_CONFIG_NOSYSTEM/GIT_ATTR_NOSYSTEM added.
+  B4-S05: shard boundary tests now cover every index 0..7 in both du and dich, with one dedicated mutant per index
+  (including the reviewer's range(1, 8)); spec constants 15 s and 120 s got cases and mutants.
+  B4-C04: A/B now re-applies a case's self-modification to each side's script and byte-compares it; cases that never
+  reach a CLI are listed as an acceptance gap and `ab` no longer reports ĐẠT. RESULT: criterion 1 is still RED and
+  cannot be closed by code: 157 counted, 148 byte-compared, 9 never reach a CLI (injected harness faults), and the one
+  self-modified case differs only in traceback line numbers. A spec decision is required (see remaining_work).
+  B4-C05: corrections to the attempt-2 receipts are appended below (failed runs kept failed, real rc and cause).
+changed_paths:   # git diff --name-only 48d372e..6767e37
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - ops/specs/wp1462-r1/RUNBOOK_CONG_TAC.md
+  - ops/specs/wp1462-r1/do/KET_QUA.md
+  - ops/specs/wp1462-r1/do/do_b4.py
+size_receipt:
+  command: git diff --numstat 48d372e14f190dae83a75ccbca8ee9a0b25635c5 6767e377bc2bdf3b512c6641496e88f614eb8978
+  numstat:
+    - [244, 0, .claude/dev/packet_loop.py]
+    - [793, 3, .claude/dev/packet_loop_test.py]
+    - [30, 0, ops/specs/wp1462-r1/RUNBOOK_CONG_TAC.md]
+    - [207, 0, ops/specs/wp1462-r1/do/KET_QUA.md]
+    - [325, 0, ops/specs/wp1462-r1/do/do_b4.py]
+  files: 5
+  added: 1599
+  deleted: 3
+  tran: {files: 6, added: 1600, nguon: "spec r8 nang_tran (lease field size)"}
+  ket_luan: TRONG_TRAN (1 line of headroom; KET_QUA.md mutant table was compacted to one row per mutant to fit)
+  delta_vs_attempt2: "git diff --numstat b1c9e82 6767e37: packet_loop.py +49/-8, packet_loop_test.py +80/-11, KET_QUA.md +184/-223, do_b4.py +59/-16"
+  write_set_check: "all 5 paths are under effective_write_set; SPEC.md untouched"
+authority_checks:
+  prompt: {path: ops/prompts/wp1462-r8-g2-fable-executor.txt, ref: "origin/ops/wp1462-r1 (e859c72)", sha256: 754bfb55c355c3625a3dda90c126b9e37949c39050b0a308ae48f8af9208368e, khop_lease: true}
+  spec: {path: ops/specs/wp1462-r1/SPEC.md, ref: origin/ops/wp1462-r1, sha256: a5d28e2a0ccbd7b21d61d7b8c97c382728bfe1341a64b99bd697f988dc0641dc, khop_lease: true}
+  verdict: {path: rv1462/codex-source-review-2.json, sha256: 646de32bea364a4e71339b2a044a5d47229cffffdeb47b6d5846cb1b5c3ef281, khop_dispatch: true}
+  lease: {path: ops/leases/wp1462-r8-g2-claude.yaml, ref: origin/ops/wp1462-r1, lease_until: "2026-11-24T08:00:00Z"}
+da_doc:   # read IN FULL this session (the earlier sessions did not)
+  - CLAUDE.md (session context, full)
+  - "docs/PROTOCOL_DA_PHIEN.md §4, §5 (incl. 5.1), §6, §7, §8 (incl. 8.1, 8.2, 8.3), §10 (10.1, 10.2.1–10.2.4), §11, §12, §13 (incl. 13.1, 13.2) — lines 241–1261"
+  - .claude/skills/work-packet/SKILL.md (full)
+  - docs/adr/0044, 0053, 0055, 0060, 0067 (full)
+  - "SPEC r8: Mục tiêu, Hợp đồng §1–§10, Nghiệm thu (GT-1..GT-7, luật chung, tiêu chí 1–11), Write set, Kích thước (nang_tran)"
+  - verdict JSON (findings, class_table, prior_class_status, notes, unfinished_commands, test_selection)
+prior_findings:   # finding id -> class -> change -> locking test / dedicated mutant (each mutant measured GIET by its target's own ChotB4)
+  - id: B4-C01
+    class: b4-trusted-classifier-materialization
+    severity: P1
+    change: >
+      `_b4_anh_chup` (new): commit M -> trees -> blobs read raw via `git cat-file --batch` (no filters, no attributes,
+      no checkout), every object re-hashed against its OID (sha1/sha256 by OID length), bytes written by our own code;
+      symlink entries become regular files, gitlinks empty dirs; missing object, hash mismatch or a path whose
+      absolute form leaves the temp tree raise ValueError -> `la`. `read-tree`/`checkout-index` removed, `core.symlinks`
+      config removed (no longer used). Env adds GIT_CONFIG_NOSYSTEM=1, GIT_ATTR_NOSYSTEM=1. Isolation of local/global
+      config and global attributes is now measured on the classifier INPUT (merge commit C), because the executed tree
+      no longer depends on them. In-tree `.gitattributes` no longer transforms the executed blob either (exact blob, §5).
+    measured_on_probe: "rv1462/a2/probe_obj.py on the attempt-3 code: healthy=khong_giam, forged_loose=la (was duong_nhanh), xdg_attributes_*=khong_giam; a3/tools/probe3.py: blob/tree/commit forged, missing blob, '..' tree entry -> la"
+    tests: [cong_b4_gia_mao_blob, cong_b4_gia_mao_cay, cong_b4_object_vang, cong_b4_cay_ra_ngoai, cong_b4_git_doi_ten_cuc_bo, cong_b4_git_doi_ten_toan_cuc, cong_b4_git_thuoc_tinh_hop, cong_b4_git_khong_he_thong, cong_b4_git_thuoc_tinh_trong_cay (expectation changed to the exact blob, khong_giam), kept: cong_b4_git_smudge_cuc_bo, cong_b4_git_smudge_toan_cuc, cong_b4_git_thay_the, cong_b4_git_cau_hinh_la_van_nhanh, cong_b4_git_thuoc_tinh_toan_cuc, cong_b4_lien_tep, cong_b4_lien_thu_muc]
+    mutants: [b4_checkout_thay_anh_chup (reverts to read-tree+checkout-index), b4_bo_kiem_bam, b4_bo_bam_blob, b4_bo_bam_cay, b4_object_vang_bo_qua, b4_ghi_ra_ngoai, b4_ghi_lien_that (replaces b4_lien_trong_cay_tam), b4_ma_tu_cay_hop (re-anchored), b4_git_dir_cua_kho, b4_doc_cau_hinh_toan_cuc, b4_doc_thuoc_tinh_toan_cuc (retargeted), b4_doc_cau_hinh_he_thong, b4_doc_thuoc_tinh_he_thong]
+    equivalent_or_not_closed: >
+      (1) Per-kind mutant "skip hash check for the commit object" is equivalent: self-check 7a runs
+      `rev-parse refs/remotes/origin/master^{commit}`, and git re-hashes the commit there (measured: a forged M commit makes
+      7a red before step 4), so no forged-commit case exists. (2) NOT closed: objects of H and history (merge-base) that the
+      classifier's own git reads through alternates are not re-hashed; only the executed tree (M commit -> trees -> blobs) is.
+      Copies served inconsistently (same OID in two packs, MRU order) are not addressed. (3) System gitconfig/gitattributes:
+      the case measures that both NOSYSTEM variables reach the classifier process; a real /etc file was not used (needs root).
+  - id: B4-S05
+    class: b4-predicate-mutation-proof
+    severity: P2
+    change: >
+      Method change (the class recurred in 3 review rounds, §12): instead of adding the named survivor only, the shard predicate
+      is covered over its whole index domain 0..7 x {du, dich} with one case per (index, mode) and one dedicated mutant per index.
+      Audited the remaining selection/omission boundaries of §§2–9 (table in KET_QUA.md "Biên đã soát"); added the two that
+      had none: REST timeout 15 s at the production call (the GT-1 fake now logs `han`) and classifier timeout 120 s.
+    tests: ["cong_b4_bc_{du,dich}_thieu_manh_{0..6} (14 new; index 7 already covered)", cong_b4_han_dac_ta, "cong_b4_dc_beta (now also asserts han == 15)"]
+    mutants: [b4_bc_bo_manh_dau (= reviewer range(1, 8)), "b4_bc_bo_manh_1 .. b4_bc_bo_manh_6", b4_bc_bay_manh (existing, index 7), b4_han_khac_15, b4_han_pl_khac_120]
+    not_given_a_mutant: "gia_tri `[:120]` (spec says at most 120, shorter truncation is spec-conformant)"
+    read_tree_checkout_rc_guards: "none remain (both commands removed)"
+  - id: B4-C04
+    class: b4-ab-population-coverage
+    severity: P2
+    change: >
+      do_b4.py: a case that runs a script it modified itself is still run as-is, THEN the same edit (expanded to whole lines,
+      must be unique in both scripts) is re-applied to each side's packet_loop.py, both run in the same directory, bytes recorded
+      as a normal comparable entry. Exception traces now carry the cause chain with the innermost message. Cases that enter the
+      builder without any comparable call are listed as KHOẢNG TRỐNG and each one is a red line; `ab` cannot print ĐẠT while
+      any remain. Self-check extended: an extra head-side byte in a self-modified variant must make the comparison red; a
+      counted case without comparisons must appear in the gap list (4 self-check mutations each made it red, measured).
+    result: >
+      NOT CLOSED, STOPPED as instructed: the compared population cannot equal 157. 157 counted = 148 byte-compared + 9 that
+      never reach a CLI. The 9 are r1187_transition_{setup,import,dispatch}_{AssertionError,RuntimeError,TimeoutExpired}:
+      the harness injects a fault ('injected') while building the fixture (setup), while importing the module (import) or in
+      place of main (dispatch); identical traces at base and head; no CLI output exists on either side. Of the 148, 147 are
+      byte-identical in the new shape and match their class template in the old shape; r1187_overflow_crash_credit (self-
+      modified script, CLI crashes with a traceback) differs ONLY in traceback line numbers because head's packet_loop.py is
+      longer — byte equality is impossible by construction. Both gaps need a spec decision on criterion 1.
+  - id: B4-C05
+    class: b4-handoff-evidence-contract
+    severity: P3
+    change: "append-only corrections below (corrections_to_attempt2); this handoff records failed runs as failed with rc and cause, reruns separately, and a real selector/catalog identity"
+corrections_to_attempt2:   # attempt-2 handoff sha256 16e5695d01cc21fae4bc26d79eb3d7d782615652141a8e3fbdf4f0bf4b693dd6 is NOT edited; this block supersedes the named entries
+  - entry: "tests[name='worktree run (diagnostic only, not evidence')] status not_run"
+    corrected: {status: failed, rc: khong_do_duoc, cause: "rig: worktree .git is a file (launcher probes refuse a linked worktree) and the WP1174 carrier refuses a dirty tree; 6 void_* cases + carrier failed per the attempt-2 session", evidence: "rv1462/a2/manh/ is empty now; the shard logs were not retained, so the exact rc per shard is not measurable"}
+  - entry: "tests[name='packet_loop_test, 4 shards ...'] evidence 'GOM: ĐẠT · 4 mảnh · 1745'"
+    corrected: {status: failed, rc: 1, cause: "gather run without KQ_MANH (CI job result) ⇒ 'job mảnh có kết quả '' ... (phải là success)'", evidence: "rv1462/a2/mH/gom.log sha256 f21f5704ec8bfaffe13bb8a3ebb74e0cefc64789f880bcfd08ecf24273abcba7 and rv1462/a2/m1/gom.log (same failure)", rerun: "only the reviewer's independent re-gather (KQ_MANH=success) passed; no executor gather receipt exists for b1c9e82"}
+  - entry: "test_selection.selector_policy_sha: null"
+    corrected: "see test_selection below (attempt 3 identity); attempt 2 had none"
+tests:   # positive evidence; raw logs under rv1462/a3/log/
+  - name: packet_loop_test 4 shards on EXACT H 6767e37 (shared clean clone a3/cloneH, .git is a directory, origin/master 5f461a5, merge-base 48d372e)
+    command: "python -B .claude/dev/packet_loop_test_manh.py --manh i/4 --ra … (i=0..3), then PACKET_LOOP=chay KQ_MANH=success … --gom mH --n 4"
+    status: passed
+    evidence: "rc 0 x4, TỔNG: ĐẠT x4: 109/109 (shard 0 = the RERUN, alone in the checkout, carrier executed_sha 6767e37, overall_status passed) + 43/43 + 808/808 + 808/808 = 1768/1768; GOM: ĐẠT · 4 mảnh · 1768 ca bắt buộc (sổ 1770 − CA_DAI), rc 0. logs a3/log/mH/manh-{0..3}.log sha256 09d19f6d…, 22ed9bbe…, 96d9d342…, c7b593d3…; gom.log ce9101f5…"
+  - name: "packet_loop_test shard 0 on EXACT H — FIRST run (kept as failed)"
+    command: python -B .claude/dev/packet_loop_test_manh.py --manh 0/4
+    status: failed
+    rc: 1
+    evidence: "109/109 cases passed, WP1174 carrier report overall_status passed, but TỔNG: 1 lỗi: carrier snapshot of the clone changed (file_count 18691 -> 18715) because I ran `tl.py --selftest` in the SAME checkout at the same time, which wrote ignored files under scripts/.tl_state and references/golden/fixtures. Rig error, not code. Log a3/log/mH/that_bai/manh-0.log sha256 22ce6f5459e3472990405727e34b5d9f51d42ebbdd5847142edc3aeef865031b. Rerun separately after `git clean -fdX` of those two dirs, alone in the checkout (entry above)."
+  - name: packet_loop_test 4 shards on the LOCAL measurement commit bfbe8fe (identical code hashes to H; only KET_QUA.md differs)
+    command: same, a3/clone, origin/master 8656dc0
+    status: passed
+    evidence: "rc 0 x4, TỔNG: ĐẠT x4: 109/109 + 43/43 + 808/808 + 808/808 = 1768/1768 (BỎ QUA on Linux: native-Windows cases); GOM: ĐẠT · 4 mảnh · 1768 ca bắt buộc (sổ 1770 − CA_DAI), rc 0. N after = 1768 = 1579 base + 189 cong_b4_* (attempt 2: 1745 = 1579 + 166)"
+  - name: cong_b4_* on the worktree code, diagnostic
+    status: passed
+    evidence: "a3/log/b4wt-{0..3}.json: 48+47+47+47 = 189/189 passed (a forged-commit case was tried and dropped before this run: see equivalent_or_not_closed)"
+  - name: do_b4.py dot-bien (criterion 4), code hashes identical to H
+    command: python -B ops/specs/wp1462-r1/do/do_b4.py dot-bien i/4 (i=0..3)
+    status: passed
+    evidence: "rc 0 x4, KẾT QUẢ dot-bien: ĐẠT; 143 b4_ mutants, 197 pairs, 197/197 GIET by the target's own ChotB4, 0 false credit, 0 survivors, 0 red cross-family controls. logs a3/log/dotbien-{0..3}.log sha256 129872bf…, 1ac0916c…, 5d5a1db0…, 5a95aa37…"
+  - name: do_b4.py phat-lai (criterion 8), code hashes identical to H
+    command: python -B ops/specs/wp1462-r1/do/do_b4.py phat-lai
+    status: passed
+    evidence: "rc 0; 60 merges; table sha256 aa932267e766cf3f6e242f35febe3692909f3e909cb510177ba83d780bfc849a; 42 khong_giam + 18 duong_nhanh through the new verified snapshot on the real 17 529-blob tree; REST 0; private copy clean; CRLF 60/60. log a3/log/phatlai.log sha256 3da463c9d6abe3e7ef42e07d364a143d32dc0981e94e37e1e67e76a0744aeaf4"
+  - name: do_b4.py ab (criteria 1-2), code hashes identical to H
+    command: python -B ops/specs/wp1462-r1/do/do_b4.py ab i/4 (i=0..3)
+    status: failed
+    rc: [1, 1, 1, 1]
+    evidence: >
+      KẾT QUẢ ab: 2 · 2 · 5 · 2 lỗi. Base book 1581 cases run with the counter (dat 1543, BoQua 37, OSError 1 at base).
+      157 enter _c1106 (38/39/43/37) = 148 byte-compared + 9 never reach a CLI (the 9 red gap lines). 147 ordinary cases
+      byte-identical in the new shape; old shape (a) 3 · (b) 104 · (c) 36 · (z) 4, all on template. r1187_overflow_crash_credit:
+      rc 1/1, stderr differs only in traceback line numbers (red in criterion 1 and in class (z) of criterion 2). Self-checks
+      (bộ so 14, phép đếm incl. new self-modified/gap checks) pass. logs a3/log/ab-{0..3}.log sha256 a5ec7989…, 4f325d6e…, cebb4ce3…, 24c552dd…
+  - name: Ruff F delta vs 48d372e (ruff 0.16.9, --isolated --select F)
+    status: passed
+    evidence: "packet_loop.py 3/3, packet_loop_test.py 13/13, identical diagnostics modulo line numbers; do_b4.py 0 (All checks passed). Bare ruff is not green (pre-existing), delta = 0"
+  - {name: doctrine-scan (exact H), status: passed, evidence: "rc 0; sạch — đã quét 12 tệp, 0 chỗ chép doctrine (a3/log/mH/doctrine.log)"}
+  - {name: adr-song (exact H), status: passed, evidence: "rc 0; 66 ADR / 66 dòng §20, khớp 1–1 (tha 0016) (a3/log/mH/adr.log)"}
+  - name: tl selftest (exact H)
+    status: failed
+    rc: 1
+    evidence: "== tl selftest 1770/1784 ==; the SAME 14 IDs fail at base 48d372e in the same environment (1770/1784, rc 1): r973_bootstrap_* (8), wp433_gws_cred_* (4), wp433_nlm_gws_dich_ngoai_kho, wp727_tl_gws_refresh. Delta = 0, environment-dependent (credential/bootstrap tests); attempt 2 measured 1784/1784 in a different container state. logs a3/log/mH/selftest.log, a3/log/selftest-base.log"
+  - {name: git diff --check 48d372e..H, status: passed, evidence: "no output"}
+  - {name: CI PR Ubuntu / gate-packet-loop-manh 16 shards / ci-dot-bien-du.yml on H, status: not_run, evidence: "executor does not push or dispatch (lease)"}
+  - {name: Windows, status: not_run, evidence: "cloud Linux; lease Windows_CI 0; CRLF only simulated; path containment with '\\' or drive names unmeasured on Windows"}
+  - {name: old MUTANTS table (non-b4) and CA_DAI, status: not_run, evidence: "belongs to packet-loop-dot-bien.yml after merge"}
+test_selection:
+  gate_tier: T2
+  selector_policy_sha: 754bfb55c355c3625a3dda90c126b9e37949c39050b0a308ae48f8af9208368e   # frozen executor prompt that names the measurement set (no automated selector is active, protocol §10.1)
+  policy_source: "origin/ops/wp1462-r1:ops/prompts/wp1462-r8-g2-fable-executor.txt + SPEC r8 a5d28e2a criteria 1-11"
+  catalog_identity: {packet_loop_test_py_blob_at_H: 54c8ed4be4036aa782cd30603cf18a16341a0fe6, case_count: 1770, b4_cases: 189, b4_mutants: 143}
+  tested_sha: 6767e377bc2bdf3b512c6641496e88f614eb8978
+  selected_groups: [packet_loop_test 4 shards + gom (exact H), do_b4 dot-bien / phat-lai / ab (identical code hashes), ruff F delta, doctrine-scan, adr-song, tl selftest (+ base), git diff --check]
+  full_fallback_reason: "sensitive packet: full component suite run; repository full oracle runs on CI after a push"
+run_start: {sha: b1c9e826dac468de1cb1a4545bb8d1f866b035cb, tree: ed0260bd98657887e1da06f7c780a8cf98f8510c}
+run_end: {sha: 6767e377bc2bdf3b512c6641496e88f614eb8978, tree: 2b14367581f64ae692be863c1bfe8389b148643a, working_tree: clean, commits_added_by_this_session: 1}
+three_marks: {base_sha: 48d372e14f190dae83a75ccbca8ee9a0b25635c5, start: b1c9e826dac468de1cb1a4545bb8d1f866b035cb, head: 6767e377bc2bdf3b512c6641496e88f614eb8978}
+stop_conditions_hit:
+  - "§12 class recurrence: b4-predicate-mutation-proof appeared in three review rounds (spec reviews + both source reviews) ⇒ Review Rescue Checkpoint is due; this attempt changed method (whole-domain cases + per-index mutants + boundary audit) instead of adding the named survivor; the checkpoint decision itself belongs to the coordinator"
+  - "executor attempts: 3/3 used — no further executor attempt under this lease"
+  - "frozen acceptance criterion 1 unattainable as written (B4-C04 result) ⇒ needs a Packet revision / spec decision, not another code attempt"
+remaining_work:
+  - "SPEC DECISION (criterion 1): how to treat (a) 9 builder-entry cases whose harness injects a fault before any CLI runs, and (b) a self-modified-script case whose crash traceback carries file line numbers. Without it criterion 1 stays red by construction."
+  - "Codex source review 3 on exact H 6767e37 (lease cap Codex_source_review 3; this would be the 3rd and last) — verify B4-C01, B4-S05, B4-C05; B4-C04 is reported as an open acceptance gap, not as fixed."
+  - "Unclosed residual of B4-C01 to be reviewed: H-side/history objects read by the classifier's own git are not re-hashed."
+  - "Then the lease sequence: owner exact-H audit before first push, PR CI Ubuntu, ci-dot-bien-du.yml on H, owner line 'windows: <H> mien' if K6 needs it."
+  - "Coordinator posts this handoff + size receipt to Issue #1462 (executor makes no GitHub writes)."
+diem_can_reviewer_soi:
+  - "_b4_anh_chup holds the whole cat-file output in memory (351 MB for the real master tree, measured in phat-lai) — memory, not correctness."
+  - "Path containment uses os.path.abspath on the joined path; names with '\\' or drive letters are only meaningful on Windows (unmeasured)."
+  - "cong_b4_git_khong_he_thong measures that the NOSYSTEM variables reach the classifier, not a real system file."
+  - "ab/dot-bien/phat-lai ran on local commit bfbe8fe whose three code files are byte-identical to H (sha256 816f77d1…, 43e32fd9…, 277be0ad…); only KET_QUA.md differs."
+next_role: reviewer
+manual_next_action: "Coordinator: verify this handoff's sha256, post it to Issue #1462, record the criterion-1 spec decision need (and the §12 checkpoint), and if continuing dispatch Codex source review 3 on 6767e377bc2bdf3b512c6641496e88f614eb8978 (branch agent/wp1462-r8-g2-a3 in worktree agent-a200d1c00085561f8, not pushed)."
+copyable_prompt: null
+failure:
+  fingerprint: null
+  category: null
+successors: []

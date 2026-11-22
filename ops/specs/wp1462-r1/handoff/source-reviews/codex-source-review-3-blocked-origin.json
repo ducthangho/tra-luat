@@ -1,0 +1,368 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1462",
+  "revision": 9,
+  "generation": 3,
+  "attempt": 4,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_cli",
+  "transport": "machine/local",
+  "session_id": "01a200cb-e147-7063-895f-aebdcc7708c2",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_cli",
+    "transport": "machine/local",
+    "launcher_run_id": "da71c96e01554d3aa11b1d8fbb46e93d",
+    "served_model": "KHONG_DO_DUOC",
+    "served_effort": "KHONG_DO_DUOC",
+    "identity_basis": "Codex agent session, local execution tools and current launcher run. Per-request model/effort receipt not available in current run.json.",
+    "sandbox": "workspace-write; network restricted; approval policy never; reviewed checkout treated read-only"
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "724993bf23f16070f272ccd81b4fe16c111ce2eb",
+  "reviewed_tree": "75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "tests": [
+    {
+      "cmd": "git rev-parse HEAD HEAD^{tree}",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "724993bf23f16070f272ccd81b4fe16c111ce2eb\n75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12",
+      "stdout_sha256": "48b1cd0a1b7bc008fcd272ac05baff9832db2bb5b0b798642424352ac16fba8b"
+    },
+    {
+      "cmd": "git branch --show-current",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "agent/wp1462-r9-g3-opus",
+      "stdout_sha256": "46b146e9b547a46dad836a12cf7380e7bb7b452d7fc02ea7f1ca69bb15a24acf"
+    },
+    {
+      "cmd": "git config core.abbrev",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "7",
+      "stdout_sha256": "10159baf262b43a92d95db59dae1f72c645127301661e0a3ce4e38b295a97c58"
+    },
+    {
+      "cmd": "git remote get-url origin",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "/home/user/tra-luat",
+      "stdout_sha256": "2405b2dfca7b48be11d4052a5368590bb47f6dcbe6565e53c865340ef0a10cc9"
+    },
+    {
+      "cmd": "git ls-remote --get-url origin",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "/home/user/tra-luat",
+      "stdout_sha256": "2405b2dfca7b48be11d4052a5368590bb47f6dcbe6565e53c865340ef0a10cc9"
+    },
+    {
+      "cmd": "git rev-parse --is-shallow-repository",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "false",
+      "stdout_sha256": "2ed27c1421e6928dbe13dbfdb5c59e1045b30341fe7ebe05700006bc5ac572c0"
+    },
+    {
+      "cmd": "git status --porcelain=v1 --untracked-files=all --ignored=matching",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "!! .codex/",
+      "stdout_sha256": "7a26e2a87df7447fae58bdb1eb41dca70c4e41f40c2b821cb7466761d682cb52"
+    },
+    {
+      "cmd": "git diff --binary",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "No output",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "cmd": "git diff --cached --binary",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "No output",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "cmd": "git ls-files --others --exclude-standard",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "No output",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "cmd": "git ls-files --others --ignored --exclude-standard",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "No output",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "cmd": "git diff --numstat 48d372e14f190dae83a75ccbca8ee9a0b25635c5 724993bf23f16070f272ccd81b4fe16c111ce2eb",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "244\t0\t.claude/dev/packet_loop.py\n793\t3\t.claude/dev/packet_loop_test.py\n30\t0\tops/specs/wp1462-r1/RUNBOOK_CONG_TAC.md\n50\t0\tops/specs/wp1462-r1/do/KET_QUA.md\n439\t0\tops/specs/wp1462-r1/do/do_b4.py",
+      "stdout_sha256": "c62c95ecdb5243acbc927bb451ff9cfbd22d2573dbd622b7f39dc6877ba405d4"
+    },
+    {
+      "cmd": "git show origin/ops/wp1462-r1:ops/specs/wp1462-r1/SPEC.md",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Artifact read successfully; SHA-256=e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d",
+      "stdout_sha256": "e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d"
+    },
+    {
+      "cmd": "git show origin/ops/wp1462-r1:ops/leases/wp1462-r9-g3-claude.yaml",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Artifact read successfully; SHA-256=c024376e0c8e5025b480391b89dd38a42ea90ae4ae9cf13467473d802acdf824",
+      "stdout_sha256": "c024376e0c8e5025b480391b89dd38a42ea90ae4ae9cf13467473d802acdf824"
+    },
+    {
+      "cmd": "git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/mission-r95.json",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rv1462/clone",
+      "rc": 0,
+      "status": "passed",
+      "summary": "Artifact read successfully; SHA-256=dbc6bb14d2115e4c609b39a04d79d10e60d256da08dc3a8b1b8924b607fbd2c0",
+      "stdout_sha256": "dbc6bb14d2115e4c609b39a04d79d10e60d256da08dc3a8b1b8924b607fbd2c0"
+    },
+    {
+      "cmd": "git remote get-url origin",
+      "cwd": "/home/user/tra-luat",
+      "rc": 0,
+      "status": "passed",
+      "summary": "https://github.com/ducthangho/tra-luat",
+      "stdout_sha256": "bd9694e76b133a4e1a8c8c035cbb4f730c2e52bafb6a78e23d15d8c44db64ccd"
+    },
+    {
+      "cmd": "git rev-parse 724993bf23f16070f272ccd81b4fe16c111ce2eb 724993bf23f16070f272ccd81b4fe16c111ce2eb^{tree} refs/remotes/origin/master",
+      "cwd": "/home/user/tra-luat",
+      "rc": 0,
+      "status": "passed",
+      "summary": "724993bf23f16070f272ccd81b4fe16c111ce2eb\n75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12\ne2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+      "stdout_sha256": "5844de0f5c6f4453344351e73f4efb6b6cb69df87eff3d10a214fdab9bc48737"
+    },
+    {
+      "cmd": "python -B .claude/dev/packet_loop_test_manh.py --manh 0/4",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Stopped at mandatory bootstrap preflight; no product result inferred."
+    },
+    {
+      "cmd": "Run committed cong_b4_* cases",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Stopped at mandatory bootstrap preflight; no product result inferred."
+    },
+    {
+      "cmd": "python -B ops/specs/wp1462-r1/do/do_b4.py ab",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Stopped at mandatory bootstrap preflight; no product result inferred."
+    },
+    {
+      "cmd": "python -B ops/specs/wp1462-r1/do/do_b4.py dot-bien",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Stopped at mandatory bootstrap preflight; no product result inferred."
+    },
+    {
+      "cmd": "Independent patch guard mutations and own-ChotB4 attribution",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Stopped at mandatory bootstrap preflight; no product result inferred."
+    },
+    {
+      "cmd": "Whole-book CLI census and A/B population verification",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Stopped at mandatory bootstrap preflight; no product result inferred."
+    },
+    {
+      "cmd": "Ruff pin/probe contract and bare F lint delta",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Stopped at mandatory bootstrap preflight; no product result inferred."
+    },
+    {
+      "cmd": "python -B .claude/dev/packet_loop.py doctrine-scan --root .",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Stopped at mandatory bootstrap preflight; no product result inferred."
+    },
+    {
+      "cmd": "python -B .claude/dev/packet_loop.py adr-song --root .",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Stopped at mandatory bootstrap preflight; no product result inferred."
+    },
+    {
+      "cmd": "Merge candidate into private scratch copy of origin/master and rerun B4",
+      "rc": null,
+      "status": "not_run",
+      "summary": "Stopped at mandatory bootstrap preflight; no product result inferred."
+    }
+  ],
+  "findings": [
+    {
+      "id": "B4-PREFLIGHT-02",
+      "class_slug": "b4-review-bootstrap-origin",
+      "severity": "P2",
+      "location": "Supplied reviewer checkout .git/config; docs/PROTOCOL_DA_PHIEN.md:770; .claude/skills/cross-review/SKILL.md:245",
+      "claim": "The supplied read-only reviewer checkout has origin=/home/user/tra-luat instead of the real GitHub endpoint. Protocol section 8.1 requires origin to be set to the real endpoint before read-only handoff. AGENTS.md section 2 forbids the reviewer from correcting a preflight mismatch. This is a bootstrap defect, not a demonstrated defect in the candidate implementation.",
+      "evidence": [
+        "git remote get-url origin and git ls-remote --get-url origin both returned rc=0 and /home/user/tra-luat.",
+        "The source repository has origin=https://github.com/ducthangho/tra-luat and contains the assigned candidate/tree. This identifies a plausible source but does not satisfy the explicit endpoint requirement on the handed-off checkout.",
+        "Current launcher run da71c96e01554d3aa11b1d8fbb46e93d records remotes=[] for this workspace. It is still dang_chay; no terminal execution receipt is claimed.",
+        "Head/tree, r9 spec hash, g3 lease and Mission r95 hash all match the corrected assignment. The earlier generation/Mission mismatch is resolved.",
+        "An asynchronous clarification requested a corrected bootstrap snapshot or an explicit scoped instruction for the local mirror. No response was received before this record was written."
+      ],
+      "suggested_fix": {
+        "where": "Coordinator bootstrap for the reviewer clone, outside candidate source changes.",
+        "how": "Have the bootstrapper set origin to the real repository endpoint, verify the supplied refs/objects and required runtime capabilities, and hand over a new read-only snapshot at the same exact H/tree. Alternatively provide an explicit authorized instruction that resolves this particular endpoint requirement for the offline review. Preserve the call and round history.",
+        "locking_test": "Before substantive review, require git remote get-url origin and git ls-remote --get-url origin to identify the authorized real endpoint; recheck H/tree/spec hash/generation and the bootstrap receipt. Do not count ls-remote against a local mirror as live GitHub evidence.",
+        "what_the_fix_may_spawn": "Changing refs or candidate H while repairing bootstrap would stale the assignment; merely changing the URL does not prove remote freshness, object completeness or runtime parity."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "b4-review-bootstrap-origin",
+      "finding_ids": [
+        "B4-PREFLIGHT-02"
+      ],
+      "highest_open_severity": "P2",
+      "source_round_sha": "724993bf23f16070f272ccd81b4fe16c111ce2eb",
+      "common_fix_or_reason": "Have the bootstrapper set origin to the real repository endpoint, verify the supplied refs/objects and required runtime capabilities, and hand over a new read-only snapshot at the same exact H/tree. Alternatively provide an explicit authorized instruction that resolves this particular endpoint requirement for the offline review. Preserve the call and round history.",
+      "closing_check": "Before substantive review, require git remote get-url origin and git ls-remote --get-url origin to identify the authorized real endpoint; recheck H/tree/spec hash/generation and the bootstrap receipt. Do not count ls-remote against a local mirror as live GitHub evidence."
+    }
+  ],
+  "prior_findings_check": [],
+  "prior_class_status": [],
+  "prior_preflight_check": {
+    "id": "B4-PREFLIGHT-01",
+    "label": "ĐÃ VÁ THẬT",
+    "evidence": "Corrected prompt specifies revision 9 / generation 3 / attempt 4 / Mission r95; lease agrees. Mission r95 is now available at origin/ops/wp1172-plan-r4 (2404125fbeaddaf2de467d1705c93fbece703401), bytes SHA-256 dbc6bb14d2115e4c609b39a04d79d10e60d256da08dc3a8b1b8924b607fbd2c0."
+  },
+  "hunt_table": [
+    {
+      "hypothesis": "Trusted-classifier materialization and input-object integrity satisfy spec section 5.",
+      "command": "Inspect spec and run existing committed integrity cases; no new hostile payloads.",
+      "real_output": "not_run: bootstrap preflight stopped substantive review; no runtime output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "Every required guard has a target case that kills its mutation through ChotB4.",
+      "command": "Run committed mutants and authorized independent patch mutations.",
+      "real_output": "not_run: bootstrap preflight stopped substantive review; no runtime output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "A/B enumeration covers every existing kiem-merge case.",
+      "command": "Run whole-book counter and independently reconcile three groups.",
+      "real_output": "not_run: bootstrap preflight stopped substantive review; no runtime output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "REST timeouts, redirects and malformed responses fail closed.",
+      "command": "Run committed transport cases and corresponding mutations.",
+      "real_output": "not_run: bootstrap preflight stopped substantive review; no runtime output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "K2b placement, exact-string matching and inertness meet the contract.",
+      "command": "Run committed ordering, switch-value and diagnostic cases.",
+      "real_output": "not_run: bootstrap preflight stopped substantive review; no runtime output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    },
+    {
+      "hypothesis": "B4 behavior survives integration with current master.",
+      "command": "Merge only in a private scratch repository and rerun committed B4 cases.",
+      "real_output": "not_run: bootstrap preflight stopped substantive review; no runtime output exists.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC"
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Exact candidate SHA/tree",
+      "declared": [
+        "724993bf23f16070f272ccd81b4fe16c111ce2eb",
+        "75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12"
+      ],
+      "measured": [
+        "724993bf23f16070f272ccd81b4fe16c111ce2eb",
+        "75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12"
+      ],
+      "match": true
+    },
+    {
+      "claim": "Frozen spec SHA-256",
+      "declared": "e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d",
+      "measured": "e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d",
+      "match": true
+    },
+    {
+      "claim": "Revision/generation/attempt/Mission",
+      "declared": "r9/g3/attempt4/Mission95",
+      "measured": "r9/g3 and Mission95 agree in prompt, lease and available Mission artifact; handoff SHA-256 946895b63fcfd6f2e2479ce2d2842e919bab24f58c3c60729e4ef41fd6d2ca1e",
+      "match": true
+    },
+    {
+      "claim": "Diff size vs immutable baseline 48d372e14f190dae83a75ccbca8ee9a0b25635c5",
+      "declared": "5 files +1556/-3; cap 6 files/1600 added",
+      "measured": "5 files +1556/-3",
+      "match": true
+    },
+    {
+      "claim": "Reviewer origin endpoint required by protocol 8.1",
+      "declared": "https://github.com/ducthangho/tra-luat",
+      "measured": "/home/user/tra-luat",
+      "match": false
+    },
+    {
+      "claim": "138 B4 cases, 97 mutants/129 pairs, 147 byte-identical A/B cases",
+      "declared": "Executor claims in assignment",
+      "measured": "not_run",
+      "match": null
+    }
+  ],
+  "verdict": "blocked",
+  "assurance": "review_deferred",
+  "evidence_url": null,
+  "notes": [
+    "PREFLIGHT-ONLY BLOCKED RECORD. Not a completed source review, source-code rejection, approval or merge authorization. No candidate source edits, commits, push, GitHub writes, workflow dispatch, variable changes or LIVE operations were performed.",
+    "The four-way classification of round-2 code findings was not performed. Empty prior_findings_check/prior_class_status means not_run, not closed or no findings; fabricating a fix label would misrepresent evidence. This blocked record does not satisfy the completed source-review contract.",
+    "Round-2 findings pending independent recheck: B4-C01 / b4-trusted-classifier-materialization, B4-S05 / b4-predicate-mutation-proof, B4-C04 / b4-ab-population-coverage, B4-C05 / b4-handoff-evidence-contract. Also retain inherited b4-rest-total-deadline and b4-g5-readback-normalization history.",
+    "All three declared residuals remain unassessed. No new hostile payloads were composed or executed.",
+    "Initial and repeated Git checks show unchanged head/tree, empty tracked and index diffs and no reported untracked files. Ignored status reports .codex/. Full before/after byte snapshots of ignored runtime files and the source repository were not captured; no complete filesystem-immutability claim is made.",
+    "The real GitHub remote was not queried. Supplied ref/object observations are local snapshot evidence. No claim of remote freshness or independently verified GitHub publication/owner authorization is made.",
+    "The prompt declares an owner-granted extra review call. No budget reset or additional call is authorized by this report. Coordinator must reconcile the current launcher result and budget.",
+    "Current launcher is still running while this report is written. Terminal rc, final stdout hash and completed model/effort receipt must be attached by the coordinator after the process exits.",
+    "Raw preflight observations: /tmp/wp1462-review3-preflight-01a200cb-e147-7063-895f-aebdcc7708c2/preflight.json"
+  ],
+  "created_at_utc": "2026-11-22T01:12:38.669511+00:00"
+}

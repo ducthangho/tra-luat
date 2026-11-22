@@ -1,0 +1,1129 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1463",
+  "mission_issue": 1172,
+  "revision": 4,
+  "generation": null,
+  "generation_reason": "Proposed frozen-spec candidate; no implementation generation/lease admitted.",
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "session_id": "wp1463-spec-review-r4-5fde1c5e-20261122",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_service",
+    "transport": "machine",
+    "session_id": "wp1463-spec-review-r4-5fde1c5e-20261122",
+    "serving_model": "KHONG_DO_DUOC",
+    "serving_effort": "KHONG_DO_DUOC",
+    "attestation": "Independent tool-enabled Codex service context assigned by user; no subagents and no executor-context fork. No per-request serving-model/effort or launcher run receipt exposed. No identity inferred from GitHub submitter."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+  "reviewed_tree": "8d80f446c719b92fe2ef2476a73733bcd2cf0838",
+  "reviewed_file": "ops/specs/wp1463-r1/SPEC.md",
+  "reviewed_file_sha256": "6a4fabce0dd2e1a95e59f375943ae657a26b9dec237e4dc4f3a8dda5d8c882cf",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "changes_requested",
+  "assurance": "review_deferred",
+  "assurance_attestation": "Independent exact-object spec review with measured local probes and authenticated read-only GitHub evidence. Findings remain; no approval/land authority asserted. Requested model profile is not measured serving identity. Caller must record terminal wrapper status/output digest after this run.",
+  "evidence_url": null,
+  "environment": {
+    "os": "Linux",
+    "python": "3.13.18",
+    "sandbox_mode": "workspace-write;approval_policy never",
+    "source_boundary": "Assigned checkout kept read-only; .git fetch write was enforced denied. Source-file read-only behavior otherwise follows assignment, not claimed as a complete enforced mount. All mutations confined to /tmp scratch/output.",
+    "actionlint": "present",
+    "shellcheck": "absent",
+    "ruff": "0.16.9"
+  },
+  "anchors": {
+    "current_master": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+    "plan_ref_sha": "2404125fbeaddaf2de467d1705c93fbece703401",
+    "plan_r4_sha256": "0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe",
+    "base_sha_for_implementation": null
+  },
+  "findings": [
+    {
+      "id": "PR2-S04",
+      "class_slug": "preservation-oracle-checks-names-only",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          163,
+          164,
+          165,
+          166,
+          168,
+          209,
+          210,
+          211,
+          212,
+          213,
+          214
+        ]
+      },
+      "claim": "The raw cu block and ok_cu_E repair the three old examples, but the replacement preservation oracle still contradicts its own required fixtures. Acceptance2(e) only checks green totals, old mutation-name coverage/ranks and the old MOI full/light regex. It does not inspect cu.tu_kiem. Nevertheless acceptance2 mandates that kho_va_ben_doc_cu fail when only a TU_KIEM result is missing while all summaries, specifically TONG:DAT, remain green. The literal predicate remains true, even when A3 correctly marks that TU_KIEM not_run. An executor must alter a frozen predicate, add an unrelated corruption, or fail the frozen exact-vector self-test. The whole preservation section also retains a contradictory statement about nonempty equivalence tables.",
+      "manifestations": [
+        {
+          "id": "S04-j",
+          "severity": "P2",
+          "location": "Acceptance2(e), exact-vector rule and missing-TU_KIEM negative input, lines210-212",
+          "description": "Missing cu.tu_kiem with TONG:DAT gives failed coordinates {cong_thuc_cu_dong,tong_hai_chieu}; the spec additionally requires kho_va_ben_doc_cu, which remains true under its definition."
+        },
+        {
+          "id": "S04-k",
+          "severity": "P3",
+          "location": "Acceptance2 negative raw-order fixture, line212",
+          "description": "Reversing only cu.dot_bien while retaining green summaries and the plan-aligned A3 ranks also leaves 2(e) true. If the intended fixture additionally changes aligned A3 records to not_run, that must be specified; a raw-order mutation alone cannot guarantee the mandated e failure."
+        },
+        {
+          "id": "S04-l",
+          "severity": "P3",
+          "location": "§4 final preservation paragraph line168 versus lines165-166 and reviewed-equivalent control line213",
+          "description": "Line168 says both unproven states, including the reverse law with nonempty E, close toward non-xanh. The ordered conclusion law and mandatory reviewed-equivalent fixture instead allow E nonempty/equivalent_reviewed/TONG:DAT. Not asserting a reverse theorem is not a requirement that its input be non-green."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "Raw absence repaired: missing_db ok_cuFalse,missing_tkNone,valid equivalence ok_cuFalse/ok_cu_ETrue. Missing-TU_KIEM/DAT fails d,tong but e remainsTrue; r4 requires eFalse. Corrected-mask lock rc0,current mask rc3/GIET. COMPARATOR_E raw-order-only=True;MOI accepts all green-summary controls.",
+          "artifact": "/tmp/wp1463-r4-review/probe_contract.log"
+        },
+        {
+          "command": "nl -ba ops/specs/wp1463-r1/SPEC.md; inspect lines163-168,209-214",
+          "exit_code": 0,
+          "observed_output": "2(e) has no TU_KIEM/raw-identity predicate; line212 requires e in both failure masks; line168 says cả hai đều ĐÓNG về phía không xanh; line213 requires valid-E/TONG:DAT."
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC §4 preservation-law domain and acceptance2(d/e), fixture failure masks and comparator self-tests. These clauses define the oracle; changing legacy phan_hang or expanding product scope cannot resolve their inconsistency.",
+        "how": "Keep the nine predicates independent and derive each expected failed-coordinate set from the fixture changes. Cheapest correction: missing-TU_KIEM/DAT fails d and tong, not e; raw-order-only corruption fails d unless additional A3 effects are explicitly part of the fixture. Keep e tested by its existing malformed-reader/mutation-rank controls. Rewrite line168 so only unavailable ok_cu forbids green, while nonempty E merely removes the inverse theorem obligation and still permits the specified reviewed-equivalent green result. Do not invent another production equivalence mechanism.",
+        "locking_test": "Runnable witness: python3 -B /tmp/wp1463-r4-review/probe_contract.py (COMPARATOR_E, S04_MASK_ACTUAL, MASK_LOCK). Hold all e inputs constant while removing raw TU_KIEM, then assert the exact vector. Corrected mask yields target rc0; recurrence of the current mask yields TinHieuChotCa/rc3/GIET. Retain mutants separately removing cong_thuc_cu_dong and tong_hai_chieu and a mutant using ok_cu rather than ok_cu_E on the valid-equivalent control; each must change its own coordinate. Add a nonempty-E green control and reject a mutant forcing every such input non-green.",
+        "may_spawn": "Making e depend on every other predicate destroys the advertised independence and can conceal a removed check. Changing multiple unrelated fixture fields can make the demanded vector pass for the wrong reason. Treating None as True or filling absent ranks reopens the previous raw-evidence failure."
+      },
+      "fix_attempted": "Scratch-only executable predicate and corrected-mask witnesses; no repository patch.",
+      "confidence": "High for missing-TU_KIEM contradiction; raw-order fixture and nonempty-E paragraph are explicitly reported as contract ambiguity/inconsistency, not implemented runtime bugs."
+    },
+    {
+      "id": "PR2-S11",
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          216,
+          318
+        ]
+      },
+      "claim": "Acceptance4 applies the full-suite audit-hook positive control to two narrower standalone registry probes. Its common condition requires the observed tracked-file set to contain ops/ci_provenance.py, then says both separate phan_chung calls apply the same condition. Real phan_chung does not open that product file. Both healthy standalone runs therefore fail the literal acceptance despite correct nonempty hook evidence and complete zone coverage; the spec’s own measured file list agrees with this counterexample. This is a scope error in the measurement oracle, distinct from the now-fixed missing-zone-input class.",
+      "manifestations": [
+        {
+          "id": "S11-a",
+          "severity": "P2",
+          "location": "Acceptance4 original-registry standalone probe",
+          "description": "Overlay phan_chung returns True/1226 of1226 with four in-zone tracked opens and no ops/ci_provenance.py; the inherited product-presence condition rejects it."
+        },
+        {
+          "id": "S11-b",
+          "severity": "P2",
+          "location": "Acceptance4 four-key-rollback standalone probe",
+          "description": "The rollback phan_chung run has the same legitimate four-file read set and is rejected by the same inherited condition."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_registry.py",
+          "exit_code": 0,
+          "observed_output": "FIXTURE 27/27 independent oracle and real selector; SHA256 135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036. Overlay and four-key rollback: PHẢN CHỨNG 1226/1226, True; NHE-only 1224/1226,False; NHE+MAU_NHE 1225/1226,False. Both standalone healthy probes open exactly ci-dot-bien-du.yml, ci.yml, launcher-windows.yml and ops/bash_nen.py; outside=[]; ops/ci_provenance.py absent from both.",
+          "artifact": "/tmp/wp1463-r4-review/probe_registry.log"
+        },
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "SCOPE_LOCK scoped rc0;shared product-presence sentinel rc3/GIET;both actual standalone sets lack product.",
+          "artifact": "/tmp/wp1463-r4-review/probe_contract.log"
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC acceptance4 per-probe hook-liveness conditions and its measurement script contract. The selector’s zone and production registry logic already behave as specified and need no expansion for this defect.",
+        "how": "Retain the same subset-of-zone condition for all three measurements, but state the positive liveness witness separately: full suite must open ops/ci_provenance.py; each standalone registry probe must observe a genuine known registry input such as .github/workflows/ci.yml. Keep three independent file sets; do not union them before proving each hook ran.",
+        "locking_test": "Run python3 -B /tmp/wp1463-r4-review/probe_registry.py and probe_contract.py (ACCEPTANCE4_STANDALONE, SCOPE_LOCK). Both measured standalone healthy sets must pass their own sentinel; an empty set must fail. A mutant reusing the suite-only product sentinel must die by the test’s own assertion: current SCOPE_LOCK scoped rc0, shared sentinel rc3/GIET. Also reject a mutant unioning the full-suite set into an empty standalone observation.",
+        "may_spawn": "Dropping liveness entirely lets a disabled hook pass on an empty set. Artificially opening the product file to satisfy the test fabricates coverage. Using a global union hides one failed standalone measurement."
+      },
+      "fix_attempted": "Ran real phan_chung four ways with Python audit hook; tested scoped versus shared liveness predicate in scratch.",
+      "confidence": "High; both real healthy read sets and the spec’s recorded baseline show the contradiction."
+    },
+    {
+      "id": "PR2-S12",
+      "class_slug": "workflow-definition-capability-inferred-from-local-failure",
+      "severity": "P3",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          13,
+          256,
+          308
+        ]
+      },
+      "claim": "The new E2 dependency-waiver question is motivated by cloud GraphQL403 without routing through the already-landed read-only workflow intended to solve exactly that limitation. Plan r4 §2 explicitly names this workflow for B1/B3 reuse. The workflow and current collector do measure the §10.2.2 definition checkpoint using exact repository/path/OID/blob/hash evidence. The runbook should try the existing authorized measurement path before asking to replace landed with merged. This does not mean the existing PR1 receipt is already repaired, that a live run is guaranteed to pass, or that this review authorizes dispatch.",
+      "manifestations": [
+        {
+          "id": "S12-a",
+          "severity": "P3",
+          "location": "Shared B1a/B2 dependency procedure, E2 paragraph line256",
+          "description": "Local inability to call GraphQL is presented as the reason to seek a merged-not-landed exception, with no existing Actions collector/import path or attempt-bound measurement step."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "WD_PROBE healthy rc0/passed, definition OID cccccccccccccccccccccccccccccccccccccccc, blob3cdcf389d7dd495e3ae2956b04a016f39e5f37a3, SHA256 c322a996b2755e97d8654427286e224572cfff4a465102666a21b9a45a16c9c6. GraphQL403 rc3/not_measured; mutable-ref URL rc3/not_measured. Existing c53-c60 all rc0, including real collector/importer with fake API responses, actual workflow allowlist and shell-body probes. No live Actions dispatch.",
+          "artifact": "/tmp/wp1463-r4-review/probe_contract.log"
+        },
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_additional.py",
+          "exit_code": 0,
+          "observed_output": "PLAN_ID 8/8 controls; two valid equivalence records preserve distinct untrimmed reason/reviewer, invalid whitespace entry stays song without provenance. Sibling1460/1461 registry write=True, sibling1462=False. Durable decision comments7066720293(r1),7066894318(r2). Read-only WD workflow: contents:read,actions:read; one do-wd job; timeout10min.",
+          "artifact": "/tmp/wp1463-r4-review/probe_additional.log"
+        },
+        {
+          "command": "Read origin/master:.github/workflows/ops-do-workflow-definition.yml and ops/ci_provenance.py do_wd/nhap_wd; read plan r4 §2; GitHub GET issuecomment7065823063 and PR1 comments since2026-11-21T16:39Z",
+          "exit_code": null,
+          "observed_output": "Workflow runs python3 ops/ci_provenance.py do-wd --repo \"$REPO\" --run \"$RUN_ID\" --out wd.json, uploads workflow-definition-<run>. thu --wd-run imports and rehashes it. Current PR1 M8 still landed:false; returned comments contain only that M8, no superseding completion record.",
+          "source_url": "https://github.com/ducthangho/tra-luat/issues/1448#issuecomment-7065823063",
+          "transport_status": "Local git/file reads succeeded; GitHub connected-tool GETs returned success, no shell exit code for API calls."
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC Quy trình và quyền, predecessor evidence procedure/E2 paragraph; reference existing workflow and collector rather than changing their code or weakening protocol landed.",
+        "how": "Add the route: identify the predecessor’s exact target CI run/attempt; obtain a bounded authorized ops-do-workflow-definition run on master for that run; import via ci_provenance.py thu --wd-run and verify its artifact and exact definition identity alongside the other three checkpoints. Reconcile M8/bookkeeping only after evidence is complete. Keep merged-only waiver as a separate owner option only if the measurement route is unavailable or evidence remains missing, with the actual failure and any needed allowance stated. Local GraphQL403 alone does not establish global unavailability.",
+        "locking_test": "Current runnable checks: python3 -B /tmp/wp1463-r4-review/probe_contract.py, WD_PROBE and c53-c60. Healthy fixture produces passed plus exact OID/blob/SHA256; GraphQL403 and mutable-ref URL remain not_measured. The checklist must reject a mutant declaring the route unavailable solely from local403, and must reject a mutant treating workflow existence/success without validated target artifact as landed. Live completion requires an independently authorized real run/attempt receipt; it was not run here.",
+        "may_spawn": "Workflow existence does not prove a target measurement passed; dispatch consumes resources and needs its own authority/allowance. Do not substitute the measurement workflow’s checkout/head for the target definition OID, or change landed:false to true before all four checkpoints and bookkeeping are complete."
+      },
+      "fix_attempted": "Inspected current workflow/collector and ran existing producer/importer and shell tests with fixtures. No dispatch, API write or receipt edit.",
+      "confidence": "High for the omitted existing capability; whether it completes each future predecessor’s live checkpoint remains unmeasured."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "a3-case-execution-status-collapsed",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 3,
+      "previous_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "No further fix to the prior spec cause shown by the measured controls.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py; python3 -B /tmp/wp1463-r4-review/probe_envelope.py",
+        "result": "All S01-f/g/h are closed at spec scope: the single ordered composition rule examines original invocation before old rank, applies to product/self/registry-copy/TU_KIEM, and cache entries carry original status atomically, including warm-up. Real old runners preserve the legacy ranks/cache behavior; r4 model rejects all old sidecar-loss witnesses; recurrence mutant dies by target assertion. Future implementation is not certified.",
+        "unmeasured": "None remaining for this prior spec cause at the measured base;future implementation and lease admission not certified."
+      }
+    },
+    {
+      "slug": "preservation-oracle-checks-names-only",
+      "finding_ids": [
+        "PR2-S04"
+      ],
+      "manifestations": [
+        {
+          "id": "S04-j",
+          "severity": "P2",
+          "location": "Acceptance2(e), exact-vector rule and missing-TU_KIEM negative input, lines210-212",
+          "description": "Missing cu.tu_kiem with TONG:DAT gives failed coordinates {cong_thuc_cu_dong,tong_hai_chieu}; the spec additionally requires kho_va_ben_doc_cu, which remains true under its definition."
+        },
+        {
+          "id": "S04-k",
+          "severity": "P3",
+          "location": "Acceptance2 negative raw-order fixture, line212",
+          "description": "Reversing only cu.dot_bien while retaining green summaries and the plan-aligned A3 ranks also leaves 2(e) true. If the intended fixture additionally changes aligned A3 records to not_run, that must be specified; a raw-order mutation alone cannot guarantee the mandated e failure."
+        },
+        {
+          "id": "S04-l",
+          "severity": "P3",
+          "location": "§4 final preservation paragraph line168 versus lines165-166 and reviewed-equivalent control line213",
+          "description": "Line168 says both unproven states, including the reverse law with nonempty E, close toward non-xanh. The ordered conclusion law and mandatory reviewed-equivalent fixture instead allow E nonempty/equivalent_reviewed/TONG:DAT. Not asserting a reverse theorem is not a requirement that its input be non-green."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 3,
+      "previous_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "VÁ SINH LỖI MỚI",
+      "common_fix": "Keep the nine predicates independent and derive each expected failed-coordinate set from the fixture changes. Cheapest correction: missing-TU_KIEM/DAT fails d and tong, not e; raw-order-only corruption fails d unless additional A3 effects are explicitly part of the fixture. Keep e tested by its existing malformed-reader/mutation-rank controls. Rewrite line168 so only unavailable ok_cu forbids green, while nonempty E merely removes the inverse theorem obligation and still permits the specified reviewed-equivalent green result. Do not invent another production equivalence mechanism.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+        "result": "S04-g/h raw absence is now representable without fabricated HONG; missing raw TU_KIEM makes ok_cu unavailable. S04-i forward theorem now uses ok_cu_E. Those repairs were independently checked, but S04-j/k/l leave the same preservation-oracle class open: required exact failure vectors and theorem-domain prose disagree with the defined predicates.",
+        "unmeasured": "Future implementation is not reviewed; live all-ref lease exclusion is independently unknown."
+      }
+    },
+    {
+      "slug": "dependency-completion-replaced-by-lease-absence",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 3,
+      "previous_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "No further fix to the prior spec cause shown by the measured controls.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+        "result": "S06-c/d/e are closed: PR1 is accurately merged/landed:false; B1a and B2 share protocol landed with four evidence items, exact packet/revision/generation and a newer-receipt check. Merged-only and receipt-only negatives are present and discriminate the former proxies. E2 cannot waive anything until a new owner-approved Mission revision. The separate omitted-measurement-route finding does not authorize the old proxy.",
+        "unmeasured": "None remaining for this prior spec cause at the measured base;future implementation and lease admission not certified."
+      }
+    },
+    {
+      "slug": "a3-plan-identity-validation-gap",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 3,
+      "previous_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "No further fix to the prior spec cause shown by the measured controls.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_additional.py",
+        "result": "Both modes reject duplicate mutation/TU_KIEM plan names and unknown equivalence keys; raw result identities are now explicitly checked in order. Independent rule controls8/8; no weakening in r4.",
+        "unmeasured": "None remaining for this prior spec cause at the measured base;future implementation and lease admission not certified."
+      }
+    },
+    {
+      "slug": "a3-equivalence-provenance-not-emitted",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 3,
+      "previous_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "No further fix to the prior spec cause shown by the measured controls.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_additional.py",
+        "result": "§4 continues to emit reason/reviewer verbatim on valid equivalence entries, including killed declarations; independent wire controls preserve distinct values and reject whitespace-only entries.",
+        "unmeasured": "None remaining for this prior spec cause at the measured base;future implementation and lease admission not certified."
+      }
+    },
+    {
+      "slug": "registry-rollback-leaves-dependent-entries",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 3,
+      "previous_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "No further fix to the prior spec cause shown by the measured controls.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_registry.py",
+        "result": "Four-key deletion, in-place semantics and other entries preserved. Real phan_chung1226/1226 after full rollback; partial deletion1224/1226 and1225/1226; fallback full27/27.",
+        "unmeasured": "None remaining for this prior spec cause at the measured base;future implementation and lease admission not certified."
+      }
+    },
+    {
+      "slug": "obsolete-adr0060-opt-in-rationale",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 3,
+      "previous_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "No further fix to the prior spec cause shown by the measured controls.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+        "result": "ADR0062 default policy retained; no declaration does not waive M3. Actual K6 controls no-waiver12/exact-waiver0; Windows required and M9 true.",
+        "unmeasured": "None remaining for this prior spec cause at the measured base;future implementation and lease admission not certified."
+      }
+    },
+    {
+      "slug": "budget-authority-revision-misattributed",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 3,
+      "previous_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "No further fix to the prior spec cause shown by the measured controls.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+        "result": "r96 file SHA256 verified and installed-comment object matches; drafting5/6 is correctly attributed to r96, not historical r85(3/4).",
+        "unmeasured": "None remaining for this prior spec cause at the measured base;future implementation and lease admission not certified."
+      }
+    },
+    {
+      "slug": "delegated-decisions-missing-durable-ledger",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 3,
+      "previous_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "No further fix to the prior spec cause shown by the measured controls.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_additional.py",
+        "result": "GitHub readback sees r1 decision ledger7066720293 and r2 supplemental ledger7066894318; candidate explicitly retains those decisions and future owner hash/Mission/lease prerequisites.",
+        "unmeasured": "None remaining for this prior spec cause at the measured base;future implementation and lease admission not certified."
+      }
+    },
+    {
+      "slug": "pr2-zone-excludes-new-harness-dependencies",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 2,
+      "source_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "previous_round": 3,
+      "previous_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "No further fix to the prior spec cause shown by the measured controls.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_registry.py",
+        "result": "Both workflows added to independent Z, actual VUNG_THEM and27-row fixture; actual phan_chung opens4 tracked inputs, all in-zone. The new liveness-sentinel scope error does not remove any zone dependency.",
+        "unmeasured": "None remaining for this prior spec cause at the measured base;future implementation and lease admission not certified."
+      }
+    },
+    {
+      "slug": "measurement-liveness-oracle-crosses-scope",
+      "finding_ids": [
+        "PR2-S11"
+      ],
+      "manifestations": [
+        {
+          "id": "S11-a",
+          "severity": "P2",
+          "location": "Acceptance4 original-registry standalone probe",
+          "description": "Overlay phan_chung returns True/1226 of1226 with four in-zone tracked opens and no ops/ci_provenance.py; the inherited product-presence condition rejects it."
+        },
+        {
+          "id": "S11-b",
+          "severity": "P2",
+          "location": "Acceptance4 four-key-rollback standalone probe",
+          "description": "The rollback phan_chung run has the same legitimate four-file read set and is rejected by the same inherited condition."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "status": "OPEN_NEW",
+      "common_fix": "Retain the same subset-of-zone condition for all three measurements, but state the positive liveness witness separately: full suite must open ops/ci_provenance.py; each standalone registry probe must observe a genuine known registry input such as .github/workflows/ci.yml. Keep three independent file sets; do not union them before proving each hook ran.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_registry.py; python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+        "result": "Acceptance4 applies the full-suite audit-hook positive control to two narrower standalone registry probes. Its common condition requires the observed tracked-file set to contain ops/ci_provenance.py, then says both separate phan_chung calls apply the same condition. Real phan_chung does not open that product file. Both healthy standalone runs therefore fail the literal acceptance despite correct nonempty hook evidence and complete zone coverage; the spec’s own measured file list agrees with this counterexample. This is a scope error in the measurement oracle, distinct from the now-fixed missing-zone-input class.",
+        "unmeasured": "Revised specification and future implementation not available; no live workflow dispatch for S12."
+      }
+    },
+    {
+      "slug": "workflow-definition-capability-inferred-from-local-failure",
+      "finding_ids": [
+        "PR2-S12"
+      ],
+      "manifestations": [
+        {
+          "id": "S12-a",
+          "severity": "P3",
+          "location": "Shared B1a/B2 dependency procedure, E2 paragraph line256",
+          "description": "Local inability to call GraphQL is presented as the reason to seek a merged-not-landed exception, with no existing Actions collector/import path or attempt-bound measurement step."
+        }
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "status": "OPEN_NEW",
+      "common_fix": "Add the route: identify the predecessor’s exact target CI run/attempt; obtain a bounded authorized ops-do-workflow-definition run on master for that run; import via ci_provenance.py thu --wd-run and verify its artifact and exact definition identity alongside the other three checkpoints. Reconcile M8/bookkeeping only after evidence is complete. Keep merged-only waiver as a separate owner option only if the measurement route is unavailable or evidence remains missing, with the actual failure and any needed allowance stated. Local GraphQL403 alone does not establish global unavailability.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py; python3 -B /tmp/wp1463-r4-review/probe_additional.py; Read origin/master:.github/workflows/ops-do-workflow-definition.yml and ops/ci_provenance.py do_wd/nhap_wd; read plan r4 §2; GitHub GET issuecomment7065823063 and PR1 comments since2026-11-21T16:39Z",
+        "result": "The new E2 dependency-waiver question is motivated by cloud GraphQL403 without routing through the already-landed read-only workflow intended to solve exactly that limitation. Plan r4 §2 explicitly names this workflow for B1/B3 reuse. The workflow and current collector do measure the §10.2.2 definition checkpoint using exact repository/path/OID/blob/hash evidence. The runbook should try the existing authorized measurement path before asking to replace landed with merged. This does not mean the existing PR1 receipt is already repaired, that a live run is guaranteed to pass, or that this review authorizes dispatch.",
+        "unmeasured": "Revised specification and future implementation not available; no live workflow dispatch for S12."
+      }
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "finding_id": "PR2-S01",
+      "class_slug": "a3-case-execution-status-collapsed",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "manifestations_checked": [
+        "S01-f",
+        "S01-g",
+        "S01-h"
+      ],
+      "assessment": "All S01-f/g/h are closed at spec scope: the single ordered composition rule examines original invocation before old rank, applies to product/self/registry-copy/TU_KIEM, and cache entries carry original status atomically, including warm-up. Real old runners preserve the legacy ranks/cache behavior; r4 model rejects all old sidecar-loss witnesses; recurrence mutant dies by target assertion. Future implementation is not certified.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "Original-sidecar rejection followed by legacy GIET/product,GIET/self,TIN_DUNG_GIA/TU_KIEM now composes to infrastructure_error; original cache reused;6/6 composition vectors;old-rule mutant rc3/GIET. Envelope31/31.",
+          "artifact": "/tmp/wp1463-r4-review/probe_contract.log"
+        },
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_envelope.py",
+          "exit_code": 0,
+          "observed_output": "Original-sidecar rejection followed by legacy GIET/product,GIET/self,TIN_DUNG_GIA/TU_KIEM now composes to infrastructure_error; original cache reused;6/6 composition vectors;old-rule mutant rc3/GIET. Envelope31/31.",
+          "artifact": "/tmp/wp1463-r4-review/probe_envelope.log"
+        }
+      ],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    },
+    {
+      "finding_id": "PR2-S04",
+      "class_slug": "preservation-oracle-checks-names-only",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "VÁ SINH LỖI MỚI",
+      "manifestations_checked": [
+        "S04-g",
+        "S04-h",
+        "S04-i"
+      ],
+      "assessment": "S04-g/h raw absence is now representable without fabricated HONG; missing raw TU_KIEM makes ok_cu unavailable. S04-i forward theorem now uses ok_cu_E. Those repairs were independently checked, but S04-j/k/l leave the same preservation-oracle class open: required exact failure vectors and theorem-domain prose disagree with the defined predicates.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "Raw absence repaired: missing_db ok_cuFalse,missing_tkNone,valid equivalence ok_cuFalse/ok_cu_ETrue. Missing-TU_KIEM/DAT fails d,tong but e remainsTrue; r4 requires eFalse. Corrected-mask lock rc0,current mask rc3/GIET.",
+          "artifact": "/tmp/wp1463-r4-review/probe_contract.log"
+        }
+      ],
+      "unmeasured": "No future implementation or lease/land approval is claimed. The measurements resolve the prior spec examples; unresolved same-class manifestations are explicitly listed above."
+    },
+    {
+      "finding_id": "PR2-S06",
+      "class_slug": "dependency-completion-replaced-by-lease-absence",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "manifestations_checked": [
+        "S06-c",
+        "S06-d",
+        "S06-e"
+      ],
+      "assessment": "S06-c/d/e are closed: PR1 is accurately merged/landed:false; B1a and B2 share protocol landed with four evidence items, exact packet/revision/generation and a newer-receipt check. Merged-only and receipt-only negatives are present and discriminate the former proxies. E2 cannot waive anything until a new owner-approved Mission revision. The separate omitted-measurement-route finding does not authorize the old proxy.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+          "exit_code": 0,
+          "observed_output": "Current GitHub PR1 M8 landed:false and r96 merged_landed_false agree with corrected SPEC. Negative completion controls5/5 reject;fully landed control accepts.",
+          "artifact": "/tmp/wp1463-r4-review/probe_governance.log"
+        }
+      ],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "a3-case-execution-status-collapsed",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "assessment": "All S01-f/g/h are closed at spec scope: the single ordered composition rule examines original invocation before old rank, applies to product/self/registry-copy/TU_KIEM, and cache entries carry original status atomically, including warm-up. Real old runners preserve the legacy ranks/cache behavior; r4 model rejects all old sidecar-loss witnesses; recurrence mutant dies by target assertion. Future implementation is not certified.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "Original-sidecar rejection followed by legacy GIET/product,GIET/self,TIN_DUNG_GIA/TU_KIEM now composes to infrastructure_error; original cache reused;6/6 composition vectors;old-rule mutant rc3/GIET. Envelope31/31.",
+          "artifact": "/tmp/wp1463-r4-review/probe_contract.log"
+        },
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_envelope.py",
+          "exit_code": 0,
+          "observed_output": "Original-sidecar rejection followed by legacy GIET/product,GIET/self,TIN_DUNG_GIA/TU_KIEM now composes to infrastructure_error; original cache reused;6/6 composition vectors;old-rule mutant rc3/GIET. Envelope31/31.",
+          "artifact": "/tmp/wp1463-r4-review/probe_envelope.log"
+        }
+      ],
+      "remaining_manifestations": [],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    },
+    {
+      "class_slug": "preservation-oracle-checks-names-only",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "VÁ SINH LỖI MỚI",
+      "assessment": "S04-g/h raw absence is now representable without fabricated HONG; missing raw TU_KIEM makes ok_cu unavailable. S04-i forward theorem now uses ok_cu_E. Those repairs were independently checked, but S04-j/k/l leave the same preservation-oracle class open: required exact failure vectors and theorem-domain prose disagree with the defined predicates.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "Raw absence repaired: missing_db ok_cuFalse,missing_tkNone,valid equivalence ok_cuFalse/ok_cu_ETrue. Missing-TU_KIEM/DAT fails d,tong but e remainsTrue; r4 requires eFalse. Corrected-mask lock rc0,current mask rc3/GIET.",
+          "artifact": "/tmp/wp1463-r4-review/probe_contract.log"
+        }
+      ],
+      "remaining_manifestations": [
+        "S04-j",
+        "S04-k",
+        "S04-l"
+      ],
+      "unmeasured": "Future executor code/CI acceptance remains due; this status only closes the reviewed spec cause when no current manifestation remains."
+    },
+    {
+      "class_slug": "dependency-completion-replaced-by-lease-absence",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "assessment": "S06-c/d/e are closed: PR1 is accurately merged/landed:false; B1a and B2 share protocol landed with four evidence items, exact packet/revision/generation and a newer-receipt check. Merged-only and receipt-only negatives are present and discriminate the former proxies. E2 cannot waive anything until a new owner-approved Mission revision. The separate omitted-measurement-route finding does not authorize the old proxy.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+          "exit_code": 0,
+          "observed_output": "Current GitHub PR1 M8 landed:false and r96 merged_landed_false agree with corrected SPEC. Negative completion controls5/5 reject;fully landed control accepts.",
+          "artifact": "/tmp/wp1463-r4-review/probe_governance.log"
+        }
+      ],
+      "remaining_manifestations": [],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    },
+    {
+      "class_slug": "a3-plan-identity-validation-gap",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "assessment": "Both modes reject duplicate mutation/TU_KIEM plan names and unknown equivalence keys; raw result identities are now explicitly checked in order. Independent rule controls8/8; no weakening in r4.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_additional.py",
+          "exit_code": 0,
+          "observed_output": "Independent contract model8/8 controls across both modes: unique plans accepted;duplicate mutation/TU_KIEM names and unknown equivalence keys rejected.",
+          "artifact": "/tmp/wp1463-r4-review/probe_additional.log"
+        }
+      ],
+      "remaining_manifestations": [],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    },
+    {
+      "class_slug": "a3-equivalence-provenance-not-emitted",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "assessment": "§4 continues to emit reason/reviewer verbatim on valid equivalence entries, including killed declarations; independent wire controls preserve distinct values and reject whitespace-only entries.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_additional.py",
+          "exit_code": 0,
+          "observed_output": "Two valid wire records retain distinct untrimmed reason/reviewer;whitespace-only invalid entry has song and no provenance fields.",
+          "artifact": "/tmp/wp1463-r4-review/probe_additional.log"
+        }
+      ],
+      "remaining_manifestations": [],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    },
+    {
+      "class_slug": "registry-rollback-leaves-dependent-entries",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "assessment": "Four-key deletion, in-place semantics and other entries preserved. Real phan_chung1226/1226 after full rollback; partial deletion1224/1226 and1225/1226; fallback full27/27.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_registry.py",
+          "exit_code": 0,
+          "observed_output": "Real phan_chung1226/1226 after four-key deletion;partial deletion1224/1226 and1225/1226;full fallback27/27;other entries unchanged.",
+          "artifact": "/tmp/wp1463-r4-review/probe_registry.log"
+        }
+      ],
+      "remaining_manifestations": [],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    },
+    {
+      "class_slug": "obsolete-adr0060-opt-in-rationale",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "assessment": "ADR0062 default policy retained; no declaration does not waive M3. Actual K6 controls no-waiver12/exact-waiver0; Windows required and M9 true.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+          "exit_code": 0,
+          "observed_output": "Actual M3 required,M9 True;K6 without waiver12,exact owner waiver0.",
+          "artifact": "/tmp/wp1463-r4-review/probe_governance.log"
+        }
+      ],
+      "remaining_manifestations": [],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    },
+    {
+      "class_slug": "budget-authority-revision-misattributed",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "assessment": "r96 file SHA256 verified and installed-comment object matches; drafting5/6 is correctly attributed to r96, not historical r85(3/4).",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+          "exit_code": 0,
+          "observed_output": "r96 file hash2d9a60a5... verified;installed comment JSON equal;draft5/6,code3/3/2/3/1/1/0;r85 historical3/4.",
+          "artifact": "/tmp/wp1463-r4-review/probe_governance.log"
+        }
+      ],
+      "remaining_manifestations": [],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    },
+    {
+      "class_slug": "delegated-decisions-missing-durable-ledger",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "assessment": "GitHub readback sees r1 decision ledger7066720293 and r2 supplemental ledger7066894318; candidate explicitly retains those decisions and future owner hash/Mission/lease prerequisites.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_additional.py",
+          "exit_code": 0,
+          "observed_output": "GitHub current packet comments include r1 ledger7066720293 and r2 supplement7066894318.",
+          "artifact": "/tmp/wp1463-r4-review/probe_additional.log"
+        }
+      ],
+      "remaining_manifestations": [],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    },
+    {
+      "class_slug": "pr2-zone-excludes-new-harness-dependencies",
+      "source_round": 3,
+      "source_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "status": "ĐÃ VÁ THẬT",
+      "assessment": "Both workflows added to independent Z, actual VUNG_THEM and27-row fixture; actual phan_chung opens4 tracked inputs, all in-zone. The new liveness-sentinel scope error does not remove any zone dependency.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r4-review/probe_registry.py",
+          "exit_code": 0,
+          "observed_output": "Fixture27/27;real selector27/27;4/4 tracked opens inside revised Z;both added workflows included.",
+          "artifact": "/tmp/wp1463-r4-review/probe_registry.log"
+        }
+      ],
+      "remaining_manifestations": [],
+      "unmeasured": "None remaining to close this prior spec cause at the measured base. Future implementation/CI and live lease admission are separate obligations, not certified here."
+    }
+  ],
+  "class_mapping": [],
+  "class_lineage_notes": "S04 slug retained across rounds1-4. S11 is a measurement-scope/sentinel error, not a renamed missing-zone-input class. S12 is omission of an existing measurement route, not a substitute definition of landed; S06 proxy defect is closed. No split/merge of old slugs.",
+  "counts": {
+    "open_findings": 3,
+    "P0": 0,
+    "P1": 0,
+    "P2": 2,
+    "P3": 1,
+    "open_classes": 3,
+    "open_manifestations": 6,
+    "manifestations_by_severity": {
+      "P2": 3,
+      "P3": 3
+    },
+    "tracked_classes": 12,
+    "immediately_previous_findings_checked": 3,
+    "previous_open_classes_closed": 2,
+    "previous_open_classes_not_closed": 1,
+    "new_classes": 2
+  },
+  "convergence": {
+    "prior_open_classes": 3,
+    "closed": 2,
+    "closure_ratio": "2/3",
+    "new_class_slugs": [
+      "measurement-liveness-oracle-crosses-scope",
+      "workflow-definition-capability-inferred-from-local-failure"
+    ],
+    "checkpoint": "S04 remains open after the explicit round4 redesign. Preserve recurrence history; protocol§12/ADR0067 require reconsidering the approach and, where its E1 conditions apply, escalation by the coordinator. This review grants no extra author/review budget. Candidate counters before this run:author4/5,review3/6; this is review4."
+  },
+  "hunt_table": [
+    {
+      "direction": "Invocation composition and cache",
+      "hypothesis": "Rejected original execution evidence may still disappear behind a successful mutant rank.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+      "real_output": "COMPOSITION 6/6; original rc0 with rejected sidecar retains old GIET/GIET/TIN_DUNG_GIA in product/self/TU_KIEM runners, but r4 composition returns infrastructure_error; second calls reuse original cache. COMPOSITION_LOCK repaired rc0; old mapping mutant rc3/GIET. PRIOR_S04 missing_db ok_cu=False, missing_tk ok_cu=None, equivalent ok_cu=False/ok_cu_E=True. COMPARATOR_E healthy=True, missing_tk=True, reordered_raw=True; legacy_reader=True in all three. S04_MASK_ACTUAL=[cong_thuc_cu_dong,tong_hai_chieu], while r4 requires kho_va_ben_doc_cu too. MASK_LOCK corrected mask rc0; r4 mask rc3/GIET. SCOPE_LOCK scoped rc0; shared product-presence requirement rc3/GIET.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Child-result envelope",
+      "hypothesis": "Malformed or stale sidecar could be accepted despite the six-step boundary.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_envelope.py",
+      "real_output": "ENVELOPE_TOTAL31/31, including5 accepted and26 rejected/error controls.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Raw absence and old formula",
+      "hypothesis": "Missing planned results may still require invented ranks.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+      "real_output": "COMPOSITION 6/6; original rc0 with rejected sidecar retains old GIET/GIET/TIN_DUNG_GIA in product/self/TU_KIEM runners, but r4 composition returns infrastructure_error; second calls reuse original cache. COMPOSITION_LOCK repaired rc0; old mapping mutant rc3/GIET. PRIOR_S04 missing_db ok_cu=False, missing_tk ok_cu=None, equivalent ok_cu=False/ok_cu_E=True. COMPARATOR_E healthy=True, missing_tk=True, reordered_raw=True; legacy_reader=True in all three. S04_MASK_ACTUAL=[cong_thuc_cu_dong,tong_hai_chieu], while r4 requires kho_va_ben_doc_cu too. MASK_LOCK corrected mask rc0; r4 mask rc3/GIET. SCOPE_LOCK scoped rc0; shared product-presence requirement rc3/GIET.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Comparator exact vectors and theorem domain",
+      "hypothesis": "A fixed expected failure set may demand a predicate failure that its inputs cannot produce.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+      "real_output": "COMPOSITION 6/6; original rc0 with rejected sidecar retains old GIET/GIET/TIN_DUNG_GIA in product/self/TU_KIEM runners, but r4 composition returns infrastructure_error; second calls reuse original cache. COMPOSITION_LOCK repaired rc0; old mapping mutant rc3/GIET. PRIOR_S04 missing_db ok_cu=False, missing_tk ok_cu=None, equivalent ok_cu=False/ok_cu_E=True. COMPARATOR_E healthy=True, missing_tk=True, reordered_raw=True; legacy_reader=True in all three. S04_MASK_ACTUAL=[cong_thuc_cu_dong,tong_hai_chieu], while r4 requires kho_va_ben_doc_cu too. MASK_LOCK corrected mask rc0; r4 mask rc3/GIET. SCOPE_LOCK scoped rc0; shared product-presence requirement rc3/GIET.",
+      "exit_code": 0,
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S04"
+      ]
+    },
+    {
+      "direction": "Selector zone and rollback",
+      "hypothesis": "K8 may open files outside frozen Z or rollback may leave dependent entries.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_registry.py",
+      "real_output": "FIXTURE 27/27 independent oracle and real selector; SHA256 135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036. Overlay and four-key rollback: PHẢN CHỨNG 1226/1226, True; NHE-only 1224/1226,False; NHE+MAU_NHE 1225/1226,False. Both standalone healthy probes open exactly ci-dot-bien-du.yml, ci.yml, launcher-windows.yml and ops/bash_nen.py; outside=[]; ops/ci_provenance.py absent from both.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Per-probe measurement liveness",
+      "hypothesis": "A full-suite sentinel may falsely reject a valid standalone measurement.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_registry.py",
+      "real_output": "FIXTURE 27/27 independent oracle and real selector; SHA256 135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036. Overlay and four-key rollback: PHẢN CHỨNG 1226/1226, True; NHE-only 1224/1226,False; NHE+MAU_NHE 1225/1226,False. Both standalone healthy probes open exactly ci-dot-bien-du.yml, ci.yml, launcher-windows.yml and ops/bash_nen.py; outside=[]; ops/ci_provenance.py absent from both.",
+      "exit_code": 0,
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S11"
+      ]
+    },
+    {
+      "direction": "Consumer mode isolation",
+      "hypothesis": "Real registry may accept full/light mismatches or leak the light flag.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_registry.py",
+      "real_output": "day_du/full0errors;day_du/light1;nhe/full1;nhe/light0;light env=1,full env=None.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Dependency completion proxies",
+      "hypothesis": "Merge ancestry or an absent lease may still stand in for landed.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+      "real_output": "R96_REMOTE_EQUAL True; r85 drafting caps3/4, r96 caps5/6; code caps3/3/2/3/1/1/0. PR1 merged_landed_false, merge on first-parent=True, current M8 landed:false=True, SPEC_CORRECTED=True. Completion controls draft/in-progress/merged-only/incomplete/wrong-identity=False; fully-landed=True. Windows required; K6 no waiver rc12, exact owner waiver rc0. Four ai-dang-giu queries rc12; exhaustive exclusion unknown.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Existing definition-provenance capability",
+      "hypothesis": "Cloud403 may be wrongly generalized before trying the existing Actions collector.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+      "real_output": "WD_PROBE healthy rc0/passed, definition OID cccccccccccccccccccccccccccccccccccccccc, blob3cdcf389d7dd495e3ae2956b04a016f39e5f37a3, SHA256 c322a996b2755e97d8654427286e224572cfff4a465102666a21b9a45a16c9c6. GraphQL403 rc3/not_measured; mutable-ref URL rc3/not_measured. Existing c53-c60 all rc0, including real collector/importer with fake API responses, actual workflow allowlist and shell-body probes. No live Actions dispatch.",
+      "exit_code": 0,
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S12"
+      ]
+    },
+    {
+      "direction": "Authority, budget and platform gates",
+      "hypothesis": "Historical r85 caps or absent ADR declaration may be mistaken for current authority.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+      "real_output": "R96_REMOTE_EQUAL True; r85 drafting caps3/4, r96 caps5/6; code caps3/3/2/3/1/1/0. PR1 merged_landed_false, merge on first-parent=True, current M8 landed:false=True, SPEC_CORRECTED=True. Completion controls draft/in-progress/merged-only/incomplete/wrong-identity=False; fully-landed=True. Windows required; K6 no waiver rc12, exact owner waiver rc0. Four ai-dang-giu queries rc12; exhaustive exclusion unknown.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Live lease exclusion",
+      "hypothesis": "Unfetched or stale refs may hide a write-set holder.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+      "real_output": "Remote all-heads API returned405; scratch cache446 refs,400 exact matches,5 missing/changed,42extra. Remote fetch128(proxy connection refused); four ai-dang-giu queries12. Exact known wp1475 lease holds suite until2026-11-23T01:57:05Z; GitHub exact-ref wp1236 lease holds registry until2026-11-23T13:45:00Z.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "finding_ids": []
+    },
+    {
+      "direction": "Plan fidelity, removed mechanisms and siblings",
+      "hypothesis": "PR2 may reintroduce external authorization mechanisms or violate Q3/serialized shared-file work.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_additional.py",
+      "real_output": "PLAN_ID 8/8 controls; two valid equivalence records preserve distinct untrimmed reason/reviewer, invalid whitespace entry stays song without provenance. Sibling1460/1461 registry write=True, sibling1462=False. Durable decision comments7066720293(r1),7066894318(r2). Read-only WD workflow: contents:read,actions:read; one do-wd job; timeout10min.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Current-code feasibility and old anchors",
+      "hypothesis": "The stated inventory or runner mocks may disagree with current master.",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+      "real_output": "Current master CA68/DOT_BIEN398/DOT_BIEN_TEST11/TU_KIEM2; old self-mutant anchors11/11 unique;14 selected current cases rc0. R4 explicitly permits adapting c66 and old two-tuple mocks without altering frozen mutation tuples.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Exact candidate identity",
+      "claimed": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f / 6a4fabce0dd2e1a95e59f375943ae657a26b9dec237e4dc4f3a8dda5d8c882cf",
+      "measured": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f / 6a4fabce0dd2e1a95e59f375943ae657a26b9dec237e4dc4f3a8dda5d8c882cf / tree8d80f446c719b92fe2ef2476a73733bcd2cf0838",
+      "matches": true,
+      "command": "git rev-parse HEAD HEAD^{tree}; sha256 of git/local SPEC; GitHub head GET at start/end"
+    },
+    {
+      "claim": "Current master",
+      "claimed": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+      "measured": "Same locally and via GitHub at start/end",
+      "matches": true,
+      "command": "git rev-parse origin/master; GitHub GET git/ref/heads/master"
+    },
+    {
+      "claim": "Plan r4 hash",
+      "claimed": "0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe",
+      "measured": "same",
+      "matches": true,
+      "command": "SHA256 git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md"
+    },
+    {
+      "claim": "Mission r96 authority",
+      "claimed": "2d9a60a5eda9537475d7bb0901e882fef2d97d96a2ad4a4aa0d97c76862e73a9;draft5/6",
+      "measured": "same hash;installed-comment JSON equal;implementation3/3/2/3/1/1/0",
+      "matches": true,
+      "command": "probe_governance.py + read issuecomment7066078931"
+    },
+    {
+      "claim": "Current suite inventory",
+      "claimed": "68/398/11/2",
+      "measured": "68/398/11/2;11/11 self-mutant anchors unique",
+      "matches": true,
+      "command": "probe_contract.py"
+    },
+    {
+      "claim": "Zone table",
+      "claimed": "27rows/hash135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036",
+      "measured": "same;oracle27/27;real selector27/27",
+      "matches": true,
+      "command": "probe_registry.py"
+    },
+    {
+      "claim": "Standalone phan_chung liveness under same acceptance condition",
+      "claimed": "Each set includes ops/ci_provenance.py",
+      "measured": "0/2 include product;both have4 in-zone inputs and1226/1226",
+      "matches": false,
+      "command": "probe_registry.py"
+    },
+    {
+      "claim": "K8 runtime about8s local",
+      "claimed": "Historical estimate, not fixed threshold",
+      "measured": "12.520/11.541/13.009/11.845s for overlay/four/partial/partial, this environment",
+      "matches": "Different measurement, not a contract failure",
+      "command": "probe_registry.py"
+    },
+    {
+      "claim": "Missing-TU_KIEM/DAT exact failed coordinates",
+      "claimed": "d,tong,e",
+      "measured": "d,tong; e=True,old MOI=True",
+      "matches": false,
+      "command": "probe_contract.py"
+    },
+    {
+      "claim": "Current selected cases",
+      "claimed": "No full-suite claim requested for spec-only candidate",
+      "measured": "14/14 selected cases rc0;31/31 envelope-model vectors;6/6 composition-model vectors",
+      "matches": "Measured scopes only",
+      "command": "probe_contract.py;probe_envelope.py"
+    },
+    {
+      "claim": "All live refs available",
+      "claimed": "Required before exhaustive lease exclusion",
+      "measured": "Fetch128;405 remote,446 cache,400 matches;queries12x4",
+      "matches": false,
+      "command": "fetch remote;probe_governance.py"
+    },
+    {
+      "claim": "Delivery size and timing",
+      "claimed": "4files;450added-lines cap;postmerge<=30%full/median step<=600s",
+      "measured": "4named paths;future additions and timing not measured. Spec-r3-to-r4 diff+60/-39 is not delivery numstat.",
+      "matches": "not_measured",
+      "command": "Read write set/size/acceptance;git diff --stat ce3b62b1 5fde1c5e"
+    },
+    {
+      "claim": "Checkout unchanged",
+      "claimed": "Read-only review",
+      "measured": "17638file hashes + HEAD/tree/status/index/worktree diff equal;file deltas[]",
+      "matches": true,
+      "command": "Compare snapshot-start.json and snapshot-end.json"
+    }
+  ],
+  "tests": [
+    {
+      "name": "Contract witnesses and own-case locking tests",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+      "exit_code": 0,
+      "evidence": "COMPOSITION 6/6; original rc0 with rejected sidecar retains old GIET/GIET/TIN_DUNG_GIA in product/self/TU_KIEM runners, but r4 composition returns infrastructure_error; second calls reuse original cache. COMPOSITION_LOCK repaired rc0; old mapping mutant rc3/GIET. PRIOR_S04 missing_db ok_cu=False, missing_tk ok_cu=None, equivalent ok_cu=False/ok_cu_E=True. COMPARATOR_E healthy=True, missing_tk=True, reordered_raw=True; legacy_reader=True in all three. S04_MASK_ACTUAL=[cong_thuc_cu_dong,tong_hai_chieu], while r4 requires kho_va_ben_doc_cu too. MASK_LOCK corrected mask rc0; r4 mask rc3/GIET. SCOPE_LOCK scoped rc0; shared product-presence requirement rc3/GIET. Measurement success does not mean candidate approval."
+    },
+    {
+      "name": "Registry overlay and rollback",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_registry.py",
+      "exit_code": 0,
+      "evidence": "FIXTURE 27/27 independent oracle and real selector; SHA256 135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036. Overlay and four-key rollback: PHẢN CHỨNG 1226/1226, True; NHE-only 1224/1226,False; NHE+MAU_NHE 1225/1226,False. Both standalone healthy probes open exactly ci-dot-bien-du.yml, ci.yml, launcher-windows.yml and ops/bash_nen.py; outside=[]; ops/ci_provenance.py absent from both. Measurement success does not mean candidate approval."
+    },
+    {
+      "name": "Governance controls",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_governance.py",
+      "exit_code": 0,
+      "evidence": "R96_REMOTE_EQUAL True; r85 drafting caps3/4, r96 caps5/6; code caps3/3/2/3/1/1/0. PR1 merged_landed_false, merge on first-parent=True, current M8 landed:false=True, SPEC_CORRECTED=True. Completion controls draft/in-progress/merged-only/incomplete/wrong-identity=False; fully-landed=True. Windows required; K6 no waiver rc12, exact owner waiver rc0. Four ai-dang-giu queries rc12; exhaustive exclusion unknown. Measurement success does not mean candidate approval."
+    },
+    {
+      "name": "Plan/identity/provenance controls",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_additional.py",
+      "exit_code": 0,
+      "evidence": "PLAN_ID 8/8 controls; two valid equivalence records preserve distinct untrimmed reason/reviewer, invalid whitespace entry stays song without provenance. Sibling1460/1461 registry write=True, sibling1462=False. Durable decision comments7066720293(r1),7066894318(r2). Read-only WD workflow: contents:read,actions:read; one do-wd job; timeout10min. Measurement success does not mean candidate approval."
+    },
+    {
+      "name": "Envelope boundary model",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_envelope.py",
+      "exit_code": 0,
+      "evidence": "31/31 model vectors; not delivered A3 code."
+    },
+    {
+      "name": "Existing selected master cases",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-r4-review/probe_contract.py",
+      "exit_code": 0,
+      "evidence": "14/14 selected cases rc0: c53-c60 and c63-c68; includes workflow collector/importer/shell-body fixtures. No live API used by those cases."
+    },
+    {
+      "name": "Ruff pin/probe contract",
+      "status": "passed",
+      "command": "Current registry loi_ruff_ci() in probe_contract.py",
+      "exit_code": 0,
+      "evidence": "([],3); structural workflow contract only."
+    },
+    {
+      "name": "Bare Ruff current touched Python",
+      "status": "passed",
+      "command": "ruff check --no-cache --select F /tmp/wp1463-r4-review/repo/ops/ci_provenance_test.py /tmp/wp1463-r4-review/repo/.claude/dev/ci_dang_ky_test.py",
+      "exit_code": 0,
+      "evidence": "All checks passed; executable Ruff0.16.9, different from CI pin0.15.15; no future script lint claimed."
+    },
+    {
+      "name": "Assigned checkout remote fetch",
+      "status": "failed",
+      "command": "git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune",
+      "exit_code": 255,
+      "evidence": "cannot open .git/FETCH_HEAD:Read-only file system; no bypass attempted."
+    },
+    {
+      "name": "Scratch remote fetch",
+      "status": "failed",
+      "command": "git -C /tmp/wp1463-r4-review/repo fetch --prune origin '+refs/heads/*:refs/remotes/origin/*'",
+      "exit_code": 128,
+      "evidence": "Proxy127.0.0.1:34023 connection refused; read-only cached refs subsequently copied from supplied mirrors are not a successful remote fetch."
+    },
+    {
+      "name": "Live four-path lease queries",
+      "status": "failed",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <each of four delivery paths>, scratch cwd",
+      "exit_code": 12,
+      "evidence": "All four rc12/KHÔNG_XÁC_ĐỊNH. No lease-free conclusion. Known holders read from exact live refs separately."
+    },
+    {
+      "name": "Workflow run-list read capability",
+      "status": "failed",
+      "command": "GitHub connector fetch /actions/workflows/ops-do-workflow-definition.yml/runs?per_page=100",
+      "exit_code": null,
+      "evidence": "Tool rejects URL with HTTP400 INVALID_ARGUMENT; this is reader-tool capability, not proof workflow is unavailable."
+    },
+    {
+      "name": "Future implementation and required CI",
+      "status": "not_run",
+      "command": "Future full/light,do_pr2.py ab/registry/vung/tu-kiem --dot-bien, full registry, Windows and CI",
+      "exit_code": null,
+      "evidence": "Spec-only review; code and do_pr2.py not implemented. No dispatch authorized. shellcheck absent; actionlint present. No full-suite pass, code-size feasibility or savings claim."
+    },
+    {
+      "name": "Source integrity",
+      "status": "passed",
+      "command": "Compare /tmp/wp1463-r4-review/snapshot-start.json and snapshot-end.json",
+      "exit_code": 0,
+      "evidence": "Identical17638file hashes,HEAD/tree,status,index/worktree diffs;ignored.codex included. Equality attests no observed delta, not absence of transient writes historically."
+    }
+  ],
+  "workflow_checkpoint_assessment": {
+    "measures_requested_checkpoint": true,
+    "mechanism": "Read-only Actions workflow passes target run_id to do-wd; GraphQL WorkflowRun.file.repositoryFileUrl binds exact repo/path/OID; collector computes blob/hash; thu --wd-run validates artifact provenance/digest and re-fetches definition bytes.",
+    "e2_assessment": "Merged-not-landed waiver is not established as necessary by cloud GraphQL403. Existing authorized measurement route should be attempted first. Any dispatch allowance is separate; no dispatch performed or authorized here.",
+    "actual_target_completed": false,
+    "unmeasured": "Live workflow execution and complete target run/attempt evidence; PR1 current M8 still landed:false."
+  },
+  "notes": "Read-only spec review, not implementation approval. Three grouped findings remain (2P2+1P3;6 manifestations). All3 prior findings and all10 prior classes are checked with current evidence. S01 and S06 close at spec scope; S04 old raw/domain witnesses improve but new oracle contradictions keep it open. No repository edit/commit/push, GitHub write, workflow dispatch, lease grant, merge, land or LIVE. Exhaustive live lease exclusion could not be measured; rc12 is not no holders. Known wp1236/wp1475 overlaps remain prerequisites to future execution. No future implementation, full-suite, performance or delivery-size result is invented.",
+  "artifact_manifest": [
+    {
+      "path": "/tmp/wp1463-r4-review/probe_additional.log",
+      "bytes": 2463,
+      "sha256": "1572bf0e6ccb735d67cbc1a5790fdc33885c2460aa41b67a22a74f8c90eb72e3"
+    },
+    {
+      "path": "/tmp/wp1463-r4-review/probe_additional.py",
+      "bytes": 2150,
+      "sha256": "e92f2cb53adae070a02eee103320f823ac4ce5f86224a25eee56e0d5370d820a"
+    },
+    {
+      "path": "/tmp/wp1463-r4-review/probe_contract.log",
+      "bytes": 2849,
+      "sha256": "ecc5a5e06685f0cc1ae84e9db8fc180a26e9770e8cb85d4c6a15593c8fb47997"
+    },
+    {
+      "path": "/tmp/wp1463-r4-review/probe_contract.py",
+      "bytes": 8638,
+      "sha256": "2b21d88a64db70399a4b92cdee957517b39193c2a2e0c25a6dbbd39d49c83b9c"
+    },
+    {
+      "path": "/tmp/wp1463-r4-review/probe_envelope.log",
+      "bytes": 1879,
+      "sha256": "25b737fc90486633ed956c8031b6840cfe750432065724be17027e4477cf9a17"
+    },
+    {
+      "path": "/tmp/wp1463-r4-review/probe_envelope.py",
+      "bytes": 3834,
+      "sha256": "bca8b14811c87c459737635d3e872a94cf706e35eee0ba0bed3e43510ebbb0e6"
+    },
+    {
+      "path": "/tmp/wp1463-r4-review/probe_governance.log",
+      "bytes": 8453,
+      "sha256": "5d462be4c11a3680ea15884abb59e3eeeb9ad5187185a7694024a00a4a581491"
+    },
+    {
+      "path": "/tmp/wp1463-r4-review/probe_governance.py",
+      "bytes": 4523,
+      "sha256": "4ff6a44e81a1c8146868f50718f40b89bb0f4437cb521699edddb16d978a3a68"
+    },
+    {
+      "path": "/tmp/wp1463-r4-review/probe_registry.log",
+      "bytes": 1655,
+      "sha256": "b0dbf72660d304bc8e97c23c8524dd206d5e46824844aae65229e084f4135209"
+    },
+    {
+      "path": "/tmp/wp1463-r4-review/probe_registry.py",
+      "bytes": 3725,
+      "sha256": "b101779333c22cfe8b9bcf521c3144e3653a6267c9295f6a0a29caf617df805c"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+KHONG_HOP_LE (§8.3):
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+kiem83 rc=1

@@ -1,0 +1,5 @@
+**changes_requested** — 6 P2 and 3 P3 findings across 9 cause classes, covering 18 manifestations.
+
+[JSON report](/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1463-spec-review-1.json) written and printed.
+
+Registry probe: **1226/1226 passed**. Live lease checks returned **UNKNOWN (rc 12)**; both known blockers remain recorded. No repository or GitHub writes.

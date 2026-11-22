@@ -1,0 +1,8 @@
+Saved [review JSON](/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1463-spec-review-2.json).
+
+Verdict: **changes_requested — 3 P2 classes**:
+- Incomplete child-result validation.
+- Unsound preservation/A3 comparison.
+- K8 dependencies outside the frozen zone.
+
+All nine prior findings reassessed. Repository unchanged; exhaustive live lease verification remains unmeasured.

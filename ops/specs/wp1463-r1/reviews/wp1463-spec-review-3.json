@@ -1,0 +1,1005 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1463",
+  "mission_issue": 1172,
+  "revision": 3,
+  "generation": null,
+  "generation_reason": "Proposed spec-review candidate; no implementation generation/lease has been admitted. No generation invented.",
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "session_id": "wp1463-spec-review-r3-ce3b62b1-20261122",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_service",
+    "transport": "machine",
+    "session_id": "wp1463-spec-review-r3-ce3b62b1-20261122",
+    "serving_model": "KHONG_DO_DUOC",
+    "serving_effort": "KHONG_DO_DUOC",
+    "attestation": "Independent tool-enabled Codex review context assigned by the user. No executor-context fork or subagent. No per-request serving-model/effort or launcher receipt exposed; requested model profile is not used as measured identity."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+  "reviewed_tree": "c9952abcf83917ef42a418248bfcfc784cbe8742",
+  "reviewed_file": "ops/specs/wp1463-r1/SPEC.md",
+  "reviewed_file_sha256": "ffa2bdaf1072dbd01a638ee2591cd9ac069275af011d673ffc9482ed4923b0d8",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "changes_requested",
+  "assurance": "review_deferred",
+  "assurance_attestation": "Independent exact-object spec assessment with locally measured evidence and authenticated GitHub reads. No approval-level assurance asserted: findings remain; executor runtime identity and whole live-ref completeness are not attested. review_deferred here does not authorize bypassing sensitive review, execution, merge or land. Wrapper completion/output hash must be recorded by the caller after this response ends.",
+  "evidence_url": null,
+  "environment": {
+    "os": "Linux x86_64",
+    "python": "3.13.18",
+    "git": "2.43.0",
+    "sandbox_mode": "workspace-write; approval_policy never",
+    "source_policy": "Assigned checkout voluntarily kept read-only; tools allow workspace writes, so prompt read-only is not claimed as an enforced source mount. All scratch mutations are under /tmp outside the checkout.",
+    "actionlint": "present",
+    "shellcheck": "absent",
+    "ruff_executable": "0.16.9",
+    "python_module_ruff": "unavailable"
+  },
+  "anchors": {
+    "authoritative_spec": {
+      "sha": "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+      "path": "ops/specs/wp1463-r1/SPEC.md",
+      "sha256": "ffa2bdaf1072dbd01a638ee2591cd9ac069275af011d673ffc9482ed4923b0d8"
+    },
+    "local_spec_matches": true,
+    "current_master": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+    "plan_ref": "origin/ops/wp1172-plan-r4",
+    "plan_ref_sha": "2404125fbeaddaf2de467d1705c93fbece703401",
+    "acceptance_baseline": "No implementation lease baseline assigned; spec design base is current master above.",
+    "continuation_base": null
+  },
+  "findings": [
+    {
+      "id": "PR2-S01",
+      "class_slug": "a3-case-execution-status-collapsed",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          115,
+          123,
+          124,
+          135,
+          136,
+          137,
+          141,
+          150,
+          173,
+          176
+        ]
+      },
+      "claim": "The six-step child validator repairs the previous malformed-envelope examples, but the ordered mapping still discards a failed execution prerequisite when the original target case returned legacy rc=0. A missing/rejected result file makes that original invocation infrastructure_error while leaving its rc=0 unchanged. The real legacy mutation runners therefore continue and can return GIET, or the expected TU_KIEM rank. Row 135 propagates the original invocation status only when the legacy rank is HONG; rows 137/141 then report the completed mutant as hoan_tat/giet or hoan_tat/true. With otherwise healthy inputs, A3 can be xanh despite its original-case execution evidence having been rejected. The same mechanism crosses the baseline cache, both mutation runners and TU_KIEM; validating files in isolation does not close it.",
+      "manifestations": [
+        {
+          "id": "S01-f",
+          "location": "§4 rows 135–137; current nen_cua/chay_dot_bien",
+          "description": "Original case rc0 with absent/invalid sidecar, followed by completed rc3 target assertion: old GIET survives and the literal A3 mapping loses the original infrastructure_error."
+        },
+        {
+          "id": "S01-g",
+          "location": "§4 rows 135–137; current chay_dot_bien_test and planned registry-copy mutations",
+          "description": "The self-mutant runner has the same cached-original prerequisite; its legacy GIET also bypasses row 135. The new registry-copy runner must obey the same original-case rule."
+        },
+        {
+          "id": "S01-h",
+          "location": "§2 light execution; §4 rows 135/141; K5a/K5d",
+          "description": "TU_KIEM can have an unvalidated rc0 original run and a completed mutant matching TIN_DUNG_GIA or SONG_SOT, yet emit hoan_tat/true in either mode."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "ENVELOPE_TOTAL 31 31. BASELINE_SIDECAR_LOST real_legacy_rank GIET calls [baseline, mutant] baseline_A3 infrastructure_error mutant_A3 hoan_tat literal_mapping (hoan_tat,giet). SELF_MUTANT_BASELINE_SIDECAR_LOST GIET -> (hoan_tat,giet). TK_BASELINE_SIDECAR_LOST real_legacy_rank TIN_DUNG_GIA expected TIN_DUNG_GIA -> (hoan_tat,True). BASELINE_LOCK fixed_map rc0; recurrence mapped rc3 GIET via DO:baseline_lock.",
+          "artifact": "/tmp/wp1463-r3-review/probe_contract.log"
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC §4 original-case/mutation mapping, K5a/K5d and the eventual nen_cua cache plus chay_dot_bien/chay_dot_bien_test/registry-copy runner. This is where a prerequisite result becomes an item result; the already-strict file validator is not the missing layer.",
+        "how": "Define one composition rule that preserves execution status for every required invocation, including the cached original case, independently of legacy HONG. Carry that status through cache hits and all consumers. Keep the actual legacy rc/rank/counts unchanged; do not turn a formerly GIET legacy result into an invented HONG merely to force the new status through row 135.",
+        "locking_test": "Runnable witness and test sketch: python3 -B /tmp/wp1463-r3-review/probe_contract.py, BASELINE_LOCK. Through each real parent/runner, make ONLY the original rc0 result file absent or invalid and make the mutant complete normally; require infrastructure_error/null and a non-green total. Healthy original+mutant is the positive control. The mutant that consults original status only when hang_cu==HONG must die by the target case TinHieuChotCa/rc3/GIET, not an unpacking error. Test cache reuse and TU_KIEM in both modes.",
+        "may_spawn": "Changing cache/result tuple shape can break old mocks or old tuple anchors. Stopping before the mutant may destroy the promised legacy comparison. Do not count the intentionally bad child in a negative test as an outer test infrastructure failure; preserve the case-owned assertion boundary."
+      },
+      "confidence": "high for the contract gap; new A3 is modeled from the frozen table, not claimed to be implemented",
+      "fix_attempted": "Scratch-only composition/locking-test sketch; no repository patch."
+    },
+    {
+      "id": "PR2-S04",
+      "class_slug": "preservation-oracle-checks-names-only",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          106,
+          107,
+          110,
+          124,
+          133,
+          145,
+          154,
+          157,
+          158,
+          160,
+          172,
+          199,
+          202,
+          205,
+          207
+        ]
+      },
+      "claim": "The new raw legacy fields fix the previous lossy projection for executed results, and the nine-coordinate self-test fixes the redundant-check mutant problem. The replacement preservation contract is still not total over its own required inputs: not_run has no legacy rank to copy, but every mutation/TU_KIEM record must contain hang_cu from a four-string domain that excludes null. Filling HONG fabricates an observation and changes the old result list; omitting the item avoids the required per-item not_run projection. Separately, the new unqualified xanh=>old-ok law is false for the generic reviewed-equivalent fixture that §4 explicitly permits. Production’s empty equivalence table prevents that latter case in main, but the theorem says every configuration and acceptance also uses synthetic inputs; its domain must be explicit.",
+      "manifestations": [
+        {
+          "id": "S04-g",
+          "severity": "P2",
+          "location": "§4 dot_bien raw schema/domain versus row 133; acceptance 2(d)",
+          "description": "A planned mutation with no returned result must be not_run, yet has no raw hang_cu in the allowed domain. Synthesizing a HONG row changes old du from false to true and xau from empty to nonempty."
+        },
+        {
+          "id": "S04-h",
+          "severity": "P2",
+          "location": "§4 tu_kiem raw schema/domain versus row 133; K5 missing-result fixture",
+          "description": "A missing TU_KIEM result likewise has no raw hang_cu. No absent-result representation or rule for whether the old formula is measurable is defined."
+        },
+        {
+          "id": "S04-i",
+          "severity": "P3",
+          "location": "§4 equivalence mapping/total law versus line 157 universal preservation implication",
+          "description": "Healthy cases and TU_KIEM plus a completed SONG_SOT mutant with a valid reviewed-equivalence entry produce equivalent_reviewed/xanh, while legacy xau makes old ok false. The empty-production-table premise appears only in the reverse implication T."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "RAW_PRESERVATION retains GIET/TIN_DUNG_GIA/SONG_SOT and g=1/0/0. VECTOR_REMOVAL ast_phan_hang and luoi_phan_hang both killed by changed vectors. MISSING_RESULT_CURRENT_MAIN rc1: CA1/1, plan1/results0, DOT BIEN0/1, TK DAT, TONG DO. MISSING_RESULT_RECONSTRUCTION raw duFalse xau[]; fill_HONG duTrue xau[HONG]. MISSING_RESULT_SCHEMA null_allowed False omit_hang_cu_allowed False. EQUIVALENCE_DOMAIN legacy SONG_SOT, equivalent_reviewed, literal_conclusion xanh, old_okFalse, implicationFalse. MISSING_LOCK None rc0 versus fabricated HONG rc3/GIET; EQUIVALENCE_LOCK scoped premise rc0 versus unscoped rc3/GIET.",
+          "artifact": "/tmp/wp1463-r3-review/probe_contract.log"
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC §4 raw-result schema, missing-result mapping and preservation predicates; acceptance 2(d)/tu-kiem. Fix the evidence/proof contract here rather than changing phan_hang or the old mutation corpus.",
+        "how": "Specify an explicit absence representation and retain the actual result identities/order/cardinality separately from any plan-aligned diagnostics, so old du/xau are reconstructed without fabricated ranks. State when the old computation is unavailable, especially for a TU_KIEM invocation that never returned. Scope the forward preservation theorem to the empty production equivalence table, or state the intended generic relation separately; keep reviewed-equivalent behavior testable.",
+        "locking_test": "Runnable starting witnesses: python3 -B /tmp/wp1463-r3-review/probe_contract.py, MISSING_RESULT_*, MISSING_LOCK and EQUIVALENCE_LOCK. Add missing mutation and missing TU_KIEM vectors to comparator self-tests, with completed HONG and complete healthy controls. A mutant fabricating HONG for an absent result, a mutant normalizing raw identity before du, and a mutant dropping the theorem’s domain premise must each fail their own declared check. For suite cases use their TinHieuChotCa; comparator mutants must change the intended coordinate of the nine-check vector.",
+        "may_spawn": "A null/sentinel convention can accidentally let absent results pass, or normalize reordered/duplicate results and reopen identity validation. An overly broad old/new equality can reject intentional A3 tightening. Do not weaken the empty production equivalence-table guard to make the theorem pass."
+      },
+      "confidence": "high for absence/schema conflict and the stated universal theorem; no production reviewed-equivalence false-green is claimed",
+      "fix_attempted": "Scratch-only missing-result and theorem-domain probes plus runnable locking-test sketches."
+    },
+    {
+      "id": "PR2-S06",
+      "class_slug": "dependency-completion-replaced-by-lease-absence",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          12,
+          247,
+          248,
+          250,
+          258,
+          259,
+          261
+        ]
+      },
+      "claim": "The original no-lease shortcut was removed, but the candidate replaces actual predecessor completion with another insufficient proxy: it defines landed as merged plus presence on master’s first-parent chain. That contradicts the protocol/AGENTS distinction and the supplied Mission authority. PR1 is an actual counterexample: the exact merge commit is current master, but Mission r96 and its M8 receipt explicitly say landed:false because Workflow definition provenance was not measured. The spec nevertheless calls PR1 landed, and its B1a/B2 admission predicate would accept the same merged-but-unfinished state. This reopens the existing prerequisite-completion cause class; it is not a request to block this authorized spec review or to infer new lease authority.",
+      "manifestations": [
+        {
+          "id": "S06-c",
+          "location": "Identity/base paragraph line 12",
+          "description": "PR1 #1448 is labeled landed at e2f28fb although authoritative r96/M8 record merged_landed_false."
+        },
+        {
+          "id": "S06-d",
+          "location": "Predecessor condition line 248, B1a",
+          "description": "B1a is accepted as landed using only merge+first-parent, without evidence of required post-merge gates/bookkeeping."
+        },
+        {
+          "id": "S06-e",
+          "location": "Predecessor condition line 248 and truth table, B2",
+          "description": "The same insufficient completion definition applies to B2; merged but landed:false is missing from the distinguishing table."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r3-review/probe_governance.py",
+          "exit_code": 0,
+          "observed_output": "PR1_COMPLETION merged_landed_false merge_on_first_parent True landed False candidate_land_predicate True. PR1_LATEST_RECEIPTS [(7065823063,True)]. COMPLETION_CONTROL merged=True,first_parent=True,landed=False,lease=False: correctFalse,merge_only_mutantTrue; landed=True controlTrue.",
+          "artifact": "/tmp/wp1463-r3-review/probe_governance.log"
+        },
+        {
+          "command": "GitHub GET /repos/ducthangho/tra-luat/issues/1448/comments?since=2026-11-21T16:39:00Z&per_page=100; GET /issues/comments/7066078931",
+          "exit_code": null,
+          "transport_status": "tool success",
+          "observed_output": "One PR1 comment returned: M8 7065823063, landed:false, reason §10.2.2 Workflow definition unavailable (GraphQL403); no superseding completion receipt in this returned interval. Installed-r96 comment JSON equals the Git mission-r96.json object.",
+          "artifact": "/tmp/wp1463-r3-review/pr1-comments.json",
+          "source_url": "https://github.com/ducthangho/tra-luat/issues/1448#issuecomment-7065823063"
+        }
+      ],
+      "suggested_fix": {
+        "where": "SPEC identity/base statement and the single shared predecessor predicate/truth table under Quy trình và quyền, covering PR1, B1a and B2. This is an orchestration contract defect, not a reason to edit registry/product code.",
+        "how": "Use protocol-defined landed evidence for prerequisites and retain ancestry as a necessary check, not the full definition. Correct PR1 to merged/landed:false. If readiness after merge alone is the intended dependency, state that as an explicit owner-approved Mission dependency change instead of renaming merged to landed.",
+        "locking_test": "Run probe_governance.py using the actual PR1 r96/M8 fixture. Add merged+first-parent+lease-absent+landed:false as a negative row for every completion prerequisite, and a fully landed receipt as the positive row. The proposed admission/checklist measurement must reject a mutant that drops completion evidence or substitutes merge-only/lease-absence. No product gate edit is authorized by this suggestion.",
+        "may_spawn": "A stale or wrong-generation receipt can falsely satisfy a dependency; bind packet/revision, merge SHA and completion evidence. A genuine Mission waiver may change the prerequisite, but must not rewrite failed/unmeasured evidence as passed. Avoid requiring unrelated successor debt to be complete without authority."
+      },
+      "confidence": "high; contradictory current Git and durable authority measured",
+      "fix_attempted": "Measured actual authority and an executable distinguishing truth-table sketch; no authority or repository mutation."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "a3-case-execution-status-collapsed",
+      "finding_ids": [
+        "PR2-S01"
+      ],
+      "manifestations": [
+        {
+          "id": "S01-f",
+          "location": "§4 rows 135–137; current nen_cua/chay_dot_bien",
+          "description": "Original case rc0 with absent/invalid sidecar, followed by completed rc3 target assertion: old GIET survives and the literal A3 mapping loses the original infrastructure_error."
+        },
+        {
+          "id": "S01-g",
+          "location": "§4 rows 135–137; current chay_dot_bien_test and planned registry-copy mutations",
+          "description": "The self-mutant runner has the same cached-original prerequisite; its legacy GIET also bypasses row 135. The new registry-copy runner must obey the same original-case rule."
+        },
+        {
+          "id": "S01-h",
+          "location": "§2 light execution; §4 rows 135/141; K5a/K5d",
+          "description": "TU_KIEM can have an unvalidated rc0 original run and a completed mutant matching TIN_DUNG_GIA or SONG_SOT, yet emit hoan_tat/true in either mode."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "status": "VÁ HỜ",
+      "reopened_after_round2": false,
+      "common_fix": "Define one composition rule that preserves execution status for every required invocation, including the cached original case, independently of legacy HONG. Carry that status through cache hits and all consumers. Keep the actual legacy rc/rank/counts unchanged; do not turn a formerly GIET legacy result into an invented HONG merely to force the new status through row 135.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+        "result": "ENVELOPE_TOTAL 31 31. BASELINE_SIDECAR_LOST real_legacy_rank GIET calls [baseline, mutant] baseline_A3 infrastructure_error mutant_A3 hoan_tat literal_mapping (hoan_tat,giet). SELF_MUTANT_BASELINE_SIDECAR_LOST GIET -> (hoan_tat,giet). TK_BASELINE_SIDECAR_LOST real_legacy_rank TIN_DUNG_GIA expected TIN_DUNG_GIA -> (hoan_tat,True). BASELINE_LOCK fixed_map rc0; recurrence mapped rc3 GIET via DO:baseline_lock.",
+        "unmeasured": "Frozen contract fails these witnesses; delivered future implementation not measured."
+      }
+    },
+    {
+      "slug": "preservation-oracle-checks-names-only",
+      "finding_ids": [
+        "PR2-S04"
+      ],
+      "manifestations": [
+        {
+          "id": "S04-g",
+          "severity": "P2",
+          "location": "§4 dot_bien raw schema/domain versus row 133; acceptance 2(d)",
+          "description": "A planned mutation with no returned result must be not_run, yet has no raw hang_cu in the allowed domain. Synthesizing a HONG row changes old du from false to true and xau from empty to nonempty."
+        },
+        {
+          "id": "S04-h",
+          "severity": "P2",
+          "location": "§4 tu_kiem raw schema/domain versus row 133; K5 missing-result fixture",
+          "description": "A missing TU_KIEM result likewise has no raw hang_cu. No absent-result representation or rule for whether the old formula is measurable is defined."
+        },
+        {
+          "id": "S04-i",
+          "severity": "P3",
+          "location": "§4 equivalence mapping/total law versus line 157 universal preservation implication",
+          "description": "Healthy cases and TU_KIEM plus a completed SONG_SOT mutant with a valid reviewed-equivalence entry produce equivalent_reviewed/xanh, while legacy xau makes old ok false. The empty-production-table premise appears only in the reverse implication T."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "status": "VÁ SINH LỖI MỚI",
+      "reopened_after_round2": false,
+      "common_fix": "Specify an explicit absence representation and retain the actual result identities/order/cardinality separately from any plan-aligned diagnostics, so old du/xau are reconstructed without fabricated ranks. State when the old computation is unavailable, especially for a TU_KIEM invocation that never returned. Scope the forward preservation theorem to the empty production equivalence table, or state the intended generic relation separately; keep reviewed-equivalent behavior testable.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+        "result": "RAW_PRESERVATION retains GIET/TIN_DUNG_GIA/SONG_SOT and g=1/0/0. VECTOR_REMOVAL ast_phan_hang and luoi_phan_hang both killed by changed vectors. MISSING_RESULT_CURRENT_MAIN rc1: CA1/1, plan1/results0, DOT BIEN0/1, TK DAT, TONG DO. MISSING_RESULT_RECONSTRUCTION raw duFalse xau[]; fill_HONG duTrue xau[HONG]. MISSING_RESULT_SCHEMA null_allowed False omit_hang_cu_allowed False. EQUIVALENCE_DOMAIN legacy SONG_SOT, equivalent_reviewed, literal_conclusion xanh, old_okFalse, implicationFalse. MISSING_LOCK None rc0 versus fabricated HONG rc3/GIET; EQUIVALENCE_LOCK scoped premise rc0 versus unscoped rc3/GIET.",
+        "unmeasured": "Frozen contract fails these witnesses; delivered future implementation not measured."
+      }
+    },
+    {
+      "slug": "dependency-completion-replaced-by-lease-absence",
+      "finding_ids": [
+        "PR2-S06"
+      ],
+      "manifestations": [
+        {
+          "id": "S06-c",
+          "location": "Identity/base paragraph line 12",
+          "description": "PR1 #1448 is labeled landed at e2f28fb although authoritative r96/M8 record merged_landed_false."
+        },
+        {
+          "id": "S06-d",
+          "location": "Predecessor condition line 248, B1a",
+          "description": "B1a is accepted as landed using only merge+first-parent, without evidence of required post-merge gates/bookkeeping."
+        },
+        {
+          "id": "S06-e",
+          "location": "Predecessor condition line 248 and truth table, B2",
+          "description": "The same insufficient completion definition applies to B2; merged but landed:false is missing from the distinguishing table."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "status": "VÁ HỜ",
+      "reopened_after_round2": true,
+      "common_fix": "Use protocol-defined landed evidence for prerequisites and retain ancestry as a necessary check, not the full definition. Correct PR1 to merged/landed:false. If readiness after merge alone is the intended dependency, state that as an explicit owner-approved Mission dependency change instead of renaming merged to landed.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r3-review/probe_governance.py",
+        "result": "PR1_COMPLETION merged_landed_false merge_on_first_parent True landed False candidate_land_predicate True. PR1_LATEST_RECEIPTS [(7065823063,True)]. COMPLETION_CONTROL merged=True,first_parent=True,landed=False,lease=False: correctFalse,merge_only_mutantTrue; landed=True controlTrue.",
+        "unmeasured": "Frozen contract fails these witnesses; delivered future implementation not measured."
+      }
+    },
+    {
+      "slug": "a3-plan-identity-validation-gap",
+      "finding_ids": [],
+      "prior_finding_ids": [
+        "PR2-S02"
+      ],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "§4 explicitly checks plan uniqueness independently in both modes and preserves ordered result comparison. PLAN_ID unique=>xanh, duplicate=>khong_ket_luan for both modes; K5b has the exact matching-duplicate counterexample and a dedicated removal mutant.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r3-review/probe_governance.py",
+        "result": "§4 explicitly checks plan uniqueness independently in both modes and preserves ordered result comparison. PLAN_ID unique=>xanh, duplicate=>khong_ket_luan for both modes; K5b has the exact matching-duplicate counterexample and a dedicated removal mutant.",
+        "unmeasured": "No additional measurement required for this old spec claim; future implementation is outside this review."
+      }
+    },
+    {
+      "slug": "a3-equivalence-provenance-not-emitted",
+      "finding_ids": [],
+      "prior_finding_ids": [
+        "PR2-S03"
+      ],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "§4/K5c retain both reason and reviewer in emitted records. Two independently serialized/read-back records retain distinct reasons/reviewers including spaces. Separate field-removal mutants are required. The universal theorem defect is tracked under S04, not this transport field class.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r3-review/probe_governance.py",
+        "result": "§4/K5c retain both reason and reviewer in emitted records. Two independently serialized/read-back records retain distinct reasons/reviewers including spaces. Separate field-removal mutants are required. The universal theorem defect is tracked under S04, not this transport field class.",
+        "unmeasured": "No additional measurement required for this old spec claim; future implementation is outside this review."
+      }
+    },
+    {
+      "slug": "registry-rollback-leaves-dependent-entries",
+      "finding_ids": [],
+      "prior_finding_ids": [
+        "PR2-S05"
+      ],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Real four-dictionary deletion:1226/1226 and default-full27/27; NHE-only1224/1226, NHE+MAU_NHE1225/1226. Other suites unchanged. Its induced dependency class S10 also closes this round.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r3-review/probe_registry.py",
+        "result": "Real four-dictionary deletion:1226/1226 and default-full27/27; NHE-only1224/1226, NHE+MAU_NHE1225/1226. Other suites unchanged. Its induced dependency class S10 also closes this round.",
+        "unmeasured": "No additional measurement required for this old spec claim; future implementation is outside this review."
+      }
+    },
+    {
+      "slug": "obsolete-adr0060-opt-in-rationale",
+      "finding_ids": [],
+      "prior_finding_ids": [
+        "PR2-S07"
+      ],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Current _phan_loai_windows says required with or without the declaration; M9True. Extracted real K6 gives rc12 without waiver and rc0 with exact-head owner waiver. Candidate states these obligations and does not claim Windows CI0 waives M3.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r3-review/probe_governance.py",
+        "result": "Current _phan_loai_windows says required with or without the declaration; M9True. Extracted real K6 gives rc12 without waiver and rc0 with exact-head owner waiver. Candidate states these obligations and does not claim Windows CI0 waives M3.",
+        "unmeasured": "No additional measurement required for this old spec claim; future implementation is outside this review."
+      }
+    },
+    {
+      "slug": "budget-authority-revision-misattributed",
+      "finding_ids": [],
+      "prior_finding_ids": [
+        "PR2-S08"
+      ],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Independently hashed r96 and compared its installed-comment object: equal. r96 caps5/6 versus r85 historical3/4; implementation3/3/2/3/1/1/0 retained. Spec drafting and code/connector axes are separate; no size exception is granted.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r3-review/probe_governance.py",
+        "result": "Independently hashed r96 and compared its installed-comment object: equal. r96 caps5/6 versus r85 historical3/4; implementation3/3/2/3/1/1/0 retained. Spec drafting and code/connector axes are separate; no size exception is granted.",
+        "unmeasured": "No additional measurement required for this old spec claim; future implementation is outside this review."
+      }
+    },
+    {
+      "slug": "delegated-decisions-missing-durable-ledger",
+      "finding_ids": [],
+      "prior_finding_ids": [
+        "PR2-S09"
+      ],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Read current Issue1463 comments7066720293 and7066894318. The five retained decisions exist durably, r2 reanchors them and corrects decision4; no newly invented sixth delegated decision was found in r3. Pending-at-r2-authoring language is historical.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r3-review/probe_governance.py",
+        "result": "Read current Issue1463 comments7066720293 and7066894318. The five retained decisions exist durably, r2 reanchors them and corrects decision4; no newly invented sixth delegated decision was found in r3. Pending-at-r2-authoring language is historical.",
+        "unmeasured": "No additional measurement required for this old spec claim; future implementation is outside this review."
+      }
+    },
+    {
+      "slug": "pr2-zone-excludes-new-harness-dependencies",
+      "finding_ids": [],
+      "prior_finding_ids": [
+        "PR2-S10"
+      ],
+      "manifestations": [
+        "S10-a: ci-dot-bien-du.yml now in zone",
+        "S10-b: launcher-windows.yml now in zone"
+      ],
+      "highest_open_severity": null,
+      "source_round": 2,
+      "source_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Both old manifestations S10-a/b are closed on the current base. The real phan_chung opens exactly four tracked inputs; all are day_du under revised Z and the actual data-only selector. Fixture is 27/27 with the frozen hash. Full rollback remains 1226/1226, partial rollbacks fail. The entire candidate’s zone/oracle/hash/K6/K8/acceptance4/7/drift clauses were cross-checked.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r3-review/probe_registry.py",
+        "result": "FIXTURE27 hash135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036 oracle27 registry27. K8 overlay/four1226/1226, only_nhe1224/1226, nhe_mau_nhe1225/1226; all tracked_opens inside revised zone; four-delete fallback_full27 and other_entries_unchangedTrue.",
+        "unmeasured": "No remaining measurement needed for the old spec contradiction at this base. Full future-H vung audit remains an implementation acceptance obligation, not certified here."
+      }
+    }
+  ],
+  "prior_findings_check": [
+    {
+      "id": "PR2-S01",
+      "class_slug": "a3-case-execution-status-collapsed",
+      "source_round": 2,
+      "source_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "status": "VÁ HỜ",
+      "assessment": "S01-c/d/e are repaired at the local file-validation boundary: missing fields, forbidden states and inconsistent triples now reject. 31/31 contract-model vectors pass. The whole cause is not closed: valid rc0 original cases with rejected sidecars are not composed into the item status (S01-f/g/h).",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "ENVELOPE_TOTAL 31 31. BASELINE_SIDECAR_LOST real_legacy_rank GIET calls [baseline, mutant] baseline_A3 infrastructure_error mutant_A3 hoan_tat literal_mapping (hoan_tat,giet). SELF_MUTANT_BASELINE_SIDECAR_LOST GIET -> (hoan_tat,giet). TK_BASELINE_SIDECAR_LOST real_legacy_rank TIN_DUNG_GIA expected TIN_DUNG_GIA -> (hoan_tat,True). BASELINE_LOCK fixed_map rc0; recurrence mapped rc3 GIET via DO:baseline_lock.",
+          "artifact": "/tmp/wp1463-r3-review/probe_contract.log"
+        }
+      ],
+      "unmeasured": "Future delivered parent/cache/runner implementation is not part of this spec-only object."
+    },
+    {
+      "id": "PR2-S04",
+      "class_slug": "preservation-oracle-checks-names-only",
+      "source_round": 2,
+      "source_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "status": "VÁ SINH LỖI MỚI",
+      "assessment": "The three executed-result rank witnesses are now lossless; the previous timeout-TU_KIEM tightening is admitted by T; AST/grid removal is detected independently by vector comparison. The added mandatory raw fields cannot represent missing results, and the new universal forward theorem omits its production-only premise (S04-g/h/i).",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+          "exit_code": 0,
+          "observed_output": "RAW_PRESERVATION retains GIET/TIN_DUNG_GIA/SONG_SOT and g=1/0/0. VECTOR_REMOVAL ast_phan_hang and luoi_phan_hang both killed by changed vectors. MISSING_RESULT_CURRENT_MAIN rc1: CA1/1, plan1/results0, DOT BIEN0/1, TK DAT, TONG DO. MISSING_RESULT_RECONSTRUCTION raw duFalse xau[]; fill_HONG duTrue xau[HONG]. MISSING_RESULT_SCHEMA null_allowed False omit_hang_cu_allowed False. EQUIVALENCE_DOMAIN legacy SONG_SOT, equivalent_reviewed, literal_conclusion xanh, old_okFalse, implicationFalse. MISSING_LOCK None rc0 versus fabricated HONG rc3/GIET; EQUIVALENCE_LOCK scoped premise rc0 versus unscoped rc3/GIET.",
+          "artifact": "/tmp/wp1463-r3-review/probe_contract.log"
+        }
+      ],
+      "unmeasured": "Actual future comparator and complete mutant set are not implemented."
+    },
+    {
+      "id": "PR2-S10",
+      "class_slug": "pr2-zone-excludes-new-harness-dependencies",
+      "source_round": 2,
+      "source_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "status": "ĐÃ VÁ THẬT",
+      "assessment": "Both old manifestations S10-a/b are closed on the current base. The real phan_chung opens exactly four tracked inputs; all are day_du under revised Z and the actual data-only selector. Fixture is 27/27 with the frozen hash. Full rollback remains 1226/1226, partial rollbacks fail. The entire candidate’s zone/oracle/hash/K6/K8/acceptance4/7/drift clauses were cross-checked.",
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r3-review/probe_registry.py",
+          "exit_code": 0,
+          "observed_output": "FIXTURE27 hash135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036 oracle27 registry27. K8 overlay/four1226/1226, only_nhe1224/1226, nhe_mau_nhe1225/1226; all tracked_opens inside revised zone; four-delete fallback_full27 and other_entries_unchangedTrue.",
+          "artifact": "/tmp/wp1463-r3-review/probe_registry.log"
+        }
+      ],
+      "unmeasured": "No remaining measurement needed for the old spec contradiction at this base. Full future-H vung audit remains an implementation acceptance obligation, not certified here."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "a3-case-execution-status-collapsed",
+      "status": "VÁ HỜ",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "previous_status": "open",
+      "assessment": "The six-step child validator repairs the previous malformed-envelope examples, but the ordered mapping still discards a failed execution prerequisite when the original target case returned legacy rc=0. A missing/rejected result file makes that original invocation infrastructure_error while leaving its rc=0 unchanged. The real legacy mutation runners therefore continue and can return GIET, or the expected TU_KIEM rank. Row 135 propagates the original invocation status only when the legacy rank is HONG; rows 137/141 then report the completed mutant as hoan_tat/giet or hoan_tat/true. With otherwise healthy inputs, A3 can be xanh despite its original-case execution evidence having been rejected. The same mechanism crosses the baseline cache, both mutation runners and TU_KIEM; validating files in isolation does not close it.",
+      "current_finding_ids": [
+        "PR2-S01"
+      ],
+      "reopened": false,
+      "unmeasured": "No future implementation assurance."
+    },
+    {
+      "class_slug": "preservation-oracle-checks-names-only",
+      "status": "VÁ SINH LỖI MỚI",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "previous_status": "open",
+      "assessment": "The new raw legacy fields fix the previous lossy projection for executed results, and the nine-coordinate self-test fixes the redundant-check mutant problem. The replacement preservation contract is still not total over its own required inputs: not_run has no legacy rank to copy, but every mutation/TU_KIEM record must contain hang_cu from a four-string domain that excludes null. Filling HONG fabricates an observation and changes the old result list; omitting the item avoids the required per-item not_run projection. Separately, the new unqualified xanh=>old-ok law is false for the generic reviewed-equivalent fixture that §4 explicitly permits. Production’s empty equivalence table prevents that latter case in main, but the theorem says every configuration and acceptance also uses synthetic inputs; its domain must be explicit.",
+      "current_finding_ids": [
+        "PR2-S04"
+      ],
+      "reopened": false,
+      "unmeasured": "No future implementation assurance."
+    },
+    {
+      "class_slug": "dependency-completion-replaced-by-lease-absence",
+      "status": "VÁ HỜ",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "previous_status": "ĐÃ VÁ THẬT",
+      "assessment": "The original no-lease shortcut was removed, but the candidate replaces actual predecessor completion with another insufficient proxy: it defines landed as merged plus presence on master’s first-parent chain. That contradicts the protocol/AGENTS distinction and the supplied Mission authority. PR1 is an actual counterexample: the exact merge commit is current master, but Mission r96 and its M8 receipt explicitly say landed:false because Workflow definition provenance was not measured. The spec nevertheless calls PR1 landed, and its B1a/B2 admission predicate would accept the same merged-but-unfinished state. This reopens the existing prerequisite-completion cause class; it is not a request to block this authorized spec review or to infer new lease authority.",
+      "current_finding_ids": [
+        "PR2-S06"
+      ],
+      "reopened": true,
+      "unmeasured": "No future implementation assurance."
+    },
+    {
+      "class_slug": "a3-plan-identity-validation-gap",
+      "status": "ĐÃ VÁ THẬT",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "assessment": "§4 explicitly checks plan uniqueness independently in both modes and preserves ordered result comparison. PLAN_ID unique=>xanh, duplicate=>khong_ket_luan for both modes; K5b has the exact matching-duplicate counterexample and a dedicated removal mutant.",
+      "current_finding_ids": [],
+      "unmeasured": "Future implementation only."
+    },
+    {
+      "class_slug": "a3-equivalence-provenance-not-emitted",
+      "status": "ĐÃ VÁ THẬT",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "assessment": "§4/K5c retain both reason and reviewer in emitted records. Two independently serialized/read-back records retain distinct reasons/reviewers including spaces. Separate field-removal mutants are required. The universal theorem defect is tracked under S04, not this transport field class.",
+      "current_finding_ids": [],
+      "unmeasured": "Future implementation only."
+    },
+    {
+      "class_slug": "registry-rollback-leaves-dependent-entries",
+      "status": "ĐÃ VÁ THẬT",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "assessment": "Real four-dictionary deletion:1226/1226 and default-full27/27; NHE-only1224/1226, NHE+MAU_NHE1225/1226. Other suites unchanged. Its induced dependency class S10 also closes this round.",
+      "current_finding_ids": [],
+      "unmeasured": "Future implementation only."
+    },
+    {
+      "class_slug": "obsolete-adr0060-opt-in-rationale",
+      "status": "ĐÃ VÁ THẬT",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "assessment": "Current _phan_loai_windows says required with or without the declaration; M9True. Extracted real K6 gives rc12 without waiver and rc0 with exact-head owner waiver. Candidate states these obligations and does not claim Windows CI0 waives M3.",
+      "current_finding_ids": [],
+      "unmeasured": "Future implementation only."
+    },
+    {
+      "class_slug": "budget-authority-revision-misattributed",
+      "status": "ĐÃ VÁ THẬT",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "assessment": "Independently hashed r96 and compared its installed-comment object: equal. r96 caps5/6 versus r85 historical3/4; implementation3/3/2/3/1/1/0 retained. Spec drafting and code/connector axes are separate; no size exception is granted.",
+      "current_finding_ids": [],
+      "unmeasured": "Future implementation only."
+    },
+    {
+      "class_slug": "delegated-decisions-missing-durable-ledger",
+      "status": "ĐÃ VÁ THẬT",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "assessment": "Read current Issue1463 comments7066720293 and7066894318. The five retained decisions exist durably, r2 reanchors them and corrects decision4; no newly invented sixth delegated decision was found in r3. Pending-at-r2-authoring language is historical.",
+      "current_finding_ids": [],
+      "unmeasured": "Future implementation only."
+    },
+    {
+      "class_slug": "pr2-zone-excludes-new-harness-dependencies",
+      "status": "ĐÃ VÁ THẬT",
+      "previous_round": 2,
+      "previous_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "assessment": "Both old manifestations S10-a/b are closed on the current base. The real phan_chung opens exactly four tracked inputs; all are day_du under revised Z and the actual data-only selector. Fixture is 27/27 with the frozen hash. Full rollback remains 1226/1226, partial rollbacks fail. The entire candidate’s zone/oracle/hash/K6/K8/acceptance4/7/drift clauses were cross-checked.",
+      "current_finding_ids": [],
+      "unmeasured": "No remaining measurement needed for the old spec contradiction at this base. Full future-H vung audit remains an implementation acceptance obligation, not certified here."
+    }
+  ],
+  "class_mapping": [],
+  "class_lineage": [
+    {
+      "class_slug": "dependency-completion-replaced-by-lease-absence",
+      "relation": "reopened, no rename/split/merge",
+      "reason": "Same semantic cause: prerequisite completion replaced by a proxy; r1 lease-absence shortcut is fixed, but r2/r3 merge-only definition still admits incomplete predecessors. Round2 closure was too broad."
+    }
+  ],
+  "counts": {
+    "open_findings": 3,
+    "P0": 0,
+    "P1": 0,
+    "P2": 3,
+    "P3": 0,
+    "open_classes": 3,
+    "open_manifestations": 9,
+    "manifestations_by_severity": {
+      "P2": 8,
+      "P3": 1
+    },
+    "classes_tracked_including_history": 10,
+    "prior_open_findings_checked": 3,
+    "prior_open_classes_closed": 1,
+    "prior_open_classes_not_closed": 2,
+    "previously_closed_classes_reopened": 1
+  },
+  "convergence": {
+    "previous_open_classes": 3,
+    "closed_this_round": 1,
+    "closure_ratio": "1/3",
+    "new_class_slugs": [],
+    "reopened_classes": [
+      "dependency-completion-replaced-by-lease-absence"
+    ],
+    "checkpoint": "S01 and S04 remain open across spec rounds1–3. Protocol§12 requires review of the approach at a checkpoint before another ordinary fix/review cycle; spec revisions do not reset history/budget. This review neither spends another call nor grants an extension."
+  },
+  "hunt_table": [
+    {
+      "direction": "Child envelope boundary",
+      "hypothesis": "Malformed/stale/typed-inconsistent output still passes the replacement validator.",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+      "real_output": "ENVELOPE_TOTAL31/31: five accepted triples plus26 rejection/error vectors, including all previous S01-c/d/e witnesses.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Execution prerequisites and cache",
+      "hypothesis": "A rejected original-case invocation can disappear behind a legacy-successful mutation result.",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+      "real_output": "ENVELOPE_TOTAL 31 31. BASELINE_SIDECAR_LOST real_legacy_rank GIET calls [baseline, mutant] baseline_A3 infrastructure_error mutant_A3 hoan_tat literal_mapping (hoan_tat,giet). SELF_MUTANT_BASELINE_SIDECAR_LOST GIET -> (hoan_tat,giet). TK_BASELINE_SIDECAR_LOST real_legacy_rank TIN_DUNG_GIA expected TIN_DUNG_GIA -> (hoan_tat,True). BASELINE_LOCK fixed_map rc0; recurrence mapped rc3 GIET via DO:baseline_lock.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S01"
+      ]
+    },
+    {
+      "direction": "Raw preservation on incomplete runs",
+      "hypothesis": "The new raw-result schema cannot represent the mandatory missing-result fixture without inventing evidence.",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+      "real_output": "Missing raw result: duFalse/xau[]; fabricated HONG row:duTrue/xau[HONG]. Null and omitted hang_cu prohibited by r3.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S04"
+      ]
+    },
+    {
+      "direction": "Domain of equivalence theorem",
+      "hypothesis": "A generic reviewed-equivalent input falsifies the universal forward preservation law.",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+      "real_output": "SONG_SOT -> equivalent_reviewed -> xanh; old_okFalse. Empty-production-table scope makes locking control pass; dropping it yields target rc3/GIET.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S04"
+      ]
+    },
+    {
+      "direction": "Independent teeth of the comparator",
+      "hypothesis": "A redundant AST/grid predicate can still be removed without detection.",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+      "real_output": "Expected failed coordinates{ast,grid}; removing ast yields{grid}; removing grid yields{ast}; both differ and are killed. Product-blob mismatch now explicitly listed.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Real registry dependency closure and rollback",
+      "hypothesis": "The K8 proof still opens tracked files outside the revised zone or breaks rollback.",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_registry.py",
+      "real_output": "FIXTURE27 hash135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036 oracle27 registry27. K8 overlay/four1226/1226, only_nhe1224/1226, nhe_mau_nhe1225/1226; all tracked_opens inside revised zone; four-delete fallback_full27 and other_entries_unchangedTrue.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Output-mode consumer and environment leakage",
+      "hypothesis": "Real registry accepts mixed full/light evidence or leaks the light flag into full mode.",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_registry.py",
+      "real_output": "day_du/full errors0;day_du/light1;nhe/full1;nhe/light0. env light=1,full=None. These are synthetic output controls through real chay_moi.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Predecessor completion versus proxies",
+      "hypothesis": "Merged+first-parent is being used as completed/landed.",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_governance.py; read current PR1 M8 via GitHub",
+      "real_output": "PR1_COMPLETION merged_landed_false merge_on_first_parent True landed False candidate_land_predicate True. PR1_LATEST_RECEIPTS [(7065823063,True)]. COMPLETION_CONTROL merged=True,first_parent=True,landed=False,lease=False: correctFalse,merge_only_mutantTrue; landed=True controlTrue.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S06"
+      ]
+    },
+    {
+      "direction": "Authority, budgets, Windows and owner decisions",
+      "hypothesis": "Obsolete r85 caps or absent ADR declaration can permit unbudgeted work or bypass M3.",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_governance.py; read installed r96 comment7066078931",
+      "real_output": "r96 hash2d9a60a5... matches; comment object equal; caps5/6; code3/3/2/3/1/1/0. Windows required with/without declaration; K6 no-waiver12,exact-waiver0. Q3 unchanged.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Live all-ref lease exclusion",
+      "hypothesis": "An unseen live ref/lease can overlap the proposed write set.",
+      "command": "git fetch --prune origin +refs/heads/*:refs/remotes/origin/* in scratch; python3 -B ops/lease_publish.py ai-dang-giu <each of4 delivery paths>; GitHub matching-refs GET",
+      "real_output": "Fetch128:proxy127.0.0.1:46095 unavailable. Four lease queries rc12. Remote405/cached445,401 exact matches,4 missing/mismatched heads,41 extra stale refs. Exact remote lease blobs confirm wp1236 and wp1475 holders.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "finding_ids": []
+    },
+    {
+      "direction": "Scope, plan fidelity and sibling conflicts",
+      "hypothesis": "PR2 reintroduces a removed authorization store, changes push policy or silently widens write scope.",
+      "command": "Read complete r4/r3/r84/r96 and candidate; git show sibling1460/1461/1462 specs; compare actual selector overlay",
+      "real_output": "Q3 preserves light-by-diff push; no CHO_PHEP mechanism added; only4 delivery paths. B1a and B3 both share registry; B4 does not. Full live exclusion remains separately unmeasured. Dependency completion defect is separately reported.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Current suite capability and old behavior",
+      "hypothesis": "A claimed current-base count/coverage hides a local setup or baseline failure.",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_cases.py; rerun c60 with CLI-equivalent sys.path",
+      "real_output": "68 cases,initial66 pass: c60 import setup failure and c61 missing shellcheck. Corrected c60 rc0. Union67/68; c61 remains rc3 missing required tool. Four direct tracked opens plus corrected bash_nen; subprocess coverage not claimed complete.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "finding_ids": []
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Candidate identity/hash",
+      "claimed": [
+        "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+        "c9952abcf83917ef42a418248bfcfc784cbe8742",
+        "ffa2bdaf1072dbd01a638ee2591cd9ac069275af011d673ffc9482ed4923b0d8"
+      ],
+      "measured": [
+        "ce3b62b14bfc5818f1ae6fd7639d8e61d4281f95",
+        "c9952abcf83917ef42a418248bfcfc784cbe8742",
+        "ffa2bdaf1072dbd01a638ee2591cd9ac069275af011d673ffc9482ed4923b0d8"
+      ],
+      "matches": true,
+      "command": "git rev-parse HEAD HEAD^{tree}; SHA256 git blob/local bytes; final GitHub candidate ref GET"
+    },
+    {
+      "claim": "Current master and five referenced blobs",
+      "claimed": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+      "measured": "Exact GitHub master=e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8; all5 blob OIDs equal spec",
+      "matches": true,
+      "command": "GitHub master ref GET; git rev-parse origin/master:<each path>"
+    },
+    {
+      "claim": "Plan r4 SHA256",
+      "claimed": "0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe",
+      "measured": "same",
+      "matches": true,
+      "command": "SHA256 git show origin/ops/wp1172-plan-r4:ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md"
+    },
+    {
+      "claim": "Plan r3 SHA256",
+      "claimed": "2e9fb13f1ab3f299c2d2dc1e5a6e407ff0aadb8aee1f6ffd00d88fc02b146f89",
+      "measured": "same",
+      "matches": true,
+      "command": "SHA256 git show origin/ops/wp1172-plan-r3:ops/specs/wp1172-source-plan-r3/KE_HOACH_NGUON_R3.md in scratch"
+    },
+    {
+      "claim": "Mission r96 hash and install",
+      "claimed": "2d9a60a5eda9537475d7bb0901e882fef2d97d96a2ad4a4aa0d97c76862e73a9",
+      "measured": "same; installed comment object equals Git JSON",
+      "matches": true,
+      "command": "probe_governance.py; GitHub GET issuecomment7066078931"
+    },
+    {
+      "claim": "Frozen zone fixture",
+      "claimed": "27 rows /135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036",
+      "measured": "same; independent oracle27/27; real selector27/27",
+      "matches": true,
+      "command": "probe_registry.py"
+    },
+    {
+      "claim": "Current corpus",
+      "claimed": "CA68,DOT_BIEN398,DOT_BIEN_TEST11,TU_KIEM2",
+      "measured": "same; all11 old self-mutant anchors unique",
+      "matches": true,
+      "command": "probe_contract.py"
+    },
+    {
+      "claim": "K8 closure/rollback",
+      "claimed": "Full phan_chung; every tracked open inside zone",
+      "measured": "4/4 tracked opens inside;overlay/four1226/1226;NHE-only1224;NHE+MAU_NHE1225;four-deletefull27/27",
+      "matches": true,
+      "command": "probe_registry.py"
+    },
+    {
+      "claim": "K8 runtime",
+      "claimed": "about8s local, not CI",
+      "measured": "overlay7.334s;four7.317s;NHE-only7.068s;NHE+MAU_NHE7.266s",
+      "matches": "same order of magnitude, different run",
+      "command": "probe_registry.py"
+    },
+    {
+      "claim": "Child validator former witnesses",
+      "claimed": "All reject appropriately",
+      "measured": "31/31 contract-model controls; not future implementation",
+      "matches": "contract examples verified",
+      "command": "probe_contract.py"
+    },
+    {
+      "claim": "PR1 landed at base",
+      "claimed": "landed",
+      "measured": "merged_landed_false;M on first-parent;M8 landed:false",
+      "matches": false,
+      "command": "probe_governance.py; PR1 current M8 GET"
+    },
+    {
+      "claim": "Live ref completeness",
+      "claimed": "all refs fetched before exclusion",
+      "measured": "405 live,445cached,401matching,4missing/mismatched,41stale extra",
+      "matches": false,
+      "command": "fetch+matching-refs+refs-comparison.json"
+    },
+    {
+      "claim": "Spec drafting/implementation budgets",
+      "claimed": "5/6;3/3/2/3/1/1/0",
+      "measured": "same in r96; r85 historical3/4",
+      "matches": true,
+      "command": "probe_governance.py"
+    },
+    {
+      "claim": "Delivery size cap",
+      "claimed": "4 named files; <=6 files/450 additions",
+      "measured": "4 named paths; implementation additions unknown",
+      "matches": "not_measured: future implementation",
+      "command": "Read Write set/Kích thước; actual spec revision diff71 additions/38 deletions is not delivery numstat"
+    },
+    {
+      "claim": "Full/light savings and after-merge metrics",
+      "claimed": "full~503s;day_du<=30%;median step<=600s",
+      "measured": "Not measured; current base cases48.047s in initial probe is not full/light timing",
+      "matches": "not_measured",
+      "command": "No full future suite, CI dispatch or after-merge cohort"
+    },
+    {
+      "claim": "Read-only checkout integrity",
+      "claimed": "no changes",
+      "measured": "17638/17638 file hashes,HEAD/tree,status,index/worktree diffs identical",
+      "matches": true,
+      "command": "Compare snapshot-start.json and snapshot-end.json"
+    }
+  ],
+  "tests": [
+    {
+      "name": "Frozen identity and authority",
+      "status": "passed",
+      "command": "git blob/local SHA256; read current GitHub refs and installed-r96 comment",
+      "exit_code": 0,
+      "evidence": "HEADce3b62b14bfc5818f1ae6fd7639d8e61d4281f95;treec9952abcf83917ef42a418248bfcfc784cbe8742;specffa2bdaf1072dbd01a638ee2591cd9ac069275af011d673ffc9482ed4923b0d8;mastere2f28fb39c519511a61d1fdba5b1fc8f77bb76b8;r96 readback equal."
+    },
+    {
+      "name": "Contract counterexamples and prior repairs",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_contract.py",
+      "exit_code": 0,
+      "evidence": "31/31 envelope vectors; old real runners/classifier; S01/S04 counterexamples; own-case rc3/GIET locking witnesses; vector-removal checks. This is successful measurement of defects, not a pass of the candidate contract.",
+      "artifact": "/tmp/wp1463-r3-review/probe_contract.log"
+    },
+    {
+      "name": "Registry overlay/rollback/dependencies",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_registry.py",
+      "exit_code": 0,
+      "evidence": "FIXTURE27 hash135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036 oracle27 registry27. K8 overlay/four1226/1226, only_nhe1224/1226, nhe_mau_nhe1225/1226; all tracked_opens inside revised zone; four-delete fallback_full27 and other_entries_unchangedTrue.",
+      "artifact": "/tmp/wp1463-r3-review/probe_registry.log"
+    },
+    {
+      "name": "Governance checks",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_governance.py",
+      "exit_code": 0,
+      "evidence": "Windows required;K6 12/0 controls; authority5/6;PR1 merged-but-not-landed witness;plan identity and emitted equivalence controls.",
+      "artifact": "/tmp/wp1463-r3-review/probe_governance.log"
+    },
+    {
+      "name": "Current base cases",
+      "status": "failed",
+      "command": "python3 -B /tmp/wp1463-r3-review/probe_cases.py",
+      "exit_code": 0,
+      "case_status": "66/68 initial; probe reports rather than exits on failed cases",
+      "evidence": "c60 initially rc4 due reviewer import-path setup; corrected CLI-equivalent import path rerun rc0. c61 rc3 because shellcheck absent. Combined measured cases67/68; no clean full-suite pass.",
+      "artifact": "/tmp/wp1463-r3-review/cases.json"
+    },
+    {
+      "name": "Ruff pin/probe contract",
+      "status": "passed",
+      "command": "Import current .claude/dev/ci_dang_ky_test.py; loi_ruff_ci()",
+      "exit_code": 0,
+      "evidence": "([],3): three structurally checked workflow jobs; distinct from actual lint."
+    },
+    {
+      "name": "Python-module Ruff invocation capability",
+      "status": "failed",
+      "command": "python3 -m ruff --version; python3 -m ruff check --no-cache --select F ops/ci_provenance_test.py .claude/dev/ci_dang_ky_test.py",
+      "exit_codes": [
+        1,
+        1
+      ],
+      "evidence": "/usr/local/bin/python3:No module named ruff. Executable available separately; no install or bypass."
+    },
+    {
+      "name": "Bare Ruff current touched Python files",
+      "status": "passed",
+      "command": "ruff --version; ruff check --no-cache --select F ops/ci_provenance_test.py .claude/dev/ci_dang_ky_test.py",
+      "exit_codes": [
+        0,
+        0
+      ],
+      "evidence": "ruff0.16.9;All checks passed. Local version differs from CI pin0.15.15; only current-base lint under stated version is attested."
+    },
+    {
+      "name": "Fetch all remote heads",
+      "status": "failed",
+      "command": "git -C /tmp/wp1463-r3-review/repo fetch --prune origin +refs/heads/*:refs/remotes/origin/*",
+      "exit_code": 128,
+      "evidence": "Network proxy connection refused. Local mirror refs copied into scratch are cache evidence only."
+    },
+    {
+      "name": "Four live lease queries",
+      "status": "failed",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <each delivery path> in scratch",
+      "exit_codes": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "evidence": "KHÔNG_XÁC_ĐỊNH; never interpreted as no holders. GitHub exact lease blobs confirm known wp1236/wp1475 holds; exhaustive exclusion not measured.",
+      "artifact": "/tmp/wp1463-r3-review/leases-query.json"
+    },
+    {
+      "name": "Future implementation acceptance",
+      "status": "not_run",
+      "command": "Future full/light, do_pr2.py ab/registry/vung/tu-kiem --dot-bien, full registry, required CI",
+      "evidence": "Spec-only candidate; future code/script do not exist. No CI dispatch authorized; shellcheck absent; no Windows or full future-H timing claim."
+    },
+    {
+      "name": "Read-only snapshot",
+      "status": "passed",
+      "command": "Compare snapshot-start.json and snapshot-end.json",
+      "exit_code": 0,
+      "evidence": "SNAPSHOT_EQUAL True;17638 file hashes;DELTA[]. Preexisting ignored .codex directory included. Equality proves no observed start/end delta, not absence of all transient writes. External /home/user/tra-luat was only read for refs/remote configuration; no whole-tree integrity attestation for that external mirror."
+    }
+  ],
+  "notes": "Read-only review of exact SPEC candidate ce3b62b1, not implementation approval. Every immediate round2 finding is labeled; cause slugs retained and the entire candidate was scanned beyond the author change list. Three grouped findings remain (nine manifestations, including one P3 manifestation under a P2 class). The zone class closes with measured current-code evidence. Known live leases and not-yet-landed dependencies block future execution independently of this spec review. All-ref fetch failed; four rc12 lease queries and partial GitHub/cache comparison are disclosed, never counted as exclusion pass. No repository edit/commit/push, GitHub write, workflow dispatch, LIVE, lease issuance or deployment. No future implementation test, complete full-suite pass, size feasibility or performance result is claimed."
+}

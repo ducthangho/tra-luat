@@ -1,0 +1,18 @@
+KHONG_HOP_LE (§8.3):
+  - class_table[a3-plan-identity-validation-gap]: thieu bieu hien
+  - class_table[a3-equivalence-provenance-not-emitted]: thieu bieu hien
+  - class_table[registry-rollback-leaves-dependent-entries]: thieu bieu hien
+  - class_table[obsolete-adr0060-opt-in-rationale]: thieu bieu hien
+  - class_table[budget-authority-revision-misattributed]: thieu bieu hien
+  - class_table[delegated-decisions-missing-durable-ledger]: thieu bieu hien
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+  - prior_class_status[None]: thieu bang chung
+kiem83 rc=1

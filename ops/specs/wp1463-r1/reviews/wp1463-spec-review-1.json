@@ -1,0 +1,1141 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1463",
+  "revision": 1,
+  "generation": null,
+  "generation_note": "No execution generation or lease has been issued. This is spec-drafting review round1; null avoids inventing a leased generation.",
+  "mission_id": "gh-1172",
+  "authority_revision": 96,
+  "review_round": 1,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "session_id": "wp1463-spec-review-r1-75016f96-dtrlfob5",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "model": "KHONG_DO_DUOC",
+    "effort": "KHONG_DO_DUOC",
+    "execution_surface": "codex_service",
+    "transport": "machine",
+    "session_id": "wp1463-spec-review-r1-75016f96-dtrlfob5",
+    "attestation": "Independent Codex service context assigned by user; no executor context was reused or forked. Model variant/effort requested in spec are not per-response runtime evidence."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+  "reviewed_tree": "316611785d6b79a3e75480d8d21b34ee38fbfe64",
+  "reviewed_file": "ops/specs/wp1463-r1/SPEC.md",
+  "reviewed_file_sha256": "68c90af23988d754d6a220e73868e787cca577d6c0fdaa43995cb8a028e9b99d",
+  "comparison_base_sha": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "verdict": "changes_requested",
+  "assurance": "review_deferred",
+  "assurance_note": "No approval assurance is claimed. A substantive independent Codex spec review WAS performed, with measured counterexamples. The enum is used conservatively for approval not granted, not to imply no reviewer work. Serving model/effort and complete live lease freshness are not attested. No human audit, cross_approved state, merge authority or implementation gate pass is asserted.",
+  "evidence_url": null,
+  "environment": {
+    "os": "Linux",
+    "python": "3.13.18",
+    "git": "2.43.0",
+    "cpu_count": 4,
+    "affinity_count": 4,
+    "actionlint": "1.7.7",
+    "shellcheck": null,
+    "core_abbrev": 7,
+    "sandbox_mode": "workspace-write; policy never; network restricted",
+    "read_only_enforcement": "Reviewer discipline plus before/after checkout snapshot; sandbox is not a filesystem-enforced read-only checkout.",
+    "scratch_root": "/tmp/wp1463-review-dtrlfob5"
+  },
+  "findings": [
+    {
+      "id": "PR2-S01",
+      "class_slug": "a3-case-execution-status-collapsed",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          100,
+          112,
+          117,
+          122,
+          127,
+          143
+        ]
+      },
+      "title": "Base-case timeout and infrastructure exceptions are reported as completed observations",
+      "claim": "The frozen mapping groups every rc=4 with a genuine failed assertion. CURRENT chay_ca catches TimeoutExpired and FileNotFoundError as rc=4. Thus a timed-out base case becomes hoan_tat/failed and ket_luan_tong=do, while the same execution failure in a mutant/TU_KIEM becomes timed_out or infrastructure_error. This violates plan r4 A+3's separation of execution from observation. K5 requires tests to affirm the wrong base-case row, and its timeout/infrastructure fixtures can be satisfied using only mutants.",
+      "manifestations": [
+        {
+          "id": "S01-a",
+          "location": "§4 mapping, base cases",
+          "description": "TimeoutExpired during a base case becomes hoan_tat/failed."
+        },
+        {
+          "id": "S01-b",
+          "location": "§4 mapping, base cases",
+          "description": "Failure to launch a dependency becomes hoan_tat/failed."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_a3.py",
+          "exit_code": 0,
+          "observed": "CASE timeout (4, \"HONG:probe:TimeoutExpired: Command 'git' timed out after 60 seconds\"); CASE spawn (4, 'HONG:probe:FileNotFoundError: git'); both map under SPEC line 112 to hoan_tat/failed/do. Assertion control returns rc=3. These are actual chay_ca results; SPEC_MAPPING is a literal interpretation of the candidate, not an implementation run."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Revise §4's base-case rows, structured runner result contract, and K5 in SPEC.md; execution information must be retained where chay_ca catches the exception, before the formatter loses it.",
+        "how": "Keep legacy mutant classification semantics intact, but carry a separate structured execution outcome for base-case timeout/infrastructure failures. Define which genuine completed test failures remain failed, and make the mapping exhaustive across ca/dot_bien/tu_kiem.",
+        "locking_test": "Run the existing probe against the revised runner contract with healthy and TinHieuChotCa controls. Add cases for base-case timeout and spawn failure in both modes; a mutant mapping either to hoan_tat/failed must die via that case's own TinHieuChotCa. Verify legacy rc/phan_hang behavior independently.",
+        "what_the_fix_may_spawn": "Overbroad exception classification could hide an actual assertion or product failure as infrastructure. Extra result fields can break legacy tuple unpacking and the existing self-mutants."
+      },
+      "confidence": "high",
+      "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+    },
+    {
+      "id": "PR2-S02",
+      "class_slug": "a3-plan-identity-validation-gap",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          128,
+          129,
+          131,
+          143,
+          163
+        ]
+      },
+      "title": "The frozen total rule drops the existing uniqueness check on planned names",
+      "claim": "Line 128 rejects a result list that differs from its plan, but never rejects a plan with duplicate names when results duplicate those names identically. All other conditions can be healthy and nonempty, so line 129 mandates xanh. CURRENT main includes len(set(ten_kh)) == len(ten_kh), and returns DO for that same case. Therefore line 131's universal equivalence claim is false beyond the declared empty-TU_KIEM exception. Name-set inclusion in acceptance 2 also hides duplicate identities.",
+      "manifestations": [
+        {
+          "id": "S02-a",
+          "location": "§4 total rule and equivalence claim",
+          "description": "Duplicate planned names with exactly matching completed results can become green."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_contract.py",
+          "exit_code": 0,
+          "observed": "Unique plan ('m1',): LEGACY_RC 0 / TONG: DAT. Duplicate plan ('m1','m1'), identical result names, healthy CA, nonempty successful TU_KIEM: LEGACY_RC 1 / TONG: DO. Neither frozen rule 1 nor rule 2 matches the duplicate witness, so the specified total is xanh."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Add the missing invalid-plan condition to §4, then cover it in K5 and acceptance 2. This belongs to plan identity validation, not only result-list comparison.",
+        "how": "Require unique planned mutant identities independently of received results; preserve the existing full-mode rejection. Define the light-mode treatment consistently with an invalid plan.",
+        "locking_test": "Use the exact unique/duplicate fixture in probe_contract.py. Add an actual A3 aggregator case requiring non-green for duplicate plans even with identical result ordering/count. A mutant removing planned-name uniqueness must be killed by the dedicated case.",
+        "what_the_fix_may_spawn": "Using sets for the whole comparison can erase ordering or multiplicity errors. Keep uniqueness and exact ordered result matching as separate checks."
+      },
+      "confidence": "high",
+      "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+    },
+    {
+      "id": "PR2-S03",
+      "class_slug": "a3-equivalence-provenance-not-emitted",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          101,
+          115,
+          124,
+          143
+        ]
+      },
+      "title": "The emitted equivalent_reviewed record omits the required review evidence",
+      "claim": "Plan r4 A+3 requires ly_do and nguoi_xac_nhan for equivalent_reviewed. The candidate validates those fields only in an input table, then specifies a dot_bien record containing just ten, trang_thai_thuc_thi and phan_hang_dot_bien. No top-level field carries that table. A consumer of KET_CUC_A3 cannot read the reason or reviewer. An empty production table prevents this on the initial live path, but does not make the mandatory equivalence fixture or the frozen schema complete for downstream consumers.",
+      "manifestations": [
+        {
+          "id": "S03-a",
+          "location": "§4 emitted dot_bien schema and equivalence fixture",
+          "description": "Distinct valid review evidence serializes to the same evidence-free equivalent_reviewed item."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_contract.py",
+          "exit_code": 0,
+          "observed": "Two valid tables, one with reviewer-A/semantically equal and one with reviewer-B/different explanation, produce the same frozen item {'ten':'m','trang_thai_thuc_thi':'hoan_tat','phan_hang_dot_bien':'equivalent_reviewed'}. This is a projection probe of the specified keys, not a claim that A3 implementation exists."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Amend the §4 wire schema and K5 equivalence round-trip fixtures, where evidence crosses from producer to future PR5/B1b consumers.",
+        "how": "Specify conditional ly_do and nguoi_xac_nhan fields on equivalent_reviewed items, or a fully bound emitted table with an explicit join contract. Keep the production table empty and never count equivalent_reviewed as a kill.",
+        "locking_test": "Serialize and parse the required equivalence fixture; assert the reason and reviewer survive unchanged. Missing/blank evidence must not emit equivalent_reviewed. A mutant dropping either emitted field must die in the serialization case, with healthy non-equivalence controls.",
+        "what_the_fix_may_spawn": "A second unbound table can associate evidence with the wrong mutant; broadening the schema may affect future consumers. Freeze the chosen binding before implementation."
+      },
+      "confidence": "high",
+      "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+    },
+    {
+      "id": "PR2-S04",
+      "class_slug": "preservation-oracle-checks-names-only",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          131,
+          153,
+          163,
+          193
+        ]
+      },
+      "title": "Acceptance 2 does not enforce the immutability it claims to measure",
+      "claim": "I-a forbids changing any existing DOT_BIEN, DOT_BIEN_TEST or TU_KIEM entry and phan_hang. Acceptance 2 only checks a set of names and GIET for those names, plus output regexes. It can pass after a mutant's actual fault has been replaced while keeping its name and an assertion failure. It also omits TU_KIEM entry preservation and a direct preservation check on phan_hang. Finally, the advertised substitute for r4's same-SHA comparison runs different base/H inventories; those are complementary checks, not the stated same-snapshot A/B proof.",
+      "manifestations": [
+        {
+          "id": "S04-a",
+          "location": "Acceptance 2 → I-a",
+          "description": "Mutant content/target preservation is replaced by name-set inclusion."
+        },
+        {
+          "id": "S04-b",
+          "location": "Acceptance 2 → I-a",
+          "description": "TU_KIEM and phan_hang immutability have no corresponding executable comparison."
+        },
+        {
+          "id": "S04-c",
+          "location": "§4 equivalence and Chỗ khác chữ kế hoạch",
+          "description": "Different-commit runs are presented as satisfying the same-SHA no-behavior-change comparison."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_contract.py; sed -n '153,165p' ops/specs/wp1463-r1/SPEC.md",
+          "exit_code": 0,
+          "observed": "Actual existing A1_xoa_co_attempt: GIET. Changed tuple with the same name/target but required=True retained and only help suppressed: also GIET, same DO:c01_cli_du_co. NAME_SUBSET True; TUPLE_EQUAL False. Acceptance 2's recorded-name predicate cannot distinguish them. Source inspection confirms it compares names/results, not full tuple entries or phan_hang."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Strengthen acceptance 2 and its self-check in do_pr2.py; align §4's preservation claim and the deviation paragraph. The comparator, rather than the regex consumer, owns this invariant.",
+        "how": "Compare each original full tuple by table/name, allow additions only, and verify the unchanged classifier with an explicit source/AST or exhaustive behavioral contract. Separately compare old/new aggregation or reporting on one frozen product/test/mutant snapshot for unchanged behavior; retain the base/H inventory-growth check.",
+        "locking_test": "Extend the comparator self-check beyond missing-name: alter replacement, anchor, target, TU_KIEM expectation, and classifier while preserving names and all-green summaries; each must be rejected. The demonstrated same-name mutant replacement is a runnable negative fixture. Dedicated comparator mutants omitting each comparison must die.",
+        "what_the_fix_may_spawn": "Literal source comparison may reject harmless formatting; AST/value comparison may miss call-site changes. State the intended equivalence boundary and do not accidentally prohibit adding new mutants."
+      },
+      "confidence": "high",
+      "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+    },
+    {
+      "id": "PR2-S05",
+      "class_slug": "registry-rollback-leaves-dependent-entries",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          208
+        ]
+      },
+      "title": "The documented one-line rollback leaves the registry gate red",
+      "claim": "The spec adds four coupled registry entries but tells operators to roll back by deleting only NHE[p]. MAU_DAY_DU and MAU_NHE then retain p. Existing phan_chung rejects both key-set invariants, so the promised quick return to full mode fails the registry gate. This is a concrete recovery procedure defect, even though reverting the whole PR remains available.",
+      "manifestations": [
+        {
+          "id": "S05-a",
+          "location": "Quy trình và quyền / Hoàn tác",
+          "description": "Removing only NHE violates both MAU_DAY_DU=NHE and MAU_NHE⊆NHE."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_registry.py",
+          "exit_code": 0,
+          "observed": "Four-entry overlay: phan_chung 1226/1226. After deleting only NHE[p]: 1224/1226; p643-A1-chi-bo-trong-NHE and p647-M2-mau-nhe-chi-cho-bo-trong-NHE are LỌT. The fallback plan is day_du, but the registry gate is red. Full registry main with all four additions later returned rc=0 / TỔNG: ĐẠT."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Correct the rollback paragraph at line 208 and test the chosen rollback against the actual registry invariants.",
+        "how": "Use full PR revert as the minimum valid recovery, or describe removing the coupled entries together while preserving all unrelated entries. Do not promise a one-line NHE deletion.",
+        "locking_test": "Apply the documented rollback to an isolated overlay; require phan_chung=True and this suite's fallback day_du. A recovery mutant leaving either MAU map entry behind must be rejected. Existing two named registry checks already give this test teeth.",
+        "what_the_fix_may_spawn": "An overly broad cleanup could delete other NHE suites or their regions. Test preservation of their data and plans."
+      },
+      "confidence": "high",
+      "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+    },
+    {
+      "id": "PR2-S06",
+      "class_slug": "dependency-completion-replaced-by-lease-absence",
+      "severity": "P2",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          11,
+          202,
+          203
+        ]
+      },
+      "title": "The lease condition can admit PR2 before its ordered predecessors",
+      "claim": "The first sentence correctly states B1→B2→PR2. It then replaces B1a completion with 'landed OR no lease on the shared file' and waits for B2 only if B2 already has a lease. A predecessor still drafting or waiting for a lease satisfies those shortcuts. Mission r96 still records B1 conditional execution and B2 spec drafting; it does not authorize reordering them. Write exclusion and dependency completion are separate conditions. The later requirement for a Mission admission does not make the frozen admission predicate correct.",
+      "manifestations": [
+        {
+          "id": "S06-a",
+          "location": "line 202 condition (c)",
+          "description": "B1a not landed and no lease can satisfy the PR2 predecessor condition."
+        },
+        {
+          "id": "S06-b",
+          "location": "line 202 B2 condition",
+          "description": "B2 not started is bypassed because it has no lease yet."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_governance.py",
+          "exit_code": 0,
+          "observed": "ORDER_WITNESS False False False False: SPEC_LEASE_CONDITION True, PLAN_ORDER False. True False False False also returns True/False. True False True False returns True/True. Mission r96: B1 admitted_execution_conditional; B2 admitted_spec_drafting; PR2 depends_on 'after B1'. Plan r4 §7 explicitly orders B1, B2, PR2."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Rewrite line 202's predecessor conditions, keeping independent live-lease checks and exact-base remeasurement.",
+        "how": "Require the applicable B1a and B2 completion/admission milestones from the installed Mission, or cite an explicit owner-approved reorder in a new Mission revision. Lack/expiry of a lease must not stand in for completion.",
+        "locking_test": "Add a reviewable admission truth table for predecessor not_started/running/completed × lease absent/present. The two measured counterexamples must reject; completed predecessors and clear leases may proceed to the other gates. A predicate mutant changing completion to 'or no lease' must fail that check.",
+        "what_the_fix_may_spawn": "A hard-coded interpretation of B1 can accidentally wait for deferred B1b work; identify exactly which installed predecessor milestone is required and keep the split's authority explicit."
+      },
+      "confidence": "high",
+      "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+    },
+    {
+      "id": "PR2-S07",
+      "class_slug": "obsolete-adr0060-opt-in-rationale",
+      "severity": "P3",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          205,
+          228
+        ]
+      },
+      "title": "Omitting the declaration is permitted, but does not avoid M3",
+      "claim": "ADR-0062 N1 superseded ADR-0060 M10: every unmerged packet is subject to ADR-0060 even with zero declaration lines. The candidate's rationale distinguishes 'line present ⇒ M3 local Windows' from 'line absent ⇒ K6 waiver', which is false. Omission itself does not weaken K6 or K7 in current code. The no-Windows-CI policy and local-Windows budget are also separate from an exact-H owner waiver; the spec should describe that distinction without claiming an opt-out.",
+      "manifestations": [
+        {
+          "id": "S07-a",
+          "location": "line 205",
+          "description": "Superseded opt-in M10 is used to explain avoidance of M3."
+        },
+        {
+          "id": "S07-b",
+          "location": "author decision 4",
+          "description": "The self-decision inherits the same invalid rationale."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_governance.py; cat docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md",
+          "exit_code": 0,
+          "observed": "WINDOWS absent required M9 True; WINDOWS present required M9 True. Executed CURRENT K6 body: without waiver rc12; with exact owner waiver line rc0. ADR-0062 N1: default applies even without dieu_kien_merge; other ADR-0060 conditions unchanged."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Replace line 205's rationale and decision 4's explanation; cite ADR-0062 and protocol §8, not the superseded activation rule.",
+        "how": "Keep zero declaration lines if desired. State that M3/K6 remain applicable and the packet needs a valid exact-H owner disposition covering the required Windows evidence under the budget constraints. Keep K7 and severity conditions unchanged.",
+        "locking_test": "Retain the present/absent declaration classification comparison and the required/no-waiver versus owner-waiver K6 check. A mutant that makes missing declaration disable Windows or M9 must be rejected. This is a spec correction, not permission to edit packet_loop.py.",
+        "what_the_fix_may_spawn": "Treating a standing no-Windows-CI rule as a waiver of all local Windows evidence would broaden authority. Do not copy any sibling's unresolved rationale as authority."
+      },
+      "confidence": "high",
+      "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+    },
+    {
+      "id": "PR2-S08",
+      "class_slug": "budget-authority-revision-misattributed",
+      "severity": "P3",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          11,
+          204
+        ]
+      },
+      "title": "The valid 5/6 drafting budget is attributed to the wrong Mission revision",
+      "claim": "Line 11 cites Mission r85 per_new_packet as the budget authority; line 204 uses 5 author/6 spec-review calls. The immutable r85 object contains 3/4. Installed r96 contains 5/6 and is the actual authority for this review. The numerical budget is supported, but the frozen spec's citation would send a dispatcher validating its stated source to a different cap.",
+      "manifestations": [
+        {
+          "id": "S08-a",
+          "location": "budget authority at lines 11 and 204",
+          "description": "5/6 is current, but r85 is cited for per_new_packet."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_governance.py",
+          "exit_code": 0,
+          "observed": "BUDGET 85 3 4; BUDGET 96 5 6. mission-r96.json SHA256=2d9a60a5eda9537475d7bb0901e882fef2d97d96a2ad4a4aa0d97c76862e73a9 matches installed comment 7066078931; execution caps remain 3/3/2/3/1/1/0."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Update source/authority and budget citations to the exact installed Mission revision that authorizes the current caps.",
+        "how": "Name r96, its immutable file/hash and installation receipt for current budgets, preserving r85 as admission history. Keep counters cumulative.",
+        "locking_test": "A source-reading check must compare the stated cap with the named immutable JSON. Pointing it back to r85 while retaining 5/6 should fail; pointing to r96 should pass. No product-code mutant is needed for a citation correction.",
+        "what_the_fix_may_spawn": "Updating references must not reset consumed calls, reinterpret spec-review calls as source-review calls, or silently increase any execution cap."
+      },
+      "confidence": "high",
+      "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+    },
+    {
+      "id": "PR2-S09",
+      "class_slug": "delegated-decisions-missing-durable-ledger",
+      "severity": "P3",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          224,
+          225,
+          226,
+          227,
+          228,
+          229
+        ],
+        "external": "https://github.com/ducthangho/tra-luat/issues/1463"
+      },
+      "title": "The five self-decisions have no required Issue decision records",
+      "claim": "Mission r96 inherits r87_constraints requiring every self-taken decision to have an uy_quyen_quyet_dinh.v1 entry on the Packet Issue. The candidate labels five decisions as delegated self-decisions, but Issue #1463 currently has no comments. The heading delegates recording to the coordinator; it is not evidence that recording happened. This is pending process work before approval, not a request for this read-only reviewer to publish anything.",
+      "manifestations": [
+        {
+          "id": "S09-1",
+          "location": "author decision 1",
+          "description": "No durable uy_quyen_quyet_dinh.v1 entry on Issue #1463."
+        },
+        {
+          "id": "S09-2",
+          "location": "author decision 2",
+          "description": "No durable uy_quyen_quyet_dinh.v1 entry on Issue #1463."
+        },
+        {
+          "id": "S09-3",
+          "location": "author decision 3",
+          "description": "No durable uy_quyen_quyet_dinh.v1 entry on Issue #1463."
+        },
+        {
+          "id": "S09-4",
+          "location": "author decision 4",
+          "description": "No durable uy_quyen_quyet_dinh.v1 entry on Issue #1463."
+        },
+        {
+          "id": "S09-5",
+          "location": "author decision 5",
+          "description": "No durable uy_quyen_quyet_dinh.v1 entry on Issue #1463."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "GitHub connector fetch_issue(repository_full_name='ducthangho/tra-luat', issue_number=1463); fetch_issue_comments(repo_full_name='ducthangho/tra-luat', issue_number=1463); read mission-r96.json:r87_constraints",
+          "exit_code": null,
+          "observed": "Successful connected reads: issue comments=0; comments=[]; r87 rule requires an entry for every self-taken decision."
+        }
+      ],
+      "suggested_fix": {
+        "where": "Coordinator's decision ledger on Issue #1463, linked from the next spec review handoff; the requirement concerns durable authority records, not runtime code.",
+        "how": "Record all five decisions under the required schema, with evidence and the reviewed spec revision/hash. Correct decision 4's rationale per PR2-S07 before recording it. Read back the records; do not claim the reviewer posted them.",
+        "locking_test": "A read-only ledger audit should resolve each of decisions 1–5 to its own valid entry or an explicitly enumerated valid combined record. Removing one entry or binding it to another spec hash must leave that decision unresolved; this is a record-validation negative fixture, not a product mutant.",
+        "what_the_fix_may_spawn": "A retrospective record can blur author and approver identities or be misread as owner approval; preserve the actual decision maker, time, authority and pending hash approval."
+      },
+      "confidence": "high",
+      "unmeasured": "No ledger schema validator was executed; no GitHub writes were made. A later coordinator publication can close this process finding without product changes."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "a3-case-execution-status-collapsed",
+      "finding_ids": [
+        "PR2-S01"
+      ],
+      "manifestations": [
+        {
+          "id": "S01-a",
+          "location": "§4 mapping, base cases",
+          "description": "TimeoutExpired during a base case becomes hoan_tat/failed."
+        },
+        {
+          "id": "S01-b",
+          "location": "§4 mapping, base cases",
+          "description": "Failure to launch a dependency becomes hoan_tat/failed."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "common_fix": "Keep legacy mutant classification semantics intact, but carry a separate structured execution outcome for base-case timeout/infrastructure failures. Define which genuine completed test failures remain failed, and make the mapping exhaustive across ca/dot_bien/tu_kiem.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_a3.py",
+        "result": "OPEN: CASE timeout (4, \"HONG:probe:TimeoutExpired: Command 'git' timed out after 60 seconds\"); CASE spawn (4, 'HONG:probe:FileNotFoundError: git'); both map under SPEC line 112 to hoan_tat/failed/do. Assertion control returns rc=3. These are actual chay_ca results; SPEC_MAPPING is a literal interpretation of the candidate, not an implementation run.",
+        "expected_after_fix": "Run the existing probe against the revised runner contract with healthy and TinHieuChotCa controls. Add cases for base-case timeout and spawn failure in both modes; a mutant mapping either to hoan_tat/failed must die via that case's own TinHieuChotCa. Verify legacy rc/phan_hang behavior independently.",
+        "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+      }
+    },
+    {
+      "slug": "a3-plan-identity-validation-gap",
+      "finding_ids": [
+        "PR2-S02"
+      ],
+      "manifestations": [
+        {
+          "id": "S02-a",
+          "location": "§4 total rule and equivalence claim",
+          "description": "Duplicate planned names with exactly matching completed results can become green."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "common_fix": "Require unique planned mutant identities independently of received results; preserve the existing full-mode rejection. Define the light-mode treatment consistently with an invalid plan.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_contract.py",
+        "result": "OPEN: Unique plan ('m1',): LEGACY_RC 0 / TONG: DAT. Duplicate plan ('m1','m1'), identical result names, healthy CA, nonempty successful TU_KIEM: LEGACY_RC 1 / TONG: DO. Neither frozen rule 1 nor rule 2 matches the duplicate witness, so the specified total is xanh.",
+        "expected_after_fix": "Use the exact unique/duplicate fixture in probe_contract.py. Add an actual A3 aggregator case requiring non-green for duplicate plans even with identical result ordering/count. A mutant removing planned-name uniqueness must be killed by the dedicated case.",
+        "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+      }
+    },
+    {
+      "slug": "a3-equivalence-provenance-not-emitted",
+      "finding_ids": [
+        "PR2-S03"
+      ],
+      "manifestations": [
+        {
+          "id": "S03-a",
+          "location": "§4 emitted dot_bien schema and equivalence fixture",
+          "description": "Distinct valid review evidence serializes to the same evidence-free equivalent_reviewed item."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "common_fix": "Specify conditional ly_do and nguoi_xac_nhan fields on equivalent_reviewed items, or a fully bound emitted table with an explicit join contract. Keep the production table empty and never count equivalent_reviewed as a kill.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_contract.py",
+        "result": "OPEN: Two valid tables, one with reviewer-A/semantically equal and one with reviewer-B/different explanation, produce the same frozen item {'ten':'m','trang_thai_thuc_thi':'hoan_tat','phan_hang_dot_bien':'equivalent_reviewed'}. This is a projection probe of the specified keys, not a claim that A3 implementation exists.",
+        "expected_after_fix": "Serialize and parse the required equivalence fixture; assert the reason and reviewer survive unchanged. Missing/blank evidence must not emit equivalent_reviewed. A mutant dropping either emitted field must die in the serialization case, with healthy non-equivalence controls.",
+        "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+      }
+    },
+    {
+      "slug": "preservation-oracle-checks-names-only",
+      "finding_ids": [
+        "PR2-S04"
+      ],
+      "manifestations": [
+        {
+          "id": "S04-a",
+          "location": "Acceptance 2 → I-a",
+          "description": "Mutant content/target preservation is replaced by name-set inclusion."
+        },
+        {
+          "id": "S04-b",
+          "location": "Acceptance 2 → I-a",
+          "description": "TU_KIEM and phan_hang immutability have no corresponding executable comparison."
+        },
+        {
+          "id": "S04-c",
+          "location": "§4 equivalence and Chỗ khác chữ kế hoạch",
+          "description": "Different-commit runs are presented as satisfying the same-SHA no-behavior-change comparison."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "common_fix": "Compare each original full tuple by table/name, allow additions only, and verify the unchanged classifier with an explicit source/AST or exhaustive behavioral contract. Separately compare old/new aggregation or reporting on one frozen product/test/mutant snapshot for unchanged behavior; retain the base/H inventory-growth check.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_contract.py; sed -n '153,165p' ops/specs/wp1463-r1/SPEC.md",
+        "result": "OPEN: Actual existing A1_xoa_co_attempt: GIET. Changed tuple with the same name/target but required=True retained and only help suppressed: also GIET, same DO:c01_cli_du_co. NAME_SUBSET True; TUPLE_EQUAL False. Acceptance 2's recorded-name predicate cannot distinguish them. Source inspection confirms it compares names/results, not full tuple entries or phan_hang.",
+        "expected_after_fix": "Extend the comparator self-check beyond missing-name: alter replacement, anchor, target, TU_KIEM expectation, and classifier while preserving names and all-green summaries; each must be rejected. The demonstrated same-name mutant replacement is a runnable negative fixture. Dedicated comparator mutants omitting each comparison must die.",
+        "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+      }
+    },
+    {
+      "slug": "registry-rollback-leaves-dependent-entries",
+      "finding_ids": [
+        "PR2-S05"
+      ],
+      "manifestations": [
+        {
+          "id": "S05-a",
+          "location": "Quy trình và quyền / Hoàn tác",
+          "description": "Removing only NHE violates both MAU_DAY_DU=NHE and MAU_NHE⊆NHE."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "common_fix": "Use full PR revert as the minimum valid recovery, or describe removing the coupled entries together while preserving all unrelated entries. Do not promise a one-line NHE deletion.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_registry.py",
+        "result": "OPEN: Four-entry overlay: phan_chung 1226/1226. After deleting only NHE[p]: 1224/1226; p643-A1-chi-bo-trong-NHE and p647-M2-mau-nhe-chi-cho-bo-trong-NHE are LỌT. The fallback plan is day_du, but the registry gate is red. Full registry main with all four additions later returned rc=0 / TỔNG: ĐẠT.",
+        "expected_after_fix": "Apply the documented rollback to an isolated overlay; require phan_chung=True and this suite's fallback day_du. A recovery mutant leaving either MAU map entry behind must be rejected. Existing two named registry checks already give this test teeth.",
+        "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+      }
+    },
+    {
+      "slug": "dependency-completion-replaced-by-lease-absence",
+      "finding_ids": [
+        "PR2-S06"
+      ],
+      "manifestations": [
+        {
+          "id": "S06-a",
+          "location": "line 202 condition (c)",
+          "description": "B1a not landed and no lease can satisfy the PR2 predecessor condition."
+        },
+        {
+          "id": "S06-b",
+          "location": "line 202 B2 condition",
+          "description": "B2 not started is bypassed because it has no lease yet."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "common_fix": "Require the applicable B1a and B2 completion/admission milestones from the installed Mission, or cite an explicit owner-approved reorder in a new Mission revision. Lack/expiry of a lease must not stand in for completion.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_governance.py",
+        "result": "OPEN: ORDER_WITNESS False False False False: SPEC_LEASE_CONDITION True, PLAN_ORDER False. True False False False also returns True/False. True False True False returns True/True. Mission r96: B1 admitted_execution_conditional; B2 admitted_spec_drafting; PR2 depends_on 'after B1'. Plan r4 §7 explicitly orders B1, B2, PR2.",
+        "expected_after_fix": "Add a reviewable admission truth table for predecessor not_started/running/completed × lease absent/present. The two measured counterexamples must reject; completed predecessors and clear leases may proceed to the other gates. A predicate mutant changing completion to 'or no lease' must fail that check.",
+        "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+      }
+    },
+    {
+      "slug": "obsolete-adr0060-opt-in-rationale",
+      "finding_ids": [
+        "PR2-S07"
+      ],
+      "manifestations": [
+        {
+          "id": "S07-a",
+          "location": "line 205",
+          "description": "Superseded opt-in M10 is used to explain avoidance of M3."
+        },
+        {
+          "id": "S07-b",
+          "location": "author decision 4",
+          "description": "The self-decision inherits the same invalid rationale."
+        }
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "common_fix": "Keep zero declaration lines if desired. State that M3/K6 remain applicable and the packet needs a valid exact-H owner disposition covering the required Windows evidence under the budget constraints. Keep K7 and severity conditions unchanged.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_governance.py; cat docs/adr/0062-adr-0060-mac-dinh-va-dong-bang-adr-0054.md",
+        "result": "OPEN: WINDOWS absent required M9 True; WINDOWS present required M9 True. Executed CURRENT K6 body: without waiver rc12; with exact owner waiver line rc0. ADR-0062 N1: default applies even without dieu_kien_merge; other ADR-0060 conditions unchanged.",
+        "expected_after_fix": "Retain the present/absent declaration classification comparison and the required/no-waiver versus owner-waiver K6 check. A mutant that makes missing declaration disable Windows or M9 must be rejected. This is a spec correction, not permission to edit packet_loop.py.",
+        "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+      }
+    },
+    {
+      "slug": "budget-authority-revision-misattributed",
+      "finding_ids": [
+        "PR2-S08"
+      ],
+      "manifestations": [
+        {
+          "id": "S08-a",
+          "location": "budget authority at lines 11 and 204",
+          "description": "5/6 is current, but r85 is cited for per_new_packet."
+        }
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "common_fix": "Name r96, its immutable file/hash and installation receipt for current budgets, preserving r85 as admission history. Keep counters cumulative.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_governance.py",
+        "result": "OPEN: BUDGET 85 3 4; BUDGET 96 5 6. mission-r96.json SHA256=2d9a60a5eda9537475d7bb0901e882fef2d97d96a2ad4a4aa0d97c76862e73a9 matches installed comment 7066078931; execution caps remain 3/3/2/3/1/1/0.",
+        "expected_after_fix": "A source-reading check must compare the stated cap with the named immutable JSON. Pointing it back to r85 while retaining 5/6 should fail; pointing to r96 should pass. No product-code mutant is needed for a citation correction.",
+        "unmeasured": "Implementation has not been written; future closing tests/mutants have not been run."
+      }
+    },
+    {
+      "slug": "delegated-decisions-missing-durable-ledger",
+      "finding_ids": [
+        "PR2-S09"
+      ],
+      "manifestations": [
+        {
+          "id": "S09-1",
+          "location": "author decision 1",
+          "description": "No durable uy_quyen_quyet_dinh.v1 entry on Issue #1463."
+        },
+        {
+          "id": "S09-2",
+          "location": "author decision 2",
+          "description": "No durable uy_quyen_quyet_dinh.v1 entry on Issue #1463."
+        },
+        {
+          "id": "S09-3",
+          "location": "author decision 3",
+          "description": "No durable uy_quyen_quyet_dinh.v1 entry on Issue #1463."
+        },
+        {
+          "id": "S09-4",
+          "location": "author decision 4",
+          "description": "No durable uy_quyen_quyet_dinh.v1 entry on Issue #1463."
+        },
+        {
+          "id": "S09-5",
+          "location": "author decision 5",
+          "description": "No durable uy_quyen_quyet_dinh.v1 entry on Issue #1463."
+        }
+      ],
+      "highest_open_severity": "P3",
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "common_fix": "Record all five decisions under the required schema, with evidence and the reviewed spec revision/hash. Correct decision 4's rationale per PR2-S07 before recording it. Read back the records; do not claim the reviewer posted them.",
+      "closing_check": {
+        "command": "GitHub connector fetch_issue(repository_full_name='ducthangho/tra-luat', issue_number=1463); fetch_issue_comments(repo_full_name='ducthangho/tra-luat', issue_number=1463); read mission-r96.json:r87_constraints",
+        "result": "OPEN: Successful connected reads: issue comments=0; comments=[]; r87 rule requires an entry for every self-taken decision.",
+        "expected_after_fix": "A read-only ledger audit should resolve each of decisions 1–5 to its own valid entry or an explicitly enumerated valid combined record. Removing one entry or binding it to another spec hash must leave that decision unresolved; this is a record-validation negative fixture, not a product mutant.",
+        "unmeasured": "No ledger schema validator was executed; no GitHub writes were made. A later coordinator publication can close this process finding without product changes."
+      }
+    }
+  ],
+  "class_counts": {
+    "classes": 9,
+    "manifestations": 18,
+    "findings": 9,
+    "P0": 0,
+    "P1": 0,
+    "P2": 6,
+    "P3": 3
+  },
+  "prior_findings_check": [],
+  "prior_class_status": [],
+  "class_mapping_table": [],
+  "prior_review_note": "Round1 for this PR2 spec. No immediately previous PR2 verdict; no class split/merge. Sibling history was used as context, not substituted for a previous round.",
+  "hunt_table": [
+    {
+      "direction": "Identity and source lineage",
+      "hypothesis": "Review might target stale/different bytes or an uninstalled plan.",
+      "command": "git show exact candidate/spec; sha256sum; GitHub refs and installation comment GET",
+      "real_output": "Candidate/file hash match; master=e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8; plan r4 hash0f287ce4...; installed r96 hash2d9a60a5... matches local bytes.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "scope": "Exact candidate and named authority objects only."
+    },
+    {
+      "direction": "Selector/flag transport and data-only feasibility",
+      "hypothesis": "NHE addition needs forbidden workflow logic changes or selects light for unknown events.",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_registry.py",
+      "real_output": "23/23 oracle and registry; BAM3a7d54b2... unchanged; workflow guards []; push/PR outside=nhe, inside=day_du; schedule/dispatch/missing=day_du; env1 versusNone; real registry main1226/1226,TỔNG:ĐẠT.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "scope": "Actual selector/reader with specified data overlay; new flag-reading implementation not yet present."
+    },
+    {
+      "direction": "Dependency zone through actual file opens",
+      "hypothesis": "A currently read tracked file lies outside the frozen zone.",
+      "command": "PYTHONPATH=/tmp/wp1463-review-dtrlfob5/hook WP1463_OPEN_LOG=/tmp/wp1463-review-dtrlfob5/opens.jsonl python3 -B /tmp/wp1463-review-dtrlfob5/probe_cases.py",
+      "real_output": "All68 cases observed;67 pass, c61 missing-shellcheck failure. Five tracked paths: registry, ops-do-workflow-definition.yml, bash_nen.py, ci_provenance.py, ci_provenance_test.py. All5 in zone.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "scope": "No outside-zone read in measured case execution. Full mutation plan and non-Python opens were not measured; cannot certify complete acceptance4."
+    },
+    {
+      "direction": "Execution/observation separation",
+      "hypothesis": "Base-case infrastructure exceptions are falsely called completed tests.",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_a3.py",
+      "real_output": "TimeoutExpired/FileNotFoundError both rc4; frozen mapping forces hoan_tat/failed/do; assertion control rc3.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S01"
+      ]
+    },
+    {
+      "direction": "Total aggregation identity invariants",
+      "hypothesis": "Exact equality to a malformed plan can bypass legacy non-green behavior.",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_contract.py",
+      "real_output": "Plan m1,m1 with matching result names: legacy rc1; frozen total's rules1/2 do not match => xanh. Unique control legacy rc0.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S02"
+      ]
+    },
+    {
+      "direction": "Equivalence provenance across serialization",
+      "hypothesis": "A consumer cannot recover the review evidence for equivalent_reviewed.",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_contract.py",
+      "real_output": "Different valid reviewer/reason input tables yield identical specified three-key output item.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S03"
+      ]
+    },
+    {
+      "direction": "A/B comparator strength",
+      "hypothesis": "A changed fault can keep its old name and kill result, passing the declared preservation check.",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_contract.py",
+      "real_output": "Original mutant and required=True/help-suppressed replacement both GIET; NAME_SUBSET=True, TUPLE_EQUAL=False.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S04"
+      ]
+    },
+    {
+      "direction": "Recovery through documented rollback",
+      "hypothesis": "Removing NHE alone leaves dependent maps inconsistent.",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_registry.py",
+      "real_output": "Before1226/1226; after1224/1226; exactly two key-set guards fail.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S05"
+      ]
+    },
+    {
+      "direction": "Predecessor completion versus resource availability",
+      "hypothesis": "No lease can be mistaken for an ordered predecessor having completed.",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_governance.py",
+      "real_output": "Both predecessors not done/no leases: candidate conditionTrue, planFalse; B1 done/B2 not done/no leases alsoTrue/False.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S06"
+      ]
+    },
+    {
+      "direction": "Live write-set exclusion",
+      "hypothesis": "Named blockers disappeared or another live holder overlaps.",
+      "command": "All-ref fetch attempt; four direct ai-dang-giu commands; authenticated GitHub head comparison; supplemental cached scan",
+      "real_output": "Direct queries rc12. Two named lease refs match live GitHub and cached leases remain active.404 head names available,403 OIDs match; one stale ref cannot be refreshed through restricted shell.",
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "scope": "Known blockers confirmed; exhaustive live absence of additional blockers not certified."
+    },
+    {
+      "direction": "Merge doctrine and budget sources",
+      "hypothesis": "An omitted opt-in line bypasses current Windows doctrine, or budget cites older caps.",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_governance.py; read ADR-0062 N1",
+      "real_output": "Absent/present declaration both required/M9True; K6 waiver needed in both. r85=3/4, r96=5/6.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S07",
+        "PR2-S08"
+      ]
+    },
+    {
+      "direction": "Delegated decision records",
+      "hypothesis": "Self-decisions have the durable records required by installed Mission.",
+      "command": "GitHub fetch_issue_comments #1463; read r96:r87_constraints",
+      "real_output": "comments=[]; five self-decisions in spec; rule requires entries.",
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S09"
+      ]
+    },
+    {
+      "direction": "PR1 consumption, scope and removed mechanisms",
+      "hypothesis": "PR2 assumes unfinished PR1 timing or reintroduces removed authorization stores/switches.",
+      "command": "git diff --name-only e2f28fb^1 e2f28fb; inspect PR1 collector and r96 pr1_r92/packet_graph; compare r4 A+1/A+3 and PR2 out-of-scope",
+      "real_output": "PR1 landed shadow classifier/G5 instrumentation/collector; G5 timing completeness and M3 ci_provenance timing remain waived/unmeasured pending PR1b. PR2 uses its own timing A/B and existing registry, introduces no CHO_PHEP store or new M9 policy. Only PR3/PR4 require shadow14days.",
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "scope": "No PR1 timing-completeness or saving claim is accepted as measured. Ordering defect is separately PR2-S06."
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Candidate file sha256",
+      "claimed": "68c90af23988d754d6a220e73868e787cca577d6c0fdaa43995cb8a028e9b99d",
+      "measured": "same",
+      "matches": true
+    },
+    {
+      "claim": "Current master/base",
+      "claimed": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+      "measured": "same in local ref and two authenticated GitHub snapshots",
+      "matches": true
+    },
+    {
+      "claim": "Plan r4 hash",
+      "claimed": "0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe",
+      "measured": "same from Git blob",
+      "matches": true
+    },
+    {
+      "claim": "Plan r3 hash",
+      "claimed": "2e9fb13f1ab3f299c2d2dc1e5a6e407ff0aadb8aee1f6ffd00d88fc02b146f89",
+      "measured": "same from Git blob; API text saved by apply_patch initially added one newline, corrected by writing exact Git bytes",
+      "matches": true
+    },
+    {
+      "claim": "Frozen zone fixture rows/hash",
+      "claimed": "23 / b0dd2b59cbf623c3abea7ee971b591d9ac39fc0d84bac52958bbe37a98b1f96a",
+      "measured": "23 / same; oracle23/23, registry23/23",
+      "matches": true
+    },
+    {
+      "claim": "Baseline corpus counts",
+      "claimed": {
+        "CA": 68,
+        "DOT_BIEN": 398,
+        "DOT_BIEN_TEST": 11,
+        "TU_KIEM": 2,
+        "plan": 409
+      },
+      "measured": {
+        "CA": 68,
+        "DOT_BIEN": 398,
+        "DOT_BIEN_TEST": 11,
+        "TU_KIEM": 2,
+        "plan": 409
+      },
+      "matches": true
+    },
+    {
+      "claim": "Registry gate hash",
+      "claimed": "3a7d54b26d667dab3d3dbc10cb98eb6697d42e12e903b65252736b55ab90abe2 unchanged by data-only edit",
+      "measured": "same; loi_vung_thiet_lap/loi_env_registry/loi_workflow_dot_bien_du all []",
+      "matches": true
+    },
+    {
+      "claim": "Registry proof population",
+      "claimed": "existing checks pass with new suite",
+      "measured": "1226/1226 and main rc0; rollback deletion1224/1226",
+      "matches": "normal overlay yes; documented rollback no"
+    },
+    {
+      "claim": "Observed tracked input paths",
+      "claimed": "5 from full audit during authoring",
+      "measured": "5 from all baseline cases in this review; full mutant audit not rerun",
+      "matches": "same observed set, narrower measurement scope"
+    },
+    {
+      "claim": "Baseline case pass count",
+      "claimed": "67/68; c61 missing shellcheck",
+      "measured": "67/68; same case/reason",
+      "matches": true
+    },
+    {
+      "claim": "Case timing",
+      "claimed": "approximately73s, author's machine/run",
+      "measured": "61.592s with audit hook on this run",
+      "matches": "not an equivalence requirement; separate observation"
+    },
+    {
+      "claim": "Full baseline runtime / kills",
+      "claimed": "approximately503s;409/409 killed",
+      "measured": null,
+      "matches": "not_measured; full baseline mutant loop not run"
+    },
+    {
+      "claim": "Spec drafting caps",
+      "claimed": "5 author /6 review, r85 cited",
+      "measured": "r85=3/4; installed r96=5/6",
+      "matches": "numbers current, source attribution wrong"
+    },
+    {
+      "claim": "Implementation caps",
+      "claimed": "attempts3,source-review3,connector2,PR-CI3,M9=1,rerun1,WindowsCI0",
+      "measured": "same in r96 per_new_packet",
+      "matches": true
+    },
+    {
+      "claim": "ADR activation OIDs",
+      "claimed": "0053/0055 present at OID, absent at first parent, first-parent master",
+      "measured": "both: rc0, expected rc128, membershipTrue",
+      "matches": true
+    },
+    {
+      "claim": "Delivered size cap/write set",
+      "claimed": "4 files, default cap6 files/450 additions",
+      "measured": "4 specified paths, cap supported; no delivered implementation or numstat exists",
+      "matches": "planned scope only; feasibility under450 additions not proven"
+    },
+    {
+      "claim": "Remote ref coverage",
+      "claimed": "must fetch all and scan",
+      "measured": "404 live heads;445 cached origin refs;0 missing names;1 OID mismatch; direct ai-dang-giu rc12 on all4 paths",
+      "matches": false
+    },
+    {
+      "claim": "Known blocker expiry",
+      "claimed": "wp1236 2026-11-23T13:45:00Z;wp1475 2026-11-23T01:57:05Z",
+      "measured": "same; both blocking-lease ref OIDs match GitHub",
+      "matches": true
+    },
+    {
+      "claim": "Decision ledger entries",
+      "claimed": "five self-decisions to be recorded on Issue1463",
+      "measured": "0 comments /0 published entries",
+      "matches": false
+    },
+    {
+      "claim": "After-merge day_du≤30%, step median≤600s, ≥30 jobs/14days",
+      "claimed": "future operator-owned acceptance10",
+      "measured": null,
+      "matches": "not_measured; no implementation merge or cohort"
+    },
+    {
+      "claim": "Read-only review checkout",
+      "claimed": "no edits",
+      "measured": "17638/17638 tracked hashes unchanged; HEAD/tree/index/diff/status unchanged",
+      "matches": true,
+      "limits": "Ignored .codex paths inventoried; ignored-byte equality from start not measured."
+    }
+  ],
+  "tests": [
+    {
+      "name": "Frozen candidate identity",
+      "status": "passed",
+      "command": "git rev-parse HEAD HEAD^{tree}; git show HEAD:ops/specs/wp1463-r1/SPEC.md | sha256sum",
+      "exit_code": 0,
+      "evidence": "HEAD 75016f96b3db98988148565d2b096791a3d051fd; tree 316611785d6b79a3e75480d8d21b34ee38fbfe64; file sha256 68c90af23988d754d6a220e73868e787cca577d6c0fdaa43995cb8a028e9b99d. Live GitHub ref independently matches."
+    },
+    {
+      "name": "Registry four-data-change overlay",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_registry.py",
+      "exit_code": 0,
+      "evidence": "Oracle 23/23; real ke_hoach 23/23; frozen fixture hash matches; three workflow guards []; NHE env set/unset correct; output-mode 2 positive and 2 negative pairings correct; phan_chung 1226/1226 before rollback. Uses real current registry module with in-memory data additions, not a delivered implementation.",
+      "artifact": "/tmp/wp1463-review-dtrlfob5/probe_registry.log"
+    },
+    {
+      "name": "Real registry main with four data additions",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_registry_main.py",
+      "exit_code": 0,
+      "evidence": "PHẢN CHỨNG: 1226/1226 đỏ đúng; TỔNG: ĐẠT; REGISTRY_MAIN_RC 0",
+      "artifact": "/tmp/wp1463-review-dtrlfob5/registry-main.log"
+    },
+    {
+      "name": "Rollback counterexample",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_registry.py",
+      "exit_code": 0,
+      "evidence": "Expected negative observed: one-line rollback leaves phan_chung false, 1224/1226; exactly p643-A1-chi-bo-trong-NHE and p647-M2-mau-nhe-chi-cho-bo-trong-NHE fail.",
+      "artifact": "/tmp/wp1463-review-dtrlfob5/phan_chung_after.log"
+    },
+    {
+      "name": "A3 execution mapping and corpus counts",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_a3.py",
+      "exit_code": 0,
+      "evidence": "Measured current runner rc4 for timeout/spawn; rc3 assertion control. Counts CA=68, DOT_BIEN=398, DOT_BIEN_TEST=11, TU_KIEM=2. Counterexamples interpreted against frozen spec; no new A3 implementation claimed.",
+      "artifact": "/tmp/wp1463-review-dtrlfob5/probe_a3.log"
+    },
+    {
+      "name": "A3 duplicate-plan and preservation counterexamples",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_contract.py",
+      "exit_code": 0,
+      "evidence": "Current aggregator rejects duplicate planned names (rc1), unique control rc0. Same-name changed mutant preserving required=True is still GIET. Equivalence serialization projection drops review identity/reason.",
+      "artifact": "/tmp/wp1463-review-dtrlfob5/probe_contract.log"
+    },
+    {
+      "name": "Current merge predicates and Mission budgets",
+      "status": "passed",
+      "command": "python3 -B /tmp/wp1463-review-dtrlfob5/probe_governance.py",
+      "exit_code": 0,
+      "evidence": "With/without declaration: Windows required, M9 True. Extracted real K6 body: no waiver rc12, owner exact-H waiver rc0. r85 caps3/4, r96 caps5/6. Dependency truth-table counterexamples recorded.",
+      "artifact": "/tmp/wp1463-review-dtrlfob5/probe_governance.log"
+    },
+    {
+      "name": "All 68 baseline cases with Python open auditing",
+      "status": "failed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/tmp/wp1463-review-dtrlfob5/hook WP1463_OPEN_LOG=/tmp/wp1463-review-dtrlfob5/opens.jsonl python3 -B /tmp/wp1463-review-dtrlfob5/probe_cases.py",
+      "exit_code": 0,
+      "evidence": "Probe wrapper itself exits0; test results are 67/68, not a passed suite. c61 rc3: thiếu actionlint/shellcheck trong kho thật. Other67 cases rc0. 61.592s. Five tracked opened paths, all in frozen zone. Two observed Python process IDs. This did not execute the complete 409-mutant plan.",
+      "artifact": "/tmp/wp1463-review-dtrlfob5/cases-results.json"
+    },
+    {
+      "name": "Direct GitHub fetch of all heads",
+      "status": "failed",
+      "command": "git -C /tmp/wp1463-review-dtrlfob5/repo fetch origin '+refs/heads/*:refs/remotes/origin/*'",
+      "exit_code": 128,
+      "evidence": "Failed to connect to 127.0.0.1 port33861. No sandbox/network override attempted."
+    },
+    {
+      "name": "Fetch supplied mirror refs and compare authenticated GitHub snapshot",
+      "status": "passed",
+      "command": "git -C /tmp/wp1463-review-dtrlfob5/repo fetch /home/user/tra-luat '+refs/remotes/origin/*:refs/remotes/origin/*'; compare with GitHub GET /repos/ducthangho/tra-luat/git/matching-refs/heads/",
+      "exit_code": 0,
+      "evidence": "404 GitHub heads;445 local origin refs including41 extras; missing names0. OID matches403/404. One stale unrelated ref ops/bundled-gate-oracle-spec (remote5bd8463..., local867243d...). master, candidate, plan branch and both blocking lease refs match. This is scoped evidence, not all-ref freshness approval.",
+      "artifact": "/tmp/wp1463-review-dtrlfob5/remote-heads-2.json"
+    },
+    {
+      "name": "Required live lease queries",
+      "status": "failed",
+      "command": "cd /tmp/wp1463-review-dtrlfob5/repo && python3 -B ops/lease_publish.py ai-dang-giu <each of the four delivery paths>",
+      "exit_code": 12,
+      "evidence": "All four commands return CHAN[12] KHÔNG_XÁC_ĐỊNH because git ls-remote cannot reach proxy. Never interpreted as zero holders.",
+      "artifacts": [
+        "/tmp/wp1463-review-dtrlfob5/lease-0.log",
+        "/tmp/wp1463-review-dtrlfob5/lease-1.log",
+        "/tmp/wp1463-review-dtrlfob5/lease-2.log",
+        "/tmp/wp1463-review-dtrlfob5/lease-3.log"
+      ]
+    },
+    {
+      "name": "Supplementary cached-ref lease analysis",
+      "status": "passed",
+      "command": "Import CURRENT ops/lease_publish.py; _quet_lease_toan_kho(root, doi_chieu_ref=False, chan_nhanh_tut_sau=True); filter _lease_cham_duong/_phan_loai_lease/_bia_mo_doi_xung (inline script in tool transcript)",
+      "exit_code": 0,
+      "evidence": "564 distinct cached lease records. Current known holders: wp1236-a-r12-g1-claude-20261121 for registry, expires2026-11-23T13:45:00Z; wp1475-r1-g1-claude for provenance test, expires2026-11-23T01:57:05Z; no cached holder for two measurement outputs. This intentionally separate offline inspection does not replace the failed live lease gate."
+    },
+    {
+      "name": "ADR-0053/0055 activation OIDs",
+      "status": "passed",
+      "command": "git cat-file -e <oid>:<ADR>; git cat-file -e <oid>^:<ADR>; git rev-list --first-parent origin/master",
+      "exit_codes": [
+        0,
+        128,
+        0
+      ],
+      "evidence": "Both named OIDs introduce their ADR (present at OID, absent at first parent) and are on master first-parent. Nonshallow repository. Expected parent absence is positive evidence, not a failed introduction check."
+    },
+    {
+      "name": "Complete full/light implementation suites and all new mutants",
+      "status": "not_run",
+      "command": "python3 -B ops/ci_provenance_test.py; CI_PROVENANCE_KHONG_DOT_BIEN=1 python3 -B ops/ci_provenance_test.py",
+      "evidence": "Spec-only candidate; new behavior is not implemented. Full baseline mutant run was not repeated because shellcheck capability is absent and user requested cheap probes. Do not infer a passed full suite from selective mutant probes."
+    },
+    {
+      "name": "Full-mode all-descendant zone audit",
+      "status": "not_run",
+      "command": "Future do_pr2.py vung with full implementation mutation plan",
+      "evidence": "Only all baseline cases and their real descendants were audited in this review; full409-mutant dependency closure and future added cases are unmeasured."
+    },
+    {
+      "name": "Bare Ruff, CI dispatch, Windows, after-merge metrics",
+      "status": "not_run",
+      "command": "not executed",
+      "evidence": "No implementation diff or authorized workflow dispatch; Windows/local CI unavailable. No Ruff pass, new CI run, 14-day metric or delivery-size pass is claimed."
+    },
+    {
+      "name": "Read-only checkout snapshot",
+      "status": "passed",
+      "command": "Compare snapshot-start.json and recomputed tracked hashes/HEAD/tree/status/diff/index",
+      "exit_code": 0,
+      "evidence": "17638/17638 tracked hashes unchanged; HEAD/tree unchanged; status identical: only pre-existing ignored .codex/. Tracked/untracked/index deltas0. Ignored paths were listed but their initial byte contents were not hashed, so byte-identical ignored content over the entire interval is not attested.",
+      "artifacts": [
+        "/tmp/wp1463-review-dtrlfob5/snapshot-start.json",
+        "/tmp/wp1463-review-dtrlfob5/snapshot-end.json"
+      ]
+    }
+  ],
+  "decision_assessment": [
+    {
+      "decision": 1,
+      "assessment": "Keeping two additional suites outside PR2 is supported by Issue/Mission scope; no forced expansion."
+    },
+    {
+      "decision": 2,
+      "assessment": "Unknown flag values select full mode as required by r3 I3; correct fail-closed direction."
+    },
+    {
+      "decision": 3,
+      "assessment": "Keeping registry mutants in ci_provenance_test is feasible in principle; actual adequacy and correct per-case exception classification belong to code review. Ordinary registry phan_chung remains mandatory."
+    },
+    {
+      "decision": 4,
+      "assessment": "Zero declaration lines are allowed, but omission does not switch off ADR-0060 M3. PR2-S07."
+    },
+    {
+      "decision": 5,
+      "assessment": "An empty production equivalence table preserves all-killed policy; the mandatory equivalence wire fixture still needs its evidence. PR2-S03."
+    }
+  ],
+  "notes": "Approve only with zero findings: this candidate has6 P2+3 P3. Known external leases block execution, not permission for this spec review. No repository edit/commit/push, GitHub write, workflow dispatch, LIVE call or sub-agent was used. Read-only probes and scratch artifacts are under /tmp. The five-file zone and data-only registry change are supported within the measured scope. New implementation, full409-mutant dependency audit, full/light A/B on H, new dedicated mutants, delivery numstat and after-merge metrics remain unmeasured. The candidate must also explicitly accommodate existing c66: its current healthy mock uses empty TU_KIEM and expects DAT, while the new empty-TU_KIEM contract rejects it; adapting that case is within the test-file write set, so this is an implementation note, not a separate finding. Literal protocol generation schema assumes an execution packet; no such generation exists here, hence the explicit null. Current review output is local only."
+}

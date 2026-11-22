@@ -1,0 +1,68 @@
+{
+  "version": "1.6.2",
+  "run_id": "d9764a9f1fd1464b974bdb164bf1727d",
+  "short_id": "d9764a9f",
+  "ten": "wp1463-spec-review-5",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 11,
+    "van_tay": "d9926933c59f292f"
+  },
+  "trang_thai": "dang_chay",
+  "bat_dau_utc": "2026-11-22T02:46:29.853148+00:00",
+  "ket_thuc_utc": null,
+  "ma_thoat": null,
+  "ly_do_dung": null,
+  "pid": 18440,
+  "khoa_danh_tinh": "linux:248135",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1463-clone",
+  "head": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+  "ref": "ops/wp1463-r1",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "61fc6fb8514dab13fbe23e8bc14f69f3c3a6980e610206cddbc456cd385fee4c",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=18B"
+    }
+  },
+  "bo_qua_probe_ly_do": null,
+  "probe_da_chay": [
+    "ghi",
+    "spawn",
+    "workspace"
+  ],
+  "provider": "openai_codex",
+  "execution_surface": "codex_cli",
+  "transport": "machine",
+  "transport_sha256": "e14fc83739c13c1074b12bd1acce4010c893c7f6fbfc1593b4a31d74cabb57af",
+  "thuc_thi_duong_dan": "/opt/node22/lib/node_modules/@openai/codex/bin/codex.js",
+  "thuc_thi_ly_do": null,
+  "thuc_thi_ung_vien_sau": [],
+  "agent_da_khai": null,
+  "agent_suy_ra": "codex",
+  "probe_bo_qua": [
+    "claude_trust"
+  ],
+  "chup_workspace": false,
+  "checkpoint_sha256": "973a21a4a1549774084698dc69be8e596e3e06c4c6b9dc3d077d7c17b5c68bb2",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/runs/d9764a9f/prompt.snapshot",
+  "prompt_kin_hoan_toan": false,
+  "failure_class": "unknown"
+}

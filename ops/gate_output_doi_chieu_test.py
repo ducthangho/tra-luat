@@ -590,6 +590,18 @@ def cli(*a):
 
 
 @ca
+def a128_cli_stat():
+    from contextlib import redirect_stderr
+    from io import StringIO
+    from unittest.mock import patch
+
+    stderr = StringIO()
+    with patch.object(Path, "is_file", side_effect=OSError("stat unavailable")), redirect_stderr(stderr):
+        rc = khong_nem(lambda: G().main(["kiem-tep", "danh-gia.txt", "--provenance", "."]))
+    bang(rc == 2 and stderr.getvalue().startswith("LỖI THAM SỐ:"), f"stat loi: {rc!r}, {stderr.getvalue()!r}")
+
+
+@ca
 def a210_cli():
     for ten, (tep, _, tt, _) in FX.items():
         rc, ra = cli("kiem-tep", str(ROOT / tep), "--provenance", str(ROOT / L / THU_MUC_THAT[ten]))
@@ -1236,7 +1248,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m62_bo_so_tong_job", '    if d["moc"] != (moc_tu, so_pass, n):', '    if d["moc"][:2] != (moc_tu, so_pass):', "a110"),
     ("m63_bo_so_trang_thai_tong", '    if d["moc"] != (moc_tu, so_pass, n):', '    if d["moc"][1:] != (so_pass, n):', "a110"),
     ("m64_bo_ve_hai_ket_luan", 'if j["conclusion"] != "success" and j["tt"] != "failed":', 'if j["tt"] == "passed" and j["conclusion"] != "success":', "a113"),
-    ("m65_cli_khong_bat_stat", "        except OSError:\n            vang = True\n", "        except KeyError:\n            vang = True\n", "a210"),
+    ("m65_cli_khong_bat_stat", "        except OSError:\n            vang = True\n", "        except KeyError:\n            vang = True\n", "a128"),
     ("m66_bo_utf8", '        return None, ["khong_phai_utf8"]', '        txt = byte.decode("utf-8", "replace")', "a103"),
     ("m67_dau_tep_63_hex", 'sha256 ([0-9a-f]{64})\\)")', 'sha256 ([0-9a-f]{63,64})\\)")', "a103"),
     ("m68_bo_thieu_moc", '    if so_moc == 0:\n        ly.append("thieu_moc")\n', "    if False:\n        pass\n", "a103"),

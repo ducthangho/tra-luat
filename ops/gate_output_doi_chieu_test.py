@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Phản chứng CHẠY ĐƯỢC cho `ops/gate_output_doi_chieu.py` — packet #1236 đợt A, đặc tả `ops/specs/wp1236-r9.md` mục `nghiem_thu`
-(sha256 e3efa593…). Tên ca theo bảng: `a1NN_…` = A1-NN, `a2NN_…` = A2-NN.
+"""Phản chứng CHẠY ĐƯỢC cho `ops/gate_output_doi_chieu.py` — packet #1236 đợt A, đặc tả `ops/specs/wp1236-r12.md` mục `nghiem_thu`
+(sha256 4589daf1…). Tên ca theo bảng: `a1NN_…` = A1-NN, `a2NN_…` = A2-NN.
 
 Fixture THẬT ở `ops/land/**` (không sửa); biến thể dựng trên BẢN SAO trong thư mục tạm. A1-2, A2-11, A2-13 đọc cây tại một commit
 ghim bằng `git archive` (không đọc cây làm việc); không có commit ấy ⇒ ca ĐỎ, không bỏ qua.
@@ -404,10 +404,10 @@ def a117_loi_duyet_va_job_trung():   # review lượt 2 G01 (lỗi os.scandir kh
     from unittest import mock
     goc_scandir = os.scandir
     with mini("T-v3-pass") as (tep, thu):
-        (thu / "con").mkdir()
-        shutil.copy(thu / "prov.yaml", thu / "con" / "prov.yaml")
+        (thu / "provenance-copy").mkdir()
+        shutil.copy(thu / "prov.yaml", thu / "provenance-copy" / "prov.yaml")
         ky(G().kiem_tep(tep, thu), "not_measured", ["provenance_nhieu"], "doi chung hai provenance")
-        loi = lambda p, *a: (_ for _ in ()).throw(PermissionError(p)) if str(p).endswith("con") else goc_scandir(p, *a)  # noqa: E731
+        loi = lambda p, *a: (_ for _ in ()).throw(PermissionError(p)) if Path(p).name == "provenance-copy" else goc_scandir(p, *a)  # noqa: E731
         with mock.patch.object(os, "scandir", loi):
             ky(G().kiem_tep(tep, thu), "not_measured", ["PermissionError"], "G01 loi duyet")
     ky(kt("T-v3-pass", None, lambda y: y["moc"]["gate_output"]["jobs"].append(dict(y["moc"]["gate_output"]["jobs"][0]))),
@@ -472,20 +472,22 @@ def a203_duong_khong_tep():
 
 @ca
 def a204_duong_dan():
-    if os.name != "posix":
-        print("BO QUA a204 (symlink chi do tren POSIX)")
-        return
+    from unittest.mock import patch
+
     t = ten_tep("T-v3-pass")
     with ho_so_tam() as thu:
         (thu / "x").mkdir()
-        os.symlink(".", thu / "lk")
-        for nhan, ref in (("a", f"x/../{t}"), ("b", "/tmp/khong/danh-gia-gate-output-1.txt"), ("c", f"lk/{t}"),
-                          ("d", "danh-gia-gate-output-1.txt")):
+        tham_chieu = [f"x/../{t}", "danh-gia-gate-output-1.txt"]
+        if os.name == "posix":
+            os.symlink(".", thu / "lk")
+            tham_chieu.append(f"lk/{t}")
+        for ref in tham_chieu:
             vp = G().kiem_ho_so({"moc_gate_output": f"measured — {ref}"}, thu)
-            bang(vp == [f"$.moc_gate_output: tep_danh_gia_khong_hop_le:{ref}"], f"({nhan}) {vp}")
-        ref = str(thu / t)   # J01 lượt 4: đường tuyệt đối tới tệp THẬT
-        vp = G().kiem_ho_so({"moc_gate_output": f"measured — {ref}"}, thu)
-        bang(vp == [f"$.moc_gate_output: tep_danh_gia_khong_hop_le:{ref}"], f"(e) tuyet doi {vp}")
+            bang(vp == [f"$.moc_gate_output: tep_danh_gia_khong_hop_le:{ref}"], f"{ref}: {vp}")
+        ref = f"/tep-ton-tai/{t}"
+        with patch.object(Path, "is_file", return_value=True):
+            vp = G().kiem_ho_so({"moc_gate_output": f"measured — {ref}"}, thu)
+        bang(vp == [f"$.moc_gate_output: tep_danh_gia_khong_hop_le:{ref}"], f"duong tuyet doi: {vp}")
 
 
 @ca
@@ -873,6 +875,293 @@ def a123_thu_tu_va_dinh_dang():   # r10 luật 4: thứ tự chốt K1/K8, label
         bang(ra.splitlines()[:2] == [f"VI_PHAM {hs} $.moc_gate_output: duong_khong_tep_danh_gia", f"DO {hs} (1 vi phạm)"], f"cli VI_PHAM: {ra[:300]}")
 
 
+@ca
+def a124_token_ascii_qua_ho_so():
+    """Kiểm tiền tố và dấu phân cách qua token và qua hồ sơ."""
+    mau = (
+        (lambda c: c + "skipped", lambda c: c in " \t"),
+        (lambda c: c + "kipped", lambda c: c.casefold() == "s"),
+        (lambda c: "skipped" + c + "x", lambda c: c in " \t—-:(,.;"),
+    )
+    for tao, nhan in mau:
+        for c in map(chr, range(128)):
+            gia_tri = tao(c)
+            mong = "skipped" if nhan(c) else None
+            bang(G().token(gia_tri) == mong, f"token {gia_tri!r}: mong {mong!r}")
+            vp = G().kiem_ho_so({"gate_output": gia_tri}, ROOT)
+            bang(vp == ([] if mong else ["$.gate_output: dinh_dang_loi_khai"]), f"ho so {gia_tri!r}: {vp}")
+    for gia_tri, mong in (("ſkipped", "skipped"), ("skipped\n", "skipped"), ("skipped\u0085", None),
+                         ("\u00a0skipped", None), ("skipped\nx", None), ("skipped\u2003x", None)):
+        bang(G().token(gia_tri) == mong, f"token {gia_tri!r}: mong {mong!r}")
+        vp = G().kiem_ho_so({"gate_output": gia_tri}, ROOT)
+        bang(vp == ([] if mong else ["$.gate_output: dinh_dang_loi_khai"]), f"ho so {gia_tri!r}: {vp}")
+
+
+@ca
+def a125_ascii_dong_danh_gia():
+    """Chữ số và hex ở từng trường, chữ thường ở kết luận."""
+    from string import ascii_lowercase, digits, hexdigits
+    hex_thuong = digits + hexdigits[10:16]
+    mau = (
+        "# Danh gia Gate output run {run} attempt {attempt} head {head} "
+        "— (danh_gia_gate.py sha256 {bo_sinh})",
+        "JOB {job} ten [nhan] conclusion={conclusion} log_sha256={log} -> passed: x",
+        "JOB {skip_cu} x: skipped (khong tinh)",
+        "JOB {skip_v3} y: skipped -> not_measured (khong suy pass)",
+        "MOC_GATE_OUTPUT: passed ({dat}/{tong} job co dau hieu duong)",
+    )
+    goc = dict(run="10", attempt="20", head="a" * 40, bo_sinh="a" * 64,
+               job="31", conclusion="success", log="a" * 64, skip_cu="42", skip_v3="53", dat="1", tong="2")
+    cac_chu_so = [chr(n) for n in range(128, 0x110000) if chr(n).isdecimal()]
+    def doc(truong, ky_tu):
+        du_lieu = dict(goc, **{truong: ky_tu + goc[truong][1:]})
+        return G().doc_danh_gia("\n".join(dong.format_map(du_lieu) for dong in mau).encode())
+    for truong, lop in (
+        ("run", digits), ("attempt", digits), ("head", hex_thuong), ("bo_sinh", hex_thuong),
+        ("job", digits), ("conclusion", ascii_lowercase + "_"), ("log", hex_thuong),
+        ("skip_cu", digits), ("skip_v3", digits), ("dat", digits), ("tong", digits),
+    ):
+        for ky_tu in [*map(chr, range(128)), *cac_chu_so, "é", "ａ", "𐐀"]:
+            kq, ly_do = doc(truong, ky_tu)
+            bang((kq is not None) == (ky_tu in lop), f"{truong} {ky_tu!r}: {ly_do}")
+
+
+@ca
+def a126_mien_ascii_qua_ho_so():
+    """Đối chiếu URL, ngày và văn bản tự do với readback qua cả hai tuyến."""
+    with tempfile.TemporaryDirectory(prefix="godc_ascii_") as tam:
+        thu = Path(tam)
+        tep = thu / "readback-duyet-issuecomment-123.json"
+        def do(url, dong, ly_do):
+            tep.write_text(json.dumps(rb(dong, html_url=url)), encoding="utf-8")
+            khai = f"owner_waived — {url} {SHA}"
+            bang(G().kiem_mien(khai, thu, None) == ly_do, f"mien {url!r}, {dong!r}")
+            vp = G().kiem_ho_so({"gate_output": khai}, thu)
+            mong = [f"$.gate_output: waiver_khong_co_can_cu:{x}" for x in ly_do]
+            bang(vp == mong, f"ho so mien {url!r}, {dong!r}: {vp}")
+
+        do(URL, DONG, [])
+        do(URL.replace("issues/", "issues/é"), DONG, ["url"])
+        do(URL.replace("comment-123", "comment-１２３"), DONG, ["url"])
+        do(URL, DONG.replace("2026-", "٢٠٢٦-"), ["dong_mien"])
+        do(URL, DONG.replace("ubuntu-latest", "ubuntu-latest,ｗindows"), ["dong_mien"])
+        do(URL, DONG.replace(SHA, "ａ" + SHA[1:]), ["dong_mien"])
+        for ky_tu, ket_qua in (("\u00a0", []), ("\ud800", []), ("𐐀", []), ("\t", ["dong_mien"]),
+                               ("\u0085", ["dong_mien"]), ("\u2028", ["dong_mien"])):
+            do(URL, DONG.replace("ly_do=", f"ly_do={ky_tu}"), ket_qua)
+
+
+BANG_O_R11 = r"""{
+"chieu": {"fixture":"mỗi vi phạm của kiem_ho_so: bỏ tiền tố '$.moc_gate_output: ', thay ':<tên tệp đánh giá>:' bằng ':'","la_fixture":"[trạng thái, danh sách lý do] của kiem_tep","la_mien":"danh sách lý do của kiem_mien (ngoại lệ ⇒ đỏ)","mien":"mỗi vi phạm của kiem_ho_so: phần sau 'waiver_khong_co_can_cu:'"},
+"hat_giong": {"fixture":{"T-skip":{"ho_so":{"moc_gate_output":"measured — <tên tệp đánh giá tương đối thư mục>"},"provenance":"ops/land/pr1344-wp1343-provenance/ci/provenance.yaml","provenance_sha256":"30a2bfd3c2f638d5ea2acb6c473f92315641cca260f69269f5d32008280b175a","tep":"ops/land/pr1344-wp1343-provenance/danh-gia-gate-output-43969906464.txt","tep_sha256":"88c23b14e6de89270a42e36db551821b01ba22d5f5386096e020640238e31ecc","thu_muc":"ops/land/pr1344-wp1343-provenance"},"T-v3-pass":{"ho_so":{"moc_gate_output":"measured — <tên tệp đánh giá tương đối thư mục>"},"provenance":"ops/land/pr1440-wp1319-provenance/ci-provenance-44669622916/provenance.yaml","provenance_sha256":"d749903c0613a1120953c781ef295aa16fae2ee5c55e15d8266fb1956062f57e","tep":"ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt","tep_sha256":"452024d7e9bd5d589f3d65bcef9f3e67a527f234c63dd4aa7f2adcd7173013bf","thu_muc":"ops/land/pr1440-wp1319-provenance"}},"mien":{"dong":"mien_gate_output: d8cf2ab57f9f25a93cefedcebfb315826b6b78fe os=ubuntu-latest ly_do=job huy theo chi thi han=2026-12-31","ho_so":{"gate_output":"<loi_khai>"},"loi_khai":"owner_waived — {url} {sha}","loi_khai_head":"owner_waived — {url}","readback":{"author_association":"OWNER","body":"mien_gate_output: d8cf2ab57f9f25a93cefedcebfb315826b6b78fe os=ubuntu-latest ly_do=job huy theo chi thi han=2026-12-31","html_url":"https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123","user":{"login":"ducthangho"}},"sha":"d8cf2ab57f9f25a93cefedcebfb315826b6b78fe","ten_readback":"readback-duyet-issuecomment-123.json","url":"https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123"}},
+"o": [
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"schema:H1","la":["not_measured",["provenance_0"]],"ops":[["prov",["schema"],"CI_PROVENANCE/1"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"schema:H2","la":["not_measured",["provenance_0"]],"ops":[["prov",["schema"]," ci_provenance/1"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"schema:H3","la":["not_measured",["provenance_0"]],"ops":[["prov",["schema"],"ci_provenance/1 "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"schema:H4","la":["not_measured",["provenance_0"]],"ops":[["prov",["schema"],"ｃi_provenance/1"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"schema:H6a","la":["not_measured",["provenance_0"]],"ops":[["prov",["schema"],"xci_provenance/1"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"schema:H6b","la":["not_measured",["provenance_0"]],"ops":[["prov",["schema"],"ci_provenance/1x"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"run.head_sha:H1","la":["not_measured",["provenance_0"]],"ops":[["prov",["moc","run","head_sha"],"D8CF2AB57F9F25A93CEFEDCEBFB315826B6B78FE"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"run.head_sha:H2","la":["not_measured",["provenance_0"]],"ops":[["prov",["moc","run","head_sha"]," d8cf2ab57f9f25a93cefedcebfb315826b6b78fe"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"run.head_sha:H3","la":["not_measured",["provenance_0"]],"ops":[["prov",["moc","run","head_sha"],"d8cf2ab57f9f25a93cefedcebfb315826b6b78fe "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"run.head_sha:H4","la":["not_measured",["provenance_0"]],"ops":[["prov",["moc","run","head_sha"],"ｄ8cf2ab57f9f25a93cefedcebfb315826b6b78fe"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"run.head_sha:H6a","la":["not_measured",["provenance_0"]],"ops":[["prov",["moc","run","head_sha"],"xd8cf2ab57f9f25a93cefedcebfb315826b6b78fe"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_0"],"id":"run.head_sha:H6b","la":["not_measured",["provenance_0"]],"ops":[["prov",["moc","run","head_sha"],"d8cf2ab57f9f25a93cefedcebfb315826b6b78fex"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.event:H1","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","event"],"PUSH"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.event:H2","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","event"]," push"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.event:H3","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","event"],"push "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.event:H4","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","event"],"ｐush"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.event:H6a","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","event"],"xpush"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.event:H6b","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","event"],"pushx"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.loi_khai_rest_path:H1","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","loi_khai_rest_path"],".GITHUB/WORKFLOWS/CI.YML"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.loi_khai_rest_path:H2","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","loi_khai_rest_path"]," .github/workflows/ci.yml"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.loi_khai_rest_path:H3","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","loi_khai_rest_path"],".github/workflows/ci.yml "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.loi_khai_rest_path:H4","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","loi_khai_rest_path"],".ｇithub/workflows/ci.yml"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.loi_khai_rest_path:H6a","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","loi_khai_rest_path"],"x.github/workflows/ci.yml"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:khong_phai_run_land"],"id":"run.loi_khai_rest_path:H6b","la":["not_measured",["khong_phai_run_land"]],"ops":[["prov",["moc","run","loi_khai_rest_path"],".github/workflows/ci.ymlx"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"run.trang_thai:H1","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","run","trang_thai"],"PASSED"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"run.trang_thai:H2","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","run","trang_thai"]," passed"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"run.trang_thai:H3","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","run","trang_thai"],"passed "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"run.trang_thai:H4","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","run","trang_thai"],"ｐassed"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"run.trang_thai:H6a","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","run","trang_thai"],"xpassed"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"run.trang_thai:H6b","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","run","trang_thai"],"passedx"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"tap_jobs.trang_thai:H1","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","gate_output","tap_jobs","trang_thai"],"PASSED"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"tap_jobs.trang_thai:H2","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","gate_output","tap_jobs","trang_thai"]," passed"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"tap_jobs.trang_thai:H3","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","gate_output","tap_jobs","trang_thai"],"passed "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"tap_jobs.trang_thai:H4","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","gate_output","tap_jobs","trang_thai"],"ｐassed"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"tap_jobs.trang_thai:H6a","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","gate_output","tap_jobs","trang_thai"],"xpassed"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"tap_jobs.trang_thai:H6b","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["moc","gate_output","tap_jobs","trang_thai"],"passedx"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.passed:H1","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",136067289163,"trang_thai"],"PASSED"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.passed:H2","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",136067289163,"trang_thai"]," passed"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.passed:H3","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",136067289163,"trang_thai"],"passed "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.passed:H4","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",136067289163,"trang_thai"],"ｐassed"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.passed:H6a","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",136067289163,"trang_thai"],"xpassed"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.passed:H6b","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",136067289163,"trang_thai"],"passedx"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.name:H1","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"name"],"GATE-CONG-CU (UBUNTU-LATEST, 1)"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.name:H2","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"name"]," gate-cong-cu (ubuntu-latest, 1)"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.name:H3","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"name"],"gate-cong-cu (ubuntu-latest, 1) "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.name:H4","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"name"],"ｇate-cong-cu (ubuntu-latest, 1)"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.name:H6a","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"name"],"xgate-cong-cu (ubuntu-latest, 1)"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.name:H6b","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"name"],"gate-cong-cu (ubuntu-latest, 1)x"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.conclusion:H1","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"conclusion"],"SUCCESS"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.conclusion:H2","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"conclusion"]," success"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.conclusion:H3","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"conclusion"],"success "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.conclusion:H4","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"conclusion"],"ｓuccess"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.conclusion:H6a","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"conclusion"],"xsuccess"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.conclusion:H6b","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"conclusion"],"successx"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.labels_phan_tu:H1","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"labels",0],"UBUNTU-LATEST"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.labels_phan_tu:H2","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"labels",0]," ubuntu-latest"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.labels_phan_tu:H3","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"labels",0],"ubuntu-latest "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.labels_phan_tu:H4","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"labels",0],"ｕbuntu-latest"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.labels_phan_tu:H6a","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"labels",0],"xubuntu-latest"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.labels_phan_tu:H6b","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"labels",0],"ubuntu-latestx"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:log_sha_lech:136067289163"],"id":"log.sha256:H1","la":["not_measured",["log_sha_lech:136067289163"]],"ops":[["prov",["log_day_du",136067289163,"sha256"],"52230A835CD8D5E546575CB978C3E2E78F2400F5381544BE5E751D8B00EE2466"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:log_sha_lech:136067289163"],"id":"log.sha256:H2","la":["not_measured",["log_sha_lech:136067289163"]],"ops":[["prov",["log_day_du",136067289163,"sha256"]," 52230a835cd8d5e546575cb978c3e2e78f2400f5381544be5e751d8b00ee2466"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:log_sha_lech:136067289163"],"id":"log.sha256:H3","la":["not_measured",["log_sha_lech:136067289163"]],"ops":[["prov",["log_day_du",136067289163,"sha256"],"52230a835cd8d5e546575cb978c3e2e78f2400f5381544be5e751d8b00ee2466 "]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:log_sha_lech:136067289163"],"id":"log.sha256:H4","la":["not_measured",["log_sha_lech:136067289163"]],"ops":[["prov",["log_day_du",136067289163,"sha256"],"５2230a835cd8d5e546575cb978c3e2e78f2400f5381544be5e751d8b00ee2466"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:log_sha_lech:136067289163"],"id":"log.sha256:H6a","la":["not_measured",["log_sha_lech:136067289163"]],"ops":[["prov",["log_day_du",136067289163,"sha256"],"x52230a835cd8d5e546575cb978c3e2e78f2400f5381544be5e751d8b00ee2466"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:log_sha_lech:136067289163"],"id":"log.sha256:H6b","la":["not_measured",["log_sha_lech:136067289163"]],"ops":[["prov",["log_day_du",136067289163,"sha256"],"52230a835cd8d5e546575cb978c3e2e78f2400f5381544be5e751d8b00ee2466x"]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.skipped:H1","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",133659160050,"trang_thai"],"SKIPPED"]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.skipped:H2","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",133659160050,"trang_thai"]," skipped"]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.skipped:H3","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",133659160050,"trang_thai"],"skipped "]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.skipped:H4","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",133659160050,"trang_thai"],"ｓkipped"]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.skipped:H6a","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",133659160050,"trang_thai"],"xskipped"]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du"],"id":"checkout.skipped:H6b","la":["not_measured",["provenance_chua_du"]],"ops":[["prov",["@checkout",133659160050,"trang_thai"],"skippedx"]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du,tap_job_lech,tap_skip_lech"],"id":"job.conclusion_skipped:H1","la":["not_measured",["provenance_chua_du","tap_job_lech","tap_skip_lech"]],"ops":[["prov",["@job",133659160050,"conclusion"],"SKIPPED"]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du,tap_job_lech,tap_skip_lech"],"id":"job.conclusion_skipped:H2","la":["not_measured",["provenance_chua_du","tap_job_lech","tap_skip_lech"]],"ops":[["prov",["@job",133659160050,"conclusion"]," skipped"]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du,tap_job_lech,tap_skip_lech"],"id":"job.conclusion_skipped:H3","la":["not_measured",["provenance_chua_du","tap_job_lech","tap_skip_lech"]],"ops":[["prov",["@job",133659160050,"conclusion"],"skipped "]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du,tap_job_lech,tap_skip_lech"],"id":"job.conclusion_skipped:H4","la":["not_measured",["provenance_chua_du","tap_job_lech","tap_skip_lech"]],"ops":[["prov",["@job",133659160050,"conclusion"],"ｓkipped"]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du,tap_job_lech,tap_skip_lech"],"id":"job.conclusion_skipped:H6a","la":["not_measured",["provenance_chua_du","tap_job_lech","tap_skip_lech"]],"ops":[["prov",["@job",133659160050,"conclusion"],"xskipped"]]},
+{"fx":"T-skip","ho_so":["danh_gia_khong_passed:not_measured:provenance_chua_du,tap_job_lech,tap_skip_lech"],"id":"job.conclusion_skipped:H6b","la":["not_measured",["provenance_chua_du","tap_job_lech","tap_skip_lech"]],"ops":[["prov",["@job",133659160050,"conclusion"],"skippedx"]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:check_bat_buoc:gate-ops (ubuntu-latest)"],"id":"check_bat_buoc.ten:H1","la":["not_measured",["check_bat_buoc:gate-ops (ubuntu-latest)"]],"ops":[["prov",["@job",136067289134,"name"],"GATE-OPS (UBUNTU-LATEST)"],["tep","JOB 136067289134 gate-ops (ubuntu-latest) [","JOB 136067289134 GATE-OPS (UBUNTU-LATEST) ["]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:check_bat_buoc:gate-ops (ubuntu-latest)"],"id":"check_bat_buoc.ten:H2","la":["not_measured",["check_bat_buoc:gate-ops (ubuntu-latest)"]],"ops":[["prov",["@job",136067289134,"name"]," gate-ops (ubuntu-latest)"],["tep","JOB 136067289134 gate-ops (ubuntu-latest) [","JOB 136067289134  gate-ops (ubuntu-latest) ["]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:check_bat_buoc:gate-ops (ubuntu-latest)"],"id":"check_bat_buoc.ten:H3","la":["not_measured",["check_bat_buoc:gate-ops (ubuntu-latest)"]],"ops":[["prov",["@job",136067289134,"name"],"gate-ops (ubuntu-latest) "],["tep","JOB 136067289134 gate-ops (ubuntu-latest) [","JOB 136067289134 gate-ops (ubuntu-latest)  ["]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:check_bat_buoc:gate-ops (ubuntu-latest)"],"id":"check_bat_buoc.ten:H4","la":["not_measured",["check_bat_buoc:gate-ops (ubuntu-latest)"]],"ops":[["prov",["@job",136067289134,"name"],"ｇate-ops (ubuntu-latest)"],["tep","JOB 136067289134 gate-ops (ubuntu-latest) [","JOB 136067289134 ｇate-ops (ubuntu-latest) ["]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:check_bat_buoc:gate-ops (ubuntu-latest)"],"id":"check_bat_buoc.ten:H6a","la":["not_measured",["check_bat_buoc:gate-ops (ubuntu-latest)"]],"ops":[["prov",["@job",136067289134,"name"],"xgate-ops (ubuntu-latest)"],["tep","JOB 136067289134 gate-ops (ubuntu-latest) [","JOB 136067289134 xgate-ops (ubuntu-latest) ["]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:check_bat_buoc:gate-ops (ubuntu-latest)"],"id":"check_bat_buoc.ten:H6b","la":["not_measured",["check_bat_buoc:gate-ops (ubuntu-latest)"]],"ops":[["prov",["@job",136067289134,"name"],"gate-ops (ubuntu-latest)x"],["tep","JOB 136067289134 gate-ops (ubuntu-latest) [","JOB 136067289134 gate-ops (ubuntu-latest)x ["]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.labels_day:thu_tu","la":["not_measured",["job_lech:136067289163"]],"ops":[["tep","JOB 136067289163 gate-cong-cu (ubuntu-latest, 1) [ubuntu-latest]","JOB 136067289163 gate-cong-cu (ubuntu-latest, 1) [a,b]"],["prov",["@job",136067289163,"labels"],["b","a"]]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.labels_day:lap","la":["not_measured",["job_lech:136067289163"]],"ops":[["tep","JOB 136067289163 gate-cong-cu (ubuntu-latest, 1) [ubuntu-latest]","JOB 136067289163 gate-cong-cu (ubuntu-latest, 1) [a,b]"],["prov",["@job",136067289163,"labels"],["a","b","b"]]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.labels_day:thieu","la":["not_measured",["job_lech:136067289163"]],"ops":[["tep","JOB 136067289163 gate-cong-cu (ubuntu-latest, 1) [ubuntu-latest]","JOB 136067289163 gate-cong-cu (ubuntu-latest, 1) [a,b]"],["prov",["@job",136067289163,"labels"],["a"]]]},
+{"fx":"T-v3-pass","ho_so":[],"id":"job.labels_day:doi_chung","la":["passed",[]],"ops":[["tep","JOB 136067289163 gate-cong-cu (ubuntu-latest, 1) [ubuntu-latest]","JOB 136067289163 gate-cong-cu (ubuntu-latest, 1) [a,b]"],["prov",["@job",136067289163,"labels"],["a","b"]]]},
+{"fx":"T-v3-pass","ho_so":["danh_gia_khong_passed:not_measured:job_lech:136067289163"],"id":"job.name:H5","la":["not_measured",["job_lech:136067289163"]],"ops":[["prov",["@job",136067289163,"name"],"gate-cong-cu (ubuntu-latest, 1)é"],["tep","JOB 136067289163 gate-cong-cu (ubuntu-latest, 1) [","JOB 136067289163 gate-cong-cu (ubuntu-latest, 1)é ["]]},
+{"ho_so":["html_url"],"id":"readback.html_url:H1","la":["html_url"],"mien":{"readback":["html_url","HTTPS://GITHUB.COM/DUCTHANGHO/TRA-LUAT/ISSUES/1236#ISSUECOMMENT-123"]}},
+{"ho_so":["html_url"],"id":"readback.html_url:H2","la":["html_url"],"mien":{"readback":["html_url"," https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123"]}},
+{"ho_so":["html_url"],"id":"readback.html_url:H3","la":["html_url"],"mien":{"readback":["html_url","https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123 "]}},
+{"ho_so":["html_url"],"id":"readback.html_url:H4","la":["html_url"],"mien":{"readback":["html_url","ｈttps://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123"]}},
+{"ho_so":["html_url"],"id":"readback.html_url:H6a","la":["html_url"],"mien":{"readback":["html_url","xhttps://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123"]}},
+{"ho_so":["html_url"],"id":"readback.html_url:H6b","la":["html_url"],"mien":{"readback":["html_url","https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-123x"]}},
+{"ho_so":["tac_gia"],"id":"readback.login:H1","la":["tac_gia"],"mien":{"readback":["user.login","DUCTHANGHO"]}},
+{"ho_so":["tac_gia"],"id":"readback.login:H2","la":["tac_gia"],"mien":{"readback":["user.login"," ducthangho"]}},
+{"ho_so":["tac_gia"],"id":"readback.login:H3","la":["tac_gia"],"mien":{"readback":["user.login","ducthangho "]}},
+{"ho_so":["tac_gia"],"id":"readback.login:H4","la":["tac_gia"],"mien":{"readback":["user.login","ｄucthangho"]}},
+{"ho_so":["tac_gia"],"id":"readback.login:H6a","la":["tac_gia"],"mien":{"readback":["user.login","xducthangho"]}},
+{"ho_so":["tac_gia"],"id":"readback.login:H6b","la":["tac_gia"],"mien":{"readback":["user.login","ducthanghox"]}},
+{"ho_so":["tac_gia"],"id":"readback.author_association:H1","la":["tac_gia"],"mien":{"readback":["author_association","owner"]}},
+{"ho_so":["tac_gia"],"id":"readback.author_association:H2","la":["tac_gia"],"mien":{"readback":["author_association"," OWNER"]}},
+{"ho_so":["tac_gia"],"id":"readback.author_association:H3","la":["tac_gia"],"mien":{"readback":["author_association","OWNER "]}},
+{"ho_so":["tac_gia"],"id":"readback.author_association:H4","la":["tac_gia"],"mien":{"readback":["author_association","ＯWNER"]}},
+{"ho_so":["tac_gia"],"id":"readback.author_association:H6a","la":["tac_gia"],"mien":{"readback":["author_association","xOWNER"]}},
+{"ho_so":["tac_gia"],"id":"readback.author_association:H6b","la":["tac_gia"],"mien":{"readback":["author_association","OWNERx"]}},
+{"ho_so":["dong_mien"],"id":"mien.os:H1","la":["dong_mien"],"mien":{"dong":["ubuntu-latest","UBUNTU-LATEST"]}},
+{"ho_so":["dong_mien"],"id":"mien.os:H2","la":["dong_mien"],"mien":{"dong":["ubuntu-latest"," ubuntu-latest"]}},
+{"ho_so":["dong_mien"],"id":"mien.os:H3","la":["dong_mien"],"mien":{"dong":["ubuntu-latest","ubuntu-latest "]}},
+{"ho_so":["dong_mien"],"id":"mien.os:H4","la":["dong_mien"],"mien":{"dong":["ubuntu-latest","ｕbuntu-latest"]}},
+{"ho_so":["os"],"id":"mien.os:H6a","la":["os"],"mien":{"dong":["ubuntu-latest","xubuntu-latest"]}},
+{"ho_so":["os"],"id":"mien.os:H6b","la":["os"],"mien":{"dong":["ubuntu-latest","ubuntu-latestx"]}},
+{"ho_so":null,"id":"mien.head:H1","la":["sha"],"mien":{"head":"D8CF2AB57F9F25A93CEFEDCEBFB315826B6B78FE"}},
+{"ho_so":["sha"],"id":"mien.sha_loi_khai:H1","la":["sha"],"mien":{"loi_khai_sha":"D8CF2AB57F9F25A93CEFEDCEBFB315826B6B78FE"}},
+{"ho_so":null,"id":"mien.head:H2","la":["sha"],"mien":{"head":" d8cf2ab57f9f25a93cefedcebfb315826b6b78fe"}},
+{"ho_so":[],"id":"mien.sha_loi_khai:H2","la":[],"mien":{"loi_khai_sha":" d8cf2ab57f9f25a93cefedcebfb315826b6b78fe"}},
+{"ho_so":null,"id":"mien.head:H3","la":["sha"],"mien":{"head":"d8cf2ab57f9f25a93cefedcebfb315826b6b78fe "}},
+{"ho_so":[],"id":"mien.sha_loi_khai:H3","la":[],"mien":{"loi_khai_sha":"d8cf2ab57f9f25a93cefedcebfb315826b6b78fe "}},
+{"ho_so":null,"id":"mien.head:H4","la":["sha"],"mien":{"head":"ｄ8cf2ab57f9f25a93cefedcebfb315826b6b78fe"}},
+{"ho_so":["sha"],"id":"mien.sha_loi_khai:H4","la":["sha"],"mien":{"loi_khai_sha":"ｄ8cf2ab57f9f25a93cefedcebfb315826b6b78fe"}},
+{"ho_so":null,"id":"mien.head:H6a","la":["sha"],"mien":{"head":"xd8cf2ab57f9f25a93cefedcebfb315826b6b78fe"}},
+{"ho_so":[],"id":"mien.sha_loi_khai:H6a","la":[],"mien":{"loi_khai_sha":"xd8cf2ab57f9f25a93cefedcebfb315826b6b78fe"}},
+{"ho_so":null,"id":"mien.head:H6b","la":["sha"],"mien":{"head":"d8cf2ab57f9f25a93cefedcebfb315826b6b78fex"}},
+{"ho_so":[],"id":"mien.sha_loi_khai:H6b","la":[],"mien":{"loi_khai_sha":"d8cf2ab57f9f25a93cefedcebfb315826b6b78fex"}}
+]
+}"""
+
+
+@ca
+def a127_bang_o_dong_bang():
+    """Chạy 125 ô đặc tả trên hàm lá và đối chiếu hồ sơ."""
+    from copy import deepcopy
+    from hashlib import sha256
+
+    bang_o = json.loads(BANG_O_R11)
+    byte_chuan = json.dumps(bang_o, ensure_ascii=False, sort_keys=True).encode()
+    bang(sha256(byte_chuan).hexdigest() == "628e27046ab4ba7a7b3cf31eb65ded9b88c718c5bfd067401d12b60d2c21b857",
+         "bang o dong bang lech SHA-256")
+    hat_giong = bang_o["hat_giong"]
+    fixtures = {}
+    for ten, fx in hat_giong["fixture"].items():
+        tep, prov = ((ROOT / fx[k]).read_bytes() for k in ("tep", "provenance"))
+        for k, b in (("tep", tep), ("provenance", prov)):
+            bang(sha256(b).hexdigest() == fx[f"{k}_sha256"], f"{ten}: {k} lech SHA-256")
+        fixtures[ten] = (Path(fx["tep"]).name, tep.decode(), yaml.safe_load(prov), fx["ho_so"])
+
+    for o in bang_o["o"]:
+        with tempfile.TemporaryDirectory(prefix="godc_o_") as tam:
+            thu = Path(tam)
+            if "mien" in o:
+                la, ho_so = _do_o_mien(hat_giong["mien"], o["mien"], thu)
+            else:
+                ten, tep, prov, ho_so_goc = fixtures[o["fx"]]
+                la, ho_so = _do_o_fixture(ten, tep, deepcopy(prov), ho_so_goc, o["ops"], thu)
+            bang(la == o["la"], f"{o['id']}: ham la {la}, mong {o['la']}")
+            bang(ho_so == o["ho_so"], f"{o['id']}: ho so {ho_so}, mong {o['ho_so']}")
+
+
+def _thay_mot(goc, cu, moi):
+    bang(goc.count(cu) == 1, f"chuoi o dong bang khong xuat hien dung mot lan: {cu!r}")
+    return goc.replace(cu, moi, 1)
+
+
+def _do_o_fixture(ten, tep, prov, ho_so_goc, ops, thu):
+    for loai, vi_tri, gia_tri in ops:
+        if loai == "tep":
+            tep = _thay_mot(tep, vi_tri, gia_tri)
+            continue
+        dich = prov
+        if vi_tri[0].startswith("@"):
+            nhom = prov["moc"]["checkout"] if vi_tri[0] == "@checkout" else prov["moc"]["gate_output"]["jobs"]
+            dich, = [job for job in nhom if job["job_id"] == vi_tri[1]]
+            vi_tri = vi_tri[2:]
+        for khoa in vi_tri[:-1]:
+            dich = dich[khoa]
+        dich[vi_tri[-1]] = gia_tri
+    (thu / "prov.yaml").write_text(yaml.safe_dump(prov), encoding="utf-8")
+    (thu / ten).write_bytes(tep.encode())
+    tt, ly_do = G().kiem_tep(thu / ten, thu)
+    ho_so = {k: _thay_mot(v, "<tên tệp đánh giá tương đối thư mục>", ten) for k, v in ho_so_goc.items()}
+    vp = G().kiem_ho_so(ho_so, thu)
+    return [tt, ly_do], [v.removeprefix("$.moc_gate_output: ").replace(f":{ten}:", ":") for v in vp]
+
+
+def _do_o_mien(hat, sua, thu):
+    import copy
+    readback = copy.deepcopy(hat["readback"])
+    if "readback" in sua:
+        khoa, gia_tri = sua["readback"]
+        if khoa == "user.login":
+            readback["user"]["login"] = gia_tri
+        else:
+            readback[khoa] = gia_tri
+    if "dong" in sua:
+        readback["body"] = _thay_mot(hat["dong"], *sua["dong"])
+    (thu / hat["ten_readback"]).write_text(json.dumps(readback), encoding="utf-8")
+    head = sua.get("head")
+    if head is not None:
+        khai = hat["loi_khai_head"].format(url=hat["url"])
+        return G().kiem_mien(khai, thu, head), None
+    khai = hat["loi_khai"].format(url=hat["url"], sha=sua.get("loi_khai_sha", hat["sha"]))
+    ho_so = {k: _thay_mot(v, "<loi_khai>", khai) for k, v in hat["ho_so"].items()}
+    vp = G().kiem_ho_so(ho_so, thu)
+    return G().kiem_mien(khai, thu, None), [v.removeprefix("$.gate_output: waiver_khong_co_can_cu:") for v in vp]
+
+
 # ---------------------------------------------------------------- đột biến
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("m1_bo_nhanh_skipped", '    if d["skip"]:\n        return "not_measured", ["co_job_skipped"]\n', "", "a115"),
@@ -894,7 +1183,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m17_theo_symlink", '            if p.is_symlink():\n                ly.append("symlink")\n                continue\n', "", "a112"),
     ("m18_khong_chuan_hoa", "            c = _chuan(k)", "            c = str(k)", "a201"),
     ("m19_bo_phi_loi_khai", ' and c not in PHI_LOI_KHAI', "", "a201"),
-    ("m20_bo_lookahead", r'RE_TOKEN = re.compile(r"\s*([a-z_]+)(?=$|[\s—\-:(,.;])")', r'RE_TOKEN = re.compile(r"\s*([a-z_]+)")', "a202"),
+    ("m20_bo_lookahead", r'RE_TOKEN = re.compile(r"[ \t]*([a-z_]+)(?=$|[ \t—\-:(,.;])")', r'RE_TOKEN = re.compile(r"[ \t]*([a-z_]+)")', "a202"),
     ("m21_duong_khong_can_tep", '            if tk in ("passed", "measured") and not teps:\n                vp.append(f"{duong}: duong_khong_tep_danh_gia")\n',
      "", "a203"),
     ("m22_bo_cham_cham", '".." in pp.parts', "False", "a204"),
@@ -1011,8 +1300,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m125_dau_head_khong_hex", "head ([0-9a-f]{40})", "head (.{40})", "a120"),
     ("m126_job_labels_ngoac", r"\[([^\]]*)\]", r"\[(.*)\]", "a120"),
     ("m127_skip_v3_khop_dau", "RE_SKIP_V3.fullmatch(d)", "RE_SKIP_V3.match(d)", "a120"),
-    ("m128_moc_so_rong", r"\((\d+)/(\d+) job", r"\((\d*)/(\d+) job", "a120"),
-    ("m129_token_bo_gach_dai", r"[\s—\-:(,.;]", r"[\s\-:(,.;]", "a121"),
+    ("m128_moc_so_rong", r"\(([0-9]+)/([0-9]+) job", r"\(([0-9]*)/([0-9]+) job", "a120"),
+    ("m129_token_bo_gach_dai", r"[ \t—\-:(,.;]", r"[ \t\-:(,.;]", "a121"),
     ("m130_token_search", "RE_TOKEN.match(gia_tri.casefold())", "RE_TOKEN.search(gia_tri.casefold())", "a121"),
     ("m131_tep_run_chu", "output-[0-9]+", "output-[a-z0-9]+", "a121"),
     ("m132_khoa_bo_so", "if c.isalnum()", "if c.isalpha()", "a121"),
@@ -1032,6 +1321,19 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m146_argparse_usage", "    def error(self, message):\n", "    def _error(self, message):\n", "a217"),
     ("m58_cli_chi_bat_OSError", "        except Exception as e:   # gồm vòng", "        except OSError as e:   # gồm vòng", "a214"),
 )
+DOT_BIEN += (
+    ("r12_token_space_unicode", r're.compile(r"[ \t]*([a-z_]+)', r're.compile(r"\s*([a-z_]+)', "a124"),
+    ("r12_token_sep_unicode", r"(?=$|[ \t—", r"(?=$|[\s—", "a124"),
+    ("r12_run_so_unicode", r"Gate output run ([0-9]+) attempt", r"Gate output run (\d+) attempt", "a125"),
+    ("r12_job_conclusion_unicode", r"conclusion=([a-z_]+) log_sha256=", r"conclusion=(\w+) log_sha256=", "a125"),
+    ("r12_url_path_unicode", r"tra-luat/[A-Za-z0-9._~/%-]*?#issuecomment-", r"tra-luat/\S*?#issuecomment-", "a126"),
+    ("r12_mien_ly_do_unicode", r"ly_do=([^ \t].*?) han=", r"ly_do=(\S.*?) han=", "a126"),
+)
+CHI_POSIX = frozenset({
+    "m17_theo_symlink", "m23_bo_symlink_thanh_phan", "m56_xoa_ly_do_symlink",
+    "m70_bo_ly_do_symlink_thu_muc", "m71_goc_symlink", "m76_readback_symlink",
+    "m93_theo_symlink_thu_muc", "m105_goc_ho_so_symlink", "m107_goc_readback_symlink",
+})
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_KeyError", "def la_landed(du_lieu):\n", "def la_landed(du_lieu):\n    raise KeyError('vo can')\n", "a212", "TIN_DUNG_GIA"),
     ("chi_them_chu_thich", 'CHU_KHO = "ducthangho"\n', 'CHU_KHO = "ducthangho"  # vo hai\n', "a201", "SONG_SOT"),
@@ -1096,19 +1398,28 @@ def main(argv):
         print("dung: gate_output_doi_chieu_test.py [--mot-ca TEN]", file=sys.stderr)
         return 2
     kq = [chay_ca(ten) for ten in CA]
-    print("".join(f"[{dong}]\n" for rc, dong in kq if rc), end="")
+    print("".join(f"[{dong}]\\n" for rc, dong in kq if rc), end="")
     dat = sum(rc == 0 for rc, _ in kq)
-    print(f"CA: {dat}/{len(CA)} dat")
-    xau = [f"{ten}: {h} {ct}" for ten, cu, moi, dich in DOT_BIEN for h, ct in [chay_dot_bien(ten, cu, moi, dich)] if h != "GIET"]
+    danh_sach = {ten for ten, *_ in DOT_BIEN}
+    sai_khai_bao = CHI_POSIX - danh_sach
+    if sai_khai_bao:
+        print(f"[DOT BIEN CHI POSIX KHONG TON TAI] {sorted(sai_khai_bao)}")
+    duoc_do = DOT_BIEN
+    if os.name != "posix":
+        print(f"BO QUA chi-POSIX: {', '.join(sorted(CHI_POSIX))}")
+        duoc_do = [db for db in DOT_BIEN if db[0] not in CHI_POSIX]
+    xau = [f"{ten}: {h} {ct}" for ten, cu, moi, dich in duoc_do
+           for h, ct in [chay_dot_bien(ten, cu, moi, dich)] if h != "GIET"]
     for x in xau:
         print(f"[DOT BIEN KHONG BI GIET DUNG] {x}")
-    print(f"DOT BIEN: {len(DOT_BIEN) - len(xau)}/{len(DOT_BIEN)} bi giet dung ly do")
+    print(f"CA: {dat}/{len(CA)} dat")
+    print(f"DOT BIEN: {len(duoc_do) - len(xau)}/{len(duoc_do)} bi giet dung ly do")
     loi_tk = [f"{ten}: mong {mong}, duoc {h}" for ten, cu, moi, dich, mong in TU_KIEM
               for h in [chay_dot_bien(ten, cu, moi, dich)[0]] if h != mong]
     for x in loi_tk:
         print(f"[TU KIEM] {x}")
     print(f"TU KIEM PHAN HANG: {'DAT' if not loi_tk else 'DO'} ({len(TU_KIEM)} dot bien)")
-    ok = dat == len(CA) > 0 and len(DOT_BIEN) > 0 and not xau and not loi_tk
+    ok = dat == len(CA) > 0 and len(duoc_do) > 0 and not xau and not loi_tk and not sai_khai_bao
     print(f"TONG: {'DAT' if ok else 'DO'}")
     return 0 if ok else 1
 

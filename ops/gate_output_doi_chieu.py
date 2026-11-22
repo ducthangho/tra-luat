@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Đối chiếu lời khai `gate_output` với tệp đánh giá và provenance — packet #1236, đặc tả `ops/specs/wp1236-r9.md` (sha256
-e3efa593…, chủ kho duyệt issuecomment-7043381576). Đợt A: module ĐỌC, chưa nối vào cổng nào (B: L8 ở `land_evidence_nguon`;
+"""Đối chiếu lời khai `gate_output` với tệp đánh giá và provenance — packet #1236, đặc tả `ops/specs/wp1236-r12.md` (sha256
+4589daf1…, chủ kho duyệt issuecomment-7063475061). Đợt A: module ĐỌC, chưa nối vào cổng nào (B: L8 ở `land_evidence_nguon`;
 C: D2b ở `kiem-dong-wp`). Cổng KHÔNG tự chứng minh gate đã đạt: nó chứng minh lời khai dương KHỚP một tệp
 `danh-gia-gate-output-<run>.txt` (đầu ra `danh_gia_gate.py` v1/v2/v3), và tệp ấy KHỚP provenance của đúng run (K1–K8).
 
@@ -28,18 +28,18 @@ BO_SINH = {"b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd": "
            "0ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058faf": "v3"}
 CHECK_BAT_BUOC_TEN = ("gate (ubuntu-latest)", "gate-cong-cu-gop (ubuntu-latest)", "gate-ops (ubuntu-latest)",
                       "gate-packet-loop (ubuntu-latest)", "gate-registry (ubuntu-latest)")
-RE_DAU = re.compile(r"# Danh gia Gate output run (\d+) attempt (\d+) head ([0-9a-f]{40}) — .*\(danh_gia_gate\.py sha256 ([0-9a-f]{64})\)")
-RE_JOB = re.compile(r"JOB (\d+) (.+?) \[([^\]]*)\] conclusion=(\w+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)")
-RE_SKIP_CU = re.compile(r"JOB (\d+) (.+?): skipped \(khong tinh\)")
-RE_SKIP_V3 = re.compile(r"JOB (\d+) (.+?): skipped -> not_measured \(khong suy pass\)")
-RE_MOC = re.compile(r"MOC_GATE_OUTPUT: (passed|failed|not_measured) \((\d+)/(\d+) job co dau hieu duong\)")
+RE_DAU = re.compile(r"# Danh gia Gate output run ([0-9]+) attempt ([0-9]+) head ([0-9a-f]{40}) — .*\(danh_gia_gate\.py sha256 ([0-9a-f]{64})\)")
+RE_JOB = re.compile(r"JOB ([0-9]+) (.+?) \[([^\]]*)\] conclusion=([a-z_]+) log_sha256=([0-9a-f]{64}) -> (passed|failed|not_measured): (.*)")
+RE_SKIP_CU = re.compile(r"JOB ([0-9]+) (.+?): skipped \(khong tinh\)")
+RE_SKIP_V3 = re.compile(r"JOB ([0-9]+) (.+?): skipped -> not_measured \(khong suy pass\)")
+RE_MOC = re.compile(r"MOC_GATE_OUTPUT: (passed|failed|not_measured) \(([0-9]+)/([0-9]+) job co dau hieu duong\)")
 PHI_LOI_KHAI = frozenset({"gateoutputnguon", "gateoutputnguonvagioihan", "mocgateoutputrcdisposition"})
 TOKEN = frozenset({"passed", "measured", "not_measured", "failed", "skipped", "not_run", "owner_waived"})
-RE_TOKEN = re.compile(r"\s*([a-z_]+)(?=$|[\s—\-:(,.;])")
+RE_TOKEN = re.compile(r"[ \t]*([a-z_]+)(?=$|[ \t—\-:(,.;])")
 RE_TEP_DG = re.compile(r"[A-Za-z0-9_./-]*danh-gia-gate-output-[0-9]+\.txt")   # findall trái-nhất + tham lam ⇒ không cần lookbehind
-RE_KHOI_LANDED = re.compile(r"landed_\d{8}")
-RE_URL = re.compile(r"https://github\.com/ducthangho/tra-luat/\S*?#issuecomment-(\d+)")
-RE_MIEN = re.compile(r"mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=(\S.*?) han=(\d{4}-\d{2}-\d{2})")
+RE_KHOI_LANDED = re.compile(r"landed_[0-9]{8}")
+RE_URL = re.compile(r"https://github\.com/ducthangho/tra-luat/[A-Za-z0-9._~/%-]*?#issuecomment-([0-9]+)")
+RE_MIEN = re.compile(r"mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=([^ \t].*?) han=([0-9]{4}-[0-9]{2}-[0-9]{2})")
 CHU_KHO = "ducthangho"
 
 

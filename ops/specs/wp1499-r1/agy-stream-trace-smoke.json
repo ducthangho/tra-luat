@@ -1,0 +1,47 @@
+{
+  "packet": 1499,
+  "kind": "prototype_feasibility",
+  "run": "d9e0672caa984af28afd70cc4c1de317",
+  "launcher_sha256": "904773ed4990cdb9b9a2cb512f243eccb1e3dc4d3f3a33ffb7aea0356e312e34",
+  "launcher_rc": 0,
+  "model_reported_by_init": "gemini-4-neon-high",
+  "conversation_id": "a589a71c-c730-4b2e-a0ca-26ca6e8d8d14",
+  "retained_tool_steps": [
+    {
+      "event": "step_update",
+      "step_update": {
+        "conversation_id": "a589a71c-c730-4b2e-a0ca-26ca6e8d8d14",
+        "step_index": 2,
+        "state": "ACTIVE",
+        "step_type": "tool",
+        "tool_name": "run_command",
+        "tool_info": {
+          "name": "run_command",
+          "parameters": {
+            "CommandLine": "git --version"
+          }
+        }
+      }
+    },
+    {
+      "event": "step_update",
+      "step_update": {
+        "conversation_id": "a589a71c-c730-4b2e-a0ca-26ca6e8d8d14",
+        "step_index": 2,
+        "state": "DONE",
+        "step_type": "tool",
+        "tool_name": "run_command",
+        "duration_seconds": 2.3095515,
+        "tool_info": {
+          "name": "run_command",
+          "parameters": {
+            "CommandLine": "git --version"
+          },
+          "output": "Created At: 2026-11-22T23:27:08+07:00\nCompleted At: 2026-11-22T23:27:10+07:00\nCommand exited with code 0.\n\nCommand output:\ngit version 2.56.1.windows.1\n"
+        }
+      }
+    }
+  ],
+  "negative_trace": "not_run_in_stream_mode",
+  "formal_review": false
+}

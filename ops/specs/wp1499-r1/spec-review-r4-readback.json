@@ -1,0 +1,23 @@
+{
+  "reviewed_sha": "298d9fbe57143c297472827e89a5788515735db8",
+  "reviewed_file_sha256": "8472a9d8d2ca551dda32b920748cee923acf341049a5137276490af58ad03fd7",
+  "verdict": "approve",
+  "findings": [],
+  "prior_class_status": {
+    "receipt_compatibility": "closed_in_r4: Section 2 now anchors comparison to ops/bien_nhan_v2.py::_provider_chinh_tac() across isolated base and candidate checkouts, requiring error=None and structural equality of parsed hop_dong and bi_danh, paired with a per-table AST diff verifying only the Antigravity triple moves from _PROVIDER_NGOAI_CLI to _TRANSPORT_CONTRACTS (key agy) while all other rows and both alias tables match base.",
+    "exclusivity_wp1233": "closed_in_r4: Scope section now separates pre-grant (ai-dang-giu rc0 and no holder on either file) from pre-publish (both files rc11 with a single active WP1499 executor lease matching revision, generation, write set, and non-expiration), preserving git ls-remote --heads origin vs refs/remotes/origin parity and fail-closed BLOCKED on missing lease, extra holder, ref mismatch, or indeterminate scan.",
+    "executable_naming": "closed_in_r3_no_regression_in_r4",
+    "privilege_boundary": "closed_in_r3_no_regression_in_r4",
+    "native_verification": "closed_in_r3_no_regression_in_r4",
+    "authority_scope": "closed_in_r3_no_regression_in_r4",
+    "independent_assurance": "closed_in_r3_no_regression_in_r4"
+  },
+  "notes": "Spec-text delta review only on the provided r4 text for 298d9fbe57143c297472827e89a5788515735db8. Both r3 requested changes are satisfied without introducing regressions or contradicting the two-file write set, and the r3 reconciliation section properly records that smokes d9e0672c and 0a7c696e only show stream-trace feasibility rather than exact-candidate evidence. No tools were called; source code, runtime behavior (including _provider_chinh_tac() and ai-dang-giu), tests, native smokes, and gates were not tested and must be verified during execution and post-change review.",
+  "conversation_id": "11d7f7a2-3fcd-415e-a51a-b6610c227c2e",
+  "launcher_run": "4e362273",
+  "execution_surface": "antigravity",
+  "provider": "google_antigravity",
+  "transport": "machine/local",
+  "requested_model": "gemini-4-neon-high",
+  "serving_model_identity": "unknown"
+}

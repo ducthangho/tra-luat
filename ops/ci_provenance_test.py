@@ -1617,6 +1617,30 @@ class _StderrHong(io.StringIO):
     def write(self, s):
         raise self.loi if self.loi is not None else OSError(28, "stderr đầy (giả)")
 
+def _that_ben(ham, *a, **k):
+    """Thao tác filesystem THẬT trong đồ giả của test (#1475, Windows A6 lượt 13): `PermissionError` thoáng qua do môi trường
+    (Defender, indexer) KHÔNG được lọt vào phép đo — chỉ lỗi được TIÊM mới được tính. Thử lại tối đa 100 lần × 50 ms rồi mới để lỗi đi."""
+    import time as _t
+    for lan in range(100):
+        try:
+            return ham(*a, **k)
+        except PermissionError:
+            if lan == 99:
+                raise
+            _t.sleep(0.05)
+
+def _xoa_that_ben(duong, **kw):
+    """`rmtree` THẬT cho đồ giả: dọn bền (bỏ qua lỗi thoáng qua) trước; còn sót thật thì mới gọi kèm callback để mã được đo thấy lỗi."""
+    import time as _t
+    for _ in range(100):
+        if not os.path.lexists(duong):
+            return None
+        try:
+            shutil.rmtree(duong)
+        except PermissionError:
+            _t.sleep(0.05)
+    return shutil.rmtree(duong, **kw)
+
 def _ghi_voi_doi_ten_gia(ke_hoach, *, windows=True, co_cu=False, xoa=None, onexc=None, stderr_hong=False, moi=None, cu_cay=None, lien_ket=None, bat_moi=False, ngat_ngu=None, ngat_ghi=None):
     """#1475: chạy `ghi_nguyen_tu` với `_thay_the`/`_xoa_cay`/`ngu_thu_lai` giả. `ke_hoach[cho]` (cho ∈ a cất bản trước ·
     b đưa tạm vào chỗ · c hoàn tác) là hàm nhận số thứ tự lời gọi ở chỗ ấy, trả ngoại lệ để ném hay None để đổi tên THẬT.
@@ -1634,14 +1658,14 @@ def _ghi_voi_doi_ten_gia(ke_hoach, *, windows=True, co_cu=False, xoa=None, onexc
         loi = ke_hoach.get(cho, lambda i: None)(goi.count(cho) - 1)
         if loi is not None:
             raise loi
-        os.replace(nguon, dich)
+        _that_ben(os.replace, nguon, dich)
 
     def tiem(that, ds):
         def f(*a, **kw):
             loi = ds.pop(0) if ds else None
             if loi is not None:
                 raise loi
-            return that(*a, **kw)
+            return _that_ben(that, *a, **kw)
         return f
 
     def xoa_gia(duong, **kw):
@@ -1651,7 +1675,7 @@ def _ghi_voi_doi_ten_gia(ke_hoach, *, windows=True, co_cu=False, xoa=None, onexc
         if isinstance(kh, BaseException):   # ngắt ngay trong lần dọn (review lượt 12 F2.v)
             raise kh
         if kh is None:
-            return shutil.rmtree(duong, **kw)
+            return _xoa_that_ben(duong, **kw)
         lan, theo_ten = goi_xoa.count(cho) - 1, kh.get("theo_ten")
 
         def theo(that, tien_to):   # tiêm theo TÊN nút: "x" cho unlink tệp/link tên x, "@d" cho rmdir thư mục tên d
@@ -1659,7 +1683,7 @@ def _ghi_voi_doi_ten_gia(ke_hoach, *, windows=True, co_cu=False, xoa=None, onexc
                 loi = theo_ten.get(tien_to + os.path.basename(os.fspath(ten).rstrip("/\\")), lambda i: None)(lan)
                 if loi is not None:
                     raise loi
-                return that(ten, *a, **k)
+                return _that_ben(that, ten, *a, **k)
             return f
         with mock.patch.object(os, "unlink", theo(os.unlink, "") if theo_ten else tiem(os.unlink, list(kh.get("unlink", [])))), \
                 mock.patch.object(os, "rmdir", theo(os.rmdir, "@") if theo_ten else tiem(os.rmdir, list(kh.get("rmdir", [])))), \
@@ -1908,7 +1932,7 @@ def c73_bang_chan_tri_loai_loi():   # #1475 review lượt 5 F2.n: TOÀN BỘ b�
                             else:
                                 onerror(os.unlink, f"{p}/{t}", (type(e), e, None))
                         if not s:
-                            shutil.rmtree(p)
+                            _that_ben(shutil.rmtree, p)
                     with tempfile.TemporaryDirectory() as thu, mock.patch.object(m, "_xoa_cay", xoa_gia), \
                             mock.patch.object(m, "ngu_thu_lai", ngu.append), mock.patch.object(m, "LA_WINDOWS", windows), \
                             mock.patch.object(m, "_DUNG_ONEXC", onexc), contextlib.redirect_stderr(io.StringIO()) as err:
@@ -2023,7 +2047,7 @@ def c74_phan_loai_doi_tuong_loi():   # #1475 review lượt 6 F2.o: ranh giới 
                     def xoa_gia(p, onexc=None, onerror=None):
                         goi.append(1)
                         if len(goi) > 1:
-                            return shutil.rmtree(p)
+                            return _that_ben(shutil.rmtree, p)
                         for e in ([tao()] + ([OSError(errno.EACCES, "PE kèm")] if kem_pe else [])):
                             if onexc is not None:
                                 onexc(os.unlink, f"{p}/x", e)
@@ -2049,7 +2073,7 @@ def c74_phan_loai_doi_tuong_loi():   # #1475 review lượt 6 F2.o: ranh giới 
         trang["k"] += 1
         loi = [OSError(errno.EACCES, "PE trước")] if k < trang["j"] else (trang["loi"] if k == trang["j"] else None)
         if loi is None:
-            return os.rmdir(p)
+            return _that_ben(os.rmdir, p)
         for e in loi:
             (onexc(os.unlink, f"{p}/x", e) if onexc is not None else onerror(os.unlink, f"{p}/x", (type(e), e, None)))
     ngu = []
@@ -2062,7 +2086,7 @@ def c74_phan_loai_doi_tuong_loi():   # #1475 review lượt 6 F2.o: ranh giới 
                     lich = (frozenset({"PE"}),) * j + (frozenset({nhan, "PE"} if kem_pe else {nhan}),)
                     n, ngu_mong, sach = _mong_c73(lich, True)
                     if p.exists():
-                        os.rmdir(p)
+                        _that_ben(os.rmdir, p)
                     p.mkdir()
                     trang.update(k=0, j=j, loi=[tao()] + ([OSError(errno.EACCES, "PE kèm")] if kem_pe else []))
                     del ngu[:]

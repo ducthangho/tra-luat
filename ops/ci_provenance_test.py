@@ -2265,6 +2265,168 @@ def c76_ngat_moi_diem():   # #1475 review lượt 12 F2.v: ngoại lệ không p
                 so_o += 1
     bang(so_o == 4 * ((2 + 3 * 4 + 2 + 1) + (2 + 1 * 4 + 2 + 1) + (1 + 2 + 1 + 1)), f"số ô ngắt: {so_o}")
 
+@ca
+def c77_ngan_sach_thu_lai_doc_lap():
+    # #1475 F2.w: mỗi lần gọi đổi tên hoặc dọn có ngân sách và bậc chờ riêng.
+    from itertools import product
+
+    cho = [0.05, 0.1, 0.2, 0.4, 0.8]
+    cu, moi = {"x": b"cu"}, {"x": b"moi"}
+
+    def doi_ten(so_loi, loi_cuoi=None):
+        loi = [PE(f"doi ten {i}") for i in range(so_loi)]
+        return lambda i: loi[i] if i < so_loi else loi_cuoi
+
+    def don(so_loi):
+        return lambda i: {"theo_ten": {"x": lambda _: PE("don")}} if i < so_loi else None
+
+    def kiem(r, nhan, goi, ngu, loi, out, xoa, sot=None, bao=False):
+        sot = {} if sot is None else sot
+        bang(r["goi"] == goi and r["ngu"] == ngu and r["loi"] is loi, f"{nhan}: goi/ngu/loi: {r}")
+        bang(r["out"] == out and r["xoa"] == xoa, f"{nhan}: out/xoa: {r}")
+        sot_that = {"cu" if ten.endswith(".cu") else "tam": cay for ten, cay in r["sot"].items()}
+        bang(len(r["sot"]) == len(sot) and sot_that == sot, f"{nhan}: sot: {r}")
+        bang(("KHONG_DON_DUOC" in r["err"]) == bao, f"{nhan}: bao don: {r}")
+
+    for a, b in product(range(6), repeat=2):
+        for d in range(7):
+            r = _ghi_voi_doi_ten_gia({"a": doi_ten(a), "b": doi_ten(b)}, co_cu=True,
+                                     xoa={"cu": don(d)}, cu_cay=cu, moi=moi)
+            kiem(r, ("a-b-cu", a, b, d), ["a"] * (a + 1) + ["b"] * (b + 1),
+                 cho[:a] + cho[:b] + cho[:d], None, moi, ["cu"] * min(d + 1, 6),
+                 {"cu": cu} if d == 6 else None, bao=d == 6)
+
+    def loi_ket_thuc(n, cho):
+        yield OSError(errno.EIO, f"{cho} EIO")
+        if n == 5:
+            yield PE(f"{cho} het luot")
+
+    # Khi (a) hỏng hoặc (b) hỏng mà không có bản trước, không có hoàn tác.
+    for cho_hong, co_cu in (("a", True), ("b", False)):
+        for n, d in product(range(6), range(7)):
+            for loi in loi_ket_thuc(n, cho_hong):
+                r = _ghi_voi_doi_ten_gia({cho_hong: doi_ten(n, loi)}, co_cu=co_cu,
+                                         xoa={"tam": don(d)}, cu_cay=cu, moi=moi)
+                kiem(r, (cho_hong, n, d, type(loi).__name__), [cho_hong] * (n + 1),
+                     cho[:n] + cho[:d], loi, cu if co_cu else None,
+                     ["tam"] * min(d + 1, 6), {"tam": moi} if d == 6 else None, bao=d == 6)
+
+    for a, b, c in product(range(6), range(6), range(7)):
+        for loi_b in loi_ket_thuc(b, "b"):
+            loi_c = PE("c het luot") if c == 6 else None
+            for d in range(7):
+                r = _ghi_voi_doi_ten_gia(
+                    {"a": doi_ten(a), "b": doi_ten(b, loi_b), "c": doi_ten(min(c, 5), loi_c)},
+                    co_cu=True, xoa={"tam": don(d)}, cu_cay=cu, moi=moi)
+                sot = {"cu": cu} if c == 6 else {}
+                if d == 6:
+                    sot["tam"] = moi
+                kiem(r, ("a-b-c-tam", a, b, c, d, type(loi_b).__name__),
+                     ["a"] * (a + 1) + ["b"] * (b + 1) + ["c"] * min(c + 1, 6),
+                     cho[:a] + cho[:b] + cho[:c] + cho[:d],
+                     loi_c if c == 6 else loi_b, None if c == 6 else cu,
+                     ["tam"] * min(d + 1, 6), sot, bao=d == 6)
+
+# Các đột biến tái dựng từ review 13 dùng bộ đếm chỉ sống trong một giao dịch.
+_F2W_NEO = (
+    'def doi_ten_thu_lai(nguon, dich):\n'
+    '    """`os.replace` có thử lại (#1475); hết lượt thì ném CHÍNH `PermissionError` của lần cuối."""\n'
+    '    for k in range(SO_LAN_THU_LAI + 1):\n'
+    '        try:\n'
+    '            return _thay_the(nguon, dich)\n'
+    '        except PermissionError:\n'
+    '            if not LA_WINDOWS:   # chỉ Windows\n'
+    '                raise\n'
+    '            if k == SO_LAN_THU_LAI:   # hết lượt: ném chính lỗi cuối\n'
+    '                raise\n'
+    '            ngu_thu_lai(CHO_GOC * 2 ** k)\n'
+    '\n'
+    '_DUNG_ONEXC = sys.version_info >= (3, 12)   # `onexc` có từ 3.12; trước đó `onerror` (test chạy được cả hai nhánh)\n'
+    '\n'
+    'def don_thu_muc(p):\n'
+    '    """Xoá cây thư mục tạm, cùng chính sách thử lại (#1475): mọi lỗi xoá được GOM (không nuốt câm như\n'
+    '    `ignore_errors=True`); thử lại khi trên Windows lần dọn ấy có ≥1 `PermissionError` và mọi lỗi còn lại chỉ là ENOTEMPTY\n'
+    '    (`rmtree` thật báo ENOTEMPTY ở thư mục cha khi một tệp con hỏng). Luật chỉ đọc LOẠI lỗi, không đọc hình dạng cây (sổ uỷ\n'
+    '    quyền #1475, lần xét lại thứ hai). Lỗi khác (EIO…) hay nền khác ⇒ dừng ngay. Không bao giờ ném — dọn dẹp không được đổi kết\n'
+    '    quả của lần ghi — nhưng còn sót thì BÁO `KHONG_DON_DUOC` (lỗi của chính việc báo bị cô lập, review lượt 2 F3) và trả False."""\n'
+    '    for k in range(SO_LAN_THU_LAI + 1):\n'
+    '        loi = []\n'
+    '        if _DUNG_ONEXC:\n'
+    '            _xoa_cay(p, onexc=lambda ham, duong, e: loi.append((duong, e)))\n'
+    '        else:\n'
+    '            _xoa_cay(p, onerror=lambda ham, duong, tt: loi.append((duong, tt[1])))\n'
+    '        if not os.path.lexists(p):\n'
+    '            return True\n'
+    '        loai = {"PE" if isinstance(e, PermissionError) else "ENOTEMPTY" if isinstance(e, OSError) and e.errno == errno.ENOTEMPTY\n'
+    '                else "khac" for _, e in loi}   # phân loại LẠI ở mỗi lần dọn (lỗi có thể đổi loại giữa các lần)\n'
+    '        if not (LA_WINDOWS and "PE" in loai and "khac" not in loai):   # dọn: chỉ thử lại PermissionError trên Windows\n'
+    '            break\n'
+    '        if k == SO_LAN_THU_LAI:   # dọn: hết lượt\n'
+    '            break\n'
+    '        ngu_thu_lai(CHO_GOC * 2 ** k)\n'
+    '    try:   # báo là best-effort: stderr hỏng (đĩa đầy…) không được đổi kết quả ghi hay thay lỗi đang ném\n'
+    '        print(f"KHONG_DON_DUOC {p}: {[f\'{type(e).__name__}: {e}\' for _, e in loi][:3]}", file=sys.stderr)\n'
+    '    except Exception:\n'
+    '        pass\n'
+    '    return False\n'
+    '\n'
+    'def ghi_nguyen_tu(out, tep):\n'
+    '    """Ghi vào thư mục tạm CÙNG CẤP rồi `os.replace`: lỗi giữa chừng ⇒ `out` vắng hoặc giữ nguyên bản trước.\n'
+    '    Cả ba lần đổi tên (cất bản trước · đưa tạm vào chỗ · hoàn tác) đi qua `doi_ten_thu_lai`; cả hai lần dọn qua\n'
+    '    `don_thu_muc` (#1475). Hoàn tác hỏng thì bản trước GIỮ NGUYÊN ở `<tam>.cu` để phục hồi tay, còn thư mục tạm vẫn được dọn."""\n'
+    '    out = Path(out).resolve()\n'
+    '    out.parent.mkdir(parents=True, exist_ok=True)\n'
+    '    tam = Path(tempfile.mkdtemp(prefix=f".{out.name}.tam-", dir=out.parent))\n'
+    '    cu = out.parent / f"{tam.name}.cu"\n'
+    '    try:\n'
+    '        for ten, byte in tep.items():\n'
+    '            ghi_tep(tam / ten, byte)\n'
+    '        if out.exists():\n'
+    '            doi_ten_thu_lai(out, cu)\n'
+    '        doi_ten_thu_lai(tam, out)\n'
+    '    except BaseException:\n'
+    '        try:\n'
+    '            if cu.exists() and not out.exists():\n'
+    '                doi_ten_thu_lai(cu, out)\n'
+    '        finally:   # dọn thư mục tạm KỂ CẢ khi hoàn tác ném\n'
+    '            if os.path.lexists(tam):\n'
+    '                don_thu_muc(tam)\n'
+    '        raise\n'
+    '    if os.path.lexists(cu):\n'
+    '        don_thu_muc(cu)\n'
+    '\n'
+)
+_F2W_GIAO_DICH = """
+_f2w_da_thu = None
+_f2w_ghi_that = ghi_nguyen_tu
+
+def ghi_nguyen_tu(out, tep):
+    global _f2w_da_thu
+    truoc, _f2w_da_thu = _f2w_da_thu, 0
+    try:
+        return _f2w_ghi_that(out, tep)
+    finally:
+        _f2w_da_thu = truoc
+"""
+_F2W_DOI_TEN, _F2W_DON_VA_GHI = _F2W_NEO.split("\ndef don_thu_muc", 1)
+_F2W_NGAN_SACH = "k == SO_LAN_THU_LAI or (_f2w_da_thu is not None and _f2w_da_thu >= SO_LAN_THU_LAI)"
+_F2W_DEM = "if _f2w_da_thu is not None:\n"
+_F2W_DOI_TEN_CHUNG = _F2W_DOI_TEN.replace(
+    "        except PermissionError:", "        except PermissionError:\n            global _f2w_da_thu"
+).replace("k == SO_LAN_THU_LAI", _F2W_NGAN_SACH).replace(
+    "            ngu_thu_lai(", "            " + _F2W_DEM + "                _f2w_da_thu += 1\n            ngu_thu_lai("
+)
+_F2W_BAC_CHO_CHUNG = _F2W_DOI_TEN.replace(
+    "            ngu_thu_lai(CHO_GOC * 2 ** k)",
+    "            global _f2w_da_thu\n            " + _F2W_DEM
+    + "                k = _f2w_da_thu\n                _f2w_da_thu += 1\n            ngu_thu_lai(CHO_GOC * 2 ** k)"
+)
+_F2W_DON_CHUNG = _F2W_DON_VA_GHI.replace(
+    "    for k in range(SO_LAN_THU_LAI + 1):", "    global _f2w_da_thu\n    for k in range(SO_LAN_THU_LAI + 1):", 1
+).replace("k == SO_LAN_THU_LAI", _F2W_NGAN_SACH, 1).replace(
+    "        ngu_thu_lai(", "        " + _F2W_DEM + "            _f2w_da_thu += 1\n        ngu_thu_lai(", 1
+)
+
 DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chuỗi gốc phải xuất hiện ĐÚNG MỘT lần.
     ("A1_xoa_co_attempt", 't.add_argument("--attempt", required=True, type=int, help="run_attempt phải đo")', 't.add_argument("--attempt", type=int, default=1, help=argparse.SUPPRESS)', "c01"),
     ("A2_bo_so_attempt", 'if k not in thieu and r.get(k) != v]', "if False]", "c02"),
@@ -2726,6 +2888,12 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ('M5_nuot_ngat_khi_don_ban_truoc', '    if os.path.lexists(cu):\n        don_thu_muc(cu)\n', '    if os.path.lexists(cu):\n        try:\n            don_thu_muc(cu)\n        except BaseException:\n            pass\n', 'c76'),
     ('M6_GeneratorExit_tra_ve_som', '    except BaseException:\n        try:\n', '    except GeneratorExit:\n        return\n    except BaseException:\n        try:\n', 'c76'),
     ('M7_ValueError_tra_ve_som', '    except BaseException:\n        try:\n', '    except ValueError:\n        return\n    except BaseException:\n        try:\n', 'c76'),
+    ("F2w_N1_ngan_sach_chung_doi_ten", _F2W_NEO,
+     _F2W_DOI_TEN_CHUNG + "\ndef don_thu_muc" + _F2W_DON_VA_GHI + _F2W_GIAO_DICH, "c77"),
+    ("F2w_N2_bac_cho_chung_doi_ten", _F2W_NEO,
+     _F2W_BAC_CHO_CHUNG + "\ndef don_thu_muc" + _F2W_DON_VA_GHI + _F2W_GIAO_DICH, "c77"),
+    ("F2w_N12_ngan_sach_chung_doi_ten_va_don", _F2W_NEO,
+     _F2W_DOI_TEN_CHUNG + "\ndef don_thu_muc" + _F2W_DON_CHUNG + _F2W_GIAO_DICH, "c77"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_AttributeError_qua_except_doi_kieu", "def than(dong):\n",

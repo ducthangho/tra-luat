@@ -17,8 +17,8 @@ recorder_is_dispatcher: true
 recorder_ghi_chu: 'Codex ghi theo uy quyen chu kho va thi cong; Antigravity Gemini review doc lap'
 leased_at_utc: '2026-11-22T12:55:49Z'
 heartbeat_at: '2026-11-22T12:55:49Z'
-lease_until: '2026-11-24T12:55:49Z'
-lease_expires_at_utc: '2026-11-24T12:55:49Z'
+lease_until: '2026-11-22T15:39:34Z'
+lease_expires_at_utc: '2026-11-22T15:39:34Z'
 role: executor
 provider: openai_codex
 executor: openai_codex
@@ -86,3 +86,10 @@ nang_tran:
   can_cu: 'comment 7075054983; diff ke thua 2 tep +801/-10; test nhieu thao tac chung giao dich la cong nghiem thu'
   tran_cu: {tep: 6, dong_them: 450}
   tran_moi: {tep: 2, dong_them: 1000}
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-24T12:55:49Z'
+  han_moi_utc: '2026-11-22T15:39:34Z'
+  chi_thi: 'https://github.com/ducthangho/tra-luat/pull/1498#issuecomment-7080632430'
+  ly_do: 'PR #1498 da merge a2bdb480e8fb54c152af190378c434fa41b0feaf; CI master 45036799994 success, 39/39 job, da doi chieu 4 moc provenance.'
+  vi_sao_khong_dung_bia_mo: 'Ket thuc quyen ghi sau land, khong cap lease ke nhiem.'
+  nguoi_rut: 'Codex land operator ghi theo chi thi chu kho'

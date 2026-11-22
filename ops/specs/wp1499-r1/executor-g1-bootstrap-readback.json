@@ -1,0 +1,43 @@
+{
+  "packet": 1499,
+  "mission_revision": 98,
+  "revision": 4,
+  "generation": 1,
+  "lease": "wp1499-r4-g1-codex",
+  "lease_receipt": "https://github.com/ducthangho/tra-luat/issues/1499#issuecomment-7082282173",
+  "base": "a2bdb480e8fb54c152af190378c434fa41b0feaf",
+  "source_runs": [
+    {
+      "platform": "Linux cloud",
+      "run": "87df55e4",
+      "rc": 14,
+      "pid": null,
+      "outcome": "launcher rejected linked git worktree"
+    },
+    {
+      "platform": "Linux cloud",
+      "run": "b74f2123",
+      "rc": 1,
+      "stdout_bytes": 0,
+      "outcome": "Codex CLI emitted stdin notice then stopped; standalone diagnostic reproduced read-only filesystem while initializing in-process app-server client",
+      "diagnostic": "filesystem tracing identified writes required for Codex local runtime state, not a repository error"
+    },
+    {
+      "platform": "Windows cloud VM",
+      "rc": 13,
+      "outcome": "launcher credential status requires a new Codex snapshot",
+      "run_directory_created": false,
+      "checkout_at_base": true
+    }
+  ],
+  "source_attempts_with_model_output": 0,
+  "source_modified": false,
+  "disposition": "blocked_on_codex_cli_runtime",
+  "followups": [
+    "Fresh authorized Windows credential snapshot through the existing launcher flow, or approved successor lease for an available Codex execution surface."
+  ],
+  "review_caps": {
+    "wp1462": "6/6",
+    "wp1463": "6/6"
+  }
+}

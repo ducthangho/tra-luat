@@ -1,0 +1,88 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1475
+packet_id: CI-PROVENANCE-WIN-THU-LAI
+mission_ghi_chu: 'khong thuoc Mission; nguon cap viec: phat hien Windows cua packet #1322 (comment 7049377019), chu kho chon phuong an 1 (sua ma)'
+revision: 1
+generation: 3
+lease_id: wp1475-r1-g3-codex
+thay_the_cho: [wp1475-r1-g2-antigravity]
+thay_the_cho_ghi_chu: 'Doi cap executor-reviewer theo vai tro thuc te, giu base va write set'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1475#issuecomment-7079439859
+authority_url: https://github.com/ducthangho/tra-luat/issues/1475#issuecomment-7079439859
+authority_ghi_chu: 'Chu kho uy quyen tu dieu phoi lease va thuc hien lien tuc den khi mo PR'
+recorded_by: openai_codex_dispatcher
+recorder_is_dispatcher: true
+recorder_ghi_chu: 'Codex ghi theo uy quyen chu kho va thi cong; Antigravity Gemini review doc lap'
+leased_at_utc: '2026-11-22T12:55:49Z'
+heartbeat_at: '2026-11-22T12:55:49Z'
+lease_until: '2026-11-24T12:55:49Z'
+lease_expires_at_utc: '2026-11-24T12:55:49Z'
+role: executor
+provider: openai_codex
+executor: openai_codex
+model: KHONG_DO_DUOC
+model_family: openai
+execution_surface: codex_service
+transport: machine
+transport_ghi_chu: 'Codex service trong workspace dam may'
+environment: cloud
+operating_system: Linux
+shell: bash
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+assurance_target: cross_approved
+reviewer: google_antigravity
+reviewer_provider: google_antigravity
+reviewer_model_family: gemini
+reviewer_execution_surface: antigravity
+reviewer_transport: machine/local
+reviewer_model: gemini-4-neon-high
+reviewer_independence: 'agy phien moi, review diff dong bang, chi doc, khac ho model; phai neo exact SHA va khai gioi han evidence'
+spec_path: ops/specs/CI-PROVENANCE-WIN-THU-LAI-r1-g3.md
+spec_ref: refs/heads/ops/wp1475-r1-g1-lease@bd2f2103d0bb1de46cf6b6ec25552dbb560a82a6
+spec_ref_ghi_chu: 'OID40 spec g3, base nghiem thu bat bien'
+spec_hash: aa0e4d798d9aa4fefd3f0c6c1d3c91df5a60277829af4009ccb0cfdb99a37e85
+spec_sha256: aa0e4d798d9aa4fefd3f0c6c1d3c91df5a60277829af4009ccb0cfdb99a37e85
+spec_sha256_required: aa0e4d798d9aa4fefd3f0c6c1d3c91df5a60277829af4009ccb0cfdb99a37e85
+spec_blob: 7a7a1af03dd3f38e875b69fa556a3ff7466ea78d
+branch: agent/wp1475-g3-codex
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: e02d748d29cd5165fc29fa1a5a8e9b94593874c7
+start_from_sha: 7f41c39c87493137bc73ff4c6d1dc24a75f41ae6
+reviewed_sha_required: 7f41c39c87493137bc73ff4c6d1dc24a75f41ae6
+reviewed_sha_ghi_chu: 'Diem ke thua tu g1, khong phai verdict approve; review moi neo SHA va tree cua ung vien moi'
+write_set:
+- ops/ci_provenance.py
+- ops/ci_provenance_test.py
+write_set_hash: 7e13bbe22a90719aadb9b5e1ac993b13eb043caddb81229b9f8c209d7af293eb
+write_set_hash_scope: sorted NFC casefold exact paths encoded as compact UTF-8 JSON
+closure_status: 'Thay lease g2 hai chieu, giu write set'
+tran_kich_thuoc: 'ADR-0053 rieng #1475 g3: 2 tep va toi da 1000 dong them'
+tran_loi_goi_codex: 'Vong mo den khi het P0/P1/P2 theo comment 7079439859'
+dieu_kien_merge_bo_sung: 'ADR-0060 (dong khai cua spec), windows required theo A6 cua dac ta (chu kho mien luot ca bo M3); spec khai cham E5 nen chu kho duyet merge neo exact SHA; chay kiem-merge K0-K7 TRUOC khi bo draft'
+coordination_paths:
+- ops/leases/wp1475-r1-g3-codex.yaml
+- ops/specs/CI-PROVENANCE-WIN-THU-LAI-r1-g3.md
+run_minutes: 2880
+heartbeat_required_minutes: 360
+review_sla_minutes: 240
+prohibited_actions:
+- LIVE
+- stage_credential_to_Drive
+- edit_real_credential
+- self_review
+- self_approve
+- merge
+- land
+- kill_other_session_process
+- write_outside_effective_write_set
+land_authority_note: owner final approval on a specific SHA required before merge; land bookkeeping separate
+nang_tran:
+  ai_nang: ducthangho
+  can_cu: 'comment 7075054983; diff ke thua 2 tep +801/-10; test nhieu thao tac chung giao dich la cong nghiem thu'
+  tran_cu: {tep: 6, dong_them: 450}
+  tran_moi: {tep: 2, dong_them: 1000}

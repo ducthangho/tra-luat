@@ -1,0 +1,30 @@
+{
+  "packet": 1499,
+  "spec_revision": 1,
+  "reviewed_spec_commit": "ed1c7311fd5cf84613465be7909a0134941acf67",
+  "spec_hash_confirmed_by_bootstrap": "558b43290c6b5f2660a54f22da1d3c11aa6915bd725f9df59dcba1b66e5d9f6f",
+  "spec_hash_claimed_by_reviewer": "unmeasured",
+  "launcher_run": "f2f99198",
+  "transport": [
+    "google_antigravity",
+    "antigravity",
+    "machine/local"
+  ],
+  "launcher_rc": 0,
+  "verdict": "changes_requested",
+  "stdout_sha256": "4a2d01c0198fa2c5a69c33cbac01b2ef74dfcf1849c01b92e153edc4d9a9185e",
+  "reviewer_conversation": "594e9bff-93a5-4791-bd68-e7ec8d83d7da",
+  "classes": [
+    "executable_naming",
+    "receipt_compatibility",
+    "privilege_boundary",
+    "native_verification",
+    "exclusivity_wp1233",
+    "independent_assurance"
+  ],
+  "successor_spec": {
+    "commit": "6a9fb2d9dc43a1415825a05540b391944c739a2f",
+    "sha256": "50c81166533bd9795883edab5f040ba21bff91775363303757c10653b75f08a8"
+  },
+  "source_lease_issued": false
+}

@@ -1,0 +1,60 @@
+{
+  "packet": 1499,
+  "spec_revision": 2,
+  "launcher_run": "1f406b92",
+  "launcher_rc": 0,
+  "session": "15f04389-cae2-4cac-9303-cbcc56ba9d22",
+  "stdout_sha256": "e142a245251e30657492caa509ec045e6c6f91645008c234c4eded67e522ad90",
+  "verdict": "changes_requested",
+  "sha": "6a9fb2d9dc43a1415825a05540b391944c739a2f",
+  "spec": "50c81166533bd9795883edab5f040ba21bff91775363303757c10653b75f08a8",
+  "findings": [
+    {
+      "id": "F1",
+      "class_slug": "native_verification",
+      "severity": "high",
+      "claim": "Criterion 4 leaves the gate outcome undefined when runtime tool-execution evidence is unmeasured, lacks a negative non-execution oracle and denied_actions schema/missing-field rule, and does not bind receipt generation or candidate hashes to pass/fail assertions."
+    },
+    {
+      "id": "F2",
+      "class_slug": "receipt_compatibility",
+      "severity": "high",
+      "claim": "Criterion 2 mandates a before/after validator contract comparison without a pass/fail predicate and underspecifies the raw-record locking test and historical local_process regression check."
+    },
+    {
+      "id": "F3",
+      "class_slug": "exclusivity_wp1233",
+      "severity": "high",
+      "claim": "WP1233 exclusivity lacks an explicit block rule on active lock detection, omits acceptance evidence from Criteria 1-5 (contradicting D?i chi?u review r1), and leaves ref-freshness and base-drift re-approval undefined."
+    },
+    {
+      "id": "F4",
+      "class_slug": "authority_scope",
+      "severity": "medium",
+      "claim": "Criterion 5 embeds Mission #1172 r98 conditional cap activation and B4/PR2 lease/ledger governance inside WP1499 acceptance criteria without separating coordinator authority from WP1499 implementer authority, and Write set grants directory-wide access to ops/specs/wp1499-r1/."
+    },
+    {
+      "id": "F5",
+      "class_slug": "executable_naming",
+      "severity": "medium",
+      "claim": "Scope assumes the existing argv[0] normalizer already strips one of (.exe, .cmd, .bat, .ps1) while restricting launcher.py edits to the transport table only, and Criterion 1 omits negative fallback expectations, unsupported suffixes, and symlink test criteria."
+    },
+    {
+      "id": "F6",
+      "class_slug": "privilege_boundary",
+      "severity": "medium",
+      "claim": "Criterion 3 leaves the allowlisted read commands, exact-match enforcement mechanism, global-state non-mutation proof, and evidence redaction/storage boundaries underspecified."
+    },
+    {
+      "id": "F7",
+      "class_slug": "independent_assurance",
+      "severity": "medium",
+      "claim": "Criterion 5 forbids using the candidate launcher only as 'sole evidence' (leaving a self-attestation loophole) and underspecifies Antigravity transport provenance and positive test evidence."
+    }
+  ],
+  "successor_spec": {
+    "commit": "f56b00500954bda8b6ec22a76c94cd30f470bce9",
+    "sha256": "b33807423a4fba6063c9ffc2511a45ce2d1feb350cd63d352c5bbbcd62a76ee8"
+  },
+  "source_lease_issued": false
+}

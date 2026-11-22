@@ -57,8 +57,8 @@
   "audit_label_if_delegated": "owner audits exact H personally (human_exact_head_audit.v1); coordinator never signs",
   "recorded_by": "Claude Code coordinator session; not author or reviewer",
   "recorder_is_executor": false,
-  "lease_until": "2026-11-26T08:00:00Z",
-  "lease_expires_at_utc": "2026-11-26T08:00:00Z",
+  "lease_until": "2026-11-22T14:27:41Z",
+  "lease_expires_at_utc": "2026-11-22T14:27:41Z",
   "heartbeat_required_minutes": 360,
   "heartbeat_at": null,
   "limits": {
@@ -91,5 +91,7 @@
     "ruleset_change"
   ],
   "current_head": "6767e377bc2bdf3b512c6641496e88f614eb8978",
-  "attempts_used": 3
+  "attempts_used": 3,
+  "retirement_authority_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7080479301",
+  "retirement_reason": "MCR-1172-r97 review-only continuation, source attempts exhausted"
 }

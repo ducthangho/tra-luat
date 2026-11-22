@@ -1,4 +1,4 @@
-# Đặc tả packet `CI-PROVENANCE-WIN-THU-LAI` r1: thử lại có giới hạn khi `os.replace` gặp `PermissionError` trên Windows
+# CI-PROVENANCE-WIN-THU-LAI r1 — Thử lại có giới hạn khi os.replace gặp PermissionError trên Windows
 
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab

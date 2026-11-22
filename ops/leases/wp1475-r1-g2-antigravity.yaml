@@ -86,3 +86,4 @@ nang_tran:
   can_cu: 'comment 7075054983; diff ke thua 2 tep +801/-10; test nhieu thao tac chung giao dich la cong nghiem thu'
   tran_cu: {tep: 6, dong_them: 450}
   tran_moi: {tep: 2, dong_them: 1000}
+da_bi_thay_the: wp1475-r1-g3-codex

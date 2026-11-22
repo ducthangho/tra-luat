@@ -2311,21 +2311,22 @@ def c77_ngan_sach_thu_lai_doc_lap():
                      cho[:n] + cho[:d], loi, cu if co_cu else None,
                      ["tam"] * min(d + 1, 6), {"tam": moi} if d == 6 else None, bao=d == 6)
 
-    for a, b, c in product(range(6), range(6), range(7)):
+    for a, b, c in product(range(6), repeat=3):
         for loi_b in loi_ket_thuc(b, "b"):
-            loi_c = PE("c het luot") if c == 6 else None
-            for d in range(7):
-                r = _ghi_voi_doi_ten_gia(
-                    {"a": doi_ten(a), "b": doi_ten(b, loi_b), "c": doi_ten(min(c, 5), loi_c)},
-                    co_cu=True, xoa={"tam": don(d)}, cu_cay=cu, moi=moi)
-                sot = {"cu": cu} if c == 6 else {}
-                if d == 6:
-                    sot["tam"] = moi
-                kiem(r, ("a-b-c-tam", a, b, c, d, type(loi_b).__name__),
-                     ["a"] * (a + 1) + ["b"] * (b + 1) + ["c"] * min(c + 1, 6),
-                     cho[:a] + cho[:b] + cho[:c] + cho[:d],
-                     loi_c if c == 6 else loi_b, None if c == 6 else cu,
-                     ["tam"] * min(d + 1, 6), sot, bao=d == 6)
+            for loi_c in (None, *loi_ket_thuc(c, "c")):
+                for d in range(7):
+                    r = _ghi_voi_doi_ten_gia(
+                        {"a": doi_ten(a), "b": doi_ten(b, loi_b), "c": doi_ten(c, loi_c)},
+                        co_cu=True, xoa={"tam": don(d)}, cu_cay=cu, moi=moi)
+                    sot = {"cu": cu} if loi_c is not None else {}
+                    if d == 6:
+                        sot["tam"] = moi
+                    kiem(r, ("a-b-c-tam", a, b, c, d, type(loi_b).__name__, type(loi_c).__name__),
+                         ["a"] * (a + 1) + ["b"] * (b + 1) + ["c"] * (c + 1),
+                         cho[:a] + cho[:b] + cho[:c] + cho[:d],
+                         loi_b if loi_c is None else loi_c, cu if loi_c is None else None,
+                         ["tam"] * min(d + 1, 6), sot, bao=d == 6)
+
 
 # Các đột biến tái dựng từ review 13 dùng bộ đếm chỉ sống trong một giao dịch.
 _F2W_NEO = (
@@ -2411,11 +2412,12 @@ def ghi_nguyen_tu(out, tep):
 _F2W_DOI_TEN, _F2W_DON_VA_GHI = _F2W_NEO.split("\ndef don_thu_muc", 1)
 _F2W_NGAN_SACH = "k == SO_LAN_THU_LAI or (_f2w_da_thu is not None and _f2w_da_thu >= SO_LAN_THU_LAI)"
 _F2W_DEM = "if _f2w_da_thu is not None:\n"
-_F2W_DOI_TEN_CHUNG = _F2W_DOI_TEN.replace(
+_F2W_DEM_DOI_TEN = _F2W_DOI_TEN.replace(
     "        except PermissionError:", "        except PermissionError:\n            global _f2w_da_thu"
-).replace("k == SO_LAN_THU_LAI", _F2W_NGAN_SACH).replace(
+).replace(
     "            ngu_thu_lai(", "            " + _F2W_DEM + "                _f2w_da_thu += 1\n            ngu_thu_lai("
 )
+_F2W_DOI_TEN_CHUNG = _F2W_DEM_DOI_TEN.replace("k == SO_LAN_THU_LAI", _F2W_NGAN_SACH)
 _F2W_BAC_CHO_CHUNG = _F2W_DOI_TEN.replace(
     "            ngu_thu_lai(CHO_GOC * 2 ** k)",
     "            global _f2w_da_thu\n            " + _F2W_DEM
@@ -2893,7 +2895,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("F2w_N2_bac_cho_chung_doi_ten", _F2W_NEO,
      _F2W_BAC_CHO_CHUNG + "\ndef don_thu_muc" + _F2W_DON_VA_GHI + _F2W_GIAO_DICH, "c77"),
     ("F2w_N12_ngan_sach_chung_doi_ten_va_don", _F2W_NEO,
-     _F2W_DOI_TEN_CHUNG + "\ndef don_thu_muc" + _F2W_DON_CHUNG + _F2W_GIAO_DICH, "c77"),
+     _F2W_DEM_DOI_TEN + "\ndef don_thu_muc" + _F2W_DON_CHUNG + _F2W_GIAO_DICH, "c77"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_AttributeError_qua_except_doi_kieu", "def than(dong):\n",

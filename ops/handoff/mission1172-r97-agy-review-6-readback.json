@@ -1,0 +1,76 @@
+{
+  "mission": "gh-1172",
+  "revision": 97,
+  "installed_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7080569071",
+  "lease_workflow": "https://github.com/ducthangho/tra-luat/actions/runs/45032963621",
+  "requested_model": "gemini-4-neon-xhigh",
+  "serving_model_identity": "unknown",
+  "cli": "agy 1.5.14",
+  "result": "blocked_no_verdict",
+  "recorded_by": "Codex dispatcher",
+  "review_invocations_used": {
+    "wp1462": 6,
+    "wp1463": 6
+  },
+  "review_invocations_cap": {
+    "wp1462": 6,
+    "wp1463": 6
+  },
+  "notes": [
+    "Both CLI invocations consumed model tokens and returned an empty response with command permission denied.",
+    "The launcher recorded a generic local_process identity; no reviewer assurance is claimed.",
+    "Both review checkouts remained clean."
+  ],
+  "runs": [
+    {
+      "packet": "wp1462",
+      "run_id": "9a62660523864573934d412597331cf8",
+      "head": "724993bf23f16070f272ccd81b4fe16c111ce2eb",
+      "state": "xong",
+      "rc": 0,
+      "start": "2026-11-22T21:36:30.766243+07:00",
+      "end": "2026-11-22T21:36:59.389306+07:00",
+      "provider": "local_process",
+      "execution_surface": "subprocess",
+      "transport": "machine",
+      "prompt_sha256": "cbe721819b0909ff671c8757fe5a449aa7d73cc7c0c5c3f2382fc0c27b6db9fd",
+      "run_sha256": "220c076deb18f49f6aef2d9454cef33eb4fb86b38c97deb83439a6d799041664",
+      "stdout_sha256": "33397e5f6c1b810c9e7206265cca3b7ec87a177506f0494dc381a97fc3de3aea",
+      "stderr_sha256": "6f9b232ca1f3b43aa72e2ba63698c09b0796b612d5a17cf05efee31e6c79b713",
+      "denied": [
+        {
+          "action": "command",
+          "display_name": "Bash"
+        }
+      ],
+      "response_length": 0,
+      "conversation": "fe8912e9-5db1-456d-be58-382965fda7ca",
+      "git_status": []
+    },
+    {
+      "packet": "wp1463",
+      "run_id": "18f4b763c38e4d98883a43324371231f",
+      "head": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "state": "xong",
+      "rc": 0,
+      "start": "2026-11-22T21:36:17.53142+07:00",
+      "end": "2026-11-22T21:36:55.217984+07:00",
+      "provider": "local_process",
+      "execution_surface": "subprocess",
+      "transport": "machine",
+      "prompt_sha256": "465ac311d1abcd667df08a45b890e772d7be2beb8932b54828b2302b47256b8a",
+      "run_sha256": "4350c5fda9502247cf6225a96f8d4115ee08aaa5e24aa495e27389c72a8ec4e9",
+      "stdout_sha256": "7757780a122eef04e8d90360faef383dd3bb4439f1d3b421a37bbbd90ac8cad6",
+      "stderr_sha256": "6f9b232ca1f3b43aa72e2ba63698c09b0796b612d5a17cf05efee31e6c79b713",
+      "denied": [
+        {
+          "action": "command",
+          "display_name": "Bash"
+        }
+      ],
+      "response_length": 0,
+      "conversation": "b82c11e8-a8f1-47f5-ae34-e543cd667b56",
+      "git_status": []
+    }
+  ]
+}

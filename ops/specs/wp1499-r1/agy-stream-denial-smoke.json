@@ -1,0 +1,53 @@
+{
+  "packet": 1499,
+  "kind": "prototype_feasibility_negative",
+  "run": "0a7c696e76fb42a3a0cefbf0b6cbbc2b",
+  "launcher_rc": 0,
+  "response_length": 0,
+  "retained_tool_steps": [
+    {
+      "event": "step_update",
+      "step_update": {
+        "conversation_id": "816249fc-ae7e-4e5f-86d9-b5a2388fb990",
+        "step_index": 2,
+        "state": "ACTIVE",
+        "step_type": "tool",
+        "tool_name": "run_command",
+        "tool_info": {
+          "name": "run_command",
+          "parameters": {
+            "CommandLine": "git rev-parse --is-inside-work-tree"
+          }
+        }
+      }
+    },
+    {
+      "event": "step_update",
+      "step_update": {
+        "conversation_id": "816249fc-ae7e-4e5f-86d9-b5a2388fb990",
+        "step_index": 2,
+        "state": "ERROR",
+        "step_type": "tool",
+        "tool_name": "run_command",
+        "duration_seconds": 1.2002256,
+        "tool_info": {
+          "name": "run_command",
+          "parameters": {
+            "CommandLine": "git rev-parse --is-inside-work-tree"
+          },
+          "error": {
+            "type": "TOOL_ERROR",
+            "message": "permission check failed for unsandboxed \"git rev-parse --is-inside-work-tree\": user denied permission to run command:\ngit rev-parse --is-inside-work-tree\nDo not attempt to circumvent this denial by rephrasing the command, using alternative tools/scripts (e.g. python, sh, curl), or accessing the same target resource. Proceed without performing this action."
+          }
+        }
+      }
+    }
+  ],
+  "denied_actions": [
+    {
+      "action": "command",
+      "display_name": "Bash"
+    }
+  ],
+  "formal_review": false
+}

@@ -48,8 +48,8 @@
   "authority_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7103470083",
   "recorded_by": "Codex dispatcher",
   "leased_at_utc": "2026-11-23T14:08:09Z",
-  "lease_until": "2026-11-24T14:05:37Z",
-  "lease_expires_at_utc": "2026-11-24T14:05:37Z",
+  "lease_until": "2026-11-23T15:46:33Z",
+  "lease_expires_at_utc": "2026-11-23T15:46:33Z",
   "heartbeat_required_minutes": 360,
   "limits": {
     "executor_attempts": 4,
@@ -83,5 +83,9 @@
       "merge",
       "required post-merge evidence"
     ]
-  }
+  },
+  "prior_lease_until": "2026-11-24T14:05:37Z",
+  "released_at_utc": "2026-11-23T15:46:33Z",
+  "released_reason": "exact-head merge and required post-merge CI verified",
+  "released_merge": "a99a74f75867172fe62f984d7528f5d5bd73dacb"
 }

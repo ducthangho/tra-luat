@@ -1,5 +1,14 @@
 # Kết quả đo của executor — wp1462 (B4), attempt 4
 
+## Bổ sung lượt thực thi 5 (r9/g6)
+
+Windows local, Python 3.12.10, Git 2.56.0.windows.4. Bản sao đo dùng base `48d372e14f190dae83a75ccbca8ee9a0b25635c5`.
+SHA-256 mã đã đo: `packet_loop.py` `437a7188d183bbd03e99d97231a754e8572528bfb293083b62aa5db94fc5ee3f`; `do_b4.py` `3d06badc10006cfc4cce3b71201d480511133f8e0f46f689a682dcc10f6f521f`. `packet_loop_test.py` giữ nguyên hash ghi bên dưới.
+
+- A/B đích qua `lenh_ab((0, 2))` với quần thể giới hạn ở chín ca ngoại lệ transition và một ca tự sửa script: rc 0, 9 ca nhóm (b), 1 ca nhóm (c), 6 lời nhóm (b) không có byte, 0 lỗi. Tự kiểm bộ so có 0 lỗi và giết 4/4 đột biến sẵn có.
+- Bảy ca B4 đích qua `chay_suite`: rc 0, 7/7 đạt. Fixture cây Git rỗng qua `_b4_tinh_lai`: rc 0, `cat-file` nhận stdin rỗng và trả `b""`, cây thiếu classifier vẫn cho `la`.
+- Các số đầy đủ bên dưới là kết quả lịch sử của lượt 4. Số đo lượt 5 có phạm vi đích như trên.
+
 Tệp nằm TRONG H nên không ghi SHA, cây hay numstat của H (ở handoff §7 và Issue #1462). Kết quả neo bằng sha256 của mã đã chạy:
 `.claude/dev/packet_loop.py` `816f77d10413bbaa744795c09a7e2a1f14b03d927cd0642737a353396cec934b` · `.claude/dev/packet_loop_test.py` `43e32fd96687218aed7b80dd9f96ead8fda88ea2e17544cedfe7f6e8c462ca0c` (cả hai không đổi so với attempt 3) · `ops/specs/wp1462-r1/do/do_b4.py` `1979b0b1a39cfa6253df2036151d13bee933dc0b91634b6ff61cb8550edaae55`.
 Nền: phiên cloud Linux, 4 nhân, Python 3.13.18, git 2.43.0, clone sạch (`.git` là thư mục), base `48d372e14f190dae83a75ccbca8ee9a0b25635c5` (merge-base với `origin/master`). Log thô ngoài kho, đường dẫn ở handoff.

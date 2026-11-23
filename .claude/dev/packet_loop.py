@@ -3676,8 +3676,8 @@ def _b4_tinh_lai(root: Path, cay_ma: str, goc: str, dau: str) -> str:
         (td / "git" / "config").write_bytes(b'[core]\n\tattributesFile = "%s"\n' % os.fsencode((td / "git" / "attributes").as_posix()))
 
         def g(*lenh, them=None, vao=None) -> tuple:
-            p = subprocess.run(["git", *lenh], env={**env, **(them or {})}, cwd=td / "cay", capture_output=True, input=vao, stdin=None if vao else subprocess.DEVNULL, timeout=B4_HAN_PL)
-            return p.returncode, p.stdout if vao else p.stdout.decode("ascii", "replace").strip()
+            p = subprocess.run(["git", *lenh], env={**env, **(them or {})}, cwd=td / "cay", capture_output=True, input=vao, stdin=None if vao is not None else subprocess.DEVNULL, timeout=B4_HAN_PL)
+            return p.returncode, p.stdout if vao is not None else p.stdout.decode("ascii", "replace").strip()
         cay = g("merge-tree", "--write-tree", "--no-messages", goc, dau) if rc == 0 else (1, "")
         C = g("commit-tree", cay[1], "-p", goc, "-p", dau, "-m", "pl1462", them=ngay) if cay[0] == 0 else (1, "")
         if C[0] or not SHA_RE.fullmatch(C[1]):

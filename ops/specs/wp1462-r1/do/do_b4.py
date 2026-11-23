@@ -233,8 +233,15 @@ def phan_nhom(vao, ghi, vet_b, vet_h, cham_b, cham_h):
         nhom[n].append(t)
         e = so_nhom(n, ghi.get(t, []), nem)
         loi += [f"tiêu chí 1 nhóm ({n}): {t}: {e}"] * bool(e)
+        for ve, vet in (("base", vet_b), ("head", vet_h)):
+            if any(v.startswith("la:") and v.endswith(":so:False") for v in vet.get(t, [])):
+                loi.append(f"tiêu chí 1: {t}: {ve} không dựng lại được bản sửa duy nhất")
     so = sum(map(len, nhom.values()))
     return nhom, loi + [f"tiêu chí 1: phân loại {so} ca ≠ đếm {len(vao)}"] * (so != len(vao))
+
+
+def ngoai_le_tc2(nhom, cham, xs):
+    return nhom == "b" and cham == 0 and bool(xs) and all(isinstance(x, str) and x == xs[0] for x in xs)
 
 
 def tu_kiem_nhom():
@@ -248,7 +255,13 @@ def tu_kiem_nhom():
           ("(a) có vế ném", "a", [("a", ["m.E('i')", tb(1)])], ((), ()), False), ("(a) không lời nào", "a", [], ((), ()), False),
           ("(b) cùng chuỗi", "b", [("a", ["m.E('i')"] * 2)], (i, i), True), ("(b) thông điệp lệch", "b", [("a", ["m.E('i')", "m.E('j')"])], (i, i), False),
           ("(b) chuỗi ra khỏi bộ dựng lệch", "b", [], (i, j), False), ("(b) không có ngoại lệ", "b", [], ((), ()), False), ("(b) có vế cho byte", "b", [("a", ["m.E('i')", tb(1)])], (i, i), False)]
-    return [f"tự kiểm nhóm: {ten}" for ten, n, ds, nem, mong in ca if (so_nhom(n, ds, nem) is None) is not mong]
+    loi = [f"tự kiểm nhóm: {ten}" for ten, n, ds, nem, mong in ca if (so_nhom(n, ds, nem) is None) is not mong]
+    for n, cham, xs, mong in (("b", 0, [i[0], i[0]], True), ("a", 0, [i[0], i[0]], False),
+                               ("b", 1, [i[0], i[0]], False), ("b", None, [i[0], i[0]], False),
+                               ("b", 0, [i[0], tb(1)], False), ("b", 0, [i[0], j[0]], False)):
+        if ngoai_le_tc2(n, cham, xs) != mong:
+            loi.append(f"tự kiểm ngoại lệ tiêu chí 2: {n}, {cham}, {xs}")
+    return loi
 
 
 def tu_kiem_dem(td):
@@ -280,6 +293,11 @@ def tu_kiem_dem(td):
             "cham_nem": ["vao", "so", r, "ca:KeyError"], "script_la": ["vao", "la:0:so:True", "ca:dat"], "ngoai": ["ca:dat"]}
     nh = {"a": ["cham_nem", "gian_tiep", "khong_sd", "thang"], "b": ["dung_nem", "runner_nem"], "c": ["script_la"]}
     g2 = do_ca(G, [Path(td, "a/packet_loop.py"), Path(td, "b/packet_loop.py")], td, {"script_la"})[0]
+    t = "script_la"
+    khong_dung_lai = {t: ["vao", "la:99:so:False", "ca:dat"]}
+    _, loi_dung_lai = phan_nhom({t}, {t: [("c", [(99, b"", b"")] * 2)]}, khong_dung_lai, khong_dung_lai, {}, {})
+    if len(loi_dung_lai) != 2:
+        return [f"tự kiểm dựng lại bản sửa: {loi_dung_lai}"]
     ok = (vet, vh, nhom, [x.split(": ")[1] for x in loi], so_nhom("c", g2.get("script_la", [])) is not None) == (mong, {t: mong[t] for t in vao}, nh, ["cham_nem"], True)
     return [] if ok and MON["do"] else [f"tự kiểm phép đếm/nhóm: vết {vet} · nhóm {nhom} · lỗi {loi} (mong {mong} · {nh}); máy đếm CLI bật: {MON['do']}"]
 
@@ -338,9 +356,14 @@ def lenh_ab(manh=(0, 1)):
     loi += e
     lop, bo_qua = {}, []
     for t, ds in ghi["cu"].items():   # tiêu chí 2: lời có vế ném (nhóm b) không có byte để xếp lớp ⇒ liệt kê; lời `c` so sau CHUAN (cùng phép của tiêu chí 1)
+        if any(v.startswith("la:") and v.endswith(":so:False") for v in vh["cu"].get(t, [])):
+            loi.append(f"tiêu chí 2: {t}: không dựng lại được bản sửa duy nhất")
         for i, (k, xs) in enumerate(ds):
             if any(isinstance(x, str) for x in xs):
-                bo_qua.append(t)
+                if ngoai_le_tc2("b" if t in nhom["b"] else "a", chh["cu"].get(t), xs):
+                    bo_qua.append(t)
+                else:
+                    loi.append(f"tiêu chí 2: {t} lời {i}: ngoại lệ thiếu bằng chứng nhóm (b), 0 lần chạm CLI hoặc bằng nhau: {xs}")
                 continue
             b, h = ((x[0], CHUAN(x[1]), CHUAN(x[2])) for x in xs) if k == "c" else xs
             lp, er = so(b, h)

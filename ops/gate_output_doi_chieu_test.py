@@ -775,7 +775,7 @@ def a217_cli_tham_so_va_ma_thoat():
         rc, ra = cli(*a)
         bang(rc == mong and "Traceback" not in ra and (mong == 0 or ra.startswith("LỖI THAM SỐ:")), f"{nhan}: rc={rc} {ra[-150:]}")
         if nhan == "--help":
-            bang("Đối chiếu gate_output với tệp đánh giá và provenance (wp1236 r10)." in " ".join(ra.split()), ra)
+            bang("Đối chiếu gate_output với tệp đánh giá và provenance (wp1236 r10). " in " ".join(ra.split()), ra)
         elif nhan == "provenance vang":
             bang(ra.splitlines() == ["LỖI THAM SỐ: tệp hoặc thư mục provenance vắng/không đọc được"], ra)
         else:

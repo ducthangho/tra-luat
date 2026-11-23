@@ -235,6 +235,8 @@ def a106_danh_tinh_job():
        "not_measured", [f"job_lech:{k}"], "doi name")
     ky(kt("T-v3-pass", lambda x: sua_dong(x, i, lambda d: d.replace("[ubuntu-latest]", "[ubuntu-24.04]", 1))),
        "not_measured", [f"job_lech:{k}"], "doi labels")
+    ky(kt("T-v3-pass", lambda x: sua_dong(x, i, lambda d: d.replace(" (", "  (", 1))),
+       "not_measured", [f"job_lech:{k}"], "giu khoang trang trong ten")
     tf = (ROOT / FX["T-fail"][0]).read_text(encoding="utf-8")
     jf = [n for n, d in enumerate(tf.split("\n")) if "conclusion=failure" in d][0]
     kf = job_id(tf.split("\n")[jf])
@@ -275,6 +277,8 @@ def a108_neo():
         shutil.copy(thu / "prov.yaml", thu / "prov2.yaml")
         ky(G().kiem_tep(tep, thu), "not_measured", ["provenance_nhieu"], "(b) hai ban cung bo ba")
     ky(kt("T-v3-pass", None, lambda y: y["moc"]["run"].update(event="workflow_dispatch")), "not_measured", ["khong_phai_run_land"], "(c)")
+    ky(kt("T-v3-pass", None, lambda y: y["moc"]["run"].update(event="push\t")),
+       "not_measured", ["khong_phai_run_land"], "(c) event co tab")
     ky(kt("T-v3-pass", None, lambda y: y["moc"]["run"].update(loi_khai_rest_path=".github/workflows/launcher-windows.yml")),
        "not_measured", ["khong_phai_run_land"], "(d) path")
     ky(kt("T-v3-pass", None, lambda y: y["moc"]["run"].update(run_id=float(y["moc"]["run"]["run_id"]))), "not_measured", ["provenance_0"], "(e)")
@@ -476,6 +480,8 @@ def a204_duong_dan():
 
     t = ten_tep("T-v3-pass")
     with ho_so_tam() as thu:
+        vp = G().kiem_ho_so({"moc_gate_output": f"measured — ./{t}"}, thu)
+        bang(vp == [], f"duong ./ hop le: {vp}")
         (thu / "x").mkdir()
         tham_chieu = [f"x/../{t}", "danh-gia-gate-output-1.txt"]
         if os.name == "posix":
@@ -788,6 +794,10 @@ def a217_cli_tham_so_va_ma_thoat():
         xau.write_text("moc_gate_output: 'measured — khong-tep.txt'\n", encoding="utf-8")
         rc, ra = cli("kiem-ho-so", str(tot))
         bang(rc == 0 and f"DAT {tot} (0 vi phạm)" in ra, f"ho so sach: rc={rc} {ra[-200:]}")
+        fallback = tot.with_name("pr9001-thu.yaml")
+        shutil.copyfile(tot, fallback)
+        rc, ra = cli("kiem-ho-so", str(fallback))
+        bang(rc == 0 and f"DAT {fallback} (0 vi phạm)" in ra, f"ten provenance theo stem: {ra!r}")
         rc, ra = cli("kiem-ho-so", str(xau), str(tot))
         bang(rc == 1 and f"DO {xau} (1 vi phạm)" in ra and f"DAT {tot}" in ra, f"xau roi sach: rc={rc} {ra[-300:]}")
 
@@ -1019,7 +1029,7 @@ def a126_mien_ascii_qua_ho_so():
             do(URL, DONG.replace("ly_do=", f"ly_do={ky_tu}"), ["dong_mien"])
         do(URL, DONG.split("ly_do=")[0] + "ly_do= han=2026-12-31", ["dong_mien"])
         do(URL, DONG.replace("ly_do=", "ly_do=x han=2025-01-01 "), [])
-        for ky_tu in _mau_loai_unicode("\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029 \t"):
+        for ky_tu in (*_mau_loai_unicode("\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029 \t"), "\x00", "\u200b"):
             do(URL, DONG.replace("ly_do=", f"ly_do={ky_tu}"), [])
 
 

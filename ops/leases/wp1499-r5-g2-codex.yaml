@@ -49,8 +49,8 @@
   "mission_install_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7081897251",
   "recorded_by": "Codex dispatcher",
   "leased_at_utc": "2026-11-22T23:10:50Z",
-  "lease_until": "2026-11-23T03:10:50Z",
-  "lease_expires_at_utc": "2026-11-23T03:10:50Z",
+  "lease_until": "2026-11-23T01:53:51Z",
+  "lease_expires_at_utc": "2026-11-23T01:53:51Z",
   "heartbeat_required_minutes": 360,
   "limits": {
     "executor_attempts": 1,
@@ -58,5 +58,7 @@
     "run_minutes": 90,
     "windows_ci": 0
   },
-  "predecessor_expired": "wp1499-r4-g1-codex"
+  "predecessor_expired": "wp1499-r4-g1-codex",
+  "da_bi_thay_the": "wp1499-r5-g3-codex",
+  "retirement_authority_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7089481683"
 }

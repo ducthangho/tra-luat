@@ -567,6 +567,7 @@ def a209_mien():
         bang(G().kiem_mien(f"owner_waived — {URL}", Path(thu), SHA) == [], "head bang SHA")
         bang(G().kiem_mien(f"owner_waived — {URL}", Path(thu), "0" * 40) == ["sha"], "head khac SHA")
         bang(G().kiem_mien(f"owner_waived — {URL} {URL.replace('123', '9')}", Path(thu), SHA) == ["url"], "hai URL")
+        bang(G().kiem_mien(f"owner_waived — {URL} {URL}", Path(thu), SHA) == ["url"], "hai URL giong nhau")
         bang(G().kiem_ho_so({"moc_gate_output": f"owner_waived — {URL} {SHA}"}, Path(thu)) == [], "(j) kiem_ho_so hop le")
         (Path(thu) / "readback-duyet-issuecomment-123.json").write_text(json.dumps(rb(DONG, author_association="MEMBER")), encoding="utf-8")
         vp = G().kiem_ho_so({"moc_gate_output": f"owner_waived — {URL} {SHA}"}, Path(thu))
@@ -580,7 +581,8 @@ def a209_mien():
             bang(G().kiem_mien(f"owner_waived — {URL} {SHA}", Path(thu), None) == ["readback"], "(l) readback symlink")
             os.unlink(Path(thu) / "readback-duyet-issuecomment-123.json")
         (Path(thu) / "readback-duyet-issuecomment-123.json").write_text("{khong phai json", encoding="utf-8")
-        bang(G().kiem_mien(f"owner_waived — {URL} {SHA}", Path(thu), None) == ["doc_readback"], "(m) JSON hong")
+        bang(khong_nem(lambda: G().kiem_mien(f"owner_waived — {URL} {SHA}", Path(thu), None)) == ["doc_readback"],
+             "(m) JSON hong")
 
 
 def cli(*a):

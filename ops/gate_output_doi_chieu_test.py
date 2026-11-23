@@ -445,7 +445,7 @@ def a201_loi_khai():
 @ca
 def a202_token():
     vao = ["measured — x", "  passed", "FAILED: x", "measuredx", "measured1", "passed!", 5, {"a": 1}]
-    ra = [G().token(v) for v in vao]
+    ra = [khong_nem(lambda: G().token(v)) for v in vao]
     bang(ra == ["measured", "passed", "failed", None, None, None, None, None], f"token: {ra}")
 
 
@@ -673,11 +673,11 @@ def a214_vong_tham_chieu():   # review lượt 1 F03
         loi = G().loi_khai(d) and None
     except Exception as e:   # RecursionError (bỏ chốt vòng) phải ĐỎ ở đây, không thoát ra thành lỗi vô can
         loi = e
-    bang(isinstance(loi, ValueError) and "vong_tham_chieu" in str(loi), f"loi_khai tren vong: {loi!r}")
+    bang(isinstance(loi, ValueError) and str(loi) == "vong_tham_chieu tại $.a[0].b", f"loi_khai tren vong: {loi!r}")
     with tempfile.TemporaryDirectory(prefix="godc_vong_") as thu:
         (Path(thu) / "v-land-evidence.yaml").write_text("a: &x\n  - b: *x\n", encoding="utf-8")
         rc, ra = cli("kiem-ho-so", str(Path(thu) / "v-land-evidence.yaml"))
-        bang(rc == 2 and "Traceback" not in ra, f"CLI vong: rc={rc} {ra[-200:]}")
+        bang(rc == 2 and ra.splitlines() == [f"LỖI THAM SỐ: {Path(thu) / 'v-land-evidence.yaml'}: không đọc được (ValueError)"], f"CLI vong: rc={rc} {ra[-200:]}")
 
 
 def khong_nem(f):   # tính chất ĐANG ĐO là "không ném trên đầu vào dị dạng" ⇒ ngoại lệ là kết quả, không phải lỗi vô can
@@ -766,8 +766,17 @@ def a217_cli_tham_so_va_ma_thoat():
                           ("provenance vang", ("kiem-tep", tep, "--provenance", "/khong/co"), 2)):
         rc, ra = cli(*a)
         bang(rc == mong and "Traceback" not in ra and (mong == 0 or ra.startswith("LỖI THAM SỐ:")), f"{nhan}: rc={rc} {ra[-150:]}")
+        if nhan == "--help":
+            bang("Đối chiếu gate_output với tệp đánh giá và provenance (wp1236 r10)." in ra.splitlines(), ra)
+        elif nhan == "provenance vang":
+            bang(ra.splitlines() == ["LỖI THAM SỐ: tệp hoặc thư mục provenance vắng/không đọc được"], ra)
+        else:
+            bang(ra.splitlines()[0].startswith("LỖI THAM SỐ: the following arguments are required:"), ra)
     rc, ra = cli("kiem-tep", tep, "--provenance", str(ROOT / L / THU_MUC_THAT["T-v3-pass"]))
-    bang(ra.splitlines()[0] == f"passed {tep} -", f"dong ket qua: {ra.splitlines()[:1]}")
+    bang(rc == 0 and ra.splitlines() == [
+        f"passed {tep} -",
+        "GIỚI HẠN: không đọc log thật; tệp đánh giá và provenance sửa tay được",
+    ], f"dong ket qua: {ra!r}")
     rc, ra = cli("kiem-tep", str(ROOT / FX["T-skip"][0]), "--provenance", str(ROOT / L / THU_MUC_THAT["T-skip"]))
     bang(ra.splitlines()[0].endswith(" co_job_skipped"), f"dong ket qua co ly do: {ra.splitlines()[:1]}")
     with ho_so_tam() as thu:
@@ -826,7 +835,7 @@ def a121_token_tep_khoa_landed():   # r10 luật 4: ngữ pháp token, tên tệ
     for doc, mong in (({"landed": 1}, False), ({"trang_thai_packet": {"landed": 1}}, False), ({"landed_20261120": {"landed": 1}}, False),
                       ({"landed_202611201": {"landed": True}}, False), ({"landed_123": {"landed": True}}, False),
                       ({"landed_abcdefgh": {"landed": True}}, False), ({"landed_20261120": {"landed": True}}, True)):
-        bang(G().la_landed(doc) is mong, f"la_landed({doc})")
+        bang(khong_nem(lambda: G().la_landed(doc)) is mong, f"la_landed({doc})")
 
 
 @ca

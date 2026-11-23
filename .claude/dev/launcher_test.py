@@ -15063,6 +15063,36 @@ def _r1335_tep(duong: Path, dau: str) -> Path:
 
 
 @ca
+def r1499_phan_loai_agy_theo_argv0():
+    m = _tai_launcher_thu()
+    cot = ("provider", "execution_surface", "transport")
+
+    def route(*argv):
+        qd = m._quyet_dinh_agent(list(argv))
+        return tuple(qd[k] for k in cot)
+
+    agy = ("google_antigravity", "antigravity", "machine/local")
+    thuong = ("local_process", "subprocess", "machine")
+    ten_agy = ["agy", "AGY.EXE", "agy.cmd", "agy.bat", "agy.ps1",
+               str(Path.cwd() / "bin" / "AGY.EXE")]
+    if LA_WINDOWS:
+        ten_agy.append(str(Path.cwd() / "bin") + "/AGY.EXE")
+    for ten in ten_agy:
+        bang(route(ten) == agy, f"route {ten!r} phai la {agy}")
+    for ten in ("agy-helper", "agy.zip", "agy.exe.exe", "wrapper"):
+        bang(route(ten, "agy") == thuong, f"argv[0]={ten!r} phai giu fallback")
+    bi_chan = _r1335_qd(m, ["cmd.exe", "/c", "agy"])
+    bang(isinstance(bi_chan, tuple) and bi_chan[1] == MA_THAM_SO,
+         f"vo shell khong khai agent phai bi chan: {bi_chan}")
+    for ten, mong in (
+        ("codex", ("openai_codex", "codex_cli", "machine")),
+        ("claude", ("anthropic_claude", "claude_code", "machine/local")),
+        ("llm", ("openai_api", "llm_cli", "machine")),
+    ):
+        bang(route(ten) == mong, f"route {ten!r} phai giu {mong}")
+
+
+@ca
 def r1335_ma_tran_agent_khai_bao():
     """r2 §4 + M7: ma trận biết trước đáp án; probe đo bằng `chay_cac_probe` thật."""
     m = _tai_launcher_thu()
@@ -15374,7 +15404,7 @@ def r1335_P2_windows_bo_ung_vien_khong_duoi():
 def r1335_bang_transport_tu_choi_ten_trung():
     """D4: chốt chết thay bằng chốt đo được — tên lệnh thuộc hai provider ⇒ RuntimeError."""
     m = _tai_launcher_thu()
-    bang(set(m._kiem_bang_transport()) == {"claude", "codex", "llm"}, "bang that phai qua chot")
+    bang(set(m._kiem_bang_transport()) == {"claude", "codex", "llm", "agy"}, "bang that phai qua chot")
     for hong in ((("p1", ("a",), "s", "t"), ("p2", ("a",), "s", "t")),
                  (("p1", ("a",), "s", "t"), ("p1", ("b",), "s2", "t"))):
         try:

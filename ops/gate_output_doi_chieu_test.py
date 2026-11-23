@@ -937,6 +937,11 @@ def a125_ascii_dong_danh_gia():
             kq, ly_do = doc(truong, ky_tu)
             bang((kq is not None) == (ky_tu in lop), f"{truong} {ky_tu!r}: {ly_do}")
 
+    for field in ("skip_cu", "skip_v3"):
+        du_lieu = dict(goc, **{field: goc[field] + " café𐐀"})
+        kq, ly = G().doc_danh_gia("\n".join(dong.format_map(du_lieu) for dong in mau).encode())
+        bang(not ly and int(goc[field]) in kq["skip"], f"{field}: {ly}")
+
 
 @ca
 def a126_mien_ascii_qua_ho_so():
@@ -953,14 +958,126 @@ def a126_mien_ascii_qua_ho_so():
             bang(vp == mong, f"ho so mien {url!r}, {dong!r}: {vp}")
 
         do(URL, DONG, [])
+        do(URL, DONG.replace("ubuntu-latest", "ubuntu-latest,win7"), [])
         do(URL.replace("issues/", "issues/é"), DONG, ["url"])
         do(URL.replace("comment-123", "comment-１２３"), DONG, ["url"])
         do(URL, DONG.replace("2026-", "٢٠٢٦-"), ["dong_mien"])
         do(URL, DONG.replace("ubuntu-latest", "ubuntu-latest,ｗindows"), ["dong_mien"])
         do(URL, DONG.replace(SHA, "ａ" + SHA[1:]), ["dong_mien"])
-        for ky_tu, ket_qua in (("\u00a0", []), ("\ud800", []), ("𐐀", []), ("\t", ["dong_mien"]),
-                               ("\u0085", ["dong_mien"]), ("\u2028", ["dong_mien"])):
-            do(URL, DONG.replace("ly_do=", f"ly_do={ky_tu}"), ket_qua)
+        for ky_tu in " \t\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029":
+            do(URL, DONG.replace("ly_do=", f"ly_do={ky_tu}"), ["dong_mien"])
+        do(URL, DONG.split("ly_do=")[0] + "ly_do= han=2026-12-31", ["dong_mien"])
+        do(URL, DONG.replace("ly_do=", "ly_do=x han=2025-01-01 "), [])
+        for ky_tu in _mau_loai_unicode("\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029 \t"):
+            do(URL, DONG.replace("ly_do=", f"ly_do={ky_tu}"), [])
+
+
+def _mau_loai_unicode(cam, bo_loai=()):
+    """Một đại diện của mỗi loại Unicode trên tuyến và một ký tự ngoài BMP."""
+    from unicodedata import category
+    mau = {}
+    for ma in range(128, 0x110000):
+        ky_tu = chr(ma)
+        loai = category(ky_tu)
+        if ky_tu not in cam and loai not in bo_loai:
+            mau.setdefault(loai, ky_tu)
+    return (*mau.values(), "𐐀")
+
+
+@ca
+def a129_ten_job_lazy_qua_ho_so():
+    tep_goc, prov_goc, *_ = FX["T-v3-pass"]
+    txt = (ROOT / tep_goc).read_text(encoding="utf-8")
+    vi_tri = dong_job(txt, 0)
+    dong = txt.split("\n")[vi_tri]
+    ma = job_id(dong)
+    p = yaml.safe_load((ROOT / prov_goc).read_bytes())
+    ten_goc = next(row["name"] for row in p["moc"]["gate_output"]["jobs"] if row["job_id"] == ma)
+    tien_to = f"JOB {ma} "
+    dau = tien_to + ten_goc
+    bang(dong.startswith(dau + " ["), "fixture job khong co ten va hau to mong doi")
+    duoi = dong[len(dau):]
+    ten_tep_dg = Path(tep_goc).name
+    loi_goc = "$.moc_gate_output: danh_gia_khong_passed:" + ten_tep_dg + ":not_measured:"
+
+    def kiem(dong_moi, ten_mong, ly_do=""):
+        def sua_prov(doc):
+            if ten_mong is not None:
+                next(row for row in doc["moc"]["gate_output"]["jobs"] if row["job_id"] == ma)["name"] = ten_mong
+        with mini("T-v3-pass", lambda x: sua_dong(x, vi_tri, lambda _: dong_moi), sua_prov) as (tep, thu):
+            dich = tep.rename(thu / ten_tep_dg)
+            doc, ly = G().doc_danh_gia(dich.read_bytes())
+            if ly_do:
+                bang(doc is None and ly == [ly_do], f"doc job {dong_moi!r}: {ly}")
+            else:
+                bang(not ly and doc["jobs"][ma]["name"] == ten_mong, f"ten job lazy {dong_moi!r}: {doc}")
+            vp = G().kiem_ho_so({"moc_gate_output": f"measured — {ten_tep_dg}"}, thu)
+            bang(vp == ([loi_goc + ly_do] if ly_do else []), f"ho so lazy {dong_moi!r}: {vp}")
+
+    kiem(dong, ten_goc)
+    kiem(dau + " [khong khop]" + duoi, ten_goc + " [khong khop]")
+    kiem(dong + duoi, ten_goc)
+    kiem(tien_to + duoi.lstrip(), None, "dong_la")
+    kiem(dau + duoi.replace("]", "]]", 1), None, "dong_la")
+    kiem(dong + "\nloi", None, "dong_la")
+    for ky_tu in _mau_loai_unicode("\r\n", {"Cs"}):
+        kiem(tien_to + ky_tu + ten_goc + duoi + ky_tu, ky_tu + ten_goc)
+
+
+@ca
+def a130_tong_ket_qua_cong_ci():
+    """Đo đầu ra main qua consumer CI thật, dùng ca/đột biến thu nhỏ."""
+    import io
+    import runpy
+    from unittest.mock import patch
+
+    cong = runpy.run_path(str(ROOT / ".claude/dev/ci_dang_ky_test.py"))
+    path = "ops/gate_output_doi_chieu_test.py"
+    mau = {path: cong["MOI"][path]}
+    db = (("mot", "x", "y", "a"), ("chi_posix", "x", "z", "a"))
+    for nen in ("posix", "nt"):
+        windows = nen == "nt"
+        for bien, ca_rc, mutant, chi_posix, tong_db in (
+            ("dat", 0, "GIET", {"chi_posix"}, db),
+            ("ca do", 3, "GIET", {"chi_posix"}, db),
+            ("dot bien song", 0, "SONG_SOT", {"chi_posix"}, db),
+            ("ten chi POSIX la", 0, "GIET", {"khong_ton_tai"}, db),
+            ("mau so 0", 0, "GIET", set(), ()),
+        ):
+            output = io.StringIO()
+            with patch.dict(main.__globals__, {"CA": {"a": None}, "DOT_BIEN": tong_db, "TU_KIEM": (),
+                                               "CHI_POSIX": chi_posix,
+                                               "chay_ca": lambda _: (ca_rc, "ca thu"),
+                                               "chay_dot_bien": lambda *_: (mutant, "")}), \
+                    patch.object(os, "name", nen), contextlib.redirect_stdout(output):
+                rc = main([])
+            text = output.getvalue()
+            kiem = io.StringIO()
+            with contextlib.redirect_stdout(kiem):
+                do = cong["chay_moi"](moi=mau, cach_ly={}, chay_mot=lambda _: (rc, text),
+                                     doc_moi_truong=lambda: None, doc_trong_ci=lambda: True,
+                                     doc_nen_windows=lambda: windows)
+                bang(cong["chay_moi"](moi=mau, cach_ly={}, chay_mot=lambda _: (0, text),
+                                     doc_moi_truong=lambda: None, doc_trong_ci=lambda: True,
+                                     doc_nen_windows=lambda: windows) == (bien != "dat"),
+                     f"{nen}, {bien}: consumer khong nhin dung dau ra khi rc=0")
+            bang((rc, do) == ((0, 0) if bien == "dat" else (1, 1)), f"{nen}, {bien}: {rc}, {kiem.getvalue()}")
+            if bien == "dat":
+                n = 1 if windows else 2
+                bang(text.splitlines()[-4:] == ["CA: 1/1 dat", f"DOT BIEN: {n}/{n} bi giet dung ly do",
+                                               "TU KIEM PHAN HANG: DAT (0 dot bien)", "TONG: DAT"], repr(text))
+
+
+@ca
+def a131_ten_tep_co_Z():
+    ten = Path(FX["T-v3-pass"][0]).name
+    tham_chieu = f"Z/{ten}"
+    with mini("T-v3-pass") as (tep, thu):
+        (thu / "Z").mkdir()
+        tep.rename(thu / tham_chieu)
+        loi_khai = f"measured — {tham_chieu}"
+        bang(G().tep_danh_gia(loi_khai) == [tham_chieu], "ten tep can giu Z")
+        bang(G().kiem_ho_so({"moc_gate_output": loi_khai}, thu) == [], "ho so co tep trong Z")
 
 
 BANG_O_R11 = r"""{
@@ -1334,6 +1451,12 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("m58_cli_chi_bat_OSError", "        except Exception as e:   # gồm vòng", "        except OSError as e:   # gồm vòng", "a214"),
 )
 DOT_BIEN += (
+    ("r12i_head_uppercase", "head ([0-9a-f]{40})", "head ([0-9a-fA-F]{40})", "a125"),
+    ("r12i_os_digit7", "os=([a-z0-9,.-]+)", "os=([a-z0-689,.-]+)", "a126"),
+    ("r12i_filename_Z", "[A-Za-z0-9_./-]*danh-gia", "[A-Ya-z0-9_./-]*danh-gia", "a131"),
+    ("r12i_skip_old_ascii_name", r"(.+?): skipped \(khong tinh\)", r"([\x00-\x7f]+?): skipped \(khong tinh\)", "a125"),
+    ("r12i_skip_v3_ascii_name", r"(.+?): skipped ->", r"([\x00-\x7f]+?): skipped ->", "a125"),
+    ("r12_job_ten_greedy", r'JOB ([0-9]+) (.+?) \[', r'JOB ([0-9]+) (.+) \[', "a129"),
     ("r12_token_space_unicode", r're.compile(r"[ \t]*([a-z_]+)', r're.compile(r"\s*([a-z_]+)', "a124"),
     ("r12_token_sep_unicode", r"(?=$|[ \t—", r"(?=$|[\s—", "a124"),
     ("r12_run_so_unicode", r"Gate output run ([0-9]+) attempt", r"Gate output run (\d+) attempt", "a125"),
@@ -1410,7 +1533,7 @@ def main(argv):
         print("dung: gate_output_doi_chieu_test.py [--mot-ca TEN]", file=sys.stderr)
         return 2
     kq = [chay_ca(ten) for ten in CA]
-    print("".join(f"[{dong}]\\n" for rc, dong in kq if rc), end="")
+    print("".join(f"[{dong}]\n" for rc, dong in kq if rc), end="")
     dat = sum(rc == 0 for rc, _ in kq)
     danh_sach = {ten for ten, *_ in DOT_BIEN}
     sai_khai_bao = CHI_POSIX - danh_sach

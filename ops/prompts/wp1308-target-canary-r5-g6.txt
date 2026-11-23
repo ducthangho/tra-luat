@@ -1,0 +1,5 @@
+Execute Packet1308 r5/g6 under installed Mission59 and the current immutable spec/admission.
+Only the five-path metadata/canary write set; every mutator goes through the stock launcher/resolver with expected revisions and actual receipts.
+Adopt the preserved g5 leased state into journals-g6 via canonical adopt-state, record-lease rebind, then nang-tran attempts/vong_review/codex_review_calls 1->2 with recorded owner instruction. Never fresh-init, reset, delete, replay or copy seed.
+One independent Codex review of the canary H; owner posts the actual-human exact-H audit before H publication; exact-H Ubuntu CI and one genuine connector before accept.
+Hard expiry 2026-11-17T09:22:00Z; earliest expiry governs. No Windows CI/full M9/source/G5/LIVE/PR0-PR8.

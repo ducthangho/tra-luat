@@ -1,0 +1,5 @@
+# B4 review 7 activation
+
+Activate only B4's seventh Antigravity source review under the r98 decision https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7081875250. Six source review invocations are already consumed. Candidate 724993bf23f16070f272ccd81b4fe16c111ce2eb, tree 75bd0a3bc6cb81f5e776c0e5dc81e3c4d0af7b12. WP1499 prerequisite landed https://github.com/ducthangho/tra-luat/pull/1499#issuecomment-7106117734.
+
+Windows VM tra-luat-win, Antigravity 1.5.15, plan mode, exact session allowlist. Positive fixture b5616f020d4d4b5886589016f744138e read a file and ran git --version with the result matching operator Git. Trace SHA-256 1344f2dd6eed3d09ac9005426063fd5c8b510845cf755d084589dac01a1eb802. Negative fixture 63369fb38ecb409c846e02e9cb72f1a6 produced denied_actions=command with zero completed command executions. Trace SHA-256 2a7839e69824344ed98e769dcd57e810f33163f22f98f70bb73845d621344621. Dedicated launcher from master a99a74f75867172fe62f984d7528f5d5bd73dacb, outside candidate checkout. Formal review invokes read_file only. These two fixture runs are preflight and used no B4 candidate bytes. No PR2 dispatch in this activation.

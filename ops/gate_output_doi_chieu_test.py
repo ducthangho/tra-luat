@@ -775,7 +775,7 @@ def a217_cli_tham_so_va_ma_thoat():
         rc, ra = cli(*a)
         bang(rc == mong and "Traceback" not in ra and (mong == 0 or ra.startswith("LỖI THAM SỐ:")), f"{nhan}: rc={rc} {ra[-150:]}")
         if nhan == "--help":
-            bang("Đối chiếu gate_output với tệp đánh giá và provenance (wp1236 r10)." in ra.splitlines(), ra)
+            bang("Đối chiếu gate_output với tệp đánh giá và provenance (wp1236 r10)." in " ".join(ra.split()), ra)
         elif nhan == "provenance vang":
             bang(ra.splitlines() == ["LỖI THAM SỐ: tệp hoặc thư mục provenance vắng/không đọc được"], ra)
         else:
@@ -797,7 +797,7 @@ def a217_cli_tham_so_va_ma_thoat():
         fallback = tot.with_name("pr9001-thu.yaml")
         shutil.copyfile(tot, fallback)
         rc, ra = cli("kiem-ho-so", str(fallback))
-        bang(rc == 0 and f"DAT {fallback} (0 vi phạm)" in ra, f"ten provenance theo stem: {ra!r}")
+        bang(rc == 0 and ra.splitlines() == [f"DAT {fallback} (0 vi phạm)"], f"ten provenance theo stem: {ra!r}")
         rc, ra = cli("kiem-ho-so", str(xau), str(tot))
         bang(rc == 1 and f"DO {xau} (1 vi phạm)" in ra and f"DAT {tot}" in ra, f"xau roi sach: rc={rc} {ra[-300:]}")
 
@@ -931,9 +931,9 @@ def a124_token_ascii_qua_ho_so():
             bang(vp == ([] if mong else ["$.gate_output: dinh_dang_loi_khai"]), f"ho so {gia_tri!r}: {vp}")
 
     for c in (*ascii_day_du, *dai_dien, *khoang_trang, "—"):
-        bang_chung = c.isascii() or c in dai_dien or c == "—"
-        kiem(c + "skipped", "skipped" if c in " \t" else None, bang_chung)
-        kiem("skipped" + c + "x", "skipped" if c in " \t—-:(,.;" else None, bang_chung)
+        kiem(c + "skipped", "skipped" if c in " \t" else None, True)
+        kiem("skipped" + c + "x", "skipped" if c in " \t—-:(,.;" else None, True)
+        kiem("skipped" + c, "skipped" if c in "\n \t—-:(,.;" else None, True)
 
     for c in (*ascii_day_du, *dai_dien, *chu_va_so):
         bang_chung = c.isascii() or c in dai_dien or c in "ſK"
@@ -951,6 +951,7 @@ def a124_token_ascii_qua_ho_so():
 @ca
 def a125_ascii_dong_danh_gia():
     """Chữ số và hex ở từng trường, chữ thường ở kết luận."""
+    import itertools
     from string import ascii_lowercase, digits, hexdigits
     hex_thuong = digits + hexdigits[10:16]
     mau = (
@@ -986,14 +987,20 @@ def a125_ascii_dong_danh_gia():
             ("skip_cu", digits), ("skip_v3", digits), ("dat", digits), ("tong", digits),
         ):
             unicode_am = chu_va_so if truong == "conclusion" else cac_chu_so
-            for c in (*map(chr, range(128)), *unicode_am, *dai_dien):
-                du_lieu = dict(goc, **{truong: c + goc[truong][1:]})
+            mau_ky_tu = (*map(chr, range(128)), *unicode_am, *dai_dien)
+            gia_tri = goc[truong]
+            for i, c in itertools.product(sorted({0, len(gia_tri) // 2, len(gia_tri) - 1}), mau_ky_tu):
+                du_lieu = dict(goc, **{truong: gia_tri[:i] + c + gia_tri[i + 1:]})
                 byte = "\n".join(dong.format_map(du_lieu) for dong in mau).encode()
                 kq, ly_do = G().doc_danh_gia(byte)
-                bang((kq is not None) == (c in lop), f"{truong} {c!r}: {ly_do}")
+                dat_lop = c in lop or (c == " " and i == len(gia_tri) - 1 and truong in ("job", "skip_cu", "skip_v3"))
+                ly_mong = ([] if dat_lop else ["cr_le"] if c == "\r" else ["dau_tep_sai"]
+                           if truong in ("run", "attempt", "head", "bo_sinh") else ["dong_la", "thieu_moc"]
+                           if truong in ("dat", "tong") else ["dong_la"])
+                bang((kq is not None, ly_do) == (dat_lop, ly_mong), f"{truong} {i} {c!r}: {ly_do}")
                 if c.isascii() or c in dai_dien:
                     tep.write_bytes(byte)
-                    ly = ",".join(ly_do or ["bo_sinh_la"])
+                    ly = ",".join(ly_mong or ["bo_sinh_la"])
                     vp = G().kiem_ho_so(ho_so, thu)
                     mong = [f"$.gate_output: danh_gia_khong_passed:{tep.name}:not_measured:{ly}"]
                     bang(vp == mong, f"ho so {truong} {c!r}: {vp}")

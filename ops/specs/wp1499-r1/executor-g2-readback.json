@@ -1,0 +1,29 @@
+{
+  "packet": 1499,
+  "mission_revision": 98,
+  "packet_revision": 5,
+  "generation": 2,
+  "lease": "wp1499-r5-g2-codex",
+  "lease_receipt": "https://github.com/ducthangho/tra-luat/issues/1499#issuecomment-7087500709",
+  "launcher_run": "0591f02079c949b6807441c386e350a1",
+  "launcher_rc": 0,
+  "has_model_output": true,
+  "head": "a2bdb480e8fb54c152af190378c434fa41b0feaf",
+  "tree": "a24b56a85702197b0eecbd1cb6a7b97cea35990a",
+  "source_commit_created": false,
+  "source_write_set_diff_empty": true,
+  "conclusion": "blocked_before_source_write",
+  "model_sandbox_git_ls_remote": {
+    "rc": 128,
+    "diagnostic": "Schannel SEC_E_NO_CREDENTIALS"
+  },
+  "desktop_operator_git_ls_remote": {
+    "default_backend_rc": 0,
+    "openssl_backend_rc": 0,
+    "matching_refs": true
+  },
+  "source_executions": { "used": 1, "cap": 1 },
+  "independent_code_reviews": { "used": 0, "cap": 1 },
+  "windows_candidate_smoke": "not_run",
+  "b4_pr2_review_caps": "6/6 each"
+}

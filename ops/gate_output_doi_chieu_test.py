@@ -1099,6 +1099,23 @@ def a130_tong_ket_qua_cong_ci():
 
 
 @ca
+def a132_ascii_khoa_landed_qua_ho_so():
+    """Kiểm tám vị trí chữ số trong khoá landed và vi phạm của hồ sơ."""
+    ngay = "20261120"
+    dai_dien = _mau_loai_unicode("")
+    chu_so_unicode = tuple(chr(ma) for ma in range(128, 0x110000) if chr(ma).isdecimal())
+    for vi_tri in range(len(ngay)):
+        for ky_tu in (*map(chr, range(128)), *dai_dien, *chu_so_unicode):
+            khoa = "landed_" + ngay[:vi_tri] + ky_tu + ngay[vi_tri + 1:]
+            ho_so = {khoa: {"landed": True}}
+            mong = ky_tu in "0123456789"
+            bang(G().la_landed(ho_so) is mong, f"khoa {khoa!r}: mong {mong}")
+            if ky_tu.isascii() or ky_tu in dai_dien:
+                vp = G().kiem_ho_so(ho_so, ROOT)
+                bang(vp == (["$: landed_khong_loi_khai_gate_output"] if mong else []), f"khoa {khoa!r}: {vp}")
+
+
+@ca
 def a131_ten_tep_co_Z():
     ten = Path(FX["T-v3-pass"][0]).name
     tham_chieu = f"Z/{ten}"

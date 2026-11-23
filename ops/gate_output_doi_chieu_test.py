@@ -954,18 +954,28 @@ def a125_ascii_dong_danh_gia():
         if loai[0] in "LN":
             chu_va_so.append(ky_tu)
 
-    def doc(truong, ky_tu):
-        du_lieu = dict(goc, **{truong: ky_tu + goc[truong][1:]})
-        return G().doc_danh_gia("\n".join(dong.format_map(du_lieu) for dong in mau).encode())
-    for truong, lop in (
-        ("run", digits), ("attempt", digits), ("head", hex_thuong), ("bo_sinh", hex_thuong),
-        ("job", digits), ("conclusion", ascii_lowercase + "_"), ("log", hex_thuong),
-        ("skip_cu", digits), ("skip_v3", digits), ("dat", digits), ("tong", digits),
-    ):
-        unicode_am = chu_va_so if truong == "conclusion" else cac_chu_so
-        for ky_tu in (*map(chr, range(128)), *unicode_am, "é", "ａ", "𐐀"):
-            kq, ly_do = doc(truong, ky_tu)
-            bang((kq is not None) == (ky_tu in lop), f"{truong} {ky_tu!r}: {ly_do}")
+    dai_dien = _mau_loai_unicode("", bo_loai=("Cs",))
+    with tempfile.TemporaryDirectory(prefix="godc_danh_gia_") as tam:
+        thu = Path(tam)
+        tep = thu / "danh-gia-gate-output-10.txt"
+        ho_so = {"gate_output": f"measured — {tep.name}"}
+        for truong, lop in (
+            ("run", digits), ("attempt", digits), ("head", hex_thuong), ("bo_sinh", hex_thuong),
+            ("job", digits), ("conclusion", ascii_lowercase + "_"), ("log", hex_thuong),
+            ("skip_cu", digits), ("skip_v3", digits), ("dat", digits), ("tong", digits),
+        ):
+            unicode_am = chu_va_so if truong == "conclusion" else cac_chu_so
+            for c in (*map(chr, range(128)), *unicode_am, *dai_dien):
+                du_lieu = dict(goc, **{truong: c + goc[truong][1:]})
+                byte = "\n".join(dong.format_map(du_lieu) for dong in mau).encode()
+                kq, ly_do = G().doc_danh_gia(byte)
+                bang((kq is not None) == (c in lop), f"{truong} {c!r}: {ly_do}")
+                if c.isascii() or c in dai_dien:
+                    tep.write_bytes(byte)
+                    ly = ",".join(ly_do or ["bo_sinh_la"])
+                    vp = G().kiem_ho_so(ho_so, thu)
+                    mong = [f"$.gate_output: danh_gia_khong_passed:{tep.name}:not_measured:{ly}"]
+                    bang(vp == mong, f"ho so {truong} {c!r}: {vp}")
 
     for field in ("skip_cu", "skip_v3"):
         du_lieu = dict(goc, **{field: goc[field] + " café𐐀"})
@@ -1000,6 +1010,83 @@ def a126_mien_ascii_qua_ho_so():
         do(URL, DONG.replace("ly_do=", "ly_do=x han=2025-01-01 "), [])
         for ky_tu in _mau_loai_unicode("\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029 \t"):
             do(URL, DONG.replace("ly_do=", f"ly_do={ky_tu}"), [])
+
+
+@ca
+def a133_lop_dong_mien_qua_ho_so():
+    """Kiểm lớp ký tự trong URL và dòng miễn, rồi đối chiếu lý do qua hồ sơ."""
+    from datetime import date
+    from string import ascii_letters, ascii_lowercase, digits
+    from unicodedata import category
+
+    ascii_day_du = tuple(map(chr, range(128)))
+    dai_dien = _mau_loai_unicode("")
+    so_unicode = []
+    chu_so_unicode = []
+    for ma in range(128, 0x110000):
+        ky_tu = chr(ma)
+        loai = category(ky_tu)
+        if loai == "Nd":
+            so_unicode.append(ky_tu)
+        if loai[0] in "LN":
+            chu_so_unicode.append(ky_tu)
+
+    with tempfile.TemporaryDirectory(prefix="godc_mien_") as tam:
+        thu = Path(tam)
+        tep = thu / "readback-duyet-issuecomment-123.json"
+
+        def kiem(url, dong, ly_do):
+            tep.write_text(json.dumps(rb(dong, html_url=url)), encoding="utf-8")
+            khai = f"owner_waived — {url} {SHA}"
+            bang(G().kiem_mien(khai, thu, None) == ly_do, f"mien {url!r}, {dong!r}: {ly_do}")
+            vp = G().kiem_ho_so({"gate_output": khai}, thu)
+            mong = [f"$.gate_output: waiver_khong_co_can_cu:{x}" for x in ly_do]
+            bang(vp == mong, f"ho so mien {url!r}, {dong!r}: {vp}")
+
+        for truong, lop, unicode_am in (
+            ("url_path", ascii_letters + digits + "._~/%-", chu_so_unicode),
+            ("url_id", digits, so_unicode),
+            ("sha", digits + "abcdef", so_unicode),
+            ("os", ascii_lowercase + digits + ",.-", chu_so_unicode),
+            ("nam", digits, so_unicode),
+            ("thang", digits, so_unicode),
+            ("ngay", digits, so_unicode),
+        ):
+            for c in (*ascii_day_du, *dai_dien, *unicode_am):
+                url, dong = URL, DONG
+                dung_lop = c in lop
+                if truong == "url_path":
+                    url = URL.replace("/issues/", f"/issu{c}s/")
+                elif truong == "url_id":
+                    url = URL[:-3] + c + "23"
+                elif truong == "sha":
+                    dong = DONG.replace(SHA, c + SHA[1:])
+                elif truong == "os":
+                    dong = DONG.replace("ubuntu-latest", f"ubuntu-latest,{c}x")
+                else:
+                    ngay = {"nam": f"{c}026-12-31", "thang": f"2026-{c}2-31",
+                            "ngay": f"2026-12-{c}1"}[truong]
+                    dong = DONG.replace("2026-12-31", ngay)
+
+                la_url = truong in ("url_path", "url_id")
+                regex, dau_vao = (G().RE_URL, url) if la_url else (G().RE_MIEN, dong)
+                bang(bool(regex.fullmatch(dau_vao)) == dung_lop, f"{truong} {c!r}: mong {dung_lop}")
+                if not (c.isascii() or c in dai_dien):
+                    continue
+                if not dung_lop:
+                    ly_do = ["url" if la_url else "dong_mien"]
+                elif truong == "url_id" and c != "1":
+                    ly_do = ["readback"]
+                elif truong == "sha" and c != SHA[0]:
+                    ly_do = ["sha"]
+                else:
+                    ly_do = []
+                    if truong in ("nam", "thang", "ngay"):
+                        try:
+                            date.fromisoformat(ngay)
+                        except ValueError:
+                            ly_do = ["han"]
+                kiem(url, dong, ly_do)
 
 
 def _mau_loai_unicode(cam, bo_loai=()):
@@ -1125,6 +1212,34 @@ def a131_ten_tep_co_Z():
         loi_khai = f"measured — {tham_chieu}"
         bang(G().tep_danh_gia(loi_khai) == [tham_chieu], "ten tep can giu Z")
         bang(G().kiem_ho_so({"moc_gate_output": loi_khai}, thu) == [], "ho so co tep trong Z")
+
+
+@ca
+def a134_lop_dong_ten_tep_qua_ho_so():
+    from string import ascii_letters, digits
+    from unicodedata import category
+
+    dai_dien = _mau_loai_unicode("")
+    ten = "danh-gia-gate-output-123.txt"
+    with tempfile.TemporaryDirectory(prefix="godc_ten_tep_") as tam:
+        for vi_tri in ("thu_muc", "run"):
+            for ma in range(0x110000):
+                c = chr(ma)
+                qua_ho_so = c.isascii() or c in dai_dien
+                if not qua_ho_so and not (category(c)[0] in "LN" if vi_tri == "thu_muc" else c.isdecimal()):
+                    continue
+                if vi_tri == "thu_muc":
+                    tham_chieu = f"x{c}x/{ten}"
+                    mong = [tham_chieu if c in ascii_letters + digits + "_./-" else f"x/{ten}"]
+                else:
+                    tham_chieu = ten.replace("123", c + "23")
+                    mong = [tham_chieu] if c in digits else []
+                khai = f"measured — {tham_chieu}"
+                bang(G().tep_danh_gia(khai) == mong, f"tep {tham_chieu!r}: mong {mong!r}")
+                if qua_ho_so:
+                    vp = G().kiem_ho_so({"gate_output": khai}, Path(tam))
+                    ly = f"tep_danh_gia_khong_hop_le:{mong[0]}" if mong else "duong_khong_tep_danh_gia"
+                    bang(vp == [f"$.gate_output: {ly}"], f"ho so {tham_chieu!r}: {vp}")
 
 
 BANG_O_R11 = r"""{

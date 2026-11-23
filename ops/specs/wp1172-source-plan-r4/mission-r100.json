@@ -1,0 +1,1566 @@
+{
+  "schema_version": 1,
+  "mission_id": "gh-1172",
+  "revision": 100,
+  "supersedes_revision": 99,
+  "change_request": "MCR-1172-r100",
+  "base_sha": "48d372e14f190dae83a75ccbca8ee9a0b25635c5",
+  "objective": "Thi công tối ưu mutation testing PR0–PR8 qua protocol canonical ADR-0063: Codex executor/reviewer độc lập và actual human audit.",
+  "risk": "sensitive",
+  "requires_live": false,
+  "state": "approved_for_installation",
+  "source_plan_sha256": "0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe",
+  "inheritance": {
+    "previous_installed_revision": 96,
+    "previous_plan_sha256": "2d9a60a5eda9537475d7bb0901e882fef2d97d96a2ad4a4aa0d97c76862e73a9",
+    "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7066078931",
+    "prior_inheritance_r96": {
+      "previous_installed_revision": 95,
+      "previous_plan_sha256": "dbc6bb14d2115e4c609b39a04d79d10e60d256da08dc3a8b1b8924b607fbd2c0",
+      "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7063276731",
+      "rule": "Preserve r95. Records PR1 merged and owner decisions after r95 (ghi hộ 7064595262: new H + K7 #2; K6 owner line 7064911476); admits B2 (freshness watchdog) into spec drafting; records the ci_dang_ky_test.py blocker (lease wp1236-a-r12 until 2026-11-23T13:45Z) for B1/B2/PR2 implementation.",
+      "prior_inheritance_r95": {
+        "previous_installed_revision": 94,
+        "previous_plan_sha256": "4961b0e2358aaedc01c20b122626b4ed3b5d0c6beb1ea59d8a97ea611f5e3c67",
+        "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7061028023",
+        "rule": "Preserve r94. Records owner decision ghi hộ https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7063251047 ([E1+E3] B4 acceptance criterion 1 amended to three case groups; +1 executor attempt) and installs B4 spec r9. Also records PR1: source review 8 approve 0 findings on f1e7a6d (verdict sha256 ba307468185aa4e81f26d2b7490314025625c70a42784b473b8fb37b7e5047e5), H c6dd6d2 = f1e7a6d merged with master 29c22f7, draft PR #1492, owner exact-H audit comment 7063192803.",
+        "prior_inheritance_r94": {
+          "previous_installed_revision": 93,
+          "previous_plan_sha256": "3314fe34ea3d2a958dfe1d9ec10db642cefca916fb7d6c4ac70e67795459f793",
+          "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7059092115",
+          "rule": "Preserve r93. Records owner decision ghi hộ https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7060883209 ([E2] PR1 nang_tran 32 files/7000 added) and installs PR1 spec r7 (r6 + new nang_tran block only).",
+          "prior_inheritance_r93": {
+            "previous_installed_revision": 92,
+            "previous_plan_sha256": "af1ca2aebc5afa4fd7693215c2663133f789ece0bd0fba4c5f6c129ec223eb2d",
+            "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7057536545",
+            "rule": "RECORD-ONLY: preserve r92; records the owner's explicit numeric decision of ghi hộ https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7059088253 ([E2] PR1 +2 attempts +2 source reviews). No spec, scope, write set or other packet changes.",
+            "prior_inheritance_r92": {
+              "previous_installed_revision": 91,
+              "previous_plan_sha256": "e315e21eb5938b9969715df3033340bf202a4b89407733a47184b4f1891ed435",
+              "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7055501782",
+              "rule": "Preserve r91 and all history. Records owner decisions of ghi hộ 7055708825 ([E2] Fable quota exhausted until 2026-11-25T08:00Z: PR1 attempt 5 and B4 attempt 2 by Claude Opus 5.5 at the highest effort) and 7056714807 ([E1+E2+E3] PR1: cut G5 timing completeness to successor PR1b, owner waiver of two M3 keys in acceptance 5, +1 attempt +1 source review); installs PR1 spec r6 on owner hash approval; Codex call counting per decision log https://github.com/ducthangho/tra-luat/issues/1448#issuecomment-7056951709.",
+              "prior_inheritance_r91": {
+                "previous_installed_revision": 90,
+                "previous_plan_sha256": "bfcf9728a713279fc519c5193a1a1d1826745288a4676d92438edb9bb6504c36",
+                "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7054236094",
+                "rule": "Preserve r90 and all history. Records owner decisions of ghi hộ 7054738466 ([E2] B3 r8 +1/+1) and 7055187755 ([E1+E2] B3 r9: every Exception escaping the nhap_wd call => khong_do_duoc, enumerated catch set abandoned; +1/+1), the coordinator reading of that answer against Q7 (decision log https://github.com/ducthangho/tra-luat/issues/1461#issuecomment-7055281943), freezes the B1a r7 and B3 r9 specs on owner hash approval, and admits B1a #1460 into execution conditional on lease wp1236-a-r9 releasing .claude/dev/ci_dang_ky_test.py and on a free writer slot.",
+                "prior_inheritance_r90": {
+                  "previous_installed_revision": 89,
+                  "previous_plan_sha256": "6dbaf8c2395caffb1f67d7482c1b99bc3d6be15bada48d354cbdd5bce42a1cf4",
+                  "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7053690021",
+                  "rule": "Preserve r89 and all history. Records owner decisions of ghi hộ https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7054219300 ([E1+E2] PR1 redesign + 2 attempts + 2 source reviews; [E2] B3 +1 author +1 spec review).",
+                  "prior_inheritance_r89": {
+                    "previous_installed_revision": 88,
+                    "previous_plan_sha256": "96df5fad1793e7c26ebe743a21c92639619a259058ebbe2f3704b3a80d6be0f8",
+                    "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7047934753",
+                    "rule": "Preserve r88 and all history. Records owner decisions of ghi hộ https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7053620878 ([E2] B3 +1 author +1 spec review; [E2] B4 nang_tran 6 files/1600 added) and installs B4 spec r8 (r7 + nang_tran block only).",
+                    "prior_inheritance_r88": {
+                      "previous_installed_revision": 87,
+                      "previous_plan_sha256": "9cc1dc15a426a5617505316f06784fbb9d0ad23638a4449ffa49688d1d628711",
+                      "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7047032246",
+                      "rule": "Preserve r87 and all history. Records owner decisions of ghi hộ https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7047654570 (PR1 spec r4 + Fable attempt 3; one confirmatory B4 spec review) and admits B4 #1462 into execution after its spec review 7 approved r7.",
+                      "prior_inheritance_r87": {
+                        "previous_installed_revision": 86,
+                        "previous_plan_sha256": "fffcfbe50cd77ff615914c56a2f2bcd07b051104b511157657814d2a8599b081",
+                        "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7045886115",
+                        "rule": "Preserve r86 and all history. Records owner decisions written down at https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7046422866 (ghi hộ, full-body readback verified) and later chat decisions of 2026-11-20, plus corrections after the independent protocol-compliance audit (ops/wp1172-kiem83-thamkhao:ops/specs/wp1172-kiem83/AUDIT_TUAN_THU_PHIEN_DIEU_PHOI_20261120.md).",
+                        "prior_inheritance_r86": {
+                          "previous_installed_revision": 85,
+                          "previous_plan_sha256": "6ccdce617409600a5f1f72b616d85381e404fce96853acc66cbef8f0f6861436",
+                          "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7044368881",
+                          "rule": "Preserve r85 and all history. Spec status at r86: B1 #1460 r3 (29c99e7) review 3/4 changes_requested 1 P1+3 P2; B3 #1461 r3 (a3e9189) review 3/4 changes_requested 2 P2; B4 #1462 r3 (6a0612f) review 3/4 changes_requested 3 P2; each used 3/3 author calls. Owner decision in chat 2026-11-20 ('Gói đề xuất'): (1) +2 author and +2 Codex review calls per spec for B1, B3, B4, until zero P0-P3; (2) size rule: no estimated nang_tran in specs; leases under the default sensitive size cap; the executor measures git diff --numstat during implementation and stops before exceeding; the coordinator then requests nang_tran with measured numstat per ADR-0053 for owner approval; (3) A4 integration removed from B1 (findings in three consecutive rounds); A4 remains an operator step consumed by B3.",
+                          "prior_inheritance_r85": {
+                            "previous_installed_revision": 84,
+                            "previous_plan_sha256": "a90f5df0746efcd3e92b8ff356806103a410fff71d3da4d7d4fd5e0f1dd96945",
+                            "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7038490132",
+                            "rule": "Preserve r84 and all history. Owner chat 2026-11-20 asked to run independent packets in parallel because PR1 is slow. r85 opens parallel lanes for B1, B3, B4 and PR2 of plan r4 (sha256 0f287ce4) next to PR1. Deviation recorded: PR1 attempt 1 (Fable 5.2) was cut by a provider limit after producing 302f76b; owner chose Claude Opus 5.5 xhigh for attempt 2 (c5c03ae); Codex source review 1 on 302f76b: changes_requested 5 P2. Executor policy from the owner: Fable 5.2 for hard tasks, coordinator balances easy ones; Windows tests on the owner's desktop first, then the VM; the Asus machine is offline.",
+                            "prior_inheritance_r84": {
+                              "previous_installed_revision": 83,
+                              "previous_plan_sha256": "7c54fab64607164a5f9f8215fed86f128815a925456958e6e00dd9edf0a81027",
+                              "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7038346647",
+                              "rule": "Record-only. Preserve r83 and all history. The owner decided in the coordinator chat 2026-11-20 ('Tôi quyết định thực hiện theo các khuyến nghị của bạn') to adopt the coordinator's recommendations for Q1-Q9 of source plan r4 draft 9 (sha256 0f287ce4) and r3 section 7, each with its stated conditions. No packet is admitted or leased; the decisions apply when each gating packet is specified.",
+                              "prior_inheritance_r83": {
+                                "previous_installed_revision": 82,
+                                "previous_plan_sha256": "24d089b02c3c6b7fb734b417de4be5a46577e1501ca63c7d848a9f3cdabbbc20",
+                                "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7032189767",
+                                "rule": "Preserve r82 and all history, counters and UNKNOWN. Original source plan r2 was recovered by the owner (bytes sha256 f4611b0f, stored at ops/wp1172-plan-r4). On owner instruction (chat 2026-11-20) the coordinator drafted source plan r4 merging r2, r3, the PR0 draft and the Proxima critique; the owner then lifted the review ceiling until zero P0-P3 with Fable 5.2 as reviser. Nine Codex review calls (gpt-6-astra xhigh, served gpt-6-astra) and one Fable 5.2 xhigh revision call were used; round 9 approved draft 9 with 0 P0-P3. r83 installs r4 draft 9 as the source plan. PR1 (#1448) lease, spec, caps and counters are unchanged; no new packet is admitted or leased by r83.",
+                                "prior_inheritance_r82": {
+                                  "previous_installed_revision": 81,
+                                  "previous_plan_sha256": "f6a7d977c4b43628672c18f112c3ee96bee5883d4a4335f56e4c5690957e8052",
+                                  "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7031984475",
+                                  "rule": "Preserve r81 and all history. The r81 spec-review call is used: wp1448-spec-review-1 (Codex gpt-6-astra xhigh, served gpt-6-astra) on spec r1 a2e264f0: changes_requested 4 P2 + 1 P3. The coordinator wrote spec r2 (5014de59) applying each suggested_fix. r82 authorizes one Codex review of spec r2; only if it has no P0-P2 may the coordinator grant the PR1 lease and dispatch the executor under the limits below. Any P0-P2 stops for the owner.",
+                                  "prior_inheritance_r81": {
+                                    "previous_installed_revision": 80,
+                                    "previous_plan_sha256": "e695dbe28285ec678d47eaeefde641d1ea936f3c639d34ab028569beef2d0bfd",
+                                    "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7031732922",
+                                    "rule": "Install source plan r3 revision 4 as the replacement for the lost r2. Drafting used author 4/4 and Codex review 5/5 (one lost to infrastructure). Final review wp1172-plan-r3-review-4 (Codex gpt-6-astra xhigh, served gpt-6-astra): approve the exact hash, no P0-P2, R3-06 and R3-09 closed, every one of 216 completed recent PR runs lands in exactly one G4 category; one P3 rounding advisory (PR6 lower endpoint 3.4 not 3.5 under the stated outward-rounding rule) carried as an erratum.",
+                                    "prior_inheritance_r80": {
+                                      "previous_installed_revision": 79,
+                                      "previous_plan_sha256": "cd660d746a79b29790f2e2c98e88de5ccabf6b5e017b5ed25f516d6a757b9553",
+                                      "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7031562075",
+                                      "rule": "Record plus budget. Replacement review wp1172-plan-r3-review-3b on draft 43137d53: changes_requested with one P2 (R3-06 G4 accounting) and P3 R3-09/R3-11; 9/10 closed; 198 numbers checked; reviewer would approve after the focused G4 correction. Coordinator proposed installing r3 with binding errata; the owner chose instead (chat 2026-11-20, 'Sửa G4 trước') to fix G4 inside the plan first: exactly one more author call and one more Codex review call, then install. Draft plan and reviews are stored at ops/wp1172-plan-r3@16fbff9.",
+                                      "prior_inheritance_r79": {
+                                        "previous_installed_revision": 78,
+                                        "previous_plan_sha256": "15f720a16d30c8a7077782b211329a5d2f01a97e7490236aa91aa12746008edb",
+                                        "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7030460366",
+                                        "rule": "Record-only plus one replacement call. Round-3 author call used (draft 43137d53a4451dfc8adb45c83d06c6314353ab7c393e77da2e3e0d1dee467cf4). Codex review call 3 (wp1172-plan-r3-review-3, launcher run eb7e6420, started 2026-11-20T04:34:13Z) was killed by a container restart about 34 minutes later with empty stdout and no verdict; it is counted as used (3/3) and recorded as lost_infrastructure, not refunded. Owner chat 2026-11-20 authorized exactly one replacement Codex review call on the same frozen draft and prompt.",
+                                        "lost_call": {
+                                          "run": "wp1172-plan-r3-review-3",
+                                          "launcher_short_id": "eb7e6420",
+                                          "state": "dang_chay at kill",
+                                          "stdout_bytes": 0,
+                                          "verdict": null
+                                        },
+                                        "prior_inheritance_r78": {
+                                          "previous_installed_revision": 77,
+                                          "previous_plan_sha256": "c03c0c82dddc655e214472231aa54f64968181f6f9055eaec3c3ce11d25a8e37",
+                                          "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7029895013",
+                                          "rule": "Preserve r77 and all history, counters, costs, failures and UNKNOWN. The r72 source_plan_r3_drafting budget is used: author calls 2/2 (drafts c9090f77, 7fe0545b), Codex review calls 2/2 (wp1172-plan-r3-review-1: changes_requested 7 P2 + 2 P3, numbers 130/130; wp1172-plan-r3-review-2: changes_requested 4 P2 + 1 P3, numbers 171 checked with one DX-2 recompute error; 5 prior findings closed, 4 partially). r78 adds exactly one more author call and one more Codex review call for the same document; nothing else changes.",
+                                          "prior_inheritance_r77": {
+                                            "previous_installed_revision": 76,
+                                            "previous_plan_sha256": "fa1616752fad545185502fe8e762af37ddf413d1453cf4b495145e7b6864ff40",
+                                            "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7028948296",
+                                            "rule": "Record-only revision. Packet1434 r3/g1 merged: PR #1439 head 91362b4, merge 5e5d2cc (owner clicked merge 2026-11-20T03:45:33Z); source reviews 4/4 (last two approve), connector clean on head, owner exact-H audits before each push, K6/K7 waived, kiem-merge rc0, master gate 44669876260 success; M8 landed:false (§10.2.2 not measured). Deviations recorded: the PR CI on 91362b4 ran lane day_du (one unplanned mutation CI run) because master drifted between pushes; the connector auto-reviewed once more on ready-for-review (3 vs cap 2). Lease wp1434-r3-g1-claude withdrawn at aeb7d57. r77 grants no new packet authority; the r72 source_plan_r3_drafting block (2 author calls, 2 Codex review calls, document only) is now triggered and in progress. Preserve all history, counters, costs, failures and UNKNOWN.",
+                                            "m8": "https://github.com/ducthangho/tra-luat/issues/1434#issuecomment-7029889258",
+                                            "prior_inheritance_r76": {
+                                              "previous_installed_revision": 75,
+                                              "previous_plan_sha256": "c0fdff644f71accc3bd52857c572cf9d81a2f53c3e2b182ecb0f341547baadb5",
+                                              "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7028440169",
+                                              "rule": "Preserve r75 and all history, counters, costs, failures and UNKNOWN; no reset, refund or replay. Packet1434 r3/g1: wp1434-source-review-3 approved H 70eafc1; owner exact-H audit 7028804716 posted before the first push of H; the genuine connector review of H (review 5986843693) raised two P2 code-robustness findings in thu_thap.py (pagination fallback chosen only from page 1; latest-run item totals turn missing data into 0). The coordinator checked the frozen snapshot: neither path is exercised by the actual data (both 502 runs failed on page 1 and used the full c30 series; the latest full run has all 8 logs and artifacts), so BASELINE numbers are expected unchanged, but the code defects are real. Attempts 3/3 and Codex source reviews 3/3 are used. r76 adds exactly one executor attempt to fix only these two findings, one Codex source review of the new head, and requires a new owner exact-H audit before its first push; connector re-review stays within the existing 2-request cap.",
+                                              "connector_review_1": {
+                                                "review_id": 5986843693,
+                                                "head": "70eafc14bfb49ca4c22f6b38ef7a1fd460b4767e",
+                                                "findings": [
+                                                  "P2 thu_thap.py:995 select the fallback when any primary pagination page fails",
+                                                  "P2 thu_thap.py:1217 preserve unavailable states in the latest-run item totals"
+                                                ]
+                                              },
+                                              "prior_inheritance_r75": {
+                                                "previous_installed_revision": 74,
+                                                "previous_plan_sha256": "d0a30e0464065db654c22e835cffb53512e7ed8b82d55a8e5a917288c3524601",
+                                                "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7027087192",
+                                                "rule": "Preserve r74 and all history, counters, costs, failures and UNKNOWN; no reset, refund or replay. Packet1434 r3/g1 used attempts 2/2 and Codex source reviews 2/2. wp1434-source-review-1 on 484d416: changes_requested (3 P2 + 1 P3). wp1434-source-review-2 on 07330ed: changes_requested; round-1 findings 4 closed + 1 partially, new P2 m3-filter-drops-imported-mutation-table, P2 m4-marks-measurable-claims-unmeasurable (partial), P2 m3-import-side-effects-escape-output; 11/11 mutants killed, 18/18 live checks matched, M1/M2 data unaffected. The coordinator stopped at the limit for the owner. r75 raises the limits by exactly one attempt and one Codex source review for the same packet/revision/generation; nothing else changes.",
+                                                "source_review_1": {
+                                                  "run": "wp1434-source-review-1",
+                                                  "head": "484d41656ab3f237b87cfe3b0f581c403debce9f",
+                                                  "verdict": "changes_requested"
+                                                },
+                                                "source_review_2": {
+                                                  "run": "wp1434-source-review-2",
+                                                  "head": "07330ed90662faed5479c3d186cb72363ffba355",
+                                                  "verdict": "changes_requested",
+                                                  "findings": [
+                                                    "P2 m3-filter-drops-imported-mutation-table",
+                                                    "P2 m4-marks-measurable-claims-unmeasurable",
+                                                    "P2 m3-import-side-effects-escape-output"
+                                                  ]
+                                                },
+                                                "prior_inheritance_r74": {
+                                                  "previous_installed_revision": 73,
+                                                  "previous_plan_sha256": "1360b22306eede2a99a618186c0cd81fe947750e36f648fe33fb4ad6d63d3b84",
+                                                  "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7026752494",
+                                                  "rule": "Preserve r73 and all history, counters, costs, failures and UNKNOWN; no reset, refund or replay. Both spec-review calls are used. wp1434-spec-review-2 (Codex gpt-6-astra xhigh, served gpt-6-astra) on spec r2 2495c613: prior findings 4 closed + 1 partially closed; new P2 attempt-end-time-has-no-defined-source and P3 skipped-jobs-enter-executed-class. Per r73 the coordinator stopped at a checkpoint for the owner. r74 freezes spec r3 (packet revision 3) which changes only those two points; no third spec review; both fixes are verified in the source review (spec §8 mutants).",
+                                                  "spec_review_2": {
+                                                    "run": "wp1434-spec-review-2",
+                                                    "verdict": "changes_requested",
+                                                    "reviewed_spec_sha256": "2495c613151a00fc75f6d3a776b69e24b1fa8ecf4de053f4593909fb61860c41",
+                                                    "findings": [
+                                                      "P2 attempt-end-time-has-no-defined-source",
+                                                      "P3 skipped-jobs-enter-executed-class"
+                                                    ]
+                                                  },
+                                                  "prior_inheritance_r73": {
+                                                    "previous_installed_revision": 72,
+                                                    "previous_plan_sha256": "a38b26a2201032571408fd0f747258fe541af638453a5e387ecc4a6f04045473",
+                                                    "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7026395594",
+                                                    "rule": "Preserve r72 and all history, counters, costs, failures and UNKNOWN; no reset, refund or replay. The one r72 spec-review call is used: wp1434-spec-review-1 (Codex gpt-6-astra xhigh, served gpt-6-astra) returned changes_requested on spec r1 88c49734 with 4 P2 + 1 P3. r73 replaces the frozen spec with r2 (packet revision 2) fixing all five, adds one more spec-review call, and keeps every other limit.",
+                                                    "spec_review_1": {
+                                                      "run": "wp1434-spec-review-1",
+                                                      "verdict": "changes_requested",
+                                                      "reviewed_spec_sha256": "88c49734c051ae16135cfae6d9464c7ee19eefa6ec5b557ff74fd10cedcb39bf",
+                                                      "findings": [
+                                                        "P2 output-layout-conflicts-with-read-only-delivery",
+                                                        "P2 live-recollection-is-not-frozen-replay",
+                                                        "P2 run-attempt-accounting-is-undefined",
+                                                        "P2 baseline-omits-existing-suite-timing-and-mode-evidence",
+                                                        "P3 distinguish-measured-zero-from-missing-data"
+                                                      ]
+                                                    },
+                                                    "prior_inheritance_r72": {
+                                                      "previous_installed_revision": 71,
+                                                      "previous_plan_sha256": "cb8886d20f7a2adaa72402e6fe127335f12409fae35d02afa7698daaa1e47592",
+                                                      "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7017106241",
+                                                      "rule": "Preserve r71 and all history, counters, costs, failures and UNKNOWN; no reset, refund or replay. r72 records that the original source plan r2 cannot be found and admits exactly one read-only measurement Packet, #1434, whose output is input for a replacement source plan r3.",
+                                                      "owner_decision": "Owner chat 2026-11-20: approved the coordinator's proposal (search once more in the logged-in ChatGPT/Codex history, and in parallel prepare a replacement source plan r3 built on measurements, starting with a read-only baseline Packet). Owner chat 2026-11-20 (follow-up): after the measurements exist, build the plan with Fable 5.2 or higher, have it reviewed by a high Codex model, and present one best option.",
+                                                      "prior_inheritance_r71": {
+                                                        "previous_installed_revision": 70,
+                                                        "previous_plan_sha256": "0ba919c1128c06064ade9553421d0af0fa413e1d010b20d1f3c0a3ac3bb1542e",
+                                                        "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7010161923",
+                                                        "rule": "Record-only revision. Packet1422 r1/g1 (E5: canonical mo-lai ci-do for the cross-family human_audited target lane with a codex_service reviewer) merged: PR #1427 source head 7c68d118, merge commit b830d47 (owner clicked merge 2026-11-19T17:12:12Z); two Codex reviews approve; owner exact-H audit; K6/K7 waived by owner comment; master gate 38/39 with the only failure being the pre-existing release-verify manifest mismatch from PR #1425 (delta 0); Windows run cancelled; M8 landed:false (§10.2.2 checkout/workflow_definition/gate_output not_measured); lease wp1422-r1-g1-claude withdrawn by early expiry at 1c09402. r71 grants no new authority: envelope zero, empty write set. Preserve all r70 history, counters, costs, failures and UNKNOWN; no reset, refund or replay.",
+                                                        "m8": "https://github.com/ducthangho/tra-luat/issues/1422#issuecomment-7017084602",
+                                                        "human_exact_head_audit": "https://github.com/ducthangho/tra-luat/pull/1427#issuecomment-7015801311",
+                                                        "owner_waiver_k6_k7": "https://github.com/ducthangho/tra-luat/pull/1427#issuecomment-7015889026",
+                                                        "prior_inheritance_r70": {
+                                                          "previous_installed_revision": 69,
+                                                          "previous_plan_sha256": "d0296d80d3e9a732a39be04ed3b3bedcf16ba13abc14402f15cc3ac20ac6e3ad",
+                                                          "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7009880317",
+                                                          "rule": "Preserve r69, PR0 g4/g5 results and all history, counters, costs, failures and UNKNOWN; no reset, refund or replay. r70 admits exactly one source packet, #1422, to close the E5 debt recorded in r69: canonical mo-lai ci-do is unreachable in the cross-family human_audited target lane with a codex_service reviewer.",
+                                                          "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7010025963",
+                                                          "prior_inheritance_r69": {
+                                                            "previous_installed_revision": 68,
+                                                            "previous_plan_sha256": "8fb7c91e934f643f5f3cc7cecea91dd18c54d4e384f64a2ef3717302bef0dbee",
+                                                            "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7004889140",
+                                                            "rule": "Record-only revision. PR0 #1166 r4/g5 reached canonical accepted on the Desktop at 2026-11-19T11:55:46Z (state accepted rev12, accepted_sha b79cbf56a1696b44c38529275312287ca78ba91d, witness rev25); PR #1412 merged at f8b9cdd (owner clicked merge 12:10:57Z); master gate 39/39 after one infrastructure rerun; M8 landed:false (§10.2.2 checkout/workflow_definition/gate_output not_measured). r69 grants no new authority: envelope zero, empty write set. Preserve all r68/g4/g5 history, counters (attempts 3/4, review 3/4, Codex 3/4), costs, failures and UNKNOWN; no reset, refund or replay.",
+                                                            "result_checkpoint": "https://github.com/ducthangho/tra-luat/issues/1166#issuecomment-7008546621",
+                                                            "m8": "https://github.com/ducthangho/tra-luat/issues/1166#issuecomment-7009869906",
+                                                            "human_acceptance_audit": "https://github.com/ducthangho/tra-luat/pull/1412#issuecomment-7007474237",
+                                                            "prior_inheritance_r68": {
+                                                              "previous_installed_revision": 67,
+                                                              "previous_plan_sha256": "c47678eecb6faf48a4d688a1b6e75ea3340f31060d243eb1e1a2d788b8574df6",
+                                                              "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6999264669",
+                                                              "rule": "Preserve r67 and PR0 g4 history, counters (attempts 2/3, review 2/3, Codex 2/3), costs, failures and UNKNOWN; no reset, refund or replay. g4 reached approved_pending rev11 (pending_sha 18d48b6, owner exact-H2 audit 7003930208, connector clean) but exact-H2 CI was red on gate (ubuntu-latest) run 44488618410 (bare bash call at .claude/dev/ci_dang_ky_test.py:2596). Canonical mo-lai ci-do is unreachable for the cross-family human_audited lane (receipt must name provider codex and assurance human_audited, which bien_nhan_v2 forbids for models); two mo-lai calls ended clean UNKNOWN with no state write. g5 adopts g4 approved_pending via canonical adopt-state pending recovery, as WP1308 g8->g9 did.",
+                                                              "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7004832203",
+                                                              "prior_inheritance_r67": {
+                                                                "previous_installed_revision": 66,
+                                                                "previous_plan_sha256": "6372a34a8d4405c629b84134ad46cebcfae0d535f24fe4e49e48119f24463449",
+                                                                "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6995985717",
+                                                                "rule": "Preserve r66, WP1308 g1-g9 and all earlier history, counters, costs, failures and UNKNOWN; no reset, refund or replay. WP1166 r1-r3 history (leases wp1166-r1/r2/r3-g*-codex, closed draft PR #1167, historical exact-H 9fc17a1161fa7d3d5deae00a7dc43f575ee4d322 evidence) is imported as history only: old CI/review/audit results are not evidence for any new H.",
+                                                                "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6999217718",
+                                                                "prior_inheritance_r66": {
+                                                                  "previous_installed_revision": 65,
+                                                                  "previous_plan_sha256": "4ffa95ce252faa793883ea6f8956d6ce27d0443d6e37368d720e4c4c48158215",
+                                                                  "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6979844522",
+                                                                  "rule": "Record-only revision. Packet1308 r5/g9 reached canonical accepted on the Desktop at 2026-11-18T17:14:32Z (state accepted rev17, accepted_sha 8f50ef033d560e572658a2c35bcd834e6b18d589, witness rev63, boot 2f7fa68a unchanged); final counters attempts/review/Codex 6/6. The g9 allowance and lease ended 2026-11-18T18:59Z. r66 grants no new authority: envelope is zero and no Packet may be admitted under it. Preserve all r65/g9 and earlier history, counters, costs, failures and UNKNOWN; no reset, refund or replay.",
+                                                                  "result_checkpoint": "https://github.com/ducthangho/tra-luat/issues/1308#issuecomment-6994602014",
+                                                                  "human_acceptance_audit": "https://github.com/ducthangho/tra-luat/pull/1399#issuecomment-6984444170",
+                                                                  "lifecycle_erratum": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6982222196",
+                                                                  "prior_inheritance_r65": {
+                                                                    "previous_installed_revision": 64,
+                                                                    "previous_plan_sha256": "ebc57765060256fc77614e723c533847d41c845b6a0874349448fd802141a68f",
+                                                                    "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6979218857",
+                                                                    "rule": "r64 left the Packet1308 packet_graph row at r5/g8 (WP1308-r5-g8-desktop-accept-activity), so canonical resolution of the r64 g9 admission failed closed with \"Mission registered Packet\" (adopt-state clean UNKNOWN twice, no state/witness write). r65 corrects only that row to r5/g9; every other r64 term, limit and window is unchanged. Preserve all r64/g8 history; no reset or refund.",
+                                                                    "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6978536145",
+                                                                    "prior_inheritance_r64": {
+                                                                      "previous_installed_revision": 63,
+                                                                      "previous_plan_sha256": "e668dc3e65fd09d9270a835b416b82b5130504e42302fe659c9e537e6d1e7b87",
+                                                                      "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6975953837",
+                                                                      "rule": "Preserve r63, #1393 and g8 results and all earlier history, counters, costs, failures and UNKNOWN; no reset, refund or replay. #1393 merged at d39313e (PR #1397, owner clicked merge 2026-11-18T12:24:46Z). g8 stayed approved_pending rev8 (pending_sha 6886ebe) after its allowance ended 2026-11-18T10:45:00Z without accept, because accept compared raw_snapshot_sha256/cursor page counts between two publication collections.",
+                                                                      "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6978536145",
+                                                                      "prior_inheritance_r63": {
+                                                                        "previous_installed_revision": 62,
+                                                                        "previous_plan_sha256": "d26ee2becd4ae842cc82c3ea6289f4c6c64b1ca9211f29e89019c8d5a3c274e0",
+                                                                        "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6969082747",
+                                                                        "rule": "Preserve r62/g8 results and all history; g8 approved_pending rev8 (pending_sha 6886ebe) kept until its window ends 2026-11-18T10:45:00Z; accept attempts ended clean UNKNOWN (I2 glob from #1319 leases, master race, coordinator acc_fetch earliest-run bug, then publication evidence raw_snapshot_sha256 mismatch); no reset or refund.",
+                                                                        "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6975912237",
+                                                                        "prior_inheritance_r62": {
+                                                                          "previous_installed_revision": 61,
+                                                                          "previous_plan_sha256": "599afa9f2495adad57c63272ab630ca73ed53891511977064e7a66e154fe4607",
+                                                                          "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6945156953",
+                                                                          "rule": "Preserve r61, #1370 and g7 results and all earlier history, counters, costs, failures and UNKNOWN; no reset, refund or replay. #1370 merged at 641108c (M8 landed:false, §10.2.2 gate_output not_measured). g7 stayed approved_pending rev12 (sha 0f569cd4) until its allowance ended 2026-11-17T12:36Z without accept, because the Events-API publication collector could not produce evidence.",
+                                                                          "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6969055884",
+                                                                          "prior_inheritance_r61": {
+                                                                            "previous_installed_revision": 60,
+                                                                            "previous_plan_sha256": "9987115c4dbb36538e3dbe710d557a8eff41429cb9a8119e98628b99d0900f0a",
+                                                                            "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6940711831",
+                                                                            "rule": "Preserve r60/g7 results and all history; g7 approved_pending rev12 kept until its window ends; no reset or refund.",
+                                                                            "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6945148714",
+                                                                            "prior_inheritance_r60": {
+                                                                              "previous_installed_revision": 59,
+                                                                              "previous_plan_sha256": "9c86e1558915895202a89d27c59c1d15b449ff877eb0e090afb405fa7e1b1e17",
+                                                                              "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6937079858",
+                                                                              "rule": "Preserve r59/g6 results and all earlier history, counters, costs, failures and UNKNOWN; g6 closed blocked (rescue_required codex_review_calls) by owner decision; no reset, refund or replay.",
+                                                                              "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6940706317",
+                                                                              "prior_inheritance_r59": {
+                                                                                "previous_installed_revision": 58,
+                                                                                "previous_plan_sha256": "92bf097ed3de849011ec136a1bff43e99e59e82ccb7888b9dab6a10780259cc4",
+                                                                                "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6933449731",
+                                                                                "rule": "Preserve r58 and all earlier history, g4/g5 results, counters, costs, failures and UNKNOWN; no reset, refund or replay. WP1350 landed (merged 59b3fb9, M8 landed:false per §10.2.2 gate_output not_measured).",
+                                                                                "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6937069662",
+                                                                                "prior_inheritance_r58": {
+                                                                                  "previous_installed_revision": 57,
+                                                                                  "previous_plan_sha256": "058b399f8b370f09df8d7288225ae42aa2a7edbb097b418c105ac2266e82a403",
+                                                                                  "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6932329106",
+                                                                                  "rule": "Preserve r57/g5 results and all history; g5 closed by owner decision, its lease expired; no reset or refund.",
+                                                                                  "owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6933449308",
+                                                                                  "prior_inheritance_r57": {
+                                                                                    "previous_installed_revision": 36,
+                                                                                    "previous_plan_sha256": "24fcde81b306c412494956ac8457ffd8c5da4523cca45aea8e11594f3b0f5d53",
+                                                                                    "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6860961333",
+                                                                                    "expired_at_utc": "2026-11-14T01:23:19Z",
+                                                                                    "rule": "Preserve all r36/g4 and earlier history, failures, costs, counters and UNKNOWN. g4 allowance expired at its original absolute time; no extension, refund, reset or replay. g4 approved_pending state is carried only by canonical adoption.",
+                                                                                    "r57_proposal": "https://github.com/ducthangho/tra-luat/issues/1308#issuecomment-6931332364",
+                                                                                    "r57_owner_decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6931505436",
+                                                                                    "prior_inheritance_r36": {
+                                                                                      "previous_installed_revision": 35,
+                                                                                      "previous_plan_sha256": "14a10298036b0272e3c2d30bc624fd0216ff874d9a973d2b931bc8d7ddff69fc",
+                                                                                      "installation_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6859568339",
+                                                                                      "expired_at_utc": null,
+                                                                                      "rule": "Preserve all r35/g3 and earlier history, failures, preparation/wait/metadata costs and UNKNOWN. G3 remains frozen at its original absolute expiry until superseded through canonical fencing; no retrospective extension, time refund, state reset or new source/PR0-PR8 allowance.",
+                                                                                      "r32_last_observed_receipt": "https://github.com/ducthangho/tra-luat/issues/1308#issuecomment-6850048834",
+                                                                                      "approved_but_not_installed_revision33": {
+                                                                                        "plan_sha256": "c85d68b851f0380866403ab5f3de1ffdb5fc44251ff10e7a883ee11895cd9f92",
+                                                                                        "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6855072273",
+                                                                                        "installation_occurred_in_this_session": false,
+                                                                                        "rule": "Prospective budget-only replacement before registration; preserve r33 approval and operator asset provenance. Reconcile live events before retaining prospective Packet1308 r3/g3; never reuse an already-issued generation or refund history."
+                                                                                      },
+                                                                                      "approved_but_not_installed_revision34": {
+                                                                                        "plan_sha256": "32dddd1feac65cb69f285eace33e1340dfe57d6fb746ad78ab21b9aaa8a4d322",
+                                                                                        "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6857228204",
+                                                                                        "rule": "Preserve exact approved r34 budget and all prior history. This prospective revision changes only the missing current ASUS observation prerequisite; no prior generation reset or retrospective PASS."
+                                                                                      },
+                                                                                      "issued_generation3": {
+                                                                                        "lease_id": "wp1308-r3-g3-codex",
+                                                                                        "lease_oid": "9efae191bcc0110239820cc68f1eb43d726b9ce4",
+                                                                                        "original_expiry_utc": "2026-11-13T21:50:11Z",
+                                                                                        "receipt": "https://github.com/ducthangho/tra-luat/issues/1308#issuecomment-6859663019",
+                                                                                        "desktop_observed_utc": "2026-11-13T17:41:04.410404Z",
+                                                                                        "desktop_journal_present": false,
+                                                                                        "desktop_witness_present": false,
+                                                                                        "desktop_new_lifecycle_attempts": 0,
+                                                                                        "desktop_new_model_workloads": 0,
+                                                                                        "usage_scope": "Only this Desktop session; unavailable ASUS counters and billing stay UNKNOWN. Recheck current records and processes before issuance."
+                                                                                      }
+                                                                                    }
+                                                                                  }
+                                                                                }
+                                                                              }
+                                                                            }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "packet_graph": [
+    {
+      "packet": 1174,
+      "role": "minimal_canonical_lifecycle_adapter",
+      "depends_on": [],
+      "prerequisite": "landed ADR0063 and separately admitted new reduced-scope Packet",
+      "revision": 24,
+      "generation": 21,
+      "contract_id": "WP1174-r24-C15-J"
+    },
+    {
+      "packet": 1166,
+      "role": "PR0",
+      "depends_on": [
+        1174,
+        1308
+      ],
+      "revision": 4,
+      "generation": 5,
+      "contract_id": "WP1166-r4-g5-desktop-pr0",
+      "prerequisite": "PR0 g5: adopt g4 approved_pending (rev11, pending_sha 18d48b6) through canonical adopt-state pending recovery on the same Desktop enrollment (mission1172-desktop-1166-g4-20261119, boot 72e83588), record-lease, nang-tran within the r68 caps, begin-attempt, fix the bare bash call into H3, independent Codex review, owner exact-H3 audit, exact-H3 CI, connector, canonical accept.",
+      "adoption": "history_imported_r1_r3_no_evidence_carryover"
+    },
+    {
+      "packet": 1308,
+      "role": "target_admission_canary",
+      "depends_on": [
+        1174,
+        1309,
+        1315,
+        1350,
+        1370,
+        1393
+      ],
+      "prerequisite": "g8 approved_pending at rev8 (sha cea8bf86), allowance ended 2026-11-18T10:45Z without accept because publication receipts were compared on raw snapshot hash and page counts; #1393 fixed the comparison (merged d39313e). g9 adopts that state via canonical adopt-state pending recovery into journals-g9 (same enrollment id/binding, same boot 2f7fa68a), raises limits 4->6 only via canonical nang-tran bounded by the g9 admission allowance and the owner decision, record-lease rebind to wp1308-r5-g9-codex, then a new canary H with g9 metadata paths, offline Codex review scoped to the packet diff, owner actual-human exact-H audit, controlled publication, Ubuntu PR CI, genuine connector and canonical accept. Never fresh-init, reset, delete or copy seed.",
+      "revision": 5,
+      "generation": 9,
+      "contract_id": "WP1308-r5-g9-desktop-accept-after-1393",
+      "source_changes_allowed": false
+    },
+    {
+      "packet": 1309,
+      "role": "canonical_snapshot_timeout480",
+      "depends_on": [
+        1174
+      ],
+      "delivery_pr": 1311,
+      "required_merge_sha": "dc635d3c90ecc348bc916bfd3e9b0a8f8ad9000d",
+      "prerequisite": "Actual postmerge CI/provenance/M8 and closure, not merge status alone",
+      "new_source_work_authorized": false
+    },
+    {
+      "packet": 1350,
+      "role": "nang_tran_attempts_axis_source",
+      "depends_on": [
+        1315
+      ],
+      "revision": 1,
+      "generation": 1,
+      "contract_id": "WP1350-r1-nang-tran-attempts",
+      "source_changes_allowed": true,
+      "status": "merged 59b3fb9; closed; M8 https://github.com/ducthangho/tra-luat/issues/1350#issuecomment-6936453698"
+    },
+    {
+      "packet": 1370,
+      "role": "publication_evidence_activity_api_source",
+      "depends_on": [
+        1174,
+        1315,
+        1350
+      ],
+      "revision": 1,
+      "generation": 1,
+      "contract_id": "WP1370-r1-publication-activity-api",
+      "source_changes_allowed": true,
+      "state": "merged 641108c; M8 https://github.com/ducthangho/tra-luat/issues/1370#issuecomment-6968893516"
+    },
+    {
+      "packet": 1393,
+      "role": "accept_publication_snapshot_compare_source",
+      "depends_on": [
+        1174,
+        1315,
+        1350,
+        1370
+      ],
+      "revision": 1,
+      "generation": 1,
+      "contract_id": "WP1393-r1-accept-snapshot-compare",
+      "source_changes_allowed": true,
+      "status": "merged d39313e (PR #1397); M8 recorded separately"
+    },
+    {
+      "packet": 1422,
+      "role": "lifecycle_fix_mo_lai_target_service",
+      "depends_on": [
+        1174,
+        1166
+      ],
+      "revision": 1,
+      "generation": 1,
+      "contract_id": "WP1422-r1-g1-mo-lai-target-service",
+      "prerequisite": "E5 source fix: frozen spec ops/specs/wp1422-r1/SPEC.md sha256 0e30476467476439c7f44f0fda6043d066e57e6108a84cc482d633b9460013aa approved by the owner; owner audits exact H personally."
+    },
+    {
+      "packet": 1434,
+      "role": "baseline_measurement_for_source_plan_r3",
+      "depends_on": [
+        1166
+      ],
+      "revision": 3,
+      "generation": 1,
+      "contract_id": "WP1434-r3-g1-do-nen-dot-bien",
+      "prerequisite": "Frozen spec ops/specs/wp1434-r3/SPEC.md sha256 0247845e6dd643388f7219781ebff553b605e59d731481d10a024e80ae8232b4 (branch ops/wp1434-r1 @ 9983719) approved by the owner; owner audits exact H before merge.",
+      "source_changes_allowed": false,
+      "read_only_measurement": true,
+      "superseded_specs": [
+        "r1 88c49734c051ae16135cfae6d9464c7ee19eefa6ec5b557ff74fd10cedcb39bf",
+        "r2 2495c613151a00fc75f6d3a776b69e24b1fa8ecf4de053f4593909fb61860c41"
+      ]
+    },
+    {
+      "packet": 1448,
+      "role": "PR1",
+      "source_plan": "r3",
+      "depends_on_roles": [
+        "PR0"
+      ],
+      "status": "merged_landed_false",
+      "revision": 2,
+      "generation": 1,
+      "contract_id": "WP1448-r2-g1-quan-sat-g5",
+      "prerequisite": "Frozen spec ops/specs/wp1448-r2/SPEC.md sha256 5014de59a48aad517ae22d1b91a6ae8dc1b382fc4650fdddecffe9cc5927c53e (branch ops/wp1448-r1 @ 190008d) approved by the owner and a Codex spec review with no P0-P2; owner exact-H audit before the first push of H; K7 full_mutant_audit success on H; Windows waived by standing rule.",
+      "merge": {
+        "pr": 1492,
+        "M": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+        "H": "7dcaa20f8e100d47b17f04ac5841fc36bce1e4c0",
+        "merged_at": "2026-11-21T16:07:05Z",
+        "ci_master": "39/39 success",
+        "M8": "https://github.com/ducthangho/tra-luat/issues/1448#issuecomment-7065823063",
+        "landed": false,
+        "lease": "wp1448-r7-g10-claude shortened to 2026-11-21T17:17:31Z"
+      },
+      "debt": [
+        "PR1b — G5 timing collector redesign",
+        "thu_thap Windows mutant killed by WinError 32 file lock",
+        "lease_publish check does not reject short spec_ref OID"
+      ]
+    },
+    {
+      "packet": null,
+      "role": "PR2",
+      "source_plan": "r3",
+      "depends_on_roles": [
+        "PR1"
+      ],
+      "status": "admitted_spec_drafting",
+      "write_set": [
+        "ops/ci_provenance_test.py",
+        ".claude/dev/ci_dang_ky_test.py",
+        "ops/specs/<pr2>/"
+      ],
+      "depends_on": "after B1 (shared ci_dang_ky_test.py); Q3 decided in r84",
+      "blocked_by_r96": "lease wp1236-a-r12-g1-claude-20261121 (Mission #1236) holds .claude/dev/ci_dang_ky_test.py until 2026-11-23T13:45:00Z"
+    },
+    {
+      "packet": null,
+      "role": "PR3",
+      "source_plan": "r3",
+      "depends_on_roles": [
+        "PR1",
+        "PR2"
+      ],
+      "status": "not_dispatched"
+    },
+    {
+      "packet": null,
+      "role": "PR4",
+      "source_plan": "r3",
+      "depends_on_roles": [
+        "PR1",
+        "PR2"
+      ],
+      "status": "not_dispatched"
+    },
+    {
+      "packet": null,
+      "role": "PR5",
+      "source_plan": "r3",
+      "depends_on_roles": [
+        "PR0",
+        "PR1",
+        "PR2"
+      ],
+      "status": "not_dispatched"
+    },
+    {
+      "packet": null,
+      "role": "PR6",
+      "source_plan": "r3",
+      "depends_on_roles": [
+        "PR4",
+        "PR5",
+        "PR3"
+      ],
+      "status": "not_dispatched"
+    },
+    {
+      "packet": null,
+      "role": "PR7",
+      "source_plan": "r3",
+      "depends_on_roles": [
+        "PR3",
+        "PR6_or_owner_declined"
+      ],
+      "status": "not_dispatched"
+    },
+    {
+      "packet": null,
+      "role": "PR8",
+      "source_plan": "r3",
+      "depends_on_roles": [
+        "PR7"
+      ],
+      "status": "not_dispatched",
+      "owner_residual_risk_decision_required": true
+    },
+    {
+      "packet": 1460,
+      "role": "B1",
+      "source_plan": "r4",
+      "status": "admitted_execution_conditional",
+      "description": "full-audit receipt contract bien_nhan_audit.v1 + A3 concurrency canary + A4 definition identity",
+      "prerequisite": "Own frozen spec approved by the owner (hash) and its own Mission revision before any lease.",
+      "write_set": [
+        ".github/workflows/ci-dot-bien-du.yml",
+        ".claude/dev/ci_dang_ky_test.py",
+        "ops/specs/<b1>/"
+      ],
+      "blocked_by": "lease wp1236-a-r9-g1-claude-20261120 holds .claude/dev/ci_dang_ky_test.py until 2026-11-22T15:35Z: spec now, implementation after release",
+      "b1a_r89": "B1a spec r7 ops/wp1460-r1@d1b08c2 SPEC sha256 d53341fb8d549d89f99e4cda0bd6ed380bf9975ce47b95a43ad1adaf5b3963b3, Codex spec review 7 approve 0 findings (reviews at 163ece8). Owner hash approval to be requested together with B3 (decision log https://github.com/ducthangho/tra-luat/issues/1460#issuecomment-7048557300); not admitted to execution by r89.",
+      "role_detail": "B1a (receipt contract bien_nhan_audit.v1 + collector); diagnostics/A+3/dependency provenance/RSS go to successor B1b",
+      "spec": {
+        "path": "ops/specs/wp1460-r1/SPEC.md",
+        "commit": "ops/wp1460-r1@d1b08c219227d4b8925702029cd20d4e0febed54",
+        "sha256": "d53341fb8d549d89f99e4cda0bd6ed380bf9975ce47b95a43ad1adaf5b3963b3",
+        "contract_files": {
+          "hop_dong/bien_nhan_audit.v1.schema.json": "844b5218b6f6844945f5c4c9440f09015d238fe09a60d64b3787c440787e4f46",
+          "hop_dong/fixture.json": "ce8595739a1ab2f4a86c9c196255e5f91fb19a9f6d3865df6caa2d66f9970e6d"
+        }
+      },
+      "spec_reviews": "7 Codex gpt-6-astra xhigh rounds; round 7 approve 0 findings (ops/wp1460-r1@163ece8 ops/specs/wp1460-r1/reviews/)",
+      "lease_condition": "lease only after wp1236-a-r9-g1-claude-20261120 releases .claude/dev/ci_dang_ky_test.py (expiry 2026-11-22T15:35Z or earlier land) AND at most two executor writers run; full ref scan (ai-dang-giu) before issuing",
+      "limits": {
+        "executor_attempts": 3,
+        "Codex_source_review": 3,
+        "codex_calls_total_cap": "10 (ADR-0055 line in spec)",
+        "connector": 2,
+        "PR_Ubuntu_CI": 3,
+        "full_M9": 1,
+        "CI_reruns": 1,
+        "Windows_CI": 0
+      },
+      "size": "default sensitive cap 6 files/450 added (ADR-0053 line); contract files already 195 lines; executor measures and stops before review; nang_tran only with measured numstat (owner E2)",
+      "blocked_by_r96": "lease wp1236-a-r12-g1-claude-20261121 (Mission #1236) holds .claude/dev/ci_dang_ky_test.py until 2026-11-23T13:45:00Z"
+    },
+    {
+      "packet": null,
+      "role": "B2",
+      "source_plan": "r4",
+      "status": "admitted_spec_drafting",
+      "description": "independent freshness watchdog (6h, three states, report only)",
+      "prerequisite": "Own frozen spec approved by the owner (hash) and its own Mission revision before any lease.",
+      "budget": "per_new_packet (spec_author_calls 5, codex_spec_review_calls 6); implementation after B1 lands and after lease wp1236-a-r12 releases .claude/dev/ci_dang_ky_test.py"
+    },
+    {
+      "packet": 1461,
+      "role": "B3",
+      "source_plan": "r4",
+      "status": "spec_frozen_not_admitted",
+      "description": "release gate on Package deploy bound to exact H/package bytes; no machine-granted exceptions",
+      "prerequisite": "Own frozen spec approved by the owner (hash) and its own Mission revision before any lease.",
+      "write_set": [
+        "scripts/deploy-package.sh",
+        "scripts/deploy-package.ps1",
+        "scripts/deploy-guard.ps1",
+        ".claude/hooks/pretooluse_guard.py",
+        ".claude/hooks/pretooluse_guard_test.py",
+        "ops/specs/<b3>/"
+      ],
+      "depends_on": "B1 receipt contract frozen in the B1 spec (not B1 landed); blocking mode only after Q7 conditions",
+      "spec_budget_r89": "owner [E2] +1 author (r6) +1 spec review: author 6, Codex spec review 7; r5 4a5edea b9003d6a review 5 changes_requested 2 P2",
+      "spec_budget_r90": "owner [E2] second +1 author +1 review: author 7, Codex spec review 8; r6 ad2c43b ddbaa300 review 6 changes_requested 2 P2 (SPEC-19, SPEC-20) caused by r6 author over-reach; r7 restricted to those two classes",
+      "spec": {
+        "path": "ops/specs/wp1461-r1/SPEC.md",
+        "commit": "ops/wp1461-r1@a12f6e831dde3e4397d3782bbc15217b2e26ab04",
+        "sha256": "9066a4c631065d6eac0e55117422c74ae2d2039c3e8816ca165f3fe0f1b90309",
+        "pins_b1a": "d1b08c2 / d53341fb"
+      },
+      "spec_reviews": "9 Codex rounds; round 9 approve 0 findings (ops/wp1461-r1@1a8bbc3 ops/specs/wp1461-r1/reviews/)",
+      "admission": "own Mission revision later, after B1 lands and per r4 order (... PR3 -> B3); spec states a certain size overrun (about 11 files) => executor stops before review and coordinator asks nang_tran (E2)"
+    },
+    {
+      "packet": 1462,
+      "role": "B4",
+      "source_plan": "r4",
+      "status": "review_only",
+      "description": "tighten-only kill switch per reduction class + trusted live read in kiem-merge; before PR3 enablement",
+      "prerequisite": "Own frozen spec approved by the owner (hash) and its own Mission revision before any lease.",
+      "write_set": [
+        ".claude/dev/packet_loop.py",
+        ".claude/dev/packet_loop_test.py",
+        "ops/specs/wp1462-r1/"
+      ],
+      "depends_on": "Q9(a): writer set W measured before the B4 spec is frozen",
+      "revision": 9,
+      "generation": 4,
+      "spec": {
+        "path": "ops/specs/wp1462-r1/SPEC.md",
+        "commit": "ops/wp1462-r1@f5b0ff1",
+        "sha256": "e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d",
+        "previous": "r8 a5d28e2a (529c3ac)",
+        "change": "acceptance 1: (a) 147 CLI cases byte-compared, (b) 9 fault-injected-before-CLI cases compared by exception chain, (c) 1 self-modified case compared after traceback line-number normalisation"
+      },
+      "spec_reviews": "7 Codex gpt-6-astra xhigh rounds; round 7 approve 0 findings (verdicts on ops/wp1462-r1 @ c7b9be3 ops/specs/wp1462-r1/reviews/)",
+      "executor": "claude-fable-5-2 (separate worktree/cloud session)",
+      "reviewer": "google_antigravity",
+      "limits": {
+        "executor_attempts": 3,
+        "codex_calls_total_cap": "10 (ADR-0055 line)",
+        "Codex_source_review": 3,
+        "connector": 2,
+        "PR_Ubuntu_CI": 3,
+        "full_M9": 1,
+        "CI_reruns": 1,
+        "Windows_CI": 0
+      },
+      "size": "nang_tran installed in spec r8: tran_cu 6 files/450 added, tran_moi 6 files/1600 added, measured on the delivered candidate vs lease base; exceed => stop before review and ask owner (E2)",
+      "order": "before the ADR-0068 governance packet (session_015GtxrcdabvDuhzgezMEE89)",
+      "CHO_PHEP": "never set by B4; W measurement before any CHO_PHEP (Q9a)",
+      "attempt1": "Fable 5.2, H 45317c6f00fd1c9d8373998c377db35451a3a1d1 (local, not pushed): 5 files +1263/-3, stopped before review on size; handoff https://github.com/ducthangho/tra-luat/issues/1462#issuecomment-7053610587",
+      "lease_successor": "wp1462-r9-g3-claude: spec r9, start 6767e37, attempt 4",
+      "attempt2_model": "claude-opus-5-5 (owner E2 7055708825); Fable partial diff saved e75a5a82",
+      "limits_r95": {
+        "executor_attempts": 4,
+        "executor_attempts_used": 3,
+        "Codex_source_review": 3,
+        "Codex_source_review_used": 2,
+        "executor_model": "claude-opus-5-5 while Fable quota exhausted"
+      },
+      "attempt3": "Opus 5.5 head 6767e377bc2bdf3b512c6641496e88f614eb8978 (local): 5 files +1599/-3; P1 closed; criterion 1 blocked; handoff https://github.com/ducthangho/tra-luat/issues/1462#issuecomment-7063199346",
+      "contract_id": "WP1462-r9-g4-agy-review-only",
+      "source_changes_allowed": false,
+      "reviewed_sha": "724993bf23f16070f272ccd81b4fe16c111ce2eb"
+    },
+    {
+      "packet": 1463,
+      "role": "PR2",
+      "revision": 5,
+      "generation": 1,
+      "contract_id": "WP1463-r5-g1-agy-spec-review-only",
+      "status": "spec_review_only",
+      "source_changes_allowed": false,
+      "reviewer": "google_antigravity",
+      "depends_on": [
+        1460
+      ]
+    },
+    {
+      "packet": 1499,
+      "role": "launcher_agy_cli_identity",
+      "revision": 6,
+      "generation": 4,
+      "contract_id": "WP1499-r6-g4-receipt-fixtures",
+      "status": "admitted_spec_review_pending",
+      "source_changes_allowed": false,
+      "risk": "sensitive",
+      "spec_path": "ops/specs/wp1499-r1/SPEC-r6.md",
+      "spec_sha256": "ce0d90a43825bc80e052fad657b018f4f32ca58031e827039d30534016d89a7c",
+      "base_sha": "a2bdb480e8fb54c152af190378c434fa41b0feaf",
+      "spec_commit": "5e7caea684b41c3510839e7fd1f999476356ddf4",
+      "write_set": [
+        ".claude/dev/launcher.py",
+        ".claude/dev/launcher_test.py",
+        "ops/bien_nhan_v2_test.py"
+      ]
+    }
+  ],
+  "routing_history": {
+    "previous_exception": {
+      "id": "MCR-1172-C1",
+      "decision": "approved_for_implementation",
+      "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6612730723",
+      "scope": "Only Mission1172 and valid registered Packets; WP1166 requires history/usage adoption",
+      "hard_expiry_utc": "2026-12-24T18:53:00Z",
+      "reviewer_surface": "codex_service",
+      "transport": "machine",
+      "identity_evidence": "configured_higher_effort; actual_serving_unknown_if_unmeasured",
+      "actual_human_audit_required": true,
+      "canonical_implementation_readback_required": true,
+      "production_active": false,
+      "old_receipts_relabelled": false,
+      "hard_expiry_utc_history": [
+        {
+          "hard_expiry_utc": "2026-11-17T18:53:00Z",
+          "source": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6612730723"
+        },
+        {
+          "hard_expiry_utc": "2026-11-24T18:53:00Z",
+          "source": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6933449308"
+        }
+      ],
+      "extension_decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6999217718"
+    }
+  },
+  "envelope": {
+    "scope": "PR1 (#1448) unchanged under r82 caps, plus B1, B3, B4 and PR2 of plan r4: spec drafting, Codex spec review until 0 P0-P3, owner spec-hash approval, then lease and executor per packet. No gate-loosening switch value (CHO_PHEP) is set by any of them; no Windows CI; no LIVE.",
+    "max_packets": 5,
+    "max_successor_depth": 0,
+    "max_attempts_per_packet": 3,
+    "max_run_minutes": 4320,
+    "same_failure_limit": 2,
+    "max_parallel_workers": 2,
+    "max_agent_invocations": 73,
+    "max_cloud_minutes": 4320,
+    "max_inbox_backlog": 100,
+    "provider_budgets": {
+      "paid_credit_purchase_allowed": false,
+      "executor": "claude-fable-5-2",
+      "reviewer": "codex gpt-6-astra xhigh",
+      "new_codex_spec_review_calls": 1,
+      "new_source_model_calls": 3,
+      "new_codex_service_reviewer_calls": 3,
+      "new_genuine_connector_review_requests": 2,
+      "new_pr_ubuntu_ci_runs": 3,
+      "new_full_m9_runs": 1,
+      "new_windows_runs": 0,
+      "ci_reruns": 1,
+      "total_new_model_workloads_limit": 9,
+      "per_new_packet": {
+        "spec_author_calls": 5,
+        "codex_spec_review_calls": 6,
+        "executor_attempts": 3,
+        "codex_source_review_calls": 3,
+        "pr_ubuntu_ci_runs": 3,
+        "full_m9_runs": 1,
+        "connector": 2,
+        "ci_reruns": 1,
+        "windows_ci_runs": 0,
+        "windows_local_runs": "B3 only: owner desktop first, then VM"
+      },
+      "size_rule": "Per ADR-0044/0053: the cap applies to the delivered candidate (H pushed or sent to review/audit); measure numstat before every review/push and stop before review if over; nang_tran only with measured numstat and owner approval. r86 'stops before exceeding' is read this way."
+    }
+  },
+  "target_canary_window": {
+    "target": "DESKTOP-T9R33P2 Ubuntu WSL2, ordinary user tlcanary UID1000, native ext4/magic ef53",
+    "window_minutes_from_actual_installation": 360,
+    "technical_canary_max_minutes": 330,
+    "old_technical_canary_limit_minutes": 10,
+    "canary_limit_change_reason": "Correct premature g3 clock issuance while required tools were absent. Setup is now complete. Replace the optimistic 23-minute clone budget with150minutes, based on23 x367.5554964s=140.90minutes plus9.10minutes reserve; retain required resolver/API/publication/reviewer/human/CI/queue gates and20minutes lifecycle contingency. Budgets are planning reservations and caps, not measured minimums or a p95/upper-bound guarantee.",
+    "per_snapshot_timeout_seconds": 480,
+    "attempts_limit": 6,
+    "review_rounds_limit": 6,
+    "codex_review_calls_limit": 6,
+    "executor_requested_effort": "high",
+    "reviewer_requested_effort": "xhigh",
+    "reviewer_execution_surface": "codex_service",
+    "actual_serving_identity": "UNKNOWN unless measured",
+    "first_publication_heads_max": 2,
+    "ubuntu_pr_CI_heads_attempts_max": 2,
+    "new_full_M9_runs": 0,
+    "new_windows_runs": 0,
+    "no_automatic_successor": true,
+    "expiry_rule": "Freeze allowance starts_utc immediately before metadata issuance; ends_utc=min(starts_utc+360minutes, MCR-1172-C1 2026-11-24T18:53:00Z). Earliest of allowance/lease/installation/routing expiry governs. No refresh/reset or automatic successor.",
+    "history_rule": "R32 expired with init/record-lease rc0, leased revision1/witness revision2; begin-attempt rc8/UNKNOWN clone480 and no digest change. attempts/reviews/model0 per last holder receipt, subject to current readback; missing or pending usage stays UNKNOWN. Preserve all ASUS lineage, journals, witnesses, seed and failures; no state copy or counter reset. G3 was actually issued and Installed35; its original times and all setup/authority costs remain historical. No g3 journal/witness/attempt/model existed at17:41:04Z. This is not evidence about current ASUS usage; re-observe before g4.",
+    "genuine_connector_review_requests_limit": 1,
+    "connector_identity_rule": "One genuine GitHub Codex Connector review on exact published H, separate from one independent configured-xhigh offline service reviewer. Count both actual workloads; no automatic event assumed free, no second manual request without reconciliation.",
+    "technical_canary_limit_before_r34_minutes": 60,
+    "setup_before_clock": true,
+    "authority_installation_budget_minutes": 30,
+    "final_bookkeeping_minutes": 15,
+    "outside_stop_margin_minutes": 15,
+    "lifecycle_reservation_minutes": {
+      "fresh_clones_23": 150,
+      "I2_API_local": 15,
+      "publication": 10,
+      "offline_reviewer": 10,
+      "actual_human_exact_H": 20,
+      "exact_H_CI_execution": 150,
+      "CI_queue": 15,
+      "inside_contingency": 20
+    },
+    "reservation_limitations": "Clone18.28/97.34/367.56s and full-resolver148.61s are samples, not p95/upper bounds. CI samples91m29s/116m44s are source samples, not target guarantees. Connector30minutes overlaps exact-H CI150 only after audited controlled publication. Additional mandatory calls/gates or classification beyond reserved scope requires reconciliation, never omission.",
+    "g7_limits_rule": "Limits 4/4/4 reached only through canonical nang-tran from g6 values 2/2/2 with recorded owner instruction; used counters never reset. Review prompt scope is limited to the packet's five-path diff against the baseline; baseline content outside the diff is out of scope.",
+    "limit_change_r64": {
+      "from": 4,
+      "to": 6,
+      "axes": [
+        "attempts_limit",
+        "review_rounds_limit",
+        "codex_review_calls_limit"
+      ],
+      "reason": "cumulative WP1308 counters reached 4/4 in g8; g9 needs pending recovery, one new attempt and one Codex review, plus one reserve",
+      "decision": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-6978536145"
+    },
+    "history_note": "Kept as WP1308 history; r67 work is governed by target_activation_window."
+  },
+  "effective_write_set": [
+    "ops/specs/wp1448-r1/SPEC.md",
+    "ops/specs/wp1448-r2/SPEC.md",
+    "ops/leases/wp1448-r2-g1-claude.yaml",
+    "ops/cong_cu_test.py",
+    "ops/ci_duong_nhanh.py",
+    "ops/ci_duong_nhanh_test.py",
+    ".github/workflows/ci.yml",
+    ".claude/dev/ci_dang_ky_test.py",
+    "ops/specs/wp1448-r2/do/"
+  ],
+  "publication_permission": {
+    "scope": "Same required admission metadata categories previously explicitly authorized, updated for this readmission only: runtime paths, boot/root/device/inode/mount identities and private-seed SHA256 fingerprint.",
+    "excluded": "No seed bytes, HMAC key, token, credential or raw operational logs on public GitHub.",
+    "raw_operational_evidence": "Retain privately; public checkpoints minimal."
+  },
+  "acceptance_criteria": [
+    "Before installation/dispatch verify current source1309 land, closed source lease, master/fullrefs, exact canonical product hash and current r36 decision/registration; old source approvals are not Desktop activation.",
+    "Re-observe boot/root/mount and ordinary UID; native ext4/magic/durability and producer handoff/quiescence; freeze actual descriptor/spec/lease only after authority exists.",
+    "Use canonical immutable spec→admission chain and current lease/I2/installed-Mission resolver. Scoped init must produce awaiting_lease/revision0 plus initialized witness and exact high_water readback.",
+    "Record lease and reserve one attempt before any canary work. Keep actual stdout/stderr/rc, state/witness digests and counters.",
+    "Use metadata-only P bootstrap for genuine PR identity; H remains local before required exact-H actual-human audit and controlled publication. Declare the full five-path metadata/canary diff; no candidate self-authority.",
+    "One independent Codex reviewer requested higher effort; service verdict is advisory only. Approve may yield approved_pending but cannot create accepted/human_acceptance.",
+    "Actual-human exact evidence review, applicable publication/CI/connector/canonical checks remain mandatory before accept. MCR approval is not outcome acceptance; no formal GitHub Approve impersonation.",
+    "Negative invalid/stale admission and missing-human checks must reject with no unauthorized state/witness write or dispatch, as applicable to the admitted test scope.",
+    "No product/protocol/workflow/security/ACL/account/credential/LIVE edits, no WindowsCI/full Windows mutants or new full M9. No automatic PR0–PR8 dispatch.",
+    "Reassess finite remaining fit before each action. Timeout/infra/unknown/skipped/not_run are distinct from pass. Preserve intermediate journal/witness and failures; never reset/delete/copy-back. Stop at a concrete human gate or on cap/expiry.",
+    "Bookkeeping and lease release must use actual receipts/readback; no target or Mission completion claim from merged source, diagnostic rc0 or proposal alone.",
+    "No required gate is waived by a budget cap: if classification requires more publication, CI or M9 than reserved, stop for a concrete reconciliation before dispatch.",
+    "Reserve and count offline reviewer1 plus connector gate1 as two actual model workloads. Canonical _doc_connector requires a genuine same-head bot completion; never synthesize it or reuse source-head receipts.",
+    "Packet1308 r4/g4 is an explicitly approved readmission after g3 premature clock issuance, not an automatic successor. Do not alter historical g3 admission/spec/expiry or transplant ASUS runtime. Preserve the existing Desktop operator-provisioned protected asset only if same boot/root/ownership/fingerprint and virgin journal/witness are freshly verified. G4 descriptor must bind its real enrollment/coordinator/g0=4; if any prior state/witness exists, stop for canonical adoption rather than delete or reset.",
+    "Before any new lease: genuine previous sole Dispatcher release and incoming Mission/Packet ownership; terminal receipts, Desktop current physical quiescence and canonical symmetric old-lease fencing/closure. Current ASUS readback may remain UNKNOWN only under offline_predecessor_reconciliation; do not call offline/expiry physical quiescence or reuse ASUS state/seed/approval.",
+    "Target private seed provisioning must come through actual configured canonical authority/protected channel; no self-supplied seed, grant or credential. If unavailable, stop before enrollment/init.",
+    "User authorized ordinary-user tool/environment setup for tlcanary on2026-11-13; setup completed using canonical bootstrap and process-only master key. Nonsecret PATH/UTF8/runtime profile and local dependencies are allowed for this setup. No sudo/account/ACL/security changes, shared credential rotation/upload or LIVE mutation. Reviewer identity remains truthful; installing CLIs or auth-status checks are not permission for extra model workloads.",
+    "Before freezing starts_utc, execute fresh native-tool version/import checks and actual launcher doctor via canonical process-scoped agent-creds-exec; require no missing required tools. Account for Codex saved-auth freshness honestly; no unreserved model probe. NLM is not a dependency of this metadata-only Codex-service canary; its expired cookie is a recorded environment limitation, not waived runtime/CI/human evidence.",
+    "Before grant, verify or start one ordinary bounded WSL boot keeper whose deadline covers the new allowance plus5minutes; no reboot, global power/profile or security changes. If boot changes, stop and re-admit rather than edit the binding.",
+    "Canonical control-plane supersession must be normal expected-old FF, with g3 da_bi_thay_the=wp1308-r4-g4-codex and g4 thay_the_cho including wp1308-r3-g3-codex. Preserve g1/g2 reciprocal links to g3; do not rewrite their history to manufacture a direct chain. Validate full current lease scan, publisher and I2 before runtime authority.",
+    "After exact approved r36 installation and actual full resolver/runtime readback, proceed directly into admitted lifecycle if finite whole-fit remains. Required setup/preparation must not be deferred into the new run window. Publication and audit gates remain sequential and required."
+  ],
+  "activation_checkpoint": {
+    "state": "r70_installed_wp1422_pending",
+    "target_admitted": true,
+    "target_init": true,
+    "g4_state": "approved_pending rev6 witness7 preserved on Desktop",
+    "canary_passed": true,
+    "actual_human_acceptance": true,
+    "PR0_PR8_dispatch_allowed": false,
+    "g5_issued": false,
+    "human_audit": "owner audits canary exact H personally (human_exact_head_audit.v1); coordinator never signs",
+    "g5_closed": true,
+    "g6_issued": false,
+    "g7_issued": false,
+    "g6_closed": true,
+    "g7_accept_blocked_by": "resolved by #1370 merged 641108c",
+    "g7_closed": true,
+    "g8_issued": true,
+    "g8_accept_blocked_by": "resolved by #1393 merged d39313e",
+    "g8_closed": true,
+    "g9_issued": true,
+    "g9_closed": true,
+    "g9_result": "accepted rev17 accepted_sha 8f50ef033d560e572658a2c35bcd834e6b18d589 at 2026-11-18T17:14:32Z; human_acceptance from the owner's own exact-H audit (PR #1399 comment 6984444170)",
+    "pr1399_disposition": "owner decision pending (close or merge metadata); coordinator does not merge",
+    "desktop_boot_keeper": "still running as tlcanary; stop only with owner consent",
+    "PR0_dispatch_allowed": false,
+    "PR1_PR8_dispatch_allowed": false,
+    "target_activation_issued": true,
+    "g5_naming_note": "The term 'G5' is retired (owner decision 6999217718). Older fields g5_issued/g5_closed refer to the WP1308 generation g5 and are kept as history only.",
+    "g4_result": "approved_pending rev11 pending_sha 18d48b6; exact-H2 CI red (gate); mo-lai unreachable in this lane",
+    "pr0_result": "accepted rev12 accepted_sha b79cbf5 (2026-11-19T11:55:46Z); PR #1412 merged f8b9cdd; M8 landed:false",
+    "open_debt": "mo-lai ci-do unreachable for cross-family human_audited target lane (_du_dieu_kien_approve vs bien_nhan_v2 model/human assurance partition) — separate E5 packet",
+    "wp1422_dispatch_allowed": true
+  },
+  "rollback": {
+    "on_mismatch": "Stop dispatch, retain state/witness/counters/evidence, reconcile under authority; no deletion or old-writer restart",
+    "source_rollback": "Not authorized by this target-only plan; use separate corrective/revert protocol if required"
+  },
+  "desktop_preflight_evidence": {
+    "ordinary_user": "tlcanary UID/GID1000, only primary group; no sudo granted",
+    "filesystem": "ext4, magic ef53",
+    "transport_full_clone": {
+      "rc": 0,
+      "elapsed_seconds": 367.5554964,
+      "finished_at_utc": "2026-11-13T11:46:10.8377323Z",
+      "same_endpoint_and_clone_options": true,
+      "timeout_seconds": 480,
+      "project_code_executed": false
+    },
+    "fresh_runtime_probe_utc": "2026-11-13T17:41:04.410404Z",
+    "durability_fsync_rename_readback": true,
+    "cross_process_lock_rejection": true,
+    "source_sha256": "ccabfccea64894fe18b6eee1de42259d7788b7ad2393439c3f5630fd0c4f5b28",
+    "limitations": [
+      "Preflight only, not canary PASS or future admission proof.",
+      "Fresh boot/root/mount/durability/lock/process and virgin-state checks required at g4 freeze.",
+      "Sole ownership/release and actual Installed35/g3 authority exist; g4 has not been issued.",
+      "NLM cookie expired despite standard reload; no shared rotation performed.",
+      "Codex saved auth snapshot is old; no model call was spent on a probe. Service reviewer must be actually independent and budgeted."
+    ],
+    "tools_setup_receipt": "TLCANARY-SETUP-RESULT.json",
+    "required_tools_present": true,
+    "launcher_doctor_authenticated_rc": 0,
+    "launcher_ok_kha_dung": false,
+    "codex_saved_auth_live_probe": "NOT_RUN",
+    "nlm_auth_live_rc": 2
+  },
+  "offline_predecessor_reconciliation": {
+    "scope": "Only ASUS g2 predecessor observations for explicit Desktop Packet1308/r4/g4 readmission, preserving exact r35 exception and residual risk. Longer observation gap is material and requires exact r36 approval; current facts still must be rechecked where available.",
+    "unavailable_evidence": "Current ASUS physical processes/state/witness/counters cannot be observed while its Desktop Commander is offline. Their current values remain UNKNOWN; historical receipts are not promoted to current PASS.",
+    "historical_evidence": [
+      "ASUS holder checkpoint6850048834: begin-attempt rc8 UNKNOWN clone480 with no reservation/state-witness digest change.",
+      "ASUS release6855527060 and Desktop actual holder release6858182165/6858197450.",
+      "Incoming sole ownership6858243280/6858250780.",
+      "Last verified ASUS state revision1 generation2; attempts/reviews/model0 at historical observation only; retain full state/witness hashes in private evidence.",
+      "Old lease expired2026-11-13T11:58:44Z; old admission boot already mismatched at prior readback."
+    ],
+    "required_before_installation": [
+      "Recheck current GitHub comments, full refs, source closure and every relevant canonical authority ref.",
+      "Preserve verified symmetric g1/g2-to-g3 history and complete reciprocal g3-to-g4 canonical fencing/readback before any g4 dispatch; no force/delete/history rewrite or mutation of any journal.",
+      "Verify Desktop current ordinary UID/topology/durability/lock/quiescence, existing operator-provisioned protected asset and fingerprint; no new or transferred seed.",
+      "No pending mutator/model/CI call from outgoing holders according to genuine holder receipts; any contrary live fact or unknown usage that prevents cap reconciliation blocks new dispatch.",
+      "Freeze actual new immutable admission/spec/lease only after tools/credentials ready and exact r36 decision; preserve prior authority bytes and all clocks/history. Install exact approved r36 in canonical order and require fresh I2/full resolver/runtime proof.",
+      "Recheck whole-fit and actual-human availability. All runtime/review/publication/CI caps and negative/positive evidence obligations remain."
+    ],
+    "residual_risk": "Canonical fencing plus expiry does not physically stop a cached private ASUS writer or prove its local journal unchanged. Owner accepts this bounded observation gap for the separate Desktop runtime only. No new permission to use any such ASUS result.",
+    "return_of_ASUS": "Do not resume old writer/binding. Refresh ASUS evidence and reconcile against preserved history before any ASUS reuse. Unexpected changes trigger checkpoint; no rollback/copy-back/reset/refund.",
+    "prohibitions": [
+      "Do not copy/export raw seed/HMAC/credential or ASUS state/witness into Desktop.",
+      "Do not claim current ASUS counters are zero or rewrite missing cost/usage as zero.",
+      "No bypass of consumer code, TargetProof, I2, human audit, review/CI gates or expired deadlines.",
+      "No new product/protocol/workflow/security/account/ACL/LIVE edits or source/fullM9/Windows/model-call allowance. Ordinary-user environment setup already explicitly authorized remains recorded separately; no raw secrets/shared bundle rotations."
+    ]
+  },
+  "r57_constraints": [
+    "Target G5 grant/enrollment, installation, LIVE, PR0-PR8 and Mission closure are out of scope.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-11-17T18:53:00Z unchanged; admission/lease expiry must not exceed it.",
+    "Binding_sha256 kept from g4 because canonical adoption requires identity equality; it no longer equals the builder hash of the new boot facts. Recorded, not hidden.",
+    "Boot keeper process holds the WSL boot through the lifecycle; any boot change stops at a checkpoint."
+  ],
+  "r62_constraints": [
+    "Target G5 grant/enrollment, installation, LIVE, PR0-PR8 and Mission closure are out of scope.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-11-24T18:53:00Z; admission/lease expiry must not exceed it.",
+    "Binding_sha256 kept from g4 because canonical adoption requires identity equality; recorded, not hidden.",
+    "Boot keeper process holds the WSL boot through the lifecycle; any boot change stops at a checkpoint.",
+    "No Windows CI, full M9, source change or model executor call; offline Codex service review and one genuine connector review only.",
+    "Owner audits the new canary exact H personally (human_exact_head_audit.v1); the coordinator never signs.",
+    "WP1179 test-log cleanup is out of scope; the g6 finding stays in history."
+  ],
+  "r64_constraints": [
+    "Target G5 grant/enrollment, installation, LIVE, PR0-PR8 and Mission closure are out of scope.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-11-24T18:53:00Z; admission/lease expiry must not exceed it.",
+    "Binding_sha256 kept from g4 because canonical adoption requires identity equality; recorded, not hidden.",
+    "Boot keeper process holds the WSL boot through the lifecycle; any boot change stops at a checkpoint.",
+    "No Windows CI, full M9, source change or model executor call; offline Codex service review and one genuine connector review only.",
+    "Owner audits the new canary exact H personally (human_exact_head_audit.v1); the coordinator never signs.",
+    "TL_MASTER_KEY is read on the Desktop only for doctor and deleted immediately; the cloud session never reads it.",
+    "The accept human-remote-run input is the earliest workflow run on H across all same-head runs."
+  ],
+  "r66_constraints": [
+    "Canary accepted is not Target G5 grant/enrollment, installation, LIVE, PR0-PR8 dispatch or Mission closure; each needs a separate explicit owner decision.",
+    "No new Packet admission, attempt, review, model call, Windows CI or full M9 under r66.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-11-24T18:53:00Z unchanged.",
+    "TL_MASTER_KEY was rotated on 2026-11-19 after g9 (bundles re-encrypted in place, read back with the new key); old key material and its shared doc are kept until the owner confirms every consumer has the new key. No secret value is recorded here.",
+    "Coordinator never signs human audits; delegated records are owner_delegated_audit, never human_audited."
+  ],
+  "target_activation_window": {
+    "target": "DESKTOP-T9R33P2 Ubuntu WSL2, ordinary user tlcanary UID1000, native ext4/magic ef53",
+    "packet": 1166,
+    "revision": 4,
+    "generation": 5,
+    "enrollment_origin": "imported_lineage_via_adopt_state",
+    "enrollment_rule": "Same enrollment id/binding as g4 (canonical adoption requires identity equality); same boot 72e83588 held by the keeper; g4 state carried only by canonical adopt-state pending recovery into a new journal root; no seed copy, reset or fresh init.",
+    "boot_keeper": "Start a keeper holding the WSL boot before issuing the allowance, covering allowance + 5 minutes; any boot change stops at a checkpoint.",
+    "rollout": "packet_loop.py on the target must equal origin/master bytes before admission.",
+    "attempts_limit": 4,
+    "review_rounds_limit": 4,
+    "codex_review_calls_limit": 4,
+    "expiry_rule": "ends_utc=min(starts_utc+2880 minutes, MCR-1172-C1 2026-12-24T18:53:00Z). Earliest of allowance/lease/installation/routing expiry governs. No refresh/reset or automatic successor.",
+    "new_windows_runs": 0,
+    "new_full_M9_runs": "0 unless the frozen spec requires one; then 1 Linux run, recorded in the spec",
+    "human_audit": "owner audits exact H personally (human_exact_head_audit.v1); coordinator never signs",
+    "window_minutes_from_allowance_start": 2880,
+    "window_reason": "Owner asked the coordinator to set a reasonable window (2026-11-19 chat, after approving r67 3de066f7). 2880 minutes = 48h: the executor/review/CI path is ~6-10h by the g3-g9 rhythm, plus waiting for the owner's own exact-H audit across a night and day; caps 3/3/3 still bound the work.",
+    "limits_rule": "g5 raises attempts/vong_review/codex_review_calls from 3 to 4 only via canonical nang-tran after record-lease, citing the owner decision; counters from g4 are kept."
+  },
+  "r67_constraints": [
+    "Installation/production route (production_active stays false), LIVE, PR1-PR8 dispatch and Mission closure are out of scope; each needs a separate explicit owner decision.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z; admission/lease expiry must not exceed it.",
+    "Executor Fable 5.2 (claude-fable-5-2); reviewer Codex gpt-6-astra, independent context. No Windows CI; cancel Windows runs after merge.",
+    "Owner audits PR0 exact H personally (human_exact_head_audit.v1); the coordinator never signs; delegated records are owner_delegated_audit.",
+    "TL_MASTER_KEY is read on the Desktop only when required and deleted immediately; the cloud session never reads it. Old key material is kept until the owner confirms every consumer has the new key.",
+    "WP1308 g9 accepted state, witness and seed are read-only history; no reset, delete or reuse of its enrollment."
+  ],
+  "r67_pr0_acceptance": [
+    "Every checkout and shard receipt of the full mutation audit matches the event SHA (scheduled and workflow_dispatch).",
+    "Concurrent audit runs do not cancel or replace one another; distinct run IDs are preserved.",
+    "Negative tests reject moving refs, missing shards, incorrect SHA and cancelled/incomplete results.",
+    "Existing schedule, test inventory, timeouts and M9 requirements are kept; no runtime-saving claim.",
+    "Frozen spec, independent Codex review approve, PR CI green, connector clean, owner exact-H audit, then canonical accept; M8 records §10.2.2 milestones honestly."
+  ],
+  "r68_constraints": [
+    "Installation/production route, LIVE, PR1-PR8 dispatch and Mission closure stay out of scope.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z; admission/lease expiry must not exceed it.",
+    "The mo-lai cross-family human_audited gap is recorded as debt for a separate E5 packet; PR0 does not change gate code.",
+    "Owner audits exact H3 personally (human_exact_head_audit.v1); the coordinator never signs.",
+    "TL_MASTER_KEY is read on the Desktop only when required and deleted immediately; the cloud session never reads it."
+  ],
+  "r69_constraints": [
+    "PR1-PR8 dispatch, installation/production route, LIVE and Mission closure need separate explicit owner decisions.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged.",
+    "Lease wp1166-r4-g5-claude remains until 2026-11-21T09:17Z; no further mutator is authorized under r69.",
+    "Coordinator never signs human audits; delegated records are owner_delegated_audit."
+  ],
+  "r70_constraints": [
+    "E5: the owner approves the frozen spec hash before any lease and audits exact H before merge; the coordinator never signs.",
+    "Source lane only; no Desktop target lifecycle, no Windows CI, no new full M9 run unless the spec requires one.",
+    "PR1-PR8 dispatch, installation/production route, LIVE and Mission closure stay out of scope.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "r71_constraints": [
+    "E5 mo-lai debt closed in source (b830d47); no lifecycle run has exercised the new path on a target yet.",
+    "Master release-verify red (RELEASE_MANIFEST.json vs scripts/tl_gws.py, scripts/tl_test_fragments_bundled.py) is pre-existing from PR #1425 and belongs to another packet.",
+    "PR1-PR8 dispatch, installation/production route, LIVE and Mission closure need separate explicit owner decisions.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged.",
+    "Coordinator never signs human audits; delegated records are owner_delegated_audit."
+  ],
+  "source_plan_status": {
+    "r2_sha256": "f4611b0f0c79f33d56b293f5fcb854eeeae2fcbb6acbdfd59d6134dcbfbdcb8f",
+    "r2_status": "recovered_by_owner",
+    "earliest_public_reference": "https://github.com/ducthangho/tra-luat/issues/1173#issuecomment-6603395585 (2026-11-03T12:08:42Z)",
+    "searched": "repo tree and full Git object store (blob hash scan); Issue #1172/#1173/#1174 comments; DESKTOP-T9R33P2 Windows and WSL; tra-luat-win; ASUS-LAPTOP Codex sessions 2026-11-02..04; owner-provided ChatGPT-side search report 2026-11-20 (ChatGPT/Codex history itself not reachable without login).",
+    "rule": "Never reconstruct r2 and call it original. If the owner later produces bytes matching the r2 hash, record them in a later revision; r3 then stays a separate, named replacement unless the owner decides otherwise.",
+    "replacement": "source plan r3 (not yet drafted); r3 must be built on #1434 measurements, frozen with its own sha256 and approved by the owner before any PR1 dispatch.",
+    "acceptance_clause_change": "The r1-r71 acceptance item 'keep acceptance of source plan r2' is unverifiable and is replaced, once r3 is installed, by the acceptance of r3. Until then PR1-PR8 stay locked.",
+    "r3": {
+      "path": "ops/specs/wp1172-source-plan-r3/KE_HOACH_NGUON_R3.md",
+      "branch_commit": "ops/wp1172-plan-r3@c032656d6e9107c7d0d570afe374fd78b6424e93",
+      "sha256": "2e9fb13f1ab3f299c2d2dc1e5a6e407ff0aadb8aee1f6ffd00d88fc02b146f89",
+      "status": "installed_backbone_of_r4",
+      "reviews": {
+        "codex-review-1.json": "4439d254017920fe2caa31ece1d58805ae262b06a53211b0aaf807eae3a209e8",
+        "codex-review-2.json": "274ea126cbd97f2adf5381bbc629ce78c6c17b2ecbfa67d490f2392877019a5e",
+        "codex-review-3b.json": "5d3bb36c80ca1a0a1c04ad48464cc2b48f34c5f5249a4300259bfeadc27e47d7",
+        "codex-review-4.json": "8927db652c8098f994cf14dfb7f5b34c232a43601781918a3fbb876f6c7123eb"
+      },
+      "errata": [
+        "R3-11 (P3): under the plan's outward-rounding rule the with-PR6 savings range is 3.4-5.6 million s / 30 days (computed lower endpoint 3.4986), not 3.5-5.6."
+      ],
+      "acceptance_clause": "From r81, Mission acceptance uses source plan r3 (sections 3-5, 8) instead of the unverifiable r2 clause.",
+      "owner_questions_open": [
+        "Q1 before PR3",
+        "Q2 before PR5/PR6",
+        "Q3 before PR2",
+        "Q4",
+        "Q5"
+      ]
+    },
+    "r2_recovered": {
+      "bytes_sha256": "f4611b0f0c79f33d56b293f5fcb854eeeae2fcbb6acbdfd59d6134dcbfbdcb8f",
+      "size": 31028,
+      "stored_at": "ops/wp1172-plan-r4@58ff4c93740e31ea6c4b1023a4e0ae4956019e78:ops/specs/wp1172-source-plan-r4/nguon/KE_HOACH_TOI_UU_MUTATION_TESTING_r2_2026-11-03.md",
+      "recovered": "owner upload in the coordinator chat 2026-11-20",
+      "rule_applied": "Recorded per the r72 rule; r3 is not cancelled, it is the backbone of r4 lane A."
+    },
+    "r4": {
+      "path": "ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md",
+      "branch_commit": "ops/wp1172-plan-r4@58ff4c93740e31ea6c4b1023a4e0ae4956019e78",
+      "draft": 9,
+      "sha256": "0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe",
+      "status": "installed_merged_plan",
+      "composition": "r3 unchanged (lane A, PR1-PR8, I1-I6, G1-G6) + tightening A+1..A+5 for packets not yet opened + lane B (B1 receipt contract + A3/A4 canary, B2 freshness watchdog, B3 release gate on Package deploy, B4 tighten-only kill switch and trusted kiem-merge consumer) + lane C (risk-based M9, closed by default, gates Q8a/Q8b).",
+      "sources": {
+        "r2": "f4611b0f0c79f33d56b293f5fcb854eeeae2fcbb6acbdfd59d6134dcbfbdcb8f",
+        "pr0_draft": "621026692cda1be04d8f1df1a47828d19d01c087dcb484f7c3b2fbf58a900e8e",
+        "proxima": "122fadcab2dbf34303edafc3cd6e93ae08aeba7f3593ce715eeba7ef1d05cec8",
+        "r3": "2e9fb13f1ab3f299c2d2dc1e5a6e407ff0aadb8aee1f6ffd00d88fc02b146f89"
+      },
+      "reviews": {
+        "codex-review-1.json": "8de74457dec980c6b2d6783f057f2228dde1238b5f9ad931afaa9d0efe18eb34",
+        "codex-review-2.json": "9a7cd44483ff1e9be26955233c0fc7ad0f7b6895a24be383623e3b80298e4f9c",
+        "codex-review-3.json": "1e0fe81e6bad2e730977a55eee738caef15c31c8860d13a3ad6988852b315849",
+        "codex-review-4.json": "ce94d6aaace8eb5b10b773f4029f9785fae21d7d77706ce0f56a6e284a8bfa23",
+        "codex-review-5.json": "7ce059909ecdbbb66593f01fdb8c5c540d7cab0a5d758a1cc3452162f6ce657e",
+        "codex-review-6.json": "96ae90c01b90958ef76de60451c69b2d3e213101fceacd79b32c163f1d5f63eb",
+        "codex-review-7.json": "11f56040cc6be097ff6c65209a6b74befad5ec442d0cf13ac0f042720bf8da2d",
+        "codex-review-8.json": "8281d1b98117c11239c36b7fd546ee05703dea253b5125b53fa620ce72795a33",
+        "codex-review-9.json": "38ad9f4564743b01868e2173f4dff3052d17089ae5d5182d4ee5d9ac6b52aa78"
+      },
+      "final_review": "codex-review-9: approve, 0 P0-P3, numbers_checked 52, reviewed 1ba8db0 / 0f287ce4",
+      "model_calls": {
+        "codex_review": 9,
+        "fable_revision": 1,
+        "coordinator_drafting": "in-session (not a separate call)"
+      },
+      "acceptance_clause": "From r83, Mission acceptance uses source plan r4 draft 9 (lanes A and B; lane C only if Q8a/Q8b open) instead of r3 alone; r3 sections 3-5 and 8 remain binding inside lane A.",
+      "owner_questions_open": [
+        "Q8a after PR8",
+        "Q8b after C1"
+      ],
+      "owner_questions_decided_r84": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q9"
+      ]
+    }
+  },
+  "r72_constraints": [
+    "Owner approves the frozen #1434 spec hash and this plan hash before any lease, and audits exact H before merge; the coordinator never signs.",
+    "#1434 measures only: no optimization, no workflow/test/runtime edits, no new mutation CI, no Windows CI.",
+    "Source plan r3 is a separate later revision with its own hash and owner approval; PR1-PR8 stay locked until then.",
+    "Installation/production route, LIVE and Mission closure stay out of scope.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "r73_constraints": [
+    "Owner approves spec r2 2495c613 and this plan hash before the second spec review and any lease; a second changes_requested stops at a checkpoint for the owner (no third spec review).",
+    "Delivery PR must classify as duong_nhanh (no mutation CI) with no unknown test location; measured on the real CI log before merge.",
+    "Raw API/log snapshots stay outside the repository; only hashes are committed.",
+    "All r72 constraints carry over unchanged."
+  ],
+  "r74_constraints": [
+    "Owner approves spec r3 0247845e and this plan hash before any lease; no further spec review.",
+    "Source review must run the spec §8 mutants including skipped-as-executed and run.updated_at-as-end; a changes_requested there follows the normal attempt/review limits (2/2).",
+    "All r73 constraints carry over, except that no third spec review exists."
+  ],
+  "r75_constraints": [
+    "Exactly one more executor attempt (3/3) and one more Codex source review (3/3) for Packet1434 r3/g1, under the existing lease extended only if needed to cover them; a third changes_requested stops again for the owner.",
+    "Attempt 3 fixes only the three open P2 (and keeps every closed finding closed); M1/M2 data and the cohort/snapshot API entries stay unchanged.",
+    "All r74 constraints carry over."
+  ],
+  "r76_constraints": [
+    "Exactly one more executor attempt (4/4) and one more Codex source review (4/4) for Packet1434 r3/g1, fixing only the two connector P2 findings plus fixtures; BASELINE M1/M2/M2b numbers must stay byte-identical unless a change is explained by the fix.",
+    "New candidate H needs a new owner exact-H audit posted before its first push; then CI and one connector re-request (2/2).",
+    "Any further P0-P2 stops again for the owner.",
+    "All r75 constraints carry over."
+  ],
+  "r77_constraints": [
+    "Source plan r3 install and any PR1 dispatch need a later revision with the owner's hash approval.",
+    "PR1-PR8 dispatch, installation/production route, LIVE and Mission closure stay out of scope.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "r78_constraints": [
+    "Exactly one more author call and one more Codex review call for the plan r3 document; document only.",
+    "All r77 constraints carry over."
+  ],
+  "r79_constraints": [
+    "Exactly one replacement Codex review call on draft 43137d53 with the same prompt; a changes_requested stops for the owner.",
+    "All r78 constraints carry over."
+  ],
+  "r80_constraints": [
+    "Exactly one more author call and one more Codex review call for plan r3; document only.",
+    "All r79 constraints carry over."
+  ],
+  "r81_constraints": [
+    "PR1 dispatch needs its frozen spec and the owner's hash approval in a later revision.",
+    "Owner questions Q1-Q5 of plan r3 are decided at the gating packet (Q1 before PR3, Q2 before PR5/PR6, Q3 before PR2).",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged; installation route, LIVE and Mission closure out of scope."
+  ],
+  "r82_constraints": [
+    "Spec r2 review with any P0-P2 stops for the owner (no lease).",
+    "Before pushing H, update the branch onto latest master and re-measure the lane (lesson from #1439).",
+    "PR1 must not change any gate decision; shadow output never reaches GITHUB_OUTPUT.",
+    "Owner questions Q1-Q5 untouched by PR1.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "r83_constraints": [
+    "r83 installs plan r4 draft 9 only; it admits and leases no new packet. PR1 (#1448) continues under r82 caps and its frozen spec/lease.",
+    "Lane B packets (B1-B4) and lane C need their own frozen specs, owner hash approval and Mission revisions; order per r4 section 7 (PR1 -> B1 -> B2 -> PR2 -> B4 -> PR3 -> B3 -> PR4...).",
+    "No mechanism of r4 may loosen a gate from outside merged code; the kill switch only tightens (r4 A+1).",
+    "Owner questions Q1-Q9 are decided at the gating packet; none is decided by r83.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "owner_decisions": {
+    "source": "owner chat 2026-11-20, coordinator session session_015Gtxrb3cuZ7Nm935R8yA5W",
+    "Q1": "YES: accept that PRs outside the conservative closure do not measure G5 before merge, compensated by the day_du push after merge, only under all enabling conditions of PR3 (r3 five + r4 A+2, A+5, B4 landed); otherwise PR3 closes 'measured, no code change'.",
+    "Q2": "YES to PR5+PR6 only if PR1 data give s >= 0.6 and PR5 passes all negative cases; otherwise drop both and use the 'PR6 rejected' column.",
+    "Q3": "Follow the existing NHE rule (push also light by diff) for the PR2 suite.",
+    "Q4": "NO: internal optimisation of the full_mutant_audit loop is out of this mission.",
+    "Q5": "14 days of shadow before PR3/PR4, 14-day check after PR3, 30 days at PR8; unmet metrics recorded do_khong_dat, targets not lowered.",
+    "Q6": "YES: accept lane B and A+2..A+5; G7 best-effort with cross-monitoring; packet_loop_test/nhanh_don_duoc_test excluded from lanes A/B.",
+    "Q7": "B3 blocks once read capability is measured on both deploy hosts; accept (a) no machine-granted exceptions, emergency only by the owner with TTY confirmation, (b) master protection measured at enablement and monthly, (c) the emergency flag has only the script TTY check and the PreToolUse ask layer; AI non-use is procedural.",
+    "Q8a": "DEFERRED per recommendation: decide after PR8.",
+    "Q8b": "DEFERRED per recommendation: decide after C1.",
+    "Q9": "(a) writer set W measured before B4 spec and narrowed to the owner only, Variables:write removed from apps/tokens that do not need it, no CHO_PHEP before W is measured; (b) YES default-closed with its stated costs; (c) YES not-reduce scope disables only the new reduction of that class and keeps the existing duong_nhanh exception; (d) residual risks (i)-(iv) accepted with W narrowed."
+  },
+  "r84_constraints": [
+    "Record-only: no new packet authority; PR1 (#1448) unchanged under r82 caps.",
+    "Conditional decisions (Q1, Q2, Q7, Q9a) take effect only when their stated conditions are measured at the gating packet.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "r85_constraints": [
+    "Each new packet needs its own frozen spec with the owner's hash approval before any lease; issues are opened by the coordinator.",
+    "Write sets must not overlap a live lease; ai-dang-giu over all refs before each lease.",
+    "Heavy executors run in separate cloud sessions so they do not slow PR1's A/B; at most 3 executors at once.",
+    "B4 must not set or require CHO_PHEP; B3 blocking mode only after both deploy hosts' read capability is measured.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "spec_ledger_r86": {
+    "B1": {
+      "author": 3,
+      "review": 3,
+      "last": "r3 29c99e7 a90a948c changes_requested 1P1+3P2"
+    },
+    "B3": {
+      "author": 3,
+      "review": 3,
+      "last": "r3 a3e9189 47b68b99 changes_requested 2P2"
+    },
+    "B4": {
+      "author": 3,
+      "review": 3,
+      "last": "r3 6a0612f fcb2fc2c changes_requested 3P2"
+    },
+    "PR1": {
+      "executor_attempts": 2,
+      "attempt1": "Fable 5.2 302f76b (cut by provider limit)",
+      "attempt2": "Opus 5.5 c5c03ae (in progress)",
+      "codex_source_reviews": 1
+    }
+  },
+  "r86_constraints": [
+    "B1 does not integrate A4; it records github.workflow_sha or not_measured only.",
+    "No spec carries an estimated size exception; size exceptions need measured numstat at implementation time.",
+    "If PR1 Codex source review 2 still has P0-P2, attempt 3 goes to Fable 5.2 building on the attempt-2 commit (owner chat 2026-11-20).",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "pr1_r87": {
+    "spec_r3": {
+      "path": "ops/specs/wp1448-r3/SPEC.md",
+      "branch_commit": "ops/wp1448-r1@c5e4fa9943c8203ccb36e69c947fbd205ec81db3",
+      "sha256": "d1c6f1e69c908fe54d927863e16e01e78883888ecf11429fb11878173d584ff0",
+      "change": "r2 + ADR-0053 activation line + nang_tran (tran_moi 32 files / 6500 added lines) from measured numstat 29 files +5771 at c5c03ae; contract/acceptance/write set unchanged"
+    },
+    "attempts": {
+      "1": "Fable 5.2, 302f76b, cut by provider limit, no handoff",
+      "2": "Claude Opus 5.5 (owner choice), c5c03ae, handoff https://github.com/ducthangho/tra-luat/issues/1448#issuecomment-7046902196"
+    },
+    "codex_source_review": {
+      "used": 1,
+      "cap": "2 (ADR-0052/0055; spec has no tran_loi_goi_codex line)",
+      "note": "review 1 ran on 302f76b without executor handoff (audit A2); review 2 is the last unless the owner raises the cap"
+    },
+    "lease_successor": "wp1448-r3-g2-claude: spec r3, model per attempt (Opus 5.5 for attempt 2; Fable 5.2 for attempt 3), reviewer_execution_surface codex_cli, write set as r2 lease, thay_the_cho wp1448-r2-g1-claude with tombstone",
+    "windows": "ADR-0060 K6 requires an owner line 'windows: <H> mien' anchored to the final H (diff has subprocess/pathlib/encoding lines); a spec sentence is not a waiver"
+  },
+  "b1a_r87": {
+    "decision": "[E1] split B1 into B1a (receipt contract frozen as JSON Schema + fixtures, sha-pinned) and successor B1b (diagnostics, A+3 layers, dependency provenance, RSS)",
+    "extra_calls": "author +2 total over r86 (6th and 7th), review +2 (cap 8)"
+  },
+  "b4_r87": {
+    "decision": "[E1+E2] revert per-predicate mutation proof to the protocol's general rule; adequacy checked at code review on H; size receipts outside H",
+    "extra_calls": "author +1 (6th)",
+    "order": "B4 before the ADR-0068 governance packet (owner, via session_015GtxrcdabvDuhzgezMEE89) since both touch .claude/dev/packet_loop.py"
+  },
+  "r87_constraints": [
+    "max_parallel_workers = 2 per protocol §8 (owner E3 decision).",
+    "Every owner question carries an ADR-0067 E code; every self-taken decision gets a uy_quyen_quyet_dinh.v1 entry on the packet Issue.",
+    "Reviews (code, spec, plan) must use the protocol §7/§8/§8.3 verdict contract and pass the coordinator's in-session check until the ADR-0068 gate lands; a verdict that fails the check is not used.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "pr1_r88": {
+    "spec_r4": {
+      "path": "ops/specs/wp1448-r4/SPEC.md",
+      "commit": "ops/wp1448-r1@6d3b03a2111f2c3a34006c6f82d1d570ac9bf078",
+      "sha256": "84db970805be977945cecff006a7a99ee0f01acb9d48ac74b004a763ef098c92"
+    },
+    "lease": "wp1448-r4-g3-claude (ops/wp1448-r1@0347c0f)",
+    "attempt3": "Fable 5.2 xhigh, prompt ops/prompts/wp1448-r4-g3-fable-attempt3.txt sha256 30d883ea…",
+    "codex_calls_used": 2
+  },
+  "r88_constraints": [
+    "Two executor writers at most (PR1 attempt 3 and B4).",
+    "B4 executor must not touch PR1's write set; ADR-0068 packet waits for B4 to land.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "pr1_r89": {
+    "attempt3": "Fable 5.2 H 60ffc2b77653f14661721f032bf0c66a772a7be7 (local), 29 files +6065/-1 within nang_tran 32/6500; handoff https://github.com/ducthangho/tra-luat/issues/1448#issuecomment-7053596580",
+    "codex_source_review_3": "in progress at r89 drafting (3/3 of Mission source-review cap; ADR-0055 total 10)",
+    "codex_calls_used_before_review3": 2
+  },
+  "r89_constraints": [
+    "Two executor writers at most (PR1 and B4); B3/B1a spec authoring is not an executor writer.",
+    "B4 lease successor issued only after the owner approves the r8 spec hash and this revision is installed.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "pr1_r90": {
+    "source_review_3": "Codex on 60ffc2b changes_requested: g4-receipt-authority P2 and g5-collector-expected-id-accounting P2 VÁ SINH LỖI MỚI (third recurrence), new P3 offline-replay-executes-live-git; 4 other classes ĐÃ VÁ THẬT; verdict sha256 abffa9c92f1576ecf000012dfe08cd8afc82cd7306a396565e938763d2b20f09",
+    "decision": "[E1+E2] redesign by positive evidence only: per-file structural validation independent of inventory; known content corruption anywhere vetoes and the gather marker cannot override; timing usable only with unique child identity and validated finite ordered intervals; non-PR runs acquire their own receipts/inventory; --tinh never invokes git (spec §5).",
+    "limits": {
+      "executor_attempts": 5,
+      "Codex_source_review": 5,
+      "codex_calls_total_cap": "10 (ADR-0055 line in spec r4)",
+      "connector": 2,
+      "PR_Ubuntu_CI": 3,
+      "full_M9": 1,
+      "CI_reruns": 1,
+      "Windows_CI": 0
+    },
+    "spec": "unchanged r4 ops/specs/wp1448-r4/SPEC.md sha256 84db970805be977945cecff006a7a99ee0f01acb9d48ac74b004a763ef098c92; nang_tran 32 files/6500 added still applies",
+    "lease_successor": "wp1448-r4-g4-claude: thay_the_cho wp1448-r4-g3-claude (tombstone two-way), base 64fa515, start 60ffc2b, executor Fable 5.2 xhigh"
+  },
+  "r90_constraints": [
+    "Two executor writers at most (PR1 attempt 4 and B4 follow-up).",
+    "PR1 redesign stays within spec r4 contract and write set; any need to change the spec stops and asks the owner.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "r91_constraints": [
+    "Two executor writers at most (currently PR1 and B4); B1a lease waits for a free slot.",
+    "B3 is frozen but not admitted to execution by r91.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "pr1_r92": {
+    "source_review_5": "Codex on d0ccd1f (attempt 5 by Opus 5.5) changes_requested: g4-receipt-authority and 5 other classes ĐÃ VÁ THẬT; open g5-collector-expected-id-accounting P2 (5th recurrence), g4-denominator-evidence P2, new-guard-mutation-coverage P3, acceptance5-baseline-evidence P2; verdict sha256 80ee5a2b0665a0726ec0d5db50eca821a5c652b6500b8ed3f85dbc313cf81ec4",
+    "spec_r6": {
+      "path": "ops/specs/wp1448-r6/SPEC.md",
+      "commit": "ops/wp1448-r1@5a80a392f0eb33a056beb2e9c78c75ac2e39487c",
+      "sha256": "99b5439e74bd4ba470d845d244e273f68b0c47f6b87030ccfe77070a3fb1ea51",
+      "content": "r4 + G5 timing completeness cut to successor PR1b (always khong_do_duoc), owner waiver of M3.bang[ops/cong_cu_test.py] and M3.bang[ops/ci_provenance_test.py] in acceptance 5 (not a pass), property-to-mutant matrix for the cut (r6), corrected Codex counting",
+      "spec_reviews": "PR1 spec reviews used 4 (r1, r2, r5 changes_requested 1 P2, r6 approve 0 findings)"
+    },
+    "limits": {
+      "executor_attempts": 6,
+      "executor_attempts_used": 5,
+      "Codex_source_review": 6,
+      "Codex_source_review_used": 5,
+      "connector": 2,
+      "connector_used": 0,
+      "codex_calls_total_cap": "10 per PR (ADR-0055): source reviews + connector; spec reviews counted separately",
+      "PR_Ubuntu_CI": 3,
+      "full_M9": 1,
+      "CI_reruns": 1,
+      "Windows_CI": 0
+    },
+    "executor_model": "claude-opus-5-5 highest effort while Fable quota is exhausted (until 2026-11-25T08:00Z); attempt 6 continues from d0ccd1f2603f0402878d089c84061f667662b7e5",
+    "size": "nang_tran 32 files/6500 added unchanged; candidate after the cut measured before review; exceed => stop and ask owner (E2) with measured numstat",
+    "debt": "successor packet PR1b — G5 timing collector redesign (not created)",
+    "lease_successor": "wp1448-r6-g6-claude: spec r6, thay_the_cho wp1448-r4-g5-claude"
+  },
+  "r92_constraints": [
+    "Two executor writers at most (PR1 attempt 6 and B4 attempt 2); B1a lease waits for a free slot.",
+    "Fable 5.2 unavailable until 2026-11-25T08:00Z; executors run on Claude Opus 5.5 highest effort until then.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "pr1_r93": {
+    "source_review_6": "Codex on 282948b changes_requested: collector-bounded-output-writes P2, snapshot-manifest-integrity P2 (VÁ HỜ), new-guard-mutation-coverage P3, handoff-literal-evidence P3; verdict sha256 1352950760942a244dc9e7b41c465d3b38879ba844959920798e3d1ed1c8ab52",
+    "limits": {
+      "executor_attempts": 8,
+      "executor_attempts_used": 6,
+      "Codex_source_review": 8,
+      "Codex_source_review_used": 6,
+      "connector": 2,
+      "connector_used": 0,
+      "codex_calls_total_cap": "10 per PR (ADR-0055)"
+    },
+    "lease_successor": "wp1448-r6-g7-claude: spec r6 unchanged, start 282948b, executor Claude Opus 5.5 highest effort while Fable quota is exhausted"
+  },
+  "r93_constraints": [
+    "Record-only revision of an explicit owner decision; Two executor writers at most.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "pr1_r94": {
+    "attempt7": "Opus 5.5 head 4526ea027e15ac49348785003dbd328fdce6719d (local): 28 files +6768/-1, stopped before review on size; all 4 review-6 classes addressed; handoff sha256 c9b12e666f18acbd49150fa02595881e17971fe9a03a31e269063bd8aa640645",
+    "spec_r7": {
+      "path": "ops/specs/wp1448-r7/SPEC.md",
+      "commit": "ops/wp1448-r1@cf059a2",
+      "sha256": "2ef4c61c118c77945a8c68915b020b105d8806cb3faa7d1c9a9c60f60a55346a",
+      "change": "nang_tran tran_moi 32 files / 7000 added (was 6500)"
+    },
+    "limits": {
+      "executor_attempts": 8,
+      "executor_attempts_used": 7,
+      "Codex_source_review": 8,
+      "Codex_source_review_used": 6,
+      "connector": 2,
+      "connector_used": 0
+    },
+    "lease_successor": "wp1448-r7-g8-claude: spec r7, reviewed head 4526ea0, attempt 8 only if review 7 requires"
+  },
+  "r94_constraints": [
+    "Two executor writers at most.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "pr1_r95": {
+    "status": "source review 8 approve; awaiting owner audit_source fix then push H c6dd6d2 to PR #1492"
+  },
+  "r95_constraints": [
+    "Two executor writers at most.",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "r96_constraints": [
+    "Two executor writers at most.",
+    "Spec authors on Claude Opus 5.5 while Fable quota is exhausted (until 2026-11-25T08:00Z).",
+    "Routing exception MCR-1172-C1 hard expiry 2026-12-24T18:53:00Z unchanged."
+  ],
+  "r97_decision": {
+    "decision": "approved",
+    "decision_source": "human",
+    "approved_by": "ducthangho",
+    "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7080479301",
+    "mcr_sha256": "660e7a295f339407a9f45da456db2d7972f0f438efcea5d63014ed71eedc9fbe",
+    "mcr_commit": "f183675a20d6ebb9f3831f1b1e372cfddd478254",
+    "coordinator": "codex",
+    "successor_executor": "codex",
+    "reviewer": "google_antigravity",
+    "independent_sessions_required": true,
+    "b4": {
+      "packet": 1462,
+      "reviewed_sha": "724993bf23f16070f272ccd81b4fe16c111ce2eb",
+      "historical_executor_used": 4,
+      "historical_executor_cap": 4,
+      "review_used": 5,
+      "review_cap": 6,
+      "prior_run": "a0f70f4b",
+      "prior_run_terminal_state": "unknown"
+    },
+    "pr2": {
+      "packet": 1463,
+      "spec_commit": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "spec_sha256": "3ac18bc62a6bc7ecbf372d1ec3d60dbca183495a83e59e41c0a5400a05bf2d5d",
+      "review_used": 5,
+      "review_cap": 6,
+      "prior_run": "d9764a9f",
+      "prior_run_terminal_state": "unknown"
+    },
+    "review_replacement_may_proceed_without_prior_verdict": true,
+    "b2": {
+      "packet": 1494,
+      "spec_revision": 4,
+      "spec_sha256": "22d6a09277509c5462c955278da03696c6931ea8aa9fbcfe349df73c9e451740",
+      "execution_after": [
+        "wp1460",
+        "shared_write_lease_release"
+      ]
+    }
+  },
+  "r98_decision": {
+    "approved_by": "ducthangho",
+    "decision_source": "human",
+    "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7081875250",
+    "mcr_sha256": "24fde6375e5613322a0f898bea047e5953bc0a820e53f7b9358c0e70906d2f6a",
+    "prior_installed": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7080569071",
+    "coordinator": "codex",
+    "executor": "codex",
+    "reviewer": "google_antigravity",
+    "b4_and_pr2": {
+      "used": 6,
+      "current_cap": 6,
+      "conditional_cap": 7,
+      "can_activate_after": "wp1499 lands and reviewer settings pass preflight"
+    },
+    "wp1499": {
+      "source_attempt_cap": 1,
+      "independent_source_review_cap": 1,
+      "deadline_minutes": 90,
+      "source_lease_ready": false
+    }
+  },
+  "r99_decision": {
+    "approved_by": "ducthangho",
+    "decision_source": "human",
+    "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7092816867",
+    "mcr_sha256": "dbb2ca68f898b4fc55223fb2e895687024da08b5fd1b12a845be4c42cf7b881a",
+    "prior_installed": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7081897251",
+    "wp1499": {
+      "used_executor_attempts": 2,
+      "executor_attempt_cap": 3,
+      "source_review_used": 0,
+      "source_review_cap": 1,
+      "source_lease_ready": false
+    },
+    "b4_and_pr2": {
+      "used": 6,
+      "current_cap": 6,
+      "conditional_cap": 7
+    }
+  },
+  "r100_decision": {
+    "approved_by": "ducthangho",
+    "decision_source": "human",
+    "decision_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7096453147",
+    "mcr_sha256": "9bea968a0b1953f438a1b08ae4b0602daf967277ca3c5b505be288c2d737ec12",
+    "prior_installed": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7092843279",
+    "wp1499": {
+      "used_executor_attempts": 3,
+      "executor_attempt_cap": 4,
+      "source_review_used": 0,
+      "source_review_cap": 1,
+      "spec_revision": 6,
+      "candidate_tree": "6136a1672a85d5734641b8467fe0e606adad4c95"
+    }
+  }
+}

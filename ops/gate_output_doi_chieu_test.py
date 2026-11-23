@@ -890,18 +890,36 @@ def a123_thu_tu_va_dinh_dang():   # r10 luật 4: thứ tự chốt K1/K8, label
 @ca
 def a124_token_ascii_qua_ho_so():
     """Kiểm tiền tố và dấu phân cách qua token và qua hồ sơ."""
-    mau = (
-        (lambda c: c + "skipped", lambda c: c in " \t"),
-        (lambda c: c + "kipped", lambda c: c.casefold() == "s"),
-        (lambda c: "skipped" + c + "x", lambda c: c in " \t—-:(,.;"),
-    )
-    for tao, nhan in mau:
-        for c in map(chr, range(128)):
-            gia_tri = tao(c)
-            mong = "skipped" if nhan(c) else None
-            bang(G().token(gia_tri) == mong, f"token {gia_tri!r}: mong {mong!r}")
+    from unicodedata import category
+
+    ascii_day_du = tuple(map(chr, range(128)))
+    dai_dien = _mau_loai_unicode("—")
+    khoang_trang = []
+    chu_va_so = []
+    for ma in range(128, 0x110000):
+        ky_tu = chr(ma)
+        if ky_tu.isspace():
+            khoang_trang.append(ky_tu)
+        if category(ky_tu)[0] in "LN":
+            chu_va_so.append(ky_tu)
+
+    def kiem(gia_tri, mong, qua_ho_so):
+        bang(G().token(gia_tri) == mong, f"token {gia_tri!r}: mong {mong!r}")
+        if qua_ho_so:
             vp = G().kiem_ho_so({"gate_output": gia_tri}, ROOT)
             bang(vp == ([] if mong else ["$.gate_output: dinh_dang_loi_khai"]), f"ho so {gia_tri!r}: {vp}")
+
+    for c in (*ascii_day_du, *dai_dien, *khoang_trang, "—"):
+        bang_chung = c.isascii() or c in dai_dien or c == "—"
+        kiem(c + "skipped", "skipped" if c in " \t" else None, bang_chung)
+        kiem("skipped" + c + "x", "skipped" if c in " \t—-:(,.;" else None, bang_chung)
+
+    for c in (*ascii_day_du, *dai_dien, *chu_va_so):
+        bang_chung = c.isascii() or c in dai_dien or c in "ſK"
+        for i, ky_tu in enumerate("skipped"):
+            gia_tri = "skipped"[:i] + c + "skipped"[i + 1:]
+            kiem(gia_tri, "skipped" if c.casefold() == ky_tu else None, bang_chung)
+
     for gia_tri, mong in (("ſkipped", "skipped"), ("skipped\n", "skipped"), ("skipped\u0085", None),
                          ("\u00a0skipped", None), ("skipped\nx", None), ("skipped\u2003x", None)):
         bang(G().token(gia_tri) == mong, f"token {gia_tri!r}: mong {mong!r}")
@@ -924,7 +942,18 @@ def a125_ascii_dong_danh_gia():
     )
     goc = dict(run="10", attempt="20", head="a" * 40, bo_sinh="a" * 64,
                job="31", conclusion="success", log="a" * 64, skip_cu="42", skip_v3="53", dat="1", tong="2")
-    cac_chu_so = [chr(n) for n in range(128, 0x110000) if chr(n).isdecimal()]
+    from unicodedata import category
+
+    cac_chu_so = []
+    chu_va_so = []
+    for ma in range(128, 0x110000):
+        ky_tu = chr(ma)
+        loai = category(ky_tu)
+        if loai == "Nd":
+            cac_chu_so.append(ky_tu)
+        if loai[0] in "LN":
+            chu_va_so.append(ky_tu)
+
     def doc(truong, ky_tu):
         du_lieu = dict(goc, **{truong: ky_tu + goc[truong][1:]})
         return G().doc_danh_gia("\n".join(dong.format_map(du_lieu) for dong in mau).encode())
@@ -933,7 +962,8 @@ def a125_ascii_dong_danh_gia():
         ("job", digits), ("conclusion", ascii_lowercase + "_"), ("log", hex_thuong),
         ("skip_cu", digits), ("skip_v3", digits), ("dat", digits), ("tong", digits),
     ):
-        for ky_tu in [*map(chr, range(128)), *cac_chu_so, "é", "ａ", "𐐀"]:
+        unicode_am = chu_va_so if truong == "conclusion" else cac_chu_so
+        for ky_tu in (*map(chr, range(128)), *unicode_am, "é", "ａ", "𐐀"):
             kq, ly_do = doc(truong, ky_tu)
             bang((kq is not None) == (ky_tu in lop), f"{truong} {ky_tu!r}: {ly_do}")
 

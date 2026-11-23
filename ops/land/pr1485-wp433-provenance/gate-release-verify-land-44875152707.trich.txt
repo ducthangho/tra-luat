@@ -1,0 +1,8 @@
+# trich log job 136758185733 gate (ubuntu-latest), run 44875152707 push master 96cd012; log_sha256=afe0e887cd5aebe15d1c6fe1a1f24bf5665750d930e0d4d35f105b7de29226cb
+1995: {"ok": false, "error": "STUB_EARLY_EXIT"}
+3819: == tl selftest 1785/1785 ==
+4850:           "command": "release-verify RELEASE_MANIFEST.json --strict --json",
+10162: ##[group]Run python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+10163: [36;1mpython scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json[0m
+10183:   "expected_file_count": 186,
+10184:   "checked_file_count": 186,

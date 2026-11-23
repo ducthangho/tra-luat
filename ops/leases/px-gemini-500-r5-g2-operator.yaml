@@ -1,0 +1,38 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1457
+packet_id: px-gemini-500
+revision: 5
+generation: 2
+lease_id: px-gemini-500-r5-g2-operator
+role: operator
+reviewer: 'Codex offline qua launcher.py truoc push (ADR-0060 M5/M12) + connector Codex tren PR khi con draft'
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 96cd0120d2aa0ba555641fdde90c9d4fbd8b9c89
+target_hosts: []
+live_change: 'Khong co. Chi chen khoi dinh chinh vao r1/r2 RESULTS. 0 thao tac VM, 0 loi goi inference.'
+spec_path: ops/specs/px-gemini-500-r5.md
+spec_hash: ceaba9d5d0c4093ff967a4d2f39aae6161d36b3e3734b3202323f790a43417c5
+write_set:
+- ops/acceptance/px-gemini-500/r1/RESULTS.md
+- ops/acceptance/px-gemini-500/r2/RESULTS.md
+- ops/leases/px-gemini-500-r5-g2-operator.yaml
+- ops/specs/px-gemini-500-r5.md
+write_set_hash: 87ff39eb93a84bb629164d51dbf8b034443f9071e8f4b69c8a00427b674796db
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ops/px-gemini-500-r5
+base_sha: 96cd0120d2aa0ba555641fdde90c9d4fbd8b9c89
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 21-11-2026 "Chon 1, lam tiep di"; ghi ho https://github.com/ducthangho/tra-luat/issues/1457#issuecomment-7058992187'
+recorded_by: 'phien chan doan (vai operator cua packet px-gemini-500)'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'Generation 1 (px-gemini-500-r5-g1-operator, nhanh cuc bo, khong push) het han 2026-11-21T07:03:17Z truoc khi push; khong bia mo. Noi dung r1/r2 RESULTS giu nguyen nhu ung vien da review e7bc185, chi rebase len base moi.'
+leased_at_utc: '2026-11-21T07:04:38Z'
+heartbeat_at: '2026-11-21T07:04:38Z'
+lease_until: '2026-11-21T11:04:38Z'
+lease_expires_at_utc: '2026-11-21T11:04:38Z'
+max_lease_hours: 4
+review_calls_limit: 4
+native_runs_limit_per_host: 0
+inference_calls_limit_per_host: 0

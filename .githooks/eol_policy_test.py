@@ -883,8 +883,7 @@ def _ban_sao_cay(dest):
 def _tai_sinh_bundled(copy):
     """Tái sinh adapter bundled bằng CHÍNH generator canonical — không viết tay module sinh ra."""
     tf = _hop_dong_fragment()
-    data = tf.generate_bundled_module_bytes(copy / "scripts" / "test_fragments")
-    (copy / "scripts" / "tl_test_fragments_bundled.py").write_bytes(data)
+    tf.write_bundled_modules(copy / "scripts" / "test_fragments", copy / "scripts")
 
 
 def _chay_cong(copy):
@@ -975,8 +974,7 @@ def case_driver_that_chay_probe_tren_bundle_giai_nen(root):
     for p in goc:
         shutil.copyfile(p, nguon / p.name)
     (nguon / (_PROBE_FILE_ID + ".py")).write_text(_PROBE_FILE_SRC, encoding="utf-8", newline="\n")
-    (goi / "scripts" / "tl_test_fragments_bundled.py").write_bytes(
-        tf.generate_bundled_module_bytes(nguon))
+    tf.write_bundled_modules(nguon, goi / "scripts")
 
     driver = root.parent / "driver.py"
     driver.write_text(cong._DRIVER, encoding="utf-8", newline="\n")

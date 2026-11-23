@@ -432,6 +432,307 @@ def phan_loai(env=os.environ, chay=subprocess.run, kho=ROOT, tra_env=False, ra_d
     return (*kq, env2) if tra_env else kq
 
 
+# wp1448 (QUAN-SAT-G5): HAI DONG BONG, chi de QUAN SAT. Khong job nao doc chung: chung chi ra stdout cua buoc phan loai,
+# KHONG BAO GIO vao `GITHUB_OUTPUT` (ca `t110` do tung byte), va moi loi trong ma bong chi thanh `khong_do_duoc` kem ly do
+# (ca `t117`). Dinh nghia cua bao dong va cua ngu canh so sanh moi o dac ta `ops/specs/wp1448-r2/SPEC.md`.
+BONG_CHAY, BONG_BO_QUA, BONG_KDD = "chay", "bo_qua", "khong_do_duoc"
+BONG_DO_DUOC = "do_duoc"
+# review F3: phan loai DANG CHAY co DO DUOC khong (khong phai fail-close). Danh sach CHO PHEP cac tien to ly do ma CHINH bo phan loai
+# viet khi da do xong (`phan_loai_tu_diff`, `phan_loai_day_du`); moi ly do khac — `KHONG DO DUOC`, `LOI NOI BO`, `khong phan loai` —
+# la khong do duoc. Ten tep chi xuat hien SAU cac tien to nay, nen tien to khong bi noi dung diff gia mao.
+LY_DO_CU_DO_DUOC = ("DUONG_NHANH: DAY_DU vi ", "DUONG_NHANH: toan bo ", "DUONG_NHANH: diff RONG (khong tep nao doi)")
+# Phat hien DO DUOC cua `kiem_diff_check`: git tra rc=2 khi thay loi khoang trang / dau xung dot (do 20-11-2026: loi khoang trang
+# rc=2, dau xung dot rc=2, revision hong rc=128, sach rc=0). Moi rc khac la git LOI, khong phai phat hien.
+DAU_PHAT_HIEN_DIFF_CHECK = "git diff --check rc=2:"
+BIEN_RUN, BIEN_ATTEMPT = "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT"
+HAN_BONG_GIAY, HAN_BONG_MOT_LENH = 90, 30
+# BAO DONG BAO THU cua bo ca cong cu (`ops/cong_cu_test.py`), tung THANH PHAN mot the rieng de dot bien bo mot thanh phan lo ra.
+BAO_DONG_OPS, BAO_DONG_CLAUDE_DEV, BAO_DONG_GITHUB = "ops/", ".claude/dev/", ".github/"
+BAO_DONG_SCRIPTS = ("scripts", ".py")                       # `scripts/*.py`, muc TEN: mot cap, moi muc cua diff
+BAO_DONG_CAU_HINH_DUOI, BAO_DONG_CAU_HINH_TEN = (".toml", ".cfg"), (".gitattributes", ".gitignore")
+BAO_DONG_CAU_HINH_REQ = ("requirements", ".txt")
+# Ra tinh cac loi goi `git` ma bo ca cong cu chay tren CAY THAT (ca `t116` quet lai va doi khop): `rev-parse HEAD` chi lay danh
+# tinh; `ls-files --cached -s -z` (`ops/bash_nen.py`) liet ke INDEX va bo quet doc NOI DUNG moi muc co duoi duoi day, o MOI
+# thu muc. Nen moi duong dan mang duoi ay thuoc bao dong, ke ca duoi bon tien to ho so.
+GIT_CONG_CU_DA_RA = {"ops/cong_cu_test.py": ("add", "checkout", "config", "hash-object", "ls-files", "rev-parse", "update-index"),
+                     "ops/bash_nen.py": ("ls-files",)}
+BAO_DONG_DUOI_GIT_QUET = (".py", ".pyw")
+# DAU VAN TAY bao thu: ten va noi dung (OID blob) cua moi tep duoi cac thu muc chua bo doc thuc thi cua bo ca; `scripts/` chi TEN.
+VAN_TAY_NOI_DUNG, VAN_TAY_TEN = ("ops/", ".claude/dev/", ".claude/hooks/"), ("scripts/",)
+TEP_BAO_DONG = "ops/specs/wp1448-r2/do/BAO_DONG.json"       # van tay DO LUC DUNG bao dong; nam duoi tien to ho so nen khong tu bam chinh no
+MAU_DONG_CHA = re.compile(rb"([0-9a-f]{40})((?: [0-9a-f]{40})*)\n")
+MAU_MUC_CAY = re.compile(r"([0-7]{6}) (blob|commit) ([0-9a-f]{40})\t(.+)", re.S)
+MAU_SO = re.compile(r"[0-9]{1,20}")
+
+
+class HetHanBong(Exception):
+    """Ma bong da dung het ngan sach thoi gian cua no; chi ma bong nem va bat."""
+
+
+def thanh_phan_bao_dong(duong):
+    """The cua thanh phan bao dong bao thu ma `duong` thuoc, hoac chuoi rong (ngoai bao dong). Ham THUAN."""
+    if duong.startswith(BAO_DONG_OPS) and not duong.startswith(ALLOWLIST_TIEN_TO):
+        return "ops"
+    if duong.startswith(BAO_DONG_CLAUDE_DEV):
+        return "claude_dev"
+    tp = duong.split("/")
+    if len(tp) == 2 and tp[0] == BAO_DONG_SCRIPTS[0] and tp[1].endswith(BAO_DONG_SCRIPTS[1]):
+        return "scripts_ten"
+    if duong.startswith(BAO_DONG_GITHUB):
+        return "github"
+    if len(tp) == 1 and (duong.endswith(BAO_DONG_CAU_HINH_DUOI) or duong in BAO_DONG_CAU_HINH_TEN
+                         or (duong.startswith(BAO_DONG_CAU_HINH_REQ[0]) and duong.endswith(BAO_DONG_CAU_HINH_REQ[1]))):
+        return "cau_hinh_goc"
+    if duong.casefold().endswith(BAO_DONG_DUOI_GIT_QUET):
+        return "git_quet_py"
+    return ""
+
+
+def _oid(x):
+    return x if type(x) is str and x.strip("0") and MAU_SHA.fullmatch(x) else None
+
+
+def _chay_co_han(chay, han=None, dong_ho=None):
+    """Boc `chay` cho ma bong: moi lenh co han rieng, ca khoi co han chung; het han => `HetHanBong`."""
+    import time
+    dong_ho = dong_ho or time.monotonic
+    het = dong_ho() + (HAN_BONG_GIAY if han is None else han)
+
+    def chay_bong(argv, **kw):
+        con = het - dong_ho()
+        if con <= 0:
+            raise HetHanBong("het ngan sach thoi gian cua ma bong")
+        return chay(argv, timeout=min(con, HAN_BONG_MOT_LENH), **kw)
+    return chay_bong
+
+
+def ngu_canh_merge(env, chay=subprocess.run, kho=ROOT):
+    """(goc_so, None) khi merge ref co DUNG hai cha, cha hai = `dau` va goc su kien la to tien cua cha mot; con lai (None, ly do).
+    `goc_so` = cha THU NHAT cua merge ref. Sai mot dieu kien hay git loi => khong dung duoc ngu canh moi."""
+    goc, dau, hop = (_oid(env.get(k)) for k in (BIEN_GOC, BIEN_DAU, BIEN_MERGE))
+    if not (goc and dau and hop):
+        return None, "thieu_hoac_hong_oid"
+    try:
+        r = chay(["git", "rev-list", "--parents", "-n", "1", hop], cwd=kho, capture_output=True)
+    except Exception as e:
+        return None, f"rev_list_nem_{type(e).__name__}"
+    ra_cha = getattr(r, "stdout", None)
+    if not isinstance(ra_cha, (bytes, bytearray)) or getattr(r, "returncode", None) != 0:
+        return None, f"rev_list_rc_{getattr(r, 'returncode', None)}"
+    k = MAU_DONG_CHA.fullmatch(bytes(ra_cha))
+    if not k or k.group(1).decode("ascii") != hop:
+        return None, "rev_list_dau_ra_la"
+    cha = k.group(2).decode("ascii").split()
+    if len(cha) != 2:
+        return None, f"so_cha_{len(cha)}"
+    if cha[1] != dau:
+        return None, "cha_hai_khac_dau"
+    try:
+        t = chay(["git", "merge-base", "--is-ancestor", goc, cha[0]], cwd=kho, capture_output=True)
+    except Exception as e:
+        return None, f"is_ancestor_nem_{type(e).__name__}"
+    rc = getattr(t, "returncode", None)
+    if rc == 1:
+        return None, "goc_su_kien_khong_la_to_tien_cha_mot"
+    if rc != 0:
+        return None, f"is_ancestor_rc_{rc}"
+    return cha[0], None
+
+
+def van_tay_bao_dong(cay, chay=subprocess.run, kho=ROOT):
+    """(sha256 hex, None) cua dau van tay bao thu tren cay git `cay`, hoac (None, ly do). Mot dong moi tep: `mode oid duong` duoi
+    `VAN_TAY_NOI_DUNG` (tru bon tien to ho so), `ten duong` duoi `VAN_TAY_TEN`; sap xep roi bam."""
+    import hashlib
+    try:
+        r = chay(["git", "ls-tree", "-r", "-z", "--full-tree", cay, "--", *(x.rstrip("/") for x in VAN_TAY_NOI_DUNG + VAN_TAY_TEN)],
+                 cwd=kho, capture_output=True)
+    except Exception as e:
+        return None, f"ls_tree_nem_{type(e).__name__}"
+    ra = getattr(r, "stdout", None)
+    if getattr(r, "returncode", None) != 0 or not isinstance(ra, (bytes, bytearray)) or not ra or not bytes(ra).endswith(b"\0"):
+        return None, f"ls_tree_rc_{getattr(r, 'returncode', None)}_hoac_dau_ra_rong_cut"
+    dong = []
+    for muc in bytes(ra).decode("utf-8", "surrogateescape").rstrip("\0").split("\0"):
+        k = MAU_MUC_CAY.fullmatch(muc)
+        if not k:
+            return None, "ls_tree_ban_ghi_la"
+        mode, _loai, oid, duong = k.groups()
+        if duong.startswith(VAN_TAY_TEN):
+            dong.append("ten " + duong)
+        elif duong.startswith(VAN_TAY_NOI_DUNG) and not duong.startswith(ALLOWLIST_TIEN_TO):
+            dong.append(f"{mode} {oid} {duong}")
+    if not dong:
+        return None, "khong_tep_nao_duoi_cac_thu_muc_bo_doc"
+    return hashlib.sha256(("\n".join(sorted(dong)) + "\n").encode("utf-8", "surrogateescape")).hexdigest(), None
+
+
+def doc_van_tay_da_dung(kho=ROOT):
+    """(sha256 hex da ghi luc dung bao dong, None) tu `TEP_BAO_DONG` tren cay dang chay, hoac (None, ly do)."""
+    import json
+    try:
+        d = json.loads((Path(kho) / TEP_BAO_DONG).read_text(encoding="utf-8"))
+        vt = d["van_tay"]
+    except Exception as e:
+        return None, f"tep_bao_dong_{type(e).__name__}"
+    if type(vt) is not str or not re.fullmatch(r"[0-9a-f]{64}", vt):
+        return None, "tep_bao_dong_van_tay_la"
+    return vt, None
+
+
+def bong_cong_cu(su_kien, che_do, doi, env2, chay=subprocess.run, kho=ROOT, cu_do=BONG_DO_DUOC):
+    """(quyet dinh, ly do, quyet dinh THEO DUONG DAN, trang thai van tay) cua output `cong_cu` DU KIEN. `bo_qua` (bo MOI) chi khi
+    MOI dieu kien cua dac ta dat; push va moi truong hop do duoc khac => `chay`; khong do duoc => `khong_do_duoc`. Khong bao gio
+    `bo_qua` theo mac dinh. `cu_do`: phan loai dang chay `day_du` ma la FAIL-CLOSE (do loi) thi khong phai `day_du` do duoc."""
+    if su_kien == "push":
+        return BONG_CHAY, "push", BONG_CHAY, "-"
+    if su_kien != "pull_request":
+        return BONG_CHAY, "su_kien_khong_phai_pull_request", BONG_CHAY, "-"
+    if che_do != DAY_DU:
+        return BONG_CHAY, "che_do_dang_chay_khong_phai_day_du", BONG_CHAY, "-"
+    if cu_do != BONG_DO_DUOC:
+        return BONG_KDD, "che_do_dang_chay_la_fail_close", BONG_KDD, "-"
+    if doi is None:
+        return BONG_KDD, "diff_khong_do_duoc", BONG_KDD, "-"
+    if not doi:
+        return BONG_CHAY, "diff_rong", BONG_CHAY, "-"
+    goc_so, ly = ngu_canh_merge(env2 or {}, chay, kho)
+    if goc_so is None:
+        return BONG_KDD, "ngu_canh_merge:" + ly, BONG_KDD, "-"
+    dong_gop = doc_diff_cay(goc_so, env2.get(BIEN_MERGE), chay, kho)
+    if dong_gop is None:
+        return BONG_KDD, "dong_gop_merge_khong_do_duoc", BONG_KDD, "-"
+    tat_ca = set(doi) | dong_gop
+    if not all(type(x) is str and _duong_dan_sach(x) for x in tat_ca):
+        return BONG_CHAY, "duong_dan_la", BONG_CHAY, "-"
+    if not any(not khop_allowlist(x) for x in dong_gop):
+        return BONG_CHAY, "dong_gop_merge_chi_ho_so", BONG_CHAY, "-"
+    cham = {}
+    for x in tat_ca:
+        the = thanh_phan_bao_dong(x)
+        if the:
+            cham[the] = cham.get(the, 0) + 1
+    if cham:
+        return BONG_CHAY, "cham_bao_dong:" + "+".join(f"{t}={n}" for t, n in sorted(cham.items())), BONG_CHAY, "-"
+    da_dung, ly_d = doc_van_tay_da_dung(kho)
+    if da_dung is None:
+        return BONG_KDD, "van_tay:" + ly_d, BONG_BO_QUA, BONG_KDD
+    hien, ly_h = van_tay_bao_dong(env2.get(BIEN_MERGE), chay, kho)
+    if hien is None:
+        return BONG_KDD, "van_tay:" + ly_h, BONG_BO_QUA, BONG_KDD
+    if hien != da_dung:
+        return BONG_CHAY, "van_tay_lech", BONG_BO_QUA, "lech"
+    return BONG_BO_QUA, "ngoai_bao_dong", BONG_BO_QUA, "khop"
+
+
+def phan_loai_bong(env, chay=subprocess.run, kho=ROOT):
+    """(doi, moi, ly do khong do duoc | None) — CUNG cac buoc cua `phan_loai_day_du` (`doc_diff` -> `phan_loai_tu_diff` ->
+    `doc_raw_ba_cap` -> `ly_do_ve_day_du`) tren env da chuan hoa cua su kien `pull_request`, nhung GIU trang thai khong do duoc thay
+    vi fail-close ve `day_du` (review F3): bo phan loai that PHAI fail-close, con bong phai biet no KHONG do duoc. `t118` doi khop
+    voi `phan_loai_day_du` tren moi dau vao do duoc."""
+    doi = doc_diff(env, chay, kho)
+    if doi is None:
+        return None, BONG_KDD, "diff_ngu_canh_moi_khong_do_duoc"
+    che_do, _ly = phan_loai_tu_diff(doi)
+    if che_do != DUONG_NHANH or not doi:
+        return doi, che_do, None
+    raw = doc_raw_ba_cap(env, chay, kho)
+    if isinstance(raw, str):
+        return doi, BONG_KDD, "raw_ngu_canh_moi_khong_do_duoc"
+    return doi, (DAY_DU if ly_do_ve_day_du(doi, raw) else DUONG_NHANH), None
+
+
+def kiem_bong(loi, dau_phat_hien=None):
+    """`dat` | `do` | `khong_do_duoc` cua MOT phep kiem tren ngu canh moi. Rong => dat. Moi dong la PHAT HIEN do duoc (khong mo dau
+    `KHONG DO DUOC`; khi `dau_phat_hien` co mat thi phai mo dau bang dung dau ay — danh sach CHO PHEP) => do. Con lai => khong do duoc."""
+    if not loi:
+        return "dat"
+    if any(x.startswith("KHONG DO DUOC") for x in loi):
+        return BONG_KDD
+    if dau_phat_hien is not None and not all(x.startswith(dau_phat_hien) for x in loi):
+        return BONG_KDD
+    return "do"
+
+
+def bong_phan_loai(su_kien, che_do, env2, chay=subprocess.run, kho=ROOT):
+    """(cu, moi, goc_so | None, ly do, kiem) — `cu` la phan loai theo luat dang chay; `moi` la CUNG bo phan loai (diff, raw, mode)
+    tren ngu canh so sanh moi (goc = cha thu nhat cua merge ref), cong ba phep kiem mode / diff-check / nhi phan khi `moi` ra
+    duong nhanh. Ngu canh khong dung duoc, hay MOT lan doc nao (diff, raw, mode, noi dung) khong do duoc => `moi` = `khong_do_duoc`
+    kem ly do — khong bao gio thanh mot phan loai do duoc (review F3)."""
+    if su_kien != "pull_request":
+        return che_do, BONG_KDD, None, "su_kien_khong_phai_pull_request", "-"
+    goc_so, ly = ngu_canh_merge(env2 or {}, chay, kho)
+    if goc_so is None:
+        return che_do, BONG_KDD, None, "ngu_canh_merge:" + ly, "-"
+    env_moi = {**env2, BIEN_GOC: goc_so}
+    doi_m, moi, ly_kdd = phan_loai_bong(env_moi, chay, kho)
+    if moi == BONG_KDD:
+        return che_do, BONG_KDD, goc_so, ly_kdd, "-"
+    kiem = "-"
+    if moi == DUONG_NHANH and doi_m:
+        kiem = "dat"
+        for ten, phep, dau in (("kiem_mode", lambda: kiem_mode_git(env_moi, chay, kho, doi_m), None),
+                               ("kiem_diff_check", lambda: kiem_diff_check(env_moi, chay, kho), DAU_PHAT_HIEN_DIFF_CHECK),
+                               ("kiem_nhi_phan", lambda: kiem_nhi_phan(env_moi, chay, kho), None)):
+            kq = kiem_bong(phep(), dau)
+            if kq == BONG_KDD:
+                return che_do, BONG_KDD, goc_so, ten + "_khong_do_duoc", BONG_KDD
+            if kq == "do":
+                kiem = "do"
+    return che_do, moi, goc_so, "-", kiem
+
+
+def dong_bong(env, che_do, env2, doi, chay=subprocess.run, kho=ROOT, ly_do=None):
+    """Hai dong bong (danh sach chuoi). Moi loi cua TUNG dong thanh `khong_do_duoc` kem ten lop loi; khong nem ra ngoai. `ly_do`: ly
+    do cua phan loai DANG CHAY — chi tien to trong `LY_DO_CU_DO_DUOC` moi la phan loai do duoc (`cu_do`); vang => khong do duoc."""
+    try:
+        cu_do = BONG_DO_DUOC if che_do in (DAY_DU, DUONG_NHANH) and type(ly_do) is str and ly_do.startswith(LY_DO_CU_DO_DUOC) else BONG_KDD
+        su_kien = env.get(BIEN_SU_KIEN) or ""
+        run, att = (x if type(x) is str and MAU_SO.fullmatch(x) else "-" for x in (env.get(BIEN_RUN), env.get(BIEN_ATTEMPT)))
+        o = {k: _oid((env2 or env).get(b)) or "-" for k, b in (("goc", BIEN_GOC), ("dau", BIEN_DAU), ("hop", BIEN_MERGE))}
+        goc_su_kien = _oid(env.get(BIEN_GOC)) or "-"
+        su_kien_in = su_kien if su_kien in SU_KIEN_PHAN_LOAI else "khac"
+        duoi = f"run={run}/{att} head={o['dau']}"
+        chay_bong = _chay_co_han(chay)
+    except Exception as e:
+        return [f"BONG_CONG_CU: {BONG_KDD} ly_do=loi_noi_bo:{type(e).__name__} run=-/- head=-",
+                f"BONG_PHAN_LOAI: cu={che_do} moi={BONG_KDD} goc_su_kien=- goc_so=- dau=- hop=- ly_do=loi_noi_bo:{type(e).__name__} "
+                f"cu_do={BONG_KDD} run=-/-"]
+    try:
+        qd, ly, theo_duong, vt = bong_cong_cu(su_kien, che_do, doi, env2, chay_bong, kho, cu_do)
+    except Exception as e:
+        qd, ly, theo_duong, vt = BONG_KDD, f"loi_noi_bo:{type(e).__name__}", BONG_KDD, "-"
+    try:
+        cu, moi, goc_so, ly_pl, kiem = bong_phan_loai(su_kien, che_do, env2, chay_bong, kho)
+    except Exception as e:
+        cu, moi, goc_so, ly_pl, kiem = che_do, BONG_KDD, None, f"loi_noi_bo:{type(e).__name__}", "-"
+    return [f"BONG_CONG_CU: {qd} ly_do={ly} {duoi} duong_dan={theo_duong} van_tay={vt} su_kien={su_kien_in} che_do={che_do}",
+            f"BONG_PHAN_LOAI: cu={cu} moi={moi} goc_su_kien={goc_su_kien} goc_so={goc_so or '-'} dau={o['dau']} hop={o['hop']} "
+            f"ly_do={ly_pl} cu_do={cu_do} kiem_moi={kiem} run={run}/{att} su_kien={su_kien_in}"]
+
+
+def in_bong(env, che_do, env2, doi, chay, kho, ra, ly_do=None):
+    """In hai dong bong ra `ra`. KHONG tra gi, KHONG nem: ma thoat va output that cua `main` khong phu thuoc ham nay."""
+    try:
+        for dong in dong_bong(env, che_do, env2, doi, chay, kho, ly_do):
+            print(dong, file=ra)
+    except Exception as e:
+        try:
+            print(f"BONG_CONG_CU: {BONG_KDD} ly_do=loi_in:{type(e).__name__} run=-/- head=-", file=ra)
+        except Exception:
+            pass
+
+
+def lenh_van_tay(argv, chay=subprocess.run, kho=ROOT, ra=None) -> int:
+    """`van-tay [<commit>]`: in dau van tay bao thu cua `<commit>` (mac dinh HEAD) — de DUNG LAI bao dong (`TEP_BAO_DONG`)."""
+    ra = ra if ra is not None else sys.stdout
+    vt, ly = van_tay_bao_dong(argv[0] if argv else "HEAD", chay, kho)
+    if vt is None:
+        print(f"BAO_DONG: KHONG DO DUOC van tay ({ly})", file=sys.stderr)
+        return 1
+    print(f'{{"phien_ban": 1, "van_tay": "{vt}"}}', file=ra)
+    return 0
+
+
 def _dau_ra(r) -> str:
     """stdout rồi stderr của một tiến trình con, đã giải mã; đối tượng lạ ⇒ chuỗi rỗng (không ném)."""
     ra = b""
@@ -796,6 +1097,8 @@ def main(argv=None, env=os.environ, chay=subprocess.run, kho=ROOT, ra=None) -> i
     argv = sys.argv[1:] if argv is None else list(argv)
     if argv == ["kiem-re"]:
         return lenh_kiem_re(env, chay, kho, ra)
+    if argv[:1] == ["van-tay"] and len(argv) <= 2:
+        return lenh_van_tay(argv[1:], chay, kho, ra)
     if argv:
         print("dung: ci_duong_nhanh.py [kiem-re]", file=sys.stderr)
         return 2
@@ -822,6 +1125,8 @@ def main(argv=None, env=os.environ, chay=subprocess.run, kho=ROOT, ra=None) -> i
         except OSError as e:
             print(f"DUONG_NHANH: khong ghi duoc GITHUB_OUTPUT ({type(e).__name__}) - DO", file=sys.stderr)
             return 1
+    # wp1448: hai dong bong in SAU khi output that da ghi xong; chung khong doi ma thoat, khong cham `GITHUB_OUTPUT`.
+    in_bong(env, che_do, env2, doi[0] if doi else None, chay, kho, ra, ly_do)
     return 0
 
 

@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import rg-windows-khong-tu-cai rg-co-chay-truoc-cargo agent-creds-bootstrap agy-ghim
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import rg-windows-khong-tu-cai rg-co-chay-truoc-cargo agent-creds-bootstrap agy-ghim cong-cu-ban-ke ruff-ban-ghim-ci
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -514,6 +514,107 @@ fi
 MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" nap 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?; echo "[session-start] agent-creds-bootstrap: rc=$MA_AC"
 MA_AC=0; "$PY" "$GOC/ops/cloud_agent_creds.py" cai-agy 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?; echo "[session-start] agy-ghim: rc=$MA_AC"
 # <<< agent-creds (wp1039)
+
+# >>> cong-cu-ban-ke (wp1474)
+# Spec ops/specs/cong-cu-hook-r1.md. VI SAO: hook chi co buoc cai rieng cho rg va actionlint; moi cong cu khac cua ban ke
+# `ops/cong_cu.yaml` chi co mat NEU anh container co san. Do 21-11-2026: `shellcheck` (chuan_bi, canary blocking) VANG o moi
+# phien remote, nen `actionlint` bo am tham ca lop luat SC* ma van rc=0 — phep do trong phien yeu hon CI. Khong viet cong
+# thuc cai moi: goi DUNG `ops/cai_cong_cu.sh <ten>` ma CI dung, va ket luan bang LAN DO LAI, khong bang rc trinh cai (r244).
+# Ruff: ban ghim DUY NHAT doc tu ci.yml (`ruff==X.Y.Z`), cai qua `$PY -m pip` — nguong ruff cua CLAUDE.md do bang `$PY -m ruff`.
+# Khoi KHONG BAO GIO lam hook dung: goi bang `|| MA_CC=$?`; `doctor` ben duoi van la cong duy nhat quyet dinh thoat 12.
+# Codex luot 1 (F1474-01): MOI lenh ngoai co tran — probe 30 giay, moi lan cai toi da 180 giay, ca khoi toi da 300 giay
+# (hook co 600), va `timeout -k 5` de trinh cai lo TERM van bi giet. Ba tran doc tu bien moi truong chi de test rut ngan.
+# Bien khong phai so nguyen khong am => dung mac dinh: `$(( 1x ))` lam CHET CA HOOK, ke ca khi khoi chay duoi `||` (do 21-11).
+# Codex luot 2: F1474-04 — tran probe/cai bang 0 lam `timeout` TAT han (GNU: 0 = khong tran) => 0 ve mac dinh (`duong`);
+# F1474-05 — `018` la so BAT PHAN trong `$(( ))` => ep thap phan `10#`, toi da 6 chu so. Ngan sach 0 van hop le: bo qua cai.
+_cc_so() {   # <gia tri> <mac dinh> [duong] — in so nguyen thap phan da chuan hoa, hoac mac dinh
+  case "$1" in ''|*[!0-9]*) echo "$2"; return 0 ;; esac
+  [ "${#1}" -le 6 ] || { echo "$2"; return 0; }
+  local n=$(( 10#$1 ))
+  if [ "$n" -eq 0 ] && [ "${3:-}" = duong ]; then echo "$2"; else echo "$n"; fi
+}
+CC_TRAN_PROBE="$(_cc_so "${TL_CC_TRAN_PROBE_GIAY:-}" 30 duong)"; CC_TRAN_CAI="$(_cc_so "${TL_CC_TRAN_CAI_GIAY:-}" 180 duong)"
+CC_NGAN_SACH="$(_cc_so "${TL_CC_NGAN_SACH_GIAY:-}" 300)"
+_cc_chay_tran() {   # <giay> <lenh...> — tran thoi gian (TERM roi KILL sau 5 giay) neu co `timeout`, khong thi chay thang
+  local giay="$1"; shift
+  if co timeout; then timeout -k 5 "$giay" "$@"; else "$@"; fi
+}
+_cc_thieu() {   # in "<so cong cu can> <ten chua DAT…>"; doc duoc => rc 0, khong doc duoc => rc khac 0
+  local json
+  json="$(_cc_chay_tran "$CC_TRAN_PROBE" "$PY" "$GOC/ops/cong_cu.py" kiem-tra --json 2>/dev/null)" || true   # rc khac 0 khi co cong cu thieu
+  printf '%s' "$json" | _cc_chay_tran "$CC_TRAN_PROBE" "$PY" -c '
+import json, re, sys
+import yaml
+ban_ke = yaml.safe_load(open(sys.argv[1], encoding="utf-8"))["cong_cu"]
+do = json.load(sys.stdin)["cong_cu"]
+trang_thai = {c["ten"]: c.get("trang_thai") for c in do}
+can = [t for t, v in ban_ke.items() if v.get("bat_buoc") or v.get("chuan_bi")]
+if not all(re.fullmatch(r"[A-Za-z0-9_.-]+", t) for t in can):
+    raise SystemExit(3)
+print(" ".join([str(len(can))] + [t for t in can if trang_thai.get(t) != "DAT"]))' "$GOC/ops/cong_cu.yaml" 2>/dev/null
+}
+cai_cong_cu_ban_ke() {
+  local kq so thieu t ma con ghim ban ban_tran loi=0 bat_dau="$SECONDS"
+  # Codex luot 1 (F1474-02): do/ban ke hong => KHONG cai gi, ke ca ruff — tra ve NGAY.
+  if ! kq="$(_cc_thieu)" || [ -z "$kq" ]; then
+    echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC (kiem-tra --json hoac ops/cong_cu.yaml khong doc duoc) — khong cai gi"
+    return 1
+  fi
+  read -r so thieu <<< "$kq"
+  for t in $thieu; do
+    con=$(( CC_NGAN_SACH - (SECONDS - bat_dau) ))
+    if [ "$con" -lt 15 ]; then
+      echo "[session-start] cong-cu-ban-ke: HET NGAN SACH ${CC_NGAN_SACH}s — bo qua cai $t"
+      continue
+    fi
+    [ "$con" -lt "$CC_TRAN_CAI" ] || con="$CC_TRAN_CAI"
+    ma=0; _cc_chay_tran "$con" bash "$GOC/ops/cai_cong_cu.sh" "$t" >/dev/null 2>&1 || ma=$?
+    echo "[session-start] cong-cu-ban-ke: cai $t — trinh cai rc=$ma (ket luan theo lan do lai)"
+  done
+  if ! kq="$(_cc_thieu)" || [ -z "$kq" ]; then
+    echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC sau khi cai"
+    loi=1
+  else
+    read -r so thieu <<< "$kq"
+    if [ -n "$thieu" ]; then
+      echo "[session-start] cong-cu-ban-ke: CHUA DAT $thieu — thu tay: bash ops/cai_cong_cu.sh <ten>"
+      loi=1
+    else
+      echo "[session-start] cong-cu-ban-ke: DAT ($so cong cu)"
+    fi
+  fi
+  ghim="$(grep -oE 'ruff==[0-9]+\.[0-9]+\.[0-9]+' "$GOC/.github/workflows/ci.yml" 2>/dev/null | sort -u || true)"
+  if [ -z "$ghim" ] || [ "$(printf '%s\n' "$ghim" | wc -l)" -ne 1 ]; then
+    echo "[session-start] ruff: KHONG DO DUOC ban ghim trong ci.yml (can dung mot gia tri, thay: $(printf '%s' "$ghim" | tr '\n' ' '))"
+    return 1
+  fi
+  ghim="${ghim#ruff==}"
+  ban="$(_cc_chay_tran "$CC_TRAN_PROBE" "$PY" -m ruff --version 2>/dev/null || true)"
+  if [ "$ban" != "ruff $ghim" ]; then
+    con=$(( CC_NGAN_SACH - (SECONDS - bat_dau) ))
+    if [ "$con" -lt 15 ]; then
+      echo "[session-start] ruff: HET NGAN SACH ${CC_NGAN_SACH}s — bo qua cai ruff==$ghim"
+    else
+      [ "$con" -lt "$CC_TRAN_CAI" ] || con="$CC_TRAN_CAI"
+      ma=0; _cc_chay_tran "$con" "$PY" -m pip install --quiet "ruff==$ghim" >/dev/null 2>&1 || ma=$?
+      ban="$(_cc_chay_tran "$CC_TRAN_PROBE" "$PY" -m ruff --version 2>/dev/null || true)"
+      echo "[session-start] ruff: cai ruff==$ghim — pip rc=$ma"
+    fi
+  fi
+  if [ "$ban" = "ruff $ghim" ]; then
+    echo "[session-start] ruff: DAT $ghim ($PY -m ruff)"
+  else
+    echo "[session-start] ruff: CHUA DAT ban ghim $ghim (do duoc: '${ban:-khong chay}')"
+    loi=1
+  fi
+  ban_tran="$(_cc_chay_tran "$CC_TRAN_PROBE" env -u PATH PATH="$PATH_GOC" ruff --version 2>/dev/null || true)"
+  if [ -n "$ban_tran" ] && [ "$ban_tran" != "ruff $ghim" ]; then
+    echo "[session-start] CANH BAO ruff: 'ruff' tren PATH la '$ban_tran', khac ban ghim CI $ghim — do nguong ruff bang: $PY -m ruff"
+  fi
+  return "$loi"
+}
+MA_CC=0; cai_cong_cu_ban_ke || MA_CC=$?; echo "[session-start] cong-cu-ban-ke: rc=$MA_CC"
+# <<< cong-cu-ban-ke (wp1474)
 
 # --- Xác thực codex, để nó chạy được trên NHIỀU môi trường
 #

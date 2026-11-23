@@ -1,0 +1,13 @@
+{
+  "packet": 1499,
+  "revision": 6,
+  "reviewed_sha": "5e7caea684b41c3510839e7fd1f999476356ddf4",
+  "spec_sha256": "ce0d90a43825bc80e052fad657b018f4f32ca58031e827039d30534016d89a7c",
+  "provider": "google_antigravity",
+  "verdict": "approve",
+  "findings": [],
+  "launcher_rc": 0,
+  "scope": "specification delta only",
+  "decision": "freeze_spec",
+  "owner_mcr": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7092816867"
+}

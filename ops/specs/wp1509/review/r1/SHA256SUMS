@@ -1,4 +1,6 @@
 67a47336d71220273e089c819727fe7347fa155abef7a3cca0162b7f4e18beb2  PROMPT.md
 aa36078c17110cca123a0c5e1e15872b506d9c84a4dcb55616d854f4c58555d7  VERDICT.md
-ca59296d08dc273d59d0769dd88cf06d72549d3d81ff4d1c0f33ead8bcc0f663  run.json
+b3868789d60885f41529bda248f36acd6aa6d520b8f11203bdc2315861e35332  run.json
 a8f5cec6b20cc1726d0ac03ab0c8d2b321b9b5c14d8b6097b3f40f99c8f82ff0  ../../../wp1509-r1.md
+# run.json: băm trên blob đã chuẩn hoá LF trong git. Tệp gốc launcher ghi trên Windows (CRLF) có sha256
+# ca59296d08dc273d59d0769dd88cf06d72549d3d81ff4d1c0f33ead8bcc0f663; nội dung khác nhau đúng ở ký tự xuống dòng.

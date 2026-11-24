@@ -138,7 +138,7 @@ bookkeeping:
   - {item: 'PR #1465 (dot A r9, da bi thay)', ket_qua: 'measured — readback-pr-1465.json: closed, khong merge.'}
   - {item: 'PR #1480 (dot A r10)', ket_qua: 'GitHub danh dau merged vi head 79b3c24 nam trong 9d61d4e; khong co merge rieng.'}
   - {item: 'RELEASE_MANIFEST.json', ket_qua: 'not_applicable — 3 tep write set khong nam trong manifest; release-verify --strict 186/186 tren merge.'}
-  - {item: 'bien ban M8 tren #1236', ket_qua: 'not_measured luc ghi — dang sau khi ho so nay commit; bien ban tro lai ho so nay.'}
+  - {item: 'bien ban M8 tren #1236', ket_qua: 'measured — readback-m8-7129701231.json: #1236 issuecomment-7129701231 (2026-11-24T11:08:07Z, dang qua app claude), khoi yaml khop tung byte ban goc, sha256 3f477483f681c1fd…; landed true, bon moc passed.'}
   - {item: 'dong Issue #1236', ket_qua: 'not_applicable — con dot B (noi L8) va dot C (D2b), roi #1257.'}
   - {item: 'no ghi lai', ket_qua: 'thuat_lai — sua fixture wp433_gws_cred_no tren Windows (ten con) va tai sinh bundle test, PR rieng (7127447632).'}
   - {item: 'phat hanh', ket_qua: 'not_applicable — dot nay khong bump VERSION.'}

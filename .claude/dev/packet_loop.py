@@ -3910,9 +3910,10 @@ def cmd_kiem_merge(a, state_dir: Path) -> int:
 
 # --- #1236 đợt C (`ops/specs/wp1236-r12.md`, mục *D2b chi tiết*): `moc_10_2_2.gate_output` dương của biên bản M8 phải khớp tệp đánh giá
 # (hoặc readback miễn) TẠI `oid` trên remote. MÃ cổng lấy từ `origin/master`, DỮ LIỆU lấy từ `oid`; không đọc cây làm việc.
+# Mỗi thành phần đường dẫn chỉ nhận ASCII in được 0x21–0x7E trừ `/` (chủ kho, #1236 issuecomment-7134458601): đường dẫn in ra luôn đúng một dòng.
 D2B_MODULE = "ops/gate_output_doi_chieu.py"
-D2B_TEP_RE = re.compile(r"ops/land/[^/]+-provenance/(?:[^/]+/)*danh-gia-gate-output-[0-9]+\.txt")
-D2B_READBACK_RE = re.compile(r"ops/land/[^/]+-provenance(?:/[^/]+)*")
+D2B_TEP_RE = re.compile(r"ops/land/[!-.0-~]+-provenance/(?:[!-.0-~]+/)*danh-gia-gate-output-[0-9]+\.txt")
+D2B_READBACK_RE = re.compile(r"ops/land/[!-.0-~]+-provenance(?:/[!-.0-~]+)*")
 
 
 def _d2b(root: Path, bb: dict, thieu: list) -> None:
@@ -3922,7 +3923,11 @@ def _d2b(root: Path, bb: dict, thieu: list) -> None:
     try:
         thieu.extend(f"D2b {x}" for x in _d2b_kiem(root, bb))
     except Exception as ex:
-        _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: D2b {type(ex).__name__}: {ex}")
+        _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: D2b {ex!r}")  # repr: thông điệp của ngoại lệ không tách được dòng
+
+
+def _d2b_blob(b: bytes) -> bytes:
+    return hashlib.sha1(b"blob %d\0" % len(b) + b).hexdigest().encode()  # OID blob của git (kho sha1: `oid` 40 hex)
 
 
 def _d2b_kiem(root: Path, bb: dict) -> list:
@@ -3938,17 +3943,18 @@ def _d2b_kiem(root: Path, bb: dict) -> list:
     if "thieu_nguon" in vp:
         return vp
     oid, dd = ng["oid"], ng[khoa[-1]]
-
-    def git(*x):  # đường dẫn là chuỗi THÔ, không phải pathspec; rc ≠ 0 ⇒ không dùng stdout (bị ngắt sau khi in vẫn là lỗi)
-        rc, o = _git_do(root, "--literal-pathspecs", *x)
-        return None if rc else o
-    ref = git("branch", "-r", "--contains", oid, "--format=%(refname)")
-    if git("cat-file", "-t", oid) != b"commit\n" or not any(r.startswith(b"refs/remotes/origin/") for r in (ref or b"").split(b"\n")):
-        return vp + ["oid_khong_tren_remote"]
     if not (D2B_TEP_RE if passed else D2B_READBACK_RE).fullmatch(dd) or "." in dd.split("/") or ".." in dd.split("/"):
-        return vp + ["duong_dan_sai"]
-    if (cay_git := git("ls-tree", "-z", "-t", oid, "--", dd)) is None:
-        raise OSError("git ls-tree")
+        return vp + ["duong_dan_sai"]  # kiểm trên chuỗi THÔ, trước mọi lệnh git và mọi dòng in
+
+    def git(*x, hoi=False):  # đường dẫn là chuỗi THÔ, không phải pathspec. rc ≠ 0 ⇒ KHÔNG dùng stdout (bị ngắt sau khi in vẫn là lỗi):
+        rc, o = _git_do(root, "--literal-pathspecs", *x)  # lệnh HỎI (`hoi`) coi như trả rỗng, lệnh còn lại là lỗi đo
+        if rc and not hoi:
+            raise OSError(f"git {x[0]}")
+        return b"" if rc else o
+    ref = git("branch", "-r", "--contains", oid, "--format=%(refname)", hoi=True)
+    if git("cat-file", "-t", oid, hoi=True) != b"commit\n" or not any(r.startswith(b"refs/remotes/origin/") for r in ref.split(b"\n")):
+        return vp + ["oid_khong_tren_remote"]
+    cay_git = git("ls-tree", "-z", "-t", oid, "--", dd)
     tien_to = [dd[:m.start()] for m in re.finditer("/", dd)] + [dd]  # mỗi tiền tố là cây 040000, tệp đánh giá là 100644; symlink (120000) hay vắng ⇒ đỏ
     mong = [(b"100644" if passed and d == dd else b"040000") + b"\t" + d.encode() for d in tien_to]
     co = [x.split(b" ")[0] + b"\t" + x.partition(b"\t")[2] for x in cay_git.split(b"\0")]
@@ -3956,14 +3962,20 @@ def _d2b_kiem(root: Path, bb: dict) -> list:
         return vp + [f"symlink_hoac_mode:{sai[0]}"]
     with tempfile.TemporaryDirectory() as tam, tempfile.TemporaryDirectory() as tam_cay:
         ma, cay, thu = Path(tam) / D2B_MODULE, Path(tam_cay), "/".join(dd.split("/")[:3])
-        if not (b := git("show", f"refs/remotes/origin/master:{D2B_MODULE}")):
+        if not (b := git("show", f"refs/remotes/origin/master:{D2B_MODULE}", hoi=True)):
             _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: không đọc được {D2B_MODULE} trên origin/master")
         ma.parent.mkdir(), ma.write_bytes(b)
         mod = _nap(Path(tam), "gate_output_doi_chieu")
-        if not (tar := git("archive", "--format=tar", oid, "--", thu)):
-            raise OSError("git archive")
-        with tarfile.open(fileobj=io.BytesIO(tar)) as t:  # chỉ tệp thường (thư mục cha tự dựng): symlink trong `oid` KHÔNG được dựng lại
-            t.extractall(cay, filter=lambda m, p: tarfile.data_filter(m, p) if m.isreg() else None)
+        with tarfile.open(fileobj=io.BytesIO(git("archive", "--format=tar", oid, "--", thu))) as t:
+            t.extractall(cay, filter="data")
+        # Bản bung phải ĐÚNG là cây của `oid`, từng mục: symlink vẫn là symlink (validator tự thấy và tự từ chối theo K2), tệp khớp băm blob.
+        # Lệch khi `.gitattributes` của `oid` ẩn tệp (export-ignore) hay đổi byte (eol, ident), khi nền không tạo được symlink (tarfile chép
+        # đích), hoặc khi hai tên chỉ khác hoa/thường hay dạng chuẩn hoá (nền không phân biệt sẽ gộp làm một).
+        muc = [(x.split(b" ")[0], x.split(b"\t")[0][-40:], os.fsdecode(x.partition(b"\t")[2])) for x in filter(None, git("ls-tree", "-r", "-z", oid, "--", thu).split(b"\0"))]
+        if len({unicodedata.normalize("NFC", t).casefold() for _, _, t in muc}) != len(muc) or not all(
+                (cay / t).is_symlink() if mode == b"120000" else (cay / t).is_file() and _d2b_blob((cay / t).read_bytes()) == sha
+                for mode, sha, t in muc):
+            raise OSError("bản bung git archive không khớp cây của oid")
         if passed:
             tt, ly = mod.kiem_tep(cay / dd, cay / thu)
             if tt != "passed":

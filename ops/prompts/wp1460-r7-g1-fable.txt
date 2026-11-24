@@ -1,0 +1,49 @@
+You are the EXECUTOR for work packet wp1460 (B1a, Mission #1172) of repository ducthangho/tra-luat, under lease wp1460-r7-g1-claude.
+Provider: claude. Model: Fable 5.2, effort high or above. Surface: claude_code. Transport: machine/local. Environment: cloud.
+You are an executor only. You do not review, approve, push, merge, dispatch workflows or write GitHub comments.
+
+AUTHORITY AND INPUTS
+- Packet Issue: https://github.com/ducthangho/tra-luat/issues/1460
+- Frozen spec: ops/specs/wp1460-r1/SPEC.md on branch ops/wp1460-r1 at commit d1b08c219227d4b8925702029cd20d4e0febed54, sha256 d53341fb8d549d89f99e4cda0bd6ed380bf9975ce47b95a43ad1adaf5b3963b3, revision 7.
+  First verify it with `git fetch origin ops/wp1460-r1 && git show d1b08c219227d4b8925702029cd20d4e0febed54:ops/specs/wp1460-r1/SPEC.md | sha256sum`. If the hash differs, STOP.
+- Lease: ops/leases/wp1460-r7-g1-claude.yaml on branch ops/wp1460-r1. Read it and obey its limits.
+- Owner decision for this lease: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7130669819
+- Read before coding: CLAUDE.md, AGENTS.md, docs/PROTOCOL_DA_PHIEN.md (§4, §7, §8, §12), .claude/skills/work-packet/SKILL.md and the whole spec.
+
+BASE AND BRANCH
+- Base: origin/master at 5259239d763c9ffc1677f033bd9a9cf23ede9299. The spec was drafted at 0f9aa2a. Since then `.claude/dev/ci_dang_ky_test.py` changed a lot (wp1236, #1445). Re-measure every claim of the spec about current code against this base before relying on it. If the spec cannot be applied to the current base without changing what it says, STOP and report the exact clause, the measurement and what you need.
+- Work on the local branch `agent/wp1460-r7-g1-fable`, created from the base. Commit locally. DO NOT PUSH: the owner audits the exact head before its first push.
+
+WRITE SET (exactly four files, no fifth)
+1. .github/workflows/ci-dot-bien-du.yml
+2. .claude/dev/ci_dang_ky_test.py
+3. ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json — byte copy from the spec branch. Its sha256 must be 844b5218b6f6844945f5c4c9440f09015d238fe09a60d64b3787c440787e4f46.
+4. ops/specs/wp1460-r1/hop_dong/fixture.json — byte copy from the spec branch. Its sha256 must be ce8595739a1ab2f4a86c9c196255e5f91fb19a9f6d3865df6caa2d66f9970e6d.
+You must not write, edit or reformat the two hop_dong files. Needing any other file => STOP and report.
+
+SIZE
+Default sensitive cap: ≤ 6 files and ≤ 450 added lines, measured by `git diff --numstat <base>...HEAD`. Measure while working and before handing off. If the candidate would exceed the cap, STOP before finishing. Do not cut cases, fixtures or mutants to fit. Report the measured numstat and the missing work.
+
+GATES (spec acceptance 9 plus CLAUDE.md)
+- actionlint on ci-dot-bien-du.yml, with shellcheck present: rc 0, and finding delta vs base 0. Record both versions.
+- `python .claude/dev/ci_dang_ky_test.py` N/N, equal numbers.
+- `python3 -m ruff check --select F` delta 0 vs base on every changed .py.
+- Every acceptance item of the spec, with its two-direction cases and its dedicated mutants. Each mutant is classified by the target case's own exception class, as the spec requires.
+- A/B for acceptance 5: build base and head in ONE command.
+- `git config core.abbrev 7` before running gates.
+- Never write the CI-skip marker in any file or commit message.
+
+STOP CONDITIONS
+A spec clause that is contradictory or impossible on the current base; a write outside the write set; the size cap; the same failure recurring three times with the same shape (§12). Report instead of working around.
+
+HANDOFF
+When done, or when stopped, write /tmp/wp1460-r7-g1-HANDOFF.yaml following protocol §7. It must contain:
+- packet wp1460, revision 7, generation 1, lease_id wp1460-r7-g1-claude;
+- provider, model, surface;
+- base SHA, head SHA and tree as full OIDs;
+- numstat per file;
+- every gate: exact command, real exit code and the positive marker line;
+- mutant table: name, target case, killed-by-correct-reason yes/no;
+- what is not measured;
+- open questions.
+Then reply with: head SHA, tree, numstat totals, the gate summary and the handoff path.

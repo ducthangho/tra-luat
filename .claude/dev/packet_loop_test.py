@@ -9902,7 +9902,7 @@ CASES += [("r1187_markdown_example", _ca1187("markdown", red=False)), ("r1187_ti
           ("r1187_title_packet", _ca1187("title", lambda x: x["ls"].update(packet_id="wrong"))), ("r1187_title_revision", _ca1187("title", lambda x: x["ls"].update(revision=2)))]
 
 MUTANTS["r1187_drop_heading_identity"] = ('        headings = re.findall(r"(?m)^# ([A-Za-z0-9_-]+) r([1-9][0-9]*) (?:—|–|-) .+$", visible)', '        headings = []', ["r1187_title_positive"])
-MUTANTS["r1187_ignore_heading_conflict"] = ('values + [t[0 if key == "packet_id" else 1] for t in headings]', 'values or [t[0 if key == "packet_id" else 1] for t in headings]', ["r1187_title_conflict"])
+MUTANTS["r1187_ignore_heading_conflict"] = ('values + heading_values', 'values or heading_values', ["r1187_title_conflict"])
 MUTANTS["r1187_read_fenced_example"] = ('visible, errors = _che_khong_render(spec.decode("utf-8"))', 'visible, errors = spec.decode("utf-8"), []', ["r1187_markdown_example"])
 MUTANTS["r1187_drop_yaml_duplicates"] = ('None in khoa or len(set(khoa)) != len(khoa)', 'None in khoa', ["r1187_duplicate"])
 CASES += [("r1187_event_pr", _ca1187("human", lambda x: x["run"].update(event="pull_request"), False)), ("r1187_event_pr_target", _ca1187("human", lambda x: x["run"].update(event="pull_request_target"), False))]
@@ -10251,6 +10251,92 @@ def _format1187(x, text):
     _g(w,"add",p); _g(w,"commit","-qm","format fixture"); oid=_g(w,"rev-parse","HEAD")
     sha=hashlib.sha256(text).hexdigest(); x["ls"].update(spec_ref="refs/heads/ops/spec@"+oid,spec_hash=sha,spec_sha256_required=sha)
     x["a"].head=oid; x["spec"]=text
+
+
+def _spec_h1_wp1500(c, packet, text, error):
+    spec = text.encode("utf-8")
+
+    def change(ctx):
+        _format1187(ctx, spec)
+        ctx["ls"].update(packet_id=packet, revision=6)
+
+    try:
+        m, w, a, lease, *_ = _setup1187(c, "spec", change)
+    except (Exception, SystemExit) as ex:
+        raise CliSapDo("wp1500 setup crashed") from ex
+    try:
+        actual = m._spec_merge(w, a.head, "ops/specs/X.md", lease)
+    except ValueError as ex:
+        if type(ex) is not ValueError:
+            raise CliSapDo("wp1500 ValueError subclass crashed") from ex
+        assert str(ex) == error, (str(ex), error)
+        return
+    except (Exception, SystemExit) as ex:
+        raise CliSapDo("wp1500 target crashed") from ex
+    assert error is None, ("K1 accepted malformed identity", error)
+    assert actual == spec, "K1 returned different spec bytes"
+
+
+def _spec_h1_crash_wp1500(c):
+    from argparse import Namespace
+    from unittest.mock import patch
+
+    for stage, failure in (
+        ("setup", ValueError("fixture crashed during setup")),
+        ("target", UnicodeDecodeError("utf-8", b"\xff", 0, 1, "invalid bytes")),
+        ("target", RuntimeError("target crashed")),
+        ("target", SystemExit(12)),
+    ):
+        def fail(*_):
+            raise failure
+
+        def setup(*_):
+            return Namespace(_spec_merge=fail), c.tmp, Namespace(head="fixture"), {}
+
+        with patch.dict(_spec_h1_wp1500.__globals__, _setup1187=fail if stage == "setup" else setup):
+            try:
+                _spec_h1_wp1500(c, "wp1499", "# wp1499 r6 - frozen\n", _WP1500_PACKET_ERROR)
+            except CliSapDo as ex:
+                assert ex.__cause__ is failure, (stage, ex.__cause__)
+            else:
+                raise AssertionError(f"{stage} crash counted as normal rejection")
+
+
+CASES.append(("wp1500_h1_harness_crash", _spec_h1_crash_wp1500))
+
+
+_WP1500_PACKET_ERROR = "spec packet_id không khớp lease"
+for label, packet, heading, declarations, error in (
+    ("alias", "wp1499", "WP1499 r6", "", None),
+    ("consistent", "wp1499", "WP1499 r6", "- packet_id: wp1499; revision: 6;\n", None),
+    ("literal_lower", "wp1499", "wp1499 r6", "", None),
+    ("literal_upper", "WP1499", "WP1499 r6", "", None),
+    ("reverse", "WP1499", "wp1499 r6", "", _WP1500_PACKET_ERROR),
+    ("wrong_number", "wp1499", "WP1498 r6", "", _WP1500_PACKET_ERROR),
+    ("leading_zero", "wp1499", "WP01499 r6", "", _WP1500_PACKET_ERROR),
+    ("mixed_prefix", "wp1499", "Wp1499 r6", "", _WP1500_PACKET_ERROR),
+    ("other_packet", "other1499", "OTHER1499 r6", "", _WP1500_PACKET_ERROR),
+    ("nonnumeric", "wp1499-note", "WP1499-NOTE r6", "", _WP1500_PACKET_ERROR),
+    ("explicit_upper", "wp1499", "wp1499 r6", "packet_id: WP1499\n", _WP1500_PACKET_ERROR),
+    ("inline_upper", "wp1499", "WP1499 r6", "- packet_id: WP1499; revision: 6;\n", _WP1500_PACKET_ERROR),
+    ("explicit_other", "wp1499", "WP1499 r6", "packet_id: wp1498\n", _WP1500_PACKET_ERROR),
+    ("revision", "wp1499", "WP1499 r6", "revision: 5\n", "spec revision không khớp lease"),
+    ("grammar", "wp1499", "ＷＰ1499 r6", "", "spec identity H1 sai grammar"),
+):
+    CASES.append(("wp1500_h1_" + label, lambda c, p=packet, t=f"# {heading} - frozen\n{declarations}", e=error:
+                  _spec_h1_wp1500(c, p, t, e)))
+
+
+MUTANTS.update({
+    "r1187_wp1500_drop_h1_alias": (
+        'heading_values = [lease[key] if value == alias else value for value in heading_values]',
+        'heading_values = list(heading_values)', ["wp1500_h1_alias", "wp1500_h1_consistent"]),
+    "r1187_wp1500_lower_all_packet_ids": (
+        'values = list(dict.fromkeys(values + heading_values))',
+        'values = list(dict.fromkeys(v.lower() if key == "packet_id" else v for v in values + heading_values))',
+        ["wp1500_h1_literal_upper", "wp1500_h1_mixed_prefix", "wp1500_h1_other_packet",
+         "wp1500_h1_nonnumeric", "wp1500_h1_explicit_upper", "wp1500_h1_inline_upper"]),
+})
 
 
 for label, declaration in {

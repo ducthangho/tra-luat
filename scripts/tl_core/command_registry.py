@@ -1844,10 +1844,12 @@ COMMAND_META = {
     "nlm-audit-physical":   _m("low", True, "local", False, False, False, None, None, False, "nlm_ops", generated=True, nlm_fallback="unverified"),   # v1.34.57 B-#3 read-only; v1.34.61 E2: NLM-chết → stale-cache + cờ UNVERIFIED_NLM_STATE
     "nlm-migrate":          _m("high", False, "registry_nlm", True, True, False, None, "nlm_migrate", False, "nlm_ops", generated=True, nlm_fallback="defer"),   # v1.34.57 B-#4..#7; v1.34.61 E2: --apply NLM-chết → DEFERRED + resume-artifact --from-plan
     "nlm-cross":            _m("low", True, "none", False, False, False, None, None, False, "nlm_ops", nlm_fallback="corpus_read"),   # v1.34.60 E1 (meta mới — lệnh cũ ở cli.py chưa từng có meta)
-    # v1.36.71 r380 — llm-order ghi TỆP CẤU HÌNH LOCAL (không Drive/registry/NLM); llm-khai-niem chỉ đọc
-    # (qua tl extract) + gọi Claude, ghi duy nhất khi người gọi khai --out/--nhat-ky.
+    # v1.36.71 r380 — llm-order ghi TỆP CẤU HÌNH LOCAL (không Drive/registry/NLM); llm-khai-niem đọc nguồn qua
+    # tl extract, gọi Claude, ghi khi người gọi khai --out/--nhat-ky.
     "llm-order":            _m("low", False, "local", False, False, True, None, None, False, "ops_misc", generated=True),
-    "llm-khai-niem":        _m("low", True, "local", False, False, True, None, None, False, "ops_misc", generated=True),
+    # read_only=False CÓ CHỦ ĐÍCH: lệnh tiêu credit/hạn mức Claude và ghi `--out`/`--nhat-ky` (cờ `--nhat-ky` nằm
+    # NGOÀI họ cờ sinh tệp mà hook subagent canh) — xếp lớp GHI để subagent read-only bị chặn (sai về phía an toàn).
+    "llm-khai-niem":        _m("low", False, "local", False, False, True, None, None, False, "ops_misc", generated=True),
     "doc-text":             _m("low", True, "local", False, False, False, None, None, False, "lookup_ops", generated=True),   # v1.34.60 A1 (read-only; ghi cache extract local)
     "doc-compare":          _m("low", True, "local", False, False, False, None, None, False, "doc_identity", generated=True, nlm_fallback="corpus_read"),   # v1.34.63 A2 (read-only; đọc corpus — chạy khi NLM chết; ghi cache extract local)
     "missing-sohieu":       _m("medium", False, "registry", False, True, False, None, None, False, None, generated=True),

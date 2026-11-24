@@ -1073,7 +1073,7 @@
       "llm-khai-niem": {
         "generated": true,
         "idempotency_contract": null,
-        "read_only": true,
+        "read_only": false,
         "requires_confirm": false,
         "risk": "low",
         "supports_dry_run": false,
@@ -2266,7 +2266,7 @@
       "high_risk": 29,
       "nested": 9,
       "total": 201,
-      "write_commands": 107
+      "write_commands": 108
     },
     "schema": "command_registry.v1"
   },

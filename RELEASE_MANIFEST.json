@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2q",
   "root_name": "tra-luat",
   "file_count": 187,
-  "total_bytes": 9441466,
-  "package_hash": "285d6d2a5acb1905fbbe6b59fe60dc63dba6e24c092143e1e5b0984f6ad42aef",
-  "content_hash": "285d6d2a5acb1905fbbe6b59fe60dc63dba6e24c092143e1e5b0984f6ad42aef",
+  "total_bytes": 9441729,
+  "package_hash": "34a2ffe5553e3a656b443f53913218057fb300832a6d8c9f5689172df47fe5a4",
+  "content_hash": "34a2ffe5553e3a656b443f53913218057fb300832a6d8c9f5689172df47fe5a4",
   "required_missing": [],
   "files": [
     {
@@ -343,8 +343,8 @@
     },
     {
       "path": "references/golden/tool_inventory_inventory_decision.json",
-      "size": 63964,
-      "sha256": "66db3fd38f162dbdffe07e5a8b973f1ba661f8f830c359983400532c59a38bc0"
+      "size": 63965,
+      "sha256": "b840a32d095082269ef3e628991052eaeb34a94c7160992eaccfbb453205891c"
     },
     {
       "path": "references/golden/topology_vectors.json",
@@ -738,8 +738,8 @@
     },
     {
       "path": "scripts/tl_core/command_registry.py",
-      "size": 189866,
-      "sha256": "4465b11f299d22589ac2b39deea900b227046a67e44951bd1d3f0e80f16fd1d2"
+      "size": 190128,
+      "sha256": "87cbc87f9b9602f2aef541fc0f5900e6de63e0b34d63f931bda93bbe5794ca9c"
     },
     {
       "path": "scripts/tl_core/deterministic.py",

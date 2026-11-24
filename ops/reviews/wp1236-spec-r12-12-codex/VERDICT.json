@@ -1,0 +1,996 @@
+{
+  "spec_sha256": "0acd3f87046b97768bfaad83c2f42190ee0f9fb824dbc186b84e32ead605fc32",
+  "vong": 12,
+  "reviewed_sha": "04095f1c8707648e6a15498aae1ed53c7377cd15",
+  "reviewed_tree": "4d8ff992043a43ce78ce945fd320ea113a4a4364",
+  "findings": [
+    {
+      "id": "AC01",
+      "class_slug": "test-thieu-chot",
+      "severity": "P2",
+      "vi_tri": "ops/specs/wp1236-r12.md:347–352, 415–423; D2b:193–196",
+      "van_de": "Luật8 chưa tạo miền nghiệm thu hữu hạn có thể vét cạn như lời khẳng định. Nó đóng alphabet dương, nhưng tập âm chỉ là ASCII + một số lớp Unicode tương ứng; các symbol/mark/format ngoài lớp đó vẫn có thể được thêm mà không bị tập âm bắt buộc ở hàm lá phát hiện. Một đại diện/general category ở consumer không lấp khoảng trống ấy. Các lượng từ *, + và ngữ cảnh/literal/lookahead không có tập vector hay họ đột biến đóng; mọi chuỗi vẫn không bị chặn độ dài. D2b còn bốn lần dùng [^/]+ ở hai regex, nằm ngoài năm chỗ tự do và ngoài phạm vi Module mới của luật8; luật4 vẫn áp cho C. Vì thế cùng cơ chế tìm đột biến mới để mở P2 chưa kết thúc.",
+      "bang_chung": {
+        "negative_universe": "probe_grammar.py rc0: [a-z_] và [a-z_🙂] bằng nhau trên 138623 vector bắt buộc ở hàm lá (128 ASCII + toàn bộ chữ/số Unicode ngoài ASCII); khác ở U+1F642 (So). Fixture đồng bộ conclusion 🙂 và failed: projection gốc kiem_tep=not_measured/dong_la, consumer failed có vi phạm; mutant kiem_tep=failed, consumer=[]. Không tuyên bố đã chạy một suite r12 chưa có.",
+        "length": "[ \\t]* → [ \\t]{0,4096} bằng nhau ở 128 ca thay một ký tự và đối chứng 0/1/2 whitespace; khác ở 4097 space trước passed. Tổng quát: với bất kỳ tập chuỗi kiểm hữu hạn, chọn ngưỡng lớn hơn mọi prefix đã kiểm. Kiểm đủ alphabet không chứng minh mọi regex/chuỗi tương đương.",
+        "D2b": "Hai regex tại193–195 đều nhận thành phần đường dẫn mang U+1F600/U+200B/U+0301/U+000A. Đo fullmatch, không tuyên bố đã chạy git archive/D2b sản phẩm. Các vị trí này chưa có phân hạng hoặc ngoại lệ được chốt trong luật8.",
+        "end_assertion": "RE_TOKEN r12 nhận passed\\n nhưng từ chối passed\\nx và \\npassed do $ khớp trước LF cuối. Kỳ vọng phải xét assertion/casefold, không thể chỉ suy từ membership [ \\t].",
+        "artifacts": [
+          "grammar_probes.json",
+          "regex_inventory.json",
+          "probe_grammar.py"
+        ]
+      },
+      "de_xuat": "Chốt miền kiểm/đột biến hữu hạn có danh sách vị trí, ngữ cảnh, phép biến đổi, vector và oracle cụ thể; hoặc dùng kiểm tương đương có chứng minh cho đúng họ regex được cho phép. Ghi đúng giới hạn thay câu mọi đột biến đều bị giết. Phần âm phải bao complement cần thiết hoặc có kiểm membership độc lập; ghim Unicode version và tuyến đo. Đưa D2b vào cùng luật hoặc nêu rõ ngoại lệ và tiêu chí hữu hạn riêng. Chốt riêng lượng từ, literal, ranh giới/assertion và chuẩn hoá trước match; đừng biến kiểm alphabet thành lời hứa về mọi chuỗi."
+    },
+    {
+      "id": "AC02",
+      "class_slug": "test-thieu-chot",
+      "severity": "P2",
+      "vi_tri": "ops/specs/wp1236-r12.md:353–361, 404–409, 424–431",
+      "van_de": "Chưa chốt thứ tự luật8 với luật5/6 cho đột biến lịch sử thu hẹp văn bản tự do. Luật8 gọi mọi thu hẹp vượt mệnh đề là P3 theo6(b); luật6(1) lại xét kho hồi quy trước, luật5 đòi GIET hoặc chứng minh tương đương/chốt đã bỏ. Bốn r11_reason_* vẫn có cùng nghĩa phân biệt trên r12: chỉ mất mỏ neo cũ, chốt nội dung lý do vẫn tồn tại. Không thể dùng việc bỏ ký hiệu \\S làm bằng chứng CHOT_DA_BO. Hai reviewer có thể phân hạng cùng survivor thành thiếu hồi quy/P2 hoặc ngoài bảng/P3.",
+      "bang_chung": {
+        "quote": "Luật5: KHONG_AP_DUNG → <id đột biến thay thế cùng nghĩa> GIET ... hoặc CHOT_DA_BO ... hoặc ... TUONG_DUONG. Luật6: luật1,2,4,5 xét TRƯỚC. Luật8: thu hẹp văn bản tự do là P3 ngoai_bang_dong.",
+        "measured": "pairs11_projection.json: 15/15 ID đã đối chiếu. Bốn r11_reason_bmp_only/no_zero_width/no_combining/no_control có witness lần lượt U+1F600/U+200B/U+0301/U+0001: regex r12 nhận, bản hạn chế cùng nghĩa từ chối. 13 neo regex cũ không áp nguyên văn; 2 neo biểu thức còn áp. Mất neo không chứng minh mất nghĩa.",
+        "partition": "9 tương đương sau chiếu; 4 thu hẹp lý do còn phân biệt; 2 còn nghĩa vụ bắt (r11_token_single_ws, r11_event_casefold). Chi tiết từng ID nằm ở pairs11_projection.json.",
+        "existing_p3": "P03/Q02/S02 hai ID r9b_event_tab và r9b_name_inner_spaces vẫn là P3 lịch sử theo phân hạng đã giao; không tự nâng/hạ hay miễn chúng khi sửa quy tắc mới."
+      },
+      "de_xuat": "Ghi một thứ tự phân hạng duy nhất và ledger di trú cho đủ201 ID. Khuyến nghị giữ các ID lịch sử còn phân biệt là hồi quy bắt buộc; quy tắc P3 mới chỉ áp cho đột biến chưa có trong kho, nếu đó là ý định chủ kho. Nếu chủ kho chọn đổi cả nghĩa vụ lịch sử, ghi ngoại lệ và cách đóng P3/waiver tường minh, không gọi CHOT_DA_BO khi nghĩa vẫn còn. Cho hai reviewer áp cùng15 cặp và ra cùng nhãn/kết quả kết thúc."
+    },
+    {
+      "id": "AC03",
+      "class_slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "severity": "P2",
+      "vi_tri": "ops/specs/wp1236-r12.md:84–93, 156, 424–429",
+      "van_de": "Mệnh đề văn bản tự do mới mâu thuẫn regex và chưa nêu đủ tiền điều kiện để dựng đối chứng. Tên job được nói dừng ở \" [\" đầu tiên, trong khi (.+?) vẫn backtrack đến delimiter sau để toàn dòng khớp; hai dạng skipped còn dùng delimiter khác. Yêu cầu đối chứng DƯƠNG mỗi general category cho các trường đọc từ UTF-8 nghiêm là không thực hiện được với Cs (surrogate). Câu ràng buộc là ĐÚNG các mệnh đề trong ngoặc không mô tả tương tác với decode, tách dòng và chốt CR toàn tệp. Cần chọn nghĩa sản phẩm trước khi xác định đột biến là nới hay thu hẹp.",
+      "bang_chung": {
+        "first_delimiter": "probe_grammar.py rc0: JOB 1 alpha [bad] beta [ubuntu-latest] conclusion=success log_sha256=<64 số0> -> passed: ok khớp nguyên regex r12, name=alpha [bad] beta; mệnh đề mới yêu cầu name kết thúc ở alpha. Đây là mâu thuẫn do câu thêm ở r12, không mở lại lỗi r11 vô cớ.",
+        "category": "Python3.13.18 Unicode15.1: category(U+D800)=Cs; encode UTF-8 nghiêm ném UnicodeEncodeError. Không có ký tự Cs nào làm đối chứng dương qua doc_danh_gia(bytes) theo85.",
+        "scope": "Đo regex/đường decode đã quy định; không coi fullmatch riêng là bằng chứng một LF lọt toàn consumer.",
+        "artifacts": [
+          "grammar_probes.json"
+        ]
+      },
+      "de_xuat": "Định nghĩa tokenisation/boundary từng trường (kể cả skipped), escape/delimiter và các điều kiện chung UTF-8/CR/LF trước điều kiện riêng. Nếu muốn giữ regex hiện có, sửa mệnh đề cho đúng backtracking; nếu muốn delimiter đầu tiên, ghi thay đổi luật tương ứng và oracle. Giới hạn positive category theo tập giá trị có thể đi qua tuyến đó; Cs và các giá trị không hợp lệ phải là âm hoặc KHONG_AP_DUNG có lý do. Có đối chứng cho mỗi mệnh đề qua đúng consumer."
+    },
+    {
+      "id": "AC04",
+      "class_slug": "so-do-khong-cung-pham-vi-nguon",
+      "severity": "P3",
+      "vi_tri": "ops/specs/wp1236-r12.md:357, 404–405, 513–531, 704–710",
+      "van_de": "Phần hiện hành vẫn buộc ledger đúng127/152 ID, trái luật5 cộng dồn và lịch sử mã9–11 vừa thêm. Kho cần đối chiếu hiện là201 ID =186+15; không thể dùng đúng152 làm mẫu số r12. Khối kích thước/ai_nang vẫn ghi chờ spec_hash r11 và ước cũ; chưa ghi số đo r11 cuối1985 cùng dự toán viết lại grammar r12. Chưa có bằng chứng vượt2100, nhưng bản đặc tả hiện không cho một nguồn số hiện hành nhất quán.",
+      "bang_chung": {
+        "bank": "git show lease-moi:ops/reviews/wp1236-a-r11-ma-11-codex/kho_dot_bien_luot6_7_8_9_10_11.jsonl:201 dòng,201 ID duy nhất; sha256191225cac93a5bec155cc9116911022b334df5d7b6f0bf6094632973b82af740. Phân rã127+14+11+15+19+15. Ledger cũ186 ID, không phải201 ID đã nghiệm thu.",
+        "numstat": "git diff --numstat 8048551 ma-0d81487 -- ba tệp đợt A:1+343+1641=1985 dòng thêm,0 xoá; còn115 so trần đề nghị2100. Mã r12 và kích thước sau viết lại: not_run/chưa có.",
+        "preserved_counts": "30 ca sàn A;8 luật;50 ID m1..m50 kế thừa;125 ô với băm628e27046ab4ba7a7b3cf31eb65ded9b88c718c5bfd067401d12b60d2c21b857 vẫn đúng."
+      },
+      "de_xuat": "Đồng bộ mọi câu127/152 hiện hành thành hợp đồng201 ID (giữ các số cũ có nhãn lịch sử), ghim ref+path+băm của kho hợp nhất và so tập ID. Cập nhật căn cứ kích thước bằng1985 và phần thay/thêm dự kiến của r12; ghi rõ2100 là trần chờ duyệt theo băm nào và dừng nếu numstat thật vượt. Không tự nâng trần."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "test-thieu-chot",
+      "finding_ids": [
+        "AC01",
+        "AC02"
+      ],
+      "manifestations": [
+        "miền âm chưa đóng",
+        "alphabet hữu hạn nhưng chuỗi/ngữ cảnh chưa đóng",
+        "D2b [^/] chưa phân loại",
+        "luật5/6/8 không thống nhất cho lịch sử"
+      ],
+      "highest_open_severity": "P2",
+      "nguon": "Spec vòng1–10 alias nghiem-thu-khong-co-lap-chot-dich; mã1–11, P01/P03→Q01/Q02→S01/S02; r12 cùng cơ chế.",
+      "common_fix": "Chốt một hợp đồng nghiệm thu hữu hạn và một thứ tự phân hạng, gồm mọi vị trí/ngữ cảnh/consumer cùng toàn kho lịch sử.",
+      "closing_check": "Hai người đọc cùng inventory/vector/201 ID ra cùng nhãn;15 r11 ID có terminal disposition hợp lệ; âm ngoài alphabet và lượng từ/assertion/D2b có tiêu chí đóng đã ghim. Không dùng tổng suite làm bằng chứng toàn miền.",
+      "ly_do_va_rieng": "AC01 kiểm tính đầy đủ miền, AC02 kiểm di trú/ưu tiên; cùng cơ chế thiếu thước nghiệm thu nên giữ một slug, không reset lịch sử."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_ids": [
+        "AC03"
+      ],
+      "manifestations": [
+        "delimiter đầu tiên trái regex",
+        "đối chứng positive Cs không thể đi qua UTF8"
+      ],
+      "highest_open_severity": "P2",
+      "nguon": "U01/M02/N03 đã đóng; tái mở chỉ vì mệnh đề luật8 mới tại424–429 với phản chứng độc lập.",
+      "common_fix": "Viết hợp đồng trường từ pipeline phân tích thực, quy định delimiter và tập đầu vào khả thi.",
+      "closing_check": "Ví dụ hai delimiter có một kết quả duy nhất; oracle cho5 trường bao điều kiện chung/riêng; từng positive category đi qua API thật hoặc được phân loại âm/không áp dụng có lý do.",
+      "ly_do_va_rieng": "Không cần vá lại CLI/producer của r11; phạm vi tái mở chỉ câu grammar mới."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_ids": [
+        "AC04"
+      ],
+      "manifestations": [
+        "mẫu số kho hiện hành152 thay vì201",
+        "ledger127 cũ chưa gắn nhãn phạm vi",
+        "ngữ cảnh nang_tran chưa cập nhật r12/1985"
+      ],
+      "highest_open_severity": "P3",
+      "nguon": "V02/Z02 đã đóng ở r11; lịch sử mã9–11 được thêm trong r12 nhưng các số hiện hành không cập nhật.",
+      "common_fix": "Một bảng nguồn số hiện hành neo ref/hash, phân biệt số lịch sử, đo thật và ước lượng.",
+      "closing_check": "So đúng tập201 ID/201 ledger; số1985 tái lập từ numstat; dự toán r12 tách riêng, trần2100 và authority cùng revision.",
+      "ly_do_va_rieng": "Một lần đối soát toàn đặc tả cho mọi mẫu số/nguồn; không cần thay luật cổng để sửa số."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "xuong-dong-khong-khop-byte-that",
+      "finding_cu": [
+        "codex:R01",
+        "claude:R01"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "P01",
+        "P02",
+        "P03",
+        "Q01",
+        "Q02",
+        "S01",
+        "S02",
+        "alias U02/V01/W01/X01/Z01/AA01"
+      ],
+      "vong_xuat_hien": {
+        "dac_ta": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          12
+        ],
+        "ma": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "VA_MOT_PHAN",
+      "evidence": "R12 loại \\d/\\s/\\S/\\w ở các regex module;9/15 thao tác lượt11 tương đương sau chiếu,125/125 ô giữ kỳ vọng. Nhưng AC01/AC02 và P3 S02 còn mở; đổi luật/đẩy thu hẹp sang P3 không phải vá thật theo§8.3.",
+      "chua_do_duoc": "Chưa có suite/mã r12, ledger201 và waiver exact final code SHA; chưa đo Windows. 15 cặp được chiếu nghĩa, không khai đã GIET trên mã r12.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "per_finding": [
+        {
+          "id": "S01←Q01←P01",
+          "status": "VA_MOT_PHAN",
+          "evidence": "9 cặp thành tương đương;4 reason còn nghĩa;miền nghiệm thu còn AC01/AC02."
+        },
+        {
+          "id": "S02←Q02←P03",
+          "status": "CHUA_VA",
+          "evidence": "R12:710 giữ nguyên hai ID P3, chỉ hẹn miễn exact head cuối; không có waiver exact head trong đầu vào. Không suy thành miễn đã có.",
+          "chua_do_duoc": "Không mạng; miễn code cần xác minh ở code head cuối, không lấy spec head thay."
+        },
+        {
+          "id": "P02/AA01",
+          "status": "DA_VA_THAT",
+          "evidence": "Giữ kết luận lịch sử ma10/ma11 về seed; băm bảng/seed/chieu không đổi,125/125 ô r12 projection khớp. Không tái mở dependency implementation đã đóng."
+        }
+      ]
+    },
+    {
+      "slug": "nang-tran-thieu-hop-dong-authority",
+      "finding_cu": [
+        "codex:R03",
+        "claude:R11"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "d2b-thieu-neo-attempt",
+      "finding_cu": [
+        "codex:R04"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_cu": [
+        "codex:R05",
+        "claude:R05",
+        "codex:S02",
+        "claude:S04",
+        "claude:T05",
+        "V02",
+        "Z02 (tái mở bởi r11 tiếp nhận lượt mã7–8)"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        5,
+        9
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "VA_MOT_PHAN",
+      "evidence": "Base66/170,47/10/9 và25/56/39/50 đã đo khớp. AC04: kho201 ID nhưng hiện hành152;numstat1985.",
+      "chua_do_duoc": "Kích thước mã r12 chưa tồn tại; không coi2100 đã được duyệt cho r12.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12."
+    },
+    {
+      "slug": "trang-thai-job-khong-khop-conclusion",
+      "finding_cu": [
+        "claude:R02"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "landed-khong-buoc-loi-khai-hop-le",
+      "finding_cu": [
+        "claude:R04",
+        "claude:S01"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "l8-chua-chot-thu-tu-cutover",
+      "finding_cu": [
+        "claude:R07"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "khong-kiem-co-toan-ven-provenance",
+      "finding_cu": [
+        "claude:R08"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "claude:R09",
+        "claude:S07",
+        "codex:T02",
+        "claude:T03",
+        "U01",
+        "ma7:M02",
+        "ma8:N03"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        "ma7",
+        "ma8"
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "VA_MOT_PHAN",
+      "evidence": "CLI/producer/consumer cũ giữ kết luận đóng của ma11. AC03 đo mâu thuẫn do mệnh đề tự do r12 mới; first-delimiter và Cs.",
+      "chua_do_duoc": "Chưa chọn nghĩa chính thức cho delimiter; không chạy lại CLI/Windows vì diff chỉ đặc tả.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12."
+    },
+    {
+      "slug": "nguon-doc-khong-neo-cung-snapshot",
+      "finding_cu": [
+        "claude:R12",
+        "claude:S02"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "he-qua-gioi-han-khai-thieu",
+      "finding_cu": [
+        "claude:R10",
+        "claude:T02",
+        "claude:T04"
+      ],
+      "vong_xuat_hien": [
+        1,
+        3
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "pham-vi-kiem-chung-trai-adr-windows",
+      "finding_cu": [
+        "U03"
+      ],
+      "vong_xuat_hien": [
+        4
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "P01",
+        "P02",
+        "P03",
+        "Q01",
+        "Q02",
+        "S01",
+        "S02",
+        "alias U02/V01/W01/X01/Z01/AA01"
+      ],
+      "vong_xuat_hien": {
+        "dac_ta": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          12
+        ],
+        "ma": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "VA_MOT_PHAN",
+      "evidence": "R12 loại \\d/\\s/\\S/\\w ở các regex module;9/15 thao tác lượt11 tương đương sau chiếu,125/125 ô giữ kỳ vọng. Nhưng AC01/AC02 và P3 S02 còn mở; đổi luật/đẩy thu hẹp sang P3 không phải vá thật theo§8.3.",
+      "chua_do_duoc": "Chưa có suite/mã r12, ledger201 và waiver exact final code SHA; chưa đo Windows. 15 cặp được chiếu nghĩa, không khai đã GIET trên mã r12.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "per_finding": [
+        {
+          "id": "S01←Q01←P01",
+          "status": "VA_MOT_PHAN",
+          "evidence": "9 cặp thành tương đương;4 reason còn nghĩa;miền nghiệm thu còn AC01/AC02."
+        },
+        {
+          "id": "S02←Q02←P03",
+          "status": "CHUA_VA",
+          "evidence": "R12:710 giữ nguyên hai ID P3, chỉ hẹn miễn exact head cuối; không có waiver exact head trong đầu vào. Không suy thành miễn đã có.",
+          "chua_do_duoc": "Không mạng; miễn code cần xác minh ở code head cuối, không lấy spec head thay."
+        },
+        {
+          "id": "P02/AA01",
+          "status": "DA_VA_THAT",
+          "evidence": "Giữ kết luận lịch sử ma10/ma11 về seed; băm bảng/seed/chieu không đổi,125/125 ô r12 projection khớp. Không tái mở dependency implementation đã đóng."
+        }
+      ]
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_cu": [
+        "ma6:L03"
+      ],
+      "vong_xuat_hien": [
+        "ma6"
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "vong_xuat_hien": [
+        "ma1"
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma2"
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma3"
+      ],
+      "scope": "MỨC ĐẶC TẢ tại2d9baf0; không phải approval mã đợtA.",
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ DA_VA_THAT từ verdict vòng10. unchanged_contracts.json so8 khối hợp đồng trước/sau delta đều byte-equal; cell_hash.json xác nhận125 delta/kỳ vọng cũ giữ nguyên; counts.json xác nhận mã sản phẩm không đổi so79b3c24. Không có bằng chứng bản sửa2 gây hồi quy lớp này."
+      ],
+      "chua_do_duoc": "Không chạy lại các phản chứng lịch sử ngoài delta; không coi tổng suite hoặc scope cut là bằng chứng vá mới. Closure kế thừa vòng10, không tái mở khi không có hồi quy được đo.",
+      "pham_vi_hien_tai": "Đặc tả; không chứng nhận mã r12.",
+      "evidence_hien_tai": "Giữ evidence/nhãn đã đóng của nguồn vòng11; quét diff r11→r12 không thấy thay đổi chốt thuộc lớp này. Không mở lại hay khai đã rerun mã."
+    }
+  ],
+  "bang_noi_slug": [
+    {
+      "slug_nguon": "test-thieu-chot",
+      "slug_dich": "nghiem-thu-khong-co-lap-chot-dich",
+      "quan_he": "alias kế thừa ở mức đặc tả",
+      "ly_do": "Giữ cả hai trong prior_class_status; U/F đếm một lần như vòng10, không reset lịch sử mã."
+    },
+    {
+      "slug_nguon": "nghiem-thu-khong-co-lap-chot-dich",
+      "slug_dich": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding": "Z01→AA01→DA_VA_THAT",
+      "ly_do": "Đóng seed và observation của cùng125 ô; không cắt thêm acceptance."
+    },
+    {
+      "slug_nguon": "test-thieu-chot",
+      "slug_dac_ta": "nghiem-thu-khong-co-lap-chot-dich",
+      "slug_hien_tai": "test-thieu-chot",
+      "finding_cu": [
+        "P01",
+        "P02",
+        "P03",
+        "Q01",
+        "Q02",
+        "S01",
+        "S02"
+      ],
+      "finding_moi": [
+        "AC01",
+        "AC02"
+      ],
+      "ly_do": "Alias đã có tại spec653 và verdict mã; một đơn vị nguyên nhân, giữ cả hai nhãn lịch sử và chỉ tính một U. Không gộp mới để giảm tỷ lệ."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_moi": [
+        "AC03"
+      ],
+      "ly_do": "Tái mở do câu r12 mới, có phép đo; không mở lại các biểu hiện CLI đã đóng."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_moi": [
+        "AC04"
+      ],
+      "ly_do": "Tái mở do r12 thêm lịch sử9–11 mà bỏ sót mẫu số hiện hành."
+    }
+  ],
+  "hoi_tu": {
+    "vong11_sang_12": "0/1",
+    "U": [
+      "test-thieu-chot"
+    ],
+    "F": [],
+    "nguon_U": "Lớp còn mở sau review MÃ lượt11 trên0d814877e3acef6274a7f1c0e9a28531a24d0e65, được nhiệm vụ yêu cầu kế thừa vào spec12.",
+    "chi_chuoi_review_dac_ta": "N/A (0/0): riêng verdict SPEC vòng11 approve, không có U. Không biến approve đó thành changes_requested hồi tố.",
+    "lop_lap_lan_ba": [
+      "test-thieu-chot",
+      "nghiem-thu-khong-co-lap-chot-dich"
+    ],
+    "alias_khong_dem_hai_lan": true,
+    "lop_tai_mo": [
+      "hop-dong-dau-vao-dau-ra-chua-chot",
+      "so-do-khong-cung-pham-vi-nguon"
+    ],
+    "checkpoint": "Giữ rescue/history§12; E1 và call13/14 được user giao cho lượt này, không tự cấp review/rework mới."
+  },
+  "da_do_khop": [
+    {
+      "command": "sha256sum ../SPEC.md ops/specs/wp1236-r12.md; git show 04095f1:ops/specs/wp1236-r12.md (đối chiếu byte trong review_setup.py)",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "0acd3f87046b97768bfaad83c2f42190ee0f9fb824dbc186b84e32ead605fc32; hai tệp và Git blob bằng byte"
+    },
+    {
+      "command": "git diff --no-index ops/specs/wp1236-r11.md ops/specs/wp1236-r12.md",
+      "rc": 1,
+      "status": "passed",
+      "positive_evidence": "rc1 = có diff, đã đọc toàn diff; không phải lỗi test"
+    },
+    {
+      "command": "python3 -B ../work/review_setup.py",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "Archive base chuẩn, hash/ref kiểm đủ;setup.json"
+    },
+    {
+      "command": "python3 -B ../work/measure_base.py",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": {
+        "evaluations": 66,
+        "evaluation_counts": {
+          "not_measured": 9,
+          "passed": 47,
+          "failed": 10
+        },
+        "evaluation_deltas": [],
+        "records": 170,
+        "record_counts": {
+          "MIEN_CUTOVER": 25,
+          "KHONG_LOI_KHAI": 50,
+          "DO": 56,
+          "DAT": 39
+        },
+        "record_deltas": [],
+        "landed_old": 94,
+        "landed_new": 94,
+        "urls_outside_class": 0,
+        "url_occurrences": 2504,
+        "seconds": 38.47,
+        "scope": "r11 product and mechanical r12 regex projection, same archived base; no r12 implementation exists"
+      },
+      "limit": "So module r11 với projection chỉ delta regex r12; không phải nghiệm thu mã r12."
+    },
+    {
+      "command": "python3 -B ../work/probe_grammar.py",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "Phản chứng grammar và15 ID có artifact; các mâu thuẫn là finding, không phải gate pass."
+    },
+    {
+      "command": "python3 -B ../work/check_cells.py",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": {
+        "cells": 125,
+        "passed": 125,
+        "hash": "628e27046ab4ba7a7b3cf31eb65ded9b88c718c5bfd067401d12b60d2c21b857",
+        "claims": 119,
+        "lexical_deltas": 0
+      }
+    },
+    {
+      "command": "git diff --numstat 8048551 ma-0d81487 -- ops/gate_output_doi_chieu.py ops/gate_output_doi_chieu_test.py .claude/dev/ci_dang_ky_test.py",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "1\t0\t.claude/dev/ci_dang_ky_test.py\n343\t0\tops/gate_output_doi_chieu.py\n1641\t0\tops/gate_output_doi_chieu_test.py\n"
+    },
+    {
+      "command": "git diff --check",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "Không lỗi whitespace; repo không có diff."
+    },
+    {
+      "command": "Full worker/land gates, full mutation suite r12, native Windows, GitHub readback",
+      "rc": null,
+      "status": "not_run",
+      "positive_evidence": null,
+      "reason": "Review đặc tả offline; không có mã r12, không được mạng; không cần thực thi gate triển khai cho thay đổi chỉ đặc tả."
+    }
+  ],
+  "verdict": "changes_requested",
+  "progress": "Hoàn tất: đã ghi hai tệp verdict, validator HOP_LE, snapshot đầu/cuối khớp.",
+  "revision": 12,
+  "review_class": "sensitive",
+  "scope": "Review ĐẶC TẢ offline, không review/approve mã đợt A r12 chưa tồn tại.",
+  "reference_code_sha": "0d814877e3acef6274a7f1c0e9a28531a24d0e65",
+  "reference_base_sha": "8048551a9b1eb886c126d2a1a4df0f95fb285964",
+  "preflight": {
+    "repository": "ducthangho/tra-luat",
+    "origin": "https://github.com/ducthangho/tra-luat.git",
+    "branch": "spec12",
+    "spec_file_equal_git_blob": true,
+    "generation": "N/A: review đặc tả theo chỉ thị trực tiếp; không cấp/nhận lease thi công.",
+    "authority": "Chỉ thị user: vòng12, lời gọi13/14, E1 đã chọn; không mạng, repository chỉ đọc; băm r12 còn chờ chủ kho duyệt.",
+    "repository_write_set": [],
+    "effective_write_set": [
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r12-12-codex/work"
+    ],
+    "capabilities": "Local git objects, Python3.13.18, PyYAML; đủ đo base và các ref được giao.",
+    "lease_moi_oid": "e767abcd32a2efbc86fd661d3bff385cdfcd1cd1",
+    "core_abbrev": 7,
+    "network_authority_readback": "not_run theo cấm mạng; không suy comment authority từ nội dung spec."
+  },
+  "review_identity": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "model_family": "openai",
+    "model_served": "KHONG_DO_DUOC",
+    "effort_served": "KHONG_DO_DUOC",
+    "session_id": "01a1fdfb-4bcc-7862-851d-322cf5240d07",
+    "run_id": "e8e4f968460e4b1b9ce0effc347bc09f",
+    "source": "../run/e8e4f968/run.json (provider/surface/transport/run_id); CODEX_SESSION_ID; sandbox từ runtime instructions.",
+    "sandbox": "workspace-write; reviewer tự giữ repo read-only theo assignment, chỉ tạo/sửa work/. Không khẳng định kernel mount của toàn repo là read-only.",
+    "independence": "Context reviewer được giao riêng; không fork executor, không dùng subagent.",
+    "assurance_limit": "Verdict nội dung; không tự tạo cross_approved, audit, waiver, lease hoặc land. Terminal rc/stdout hash cần launcher ghi sau khi run kết thúc."
+  },
+  "measurements_not_passed": {
+    "failed_setup_only": [
+      {
+        "command": "probe_grammar.py lần đầu",
+        "rc": 1,
+        "reason": "SyntaxError trong script reviewer, đã sửa tại work và chạy lại rc0."
+      },
+      {
+        "command": "check_cells.py lần đầu",
+        "rc": 1,
+        "reason": "Thiếu diễn giải @checkout/@job trong runner reviewer, đã bổ sung rồi chạy đủ125/125."
+      }
+    ],
+    "skipped": [],
+    "product_failures": "Không thực thi test implementation r12; AC01–AC04 là findings của đặc tả."
+  },
+  "counts_and_budget": {
+    "findings": 4,
+    "open_severity": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 3,
+      "P3": 1
+    },
+    "logical_open_classes": 3,
+    "inherited_p3": "S02:2 ID vẫn chờ miễn code exact SHA; theo dõi riêng, không nhân đôi finding spec.",
+    "current_bank": {
+      "pairs11.jsonl": {
+        "rows": 15,
+        "unique_ids": 15,
+        "sha256": "bfb229c2d6a4c880d61faf707db207dfdb321c588e52f6434ed71d4ca9cfbbb4"
+      },
+      "pairs_all.jsonl": {
+        "rows": 201,
+        "unique_ids": 201,
+        "sha256": "191225cac93a5bec155cc9116911022b334df5d7b6f0bf6094632973b82af740"
+      },
+      "ledger186.jsonl": {
+        "rows": 186,
+        "unique_ids": 186,
+        "sha256": "b0ef3c681c5516e8d2ac1eae07a31259def770dd625c8b6de2ce5d67cab062c1"
+      }
+    },
+    "by_round": {
+      "6": 127,
+      "7": 14,
+      "8": 11,
+      "9": 15,
+      "10": 19,
+      "11": 15
+    },
+    "r11_code_lines_added": 1985,
+    "proposed_limit": 2100,
+    "remaining_before_rewrite": 115,
+    "r12_code_size": "KHONG_DO_DUOC: chưa có mã",
+    "codex_call": "13/14 theo user, không độc lập xác minh comment mạng."
+  },
+  "pair_projection": [
+    {
+      "id": "r11_url_bmp_only",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> replacement TUONG_DUONG",
+      "proof": "ASCII URL alphabet excludes all removed codepoints; intersect the same exclusion with [A-Za-z0-9._~/%-] leaves that alphabet unchanged."
+    },
+    {
+      "id": "r11_url_no_zero_width",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> replacement TUONG_DUONG",
+      "proof": "ASCII URL alphabet excludes all removed codepoints; intersect the same exclusion with [A-Za-z0-9._~/%-] leaves that alphabet unchanged."
+    },
+    {
+      "id": "r11_url_no_combining",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> replacement TUONG_DUONG",
+      "proof": "ASCII URL alphabet excludes all removed codepoints; intersect the same exclusion with [A-Za-z0-9._~/%-] leaves that alphabet unchanged."
+    },
+    {
+      "id": "r11_url_no_control",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> replacement TUONG_DUONG",
+      "proof": "ASCII URL alphabet excludes all removed codepoints; intersect the same exclusion with [A-Za-z0-9._~/%-] leaves that alphabet unchanged."
+    },
+    {
+      "id": "r11_reason_bmp_only",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> same-meaning replacement; NOT CHOT_DA_BO",
+      "projected_pattern": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=((?![\\U00010000-\\U0010ffff])[^ \\t].*?) han=([0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "witness": "'😀'",
+      "old_match": true,
+      "mutant_match": false,
+      "conflict": "Law8 says free-text restriction P3; laws5 and6(1) require historical same-meaning regression first. No explicit precedence/terminal disposition for this conflict."
+    },
+    {
+      "id": "r11_reason_no_zero_width",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> same-meaning replacement; NOT CHOT_DA_BO",
+      "projected_pattern": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=((?![\\u200b-\\u200f\\ufeff])[^ \\t].*?) han=([0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "witness": "'\\u200b'",
+      "old_match": true,
+      "mutant_match": false,
+      "conflict": "Law8 says free-text restriction P3; laws5 and6(1) require historical same-meaning regression first. No explicit precedence/terminal disposition for this conflict."
+    },
+    {
+      "id": "r11_reason_no_combining",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> same-meaning replacement; NOT CHOT_DA_BO",
+      "projected_pattern": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=((?![\\u0300-\\u036f])[^ \\t].*?) han=([0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "witness": "'́'",
+      "old_match": true,
+      "mutant_match": false,
+      "conflict": "Law8 says free-text restriction P3; laws5 and6(1) require historical same-meaning regression first. No explicit precedence/terminal disposition for this conflict."
+    },
+    {
+      "id": "r11_reason_no_control",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> same-meaning replacement; NOT CHOT_DA_BO",
+      "projected_pattern": "mien_gate_output: ([0-9a-f]{40}) os=([a-z0-9,.-]+) ly_do=((?![\\x00-\\x1f])[^ \\t].*?) han=([0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "witness": "'\\x01'",
+      "old_match": true,
+      "mutant_match": false,
+      "conflict": "Law8 says free-text restriction P3; laws5 and6(1) require historical same-meaning regression first. No explicit precedence/terminal disposition for this conflict."
+    },
+    {
+      "id": "r11_word_ascii_first",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> replacement TUONG_DUONG",
+      "proof": "[a-z_]+ already ASCII in every position; restriction to ASCII at first/last is redundant."
+    },
+    {
+      "id": "r11_word_ascii_last",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> replacement TUONG_DUONG",
+      "proof": "[a-z_]+ already ASCII in every position; restriction to ASCII at first/last is redundant."
+    },
+    {
+      "id": "r11_token_single_ws",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> replacement GIET <future r12 case>",
+      "proof": "[ \\t]* -> [ \\t]? still changes two-space token; A2-2 explicitly requires two-space passed.",
+      "original": "passed",
+      "mutant": false
+    },
+    {
+      "id": "r11_token_no_nel",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> replacement TUONG_DUONG",
+      "proof": "U+0085 is absent from [ \\t]; U+0660..0669 absent from [0-9]."
+    },
+    {
+      "id": "r11_run_no_arabic",
+      "literal_anchor_count": 0,
+      "ledger": "KHONG_AP_DUNG -> replacement TUONG_DUONG",
+      "proof": "U+0085 is absent from [ \\t]; U+0660..0669 absent from [0-9]."
+    },
+    {
+      "id": "r11_consumer_ascii_conclusion",
+      "literal_anchor_count": 1,
+      "ledger": "TUONG_DUONG",
+      "proof": "Original anchor remains; all parsed conclusions match [a-z_]+ so isascii() always true."
+    },
+    {
+      "id": "r11_event_casefold",
+      "literal_anchor_count": 1,
+      "ledger": "GIET <future r12 case>; P2 if survives",
+      "proof": "run.event:H1 uses PUSH, leaf K3 not_measured vs mutant passed; 125-cell hash unchanged."
+    }
+  ],
+  "safety_assessment": {
+    "base_results_unchanged": true,
+    "base": {
+      "evaluations": 66,
+      "evaluation_counts": {
+        "not_measured": 9,
+        "passed": 47,
+        "failed": 10
+      },
+      "evaluation_deltas": [],
+      "records": 170,
+      "record_counts": {
+        "MIEN_CUTOVER": 25,
+        "KHONG_LOI_KHAI": 50,
+        "DO": 56,
+        "DAT": 39
+      },
+      "record_deltas": [],
+      "landed_old": 94,
+      "landed_new": 94,
+      "urls_outside_class": 0,
+      "url_occurrences": 2504,
+      "seconds": 38.47,
+      "scope": "r11 product and mechanical r12 regex projection, same archived base; no r12 implementation exists"
+    },
+    "raw_url_scan": {
+      "files_scanned": 8902,
+      "readback_json_files": 2812,
+      "url_occurrences": 2504,
+      "distinct_urls": 1438,
+      "outside_class": [],
+      "new_no_fullmatch": []
+    },
+    "limit": "Không thấy hồi quy trên dữ liệu base không đồng nghĩa luật mới đã đủ rõ hoặc chứng minh mọi dữ liệu tương lai. Chỉ regex projection, không tự đổi cổng.",
+    "decoded_readback_urls": {
+      "parsed_readback_json": 2812,
+      "errors": [],
+      "decoded_url_occurrences": 1797,
+      "outside_class": []
+    }
+  },
+  "severity_decision": "changes_requested:3 P2 và1 P3 của đặc tả còn mở. Không approve sensitive; không tự miễn P3 lịch sử hay dùng việc đổi scope làm DA_VA_THAT.",
+  "read_only_snapshot": {
+    "start": "snapshot_start.json",
+    "end": "snapshot_end.json",
+    "equal": true,
+    "tracked_diff": "empty",
+    "index_diff": "empty",
+    "untracked": "empty",
+    "ignored": "git status lists pre-existing empty .codex/ mount; git ls-files --others --ignored empty at both ends",
+    "limit": "Two snapshots show no observed delta; do not prove no transient write ever occurred. No repository mutation was requested/executed."
+  },
+  "validation": {
+    "command": "python3 /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r12-12-codex/kiem_verdict_lop.py /tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r12-12-codex/work/VERDICT.json --vong 12",
+    "rc": 0,
+    "status": "passed",
+    "positive_evidence": "HOP_LE (§8.3): 4 finding, 3 lop",
+    "artifact": "kiem_verdict.txt"
+  },
+  "artifact_hashes": {
+    "VERDICT.md": "2e759799ca29a8e0f275c525923b4f399acf30a6f8c8c2068cfc7319f7e88cb2",
+    "base_evaluations.json": "3fd52930e9e51f32900b970cec494e18ff84dbb54624c4954153e4d61e3aa471",
+    "base_records.json": "f3cd2b2e12ff122fdd7a770d3eb1aaae2f22d717889e80e18d14fa033d966c76",
+    "base_summary.json": "8168a1d469ed03703bb5918e4f9c0a9448d440a2a1d81d70a1fc5bfdecc6935a",
+    "base_url_scan.json": "012fc36e9a63adad5f91910a9f424a9e8181e9548bb1b8e4d0f14c3b301f1277",
+    "cells125_projection.json": "3f128009079532ee6035d156724676e39e9a5b5a4f42a29673ea49c69baac0df",
+    "check_cells.log": "76a482703733451b1d99a0ee14e34a2200d98c218d2dce60b31c79a3f76f730f",
+    "check_cells.py": "4382b5e58d908e6464efd3e2be8e49334983c115f966b427c2bf4696badde1ca",
+    "decoded_readback_urls.json": "c4408b4daa5236ca96aaa1bee0d7aade2cbf774a7c73434e64407ffb24bb031c",
+    "grammar_probes.json": "ecf01eb9184475ef2338a790fbcacaedbad4c9f0aea4a5e937cc7f5d5ed2c3ec",
+    "kiem_verdict.txt": "f1cf29f42fce6ae802e6bb481eb6e0009e73ff5b7c7137ff2c5d5fedfb73ef71",
+    "ledger186.jsonl": "b0ef3c681c5516e8d2ac1eae07a31259def770dd625c8b6de2ce5d67cab062c1",
+    "lexical_base.json": "c7587732cf5041c9e9ca60ebac49fe5a0595b3b4ec9026c0340948250fb16f35",
+    "measure_base.log": "d85ba5d8681923e39a08ae0fc17e9bc8500dec69c3dd9d871c92b5d6e8bd972d",
+    "measure_base.py": "68bbd6fc60d9baba6cda65ffa678076f30dd9130ee0eb00e63f77a20d7927700",
+    "pairs11.jsonl": "bfb229c2d6a4c880d61faf707db207dfdb321c588e52f6434ed71d4ca9cfbbb4",
+    "pairs11_projection.json": "5b764469d86452df921eb0e352d981dd60b334a034167d5a9b4f07133ba81f13",
+    "pairs_all.jsonl": "191225cac93a5bec155cc9116911022b334df5d7b6f0bf6094632973b82af740",
+    "probe_grammar.log": "ecf01eb9184475ef2338a790fbcacaedbad4c9f0aea4a5e937cc7f5d5ed2c3ec",
+    "probe_grammar.py": "196cee04af87de41088562b8d083c21d074a041fdd83dd1cde3e56e79edbb248",
+    "r11_module.py": "ac6d6253753deef360f9196dabdb149c19a654d88854536fb4572d65ca94c624",
+    "r12_projection.py": "12d55ef132300d29f69a7ae6721837fe2e35df5cfa48215f3f375e5b9c6b9d3c",
+    "regex_inventory.json": "13b4ed1ad5c8e9e0afac0596fd1dc96f430f65da76afc2fcaa3b11833eb4cacb",
+    "review_setup.py": "1771ea812adc8c2837274929b2e5a9bb6b59477a020b641dfd3a339e7de4affe",
+    "setup.json": "cb1e82f1d3d105e9b524633b362f61ec18a645a6747e32a786915c89a1109dbb",
+    "snapshot_end.json": "41cd210391f5f32393a0b28200691f1048b798c43139d80fcc2e2f0486df644d",
+    "snapshot_start.json": "41cd210391f5f32393a0b28200691f1048b798c43139d80fcc2e2f0486df644d",
+    "write_verdict.py": "cf0f87c678d94fe49d80791663d412538defec15c0e363ba3f0130497cec563a"
+  }
+}

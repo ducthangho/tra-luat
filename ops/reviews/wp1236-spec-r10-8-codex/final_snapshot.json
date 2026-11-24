@@ -1,0 +1,71 @@
+{
+  "checks": [
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD",
+        "HEAD^{tree}"
+      ],
+      "rc": 0,
+      "stdout": "81dc1eb73925babe638ed50222e0354bf7488248\nf97856425daee530ad4d92cd5052f2f0e2720496\n",
+      "stderr": "",
+      "stdout_sha256": "5ae622b4bd9c089c89cd509cfdae3d39d0d5ce75697bc14d2f5975fb0dd6627d"
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all",
+        "--ignored=matching"
+      ],
+      "rc": 0,
+      "stdout": "!! .codex/\n",
+      "stderr": "",
+      "stdout_sha256": "7a26e2a87df7447fae58bdb1eb41dca70c4e41f40c2b821cb7466761d682cb52"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--binary"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": "",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--binary"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": "",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "33b6803",
+        "81dc1eb",
+        "--",
+        "ops/specs/wp1236-r10.md"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": "",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "same_head_tree": true,
+  "same_status_including_ignored_directory": true,
+  "tracked_and_index_clean": true,
+  "limit": "Không có delta quan sát giữa hai snapshot. Không chứng minh chưa từng ghi rồi hoàn nguyên; không có snapshot byte đầu cho ignored .codex/. Chỉ checkout được giao nằm trong phạm vi quan sát, không đo repo Executor gốc."
+}

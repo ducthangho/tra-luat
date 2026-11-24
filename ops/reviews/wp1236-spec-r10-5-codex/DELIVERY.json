@@ -1,0 +1,39 @@
+{
+  "artifacts": {
+    "VERDICT.json": {
+      "bytes": 41764,
+      "sha256": "77076a9c06206f184c2eedf15cbdf1d250a0d54283e5c77d8d61e582ce11d4c0"
+    },
+    "VERDICT.md": {
+      "bytes": 7308,
+      "sha256": "edb2c7b067c777365dfd221e59e2588789da882b2328f13280ac86ffc6dcddc7"
+    },
+    "kiem_verdict.txt": {
+      "bytes": 33,
+      "sha256": "9739f5bd7b231ec52705a94e69de72d373883fea5c969d334c4f5ee6af7394f0"
+    }
+  },
+  "validation_rc": 0,
+  "read_only": {
+    "review": {
+      "files_before": 17369,
+      "files_after": 17369,
+      "changed_paths": [],
+      "git_commands_equal": true,
+      "head_tree": [
+        "4b5e3c6b15eb311540447d67d0e0ad62a85e71d1",
+        "293d124054e74bb0459b69c2e5df6691b74af49d"
+      ]
+    },
+    "code_reference": {
+      "files_before": 17333,
+      "files_after": 17333,
+      "changed_paths": [],
+      "git_commands_equal": true,
+      "head_tree": [
+        "c2d606bb6fc230c288200b8f1dd79715462c172b",
+        "9b78e9e0b1e1d445e19747e65ab4f65ea4016511"
+      ]
+    }
+  }
+}

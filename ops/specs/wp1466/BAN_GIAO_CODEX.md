@@ -63,6 +63,28 @@ N1–N16, trần 450 dòng / 6 tệp, và khối `so-dang-ky` trên base mới.
     đóng băng và tự có luật DỪNG khi số đã bị chiếm.
   - Bước 3d chỉ kiểm tệp `docs/adr/0068-*` trên mọi ref. Lúc đo chưa ref nào có tệp ấy; số chỉ thực sự được chiếm khi land.
 
+## 3b. Cập nhật 24-11 11:35Z — model, cách review, và hai lease đang chặn
+**Model và effort (E2, ghi hộ ở #1466 issuecomment-7130364325):**
+- Executor: Claude Fable 5.2, effort `high`.
+- Reviewer: Codex, `model_reasoning_effort=high`. Dòng reviewer của đặc tả r8 ghi `xhigh`; quyết định này của chủ kho thay nó.
+
+**Cách vá và review (chỉ thị của chủ kho):**
+- Đọc kỹ `SKILL.md` (lõi skill tra-luat), `.claude/skills/work-packet/SKILL.md` và `.claude/skills/cross-review/SKILL.md`.
+- Áp ADR-0060 (`docs/adr/0060-dieu-kien-merge-va-moc-ready.md`, M2) và protocol §8.3: vá và review theo LỚP lỗi, không theo từng lỗi.
+  - Mỗi finding mang đúng một `class_slug`. Lượt review nào cũng có bảng lớp.
+  - Từ lượt 2, đối chiếu lượt trước bằng bốn nhãn, xét theo finding rồi theo lớp, và tính hội tụ |F|/|U|.
+  - Executor khái quát mỗi finding thành lớp, quét mọi biểu hiện cùng lớp rồi vá cả lớp. Đừng vá đúng chỗ được chỉ rồi bỏ sót đường thứ ba.
+- Khuôn đã dùng cho 8 lượt review đặc tả: `review/r*-l*/PROMPT.md`, gồm bảng (i) lớp mở và bảng (ii) nợ kế nhiệm.
+
+**Hai lease đang giữ write set của wp1466** (đo `ai-dang-giu` lúc 11:35Z, master `f602325`):
+
+| lease | giữ | hết hạn | quyết định của chủ kho |
+|---|---|---|---|
+| `wp1507-r1-g1-claude` (#1507) | `docs/PROTOCOL_DA_PHIEN.md` | 24-11 23:20Z | THU HỒI. wp1507 ra r2 với ADR-0069 và chờ wp1466 land. Đã báo ở #1507 issuecomment-7130366137 |
+| `wp1236-c-r12-g1-claude-20261124` (#1236-C) | `packet_loop.py`, `packet_loop_test.py` | 27-11 11:22Z | #1236-C chạy TRƯỚC. wp1466 chờ #1236-C land hoặc lease ấy hết hạn, rồi rebase nguyên mẫu |
+
+B4 #1462 đã đóng lúc 24-11 11:18Z; điều kiện về B4 đã thoả.
+
 ## 4. Việc tiếp theo, theo thứ tự
 1. Chờ chủ kho merge PR #1495. Kiểm sau merge: `git rev-parse origin/master:ops/specs/wp1466.md` phải trỏ tới blob có
    sha256 bằng `98790505…`.

@@ -84,3 +84,5 @@ nang_tran: []
 requires_live: false
 ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
 diem_dung: 'sau K2a (do ACL) phai dang ket qua + de xuat thiet ke, cho chu kho duyet tren #1511 truoc K2b.'
+da_bi_thay_the: wp1511-r2-g2-claude
+da_bi_thay_the_ghi_chu: 'revision r2 (#1511 issuecomment-7139074265); r1 con han nen bia mo hai chieu.'

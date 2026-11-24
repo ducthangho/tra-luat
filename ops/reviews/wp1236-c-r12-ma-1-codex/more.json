@@ -1,0 +1,71 @@
+[
+  {
+    "label": "C5c",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b duong_dan_sai\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "label": "newline_diagnostic",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b symlink_hoac_mode:ops/land/dong\nmoi-provenance\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  },
+  {
+    "label": "mC11",
+    "rc": 8,
+    "stdout": "",
+    "stderr": "KHÔNG ĐO ĐƯỢC: D2b FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/tmp/tmp9ewsvd4s/ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-1.txt'\n"
+  },
+  {
+    "label": "outside_import",
+    "case": "cong_d2b_c1_passed_dat",
+    "classification": "GIET",
+    "detail": "ChotB4: ('cong_d2b_c1_passed_dat', 'doi_chung_dat: đòi (0, [], [\\'D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@93ee0270f746af2023cc43f83ec43c1ddccb489f\\']), được (8, [\"KHÔNG ĐO ĐƯỢC: D2b NameError: name \\'tarfile\\' is not defined\"], []); stderr=\"KHÔNG ĐO ĐƯỢC: D2b NameError: name \\'tarfile\\' is not defined\"')"
+  },
+  {
+    "label": "ruff_delta",
+    "base_count": 16,
+    "head_count": 16,
+    "new": [
+      [
+        "packet_loop_test.py",
+        "F811",
+        "Redefinition of unused `lock_fd` from line 12693: `lock_fd` redefined here"
+      ],
+      [
+        "packet_loop_test.py",
+        "F811",
+        "Redefinition of unused `lock_fd` from line 13169: `lock_fd` redefined here"
+      ],
+      [
+        "packet_loop_test.py",
+        "F811",
+        "Redefinition of unused `lock_fd` from line 13317: `lock_fd` redefined here"
+      ]
+    ],
+    "removed": [
+      [
+        "packet_loop_test.py",
+        "F811",
+        "Redefinition of unused `lock_fd` from line 12464: `lock_fd` redefined here"
+      ],
+      [
+        "packet_loop_test.py",
+        "F811",
+        "Redefinition of unused `lock_fd` from line 12940: `lock_fd` redefined here"
+      ],
+      [
+        "packet_loop_test.py",
+        "F811",
+        "Redefinition of unused `lock_fd` from line 13088: `lock_fd` redefined here"
+      ]
+    ],
+    "version": "ruff 0.15.15"
+  },
+  {
+    "label": "classifier_source_diff",
+    "diff": "--- \n\n+++ \n\n@@ -18,7 +18,7 @@\n\n             ket[ten] = (_TinDungGia(f\"{type(ex).__name__}: {ex}\") if _co_sap_do(ex) else\n                         ex if isinstance(ex.__cause__, OSError) else f\"BỎ QUA không có OSError đo được: {ex}\")\n         except Exception as ex:  # noqa: BLE001 — ca đỏ là dữ liệu, không phải sự cố\n-            if ten.startswith(\"cong_b4_\"):  # #1462 GT-6: GIẾT chỉ khi CHÍNH ca ấy ném `ChotB4`; mọi kết cục khác là TÍN DỤNG GIẢ\n+            if ten.startswith((\"cong_b4_\", \"cong_d2b_\")):  # #1462 GT-6 (và D2b #1236): GIẾT chỉ khi CHÍNH ca ấy ném `ChotB4`; mọi kết cục khác là TÍN DỤNG GIẢ\n                 ket[ten] = (str if type(ex) is ChotB4 and ex.args[:1] == (ten,) and not _co_sap_do(ex) else _TinDungGia)(f\"{type(ex).__name__}: {ex}\")\n                 continue\n             if ten.startswith(\"wp1174_\"):",
+    "legacy_cases_outside_new_prefix": 1787
+  }
+]

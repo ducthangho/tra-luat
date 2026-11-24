@@ -1,0 +1,590 @@
+{
+  "head": {
+    "rc": 0,
+    "count": 56,
+    "results": {
+      "c1106_k0_bo_pr_head": {
+        "targets": {
+          "cong_c_k0_pr_head": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k1_bo_spec_hash": {
+        "targets": {
+          "cong_c_k1_hash": "GIET"
+        },
+        "controls_failed": []
+      },
+      "wp1124_k1_doi_mot_dong": {
+        "targets": {
+          "cong_c_k1_khong_dong": "GIET"
+        },
+        "controls_failed": []
+      },
+      "wp1124_k1_chi_dem_dong_hop_le": {
+        "targets": {
+          "cong_c_k1_mot_dong_sai": "GIET"
+        },
+        "controls_failed": []
+      },
+      "wp1124_k1_nhan_hai_dong": {
+        "targets": {
+          "cong_c_k1_hai_dong": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k6_bo_rc_diff": {
+        "targets": {
+          "cong_c_k6_diff_loi": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_yaml_nhan_anchor": {
+        "targets": {
+          "cong_c_k1_anchor": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k1_bo_rc_rev_list": {
+        "targets": {
+          "cong_c_k1_git_loi": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_d3_bo_rc_git": {
+        "targets": {
+          "cong_c_d3_git_loi": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k6_id_tuy_y": {
+        "targets": {
+          "cong_c_k6_thieu_id": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k1_bo_l1": {
+        "targets": {
+          "cong_c_k1_l2": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k3_bo_connector": {
+        "targets": {
+          "cong_c_k3_p1": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k4_bo_head": {
+        "targets": {
+          "cong_c_k4_head": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k4_bo_stdout_sha": {
+        "targets": {
+          "cong_c_k4_stdout": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k5_bo_chu_kho": {
+        "targets": {
+          "cong_c_k5_sai_nguoi": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k5_tap_con": {
+        "targets": {
+          "cong_c_k5_thua": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k6_rong_van_dat": {
+        "targets": {
+          "cong_c_k6_rong": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k6_buoc1_bo_duoi": {
+        "targets": {
+          "cong_c_k6_land_py_unknown": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_d2_bo": {
+        "targets": {
+          "cong_c_d2_not_measured": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_d2_bo_nghiem_thu": {
+        "targets": {
+          "cong_c_d2_nghiem_thu": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_d4_bo_han": {
+        "targets": {
+          "cong_c_d4_tuong_lai": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k3_neo_commit_id": {
+        "targets": {
+          "cong_c_k3_p2_commit_doi": "GIET",
+          "cong_c_k3_p2_original_head": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k3_biet_bo_original": {
+        "targets": {
+          "cong_c_k3_original_tien_to": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k6_buoc1_bo_mode": {
+        "targets": {
+          "cong_c_k6_symlink": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_d1_nhan_bool": {
+        "targets": {
+          "cong_c_d1_generation_bool": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC1_khong_chay": {
+        "targets": {
+          "cong_d2b_c1_passed_dat": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_chay_moi_gia_tri": {
+        "targets": {
+          "cong_d2b_c1_passed_dat": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_doc_cay_lam_viec": {
+        "targets": {
+          "cong_d2b_c1_passed_dat": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC2_thieu_nguon_bo_qua": {
+        "targets": {
+          "cong_d2b_c2_thieu_nguon": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_bo_dang_oid": {
+        "targets": {
+          "cong_d2b_c2_thieu_nguon": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC10_attempt_khong_int": {
+        "targets": {
+          "cong_d2b_c3_attempt_kieu": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_attempt_bo_duong": {
+        "targets": {
+          "cong_d2b_c3_attempt_kieu": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_neo_attempt_ban_kem": {
+        "targets": {
+          "cong_d2b_c3_attempt_kieu": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_attempt_ca_mien": {
+        "targets": {
+          "cong_d2b_c6_mien": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC3_bo_neo_run": {
+        "targets": {
+          "cong_d2b_c3_neo": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC9_bo_neo_attempt": {
+        "targets": {
+          "cong_d2b_c3_neo": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC4_bo_neo_head": {
+        "targets": {
+          "cong_d2b_c3_neo": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC5_nhan_moi_trang_thai": {
+        "targets": {
+          "cong_d2b_c4_kiem_tep": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_dung_lai_symlink": {
+        "targets": {
+          "cong_d2b_c4_kiem_tep": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC12_nhan_hai_cham": {
+        "targets": {
+          "cong_d2b_c5_duong_dan": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_nhan_mot_cham": {
+        "targets": {
+          "cong_d2b_c5_duong_dan": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC6_ops_bat_ky": {
+        "targets": {
+          "cong_d2b_c5_duong_dan": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_readback_ops_bat_ky": {
+        "targets": {
+          "cong_d2b_c5_duong_dan": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_duong_dan_khop_dau": {
+        "targets": {
+          "cong_d2b_c5_duong_dan": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC11_bo_mode": {
+        "targets": {
+          "cong_d2b_c5_mode": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mien_nhan_tep": {
+        "targets": {
+          "cong_d2b_c6_mien": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC7_mien_thuan_loi_khai": {
+        "targets": {
+          "cong_d2b_c6_mien": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mien_head_none": {
+        "targets": {
+          "cong_d2b_c6_mien": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mien_thu_muc_goc": {
+        "targets": {
+          "cong_d2b_c6_mien": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC14_in_dat_khi_vi_pham": {
+        "targets": {
+          "cong_d2b_c6_mien": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC8_gop_rc_12": {
+        "targets": {
+          "cong_d2b_c7_module_vang": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_nuot_loi_do": {
+        "targets": {
+          "cong_d2b_c7_module_nem": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_bo_rc_git": {
+        "targets": {
+          "cong_d2b_c7_git_loi": "GIET",
+          "cong_d2b_c9_oid_khong_phai_commit": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_mC13_bo_remote": {
+        "targets": {
+          "cong_d2b_c9_oid": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_remote_bat_ky": {
+        "targets": {
+          "cong_d2b_c9_oid": "GIET"
+        },
+        "controls_failed": []
+      },
+      "d2b_bo_loai_commit": {
+        "targets": {
+          "cong_d2b_c9_oid_khong_phai_commit": "GIET"
+        },
+        "controls_failed": []
+      }
+    }
+  },
+  "base": {
+    "rc": 0,
+    "count": 25,
+    "results": {
+      "c1106_k0_bo_pr_head": {
+        "targets": {
+          "cong_c_k0_pr_head": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k1_bo_spec_hash": {
+        "targets": {
+          "cong_c_k1_hash": "GIET"
+        },
+        "controls_failed": []
+      },
+      "wp1124_k1_doi_mot_dong": {
+        "targets": {
+          "cong_c_k1_khong_dong": "GIET"
+        },
+        "controls_failed": []
+      },
+      "wp1124_k1_chi_dem_dong_hop_le": {
+        "targets": {
+          "cong_c_k1_mot_dong_sai": "GIET"
+        },
+        "controls_failed": []
+      },
+      "wp1124_k1_nhan_hai_dong": {
+        "targets": {
+          "cong_c_k1_hai_dong": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k6_bo_rc_diff": {
+        "targets": {
+          "cong_c_k6_diff_loi": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_yaml_nhan_anchor": {
+        "targets": {
+          "cong_c_k1_anchor": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k1_bo_rc_rev_list": {
+        "targets": {
+          "cong_c_k1_git_loi": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_d3_bo_rc_git": {
+        "targets": {
+          "cong_c_d3_git_loi": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k6_id_tuy_y": {
+        "targets": {
+          "cong_c_k6_thieu_id": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k1_bo_l1": {
+        "targets": {
+          "cong_c_k1_l2": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k3_bo_connector": {
+        "targets": {
+          "cong_c_k3_p1": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k4_bo_head": {
+        "targets": {
+          "cong_c_k4_head": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k4_bo_stdout_sha": {
+        "targets": {
+          "cong_c_k4_stdout": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k5_bo_chu_kho": {
+        "targets": {
+          "cong_c_k5_sai_nguoi": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k5_tap_con": {
+        "targets": {
+          "cong_c_k5_thua": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k6_rong_van_dat": {
+        "targets": {
+          "cong_c_k6_rong": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k6_buoc1_bo_duoi": {
+        "targets": {
+          "cong_c_k6_land_py_unknown": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_d2_bo": {
+        "targets": {
+          "cong_c_d2_not_measured": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_d2_bo_nghiem_thu": {
+        "targets": {
+          "cong_c_d2_nghiem_thu": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_d4_bo_han": {
+        "targets": {
+          "cong_c_d4_tuong_lai": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k3_neo_commit_id": {
+        "targets": {
+          "cong_c_k3_p2_commit_doi": "GIET",
+          "cong_c_k3_p2_original_head": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k3_biet_bo_original": {
+        "targets": {
+          "cong_c_k3_original_tien_to": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_k6_buoc1_bo_mode": {
+        "targets": {
+          "cong_c_k6_symlink": "GIET"
+        },
+        "controls_failed": []
+      },
+      "c1106_d1_nhan_bool": {
+        "targets": {
+          "cong_c_d1_generation_bool": "GIET"
+        },
+        "controls_failed": []
+      }
+    }
+  },
+  "legacy_delta": {},
+  "mC1_mC14": {
+    "d2b_mC1_khong_chay": {
+      "targets": {
+        "cong_d2b_c1_passed_dat": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC2_thieu_nguon_bo_qua": {
+      "targets": {
+        "cong_d2b_c2_thieu_nguon": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC10_attempt_khong_int": {
+      "targets": {
+        "cong_d2b_c3_attempt_kieu": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC3_bo_neo_run": {
+      "targets": {
+        "cong_d2b_c3_neo": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC9_bo_neo_attempt": {
+      "targets": {
+        "cong_d2b_c3_neo": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC4_bo_neo_head": {
+      "targets": {
+        "cong_d2b_c3_neo": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC5_nhan_moi_trang_thai": {
+      "targets": {
+        "cong_d2b_c4_kiem_tep": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC12_nhan_hai_cham": {
+      "targets": {
+        "cong_d2b_c5_duong_dan": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC6_ops_bat_ky": {
+      "targets": {
+        "cong_d2b_c5_duong_dan": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC11_bo_mode": {
+      "targets": {
+        "cong_d2b_c5_mode": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC7_mien_thuan_loi_khai": {
+      "targets": {
+        "cong_d2b_c6_mien": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC14_in_dat_khi_vi_pham": {
+      "targets": {
+        "cong_d2b_c6_mien": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC8_gop_rc_12": {
+      "targets": {
+        "cong_d2b_c7_module_vang": "GIET"
+      },
+      "controls_failed": []
+    },
+    "d2b_mC13_bo_remote": {
+      "targets": {
+        "cong_d2b_c9_oid": "GIET"
+      },
+      "controls_failed": []
+    }
+  }
+}

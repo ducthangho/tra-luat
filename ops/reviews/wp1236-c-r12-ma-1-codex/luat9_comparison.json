@@ -1,0 +1,26 @@
+{
+  "counts": {
+    "GIET": 174,
+    "SONG": 4
+  },
+  "manifest_equal_bytes": true,
+  "baseline_cases": [
+    "cong_d2b_c1_passed_dat",
+    "cong_d2b_c2_thieu_nguon",
+    "cong_d2b_c3_attempt_kieu",
+    "cong_d2b_c3_neo",
+    "cong_d2b_c4_kiem_tep",
+    "cong_d2b_c5_duong_dan",
+    "cong_d2b_c5_mode",
+    "cong_d2b_c6_mien",
+    "cong_d2b_c7_module_vang",
+    "cong_d2b_c7_module_khong_nap",
+    "cong_d2b_c7_module_nem",
+    "cong_d2b_c7_git_loi",
+    "cong_d2b_c9_oid",
+    "cong_d2b_c9_oid_khong_phai_commit"
+  ],
+  "changed_id_class_target": [],
+  "completed": true,
+  "rc": 0
+}

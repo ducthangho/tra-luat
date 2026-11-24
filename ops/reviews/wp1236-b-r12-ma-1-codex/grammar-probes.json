@@ -1,0 +1,42 @@
+[
+  {
+    "label": "control",
+    "rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  },
+  {
+    "label": "header",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+    ],
+    "passed": true
+  },
+  {
+    "label": "job",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "summary",
+    "rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la,thieu_moc"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la,thieu_moc"
+    ],
+    "passed": true
+  }
+]

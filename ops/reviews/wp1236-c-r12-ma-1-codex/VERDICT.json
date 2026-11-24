@@ -1,0 +1,357 @@
+{
+  "reviewed_sha": "ac523aebd876640b369e94511fd44e81bace0908",
+  "spec_sha256": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+  "vong": 1,
+  "dot": "C",
+  "findings": [
+    {
+      "id": "C01",
+      "class_slug": "archive-loc-mat-du-lieu-kiem",
+      "severity": "P1",
+      "vi_tri": ".claude/dev/packet_loop.py:3966 (_d2b_kiem tar extraction); .claude/dev/packet_loop_test.py:9623 (provenance_la_symlink)",
+      "van_de": "Bỏ symlink khỏi archive trước kiem_tep làm mất lý do K2 symlink: hồ sơ có YAML thường hợp lệ cùng symlink YAML bị nâng từ not_measured thành passed, cho đóng WP rc 0. Ca hiện tại chỉ có symlink mà không có YAML thường nên đỏ vì provenance_0, không phát hiện sự mất thông tin này.",
+      "bang_chung": "work/behavior.json: existing_yaml_symlink_with_regular_provenance rc=0, D2b ĐẠT và ĐÓNG ĐƯỢC WP; same_tree_direct_validator = [not_measured,[symlink]], ls-tree của p.yaml mode 120000. Tái lập: PYTHONDONTWRITEBYTECODE=1 TMPDIR=<work>/tmp python3 -B <work>/probe_behavior.py; dùng symlink fixture _d2b_cay sẵn có, chỉ thêm tệp thường regular.yaml. Không sửa mã sản phẩm. Bổ sung trên fixture _d2b_cay NGUYÊN TRẠNG: existing_symlink.json cho module [not_measured,[symlink,provenance_0]], CLI rc12 chỉ báo kiem_tep:not_measured:provenance_0; test hiện tại đã đổi lý do đầu so cây O.",
+      "de_xuat": {
+        "o_dau": "_d2b_kiem tại ranh giới cây Git/archive → validator, vì thông tin đã mất trước khi module được gọi; không hạ chốt K2 của module A.",
+        "cach_va": "Giữ thông tin entry/mode của cây nguồn để từ chối đúng các symlink mà validator sẽ báo, trước khi lọc để giải nén an toàn. Không cần dựng hay theo symlink. Bao cả YAML symlink lẫn thư mục symlink trong phạm vi provenance.",
+        "kiem_dong": "Đối chứng YAML thường hợp lệ đạt; cùng cây thêm symlink fixture phải rc12, không dòng ĐẠT và có lý do tương ứng. Kiểm thêm thư mục symlink và nhánh owner_waived để tránh siết sai; đột biến bỏ bước bảo toàn/phát hiện mode phải đỏ đúng ca.",
+        "rui_ro": "Từ chối mọi entry không phải file trên cả archive có thể chặn oan symlink không liên quan hoặc readback được hợp đồng cho bỏ qua; phạm vi phải theo K2 và từng nhánh."
+      }
+    },
+    {
+      "id": "C02",
+      "class_slug": "hop-dong-dau-ra-duong-dan-tu-do",
+      "severity": "P2",
+      "vi_tri": ".claude/dev/packet_loop.py:3914-3915,3956,3977",
+      "van_de": "Regex chấp nhận LF trong thành phần đường dẫn; in nguyên văn vào mẫu một dòng làm cả passed và owner_waived trả rc0 nhưng D2b ĐẠT bị tách thành hai dòng. Lý do chứa đường dẫn cũng có cùng cơ chế. Đây là lỗi hành vi/hợp đồng đầu ra, không phải đột biến ngoài bảng. Hai yêu cầu đặc tả (nguyên văn đường dẫn tự do và đúng một dòng) mâu thuẫn ở miền này.",
+      "bang_chung": "work/behavior.json newline_passed và newline_waived: rc0, stdout chứa D2b ĐẠT ...dong\\nmoi-provenance...; phép đo dùng tên thư mục hợp lệ bình thường trên POSIX, không thoát cây. work/more.json bổ sung nhánh lý do symlink_hoac_mode.",
+      "de_xuat": {
+        "o_dau": "Chốt hợp đồng đường dẫn/hiển thị D2b trong đặc tả rồi triển khai chung tại _d2b_kiem; hiện không thể giữ đồng thời đường dẫn nguyên văn chứa LF và đúng một dòng vật lý.",
+        "cach_va": "Điều phối chốt miền ký tự xuống dòng hoặc quy tắc mã hoá đường dẫn trong output, neo revision/hash nếu đổi hợp đồng. Sau đó dùng cùng quy tắc cho passed, owner_waived và lý do chứa path; không tự strip/normalize dữ liệu Git.",
+        "kiem_dong": "Đo cả nhánh đạt/miễn/trượt với LF, CR và chuỗi Unicode phân dòng theo quy tắc đã chốt; mỗi output tuân đúng số dòng, rc và tên lý do, đường dẫn thường vẫn đạt.",
+        "rui_ro": "Cấm mọi Unicode/control quá rộng sẽ trái miền văn bản tự do r12; escape output làm đổi hợp đồng raw-path và cần cập nhật consumer/test."
+      }
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "archive-loc-mat-du-lieu-kiem",
+      "manifestations": [
+        "C01-a: mất lý do đầu symlink trên fixture nguyên trạng",
+        "C01-b: nhận passed khi có thêm YAML thường hợp lệ",
+        "C01-c: thư mục symlink trong phạm vi provenance bị lọc cùng cơ chế (suy từ chon_provenance và tar filter; chưa tạo payload mới để đo)"
+      ],
+      "highest_open_severity": "P1",
+      "common_fix": "Giữ thông tin entry/mode của cây nguồn để từ chối đúng các symlink mà validator sẽ báo, trước khi lọc để giải nén an toàn. Không cần dựng hay theo symlink. Bao cả YAML symlink lẫn thư mục symlink trong phạm vi provenance.",
+      "closing_check": "Đối chứng YAML thường hợp lệ đạt; cùng cây thêm symlink fixture phải rc12, không dòng ĐẠT và có lý do tương ứng. Kiểm thêm thư mục symlink và nhánh owner_waived để tránh siết sai; đột biến bỏ bước bảo toàn/phát hiện mode phải đỏ đúng ca.",
+      "source": {
+        "vong": 1,
+        "reviewed_sha": "ac523aebd876640b369e94511fd44e81bace0908"
+      }
+    },
+    {
+      "slug": "hop-dong-dau-ra-duong-dan-tu-do",
+      "manifestations": [
+        "C02-a: passed in đường dẫn LF thành nhiều dòng",
+        "C02-b: owner_waived in đường dẫn LF thành nhiều dòng",
+        "C02-c: symlink_hoac_mode chứa đường dẫn LF thành nhiều dòng"
+      ],
+      "highest_open_severity": "P2",
+      "common_fix": "Điều phối chốt miền ký tự xuống dòng hoặc quy tắc mã hoá đường dẫn trong output, neo revision/hash nếu đổi hợp đồng. Sau đó dùng cùng quy tắc cho passed, owner_waived và lý do chứa path; không tự strip/normalize dữ liệu Git.",
+      "closing_check": "Đo cả nhánh đạt/miễn/trượt với LF, CR và chuỗi Unicode phân dòng theo quy tắc đã chốt; mỗi output tuân đúng số dòng, rc và tên lý do, đường dẫn thường vẫn đạt.",
+      "source": {
+        "vong": 1,
+        "reviewed_sha": "ac523aebd876640b369e94511fd44e81bace0908"
+      }
+    }
+  ],
+  "lech_spec": [
+    {
+      "muc": "Luật 9 chạy trên khối D2b qua d2b_noi.py",
+      "phan_quyet": "Chấp nhận cơ chế đo delta có giới hạn đã khai: bộ nối ghép đúng khối rồi dùng chay_suite/ChotB4 thật; do rc0 HOAN_TAT, 174 GIET + 4 TUONG_DUONG. Không thay bằng chứng không hồi quy toàn bộ; help ngoài khối chưa có ca.",
+      "bang_chung": "block_identity.json: mọi byte nội dung khớp; chỉ loại 2 LF phân cách cuối trước def cmd_kiem_dong_wp. Hai tệp full hash khớp handoff, scanner hash đúng. Câu cắt nguyên văn cần hiểu có bỏ 2 dòng trống; không có đổi code."
+    },
+    {
+      "muc": "Fixture chỉ chép tệp đánh giá + YAML; đổi head header/provenance thành merge của kho tạm",
+      "phan_quyet": "Chấp nhận cho C1/C4/C5c; giữ ngữ nghĩa được nghiệm thu.",
+      "bang_chung": "behavior.json: T-v3 gốc/adapted = passed/[]; T-fail gốc/adapted = failed/[]; header == M tạm. C4 CLI rc12 duy nhất kiem_tep:failed:-, không neo_* và không D3. C5c rc12 duong_dan_sai (more.json). C1 nằm trên ref origin/ops/x, working tree ở master không có dữ liệu; đột biến d2b_doc_cay_lam_viec đã GIET đúng cong_d2b_c1_passed_dat (declared_head.log)."
+    },
+    {
+      "muc": "Giữ hợp đồng đầu ra riêng packet_loop_test.py thay bốn dòng của test đợt A",
+      "phan_quyet": "Chấp nhận: bộ test tích hợp phải giữ producer/consumer đã đăng ký; không cần sửa ngoài write set chỉ để giống harness A.",
+      "bang_chung": "packet_loop_test_manh.py chay → T.main → _legacy_main giữ nguyên contract. Đã chạy đủ 16 shard/1799 IDs và GOM: không thiếu/lệch phân hoạch, carrier đúng một mảnh; GOM rc1 vì 14 shard đỏ do 15 ca socket EPERM. Các dòng nền, AC18, tổng và MẢNH có mặt trong log. Ruff contract riêng errors=[] count=3. Không nhận gate tích hợp xanh."
+    },
+    {
+      "muc": "C5(b) dưới mC11 không ra ĐẠT",
+      "phan_quyet": "Chấp nhận phép đo chốt mode theo lý do riêng: có/không symlink_hoac_mode phân biệt được. Không xác nhận lời kỳ vọng mC11 ra ĐẠT; thực tế rc8. Việc bỏ symlink toàn cục không được chấp nhận, đã thành C01.",
+      "bang_chung": "more.json mC11 dùng đúng mutant khai và symlink fixture: rc8 FileNotFoundError, không THIẾU D2b symlink_hoac_mode; bộ phân hạng xác nhận GIET đúng cong_d2b_c5_mode trong tập 31 khai báo (declared_head.log)."
+    }
+  ],
+  "m3_windows": {
+    "ket_luan": "required; Windows local not_run trong review offline này",
+    "can_cu": "ADR-0060 M3 bước 2: cả hai tệp diff nằm trong .claude/dev/**; spec r12 Kiểm chứng theo nền cũng khai C required. LEASE.yaml dẫn chủ kho miễn Windows CI #1236 issuecomment-7129998930; không biến miễn CI thành miễn local. Không gọi mạng để kiểm receipt live.",
+    "rui_ro_can_do": [
+      "Python 3.12+ tarfile.data_filter/extractall trên NTFS: chế độ symlink bằng Git index 120000, đối chiếu cùng fixture với Linux; không cần quyền tạo symlink OS cho fixture.",
+      "MAX_PATH: chạy cùng đường dẫn root dự kiến của Windows, cả ca tự kiểm và đột biến lồng nhiều thư mục; fixture rút gọn không chứng minh mọi tổng chiều dài <260.",
+      "Chuỗi có dấu, ngoài BMP, U+0001/U+2028/U+2029 và khoảng trắng qua YAML → argv git.exe → ls-tree -z → decode/encode → stdout UTF-8; giữ raw path, không quy pathspec.",
+      "Backslash, tên NTFS không hợp lệ, reserved names, dấu chấm/khoảng trắng cuối và case collision trong archive; đo lỗi kiểm soát rc8, không traceback hoặc đọc nhầm tệp.",
+      "CRLF: biên bản/lease, provenance và tệp đánh giá CRLF đồng nhất; không thay bytes bên trong fixture lúc clone/archive; stdout/stderr console cp1258/UTF-8.",
+      "C01 và C02 phải có phép hồi quy trên Windows cho miền tên đi được qua NTFS, tách các miền POSIX-only."
+    ],
+    "tieu_chi_ban_giao": "Điều phối chạy base f602325574c62184caf16309631f5f680ca5cee2 và head ac523aebd876640b369e94511fd44e81bace0908 cùng máy/cùng lệnh, danh sách ID và kết quả; skipped/not_run không tính xanh theo M3."
+  },
+  "luat9": {
+    "delta": {
+      "counts": {
+        "GIET": 174,
+        "SONG": 4
+      },
+      "manifest_equal_bytes": true,
+      "baseline_cases": [
+        "cong_d2b_c1_passed_dat",
+        "cong_d2b_c2_thieu_nguon",
+        "cong_d2b_c3_attempt_kieu",
+        "cong_d2b_c3_neo",
+        "cong_d2b_c4_kiem_tep",
+        "cong_d2b_c5_duong_dan",
+        "cong_d2b_c5_mode",
+        "cong_d2b_c6_mien",
+        "cong_d2b_c7_module_vang",
+        "cong_d2b_c7_module_khong_nap",
+        "cong_d2b_c7_module_nem",
+        "cong_d2b_c7_git_loi",
+        "cong_d2b_c9_oid",
+        "cong_d2b_c9_oid_khong_phai_commit"
+      ],
+      "changed_id_class_target": [],
+      "completed": true,
+      "rc": 0
+    },
+    "khong_hoi_quy": "classifier.json: 1787 tên ca cũ × 7 kiểu ngoại lệ =12509, delta phân hạng 0. declared_comparison.json: base 25/25, head 56/56 (31 delta D2b + cùng 25 cũ), tất cả GIET đúng ca đích, không đối chứng chết oan, delta 25 cũ=0. Base 14/14 D cũ+CRLF và head 29/29 gồm D2b đạt. Head đầy đủ 16 shard: 1799 ca =1746 passed+15 failed(socket PermissionError)+38 skipped; mọi ca D2b đạt. GOM rc1; không thiếu/lệch phân hoạch, carrier đúng một mảnh, nhưng gate KHÔNG passed. Đối chứng cong_b4_vc_loi_ket_noi trên base cùng PermissionError. Full baseline base và full 2040/2009 mutations chưa đo, không chứng nhận nghĩa vụ full non-regression.",
+    "tuong_duong_da_kiem": {
+      "equivalents": [
+        {
+          "id": "j1:_d2b_kiem:40:7",
+          "diff": "--- \n\n+++ \n\n@@ -35,3 +35,3 @@\n\n         return vp + ['duong_dan_sai']\n-    if (cay_git := git('ls-tree', '-z', '-t', oid, '--', dd)) is None:\n+    if (cay_git := git('ls-tree', '-z', '-t', oid, '--', dd)) == None:\n         raise OSError('git ls-tree')"
+        },
+        {
+          "id": "g:_d2b_kiem:35:49",
+          "diff": "--- \n\n+++ \n\n@@ -30,3 +30,3 @@\n\n         return None if rc else o\n-    ref = git('branch', '-r', '--contains', oid, '--format=%(refname)')\n+    ref = git('branch', '-r', '--contains', oid, '--format=%(refname)~')\n     if git('cat-file', '-t', oid) != b'commit\\n' or not any((r.startswith(b'refs/remotes/origin/') for r in (ref or b'').split(b'\\n'))):"
+        },
+        {
+          "id": "i7:_d2b_kiem:25:90",
+          "diff": "--- \n\n+++ \n\n@@ -20,3 +20,3 @@\n\n     khoa = ('oid', 'tep') if passed else ('oid', 'chuoi', 'readback_thu_muc')\n-    vp = [] if isinstance(ng, dict) and all((isinstance(ng.get(k), str) for k in khoa)) and SHA_RE.fullmatch(ng['oid']) else ['thieu_nguon']\n+    vp = [] if isinstance(ng, dict) and all((isinstance(ng.get(k), str) for k in khoa)) and SHA_RE.match(ng['oid']) else ['thieu_nguon']\n     if passed and (not (type(ra) is int and ra >= 1)):"
+        },
+        {
+          "id": "j1:_d2b_kiem:26:23",
+          "diff": "--- \n\n+++ \n\n@@ -21,3 +21,3 @@\n\n     vp = [] if isinstance(ng, dict) and all((isinstance(ng.get(k), str) for k in khoa)) and SHA_RE.fullmatch(ng['oid']) else ['thieu_nguon']\n-    if passed and (not (type(ra) is int and ra >= 1)):\n+    if passed and (not (type(ra) == int and ra >= 1)):\n         vp.append('attempt_kieu')"
+        }
+      ],
+      "domain_probes": "passed",
+      "ref_count": 417,
+      "proofs": [
+        "git helper returns exactly None or bytes; equality with None agrees with identity on that domain",
+        "ref trailing tilde leaves startswith refs/remotes/origin/ invariant; no ref can contain newline",
+        "SHA_RE anchors beginning and absolute end with 40 lowercase hex; match and fullmatch accept identical language",
+        "YAML safe types have normal metaclasses; comparing type(value) to int by == and is agrees"
+      ],
+      "limit": "Finite probes supplement domain proofs; no claim of enumerating all strings"
+    },
+    "chua_do_duoc": [
+      "Windows native/local M3",
+      "CI GitHub và readback authority online",
+      "Full mutation legacy base2009/head2040 và 2 CA_DAI",
+      "Full baseline base; head 15 ca B4 socket failed do EPERM và 38 skipped, không chứng nhận full base⊆head đều passed",
+      "Help text ngoài khối không có ca hành vi tự động; import và lời gọi D2b đã được đo"
+    ],
+    "inventory": {
+      "base_mutants": 2009,
+      "head_mutants": 2040,
+      "added": [
+        "d2b_attempt_bo_duong",
+        "d2b_attempt_ca_mien",
+        "d2b_bo_dang_oid",
+        "d2b_bo_loai_commit",
+        "d2b_bo_rc_git",
+        "d2b_chay_moi_gia_tri",
+        "d2b_doc_cay_lam_viec",
+        "d2b_dung_lai_symlink",
+        "d2b_duong_dan_khop_dau",
+        "d2b_mC10_attempt_khong_int",
+        "d2b_mC11_bo_mode",
+        "d2b_mC12_nhan_hai_cham",
+        "d2b_mC13_bo_remote",
+        "d2b_mC14_in_dat_khi_vi_pham",
+        "d2b_mC1_khong_chay",
+        "d2b_mC2_thieu_nguon_bo_qua",
+        "d2b_mC3_bo_neo_run",
+        "d2b_mC4_bo_neo_head",
+        "d2b_mC5_nhan_moi_trang_thai",
+        "d2b_mC6_ops_bat_ky",
+        "d2b_mC7_mien_thuan_loi_khai",
+        "d2b_mC8_gop_rc_12",
+        "d2b_mC9_bo_neo_attempt",
+        "d2b_mien_head_none",
+        "d2b_mien_nhan_tep",
+        "d2b_mien_thu_muc_goc",
+        "d2b_neo_attempt_ban_kem",
+        "d2b_nhan_mot_cham",
+        "d2b_nuot_loi_do",
+        "d2b_readback_ops_bat_ky",
+        "d2b_remote_bat_ky"
+      ],
+      "removed": [],
+      "changed_targets": {}
+    },
+    "ngoai_manifest": [
+      {
+        "old": "import tarfile\n",
+        "new": "",
+        "classification": "ngoai_bang_dong; closed by existing test evidence (no surviving mutant)",
+        "target": "cong_d2b_c1_passed_dat",
+        "result": "GIET via ChotB4; rc8 controlled NameError differs from expected rc0",
+        "evidence": "more.json / probe_more.py; applied only to scratch copy",
+        "limit": "Not counted among 178 manifest mutants or new open findings"
+      }
+    ]
+  },
+  "da_do_khop": [
+    {
+      "name": "preflight",
+      "status": "passed",
+      "evidence": "preflight.json; spec blob e5583bc042448517b94eadda57231dfc60e0a284; source bytes == SPEC.md; 2 files +313/-12, git diff --check rc0"
+    },
+    {
+      "name": "D2b + D1/D3/D4 legacy via chay_suite",
+      "status": "passed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=<work>/tmp python3 <bang_chung>/cong_cu/chay_ca.py <repo> ca cong_d2b_ cong_c_d cong_c_fixture_crlf",
+      "rc": 0,
+      "evidence": "targeted.log: 29/29 đạt"
+    },
+    {
+      "name": "Ruff bare F",
+      "status": "failed",
+      "rc": 1,
+      "evidence": "ruff_checkout_base/head.json run from actual respective checkout; both rc1 16 diagnostics, delta0; ruff_checkout_comparison.json. Earlier scratch-file check agrees. Ruff 0.15.15; delta criterion passed.",
+      "command": "python3 -m ruff check --no-cache --select F --output-format json .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py"
+    },
+    {
+      "name": "Ruff pin/probe contract",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "ruff_contract.json errors=[] count=3; distinct from bare lint"
+    },
+    {
+      "name": "selftest/CI registration executor evidence",
+      "status": "not_run",
+      "evidence": "reviewer chưa chạy; executor gate logs là lời khai độc lập chưa tái tạo toàn suite"
+    },
+    {
+      "name": "Canonical code / OID data separation",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "source_separation.json: both passed and owner_waived rc0 despite unusable module in OID and worktree; canonical module on origin/master remains intact"
+    },
+    {
+      "name": "Luật 9 do + inventory + ledger",
+      "status": "passed",
+      "rc": 0,
+      "evidence": "luat9.log HOAN_TAT; 178=174 GIET+4 TUONG_DUONG; luat9_comparison.json, ledger_A.tsv; baseline 14 ca đạt; không có thay đổi ID/phân hạng/ca giết so executor"
+    },
+    {
+      "name": "Base socket countercheck",
+      "status": "failed",
+      "rc": 1,
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=<work>/tmp python3 <bang_chung>/cong_cu/chay_ca.py <work>/base ca cong_b4_vc_loi_ket_noi",
+      "evidence": "base_socket_probe.log: same PermissionError [Errno 1] Operation not permitted as head shard 3; environmental limitation, not code finding"
+    },
+    {
+      "name": "Declared mutants head/base",
+      "status": "passed",
+      "rc": 0,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONUTF8=1 TMPDIR=<work>/tmp python3 -u -B <bang_chung>/cong_cu/chay_ca.py <repo|work/base> db [d2b_] c1106_ wp1124_",
+      "evidence": "declared_head.log 56/56, declared_base.log 25/25; declared_comparison.json, mC1–mC14 all GIET đúng ca; legacy delta=0"
+    },
+    {
+      "name": "Base D legacy and CRLF",
+      "status": "passed",
+      "rc": 0,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONUTF8=1 TMPDIR=<work>/tmp python3 -u -B <bang_chung>/cong_cu/chay_ca.py <work>/base ca cong_c_d cong_c_fixture_crlf",
+      "evidence": "legacy_base.log 14/14 dat; corresponding head subset within 29/29"
+    },
+    {
+      "name": "Official head 16 shards",
+      "status": "failed",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONUTF8=1 PYTHONIOENCODING=utf-8 TMPDIR=<work>/tmp python3 -B .claude/dev/packet_loop_test_manh.py --manh i/16 --ra <work>/head/reports/manh-i.json (i=0..15, max4workers)",
+      "rc_by_shard": {
+        "0": 0,
+        "1": 0,
+        "2": 1,
+        "3": 1,
+        "4": 1,
+        "5": 1,
+        "6": 1,
+        "7": 1,
+        "8": 1,
+        "9": 1,
+        "10": 1,
+        "11": 1,
+        "12": 1,
+        "13": 1,
+        "14": 1,
+        "15": 1
+      },
+      "positive_evidence": "16/16 receipts; exactly1799 unique IDs; 1746 passed, 15 failed(all socket EPERM), 38 skipped. All15D2b ran, nonefailed/noneskipped. head_shards_summary.json, head/manh-*.log and receipts."
+    },
+    {
+      "name": "Official GOM",
+      "status": "failed",
+      "rc": 1,
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONUTF8=1 TMPDIR=<work>/tmp PACKET_LOOP=chay KQ_MANH=failure python3 -B .claude/dev/packet_loop_test_manh.py --gom <work>/head/reports --n 16",
+      "evidence": "gom.log: 14 shard rc1 plus aggregatefailure; no missing/different case partition or carrier error. 1799 registered mandatory cases."
+    },
+    {
+      "name": "Long queue remainder",
+      "status": "not_run",
+      "rc_of_interrupted_queue": 130,
+      "evidence": "run_gates.py queue interrupted only AFTER all16head receipts completed; redundant199-mutant batch only partially begun, not counted. Base16shards and remaining large legacy audit not run. Complete56head/25base dedicated logs are separate."
+    },
+    {
+      "name": "Final checkout integrity",
+      "status": "passed",
+      "rc": 0,
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B <work>/final_check.py",
+      "evidence": "final_check.json: exact HEAD/tree/base retained; core.abbrev7; tracked/untracked clean, ignored.codex dirs unchanged; 19345 worktree entries byte/directory snapshot delta0. Snapshot covers from before long shard run; .git byte snapshot excluded, Git identity/index diff checked separately."
+    }
+  ],
+  "verdict": "changes_requested",
+  "identity": {
+    "provider": "openai_codex",
+    "model_family": "openai",
+    "execution_surface": "codex_cli",
+    "transport": "machine/local",
+    "run": "818363afb8604444a392385f153c077d",
+    "model": "KHONG_DO_DUOC",
+    "effort": "KHONG_DO_DUOC",
+    "sandbox": "workspace-write; repo kept read-only by commands",
+    "network": "External network/GitHub not used; local socket mocks attempted by official B4 tests and denied by sandbox",
+    "source": "run/818363af/run.json: executable /opt/node22/lib/node_modules/@openai/codex/bin/codex.js; local_process/subprocess/machine transport receipt. No served model/effort fields; stderr only Reading additional input from stdin."
+  },
+  "review_status": "completed_changes_requested",
+  "reviewed_tree": "e62a4e166e9f181f2a291337d8c527dd84fbaf7e",
+  "base_sha": "f602325574c62184caf16309631f5f680ca5cee2",
+  "completed_at": "2026-11-24T14:25:29.506903+00:00",
+  "gate_scope": {
+    "head_shards": {
+      "passed": 1746,
+      "failed": 15,
+      "skipped": 38
+    },
+    "required_checks_not_satisfied": [
+      "Full gate is red in this sandbox",
+      "Full base/head non-regression proof incomplete",
+      "Windows local M3 not_run"
+    ],
+    "review_conclusion": "Two independently measured behavior findings; changes_requested; no approval/land authority implied."
+  }
+}

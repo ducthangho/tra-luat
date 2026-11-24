@@ -1,0 +1,686 @@
+[
+  {
+    "id": "c2:kiem_ho_so:408:4",
+    "sha256": "6ef63aeb66bd2658f618c350e7851f2a024f5f0dd5cfa9afeb422fc4d19cd1af",
+    "rank": "GIET",
+    "case": [
+      "c14_cli_moi_to_hop_duong_dan"
+    ],
+    "assertion": "DO:c14_cli_moi_to_hop_duong_dan:--root . --tep ops/land/pr9001-thu-land-evidence.yaml: rc=1 dex/work/tmp/quet_db__60ge76o/tmpgg2afdq7/gate_output_doi_chieu.py\", line 366, in main     vp, ghi = kiem_ho_so(tep, byte, goc, yaml)     ^^^^^^^ TypeError: cannot unpack non-iterable NoneType object "
+  },
+  {
+    "id": "f:kiem_ho_so:408:4",
+    "sha256": "a54d5265f020178db012795902a4dafd1c7600da5113c4677cdf1e84ce427adb",
+    "rank": "GIET",
+    "case": [
+      "c14_cli_moi_to_hop_duong_dan"
+    ],
+    "assertion": "DO:c14_cli_moi_to_hop_duong_dan:--root . --tep ops/land/pr9001-thu-land-evidence.yaml: rc=1 dex/work/tmp/quet_db__60ge76o/tmp_b3lzh8y/gate_output_doi_chieu.py\", line 366, in main     vp, ghi = kiem_ho_so(tep, byte, goc, yaml)     ^^^^^^^ TypeError: cannot unpack non-iterable NoneType object "
+  },
+  {
+    "id": "c2:l8:426:4",
+    "sha256": "91f88555b760c29517f5cb79e1c41a8a097f46696262cfc49f2fb3bd4fffa0e4",
+    "rank": "GIET",
+    "case": [
+      "c14_cli_moi_to_hop_duong_dan"
+    ],
+    "assertion": "DO:c14_cli_moi_to_hop_duong_dan:--root . --tep ops/land/pr9001-thu-land-evidence.yaml: rc=1 p/quet_db__60ge76o/tmpl5dghow6/gate_output_doi_chieu.py\", line 288, in kiem_ho_so     vp8, ghi8 = l8(tep, byte, du_lieu, prov, goc)     ^^^^^^^^^ TypeError: cannot unpack non-iterable NoneType object "
+  },
+  {
+    "id": "f:l8:426:4",
+    "sha256": "a1770426fad957638b99522917fe02289ad7f70e45299e115e2d93826b217291",
+    "rank": "GIET",
+    "case": [
+      "c14_cli_moi_to_hop_duong_dan"
+    ],
+    "assertion": "DO:c14_cli_moi_to_hop_duong_dan:--root . --tep ops/land/pr9001-thu-land-evidence.yaml: rc=1 p/quet_db__60ge76o/tmpbedny7dp/gate_output_doi_chieu.py\", line 288, in kiem_ho_so     vp8, ghi8 = l8(tep, byte, du_lieu, prov, goc)     ^^^^^^^^^ TypeError: cannot unpack non-iterable NoneType object "
+  },
+  {
+    "id": "a2:l8:422:8",
+    "sha256": "22e95194e634d4cdc84f392246aa1e5a71d2455c1fbfb8a7f81922d2ea4aa7c0",
+    "rank": "GIET",
+    "case": [
+      "c01_l1_luot1_mergeable_clean_khong_nguon"
+    ],
+    "assertion": "DO:c01_l1_luot1_mergeable_clean_khong_nguon:lượt 1 #771: mong rc=1, được 2 KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: L8 không nạp/chạy được gate_output_doi_chieu.py: TypeError: kiem_ho_so trả list land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 1 KHÔNG ĐO ĐƯỢC · tổng 1"
+  },
+  {
+    "id": "g:l8:415:18",
+    "sha256": "17f4d958c32301e9e3795bacb697e8bdd9baec45faf06dcd3d47db6a27a3eb3a",
+    "rank": "GIET",
+    "case": [
+      "c01_l1_luot1_mergeable_clean_khong_nguon"
+    ],
+    "assertion": "DO:c01_l1_luot1_mergeable_clean_khong_nguon:lượt 1 #771: mong rc=1, được 2 KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: L8 không nạp/chạy được gate_output_doi_chieu.py~: AttributeError: 'NoneType' object has no attribute 'loader' land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi p"
+  },
+  {
+    "id": "a:l8:419:11",
+    "sha256": "5f0fde57aa298c5e4cfd0ff8fd73b64eddc938bf7e0fed3968a610ed2a1b18f4",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ ĐỎ ops/land/pr997-wp978-land-evidence.yaml: 2 vi phạm   L8 $.post_merge_checks[0].moc_gate_out"
+  },
+  {
+    "id": "c2:l8:420:12",
+    "sha256": "924ed19c0a83e339dff88d140d562c1fdb2000860e6c0489d4146e9ee75f4ee2",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ ĐỎ ops/land/pr997-wp978-land-evidence.yaml: 2 vi phạm   L8 $.post_merge_checks[0].moc_gate_out"
+  },
+  {
+    "id": "f:l8:420:12",
+    "sha256": "bf6e629c6d3b12e72632b0000e4772d65502863c6c55eb495d57fe6efbd9467d",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 MIỄN TRỪ ops/land/plat-x8-land-evidence.yaml (băm khớp ảnh chụp cutover) ĐẠT ops/land/pr1013-land-evidence-l7-r2-land-evidence.yaml ĐẠT ops/land/pr1022-windows-local-r1-land-evidence.yaml "
+  },
+  {
+    "id": "a:l8:426:108",
+    "sha256": "8928d5771728e0f9d371b84e0e387ee7e87414696c81c343d4c470aa1bdb9b59",
+    "rank": "GIET",
+    "case": [
+      "c18_l7_mien_tru_theo_bam"
+    ],
+    "assertion": "DO:c18_l7_mien_tru_theo_bam:cùng byte dưới TÊN khác không được miễn trừ: [\"L7 $.assurance_81.thuc_thi: khai DAT mà không có mapping đo thực thi — 'None'\"] ['L8 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ']"
+  },
+  {
+    "id": "k3:l8:426:108",
+    "sha256": "c018b88b7c9043301c3177ddd71ac0660859010f08194ac1bc35ddcdb754181c",
+    "rank": "GIET",
+    "case": [
+      "c29_b3_l8_mien_tru_theo_ten_va_bam"
+    ],
+    "assertion": "DO:c29_b3_l8_mien_tru_theo_ten_va_bam:miễn trừ L8 gắn TÊN: [\"L1 $.authorization_ghi_chu: lời khai đo không có token nguồn phân giải được (token: readback-pr-963.json, readback-events-963.json, readback-comment-6435716217.json) — 'measured — readback-pr-963.json merged_by=ducthangho, merged_at 2026-1"
+  },
+  {
+    "id": "g:l8:418:53",
+    "sha256": "376630fe4e435995d6f09c85e63f0c03fc8fea82a11a5e0e5a0cdd93ed329bc3",
+    "rank": "GIET",
+    "case": [
+      "c01_l1_luot1_mergeable_clean_khong_nguon"
+    ],
+    "assertion": "DO:c01_l1_luot1_mergeable_clean_khong_nguon:lượt 1 #771: mong rc=1, được 2 KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: L8 không nạp/chạy được gate_output_doi_chieu.py: ValueError: compile() mode must be 'exec', 'eval' or 'single' land_evidence_nguon: 0 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi "
+  },
+  {
+    "id": "g:l8:426:14",
+    "sha256": "2ab6d64b3d65c595142b5f37c3209ae66e0b5969e5c042def5132d83a1128698",
+    "rank": "GIET",
+    "case": [
+      "c25_b2_l8_ho_so_moi_duong_khong_tep_danh_gia"
+    ],
+    "assertion": "DO:c25_b2_l8_ho_so_moi_duong_khong_tep_danh_gia:B2 lời khai dương chỉ trích kiem-gate: mong rc=1 l8=['$.moc_gate_output: duong_khong_tep_danh_gia'] dong=['ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm'], được 1 ĐỎ ops/land/pr9001-thu-land-evidence.yaml: 1 vi phạm   L8 ~$.moc_gate_output: duon"
+  },
+  {
+    "id": "g:l8:426:37",
+    "sha256": "47d4e359e23f3f869bd43d496a87ba513e809ba1fbb8d97b3b6639853dea0287",
+    "rank": "GIET",
+    "case": [
+      "c29_b3_l8_mien_tru_theo_ten_va_bam"
+    ],
+    "assertion": "DO:c29_b3_l8_mien_tru_theo_ten_va_bam:B3 sửa một byte ⇒ mất miễn trừ, L8 áp: mong rc=1 l8=['$: landed_khong_loi_khai_gate_output'] dong=['  ghi chú ops/land/pr963-wp943-land-evidence.yaml: L8 mất miễn trừ: băm lệch ảnh chụp — kiểm đủ'], được 1 land/pr963-wp943-provenance/do-1027-landed/readback-comm"
+  },
+  {
+    "id": "g:l8:420:24",
+    "sha256": "bde347a9f9437034a28e4b6a2ebdde15a6813f5f12d45cdd2303ea11d1dba078",
+    "rank": "GIET",
+    "case": [
+      "c29_b3_l8_mien_tru_theo_ten_va_bam"
+    ],
+    "assertion": "DO:c29_b3_l8_mien_tru_theo_ten_va_bam:bản sao NGUYÊN BYTE: được miễn L8 (rc 1 là của L1, bản sao không mang provenance): mong rc=1 l8=[] dong=['  ghi chú ops/land/pr963-wp943-land-evidence.yaml: L8 miễn trừ (băm khớp ảnh chụp base đợt B)'], được 1 có token nguồn phân giải được (token: ops/land/pr963"
+  },
+  {
+    "id": "g:l8:423:30",
+    "sha256": "f68c6c40955107642da984f1403d6379652738b34ffd1c748533a6ee144050d5",
+    "rank": "GIET",
+    "case": [
+      "c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc"
+    ],
+    "assertion": "DO:c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc:module 'def kiem_ho_so(d, t):\\n    return None\\n' ⇒ rc 2 KHÔNG ĐO ĐƯỢC: rc=2 KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: L8 không nạp/chạy được gate_output_doi_chieu.py: TypeError: kiem_ho_so trả ~NoneType land_evidence_nguon: 0 ĐẠT · 0/0"
+  },
+  {
+    "id": "g:l8:425:28",
+    "sha256": "6badc4f1fb436158a77cd87b9acfb60e73a1b5633eeda4928e44465be10e4d3b",
+    "rank": "GIET",
+    "case": [
+      "c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc"
+    ],
+    "assertion": "DO:c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc:module None ⇒ rc 2 KHÔNG ĐO ĐƯỢC: rc=2 No such file or directory: '/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/work/tmp/len_cay_at8hx_ac/kho/ops/gate_output_doi_chieu.py' land_evidence_nguon: "
+  },
+  {
+    "id": "g:l8:425:72",
+    "sha256": "c97ff8255b26ceca06eb7ec2b36c639d1422e8781f1b10d37e8091588ab1cc23",
+    "rank": "GIET",
+    "case": [
+      "c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc"
+    ],
+    "assertion": "DO:c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc:module None ⇒ rc 2 KHÔNG ĐO ĐƯỢC: rc=2 No such file or directory: '/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/work/tmp/len_cay_yz9seidn/kho/ops/gate_output_doi_chieu.py' land_evidence_nguon: "
+  },
+  {
+    "id": "g:l8:425:92",
+    "sha256": "38bdc60923dcecb982c0c0c9497e02c0e0259b5d1f598fa20e43d07babaf622c",
+    "rank": "GIET",
+    "case": [
+      "c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc"
+    ],
+    "assertion": "DO:c30_b4_l8_module_khong_nap_duoc_la_khong_do_duoc:module \"def kiem_ho_so(d, t):\\n    raise RuntimeError('gia')\\n\" ⇒ rc 2 KHÔNG ĐO ĐƯỢC: rc=2 KHÔNG ĐO ĐƯỢC ops/land/pr9001-thu-land-evidence.yaml: L8 không nạp/chạy được gate_output_doi_chieu.py: RuntimeError: ~gia land_evidence_nguon: 0 ĐẠT · 0/0 mi"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:0",
+    "sha256": "81b29100fade123551d5f059626b502307e3a25f78826e3ad8b3be8c442b77d2",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:1",
+    "sha256": "e1e084a4e780ccfb8510d8859c74c0c9aad1dea3f7f2ce92b283809ff2073296",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:2",
+    "sha256": "7b6bb4d0ab09823e13c2be2dc1fefa1dc2722d10930aa5a075226fe703ede83b",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:3",
+    "sha256": "f901523fbcb3e00a76eae4d3174e9976eac875bb4e33aee728b8846546ebc678",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:4",
+    "sha256": "00e96056c17a579455693bda59e837a24aafe19827dd53e1e0bd2fa6a2281b49",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:5",
+    "sha256": "229690b5e7c2f0d3299c07085d3d8a49124409c0e7253f4769c5fd1e2d256b28",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:6",
+    "sha256": "6512f371b847ed92e055b2499c187448dce8547077f42ff48edcfb1f01e052e6",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:7",
+    "sha256": "8d69d4982b26b4f11324d7bd8470c6b820c60b15e34f63f954d5f292c5fb9029",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:8",
+    "sha256": "e5835544342d68c801a93f3c1d574cceece16788c9afa2efa10a48132c37609f",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:9",
+    "sha256": "fe4365ec72dd5e57446d9225b43e03d4016bd4eedb9490c3baad2c886e6b9dc3",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:10",
+    "sha256": "4ab5c9d0bb1db1b96184d7a3f6106f0a7cf7969ca7c37bbca1dd0ab628562a1c",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:11",
+    "sha256": "275bca1e2b559cd0d2a8c4aead653bccb6f002fca356e4a95a2d782bf0ddc901",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:12",
+    "sha256": "509e83c31d26d1c18855d63ef2c0c64ab41b8038d203c9837d04a1dcd2507c41",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:13",
+    "sha256": "d238b221b85e7ae55f08ca8914960d2fe53e0b74ce4d7fb907e62b684901d323",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:14",
+    "sha256": "f18e4732a2973d0d63d2384b050343aba946b7a0045829b92023956acf185470",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:15",
+    "sha256": "b0dbe69041d33b2783fc9e59d66a36c255ab8ab68a7ca041504c7ecaee61dc6c",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:16",
+    "sha256": "7e61d93c51e9c374164e11995ccb36311d759301585c44b930bf225a6e9bb86b",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:17",
+    "sha256": "e07ae813d84ee77efc99b2706043f7752486ab47ba616dd8671a203c0360570b",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:18",
+    "sha256": "1aebe5715f4c8473e816b2c13f5d0f6d232ebaca5f4062bef669204347391dc6",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:19",
+    "sha256": "0104ac3eb3a3c0adbb4813f4b9d4e3e59f53490a49a4b504db9dbd5075fad3c7",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:20",
+    "sha256": "49692043c8bf5e9b42c62022bfeaf6ebc2131ec21bd28911b276b0b9cce317bb",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:21",
+    "sha256": "ba2786f560fe1940bb95acb44ae693574beca3eece2c95ae976bfbfa81403632",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:22",
+    "sha256": "8b8b8bf3d35490b787a7fc6b0f6278bbdd3be0453772d6c98972388e25172fa2",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:23",
+    "sha256": "68232e8f1e628850cc4752eed950e01315300bca35ba82f0a84d7f58d66f222a",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:24",
+    "sha256": "7538efb10bc1801461317b690fc3718953cb9f8e36dddde509d8eebae3c372f0",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:25",
+    "sha256": "0e2f263e78f2c8b3d5059797ce3d83ed7bc835341733ba6ddf3efbfb23cd86cd",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:26",
+    "sha256": "d3ff0ec15e6ef44831be61d89003045dd99c1825773d02210e063b69d108f83c",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:27",
+    "sha256": "fb8bf79861777d3d2ccd568d8e2f2c00c850b76ccb2b4ccecba170c71d13404a",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:28",
+    "sha256": "b6a1e8056542621b61ec1bb85425479fc2edb010ae8e4e644b0858619cbf9acb",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:29",
+    "sha256": "a448ad6139dc12af5b8f591ef108ac3860e56bb8690b86ff2408df2c5c532a9d",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:30",
+    "sha256": "eda4821b2a37289d2911f287f743942fddd65ba250a780bb9be1830377e9a110",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:31",
+    "sha256": "8c344c3c66f917ebbccd92108681c813bdeef951d96dcbfdf900e3fcdf33c942",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:32",
+    "sha256": "8281c5503136d3fedccb5c1844dafc75b145066bb2ee2d410e80dbaeedc82fb0",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:33",
+    "sha256": "5d43fa1c19ee74aac7d3d53da07869672b7d7867977af46e55d15ddd36ce6686",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:34",
+    "sha256": "268afb80897a2b9ca42ff3216ed56dc3d5cf998d41e7c8a56ba7849bcb0fad16",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:35",
+    "sha256": "40a7fd21cd03f97fc45c89789dea099ee2342eb84931855ab4297b541a352d03",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:36",
+    "sha256": "9ca12e2519cd7460acb264c8f7355728635142fe60b1b3b6012e10021a488ef8",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:37",
+    "sha256": "1f28f9883e294fd10aa6beafe0fac0f41de580dd417f67872230428dcec273fd",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:38",
+    "sha256": "b5050983c9d5200d82db3c6b18cc3d05511a21a0a99db1cb599138372022e6c1",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:39",
+    "sha256": "8290250778acb86bb073a8a04d80a93c70460315140b3dafa68aa7566d582af9",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:40",
+    "sha256": "f286ac05fa0ee999c33beabf8991a1f9e95c6dbf94afe3d03a1004eef837fcb8",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:41",
+    "sha256": "d46aeb4502ca463d28b07b01ac4659a4350c1e08aa111700e02c78c74ddc6797",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:42",
+    "sha256": "f89672ed86e7fa0154867d5538c3d64cd675272e00b9fd93926824767cf3f73a",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:43",
+    "sha256": "cbe7f160d49f896e1f281123a0a63c0a2ef19759fef3f9350ed94513711acde0",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:44",
+    "sha256": "0624438da3a50d27a19fa5f5361c4d9fe93ad1f57a6389925d9417a8f789ae02",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:45",
+    "sha256": "825fdb7eef82ba806ccb18364395bfc4e86acbbdcce77a4a2b338892589989ba",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:46",
+    "sha256": "ad05b5741e42f5cecced2968550f646056dd396417d651945517fffa64d54c32",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:47",
+    "sha256": "0e6f3b2974cce172ba44fafefbd62e844234eeb846b05e4098bc96298d9f517e",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:48",
+    "sha256": "2bb871974183eb89d92c3641fec0b3146367799f3320f661ccd43b13f40bb2c8",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:49",
+    "sha256": "ca8e5cab2b2d32350e406eeedf3db94965518f89feaee17981ae80a374ba5a42",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:50",
+    "sha256": "90b90904da4a1d76aab26444677d5c6594830d6ab3b77bb394a4a0e9eaf9db8c",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:51",
+    "sha256": "0d70107049ad4e0ab5e24850c93caed7e377f9a697a5a404bb4bfe969a8f5b8d",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:52",
+    "sha256": "21140bf702736b5654efd2aff1dfdacc487dea5d9a77d0c4493cfc35264ff178",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:53",
+    "sha256": "3048f55eb69e8b681cedc3400b2fcaad47aa03d7ff54c89fad84c9b55e100227",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:54",
+    "sha256": "d296e8766a6a5517bc2ae7022e7719daf305de95eec40e8587faa691d81cf088",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 ce.yaml ĐẠT ops/land/pr992-wp923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml   ghi chú ops/land/pr997-wp978-land-evidence.yaml: L8 miễn trừ (bă"
+  },
+  {
+    "id": "h1:MIEN_TRU_L8:55",
+    "sha256": "af8e1a3a821f6ff953839aacfde245a1ba5670714bb1f7f9a347428c51e5302c",
+    "rank": "GIET",
+    "case": [
+      "c11_cay_that_dat_va_mien_tru_du"
+    ],
+    "assertion": "DO:c11_cay_that_dat_va_mien_tru_du:cây thật phải ĐẠT, mẫu số 28 miễn trừ: rc=1 p923-r3-land-evidence.yaml ĐẠT ops/land/pr994-land-81-ha-cap-r2-land-evidence.yaml ĐẠT ops/land/pr995-wp960-land-evidence.yaml ĐỎ ops/land/pr997-wp978-land-evidence.yaml: 2 vi phạm   L8 $.post_merge_checks[0].moc_gate_out"
+  },
+  {
+    "id": "h2:MIEN_TRU_L8",
+    "sha256": "90881a3e176aef05750c0dc0d6bfbfdee43b0ad06de7185fbbde779824a00a97",
+    "rank": "GIET",
+    "case": [
+      "c24_b1_mien_tru_l8_la_dung_tap_do_tren_base"
+    ],
+    "assertion": "DO:c24_b1_mien_tru_l8_la_dung_tap_do_tren_base:MIEN_TRU_L8 lệch tập ĐỎ đo trên f602325: thiếu [], thừa ['~them~'], lệch băm []"
+  }
+]

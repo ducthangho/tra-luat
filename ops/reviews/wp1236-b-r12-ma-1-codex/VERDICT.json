@@ -1,0 +1,442 @@
+{
+  "reviewed_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c",
+  "reviewed_tree": "ef68fdd1000127174203f3213f19a69ca20be936",
+  "spec_sha256": "4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7",
+  "vong": 1,
+  "dot": "B",
+  "findings": [
+    {
+      "id": "B01",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "severity": "P2",
+      "vi_tri": "ops/land_evidence_nguon_test.py:706 (c32), :620 (c27); SPEC.md:347–352, :473–474",
+      "van_de": "Luật 4 yêu cầu ma trận nghĩa hữu hạn đi qua consumer L8; luật 9 giữ nghĩa vụ ca bắt buộc độc lập với manifest. c32 chỉ có một phần miền. Thiếu đối chứng owner_waived hợp lệ, URL 1/2, strip/fullmatch dòng miễn và thứ tự hai lỗi; thiếu hai tên phi-lời-khai, chuẩn hóa giữ chữ số, đủ dấu phân cách và True/1 cho cả ba dạng landed. Bộ ca đọc cây base chỉ so tập ĐỎ, không thay các oracle riêng này. Ngữ pháp từng loại dòng tệp đánh giá cũng chưa có bảng biến thể/đối chứng qua L8.",
+      "bang_chung": [
+        "audit_matrix.py chạy các ca c24–c32: 9/9 đạt; 181 lời gọi module thật. Chỉ 3 lời khai owner_waived, cả ba dừng tại waiver_khong_co_can_cu:url; 0 lời gọi miễn có căn cứ. Xem matrix-observed.json và logs/matrix-observed.log.",
+        "Quét toàn bộ land_evidence_nguon_test.py: owner_waived chỉ ở dòng 713; không có gate2output, gate_output_nguon_va_gioi_han, moc_gate_output_rc_disposition. Các ca L1–L7 dùng module câm nên không chứng minh miền này qua L8.",
+        "probe_matrix.py cung cấp 27 đối chứng tái lập qua main/L8 trên mã nguyên vẹn: kết quả tại matrix-probes.json; đây là phép đo hành vi và fixture cho các ô còn thiếu, không phải đột biến.",
+        "SPEC.md luật 4 yêu cầu các miền cụ thể và đúng consumer; luật 9 đoạn cuối giữ ca luật 4 bắt buộc, độc lập phân hạng đột biến ngoài manifest.",
+        "probe_grammar.py: 4/4 đối chứng dữ liệu qua main/L8 (tệp hợp lệ, header sai, dòng job sai, dòng tổng sai); đúng rc và lý do K1 cho từng ô, xem grammar-probes.json. Không đột biến mã."
+      ],
+      "de_xuat": "Bổ sung/tái sử dụng các bảng dữ liệu theo từng miền bắt buộc qua main/L8, với kỳ vọng độc lập và đối chứng dương/âm; nhánh miễn đặt hai lỗi đồng thời để khóa thứ tự. Không cần sao chép mọi test đợt A hay mở rộng miền ngoài đặc tả. Đo lại bộ ca và delta luật 9 sau thay đổi."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "manifestations": [
+        "B01: ma trận miễn qua L8 thiếu toàn bộ nhánh có một URL hợp lệ và đối chứng",
+        "B01: ma trận khóa/token/landed chưa đầy đủ",
+        "B01: ngữ pháp từng dòng đánh giá chưa có bảng qua consumer L8"
+      ],
+      "highest_open_severity": "P2",
+      "common_fix": "Một lớp bảng dữ liệu theo luật 4, chạy qua L8 với oracle độc lập; tái sử dụng fixture/helper của đợt A khi phù hợp.",
+      "closing_check": "Ledger ánh xạ từng miền luật 4 → ca/ô qua L8; đủ dương/âm/thứ tự chốt; suite xanh và luật 9 delta GIET/TUONG_DUONG, 0 hồi quy kế thừa.",
+      "source": "Lượt B/1 tại f4e93b366d7014e3efd464b2018e8ec7a4f8576c; slug giữ từ lớp nêu trong SPEC.md mục Ma trận."
+    }
+  ],
+  "m3_windows": {
+    "ket_luan": "required",
+    "can_cu": [
+      "ADR-0060 M3 bước 1: không thuộc làn lưu trữ (hai tệp mã Python).",
+      "Bước 2 khớp dòng thêm thật ops/land_evidence_nguon_test.py:92 encoding=, :302 subprocess.run, :573 subprocess.run, :678 subprocess.run. Dừng ở bước 2; không xét 3/4.",
+      "Windows local chưa chạy trong reviewer Linux; điều phối chịu trách nhiệm trên exact head và base. Miễn Windows CI theo chỉ thị chủ kho trong prompt/LEASE; không suy miễn local."
+    ]
+  },
+  "luat9": {
+    "cong_cu_sha256": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+    "domain_authority": "E3, #1236 issuecomment-7130670276 supplied in prompt.snapshot; DELTA + no regression; kho B empty",
+    "base": {
+      "GIET": 335,
+      "SONG": 187,
+      "VO_CAN": 28
+    },
+    "head": {
+      "GIET": 438,
+      "SONG": 173,
+      "VO_CAN": 13
+    },
+    "delta": {
+      "total": 76,
+      "ranks": {
+        "GIET": 76
+      },
+      "ledger": "delta-ledger.json"
+    },
+    "ke_thua_hoi_quy": {
+      "total": 548,
+      "regressions": [],
+      "ledger": "inherited-ledger.json",
+      "base_not_applicable_replacements": [
+        {
+          "base_id": "c2:kiem_ho_so:340:4",
+          "reason": "neo xuat hien 0 lan",
+          "replacement": "c2:kiem_ho_so:408:4",
+          "rank": "GIET",
+          "case": [
+            "c14_cli_moi_to_hop_duong_dan"
+          ]
+        },
+        {
+          "base_id": "f:kiem_ho_so:340:4",
+          "reason": "neo xuat hien 0 lan",
+          "replacement": "f:kiem_ho_so:408:4",
+          "rank": "GIET",
+          "case": [
+            "c14_cli_moi_to_hop_duong_dan"
+          ]
+        }
+      ],
+      "criterion": "base GIET -> head != GIET (stricter than GIET -> SONG)"
+    },
+    "tuong_duong_da_kiem": [],
+    "baseline_cases": {
+      "base": 23,
+      "head": 33
+    },
+    "neo": {
+      "base": {
+        "cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+        "test": "3bbeea803f2506b146e5502ba7e5858bbb67da28882abad592b43291a3910f55",
+        "goc": "628b8cc310f286c4d26114878100fdb173bf4b4793e8ffd8f88504d656fcb35e",
+        "manifest": "abdeec1b218c8aafc52aa9e3ac33dbcefb096e0cfad4b821c74a972019876a2a",
+        "python": "3.13.18",
+        "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "head": {
+        "cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+        "test": "c3e5a46ae7c4d6b6da9fcb57fed7aa677253ae78dff401e0b8539a0d0d312a81",
+        "goc": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c",
+        "manifest": "a606d347220333bd12930c1604c3d7cd56c1f140f9e70d8b8bdbc58eb38b5df6",
+        "python": "3.13.18",
+        "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "kho_B": {
+      "total": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "reviewer_mutants_outside_manifest": 0,
+    "rc_head": 0,
+    "rc_base": 0,
+    "completion_markers": [
+      "HOAN_TAT head",
+      "HOAN_TAT base"
+    ]
+  },
+  "da_do_khop": [
+    {
+      "name": "suite",
+      "command": "python3 -B ops/land_evidence_nguon_test.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "CA 33/33; DOT BIEN 140/140; TU KIEM DAT (2); TONG DAT",
+      "log": "logs/suite.log",
+      "stdout_sha256": "3092ac039e9cdc4d71a5816521343395f4c84e9835de63b1824f80cf3eb13966",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "gate",
+      "command": "python3 -B ops/land_evidence_nguon.py --root .",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "149 DAT; 25/28 cutover exemptions; 0 violations; 0 unmeasured; 174 total",
+      "log": "logs/gate.log",
+      "stdout_sha256": "a9a5ffdd6e84365989aa08bd6d0c2e97a3f3a51c8dd13b8cc3f10d4df7dbb144",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "ci",
+      "command": "python3 -B .claude/dev/ci_dang_ky_test.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "PHAN CHUNG 1226/1226; TONG DAT",
+      "log": "logs/ci.log",
+      "stdout_sha256": "2773d93effe692afc1bbaa77e7c1f2f22fbac4488eb9765385a5b3ed1c3183dd",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "ruff",
+      "command": "python3 -m ruff check --select F ops/land_evidence_nguon.py ops/land_evidence_nguon_test.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "All checks passed!; RUFF_NO_CACHE=true",
+      "log": "logs/ruff.log",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "ruff-base",
+      "command": "python3 -m ruff check --select F ../work/base/ops/land_evidence_nguon.py ../work/base/ops/land_evidence_nguon_test.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "All checks passed!; delta 0",
+      "log": "logs/ruff-base.log",
+      "stdout_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "tested_sha": "f602325574c62184caf16309631f5f680ca5cee2"
+    },
+    {
+      "name": "diffcheck",
+      "command": "git diff --check f602325 HEAD",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "empty stdout; rc 0",
+      "log": "logs/diffcheck.log",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "numstat",
+      "command": "git diff --numstat f602325 HEAD",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "87+255=342 added lines; 2 files; within 450/6",
+      "log": "logs/numstat.log",
+      "stdout_sha256": "6212a1ada3242bc9b92125477bc4f6ff86cf02f6a07437d71d2a120f4aa92867",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "do-l8",
+      "command": "python3 -B ../bang_chung/do-l8/do_l8.py ../work/base ../work/do_l8_base.json",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "174=25 cutover+56 red+43 passed+50 without claims; 93 violations; 0 parse errors",
+      "log": "logs/do-l8.log",
+      "stdout_sha256": "e1f954d54ed73fc7af14096428a072380652cb3d74e1eac277e7b7b5fd7bf777",
+      "tested_sha": "f602325574c62184caf16309631f5f680ca5cee2"
+    },
+    {
+      "name": "compare-inputs",
+      "command": "python3 -B ../work/compare_inputs.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "constant == measured set; no cutover overlap; 56/56 hashes also match 8048551",
+      "log": "logs/compare-inputs.log",
+      "stdout_sha256": "7657d0a3397ccbbd34e311b166c46b1260261ca50943ecffc6b3d67d2eec1990",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "hoi-quy",
+      "command": "python3 -B ops/reviews/wp1236-r10-soan/quet_dot_bien.py hoi-quy ../work/base-manifest-map.json ../work/base/ops/land_evidence_nguon.py ops/land_evidence_nguon.py --ra ../work/inherited.jsonl",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "550 IDs; 548 applicable; 2 not applicable (return vp, ghi changed)",
+      "log": "logs/hoi-quy.log",
+      "stdout_sha256": "dec7b28add12c99fac30ef0768d2d6f01ca9bd4dac15774307bf960519e51bf5",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "matrix-observed",
+      "command": "python3 -B ../work/audit_matrix.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "9/9 cases c24–c32 pass; 181 real-module calls; all 3 waiver claims stop at url",
+      "log": "logs/matrix-observed.log",
+      "stdout_sha256": "060685efdfa527885416f1e6fff9c09128f0cdefa0fc584e1e1edb9f541a2816",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "matrix-probes",
+      "command": "python3 -B ../work/probe_matrix.py",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "27/27 independent behavior probes through main/L8 pass",
+      "log": "logs/matrix-probes.log",
+      "stdout_sha256": "56fbdfce115e9265cbe6df76d77921bb0cc7d256316237cf9f710aa5cd1df9e2",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "do-head",
+      "command": "python3 -B ops/reviews/wp1236-r10-soan/quet_dot_bien.py do ops/land_evidence_nguon.py ops/land_evidence_nguon_test.py ../work/kho-rong.jsonl --thu-muc-ra ../work/do-head --song-song 12",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "HOAN_TAT; 624 mutants: {'GIET': 438, 'SONG': 173, 'VO_CAN': 13}; baseline 33/33",
+      "log": "logs/do-head.log",
+      "stdout_sha256": "63b0bb7fa6a101bf14b310638452664ffb6a7d18ca1c566810ede13e5748ebde",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "do-base",
+      "command": "python3 -B ops/reviews/wp1236-r10-soan/quet_dot_bien.py do ../work/base/ops/land_evidence_nguon.py ../work/shim_test.py ../work/kho-rong.jsonl --thu-muc-ra ../work/do-base --song-song 4",
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/repo",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "HOAN_TAT; 550 mutants: {'GIET': 335, 'SONG': 187, 'VO_CAN': 28}; baseline 23/23",
+      "log": "logs/do-base.log",
+      "stdout_sha256": "677c1f3a71dfe0ce11d3a43df8294609c603b26ab25f7f39d718c13328869f50",
+      "tested_sha": "f602325574c62184caf16309631f5f680ca5cee2"
+    },
+    {
+      "name": "grammar-probes",
+      "command": "python3 -B ../work/probe_grammar.py",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "4/4: control rc0; header/job/summary rc1 đúng dau_tep_sai, dong_la, dong_la+thieu_moc",
+      "log": "logs/grammar-probes.log",
+      "stdout_sha256": "6a3dbc9e8bd77da40813e930c8069ccb114ad180a427e4eddb91301a1ff48b48",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "spec-red-names",
+      "command": "Python: lấy dòng DO từ ops/reviews/wp1236-r9-soan/do_loi_khai.txt rồi so tập tên do_l8_base.json",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "SPEC_RED 56 BASE_RED 56 missing [] extra []",
+      "log": "logs/spec-red-names.log",
+      "stdout_sha256": "9ea58b9843e4ddee88fa758e14dbc11f936b2bbaa48ae2140c165ad8669611ff",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "ruff-contract",
+      "command": "python3 -B: runpy.run_path('.claude/dev/ci_dang_ky_test.py')['loi_ruff_ci']()",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "RUFF_CONTRACT 3 []",
+      "log": "logs/ruff-contract.log",
+      "stdout_sha256": "1069744e64ae4de530c2eb1c699b614c5404f7a707ecc67a3853e39ed9929d4a",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    },
+    {
+      "name": "luat9-ledger",
+      "command": "python3 -B ../work/finish_luat9.py",
+      "rc": 0,
+      "status": "passed",
+      "positive_evidence": "76/76 delta GIET with DO: assertion; 548 inherited IDs, 0 regressions; 2 replacements GIET; exact inventories/hashes/baselines/completion checked",
+      "log": "logs/luat9-ledger.log",
+      "stdout_sha256": "429d44f1c853cb218dede7e71c9ca35e2c0796e213feff326a3c439a155176f8",
+      "tested_sha": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c"
+    }
+  ],
+  "verdict": "changes_requested",
+  "reviewer": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "run_id": "a7819b048f5741019ff1ac00fec0aed7",
+    "model": "KHONG_DO_DUOC",
+    "effort": "KHONG_DO_DUOC",
+    "sandbox": "workspace-write; repository treated read-only; scratch restricted to work/"
+  },
+  "base_sha": "f602325574c62184caf16309631f5f680ca5cee2",
+  "packet": {
+    "id": "wp1236",
+    "revision": 12,
+    "generation": 1,
+    "lease_id": "wp1236-b-r12-g1-claude-20261124",
+    "review_class": "sensitive",
+    "write_set": [
+      "ops/land_evidence_nguon.py",
+      "ops/land_evidence_nguon_test.py"
+    ],
+    "review_call": "B 1/4"
+  },
+  "environment": {
+    "os": "Linux-6.18.44-fc-v819-x86_64-with-glibc2.39",
+    "python": "3.13.18",
+    "git": "git version 2.43.0",
+    "ruff": "0.15.15",
+    "core_abbrev": "7",
+    "network": "not_used",
+    "scratch": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b1-1-codex/work",
+    "repository_policy": "read-only; all mutations/temp/cache in work/; no commits/push"
+  },
+  "test_mapping": {
+    "B1": "c11+c24 / mB1_xoa_muc_mien_tru_cay_that + mB1_xoa_muc_mien_tru_tap_do",
+    "B2": "c25 / mB2_L8_khong_duoc_goi",
+    "B3": "c29 / mB3_mien_tru_theo_ten",
+    "B4": "c30 / mB4_nuot_loi_nap",
+    "B5": "c28 / mB5_noi_danh_sach",
+    "B6": "c26 / mB6_sai_thu_muc_provenance",
+    "B7": "c27 / mB7_bo_qua_ho_so_khong_loi_khai",
+    "B8": "c31 / mB8_L8_truoc_chot_cutover"
+  },
+  "reviewed_choices": [
+    "L8 ở cuối kiem_ho_so; main đã continue cho cutover khớp byte. c31 khóa cả miễn và mất miễn.",
+    "Nạp module từ goc/ops bằng importlib spec + exec(compile(read_bytes)): đúng gốc, không dùng/ghi pyc. Module đợt A không cần đăng ký sys.modules.",
+    "Nạp trước miễn L8 không trái điều kiện module không nạp được ⇒ không ĐẠT. L5 vẫn chạy trước.",
+    "SystemExit được đổi thành KhongDoDuoc, tránh sys.exit(0) cho đạt giả.",
+    "Dữ liệu và băm dùng cùng byte đã nạp; mỗi vi phạm giữ nguyên và thêm L8.",
+    "B5 dùng vân tay chép riêng của tập tên+băm, không đọc hằng kỳ vọng từ module; đo lại khớp độc lập.",
+    "L1–L7 dùng module câm hợp lý để tách luật; không thể dùng chúng thay ma trận L8 (B01).",
+    "Bí danh môi trường được E3 cho phép; một dòng biểu thức và chú thích."
+  ],
+  "not_run": [
+    "Windows local (điều phối, required)",
+    "GitHub CI/connector/full_mutant_audit (offline trước push; không truy cập mạng)",
+    "selftest toàn kho và thử ghép master 5259239: chỉ có evidence executor, reviewer không đo lại; không tính pass độc lập"
+  ],
+  "skipped": [],
+  "measurement_corrections": [
+    "Ruff lần đầu RUFF_NO_CACHE=1 rc2 (giá trị env sai); sửa thành true rồi head/base đều rc0. Giữ logs/ruff-setup.*.",
+    "Base lần đầu archive thiếu các tệp nguồn L1 khiến c11 đỏ, scanner rc2 trước đột biến; bổ sung archive đầy đủ exact base và chạy lại. Giữ logs/do-base-setup.*.",
+    "Probe dấu -/. lần đầu ghép sát tên tệp: tên tối đại theo đặc tả là passed-.../passed...., nên kỳ vọng rc0 sai (25/27). Đặt khoảng trắng sau dấu để cô lập chốt delimiter, 27/27. Không quy lỗi fixture này cho sản phẩm; giữ matrix-probes-initial.*."
+  ],
+  "read_only_verification": {
+    "head": "f4e93b366d7014e3efd464b2018e8ec7a4f8576c",
+    "tree": "ef68fdd1000127174203f3213f19a69ca20be936",
+    "tracked_files_hashed": 17938,
+    "start_end_equal": true,
+    "worktree_diff_bytes": 0,
+    "index_diff_bytes": 0,
+    "untracked_files": 0,
+    "ignored": "only empty .codex/ sandbox mount; no ignored files listed; midpoint/end observed empty",
+    "limitation": "Snapshots establish no observed byte delta at the two points, not a proof of full write history. Sandbox is workspace-write; reviewer treated repository read-only. Source repositories outside supplied checkout were not observed."
+  },
+  "completed_at_utc": "2026-11-24T14:27:49.944003+00:00",
+  "passed": [
+    "suite",
+    "gate",
+    "ci",
+    "ruff",
+    "ruff-base",
+    "diffcheck",
+    "numstat",
+    "do-l8",
+    "compare-inputs",
+    "hoi-quy",
+    "matrix-observed",
+    "matrix-probes",
+    "do-head",
+    "do-base",
+    "grammar-probes",
+    "spec-red-names",
+    "ruff-contract",
+    "luat9-ledger"
+  ],
+  "failed": [
+    {
+      "attempt": "ruff-setup",
+      "rc": 2,
+      "reason": "RUFF_NO_CACHE=1 invalid; corrected to true",
+      "log": "logs/ruff-setup.log",
+      "resolved": true
+    },
+    {
+      "attempt": "do-base-setup",
+      "rc": 2,
+      "reason": "partial base archive omitted L1 source files; full exact-base archive supplied before rerun",
+      "log": "logs/do-base-setup.log",
+      "resolved": true
+    },
+    {
+      "attempt": "matrix-probes-initial",
+      "rc": 1,
+      "reason": "reviewer fixture expected standalone filename after adjacent -/.; maximal-token contract requires separating space for delimiter-only probe; corrected 27/27",
+      "log": "logs/matrix-probes-initial.log",
+      "resolved": true
+    }
+  ]
+}

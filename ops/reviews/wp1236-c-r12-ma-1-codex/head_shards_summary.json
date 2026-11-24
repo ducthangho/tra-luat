@@ -1,0 +1,463 @@
+{
+  "shards_completed": 16,
+  "registered_cases": 1799,
+  "unique_cases": 1799,
+  "passed": 1746,
+  "failed": 15,
+  "skipped": 38,
+  "rows": [
+    {
+      "label": "head/manh-0",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "0/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-0.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 0,
+      "seconds": 749.11,
+      "baseline_passed": 109,
+      "baseline_runnable": 109,
+      "skipped": 0,
+      "failures": [],
+      "skip_reasons": [],
+      "report_rc": 0,
+      "carrier": true
+    },
+    {
+      "label": "head/manh-1",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "1/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-1.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 0,
+      "seconds": 346.88,
+      "baseline_passed": 43,
+      "baseline_runnable": 43,
+      "skipped": 0,
+      "failures": [],
+      "skip_reasons": [],
+      "report_rc": 0,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-2",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "2/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-2.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 769.08,
+      "baseline_passed": 114,
+      "baseline_runnable": 115,
+      "skipped": 3,
+      "failures": [
+        "ĐỎ  cong_b4_vc_khuc_cuoi_tre_trong_han: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_read: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_persist_update_held: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_breakaway_ngam: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-3",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "3/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-3.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 495.06,
+      "baseline_passed": 113,
+      "baseline_runnable": 114,
+      "skipped": 4,
+      "failures": [
+        "ĐỎ  cong_b4_vc_loi_ket_noi: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_volume_junction: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_persist_bindings: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_abi: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_long: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-4",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "4/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-4.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 540.26,
+      "baseline_passed": 115,
+      "baseline_runnable": 116,
+      "skipped": 2,
+      "failures": [
+        "ĐỎ  cong_b4_vc_proxy: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_swap_ancestor: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_thuan: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-5",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "5/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-5.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 311.45,
+      "baseline_passed": 114,
+      "baseline_runnable": 116,
+      "skipped": 2,
+      "failures": [
+        "ĐỎ  cong_b4_vc_get_header: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'",
+        "ĐỎ  cong_b4_gt4_chan_va_dem: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_metadata_drift: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_han: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-6",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "6/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-6.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 309.86,
+      "baseline_passed": 114,
+      "baseline_runnable": 115,
+      "skipped": 3,
+      "failures": [
+        "ĐỎ  cong_b4_vc_khong_chuyen_huong: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_noinherit: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_seed_ok: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_mo_coi: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-7",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "7/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-7.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 440.39,
+      "baseline_passed": 114,
+      "baseline_runnable": 115,
+      "skipped": 3,
+      "failures": [
+        "ĐỎ  cong_b4_vc_404_nguyen_ma: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_symlink_file: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_seed_hardlink: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_treo_truoc_gan: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-8",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "8/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-8.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 369.96,
+      "baseline_passed": 115,
+      "baseline_runnable": 116,
+      "skipped": 2,
+      "failures": [
+        "ĐỎ  cong_b4_vc_500_khong_thu_lai: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_seed_acl: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_khong_ke_thua: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-9",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "9/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-9.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 349.79,
+      "baseline_passed": 113,
+      "baseline_runnable": 114,
+      "skipped": 4,
+      "failures": [
+        "ĐỎ  cong_b4_vc_tran_byte: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  luong_canonical_chay_that: chỉ đo lệnh pwsh trên Windows",
+        "BỎ QUA  wp1342_native_lock_exclusive: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_seed_fingerprint: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_loi_truoc_gan: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-10",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "10/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-10.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 359.03,
+      "baseline_passed": 114,
+      "baseline_runnable": 115,
+      "skipped": 3,
+      "failures": [
+        "ĐỎ  cong_b4_vc_han_tuong: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_lock_noinherit: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_seed_nonfile: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_loi_sau_gan: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-11",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "11/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-11.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 507.05,
+      "baseline_passed": 113,
+      "baseline_runnable": 114,
+      "skipped": 3,
+      "failures": [
+        "ĐỎ  cong_b4_vc_trong_han_tuong: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_lock_names: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_seed_drift: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_cha_chet_sau_gan: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-12",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "12/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-12.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 359.96,
+      "baseline_passed": 113,
+      "baseline_runnable": 114,
+      "skipped": 3,
+      "failures": [
+        "ĐỎ  cong_b4_vc_han_socket: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_persist_create: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_boot_stable: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_cha_chet_truoc_gan: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-13",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "13/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-13.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 340.63,
+      "baseline_passed": 113,
+      "baseline_runnable": 114,
+      "skipped": 3,
+      "failures": [
+        "ĐỎ  cong_b4_vc_eof_tre: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_persist_update: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_boot_failclosed: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_query_loi: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-14",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "14/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-14.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 291.57,
+      "baseline_passed": 115,
+      "baseline_runnable": 116,
+      "skipped": 1,
+      "failures": [
+        "ĐỎ  cong_b4_vc_khuc_cuoi_tre: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_persist_update_refuse: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    },
+    {
+      "label": "head/manh-15",
+      "command": [
+        "/usr/local/bin/python3",
+        "-B",
+        ".claude/dev/packet_loop_test_manh.py",
+        "--manh",
+        "15/16",
+        "--ra",
+        "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/work/head/reports/manh-15.json"
+      ],
+      "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/c1-1-codex/repo",
+      "rc": 1,
+      "seconds": 220.88,
+      "baseline_passed": 114,
+      "baseline_runnable": 115,
+      "skipped": 2,
+      "failures": [
+        "ĐỎ  cong_b4_vc_eof_tre_trong_han: CliSapDo: b4 vận chuyển SẬP: rc=1; stderr='y,\\n                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\\n                                self.socket_type)\\n                                ^^^^^^^^^^^^^^^^^\\n  File \"/usr/local/lib/python3.13/socket.py\", line 233, in __init__\\n    _socket.socket.__init__(self, family, type, proto, fileno)\\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nPermissionError: [Errno 1] Operation not permitted'"
+      ],
+      "skip_reasons": [
+        "BỎ QUA  wp1342_native_persist_update_symlink: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt",
+        "BỎ QUA  wp1342_native_job_breakaway_tuong_minh: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt"
+      ],
+      "report_rc": 1,
+      "carrier": false
+    }
+  ],
+  "all_failures_socket_permission": true,
+  "d2b_cases": [
+    "cong_d2b_c7_git_loi",
+    "cong_d2b_c9_oid",
+    "cong_d2b_c9_oid_khong_phai_commit",
+    "cong_d2b_c1_passed_dat",
+    "cong_d2b_tu_kiem_phan_hang",
+    "cong_d2b_c2_thieu_nguon",
+    "cong_d2b_c3_attempt_kieu",
+    "cong_d2b_c3_neo",
+    "cong_d2b_c4_kiem_tep",
+    "cong_d2b_c5_duong_dan",
+    "cong_d2b_c5_mode",
+    "cong_d2b_c6_mien",
+    "cong_d2b_c7_module_vang",
+    "cong_d2b_c7_module_khong_nap",
+    "cong_d2b_c7_module_nem"
+  ],
+  "d2b_failed": [],
+  "d2b_skipped": []
+}

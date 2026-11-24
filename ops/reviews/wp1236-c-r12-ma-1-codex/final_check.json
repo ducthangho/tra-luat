@@ -1,0 +1,77 @@
+{
+  "timestamp": "2026-11-24T14:24:50.693663+00:00",
+  "passed": true,
+  "commands": [
+    {
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD",
+        "HEAD^{tree}",
+        "HEAD^"
+      ],
+      "rc": 0,
+      "stdout": "ac523aebd876640b369e94511fd44e81bace0908\ne62a4e166e9f181f2a291337d8c527dd84fbaf7e\nf602325574c62184caf16309631f5f680ca5cee2\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all",
+        "--ignored=matching"
+      ],
+      "rc": 0,
+      "stdout": "!! .codex/\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--binary"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--binary"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "f602325574c62184caf16309631f5f680ca5cee2",
+        "HEAD"
+      ],
+      "rc": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "config",
+        "--get",
+        "core.abbrev"
+      ],
+      "rc": 0,
+      "stdout": "7\n",
+      "stderr": ""
+    }
+  ],
+  "worktree_entries": 19345,
+  "worktree_delta": {},
+  "scope": "Compared all worktree entries, including ignored directories, to content_snapshot taken before long shard run; .git excluded from byte snapshot. Git identity/index diff/status checked separately. Initial preflight clean; no claim of tracing every filesystem operation."
+}

@@ -1,0 +1,29 @@
+{
+  "equivalents": [
+    {
+      "id": "j1:_d2b_kiem:40:7",
+      "diff": "--- \n\n+++ \n\n@@ -35,3 +35,3 @@\n\n         return vp + ['duong_dan_sai']\n-    if (cay_git := git('ls-tree', '-z', '-t', oid, '--', dd)) is None:\n+    if (cay_git := git('ls-tree', '-z', '-t', oid, '--', dd)) == None:\n         raise OSError('git ls-tree')"
+    },
+    {
+      "id": "g:_d2b_kiem:35:49",
+      "diff": "--- \n\n+++ \n\n@@ -30,3 +30,3 @@\n\n         return None if rc else o\n-    ref = git('branch', '-r', '--contains', oid, '--format=%(refname)')\n+    ref = git('branch', '-r', '--contains', oid, '--format=%(refname)~')\n     if git('cat-file', '-t', oid) != b'commit\\n' or not any((r.startswith(b'refs/remotes/origin/') for r in (ref or b'').split(b'\\n'))):"
+    },
+    {
+      "id": "i7:_d2b_kiem:25:90",
+      "diff": "--- \n\n+++ \n\n@@ -20,3 +20,3 @@\n\n     khoa = ('oid', 'tep') if passed else ('oid', 'chuoi', 'readback_thu_muc')\n-    vp = [] if isinstance(ng, dict) and all((isinstance(ng.get(k), str) for k in khoa)) and SHA_RE.fullmatch(ng['oid']) else ['thieu_nguon']\n+    vp = [] if isinstance(ng, dict) and all((isinstance(ng.get(k), str) for k in khoa)) and SHA_RE.match(ng['oid']) else ['thieu_nguon']\n     if passed and (not (type(ra) is int and ra >= 1)):"
+    },
+    {
+      "id": "j1:_d2b_kiem:26:23",
+      "diff": "--- \n\n+++ \n\n@@ -21,3 +21,3 @@\n\n     vp = [] if isinstance(ng, dict) and all((isinstance(ng.get(k), str) for k in khoa)) and SHA_RE.fullmatch(ng['oid']) else ['thieu_nguon']\n-    if passed and (not (type(ra) is int and ra >= 1)):\n+    if passed and (not (type(ra) == int and ra >= 1)):\n         vp.append('attempt_kieu')"
+    }
+  ],
+  "domain_probes": "passed",
+  "ref_count": 417,
+  "proofs": [
+    "git helper returns exactly None or bytes; equality with None agrees with identity on that domain",
+    "ref trailing tilde leaves startswith refs/remotes/origin/ invariant; no ref can contain newline",
+    "SHA_RE anchors beginning and absolute end with 40 lowercase hex; match and fullmatch accept identical language",
+    "YAML safe types have normal metaclasses; comparing type(value) to int by == and is agrees"
+  ],
+  "limit": "Finite probes supplement domain proofs; no claim of enumerating all strings"
+}

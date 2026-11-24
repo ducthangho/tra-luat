@@ -1,0 +1,254 @@
+[
+  {
+    "label": "separator ' '",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "separator '\\t'",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "separator '—'",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "separator '-'",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "separator ':'",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "separator '('",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "separator ','",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "separator '.'",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "separator ';'",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "key gate_output_nguon",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "key gate_output_nguon_va_gioi_han",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "key moc_gate_output_rc_disposition",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "key gate2output",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "landed root True",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected_l8": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "actual_l8": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "passed": true
+  },
+  {
+    "label": "landed root 1",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "landed packet True",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected_l8": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "actual_l8": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "passed": true
+  },
+  {
+    "label": "landed packet 1",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "landed dated True",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected_l8": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "actual_l8": [
+      "$: landed_khong_loi_khai_gate_output"
+    ],
+    "passed": true
+  },
+  {
+    "label": "landed dated 1",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "waiver valid",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "waiver two URLs",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:url"
+    ],
+    "actual_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:url"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver strip",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected_l8": [],
+    "actual_l8": [],
+    "passed": true
+  },
+  {
+    "label": "waiver trailing text",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "actual_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver wrong author",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:tac_gia"
+    ],
+    "actual_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:tac_gia"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver html before author",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:html_url"
+    ],
+    "actual_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:html_url"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver os before sha",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:os"
+    ],
+    "actual_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:os"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver date before os",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:han"
+    ],
+    "actual_l8": [
+      "$.gate_output: waiver_khong_co_can_cu:han"
+    ],
+    "passed": true
+  }
+]

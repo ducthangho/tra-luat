@@ -1,0 +1,70 @@
+[
+  {
+    "label": "baseline",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt@01431a3480238ca0973692c96593115da28a484b\nĐÓNG ĐƯỢC WP P — merge 765f13b4706a33ae33e55c9392421df0c0b36ffe\n",
+    "stderr": ""
+  },
+  {
+    "label": "existing_yaml_symlink_with_regular_provenance",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/lk2-provenance/danh-gia-gate-output-44669622916.txt@01431a3480238ca0973692c96593115da28a484b\nĐÓNG ĐƯỢC WP P — merge 765f13b4706a33ae33e55c9392421df0c0b36ffe\n",
+    "stderr": ""
+  },
+  {
+    "label": "same_tree_direct_validator",
+    "result": [
+      "not_measured",
+      [
+        "symlink"
+      ]
+    ],
+    "mode": "120000 blob 2907330bc9e39ff0262346dbb11d97194374edfc\tops/land/lk2-provenance/p.yaml"
+  },
+  {
+    "label": "newline_passed",
+    "rc": 0,
+    "stdout": "D2b ĐẠT ops/land/dong\nmoi-provenance/danh-gia-gate-output-44669622916.txt@26ba7189d3a97c9afac8d4b4ce79a7f5ad0a844a\nĐÓNG ĐƯỢC WP P — merge 527b31bba3edfd4aa74b1be7849944c43cc6e4ac\n",
+    "stderr": ""
+  },
+  {
+    "label": "newline_waived",
+    "rc": 0,
+    "stdout": "D2b ĐẠT mien ops/land/dong\nmoi-provenance@26ba7189d3a97c9afac8d4b4ce79a7f5ad0a844a\nĐÓNG ĐƯỢC WP P — merge 527b31bba3edfd4aa74b1be7849944c43cc6e4ac\n",
+    "stderr": ""
+  },
+  {
+    "label": "fixture_equivalence",
+    "path": "ops/land/pr1440-wp1319-provenance/danh-gia-gate-output-44669622916.txt",
+    "original": [
+      "passed",
+      []
+    ],
+    "adapted": [
+      "passed",
+      []
+    ],
+    "header": "5fd13b9e3e6145bd1a33df047cc71d48cb88be00",
+    "merge": "5fd13b9e3e6145bd1a33df047cc71d48cb88be00"
+  },
+  {
+    "label": "fixture_equivalence",
+    "path": "ops/land/pr1453-wp433-provenance/danh-gia-gate-output-44711337223.txt",
+    "original": [
+      "failed",
+      []
+    ],
+    "adapted": [
+      "failed",
+      []
+    ],
+    "header": "5fd13b9e3e6145bd1a33df047cc71d48cb88be00",
+    "merge": "5fd13b9e3e6145bd1a33df047cc71d48cb88be00"
+  },
+  {
+    "label": "C4_exact",
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:failed:-\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  }
+]

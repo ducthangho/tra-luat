@@ -1,0 +1,15 @@
+{
+  "fixture": "unmodified _d2b_cay",
+  "direct_validator": [
+    "not_measured",
+    [
+      "symlink",
+      "provenance_0"
+    ]
+  ],
+  "cli": {
+    "rc": 12,
+    "stdout": "",
+    "stderr": "  THIẾU  D2b kiem_tep:not_measured:provenance_0\nCHƯA ĐÓNG ĐƯỢC WP: thiếu D2b\n"
+  }
+}

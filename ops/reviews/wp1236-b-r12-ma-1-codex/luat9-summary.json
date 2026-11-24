@@ -1,0 +1,61 @@
+{
+  "base": {
+    "GIET": 335,
+    "SONG": 187,
+    "VO_CAN": 28
+  },
+  "head": {
+    "GIET": 438,
+    "SONG": 173,
+    "VO_CAN": 13
+  },
+  "delta": {
+    "GIET": 76
+  },
+  "delta_total": 76,
+  "inherited_total": 548,
+  "regressions": [],
+  "removed_base_replacements": [
+    {
+      "base_id": "c2:kiem_ho_so:340:4",
+      "reason": "neo xuat hien 0 lan",
+      "replacement": "c2:kiem_ho_so:408:4",
+      "rank": "GIET",
+      "case": [
+        "c14_cli_moi_to_hop_duong_dan"
+      ]
+    },
+    {
+      "base_id": "f:kiem_ho_so:340:4",
+      "reason": "neo xuat hien 0 lan",
+      "replacement": "f:kiem_ho_so:408:4",
+      "rank": "GIET",
+      "case": [
+        "c14_cli_moi_to_hop_duong_dan"
+      ]
+    }
+  ],
+  "equivalents": [],
+  "baseline_cases": {
+    "base": 23,
+    "head": 33
+  },
+  "neo": {
+    "base": {
+      "cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+      "test": "3bbeea803f2506b146e5502ba7e5858bbb67da28882abad592b43291a3910f55",
+      "goc": "628b8cc310f286c4d26114878100fdb173bf4b4793e8ffd8f88504d656fcb35e",
+      "manifest": "abdeec1b218c8aafc52aa9e3ac33dbcefb096e0cfad4b821c74a972019876a2a",
+      "python": "3.13.18",
+      "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "head": {
+      "cong_cu": "1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c",
+      "test": "c3e5a46ae7c4d6b6da9fcb57fed7aa677253ae78dff401e0b8539a0d0d312a81",
+      "goc": "a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c",
+      "manifest": "a606d347220333bd12930c1604c3d7cd56c1f140f9e70d8b8bdbc58eb38b5df6",
+      "python": "3.13.18",
+      "kho": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

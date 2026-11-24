@@ -16023,7 +16023,38 @@ _R387_KHOI_CHO = ("    try:\n        log_cay_chet = _cho_cay_chet_truoc_bam(p.pi
 _R387_DONG_DOC_SO = "    so_moi = _doc_so(thu_muc) or {}\n"
 
 
+@ca
+def r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc():
+    """r1509: ACE CodexSandboxUsers chỉ được tha trên THƯ MỤC, quyền chỉ đọc, đúng tên + alias + miền máy."""
+    m = _tai_launcher_thu()
+    u = "S-1-5-21-1-2-3-1001"
+    g = "S-1-5-21-1-2-3-1003"
+    f = m._ace_sandbox_codex_duoc_phep
+    bang(f(True, "A", "0x1200a9", g, "CodexSandboxUsers", 4, u), "ca thật trên máy chủ kho phải qua")
+    bang(f(True, "A", "FRFX", g, "codexsandboxusers", 4, u), "dạng chữ FRFX chỉ đọc phải qua")
+    for ten_ca, doi in (("tệp", (False, "A", "0x1200a9", g, "CodexSandboxUsers", 4, u)),
+                        ("ghi", (True, "A", "0x1201bf", g, "CodexSandboxUsers", 4, u)),
+                        ("FA", (True, "A", "FA", g, "CodexSandboxUsers", 4, u)),
+                        ("quyền lạ", (True, "A", "ZZ", g, "CodexSandboxUsers", 4, u)),
+                        ("tên khác", (True, "A", "0x1200a9", g, "CodexSandboxUsers2", 4, u)),
+                        ("tên rỗng", (True, "A", "0x1200a9", g, "", 0, u)),
+                        ("không phải alias", (True, "A", "0x1200a9", g, "CodexSandboxUsers", 1, u)),
+                        ("miền khác", (True, "A", "0x1200a9", "S-1-5-21-9-9-9-1003", "CodexSandboxUsers", 4, u)),
+                        ("Everyone", (True, "A", "0x1200a9", "S-1-1-0", "CodexSandboxUsers", 4, u)),
+                        ("audit", (True, "AU", "0x1200a9", g, "CodexSandboxUsers", 4, u))):
+        bang(not f(*doi), f"r1509 phải ĐỎ: {ten_ca}")
+
+
 DOT_BIEN = [
+    # r1509: nới danh sách cho phép phải làm ca đích ĐỎ.
+    ("r1509_tha_ca_tep", ("    if not directory or loai != \"A\":", "    if loai != \"A\":"),
+     ["r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc"]),
+    ("r1509_tha_quyen_ghi", ("    if mask is None or mask & ~_SANDBOX_CODEX_QUYEN_DOC:", "    if mask is None:"),
+     ["r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc"]),
+    ("r1509_tha_moi_ten", ("    if (ten or \"\").casefold() != _SANDBOX_CODEX_NHOM or kieu != 4:", "    if kieu != 4:"),
+     ["r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc"]),
+    ("r1509_tha_moi_mien", ("            and sid != user_sid)", "            or True)"),
+     ["r1509_acl_sandbox_codex_chi_tha_thu_muc_chi_doc"]),
     # wp387 packet A (M6): mỗi chốt của đặc tả LAUNCHER-BAM-LOG-SAU-CAY-CHET r1 một đột biến; không mục nào mang điều kiện nền.
     ("r387_khai_cay_chet_luon_true", ("log_bam_cay_da_chet=log_cay_chet,", "log_bam_cay_da_chet=True,"), ["r387_m1_chau_ghi_muon_khai_pham_vi_bam"]),
     ("r387_khai_cay_chet_luon_false", ("log_bam_cay_da_chet=log_cay_chet,", "log_bam_cay_da_chet=False,"), ["r387_m1_con_thuong_chung_minh_cay_chet"]),

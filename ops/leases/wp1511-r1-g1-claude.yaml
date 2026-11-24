@@ -1,0 +1,86 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1511
+packet_id: wp1511
+revision: 1
+generation: 1
+lease_id: wp1511-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model: claude-opus-5-5
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: local
+risk: sensitive
+depends_on: []
+reviewer: codex
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+reviewer_transport: machine
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+spec_path: ops/specs/wp1511.md
+spec_sha256_required: 4ea2924499e3d9b50560c04a17f9061f12ca479a32b23be398c028f55a6b38e9
+spec_hash: 4ea2924499e3d9b50560c04a17f9061f12ca479a32b23be398c028f55a6b38e9
+spec_ref: refs/heads/ops/wp1511-r1-g1-lease@159d909937eaff0c54313aa748520c3ed021a6e5
+prompt_path: ops/specs/wp1511.md
+prompt_sha256_required: 4ea2924499e3d9b50560c04a17f9061f12ca479a32b23be398c028f55a6b38e9
+write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+- ops/land/pr1510-r1509-acl-codex-land-evidence.yaml
+- ops/land/pr1510-r1509-provenance/
+write_set_hash: f6121b4b6828a36f4adcd64300cb23553f08ab8a6c6ddda5c5e0cbba4f2d565f
+write_set_hash_cong_thuc: sha256 cua JSON gon (separators , :) UTF-8 cua danh sach duong dan da chuan hoa NFC, casefold, sap xep
+write_set_ghi_chu: 'launcher*.py CHI K2b sau diem dung duoc duyet; ops/land/... la K3 (prefix provenance).'
+change_policy_sha: null
+effective_write_set:
+- .claude/dev/launcher.py
+- .claude/dev/launcher_test.py
+- ops/land/pr1510-r1509-acl-codex-land-evidence.yaml
+- ops/land/pr1510-r1509-provenance/
+effective_write_set_nguon: khai_bao_trong_spec
+merge_conditions:
+- {id: M-1, dieu_kien: 'verdict codex approve tren head cuoi moi PR, khong P0/P1/P2; toi da 2 loi goi codex moi PR'}
+- {id: M-2, dieu_kien: 'ci.yml luot PR XANH tren head cuoi doc bang check run; PR-B them launcher-windows xanh'}
+- {id: M-3, dieu_kien: 'N1-N6 cua spec'}
+uy_quyen_merge: false
+branch: agent/wp1511-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: a03a28ef076503c7fe93c208a4998c32590a977f
+start_from_sha: a03a28ef076503c7fe93c208a4998c32590a977f
+reviewed_sha_required: a03a28ef076503c7fe93c208a4998c32590a977f
+reviewed_sha_required_nghia: 'Chua co head ung vien; verdict neo exact head THAT.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1511#issuecomment-7137675267
+granted_on_instruction_readback: 'chu kho noi "Duyệt lease" trong chat phien local 24-11-2026; ghi ho tren #1511. Bam byte KHONG DO DUOC.'
+recorded_by: claude-orchestrator-session
+recorder_is_executor: true
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-24T16:30:00Z'
+  ket_qua: 'KHONG DO (ai-dang-giu chua chay tai cho; tren Windows quet ~20 phut); launcher.py vua land #1510 khong qua lease.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'packet moi.'
+leased_at_utc: '2026-11-24T16:30:00Z'
+heartbeat_at: '2026-11-24T16:30:00Z'
+lease_until: '2026-11-26T16:30:00Z'
+lease_expires_at_utc: '2026-11-26T16:30:00Z'
+run_minutes: 120
+heartbeat_minutes: 60
+attempts_used: 0
+attempts_limit: 2
+review_rounds_limit: 3
+budget:
+  codex_review_calls:
+    pr_a_k3: {used: 0, reserved: 0, limit: 2}
+    pr_b_k2b: {used: 0, reserved: 0, limit: 2}
+  khong_reset_theo_generation: true
+nang_tran: []
+requires_live: false
+ci_policy: bat_buoc_xanh_tren_head_cuoi_truoc_khi_bao_du_dieu_kien
+diem_dung: 'sau K2a (do ACL) phai dang ket qua + de xuat thiet ke, cho chu kho duyet tren #1511 truoc K2b.'

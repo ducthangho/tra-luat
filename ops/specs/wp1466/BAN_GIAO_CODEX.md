@@ -22,7 +22,7 @@ Write set có đúng 4 tệp:
 - `.claude/dev/packet_loop.py`
 - `.claude/dev/packet_loop_test.py`
 
-## 2. Trạng thái (đo 22-11-2026, khoảng 02:50Z)
+## 2. Trạng thái (đo lại 24-11-2026, 11:17Z)
 | hạng mục | trạng thái |
 |---|---|
 | Đặc tả | `ops/specs/wp1466.md` r8, sha256 `98790505d927224bc5e1e42e8f9460376a911a913e2e1d1b12bdf36c5eb20834`, commit `e215940`. **ĐÃ ĐÓNG BĂNG**: chủ kho duyệt băm (C1, E5) tại #1466 issuecomment-7058374374 |
@@ -30,9 +30,24 @@ Write set có đúng 4 tệp:
 | Quyết định chủ kho đã có | tách 3 packet (E2) · merge thẳng master cho #1466/#1469/#1470 (C5, E5) · đổi người soạn sang Opus 5.5 (E2) · tách khối tiền kiểm sang #1484 (E2) · C1 duyệt băm · C3 miễn Windows (`windows: <H> mien`) · C4 giữ INV-03 `chưa đo` và INV-18 nguồn CLAUDE.md. Mọi bản ghi hộ nằm trên #1466 |
 | PR #1495 | đưa đặc tả và hồ sơ vào master. Head `85fbc80`, CI 25 xanh + 2 bỏ qua, bot Codex 0 finding, `mergeable_state: clean`. **Chờ chủ kho tự merge** |
 | Lease wp1466 | CHƯA cấp |
-| Chặn | B4 #1462 chưa land. Lease `wp1462-r9-g3-claude` giữ `.claude/dev/packet_loop.py` và `.claude/dev/packet_loop_test.py`. Phiên B4 bàn giao lượt thực thi 4/4 lúc 21-11 18:15Z |
+| B4 #1462 | **ĐÃ MERGE vào master**: PR #1504, merge commit `2cbb552876c2f0dd6e957db7c2408112c7527127` (24-11 10:45Z), nằm trên first-parent master. Issue #1462 vẫn `open`. Lease `wp1462-r9-g6-codex-release` (trên `origin/ops/wp1462-r1`) VẪN GIỮ `packet_loop.py` và `packet_loop_test.py`, hết hạn `2026-11-24T14:46:31Z`, hoặc sớm hơn nếu bị thu hồi |
 | Trần Codex | `tran_loi_goi_codex: ADR-0055@d2e3052…` ⇒ trần 10 lời gọi; **đã dùng 9**. Lời gọi 2 bị đứt mạng nhưng vẫn tính. Bot connector trên PR không tính |
 | Packet kế nhiệm | KN-0 #1469, KN-1 #1470 (nối tiếp, sau wp1466), #1484 tiền kiểm lease toàn kho (nợ `INV-02-TIEN-KIEM-CAP-LEASE-KHONG-CLOSURE`, độc lập với KN-0/KN-1). Cả ba đều `proposed`, chưa có đặc tả |
+
+**Chạy thử điều kiện bắt đầu, chỉ đọc (24-11 11:17Z, clone sạch, master `2cbb552`):**
+- 3a: 330/330 nhánh, thiếu 0, thừa 0, không shallow.
+- 3b: policy 0.
+- 3d: chưa ref nào có ADR 0068 trở lên.
+- 3c: ADR-0068 và `PROTOCOL_DA_PHIEN.md` cho `NGƯỜI_GIỮ 0`. Hai tệp `.py` cho `NGƯỜI_GIỮ 1: wp1462-r9-g6-codex-release` (rc 11).
+
+Vậy chỉ cấp được lease wp1466 sau 14:46Z hôm nay, hoặc sớm hơn nếu lease B4 bị thu hồi.
+
+**Nguyên mẫu trên master mới:** `git apply -3` của `nguyen-mau-r5/nguyen-mau.patch` lên `2cbb552`:
+- `packet_loop.py`, `PROTOCOL_DA_PHIEN.md` và ADR-0068 áp sạch;
+- `packet_loop_test.py` XUNG ĐỘT một chỗ, quanh dòng 19303 của bản cũ, ở phần đăng ký ca/đột biến.
+
+B4 thêm khoảng 884 dòng vào tệp test và khoảng 251 dòng vào `packet_loop.py`. Executor phải giải xung đột, rồi đo lại
+N1–N16, trần 450 dòng / 6 tệp, và khối `so-dang-ky` trên base mới.
 
 ## 3. ĐIỂM PHẢI HỎI CHỦ KHO TRƯỚC KHI CODEX THI CÔNG
 Đặc tả đã đóng băng ghi (mục 1, dòng `executor` và `reviewer`):

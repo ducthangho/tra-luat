@@ -298,10 +298,24 @@ def d1_env_file_khong_dung():   # spec r2 D1': bật tự cập nhật ⇒ `cai-
         truoc, _, _ = f.read_bytes(), s.chay(), s.chay()
         bang(f.read_bytes() == truoc, f"env file bị đổi: {f.read_bytes()!r}")
 # ---------- G: `ghim-agy` (spec r2 Thay đổi 3) ----------
-def _rel_gia(m, tar=TAR_TOT, bo=(), lech=()):
-    ts = [{"name": f"agy_cli_{t}.tar.gz", "browser_download_url": f"https://gia.invalid/{k}",
-           "digest": "sha256:" + ("0" * 64 if k in lech else hashlib.sha256(tar).hexdigest())} for k, t in m.TAI_SAN_AGY.items() if k not in bo]
-    m.doc_release, m.tai = (lambda ban=None: {"tag_name": "9.8.7", "assets": ts}), (lambda url: tar)
+KHOA_6 = ("linux_amd64", "linux_arm64", "linux_amd64_musl", "linux_arm64_musl", "darwin_amd64", "darwin_arm64")
+def _rel_gia(m, bo=(), lech=(), tar_rieng=None):
+    """F01 (cross-review #1505): sáu tarball KHÁC byte theo nền, `tai` ghi nhật ký URL; trả (bảng kỳ vọng độc lập, nhật ký)."""
+    tars = {k: _tar([("antigravity", NOI_DUNG + k.encode())]) for k in KHOA_6}
+    tars.update(tar_rieng or {})
+    url = {k: f"https://gia.invalid/{k}" for k in KHOA_6}
+    ts = [{"name": f"agy_cli_{t}.tar.gz", "browser_download_url": url[k],
+           "digest": "sha256:" + ("0" * 64 if k in lech else hashlib.sha256(tars[k]).hexdigest())} for k, t in m.TAI_SAN_AGY.items() if k not in bo]
+    theo_url, nk = {u: tars[k] for k, u in url.items()}, []
+    m.doc_release, m.tai = (lambda ban=None: {"tag_name": "9.8.7", "assets": ts}), (lambda u: (nk.append(u), theo_url[u])[1])
+    return {k: (url[k], hashlib.sha512(tars[k]).hexdigest()) for k in KHOA_6}, nk
+def _khoi_python(ra):   # parse AN TOÀN khối `AGY_VER = …` / `NEN = {…}` (không exec); thiếu khối ⇒ {}
+    dong = ra.splitlines()
+    if not any(d.startswith("AGY_VER = ") for d in dong):
+        return {}
+    i = next(n for n, d in enumerate(dong) if d.startswith("AGY_VER = "))
+    j = next(n for n in range(i, len(dong)) if dong[n] == "}")
+    return {a.targets[0].id: ast.literal_eval(a.value) for a in ast.parse(chr(10).join(dong[i:j + 1])).body}
 def _ghim(m, argv=("ghim-agy",)):
     buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")   # main() gọi reconfigure ⇒ cần TextIOWrapper, không StringIO
     with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(io.TextIOWrapper(io.BytesIO(), encoding="utf-8")):
@@ -309,18 +323,21 @@ def _ghim(m, argv=("ghim-agy",)):
     buf.flush()
     return rc, buf.buffer.getvalue().decode("utf-8")
 def g1_ghim_in_dung_sau_cap():
-    _rel_gia(m := nap_mod())
+    mong, nk = _rel_gia(m := nap_mod())
     rc, ra = _ghim(m)
-    h = hashlib.sha512(TAR_TOT).hexdigest()
-    dong = [f"| `{k}` | `https://gia.invalid/{k}` | `{h}` |" for k in m.TAI_SAN_AGY]
-    bang(rc == 0 and 'AGY_VER = "9.8.7"' in ra and all(d in ra.splitlines() for d in dong) and len(m.TAI_SAN_AGY) == 6, f"rc={rc} {ra!r}")
-def g2_ghim_tu_choi_khi_sai():
-    for ten, kw in (("lệch digest", {"lech": ("darwin_arm64",)}), ("thiếu tài sản", {"bo": ("linux_arm64",)}),
-                    ("tarball hai tệp", {"tar": _tar([("antigravity", NOI_DUNG), ("khac", b"y")])})):
+    bang(rc == 0 and sorted(m.TAI_SAN_AGY) == sorted(KHOA_6), f"rc={rc} khoá={sorted(m.TAI_SAN_AGY)} {ra!r}")
+    bang(sorted(nk) == sorted(u for u, _ in mong.values()), f"phải tải ĐỦ sáu URL, mỗi URL một lần: {nk}")
+    bang(_khoi_python(ra) == {"AGY_VER": "9.8.7", "NEN": mong}, f"khối Python sai: {_khoi_python(ra)!r}")
+    md = [d for d in ra.splitlines() if d.startswith("| `")]
+    bang(md == [f"| `{k}` | `{u}` | `{h}` |" for k, (u, h) in mong.items()], f"bảng Markdown sai: {md!r}")
+def g2_ghim_tu_choi_khi_sai():   # nền hỏng đặt CUỐI bảng ⇒ bản in-sớm cũng lộ; đầu ra lỗi = ĐÚNG một dòng chẩn đoán
+    for ten, kw in (("lệch digest", {"lech": ("darwin_arm64",)}), ("thiếu tài sản", {"bo": ("darwin_arm64",)}),
+                    ("tarball hai tệp", {"tar_rieng": {"darwin_arm64": _tar([("antigravity", NOI_DUNG), ("khac", b"y")])}})):
         m = nap_mod()
         _rel_gia(m, **kw)
         rc, ra = _ghim(m)
-        bang(rc == 1 and "AGY_VER" not in ra and "ghim-agy: ✗" in ra, f"{ten}: rc={rc} {ra!r}")
+        dong = [d for d in ra.splitlines() if d.strip()]
+        bang(rc == 1 and len(dong) == 1 and dong[0].startswith("ghim-agy: ✗"), f"{ten}: rc={rc} {ra!r}")
     m = nap_mod()
     _rel_gia(m)
     bang(_ghim(m, ("ghim-agy", "--ban", "../x"))[0] == 2, "--ban không phải X.Y.Z mà không bị từ chối")
@@ -785,6 +802,10 @@ DOT_BIEN = (
     ("D2_ghi_cwd_khi_khong_dat_bien", "ma", "lambda: gop_settings(home)):", 'lambda: gop_settings(home), lambda: open(env.get("CLAUDE_ENV_FILE") or "env.sh", "a").write("x\\n")):', "d2_khong_env_file_khong_tao_tep"),
     ("D1_ghi_lai_dong_tat", "ma", "lambda: gop_settings(home)):", 'lambda: gop_settings(home), lambda: env.get("CLAUDE_ENV_FILE") and open(env["CLAUDE_ENV_FILE"], "a").write("export AGY_CLI_DISABLE_AUTO_UPDATE=1\\n")):', "d1_env_file_khong_dung"),
     ("G1_sha256_thay_sha512", "ma", 'a["browser_download_url"], hashlib.sha512(du).hexdigest()))', 'a["browser_download_url"], hashlib.sha256(du).hexdigest()))', "g1_ghim_in_dung_sau_cap"),
+    ("G1_nen_python_rong", "ma", """        print(f'    "{k}": ("{u}", "{h}"),')""", "        pass", "g1_ghim_in_dung_sau_cap"),
+    ("G1_cat_bam_python", "ma", """        print(f'    "{k}": ("{u}", "{h}"),')""", """        print(f'    "{k}": ("{u}", "{h[:64]}"),')""", "g1_ghim_in_dung_sau_cap"),
+    ("G1_tai_mot_lan_dung_lai", "ma", '            du = tai(a["browser_download_url"])', '            du = du if dong else tai(a["browser_download_url"])', "g1_ghim_in_dung_sau_cap"),
+    ("G2_in_nen_truoc_kiem", "ma", "        dong = []", '        dong = []; print("NEN = {}")', "g2_ghim_tu_choi_khi_sai"),
     ("G2_bo_kiem_digest", "ma", '    if "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):', "    if False:", "g2_ghim_tu_choi_khi_sai"),
     ("G2_bo_kiem_tarball_ghim", "ma", '                return print(f"ghim-agy: ✗ tarball', '                pass; print(f"ghim-agy: ✗ tarball', "g2_ghim_tu_choi_khi_sai"),
     ("G2_bo_kiem_ban", "ma", ' and re.fullmatch(r"\\d+\\.\\d+\\.\\d+", argv[2])):', "):", "g2_ghim_tu_choi_khi_sai"),

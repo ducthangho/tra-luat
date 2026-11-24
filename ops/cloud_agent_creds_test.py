@@ -4,7 +4,7 @@
 ném `TinHieuChotCa` (con thoát 3 + `DO:<ca>:`); lỗi vô can thoát 4 = TÍN DỤNG GIẢ; 5 = bỏ qua (Windows, hay cây rời không .git).
 Ca `p3<a|b|c|s><số>_…` (#1089, spec CLOUD-SETUP-P3-WRITEBACK r2 `nghiem_thu`): `ghi-nguoc` in-process trên Drive giả GIỮ TRẠNG THÁI;
 B trích NGUYÊN VĂN `agent_creds_put` từ references/Code.2.21.2q.gs, chạy bằng `node` với LockService/Drive/... giả."""
-import ast, atexit, base64, contextlib, ctypes, hashlib, importlib.util, inspect, io, json, os, re, shutil, subprocess, sys, tarfile, tempfile, time  # noqa: E401
+import ast, atexit, base64, builtins, contextlib, ctypes, hashlib, importlib.util, inspect, io, json, os, re, shutil, subprocess, sys, tarfile, tempfile, time  # noqa: E401
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -297,50 +297,84 @@ def d1_env_file_khong_dung():   # spec r2 D1': bật tự cập nhật ⇒ `cai-
         _ghi(f, "export FOO=1\n")
         truoc, _, _ = f.read_bytes(), s.chay(), s.chay()
         bang(f.read_bytes() == truoc, f"env file bị đổi: {f.read_bytes()!r}")
-# ---------- G: `ghim-agy` (spec r2 Thay đổi 3) ----------
-KHOA_6 = ("linux_amd64", "linux_arm64", "linux_amd64_musl", "linux_arm64_musl", "darwin_amd64", "darwin_arm64")
-def _rel_gia(m, bo=(), lech=(), tar_rieng=None):
-    """F01 (cross-review #1505): sáu tarball KHÁC byte theo nền, `tai` ghi nhật ký URL; trả (bảng kỳ vọng độc lập, nhật ký)."""
-    tars = {k: _tar([("antigravity", NOI_DUNG + k.encode())]) for k in KHOA_6}
-    tars.update(tar_rieng or {})
-    url = {k: f"https://gia.invalid/{k}" for k in KHOA_6}
-    ts = [{"name": f"agy_cli_{t}.tar.gz", "browser_download_url": url[k],
-           "digest": "sha256:" + ("0" * 64 if k in lech else hashlib.sha256(tars[k]).hexdigest())} for k, t in m.TAI_SAN_AGY.items() if k not in bo]
-    theo_url, nk = {u: tars[k] for k, u in url.items()}, []
-    m.doc_release, m.tai = (lambda ban=None: {"tag_name": "9.8.7", "assets": ts}), (lambda u: (nk.append(u), theo_url[u])[1])
-    return {k: (url[k], hashlib.sha512(tars[k]).hexdigest()) for k in KHOA_6}, nk
-def _khoi_python(ra):   # parse AN TOÀN khối `AGY_VER = …` / `NEN = {…}` (không exec); thiếu khối ⇒ {}
-    dong = ra.splitlines()
-    if not any(d.startswith("AGY_VER = ") for d in dong):
-        return {}
-    i = next(n for n, d in enumerate(dong) if d.startswith("AGY_VER = "))
-    j = next(n for n in range(i, len(dong)) if dong[n] == "}")
-    return {a.targets[0].id: ast.literal_eval(a.value) for a in ast.parse(chr(10).join(dong[i:j + 1])).body}
-def _ghim(m, argv=("ghim-agy",)):
-    buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")   # main() gọi reconfigure ⇒ cần TextIOWrapper, không StringIO
-    with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(io.TextIOWrapper(io.BytesIO(), encoding="utf-8")):
-        rc = m.main(list(argv))
-    buf.flush()
-    return rc, buf.buffer.getvalue().decode("utf-8")
-def g1_ghim_in_dung_sau_cap():
-    mong, nk = _rel_gia(m := nap_mod())
-    rc, ra = _ghim(m)
-    bang(rc == 0 and sorted(m.TAI_SAN_AGY) == sorted(KHOA_6), f"rc={rc} khoá={sorted(m.TAI_SAN_AGY)} {ra!r}")
-    bang(sorted(nk) == sorted(u for u, _ in mong.values()), f"phải tải ĐỦ sáu URL, mỗi URL một lần: {nk}")
-    bang(_khoi_python(ra) == {"AGY_VER": "9.8.7", "NEN": mong}, f"khối Python sai: {_khoi_python(ra)!r}")
-    md = [d for d in ra.splitlines() if d.startswith("| `")]
-    bang(md == [f"| `{k}` | `{u}` | `{h}` |" for k, (u, h) in mong.items()], f"bảng Markdown sai: {md!r}")
-def g2_ghim_tu_choi_khi_sai():   # nền hỏng đặt CUỐI bảng ⇒ bản in-sớm cũng lộ; đầu ra lỗi = ĐÚNG một dòng chẩn đoán
-    for ten, kw in (("lệch digest", {"lech": ("darwin_arm64",)}), ("thiếu tài sản", {"bo": ("darwin_arm64",)}),
-                    ("tarball hai tệp", {"tar_rieng": {"darwin_arm64": _tar([("antigravity", NOI_DUNG), ("khac", b"y")])}})):
-        m = nap_mod()
-        _rel_gia(m, **kw)
-        rc, ra = _ghim(m)
-        dong = [d for d in ra.splitlines() if d.strip()]
-        bang(rc == 1 and len(dong) == 1 and dong[0].startswith("ghim-agy: ✗"), f"{ten}: rc={rc} {ra!r}")
+# ---------- G: `ghim-agy` (spec r2 Thay đổi 3) — harness HỢP ĐỒNG, lớp `ghim-output-oracle` (cross-review #1505 lượt 1–2) ----------
+# Giữ `main`/`doc_release`/`tai`/`ghim_agy` THẬT; chỉ giả `urllib.request.urlopen`. Oracle khoá nền -> tên tài sản chép từ
+# bảng spec r2 Thay đổi 1, ĐỘC LẬP với `TAI_SAN_AGY` (F01-g). So TOÀN transcript, không parse khúc (F01-e/f).
+ORACLE_TAI_SAN = {"linux_amd64": "agy_cli_linux_x64.tar.gz", "linux_arm64": "agy_cli_linux_arm64.tar.gz",
+                  "linux_amd64_musl": "agy_cli_linux_x64_musl.tar.gz", "linux_arm64_musl": "agy_cli_linux_arm64_musl.tar.gz",
+                  "darwin_amd64": "agy_cli_mac_x64.tar.gz", "darwin_arm64": "agy_cli_mac_arm64.tar.gz"}
+KHOA_6 = tuple(ORACLE_TAI_SAN)
+_API = "https://api.github.com/repos/google-antigravity/antigravity-cli/releases/"
+HONG_TAI_SAN = ("lech", "thieu", "hai_tep", "ten_sai", "khong_thuong")   # F01-k/l/m/o/p, đặt ở TỪNG nền
+def _tar_nen(ban, k, hong=None):
+    if hong == "hai_tep":
+        return _tar([("antigravity", NOI_DUNG), ("khac", b"y")])
+    if hong == "ten_sai":
+        return _tar([("khac", NOI_DUNG)])
+    if hong == "khong_thuong":
+        return _tar([("antigravity", None)])
+    return _tar([("antigravity", NOI_DUNG + f"{ban}/{k}".encode())])   # sáu nền × hai phiên bản: byte KHÁC nhau
+def _ghim_that(argv=("ghim-agy",), hong=None, loi=None):
+    """Chạy `main` thật dưới transport giả. Trả rc, stdout, stderr, nhật ký URL, các lần GHI (F01-n) và bảng kỳ vọng."""
+    hong, nk, ghi, bai = hong or {}, [], [], {}
+    for ban in ("9.8.7", "2.3.4"):
+        bai[ban] = {k: (f"https://gia.invalid/{ban}/{ten}", _tar_nen(ban, k, hong.get(k))) for k, ten in ORACLE_TAI_SAN.items()}
+    def release(ban):
+        ts = [{"name": ten, "browser_download_url": bai[ban][k][0],
+               "digest": "sha256:" + ("0" * 64 if hong.get(k) == "lech" else hashlib.sha256(bai[ban][k][1]).hexdigest())}
+              for k, ten in ORACLE_TAI_SAN.items() if hong.get(k) != "thieu"]
+        return json.dumps({"tag_name": ban, "assets": ts}).encode("utf-8")
+    theo_url = {u: b for d in bai.values() for u, b in d.values()}
+    def urlopen(req, timeout=None):
+        u = getattr(req, "full_url", req)
+        nk.append(u)
+        if u.startswith(_API):
+            if loi == "release":
+                raise OSError("giả lập mạng hỏng")
+            if loi == "json":
+                return io.BytesIO(b"{khong phai json")
+            return io.BytesIO(release("9.8.7" if u == _API + "latest" else u.rsplit("/", 1)[1]))
+        if loi == "tai" and len(nk) == 3:   # hỏng ở lượt tải tài sản THỨ HAI
+            raise OSError("giả lập tải hỏng")
+        return io.BytesIO(theo_url[u])
+    that_open = builtins.open
+    def open_canh(f, mode="r", *a, **kw):
+        if any(c in mode for c in "wax+"):
+            ghi.append(f"open({f!s}, {mode})")
+        return that_open(f, mode, *a, **kw)
     m = nap_mod()
-    _rel_gia(m)
-    bang(_ghim(m, ("ghim-agy", "--ban", "../x"))[0] == 2, "--ban không phải X.Y.Z mà không bị từ chối")
+    ra, loi_ra = io.TextIOWrapper(io.BytesIO(), encoding="utf-8"), io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+    with tempfile.TemporaryDirectory(prefix="cac_ghim_") as t:
+        with contextlib.chdir(t), mock.patch("urllib.request.urlopen", urlopen), mock.patch("builtins.open", open_canh), \
+                mock.patch("os.replace", lambda *a, **kw: ghi.append(f"replace{a}")), \
+                contextlib.redirect_stdout(ra), contextlib.redirect_stderr(loi_ra):   # main() gọi reconfigure ⇒ TextIOWrapper
+            rc = m.main(list(argv))
+        ghi += [f"tệp mới: {p.name}" for p in Path(t).iterdir()]
+    ra.flush(), loi_ra.flush()
+    return SimpleNamespace(rc=rc, ra=ra.buffer.getvalue().decode("utf-8"), loi=loi_ra.buffer.getvalue().decode("utf-8"), nk=nk, ghi=ghi,
+                           mong={ban: {k: (u, hashlib.sha512(b).hexdigest()) for k, (u, b) in d.items()} for ban, d in bai.items()})
+def _transcript_mong(ban, mong):
+    d = mong[ban]
+    return ([f'AGY_VER = "{ban}"', "NEN = {"] + [f'    "{k}": ("{u}", "{h}"),' for k, (u, h) in d.items()] + ["}", ""]
+            + [f"| `{k}` | `{u}` | `{h}` |" for k, (u, h) in d.items()])
+def _bang_thanh_cong(kq, ban, ten):
+    bang(kq.rc == 0 and kq.loi == "" and kq.ghi == [], f"{ten}: rc={kq.rc} stderr={kq.loi!r} ghi={kq.ghi}")
+    bang(kq.ra.splitlines() == _transcript_mong(ban, kq.mong), f"{ten}: transcript lệch hợp đồng: {kq.ra!r}")
+    duong = _API + ("latest" if ban == "9.8.7" else f"tags/{ban}")
+    bang(kq.nk == [duong] + [kq.mong[ban][k][0] for k in KHOA_6], f"{ten}: nhật ký mạng {kq.nk}")
+def g1_ghim_in_dung_sau_cap():   # release latest: đủ sáu tải đúng nền, transcript ĐÚNG từng dòng, không ghi
+    _bang_thanh_cong(_ghim_that(), "9.8.7", "latest")
+def g3_ghim_ban_chi_dinh():   # F01-h/i: `--ban` hợp lệ đi xuống `tags/<ban>` và ra đúng phiên bản ấy
+    _bang_thanh_cong(_ghim_that(("ghim-agy", "--ban", "2.3.4")), "2.3.4", "--ban 2.3.4")
+def g2_ghim_tu_choi_khi_sai():   # ma trận: năm kiểu hỏng × sáu nền + mạng/JSON/tải; mỗi ca rc 1, ĐÚNG một dòng chẩn đoán, không ghi
+    ca = [(f"{h}@{k}", {"hong": {k: h}}) for h in HONG_TAI_SAN for k in KHOA_6]
+    ca += [("release hỏng", {"loi": "release"}), ("json hỏng", {"loi": "json"}), ("tải hỏng", {"loi": "tai"})]
+    for ten, kw in ca:
+        kq = _ghim_that(**kw)
+        dong = [d for d in kq.ra.splitlines() if d.strip()]
+        bang(kq.rc == 1 and kq.loi == "" and kq.ghi == [] and len(dong) == 1 and dong[0].startswith("ghim-agy: ✗"),
+             f"{ten}: rc={kq.rc} ghi={kq.ghi} stdout={kq.ra!r} stderr={kq.loi!r}")
+    bang(_ghim_that(("ghim-agy", "--ban", "../x")).rc == 2, "--ban không phải X.Y.Z mà không bị từ chối")
 # ---------- H: khối trong hook ----------
 MO, DONG = "# >>> agent-creds (wp1039)", "# <<< agent-creds (wp1039)"
 PY_GIA = "#!{exe}\nimport json, sys\nopen({log!r}, 'a').write(json.dumps(sys.argv[1:]) + '\\n')\nsys.exit(3)\n"   # argv nguyên danh sách (F09)
@@ -806,6 +840,24 @@ DOT_BIEN = (
     ("G1_cat_bam_python", "ma", """        print(f'    "{k}": ("{u}", "{h}"),')""", """        print(f'    "{k}": ("{u}", "{h[:64]}"),')""", "g1_ghim_in_dung_sau_cap"),
     ("G1_tai_mot_lan_dung_lai", "ma", '            du = tai(a["browser_download_url"])', '            du = du if dong else tai(a["browser_download_url"])', "g1_ghim_in_dung_sau_cap"),
     ("G2_in_nen_truoc_kiem", "ma", "        dong = []", '        dong = []; print("NEN = {}")', "g2_ghim_tu_choi_khi_sai"),
+    # Lớp `ghim-output-oracle` lượt 2 (F01-e…p): mỗi biểu hiện một đột biến SẢN PHẨM, chết ở chốt hợp đồng đúng ca
+    ("F01e_khoi_thua_sau_dong", "ma", '    print("}")', '    print("}"); print("NEN = {}")', "g1_ghim_in_dung_sau_cap"),
+    ("F01f_thieu_dong_dong", "ma", '    print("}")', "    pass", "g1_ghim_in_dung_sau_cap"),
+    ("F01g_doi_cho_ten_tai_san", "ma", '"darwin_amd64": "mac_x64", "darwin_arm64": "mac_arm64"}', '"darwin_amd64": "mac_arm64", "darwin_arm64": "mac_x64"}', "g1_ghim_in_dung_sau_cap"),
+    ("F01h_bo_ban_chi_dinh", "ma", "return ghim_agy(argv[2] if len(argv) == 3 else None)", "return ghim_agy(None)", "g3_ghim_ban_chi_dinh"),
+    ("F01i_luon_latest", "ma", '(f"tags/{ban}" if ban else "latest")', '"latest"', "g3_ghim_ban_chi_dinh"),
+    ("F01j_loi_mang_rc0", "ma", 'return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1', 'return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 0', "g2_ghim_tu_choi_khi_sai"),
+    ("F01k_thieu_chi_kiem_cuoi", "ma", """            if a is None:
+                return print(f"ghim-agy: ✗ thiếu tài sản {k}") or 1""", """            if a is None and k != "darwin_arm64":
+                continue
+            if a is None:
+                return print(f"ghim-agy: ✗ thiếu tài sản {k}") or 1""", "g2_ghim_tu_choi_khi_sai"),
+    ("F01l_digest_chi_kiem_cuoi", "ma", '!= a.get("digest"):', '!= a.get("digest") and k == "darwin_arm64":', "g2_ghim_tu_choi_khi_sai"),
+    ("F01m_tarball_chi_kiem_cuoi", "ma", 'if len(tvg) != 1 or tvg[0].name != "antigravity" or not tvg[0].isreg():',
+     'if (len(tvg) != 1 or tvg[0].name != "antigravity" or not tvg[0].isreg()) and k == "darwin_arm64":', "g2_ghim_tu_choi_khi_sai"),
+    ("F01n_ghi_tep", "ma", "        dong = []", '        dong = []; open("ghim-agy.log", "a").close()', "g1_ghim_in_dung_sau_cap"),
+    ("F01o_bo_kiem_ten_member", "ma", ' or tvg[0].name != "antigravity"', "", "g2_ghim_tu_choi_khi_sai"),
+    ("F01p_bo_kiem_tep_thuong", "ma", " or not tvg[0].isreg()", "", "g2_ghim_tu_choi_khi_sai"),
     ("G2_bo_kiem_digest", "ma", '    if "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):', "    if False:", "g2_ghim_tu_choi_khi_sai"),
     ("G2_bo_kiem_tarball_ghim", "ma", '                return print(f"ghim-agy: ✗ tarball', '                pass; print(f"ghim-agy: ✗ tarball', "g2_ghim_tu_choi_khi_sai"),
     ("G2_bo_kiem_ban", "ma", ' and re.fullmatch(r"\\d+\\.\\d+\\.\\d+", argv[2])):', "):", "g2_ghim_tu_choi_khi_sai"),

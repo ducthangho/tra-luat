@@ -223,8 +223,10 @@ Claude Code web → *Environment variables* của môi trường; Codex Cloud �
 `bash ops/codex_cloud_setup.sh`). Không dán khoá vào kho/prompt/issue. Hook `.claude/hooks/session-start.sh` (chỉ khi
 `CLAUDE_CODE_REMOTE=true`) gọi `ops/cloud_agent_creds.py` `nap` rồi `cai-agy`; setup Codex chỉ gọi `nap`. `nap` chạy
 `tl bootstrap --env code --no-nlm` (hạn `TL_CLOUD_BOOTSTRAP_TIMEOUT_GIAY`, mặc định 180 s), che khoá, in ĐÚNG MỘT dòng
-`agent_creds: <trạng thái> — <chi tiết>`. `cai-agy` cài `agy` 1.4.12 ghim (sha512) vào `~/.local/bin/agy`, đặt
-`modelProvider = "gemini"`, thêm `AGY_CLI_DISABLE_AUTO_UPDATE=1` vào `CLAUDE_ENV_FILE`. Cả hai luôn rc 0.
+`agent_creds: <trạng thái> — <chi tiết>`. `cai-agy` cài `agy` 1.5.16 ghim (sha512) vào `~/.local/bin/agy` khi chưa có bản >= 1.5.16 (bản ghim là SÀN; `agy` được
+tự cập nhật, bản mới hơn được giữ), đặt `modelProvider = "gemini"`. Cả hai luôn rc 0. Ghim lại bản mới nhất:
+`python ops/cloud_agent_creds.py ghim-agy` (kiểm sha256 theo GitHub, in khối `AGY_VER`/`NEN` mới, không ghi tệp) ⇒ ra revision
+đặc tả mới (`ops/specs/cloud-setup-p2b-wire-r2.md` là bản hiện hành) rồi dán vào `ops/cloud_agent_creds.py`.
 
 | trạng thái `agent_creds:` | nghĩa → việc phải làm |
 |---|---|

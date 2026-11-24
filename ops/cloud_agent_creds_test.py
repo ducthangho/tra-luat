@@ -32,8 +32,8 @@ BASE_P3 = "8f123b27b338e5e173a668209eb4904f49dd611b"   # base của lease wp1089
 BASE = "97120d3c76ebb7c3eda4b585ff46f1c51e30c91b"   # base của lease wp1039 — vế âm L6a
 BASE_PD = "ded5d41b1754ef05d87815f20c48203e6b00e58d"   # base của lease wp1334 — vế âm N1/N5b
 LA_WINDOWS = os.name == "nt"
-SPEC = HERE / "specs" / "cloud-setup-p2b-wire-r1.md"   # B8 so với CHÍNH bảng "Hằng ghim agy" của spec đóng băng, không chép lại
-SPEC_SHA256 = "67b448acc825fdd29f118c3b9082583773b4ad218a7c83ab4db496daa8f26d81"
+SPEC = HERE / "specs" / "cloud-setup-p2b-wire-r2.md"   # B8 so với CHÍNH bảng "Hằng ghim agy" của spec đóng băng, không chép lại
+SPEC_SHA256 = "c43c08cd71e1f1580beb5abfc0cb9c57fe16c8ee9fe80e9035cca558e2ed8ee2"
 class TinHieuChotCa(AssertionError):
     """Chỉ `bang()` ném lớp này ⇒ phân biệt giết thật (chốt) với chết vì lỗi vô can."""
 class BoQua(Exception):
@@ -185,7 +185,7 @@ def a8_nap_luon_rc0():
     k = chay_nap({}, argv=("nap", "--la"))
     bang(k.rc == 2 and len(k.nk) == 0, f"`nap --la`: rc={k.rc}, tl.py chạy {len(k.nk)} lần")
 # ---------- B/C/D: `cai-agy` ----------
-NOI_DUNG = b'#!/bin/sh\n[ -n "$CAC_AGY_NK" ] && echo "$*" >> "$CAC_AGY_NK"\necho antigravity 1.4.12\n'
+NOI_DUNG = b'#!/bin/sh\n[ -n "$CAC_AGY_NK" ] && echo "$*" >> "$CAC_AGY_NK"\necho antigravity 1.5.16\n'
 def _tar(muc):   # (tên, byte | None = symlink tới /etc/passwd)
     with tarfile.open(fileobj=(b := io.BytesIO()), mode="w:gz") as tf:
         for ten, du in muc:
@@ -228,7 +228,8 @@ def b2_sha512_lech_khong_ghi():
         bang(s.agy.read_bytes() == truoc, "bản cũ bị đổi dù sha512 lệch")
 def b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay():   # B3 (đếm 0) + B4 (đếm 1, tệp được thay)
     _posix()
-    for cu, n in ((("antigravity 1.4.12", 0), 0), (("antigravity 1.4.13", 0), 1), (("antigravity 1.4.12", 1), 1), (("\\0377", 0), 1), (("antigravity 1.4.120", 0), 1), (("antigravity 1.4.12rc1", 0), 1), (("antigravity 1.4.12beta", 0), 1)):
+    for cu, n in ((("antigravity 1.5.16", 0), 0), (("antigravity 1.6.0", 0), 0), (("antigravity 1.5.15", 0), 1), (("antigravity 1.5.16", 1), 1), (("\\0377", 0), 1),
+                  (("antigravity 1.4.120", 0), 1), (("antigravity 1.5.16rc1", 0), 1), (("antigravity 1.5.16beta", 0), 1)):   # spec r2: SÀN, bản mới hơn được giữ
         with san_agy(agy_cu=cu) as s:
             s.chay()
             bang(len(s.dem) == n and (n == 0 or s.agy.read_bytes() == NOI_DUNG), f"{cu}: tải {len(s.dem)} lần (mong {n}) / không thay tệp")
@@ -265,7 +266,7 @@ def b8_hang_ghim_dung_spec():
     m, b = nap_mod(), SPEC.read_bytes()
     bang(hashlib.sha256(b).hexdigest() == SPEC_SHA256, "spec đóng băng đổi băm")
     bang(len(spec := dict((k, (u, h)) for k, u, h in re.findall(r"^\| `(\w+)` \| `(https://\S+)` \| `([0-9a-f]{128})` \|$", b.decode("utf-8"), re.M))) == 6, "spec phải có 6 nền")
-    bang(m.AGY_VER == "1.4.12" and sorted(m.NEN) == sorted(spec), f"AGY_VER={m.AGY_VER} khoá={sorted(m.NEN)}")
+    bang(m.AGY_VER == "1.5.16" and sorted(m.NEN) == sorted(spec), f"AGY_VER={m.AGY_VER} khoá={sorted(m.NEN)}")
     for k, v in spec.items():
         bang(tuple(m.NEN[k]) == v, f"hằng ghim {k} lệch spec")
 def _goi_doi_kieu(f, *a):
@@ -291,11 +292,38 @@ def c2_settings_khong_phai_object_khong_dung():
             truoc = hashlib.sha256(s.settings.read_bytes()).hexdigest()
             rc, ra = s.chay()
             bang(rc == 0 and hashlib.sha256(s.settings.read_bytes()).hexdigest() == truoc and "agy: ⚠" in ra, f"{nd!r}: tệp bị đổi / không cảnh báo")
-def d1_env_file_dung_mot_dong():
+def d1_env_file_khong_dung():   # spec r2 D1': bật tự cập nhật ⇒ `cai-agy` không đụng CLAUDE_ENV_FILE
     with tempfile.TemporaryDirectory() as t, san_agy(nen="freebsd_amd64", env_them={"CLAUDE_ENV_FILE": str(f := Path(t) / "env.sh")}) as s:
-        _ghi(f, "export FOO=1\n"), s.chay(), s.chay()
-        dong = f.read_text(encoding="utf-8").splitlines()
-        bang(dong.count("export AGY_CLI_DISABLE_AUTO_UPDATE=1") == 1 and "export FOO=1" in dong, f"env file: {dong}")
+        _ghi(f, "export FOO=1\n")
+        truoc, _, _ = f.read_bytes(), s.chay(), s.chay()
+        bang(f.read_bytes() == truoc, f"env file bị đổi: {f.read_bytes()!r}")
+# ---------- G: `ghim-agy` (spec r2 Thay đổi 3) ----------
+def _rel_gia(m, tar=TAR_TOT, bo=(), lech=()):
+    ts = [{"name": f"agy_cli_{t}.tar.gz", "browser_download_url": f"https://gia.invalid/{k}",
+           "digest": "sha256:" + ("0" * 64 if k in lech else hashlib.sha256(tar).hexdigest())} for k, t in m.TAI_SAN_AGY.items() if k not in bo]
+    m.doc_release, m.tai = (lambda ban=None: {"tag_name": "9.8.7", "assets": ts}), (lambda url: tar)
+def _ghim(m, argv=("ghim-agy",)):
+    buf = io.TextIOWrapper(io.BytesIO(), encoding="utf-8")   # main() gọi reconfigure ⇒ cần TextIOWrapper, không StringIO
+    with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(io.TextIOWrapper(io.BytesIO(), encoding="utf-8")):
+        rc = m.main(list(argv))
+    buf.flush()
+    return rc, buf.buffer.getvalue().decode("utf-8")
+def g1_ghim_in_dung_sau_cap():
+    _rel_gia(m := nap_mod())
+    rc, ra = _ghim(m)
+    h = hashlib.sha512(TAR_TOT).hexdigest()
+    dong = [f"| `{k}` | `https://gia.invalid/{k}` | `{h}` |" for k in m.TAI_SAN_AGY]
+    bang(rc == 0 and 'AGY_VER = "9.8.7"' in ra and all(d in ra.splitlines() for d in dong) and len(m.TAI_SAN_AGY) == 6, f"rc={rc} {ra!r}")
+def g2_ghim_tu_choi_khi_sai():
+    for ten, kw in (("lệch digest", {"lech": ("darwin_arm64",)}), ("thiếu tài sản", {"bo": ("linux_arm64",)}),
+                    ("tarball hai tệp", {"tar": _tar([("antigravity", NOI_DUNG), ("khac", b"y")])})):
+        m = nap_mod()
+        _rel_gia(m, **kw)
+        rc, ra = _ghim(m)
+        bang(rc == 1 and "AGY_VER" not in ra and "ghim-agy: ✗" in ra, f"{ten}: rc={rc} {ra!r}")
+    m = nap_mod()
+    _rel_gia(m)
+    bang(_ghim(m, ("ghim-agy", "--ban", "../x"))[0] == 2, "--ban không phải X.Y.Z mà không bị từ chối")
 # ---------- H: khối trong hook ----------
 MO, DONG = "# >>> agent-creds (wp1039)", "# <<< agent-creds (wp1039)"
 PY_GIA = "#!{exe}\nimport json, sys\nopen({log!r}, 'a').write(json.dumps(sys.argv[1:]) + '\\n')\nsys.exit(3)\n"   # argv nguyên danh sách (F09)
@@ -740,22 +768,26 @@ DOT_BIEN = (
     ("B1_khong_ghi", "ma", "        _ghi_nguyen_tu(agy, tf.extractfile(tv[0]).read(), 0o755)", "        pass", "b1_chua_co_thi_tai_va_ghi"),
     ("B2_bo_kiem_sha", "ma", "    if hashlib.sha512(du_lieu).hexdigest() != muc[1]:", "    if False:", "b2_sha512_lech_khong_ghi"),
     ("B3_luon_tai", "ma", "    if _ban_khop(agy):", "    if False:", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
-    ("B4_loi_giai_ma_thoat_khoi_kiem_ban", "ma", "    return p.returncode == 0 and AGY_VER in", '    return p.returncode == 0 and ra.encode("ascii") and AGY_VER in', "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_loi_giai_ma_thoat_khoi_kiem_ban", "ma", "    return p.returncode == 0 and any(", '    return p.returncode == 0 and ra.encode("ascii") and any(', "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
     ("B4_qua_han_chi_giet_cha", "ma", "        return _giet_nhom(p)[0] and False", "        return p.kill() or False", "b10_version_treo_giet_ca_nhom"),
-    ("B4_so_chuoi_con", "ma", 'AGY_VER in re.split(r"[\\s,;()]+", ra)', "AGY_VER in ra", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
-    ("B4_bien_chi_chan_so", "ma", 'AGY_VER in re.split(r"[\\s,;()]+", ra)', 're.search(r"(?<![\\d.])" + re.escape(AGY_VER) + r"(?!\\.?\\d)", ra) is not None', "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_so_chuoi_con", "ma", ' and any(re.fullmatch(r"\\d+\\.\\d+\\.\\d+", t) and _bo_so(t) >= _bo_so(AGY_VER)\n                                     for t in re.split(r"[\\s,;()]+", ra))', " and AGY_VER in ra", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_bang_thay_san", "ma", "_bo_so(t) >= _bo_so(AGY_VER)", "_bo_so(t) == _bo_so(AGY_VER)", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
+    ("B4_san_thanh_tran", "ma", "_bo_so(t) >= _bo_so(AGY_VER)", "_bo_so(t) <= _bo_so(AGY_VER)", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
     ("B4_chi_kiem_co_mat", "ma", "    if _ban_khop(agy):", "    if agy.is_file():", "b34_dung_ban_khong_tai_lech_hoac_hong_thi_thay"),
     ("B5_roi_ve_linux_amd64", "ma", "    muc = NEN.get(k)", '    muc = NEN.get(k) or NEN["linux_amd64"]', "b5_nen_ngoai_bang"),
     ("B6_extractall", "ma", "        tv = tf.getmembers()\n", '        tf.extractall(agy.parent, filter="fully_trusted")\n        tv = tf.getmembers()\n', "b6_tarball_doc_tu_choi"),
     ("B7_goi_agy_install", "ma", '    print(f"agy: ✓ đã cài', '    subprocess.run([str(agy), "install"], capture_output=True, timeout=15)\n    print(f"agy: ✓ đã cài', "b7_khong_goi_agy_install"),
-    ("B8_doi_mot_ky_tu_sha", "ma", '"ea01c73b77', '"fa01c73b77', "b8_hang_ghim_dung_spec"),
+    ("B8_doi_mot_ky_tu_sha", "ma", '"3dee9f26e2', '"4dee9f26e2', "b8_hang_ghim_dung_spec"),
     ("B9_bo_musl", "ma", ' + ("_musl" if he == "linux" and musl else "")', "", "b9_luat_chon_nen"),
     ("C1_ghi_de_ca_tep", "ma", '    d = {**d, "modelProvider": "gemini"}', '    d = {"modelProvider": "gemini"}', "c13_gop_model_provider_khong_ghi_khoa"),
     ("C2_ghi_de_khi_parse_loi", "ma", 'return print(f"agy: ⚠ settings.json không đọc được', 'd = {}; print(f"', "c2_settings_khong_phai_object_khong_dung"),
     ("C3_ghi_api_key", "ma", '    d = {**d, "modelProvider": "gemini"}', '    d = {**d, "modelProvider": "gemini", "apiKey": os.environ.get("GEMINI_API_KEY", "")}', "c13_gop_model_provider_khong_ghi_khoa"),
-    ("D2_ghi_cwd_khi_khong_dat_bien", "ma", '    if env.get("CLAUDE_ENV_FILE"):\n        p = Path(env["CLAUDE_ENV_FILE"])', '    if True:\n        p = Path(env.get("CLAUDE_ENV_FILE") or "env.sh")', "d2_khong_env_file_khong_tao_tep"),
-    ("D1_noi_moi_luot", "ma", "        if cu.count(DONG_ENV) != 1:\n            _ghi_nguyen_tu(p, (\"\\n\".join([x for x in cu if x != DONG_ENV] + [DONG_ENV])",
-     "        if True:\n            _ghi_nguyen_tu(p, (\"\\n\".join(cu + [DONG_ENV])", "d1_env_file_dung_mot_dong"),
+    ("D2_ghi_cwd_khi_khong_dat_bien", "ma", "lambda: gop_settings(home)):", 'lambda: gop_settings(home), lambda: open(env.get("CLAUDE_ENV_FILE") or "env.sh", "a").write("x\\n")):', "d2_khong_env_file_khong_tao_tep"),
+    ("D1_ghi_lai_dong_tat", "ma", "lambda: gop_settings(home)):", 'lambda: gop_settings(home), lambda: env.get("CLAUDE_ENV_FILE") and open(env["CLAUDE_ENV_FILE"], "a").write("export AGY_CLI_DISABLE_AUTO_UPDATE=1\\n")):', "d1_env_file_khong_dung"),
+    ("G1_sha256_thay_sha512", "ma", 'a["browser_download_url"], hashlib.sha512(du).hexdigest()))', 'a["browser_download_url"], hashlib.sha256(du).hexdigest()))', "g1_ghim_in_dung_sau_cap"),
+    ("G2_bo_kiem_digest", "ma", '    if "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):', "    if False:", "g2_ghim_tu_choi_khi_sai"),
+    ("G2_bo_kiem_tarball_ghim", "ma", '                return print(f"ghim-agy: ✗ tarball', '                pass; print(f"ghim-agy: ✗ tarball', "g2_ghim_tu_choi_khi_sai"),
+    ("G2_bo_kiem_ban", "ma", ' and re.fullmatch(r"\\d+\\.\\d+\\.\\d+", argv[2])):', "):", "g2_ghim_tu_choi_khi_sai"),
     ("H1_doi_khoi_ra_sau_doctor", "hook", None, _doi_khoi_ra_sau, "h1_vi_tri_khoi_trong_hook"),
     ("H1_khoi_ngay_sau_tieu_de_truoc_pip", "hook", None, _doi_khoi_len_tieu_de, "h1_vi_tri_khoi_trong_hook"),
     ("H2_bo_or_true", "hook", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /'", "h2_khoi_song_sot_set_e"),

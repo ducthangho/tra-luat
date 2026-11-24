@@ -1,10 +1,10 @@
-# wp1460 r7 — B1a của kế hoạch nguồn r4: biên nhận full audit `bien_nhan_audit.v1` (phần bên tiêu dùng cần) + canary A3 (BIEN-NHAN-AUDIT-V1-A)
+# wp1460 r8 — B1a của kế hoạch nguồn r4: biên nhận full audit `bien_nhan_audit.v1` (phần bên tiêu dùng cần) + canary A3 (BIEN-NHAN-AUDIT-V1-A)
 packet_id: wp1460
-revision: 7
+revision: 8
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 
-Trạng thái: thay r6 (cùng đường dẫn, commit `2e93730ff2451353086964e78d0bcff7e9bb5ac5`, sha256 `8080a30f639812e8274c4e3a2249301d1eb776bf6320f5a0f833c80f17232009`; r5 `f18abde`, r4 `9f09a12`, r3 `29c99e7`, r2 `9f7010e`, r1 `d7e89d9`). Sáu lượt review spec Codex; lượt 6 (`wp1460-spec-review-6`, trên r6) trả 4 P2 + 1 P3, trong đó hai lớp bị xếp VÁ HỜ; r7 sửa theo LỚP và lần này người soạn TỰ ĐO RĂNG bằng đột biến trước khi báo (bảng "Thay đổi", mục "Số đo"). Lượt 4 còn hai lớp P2: `v1-not-fully-specified` và `legacy-selector-equivalence-is-impossible`. Quyết định chủ kho E1 (chat 2026-11-20, ghi vào Mission r87): **TÁCH B1**. Nguyên nhân gốc được nhận: đóng băng một hợp đồng rất rộng bằng văn xuôi trước khi có mã. Từ r5, packet là **B1a**: phạm vi hẹp, hợp đồng đóng băng bằng HIỆN VẬT MÁY (schema + fixture), văn xuôi chỉ trỏ tới chúng. Phần còn lại thành packet kế nhiệm B1b (mục "Ngoài phạm vi"). Chưa có lease.
+Trạng thái: thay r7 (cùng đường dẫn, commit `d1b08c219227d4b8925702029cd20d4e0febed54`, sha256 `d53341fb8d549d89f99e4cda0bd6ed380bf9975ce47b95a43ad1adaf5b3963b3`, review spec lượt 7 approve 0 finding; lease thi công `wp1460-r7-g1-claude`). r8 CHỈ thêm khối `nang_tran` theo `ADR-0053` theo đúng đường mục "Kích thước" của r7 đã định: executor lượt 2 dừng TRƯỚC review vì ứng viên sẽ vượt trần mặc định. r8 chỉ đổi dòng `revision`, đoạn Trạng thái này, mục "Kích thước" và bảng "Thay đổi"; hợp đồng, nghiệm thu, lệnh kiểm, write set và quy trình giữ nguyên từng byte. Đoạn trạng thái của r7, giữ làm lịch sử: thay r6 (cùng đường dẫn, commit `2e93730ff2451353086964e78d0bcff7e9bb5ac5`, sha256 `8080a30f639812e8274c4e3a2249301d1eb776bf6320f5a0f833c80f17232009`; r5 `f18abde`, r4 `9f09a12`, r3 `29c99e7`, r2 `9f7010e`, r1 `d7e89d9`). Sáu lượt review spec Codex; lượt 6 (`wp1460-spec-review-6`, trên r6) trả 4 P2 + 1 P3, trong đó hai lớp bị xếp VÁ HỜ; r7 sửa theo LỚP và lần này người soạn TỰ ĐO RĂNG bằng đột biến trước khi báo (bảng "Thay đổi", mục "Số đo"). Lượt 4 còn hai lớp P2: `v1-not-fully-specified` và `legacy-selector-equivalence-is-impossible`. Quyết định chủ kho E1 (chat 2026-11-20, ghi vào Mission r87): **TÁCH B1**. Nguyên nhân gốc được nhận: đóng băng một hợp đồng rất rộng bằng văn xuôi trước khi có mã. Từ r5, packet là **B1a**: phạm vi hẹp, hợp đồng đóng băng bằng HIỆN VẬT MÁY (schema + fixture), văn xuôi chỉ trỏ tới chúng. Phần còn lại thành packet kế nhiệm B1b (mục "Ngoài phạm vi"). Chưa có lease.
 
 Nguồn: kế hoạch nguồn r4 (`ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md`, nhánh `ops/wp1172-plan-r4`, sha256 `0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe`; "§…" không ghi nguồn là tới tệp ấy). Thẩm quyền: Mission r85 và các revision kế tiếp ghi quyết định chủ kho 2026-11-20 (r86: nâng trần soạn/review, luật kích thước, bỏ A4 khỏi B1; r87: tách B1, thêm một lượt soạn); r84 Q6 = có. Base lúc soạn: `master` `0f9aa2a2cc697129e1f5be72feddf60986286865`; base thi công đo lại khi cấp lease. Đặc tả chỉ có hiệu lực khi chủ kho duyệt băm của nó và một Mission revision cài nó.
 
@@ -368,6 +368,12 @@ Không tệp thứ năm. Không đặt được lệnh thu trong `ci_dang_ky_tes
 - Executor đo `git diff --numstat <base>...HEAD` trên đúng bốn tệp giao nộp trong lúc thi công và trước MỖI lần xin review; ghi số đo vào PR.
 - Theo `ADR-0044`: ứng viên giao nộp vượt trần ⇒ DỪNG TRƯỚC review; không cắt ca, fixture hay đột biến để lọt trần; báo điều phối kèm numstat đã đo và phần việc còn thiếu.
 - Khi ấy điều phối xin chủ kho một khối `nang_tran` đúng `ADR-0053` (bốn trường `ai_nang`, `can_cu` có numstat ĐÃ ĐO, `tran_cu`, `tran_moi`); chủ kho duyệt; khối vào một revision đặc tả (chỉ đổi dòng `revision`, đoạn Trạng thái, mục này, bảng Thay đổi) và chép nguyên vào lease. Executor chỉ tiếp tục sau khi lease mang khối ấy.
+- **Khối `nang_tran` (`ADR-0053`, quyết định chủ kho 2026-11-24, ghi hộ trên #1172):**
+  - `ai_nang`: chủ kho `ducthangho`, câu trả lời nguyên văn «6 tệp / 1600 dòng» (phiên điều phối Mission hỏi qua công cụ hỏi đáp, ~12:15Z).
+  - `can_cu`: numstat ĐÃ ĐO trên head dở `877295930d136413dce68a9cdee5a8a3f35075e1` (tree `72ab13c24c391110094e37eb130fd9ba32a911a7`) so base `5259239d763c9ffc1677f033bd9a9cf23ede9299`: 4 tệp, +408/−20 (`.claude/dev/ci_dang_ky_test.py` +127, `.github/workflows/ci-dot-bien-du.yml` +86, schema +34, fixture +161); phiên điều phối gói đo lại khớp lời executor. Phần còn thiếu lúc dừng: collector `--thu-bien-nhan-audit`, bộ kiểm hợp đồng (Nghiệm thu 1), ca Nghiệm thu 2–4, bộ chạy đột biến cùng các mutant (Nghiệm thu 7). Ước tính của executor cho ứng viên đầy đủ 930–1120 dòng thêm là ƯỚC, KHÔNG phải số đo, và không là căn cứ của trần.
+  - `tran_cu`: 6 tệp / 450 dòng thêm (trần mặc định `sensitive`).
+  - `tran_moi`: 6 tệp / 1600 dòng thêm theo `git diff --numstat` so base của lease.
+  - Khối này chép NGUYÊN vào lease kế nhiệm. Mọi luật còn lại của mục này giữ nguyên với `tran_moi` thay cho trần mặc định: đo trong lúc thi công và trước MỖI lần xin review; vượt `tran_moi` ⇒ DỪNG trước review, không cắt ca/fixture/đột biến.
 
 ## Quy trình và quyền
 - Lớp review: `sensitive`. Executor: Claude Code (Fable 5.2). Reviewer: Codex service gpt-6-astra, mức suy luận cao nhất, phiên độc lập, chỉ đọc.
@@ -387,6 +393,15 @@ Không tệp thứ năm. Không đặt được lệnh thu trong `ci_dang_ky_tes
 - CHƯA ĐO: `actionlint`/Ruff nền; giá trị `github.workflow_sha` và `github.repository_id` trên lượt dispatch của nhánh; cách REST liệt kê job qua nhiều attempt (mục 7 đo); hạn mức job đồng thời; thời hạn lưu artifact.
 
 ## Thay đổi
+**r7 → r8 (`nang_tran`, không qua review spec mới về nội dung). Chỉ đổi:**
+
+| Chỗ | Đổi |
+|---|---|
+| dòng tiêu đề, `revision` | 7 → 8 |
+| đoạn Trạng thái | thêm câu dẫn r8, giữ nguyên đoạn r7 làm lịch sử |
+| mục "Kích thước" | thêm khối `nang_tran` (`ai_nang`, `can_cu` có numstat đã đo, `tran_cu`, `tran_moi`) |
+| bảng "Thay đổi" | thêm mục này |
+
 **r6 → r7 (review spec lượt 6). Sửa theo LỚP; răng do người soạn tự đo.**
 
 | Lớp | Sửa ở r7 |

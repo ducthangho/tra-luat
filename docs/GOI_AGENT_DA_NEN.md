@@ -357,7 +357,13 @@ biến môi trường của environment.
   thừa), và phép kiểm đòi cả cụm `<thuật ngữ> là <định nghĩa>` có nguyên văn trong
   nguồn. Lệch thì `rc=5`, không dùng kết quả.
 - Mỗi lần chạy in ra đường đã dùng, model và token; `--nhat-ky usage.jsonl` ghi dồn để
-  cộng tổng.
+  cộng tổng (phải là tệp KHÁC `--out`).
+- **Đường `sub` đo nguồn xác thực trước khi gọi model**: `claude --setting-sources "" auth status --json`
+  với cùng env của lời gọi; chỉ `authMethod` ∈ {`claude.ai`, `oauth_token`} và `apiProvider=firstParty` mới
+  được coi là subscription. Giới hạn: không phân biệt hạn mức gói với "extra usage" tài khoản tự bật.
+- **Kiểm nguyên văn là fail-closed**: nguồn có ranh giới khoản mơ hồ (dòng lạ trước khoản đầu, khoản mất số giữa
+  các khoản có số), khoản dùng từ nối khác "là" (vd "bao gồm"), hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì
+  đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ (`--tep`) hoặc dựng `tl cache-build` trước.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
   `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả
   hai thì lệnh báo HẾT ĐƯỜNG (`rc=3`) kèm lý do từng đường; `tl llm-order` in sẵn đường nào

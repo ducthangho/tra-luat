@@ -2952,6 +2952,16 @@ def _llm_in_trang_thai(lr, thu_tu, nguon, tt):
     print("  CO MAT != DUNG DUOC — so du credit chi xem o Claude Console > Billing")
 
 
+def _cung_dich(a, b) -> bool:
+    pa, pb = Path(a), Path(b)
+    try:
+        if pa.resolve() == pb.resolve():
+            return True
+        return pa.exists() and pb.exists() and os.path.samefile(pa, pb)
+    except OSError:
+        return True   # không đo được ⇒ coi như trùng (fail-closed)
+
+
 def _ghi_nguyen_tu_giu_quyen(dich, noi_dung) -> None:
     """Tệp tạm CÙNG thư mục → fsync → os.replace. Đích có sẵn thì GIỮ quyền của nó (lượt 2 N5: mkstemp tạo
     0600, thay thẳng là đổi 0644 → 0600 sau lưng tiến trình khác đang đọc). Lỗi giữa chừng: dọn tệp tạm."""
@@ -3058,6 +3068,11 @@ def cmd_llm_khai_niem(a) -> int:
         return 2
     if getattr(a, "out", None) and Path(a.out).is_dir():   # lượt 2 N5: kiểm đích TRƯỚC khi tiêu token
         print(f"[tl] --out {a.out} la thu muc — can duong dan tep", file=sys.stderr)
+        return 2
+    if getattr(a, "out", None) and getattr(a, "nhat_ky", None) and _cung_dich(a.out, a.nhat_ky):
+        # Lượt 3 M5: nhật ký JSONL nối vào CHÍNH tệp `--out` ⇒ JSON đã xác minh hỏng (`Extra data`), kể cả khi rc 5
+        # (byte cũ bị nối thêm). So theo đường dẫn tuyệt đối đã giải symlink VÀ theo định danh tệp nếu đã tồn tại.
+        print(f"[tl] --out va --nhat-ky tro cung mot tep ({a.out}) — dung hai tep khac nhau", file=sys.stderr)
         return 2
     print(f"[tl] thu tu duong: {','.join(thu_tu)} ({nguon})", file=sys.stderr)
     try:

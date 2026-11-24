@@ -4506,7 +4506,7 @@ def t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit():
         status = 200
         def __enter__(self): return self
         def __exit__(self, *a): return False
-        def __init__(self, than=b'{"type": "message", "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}'):
+        def __init__(self, than=b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}'):
             self._than = than
         def read(self): return self._than
 
@@ -4539,9 +4539,13 @@ def t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit():
     # JSON không phải object ở cả hai đường không được ném AttributeError.
     # Lượt 2 N8: mỗi điều kiện một mẫu RIÊNG — thiếu `type`, model khác, token âm (cùng usage hợp lệ).
     for than in (b"", b'{"status": "ok"}', b"[]", b'{"type": "message", "usage": {"input_tokens": "8"}}',
-                 b'{"model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
-                 b'{"type": "message", "model": "other-model", "usage": {"input_tokens": 8, "output_tokens": 3}}',
-                 b'{"type": "message", "model": "claude-haiku-5-5", "usage": {"input_tokens": -1, "output_tokens": 3}}'):
+                 # Mỗi mẫu là khung Message ĐẦY ĐỦ, chỉ hỏng ĐÚNG trường nó đo — kẻo chốt khác che (lượt 3).
+                 b'{"id": "msg_01", "role": "assistant", "content": [], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [], "model": "other-model", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": -1}}',
+                 # Lượt 3 M6: thiếu khung Message (id/role/content) và usage 0+0.
+                 b'{"type": "message", "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [], "model": "claude-haiku-5-5", "usage": {"input_tokens": 0, "output_tokens": 0}}'):
         tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=lambda r, timeout=None, _t=than: _R(_t))
         bang(tt == "KHONG_DO_DUOC", f"2xx {than!r} khong chung minh dung duoc, duoc {tt}: {mo_ta}")
     tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=mo_loi(401, b"[]"))
@@ -17809,8 +17813,8 @@ DOT_BIEN = [
      ('            if not (la_message and dung_model and co_usage):\n', '            if False:\n'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_bo_kiem_type",
-     ('            la_message = isinstance(than_tl, dict) and than_tl.get("type") == "message"',
-      '            la_message = isinstance(than_tl, dict)'),
+     ('            la_message = (isinstance(than_tl, dict) and than_tl.get("type") == "message"\n',
+      '            la_message = (isinstance(than_tl, dict)\n'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_bo_kiem_model",
      ('            dung_model = isinstance(than_tl, dict) and than_tl.get("model") == ANTHROPIC_MODEL_KIEM_SONG',
@@ -17819,6 +17823,15 @@ DOT_BIEN = [
     ("anthropic_api_nhan_token_am",
      ('isinstance(u.get(k), int) and not isinstance(u.get(k), bool) and u.get(k) >= 0',
       'isinstance(u.get(k), int) and not isinstance(u.get(k), bool)'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_bo_kiem_khung_message",
+     ('                          and isinstance(than_tl.get("id"), str) and than_tl.get("id", "").startswith("msg_")\n'
+      '                          and than_tl.get("role") == "assistant" and isinstance(than_tl.get("content"), list))',
+      '                          )'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_nhan_0_token",
+     ('for k in ("input_tokens", "output_tokens")) and u.get("input_tokens", 0) > 0',
+      'for k in ("input_tokens", "output_tokens"))'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_mat_mang_thanh_chua_xac_thuc",
      ('        return ("KHONG_DO_DUOC", f"key ({ten}) · kiem song khong chay duoc: {type(e).__name__}")',

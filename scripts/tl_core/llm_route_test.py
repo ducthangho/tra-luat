@@ -89,7 +89,7 @@ def run_sub_gia(data=None, rc=0, is_error=False, model="claude-haiku-5-5", nhat_
     def chay(cmd, **k):
         if nhat_ky is not None:
             nhat_ky.append((cmd, k))
-        if list(cmd[1:3]) == ["auth", "status"]:
+        if "auth" in cmd and "status" in cmd:
             return subprocess.CompletedProcess(cmd, auth_rc, json.dumps(auth), "")
         mu = ({model: {"inputTokens": 2, "outputTokens": 55, "cacheReadInputTokens": 0,
                        "cacheCreationInputTokens": 1911, "canonicalModel": model}}
@@ -197,7 +197,9 @@ def ca_sub_go_key_va_cat_ngu_canh(m):
     m.duong_sub("he", "nd", {"type": "object"}, "claude-haiku-5-5", env,
                 chay=run_sub_gia(nhat_ky=nk), tim=lambda t: "/usr/bin/claude")
     cmd, k = next(c for c in nk if "-p" in c[0])
-    auth_cmd, auth_k = next(c for c in nk if list(c[0][1:3]) == ["auth", "status"])
+    auth_cmd, auth_k = next(c for c in nk if "auth" in c[0] and "status" in c[0])
+    bang("--setting-sources" in auth_cmd and auth_cmd[auth_cmd.index("--setting-sources") + 1] == "",
+         f"auth status phai dung CUNG --setting-sources rong voi loi goi model (luot 3 M3): {auth_cmd}")
     bang(not any(b in auth_k["env"] for b in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "TL_ANTHROPIC_API_KEY")),
          "phep do auth status phai dung CUNG env da go key nhu loi goi model")
     bang(not any(b in k["env"] for b in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "TL_ANTHROPIC_API_KEY")),
@@ -539,33 +541,84 @@ def ca_sub_xac_thuc_tai_khoan(m):
 
 
 def ca_cap_co_ranh_gioi(m):
+    # Lượt 3 M4: chạm CAP ⇒ CHẶN mọi Điều, và KHÔNG được đọc lần hai để "xác nhận" ranh giới (bản đọc lần hai có
+    # thể là bản khác). Đếm số lời gọi extract: đúng 1.
     goi = []
 
-    def chay(dieu_sau_co):
-        def _c(cmd, **k):
-            goi.append(cmd)
-            d = cmd[cmd.index("--dieu") + 1]
-            if d in ("3", "3a"):
-                return subprocess.CompletedProcess(cmd, 0, f"===== Điều {d} =====\n" + VAN_BAN,
-                                                   "[tl] ⚠ độ dài chạm CAP export (~200k ký tự)\n")
-            if dieu_sau_co:
-                return subprocess.CompletedProcess(cmd, 0, f"===== Điều {d} =====\nĐiều {d}. X", "")
-            return subprocess.CompletedProcess(cmd, 1, "", "khong tim thay")
-        return _c
-    vb, _ = m.lay_dieu_qua_extract("1/2025/QH15", "3", "/x/tl.py", chay=chay(True))
-    bang(vb == VAN_BAN.strip() and goi[-1][goi[-1].index("--dieu") + 1] == "4", "Dieu da co Dieu 4 sau phai qua")
-    for dieu_sau_co, dieu in ((False, "3"), (True, "3a")):
-        try:
-            m.lay_dieu_qua_extract("1/2025/QH15", dieu, "/x/tl.py", chay=chay(dieu_sau_co))
-        except ValueError:
-            continue
-        raise TinHieuChotCa(f"CAP khong xac nhan duoc ranh gioi (dieu={dieu}) phai chan")
+    def chay(cmd, **k):
+        goi.append(cmd)
+        d = cmd[cmd.index("--dieu") + 1]
+        return subprocess.CompletedProcess(cmd, 0, f"===== Điều {d} =====\n" + VAN_BAN + "\n===== Điều 4 =====",
+                                           "[tl] ⚠ độ dài chạm CAP export (~200k ký tự)\n")
+    try:
+        m.lay_dieu_qua_extract("1/2025/QH15", "3", "/x/tl.py", chay=chay)
+        raise TinHieuChotCa("cham CAP phai chan")
+    except ValueError:
+        pass
+    bang(len(goi) == 1, f"khong duoc doc lan hai de xac nhan ranh gioi: {len(goi)} loi goi extract")
 
 
 def ca_504_uu_tien_ma(m):
     bang(m.phan_loai_loi_api(LoiGia(504, "overloaded_error", "x")) is m.Dung, "504 kem overloaded_error phai DUNG (ma thang body)")
     bang(m.phan_loai_loi_api(LoiGia(500, "rate_limit_error", "x")) is m.Dung, "500 kem rate_limit_error phai DUNG")
     bang(m.phan_loai_loi_api(LoiGia(None, "overloaded_error", "x")) is m.ChuyenDuong, "khong ma: dung type")
+
+
+# ------------------------------------------------------------- ca: cross-review lượt 3 (M1–M3)
+
+def ca_ngoac_goi_tat(m):
+    vb = "Điều 3.\n1. Doanh nghiệp (sau đây gọi là DN) là tổ chức.\n2. Hồ sơ là tài liệu."
+    dung = [{"stt": 1, "thuat_ngu": "Doanh nghiệp (sau đây gọi là DN)", "dinh_nghia": "tổ chức."},
+            {"stt": 2, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu."}]
+    bang(m.lech_nguyen_van(dung, vb) == [], "tach ngoai ngoac phai dat")
+    sai = [{"stt": 1, "thuat_ngu": "Doanh nghiệp (sau đây gọi", "dinh_nghia": "DN) là tổ chức."}, dung[1]]
+    bang(m.lech_nguyen_van(sai, vb) == [1], "tach tai chu 'la' trong ngoac phai lech")
+
+
+def ca_tron_co_so_va_mat_so(m):
+    vb = "Điều 3.\n1. A là x.\n2. B là y.\nC là z.\n4. D là t."
+    bang(m.tach_khoan(vb) is None, f"nguon co so ma mot khoan mat so phai mo ho: {m.tach_khoan(vb)}")
+    gop = [{"stt": 1, "thuat_ngu": "A", "dinh_nghia": "x."}, {"stt": 2, "thuat_ngu": "B", "dinh_nghia": "y.\nC là z."},
+           {"stt": 4, "thuat_ngu": "D", "dinh_nghia": "t."}]
+    bang(m.lech_nguyen_van(gop, vb) == [0], "gop khoan mat so vao khoan truoc phai khong dat")
+
+
+def ca_khoan_bao_gom_bi_chan(m):
+    vb = "Điều 3.\n1. Thiết bị bao gồm:\na) máy;\nb) dụng cụ."
+    kn = [{"stt": 1, "thuat_ngu": "Thiết bị", "dinh_nghia": "bao gồm:\na) máy;\nb) dụng cụ."}]
+    bang(m.lech_nguyen_van(kn, vb) == [1], "khoan dung 'bao gom' khong xac minh duoc phai chan (khong nhan sai)")
+
+
+def ca_token_moi_truong(m):
+    for usage, mu_ghi in (({}, {"claude-haiku-5-5": {"inputTokens": 0, "outputTokens": 0, "cacheReadInputTokens": 1200}}),
+                          ({"input_tokens": 9, "output_tokens": 2}, {}),
+                          ({}, {"claude-haiku-5-5": {"inputTokens": 5, "outputTokens": 2, "cacheReadInputTokens": "x"}})):
+        def chay(cmd, _u=usage, _mu=mu_ghi, **k):
+            if "auth" in cmd and "status" in cmd:
+                return subprocess.CompletedProcess(cmd, 0, json.dumps(AUTH_SUB), "")
+            kq = {"subtype": "error_during_execution", "is_error": True, "result": "x", "modelUsage": _mu}
+            if _u:
+                kq["usage"] = _u
+            return subprocess.CompletedProcess(cmd, 1, json.dumps(kq), "")
+        rc, _, nhat = chay_lenh(m, KEY, {"sub": sub(m, chay), "api": cam("api")})
+        bang(rc == m.MA_DUNG, f"co dau token (cache/usage tong/sai kieu) phai DUNG, khong goi api: {usage} {mu_ghi} rc={rc} {nhat}")
+
+
+def ca_auth_sai_kieu(m):
+    try:
+        m.duong_sub("he", "nd", {"type": "object"}, "claude-haiku-5-5", {},
+                    chay=run_sub_gia(auth={"loggedIn": True, "authMethod": [], "apiProvider": "firstParty"}),
+                    tim=lambda t: "/usr/bin/claude")
+    except m.ChuyenDuong:
+        return
+    except TypeError as e:
+        raise TinHieuChotCa(f"authMethod sai kieu lam no TypeError: {e}") from e
+    raise TinHieuChotCa("authMethod sai kieu ma van di sub")
+
+
+def ca_usage_thieu_truong(m):
+    bang(m._usage_sub({"x": {"outputTokens": 3}}) is None, "thieu inputTokens khong duoc bu 0")
+    bang(m._usage_sub({"x": {}}) is None, "muc rong khong duoc thanh 4 so 0")
 
 
 CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen_sub, ca_het_credit_402_chuyen_sub,
@@ -577,7 +630,9 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_sub_het_luot_schema_thi_dung, ca_sub_thieu_dau_duong_khong_nhan, ca_sub_dinh_tuyen_nha_cung_cap,
       ca_qua_tai_chuyen_duong, ca_co_rong_va_symlink_dut, ca_extract_cham_tran,
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
-      ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma]
+      ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
+      ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_token_moi_truong, ca_auth_sai_kieu,
+      ca_usage_thieu_truong]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
@@ -598,10 +653,11 @@ DOT_BIEN = [
     ("bo_kiem_nguyen_van", ('kq["lech"] = lech_nguyen_van(kq["khai_niem"], van_ban)', 'kq["lech"] = []'),
      "ca_lech_nguyen_van"),
     ("bo_chuan_hoa_la", ('        if k["dinh_nghia"].startswith("là "):', "        if False:"), "ca_chuan_hoa_chu_la"),
-    ("so_chuoi_con", ("_gon(cum) == _gon(khoan[i][1])", "_gon(cum) in _gon(khoan[i][1])"), "ca_dinh_nghia_bi_cat"),
-    ("so_ca_nguon", ("_gon(cum) == _gon(khoan[i][1])", "_gon(cum) in _gon(van_ban)"), "ca_dinh_nghia_bi_cat"),
+    ("so_chuoi_con", ("and dn == _gon(khoan[i][1][m.end():])", "and dn in _gon(khoan[i][1][m.end():])"),
+     "ca_dinh_nghia_bi_cat"),
+    ("so_ca_nguon", ("and dn == _gon(khoan[i][1][m.end():])", "and dn in _gon(van_ban)"), "ca_dinh_nghia_bi_cat"),
     ("bo_khoan_thieu", ("    lech.extend(so_cua[len(khai_niem):])\n", ""), "ca_bo_khoan_va_mang_rong"),
-    ("bo_kiem_stt", ('k.get("stt") == so_cua[i] and ', ""), "ca_trao_so"),
+    ("bo_kiem_stt", ('if i < len(khoan) and k.get("stt") == so_cua[i]:', "if i < len(khoan):"), "ca_trao_so"),
     ("stt_theo_vi_tri", ("    so_cua = [so if so is not None else i + 1 for i, (so, _) in enumerate(khoan)]",
                          "    so_cua = [i + 1 for i, (so, _) in enumerate(khoan)]"), "ca_so_khoan_nguon_va_dang_so"),
     ("so_khoan_can_khoang_trang", ('_RE_SO_KHOAN = re.compile(r"^(?:(\\d+)\\s*[.)](?!\\d)|\\((\\d+)\\))\\s*")',
@@ -610,7 +666,13 @@ DOT_BIEN = [
     ("nuot_dong_truoc_khoan_dau", ("        elif not khoan and ln.endswith(\":\"):\n            continue\n        else:\n            return None",
                                    "        elif not khoan and ln.endswith(\":\"):\n            continue\n        elif not khoan:\n            continue\n        else:\n            return None"),
      "ca_nguon_mo_ho_thi_khong_dat"),
-    ("bo_kiem_la_trong_thuat_ngu", ("tn.strip() and not _RE_LA.search(tn)", "tn.strip()"), "ca_tach_tai_la_dau_tien"),
+    ("tach_tai_la_cuoi", ("        if truoc.count(\"(\") <= truoc.count(\")\"):\n            return m\n    return None",
+                          "        if truoc.count(\"(\") <= truoc.count(\")\"):\n            last = m\n    return locals().get(\"last\")"),
+     "ca_tach_tai_la_dau_tien"),
+    ("la_trong_ngoac_cung_tinh", ("        if truoc.count(\"(\") <= truoc.count(\")\"):\n            return m",
+                                  "        if True:\n            return m"), "ca_ngoac_goi_tat"),
+    ("tron_so_gop_vao_khoan_truoc", ("            elif khoan and (_RE_DIEM.match(ln) or not _la_ngoai_ngoac(ln)):",
+                                     "            elif khoan:"), "ca_tron_co_so_va_mat_so"),
     ("diem_mo_khoan_moi", ("        if _RE_DIEM.match(ln):\n            if not khoan:\n                return None\n            khoan[-1][1] += \"\\n\" + ln\n        elif",
                            "        if False:\n            pass\n        elif"), "ca_khoan_mat_so_co_diem_dat"),
     ("bom_khong_go", ('    dong = next((ln for ln in str(van_ban).lstrip("\\ufeff").splitlines() if ln.strip()), "")',
@@ -619,15 +681,26 @@ DOT_BIEN = [
                         "if subtype in SUBTYPE_LOI_YEU_CAU:"), "ca_sub_stop_reason_va_kieu"),
     ("nhan_0_token", ('    if u is None or not (u["input"] or u["output"]):\n        raise Dung(',
                       '    if False:\n        raise Dung('), "ca_sub_stop_reason_va_kieu"),
-    ("loi_sau_chay_van_chuyen", ('        if u is not None and (u["input"] or u["output"]):\n            raise Dung(',
-                                 '        if False:\n            raise Dung('), "ca_sub_thieu_dau_duong_khong_nhan"),
+    ("loi_sau_chay_van_chuyen", ("        if dau is not False:\n", "        if False:\n"), "ca_sub_thieu_dau_duong_khong_nhan"),
+    ("token_chi_input_output", ("            thay += [v[k] for k in _KHOA_MU.values() if k in v]",
+                                "            thay += [v[k] for k in (\"inputTokens\", \"outputTokens\") if k in v]"),
+     "ca_token_moi_truong"),
+    ("bo_usage_tong", ("        thay += [us[k] for k in _KHOA_USAGE if k in us]", "        pass"), "ca_token_moi_truong"),
+    ("sai_kieu_coi_la_chua_chay", ("    if not all(_so_khong_am(x) for x in thay):\n        return None",
+                                   "    if not all(_so_khong_am(x) for x in thay):\n        return False"),
+     "ca_token_moi_truong"),
+    ("usage_bu_0_khi_thieu", ('        if "inputTokens" not in v or "outputTokens" not in v:\n            return None\n', ""),
+     "ca_usage_thieu_truong"),
     ("bo_kiem_xac_thuc", ("    kiem_xac_thuc_sub(claude_bin, env, chay)\n", ""), "ca_sub_xac_thuc_tai_khoan"),
     ("cho_api_key_la_sub", ('AUTH_SUBSCRIPTION = frozenset({"claude.ai", "oauth_token"})',
                             'AUTH_SUBSCRIPTION = frozenset({"claude.ai", "oauth_token", "api_key"})'), "ca_sub_xac_thuc_tai_khoan"),
-    ("bo_kiem_nha_cung_cap", ('phuong_thuc in AUTH_SUBSCRIPTION and nha_cc == "firstParty"',
-                              'phuong_thuc in AUTH_SUBSCRIPTION'), "ca_sub_xac_thuc_tai_khoan"),
-    ("cap_cho_qua_het", ("        if not (str(dieu).isdigit() and _co_dieu(so_hieu, str(int(dieu) + 1), tl_py, chay, them)):",
-                         "        if False:"), "ca_cap_co_ranh_gioi"),
+    ("bo_kiem_nha_cung_cap", ('            and nha_cc == "firstParty"):', '            ):'), "ca_sub_xac_thuc_tai_khoan"),
+    ("auth_khong_kiem_kieu", ("isinstance(phuong_thuc, str) and phuong_thuc in AUTH_SUBSCRIPTION",
+                              "phuong_thuc in AUTH_SUBSCRIPTION"), "ca_auth_sai_kieu"),
+    ("auth_doc_settings_nguoi_dung", ('            p = chay([claude_bin, "--setting-sources", "", "auth", "status", "--json"]',
+                                      '            p = chay([claude_bin, "auth", "status", "--json"]'), "ca_sub_go_key_va_cat_ngu_canh"),
+    ("cap_cho_qua_het", ('    if MAU_CAP_EXTRACT in (p.stderr or ""):\n        raise ValueError(',
+                         '    if False:\n        raise ValueError('), "ca_cap_co_ranh_gioi"),
     ("schema_retries_chuyen_duong", ('SUBTYPE_LOI_YEU_CAU = frozenset({"error_max_structured_output_retries", ',
                                      'SUBTYPE_LOI_YEU_CAU = frozenset({'), "ca_sub_het_luot_schema_thi_dung"),
     ("nhan_khi_thieu_is_error", ('kq.get("is_error") is False', 'not kq.get("is_error")'),
@@ -658,7 +731,7 @@ DOT_BIEN = [
     ("bo_chot_cap", ("    if MAU_CAP_EXTRACT in (p.stderr or \"\"):\n", "    if False:\n"), "ca_extract_cham_tran"),
     ("bo_kiem_rc_sub", ('if not (p.returncode == 0 and subtype == "success"', 'if not (subtype == "success"'),
      "ca_sub_thieu_dau_duong_khong_nhan"),
-    ("doc_settings_nguoi_dung", ('"--setting-sources", "",', '"--setting-sources", "user",'),
+    ("doc_settings_nguoi_dung", ('"--strict-mcp-config",\n            "--setting-sources", "",', '"--strict-mcp-config",\n            "--setting-sources", "user",'),
      "ca_sub_go_key_va_cat_ngu_canh"),
     ("tep_hong_lui_mac_dinh", ('            raise ValueError(f"tep thu tu {tep} hong', '            return THU_TU_MAC_DINH, "mac dinh"\n            raise ValueError(f"tep thu tu {tep} hong'),
      "ca_tep_hong_fail_closed"),

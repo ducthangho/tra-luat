@@ -4817,11 +4817,15 @@ def _do_anthropic_api(moi_truong: dict[str, str] | None = None, kiem_song: bool 
             # `{"status":"ok"}` từng được dán `DUNG_DUOC`). Đòi đúng một Message có usage số nguyên.
             # Từng điều kiện TÁCH RIÊNG để mỗi cái có đột biến canh riêng (cross-review lượt 2 N8: bỏ riêng
             # kiểm `type` mà t162 vẫn xanh; token âm và model khác từng được dán DUNG_DUOC).
-            la_message = isinstance(than_tl, dict) and than_tl.get("type") == "message"
+            # Lượt 3 M6: đòi đủ khung một Message thật (id, role, content) — object chỉ có type/model/usage 0+0 không
+            # chứng minh một lượt gọi đã được phục vụ.
+            la_message = (isinstance(than_tl, dict) and than_tl.get("type") == "message"
+                          and isinstance(than_tl.get("id"), str) and than_tl.get("id", "").startswith("msg_")
+                          and than_tl.get("role") == "assistant" and isinstance(than_tl.get("content"), list))
             dung_model = isinstance(than_tl, dict) and than_tl.get("model") == ANTHROPIC_MODEL_KIEM_SONG
             co_usage = isinstance(u, dict) and all(
                 isinstance(u.get(k), int) and not isinstance(u.get(k), bool) and u.get(k) >= 0
-                for k in ("input_tokens", "output_tokens"))
+                for k in ("input_tokens", "output_tokens")) and u.get("input_tokens", 0) > 0
             if not (la_message and dung_model and co_usage):
                 return ("KHONG_DO_DUOC", f"key ({ten}) · HTTP {r.status} nhung phan hoi KHONG phai Message cua "
                                          f"{ANTHROPIC_MODEL_KIEM_SONG} co usage hop le — khong chung minh duoc "

@@ -29,6 +29,13 @@ và chuyển qua lại khi một bên hết hạn mức/credit.
   `claude auth status --json` cùng env — chỉ `authMethod` ∈ {claude.ai, oauth_token} + `apiProvider=firstParty`
   (N4); `--out` kiểm đích trước khi gọi model, giữ quyền tệp, lỗi I/O ⇒ rc 2 (N5); CAP chỉ chặn khi không thấy
   Điều kế tiếp (N6); mã HTTP thắng `type` của body (N7); `doctor` đòi đúng model + token không âm (N8).
+- Cross-review Codex lượt 3 (`ops/reviews/pr1503-review-3-codex/`, chủ kho nâng trần; REQUEST_CHANGES, 6 P1 · 1 P2)
+  — đã vá: tách thuật ngữ tại chữ "là" đầu tiên NGOÀI ngoặc và so theo vị trí ranh giới; nguồn có số mà một
+  dòng không số mở bằng "… là …" ⇒ mơ hồ; khoản dùng từ nối khác "là" (vd "bao gồm") ⇒ bị chặn, không nhận sai
+  (M1); dấu "model đã chạy" xét MỌI trường token (cả cache, cả `usage` tổng), số đo sai kiểu ⇒ dừng (M2);
+  `auth status` chạy với CÙNG `--setting-sources ""` như lời gọi model, kiểm kiểu `authMethod` (M3); chạm CAP
+  ⇒ chặn mọi Điều, bỏ lần đọc thứ hai (M4); `--out` trùng `--nhat-ky` ⇒ rc 2 trước khi gọi model (M5); `doctor`
+  đòi khung Message (id/role/content) và input > 0 (M6); số writer ghim trong `pretooluse_guard_test` 106 → 108 (M7).
 - Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
   key qua `agent_creds` chưa làm.
 

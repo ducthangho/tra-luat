@@ -1,0 +1,195 @@
+# HO SO LAND — packet #1236 GATE-OUTPUT-DOI-CHIEU dot A (module ops/gate_output_doi_chieu.py + bo test), revision 12 generation 2,
+#   lease wp1236-a-r12-g2-codex-20261122, qua PR #1502. Khuon: ops/land/pr1490-wp433-land-evidence.yaml.
+# Schema chuan: docs/PROTOCOL_DA_PHIEN.md §7; moc gate §10.2.2.
+#
+# TRANG THAI: merged (9d61d4e), landed TRUE tren CHINH merge SHA. ci.yml push master 45376074845 tren 9d61d4e: bon moc §10.2.2 measured
+#   passed (run, checkout 39/39, gate output 39/39 kem phan chung, Workflow definition qua wd-run 45377174762).
+# UY QUYEN: audit E5 chu kho TU DANG #1236 issuecomment-7107992503 (app null) — duyet merge dung SHA moi sau khi review toan goi approve
+#   va CI bat buoc xanh; uy quyen gom hau kiem, ghi so land, nha lease va dong WP neu hau kiem dat.
+# NHAN: measured / loi_khai_co_neo / thuat_lai / not_measured.
+# Readback tho: ops/land/pr1502-wp1236-a-provenance/ (SHA256SUMS kem). REST GET qua proxy phien bang GITHUB_PAT, 2026-11-24T11:0xZ.
+
+schema_version: 1
+# ---- TRUONG CHUAN PROTOCOL §7
+provider: claude
+role: land_operator
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+session_id: https://claude.ai/code/session_015GtxrYsNDbfLo32S39f5uY
+input_packet_generations:
+  - packet_issue: 1236
+    packet_id: wp1236
+    revision: 12
+    generation: 2
+    lease_id: wp1236-a-r12-g2-codex-20261122
+    ghi_chu: >-
+      Executor Codex (openai_codex, gpt-6). Chu kho doi executor tu Claude (g1, het quota) sang Codex o #1236 issuecomment-7082184146
+      (app null), diem khoi dau du phong 79b3c24 (dau PR #1480). Ban r12 cuc bo cua phien Claude g1 (85fac81..8eb0a1f) KHONG duoc push
+      va KHONG nam trong ung vien; Codex dung lai r12 tu 79b3c24.
+authorized_head_sha: 835655b6b5d8ad2add49f04ded92d3fd3f42515e
+approver: ducthangho
+authorization_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7107992503
+authorization_ghi_chu: >-
+  measured — readback-audit-e5-7107992503.json: user ducthangho, author_association OWNER, performed_via_github_app null, created_at =
+  updated_at 2026-11-23T16:59:49Z. Than: audit thay doi tu 1c8316a sang 835655b, tree b52aa72d; "Audit E5 dat. Toi duyet merge dung SHA moi
+  sau khi review toan goi approve va CI bat buoc xanh. Uy quyen bao gom hau kiem, ghi so land, nha lease va dong WP neu hau kiem dat."
+  Ghi chu: phep audit neu ro pham vi 1c8316a..835655b; cac doan truoc 1c8316a khong duoc audit nay nhac den (khong do duoc o day).
+  Merge: readback-pr-1502.json merged_at 2026-11-24T10:34:28Z, merge_commit_sha 9d61d4e. CAVEAT #566: ai bam merge khong do duoc.
+ngoai_le_windows: >-
+  measured — readback-windows-mien-7127447632.json: user ducthangho, app null, 2026-11-24T09:27:50Z: "windows: 835655b… mien. Ly do: base va
+  ung vien cung do wp433_gws_cred_no do fixture dung ten con tren Windows. Ghi no sua fixture va tai sinh bundle test o PR rieng."
+land_operator: 'measured — readback-pr-1502.json: merged_at 2026-11-24T10:34:28Z, merge_commit_sha 9d61d4e, state closed, draft false.'
+merge_method: merge
+merge_commit: 9d61d4efe6b59c20c12ba87420efd7dfd6e224bc
+merge_commit_tree: 32b1eabba0f6a4309127f1efd9fde0cb2660e9bc
+merge_commit_parents: [168d562b824db709ad88aa14f81d0ce3038cbfcb, 835655b6b5d8ad2add49f04ded92d3fd3f42515e]
+merge_ghi_chu: >-
+  measured — readback-commit-9d61d4e.json + linux/nghiem-thu-9d61d4e.txt: cha thu nhat 168d562, cha thu hai 835655b (tree b52aa72d). base
+  lease 010046f la to tien cua 168d562; diff 010046f..168d562 KHONG cham 3 duong write set. numstat 9d61d4e^1..9d61d4e = 010046f..835655b:
+  3 tep, +2097/-0 (<= 2100); blob ca 3 tep tai merge BANG tai head. git diff --check 168d562..9d61d4e rc 0. release-verify
+  RELEASE_MANIFEST.json --strict tai merge ok true, expected 186 = checked 186, failed []. 14 commit tren nhanh (readback-pr1502-commits.json):
+  1db0ae5, f4f17bc, 79b3c24 (r10, cua phien Claude g1 qua PR #1480), ec4bfa3 .. 835655b (r12, Codex g2).
+pre_merge_checks:
+  - name: 'CI PR tren head cuoi'
+    sha: 835655b6b5d8ad2add49f04ded92d3fd3f42515e
+    conclusion: success
+    nguon: [readback-runs-head-835655b.json, readback-checkruns-head-835655b.json]
+    ghi_chu: >-
+      measured — readback-runs-head-835655b.json: ci.yml pull_request 45351821460 success, lease-pr 45351821583 success, thu-hoi 45351820860
+      va 45366012765 success, launcher-windows 45351821373 skipped (paths). readback-checkruns-head-835655b.json: 38 check run, 36 success,
+      2 skipped.
+  - name: 'M9 full_mutant_audit tren head'
+    sha: 835655b6b5d8ad2add49f04ded92d3fd3f42515e
+    conclusion: success
+    nguon: [readback-runs-head-835655b.json]
+    ghi_chu: 'measured — readback-runs-head-835655b.json: ci-dot-bien-du.yml workflow_dispatch 45357397393 success tren 835655b.'
+  - name: 'Review offline toan goi (§8.3) — Google Antigravity'
+    sha: 835655b6b5d8ad2add49f04ded92d3fd3f42515e
+    conclusion: approve
+    nguon: [readback-review-approve-7125514979.json, readback-tien-do-7123865566.json, readback-pr1502-comments.json]
+    ghi_chu: >-
+      loi_khai_co_neo — #1236 issuecomment-7125514979 (2026-11-24T07:55:02Z) ghi APPROVED cua reviewer Google Antigravity, launcher
+      4f03cfd9, exact SHA 835655b, tree b52aa72d, spec hash 4589daf1; bien nhan 93f15a66 (23/23 dot bien song tuong duong), 5d652747
+      (du 45 hang luat 6 va 125 o). Comment nay dang qua app chatgpt-codex-connector (performed_via_github_app khac null), tuc la loi khai
+      cua phien Codex, khong phai chu kho tu dang; ban than cac bien nhan AGY KHONG nam trong ho so nay (khong do duoc o day). Ban giao
+      merge (PR #1502 issuecomment-7127567022) them receipt 92b050ed.
+  - name: 'Codex connector tren PR #1502'
+    sha: 835655b6b5d8ad2add49f04ded92d3fd3f42515e
+    conclusion: 'completed, khong finding'
+    nguon: [readback-pr1502-comments.json, readback-pr1502-reviews.json, readback-pr1502-review-comments.json]
+    ghi_chu: >-
+      measured — readback-pr1502-comments.json: 7125546959 codex-review-state commit_sha 835655b has_any_findings false; 7125579620 "Didn't find any major issues",
+      Reviewed commit 835655b6b5, 07:58:29Z — TRUOC merge 10:34:28Z. reviews va review-comments rong.
+  - name: 'kiem-merge K0-K7 cua executor'
+    sha: 835655b6b5d8ad2add49f04ded92d3fd3f42515e
+    conclusion: success
+    nguon: [readback-pr1502-comments.json]
+    ghi_chu: 'loi_khai_co_neo — PR #1502 issuecomment-7127567022: kiem-merge K0-K7 rc 0 tren 835655b, tree b52aa72d, dich master.'
+  - name: 'Bo test #1236 va selftest tren ung vien (executor)'
+    sha: 835655b6b5d8ad2add49f04ded92d3fd3f42515e
+    conclusion: success
+    nguon: [readback-tien-do-7123865566.json]
+    ghi_chu: >-
+      loi_khai_co_neo — #1236 issuecomment-7123865566: Linux selftest 1784/1784; bo #1236 51/51 ca, 158/158 dot bien, 2/2 tu kiem; luat 9
+      HOAN_TAT 923/946, 23 song tuong duong; ledger B 201 ID. Do lai doc lap tren MERGE (measured, post_merge_checks).
+  - name: 'Do native Windows'
+    sha: 835655b6b5d8ad2add49f04ded92d3fd3f42515e
+    conclusion: mien
+    nguon: [readback-windows-mien-7127447632.json, readback-tien-do-7123865566.json]
+    ghi_chu: >-
+      measured (mien) + loi_khai_co_neo (so do) — readback-windows-mien-7127447632.json: chu kho mien Windows cho 835655b (7127447632); lien khai executor: base va head cung
+      1783/1784, cung ID do cu wp433_gws_cred_no, cong rieng #1236 rc 0 hai nen.
+post_merge_checks:
+  - name: 'ci.yml push master tren DUNG merge SHA'
+    run_id: 45376074845
+    run_attempt: 1
+    sha: 9d61d4efe6b59c20c12ba87420efd7dfd6e224bc
+    conclusion: success
+    nguon: [ci/provenance.yaml, ci/run.json, ci/jobs.json, ci-provenance-thu.log, readback-run-45376074845.json, readback-jobs-45376074845.json, readback-runs-merge-9d61d4e.json, danh-gia-gate-output-45376074845.txt, phan-chung-buoc-45376074845.txt, gate-registry-gate-output-doi-chieu-45376074845.trich.txt, wd/wd-45376074845.json, wd/readback-run-45377174762.json, wd/readback-jobs-45377174762.json]
+    moc_run: 'measured — ci/provenance.yaml moc.run passed: event push, head_sha 9d61d4e, run_attempt 1 (ci-provenance-thu.log RUN: passed).'
+    moc_checkout: 'measured — ci-provenance-thu.log: 39/39 job checkout passed 9d61d4efe6b59c20c12ba87420efd7dfd6e224bc; readback-jobs: 39/39 nhan ubuntu-latest, runner_id khac 0.'
+    moc_workflow_definition: >-
+      measured — ci-provenance-thu.log WORKFLOW_DEFINITION: passed (wd-run) (ops/ci_provenance.py thu --wd-run 45377174762);
+      wd/wd-45376074845.json (artifact workflow-definition-45376074845 tai qua wd_dl.py): path .github/workflows/ci.yml, check_suite_commit
+      9d61d4e, blob a1db88d9 (= git rev-parse 9d61d4e:.github/workflows/ci.yml), sha256 d1201a76…82f5 (= sha256 git show), loi_graphql [];
+      luot do ops-do-workflow-definition.yml workflow_dispatch tu phien nay qua MCP actions_run_trigger, ref master, success.
+    moc_gate_output: >-
+      measured — danh-gia-gate-output-45376074845.txt (danh_gia_gate.py v2 sha256 539fed68, chep nguyen tu ho so #1490): passed 39/39 job co
+      dau hieu duong; job gate (ubuntu-latest) 138382752407 in `== tl selftest 1786/1786 ==`. gate-registry-gate-output-doi-chieu-45376074845.trich.txt
+      (job 138384568432, log_sha256 75ce036e…): `CI_DANG_KY ops/gate_output_doi_chieu_test.py: ĐẠT rc=0`, che_do day_du, 832,683 giay.
+      phan-chung-buoc-45376074845.txt: xoa dau hieu 4 buoc (gate selftest, gate release-verify LAND, gate-registry ci_dang_ky --chay,
+      gate-packet-loop --gom) => not_measured, rc 0 ca bon. ci/provenance.yaml tu ghi gate_output not_measured (ban chat cua ci_provenance.py,
+      xem NOT_MEASURED: 39 trong log); moc passed dua tren tep danh gia rieng, dung luat dot A cua chinh packet nay.
+  - name: 'Nghiem thu doc lap tren merge (Linux, phien land)'
+    sha: 9d61d4efe6b59c20c12ba87420efd7dfd6e224bc
+    conclusion: success
+    nguon: [linux/nghiem-thu-9d61d4e.txt]
+    ghi_chu: >-
+      measured — worktree tach tai 9d61d4e, core.abbrev 7: ops/gate_output_doi_chieu_test.py CA 51/51, DOT BIEN 158/158 bi giet dung ly do,
+      TU KIEM PHAN HANG DAT, TONG DAT rc 0; .claude/dev/ci_dang_ky_test.py PHAN CHUNG 1226/1226, TONG DAT rc 0; release-verify --strict
+      186/186; git diff --check rc 0.
+bookkeeping:
+  - {item: 'rut han lease wp1236-a-r12-g2-codex-20261122', ket_qua: 'xem lease.thu_hoi_cuoi'}
+  - item: 'PR #1459 (dac ta r9-r12 + verdict review dac ta)'
+    ket_qua: >-
+      measured — readback-pr-1459.json: merged, merge commit ed0008d9f0fbeec44a734a7ae7152fdf8e83b738 tai exact head 8bcc371; quyet dinh chu
+      kho ghi ho o readback-ghi-ho-1459-7129098397.json. Dac ta r12 nay nam tren master: ops/specs/wp1236-r12.md blob e5583bc0 = spec_blob lease.
+  - {item: 'PR #1465 (dot A r9, da bi thay)', ket_qua: 'measured — readback-pr-1465.json: closed, khong merge.'}
+  - {item: 'PR #1480 (dot A r10)', ket_qua: 'GitHub danh dau merged vi head 79b3c24 nam trong 9d61d4e; khong co merge rieng.'}
+  - {item: 'RELEASE_MANIFEST.json', ket_qua: 'not_applicable — 3 tep write set khong nam trong manifest; release-verify --strict 186/186 tren merge.'}
+  - {item: 'bien ban M8 tren #1236', ket_qua: 'not_measured luc ghi — dang sau khi ho so nay commit; bien ban tro lai ho so nay.'}
+  - {item: 'dong Issue #1236', ket_qua: 'not_applicable — con dot B (noi L8) va dot C (D2b), roi #1257.'}
+  - {item: 'no ghi lai', ket_qua: 'thuat_lai — sua fixture wp433_gws_cred_no tren Windows (ten con) va tai sinh bundle test, PR rieng (7127447632).'}
+  - {item: 'phat hanh', ket_qua: 'not_applicable — dot nay khong bump VERSION.'}
+# ---- het truong chuan
+packet_id: wp1236
+packet_issue: 1236
+packet_ten: GATE-OUTPUT-DOI-CHIEU
+dot: A
+revision: 12
+generation: 2
+pham_vi_land: >-
+  3 tep, +2097/-0: ops/gate_output_doi_chieu.py +343 (moi), ops/gate_output_doi_chieu_test.py +1753 (moi), .claude/dev/ci_dang_ky_test.py +1.
+  Module chua noi vao cong nao; L8 thuoc dot B, D2b thuoc dot C.
+environment: cloud
+operating_system: linux
+recorded_by: claude-session session_015GtxrYsNDbfLo32S39f5uY (phien land; truoc do la executor g1 cua dot A).
+
+spec:
+  path: ops/specs/wp1236-r12.md
+  blob: e5583bc042448517b94eadda57231dfc60e0a284
+  sha256: 4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7
+  nguon: 'measured — git rev-parse origin/master:ops/specs/wp1236-r12.md = e5583bc0 (sau merge #1459); sha256 = lease spec_hash.'
+
+lease:
+  lease_id: wp1236-a-r12-g2-codex-20261122
+  path: ops/leases/wp1236-a-r12-g2-codex-20261122.yaml (nhanh ops/wp1236-r10-a-lease)
+  write_set_so_tep: 3
+  write_set_hash: e348a0aec274cc000368e7b728a9a70423434e000ace619fbc059383907fb2f5
+  thay_the_cho: 'wp1236-a-r12-g1-claude-20261121 (bia mo hai chieu trong commit 18d3cdf).'
+  thu_hoi_cuoi: >-
+    RUT HAN sau merge: lease_until 2026-11-24T16:38:54Z -> 2026-11-24T10:44:49Z (commit 55a7d79 tren ops/wp1236-r10-a-lease, lease_publish
+    check rc 0), kem thu_hoi_bang_rut_han va budget_cuoi_ghi_chu. ai-dang-giu-sau-rut-han.txt (clone moi, fetch '+refs/heads/*:refs/heads/*',
+    tap nhanh may chu = cuc bo, 328 nhanh, sau han moi): ca 3 duong dan write set NGUOI_GIU 0, rc 0. Lan quet dau trong kho chinh ra CHAN [12]
+    (nhanh cuc bo tut sau) nen khong dung.
+  diff_do: 'measured — linux/nghiem-thu-9d61d4e.txt + numstat 9d61d4e^1..9d61d4e: 3 tep, +2097 (<= 2100 dong them, <= 3 tep).'
+
+trang_thai_packet:
+  merged: true
+  landed: true
+  landed_dieu_kien: >-
+    PROTOCOL §10.2.4 — (1) gate: run 45376074845 tren CHINH 9d61d4e bon moc run/checkout/gate_output/workflow_definition measured passed.
+    (2) lease nha: DAT (3 duong dan NGUOI_GIU 0). (3) bookkeeping: ho so nay + M8 tren #1236. (4) review neo 835655b: AGY approve (loi khai
+    co neo) + connector khong finding truoc merge + audit E5 chu kho. (5) uy quyen: audit tu dang 7107992503; Windows mien 7127447632.
+    (6) muc tieu: bo #1236 51/51, 158/158 do lai tren merge; CI selftest 1786/1786. (7) tran: 3/3 tep, 2097/2100 dong.
+  canh_bao_cho_chu_kho: >-
+    (i) Bien ban APPROVE cua AGY va so do luat 9/ledger chi co o dang comment dang qua app Codex connector; bien nhan AGY khong nam trong kho.
+    (ii) Audit E5 nhac pham vi 1c8316a..835655b. (iii) Windows native chua do tren ung vien ngoai loi khai executor (mien). (iv) So loi goi
+    Codex/AGY cua g2 khong co bien nhan trong ho so nay. (v) Bien do 2097/2100: dot sau khong con cho trong tran cu.
+
+khong_do_duoc:
+  - 'Ai bam merge (merged_by la danh tinh token).'
+  - 'Noi dung cac bien nhan AGY 93f15a66, 5d652747, 92b050ed.'
+  - 'So loi goi Codex/AGY cua generation 2.'
+  - 'Native Windows tren 835655b (mien).'

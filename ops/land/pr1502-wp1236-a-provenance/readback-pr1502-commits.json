@@ -1,0 +1,1150 @@
+[
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/1db0ae5dadf38dc4816cee51831173190d0ca346/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-21T00:17:13Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-21T00:17:13Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops(wp1236 đợt A r10): khởi điểm từ c2d606b + rút gọn mã tương đương, sửa L03, ca ma trận nghĩa a120–a123 (luật 4)\n\nĐặc tả r10 @81dc1eb (sha 3ee83173, chủ kho duyệt issuecomment-7053833153); lease\nwp1236-a-r10-g1-claude-20261121. Commit cục bộ, CHƯA push (ADR-0060 M5: chờ review offline).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYsNDbfLo32S39f5uY",
+   "tree": {
+    "sha": "dc7da5b2569895d1e3c88a5b0d826f2052107f38",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/dc7da5b2569895d1e3c88a5b0d826f2052107f38"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/1db0ae5dadf38dc4816cee51831173190d0ca346",
+   "verification": {
+    "payload": "tree dc7da5b2569895d1e3c88a5b0d826f2052107f38\nparent 010046f2141799ec6ffc9cfa1322d49df3f3f680\nauthor Claude <noreply@anthropic.com> 1795220233 +0000\ncommitter Claude <noreply@anthropic.com> 1795220233 +0000\n\nops(wp1236 đợt A r10): khởi điểm từ c2d606b + rút gọn mã tương đương, sửa L03, ca ma trận nghĩa a120–a123 (luật 4)\n\nĐặc tả r10 @81dc1eb (sha 3ee83173, chủ kho duyệt issuecomment-7053833153); lease\nwp1236-a-r10-g1-claude-20261121. Commit cục bộ, CHƯA push (ADR-0060 M5: chờ review offline).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYsNDbfLo32S39f5uY\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQMRXifWr\nIZg26yHwQLNCBiHoj11kuaJCV0VUiDyLmd3WaFgvEME7/BpHeS2Xg/V21bBtltCj3AGkPpvxh9bH\naQE=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-21T02:33:32Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/1db0ae5dadf38dc4816cee51831173190d0ca346",
+  "node_id": "C_kwDOTNeRjdoAKDFkYjBhZTVkYWRmMzhkYzQ4MTZjZWU1MTgzMTE3MzE5MGQwY2EzNDY",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/010046f2141799ec6ffc9cfa1322d49df3f3f680",
+    "sha": "010046f2141799ec6ffc9cfa1322d49df3f3f680",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/010046f2141799ec6ffc9cfa1322d49df3f3f680"
+   }
+  ],
+  "sha": "1db0ae5dadf38dc4816cee51831173190d0ca346",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/1db0ae5dadf38dc4816cee51831173190d0ca346"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f4f17bc4237a5362117f37b56e65209b92465f64/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-21T01:50:48Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-21T01:50:48Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops(wp1236 đợt A r10): đóng đột biến sống của lượt quét do (153 → 41 → rút gọn/ca), m125–m145\n\nQuét do (công cụ khuyến nghị, luật 3) trên 1db0ae5: 916 = 871 giết / 41 sống sạch / 4 lỗi\nvô can, HOAN_TAT. 41 sống: 3 thêm ca (tháng/ngày có chữ, token ngoài tập), 8 bỏ bằng rút gọn\n(lookbehind thừa của RE_TEP_DG, nhãn skip thành bool), 30 tương đương (danh sách trong handoff).\nBộ test: CA 40/40 · DOT BIEN 145/145 · TU KIEM DAT · TONG DAT.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYsNDbfLo32S39f5uY",
+   "tree": {
+    "sha": "b78a198f57d217c6f27a081316c04040fa120a52",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/b78a198f57d217c6f27a081316c04040fa120a52"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/f4f17bc4237a5362117f37b56e65209b92465f64",
+   "verification": {
+    "payload": "tree b78a198f57d217c6f27a081316c04040fa120a52\nparent 1db0ae5dadf38dc4816cee51831173190d0ca346\nauthor Claude <noreply@anthropic.com> 1795225848 +0000\ncommitter Claude <noreply@anthropic.com> 1795225848 +0000\n\nops(wp1236 đợt A r10): đóng đột biến sống của lượt quét do (153 → 41 → rút gọn/ca), m125–m145\n\nQuét do (công cụ khuyến nghị, luật 3) trên 1db0ae5: 916 = 871 giết / 41 sống sạch / 4 lỗi\nvô can, HOAN_TAT. 41 sống: 3 thêm ca (tháng/ngày có chữ, token ngoài tập), 8 bỏ bằng rút gọn\n(lookbehind thừa của RE_TEP_DG, nhãn skip thành bool), 30 tương đương (danh sách trong handoff).\nBộ test: CA 40/40 · DOT BIEN 145/145 · TU KIEM DAT · TONG DAT.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYsNDbfLo32S39f5uY\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQKnC5i7s\nlYFyHRfng6IX+1hI3qtV/zvpOmDoZO6z6ropcKd0w+cEdyPwhAe1z2KGg9WQ3g4Elca+KJXbslJT\nYwE=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-21T02:33:32Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/f4f17bc4237a5362117f37b56e65209b92465f64",
+  "node_id": "C_kwDOTNeRjdoAKGY0ZjE3YmM0MjM3YTUzNjIxMTdmMzdiNTZlNjUyMDliOTI0NjVmNjQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/1db0ae5dadf38dc4816cee51831173190d0ca346",
+    "sha": "1db0ae5dadf38dc4816cee51831173190d0ca346",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/1db0ae5dadf38dc4816cee51831173190d0ca346"
+   }
+  ],
+  "sha": "f4f17bc4237a5362117f37b56e65209b92465f64",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f4f17bc4237a5362117f37b56e65209b92465f64"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/79b3c24b8e6c7b74e456880a1249b0de1cb0d948/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-21T02:27:49Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-21T02:27:49Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops(wp1236 đợt A r10): lỗi cú pháp argparse theo mẫu stderr LỖI THAM SỐ (M02 review mã lượt 7) + m146\n\nChủ kho chọn phương án 2 sau lượt 7: vá M02, miễn M01/M03 (lỗ bộ test, mã đúng mọi đối chứng).\nBộ test: CA 40/40 · DOT BIEN 146/146 · TU KIEM DAT · TONG DAT.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYsNDbfLo32S39f5uY",
+   "tree": {
+    "sha": "f452299ff0cde1fc94f3659b3e2da6e54b0e4d62",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/f452299ff0cde1fc94f3659b3e2da6e54b0e4d62"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/79b3c24b8e6c7b74e456880a1249b0de1cb0d948",
+   "verification": {
+    "payload": "tree f452299ff0cde1fc94f3659b3e2da6e54b0e4d62\nparent f4f17bc4237a5362117f37b56e65209b92465f64\nauthor Claude <noreply@anthropic.com> 1795228069 +0000\ncommitter Claude <noreply@anthropic.com> 1795228069 +0000\n\nops(wp1236 đợt A r10): lỗi cú pháp argparse theo mẫu stderr LỖI THAM SỐ (M02 review mã lượt 7) + m146\n\nChủ kho chọn phương án 2 sau lượt 7: vá M02, miễn M01/M03 (lỗ bộ test, mã đúng mọi đối chứng).\nBộ test: CA 40/40 · DOT BIEN 146/146 · TU KIEM DAT · TONG DAT.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrYsNDbfLo32S39f5uY\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQJtIwNzd\n7waez7zXGsCTzka91Jh3pAzskBEkh/bGdQKXeUggMGGovoyrTK4anG4HGscYBsBcj2W6U7wpTkWx\nmgs=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-21T02:33:32Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/79b3c24b8e6c7b74e456880a1249b0de1cb0d948",
+  "node_id": "C_kwDOTNeRjdoAKDc5YjNjMjRiOGU2YzdiNzRlNDU2ODgwYTEyNDliMGRlMWNiMGQ5NDg",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/f4f17bc4237a5362117f37b56e65209b92465f64",
+    "sha": "f4f17bc4237a5362117f37b56e65209b92465f64",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f4f17bc4237a5362117f37b56e65209b92465f64"
+   }
+  ],
+  "sha": "79b3c24b8e6c7b74e456880a1249b0de1cb0d948",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/79b3c24b8e6c7b74e456880a1249b0de1cb0d948"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ec4bfa313370fd74b86815830a3878bb2fe9e02d/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-22T17:06:56Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-22T17:06:56Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "wp1236 r12: dong ngu phap ASCII va khoi phuc bang test dot A",
+   "tree": {
+    "sha": "45040e958e03bc174bb332ed80491961e1fce741",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/45040e958e03bc174bb332ed80491961e1fce741"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/ec4bfa313370fd74b86815830a3878bb2fe9e02d",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/ec4bfa313370fd74b86815830a3878bb2fe9e02d",
+  "node_id": "C_kwDOTNeRjdoAKGVjNGJmYTMxMzM3MGZkNzRiODY4MTU4MzBhMzg3OGJiMmZlOWUwMmQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/79b3c24b8e6c7b74e456880a1249b0de1cb0d948",
+    "sha": "79b3c24b8e6c7b74e456880a1249b0de1cb0d948",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/79b3c24b8e6c7b74e456880a1249b0de1cb0d948"
+   }
+  ],
+  "sha": "ec4bfa313370fd74b86815830a3878bb2fe9e02d",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ec4bfa313370fd74b86815830a3878bb2fe9e02d"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ebfe23b97353ca9974493a5c2a49fadb32485368/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-22T17:42:26Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-22T17:42:26Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "wp1236 r12: do loi stat CLI doc lap nen",
+   "tree": {
+    "sha": "377b0289b185a2d68ebcf212fed70dd7504c0a72",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/377b0289b185a2d68ebcf212fed70dd7504c0a72"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/ebfe23b97353ca9974493a5c2a49fadb32485368",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/ebfe23b97353ca9974493a5c2a49fadb32485368",
+  "node_id": "C_kwDOTNeRjdoAKGViZmUyM2I5NzM1M2NhOTk3NDQ5M2E1YzJhNDlmYWRiMzI0ODUzNjg",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/ec4bfa313370fd74b86815830a3878bb2fe9e02d",
+    "sha": "ec4bfa313370fd74b86815830a3878bb2fe9e02d",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ec4bfa313370fd74b86815830a3878bb2fe9e02d"
+   }
+  ],
+  "sha": "ebfe23b97353ca9974493a5c2a49fadb32485368",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ebfe23b97353ca9974493a5c2a49fadb32485368"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f5fbe6cc65d118711d7516df4693a7e69136ad32/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-23T01:29:57Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-23T01:29:57Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "wp1236 r12: bo sung phan chung ngu phap va dau ra CI",
+   "tree": {
+    "sha": "15969e9a710b14290e4c1e017544f34c66f5354f",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/15969e9a710b14290e4c1e017544f34c66f5354f"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/f5fbe6cc65d118711d7516df4693a7e69136ad32",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/f5fbe6cc65d118711d7516df4693a7e69136ad32",
+  "node_id": "C_kwDOTNeRjdoAKGY1ZmJlNmNjNjVkMTE4NzExZDc1MTZkZjQ2OTNhN2U2OTEzNmFkMzI",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/ebfe23b97353ca9974493a5c2a49fadb32485368",
+    "sha": "ebfe23b97353ca9974493a5c2a49fadb32485368",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ebfe23b97353ca9974493a5c2a49fadb32485368"
+   }
+  ],
+  "sha": "f5fbe6cc65d118711d7516df4693a7e69136ad32",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f5fbe6cc65d118711d7516df4693a7e69136ad32"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4ab66bb0e6046fbd9773db7add37a5f14681d69d/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-23T06:08:26Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-23T06:08:26Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "test(gate): expand Unicode grammar checks for wp1236",
+   "tree": {
+    "sha": "cf833d80a5e107f9b045f8a23a2bbe9746e87a20",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/cf833d80a5e107f9b045f8a23a2bbe9746e87a20"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/4ab66bb0e6046fbd9773db7add37a5f14681d69d",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/4ab66bb0e6046fbd9773db7add37a5f14681d69d",
+  "node_id": "C_kwDOTNeRjdoAKDRhYjY2YmIwZTYwNDZmYmQ5NzczZGI3YWRkMzdhNWYxNDY4MWQ2OWQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/f5fbe6cc65d118711d7516df4693a7e69136ad32",
+    "sha": "f5fbe6cc65d118711d7516df4693a7e69136ad32",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f5fbe6cc65d118711d7516df4693a7e69136ad32"
+   }
+  ],
+  "sha": "4ab66bb0e6046fbd9773db7add37a5f14681d69d",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4ab66bb0e6046fbd9773db7add37a5f14681d69d"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/941a8188b9702479996581bbe67fbe8eb11b9b77/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-23T06:11:25Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-23T06:11:25Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "test(gate): cover ASCII landed keys for wp1236",
+   "tree": {
+    "sha": "d17668ad868b3905e0d862ef6f691261da12e190",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/d17668ad868b3905e0d862ef6f691261da12e190"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/941a8188b9702479996581bbe67fbe8eb11b9b77",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/941a8188b9702479996581bbe67fbe8eb11b9b77",
+  "node_id": "C_kwDOTNeRjdoAKDk0MWE4MTg4Yjk3MDI0Nzk5OTY1ODFiYmU2N2ZiZThlYjExYjliNzc",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/4ab66bb0e6046fbd9773db7add37a5f14681d69d",
+    "sha": "4ab66bb0e6046fbd9773db7add37a5f14681d69d",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/4ab66bb0e6046fbd9773db7add37a5f14681d69d"
+   }
+  ],
+  "sha": "941a8188b9702479996581bbe67fbe8eb11b9b77",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/941a8188b9702479996581bbe67fbe8eb11b9b77"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f4d5251233cc50e70263972e66431c84db979ea5/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-23T08:37:49Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-23T08:37:49Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "test(gate): cover waiver, evaluation and filename grammar",
+   "tree": {
+    "sha": "7e80722902d09925321e734a251dafc2f32ff978",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/7e80722902d09925321e734a251dafc2f32ff978"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/f4d5251233cc50e70263972e66431c84db979ea5",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/f4d5251233cc50e70263972e66431c84db979ea5",
+  "node_id": "C_kwDOTNeRjdoAKGY0ZDUyNTEyMzNjYzUwZTcwMjYzOTcyZTY2NDMxYzg0ZGI5NzllYTU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/941a8188b9702479996581bbe67fbe8eb11b9b77",
+    "sha": "941a8188b9702479996581bbe67fbe8eb11b9b77",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/941a8188b9702479996581bbe67fbe8eb11b9b77"
+   }
+  ],
+  "sha": "f4d5251233cc50e70263972e66431c84db979ea5",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f4d5251233cc50e70263972e66431c84db979ea5"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/a428905c0a7b5f1521561383a631da5f62f596b3/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-23T08:38:48Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-23T08:38:48Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "test(gate): verify CLI and malformed input results",
+   "tree": {
+    "sha": "6725b7d96e23fc89e8d0233442de08d1a9fd3957",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/6725b7d96e23fc89e8d0233442de08d1a9fd3957"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/a428905c0a7b5f1521561383a631da5f62f596b3",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/a428905c0a7b5f1521561383a631da5f62f596b3",
+  "node_id": "C_kwDOTNeRjdoAKGE0Mjg5MDVjMGE3YjVmMTUyMTU2MTM4M2E2MzFkYTVmNjJmNTk2YjM",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/f4d5251233cc50e70263972e66431c84db979ea5",
+    "sha": "f4d5251233cc50e70263972e66431c84db979ea5",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f4d5251233cc50e70263972e66431c84db979ea5"
+   }
+  ],
+  "sha": "a428905c0a7b5f1521561383a631da5f62f596b3",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/a428905c0a7b5f1521561383a631da5f62f596b3"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2fbb2838a9db56a79eccb23e00931850c8181b1d/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-23T08:40:47Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-23T08:40:47Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "test(gate): cover duplicate waiver URL and invalid readback",
+   "tree": {
+    "sha": "53d402e3b294ef278390e447b0e516099fd43511",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/53d402e3b294ef278390e447b0e516099fd43511"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/2fbb2838a9db56a79eccb23e00931850c8181b1d",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/2fbb2838a9db56a79eccb23e00931850c8181b1d",
+  "node_id": "C_kwDOTNeRjdoAKDJmYmIyODM4YTlkYjU2YTc5ZWNjYjIzZTAwOTMxODUwYzgxODFiMWQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/a428905c0a7b5f1521561383a631da5f62f596b3",
+    "sha": "a428905c0a7b5f1521561383a631da5f62f596b3",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/a428905c0a7b5f1521561383a631da5f62f596b3"
+   }
+  ],
+  "sha": "2fbb2838a9db56a79eccb23e00931850c8181b1d",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2fbb2838a9db56a79eccb23e00931850c8181b1d"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/bdafe60c4a225f9057b9e92218bbf7399ab10e56/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-23T08:54:14Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-23T08:54:14Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "test(gate): close inherited regression cases",
+   "tree": {
+    "sha": "4a8822079106c736540c0d1fba5078b5ea3eb0f7",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/4a8822079106c736540c0d1fba5078b5ea3eb0f7"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/bdafe60c4a225f9057b9e92218bbf7399ab10e56",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/bdafe60c4a225f9057b9e92218bbf7399ab10e56",
+  "node_id": "C_kwDOTNeRjdoAKGJkYWZlNjBjNGEyMjVmOTA1N2I5ZTkyMjE4YmJmNzM5OWFiMTBlNTY",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/2fbb2838a9db56a79eccb23e00931850c8181b1d",
+    "sha": "2fbb2838a9db56a79eccb23e00931850c8181b1d",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2fbb2838a9db56a79eccb23e00931850c8181b1d"
+   }
+  ],
+  "sha": "bdafe60c4a225f9057b9e92218bbf7399ab10e56",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/bdafe60c4a225f9057b9e92218bbf7399ab10e56"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/1c8316af4adfd8b9ff3f3ef463707fe80bf425ad/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-23T15:14:10Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-23T15:14:10Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "test(gate): assert independent grammar failure reasons",
+   "tree": {
+    "sha": "612ebd71dbea3d16b86388adcacadabba1d8f2b2",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/612ebd71dbea3d16b86388adcacadabba1d8f2b2"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/1c8316af4adfd8b9ff3f3ef463707fe80bf425ad",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/1c8316af4adfd8b9ff3f3ef463707fe80bf425ad",
+  "node_id": "C_kwDOTNeRjdoAKDFjODMxNmFmNGFkZmQ4YjlmZjNmM2VmNDYzNzA3ZmU4MGJmNDI1YWQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/bdafe60c4a225f9057b9e92218bbf7399ab10e56",
+    "sha": "bdafe60c4a225f9057b9e92218bbf7399ab10e56",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/bdafe60c4a225f9057b9e92218bbf7399ab10e56"
+   }
+  ],
+  "sha": "1c8316af4adfd8b9ff3f3ef463707fe80bf425ad",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/1c8316af4adfd8b9ff3f3ef463707fe80bf425ad"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/835655b6b5d8ad2add49f04ded92d3fd3f42515e/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-23T16:24:50Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-23T16:24:50Z",
+    "email": "codex@users.noreply.github.com",
+    "name": "Codex"
+   },
+   "message": "test(gate): reject extra help description characters",
+   "tree": {
+    "sha": "b52aa72d2733818416d38f07fad31f974b70bee5",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/b52aa72d2733818416d38f07fad31f974b70bee5"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/835655b6b5d8ad2add49f04ded92d3fd3f42515e",
+   "verification": {
+    "payload": null,
+    "reason": "unsigned",
+    "signature": null,
+    "verified": false,
+    "verified_at": null
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/267193182?v=4",
+   "events_url": "https://api.github.com/users/codex/events{/privacy}",
+   "followers_url": "https://api.github.com/users/codex/followers",
+   "following_url": "https://api.github.com/users/codex/following{/other_user}",
+   "gists_url": "https://api.github.com/users/codex/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/codex",
+   "id": 267193182,
+   "login": "codex",
+   "node_id": "U_kgDOD-0LXg",
+   "organizations_url": "https://api.github.com/users/codex/orgs",
+   "received_events_url": "https://api.github.com/users/codex/received_events",
+   "repos_url": "https://api.github.com/users/codex/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/codex/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/codex/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/codex",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/835655b6b5d8ad2add49f04ded92d3fd3f42515e",
+  "node_id": "C_kwDOTNeRjdoAKDgzNTY1NWI2YjVkOGFkMmFkZDQ5ZjA0ZGVkOTJkM2ZkM2Y0MjUxNWU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/1c8316af4adfd8b9ff3f3ef463707fe80bf425ad",
+    "sha": "1c8316af4adfd8b9ff3f3ef463707fe80bf425ad",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/1c8316af4adfd8b9ff3f3ef463707fe80bf425ad"
+   }
+  ],
+  "sha": "835655b6b5d8ad2add49f04ded92d3fd3f42515e",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/835655b6b5d8ad2add49f04ded92d3fd3f42515e"
+ }
+]

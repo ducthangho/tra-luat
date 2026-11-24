@@ -1,0 +1,73 @@
+# ai-dang-giu sau rut han (han moi 2026-11-24T10:44:49Z). Clone moi, git fetch origin '+refs/heads/*:refs/heads/*', HEAD tach tai master 2cbb55287; tap nhanh may chu so voi refs/heads cuc bo: thieu 0 thua 0 tren 328 nhanh; 2026-11-24T10:46:10Z. Lan quet dau trong kho chinh ra CHAN [12] (nhanh cuc bo tut sau), khong dung.
+## .claude/dev/ci_dang_ky_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	c1a1a-exec-2-claude-20260927	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/c1a1a-exec-2-claude-20260927.yaml
+HẾT_HẠN	ci-dot-bien-chia-manh-r2-g1-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-dot-bien-chia-manh-r2-g1-claude.yaml
+HẾT_HẠN	ci-duong-nhanh-ho-so-r2-g2-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-duong-nhanh-ho-so-r2-g2-claude.yaml
+HẾT_HẠN	ci-duong-nhanh-ho-so-r2-g3-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-duong-nhanh-ho-so-r2-g3-claude.yaml
+HẾT_HẠN	ci-duong-nhanh-ho-so-r2-g4-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-duong-nhanh-ho-so-r2-g4-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g1-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-g5-cong-cu-chia-manh-r1-g1-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g2-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-g5-cong-cu-chia-manh-r1-g2-claude.yaml
+HẾT_HẠN	ci-g5-cong-cu-chia-manh-r1-g3-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-g5-cong-cu-chia-manh-r1-g3-claude.yaml
+HẾT_HẠN	ci-registry-dot-bien-theo-diff-r1-g1-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-registry-dot-bien-theo-diff-r1-g1-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r1-g1-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-registry-nang-tran-bo-day-du-r1-g1-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r2-g2-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-registry-nang-tran-bo-day-du-r2-g2-claude.yaml
+HẾT_HẠN	ci-registry-nang-tran-bo-day-du-r3-g3-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-registry-nang-tran-bo-day-du-r3-g3-claude.yaml
+HẾT_HẠN	ci-registry-pretooluse-che-do-nhe-r1-g1-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-registry-pretooluse-che-do-nhe-r1-g1-claude.yaml
+HẾT_HẠN	ci-registry-thu-hep-vung-r1-g1-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-registry-thu-hep-vung-r1-g1-claude.yaml
+HẾT_HẠN	ci-song-song-registry-g5-mot-lan-r1-g1-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-song-song-registry-g5-mot-lan-r1-g1-claude.yaml
+HẾT_HẠN	ci-song-song-registry-g5-mot-lan-r1-g2-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-song-song-registry-g5-mot-lan-r1-g2-claude.yaml
+HẾT_HẠN	ci-song-song-registry-g5-mot-lan-r1-g3-claude	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/ci-song-song-registry-g5-mot-lan-r1-g3-claude.yaml
+HẾT_HẠN	gate-tach-job-cat-chi-phi-exec-1-claude-20260906	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/gate-tach-job-cat-chi-phi-exec-1-claude-20260906.yaml
+HẾT_HẠN	gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml
+HẾT_HẠN	gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml
+HẾT_HẠN	gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/gate-tach-job-cat-chi-phi-exec-1r4-claude-20260906.yaml
+HẾT_HẠN	khong-do-duoc-phai-do-exec-1-claude-20260829	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/khong-do-duoc-phai-do-exec-1-claude-20260829.yaml
+HẾT_HẠN	khong-do-duoc-phai-do-exec-1r2-claude-20260829	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/khong-do-duoc-phai-do-exec-1r2-claude-20260829.yaml
+HẾT_HẠN	mutant-khong-chay-tren-windows-exec-1-claude-20260906	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/mutant-khong-chay-tren-windows-exec-1-claude-20260906.yaml
+HẾT_HẠN	wp773-r2-g2-claude-20261017	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/wp773-r2-g2-claude-20261017.yaml
+HẾT_HẠN	wp773-r3-g3-claude-20261018	refs/heads/agent/windows-local-may-chu-kho-r3-bien-nhan:ops/leases/wp773-r3-g3-claude-20261018.yaml
+HẾT_HẠN	wp1173-r3-g2-codex	refs/heads/agent/wp1173-r3-g2-codex:ops/leases/wp1173-r3-g2-codex.yaml
+HẾT_HẠN	wp1173-r4-g3-codex	refs/heads/agent/wp1173-r4-g3-codex:ops/leases/wp1173-r3-g2-codex.yaml
+HẾT_HẠN	lease-pr-r1-g1-claude	refs/heads/agent/wp1236-a-r12-g2-codex:ops/leases/lease-pr-r1-g1-claude.yaml
+HẾT_HẠN	wp1166-r4-g4-claude	refs/heads/agent/wp1236-a-r12-g2-codex:ops/leases/wp1166-r4-g4-claude.yaml
+HẾT_HẠN	wp1039-cloud-setup-p2b-r1-g1-claude	refs/heads/ops/cap-lease-1039-g1:ops/leases/wp1039-cloud-setup-p2b-r1-g1-claude.yaml
+HẾT_HẠN	ci-lan-luu-tru-r1-g1-claude-remote-20261101	refs/heads/ops/ci-lan-luu-tru-r1-lease:ops/leases/ci-lan-luu-tru-r1-g1-claude-remote-20261101.yaml
+HẾT_HẠN	ci-lan-luu-tru-r1-g2-claude-remote-20261101	refs/heads/ops/ci-lan-luu-tru-r1-lease:ops/leases/ci-lan-luu-tru-r1-g2-claude-remote-20261101.yaml
+HẾT_HẠN	wp1166-r1-g1-codex	refs/heads/ops/wp1166-concurrency-canary:ops/leases/wp1166-r1-g1-codex.yaml
+HẾT_HẠN	wp1166-r4-g5-claude	refs/heads/ops/wp1166-r4-g5:ops/leases/wp1166-r4-g5-claude.yaml
+HẾT_HẠN	wp1170-r5-g4-codex-20261104	refs/heads/ops/wp1170-r5-g4-lease:ops/leases/wp1170-r5-g4-codex-20261104.yaml
+HẾT_HẠN	wp1170-r6-g5-codex-20261104	refs/heads/ops/wp1170-r6-g5-lease:ops/leases/wp1170-r6-g5-codex-20261104.yaml
+HẾT_HẠN	wp1236-a1-r7-g1-claude-remote-20261106	refs/heads/ops/wp1236-a1-r7-g1-lease:ops/leases/wp1236-a1-r7-g1-claude-remote-20261106.yaml
+HẾT_HẠN	wp1236-a-r10-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r10-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r11-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r11-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r12-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r12-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r12-g2-codex-20261122	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r12-g2-codex-20261122.yaml
+HẾT_HẠN	wp1236-a-r9-g1-claude-20261120	refs/heads/ops/wp1236-r9-a-lease:ops/leases/wp1236-a-r9-g1-claude-20261120.yaml
+HẾT_HẠN	wp1343-r1-g1-claude	refs/heads/ops/wp1343-r1-g1-lease:ops/leases/wp1343-r1-g1-claude.yaml
+HẾT_HẠN	wp1343-r2-g1-claude	refs/heads/ops/wp1343-r1-g1-lease:ops/leases/wp1343-r2-g1-claude.yaml
+HẾT_HẠN	wp1343-r3-g1-claude	refs/heads/ops/wp1343-r1-g1-lease:ops/leases/wp1343-r3-g1-claude.yaml
+HẾT_HẠN	wp923-r2-g2-claude	refs/heads/ops/wp923-r2-g2-lease:ops/leases/wp923-r2-g2-claude.yaml
+HẾT_HẠN	wp923-r3-g3-claude	refs/heads/ops/wp923-r3-g3-lease:ops/leases/wp923-r3-g3-claude.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/gate_output_doi_chieu.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp1236-a1-r7-g1-claude-remote-20261106	refs/heads/ops/wp1236-a1-r7-g1-lease:ops/leases/wp1236-a1-r7-g1-claude-remote-20261106.yaml
+HẾT_HẠN	wp1236-a-r10-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r10-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r11-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r11-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r12-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r12-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r12-g2-codex-20261122	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r12-g2-codex-20261122.yaml
+HẾT_HẠN	wp1236-a-r9-g1-claude-20261120	refs/heads/ops/wp1236-r9-a-lease:ops/leases/wp1236-a-r9-g1-claude-20261120.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0
+## ops/gate_output_doi_chieu_test.py
+PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN
+HẾT_HẠN	wp1236-a1-r7-g1-claude-remote-20261106	refs/heads/ops/wp1236-a1-r7-g1-lease:ops/leases/wp1236-a1-r7-g1-claude-remote-20261106.yaml
+HẾT_HẠN	wp1236-a-r10-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r10-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r11-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r11-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r12-g1-claude-20261121	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r12-g1-claude-20261121.yaml
+HẾT_HẠN	wp1236-a-r12-g2-codex-20261122	refs/heads/ops/wp1236-r10-a-lease:ops/leases/wp1236-a-r12-g2-codex-20261122.yaml
+HẾT_HẠN	wp1236-a-r9-g1-claude-20261120	refs/heads/ops/wp1236-r9-a-lease:ops/leases/wp1236-a-r9-g1-claude-20261120.yaml
+NGƯỜI_GIỮ 0: không có
+rc=0

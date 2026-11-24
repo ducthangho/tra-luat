@@ -1,0 +1,58 @@
+You are the EXECUTOR for work packet wp1460 (B1a, Mission #1172) of repository ducthangho/tra-luat, under lease wp1460-r8-g2-claude.
+Provider: claude. Model: Fable 5.2, effort high or above. Surface: claude_code. Transport: machine/local. Environment: cloud.
+You are an executor only. You do not review, approve, push, merge, dispatch workflows or write GitHub comments.
+
+AUTHORITY AND INPUTS
+- Packet Issue: https://github.com/ducthangho/tra-luat/issues/1460
+- Frozen spec: ops/specs/wp1460-r1/SPEC.md on branch ops/wp1460-r1 at commit d26c8ae8d27a0bddd71bbd08a5153bb47b879130, sha256 33d433b018d6eb74048fe27f2cc517b01276a28b76edbe50ffea387a0614dd0c, revision 8.
+  First verify it with `git fetch origin ops/wp1460-r1 && git show d26c8ae8d27a0bddd71bbd08a5153bb47b879130:ops/specs/wp1460-r1/SPEC.md | sha256sum`. If the hash differs, STOP.
+  r8 equals r7 except the revision line, the status paragraph, the "Kích thước" section (new `nang_tran` block) and the change table. Contract, acceptance, check code, write set and process are byte-identical to r7.
+- Lease: ops/leases/wp1460-r8-g2-claude.yaml on branch ops/wp1460-r1. Read it and obey its limits. It replaces wp1460-r7-g1-claude.
+- Owner decisions: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7130669819 (roles) and https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7131174274 (size cap 6 files / 1600 added lines, executor cap 4 with 2 used, spec r8 hash approved).
+- Read before coding: CLAUDE.md, AGENTS.md, docs/PROTOCOL_DA_PHIEN.md (§4, §7, §8, §12), .claude/skills/work-packet/SKILL.md and the whole spec.
+
+BASE, START POINT AND BRANCH
+- Base: origin/master at 5259239d763c9ffc1677f033bd9a9cf23ede9299. All numstat is measured against this base.
+- Start from the unfinished head of attempt 2: 877295930d136413dce68a9cdee5a8a3f35075e1 (tree 72ab13c24c391110094e37eb130fd9ba32a911a7), two local WIP commits. The coordinator gives you its location. Verify both OIDs before working. Read the attempt-2 handoff the coordinator gives you; it lists what is done and what is missing.
+- Work on the local branch `agent/wp1460-r8-g2-fable`, created at that head. Commit locally. DO NOT PUSH: the owner audits the exact head before its first push. You may squash or reorganise the WIP commits; the final head must contain only the four write-set files changed against the base.
+- The spec was drafted at 0f9aa2a. Re-measure every claim of the spec about current code against the base before relying on it. If the spec cannot be applied to the current base without changing what it says, STOP and report the exact clause, the measurement and what you need.
+
+WRITE SET (exactly four files, no fifth)
+1. .github/workflows/ci-dot-bien-du.yml
+2. .claude/dev/ci_dang_ky_test.py
+3. ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json — byte copy from the spec branch. Its sha256 must be 844b5218b6f6844945f5c4c9440f09015d238fe09a60d64b3787c440787e4f46.
+4. ops/specs/wp1460-r1/hop_dong/fixture.json — byte copy from the spec branch. Its sha256 must be ce8595739a1ab2f4a86c9c196255e5f91fb19a9f6d3865df6caa2d66f9970e6d.
+You must not write, edit or reformat the two hop_dong files. Needing any other file => STOP and report.
+
+SIZE (nang_tran, ADR-0053, spec r8)
+Cap: ≤ 6 files and ≤ 1600 added lines, measured by `git diff --numstat <base>...HEAD`. Measure while working and before handing off. If the candidate would exceed the cap, STOP before finishing. Do not cut cases, fixtures or mutants to fit. Report the measured numstat and the missing work.
+
+ANSWERS TO THE OPEN QUESTIONS OF ATTEMPT 2 (coordinator's reading of the spec text, not a spec change)
+(2) Acceptance 1 includes the `--dot-bien` pass. Its last sentence says the delivered test suite re-runs "these checks" on the copied files: the command with `--dot-bien` (FIXTURE / DOT BIEN 249/249 / TONG lines) plus the sha256 of both files. Spec §7 "Chi phí CI" says the new cases run in `gate-registry` of `ci.yml` and the executor reports the job-time delta. Run it in full; measure and report the delta; do not cut it.
+(3) Passing RUN_ID / RUN_ATTEMPT / SU_KIEN_SHA through explicit `env:` matches spec §3 "Dấu job" ("parameters only via `env:`, the body holds no Actions expression"). Keep it.
+(4) The collector may take `--ref` and `--workflow-sha` as context values. `--workflow-sha` is `github.workflow_sha` (spec §3 "Định danh definition"); when it is absent or not 40 hex this is NOT an argument error: the receipt records `not_measured` with `ly_do` and may still be green. It is not in the mandatory context list of §3 "Lệnh thu". `--ref` is `github.ref`, used to fill `su_kien.ref` which the schema requires. §3 does not list it as mandatory, and the spec is silent on its absence: choose a behaviour, state it in the handoff for the reviewer, and never produce a green receipt that lacks a value the schema requires.
+
+GATES (spec acceptance 9 plus CLAUDE.md)
+- actionlint on ci-dot-bien-du.yml, with shellcheck present: rc 0, and finding delta vs base 0. Record both versions.
+- `python .claude/dev/ci_dang_ky_test.py` N/N, equal numbers. Report its wall time on base and on head.
+- `python3 -m ruff check --select F` delta 0 vs base on every changed .py (use `python3 -m ruff`, version 0.15.15; the `ruff` on PATH is a different version).
+- Every acceptance item of the spec, with its two-direction cases and its dedicated mutants. Each mutant is classified by the target case's own exception class, as the spec requires.
+- A/B for acceptance 5: build base and head in ONE command.
+- `git config core.abbrev 7` before running gates.
+- Never write the CI-skip marker in any file or commit message.
+
+STOP CONDITIONS
+A spec clause that is contradictory or impossible on the current base; a write outside the write set; the size cap; the same failure recurring three times with the same shape (§12). Report instead of working around.
+
+HANDOFF
+When done, or when stopped, write /tmp/wp1460-r8-g2-HANDOFF.yaml following protocol §7. It must contain:
+- packet wp1460, revision 8, generation 2, lease_id wp1460-r8-g2-claude, attempt number;
+- provider, model, surface;
+- base SHA, start SHA, head SHA and tree as full OIDs;
+- numstat per file and totals;
+- every gate: exact command, real exit code and the positive marker line;
+- mutant table: name, target case, killed-by-correct-reason yes/no;
+- the behaviour chosen for an absent `--ref`;
+- what is not measured;
+- open questions.
+Then reply with: head SHA, tree, numstat totals, the gate summary and the handoff path.

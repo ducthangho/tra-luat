@@ -11,6 +11,7 @@ Dòng tổng (sổ đăng ký CI): `llm_route tests: N/N ca QUA · M/M dot bien 
 """
 from __future__ import annotations
 
+import contextlib
 import importlib.util
 import json
 import subprocess
@@ -633,11 +634,14 @@ def ca_ranh_gioi_luot4(m):
         # Không có dấu ":" (chỉ chốt "dừng ở dòng điểm" chặn được).
         ("Điều 3.\n1. Thiết bị bao gồm\na) máy là công cụ;\nb) dụng cụ.",
          kn(("Thiết bị bao gồm a) máy", "công cụ; b) dụng cụ."))),
+        # Dấu ":" trước "là" trên một dòng CÂN (không bị chốt nguồn mơ hồ che).
+        ("Điều 3.\n1. Thiết bị gồm: máy là công cụ.", kn(("Thiết bị gồm: máy", "công cụ."))),
         ("Điều 3.\n1. Thiết bị bao gồm: a) máy là công cụ; b) dụng cụ.",
          kn(("Thiết bị bao gồm: a) máy", "công cụ; b) dụng cụ."))),
     )
     for vb, k in sai:
-        bang(m.lech_nguyen_van(k, vb) == [1], f"ranh gioi sai phai lech: {vb!r} -> {m.lech_nguyen_van(k, vb)}")
+        # [1] (lệch khoản) hay [0] (nguồn mơ hồ — lượt 8 U1/U3) đều là CHẶN; chỉ [] là nhận nhầm.
+        bang(m.lech_nguyen_van(k, vb) in ([1], [0]), f"ranh gioi sai phai lech: {vb!r} -> {m.lech_nguyen_van(k, vb)}")
     dung = (
         ('Điều 3.\n1. "Tổ chức là gì" là tên gọi của dự án.', kn(('"Tổ chức là gì"', "tên gọi của dự án."))),
         ("Điều 3.\n1. \u201cTổ chức là gì\u201d là tên gọi.", kn(("\u201cTổ chức là gì\u201d", "tên gọi."))),
@@ -750,6 +754,59 @@ def ca_sau_khoi_chay_khong_chuyen(m):
     finally:
         m.subprocess.Popen = goc_popen
     bang(giu and giu[0].returncode is not None, f"tien trinh con chua duoc thu hoi sau loi doc: {giu and giu[0].returncode}")
+    # Lượt 8 U2: giả lập nhánh Windows — KHÔNG được đóng pipe đồng bộ (luồng đọc nền có thể đang giữ nó), vẫn thu hồi.
+    giu.clear()
+    dong = []
+
+    class PopenWin(PopenDocHong):
+        def __init__(self, *a, **k):
+            super().__init__(*a, **k)
+            for ten in ("stdout", "stderr"):
+                ong = getattr(self, ten)
+                setattr(self, ten, types.SimpleNamespace(close=lambda _t=ten, _o=ong: (dong.append(_t), _o.close())))
+    m.subprocess.Popen, la_win = PopenWin, m._LA_WINDOWS
+    m._LA_WINDOWS = True
+    try:
+        try:
+            m._chay_co_moc([sys.executable, "-c", "import time; time.sleep(30)"], timeout=10, text=True)
+        except OSError:
+            pass
+    finally:
+        m.subprocess.Popen, m._LA_WINDOWS = goc_popen, la_win
+    da_dong = list(dong)   # chụp TRƯỚC khi ca tự dọn pipe
+    for p_ in giu:
+        for ten in ("stdout", "stderr"):
+            with contextlib.suppress(Exception):
+                getattr(p_, ten).close()
+    bang(not da_dong, f"nhanh Windows khong duoc dong pipe dong bo: {da_dong}")
+    bang(giu and giu[0].returncode is not None, "nhanh Windows van phai thu hoi tien trinh con")
+
+
+def ca_nguon_mo_ho_luot8(m):
+    """Lượt 8 U1/U3: nguồn có dòng mà ngoặc/trích dẫn không khép trong dòng, `)` lẻ, `”` lẻ, hay trích dẫn cong LỒNG
+    cùng kiểu ⇒ từ chối CẢ nguồn, bất kể câu trả lời. Đối chứng: dấu số/điểm đầu dòng và ngoặc cân bằng vẫn đạt."""
+    def kn(*cap):
+        return [{"stt": i + 1, "thuat_ngu": a, "dinh_nghia": b} for i, (a, b) in enumerate(cap)]
+    mo_ho = (
+        # U3: trích dẫn hai dòng, dòng sau mở bằng số tình cờ nối tiếp số khoản.
+        ('Điều 3.\n1. Quy tắc là văn bản ghi \u201c1. Bước đầu là chuẩn bị;\n2. Bước sau là thực hiện\u201d.',
+         kn(("Quy tắc", "văn bản ghi \u201c1. Bước đầu là chuẩn bị;"), ("Bước sau", "thực hiện\u201d."))),
+        # U1: trích dẫn cong lồng cùng kiểu.
+        ("Điều 3.\n1. \u201cCụm \u201cx\u201d là y\u201d là tên gọi.", kn(("\u201cCụm \u201cx\u201d", "y\u201d là tên gọi."))),
+        # Lồng mà dòng vẫn "cân" về số dấu: chỉ chốt trích-dẫn-lồng bắt được.
+        ("Điều 3.\n1. \u201cCụm \u201cx\u201d là y \u201cz\u201d là tên gọi.", kn(("\u201cCụm \u201cx\u201d", "y \u201cz\u201d là tên gọi."))),
+        # `)` lẻ rồi `(` bù lại về 0: chỉ chốt `)` lẻ bắt được.
+        ("Điều 3.\nHồ sơ) là (tài liệu.", kn(("Hồ sơ)", "(tài liệu."))),
+        ("Điều 3.\nHồ sơ (bản chính là tài liệu.", kn(("Hồ sơ (bản chính", "tài liệu."))),
+        ("Điều 3.\nHồ sơ) là tài liệu.", kn(("Hồ sơ)", "tài liệu."))),
+        ("Điều 3.\nHồ sơ\u201d là tài liệu.", kn(("Hồ sơ\u201d", "tài liệu."))),
+        ('Điều 3.\nHồ sơ " là tài liệu.', kn(('Hồ sơ "', "tài liệu."))),
+    )
+    for vb, k in mo_ho:
+        bang(m.tach_khoan(vb) is None and m.lech_nguyen_van(k, vb) == [0], f"nguon mo ho phai bi tu choi: {vb!r}")
+    dung = ("Điều 3.\n(1) Hồ sơ (bản chính) là tài liệu;\na) bản giấy;\nb) bản số.\n2) Dữ liệu là thông tin.",
+            kn(("Hồ sơ (bản chính)", "tài liệu;\na) bản giấy;\nb) bản số."), ("Dữ liệu", "thông tin.")))
+    bang(m.lech_nguyen_van(dung[1], dung[0]) == [], f"dau so/diem dau dong bi chan oan: {m.tach_khoan(dung[0])}")
 
 
 def ca_usage_thieu_truong(m):
@@ -768,19 +825,33 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
       ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
       ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_auth_sai_kieu,
-      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen]
+      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
+    # Lượt 8 U1/U3/U2: mỗi chốt của `_dong_mo_ho` một đột biến.
+    ("bo_chot_nguon_mo_ho", ("    if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):\n        return None", "    if False:\n        return None"),
+     "ca_nguon_mo_ho_luot8"),
+    ("khong_bo_dau_dong", ("    if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):", "    if any(_dong_mo_ho(ln) for ln in dong):"), "ca_nguon_mo_ho_luot8"),
+    ("cho_trich_dan_long", ('            elif c == "\\u201c" and trich == "\\u201d":\n                return True\n', ""), "ca_nguon_mo_ho_luot8"),
+    ("cho_ngoac_dong_le", ("            if not sau:\n                return True\n", ""), "ca_nguon_mo_ho_luot8"),
+    ("cho_dong_cong_le", ('        elif c == "\\u201d":\n            return True\n', ""), "ca_nguon_mo_ho_luot8"),
+    ("cho_ngoac_mo_qua_dong", ("    return sau != 0 or trich is not None", "    return trich is not None"), "ca_nguon_mo_ho_luot8"),
+    ("cho_trich_dan_qua_dong", ("    return sau != 0 or trich is not None", "    return sau != 0"), "ca_nguon_mo_ho_luot8"),
+    ("dong_ong_tren_windows", ("        if not _LA_WINDOWS:\n", "        if True:\n"), "ca_sau_khoi_chay_khong_chuyen"),
     # Lượt 7 T1/T2.
     ("tiep_dong_ca_nguon_mat_so", ("        elif co_so and khoan and _RE_MO_BANG_LA.match(ln)", "        elif khoan and _RE_MO_BANG_LA.match(ln)"),
      "ca_ranh_gioi_luot4"),
     ("la_dau_dong_luon_noi", ("_RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None:", "_RE_MO_BANG_LA.match(ln):"), "ca_ranh_gioi_luot4"),
-    ("bo_trich_dan_thang", ("        elif c == '\"':\n            trich = '\"'\n", ""), "ca_ranh_gioi_luot4"),
-    ("bo_trich_dan_cong", ('        elif c == "\\u201c":\n            trich = "\\u201d"', "        pass"), "ca_ranh_gioi_luot4"),
-    ("dau_dong_khac_khep_trich_dan", ("            if c == trich:\n", "            if c in ('\"', \"\\u201d\"):\n"), "ca_ranh_gioi_luot4"),
-    ("ngoac_dong_trong_trich_dan", ("            if c == trich:\n                trich = None\n",
-                                    "            if c == trich:\n                trich = None\n            elif c == \")\" and sau:\n                sau -= 1\n"),
+    ("bo_trich_dan_thang", ("        elif c == '\"':\n            trich = '\"'\n        elif c == \"\\u201c\":\n            trich = \"\\u201d\"\n\n\ndef _tu_noi",
+                            "        elif c == \"\\u201c\":\n            trich = \"\\u201d\"\n\n\ndef _tu_noi"), "ca_ranh_gioi_luot4"),
+    ("bo_trich_dan_cong", ('        elif c == "\\u201c":\n            trich = "\\u201d"\n\n\ndef _tu_noi', "        pass\n\n\ndef _tu_noi"),
+     "ca_ranh_gioi_luot4"),
+    ("dau_dong_khac_khep_trich_dan", ("            # thẳng) — chỉ đúng dấu đóng của CHÍNH cụm đang mở mới khép nó.\n            if c == trich:\n",
+                                      "            # thẳng) — chỉ đúng dấu đóng của CHÍNH cụm đang mở mới khép nó.\n            if c in ('\"', \"\\u201d\"):\n"),
+     "ca_ranh_gioi_luot4"),
+    ("ngoac_dong_trong_trich_dan", ("            # thẳng) — chỉ đúng dấu đóng của CHÍNH cụm đang mở mới khép nó.\n            if c == trich:\n                trich = None\n",
+                                    "            # thẳng) — chỉ đúng dấu đóng của CHÍNH cụm đang mở mới khép nó.\n            if c == trich:\n                trich = None\n            elif c == \")\" and sau:\n                sau -= 1\n"),
      "ca_ranh_gioi_luot4"),
     ("khong_thu_hoi_sau_loi_doc", ("        with contextlib.suppress(Exception):\n            proc.wait(timeout=5)\n", ""),
      "ca_sau_khoi_chay_khong_chuyen"),

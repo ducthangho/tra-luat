@@ -64,6 +64,10 @@ và chuyển qua lại khi một bên hết hạn mức/credit.
   trạng thái ngoặc/trích dẫn (chỉ dòng mở bằng "là" sau thuật ngữ chưa có từ nối; ngoặc trải nhiều dòng bị chặn);
   bộ quét giữ ĐÚNG một cụm trích dẫn đang mở, ký tự bên trong là nội dung (T1); tiến trình con được giết, đóng
   pipe và `wait` có giới hạn, không phụ thuộc đọc lại (T2).
+- Cross-review Codex lượt 8 (`ops/reviews/pr1503-review-8-codex/`, REQUEST_CHANGES, 2 P1 · 1 P2; đóng T1/T2) —
+  chủ kho nâng trần lên 9, chặn MỌI nguồn mơ hồ: một dòng (sau khi bỏ dấu số khoản/điểm đầu dòng) có ngoặc hay
+  trích dẫn không khép trong dòng, `)`/`”` lẻ, hoặc trích dẫn cong lồng cùng kiểu ⇒ từ chối cả nguồn (U1, U3);
+  `wait` có giới hạn TRƯỚC khi đóng pipe, và trên Windows không đóng pipe đồng bộ (U2).
 - Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
   key qua `agent_creds` chưa làm.
 

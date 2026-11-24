@@ -85,6 +85,9 @@ class Dung(Exception):
     """Lỗi thuộc về YÊU CẦU — không thử đường khác."""
 
 
+_LA_WINDOWS = os.name == "nt"
+
+
 class KhongKhoiChay(OSError):
     """Tiến trình con KHÔNG khởi chạy được (Popen hỏng) — mốc phân biệt lỗi TRƯỚC với lỗi SAU khởi chạy (lượt 6 S1)."""
 
@@ -102,11 +105,14 @@ def _chay_co_moc(cmd, *, timeout=None, capture_output=True, **kw):
         # Lượt 7 T2: thu hồi KHÔNG phụ thuộc vào việc đọc lại (lỗi đọc có thể lặp lại): giết, đóng pipe, rồi `wait` CÓ
         # giới hạn — tiến trình khác còn giữ pipe cũng không làm lệnh treo.
         proc.kill()
-        for ong in (proc.stdout, proc.stderr):
-            with contextlib.suppress(Exception):
-                ong.close()
         with contextlib.suppress(Exception):
             proc.wait(timeout=5)
+        # Lượt 8 U2: trên Windows `communicate` đọc pipe bằng LUỒNG nền — đóng đồng bộ có thể chờ luồng ấy (khi một
+        # tiến trình khác còn giữ đầu ghi) ⇒ không đóng ở đó; thu hồi đã xong ở `wait` phía trên.
+        if not _LA_WINDOWS:
+            for ong in (proc.stdout, proc.stderr):
+                with contextlib.suppress(Exception):
+                    ong.close()
         raise
     return subprocess.CompletedProcess(cmd, proc.returncode, out, err)
 
@@ -496,6 +502,8 @@ def tach_khoan(van_ban):
     - Nguồn MẤT số (Google Doc rơi số tự động — Điều 3 Luật 134/2025/QH15): MỖI DÒNG là một khoản, không có tiếp
       dòng (lượt 6 S2) — dòng gãy giữa câu thành khoản không xác minh được ⇒ chặn."""
     dong = [ln.strip() for ln in str(van_ban).lstrip("\ufeff").splitlines() if ln.strip()]
+    if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):
+        return None   # lượt 8 U1/U3 (quyết định chủ kho): nguồn có dấu phân cách mơ hồ ⇒ từ chối CẢ nguồn
     if dong and _RE_TIEU_DE_DIEU.match(dong[0]):
         dong = dong[1:]
     co_so = any(_RE_SO_KHOAN.match(ln) for ln in dong)
@@ -526,6 +534,40 @@ def tach_khoan(van_ban):
 
 def _gon(s) -> str:
     return " ".join(str(s).split())
+
+
+def _bo_dau_dong(ln) -> str:
+    """Bỏ dấu số khoản (`1.`, `1)`, `(1)`) hoặc dấu điểm (`a)`, `-`) ở ĐẦU dòng — dấu ngoặc của chúng không phải ngoặc
+    nội dung (`a)` không có `(` đi kèm)."""
+    m = _RE_SO_KHOAN.match(ln) or _RE_DIEM.match(ln)
+    return ln[m.end():] if m else ln
+
+
+def _dong_mo_ho(ln) -> bool:
+    """Một dòng có dấu phân cách MƠ HỒ: ngoặc tròn hay trích dẫn KHÔNG khép ngay trong dòng (trải sang dòng khác —
+    lượt 8 U3: số thứ tự trong trích dẫn nhiều dòng bị nhận là số khoản), dấu `)` không có `(`, hoặc trích dẫn cong
+    LỒNG cùng kiểu dấu (lượt 8 U1: dấu đóng của cụm trong khép nhầm cụm ngoài). Ký tự bên trong một cụm trích dẫn là
+    nội dung, trừ dấu mở cong `“` (lồng ⇒ mơ hồ). Chốt BẢO THỦ: chặn oan được, nhận nhầm thì không."""
+    sau, trich = 0, None
+    for c in ln:
+        if trich is not None:
+            if c == trich:
+                trich = None
+            elif c == "\u201c" and trich == "\u201d":
+                return True
+        elif c == "(":
+            sau += 1
+        elif c == ")":
+            if not sau:
+                return True
+            sau -= 1
+        elif c == '"':
+            trich = '"'
+        elif c == "\u201c":
+            trich = "\u201d"
+        elif c == "\u201d":
+            return True
+    return sau != 0 or trich is not None
 
 
 def _quet(txt):

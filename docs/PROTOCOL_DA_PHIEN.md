@@ -320,8 +320,10 @@ lease thì ngừng sửa code; land authority còn hạn không gia hạn lease.
 bookkeeping chỉ tiếp tục nếu chính các thao tác ấy nằm trong land authority còn hiệu lực.
 Không có quyền tương ứng thì handoff phần còn lại, không tự hồi sinh lease.
 
-Local worktree stale được dọn khi process dừng. Remote branch/PR stale giữ đến khi mission kết thúc cộng 30 ngày;
-`/packet preserve` kéo dài thời hạn. Cleanup chỉ bắt đầu sau khi báo cáo cuối và final state hash trên canonical
+Local worktree stale được dọn khi process dừng. Nhánh remote, PR thế hệ cũ và worktree của một packet được dọn
+ngay sau khi bản ghi sổ của packet đã readback khớp (việc hậu merge `don_rac`); phần chưa dọn được thì lịch dọn
+làm sau, theo `ADR-0068`. Với một packet, báo cáo cuối là bản ghi sổ ấy và final state là merge commit đã readback;
+`/packet preserve` giữ lại nhánh hay PR của packet. Cleanup chỉ bắt đầu sau khi báo cáo cuối và final state hash trên canonical
 đã được readback khớp; artifact hết hạn không được dùng làm bằng chứng mission complete.
 
 ## 5. Write set và giảm conflict
@@ -1235,7 +1237,9 @@ mới không tự nhận candidate mới; đổi head đòi review/gate/authoriz
 Sau merge, ghi merge commit/parents/tree, xác minh quan hệ với candidate/target, đọc hậu-merge
 gate bằng các identity §10.2.2, làm từng mục bookkeeping còn trong authority và đăng/readback
 receipt theo §7. Hết hạn hoặc thiếu quyền cho bước còn lại thì dừng bước ấy và handoff; không
-gọi `landed`/Packet complete/Mission complete khi thiếu bằng chứng tương ứng.
+gọi `landed`/Packet complete/Mission complete khi thiếu bằng chứng tương ứng. Bookkeeping đã readback thì
+Land Operator làm `don_rac` theo `ADR-0068`: xoá nhánh, đóng PR thế hệ cũ, gỡ worktree của packet, và ghi biên
+nhận. `don_rac` không chặn `landed`; phần không làm được thì ghi `don_rac: chuyen_lich` cho lịch dọn.
 
 #### 13.2 Thay ruleset trong phạm vi được ủy quyền riêng
 
@@ -1521,7 +1525,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0025` | Issue contract và state machine | Accepted | có nhắc: `packet_loop.py`×173 (`transition`) |
 | `ADR-0026` | Rollout theo promotion gate | Accepted | chưa đo |
 | `ADR-0027` | Mission integration branch | Accepted | có nhắc: `packet_loop.py`×1 |
-| `ADR-0028` | Stale generation và retention | Accepted | có nhắc: `packet_loop.py`×6 |
+| `ADR-0028` | Stale generation và retention | Accepted — phần giữ remote branch/PR 30 ngày **đã bị thay** bởi `ADR-0068` (24-11-2026) | có nhắc: `packet_loop.py`×6 |
 | `ADR-0029` | Budget guard cho agent | Accepted | có nhắc: `packet_loop.py`×62 · `launcher.py`×44 |
 | `ADR-0030` | Definition of done của mission | Accepted | có nhắc: `packet_loop.py`×2 |
 | `ADR-0031` | Test fragment thay khóa toàn cục selftest | Accepted | có nhắc: `ci.yml`×7 · `gate_lifecycle.py`×2 |
@@ -1550,16 +1554,17 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0055` | Trần trục LỜI GỌI Codex mỗi PR nâng theo chỉ thị chủ kho 25-10-2026, thay số của `ADR-0052`; trục LỜI GỌI nay bằng trục VÒNG; hiệu lực neo theo `spec_hash` đóng băng, không hồi tố | Accepted | `packet_loop.py`: cùng bộ đếm trong state như `ADR-0052` — người khởi tạo tự truyền trần; không gì đọc dòng khai `tran_loi_goi_codex:` |
 | `ADR-0056` | Ngưỡng thu hồi lease vì không tiến triển nâng từ 30 lên 360 phút theo chỉ thị chủ kho 19-10-2026, thay đúng câu 30 phút của `ADR-0017`; chỉ áp lease mới, không hồi tố; `lease_until`, generation, bia mộ, exact head và heartbeat 15 phút sau `changes_requested` giữ nguyên | Accepted — đã kích hoạt vận hành (merge PR thi công wp943) | **0 cổng** — không controller trong kho mang hằng 30 phút; không có controller ngoài, phiên điều phối áp tay |
 | `ADR-0057` | Máy Windows local của chủ kho dùng khi online theo chỉ thị chủ kho 29-10-2026; đã chạy local thì vá lỗi local do diff trước merge; cộng thêm, không thay check bắt buộc CI; phạm vi và khoá sửa bởi `ADR-0058` | Accepted | không cổng — kỷ luật executor |
-| `ADR-0058` | Máy Windows local: sửa đúng §1 Phạm vi và §3 Khoá của `ADR-0057` theo chỉ thị chủ kho 30-10-2026 — phạm vi là mọi máy Windows của chủ kho `Online` trong `list_devices`; khoá và sổ đo theo từng máy; dòng khoá có hạn không quá 2 giờ, khoá hết hiệu lực khi quá hạn, khi dòng dạng cũ quá 2 giờ, hoặc khi phiên giữ khoá tuyên bố bỏ có bằng chứng; khoá bổ sung bởi `ADR-0059` | Accepted | không cổng — kỷ luật executor |
-| `ADR-0059` | Máy Windows local: chỉ bổ sung §3 Hạn khoá của `ADR-0058` và §3 Khoá của `ADR-0057` theo đặc tả chủ kho duyệt 31-10-2026 — nhịp tim của dòng khoá, tiếp nhận khoá khi còn tiến trình, lượt bị ngắt, đọc lại trước khi ghi lại, nhả khoá; luật nằm trong ADR | Accepted | không cổng — kỷ luật executor |
-| `ADR-0060` | Điều kiện merge, mốc bỏ draft và làn sổ sách; luật chi tiết chỉ ở ADR ấy; độc lập với `ADR-0054`; không hồi tố | Accepted; M10 bị thay bởi `ADR-0062` | `packet_loop.py` `kiem-merge` (K0–K7), `kiem-dong-wp` (D1–D4) |
+| `ADR-0058` | Máy Windows local: sửa đúng §1 Phạm vi và §3 Khoá của `ADR-0057` theo chỉ thị chủ kho 30-10-2026 — phạm vi là mọi máy Windows của chủ kho `Online` trong `list_devices`; khoá và sổ đo theo từng máy; dòng khoá có hạn không quá 2 giờ, khoá hết hiệu lực khi quá hạn, khi dòng dạng cũ quá 2 giờ, hoặc khi phiên giữ khoá tuyên bố bỏ có bằng chứng; khoá bổ sung bởi `ADR-0059` | Accepted — câu "Dọn máy là việc của chủ kho" **đã thu hẹp** bởi `ADR-0068` D7, D11 | không cổng — kỷ luật executor |
+| `ADR-0059` | Máy Windows local: chỉ bổ sung §3 Hạn khoá của `ADR-0058` và §3 Khoá của `ADR-0057` theo đặc tả chủ kho duyệt 31-10-2026 — nhịp tim của dòng khoá, tiếp nhận khoá khi còn tiến trình, lượt bị ngắt, đọc lại trước khi ghi lại, nhả khoá; luật nằm trong ADR | Accepted — câu "Dọn máy là việc của chủ kho" **đã thu hẹp** bởi `ADR-0068` D7, D11 | không cổng — kỷ luật executor |
+| `ADR-0060` | Điều kiện merge, mốc bỏ draft và làn sổ sách; luật chi tiết chỉ ở ADR ấy; độc lập với `ADR-0054`; không hồi tố | Accepted; M10 bị thay bởi `ADR-0062`; danh sách hậu merge của M7 thêm `don_rac` bởi `ADR-0068` D1 | `packet_loop.py` `kiem-merge` (K0–K7), `kiem-dong-wp` (D1–D4) |
 | `ADR-0061` | Không ghi được trạng thái "credential Codex bị từ chối": chấp nhận vĩnh viễn khả năng probe lặp khi state còn đọc được mà chưa nhớ danh tính ấy (nợ #825); cả ba lối báo lỗi ghi có lý do riêng; không dựng chỗ lưu dự phòng | Accepted | có nhắc: `launcher.py`×4 (hàm/tên nợ, chưa chứng minh cổng đọc quyết định); việc chấp nhận sống bằng kỷ luật đọc |
 | `ADR-0062` | ADR-0060 mặc định cho packet chưa merge, đóng băng ADR-0054 và chuyển ba bất biến push vào protocol | Accepted | `packet_loop.py` `kiem-merge` K1 |
 | `ADR-0063` | Nguồn spec ghim OID, human audit riêng và chuyển tiếp candidate lịch sử có owner disposition | Accepted — hiệu lực từ land trên first-parent master | `packet_loop.py` `kiem-merge` K1/K4 |
 | `ADR-0064` | NLM tự nạp lại jar có điều kiện, chỉ ở phiên cloud (thay r208c ở điểm "tự nạp khi hết hạn") | Accepted | `wp1099_nlm_nap_lai` (selftest fragment) |
 | `ADR-0065` | Model/effort phục vụ của reviewer là trường ghi nếu đo được; `KHONG_DO_DUOC` không chặn assurance §8.1 hay `landed`; họ model theo identity provider; hồi tố ở packet riêng | Accepted | `ops/land_evidence_nguon.py` (L7) |
 | `ADR-0066` | Admission thu-hoi: bỏ 'S tổ tiên H', thay bằng cổng vùng bằng nhau ở mọi merge-base | Accepted — hiệu lực từ land `THU-HOI-ADMISSION-MERGE-BASE-B` | 0 cổng (đo lúc land A); sau land B: `ops/lease_publish.py` `kiem-thu-hoi-github` |
-| `ADR-0067` | Danh sách đóng E1–E5: agent chỉ hỏi chủ kho trong năm tình huống; đóng băng đặc tả sau review độc lập, audit uỷ quyền, tự merge packet không chạm E4/E5, uỷ quyền thường trực cấp lease có hạn; sổ quyết định uỷ quyền, bản tin hằng ngày, comment ghi hộ có nhãn | Accepted — cơ chế cần cổng mã có hiệu lực khi cổng ấy đổi (bảng chuyển tiếp trong ADR) | **0 cổng**; đo lúc land trên sáu vị trí cổng (mục Cưỡng chế của ADR) |
+| `ADR-0067` | Danh sách đóng E1–E5: agent chỉ hỏi chủ kho trong năm tình huống; đóng băng đặc tả sau review độc lập, audit uỷ quyền, tự merge packet không chạm E4/E5, uỷ quyền thường trực cấp lease có hạn; sổ quyết định uỷ quyền, bản tin hằng ngày, comment ghi hộ có nhãn | Accepted — cơ chế cần cổng mã có hiệu lực khi cổng ấy đổi (bảng chuyển tiếp trong ADR); `hau_merge` thêm `don_rac` và ví dụ E4 đọc theo `ADR-0068` D1, D8 | **0 cổng**; đo lúc land trên sáu vị trí cổng (mục Cưỡng chế của ADR) |
+| `ADR-0068` | Dọn rác ngay sau land: việc hậu merge thứ năm `don_rac` (xoá nhánh theo sáu điều, đóng PR thế hệ cũ, gỡ worktree của packet), không chặn `landed`; lịch dọn dự phòng trên GitHub và trên máy chủ kho; xoá nhánh theo D4 không là E4 | Accepted | **0 cổng** lúc land; công cụ và lịch dọn của `DON-RAC-B`, `DON-RAC-C` (Mission #1506) |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

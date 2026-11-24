@@ -68,18 +68,6 @@ cong_cu:
         lenh: [python, -c, "import importlib.metadata as m; print(m.version('jsonschema'))"]
         regex: '(?m)^(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$'
     cai: {lenh: "python -m pip install --quiet jsonschema==4.26.0"}
-  anthropic:
-    # SDK Python cho đường `api` của `scripts/tl_core/llm_route.py` (#1503). KHÔNG bắt buộc và
-    # nạp MUỘN bên trong hàm: thiếu gói thì đường `api` báo ChuyenDuong rồi lùi sang `sub`,
-    # và `llm_route_test.py` dùng client giả nên không cần gói. Khai ở đây vì `t16` đòi mọi
-    # gói bên thứ ba có tên trong bản kê. `ban_ghim: null` — chưa cổng nào gọi API thật.
-    bat_buoc: false
-    ban_ghim: null
-    probe:
-      - ten: mac_dinh
-        lenh: [python, -c, "import importlib.metadata as m; print(m.version('anthropic'))"]
-        regex: '(?m)^(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$'
-    cai: {lenh: "python -m pip install --quiet anthropic==2.13.0"}
   shellcheck:
     # KHÔNG bắt buộc: actionlint tự dò shellcheck trên PATH, ÂM THẦM bỏ lớp luật SC* khi
     # vắng (rc=0) — canary trên bắt đúng sự âm thầm đó (T2).

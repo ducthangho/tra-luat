@@ -1,0 +1,502 @@
+{
+ "cutover": [
+  "plat-x8-land-evidence.yaml",
+  "pr468-hoso-4-packet-land-evidence.yaml",
+  "pr477-dung-goi-review-land-evidence.yaml",
+  "pr478-land-evidence.yaml",
+  "pr480-land-evidence.yaml",
+  "pr487-land-evidence.yaml",
+  "pr489-land-evidence.yaml",
+  "pr493-land-evidence.yaml",
+  "pr554-wp541-land-evidence.yaml",
+  "pr594-wp578-land-evidence.yaml",
+  "pr621-skill-bai-hoc-land-evidence.yaml",
+  "pr666-wp650-land-evidence.yaml",
+  "pr680-wp676-land-evidence.yaml",
+  "pr684-wp677-land-evidence.yaml",
+  "pr689-wp677-land-evidence.yaml",
+  "pr696-wp668-land-evidence.yaml",
+  "pr701-wp687-land-evidence.yaml",
+  "pr703-wp674-land-evidence.yaml",
+  "pr707-wp705-land-evidence.yaml",
+  "pr714-wp710-land-evidence.yaml",
+  "pr718-wp678-land-evidence.yaml",
+  "pr721-wp698-land-evidence.yaml",
+  "pr732-wp685-land-evidence.yaml",
+  "pr759-no-p3-ho-so-land-evidence.yaml",
+  "pr765-wp743-land-evidence.yaml"
+ ],
+ "do": {
+  "pr1023-wp1009-r4-land-evidence.yaml": [
+   "be6a19a854be2163322d216c1e1d8d725a20a55f97e795aa5428727f57b214f8",
+   [
+    "$.pre_merge_checks[1].moc_gate_output: duong_khong_tep_danh_gia",
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1029-windows-local-r2-land-evidence.yaml": [
+   "f2cb15c6006f8cbbfb4b9445bd5e914bf54a9cbc26bf0454ef20d1dd7b7a9fa0",
+   [
+    "$.moc_10_2_2_bo_sung_20261030.gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr1040-wp1021-land-evidence.yaml": [
+   "3526c8eec297f89e4c96c1c34d42f6e227dd2a005bad876160f925af87df9e58",
+   [
+    "$.landed_20261031.bon_moc_10_2_2.gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml": [
+   "55c25b0cdcbf6eb1c30faff36fcd778345f58a57e1defc9d7d43d6bc76e0bc54",
+   [
+    "$.pre_merge_checks[1].moc_gate_output: duong_khong_tep_danh_gia",
+    "$.pre_merge_checks[4].moc_gate_output: duong_khong_tep_danh_gia",
+    "$.pre_merge_checks[7].moc_gate_output: duong_khong_tep_danh_gia",
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$.post_merge_checks[1].moc_gate_output: duong_khong_tep_danh_gia",
+    "$.post_merge_checks[5].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1046-wp1030-r6-land-evidence.yaml": [
+   "6a4e8fc85abb568b71fc7fe83e143a50c638e7ac80ab906cd5e44127cf1ecd8c",
+   [
+    "$.post_merge_checks[1].moc_gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr1048-claude-md-powershell-land-evidence.yaml": [
+   "a588e59f6f94dc1fab3637ac1361c7c99e49eca44d6eb819985e4d64ae1f5462",
+   [
+    "$.post_merge_checks[0].bon_moc_10_2_2.gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr1051-wp1006-t27-land-evidence.yaml": [
+   "8a39302482b8edad44a30ac80f7221658dc4686a68ecf3bdb1f6f6fc81f697c8",
+   [
+    "$.moc_10_2_2.gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr1055-wp1052-land-evidence.yaml": [
+   "b3d0f73dc7ccd9fa9fea86912dcb1cd88edd036ac34c1279ba27c01155adc751",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1063-wp1038-r1-land-evidence.yaml": [
+   "072d584fb37b74ae2fcfaf11f83c8540a2cd9060fe4fc4c060d357b655ab4c69",
+   [
+    "$.pre_merge_checks[1].moc_gate_output: duong_khong_tep_danh_gia",
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1064-windows-local-r3-land-evidence.yaml": [
+   "34000573791672b926ace93ac19c6848acbc877c315b1f332fc1b15c27924408",
+   [
+    "$.moc_10_2_2.gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr1065-vm-cap-nhat-cong-cu-land-evidence.yaml": [
+   "1b0259db0719808c5c2afd46cde0e462bd80866c9c860bfe1311be9cc9431ecb",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1073-wp1039-r1-land-evidence.yaml": [
+   "7458eaa90cdcd3cb02eaebda8de7f2b3b798265dbfa03682b6386f89e861dd3b",
+   [
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1080-wp1077-land-evidence.yaml": [
+   "66901a2781d2976c65c8242b9488767bf55e324fd21e20cf6febacd084a89b32",
+   [
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml": [
+   "b49d10f34a579e098a740ce88857382250e622c8321b3217304d392568a4f681",
+   [
+    "$.post_merge_checks[1].moc_gate_output: duong_khong_tep_danh_gia",
+    "$.post_merge_checks[3].moc_gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr1097-wp1078-land-evidence.yaml": [
+   "7faaf52e686d5e88f137ef606257a9c59621b48cc8623f2d75c3c990a9e4d649",
+   [
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1100-wp1089-r2-land-evidence.yaml": [
+   "e9abffb678cbe96b45cb10a7dfc0bcf69327fa972d0ed78747403db94e957e47",
+   [
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1115-wp1079-land-evidence.yaml": [
+   "fcb4f136997a75716f5197302f97999247285325b3cf93014059593f6a28752c",
+   [
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$.landed_20261102.windows_sau_va.moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1118-ghi-so-bo-sung-1065-land-evidence.yaml": [
+   "6f0fd219c02813ae278df250b9f3ae351c861fcfccc8976c12923055246ad476",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1127-wp1120-land-evidence.yaml": [
+   "c36037061e11f29423a950b69428673fd1f87d01bf3ac2909b224b8302f7ca6c",
+   [
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1128-wp1113-land-evidence.yaml": [
+   "7ececaadbe05de1036814b0308ba106508e61d4ae91d3a0ea725525e3f16b15b",
+   [
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1130-wp1122-land-evidence.yaml": [
+   "4e06624080b12659c554e506451c327f746d0ff2b21e964fca8d64531d19acdf",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-41365578430.txt:not_measured:provenance_0",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1137-wp1134-land-evidence.yaml": [
+   "55597684a48fdb506938a2590ef299209834a677467e1faf9d0d202e84fb0da3",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1141-wp1132-land-evidence.yaml": [
+   "5f049978fbcc5e05642d75f400db50bd7ace59ddaadd792e63fa93727be91f85",
+   [
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1155-wp1143-land-evidence.yaml": [
+   "be22b4655d42d11265f2298c39dbdfef6c5d955ede1366f39fa81e1a70a9e7d5",
+   [
+    "$.moc_10_2_2.gate_output: duong_khong_tep_danh_gia",
+    "$.post_merge_provenance.gate_output: dinh_dang_loi_khai",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1192-wp1147-land-evidence.yaml": [
+   "432343e2ef39c9a6cece8b748029e303f4486bd38319cc8e0894411ad9b511a8",
+   [
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1193-wp1189-land-evidence.yaml": [
+   "90808ecc1552f35bf22030f5ce10fcd9d2a40c46fcbd050c7f968eae1b9da698",
+   [
+    "$.moc_10_2_2.gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr1197-wp1099-land-evidence.yaml": [
+   "65d161b8b326c93b09f7bcee836c71afad6284353383c3de6a7f3af6ef7482ce",
+   [
+    "$.moc_10_2_2.gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1340-wp1315-land-evidence.yaml": [
+   "4ad7a3b6cc2e6c402a0038f47048b5afd616b685e21b9734688fec42f84981b5",
+   [
+    "$.post_merge_checks[0].moc_gate_output: waiver_khong_co_can_cu:url"
+   ]
+  ],
+  "pr1344-wp1343-land-evidence.yaml": [
+   "4307a59ec7e39a3cd424d639f93f378c7bcb579c6de23ba423d186c5377efa15",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-43969906464.txt:not_measured:co_job_skipped",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1347-wp1345-land-evidence.yaml": [
+   "d38da3b69f8db30c7ee5f8afb32bd0786de6fc5980d855a4c38b878e5e40fc58",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-43975814762.txt:not_measured:co_job_skipped",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1352-wp1350-land-evidence.yaml": [
+   "3f87c56642f76ffad40cd106b52df90205814b45f3bbf433e77d73a4a89bb922",
+   [
+    "$.post_merge_checks[0].moc_gate_output: waiver_khong_co_can_cu:url",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1392-wp1389-land-evidence.yaml": [
+   "eeb7a942279b3c45147fa44f6e9e053d420f6159f2c92b304f24c7444b8b4c2c",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:ci-11bd033/danh-gia-gate-output-44498563470.txt:failed:-",
+    "$.post_merge_checks[1].moc_gate_output: tep_danh_gia_khong_hop_le:pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1394-wp433-land-evidence.yaml": [
+   "c42246505396d0e1a1fa39e9a1320663e4539f981f74bc6d4d2c1c8990e2f0fb",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44295243563.txt:failed:-"
+   ]
+  ],
+  "pr1406-wp1404-land-evidence.yaml": [
+   "51bd90f4c7bd63a418c8828b8b11f2512a21ffa1d62a6e917871f9bf4e8076e3",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:ci-cad9b1f/danh-gia-gate-output-44497897849.txt:failed:-",
+    "$.post_merge_checks[1].moc_gate_output: tep_danh_gia_khong_hop_le:pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr1415-wp433-land-evidence.yaml": [
+   "49e60d048fbaae3d8e7ece058fa248cb1a4b9e3ad1714efc0af168e0e7c3a389",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44489289788.txt:failed:-"
+   ]
+  ],
+  "pr1421-wp433-land-evidence.yaml": [
+   "24dc762fc65cbd175b7f10306941959531baad3d03d53faee79c1663fc90f22e",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44533503543.txt:failed:-"
+   ]
+  ],
+  "pr1425-wp433-land-evidence.yaml": [
+   "c0a8ff8ac82b06680ba452fa298623b0658711f8fed83455172a1d1797b6aaad",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44569159263.txt:failed:-"
+   ]
+  ],
+  "pr1431-wp433-land-evidence.yaml": [
+   "23bbaf40f3d57a7e1605ed588b87d3ba0d6bbce2637934c9597058d672b9916c",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44639124743.txt:failed:-"
+   ]
+  ],
+  "pr1441-wp433-land-evidence.yaml": [
+   "b0ebd7cd0d3bab37f0ee5ab66d27231a32c94b2a1d38548624847e0dec55f624",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44687835603.txt:failed:-"
+   ]
+  ],
+  "pr1453-wp433-land-evidence.yaml": [
+   "39cbe4e7b873f125f335d84d31929fae9e596fb94099d8ef9445326f44eee7c0",
+   [
+    "$.post_merge_checks[0].moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44711337223.txt:failed:-"
+   ]
+  ],
+  "pr631-doctrine-rest-land-evidence.yaml": [
+   "24888a097f35c247c1454cb012bc8ff2c1a34f542e05dbc29136fd4f119e2c85",
+   [
+    "$.moc_10_2_2.gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr679-wp678-land-evidence.yaml": [
+   "e187218be88849b78b26bb12d1a1b53f4aac8c2eefd7cd636c21d61fdb916c67",
+   [
+    "$.post_merge_checks[0].moc_gate_output: dinh_dang_loi_khai"
+   ]
+  ],
+  "pr778-wp773-land-evidence.yaml": [
+   "4cee82ae07a401b668318a496d9dd7893c79b34ad93511ef37c8108316f0ac1a",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr791-wp782-land-evidence.yaml": [
+   "a5de49cbe980b376c62097ac72da28f2f443a8e871e00d418702d4c1bd5cc863",
+   [
+    "$.danh_tinh_CI_10_2_2.gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr793-wp784-land-evidence.yaml": [
+   "97dd66d0b47d7eb19dc4d42bb18939f5bef645b6c279ce53aff730462181aff9",
+   [
+    "$.danh_tinh_CI_10_2_2.gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr864-wp858-land-evidence.yaml": [
+   "28b9e354a7400770c9a15fed7c9dfcd4a4292bdbf15c918506fd9f49c46a2fa8",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr870-claude-md-bai-hoc-c-land-evidence.yaml": [
+   "91f46fb32d8fbc66481206c7fb7c3be64088926394d82c8ef8772f1c8186aa9b",
+   [
+    "$.cap_nhat_20261026.bon_moc_10_2_2.gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr881-wp852-land-evidence.yaml": [
+   "43764b48699f47c6c79e0e870c4419d659e40bd5fa375479f038489b007c77df",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr889-claude-md-bai-hoc-c-land-evidence.yaml": [
+   "07d9fab52fdda088e37a3106b11440ea17b4a40e90617322b0d8252bebaf134a",
+   [
+    "$.cap_nhat_20261026.bon_moc_10_2_2.gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml": [
+   "fbb4b34d4ed74ceee3facc7c47a3438ffaa0775d19da2b87e328e0203b9489fc",
+   [
+    "$.cap_nhat_20261026.bon_moc_10_2_2.gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr924-wp923-land-evidence.yaml": [
+   "3857723bc79f9f7b6ac45e3c3a3619ed2514186d6f2eeab2fcafdf302515502f",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr931-wp835-land-evidence.yaml": [
+   "2b8ed5d20ee89c535a4fbf59a2281f146978d05b18a54a0d3702f9737e15569c",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr945-wp899-land-evidence.yaml": [
+   "7be4cac3e343d586dc861b4280b517a797139ead2cab1a6356f1b1cdb9275976",
+   [
+    "$.bon_moc_10_2_2.gate_output: duong_khong_tep_danh_gia"
+   ]
+  ],
+  "pr950-wp834-land-evidence.yaml": [
+   "56cdd2456608633c1f1a2ec407723dcf549a660dca36c4ce90b129e631cb5482",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr963-wp943-land-evidence.yaml": [
+   "81395ff671200dcdcff2e0aa570be534559ede6ce02555f3da517426df428212",
+   [
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ],
+  "pr997-wp978-land-evidence.yaml": [
+   "1c9a724d993e7424feae93f9281749495e3c81a8334832e8e5b9caa80230a65a",
+   [
+    "$.post_merge_checks[0].moc_gate_output: duong_khong_tep_danh_gia",
+    "$: landed_khong_loi_khai_gate_output"
+   ]
+  ]
+ },
+ "dat": [
+  "pr1109-spec-ci-lan-luu-tru-land-evidence.yaml",
+  "pr1138-wp825-land-evidence.yaml",
+  "pr1142-wp1117-land-evidence.yaml",
+  "pr1198-wp1195-land-evidence.yaml",
+  "pr1229-wp1223-land-evidence.yaml",
+  "pr1230-wp1224-land-evidence.yaml",
+  "pr1231-wp1105-land-evidence.yaml",
+  "pr1242-wp1237-land-evidence.yaml",
+  "pr1249-wp1240-land-evidence.yaml",
+  "pr1258-wp1221-land-evidence.yaml",
+  "pr1267-wp1252-land-evidence.yaml",
+  "pr1270-wp1179-land-evidence.yaml",
+  "pr1277-wp1272-land-evidence.yaml",
+  "pr1310-wp1288-land-evidence.yaml",
+  "pr1312-giam-hoi-p1-land-evidence.yaml",
+  "pr1317-giam-hoi-p2-land-evidence.yaml",
+  "pr1323-wp1265-land-evidence.yaml",
+  "pr1328-wp1266-land-evidence.yaml",
+  "pr1338-wp1331-land-evidence.yaml",
+  "pr1341-wp1335-land-evidence.yaml",
+  "pr1348-wp1336-land-evidence.yaml",
+  "pr1354-wp1353-land-evidence.yaml",
+  "pr1358-wp1356-land-evidence.yaml",
+  "pr1362-wp1361-land-evidence.yaml",
+  "pr1363-wp1342-land-evidence.yaml",
+  "pr1366-wp1365-land-evidence.yaml",
+  "pr1367-wp1334-land-evidence.yaml",
+  "pr1372-wp1371-land-evidence.yaml",
+  "pr1376-wp1375-land-evidence.yaml",
+  "pr1378-wp1319-land-evidence.yaml",
+  "pr1379-wp1326-land-evidence.yaml",
+  "pr1382-wp1313-land-evidence.yaml",
+  "pr1384-wp1342-land-evidence.yaml",
+  "pr1386-wp646-land-evidence.yaml",
+  "pr1388-wp387-land-evidence.yaml",
+  "pr1390-wp1342-land-evidence.yaml",
+  "pr1407-wp1342-land-evidence.yaml",
+  "pr1414-wp387-land-evidence.yaml",
+  "pr1420-wp1342-land-evidence.yaml",
+  "pr1467-wp1322-land-evidence.yaml",
+  "pr1485-wp433-land-evidence.yaml",
+  "pr1490-wp433-land-evidence.yaml",
+  "pr1502-wp1236-a-land-evidence.yaml"
+ ],
+ "khong": [
+  "pr1013-land-evidence-l7-r2-land-evidence.yaml",
+  "pr1022-windows-local-r1-land-evidence.yaml",
+  "pr1041-wp1037-land-evidence.yaml",
+  "pr1047-wp1045-land-evidence.yaml",
+  "pr491-r358-ghi-so-land-evidence.yaml",
+  "pr672-wp574-land-evidence.yaml",
+  "pr772-wp766-land-evidence.yaml",
+  "pr779-wp775-land-evidence.yaml",
+  "pr792-wp484-land-evidence.yaml",
+  "pr800-wp794-land-evidence.yaml",
+  "pr801-wp795-land-evidence.yaml",
+  "pr818-wp788-land-evidence.yaml",
+  "pr823-wp802-land-evidence.yaml",
+  "pr832-wp831-land-evidence.yaml",
+  "pr836-wp812-land-evidence.yaml",
+  "pr838-wp671-land-evidence.yaml",
+  "pr846-wp845-land-evidence.yaml",
+  "pr848-wp744-land-evidence.yaml",
+  "pr849-wp748-land-evidence.yaml",
+  "pr851-wp822-land-evidence.yaml",
+  "pr862-wp748-r21-land-evidence.yaml",
+  "pr866-wp856-land-evidence.yaml",
+  "pr869-wp748-r22-land-evidence.yaml",
+  "pr872-wp871-land-evidence.yaml",
+  "pr873-wp868-land-evidence.yaml",
+  "pr877-wp854-land-evidence.yaml",
+  "pr880-wp878-land-evidence.yaml",
+  "pr882-wp748-r23-land-evidence.yaml",
+  "pr883-wp879-land-evidence.yaml",
+  "pr888-wp886-land-evidence.yaml",
+  "pr894-wp748-r24-land-evidence.yaml",
+  "pr895-wp892-land-evidence.yaml",
+  "pr907-wp906-land-evidence.yaml",
+  "pr908-no-p3-spec-r4-land-evidence.yaml",
+  "pr909-wp748-r25-land-evidence.yaml",
+  "pr913-wp910-land-evidence.yaml",
+  "pr917-wp910-land-evidence.yaml",
+  "pr926-wp919-land-evidence.yaml",
+  "pr930-wp752-wp763-land-evidence.yaml",
+  "pr932-wp748-r26-land-evidence.yaml",
+  "pr933-wp929-land-evidence.yaml",
+  "pr957-wp748-r27-land-evidence.yaml",
+  "pr964-wp748-r28-land-evidence.yaml",
+  "pr969-wp813-land-evidence.yaml",
+  "pr983-wp923-land-evidence.yaml",
+  "pr990-wp981-land-evidence.yaml",
+  "pr991-wp987-land-evidence.yaml",
+  "pr992-wp923-r3-land-evidence.yaml",
+  "pr994-land-81-ha-cap-r2-land-evidence.yaml",
+  "pr995-wp960-land-evidence.yaml"
+ ],
+ "loi": {}
+}

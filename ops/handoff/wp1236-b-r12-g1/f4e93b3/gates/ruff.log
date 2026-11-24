@@ -1,0 +1,11 @@
+ruff 0.15.15
+# hai tep cua dot B (head f4e93b3):
+All checks passed!
+rc=0
+# cung hai tep tren base f602325:
+All checks passed!
+rc=0
+# scripts/tl.py (khong doi; nguong CLAUDE.md 12 F821):
+12	F821	undefined-name
+Found 12 errors.
+rc=1

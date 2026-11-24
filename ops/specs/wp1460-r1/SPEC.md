@@ -1,10 +1,10 @@
-# wp1460 r8 — B1a của kế hoạch nguồn r4: biên nhận full audit `bien_nhan_audit.v1` (phần bên tiêu dùng cần) + canary A3 (BIEN-NHAN-AUDIT-V1-A)
+# wp1460 r9 — B1a của kế hoạch nguồn r4: biên nhận full audit `bien_nhan_audit.v1` (phần bên tiêu dùng cần) + canary A3 (BIEN-NHAN-AUDIT-V1-A)
 packet_id: wp1460
-revision: 8
+revision: 9
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 
-Trạng thái: thay r7 (cùng đường dẫn, commit `d1b08c219227d4b8925702029cd20d4e0febed54`, sha256 `d53341fb8d549d89f99e4cda0bd6ed380bf9975ce47b95a43ad1adaf5b3963b3`, review spec lượt 7 approve 0 finding; lease thi công `wp1460-r7-g1-claude`). r8 CHỈ thêm khối `nang_tran` theo `ADR-0053` theo đúng đường mục "Kích thước" của r7 đã định: executor lượt 2 dừng TRƯỚC review vì ứng viên sẽ vượt trần mặc định. r8 chỉ đổi dòng `revision`, đoạn Trạng thái này, mục "Kích thước" và bảng "Thay đổi"; hợp đồng, nghiệm thu, lệnh kiểm, write set và quy trình giữ nguyên từng byte. Đoạn trạng thái của r7, giữ làm lịch sử: thay r6 (cùng đường dẫn, commit `2e93730ff2451353086964e78d0bcff7e9bb5ac5`, sha256 `8080a30f639812e8274c4e3a2249301d1eb776bf6320f5a0f833c80f17232009`; r5 `f18abde`, r4 `9f09a12`, r3 `29c99e7`, r2 `9f7010e`, r1 `d7e89d9`). Sáu lượt review spec Codex; lượt 6 (`wp1460-spec-review-6`, trên r6) trả 4 P2 + 1 P3, trong đó hai lớp bị xếp VÁ HỜ; r7 sửa theo LỚP và lần này người soạn TỰ ĐO RĂNG bằng đột biến trước khi báo (bảng "Thay đổi", mục "Số đo"). Lượt 4 còn hai lớp P2: `v1-not-fully-specified` và `legacy-selector-equivalence-is-impossible`. Quyết định chủ kho E1 (chat 2026-11-20, ghi vào Mission r87): **TÁCH B1**. Nguyên nhân gốc được nhận: đóng băng một hợp đồng rất rộng bằng văn xuôi trước khi có mã. Từ r5, packet là **B1a**: phạm vi hẹp, hợp đồng đóng băng bằng HIỆN VẬT MÁY (schema + fixture), văn xuôi chỉ trỏ tới chúng. Phần còn lại thành packet kế nhiệm B1b (mục "Ngoài phạm vi"). Chưa có lease.
+Trạng thái: thay r8 (cùng đường dẫn, commit `d26c8ae8d27a0bddd71bbd08a5153bb47b879130`, sha256 `33d433b018d6eb74048fe27f2cc517b01276a28b76edbe50ffea387a0614dd0c`; lease `wp1460-r8-g2-claude`). r9 CHỈ thêm khối `nang_tran` thứ hai (`ADR-0053`) sau review mã Codex lượt 2/3 (run `6e53f3d5`, trên `1c31f5a88ba125af708a9609085c0edd2f8dc3ee`, còn 1 P2 F02-R2); chỉ đổi dòng `revision`, đoạn Trạng thái, mục "Kích thước" và bảng "Thay đổi". Đoạn trạng thái của r8, giữ làm lịch sử: thay r7 (cùng đường dẫn, commit `d1b08c219227d4b8925702029cd20d4e0febed54`, sha256 `d53341fb8d549d89f99e4cda0bd6ed380bf9975ce47b95a43ad1adaf5b3963b3`, review spec lượt 7 approve 0 finding; lease thi công `wp1460-r7-g1-claude`). r8 CHỈ thêm khối `nang_tran` theo `ADR-0053` theo đúng đường mục "Kích thước" của r7 đã định: executor lượt 2 dừng TRƯỚC review vì ứng viên sẽ vượt trần mặc định. r8 chỉ đổi dòng `revision`, đoạn Trạng thái này, mục "Kích thước" và bảng "Thay đổi"; hợp đồng, nghiệm thu, lệnh kiểm, write set và quy trình giữ nguyên từng byte. Đoạn trạng thái của r7, giữ làm lịch sử: thay r6 (cùng đường dẫn, commit `2e93730ff2451353086964e78d0bcff7e9bb5ac5`, sha256 `8080a30f639812e8274c4e3a2249301d1eb776bf6320f5a0f833c80f17232009`; r5 `f18abde`, r4 `9f09a12`, r3 `29c99e7`, r2 `9f7010e`, r1 `d7e89d9`). Sáu lượt review spec Codex; lượt 6 (`wp1460-spec-review-6`, trên r6) trả 4 P2 + 1 P3, trong đó hai lớp bị xếp VÁ HỜ; r7 sửa theo LỚP và lần này người soạn TỰ ĐO RĂNG bằng đột biến trước khi báo (bảng "Thay đổi", mục "Số đo"). Lượt 4 còn hai lớp P2: `v1-not-fully-specified` và `legacy-selector-equivalence-is-impossible`. Quyết định chủ kho E1 (chat 2026-11-20, ghi vào Mission r87): **TÁCH B1**. Nguyên nhân gốc được nhận: đóng băng một hợp đồng rất rộng bằng văn xuôi trước khi có mã. Từ r5, packet là **B1a**: phạm vi hẹp, hợp đồng đóng băng bằng HIỆN VẬT MÁY (schema + fixture), văn xuôi chỉ trỏ tới chúng. Phần còn lại thành packet kế nhiệm B1b (mục "Ngoài phạm vi"). Chưa có lease.
 
 Nguồn: kế hoạch nguồn r4 (`ops/specs/wp1172-source-plan-r4/KE_HOACH_NGUON_R4.md`, nhánh `ops/wp1172-plan-r4`, sha256 `0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe`; "§…" không ghi nguồn là tới tệp ấy). Thẩm quyền: Mission r85 và các revision kế tiếp ghi quyết định chủ kho 2026-11-20 (r86: nâng trần soạn/review, luật kích thước, bỏ A4 khỏi B1; r87: tách B1, thêm một lượt soạn); r84 Q6 = có. Base lúc soạn: `master` `0f9aa2a2cc697129e1f5be72feddf60986286865`; base thi công đo lại khi cấp lease. Đặc tả chỉ có hiệu lực khi chủ kho duyệt băm của nó và một Mission revision cài nó.
 
@@ -375,6 +375,13 @@ Không tệp thứ năm. Không đặt được lệnh thu trong `ci_dang_ky_tes
   - `tran_moi`: 6 tệp / 1600 dòng thêm theo `git diff --numstat` so base của lease.
   - Khối này chép NGUYÊN vào lease kế nhiệm. Mọi luật còn lại của mục này giữ nguyên với `tran_moi` thay cho trần mặc định: đo trong lúc thi công và trước MỖI lần xin review; vượt `tran_moi` ⇒ DỪNG trước review, không cắt ca/fixture/đột biến.
 
+- **Khối `nang_tran` thứ hai (`ADR-0053`, quyết định chủ kho 2026-11-24 ~14:45Z, ghi hộ trên #1172):**
+  - `ai_nang`: chủ kho `ducthangho`, lựa chọn nguyên văn «+1 executor, nâng trần thêm» với mô tả kèm theo «nâng trần lên 6 tệp/1700 dòng để có dư».
+  - `can_cu`: numstat ĐÃ ĐO trên `1c31f5a88ba125af708a9609085c0edd2f8dc3ee` (tree `d316445a44465cd563ce72b64a65b4893e63ad0c`) so base `5259239d763c9ffc1677f033bd9a9cf23ede9299`: 4 tệp, +1566/−20; còn 34 dòng tới `tran_moi` 1600 của khối thứ nhất. Việc còn lại: vá F02-R2 (bắt `RecursionError` ở biên X2, một ca tiến trình con, một đột biến riêng), reviewer ước 10–20 dòng (ƯỚC, không phải số đo).
+  - `tran_cu`: 6 tệp / 1600 dòng thêm (khối thứ nhất).
+  - `tran_moi`: 6 tệp / 1700 dòng thêm theo `git diff --numstat` so base của lease.
+  - Khối này thay khối thứ nhất làm trần hiệu lực và được chép NGUYÊN vào lease kế nhiệm. Các luật còn lại của mục giữ nguyên.
+
 ## Quy trình và quyền
 - Lớp review: `sensitive`. Executor: Claude Code (Fable 5.2). Reviewer: Codex service gpt-6-astra, mức suy luận cao nhất, phiên độc lập, chỉ đọc.
 - Trần lời gọi Codex review trên PR giao nộp: dòng khai `ADR-0055` ở đầu tệp đặt trần PACKET là mười lời gọi mỗi PR (đếm mọi lời gọi Codex review trên PR ấy: review mã qua service VÀ connector). Trần Mission cho packet này hẹp hơn và là trần dùng được: review mã 3 + connector 2 = 5 lời gọi ≤ 10. Thiếu dòng khai thì trần packet là hai và lượt review mã thứ ba không dùng được. Review ĐẶC TẢ là bộ đếm khác (theo Mission), không tính vào mười lời gọi này và không được đặt lại khi đặc tả đổi revision.
@@ -393,6 +400,15 @@ Không tệp thứ năm. Không đặt được lệnh thu trong `ci_dang_ky_tes
 - CHƯA ĐO: `actionlint`/Ruff nền; giá trị `github.workflow_sha` và `github.repository_id` trên lượt dispatch của nhánh; cách REST liệt kê job qua nhiều attempt (mục 7 đo); hạn mức job đồng thời; thời hạn lưu artifact.
 
 ## Thay đổi
+**r8 → r9 (`nang_tran` thứ hai). Chỉ đổi:**
+
+| Chỗ | Đổi |
+|---|---|
+| dòng tiêu đề, `revision` | 8 → 9 |
+| đoạn Trạng thái | thêm câu dẫn r9, giữ nguyên đoạn r8 làm lịch sử |
+| mục "Kích thước" | thêm khối `nang_tran` thứ hai (`tran_cu` 6/1600 → `tran_moi` 6/1700) |
+| bảng "Thay đổi" | thêm mục này |
+
 **r7 → r8 (`nang_tran`, không qua review spec mới về nội dung). Chỉ đổi:**
 
 | Chỗ | Đổi |

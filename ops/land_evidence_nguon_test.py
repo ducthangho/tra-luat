@@ -14,6 +14,7 @@ import importlib.util
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -29,8 +30,7 @@ for _s in (sys.stdout, sys.stderr):
 
 HERE = Path(__file__).resolve().parent
 ROOT_THAT = HERE.parent
-# GATE_OUTPUT_DOI_CHIEU_MA là tên DUY NHẤT mà bộ quét ghim của luật 9 (`ops/reviews/wp1236-r10-soan/quet_dot_bien.py`) biết đặt;
-# nó trỏ bản đột biến của MODULE ĐANG QUÉT — ở đợt B là bộ kiểm này. Thiếu bí danh ấy thì mọi đột biến của nó đều "sống".
+# GATE_OUTPUT_DOI_CHIEU_MA: tên DUY NHẤT mà bộ quét ghim của luật 9 (`quet_dot_bien.py`) biết đặt, trỏ bản đột biến của bộ kiểm này (E3).
 MA = Path(os.environ.get("LAND_EVIDENCE_NGUON_MA") or os.environ.get("GATE_OUTPUT_DOI_CHIEU_MA") or HERE / "land_evidence_nguon.py")
 TEN = "pr9001-thu-land-evidence.yaml"
 PROV = "pr9001-thu-provenance"
@@ -89,7 +89,7 @@ def cay(ho_so, prov=None, doi_chieu=L8_CAM, ten=TEN):
         tep |= {} if doi_chieu is None else {"gate_output_doi_chieu.py": doi_chieu}
         for duong, nd in tep.items():
             (goc / "ops" / duong).parent.mkdir(parents=True, exist_ok=True)
-            (goc / "ops" / duong).write_text(nd, encoding="utf-8", newline="")
+            (goc / "ops" / duong).write_bytes(nd if isinstance(nd, bytes) else nd.encode("utf-8"))   # bytes: ca sai UTF-8 (c35)
         if prov is not None:
             (goc / "ops/land" / pv).mkdir(exist_ok=True)
         yield goc
@@ -782,6 +782,38 @@ def c35_l8_ngu_phap_tep_danh_gia_qua_cong():
         bang(dg.count(cu) == 1, f"neo ô phải xuất hiện đúng một lần trong tệp đánh giá: {cu[:40]!r}")
         ky8(f"moc_gate_output: 'measured — {DG}'\n", p | {DG: dg.replace(cu, moi)}, 1 if mong else 0, f"tệp đánh giá {moi[-40:]!r}",
             [f"$.moc_gate_output: danh_gia_khong_passed:{DG}:not_measured:{mong}"] if mong else [])
+    ky8(f"moc_gate_output: 'measured — {DG}'\n", p | {DG: dg.encode("utf-8") + b"\xff"}, 1, "tệp đánh giá có BYTE không phải UTF-8",
+        [f"$.moc_gate_output: danh_gia_khong_passed:{DG}:not_measured:khong_phai_utf8"])
+
+
+@ca
+def c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a():
+    """Luật 8 qua consumer của đợt B: IMPORT (không chép) các ca `*_qua_ho_so` của bộ test đợt A (bộ sinh 128 ký tự ASCII mỗi vị trí + đại
+    diện mỗi general category + ngoài BMP, oracle viết từ đặc tả) rồi THAY consumer `kiem_ho_so` của module A bằng `main` → L8 ở đây."""
+    def nap_a(ten):   # nạp theo ĐƯỜNG DẪN trong kho, không theo biến môi trường (bộ quét luật 9 trỏ biến ấy vào bản đột biến)
+        spec = importlib.util.spec_from_file_location(ten.replace(".", "_") + "_cho_l8", HERE / ten)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+    a, that, m, yml, dem, ma = nap_a("gate_output_doi_chieu_test.py"), nap_a("gate_output_doi_chieu.py"), nap(), __import__("yaml"), [0], {}
+    m.compile = lambda *x: ma.get(x) or ma.setdefault(x, compile(*x))   # nhớ đệm theo ĐỐI SỐ: cùng byte nguồn ⇒ cùng code, chỉ để nhanh
+
+    def qua_l8(du_lieu, thu):
+        byte, dem[0] = yml.safe_dump(du_lieu, allow_unicode=False).encode("ascii"), dem[0] + 1
+        bang(m.nap_yaml(yml, byte) == du_lieu, f"hồ sơ YAML phải nạp lại ĐÚNG phần tử bộ sinh đưa ra: {du_lieu!r}")
+        with tempfile.TemporaryDirectory(prefix="len_l8_") as tam, contextlib.redirect_stdout(io.StringIO()) as ra:
+            if Path(thu) != a.ROOT:   # ca không cần tệp đưa gốc kho làm thư mục provenance: để vắng
+                shutil.copytree(thu, Path(tam) / PROV)
+            (Path(tam) / TEN).write_bytes(byte)
+            m.main(["--root", str(ROOT_THAT), "--tep", str(Path(tam) / TEN)])
+        return dong_l8(ra.getvalue())
+    that.kiem_ho_so, a._M[:] = qua_l8, [that]   # hàm lá vẫn là module A THẬT; chỉ consumer đổi sang L8
+    for ten in [t for t in a.CA if t[:4] in ("a124", "a125", "a126", "a129", "a131", "a132", "a133", "a134")]:
+        truoc, (rc, dong) = dem[0], a.chay_ca(ten)
+        if rc == 4:   # lỗi vô can trong ca của A phải GIỮ là lỗi vô can, không được thành tín hiệu chốt của ca này
+            raise RuntimeError(dong)
+        bang(rc == 0 and dem[0] > truoc, f"{ten} qua main → L8 ({dem[0] - truoc} phần tử): rc={rc} {dong[:600]}")
+    bang(dem[0] >= 8000, f"bảng luật 8 của đợt A qua L8 chỉ còn {dem[0]} phần tử (đo 24-11-2026: 8396)")
 
 
 @ca
@@ -992,6 +1024,8 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L8_chi_giu_ly_do_dau", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = mod.kiem_ho_so(du_lieu, prov)[:1]", "c24"),
     ("L8_nuot_ly_do_mien", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = [x for x in mod.kiem_ho_so(du_lieu, prov) if \"waiver_\" not in x]", "c34"),
     ("L8_nuot_ly_do_tep_danh_gia", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = [x for x in mod.kiem_ho_so(du_lieu, prov) if \"danh_gia_khong_passed\" not in x]", "c35"),
+    ("L8_chuan_hoa_nfkc_truoc_khi_doi_chieu", 'kq = mod.kiem_ho_so(du_lieu, prov)',
+     'kq = mod.kiem_ho_so(json.loads(unicodedata.normalize("NFKC", json.dumps(du_lieu, ensure_ascii=False))), prov)', "c36"),
     ("L8_chi_chuyen_mot_so_ly_do", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = [x for x in mod.kiem_ho_so(du_lieu, prov) if \"duong_khong\" in x or x[:3] == \"$: \"]", "c32"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

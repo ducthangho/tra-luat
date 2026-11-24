@@ -1,0 +1,238 @@
+[
+  {
+    "label": "token '\\u017fkipped'",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  },
+  {
+    "label": "token 's\\u212aipped'",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  },
+  {
+    "label": "token '\\xa0skipped'",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "actual": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "passed": true
+  },
+  {
+    "label": "token 'skipped\\u2003x'",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "actual": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "passed": true
+  },
+  {
+    "label": "token 'skipped\\U00010400'",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "actual": [
+      "$.gate_output: dinh_dang_loi_khai"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver reason control",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  },
+  {
+    "label": "waiver reason empty",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "actual": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver reason space",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "actual": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver reason tab",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "actual": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver reason LF",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "actual": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver reason splitlines",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "actual": [
+      "$.gate_output: waiver_khong_co_can_cu:dong_mien"
+    ],
+    "passed": true
+  },
+  {
+    "label": "waiver reason non-BMP",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  },
+  {
+    "label": "waiver reason surrogate",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  },
+  {
+    "label": "waiver reason embedded-han",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  },
+  {
+    "label": "UTF8 control",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  },
+  {
+    "label": "UTF8 invalid byte",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:khong_phai_utf8"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:khong_phai_utf8"
+    ],
+    "passed": true
+  },
+  {
+    "label": "header head hex length",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+    ],
+    "passed": true
+  },
+  {
+    "label": "header Unicode Nd",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai"
+    ],
+    "passed": true
+  },
+  {
+    "label": "job empty name",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "job forbidden label bracket",
+    "expected_rc": 1,
+    "actual_rc": 1,
+    "expected": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+    ],
+    "actual": [
+      "$.gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dong_la"
+    ],
+    "passed": true
+  },
+  {
+    "label": "job earliest matching suffix",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  },
+  {
+    "label": "job backtracks over nonmatching delimiter",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  },
+  {
+    "label": "job Unicode non-BMP",
+    "expected_rc": 0,
+    "actual_rc": 0,
+    "expected": [],
+    "actual": [],
+    "passed": true
+  }
+]

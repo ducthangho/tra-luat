@@ -1,0 +1,20 @@
+{
+  "authority": "SPEC r12 luật 4: đúng consumer của đợt (L8 ở B); luật 8 cụ thể hóa các vị trí ngữ pháp/văn bản tự do của luật 4; luật 9 giữ nghĩa vụ ca độc lập với manifest.",
+  "limit": "Không yêu cầu chạy lại toàn bộ phép vét cạn hàm lá A trong B; phần B là đối chứng qua L8 của miền consumer và các mệnh đề ngữ pháp. Không đòi mọi lý do provenance hay ca filesystem riêng A. Dữ liệu probe mới không được tính thành test đã có trên candidate.",
+  "domains": [
+    {"domain":"tập 7 token và đầu vào không chuỗi/rỗng/ngoài tập", "cases":["c32","c34"], "status":"đủ tập token cơ bản", "remaining":"Tiền xử lý casefold và miền ký tự theo luật 8: chưa có ſ/K, đại diện Unicode âm/general category/non-BMP."},
+    {"domain":"3 tên phi-lời-khai, chuẩn hóa khóa giữ số", "cases":["c32"], "status":"đã đóng ví dụ lượt 1", "evidence":"Có cả 3 tên, gate2output, tên gần giống, chuẩn hóa hoa/thường/cách/dấu."},
+    {"domain":"tập dấu phân cách và đầu/cuối LF", "cases":["c32"], "status":"đã đóng tập literal của lượt 1", "remaining":"Miền âm ngoài ASCII theo luật 8 còn thiếu; U+2013 là một mẫu, không thay các category."},
+    {"domain":"3 dạng landed, True/1, ưu tiên khóa", "cases":["c27"], "status":"đã đóng ví dụ lượt 1", "remaining":"Vị trí [0-9]{8} của khối landed thiếu đại diện Unicode chữ số âm (thuộc miền luật 8, không phải thiếu True/1)."},
+    {"domain":"URL 0/1/2, readback 0/1/2, 9 điều kiện miễn và thứ tự", "cases":["c34"], "status":"đủ 9 lỗi đơn và 7 cặp khả thi", "evidence":"doc_readback→html_url không là cặp độc lập trên JSON không parse được; không đòi ca bất khả thi."},
+    {"domain":"dòng miễn strip/fullmatch, văn bản tự do ly_do", "cases":["c34"], "status":"strip/fullmatch cơ bản đã đóng, ngữ pháp chưa đủ", "remaining":"Miền ly_do hiện chỉ một chuỗi ASCII hợp lệ. Thiếu rỗng/space/tab, splitlines, general categories đi được qua JSON (gồm Cs/non-BMP), điểm kết thúc han= theo nghĩa regex. Miền lớp ký tự URL, SHA, OS, từng phần ngày chưa có bảng consumer."},
+    {"domain":"tệp đánh giá: điều kiện chung UTF-8 và CR/LF", "cases":["c35"], "status":"CRLF đồng nhất, trộn xuống dòng, CR lẻ đã có", "remaining":"Chưa có byte sai UTF-8; toàn c35 viết str bằng UTF-8."},
+    {"domain":"tệp đánh giá: header/job/skipped cũ/skipped v3/tổng/rỗng", "cases":["c35"], "status":"đủ loại dòng, chưa đủ mệnh đề/miền từng vị trí", "remaining":"Thiếu ma trận các vị trí số/hex/trạng thái và đại diện Unicode âm; tên job không rỗng, nhãn không chứa ], tên/đuôi tự do theo general category, delimiter sớm không khớp và hai hậu tố cùng khớp; tên skipped không rỗng và các ranh giới literal. Probe mới đã đo các ví dụ phân biệt, candidate vẫn thiếu bảng tổng quát."},
+    {"domain":"tên tệp trích: đường tương đối/tuyệt đối/.., nhiều tệp", "cases":["c32"], "status":"đủ các ví dụ đã nêu", "remaining":"Miền lớp ký tự của token tên tệp theo luật 8 chưa có bảng consumer; không yêu cầu thêm tấn công symlink trong review này."}
+  ],
+  "new_patch_classes": [
+    {"class":"oracle lấy từ output mã", "conclusion":"không phát hiện", "evidence":"c27/c32/c34/c35 ghi literal rc/lý do; c24 đọc bản tham chiếu đặc tả tại base bất biến; việc lấy vị trí dòng từ fixture không sinh kỳ vọng từ kết quả mã."},
+    {"class":"phụ thuộc thứ tự hoặc rò tệp tạm", "conclusion":"không phát hiện trong phạm vi đo", "evidence":"5 ca đổi chạy đảo thứ tự rc0, đối chiếu suite xuôi; thư mục riêng patch-temp rỗng sau baseline và 3 đột biến đích."},
+    {"class":"chết đột biến sai ca", "conclusion":"không phát hiện", "evidence":"3 mutant mới baseline rc0, mutant rc3 với DO của đúng c24/c34/c35; raw_child_results trong patch-check.json."}
+  ]
+}

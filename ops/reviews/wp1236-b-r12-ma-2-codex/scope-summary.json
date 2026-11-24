@@ -1,0 +1,32 @@
+{
+  "case_results": {
+    "c27_b7_l8_landed_khong_loi_khai": [
+      0,
+      ""
+    ],
+    "c32_l8_ma_tran_token_va_khoa_qua_cong": [
+      0,
+      ""
+    ],
+    "c34_l8_ma_tran_mien_qua_cong": [
+      0,
+      ""
+    ],
+    "c35_l8_ngu_phap_tep_danh_gia_qua_cong": [
+      0,
+      ""
+    ]
+  },
+  "cells": 150,
+  "waiver_ly_do_values": [
+    "job huy theo chi thi"
+  ],
+  "waiver_body_non_ascii": [],
+  "token_non_ascii": [
+    8211,
+    8212
+  ],
+  "grammar_cells": 19,
+  "raw_byte_fixtures": 0,
+  "raw_byte_reason": "All c35 fixtures are str passed to cay.write_text(encoding=utf-8); no write_bytes path in c35."
+}

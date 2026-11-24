@@ -1,0 +1,86 @@
+{
+  "reverse_order": {
+    "c35_l8_ngu_phap_tep_danh_gia_qua_cong": [
+      0,
+      ""
+    ],
+    "c34_l8_ma_tran_mien_qua_cong": [
+      0,
+      ""
+    ],
+    "c32_l8_ma_tran_token_va_khoa_qua_cong": [
+      0,
+      ""
+    ],
+    "c27_b7_l8_landed_khong_loi_khai": [
+      0,
+      ""
+    ],
+    "c24_b1_mien_tru_l8_la_dung_tap_do_tren_base": [
+      0,
+      ""
+    ]
+  },
+  "new_targeted_mutants": {
+    "L8_chi_giu_ly_do_dau": {
+      "target": "c24",
+      "result": [
+        "GIET",
+        "dence.yaml', 'pr870-claude-md-bai-hoc-c-land-evidence.yaml', 'pr889-claude-md-bai-hoc-c-land-evidence.yaml', 'pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml', 'pr997-wp978-land-evidence.yaml']"
+      ]
+    },
+    "L8_nuot_ly_do_mien": {
+      "target": "c34",
+      "result": [
+        "GIET",
+        "te_output: waiver_khong_co_can_cu:url'] dong=[], được 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT"
+      ]
+    },
+    "L8_nuot_ly_do_tep_danh_gia": {
+      "target": "c35",
+      "result": [
+        "GIET",
+        "69622916.txt:not_measured:dau_tep_sai'] dong=[], được 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT"
+      ]
+    }
+  },
+  "raw_child_results": [
+    {
+      "case": "c24_b1_mien_tru_l8_la_dung_tap_do_tren_base",
+      "path": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b2-2-codex/work/patch-temp/len_db_ltlfr1cn/goc.py",
+      "rc": 0,
+      "output": "\n"
+    },
+    {
+      "case": "c24_b1_mien_tru_l8_la_dung_tap_do_tren_base",
+      "path": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b2-2-codex/work/patch-temp/len_db_ltlfr1cn/db_L8_chi_giu_ly_do_dau.py",
+      "rc": 3,
+      "output": "DO:c24_b1_mien_tru_l8_la_dung_tap_do_tren_base:lý do L8 TỪNG hồ sơ (đường dẫn, tên lý do) lệch bản tham chiếu ops/reviews/wp1236-r9-soan/do_loi_khai.txt: ['pr1023-wp1009-r4-land-evidence.yaml', 'pr1040-wp1021-land-evidence.yaml', 'pr1042-pr1068-cloud-setup-p2-spec-land-evidence.yaml', 'pr1063-wp1038-r1-land-evidence.yaml', 'pr1073-wp1039-r1-land-evidence.yaml', 'pr1080-wp1077-land-evidence.yaml', 'pr1095-pr1101-cloud-setup-p3-p3b-spec-land-evidence.yaml', 'pr1097-wp1078-land-evidence.yaml', 'pr1100-wp1089-r2-land-evidence.yaml', 'pr1115-wp1079-land-evidence.yaml', 'pr1127-wp1120-land-evidence.yaml', 'pr1128-wp1113-land-evidence.yaml', 'pr1130-wp1122-land-evidence.yaml', 'pr1141-wp1132-land-evidence.yaml', 'pr1155-wp1143-land-evidence.yaml', 'pr1192-wp1147-land-evidence.yaml', 'pr1197-wp1099-land-evidence.yaml', 'pr1344-wp1343-land-evidence.yaml', 'pr1347-wp1345-land-evidence.yaml', 'pr1352-wp1350-land-evidence.yaml', 'pr1392-wp1389-land-evidence.yaml', 'pr1406-wp1404-land-evidence.yaml', 'pr870-claude-md-bai-hoc-c-land-evidence.yaml', 'pr889-claude-md-bai-hoc-c-land-evidence.yaml', 'pr896-claude-md-bai-hoc-c-tro-nguon-land-evidence.yaml', 'pr997-wp978-land-evidence.yaml']\n"
+    },
+    {
+      "case": "c34_l8_ma_tran_mien_qua_cong",
+      "path": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b2-2-codex/work/patch-temp/len_db_dvhjfvb0/goc.py",
+      "rc": 0,
+      "output": "\n"
+    },
+    {
+      "case": "c34_l8_ma_tran_mien_qua_cong",
+      "path": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b2-2-codex/work/patch-temp/len_db_dvhjfvb0/db_L8_nuot_ly_do_mien.py",
+      "rc": 3,
+      "output": "DO:c34_l8_ma_tran_mien_qua_cong:miễn url, landed=False: 'ed — d8cf2ab57f9f25a93cefedcebfb315826b6b78fe': mong rc=1 l8=['$.gate_output: waiver_khong_co_can_cu:url'] dong=[], được 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n\n"
+    },
+    {
+      "case": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+      "path": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b2-2-codex/work/patch-temp/len_db_n5u6jptp/goc.py",
+      "rc": 0,
+      "output": "\n"
+    },
+    {
+      "case": "c35_l8_ngu_phap_tep_danh_gia_qua_cong",
+      "path": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/b2-2-codex/work/patch-temp/len_db_n5u6jptp/db_L8_nuot_ly_do_tep_danh_gia.py",
+      "rc": 3,
+      "output": "DO:c35_l8_ngu_phap_tep_danh_gia_qua_cong:tệp đánh giá '# Danh giá': mong rc=1 l8=['$.moc_gate_output: danh_gia_khong_passed:danh-gia-gate-output-44669622916.txt:not_measured:dau_tep_sai'] dong=[], được 0 ĐẠT ops/land/pr9001-thu-land-evidence.yaml\nland_evidence_nguon: 1 ĐẠT · 0/0 miễn trừ (băm khớp) · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 1\nTỔNG: ĐẠT\n\n"
+    }
+  ],
+  "temp_remaining": []
+}

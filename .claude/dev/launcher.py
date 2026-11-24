@@ -4775,6 +4775,61 @@ def _do_antigravity(moi_truong: dict[str, str] | None = None) -> tuple[str, str]
 _RE_SLUG_GITHUB = re.compile(r"github\.com[:/]+([^/]+/[^/\s]+?)(?:\.git)?/*$")
 
 
+ANTHROPIC_KEY_BIEN = ("TL_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY")
+ANTHROPIC_MODEL_KIEM_SONG = "claude-haiku-5-5"
+
+
+def _do_anthropic_api(moi_truong: dict[str, str] | None = None, kiem_song: bool = False,
+                      mo=urllib.request.urlopen) -> tuple[str, str]:
+    """Đo đường Claude API bằng API key cho SCRIPT (`.claude/dev/llm_route.py`), KHÔNG phải
+    xác thực của chính Claude Code.
+
+    Key đọc từ `TL_ANTHROPIC_API_KEY` rồi `ANTHROPIC_API_KEY`. Tên riêng `TL_` vì trang sửa
+    môi trường cloud báo `ANTHROPIC_API_KEY` "won't be used to authenticate requests"
+    (đo 24-11-2026), và Network secrets không lưu được cho host của Anthropic.
+
+    Mặc định KHÔNG gọi mạng: có key ⇒ `CO_CREDENTIAL` (có mặt ≠ dùng được). `--kiem-song`
+    gửi MỘT lời gọi Messages nhỏ thật (tốn token rất ít) — chỉ 2xx mới là `DUNG_DUOC`,
+    vì nó chứng minh cả key lẫn còn credit. Số dư credit KHÔNG đọc được bằng API key:
+    xem Claude Console > Billing. KHÔNG BAO GIỜ đưa giá trị key vào mô tả.
+    """
+    mt = _env_da_chuan(moi_truong)
+    ten = next((b for b in ANTHROPIC_KEY_BIEN if (mt.get(b) or "").strip()), None)
+    if ten is None:
+        # `THIEU`, không phải `CHUA_XAC_THUC`: đường này TUỲ CHỌN, mà hook phiên in CANH BAO cho
+        # mọi `CHUA_XAC_THUC` — để vậy thì mọi phiên không dùng key mang một cảnh báo thường trực,
+        # và chốt đỏ thường trực là chốt bị bỏ qua. Key BỊ TỪ CHỐI / HẾT CREDIT mới cảnh báo.
+        return ("THIEU", "chua dat " + " / ".join(ANTHROPIC_KEY_BIEN) + " (tuy chon)")
+    if not kiem_song:
+        return ("CO_CREDENTIAL", f"co key ({ten}) · chua chung minh dung duoc, them --kiem-song")
+    goc = (mt.get("ANTHROPIC_BASE_URL") or "https://api.anthropic.com").rstrip("/")
+    than = json.dumps({"model": ANTHROPIC_MODEL_KIEM_SONG, "max_tokens": 16,
+                       "output_config": {"effort": "low"},
+                       "messages": [{"role": "user", "content": "ok"}]}).encode()
+    req = urllib.request.Request(goc + "/v1/messages", data=than, method="POST", headers={
+        "x-api-key": mt[ten].strip(), "anthropic-version": "2023-06-01",
+        "content-type": "application/json"})
+    try:
+        with mo(req, timeout=30) as r:
+            u = (json.loads(r.read() or b"{}").get("usage") or {})
+            return ("DUNG_DUOC", f"key ({ten}) · kiem song HTTP {r.status} ({ANTHROPIC_MODEL_KIEM_SONG}, "
+                                 f"{u.get('input_tokens', '?')}+{u.get('output_tokens', '?')} token) · "
+                                 "so du credit: xem Claude Console > Billing")
+    except urllib.error.HTTPError as e:
+        try:
+            loi = (json.loads(e.read() or b"{}").get("error") or {})
+        except (ValueError, OSError):
+            loi = {}
+        kieu, tb = loi.get("type") or "", str(loi.get("message") or "")
+        if e.code == 402 or kieu == "billing_error" or (e.code == 400 and "credit balance" in tb.lower()):
+            return ("CHUA_XAC_THUC", f"key ({ten}) · HET CREDIT (HTTP {e.code}) — nap them o Console > Billing")
+        if e.code in (401, 403):
+            return ("CHUA_XAC_THUC", f"key ({ten}) · bi tu choi HTTP {e.code} ({kieu or 'khong ro'})")
+        return ("KHONG_DO_DUOC", f"key ({ten}) · kiem song HTTP {e.code} ({kieu or 'khong ro'})")
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        return ("KHONG_DO_DUOC", f"key ({ten}) · kiem song khong chay duoc: {type(e).__name__}")
+
+
 def _do_rest_github(url: str, timeout: float = 6.0, *, token: str | None = None) -> tuple[str, str, bool]:
     """Đo MỘT đường REST. Trả (`mo`|`chan`|`khong_do_duoc`, mô tả, THAO TÁC THÀNH CÔNG).
 
@@ -5588,6 +5643,10 @@ KHA_NANG = [
     {"ten": "antigravity", "do": lambda ws, ks=False: _do_antigravity(_MOI_TRUONG_DA_DOC),
      "vi_sao": "provider google_antigravity qua execution_surface antigravity (AG-T0-01B)",
      "khac_phuc": "cai agy CLI va chay `agy` (mo TUI de dang nhap)"},
+    {"ten": "anthropic-api", "do": lambda ws, ks=False: _do_anthropic_api(_MOI_TRUONG_DA_DOC, ks),
+     "vi_sao": "duong api cua .claude/dev/llm_route.py (script goi Claude bang API key, khong phai Claude Code)",
+     "khac_phuc": "them TL_ANTHROPIC_API_KEY vao bien moi truong cua environment (KHONG dung Network "
+                  "secrets), mo phien moi; het credit: Claude Console > Billing"},
 ]
 
 

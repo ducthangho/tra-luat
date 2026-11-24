@@ -655,8 +655,27 @@ def ca_ranh_gioi_luot4(m):
     bang(m.lech_nguyen_van(kn(("Hồ sơ (nhóm: bản giấy (bản chính))", "tập tài liệu.")), long) == [],
          "dau ':' trong ngoac long bi chan oan")
     # Lượt 5 R1 (nguồn mất số): dòng mở bằng "là" SAU một khoản đã có từ nối KHÔNG được gộp vào khoản ấy.
-    mat = "Điều 3.\nHồ sơ là tài liệu.\nlà bản sao."
-    bang(m.lech_nguyen_van(kn(("Hồ sơ", "tài liệu. là bản sao.")), mat) != [], "gop dong 'la ...' vao khoan da co tu noi")
+    mat = "Điều 3.\n1. Hồ sơ là tài liệu.\nlà bản sao.\n2. Dữ liệu là thông tin."
+    bang(m.lech_nguyen_van(kn(("Hồ sơ", "tài liệu. là bản sao."), ("Dữ liệu", "thông tin.")), mat) != [],
+         "gop dong 'la ...' vao khoan da co tu noi")
+    # Lượt 6 S2: (a) ngoặc tròn NẰM TRONG trích dẫn không mở/đóng ngoặc cú pháp; (b) nguồn MẤT số không có tiếp dòng;
+    # (c) dòng "Điều 3 của …" không phải tiêu đề.
+    mo_trich = "Điều 3.\n1. Ký hiệu mở là dấu \u201c(\u201d.\nDữ liệu là thông tin.\n2. Hồ sơ là tài liệu."
+    bang(m.tach_khoan(mo_trich) is None, f"'(' trong trich dan khong duoc mo tiep dong: {m.tach_khoan(mo_trich)}")
+    dong_trich = "Điều 3.\n1. Dấu đóng (chẳng hạn dấu \u201c)\u201d là ký hiệu kết thúc) là ký hiệu."
+    bang(m.lech_nguyen_van(kn(("Dấu đóng (chẳng hạn dấu \u201c)\u201d là ký hiệu kết thúc)", "ký hiệu.")), dong_trich) == [],
+         "')' trong trich dan dong nham ngoac: cach cat dung bi chan")
+    bang(m.lech_nguyen_van(kn(("Dấu đóng (chẳng hạn dấu \u201c)\u201d", "ký hiệu kết thúc) là ký hiệu.")), dong_trich) != [],
+         "')' trong trich dan dong nham ngoac: cach cat sai duoc nhan")
+    gay = "Điều 3.\nHồ sơ\nlà tài liệu.\nDữ liệu là thông tin."
+    bang(m.lech_nguyen_van(kn(("Hồ sơ", "tài liệu."), ("Dữ liệu", "thông tin.")), gay) != [],
+         "nguon mat so: dong gay giua cau phai bi chan")
+    khong_td = "Điều 3 của quy chế là điều khoản áp dụng.\nDữ liệu là thông tin."
+    bang(m.so_dieu_tu_tieu_de(khong_td) is None, "dong 'Dieu 3 cua ...' khong phai tieu de")
+    bang(m.lech_nguyen_van([{"stt": 1, "thuat_ngu": "Dữ liệu", "dinh_nghia": "thông tin."}], khong_td) != [],
+         "bo khoan dau (bi nhan nham la tieu de) phai lech")
+    bang(m.lech_nguyen_van(kn(("Điều 3 của quy chế", "điều khoản áp dụng."), ("Dữ liệu", "thông tin.")), khong_td) == [],
+         "du hai khoan cua tep khong tieu de phai dat")
 
 
 def ca_sau_khoi_chay_khong_chuyen(m):
@@ -673,9 +692,12 @@ def ca_sau_khoi_chay_khong_chuyen(m):
         raise subprocess.TimeoutExpired(cmd, 1)
 
     def spawn_hong(cmd):
-        raise FileNotFoundError(2, "khong co")
+        raise m.KhongKhoiChay(2, "khong co")
+
+    def io_sau_khoi_chay(cmd):
+        raise OSError(5, "EIO khi doc pipe")   # lượt 6 S1: OSError KHÁC KhongKhoiChay ⇒ đã qua mốc khởi chạy
     khong = {"input_tokens": 0, "output_tokens": 0}
-    sau = (("qua han", qua_han),
+    sau = (("qua han", qua_han), ("loi I/O sau khoi chay", io_sau_khoi_chay),
            ("mat envelope", lambda c: subprocess.CompletedProcess(c, 1, "Error: something", "")),
            ("loi so do 0", lambda c: subprocess.CompletedProcess(c, 1, json.dumps(
                {"subtype": "error_during_execution", "is_error": True, "result": "limit", "modelUsage": {},
@@ -687,6 +709,21 @@ def ca_sau_khoi_chay_khong_chuyen(m):
         bang(rc == m.MA_DUNG, f"{ten} sau khi khoi chay: phai DUNG, khong goi api: rc={rc} {nhat}")
     rc, kq, nhat = chay_lenh(m, KEY, {"sub": sub(m, gia(spawn_hong)), "api": api(m, client_gia())})
     bang(rc == 0 and kq["duong"] == "api", f"khong khoi chay duoc claude -p (truoc model) phai chuyen api: rc={rc} {nhat}")
+    # Bộ chạy THẬT `_chay_co_moc`: spawn hỏng ⇒ KhongKhoiChay; tiến trình chạy được ⇒ CompletedProcess.
+    try:
+        m._chay_co_moc(["/khong/ton/tai/claude-gia"], timeout=10, text=True)
+        raise TinHieuChotCa("spawn hong phai nem KhongKhoiChay")
+    except OSError as e:
+        bang(isinstance(e, m.KhongKhoiChay), f"spawn hong phai nem KhongKhoiChay, duoc {type(e).__name__}")
+    p = m._chay_co_moc([sys.executable, "-c", "print('ok')"], timeout=30, text=True, stdin=subprocess.DEVNULL)
+    bang(p.returncode == 0 and p.stdout.strip() == "ok", f"_chay_co_moc chay that: {p}")
+    try:
+        m._chay_co_moc([sys.executable, "-c", "import time; time.sleep(30)"], timeout=0.5, text=True)
+        raise TinHieuChotCa("qua han phai nem TimeoutExpired")
+    except m.KhongKhoiChay as e:
+        raise TinHieuChotCa(f"qua han SAU khoi chay khong duoc thanh KhongKhoiChay: {e}") from e
+    except subprocess.TimeoutExpired:
+        pass
 
 
 def ca_usage_thieu_truong(m):
@@ -718,7 +755,14 @@ DOT_BIEN = [
      "ca_khoan_mat_so_co_diem_dat"),
     ("cau_dan_nuot_khoan_dau", (' and _tu_noi(ln) is None:\n            continue', ':\n            continue'), "ca_khoan_mat_so_co_diem_dat"),
     ("nguon_mat_so_khong_tach", ("        elif not co_so:\n            khoan.append([None, ln])\n", ""), "ca_khoan_co_so_va_diem_dat"),
-    ("ngoac_qua_dong_thanh_mo_ho", ("        elif khoan and (_dang_mo(khoan[-1][1]) or ", "        elif khoan and ("), "ca_ranh_gioi_luot4"),
+    ("ngoac_qua_dong_thanh_mo_ho", ("        elif co_so and khoan and (_dang_mo(khoan[-1][1]) or ", "        elif co_so and khoan and ("),
+     "ca_ranh_gioi_luot4"),
+    # Lượt 6 S2.
+    ("tiep_dong_ca_nguon_mat_so", ("        elif co_so and khoan and (_dang_mo(", "        elif khoan and (_dang_mo("), "ca_ranh_gioi_luot4"),
+    ("ngoac_mo_trong_trich_dan", ('        if c == "(" and not trich:', '        if c == "(":'), "ca_ranh_gioi_luot4"),
+    ("ngoac_dong_trong_trich_dan", ('        elif c == ")" and sau and not trich:', '        elif c == ")" and sau:'), "ca_ranh_gioi_luot4"),
+    ("tieu_de_long", ('_RE_TIEU_DE_DIEU = re.compile(r"^\\s*Điều\\s+(\\d+[a-zđ]?)\\s*[.:]")',
+                      '_RE_TIEU_DE_DIEU = re.compile(r"^\\s*Điều\\s+(\\d+[a-zđ]?)\\b")'), "ca_ranh_gioi_luot4"),
     ("la_dau_dong_luon_noi", ("(_RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None)", "_RE_MO_BANG_LA.match(ln)"),
      "ca_ranh_gioi_luot4"),
     ("tach_tai_la_cuoi", ("        if i in vi_tri_la:\n", "        if i in vi_tri_la and i == max(vi_tri_la):\n"),
@@ -726,7 +770,7 @@ DOT_BIEN = [
     ("la_trong_ngoac_cung_tinh", ("        if trong:\n            continue\n", ""), "ca_ngoac_goi_tat"),
     ("bo_trich_dan_thang", ("        elif c == '\"':\n            thang = not thang\n", ""), "ca_ranh_gioi_luot4"),
     ("bo_trich_dan_cong", ('        elif c == "\\u201c":\n            cong += 1\n', ""), "ca_ranh_gioi_luot4"),
-    ("ngoac_mot_tang_coi_la_ngoai", ("        yield i, c, sau > 0 or thang or cong > 0", "        yield i, c, sau > 1 or thang or cong > 0"),
+    ("ngoac_mot_tang_coi_la_ngoai", ("        yield i, c, sau > 0 or trich", "        yield i, c, sau > 1 or trich"),
      "ca_ranh_gioi_luot4"),
     ("bo_chan_hai_cham", ('        if c == ":":\n            return None\n', ""), "ca_ranh_gioi_luot4"),
     ("bo_hai_ve_khac_rong", ("dung = bool(tn_nguon and dn_nguon) and tn == tn_nguon", "dung = tn == tn_nguon"), "ca_ranh_gioi_luot4"),
@@ -740,7 +784,15 @@ DOT_BIEN = [
     ("mat_envelope_chuyen", ('        raise Dung(f"claude -p rc={p.returncode}: khong co envelope',
                              '        raise ChuyenDuong(f"claude -p rc={p.returncode}: khong co envelope'),
      "ca_sau_khoi_chay_khong_chuyen"),
-    ("spawn_hong_thi_dung", ('        raise ChuyenDuong(f"khong khoi chay duoc claude', '        raise Dung(f"khong khoi chay duoc claude'),
+    ("spawn_hong_thi_dung", ('        raise ChuyenDuong(f"khong khoi chay duoc claude -p', '        raise Dung(f"khong khoi chay duoc claude -p'),
+     "ca_sau_khoi_chay_khong_chuyen"),
+    # Lượt 6 S1.
+    ("io_sau_khoi_chay_chuyen", ('        raise Dung(f"claude -p loi I/O sau khi khoi chay', '        raise ChuyenDuong(f"claude -p loi I/O sau khi khoi chay'),
+     "ca_sau_khoi_chay_khong_chuyen"),
+    ("popen_hong_khong_danh_dau", ("        raise KhongKhoiChay(e.errno, f\"khong khoi chay duoc {cmd[0]}", "        raise OSError(e.errno, f\"khong khoi chay duoc {cmd[0]}"),
+     "ca_sau_khoi_chay_khong_chuyen"),
+    ("qua_han_thanh_khong_khoi_chay", ("        out, err = proc.communicate(timeout=timeout)\n    except BaseException:",
+                                       "        out, err = proc.communicate(timeout=timeout)\n    except subprocess.TimeoutExpired as e:\n        raise KhongKhoiChay(0, 'x') from e\n    except BaseException:"),
      "ca_sau_khoi_chay_khong_chuyen"),
     ("402_khong_chuyen", ("MA_CHUYEN_DUONG = frozenset({401, 402, 403, 429, 503, 529})",
                           "MA_CHUYEN_DUONG = frozenset({401, 403, 429, 503, 529})"), "ca_het_credit_402_chuyen_sub"),

@@ -2955,7 +2955,10 @@ def _llm_in_trang_thai(lr, thu_tu, nguon, tt):
 def _cung_dich(a, b) -> bool:
     pa, pb = Path(a), Path(b)
     try:
-        if pa.resolve() == pb.resolve():
+        ra, rb = pa.resolve(), pb.resolve()
+        # Lượt 6 S3: quan hệ TỔ TIÊN–HẬU DUỆ cũng là "chung đích": đích trên sẽ phải vừa là tệp vừa là thư mục, nên lần
+        # ghi thứ hai LUÔN hỏng sau khi đã tốn model.
+        if ra == rb or ra in rb.parents or rb in ra.parents:
             return True
         return pa.exists() and pb.exists() and os.path.samefile(pa, pb)
     except OSError:

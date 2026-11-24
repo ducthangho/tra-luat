@@ -63,7 +63,9 @@ STOP_REASON_LOI_YEU_CAU = frozenset({"refusal", "max_tokens"})
 CO_CLAUDE_CODE_VO_HAI = frozenset({"CLAUDE_CODE_USE_CCR_V2", "CLAUDE_CODE_USE_POWERSHELL_TOOL",
                                    "CLAUDE_CODE_USE_COWORK_PLUGINS", "CLAUDE_CODE_USE_NATIVE_FILE_SEARCH"})
 MAU_CAP_EXTRACT = "độ dài chạm CAP export"   # dấu riêng của cảnh báo trần trong `tl_core/extract_cache.py`
-_RE_TIEU_DE_DIEU = re.compile(r"^\s*Điều\s+(\d+[a-zđ]?)\b")
+# Tiêu đề Điều: số Điều phải đi ngay với dấu "." hoặc ":" (lượt 6 S2: dòng "Điều 3 của quy chế là …" của tệp KHÔNG
+# tiêu đề từng bị nhận là tiêu đề, khoản đầu bị bỏ). Dùng CHUNG cho metadata và cho phân đoạn khoản.
+_RE_TIEU_DE_DIEU = re.compile(r"^\s*Điều\s+(\d+[a-zđ]?)\s*[.:]")
 
 
 def so_dieu_tu_tieu_de(van_ban):
@@ -81,6 +83,27 @@ class ChuyenDuong(Exception):
 
 class Dung(Exception):
     """Lỗi thuộc về YÊU CẦU — không thử đường khác."""
+
+
+class KhongKhoiChay(OSError):
+    """Tiến trình con KHÔNG khởi chạy được (Popen hỏng) — mốc phân biệt lỗi TRƯỚC với lỗi SAU khởi chạy (lượt 6 S1)."""
+
+
+def _chay_co_moc(cmd, *, timeout=None, capture_output=True, **kw):
+    """Như `subprocess.run(..., capture_output=True)` nhưng lỗi KHỞI CHẠY ném `KhongKhoiChay`, còn mọi lỗi SAU khi
+    `Popen` đã trả tiến trình (đọc pipe, chờ, quá hạn) giữ nguyên kiểu và tiến trình con được giết + thu hồi."""
+    try:
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kw)
+    except OSError as e:
+        raise KhongKhoiChay(e.errno, f"khong khoi chay duoc {cmd[0]}: {e.strerror or e}") from e
+    try:
+        out, err = proc.communicate(timeout=timeout)
+    except BaseException:
+        proc.kill()
+        with contextlib.suppress(Exception):
+            proc.communicate(timeout=5)
+        raise
+    return subprocess.CompletedProcess(cmd, proc.returncode, out, err)
 
 
 class HetDuong(Exception):
@@ -254,7 +277,7 @@ def _usage_sub(mu):
     return tong
 
 
-def kiem_xac_thuc_sub(claude_bin, env, chay=subprocess.run) -> None:
+def kiem_xac_thuc_sub(claude_bin, env, chay=_chay_co_moc) -> None:
     """Đường `sub` CHỈ được báo là subscription khi CLI tự khai xác thực bằng TÀI KHOẢN Anthropic
     (`authMethod` ∈ AUTH_SUBSCRIPTION) qua nhà cung cấp `firstParty`, đo bằng `claude auth status --json`
     với ĐÚNG env mà lời gọi model sẽ dùng (cross-review lượt 2 N4: key lưu từ `/login`, `apiKeyHelper` trong
@@ -281,7 +304,7 @@ def kiem_xac_thuc_sub(claude_bin, env, chay=subprocess.run) -> None:
                           "khong phai tai khoan subscription")
 
 
-def duong_sub(he_thong, noi_dung, schema, model, env, chay=subprocess.run, tim=shutil.which):
+def duong_sub(he_thong, noi_dung, schema, model, env, chay=_chay_co_moc, tim=shutil.which):
     claude_bin = tim("claude")
     if not claude_bin:
         raise ChuyenDuong("khong co claude CLI tren PATH")
@@ -292,18 +315,28 @@ def duong_sub(he_thong, noi_dung, schema, model, env, chay=subprocess.run, tim=s
     # khởi chạy rồi thì KHÔNG đoán "model đã chạy chưa" từ envelope nữa — năm lượt review liên tiếp tìm ra một cửa
     # mới trong phép đoán ấy (F2→N2→M2→Q2→R2). Mọi lỗi sau khởi chạy ⇒ DỪNG; người dùng tự chạy lại với `--thu-tu api`.
     goi_y = "loi sau khi claude -p da khoi chay — khong tu chuyen duong; het han muc goi thi chay lai voi --thu-tu api"
+    # cwd tạm: tránh nạp ngữ cảnh kho. Tạo TRƯỚC mốc khởi chạy (lỗi ở đây là chuẩn bị ⇒ chuyển được) và dọn bằng
+    # `ignore_errors` SAU đó: lỗi dọn dẹp không được quyết định đường (lượt 6 S1).
+    try:
+        cwd = tempfile.mkdtemp(prefix="llm-route-")
+    except OSError as e:
+        raise ChuyenDuong(f"khong tao duoc thu muc tam cho claude -p: {type(e).__name__}") from e
     try:
         # stdin=DEVNULL: không có thì `claude -p` chèn dòng "no stdin data received" TRƯỚC
-        # JSON (đo 06-09-2026, CLAUDE.md §Gọi agent đa nền). cwd tạm: tránh nạp ngữ cảnh kho.
-        with tempfile.TemporaryDirectory(prefix="llm-route-") as cwd:
-            p = chay(lenh_sub(claude_bin, he_thong, noi_dung, schema, model),
-                     stdin=subprocess.DEVNULL, capture_output=True, text=True,
-                     encoding="utf-8", errors="replace", timeout=TIMEOUT_SUB_GIAY,
-                     env=env_cho_sub(env), cwd=cwd)
+        # JSON (đo 06-09-2026, CLAUDE.md §Gọi agent đa nền).
+        p = chay(lenh_sub(claude_bin, he_thong, noi_dung, schema, model),
+                 stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                 encoding="utf-8", errors="replace", timeout=TIMEOUT_SUB_GIAY,
+                 env=env_cho_sub(env), cwd=cwd)
+    except KhongKhoiChay as e:
+        raise ChuyenDuong(f"khong khoi chay duoc claude -p: {e}") from e
     except subprocess.TimeoutExpired as e:
         raise Dung(f"claude -p qua han {TIMEOUT_SUB_GIAY}s ({goi_y})") from e
     except OSError as e:
-        raise ChuyenDuong(f"khong khoi chay duoc claude: {type(e).__name__}") from e
+        # Mọi OSError KHÁC `KhongKhoiChay` xảy ra SAU mốc khởi chạy (đọc pipe, chờ) ⇒ DỪNG (lượt 6 S1).
+        raise Dung(f"claude -p loi I/O sau khi khoi chay: {type(e).__name__} ({goi_y})") from e
+    finally:
+        shutil.rmtree(cwd, ignore_errors=True)
     tho = p.stdout or ""
     i = tho.find("{")
     try:
@@ -439,7 +472,6 @@ def chuan_hoa_khai_niem(khai_niem):
 
 # Số khoản: `1.` `1)` `1.Hồ sơ` (dính thân) hoặc `(1)`; `(?!\d)` để "1.5 triệu" không bị đọc thành khoản 1.
 _RE_SO_KHOAN = re.compile(r"^(?:(\d+)\s*[.)](?!\d)|\((\d+)\))\s*")
-_RE_DIEU = re.compile(r"^Điều\s+\d+")
 _RE_DIEM = re.compile(r"^([a-zđ]\)|[-–•+])\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
 _RE_MO_BANG_LA = re.compile(r"^là(?:\s|$)")
@@ -452,13 +484,14 @@ def tach_khoan(van_ban):
     Ranh giới do CẤU TRÚC dòng quyết, KHÔNG do chữ "là" (Review Rescue Checkpoint sau lượt 5: năm lượt liên tiếp
     tìm ra một cửa mới trong phép đoán theo từ nối — F1→N1→M1→Q1→R1):
     - Bỏ BOM, dòng tiêu đề `Điều N.` và câu dẫn (dòng kết thúc `:`) đứng TRƯỚC khoản đầu.
-    - Dòng điểm (`a)`, `-`) nối vào khoản đang mở. Dòng là TIẾP DÒNG có bằng chứng khi khoản đang mở còn trong
-      ngoặc/trích dẫn, hoặc khi khoản đang mở CHƯA có từ nối và dòng mở bằng "là" (lượt 4 Q3).
+    - Dòng điểm (`a)`, `-`) nối vào khoản đang mở. Ở nguồn CÓ số, dòng là TIẾP DÒNG có bằng chứng khi khoản đang
+      mở còn trong ngoặc/trích dẫn, hoặc khi khoản đang mở CHƯA có từ nối và dòng mở bằng "là" (lượt 4 Q3).
     - Nguồn CÓ số: dòng mang số mở khoản; số phải LIÊN TỤC từ 1 (lượt 5 R1: khoản mất số ở giữa); mọi dòng
       không số khác ⇒ None (có thể là khoản mất số — không đoán).
-    - Nguồn MẤT số (Google Doc rơi số tự động — Điều 3 Luật 134/2025/QH15): MỖI DÒNG là một khoản."""
+    - Nguồn MẤT số (Google Doc rơi số tự động — Điều 3 Luật 134/2025/QH15): MỖI DÒNG là một khoản, không có tiếp
+      dòng (lượt 6 S2) — dòng gãy giữa câu thành khoản không xác minh được ⇒ chặn."""
     dong = [ln.strip() for ln in str(van_ban).lstrip("\ufeff").splitlines() if ln.strip()]
-    if dong and _RE_DIEU.match(dong[0]):
+    if dong and _RE_TIEU_DE_DIEU.match(dong[0]):
         dong = dong[1:]
     co_so = any(_RE_SO_KHOAN.match(ln) for ln in dong)
     khoan: list[list] = []
@@ -470,7 +503,8 @@ def tach_khoan(van_ban):
             if not khoan:
                 return None
             khoan[-1][1] += "\n" + ln
-        elif khoan and (_dang_mo(khoan[-1][1]) or (_RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None)):
+        elif co_so and khoan and (_dang_mo(khoan[-1][1]) or (_RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None)):
+            # Tiếp dòng CHỈ ở nguồn có số (lượt 6 S2): nguồn mất số không có ranh giới nào khác ngoài dòng.
             khoan[-1][1] += "\n" + ln
         elif not khoan and ln.endswith(":") and _tu_noi(ln) is None:
             continue   # câu dẫn: kết thúc ":" và KHÔNG có từ nối (khoản "X là … sau:" có điểm thì không phải câu dẫn)
@@ -492,10 +526,12 @@ def _quet(txt):
     có trạng thái thay cho đếm/regex (lượt 5 R3: xoá cặp ngoặc trong cùng bằng regex bỏ sót ngoặc lồng)."""
     sau, thang, cong = 0, False, 0
     for i, c in enumerate(txt):
-        yield i, c, sau > 0 or thang or cong > 0
-        if c == "(":
+        trich = thang or cong > 0
+        yield i, c, sau > 0 or trich
+        # Ngoặc tròn NẰM TRONG trích dẫn là nội dung, không phải cú pháp (lượt 6 S2: `“(”`, `“)”`).
+        if c == "(" and not trich:
             sau += 1
-        elif c == ")" and sau:
+        elif c == ")" and sau and not trich:
             sau -= 1
         elif c == '"':
             thang = not thang

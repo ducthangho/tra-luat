@@ -53,6 +53,12 @@ và chuyển qua lại khi một bên hết hạn mức/credit.
     đếm/regex (R3);
   · `doctor` chỉ nhận khối `text` có `text` là chuỗi (R4); `--nhat-ky` tạo thư mục cha như `--out`, chỉ chặn khi
     đích là thư mục hoặc cha bị một tệp chắn (R5).
+- Cross-review Codex lượt 6 (`ops/reviews/pr1503-review-6-codex/`, REQUEST_CHANGES, 2 P1 · 1 P2; đóng R1/R3/R4)
+  — chủ kho nâng trần lên 7, đã vá: mốc khởi chạy là lúc `Popen` trả tiến trình (`_chay_co_moc`, lỗi spawn ném
+  `KhongKhoiChay` ⇒ chuyển được; mọi OSError sau mốc ⇒ dừng; thư mục tạm tạo trước mốc, dọn bằng
+  `ignore_errors`) (S1); ngoặc tròn nằm trong trích dẫn là nội dung, nguồn mất số không có tiếp dòng, tiêu đề Điều
+  đòi dấu `.`/`:` sau số (dòng "Điều 3 của …" không còn bị bỏ) (S2); `--out`/`--nhat-ky` quan hệ cha–con ⇒ rc 2
+  trước model (S3).
 - Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
   key qua `agent_creds` chưa làm.
 

@@ -32324,6 +32324,12 @@ def run() -> int:
                 _n_truoc4 = len(_goi_model)
                 _rc_chan, _ = _chay(tep=str(_t15), nhat_ky=str(_d / "chan" / "u.jsonl"))
                 _chan_ok = _rc_chan == 2 and len(_goi_model) == _n_truoc4
+                # Lượt 6 S3: `--out` và `--nhat-ky` có quan hệ cha–con (cả hai chưa tồn tại), HAI chiều ⇒ rc 2 trước model.
+                _cc = _d / "chacon"
+                _n_truoc5 = len(_goi_model)
+                _rc_cc1, _ = _chay(tep=str(_t15), out=str(_cc / "a"), nhat_ky=str(_cc / "a" / "u.jsonl"))
+                _rc_cc2, _ = _chay(tep=str(_t15), out=str(_cc / "b" / "kq.json"), nhat_ky=str(_cc / "b"))
+                _chacon_ok = _rc_cc1 == 2 and _rc_cc2 == 2 and len(_goi_model) == _n_truoc5 and not _cc.exists()
                 _os380.environ["TL_LLM_ORDER_FILE"] = str(_d)            # tệp thứ tự là THƯ MỤC
                 _ns_o2 = _ty378.SimpleNamespace(thu_tu="sub", reset=False, json=True)
                 with _ctx378.redirect_stdout(_io378.StringIO()), _ctx378.redirect_stderr(_io378.StringIO()):
@@ -32336,7 +32342,7 @@ def run() -> int:
                 and "--profile" in _them_bat[-1] and _rc5 == 5 and _giu and _rc_rong == 2
                 and _rc_bom_lech == 2 and _rc_bom == 0 and _dieu_bom == "15"
                 and _rc_outdir == 2 and _khong_goi and _rc_ghi == 0 and _giu_quyen and _rc_order_dir == 2 and _trung_ok
-                and _nkdir_ok and _nkmuon_ok and _moi_ok and _chan_ok)
+                and _nkdir_ok and _nkmuon_ok and _moi_ok and _chan_ok and _chacon_ok)
     _t110("r380_llm_khai_niem_bien_dau_vao", _c380_llm_khai_niem_bien_dau_vao)
 
     # F1-02 / wp42 rev2 (late-duplicate RED) — PHẢI là đăng ký cuối cùng trước tally:

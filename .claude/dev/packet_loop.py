@@ -3442,7 +3442,12 @@ def _spec_merge(root, h, path, lease):
         if key == "revision":
             values += re.findall(r"(?m)^- packet_id: [^;\n]+; revision: ([0-9]+);", visible)
         headings = re.findall(r"(?m)^# ([A-Za-z0-9_-]+) r([1-9][0-9]*) (?:—|–|-) .+$", visible)
-        values = list(dict.fromkeys(values + [t[0 if key == "packet_id" else 1] for t in headings]))
+        heading_values = [t[0 if key == "packet_id" else 1] for t in headings]
+        if key == "packet_id" and re.fullmatch(r"wp[0-9]+", lease[key]):
+            # WP1500: alias hiển thị chỉ áp dụng cho H1 của mã WP dạng số.
+            alias = lease[key].upper()
+            heading_values = [lease[key] if value == alias else value for value in heading_values]
+        values = list(dict.fromkeys(values + heading_values))
         if values != [str(lease.get(key))]:
             raise ValueError(f"spec {key} không khớp lease")
     present_rc, present = _git_do(root, "ls-tree", "-r", h, "--", path)

@@ -222,7 +222,8 @@ jobs:
           exit 0
       - name: thu biên nhận audit (wp1460)
         if: always()
-        run: python .claude/dev/ci_dang_ky_test.py --thu-bien-nhan-audit bien_nhan_audit.json --rest rest --manh-tho manh-tho --dau-tho dau-tho --kho "${{ github.repository }}" --kho-id "${{ github.repository_id }}" --workflow-ref "${{ github.workflow_ref }}" --workflow-sha "${{ github.workflow_sha }}" --su-kien "${{ github.event_name }}" --ref "${{ github.ref }}" --cron "${{ github.event.schedule }}" --sha-su-kien "${{ github.sha }}" --run-id "${{ github.run_id }}" --run-attempt "${{ github.run_attempt }}"
+        env: {KHO: "${{ github.repository }}", KHO_ID: "${{ github.repository_id }}", WORKFLOW_REF: "${{ github.workflow_ref }}", WORKFLOW_SHA: "${{ github.workflow_sha }}", SU_KIEN: "${{ github.event_name }}", REF: "${{ github.ref }}", CRON: "${{ github.event.schedule }}", SHA_SU_KIEN: "${{ github.sha }}", RUN_ID: "${{ github.run_id }}", RUN_ATTEMPT: "${{ github.run_attempt }}"}
+        run: python .claude/dev/ci_dang_ky_test.py --thu-bien-nhan-audit bien_nhan_audit.json --rest rest --manh-tho manh-tho --dau-tho dau-tho --kho "$KHO" --kho-id "$KHO_ID" --workflow-ref "$WORKFLOW_REF" --workflow-sha "$WORKFLOW_SHA" --su-kien "$SU_KIEN" --ref "$REF" --cron "$CRON" --sha-su-kien "$SHA_SU_KIEN" --run-id "$RUN_ID" --run-attempt "$RUN_ATTEMPT"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

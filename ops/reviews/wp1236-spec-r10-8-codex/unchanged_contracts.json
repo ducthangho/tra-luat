@@ -1,0 +1,208 @@
+{
+  "xuong-dong-khong-khop-byte-that": [
+    {
+      "current_lines": [
+        71,
+        81
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "bd989b00d0f6a990f7537cf65dddfb62c21a44eb5e563304df3b8175a80ba25c"
+    },
+    {
+      "current_lines": [
+        350,
+        350
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "80aece3200ddc7009f6f8540d0d8e57058d0c810847aea785e6a0edc63e45f35"
+    }
+  ],
+  "d2b-thieu-neo-attempt": [
+    {
+      "current_lines": [
+        170,
+        183
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "dd71b79f86649fdf81e9994806a80b3cc481e1f31c97cb39bdbd3e8f624ac8d2"
+    },
+    {
+      "current_lines": [
+        403,
+        403
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "3db051d9a47f9556bb212f43a910d8efdae3bfb3e562c974e4fe690c72cb7a38"
+    }
+  ],
+  "trang-thai-job-khong-khop-conclusion": [
+    {
+      "current_lines": [
+        97,
+        99
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "0ada90b9b5aef234a79be1bf422af9c1bb12d100b7e38fadb5ffc3b30389d293"
+    },
+    {
+      "current_lines": [
+        360,
+        360
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "75d5d6069947f744b10b783f6a80ede1bd0fe139cb202743429a24dcb09ece52"
+    }
+  ],
+  "landed-khong-buoc-loi-khai-hop-le": [
+    {
+      "current_lines": [
+        128,
+        134
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "a8bb0496ff8578ae654d5d06192b1d9d93a7dfe72afb95ed5ae1adcf16ea2b74"
+    },
+    {
+      "current_lines": [
+        375,
+        376
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "8b593d7470dc2b397a8c53f4079271a239202ce1c562781f9e75d9bab749d199"
+    }
+  ],
+  "l8-chua-chot-thu-tu-cutover": [
+    {
+      "current_lines": [
+        158,
+        158
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "17bb82c0326bedec094e46eda0fc6676b4afddf6bbde8279e14f62e9d4dc9bc7"
+    },
+    {
+      "current_lines": [
+        200,
+        207
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "9fe2887314370cc129bf458829e77071426cd0240dc7a0b9841495751a5bfed8"
+    },
+    {
+      "current_lines": [
+        388,
+        395
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "9cf525dba630127e3fd5cc96d27bfc64e0724af39392681ac146b5814ab708f4"
+    }
+  ],
+  "khong-kiem-co-toan-ven-provenance": [
+    {
+      "current_lines": [
+        91,
+        93
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "482d2ad8da1426540ed2ce8cb3e2cbf66102c5d0b2a95611b0b49216c24efc51"
+    },
+    {
+      "current_lines": [
+        361,
+        361
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "8a72bea0f421f5ea343eb103cbb78f93c81dbc8565348dba2ad3d7e03d944d33"
+    }
+  ],
+  "hop-dong-dau-vao-dau-ra-chua-chot": [
+    {
+      "current_lines": [
+        144,
+        152
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "7f1891fe5d0f29542623b580def6a21c51f117410536cddc464ea7d92eb4a5fc"
+    },
+    {
+      "current_lines": [
+        186,
+        198
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "ffd3f7e79d9349b90ed6b9eaf1e4ae20f6cf26df42cc35fb6f0011291c52461b"
+    },
+    {
+      "current_lines": [
+        401,
+        409
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "69afe88c416ecbe5635adea9a2a34206843ce00f396d128baa3c197e0414b368"
+    }
+  ],
+  "nguon-doc-khong-neo-cung-snapshot": [
+    {
+      "current_lines": [
+        115,
+        119
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "388ec167cf0c9897fcf875923814b7dc5932f6710855f42c18e1e3242afa4156"
+    },
+    {
+      "current_lines": [
+        172,
+        198
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "64a11775118090954a12ad57ba9ca732bc7e8310f51e7065ec2f1294aa9d952d"
+    }
+  ],
+  "he-qua-gioi-han-khai-thieu": [
+    {
+      "current_lines": [
+        209,
+        231
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "eac2ce30574b6e1e2bd5fcafcc183eba0b62a48192878c2b74c01354d4cbd8c3"
+    },
+    {
+      "current_lines": [
+        248,
+        264
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "d2b9d7a44e4b4122cf4b8463c0c6d461f80c973fd3af722f426d809760a3d8e6"
+    },
+    {
+      "current_lines": [
+        481,
+        495
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "52aa731fde989b20f55e4489fe6bdb3b5bb85df5dae05e782cf5f03ff6af0e96"
+    }
+  ],
+  "pham-vi-kiem-chung-trai-adr-windows": [
+    {
+      "current_lines": [
+        442,
+        456
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "2f33ed5adb3113a7b91797ca63898665f50d2012ad4960f3b84ce34a570d3064"
+    }
+  ],
+  "nang-tran-thieu-hop-dong-authority": [
+    {
+      "current_lines": [
+        432,
+        438
+      ],
+      "exact_text_exists_in_prior_spec": true,
+      "sha256": "643c6e06b6888a4700beabafc5bf9f9be655e29b0eec764ba1a54a6f04a29afa"
+    }
+  ]
+}

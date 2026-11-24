@@ -1,0 +1,7 @@
+{
+  "plain": [],
+  "dot": [],
+  "docstring": "Tệp trích `t` tương đối `thu_muc`: cấm tuyệt đối, `.`/`..`, symlink ở mọi thành phần; phải là tệp thường.",
+  "source_sha256": "af0ae26c02406841f771781676c41be3c0ef26af2d645971603f3de6a5f0ab94",
+  "source_commit": "c2d606bb6fc230c288200b8f1dd79715462c172b"
+}

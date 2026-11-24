@@ -1,0 +1,323 @@
+{
+  "scope": "spec r10; r9 product is a reference, not an r10 implementation",
+  "thamchieu": {
+    "rc": 0,
+    "last_lines": [
+      "passed ops/land/pr631-doctrine-rest-provenance/gate-hau-merge-20261105b/danh-gia-gate-output-42018846747.txt ",
+      "Counter({'passed': 47, 'failed': 10, 'not_measured': 9})"
+    ],
+    "byte_match": true,
+    "stdout_sha256": "3f47032b137318ecab965197abadd9f162cf3f2e30f0350e36f92f09b3816d18"
+  },
+  "do_loi_khai": {
+    "rc": 0,
+    "last_lines": [
+      "{'MIEN_CUTOVER': 25, 'KHONG_LOI_KHAI': 50, 'DO': 56, 'DAT': 39}",
+      "{'duong_khong_tep_danh_gia': 39, 'landed_khong_loi_khai_gate_output': 36, 'danh_gia_khong_passed': 12, 'dinh_dang_loi_khai': 2, 'waiver_khong_co_can_cu': 2, 'tep_danh_gia_khong_hop_le': 2}"
+    ],
+    "byte_match": true,
+    "stdout_sha256": "1befd6837c7840dd962af700b6f5c84bae9ae107e346ba72b92f6ec91b7275d2"
+  },
+  "source_ref_oid": "bd8562d23e4d9d74be122ada32f0883f1bc870f8",
+  "replay_sources": [
+    {
+      "name": "independent_mutants.jsonl",
+      "in_git": false,
+      "sandbox_exists": true,
+      "sha256": "4941ae8f1578b361b841ef0cf66ee40fc3d61097ed0d96f63f440109f9c3f6be",
+      "manifest_match": true,
+      "count": 96
+    },
+    {
+      "name": "independent_corrected.jsonl",
+      "in_git": false,
+      "sandbox_exists": true,
+      "sha256": "588b3c81a94e7924450fe0e85e4fc5a1a62bf1261568c048fc6cc04e3dcf62ab",
+      "manifest_match": true,
+      "count": 11
+    },
+    {
+      "name": "extra_mutants.jsonl",
+      "in_git": false,
+      "sandbox_exists": true,
+      "sha256": "388bdea97004ce03e2ab7ea02da50a0bdd7da545244c9f64893c1859492579b5",
+      "manifest_match": true,
+      "count": 6
+    },
+    {
+      "name": "order_url_mutants.jsonl",
+      "in_git": false,
+      "sandbox_exists": true,
+      "sha256": "58e248f16ea2755c82017335f2d3895ab07b95a2c1f6b437b4b301afbd2589c8",
+      "manifest_match": true,
+      "count": 5
+    },
+    {
+      "name": "reason_complete_mutants.jsonl",
+      "in_git": false,
+      "sandbox_exists": true,
+      "sha256": "4898f0c663571eb53b43c4507d1fb1a97f586a11ecf941ba8b3f513859b91184",
+      "manifest_match": true,
+      "count": 20
+    }
+  ],
+  "operator_examples": {
+    "key_alpha_only": {
+      "kind": "regex_or_set",
+      "line": 182
+    },
+    "ref_any_run": {
+      "kind": "regex_or_set",
+      "line": 39
+    },
+    "ref_txt_wild": {
+      "kind": "regex_or_set",
+      "line": 39
+    },
+    "phi_substring": {
+      "kind": "extended_contract",
+      "line": 195
+    },
+    "phi_skip_descendants": {
+      "kind": "extended_contract",
+      "line": 197
+    },
+    "waiver_head_truthy": {
+      "kind": "extended_contract",
+      "line": 262
+    }
+  },
+  "early_return_ids": [
+    "delete_return_58",
+    "delete_return_60",
+    "delete_return_97",
+    "delete_return_112",
+    "delete_return_127",
+    "delete_return_129",
+    "delete_return_132",
+    "delete_return_171",
+    "delete_return_173",
+    "delete_return_175",
+    "delete_return_214",
+    "delete_return_227",
+    "delete_return_238",
+    "delete_return_243",
+    "delete_return_249",
+    "delete_return_251",
+    "delete_return_254",
+    "delete_return_261",
+    "delete_return_263",
+    "delete_return_319",
+    "delete_return_55",
+    "delete_return_231",
+    "delete_return_316"
+  ],
+  "case_counts": {
+    "A": [
+      "A1-1",
+      "A1-2",
+      "A1-3",
+      "A1-4",
+      "A1-5",
+      "A1-6",
+      "A1-7",
+      "A1-8",
+      "A1-9",
+      "A1-10",
+      "A1-11",
+      "A1-12",
+      "A1-13",
+      "A1-14",
+      "A1-16",
+      "A1-17",
+      "A1-15",
+      "A2-1",
+      "A2-2",
+      "A2-3",
+      "A2-4",
+      "A2-5",
+      "A2-6",
+      "A2-7",
+      "A2-8",
+      "A2-9",
+      "A2-10",
+      "A2-12",
+      "A2-13",
+      "A2-11"
+    ],
+    "B": [
+      "B1",
+      "B2",
+      "B3",
+      "B4",
+      "B7",
+      "B8",
+      "B5",
+      "B6"
+    ],
+    "C": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9"
+    ]
+  },
+  "numstat": "1\t0\t.claude/dev/ci_dang_ky_test.py\n335\t0\tops/gate_output_doi_chieu.py\n988\t0\tops/gate_output_doi_chieu_test.py\n",
+  "r9_product_lines": 335,
+  "r9_test_lines": 988,
+  "reference_lines": {
+    "thamchieu.py": 101,
+    "do_loi_khai.py": 77
+  },
+  "generator_inventory": {
+    "539fed68fdd6bdeadb3b70b4ce998419b19afc408ba82bc4152b337d28010a24": 28,
+    "0ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058faf": 2,
+    "b87f9697345906e01b85e1db164d9aff2f9021db4bed1c63bc165b59583d9fcd": 20
+  },
+  "base_land_diff": "",
+  "fixture_control": [
+    "passed",
+    []
+  ],
+  "parser": {
+    "job_job": [
+      "job_lap"
+    ],
+    "skip_skip": [
+      "job_lap"
+    ],
+    "skip_job": [
+      "job_lap"
+    ],
+    "job_skip": [
+      "job_lap"
+    ],
+    "LF": [
+      "passed",
+      []
+    ],
+    "CRLF": [
+      "passed",
+      []
+    ],
+    "CR_mixed": [
+      "xuong_dong_tron"
+    ],
+    "CR_lone": [
+      "cr_le"
+    ]
+  },
+  "duplicate_provenance": [
+    "not_measured",
+    [
+      "job_id_trung_provenance"
+    ]
+  ],
+  "malformed": {
+    "jobs_append_scalar": [
+      "passed",
+      []
+    ],
+    "jobs_replace_scalar": [
+      "not_measured",
+      [
+        "tap_job_lech"
+      ]
+    ],
+    "tap_jobs_string": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ],
+    "checkout_number": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ],
+    "checkout_string_item": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ],
+    "checkout_empty": [
+      "not_measured",
+      [
+        "provenance_chua_du"
+      ]
+    ],
+    "labels_null": [
+      "not_measured",
+      [
+        "job_lech:136067207297"
+      ]
+    ]
+  },
+  "dot_path": {
+    "danh-gia-gate-output-44669622916.txt": [],
+    "./danh-gia-gate-output-44669622916.txt": [],
+    "../danh-gia-gate-output-44669622916.txt": [
+      "$.gate_output: tep_danh_gia_khong_hop_le:../danh-gia-gate-output-44669622916.txt"
+    ]
+  },
+  "landed_parity": {
+    "total": 170,
+    "landed": 94,
+    "mismatch": []
+  },
+  "claim_paths": {
+    "total": 62,
+    "found": 60,
+    "missing": [
+      [
+        "pr1392-wp1389-land-evidence.yaml",
+        "pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt",
+        false
+      ],
+      [
+        "pr1406-wp1404-land-evidence.yaml",
+        "pr1415-wp433-provenance/hau-due-4eda94e/danh-gia-gate-output-44502045702.txt",
+        false
+      ]
+    ]
+  },
+  "attempt_types": [
+    {
+      "value": "None",
+      "valid": false,
+      "matches_header_1": false
+    },
+    {
+      "value": "True",
+      "valid": false,
+      "matches_header_1": false
+    },
+    {
+      "value": "1",
+      "valid": true,
+      "matches_header_1": true
+    },
+    {
+      "value": "2",
+      "valid": true,
+      "matches_header_1": false
+    },
+    {
+      "value": "1.0",
+      "valid": false,
+      "matches_header_1": false
+    },
+    {
+      "value": "0",
+      "valid": false,
+      "matches_header_1": false
+    }
+  ]
+}

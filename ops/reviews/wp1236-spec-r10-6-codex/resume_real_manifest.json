@@ -1,0 +1,44 @@
+{
+  "only_docstring_changed": true,
+  "runtime_ast_equal": true,
+  "generator_command": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+    "sinh",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/work/doc_only_original.py",
+    "--ra",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/work/doc_only_m.jsonl"
+  ],
+  "generator_rc": 0,
+  "generator_stdout": "SINH 800 a=70 a2=78 b=75 c=26 c2=43 d=9 e=52 f=41 g=236 h1=18 h2=4 i1=39 i2=11 i3=6 i4=23 i5=29 i6=2 i7=8 j1=10 j2=2 k1=3 k2=6 k3=3 l=6\n",
+  "same_ids": true,
+  "same_id_different_sha_count": 800,
+  "run_command": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+    "chay",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/work/doc_only_subset.jsonl",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+    "--ra",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-6-codex/work/doc_only_kq.jsonl",
+    "--song-song",
+    "1"
+  ],
+  "run_rc": 0,
+  "stdout": "TONG 1 · GIET 1 · SONG_SACH 0 · CHI_LOI_VO_CAN 0\n",
+  "result": {
+    "id": "a2:_chuan:0:0:bo_if0",
+    "op": "a2",
+    "dong": 0,
+    "sha256": "d71103ba3227fc589218c8f6aa458fa59d1826f9b7d7a11facbb34e753343268",
+    "rc": 0,
+    "giet": [
+      "a201_loi_khai"
+    ],
+    "hong": []
+  },
+  "input_sha256": "07582c86f668383f31321a1b57b8c1a2c618aff2bdbd38b5a272e6659d8cfc52",
+  "result_sha_matches_input": false
+}

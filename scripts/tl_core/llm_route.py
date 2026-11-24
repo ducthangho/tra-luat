@@ -51,6 +51,14 @@ TIMEOUT_SUB_GIAY = 300
 SUBTYPE_LOI_YEU_CAU = frozenset({"error_max_structured_output_retries", "error_max_turns",
                                  "error_max_budget_usd"})
 HOST_API_ANTHROPIC = "api.anthropic.com"
+MA_CHUYEN_DUONG = frozenset({401, 402, 403, 429, 503, 529})
+KIEU_CHUYEN_DUONG = frozenset({"authentication_error", "billing_error", "permission_error", "rate_limit_error",
+                               "overloaded_error"})
+# `claude auth status --json` (đo trong binary 2.1.331): authMethod ∈ {none, third_party, claude.ai,
+# api_key_helper, oauth_token, api_key}. CHỈ hai giá trị dưới là xác thực bằng tài khoản Anthropic (gói);
+# `api_key`/`api_key_helper` là API key, `third_party` là Bedrock/Vertex/Foundry (cross-review lượt 2 N4).
+AUTH_SUBSCRIPTION = frozenset({"claude.ai", "oauth_token"})
+STOP_REASON_LOI_YEU_CAU = frozenset({"refusal", "max_tokens"})
 # DANH SÁCH CHO PHÉP các cờ `CLAUDE_CODE_USE_*` KHÔNG đổi nhà cung cấp. Mọi tên `CLAUDE_CODE_USE_*` khác
 # đang bật ⇒ từ chối đường `sub` (fail-closed, kể cả tên CLI tương lai thêm vào). Đo trên Claude Code
 # 2.1.331 (24-11-2026, quét chuỗi trong binary): 11 tên; 7 là nhà cung cấp/gateway (GATEWAY, BEDROCK,
@@ -65,7 +73,7 @@ _RE_TIEU_DE_DIEU = re.compile(r"^\s*Điều\s+(\d+[a-zđ]?)\b")
 
 def so_dieu_tu_tieu_de(van_ban):
     """Số Điều đọc từ dòng đầu (`Điều 15. …`), hoặc None nếu dòng đầu không phải tiêu đề Điều."""
-    dong = next((ln for ln in str(van_ban).splitlines() if ln.strip()), "")
+    dong = next((ln for ln in str(van_ban).lstrip("\ufeff").splitlines() if ln.strip()), "")
     m = _RE_TIEU_DE_DIEU.match(dong)
     return m.group(1) if m else None
 
@@ -120,16 +128,19 @@ def phan_loai_loi_api(e: BaseException) -> type[Exception]:
     if not isinstance(kieu, str):
         kieu = None
     thong_bao = str(getattr(e, "message", "") or e).lower()
-    # 503/529 = dịch vụ API quá tải/không khả dụng — lỗi phía ĐƯỜNG (cross-review PR #1503 F7, đo bằng
-    # SDK 2.13.0 + transport giả). KHÔNG mở rộng mù sang mọi 5xx: 500/504 có thể là yêu cầu đã được xử lý
-    # (tính tiền) hoặc tính năng chưa hỗ trợ — giữ DỪNG, chờ người giữ hợp đồng quyết.
-    if ma in (401, 402, 403, 429, 503, 529) or kieu in ("authentication_error", "billing_error",
-                                                         "permission_error", "rate_limit_error",
-                                                         "overloaded_error"):
-        return ChuyenDuong
-    # Hết credit từng được trả bằng 400 kèm câu "credit balance is too low" — chỉ chuỗi
-    # ẤY mới chuyển đường; mọi 400 khác là lỗi của yêu cầu.
-    if ma == 400 and "credit balance" in thong_bao:
+    # MÃ HTTP QUYẾT TRƯỚC, `type` trong body chỉ dùng khi KHÔNG có mã (cross-review lượt 2 N7: 504 kèm
+    # `overloaded_error` từng lọt sang `sub` vì nhánh `type` thắng mã). 503/529 = dịch vụ quá tải/không
+    # khả dụng — lỗi phía ĐƯỜNG (lượt 1 F7, đo bằng SDK 2.13.0 + transport giả). 500/504 có thể là yêu cầu
+    # ĐÃ được xử lý (tính tiền) ⇒ DỪNG, bất kể body nói gì.
+    if isinstance(ma, int) and not isinstance(ma, bool):
+        if ma in MA_CHUYEN_DUONG:
+            return ChuyenDuong
+        # Hết credit từng được trả bằng 400 kèm câu "credit balance is too low" — chỉ chuỗi ẤY mới
+        # chuyển đường; mọi 400 khác là lỗi của yêu cầu.
+        if ma == 400 and "credit balance" in thong_bao:
+            return ChuyenDuong
+        return Dung
+    if kieu in KIEU_CHUYEN_DUONG:
         return ChuyenDuong
     return Dung
 
@@ -223,11 +234,53 @@ def kiem_dinh_tuyen_sub(env) -> None:
             raise ChuyenDuong(f"ANTHROPIC_BASE_URL tro toi host {host!r} — khong bao dam tinh vao subscription")
 
 
+def _so_khong_am(v) -> bool:
+    return isinstance(v, int) and not isinstance(v, bool) and v >= 0
+
+
+def _usage_sub(mu):
+    """Tổng token từ `modelUsage` nếu ĐÚNG KIỂU (dict tên→dict số nguyên không âm), ngược lại None."""
+    if not isinstance(mu, dict) or not mu or not all(isinstance(v, dict) for v in mu.values()):
+        return None
+    tong = {"input": 0, "output": 0, "cache_doc": 0, "cache_ghi": 0}
+    khoa = {"input": "inputTokens", "output": "outputTokens", "cache_doc": "cacheReadInputTokens",
+            "cache_ghi": "cacheCreationInputTokens"}
+    for v in mu.values():
+        for dich, nguon in khoa.items():
+            x = v.get(nguon, 0)
+            if not _so_khong_am(x):
+                return None
+            tong[dich] += x
+    return tong
+
+
+def kiem_xac_thuc_sub(claude_bin, env, chay=subprocess.run) -> None:
+    """Đường `sub` CHỈ được báo là subscription khi CLI tự khai xác thực bằng TÀI KHOẢN Anthropic
+    (`authMethod` ∈ AUTH_SUBSCRIPTION) qua nhà cung cấp `firstParty`, đo bằng `claude auth status --json`
+    với ĐÚNG env mà lời gọi model sẽ dùng (cross-review lượt 2 N4: key lưu từ `/login`, `apiKeyHelper` trong
+    policy… đều nằm ngoài ba biến bị gỡ). Không đo được ⇒ ChuyenDuong. Giới hạn đã khai: tín hiệu này
+    KHÔNG phân biệt hạn mức gói với "extra usage" mà tài khoản tự bật."""
+    try:
+        with tempfile.TemporaryDirectory(prefix="llm-route-auth-") as cwd:
+            p = chay([claude_bin, "auth", "status", "--json"], stdin=subprocess.DEVNULL, capture_output=True,
+                     text=True, encoding="utf-8", errors="replace", timeout=60, env=env_cho_sub(env), cwd=cwd)
+        tt = json.loads(p.stdout or "null") if p.returncode == 0 else None
+    except (OSError, subprocess.SubprocessError, ValueError) as e:
+        raise ChuyenDuong(f"khong do duoc nguon xac thuc cua claude CLI ({type(e).__name__})") from e
+    if not isinstance(tt, dict):
+        raise ChuyenDuong(f"khong do duoc nguon xac thuc cua claude CLI (rc={p.returncode})")
+    phuong_thuc, nha_cc = tt.get("authMethod"), tt.get("apiProvider")
+    if not (tt.get("loggedIn") is True and phuong_thuc in AUTH_SUBSCRIPTION and nha_cc == "firstParty"):
+        raise ChuyenDuong(f"claude CLI xac thuc bang authMethod={phuong_thuc!r} apiProvider={nha_cc!r} — "
+                          "khong phai tai khoan subscription")
+
+
 def duong_sub(he_thong, noi_dung, schema, model, env, chay=subprocess.run, tim=shutil.which):
     claude_bin = tim("claude")
     if not claude_bin:
         raise ChuyenDuong("khong co claude CLI tren PATH")
     kiem_dinh_tuyen_sub(env)
+    kiem_xac_thuc_sub(claude_bin, env, chay)
     try:
         # stdin=DEVNULL: không có thì `claude -p` chèn dòng "no stdin data received" TRƯỚC
         # JSON (đo 06-09-2026, CLAUDE.md §Gọi agent đa nền). cwd tạm: tránh nạp ngữ cảnh kho.
@@ -246,27 +299,39 @@ def duong_sub(he_thong, noi_dung, schema, model, env, chay=subprocess.run, tim=s
         kq = json.loads(tho[i:]) if i >= 0 else None
     except json.JSONDecodeError:
         kq = None
-    subtype = kq.get("subtype") if isinstance(kq, dict) else None
-    if subtype in SUBTYPE_LOI_YEU_CAU:
-        raise Dung(f"claude -p {subtype} (loi phia yeu cau — khong chuyen duong)")
-    # NHẬN chỉ khi đủ BA dấu dương: rc 0, `subtype == "success"`, `is_error` đúng là False.
-    # Thiếu một dấu (envelope lỗi mà rc 0, thiếu `is_error`) ⇒ không nhận (F2, PR #1503).
-    if not (p.returncode == 0 and isinstance(kq, dict) and subtype == "success" and kq.get("is_error") is False):
-        mo_ta = (kq or {}).get("result") if isinstance(kq, dict) else (p.stderr or tho)
-        raise ChuyenDuong(f"claude -p rc={p.returncode} subtype={subtype}: {str(mo_ta or '').strip()[:160]}")
-    mu = kq.get("modelUsage") or {}
-    da_chay = {(v or {}).get("canonicalModel") or k for k, v in mu.items()}
+    # Giải mã envelope MỘT lần, KIỂM KIỂU trước mọi phép tra (lượt 2 N2: `subtype=[]` từng ném TypeError,
+    # `modelUsage` dạng mảng ném AttributeError).
+    if not isinstance(kq, dict):
+        raise ChuyenDuong(f"claude -p rc={p.returncode}: khong co envelope JSON ({(p.stderr or tho).strip()[:160]})")
+    subtype = kq.get("subtype") if isinstance(kq.get("subtype"), str) else None
+    stop = kq.get("stop_reason") if isinstance(kq.get("stop_reason"), str) else None
+    u = _usage_sub(kq.get("modelUsage"))
+    # Lỗi phía YÊU CẦU ⇒ DỪNG: subtype đã biết, hoặc lý do kết thúc là từ chối/cắt đầu ra — kể cả khi
+    # envelope tự xưng `success` (lượt 2 N2).
+    if subtype in SUBTYPE_LOI_YEU_CAU or stop in STOP_REASON_LOI_YEU_CAU:
+        raise Dung(f"claude -p subtype={subtype} stop_reason={stop} (loi phia yeu cau — khong chuyen duong)")
+    # NHẬN chỉ khi đủ BA dấu dương: rc 0, `subtype == "success"`, `is_error` đúng là False (lượt 1 F2).
+    if not (p.returncode == 0 and subtype == "success" and kq.get("is_error") is False):
+        mo_ta = str(kq.get("result") or "").strip()[:160]
+        # Envelope lỗi mà model ĐÃ CHẠY (có token) ⇒ gọi lại ở `api` là tiêu tiền lần hai cho cùng việc:
+        # DỪNG. Chỉ lỗi trước khi model chạy (hạn mức, xác thực, khởi động — không token) mới chuyển đường.
+        # `error_during_execution` dùng cho CẢ hai ca (lượt 2 N2), nên phân bằng phép đo token, không bằng tên.
+        if u is not None and (u["input"] or u["output"]):
+            raise Dung(f"claude -p rc={p.returncode} subtype={subtype} sau khi model da chay: {mo_ta}")
+        raise ChuyenDuong(f"claude -p rc={p.returncode} subtype={subtype}: {mo_ta}")
+    mu = kq.get("modelUsage")
+    da_chay = {(v.get("canonicalModel") if isinstance(v.get("canonicalModel"), str) else k)
+               for k, v in mu.items()} if isinstance(mu, dict) and all(isinstance(v, dict) for v in mu.values()) else None
     if da_chay != {model}:
-        raise Dung(f"model da chay {sorted(da_chay)} khac model yeu cau {model!r}")
+        raise Dung(f"model da chay {sorted(da_chay) if da_chay else da_chay} khac model yeu cau {model!r}")
+    if u is None or not (u["input"] or u["output"]):
+        raise Dung("claude -p thanh cong nhung khong co so do token — khong chung minh model da chay")
     data = kq.get("structured_output")
     if data is None:
         raise Dung("claude -p khong tra structured_output")
-    u = next(iter(mu.values()))
     return {
         "duong": "sub", "nguon_key": None, "model": model, "data": data,
-        "usage": {"input": u.get("inputTokens", 0), "output": u.get("outputTokens", 0),
-                  "cache_doc": u.get("cacheReadInputTokens", 0),
-                  "cache_ghi": u.get("cacheCreationInputTokens", 0)},
+        "usage": u,
         # Số CLI tự ước theo giá API; với gói nó là thước đo hạn mức, không phải hoá đơn.
         "usd_uoc_tinh": kq.get("total_cost_usd"),
     }
@@ -367,37 +432,53 @@ def chuan_hoa_khai_niem(khai_niem):
     return khai_niem
 
 
-_RE_SO_KHOAN = re.compile(r"^(\d+)\s*[.)]\s+")
+# Số khoản: `1.` `1)` `1.Hồ sơ` (dính thân) hoặc `(1)`; `(?!\d)` để "1.5 triệu" không bị đọc thành khoản 1.
+_RE_SO_KHOAN = re.compile(r"^(?:(\d+)\s*[.)](?!\d)|\((\d+)\))\s*")
 _RE_DIEU = re.compile(r"^Điều\s+\d+")
 _RE_DIEM = re.compile(r"^([a-zđ]\)|[-–•+])\s*")
+_RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
 
 
-def tach_khoan(van_ban) -> list[str]:
-    """Các khoản (đã gỡ số thứ tự) của một Điều "Giải thích từ ngữ", theo thứ tự nguồn.
+def tach_khoan(van_ban):
+    """Các khoản của một Điều "Giải thích từ ngữ": danh sách `(số_nguồn | None, văn bản đã gỡ số)`, theo thứ
+    tự nguồn; `None` khi KHÔNG xác định được ranh giới (fail-closed — cross-review lượt 2 N1).
 
-    Bỏ dòng tiêu đề `Điều N.` và câu dẫn trước khoản đầu. Nguồn CÓ số thứ tự (`1.`, `2)`) ⇒ chỉ dòng
-    mang số mới mở khoản mới. Nguồn MẤT số (Google Doc export rơi số tự động — đo trên Điều 3 Luật
-    134/2025/QH15) ⇒ dòng có " là " và không mở đầu bằng ký hiệu điểm (`a)`, `-`) mở khoản mới.
-    Dòng còn lại nối vào khoản trước (điểm a, b…)."""
-    dong = [ln.strip() for ln in str(van_ban).splitlines() if ln.strip()]
+    - Bỏ BOM, dòng tiêu đề `Điều N.` và câu dẫn (dòng kết thúc `:` không chứa chữ "là") đứng TRƯỚC khoản
+      đầu. Bất kỳ dòng nào khác trước khoản đầu ⇒ None: nó có thể là thân của khoản đầu bị bỏ (N1 đo được
+      khoản "X là" xuống dòng bị nuốt mất rồi vẫn báo đạt).
+    - Nguồn CÓ số thứ tự ⇒ chỉ dòng mang số mở khoản; dòng khác nối vào khoản trước; số nguồn được giữ để
+      đối chiếu `stt` (nguồn đánh `1.` rồi `4.` thì `stt` phải là 4, không phải 2).
+    - Nguồn MẤT số (Google Doc rơi số tự động — Điều 3 Luật 134/2025/QH15): dòng có chữ "là" mở khoản; dòng
+      điểm (`a)`, `-`) nối vào khoản trước; dòng KHÔNG có "là" và không phải điểm ⇒ None (không phân biệt
+      được tiếp dòng với khoản dùng từ nối khác — để người dùng đưa nguồn có số)."""
+    dong = [ln.strip() for ln in str(van_ban).lstrip("\ufeff").splitlines() if ln.strip()]
     if dong and _RE_DIEU.match(dong[0]):
         dong = dong[1:]
     co_so = any(_RE_SO_KHOAN.match(ln) for ln in dong)
-    khoan: list[str] = []
+    khoan: list[list] = []
     for ln in dong:
         m = _RE_SO_KHOAN.match(ln)
         if co_so:
             if m:
-                khoan.append(ln[m.end():])
+                khoan.append([int(m.group(1) or m.group(2)), ln[m.end():]])
             elif khoan:
-                khoan[-1] += "\n" + ln
+                khoan[-1][1] += "\n" + ln
+            elif ln.endswith(":") and not _RE_LA.search(ln):
+                continue
+            else:
+                return None
             continue
-        mo = " là " in ln and not _RE_DIEM.match(ln) and not ln.endswith(":")
-        if mo:
-            khoan.append(ln)
-        elif khoan:
-            khoan[-1] += "\n" + ln
-    return khoan
+        if _RE_DIEM.match(ln):
+            if not khoan:
+                return None
+            khoan[-1][1] += "\n" + ln
+        elif _RE_LA.search(ln):
+            khoan.append([None, ln])
+        elif not khoan and ln.endswith(":"):
+            continue
+        else:
+            return None
+    return [(so, txt) for so, txt in khoan]
 
 
 def _gon(s) -> str:
@@ -405,20 +486,23 @@ def _gon(s) -> str:
 
 
 def lech_nguyen_van(khai_niem, van_ban):
-    """Các `stt` sai so với nguồn. So TRỌN KHOẢN (khoảng trắng gộp), không so chuỗi con: cross-review
-    PR #1503 F1 đo được định nghĩa bị CẮT (`tài liệu` thay cho cả câu), mảng rỗng, thiếu khoản và
-    tráo số đều qua phép kiểm chuỗi con. Nay đòi: mục thứ i có `stt == i+1` và cụm
-    `<thuật ngữ> là <định nghĩa>` bằng đúng khoản thứ i của nguồn; khoản nguồn không có mục tương
-    ứng cũng là lệch (số của khoản ấy). Nguồn không tách được khoản nào ⇒ `[0]` (không xác minh được)."""
+    """Các `stt` sai so với nguồn. So TRỌN KHOẢN (khoảng trắng gộp), không so chuỗi con (lượt 1 F1: định nghĩa
+    bị cắt, thiếu khoản, tráo số đều từng lọt). Mục thứ i phải: `stt` = số của khoản thứ i trong nguồn (hoặc
+    i+1 khi nguồn mất số); thuật ngữ KHÔNG chứa chữ "là" (tách tại chữ "là" ĐẦU TIÊN — lượt 2 N1); và cụm
+    `<thuật ngữ> là <định nghĩa>` bằng đúng khoản ấy. Khoản nguồn không có mục tương ứng cũng là lệch.
+    Nguồn không xác định được ranh giới khoản ⇒ `[0]` (không xác minh được ⇒ không dùng)."""
     khoan = tach_khoan(van_ban)
     if not khoan:
         return [0]
+    so_cua = [so if so is not None else i + 1 for i, (so, _) in enumerate(khoan)]
     lech = []
     for i, k in enumerate(khai_niem):
-        cum = f'{k["thuat_ngu"]} là {k["dinh_nghia"]}'
-        if not (i < len(khoan) and k["stt"] == i + 1 and _gon(cum) == _gon(khoan[i])):
-            lech.append(k["stt"])
-    lech.extend(range(len(khai_niem) + 1, len(khoan) + 1))
+        tn = str(k.get("thuat_ngu", ""))
+        cum = f'{tn} là {k.get("dinh_nghia", "")}'
+        if not (i < len(khoan) and k.get("stt") == so_cua[i] and tn.strip() and not _RE_LA.search(tn)
+                and _gon(cum) == _gon(khoan[i][1])):
+            lech.append(k.get("stt"))
+    lech.extend(so_cua[len(khai_niem):])
     return lech
 
 
@@ -508,9 +592,23 @@ def lay_dieu_qua_extract(so_hieu, dieu, tl_py, chay=subprocess.run, them=()):
     # (nó so với chính bản bị cắt) — dừng TRƯỚC khi gọi model (cross-review PR #1503 F6). Neo vào dấu
     # RIÊNG của cảnh báo CAP trong `extract_cache.py`, không vào một từ chung.
     if MAU_CAP_EXTRACT in (p.stderr or ""):
-        raise ValueError(f"nguon cua {so_hieu} cham tran export (~200k ky tu) — Dieu {dieu} co the bi CAT; "
-                         f"chay `tl cache-build {so_hieu}` (no-cap) roi chay lai")
+        # Cảnh báo CAP phát theo độ dài TOÀN VĂN, nên chặn mọi Điều là chặn oan Điều đã kết thúc trước điểm
+        # cắt (cross-review lượt 2 N6). Bằng chứng Điều N trọn vẹn: chính `tl extract` tìm thấy Điều N+1 trong
+        # cùng bản export — có Điều sau thì Điều N đã có ranh giới cuối. Không đo được (số có hậu tố, Điều
+        # cuối, extract lỗi) ⇒ chặn.
+        if not (str(dieu).isdigit() and _co_dieu(so_hieu, str(int(dieu) + 1), tl_py, chay, them)):
+            raise ValueError(f"nguon cua {so_hieu} cham tran export (~200k ky tu) va khong xac nhan duoc Dieu {dieu} "
+                             f"da ket thuc — chay `tl cache-build {so_hieu}` (no-cap) roi chay lai")
     return out.split(dau, 1)[1].strip(), p.stderr or ""
+
+
+def _co_dieu(so_hieu, dieu, tl_py, chay, them) -> bool:
+    try:
+        p = chay([sys.executable, str(tl_py), "extract", str(so_hieu), "--dieu", str(dieu), *them],
+                 capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return p.returncode == 0 and f"===== Điều {dieu} =====" in (p.stdout or "")
 
 
 def tach_khai_niem(van_ban, so_hieu="", model=MODEL_MAC_DINH, thu_tu=THU_TU_MAC_DINH, env=None,

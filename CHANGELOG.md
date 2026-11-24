@@ -22,6 +22,13 @@ và chuyển qua lại khi một bên hết hạn mức/credit.
   đạt, nguyên tử (F4); chuyển tiếp `--config` (F5); nguồn chạm trần export ⇒ dừng trước model (F6); 503/529 ⇒
   chuyển đường (F7); `doctor` đòi Message có usage (F8); `--thu-tu ""`/symlink đứt ⇒ fail-closed (F9); `--tep`
   lấy số Điều từ tiêu đề, cấm ghép số hiệu (F11); tệp không UTF-8 ⇒ rc 2 (F12).
+- Cross-review Codex lượt 2 (`ops/reviews/pr1503-review-2-codex/`, REQUEST_CHANGES, 4 P1 · 4 P2) — đã vá: tách
+  khoản FAIL-CLOSED (dòng lạ trước khoản đầu ⇒ nguồn mơ hồ; số khoản nguồn là `stt` kỳ vọng; `1.X`/`(1)`;
+  thuật ngữ không chứa "là") (N1); envelope `claude -p` kiểm kiểu, `stop_reason` refusal/max_tokens ⇒ DỪNG,
+  lỗi SAU khi model đã chạy (có token) ⇒ DỪNG, thành công 0 token ⇒ DỪNG (N2); BOM UTF-8 (N3); đường `sub` đo
+  `claude auth status --json` cùng env — chỉ `authMethod` ∈ {claude.ai, oauth_token} + `apiProvider=firstParty`
+  (N4); `--out` kiểm đích trước khi gọi model, giữ quyền tệp, lỗi I/O ⇒ rc 2 (N5); CAP chỉ chặn khi không thấy
+  Điều kế tiếp (N6); mã HTTP thắng `type` của body (N7); `doctor` đòi đúng model + token không âm (N8).
 - Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
   key qua `agent_creds` chưa làm.
 

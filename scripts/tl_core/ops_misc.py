@@ -2952,6 +2952,28 @@ def _llm_in_trang_thai(lr, thu_tu, nguon, tt):
     print("  CO MAT != DUNG DUOC — so du credit chi xem o Claude Console > Billing")
 
 
+def _ghi_nguyen_tu_giu_quyen(dich, noi_dung) -> None:
+    """Tệp tạm CÙNG thư mục → fsync → os.replace. Đích có sẵn thì GIỮ quyền của nó (lượt 2 N5: mkstemp tạo
+    0600, thay thẳng là đổi 0644 → 0600 sau lưng tiến trình khác đang đọc). Lỗi giữa chừng: dọn tệp tạm."""
+    dich.parent.mkdir(parents=True, exist_ok=True)
+    quyen = (dich.stat().st_mode & 0o7777) if dich.is_file() else None   # không dùng `stat`: tl.py không có tên ấy (I11)
+    fd, tam = tempfile.mkstemp(prefix=dich.name + ".", suffix=".tmp", dir=str(dich.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(noi_dung)
+            f.flush()
+            os.fsync(f.fileno())
+        if quyen is not None:
+            os.chmod(tam, quyen)
+        os.replace(tam, dich)
+    except BaseException:
+        try:
+            os.unlink(tam)
+        except OSError:
+            pass
+        raise
+
+
 def cmd_llm_order(a) -> int:
     """Xem / đặt / xoá thứ tự đường gọi Claude (lưu bền ở tệp, đổi được bất cứ lúc nào)."""
     lr = _tl_core_import("llm_route")
@@ -2966,8 +2988,8 @@ def cmd_llm_order(a) -> int:
             thu_tu, tep = lr.luu_thu_tu(a.thu_tu)
             print(f"da luu thu tu {','.join(thu_tu)} -> {tep}", file=sys.stderr)
         thu_tu, nguon = lr.thu_tu_hieu_luc()
-    except ValueError as e:
-        print(f"[tl] {e}", file=sys.stderr)
+    except (ValueError, OSError) as e:   # OSError: tệp thứ tự là thư mục/không ghi được (lượt 2 N5)
+        print(f"[tl] {type(e).__name__}: {e}" if isinstance(e, OSError) else f"[tl] {e}", file=sys.stderr)
         return 2
     tt = lr.trang_thai_duong()
     if getattr(a, "json", False):
@@ -2997,7 +3019,8 @@ def cmd_llm_khai_niem(a) -> int:
                   file=sys.stderr)
             return 2
         try:
-            van_ban = Path(a.tep).read_text(encoding="utf-8").strip()
+            # `utf-8-sig`: gỡ BOM đầu tệp — để nguyên thì U+FEFF che tiêu đề `Điều N` (lượt 2 N3).
+            van_ban = Path(a.tep).read_text(encoding="utf-8-sig").strip()
         except UnicodeError as e:   # F12: tệp mã cũ ⇒ rc 2 kèm hướng dẫn, không traceback
             print(f"[tl] {a.tep} khong phai UTF-8 ({type(e).__name__}) — luu lai duoi dang UTF-8", file=sys.stderr)
             return 2
@@ -3033,6 +3056,9 @@ def cmd_llm_khai_niem(a) -> int:
     if not van_ban:
         print("[tl] van ban rong", file=sys.stderr)
         return 2
+    if getattr(a, "out", None) and Path(a.out).is_dir():   # lượt 2 N5: kiểm đích TRƯỚC khi tiêu token
+        print(f"[tl] --out {a.out} la thu muc — can duong dan tep", file=sys.stderr)
+        return 2
     print(f"[tl] thu tu duong: {','.join(thu_tu)} ({nguon})", file=sys.stderr)
     try:
         kq = lr.tach_khai_niem(van_ban, so_hieu or "", a.model, thu_tu)
@@ -3048,19 +3074,11 @@ def cmd_llm_khai_niem(a) -> int:
     # F4 (PR #1503): `--out` CHỈ ghi khi kết quả QUA kiểm nguyên văn, và ghi nguyên tử — kết quả bị từ
     # chối (rc 5) không được đè lên bản đã xác minh trước đó.
     if getattr(a, "out", None) and not kq["lech"]:
-        _dich = Path(a.out)
-        _dich.parent.mkdir(parents=True, exist_ok=True)
-        _fd, _tam = tempfile.mkstemp(prefix=_dich.name + ".", suffix=".tmp", dir=str(_dich.parent))
         try:
-            with os.fdopen(_fd, "w", encoding="utf-8") as _f:
-                _f.write(json.dumps(ket, ensure_ascii=False, indent=2) + "\n")
-            os.replace(_tam, _dich)
-        except BaseException:
-            try:
-                os.unlink(_tam)
-            except OSError:
-                pass
-            raise
+            _ghi_nguyen_tu_giu_quyen(Path(a.out), json.dumps(ket, ensure_ascii=False, indent=2) + "\n")
+        except OSError as e:   # lượt 2 N5: lỗi I/O ⇒ rc 2 có thông báo, không traceback
+            print(f"[tl] khong ghi duoc --out {a.out}: {type(e).__name__}: {e}", file=sys.stderr)
+            return 2
     if getattr(a, "nhat_ky", None):
         lr.ghi_nhat_ky(a.nhat_ky, kq, "llm-khai-niem")
     u = kq["usage"]

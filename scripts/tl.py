@@ -1585,7 +1585,7 @@ _STUB_MAP = {
         'cmd_ocr_verify', 'cmd_profile_ingest_ocr',
     ],
     "ops_misc": [
-        'cmd_llm_order', 'cmd_llm_khai_niem', '_llm_in_trang_thai',   # v1.36.71 r380 — llm-order/llm-khai-niem (bẫy I11: re-home)
+        'cmd_llm_order', 'cmd_llm_khai_niem', '_llm_in_trang_thai', '_ghi_nguyen_tu_giu_quyen',   # v1.36.71 r380 — llm-order/llm-khai-niem (bẫy I11: re-home)
         '_alias_terms', '_canonical_for_query', '_compiles', '_corpus_safe_reversible', '_doctor_exporttext_probe_target', '_nlm_probe_summary', '_official_rank', '_reassemble_parts',   # I11
         '_content_md5', '_doctor_exporttext_probe', '_drift_hint_lines', '_ensure_gws_nlm', '_entries_with_live_fields', '_instruction_audit_text', '_integrity_scan',
         '_journal_close_plan', '_journal_read', '_journal_reapply_one', '_journal_resume_ops', '_journal_undo_ops', '_loop_controller',

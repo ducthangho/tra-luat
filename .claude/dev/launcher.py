@@ -4815,14 +4815,20 @@ def _do_anthropic_api(moi_truong: dict[str, str] | None = None, kiem_song: bool 
             u = than_tl.get("usage") if isinstance(than_tl, dict) else None
             # BẰNG CHỨNG DƯƠNG, không phải 2xx trần (cross-review PR #1503 F8: gateway trả 200 rỗng hoặc
             # `{"status":"ok"}` từng được dán `DUNG_DUOC`). Đòi đúng một Message có usage số nguyên.
-            la_message = (isinstance(than_tl, dict) and than_tl.get("type") == "message" and isinstance(u, dict)
-                          and all(isinstance(u.get(k), int) and not isinstance(u.get(k), bool)
-                                  for k in ("input_tokens", "output_tokens")))
-            if not la_message:
-                return ("KHONG_DO_DUOC", f"key ({ten}) · HTTP {r.status} nhung phan hoi KHONG phai Message "
-                                         "co usage — khong chung minh duoc (gateway/proxy?)")
+            # Từng điều kiện TÁCH RIÊNG để mỗi cái có đột biến canh riêng (cross-review lượt 2 N8: bỏ riêng
+            # kiểm `type` mà t162 vẫn xanh; token âm và model khác từng được dán DUNG_DUOC).
+            la_message = isinstance(than_tl, dict) and than_tl.get("type") == "message"
+            dung_model = isinstance(than_tl, dict) and than_tl.get("model") == ANTHROPIC_MODEL_KIEM_SONG
+            co_usage = isinstance(u, dict) and all(
+                isinstance(u.get(k), int) and not isinstance(u.get(k), bool) and u.get(k) >= 0
+                for k in ("input_tokens", "output_tokens"))
+            if not (la_message and dung_model and co_usage):
+                return ("KHONG_DO_DUOC", f"key ({ten}) · HTTP {r.status} nhung phan hoi KHONG phai Message cua "
+                                         f"{ANTHROPIC_MODEL_KIEM_SONG} co usage hop le — khong chung minh duoc "
+                                         "(gateway/proxy?)")
             u = u if isinstance(u, dict) else {}
-            return ("DUNG_DUOC", f"key ({ten}) · kiem song HTTP {r.status} ({ANTHROPIC_MODEL_KIEM_SONG}, "
+            mdl = than_tl.get("model") if isinstance(than_tl, dict) else None
+            return ("DUNG_DUOC", f"key ({ten}) · kiem song HTTP {r.status} (model tra ve {mdl}, "
                                  f"{u.get('input_tokens')}+{u.get('output_tokens')} token) · "
                                  "so du credit: xem Claude Console > Billing")
     except urllib.error.HTTPError as e:

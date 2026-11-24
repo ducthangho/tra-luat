@@ -32233,7 +32233,10 @@ def run() -> int:
         _kn = [{"stt": 1, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu do cơ quan lập."}]
         _them_bat = []
 
+        _goi_model = []
+
         def _sub_gia(he, nd, schema, model, env):
+            _goi_model.append(model)
             return {"duong": "sub", "nguon_key": None, "model": model, "data": {"khai_niem": [dict(x) for x in _kn]},
                     "usage": {"input": 1, "output": 1, "cache_doc": 0, "cache_ghi": 0}, "usd_uoc_tinh": None}
 
@@ -32274,12 +32277,34 @@ def run() -> int:
                 _ns_o = _ty378.SimpleNamespace(thu_tu="", reset=False, json=True)
                 with _ctx378.redirect_stdout(_io378.StringIO()), _ctx378.redirect_stderr(_io378.StringIO()):
                     _rc_rong = _tlm380.cmd_llm_order(_ns_o)
+                # Lượt 2 N3: BOM UTF-8 không được che tiêu đề `Điều 15`.
+                _kn[0]["dinh_nghia"] = "tài liệu do cơ quan lập."
+                _bom = _d / "bom.txt"
+                _bom.write_bytes("\ufeffĐiều 15. Giải thích từ ngữ\nHồ sơ là tài liệu do cơ quan lập.".encode("utf-8"))
+                _rc_bom_lech, _ = _chay(tep=str(_bom), dieu="7")
+                _rc_bom, _o_bom = _chay(tep=str(_bom))
+                _dieu_bom = json.loads(_o_bom)["dieu"] if _rc_bom == 0 else None
+                # Lượt 2 N5: `--out` là thư mục ⇒ rc 2 TRƯỚC khi gọi model; ghi đè giữ quyền 0644.
+                _n_truoc = len(_goi_model)
+                _rc_outdir, _ = _chay(tep=str(_t15), out=str(_d))
+                _khong_goi = len(_goi_model) == _n_truoc
+                _out2 = _d / "kq2.json"
+                _out2.write_text("{}", encoding="utf-8")
+                _os380.chmod(_out2, 0o644)
+                _rc_ghi, _ = _chay(tep=str(_t15), out=str(_out2))
+                _giu_quyen = (_out2.stat().st_mode & 0o777) == 0o644 and json.loads(_out2.read_text(encoding="utf-8"))["dieu"] == "15"
+                _os380.environ["TL_LLM_ORDER_FILE"] = str(_d)            # tệp thứ tự là THƯ MỤC
+                _ns_o2 = _ty378.SimpleNamespace(thu_tu="sub", reset=False, json=True)
+                with _ctx378.redirect_stdout(_io378.StringIO()), _ctx378.redirect_stderr(_io378.StringIO()):
+                    _rc_order_dir = _tlm380.cmd_llm_order(_ns_o2)
             finally:
                 _lr.duong_sub, _lr.lay_dieu_qua_extract = _sav_sub, _sav_ex
                 _env110_restore(_sv)
         return (_rc_a == 0 and _dieu_tep == "15" and _rc_lech == 2 and _rc_ghep == 2 and _rc_ma == 2
                 and _rc_cfg == 0 and _them_bat and _them_bat[-1][:2] == ["--config", "yeu_cau.json"]
-                and "--profile" in _them_bat[-1] and _rc5 == 5 and _giu and _rc_rong == 2)
+                and "--profile" in _them_bat[-1] and _rc5 == 5 and _giu and _rc_rong == 2
+                and _rc_bom_lech == 2 and _rc_bom == 0 and _dieu_bom == "15"
+                and _rc_outdir == 2 and _khong_goi and _rc_ghi == 0 and _giu_quyen and _rc_order_dir == 2)
     _t110("r380_llm_khai_niem_bien_dau_vao", _c380_llm_khai_niem_bien_dau_vao)
 
     # F1-02 / wp42 rev2 (late-duplicate RED) — PHẢI là đăng ký cuối cùng trước tally:

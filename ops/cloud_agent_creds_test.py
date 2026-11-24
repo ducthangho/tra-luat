@@ -4,7 +4,7 @@
 ném `TinHieuChotCa` (con thoát 3 + `DO:<ca>:`); lỗi vô can thoát 4 = TÍN DỤNG GIẢ; 5 = bỏ qua (Windows, hay cây rời không .git).
 Ca `p3<a|b|c|s><số>_…` (#1089, spec CLOUD-SETUP-P3-WRITEBACK r2 `nghiem_thu`): `ghi-nguoc` in-process trên Drive giả GIỮ TRẠNG THÁI;
 B trích NGUYÊN VĂN `agent_creds_put` từ references/Code.2.21.2q.gs, chạy bằng `node` với LockService/Drive/... giả."""
-import ast, atexit, base64, builtins, contextlib, ctypes, hashlib, importlib.util, inspect, io, json, os, re, shutil, subprocess, sys, tarfile, tempfile, time  # noqa: E401
+import ast, atexit, base64, contextlib, ctypes, hashlib, importlib.util, inspect, io, json, os, re, shutil, subprocess, sys, tarfile, tempfile, time  # noqa: E401
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -297,84 +297,348 @@ def d1_env_file_khong_dung():   # spec r2 D1': bật tự cập nhật ⇒ `cai-
         _ghi(f, "export FOO=1\n")
         truoc, _, _ = f.read_bytes(), s.chay(), s.chay()
         bang(f.read_bytes() == truoc, f"env file bị đổi: {f.read_bytes()!r}")
-# ---------- G: `ghim-agy` (spec r2 Thay đổi 3) — harness HỢP ĐỒNG, lớp `ghim-output-oracle` (cross-review #1505 lượt 1–2) ----------
-# Giữ `main`/`doc_release`/`tai`/`ghim_agy` THẬT; chỉ giả `urllib.request.urlopen`. Oracle khoá nền -> tên tài sản chép từ
-# bảng spec r2 Thay đổi 1, ĐỘC LẬP với `TAI_SAN_AGY` (F01-g). So TOÀN transcript, không parse khúc (F01-e/f).
+# ---------- G: `ghim-agy` (spec r2 Thay đổi 3) — harness HỢP ĐỒNG ở RANH GIỚI TIẾN TRÌNH, lớp `ghim-output-oracle` (cross-review #1505 lượt 1–3) ----------
+# Mỗi ca chạy `main` THẬT (kể cả bước nạp module) trong MỘT tiến trình con `python -I -B` riêng: cwd/HOME/TEMP là thư mục tạm riêng.
+# Ba người quan sát, không cái nào biết tên API của mã sản phẩm:
+#   (1) audit hook của CPython, bật CHỈ quanh [nạp module + main + việc hẹn lúc thoát (atexit, finalizer)]: sự kiện nào KHÔNG thuộc `SU_KIEN_LANH` (danh sách CHO PHÉP) và
+#       không phải `open` chỉ-đọc ⇒ ghi nhận rồi TỪ CHỐI (ném `TuChoi(BaseException)`) — mã nuốt lỗi hay tạo-rồi-xoá vẫn để lại dấu;
+#   (2) transport giả thay `urllib.request.urlopen`: ràng lời gọi vào CHỮ KÝ của urlopen thật, kiểm kiểu req/timeout như transport
+#       thật, ghi đủ request; lời gọi sai ⇒ vào `sai` (chốt riêng của ca), KHÔNG lẫn với lỗi mạng giả;
+#   (3) ảnh chụp cây cwd/HOME/TEMP trước–sau từng lời gọi, và fd 1/2 THẬT của tiến trình con (phải rỗng).
+# MỘT hàm hậu điều `_hau_dieu_chung` cho MỌI lời gọi (rc 0/1/2). Oracle nền -> tên tài sản chép từ bảng spec r2 Thay đổi 1, ĐỘC LẬP
+# với `TAI_SAN_AGY` (F01-g). So TOÀN transcript, không parse khúc (F01-e/f). Ma trận lỗi chạy cho CẢ latest lẫn `--ban` (F01-s).
 ORACLE_TAI_SAN = {"linux_amd64": "agy_cli_linux_x64.tar.gz", "linux_arm64": "agy_cli_linux_arm64.tar.gz",
                   "linux_amd64_musl": "agy_cli_linux_x64_musl.tar.gz", "linux_arm64_musl": "agy_cli_linux_arm64_musl.tar.gz",
                   "darwin_amd64": "agy_cli_mac_x64.tar.gz", "darwin_arm64": "agy_cli_mac_arm64.tar.gz"}
 KHOA_6 = tuple(ORACLE_TAI_SAN)
 _API = "https://api.github.com/repos/google-antigravity/antigravity-cli/releases/"
 HONG_TAI_SAN = ("lech", "thieu", "hai_tep", "ten_sai", "khong_thuong")   # F01-k/l/m/o/p, đặt ở TỪNG nền
+LOI_CHUNG = ("release", "json", "tai")   # mạng hỏng khi đọc release · release không phải JSON · mạng hỏng ở lượt tải tài sản THỨ HAI
+CHE_DO = (("ghim-agy",), ("ghim-agy", "--ban", "2.3.4"))   # F01-s: MỌI hàng âm chạy ở cả hai chế độ
+ARGV_SAI = (("--ban", "../x"), ("--ban",), ("--ban", "2.3"), ("--ban", "v2.3.4"), ("--ban", "2.3.4", "thua"), ("thua",))
+# Danh sách CHO PHÉP (không phải danh sách cấm): sự kiện audit không thể ghi đĩa/sinh tiến trình/ra mạng. Tên nào ngoài đây ⇒ ĐỎ.
+SU_KIEN_LANH = ("compile", "exec", "import", "marshal.loads", "os.listdir", "os.scandir", "sys._getframe", "sys._getframemodulename",
+                "object.__getattr__", "object.__setattr__", "object.__delattr__", "builtins.id", "code.__new__", "function.__new__",
+                "sys.excepthook", "sys.unraisablehook")
+# Nạp TRƯỚC cửa sổ đo (thư viện chuẩn mà mã sản phẩm import ở đầu tệp): `import ctypes` tự nó phát `ctypes.dlopen`. Danh sách CỐ ĐỊNH,
+# không suy từ nguồn đang thử — bản đột biến không được quyết định cái gì chạy NGOÀI cửa sổ đo.
+LAM_NONG = ("base64", "contextlib", "ctypes", "gzip", "hashlib", "io", "json", "math", "os", "pathlib", "platform", "re", "shutil",
+            "signal", "subprocess", "tarfile", "tempfile", "threading", "time", "urllib.request")
+CON_GHIM = r'''"""Tiến trình con của harness `ghim-agy` (sinh từ ops/cloud_agent_creds_test.py). argv: <viec.json> <kq.json>."""
+import atexit, base64, email.message, gc, importlib, importlib.util, inspect, io, json, math, os, sys, urllib.error, urllib.request  # noqa: E401
+sys.dont_write_bytecode = True
+VIEC = json.loads(open(sys.argv[1], encoding="utf-8").read())
+LANH, DUNG = frozenset(VIEC["lanh"]), VIEC["dung"]
+GHI = os.O_WRONLY | os.O_RDWR | os.O_APPEND | os.O_CREAT | os.O_TRUNC
+CUA = [None]   # cửa sổ đo đang mở: {"sk": [...], "n": int}; None = harness đang tự làm việc
+class TuChoi(BaseException):
+    """Không phải `Exception` ⇒ `except Exception` của mã sản phẩm không nuốt được; có nuốt bằng `except BaseException` thì dấu vẫn còn."""
+def canh(ten, ds):
+    cua = CUA[0]
+    if cua is None or ten in LANH:
+        return
+    if (ten == "open" and len(ds) >= 3 and (ds[1] is None or (isinstance(ds[1], str) and not set(ds[1]) & set("wax+")))
+            and type(ds[2]) is int and not ds[2] & GHI):
+        return   # mở CHỈ ĐỌC (io.open lẫn os.open): cả chế độ lẫn cờ đều không mang quyền ghi
+    CUA[0] = None   # `repr` của đối số không được tái nhập hook
+    try:
+        mo_ta = ten + "(" + ", ".join(repr(x)[:120] for x in ds) + ")"
+    except Exception as e:
+        mo_ta = ten + "(<repr lỗi " + type(e).__name__ + ">)"
+    finally:
+        CUA[0] = cua
+    cua["n"] += 1
+    if len(cua["sk"]) < 20:
+        cua["sk"].append(mo_ta)
+    raise TuChoi(mo_ta)
+sys.addaudithook(canh)
+for _ten in VIEC["lam_nong"]:
+    importlib.import_module(_ten)
+THAT = urllib.request.urlopen
+CHU_KY = inspect.signature(THAT)   # chữ ký của urlopen THẬT trên chính bản Python đang chạy
+MAC_DINH = CHU_KY.parameters["timeout"].default
+class PhanHoi:
+    """Mặt tối thiểu của http.client.HTTPResponse — KHÔNG có getvalue/seek như BytesIO (thứ phản hồi thật không có)."""
+    def __init__(self, than, url):
+        self._b, self.url, self.status, self.reason, self.headers, self.closed = io.BytesIO(than), url, 200, "OK", email.message.Message(), False
+    def read(self, amt=None):
+        return self._b.read() if amt is None else self._b.read(amt)
+    def close(self):
+        self.closed = True
+    def __enter__(self):
+        return self
+    def __exit__(self, *a):
+        self.close()
+    def geturl(self):
+        return self.url
+    def getcode(self):
+        return self.status
+    def info(self):
+        return self.headers
+def tao_urlopen(ban, nk, sai):
+    def tu_choi(ly_do, loi):
+        sai.append(ly_do)
+        raise loi
+    def urlopen(*a, **kw):
+        try:
+            b = CHU_KY.bind(*a, **kw)
+        except TypeError as e:
+            tu_choi("lời gọi lệch chữ ký urlopen thật: " + str(e), TypeError(str(e)))
+        b.apply_defaults()
+        req, du, han = b.arguments["url"], b.arguments["data"], b.arguments["timeout"]
+        if isinstance(req, str):
+            url, kieu, tieu_de, pt = req, "str", {}, None
+        elif isinstance(req, urllib.request.Request):
+            url, kieu, tieu_de, pt, du = req.full_url, "Request", dict(req.header_items()), getattr(req, "method", None), req.data if du is None else du
+        else:
+            tu_choi("req kiểu " + type(req).__name__ + " — urlopen thật chỉ nhận str hoặc urllib.request.Request", TypeError("req"))
+        pt = pt or ("GET" if du is None else "POST")
+        nk.append({"url": url, "kieu": kieu, "pt": pt, "han": None if han is MAC_DINH else repr(han), "tieu_de": tieu_de})
+        if han is not MAC_DINH and han is not None:   # bỏ trống / None: transport thật nhận (mặc định toàn cục / chặn vô hạn)
+            if isinstance(han, bool) or not isinstance(han, (int, float)):
+                tu_choi("timeout=" + repr(han) + " (" + type(han).__name__ + ") — socket.settimeout thật ném TypeError với kiểu này", TypeError("timeout phải là số"))
+            if not (math.isfinite(han) and han > 0):
+                tu_choi("timeout=" + repr(han) + " không dương/hữu hạn", ValueError("Timeout value out of range"))
+        if pt != "GET":
+            sai.append("phương thức " + pt + " tới " + repr(url) + " — đọc release/tải tài sản là GET")
+        muc = ban.get(url)
+        if muc is None:
+            tu_choi("URL ngoài bảng phục vụ: " + repr(url), urllib.error.URLError("gia: khong phuc vu URL nay"))
+        if "nem" in muc:
+            raise OSError(muc["nem"])   # lỗi MẠNG giả (fixture) — không phải lỗi đối số, không vào `sai`
+        return PhanHoi(base64.b64decode(muc["than"]), url)
+    return urlopen
+def cay(goc):
+    return sorted(os.path.relpath(os.path.join(d, x), goc) for d, thu_muc, tep in os.walk(goc) for x in thu_muc + tep)
+KQ = []
+for i, v in enumerate(VIEC["goi"]):
+    cwd = os.path.join(DUNG, "cwd", str(i))
+    os.makedirs(cwd)
+    os.chdir(cwd)
+    truoc, nk, sai, cua, rc, nl, m, spec = cay(DUNG), [], [], {"sk": [], "n": 0}, None, None, None, None
+    ra, loi = (io.TextIOWrapper(io.BytesIO(), encoding="utf-8", newline="\n") for _ in "12")   # main() gọi reconfigure ⇒ TextIOWrapper
+    urllib.request.urlopen = tao_urlopen(v["ban"], nk, sai)
+    gc.collect()
+    atexit._clear()   # việc hẹn-lúc-thoát của harness/thư viện không được lẫn vào cửa sổ đo
+    sys.stdout, sys.stderr = ra, loi
+    CUA[0] = cua
+    try:   # CỬA SỔ ĐO = đúng những gì `python cloud_agent_creds.py <argv>` làm: nạp module, main(argv), rồi THOÁT tiến trình
+        spec = importlib.util.spec_from_file_location("cloud_agent_creds_duoi_test", VIEC["ma"])
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        rc = m.main(list(v["argv"]))
+    except BaseException as e:
+        nl = {"kieu": type(e).__name__, "tu_choi": isinstance(e, TuChoi), "nd": str(e)[:300]}
+    try:   # vẫn TRONG cửa sổ: việc mã hẹn tới lúc thoát (atexit) và finalizer của đối tượng nó để lại — ghi trễ cũng là ghi
+        m = spec = None
+        atexit._run_exitfuncs()
+        gc.collect()
+    except BaseException as e:
+        nl = nl or {"kieu": type(e).__name__, "tu_choi": isinstance(e, TuChoi), "nd": str(e)[:300]}
+    finally:
+        CUA[0] = None
+        atexit._clear()
+        sys.stdout, sys.stderr = sys.__stdout__, sys.__stderr__
+        urllib.request.urlopen = THAT
+    van = []
+    for s in (ra, loi):
+        try:
+            s.flush()
+            van.append(s.buffer.getvalue().decode("utf-8", "backslashreplace"))
+        except Exception as e:
+            van.append("<không đọc được luồng: " + type(e).__name__ + ">")
+    KQ.append({"rc": None if nl else 0 if rc is None else rc if type(rc) in (int, bool) else 1,   # như `sys.exit(main(...))` đổi ra mã thoát
+               "rc_tho": repr(rc), "ra": van[0], "loi": van[1], "nk": nk, "sai": sai, "sk": cua["sk"], "n_sk": cua["n"], "ngoai_le": nl,
+               "moi": sorted(set(cay(DUNG)) - set(truoc))})
+os.chdir(DUNG)
+with open(sys.argv[2], "w", encoding="utf-8") as f:
+    json.dump(KQ, f)
+'''
+_TAR_NHO = {}
 def _tar_nen(ban, k, hong=None):
-    if hong == "hai_tep":
-        return _tar([("antigravity", NOI_DUNG), ("khac", b"y")])
-    if hong == "ten_sai":
-        return _tar([("khac", NOI_DUNG)])
-    if hong == "khong_thuong":
-        return _tar([("antigravity", None)])
-    return _tar([("antigravity", NOI_DUNG + f"{ban}/{k}".encode())])   # sáu nền × hai phiên bản: byte KHÁC nhau
-def _ghim_that(argv=("ghim-agy",), hong=None, loi=None):
-    """Chạy `main` thật dưới transport giả. Trả rc, stdout, stderr, nhật ký URL, các lần GHI (F01-n) và bảng kỳ vọng."""
-    hong, nk, ghi, bai = hong or {}, [], [], {}
-    for ban in ("9.8.7", "2.3.4"):
-        bai[ban] = {k: (f"https://gia.invalid/{ban}/{ten}", _tar_nen(ban, k, hong.get(k))) for k, ten in ORACLE_TAI_SAN.items()}
-    def release(ban):
-        ts = [{"name": ten, "browser_download_url": bai[ban][k][0],
-               "digest": "sha256:" + ("0" * 64 if hong.get(k) == "lech" else hashlib.sha256(bai[ban][k][1]).hexdigest())}
-              for k, ten in ORACLE_TAI_SAN.items() if hong.get(k) != "thieu"]
-        return json.dumps({"tag_name": ban, "assets": ts}).encode("utf-8")
-    theo_url = {u: b for d in bai.values() for u, b in d.values()}
-    def urlopen(req, timeout=None):
-        u = getattr(req, "full_url", req)
-        nk.append(u)
-        if u.startswith(_API):
-            if loi == "release":
-                raise OSError("giả lập mạng hỏng")
-            if loi == "json":
-                return io.BytesIO(b"{khong phai json")
-            return io.BytesIO(release("9.8.7" if u == _API + "latest" else u.rsplit("/", 1)[1]))
-        if loi == "tai" and len(nk) == 3:   # hỏng ở lượt tải tài sản THỨ HAI
-            raise OSError("giả lập tải hỏng")
-        return io.BytesIO(theo_url[u])
-    that_open = builtins.open
-    def open_canh(f, mode="r", *a, **kw):
-        if any(c in mode for c in "wax+"):
-            ghi.append(f"open({f!s}, {mode})")
-        return that_open(f, mode, *a, **kw)
-    m = nap_mod()
-    ra, loi_ra = io.TextIOWrapper(io.BytesIO(), encoding="utf-8"), io.TextIOWrapper(io.BytesIO(), encoding="utf-8")
+    if (ban, k, hong) not in _TAR_NHO:
+        _TAR_NHO[ban, k, hong] = (_tar([("antigravity", NOI_DUNG), ("khac", b"y")]) if hong == "hai_tep" else _tar([("khac", NOI_DUNG)]) if hong == "ten_sai"
+                                  else _tar([("antigravity", None)]) if hong == "khong_thuong"
+                                  else _tar([("antigravity", NOI_DUNG + f"{ban}/{k}".encode())]))   # sáu nền × hai phiên bản: byte KHÁC nhau
+    return _TAR_NHO[ban, k, hong]
+def _goi(ten, argv=("ghim-agy",), hong=None, loi=None):
+    """Mô tả MỘT lời gọi CLI: tên hàng, argv, {nền: kiểu hỏng}, lỗi chung. `pb` = phiên bản mà lời gọi phải ra."""
+    argv = tuple(argv)
+    return SimpleNamespace(ten=ten, argv=argv, hong=dict(hong or {}), loi=loi, pb=argv[2] if len(argv) == 3 else "9.8.7",
+                           duong=_API + (f"tags/{argv[2]}" if len(argv) == 3 else "latest"))
+def _ban_phuc_vu(hong, loi):
+    """Bảng URL -> phản hồi cho MỘT lời gọi (luôn phục vụ CẢ hai phiên bản) và kỳ vọng {phiên bản: {nền: (url, sha512)}}."""
+    ban, mong = {}, {}
+    for pb, duong in (("9.8.7", ("latest", "tags/9.8.7")), ("2.3.4", ("tags/2.3.4",))):
+        ts = {k: (f"https://gia.invalid/{pb}/{ten}", _tar_nen(pb, k, hong.get(k))) for k, ten in ORACLE_TAI_SAN.items()}
+        rel = json.dumps({"tag_name": pb, "assets": [
+            {"name": ORACLE_TAI_SAN[k], "browser_download_url": u, "digest": "sha256:" + ("0" * 64 if hong.get(k) == "lech" else hashlib.sha256(b).hexdigest())}
+            for k, (u, b) in ts.items() if hong.get(k) != "thieu"]}).encode("utf-8")
+        for d in duong:
+            ban[_API + d] = {"nem": "giả lập mạng hỏng"} if loi == "release" else {"than": b"{khong phai json" if loi == "json" else rel}
+        for i, (u, b) in enumerate(ts.values()):
+            ban[u] = {"nem": "giả lập tải hỏng"} if loi == "tai" and i == 1 else {"than": b}
+        mong[pb] = {k: (u, hashlib.sha512(b).hexdigest()) for k, (u, b) in ts.items()}
+    return {u: ({"than": base64.b64encode(m["than"]).decode("ascii")} if "than" in m else m) for u, m in ban.items()}, mong
+def _chay_ghim(ds, ma=None):
+    """Chạy lần lượt các lời gọi `ds` trong MỘT tiến trình con (mỗi lời gọi một cửa sổ đo riêng, một cwd riêng). Trả kết quả theo thứ tự.
+    Tiến trình con hỏng (rc khác 0, không có kq.json) là lỗi HARNESS ⇒ RuntimeError (thoát 4), không bao giờ là chốt của ca."""
+    ban_mong = [_ban_phuc_vu(g.hong, g.loi) for g in ds]
     with tempfile.TemporaryDirectory(prefix="cac_ghim_") as t:
-        with contextlib.chdir(t), mock.patch("urllib.request.urlopen", urlopen), mock.patch("builtins.open", open_canh), \
-                mock.patch("os.replace", lambda *a, **kw: ghi.append(f"replace{a}")), \
-                contextlib.redirect_stdout(ra), contextlib.redirect_stderr(loi_ra):   # main() gọi reconfigure ⇒ TextIOWrapper
-            rc = m.main(list(argv))
-        ghi += [f"tệp mới: {p.name}" for p in Path(t).iterdir()]
-    ra.flush(), loi_ra.flush()
-    return SimpleNamespace(rc=rc, ra=ra.buffer.getvalue().decode("utf-8"), loi=loi_ra.buffer.getvalue().decode("utf-8"), nk=nk, ghi=ghi,
-                           mong={ban: {k: (u, hashlib.sha512(b).hexdigest()) for k, (u, b) in d.items()} for ban, d in bai.items()})
+        t = Path(t).resolve()
+        for d in ("cwd", "home", "tmp"):
+            (t / "dung" / d).mkdir(parents=True)
+        (t / "con.py").write_text(CON_GHIM, encoding="utf-8", newline="\n")
+        (t / "viec.json").write_text(json.dumps({"ma": str(ma or MA), "dung": str(t / "dung"), "lanh": SU_KIEN_LANH, "lam_nong": LAM_NONG,
+                                                  "goi": [{"argv": g.argv, "ban": b} for g, (b, _) in zip(ds, ban_mong)]}), encoding="utf-8")
+        nha, tam = str(t / "dung" / "home"), str(t / "dung" / "tmp")
+        r = subprocess.run([sys.executable, "-I", "-B", "-X", "utf8", str(t / "con.py"), str(t / "viec.json"), str(t / "kq.json")], cwd=str(t),
+                           env=dict(os.environ, HOME=nha, USERPROFILE=nha, TEMP=tam, TMP=tam, TMPDIR=tam), stdin=subprocess.DEVNULL,
+                           capture_output=True, timeout=300)
+        tho = [x.decode("utf-8", "backslashreplace") for x in (r.stdout, r.stderr)]
+        if r.returncode != 0 or not (t / "kq.json").is_file():
+            raise RuntimeError(f"tiến trình con của harness ghim hỏng (rc={r.returncode}): {tho[1][-400:]}")
+        kq = json.loads((t / "kq.json").read_text(encoding="utf-8"))
+    if len(kq) != len(ds):
+        raise RuntimeError(f"tiến trình con trả {len(kq)} kết quả cho {len(ds)} lời gọi")
+    return [SimpleNamespace(**k, ten=g.ten, goi=g, mong=mong, tho=tho) for k, g, (_, mong) in zip(kq, ds, ban_mong)]
+def _hau_dieu_chung(kq, stderr_tu_do=False):
+    """Hậu điều của MỌI lời gọi `ghim-agy`, bất kể rc: không ghi (F01-n/r), transport đúng (F01-q), không lọt kênh, stderr rỗng."""
+    bang(not kq.sk and not kq.n_sk, f"{kq.ten}: sự kiện ngoài danh sách cho phép trong cửa sổ đo — ghi đĩa/tiến trình/mạng ({kq.n_sk} lần): {kq.sk}")
+    bang(not kq.moi, f"{kq.ten}: mục mới dưới cwd/HOME/TEMP: {kq.moi}")
+    bang(not kq.sai, f"{kq.ten}: transport — lời gọi sai đối số / URL ngoài bảng: {kq.sai}")
+    bang(kq.tho == ["", ""], f"{kq.ten}: có byte đi thẳng fd 1/2 của tiến trình con, ngoài sys.stdout/sys.stderr: {kq.tho}")
+    if kq.ngoai_le:   # không dấu ghi, không sai transport mà vẫn văng ngoại lệ ⇒ lỗi VÔ CAN (thoát 4), không nhận làm chốt
+        raise RuntimeError(f"{kq.ten}: ngoại lệ thoát khỏi nạp module/main: {kq.ngoai_le}")
+    bang(stderr_tu_do or kq.loi == "", f"{kq.ten}: stderr không rỗng: {kq.loi!r}")
 def _transcript_mong(ban, mong):
     d = mong[ban]
     return ([f'AGY_VER = "{ban}"', "NEN = {"] + [f'    "{k}": ("{u}", "{h}"),' for k, (u, h) in d.items()] + ["}", ""]
             + [f"| `{k}` | `{u}` | `{h}` |" for k, (u, h) in d.items()])
-def _bang_thanh_cong(kq, ban, ten):
-    bang(kq.rc == 0 and kq.loi == "" and kq.ghi == [], f"{ten}: rc={kq.rc} stderr={kq.loi!r} ghi={kq.ghi}")
-    bang(kq.ra.splitlines() == _transcript_mong(ban, kq.mong), f"{ten}: transcript lệch hợp đồng: {kq.ra!r}")
-    duong = _API + ("latest" if ban == "9.8.7" else f"tags/{ban}")
-    bang(kq.nk == [duong] + [kq.mong[ban][k][0] for k in KHOA_6], f"{ten}: nhật ký mạng {kq.nk}")
-def g1_ghim_in_dung_sau_cap():   # release latest: đủ sáu tải đúng nền, transcript ĐÚNG từng dòng, không ghi
-    _bang_thanh_cong(_ghim_that(), "9.8.7", "latest")
+def _bang_thanh_cong(kq):
+    _hau_dieu_chung(kq)
+    bang(kq.rc == 0, f"{kq.ten}: rc={kq.rc_tho}, mong 0 — stdout={kq.ra!r}")
+    bang(kq.ra == "".join(d + "\n" for d in _transcript_mong(kq.goi.pb, kq.mong)), f"{kq.ten}: transcript lệch hợp đồng: {kq.ra!r}")
+    bang([x["url"] for x in kq.nk] == [kq.goi.duong] + [kq.mong[kq.goi.pb][k][0] for k in KHOA_6], f"{kq.ten}: nhật ký mạng {[x['url'] for x in kq.nk]}")
+def _bang_tu_choi(kq):
+    _hau_dieu_chung(kq)
+    dong, url, d = kq.ra.splitlines(), [x["url"] for x in kq.nk], kq.mong[kq.goi.pb]
+    bang(kq.rc == 1 and len(dong) == 1 and dong[0].startswith("ghim-agy: ✗") and kq.ra.endswith("\n"), f"{kq.ten}: rc={kq.rc_tho} stdout={kq.ra!r}")
+    bang(url[:1] == [kq.goi.duong] and set(url[1:]) <= {u for u, _ in d.values()}, f"{kq.ten}: nhật ký mạng {url}")
+    for k, h in kq.goi.hong.items():   # bằng chứng nguyên nhân: không thể biết digest/tarball hỏng nếu chưa tải chính tài sản ấy
+        bang(h == "thieu" or d[k][0] in url, f"{kq.ten}: từ chối mà chưa tải tài sản {k} — không phải vì kiểu hỏng đang thử ({url})")
+    bang(kq.goi.loi != "tai" or d[KHOA_6[1]][0] in url, f"{kq.ten}: chưa tới lượt tải bị làm hỏng ({url})")
+def _bang_argv_sai(kq):   # F01-r: rc 2 KHÔNG miễn hậu điều chung; usage ở stderr được phép, stdout (kênh dữ liệu) phải rỗng, không tải gì
+    _hau_dieu_chung(kq, stderr_tu_do=True)
+    bang(kq.rc == 2 and kq.nk == [] and kq.ra == "", f"{kq.ten}: rc={kq.rc_tho} tải={[x['url'] for x in kq.nk]} stdout={kq.ra!r}")
+def g1_ghim_in_dung_sau_cap():   # release latest: đủ sáu tải đúng nền đúng thứ tự, transcript ĐÚNG từng byte, không ghi
+    _bang_thanh_cong(_chay_ghim([_goi("latest")])[0])
 def g3_ghim_ban_chi_dinh():   # F01-h/i: `--ban` hợp lệ đi xuống `tags/<ban>` và ra đúng phiên bản ấy
-    _bang_thanh_cong(_ghim_that(("ghim-agy", "--ban", "2.3.4")), "2.3.4", "--ban 2.3.4")
-def g2_ghim_tu_choi_khi_sai():   # ma trận: năm kiểu hỏng × sáu nền + mạng/JSON/tải; mỗi ca rc 1, ĐÚNG một dòng chẩn đoán, không ghi
-    ca = [(f"{h}@{k}", {"hong": {k: h}}) for h in HONG_TAI_SAN for k in KHOA_6]
-    ca += [("release hỏng", {"loi": "release"}), ("json hỏng", {"loi": "json"}), ("tải hỏng", {"loi": "tai"})]
-    for ten, kw in ca:
-        kq = _ghim_that(**kw)
-        dong = [d for d in kq.ra.splitlines() if d.strip()]
-        bang(kq.rc == 1 and kq.loi == "" and kq.ghi == [] and len(dong) == 1 and dong[0].startswith("ghim-agy: ✗"),
-             f"{ten}: rc={kq.rc} ghi={kq.ghi} stdout={kq.ra!r} stderr={kq.loi!r}")
-    bang(_ghim_that(("ghim-agy", "--ban", "../x")).rc == 2, "--ban không phải X.Y.Z mà không bị từ chối")
+    _bang_thanh_cong(_chay_ghim([_goi("--ban 2.3.4", CHE_DO[1])])[0])
+def g2_ghim_tu_choi_khi_sai():   # (năm kiểu hỏng × sáu nền + mạng/JSON/tải) × (latest, --ban) ⇒ rc 1, ĐÚNG một dòng; argv sai ⇒ rc 2, không tải
+    ds = []
+    for argv in CHE_DO:
+        nhan = " ".join(argv[1:]) or "latest"
+        ds += [_goi(f"{nhan}: {h}@{k}", argv, hong={k: h}) for h in HONG_TAI_SAN for k in KHOA_6]
+        ds += [_goi(f"{nhan}: {loi} hỏng", argv, loi=loi) for loi in LOI_CHUNG]
+    n_loi = len(ds)
+    ds += [_goi("argv sai " + " ".join(map(repr, a)), ("ghim-agy",) + a) for a in ARGV_SAI]
+    kq = _chay_ghim(ds)
+    bang(n_loi == len(CHE_DO) * (len(HONG_TAI_SAN) * len(KHOA_6) + len(LOI_CHUNG)) == 66, f"ma trận lỗi phải đủ 66 hàng, có {n_loi}")
+    for x in kq[:n_loi]:
+        _bang_tu_choi(x)
+    for x in kq[n_loi:]:
+        _bang_argv_sai(x)
+# Tự kiểm của CHÍNH harness (đối chứng dương): một `main` GIẢ làm đúng từng việc bị cấm ⇒ hậu điều chung PHẢI đỏ; việc lành ⇒ PHẢI xanh.
+MA_THU = r'''import atexit, os, subprocess, sys, tempfile, threading, urllib.request  # noqa: E401
+from pathlib import Path
+U = "https://gia.invalid/9.8.7/agy_cli_linux_x64.tar.gz"
+class GhiKhiHuy:
+    def __del__(self):
+        open("g.txt", "w").close()
+def main(argv):
+    ca, tam = argv[0], os.environ["TEMP"]
+    if ca == "lanh":   # đọc tệp, liệt kê thư mục, ba dạng lời gọi transport hợp lệ
+        open(__file__, encoding="utf-8").read(), os.listdir("."), Path(__file__).read_bytes(), os.close(os.open(__file__, os.O_RDONLY))
+        with urllib.request.urlopen(U, timeout=30) as r:
+            r.read()
+        urllib.request.urlopen(urllib.request.Request(U, headers={"User-Agent": "x"}), None, 2.5).read(), urllib.request.urlopen(U).read()
+        print("ok")
+    elif ca == "path_tuyet_doi":
+        Path(tam, "a.txt").write_text("x", encoding="utf-8")
+    elif ca == "os_open":
+        os.close(os.open(os.path.join(tam, "b.bin"), os.O_WRONLY | os.O_CREAT | os.O_TRUNC))
+    elif ca == "temporaryfile":
+        tempfile.TemporaryFile().close()
+    elif ca == "tao_roi_xoa":
+        Path("c.txt").write_text("x", encoding="utf-8"), Path("c.txt").unlink()
+    elif ca == "nuot_loi":
+        try:
+            open("d.txt", "w").close()
+        except BaseException:
+            pass
+    elif ca == "them_vao":
+        open(__file__, "a").close()
+    elif ca == "mkdir":
+        os.mkdir("e")
+    elif ca == "doi_ten":
+        os.replace("khong-co-1", "khong-co-2")
+    elif ca == "xoa":
+        os.remove("khong-co-3")
+    elif ca == "fdopen":
+        os.fdopen(1, "w", closefd=False)
+    elif ca == "tien_trinh":
+        subprocess.run([sys.executable, "-c", "pass"])
+    elif ca == "mo_khoa_mang":
+        urllib.request.build_opener().open(U, timeout=1)
+    elif ca == "hen_luc_thoat":   # main trả 0 sạch sẽ; việc ghi chỉ xảy ra khi tiến trình thoát
+        atexit.register(lambda: open("f.txt", "w").close())
+    elif ca == "ghi_khi_huy":   # ... hoặc khi đối tượng để lại bị thu hồi
+        globals()["_giu"] = GhiKhiHuy()
+    elif ca == "luong":
+        threading.Thread(target=lambda: open("h.txt", "w").close()).start()
+    elif ca == "fd_tho":
+        os.write(1, b"lot")
+    else:   # lời gọi transport SAI: nuốt lỗi như `ghim_agy` vẫn làm ⇒ chỉ nhật ký `sai` mới tố được
+        try:
+            {"timeout_chuoi": lambda: urllib.request.urlopen(U, timeout="30"), "timeout_am": lambda: urllib.request.urlopen(U, timeout=-1),
+             "timeout_bool": lambda: urllib.request.urlopen(U, timeout=True), "req_sai_kieu": lambda: urllib.request.urlopen(U.encode()),
+             "doi_so_la": lambda: urllib.request.urlopen(U, thoi_han=3), "post": lambda: urllib.request.urlopen(U, b"x"),
+             "url_la": lambda: urllib.request.urlopen(U + "?x=1")}[ca]()
+        except Exception:
+            pass
+    return 0
+'''
+THU_GHI = ("path_tuyet_doi", "os_open", "temporaryfile", "tao_roi_xoa", "nuot_loi", "them_vao", "mkdir", "doi_ten", "xoa", "fdopen", "tien_trinh", "mo_khoa_mang",
+           "hen_luc_thoat", "ghi_khi_huy", "luong")
+THU_SAI = ("timeout_chuoi", "timeout_am", "timeout_bool", "req_sai_kieu", "doi_so_la", "post", "url_la")
+def _bi_chot(kq):
+    try:
+        _hau_dieu_chung(kq)
+    except TinHieuChotCa:
+        return True
+    return False
+def g4_quan_sat_va_transport_co_rang():   # F01-n/q: người quan sát thấy MỌI đường ghi đã biết lọt và transport giả bác đúng thứ transport thật bác
+    with tempfile.TemporaryDirectory(prefix="cac_thu_") as t:
+        (ma := Path(t) / "ma_thu.py").write_text(MA_THU, encoding="utf-8", newline="\n")
+        truoc = ma.read_bytes()
+        kq = {x.ten: x for x in _chay_ghim([_goi(ten, (ten,)) for ten in ("lanh",) + THU_GHI + THU_SAI], ma=ma)}
+        lot = _chay_ghim([_goi("fd_tho", ("fd_tho",))], ma=ma)[0]
+        bang(ma.read_bytes() == truoc and [p.name for p in Path(t).iterdir()] == ["ma_thu.py"], "người quan sát ghi nhận mà KHÔNG từ chối: tệp thử bị đổi/thêm")
+    x = kq["lanh"]
+    bang(not _bi_chot(x) and (x.rc, x.ra, x.loi, x.ngoai_le, len(x.nk)) == (0, "ok\n", "", None, 3), f"việc lành bị chốt oan: sk={x.sk} sai={x.sai} nk={x.nk} {x.ngoai_le}")
+    bang([(n["kieu"], n["pt"], n["han"]) for n in x.nk] == [("str", "GET", "30"), ("Request", "GET", "2.5"), ("str", "GET", None)], f"nhật ký transport thiếu trường: {x.nk}")
+    # dấu = mảnh phải có trong sự kiện ĐẦU TIÊN; "" = tuỳ nền (Windows: winreg.OpenKey khi dò proxy; POSIX: urllib.Request/socket)
+    for ten, dau in zip(THU_GHI, ("a.txt", "b.bin", "open(", "c.txt", "d.txt", "ma_thu.py", "os.mkdir", "os.rename", "os.remove", "open(1", "subprocess.Popen", "",
+                                  "f.txt", "g.txt", "_thread.start")):
+        x = kq[ten]
+        bang(x.sk and dau in x.sk[0] and not x.moi and _bi_chot(x), f"{ten}: người quan sát mù hoặc hậu điều không đỏ — sk={x.sk} moi={x.moi}")
+    for ten in ("nuot_loi", "hen_luc_thoat", "ghi_khi_huy"):   # main về 0, không ngoại lệ nào thoát ra: CHỈ nhật ký sự kiện tố được
+        bang(kq[ten].ngoai_le is None and kq[ten].rc == 0, f"{ten}: phải là ca mà mã che được lỗi, lại thấy {kq[ten].ngoai_le} rc={kq[ten].rc_tho}")
+    for ten in THU_SAI:
+        x = kq[ten]
+        bang(len(x.sai) == 1 and not x.sk and x.ngoai_le is None and _bi_chot(x), f"{ten}: transport giả nhận lời gọi sai — sai={x.sai} sk={x.sk} {x.ngoai_le}")
+    bang(lot.tho[0] == "lot" and not lot.sk and _bi_chot(lot), f"fd_tho: byte đi thẳng fd 1 không bị thấy: {lot.tho}")
 # ---------- H: khối trong hook ----------
 MO, DONG = "# >>> agent-creds (wp1039)", "# <<< agent-creds (wp1039)"
 PY_GIA = "#!{exe}\nimport json, sys\nopen({log!r}, 'a').write(json.dumps(sys.argv[1:]) + '\\n')\nsys.exit(3)\n"   # argv nguyên danh sách (F09)
@@ -861,6 +1125,21 @@ DOT_BIEN = (
     ("G2_bo_kiem_digest", "ma", '    if "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):', "    if False:", "g2_ghim_tu_choi_khi_sai"),
     ("G2_bo_kiem_tarball_ghim", "ma", '                return print(f"ghim-agy: ✗ tarball', '                pass; print(f"ghim-agy: ✗ tarball', "g2_ghim_tu_choi_khi_sai"),
     ("G2_bo_kiem_ban", "ma", ' and re.fullmatch(r"\\d+\\.\\d+\\.\\d+", argv[2])):', "):", "g2_ghim_tu_choi_khi_sai"),
+    # Lớp `ghim-output-oracle` lượt 3 (F01-n/q/r/s): đột biến SẢN PHẨM, mỗi cái chỉ chết được ở hậu điều chung của đúng ca
+    ("F01n_path_write_text_tuyet_doi", "ma", "        dong = []", '        dong = []; Path(os.environ.get("TMPDIR") or os.environ.get("TEMP") or "/tmp", "ghim-agy-lot.txt").write_text("x", encoding="utf-8")', "g1_ghim_in_dung_sau_cap"),
+    ("F01n_os_open", "ma", "        dong = []", '        dong = []; os.close(os.open(os.path.join(os.environ.get("TMPDIR") or os.environ.get("TEMP") or "/tmp", "ghim-agy-lot.bin"), os.O_WRONLY | os.O_CREAT | os.O_TRUNC))', "g3_ghim_ban_chi_dinh"),
+    ("F01n_temporaryfile", "ma", "        dong = []", "        dong = []; tempfile.TemporaryFile().close()", "g1_ghim_in_dung_sau_cap"),
+    ("F01n_tao_roi_xoa", "ma", "        dong = []", '        dong = []; Path("ghim-agy-tam.txt").write_text("x", encoding="utf-8"); Path("ghim-agy-tam.txt").unlink()', "g1_ghim_in_dung_sau_cap"),
+    ("F01n_ghi_roi_nuot_loi", "ma", "        dong = []", '        dong = []\n        try:\n            open("ghim-agy.log", "a").close()\n        except BaseException:\n            pass', "g3_ghim_ban_chi_dinh"),
+    ("F01n_ghi_o_nhanh_loi", "ma", '        return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1', '        Path(os.environ.get("TMPDIR") or os.environ.get("TEMP") or "/tmp", "ghim-agy-loi.txt").write_text(type(e).__name__, encoding="utf-8")\n        return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1', "g2_ghim_tu_choi_khi_sai"),
+    ("F01q_timeout_chuoi_release", "ma", "timeout=30) as r:", 'timeout="30") as r:', "g3_ghim_ban_chi_dinh"),
+    ("F01q_timeout_chuoi_tai", "ma", "timeout=300) as r:", 'timeout="300") as r:', "g1_ghim_in_dung_sau_cap"),
+    ("F01r_argv_sai_ghi_tep", "ma", '    return print("dùng: cloud_agent_creds.py', '    open("ghim-agy-argv.log", "a").close()\n    return print("dùng: cloud_agent_creds.py', "g2_ghim_tu_choi_khi_sai"),
+    ("F01r_argv_sai_van_tai", "ma", '    return print("dùng: cloud_agent_creds.py', '    try:\n        doc_release()\n    except Exception:\n        pass\n    return print("dùng: cloud_agent_creds.py', "g2_ghim_tu_choi_khi_sai"),
+    ("F01s_ban_bo_kiem_digest", "ma", '    if "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):', '    if ban is None and "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):', "g2_ghim_tu_choi_khi_sai"),
+    ("F01s_ban_bo_kiem_tarball", "ma", 'if len(tvg) != 1 or tvg[0].name != "antigravity" or not tvg[0].isreg():', 'if ban is None and (len(tvg) != 1 or tvg[0].name != "antigravity" or not tvg[0].isreg()):', "g2_ghim_tu_choi_khi_sai"),
+    ("F01s_ban_bo_kiem_thieu", "ma", '            if a is None:\n                return print(f"ghim-agy: ✗ thiếu tài sản {k}") or 1', '            if a is None and ban is not None:\n                continue\n            if a is None:\n                return print(f"ghim-agy: ✗ thiếu tài sản {k}") or 1', "g2_ghim_tu_choi_khi_sai"),
+    ("F01s_ban_loi_rc0", "ma", 'return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or 1', 'return print(f"ghim-agy: ✗ lỗi {type(e).__name__}") or (0 if ban else 1)', "g2_ghim_tu_choi_khi_sai"),
     ("H1_doi_khoi_ra_sau_doctor", "hook", None, _doi_khoi_ra_sau, "h1_vi_tri_khoi_trong_hook"),
     ("H1_khoi_ngay_sau_tieu_de_truoc_pip", "hook", None, _doi_khoi_len_tieu_de, "h1_vi_tri_khoi_trong_hook"),
     ("H2_bo_or_true", "hook", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /' || MA_AC=$?", "\"$GOC/ops/cloud_agent_creds.py\" nap 2>&1 | sed 's/^/[session-start] /'", "h2_khoi_song_sot_set_e"),
@@ -914,6 +1193,7 @@ DOT_BIEN = (
 TU_KIEM = (   # F2 — (tên, tệp, gốc, thay, ca đích, hạng mong đợi)
     ("vo_can_qua_except_doi_kieu", "ma", "    he = he.lower()\n", "    raise AttributeError('vo can')\n", "b9_luat_chon_nen", "TIN_DUNG_GIA"),
     ("chi_them_chu_thich", "ma", "TIMEOUT_MAC_DINH, HAN_VERSION, HAN_DON = 180, 15, 10\n", "TIMEOUT_MAC_DINH, HAN_VERSION, HAN_DON = 180, 15, 10  # vo hai\n", "a5_doc_timeout", "SONG_SOT"),
+    ("vo_can_trong_tien_trinh_con", "ma", '    if argv == ["ghim-agy"] or (', '    ten_khong_ton_tai\n    if argv == ["ghim-agy"] or (', "g1_ghim_in_dung_sau_cap", "TIN_DUNG_GIA"),
 )
 def phan_hang(rc, ra, ten_ca):
     """GIET chỉ khi con thoát 3 VÀ có dòng `DO:<đúng ca đích>:` — `AssertionError` trần hay ca khác là tín dụng giả."""

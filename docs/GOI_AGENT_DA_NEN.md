@@ -282,6 +282,120 @@ kết luận sai ở container này — phải nói rõ **đường nào**.
 - **Nó từ chối chạy ngoài thư mục git tin cậy**: `Not inside a trusted directory and
   --skip-git-repo-check was not specified`. Chạy trong kho, đừng chạy ở `/tmp`.
 
+## Script gọi Claude: subscription hay API key (`tl llm-order`, `tl llm-khai-niem`)
+
+Đây là chuyện của SCRIPT gọi model (ví dụ tách khái niệm của một điều "Giải thích từ
+ngữ"), KHÔNG phải chuyện xác thực của chính phiên Claude Code. Phiên Claude Code luôn
+tính vào tài khoản Anthropic (subscription) của người dùng.
+
+### Đặt key ở đâu — đo 24-11-2026 trên phiên Claude Code trên web
+
+- **Network secrets KHÔNG dùng được.** Công cụ xin credential từ chối thẳng host của
+  Anthropic: không lưu được credential cho `api.anthropic.com`, và proxy không bao giờ
+  gắn secret vào request tới đó.
+- **Phải là biến môi trường** của environment (menu môi trường trên thanh tiêu đề
+  phiên → Edit → ô biến, định dạng `.env`). Giá trị lưu dạng văn bản thường: ai dùng
+  environment đó, và mọi lệnh trong phiên của họ, đều đọc được. Dùng key riêng, hạn
+  mức chi tiêu thấp.
+- **Đặt tên `TL_ANTHROPIC_API_KEY`, đừng đặt `ANTHROPIC_API_KEY`.** Trang sửa môi
+  trường cảnh báo tên chuẩn *"won't be used to authenticate requests"*. Câu đó không
+  nói rõ biến có còn được đưa vào phiên cho script đọc hay không. Tên riêng thì khỏi
+  phải đoán. Script đọc `TL_` trước, rồi mới tới tên chuẩn.
+- **Biến chỉ nạp khi phiên KHỞI ĐỘNG LẠI.** Lưu xong mà vẫn ở phiên cũ thì phiên đó
+  không thấy biến. Một lần resume phiên (container khởi động lại) đã đủ nạp: đo được ở
+  phiên ngày 24-11. Môi trường cloud KHÔNG chia sẻ biến với máy cá nhân: trên Windows
+  phải tự đặt (`setx TL_ANTHROPIC_API_KEY "..."` rồi mở terminal mới).
+
+### Hai đường, tự chuyển khi đường hỏng TRƯỚC khi gọi model
+
+Lệnh nằm trong gói phát hành (chạy được cả trên Cowork); lõi ở `scripts/tl_core/llm_route.py`:
+
+```
+python scripts/tl.py llm-khai-niem 134/2025/QH15 --dieu 3 [--out kq.json] [--json] [--nhat-ky u.jsonl]
+python scripts/tl.py llm-khai-niem --tep dieu3.txt          # văn bản Điều có sẵn ở tệp
+python scripts/tl.py llm-order                              # xem thứ tự hiệu lực và nguồn của nó
+python scripts/tl.py llm-order api,sub                      # đặt (lưu bền), đổi lúc nào cũng được
+python scripts/tl.py llm-order --reset                      # về mặc định sub,api
+```
+
+Nguyên văn lấy qua chính `tl extract` (tiến trình con), không qua đường đọc thứ hai.
+Thứ tự hiệu lực: cờ `--thu-tu` của lần chạy > tệp do `tl llm-order` lưu
+(`~/.tra_luat_llm.json`, đổi chỗ bằng `TL_LLM_ORDER_FILE`) > biến `TL_LLM_ORDER` > mặc
+định **`sub,api`**. Tệp hỏng thì lệnh ĐỎ (`rc=2`), không lặng lẽ lùi về mặc định, vì lùi
+im lặng là đổi đường tính tiền sau lưng người dùng. Tệp ở thư mục nhà nên trong phiên
+cloud nó mất khi container bị thu hồi; muốn bền qua mọi phiên thì đặt `TL_LLM_ORDER` trong
+biến môi trường của environment.
+
+| Đường | Gọi bằng | Tính tiền vào |
+|---|---|---|
+| `api` | SDK `anthropic` + `TL_ANTHROPIC_API_KEY` | credit API (Claude Console) |
+| `sub` | `claude -p` (Claude Code không tương tác) | hạn mức subscription |
+
+- **Chỉ CHUYỂN khi lỗi thuộc về ĐƯỜNG và xảy ra TRƯỚC khi model chạy**: ở đường `api` là thiếu key/SDK,
+  401, 403, 402 hay `billing_error` (hết credit), 400 kèm câu *credit balance*, 429, mất kết nối; ở đường
+  `sub` là thiếu CLI, định tuyến sai, `auth status` không phải subscription, hoặc không khởi chạy được
+  `claude -p`. Lỗi thuộc về YÊU CẦU thì DỪNG: 400 khác, model từ chối, bị cắt `max_tokens`, sai model,
+  sai schema. Chạy lại lỗi ấy ở đường kia chỉ tốn tiền hai lần.
+- **`claude -p` đã khởi chạy thì mọi lỗi đều DỪNG, kể cả chạm hạn mức gói** (`rc=4`, thông báo chỉ cách
+  chạy lại bằng `--thu-tu api`). Năm lượt cross-review liên tiếp (PR #1503) đều tìm ra một cửa mới trong
+  phép đoán "model đã chạy chưa" từ envelope của CLI, nên chủ kho quyết định bỏ hẳn phép đoán ấy: không
+  tự tiêu credit API khi không chứng minh được lượt gói chưa tốn gì.
+- **Đường `sub` chỉ được báo là subscription khi Claude Code KHÔNG bị định tuyến đi nơi khác.** Mọi biến
+  `CLAUDE_CODE_USE_*` đang bật mà không nằm trong danh sách CHO PHÉP (4 cờ tính năng, gồm
+  `CLAUDE_CODE_USE_CCR_V2` của chính phiên web) và `ANTHROPIC_BASE_URL` trỏ host khác `api.anthropic.com`
+  đều làm đường `sub` bị từ chối. Bản vá đầu chặn theo tiền tố và chặn oan `CCR_V2`, lộ ra ở lần chạy thật.
+- **Đường `sub` là đường hợp lệ DUY NHẤT để script dùng gói.** Đừng lấy token OAuth của
+  Claude Code (`claude_oauth_token` trong `agent_creds`) đi gọi API thẳng. Đường `sub`
+  gỡ `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` và `TL_ANTHROPIC_API_KEY` khỏi env của
+  tiến trình con. Lý do: trên máy cá nhân, `claude` CLI thấy key thì có thể lặng lẽ tính
+  tiền vào API thay vì gói.
+- **`claude -p` trần đắt hơn nhiều so với bản đã cắt.** Đo 24-11-2026 trên một câu hỏi
+  một dòng: gọi trần nạp nguyên system prompt và bộ tool của Claude Code, khoảng 92k
+  token vào hạn mức. Thêm `--tools "" --strict-mcp-config --setting-sources ""
+  --disable-slash-commands --system-prompt …` thì còn khoảng 1,9k. **Đừng dùng
+  `--bare`**: chế độ ấy chỉ nhận API key, tức biến đường `sub` thành đường `api` mà không
+  báo gì.
+- **Cùng prompt, hai đường có thể tách khác nhau.** Đo 24-11-2026 trên Điều 3 Luật
+  134/2025/QH15: đường `api` cắt đúng sau chữ "là", còn đường `sub` giữ "là …" ở đầu
+  định nghĩa. Cả hai đều qua phép kiểm chuỗi con cũ. Nay ranh giới do MÃ quyết (bỏ "là "
+  thừa), và phép kiểm đòi cả cụm `<thuật ngữ> là <định nghĩa>` có nguyên văn trong
+  nguồn. Lệch thì `rc=5`, không dùng kết quả.
+- Mỗi lần chạy in ra đường đã dùng, model và token; `--nhat-ky usage.jsonl` ghi dồn để
+  cộng tổng (phải là tệp KHÁC `--out`).
+- **Đường `sub` đo nguồn xác thực trước khi gọi model**: `claude --setting-sources "" auth status --json`
+  với cùng env của lời gọi; chỉ `authMethod` ∈ {`claude.ai`, `oauth_token`} và `apiProvider=firstParty` mới
+  được coi là subscription. Giới hạn: không phân biệt hạn mức gói với "extra usage" tài khoản tự bật.
+- **`ok`/`rc=0` KHÔNG có nghĩa ranh giới khoản đã được chứng minh.** Phép kiểm chỉ chứng minh thuật ngữ và định
+  nghĩa khớp nguyên văn TỪNG KHOẢN theo phân đoạn của bộ quét; ranh giới khoản tách từ văn bản THÔ thì không chứng
+  minh được — 11 lượt cross-review (PR #1503) lượt nào cũng tìm ra một cách phân đoạn sai mới. Kết quả luôn mang
+  `"can_nguoi_duyet": true` kèm `pham_vi_kiem`; người dùng phải duyệt số khoản và ranh giới trước khi dùng. Các lỗ
+  đã biết mà chưa vá (trích dẫn hai tầng bị làm phẳng thành `"`, khoản dài ngắt dòng trước một mệnh đề có "là" ở
+  nguồn mất số, tiểu mục đánh số trùng số khoản kế tiếp, xuống dòng của điểm bị gộp khi so) ghi nợ ở issue riêng.
+- **Kiểm nguyên văn là fail-closed, ranh giới khoản theo CẤU TRÚC dòng** (không đoán theo chữ "là"): nguồn có
+  số thì số khoản phải liên tục từ 1 và mọi dòng không số phải là điểm (`a)`, `-`) hoặc dòng mở bằng "là" sau một
+  thuật ngữ chưa có từ nối; nguồn mất số (Google Doc) thì mỗi dòng là một khoản. Nguồn có BẤT KỲ dòng nào mà
+  ngoặc/trích dẫn không khép trong chính dòng ấy (trải nhiều dòng, `)` hay `”` lẻ), trích dẫn cong lồng cùng
+  kiểu, hoặc BẤT KỲ dấu ngoặc/trích dẫn nào ngoài `(` `)` `“` `”` `"` (vd `«»` `‘’` `'` `„` `[]`) ⇒ từ chối CẢ
+  nguồn; tiêu đề Điều dính khoản đầu trên cùng một dòng cũng bị từ chối. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
+  số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
+  (`--tep`) hoặc dựng `tl cache-build` trước.
+- **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
+  `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả
+  hai thì lệnh báo HẾT ĐƯỜNG (`rc=3`) kèm lý do từng đường; `tl llm-order` in sẵn đường nào
+  có mặt.
+
+### Còn bao nhiêu credit
+
+- **Số dư: chỉ xem được ở Claude Console → Billing.** Chúng tôi chưa tìm thấy endpoint
+  nào cho API key thường đọc số dư. Admin API có báo cáo chi phí, nhưng nó cần admin key
+  và trả số đã tiêu chứ không phải số còn lại.
+- **Key còn sống và còn credit hay không:** `python .claude/dev/launcher.py doctor
+  --kiem-song`. Mục `anthropic-api` gửi MỘT lời gọi Messages nhỏ thật (đo 24-11-2026: 26
+  token). Chỉ khi trả 2xx mới được nhãn `DUNG_DUOC`. Hết credit hoặc key bị từ chối thì
+  ra `CHUA_XAC_THUC`, kèm cách chữa. `doctor` không có `--kiem-song` thì KHÔNG gọi mạng:
+  có key chỉ là `CO_CREDENTIAL`, không có key là `THIEU`. Thiếu key không bị tính là
+  cảnh báo, vì đường này tuỳ chọn.
+
 ## Các chốt
 
 Chạy trước khi gọi agent, hoặc gói luôn lượt gọi:

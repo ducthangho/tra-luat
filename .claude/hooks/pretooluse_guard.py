@@ -115,6 +115,8 @@ _GIT_CO_MANG_GIA_TRI = frozenset({"-C", "-c", "--git-dir", "--work-tree", "--nam
 _TL_LENH_GHI = frozenset({
     "agent-creds-set",   # WP1009: ghi credential agent len Drive — subagent PHAI bi chan
     "agent-creds-exec",  # WP1038: dat credential vao tien trinh khac — subagent PHAI bi chan
+    "llm-order",         # r380: ghi tep thu tu ~/.tra_luat_llm.json
+    "llm-khai-niem",     # r380: goi Claude (TIEU credit/han muc) + ghi --out/--nhat-ky — subagent PHAI bi chan
     "backfill-hieuluc", "backfill-loai", "backfill-nlm-status", "backfill-notebook",
     "backfill-title-vn", "bench", "boot", "bootstrap", "bundle-export", "cache-build",
     "cache-snapshot", "chunk-apply", "config-pin-registry", "confirm", "consolidation-cleanup",

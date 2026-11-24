@@ -56,6 +56,7 @@ Nguồn sự thật MÁY-ĐỌC: `tl tool-inventory --json` (kèm registry metad
 | Tìm & xác minh nguồn | `find-doc` · `exists` · `locate` · `source-map` · `status` · `relation-check` · `vbhn-check/verify/compare` · `extract` |
 | Nạp & convert (GHI — dry-run trước) | `ingest-local` · `profile-ingest` · `ingest-inbox` · `ingest-zip` · `ingest-ocr` · `profile-ingest-chunks` · `convert-verify` · `nlm-add` |
 | OCR & chunk (local an toàn) | `ocr-analyze/run/verify` · `chunk-plan/apply/verify` |
+| Gọi Claude cho script (r380) | `llm-order` (thứ tự đường: mặc định `sub,api`, đổi bất cứ lúc nào) · `llm-khai-niem` (tách khái niệm Điều "Giải thích từ ngữ", kiểm nguyên văn) |
 | NLM | `nlm-list/get/query/cross/content/links/auth-status/audit-physical/migrate/source-remove` · `nlm-reconcile` · `nlm-orphans` · `counts --live-nlm` · `slot-audit` |
 | Registry & corpus | `reg-query` · `register` · `recat` · `backfill-loai/title-vn/hieuluc/nlm-status` · `sweep` · `dedup-plan/corpus` · `corpus-audit` · `source-rename/delete/update-corpus` · `hygiene` |
 | Rà soát hồ sơ (điều phối) | `rasoat-loop --dry-rounds K` · `frontier-expand` — kịch bản: `references/RASOAT_HOSO_LOOP.md` |

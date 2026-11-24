@@ -1,0 +1,34 @@
+[
+  {
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r9-soan/thamchieu.py",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo"
+    ],
+    "rc": 0,
+    "stdout_sha256": "3f47032b137318ecab965197abadd9f162cf3f2e30f0350e36f92f09b3816d18",
+    "matches_frozen": true,
+    "seconds": 9.923797532999743,
+    "last_lines": [
+      "passed ops/land/pr631-doctrine-rest-provenance/gate-hau-merge-20261105b/danh-gia-gate-output-42018846747.txt ",
+      "Counter({'passed': 47, 'failed': 10, 'not_measured': 9})"
+    ]
+  },
+  {
+    "command": [
+      "/usr/local/bin/python3",
+      "-B",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r9-soan/do_loi_khai.py",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo"
+    ],
+    "rc": 0,
+    "stdout_sha256": "1befd6837c7840dd962af700b6f5c84bae9ae107e346ba72b92f6ec91b7275d2",
+    "matches_frozen": true,
+    "seconds": 11.444558262999635,
+    "last_lines": [
+      "{'MIEN_CUTOVER': 25, 'KHONG_LOI_KHAI': 50, 'DO': 56, 'DAT': 39}",
+      "{'duong_khong_tep_danh_gia': 39, 'landed_khong_loi_khai_gate_output': 36, 'danh_gia_khong_passed': 12, 'dinh_dang_loi_khai': 2, 'waiver_khong_co_can_cu': 2, 'tep_danh_gia_khong_hop_le': 2}"
+    ]
+  }
+]

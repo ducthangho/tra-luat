@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/usr/local/bin/python3",
+    "-B",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/repo/ops/reviews/wp1236-r10-soan/quet_dot_bien.py",
+    "chay",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/resume_input.jsonl",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu_test.py",
+    "--goc",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/ma_r9_git/ops/gate_output_doi_chieu.py",
+    "--ra",
+    "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work/resume_kq.jsonl",
+    "--song-song",
+    "1"
+  ],
+  "cwd": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r10-7-codex/work",
+  "rc": 0,
+  "seconds": 88.85024685199824,
+  "stdout_sha256": "24462066dd3eb0ec0aa20b266f7f0481df8d649865a93c48230def6e13882244",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

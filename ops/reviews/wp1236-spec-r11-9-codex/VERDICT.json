@@ -1,0 +1,1098 @@
+{
+  "spec_sha256": "8a77e52341ba6f3a9785d10f938cb91c11e7223f69ed1154ed4bb1ee5adfd887",
+  "vong": 9,
+  "reviewed_sha": "9f7fd71c7cd402603db7a319f0d3e3041d595437",
+  "reviewed_tree": "5e25a58665ea37dacf85b5453d5c33e2c1a6b3a0",
+  "review_class": "sensitive",
+  "review_scope": "specification_only",
+  "status": "complete",
+  "findings": [
+    {
+      "id": "Z01",
+      "class_slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "severity": "P2",
+      "vi_tri": "SPEC.md:355–377 (luật 6), đối chiếu luật 1/4/5 tại 311–352",
+      "van_de": "Bảng đóng chưa xác định được một miền nghiệm thu chung: chưa chốt tập ô/đầu vào quan sát, kỳ vọng dương hay âm và thứ tự ưu tiên giữa ngu_phap, hồi quy và (a)/(b); ≥1 mẫu mỗi ô không đặt biên cho mọi biến thể mà (a) tiếp tục bắt buộc. Đây là lỗi hợp đồng nghiệm thu, không phải lỗi mới của mã sản phẩm đã neo.",
+      "bang_chung": [
+        "inventory_audit.json: tự duyệt AST mã 5a1bf33 có 72 Compare trong hàm (+1 guard __name__ ở mức module); inventory61 và coverage45 đúng byte/hash nhưng lọc mất 11 nút trước đó. 16 nút ngoài coverage có cả hai phép so CHUỖI d == empty và CR in d, trái mô tả. Coverage còn gán attempt_yeu_cau cho domain run.head_sha.",
+        "cell_witnesses.json: H2 event=\" push\" cùng mẫu H1/H3/H4/H6 không phân biệt mutant event.lstrip(TAB); event=TAB+push làm HEAD not_measured/khong_phai_run_land, mutant passed, và consumer từ vi phạm thành []. Cùng ô H2, không họ mới.",
+        "cell_witnesses.json: GATE_OUTPUT_NGUON và khoảng trắng vẫn được _chuan đưa về gateoutputnguon, helper/consumer đều []; không thể bắt buộc kỳ vọng âm cho các biến đổi được cho phép ấy. OS viết hoa/cách/NFKC bị RE_MIEN chặn bằng dong_mien trước phép so OS; mutant casefold OS không được phân biệt.",
+        "Hàng labels được biểu diễn là so chuỗi join nhưng mang nghĩa dãy: chọn CHUỖI có H5 mà thiếu H7–H9; chọn DÃY có H7–H9 nhưng quy tắc không nêu H5/H10. Các hàng key/substring khác cũng chưa có loại và oracle chốt riêng.",
+        "Họ URL-dedup, grammar/type/đệ quy và CLI ở lượt6–7 vẫn có nghĩa vụ luật1/4/5 nhưng nhiều điểm không ở45; (b) hiện có thể gọi chúng ngoai_bang_dong, còn (a) chỉ nói ô áp dụng mà không xử trạng thái ngu_phap. Cần quy tắc ưu tiên rõ, không lấy giảm phạm vi làm DA_VA_THAT."
+      ],
+      "de_xuat": "Đóng băng ledger nghĩa với ID ổn định, loại miền, bên biến đổi, ngữ cảnh, đầu vào đại diện/toán tử cụ thể, oracle và tuyến consumer của từng ô; giữ hàng khi chỉ đổi biểu diễn mã. Nêu rõ tập hữu hạn nào là nghĩa vụ P2 và cách xử biến thể khác trong cùng họ. Chốt ưu tiên luật1/2/4/5/ngu_phap trước (a)/(b); ghi disposition có authority cho phần cố ý chuyển scope. Đo lại các đối chứng hiện có trước khi giao executor."
+    },
+    {
+      "id": "Z02",
+      "class_slug": "so-do-khong-cung-pham-vi-nguon",
+      "severity": "P3",
+      "vi_tri": "SPEC.md:463–465, đối chiếu luật5:343–352 và phần kế thừa lượt7–8:626–634",
+      "van_de": "Số tổng hiện hành vẫn khai 127 cặp kho reviewer, nhưng sau hai lượt mã được r11 tiếp nhận, nghĩa vụ hồi quy cộng dồn là 152 ID. Con số127 đúng cho riêng kho lượt6, không đúng cho tổng hiện hành.",
+      "bang_chung": [
+        "counts.json: kho_dot_bien_reviewer_luot6_7_8.jsonl tại b6c0063 có 152 dòng/152 ID duy nhất =127 lượt6 +14 lượt7 +11 lượt8. Luật5 vẫn đòi cộng dồn; không có waiver cho 25 ID sau.",
+        "Đếm độc lập: 30 ca sàn,7 luật, numstat A=1+343+1248=1592; 1592+(300..450)=1892..2042, phù hợp ước ~1900–2050 và trần đề nghị2100. Đây không phải finding về quyền nâng trần."
+      ],
+      "de_xuat": "Ghi127 là số kho lượt6; ghi tổng ledger hiện hành152 cùng con trỏ/băm kho cộng dồn và phân rã127+14+11. Đồng bộ mô tả số luật hiện hành với7; kiểm đủ tậpID, không chỉ đếm dòng. Giữ2100 là đề nghị CHỜ E2."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_ids": [
+        "Z01"
+      ],
+      "manifestations": [
+        "r9-I: hàng/điểm so không cùng miền đã khai; hàng ngữ pháp và seam không có route (a)/(b) rõ",
+        "r9-A: kiểu hàng, parser reachability, biến đổi hợp lệ và oracle âm không đồng nhất",
+        "r9-B: ≥1 mẫu/ô đối lập với mọi mutant cùng họ; H2 TAB làm phản chứng",
+        "r9-P: luật1/2/4/5 và hồi quy lịch sử chưa có ưu tiên tường minh so với phân hạng(a)/(b)"
+      ],
+      "highest_open_severity": "P2",
+      "nguon": {
+        "spec8": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "code8": "5a1bf33831bb4e3a227cfb25843cef8a922c634b",
+        "current_spec": "9f7fd71c7cd402603db7a319f0d3e3041d595437",
+        "history": "spec1–7; mã1–8, L01/L02→M01/M03→N01/N02; giữ alias test-thieu-chot"
+      },
+      "common_fix": "Một bảng nghĩa đóng băng (row/cell ID, nguồn dữ liệu, ngữ cảnh, toán tử/mẫu, oracle, consumer) và một thuật toán phân hạng đầy đủ, giữ quy tắc hồi quy/ngu_phap riêng. Mở rộng bảng phải có revision/authority; refactor không xóa nghĩa vụ.",
+      "closing_check": "Hai người độc lập phải dựng cùng tập ô và cùng nhãn cho 50 witness lịch sử, H2 space/TAB, các normalized-key/OS/labels, grammar ngoài45, m65/m79. Ca mỗi ô phân biệt đúng tính chất; mutant chưa thuộc tập đóng có disposition rõ; không suy đã vá từ cắt scope.",
+      "ly_do_va_rieng": "Các biểu hiện cùng gốc hợp đồng miền chưa chốt; gom thành một finding, không yêu cầu vá ca riêng lẻ."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_ids": [
+        "Z02"
+      ],
+      "manifestations": [
+        "Tổng hiện hành127 chỉ là kho lượt6; nghĩa vụ cộng dồn152 gồm14 lượt7 và11 lượt8"
+      ],
+      "highest_open_severity": "P3",
+      "nguon": {
+        "prior": "Spec8 DA_VA_THAT; số127 đúng lúc ấy",
+        "current": "9f7fd71c7cd402603db7a319f0d3e3041d595437",
+        "artifact_source": "b6c0063ba05fafea6629b1b0af6a607897254a91"
+      },
+      "common_fix": "Nêu riêng baseline lịch sử và tổng hiện hành, cùng băm/con trỏ và tậpID của mỗi nguồn; đồng bộ câu giới thiệu và bảng số.",
+      "closing_check": "Đếm152 ID duy nhất, hiệu tập đủ127+14+11; spec/ledger không công bố127 là tổng hiện hành. Kiểm30ca/7luật/50mutant sàn/1592dòng ở đúng phạm vi.",
+      "ly_do_va_rieng": "Một cập nhật tổng hợp số liệu và phạm vi, tách khỏi cách đóng miền của Z01 vì đây là lời khai số hiện tại sai ngay trên dữ liệu đã ghim."
+    }
+  ],
+  "prior_class_status": [
+    {
+      "slug": "xuong-dong-khong-khop-byte-that",
+      "finding_cu": [
+        "codex:R01",
+        "claude:R01"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ nhãn đã đóng: diff r10→r11 không đổi hợp đồng của lớp; unchanged_contracts.json ghi đoạn nguyên văn và hash tự đối chiếu ở lượt này."
+      ],
+      "chua_do_duoc": "Không còn nghĩa vụ đặc tả cần đo thêm để giữ nhãn; không chứng nhận mã r11, Windows thật, CI/authority live."
+    },
+    {
+      "slug": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "codex:R02",
+        "claude:R03",
+        "claude:R06",
+        "codex:S01",
+        "codex:S03",
+        "claude:S03",
+        "claude:S05",
+        "claude:S06",
+        "codex:T01",
+        "claude:T01",
+        "U02",
+        "V01",
+        "W01",
+        "X01",
+        "ma7:M01",
+        "ma7:M03",
+        "ma8:N01",
+        "ma8:N02"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        "ma7",
+        "ma8"
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "VA_MOT_PHAN",
+        "code8_sha": "5a1bf33831bb4e3a227cfb25843cef8a922c634b"
+      },
+      "status": "VA_MOT_PHAN",
+      "evidence": [
+        "N01 VA_MOT_PHAN ở mức spec: H4/H5/H6/H10 mô tả được11 survivor lượt8; luật1/2/4 còn consumer/target và luật6 buộc seam cho stat/absolute. Nhưng các mâu thuẫn tập ô/biên và route phân hạng ở Z01 chưa cho một acceptance tất định.",
+        "N02 DA_VA_THAT ở mức spec: luật5 thêm KAD→ID cùng nghĩa→TUONG_DUONG kèm chứng minh mới; không được chép nhãn head cũ. equivalence.json chứng minh findall hai regex cho cùng span và hai Pattern-binding cho is/== cùng kết quả;22197 mẫu findall delta0 chỉ bổ trợ chứng minh.",
+        "Luật3 từ spec8 và luật6 r11 đều có phần thu hẹp acceptance; theo§8.3 không tính phần cắt scope là vá. Giữ lịch sử X01, L01/L02→M01/M03→N01/N02 và alias, không reset budget.",
+        "tab_mutant_suite.json:42/42 ca mã8 qua mutant event.lstrip(TAB), còn fixture TAB phân biệt HEAD/mutant qua cả hai tuyến. Đây là phản chứng về biên họH2, không tuyên bố test r11 đã tồn tại."
+      ],
+      "chua_do_duoc": "Chưa có ledger/ma trận và mã r11. Nợ scanner đã rút khỏi scope vẫn không được coi đã sửa; không miễn mutant/P3 cũ hoặc chứng nhận ledger code8 đã tự sửa.",
+      "per_finding": [
+        {
+          "id": "N01",
+          "status": "VA_MOT_PHAN",
+          "evidence": "Z01; all_comparison_domains.json; historical_family_mapping.json; cell_witnesses.json"
+        },
+        {
+          "id": "N02",
+          "status": "DA_VA_THAT",
+          "evidence": "SPEC:343–352,120–122; equivalence.json; nhãn này chỉ là closure của thiếu hợp đồng đặc tả."
+        }
+      ]
+    },
+    {
+      "slug": "nang-tran-thieu-hop-dong-authority",
+      "finding_cu": [
+        "codex:R03",
+        "claude:R11"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "SPEC:471–479 có đủ ai_nang/can_cu/tran_cu/tran_moi, cũ1700 mới2100,3tệp; ghi CHỜ E2 cùng spec_hash. counts.json đo1592 và khoảngước1892–2042. Không có delta cho phép executor dùng2100 trước duyệt. thay_the giữ1400 là phương án hẹp cũ, không phải trần hiện hành; nên cập nhật nếu dùng làm phương án thực tế."
+      ],
+      "chua_do_duoc": "Không readback comment duyệt1700/E1 hoặc ngân sách live do cấm mạng; không coi2100 đã được cấp. Điều này không làm thiếu hợp đồng đề nghị."
+    },
+    {
+      "slug": "d2b-thieu-neo-attempt",
+      "finding_cu": [
+        "codex:R04"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ nhãn đã đóng: diff r10→r11 không đổi hợp đồng của lớp; unchanged_contracts.json ghi đoạn nguyên văn và hash tự đối chiếu ở lượt này."
+      ],
+      "chua_do_duoc": "Không còn nghĩa vụ đặc tả cần đo thêm để giữ nhãn; không chứng nhận mã r11, Windows thật, CI/authority live."
+    },
+    {
+      "slug": "so-do-khong-cung-pham-vi-nguon",
+      "finding_cu": [
+        "codex:R05",
+        "claude:R05",
+        "codex:S02",
+        "claude:S04",
+        "claude:T05",
+        "V02",
+        "Z02 (tái mở bởi r11 tiếp nhận lượt mã7–8)"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "VA_MOT_PHAN",
+      "evidence": [
+        "counts.json:30 ca,7luật,1592dòng và khoảng1892–2042 khớp;127 chỉ đúng kho lượt6, tổng152. Đây là delta r11 làm cũ lời khai từng đúng, không mở lại các số corpus47/10/9 hoặc25/56/39/50 đã đóng."
+      ],
+      "chua_do_duoc": "Chưa có numstat r11;2100 vẫn là đề nghị E2. Không cần thêm phép đo để xác định Z02."
+    },
+    {
+      "slug": "trang-thai-job-khong-khop-conclusion",
+      "finding_cu": [
+        "claude:R02"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ nhãn đã đóng: diff r10→r11 không đổi hợp đồng của lớp; unchanged_contracts.json ghi đoạn nguyên văn và hash tự đối chiếu ở lượt này."
+      ],
+      "chua_do_duoc": "Không còn nghĩa vụ đặc tả cần đo thêm để giữ nhãn; không chứng nhận mã r11, Windows thật, CI/authority live."
+    },
+    {
+      "slug": "landed-khong-buoc-loi-khai-hop-le",
+      "finding_cu": [
+        "claude:R04",
+        "claude:S01"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ nhãn đã đóng: diff r10→r11 không đổi hợp đồng của lớp; unchanged_contracts.json ghi đoạn nguyên văn và hash tự đối chiếu ở lượt này."
+      ],
+      "chua_do_duoc": "Không còn nghĩa vụ đặc tả cần đo thêm để giữ nhãn; không chứng nhận mã r11, Windows thật, CI/authority live."
+    },
+    {
+      "slug": "l8-chua-chot-thu-tu-cutover",
+      "finding_cu": [
+        "claude:R07"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ nhãn đã đóng: diff r10→r11 không đổi hợp đồng của lớp; unchanged_contracts.json ghi đoạn nguyên văn và hash tự đối chiếu ở lượt này."
+      ],
+      "chua_do_duoc": "Không còn nghĩa vụ đặc tả cần đo thêm để giữ nhãn; không chứng nhận mã r11, Windows thật, CI/authority live."
+    },
+    {
+      "slug": "khong-kiem-co-toan-ven-provenance",
+      "finding_cu": [
+        "claude:R08"
+      ],
+      "vong_xuat_hien": [
+        1
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ nhãn đã đóng: diff r10→r11 không đổi hợp đồng của lớp; unchanged_contracts.json ghi đoạn nguyên văn và hash tự đối chiếu ở lượt này."
+      ],
+      "chua_do_duoc": "Không còn nghĩa vụ đặc tả cần đo thêm để giữ nhãn; không chứng nhận mã r11, Windows thật, CI/authority live."
+    },
+    {
+      "slug": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "claude:R09",
+        "claude:S07",
+        "codex:T02",
+        "claude:T03",
+        "U01",
+        "ma7:M02",
+        "ma8:N03"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2,
+        3,
+        4,
+        "ma7",
+        "ma8"
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT",
+        "code8_sha": "5a1bf33831bb4e3a227cfb25843cef8a922c634b"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Luật7 SPEC:378–382 chốt4dòng liên tiếp/regex hiện có, skips đứng trước, mẫu số thực đo và4 đối chứng âm qua chay_moi trên hai chế độ. Hợp đồng đủ để sửa N03 mà không nới regex/đổi write_set.",
+        "output_contract.json: producer mã8 với seam nt rc0 nhưng consumer1; bố cục đúng luật7 consumer0 ở cả hai chế độ (POSIX146,nt135 đột biến dispatch trong mô phỏng). Ca đỏ/mutant sống/tênPOSIX lạ/mẫu số0 đều đỏ. Đây là kiểm hợp đồng, không phải chạy Windows thật.",
+        "999/999 giả vẫn khớp regex (consumer0); vì vậy phải kiểm riêng câu mẫu số là số THỰC ĐO bằng inventory dispatch. Điều này đã được luật7 đòi, không suy từ regex pass. Luật6 loại m65/m79 khỏi skips vì có seam; portable_seams.json có đối chứng âm/dương.",
+        "Các mẫu CLI/D2b cũ giữ nguyên byte (unchanged_contracts.json); không có hồi quy spec của các biểu hiện U01/M02 đã đóng."
+      ],
+      "chua_do_duoc": "Mã r11 chưa có; native Windows local/CI chưa chạy. Những điều đó thuộc nghiệm thu mã, không là thiếu hợp đồng luật7.",
+      "per_finding": [
+        {
+          "id": "N03",
+          "status": "DA_VA_THAT",
+          "evidence": "Đủ chặt ở mức đặc tả theo luật7; implementation code8 vẫn có lỗi, chưa xác nhận mã tương lai."
+        }
+      ]
+    },
+    {
+      "slug": "nguon-doc-khong-neo-cung-snapshot",
+      "finding_cu": [
+        "claude:R12",
+        "claude:S02"
+      ],
+      "vong_xuat_hien": [
+        1,
+        2
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ nhãn đã đóng: diff r10→r11 không đổi hợp đồng của lớp; unchanged_contracts.json ghi đoạn nguyên văn và hash tự đối chiếu ở lượt này."
+      ],
+      "chua_do_duoc": "Không còn nghĩa vụ đặc tả cần đo thêm để giữ nhãn; không chứng nhận mã r11, Windows thật, CI/authority live."
+    },
+    {
+      "slug": "he-qua-gioi-han-khai-thieu",
+      "finding_cu": [
+        "claude:R10",
+        "claude:T02",
+        "claude:T04"
+      ],
+      "vong_xuat_hien": [
+        1,
+        3
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ nhãn đã đóng: diff r10→r11 không đổi hợp đồng của lớp; unchanged_contracts.json ghi đoạn nguyên văn và hash tự đối chiếu ở lượt này."
+      ],
+      "chua_do_duoc": "Không còn nghĩa vụ đặc tả cần đo thêm để giữ nhãn; không chứng nhận mã r11, Windows thật, CI/authority live."
+    },
+    {
+      "slug": "pham-vi-kiem-chung-trai-adr-windows",
+      "finding_cu": [
+        "U03"
+      ],
+      "vong_xuat_hien": [
+        4
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "DA_VA_THAT"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "Giữ nhãn đã đóng: diff r10→r11 không đổi hợp đồng của lớp; unchanged_contracts.json ghi đoạn nguyên văn và hash tự đối chiếu ở lượt này."
+      ],
+      "chua_do_duoc": "Không còn nghĩa vụ đặc tả cần đo thêm để giữ nhãn; không chứng nhận mã r11, Windows thật, CI/authority live."
+    },
+    {
+      "slug": "test-thieu-chot",
+      "finding_cu": [
+        "ma1:F04",
+        "ma2:G02",
+        "ma3:H01",
+        "ma4:J01",
+        "ma4:J02",
+        "ma5:K01",
+        "ma5:K02",
+        "ma6:L01",
+        "ma6:L02",
+        "ma7:M01",
+        "ma7:M03",
+        "ma8:N01",
+        "ma8:N02"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma2",
+        "ma3",
+        "ma4",
+        "ma5",
+        "ma6",
+        "ma7",
+        "ma8"
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "VA_MOT_PHAN",
+        "code8_sha": "5a1bf33831bb4e3a227cfb25843cef8a922c634b"
+      },
+      "status": "VA_MOT_PHAN",
+      "evidence": [
+        "N01 VA_MOT_PHAN ở mức spec: H4/H5/H6/H10 mô tả được11 survivor lượt8; luật1/2/4 còn consumer/target và luật6 buộc seam cho stat/absolute. Nhưng các mâu thuẫn tập ô/biên và route phân hạng ở Z01 chưa cho một acceptance tất định.",
+        "N02 DA_VA_THAT ở mức spec: luật5 thêm KAD→ID cùng nghĩa→TUONG_DUONG kèm chứng minh mới; không được chép nhãn head cũ. equivalence.json chứng minh findall hai regex cho cùng span và hai Pattern-binding cho is/== cùng kết quả;22197 mẫu findall delta0 chỉ bổ trợ chứng minh.",
+        "Luật3 từ spec8 và luật6 r11 đều có phần thu hẹp acceptance; theo§8.3 không tính phần cắt scope là vá. Giữ lịch sử X01, L01/L02→M01/M03→N01/N02 và alias, không reset budget.",
+        "tab_mutant_suite.json:42/42 ca mã8 qua mutant event.lstrip(TAB), còn fixture TAB phân biệt HEAD/mutant qua cả hai tuyến. Đây là phản chứng về biên họH2, không tuyên bố test r11 đã tồn tại."
+      ],
+      "chua_do_duoc": "Chưa có ledger/ma trận và mã r11. Nợ scanner đã rút khỏi scope vẫn không được coi đã sửa; không miễn mutant/P3 cũ hoặc chứng nhận ledger code8 đã tự sửa.",
+      "per_finding": [
+        {
+          "id": "N01",
+          "status": "VA_MOT_PHAN",
+          "evidence": "Z01; all_comparison_domains.json; historical_family_mapping.json; cell_witnesses.json"
+        },
+        {
+          "id": "N02",
+          "status": "DA_VA_THAT",
+          "evidence": "SPEC:343–352,120–122; equivalence.json; nhãn này chỉ là closure của thiếu hợp đồng đặc tả."
+        }
+      ]
+    },
+    {
+      "slug": "mo-ta-duong-dan-lech-hop-dong",
+      "finding_cu": [
+        "ma6:L03"
+      ],
+      "vong_xuat_hien": [
+        "ma6"
+      ],
+      "scope": "MỨC ĐẶC TẢ: hợp đồng đã đủ cho bản thi công đóng lớp hay chưa; không tự chứng nhận mã r11.",
+      "nguon": {
+        "spec8_sha": "81dc1eb73925babe638ed50222e0354bf7488248",
+        "spec8_status": "VA_MOT_PHAN",
+        "code8_status": "DA_VA_THAT",
+        "code8_sha": "5a1bf33831bb4e3a227cfb25843cef8a922c634b"
+      },
+      "status": "DA_VA_THAT",
+      "evidence": [
+        "L03 đã đóng ở mã7–8; không mở lại. Tự xác nhận path_contract.json: docstring _tep_trong ghi ./ HỢP LỆ; plain và ./ qua helper/consumer, ../,symlink,absolute bị chặn. r11 không đổi luật đường dẫn A."
+      ],
+      "chua_do_duoc": "Không còn nghĩa vụ đặc tả cần đo thêm để giữ nhãn; không chứng nhận mã r11, Windows thật, CI/authority live."
+    },
+    {
+      "slug": "yaml-ngoai-schema-bi-chan",
+      "finding_cu": [
+        "F01"
+      ],
+      "vong_xuat_hien": [
+        "ma1"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "Giữ closure mã8; delta review hiện tại chỉ là spec r11.",
+      "nguon": {
+        "code8_sha": "5a1bf33831bb4e3a227cfb25843cef8a922c634b",
+        "code8_status": "DA_VA_THAT"
+      },
+      "evidence": [
+        "Giữ nhãn đã đóng của mã8. Toàn diff r10→r11 chỉ thay miền nghiệm thu/ledger/regex tương đương/output/nâng trần; không đổi hợp đồng sản phẩm của lớp. Không tự mở lại kiểm toàn lớp đã đóng."
+      ],
+      "chua_do_duoc": "Không chạy lại mọi phép đo của mã8; không khai review này là tái approve code."
+    },
+    {
+      "slug": "k2-mat-loi-doc",
+      "finding_cu": [
+        "F02",
+        "G01"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma2"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "Giữ closure mã8; delta review hiện tại chỉ là spec r11.",
+      "nguon": {
+        "code8_sha": "5a1bf33831bb4e3a227cfb25843cef8a922c634b",
+        "code8_status": "DA_VA_THAT"
+      },
+      "evidence": [
+        "Giữ nhãn đã đóng của mã8. Toàn diff r10→r11 chỉ thay miền nghiệm thu/ledger/regex tương đương/output/nâng trần; không đổi hợp đồng sản phẩm của lớp. Không tự mở lại kiểm toàn lớp đã đóng."
+      ],
+      "chua_do_duoc": "Không chạy lại mọi phép đo của mã8; không khai review này là tái approve code."
+    },
+    {
+      "slug": "cli-vong-yaml-traceback",
+      "finding_cu": [
+        "F03",
+        "H02"
+      ],
+      "vong_xuat_hien": [
+        "ma1",
+        "ma3"
+      ],
+      "status": "DA_VA_THAT",
+      "scope": "Giữ closure mã8; delta review hiện tại chỉ là spec r11.",
+      "nguon": {
+        "code8_sha": "5a1bf33831bb4e3a227cfb25843cef8a922c634b",
+        "code8_status": "DA_VA_THAT"
+      },
+      "evidence": [
+        "Giữ nhãn đã đóng của mã8. Toàn diff r10→r11 chỉ thay miền nghiệm thu/ledger/regex tương đương/output/nâng trần; không đổi hợp đồng sản phẩm của lớp. Không tự mở lại kiểm toàn lớp đã đóng."
+      ],
+      "chua_do_duoc": "Không chạy lại mọi phép đo của mã8; không khai review này là tái approve code."
+    }
+  ],
+  "bang_noi_slug": [
+    {
+      "slug_nguon": "test-thieu-chot",
+      "slug_dich": "nghiem-thu-khong-co-lap-chot-dich",
+      "finding_cu": [
+        "spec1–7:R02/S01/U02/V01/W01/X01",
+        "ma1–6:F04/G02/H01/J01/J02/K01/K02/L01/L02",
+        "ma7:M01/M03",
+        "ma8:N01/N02"
+      ],
+      "finding_hien_tai": [
+        "Z01"
+      ],
+      "ly_do": "Alias lịch sử đã có ở spec8 và mã8, cùng nguyên nhân thiếu acceptance độc lập đúng nghĩa. Giữ cả hai slug trong prior; chỉ đếm một lớp.",
+      "phep_doi_chieu": "50 witness lịch sử trong historical_family_mapping.json và các oracle trong cell_witnesses.json; không gộp mới để giảm số lớp."
+    },
+    {
+      "slug_nguon": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "slug_dich": "hop-dong-dau-vao-dau-ra-chua-chot",
+      "finding_cu": [
+        "U01",
+        "M02",
+        "N03"
+      ],
+      "ly_do": "M02 đóng, N03 cùng lớp output/consumer; luật7 nay đủ ở mức spec. Không tự coi mã đã vá."
+    },
+    {
+      "slug_nguon": "so-do-khong-cung-pham-vi-nguon",
+      "slug_dich": "so-do-khong-cung-pham-vi-nguon",
+      "finding_cu": [
+        "R05",
+        "S02",
+        "S04",
+        "T05",
+        "V02"
+      ],
+      "finding_hien_tai": [
+        "Z02"
+      ],
+      "ly_do": "Tái mở vì tổng hiện hành bị trôi khi r11 nhận thêm lịch sử7–8; cùng slug, không đặt lớp mới."
+    }
+  ],
+  "hoi_tu": {
+    "vong8_sang_9": "1/2",
+    "U": [
+      "nghiem-thu-khong-co-lap-chot-dich",
+      "hop-dong-dau-vao-dau-ra-chua-chot"
+    ],
+    "F": [
+      "hop-dong-dau-vao-dau-ra-chua-chot"
+    ],
+    "scope": "Các lớp còn mở ở mốc8 sau tiếp nhận review MÃ8, xét closure ở MỨC ĐẶC TẢ theo chỉ thị. Không là tỷ lệ vá mã r11.",
+    "mau_so": "L03 còn chờ ở verdict spec8 nhưng đã DA_VA_THAT trong mã8; giữ trạng thái mới nhất, không đưa vàoU để lấy thêm tín dụng. Alias test-thieu-chot đếm một lần.",
+    "doi_chieu_union_tho_spec8_va_ma8": {
+      "U": [
+        "nghiem-thu-khong-co-lap-chot-dich",
+        "mo-ta-duong-dan-lech-hop-dong",
+        "hop-dong-dau-vao-dau-ra-chua-chot"
+      ],
+      "da_dong_hien_tai": [
+        "mo-ta-duong-dan-lech-hop-dong",
+        "hop-dong-dau-vao-dau-ra-chua-chot"
+      ],
+      "ratio": "2/3",
+      "note": "Chỉ là hợp thô hai danh sách lịch sử khác thời điểm; không dùng làm tỷ lệ hội tụ vì L03 đã đóng trước vòng9."
+    },
+    "lop_lap_lan_ba": [
+      "nghiem-thu-khong-co-lap-chot-dich",
+      "test-thieu-chot",
+      "hop-dong-dau-vao-dau-ra-chua-chot",
+      "so-do-khong-cung-pham-vi-nguon"
+    ],
+    "lop_moi": [],
+    "lop_tai_mo": [
+      "so-do-khong-cung-pham-vi-nguon"
+    ],
+    "lich_su_giu_nguyen": {
+      "spec7_sang_8": "0/2",
+      "ma6_sang_7": "1/2",
+      "ma7_sang_8": "0/2"
+    },
+    "checkpoint": "Lớp lặp≥3 vẫn cần xét lại cách làm theo§12. E1 đã chọn đóng miền, nhưng Z01 cho thấy bản này chưa chốt được miền; không tự mở vòng vá/đổi ngân sách. 1/2 ở mức spec không chứng minh hội tụ mã."
+  },
+  "da_do_khop": [
+    {
+      "phep_do": "spec hash + Git blob + identity",
+      "command": "sha256sum ../SPEC.md; git rev-parse HEAD HEAD^{tree}; Python compare SPEC bytes to git show HEAD:ops/specs/wp1236-r11.md",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "preflight.json",
+      "positive_evidence": "Đúng sha2568a77e5…; đúngHEAD9f7fd71…/tree5e25a586…; byte blob trùng; sạch tracked/index/untracked."
+    },
+    {
+      "phep_do": "AST độc lập rồi đối chiếu inventory",
+      "command": "Python ast.parse/ast.walk exact git show ma-5a1bf33:ops/gate_output_doi_chieu.py; python3 -B ../work/map_matrix.py",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": [
+        "independent_ast.json",
+        "inventory_audit.json",
+        "all_comparison_domains.json",
+        "historical_family_mapping.json"
+      ],
+      "positive_evidence": "73Compare cả module=72tronghàm+1guard;61inventory/45coverage; hashcoverage đúng47597c…;50 witness lịch sử được ánh xạ, không claim rerun cả50."
+    },
+    {
+      "phep_do": "đối chứng các luật5/6/7",
+      "command": "python3 -B ../work/audit_r9.py",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": [
+        "cell_witnesses.json",
+        "equivalence.json",
+        "portable_seams.json",
+        "output_contract.json"
+      ],
+      "positive_evidence": "R9_WITNESSES_COMPLETE;22197regex samples delta0+proof;2seam head/mutant/control;40producer-consumer scenarios; H2/normalization/parser negative controls."
+    },
+    {
+      "phep_do": "mutant H2 qua toàn42ca mã8",
+      "command": "Python import work/audit_r9.py; set suite MA to mut_event_lstrip_tab.py; chay_ca each CA; rerun only a213 after scratch dependency restoration",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "tab_mutant_suite.json",
+      "positive_evidence": "42/42 case rc0 trên mutant, direct TAB witness đổi kết quả. Không chạy146mutation audit và không gọi đây là gate mãr11.",
+      "setup_correction": "Lượt đầu41/42+1rc4 vì bản sao thiếu kiem_ho_so_land.py. Giữ log lỗi trong artifact; chép đúng blob dependency vào work và đo lại duy nhất ca bị ảnh hưởng,rc0. Không lấy lỗi setup làm mutant bị giết."
+    },
+    {
+      "phep_do": "giữ lớp đường dẫn đã đóng",
+      "command": "Python import scratch product; isolated T-v3-pass per plain/dot/dotdot/symlink/absolute",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "path_contract.json",
+      "positive_evidence": "Plain và./ đều[];3đường cấm đều vi phạm; docstring hiện đúng.",
+      "setup_correction": "Probe ban đầu dùng chung fixture có symlink làm K2 đỏ cả control; không lấy tín dụng, dựng riêng mỗi fixture rồi đo lại."
+    },
+    {
+      "phep_do": "tổng và nâng trần",
+      "command": "git diff --numstat 010046f2141799ec6ffc9cfa1322d49df3f3f680 ma-5a1bf33; Python count spec rows/laws/cumulative bank IDs",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "counts.json",
+      "positive_evidence": "3files+1592;30ca;7luật;152ID=127+14+11;ước1892..2042<2100;E2chờduyệt."
+    },
+    {
+      "phep_do": "bảo toàn hợp đồng các lớp đã đóng",
+      "command": "Python compare23 prior spec8 contract ranges from wp1236-r10.md to exact SPEC.md",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "unchanged_contracts.json",
+      "positive_evidence": "22/23đoạn nguyên văn giữ nguyên;1đoạn nang_tran đổi có chủ đích, đủ4khóa, vẫnchờduyệt."
+    },
+    {
+      "phep_do": "snapshot đầu/cuối + diff --check",
+      "command": "Hash tracked/untracked/ignored files + git status/diff/index + git diff --check HEAD^ HEAD",
+      "rc": 0,
+      "ket_qua": "passed",
+      "artifact": "snapshot_final.json",
+      "positive_evidence": "17502 files, delta0, HEAD/tree đúng; diff/index sạch; chỉ .codex/ ignored có sẵn."
+    }
+  ],
+  "verdict": "changes_requested",
+  "revision": 11,
+  "base_sha": "394e93468fc8d84ec20938e6df8fb7ab72b2cc37",
+  "source_product_sha": "5a1bf33831bb4e3a227cfb25843cef8a922c634b",
+  "source_product_tree": "19fe7bd12a8a2e038a11ec230efb706be5756caa",
+  "review_identity": {
+    "provider": "openai_codex",
+    "execution_surface": "codex_cli",
+    "transport": "machine",
+    "run_id": "298fef3034494c03a87654a39ff885c8",
+    "session_id": "01a1fc54-e4cc-75b3-ac2e-a30cb16aea91",
+    "model_family": "openai",
+    "model_family_source": "provider fallback ADR-0065",
+    "model_served": "KHONG_DO_DUOC",
+    "effort_served": "KHONG_DO_DUOC",
+    "identity_source": "../run/298fef30/run.json + CODEX_SESSION_ID; launcher still running during this review",
+    "model_limit": "Không suy model/effort phục vụ từ tên yêu cầu, header hoặc GitHub actor.",
+    "independence": "Context reviewer được giao riêng; không tái dùng/fork context executor, không tạo subagent.",
+    "sandbox": "workspace-write; thao tác của reviewer chỉ ghi work/, không khai filesystem sandbox read-only.",
+    "assurance_limit": "Verdict nội dung offline; không tự tạo cross_approved, lease, audit, merge hoặc land. Dispatcher kiểm terminal receipt khi run kết thúc."
+  },
+  "preflight": {
+    "commands": [
+      {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD",
+          "HEAD^{tree}"
+        ],
+        "rc": 0,
+        "stdout": "9f7fd71c7cd402603db7a319f0d3e3041d595437\n5e25a58665ea37dacf85b5453d5c33e2c1a6b3a0\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all",
+          "--ignored=matching"
+        ],
+        "rc": 0,
+        "stdout": "!! .codex/\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--cached",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "git",
+          "config",
+          "--get",
+          "core.abbrev"
+        ],
+        "rc": 0,
+        "stdout": "7\n",
+        "stderr": ""
+      }
+    ],
+    "snapshot_files": 17502,
+    "spec_sha256": "8a77e52341ba6f3a9785d10f938cb91c11e7223f69ed1154ed4bb1ee5adfd887",
+    "spec_matches_blob": true,
+    "python": "3.13.18 (main, Oct 26 2026, 14:08:19) [Clang 23.1.3 ]",
+    "platform": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "session_id": "01a1fc54-e4cc-75b3-ac2e-a30cb16aea91",
+    "scope": "specification_only",
+    "generation": "N/A review spec",
+    "write_set": [
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r11-9-codex/work"
+    ],
+    "repository_write_set": [],
+    "authority": "Chỉ thị trực tiếp người dùng cho review đặc tả r11 vòng9; generation/lease thi công không áp dụng.",
+    "branch": "spec11",
+    "origin": "https://github.com/ducthangho/tra-luat.git",
+    "network": "not_run, theo lệnh cấm",
+    "E1_source": "Chỉ thị người dùng + SPEC dẫn issuecomment-7057154780; không claim readback GitHub.",
+    "E2_status": "Đề nghị 1700→2100 chưa được duyệt; không cản việc review đề nghị này."
+  },
+  "acceptance_assessment": {
+    "law6": {
+      "status": "failed",
+      "finding": "Z01",
+      "rows_finite": 45,
+      "nominal_columns": 10,
+      "reason": "Số nhãn hàng/cột hữu hạn không đủ để tập ô/oracle hay tập biến thể P2 có biên; chưa có ma trận450ô quyết định được."
+    },
+    "law7": {
+      "status": "passed_at_spec_level",
+      "evidence": "output_contract.json",
+      "limits": "Đếm thực đo phải kiểm riêng bằng dispatch inventory; consumer regex không tự phát hiện999/999 giả. NativeWindows not_run."
+    },
+    "law5_new_equivalence_terminal": {
+      "status": "passed_at_spec_level",
+      "evidence": "equivalence.json",
+      "conditions": "Giữ ID cũ, neo replacement cùng nghĩa trên current head, chứng minh tương đương toàn miền liên quan. KHONG_AP_DUNG/không tái hiện/suite xanh không tự là TUONG_DUONG; ref_no_boundary không phải lý do bỏ nghĩa vụ biên token."
+    },
+    "tep_danh_gia": {
+      "status": "equivalent",
+      "evidence": "equivalence.json",
+      "meaning": "Token tối đại theo chính regex/greediness trái-nhất, không thêm ranh giới bên phải; không đổi luật cổng."
+    },
+    "m65_m79": {
+      "status": "specified_and_feasible",
+      "evidence": "portable_seams.json",
+      "measure": "m65 statOSError:HEADrc2+prefix,mutantOSError;controlrc0. m79:realPurePosixPath absolute + mocked filesystem:HEADNone,mutantpath;relativebothpath.",
+      "limits": "Tích hợp từng thuộc tính vào ledger luật6 cần route rõ vì stat/is_absolute là lời gọi, không thuộc45Compare; được giữ trongZ01. Không miễn chạyWindowslocal theoM3."
+    }
+  },
+  "counts_and_budget": {
+    "A_count": 30,
+    "A_ids": [
+      "A1-1",
+      "A1-2",
+      "A1-3",
+      "A1-4",
+      "A1-5",
+      "A1-6",
+      "A1-7",
+      "A1-8",
+      "A1-9",
+      "A1-10",
+      "A1-11",
+      "A1-12",
+      "A1-13",
+      "A1-14",
+      "A1-16",
+      "A1-17",
+      "A1-15",
+      "A2-1",
+      "A2-2",
+      "A2-3",
+      "A2-4",
+      "A2-5",
+      "A2-6",
+      "A2-7",
+      "A2-8",
+      "A2-9",
+      "A2-10",
+      "A2-12",
+      "A2-13",
+      "A2-11"
+    ],
+    "matrix_rules": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7"
+    ],
+    "cumulative_regression_ids": 152,
+    "unique_cumulative_ids": 152,
+    "bank_by_round": {
+      "ma6": 127,
+      "ma7": 14,
+      "ma8": 11
+    },
+    "numstat_command": "git diff --numstat 010046f2141799ec6ffc9cfa1322d49df3f3f680 ma-5a1bf33",
+    "numstat_rc": 0,
+    "numstat": "1\t0\t.claude/dev/ci_dang_ky_test.py\n343\t0\tops/gate_output_doi_chieu.py\n1248\t0\tops/gate_output_doi_chieu_test.py\n",
+    "r10_added": 1592,
+    "r11_estimate_exact_interval": [
+      1892,
+      2042
+    ],
+    "nang_tran": {
+      "old": 1700,
+      "proposed": 2100,
+      "status": "CHỜ E2; explicit user supplied authority scope, no live readback"
+    },
+    "stale_current_text": [
+      [
+        308,
+        "review mã r9 đợt A. Vá thêm từng dòng ca theo finding không đóng được lớp; r10 thay bằng NĂM luật bao cả lớp, áp cho mọi đợt (luật 3 là công cụ khuyến nghị từ bản sửa 3; luật 1, 2, 4, 5 bắt buộc). Các bảng ca"
+      ],
+      [
+        464,
+        "**50** đột biến đánh số kế thừa m1…m50 (sàn, không phải tổng); **127** cặp kho reviewer; mẫu số quét trên mã r10 CHƯA ĐO (pilot trên mã"
+      ],
+      [
+        478,
+        "  thay_the: \"giữ 1400 và tách phần ca bảng dữ liệu của luật 4 sang một đợt A2 riêng (thêm một lease, một chuỗi review); đợt A1 không đạt luật 4 cho tới khi A2 land\""
+      ]
+    ],
+    "numbered_mutant_floor": 50,
+    "floor_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50
+    ],
+    "bank6_sha256": "6777b1d4fa59f8a2cdca9603bbf86338d440b6656076a0809c55a8c60954a3cd",
+    "bank6_ids_preserved": true,
+    "bank_cumulative_sha256": "f311a24c21693df4f291fe4cdb34c1c3575b4d646cfae6106b2d5e3b09a72d05"
+  },
+  "prior_status_summary": {
+    "DA_VA_THAT": 15,
+    "VA_MOT_PHAN": 3,
+    "CHUA_VA": 0,
+    "KHONG_DO_DUOC": 0
+  },
+  "severity_decision": {
+    "current_spec_open": {
+      "P0": 0,
+      "P1": 0,
+      "P2": 1,
+      "P3": 1
+    },
+    "open_classes": 2,
+    "reason": "Sensitive: Z01 P2 chặn approval; Z02 P3 cũng phải đóng/miễn exactSHA. Không có miễn trừ được cấp và không tự ghi nợP3."
+  },
+  "validation_scope": {
+    "passed": [
+      "preflight",
+      "AST reconciliation",
+      "historical family mapping",
+      "semantic witnesses",
+      "equivalence proof+samples",
+      "portable seams",
+      "producer-consumer contract probes",
+      "counts",
+      "unchanged contracts"
+    ],
+    "failed": [
+      "acceptance of spec law6 (Z01)",
+      "current total claim127 (Z02)"
+    ],
+    "skipped": [],
+    "not_run": [
+      "nativeWindows",
+      "remoteCI",
+      "GitHub/network/authorityreadback",
+      "mãr11 (chưa có)",
+      "146mutant audit hiện hành/fullscanner",
+      "fullselftest/release",
+      "Ruffpin/probe",
+      "bareRufflint",
+      "LIVE/merge/deploy"
+    ],
+    "limits": "Không suy gate mã pass từ phép đo đặc tả. Hai lỗi setup được khai và đo lại đúng phạm vi; không tính chúng thành finding sản phẩm."
+  },
+  "read_only_snapshot": {
+    "checks": [
+      {
+        "command": [
+          "git",
+          "rev-parse",
+          "HEAD",
+          "HEAD^{tree}"
+        ],
+        "rc": 0,
+        "stdout": "9f7fd71c7cd402603db7a319f0d3e3041d595437\n5e25a58665ea37dacf85b5453d5c33e2c1a6b3a0\n",
+        "stderr": "",
+        "stdout_sha256": "d3c7269b8a51f9b99b7d4a4be4132cbdb8e6dbdc287ba0db8d99ab2cb6ab6439"
+      },
+      {
+        "command": [
+          "git",
+          "status",
+          "--porcelain=v1",
+          "--untracked-files=all",
+          "--ignored=matching"
+        ],
+        "rc": 0,
+        "stdout": "!! .codex/\n",
+        "stderr": "",
+        "stdout_sha256": "7a26e2a87df7447fae58bdb1eb41dca70c4e41f40c2b821cb7466761d682cb52"
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": "",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--cached",
+          "--binary"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": "",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check",
+          "HEAD^",
+          "HEAD"
+        ],
+        "rc": 0,
+        "stdout": "",
+        "stderr": "",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "files": 17502,
+    "delta": [],
+    "same_head_tree": true,
+    "limit": "Hai snapshot chứng minh không có delta byte quan sát được; không chứng minh lịch sử ghi rồi hoàn nguyên. Repo executor gốc ngoài phạm vi quan sát."
+  },
+  "schema_validation": {
+    "command": [
+      "python3",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r11-9-codex/kiem_verdict_lop.py",
+      "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r11-9-codex/work/VERDICT.json",
+      "--vong",
+      "9"
+    ],
+    "rc": 0,
+    "stdout": "HOP_LE (§8.3): 2 finding, 2 lop\n",
+    "stderr": "",
+    "stdout_sha256": "9739f5bd7b231ec52705a94e69de72d373883fea5c969d334c4f5ee6af7394f0",
+    "scope": "Schema/slug only; not semantic correctness or authority"
+  }
+}

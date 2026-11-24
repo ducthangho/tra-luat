@@ -1,0 +1,79 @@
+{
+  "version": "1.6.2",
+  "run_id": "25d7d44cfffe417c9ed93629f9ae1ba7",
+  "short_id": "25d7d44c",
+  "ten": "wp1236-spec-r9-2-claude",
+  "lenh": {
+    "chuong_trinh": "claude",
+    "so_doi_so": 15,
+    "van_tay": "907950b37c36144c"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-11-20T11:59:32.511526+00:00",
+  "ket_thuc_utc": "2026-11-20T12:16:04.334445+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 4317,
+  "khoa_danh_tinh": "linux:269128",
+  "workspace": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r9-2-claude/repo",
+  "head": "951b717227207607edbe4efeceee75dfe53e7810",
+  "ref": "sandbox",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "a31b36bbb1e52c5f9cb8392c34e3d22d0e2038a064f080d33d6c382c147d49d0",
+  "deadline_utc": null,
+  "probe": {
+    "workspace": {
+      "trang_thai": "DAT",
+      "chi_tiet": ".git la thu muc"
+    },
+    "ghi": {
+      "trang_thai": "DAT",
+      "chi_tiet": "ghi-readback-xoa thanh cong"
+    },
+    "spawn": {
+      "trang_thai": "DAT",
+      "chi_tiet": "rc=0; output=22B"
+    },
+    "claude_trust": {
+      "trang_thai": "KHONG_DO_DUOC",
+      "chi_tiet": "thieu khoa trust Claude"
+    }
+  },
+  "bo_qua_probe_ly_do": "claude_trust KHONG_DO_DUOC trong clone sandbox; chu kho cho phep --bo-qua-probe cho cross-review dac ta #1236 bang Claude Opus 5.5: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-6665140805 ; khong trust thu muc, allowedTools Read,Grep,Glob,Bash, setting-sources user, strict-mcp-config",
+  "probe_da_chay": [
+    "claude_trust",
+    "ghi",
+    "spawn",
+    "workspace"
+  ],
+  "provider": "anthropic_claude",
+  "execution_surface": "claude_code",
+  "transport": "machine/local",
+  "transport_sha256": "30e2724e2aecb1bf5dc9f3130901afb71c5fa229051c190a6d7ad9aff6378d6d",
+  "thuc_thi_duong_dan": "/opt/claude-code/bin/claude",
+  "thuc_thi_ly_do": null,
+  "thuc_thi_ung_vien_sau": [],
+  "agent_da_khai": null,
+  "agent_suy_ra": "claude",
+  "probe_bo_qua": [],
+  "chup_workspace": false,
+  "checkpoint_sha256": "f7670d189a0f103409cc633884c08b816ce7afff38f0c100b43b0e68d4799899",
+  "prompt_ban_chup": "/tmp/claude-0/-home-user-tra-luat/6c4ac791-21bc-5b0f-932d-b09a8580dddc/scratchpad/review/r9-2-claude/run/25d7d44c/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "log_bam_cay_da_chet": true,
+  "log_bam_cho_giay": 0.002,
+  "prompt_ban_chup_da_xoa": true,
+  "thoi_luong_giay": 991.823,
+  "log_bam_luc_utc": "2026-11-20T12:16:04.336693+00:00",
+  "stdout_byte": 33600,
+  "stdout_sha256": "b487470385543c6cf8313075f96631a92886c57f18448c356736478c92c24dfe",
+  "stderr_byte": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

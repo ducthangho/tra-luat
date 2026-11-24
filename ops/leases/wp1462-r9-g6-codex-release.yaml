@@ -93,6 +93,10 @@
   "prompt_path": "ops/prompts/wp1462-r9-g6-codex-release.txt",
   "prompt_sha256_required": "dcfab9bf501e12a499383a7add1e50c67b5fec20b953e675b3ff16c7a8739363",
   "leased_at_utc": "2026-11-24T08:46:31Z",
-  "lease_until": "2026-11-24T14:46:31Z",
-  "lease_expires_at_utc": "2026-11-24T14:46:31Z"
+  "lease_until": "2026-11-24T11:17:43Z",
+  "lease_expires_at_utc": "2026-11-24T11:17:43Z",
+  "prior_lease_until": "2026-11-24T14:46:31Z",
+  "released_at_utc": "2026-11-24T11:17:43Z",
+  "released_reason": "Owner merge and exact-head post-merge CI verified",
+  "released_merge": "2cbb552876c2f0dd6e957db7c2408112c7527127"
 }

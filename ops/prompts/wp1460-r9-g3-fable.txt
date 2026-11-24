@@ -1,0 +1,52 @@
+You are the EXECUTOR for work packet wp1460 (B1a, Mission #1172) of repository ducthangho/tra-luat, under lease wp1460-r9-g3-claude.
+Provider: claude. Model: Fable 5.2, effort high or above. Surface: claude_code. Transport: machine/local. Environment: cloud.
+You are an executor only. You do not review, approve, push, merge, dispatch workflows or write GitHub comments.
+This is executor attempt 5 of 5, the last one. It is a NARROW fix round.
+
+AUTHORITY AND INPUTS
+- Packet Issue: https://github.com/ducthangho/tra-luat/issues/1460
+- Frozen spec: ops/specs/wp1460-r1/SPEC.md on branch ops/wp1460-r1 at commit 0883d49edc22cf261f471ef71f2dc5f323e8d667, sha256 280f6f8d0dc97f29a79ed8ef94d3070d8ae1fe0487b549054137bcdbc4acbb0c, revision 9.
+  First verify it with `git fetch origin ops/wp1460-r1 && git show 0883d49edc22cf261f471ef71f2dc5f323e8d667:ops/specs/wp1460-r1/SPEC.md | sha256sum`. If the hash differs, STOP.
+  r9 equals r8 except the revision line, the status paragraph, the "Kích thước" section (second `nang_tran` block) and the change table. Contract, acceptance, check code, write set and process are byte-identical to r7/r8.
+- Lease: ops/leases/wp1460-r9-g3-claude.yaml on branch ops/wp1460-r1. Read it and obey its limits. It replaces wp1460-r8-g2-claude.
+- Owner decisions: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7130669819 (roles), https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7131174274 (first size raise, r8) and https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7134900605 (attempt 5, size cap 6 files / 1700 added lines, spec r9 hash approved).
+- Read before coding: CLAUDE.md, AGENTS.md, docs/PROTOCOL_DA_PHIEN.md (§4, §7, §8, §8.3, §12), .claude/skills/work-packet/SKILL.md and the spec.
+
+BASE, START POINT AND BRANCH
+- Base: origin/master at 5259239d763c9ffc1677f033bd9a9cf23ede9299. All numstat is measured against this base.
+- Start point: H2 = 1c31f5a88ba125af708a9609085c0edd2f8dc3ee (tree d316445a44465cd563ce72b64a65b4893e63ad0c), local branch `agent/wp1460-r8-g2-fable`. The coordinator gives you its location. Verify both OIDs before working.
+- Create local branch `agent/wp1460-r9-g3-fable` at H2. Add ONE new commit on top of H2; do not amend or rewrite H2 or its parents. DO NOT PUSH: the owner audits the exact head before its first push.
+
+SCOPE OF THIS ATTEMPT (only this)
+Source review 2 (Codex gpt-6-astra, run 6e53f3d5, changes_requested on H2) left one open P2, F02-R2, cause class `v1-not-fully-specified`:
+  `job_ky_vong_du` calls `yaml.safe_load` on the workflow file; deeply nested YAML (measured at 512 and 900 levels) raises `RecursionError`. The X2 boundary in the collector only catches `OSError`, `ValueError`, `yaml.YAMLError`, so the collector crashes without writing a receipt. That violates spec §3 ("with valid arguments the collector ALWAYS writes a schema-valid receipt, exit 0/1") and X2 ("a different shape => not green").
+Required:
+1. Catch the parser failure at the X2 boundary as an X2 reason and continue to build the not-green receipt. Do NOT catch a blanket `Exception` (it would hide programming errors).
+2. Fix by CLASS (§8.3): before patching, enumerate EVERY place in the collector path (`--thu-bien-nhan-audit`) where a YAML or JSON parser, or any other recursive or unbounded decoder, reads INPUT DATA and could raise the same kind of error (`RecursionError`, and any other non-YAMLError/non-ValueError exception the parser can raise on hostile but well-formed-looking data). Close every such path, give each its own case and its own mutant. Report the enumerated list in the handoff, including the paths you checked and found already safe, with the measurement that shows it.
+3. Each fix gets: a case that runs the collector in a child process on the hostile-shaped DATA input and requires exit 1 with a schema-valid not-green receipt carrying the X2 (or matching) reason; and a dedicated mutant that removes only that check, killed by the target case's own `TinHieuChotCa` and the right case name.
+4. Do not change anything the reviewers accepted (choices 1–7 of review 1; F01, F03, F04 closed in review 2). Do not touch the frozen oracle block or the two hop_dong files.
+
+WRITE SET (exactly four files, no fifth)
+1. .github/workflows/ci-dot-bien-du.yml
+2. .claude/dev/ci_dang_ky_test.py
+3. ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json — byte copy, sha256 844b5218b6f6844945f5c4c9440f09015d238fe09a60d64b3787c440787e4f46. Do not edit.
+4. ops/specs/wp1460-r1/hop_dong/fixture.json — byte copy, sha256 ce8595739a1ab2f4a86c9c196255e5f91fb19a9f6d3865df6caa2d66f9970e6d. Do not edit.
+This attempt is expected to touch only `.claude/dev/ci_dang_ky_test.py`. Needing any other file => STOP and report.
+
+SIZE (second nang_tran, ADR-0053, spec r9)
+Cap: ≤ 6 files and ≤ 1700 added lines, measured by `git diff --numstat <base>...HEAD`. H2 measures +1566. If the candidate would exceed the cap, STOP before finishing. Do not cut cases or mutants to fit.
+
+GATES (on the final head; base and head built in ONE command; `git config core.abbrev 7`)
+- `python .claude/dev/ci_dang_ky_test.py` N/N, equal numbers, `TỔNG: ĐẠT`; report wall time.
+- The wp1460 mutant line (`ĐỘT BIẾN wp1460: giết đúng lý do X/X …`), with 0 fake credit and 0 survivors.
+- Acceptance 1 standalone (480/480, 249/249, TONG: DAT).
+- actionlint on ci-dot-bien-du.yml with shellcheck present: rc 0, delta 0. `python3 -m ruff check --select F` (0.15.15) delta 0.
+- Re-run the review-2 probe for F02-R2 (the coordinator gives you its path) on the final head and report its result.
+- Never write the CI-skip marker in any file or commit message.
+
+STOP CONDITIONS
+A spec clause that is contradictory or impossible; a write outside the write set; the size cap; the same failure recurring three times with the same shape (§12). Report instead of working around.
+
+HANDOFF
+Write /tmp/wp1460-r9-g3-HANDOFF.yaml following protocol §7: packet wp1460, revision 9, generation 3, lease_id wp1460-r9-g3-claude, attempt 5; provider, model, surface; base, start, head SHA and tree as full OIDs; numstat per file and totals; every gate with exact command, real exit code and positive marker line; the enumerated path list for the class with each path's status; new mutant rows; what is not measured; open questions.
+Then reply with: head SHA, tree, numstat totals, the gate summary and the handoff path.

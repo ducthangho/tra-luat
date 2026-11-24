@@ -1,0 +1,121 @@
+# HANDOFF LUOT 2 TRUOC PUSH (ADR-0060 M12) — packet #1236 GATE-OUTPUT-DOI-CHIEU, dot B, revision 12, generation 1.
+# Tra loi review ma luot 1/4 (Codex, f4e93b3, changes_requested, B01 P2). Nhanh code CHUA push, CHUA co PR.
+# Executor khong tu review, khong tu approve, khong tu gan nhan "DA VA THAT" — nhan do reviewer gan theo §8.3.
+schema_version: 1
+event: executor_handoff_truoc_push
+luot_handoff: 2
+packet_issue: 1236
+packet_id: wp1236
+dot: B
+revision: 12
+generation: 1
+lease_id: wp1236-b-r12-g1-claude-20261124
+lease_ref: 'ops/wp1236-bc-lease@aa27e927931ec78f89dc9413874f7b4ba8f984e2:ops/leases/wp1236-b-r12-g1-claude-20261124.yaml'
+spec_path: ops/specs/wp1236-r12.md
+spec_blob: e5583bc042448517b94eadda57231dfc60e0a284
+spec_hash: 4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7
+role: executor
+provider: claude
+model_family: claude
+model_ghi_chu: 'model va effort: theo lease; tep nay khong chep lai dinh danh model.'
+execution_surface: claude_code
+environment: 'container cloud remote Linux, Python 3.13.18, git 2.43.0'
+executor_session: https://claude.ai/code/session_015Gtxraj8uybNKhrrYZSKtB
+dieu_phoi_session: session_015GtxrYsNDbfLo32S39f5uY
+
+base_sha: f602325574c62184caf16309631f5f680ca5cee2
+candidate_sha: 58bfa5f0bd5bf69b2003ac2524ea455447711bab
+candidate_tree: f25b7ca1b85eeaf842b64fc1aa62d2ab7229c62e
+candidate_parents: [f4e93b366d7014e3efd464b2018e8ec7a4f8576c]
+candidate_commits: ['f4e93b3 (ung vien luot 1, khong sua)', '58bfa5f (va lop B01: CHI doi ops/land_evidence_nguon_test.py)']
+candidate_branch_cuc_bo: claude/wp1236-b-r12-g1
+da_push_nhanh_code: false
+luot_truoc: {candidate_sha: f4e93b366d7014e3efd464b2018e8ec7a4f8576c, handoff: 'claude/handoff-wp1236-b-f4e93b3@a006a7ce9a02312f283b93c13f4822f7448eef7d', issue_comment: 7132624464}
+verdict_dang_tra_loi: {luot: '1/4', reviewer: openai_codex, ket_luan: changes_requested, nguon: 'ops/wp1236-bc-lease@8ccc146:ops/reviews/wp1236-b-r12-ma-1-codex/VERDICT.md', bien_nhan: '#1236 issuecomment-7134458601'}
+bundle:
+  ten: wp1236-b-58bfa5f.bundle
+  sha256: ffef7b4139f82d98f6c3ddd2cf8920c61c5a0cf8db3901a7e5bc8ebb46397908
+  lenh_tao: 'git bundle create wp1236-b-58bfa5f.bundle f602325574c62184caf16309631f5f680ca5cee2..claude/wp1236-b-r12-g1'
+  verify: 'git bundle verify: requires f602325574c62184caf16309631f5f680ca5cee2; list-heads: 58bfa5f0bd5bf69b2003ac2524ea455447711bab refs/heads/claude/wp1236-b-r12-g1'
+numstat:   # git diff --numstat origin/master...HEAD (merge-base f602325)
+  - {tep: ops/land_evidence_nguon.py, them: 87, bot: 1}
+  - {tep: ops/land_evidence_nguon_test.py, them: 327, bot: 10}
+kich_thuoc: {tep: 2, dong_them: 414, tran: '<= 6 tep / <= 450 dong them (ADR-0053)', ket_qua: trong_tran, con_lai: 36}
+write_set_do: 'diff chi cham dung 2 tep cua write set lease.'
+doi_so_voi_luot_1: 'ops/land_evidence_nguon.py KHONG doi (blob giong f4e93b3; sha256 module a104a7d9… = neo "goc" cua ca hai lan do luat 9). Chi doi tep test: +72 dong.'
+
+bang_doi_chieu_lop:
+  - slug: nghiem-thu-khong-co-lap-chot-dich
+    finding: [B01]
+    muc_luc_bao: P2
+    nguon: 'review ma luot 1/4, f4e93b3'
+    co_che: 'ca luat 4 cua dot B chi do mot phan mien huu han khi di qua consumer L8; ma san pham dung moi doi chung cua reviewer (27/27 + 4/4), tuc thieu CA, khong sai hanh vi.'
+    bieu_hien_reviewer_neu:
+      - 'mien owner_waived: 1 URL hop le, 2 URL, mien hop le cho ho so landed, strip/fullmatch dong mien, hai loi dong thoi (html_url->tac_gia, han->os, os->sha)'
+      - 'ba khoa phi-loi-khai (truoc chi 1/3), khoa giu chu so (gate2output), bang du dau phan cach'
+      - 'ba dang landed voi True va 1'
+      - 'ngu phap tung loai dong cua tep danh gia (header, dong job, dong tong)'
+      - 'c24 chi so tap DO, khong so tung ly do'
+    bieu_hien_executor_tu_tim_them:   # cung co che, reviewer chua neu
+      - 'dau phan cach: cuoi chuoi, LF cuoi (`$`), khoang trang/tab DAU; o AM: chu so, chu, `_`, `!`, `/`, `=`, LF giua, gach ngan U+2013, LF dau, tu khac dung truoc'
+      - 'token: gia tri khong phai chuoi (so, null), chuoi rong, tu ngoai tap; du 7 token cua tap'
+      - 'khoa: ten GAN GIONG phi-loi-khai (them chu so / tien to) phai duoc doc; chuan hoa hoa-thuong, dau cach, gach noi; `gate_out_put`; `gate_outpu`'
+      - 'landed: uu tien trang_thai_packet khi co khoa do (ke ca khong phai mapping); ten khoi landed_<8 so> khop tron (7 so, hau to, tien to); khoi khong phai mapping'
+      - 'mien: 0 URL; readback 0 tep / 2 tep; JSON hong; hai dong mien; tien to va hau to tren dong mien; SHA cua dong khac chuoi; os la danh sach co ubuntu-latest; cap hai loi url->readback, readback->doc_readback, tac_gia->dong_mien, dong_mien->han'
+      - 'tep danh gia: dong skipped hai dang va dang cut, dong rong, CRLF dong nhat, xuong dong tron, CR le, job lap, dong tong lap, dong tong vang'
+      - 'tep trich: `./tep` hop le, tuyet doi, `..`, tep vang trong loi khai hai tep ("MOI tep"), failed nhat quan'
+    cach_va_chung: 'MOT co che cho ca lop: bang du lieu qua `ky8` (ho so JSON -> `main` -> L8 voi module dot A THAT), moi o so rc va DUNG danh sach dong L8; ky vong viet tu luat cua dac ta (muc Module moi), khong chep tu dau ra. c32 (token/dau phan cach/tep trich/khoa), c27 (landed), c34 (mien), c35 (ngu phap tep danh gia), c24 (ly do tung ho so so voi ban tham chieu cua dac ta ops/reviews/wp1236-r9-soan/do_loi_khai.txt doc tai base bang git archive).'
+    chot_va_dot_bien_rieng:
+      c24: 'L8_chi_giu_ly_do_dau (tap DO khong doi, ly do doi) + mB1_xoa_muc_mien_tru_tap_do'
+      c27: mB7_bo_qua_ho_so_khong_loi_khai
+      c32: L8_chi_chuyen_mot_so_ly_do
+      c34: L8_nuot_ly_do_mien
+      c35: L8_nuot_ly_do_tep_danh_gia
+    phep_kiem_dong_lop:
+      - 'ledger tung o: ledger-luat4/ledger-o-58bfa5f.md va .json — 159 o qua `main`/L8 tren ma nguyen ven, tat ca DAT (c27 14, c32 67, c34 50, c35 19, cac ca B con lai 9); sinh bang ledger-luat4/ledger_o.py (ghi lai moi loi goi ky8: ho so, rc va dong L8 THUC DO).'
+      - 'c24: 56 ho so / 93 cap (duong dan, ten ly do) bang ban tham chieu cua dac ta, lech 0.'
+      - 'suite: CA 35/35 · DOT BIEN 143/143 · TONG DAT (gates/land_evidence_nguon_test.log).'
+      - 'luat 9 tren 58bfa5f: HOAN_TAT 624 = 438/173/13; delta 76/76 GIET; ke thua 0 hoi quy.'
+    chua_do_duoc:
+      - 'symlink (thanh phan duong dan tep trich, readback, thu muc provenance) qua L8: chi-POSIX, khong them ca; module dot A co ca rieng.'
+      - 'tep danh gia khong phai UTF-8 qua L8: `cay()` ghi van ban; khong them ca byte.'
+      - 'ly do K1-K8 phia provenance (bo_sinh_la, khong_phai_run_land, provenance_chua_du, job_lech, log_sha_lech, ...) qua L8: thuoc luat 1 cua dot A, khong nam trong danh sach mien cua luat 4; qua L8 chi co provenance_0 (c26) va cac ly do cua c35.'
+      - 'cap hai loi doc_readback->html_url khong dung duoc: JSON hong thi khong con html_url de sai.'
+      - 'nhanh `head` khac None cua kiem_mien: L8 luon goi voi None (dac ta luat 4 dat nhanh nay o dot A va D2b dot C).'
+    nhan: 'executor KHONG tu gan; cho reviewer doi chieu doc lap.'
+tai_dien_lop: 'lop nay la lan DAU xuat hien o review ma dot B (lich su dac ta va dot A co cung slug). Chua cham nguong "tai dien lan ba" cua dot B.'
+
+mien_tru_l8: {so_muc: 56, do_tren: f602325574c62184caf16309631f5f680ca5cee2, ghi_chu: 'khong doi so voi luot 1; reviewer luot 1 da do lai doc lap (56 muc / 93 vi pham).'}
+
+gates:   # tat ca tren 58bfa5f
+  - {ten: 'ops/land_evidence_nguon_test.py (clone sach tai 58bfa5f)', rc: 0, ket_qua: 'CA: 35/35 dat · DOT BIEN: 143/143 bi giet dung ly do · TU KIEM PHAN HANG: DAT (2 dot bien) · TONG: DAT', nguon: gates/land_evidence_nguon_test.log}
+  - {ten: 'ops/land_evidence_nguon.py --root . (cay that)', rc: 0, ket_qua: '149 DAT · 25/28 mien tru · 0 vi pham · 0 KHONG DO DUOC · tong 174', nguon: gates/land_evidence_nguon.log}
+  - {ten: 'thu ghep 58bfa5f len master hien hanh 5259239 (clone tam, KHONG push)', rc: 0, ket_qua: 'tong 175, 150 DAT, 0 vi pham', nguon: gates/land_evidence_nguon.thu-ghep-master-5259239.log}
+  - {ten: 'python3 scripts/tl.py --selftest', rc: 0, ket_qua: '== tl selftest 1786/1786 ==', nguon: gates/selftest.log}
+  - {ten: 'ruff --select F (python3 -m ruff 0.15.15)', ket_qua: 'hai tep cua dot: 0 loi tren head va tren base (delta 0); scripts/tl.py khong doi: 12 F821 = nguong CLAUDE.md', nguon: gates/ruff.log}
+  - {ten: 'git diff --check origin/master...HEAD', rc: 0, nguon: gates/diff_check.log}
+  - {ten: '.claude/dev/ci_dang_ky_test.py', rc: 0, ket_qua: 'PHAN CHUNG: 1226/1226 do dung · TONG: DAT', nguon: gates/ci_dang_ky_test.log}
+  - {ten: 'ops/kiem_ho_so_land.py --root .', rc: 1, ket_qua: 'DO SAN, delta 0: head va base f602325 cung 97/98, cung ho so pr1379-wp1326; hai dau ra giong tung dong', nguon: [gates/kiem_ho_so_land.log, gates/kiem_ho_so_land.base-f602325.log]}
+  - {ten: 'ops/ci_duong_nhanh_test.py (tron bo)', rc: 0, ket_qua: 'CA: 132/132 dat · DOT BIEN: 527/527 · TONG: DAT — DO TREN f4e93b3 (luot 1), KHONG chay lai tren 58bfa5f: module va moi tep bo nay doc deu khong doi giua hai SHA (chi tep test cua dot B doi).', nguon: gates/ci_duong_nhanh_test.f4e93b3.log}
+
+luat_9:
+  quyet_dinh_ap_dung: 'E3 chu kho, #1236 issuecomment-7130670276: mien DELTA + khong hoi quy tren phan ke thua.'
+  cong_cu: 'ops/reviews/wp1236-r10-soan/quet_dot_bien.py sha256 1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c, Python 3.13.18'
+  lenh_head: 'python3 -B ops/reviews/wp1236-r10-soan/quet_dot_bien.py do ops/land_evidence_nguon.py ops/land_evidence_nguon_test.py <kho rong 0 byte> --thu-muc-ra D --song-song 4 (clone sach tai 58bfa5f; 14:39:30Z -> 15:1xZ)'
+  head: {tong: 624, GIET: 438, SONG: 173, VO_CAN: 13, LOI_CHAY: 0, dau: HOAN_TAT, rc: 0}
+  neo_head: {goc: a104a7d9949aa235b4b9e60eb589aae16a3e0fbcf52f90c7d40d3c94e321f36c, manifest: a606d347220333bd12930c1604c3d7cd56c1f140f9e70d8b8bdbc58eb38b5df6, test: feed4f7c657fb2a79d6d667ed8152f147b2dc6794a7ab3a71d555e219f4c3c50, kho: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}
+  base: {tong: 550, GIET: 335, SONG: 187, VO_CAN: 28, LOI_CHAY: 0, dau: HOAN_TAT, rc: 0, ghi_chu: 'lan do cua luot 1 (shim ngoai kho), khong do lai; reviewer luot 1 da do lai doc lap, khop.'}
+  delta: {tong: 76, GIET: 76, SONG: 0, VO_CAN: 0}
+  ke_thua: {tong: 548, o_base: {GIET: 333, SONG: 187, VO_CAN: 28}, o_head: {GIET: 362, SONG: 173, VO_CAN: 13}, hoi_quy_GIET_thanh_khong_GIET: 0}
+  no_ma_cu: '173 SONG + 13 VO_CAN ke thua cua ma L1-L7 co san (tung ID: luat9/so-base-head-58bfa5f.md); khong va trong dot B theo quyet dinh E3.'
+  kho_B: 'rong (0 ID).'
+  nguon: [luat9/head-58bfa5f/do.log, luat9/head-58bfa5f/kq.jsonl, luat9/head-58bfa5f/manifest.jsonl.xz, luat9/head-58bfa5f/SHA256SUMS-D, luat9/base-f602325/D_base.log, luat9/base-f602325/kq.jsonl, luat9/base-f602325/manifest.jsonl.xz, luat9/base-f602325/SHA256SUMS-D, luat9/ke-thua-base-len-head.jsonl.xz, luat9/so_base_head.py, luat9/so-base-head-58bfa5f.md]
+
+windows_m3: 'reviewer luot 1 chot required (ADR-0060 M3 buoc 2). Executor khong chay Windows; dieu phoi chay Windows local sau approve.'
+cau_hoi_mo: []
+chua_do_duoc:
+  - 'Windows local: chua chay (dieu phoi).'
+  - 'CI GitHub, connector, full_mutant_audit (ADR-0060 M9): chua co — nhanh code chua push.'
+  - 'ops/ci_duong_nhanh_test.py khong chay lai tren 58bfa5f (xem gates).'
+  - 'Thoi gian bo test dot B: mot luot ca ~31 s tren may nay (luot 1: ~22 s); cong tren cay that ~7 s. Chua do tren runner CI/Windows.'
+  - 'Ho so land vao master sau 5259239 phai dat L8; dieu phoi do lai truoc merge.'

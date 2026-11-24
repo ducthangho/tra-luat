@@ -1,0 +1,61 @@
+f4e93b366d7014e3efd464b2018e8ec7a4f8576c
+2026-11-24T13:22:19Z
+DUONG_NHANH: khong ghi duoc GITHUB_OUTPUT (IsADirectoryError) - DO
+dung: ci_duong_nhanh.py [kiem-re]
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+<unknown>:3640: SyntaxWarning: invalid escape sequence '\s'
+<unknown>:5783: SyntaxWarning: invalid escape sequence '\d'
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; chốt lớp review chưa áp dụng
+/tmp/claude-0/-home-user-tra-luat/cb39e949-45ab-5475-a00b-c971889891ff/scratchpad/head_clone/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+CA: 132/132 dat · 0 do · 0 hong
+DOT BIEN: 527/527 bi giet dung ly do
+KIEM KE: ca hanh_vi=97 + cau_truc_yaml=17 + so_dang_ky=3 + tu_kiem=15 = 132 · dot bien .claude/dev/ci_dang_ky_test.py=2 + .claude/dev/packet_loop_test_manh.py=11 + .github/workflows/ci.yml=87 + .github/workflows/launcher-windows.yml=1 + ops/ci_duong_nhanh.py=307 + ops/ci_duong_nhanh_test.py=106 + ops/lease_publish.py=3 + ops/specs/wp1448-r2/do/thu_thap.py=10 = 527
+TU KIEM PHAN HANG: DAT (5 mau rc, 3 dot bien that)
+TONG: DAT
+rc=0
+2026-11-24T13:32:58Z

@@ -1378,8 +1378,8 @@ GENERATED_SPECS = [
              'rc: 0 đạt · 2 đầu vào · 3 hết đường · 4 dừng (lỗi phía yêu cầu) · 5 lệch nguyên văn',
      "args": [
          {"dest": 'sohieu', "nargs": '?', "help": 'số hiệu văn bản (vd 134/2025/QH15) — cần kèm --dieu'},
-         {"flags": ['--dieu'], "default": '3', "help": 'Điều cần tách (mặc định 3)'},
-         {"flags": ['--tep'], "help": 'đọc văn bản Điều từ tệp local thay cho tl extract'},
+         {"flags": ['--dieu'], "help": 'Điều cần tách (theo số hiệu: mặc định 3; với --tep: lấy từ tiêu đề tệp, lệch ⇒ rc 2)'},
+         {"flags": ['--tep'], "help": 'đọc văn bản Điều từ tệp local UTF-8 thay cho tl extract (không ghép với số hiệu)'},
          {"flags": ['--thu-tu'], "dest": 'thu_tu', "help": 'ghi đè thứ tự cho LẦN NÀY (sub,api | api,sub | sub | api)'},
          {"flags": ['--model'], "default": 'claude-haiku-5-5'},
          {"flags": ['--out'], "help": 'ghi JSON khái niệm ra tệp'},

@@ -32225,6 +32225,63 @@ def run() -> int:
                 and _j["tong_token"] == 1952 and _rc5 == 5)
     _t110("r380_llm_khai_niem_tu_tep_qua_sub", _c380_llm_khai_niem_tu_tep_qua_sub)
 
+    # Cross-review PR #1503 lượt 1 (Codex): F4 --out không đè khi rc 5 · F5 chuyển tiếp --config ·
+    # F11 số Điều từ tiêu đề tệp, cấm ghép số hiệu · F12 tệp không UTF-8 ⇒ rc 2 · F9 `llm-order ""` ⇒ rc 2.
+    def _c380_llm_khai_niem_bien_dau_vao():
+        _lr = _tlm380._tl_core_import("llm_route")
+        _sav_sub, _sav_ex = _lr.duong_sub, _lr.lay_dieu_qua_extract
+        _kn = [{"stt": 1, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu do cơ quan lập."}]
+        _them_bat = []
+
+        def _sub_gia(he, nd, schema, model, env):
+            return {"duong": "sub", "nguon_key": None, "model": model, "data": {"khai_niem": [dict(x) for x in _kn]},
+                    "usage": {"input": 1, "output": 1, "cache_doc": 0, "cache_ghi": 0}, "usd_uoc_tinh": None}
+
+        def _ex_gia(so_hieu, dieu, tl_py, chay=None, them=()):
+            _them_bat.append(list(them))
+            return ("Điều " + str(dieu) + ". Giải thích từ ngữ\nHồ sơ là tài liệu do cơ quan lập.", "")
+
+        def _chay(**k):
+            _ns = _ty378.SimpleNamespace(sohieu=None, dieu=None, tep=None, thu_tu="sub", model="claude-haiku-5-5",
+                                         out=None, nhat_ky=None, json=True, config=None, profile=None)
+            for kk, vv in k.items():
+                setattr(_ns, kk, vv)
+            _o = _io378.StringIO()
+            with _ctx378.redirect_stdout(_o), _ctx378.redirect_stderr(_io378.StringIO()):
+                _rc = _tlm380.cmd_llm_khai_niem(_ns)
+            return _rc, _o.getvalue()
+
+        with _tf378.TemporaryDirectory() as _d:
+            _d = _P378(_d)
+            _sv = _env110({"TL_LLM_ORDER_FILE": str(_d / "o.json"), "TL_LLM_ORDER": None})
+            try:
+                _lr.duong_sub, _lr.lay_dieu_qua_extract = _sub_gia, _ex_gia
+                _t15 = _d / "d15.txt"
+                _t15.write_text("Điều 15. Giải thích từ ngữ\nHồ sơ là tài liệu do cơ quan lập.", encoding="utf-8")
+                _rc_a, _o_a = _chay(tep=str(_t15))
+                _dieu_tep = json.loads(_o_a)["dieu"] if _rc_a == 0 else None
+                _rc_lech, _ = _chay(tep=str(_t15), dieu="7")
+                _rc_ghep, _ = _chay(tep=str(_t15), sohieu="94/2099/QH99")
+                _cu = _d / "cu.txt"
+                _cu.write_bytes(b"H\xf4 s\xff l\xe0 t\xe0i li\xeau")   # byte KHÔNG hợp lệ UTF-8 (mã cũ)
+                _rc_ma, _ = _chay(tep=str(_cu))
+                _rc_cfg, _ = _chay(sohieu="94/2099/QH99", config="yeu_cau.json", profile="Demo")
+                _out = _d / "kq.json"
+                _out.write_text('{"cu": true}', encoding="utf-8")
+                _kn[0]["dinh_nghia"] = "bản diễn giải."
+                _rc5, _ = _chay(tep=str(_t15), out=str(_out))
+                _giu = json.loads(_out.read_text(encoding="utf-8")) == {"cu": True}
+                _ns_o = _ty378.SimpleNamespace(thu_tu="", reset=False, json=True)
+                with _ctx378.redirect_stdout(_io378.StringIO()), _ctx378.redirect_stderr(_io378.StringIO()):
+                    _rc_rong = _tlm380.cmd_llm_order(_ns_o)
+            finally:
+                _lr.duong_sub, _lr.lay_dieu_qua_extract = _sav_sub, _sav_ex
+                _env110_restore(_sv)
+        return (_rc_a == 0 and _dieu_tep == "15" and _rc_lech == 2 and _rc_ghep == 2 and _rc_ma == 2
+                and _rc_cfg == 0 and _them_bat and _them_bat[-1][:2] == ["--config", "yeu_cau.json"]
+                and "--profile" in _them_bat[-1] and _rc5 == 5 and _giu and _rc_rong == 2)
+    _t110("r380_llm_khai_niem_bien_dau_vao", _c380_llm_khai_niem_bien_dau_vao)
+
     # F1-02 / wp42 rev2 (late-duplicate RED) — PHẢI là đăng ký cuối cùng trước tally:
     # guard chụp toàn bộ cases runtime rồi tự thêm ID của chính nó đúng một lần.
     def _c42_complete_runtime_test_ids_unique():

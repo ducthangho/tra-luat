@@ -77,14 +77,19 @@ def client_gia(data=None, loi=None, stop="end_turn", model="claude-haiku-5-5", n
     return lambda key: types.SimpleNamespace(messages=types.SimpleNamespace(create=create))
 
 
-def run_sub_gia(data=None, rc=0, is_error=False, model="claude-haiku-5-5", nhat_ky=None, result="ok"):
+_VANG = object()
+
+
+def run_sub_gia(data=None, rc=0, is_error=False, model="claude-haiku-5-5", nhat_ky=None, result="ok",
+                subtype="success"):
     def chay(cmd, **k):
         if nhat_ky is not None:
             nhat_ky.append((cmd, k))
-        kq = {"is_error": is_error, "result": result, "structured_output": data or DUNG,
+        kq = {"subtype": subtype, "is_error": is_error, "result": result, "structured_output": data or DUNG,
               "total_cost_usd": 0.0004,
               "modelUsage": {model: {"inputTokens": 2, "outputTokens": 55, "cacheReadInputTokens": 0,
                                      "cacheCreationInputTokens": 1911, "canonicalModel": model}}}
+        kq = {k2: v for k2, v in kq.items() if v is not _VANG}
         return subprocess.CompletedProcess(cmd, rc, json.dumps(kq, ensure_ascii=False), "")
     return chay
 
@@ -188,7 +193,8 @@ def ca_sub_go_key_va_cat_ngu_canh(m):
     bang(k.get("stdin") is subprocess.DEVNULL, "duong sub phai stdin=DEVNULL")
     bang(cmd[cmd.index("--tools") + 1] == "", f"phai --tools rong: {cmd}")
     bang("--bare" not in cmd, "--bare bien sub thanh api")
-    bang("--strict-mcp-config" in cmd and "--setting-sources" in cmd, f"thieu co cat ngu canh: {cmd}")
+    bang("--strict-mcp-config" in cmd and cmd[cmd.index("--setting-sources") + 1] == "",
+         f"phai --setting-sources RONG (khong nap settings nguoi dung): {cmd}")
 
 
 def ca_sub_sai_model_thi_dung(m):
@@ -319,15 +325,136 @@ def ca_lay_dieu_qua_extract(m):
     raise TinHieuChotCa("extract loi phai nem ValueError, khong tra van ban rong")
 
 
+# ------------------------------------------------------------- ca: cross-review lượt 1 (F1–F3)
+
+VAN_BAN_SO = ("Điều 2. Giải thích từ ngữ\nTrong Luật này, các từ ngữ dưới đây được hiểu như sau:\n"
+              "1. Hồ sơ là tài liệu do cơ quan có thẩm quyền lập.\n"
+              "2. Chủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân.")
+KN_SO = [{"stt": 1, "thuat_ngu": "Hồ sơ", "dinh_nghia": "tài liệu do cơ quan có thẩm quyền lập."},
+         {"stt": 2, "thuat_ngu": "Chủ thể", "dinh_nghia": "một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."}]
+
+
+def ca_dinh_nghia_bi_cat(m):
+    cat = json.loads(json.dumps(KN_SO))
+    cat[0]["dinh_nghia"] = "tài liệu"          # F1: chuỗi con của nguồn nhưng CẮT cụt
+    bang(m.lech_nguyen_van(cat, VAN_BAN_SO) == [1], f"dinh nghia bi cat phai lech: {m.lech_nguyen_van(cat, VAN_BAN_SO)}")
+
+
+def ca_bo_khoan_va_mang_rong(m):
+    bang(m.lech_nguyen_van(KN_SO[:1], VAN_BAN_SO) == [2], "thieu khoan 2 phai lech [2]")
+    bang(m.lech_nguyen_van([], VAN_BAN_SO) == [1, 2], "mang rong phai lech moi khoan")
+    bang(m.lech_nguyen_van(KN_SO, "Không có khoản nào ở đây") == [0], "nguon khong tach duoc khoan phai [0]")
+
+
+def ca_trao_so(m):
+    trao = [dict(KN_SO[1], stt=1), dict(KN_SO[0], stt=2)]
+    bang(m.lech_nguyen_van(trao, VAN_BAN_SO) == [1, 2], "trao thu tu khoan phai lech")
+    sai_so = [dict(KN_SO[0], stt=2), dict(KN_SO[1], stt=1)]
+    bang(m.lech_nguyen_van(sai_so, VAN_BAN_SO) == [2, 1], "dung thu tu ma sai stt phai lech")
+
+
+def ca_khoan_co_so_va_diem_dat(m):
+    bang(m.tach_khoan(VAN_BAN_SO) == ["Hồ sơ là tài liệu do cơ quan có thẩm quyền lập.",
+                                       "Chủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."], f"tach sai: {m.tach_khoan(VAN_BAN_SO)}")
+    bang(m.lech_nguyen_van(KN_SO, VAN_BAN_SO) == [], "ket qua dung (co diem a, b) bi chan oan")
+    bang(m.lech_nguyen_van(m.chuan_hoa_khai_niem(json.loads(json.dumps(DUNG["khai_niem"]))), VAN_BAN) == [],
+         "nguon mat so thu tu (Google Doc) bi chan oan")
+
+
+def ca_sub_het_luot_schema_thi_dung(m):
+    rc, _, nhat = chay_lenh(m, KEY, {"sub": sub(m, run_sub_gia(rc=1, is_error=True,
+                                                               subtype="error_max_structured_output_retries")),
+                                     "api": cam("api")})
+    bang(rc == m.MA_DUNG, f"can luot sua schema la loi phia yeu cau, khong duoc tieu credit API: rc={rc} {nhat}")
+
+
+def ca_sub_thieu_dau_duong_khong_nhan(m):
+    # Mỗi tín hiệu lỗi TÁCH RIÊNG (F10): rc khác 0 một mình, is_error một mình, subtype lạ, thiếu trường.
+    for gia in (run_sub_gia(subtype="error_during_execution"), run_sub_gia(is_error=_VANG),
+                run_sub_gia(subtype=_VANG), run_sub_gia(rc=1), run_sub_gia(is_error=True)):
+        rc, kq, nhat = chay_lenh(m, KEY, {"sub": sub(m, gia), "api": api(m, client_gia())})
+        bang(rc == 0 and kq["duong"] == "api", f"envelope thieu dau duong ma van NHAN o sub: rc={rc} {nhat}")
+
+
+def ca_sub_dinh_tuyen_nha_cung_cap(m):
+    for env in ({"CLAUDE_CODE_USE_BEDROCK": "1"}, {"CLAUDE_CODE_USE_GATEWAY": "true"},
+                {"claude_code_use_foundry": "yes"}, {"ANTHROPIC_BASE_URL": "https://gw.example.com/v1"},
+                {"CLAUDE_CODE_USE_TUONG_LAI_CHUA_BIET": "1"}):     # tên lạ ⇒ fail-closed
+        goi = []
+        try:
+            m.duong_sub("he", "nd", {"type": "object"}, "claude-haiku-5-5", env,
+                        chay=run_sub_gia(nhat_ky=goi), tim=lambda t: "/usr/bin/claude")
+        except m.ChuyenDuong:
+            bang(not goi, f"da goi claude -p du moi truong dinh tuyen {env}")
+            continue
+        raise TinHieuChotCa(f"moi truong {env} phai bi tu choi o duong sub")
+    # Phiên Claude Code trên web đặt CLAUDE_CODE_USE_CCR_V2 — chặn nó là chặn oan đường sub ở chính
+    # môi trường dùng nhiều nhất (lộ ở lần chạy thật 24-11-2026).
+    for env in ({"CLAUDE_CODE_USE_VERTEX": "0"}, {"ANTHROPIC_BASE_URL": "https://api.anthropic.com"},
+                {"CLAUDE_CODE_USE_CCR_V2": "1", "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"}):
+        try:
+            m.duong_sub("he", "nd", {"type": "object"}, "claude-haiku-5-5", env,
+                        chay=run_sub_gia(), tim=lambda t: "/usr/bin/claude")
+        except m.ChuyenDuong as e:
+            raise TinHieuChotCa(f"moi truong hop le {env} bi CHAN OAN o duong sub: {e}") from e
+
+
+def ca_qua_tai_chuyen_duong(m):
+    for loi in (LoiGia(529, None, "overloaded"), LoiGia(503, None, "unavailable"),
+                LoiGia(None, "overloaded_error", "overloaded")):
+        bang(m.phan_loai_loi_api(loi) is m.ChuyenDuong, f"qua tai ({loi.status_code}/{loi.type}) phai chuyen duong")
+    bang(m.phan_loai_loi_api(LoiGia(504, None, "x")) is m.Dung, "504 giu DUNG (yeu cau co the da duoc xu ly)")
+
+
+def ca_co_rong_va_symlink_dut(m):
+    with tempfile.TemporaryDirectory() as d:
+        env = {"TL_LLM_ORDER_FILE": str(Path(d) / "khong_co.json"), "TL_LLM_ORDER": "api"}
+        try:
+            m.thu_tu_hieu_luc("", env=env)
+            raise TinHieuChotCa("--thu-tu rong phai bi tu choi, khong roi sang bien")
+        except ValueError:
+            pass
+        lk = Path(d) / "lk.json"
+        try:
+            lk.symlink_to(Path(d) / "da_chuyen_di.json")
+        except (OSError, NotImplementedError):
+            return   # nền không tạo được symlink (Windows thiếu quyền) — vế này KHÔNG ĐO ĐƯỢC ở đó
+        env["TL_LLM_ORDER_FILE"] = str(lk)
+        try:
+            kq = m.thu_tu_hieu_luc(env=env)
+            raise TinHieuChotCa(f"symlink dut phai fail-closed, khong roi ve {kq}")
+        except ValueError:
+            pass
+        bang(m.xoa_thu_tu(env=env) is True and not lk.is_symlink(), "--reset phai xoa ca symlink dut")
+
+
+def ca_extract_cham_tran(m):
+    def chay(cmd, **k):
+        return subprocess.CompletedProcess(cmd, 0, "===== Điều 3 =====\n" + VAN_BAN,
+                                           "[tl] ⚠ độ dài chạm CAP export (~200k ký tự) — văn bản DÀI có thể bị CẮT\n")
+    try:
+        m.lay_dieu_qua_extract("1/2025/QH15", "3", "/x/tl.py", chay=chay)
+    except ValueError as e:
+        bang("cache-build" in str(e), f"thong bao phai chi duong no-cap: {e}")
+        return
+    raise TinHieuChotCa("nguon cham tran phai dung TRUOC khi goi model")
+
+
 CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen_sub, ca_het_credit_402_chuyen_sub,
       ca_400_khac_thi_dung, ca_ket_noi_chuyen_duong, ca_sub_loi_chuyen_api, ca_sub_go_key_va_cat_ngu_canh,
       ca_sub_sai_model_thi_dung, ca_het_duong, ca_tu_choi_thi_dung, ca_schema_sai_thi_dung,
       ca_lech_nguyen_van, ca_chuan_hoa_chu_la, ca_tach_sai_cho, ca_khong_in_key,
-      ca_thu_tu, ca_thu_tu_hieu_luc_va_luu, ca_tep_hong_fail_closed, ca_lay_dieu_qua_extract]
+      ca_thu_tu, ca_thu_tu_hieu_luc_va_luu, ca_tep_hong_fail_closed, ca_lay_dieu_qua_extract,
+      ca_dinh_nghia_bi_cat, ca_bo_khoan_va_mang_rong, ca_trao_so, ca_khoan_co_so_va_diem_dat,
+      ca_sub_het_luot_schema_thi_dung, ca_sub_thieu_dau_duong_khong_nhan, ca_sub_dinh_tuyen_nha_cung_cap,
+      ca_qua_tai_chuyen_duong, ca_co_rong_va_symlink_dut, ca_extract_cham_tran]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
-    ("402_khong_chuyen", ("if ma in (401, 402, 403, 429)", "if ma in (401, 403, 429)"), "ca_het_credit_402_chuyen_sub"),
+    ("402_khong_chuyen", ("if ma in (401, 402, 403, 429, 503, 529)", "if ma in (401, 403, 429, 503, 529)"),
+     "ca_het_credit_402_chuyen_sub"),
+    ("529_khong_chuyen", ("if ma in (401, 402, 403, 429, 503, 529)", "if ma in (401, 402, 403, 429, 503)"),
+     "ca_qua_tai_chuyen_duong"),
     ("moi_400_deu_chuyen", ('if ma == 400 and "credit balance" in thong_bao:', "if ma == 400:"), "ca_400_khac_thi_dung"),
     ("sub_giu_key", ("if k not in BIEN_GO_KHOI_SUB}", "}"), "ca_sub_go_key_va_cat_ngu_canh"),
     ("them_bare", ('"--no-session-persistence", "--tools", "",', '"--no-session-persistence", "--bare", "--tools", "",'),
@@ -338,15 +465,44 @@ DOT_BIEN = [
     ("bo_kiem_nguyen_van", ('kq["lech"] = lech_nguyen_van(kq["khai_niem"], van_ban)', 'kq["lech"] = []'),
      "ca_lech_nguyen_van"),
     ("bo_chuan_hoa_la", ('        if k["dinh_nghia"].startswith("là "):', "        if False:"), "ca_chuan_hoa_chu_la"),
-    ("kiem_tung_manh", ("""            if f'{k["thuat_ngu"]} là {k["dinh_nghia"]}' not in van_ban]""",
-                        """            if k["dinh_nghia"] not in van_ban or k["thuat_ngu"] not in van_ban]"""),
-     "ca_tach_sai_cho"),
+    ("so_chuoi_con", ("_gon(cum) == _gon(khoan[i])", "_gon(cum) in _gon(khoan[i])"), "ca_dinh_nghia_bi_cat"),
+    ("so_ca_nguon", ("_gon(cum) == _gon(khoan[i])", "_gon(cum) in _gon(van_ban)"), "ca_dinh_nghia_bi_cat"),
+    ("bo_khoan_thieu", ("    lech.extend(range(len(khai_niem) + 1, len(khoan) + 1))\n", ""), "ca_bo_khoan_va_mang_rong"),
+    ("bo_kiem_stt", ('k["stt"] == i + 1 and ', ""), "ca_trao_so"),
+    ("diem_mo_khoan_moi", ('        mo = " là " in ln and not _RE_DIEM.match(ln) and not ln.endswith(":")',
+                           '        mo = True'), "ca_khoan_co_so_va_diem_dat"),
+    ("schema_retries_chuyen_duong", ('SUBTYPE_LOI_YEU_CAU = frozenset({"error_max_structured_output_retries", ',
+                                     'SUBTYPE_LOI_YEU_CAU = frozenset({'), "ca_sub_het_luot_schema_thi_dung"),
+    ("nhan_khi_thieu_is_error", ('kq.get("is_error") is False', 'not kq.get("is_error")'),
+     "ca_sub_thieu_dau_duong_khong_nhan"),
+    ("nhan_khi_thieu_subtype", ('subtype == "success" and kq.get', 'subtype in ("success", None) and kq.get'),
+     "ca_sub_thieu_dau_duong_khong_nhan"),
+    ("bo_kiem_dinh_tuyen", ("    kiem_dinh_tuyen_sub(env)\n", ""), "ca_sub_dinh_tuyen_nha_cung_cap"),
+    ("dinh_tuyen_theo_ten", ('if k.upper().startswith("CLAUDE_CODE_USE_") and k.upper() not in CO_CLAUDE_CODE_VO_HAI and _bat(v)',
+                             'if k in ("CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX") and _bat(v)'),
+     "ca_sub_dinh_tuyen_nha_cung_cap"),
+    ("chan_ca_co_vo_hai", ('and k.upper() not in CO_CLAUDE_CODE_VO_HAI and _bat(v)', 'and _bat(v)'),
+     "ca_sub_dinh_tuyen_nha_cung_cap"),
+    ("cho_phep_qua_rong", ('CO_CLAUDE_CODE_VO_HAI = frozenset({"CLAUDE_CODE_USE_CCR_V2", ',
+                           'CO_CLAUDE_CODE_VO_HAI = frozenset({"CLAUDE_CODE_USE_TUONG_LAI_CHUA_BIET", "CLAUDE_CODE_USE_CCR_V2", '),
+     "ca_sub_dinh_tuyen_nha_cung_cap"),
+    ("base_url_khong_kiem_host", ("        if host != HOST_API_ANTHROPIC:", "        if False:"),
+     "ca_sub_dinh_tuyen_nha_cung_cap"),
     ("uu_tien_bien_chuan", ('BIEN_KEY = ("TL_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY")',
                             'BIEN_KEY = ("ANTHROPIC_API_KEY", "TL_ANTHROPIC_API_KEY")'), "ca_uu_tien_bien_tl"),
     ("mac_dinh_api_truoc", ('THU_TU_MAC_DINH = ("sub", "api")', 'THU_TU_MAC_DINH = ("api", "sub")'),
      "ca_mac_dinh_sub_truoc"),
-    ("bien_thang_tep", ("    if tep.exists():\n        try:", "    if tep.exists() and not env.get(BIEN_THU_TU):\n        try:"),
+    ("bien_thang_tep", ("    if tep.exists() or tep.is_symlink():\n        try:",
+                        "    if (tep.exists() or tep.is_symlink()) and not env.get(BIEN_THU_TU):\n        try:"),
      "ca_thu_tu_hieu_luc_va_luu"),
+    ("co_rong_la_vang", ("    if cli is not None:\n", "    if cli:\n"), "ca_co_rong_va_symlink_dut"),
+    ("symlink_dut_la_khong_co", ("    if tep.exists() or tep.is_symlink():\n        try:", "    if tep.exists():\n        try:"),
+     "ca_co_rong_va_symlink_dut"),
+    ("bo_chot_cap", ("    if MAU_CAP_EXTRACT in (p.stderr or \"\"):\n", "    if False:\n"), "ca_extract_cham_tran"),
+    ("bo_kiem_rc_sub", ('if not (p.returncode == 0 and isinstance(kq, dict)', 'if not (isinstance(kq, dict)'),
+     "ca_sub_thieu_dau_duong_khong_nhan"),
+    ("doc_settings_nguoi_dung", ('"--setting-sources", "",', '"--setting-sources", "user",'),
+     "ca_sub_go_key_va_cat_ngu_canh"),
     ("tep_hong_lui_mac_dinh", ('            raise ValueError(f"tep thu tu {tep} hong', '            return THU_TU_MAC_DINH, "mac dinh"\n            raise ValueError(f"tep thu tu {tep} hong'),
      "ca_tep_hong_fail_closed"),
     ("luu_truoc_kiem", ("    thu_tu = doc_thu_tu(gia_tri)\n    tep = tep_thu_tu(env)",

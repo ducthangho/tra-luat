@@ -4506,7 +4506,9 @@ def t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit():
         status = 200
         def __enter__(self): return self
         def __exit__(self, *a): return False
-        def read(self): return b'{"usage": {"input_tokens": 8, "output_tokens": 3}}'
+        def __init__(self, than=b'{"type": "message", "usage": {"input_tokens": 8, "output_tokens": 3}}'):
+            self._than = than
+        def read(self): return self._than
 
     def mo_200(req, timeout=None):
         goi.append(req)
@@ -4532,6 +4534,14 @@ def t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit():
         tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=mo_loi(ma, than))
         bang(tt == ky_vong and dau in mo_ta, f"HTTP {ma}: ky vong {ky_vong}/{dau}, duoc {tt}: {mo_ta}")
         bang(key not in mo_ta, "gia tri key lot vao mo ta")
+
+    # F8 (cross-review PR #1503): 2xx KHÔNG phải Message có usage ⇒ KHONG_DO_DUOC, không DUNG_DUOC;
+    # JSON không phải object ở cả hai đường không được ném AttributeError.
+    for than in (b"", b'{"status": "ok"}', b"[]", b'{"type": "message", "usage": {"input_tokens": "8"}}'):
+        tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=lambda r, timeout=None, _t=than: _R(_t))
+        bang(tt == "KHONG_DO_DUOC", f"2xx {than!r} khong chung minh dung duoc, duoc {tt}: {mo_ta}")
+    tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=mo_loi(401, b"[]"))
+    bang(tt == "CHUA_XAC_THUC", f"401 than JSON mang van phai CHUA_XAC_THUC: {tt}")
 
     def mo_dut(req, timeout=None):
         raise _ue.URLError("dut")
@@ -17790,6 +17800,9 @@ DOT_BIEN = [
     ("anthropic_api_uu_tien_bien_chuan",
      ('ANTHROPIC_KEY_BIEN = ("TL_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY")',
       'ANTHROPIC_KEY_BIEN = ("ANTHROPIC_API_KEY", "TL_ANTHROPIC_API_KEY")'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_nhan_moi_2xx",
+     ('            if not la_message:\n', '            if False:\n'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_mat_mang_thanh_chua_xac_thuc",
      ('        return ("KHONG_DO_DUOC", f"key ({ten}) · kiem song khong chay duoc: {type(e).__name__}")',

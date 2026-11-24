@@ -15,6 +15,13 @@ và chuyển qua lại khi một bên hết hạn mức/credit.
   `<thuật ngữ> là <định nghĩa>` có nguyên văn trong nguồn; lệch ⇒ rc 5.
 - Selftest `r380_llm_order_luu_doi_xoa`, `r380_llm_khai_niem_tu_tep_qua_sub`; bộ dev `llm_route_test.py`
   (không vào gói). Dev-side kèm theo: `launcher.py doctor` mục `anthropic-api`, tài liệu `docs/GOI_AGENT_DA_NEN.md`.
+- Cross-review Codex lượt 1 (`ops/reviews/pr1503-review-1-codex/`, REQUEST_CHANGES, 6 P1 · 5 P2 · 1 P3) — đã vá:
+  kiểm nguyên văn so TRỌN KHOẢN + số/thứ tự khoản (F1); `claude -p` cạn lượt sửa schema ⇒ DỪNG, chỉ nhận khi
+  rc 0 + `subtype=success` + `is_error=false` (F2, F10); `CLAUDE_CODE_USE_*` lạ ⇒ từ chối đường `sub`, cho phép
+  đúng 4 cờ tính năng (danh sách CHO PHÉP), `ANTHROPIC_BASE_URL` chỉ host Anthropic (F3); `--out` chỉ ghi khi
+  đạt, nguyên tử (F4); chuyển tiếp `--config` (F5); nguồn chạm trần export ⇒ dừng trước model (F6); 503/529 ⇒
+  chuyển đường (F7); `doctor` đòi Message có usage (F8); `--thu-tu ""`/symlink đứt ⇒ fail-closed (F9); `--tep`
+  lấy số Điều từ tiêu đề, cấm ghép số hiệu (F11); tệp không UTF-8 ⇒ rc 2 (F12).
 - Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
   key qua `agent_creds` chưa làm.
 

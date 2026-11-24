@@ -336,6 +336,10 @@ biến môi trường của environment.
   `claude -p` báo lỗi (thường là chạm hạn mức gói). Lỗi thuộc về YÊU CẦU thì DỪNG:
   400 khác, model từ chối, bị cắt `max_tokens`, sai model, sai schema. Chạy lại lỗi
   ấy ở đường kia chỉ tốn tiền hai lần.
+- **Đường `sub` chỉ được báo là subscription khi Claude Code KHÔNG bị định tuyến đi nơi khác.** Mọi biến
+  `CLAUDE_CODE_USE_*` đang bật mà không nằm trong danh sách CHO PHÉP (4 cờ tính năng, gồm
+  `CLAUDE_CODE_USE_CCR_V2` của chính phiên web) và `ANTHROPIC_BASE_URL` trỏ host khác `api.anthropic.com`
+  đều làm đường `sub` bị từ chối. Bản vá đầu chặn theo tiền tố và chặn oan `CCR_V2`, lộ ra ở lần chạy thật.
 - **Đường `sub` là đường hợp lệ DUY NHẤT để script dùng gói.** Đừng lấy token OAuth của
   Claude Code (`claude_oauth_token` trong `agent_creds`) đi gọi API thẳng. Đường `sub`
   gỡ `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` và `TL_ANTHROPIC_API_KEY` khỏi env của

@@ -2957,12 +2957,12 @@ def cmd_llm_order(a) -> int:
     lr = _tl_core_import("llm_route")
     try:
         if getattr(a, "reset", False):
-            if getattr(a, "thu_tu", None):
+            if getattr(a, "thu_tu", None) is not None:
                 print("--reset khong di cung gia tri thu tu", file=sys.stderr)
                 return 2
             da_xoa = lr.xoa_thu_tu()
             print(("da xoa " if da_xoa else "khong co ") + f"tep thu tu {lr.tep_thu_tu()}", file=sys.stderr)
-        elif getattr(a, "thu_tu", None):
+        elif getattr(a, "thu_tu", None) is not None:   # "" là giá trị SAI (rc 2), không phải "chỉ xem" — F9
             thu_tu, tep = lr.luu_thu_tu(a.thu_tu)
             print(f"da luu thu tu {','.join(thu_tu)} -> {tep}", file=sys.stderr)
         thu_tu, nguon = lr.thu_tu_hieu_luc()
@@ -2987,35 +2987,55 @@ def cmd_llm_khai_niem(a) -> int:
     except ValueError as e:
         print(f"[tl] {e}", file=sys.stderr)
         return 2
+    so_hieu = getattr(a, "sohieu", None) or None
+    dieu = getattr(a, "dieu", None)
     if getattr(a, "tep", None):
+        # F11 (PR #1503): tệp local KHÔNG mang số hiệu/Điều xác minh được ⇒ không cho gắn số hiệu tay, và
+        # số Điều lấy từ chính tiêu đề tệp; `--dieu` lệch tiêu đề ⇒ rc 2 (không dán nhãn sai).
+        if so_hieu:
+            print("[tl] chon MOT nguon: <so_hieu> (qua tl extract) HOAC --tep — khong ghep so hieu vao tep local",
+                  file=sys.stderr)
+            return 2
         try:
             van_ban = Path(a.tep).read_text(encoding="utf-8").strip()
+        except UnicodeError as e:   # F12: tệp mã cũ ⇒ rc 2 kèm hướng dẫn, không traceback
+            print(f"[tl] {a.tep} khong phai UTF-8 ({type(e).__name__}) — luu lai duoi dang UTF-8", file=sys.stderr)
+            return 2
         except OSError as e:
             print(f"[tl] khong doc duoc {a.tep}: {e}", file=sys.stderr)
             return 2
+        dieu_tep = lr.so_dieu_tu_tieu_de(van_ban)
+        if dieu is not None and dieu_tep is not None and str(dieu) != dieu_tep:
+            print(f"[tl] --dieu {dieu} lech tieu de tep (Dieu {dieu_tep})", file=sys.stderr)
+            return 2
+        dieu = dieu_tep if dieu_tep is not None else dieu
         nguon_vb = str(a.tep)
     else:
-        if not getattr(a, "sohieu", None):
+        if not so_hieu:
             print("[tl] can <so_hieu> --dieu N, hoac --tep <tep van ban>", file=sys.stderr)
             return 2
+        dieu = "3" if dieu is None else str(dieu)
+        # F5: chuyển tiếp CẢ `--config` lẫn `--profile` — hai cờ gốc quyết định nguồn của `tl extract`.
         them = []
+        if getattr(a, "config", None):
+            them += ["--config", str(a.config)]
         if getattr(a, "profile", None):
             them += ["--profile", str(a.profile)]
         try:
-            van_ban, loi_extract = lr.lay_dieu_qua_extract(a.sohieu, a.dieu, HERE / "tl.py", them=them)
+            van_ban, loi_extract = lr.lay_dieu_qua_extract(so_hieu, dieu, HERE / "tl.py", them=them)
         except (ValueError, OSError, subprocess.SubprocessError) as e:
             print(f"[tl] khong lay duoc nguyen van: {e}", file=sys.stderr)
             return 2
         for dong in loi_extract.splitlines():
             if dong.startswith("[tl] canonical:") or "DỰ THẢO" in dong or "[markup]" in dong:
                 print(dong, file=sys.stderr)
-        nguon_vb = f"tl extract {a.sohieu} --dieu {a.dieu}"
+        nguon_vb = f"tl extract {so_hieu} --dieu {dieu}"
     if not van_ban:
         print("[tl] van ban rong", file=sys.stderr)
         return 2
     print(f"[tl] thu tu duong: {','.join(thu_tu)} ({nguon})", file=sys.stderr)
     try:
-        kq = lr.tach_khai_niem(van_ban, getattr(a, "sohieu", "") or "", a.model, thu_tu)
+        kq = lr.tach_khai_niem(van_ban, so_hieu or "", a.model, thu_tu)
     except lr.HetDuong as e:
         print("[tl] HET DUONG — moi duong deu hong phia duong:", file=sys.stderr)
         for d, ly_do in e.lan_thu:
@@ -3024,10 +3044,23 @@ def cmd_llm_khai_niem(a) -> int:
     except lr.Dung as e:
         print(f"[tl] DUNG (loi phia yeu cau, khong thu duong khac): {e}", file=sys.stderr)
         return 4
-    ket = {"so_hieu": getattr(a, "sohieu", None), "dieu": getattr(a, "dieu", None), "nguon": nguon_vb,
-           "khai_niem": kq["khai_niem"]}
-    if getattr(a, "out", None):
-        Path(a.out).write_text(json.dumps(ket, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    ket = {"so_hieu": so_hieu, "dieu": dieu, "nguon": nguon_vb, "khai_niem": kq["khai_niem"]}
+    # F4 (PR #1503): `--out` CHỈ ghi khi kết quả QUA kiểm nguyên văn, và ghi nguyên tử — kết quả bị từ
+    # chối (rc 5) không được đè lên bản đã xác minh trước đó.
+    if getattr(a, "out", None) and not kq["lech"]:
+        _dich = Path(a.out)
+        _dich.parent.mkdir(parents=True, exist_ok=True)
+        _fd, _tam = tempfile.mkstemp(prefix=_dich.name + ".", suffix=".tmp", dir=str(_dich.parent))
+        try:
+            with os.fdopen(_fd, "w", encoding="utf-8") as _f:
+                _f.write(json.dumps(ket, ensure_ascii=False, indent=2) + "\n")
+            os.replace(_tam, _dich)
+        except BaseException:
+            try:
+                os.unlink(_tam)
+            except OSError:
+                pass
+            raise
     if getattr(a, "nhat_ky", None):
         lr.ghi_nhat_ky(a.nhat_ky, kq, "llm-khai-niem")
     u = kq["usage"]

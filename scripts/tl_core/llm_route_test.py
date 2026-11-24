@@ -718,69 +718,91 @@ def ca_sau_khoi_chay_khong_chuyen(m):
         bang(rc == m.MA_DUNG, f"{ten} sau khi khoi chay: phai DUNG, khong goi api: rc={rc} {nhat}")
     rc, kq, nhat = chay_lenh(m, KEY, {"sub": sub(m, gia(spawn_hong)), "api": api(m, client_gia())})
     bang(rc == 0 and kq["duong"] == "api", f"khong khoi chay duoc claude -p (truoc model) phai chuyen api: rc={rc} {nhat}")
-    # Bộ chạy THẬT `_chay_co_moc`: spawn hỏng ⇒ KhongKhoiChay; tiến trình chạy được ⇒ CompletedProcess.
-    try:
-        m._chay_co_moc(["/khong/ton/tai/claude-gia"], timeout=10, text=True)
-        raise TinHieuChotCa("spawn hong phai nem KhongKhoiChay")
-    except OSError as e:
-        bang(isinstance(e, m.KhongKhoiChay), f"spawn hong phai nem KhongKhoiChay, duoc {type(e).__name__}")
-    p = m._chay_co_moc([sys.executable, "-c", "print('ok')"], timeout=30, text=True, stdin=subprocess.DEVNULL)
-    bang(p.returncode == 0 and p.stdout.strip() == "ok", f"_chay_co_moc chay that: {p}")
-    try:
-        m._chay_co_moc([sys.executable, "-c", "import time; time.sleep(30)"], timeout=0.5, text=True)
-        raise TinHieuChotCa("qua han phai nem TimeoutExpired")
-    except m.KhongKhoiChay as e:
-        raise TinHieuChotCa(f"qua han SAU khoi chay khong duoc thanh KhongKhoiChay: {e}") from e
-    except subprocess.TimeoutExpired:
-        pass
-    # Lượt 7 T2: lỗi đọc LẶP LẠI ⇒ tiến trình con vẫn phải được giết VÀ thu hồi (không phụ thuộc vào đọc lại).
-    giu = []
-    goc_popen = m.subprocess.Popen
+    # Mọi tiến trình con THẬT của phần dưới được GHI LẠI và luôn bị giết + thu hồi khi ca kết thúc — kể cả dưới một
+    # đột biến bỏ bước giết (CI `ci_dang_ky --chay` báo "con cháu còn sống sau khi bộ thoát" nếu sót).
+    da_tao = []
+    goc_that = m.subprocess.Popen
 
-    class PopenDocHong(goc_popen):
+    class PopenGhiLai(goc_that):
         def __init__(self, *a, **k):
             super().__init__(*a, **k)
-            giu.append(self)
+            da_tao.append(self)
 
-        def communicate(self, *a, **k):
-            raise OSError(5, "EIO lap lai")
-    m.subprocess.Popen = PopenDocHong
-    try:
+    def phan_that():
+        # Bộ chạy THẬT `_chay_co_moc`: spawn hỏng ⇒ KhongKhoiChay; tiến trình chạy được ⇒ CompletedProcess.
         try:
-            m._chay_co_moc([sys.executable, "-c", "import time; time.sleep(30)"], timeout=10, text=True)
-            raise TinHieuChotCa("loi doc phai noi len")
+            m._chay_co_moc(["/khong/ton/tai/claude-gia"], timeout=10, text=True)
+            raise TinHieuChotCa("spawn hong phai nem KhongKhoiChay")
         except OSError as e:
-            bang(not isinstance(e, m.KhongKhoiChay), "loi doc SAU khoi chay khong duoc thanh KhongKhoiChay")
-    finally:
-        m.subprocess.Popen = goc_popen
-    bang(giu and giu[0].returncode is not None, f"tien trinh con chua duoc thu hoi sau loi doc: {giu and giu[0].returncode}")
-    # Lượt 8 U2: giả lập nhánh Windows — KHÔNG được đóng pipe đồng bộ (luồng đọc nền có thể đang giữ nó), vẫn thu hồi.
-    giu.clear()
-    dong = []
-
-    class PopenWin(PopenDocHong):
-        def __init__(self, *a, **k):
-            super().__init__(*a, **k)
-            for ten in ("stdout", "stderr"):
-                ong = getattr(self, ten)
-                setattr(self, ten, types.SimpleNamespace(close=lambda _t=ten, _o=ong: (dong.append(_t), _o.close())))
-    m.subprocess.Popen, la_win = PopenWin, m._LA_WINDOWS
-    m._LA_WINDOWS = True
-    try:
+            bang(isinstance(e, m.KhongKhoiChay), f"spawn hong phai nem KhongKhoiChay, duoc {type(e).__name__}")
+        p = m._chay_co_moc([sys.executable, "-c", "print('ok')"], timeout=30, text=True, stdin=subprocess.DEVNULL)
+        bang(p.returncode == 0 and p.stdout.strip() == "ok", f"_chay_co_moc chay that: {p}")
         try:
-            m._chay_co_moc([sys.executable, "-c", "import time; time.sleep(30)"], timeout=10, text=True)
-        except OSError:
+            m._chay_co_moc([sys.executable, "-c", "import time; time.sleep(30)"], timeout=0.5, text=True)
+            raise TinHieuChotCa("qua han phai nem TimeoutExpired")
+        except m.KhongKhoiChay as e:
+            raise TinHieuChotCa(f"qua han SAU khoi chay khong duoc thanh KhongKhoiChay: {e}") from e
+        except subprocess.TimeoutExpired:
             pass
-    finally:
-        m.subprocess.Popen, m._LA_WINDOWS = goc_popen, la_win
-    da_dong = list(dong)   # chụp TRƯỚC khi ca tự dọn pipe
-    for p_ in giu:
-        for ten in ("stdout", "stderr"):
-            with contextlib.suppress(Exception):
-                getattr(p_, ten).close()
-    bang(not da_dong, f"nhanh Windows khong duoc dong pipe dong bo: {da_dong}")
-    bang(giu and giu[0].returncode is not None, "nhanh Windows van phai thu hoi tien trinh con")
+        # Lượt 7 T2: lỗi đọc LẶP LẠI ⇒ tiến trình con vẫn phải được giết VÀ thu hồi (không phụ thuộc vào đọc lại).
+        giu = []
+        goc_popen = m.subprocess.Popen
 
+        class PopenDocHong(goc_popen):
+            def __init__(self, *a, **k):
+                super().__init__(*a, **k)
+                giu.append(self)
+
+            def communicate(self, *a, **k):
+                raise OSError(5, "EIO lap lai")
+        m.subprocess.Popen = PopenDocHong
+        try:
+            try:
+                m._chay_co_moc([sys.executable, "-c", "import time; time.sleep(30)"], timeout=10, text=True)
+                raise TinHieuChotCa("loi doc phai noi len")
+            except OSError as e:
+                bang(not isinstance(e, m.KhongKhoiChay), "loi doc SAU khoi chay khong duoc thanh KhongKhoiChay")
+        finally:
+            m.subprocess.Popen = goc_popen
+        bang(giu and giu[0].returncode is not None, f"tien trinh con chua duoc thu hoi sau loi doc: {giu and giu[0].returncode}")
+        # Lượt 8 U2: giả lập nhánh Windows — KHÔNG được đóng pipe đồng bộ (luồng đọc nền có thể đang giữ nó), vẫn thu hồi.
+        giu.clear()
+        dong = []
+
+        class PopenWin(PopenDocHong):
+            def __init__(self, *a, **k):
+                super().__init__(*a, **k)
+                for ten in ("stdout", "stderr"):
+                    ong = getattr(self, ten)
+                    setattr(self, ten, types.SimpleNamespace(close=lambda _t=ten, _o=ong: (dong.append(_t), _o.close())))
+        m.subprocess.Popen, la_win = PopenWin, m._LA_WINDOWS
+        m._LA_WINDOWS = True
+        try:
+            try:
+                m._chay_co_moc([sys.executable, "-c", "import time; time.sleep(30)"], timeout=10, text=True)
+            except OSError:
+                pass
+        finally:
+            m.subprocess.Popen, m._LA_WINDOWS = goc_popen, la_win
+        da_dong = list(dong)   # chụp TRƯỚC khi ca tự dọn pipe
+        for p_ in giu:
+            for ten in ("stdout", "stderr"):
+                with contextlib.suppress(Exception):
+                    getattr(p_, ten).close()
+        bang(not da_dong, f"nhanh Windows khong duoc dong pipe dong bo: {da_dong}")
+        bang(giu and giu[0].returncode is not None, "nhanh Windows van phai thu hoi tien trinh con")
+
+
+    m.subprocess.Popen = PopenGhiLai
+    try:
+        phan_that()
+    finally:
+        m.subprocess.Popen = goc_that
+        for p_ in da_tao:
+            if p_.poll() is None:
+                p_.kill()
+            with contextlib.suppress(Exception):
+                p_.wait(timeout=10)
 
 def ca_nguon_mo_ho_luot8(m):
     """Lượt 8 U1/U3: nguồn có dòng mà ngoặc/trích dẫn không khép trong dòng, `)` lẻ, `”` lẻ, hay trích dẫn cong LỒNG

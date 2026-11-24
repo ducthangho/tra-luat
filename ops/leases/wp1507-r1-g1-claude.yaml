@@ -57,9 +57,9 @@ thay_the_cho: []
 thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
 leased_at_utc: '2026-11-24T11:20:00Z'
 heartbeat_at: '2026-11-24T11:20:00Z'
-lease_until: '2026-11-24T23:20:00Z'
-lease_expires_at_utc: '2026-11-24T23:20:00Z'
-lease_until_ghi_chu: '12h để đủ thi công, review chéo Codex và CI; rút hạn sau land.'
+lease_until: '2026-11-24T11:43:00Z'
+lease_expires_at_utc: '2026-11-24T11:43:00Z'
+lease_until_ghi_chu: 'Gốc 2026-11-24T23:20:00Z. RÚT NGẮN về 2026-11-24T11:43:00Z — xem thu_hoi_bang_rut_han.'
 attempts_used: 1
 attempts_limit: 3
 budget:
@@ -68,3 +68,12 @@ budget:
 requires_live: false
 uy_quyen_merge: false
 uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'
+lease_sua_lan_cuoi: '2026-11-24T11:36:00Z'
+lease_sua_ghi_chu: 'Lần 1: rút ngắn lease_until/lease_expires_at_utc (thu_hoi_bang_rut_han). Không đổi write set, spec, branch.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-24T23:20:00Z'
+  han_moi_utc: '2026-11-24T11:43:00Z'
+  chi_thi: 'Chủ kho trong phiên dọn dẹp 24-11-2026 ~11:35Z (AskUserQuestion), lựa chọn "Đúng, wp1466 trước (Recommended)": rút ngắn lease #1507 để wp1466 xin lease được; #1507 làm đặc tả r2 với ADR-0069 sau khi wp1466 land. Quyết định gốc ghi hộ ở https://github.com/ducthangho/tra-luat/issues/1466#issuecomment-7130100252.'
+  ly_do: 'Trùng số ADR-0068 và trùng write set docs/PROTOCOL_DA_PHIEN.md với wp1466 (#1466, spec_hash 98790505, duyệt 21-11); wp1466 chạy trước.'
+  vi_sao_khong_dung_so: 'Theo tiền lệ ops/leases/ci-dot-bien-chia-manh-r2-g1-claude.yaml: rút hạn dùng cơ chế đã cài (phân loại lease theo hạn). Hạn mới đặt vài phút SAU lúc đẩy để ops-publish-lease.yml còn thấy lease sống (nhánh rc=9 đã đăng), không rơi vào rc=8.'
+  gioi_han: 'Ref mang lease này: nhánh ops/wp1507-r1-g1-lease. Nghiệm thu: ai-dang-giu cho bốn đường dẫn không còn wp1507-r1-g1-claude trong NGƯỜI_GIỮ sau 11:43Z.'

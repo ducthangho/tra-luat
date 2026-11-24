@@ -3875,6 +3875,47 @@ def _cho_snapshot_hoac_chan() -> bool:
     return _dang_cho_snapshot(home)
 
 
+# r1509 (đo 24-11-2026 trên máy chủ kho): Codex Windows tự đặt DACL bảo vệ trên `~/.codex`
+# `(A;OICI;0x1200a9;;;<CodexSandboxUsers>)` — nhóm cục bộ "(managed)" chứa CodexSandboxOffline/Online,
+# để lệnh trong sandbox đọc config. Chốt cũ đỏ ở THƯ MỤC ⇒ launcher "chờ snapshot" mãi. Cho phép HẸP:
+# chỉ trên THƯ MỤC, chỉ ACE allow, quyền ⊆ đọc/duyệt, SID là alias cục bộ TÊN đúng `CodexSandboxUsers`
+# cùng miền máy với người dùng. TỆP (auth.json) KHÔNG được nới: ACE ấy trên tệp nghĩa là lệnh sandbox
+# đọc được token — phải sửa ACL tệp (`launcher.py doctor` in lệnh icacls), đừng nới chốt.
+_SANDBOX_CODEX_NHOM = "codexsandboxusers"
+_SANDBOX_CODEX_QUYEN_DOC = 0x1200A9   # SYNCHRONIZE|READ_CONTROL|FILE_READ_ATTRIBUTES|EXECUTE|READ_EA|READ_DATA
+_SDDL_QUYEN_CHU = {"FR": 0x120089, "FX": 0x1200A0, "GR": 0x120089, "GX": 0x1200A0}
+
+
+def _quyen_sddl(rights: str):
+    """Mặt nạ quyền từ trường rights của SDDL; None khi không hiểu (fail-closed)."""
+    if re.fullmatch(r"0[xX][0-9a-fA-F]+", rights):
+        return int(rights, 16)
+    if not rights or len(rights) % 2:
+        return None
+    mask = 0
+    for i in range(0, len(rights), 2):
+        bit = _SDDL_QUYEN_CHU.get(rights[i:i + 2])
+        if bit is None:
+            return None
+        mask |= bit
+    return mask
+
+
+def _ace_sandbox_codex_duoc_phep(directory: bool, loai: str, rights: str, sid: str,
+                                 ten: str, kieu: int, user_sid: str) -> bool:
+    """r1509: ACE của nhóm sandbox Codex chỉ được tha trên thư mục, chỉ đọc, đúng danh tính."""
+    if not directory or loai != "A":
+        return False
+    mask = _quyen_sddl(rights)
+    if mask is None or mask & ~_SANDBOX_CODEX_QUYEN_DOC:
+        return False
+    if (ten or "").casefold() != _SANDBOX_CODEX_NHOM or kieu != 4:   # SidTypeAlias
+        return False
+    may = user_sid.rsplit("-", 1)[0]
+    return (sid.startswith("S-1-5-21-") and sid.rsplit("-", 1)[0] == may
+            and sid != user_sid)
+
+
 class _KhoCodex:
     """Pinned directory storage. No symlink traversal, broad ACL, or repo writes.
 
@@ -3909,7 +3950,7 @@ class _KhoCodex:
                     self.stack.callback(self.k.CloseHandle, h)
                     if (current / ".git").exists() or (current / ".git").is_symlink():
                         raise OSError("Codex home is inside a repository")
-                self._win_private(h)
+                self._win_private(h, directory=True)
             else:
                 if not hasattr(os, "O_NOFOLLOW") or os.open not in os.supports_dir_fd:
                     raise OSError("secure directory-relative storage unavailable")
@@ -4109,7 +4150,7 @@ class _KhoCodex:
                 self.k.LocalFree(c.cast(text, c.c_void_p))
             self.k.LocalFree(sid)
 
-    def _win_private(self, handle):
+    def _win_private(self, handle, directory=False):
         c, w = self.c, self.w
         sd, text = c.c_void_p(), w.LPWSTR()
         if self.a.GetSecurityInfo(handle, 1, 5, None, None, None, None, c.byref(sd)):
@@ -4137,8 +4178,36 @@ class _KhoCodex:
                 continue
             # Python's private Windows directories use OWNER RIGHTS (OW).
             # It is safe here only because the actual owner was checked above.
-            if fields[0] != "A" or self._win_sid(fields[5]) not in allowed | {"S-1-3-4"}:
-                raise OSError("credential ACL grants access to another principal")
+            sid = self._win_sid(fields[5])
+            if fields[0] == "A" and sid in allowed | {"S-1-3-4"}:
+                continue
+            if directory and fields[0] == "A":
+                ten, kieu = self._win_ten_sid(sid)
+                if _ace_sandbox_codex_duoc_phep(True, fields[0], fields[2], sid, ten, kieu, self.sid):
+                    continue
+            raise OSError("credential ACL grants access to another principal"
+                          + (f" ({sid}); fix: icacls <file> /inheritance:r /grant:r "
+                             "\"%USERNAME%:F\" \"*S-1-5-18:F\" \"*S-1-5-32-544:F\""
+                             if not directory else f" ({sid})"))
+
+    def _win_ten_sid(self, sid_text):
+        """(tên, SID_NAME_USE) của một SID cục bộ; lỗi ⇒ ("", 0) để chốt đỏ."""
+        c, w = self.c, self.w
+        fn = self.a.LookupAccountSidW
+        fn.argtypes = [w.LPCWSTR, c.c_void_p, w.LPWSTR, c.POINTER(w.DWORD), w.LPWSTR,
+                       c.POINTER(w.DWORD), c.POINTER(c.c_int)]
+        fn.restype = w.BOOL
+        sid = c.c_void_p()
+        if not self.a.ConvertStringSidToSidW(sid_text, c.byref(sid)):
+            return "", 0
+        try:
+            name, dom = c.create_unicode_buffer(256), c.create_unicode_buffer(256)
+            n, d, kind = w.DWORD(256), w.DWORD(256), c.c_int()
+            if not fn(None, sid, name, c.byref(n), dom, c.byref(d), c.byref(kind)):
+                return "", 0
+            return name.value, kind.value
+        finally:
+            self.k.LocalFree(sid)
 
     @contextlib.contextmanager
     def _win_security(self, directory=False):

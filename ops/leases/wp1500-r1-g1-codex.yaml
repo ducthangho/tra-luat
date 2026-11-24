@@ -42,9 +42,12 @@
   "authority_url": "https://github.com/ducthangho/tra-luat/issues/1500#issuecomment-7121222396",
   "recorded_by": "Codex dispatcher",
   "leased_at_utc": "2026-11-24T03:39:45Z",
-  "lease_until": "2026-11-24T09:39:45Z",
-  "lease_expires_at_utc": "2026-11-24T09:39:45Z",
+  "lease_until": "2026-11-24T08:46:02Z",
+  "lease_expires_at_utc": "2026-11-24T08:46:02Z",
   "heartbeat_required_minutes": 360,
   "prompt_path": "ops/prompts/wp1500-r1-g1-codex.txt",
-  "prompt_sha256_required": "d7439c88d05c302b475de8afc6e2696532f85ec571ee0d954ce3b0bdb28608a7"
+  "prompt_sha256_required": "d7439c88d05c302b475de8afc6e2696532f85ec571ee0d954ce3b0bdb28608a7",
+  "prior_lease_until": "2026-11-24T09:39:45Z",
+  "released_at_utc": "2026-11-24T08:46:02Z",
+  "released_reason": "Executor completed exact-head implementation, audit and source publication. Release shared write set for B4. CI and land remain pending on existing PR #1501."
 }

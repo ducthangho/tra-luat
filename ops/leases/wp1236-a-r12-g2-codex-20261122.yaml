@@ -25,8 +25,8 @@ executor_session: codex-current-session-wp1236-r12-g2
 executor_ghi_chu: 'Doi chieu T01 va T02 tren ban dung lai r12'
 leased_at_utc: '2026-11-22T16:38:54Z'
 heartbeat_at: '2026-11-22T16:38:54Z'
-lease_until: '2026-11-24T16:38:54Z'
-lease_expires_at_utc: '2026-11-24T16:38:54Z'
+lease_until: '2026-11-24T10:44:49Z'
+lease_expires_at_utc: '2026-11-24T10:44:49Z'
 role: executor
 provider: openai_codex
 executor: openai_codex
@@ -117,3 +117,13 @@ nang_tran:
     tran_moi: <= 3 tep / <= 800 dong them
     ai_nang: ducthangho
     can_cu_url: https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7043381576
+budget_cuoi_ghi_chu: 'Ghi luc rut han (phien land Claude session_015GtxrZk6gmfQKo7g4BfMBS). Review offline toan dot A r12 G2 APPROVED boi Google Antigravity tren 835655b (issues/1236#issuecomment-7125514979). Windows native mien (issues/1236#issuecomment-7127447632). Kich thuoc 3 tep, numstat 010046f..835655b do lai khi ghi ho so land.'
+thu_hoi_bang_rut_han:
+  han_goc_utc: '2026-11-24T16:38:54Z'
+  han_moi_utc: '2026-11-24T10:44:49Z'
+  chi_thi: 'Chu kho trong phien Claude Code: "Dong #1465, merge #1459 roi hoan thanh land, ghi so" (ghi ho o pull/1459#issuecomment-7129098397).'
+  ly_do: >-
+    Dot A cua packet GATE-OUTPUT-DOI-CHIEU (#1236) da MERGE: PR #1502 (head 835655b6b5d8ad2add49f04ded92d3fd3f42515e) merge commit 9d61d4efe6b59c20c12ba87420efd7dfd6e224bc luc 2026-11-24T10:34:28Z.
+  vi_sao_khong_dung_bia_mo: 'Chua co lease ke nhiem cho write set nay luc rut (dot B/C chua co dac ta).'
+  nguoi_rut: 'phien land Claude session_015GtxrZk6gmfQKo7g4BfMBS'
+  nghiem_thu: 'ai-dang-giu cac duong dan write set sau han moi phai ra NGUOI_GIU 0.'

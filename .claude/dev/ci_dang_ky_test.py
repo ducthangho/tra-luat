@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Sổ test sống: kiểm phạm vi, lời gọi CI, rc và bằng chứng dương."""
 import argparse
+import base64
 import concurrent.futures
 import contextlib
 import datetime
 import hashlib
+import importlib.util
 import io
 import json
 import math
@@ -982,6 +984,35 @@ BUOC_BIEN_NHAN_DU = {"name": "biên nhận mảnh phải đủ, đúng SHA sự 
 # Lượt 2 (Codex P2 partial-rerun-loses-shard-artifacts): tải theo run_id (MỌI attempt), mỗi artifact một thư mục riêng.
 TAI_VE_DU = {"pattern": "dot-bien-manh-" + _RUN_DU + "-*", "path": "manh-tho"}
 CHE_DO_AUDIT_DU = "full_mutant_audit"
+# wp1460 (B1a): MỌI job mang cặp bước dấu GHIM ngay sau bước ĐO HEAD (trước mọi bước khác); job thu `bien-nhan-audit` GHIM
+# trọn: 11 bước theo đúng thứ tự, bước 7–11 `if: always()`, quyền mức job, thân bước REST và lệnh thu nguyên văn.
+JOB_THU, _GH = "bien-nhan-audit", "${{ github."
+KHOA_DAU = {JOB_DU: JOB_DU, JOB_MANH: JOB_MANH + "-${{ matrix.manh }}", JOB_GOP: JOB_GOP, JOB_THU: JOB_THU}
+THAN_DAU = """python3 -c 'import json, os, subprocess; e = os.environ; g = lambda r:subprocess.check_output(["git", "rev-parse", r], text=True).strip(); json.dump({"schema":"dau_job.v1", "khoa_job":e["KHOA_JOB"], "run_id":int(e["RUN_ID"]), "run_attempt":int(e["RUN_ATTEMPT"]), "su_kien_sha":e["SU_KIEN_SHA"], "checkout_sha":g("HEAD"), "checkout_tree":g("HEAD^{tree}")}, open("dau-job.json", "w", encoding="utf-8"))'"""
+TAI_DAU_DU = {"pattern": "dau-job-" + _RUN_DU + "-*", "path": "dau-tho"}
+_WF_DU_REL = ".github/workflows/ci-dot-bien-du.yml"
+BUOC_REST_DU = {"name": "REST của lượt (wp1460; mỗi điểm ghi .json hoặc .loi, không dừng giữa chừng)", "if": "always()",
+                "env": {"GH_TOKEN": _GH + "token }}", "KHO": _GH + "repository }}", "RUN_ID": _RUN_DU, "WF_SHA": _GH + "workflow_sha }}"},
+                "run": 'mkdir -p rest\nlay() { ten="$1"; shift; if gh api "$@" > "rest/$ten.json" 2> "rest/$ten.loi"; then rm -f "rest/$ten.loi"; '
+                       'else rm -f "rest/$ten.json"; fi; }\nlay run "repos/$KHO/actions/runs/$RUN_ID"\n'
+                       'lay jobs --paginate --slurp "repos/$KHO/actions/runs/$RUN_ID/jobs?filter=all&per_page=100"\n'
+                       'lay artifacts --paginate --slurp "repos/$KHO/actions/runs/$RUN_ID/artifacts?per_page=100"\n'
+                       'if [[ "$WF_SHA" =~ ^[0-9a-f]{40}$ ]]; then lay definition "repos/$KHO/contents/' + _WF_DU_REL + '?ref=$WF_SHA"; fi\nexit 0\n'}
+DOI_SO_THU = (("kho", "repository"), ("kho-id", "repository_id"), ("workflow-ref", "workflow_ref"), ("workflow-sha", "workflow_sha"), ("su-kien", "event_name"),
+              ("ref", "ref"), ("cron", "event.schedule"), ("sha-su-kien", "sha"), ("run-id", "run_id"), ("run-attempt", "run_attempt"))
+BUOC_TAI_BIEN_NHAN_DU = {"if": "always()", "uses": "actions/upload-artifact@v4", "with": {
+    "name": "bien-nhan-audit-" + _LUOT_DU, "path": "bien_nhan_audit.json", "if-no-files-found": "error"}}
+BUOC_THU_DU = {"name": "thu biên nhận audit (wp1460)", "if": "always()",
+               "run": "python .claude/dev/ci_dang_ky_test.py --thu-bien-nhan-audit bien_nhan_audit.json --rest rest --manh-tho manh-tho --dau-tho dau-tho"
+                      + "".join(f' --{a} "{_GH}{b} }}}}"' for a, b in DOI_SO_THU)}
+
+
+def _buoc_dau(ten):
+    """wp1460: cặp bước dấu job GHIM của job `ten` (thân giống nhau mọi job; tham số chỉ vào qua `env`)."""
+    khoa = KHOA_DAU[ten]
+    return [{"name": "dấu job (wp1460)", "run": THAN_DAU,
+             "env": {"KHOA_JOB": khoa, "RUN_ID": _RUN_DU, "RUN_ATTEMPT": _GH + "run_attempt }}", "SU_KIEN_SHA": REF_SU_KIEN}},
+            {"uses": "actions/upload-artifact@v4", "with": {"name": "dau-job-" + _LUOT_DU + "-" + khoa, "path": "dau-job.json", "if-no-files-found": "error"}}]
 _LENH_DOI_HEAD = re.compile(r"\bgit\s+(?:checkout|switch|reset|pull|fetch|merge|rebase|worktree|clone)\b")
 
 
@@ -1012,13 +1043,13 @@ def _la_checkout(b):
     return isinstance(b, dict) and str(b.get("uses", "")).split("@")[0].strip().lower() == "actions/checkout"
 
 
-def _ghim_sha(steps):
-    """Bản sao `steps` với mọi `actions/checkout` mang `ref` = SHA sự kiện và bước ĐO HEAD ngay sau."""
+def _ghim_sha(steps, ten):
+    """Bản sao `steps` với mọi `actions/checkout` mang `ref` = SHA sự kiện, bước ĐO HEAD ngay sau, rồi cặp bước dấu của job `ten`."""
     ra = []
     for b in json.loads(json.dumps(steps or [])):
         if _la_checkout(b):
             b["with"] = dict(b.get("with") or {}, ref=REF_SU_KIEN)
-            ra += [b, json.loads(json.dumps(BUOC_KIEM_HEAD))]
+            ra += [b, json.loads(json.dumps(BUOC_KIEM_HEAD))] + _buoc_dau(ten)
         else:
             ra.append(b)
     return ra
@@ -1043,10 +1074,12 @@ def loi_ghim_sha_du(data):
             loi.append(f"wp1166 job {ten}: checkout phải ghim ref SHA sự kiện {REF_SU_KIEN!r} (ref trôi/khoá lạ): {w!r}")
         if i + 1 >= len(steps) or not _bang_kieu(steps[i + 1], BUOC_KIEM_HEAD):
             loi.append(f"wp1166 job {ten}: bước liền sau checkout phải ĐO HEAD == SHA sự kiện")
+        if ten in KHOA_DAU and not _bang_kieu(steps[i + 2:i + 4], _buoc_dau(ten)):
+            loi.append(f"wp1460 job {ten}: cặp bước dấu job GHIM phải đứng NGAY SAU bước đo HEAD, trước mọi bước khác")
         if any(_LENH_DOI_HEAD.search(str(b.get("run", ""))) for b in steps[i + 1:]):
             loi.append(f"wp1166 job {ten}: có lệnh git dời HEAD sau checkout")
     def _buoc(ten): return [b for b in ((jobs.get(ten) if isinstance(jobs.get(ten), dict) else {}).get("steps") or []) if isinstance(b, dict)]
-    tai_len = [b.get("with") for b in _buoc(JOB_MANH) if "upload-artifact" in str(b.get("uses", ""))]
+    tai_len = [b.get("with") for b in _buoc(JOB_MANH) if "upload-artifact" in str(b.get("uses", "")) and b not in _buoc_dau(JOB_MANH)]
     if len(tai_len) != 1 or not _bang_kieu(tai_len[0], {
             "name": TEN_ARTIFACT_DU + "${{ matrix.manh }}", "path": "manh/manh-${{ matrix.manh }}.json", "if-no-files-found": "error"}):
         loi.append(f"wp1166 artifact mảnh phải mang run_id + run_attempt, không overwrite: {tai_len!r}")
@@ -1192,19 +1225,19 @@ def loi_workflow_dot_bien_du(data, ci):
         loi.append(f"permissions phải đúng contents: read: {d.get('permissions')!r}")
     loi += loi_ghim_sha_du(d)
     jobs, goc = d.get("jobs") or {}, _bo_che_do_job((((ci or {}).get("jobs") or {}).get("gate-registry") or {}))
-    if set(jobs) != {JOB_DU, JOB_MANH, JOB_GOP} or not isinstance(jobs[JOB_DU], dict):
-        return loi + [f"phải đúng ba job {JOB_DU}/{JOB_MANH}/{JOB_GOP}, thấy {sorted(map(str, jobs))}"]
+    if set(jobs) != set(KHOA_DAU) or not isinstance(jobs[JOB_DU], dict):
+        return loi + [f"phải đúng bốn job {sorted(KHOA_DAU)}, thấy {sorted(map(str, jobs))}"]
     job = jobs[JOB_DU]
     if set(job) != {"runs-on", "timeout-minutes", "env", "steps"} or job["runs-on"] != "ubuntu-latest":
         loi.append(f"job: khoá {sorted(job)} / runs-on {job.get('runs-on')!r} ngoài danh sách cho phép")
     loi += [f"job: {k} lệch gate-registry" for k in ("timeout-minutes", "env") if not _bang_kieu(job.get(k), goc.get(k))]
-    ky_vong = _ghim_sha(goc.get("steps") or [])
+    ky_vong = _ghim_sha(goc.get("steps") or [], JOB_DU)
     reg = [b for b in ky_vong if "python .claude/dev/ci_dang_ky_test.py --chay" in _dong_lenh(b)]
     if len(reg) != 1:
         return loi + [f"gate-registry của ci.yml có {len(reg)} bước registry, cần đúng một"]
     reg[0]["env"] = {BIEN_WORKERS: "2", BIEN_MANH: BO_MANH}
     loi += [] if _bang_kieu(job.get("steps"), ky_vong) else [f"bước lệch gate-registry của ci.yml (env registry chỉ được {reg[0]['env']})"]
-    return loi + [f"job {j} lệch hình GHIM (#661 M5)" for j, v in zip((JOB_MANH, JOB_GOP), _job_manh_gop(goc)) if not _bang_kieu(jobs[j], v)]
+    return loi + [f"job {j} lệch hình GHIM (#661 M5 / wp1460)" for j, v in zip((JOB_MANH, JOB_GOP, JOB_THU), _job_manh_gop(goc)) if not _bang_kieu(jobs[j], v)]
 
 
 def _bang_kieu(a, b):
@@ -1218,22 +1251,28 @@ def _bang_kieu(a, b):
 
 def _job_manh_gop(goc):
     """#661 M5: hai job GHIM trọn; bước python + `env` TRÍCH từ `gate-registry`; matrix và N cùng từ `SO_MANH`."""
-    dau = _ghim_sha([{"uses": "actions/checkout@v4"}]) + json.loads(json.dumps((goc.get("steps") or [])[2:3]))
+    def dau(ten): return _ghim_sha([{"uses": "actions/checkout@v4"}], ten) + json.loads(json.dumps((goc.get("steps") or [])[2:3]))
     pip = json.loads(json.dumps((goc.get("steps") or [])[3:4]))  # wp1166: bước biên nhận của job gom cần PyYAML
     env, m = goc.get("env"), "${{ matrix.manh }}"
     # WP748 r16: full_mutant_audit ~73 800 s noi tiep (g12) => 8 manh x ~2,6 h => tran 360 (tran job GitHub).
     manh = {"runs-on": "ubuntu-latest", "timeout-minutes": 360, "env": env,
             "strategy": {"fail-fast": False, "matrix": {"manh": list(range(SO_MANH))}},
-            "steps": dau + [{"name": "đột biến một mảnh", "run": "python ops/nhanh_don_duoc_test.py",
+            "steps": dau(JOB_MANH) + [{"name": "đột biến một mảnh", "run": "python ops/nhanh_don_duoc_test.py",
                              "env": {"NHANH_DON_DUOC_DICH": f"{m}/{SO_MANH}", "NHANH_DON_DUOC_DICH_RA": f"manh/manh-{m}.json",
                                      "NHANH_DON_DUOC_DICH_DU": "1"}},
                             {"uses": "actions/upload-artifact@v4", "with": {
                                 "name": TEN_ARTIFACT_DU + m, "path": f"manh/manh-{m}.json", "if-no-files-found": "error"}}]}
     gop = {"needs": JOB_MANH, "runs-on": "ubuntu-latest", "timeout-minutes": 10,
-           "steps": dau + pip + [{"uses": "actions/download-artifact@v4",
+           "steps": dau(JOB_GOP) + pip + [{"uses": "actions/download-artifact@v4",
                                   "with": dict(TAI_VE_DU)},
                                  dict(BUOC_BIEN_NHAN_DU), {"name": "gom mảnh", "run": "python ops/nhanh_don_duoc_test.py --gop-du manh"}]}
-    return manh, gop
+    lv = {"if": "always()"}  # wp1460: bước 7–11 của job thu chạy sau BẤT KỲ bước nào hỏng trước đó
+    thu = {"needs": [JOB_DU, JOB_MANH, JOB_GOP], "if": "always()", "runs-on": "ubuntu-latest", "timeout-minutes": 10,
+           "permissions": {"contents": "read", "actions": "read"},
+           "steps": dau(JOB_THU) + pip + [dict(lv, uses="actions/download-artifact@v4", **{"with": dict(TAI_VE_DU)}),
+                                          dict(lv, uses="actions/download-artifact@v4", **{"with": dict(TAI_DAU_DU)}), dict(BUOC_REST_DU), dict(BUOC_THU_DU),
+                                          dict(BUOC_TAI_BIEN_NHAN_DU)]}
+    return manh, gop, thu
 
 
 def doc_so_worker(env=os.environ, la_windows=None):
@@ -1534,6 +1573,1056 @@ def loi_g5_workflow(data):
             loi += _loi_thuc_thi_g5(j, v, buoc if moi else buoc[:cham[0] + 1])
             loi += _loi_g5_manh_gop(j, v, buoc, cham[0]) if moi else []
     return loi
+
+
+# ══ wp1460 (B1a): lệnh thu `--thu-bien-nhan-audit` (mục 3–4 của đặc tả: X1–X8). Hàm thuần trên tệp, chạy offline. ══
+THU_MUC_HOP_DONG = ROOT / "ops/specs/wp1460-r1/hop_dong"
+_MOC_REST_DU = r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z"
+_NHO_1460 = {}
+
+
+def khoa_job_tu_ten(ten):
+    """`dot-bien-manh (3)` → `dot-bien-manh-3` (khoá trong tên artifact dấu); tên job không ma trận giữ nguyên."""
+    m = re.fullmatch(r"(.+) \((.+)\)", ten)
+    return f"{m[1]}-{m[2]}" if m else ten
+
+
+def job_ky_vong_du(wf):
+    """X2: tên job kỳ vọng lập từ CHÍNH tệp workflow `wf` tại checkout, theo thứ tự tệp; không ghi cứng số hay tên job. Job không
+    ma trận ⇒ tên khoá; job có ĐÚNG MỘT trục ma trận dạng danh sách ⇒ `<khoá> (<giá trị>)`. Hình khác ⇒ ValueError."""
+    d = yaml.safe_load(pathlib.Path(wf).read_text(encoding="utf-8"))
+    jobs, ra = d.get("jobs") if isinstance(d, dict) else None, []
+    for k, j in (jobs.items() if isinstance(jobs, dict) else []):
+        st = j.get("strategy") if isinstance(j, dict) else 0
+        if not isinstance(k, str) or not isinstance(j, dict) or "name" in j or not (st is None or isinstance(st, dict)):
+            raise ValueError(f"job {k!r}: hình ngoài hai dạng cho phép")
+        truc = list(st["matrix"].values()) if st and isinstance(st.get("matrix"), dict) else None
+        if st is not None and (not truc or len(truc) != 1 or not isinstance(truc[0], list) or not truc[0] or any(type(v) not in (int, str) for v in truc[0])):
+            raise ValueError(f"job {k!r}: ma trận phải có đúng một trục dạng danh sách")
+        ra += [k] if st is None else [f"{k} ({v})" for v in truc[0]]
+    if len(ra) < 2 or len(ra) != len(set(ra)):
+        raise ValueError(f"kiểm kê job rỗng/trùng: {ra}")
+    return ra
+
+
+def _doc_json_du(p, tho=False):
+    """JSON từ tệp (từ bytes khi `tho`). Vắng/hỏng ⇒ None: đầu vào THU ĐƯỢC không bao giờ làm lệnh thu ném."""
+    try:
+        return json.loads(p.decode("utf-8") if tho else pathlib.Path(p).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def _gop_trang_du(trang, khoa):
+    """Đầu ra `gh api --paginate --slurp`: danh sách trang `{total_count, <khoa>: [...]}`. Trả mọi phần tử khi ĐÃ ĐỌC HẾT (mọi
+    trang khai cùng `total_count` = số phần tử đã đọc); thiếu trang / sai hình ⇒ None."""
+    if not isinstance(trang, list) or not trang or not all(
+            isinstance(t, dict) and isinstance(t.get(khoa), list) and type(t.get("total_count")) is int for t in trang):
+        return None
+    ra = [x for t in trang for x in t[khoa]]
+    return ra if {t["total_count"] for t in trang} == {len(ra)} else None
+
+
+def _doc_moc_du(v):
+    try:
+        return datetime.datetime.strptime(v, "%Y-%m-%dT%H:%M:%SZ")
+    except (TypeError, ValueError):
+        return None
+
+
+def khung_cron_du(tao):
+    """X8: mốc của cron GHIM (`phút giờ * * thứ`) gần nhất ≤ `tao` — khung danh nghĩa của lượt `schedule`."""
+    phut, gio, _, _, thu = CRON_DOT_BIEN_DU.split()
+    t = tao.replace(hour=int(gio), minute=int(phut), second=0, microsecond=0) - datetime.timedelta(days=(tao.weekday() - (int(thu) - 1)) % 7)
+    return t if t <= tao else t - datetime.timedelta(days=7)
+
+
+def bo_kiem_hop_dong(thu_muc=None):
+    """Hai bộ kiểm HÌNH (biên nhận, dấu job) dựng từ schema ĐÓNG BĂNG. Vắng `jsonschema` / không đọc được schema ⇒ None
+    (KHÔNG ĐO ĐƯỢC ⇒ người gọi KHÔNG XANH)."""
+    try:
+        import jsonschema
+        S = json.loads(pathlib.Path(thu_muc or THU_MUC_HOP_DONG, "bien_nhan_audit.v1.schema.json").read_text(encoding="utf-8"))
+        return {"bien_nhan": jsonschema.Draft202012Validator(S),
+                "dau_job": jsonschema.Draft202012Validator({"$schema": S["$schema"], "$ref": "#/$defs/dau_job_v1", "$defs": S["$defs"]})}
+    except (ImportError, OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def thu_bien_nhan_audit(ra, rest, manh_tho, dau_tho, c, wf=None, hop_dong=None):
+    """Ghi MỘT biên nhận `bien_nhan_audit.v1` vào `ra` rồi trả 0 (XANH: quan sát được VÀ xác nhận đủ X1–X8) hoặc 1 (KHÔNG XANH:
+    chỉ định danh từ context + `ly_do`). `c` = context ĐÃ kiểm dạng (`doi_so_thu`). Mọi đầu vào còn lại là thứ THU ĐƯỢC: vắng,
+    hỏng hay sai đều KHÔNG XANH, không ném. Mốc `run_created_at`/khung CHỈ lấy từ `run.created_at` của REST (không có ⇒ null)."""
+    ld, rest, sha, rid, att, sk = [], pathlib.Path(rest), c["sha"], c["run_id"], c["run_attempt"], c["su_kien"]
+
+    def can(dk, ly):
+        if not dk: ld.append(ly)
+        return bool(dk)
+    V = bo_kiem_hop_dong(hop_dong)
+    can(V is not None, "KHÔNG ĐO ĐƯỢC: không nạp được jsonschema hoặc schema đóng băng")
+    run, jobs, arts = _doc_json_du(rest / "run.json"), _gop_trang_du(_doc_json_du(rest / "jobs.json"), "jobs"), _gop_trang_du(_doc_json_du(rest / "artifacts.json"), "artifacts")
+    run = run if isinstance(run, dict) else None
+    for ten, x in (("run", run), ("jobs", jobs), ("artifacts", arts)):
+        can(x is not None, f"X1: rest/{ten}.json vắng, hỏng hoặc thiếu trang (total_count khác số phần tử đã đọc)")
+    run = run or {}
+    kho_r = run.get("repository") if isinstance(run.get("repository"), dict) else {}
+    for ten, co, ctx in (("id", run.get("id"), rid), ("run_attempt", run.get("run_attempt"), att), ("head_sha", run.get("head_sha"), sha),
+                         ("path", run.get("path"), _WF_DU_REL), ("event", run.get("event"), sk),
+                         ("repository.full_name", kho_r.get("full_name"), c["kho"]), ("repository.id", kho_r.get("id"), c["kho_id"])):
+        can(type(co) is type(ctx) and co == ctx, f"X1: run.{ten} {co!r} khác context {ctx!r}")
+    tao = run.get("created_at")
+    tao = tao if isinstance(tao, str) and re.fullmatch(_MOC_REST_DU, tao) and _doc_moc_du(tao) else None
+    can(tao is not None, "X1: run.created_at vắng hoặc sai dạng (mốc ghi null, không thay bằng giờ nào khác)")
+    can(sk in ("schedule", "workflow_dispatch"), f"X8: sự kiện {sk!r} ngoài schedule/workflow_dispatch")
+    can(sk != "schedule" or c["cron"] == CRON_DOT_BIEN_DU, f"X8: cron {c['cron']!r} khác chuỗi ghim {CRON_DOT_BIEN_DU!r}")
+    khung = khung_cron_du(_doc_moc_du(tao)).strftime("%Y-%m-%dT%H:%M:%SZ") if tao and sk == "schedule" and c["cron"] == CRON_DOT_BIEN_DU else None
+    try:
+        E = job_ky_vong_du(wf or WF_DOT_BIEN_DU)
+    except (OSError, ValueError, yaml.YAMLError) as e:
+        E = []
+        ld.append(f"X2: không lập được kiểm kê job từ tệp workflow tại checkout: {type(e).__name__}: {e}")
+    ban = [j for j in jobs or [] if isinstance(j, dict) and isinstance(j.get("name"), str) and all(type(j.get(k)) is int and j[k] >= 1 for k in ("id", "run_attempt"))]
+    can(len(ban) == len(jobs or []), "X1: có bản ghi job sai dạng (name/id/run_attempt)")
+    cap, moi = [(j["name"], j["run_attempt"]) for j in ban], {}
+    for j in ban:  # tên job -> bản ghi REST có run_attempt lớn nhất
+        if j["name"] not in moi or j["run_attempt"] > moi[j["name"]]["run_attempt"]:
+            moi[j["name"]] = j
+    can(len(cap) == len(set(cap)), "X2: REST có hai bản ghi job cùng (tên, run_attempt)")
+    can(bool(E) and set(moi) == set(E), f"X2: tập job REST khác kiểm kê lập từ workflow: thiếu {sorted(set(E) - set(moi))}, thừa {sorted(set(moi) - set(E))}")
+    chi_so = {t: int(m[1]) for t in E for m in [re.fullmatch(re.escape(JOB_MANH) + r" \((0|[1-9][0-9]*)\)", t)] if m}
+    can(not E or (JOB_THU in E and JOB_GOP in E and bool(chi_so)), f"X2: kiểm kê thiếu job thu / job gom / job mảnh: {E}")
+    khoa_E, k_E = {khoa_job_tu_ten(t) for t in E}, {str(k) for k in chi_so.values()}
+    art = [a for a in arts or [] if isinstance(a, dict) and isinstance(a.get("name"), str) and type(a.get("id")) is int and a["id"] >= 1]
+    can(len(art) == len(arts or []), "X1: có bản ghi artifact sai dạng (name/id)")
+    ten_art = [a["name"] for a in art]
+    can(len(ten_art) == len(set(ten_art)), f"X7: tên artifact trùng: {sorted({n for n in ten_art if ten_art.count(n) > 1})}")
+    for n in ten_art:  # ba họ: dấu (khoá kỳ vọng), mảnh (chỉ số kỳ vọng), biên nhận của attempt TRƯỚC
+        m = re.fullmatch(rf"(dau-job|{re.escape(JOB_MANH)}|{re.escape(JOB_THU)})-{rid}-([1-9][0-9]*)(?:-(.+))?", n)
+        can(bool(m) and int(m[2]) <= att and (m[3] in khoa_E if m[1] == "dau-job" else m[3] in k_E if m[1] == JOB_MANH else m[3] is None and int(m[2]) < att),
+            f"X7: artifact tên ngoài ba họ (mảnh, dấu, biên nhận của attempt trước): {n!r}")
+
+    def lay(ho, ten, tep, thu_muc):
+        """Đúng MỘT bản ghi REST tên `ten`, `digest` đúng dạng, thư mục tải về có đúng một tệp `tep`. Trả (dòng artifact, bytes) hoặc (None, None)."""
+        co = [a for a in art if a["name"] == ten]
+        if not can(len(co) == 1, f"{ho}: cần đúng một artifact {ten!r} trong REST, thấy {len(co)}"):
+            return None, None
+        d = co[0].get("digest")
+        if not can(isinstance(d, str) and bool(re.fullmatch(r"sha256:[0-9a-f]{64}", d)), f"X7: artifact {ten!r}: digest REST vắng/sai dạng: {d!r}"):
+            return None, None
+        try:
+            co_tep = sorted(x.name for x in pathlib.Path(thu_muc, ten).iterdir())
+            nd = pathlib.Path(thu_muc, ten, tep).read_bytes() if co_tep == [tep] else None
+        except OSError:
+            co_tep, nd = None, None
+        if not can(nd is not None, f"{ho}: artifact {ten!r} tải về phải có đúng một tệp {tep!r}, thấy {co_tep}"):
+            return None, None
+        return {"id": co[0]["id"], "ten": ten, "digest": d, "sha256_noi_dung": hashlib.sha256(nd).hexdigest()}, nd
+    hang, manh, cay, att_gop = [], [], set(), moi.get(JOB_GOP, {}).get("run_attempt")
+    for t in E:
+        j = moi.get(t)
+        if j is None:
+            continue
+        khoa, tu = khoa_job_tu_ten(t), t == JOB_THU
+        can(tu or j.get("conclusion") == "success", f"X3: job {t!r}: kết luận REST của attempt mới nhất là {j.get('conclusion')!r}")
+        can(j["run_attempt"] <= att, f"X6: job {t!r} attempt {j['run_attempt']} lớn hơn attempt của lượt {att}")
+        if t in chi_so:
+            can(type(att_gop) is int and j["run_attempt"] <= att_gop, f"X6: mảnh {chi_so[t]} attempt {j['run_attempt']} mới hơn job gom ({att_gop})")
+            a, nd = lay("X5", f"{JOB_MANH}-{rid}-{j['run_attempt']}-{chi_so[t]}", f"manh-{chi_so[t]}.json", manh_tho)
+            x = _doc_json_du(nd, tho=True) if a else None
+            if a and can(isinstance(x, dict), f"X5: mảnh {chi_so[t]}: tệp không đọc được hoặc không phải object"):
+                can(x.get("head") == sha, f"X5: mảnh {chi_so[t]}: head {x.get('head')!r} khác SHA sự kiện")
+                can(type(x.get("manh")) is int and x["manh"] == chi_so[t], f"X5: mảnh {chi_so[t]}: tệp khai manh {x.get('manh')!r}")
+                manh.append({"manh": chi_so[t], "khoa_job": khoa, "attempt_ben_san_xuat": j["run_attempt"], "head": x.get("head"), "artifact": a})
+        a, nd = lay("X4", f"dau-job-{rid}-{j['run_attempt']}-{khoa}", "dau-job.json", dau_tho)
+        dau = _doc_json_du(nd, tho=True) if a else None
+        if not a or not can(V is not None and V["dau_job"].is_valid(dau), f"X4: dấu job {khoa!r}: không đúng hình dau_job_v1"):
+            continue
+        can(dau["run_id"] == rid, f"X4: dấu job {khoa!r}: run_id nhúng {dau['run_id']} khác lượt {rid}")
+        can(dau["run_attempt"] == j["run_attempt"], f"X4: dấu job {khoa!r}: run_attempt nhúng {dau['run_attempt']} khác attempt trong tên {j['run_attempt']}")
+        can(dau["khoa_job"] == khoa, f"X4: dấu job {khoa!r}: khoa_job nhúng {dau['khoa_job']!r}")
+        can(dau["su_kien_sha"] == sha, f"X4: dấu job {khoa!r}: su_kien_sha khác github.sha")
+        can(dau["checkout_sha"] == sha, f"X4: dấu job {khoa!r}: checkout_sha khác github.sha")
+        cay.add(dau["checkout_tree"])
+        hang.append({"ten": t, "khoa": khoa, "job_id": j["id"], "run_attempt": j["run_attempt"], "started_at": j.get("started_at"), "checkout_sha": dau["checkout_sha"],
+                     "checkout_tree": dau["checkout_tree"], "dau_job": a, "tu_than": tu, "ket_luan": None if tu else j.get("conclusion"),
+                     "completed_at": None if tu else j.get("completed_at")})
+    can(len(cay) <= 1, f"X4: checkout_tree lệch giữa các job: {sorted(cay)}")
+    ws = c.get("workflow_sha") if isinstance(c.get("workflow_sha"), str) and re.fullmatch(r"[0-9a-f]{40}", c["workflow_sha"]) else None
+    dd, nd = (_doc_json_du(rest / "definition.json") if ws else None), None  # định danh definition: CHỈ từ github.workflow_sha + REST contents
+    with contextlib.suppress(TypeError, KeyError, ValueError):
+        nd = base64.b64decode(dd["content"]) if dd["path"] == _WF_DU_REL and isinstance(dd["sha"], str) else None
+    if nd is not None and hashlib.sha1(b"blob %d\0" % len(nd) + nd).hexdigest() == dd["sha"]:
+        dinh = {"trang_thai": "measured", "workflow_sha": ws, "blob_oid": dd["sha"], "sha256": hashlib.sha256(nd).hexdigest()}
+    else:
+        dinh = {"trang_thai": "not_measured", "workflow_sha": ws,
+                "ly_do": "github.workflow_sha vắng hoặc không phải 40 hex" if ws is None else "không đọc được tệp workflow tại workflow_sha qua REST contents"}
+    chung = {"schema": "bien_nhan_audit.v1", "kho": c["kho"], "kho_id": c["kho_id"], "workflow": {"duong_dan": _WF_DU_REL, "workflow_ref": c["workflow_ref"]},
+             "luot": {"run_id": rid, "run_attempt": att}, "tao_luc": _iso(_gio_utc()),
+             "cong_cu": {"duong_dan": ".claude/dev/ci_dang_ky_test.py", "sha256": hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()}}
+    n, b, bn = len(E) - 1, len(chi_so), None
+    if not ld:
+        bn = dict(chung, ok=True, su_kien=dict({"ten": sk, "sha": sha, "ref": c["ref"], "run_created_at": tao},
+                                              **({"cron": c["cron"], "khung_danh_nghia_utc": khung} if sk == "schedule" else {})),
+                  dinh_danh_definition=dinh, kiem_ke_job={"ky_vong": sorted(E), "thuc_co": sorted(moi)}, job=hang, manh=manh,
+                  dau_hieu_duong={"job_truoc_success": f"{n}/{n}", "manh": f"{b}/{b}"})
+        can(V["bien_nhan"].is_valid(bn), "biên nhận xanh dựng ra KHÔNG hợp lệ theo schema (một trường thu được sai dạng)")
+    if ld:
+        bn = dict(chung, ok=False, ly_do=ld, su_kien={"ten": sk, "sha": sha, "ref": c["ref"], "cron": c["cron"] or None,
+                                                      "khung_danh_nghia_utc": khung, "run_created_at": tao})
+    pathlib.Path(ra).write_bytes((json.dumps(bn, ensure_ascii=False, indent=1, sort_keys=True) + "\n").encode("utf-8"))
+    for x in ld: print("BIEN_NHAN_AUDIT: LỖI —", x)
+    print("BIEN_NHAN_AUDIT: ĐỎ" if ld else f"BIEN_NHAN_AUDIT: ĐẠT job trước {n}/{n} · mảnh {b}/{b} · sha {sha} · run {rid}/{att} · job thu CHƯA XONG")
+    return 1 if ld else 0
+
+
+def doi_so_thu(d):
+    """Ranh giới CONTEXT của lệnh thu: mọi giá trị workflow truyền qua đối số phải có mặt và đúng dạng; sai ⇒ ValueError (LỖI ĐỐI
+    SỐ). `workflow_sha` KHÔNG thuộc danh sách bắt buộc (vắng ⇒ `not_measured`). `ref` BẮT BUỘC khác rỗng vì schema đòi `su_kien.ref`."""
+    def lay(k, mau):
+        v = d.get(k)
+        if not isinstance(v, str) or not re.fullmatch(mau, v):
+            raise ValueError(f"--{k.replace('_', '-')} thiếu hoặc sai dạng: {v!r}")
+        return v
+    if any(d.get(k) for k in ("kiem_bien_nhan_du", "chon_ra", "ket_qua_manh", "chay", "mutant")):
+        raise ValueError("--thu-bien-nhan-audit không kèm cờ của lệnh khác")
+    for k in ("thu_bien_nhan_audit", "rest", "manh_tho", "dau_tho"): lay(k, r".+")
+    kho, so = lay("kho", r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+"), r"[1-9][0-9]{0,18}"
+    return {"kho": kho, "kho_id": int(lay("kho_id", so)), "workflow_ref": lay("workflow_ref", re.escape(f"{kho}/{_WF_DU_REL}@") + r"\S+"),
+            "su_kien": lay("su_kien", r"\S+"), "ref": lay("ref", r"\S+"), "cron": lay("cron", r".*"), "sha": lay("sha_su_kien", r"[0-9a-f]{40}"),
+            "run_id": int(lay("run_id", so)), "run_attempt": int(lay("run_attempt", so)), "workflow_sha": d.get("workflow_sha")}
+
+
+def lenh_thu_bien_nhan_audit(d, wf=None, hop_dong=None):
+    """CLI `--thu-bien-nhan-audit RA …`: lỗi đối số ⇒ 2 và KHÔNG ghi biên nhận; đối số hợp lệ ⇒ LUÔN ghi một biên nhận rồi 0 / 1."""
+    try:
+        c = doi_so_thu(d)
+    except ValueError as e:
+        print("BIEN_NHAN_AUDIT: LỖI ĐỐI SỐ —", e)
+        return 2
+    return thu_bien_nhan_audit(d["thu_bien_nhan_audit"], d["rest"], d["manh_tho"], d["dau_tho"], c, wf, hop_dong)
+
+
+# ══ wp1460 Nghiệm thu 1–4, 6, 7: ca của lệnh thu + chốt hình dạng, dưới dạng {tên: thunk} để đột biến gọi được TỪNG ca. ══
+BAM_HOP_DONG = {"bien_nhan_audit.v1.schema.json": "844b5218b6f6844945f5c4c9440f09015d238fe09a60d64b3787c440787e4f46",
+                "fixture.json": "ce8595739a1ab2f4a86c9c196255e5f91fb19a9f6d3865df6caa2d66f9970e6d",
+                "LENH_KIEM_HOP_DONG": "d9c78e708e18a211b7d8c7309638ffd1c73200578cf3128f9f0fc4275430f24e"}
+DAU_RA_LENH_KIEM = ("FIXTURE: 480/480 phep kiem dung ky vong · hinh 120 · ngu nghia 118 · tu vung 79 · doi tuong 163 · luat duoc phu 12/12\n"
+                    "DOT BIEN: giet 249/249 · vi tu 57 · noi long schema 192\nTONG: DAT\n")
+GH_GIA = r'''#!/usr/bin/env python3
+"""`gh` giả GIỮ TRẠNG THÁI (wp1460 Nghiệm thu 4): trả lời theo ENDPOINT từ kho trạng thái, ghi nhật ký mọi lời gọi."""
+import json, os, sys
+d, a = os.environ["GH_GIA_KHO"], sys.argv[1:]
+open(d + "/nhat-ky", "a", encoding="utf-8").write(json.dumps(a) + "\n")
+x = json.load(open(d + "/trang-thai.json", encoding="utf-8")).get(a[-1])
+if a[0] != "api" or x is None:
+    sys.stderr.write("gh: HTTP 404\n"); sys.exit(1)
+print(json.dumps((x["trang"] if "--paginate" in a and "--slurp" in a else x["trang"][0]) if "trang" in x else x["don"]))
+'''
+
+
+class TinHieuChotCa(AssertionError):
+    """Nghiệm thu 7: tín hiệu RIÊNG «ca đích ĐỎ», `args == (tên ca,)`. Chỉ `chay_ca_dich` dựng nó; thunk của ca không bắt ngoại lệ
+    nào, nên một đột biến chết vì lỗi vô can (AttributeError, KeyError…) KHÔNG thể mang tín hiệu này."""
+
+
+def chay_ca_dich(ten):
+    if not ca_wp1460(ten)[ten]:
+        raise TinHieuChotCa(ten)
+
+
+def _yaml_1460():
+    if "yaml" not in _NHO_1460:
+        _NHO_1460["yaml"] = (yaml.safe_load(WF_DOT_BIEN_DU.read_text(encoding="utf-8")), yaml.safe_load(CI_WORKFLOW.read_text(encoding="utf-8")))
+    return _NHO_1460["yaml"]
+
+
+def _lenh_kiem_1460():
+    """Không gian tên của khối «Lệnh kiểm» (chép NGUYÊN BYTE từ đặc tả, ghim băm): cho `tieu_dung` và `bo_kiem` của bên tiêu dùng."""
+    if "lk" not in _NHO_1460:
+        ns = {"__name__": "lenh_kiem_wp1460"}
+        exec(compile(LENH_KIEM_HOP_DONG, "<lenh kiem wp1460>", "exec"), ns)
+        _NHO_1460["lk"] = ns
+    return _NHO_1460["lk"]
+
+
+def _buoc_chay(steps, hong):
+    """Nghiệm thu 4: chỉ số các bước CHẠY khi các bước trong `hong` thất bại, theo `if` đọc từ CHÍNH YAML (không `if` ⇒ chỉ chạy
+    khi mọi bước trước thành công; `always()` ⇒ luôn chạy; biểu thức khác ⇒ ValueError: không mô phỏng được)."""
+    chay, tot = [], True
+    for i, b in enumerate(steps):
+        if b.get("if") not in (None, "always()"):
+            raise ValueError(f"bước {i}: if {b.get('if')!r}")
+        if tot or b.get("if") == "always()":
+            chay.append(i)
+            tot = tot and i not in hong
+    return chay
+
+
+def ca_wp1460(chi=None):
+    """Mọi ca của wp1460. Trả {tên: bool} của ca `chi` (một ca — bộ chạy đột biến) hoặc của tất cả. KHÔNG `try/except` trong thunk."""
+    import fnmatch
+    ds, (wd0, wf0), RUN, SHA, CAY = {}, _yaml_1460(), 44000000001, "a" * 40, "b" * 40
+    E0 = [JOB_DU] + [f"{JOB_MANH} ({k})" for k in range(SO_MANH)] + [JOB_GOP, JOB_THU]  # kiểm kê bên tiêu dùng TỰ lập (độc lập với lệnh thu)
+
+    def them(ten, f):
+        if ten in ds:
+            raise AssertionError(f"trùng tên ca wp1460: {ten}")
+        ds[ten] = f
+    # ── Mục 6: chốt hình dạng. Bốn job; cặp bước dấu ngay sau đo HEAD ở MỌI job; job thu GHIM trọn (11 bước, `if` từng bước). ──
+    def ban(): return json.loads(json.dumps(wd0, default=str).replace('"true":', '"on":'))
+    def hong_du(f):
+        w = ban()
+        f(w, next(iter(w["jobs"].values())))
+        return bool(loi_workflow_dot_bien_du(w, wf0))
+    def hong_1166(f, dau):  # ĐỎ ĐÚNG LÝ DO: chốt riêng `loi_ghim_sha_du` phải nêu `dau`
+        w = ban()
+        f(w)
+        return any(dau in x for x in loi_ghim_sha_du(w)) and bool(loi_workflow_dot_bien_du(w, wf0))
+    def _j(w, ten): return w["jobs"][ten]
+    def _bt(w, ten=JOB_THU): return w["jobs"][ten]["steps"]
+    def _vd(w, ten): return next(i for i, b in enumerate(_bt(w, ten)) if _la_checkout(b)) + 2  # vị trí bước dấu
+    def _doi(w, a, b, ten=JOB_THU): _bt(w, ten)[a], _bt(w, ten)[b] = _bt(w, ten)[b], _bt(w, ten)[a]
+    def _buoc_reg(j): return next(b for b in j["steps"] if "ci_dang_ky_test.py --chay" in str(b.get("run", "")))
+    them("wp1460-yaml-that-dat", lambda: not loi_workflow_dot_bien_du(wd0, wf0) and not hong_du(lambda w, j: None))
+    them("wp1460-yaml-that-job-thu-11-buoc-if-dung", lambda: wd0["jobs"][JOB_THU].get("if") == "always()" and [b.get("if") for b in _bt(wd0)]
+         == [None] * 6 + ["always()"] * 5 and all("${{" not in _bt(wd0, _n)[_vd(wd0, _n)]["run"] for _n in KHOA_DAU))
+    for _ten in KHOA_DAU:
+        for _t, _f in (("bo-buoc-dau", lambda w, n: _bt(w, n).pop(_vd(w, n))), ("bo-buoc-tai-dau", lambda w, n: _bt(w, n).pop(_vd(w, n) + 1)),
+                       ("doi-cho-cap-dau", lambda w, n: _doi(w, _vd(w, n), _vd(w, n) + 1, n)),
+                       ("doi-cap-dau-qua-setup-python", lambda w, n: _bt(w, n).insert(_vd(w, n), _bt(w, n).pop(_vd(w, n) + 2))),
+                       ("doi-cap-dau-xuong-cuoi", lambda w, n: _bt(w, n).extend([_bt(w, n).pop(_vd(w, n)), _bt(w, n).pop(_vd(w, n))])),
+                       ("dau-truoc-do-head", lambda w, n: _doi(w, _vd(w, n) - 1, _vd(w, n), n)),
+                       ("dau-them-if", lambda w, n: _bt(w, n)[_vd(w, n)].update({"if": "always()"})),
+                       ("dau-nuot-loi", lambda w, n: _bt(w, n)[_vd(w, n)].update({"continue-on-error": True})),
+                       ("dau-than-khac", lambda w, n: _bt(w, n)[_vd(w, n)].update(run=THAN_DAU.replace('g("HEAD")', 'e["SU_KIEN_SHA"]'))),
+                       ("dau-than-co-bieu-thuc", lambda w, n: _bt(w, n)[_vd(w, n)].update(run=THAN_DAU.replace('e["SU_KIEN_SHA"]', '"' + REF_SU_KIEN + '"'))),
+                       ("dau-khoa-job-khac", lambda w, n: _bt(w, n)[_vd(w, n)]["env"].update(KHOA_JOB="khac")),
+                       ("dau-sha-la-ref", lambda w, n: _bt(w, n)[_vd(w, n)]["env"].update(SU_KIEN_SHA=_GH + "ref }}")),
+                       ("ten-dau-khong-attempt", lambda w, n: _bt(w, n)[_vd(w, n) + 1]["with"].update(name="dau-job-" + _RUN_DU + "-" + KHOA_DAU[n])),
+                       ("ten-dau-khoa-khac", lambda w, n: _bt(w, n)[_vd(w, n) + 1]["with"].update(name="dau-job-" + _LUOT_DU + "-khac")),
+                       ("tai-dau-thieu-tep-khong-loi", lambda w, n: _bt(w, n)[_vd(w, n) + 1]["with"].update({"if-no-files-found": "warn"})),
+                       ("tai-dau-them-if", lambda w, n: _bt(w, n)[_vd(w, n) + 1].update({"if": "always()"}))):
+            them(f"wp1460-{_t}-{_ten}-do", lambda _f=_f, _n=_ten: hong_1166(lambda w: _f(w, _n), f"wp1460 job {_n}: cặp bước dấu"))
+    for _ib in range(6, 11):
+        them(f"wp1460-job-thu-buoc-{_ib + 1}-bo-if-do", lambda _ib=_ib: hong_du(lambda w, j: _bt(w)[_ib].pop("if")))
+        them(f"wp1460-job-thu-buoc-{_ib + 1}-if-success-do", lambda _ib=_ib: hong_du(lambda w, j: _bt(w)[_ib].update({"if": "success()"})))
+        them(f"wp1460-job-thu-buoc-{_ib + 1}-nuot-loi-do", lambda _ib=_ib: hong_du(lambda w, j: _bt(w)[_ib].update({"continue-on-error": True})))
+    for _t, _f in [("bo-job-thu", lambda w, j: w["jobs"].pop(JOB_THU)), ("job-thu-bo-if", lambda w, j: _j(w, JOB_THU).pop("if")),
+                   ("them-job-thu-nam", lambda w, j: w["jobs"].update(khac=json.loads(json.dumps(_j(w, JOB_THU))))),
+                   ("job-thu-if-success", lambda w, j: _j(w, JOB_THU).update({"if": "success()"})),
+                   ("job-thu-if-khong-bi-huy", lambda w, j: _j(w, JOB_THU).update({"if": "${{ !cancelled() }}"})),
+                   ("job-thu-bo-quyen", lambda w, j: _j(w, JOB_THU).pop("permissions")),
+                   ("job-thu-quyen-ghi-contents", lambda w, j: _j(w, JOB_THU)["permissions"].update(contents="write")),
+                   ("job-thu-quyen-ghi-actions", lambda w, j: _j(w, JOB_THU)["permissions"].update(actions="write")),
+                   ("job-thu-quyen-them", lambda w, j: _j(w, JOB_THU)["permissions"].update({"id-token": "write"})),
+                   ("job-thu-bo-quyen-actions", lambda w, j: _j(w, JOB_THU)["permissions"].pop("actions")),
+                   ("quyen-workflow-them-actions", lambda w, j: w["permissions"].update(actions="read")),
+                   ("job-thu-timeout", lambda w, j: _j(w, JOB_THU).update({"timeout-minutes": 360})),
+                   ("job-thu-windows", lambda w, j: _j(w, JOB_THU).update({"runs-on": "windows-latest"})),
+                   ("job-thu-continue-on-error", lambda w, j: _j(w, JOB_THU).update({"continue-on-error": True})),
+                   ("job-thu-needs-rong", lambda w, j: _j(w, JOB_THU).update(needs=[])),
+                   ("job-thu-them-buoc-cuoi", lambda w, j: _bt(w).append({"run": "true"})), ("job-thu-them-buoc-dau", lambda w, j: _bt(w).insert(0, {"run": "true"})),
+                   ("job-thu-bo-buoc-pip", lambda w, j: _bt(w).pop(5)), ("job-thu-bo-buoc-tai-dau", lambda w, j: _bt(w).pop(7)), ("job-thu-bo-buoc-rest", lambda w, j: _bt(w).pop(8)),
+                   ("job-thu-bo-buoc-thu", lambda w, j: _bt(w).pop(9)), ("job-thu-bo-buoc-tai-bien-nhan", lambda w, j: _bt(w).pop(10)),
+                   ("hinh-bo-cap-dau-moi-job", lambda w, j: [_bt(w, n).pop(_vd(w, n)) for n in KHOA_DAU for _ in (0, 1)]),
+                   ("job-thu-bo-setup-python", lambda w, j: _bt(w).pop(4)), ("job-thu-troi-ghim-pip", lambda w, j: _bt(w)[5].update(run="python -m pip install PyYAML jsonschema")),
+                   ("job-thu-doi-cho-rest-va-thu", lambda w, j: _doi(w, 8, 9)), ("job-thu-thu-truoc-tai-dau", lambda w, j: _doi(w, 7, 9)),
+                   ("job-thu-tai-bien-nhan-truoc-thu", lambda w, j: _doi(w, 9, 10)), ("job-thu-bo-tai-manh", lambda w, j: _bt(w).pop(6)),
+                   ("job-thu-tai-manh-merge-multiple", lambda w, j: _bt(w)[6]["with"].update({"merge-multiple": True})),
+                   ("job-thu-tai-dau-merge-multiple", lambda w, j: _bt(w)[7]["with"].update({"merge-multiple": True})),
+                   ("job-thu-tai-manh-chi-attempt-hien-tai", lambda w, j: _bt(w)[6]["with"].update(pattern=TEN_ARTIFACT_DU + "*")),
+                   ("job-thu-tai-dau-chi-attempt-hien-tai", lambda w, j: _bt(w)[7]["with"].update(pattern="dau-job-" + _LUOT_DU + "-*")),
+                   ("job-thu-tai-dau-moi-run", lambda w, j: _bt(w)[7]["with"].update(pattern="dau-job-*")),
+                   ("job-thu-tai-dau-run-khac", lambda w, j: _bt(w)[7]["with"].update({"run-id": "1"})),
+                   ("job-thu-tai-dau-chung-thu-muc-manh", lambda w, j: _bt(w)[7]["with"].update(path="manh-tho")),
+                   ("job-thu-rest-dung-giua-chung", lambda w, j: _bt(w)[8].update(run="set -e\n" + BUOC_REST_DU["run"])),
+                   ("job-thu-rest-bo-phan-trang", lambda w, j: _bt(w)[8].update(run=BUOC_REST_DU["run"].replace("--paginate --slurp ", ""))),
+                   ("job-thu-rest-bo-filter-all", lambda w, j: _bt(w)[8].update(run=BUOC_REST_DU["run"].replace("filter=all&", ""))),
+                   ("job-thu-rest-definition-tu-sha-su-kien", lambda w, j: _bt(w)[8]["env"].update(WF_SHA=REF_SU_KIEN)),
+                   ("job-thu-rest-bo-token", lambda w, j: _bt(w)[8]["env"].pop("GH_TOKEN")),
+                   ("job-thu-lenh-thu-nuot-ma", lambda w, j: _bt(w)[9].update(run=_bt(w)[9]["run"] + " || true")),
+                   ("job-thu-lenh-thu-sha-la-ref-name", lambda w, j: _bt(w)[9].update(run=BUOC_THU_DU["run"].replace(REF_SU_KIEN, _GH + "ref_name }}"))),
+                   ("job-thu-lenh-thu-workflow-sha-tu-checkout", lambda w, j: _bt(w)[9].update(run=BUOC_THU_DU["run"].replace(_GH + "workflow_sha }}", REF_SU_KIEN))),
+                   ("job-thu-lenh-thu-attempt-ghi-cung", lambda w, j: _bt(w)[9].update(run=BUOC_THU_DU["run"].replace(_GH + "run_attempt }}", "1"))),
+                   ("job-thu-ten-bien-nhan-khong-attempt", lambda w, j: _bt(w)[10]["with"].update(name="bien-nhan-audit-" + _RUN_DU)),
+                   ("job-thu-bien-nhan-overwrite", lambda w, j: _bt(w)[10]["with"].update(overwrite=True)),
+                   ("job-thu-bien-nhan-thieu-tep-khong-loi", lambda w, j: _bt(w)[10]["with"].update({"if-no-files-found": "warn"})),
+                   ("buoc-cu-registry-them-if", lambda w, j: _buoc_reg(j).update({"if": "always()"})),
+                   ("buoc-cu-manh-them-if", lambda w, j: _bt(w, JOB_MANH)[5].update({"if": "always()"})),
+                   ("buoc-cu-tai-manh-them-if", lambda w, j: _bt(w, JOB_MANH)[6].update({"if": "always()"})),
+                   ("buoc-cu-gom-them-if", lambda w, j: _bt(w, JOB_GOP)[-1].update({"if": "always()"})),
+                   ("job-cu-du-them-if", lambda w, j: j.update({"if": "always()"})), ("job-cu-manh-continue-on-error", lambda w, j: _j(w, JOB_MANH).update({"continue-on-error": True})),
+                   ("ma-tran-9-manh", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=list(range(9)))),
+                   ("timeout-job-manh", lambda w, j: _j(w, JOB_MANH).update({"timeout-minutes": 350})),
+                   ("cron-hang-ngay", lambda w, j: w["on"].update(schedule=[{"cron": "17 19 * * *"}])),
+                   ("them-trigger-workflow-run", lambda w, j: w["on"].update(workflow_run={"workflows": ["ci"]}))] \
+            + [(f"job-thu-bo-needs-{_n}", lambda w, j, _n=_n: _j(w, JOB_THU)["needs"].remove(_n)) for _n in (JOB_DU, JOB_MANH, JOB_GOP)]:
+        them(f"wp1460-{_t}-do", lambda _f=_f: hong_du(_f))
+    # ── Nghiệm thu 1: hai tệp hợp đồng đúng băm; khối «Lệnh kiểm» đúng băm và chạy ĐỦ (có `--dot-bien`) trên hai tệp đã chép. ──
+    them("wp1460-hop-dong-bam-hai-tep-va-lenh-kiem", lambda: {**{t: hashlib.sha256((THU_MUC_HOP_DONG / t).read_bytes()).hexdigest() for t in BAM_HOP_DONG if "." in t},
+                                                               "LENH_KIEM_HOP_DONG": hashlib.sha256(LENH_KIEM_HOP_DONG.encode("utf-8")).hexdigest()} == BAM_HOP_DONG)
+    def lenh_kiem():  # tiến trình con, tệp NGOÀI kho như đặc tả viết; khởi động SỚM để chạy song song với các ca khác
+        t = pathlib.Path(tempfile.mkdtemp(prefix="wp1460-lenh-kiem-"), "lenh_kiem_hop_dong.py")
+        t.write_bytes(LENH_KIEM_HOP_DONG.encode("utf-8"))
+        return t, subprocess.Popen([sys.executable, "-B", str(t), str(THU_MUC_HOP_DONG), "--dot-bien"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                   text=True, encoding="utf-8", env=dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8"))
+    def lenh_kiem_dat(tp):
+        ra = tp[1].communicate(timeout=3600)[0]
+        shutil.rmtree(tp[0].parent)
+        return tp[1].returncode == 0 and ra == DAU_RA_LENH_KIEM
+    _lk_som = lenh_kiem() if chi is None else None
+    them("wp1460-hop-dong-lenh-kiem-480-va-dot-bien-249", lambda: lenh_kiem_dat(_lk_som or lenh_kiem()))
+    # ── Nghiệm thu 2–3: lượt GIẢ (REST lúc job thu đang chạy + kho artifact), tải về bằng MẪU của CHÍNH YAML, lệnh thu chạy thật. ──
+    lk, mau = _lenh_kiem_1460(), [_bt(wd0)[6]["with"], _bt(wd0)[7]["with"]]
+    V = lk["bo_kiem"](json.loads((THU_MUC_HOP_DONG / "bien_nhan_audit.v1.schema.json").read_text(encoding="utf-8")))
+    wf_tho = WF_DOT_BIEN_DU.read_bytes()
+    def bam(nd): return hashlib.sha256(nd).hexdigest()
+    def bam_goi(tep): return bam(b"".join(f.encode() + b"\0" + nd + b"\0" for f, nd in sorted(tep.items())))  # «gói» giả: bên tiêu dùng đo lại y hệt
+
+    def luot(att=1, chay_lai=(), su_kien="workflow_dispatch", cron="", tao="2026-11-21T09:59:50Z"):
+        w = {"jobs": [], "artifacts": [], "kho": {}, "loi": set(), "lech": {}, "run": {
+            "id": RUN, "run_attempt": att, "head_sha": SHA, "path": _WF_DU_REL, "event": su_kien, "status": "in_progress", "conclusion": None, "created_at": tao,
+            "repository": {"full_name": "o/r", "id": 7}}, "definition": {
+            "path": _WF_DU_REL, "encoding": "base64", "sha": hashlib.sha1(b"blob %d\0" % len(wf_tho) + wf_tho).hexdigest(), "content": base64.encodebytes(wf_tho).decode()},
+            "ctx": {"kho": "o/r", "kho_id": "7", "workflow_ref": f"o/r/{_WF_DU_REL}@refs/heads/agent/x", "workflow_sha": "d" * 40, "su_kien": su_kien,
+                    "ref": "refs/heads/agent/x", "cron": cron, "sha_su_kien": SHA, "run_id": str(RUN), "run_attempt": str(att)}}
+        def art(ten, tep):
+            w["kho"][ten] = tep
+            w["artifacts"].append({"id": 14000000000 + len(w["artifacts"]), "name": ten, "expired": False, "digest": "sha256:" + bam_goi(tep)})
+        for a in range(1, att + 1):
+            for i, t in enumerate(E0):
+                if a > 1 and t not in chay_lai and t != JOB_THU:
+                    continue  # job không chạy lại GIỮ bản ghi và dấu của attempt cũ
+                khoa, dang = khoa_job_tu_ten(t), t == JOB_THU and a == att
+                w["jobs"].append({"id": 90000000000 + 100 * a + i, "name": t, "run_attempt": a, "status": "in_progress" if dang else "completed",
+                                  "conclusion": None if dang else "success", "started_at": "2026-11-21T10:00:00Z", "completed_at": None if dang else "2026-11-21T10:30:00Z"})
+                art(f"dau-job-{RUN}-{a}-{khoa}", {"dau-job.json": json.dumps({"schema": "dau_job.v1", "khoa_job": khoa, "run_id": RUN, "run_attempt": a, "su_kien_sha": SHA,
+                                                                                "checkout_sha": SHA, "checkout_tree": CAY}).encode()})
+                if t.startswith(JOB_MANH + " ("):
+                    art(f"{JOB_MANH}-{RUN}-{a}-{i - 1}", {f"manh-{i - 1}.json": json.dumps({"head": SHA, "manh": i - 1, "so_manh": SO_MANH, "rc": 0}).encode()})
+                if t == JOB_THU and a < att:
+                    art(f"{JOB_THU}-{RUN}-{a}", {"bien_nhan_audit.json": b"{}"})
+        return w
+
+    def ghi(w, t, rest=True):
+        for ten, x in ((("run", w["run"]), ("definition", w["definition"])) + tuple((k, [{"total_count": len(w[k]) + w["lech"].get(k, 0), k: w[k]}]) for k in ("jobs", "artifacts"))) * rest:
+            (t / "rest").mkdir(exist_ok=True)
+            if ten in w["loi"]: (t / "rest" / f"{ten}.loi").write_text("gh: HTTP 500", encoding="utf-8")
+            elif x is not None: (t / "rest" / f"{ten}.json").write_text(json.dumps(x), encoding="utf-8")
+        for m in mau:  # hai bước tải của job thu: mẫu + thư mục đọc từ CHÍNH tệp YAML, khớp bằng `fnmatch` như Actions
+            p = m["pattern"].replace(_RUN_DU, str(RUN))
+            if "${{" in p or set(m) != {"pattern", "path"}:
+                raise ValueError(f"mẫu tải còn biểu thức / khoá lạ: {m}")
+            (t / m["path"]).mkdir()
+            for ten, tep in w["kho"].items():
+                if fnmatch.fnmatchcase(ten, p):
+                    (t / m["path"] / ten).mkdir()
+                    for f, nd in tep.items(): (t / m["path"] / ten / f).write_bytes(nd)
+
+    def thu(w, truoc=None):
+        """Chạy lệnh thu TRONG tiến trình trên lượt giả đã ghi ra đĩa. Trả (mã thoát, biên nhận đã ghi | None, stdout)."""
+        with tempfile.TemporaryDirectory(prefix="wp1460-thu-") as t:
+            t, buf = pathlib.Path(t), io.StringIO()
+            ghi(w, t, rest=truoc is None)
+            if truoc: truoc(t)
+            if w.get("wf"):  # X2: lệnh thu đọc kiểm kê từ tệp workflow được trỏ tới (bản YAML thật đã sửa), không từ hằng nào
+                d = ban()
+                w["wf"](d)
+                (t / "wf.yml").write_text(yaml.safe_dump(d, allow_unicode=True), encoding="utf-8")
+            with contextlib.redirect_stdout(buf):
+                rc = lenh_thu_bien_nhan_audit(dict(w["ctx"], thu_bien_nhan_audit=str(t / "bn.json"), rest=str(t / "rest"), manh_tho=str(t / mau[0]["path"]), dau_tho=str(t / mau[1]["path"])),
+                                              wf=t / "wf.yml" if w.get("wf") else None)
+            return rc, (_doc_json_du(t / "bn.json") if (t / "bn.json").exists() else None), buf.getvalue()
+
+    def dong_duong(w): return (f"BIEN_NHAN_AUDIT: ĐẠT job trước {len(E0) - 1}/{len(E0) - 1} · mảnh {SO_MANH}/{SO_MANH} · sha {SHA} · run {RUN}/{w['ctx']['run_attempt']}"
+                               " · job thu CHƯA XONG")
+
+    def duong(w, moc=None, canh=(), dd="measured", ws="d" * 40, truoc=None):
+        """XANH + bên tiêu dùng (`tieu_dung` của đặc tả) cho tập vi phạm RỖNG với đầu vào ĐỘC LẬP: REST sau khi lượt xong, E0, gói + nội dung đọc từ kho giả."""
+        rc, bn, out = thu(w, truoc)
+        if rc != 0 or bn is None or not V["bien_nhan"].is_valid(bn) or out.splitlines()[-1:] != [dong_duong(w)]:
+            return False
+        cuoi = json.loads(json.dumps({k: w[k] for k in ("run", "jobs", "artifacts")}))
+        cuoi["run"].update(status="completed", conclusion="success")
+        for j in cuoi["jobs"]:
+            if j["conclusion"] is None: j.update(status="completed", conclusion="success", completed_at="2026-11-21T10:31:30Z")
+        ngoai = {"h": SHA, "tree_h": CAY, "job_ky_vong": list(E0), "tai_ve": {str(a["id"]): {"sha256_goi": bam_goi(w["kho"][a["name"]]), "tep": [
+            {"ten": f, "sha256": bam(nd), "noi_dung": json.loads(nd)} for f, nd in w["kho"][a["name"]].items()]} for a in w["artifacts"]}}
+        d = bn["dinh_danh_definition"]
+        return bn["ok"] is True and lk["tieu_dung"](V, bn, cuoi, ngoai) == (set(), list(canh), moc or w["run"]["created_at"]) and (d["trang_thai"], d["workflow_sha"]) == (dd, ws) \
+            and bn["luot"] == {"run_id": RUN, "run_attempt": int(w["ctx"]["run_attempt"])} and all(m["attempt_ben_san_xuat"] == (2 if f"{JOB_MANH} ({m['manh']})" in w.get("lai", ()) else 1) for m in bn["manh"])
+
+    def am(tag, sua, **kw):
+        """KHÔNG XANH đúng lý do: thoát 1, biên nhận hợp lệ theo schema, `ok: false`, có lý do mang nhãn `tag`."""
+        w = luot(**kw)
+        sua(w)
+        rc, bn, out = thu(w)
+        return rc == 1 and bn is not None and V["bien_nhan"].is_valid(bn) and bn["ok"] is False and any(x.startswith(tag) for x in bn["ly_do"]) and out.splitlines()[-1] == "BIEN_NHAN_AUDIT: ĐỎ"
+
+    def vong_kin(sua, ten_sk, cron_mong, tao_mong, **kw):
+        """Hình không xanh với mốc KHÔNG BIẾT: mốc ghi `null` (hoặc đúng giá trị REST), không bao giờ là mốc bịa."""
+        w = luot(**kw)
+        sua(w)
+        rc, bn, _ = thu(w)
+        return rc == 1 and bn is not None and V["bien_nhan"].is_valid(bn) and bn["su_kien"] == {"ten": ten_sk, "sha": SHA, "ref": "refs/heads/agent/x", "cron": cron_mong,
+                                                                                               "khung_danh_nghia_utc": None, "run_created_at": tao_mong}
+
+    def doi_so(**doi):
+        w = luot()
+        w["ctx"].update(doi)
+        rc, bn, out = thu(w)
+        return rc == 2 and bn is None and out.startswith("BIEN_NHAN_AUDIT: LỖI ĐỐI SỐ")
+    def bg(w, ten): return max((j for j in w["jobs"] if j["name"] == ten), key=lambda j: j["run_attempt"])
+    def ar(w, ten): return next(a for a in w["artifacts"] if a["name"] == ten)
+    def xoa(w, ten): w["artifacts"].remove(ar(w, ten)); w["kho"].pop(ten)
+    def sua_tep(w, ten, tep, **doi): w["kho"][ten][tep] = json.dumps(dict(json.loads(w["kho"][ten][tep]), **doi)).encode()
+    M3, LAI, LICH = f"{JOB_MANH} (3)", {"att": 2, "chay_lai": (f"{JOB_MANH} (3)", JOB_GOP)}, {"su_kien": "schedule", "cron": CRON_DOT_BIEN_DU}
+    def lai(): return dict(luot(**LAI), lai=LAI["chay_lai"])
+    them("wp1460-thu-duong-luot-dau", lambda: duong(luot()))
+    them("wp1460-thu-duong-chay-lai-rieng-job-thu-attempt-2", lambda: duong(luot(att=2)))
+    them("wp1460-thu-duong-chay-lai-mot-manh-manh-gom-thu-attempt-2", lambda: duong(lai()))
+    them("wp1460-thu-duong-schedule-khung-cung-ngay", lambda: duong(luot(tao="2026-11-21T19:31:12Z", **LICH), moc="2026-11-21T19:17:00Z"))
+    them("wp1460-thu-duong-schedule-truoc-moc-mot-giay-khung-tuan-truoc", lambda: duong(luot(tao="2026-11-21T19:16:59Z", **LICH), moc="2026-11-14T19:17:00Z"))
+    for _t, _f, _ws in (("hong", lambda w: w["loi"].add("definition"), "d" * 40), ("blob-khac-noi-dung", lambda w: w["definition"].update(sha="c" * 40), "d" * 40),
+                        ("tep-khac", lambda w: w["definition"].update(path=".github/workflows/ci.yml"), "d" * 40),
+                        ("workflow-sha-vang-khong-lay-sha-checkout", lambda w: w["ctx"].update(workflow_sha=""), None),
+                        ("workflow-sha-khong-phai-40-hex", lambda w: w["ctx"].update(workflow_sha="master"), None)):
+        def _dn(_f=_f, _ws=_ws):
+            w = luot()
+            _f(w)
+            return duong(w, canh=["C10"], dd="not_measured", ws=_ws)
+        them(f"wp1460-thu-definition-{_t}-not-measured-van-xanh", _dn)
+    AM = [("x2-thieu-job", "X2", lambda w: w["jobs"].remove(bg(w, JOB_DU)), {}), ("x2-thua-job", "X2", lambda w: w["jobs"].append(dict(bg(w, JOB_DU), name="khac", id=5)), {}),
+          ("x2-trung-job", "X2", lambda w: w["jobs"].append(dict(bg(w, JOB_GOP), id=5)), {}),
+          ("x2-tep-workflow-9-manh-rest-8-manh", "X2", lambda w: w.update(wf=lambda d: d["jobs"][JOB_MANH]["strategy"]["matrix"].update(manh=list(range(9)))), {}),
+          ("x2-ma-tran-hai-truc", "X2", lambda w: w.update(wf=lambda d: d["jobs"][JOB_MANH]["strategy"]["matrix"].update(os=["a"])), {}),
+          ("x2-ma-tran-include", "X2", lambda w: w.update(wf=lambda d: d["jobs"][JOB_MANH]["strategy"]["matrix"].update(include=[{"manh": 0}])), {}),
+          ("x2-ma-tran-khong-phai-danh-sach", "X2", lambda w: w.update(wf=lambda d: d["jobs"][JOB_MANH]["strategy"]["matrix"].update(manh="${{ fromJSON('[0]') }}")), {}),
+          ("x2-job-dat-ten-rieng", "X2", lambda w: w.update(wf=lambda d: d["jobs"][JOB_GOP].update(name="gom")), {}),
+          ("x2-tep-workflow-khong-co-jobs", "X2", lambda w: w.update(wf=lambda d: d.pop("jobs")), {}),
+          ("x5-manh-vang-o-attempt-moi-nhat-du-co-ban-attempt-cu", "X5", lambda w: xoa(w, f"{JOB_MANH}-{RUN}-2-3"), LAI),
+          ("x5-tep-manh-khong-doc-duoc", "X5", lambda w: w["kho"][f"{JOB_MANH}-{RUN}-1-0"].update({"manh-0.json": b'{"head": "cut'}), {}),
+          ("x5-manh-khong-phai-object", "X5", lambda w: w["kho"][f"{JOB_MANH}-{RUN}-1-0"].update({"manh-0.json": b"[]"}), {}),
+          ("x5-manh-thua-tep", "X5", lambda w: w["kho"][f"{JOB_MANH}-{RUN}-1-0"].update({"x.json": b"{}"}), {}),
+          ("x5-manh-head-sai", "X5", lambda w: sua_tep(w, f"{JOB_MANH}-{RUN}-1-0", "manh-0.json", head="c" * 40), {}),
+          ("x5-manh-khai-chi-so-khac", "X5", lambda w: sua_tep(w, f"{JOB_MANH}-{RUN}-1-0", "manh-0.json", manh=1), {}),
+          ("x6-gom-cu-hon-manh", "X6", lambda w: (w["jobs"].remove(bg(w, JOB_GOP)), xoa(w, f"dau-job-{RUN}-2-{JOB_GOP}")), LAI),
+          ("x6-job-vuot-attempt-cua-luot", "X6", lambda w: bg(w, JOB_DU).update(run_attempt=2), {}),
+          ("x7-digest-vang", "X7", lambda w: ar(w, f"{JOB_MANH}-{RUN}-1-5").pop("digest"), {}),
+          ("x7-digest-sai-dang", "X7", lambda w: ar(w, f"dau-job-{RUN}-1-{JOB_DU}").update(digest="md5:" + "0" * 32), {}),
+          ("x7-artifact-ten-la", "X7", lambda w: w["artifacts"].append({"id": 6, "name": "khac", "digest": "sha256:" + "0" * 64, "expired": False}), {}),
+          ("x7-ten-trung", "X7", lambda w: w["artifacts"].append(dict(ar(w, f"{JOB_THU}-{RUN}-1"), id=6)), {"att": 2}),
+          ("x7-bien-nhan-cua-attempt-hien-tai", "X7", lambda w: w["artifacts"].append({"id": 6, "name": f"{JOB_THU}-{RUN}-1", "digest": "sha256:" + "0" * 64, "expired": False}), {}),
+          ("x7-dau-cua-attempt-tuong-lai", "X7", lambda w: w["artifacts"].append({"id": 6, "name": f"dau-job-{RUN}-2-{JOB_DU}", "digest": "sha256:" + "0" * 64, "expired": False}), {}),
+          ("x8-cron-lech", "X8", lambda w: w["ctx"].update(cron="0 0 * * *"), LICH), ("x8-schedule-cron-rong", "X8", lambda w: w["ctx"].update(cron=""), LICH),
+          ("x8-su-kien-push", "X8", lambda w: None, {"su_kien": "push"}),
+          ("x1-jobs-thieu-trang", "X1", lambda w: w["lech"].update(jobs=1), {}), ("x1-artifacts-thieu-trang", "X1", lambda w: w["lech"].update(artifacts=1), {}),
+          ("x1-run-head-sha-lech", "X1: run.head_sha", lambda w: w["run"].update(head_sha="c" * 40), {}),
+          ("x1-ten-kho-lech", "X1: run.repository.full_name", lambda w: w["run"]["repository"].update(full_name="o/khac"), {}),
+          ("x1-id-kho-lech", "X1: run.repository.id", lambda w: w["run"]["repository"].update(id=8), {}),
+          ("x1-run-id-lech", "X1: run.id", lambda w: w["run"].update(id=RUN + 1), {}), ("x1-run-attempt-lech", "X1: run.run_attempt", lambda w: w["run"].update(run_attempt=2), {}),
+          ("x1-duong-dan-workflow-lech", "X1: run.path", lambda w: w["run"].update(path=".github/workflows/ci.yml"), {}),
+          ("x1-ten-su-kien-lech", "X1: run.event", lambda w: w["run"].update(event="schedule"), {}),
+          ("x1-started-at-sai-dang", "biên nhận xanh dựng ra KHÔNG hợp lệ", lambda w: bg(w, JOB_DU).update(started_at="hôm qua"), {})]
+    AM += [(f"x1-rest-{_p}-loi", "X1", lambda w, _p=_p: w["loi"].add(_p), {}) for _p in ("run", "jobs", "artifacts")]
+    AM += [(f"x3-job-truoc-{_kl}", "X3", lambda w, _kl=_kl: bg(w, M3).update(conclusion=_kl), {}) for _kl in ("failure", "cancelled", "timed_out", "skipped")]
+    for _bt_, _kw, _tj in (("hien-tai", {}, JOB_GOP), ("attempt-1-cua-job-khong-chay-lai", {"att": 2}, JOB_DU)):  # X4: dấu attempt hiện tại VÀ dấu attempt 1 trong lượt attempt 2
+        _td = f"dau-job-{RUN}-1-{_tj}"
+        AM += [(f"x4-dau-{_t}-{_bt_}", "X4", _f, _kw) for _t, _f in (
+            ("vang", lambda w, _td=_td: xoa(w, _td)), ("trung", lambda w, _td=_td: w["artifacts"].append(dict(ar(w, _td), id=6))),
+            ("thu-muc-thua-tep", lambda w, _td=_td: w["kho"][_td].update({"x.json": b"{}"})),
+            ("sai-schema", lambda w, _td=_td: sua_tep(w, _td, "dau-job.json", schema="dau_job.v2")), ("sai-run-id", lambda w, _td=_td: sua_tep(w, _td, "dau-job.json", run_id=RUN + 1)),
+            ("sai-attempt", lambda w, _td=_td: sua_tep(w, _td, "dau-job.json", run_attempt=2)), ("sai-khoa-job", lambda w, _td=_td: sua_tep(w, _td, "dau-job.json", khoa_job="khac")),
+            ("sai-su-kien-sha", lambda w, _td=_td: sua_tep(w, _td, "dau-job.json", su_kien_sha="c" * 40)),
+            ("sai-checkout-sha", lambda w, _td=_td: sua_tep(w, _td, "dau-job.json", checkout_sha="c" * 40)),
+            ("tree-lech", lambda w, _td=_td: sua_tep(w, _td, "dau-job.json", checkout_tree="c" * 40)))]
+    def rac(nd):  # mọi tệp REST là rác: vẫn thoát 1 và ghi biên nhận không xanh hợp lệ, không ném
+        def truoc(t):
+            (t / "rest").mkdir()
+            for ten in ("run", "jobs", "artifacts", "definition"): (t / "rest" / f"{ten}.json").write_bytes(nd)
+        rc, bn, _ = thu(luot(), truoc)
+        return rc == 1 and bn is not None and V["bien_nhan"].is_valid(bn) and bn["ok"] is False and bn["su_kien"]["run_created_at"] is None
+    them("wp1460-thu-am-x1-rest-la-rac", lambda: all(rac(x) for x in (b'"x"', b"[]", b"{}", b"null", b"\xff", b"5", b'[{"total_count": 1, "jobs": [5], "artifacts": [5]}]',
+                                                                       b'{"id": [], "repository": 5, "created_at": 5, "sha": 5, "content": 5, "path": []}')))
+    for _t, _tag, _f, _kw in AM:
+        them(f"wp1460-thu-am-{_t}", lambda _tag=_tag, _f=_f, _kw=_kw: am(_tag, _f, **_kw))
+    for _t, _f, _a in (("run-loi", lambda w: w["loi"].add("run"), ("workflow_dispatch", None, None, {})),
+                       ("created-at-thieu", lambda w: w["run"].pop("created_at"), ("workflow_dispatch", None, None, {})),
+                       ("created-at-sai-dang", lambda w: w["run"].update(created_at="2026-11-21 09:59:50"), ("workflow_dispatch", None, None, {})),
+                       ("created-at-ngay-khong-ton-tai", lambda w: w["run"].update(created_at="2026-02-30T00:00:00Z"), ("workflow_dispatch", None, None, {})),
+                       ("schedule-khong-biet-khung", lambda w: w["loi"].add("run"), ("schedule", CRON_DOT_BIEN_DU, None, LICH)),
+                       ("su-kien-push-giu-moc-rest", lambda w: None, ("push", None, "2026-11-21T09:59:50Z", {"su_kien": "push"}))):
+        them(f"wp1460-thu-vong-kin-{_t}", lambda _f=_f, _a=_a: vong_kin(_f, _a[0], _a[1], _a[2], **_a[3]))
+    for _t, _ds in (("thieu-github-sha", {"sha_su_kien": None}), ("github-sha-rong", {"sha_su_kien": ""}), ("github-sha-la-ten-nhanh", {"sha_su_kien": "master"}),
+                     ("run-id-khong-phai-so", {"run_id": "abc"}), ("run-id-0", {"run_id": "0"}), ("run-attempt-rong", {"run_attempt": ""}), ("id-kho-khong-phai-so", {"kho_id": "x"}),
+                     ("ten-kho-sai-dang", {"kho": "khong-co-gach-cheo"}), ("workflow-ref-tro-tep-khac", {"workflow_ref": "o/r/.github/workflows/ci.yml@refs/heads/x"}),
+                     ("ten-su-kien-rong", {"su_kien": ""}), ("ref-vang", {"ref": None}), ("ref-rong", {"ref": ""}), ("cron-vang", {"cron": None}), ("kem-co-lenh-khac", {"chay": True})):
+        them(f"wp1460-thu-doi-so-{_t}-thoat-2-khong-ghi", lambda _ds=_ds: doi_so(**_ds))
+    # ── Nghiệm thu 4: trình tự bước theo `if` của CHÍNH YAML; thân bước REST và thân bước dấu chạy THẬT (ngoài Windows). ──
+    them("wp1460-buoc-truoc-hong-thi-buoc-7-11-van-chay", lambda: _buoc_chay(_bt(wd0), set()) == list(range(11)) and all(
+        _buoc_chay(_bt(wd0), {h}) == sorted(set(range(h + 1)) | set(range(6, 11))) for h in range(11)))
+    them("wp1460-job-truoc-do-thi-job-thu-van-chay", lambda: wd0["jobs"][JOB_THU].get("if") == "always()" and all("if" not in wd0["jobs"][n] for n in (JOB_DU, JOB_MANH, JOB_GOP)))
+    them("wp1460-cli-yaml-that-luot-dau-xanh", lambda: cli_that())
+
+    def cli_that():
+        """Lệnh của CHÍNH bước 10 trong YAML (thay biểu thức bằng giá trị), chạy thành tiến trình con trong thư mục có `rest/`, `manh-tho/`, `dau-tho/`."""
+        w, lenh = luot(), _bt(wd0)[9]["run"]
+        for a, b in DOI_SO_THU: lenh = lenh.replace(f"{_GH}{b} }}}}", w["ctx"][a.replace("-", "_")])
+        a = shlex.split(lenh)
+        with tempfile.TemporaryDirectory(prefix="wp1460-cli-") as t:
+            ghi(w, pathlib.Path(t))
+            r = subprocess.run([sys.executable, str(pathlib.Path(__file__).resolve()), *a[2:]], cwd=t, capture_output=True, text=True, encoding="utf-8", timeout=120,
+                               env=dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8"))
+            bn = _doc_json_du(pathlib.Path(t, _bt(wd0)[10]["with"]["path"]))
+        return a[:2] == ["python", ".claude/dev/ci_dang_ky_test.py"] and "${{" not in lenh and r.returncode == 0 and r.stdout.splitlines()[-1:] == [dong_duong(w)] \
+            and V["bien_nhan"].is_valid(bn) and bn["ok"] is True
+    if not nen_la_windows():
+        vo = tim_bash_nen()
+
+        def buoc_rest(w, wf_sha="d" * 40, thieu=()):
+            """Thân bước 9 lấy TỪ YAML, chạy bằng bash với `gh` giả giữ trạng thái. Trả hàm `truoc(t)` cho `thu`, và nhật ký lời gọi."""
+            nk, goc = [], f"repos/o/r/actions/runs/{RUN}"
+            def truoc(t):
+                kho = t / "gh-gia"
+                kho.mkdir()
+                (kho / "gh").write_text(GH_GIA, encoding="utf-8")
+                (kho / "gh").chmod(0o755)
+                nua = len(w["jobs"]) // 2  # hai trang: bỏ `--paginate --slurp` là chỉ thấy trang đầu
+                tt = {goc: {"don": w["run"]}, goc + "/jobs?filter=all&per_page=100": {"trang": [{"total_count": len(w["jobs"]), "jobs": x} for x in (w["jobs"][:nua], w["jobs"][nua:])]},
+                      goc + "/artifacts?per_page=100": {"trang": [{"total_count": len(w["artifacts"]), "artifacts": w["artifacts"]}]},
+                      f"repos/o/r/contents/{_WF_DU_REL}?ref={wf_sha}": {"don": w["definition"]}}
+                (kho / "trang-thai.json").write_text(json.dumps({k: v for k, v in tt.items() if k not in [goc + x for x in thieu]}), encoding="utf-8")
+                r = subprocess.run([vo, "-e", "-c", _bt(wd0)[8]["run"]], cwd=t, capture_output=True, text=True, timeout=60,
+                                   env=dict(os.environ, PATH=str(kho) + os.pathsep + os.environ.get("PATH", ""), GH_GIA_KHO=str(kho), GH_TOKEN="x", KHO="o/r", RUN_ID=str(RUN), WF_SHA=wf_sha))
+                nk.extend([r.returncode, sorted(p.name for p in (t / "rest").iterdir())] + [json.loads(x)[-1] for x in (kho / "nhat-ky").read_text(encoding="utf-8").splitlines()])
+            return truoc, nk, [goc, goc + "/jobs?filter=all&per_page=100", goc + "/artifacts?per_page=100"]
+
+        def rest_that_xanh():
+            w = luot()
+            truoc, nk, goi = buoc_rest(w)
+            return duong(w, truoc=truoc) and nk == [0, ["artifacts.json", "definition.json", "jobs.json", "run.json"]] + goi + [f"repos/o/r/contents/{_WF_DU_REL}?ref=" + "d" * 40]
+
+        def rest_that_jobs_loi():
+            w = luot()
+            truoc, nk, goi = buoc_rest(w, thieu=("/jobs?filter=all&per_page=100",))
+            rc, bn, _ = thu(w, truoc)
+            return rc == 1 and V["bien_nhan"].is_valid(bn) and any(x.startswith("X1: rest/jobs.json") for x in bn["ly_do"]) and nk[:2] == [0, ["artifacts.json", "definition.json", "jobs.loi", "run.json"]] and len(nk) == 6
+
+        def rest_that_wf_sha_vang():
+            w = luot()
+            w["ctx"].update(workflow_sha="")
+            truoc, nk, goi = buoc_rest(w, wf_sha="")
+            return duong(w, canh=["C10"], dd="not_measured", ws=None, truoc=truoc) and nk == [0, ["artifacts.json", "jobs.json", "run.json"]] + goi
+
+        def dau_that():
+            """Thân bước dấu lấy TỪ YAML, chạy trong một kho git thật: dấu đúng `dau_job_v1`, SHA và tree bằng `git rev-parse`."""
+            with tempfile.TemporaryDirectory(prefix="wp1460-dau-") as d:
+                def git(*a): return subprocess.run(["git", "-C", d, *a], capture_output=True, text=True, timeout=60, env=dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull)).stdout.strip()
+                git("init", "-q")
+                git("-c", "user.name=t", "-c", "user.email=t@example.invalid", "-c", "commit.gpgsign=false", "commit", "-q", "--allow-empty", "-m", "a")
+                r = subprocess.run([vo, "-e", "-c", _bt(wd0)[_vd(wd0, JOB_THU)]["run"]], cwd=d, capture_output=True, text=True, timeout=60,
+                                   env=dict(os.environ, KHOA_JOB="dot-bien-manh-3", RUN_ID="7", RUN_ATTEMPT="2", SU_KIEN_SHA=SHA))
+                dau = _doc_json_du(pathlib.Path(d, "dau-job.json"))
+                return r.returncode == 0 and V["dau_job"].is_valid(dau) and dau == {"schema": "dau_job.v1", "khoa_job": "dot-bien-manh-3", "run_id": 7, "run_attempt": 2, "su_kien_sha": SHA,
+                                                                                   "checkout_sha": git("rev-parse", "HEAD"), "checkout_tree": git("rev-parse", "HEAD^{tree}")}
+        them("wp1460-buoc-rest-that-gh-gia-roi-thu-xanh", rest_that_xanh)
+        them("wp1460-buoc-rest-that-mot-diem-loi-khong-dung-giua-chung", rest_that_jobs_loi)
+        them("wp1460-buoc-rest-that-workflow-sha-vang-khong-goi-definition", rest_that_wf_sha_vang)
+        them("wp1460-buoc-dau-that-ghi-dau-job-v1", dau_that)
+    if chi is not None and chi not in ds:
+        raise KeyError(f"không có ca wp1460 {chi!r}")
+    return {t: bool(f()) for t, f in ds.items() if chi is None or t == chi}
+
+
+# ══ wp1460 Nghiệm thu 7: đột biến riêng cho MỖI chốt mới. Mỗi đột biến = thay văn bản trong phần mã TRƯỚC bảng này, ghi ra BẢN SAO
+# tạm (tên tệp riêng, tắt bytecode), nạp thành module rồi gọi ĐÚNG ca đích. GIẾT ⇔ ca đích ném `TinHieuChotCa` mang tên nó. ══
+def phan_hang_dot_bien(chay, ca, lop):
+    """`GIET` ⇔ `chay(ca)` ném ĐÚNG lớp tín hiệu `lop` với `args == (ca,)`. Ngoại lệ khác — kể cả `AssertionError` thường hay tín
+    hiệu mang tên ca KHÁC — là `TIN_DUNG_GIA`; không ném là `SONG`."""
+    try:
+        chay(ca)
+    except Exception as e:  # noqa: BLE001 — phân hạng theo LỚP + tên ca, không theo «có ném hay không»
+        return "GIET" if type(e) is lop and e.args == (ca,) else f"TIN_DUNG_GIA ({type(e).__name__}: {e})"[:200]
+    return "SONG"
+
+
+def nap_ban_sao(nguon, thu_muc, ten):
+    """Nạp `nguon` thành module từ tệp TẠM mang tên riêng `ten` (không ghi `.pyc`, xoá cache import); hằng đường dẫn trỏ về kho thật."""
+    p = pathlib.Path(thu_muc, f"ci_dang_ky_ban_sao_{ten}.py")
+    p.write_text(nguon, encoding="utf-8")
+    cu, sys.dont_write_bytecode = sys.dont_write_bytecode, True
+    try:
+        importlib.invalidate_caches()
+        spec = importlib.util.spec_from_file_location(p.stem, p)
+        M = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(M)
+    finally:
+        sys.dont_write_bytecode = cu
+    M.WF_DOT_BIEN_DU, M.CI_WORKFLOW, M.THU_MUC_HOP_DONG = WF_DOT_BIEN_DU, CI_WORKFLOW, THU_MUC_HOP_DONG
+    M._NHO_1460.update(_NHO_1460)
+    return M
+
+
+def dot_bien_wp1460(bang=None):
+    """Chạy bảng đột biến. Trả [(tên, ca đích, hạng mong đợi, hạng đo được)]; `KHONG_AP_DUOC` khi văn bản cũ không xuất hiện ĐÚNG MỘT lần."""
+    dau, moc, duoi = pathlib.Path(__file__).read_text(encoding="utf-8").partition("\nDOT_BIEN_WP1460 = [")
+    ra = []
+    with tempfile.TemporaryDirectory(prefix="wp1460-dot-bien-") as t:
+        for i, (ten, sua, ca, mong) in enumerate(DOT_BIEN_WP1460 if bang is None else bang):
+            moi = dau if moc else None
+            for cu, thay in sua:
+                moi = moi.replace(cu, thay) if moi is not None and moi.count(cu) == 1 else None
+            if moi is None:
+                ra.append((ten, ca, mong, "KHONG_AP_DUOC"))
+                continue
+            try:
+                M = nap_ban_sao(moi + moc + duoi, t, f"{i}_{re.sub(r'[^a-z0-9]', '_', ten)}")
+            except Exception as e:  # noqa: BLE001 — bản sao không nạp được là lỗi vô can, KHÔNG phải giết
+                ra.append((ten, ca, mong, f"TIN_DUNG_GIA (nạp: {type(e).__name__})"))
+                continue
+            ra.append((ten, ca, mong, phan_hang_dot_bien(M.chay_ca_dich, ca, M.TinHieuChotCa)))
+    return ra
+
+
+DOT_BIEN_WP1460 = [
+    # (tên, ((văn bản cũ, văn bản mới), …), ca đích, hạng mong đợi). Mục 6 — từng điểm của chốt hình dạng:
+    ("m6-dung-bon-job", (("set(jobs) != set(KHOA_DAU) or", "set(KHOA_DAU) - set(jobs) or"),), "wp1460-them-job-thu-nam-do", "GIET"),
+    ("m6-bo-job-thu", (("set(jobs) != set(KHOA_DAU) or", "{JOB_DU, JOB_MANH, JOB_GOP} - set(jobs) or"),
+                       ("zip((JOB_MANH, JOB_GOP, JOB_THU), _job_manh_gop(goc))", "zip((JOB_MANH, JOB_GOP), _job_manh_gop(goc))")), "wp1460-bo-job-thu-do", "GIET"),
+    ("m6-vi-tri-cap-dau-job-cu-doi-qua-setup-python", (("if ten in KHOA_DAU and not _bang_kieu(steps[i + 2:i + 4]", "if ten == JOB_THU and not _bang_kieu(steps[i + 2:i + 4]"),),
+     "wp1460-doi-cap-dau-qua-setup-python-dot-bien-gop-do", "GIET"),
+    ("m6-vi-tri-cap-dau-job-thu-doi-qua-setup-python", (("if ten in KHOA_DAU and not _bang_kieu(steps[i + 2:i + 4]", "if ten in KHOA_DAU and ten != JOB_THU and not _bang_kieu(steps[i + 2:i + 4]"),),
+     "wp1460-doi-cap-dau-qua-setup-python-bien-nhan-audit-do", "GIET"),
+    ("m6-needs", (('"needs": [JOB_DU, JOB_MANH, JOB_GOP], "if"', '"needs": [JOB_MANH, JOB_GOP], "if"'),), "wp1460-job-thu-bo-needs-dot-bien-du-do", "GIET"),
+    ("m6-if-muc-job", (('[JOB_DU, JOB_MANH, JOB_GOP], "if": "always()", "runs-on"', '[JOB_DU, JOB_MANH, JOB_GOP], "runs-on"'),), "wp1460-job-thu-bo-if-do", "GIET"),
+    ("m6-quyen", (('"permissions": {"contents": "read", "actions": "read"},', '"permissions": {"contents": "write", "actions": "read"},'),), "wp1460-job-thu-quyen-ghi-contents-do", "GIET"),
+    ("m6-timeout", (('"runs-on": "ubuntu-latest", "timeout-minutes": 10,\n           "permissions"', '"runs-on": "ubuntu-latest", "timeout-minutes": 360,\n           "permissions"'),),
+     "wp1460-job-thu-timeout-do", "GIET"),
+    ("m6-if-buoc-7", (('dict(lv, uses="actions/download-artifact@v4", **{"with": dict(TAI_VE_DU)})', 'dict(uses="actions/download-artifact@v4", **{"with": dict(TAI_VE_DU)})'),),
+     "wp1460-job-thu-buoc-7-bo-if-do", "GIET"),
+    ("m6-if-buoc-8", (('dict(lv, uses="actions/download-artifact@v4", **{"with": dict(TAI_DAU_DU)})', 'dict(uses="actions/download-artifact@v4", **{"with": dict(TAI_DAU_DU)})'),),
+     "wp1460-job-thu-buoc-8-bo-if-do", "GIET"),
+    ("m6-if-buoc-9", (('không dừng giữa chừng)", "if": "always()",', 'không dừng giữa chừng)",'),), "wp1460-job-thu-buoc-9-bo-if-do", "GIET"),
+    ("m6-if-buoc-10", (('"name": "thu biên nhận audit (wp1460)", "if": "always()",', '"name": "thu biên nhận audit (wp1460)",'),), "wp1460-job-thu-buoc-10-bo-if-do", "GIET"),
+    ("m6-if-buoc-11", (('BUOC_TAI_BIEN_NHAN_DU = {"if": "always()", "uses"', 'BUOC_TAI_BIEN_NHAN_DU = {"uses"'),), "wp1460-job-thu-buoc-11-bo-if-do", "GIET"),
+    ("m6-co-buoc-5-setup-python", (('"steps": dau(JOB_THU) + pip + [', '"steps": dau(JOB_THU)[:-1] + pip + ['),), "wp1460-job-thu-bo-setup-python-do", "GIET"),
+    ("m6-co-buoc-6-pip", (('"steps": dau(JOB_THU) + pip + [', '"steps": dau(JOB_THU) + ['),), "wp1460-job-thu-bo-buoc-pip-do", "GIET"),
+    ("m6-co-buoc-7-tai-manh", (('[dict(lv, uses="actions/download-artifact@v4", **{"with": dict(TAI_VE_DU)}),\n', "[\n"),), "wp1460-job-thu-bo-tai-manh-do", "GIET"),
+    ("m6-co-buoc-8-tai-dau", (('dict(lv, uses="actions/download-artifact@v4", **{"with": dict(TAI_DAU_DU)}), dict(BUOC_REST_DU)', "dict(BUOC_REST_DU)"),), "wp1460-job-thu-bo-buoc-tai-dau-do", "GIET"),
+    ("m6-co-buoc-9-rest", (("dict(BUOC_REST_DU), dict(BUOC_THU_DU),", "dict(BUOC_THU_DU),"),), "wp1460-job-thu-bo-buoc-rest-do", "GIET"),
+    ("m6-co-buoc-10-thu", (("dict(BUOC_REST_DU), dict(BUOC_THU_DU),", "dict(BUOC_REST_DU),"),), "wp1460-job-thu-bo-buoc-thu-do", "GIET"),
+    ("m6-co-buoc-11-tai-bien-nhan", (("dict(BUOC_THU_DU),\n                                          dict(BUOC_TAI_BIEN_NHAN_DU)]}", "dict(BUOC_THU_DU)]}"),), "wp1460-job-thu-bo-buoc-tai-bien-nhan-do", "GIET"),
+    ("m6-cap-dau-co-o-moi-job", (("ra += [b, json.loads(json.dumps(BUOC_KIEM_HEAD))] + _buoc_dau(ten)", "ra += [b, json.loads(json.dumps(BUOC_KIEM_HEAD))]"),
+                                 ("if ten in KHOA_DAU and not _bang_kieu(steps[i + 2:i + 4]", "if False and not _bang_kieu(steps[i + 2:i + 4]")), "wp1460-hinh-bo-cap-dau-moi-job-do", "GIET"),
+    ("m6-ten-artifact-bien-nhan", (('"name": "bien-nhan-audit-" + _LUOT_DU,', '"name": "bien-nhan-audit-" + _RUN_DU,'),), "wp1460-job-thu-ten-bien-nhan-khong-attempt-do", "GIET"),
+    ("m6-ten-artifact-dau", (('"name": "dau-job-" + _LUOT_DU + "-" + khoa,', '"name": "dau-job-" + _RUN_DU + "-" + khoa,'),), "wp1460-ten-dau-khong-attempt-dot-bien-manh-do", "GIET"),
+    ("m6-mau-tai-dau", (('TAI_DAU_DU = {"pattern": "dau-job-" + _RUN_DU + "-*"', 'TAI_DAU_DU = {"pattern": "dau-job-*"'),), "wp1460-job-thu-tai-dau-moi-run-do", "GIET"),
+    ("m6-merge-multiple", (('**{"with": dict(TAI_DAU_DU)})', '**{"with": dict(TAI_DAU_DU, **{"merge-multiple": True})})'),), "wp1460-job-thu-tai-dau-merge-multiple-do", "GIET"),
+    ("m6-than-buoc-rest", (("$RUN_ID/jobs?filter=all&", "$RUN_ID/jobs?"),), "wp1460-job-thu-rest-bo-filter-all-do", "GIET"),
+    ("m6-lenh-thu", (("for a, b in DOI_SO_THU)}", 'for a, b in DOI_SO_THU) + " || true"}'),), "wp1460-job-thu-lenh-thu-nuot-ma-do", "GIET"),
+    # Lệnh thu — từng điều X1–X8 (X4: mỗi phép ràng buộc một đột biến) và các điểm đặc tả nêu tên:
+    ("x1-so-voi-context", (("can(type(co) is type(ctx) and co == ctx,", "can(True,"),), "wp1460-thu-am-x1-run-head-sha-lech", "GIET"),
+    ("x1-thieu-trang", (('return ra if {t["total_count"] for t in trang} == {len(ra)} else None', "return ra"),), "wp1460-thu-am-x1-jobs-thieu-trang", "GIET"),
+    ("x2-tap-job-bang-kiem-ke", (("can(bool(E) and set(moi) == set(E),", "can(bool(E),"),), "wp1460-thu-am-x2-thua-job", "GIET"),
+    ("x2-kiem-ke-khong-doc-tu-tep-workflow", (("E = job_ky_vong_du(wf or WF_DOT_BIEN_DU)", "E = job_ky_vong_du(WF_DOT_BIEN_DU)"),), "wp1460-thu-am-x2-tep-workflow-9-manh-rest-8-manh", "GIET"),
+    ("x2-ma-tran-nhieu-truc", (("not truc or len(truc) != 1 or not isinstance(truc[0], list)", "not truc or not isinstance(truc[0], list)"),), "wp1460-thu-am-x2-ma-tran-hai-truc", "GIET"),
+    ("x2-trung-ban-ghi", (("can(len(cap) == len(set(cap)),", "can(True,"),), "wp1460-thu-am-x2-trung-job", "GIET"),
+    ("x3-ket-luan", (('can(tu or j.get("conclusion") == "success",', "can(True,"),), "wp1460-thu-am-x3-job-truoc-failure", "GIET"),
+    ("x4-dung-mot-artifact", (("if not can(len(co) == 1,", "if not can(len(co) >= 1,"),), "wp1460-thu-am-x4-dau-trung-hien-tai", "GIET"),
+    ("x4-hinh-dau-job-v1", (('can(V is not None and V["dau_job"].is_valid(dau),', "can(isinstance(dau, dict),"),), "wp1460-thu-am-x4-dau-sai-schema-attempt-1-cua-job-khong-chay-lai", "GIET"),
+    ("x4-run-id", (('can(dau["run_id"] == rid,', "can(True,"),), "wp1460-thu-am-x4-dau-sai-run-id-hien-tai", "GIET"),
+    ("x4-run-attempt", (('can(dau["run_attempt"] == j["run_attempt"],', "can(True,"),), "wp1460-thu-am-x4-dau-sai-attempt-attempt-1-cua-job-khong-chay-lai", "GIET"),
+    ("x4-khoa-job", (('can(dau["khoa_job"] == khoa,', "can(True,"),), "wp1460-thu-am-x4-dau-sai-khoa-job-hien-tai", "GIET"),
+    ("x4-su-kien-sha", (('can(dau["su_kien_sha"] == sha,', "can(True,"),), "wp1460-thu-am-x4-dau-sai-su-kien-sha-attempt-1-cua-job-khong-chay-lai", "GIET"),
+    ("x4-checkout-sha", (('can(dau["checkout_sha"] == sha,', "can(True,"),), "wp1460-thu-am-x4-dau-sai-checkout-sha-hien-tai", "GIET"),
+    ("x4-tree-bang-nhau", (("can(len(cay) <= 1,", "can(True,"),), "wp1460-thu-am-x4-dau-tree-lech-attempt-1-cua-job-khong-chay-lai", "GIET"),
+    ("x5-lay-manh-attempt-cu-thay", (('a, nd = lay("X5", f"{JOB_MANH}-{rid}-{j[\'run_attempt\']}-{chi_so[t]}"', 'a, nd = lay("X5", f"{JOB_MANH}-{rid}-1-{chi_so[t]}"'),),
+     "wp1460-thu-am-x5-manh-vang-o-attempt-moi-nhat-du-co-ban-attempt-cu", "GIET"),
+    ("x5-head", (('can(x.get("head") == sha,', "can(True,"),), "wp1460-thu-am-x5-manh-head-sai", "GIET"),
+    ("x6-manh-khong-moi-hon-gom", (('can(type(att_gop) is int and j["run_attempt"] <= att_gop,', "can(True,"),), "wp1460-thu-am-x6-gom-cu-hon-manh", "GIET"),
+    ("x6-job-khong-vuot-luot", (('can(j["run_attempt"] <= att,', "can(True,"),), "wp1460-thu-am-x6-job-vuot-attempt-cua-luot", "GIET"),
+    ("x7-digest", (('if not can(isinstance(d, str) and bool(re.fullmatch(r"sha256:[0-9a-f]{64}", d)),', "if not can(True,"),), "wp1460-thu-am-x7-digest-sai-dang", "GIET"),
+    ("x7-ten-ngoai-ba-ho", (("can(bool(m) and int(m[2]) <= att and (", "can(True or ("),), "wp1460-thu-am-x7-artifact-ten-la", "GIET"),
+    ("x7-ten-trung", (("can(len(ten_art) == len(set(ten_art)),", "can(True,"),), "wp1460-thu-am-x7-ten-trung", "GIET"),
+    ("x8-cron-ghim", (('can(sk != "schedule" or c["cron"] == CRON_DOT_BIEN_DU,', "can(True,"),), "wp1460-thu-am-x8-cron-lech", "GIET"),
+    ("x8-su-kien-ngoai-hop-dong", (('can(sk in ("schedule", "workflow_dispatch"),', "can(True,"),), "wp1460-thu-am-x8-su-kien-push", "GIET"),
+    ("x8-khung-la-moc-gan-nhat-khong-vuot-tao", (("return t if t <= tao else t - datetime.timedelta(days=7)", "return t"),), "wp1460-thu-duong-schedule-truoc-moc-mot-giay-khung-tuan-truoc", "GIET"),
+    ("job-thu-tu-khai-success", (('"ket_luan": None if tu else j.get("conclusion"),', '"ket_luan": "success" if tu else j.get("conclusion"),'),), "wp1460-thu-duong-luot-dau", "GIET"),
+    ("khong-xanh-ma-thoat-0", (("    return 1 if ld else 0\n", "    return 0\n"),), "wp1460-thu-am-x3-job-truoc-cancelled", "GIET"),
+    ("ghi-bien-nhan-sai-schema", (("bn = dict(chung, ok=False, ly_do=ld,", "bn = dict(chung, ok=False, ly_do=ld, thua=1,"),), "wp1460-thu-am-x3-job-truoc-timed_out", "GIET"),
+    ("dien-gio-hien-tai-vao-run-created-at", (('"khung_danh_nghia_utc": khung, "run_created_at": tao})', '"khung_danh_nghia_utc": khung, "run_created_at": tao or _iso(_gio_utc())[:19] + "Z"})'),),
+     "wp1460-thu-vong-kin-run-loi", "GIET"),
+    ("loi-doi-so-ma-van-ghi-bien-nhan", (('"BIEN_NHAN_AUDIT: LỖI ĐỐI SỐ —", e)\n        return 2', '"BIEN_NHAN_AUDIT: LỖI ĐỐI SỐ —", e)\n        pathlib.Path(d["thu_bien_nhan_audit"]).write_text("{}", encoding="utf-8")\n        return 2'),),
+     "wp1460-thu-doi-so-thieu-github-sha-thoat-2-khong-ghi", "GIET"),
+    ("doi-so-sha-khong-kiem-dang", (('"sha": lay("sha_su_kien", r"[0-9a-f]{40}")', '"sha": lay("sha_su_kien", r".*")'),), "wp1460-thu-doi-so-github-sha-la-ten-nhanh-thoat-2-khong-ghi", "GIET"),
+    ("doi-so-run-id-khong-kiem-dang", (('"run_id": int(lay("run_id", so))', '"run_id": int(lay("run_id", r".*").strip("abc") or 1)'),), "wp1460-thu-doi-so-run-id-khong-phai-so-thoat-2-khong-ghi", "GIET"),
+    ("workflow-sha-dien-tu-sha-checkout", (('dinh = {"trang_thai": "not_measured", "workflow_sha": ws,', 'dinh = {"trang_thai": "not_measured", "workflow_sha": ws or sha,'),),
+     "wp1460-thu-definition-workflow-sha-vang-khong-lay-sha-checkout-not-measured-van-xanh", "GIET"),
+    ("definition-khong-so-blob", (('if nd is not None and hashlib.sha1(b"blob %d\\0" % len(nd) + nd).hexdigest() == dd["sha"]:', "if nd is not None:"),),
+     "wp1460-thu-definition-blob-khac-noi-dung-not-measured-van-xanh", "GIET"),
+    # Tự kiểm bộ phân hạng trên ĐƯỜNG THẬT (bản sao + nạp + gọi ca): lỗi vô can KHÔNG phải giết; đột biến vô hại SỐNG; rig hỏng thì nói rõ.
+    ("tu-kiem-loi-vo-can-NameError", (('run, jobs, arts = _doc_json_du(rest / "run.json"),', 'run, jobs, arts = _ham_khong_ton_tai(rest / "run.json"),'),), "wp1460-thu-am-x3-job-truoc-failure", "TIN_DUNG_GIA"),
+    ("tu-kiem-ban-sao-khong-nap-duoc", (("def khoa_job_tu_ten(ten):", "def khoa_job_tu_ten(ten:"),), "wp1460-thu-duong-luot-dau", "TIN_DUNG_GIA"),
+    ("tu-kiem-dot-bien-vo-hai-song", (("`dot-bien-manh (3)` → `dot-bien-manh-3` (khoá", "`dot-bien-manh (4)` → `dot-bien-manh-4` (khoá"),), "wp1460-thu-duong-luot-dau", "SONG"),
+    ("tu-kiem-ca-dich-khong-ton-tai", (("`dot-bien-manh (3)` → `dot-bien-manh-3` (khoá", "`dot-bien-manh (4)` → `dot-bien-manh-4` (khoá"),), "wp1460-khong-co-ca-nay", "TIN_DUNG_GIA"),
+    ("tu-kiem-van-ban-cu-khong-xuat-hien", (("VĂN BẢN NÀY KHÔNG CÓ Ở PHẦN MÃ PHÍA TRÊN", "x"),), "wp1460-thu-duong-luot-dau", "KHONG_AP_DUOC"),
+]
+# Khối «Lệnh kiểm» của đặc tả wp1460 r8 (Nghiệm thu 1), chép NGUYÊN BYTE — băm ghim ở `BAM_HOP_DONG`; KHÔNG sửa ở đây.
+LENH_KIEM_HOP_DONG = r'''"""Lenh kiem hop dong bien_nhan_audit.v1 (wp1460 B1a). python3 -B <tep> <thu muc hop_dong> [--dot-bien]"""
+import copy, datetime, json, re, sys
+import jsonschema
+JOB_THU, JOB_GOP, TIEN_TO_MANH, CRON_GHIM = "bien-nhan-audit", "dot-bien-gop", "dot-bien-manh", "17 19 * * 6"
+
+def nap(d):
+    d = d.rstrip("/") + "/"
+    return (json.load(open(d + "bien_nhan_audit.v1.schema.json", encoding="utf-8")), json.load(open(d + "fixture.json", encoding="utf-8")))
+
+def bo_kiem(S):
+    jsonschema.Draft202012Validator.check_schema(S)
+    return {"bien_nhan": jsonschema.Draft202012Validator(S),
+            "dau_job": jsonschema.Draft202012Validator({"$schema": S["$schema"], "$ref": "#/$defs/dau_job_v1", "$defs": S["$defs"]})}
+
+def tro(doc, duong):
+    o = doc
+    for k in [x.replace("~1", "/").replace("~0", "~") for x in duong.split("/")[1:]]:
+        o = o[int(k)] if isinstance(o, list) else o[k]
+    return o
+
+def ap(doc, sua):
+    for s in sua or []:
+        cha, _, cuoi = s["duong"].rpartition("/")
+        o, cuoi = tro(doc, cha), cuoi.replace("~1", "/").replace("~0", "~")
+        if isinstance(o, list) and cuoi == "-":
+            o.append(s["gia_tri"])
+        elif s.get("xoa"):
+            del o[int(cuoi) if isinstance(o, list) else cuoi]
+        else:
+            o[int(cuoi) if isinstance(o, list) else cuoi] = s["gia_tri"]
+    return doc
+
+def khoa_tu_ten(ten):
+    m = re.fullmatch(r"(.+) \((.+)\)", ten)
+    return f"{m[1]}-{m[2]}" if m else ten
+
+def doc_moc(v):
+    try:
+        return datetime.datetime.strptime(v, "%Y-%m-%dT%H:%M:%SZ")
+    except (TypeError, ValueError):
+        return None
+
+def khung_cron(tao):
+    """Moc `17 19 * * 6` (thu Bay 19:17 UTC) gan nhat <= tao."""
+    t = tao.replace(hour=19, minute=17, second=0) - datetime.timedelta(days=(tao.weekday() - 5) % 7)
+    return t if t <= tao else t - datetime.timedelta(days=7)
+
+def tieu_dung(V, b, rest, ngoai, bo=None, hop_le=None):
+    """Luat C cua ben tieu dung, tung VI TU co ten. Tra (tap luat vi pham, canh bao, moc tinh tuoi). `bo` = ten vi tu bi go (dot bien);
+    `hop_le` = ket qua kiem hinh da co cua b (None thi tu kiem)."""
+    if not (V["bien_nhan"].is_valid(b) if hop_le is None else hop_le) or b["ok"] is not True:
+        return {"C1"}, [], None
+    vp, run, lu, sk = set(), rest["run"], b["luot"], b["su_kien"]
+    def vt(ten, dk):                           # ten = "<luat>.<vi tu>"
+        if ten != bo and not dk: vp.add(ten.split(".")[0])
+    E = ngoai["job_ky_vong"]                   # ten job ben tieu dung TU lap tu tep workflow tai H
+    moi = {}                                   # ten job -> ban ghi REST co run_attempt lon nhat
+    for j in rest["jobs"]:
+        if j["name"] not in moi or j["run_attempt"] > moi[j["name"]]["run_attempt"]:
+            moi[j["name"]] = j
+    cap = [(j["name"], j["run_attempt"]) for j in rest["jobs"]]
+    vt("C1.attempt_moi_nhat", lu["run_attempt"] == run["run_attempt"])
+    vt("C2.run_completed", run["status"] == "completed")
+    vt("C2.run_success", run["conclusion"] == "success")
+    vt("C2.moi_job_success", all(j["conclusion"] == "success" for j in moi.values()))
+    vt("C3.kho", b["kho"] == run["repository"]["full_name"])
+    vt("C3.kho_id", b["kho_id"] == run["repository"]["id"])
+    vt("C3.duong_dan", b["workflow"]["duong_dan"] == run["path"])
+    vt("C3.run_id", lu["run_id"] == run["id"])
+    vt("C3.su_kien_ten", sk["ten"] == run["event"])
+    vt("C3.sha_rest", sk["sha"] == run["head_sha"])
+    vt("C3.sha_h", sk["sha"] == ngoai["h"])
+    hang = {r["ten"]: r for r in b["job"]}
+    vt("C4.rest_khong_trung", len(cap) == len(set(cap)))
+    vt("C4.rest_du", set(moi) == set(E))
+    vt("C4.dong_khong_trung", len(b["job"]) == len(hang))
+    vt("C4.tap_ten", set(hang) == set(E))
+    vt("C4.ky_vong", b["kiem_ke_job"]["ky_vong"] == sorted(E))
+    vt("C4.thuc_co", b["kiem_ke_job"]["thuc_co"] == sorted(E))
+    cung = [(r, moi[t]) for t, r in hang.items() if t in moi]
+    vt("C4.job_id", all(r["job_id"] == j["id"] for r, j in cung))
+    vt("C4.run_attempt", all(r["run_attempt"] == j["run_attempt"] for r, j in cung))
+    vt("C4.khoa", all(r["khoa"] == khoa_tu_ten(r["ten"]) for r in b["job"]))
+    vt("C4.tu_than", all(r["tu_than"] == (r["ten"] == JOB_THU) for r in b["job"]))
+    vt("C4.ten_dau", all(r["dau_job"]["ten"] == f"dau-job-{lu['run_id']}-{j['run_attempt']}-{khoa_tu_ten(r['ten'])}" for r, j in cung))
+    vt("C5.job_sha", all(r["checkout_sha"] == sk["sha"] for r in b["job"]))
+    vt("C5.manh_head", all(m["head"] == sk["sha"] for m in b["manh"]))
+    vt("C5.tree_h", all(r["checkout_tree"] == ngoai["tree_h"] for r in b["job"]))
+    ky = {}                                    # khoa job manh -> k, lap tu E (doc lap voi bien nhan va REST)
+    for t in E:
+        m = re.fullmatch(re.escape(TIEN_TO_MANH) + r" \((0|[1-9][0-9]*)\)", t)
+        if m: ky[khoa_tu_ten(t)] = int(m[1])
+    ten_theo_khoa = {khoa_tu_ten(t): t for t in E}
+    att = lambda khoa: moi.get(ten_theo_khoa.get(khoa), {}).get("run_attempt")   # attempt REST moi nhat cua job mang khoa ay
+    co = [m for m in b["manh"] if m["khoa_job"] in ky and att(m["khoa_job"]) is not None]
+    vt("C6.manh_khong_trung", len(b["manh"]) == len({m["khoa_job"] for m in b["manh"]}))
+    vt("C6.tap_manh", {m["khoa_job"] for m in b["manh"]} == set(ky))
+    vt("C6.job_le_luot", all(j["run_attempt"] <= lu["run_attempt"] for j in moi.values()))
+    vt("C6.chi_so", all(m["manh"] == ky[m["khoa_job"]] for m in co))
+    vt("C6.attempt", all(m["attempt_ben_san_xuat"] == att(m["khoa_job"]) for m in co))
+    vt("C6.le_gop", att(JOB_GOP) is not None and all(att(m["khoa_job"]) <= att(JOB_GOP) for m in co))
+    vt("C6.ten_artifact", all(m["artifact"]["ten"] == f"{TIEN_TO_MANH}-{lu['run_id']}-{att(m['khoa_job'])}-{ky[m['khoa_job']]}" for m in co))
+    vt("C7.job_truoc", b["dau_hieu_duong"]["job_truoc_success"] == f"{len(E) - 1}/{len(E) - 1}")
+    vt("C7.manh", b["dau_hieu_duong"]["manh"] == f"{len(ky)}/{len(ky)}")
+    kho = {a["id"]: a for a in rest["artifacts"]}
+    dau = [(r["dau_job"], "dau-job.json", r) for r in b["job"]]
+    mnh = [(m["artifact"], f"manh-{m['manh']}.json", m) for m in b["manh"]]
+    cr = [(a, kho[a["id"]]) for a, _, _ in dau + mnh if a["id"] in kho]
+    ct = [(a, ten, d, ngoai["tai_ve"][str(a["id"])]) for a, ten, d in dau + mnh if str(a["id"]) in ngoai["tai_ve"]]
+    c1 = [x for x in ct if len(x[3]["tep"]) == 1 and x[3]["tep"][0]["ten"] == x[1]]      # dung MOT tep, dung ten
+    vt("C8.co_trong_rest", len(cr) == len(dau + mnh))
+    vt("C8.ten", all(a["ten"] == r["name"] for a, r in cr))
+    vt("C8.digest_rest", all(a["digest"] == r["digest"] for a, r in cr))
+    vt("C8.chua_het_han", all(r["expired"] is False for a, r in cr))
+    vt("C8.da_tai", len(ct) == len(dau + mnh))
+    vt("C8.goi", all(a["digest"] == "sha256:" + t["sha256_goi"] for a, _, _, t in ct))
+    vt("C8.mot_tep", len(c1) == len(ct))
+    vt("C8.tep_bam", all(a["sha256_noi_dung"] == t["tep"][0]["sha256"] for a, _, _, t in c1))
+    nd = [(t["tep"][0]["noi_dung"], d) for a, ten, d, t in c1 if ten == "dau-job.json"]
+    nho = V.setdefault("nho", {})                # nho ket qua kiem hinh dau theo noi dung
+    def dau_hop_le(n):
+        k = json.dumps(n, sort_keys=True)
+        if k not in nho: nho[k] = V["dau_job"].is_valid(n)
+        return nho[k]
+    ok = [(n, d) for n, d in nd if dau_hop_le(n)]
+    vt("C11.hinh", len(ok) == len(nd))
+    vt("C11.khoa_job", all(n["khoa_job"] == d["khoa"] for n, d in ok))
+    vt("C11.run_id", all(n["run_id"] == lu["run_id"] for n, d in ok))
+    vt("C11.run_attempt", all(n["run_attempt"] == d["run_attempt"] for n, d in ok))
+    vt("C11.su_kien_sha", all(n["su_kien_sha"] == sk["sha"] for n, d in ok))
+    vt("C11.checkout_sha", all(n["checkout_sha"] == d["checkout_sha"] for n, d in ok))
+    vt("C11.checkout_tree", all(n["checkout_tree"] == d["checkout_tree"] for n, d in ok))
+    nm = [(t["tep"][0]["noi_dung"], d) for a, ten, d, t in c1 if ten != "dau-job.json"]
+    om = [(n, d) for n, d in nm if isinstance(n, dict)]
+    vt("C12.la_object", len(om) == len(nm))
+    vt("C12.head", all(n.get("head") == d["head"] for n, d in om))
+    vt("C12.manh", all(type(n.get("manh")) is int and n.get("manh") == d["manh"] for n, d in om))
+    tao = doc_moc(sk["run_created_at"])
+    vt("C9.tao_khop_rest", sk["run_created_at"] == run["created_at"])
+    vt("C9.lich_hop_le", tao is not None)
+    if sk["ten"] == "schedule":
+        vt("C9.cron_ghim", sk["cron"] == CRON_GHIM)
+        vt("C9.khung", tao is None or sk["khung_danh_nghia_utc"] == khung_cron(tao).strftime("%Y-%m-%dT%H:%M:%SZ"))
+    canh = ["C10"] if bo != "C10.canh_bao" and b["dinh_danh_definition"]["trang_thai"] == "not_measured" else []
+    return vp, canh, sk.get("khung_danh_nghia_utc") or sk["run_created_at"]
+
+class LechDauTien(Exception):
+    """Tin hieu RIENG cua bo kiem: phep kiem dau tien lech (dung cho dot bien; ngoai le khac KHONG duoc tinh la giet)."""
+
+def chay(S, F, bo=None, som=False):
+    """Chay moi phep kiem. Tra (danh sach lech, bo dem, tap luat duoc phu). `bo` (go mot vi tu) chi anh huong phan ngu nghia nen chi chay phan ay."""
+    V, sai, dem, phu = bo_kiem(S), [], {"hinh": 0, "ngu_nghia": 0, "tu_vung": 0, "doi_tuong": 0}, set()
+    def hop(nen, doc): return V["dau_job" if nen == "dau_job" else "bien_nhan"].is_valid(doc)
+    def lech(x):
+        sai.append(x)
+        if som: raise LechDauTien(x)
+    ten = [c["ten"] for c in F["ca"]]
+    assert len(ten) == len(set(ten)), "ten ca trung"
+    for t in [] if bo else F["tu_vung"]:         # moi dia diem co pattern: mau hop le; bien the thi khong
+        bien = [t["mau"] + "\n", t["mau"] + "\r\n", " " + t["mau"], t["mau"] + " ", 5, None, [t["mau"]]] + t["sai"]
+        for gt, mong in [(t["mau"], True)] + [(x, False) for x in bien]:
+            dem["tu_vung"] += 1
+            if hop(t["nen"], ap(copy.deepcopy(F["nen"][t["nen"]]), [{"duong": t["duong"], "gia_tri": gt}])) != mong:
+                lech(f"TU VUNG {t['dia_diem']}: {gt!r}")
+    for t in [] if bo else F["doi_tuong"]:       # moi object: go tung khoa / them khoa la / thay bang chuoi, danh sach deu KHONG hop le
+        goc = ap(copy.deepcopy(F["nen"][t["nen"]]), t.get("sua_truoc"))
+        o = tro(goc, t["duong"]) if t["duong"] else goc
+        bien = [{k: v for k, v in o.items() if k != x} for x in o] + [dict(o, khoa_la=1), "x", [o]]
+        for moi, mong in [(o, True)] + [(x, False) for x in bien]:
+            dem["doi_tuong"] += 1
+            doc = moi if not t["duong"] else ap(copy.deepcopy(goc), [{"duong": t["duong"], "gia_tri": moi}])
+            if hop(t["nen"], doc) != mong:
+                lech(f"DOI TUONG {t['nen']}{t['duong']}: {sorted(moi) if isinstance(moi, dict) else moi!r}")
+    for c in F["ca"]:
+        doc = ap(copy.deepcopy(F["nen"][c["nen"]]), c.get("sua"))
+        hop_le = c["hinh_hop_le"] if bo else hop(c["nen"], doc)
+        dem["hinh"] += 1
+        if hop_le != c["hinh_hop_le"]:
+            lech("HINH " + c["ten"])
+            continue                             # lech hinh: bao rieng, khong roi xuong nhanh ngu nghia
+        if c["nen"] == "dau_job":
+            continue
+        vp, canh, moc = tieu_dung(V, doc, ap(copy.deepcopy(F["nen"]["rest"]), c.get("sua_rest")), ap(copy.deepcopy(F["nen"]["ngoai"]), c.get("sua_ngoai")), bo, hop_le)
+        dem["ngu_nghia"] += 1
+        if sorted(vp) != sorted(["C1"] if not hop_le else c["vi_pham"]) or canh != c.get("canh_bao", []) or ("moc_tuoi" in c and moc != c["moc_tuoi"]):
+            lech(f"NGU NGHIA {c['ten']}: vi pham {sorted(vp)} canh bao {canh} moc {moc}")
+        phu |= set(vp) | set(canh) | ({"C9"} if "moc_tuoi" in c else set())
+    can = {f"C{i}" for i in range(1, 13)}
+    if bo is None and phu != can:
+        lech(f"PHU LUAT thieu {sorted(can - phu)}")
+    return sai, dem, phu
+
+def vi_tri_schema(S):
+    """Moi cho noi long schema: (mo ta, ham sua tren ban sao)."""
+    ra = []
+    def di(n, duong):
+        if isinstance(n, dict):
+            for k in ("pattern", "minLength", "minimum", "minItems", "uniqueItems", "const", "maxContains", "type"):
+                if k in n: ra.append((f"{duong}: go {k}", duong, ("go", k)))
+            if "contains" in n: ra.append((f"{duong}: go contains", duong, ("go", "contains")))
+            if n.get("additionalProperties") is False: ra.append((f"{duong}: mo additionalProperties", duong, ("mo", None)))
+            for x in n.get("required", []): ra.append((f"{duong}: bo required {x}", duong, ("req", x)))
+            for i in range(len(n.get("oneOf", []))): ra.append((f"{duong}: bo nhanh oneOf[{i}]", duong, ("oneOf", i)))
+            for k, v in n.items(): di(v, f"{duong}/{k}")
+        elif isinstance(n, list):
+            for i, v in enumerate(n): di(v, f"{duong}/{i}")
+    di(S, "")
+    return ra
+
+def sua_schema(S, duong, lenh):
+    S = copy.deepcopy(S)
+    n = tro(S, duong) if duong else S
+    if lenh[0] == "go":
+        del n[lenh[1]]
+        if lenh[1] == "contains": n.pop("maxContains", None)
+    elif lenh[0] == "mo": n["additionalProperties"] = True
+    elif lenh[0] == "req": n["required"].remove(lenh[1])
+    else: del n["oneOf"][lenh[1]]
+    return S
+
+def dot_bien(S, F):
+    """Moi dot bien phai lam `chay` bao LECH ma KHONG nem ngoai le. Tra (giet, tong, danh sach song/loi)."""
+    ten_vt = sorted(set(re.findall(r'vt\("(C[0-9]+\.[a-z_0-9]+)"', open(__file__, encoding="utf-8").read())) | {"C10.canh_bao"})
+    ds = [("vi tu " + t, lambda t=t: chay(S, F, bo=t, som=True)) for t in ten_vt]
+    ds += [("schema " + mt, lambda d=d, l=l: chay(sua_schema(S, d, l), F, som=True)) for mt, d, l in vi_tri_schema(S)]
+    def loi_gia(): raise KeyError("tu kiem")       # tu kiem bo phan hang: ngoai le KHONG duoc tinh la giet
+    giet, xau = 0, []
+    for ten, f in ds + [("TU KIEM ngoai le vo can", loi_gia)]:
+        try:
+            f()
+            ket = "SONG"
+        except LechDauTien:                        # CHI tin hieu rieng cua bo kiem moi la giet
+            ket = "GIET"
+        except Exception as e:                     # noqa: BLE001
+            ket = f"LOI {type(e).__name__}"
+        if ten.startswith("TU KIEM"):
+            if ket != "LOI KeyError": xau.append(f"TU KIEM bo phan hang hong: {ket}")
+        elif ket == "GIET": giet += 1
+        else: xau.append(f"{ket} (khong tinh la giet): {ten}")
+    return giet, len(ds), xau, len(ten_vt)
+
+if __name__ == "__main__":
+    S, F = nap(sys.argv[1])
+    sai, dem, phu = chay(S, F)
+    n = sum(dem.values())
+    print(f"FIXTURE: {n - len(sai)}/{n} phep kiem dung ky vong · hinh {dem['hinh']} · ngu nghia {dem['ngu_nghia']} · tu vung {dem['tu_vung']} · doi tuong {dem['doi_tuong']} · luat duoc phu {len(phu)}/12")
+    for x in sai: print("LECH:", x)
+    if "--dot-bien" in sys.argv[2:] and not sai:
+        giet, tong, xau, so_vt = dot_bien(S, F)
+        print(f"DOT BIEN: giet {giet}/{tong} · vi tu {so_vt} · noi long schema {tong - so_vt}")
+        for x in xau: print("LECH:", x)
+        sai += xau
+    print("TONG:", "DAT" if not sai else "DO")
+    sys.exit(1 if sai else 0)
+'''
 
 
 def phan_chung():
@@ -2502,7 +3591,7 @@ def phan_chung():
                    ("env-reg-su-kien", lambda w, j: _buoc_reg(j)["env"].update({BIEN_SU_KIEN: "push"})),
                    ("env-reg-co-nhe", lambda w, j: _buoc_reg(j)["env"].update(SUBAGENT_GHI_DETECT_KHONG_DOT_BIEN="1")),
                    ("env-reg-N-1", lambda w, j: _buoc_reg(j)["env"].update({BIEN_WORKERS: "1"})),
-                   ("troi-ghim-pip", lambda w, j: j["steps"][4].update(run=j["steps"][4]["run"].replace("6.0.3", "6.0.2"))),
+                   ("troi-ghim-pip", lambda w, j: j["steps"][6].update(run=j["steps"][6]["run"].replace("6.0.3", "6.0.2"))),
                    ("them-buoc", lambda w, j: j["steps"].insert(0, {"run": "true"})),
                    ("buoc-continue-on-error", lambda w, j: _buoc_reg(j).update({"continue-on-error": True})),
                    ("job-if", lambda w, j: j.update({"if": "false"})), ("job-windows", lambda w, j: j.update({"runs-on": "windows-latest"})),
@@ -2517,8 +3606,8 @@ def phan_chung():
     def _j(w, ten): return w["jobs"][ten]
     for _t, _f in (("thieu-gop", lambda w, j: w["jobs"].pop(JOB_GOP)), ("gop-khong-needs", lambda w, j: _j(w, JOB_GOP).pop("needs")),
                    ("matrix-3", lambda w, j: _j(w, JOB_MANH)["strategy"]["matrix"].update(manh=[0, 1, 2])),
-                   ("manh-sai-N", lambda w, j: _j(w, JOB_MANH)["steps"][3]["env"].update(NHANH_DON_DUOC_DICH="${{ matrix.manh }}/3")),
-                   ("manh-bo-co-du", lambda w, j: _j(w, JOB_MANH)["steps"][3]["env"].pop("NHANH_DON_DUOC_DICH_DU")),
+                   ("manh-sai-N", lambda w, j: _j(w, JOB_MANH)["steps"][5]["env"].update(NHANH_DON_DUOC_DICH="${{ matrix.manh }}/3")),
+                   ("manh-bo-co-du", lambda w, j: _j(w, JOB_MANH)["steps"][5]["env"].pop("NHANH_DON_DUOC_DICH_DU")),
                    ("gop-targeted", lambda w, j: _j(w, JOB_GOP)["steps"][-1].update(run="python ops/nhanh_don_duoc_test.py --gop-dich manh")),
                    ("manh-if", lambda w, j: _j(w, JOB_MANH).update({"if": "false"})),
                    ("manh-continue-on-error", lambda w, j: _j(w, JOB_MANH).update({"continue-on-error": True})),
@@ -2547,7 +3636,7 @@ def phan_chung():
 
     def _co(w, ten): return next(b for b in w["jobs"][ten]["steps"] if _la_checkout(b))
     def _sau_co(w, ten): return w["jobs"][ten]["steps"][next(i for i, b in enumerate(w["jobs"][ten]["steps"]) if _la_checkout(b)) + 1]
-    for _ten in (JOB_DU, JOB_MANH, JOB_GOP):
+    for _ten in KHOA_DAU:
         for _t, _ref in (("nhanh-master", "master"), ("refs-heads", "refs/heads/master"), ("github-ref", "${{ github.ref }}"),
                          ("github-ref-name", "${{ github.ref_name }}"), ("head-ref", "${{ github.head_ref }}"),
                          ("nhanh-mac-dinh", "${{ github.event.repository.default_branch }}"),
@@ -2573,7 +3662,7 @@ def phan_chung():
                    ("dang-chuoi", lambda w: w.update(concurrency="dot-bien-du-${{ github.run_id }}"))):
         _them(f"wp1166-concurrency-{_t}-do", _hong_1166(_f, "concurrency"))
 
-    def _tl(w): return next(b for b in w["jobs"][JOB_MANH]["steps"] if "upload-artifact" in str(b.get("uses", "")))["with"]
+    def _tl(w): return [b for b in w["jobs"][JOB_MANH]["steps"] if "upload-artifact" in str(b.get("uses", ""))][-1]["with"]
     def _tv(w): return next(b for b in w["jobs"][JOB_GOP]["steps"] if "download-artifact" in str(b.get("uses", "")))["with"]
     for _t, _f, _dau in (
             ("artifact-khong-run-id", lambda w: _tl(w).update(name="dot-bien-manh-${{ matrix.manh }}"), "artifact mảnh"),
@@ -2601,8 +3690,24 @@ def phan_chung():
         _them(f"wp1166-{_t}-do", _hong_1166(_f, _dau))
     _them("wp1166-gom-chay-khi-manh-bi-huy-do", _hong_du(lambda w, j: _j(w, JOB_GOP).update({"if": "${{ !cancelled() }}"})))
     _them("wp1166-gom-needs-rong-do", _hong_du(lambda w, j: _j(w, JOB_GOP).update(needs=[])))
-    _them("wp1166-yaml-that-ba-checkout-ghim", [(_co(_wd0, _n).get("with") or {}).get("ref") for _n in (JOB_DU, JOB_MANH, JOB_GOP)]
-          == [REF_SU_KIEN] * 3 and WF_DOT_BIEN_DU.read_text(encoding="utf-8").count("ref: " + REF_SU_KIEN) == 3)
+    _them("wp1166-yaml-that-ba-checkout-ghim", [(_co(_wd0, _n).get("with") or {}).get("ref") for _n in KHOA_DAU]
+          == [REF_SU_KIEN] * 4 and WF_DOT_BIEN_DU.read_text(encoding="utf-8").count("ref: " + REF_SU_KIEN) == 4)
+    # ── wp1460 (B1a): ca mục 6 + lệnh thu + hợp đồng (`ca_wp1460`), rồi đột biến riêng từng chốt, phân hạng bằng lớp tín hiệu của ca đích. ──
+    for _t, _ok in ca_wp1460().items(): _them(_t, _ok)
+    def _nem(e): raise e
+    _them("wp1460-dot-bien-tu-kiem-bo-phan-hang", [phan_hang_dot_bien(_f, "ca", TinHieuChotCa).split(" ")[0] for _f in (
+        lambda c: _nem(TinHieuChotCa(c)), lambda c: None, lambda c: _nem(TinHieuChotCa("ca-khac")), lambda c: _nem(AssertionError(f"{c}: AttributeError")),
+        lambda c: _nem(type("Con", (TinHieuChotCa,), {})(c)), lambda c: _nem(AttributeError(c)), lambda c: _nem(KeyError(c)))] == ["GIET", "SONG"] + ["TIN_DUNG_GIA"] * 5)
+    _db = dot_bien_wp1460()
+    for _t, _ca, _mong, _hang in _db:
+        _them(f"wp1460-dot-bien-{_t}", _hang.split(" ")[0] == _mong)
+    _nen = dot_bien_wp1460([("nen", (), _ca, "SONG") for _ca in sorted({m[2] for m in DOT_BIEN_WP1460 if m[3] == "GIET"})])
+    _them("wp1460-dot-bien-nen-moi-ca-dich-dat-tren-ban-sao-khong-doi", bool(_nen) and all(_h == "SONG" for *_, _h in _nen))
+    for _t, _ca, _mong, _hang in _db + _nen:
+        if _hang.split(" ")[0] != _mong: print(f"ĐỘT BIẾN wp1460 {_t} → {_ca}: mong {_mong}, đo {_hang}")
+    _giet = [x for x in _db if x[2] == "GIET"]
+    print(f"ĐỘT BIẾN wp1460: giết đúng lý do {sum(x[3] == 'GIET' for x in _giet)}/{len(_giet)} · tự kiểm phân hạng {sum(x[3].split(' ')[0] == x[2] for x in _db if x[2] != 'GIET')}/{len(_db) - len(_giet)}"
+          f" · nền {sum(_h == 'SONG' for *_, _h in _nen)}/{len(_nen)} ca đích đạt trên bản sao không đổi")
     # Hành vi của bước ĐO HEAD, thân lấy TỪ CHÍNH tệp YAML (không chép): HEAD đúng ⇒ 0 + dòng dương; HEAD lệch ⇒ khác 0.
     # Windows: KHÔNG thêm ca (không đếm một ca không đo là đạt). Ngoài Windows: `bash` lấy qua `ops/bash_nen.py::tim_bash()`
     # (g5: gate cấm lời gọi tên trần); bộ giải trả None / thiếu git ⇒ các ca này được THÊM và ĐỎ, không bỏ qua.
@@ -2623,7 +3728,7 @@ def phan_chung():
             _git("init", "-q"); _git(*_dn, "commit", "-q", "--allow-empty", "-m", "a"); _a = _git("rev-parse", "HEAD").stdout.strip()
             _git(*_dn, "commit", "-q", "--allow-empty", "-m", "b"); _b = _git("rev-parse", "HEAD").stdout.strip()
             _hex = bool(re.fullmatch(r"[0-9a-f]{40}", _a) and re.fullmatch(r"[0-9a-f]{40}", _b) and _a != _b)
-            for _ten in (JOB_DU, JOB_MANH, JOB_GOP):
+            for _ten in KHOA_DAU:
                 def _chay(sha, _n=_ten):
                     than = _sau_co(_wd0, _n)["run"].replace(REF_SU_KIEN, sha).replace("${{ github.run_id }}", "7").replace(
                         "${{ github.run_attempt }}", "1")
@@ -2933,7 +4038,12 @@ def main():
     ap.add_argument("--run-id")
     ap.add_argument("--sha-su-kien")
     ap.add_argument("--ket-qua-manh")
+    ap.add_argument("--thu-bien-nhan-audit", metavar="TEP_RA")  # wp1460: các cờ còn lại của lệnh thu (cùng `--run-id`, `--sha-su-kien`)
+    for _a in ("rest", "manh-tho", "dau-tho", "run-attempt") + tuple(a for a, _ in DOI_SO_THU if a not in ("run-id", "run-attempt", "sha-su-kien")):
+        ap.add_argument("--" + _a)
     ns = ap.parse_args()
+    if ns.thu_bien_nhan_audit is not None:  # wp1460: chỉ làm việc này
+        return lenh_thu_bien_nhan_audit(vars(ns))
     _bn = (ns.kiem_bien_nhan_du, ns.chon_ra, ns.run_id, ns.sha_su_kien, ns.ket_qua_manh)
     if any(x is not None for x in _bn):  # wp1166: chỉ làm việc này
         if any(x is None for x in _bn) or ns.chay or ns.mutant:

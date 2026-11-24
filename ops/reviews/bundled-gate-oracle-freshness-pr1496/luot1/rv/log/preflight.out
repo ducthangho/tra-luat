@@ -1,0 +1,17 @@
+HEAD=4f648e5b784aa4e19f0385eee68cd75e69e1dd18 tree=33f7b4183f408dafc029ecf860aab9857f244365 detached shallow=false clean; object 358451e8 present
+immutable=29c22f7d1f92321978d4d1dff16bd80d9ea744e0 ancestor of base=e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8 ancestor of HEAD
+va.py e909f641791c739e15e4e2112ccda687af2718daffff205959175bc3f6ecd110 (64 hex digits in README)
+ma_tran_r11.py 9314f531cb683d25965deda574a39f60b2cc02777ca389358b0b38e2405d9713 (64 hex digits in README)
+doi_chieu_don_dieu.py 95671804c21af77486a03da0e7e3f5e7911faccda9578ef0208c8424fc3b890b (64 hex digits in README)
+gen_ma_tran.py f34fcf6f071596095a64d4a3513dbfc631b1e8cb1f96205a675bf25524320191 (64 hex digits in README)
+probe_review_r1.py 7940fd2ca6ab78ed0c368a24ff8cdacf3a452aa7462d3820fa463f98620aa24f (8 hex digits in README)
+rv3_muts.py a5460db10eee8bbd59f1381eaf07432b53accf1db6f54e9414ac51bd56c6c2dd (8 hex digits in README)
+rv3_muts2.py 5667351a0c64d02c512f837387d4383f302f62d3e862177e0c104f42408496d4 (8 hex digits in README)
+rv4_san.py 6743f2ddd034b1bacbb430cd80a8b7e56e25ed3fe3a360bdf297d8261459103b (8 hex digits in README)
+ma-tran-nguyen-mau.out 30b9e906bc77465ad0db3901f6664c181654f0f8db9eebfe0e5d65a7455ae038 (64 hex digits in README)
+ma-tran-base.out becf0c2c6f3d2c68a4eafae0c90c09867b533a775b441ff194650988d9e70630 (64 hex digits in README)
+dinh-danh.txt 609566a8610c8af2d495de4cf40f895eeeac716368be363f77ffc5f0dd85766a (64 hex digits in README)
+write set: 3 files, +54/-26; W3 byte-identical; last commit manifest only
+continuation/immutable runtime trees are identical
+da ap 11 thay the
+W1 identical to va.py(base); SHA256=da1ebf1e2451c7d9a6cb221a972189c9c088d2db25603574fa0f15bf6063918b

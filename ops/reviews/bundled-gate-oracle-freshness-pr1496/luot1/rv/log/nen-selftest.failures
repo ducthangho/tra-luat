@@ -1,0 +1,14 @@
+  [FAIL] r973_bootstrap_khong_kiem_khoa
+  [FAIL] r973_bootstrap_ba_trang_thai
+  [FAIL] r973_bootstrap_require_agent_creds
+  [FAIL] r973_bootstrap_giu_auth_json_moi_hon
+  [FAIL] r973_bootstrap_last_refresh_hong_khong_pha
+  [FAIL] r973_bootstrap_auth_json_nguyen_tu
+  [FAIL] r973_bootstrap_sai_dinh_dang_khong_nap
+  [FAIL] r973_bootstrap_khong_export_khong_ghi_gemini
+  [FAIL] wp433_gws_cred_dich_ngoai_kho
+  [FAIL] wp433_gws_cred_dich_ngoai_kho_b
+  [FAIL] wp433_gws_cred_no
+  [FAIL] wp433_gws_cred_win_reparse
+  [FAIL] wp433_nlm_gws_dich_ngoai_kho
+  [FAIL] wp727_tl_gws_refresh

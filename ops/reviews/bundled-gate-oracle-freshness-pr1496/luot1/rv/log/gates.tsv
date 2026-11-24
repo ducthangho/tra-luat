@@ -1,0 +1,28 @@
+sau	selftest	1	2026-11-21T19:09:41Z	2026-11-21T19:14:27Z	python3 scripts/tl.py --selftest
+nen	selftest	1	2026-11-21T19:09:41Z	2026-11-21T19:14:28Z	python3 scripts/tl.py --selftest
+sau	fragments	0	2026-11-21T19:14:27Z	2026-11-21T19:14:28Z	python3 scripts/tl.py test-fragments-check --json
+nen	fragments	0	2026-11-21T19:14:28Z	2026-11-21T19:14:29Z	python3 scripts/tl.py test-fragments-check --json
+nen	bundle	1	2026-11-21T19:14:29Z	2026-11-21T19:15:39Z	python3 .github/checks/bundle_fragment_check.py --json
+sau	bundle	1	2026-11-21T19:14:28Z	2026-11-21T19:15:39Z	python3 .github/checks/bundle_fragment_check.py --json
+nen	verify	0	2026-11-21T19:15:39Z	2026-11-21T19:15:41Z	python3 scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+sau	verify	0	2026-11-21T19:15:39Z	2026-11-21T19:15:41Z	python3 scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+nen	workflow	0	2026-11-21T19:15:41Z	2026-11-21T19:15:41Z	python3 scripts/tl.py workflow-audit --strict --json
+sau	workflow	0	2026-11-21T19:15:41Z	2026-11-21T19:15:41Z	python3 scripts/tl.py workflow-audit --strict --json
+nen	golden	0	2026-11-21T19:15:41Z	2026-11-21T19:16:06Z	python3 scripts/tl.py golden-test --json
+sau	golden	0	2026-11-21T19:15:42Z	2026-11-21T19:16:06Z	python3 scripts/tl.py golden-test --json
+nen	eol	1	2026-11-21T19:16:06Z	2026-11-21T19:20:41Z	python3 .githooks/eol_policy_test.py
+nen	ruff-version	0	2026-11-21T19:20:41Z	2026-11-21T19:20:41Z	python3 -m ruff --version
+nen	ruff	0	2026-11-21T19:20:41Z	2026-11-21T19:20:41Z	python3 -m ruff check --no-cache --select F scripts/test_fragments/wp433_bundled_tach_manh.py
+nen	doctrine	0	2026-11-21T19:20:41Z	2026-11-21T19:20:41Z	python3 .claude/dev/packet_loop.py doctrine-scan --root .
+nen	adr	0	2026-11-21T19:20:41Z	2026-11-21T19:20:41Z	python3 .claude/dev/packet_loop.py adr-song --root .
+sau	eol	1	2026-11-21T19:16:06Z	2026-11-21T19:20:43Z	python3 .githooks/eol_policy_test.py
+sau	ruff-version	0	2026-11-21T19:20:43Z	2026-11-21T19:20:43Z	python3 -m ruff --version
+sau	ruff	0	2026-11-21T19:20:43Z	2026-11-21T19:20:43Z	python3 -m ruff check --no-cache --select F scripts/test_fragments/wp433_bundled_tach_manh.py
+sau	doctrine	0	2026-11-21T19:20:43Z	2026-11-21T19:20:43Z	python3 .claude/dev/packet_loop.py doctrine-scan --root .
+sau	adr	0	2026-11-21T19:20:43Z	2026-11-21T19:20:43Z	python3 .claude/dev/packet_loop.py adr-song --root .
+sau	diffcheck	0	2026-11-21T19:20:43Z	2026-11-21T19:20:43Z	git diff --check e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8 HEAD
+sau	names	0	2026-11-21T19:20:43Z	2026-11-21T19:20:43Z	git diff --name-only e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8 HEAD
+sau	regen-bundle	0	2026-11-21T19:20:43Z	2026-11-21T19:20:44Z	python3 -c import sys; sys.path.insert(0,'scripts'); from tl_core import test_fragments as tf; tf.write_bundled_modules('scripts/test_fragments', 'scripts')
+sau	regen-bundle-diff	0	2026-11-21T19:20:44Z	2026-11-21T19:20:44Z	git diff --exit-code -- scripts/tl_test_fragments_bundled.py scripts/tl_test_fragments_bundled_2.py
+sau	regen-manifest	0	2026-11-21T19:20:44Z	2026-11-21T19:20:45Z	python3 scripts/tl.py release-manifest --out RELEASE_MANIFEST.json
+sau	status	0	2026-11-21T19:20:45Z	2026-11-21T19:20:45Z	git status --porcelain=v1 --untracked-files=all --ignored

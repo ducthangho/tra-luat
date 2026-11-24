@@ -1,0 +1,5 @@
+nen	selftest	1	2026-11-21T19:02:35Z	2026-11-21T19:07:35Z	python3 scripts/tl.py --selftest
+nen	fragments	0	2026-11-21T19:07:35Z	2026-11-21T19:07:36Z	python3 scripts/tl.py test-fragments-check --json
+nen	bundle	1	2026-11-21T19:07:36Z	2026-11-21T19:08:49Z	python3 .github/checks/bundle_fragment_check.py --json
+nen	verify	0	2026-11-21T19:08:49Z	2026-11-21T19:08:51Z	python3 scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+nen	workflow	0	2026-11-21T19:08:51Z	2026-11-21T19:08:52Z	python3 scripts/tl.py workflow-audit --strict --json

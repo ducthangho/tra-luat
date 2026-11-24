@@ -1,0 +1,14 @@
+control {"rc": 0, "run": true, "so_nhan": 32, "do": [], "ly_do": {}}
+hai_swapped_ast {"rc": 0, "run": false, "so_nhan": 32, "do": ["V3"], "ly_do": {"V3": "KeyError: 'BUNDLED_FRAGMENT_SOURCES'"}}
+deu_source_content {"rc": 0, "run": true, "so_nhan": 32, "do": [], "ly_do": {}}
+lech_assert {"rc": 0, "run": true, "so_nhan": 32, "do": [], "ly_do": {}}
+lon_nonliteral {"rc": 0, "run": false, "so_nhan": 32, "do": ["V6"], "ly_do": {"V6": "ValueError: malformed node or string on line 4: <ast.Call object at 0x7f2cf74eca10>"}}
+deu_manifest_reverse {"rc": 0, "run": false, "so_nhan": 32, "do": ["V9"], "ly_do": {}}
+loader_relaxes_sources_type {"rc": 0, "run": true, "so_nhan": 32, "do": [], "ly_do": {}}
+writer_primary_eol {"rc": 0, "run": false, "so_nhan": 32, "do": ["V11"], "ly_do": {}}
+extra_duplicate_names {"rc": 0, "run": false, "so_nhan": 32, "do": ["V23"], "ly_do": {}}
+stale_rc_wrong {"rc": 0, "run": true, "so_nhan": 32, "do": [], "ly_do": {}}
+absent_shard_empty_field {"anchor": ["scripts/tl_core/release.py", 0]}
+missing_numeric_ok {"rc": 0, "run": true, "so_nhan": 32, "do": [], "ly_do": {}}
+current_has_error {"rc": 0, "run": true, "so_nhan": 32, "do": [], "ly_do": {}}
+stale_wrong_size {"rc": 0, "run": true, "so_nhan": 32, "do": [], "ly_do": {}}

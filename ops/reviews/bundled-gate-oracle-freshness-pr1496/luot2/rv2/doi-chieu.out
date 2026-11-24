@@ -1,0 +1,13 @@
+CI 136949922299: checkout @ 1192, checkout HEAD @ 1216, full merge SHA @ 1219
+CI 136949922299: PR_HEAD_SHA @ 1533
+CI 136949922299: eol step @ 1625–1672, 32/32 dat @ 1672
+CI 136949922299: bfc step @ 1721–1914, JSON @ 1735–1914, ok=true, case_count=20, failed=[], fragment OK
+CI 136949922299: selftest step @ 1993–3849, 1786/1786 @ 3849, final case block @ 2063–3848, fragment OK @ 3816
+CI 136950323162: checkout @ 1186, checkout HEAD @ 1212, full merge SHA @ 1215
+CI 136950323162: aggregate step @ 1300–1318, 8/8 @ 1315
+Executor nen-eol: tong.txt @ 7, rc=0, 2026-11-21T18:36:31Z–2026-11-21T18:43:10Z, 32/32 dat @ 34
+Executor nen-bfc: tong.txt @ 3, rc=0, 2026-11-21T18:34:07Z–2026-11-21T18:36:04Z, JSON @ 1–180, ok=true, case_count=20, failed=[], fragment OK
+Executor nen-selftest: tong.txt @ 1, rc=0, 2026-11-21T18:28:15Z–2026-11-21T18:34:06Z, 1786/1786 @ 1809, final case block @ 23–1808, fragment OK @ 1776
+Executor sau-eol: tong.txt @ 19, rc=0, 2026-11-21T18:51:05Z–2026-11-21T18:57:03Z, 32/32 dat @ 34
+Executor sau-bfc: tong.txt @ 14, rc=0, 2026-11-21T18:48:46Z–2026-11-21T18:50:39Z, JSON @ 1–180, ok=true, case_count=20, failed=[], fragment OK
+Executor sau-selftest: tong.txt @ 11, rc=0, 2026-11-21T18:43:11Z–2026-11-21T18:48:45Z, 1786/1786 @ 1809, final case block @ 23–1808, fragment OK @ 1776

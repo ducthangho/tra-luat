@@ -1,0 +1,8 @@
+deu_source_content control {'shard_count': 3, 'shard_bytes': 82340, 'first_name': 'wp9001_f0.py', 'last_source_line': '    return True'}
+deu_source_content mutant {'shard_count': 3, 'shard_bytes': 82340, 'first_name': 'wp9001_f0.py', 'last_source_line': '    return None'}
+loader_relaxes_sources_type control {'ids': None, 'error': 'BUNDLED_MODULE_CONTRACT'}
+loader_relaxes_sources_type mutant {'ids': ['wp9001_a'], 'error': None}
+missing_numeric_ok control {'rc': 2, 'ok': False, 'ok_type': 'bool', 'status': 'missing', 'error': 'BUNDLED_MODULE_MISSING'}
+missing_numeric_ok mutant {'rc': 2, 'ok': 0, 'ok_type': 'int', 'status': 'missing', 'error': 'BUNDLED_MODULE_MISSING'}
+stale_wrong_size control {'rc': 2, 'ok': False, 'ok_type': 'bool', 'status': 'stale', 'error': 'GENERATED_BUNDLE_STALE', 'disk_bytes': 217, 'aggregate_bytes': 217, 'shard_bytes': 217}
+stale_wrong_size mutant {'rc': 2, 'ok': False, 'ok_type': 'bool', 'status': 'stale', 'error': 'GENERATED_BUNDLE_STALE', 'disk_bytes': 217, 'aggregate_bytes': 217, 'shard_bytes': 216}

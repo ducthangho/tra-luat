@@ -1,0 +1,96 @@
+PASS case_new_file_crlf_bi_chan
+PASS case_new_file_lf_duoc_qua
+PASS case_ten_co_khoang_trang
+PASS case_ten_tieng_viet
+PASS case_cmd_lf_trong_index_duoc_qua
+PASS case_cmd_crlf_trong_index_bi_chan
+PASS case_golden_duoc_bo_qua
+PASS case_mixed_eol_bi_chan
+PASS case_lone_cr_bi_chan
+PASS case_khong_chi_so_voi_head
+PASS case_attr_doc_tu_gitattributes
+PASS case_rename_golden_sang_text_bi_chan
+PASS case_copy_golden_sang_text_bi_chan
+PASS case_rename_hop_le_van_qua
+PASS case_rename_dich_unicode_va_khoang_trang
+PASS case_parse_raw_z_hai_path
+PASS case_real_hook_rename_only_bi_chan
+PASS case_real_hook_rename_copy_only_bi_chan
+PASS case_release_bundle_chay_real_wp49_fragment
+PASS case_probe_hop_dong_canonical_o_cay_dev
+PASS case_probe_qua_bundled_topology_canonical
+FAIL case_driver_that_chay_probe_tren_bundle_giai_nen
+CHAN_DOAN: tl.py release-bundle :: rc = 0
+CHAN_DOAN: bundle_fragment_check._DRIVER (driver.py) :: rc = 0
+CHAN_DOAN: so_fragment_canonical = 20
+CHAN_DOAN: bundle_fragment_check._DRIVER (driver.py) :: load_error = None
+CHAN_DOAN: bundle_fragment_check._DRIVER (driver.py) :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_dich_ngoai_kho.py, wp433_gws_cred_dich_ngoai_kho, False, None]
+CHAN_DOAN: bundle_fragment_check._DRIVER (driver.py) :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_dich_ngoai_kho_b.py, wp433_gws_cred_dich_ngoai_kho_b, False, None]
+CHAN_DOAN: bundle_fragment_check._DRIVER (driver.py) :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_no.py, wp433_gws_cred_no, False, None]
+CHAN_DOAN: bundle_fragment_check._DRIVER (driver.py) :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_win_reparse.py, wp433_gws_cred_win_reparse, False, None]
+CHAN_DOAN: bundle_fragment_check._DRIVER (driver.py) :: ca khong ok [name, test_id, ok, error] = [wp433_nlm_gws_dich_ngoai_kho.py, wp433_nlm_gws_dich_ngoai_kho, False, None]
+CHAN_DOAN: bundle_fragment_check._DRIVER (driver.py) :: ca khong ok [name, test_id, ok, error] = [wp727_tl_gws_refresh.py, wp727_tl_gws_refresh, False, None]
+CHAN_DOAN: ve:payload.get('load_error') is None = True
+CHAN_DOAN: ve:len(cases) == len(goc) + 1 = True
+CHAN_DOAN: ve:all(c.get('ok') for c in cases) = False
+PASS case_cong_bao_load_failed_truoc_trieu_chung
+FAIL case_cong_bao_dev_discovery_failed_truoc_mismatch
+CHAN_DOAN: bundle_fragment_check.py --json :: rc = 1
+CHAN_DOAN: bundle_fragment_check.py --json :: schema = bundle_fragment_check.v1
+CHAN_DOAN: bundle_fragment_check.py --json :: ok = False
+CHAN_DOAN: bundle_fragment_check.py --json :: error = DEV_FRAGMENT_DISCOVERY_FAILED
+CHAN_DOAN: bundle_fragment_check.py --json :: problems = [DEV_FRAGMENT_DISCOVERY_FAILED, TEST_ID_SET_MISMATCH, BUNDLED_FRAGMENT_FAILED]
+CHAN_DOAN: bundle_fragment_check.py --json :: case_count = 20
+CHAN_DOAN: bundle_fragment_check.py --json :: load_error = None
+CHAN_DOAN: bundle_fragment_check.py --json :: dev_discovery_error = FragmentPathError code=INVALID_FRAGMENT_PATH con_lai_len=16
+CHAN_DOAN: bundle_fragment_check.py --json :: topology = [True, True, True, True]
+CHAN_DOAN: bundle_fragment_check.py --json :: so_id [dev, goi] = [0, 20]
+CHAN_DOAN: bundle_fragment_check.py --json :: id chi o dev = []
+CHAN_DOAN: bundle_fragment_check.py --json :: id chi o goi = [wp1030_pkg_secret_scan_duoi_la, wp1099_nlm_nap_lai, wp1121_doc_claims_xoa, wp1134_changelog_d_ngoai_goi, wp1326_doc_claims_dau_cham, wp433_bundled_tach_manh, wp433_gws_cred_dich_ngoai_kho, wp433_gws_cred_dich_ngoai_kho_b, wp433_gws_cred_no, wp433_gws_cred_win_duong, wp433_gws_cred_win_reparse, wp433_nlm_gws_dich_ngoai_kho, wp433_secrets_set_bundle, wp45_fragment_canary, wp47_generated_bundle_staleness, wp49_eol_policy_index_blobs, wp725_huong_dan_nlm, wp726_script_nlm_canary, wp727_tl_gws_refresh, wp88_worktree_recovery]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_dich_ngoai_kho.py, wp433_gws_cred_dich_ngoai_kho, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_dich_ngoai_kho_b.py, wp433_gws_cred_dich_ngoai_kho_b, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_no.py, wp433_gws_cred_no, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_win_reparse.py, wp433_gws_cred_win_reparse, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp433_nlm_gws_dich_ngoai_kho.py, wp433_nlm_gws_dich_ngoai_kho, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp727_tl_gws_refresh.py, wp727_tl_gws_refresh, False, None]
+CHAN_DOAN: ve:rc == 1 and p.get('ok') is False = True
+CHAN_DOAN: ve:p.get('error') == 'DEV_FRAGMENT_DISCOVERY_FAILED' = True
+CHAN_DOAN: ve:problems[:1] == ['DEV_FRAGMENT_DISCOVERY_FAILED'] = True
+CHAN_DOAN: ve:'INVALID_FRAGMENT_PATH' in (p.get('dev_discovery_error') or '') = True
+CHAN_DOAN: ve:p.get('load_error') is None = True
+CHAN_DOAN: ve:p.get('case_count') == len(_fragment_canonical()) = True
+CHAN_DOAN: ve:not p.get('failed') = False
+FAIL case_cong_bao_fragment_failed_khi_run_tra_false
+CHAN_DOAN: bundle_fragment_check.py --json :: rc = 1
+CHAN_DOAN: bundle_fragment_check.py --json :: schema = bundle_fragment_check.v1
+CHAN_DOAN: bundle_fragment_check.py --json :: ok = False
+CHAN_DOAN: bundle_fragment_check.py --json :: error = BUNDLED_FRAGMENT_FAILED
+CHAN_DOAN: bundle_fragment_check.py --json :: problems = [BUNDLED_FRAGMENT_FAILED]
+CHAN_DOAN: bundle_fragment_check.py --json :: case_count = 21
+CHAN_DOAN: bundle_fragment_check.py --json :: load_error = None
+CHAN_DOAN: bundle_fragment_check.py --json :: dev_discovery_error = None
+CHAN_DOAN: bundle_fragment_check.py --json :: topology = [True, True, True, True]
+CHAN_DOAN: bundle_fragment_check.py --json :: so_id [dev, goi] = [21, 21]
+CHAN_DOAN: bundle_fragment_check.py --json :: id chi o dev = []
+CHAN_DOAN: bundle_fragment_check.py --json :: id chi o goi = []
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_dich_ngoai_kho.py, wp433_gws_cred_dich_ngoai_kho, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_dich_ngoai_kho_b.py, wp433_gws_cred_dich_ngoai_kho_b, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_no.py, wp433_gws_cred_no, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp433_gws_cred_win_reparse.py, wp433_gws_cred_win_reparse, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp433_nlm_gws_dich_ngoai_kho.py, wp433_nlm_gws_dich_ngoai_kho, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp727_tl_gws_refresh.py, wp727_tl_gws_refresh, False, None]
+CHAN_DOAN: bundle_fragment_check.py --json :: ca khong ok [name, test_id, ok, error] = [wp999_fail_probe.py, wp999_fail_probe, False, None]
+CHAN_DOAN: ve:rc == 1 and p.get('ok') is False = True
+CHAN_DOAN: ve:(p.get('problems') or []) == ['BUNDLED_FRAGMENT_FAILED'] = True
+CHAN_DOAN: ve:p.get('error') == 'BUNDLED_FRAGMENT_FAILED' = True
+CHAN_DOAN: ve:hong == {_PROBE_FAIL_ID} = False
+PASS case_binary_nul_duoc_bo_qua
+PASS case_binary_khong_co_NUL_van_duoc_tha_nho_khai_text
+PASS case_moi_ho_binary_deu_duoc_tha
+PASS case_ho_binary_thieu_khai_thi_bi_bat
+PASS case_binary_giu_nguyen_byte_qua_renormalize
+PASS case_chan_doan_mac_dinh_khong_lo_bi_mat
+PASS case_chan_doan_co_tho_chi_cuc_bo
+
+29/32 dat
+HONG: case_driver_that_chay_probe_tren_bundle_giai_nen, case_cong_bao_dev_discovery_failed_truoc_mismatch, case_cong_bao_fragment_failed_khi_run_tra_false

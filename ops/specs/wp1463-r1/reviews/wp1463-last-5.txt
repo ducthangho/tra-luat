@@ -1,0 +1,10 @@
+[Review JSON]( /tmp/claude-0/-home-user-tra-luat/0ed29fd3-d596-56bc-a105-f1c27f1c8301/scratchpad/rvspec/wp1463-spec-review-5.json) written and printed.
+
+**Verdict: blocked** — remote branch advanced to `f4630c9…` during review.
+
+For requested `05a073f…`:
+
+- **PR2-S04, PR2-S11:** ĐÃ VÁ THẬT.
+- **PR2-S12: P2, VÁ SINH LỖI MỚI.** Requiring collector-wide `NOT_MEASURED: 0` rejects valid combined checkpoint evidence.
+
+The newer head was not reviewed.

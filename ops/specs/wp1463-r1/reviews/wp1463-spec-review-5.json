@@ -1,0 +1,1048 @@
+{
+  "schema_version": 1,
+  "packet_id": "wp1463",
+  "mission_id": "gh-1172",
+  "revision": 5,
+  "generation": null,
+  "round": 5,
+  "provider": "codex",
+  "role": "reviewer",
+  "model_family": "openai",
+  "execution_surface": "codex_service",
+  "transport": "machine",
+  "session_id": "wp1463-spec-review-r5-05a073f6-20261122",
+  "model_reviewer_identity": {
+    "provider": "codex",
+    "model_family": "openai",
+    "execution_surface": "codex_service",
+    "transport": "machine",
+    "session_id": "wp1463-spec-review-r5-05a073f6-20261122",
+    "serving_model": "KHONG_DO_DUOC",
+    "serving_effort": "KHONG_DO_DUOC",
+    "attestation": "Independent user-assigned tool-enabled Codex service context; no executor context fork and no subagents. Session ID is this review artifact identifier, not a platform-issued attestation. Per-request model/effort and launcher receipt were not exposed."
+  },
+  "github_submitter_identity": null,
+  "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+  "reviewed_tree": "15b752aaf15bd9498c8705cfc51889b1cb4eda4b",
+  "reviewed_file": "ops/specs/wp1463-r1/SPEC.md",
+  "reviewed_file_sha256": "3ac18bc62a6bc7ecbf372d1ec3d60dbca183495a83e59e41c0a5400a05bf2d5d",
+  "current_master_sha": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+  "independent_from_executor_session": true,
+  "review_axes": [
+    "spec",
+    "standards_security"
+  ],
+  "review_class": "sensitive",
+  "verdict": "blocked",
+  "content_disposition": "changes_requested",
+  "findings": [
+    {
+      "id": "PR2-S12",
+      "class_slug": "workflow-definition-capability-inferred-from-local-failure",
+      "severity": "P2",
+      "title": "The predecessor procedure treats an incomplete collector report as missing checkpoint evidence",
+      "location": {
+        "file": "ops/specs/wp1463-r1/SPEC.md",
+        "lines": [
+          264,
+          265,
+          267,
+          277
+        ],
+        "section": "Quy trình và quyền — Hoàn tất của tiền nhiệm, steps 4–5 and E2 fallback"
+      },
+      "claim": "Step 4 requires the same ci_provenance.py thu invocation (or another invocation of it) to produce passed for Run, Checkout and Gate output and NOT_MEASURED: 0. This is stronger than protocol §10.2.2–§10.2.3, which accepts sufficiently identified combined evidence. On the exact current master, thu still reports all 39 Gate jobs not_measured for the PR1 run even after its WD import passes. A separate existing per-step evaluator establishes Gate output, as recorded in PR #1497. Thus the prescribed recovery route cannot complete step 4 on this valid evidence combination and its fallback can ask for a merged-instead-of-landed waiver unnecessarily. This finding concerns the procedure, not the dated landed:false snapshot or a claim that the draft archival PR has completed all M8/Issue bookkeeping.",
+      "cause_class": "Inferring evidence availability from the coverage/failure of one measurement surface. R4 did this for local GraphQL; r5 fixes that route but introduces the same mechanism at the collector-wide NOT_MEASURED requirement.",
+      "manifestations": [
+        {
+          "id": "S12-b",
+          "location": "ops/specs/wp1463-r1/SPEC.md:264-267,277",
+          "description": "Collector-only zero-unmeasured requirement blocks the mixed-source checkpoint proof; the shared B1a/B2 fallback then treats that restriction as a reason to seek an E2 dependency waiver."
+        }
+      ],
+      "evidence": [
+        {
+          "command": "python3 -B /tmp/wp1463-r5-review/probe_evidence.py",
+          "exit_code": 0,
+          "observed_output": "PROVENANCE Counter({passed:43,not_measured:39}); NOT_MEASURED39. RUN44922786500 attempt1/head e2f28fb… passed. WD44975202809 passed. CHECKOUT passed39; GATE not_measured39. WD_REHASH True True. STORED_REPORT39 passed39; JOB_IDS_EXACT True; REPORT_LOG_HASHES39/39. CHECKPOINT_EVIDENCE_COMBINED True R5_STEP4 False."
+        },
+        {
+          "command": "python3 -B /tmp/wp1463-r5-review/probe_evidence.py",
+          "exit_code": 0,
+          "observed_output": "Live job136902843369 log SHA2569aa734ff4655e1c9fafb8c30771a7fb77f479f0b6a01be11c6e7a372c9fce2f0 matches archived provenance. Existing evaluator: passed; delete its registry-step marker: not_measured. Current master moc_gate on that same log/job/workflow: not_measured, thieu=[], dau_duong count0. ROUTE_LOCK combined_evidence rc0; collector_zero_only rc3/GIET via the case-owned TinHieuChotCa. Combined controls valid=True, wrong-run/wrong-head/missing-job/negative-marker=False."
+        },
+        {
+          "command": "Read exact Git blobs at 695a994b1e2e8ec1aabfbbf18a059e93403256be; GitHub GET PR1497; rg -n NOT_MEASURED ops/specs/wp1463-r1/SPEC.md",
+          "exit_code": 0,
+          "observed_output": "PR1497 draft=true, merged=false. Its land evidence explicitly preserves the standard collector gate_output not_measured values and separately cites danh_gia_gate.py v3, SHA2560ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058faf, with Gate output39/39. SPEC line264 instead mandates NOT_MEASURED:0 from thu. API calls have no shell exit code; rc0 here applies to the local Git/text reads.",
+          "source_url": "https://github.com/ducthangho/tra-luat/blob/695a994b1e2e8ec1aabfbbf18a059e93403256be/ops/land/pr1492-wp1448-land-evidence.yaml"
+        }
+      ],
+      "suggested_fix": {
+        "where": "ops/specs/wp1463-r1/SPEC.md, predecessor procedure step4, the step5 transition, E2 fallback and its truth-table reference. This is the contract that incorrectly narrows admissible evidence; the PR2 product write set need not expand.",
+        "how": "Keep thu --wd-run for the exact target definition identity and retain every raw not_measured value. Define completion over the combined, independently validated evidence for each of the four checkpoints on the same run/attempt/SHA/jobs. Permit the existing separately measured Gate-output report, with evaluator identity, per-step positive markers, command/rc and log/artifact hashes; reconcile it explicitly with the collector output. Reach E2 only if checkpoint evidence remains genuinely missing after these available sources are checked. Keep current M8 identity, latest-record and Issue-bookkeeping requirements. The cheapest repair is a procedural clarification; improving the standard collector is a separate, more expensive packet.",
+        "locking_test": "Run python3 -B /tmp/wp1463-r5-review/probe_evidence.py. Retain the actual PR1 mixed-source witness: standard collector NOT_MEASURED39, WD passed, exact39-job supplemental Gate proof. A corrected procedure accepts its checkpoint evidence, while the mutant that requires collector NOT_MEASURED0 must fail route_lock with rc3/GIET. Wrong run, wrong head, missing job and removed positive marker must remain rejected. This reviewer probe was run; it does not certify pending M8 bookkeeping or the other38 live logs independently.",
+        "may_spawn": "Combining evidence can accidentally mix attempts, SHA, jobs or workflows, trust a stale evaluator, or turn skipped/missing evidence into passed. Bind every source to the target and preserve raw states; a draft archive, success conclusion or report total alone must not establish landed."
+      },
+      "fix_attempted": "Executed a mixed-source procedural witness and negative controls in /tmp; no candidate edit, product patch, workflow dispatch or GitHub write.",
+      "confidence": "high",
+      "severity_change": "P3 in r4 was an omitted measurement route. P2 here reflects the newly explicit acceptance condition that rejects the demonstrated valid checkpoint-evidence combination."
+    }
+  ],
+  "class_table": [
+    {
+      "slug": "a3-case-execution-status-collapsed",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_contract.py; python3 -B /tmp/wp1463-r5-review/probe_envelope.py",
+        "exit_code": 0,
+        "result": "R5 retains the ordered composition of every mandatory invocation and atomic cached status, independent of old rank. Current runners measured original rc0/sidecar-rejected plus GIET or expected TU_KIEM rank; composition produces infrastructure_error and preserves old ranks. Six composition controls and31 envelope vectors passed; recurrence mutant rc3/GIET.",
+        "unmeasured": "Future A3 implementation is not present; this closes the spec cause only."
+      }
+    },
+    {
+      "slug": "preservation-oracle-checks-names-only",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_oracles.py; python3 -B /tmp/wp1463-r5-review/probe_contract.py",
+        "exit_code": 0,
+        "result": "R5 read domains and expected masks agree. Sixteen d/e contract vectors pass: raw-order-only and missing-cu.tu_kiem/DAT both fail exactly cong_thuc_cu_dong and tong_hai_chieu, with e true. E-nonempty reviewed-equivalent green is allowed and the adjusted forward law passes. Old r4 extra-e masks die by rc3/GIET. Whole-candidate scan found no remaining same-mechanism contradiction.",
+        "unmeasured": "Future do_pr2.py is not implemented. The first six predicates have unchanged inputs in these d/e fixtures; this is a contract interpretation, not a claim that a delivered nine-check comparator was run."
+      }
+    },
+    {
+      "slug": "dependency-completion-replaced-by-lease-absence",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py",
+        "exit_code": 0,
+        "result": "Both predecessors still require current exact-identity M8, canonical merge, four-checkpoint evidence and bookkeeping. Six decision controls reject draft/running/merged-only/incomplete/wrong-identity and accept completed evidence. Lease exclusion remains separate. The dated PR1 snapshot is not itself a finding.",
+        "unmeasured": "B1a/B2 actual completion and future lease admission not certified; the new collector restriction is tracked under S12, not counted twice."
+      }
+    },
+    {
+      "slug": "a3-plan-identity-validation-gap",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_identity.py",
+        "exit_code": 0,
+        "result": "Eight plan-identity controls across both modes: healthy unique plans accepted; duplicate mutation names, duplicate TU_KIEM names and unknown equivalence keys rejected. Ordered result-identity requirement remains explicit in r5.",
+        "unmeasured": "Future implementation not certified; no unmeasured item remains for this prior spec cause."
+      }
+    },
+    {
+      "slug": "a3-equivalence-provenance-not-emitted",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_identity.py",
+        "exit_code": 0,
+        "result": "Wire controls preserve two distinct valid reason/reviewer pairs verbatim, including whitespace; whitespace-only reason stays song and emits no provenance keys. R5 still requires provenance on valid declarations even if killed, and an empty production equivalence table.",
+        "unmeasured": "Future implementation not certified; no unmeasured item remains for this prior spec cause."
+      }
+    },
+    {
+      "slug": "registry-rollback-leaves-dependent-entries",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py",
+        "exit_code": 0,
+        "result": "Real current registry with four-key overlay and four-key rollback both return True/1226 of1226. NHE-only deletion returns False/1224 of1226; NHE+MAU_NHE returns False/1225 of1226. Full rollback yields day_du27/27; other entries unchanged.",
+        "unmeasured": "No remaining measurement for the spec cause at this base; future base must be rechecked."
+      }
+    },
+    {
+      "slug": "obsolete-adr0060-opt-in-rationale",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_platform.py",
+        "exit_code": 0,
+        "result": "Current M3 classifier returns required and M9=True for the delivery paths. Extracted current K6 returns12 without waiver and0 with exact-owner waiver. R5 explicitly preserves this despite no dieu_kien_merge declaration.",
+        "unmeasured": "Windows execution not run; only policy/classifier controls measured."
+      }
+    },
+    {
+      "slug": "budget-authority-revision-misattributed",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py",
+        "exit_code": 0,
+        "result": "Original r96 bytes hash2d9a60a5… and parsed content equals freshly read installed comment7066078931. r85 drafting3/4 versus r96 drafting5/6 are correctly distinguished; implementation caps remain3 attempts/3 reviews/2 connector/3 Ubuntu/1 full-M9/1 rerun/0 Windows-CI.",
+        "unmeasured": "Actual historical usage outside the supplied five-round history is not re-audited; no reset or extra call granted."
+      }
+    },
+    {
+      "slug": "delegated-decisions-missing-durable-ledger",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 1,
+      "source_sha": "75016f96b3db98988148565d2b096791a3d051fd",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py",
+        "exit_code": 0,
+        "result": "Fresh GETs confirm decision ledgers7066720293 and7066894318, including corrected ADR0062 rationale. R5 retains the five decisions and requires owner hash approval plus Mission installation before any lease.",
+        "unmeasured": "No owner hash approval for this candidate or current implementation lease claimed."
+      }
+    },
+    {
+      "slug": "pr2-zone-excludes-new-harness-dependencies",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 2,
+      "source_sha": "d254d253979429fa823b9ce357319510d626d383",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py",
+        "exit_code": 0,
+        "result": "Frozen fixture hash135c3b86… matches; independent oracle27/27 and actual overlaid selector27/27. Both measured standalone probes open exactly four tracked inputs, all in the expanded zone, including ci-dot-bien-du.yml and launcher-windows.yml.",
+        "unmeasured": "Future full-suite audit hook and post-B1a/B2 base must still be measured."
+      }
+    },
+    {
+      "slug": "measurement-liveness-oracle-crosses-scope",
+      "finding_ids": [],
+      "manifestations": [],
+      "highest_open_severity": null,
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "ĐÃ VÁ THẬT",
+      "common_fix": "Prior repair remains closed at spec scope under the listed measurements; no further fix requested.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py; python3 -B /tmp/wp1463-r5-review/probe_oracles.py",
+        "exit_code": 0,
+        "result": "Both standalone probes actually open ci.yml and do not open ops/ci_provenance.py. R5 now assigns ci.yml to them and the product file only to bo_day_du. Twelve scoped liveness vectors pass; wrong-witness, union-masking and removed-liveness mutants each die via rc3/GIET.",
+        "unmeasured": "Future full suite and do_pr2.py not present; no remaining unknown for these two prior spec manifestations."
+      }
+    },
+    {
+      "slug": "workflow-definition-capability-inferred-from-local-failure",
+      "finding_ids": [
+        "PR2-S12"
+      ],
+      "manifestations": [
+        {
+          "id": "S12-b",
+          "location": "ops/specs/wp1463-r1/SPEC.md:264-267,277",
+          "description": "Collector-only zero-unmeasured requirement blocks the mixed-source checkpoint proof; the shared B1a/B2 fallback then treats that restriction as a reason to seek an E2 dependency waiver."
+        }
+      ],
+      "highest_open_severity": "P2",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "previous_round": 4,
+      "previous_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "status": "VÁ SINH LỖI MỚI",
+      "common_fix": "Keep thu --wd-run for the exact target definition identity and retain every raw not_measured value. Define completion over the combined, independently validated evidence for each of the four checkpoints on the same run/attempt/SHA/jobs. Permit the existing separately measured Gate-output report, with evaluator identity, per-step positive markers, command/rc and log/artifact hashes; reconcile it explicitly with the collector output. Reach E2 only if checkpoint evidence remains genuinely missing after these available sources are checked. Keep current M8 identity, latest-record and Issue-bookkeeping requirements. The cheapest repair is a procedural clarification; improving the standard collector is a separate, more expensive packet.",
+      "closing_check": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_evidence.py",
+        "exit_code": 0,
+        "result": "Original S12-a is repaired: WD workflow/importer is explicitly tried before E2. New S12-b remains: step4 requires collector-wide NOT_MEASURED0, while exact PR1 evidence has standard collector39 unknown Gate jobs and a separately validated39/39 Gate report. One live job reproduced the coverage difference.",
+        "unmeasured": "Other38 live logs were not independently rerun; their IDs/hashes match stored evidence. No dispatch or M8 finalization performed. The procedural mismatch is already measured."
+      }
+    }
+  ],
+  "class_mapping_table": [],
+  "prior_findings_check": [
+    {
+      "id": "PR2-S04",
+      "class_slug": "preservation-oracle-checks-names-only",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_oracles.py; python3 -B /tmp/wp1463-r5-review/probe_contract.py",
+        "exit_code": 0,
+        "result": "R5 read domains and expected masks agree. Sixteen d/e contract vectors pass: raw-order-only and missing-cu.tu_kiem/DAT both fail exactly cong_thuc_cu_dong and tong_hai_chieu, with e true. E-nonempty reviewed-equivalent green is allowed and the adjusted forward law passes. Old r4 extra-e masks die by rc3/GIET. Whole-candidate scan found no remaining same-mechanism contradiction.",
+        "unmeasured": "Future do_pr2.py is not implemented. The first six predicates have unchanged inputs in these d/e fixtures; this is a contract interpretation, not a claim that a delivered nine-check comparator was run."
+      },
+      "prior_manifestations": [
+        "S04-j",
+        "S04-k",
+        "S04-l"
+      ],
+      "current_manifestations": []
+    },
+    {
+      "id": "PR2-S11",
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py; python3 -B /tmp/wp1463-r5-review/probe_oracles.py",
+        "exit_code": 0,
+        "result": "Both standalone probes actually open ci.yml and do not open ops/ci_provenance.py. R5 now assigns ci.yml to them and the product file only to bo_day_du. Twelve scoped liveness vectors pass; wrong-witness, union-masking and removed-liveness mutants each die via rc3/GIET.",
+        "unmeasured": "Future full suite and do_pr2.py not present; no remaining unknown for these two prior spec manifestations."
+      },
+      "prior_manifestations": [
+        "S11-a",
+        "S11-b"
+      ],
+      "current_manifestations": []
+    },
+    {
+      "id": "PR2-S12",
+      "class_slug": "workflow-definition-capability-inferred-from-local-failure",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_evidence.py",
+        "exit_code": 0,
+        "result": "Original S12-a is repaired: WD workflow/importer is explicitly tried before E2. New S12-b remains: step4 requires collector-wide NOT_MEASURED0, while exact PR1 evidence has standard collector39 unknown Gate jobs and a separately validated39/39 Gate report. One live job reproduced the coverage difference.",
+        "unmeasured": "Other38 live logs were not independently rerun; their IDs/hashes match stored evidence. No dispatch or M8 finalization performed. The procedural mismatch is already measured."
+      },
+      "prior_manifestations": [
+        "S12-a"
+      ],
+      "current_manifestations": [
+        "S12-b"
+      ]
+    }
+  ],
+  "prior_class_status": [
+    {
+      "class_slug": "a3-case-execution-status-collapsed",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_contract.py; python3 -B /tmp/wp1463-r5-review/probe_envelope.py",
+        "exit_code": 0,
+        "result": "R5 retains the ordered composition of every mandatory invocation and atomic cached status, independent of old rank. Current runners measured original rc0/sidecar-rejected plus GIET or expected TU_KIEM rank; composition produces infrastructure_error and preserves old ranks. Six composition controls and31 envelope vectors passed; recurrence mutant rc3/GIET.",
+        "unmeasured": "Future A3 implementation is not present; this closes the spec cause only."
+      }
+    },
+    {
+      "class_slug": "preservation-oracle-checks-names-only",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_oracles.py; python3 -B /tmp/wp1463-r5-review/probe_contract.py",
+        "exit_code": 0,
+        "result": "R5 read domains and expected masks agree. Sixteen d/e contract vectors pass: raw-order-only and missing-cu.tu_kiem/DAT both fail exactly cong_thuc_cu_dong and tong_hai_chieu, with e true. E-nonempty reviewed-equivalent green is allowed and the adjusted forward law passes. Old r4 extra-e masks die by rc3/GIET. Whole-candidate scan found no remaining same-mechanism contradiction.",
+        "unmeasured": "Future do_pr2.py is not implemented. The first six predicates have unchanged inputs in these d/e fixtures; this is a contract interpretation, not a claim that a delivered nine-check comparator was run."
+      }
+    },
+    {
+      "class_slug": "dependency-completion-replaced-by-lease-absence",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py",
+        "exit_code": 0,
+        "result": "Both predecessors still require current exact-identity M8, canonical merge, four-checkpoint evidence and bookkeeping. Six decision controls reject draft/running/merged-only/incomplete/wrong-identity and accept completed evidence. Lease exclusion remains separate. The dated PR1 snapshot is not itself a finding.",
+        "unmeasured": "B1a/B2 actual completion and future lease admission not certified; the new collector restriction is tracked under S12, not counted twice."
+      }
+    },
+    {
+      "class_slug": "a3-plan-identity-validation-gap",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_identity.py",
+        "exit_code": 0,
+        "result": "Eight plan-identity controls across both modes: healthy unique plans accepted; duplicate mutation names, duplicate TU_KIEM names and unknown equivalence keys rejected. Ordered result-identity requirement remains explicit in r5.",
+        "unmeasured": "Future implementation not certified; no unmeasured item remains for this prior spec cause."
+      }
+    },
+    {
+      "class_slug": "a3-equivalence-provenance-not-emitted",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_identity.py",
+        "exit_code": 0,
+        "result": "Wire controls preserve two distinct valid reason/reviewer pairs verbatim, including whitespace; whitespace-only reason stays song and emits no provenance keys. R5 still requires provenance on valid declarations even if killed, and an empty production equivalence table.",
+        "unmeasured": "Future implementation not certified; no unmeasured item remains for this prior spec cause."
+      }
+    },
+    {
+      "class_slug": "registry-rollback-leaves-dependent-entries",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py",
+        "exit_code": 0,
+        "result": "Real current registry with four-key overlay and four-key rollback both return True/1226 of1226. NHE-only deletion returns False/1224 of1226; NHE+MAU_NHE returns False/1225 of1226. Full rollback yields day_du27/27; other entries unchanged.",
+        "unmeasured": "No remaining measurement for the spec cause at this base; future base must be rechecked."
+      }
+    },
+    {
+      "class_slug": "obsolete-adr0060-opt-in-rationale",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_platform.py",
+        "exit_code": 0,
+        "result": "Current M3 classifier returns required and M9=True for the delivery paths. Extracted current K6 returns12 without waiver and0 with exact-owner waiver. R5 explicitly preserves this despite no dieu_kien_merge declaration.",
+        "unmeasured": "Windows execution not run; only policy/classifier controls measured."
+      }
+    },
+    {
+      "class_slug": "budget-authority-revision-misattributed",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py",
+        "exit_code": 0,
+        "result": "Original r96 bytes hash2d9a60a5… and parsed content equals freshly read installed comment7066078931. r85 drafting3/4 versus r96 drafting5/6 are correctly distinguished; implementation caps remain3 attempts/3 reviews/2 connector/3 Ubuntu/1 full-M9/1 rerun/0 Windows-CI.",
+        "unmeasured": "Actual historical usage outside the supplied five-round history is not re-audited; no reset or extra call granted."
+      }
+    },
+    {
+      "class_slug": "delegated-decisions-missing-durable-ledger",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py",
+        "exit_code": 0,
+        "result": "Fresh GETs confirm decision ledgers7066720293 and7066894318, including corrected ADR0062 rationale. R5 retains the five decisions and requires owner hash approval plus Mission installation before any lease.",
+        "unmeasured": "No owner hash approval for this candidate or current implementation lease claimed."
+      }
+    },
+    {
+      "class_slug": "pr2-zone-excludes-new-harness-dependencies",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py",
+        "exit_code": 0,
+        "result": "Frozen fixture hash135c3b86… matches; independent oracle27/27 and actual overlaid selector27/27. Both measured standalone probes open exactly four tracked inputs, all in the expanded zone, including ci-dot-bien-du.yml and launcher-windows.yml.",
+        "unmeasured": "Future full-suite audit hook and post-B1a/B2 base must still be measured."
+      }
+    },
+    {
+      "class_slug": "measurement-liveness-oracle-crosses-scope",
+      "label": "ĐÃ VÁ THẬT",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py; python3 -B /tmp/wp1463-r5-review/probe_oracles.py",
+        "exit_code": 0,
+        "result": "Both standalone probes actually open ci.yml and do not open ops/ci_provenance.py. R5 now assigns ci.yml to them and the product file only to bo_day_du. Twelve scoped liveness vectors pass; wrong-witness, union-masking and removed-liveness mutants each die via rc3/GIET.",
+        "unmeasured": "Future full suite and do_pr2.py not present; no remaining unknown for these two prior spec manifestations."
+      }
+    },
+    {
+      "class_slug": "workflow-definition-capability-inferred-from-local-failure",
+      "label": "VÁ SINH LỖI MỚI",
+      "source_round": 4,
+      "source_sha": "5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f",
+      "reviewed_sha": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "evidence": {
+        "command": "python3 -B /tmp/wp1463-r5-review/probe_evidence.py",
+        "exit_code": 0,
+        "result": "Original S12-a is repaired: WD workflow/importer is explicitly tried before E2. New S12-b remains: step4 requires collector-wide NOT_MEASURED0, while exact PR1 evidence has standard collector39 unknown Gate jobs and a separately validated39/39 Gate report. One live job reproduced the coverage difference.",
+        "unmeasured": "Other38 live logs were not independently rerun; their IDs/hashes match stored evidence. No dispatch or M8 finalization performed. The procedural mismatch is already measured."
+      }
+    }
+  ],
+  "hunt_table": [
+    {
+      "direction": "Preservation oracle domains and exact masks",
+      "hypothesis": "Raw-order, unavailable legacy state, or nonempty E could contradict independent predicate definitions.",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_oracles.py",
+      "real_output": "ORACLE_VECTORS16/16. Raw-order-only and missing-TK/DAT fail d+total, e=True. E-nonempty green fails only e. Old r4 masks rc3/GIET.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Mandatory-call status and cached baselines",
+      "hypothesis": "A good mutant rank could mask a failed original invocation or lost cached status.",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_contract.py; python3 -B /tmp/wp1463-r5-review/probe_envelope.py",
+      "real_output": "COMPOSITION6/6; current old product/self/TU_KIEM runners retain GIET/GIET/TIN_DUNG_GIA and reuse cached original; r5 composition rejects original sidecar loss. ENVELOPE31/31 model vectors; old-rank mutant rc3/GIET.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Actual registry selection and reader isolation",
+      "hypothesis": "The four data edits could disagree with frozen zone, leak light mode, or allow mismatched output.",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py",
+      "real_output": "Oracle27/27; selector27/27; fixture SHA135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036. Full/full and light/light errors0; both mismatches errors1. Light env1; full envNone.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Rollback integrity",
+      "hypothesis": "Deleting only part of the registry entries could leave a broken fallback.",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py",
+      "real_output": "Overlay and four-key rollback1226/1226 True; NHE-only1224/1226 False; NHE+MAU_NHE1225/1226 False. Full fallback27/27; other entries unchanged.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Independent measurement liveness",
+      "hypothesis": "A full-suite witness or union could mask or falsely reject a standalone probe.",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py; python3 -B /tmp/wp1463-r5-review/probe_oracles.py",
+      "real_output": "Both real probes open ci.yml, ci-dot-bien-du.yml, launcher-windows.yml and ops/bash_nen.py; no product file. ZONE_VECTORS12/12; three recurrence mutants rc3/GIET.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Checkpoint evidence versus collector coverage",
+      "hypothesis": "The new WD recovery procedure could reject legitimate evidence collected by multiple existing tools.",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_evidence.py",
+      "real_output": "WD/run/checkout passed; canonical collector Gate39 not_measured; separate report39/39 passed with exact IDs and log hashes. Live registry evaluator passed, removed-marker not_measured; current collector same log not_measured. Combined evidence=True, literal r5 step4=False.",
+      "exit_code": 0,
+      "conclusion": "LỖI",
+      "finding_ids": [
+        "PR2-S12"
+      ]
+    },
+    {
+      "direction": "Lease exclusion and live refs",
+      "hypothesis": "Stale or missing refs could hide overlapping write leases.",
+      "command": "git -C /tmp/wp1463-r5-review/repo fetch --prune origin +refs/heads/*:refs/remotes/origin/*; python3 -B ops/lease_publish.py ai-dang-giu <each of four paths>; GitHub GET git/matching-refs/heads/",
+      "real_output": "Fetch128: proxy connection refused. Four lease queries12/KHÔNG_XÁC_ĐỊNH. API406 live heads all match cached OIDs; cache also has40 stale refs plus HEAD. Known current wp1236 lease covers registry until2026-11-23T13:45Z and wp1475 covers suite until2026-11-23T01:57:05Z. No lease-free certification.",
+      "exit_code": null,
+      "conclusion": "KHÔNG ĐO ĐƯỢC",
+      "finding_ids": []
+    },
+    {
+      "direction": "Budget, owner decisions and platform gates",
+      "hypothesis": "Drafting budgets could be conflated with implementation limits or Windows-CI zero with M3 exemption.",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py; python3 -B /tmp/wp1463-r5-review/probe_platform.py",
+      "real_output": "r85 drafting3/4; installed r96 5/6 with exact-object readback; implementation3/3/2/3/1/1/0. Q3 push-light retained. Windows required, M9True; K6 no waiver12/exact waiver0. Both decision ledgers read back.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Plan fidelity and shared-file ordering",
+      "hypothesis": "PR2 could restore removed authorization machinery or overlap sibling work outside admission controls.",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py; read plan r4 §§4,7,12 and candidate goals/exclusions/write set",
+      "real_output": "Plan hash0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe. Four delivery paths; registry data-only; no ci.yml/product changes. B1a then B2 then PR2; sibling B1/B3 share registry, B4 does not. External allow-variable machinery remains excluded.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "A3 identity and equivalence provenance",
+      "hypothesis": "Plan duplicates or provenance-only input could disappear at the output boundary.",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_identity.py",
+      "real_output": "Eight plan-ID controls distinguish both modes; valid reason/reviewer values preserved verbatim in wire output; whitespace-only invalid entry remains song without provenance fields.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Current-code feasibility and old anchors",
+      "hypothesis": "Stated inventory, adapter interfaces or mutation anchors could disagree with current master.",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_contract.py",
+      "real_output": "CA68/DOT_BIEN398/DOT_BIEN_TEST11/TU_KIEM2;11/11 old self-mutant anchors unique;14 selected current cases rc0, including WD collector/importer and workflow shell fixtures. Candidate permits c66/two-tuple mock adaptation.",
+      "exit_code": 0,
+      "conclusion": "KHÔNG PHẢI LỖI",
+      "finding_ids": []
+    },
+    {
+      "direction": "Freeze and source integrity",
+      "hypothesis": "Remote candidate could change during the review.",
+      "command": "GitHub GET git/ref/heads/ops/wp1463-r1 at start/end; compare snapshot-start.json and snapshot-end.json",
+      "real_output": "Remote start05a073f68ca6bf4dc187643c3eaedbeff539d70e; endf4630c9a64c668ad5402a7b6bb3fbe428b9b0691. Supplied checkout remains05a073f6/tree15b752aa with17638 file hashes unchanged, no index/worktree delta. Review stopped at freshness check.",
+      "exit_code": null,
+      "conclusion": "LỖI",
+      "finding_ids": []
+    }
+  ],
+  "measure_table": [
+    {
+      "claim": "Candidate exact object",
+      "claimed": "05a073f68ca6bf4dc187643c3eaedbeff539d70e / sha2563ac18bc62a6bc7ecbf372d1ec3d60dbca183495a83e59e41c0a5400a05bf2d5d",
+      "measured": "Matched local Git blob and file; tree15b752aaf15bd9498c8705cfc51889b1cb4eda4b",
+      "matches": true,
+      "command": "git rev-parse HEAD HEAD^{tree}; SHA256 git show HEAD:ops/specs/wp1463-r1/SPEC.md"
+    },
+    {
+      "claim": "Candidate remains branch head",
+      "claimed": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+      "measured": "f4630c9a64c668ad5402a7b6bb3fbe428b9b0691",
+      "matches": false,
+      "command": "GitHub start/end ref GET"
+    },
+    {
+      "claim": "Current master",
+      "claimed": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+      "measured": "e2f28fb39c519511a61d1fdba5b1fc8f77bb76b8",
+      "matches": true,
+      "command": "git rev-parse origin/master; GitHub start/end ref GET"
+    },
+    {
+      "claim": "Plan r4 bytes",
+      "claimed": "0f287ce4369fbeb7b1939daa8de5db7c27c2a4efdc1a21f2fccdd37dc9d83fbe",
+      "measured": "same",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py"
+    },
+    {
+      "claim": "Drafting budget authority",
+      "claimed": "r96 author5/reviewer6; r85 historical3/4",
+      "measured": "same; original r96 hash2d9a60a5eda9537475d7bb0901e882fef2d97d96a2ad4a4aa0d97c76862e73a9; installed-comment parsed object equal",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py"
+    },
+    {
+      "claim": "Current suite inventory",
+      "claimed": "68cases/398product mutants/11self mutants/2TU_KIEM",
+      "measured": "same;409 mutation jobs,11/11 existing self-mutant anchors unique",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_contract.py"
+    },
+    {
+      "claim": "Zone fixture",
+      "claimed": "27rows, SHA135c3b86…",
+      "measured": "27/27 independent oracle and actual selector; full hash135c3b860a6ff3fc4deb6412b40ef47a8d0cc9e04cc81234d2dd350673f74036",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py"
+    },
+    {
+      "claim": "Standalone liveness witnesses",
+      "claimed": "ci.yml in each standalone set",
+      "measured": "2/2 sets contain ci.yml;0/2 contain product;4 tracked opens each,0 outside",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py"
+    },
+    {
+      "claim": "Standalone phan_chung runtime",
+      "claimed": "Historical about8s, no threshold",
+      "measured": "7.271s overlay;6.905s four-key rollback;7.145s NHE-only;7.229s NHE+MAU_NHE on this host",
+      "matches": "compatible observation, not CI timing",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py"
+    },
+    {
+      "claim": "Revised preservation d/e masks",
+      "claimed": "raw-order-only fails cong_thuc_cu_dong and tong_hai_chieu; e stays true",
+      "measured": "same;16 scoped vectors match their derived masks",
+      "matches": true,
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_oracles.py"
+    },
+    {
+      "claim": "Collector zero-unmeasured needed for predecessor proof",
+      "claimed": "NOT_MEASURED:0 from thu",
+      "measured": "39 unknown Gate results in standard collector versus separate Gate report39/39; exact job-ID and log-hash agreement39/39; one live job independently reproduces difference",
+      "matches": false,
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_evidence.py"
+    },
+    {
+      "claim": "Live ref coverage",
+      "claimed": "Fetch all refs before lease-free conclusion",
+      "measured": "Fetch128; API406 current heads all match cached OIDs;447 cached including40 stale and HEAD; all4 lease CLI calls12",
+      "matches": false,
+      "command": "fetch; read all-heads.json/refs-comparison.json/leases-query.json"
+    },
+    {
+      "claim": "Delivery size and postmerge metrics",
+      "claimed": "4files, <=450added lines; <=30% full; median registry step<=600s with30jobs/14days",
+      "measured": "4named paths; future code size/timing not measured. Spec-only r4→r5 diff+42/-19 is not delivery size. No postmerge sample yet.",
+      "matches": "not_measured",
+      "command": "Read write set, size and acceptance10; git diff --numstat 5fde1c5e72f7126ec72f4bcff3684fdeb6ce749f 05a073f68ca6bf4dc187643c3eaedbeff539d70e"
+    },
+    {
+      "claim": "Checkout integrity",
+      "claimed": "Read-only",
+      "measured": "17638file hashes unchanged; no content/index/status/tree delta",
+      "matches": true,
+      "command": "Snapshot comparison"
+    }
+  ],
+  "tests": [
+    {
+      "name": "r5 preservation and scoped-liveness contract probes",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_oracles.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "16 d/e oracle vectors,12 zone vectors; old-mask and three liveness mutants die rc3/GIET. Model of the frozen contract, not future delivered code."
+    },
+    {
+      "name": "Actual current registry overlay/rollback",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_registry.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "27/27 selector and independent oracle;1226/1226 healthy/full rollback; partial rollback negative controls1224/1226 and1225/1226; all opens in zone."
+    },
+    {
+      "name": "Current runner, selected cases, classifier and WD probes",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_contract.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "14/14 selected cases rc0;6/6 composition controls;11/11 old anchors; healthy WD passed, GraphQL403 and mutable-ref URL remain not_measured."
+    },
+    {
+      "name": "Sidecar boundary contract model",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_envelope.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "31/31 vectors; measured old chay_ca rc0/3/4 against typed exception classes. No claim of implemented A3 sidecar."
+    },
+    {
+      "name": "Plan identity and equivalence wire controls",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_identity.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "8 plan-ID controls and3 wire observations, consistent with frozen rules."
+    },
+    {
+      "name": "Checkpoint combination and actual-log negative control",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_evidence.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "PR1497 exact blob artifacts; report39 IDs/hashes match; one live log rehashed and reevaluated. Combined5/5 controls; current r5 restriction mutant rc3/GIET."
+    },
+    {
+      "name": "Governance source/readback checks",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_governance.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "r96 original-byte hash and installed JSON equality; Q3/budget/ADR anchors/decision ledgers/sibling write sets and6 prerequisite decisions checked."
+    },
+    {
+      "name": "Current Windows/M9 policy",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_platform.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "Windows required; M9True; K6 no waiver12, exact owner waiver0. No Windows execution."
+    },
+    {
+      "name": "Ruff pin/probe structural contract",
+      "command": "python3 -B /tmp/wp1463-r5-review/probe_contract.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "loi_ruff_ci() returned([],3); this is distinct from bare lint."
+    },
+    {
+      "name": "Bare Ruff for current touched Python",
+      "command": "ruff check --no-cache --select F /tmp/wp1463-r5-review/repo/ops/ci_provenance_test.py /tmp/wp1463-r5-review/repo/.claude/dev/ci_dang_ky_test.py",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "All checks passed. Ruff0.16.9; CI pin0.15.15. No future script lint claimed."
+    },
+    {
+      "name": "All-ref Git fetch",
+      "command": "git -C /tmp/wp1463-r5-review/repo fetch --prune origin +refs/heads/*:refs/remotes/origin/*",
+      "status": "failed",
+      "exit_code": 128,
+      "evidence": "Failed to connect to configured proxy127.0.0.1:34023. No bypass or permission escalation."
+    },
+    {
+      "name": "Four-path live lease CLI",
+      "command": "python3 -B ops/lease_publish.py ai-dang-giu <each delivery path>, cwd=/tmp/wp1463-r5-review/repo",
+      "status": "failed",
+      "exit_code": 12,
+      "evidence": "All four calls stop at git ls-remote failure. API head/OID comparison and known lease reads do not relabel these calls passed."
+    },
+    {
+      "name": "Future implementation, full/light suite, CI and Windows",
+      "command": "Future do_pr2.py ab/registry/vung/tu-kiem --dot-bien, full registry, full/light suite and required CI",
+      "status": "not_run",
+      "exit_code": null,
+      "evidence": "Spec-only candidate; future code absent. Shellcheck unavailable. No workflow dispatch authorized. No timing, full gate or450-added-lines feasibility result invented."
+    },
+    {
+      "name": "Source snapshot and whitespace check",
+      "command": "Compare snapshot-start.json/snapshot-end.json; git diff --check origin/master HEAD",
+      "status": "passed",
+      "exit_code": 0,
+      "evidence": "17638 hashes, HEAD/tree/status/worktree/index unchanged; diff-check rc0. Scratch working tree clean. Equality proves no observed endpoint delta, not absence of transient historical writes."
+    },
+    {
+      "name": "Final remote freeze check",
+      "command": "GitHub GET git/ref/heads/ops/wp1463-r1",
+      "status": "failed",
+      "exit_code": null,
+      "evidence": "Remote head advanced to f4630c9a64c668ad5402a7b6bb3fbe428b9b0691; assigned exact-object review is stale for the current branch. No review of the new head performed."
+    }
+  ],
+  "counts": {
+    "open_findings": 1,
+    "open_classes": 1,
+    "open_manifestations": 1,
+    "P0": 0,
+    "P1": 0,
+    "P2": 1,
+    "P3": 0,
+    "tracked_classes": 12,
+    "classes_closed_at_spec_scope": 11,
+    "previous_open_classes_closed": 2,
+    "previous_open_classes_total": 3,
+    "closure_fraction": "2/3",
+    "new_class_slugs": 0
+  },
+  "assurance": "review_deferred",
+  "assurance_attestation": "I attest the independent reads, probes and exact-object results recorded here. No approval assurance is granted: one P2 remains and the remote branch changed during review. This is not implementation approval, owner hash approval, CI certification, lease authority, human audit or land authorization. Provider family follows Codex identity; no serving model or submitter identity is inferred.",
+  "evidence_url": null,
+  "freshness": {
+    "start_remote_head": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+    "end_remote_head": "f4630c9a64c668ad5402a7b6bb3fbe428b9b0691",
+    "local_head_start": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+    "local_head_end": "05a073f68ca6bf4dc187643c3eaedbeff539d70e",
+    "master_unchanged": true,
+    "state": "stale_for_current_branch",
+    "action": "Stopped substantive review on final drift detection under supplied AGENTS.md stop condition and protocol §7. New head not reviewed; all findings and closure labels refer only to requested H."
+  },
+  "environment": {
+    "os": "Linux",
+    "python": "3.13.18",
+    "git": "2.43.0",
+    "ruff": "0.16.9",
+    "actionlint": "1.7.7",
+    "shellcheck": "unavailable",
+    "sandbox": "workspace-write; approval_policy=never; restricted network; assigned checkout treated read-only, scratch under /tmp",
+    "source_readonly_snapshot": "17638 tracked/untracked/ignored file hashes plus HEAD/tree/status/worktree/index equal; existing ignored .codex included",
+    "scratch": "/tmp/wp1463-r5-review"
+  },
+  "budget_and_authority": {
+    "generation_note": "Frozen-spec candidate has no implementation lease/generation; null is intentional. Explicit user assignment authorizes this independent spec review.",
+    "author_calls": "5/5 per candidate/user history; exhausted",
+    "spec_review_call": "5/6 under installed r96, including this call",
+    "implementation_caps": "3 attempts,3 source reviews,2 connector,3 Ubuntu,1 full-M9,1 rerun,0 Windows-CI; M3 exact-H requirement remains",
+    "next_step_constraint": "No further author revision or new review is authorized by this report; coordinator must reconcile remaining finding, branch drift and existing budget/owner authority."
+  },
+  "notes": "One grouped P2 on the assigned exact object. PR2-S04 and PR2-S11 are ĐÃ VÁ THẬT at spec scope; PR2-S12 is VÁ SINH LỖI MỚI. All12 prior classes checked; no slug split/merge. The author’s {cong_thuc_cu_dong,tong_hai_chieu} raw-order mask is correct; the prior d-only hint was incomplete. PR1 landed:false prose is treated as a dated snapshot, not a finding. PR1497 remains draft/unmerged and is evidence for the mixed-source checkpoint counterexample, not independent certification of all PR1 bookkeeping. Git all-ref fetch and lease CLI failed; known overlaps and future prerequisites remain. No repository edits/commits/pushes, GitHub writes, workflow dispatch, merge, lease grant or LIVE action. JSON and reviewer probes are written only under /tmp. Final remote-head drift makes verdict blocked even though the historical-object content disposition is changes_requested.",
+  "artifact_manifest": [
+    {
+      "path": "/tmp/wp1463-r5-review/SPEC.md",
+      "bytes": 124754,
+      "sha256": "3ac18bc62a6bc7ecbf372d1ec3d60dbca183495a83e59e41c0a5400a05bf2d5d"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/candidate-end.json",
+      "bytes": 367,
+      "sha256": "4446073dc2e5075f11aff5486cb43a3e480e68c00a74a088378bdc773f5d23cb"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/gate-evaluator.py",
+      "bytes": 11162,
+      "sha256": "0ea9a5e9b5a663ea6050a934b6116b1d8fcc51b23207510fe9cd056342058faf"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/gate-report.txt",
+      "bytes": 14693,
+      "sha256": "49abab769e54f8b7d78485213538c3ef042c2785c75eba094f4dcf0115767db9"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/land-evidence.yaml",
+      "bytes": 6047,
+      "sha256": "6766b09eb14d7ad41055ead721cd34fdb74c48238ae1754bc866c5cd43847eb2"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/leases-query.json",
+      "bytes": 1694,
+      "sha256": "339f5c40f7e0aece3dde6d0ee3ffaeaa776ce8508671b71b064d53cd571ee10a"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/live-registry-log.txt",
+      "bytes": 311885,
+      "sha256": "9aa734ff4655e1c9fafb8c30771a7fb77f479f0b6a01be11c6e7a372c9fce2f0"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/master-end.json",
+      "bytes": 344,
+      "sha256": "643214a3f9c3c3edf03cda347726411b837229d61fc5cfe602df9016306bacb6"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_contract.log",
+      "bytes": 2849,
+      "sha256": "ecc5a5e06685f0cc1ae84e9db8fc180a26e9770e8cb85d4c6a15593c8fb47997"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_contract.py",
+      "bytes": 8638,
+      "sha256": "ef6508f1183acb58f62b80c7080b12979d47abdfb50f94b7dd7efead629e8530"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_envelope.log",
+      "bytes": 1879,
+      "sha256": "25b737fc90486633ed956c8031b6840cfe750432065724be17027e4477cf9a17"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_envelope.py",
+      "bytes": 3834,
+      "sha256": "4b706aa6d5f4970c4256eb49105539701a25183122496c43d463d9fbe4d070a7"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_evidence.log",
+      "bytes": 1736,
+      "sha256": "dc81a84e52a688e32753b49f153afe6d41ed31515376da9694e3f64c10adb99b"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_evidence.py",
+      "bytes": 4699,
+      "sha256": "2b9f74e97d9d7acf16a858731262f3129c1ec7c78ff03697ff7b67254ef2fc94"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_governance.log",
+      "bytes": 1528,
+      "sha256": "84b0b69d82cc995176b0639fa599ee08cdd9cfbed13fdbb5e69c2b21b77bd09e"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_governance.py",
+      "bytes": 1901,
+      "sha256": "6c373027e9398df5e98da21b0b7f96c19547cf369cc05161c8aa74f01f3088ea"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_identity.log",
+      "bytes": 654,
+      "sha256": "5d5897205bef83881b9940d1140573cdb996676143b64b5a0441f50cfb30603f"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_identity.py",
+      "bytes": 1027,
+      "sha256": "2d2e6c1f9ee5aa3d1b424043b4b1a838dcd0651b5bca771f574ea05643142773"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_oracles.log",
+      "bytes": 4884,
+      "sha256": "df135b36af72cd2f92332fe94771c38c1ac4c159265a22e901ba40bc81f5aafc"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_oracles.py",
+      "bytes": 8380,
+      "sha256": "0251a34dd8aec296310344f015422ed527ba4643ed3ff3fd495d1d3520deb5dd"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_platform.log",
+      "bytes": 196,
+      "sha256": "5b85cf05756782dcfdead8aac56da5227a17df6ca6d5f567386b6ea8002321d6"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_platform.py",
+      "bytes": 1210,
+      "sha256": "6ec6a1c07ba3ca2e4a3782d2efd587caaee6060eedd45924f173d1b33e7f263f"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_registry.log",
+      "bytes": 1652,
+      "sha256": "3f29bcfe8bf380dcb4664b1233d4a044f51f13680498e0cc6b6ff0b90c17320f"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/probe_registry.py",
+      "bytes": 3729,
+      "sha256": "3af560bc547250c4b5e53811b682f6fa08f23e2e82b75878a1db9d09cce740b0"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/provenance.yaml",
+      "bytes": 94093,
+      "sha256": "619fe85af209aba3a2ba3472265db56725700312c3ec084c0fcf18e8e0c41c72"
+    },
+    {
+      "path": "/tmp/wp1463-r5-review/refs-comparison.json",
+      "bytes": 1614,
+      "sha256": "a74ad91cfe8c8256b795830ff5471a7cc04a39b27f688288ac13deba8ba7c81d"
+    }
+  ],
+  "generated_at_utc": "2026-11-22T03:00:00.884647+00:00"
+}

@@ -1,0 +1,12 @@
+KHONG_HOP_LE (§8.3):
+  - class_table[a3-case-execution-status-collapsed]: thieu bieu hien
+  - class_table[preservation-oracle-checks-names-only]: thieu bieu hien
+  - class_table[dependency-completion-replaced-by-lease-absence]: thieu bieu hien
+  - class_table[a3-plan-identity-validation-gap]: thieu bieu hien
+  - class_table[a3-equivalence-provenance-not-emitted]: thieu bieu hien
+  - class_table[registry-rollback-leaves-dependent-entries]: thieu bieu hien
+  - class_table[obsolete-adr0060-opt-in-rationale]: thieu bieu hien
+  - class_table[budget-authority-revision-misattributed]: thieu bieu hien
+  - class_table[delegated-decisions-missing-durable-ledger]: thieu bieu hien
+  - class_table[pr2-zone-excludes-new-harness-dependencies]: thieu bieu hien
+  - class_table[measurement-liveness-oracle-crosses-scope]: thieu bieu hien

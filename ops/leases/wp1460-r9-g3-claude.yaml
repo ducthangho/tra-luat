@@ -120,5 +120,6 @@
     "tran_cu": "6 tệp / 450 dòng thêm (trần mặc định `sensitive`).",
     "tran_moi": "6 tệp / 1600 dòng thêm theo `git diff --numstat` so base của lease.",
     "nguon": "ops/specs/wp1460-r1/SPEC.md r8 @ d26c8ae8d27a0bddd71bbd08a5153bb47b879130, mục Kích thước, chép nguyên"
-  }
+  },
+  "da_bi_thay_the": "wp1460-r9-g4-claude"
 }

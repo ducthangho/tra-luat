@@ -1,0 +1,52 @@
+You are the EXECUTOR for work packet wp1460 (B1a, Mission #1172) of repository ducthangho/tra-luat, under lease wp1460-r9-g4-claude.
+Provider: claude. Model: Fable 5.2, effort high or above. Surface: claude_code. Transport: machine/local. Environment: cloud.
+You are an executor only. You do not review, approve, push, merge, dispatch workflows or write GitHub comments.
+This is executor attempt 6 of 6, the last one. It is a NARROW fix round after the Review Rescue Checkpoint.
+
+AUTHORITY AND INPUTS
+- Packet Issue: https://github.com/ducthangho/tra-luat/issues/1460
+- Frozen spec (unchanged): ops/specs/wp1460-r1/SPEC.md on branch ops/wp1460-r1 at commit 0883d49edc22cf261f471ef71f2dc5f323e8d667, sha256 280f6f8d0dc97f29a79ed8ef94d3070d8ae1fe0487b549054137bcdbc4acbb0c, revision 9.
+  First verify it with `git fetch origin ops/wp1460-r1 && git show 0883d49edc22cf261f471ef71f2dc5f323e8d667:ops/specs/wp1460-r1/SPEC.md | sha256sum`. If the hash differs, STOP.
+- Lease: ops/leases/wp1460-r9-g4-claude.yaml on branch ops/wp1460-r1. Read it and obey its limits. It replaces wp1460-r9-g3-claude.
+- Owner decisions: https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7137001118 (this attempt: option (a), narrow fix of F02-R3; spec stays r9; option (b), a spec revision bounding the collector's totality promise, is recorded as DEBT and is NOT part of this attempt), plus the earlier 7130669819, 7131174274, 7134900605.
+- Read before coding: CLAUDE.md, AGENTS.md, docs/PROTOCOL_DA_PHIEN.md (§4, §7, §8, §8.3, §12), .claude/skills/work-packet/SKILL.md and the spec.
+
+BASE, START POINT AND BRANCH
+- Base: origin/master at 5259239d763c9ffc1677f033bd9a9cf23ede9299. All numstat is measured against this base.
+- Start point: H3 = d1c28891acec4f861a9f26e092d92b71bd08af9d (tree 0e44eaf4a22f66d5c04d243f691f252695e64889), local branch `agent/wp1460-r9-g3-fable`. The coordinator gives you its location. Verify both OIDs before working.
+- Create local branch `agent/wp1460-r9-g4-fable` at H3. Add ONE new commit on top of H3; do not amend or rewrite H3 or its parents. DO NOT PUSH: the owner audits the exact head before its first push.
+
+SCOPE OF THIS ATTEMPT (only this)
+Source review 3 (Codex gpt-6-astra, run c8a3bf7e, changes_requested on H3) left one open P2, F02-R3, cause class `v1-not-fully-specified`:
+  The JSON depth cap of 64 added in attempt 5 (P3, `_doc_json_du`, callers around the run/jobs/artifacts readers and the stamp/shard readers) rejects a WHOLE document when any part is deeper than 64, including fields that no X1–X8 rule and no consumer rule C1–C12 uses. The reviewer measured 10 contract-valid inputs (a deep note field in run / jobs / artifacts / shard) that are green on H2 and accepted by the frozen consumer oracle, but red on H3; and two definition cases that drop from measured to not_measured although path/blob/content are unchanged. That adds a green condition the spec does not have.
+Required:
+1. Remove the global depth cap. Keep the domain of valid inputs exactly as the contract defines it: a field that no rule uses must not decide green/red or measured/not_measured.
+2. Keep the anti-crash property that the cap was meant to give (spec §3: with valid arguments the collector ALWAYS writes a schema-valid receipt and exits 0/1): handle `RecursionError` (and only the specific exception classes you measure) at each place that actually recurses over input data — jsonschema validation of both receipt shapes and of stamps/shards, building `repr`/messages from input values, any other recursive consumer you find. Do NOT catch a blanket `Exception`.
+3. Fix by CLASS (§8.3): enumerate EVERY recursive consumer of input data in the collector path BEFORE patching, and report the list with each one's status and measurement in the handoff. Each closed path gets its own check, its own case and its own mutant, so that removing any single check turns a case red.
+4. Cases must MEASURE the protected behaviour, not only a reason string (review 3, question 4): for each boundary, a case whose input actually drives the recursive consumer past its limit on this platform, requiring exit 0/1 and a schema-valid receipt; plus POSITIVE counter-cases built from the reviewer's 10 contract-valid inputs (deep unused field at each point stays green, definition stays measured). The reviewer's probe is `depth_contract.py` in the review-3 directory the coordinator gives you; adapt a COPY.
+5. Keep everything accepted so far unchanged: P1 (six exception classes around the YAML parser call), P2 (UTF-8 job names), P4 (NUL in job names), F01, F03, F04, choices 1–7 of review 1. Do not touch the frozen oracle block or the two hop_dong files.
+
+WRITE SET (exactly four files, no fifth)
+1. .github/workflows/ci-dot-bien-du.yml
+2. .claude/dev/ci_dang_ky_test.py
+3. ops/specs/wp1460-r1/hop_dong/bien_nhan_audit.v1.schema.json — byte copy, sha256 844b5218b6f6844945f5c4c9440f09015d238fe09a60d64b3787c440787e4f46. Do not edit.
+4. ops/specs/wp1460-r1/hop_dong/fixture.json — byte copy, sha256 ce8595739a1ab2f4a86c9c196255e5f91fb19a9f6d3865df6caa2d66f9970e6d. Do not edit.
+This attempt is expected to touch only `.claude/dev/ci_dang_ky_test.py`. Needing any other file => STOP and report.
+
+SIZE (second nang_tran, ADR-0053, spec r9)
+Cap: ≤ 6 files and ≤ 1700 added lines, measured by `git diff --numstat <base>...HEAD`. H3 measures +1598. If the candidate would exceed the cap, STOP before finishing and report the measured numstat and the missing work. Do not cut cases or mutants to fit.
+
+GATES (on the final head; base and head built in ONE command; `git config core.abbrev 7`)
+- `python .claude/dev/ci_dang_ky_test.py` N/N, equal numbers, `TỔNG: ĐẠT`; report wall time.
+- The wp1460 mutant line with 0 fake credit and 0 survivors.
+- Acceptance 1 standalone (480/480, 249/249, TONG: DAT).
+- actionlint on ci-dot-bien-du.yml with shellcheck present: rc 0, delta 0. `python3 -m ruff check --select F` (0.15.15) delta 0.
+- Re-run the review-3 probe `depth_contract.py` and the review-2 probe `yaml_boundary_evidence.py` on the final head; report results.
+- Never write the CI-skip marker in any file or commit message.
+
+STOP CONDITIONS
+A spec clause that is contradictory or impossible; a write outside the write set; the size cap; the same failure recurring three times with the same shape (§12). Report instead of working around.
+
+HANDOFF
+Write /tmp/wp1460-r9-g4-HANDOFF.yaml following protocol §7: packet wp1460, revision 9, generation 4, lease_id wp1460-r9-g4-claude, attempt 6; provider, model, surface; base, start, head SHA and tree as full OIDs; numstat per file and totals; every gate with exact command, real exit code and positive marker line; the enumerated recursive-consumer list with each path's status; new mutant rows; what is not measured; open questions.
+Then reply with: head SHA, tree, numstat totals, the gate summary and the handoff path.

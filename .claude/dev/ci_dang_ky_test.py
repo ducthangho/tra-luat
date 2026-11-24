@@ -1591,7 +1591,11 @@ def khoa_job_tu_ten(ten):
 def job_ky_vong_du(wf):
     """X2: tên job kỳ vọng lập từ CHÍNH tệp workflow `wf` tại checkout, theo thứ tự tệp; không ghi cứng số hay tên job. Job không
     ma trận ⇒ tên khoá; job có ĐÚNG MỘT trục ma trận dạng danh sách ⇒ `<khoá> (<giá trị>)`. Hình khác ⇒ ValueError."""
-    d = yaml.safe_load(pathlib.Path(wf).read_text(encoding="utf-8"))
+    nd = pathlib.Path(wf).read_text(encoding="utf-8")
+    try:  # F02-R2: CHỈ lời gọi bộ phân tích. Ngoài YAMLError/ValueError, PyYAML còn ném sáu lớp dưới đây trên DỮ LIỆU (lồng quá sâu; `!!bool x`;
+        d = yaml.safe_load(nd)  # `!!int ""`; `!!timestamp x`; `!!timestamp {=: 1}`; `!!float` lục thập phân tràn) — đều là «hình khác» của X2, không phải lỗi mã ở đây.
+    except (RecursionError, KeyError, IndexError, AttributeError, TypeError, OverflowError) as e:
+        raise ValueError(f"bộ phân tích YAML vỡ trên dữ liệu của tệp ({type(e).__name__})") from None
     jobs, ra = d.get("jobs") if isinstance(d, dict) else None, []
     for k, j in (jobs.items() if isinstance(jobs, dict) else []):
         st = j.get("strategy") if isinstance(j, dict) else 0
@@ -1601,17 +1605,25 @@ def job_ky_vong_du(wf):
         if st is not None and (not truc or len(truc) != 1 or not isinstance(truc[0], list) or not truc[0] or any(type(v) not in (int, str) or len(str(v)) > 64 for v in truc[0])):
             raise ValueError(f"job {k!r}: ma trận phải có đúng một trục dạng danh sách")
         ra += [k] if st is None else [f"{k} ({v})" for v in truc[0]]
+    "".join(ra).encode("utf-8")  # F02-R2: tên job đi NGUYÊN VĂN vào biên nhận; tên không mã hoá được (surrogate từ `"\udcff"` của YAML) ⇒ UnicodeEncodeError ⊂ ValueError ⇒ X2, không vỡ lúc ghi
     if len(ra) < 2 or len(ra) != len(set(ra)):
         raise ValueError(f"kiểm kê job rỗng/trùng: {ra}")
     return ra
 
 
+_SAU_JSON_DU = 64  # trần độ sâu JSON thu được (payload REST / dấu / mảnh thật chỉ vài tầng)
+
+
 def _doc_json_du(p, tho=False):
-    """JSON từ tệp (từ bytes khi `tho`). Vắng/hỏng ⇒ None: đầu vào THU ĐƯỢC không bao giờ làm lệnh thu ném."""
+    """JSON từ tệp (từ bytes khi `tho`). Vắng/hỏng/lồng quá `_SAU_JSON_DU` tầng ⇒ None: đầu vào THU ĐƯỢC không bao giờ làm lệnh thu ném."""
     try:
-        return json.loads(p.decode("utf-8") if tho else pathlib.Path(p).read_text(encoding="utf-8"))
+        x = json.loads(p.decode("utf-8") if tho else pathlib.Path(p).read_text(encoding="utf-8"))
     except (OSError, ValueError, RecursionError):  # RecursionError: JSON lồng quá sâu (F02 — đầu vào thu được không làm lệnh thu vỡ)
         return None
+    lop = [x]  # F02-R2: JSON vừa đủ nông để ĐỌC được vẫn làm bên dùng đệ quy (jsonschema dựng `repr`) tràn ⇒ chặn độ sâu ngay tại bộ đọc, duyệt KHÔNG đệ quy
+    for _ in range(_SAU_JSON_DU):
+        lop = [v for c in lop if isinstance(c, (dict, list)) for v in (c.values() if isinstance(c, dict) else c)]
+    return None if lop else x  # F02-R2: còn phần tử ở tầng thứ `_SAU_JSON_DU` ⇒ coi như hỏng
 
 
 def _gop_trang_du(trang, khoa):
@@ -1727,7 +1739,7 @@ def thu_bien_nhan_audit(ra, rest, manh_tho, dau_tho, c, wf=None, hop_dong=None):
         try:
             co_tep = sorted(x.name for x in pathlib.Path(thu_muc, ten).iterdir())
             nd = pathlib.Path(thu_muc, ten, tep).read_bytes() if co_tep == [tep] else None
-        except OSError:
+        except (OSError, ValueError):  # F02-R2: tên job (từ YAML/REST) chứa NUL không thành đường dẫn được ⇒ ValueError, không phải OSError
             co_tep, nd = None, None
         if not can(nd is not None, f"{ho}: artifact {ten!r} tải về phải có đúng một tệp {tep!r}, thấy {co_tep}"):
             return None, None
@@ -1839,6 +1851,8 @@ print(json.dumps((x["trang"] if "--paginate" in a and "--slurp" in a else x["tra
 '''
 
 
+YAML_VO_1460 = (("RecursionError", b"[" * 512 + b"0" + b"]" * 512), ("KeyError", b"!!bool x"), ("IndexError", b'!!int ""'), ("AttributeError", b"!!timestamp x"),
+                ("TypeError", b"!!timestamp {=: 1}"), ("OverflowError", b'!!float "1:' + b"59:" * 3000 + b'1"'))  # F02-R2: (lớp PyYAML ném, GIÁ TRỊ YAML gây ra nó)
 CON_1460 = ("import importlib.util as u, pathlib, sys\nsys.dont_write_bytecode = True\ns = u.spec_from_file_location('ci_dang_ky_con', sys.argv[1])\nM = u.module_from_spec(s)\n"
             "s.loader.exec_module(M)\nM.WF_DOT_BIEN_DU, M.CI_WORKFLOW, M.THU_MUC_HOP_DONG = map(pathlib.Path, sys.argv[2:5])\ntry:\n    sys.exit(0 if M.ca_wp1460(sys.argv[5])[sys.argv[5]] else 1)\n"
             "except Exception as e:\n    sys.exit(3 if type(e).__name__ == sys.argv[6] else 4)\n")
@@ -2057,8 +2071,8 @@ def ca_wp1460(chi=None):
             if truoc: truoc(t)
             if w.get("wf"):  # X2: lệnh thu đọc kiểm kê từ tệp workflow được trỏ tới (bản YAML thật đã sửa), không từ hằng nào
                 d = ban()
-                w["wf"](d)
-                (t / "wf.yml").write_text(yaml.safe_dump(d, allow_unicode=True), encoding="utf-8")
+                tho = w["wf"](d)  # hàm trả bytes ⇒ ghi NGUYÊN byte ấy (YAML thô mà `safe_dump` không dựng nổi); không ⇒ ghi bản dict đã sửa
+                (t / "wf.yml").write_bytes(tho if isinstance(tho, bytes) else yaml.safe_dump(d, allow_unicode=True).encode("utf-8"))
             with contextlib.redirect_stdout(buf):
                 rc = lenh_thu_bien_nhan_audit(dict(w["ctx"], thu_bien_nhan_audit=str(t / "bn.json"), rest=str(t / "rest"), manh_tho=str(t / mau[0]["path"]), dau_tho=str(t / mau[1]["path"])),
                                               wf=t / "wf.yml" if w.get("wf") else None, hop_dong=w["hd"](t) if w.get("hd") else None)
@@ -2192,6 +2206,17 @@ def ca_wp1460(chi=None):
           ("x1-started-at-sai-dang", "biên nhận xanh dựng ra KHÔNG hợp lệ", lambda w: bg(w, JOB_DU).update(started_at="hôm qua"), {})]
     AM += [(f"x1-rest-{_p}-{_t}", f"X1: rest/{_p}.json", lambda w, _p=_p, _k=_k: w[_k].add(_p), {}) for _p in ("run", "jobs", "artifacts")  # F01: ba trạng thái × ba điểm lõi
            for _t, _k in (("loi", "loi"), ("json-kem-dau-loi", "kem_loi"), ("vang", "vang"))]
+    AM += [(f"x2-workflow-yaml-bo-phan-tich-vo-{_l}", f"X2: không lập được kiểm kê job từ tệp workflow tại checkout: ValueError: bộ phân tích YAML vỡ trên dữ liệu của tệp ({_l})",
+            lambda w, _v=_v: w.update(wf=lambda d: wf_tho + b"\nthem: " + _v + b"\n"), {}) for _l, _v in YAML_VO_1460]
+    AM += [("x1-rest-jobs-json-long-qua-tran", "X1: rest/jobs.json", lambda w: w["jobs"][0].update(started_at=json.loads("[" * 100 + "]" * 100)), {})]
+    def ten_job_la(k):  # F02-R2: job THỪA tên `k` khớp ở cả ba nơi (YAML, REST jobs, REST artifacts) ⇒ lệnh thu đi tới chỗ dựng ĐƯỜNG DẪN từ tên ấy
+        def sua(w):
+            w.update(wf=lambda d: d["jobs"].update({k: {"runs-on": "ubuntu-latest"}}))
+            w["jobs"].append(dict(bg(w, JOB_DU), name=k, id=5))
+            w["artifacts"].append({"id": 6, "name": f"dau-job-{RUN}-1-{k}", "digest": "sha256:" + "0" * 64, "expired": False})
+        return "X4: artifact %r tải về phải có đúng một tệp 'dau-job.json', thấy None" % f"dau-job-{RUN}-1-{k}", sua
+    AM += [("x4-ten-job-chua-nul-khong-thanh-duong-dan", *ten_job_la("a\0b"), {}),
+           ("x2-ten-job-khong-ma-hoa-duoc-utf8", "X2: không lập được kiểm kê job từ tệp workflow tại checkout: UnicodeEncodeError", ten_job_la("a\udcffb")[1], {})]
     AM += [("khong-nap-duoc-schema-dong-bang", "KHÔNG ĐO ĐƯỢC", lambda w: w.update(hd=lambda t: t / "khong-co"), {"tao": "2026-11-21T19:31:12Z", **LICH})]
     T999, nam_khong_dem = "0999-11-21T19:31:12Z", datetime.datetime(999, 1, 1).strftime("%Y") != "0999"  # F02: glibc không đệm năm < 1000
     if nam_khong_dem:
@@ -2290,7 +2315,9 @@ def ca_wp1460(chi=None):
             raise RuntimeError(f"tiến trình con của ca {ten}: mã thoát {r.returncode}")
         return r.returncode == 0
     for _t, _lop in (("thu-am-x1-rest-la-rac", "RecursionError"), ("thu-am-x2-ma-tran-gia-tri-5000-chu-so", "ValueError"), ("thu-am-x7-ten-artifact-attempt-5000-chu-so", "ValueError"),
-                     ("thu-doi-so-ref-khong-ma-hoa-duoc-utf8-thoat-2-khong-ghi", "UnicodeEncodeError")):
+                     ("thu-doi-so-ref-khong-ma-hoa-duoc-utf8-thoat-2-khong-ghi", "UnicodeEncodeError"), ("thu-am-x4-ten-job-chua-nul-khong-thanh-duong-dan", "ValueError"),
+                     ("thu-am-x2-ten-job-khong-ma-hoa-duoc-utf8", "UnicodeEncodeError"), ("thu-am-x1-rest-jobs-json-long-qua-tran", "RecursionError")) + tuple(
+                         (f"thu-am-x2-workflow-yaml-bo-phan-tich-vo-{_l}", _l) for _l, _ in YAML_VO_1460):
         them(f"wp1460-con-khong-vo-{_t}", lambda _t=_t, _lop=_lop: con("wp1460-" + _t, _lop))
     them("wp1460-cli-yaml-that-luot-dau-xanh", cli_luot_dau)
     them("wp1460-cli-schedule-nam-0001-khung-tran-van-ghi-bien-nhan-hop-le", cli_nam_1)
@@ -2509,6 +2536,9 @@ DOT_BIEN_WP1460 += [(f"f01-diem-{p}-bo-qua-dau-loi", ((f'doc("{p}")', f'_doc_jso
     ("f02-gia-tri-ma-tran-khong-gioi-han", ((" or len(str(v)) > 64 for v in truc[0]", " for v in truc[0]"),), "wp1460-con-khong-vo-thu-am-x2-ma-tran-gia-tri-5000-chu-so", "GIET"),
     ("f02-attempt-trong-ten-artifact-khong-gioi-han", (("-{rid}-([1-9][0-9]{{0,18}})(?:", "-{rid}-([1-9][0-9]*)(?:"),), "wp1460-con-khong-vo-thu-am-x7-ten-artifact-attempt-5000-chu-so", "GIET"),
     ("f02-doi-so-khong-ma-hoa-duoc-utf8", (('        v.encode("utf-8")  # F02', "        pass  # F02"),), "wp1460-con-khong-vo-thu-doi-so-ref-khong-ma-hoa-duoc-utf8-thoat-2-khong-ghi", "GIET"),
+    ("f02r2-ten-job-khong-thanh-duong-dan-khong-bat", (("        except (OSError, ValueError):  # F02-R2", "        except OSError:  # F02-R2"),), "wp1460-con-khong-vo-thu-am-x4-ten-job-chua-nul-khong-thanh-duong-dan", "GIET"),
+    ("f02r2-ten-job-khong-ma-hoa-duoc-utf8", (('    "".join(ra).encode("utf-8")  # F02-R2', "    pass  # F02-R2"),), "wp1460-con-khong-vo-thu-am-x2-ten-job-khong-ma-hoa-duoc-utf8", "GIET"),
+    ("f02r2-json-khong-chan-do-sau", (("    return None if lop else x  # F02-R2", "    return x  # F02-R2"),), "wp1460-con-khong-vo-thu-am-x1-rest-jobs-json-long-qua-tran", "GIET"),
     ("tu-kiem-tien-trinh-con-vo-vi-loi-vo-can", (("except (OSError, ValueError, RecursionError):", "except (OSError, ValueError, _khong_co):"),), "wp1460-con-khong-vo-thu-am-x1-rest-la-rac", "TIN_DUNG_GIA"),
     ("f04-blob-oid", (('"blob_oid": dd["sha"],', '"blob_oid": "0" * 40,'),), _D, "GIET"),
     ("f04-definition-sha256", (('"sha256": hashlib.sha256(nd).hexdigest()}', '"sha256": "0" * 64}'),), _D, "GIET"),
@@ -2517,6 +2547,8 @@ DOT_BIEN_WP1460 += [(f"f01-diem-{p}-bo-qua-dau-loi", ((f'doc("{p}")', f'_doc_jso
     ("f04-cong-cu-sha256", (('"sha256": hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()}', '"sha256": "0" * 64}'),), _D, "GIET"),
     ("f04-cong-cu-sha256-hinh-khong-xanh", (('"sha256": hashlib.sha256(pathlib.Path(__file__).read_bytes()).hexdigest()}', '"sha256": "0" * 64}'),), _TA + "x3-job-truoc-failure", "GIET"),
     ("f04-tao-luc", (('"tao_luc": _iso(_gio_utc()),', '"tao_luc": "2026-01-01T00:00:00.000Z",'),), _D, "GIET")] + [
+    (f"f02r2-yaml-bo-phan-tich-vo-{_l}-khong-bat", (("(RecursionError, KeyError, IndexError, AttributeError, TypeError, OverflowError) as e:", "(RecursionError, KeyError, IndexError, AttributeError, TypeError, OverflowError) as e:".replace("%s" % _l, "ZeroDivisionError")),), f"wp1460-con-khong-vo-thu-am-x2-workflow-yaml-bo-phan-tich-vo-{_l}", "GIET")
+    for _l, _ in YAML_VO_1460] + [
     (f"f03-noi-suy-{a}-vao-than", ((_THAN_THU, '"".join((\' --%s "%s%s }}"\' % (a, _GH, b) if a == "' + a + '" else \' --%s "$%s"\' % (a, a.replace("-", "_").upper())) for a, b in DOI_SO_THU)}'),),
      f"wp1460-job-thu-lenh-thu-noi-suy-{a}-vao-than-do", "GIET") for a, _ in DOI_SO_THU] + [
     ("f02-khung-nam-khong-dem-khong-kiem-dang", (("    return s if re.fullmatch(_MOC_REST_DU, s) else None", "    return s"),),

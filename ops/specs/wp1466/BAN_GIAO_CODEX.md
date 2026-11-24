@@ -49,19 +49,19 @@ Vậy chỉ cấp được lease wp1466 sau 14:46Z hôm nay, hoặc sớm hơn n
 B4 thêm khoảng 884 dòng vào tệp test và khoảng 251 dòng vào `packet_loop.py`. Executor phải giải xung đột, rồi đo lại
 N1–N16, trần 450 dòng / 6 tệp, và khối `so-dang-ky` trên base mới.
 
-## 3. ĐIỂM PHẢI HỎI CHỦ KHO TRƯỚC KHI CODEX THI CÔNG
-Đặc tả đã đóng băng ghi (mục 1, dòng `executor` và `reviewer`):
-- executor: Claude Code, model yêu cầu Fable 5.2, họ `claude`;
-- reviewer: Codex CLI `gpt-6-astra` `xhigh`, họ `openai`; assurance `cross_approved` dựa trên việc hai bên khác họ.
-
-**Nếu Codex làm EXECUTOR mã**, có ba hệ quả:
-- (a) hai dòng ấy thành sai, nên cần đặc tả r9 và chủ kho duyệt lại băm (E5);
-- (b) reviewer phải chuyển sang họ `claude`; `packet_loop.py init` chặn hai bên cùng provider (`RC_PROVIDER`, INV-06);
-- (c) trần lời gọi Codex ở mục 10 phải đọc lại, vì Codex thi công thì lời gọi không còn là review.
-
-**Nếu Codex chỉ ĐIỀU PHỐI** và executor vẫn là Claude, đặc tả giữ nguyên. Nhưng lượt review exact-H chỉ còn 1/10 lời
-gọi Codex, nên rất có thể phải xin nâng trần (ADR-0055, E2) trước khi review.
-Hỏi chủ kho đúng một câu E2/E5 về vai trò; đừng tự chọn.
+## 3. Vai trò và trùng số ADR — ĐÃ QUYẾT (24-11)
+- **Vai trò (E2), ghi hộ ở #1466 issuecomment-7130067171:** "Codex chỉ điều phối, Claude vẫn viết mã."
+  - Đặc tả r8 giữ nguyên; không cần r9.
+  - Executor mã là Claude. Reviewer exact-H là Codex.
+  - Trần ADR-0055 còn 1/10 lời gọi Codex. Nếu lượt review exact-H cần nhiều hơn một lời gọi, xin `nang_tran` (E2) TRƯỚC khi gọi.
+- **Trùng số ADR-0068 (E2/E5), ghi hộ ở #1466 issuecomment-7130100252:** "wp1466 giữ, chạy trước".
+  - wp1507 (DON-RAC-A, Mission #1506) đổi sang ADR-0069 và rebase sau khi wp1466 land; việc đó cần r2 và chủ kho duyệt lại băm.
+  - Đã báo phiên wp1507 ở #1507 issuecomment-7130103221.
+  - Hai packet cùng sửa `docs/PROTOCOL_DA_PHIEN.md`, nên phải chạy NỐI TIẾP. Trước khi cấp lease wp1466, ở bước 3c, kiểm
+    xem wp1507 đã có lease giữ protocol chưa. Nếu có thì DỪNG và hỏi chủ kho.
+  - Đặc tả nháp `SPEC-A` (CI-TAI-DUNG-THEO-CAY, nhánh `claude/ci-toi-uu-do-dac-20261115`) cũng đặt tệp `0068-`. Nó chưa
+    đóng băng và tự có luật DỪNG khi số đã bị chiếm.
+  - Bước 3d chỉ kiểm tệp `docs/adr/0068-*` trên mọi ref. Lúc đo chưa ref nào có tệp ấy; số chỉ thực sự được chiếm khi land.
 
 ## 4. Việc tiếp theo, theo thứ tự
 1. Chờ chủ kho merge PR #1495. Kiểm sau merge: `git rev-parse origin/master:ops/specs/wp1466.md` phải trỏ tới blob có
@@ -78,7 +78,7 @@ Hỏi chủ kho đúng một câu E2/E5 về vai trò; đừng tự chọn.
 
    Giới hạn G1–G10 của các công cụ này là nợ #1484; đừng hứa gì về chúng.
 4. Cấp lease: `spec_hash` `98790505…`, base là `origin/master` sau bước 3a (phải chứa merge của B4), dòng
-   `windows: <H> mien`, executor và reviewer theo kết quả của mục 3 ở trên.
+   `windows: <H> mien`, executor Claude, reviewer Codex (mục 3).
 5. Thi công. Áp nguyên mẫu `ops/specs/wp1466/nguyen-mau-r5/nguyen-mau.patch` (+434 −4, áp được lên `48d372e` bằng
    `git apply -p1`; trên base sau B4 có thể phải rebase tay) làm điểm xuất phát. Đo lại mọi tiêu chí N1–N16 ở mục 9 trên
    mã giao nộp. Dùng các khối `do-pham-vi` (N8) và `so-dang-ky` trong đặc tả. Trần ADR-0053 là 450 dòng / 6 tệp: đo

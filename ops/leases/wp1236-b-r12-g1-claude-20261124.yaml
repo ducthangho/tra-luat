@@ -29,7 +29,9 @@ lease_expires_at_utc: '2026-11-27T11:22:26Z'
 role: executor
 provider: claude
 executor: claude
-model: claude-opus
+model: claude-fable-5-2
+model_effort: high
+model_ghi_chu: 'Chu kho chi dinh Claude Fable 5.2 muc high viet ma (2026-11-24 ~11:31Z, issuecomment ghi ho kem); hai phien Opus mo luc 11:24Z chua commit gi, da dung va luu tru'
 model_family: claude
 execution_surface: claude_code
 transport: machine/local
@@ -47,6 +49,7 @@ reviewer: openai_codex
 reviewer_provider: openai_codex
 reviewer_model_family: openai
 reviewer_execution_surface: codex_cli
+reviewer_effort: high
 reviewer_transport: machine/local
 reviewer_independence: 'Codex CLI do phien dieu phoi goi qua launcher.py run, read-only tren exact head; executor KHONG tu review'
 spec_path: ops/specs/wp1236-r12.md

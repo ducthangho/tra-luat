@@ -3097,7 +3097,11 @@ def cmd_llm_khai_niem(a) -> int:
     except lr.Dung as e:
         print(f"[tl] DUNG (loi phia yeu cau, khong thu duong khac): {e}", file=sys.stderr)
         return 4
-    ket = {"so_hieu": so_hieu, "dieu": dieu, "nguon": nguon_vb, "khai_niem": kq["khai_niem"]}
+    # Lượt 11 (quyết định chủ kho): phép kiểm chỉ chứng minh "thuật ngữ + định nghĩa khớp nguyên văn TỪNG KHOẢN THEO
+    # PHÂN ĐOẠN CỦA BỘ QUÉT" — ranh giới khoản tách từ văn bản THÔ không chứng minh được (11 lượt review liên tiếp tìm
+    # ra một cách phân đoạn sai mới). Kết quả luôn mang cờ cần người duyệt ranh giới.
+    ket = {"so_hieu": so_hieu, "dieu": dieu, "nguon": nguon_vb, "khai_niem": kq["khai_niem"],
+           "can_nguoi_duyet": True, "pham_vi_kiem": lr.PHAM_VI_KIEM}
     # F4 (PR #1503): `--out` CHỈ ghi khi kết quả QUA kiểm nguyên văn, và ghi nguyên tử — kết quả bị từ
     # chối (rc 5) không được đè lên bản đã xác minh trước đó.
     if getattr(a, "out", None) and not kq["lech"]:
@@ -3133,6 +3137,6 @@ def cmd_llm_khai_niem(a) -> int:
     if kq["lech"]:
         print(f"LECH NGUYEN VAN o khoan {kq['lech']} — KHONG dung ket qua nay", file=sys.stderr)
         return 5
-    print(f"NGUYEN VAN: DAT ({len(kq['khai_niem'])} khai niem, moi cum '<thuat ngu> la <dinh nghia>' "
-          f"co nguyen van trong nguon)", file=sys.stderr)
+    print(f"NGUYEN VAN: DAT ({len(kq['khai_niem'])} khai niem khop nguyen van tung khoan theo phan doan cua bo quet) "
+          f"— CAN NGUOI DUYET ranh gioi khoan", file=sys.stderr)
     return 0

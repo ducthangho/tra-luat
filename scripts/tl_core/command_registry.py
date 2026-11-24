@@ -1375,7 +1375,8 @@ GENERATED_SPECS = [
      "help": '(v1.36.71 r380) Tách khái niệm của Điều "Giải thích từ ngữ" bằng Claude (mặc định claude-haiku-5-5) '
              'theo thứ tự của `tl llm-order`; tự chuyển đường khi đường hỏng TRƯỚC khi gọi model (hết credit, thiếu key/CLI); '
              '`claude -p` đã khởi chạy thì mọi lỗi đều dừng. '
-             'Nguyên văn lấy qua `tl extract`; kiểm cụm "<thuật ngữ> là <định nghĩa>" có trong nguồn (lệch ⇒ rc 5). '
+             'Nguyên văn lấy qua `tl extract`; kiểm thuật ngữ + định nghĩa khớp nguyên văn từng khoản (lệch ⇒ rc 5) — '
+             'ranh giới khoản KHÔNG được chứng minh, kết quả mang can_nguoi_duyet: true. '
              'rc: 0 đạt · 2 đầu vào · 3 hết đường · 4 dừng (lỗi phía yêu cầu) · 5 lệch nguyên văn',
      "args": [
          {"dest": 'sohieu', "nargs": '?', "help": 'số hiệu văn bản (vd 134/2025/QH15) — cần kèm --dieu'},

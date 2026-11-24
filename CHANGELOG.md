@@ -71,6 +71,12 @@ và chuyển qua lại khi một bên hết hạn mức/credit.
 - Cross-review Codex lượt 9 (`ops/reviews/pr1503-review-9-codex/`, lượt chết giữa chừng `ma_thoat` 1; đã đóng
   U1–U3; ghi kịp V1 P1) — chủ kho nâng trần lên 10: DANH SÁCH CHO PHÉP kiểu dấu — ngoài `(` `)` `“` `”` `"`, mọi dấu
   nhóm ngoặc/trích dẫn Unicode (Ps/Pe/Pi/Pf, cùng `＂` `″`…) ⇒ nguồn mơ hồ, từ chối cả nguồn (V1).
+- Cross-review Codex lượt 10 bị bộ lọc nội dung của nền chặn (không verdict); lượt 11 (giao việc kiểu kiểm chứng,
+  `ops/reviews/pr1503-review-11-codex/`, REQUEST_CHANGES 3 P1 · 1 P2) xác nhận lớp chuyển đường đã đóng nhưng lớp
+  ranh giới khoản vẫn ra lỗ mới. Chủ kho quyết định HẠ LỜI KHAI: kết quả chỉ chứng minh khớp nguyên văn từng khoản
+  theo phân đoạn của bộ quét, KHÔNG chứng minh ranh giới khoản — JSON mang `can_nguoi_duyet: true` + `pham_vi_kiem`.
+  Vá rẻ: nháy đơn thẳng `'` vào danh sách dấu bị từ chối (X1); tiêu đề Điều dính khoản đầu ⇒ từ chối (X3 phần a).
+  Phần còn lại của X2/X3 và X4 ghi nợ ở issue riêng.
 - Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
   key qua `agent_creds` chưa làm.
 

@@ -32222,7 +32222,9 @@ def run() -> int:
                 _env110_restore(_sv)
         return (_rc == 0 and _goi_sub and _j["duong"] == "sub" and _j["thu_tu"] == ["sub", "api"]
                 and _j["khai_niem"][0]["dinh_nghia"] == "việc thực hiện bằng điện tử các năng lực trí tuệ."
-                and _j["tong_token"] == 1952 and _rc5 == 5)
+                and _j["tong_token"] == 1952 and _rc5 == 5
+                # Lượt 11 (quyết định chủ kho): ranh giới khoản KHÔNG được chứng minh ⇒ luôn cần người duyệt.
+                and _j["can_nguoi_duyet"] is True and "KHONG chung minh ranh gioi" in _j["pham_vi_kiem"])
     _t110("r380_llm_khai_niem_tu_tep_qua_sub", _c380_llm_khai_niem_tu_tep_qua_sub)
 
     # Cross-review PR #1503 lượt 1 (Codex): F4 --out không đè khi rc 5 · F5 chuyển tiếp --config ·

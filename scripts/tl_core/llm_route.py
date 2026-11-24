@@ -489,6 +489,10 @@ _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
 _RE_MO_BANG_LA = re.compile(r"^là(?:\s|$)")
 
 
+PHAM_VI_KIEM = ("thuat ngu va dinh nghia khop nguyen van tung khoan theo phan doan cua bo quet; "
+                "KHONG chung minh ranh gioi khoan (tach tu van ban tho) — can nguoi duyet")
+
+
 def tach_khoan(van_ban):
     """Các khoản của một Điều "Giải thích từ ngữ": danh sách `(số_nguồn | None, văn bản đã gỡ số)`, theo thứ
     tự nguồn; `None` khi KHÔNG xác định được ranh giới (fail-closed).
@@ -506,6 +510,8 @@ def tach_khoan(van_ban):
     if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):
         return None   # lượt 8 U1/U3 (quyết định chủ kho): nguồn có dấu phân cách mơ hồ ⇒ từ chối CẢ nguồn
     if dong and _RE_TIEU_DE_DIEU.match(dong[0]):
+        if _tu_noi(dong[0]) is not None:
+            return None   # lượt 11 X3: tiêu đề Điều DÍNH khoản đầu trên một dòng ⇒ bỏ dòng là bỏ luôn khoản ⇒ mơ hồ
         dong = dong[1:]
     co_so = any(_RE_SO_KHOAN.match(ln) for ln in dong)
     khoan: list[list] = []
@@ -540,7 +546,8 @@ def _gon(s) -> str:
 # DANH SÁCH CHO PHÉP các dấu phân cách mà `_dong_mo_ho`/`_quet` hiểu. Mọi dấu khác thuộc nhóm ngoặc/trích dẫn
 # Unicode (Ps/Pe/Pi/Pf) hay dấu kép loại Po ⇒ nguồn mơ hồ (lượt 9 V1: danh sách cấm theo từng kiểu dấu luôn thiếu).
 _DAU_HIEU_DUOC = frozenset({"(", ")", '"', "\u201c", "\u201d"})
-_DAU_KEP_PO = frozenset({"\uff02", "\u2033", "\u2036", "\uff07"})
+# Lượt 11 X1: nháy đơn thẳng `'` (U+0027, nhóm Po) cũng là dấu trích dẫn mà bộ quét không hiểu.
+_DAU_KEP_PO = frozenset({"'", "\uff02", "\u2033", "\u2036", "\uff07"})
 
 
 def _bo_dau_dong(ln) -> str:

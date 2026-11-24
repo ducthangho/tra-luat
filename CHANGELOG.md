@@ -59,6 +59,11 @@ và chuyển qua lại khi một bên hết hạn mức/credit.
   `ignore_errors`) (S1); ngoặc tròn nằm trong trích dẫn là nội dung, nguồn mất số không có tiếp dòng, tiêu đề Điều
   đòi dấu `.`/`:` sau số (dòng "Điều 3 của …" không còn bị bỏ) (S2); `--out`/`--nhat-ky` quan hệ cha–con ⇒ rc 2
   trước model (S3).
+- Cross-review Codex lượt 7 (`ops/reviews/pr1503-review-7-codex/`, REQUEST_CHANGES, 1 P1 · 1 P2; đóng S1/S3 và
+  lớp `phan-loai-sub`) — chủ kho nâng trần lên 8, đóng bằng thiết kế: tiếp dòng ở nguồn có số KHÔNG còn dựa vào
+  trạng thái ngoặc/trích dẫn (chỉ dòng mở bằng "là" sau thuật ngữ chưa có từ nối; ngoặc trải nhiều dòng bị chặn);
+  bộ quét giữ ĐÚNG một cụm trích dẫn đang mở, ký tự bên trong là nội dung (T1); tiến trình con được giết, đóng
+  pipe và `wait` có giới hạn, không phụ thuộc đọc lại (T2).
 - Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
   key qua `agent_creds` chưa làm.
 

@@ -366,9 +366,9 @@ biến môi trường của environment.
   với cùng env của lời gọi; chỉ `authMethod` ∈ {`claude.ai`, `oauth_token`} và `apiProvider=firstParty` mới
   được coi là subscription. Giới hạn: không phân biệt hạn mức gói với "extra usage" tài khoản tự bật.
 - **Kiểm nguyên văn là fail-closed, ranh giới khoản theo CẤU TRÚC dòng** (không đoán theo chữ "là"): nguồn có
-  số thì số khoản phải liên tục từ 1 và mọi dòng không số phải là điểm (`a)`, `-`) hoặc tiếp dòng có bằng chứng
-  (còn trong ngoặc/trích dẫn, hoặc dòng mở bằng "là" sau một thuật ngữ chưa có từ nối); nguồn mất số (Google
-  Doc) thì mỗi dòng là một khoản. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
+  số thì số khoản phải liên tục từ 1 và mọi dòng không số phải là điểm (`a)`, `-`) hoặc dòng mở bằng "là" sau một
+  thuật ngữ chưa có từ nối — ngoặc/trích dẫn trải nhiều dòng bị chặn; nguồn mất số (Google Doc) thì mỗi dòng là
+  một khoản. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
   (`--tep`) hoặc dựng `tl cache-build` trước.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong

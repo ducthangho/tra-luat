@@ -99,9 +99,14 @@ def _chay_co_moc(cmd, *, timeout=None, capture_output=True, **kw):
     try:
         out, err = proc.communicate(timeout=timeout)
     except BaseException:
+        # Lượt 7 T2: thu hồi KHÔNG phụ thuộc vào việc đọc lại (lỗi đọc có thể lặp lại): giết, đóng pipe, rồi `wait` CÓ
+        # giới hạn — tiến trình khác còn giữ pipe cũng không làm lệnh treo.
         proc.kill()
+        for ong in (proc.stdout, proc.stderr):
+            with contextlib.suppress(Exception):
+                ong.close()
         with contextlib.suppress(Exception):
-            proc.communicate(timeout=5)
+            proc.wait(timeout=5)
         raise
     return subprocess.CompletedProcess(cmd, proc.returncode, out, err)
 
@@ -484,8 +489,8 @@ def tach_khoan(van_ban):
     Ranh giới do CẤU TRÚC dòng quyết, KHÔNG do chữ "là" (Review Rescue Checkpoint sau lượt 5: năm lượt liên tiếp
     tìm ra một cửa mới trong phép đoán theo từ nối — F1→N1→M1→Q1→R1):
     - Bỏ BOM, dòng tiêu đề `Điều N.` và câu dẫn (dòng kết thúc `:`) đứng TRƯỚC khoản đầu.
-    - Dòng điểm (`a)`, `-`) nối vào khoản đang mở. Ở nguồn CÓ số, dòng là TIẾP DÒNG có bằng chứng khi khoản đang
-      mở còn trong ngoặc/trích dẫn, hoặc khi khoản đang mở CHƯA có từ nối và dòng mở bằng "là" (lượt 4 Q3).
+    - Dòng điểm (`a)`, `-`) nối vào khoản đang mở. Ở nguồn CÓ số, dòng là TIẾP DÒNG chỉ khi khoản đang mở CHƯA có
+      từ nối và dòng mở bằng "là" (lượt 4 Q3); ngoặc/trích dẫn trải nhiều dòng ⇒ chặn (lượt 7 T1).
     - Nguồn CÓ số: dòng mang số mở khoản; số phải LIÊN TỤC từ 1 (lượt 5 R1: khoản mất số ở giữa); mọi dòng
       không số khác ⇒ None (có thể là khoản mất số — không đoán).
     - Nguồn MẤT số (Google Doc rơi số tự động — Điều 3 Luật 134/2025/QH15): MỖI DÒNG là một khoản, không có tiếp
@@ -503,7 +508,9 @@ def tach_khoan(van_ban):
             if not khoan:
                 return None
             khoan[-1][1] += "\n" + ln
-        elif co_so and khoan and (_dang_mo(khoan[-1][1]) or (_RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None)):
+        elif co_so and khoan and _RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None:
+            # Lượt 7 T1 (quyết định chủ kho): tiếp dòng KHÔNG còn dựa vào trạng thái ngoặc/trích dẫn — ba lượt liền tìm
+            # ra một cách làm bộ quét báo "còn mở" sai. Khoản có ngoặc trải nhiều dòng ⇒ bị chặn (giới hạn đã khai).
             # Tiếp dòng CHỈ ở nguồn có số (lượt 6 S2): nguồn mất số không có ranh giới nào khác ngoài dòng.
             khoan[-1][1] += "\n" + ln
         elif not khoan and ln.endswith(":") and _tu_noi(ln) is None:
@@ -524,29 +531,22 @@ def _gon(s) -> str:
 def _quet(txt):
     """Duyệt `txt` từng ký tự kèm trạng thái "đang trong ngoặc tròn / cụm trích dẫn" TRƯỚC ký tự ấy. Một bộ quét
     có trạng thái thay cho đếm/regex (lượt 5 R3: xoá cặp ngoặc trong cùng bằng regex bỏ sót ngoặc lồng)."""
-    sau, thang, cong = 0, False, 0
+    sau, trich = 0, None   # `trich`: None, hoặc ký tự ĐÓNG của cụm trích dẫn đang mở (`"` hoặc `”`)
     for i, c in enumerate(txt):
-        trich = thang or cong > 0
-        yield i, c, sau > 0 or trich
-        # Ngoặc tròn NẰM TRONG trích dẫn là nội dung, không phải cú pháp (lượt 6 S2: `“(”`, `“)”`).
-        if c == "(" and not trich:
+        yield i, c, sau > 0 or trich is not None
+        if trich is not None:
+            # Trong trích dẫn MỌI ký tự là nội dung (lượt 6 S2: `“(”`; lượt 7 T1: `“"”` từng lật trạng thái ngoặc kép
+            # thẳng) — chỉ đúng dấu đóng của CHÍNH cụm đang mở mới khép nó.
+            if c == trich:
+                trich = None
+        elif c == "(":
             sau += 1
-        elif c == ")" and sau and not trich:
+        elif c == ")" and sau:
             sau -= 1
         elif c == '"':
-            thang = not thang
+            trich = '"'
         elif c == "\u201c":
-            cong += 1
-        elif c == "\u201d" and cong:
-            cong -= 1
-
-
-def _dang_mo(truoc) -> bool:
-    """`truoc` còn mở một cặp ngoặc tròn hay một cụm trích dẫn (`"…"` hoặc `“…”`) ở cuối."""
-    trong = False
-    for _, _, trong in _quet(truoc + " "):
-        pass
-    return trong
+            trich = "\u201d"
 
 
 def _tu_noi(txt):

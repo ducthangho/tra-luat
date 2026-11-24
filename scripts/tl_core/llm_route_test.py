@@ -644,12 +644,17 @@ def ca_ranh_gioi_luot4(m):
         # Xuống dòng TRƯỚC từ nối: dòng mở bằng "là" là tiếp dòng, không phải khoản mất số.
         ("Điều 3.\n1. Tài liệu số\nlà tài liệu ở dạng số.\n2. Hồ sơ là tập tài liệu.",
          kn(("Tài liệu số", "tài liệu ở dạng số."), ("Hồ sơ", "tập tài liệu."))),
-        # Ngoặc trải qua hai dòng, dòng sau có chữ "là": vẫn là tiếp dòng.
-        ("Điều 3.\n1. Hồ sơ (gồm cả bản\nđiện tử là bản số) là tài liệu.\n2. Dữ liệu là thông tin.",
-         kn(("Hồ sơ (gồm cả bản điện tử là bản số)", "tài liệu."), ("Dữ liệu", "thông tin."))),
+        # Lượt 7 T1: ngoặc kép thẳng NẰM TRONG trích dẫn cong là nội dung — không lật trạng thái trích dẫn.
+        ('Điều 3.\n1. \u201cKý hiệu " là dấu\u201d là ký tự trích dẫn.', kn(('\u201cKý hiệu " là dấu\u201d', "ký tự trích dẫn."))),
     )
     for vb, k in dung:
         bang(m.lech_nguyen_van(k, vb) == [], f"ket qua dung bi chan oan: {vb!r} -> {m.lech_nguyen_van(k, vb)}")
+    # Lượt 7 T1 (giới hạn đã khai): tiếp dòng KHÔNG dựa vào trạng thái ngoặc/trích dẫn ⇒ ngoặc trải hai dòng bị chặn,
+    # và một dòng mất số sau `“"”` không bao giờ bị gộp.
+    hai_dong = "Điều 3.\n1. Hồ sơ (gồm cả bản\nđiện tử là bản số) là tài liệu.\n2. Dữ liệu là thông tin."
+    bang(m.tach_khoan(hai_dong) is None, f"ngoac trai hai dong phai bi chan: {m.tach_khoan(hai_dong)}")
+    t1 = 'Điều 3.\n1. Ký hiệu là dấu \u201c"\u201d.\nDữ liệu là thông tin.\n2. Hồ sơ là tài liệu.'
+    bang(m.tach_khoan(t1) is None, f"dong mat so sau trich dan phai mo ho: {m.tach_khoan(t1)}")
     # Lượt 5 R3: dấu ":" trong ngoặc LỒNG không phải dấu ":" cấp khoản.
     long = "Điều 3.\n1. Hồ sơ (nhóm: bản giấy (bản chính)) là tập tài liệu."
     bang(m.lech_nguyen_van(kn(("Hồ sơ (nhóm: bản giấy (bản chính))", "tập tài liệu.")), long) == [],
@@ -724,6 +729,27 @@ def ca_sau_khoi_chay_khong_chuyen(m):
         raise TinHieuChotCa(f"qua han SAU khoi chay khong duoc thanh KhongKhoiChay: {e}") from e
     except subprocess.TimeoutExpired:
         pass
+    # Lượt 7 T2: lỗi đọc LẶP LẠI ⇒ tiến trình con vẫn phải được giết VÀ thu hồi (không phụ thuộc vào đọc lại).
+    giu = []
+    goc_popen = m.subprocess.Popen
+
+    class PopenDocHong(goc_popen):
+        def __init__(self, *a, **k):
+            super().__init__(*a, **k)
+            giu.append(self)
+
+        def communicate(self, *a, **k):
+            raise OSError(5, "EIO lap lai")
+    m.subprocess.Popen = PopenDocHong
+    try:
+        try:
+            m._chay_co_moc([sys.executable, "-c", "import time; time.sleep(30)"], timeout=10, text=True)
+            raise TinHieuChotCa("loi doc phai noi len")
+        except OSError as e:
+            bang(not isinstance(e, m.KhongKhoiChay), "loi doc SAU khoi chay khong duoc thanh KhongKhoiChay")
+    finally:
+        m.subprocess.Popen = goc_popen
+    bang(giu and giu[0].returncode is not None, f"tien trinh con chua duoc thu hoi sau loi doc: {giu and giu[0].returncode}")
 
 
 def ca_usage_thieu_truong(m):
@@ -746,6 +772,18 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
+    # Lượt 7 T1/T2.
+    ("tiep_dong_ca_nguon_mat_so", ("        elif co_so and khoan and _RE_MO_BANG_LA.match(ln)", "        elif khoan and _RE_MO_BANG_LA.match(ln)"),
+     "ca_ranh_gioi_luot4"),
+    ("la_dau_dong_luon_noi", ("_RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None:", "_RE_MO_BANG_LA.match(ln):"), "ca_ranh_gioi_luot4"),
+    ("bo_trich_dan_thang", ("        elif c == '\"':\n            trich = '\"'\n", ""), "ca_ranh_gioi_luot4"),
+    ("bo_trich_dan_cong", ('        elif c == "\\u201c":\n            trich = "\\u201d"', "        pass"), "ca_ranh_gioi_luot4"),
+    ("dau_dong_khac_khep_trich_dan", ("            if c == trich:\n", "            if c in ('\"', \"\\u201d\"):\n"), "ca_ranh_gioi_luot4"),
+    ("ngoac_dong_trong_trich_dan", ("            if c == trich:\n                trich = None\n",
+                                    "            if c == trich:\n                trich = None\n            elif c == \")\" and sau:\n                sau -= 1\n"),
+     "ca_ranh_gioi_luot4"),
+    ("khong_thu_hoi_sau_loi_doc", ("        with contextlib.suppress(Exception):\n            proc.wait(timeout=5)\n", ""),
+     "ca_sau_khoi_chay_khong_chuyen"),
     # Rescue Checkpoint sau lượt 5: ranh giới khoản theo CẤU TRÚC — mỗi chốt một đột biến.
     ("dong_la_trong_nguon_co_so_bi_bo_qua", ("        else:\n            return None\n    if co_so", "        else:\n            continue\n    if co_so"),
      "ca_tron_co_so_va_mat_so"),
@@ -755,21 +793,12 @@ DOT_BIEN = [
      "ca_khoan_mat_so_co_diem_dat"),
     ("cau_dan_nuot_khoan_dau", (' and _tu_noi(ln) is None:\n            continue', ':\n            continue'), "ca_khoan_mat_so_co_diem_dat"),
     ("nguon_mat_so_khong_tach", ("        elif not co_so:\n            khoan.append([None, ln])\n", ""), "ca_khoan_co_so_va_diem_dat"),
-    ("ngoac_qua_dong_thanh_mo_ho", ("        elif co_so and khoan and (_dang_mo(khoan[-1][1]) or ", "        elif co_so and khoan and ("),
-     "ca_ranh_gioi_luot4"),
     # Lượt 6 S2.
-    ("tiep_dong_ca_nguon_mat_so", ("        elif co_so and khoan and (_dang_mo(", "        elif khoan and (_dang_mo("), "ca_ranh_gioi_luot4"),
-    ("ngoac_mo_trong_trich_dan", ('        if c == "(" and not trich:', '        if c == "(":'), "ca_ranh_gioi_luot4"),
-    ("ngoac_dong_trong_trich_dan", ('        elif c == ")" and sau and not trich:', '        elif c == ")" and sau:'), "ca_ranh_gioi_luot4"),
     ("tieu_de_long", ('_RE_TIEU_DE_DIEU = re.compile(r"^\\s*Điều\\s+(\\d+[a-zđ]?)\\s*[.:]")',
                       '_RE_TIEU_DE_DIEU = re.compile(r"^\\s*Điều\\s+(\\d+[a-zđ]?)\\b")'), "ca_ranh_gioi_luot4"),
-    ("la_dau_dong_luon_noi", ("(_RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None)", "_RE_MO_BANG_LA.match(ln)"),
-     "ca_ranh_gioi_luot4"),
     ("tach_tai_la_cuoi", ("        if i in vi_tri_la:\n", "        if i in vi_tri_la and i == max(vi_tri_la):\n"),
      "ca_tach_tai_la_dau_tien"),
     ("la_trong_ngoac_cung_tinh", ("        if trong:\n            continue\n", ""), "ca_ngoac_goi_tat"),
-    ("bo_trich_dan_thang", ("        elif c == '\"':\n            thang = not thang\n", ""), "ca_ranh_gioi_luot4"),
-    ("bo_trich_dan_cong", ('        elif c == "\\u201c":\n            cong += 1\n', ""), "ca_ranh_gioi_luot4"),
     ("ngoac_mot_tang_coi_la_ngoai", ("        yield i, c, sau > 0 or trich", "        yield i, c, sau > 1 or trich"),
      "ca_ranh_gioi_luot4"),
     ("bo_chan_hai_cham", ('        if c == ":":\n            return None\n', ""), "ca_ranh_gioi_luot4"),

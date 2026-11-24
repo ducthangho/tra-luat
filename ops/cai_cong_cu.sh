@@ -169,20 +169,48 @@ set +e
 RC_CAI=$?
 set -e
 }
+# wp1479 (CAI-APT-BACKOFF r1, ops/specs/cai-apt-backoff-r1.md): mot lan thu lai TUC THI khong du — do 19-11-2026, mirror
+# security.ubuntu.com sap vai phut, ca lan dau lan lan thu lai deu `Connection failed` (run 44521507190, 44522844747; 5/500
+# luot ci.yml tu 01-11 phai chay lai, ca 5 do o buoc cai rg). Nay thu lai toi da N lan (mac dinh 3), cho CHO*2^(k-1) giay
+# truoc lan k (mac dinh 15/30/60). Moi lan giu DUNG cac chot wp1404: dong bao, update qua sudo dung nhanh, KENH MOI rieng
+# tung lan, xoa stdout cu, chay lai qua `_wp1404_chay_cong_thuc "$@"`. Vong nam trong HAM voi bien `local` tien to rieng:
+# luot `source` cua --bat-buoc chay trong shell CHA, khong duoc de lai/dung toi bien cua shell goi (Codex wp1404 luot 2).
+# Bien dieu chinh: CAI_CONG_CU_THU_LAI (0..9), CAI_CONG_CU_CHO_GIAY (0..600); hong => mac dinh. `10#`: `08` la so BAT PHAN
+# trong `$(( ))` va lam CHET script (bai hoc #1474 F1474-05).
+_tl1479_so() {   # <gia tri> <mac dinh> <toi da> — so nguyen thap phan <= 3 chu so trong [0, toi da], khong thi mac dinh
+  local _tl1479_v
+  case "$1" in ''|*[!0-9]*) echo "$2"; return 0 ;; esac
+  [ "${#1}" -le 3 ] || { echo "$2"; return 0; }
+  _tl1479_v=$(( 10#$1 ))
+  if [ "$_tl1479_v" -le "$3" ]; then echo "$_tl1479_v"; else echo "$2"; fi
+}
+_tl1479_thu_lai_apt() {
+  local _tl1479_n _tl1479_cho _tl1479_k=0 _tl1479_s
+  _tl1479_n="$(_tl1479_so "${CAI_CONG_CU_THU_LAI:-}" 3 9)"
+  _tl1479_cho="$(_tl1479_so "${CAI_CONG_CU_CHO_GIAY:-}" 15 600)"
+  while [ "$RC_CAI" -ne 0 ] && [ "$_tl1479_k" -lt "$_tl1479_n" ]; do
+    _tl1479_k=$(( _tl1479_k + 1 ))
+    _tl1479_s=$(( _tl1479_cho << (_tl1479_k - 1) ))
+    echo "cai_cong_cu: '$TEN' cai loi (rc=$RC_CAI); cho ${_tl1479_s}s, apt-get update roi thu lai lan $_tl1479_k/$_tl1479_n" >&2
+    # Codex luot 1 F1479-01: `sleep` hong/vang duoi `set -e` tung lam script thoat NGAY voi ma cua sleep (127/23), bo qua lan
+    # cai lai va ma cua lan cai cuoi. Hong thi bao roi thu lai ngay (van trong tran N lan).
+    sleep "$_tl1479_s" || echo "cai_cong_cu: sleep ${_tl1479_s}s loi (rc=$?) — thu lai ngay" >&2
+    case "$LENH" in
+      "sudo apt-get"*) sudo apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
+      *) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
+    esac
+    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1479_k"
+    export -n KENH_KQ
+    : > "$KENH_KQ"
+    rm -f -- "$TAM_CAI/stdout"
+    _wp1404_chay_cong_thuc "$@"
+  done
+}
 _wp1404_chay_cong_thuc "$@"
 if [ "$RC_CAI" -ne 0 ]; then
   case "$LENH" in
     *"apt-get install"*)
-      echo "cai_cong_cu: '$TEN' cai loi (rc=$RC_CAI); apt-get update roi thu lai mot lan" >&2
-      case "$LENH" in
-        "sudo apt-get"*) sudo apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
-        *) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;
-      esac
-      KENH_KQ="$TAM_CAI/kq-thu-lai"
-      export -n KENH_KQ
-      : > "$KENH_KQ"
-      rm -f -- "$TAM_CAI/stdout"
-      _wp1404_chay_cong_thuc "$@" ;;
+      _tl1479_thu_lai_apt "$@" ;;
   esac
 fi
 if [ "$RC_CAI" -ne 0 ]; then

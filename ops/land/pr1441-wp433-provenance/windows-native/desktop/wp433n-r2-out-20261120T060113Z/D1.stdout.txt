@@ -1,0 +1,12 @@
+DINH DANH: utc=2026-11-20T06:01:55Z python=3.12.10 os.name=nt platform=Windows-11-10.0.26300-SP0
+DINH DANH: HEAD=adda58d59f259475a925d8b61a554f732455978b tree=1cd7d44e13bee1bb88101ffeb258a0bbd4c51630 cay_sach=True cwd=F:\tl-win\session_015GtxrZk6gmfQKo7g4BfMBS\c2-060113
+$ cmd /c ver -> rc=0
+Microsoft Windows [Version 10.0.26300.9711]
+$ reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock /v AllowDevelopmentWithoutDevLicense -> rc=0
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock
+    AllowDevelopmentWithoutDevLicense    REG_DWORD    0x1
+$ fsutil fsinfo volumeinfo F:\ -> rc=1
+Error 3: The system cannot find the path specified.
+core.symlinks='true' thu_muc_tam='F:\\tl-win\\session_015GtxrZk6gmfQKo7g4BfMBS\\t2-060113\\wp433n-rig-ae86hzq3' probe=[('symlink', True, 'ok'), ('hardlink', True, 'ok')]
+attr goc o=22 attr thu muc tam=16
+KET LUAN D1: DAT

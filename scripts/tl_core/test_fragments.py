@@ -30,6 +30,11 @@ _TEST_ID_POINTER_RE = re.compile(
     + r")(?![A-Za-z0-9_])")
 _BUNDLED_MODULE_NAME = "tl_test_fragments_bundled.py"
 _BUNDLED_RELATIVE_PATH = f"scripts/{_BUNDLED_MODULE_NAME}"
+# Bundle tách mảnh: mỗi mảnh giữ dưới ngưỡng WARN 280 KiB của `_py_size_findings` (trần mount Cowork).
+# Mảnh 1 luôn là `_BUNDLED_MODULE_NAME`; mảnh k>=2 là `tl_test_fragments_bundled_<k>.py`, chỉ được nạp
+# khi mảnh 1 KHAI trong `BUNDLED_FRAGMENT_SHARDS` (tệp mảnh lạc không khai thì không được nạp).
+_BUNDLED_SHARD_LIMIT = 192 * 1024
+_BUNDLED_SHARD_NAME_RE = re.compile(r"tl_test_fragments_bundled_([2-9]|[1-9][0-9]+)[.]py\Z")
 
 
 class FragmentError(RuntimeError):
@@ -349,48 +354,74 @@ def load_fragment_cases(fragment_root: str | Path, *, existing_ids: Iterable[str
     return tuple(loaded)
 
 
-def _read_bundled_sources(bundled_path: str | Path) -> tuple[tuple[str, str], ...]:
-    """Read the generated data-only adapter without importing or executing it."""
+def _bundled_shard_name(index: int) -> str:
+    return _BUNDLED_MODULE_NAME if index == 1 else f"tl_test_fragments_bundled_{index}.py"
+
+
+def _read_bundled_module(bundled_path: str | Path, *, primary: bool
+                         ) -> tuple[tuple[tuple[str, str], ...], tuple[str, ...]]:
+    """Read one generated data-only shard without importing or executing it."""
     path = Path(bundled_path)
+    rel = _BUNDLED_RELATIVE_PATH if primary else f"scripts/{path.name}"
+    if path.is_symlink():   # không đọc xuyên symlink tại tên mảnh (cùng chốt với `_candidate_path`)
+        raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "symlink")
     if not path.is_file():
-        raise FragmentReadError("BUNDLED_MODULE_MISSING", _BUNDLED_RELATIVE_PATH)
+        raise FragmentReadError("BUNDLED_MODULE_MISSING", rel)
     try:
         source = path.read_text(encoding="utf-8")
         source = source.replace("\r\n", "\n").replace("\r", "\n")
         tree = ast.parse(source, filename=path.name)
     except OSError as exc:
-        raise FragmentReadError("BUNDLED_MODULE_READ", _BUNDLED_RELATIVE_PATH) from exc
+        raise FragmentReadError("BUNDLED_MODULE_READ", rel) from exc
     except (SyntaxError, UnicodeError) as exc:
-        raise FragmentSyntaxError("BUNDLED_MODULE_SYNTAX", _BUNDLED_RELATIVE_PATH) from exc
+        raise FragmentSyntaxError("BUNDLED_MODULE_SYNTAX", rel) from exc
 
     body = list(tree.body)
     if (body and isinstance(body[0], ast.Expr)
             and isinstance(body[0].value, ast.Constant)
             and type(body[0].value.value) is str):
         body.pop(0)
-    assignment = body[0] if len(body) == 1 else None
-    if (not isinstance(assignment, ast.Assign) or len(assignment.targets) != 1
-            or not isinstance(assignment.targets[0], ast.Name)
-            or assignment.targets[0].id != "BUNDLED_FRAGMENT_SOURCES"):
-        raise FragmentContractError(
-            "BUNDLED_MODULE_CONTRACT", _BUNDLED_RELATIVE_PATH, "data-only assignment")
+    targets = []
+    for node in body:
+        if (not isinstance(node, ast.Assign) or len(node.targets) != 1
+                or not isinstance(node.targets[0], ast.Name)):
+            raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "data-only assignment")
+        targets.append(node.targets[0].id)
+    allowed = (["BUNDLED_FRAGMENT_SOURCES"], ["BUNDLED_FRAGMENT_SOURCES", "BUNDLED_FRAGMENT_SHARDS"])
+    if targets not in (allowed if primary else allowed[:1]):
+        raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "data-only assignment")
     try:
-        raw_entries = ast.literal_eval(assignment.value)
+        values = [ast.literal_eval(node.value) for node in body]
     except (SyntaxError, TypeError, ValueError) as exc:
-        raise FragmentContractError(
-            "BUNDLED_MODULE_CONTRACT", _BUNDLED_RELATIVE_PATH, "literal sources") from exc
+        raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "literal sources") from exc
+    raw_entries = values[0]
     if type(raw_entries) is not tuple:
-        raise FragmentContractError(
-            "BUNDLED_MODULE_CONTRACT", _BUNDLED_RELATIVE_PATH, "sources tuple")
-
+        raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "sources tuple")
     entries: list[tuple[str, str]] = []
     for item in raw_entries:
         if (type(item) is not tuple or len(item) != 2
                 or type(item[0]) is not str or type(item[1]) is not str
                 or not _FRAGMENT_NAME_RE.fullmatch(item[0])):
-            raise FragmentContractError(
-                "BUNDLED_MODULE_CONTRACT", _BUNDLED_RELATIVE_PATH, "source entry")
+            raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "source entry")
         entries.append(item)
+    shards: tuple[str, ...] = ()
+    if len(values) == 2:
+        shards = values[1]
+        expected = tuple(_bundled_shard_name(k) for k in range(2, len(shards) + 2)) \
+            if type(shards) is tuple else None
+        if not shards or shards != expected:
+            raise FragmentContractError("BUNDLED_MODULE_CONTRACT", rel, "shard list")
+    return tuple(entries), shards
+
+
+def _read_bundled_sources(bundled_path: str | Path) -> tuple[tuple[str, str], ...]:
+    """Read the primary adapter plus every shard it declares, in declared order."""
+    path = Path(bundled_path)
+    entries, shards = _read_bundled_module(path, primary=True)
+    entries = list(entries)
+    for shard in shards:
+        shard_entries, _ = _read_bundled_module(path.parent / shard, primary=False)
+        entries.extend(shard_entries)
     names = [name for name, _ in entries]
     portable_keys = [unicodedata.normalize("NFC", name).casefold() for name in names]
     if (len(set(portable_keys)) != len(portable_keys)
@@ -443,7 +474,7 @@ def _runtime_fragment_topology(scripts_root: str | Path) -> tuple[str, Path | No
     if fragment_root.exists() and _discover_fragment_paths(fragment_root):
         return "dev", fragment_root
     bundled_path = scripts / _BUNDLED_MODULE_NAME
-    if bundled_path.exists():
+    if bundled_path.exists() or bundled_path.is_symlink():   # symlink ĐỨT tại tên mảnh 1 vẫn qua chốt hợp đồng của loader
         return "bundle", bundled_path
     return "none", None
 
@@ -461,23 +492,61 @@ def load_runtime_fragment_cases(scripts_root: str | Path, *,
     return ()
 
 
-def generate_bundled_module_bytes(fragment_root: str | Path, *,
-                                  candidate_paths: Iterable[str | Path] | None = None) -> bytes:
-    """Render validated fragment sources as a deterministic data-only module."""
-    lines = [
+def generate_bundled_modules(fragment_root: str | Path, *,
+                             candidate_paths: Iterable[str | Path] | None = None
+                             ) -> tuple[tuple[str, bytes], ...]:
+    """Render validated fragment sources as deterministic data-only shards (name, bytes)."""
+    header = [
         "# -*- coding: utf-8 -*-",
         '"""Generated by tl_core.test_fragments; do not edit."""',
         "",
         "BUNDLED_FRAGMENT_SOURCES = (",
     ]
+    groups: list[list[str]] = [[]]
+    used = 0
     for path in _discover_fragment_paths(fragment_root, candidate_paths=candidate_paths):
         source, _, tree = _read_fragment_source(path)
         _literal_fragment_test_id(path, tree)
         name_literal = json.dumps(path.name, ensure_ascii=False)
         source_literal = json.dumps(source, ensure_ascii=False)
-        lines.append(f"    ({name_literal}, {source_literal}),")
-    lines.append(")")
-    return ("\n".join(lines) + "\n").encode("utf-8")
+        line = f"    ({name_literal}, {source_literal}),"
+        size = len(line.encode("utf-8")) + 1
+        if groups[-1] and used + size > _BUNDLED_SHARD_LIMIT:
+            groups.append([])
+            used = 0
+        groups[-1].append(line)
+        used += size
+    out = []
+    for index, lines in enumerate(groups, start=1):
+        body = header + lines + [")"]
+        if index == 1 and len(groups) > 1:
+            body.append("BUNDLED_FRAGMENT_SHARDS = ("
+                        + "".join(f"{json.dumps(_bundled_shard_name(k))}, "
+                                  for k in range(2, len(groups) + 1)).rstrip() + ")")
+        out.append((_bundled_shard_name(index), ("\n".join(body) + "\n").encode("utf-8")))
+    return tuple(out)
+
+
+def generate_bundled_module_bytes(fragment_root: str | Path, *,
+                                  candidate_paths: Iterable[str | Path] | None = None) -> bytes:
+    """Bytes of the primary shard; identical to the single-module form when one shard suffices."""
+    return generate_bundled_modules(fragment_root, candidate_paths=candidate_paths)[0][1]
+
+
+def write_bundled_modules(fragment_root: str | Path, scripts_dir: str | Path) -> tuple[str, ...]:
+    """Write every shard and remove stale numbered shards; the only sanctioned regeneration path."""
+    scripts = Path(scripts_dir)
+    modules = generate_bundled_modules(fragment_root)
+    names = {name for name, _ in modules}
+    for name in sorted(names):   # từ chối TRƯỚC khi ghi bất kỳ mảnh nào: không ghi xuyên symlink tại tên mảnh
+        if (scripts / name).is_symlink():
+            raise FragmentPathError("BUNDLED_MODULE_CONTRACT", f"scripts/{name}", "symlink")
+    for name, data in modules:
+        (scripts / name).write_bytes(data)
+    for stale in sorted(scripts.iterdir()):
+        if _BUNDLED_SHARD_NAME_RE.fullmatch(stale.name) and stale.name not in names:
+            stale.unlink()
+    return tuple(name for name, _ in modules)
 
 
 def load_test_id_index(repo_root: str | Path) -> TestIdIndex:

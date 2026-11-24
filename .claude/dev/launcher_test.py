@@ -10034,7 +10034,11 @@ def _wp802_bash_env():
     vo, chan_doan = runpy.run_path(str(LAUNCHER.parents[2] / "ops" / "bash_nen.py"))["tim_bash"]()
     bang(vo is not None, f"không tìm được bash dùng được: {chan_doan}")
     bo = ("BASH_ENV", "ENV")
-    return vo, {k: v for k, v in os.environ.items() if k not in bo and not k.startswith("BASH_FUNC_")}
+    env = {k: v for k, v in os.environ.items() if k not in bo and not k.startswith("BASH_FUNC_")}
+    # wp1479: `cai_cong_cu.sh` chờ 15/30/60 s trước mỗi lần thử lại apt; đồ giả không ngủ thật. Ca đo giãn cách tự gỡ/đặt.
+    env["CAI_CONG_CU_CHO_GIAY"] = "0"
+    env.pop("CAI_CONG_CU_THU_LAI", None)
+    return vo, env
 
 
 def _wp802_chay_khoi_rg_hook(s, uname, rg="echo 'Access is denied' >&2; exit 1"):
@@ -10088,6 +10092,338 @@ def r802_hook_windows_khong_cai_in_dung_lenh():
         _p, ky = _wp802_chay_khoi_rg_hook(s, "MINGW64_NT-10.0", "n=$(($(cat @KY@.n 2>/dev/null || echo 0)+1)); "
                                           "echo $n > @KY@.n; echo \"RG $n\" >> @KY@; [ $n = 1 ] && echo 'ripgrep 1.0.0'")
         bang(ky == ["RG 1"], f"Windows probe lai roi roi xuong installer: {ky}")
+
+
+# wp1474 (CONG-CU-HOOK r1, spec ops/specs/cong-cu-hook-r1.md §4): chạy RIÊNG khối `cong-cu-ban-ke` của hook trên cây tạm.
+# Đồ giả GIỮ TRẠNG THÁI: `ops/cong_cu.py` giả đọc trạng thái từ `tt.json`; `ops/cai_cong_cu.sh` giả ghi nhật ký và (nếu
+# `sua`) đổi trạng thái công cụ thành DAT; `PY` giả bắt `-m ruff`/`-m pip` (ghi nhật ký, pip ghi bản vào `ruff_mod`) và
+# chuyển mọi lời gọi khác cho Python thật. Kết luận của khối chỉ được dựa vào LẦN ĐO LẠI. `ruff` trần (nếu có) chỉ nằm trên
+# PATH CỦA PHIÊN (`PATH_GOC`), không nằm trên PATH của hook — Codex lượt 1: fixture cũ để hai PATH trùng nhau.
+_R1474_BAN_KE = {"git": {"bat_buoc": True}, "shellcheck": {"bat_buoc": False, "chuan_bi": True},
+                 "jsonschema": {"bat_buoc": True}, "tuy_chon": {"bat_buoc": False}}
+
+
+def _r1474_chay_khoi(s, tt, sua=True, ghim=("0.15.15",), ruff_mod="0.15.15", ruff_tran=None, kiem_tra_hong=False,
+                     ban_ke=None, cai_than=None, env_them=None, han=120):
+    """Trả (rc khối, stdout, nhật ký, giây). `ruff_tran`: thân script `ruff` trần (chuỗi phiên bản ⇒ in `ruff <bản>`)."""
+    than = HOOK_DANG_DUNG.read_text(encoding="utf-8")
+    co = re.search(r"^co\(\) \{.*\}$", than, re.MULTILINE)
+    khoi = re.search(r"^# >>> cong-cu-ban-ke \(wp1474\)\n.*?^# <<< cong-cu-ban-ke \(wp1474\)$", than, re.MULTILINE | re.DOTALL)
+    bang(co and khoi, "khong tach duoc khoi cong-cu-ban-ke cua hook")
+    goc, bin_, tran, ky = s / "goc", s / "bin", s / "tran", s / "ky.log"
+    (goc / "ops").mkdir(parents=True); (goc / ".github" / "workflows").mkdir(parents=True); bin_.mkdir(); tran.mkdir()
+    (goc / "ops" / "cong_cu.yaml").write_text(json.dumps({"cong_cu": ban_ke or _R1474_BAN_KE}), encoding="utf-8")   # JSON là YAML
+    (s / "tt.json").write_text(json.dumps(tt), encoding="utf-8")
+    (goc / "ops" / "cong_cu.py").write_text(
+        "import json, sys\n"
+        f"if {kiem_tra_hong!r}:\n    print('khong phai json'); sys.exit(1)\n"
+        f"tt = json.load(open({str(s / 'tt.json')!r}))\n"
+        "print(json.dumps({'cong_cu': [{'ten': t, 'trang_thai': v} for t, v in tt.items()]}))\n"
+        "sys.exit(0 if all(v == 'DAT' for v in tt.values()) else 1)\n", encoding="utf-8")
+    (goc / "ops" / "cai_cong_cu.sh").write_text(
+        f"#!/bin/sh\necho \"CAI $1\" >> '{ky}'\n" + (cai_than or "")
+        + (f"{shlex.quote(PY)} -c 'import json,sys; p=sys.argv[1]; d=json.load(open(p)); d[sys.argv[2]]=\"DAT\"; "
+           f"json.dump(d, open(p, \"w\"))' '{s / 'tt.json'}' \"$1\"\n" if sua else "")
+        + "exit 0\n", encoding="utf-8")
+    (goc / ".github" / "workflows" / "ci.yml").write_text(
+        "".join(f"      - run: python -m pip install --quiet ruff=={g}\n" for g in ghim), encoding="utf-8")
+    if ruff_mod is not None:
+        (s / "ruff_mod").write_text(ruff_mod, encoding="utf-8")
+    pyfake = bin_ / "pyfake"
+    pyfake.write_text(
+        "#!/bin/sh\n"
+        f"if [ \"$1\" = -m ] && [ \"$2\" = ruff ]; then [ -f '{s / 'ruff_mod'}' ] || exit 1; "
+        f"echo \"ruff $(cat '{s / 'ruff_mod'}')\"; exit 0; fi\n"
+        f"if [ \"$1\" = -m ] && [ \"$2\" = pip ]; then echo \"PIP $*\" >> '{ky}'; "
+        f"for a in \"$@\"; do case \"$a\" in ruff==*) printf '%s' \"${{a#ruff==}}\" > '{s / 'ruff_mod'}';; esac; done; exit 0; fi\n"
+        f"exec {shlex.quote(PY)} \"$@\"\n", encoding="utf-8")
+    if ruff_tran is not None:
+        (tran / "ruff").write_text("#!/bin/sh\n" + (f"echo 'ruff {ruff_tran}'\n" if re.fullmatch(r"[0-9.]+", ruff_tran)
+                                                    else ruff_tran + "\n"), encoding="utf-8")
+    for d in (bin_, tran):
+        for f in d.iterdir():
+            f.chmod(0o755)
+    vo, env = _wp802_bash_env()
+    path_hook = os.pathsep.join([str(bin_), env.get("PATH", "")])
+    (s / "khoi.sh").write_text("set -euo pipefail\nPY=" + shlex.quote(str(pyfake)) + "\nGOC=" + shlex.quote(str(goc))
+                               + "\nPATH_GOC=" + shlex.quote(os.pathsep.join([str(tran), path_hook])) + "\n"
+                               + co.group(0) + "\n" + khoi.group(0) + "\n", encoding="utf-8")
+    env["PATH"] = path_hook
+    env.update(env_them or {})
+    t0 = time.monotonic()
+    p = subprocess.Popen([vo, str(s / "khoi.sh")], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                         start_new_session=True)
+    try:
+        out, err = p.communicate(timeout=han)
+    except subprocess.TimeoutExpired:
+        os.killpg(p.pid, signal.SIGKILL)
+        out, err = p.communicate()
+        bang(False, f"khoi chay qua {han}s (treo): {out!r}")
+    giay = time.monotonic() - t0
+    rc = re.findall(r"^\[session-start\] cong-cu-ban-ke: rc=(\d+)$", out, re.MULTILINE)
+    bang(p.returncode == 0 and len(rc) == 1, f"khoi phai chay het va in dung mot dong rc: rc={p.returncode} {out!r} {err!r}")
+    return int(rc[0]), out, (ky.read_text(encoding="utf-8").splitlines() if ky.exists() else []), giay
+
+
+_R1474_DU = {"git": "DAT", "shellcheck": "DAT", "jsonschema": "DAT", "tuy_chon": "DAT"}
+
+
+def _r1474_cai(ky):
+    return [x for x in ky if x.startswith("CAI ")]
+
+
+def _r1474_pip(ky):
+    return [x for x in ky if x.startswith("PIP ")]
+
+
+@ca
+def r1474_thieu_chuan_bi_thi_cai_dung_mot_lan():
+    """Ca 1: thiếu `shellcheck` (`chuan_bi`) ⇒ đúng 1 lần cài nó, 0 lần cài công cụ khác, `DAT`, rc 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"))
+        bang(ky == ["CAI shellcheck"], f"phai cai dung shellcheck mot lan: {ky}")
+        bang(rc == 0 and "cong-cu-ban-ke: DAT (3 cong cu)" in out, f"cai xong phai DAT: rc={rc} {out!r}")
+
+
+@ca
+def r1474_du_het_khong_cai_gi():
+    """Ca 2: đủ hết, ruff đúng bản ⇒ 0 lần cài, 0 lần pip, rc 0; dòng DAT đếm đúng 3 công cụ bat_buoc/chuan_bi (P3 lượt 1)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU))
+        bang(ky == [] and rc == 0 and "ruff: DAT 0.15.15" in out, f"du het ma van cai/khong DAT: rc={rc} {ky} {out!r}")
+        bang("cong-cu-ban-ke: DAT (3 cong cu)" in out, f"dong DAT phai dem dung 3 cong cu: {out!r}")
+
+
+@ca
+def r1474_trinh_cai_xanh_ma_do_lai_thieu_la_CHUA_DAT():
+    """Ca 3: trình cài rc 0 mà đo lại vẫn thiếu ⇒ `CHUA DAT shellcheck`, rc khác 0 (kết luận theo lần đo lại)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), sua=False)
+        bang(ky == ["CAI shellcheck"], f"phai thu cai shellcheck: {ky}")
+        bang(rc != 0 and "CHUA DAT shellcheck" in out and "cong-cu-ban-ke: DAT" not in out,
+             f"trinh cai noi doi ma khoi bao DAT: rc={rc} {out!r}")
+
+
+@ca
+def r1474_cong_cu_tuy_chon_thieu_khong_cai():
+    """Ca 4: công cụ không `bat_buoc` cũng không `chuan_bi` mà thiếu ⇒ không cài, rc 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, tuy_chon="THIEU"))
+        bang(ky == [] and rc == 0, f"cong cu tuy chon bi cai: rc={rc} {ky}")
+
+
+@ca
+def r1474_cong_cu_vang_khoi_ket_qua_do_la_thieu():
+    """Ca 5: công cụ vắng khỏi kết quả đo ⇒ coi là thiếu và cài (fail-close)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        tt = dict(_R1474_DU); del tt["jsonschema"]
+        rc, out, ky, _g = _r1474_chay_khoi(s, tt)
+        bang(ky == ["CAI jsonschema"] and rc == 0, f"cong cu vang mat khong duoc cai: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_ket_qua_do_hong_la_KHONG_DO_DUOC():
+    """Ca 6: kết quả đo không phải JSON ⇒ `KHONG DO DUOC`, 0 lần cài, rc khác 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), kiem_tra_hong=True)
+        bang(rc != 0 and "KHONG DO DUOC" in out and not _r1474_cai(ky),
+             f"do hong ma van cai/van xanh: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_do_hong_khong_pip_ruff():
+    """Codex lượt 1 F1474-02: đo hỏng mà ruff lệch bản ⇒ KHÔNG cài gì, kể cả pip; rc khác 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), kiem_tra_hong=True, ruff_mod="0.16.9")
+        bang(rc != 0 and "KHONG DO DUOC" in out and not _r1474_cai(ky) and not _r1474_pip(ky),
+             f"do hong ma van cai/pip: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_ten_la_trong_ban_ke_la_KHONG_DO_DUOC():
+    """Codex lượt 1 (đột biến `name_regex` sống): tên công cụ ngoài `[A-Za-z0-9_.-]+` ⇒ `KHONG DO DUOC`, 0 lần cài."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        ban_ke = dict(_R1474_BAN_KE, **{"a b": {"bat_buoc": True}})
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, **{"a b": "THIEU"}), ban_ke=ban_ke)
+        bang(rc != 0 and "KHONG DO DUOC" in out and not _r1474_cai(ky), f"ten la ma van cai: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_hai_cong_cu_thieu_cai_ca_hai():
+    """Codex lượt 1 (đột biến `first_tool_only` sống): hai công cụ thiếu ⇒ cài cả hai, đúng thứ tự bản kê, rc 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, git="THIEU", jsonschema="THIEU"))
+        bang(ky == ["CAI git", "CAI jsonschema"] and rc == 0, f"phai cai ca hai cong cu thieu: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_ruff_lech_ban_ghim_thi_pip_dung_ban():
+    """Ca 7: `-m ruff` lệch bản ghim ⇒ đúng 1 lần `pip install ruff==<ghim>`, đo lại ⇒ `ruff: DAT`."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_mod="0.16.9")
+        pip = _r1474_pip(ky)
+        bang(len(pip) == 1 and "ruff==0.15.15" in pip[0].split(), f"phai pip dung ban ghim mot lan: {ky}")
+        bang(rc == 0 and "ruff: DAT 0.15.15" in out, f"pip xong phai DAT: rc={rc} {out!r}")
+    with San() as s:   # chưa có module ruff ⇒ cũng cài
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_mod=None)
+        bang(len(_r1474_pip(ky)) == 1 and rc == 0, f"thieu module ruff ma khong cai: {ky} {out!r}")
+
+
+@ca
+def r1474_hai_ban_ghim_ruff_la_KHONG_DO_DUOC():
+    """Ca 8: `ci.yml` có hai bản ghim ruff khác nhau ⇒ `KHONG DO DUOC`, 0 lần pip, rc khác 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ghim=("0.15.15", "0.16.0"), ruff_mod="0.1.0")
+        bang(rc != 0 and "ruff: KHONG DO DUOC" in out and not _r1474_pip(ky),
+             f"hai ban ghim ma van cai/xanh: rc={rc} {ky} {out!r}")
+    with San() as s:   # không có bản ghim nào
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ghim=())
+        bang(rc != 0 and "ruff: KHONG DO DUOC" in out, f"khong co ban ghim ma van xanh: rc={rc} {out!r}")
+
+
+@ca
+def r1474_ruff_tran_lech_chi_canh_bao():
+    """Ca 9: `ruff` trần trên PATH CỦA PHIÊN lệch bản ghim ⇒ có cảnh báo, rc không đổi."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, _ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_tran="0.16.9")
+        bang(rc == 0 and "CANH BAO ruff" in out and "0.16.9" in out, f"thieu canh bao ruff tran: rc={rc} {out!r}")
+    with San() as s:
+        rc, out, _ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_tran="0.15.15")
+        bang(rc == 0 and "CANH BAO ruff" not in out, f"ruff tran dung ban ma van canh bao: {out!r}")
+
+
+@ca
+def r1474_probe_ruff_tran_treo_bi_cat():
+    """Codex lượt 1 F1474-01: `ruff --version` trần treo ⇒ khối vẫn kết thúc trong trần probe, in dòng rc, rc 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, _ky, giay = _r1474_chay_khoi(s, dict(_R1474_DU), ruff_tran="sleep 60", env_them={"TL_CC_TRAN_PROBE_GIAY": "1"},
+                                              han=45)
+        bang(rc == 0 and giay < 30, f"probe treo khong bi cat: rc={rc} {giay:.1f}s {out!r}")
+
+
+@ca
+def r1474_trinh_cai_lo_TERM_van_bi_giet():
+    """Codex lượt 1 F1474-01: trình cài lờ TERM ⇒ `timeout -k` vẫn giết; khối kết thúc sớm, `CHUA DAT`, rc khác 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, giay = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), sua=False,
+                                             cai_than="trap '' TERM\nsleep 60\n", env_them={"TL_CC_TRAN_CAI_GIAY": "1"}, han=45)
+        bang(ky == ["CAI shellcheck"] and rc != 0 and "CHUA DAT shellcheck" in out and giay < 30,
+             f"trinh cai lo TERM khong bi giet: rc={rc} {giay:.1f}s {ky} {out!r}")
+
+
+@ca
+def r1474_het_ngan_sach_khong_cai():
+    """Codex lượt 1 F1474-01: ngân sách của khối đã hết ⇒ không cài, không pip, nói rõ `HET NGAN SACH`, rc khác 0."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), ruff_mod="0.16.9",
+                                           env_them={"TL_CC_NGAN_SACH_GIAY": "0"})
+        bang(rc != 0 and out.count("HET NGAN SACH") == 2 and not _r1474_cai(ky) and not _r1474_pip(ky),
+             f"het ngan sach ma van cai: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_bien_tran_khong_phai_so_dung_mac_dinh():
+    """Biến trần/ngân sách không phải số (`1x`, `abc`, rỗng) ⇒ dùng mặc định; khối vẫn chạy hết và DAT. `$(( 1x ))` từng làm
+    chết CẢ hook dù khối chạy dưới `||` (đo 21-11-2026)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    with San() as s:
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), env_them={
+            "TL_CC_TRAN_PROBE_GIAY": "abc", "TL_CC_TRAN_CAI_GIAY": "", "TL_CC_NGAN_SACH_GIAY": "1x"})
+        bang(rc == 0 and ky == ["CAI shellcheck"] and "cong-cu-ban-ke: DAT (3 cong cu)" in out,
+             f"bien tran khong phai so lam hong khoi: rc={rc} {ky} {out!r}")
+
+
+def _r1474_bien_cc(env_them):
+    """Chạy RIÊNG các dòng gán `CC_*` (+ `_cc_so`) của khối thật; trả bộ ba (probe, cài, ngân sách) đã chuẩn hoá."""
+    than = HOOK_DANG_DUNG.read_text(encoding="utf-8")
+    dau, cuoi = than.find("\n_cc_so() {"), than.find("\n_cc_chay_tran() {")
+    bang(0 <= dau < cuoi, "khong tach duoc phan gan CC_* cua khoi cong-cu-ban-ke")
+    vo, env = _wp802_bash_env()
+    env = {k: v for k, v in env.items() if not k.startswith("TL_CC_")}
+    env.update(env_them)
+    p = subprocess.run([vo, "-c", "set -euo pipefail" + than[dau:cuoi] + '\necho "$CC_TRAN_PROBE $CC_TRAN_CAI $CC_NGAN_SACH"'],
+                       env=env, capture_output=True, text=True, timeout=30)
+    return p.returncode, p.stdout.strip(), p.stderr
+
+
+@ca
+def r1474_tran_bang_0_ve_mac_dinh_so_0_dau_la_thap_phan():
+    """Codex lượt 2 F1474-04/05: trần probe/cài bằng 0 TẮT `timeout` ⇒ về mặc định; `018` là thập phân 18, không phải bát
+    phân; quá 6 chữ số ⇒ mặc định; ngân sách 0 vẫn là 0 (bỏ qua cài)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    for vao, mong in (({"TL_CC_TRAN_PROBE_GIAY": "0", "TL_CC_TRAN_CAI_GIAY": "000", "TL_CC_NGAN_SACH_GIAY": "0"}, "30 180 0"),
+                      ({"TL_CC_TRAN_PROBE_GIAY": "08", "TL_CC_TRAN_CAI_GIAY": "0009", "TL_CC_NGAN_SACH_GIAY": "018"}, "8 9 18"),
+                      ({"TL_CC_TRAN_PROBE_GIAY": "1234567", "TL_CC_TRAN_CAI_GIAY": "7", "TL_CC_NGAN_SACH_GIAY": "99999999999999999999"},
+                       "30 7 300"),
+                      ({}, "30 180 300")):
+        rc, out, err = _r1474_bien_cc(vao)
+        bang(rc == 0 and out == mong, f"chuan hoa bien tran sai: vao={vao} ra={out!r} mong={mong!r} rc={rc} {err!r}")
+    with San() as s:   # ngân sách số 0 đầu đi trọn khối, đúng một dòng rc
+        rc, out, ky, _g = _r1474_chay_khoi(s, dict(_R1474_DU, shellcheck="THIEU"), env_them={"TL_CC_NGAN_SACH_GIAY": "018"})
+        bang(rc == 0 and ky == ["CAI shellcheck"], f"ngan sach 018 lam hong khoi: rc={rc} {ky} {out!r}")
+
+
+@ca
+def r1474_cau_truc_hook_ban_ke_ci_that():
+    """Ca 10: trên hook/bản kê/ci.yml THẬT — vị trí khối, cách gọi, tên năng lực, shellcheck thuộc tập cài, một bản ghim ruff."""
+    than = HOOK_DANG_DUNG.read_text(encoding="utf-8")
+    bang(than.count("# >>> cong-cu-ban-ke (wp1474)\n") == 1 and than.count("# <<< cong-cu-ban-ke (wp1474)\n") == 1,
+         "hook phai co dung mot cap dau khoi cong-cu-ban-ke")
+    dau, cuoi = than.find("# >>> cong-cu-ban-ke"), than.find("# <<< cong-cu-ban-ke")
+    sau_ac, codex = than.find("# <<< agent-creds"), than.find("# --- Xác thực codex")
+    doctor = than.find(".claude/dev/launcher.py doctor --doi-kha-dung")
+    bang(0 <= sau_ac < dau < cuoi < codex < doctor,
+         f"khoi phai nam sau agent-creds, truoc xac thuc codex va doctor: {sau_ac} {dau} {cuoi} {codex} {doctor}")
+    bang("MA_CC=0; cai_cong_cu_ban_ke || MA_CC=$?;" in than[dau:cuoi], "khoi phai duoc goi dang `|| MA_CC=$?` (khong chan hook)")
+    nang_luc = re.search(r"^# hook-nang-luc: (.*)$", than, re.MULTILINE)
+    bang(nang_luc and {"cong-cu-ban-ke", "ruff-ban-ghim-ci"} <= set(nang_luc.group(1).split()),
+         "dong hook-nang-luc thieu ten nang luc moi")
+    import yaml as _yaml
+    ban_ke = _yaml.safe_load((LAUNCHER.parents[2] / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"]
+    sc = ban_ke.get("shellcheck") or {}
+    bang(sc.get("bat_buoc") or sc.get("chuan_bi"), f"shellcheck khong con thuoc tap cai cua ban ke that: {sc}")
+    ci = (LAUNCHER.parents[2] / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    ghim = set(re.findall(r"ruff==[0-9]+\.[0-9]+\.[0-9]+", ci))
+    bang(len(ghim) == 1, f"ci.yml that phai co dung mot ban ghim ruff: {ghim}")
+
+
+@ca
+def r1474_skill_work_packet_probe_shellcheck_ruff():
+    """Ca 11: skill `work-packet` dặn probe `shellcheck --version` và `-m ruff --version`."""
+    sk = (LAUNCHER.parents[1] / "skills" / "work-packet" / "SKILL.md").read_text(encoding="utf-8")
+    bang("shellcheck --version" in sk and "-m ruff --version" in sk, "SKILL work-packet thieu probe shellcheck/ruff")
 
 
 def _wp831_chay_cai_rg(s, nen, tot, dau="hong", venv=False, batch=False, tiem=False,
@@ -11307,8 +11643,8 @@ def r858_cai_linux_chon_ban_chay_duoc():
 
 @ca
 def r1404_cai_apt_update_roi_thu_lai():
-    """wp1404: NGUYÊN `rg.cai.<nen>`; `apt-get install` lỗi ⇒ `cai_cong_cu.sh` chạy `apt-get update` MỘT lần rồi cài lại
-    MỘT lần. Lỗi thật ⇒ ≠ 0 sau đúng một lần thử lại; cài được ngay ⇒ không update; công thức không phải apt (brew) lỗi ⇒
+    """wp1404 + wp1479: NGUYÊN `rg.cai.<nen>`; `apt-get install` lỗi ⇒ `cai_cong_cu.sh` chạy `apt-get update` rồi cài lại,
+    tối đa 3 lần (wp1479; trước đó 1 lần). Lỗi thật ⇒ ≠ 0 sau đúng 3 lần thử lại; cài được ngay ⇒ không update; công thức không phải apt (brew) lỗi ⇒
     không gọi `apt-get`. Nhật ký đối số của `apt-get` giả là phép đo, không chỉ mã thoát."""
     if LA_WINDOWS:
         return "BO QUA shell POSIX"
@@ -11330,12 +11666,15 @@ def r1404_cai_apt_update_roi_thu_lai():
         bang(p.returncode == 0 and '"DAT"' in p.stdout and gp == str(uv),
              f"apt loi roi khoi sau update ma khong DAT: rc={p.returncode} GITHUB_PATH={gp!r} {p.stderr[-300:]}")
         bang(doc(log) == ["install", "update", "install"], f"nhat ky apt sai: {doc(log)}")
-        bang("apt-get update roi thu lai mot lan" in p.stderr, f"thieu dong bao thu lai: {p.stderr[-300:]}")
-    with San() as s:   # lỗi thật: đúng một lần thử lại, giữ mã lỗi của lần cài lại
+        bang(p.stderr.count("apt-get update roi thu lai lan ") == 1 and "thu lai lan 1/3" in p.stderr,
+             f"thieu/thua dong bao thu lai: {p.stderr[-300:]}")
+    with San() as s:   # lỗi thật: đúng 3 lần thử lại (wp1479), giữ mã lỗi của lần cài cuối
         than, log = apt(s, "luon_loi")
         p, gp, _uv, _d = _wp831_chay_cai_rg(s, "linux", "echo 'ripgrep 14.1.0'", apt_get=than)
         bang(p.returncode == 100 and gp == "", f"apt luon loi phai thoat 100, khong chon: rc={p.returncode} GITHUB_PATH={gp!r}")
-        bang(doc(log) == ["install", "update", "install"], f"apt luon loi: nhat ky phai dung MOT lan thu lai: {doc(log)}")
+        bang(doc(log) == ["install"] + ["update", "install"] * 3, f"apt luon loi: nhat ky phai dung 3 lan thu lai: {doc(log)}")
+        bang([d.split("lan ")[-1] for d in p.stderr.splitlines() if "thu lai lan " in d] == ["1/3", "2/3", "3/3"],
+             f"apt luon loi: dong bao phai dem 1/3 2/3 3/3: {p.stderr[-500:]}")
     with San() as s:   # cài được ngay: không update
         than, log = apt(s, "duoc_ngay")
         p, gp, uv, _d = _wp831_chay_cai_rg(s, "linux", "echo 'ripgrep 14.1.0'", apt_get=than)
@@ -11346,6 +11685,165 @@ def r1404_cai_apt_update_roi_thu_lai():
         p, gp, _uv, _d = _wp831_chay_cai_rg(s, "macos", "echo 'ripgrep 14.1.0'", apt_get=than, brew="exit 1")
         bang(p.returncode == 1 and gp == "", f"brew loi phai thoat 1: rc={p.returncode} GITHUB_PATH={gp!r}")
         bang(doc(log) == [], f"cong thuc brew loi ma van goi apt-get: {doc(log)}")
+
+
+# wp1479 (CAI-APT-BACKOFF r1, spec ops/specs/cai-apt-backoff-r1.md §3): giãn cách + biến điều chỉnh + kênh riêng từng lần.
+# `sleep` giả (đầu PATH, qua khoá `dau/` của `_wp868_chay`) chỉ GHI đối số: đo giãn cách mà không ngủ thật.
+def _r1479_chay(s, env_them=None, apt=None, lenh=None):
+    q = shlex.quote
+    log, ngu = s / "apt.log", s / "sleep.log"
+    apt = apt or f'echo "$1" >> {q(str(log))}; case "$1" in update) exit 0;; install) exit 100;; esac; exit 99'
+    sleep = f'echo "$1" >> {q(str(ngu))}'
+    p, gp, uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh, ung_vien={str(s / "dau" / "sleep"): sleep},
+                                    env_them=env_them)
+    doc = (lambda f: f.read_text().split() if f.exists() else [])
+    return p, doc(log), doc(ngu)
+
+
+@ca
+def r1479_gian_cach_va_so_lan():
+    """Giãn cách mặc định 15/30/60 s trước lần thử lại 1/2/3; `CHO_GIAY=2` ⇒ 2/4/8; `THU_LAI=1` ⇒ một lần; `THU_LAI=0` ⇒ không
+    thử lại (không sleep, không update)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    for env_them, mong_ngu, mong_update in (({"CAI_CONG_CU_CHO_GIAY": ""}, ["15", "30", "60"], 3),
+                                            ({"CAI_CONG_CU_CHO_GIAY": "2"}, ["2", "4", "8"], 3),
+                                            ({"CAI_CONG_CU_CHO_GIAY": "", "CAI_CONG_CU_THU_LAI": "1"}, ["15"], 1),
+                                            ({"CAI_CONG_CU_THU_LAI": "0"}, [], 0)):
+        with San() as s:
+            p, log, ngu = _r1479_chay(s, env_them)
+            bang(p.returncode == 100 and ngu == mong_ngu and log.count("update") == mong_update
+                 and log.count("install") == mong_update + 1,
+                 f"{env_them}: rc={p.returncode} sleep={ngu} apt={log} (mong sleep={mong_ngu}, update={mong_update})")
+
+
+@ca
+def r1479_thu_tu_sleep_update_va_ten_kenh():
+    """Codex lượt 1 F1479-02: MỘT nhật ký có thứ tự cho `sleep`, `apt-get` và kênh của từng lần ⇒ đúng trình tự install → sleep
+    → update → install …, và kênh từng lần đúng tên `kq`, `kq-thu-lai-1`, `-2`, `-3`."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    q = shlex.quote
+    with San() as s:
+        ev = q(str(s / "ev.log"))
+        apt = f'echo "APT $1" >> {ev}; case "$1" in update) exit 0;; install) exit 100;; esac; exit 99'
+        lenh = (f'echo "KENH ${{KENH_KQ##*/}}" >> {ev}; apt-get install -y ripgrep '
+                '&& chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin"')
+        p, gp, _uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh, env_them={"CAI_CONG_CU_CHO_GIAY": ""},
+                                          ung_vien={str(s / "dau" / "sleep"): f'echo "SLEEP $1" >> {ev}'})
+        thay = (s / "ev.log").read_text().splitlines()
+        mong = ["KENH kq", "APT install"]
+        for k, giay in ((1, 15), (2, 30), (3, 60)):
+            mong += [f"SLEEP {giay}", "APT update", f"KENH kq-thu-lai-{k}", "APT install"]
+        bang(p.returncode == 100 and thay == mong, f"trinh tu/ten kenh sai: rc={p.returncode}\n thay={thay}\n mong={mong}")
+
+
+@ca
+def r1479_sleep_hong_van_cai_lai_va_giu_ma_lan_cuoi():
+    """Codex lượt 1 F1479-01: `sleep` lỗi (rc 23) hoặc không có lệnh (rc 127) ⇒ vẫn đủ 3 lần cài lại, có dòng báo, mã thoát
+    là của lần cài CUỐI (44), không phải của `sleep`."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    q = shlex.quote
+    for than_sleep in ("exit 23", "exit 127"):
+        with San() as s:
+            log = q(str(s / "apt.log"))
+            apt = (f'echo "$1" >> {log}; case "$1" in update) exit 0;; '
+                   f'install) n=$(grep -c install {log}); [ "$n" -eq 1 ] && exit 100; exit $((40 + n));; esac; exit 99')
+            p, _gp, _uv, _x, _t = _wp868_chay(s, apt=apt, ung_vien={str(s / "dau" / "sleep"): than_sleep})
+            nk = (s / "apt.log").read_text().split()
+            bang(p.returncode == 44 and nk == ["install"] + ["update", "install"] * 3
+                 and p.stderr.count("loi (rc=") >= 3 and "thu lai ngay" in p.stderr,
+                 f"sleep '{than_sleep}' lam hong vong thu lai: rc={p.returncode} apt={nk} {p.stderr[-400:]}")
+
+
+@ca
+def r1479_bien_hong_ve_mac_dinh():
+    """Biến điều chỉnh hỏng ⇒ mặc định: `abc`/rỗng/quá 3 chữ số/ngoài khoảng. `08` là THẬP PHÂN 8, không làm chết script
+    (bài học #1474 F1474-05). `THU_LAI=09` ⇒ 9 lần."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    for env_them, mong_ngu in (({"CAI_CONG_CU_CHO_GIAY": "abc"}, ["15", "30", "60"]),
+                               ({"CAI_CONG_CU_CHO_GIAY": "08"}, ["8", "16", "32"]),
+                               ({"CAI_CONG_CU_CHO_GIAY": "1000"}, ["15", "30", "60"]),
+                               ({"CAI_CONG_CU_CHO_GIAY": "0005"}, ["15", "30", "60"]),
+                               ({"CAI_CONG_CU_CHO_GIAY": "601"}, ["15", "30", "60"]),
+                               ({"CAI_CONG_CU_CHO_GIAY": "0", "CAI_CONG_CU_THU_LAI": "10"}, ["0"] * 3),
+                               ({"CAI_CONG_CU_CHO_GIAY": "0", "CAI_CONG_CU_THU_LAI": "09"}, ["0"] * 9),
+                               ({"CAI_CONG_CU_CHO_GIAY": "0", "CAI_CONG_CU_THU_LAI": "x"}, ["0"] * 3)):
+        with San() as s:
+            p, _log, ngu = _r1479_chay(s, env_them)
+            bang(p.returncode == 100 and ngu == mong_ngu, f"{env_them}: rc={p.returncode} sleep={ngu} mong={mong_ngu} {p.stderr[-300:]}")
+
+
+@ca
+def r1479_khong_phai_apt_khong_thu_lai():
+    """Công thức không chứa `apt-get install` lỗi ⇒ không sleep, không `apt-get`, thoát đúng mã lỗi."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    with San() as s:
+        p, log, ngu = _r1479_chay(s, {"CAI_CONG_CU_CHO_GIAY": ""}, lenh="exit 7")
+        bang(p.returncode == 7 and log == [] and ngu == [] and "thu lai" not in p.stderr,
+             f"cong thuc khong phai apt van thu lai: rc={p.returncode} apt={log} sleep={ngu}")
+
+
+@ca
+def r1479_kenh_rieng_tung_lan_thu_lai():
+    """Lần cài thứ 2 để tiến trình nền gọi bộ chọn và ghi KÊNH của nó SAU khi lần thứ 3 đã in thư mục tốt ⇒ vẫn chọn thư mục
+    tốt (mỗi lần thử lại một kênh riêng; trước wp1479 chỉ có kênh lần đầu và một kênh `kq-thu-lai`)."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    q = shlex.quote
+    with San() as s:
+        uv, muon = s / "goc" / "usr" / "bin", s / "muon"
+        dem, di, xong = (q(str(s / t)) for t in ("dem", "di", "xong"))
+        lenh = (f'n=$(( $(cat {dem} 2>/dev/null || echo 0) + 1 )); echo $n > {dem}; '
+                f'if [ "$n" -ge 3 ]; then printf "%s\\n" {q(str(uv))}; : > {di}; '
+                f'i=0; while [ "$i" -lt 500 ]; do [ -f {xong} ] && exit 0; sleep 0.01; i=$((i + 1)); done; exit 97; '
+                f'elif [ "$n" -eq 2 ]; then ( i=0; while [ ! -f {di} ] && [ "$i" -lt 500 ]; do sleep 0.01; i=$((i + 1)); done; '
+                f'[ -f {di} ] || exit 96; GITHUB_PATH= chon_thu_muc_chay_duoc rg {q(str(muon))} && : > {xong} ) 2>/dev/null & '
+                f'apt-get install -y ripgrep; else apt-get install -y ripgrep; fi')
+        apt = 'case "$1" in update) exit 0;; esac; exit 100'
+        p, gp, _uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh, ung_vien={str(muon): (
+            f"[ -f {xong} ] && exit 1; echo 'ripgrep 14.1.0'")})
+        bang((s / "xong").exists(), "fixture ro: tien trinh nen cua lan 2 chua ghi kenh (phep do khong xay ra)")
+        bang(p.returncode == 0 and '"DAT"' in p.stdout and p.stderr.count("thu lai lan ") == 2,
+             f"kenh cua lan thu lai truoc bi ghi lai va duoc doc: rc={p.returncode} {p.stdout[-200:]} {p.stderr[-400:]}")
+
+
+@ca
+def r1479_source_khong_lot_bien():
+    """`source` từ shell gọi (như vòng `--bat-buoc`): sau khi script thử lại xong, các biến vòng `_tl1479_*` KHÔNG còn trong
+    shell gọi; biến trùng tên của shell gọi (đặt trước) giữ nguyên giá trị."""
+    if LA_WINDOWS:
+        return "BO QUA shell POSIX"
+    _wp802_rg_yaml()
+    q = shlex.quote
+    with San() as s:
+        co = s / "da-update"
+        apt = f'if [ "$1" = update ]; then n=$(cat {q(str(co))} 2>/dev/null || echo 0); echo $((n+1)) > {q(str(co))}; exit 0; fi; ' \
+              f'[ "$(cat {q(str(co))} 2>/dev/null || echo 0)" -ge 2 ] || exit 100'
+        goc_run = subprocess.run
+
+        def run_source(args, **kw):
+            if len(args) > 1 and str(args[-2]).endswith("cai_cong_cu.sh"):
+                kich = ('_tl1479_s=GOI; tep=$1; . "$tep" rg; '
+                        'echo "SAU k=${_tl1479_k-VANG} n=${_tl1479_n-VANG} cho=${_tl1479_cho-VANG} s=${_tl1479_s-VANG}" >&2')
+                args = [args[0], "-c", kich, "goi", args[-2]]
+            return goc_run(args, **kw)
+        subprocess.run = run_source
+        try:
+            p, _gp, _uv, _x, _t = _wp868_chay(s, apt=apt)
+        finally:
+            subprocess.run = goc_run
+        bang(p.returncode == 0 and "SAU k=VANG n=VANG cho=VANG s=GOI" in p.stderr and "thu lai lan 2/3" in p.stderr,
+             f"bien vong lot ra shell goi: rc={p.returncode} {p.stderr[-400:]}")
 
 
 @ca
@@ -11382,16 +11880,19 @@ def r1404_thu_lai_chot_chi_tiet():
             _json.loads(p.stdout)
         except ValueError as e:
             bang(False, f"(a) stdout khong con la MOT tai lieu JSON ({e}): {p.stdout[:80]!r}")
-        dong = [d for d in p.stderr.splitlines() if "apt-get update roi thu lai mot lan" in d]
+        dong = [d for d in p.stderr.splitlines() if "apt-get update roi thu lai lan " in d]
         bang(len(dong) == 1 and "'rg'" in dong[0] and "rc=100" in dong[0],
              f"(a) dong bao thu lai phai DUNG MOT, co ten va rc lan dau: {dong}")
     with San() as s:   # (b)
         log = s / "apt.log"
         apt = (f'echo "$1" >> {q(str(log))}; case "$1" in update) exit 78;; '
-               f'install) [ "$(grep -c install {q(str(log))})" -eq 1 ] && exit 100; exit 42;; esac; exit 99')
+               f'install) n=$(grep -c install {q(str(log))}); [ "$n" -eq 1 ] && exit 100; exit $((40 + n));; esac; exit 99')
         p, gp, _uv, _x, _t = _wp868_chay(s, apt=apt)
-        bang(p.returncode == 42 and gp == "", f"(b) update loi + cai lai rc 42 phai thoat 42: rc={p.returncode} {p.stderr[-300:]}")
-        bang(doc(log) == ["install", "update", "install"], f"(b) update loi thi van phai cai lai MOT lan: {doc(log)}")
+        # wp1479: mỗi lần cài trả mã KHÁC (100, 42, 43, 44) ⇒ mã thoát phải là của lần CUỐI, dòng báo mang mã lần vừa hỏng.
+        bang(p.returncode == 44 and gp == "", f"(b) update loi + lan cuoi rc 44 phai thoat 44: rc={p.returncode} {p.stderr[-300:]}")
+        bang([d.split("(rc=")[1].split(")")[0] for d in p.stderr.splitlines() if "thu lai lan " in d] == ["100", "42", "43"],
+             f"(b) dong bao phai mang rc cua lan vua hong: {p.stderr[-500:]}")
+        bang(doc(log) == ["install"] + ["update", "install"] * 3, f"(b) update loi thi van phai cai lai, du 3 lan: {doc(log)}")
     lenh_tran = 'apt-get install -y ripgrep && chon_thu_muc_chay_duoc rg "${CONG_CU_GOC:-}/usr/bin"'
     with San() as s:   # (c1) nhánh gọi thẳng: toàn argv, không sudo, update in rác mà stdout vẫn là JSON
         log, co = s / "apt.log", s / "da-update"
@@ -11411,7 +11912,7 @@ def r1404_thu_lai_chot_chi_tiet():
         apt = (f'echo "$1" >> {q(str(log))}; case "$1" in update) exit 78;; '
                f'install) [ "$(grep -c install {q(str(log))})" -eq 1 ] && exit 100; exit 42;; esac; exit 99')
         p, gp, _uv, _x, _t = _wp868_chay(s, apt=apt, lenh=lenh_tran)
-        bang(p.returncode == 42 and doc(log) == ["install", "update", "install"],
+        bang(p.returncode == 42 and doc(log) == ["install"] + ["update", "install"] * 3,
              f"(c2) nhanh goi thang: update loi thi van cai lai va thoat ma lan cai lai: rc={p.returncode} {doc(log)}")
     with San() as s:   # (d)
         co, tot2 = s / "da-update", s / "tot2"
@@ -11478,7 +11979,7 @@ esac
         finally:
             subprocess.run = goc_run
         bang(p.returncode == 0 and all(f"ngoai={n} LAN_CAI=42" in p.stderr for n in (1, 2))
-             and p.stderr.count("apt-get update roi thu lai mot lan") == 2,
+             and p.stderr.count("apt-get update roi thu lai lan 1/3") == 2 and "lan 2/3" not in p.stderr,
              f"(g) source tu shell goi: bien cua shell goi bi dung toi / vong ngoai dung: rc={p.returncode} {p.stderr[-400:]}")
     for kieu in ("duoc_ngay", "can_update"):   # (i) — Codex lượt 3 (P3): công thức dùng tham số vị trí của script
         with San() as s:
@@ -14562,6 +15063,36 @@ def _r1335_tep(duong: Path, dau: str) -> Path:
 
 
 @ca
+def r1499_phan_loai_agy_theo_argv0():
+    m = _tai_launcher_thu()
+    cot = ("provider", "execution_surface", "transport")
+
+    def route(*argv):
+        qd = m._quyet_dinh_agent(list(argv))
+        return tuple(qd[k] for k in cot)
+
+    agy = ("google_antigravity", "antigravity", "machine/local")
+    thuong = ("local_process", "subprocess", "machine")
+    ten_agy = ["agy", "AGY.EXE", "agy.cmd", "agy.bat", "agy.ps1",
+               str(Path.cwd() / "bin" / "AGY.EXE")]
+    if LA_WINDOWS:
+        ten_agy.append(str(Path.cwd() / "bin") + "/AGY.EXE")
+    for ten in ten_agy:
+        bang(route(ten) == agy, f"route {ten!r} phai la {agy}")
+    for ten in ("agy-helper", "agy.zip", "agy.exe.exe", "wrapper"):
+        bang(route(ten, "agy") == thuong, f"argv[0]={ten!r} phai giu fallback")
+    bi_chan = _r1335_qd(m, ["cmd.exe", "/c", "agy"])
+    bang(isinstance(bi_chan, tuple) and bi_chan[1] == MA_THAM_SO,
+         f"vo shell khong khai agent phai bi chan: {bi_chan}")
+    for ten, mong in (
+        ("codex", ("openai_codex", "codex_cli", "machine")),
+        ("claude", ("anthropic_claude", "claude_code", "machine/local")),
+        ("llm", ("openai_api", "llm_cli", "machine")),
+    ):
+        bang(route(ten) == mong, f"route {ten!r} phai giu {mong}")
+
+
+@ca
 def r1335_ma_tran_agent_khai_bao():
     """r2 §4 + M7: ma trận biết trước đáp án; probe đo bằng `chay_cac_probe` thật."""
     m = _tai_launcher_thu()
@@ -14873,7 +15404,7 @@ def r1335_P2_windows_bo_ung_vien_khong_duoi():
 def r1335_bang_transport_tu_choi_ten_trung():
     """D4: chốt chết thay bằng chốt đo được — tên lệnh thuộc hai provider ⇒ RuntimeError."""
     m = _tai_launcher_thu()
-    bang(set(m._kiem_bang_transport()) == {"claude", "codex", "llm"}, "bang that phai qua chot")
+    bang(set(m._kiem_bang_transport()) == {"claude", "codex", "llm", "agy"}, "bang that phai qua chot")
     for hong in ((("p1", ("a",), "s", "t"), ("p2", ("a",), "s", "t")),
                  (("p1", ("a",), "s", "t"), ("p1", ("b",), "s2", "t"))):
         try:
@@ -17443,7 +17974,52 @@ DOT_BIEN = [
 
 # wp802 (N6–N8): đột biến trên BẢN SAO TẠM của hook. Chỉ `TinHieuChotCa` của ca đích mới
 # tính là GIẾT — lỗi khác là tín dụng giả (CLAUDE.md, bài học 27-08).
+# wp1479 (Codex lượt 1 F1479-02): hai khối NGUYÊN VĂN của vòng thử lại — đột biến đảo thứ tự sleep/update cần cả hai.
+_R1479_SLEEP = ('    sleep "$_tl1479_s" || echo "cai_cong_cu: sleep ${_tl1479_s}s loi (rc=$?) — thu lai ngay" >&2\n')
+_R1479_UPDATE = ('    case "$LENH" in\n'
+                 '      "sudo apt-get"*) sudo apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;\n'
+                 '      *) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;\n'
+                 '    esac\n')
+
 DOT_BIEN_HOOK = [
+    # wp1474 (CONG-CU-HOOK r1 §4 + Codex lượt 1): mỗi chốt của khối `cong-cu-ban-ke` một đột biến, đích là hook.
+    ("wp1474_bo_ve_chuan_bi", ('v.get("bat_buoc") or v.get("chuan_bi")', 'v.get("bat_buoc")'),
+     ["r1474_thieu_chuan_bi_thi_cai_dung_mot_lan"]),
+    ("wp1474_vang_mat_coi_la_DAT", ('trang_thai.get(t) != "DAT"', 'trang_thai.get(t, "DAT") != "DAT"'),
+     ["r1474_cong_cu_vang_khoi_ket_qua_do_la_thieu"]),
+    ("wp1474_ket_luan_theo_rc_trinh_cai", ('    if [ -n "$thieu" ]; then\n', '    if [ "$ma" -ne 0 ]; then\n'),
+     ["r1474_trinh_cai_xanh_ma_do_lai_thieu_la_CHUA_DAT"]),
+    ("wp1474_do_hong_van_cai", ('  if ! kq="$(_cc_thieu)" || [ -z "$kq" ]; then\n    echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC (',
+                                '  if ! kq="$(_cc_thieu || echo 3 shellcheck)" || [ -z "$kq" ]; then\n    echo "[session-start] cong-cu-ban-ke: KHONG DO DUOC ('),
+     ["r1474_ket_qua_do_hong_la_KHONG_DO_DUOC"]),
+    ("wp1474_do_hong_van_di_tiep_ruff", ('— khong cai gi"\n    return 1\n', '— khong cai gi"\n    loi=1\n'),
+     ["r1474_do_hong_khong_pip_ruff"]),
+    ("wp1474_bo_kiem_ten", ("if not all(re.fullmatch", "if False and not all(re.fullmatch"),
+     ["r1474_ten_la_trong_ban_ke_la_KHONG_DO_DUOC"]),
+    ("wp1474_chi_cai_cong_cu_dau", ('  for t in $thieu; do\n', '  for t in ${thieu%% *}; do\n'),
+     ["r1474_hai_cong_cu_thieu_cai_ca_hai"]),
+    ("wp1474_dem_ca_ban_ke", ('[str(len(can))]', '[str(len(ban_ke))]'), ["r1474_du_het_khong_cai_gi"]),
+    ("wp1474_bo_chot_ghim_duy_nhat", ('''if [ -z "$ghim" ] || [ "$(printf '%s\\n' "$ghim" | wc -l)" -ne 1 ]; then''',
+                                      'if [ -z "$ghim" ]; then'),
+     ["r1474_hai_ban_ghim_ruff_la_KHONG_DO_DUOC"]),
+    ("wp1474_bo_so_ban_ruff", ('  if [ "$ban" != "ruff $ghim" ]; then\n', '  if false; then\n'),
+     ["r1474_ruff_lech_ban_ghim_thi_pip_dung_ban"]),
+    ("wp1474_ruff_tran_doc_PATH_hook", ('PATH="$PATH_GOC" ruff --version', 'PATH="$PATH" ruff --version'),
+     ["r1474_ruff_tran_lech_chi_canh_bao"]),
+    ("wp1474_bo_tran_probe_ruff_tran", ('ban_tran="$(_cc_chay_tran "$CC_TRAN_PROBE" env -u PATH', 'ban_tran="$(env -u PATH'),
+     ["r1474_probe_ruff_tran_treo_bi_cat"]),
+    ("wp1474_bo_kill_after", ('timeout -k 5 "$giay" "$@"', 'timeout "$giay" "$@"'), ["r1474_trinh_cai_lo_TERM_van_bi_giet"]),
+    ("wp1474_bo_loc_bien_so", ("""  case "$1" in ''|*[!0-9]*) echo "$2"; return 0 ;; esac\n""", ""),
+     ["r1474_bien_tran_khong_phai_so_dung_mac_dinh"]),
+    ("wp1474_tran_0_tat_timeout", ('  if [ "$n" -eq 0 ] && [ "${3:-}" = duong ]; then', '  if false; then'),
+     ["r1474_tran_bang_0_ve_mac_dinh_so_0_dau_la_thap_phan"]),
+    ("wp1474_so_0_dau_bat_phan", ('  local n=$(( 10#$1 ))\n', '  local n=$(( $1 ))\n'),
+     ["r1474_tran_bang_0_ve_mac_dinh_so_0_dau_la_thap_phan"]),
+    ("wp1474_bo_gioi_han_chu_so", ('  [ "${#1}" -le 6 ] || { echo "$2"; return 0; }\n', ''),
+     ["r1474_tran_bang_0_ve_mac_dinh_so_0_dau_la_thap_phan"]),
+    ("wp1474_bo_ngan_sach", ('    if [ "$con" -lt 15 ]; then\n      echo "[session-start] cong-cu-ban-ke: HET NGAN SACH',
+                             '    if false; then\n      echo "[session-start] cong-cu-ban-ke: HET NGAN SACH'),
+     ["r1474_het_ngan_sach_khong_cai"]),
     ("wp802_hook_co_thay_co_chay", ("  co_chay rg || { co cargo", "  co rg || { co cargo"),
      ["r802_hook_linux_rg_hong_van_thu_cargo"]),
     ("wp802_hook_windows_roi_vao_apt", ("MINGW*|MSYS*|CYGWIN*) RG_WIN=1", "KHONG_KHOP_NEN_NAO) RG_WIN=1"),
@@ -17571,45 +18147,72 @@ DOT_BIEN_HOOK = [
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
     ("wp1404_sh_thu_lai_moi_loi", ('    *"apt-get install"*)\n', '    *)\n'),
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
-    ("wp1404_sh_bo_cai_lai", ('      _wp1404_chay_cong_thuc "$@" ;;\n', '      ;;\n'),
+    ("wp1404_sh_bo_cai_lai", ('    rm -f -- "$TAM_CAI/stdout"\n    _wp1404_chay_cong_thuc "$@"\n', '    rm -f -- "$TAM_CAI/stdout"\n'),
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
     # Codex wp1404 lượt 1: đột biến cho từng chốt của nhánh thử lại.
-    ("wp1404_sh_thu_lai_hai_lan", ('      _wp1404_chay_cong_thuc "$@" ;;\n',
-                                   '      _wp1404_chay_cong_thuc "$@"; _wp1404_chay_cong_thuc "$@" ;;\n'),
+    ("wp1404_sh_thu_lai_hai_lan", ('    _wp1404_chay_cong_thuc "$@"\n  done\n',
+                                   '    _wp1404_chay_cong_thuc "$@"; _wp1404_chay_cong_thuc "$@"\n  done\n'),
      ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
+    # wp1479: mỗi chốt của vòng thử lại có giãn cách một đột biến.
+    # Codex wp1479 lượt 1: F1479-01 (sleep hỏng) + F1479-02 (thứ tự sleep/update, tên kênh).
+    ("wp1479_sleep_hong_lam_chet", ('    sleep "$_tl1479_s" || echo "cai_cong_cu: sleep ${_tl1479_s}s loi (rc=$?) — thu lai ngay" >&2\n',
+                                    '    sleep "$_tl1479_s"\n'),
+     ["r1479_sleep_hong_van_cai_lai_va_giu_ma_lan_cuoi"], "cai_sh"),
+    ("wp1479_update_truoc_sleep", (_R1479_SLEEP + _R1479_UPDATE, _R1479_UPDATE + _R1479_SLEEP),
+     ["r1479_thu_tu_sleep_update_va_ten_kenh"], "cai_sh"),
+    ("wp1479_sai_so_kenh", ('KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1479_k"\n', 'KENH_KQ="$TAM_CAI/kq-thu-lai-$((_tl1479_k + 10))"\n'),
+     ["r1479_thu_tu_sleep_update_va_ten_kenh"], "cai_sh"),
+    ("wp1479_bo_gian_cach", ('    sleep "$_tl1479_s" ||', '    : ||'), ["r1479_gian_cach_va_so_lan"], "cai_sh"),
+    ("wp1479_gian_cach_hang_so", ('_tl1479_s=$(( _tl1479_cho << (_tl1479_k - 1) ))', '_tl1479_s=$_tl1479_cho'),
+     ["r1479_gian_cach_va_so_lan"], "cai_sh"),
+    ("wp1479_so_lan_co_dinh_1", ('_tl1479_n="$(_tl1479_so "${CAI_CONG_CU_THU_LAI:-}" 3 9)"', '_tl1479_n=1'),
+     ["r1404_cai_apt_update_roi_thu_lai", "r1479_gian_cach_va_so_lan"], "cai_sh"),
+    ("wp1479_thu_lai_khi_da_duoc", ('  while [ "$RC_CAI" -ne 0 ] && [ "$_tl1479_k" -lt', '  while [ "$_tl1479_k" -lt'),
+     ["r1404_cai_apt_update_roi_thu_lai"], "cai_sh"),
+    ("wp1479_bo_ep_thap_phan", ('  _tl1479_v=$(( 10#$1 ))\n', '  _tl1479_v=$(( $1 ))\n'), ["r1479_bien_hong_ve_mac_dinh"], "cai_sh"),
+    ("wp1479_bo_kiem_khoang", ('  if [ "$_tl1479_v" -le "$3" ]; then', '  if true; then'), ["r1479_bien_hong_ve_mac_dinh"], "cai_sh"),
+    ("wp1479_bo_gioi_han_chu_so", ('  [ "${#1}" -le 3 ] || { echo "$2"; return 0; }\n', ''), ["r1479_bien_hong_ve_mac_dinh"],
+     "cai_sh"),
+    ("wp1479_kenh_chung_moi_lan", ('    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1479_k"\n', '    KENH_KQ="$TAM_CAI/kq-thu-lai"\n'),
+     ["r1479_kenh_rieng_tung_lan_thu_lai"], "cai_sh"),
+    ("wp1479_bo_local", ('  local _tl1479_n _tl1479_cho _tl1479_k=0 _tl1479_s\n', '  _tl1479_k=0\n'),
+     ["r1479_source_khong_lot_bien"], "cai_sh"),
     ("wp1404_sh_update_vao_stdout", ('sudo apt-get update -qq >&2 ||', 'sudo apt-get update -qq ||'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
     ("wp1404_sh_bo_sudo_update", ('"sudo apt-get"*) sudo apt-get update', '"sudo apt-get"*) apt-get update'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
-    ("wp1404_sh_nhanh_tran_dung_sudo", ('        *) apt-get update -qq >&2', '        *) sudo apt-get update -qq >&2'),
+    ("wp1404_sh_nhanh_tran_dung_sudo", ('      *) apt-get update -qq >&2', '      *) sudo apt-get update -qq >&2'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
     ("wp1404_sh_update_loi_dung", ('"sudo apt-get"*) sudo apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, '
                                    'van thu lai)" >&2 ;;', '"sudo apt-get"*) sudo apt-get update -qq >&2 ;;'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
-    ("wp1404_sh_bo_ten_rc_dong_bao", ("'$TEN' cai loi (rc=$RC_CAI); apt-get update", "cai loi; apt-get update"),
+    ("wp1404_sh_bo_ten_rc_dong_bao", ("'$TEN' cai loi (rc=$RC_CAI); cho ${_tl1479_s}s, apt-get update", "cai loi; cho ${_tl1479_s}s, apt-get update"),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
-    ("wp1404_sh_giu_kenh_lan_dau", ('      KENH_KQ="$TAM_CAI/kq-thu-lai"\n', '      : > "$KENH_KQ"\n'),
+    ("wp1404_sh_giu_kenh_lan_dau", ('    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1479_k"\n', '    : > "$KENH_KQ"\n'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
-    ("wp1404_sh_dung_lai_inode_stdout", ('      rm -f -- "$TAM_CAI/stdout"\n', ''),
+    ("wp1404_sh_dung_lai_inode_stdout", ('    rm -f -- "$TAM_CAI/stdout"\n', ''),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
     # Codex wp1404 lượt 2.
-    ("wp1404_sh_kenh_moi_khong_tao", ('      export -n KENH_KQ\n      : > "$KENH_KQ"\n', '      export -n KENH_KQ\n'),
+    ("wp1404_sh_kenh_moi_khong_tao", ('    export -n KENH_KQ\n    : > "$KENH_KQ"\n', '    export -n KENH_KQ\n'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
-    ("wp1404_sh_kenh_moi_lo_export", ('      KENH_KQ="$TAM_CAI/kq-thu-lai"\n      export -n KENH_KQ\n',
-                                      '      KENH_KQ="$TAM_CAI/kq-thu-lai"\n'),
+    ("wp1404_sh_kenh_moi_lo_export", ('    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1479_k"\n    export -n KENH_KQ\n',
+                                      '    KENH_KQ="$TAM_CAI/kq-thu-lai-$_tl1479_k"\n'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
     ("wp1404_sh_bien_dem_toan_cuc", ('_wp1404_chay_cong_thuc "$@"\nif [ "$RC_CAI" -ne 0 ]; then\n  case',
                                      'LAN_CAI=0\n_wp1404_chay_cong_thuc "$@"\nif [ "$RC_CAI" -ne 0 ]; then\n  case'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
-    ("wp1404_sh_tran_update_vao_stdout", ('        *) apt-get update -qq >&2 ||', '        *) apt-get update -qq ||'),
+    ("wp1404_sh_tran_update_vao_stdout", ('      *) apt-get update -qq >&2 ||', '      *) apt-get update -qq ||'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
-    ("wp1404_sh_tran_bo_qq", ('        *) apt-get update -qq >&2 ||', '        *) apt-get update >&2 ||'),
+    ("wp1404_sh_tran_bo_qq", ('      *) apt-get update -qq >&2 ||', '      *) apt-get update >&2 ||'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
     # Codex wp1404 lượt 3 (P3): hàm phải nhận "$@" ở CẢ HAI lời gọi.
     ("wp1404_sh_mat_tham_so_lan_dau", ('_wp1404_chay_cong_thuc "$@"\nif [ "$RC_CAI" -ne 0 ]; then\n  case',
                                        '_wp1404_chay_cong_thuc\nif [ "$RC_CAI" -ne 0 ]; then\n  case'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
-    ("wp1404_sh_mat_tham_so_cai_lai", ('      _wp1404_chay_cong_thuc "$@" ;;\n', '      _wp1404_chay_cong_thuc ;;\n'),
+    ("wp1404_sh_mat_tham_so_cai_lai", ('    _wp1404_chay_cong_thuc "$@"\n  done\n', '    _wp1404_chay_cong_thuc\n  done\n'),
+     ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
+    # wp1479: lớp gọi mới cũng phải chuyển "$@" xuống (cùng chốt Codex wp1404 lượt 3).
+    ("wp1479_mat_tham_so_vong", ('      _tl1479_thu_lai_apt "$@" ;;\n', '      _tl1479_thu_lai_apt ;;\n'),
      ["r1404_thu_lai_chot_chi_tiet"], "cai_sh"),
     ("wp1404_sh_tran_update_loi_dung", ('*) apt-get update -qq >&2 || echo "cai_cong_cu: apt-get update loi (bo qua, van thu lai)" >&2 ;;',
                                         '*) apt-get update -qq >&2 ;;'),

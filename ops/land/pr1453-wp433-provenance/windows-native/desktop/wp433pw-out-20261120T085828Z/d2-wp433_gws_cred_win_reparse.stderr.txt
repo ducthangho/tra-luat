@@ -1,0 +1,1 @@
+[wp433_gws_cred_win_reparse] CA: dự_kiến=2 chạy=2 đạt=2 bỏ_qua=0 chỉ_nt=0 · LUOT: dự_kiến=7 chạy=7 đạt=7 bỏ_qua=0 chỉ_nt=0 · DOT BIEN: dự_kiến=3 chạy=3 giết_đúng=3 bỏ_qua=0 chỉ_nt=0 · HONG: 0 · TU_KIEM: 3/3 · PC_DO: 0

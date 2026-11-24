@@ -1,0 +1,37 @@
+name: lease-pr
+
+# Packet #1445 r1 (ops/specs/lease-pr-r1.md): kiểm lease THÊM/SỬA trong MỌI PR bằng đúng bộ kiểm của đường nhanh
+# (`ops/kiem_lease_pr.py` import `doc_diff` + `kiem_lease` từ `ops/ci_duong_nhanh.py`). Trước packet này, lease đi kèm PR
+# đường thường vào master không qua kiểm nghiêm nào (48/209 lease trượt, đo trên 6774181).
+# Workflow RIÊNG chứ không thêm bước vào `ci.yml`: `ci.yml` đang bị lease wp1448-r2-g1-claude giữ tới 2026-11-23T08:00Z.
+# Chỉ đọc: `contents: read`, không ghi gì. Check `kiem-lease-pr` chưa chặn merge cho tới khi chủ kho thêm nó vào ruleset.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  kiem-lease-pr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Toàn bộ lịch sử và mọi nhánh: `doc_diff` cần merge-base, bia mộ của `kiem` quét lease trên các ref khác.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: cài PyYAML + jsonschema (như gate-ops)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
+      - name: kiem-lease-pr selftest
+        run: python ops/kiem_lease_pr_test.py
+      - name: kiem lease them/sua trong PR
+        env:
+          CI_DUONG_NHANH_SU_KIEN: ${{ github.event_name }}
+          CI_DUONG_NHANH_GOC: ${{ github.event.pull_request.base.sha }}
+          CI_DUONG_NHANH_DAU: ${{ github.event.pull_request.head.sha }}
+          CI_DUONG_NHANH_MERGE: ${{ github.sha }}
+        run: python ops/kiem_lease_pr.py

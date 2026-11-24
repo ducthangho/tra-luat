@@ -1,0 +1,40 @@
+schema_version: 2
+event: operator_lease_granted
+packet_issue: 1457
+packet_id: px-gemini-500
+revision: 2
+generation: 1
+lease_id: px-gemini-500-r2-g1-operator
+role: operator
+reviewer: 'connector Codex tren PR; khong goi Codex offline (khong doi ma)'
+review_class: sensitive
+effective_review_class: sensitive
+reviewed_sha_required: 0f9aa2a2cc697129e1f5be72feddf60986286865
+target_hosts:
+- f7281f27-f79f-40a2-a2f5-b454b58a166a
+live_change: 'CHI DOC log Proxima va gemini-engine.js (giai nen app.asar trong bo nho) tren VM, tai khoan tlcommander khong admin. Phien 0 loi goi inference; 3 loi goi thu do chu kho tu chay. Khong doi cau hinh/dich vu/tai khoan/app.asar; khong doc profile/cookie/token.'
+spec_path: ops/specs/px-gemini-500-r2.md
+spec_hash: 5df0729646252c8ed6aaeded6e57beea50856dee8748984f9a4c0bcf4eacf049
+write_set:
+- ops/acceptance/px-gemini-500/r2/RESULTS.md
+- ops/leases/px-gemini-500-r2-g1-operator.yaml
+- ops/specs/px-gemini-500-r2.md
+write_set_hash: d99882893fe382c2e584c921f64827e9355754975b645801d03e855b924941f7
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp, nối bằng LF, kết thúc bằng LF
+branch: ops/px-gemini-500-r2
+base_sha: 0f9aa2a2cc697129e1f5be72feddf60986286865
+granted_by: ducthangho
+granted_on_instruction: 'chu kho 20-11-2026: "Ghi thanh r2 theo dung quy trinh di. De xuat sua gateway Proxima cho toi"'
+recorded_by: 'phien chan doan session_015GtxraqxgU6x1GshxzYCF4'
+thay_the_cho: []
+leased_at_utc: '2026-11-20T16:41:00Z'
+heartbeat_at: '2026-11-20T16:41:00Z'
+lease_until: '2026-11-20T20:41:00Z'
+lease_expires_at_utc: '2026-11-20T20:41:00Z'
+max_lease_hours: 4
+review_calls_limit: 0
+native_runs_limit_per_host: 0
+inference_calls_limit_per_host: 0
+withdrawn_at_utc: '2026-11-20T16:42:01Z'
+withdrawn_by: 'phien chan doan session_015GtxraqxgU6x1GshxzYCF4'
+withdrawn_reason: 'r2 xong: ghi 3 loi goi thu cua chu kho + doc gemini-engine.js; ket luan fixed_partial; 0 loi goi inference cua phien; ket qua ops/acceptance/px-gemini-500/r2/RESULTS.md'

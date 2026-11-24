@@ -1,0 +1,30 @@
+# do 2026-11-20T10:51:09Z, cung clone; core.abbrev 7
+## log 94cbb3688427a820de746df60a929e264981d248..00ee83998487d289324566f230b67b5923a9a9d9^1 (base -> cha thu nhat cua merge)
+45bae8d07a8cdf06a1ca9a7a2e015a6258169379 Merge PR #1452: px-ask #1446 r4+r5 - px ask that tren VM: gemini 500, perplexity 200 OK
+80a2d110e6d08c2acc85aa77dac05df3466f6117 ops(px-ask #1446): r5 - px ask perplexity that tren VM: HTTP 200, outcome ok, tra loi "OK"; thu hoi lease r5
+da66e2ee9a2f7e808a2746a8b7f3d31b8fc63ea7 ops(px-ask #1446): r5 - dac ta + lease (them dung 1 loi goi px ask that voi perplexity theo chu kho)
+1fec58cfd283fb5c79cd928a46cf663f780f5cbf ops(px-ask #1446): r4 - 1 loi goi px ask that tren VM (module 2.1.0, gemini:auto): da gui, gateway HTTP 500; thu hoi lease r4
+5d0d6e0edf46a1c6f442e5be055120b4217daada ops(px-ask #1446): r4 - dac ta + lease (1 loi goi px ask that tren VM voi module 2.1.0); thu hoi lease r3
+## merge-base --is-ancestor 00ee83998487d289324566f230b67b5923a9a9d9 66eae513b5e7a2263038ebce7e009e8d2fe52578
+rc=0
+## rev-list --first-parent 00ee839..66eae51
+66eae513b5e7a2263038ebce7e009e8d2fe52578
+## rev-list 00ee839..66eae51 (moi commit)
+66eae513b5e7a2263038ebce7e009e8d2fe52578 00ee83998487d289324566f230b67b5923a9a9d9 31d68ef2ff399692f20a86b0abf5db1064b21f01 Merge pull request #1454 from ducthangho/ops/manifest-433-p2bw
+31d68ef2ff399692f20a86b0abf5db1064b21f01 00ee83998487d289324566f230b67b5923a9a9d9 release: tai sinh RELEASE_MANIFEST.json sau land #1453 (#433 packet P2BW)
+## diff --stat 00ee839..66eae51
+ RELEASE_MANIFEST.json | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+## tep write set bi cham 00ee839..66eae51
+(het)
+## numstat 66eae513b5e7a2263038ebce7e009e8d2fe52578^1..66eae513b5e7a2263038ebce7e009e8d2fe52578 (PR #1454)
+5	5	RELEASE_MANIFEST.json
+5	5	RELEASE_MANIFEST.json
+## blob write set tai merge / hau due
+scripts/test_fragments/wp433_gws_cred_dich_ngoai_kho_b.py merge=8b2c705b631888e6b5f1a2283ef3ad7c4d48da5e hau_due=8b2c705b631888e6b5f1a2283ef3ad7c4d48da5e
+scripts/tl_test_fragments_bundled.py merge=996c8ebb9e6239410630a0834bccbe3835079e5e hau_due=996c8ebb9e6239410630a0834bccbe3835079e5e
+## tree hau due
+fd7311b450cad385835161665dbeb63e17418933
+## release-verify --strict tai 66eae513b5e7a2263038ebce7e009e8d2fe52578
+rc=0
+ok True 185 185 []

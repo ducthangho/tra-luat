@@ -9228,7 +9228,7 @@ def chay_suite(script: Path, tmp: Path, chi_chay=None):
             ket[ten] = (_TinDungGia(f"{type(ex).__name__}: {ex}") if _co_sap_do(ex) else
                         ex if isinstance(ex.__cause__, OSError) else f"BỎ QUA không có OSError đo được: {ex}")
         except Exception as ex:  # noqa: BLE001 — ca đỏ là dữ liệu, không phải sự cố
-            if ten.startswith("cong_b4_"):  # #1462 GT-6: GIẾT chỉ khi CHÍNH ca ấy ném `ChotB4`; mọi kết cục khác là TÍN DỤNG GIẢ
+            if ten.startswith(("cong_b4_", "cong_d2b_")):  # #1462 GT-6 (và D2b #1236): GIẾT chỉ khi CHÍNH ca ấy ném `ChotB4`; mọi kết cục khác là TÍN DỤNG GIẢ
                 ket[ten] = (str if type(ex) is ChotB4 and ex.args[:1] == (ten,) and not _co_sap_do(ex) else _TinDungGia)(f"{type(ex).__name__}: {ex}")
                 continue
             if ten.startswith("wp1174_"):
@@ -9241,12 +9241,12 @@ def chay_suite(script: Path, tmp: Path, chi_chay=None):
 
 # --- #1106 ADR-0060 packet C: `kiem-merge` (K0–K6) · `kiem-dong-wp` (D1–D4). Kho thật: L đưa ADR-0060 vào master, L2 sau nó; H rẽ từ L2,
 # đẩy lên `refs/pull/55/head`. Mỗi ca đổi đúng một yếu tố, đòi rc + tên điều kiện; CLI sập ⇒ TÍN DỤNG GIẢ.
-def _rev_list_loi(script, args, sd, env=None):
-    """Chạy CLI TRONG tiến trình với `git rev-list` trả rc -15 mà stdout VẪN ĐÚNG (bị ngắt sau khi in) — review offline lượt 2."""
+def _rev_list_loi(script, args, sd, env=None, lenh="rev-list"):
+    """Chạy CLI TRONG tiến trình với `git rev-list` (hoặc `lenh`) trả rc -15 mà stdout VẪN ĐÚNG (bị ngắt sau khi in) — review offline lượt 2."""
     m = importlib.util.module_from_spec(sp := importlib.util.spec_from_file_location("pl1106g", script))
     sys.path.insert(0, str(script.parent)), sp.loader.exec_module(m)
     that, loi = m._git_do, __import__("io").StringIO()
-    m._git_do = lambda root, *x: (lambda r: (-15, r[1]) if x[0] == "rev-list" else r)(that(root, *x))
+    m._git_do = lambda root, *x: (lambda r: (-15, r[1]) if lenh in x[:2] else r)(that(root, *x))
     try:
         with __import__("contextlib").redirect_stderr(loi), __import__("contextlib").redirect_stdout(__import__("io").StringIO()):
             m.main(["--state-dir", str(sd), *map(str, args)])
@@ -9337,25 +9337,71 @@ def _c1106_ca(rc_doi, phai="", cam=None, **kw):
     return ca
 
 
-def _d1106(c, doi=None, raw=None, raw_ls=None, env=None, git_loi=False):
-    import yaml
+_D2B_PROV, _D2B_RUN, _D2B_URL = "ops/land/pr1440-wp1319-provenance", 44669622916, "https://github.com/ducthangho/tra-luat/issues/1236#issuecomment-7"
+_D2B_TEP = f"{_D2B_PROV}/danh-gia-gate-output-{_D2B_RUN}.txt"
+
+
+def _d2b_chep(w, m, thu=_D2B_PROV, run=_D2B_RUN, dich=None):
+    """Chép tệp đánh giá `run` + mọi `*.yaml` của fixture THẬT `thu` vào kho tạm — đủ những gì `kiem_tep` đọc; KHÔNG chép cả thư mục (đo
+    24-11-2026: pr1453 có đường dẫn 128 ký tự, cộng thư mục tạm lồng nhau là sát MAX_PATH 260 của Windows). Head của header đổi thành merge
+    `m` của kho tạm ở mọi tệp chép ⇒ D3 và `neo_head` cùng đạt trên một biên bản."""
+    nguon = ROOT / thu
+    cu = re.match(rb"# Danh gia Gate output run [0-9]+ attempt [0-9]+ head ([0-9a-f]{40}) ", (nguon / f"danh-gia-gate-output-{run}.txt").read_bytes())[1]
+    for t in [nguon / f"danh-gia-gate-output-{run}.txt", *sorted(nguon.rglob("*.yaml"))]:
+        (d := w / (dich or thu) / t.relative_to(nguon)).parent.mkdir(parents=True, exist_ok=True)
+        d.write_bytes(t.read_bytes().replace(cu, m.encode()))
+
+
+def _d2b_readback(w, m, thu=_D2B_PROV, **doi):
+    rb = {"html_url": _D2B_URL, "user": {"login": "ducthangho"}, "author_association": "OWNER",
+          "body": f"ok\nmien_gate_output: {m} os=ubuntu-latest ly_do=may chay loi han=2026-12-31\n", **doi}
+    (w / thu / "readback-wp-issuecomment-7.json").write_bytes(json.dumps(rb).encode())
+
+
+def _d1106_kho(c, o=None, sau=None, day=True, module=True):
+    """Kho tạm của `kiem-dong-wp`: master = merge M (có module D2b nếu `module`), commit O (provenance + readback) trên `origin/ops/x` nếu `day`.
+    `o(w, m)` sửa cây của O trước commit (trả {đường dẫn: đích} ⇒ symlink 120000 thẳng vào index); `sau(w, O, bb)` chạy sau khi O đã lên remote."""
     goc = Path(tempfile.mkdtemp(prefix="d1106-", dir=c.tmp))
     w = goc / "w"
     _g(goc, "init", "-q", "--bare", "o.git"), _g(goc, "init", "-q", "-b", "master", "w"), _g(w, "remote", "add", "origin", "../o.git")
+    if module:
+        (w / "ops").mkdir(), (w / "ops/gate_output_doi_chieu.py").write_bytes((ROOT / "ops/gate_output_doi_chieu.py").read_bytes() if module is True else module)
     (w / "a").write_text("a\n", encoding="utf-8", newline="\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "A"), _g(w, "checkout", "-qb", "pr")
     (w / "b").write_text("b\n", encoding="utf-8", newline="\n"), _g(w, "add", "-A"), _g(w, "commit", "-qm", "H"), _g(w, "checkout", "-q", "master")
     h = _g(w, "rev-parse", "pr")
-    _g(w, "merge", "-q", "--no-ff", "-m", "M", "pr"), _g(w, "push", "-q", "origin", "master"), _g(w, "fetch", "-q", "origin")
+    _g(w, "merge", "-q", "--no-ff", "-m", "M", "pr"), _g(w, "push", "-q", "origin", "master")
     m = _g(w, "rev-parse", "HEAD")
+    _g(w, "checkout", "-qb", "hs"), _d2b_chep(w, m), _d2b_readback(w, m)
+    lien = (o or (lambda *_: None))(w, m) or {}
+    _g(w, "add", "-A")
+    for p, dich in lien.items():
+        (goc / "lien").write_text(dich, encoding="utf-8", newline="\n")
+        _g(w, "update-index", "--add", "--cacheinfo", f"120000,{_g(w, 'hash-object', '-w', str(goc / 'lien'))},{p}")
+    _g(w, "commit", "-qm", "O")
+    O = _g(w, "rev-parse", "HEAD")
+    _ = day and _g(w, "push", "-q", "origin", "HEAD:refs/heads/ops/x")
+    _g(w, "checkout", "-q", "master"), _g(w, "fetch", "-q", "origin")
     bb = {"packet": "P", "revision": 1, "generation": 1, "spec_hash": "a" * 64, "head_da_review": h, "tree_h": _g(w, "rev-parse", f"{h}^{{tree}}"),
           "review": {"lop": []}, "windows": {"ci": "x"}, "duyet_chu_kho": "https://github.com/o/r/issues/1#issuecomment-1", "merge_commit": m,
-          "tree_m": _g(w, "rev-parse", f"{m}^{{tree}}"), "ci_master": {"run_id": 9, "conclusion": "success"}, "nghiem_thu": {"A1": "passed"},
-          "lease_cuoi": "l1", "landed": True, "moc_10_2_2": dict.fromkeys(("run", "checkout", "workflow_definition", "gate_output"), "passed")}
-    ls = {"lease_id": "l1", "packet_id": "P", "generation": 1, "lease_until": "2026-01-01T00:00:00Z"}
+          "tree_m": _g(w, "rev-parse", f"{m}^{{tree}}"), "ci_master": {"run_id": _D2B_RUN, "run_attempt": 1, "conclusion": "success"}, "nghiem_thu": {"A1": "passed"},
+          "lease_cuoi": "l1", "landed": True, "moc_10_2_2": dict.fromkeys(("run", "checkout", "workflow_definition", "gate_output"), "passed"),
+          "gate_output_nguon": {"oid": O, "tep": _D2B_TEP}}
+    (sau or (lambda *_: None))(w, O, bb)
+    return {"goc": goc, "w": w, "bb": bb, "ls": {"lease_id": "l1", "packet_id": "P", "generation": 1, "lease_until": "2026-01-01T00:00:00Z"}}
+
+
+def _d1106_chay(c, x, doi=None, raw=None, raw_ls=None, env=None, git_loi=False):
+    import yaml
+    goc, bb, ls = x["goc"], json.loads(json.dumps(x["bb"])), dict(x["ls"])
     (doi or (lambda *_: None))(bb, ls)
     (goc / "bb.yaml").write_text(raw or yaml.safe_dump(bb, allow_unicode=True), encoding="utf-8", newline="\n")
     (goc / "ls.yaml").write_text(raw_ls or yaml.safe_dump(ls), encoding="utf-8", newline="\n")
-    return (_rev_list_loi if git_loi else run)(c.script, ["kiem-dong-wp", "--root", w, "--bien-ban", goc / "bb.yaml", "--lease", goc / "ls.yaml"], c.sd(), env)
+    chay = run if not git_loi else _rev_list_loi if git_loi is True else lambda *a: _rev_list_loi(*a, lenh=git_loi)
+    return chay(c.script, ["kiem-dong-wp", "--root", x["w"], "--bien-ban", goc / "bb.yaml", "--lease", goc / "ls.yaml"], c.sd(), env)
+
+
+def _d1106(c, doi=None, raw=None, raw_ls=None, env=None, git_loi=False, **kho):
+    return _d1106_chay(c, _d1106_kho(c, **kho), doi, raw, raw_ls, env, git_loi)
 
 
 def _c1106_diff_loi(c):
@@ -9488,6 +9534,189 @@ MUTANTS.update({
     "c1106_k3_biet_bo_original": (' x.get("original_commit_id"), *re.findall(', " *re.findall(", ["cong_c_k3_original_tien_to"]),
     "c1106_k6_buoc1_bo_mode": (' and m == "100644"', "", ["cong_c_k6_symlink"]),
     "c1106_d1_nhan_bool": ("so = lambda v: type(v) is int and v >= 1", "so = lambda v: isinstance(v, int) and v >= 1", ["cong_c_d1_generation_bool"]),
+})
+
+
+# --- #1236 đợt C (`ops/specs/wp1236-r12.md`, mục *D2b chi tiết*, bảng C1–C9): D2b của `kiem-dong-wp`. Mỗi biến thể so ĐÚNG bộ (rc, các lý do
+# `THIẾU  D2b …` theo thứ tự, các dòng `D2b …` của stdout; rc 8 thì ĐÚNG dòng `KHÔNG ĐO ĐƯỢC …`), cạnh một đối chứng đạt trên CÙNG kho. GIẾT chỉ khi chính ca ném `ChotB4(<tên ca>)`
+# (nhánh `cong_d2b_` của `chay_suite`): CLI sập hay dựng fixture hỏng ⇒ TÍN DỤNG GIẢ.
+def _d2b_do(c, x, nhan, doi, rc_doi, ly, dat=None, **kw):
+    giu = {}
+    rc, o, e = _d1106_chay(c, x, lambda bb, ls: ((doi or (lambda *_: None))(bb, ls), giu.update(bb))[0], **kw)
+    if _co_banner(o) or _co_banner(e):
+        raise CliSapDo(f"d2b {nhan} SẬP: rc={rc}; stderr={_txt(e)[-300:]!r}")
+    dong = lambda b: [d.strip(" \r") for d in b.decode("utf-8", "replace").split("\n")]  # noqa: E731 — KHÔNG `splitlines`: đường dẫn mang U+2028
+    ng = giu.get("gate_output_mien" if dat == "mien" else "gate_output_nguon") or {}
+    mong = (rc_doi, list(ly), [f"D2b ĐẠT {'mien ' + ng['readback_thu_muc'] if dat == 'mien' else ng['tep']}@{ng['oid']}"] if dat else [])
+    duoc = (rc, [d[11:] for d in dong(e) if d.startswith("THIẾU  D2b ")] or [d for d in dong(e) if d.startswith("KHÔNG ĐO ĐƯỢC")], [d for d in dong(o) if d.startswith("D2b")])
+    if duoc != mong:
+        raise ChotB4(c.b4, f"{nhan}: đòi {mong}, được {duoc}; stderr={_txt(e)[-300:]!r}")
+
+
+def _d2b_ca(*bien_the, **kho):
+    def ca(c):
+        x = _d1106_kho(c, **kho)
+        for b in (("doi_chung_dat", None, 0, [], "tep"), *bien_the) if kho.get("module", True) is True and kho.get("day", True) else bien_the:
+            _d2b_do(c, x, *b[:5], **(b[5] if len(b) > 5 else {}))
+    return ca
+
+
+def _d2b_mien(**v):
+    """Biên bản `owner_waived` hợp lệ trên kho mặc định (không `run_attempt`: nhánh này không đòi), rồi sửa `v` (None ⇒ bỏ khoá)."""
+    def doi(bb, ls):
+        bb["moc_10_2_2"]["gate_output"] = "owner_waived"
+        bb["ci_master"].pop("run_attempt")
+        mien = {"oid": bb["gate_output_nguon"]["oid"], "chuoi": f"owner_waived — {_D2B_URL}", "readback_thu_muc": _D2B_PROV, **v}
+        bb["gate_output_mien"] = {k: x for k, x in mien.items() if x is not None}
+    return doi
+
+
+def _d2b_cay(w, m):
+    """Cây của O cho các ca đường dẫn/mode/miễn/kiem_tep: bản sao ngoài `ops/land`, T-fail, thư mục không có provenance `*.yaml`, readback lệch,
+    tệp-là-thư-mục, và ba symlink (tệp đánh giá, thư mục provenance, provenance `p.yaml`)."""
+    _d2b_chep(w, m, dich="ops/khac/pr1440-wp1319-provenance"), _d2b_readback(w, m, "ops/khac/pr1440-wp1319-provenance")
+    _d2b_chep(w, m, "ops/land/pr1453-wp433-provenance", 44711337223)
+    for thu in ("ops/land/trong-provenance", "ops/land/lk2-provenance"):
+        (w / thu).mkdir(parents=True), (w / thu / _D2B_TEP.split("/")[-1]).write_bytes((w / _D2B_TEP).read_bytes())
+    _d2b_readback(w, "1" * 40, "ops/land/trong-provenance"), _d2b_readback(w, m, "ops/land/lk2-provenance", author_association="MEMBER")
+    (w / "ops/land/lk2-provenance/prov.txt").write_bytes((w / _D2B_PROV / "ci-provenance-44669622916/provenance.yaml").read_bytes())
+    (w / _D2B_PROV / "sau/b").mkdir(parents=True), _d2b_readback(w, m, f"{_D2B_PROV}/sau/b")
+    (w / _D2B_PROV / "sub/danh-gia-gate-output-3.txt").mkdir(parents=True), (w / _D2B_PROV / "sub/danh-gia-gate-output-3.txt/x").write_bytes(b"x")
+    return {f"{_D2B_PROV}/danh-gia-gate-output-1.txt": _D2B_TEP.split("/")[-1], "ops/land/lk-provenance": "pr1440-wp1319-provenance",
+            "ops/land/lk2-provenance/p.yaml": "prov.txt"}  # đích TRONG thư mục: thiếu quyền symlink (Windows) thì tarfile chép đích
+
+
+_NG = lambda **v: lambda bb, ls: bb["gate_output_nguon"].update(v)  # noqa: E731
+_D2B_KDD, _D2B_VANG = "KHÔNG ĐO ĐƯỢC: D2b ", "KHÔNG ĐO ĐƯỢC: không đọc được ops/gate_output_doi_chieu.py trên origin/master"
+_CI = lambda **v: lambda bb, ls: bb["ci_master"].update(v)  # noqa: E731
+_D2B_F, _D2B_PF = _D2B_TEP.split("/")[-1], "ops/land/pr1453-wp433-provenance"
+# văn bản tự do `[^/]+` (luật 8): một ký tự mỗi general category đi được qua tuyến YAML → regex → argv git (NUL không đi được: ca c7), gồm ngoài BMP
+_D2B_TD = "Aaǅʰª\u0300\u0903\u04880Ⅰ²_-()«»!+$^© \u2028\u2029\x01\u200b\ue000\u0378\U0001f600z"
+_D2B_SAI = lambda *ds: [(f"sai[{i}]", _NG(tep=d), 12, ["duong_dan_sai"]) for i, d in enumerate(ds)]  # noqa: E731
+_D2B_SAI_M = lambda *ds: [(f"sai_mien[{i}]", _d2b_mien(readback_thu_muc=d), 12, ["duong_dan_sai"]) for i, d in enumerate(ds)]  # noqa: E731
+_D2B_MODE = lambda nhan, tep, tai: (nhan, _NG(tep=tep), 12, [f"symlink_hoac_mode:{tai or tep}"])  # noqa: E731
+_D2B_CA = {
+    "cong_d2b_c1_passed_dat": _d2b_ca(  # C1 + hợp đồng nhánh "không chạy" + dòng ĐẠT độc lập với D4
+        ("d4_do_van_in_dat", lambda bb, ls: ls.update(lease_until="2999-01-01T00:00:00Z"), 12, [], "tep"),
+        ("khong_chay", lambda bb, ls: (bb["moc_10_2_2"].update(gate_output="not_measured"), bb.pop("gate_output_nguon")), 12, []),
+        ("d1_do_khong_chay", lambda bb, ls: (bb.update(generation=True), bb.pop("gate_output_nguon")), 12, [])),
+    "cong_d2b_c2_thieu_nguon": _d2b_ca(
+        ("bo_khoa", lambda bb, ls: bb.pop("gate_output_nguon"), 12, ["thieu_nguon"]),
+        ("khong_mapping", lambda bb, ls: bb.update(gate_output_nguon=["oid", "tep"]), 12, ["thieu_nguon"]),
+        *[(f"sai_kieu[{i}]", _NG(**v), 12, ["thieu_nguon"]) for i, v in enumerate(({"oid": None}, {"oid": 7}, {"tep": None}, {"tep": 7}))],
+        *[(f"oid_sai_dang_{k}", lambda bb, ls, f=f: bb["gate_output_nguon"].update(oid=f(bb["gate_output_nguon"]["oid"])), 12, ["thieu_nguon"])
+          for k, f in (("39", lambda o: o[:39]), ("41", lambda o: o + "0"), ("hoa", lambda o: o.translate(str.maketrans("abcdef0", "ABCDEFA"))), ("lf", lambda o: o + "\n"))],
+        ("hai_loi", lambda bb, ls: (bb.pop("gate_output_nguon"), bb["ci_master"].update(run_attempt=True)), 12, ["thieu_nguon", "attempt_kieu"]),
+        ("mien_bo_khoa", lambda bb, ls: (_d2b_mien()(bb, ls), bb.pop("gate_output_mien")), 12, ["thieu_nguon"]),
+        *[(f"mien_thieu_{k}", _d2b_mien(**{k: v}), 12, ["thieu_nguon"]) for k, v in (("chuoi", None), ("chuoi", 7), ("readback_thu_muc", None), ("oid", "x"))]),
+    "cong_d2b_c3_attempt_kieu": _d2b_ca(  # `neo_attempt` không bắn kèm `attempt_kieu`; `neo_run`/`neo_head` vẫn bắn
+        ("thieu", lambda bb, ls: bb["ci_master"].pop("run_attempt"), 12, ["attempt_kieu"]),
+        *[(f"kieu[{v!r}]", _CI(run_attempt=v), 12, ["attempt_kieu"]) for v in (True, 0, -1, "1", 1.0, 2.0)],
+        ("kieu_va_neo", lambda bb, ls: (bb.update(merge_commit=bb["head_da_review"]), bb["ci_master"].update(run_id=1, run_attempt=True)), 12, ["attempt_kieu", "neo_run", "neo_head"])),
+    "cong_d2b_c3_neo": _d2b_ca(
+        ("run", _CI(run_id=_D2B_RUN + 1), 12, ["neo_run"]), ("attempt", _CI(run_attempt=2), 12, ["neo_attempt"]),
+        ("head", lambda bb, ls: bb.update(merge_commit=bb["head_da_review"]), 12, ["neo_head"]),
+        ("ca_ba", lambda bb, ls: (bb.update(merge_commit=bb["head_da_review"]), bb["ci_master"].update(run_id=1, run_attempt=3)), 12, ["neo_run", "neo_attempt", "neo_head"])),
+    "cong_d2b_c4_kiem_tep": _d2b_ca(  # T-fail khớp mọi neo ⇒ đúng một dòng, không `neo_*`
+        ("failed", lambda bb, ls: (_NG(tep=f"{_D2B_PF}/danh-gia-gate-output-44711337223.txt")(bb, ls), _CI(run_id=44711337223)(bb, ls)), 12, ["kiem_tep:failed:-"]),
+        ("khong_provenance", _NG(tep=f"ops/land/trong-provenance/{_D2B_F}"), 12, ["kiem_tep:not_measured:provenance_0"]),
+        ("provenance_la_symlink", _NG(tep=f"ops/land/lk2-provenance/{_D2B_F}"), 12, ["kiem_tep:not_measured:provenance_0"]), o=_d2b_cay),
+    "cong_d2b_c5_duong_dan": _d2b_ca(
+        *_D2B_SAI(f"{_D2B_PROV}/../pr1440-wp1319-provenance/{_D2B_F}", f"{_D2B_PROV}/./{_D2B_F}", f"ops/khac/pr1440-wp1319-provenance/{_D2B_F}",
+                  f"{_D2B_PROV}/danh-gia-gate-output-.txt", f"{_D2B_PROV}/danh-gia-gate-output-x.txt", f"{_D2B_PROV}/danh-gia-gate-output-\u0661.txt",
+                  f"{_D2B_PROV}/danh-gia-gate-output-1xtxt", _D2B_TEP + "\n", _D2B_TEP + "/x", "x" + _D2B_TEP, "/" + _D2B_TEP, f"{_D2B_PROV}//{_D2B_F}", f"{_D2B_PROV}/a//{_D2B_F}",
+                  f"ops/land/-provenance/{_D2B_F}", f"ops/land/a/b-provenance/{_D2B_F}", f"ops/land/pr1440-wp1319-provenanc/{_D2B_F}", _D2B_PROV),
+        *_D2B_SAI_M(f"{_D2B_PROV}/..", f"{_D2B_PROV}/.", "ops/khac/pr1440-wp1319-provenance", _D2B_PROV + "/", _D2B_PROV + "\n", "x" + _D2B_PROV,
+                    "ops/land/-provenance", "ops/land/a/b-provenance", f"{_D2B_PROV}//sau"),
+        _D2B_MODE("van_ban_tu_do", f"ops/land/{_D2B_TD}-provenance/{_D2B_TD}/danh-gia-gate-output-0123456789.txt", f"ops/land/{_D2B_TD}-provenance"),
+        ("van_ban_tu_do_mien", _d2b_mien(readback_thu_muc=f"ops/land/{_D2B_TD}-provenance/{_D2B_TD}"), 12, [f"symlink_hoac_mode:ops/land/{_D2B_TD}-provenance"]), o=_d2b_cay),
+    "cong_d2b_c5_mode": _d2b_ca(
+        _D2B_MODE("tep_la_symlink", f"{_D2B_PROV}/danh-gia-gate-output-1.txt", None), _D2B_MODE("thu_muc_la_symlink", f"ops/land/lk-provenance/{_D2B_F}", "ops/land/lk-provenance"),
+        _D2B_MODE("tep_vang", f"{_D2B_PROV}/danh-gia-gate-output-2.txt", None), _D2B_MODE("tep_la_thu_muc", f"{_D2B_PROV}/sub/danh-gia-gate-output-3.txt", None),
+        _D2B_MODE("thu_muc_vang", f"{_D2B_PROV}/vang/danh-gia-gate-output-4.txt", f"{_D2B_PROV}/vang"),
+        ("mien_thu_muc_la_symlink", _d2b_mien(readback_thu_muc="ops/land/lk-provenance"), 12, ["symlink_hoac_mode:ops/land/lk-provenance"]),
+        ("mien_thu_muc_la_tep", _d2b_mien(readback_thu_muc=_D2B_TEP), 12, [f"symlink_hoac_mode:{_D2B_TEP}"]), o=_d2b_cay),
+    "cong_d2b_c6_mien": _d2b_ca(  # `head` khác None qua D2b (luật 4): SHA đúng · SHA khác (dù có trong chuỗi) · chuỗi rỗng
+        ("dat", _d2b_mien(), 0, [], "mien"), ("dat_thu_muc_con", _d2b_mien(readback_thu_muc=f"{_D2B_PROV}/sau/b"), 0, [], "mien"),
+        ("tac_gia", _d2b_mien(readback_thu_muc="ops/land/lk2-provenance"), 12, ["mien:tac_gia"]),
+        ("sha_khac", _d2b_mien(readback_thu_muc="ops/land/trong-provenance", chuoi=f"owner_waived — {_D2B_URL} {'1' * 40}"), 12, ["mien:sha"]),
+        ("chuoi_rong", _d2b_mien(chuoi=""), 12, ["mien:url"]), ("khong_readback", _d2b_mien(readback_thu_muc=f"{_D2B_PROV}/sub"), 12, ["mien:readback"]), o=_d2b_cay),
+    "cong_d2b_c7_module_vang": _d2b_ca(  # rc 8, không phải 12 hay 0; vi phạm xác định (không cần module) vẫn rc 12
+        ("passed", None, 8, [_D2B_VANG]), ("mien", _d2b_mien(), 8, [_D2B_VANG]),
+        ("thieu_nguon_van_12", lambda bb, ls: bb.pop("gate_output_nguon"), 12, ["thieu_nguon"]), module=False),
+    "cong_d2b_c7_module_khong_nap": _d2b_ca(("passed", None, 8, ["KHÔNG ĐO ĐƯỢC: nạp validator canon gate_output_doi_chieu: SyntaxError"]), module=b"x = (\n"),
+    "cong_d2b_c7_module_nem": _d2b_ca(("passed", None, 8, [_D2B_KDD + "RuntimeError: x"]), ("mien", _d2b_mien(), 8, [_D2B_KDD + "RuntimeError: x"]),
+                                      module=b"def kiem_tep(*a):\n    raise RuntimeError('x')\n\n\nkiem_mien = doc_danh_gia = kiem_tep\n"),
+    "cong_d2b_c7_git_loi": _d2b_ca(  # git bị ngắt sau khi in (rc -15, stdout nguyên) và đối số git không dựng được (NUL) ⇒ KHÔNG ĐO ĐƯỢC
+        *[(f"ngat_{k}", None, 8, [v], None, {"git_loi": k}) for k, v in (("ls-tree", _D2B_KDD + "OSError: git ls-tree"), ("archive", _D2B_KDD + "OSError: git archive"),
+                                                                       ("show", _D2B_VANG))],
+        ("argv_nul", _NG(tep=f"ops/land/a\0-provenance/{_D2B_F}"), 8, [_D2B_KDD + "OSError: git ls-tree"])),
+    "cong_d2b_c9_oid": _d2b_ca(  # O chỉ ở nhánh cục bộ và ở remote KHÁC origin
+        ("cuc_bo", None, 12, ["oid_khong_tren_remote"]), ("mien", _d2b_mien(), 12, ["oid_khong_tren_remote"]),
+        ("hai_loi_khoa_thu_tu", _NG(tep="x"), 12, ["oid_khong_tren_remote"]),
+        day=False, sau=lambda w, O, bb: _g(w, "update-ref", "refs/remotes/khac/x", O)),
+    "cong_d2b_c9_oid_khong_phai_commit": _d2b_ca(  # thẻ có chú thích trỏ O: `branch --contains` nhận, chỉ `cat-file -t` phân biệt
+        ("the", lambda bb, ls: bb["gate_output_nguon"].update(oid=bb.pop("the")), 12, ["oid_khong_tren_remote"]),
+        ("vang", _NG(oid="0" * 39 + "1"), 12, ["oid_khong_tren_remote"]),
+        *[(f"ngat_{k}", None, 12, ["oid_khong_tren_remote"], None, {"git_loi": k}) for k in ("cat-file", "branch")],
+        sau=lambda w, O, bb: (_g(w, "tag", "-a", "-m", "t", "the", O), bb.update(the=_g(w, "rev-parse", "refs/tags/the")))),
+}
+
+
+def _d2b_tu_kiem(c):
+    """Tự kiểm bộ phân hạng trên nhánh `cong_d2b_`: CLI sập và dựng fixture hỏng ⇒ TÍN DỤNG GIẢ; đột biến thật `d2b_mC1_khong_chay` ⇒ GIẾT."""
+    dich, tim = "cong_d2b_c1_passed_dat", "def cmd_kiem_dong_wp(a, state_dir: Path) -> int:\n"
+    for kieu, cap in (("sap", (tim, tim + "    raise RuntimeError('d2b')\n")), ("dung", (tim, tim)), ("that", MUTANTS["d2b_mC1_khong_chay"][:2])):
+        goc = c.script.read_text(encoding="utf-8")
+        if goc.count(cap[0]) != 1:
+            raise AssertionError(f"mỏ neo phải khớp đúng một chỗ: {cap[0]!r}")
+        (d := c.tmp / kieu).mkdir()
+        (d / "packet_loop.py").write_text(goc.replace(*cap), encoding="utf-8", newline="\n")
+        (d / "launcher.py").write_text((HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
+        cu = _d1106_kho
+        try:
+            globals().update(_d1106_kho=(lambda *a, **k: (_ for _ in ()).throw(OSError("dựng fixture"))) if kieu == "dung" else cu)
+            ket = chay_suite(d / "packet_loop.py", c.tmp / f"l{kieu}", chi_chay={dich})
+        finally:
+            globals().update(_d1106_kho=cu)
+        if (hang := _phan_loai_giet(ket.get(dich))) != ("GIET" if kieu == "that" else "TIN_DUNG_GIA"):
+            raise ChotB4(c.b4, f"phân hạng {kieu}: {hang} ({str(ket.get(dich))[:200]})")
+
+
+CASES += [(k, (lambda f, k: lambda c: (setattr(c, "b4", k), f(c))[1])(f, k)) for k, f in {**_D2B_CA, "cong_d2b_tu_kiem_phan_hang": _d2b_tu_kiem}.items()]
+_d2b_mut = lambda tim, thay, *dich: (tim, thay, [f"cong_d2b_{d}" for d in dich])  # noqa: E731
+MUTANTS.update({
+    "d2b_mC1_khong_chay": _d2b_mut("        _d2b(root, bb, thieu)\n", "", "c1_passed_dat"),
+    "d2b_chay_moi_gia_tri": _d2b_mut('    if not passed and go != "owner_waived":\n        return []\n', "", "c1_passed_dat"),
+    "d2b_doc_cay_lam_viec": _d2b_mut("mod.kiem_tep(cay / dd, cay / thu)", "mod.kiem_tep(root / dd, root / thu)", "c1_passed_dat"),
+    "d2b_mC2_thieu_nguon_bo_qua": _d2b_mut('    if "thieu_nguon" in vp:\n        return vp\n', '    if "thieu_nguon" in vp:\n        return []\n', "c2_thieu_nguon"),
+    "d2b_bo_dang_oid": _d2b_mut(' and SHA_RE.fullmatch(ng["oid"]) else ["thieu_nguon"]', ' else ["thieu_nguon"]', "c2_thieu_nguon"),
+    "d2b_mC10_attempt_khong_int": _d2b_mut("type(ra) is int and ra >= 1", "isinstance(ra, int) and ra >= 1", "c3_attempt_kieu"),
+    "d2b_attempt_bo_duong": _d2b_mut("type(ra) is int and ra >= 1", "type(ra) is int", "c3_attempt_kieu"),
+    "d2b_neo_attempt_ban_kem": _d2b_mut(' and not (k == "neo_attempt" and "attempt_kieu" in vp)', "", "c3_attempt_kieu"),
+    "d2b_attempt_ca_mien": _d2b_mut("    if passed and not (type(ra)", "    if not (type(ra)", "c6_mien"),
+    "d2b_mC3_bo_neo_run": _d2b_mut('("neo_run", d["run"], ci["run_id"]), ', "", "c3_neo"),
+    "d2b_mC9_bo_neo_attempt": _d2b_mut('("neo_attempt", d["attempt"], ra), ', "", "c3_neo"),
+    "d2b_mC4_bo_neo_head": _d2b_mut(', ("neo_head", d["head"], m_c))', ")", "c3_neo"),
+    "d2b_mC5_nhan_moi_trang_thai": _d2b_mut('            if tt != "passed":', "            if False:", "c4_kiem_tep"),
+    "d2b_dung_lai_symlink": _d2b_mut(" if m.isreg() else None", "", "c4_kiem_tep"),
+    "d2b_mC12_nhan_hai_cham": _d2b_mut(' or ".." in dd.split("/"):', ":", "c5_duong_dan"),
+    "d2b_nhan_mot_cham": _d2b_mut(' or "." in dd.split("/") or', " or", "c5_duong_dan"),
+    "d2b_mC6_ops_bat_ky": _d2b_mut('D2B_TEP_RE = re.compile(r"ops/land/', 'D2B_TEP_RE = re.compile(r"ops/[^/]+/', "c5_duong_dan"),
+    "d2b_readback_ops_bat_ky": _d2b_mut('D2B_READBACK_RE = re.compile(r"ops/land/', 'D2B_READBACK_RE = re.compile(r"ops/[^/]+/', "c5_duong_dan"),
+    "d2b_duong_dan_khop_dau": _d2b_mut(".fullmatch(dd) or", ".match(dd) or", "c5_duong_dan"),
+    "d2b_mC11_bo_mode": _d2b_mut(" if m != c]:", " if False]:", "c5_mode"),
+    "d2b_mien_nhan_tep": _d2b_mut('b"100644" if passed and d == dd', 'b"100644" if d == dd', "c6_mien"),
+    "d2b_mC7_mien_thuan_loi_khai": _d2b_mut('    if not passed and go != "owner_waived":', "    if not passed:", "c6_mien"),
+    "d2b_mien_head_none": _d2b_mut('mod.kiem_mien(ng["chuoi"], cay / dd, m_c)', 'mod.kiem_mien(ng["chuoi"], cay / dd, None)', "c6_mien"),
+    "d2b_mien_thu_muc_goc": _d2b_mut('mod.kiem_mien(ng["chuoi"], cay / dd, m_c)', 'mod.kiem_mien(ng["chuoi"], cay / thu, m_c)', "c6_mien"),
+    "d2b_mC14_in_dat_khi_vi_pham": _d2b_mut('    if not vp:\n        print(f"D2b ĐẠT', '    if True:\n        print(f"D2b ĐẠT', "c6_mien"),
+    "d2b_mC8_gop_rc_12": _d2b_mut('_die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: không đọc được {D2B_MODULE}', '_die(RC_GATE, f"KHÔNG ĐO ĐƯỢC: không đọc được {D2B_MODULE}', "c7_module_vang"),
+    "d2b_nuot_loi_do": _d2b_mut('        _die(RC_STATE, f"KHÔNG ĐO ĐƯỢC: D2b {type(ex).__name__}: {ex}")', "        return []", "c7_module_nem"),
+    "d2b_bo_rc_git": _d2b_mut("        return None if rc else o\n", "        return o\n", "c7_git_loi", "c9_oid_khong_phai_commit"),
+    "d2b_mC13_bo_remote": _d2b_mut(' or not any(r.startswith(b"refs/remotes/origin/") for r in (ref or b"").split(b"\\n")):', ":", "c9_oid"),
+    "d2b_remote_bat_ky": _d2b_mut('r.startswith(b"refs/remotes/origin/")', 'r.startswith(b"refs/remotes/")', "c9_oid"),
+    "d2b_bo_loai_commit": _d2b_mut('    if git("cat-file", "-t", oid) != b"commit\\n" or not any(', "    if not any(", "c9_oid_khong_phai_commit"),
 })
 
 

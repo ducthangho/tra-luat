@@ -1,0 +1,21 @@
+Independent read-only Antigravity source reviewer for B4 #1462 r9/g6, source review 9/9. Review exactly head 96807c6ff30681225052f165b29012e0fd0adb12, tree 15542e3d2b3cae6a4e241a94f7ecc524db4b439f, canonical master a99a74f75867172fe62f984d7528f5d5bd73dacb and frozen spec SHA-256 e14926d56277af072b2c3cd2aee4cf7a4ce930ae3f47aa63a51a0103d0f6c37d. Codex executor authored the patch and dispatcher made the local master integration. No commands, Bash, Git, network, writes, subagents, credential tools or security payloads. Use read_file exclusively and honor access refusals.
+
+Read these exact files in the provided review-context directory:
+SPEC.md
+HANDOFF-attempt4.yaml
+executor5-handoff.md
+codex-source-review-1.json
+codex-source-review-2.json
+codex-source-review-3-blocked-origin.json
+codex-source-review-3-blocked.json
+review7-summary.json
+review8-verdict.json
+review-full.diff
+review-successor.diff
+integrated-head.txt
+ruff-evidence.txt
+operator-verification.txt
+
+Inspect all five B4 source paths and reconcile review 8's evidence blocker against the completed operator measurements on this exact head. Distinguish operator-measured results from reviewer-inspected facts, and separately report owner audit, CI or land gates. Do not infer missing checks as green. Respond with nonempty JSON fields reviewed_sha, reviewed_tree, spec_sha256, verdict (approve, changes_requested or blocked), findings with actionable file and line, prior_findings, verified_checks and unmeasured_checks.
+
+MANDATORY OUTPUT FORMAT: This run is through the plain-text Antigravity transport. Write your own review findings and exact identity first, followed by an uncoded, unquoted standalone final line. If and only if you independently approve and there are no unresolved findings, that final line must be exactly KET_LUAN: approve. If you are blocked or request changes, end instead with KET_LUAN: blocked or KET_LUAN: changes_requested. No Markdown fences or text after the final line. Do not use any command, write tooling, network, or subagent to emit the verdict. Give the finding disposition faithfully even if it is non-approve.

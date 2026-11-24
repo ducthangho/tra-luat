@@ -1,0 +1,70 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 1507
+packet_id: wp1507
+spec_packet_id: DON-RAC-A
+mission_issue: 1506
+revision: 1
+generation: 1
+lease_id: wp1507-r1-g1-claude
+role: executor
+provider: claude
+executor: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: local
+reviewer: codex
+reviewer_fallback: 'claude, context đọc-chỉ độc lập, khai same-provider (không thay cross_approved cho class sensitive)'
+reviewer_model_family: openai
+reviewer_execution_surface: codex_cli
+review_class: sensitive
+effective_review_class: sensitive
+risk: sensitive
+access: read-write
+depends_on: []
+spec_path: ops/specs/wp1507-r1.md
+spec_hash: d8320e6195658d109cc26fcaa7d28425590d458f5b91cf09f68416d60e4c7b71
+spec_sha256_required: d8320e6195658d109cc26fcaa7d28425590d458f5b91cf09f68416d60e4c7b71
+spec_duyet: 'chủ kho duyệt băm d8320e61 (E5) qua AskUserQuestion 24-11-2026 ~11:05Z trong phiên dọn dẹp, lựa chọn "Duyệt cả hai, làm hộ (Recommended)"; comment ghi hộ https://github.com/ducthangho/tra-luat/issues/1507#issuecomment-7129808091 (đọc ngược khớp).'
+write_set:
+- docs/PROTOCOL_DA_PHIEN.md
+- docs/adr/0068-don-rac-ngay-sau-land-va-lich-don-du-phong.md
+- ops/leases/wp1507-r1-g1-claude.yaml
+- ops/specs/wp1507-r1.md
+write_set_hash: 607a5da07bae37503a05be4e6232ad823ed2dc51888d07fa86b418778aaacb82
+write_set_hash_rule: sha256 của các đường dẫn write_set đã sắp xếp (LC_ALL=C), nối bằng LF, kết thúc bằng LF
+effective_write_set_nguon: khai_bao_trong_spec
+xung_dot_write_set_do_luc_cap:
+  do_luc: '2026-11-24T11:13:45Z'
+  goc_quet: 'kho bare D:/tlscan.git (refs/heads/* = máy chủ; ls-remote so tập: 330/330, thiếu 0, thừa 0); master = origin/master 2cbb552'
+  ket_qua: 'ai-dang-giu cho cả bốn đường dẫn: NGƯỜI_GIỮ 0 (nhật ký C:/Users/admin/tra-luat-backups/don-20261124/ai-dang-giu-wp1507.txt)'
+branch: claude/wp1507-don-rac-a
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 2cbb552876c2f0dd6e957db7c2408112c7527127
+start_from_sha: 2cbb552876c2f0dd6e957db7c2408112c7527127
+reviewed_sha_required: 2cbb552876c2f0dd6e957db7c2408112c7527127
+reviewed_sha_required_nghia: 'Chưa có head ứng viên; mọi verdict neo exact head THẬT của nhánh thi công.'
+granted_by: ducthangho
+granted_on_instruction: https://github.com/ducthangho/tra-luat/issues/1507#issuecomment-7129808091
+granted_on_instruction_readback: 'chủ kho 24-11: "Duyệt cả hai, làm hộ (Recommended)" cho câu hỏi duyệt plan_hash Mission #1506 và spec_hash DON-RAC-A, kèm "cấp lease rồi thi công packet A".'
+granted_on_instruction_note: 'không cấp: merge/land (cần chủ kho duyệt neo exact SHA, ADR-0060 M7, E5), deploy, LIVE, sửa tệp ngoài write set.'
+recorded_by: 'phiên Claude Code dọn dẹp 24-11-2026 trên ASUS-LAPTOP (local_6749f1fb nhánh con)'
+recorder_is_executor: true
+recorder_ghi_chu: 'Phiên này vừa ghi lease vừa thi công theo chỉ thị trực tiếp của chủ kho; lease KHÔNG tự cấp — chủ kho duyệt qua AskUserQuestion.'
+thay_the_cho: []
+thay_the_cho_ghi_chu: 'g1 đầu tiên của packet.'
+leased_at_utc: '2026-11-24T11:20:00Z'
+heartbeat_at: '2026-11-24T11:20:00Z'
+lease_until: '2026-11-24T23:20:00Z'
+lease_expires_at_utc: '2026-11-24T23:20:00Z'
+lease_until_ghi_chu: '12h để đủ thi công, review chéo Codex và CI; rút hạn sau land.'
+attempts_used: 1
+attempts_limit: 3
+budget:
+  codex_review_calls: {used: 0, reserved: 0, limit: 10}
+  codex_review_calls_ghi_chu: 'trần mười theo dòng khai ADR-0055 của đặc tả (ba phép đo hợp lệ đo 24-11-2026).'
+requires_live: false
+uy_quyen_merge: false
+uy_quyen_merge_ghi_chu: 'lease chỉ cấp quyền thi công; merge/land do chủ kho duyệt đúng SHA.'

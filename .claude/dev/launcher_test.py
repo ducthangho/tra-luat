@@ -4506,7 +4506,7 @@ def t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit():
         status = 200
         def __enter__(self): return self
         def __exit__(self, *a): return False
-        def __init__(self, than=b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}'):
+        def __init__(self, than=b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}'):
             self._than = than
         def read(self): return self._than
 
@@ -4540,12 +4540,21 @@ def t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit():
     # Lượt 2 N8: mỗi điều kiện một mẫu RIÊNG — thiếu `type`, model khác, token âm (cùng usage hợp lệ).
     for than in (b"", b'{"status": "ok"}', b"[]", b'{"type": "message", "usage": {"input_tokens": "8"}}',
                  # Mỗi mẫu là khung Message ĐẦY ĐỦ, chỉ hỏng ĐÚNG trường nó đo — kẻo chốt khác che (lượt 3).
-                 b'{"id": "msg_01", "role": "assistant", "content": [], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
-                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [], "model": "other-model", "usage": {"input_tokens": 8, "output_tokens": 3}}',
-                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": -1}}',
+                 b'{"id": "msg_01", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "other-model", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": -1}}',
                  # Lượt 3 M6: thiếu khung Message (id/role/content) và usage 0+0.
                  b'{"type": "message", "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
-                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [], "model": "claude-haiku-5-5", "usage": {"input_tokens": 0, "output_tokens": 0}}'):
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 0, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": true, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": 5}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 # Lượt 4 Q4: mỗi trường khung một mẫu hỏng RIÊNG (khung còn lại đầy đủ) + khối nội dung sai kiểu.
+                 b'{"id": "abc", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "user", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [null], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": 5}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 0}}'):
         tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=lambda r, timeout=None, _t=than: _R(_t))
         bang(tt == "KHONG_DO_DUOC", f"2xx {than!r} khong chung minh dung duoc, duoc {tt}: {mo_ta}")
     tt, mo_ta = m._do_anthropic_api({"TL_ANTHROPIC_API_KEY": key}, True, mo=mo_loi(401, b"[]"))
@@ -17810,24 +17819,43 @@ DOT_BIEN = [
       'ANTHROPIC_KEY_BIEN = ("ANTHROPIC_API_KEY", "TL_ANTHROPIC_API_KEY")'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_nhan_moi_2xx",
-     ('            if not (la_message and dung_model and co_usage):\n', '            if False:\n'),
+     ('            if not (la_message and dung_model and co_usage and co_dau_ra):\n', '            if False:\n'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_bo_kiem_type",
-     ('            la_message = (isinstance(than_tl, dict) and than_tl.get("type") == "message"\n',
-      '            la_message = (isinstance(than_tl, dict)\n'),
+     ('            co_type = la_dict and than_tl.get("type") == "message"',
+      '            co_type = la_dict'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_bo_kiem_model",
      ('            dung_model = isinstance(than_tl, dict) and than_tl.get("model") == ANTHROPIC_MODEL_KIEM_SONG',
       '            dung_model = isinstance(than_tl, dict)'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
-    ("anthropic_api_nhan_token_am",
-     ('isinstance(u.get(k), int) and not isinstance(u.get(k), bool) and u.get(k) >= 0',
-      'isinstance(u.get(k), int) and not isinstance(u.get(k), bool)'),
+    ("anthropic_api_nhan_token_bool",
+     ('                isinstance(u.get(k), int) and not isinstance(u.get(k), bool)\n',
+      '                isinstance(u.get(k), int)\n'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
-    ("anthropic_api_bo_kiem_khung_message",
-     ('                          and isinstance(than_tl.get("id"), str) and than_tl.get("id", "").startswith("msg_")\n'
-      '                          and than_tl.get("role") == "assistant" and isinstance(than_tl.get("content"), list))',
-      '                          )'),
+    ("anthropic_api_bo_kiem_id",
+     ('            co_id = la_dict and isinstance(than_tl.get("id"), str) and than_tl["id"].startswith("msg_")',
+      '            co_id = la_dict'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_bo_kiem_role",
+     ('            co_role = la_dict and than_tl.get("role") == "assistant"',
+      '            co_role = la_dict'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_nhan_content_rong",
+     ('            co_content = isinstance(noi_dung, list) and len(noi_dung) > 0 and all(',
+      '            co_content = isinstance(noi_dung, list) and all('),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_bo_kiem_kieu_khoi",
+     ('                isinstance(kh, dict) and isinstance(kh.get("type"), str)\n',
+      '                isinstance(kh, dict)\n'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_bo_kiem_text_khoi",
+     ('                and (kh["type"] != "text" or isinstance(kh.get("text"), str)) for kh in noi_dung)',
+      '                for kh in noi_dung)'),
+     ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
+    ("anthropic_api_nhan_0_dau_ra",
+     ('            if not (la_message and dung_model and co_usage and co_dau_ra):',
+      '            if not (la_message and dung_model and co_usage):'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_nhan_0_token",
      ('for k in ("input_tokens", "output_tokens")) and u.get("input_tokens", 0) > 0',

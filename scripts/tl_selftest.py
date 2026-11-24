@@ -32300,6 +32300,21 @@ def run() -> int:
                 _rc_trung, _ = _chay(tep=str(_t15), out=str(_trung), nhat_ky=str(_d / "." / "trung.json"))
                 _trung_ok = (_rc_trung == 2 and len(_goi_model) == _n_truoc2
                              and _trung.read_text(encoding="utf-8") == '{"cu": 1}')
+                # Lượt 4 Q5: `--nhat-ky` là thư mục ⇒ rc 2 TRƯỚC model; lỗi I/O nhật ký muộn ⇒ rc 2, `--out` vẫn đã ghi.
+                _n_truoc3 = len(_goi_model)
+                _rc_nkdir, _ = _chay(tep=str(_t15), nhat_ky=str(_d))
+                _nkdir_ok = _rc_nkdir == 2 and len(_goi_model) == _n_truoc3
+                _sav_nk = _lr.ghi_nhat_ky
+
+                def _nk_hong(*_a, **_k):
+                    raise OSError(28, "No space left on device")
+                _out3 = _d / "kq3.json"
+                try:
+                    _lr.ghi_nhat_ky = _nk_hong
+                    _rc_nkmuon, _ = _chay(tep=str(_t15), out=str(_out3), nhat_ky=str(_d / "u.jsonl"))
+                finally:
+                    _lr.ghi_nhat_ky = _sav_nk
+                _nkmuon_ok = _rc_nkmuon == 2 and _out3.is_file()
                 _os380.environ["TL_LLM_ORDER_FILE"] = str(_d)            # tệp thứ tự là THƯ MỤC
                 _ns_o2 = _ty378.SimpleNamespace(thu_tu="sub", reset=False, json=True)
                 with _ctx378.redirect_stdout(_io378.StringIO()), _ctx378.redirect_stderr(_io378.StringIO()):
@@ -32311,7 +32326,8 @@ def run() -> int:
                 and _rc_cfg == 0 and _them_bat and _them_bat[-1][:2] == ["--config", "yeu_cau.json"]
                 and "--profile" in _them_bat[-1] and _rc5 == 5 and _giu and _rc_rong == 2
                 and _rc_bom_lech == 2 and _rc_bom == 0 and _dieu_bom == "15"
-                and _rc_outdir == 2 and _khong_goi and _rc_ghi == 0 and _giu_quyen and _rc_order_dir == 2 and _trung_ok)
+                and _rc_outdir == 2 and _khong_goi and _rc_ghi == 0 and _giu_quyen and _rc_order_dir == 2 and _trung_ok
+                and _nkdir_ok and _nkmuon_ok)
     _t110("r380_llm_khai_niem_bien_dau_vao", _c380_llm_khai_niem_bien_dau_vao)
 
     # F1-02 / wp42 rev2 (late-duplicate RED) — PHẢI là đăng ký cuối cùng trước tally:

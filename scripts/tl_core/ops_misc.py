@@ -3069,6 +3069,11 @@ def cmd_llm_khai_niem(a) -> int:
     if getattr(a, "out", None) and Path(a.out).is_dir():   # lượt 2 N5: kiểm đích TRƯỚC khi tiêu token
         print(f"[tl] --out {a.out} la thu muc — can duong dan tep", file=sys.stderr)
         return 2
+    if getattr(a, "nhat_ky", None) and (Path(a.nhat_ky).is_dir() or not Path(a.nhat_ky).parent.is_dir()):
+        # Lượt 4 Q5: nhật ký trỏ thư mục / thư mục cha không có từng ném traceback SAU khi đã ghi `--out` — kiểm TRƯỚC model.
+        print(f"[tl] --nhat-ky {a.nhat_ky}: la thu muc hoac thu muc cha khong ton tai — can duong dan tep",
+              file=sys.stderr)
+        return 2
     if getattr(a, "out", None) and getattr(a, "nhat_ky", None) and _cung_dich(a.out, a.nhat_ky):
         # Lượt 3 M5: nhật ký JSONL nối vào CHÍNH tệp `--out` ⇒ JSON đã xác minh hỏng (`Extra data`), kể cả khi rc 5
         # (byte cũ bị nối thêm). So theo đường dẫn tuyệt đối đã giải symlink VÀ theo định danh tệp nếu đã tồn tại.
@@ -3095,7 +3100,12 @@ def cmd_llm_khai_niem(a) -> int:
             print(f"[tl] khong ghi duoc --out {a.out}: {type(e).__name__}: {e}", file=sys.stderr)
             return 2
     if getattr(a, "nhat_ky", None):
-        lr.ghi_nhat_ky(a.nhat_ky, kq, "llm-khai-niem")
+        try:
+            lr.ghi_nhat_ky(a.nhat_ky, kq, "llm-khai-niem")
+        except OSError as e:   # lượt 4 Q5: lỗi I/O muộn ⇒ rc 2 có kiểm soát, nói rõ phần nào ĐÃ xong
+            da_ghi = f"--out {a.out} DA ghi; " if getattr(a, "out", None) and not kq["lech"] else ""
+            print(f"[tl] {da_ghi}khong ghi duoc --nhat-ky {a.nhat_ky}: {type(e).__name__}: {e}", file=sys.stderr)
+            return 2
     u = kq["usage"]
     if getattr(a, "json", False):
         print(_json_dumps({"ok": not kq["lech"], **ket, "duong": kq["duong"], "model": kq["model"],

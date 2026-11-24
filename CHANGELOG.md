@@ -36,6 +36,13 @@ và chuyển qua lại khi một bên hết hạn mức/credit.
   `auth status` chạy với CÙNG `--setting-sources ""` như lời gọi model, kiểm kiểu `authMethod` (M3); chạm CAP
   ⇒ chặn mọi Điều, bỏ lần đọc thứ hai (M4); `--out` trùng `--nhat-ky` ⇒ rc 2 trước khi gọi model (M5); `doctor`
   đòi khung Message (id/role/content) và input > 0 (M6); số writer ghim trong `pretooluse_guard_test` 106 → 108 (M7).
+- Cross-review Codex lượt 4 (`ops/reviews/pr1503-review-4-codex/`, trần nâng lên 5; REQUEST_CHANGES, 2 P1 · 3 P2)
+  — đã vá: từ nối "là" cấp khoản phải nằm ngoài ngoặc VÀ ngoài cụm trích dẫn, ở phần đầu khoản (trước dòng điểm
+  đầu tiên, không sau dấu `:`), hai vế khác rỗng (Q1); dòng mở bằng "là" hoặc còn trong ngoặc là tiếp dòng, không
+  phải khoản mất số (Q3); chỉ chuyển sang `api` khi envelope TỰ KHAI lỗi (`is_error=True`) kèm số đo ĐẦY ĐỦ bằng
+  0 — `null`/thiếu `usage`/chi phí ước tính dương/envelope thành công hỏng ⇒ dừng (Q2); `doctor` đòi `content`
+  khác rỗng gồm các khối đúng kiểu và token đầu ra dương (Q4); `--nhat-ky` là thư mục ⇒ rc 2 trước model, lỗi
+  I/O nhật ký muộn ⇒ rc 2 có thông báo (Q5).
 - Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
   key qua `agent_creds` chưa làm.
 

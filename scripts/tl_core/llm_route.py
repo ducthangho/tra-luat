@@ -262,24 +262,26 @@ def _usage_sub(mu):
 
 def _dau_model_da_chay(kq):
     """Bằng chứng model ĐÃ chạy trong envelope lỗi: True (có token dương ở BẤT KỲ đâu — kể cả token cache, kể
-    cả khối `usage` tổng), False (mọi số đo có mặt đều đúng kiểu và bằng 0, hoặc không có số đo nào), None (có
-    số đo SAI KIỂU ⇒ không biết). Cross-review lượt 3 M2: chỉ xét input/output của `modelUsage` thì envelope
-    chỉ có token cache, hay chỉ có `usage` tổng, từng bị coi là "chưa chạy" rồi gọi tiếp API."""
-    thay = []
-    mu = kq.get("modelUsage")
-    if mu is not None:
-        if not isinstance(mu, dict) or not all(isinstance(v, dict) for v in mu.values()):
-            return None
-        for v in mu.values():
-            thay += [v[k] for k in _KHOA_MU.values() if k in v]
+    cả khối `usage` tổng — hoặc chi phí ước tính dương), False (số đo ĐẦY ĐỦ, đúng kiểu và đều bằng 0), None
+    (không biết). Cross-review lượt 3 M2: chỉ xét input/output của `modelUsage` từng bỏ sót token cache và khối
+    `usage` tổng. Lượt 4 Q2: `null` tường minh, THIẾU khối `usage` hay thiếu input/output trong nó từng được đọc
+    là "không có số đo" ⇒ False ⇒ gọi tiếp API. Nay thiếu/null ⇒ None: "chưa chạy" phải có bằng chứng DƯƠNG."""
+    # `null` tường minh rơi vào các phép KIỂM KIỂU dưới (None không phải dict/số) ⇒ None; chỉ VẮNG `modelUsage`/
+    # `total_cost_usd` mới được coi là rỗng/0 — `usage` thì bắt buộc.
+    mu = kq.get("modelUsage", {})
+    if not isinstance(mu, dict) or not all(isinstance(v, dict) for v in mu.values()):
+        return None
+    thay = [v[k] for v in mu.values() for k in _KHOA_MU.values() if k in v]
     us = kq.get("usage")
-    if us is not None:
-        if not isinstance(us, dict):
-            return None
-        thay += [us[k] for k in _KHOA_USAGE if k in us]
+    if not isinstance(us, dict) or "input_tokens" not in us or "output_tokens" not in us:
+        return None
+    thay += [us[k] for k in _KHOA_USAGE if k in us]
     if not all(_so_khong_am(x) for x in thay):
         return None
-    return any(x > 0 for x in thay)
+    phi = kq.get("total_cost_usd", 0)
+    if isinstance(phi, bool) or not isinstance(phi, (int, float)) or not phi >= 0:
+        return None
+    return any(x > 0 for x in thay) or phi > 0
 
 
 def kiem_xac_thuc_sub(claude_bin, env, chay=subprocess.run) -> None:
@@ -352,8 +354,13 @@ def duong_sub(he_thong, noi_dung, schema, model, env, chay=subprocess.run, tim=s
         # khởi động) mới chuyển đường. `error_during_execution` dùng cho CẢ hai ca (lượt 2 N2) ⇒ phân bằng phép đo.
         dau = _dau_model_da_chay(kq)
         if dau is not False:
-            ly_do = "sau khi model da chay" if dau else "so do token sai kieu — khong biet model da chay chua"
+            ly_do = "sau khi model da chay" if dau else "so do token thieu/sai kieu — khong biet model da chay chua"
             raise Dung(f"claude -p rc={p.returncode} subtype={subtype} {ly_do}: {mo_ta}")
+        # Lượt 4 Q2: chỉ chuyển đường khi envelope TỰ KHAI LỖI (`is_error` đúng là True). Envelope tự xưng thành công
+        # mà hỏng (`is_error=[]`, thiếu `is_error`, rc khác 0 mà `is_error` False…) là MƠ HỒ ⇒ DỪNG, không tiêu credit API.
+        if kq.get("is_error") is not True:
+            raise Dung(f"claude -p rc={p.returncode} subtype={subtype} is_error={kq.get('is_error')!r}: "
+                       f"envelope mo ho — khong chuyen duong: {mo_ta}")
         raise ChuyenDuong(f"claude -p rc={p.returncode} subtype={subtype}: {mo_ta}")
     mu = kq.get("modelUsage")
     da_chay = {(v.get("canonicalModel") if isinstance(v.get("canonicalModel"), str) else k)
@@ -498,7 +505,7 @@ def tach_khoan(van_ban):
         if co_so:
             if m:
                 khoan.append([int(m.group(1) or m.group(2)), ln[m.end():]])
-            elif khoan and (_RE_DIEM.match(ln) or not _la_ngoai_ngoac(ln)):
+            elif khoan and (_RE_DIEM.match(ln) or _la_tiep_dong(khoan[-1][1], ln)):
                 khoan[-1][1] += "\n" + ln
             elif khoan:
                 # Nguồn CÓ số mà dòng không số lại mở bằng "<X> là …": có thể là một khoản MẤT số (lượt 3 M1: khoản 4
@@ -513,7 +520,11 @@ def tach_khoan(van_ban):
             if not khoan:
                 return None
             khoan[-1][1] += "\n" + ln
-        elif _RE_LA.search(ln):
+        elif khoan and _la_tiep_dong(khoan[-1][1], ln) and _tu_noi(ln) is not None:
+            # Chỉ dòng CÓ từ nối mà vẫn là tiếp dòng (mở bằng "là", hoặc còn trong ngoặc/trích dẫn) — dòng không có từ
+            # nối nào vẫn mơ hồ ở nguồn mất số (không phân biệt được với khoản dùng từ nối khác) ⇒ rơi xuống None.
+            khoan[-1][1] += "\n" + ln
+        elif _tu_noi(ln) is not None:
             khoan.append([None, ln])
         elif not khoan and ln.endswith(":"):
             continue
@@ -526,14 +537,42 @@ def _gon(s) -> str:
     return " ".join(str(s).split())
 
 
-def _la_ngoai_ngoac(txt):
-    """Match của chữ "là" ĐẦU TIÊN nằm NGOÀI mọi cặp ngoặc tròn, hoặc None. Lượt 3 M1: khoản có tên gọi tắt
-    `X (sau đây gọi là Y) là …` — chữ "là" trong ngoặc KHÔNG phải từ nối định nghĩa."""
-    for m in _RE_LA.finditer(txt):
-        truoc = txt[:m.start()]
-        if truoc.count("(") <= truoc.count(")"):
-            return m
+def _dang_mo(truoc) -> bool:
+    """`truoc` còn mở một cặp ngoặc tròn hay một cụm trích dẫn (`"…"` hoặc `“…”`)."""
+    return (truoc.count("(") > truoc.count(")") or truoc.count('"') % 2 == 1
+            or truoc.count("\u201c") > truoc.count("\u201d"))
+
+
+def _tu_noi(txt):
+    """Match của từ nối định nghĩa "là" CẤP KHOẢN, hoặc None. Là chữ "là" ĐẦU TIÊN:
+    - nằm NGOÀI ngoặc tròn (lượt 3 M1: `X (sau đây gọi là Y) là …`) và NGOÀI cụm trích dẫn (lượt 4 Q1: tên gọi
+      được trích giữa ngoặc kép có chữ "là");
+    - nằm ở PHẦN ĐẦU khoản, trước dòng điểm `a)`/`-` đầu tiên (lượt 4 Q1: khoản "bao gồm:" mà điểm a) có chữ "là"
+      từng bị cắt tại điểm a)), và không đứng sau dấu `:` ngoài ngoặc (cùng lớp, khi điểm viết liền một dòng).
+    Phần đầu được phép XUỐNG DÒNG trước từ nối (lượt 4 Q3)."""
+    dau = []
+    for ln in str(txt).split("\n"):
+        if dau and _RE_DIEM.match(ln.strip()):
+            break
+        dau.append(ln)
+    dau = "\n".join(dau)
+    for m in _RE_LA.finditer(dau):
+        truoc = dau[:m.start()]
+        if _dang_mo(truoc):
+            continue
+        sach = re.sub(r"\([^()]*\)|\"[^\"]*\"|\u201c[^\u201d]*\u201d", "", truoc)
+        return None if ":" in sach else m
     return None
+
+
+def _la_tiep_dong(khoan_dang_mo, ln) -> bool:
+    """Dòng không số `ln` là TIẾP DÒNG của khoản đang mở (không phải một khoản mất số): khoản đang mở còn trong
+    ngoặc/trích dẫn, hoặc `ln` không có từ nối với vế trước khác rỗng (dòng mở bằng "là" chính là nửa sau của
+    `<thuật ngữ>\nlà <định nghĩa>` — lượt 4 Q3). Khoản mất số luôn có thuật ngữ đứng TRƯỚC từ nối."""
+    if _dang_mo(khoan_dang_mo):
+        return True
+    m = _tu_noi(ln)
+    return m is None or not ln[:m.start()].strip()
 
 
 def lech_nguyen_van(khai_niem, van_ban):
@@ -554,9 +593,11 @@ def lech_nguyen_van(khai_niem, van_ban):
             # So THEO VỊ TRÍ ranh giới trong nguồn (lượt 3 M1), không so chuỗi ghép: thuật ngữ = phần trước chữ "là"
             # đầu tiên NGOÀI ngoặc; định nghĩa = phần sau nó. Khoản không có từ nối "là" ngoài ngoặc (vd "bao gồm")
             # ⇒ không xác minh được ⇒ lệch (chặn, không nhận sai).
-            m = _la_ngoai_ngoac(khoan[i][1])
+            m = _tu_noi(khoan[i][1])
             if m:
-                dung = tn == _gon(khoan[i][1][:m.start()]) and dn == _gon(khoan[i][1][m.end():])
+                tn_nguon, dn_nguon = _gon(khoan[i][1][:m.start()]), _gon(khoan[i][1][m.end():])
+                # Lượt 4 Q1: HAI VẾ phải khác rỗng — khoản mất phần đầu (chỉ còn "là …") từng qua với thuật ngữ "".
+                dung = bool(tn_nguon and dn_nguon) and tn == tn_nguon and dn == dn_nguon
         if not dung:
             lech.append(k.get("stt"))
     lech.extend(so_cua[len(khai_niem):])

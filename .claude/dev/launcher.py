@@ -4819,14 +4819,26 @@ def _do_anthropic_api(moi_truong: dict[str, str] | None = None, kiem_song: bool 
             # kiểm `type` mà t162 vẫn xanh; token âm và model khác từng được dán DUNG_DUOC).
             # Lượt 3 M6: đòi đủ khung một Message thật (id, role, content) — object chỉ có type/model/usage 0+0 không
             # chứng minh một lượt gọi đã được phục vụ.
-            la_message = (isinstance(than_tl, dict) and than_tl.get("type") == "message"
-                          and isinstance(than_tl.get("id"), str) and than_tl.get("id", "").startswith("msg_")
-                          and than_tl.get("role") == "assistant" and isinstance(than_tl.get("content"), list))
+            # Lượt 4 Q4: mỗi trường khung MỘT điều kiện (mỗi cái một đột biến + một mẫu hỏng riêng trong t162), và
+            # `content` phải là danh sách KHÁC RỖNG các khối có `type` chuỗi (khối `text` thì `text` là chuỗi) — mảng
+            # chứa `null` hay mảng rỗng kèm 0 token đầu ra từng được dán DUNG_DUOC trong khi SDK từ chối.
+            la_dict = isinstance(than_tl, dict)
+            noi_dung = than_tl.get("content") if la_dict else None
+            co_type = la_dict and than_tl.get("type") == "message"
+            co_id = la_dict and isinstance(than_tl.get("id"), str) and than_tl["id"].startswith("msg_")
+            co_role = la_dict and than_tl.get("role") == "assistant"
+            co_content = isinstance(noi_dung, list) and len(noi_dung) > 0 and all(
+                isinstance(kh, dict) and isinstance(kh.get("type"), str)
+                and (kh["type"] != "text" or isinstance(kh.get("text"), str)) for kh in noi_dung)
+            la_message = co_type and co_id and co_role and co_content
             dung_model = isinstance(than_tl, dict) and than_tl.get("model") == ANTHROPIC_MODEL_KIEM_SONG
+            # Token đều phải là số nguyên (không bool) và DƯƠNG: một lượt đã phục vụ thì có cả đầu vào lẫn đầu ra
+            # (lượt 4 Q4) — điều kiện "> 0" đã bao luôn token âm.
             co_usage = isinstance(u, dict) and all(
-                isinstance(u.get(k), int) and not isinstance(u.get(k), bool) and u.get(k) >= 0
+                isinstance(u.get(k), int) and not isinstance(u.get(k), bool)
                 for k in ("input_tokens", "output_tokens")) and u.get("input_tokens", 0) > 0
-            if not (la_message and dung_model and co_usage):
+            co_dau_ra = isinstance(u, dict) and isinstance(u.get("output_tokens"), int) and u["output_tokens"] > 0
+            if not (la_message and dung_model and co_usage and co_dau_ra):
                 return ("KHONG_DO_DUOC", f"key ({ten}) · HTTP {r.status} nhung phan hoi KHONG phai Message cua "
                                          f"{ANTHROPIC_MODEL_KIEM_SONG} co usage hop le — khong chung minh duoc "
                                          "(gateway/proxy?)")

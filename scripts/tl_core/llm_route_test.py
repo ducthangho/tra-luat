@@ -94,8 +94,11 @@ def run_sub_gia(data=None, rc=0, is_error=False, model="claude-haiku-5-5", nhat_
         mu = ({model: {"inputTokens": 2, "outputTokens": 55, "cacheReadInputTokens": 0,
                        "cacheCreationInputTokens": 1911, "canonicalModel": model}}
               if usage is _VANG_USAGE else usage)
+        # `usage={}` = lượt CHƯA tới model: CLI vẫn gửi số đo ĐẦY ĐỦ bằng 0 (lượt 4 Q2: thiếu số đo ⇒ không biết ⇒ DỪNG).
+        chua_chay = mu == {}
         kq = {"subtype": subtype, "is_error": is_error, "result": result, "structured_output": data or DUNG,
-              "total_cost_usd": 0.0004, "modelUsage": mu}
+              "total_cost_usd": 0 if chua_chay else 0.0004, "modelUsage": mu,
+              "usage": {"input_tokens": 0, "output_tokens": 0} if chua_chay else {"input_tokens": 2, "output_tokens": 55}}
         if stop_reason is not None:
             kq["stop_reason"] = stop_reason
         kq = {k2: v for k2, v in kq.items() if v is not _VANG}
@@ -392,8 +395,14 @@ def ca_sub_thieu_dau_duong_khong_nhan(m):
     for loi in hong:
         rc, kq, nhat = chay_lenh(m, KEY, {"sub": sub(m, run_sub_gia(**loi)), "api": cam("api")})
         bang(rc == m.MA_DUNG, f"envelope loi {loi} SAU khi model chay: phai DUNG (khong nhan, khong goi api): rc={rc} {nhat}")
-        rc, kq, nhat = chay_lenh(m, KEY, {"sub": sub(m, run_sub_gia(usage={}, **loi)), "api": api(m, client_gia())})
-        bang(rc == 0 and kq["duong"] == "api", f"envelope loi {loi} TRUOC khi model chay phai chuyen api: rc={rc} {nhat}")
+        # Lượt 4 Q2: chưa chạy model mà envelope KHÔNG tự khai lỗi (`is_error` khác True) là MƠ HỒ ⇒ DỪNG; chỉ
+        # `is_error=True` + số đo đủ bằng 0 mới chuyển đường.
+        if loi.get("is_error") is True:
+            rc, kq, nhat = chay_lenh(m, KEY, {"sub": sub(m, run_sub_gia(usage={}, **loi)), "api": api(m, client_gia())})
+            bang(rc == 0 and kq["duong"] == "api", f"envelope loi {loi} TRUOC khi model chay phai chuyen api: rc={rc} {nhat}")
+        else:
+            rc, kq, nhat = chay_lenh(m, KEY, {"sub": sub(m, run_sub_gia(usage={}, **loi)), "api": cam("api")})
+            bang(rc == m.MA_DUNG, f"envelope {loi} khong tu khai loi: mo ho, phai DUNG: rc={rc} {nhat}")
 
 
 def ca_sub_dinh_tuyen_nha_cung_cap(m):
@@ -596,9 +605,8 @@ def ca_token_moi_truong(m):
         def chay(cmd, _u=usage, _mu=mu_ghi, **k):
             if "auth" in cmd and "status" in cmd:
                 return subprocess.CompletedProcess(cmd, 0, json.dumps(AUTH_SUB), "")
-            kq = {"subtype": "error_during_execution", "is_error": True, "result": "x", "modelUsage": _mu}
-            if _u:
-                kq["usage"] = _u
+            kq = {"subtype": "error_during_execution", "is_error": True, "result": "x", "modelUsage": _mu,
+                  "total_cost_usd": 0, "usage": _u or {"input_tokens": 0, "output_tokens": 0}}
             return subprocess.CompletedProcess(cmd, 1, json.dumps(kq), "")
         rc, _, nhat = chay_lenh(m, KEY, {"sub": sub(m, chay), "api": cam("api")})
         bang(rc == m.MA_DUNG, f"co dau token (cache/usage tong/sai kieu) phai DUNG, khong goi api: {usage} {mu_ghi} rc={rc} {nhat}")
@@ -614,6 +622,70 @@ def ca_auth_sai_kieu(m):
     except TypeError as e:
         raise TinHieuChotCa(f"authMethod sai kieu lam no TypeError: {e}") from e
     raise TinHieuChotCa("authMethod sai kieu ma van di sub")
+
+
+def ca_so_do_null_thieu_va_phi(m):
+    """Lượt 4 Q2: chưa có bằng chứng DƯƠNG rằng model chưa chạy ⇒ DỪNG, không gọi API. Mỗi mẫu chỉ hỏng ĐÚNG một
+    chốt: số đo còn lại đầy đủ bằng 0 và `is_error=True`, trừ mẫu cuối (envelope tự xưng thành công mà hỏng)."""
+    khong = {"input_tokens": 0, "output_tokens": 0}
+    mau = (("modelUsage null", {"modelUsage": None, "usage": khong, "total_cost_usd": 0, "is_error": True}),
+           ("usage null", {"modelUsage": {}, "usage": None, "total_cost_usd": 0, "is_error": True}),
+           ("thieu usage", {"modelUsage": {}, "total_cost_usd": 0, "is_error": True}),
+           ("thieu output_tokens", {"modelUsage": {}, "usage": {"input_tokens": 0}, "total_cost_usd": 0, "is_error": True}),
+           ("phi duong", {"modelUsage": {}, "usage": khong, "total_cost_usd": 0.0002, "is_error": True}),
+           ("success mo ho", {"modelUsage": {}, "usage": khong, "total_cost_usd": 0, "is_error": []}))
+    for ten, phan in mau:
+        def chay(cmd, _p=phan, **k):
+            if "auth" in cmd and "status" in cmd:
+                return subprocess.CompletedProcess(cmd, 0, json.dumps(AUTH_SUB), "")
+            kq = {"subtype": "success" if _p["is_error"] == [] else "error_during_execution", "result": "x", **_p}
+            return subprocess.CompletedProcess(cmd, 0 if _p["is_error"] == [] else 1, json.dumps(kq), "")
+        rc, _, nhat = chay_lenh(m, KEY, {"sub": sub(m, chay), "api": cam("api")})
+        bang(rc == m.MA_DUNG, f"{ten}: chua chung minh model chua chay, phai DUNG khong goi api: rc={rc} {nhat}")
+    # Đối chứng: số đo đủ, bằng 0, tự khai lỗi ⇒ chuyển được.
+    def chay_dc(cmd, **k):
+        if "auth" in cmd and "status" in cmd:
+            return subprocess.CompletedProcess(cmd, 0, json.dumps(AUTH_SUB), "")
+        kq = {"subtype": "error_during_execution", "is_error": True, "result": "x", "modelUsage": {}, "usage": khong,
+              "total_cost_usd": 0}
+        return subprocess.CompletedProcess(cmd, 1, json.dumps(kq), "")
+    rc, kq, nhat = chay_lenh(m, KEY, {"sub": sub(m, chay_dc), "api": api(m, client_gia())})
+    bang(rc == 0 and kq["duong"] == "api", f"doi chung han muc truoc model phai chuyen api: rc={rc} {nhat}")
+
+
+def ca_ranh_gioi_luot4(m):
+    """Lượt 4 Q1/Q3: mỗi mẫu một chốt. Mẫu SAI phải lệch (nhận nhầm là điều cần chặn nhất); mẫu ĐÚNG phải đạt."""
+    def kn(*cap):
+        return [{"stt": i + 1, "thuat_ngu": a, "dinh_nghia": b} for i, (a, b) in enumerate(cap)]
+    sai = (
+        # Khoản mất phần đầu: thuật ngữ rỗng.
+        ("Điều 3.\n1. là tài liệu số.", kn(("", "tài liệu số."))),
+        # Chữ "là" trong tên gọi được trích dẫn (ngoặc kép thẳng / cong).
+        ('Điều 3.\n1. "Tổ chức là gì" là tên gọi của dự án.', kn(('"Tổ chức', 'gì" là tên gọi của dự án.'))),
+        ("Điều 3.\n1. \u201cTổ chức là gì\u201d là tên gọi.", kn(("\u201cTổ chức", "gì\u201d là tên gọi."))),
+        # Khoản "bao gồm" mà điểm a) có chữ "là": không được cắt vào điểm (xuống dòng / viết liền sau dấu ":").
+        ("Điều 3.\n1. Thiết bị bao gồm:\na) máy là công cụ;\nb) dụng cụ.",
+         kn(("Thiết bị bao gồm: a) máy", "công cụ; b) dụng cụ."))),
+        # Không có dấu ":" (chỉ chốt "dừng ở dòng điểm" chặn được).
+        ("Điều 3.\n1. Thiết bị bao gồm\na) máy là công cụ;\nb) dụng cụ.",
+         kn(("Thiết bị bao gồm a) máy", "công cụ; b) dụng cụ."))),
+        ("Điều 3.\n1. Thiết bị bao gồm: a) máy là công cụ; b) dụng cụ.",
+         kn(("Thiết bị bao gồm: a) máy", "công cụ; b) dụng cụ."))),
+    )
+    for vb, k in sai:
+        bang(m.lech_nguyen_van(k, vb) == [1], f"ranh gioi sai phai lech: {vb!r} -> {m.lech_nguyen_van(k, vb)}")
+    dung = (
+        ('Điều 3.\n1. "Tổ chức là gì" là tên gọi của dự án.', kn(('"Tổ chức là gì"', "tên gọi của dự án."))),
+        ("Điều 3.\n1. \u201cTổ chức là gì\u201d là tên gọi.", kn(("\u201cTổ chức là gì\u201d", "tên gọi."))),
+        # Xuống dòng TRƯỚC từ nối: dòng mở bằng "là" là tiếp dòng, không phải khoản mất số.
+        ("Điều 3.\n1. Tài liệu số\nlà tài liệu ở dạng số.\n2. Hồ sơ là tập tài liệu.",
+         kn(("Tài liệu số", "tài liệu ở dạng số."), ("Hồ sơ", "tập tài liệu."))),
+        # Ngoặc trải qua hai dòng, dòng sau có chữ "là": vẫn là tiếp dòng.
+        ("Điều 3.\n1. Hồ sơ (gồm cả bản\nđiện tử là bản số) là tài liệu.\n2. Dữ liệu là thông tin.",
+         kn(("Hồ sơ (gồm cả bản điện tử là bản số)", "tài liệu."), ("Dữ liệu", "thông tin."))),
+    )
+    for vb, k in dung:
+        bang(m.lech_nguyen_van(k, vb) == [], f"ket qua dung bi chan oan: {vb!r} -> {m.lech_nguyen_van(k, vb)}")
 
 
 def ca_usage_thieu_truong(m):
@@ -632,7 +704,7 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
       ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
       ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_token_moi_truong, ca_auth_sai_kieu,
-      ca_usage_thieu_truong]
+      ca_usage_thieu_truong, ca_so_do_null_thieu_va_phi, ca_ranh_gioi_luot4]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
@@ -653,9 +725,10 @@ DOT_BIEN = [
     ("bo_kiem_nguyen_van", ('kq["lech"] = lech_nguyen_van(kq["khai_niem"], van_ban)', 'kq["lech"] = []'),
      "ca_lech_nguyen_van"),
     ("bo_chuan_hoa_la", ('        if k["dinh_nghia"].startswith("là "):', "        if False:"), "ca_chuan_hoa_chu_la"),
-    ("so_chuoi_con", ("and dn == _gon(khoan[i][1][m.end():])", "and dn in _gon(khoan[i][1][m.end():])"),
+    ("so_chuoi_con", ("and tn == tn_nguon and dn == dn_nguon", "and tn == tn_nguon and dn in dn_nguon"),
      "ca_dinh_nghia_bi_cat"),
-    ("so_ca_nguon", ("and dn == _gon(khoan[i][1][m.end():])", "and dn in _gon(van_ban)"), "ca_dinh_nghia_bi_cat"),
+    ("so_ca_nguon", ("and tn == tn_nguon and dn == dn_nguon", "and tn == tn_nguon and dn in _gon(van_ban)"),
+     "ca_dinh_nghia_bi_cat"),
     ("bo_khoan_thieu", ("    lech.extend(so_cua[len(khai_niem):])\n", ""), "ca_bo_khoan_va_mang_rong"),
     ("bo_kiem_stt", ('if i < len(khoan) and k.get("stt") == so_cua[i]:', "if i < len(khoan):"), "ca_trao_so"),
     ("stt_theo_vi_tri", ("    so_cua = [so if so is not None else i + 1 for i, (so, _) in enumerate(khoan)]",
@@ -666,12 +739,24 @@ DOT_BIEN = [
     ("nuot_dong_truoc_khoan_dau", ("        elif not khoan and ln.endswith(\":\"):\n            continue\n        else:\n            return None",
                                    "        elif not khoan and ln.endswith(\":\"):\n            continue\n        elif not khoan:\n            continue\n        else:\n            return None"),
      "ca_nguon_mo_ho_thi_khong_dat"),
-    ("tach_tai_la_cuoi", ("        if truoc.count(\"(\") <= truoc.count(\")\"):\n            return m\n    return None",
-                          "        if truoc.count(\"(\") <= truoc.count(\")\"):\n            last = m\n    return locals().get(\"last\")"),
+    ("tach_tai_la_cuoi", ('        return None if ":" in sach else m\n    return None',
+                          '        last = None if ":" in sach else m\n    return locals().get("last")'),
      "ca_tach_tai_la_dau_tien"),
-    ("la_trong_ngoac_cung_tinh", ("        if truoc.count(\"(\") <= truoc.count(\")\"):\n            return m",
-                                  "        if True:\n            return m"), "ca_ngoac_goi_tat"),
-    ("tron_so_gop_vao_khoan_truoc", ("            elif khoan and (_RE_DIEM.match(ln) or not _la_ngoai_ngoac(ln)):",
+    ("la_trong_ngoac_cung_tinh", ('    return (truoc.count("(") > truoc.count(")") or ', "    return (False or "),
+     "ca_ngoac_goi_tat"),
+    # Lượt 4 Q1/Q3: mỗi chốt mới một đột biến, ca đích `ca_ranh_gioi_luot4`.
+    ("bo_hai_ve_khac_rong", ("dung = bool(tn_nguon and dn_nguon) and tn == tn_nguon", "dung = tn == tn_nguon"),
+     "ca_ranh_gioi_luot4"),
+    ("bo_trich_dan_thang", ("""or truoc.count('"') % 2 == 1""", "or False"), "ca_ranh_gioi_luot4"),
+    ("bo_trich_dan_cong", ('            or truoc.count("\\u201c") > truoc.count("\\u201d"))', "            or False)"),
+     "ca_ranh_gioi_luot4"),
+    ("tu_noi_trong_diem", ("        if dau and _RE_DIEM.match(ln.strip()):\n            break\n", ""), "ca_ranh_gioi_luot4"),
+    ("bo_chan_hai_cham", ('        return None if ":" in sach else m', "        return m"), "ca_ranh_gioi_luot4"),
+    ("dong_mo_bang_la_thanh_khoan_moi", ("    return m is None or not ln[:m.start()].strip()", "    return m is None"),
+     "ca_ranh_gioi_luot4"),
+    ("ngoac_qua_dong_thanh_khoan_moi", ("    if _dang_mo(khoan_dang_mo):\n        return True\n", ""),
+     "ca_ranh_gioi_luot4"),
+    ("tron_so_gop_vao_khoan_truoc", ("            elif khoan and (_RE_DIEM.match(ln) or _la_tiep_dong(khoan[-1][1], ln)):",
                                      "            elif khoan:"), "ca_tron_co_so_va_mat_so"),
     ("diem_mo_khoan_moi", ("        if _RE_DIEM.match(ln):\n            if not khoan:\n                return None\n            khoan[-1][1] += \"\\n\" + ln\n        elif",
                            "        if False:\n            pass\n        elif"), "ca_khoan_mat_so_co_diem_dat"),
@@ -682,10 +767,18 @@ DOT_BIEN = [
     ("nhan_0_token", ('    if u is None or not (u["input"] or u["output"]):\n        raise Dung(',
                       '    if False:\n        raise Dung('), "ca_sub_stop_reason_va_kieu"),
     ("loi_sau_chay_van_chuyen", ("        if dau is not False:\n", "        if False:\n"), "ca_sub_thieu_dau_duong_khong_nhan"),
-    ("token_chi_input_output", ("            thay += [v[k] for k in _KHOA_MU.values() if k in v]",
-                                "            thay += [v[k] for k in (\"inputTokens\", \"outputTokens\") if k in v]"),
+    ("token_chi_input_output", ("    thay = [v[k] for v in mu.values() for k in _KHOA_MU.values() if k in v]",
+                                "    thay = [v[k] for v in mu.values() for k in (\"inputTokens\", \"outputTokens\") if k in v]"),
      "ca_token_moi_truong"),
-    ("bo_usage_tong", ("        thay += [us[k] for k in _KHOA_USAGE if k in us]", "        pass"), "ca_token_moi_truong"),
+    ("bo_usage_tong", ("    thay += [us[k] for k in _KHOA_USAGE if k in us]", "    pass"), "ca_token_moi_truong"),
+    # Lượt 4 Q2: bốn chốt riêng, mỗi cái một mẫu riêng trong `ca_so_do_null_thieu_va_phi`.
+    ("null_coi_la_vang", ('    mu = kq.get("modelUsage", {})', '    mu = kq.get("modelUsage") or {}'),
+     "ca_so_do_null_thieu_va_phi"),
+    ("thieu_usage_coi_la_0", ('    if not isinstance(us, dict) or "input_tokens" not in us or "output_tokens" not in us:\n        return None',
+                              "    us = us if isinstance(us, dict) else {}"), "ca_so_do_null_thieu_va_phi"),
+    ("bo_dau_phi", ("    return any(x > 0 for x in thay) or phi > 0", "    return any(x > 0 for x in thay)"),
+     "ca_so_do_null_thieu_va_phi"),
+    ("mo_ho_van_chuyen", ("        if kq.get(\"is_error\") is not True:\n", "        if False:\n"), "ca_so_do_null_thieu_va_phi"),
     ("sai_kieu_coi_la_chua_chay", ("    if not all(_so_khong_am(x) for x in thay):\n        return None",
                                    "    if not all(_so_khong_am(x) for x in thay):\n        return False"),
      "ca_token_moi_truong"),

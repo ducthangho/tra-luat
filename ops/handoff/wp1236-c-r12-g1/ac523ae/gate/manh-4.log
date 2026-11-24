@@ -1,0 +1,24 @@
+/home/user/tra-luat/.claude/dev/packet_loop_test.py:3786: SyntaxWarning: invalid escape sequence '\d'
+  '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+  BỎ QUA  wp1342_native_swap_ancestor: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+  BỎ QUA  wp1342_native_job_thuan: ca native Windows (kernel32) — nền Linux không đo, KHÔNG tính đạt
+nền: 116/116 đạt · BỎ QUA: 2
+
+AC 19 — ánh xạ lớp lách → ca bắt-oan:
+  ok  78/78 lớp lách đều có ca bắt-oan (33 ca riêng biệt)
+
+tự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):
+
+AC 18 — mỗi LỚP LÁCH phải có đột biến của nó:
+  ok  78 lớp lách đều có đột biến giết · 41 đột biến PHỐI HỢP · 0 ngoại lệ
+
+SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+  ca               : 1801
+  đột biến         : 2040
+  lớp lách         : 78
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+WP1174 carrier: KHÔNG chạy ở mảnh này (cả nhóm wp1174_* ở mảnh 0; job gom đòi đúng một mảnh đã chạy)
+
+TỔNG: ĐẠT
+MẢNH: ca 4/16 · đột biến - · 118/118 ca · 0 lượt đột biến · carrier=không · 181s · rc=0

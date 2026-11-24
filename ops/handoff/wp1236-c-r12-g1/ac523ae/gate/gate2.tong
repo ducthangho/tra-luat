@@ -1,0 +1,14 @@
+HEAD=ac523aebd876640b369e94511fd44e81bace0908 cay_sach=0 bat_dau=2026-11-24T12:51:59Z
+luat9 do rc=0 1 HOAN_TAT · TONG 178 · GIET 174 · SONG_SACH 4 · CHI_LOI_VO_CAN 0 · LOI_CHAY 0
+LEDGER 178 ID · GIET 174 · TUONG_DUONG 4 · neo goc=ceb9f97ddf92 manifest=edb20f3d2a12
+ledger rc=0
+dot bien khai bao rc=0 · 199 ok · 0 do · dot bien: 199
+selftest rc=0 · == tl selftest 1786/1786 ==
+ci_dang_ky_test rc=0 · PHẢN CHỨNG: 1226/1226 đỏ đúng TỔNG: ĐẠT 
+ruff head: 8 F401 [*] unused-import;3 F811 [ ] redefined-while-unused;3 F841 [ ] unused-variable;2 F541 [*] f-string-missing-placeholders; · ruff 0.15.15
+git diff --check rc=0
+adr-song rc=0
+doctrine-scan rc=0
+numstat: 73 1 .claude/dev/packet_loop.py;240 11 .claude/dev/packet_loop_test.py;
+HEAD_cuoi=ac523aebd876640b369e94511fd44e81bace0908 cay_sach=0 ket_thuc=2026-11-24T13:13:12Z
+HOAN_TAT

@@ -1,0 +1,151 @@
+schema_version: 1
+packet_id: wp1236
+packet_issue: 1236
+packet_slug: GATE-OUTPUT-DOI-CHIEU
+dot: C
+revision: 12
+generation: 1
+lease_id: wp1236-c-r12-g1-claude-20261124
+lease_ref: 'refs/heads/ops/wp1236-bc-lease @ aa27e927931ec78f89dc9413874f7b4ba8f984e2 (ops/leases/wp1236-c-r12-g1-claude-20261124.yaml)'
+spec_path: ops/specs/wp1236-r12.md
+spec_blob: e5583bc042448517b94eadda57231dfc60e0a284
+spec_hash: 4589daf1fd666b03a68b7d7dcd5c60903c10e946963fd324c9ee6185ed8e2dc7
+spec_hash_tu_do: 'sha256sum ops/specs/wp1236-r12.md tại base f602325 = 4589daf1…; git rev-parse HEAD:ops/specs/wp1236-r12.md = e5583bc0… (khớp lease)'
+provider: claude
+model_family: claude
+execution_surface: claude_code
+transport: machine/local
+environment: remote
+operating_system: Linux
+python: 3.13.18
+role: executor
+session_id: session_015GtxrZsYAFm7iLa11eWogL
+base_sha: f602325574c62184caf16309631f5f680ca5cee2
+head_sha: ac523aebd876640b369e94511fd44e81bace0908
+head_tree: e62a4e166e9f181f2a291337d8c527dd84fbaf7e
+tested_sha: ac523aebd876640b369e94511fd44e81bace0908
+head_sha_bang_tested_sha: true
+commits:
+  - {sha: ac523aebd876640b369e94511fd44e81bace0908, cha: f602325574c62184caf16309631f5f680ca5cee2, noi_dung: 'D2b trong kiem-dong-wp + 15 ca cong_d2b_* + 31 đột biến d2b_*'}
+pushed: false        # nhánh code claude/wp1236-c-r12-g1 CHƯA push (ADR-0060 M5/M12); ứng viên giao bằng bundle
+bundle:
+  path: ops/handoff/wp1236-c-r12-g1/ac523ae/wp1236-c-ac523ae.bundle
+  sha256: c5e8e49a049a4f4522069c9f2135a5f9bb397e53f1dec0856019cfd0a0f37be3
+  bytes: 11576
+  range: f602325574c62184caf16309631f5f680ca5cee2..refs/heads/claude/wp1236-c-r12-g1
+  verify: 'git bundle verify rc 0 (gate/bundle_verify.log)'
+  dung: 'git fetch <bundle> claude/wp1236-c-r12-g1:claude/wp1236-c-r12-g1  (cần base f602325 trong kho)'
+status: needs_review
+summary: >-
+  kiem-dong-wp thêm D2b: khi moc_10_2_2.gate_output của biên bản M8 là passed hoặc owner_waived, biên bản phải trỏ tệp đánh giá
+  (hoặc readback miễn) TẠI một commit nằm trên refs/remotes/origin/*; dữ liệu đọc qua git ls-tree + git archive của oid (không đọc cây
+  làm việc), mã cổng ops/gate_output_doi_chieu.py nạp từ origin/master. Vi phạm ra rc 12 với tên lý do cố định; lỗi đo ra rc 8.
+changed_paths:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+write_set_khop_lease: true
+numstat: {lenh: 'git diff --numstat origin/master...HEAD', tep: 2, them: 313, xoa: 12, chi_tiet: 'packet_loop.py +73 −1 · packet_loop_test.py +240 −11', tran: '<= 6 tệp, <= 450 dòng thêm (ADR-0053)'}
+sha256_tep_tai_head:
+  .claude/dev/packet_loop.py: 44aaf41ef94f8426c9c8ac5e43670c8e6866482b2b1312304a1ab491b0e52de7
+  .claude/dev/packet_loop_test.py: a53419f130951a0ee9a76e9d71b37571d2477284464dbd018a069ed6aaaa2220
+tests:   # mọi phép đo dưới đây chạy trên cây SẠCH tại ac523ae (git status --porcelain rỗng trước và sau), Linux, Python 3.13.18, core.abbrev 7, kho đã unshallow
+  - name: 'packet_loop_test — lượt nền, 16 mảnh (lệnh CI: packet_loop_test_manh.py --manh i/16) + job gom'
+    status: passed
+    evidence: 'gate/manh.tong: 16/16 mảnh rc 0; gate/gom.log: "GOM: ĐẠT · 16 mảnh · 1799 ca bắt buộc (sổ 1801 − CA_DAI)"; tổng dòng "nền:" của 16 mảnh = 1761/1761 đạt; BỎ QUA chỉ gồm ca native Windows/pwsh (liệt kê trong từng manh-*.log)'
+  - name: 'ca D2b (cong_d2b_*) và ca D1–D4 cũ (C8)'
+    status: passed
+    evidence: '15/15 ca cong_d2b_* đạt (nằm trong 16 mảnh); các ca cong_c_d* và cong_c_fixture_crlf không đổi kết quả'
+  - name: 'đột biến khai báo — họ d2b_ + ba họ dùng chung fixture/nhánh phân hạng đã sửa'
+    status: passed
+    evidence: 'gate/dot_bien_khai_bao.log: 199/199 giết đúng ca đích, 0 đối chứng khác họ chết (d2b_ 31 · c1106_ 22 · wp1124_ 3 · b4_ 143)'
+  - name: 'luật 9 miền (A) — quet_dot_bien.py do trên khối D2b'
+    status: passed
+    evidence: 'luat9/do.log: "TONG 178 · GIET 174 · SONG_SACH 4 · CHI_LOI_VO_CAN 0 · LOI_CHAY 0" + dòng HOAN_TAT; luat9/ledger_A.tsv: GIET 174 · TUONG_DUONG 4 (rc 0). Cách áp cho đợt C: README.md mục 1'
+  - name: 'luật 9 miền (B) — kho hồi quy'
+    status: not_applicable
+    evidence: 'kho của đợt C bắt đầu rỗng (chỉ dẫn điều phối; spec không ghi kho cho C): luat9/kho_rong.jsonl 0 byte, HOI_QUY 0'
+  - name: 'tự kiểm bộ phân hạng nhánh cong_d2b_'
+    status: passed
+    evidence: 'ca cong_d2b_tu_kiem_phan_hang: CLI sập ⇒ TIN_DUNG_GIA · dựng fixture hỏng ⇒ TIN_DUNG_GIA · đột biến thật ⇒ GIET'
+  - name: 'python3 scripts/tl.py --selftest'
+    status: passed
+    evidence: 'gate/selftest.tail.log: "== tl selftest 1786/1786 ==", rc 0'
+  - name: 'python3 .claude/dev/ci_dang_ky_test.py'
+    status: passed
+    evidence: 'gate/ci_dang_ky.tail.log: "PHẢN CHỨNG: 1226/1226 đỏ đúng" · "TỔNG: ĐẠT", rc 0'
+  - name: 'ruff F delta so master'
+    status: passed
+    evidence: 'python3 -m ruff 0.15.15 (bản ghim CI): packet_loop.py 3 F841 cả hai vế; packet_loop_test.py 8 F401 + 3 F811 + 2 F541 cả hai vế. Delta = 0'
+  - name: 'git diff --check origin/master...HEAD'
+    status: passed
+    evidence: 'rc 0'
+  - name: 'adr-song, doctrine-scan'
+    status: passed
+    evidence: 'rc 0 cả hai'
+  - name: 'đột biến ĐỦ của packet_loop_test (2040 đột biến, lệnh workflow packet-loop-dot-bien: --dot-bien j/16) + 2 ca CA_DAI'
+    status: running
+    evidence: 'khởi động 13:13Z 24-11 trên ac523ae, 4 mảnh song song; kết quả sẽ đăng bổ sung lên #1236. CHƯA có số — không tính là đã đạt'
+  - name: 'Windows native (ADR-0060 M3 required)'
+    status: not_run
+    evidence: 'việc của điều phối trên máy chủ kho (lease: windows). Bộ ca D2b CHƯA từng chạy trên Windows — rủi ro đã biết ở README.md mục 4'
+  - name: 'CI GitHub'
+    status: not_run
+    evidence: 'chưa push (M5)'
+hop_dong_dau_ra_bo_test: >-
+  packet_loop_test.py giữ hợp đồng đầu ra RIÊNG đã đăng ký ở ci_dang_ky_test.py ("nền: N/N đạt · BỎ QUA: k" … "TỔNG: ĐẠT"), không phải
+  bốn dòng CA:/DOT BIEN:/TU KIEM PHAN HANG:/TONG: của tệp test đợt A. Không đổi: đổi là chạm ci_dang_ky_test.py ngoài write set.
+luat_9:
+  cong_cu: {path: ops/reviews/wp1236-r10-soan/quet_dot_bien.py, sha256: 1b3e4a9e0a4608b9fd6c62e1de99bf509cfd8cb96bedb4d956bac681fc1b9c0c, sua: false}
+  lenh: 'WP1236C_GOC=<kho tại ac523ae> python3 ops/reviews/wp1236-r10-soan/quet_dot_bien.py do luat9/d2b_trich.py luat9/d2b_noi.py luat9/kho_rong.jsonl --thu-muc-ra luat9/D --song-song 4'
+  neo: {goc: ceb9f97ddf920f4ad780eb43ddffccb869a5dde8f7087a7d40ef4889429c60ae, test: 18d9acfc31d0b0e5cb6e41165fe11b35da17ca0d386c0a068b9042dd74c4cea5, manifest: edb20f3d2a12aec027435ed2c2c7bc0875d17381cf624358f91ca1b069fe9c06, kho: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855, python: 3.13.18}
+  neo_ghi_chu: 'neo của bộ quét KHÔNG băm packet_loop.py/packet_loop_test.py (bộ nối đọc chúng từ kho); băm hai tệp ấy ở sha256_tep_tai_head'
+  pham_vi: 'khối D2b cắt nguyên văn từ packet_loop.py tại head: 2 hằng regex + _d2b + _d2b_kiem (luat9/d2b_trich.py, 63 dòng không rỗng)'
+  toan_tu: {a: 14, a2: 23, b: 22, c: 5, c2: 7, e: 8, f: 7, g: 71, i1: 4, i2: 5, i4: 5, i5: 1, i7: 2, j1: 2, k2: 1, l: 1}
+  ket_qua: {tong: 178, GIET: 174, TUONG_DUONG: 4, SONG_khong_tuong_duong: 0, VO_CAN: 0, LOI_CHAY: 0, baseline_ca_dat: 14}
+  song_tuong_duong:
+    - {id: 'j1:_d2b_kiem:40:7', doi: '(cay_git := git("ls-tree", …)) is None → == None', chung_minh: 'git() chỉ trả None hoặc bytes; bytes == None là False, None == None là True ⇒ cùng bảng chân trị'}
+    - {id: 'g:_d2b_kiem:35:49', doi: '"--format=%(refname)" → "--format=%(refname)~"', chung_minh: 'đầu ra chỉ được đọc qua r.startswith(b"refs/remotes/origin/"); thêm "~" SAU tên ref không đổi tiền tố của dòng nào'}
+    - {id: 'i7:_d2b_kiem:25:90', doi: 'SHA_RE.fullmatch → SHA_RE.match', chung_minh: 'SHA_RE = ^[0-9a-f]{40}\Z (hằng mức module của packet_loop.py) đã neo hai đầu ⇒ match và fullmatch nhận cùng tập chuỗi'}
+    - {id: 'j1:_d2b_kiem:26:23', doi: 'type(ra) is int → type(ra) == int', chung_minh: 'type(ra) là lớp dựng sẵn (giá trị dựng từ YAML); == giữa hai lớp là so danh tính'}
+  ngoai_khoi: 'ba dòng ngoài khối: lời gọi _d2b(root, bb, thieu) (đột biến khai báo d2b_mC1_khong_chay phủ), import tarfile (xoá ⇒ NameError ⇒ rc 8 ở mọi ca đạt), chuỗi help của argparse (không có ca)'
+bang_doi_chieu_lop:   # lớp TỰ tìm trong lúc thi công (chưa có verdict reviewer); slug đặt theo cơ chế
+  - slug: loi-do-ra-traceback-thay-vi-rc-kiem-soat
+    nguon: 'lượt quét luật 9 thứ nhất trên bản nháp (chưa commit): 21/181 đột biến chỉ chết vì CLI sập (VO_CAN)'
+    bieu_hien: 'KeyError/TypeError/AttributeError trong D2b thoát thành traceback rc 1: khoá biên bản lệch, hàm trả None, module canon ném'
+    cach_va_chung: 'mọi phép đo của D2b nằm trong _d2b_kiem; _d2b bọc MỘT try/except ⇒ _die(RC_STATE, "KHÔNG ĐO ĐƯỢC: D2b <Tên>: <thông điệp>"); việc tiêu thụ kết quả (thieu.extend) cũng nằm trong try'
+    phep_kiem_dong: 'luật 9 lượt chính thức: VO_CAN 0/178; ca cong_d2b_c7_module_nem so ĐÚNG dòng KHÔNG ĐO ĐƯỢC; đột biến d2b_nuot_loi_do (nuốt lỗi ⇒ rc 0) bị giết'
+    chua_do_duoc: 'thông điệp {ex} của ngoại lệ ngoài các đường đã có ca (vd OSError khi bung tar trên Windows) có thể mang đường dẫn tạm — không có ca'
+  - slug: test-thieu-chot
+    nguon: 'lượt quét luật 9 thứ nhất và thứ hai: 17 rồi 12 đột biến sống sạch'
+    bieu_hien: 'thứ tự hai chốt liền nhau không bị khoá · attempt_kieu nuốt mọi neo_* · [^/]+ thành .+ trong regex tệp · thông điệp rc 8 không được so · mã thừa (lọc phần tử rỗng, isdir, tên thư mục tạm)'
+    cach_va_chung: 'mỗi biến thể so ĐÚNG bộ (rc, danh sách lý do theo thứ tự, dòng stdout D2b; rc 8 thì đúng dòng KHÔNG ĐO ĐƯỢC); thêm biến thể hai-lỗi khoá thứ tự; bỏ mã không quan sát được thay vì khai tương đương'
+    phep_kiem_dong: 'luật 9 lượt chính thức: 174 GIET + 4 TUONG_DUONG có chứng minh, 0 sống không tương đương'
+    chua_do_duoc: 'đột biến NGOÀI bộ 24 toán tử (vd đổi lệnh git khác tương đương) không được đo; chuỗi help không có ca'
+lech_so_voi_chu_dac_ta:   # mỗi mục: chữ đặc tả → điều đã làm → vì sao. Cần reviewer/điều phối chốt
+  - {muc: 'luật 9 — "quet_dot_bien.py do <module> <test> <kho>"', da_lam: 'chạy trên KHỐI D2b qua bộ nối d2b_noi.py, không trên cả packet_loop.py', vi_sao: 'bộ quét gắn cứng tên tệp gate_output_doi_chieu.py, biến GATE_OUTPUT_DOI_CHIEU_MA và giao diện CA/chay_ca của tệp test đợt A; sinh trên cả packet_loop.py (7,6k dòng) không xong trong 600 s (bị cắt, chưa ra manifest). Đã báo điều phối khoảng 12:00Z 24-11 (send_message), chưa nhận trả lời'}
+  - {muc: 'C1 — "O chứa bản sao ops/land/pr1440-wp1319-provenance/"', da_lam: 'chép tệp đánh giá + mọi *.yaml (đủ những gì kiem_tep đọc), không chép cả thư mục', vi_sao: 'đo: pr1453 có đường dẫn 128 ký tự; cộng thư mục tạm lồng nhau là sát MAX_PATH 260 của Windows'}
+  - {muc: 'C1/C4 — "merge_commit = head của tệp" (head thật d8cf2ab…/00ee839…)', da_lam: 'đổi head trong header và provenance của bản sao thành merge M của kho tạm', vi_sao: 'head thật không có trong kho tạm ⇒ D3 đỏ; đổi head cho C1 ra rc 0 thật và C4 không có dòng neo_* nào với D3 xanh. kiem_tep không ký nội dung nên bản sao vẫn passed/failed như bản gốc'}
+  - {muc: 'C5(b) dưới mC11 "b ra ĐẠT"', da_lam: 'dưới đột biến bỏ kiểm mode, biến thể symlink ra rc 8 (tệp symlink không được bung) chứ không ĐẠT; ca vẫn chết vì lệch kỳ vọng', vi_sao: 'bộ bung tar chỉ dựng tệp thường — lớp thứ hai chặn symlink'}
+  - {muc: 'hợp đồng đầu ra bốn dòng (luật 7)', da_lam: 'giữ hợp đồng riêng của packet_loop_test.py', vi_sao: 'xem hop_dong_dau_ra_bo_test'}
+quyet_dinh_thiet_ke_can_reviewer_soi:
+  - 'D2b chỉ chạy khi D1 đạt (trường M8 đủ kiểu): D1 đỏ ⇒ không dòng D2b nào (biến thể d1_do_khong_chay).'
+  - 'git cat-file / git branch rc ≠ 0 ⇒ oid_khong_tren_remote (rc 12), không phải rc 8: OID vắng trong kho cho đúng rc 128 nên không tách được khỏi git hỏng. ls-tree, archive, show rc ≠ 0 ⇒ rc 8.'
+  - 'neo_run/neo_attempt/neo_head chỉ xét khi doc_danh_gia đọc được tệp; tệp hỏng thân thì đã có dòng kiem_tep:not_measured:…'
+  - 'attempt_kieu bắn thì neo_attempt không bắn kèm (không có số để so); neo_run và neo_head vẫn bắn.'
+  - 'Module nạp LƯỜI: vi phạm xác định không cần module (thieu_nguon, attempt_kieu, oid, đường dẫn, mode) ra rc 12 kể cả khi module vắng; rc 8 chỉ khi thật sự cần gọi kiem_tep/kiem_mien.'
+  - 'Mode kiểm bằng MỘT lệnh git ls-tree -z -t <oid> -- <đường dẫn>: git liệt kê chuỗi cây cha rồi tới lá; so từng (mode, tên) với kỳ vọng, lệch đầu tiên là đường dẫn trong lý do.'
+  - 'Bung git archive bằng tarfile.extractall(filter=…): chỉ tệp thường; cần Python ≥ 3.12 (CI ghim 3.12).'
+  - 'Dòng D2b ĐẠT in cả khi D3/D4 đỏ (đặc tả chỉ cấm in khi có vi phạm D2b).'
+chua_do_duoc:
+  - 'Windows: chưa chạy ca nào. Biết trước: (a) thành phần đường dẫn chứa "\" — git for Windows có thể coi là dấu phân cách, chưa đo; (b) ca văn bản tự do truyền U+0001/U+2028/ký tự ngoài BMP qua argv của git.exe, chưa đo; (c) tên tệp trong oid không hợp lệ trên NTFS ⇒ bung tar ném OSError ⇒ rc 8, không có ca.'
+  - 'tep/readback_thu_muc chứa ký tự xuống dòng: regex đặc tả [^/]+ cho phép, khi ấy dòng "D2b ĐẠT …" hay lý do symlink_hoac_mode:… bị tách thành nhiều dòng. Không xử lý (đặc tả không nói); không có ca.'
+  - 'Hai lệnh git branch -r --contains và cat-file chạy trên object store cục bộ: không chứng minh remote THẬT còn giữ oid lúc chạy (đặc tả đòi fetch trước).'
+  - 'Đột biến ĐỦ 2040 của packet_loop_test trên ac523ae: đang chạy, chưa có số.'
+  - 'Tài liệu ngoài write set vẫn ghi "D1–D4" cho kiem-dong-wp (ADR-0060 mục Cưỡng chế, bảng §20 protocol) — không sửa được trong packet này.'
+cau_hoi_con_mo:
+  - 'Điều phối/reviewer có nhận cách áp luật 9 trên khối D2b không (README.md mục 1)? Nếu không: cần chỉ rõ <module>/<test> cho đợt C.'
+  - 'Có cần chặn ký tự điều khiển/xuống dòng trong tep và readback_thu_muc không (hiện theo đúng regex đặc tả)? Đổi là đổi đặc tả.'
+remaining_work:
+  - 'điều phối: review Codex offline trên ac523ae (ngân sách 4 lượt, chưa dùng), Windows local (M3)'
+  - 'executor: đăng kết quả lượt đột biến đủ lên #1236; nhận finding theo bảng lớp ⇒ vá theo lớp, commit mới, handoff mới'
+  - 'sau APPROVE trên SHA X: push đúng X lên claude/wp1236-c-r12-g1, mở PR draft vào master'

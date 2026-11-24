@@ -2935,3 +2935,121 @@ INSTRUCTION_REQUIRED = {
     "source id": "Instruction phải neo về source id/drive_id.",
     "Điều": "Instruction phải neo về Điều/khoản/điểm.",
 }
+
+
+# ───────────────────────── v1.36.71 r380 — gọi Claude cho script: SUBSCRIPTION ↔ API key ─────────────────────────
+# Lõi THUẦN ở `tl_core/llm_route.py` (không bind). Hai handler dưới đây được re-home về namespace tl
+# (bẫy I11) nên tên mới PHẢI khai trong `_STUB_MAP["ops_misc"]` của tl.py.
+
+def _llm_in_trang_thai(lr, thu_tu, nguon, tt):
+    api, sub = tt["api"], tt["sub"]
+    print(f"thu tu hieu luc: {','.join(thu_tu)}  (nguon: {nguon})")
+    print(f"  sub: claude CLI={'co' if sub['claude_cli'] else 'KHONG'}  — tinh vao han muc subscription")
+    print(f"  api: key={'co (' + api['bien_key'] + ')' if api['bien_key'] else 'KHONG'} · "
+          f"sdk anthropic={'co' if api['sdk'] else 'KHONG'}  — tinh vao credit API")
+    print(f"  doi: tl llm-order sub,api | api,sub | sub | api   ·   ve mac dinh: tl llm-order --reset "
+          f"(mac dinh {','.join(lr.THU_TU_MAC_DINH)})")
+    print("  CO MAT != DUNG DUOC — so du credit chi xem o Claude Console > Billing")
+
+
+def cmd_llm_order(a) -> int:
+    """Xem / đặt / xoá thứ tự đường gọi Claude (lưu bền ở tệp, đổi được bất cứ lúc nào)."""
+    lr = _tl_core_import("llm_route")
+    try:
+        if getattr(a, "reset", False):
+            if getattr(a, "thu_tu", None):
+                print("--reset khong di cung gia tri thu tu", file=sys.stderr)
+                return 2
+            da_xoa = lr.xoa_thu_tu()
+            print(("da xoa " if da_xoa else "khong co ") + f"tep thu tu {lr.tep_thu_tu()}", file=sys.stderr)
+        elif getattr(a, "thu_tu", None):
+            thu_tu, tep = lr.luu_thu_tu(a.thu_tu)
+            print(f"da luu thu tu {','.join(thu_tu)} -> {tep}", file=sys.stderr)
+        thu_tu, nguon = lr.thu_tu_hieu_luc()
+    except ValueError as e:
+        print(f"[tl] {e}", file=sys.stderr)
+        return 2
+    tt = lr.trang_thai_duong()
+    if getattr(a, "json", False):
+        print(_json_dumps({"ok": True, "thu_tu": list(thu_tu), "nguon": nguon,
+                           "tep": str(lr.tep_thu_tu()), "mac_dinh": list(lr.THU_TU_MAC_DINH),
+                           "duong": tt}))
+    else:
+        _llm_in_trang_thai(lr, thu_tu, nguon, tt)
+    return 0
+
+
+def cmd_llm_khai_niem(a) -> int:
+    """Tách khái niệm của một Điều 'Giải thích từ ngữ' bằng Claude, kiểm nguyên văn theo cụm."""
+    lr = _tl_core_import("llm_route")
+    try:
+        thu_tu, nguon = lr.thu_tu_hieu_luc(getattr(a, "thu_tu", None))
+    except ValueError as e:
+        print(f"[tl] {e}", file=sys.stderr)
+        return 2
+    if getattr(a, "tep", None):
+        try:
+            van_ban = Path(a.tep).read_text(encoding="utf-8").strip()
+        except OSError as e:
+            print(f"[tl] khong doc duoc {a.tep}: {e}", file=sys.stderr)
+            return 2
+        nguon_vb = str(a.tep)
+    else:
+        if not getattr(a, "sohieu", None):
+            print("[tl] can <so_hieu> --dieu N, hoac --tep <tep van ban>", file=sys.stderr)
+            return 2
+        them = []
+        if getattr(a, "profile", None):
+            them += ["--profile", str(a.profile)]
+        try:
+            van_ban, loi_extract = lr.lay_dieu_qua_extract(a.sohieu, a.dieu, HERE / "tl.py", them=them)
+        except (ValueError, OSError, subprocess.SubprocessError) as e:
+            print(f"[tl] khong lay duoc nguyen van: {e}", file=sys.stderr)
+            return 2
+        for dong in loi_extract.splitlines():
+            if dong.startswith("[tl] canonical:") or "DỰ THẢO" in dong or "[markup]" in dong:
+                print(dong, file=sys.stderr)
+        nguon_vb = f"tl extract {a.sohieu} --dieu {a.dieu}"
+    if not van_ban:
+        print("[tl] van ban rong", file=sys.stderr)
+        return 2
+    print(f"[tl] thu tu duong: {','.join(thu_tu)} ({nguon})", file=sys.stderr)
+    try:
+        kq = lr.tach_khai_niem(van_ban, getattr(a, "sohieu", "") or "", a.model, thu_tu)
+    except lr.HetDuong as e:
+        print("[tl] HET DUONG — moi duong deu hong phia duong:", file=sys.stderr)
+        for d, ly_do in e.lan_thu:
+            print(f"  {d}: {ly_do}", file=sys.stderr)
+        return 3
+    except lr.Dung as e:
+        print(f"[tl] DUNG (loi phia yeu cau, khong thu duong khac): {e}", file=sys.stderr)
+        return 4
+    ket = {"so_hieu": getattr(a, "sohieu", None), "dieu": getattr(a, "dieu", None), "nguon": nguon_vb,
+           "khai_niem": kq["khai_niem"]}
+    if getattr(a, "out", None):
+        Path(a.out).write_text(json.dumps(ket, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if getattr(a, "nhat_ky", None):
+        lr.ghi_nhat_ky(a.nhat_ky, kq, "llm-khai-niem")
+    u = kq["usage"]
+    if getattr(a, "json", False):
+        print(_json_dumps({"ok": not kq["lech"], **ket, "duong": kq["duong"], "model": kq["model"],
+                           "thu_tu": list(thu_tu), "nguon_thu_tu": nguon, "usage": u,
+                           "tong_token": lr.tong_token(u), "usd_uoc_tinh": kq["usd_uoc_tinh"],
+                           "lan_thu": kq["lan_thu"], "lech_nguyen_van": kq["lech"]}))
+    else:
+        print(_json_dumps(ket))
+    for d, ly_do in kq["lan_thu"]:
+        print(f"[chuyen duong] {d}: {ly_do}", file=sys.stderr)
+    print(f"DUONG: {kq['duong']}" + (f" (key tu {kq['nguon_key']})" if kq["nguon_key"] else
+                                     " (subscription — tinh vao han muc goi)"), file=sys.stderr)
+    print(f"MODEL: {kq['model']}", file=sys.stderr)
+    print(f"TOKEN: input={u['input']} output={u['output']} cache_doc={u['cache_doc']} "
+          f"cache_ghi={u['cache_ghi']} tong={lr.tong_token(u)}", file=sys.stderr)
+    if kq["usd_uoc_tinh"] is not None:
+        print(f"USD (CLI uoc tinh): {kq['usd_uoc_tinh']:.6f}", file=sys.stderr)
+    if kq["lech"]:
+        print(f"LECH NGUYEN VAN o khoan {kq['lech']} — KHONG dung ket qua nay", file=sys.stderr)
+        return 5
+    print(f"NGUYEN VAN: DAT ({len(kq['khai_niem'])} khai niem, moi cum '<thuat ngu> la <dinh nghia>' "
+          f"co nguyen van trong nguon)", file=sys.stderr)
+    return 0

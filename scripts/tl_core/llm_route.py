@@ -1,41 +1,32 @@
 #!/usr/bin/env python3
-"""Gọi Claude cho tác vụ trích xuất có cấu trúc, tự chọn đường API key ↔ subscription.
+"""tl_core.llm_route — gọi Claude cho trích xuất có cấu trúc, tự chọn đường SUBSCRIPTION ↔ API key.
 
-DEV-SIDE (không vào gói phát hành). Hai đường, thứ tự lấy từ `--thu-tu` hoặc
-biến `TL_LLM_ORDER` (mặc định `api,sub`):
+Module THUẦN (không bind vào namespace tl, không đọc global tl). Lệnh: `tl llm-order`, `tl llm-khai-niem`
+(handler ở `ops_misc.py`). Hai đường; thứ tự hiệu lực theo `thu_tu_hieu_luc`:
+cờ `--thu-tu` > tệp đã lưu bằng `tl llm-order` > biến `TL_LLM_ORDER` > mặc định `sub,api`.
 
-  api  Claude API bằng SDK `anthropic`, key đọc từ `TL_ANTHROPIC_API_KEY` rồi mới
-       tới `ANTHROPIC_API_KEY`. Tên riêng `TL_` vì phiên Claude Code trên web BỎ
-       QUA `ANTHROPIC_API_KEY` khi xác thực (cảnh báo của trang sửa môi trường, đo
-       24-11-2026), còn Network secrets KHÔNG lưu được cho host của Anthropic.
-  sub  `claude -p` (Claude Code không tương tác) — tính vào SUBSCRIPTION. Đây là
-       đường hợp lệ duy nhất để script dùng gói; KHÔNG lấy token OAuth của Claude
-       Code đi gọi API thẳng.
+  sub  `claude -p` (Claude Code không tương tác) — tính vào SUBSCRIPTION. Đường hợp lệ DUY NHẤT để
+       script dùng gói; KHÔNG lấy token OAuth của Claude Code đi gọi API thẳng.
+  api  Claude API bằng SDK `anthropic`, key đọc từ `TL_ANTHROPIC_API_KEY` rồi mới tới
+       `ANTHROPIC_API_KEY`. Tên riêng `TL_` vì phiên Claude Code trên web BỎ QUA `ANTHROPIC_API_KEY`
+       khi xác thực (đo 24-11-2026), còn Network secrets KHÔNG lưu được cho host của Anthropic.
 
-CHUYỂN ĐƯỜNG chỉ khi lỗi thuộc về ĐƯỜNG (thiếu key/SDK/CLI, 401, 403, 402 hết
-credit, 429, mất kết nối, `claude -p` báo lỗi — thường là chạm hạn mức gói). Lỗi
-thuộc về YÊU CẦU (400 khác, model từ chối, cắt `max_tokens`, sai model, đầu ra
-không đúng schema) thì DỪNG: chạy lại ở đường kia chỉ tiêu tiền lần hai cho cùng
-một lỗi.
+CHUYỂN ĐƯỜNG chỉ khi lỗi thuộc về ĐƯỜNG (thiếu key/SDK/CLI, 401, 403, 402 hết credit, 429, mất kết
+nối, `claude -p` báo lỗi — thường là chạm hạn mức gói). Lỗi thuộc về YÊU CẦU (400 khác, model từ
+chối, cắt `max_tokens`, sai model, đầu ra sai schema) thì DỪNG: chạy lại ở đường kia chỉ tiêu tiền
+lần hai cho cùng một lỗi.
 
-Đo 24-11-2026 trong phiên remote: `claude -p` trần nạp nguyên system prompt + bộ
-tool của Claude Code (~92k token vào hạn mức gói cho một câu hỏi một dòng); thêm
-`--tools "" --strict-mcp-config --setting-sources "" --disable-slash-commands
---system-prompt …` còn ~1,9k. KHÔNG dùng `--bare`: chế độ ấy chỉ nhận API key,
-tức là lặng lẽ biến đường `sub` thành đường `api`.
+Đo 24-11-2026 trong phiên remote: `claude -p` trần nạp nguyên system prompt + bộ tool của Claude
+Code (~92k token vào hạn mức gói cho một câu hỏi một dòng); thêm `--tools "" --strict-mcp-config
+--setting-sources "" --disable-slash-commands --system-prompt …` còn ~1,9k. KHÔNG dùng `--bare`:
+chế độ ấy chỉ nhận API key, tức lặng lẽ biến đường `sub` thành đường `api`.
 
-Lệnh:
-  python .claude/dev/llm_route.py trang-thai
-  python .claude/dev/llm_route.py tach-khai-niem <tệp_điều.txt> --so-hieu 134/2025/QH15
-         [--thu-tu api,sub] [--model claude-haiku-5-5] [--out kq.json] [--nhat-ky usage.jsonl]
-
-Mã thoát: 0 đạt · 2 sai đối số/đầu vào · 3 HẾT ĐƯỜNG (mọi đường đều hỏng phía
-đường) · 4 DỪNG (lỗi phía yêu cầu) · 5 đầu ra KHÔNG khớp nguyên văn nguồn.
-KHÔNG BAO GIỜ in giá trị key.
+Mã thoát: 0 đạt · 2 sai đối số/đầu vào · 3 HẾT ĐƯỜNG · 4 DỪNG (lỗi phía yêu cầu) · 5 đầu ra KHÔNG
+khớp nguyên văn nguồn. KHÔNG BAO GIỜ in giá trị key.
 """
 from __future__ import annotations
 
-import argparse
+import contextlib
 import json
 import os
 import shutil
@@ -44,10 +35,6 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-
-for _s in (sys.stdout, sys.stderr):
-    if hasattr(_s, "reconfigure"):
-        _s.reconfigure(encoding="utf-8", errors="backslashreplace")
 
 MODEL_MAC_DINH = "claude-haiku-5-5"
 DUONG_HOP_LE = ("api", "sub")
@@ -74,8 +61,13 @@ class HetDuong(Exception):
         super().__init__("; ".join(f"{d}: {l}" for d, l in lan_thu))
 
 
+THU_TU_MAC_DINH = ("sub", "api")
+BIEN_THU_TU = "TL_LLM_ORDER"
+BIEN_TEP_THU_TU = "TL_LLM_ORDER_FILE"
+
+
 def doc_thu_tu(gia_tri: str | None) -> tuple[str, ...]:
-    tho = (gia_tri or "api,sub").replace(" ", "")
+    tho = (",".join(THU_TU_MAC_DINH) if gia_tri is None else gia_tri).replace(" ", "")
     ds = tuple(x for x in tho.split(",") if x)
     if not ds or any(x not in DUONG_HOP_LE for x in ds) or len(set(ds)) != len(ds):
         raise ValueError(f"thu tu duong khong hop le: {gia_tri!r} (chi nhan api,sub — khong trung)")
@@ -220,7 +212,7 @@ def duong_sub(he_thong, noi_dung, schema, model, env, chay=subprocess.run, tim=s
 
 # ----------------------------------------------------------------- điều phối
 
-def goi(he_thong, noi_dung, schema, model=MODEL_MAC_DINH, thu_tu=("api", "sub"), env=None,
+def goi(he_thong, noi_dung, schema, model=MODEL_MAC_DINH, thu_tu=THU_TU_MAC_DINH, env=None,
         cac_duong=None):
     env = dict(os.environ if env is None else env)
     cac_duong = cac_duong or {"api": duong_api, "sub": duong_sub}
@@ -320,65 +312,62 @@ def lech_nguyen_van(khai_niem, van_ban):
             if f'{k["thuat_ngu"]} là {k["dinh_nghia"]}' not in van_ban]
 
 
-def lenh_tach_khai_niem(a, env=None, cac_duong=None) -> int:
+# ----------------------------------------------------------------- thứ tự đường (lưu bền)
+
+def tep_thu_tu(env=None) -> Path:
+    env = os.environ if env is None else env
+    return Path(env.get(BIEN_TEP_THU_TU) or Path.home() / ".tra_luat_llm.json")
+
+
+def thu_tu_hieu_luc(cli=None, env=None, tep=None):
+    """Trả (thứ_tự, nguồn). Cờ > tệp đã lưu > biến môi trường > mặc định.
+
+    Tệp ĐỌC KHÔNG ĐƯỢC hay sai định dạng thì NÉM ValueError, không lùi về mặc định: lùi im lặng
+    là đổi đường tính tiền sau lưng người dùng (fail-closed)."""
+    env = os.environ if env is None else env
+    if cli:
+        return doc_thu_tu(cli), "co --thu-tu"
+    tep = tep_thu_tu(env) if tep is None else Path(tep)
+    if tep.exists():
+        try:
+            gia_tri = json.loads(tep.read_text(encoding="utf-8")).get("thu_tu")
+        except (OSError, ValueError, AttributeError) as e:
+            raise ValueError(f"tep thu tu {tep} hong ({type(e).__name__}) — sua hoac `tl llm-order --reset`") from e
+        if not isinstance(gia_tri, str):
+            raise ValueError(f"tep thu tu {tep} thieu khoa chuoi 'thu_tu' — `tl llm-order --reset`")
+        return doc_thu_tu(gia_tri), f"tep {tep}"
+    if (env.get(BIEN_THU_TU) or "").strip():
+        return doc_thu_tu(env[BIEN_THU_TU]), f"bien {BIEN_THU_TU}"
+    return THU_TU_MAC_DINH, "mac dinh"
+
+
+def luu_thu_tu(gia_tri, env=None, tep=None) -> tuple[tuple[str, ...], Path]:
+    """Ghi NGUYÊN TỬ (tệp tạm cùng thư mục → os.replace). Kiểm hợp lệ TRƯỚC khi ghi."""
+    thu_tu = doc_thu_tu(gia_tri)
+    tep = tep_thu_tu(env) if tep is None else Path(tep)
+    tep.parent.mkdir(parents=True, exist_ok=True)
+    fd, tam = tempfile.mkstemp(prefix=".tl-llm-", dir=str(tep.parent))
     try:
-        van_ban = Path(a.tep).read_text(encoding="utf-8").strip()
-    except OSError as e:
-        print(f"khong doc duoc {a.tep}: {e}", file=sys.stderr)
-        return MA_DOI_SO
-    if not van_ban:
-        print(f"{a.tep} rong", file=sys.stderr)
-        return MA_DOI_SO
-    try:
-        thu_tu = doc_thu_tu(a.thu_tu or (env or os.environ).get("TL_LLM_ORDER"))
-    except ValueError as e:
-        print(str(e), file=sys.stderr)
-        return MA_DOI_SO
-    noi_dung = (f"Văn bản số hiệu {a.so_hieu}.\n\n<dieu_khoan>\n{van_ban}\n</dieu_khoan>"
-                if a.so_hieu else f"<dieu_khoan>\n{van_ban}\n</dieu_khoan>")
-    try:
-        kq = goi(HE_THONG_KHAI_NIEM, noi_dung, SCHEMA_KHAI_NIEM, a.model, thu_tu, env, cac_duong)
-        kiem_schema(kq["data"], SCHEMA_KHAI_NIEM)
-    except HetDuong as e:
-        print("HET DUONG — moi duong deu hong phia duong:", file=sys.stderr)
-        for d, l in e.lan_thu:
-            print(f"  {d}: {l}", file=sys.stderr)
-        return MA_HET_DUONG
-    except Dung as e:
-        print(f"DUNG (loi phia yeu cau, khong thu duong khac): {e}", file=sys.stderr)
-        return MA_DUNG
-
-    kn = chuan_hoa_khai_niem(kq["data"]["khai_niem"])
-    ket = {"so_hieu": a.so_hieu, "nguon": str(a.tep), "khai_niem": kn}
-    van_ban_json = json.dumps(ket, ensure_ascii=False, indent=2)
-    if a.out:
-        Path(a.out).write_text(van_ban_json + "\n", encoding="utf-8")
-    print(van_ban_json)
-    if a.nhat_ky:
-        ghi_nhat_ky(a.nhat_ky, kq, "tach-khai-niem")
-
-    u = kq["usage"]
-    for d, l in kq["lan_thu"]:
-        print(f"[chuyen duong] {d}: {l}", file=sys.stderr)
-    print(f"DUONG: {kq['duong']}" + (f" (key tu {kq['nguon_key']})" if kq["nguon_key"] else
-                                     " (subscription — tinh vao han muc goi)"), file=sys.stderr)
-    print(f"MODEL: {kq['model']}", file=sys.stderr)
-    print(f"TOKEN: input={u['input']} output={u['output']} cache_doc={u['cache_doc']} "
-          f"cache_ghi={u['cache_ghi']} tong={u['input'] + u['output'] + u['cache_doc'] + u['cache_ghi']}",
-          file=sys.stderr)
-    if kq["usd_uoc_tinh"] is not None:
-        print(f"USD (CLI uoc tinh): {kq['usd_uoc_tinh']:.6f}", file=sys.stderr)
-    lech = lech_nguyen_van(kn, van_ban)
-    if lech:
-        print(f"LECH NGUYEN VAN o khoan {lech} — KHONG dung ket qua nay", file=sys.stderr)
-        return MA_LECH_NGUYEN_VAN
-    print(f"NGUYEN VAN: DAT ({len(kn)} khai niem, moi cum '<thuat ngu> la <dinh nghia>' co nguyen van trong nguon)",
-          file=sys.stderr)
-    return MA_OK
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump({"thu_tu": ",".join(thu_tu)}, f)
+        os.replace(tam, tep)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.unlink(tam)
+        raise
+    return thu_tu, tep
 
 
-def lenh_trang_thai(a, env=None, tim=shutil.which) -> int:
-    """Chỉ báo ĐƯỜNG NÀO CÓ MẶT — không gọi gì, không chứng minh dùng được."""
+def xoa_thu_tu(env=None, tep=None) -> bool:
+    tep = tep_thu_tu(env) if tep is None else Path(tep)
+    if tep.exists():
+        tep.unlink()
+        return True
+    return False
+
+
+def trang_thai_duong(env=None, tim=shutil.which) -> dict:
+    """Đường nào CÓ MẶT — không gọi gì, không chứng minh dùng được."""
     env = os.environ if env is None else env
     ten, _ = lay_key(env)
     try:
@@ -386,38 +375,35 @@ def lenh_trang_thai(a, env=None, tim=shutil.which) -> int:
         co_sdk = importlib.util.find_spec("anthropic") is not None
     except (ImportError, ValueError):
         co_sdk = False
-    print(f"api: key={'co (' + ten + ')' if ten else 'KHONG'} · sdk={'co' if co_sdk else 'KHONG'}")
-    print(f"sub: claude CLI={'co' if tim('claude') else 'KHONG'}")
-    try:
-        print(f"thu tu: {','.join(doc_thu_tu(env.get('TL_LLM_ORDER')))} (TL_LLM_ORDER)")
-    except ValueError as e:
-        print(f"thu tu: LOI — {e}")
-        return MA_DOI_SO
-    print("CO MAT != DUNG DUOC — so du credit chi xem duoc o Claude Console > Billing; "
-          "song/chet cua key: launcher.py doctor --kiem-song")
-    return MA_OK
+    return {"api": {"bien_key": ten, "sdk": co_sdk}, "sub": {"claude_cli": bool(tim("claude"))}}
 
 
-def phan_tich(argv):
-    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    sub = p.add_subparsers(dest="lenh", required=True)
-    t = sub.add_parser("tach-khai-niem", help="tach khai niem tu dieu 'Giai thich tu ngu'")
-    t.add_argument("tep")
-    t.add_argument("--so-hieu", default="")
-    t.add_argument("--thu-tu", default=None, help="api,sub | sub,api | api | sub (mac dinh TL_LLM_ORDER hoac api,sub)")
-    t.add_argument("--model", default=MODEL_MAC_DINH)
-    t.add_argument("--out")
-    t.add_argument("--nhat-ky", help="tep JSONL ghi don usage moi lan goi")
-    sub.add_parser("trang-thai", help="duong nao co mat (khong goi API)")
-    return p.parse_args(argv)
+# ----------------------------------------------------------------- lấy nguyên văn Điều
+
+def lay_dieu_qua_extract(so_hieu, dieu, tl_py, chay=subprocess.run, them=()):
+    """Lấy nguyên văn Điều bằng CHÍNH `tl extract` (đường đọc đã verify, có cảnh báo markup/dự thảo
+    riêng) — không dựng đường đọc thứ hai. Trả (văn bản, stderr của extract)."""
+    p = chay([sys.executable, str(tl_py), "extract", str(so_hieu), "--dieu", str(dieu), *them],
+             capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
+    dau = f"===== Điều {dieu} ====="
+    out = p.stdout or ""
+    if p.returncode != 0 or dau not in out:
+        raise ValueError(f"tl extract {so_hieu} --dieu {dieu} rc={p.returncode}: "
+                         f"{(p.stderr or out).strip()[-300:]}")
+    return out.split(dau, 1)[1].strip(), p.stderr or ""
 
 
-def main(argv=None) -> int:
-    a = phan_tich(sys.argv[1:] if argv is None else argv)
-    if a.lenh == "tach-khai-niem":
-        return lenh_tach_khai_niem(a)
-    return lenh_trang_thai(a)
+def tach_khai_niem(van_ban, so_hieu="", model=MODEL_MAC_DINH, thu_tu=THU_TU_MAC_DINH, env=None,
+                   cac_duong=None) -> dict:
+    """Ném HetDuong / Dung. Trả kết quả `goi` kèm `khai_niem` đã chuẩn hoá và `lech` (danh sách stt)."""
+    noi_dung = (f"Văn bản số hiệu {so_hieu}.\n\n<dieu_khoan>\n{van_ban}\n</dieu_khoan>"
+                if so_hieu else f"<dieu_khoan>\n{van_ban}\n</dieu_khoan>")
+    kq = goi(HE_THONG_KHAI_NIEM, noi_dung, SCHEMA_KHAI_NIEM, model, thu_tu, env, cac_duong)
+    kiem_schema(kq["data"], SCHEMA_KHAI_NIEM)
+    kq["khai_niem"] = chuan_hoa_khai_niem(kq["data"]["khai_niem"])
+    kq["lech"] = lech_nguyen_van(kq["khai_niem"], van_ban)
+    return kq
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+def tong_token(u) -> int:
+    return u["input"] + u["output"] + u["cache_doc"] + u["cache_ghi"]

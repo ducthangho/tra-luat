@@ -282,7 +282,7 @@ kết luận sai ở container này — phải nói rõ **đường nào**.
 - **Nó từ chối chạy ngoài thư mục git tin cậy**: `Not inside a trusted directory and
   --skip-git-repo-check was not specified`. Chạy trong kho, đừng chạy ở `/tmp`.
 
-## Script gọi Claude: API key hay subscription (`.claude/dev/llm_route.py`)
+## Script gọi Claude: subscription hay API key (`tl llm-order`, `tl llm-khai-niem`)
 
 Đây là chuyện của SCRIPT gọi model (ví dụ tách khái niệm của một điều "Giải thích từ
 ngữ"), KHÔNG phải chuyện xác thực của chính phiên Claude Code. Phiên Claude Code luôn
@@ -308,8 +308,23 @@ tính vào tài khoản Anthropic (subscription) của người dùng.
 
 ### Hai đường, tự chuyển khi đường hỏng
 
-`python .claude/dev/llm_route.py tach-khai-niem <tệp> --so-hieu <số hiệu>`. Thứ tự đường
-lấy từ `--thu-tu` hoặc biến `TL_LLM_ORDER` (mặc định `api,sub`):
+Lệnh nằm trong gói phát hành (chạy được cả trên Cowork); lõi ở `scripts/tl_core/llm_route.py`:
+
+```
+python scripts/tl.py llm-khai-niem 134/2025/QH15 --dieu 3 [--out kq.json] [--json] [--nhat-ky u.jsonl]
+python scripts/tl.py llm-khai-niem --tep dieu3.txt          # văn bản Điều có sẵn ở tệp
+python scripts/tl.py llm-order                              # xem thứ tự hiệu lực và nguồn của nó
+python scripts/tl.py llm-order api,sub                      # đặt (lưu bền), đổi lúc nào cũng được
+python scripts/tl.py llm-order --reset                      # về mặc định sub,api
+```
+
+Nguyên văn lấy qua chính `tl extract` (tiến trình con), không qua đường đọc thứ hai.
+Thứ tự hiệu lực: cờ `--thu-tu` của lần chạy > tệp do `tl llm-order` lưu
+(`~/.tra_luat_llm.json`, đổi chỗ bằng `TL_LLM_ORDER_FILE`) > biến `TL_LLM_ORDER` > mặc
+định **`sub,api`**. Tệp hỏng thì lệnh ĐỎ (`rc=2`), không lặng lẽ lùi về mặc định, vì lùi
+im lặng là đổi đường tính tiền sau lưng người dùng. Tệp ở thư mục nhà nên trong phiên
+cloud nó mất khi container bị thu hồi; muốn bền qua mọi phiên thì đặt `TL_LLM_ORDER` trong
+biến môi trường của environment.
 
 | Đường | Gọi bằng | Tính tiền vào |
 |---|---|---|
@@ -339,6 +354,10 @@ lấy từ `--thu-tu` hoặc biến `TL_LLM_ORDER` (mặc định `api,sub`):
   nguồn. Lệch thì `rc=5`, không dùng kết quả.
 - Mỗi lần chạy in ra đường đã dùng, model và token; `--nhat-ky usage.jsonl` ghi dồn để
   cộng tổng.
+- **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
+  `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả
+  hai thì lệnh báo HẾT ĐƯỜNG (`rc=3`) kèm lý do từng đường; `tl llm-order` in sẵn đường nào
+  có mặt.
 
 ### Còn bao nhiêu credit
 

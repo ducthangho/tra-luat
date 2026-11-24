@@ -69,7 +69,7 @@ cong_cu:
         regex: '(?m)^(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$'
     cai: {lenh: "python -m pip install --quiet jsonschema==4.26.0"}
   anthropic:
-    # SDK Python cho đường `api` của `.claude/dev/llm_route.py` (#1503). KHÔNG bắt buộc và
+    # SDK Python cho đường `api` của `scripts/tl_core/llm_route.py` (#1503). KHÔNG bắt buộc và
     # nạp MUỘN bên trong hàm: thiếu gói thì đường `api` báo ChuyenDuong rồi lùi sang `sub`,
     # và `llm_route_test.py` dùng client giả nên không cần gói. Khai ở đây vì `t16` đòi mọi
     # gói bên thứ ba có tên trong bản kê. `ban_ghim: null` — chưa cổng nào gọi API thật.

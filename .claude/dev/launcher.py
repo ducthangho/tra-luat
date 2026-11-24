@@ -4781,7 +4781,7 @@ ANTHROPIC_MODEL_KIEM_SONG = "claude-haiku-5-5"
 
 def _do_anthropic_api(moi_truong: dict[str, str] | None = None, kiem_song: bool = False,
                       mo=urllib.request.urlopen) -> tuple[str, str]:
-    """Đo đường Claude API bằng API key cho SCRIPT (`.claude/dev/llm_route.py`), KHÔNG phải
+    """Đo đường Claude API bằng API key cho SCRIPT (`tl llm-khai-niem`, lõi `scripts/tl_core/llm_route.py`), KHÔNG phải
     xác thực của chính Claude Code.
 
     Key đọc từ `TL_ANTHROPIC_API_KEY` rồi `ANTHROPIC_API_KEY`. Tên riêng `TL_` vì trang sửa
@@ -5644,7 +5644,7 @@ KHA_NANG = [
      "vi_sao": "provider google_antigravity qua execution_surface antigravity (AG-T0-01B)",
      "khac_phuc": "cai agy CLI va chay `agy` (mo TUI de dang nhap)"},
     {"ten": "anthropic-api", "do": lambda ws, ks=False: _do_anthropic_api(_MOI_TRUONG_DA_DOC, ks),
-     "vi_sao": "duong api cua .claude/dev/llm_route.py (script goi Claude bang API key, khong phai Claude Code)",
+     "vi_sao": "duong api cua `tl llm-khai-niem` (script goi Claude bang API key, khong phai Claude Code)",
      "khac_phuc": "them TL_ANTHROPIC_API_KEY vao bien moi truong cua environment (KHONG dung Network "
                   "secrets), mo phien moi; het credit: Claude Console > Billing"},
 ]

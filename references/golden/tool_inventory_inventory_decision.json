@@ -79,6 +79,8 @@
     "live-smoke-plan",
     "live-state-diff",
     "live-state-snapshot",
+    "llm-khai-niem",
+    "llm-order",
     "locate",
     "loop",
     "manifest",
@@ -1066,6 +1068,26 @@
         "risk": "medium",
         "supports_dry_run": false,
         "workflow_task": "live_state_snapshot",
+        "write_scope": "local"
+      },
+      "llm-khai-niem": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
+      "llm-order": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
         "write_scope": "local"
       },
       "locate": {
@@ -2240,11 +2262,11 @@
       }
     },
     "counts": {
-      "generated_parsers": 154,
+      "generated_parsers": 156,
       "high_risk": 29,
       "nested": 9,
-      "total": 199,
-      "write_commands": 106
+      "total": 201,
+      "write_commands": 107
     },
     "schema": "command_registry.v1"
   },

@@ -1,3 +1,23 @@
+# ★ v1.36.71 — r380: `tl llm-order` + `tl llm-khai-niem` — gọi Claude cho script, subscription ↔ API key (#1503) (2026-11-24)
+
+Chủ kho cần chạy tác vụ trích xuất bằng Claude ngay trong skill (cả Cowork), dùng subscription hoặc API key
+và chuyển qua lại khi một bên hết hạn mức/credit.
+
+- Lõi THUẦN `scripts/tl_core/llm_route.py`: đường `sub` = `claude -p` đã cắt ngữ cảnh (đo 24-11: ~1,9k token
+  thay vì ~92k của lệnh trần; KHÔNG `--bare` vì chế độ ấy chỉ nhận API key) và gỡ mọi biến key khỏi env con;
+  đường `api` = SDK `anthropic` + `TL_ANTHROPIC_API_KEY` (rồi `ANTHROPIC_API_KEY`). Chỉ CHUYỂN đường khi lỗi
+  thuộc về đường (thiếu key/SDK/CLI, 401/402/403/429, `billing_error`, 400 "credit balance", mất mạng,
+  `claude -p` báo lỗi); lỗi phía yêu cầu (400 khác, từ chối, `max_tokens`, sai model, sai schema) thì DỪNG.
+- `tl llm-order [THU_TU] [--reset]`: thứ tự lưu bền ở `~/.tra_luat_llm.json` (`TL_LLM_ORDER_FILE`); hiệu lực
+  cờ > tệp > `TL_LLM_ORDER` > mặc định **`sub,api`**. Tệp hỏng ⇒ rc 2, không lùi im lặng về mặc định.
+- `tl llm-khai-niem <số hiệu> --dieu N | --tep`: nguyên văn qua chính `tl extract` (tiến trình con). Mã quyết
+  ranh giới (bỏ "là " thừa — đo 24-11: đường `sub` giữ "là …", đường `api` thì không) và kiểm CẢ CỤM
+  `<thuật ngữ> là <định nghĩa>` có nguyên văn trong nguồn; lệch ⇒ rc 5.
+- Selftest `r380_llm_order_luu_doi_xoa`, `r380_llm_khai_niem_tu_tep_qua_sub`; bộ dev `llm_route_test.py`
+  (không vào gói). Dev-side kèm theo: `launcher.py doctor` mục `anthropic-api`, tài liệu `docs/GOI_AGENT_DA_NEN.md`.
+- Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
+  key qua `agent_creds` chưa làm.
+
 # ★ v1.36.70 — r377: phát hành gom 8 packet từ sau v1.36.69 (#1371) (2026-11-17)
 
 Packet phát hành `RELEASE-1.36.70` r1 (Issue #1371). Bump ba chỗ (`VERSION`, `tl.py`, `SKILL.md`), tái sinh manifest.

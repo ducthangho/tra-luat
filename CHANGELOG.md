@@ -43,6 +43,16 @@ và chuyển qua lại khi một bên hết hạn mức/credit.
   0 — `null`/thiếu `usage`/chi phí ước tính dương/envelope thành công hỏng ⇒ dừng (Q2); `doctor` đòi `content`
   khác rỗng gồm các khối đúng kiểu và token đầu ra dương (Q4); `--nhat-ky` là thư mục ⇒ rc 2 trước model, lỗi
   I/O nhật ký muộn ⇒ rc 2 có thông báo (Q5).
+- Cross-review Codex lượt 5 (`ops/reviews/pr1503-review-5-codex/`, REQUEST_CHANGES, 2 P1 · 3 P2) chạm trần ⇒
+  Review Rescue Checkpoint; chủ kho chọn ĐỔI THIẾT KẾ (+1 lượt, trần 6) vì hai lớp P1 tái phát cả năm lượt:
+  · chuyển đường `sub`→`api` CHỈ khi lỗi trước khi `claude -p` khởi chạy (thiếu CLI, định tuyến, `auth status`,
+    spawn hỏng); đã khởi chạy thì mọi lỗi (quá hạn, mất envelope, hết hạn mức gói) ⇒ DỪNG, gợi ý `--thu-tu api`.
+    Bỏ hẳn phép đoán "model đã chạy chưa" từ envelope (`_dau_model_da_chay`) (R2);
+  · ranh giới khoản theo CẤU TRÚC dòng: nguồn có số ⇒ số liên tục từ 1, dòng không số phải là điểm hoặc tiếp
+    dòng có bằng chứng; nguồn mất số ⇒ mỗi dòng một khoản (R1). Bộ quét có trạng thái ngoặc/trích dẫn thay cho
+    đếm/regex (R3);
+  · `doctor` chỉ nhận khối `text` có `text` là chuỗi (R4); `--nhat-ky` tạo thư mục cha như `--out`, chỉ chặn khi
+    đích là thư mục hoặc cha bị một tệp chắn (R5).
 - Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
   key qua `agent_creds` chưa làm.
 

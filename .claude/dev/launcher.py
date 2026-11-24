@@ -4827,9 +4827,11 @@ def _do_anthropic_api(moi_truong: dict[str, str] | None = None, kiem_song: bool 
             co_type = la_dict and than_tl.get("type") == "message"
             co_id = la_dict and isinstance(than_tl.get("id"), str) and than_tl["id"].startswith("msg_")
             co_role = la_dict and than_tl.get("role") == "assistant"
+            # Lượt 5 R4: probe KHÔNG khai tools ⇒ Message hợp lệ chỉ có khối `text`; khối loại khác (vd `tool_use` thiếu
+            # trường bắt buộc) không phải bằng chứng một lượt đã phục vụ.
             co_content = isinstance(noi_dung, list) and len(noi_dung) > 0 and all(
-                isinstance(kh, dict) and isinstance(kh.get("type"), str)
-                and (kh["type"] != "text" or isinstance(kh.get("text"), str)) for kh in noi_dung)
+                isinstance(kh, dict) and kh.get("type") == "text"
+                and isinstance(kh.get("text"), str) for kh in noi_dung)
             la_message = co_type and co_id and co_role and co_content
             dung_model = isinstance(than_tl, dict) and than_tl.get("model") == ANTHROPIC_MODEL_KIEM_SONG
             # Token đều phải là số nguyên (không bool) và DƯƠNG: một lượt đã phục vụ thì có cả đầu vào lẫn đầu ra

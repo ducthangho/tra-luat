@@ -4548,6 +4548,9 @@ def t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit():
                  b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 0, "output_tokens": 3}}',
                  b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": true, "output_tokens": 3}}',
                  b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": 5}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 # Lượt 5 R4: khối `tool_use` thiếu trường bắt buộc (probe không khai tools).
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "tool_use"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
+                 b'{"id": "msg_01", "type": "message", "role": "assistant", "content": [{"type": "tool_use", "text": "x"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
                  # Lượt 4 Q4: mỗi trường khung một mẫu hỏng RIÊNG (khung còn lại đầy đủ) + khối nội dung sai kiểu.
                  b'{"id": "abc", "type": "message", "role": "assistant", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
                  b'{"id": "msg_01", "type": "message", "role": "user", "content": [{"type": "text", "text": "ok"}], "model": "claude-haiku-5-5", "usage": {"input_tokens": 8, "output_tokens": 3}}',
@@ -17846,11 +17849,11 @@ DOT_BIEN = [
       '            co_content = isinstance(noi_dung, list) and all('),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_bo_kiem_kieu_khoi",
-     ('                isinstance(kh, dict) and isinstance(kh.get("type"), str)\n',
+     ('                isinstance(kh, dict) and kh.get("type") == "text"\n',
       '                isinstance(kh, dict)\n'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_bo_kiem_text_khoi",
-     ('                and (kh["type"] != "text" or isinstance(kh.get("text"), str)) for kh in noi_dung)',
+     ('                and isinstance(kh.get("text"), str) for kh in noi_dung)',
       '                for kh in noi_dung)'),
      ["t162_do_anthropic_api_khong_goi_mac_dinh_va_phan_loai_het_credit"]),
     ("anthropic_api_nhan_0_dau_ra",

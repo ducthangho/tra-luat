@@ -1373,7 +1373,8 @@ GENERATED_SPECS = [
      ]},
     {"name": 'llm-khai-niem', "handler": 'cmd_llm_khai_niem',
      "help": '(v1.36.71 r380) Tách khái niệm của Điều "Giải thích từ ngữ" bằng Claude (mặc định claude-haiku-5-5) '
-             'theo thứ tự của `tl llm-order`; tự chuyển đường khi đường hỏng (hết credit/hạn mức, thiếu key/CLI). '
+             'theo thứ tự của `tl llm-order`; tự chuyển đường khi đường hỏng TRƯỚC khi gọi model (hết credit, thiếu key/CLI); '
+             '`claude -p` đã khởi chạy thì mọi lỗi đều dừng. '
              'Nguyên văn lấy qua `tl extract`; kiểm cụm "<thuật ngữ> là <định nghĩa>" có trong nguồn (lệch ⇒ rc 5). '
              'rc: 0 đạt · 2 đầu vào · 3 hết đường · 4 dừng (lỗi phía yêu cầu) · 5 lệch nguyên văn',
      "args": [

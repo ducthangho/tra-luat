@@ -32315,6 +32315,15 @@ def run() -> int:
                 finally:
                     _lr.ghi_nhat_ky = _sav_nk
                 _nkmuon_ok = _rc_nkmuon == 2 and _out3.is_file()
+                # Lượt 5 R5: `--out` và `--nhat-ky` khác tệp trong CÙNG một thư mục mới ⇒ rc 0, cả hai được tạo; cha bị một
+                # TỆP chắn ⇒ rc 2 trước model.
+                _moi = _d / "moi" / "con"
+                _rc_moi, _ = _chay(tep=str(_t15), out=str(_moi / "kq.json"), nhat_ky=str(_moi / "u.jsonl"))
+                _moi_ok = _rc_moi == 0 and (_moi / "kq.json").is_file() and (_moi / "u.jsonl").is_file()
+                (_d / "chan").write_text("x", encoding="utf-8")
+                _n_truoc4 = len(_goi_model)
+                _rc_chan, _ = _chay(tep=str(_t15), nhat_ky=str(_d / "chan" / "u.jsonl"))
+                _chan_ok = _rc_chan == 2 and len(_goi_model) == _n_truoc4
                 _os380.environ["TL_LLM_ORDER_FILE"] = str(_d)            # tệp thứ tự là THƯ MỤC
                 _ns_o2 = _ty378.SimpleNamespace(thu_tu="sub", reset=False, json=True)
                 with _ctx378.redirect_stdout(_io378.StringIO()), _ctx378.redirect_stderr(_io378.StringIO()):
@@ -32327,7 +32336,7 @@ def run() -> int:
                 and "--profile" in _them_bat[-1] and _rc5 == 5 and _giu and _rc_rong == 2
                 and _rc_bom_lech == 2 and _rc_bom == 0 and _dieu_bom == "15"
                 and _rc_outdir == 2 and _khong_goi and _rc_ghi == 0 and _giu_quyen and _rc_order_dir == 2 and _trung_ok
-                and _nkdir_ok and _nkmuon_ok)
+                and _nkdir_ok and _nkmuon_ok and _moi_ok and _chan_ok)
     _t110("r380_llm_khai_niem_bien_dau_vao", _c380_llm_khai_niem_bien_dau_vao)
 
     # F1-02 / wp42 rev2 (late-duplicate RED) — PHẢI là đăng ký cuối cùng trước tally:

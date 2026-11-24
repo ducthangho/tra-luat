@@ -45,11 +45,6 @@ BIEN_KEY = ("TL_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY")
 # kẻo trên máy cá nhân "sub" lặng lẽ tính tiền vào API key.
 BIEN_GO_KHOI_SUB = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "TL_ANTHROPIC_API_KEY")
 TIMEOUT_SUB_GIAY = 300
-# Subtype kết quả của `claude -p` nghĩa là MODEL ĐÃ CHẠY mà yêu cầu không đạt — lỗi phía YÊU CẦU,
-# chạy lại ở đường `api` chỉ tốn credit lần hai (cross-review PR #1503 F2). Tên đo trong CLI đã cài
-# 24-11-2026; subtype lạ ⇒ không phải `success` ⇒ chuyển đường (fail-closed cho việc NHẬN kết quả).
-SUBTYPE_LOI_YEU_CAU = frozenset({"error_max_structured_output_retries", "error_max_turns",
-                                 "error_max_budget_usd"})
 HOST_API_ANTHROPIC = "api.anthropic.com"
 MA_CHUYEN_DUONG = frozenset({401, 402, 403, 429, 503, 529})
 KIEU_CHUYEN_DUONG = frozenset({"authentication_error", "billing_error", "permission_error", "rate_limit_error",
@@ -240,7 +235,6 @@ def _so_khong_am(v) -> bool:
 
 _KHOA_MU = {"input": "inputTokens", "output": "outputTokens", "cache_doc": "cacheReadInputTokens",
             "cache_ghi": "cacheCreationInputTokens"}
-_KHOA_USAGE = ("input_tokens", "output_tokens", "cache_read_input_tokens", "cache_creation_input_tokens")
 
 
 def _usage_sub(mu):
@@ -258,30 +252,6 @@ def _usage_sub(mu):
                 return None
             tong[dich] += x
     return tong
-
-
-def _dau_model_da_chay(kq):
-    """Bằng chứng model ĐÃ chạy trong envelope lỗi: True (có token dương ở BẤT KỲ đâu — kể cả token cache, kể
-    cả khối `usage` tổng — hoặc chi phí ước tính dương), False (số đo ĐẦY ĐỦ, đúng kiểu và đều bằng 0), None
-    (không biết). Cross-review lượt 3 M2: chỉ xét input/output của `modelUsage` từng bỏ sót token cache và khối
-    `usage` tổng. Lượt 4 Q2: `null` tường minh, THIẾU khối `usage` hay thiếu input/output trong nó từng được đọc
-    là "không có số đo" ⇒ False ⇒ gọi tiếp API. Nay thiếu/null ⇒ None: "chưa chạy" phải có bằng chứng DƯƠNG."""
-    # `null` tường minh rơi vào các phép KIỂM KIỂU dưới (None không phải dict/số) ⇒ None; chỉ VẮNG `modelUsage`/
-    # `total_cost_usd` mới được coi là rỗng/0 — `usage` thì bắt buộc.
-    mu = kq.get("modelUsage", {})
-    if not isinstance(mu, dict) or not all(isinstance(v, dict) for v in mu.values()):
-        return None
-    thay = [v[k] for v in mu.values() for k in _KHOA_MU.values() if k in v]
-    us = kq.get("usage")
-    if not isinstance(us, dict) or "input_tokens" not in us or "output_tokens" not in us:
-        return None
-    thay += [us[k] for k in _KHOA_USAGE if k in us]
-    if not all(_so_khong_am(x) for x in thay):
-        return None
-    phi = kq.get("total_cost_usd", 0)
-    if isinstance(phi, bool) or not isinstance(phi, (int, float)) or not phi >= 0:
-        return None
-    return any(x > 0 for x in thay) or phi > 0
 
 
 def kiem_xac_thuc_sub(claude_bin, env, chay=subprocess.run) -> None:
@@ -317,6 +287,11 @@ def duong_sub(he_thong, noi_dung, schema, model, env, chay=subprocess.run, tim=s
         raise ChuyenDuong("khong co claude CLI tren PATH")
     kiem_dinh_tuyen_sub(env)
     kiem_xac_thuc_sub(claude_bin, env, chay)
+    # Ranh giới chuyển đường (Review Rescue Checkpoint sau lượt 5, quyết định chủ kho): CHỈ lỗi TRƯỚC khi tiến trình
+    # `claude -p` khởi chạy (thiếu CLI, định tuyến, `auth status`, không spawn được) mới được chuyển sang `api`. Đã
+    # khởi chạy rồi thì KHÔNG đoán "model đã chạy chưa" từ envelope nữa — năm lượt review liên tiếp tìm ra một cửa
+    # mới trong phép đoán ấy (F2→N2→M2→Q2→R2). Mọi lỗi sau khởi chạy ⇒ DỪNG; người dùng tự chạy lại với `--thu-tu api`.
+    goi_y = "loi sau khi claude -p da khoi chay — khong tu chuyen duong; het han muc goi thi chay lai voi --thu-tu api"
     try:
         # stdin=DEVNULL: không có thì `claude -p` chèn dòng "no stdin data received" TRƯỚC
         # JSON (đo 06-09-2026, CLAUDE.md §Gọi agent đa nền). cwd tạm: tránh nạp ngữ cảnh kho.
@@ -326,47 +301,32 @@ def duong_sub(he_thong, noi_dung, schema, model, env, chay=subprocess.run, tim=s
                      encoding="utf-8", errors="replace", timeout=TIMEOUT_SUB_GIAY,
                      env=env_cho_sub(env), cwd=cwd)
     except subprocess.TimeoutExpired as e:
-        raise ChuyenDuong(f"claude -p qua han {TIMEOUT_SUB_GIAY}s") from e
+        raise Dung(f"claude -p qua han {TIMEOUT_SUB_GIAY}s ({goi_y})") from e
     except OSError as e:
-        raise ChuyenDuong(f"khong chay duoc claude: {type(e).__name__}") from e
+        raise ChuyenDuong(f"khong khoi chay duoc claude: {type(e).__name__}") from e
     tho = p.stdout or ""
     i = tho.find("{")
     try:
         kq = json.loads(tho[i:]) if i >= 0 else None
     except json.JSONDecodeError:
         kq = None
-    # Giải mã envelope MỘT lần, KIỂM KIỂU trước mọi phép tra (lượt 2 N2: `subtype=[]` từng ném TypeError,
-    # `modelUsage` dạng mảng ném AttributeError).
+    # Giải mã envelope MỘT lần, KIỂM KIỂU trước mọi phép tra (lượt 2 N2).
     if not isinstance(kq, dict):
-        raise ChuyenDuong(f"claude -p rc={p.returncode}: khong co envelope JSON ({(p.stderr or tho).strip()[:160]})")
+        raise Dung(f"claude -p rc={p.returncode}: khong co envelope JSON ({goi_y}): {(p.stderr or tho).strip()[:160]}")
     subtype = kq.get("subtype") if isinstance(kq.get("subtype"), str) else None
     stop = kq.get("stop_reason") if isinstance(kq.get("stop_reason"), str) else None
-    u = _usage_sub(kq.get("modelUsage"))
-    # Lỗi phía YÊU CẦU ⇒ DỪNG: subtype đã biết, hoặc lý do kết thúc là từ chối/cắt đầu ra — kể cả khi
-    # envelope tự xưng `success` (lượt 2 N2).
-    if subtype in SUBTYPE_LOI_YEU_CAU or stop in STOP_REASON_LOI_YEU_CAU:
-        raise Dung(f"claude -p subtype={subtype} stop_reason={stop} (loi phia yeu cau — khong chuyen duong)")
-    # NHẬN chỉ khi đủ BA dấu dương: rc 0, `subtype == "success"`, `is_error` đúng là False (lượt 1 F2).
-    if not (p.returncode == 0 and subtype == "success" and kq.get("is_error") is False):
+    # NHẬN chỉ khi đủ dấu dương: rc 0, `subtype == "success"`, `is_error` đúng là False (lượt 1 F2), và lý do kết thúc
+    # không phải từ chối/cắt đầu ra (lượt 2 N2: kể cả khi envelope tự xưng `success`).
+    if not (p.returncode == 0 and subtype == "success" and kq.get("is_error") is False
+            and stop not in STOP_REASON_LOI_YEU_CAU):
         mo_ta = str(kq.get("result") or "").strip()[:160]
-        # Envelope lỗi mà model ĐÃ CHẠY (có token ở bất kỳ trường nào) hoặc KHÔNG BIẾT (số đo sai kiểu) ⇒ gọi lại ở
-        # `api` có thể tiêu tiền lần hai cho cùng việc: DỪNG. Chỉ khi mọi số đo sạch và bằng 0 (hạn mức, xác thực,
-        # khởi động) mới chuyển đường. `error_during_execution` dùng cho CẢ hai ca (lượt 2 N2) ⇒ phân bằng phép đo.
-        dau = _dau_model_da_chay(kq)
-        if dau is not False:
-            ly_do = "sau khi model da chay" if dau else "so do token thieu/sai kieu — khong biet model da chay chua"
-            raise Dung(f"claude -p rc={p.returncode} subtype={subtype} {ly_do}: {mo_ta}")
-        # Lượt 4 Q2: chỉ chuyển đường khi envelope TỰ KHAI LỖI (`is_error` đúng là True). Envelope tự xưng thành công
-        # mà hỏng (`is_error=[]`, thiếu `is_error`, rc khác 0 mà `is_error` False…) là MƠ HỒ ⇒ DỪNG, không tiêu credit API.
-        if kq.get("is_error") is not True:
-            raise Dung(f"claude -p rc={p.returncode} subtype={subtype} is_error={kq.get('is_error')!r}: "
-                       f"envelope mo ho — khong chuyen duong: {mo_ta}")
-        raise ChuyenDuong(f"claude -p rc={p.returncode} subtype={subtype}: {mo_ta}")
+        raise Dung(f"claude -p rc={p.returncode} subtype={subtype} stop_reason={stop} ({goi_y}): {mo_ta}")
     mu = kq.get("modelUsage")
     da_chay = {(v.get("canonicalModel") if isinstance(v.get("canonicalModel"), str) else k)
                for k, v in mu.items()} if isinstance(mu, dict) and all(isinstance(v, dict) for v in mu.values()) else None
     if da_chay != {model}:
         raise Dung(f"model da chay {sorted(da_chay) if da_chay else da_chay} khac model yeu cau {model!r}")
+    u = _usage_sub(mu)
     if u is None or not (u["input"] or u["output"]):
         raise Dung("claude -p thanh cong nhung khong co so do token — khong chung minh model da chay")
     data = kq.get("structured_output")
@@ -429,6 +389,7 @@ def ghi_nhat_ky(tep, kq, tac_vu):
     dong = {"thoi_diem": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "tac_vu": tac_vu,
             "duong": kq["duong"], "model": kq["model"], **kq["usage"],
             "usd_uoc_tinh": kq["usd_uoc_tinh"], "lan_thu": kq["lan_thu"]}
+    Path(tep).parent.mkdir(parents=True, exist_ok=True)   # lượt 5 R5: cùng hợp đồng với `--out`
     with open(tep, "a", encoding="utf-8") as f:
         f.write(json.dumps(dong, ensure_ascii=False) + "\n")
 
@@ -481,55 +442,44 @@ _RE_SO_KHOAN = re.compile(r"^(?:(\d+)\s*[.)](?!\d)|\((\d+)\))\s*")
 _RE_DIEU = re.compile(r"^Điều\s+\d+")
 _RE_DIEM = re.compile(r"^([a-zđ]\)|[-–•+])\s*")
 _RE_LA = re.compile(r"(?:^|\s)là(?:\s|$)")
+_RE_MO_BANG_LA = re.compile(r"^là(?:\s|$)")
 
 
 def tach_khoan(van_ban):
     """Các khoản của một Điều "Giải thích từ ngữ": danh sách `(số_nguồn | None, văn bản đã gỡ số)`, theo thứ
-    tự nguồn; `None` khi KHÔNG xác định được ranh giới (fail-closed — cross-review lượt 2 N1).
+    tự nguồn; `None` khi KHÔNG xác định được ranh giới (fail-closed).
 
-    - Bỏ BOM, dòng tiêu đề `Điều N.` và câu dẫn (dòng kết thúc `:` không chứa chữ "là") đứng TRƯỚC khoản
-      đầu. Bất kỳ dòng nào khác trước khoản đầu ⇒ None: nó có thể là thân của khoản đầu bị bỏ (N1 đo được
-      khoản "X là" xuống dòng bị nuốt mất rồi vẫn báo đạt).
-    - Nguồn CÓ số thứ tự ⇒ chỉ dòng mang số mở khoản; dòng khác nối vào khoản trước; số nguồn được giữ để
-      đối chiếu `stt` (nguồn đánh `1.` rồi `4.` thì `stt` phải là 4, không phải 2).
-    - Nguồn MẤT số (Google Doc rơi số tự động — Điều 3 Luật 134/2025/QH15): dòng có chữ "là" mở khoản; dòng
-      điểm (`a)`, `-`) nối vào khoản trước; dòng KHÔNG có "là" và không phải điểm ⇒ None (không phân biệt
-      được tiếp dòng với khoản dùng từ nối khác — để người dùng đưa nguồn có số)."""
+    Ranh giới do CẤU TRÚC dòng quyết, KHÔNG do chữ "là" (Review Rescue Checkpoint sau lượt 5: năm lượt liên tiếp
+    tìm ra một cửa mới trong phép đoán theo từ nối — F1→N1→M1→Q1→R1):
+    - Bỏ BOM, dòng tiêu đề `Điều N.` và câu dẫn (dòng kết thúc `:`) đứng TRƯỚC khoản đầu.
+    - Dòng điểm (`a)`, `-`) nối vào khoản đang mở. Dòng là TIẾP DÒNG có bằng chứng khi khoản đang mở còn trong
+      ngoặc/trích dẫn, hoặc khi khoản đang mở CHƯA có từ nối và dòng mở bằng "là" (lượt 4 Q3).
+    - Nguồn CÓ số: dòng mang số mở khoản; số phải LIÊN TỤC từ 1 (lượt 5 R1: khoản mất số ở giữa); mọi dòng
+      không số khác ⇒ None (có thể là khoản mất số — không đoán).
+    - Nguồn MẤT số (Google Doc rơi số tự động — Điều 3 Luật 134/2025/QH15): MỖI DÒNG là một khoản."""
     dong = [ln.strip() for ln in str(van_ban).lstrip("\ufeff").splitlines() if ln.strip()]
     if dong and _RE_DIEU.match(dong[0]):
         dong = dong[1:]
     co_so = any(_RE_SO_KHOAN.match(ln) for ln in dong)
     khoan: list[list] = []
     for ln in dong:
-        m = _RE_SO_KHOAN.match(ln)
-        if co_so:
-            if m:
-                khoan.append([int(m.group(1) or m.group(2)), ln[m.end():]])
-            elif khoan and (_RE_DIEM.match(ln) or _la_tiep_dong(khoan[-1][1], ln)):
-                khoan[-1][1] += "\n" + ln
-            elif khoan:
-                # Nguồn CÓ số mà dòng không số lại mở bằng "<X> là …": có thể là một khoản MẤT số (lượt 3 M1: khoản 4
-                # mất số bị gộp vào khoản 3 rồi vẫn báo đạt) ⇒ mơ hồ, fail-closed.
-                return None
-            elif ln.endswith(":") and not _RE_LA.search(ln):
-                continue
-            else:
-                return None
-            continue
-        if _RE_DIEM.match(ln):
+        m = _RE_SO_KHOAN.match(ln) if co_so else None
+        if m:
+            khoan.append([int(m.group(1) or m.group(2)), ln[m.end():]])
+        elif _RE_DIEM.match(ln):
             if not khoan:
                 return None
             khoan[-1][1] += "\n" + ln
-        elif khoan and _la_tiep_dong(khoan[-1][1], ln) and _tu_noi(ln) is not None:
-            # Chỉ dòng CÓ từ nối mà vẫn là tiếp dòng (mở bằng "là", hoặc còn trong ngoặc/trích dẫn) — dòng không có từ
-            # nối nào vẫn mơ hồ ở nguồn mất số (không phân biệt được với khoản dùng từ nối khác) ⇒ rơi xuống None.
+        elif khoan and (_dang_mo(khoan[-1][1]) or (_RE_MO_BANG_LA.match(ln) and _tu_noi(khoan[-1][1]) is None)):
             khoan[-1][1] += "\n" + ln
-        elif _tu_noi(ln) is not None:
+        elif not khoan and ln.endswith(":") and _tu_noi(ln) is None:
+            continue   # câu dẫn: kết thúc ":" và KHÔNG có từ nối (khoản "X là … sau:" có điểm thì không phải câu dẫn)
+        elif not co_so:
             khoan.append([None, ln])
-        elif not khoan and ln.endswith(":"):
-            continue
         else:
             return None
+    if co_so and [so for so, _ in khoan] != list(range(1, len(khoan) + 1)):
+        return None
     return [(so, txt) for so, txt in khoan]
 
 
@@ -537,42 +487,51 @@ def _gon(s) -> str:
     return " ".join(str(s).split())
 
 
+def _quet(txt):
+    """Duyệt `txt` từng ký tự kèm trạng thái "đang trong ngoặc tròn / cụm trích dẫn" TRƯỚC ký tự ấy. Một bộ quét
+    có trạng thái thay cho đếm/regex (lượt 5 R3: xoá cặp ngoặc trong cùng bằng regex bỏ sót ngoặc lồng)."""
+    sau, thang, cong = 0, False, 0
+    for i, c in enumerate(txt):
+        yield i, c, sau > 0 or thang or cong > 0
+        if c == "(":
+            sau += 1
+        elif c == ")" and sau:
+            sau -= 1
+        elif c == '"':
+            thang = not thang
+        elif c == "\u201c":
+            cong += 1
+        elif c == "\u201d" and cong:
+            cong -= 1
+
+
 def _dang_mo(truoc) -> bool:
-    """`truoc` còn mở một cặp ngoặc tròn hay một cụm trích dẫn (`"…"` hoặc `“…”`)."""
-    return (truoc.count("(") > truoc.count(")") or truoc.count('"') % 2 == 1
-            or truoc.count("\u201c") > truoc.count("\u201d"))
+    """`truoc` còn mở một cặp ngoặc tròn hay một cụm trích dẫn (`"…"` hoặc `“…”`) ở cuối."""
+    trong = False
+    for _, _, trong in _quet(truoc + " "):
+        pass
+    return trong
 
 
 def _tu_noi(txt):
-    """Match của từ nối định nghĩa "là" CẤP KHOẢN, hoặc None. Là chữ "là" ĐẦU TIÊN:
-    - nằm NGOÀI ngoặc tròn (lượt 3 M1: `X (sau đây gọi là Y) là …`) và NGOÀI cụm trích dẫn (lượt 4 Q1: tên gọi
-      được trích giữa ngoặc kép có chữ "là");
-    - nằm ở PHẦN ĐẦU khoản, trước dòng điểm `a)`/`-` đầu tiên (lượt 4 Q1: khoản "bao gồm:" mà điểm a) có chữ "là"
-      từng bị cắt tại điểm a)), và không đứng sau dấu `:` ngoài ngoặc (cùng lớp, khi điểm viết liền một dòng).
-    Phần đầu được phép XUỐNG DÒNG trước từ nối (lượt 4 Q3)."""
+    """Match của từ nối định nghĩa "là" CẤP KHOẢN, hoặc None: chữ "là" ĐẦU TIÊN nằm NGOÀI ngoặc tròn và cụm trích
+    dẫn (lượt 3 M1, lượt 4 Q1), ở PHẦN ĐẦU khoản — trước dòng điểm đầu tiên và không sau một dấu `:` NGOÀI ngoặc
+    (lượt 4 Q1; lượt 5 R3: dấu `:` trong ngoặc lồng không tính). Phần đầu được phép xuống dòng (lượt 4 Q3)."""
     dau = []
     for ln in str(txt).split("\n"):
         if dau and _RE_DIEM.match(ln.strip()):
             break
         dau.append(ln)
     dau = "\n".join(dau)
-    for m in _RE_LA.finditer(dau):
-        truoc = dau[:m.start()]
-        if _dang_mo(truoc):
+    vi_tri_la = {m.start(): m for m in _RE_LA.finditer(dau)}
+    for i, c, trong in _quet(dau):
+        if trong:
             continue
-        sach = re.sub(r"\([^()]*\)|\"[^\"]*\"|\u201c[^\u201d]*\u201d", "", truoc)
-        return None if ":" in sach else m
+        if c == ":":
+            return None
+        if i in vi_tri_la:
+            return vi_tri_la[i]
     return None
-
-
-def _la_tiep_dong(khoan_dang_mo, ln) -> bool:
-    """Dòng không số `ln` là TIẾP DÒNG của khoản đang mở (không phải một khoản mất số): khoản đang mở còn trong
-    ngoặc/trích dẫn, hoặc `ln` không có từ nối với vế trước khác rỗng (dòng mở bằng "là" chính là nửa sau của
-    `<thuật ngữ>\nlà <định nghĩa>` — lượt 4 Q3). Khoản mất số luôn có thuật ngữ đứng TRƯỚC từ nối."""
-    if _dang_mo(khoan_dang_mo):
-        return True
-    m = _tu_noi(ln)
-    return m is None or not ln[:m.start()].strip()
 
 
 def lech_nguyen_van(khai_niem, van_ban):
@@ -584,7 +543,7 @@ def lech_nguyen_van(khai_niem, van_ban):
     khoan = tach_khoan(van_ban)
     if not khoan:
         return [0]
-    so_cua = [so if so is not None else i + 1 for i, (so, _) in enumerate(khoan)]
+    so_cua = list(range(1, len(khoan) + 1))   # số nguồn (nếu có) đã được buộc LIÊN TỤC từ 1 ở `tach_khoan`
     lech = []
     for i, k in enumerate(khai_niem):
         tn, dn = _gon(k.get("thuat_ngu", "")), _gon(k.get("dinh_nghia", ""))

@@ -3069,11 +3069,15 @@ def cmd_llm_khai_niem(a) -> int:
     if getattr(a, "out", None) and Path(a.out).is_dir():   # lượt 2 N5: kiểm đích TRƯỚC khi tiêu token
         print(f"[tl] --out {a.out} la thu muc — can duong dan tep", file=sys.stderr)
         return 2
-    if getattr(a, "nhat_ky", None) and (Path(a.nhat_ky).is_dir() or not Path(a.nhat_ky).parent.is_dir()):
-        # Lượt 4 Q5: nhật ký trỏ thư mục / thư mục cha không có từng ném traceback SAU khi đã ghi `--out` — kiểm TRƯỚC model.
-        print(f"[tl] --nhat-ky {a.nhat_ky}: la thu muc hoac thu muc cha khong ton tai — can duong dan tep",
-              file=sys.stderr)
-        return 2
+    if getattr(a, "nhat_ky", None):
+        # Lượt 4 Q5: nhật ký trỏ thư mục từng ném traceback SAU khi đã ghi `--out` — kiểm TRƯỚC model. Lượt 5 R5: thư mục
+        # cha CHƯA có thì được tạo khi ghi (như `--out`); chỉ chặn khi tổ tiên gần nhất đang tồn tại không phải thư mục.
+        _nk = Path(a.nhat_ky)
+        _to = next((x for x in _nk.absolute().parents if x.exists()), None)
+        if _nk.is_dir() or _to is None or not _to.is_dir():
+            print(f"[tl] --nhat-ky {a.nhat_ky}: la thu muc, hoac duong dan cha bi chan boi mot tep — can duong dan tep",
+                  file=sys.stderr)
+            return 2
     if getattr(a, "out", None) and getattr(a, "nhat_ky", None) and _cung_dich(a.out, a.nhat_ky):
         # Lượt 3 M5: nhật ký JSONL nối vào CHÍNH tệp `--out` ⇒ JSON đã xác minh hỏng (`Extra data`), kể cả khi rc 5
         # (byte cũ bị nối thêm). So theo đường dẫn tuyệt đối đã giải symlink VÀ theo định danh tệp nếu đã tồn tại.

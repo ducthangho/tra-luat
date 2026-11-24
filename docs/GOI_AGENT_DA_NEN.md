@@ -306,7 +306,7 @@ tính vào tài khoản Anthropic (subscription) của người dùng.
   phiên ngày 24-11. Môi trường cloud KHÔNG chia sẻ biến với máy cá nhân: trên Windows
   phải tự đặt (`setx TL_ANTHROPIC_API_KEY "..."` rồi mở terminal mới).
 
-### Hai đường, tự chuyển khi đường hỏng
+### Hai đường, tự chuyển khi đường hỏng TRƯỚC khi gọi model
 
 Lệnh nằm trong gói phát hành (chạy được cả trên Cowork); lõi ở `scripts/tl_core/llm_route.py`:
 
@@ -331,11 +331,15 @@ biến môi trường của environment.
 | `api` | SDK `anthropic` + `TL_ANTHROPIC_API_KEY` | credit API (Claude Console) |
 | `sub` | `claude -p` (Claude Code không tương tác) | hạn mức subscription |
 
-- **Chỉ CHUYỂN khi lỗi thuộc về ĐƯỜNG**: thiếu key/SDK/CLI, 401, 403, 402 hay
-  `billing_error` (hết credit), 400 kèm câu *credit balance*, 429, mất kết nối, hoặc
-  `claude -p` báo lỗi (thường là chạm hạn mức gói). Lỗi thuộc về YÊU CẦU thì DỪNG:
-  400 khác, model từ chối, bị cắt `max_tokens`, sai model, sai schema. Chạy lại lỗi
-  ấy ở đường kia chỉ tốn tiền hai lần.
+- **Chỉ CHUYỂN khi lỗi thuộc về ĐƯỜNG và xảy ra TRƯỚC khi model chạy**: ở đường `api` là thiếu key/SDK,
+  401, 403, 402 hay `billing_error` (hết credit), 400 kèm câu *credit balance*, 429, mất kết nối; ở đường
+  `sub` là thiếu CLI, định tuyến sai, `auth status` không phải subscription, hoặc không khởi chạy được
+  `claude -p`. Lỗi thuộc về YÊU CẦU thì DỪNG: 400 khác, model từ chối, bị cắt `max_tokens`, sai model,
+  sai schema. Chạy lại lỗi ấy ở đường kia chỉ tốn tiền hai lần.
+- **`claude -p` đã khởi chạy thì mọi lỗi đều DỪNG, kể cả chạm hạn mức gói** (`rc=4`, thông báo chỉ cách
+  chạy lại bằng `--thu-tu api`). Năm lượt cross-review liên tiếp (PR #1503) đều tìm ra một cửa mới trong
+  phép đoán "model đã chạy chưa" từ envelope của CLI, nên chủ kho quyết định bỏ hẳn phép đoán ấy: không
+  tự tiêu credit API khi không chứng minh được lượt gói chưa tốn gì.
 - **Đường `sub` chỉ được báo là subscription khi Claude Code KHÔNG bị định tuyến đi nơi khác.** Mọi biến
   `CLAUDE_CODE_USE_*` đang bật mà không nằm trong danh sách CHO PHÉP (4 cờ tính năng, gồm
   `CLAUDE_CODE_USE_CCR_V2` của chính phiên web) và `ANTHROPIC_BASE_URL` trỏ host khác `api.anthropic.com`
@@ -361,9 +365,12 @@ biến môi trường của environment.
 - **Đường `sub` đo nguồn xác thực trước khi gọi model**: `claude --setting-sources "" auth status --json`
   với cùng env của lời gọi; chỉ `authMethod` ∈ {`claude.ai`, `oauth_token`} và `apiProvider=firstParty` mới
   được coi là subscription. Giới hạn: không phân biệt hạn mức gói với "extra usage" tài khoản tự bật.
-- **Kiểm nguyên văn là fail-closed**: nguồn có ranh giới khoản mơ hồ (dòng lạ trước khoản đầu, khoản mất số giữa
-  các khoản có số), khoản dùng từ nối khác "là" (vd "bao gồm"), hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì
-  đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ (`--tep`) hoặc dựng `tl cache-build` trước.
+- **Kiểm nguyên văn là fail-closed, ranh giới khoản theo CẤU TRÚC dòng** (không đoán theo chữ "là"): nguồn có
+  số thì số khoản phải liên tục từ 1 và mọi dòng không số phải là điểm (`a)`, `-`) hoặc tiếp dòng có bằng chứng
+  (còn trong ngoặc/trích dẫn, hoặc dòng mở bằng "là" sau một thuật ngữ chưa có từ nối); nguồn mất số (Google
+  Doc) thì mỗi dòng là một khoản. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
+  số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
+  (`--tep`) hoặc dựng `tl cache-build` trước.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong
   `requirements.txt`, cài tay `pip install anthropic`) cùng `TL_ANTHROPIC_API_KEY`. Thiếu cả
   hai thì lệnh báo HẾT ĐƯỜNG (`rc=3`) kèm lý do từng đường; `tl llm-order` in sẵn đường nào

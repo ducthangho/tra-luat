@@ -802,6 +802,11 @@ def ca_nguon_mo_ho_luot8(m):
         ("Điều 3.\nHồ sơ\u201d là tài liệu.", kn(("Hồ sơ\u201d", "tài liệu."))),
         ('Điều 3.\nHồ sơ " là tài liệu.', kn(('Hồ sơ "', "tài liệu."))),
     )
+    # Lượt 9 V1: kiểu dấu bộ quét KHÔNG hiểu — dù cân trong dòng — ⇒ mơ hồ (danh sách CHO PHÉP).
+    for mo, dong in (("\u00ab", "\u00bb"), ("\u2018", "\u2019"), ("\u201e", "\u201c"), ("[", "]"), ("\u300c", "\u300d"),
+                     ("\uff02", "\uff02"), ("\u2039", "\u203a")):
+        vb = f"Điều 3.\n1. {mo}Tổ chức là gì{dong} là tên gọi."
+        mo_ho += ((vb, kn((f"{mo}Tổ chức", f"gì{dong} là tên gọi."))),)
     for vb, k in mo_ho:
         bang(m.tach_khoan(vb) is None and m.lech_nguyen_van(k, vb) == [0], f"nguon mo ho phai bi tu choi: {vb!r}")
     dung = ("Điều 3.\n(1) Hồ sơ (bản chính) là tài liệu;\na) bản giấy;\nb) bản số.\n2) Dữ liệu là thông tin.",
@@ -829,6 +834,10 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
+    # Lượt 9 V1: danh sách CHO PHÉP kiểu dấu.
+    ("cho_dau_ngoai_danh_sach", ('            return True   # lượt 9 V1', '            pass   # lượt 9 V1'), "ca_nguon_mo_ho_luot8"),
+    ("chi_xet_pi_pf", ('unicodedata.category(c) in ("Ps", "Pe", "Pi", "Pf")', 'unicodedata.category(c) in ("Pi", "Pf")'), "ca_nguon_mo_ho_luot8"),
+    ("bo_dau_kep_po", ("or c in _DAU_KEP_PO):", "):"), "ca_nguon_mo_ho_luot8"),
     # Lượt 8 U1/U3/U2: mỗi chốt của `_dong_mo_ho` một đột biến.
     ("bo_chot_nguon_mo_ho", ("    if any(_dong_mo_ho(_bo_dau_dong(ln)) for ln in dong):\n        return None", "    if False:\n        return None"),
      "ca_nguon_mo_ho_luot8"),

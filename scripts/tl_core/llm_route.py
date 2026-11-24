@@ -35,6 +35,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import unicodedata
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -536,6 +537,12 @@ def _gon(s) -> str:
     return " ".join(str(s).split())
 
 
+# DANH SÁCH CHO PHÉP các dấu phân cách mà `_dong_mo_ho`/`_quet` hiểu. Mọi dấu khác thuộc nhóm ngoặc/trích dẫn
+# Unicode (Ps/Pe/Pi/Pf) hay dấu kép loại Po ⇒ nguồn mơ hồ (lượt 9 V1: danh sách cấm theo từng kiểu dấu luôn thiếu).
+_DAU_HIEU_DUOC = frozenset({"(", ")", '"', "\u201c", "\u201d"})
+_DAU_KEP_PO = frozenset({"\uff02", "\u2033", "\u2036", "\uff07"})
+
+
 def _bo_dau_dong(ln) -> str:
     """Bỏ dấu số khoản (`1.`, `1)`, `(1)`) hoặc dấu điểm (`a)`, `-`) ở ĐẦU dòng — dấu ngoặc của chúng không phải ngoặc
     nội dung (`a)` không có `(` đi kèm)."""
@@ -550,6 +557,8 @@ def _dong_mo_ho(ln) -> bool:
     nội dung, trừ dấu mở cong `“` (lồng ⇒ mơ hồ). Chốt BẢO THỦ: chặn oan được, nhận nhầm thì không."""
     sau, trich = 0, None
     for c in ln:
+        if c not in _DAU_HIEU_DUOC and (unicodedata.category(c) in ("Ps", "Pe", "Pi", "Pf") or c in _DAU_KEP_PO):
+            return True   # lượt 9 V1: dấu ngoặc/trích dẫn bộ quét KHÔNG hiểu (`«»`, `‘’`, `„`, `[]`…) ⇒ mơ hồ
         if trich is not None:
             if c == trich:
                 trich = None

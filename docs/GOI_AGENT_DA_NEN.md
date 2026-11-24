@@ -368,8 +368,8 @@ biến môi trường của environment.
 - **Kiểm nguyên văn là fail-closed, ranh giới khoản theo CẤU TRÚC dòng** (không đoán theo chữ "là"): nguồn có
   số thì số khoản phải liên tục từ 1 và mọi dòng không số phải là điểm (`a)`, `-`) hoặc dòng mở bằng "là" sau một
   thuật ngữ chưa có từ nối; nguồn mất số (Google Doc) thì mỗi dòng là một khoản. Nguồn có BẤT KỲ dòng nào mà
-  ngoặc/trích dẫn không khép trong chính dòng ấy (trải nhiều dòng, `)` hay `”` lẻ) hoặc trích dẫn cong lồng
-  cùng kiểu ⇒ từ chối CẢ nguồn. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
+  ngoặc/trích dẫn không khép trong chính dòng ấy (trải nhiều dòng, `)` hay `”` lẻ), trích dẫn cong lồng cùng
+  kiểu, hoặc BẤT KỲ dấu ngoặc/trích dẫn nào ngoài `(` `)` `“` `”` `"` (vd `«»` `‘’` `„` `[]`) ⇒ từ chối CẢ nguồn. Khoản dùng từ nối khác "là" (vd "bao gồm"), dòng gãy giữa câu ở nguồn mất
   số, hay nguồn chạm trần export ⇒ lệnh DỪNG thay vì đoán. Với các trường hợp ấy, đưa văn bản có số khoản rõ
   (`--tep`) hoặc dựng `tl cache-build` trước.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong

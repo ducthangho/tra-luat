@@ -68,6 +68,9 @@ và chuyển qua lại khi một bên hết hạn mức/credit.
   chủ kho nâng trần lên 9, chặn MỌI nguồn mơ hồ: một dòng (sau khi bỏ dấu số khoản/điểm đầu dòng) có ngoặc hay
   trích dẫn không khép trong dòng, `)`/`”` lẻ, hoặc trích dẫn cong lồng cùng kiểu ⇒ từ chối cả nguồn (U1, U3);
   `wait` có giới hạn TRƯỚC khi đóng pipe, và trên Windows không đóng pipe đồng bộ (U2).
+- Cross-review Codex lượt 9 (`ops/reviews/pr1503-review-9-codex/`, lượt chết giữa chừng `ma_thoat` 1; đã đóng
+  U1–U3; ghi kịp V1 P1) — chủ kho nâng trần lên 10: DANH SÁCH CHO PHÉP kiểu dấu — ngoài `(` `)` `“` `”` `"`, mọi dấu
+  nhóm ngoặc/trích dẫn Unicode (Ps/Pe/Pi/Pf, cùng `＂` `″`…) ⇒ nguồn mơ hồ, từ chối cả nguồn (V1).
 - Ngoài phạm vi: SDK `anthropic` KHÔNG vào `requirements.txt` (đường `api` trên Cowork cần cài tay); phân phối
   key qua `agent_creds` chưa làm.
 

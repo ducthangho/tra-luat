@@ -1,6 +1,6 @@
-# wp1521 r3 — nợ B1a: `KHE_1460` báo ĐỎ trên nền không có khe chưa đo + lượt đột biến của Nghiệm thu 1 chỉ chạy khi diff chạm đầu vào (NO-B1A-N2)
+# wp1521 r4 — nợ B1a: `KHE_1460` báo ĐỎ trên nền không có khe chưa đo + lượt đột biến của Nghiệm thu 1 chỉ chạy khi byte đầu vào khác GỐC (NO-B1A-N2)
 packet_id: wp1521
-revision: 3
+revision: 4
 tran_kich_thuoc_sensitive: ADR-0053@8ab100793df9831505f495543a74044b91c2c9ab
 tran_loi_goi_codex: ADR-0055@d2e3052d479d140b7e7b91df41ec4914fab7d544
 dieu_kien_merge: ADR-0060@36d7c5dcdcbbb27176b75135125b9009f9fe0587
@@ -11,7 +11,7 @@ review_class: sensitive
 executor: claude
 environment: cloud (Linux)
 
-Trạng thái: r3, lượt soạn cuối (3/3) theo trần `per_new_packet`. Thay r2 (`ops/wp1521-r1@5e8731f`, sha256 `74eaf678…`); r1 (`15f5437`, `d2126b3a…`) được chủ kho duyệt trước review nhưng KHÔNG dùng để cấp lease. Review lượt 2 trên r2 trả `changes_requested` với 2 P2: N2-06 (kiểm kê nghiệm thu mâu thuẫn ánh xạ tên ở 2c; đếm bỏ qua sai) và N2-07 (`doc_diff` tin rc 0 trên lịch sử có nhiều gốc hợp nhất). Lượt 2 xác nhận N2-02, 03, 04 ĐÃ VÁ THẬT; N2-01, N2-05 VÁ SINH LỖI MỚI, chính là hai finding mới N2-06, N2-07. Chưa duyệt băm r3, chưa có lease.
+Trạng thái: r4. Lượt soạn thứ 4 do chủ kho cấp thêm theo E2 (2026-11-25 ~08:5xZ, lựa chọn «+1 soạn, dùng review 4/4»). Thay r3 (`ops/wp1521-r1@2cf564c`, sha256 `4215a8bf…`). Review lượt 3 trên r3: N2-06 ĐÃ VÁ THẬT, N2-07 VÁ HỜ. Finding mới N2-08 (P2, lớp `mutation-cache-fingerprint-detached-from-inputs`): checkout nông giấu gốc hợp nhất, và hợp nhất đổi tên + sửa lọt qua diff. r4 bỏ hẳn diff và gốc hợp nhất ở bộ chọn K5, thay bằng so byte cây đang chạy với GỐC (2a–2c). r1 (`d2126b3a…`) được chủ kho duyệt trước review nhưng KHÔNG dùng để cấp lease. Chưa duyệt băm r4, chưa có lease.
 
 ## Mục tiêu
 Đóng hai khoản nợ của B1a #1460 (hồ sơ `ops/land/pr1516-wp1460-land-evidence.yaml`, mục `no_ngoai_pham_vi`, khoản 3 và 5). Không đổi hợp đồng `bien_nhan_audit.v1`.
@@ -49,37 +49,44 @@ Trạng thái: r3, lượt soạn cuối (3/3) theo trần `per_new_packet`. Tha
   - `CON_1460`: ca bị bỏ qua không bao giờ tới tiến trình con (1d); nếu vẫn tới thì thoát mã riêng 5, và cha coi mã 5 là ĐỎ;
   - bộ phân hạng đột biến: không đổi luật GIẾT; chỉ thêm lọc 1d trước khi chạy.
 
-### 2. K5 — lượt đột biến của khối «Lệnh kiểm» chạy theo DIFF của đầu vào
-- **2a. Thay cho bản ghi khoá.** Không có bản ghi «đã đo» trong cây. Quyết định dùng lại `doc_diff()` có sẵn (#643, ba trạng thái: tập · rỗng · `None`, fail-close) cùng biến `CI_DANG_KY_SU_KIEN`/`GOC`/`DAU` mà `gate-registry` đã truyền. `doc_diff` giữ nguyên.
-  - **Chốt hợp lệ của diff** (thêm ở bộ chọn K5, NGOÀI `doc_diff`): diff chỉ được dùng để BỎ QUA khi `git merge-base --all GỐC ĐẦU` thoát 0 và in ĐÚNG MỘT SHA.
-  - Không đo được, hoặc nhiều hơn một gốc hợp nhất (lịch sử criss-cross) ⇒ coi như `None`, chạy đủ.
-  - Lý do (review lượt 2, N2-07): khi có nhiều gốc hợp nhất, `git diff GỐC...ĐẦU` vẫn rc 0 nhưng tự chọn một gốc. Reviewer dựng được đồ thị mà diff ra RỖNG trong khi cây hợp nhất đổi `ci_dang_ky_test.py`; đảo thứ tự cha thì kết quả lật.
-- **2b. Vùng đầu vào** của lượt đột biến:
-  - `.claude/dev/ci_dang_ky_test.py`, vì tệp này chứa khối «Lệnh kiểm», `BAM_HOP_DONG` và `THU_MUC_HOP_DONG`;
-  - mọi tệp dưới thư mục mà `THU_MUC_HOP_DONG` trỏ tới, tính tại HEAD và cả tại GỐC khi hai bên khác nhau;
-  - `.github/workflows/ci.yml`, vì nó ghim Python và `jsonschema` cho `gate-registry`;
-  - `requirements.txt`.
-- **2c. Ca Nghiệm thu 1** `wp1460-hop-dong-lenh-kiem-480-va-dot-bien-249` tách thành hai ca.
-  - **`wp1460-hop-dong-lenh-kiem-fixture`** luôn chạy khối «Lệnh kiểm» KHÔNG có `--dot-bien`. Ca đạt khi:
-    - rc bằng 0;
-    - stdout TRÙNG BYTE với dòng ĐẦU và dòng CUỐI của `DAU_RA_LENH_KIEM`. Hai dòng ấy được TÍNH từ hằng, không chép thành chuỗi thứ hai.
-  - **`wp1460-hop-dong-lenh-kiem-dot-bien`** chạy CÓ `--dot-bien` khi một trong hai điều xảy ra:
-    - `doc_diff()` trả `None`. Trường hợp này gồm mọi lượt ngoài push/pull_request và mọi lượt chạy local không có biến;
-    - diff chạm vùng 2b.
+### 2. K5 — lượt đột biến của khối «Lệnh kiểm» chạy khi BYTE đầu vào khác GỐC
+- **2a. So byte, không so diff.** r2–r3 dựa vào `doc_diff()` và số gốc hợp nhất. Review lượt 2–3 (N2-07, N2-08) bác cách này:
+  - checkout nông có thể giấu một gốc hợp nhất;
+  - PR merge ref khác đầu PR (`CI_DANG_KY_DAU`);
+  - một hợp nhất đổi tên + sửa có thể đưa nội dung vào một tệp được canh mà diff chỉ liệt kê đường cũ.
 
-    Ca đạt khi đầu ra trùng byte `DAU_RA_LENH_KIEM`. Khi diff đo được mà không chạm vùng, ca in đúng một dòng `BỎ QUA wp1460-hop-dong-lenh-kiem-dot-bien: diff <GỐC ngắn>...<ĐẦU ngắn> không chạm vùng đầu vào` và mang trạng thái `BO_QUA_1460`.
+  Từ r4, bộ chọn K5 không đọc diff, không đọc gốc hợp nhất. Nó so BYTE của từng tệp đầu vào trong cây ĐANG CHẠY (đọc từ đĩa, đúng thứ `--chay` sẽ dùng) với blob của cùng đường dẫn tại GỐC. `doc_diff` không bị đụng.
+- **2b. Tập đầu vào `V`** = hợp của:
+  - `.claude/dev/ci_dang_ky_test.py` (chứa khối «Lệnh kiểm», `BAM_HOP_DONG`, `THU_MUC_HOP_DONG`);
+  - `.github/workflows/ci.yml` (ghim Python và `jsonschema` cho `gate-registry`);
+  - `requirements.txt`;
+  - mọi tệp dưới thư mục `THU_MUC_HOP_DONG` của cây đang chạy (liệt kê trên đĩa);
+  - mọi tệp dưới cùng thư mục ấy tại GỐC (`git ls-tree -r GỐC -- <thư mục>`).
+
+  Hợp hai danh sách bắt được cả tệp thêm lẫn tệp xoá. Thư mục `THU_MUC_HOP_DONG` của GỐC khác của cây đang chạy thì `ci_dang_ky_test.py` đã khác byte, nên lượt ấy chạy đủ theo 2c.
+- **2c. Ca Nghiệm thu 1** `wp1460-hop-dong-lenh-kiem-480-va-dot-bien-249` tách thành hai ca.
+  - **`wp1460-hop-dong-lenh-kiem-fixture`** luôn chạy khối «Lệnh kiểm» KHÔNG có `--dot-bien`. Đạt khi rc 0 và stdout TRÙNG BYTE với dòng ĐẦU và dòng CUỐI của `DAU_RA_LENH_KIEM`. Hai dòng ấy được TÍNH từ hằng, không chép thành chuỗi thứ hai.
+  - **`wp1460-hop-dong-lenh-kiem-dot-bien`** chỉ được BỎ QUA khi TẤT CẢ các điều sau đúng; thiếu bất kỳ điều nào ⇒ chạy CÓ `--dot-bien`, và đạt khi đầu ra trùng byte `DAU_RA_LENH_KIEM`:
+    - `CI_DANG_KY_SU_KIEN` ∈ {`push`, `pull_request`};
+    - `CI_DANG_KY_GOC` là 40 hex thường, khác toàn-0;
+    - `git cat-file -e GỐC^{commit}` thoát 0;
+    - với MỌI tệp trong `V`: đọc được bytes trên đĩa, và `git cat-file blob GỐC:<đường dẫn>` thoát 0 với bytes BẰNG NHAU. Một tệp vắng ở một phía thì tính là khác.
+
+    Lỗi bất kỳ khi chạy `git` hay đọc tệp ⇒ chạy đủ (fail-close). Khi bỏ qua, ca in đúng một dòng `BỎ QUA wp1460-hop-dong-lenh-kiem-dot-bien: <n> tệp đầu vào trùng byte GỐC <GỐC ngắn>` và mang trạng thái `BO_QUA_1460`.
+  - **Vì sao không cần đầu PR hay merge ref.** Cây so sánh LÀ cây đang chạy. Merge ref, đổi tên hay checkout nông chỉ đổi đường đi tới cây ấy, không đổi bytes được so. Checkout nông thiếu đối tượng GỐC thì `git cat-file` lỗi ⇒ chạy đủ.
 - **2d. Hệ quả cần nói đúng mức:**
-  - PR nào chạm `ci_dang_ky_test.py` vẫn trả trọn chi phí đột biến, kể cả chính packet này và #1522;
-  - lượt `schedule`/`workflow_dispatch` của `ci.yml` (nếu có) và lượt local luôn chạy đủ;
-  - phụ thuộc bắc cầu của `jsonschema` (`attrs`, `referencing`, `jsonschema-specifications`, `rpds-py`) KHÔNG được ghim và KHÔNG nằm trong vùng. Một lần đổi ngầm của chúng giữa hai lượt PR không chạm vùng sẽ không làm lượt đột biến chạy lại. Đây là giới hạn đã khai, KHÔNG ĐO ĐƯỢC bằng diff. Lượt push lên `master` mà không chạm vùng cũng bỏ qua.
-- **2e. Đổi nghiệm thu của packet đã land.** Nghiệm thu 1 của wp1460 r9 ghi: «Bộ test của PR giao nộp chạy lại đúng các phép này». Sau packet này câu ấy chỉ còn đúng khi diff chạm vùng hoặc không đo được diff. Thẩm quyền: quyết định chủ kho «Chạy khi khoá đổi». Cơ chế diff thay cho bản ghi khoá vì review lượt 1 (N2-03, N2-04) chỉ ra rằng bản ghi khoá không kiểm chứng được và tự tham chiếu H cuối. Chủ kho được hỏi lại khi xin duyệt băm r2.
+  - PR nào làm khác byte một tệp trong `V` vẫn trả trọn chi phí đột biến, kể cả chính packet này và #1522.
+  - Lượt `schedule`/`workflow_dispatch` và lượt local không có biến luôn chạy đủ.
+  - **Tiền đề tin GỐC.** Bỏ qua nghĩa là «đầu vào trùng byte với GỐC». Nó KHÔNG chứng minh GỐC đã từng đạt lượt đột biến đầy đủ. Tiền đề ấy đúng khi `master` giữ gate xanh, vì lần gần nhất `V` đổi trên `master` đã chạy đủ trong PR và push của nó. Đây là giới hạn đã khai, không phải bảo đảm.
+  - Phụ thuộc bắc cầu của `jsonschema` (`attrs`, `referencing`, `jsonschema-specifications`, `rpds-py`) không được ghim và không nằm trong `V`. Giới hạn đã khai: KHÔNG ĐO ĐƯỢC.
+- **2e. Đổi nghiệm thu của packet đã land.** Nghiệm thu 1 của wp1460 r9 ghi: «Bộ test của PR giao nộp chạy lại đúng các phép này». Sau packet này câu ấy chỉ còn đúng khi đầu vào khác byte GỐC, hoặc không đo được. Thẩm quyền: quyết định chủ kho «Chạy khi khoá đổi». Cơ chế so byte thay cho bản ghi khoá (bác ở lượt 1) và cho diff (bác ở lượt 2–3). Chủ kho được hỏi lại khi xin duyệt băm.
 - **2f.** Ca `wp1460-hop-dong-bam-hai-tep-va-lenh-kiem` giữ nguyên.
 
 ### 3. Bất biến
-- Không sửa hai tệp `ops/specs/wp1460-r1/hop_dong/*`, `LENH_KIEM_HOP_DONG`, `BAM_HOP_DONG`, `DAU_RA_LENH_KIEM`, lệnh thu, `ci-dot-bien-du.yml`, `ci.yml`, `doc_diff`.
+- Không sửa hai tệp `ops/specs/wp1460-r1/hop_dong/*`, `LENH_KIEM_HOP_DONG`, `BAM_HOP_DONG`, `DAU_RA_LENH_KIEM`, lệnh thu, `ci-dot-bien-du.yml`, `ci.yml`, `doc_diff`. Bộ chọn K5 KHÔNG gọi `doc_diff`.
 - Được phép đổi các bên tiêu dùng trạng thái mà 1d/1f nêu: `quet_bien`, `ca_wp1460`, `CON_1460`, bộ tổng hợp, bộ lọc mutant. Luật ĐẠT/GIẾT cũ giữ nguyên ý nghĩa.
-- Không đường nào biến một ca chưa đo thành ĐẠT. BỎ QUA chỉ sinh ra từ hai nguồn: bảng 1c, và diff đo được không chạm vùng ở 2c.
-- Tình trạng mạng: `doc_diff` chỉ gọi `git` cục bộ, như tại base.
+- Không đường nào biến một ca chưa đo thành ĐẠT. BỎ QUA chỉ sinh ra từ hai nguồn: bảng 1c, và điều kiện trùng byte ở 2c.
+- Tình trạng mạng: bộ chọn K5 chỉ gọi `git` cục bộ và đọc đĩa. Checkout của `gate-registry` dùng `fetch-depth: 0` (đo trong `ci.yml` lúc soạn r4), nên GỐC có mặt trên CI. Nếu sau này bỏ `fetch-depth: 0`, bộ chọn sẽ chạy đủ ở mọi lượt (fail-close): chỉ mất phần tiết kiệm, không mất tính đúng.
 
 ## Nghiệm thu
 1. **Kiểm kê A/B trong MỘT lệnh.** Trên nền có khe (CI 3.12; nền executor), so base với head theo TÊN, với ĐÚNG MỘT ánh xạ đổi tên được phép (2c): `wp1460-hop-dong-lenh-kiem-480-va-dot-bien-249` → hai ca `wp1460-hop-dong-lenh-kiem-fixture` và `wp1460-hop-dong-lenh-kiem-dot-bien`. Ngoài ánh xạ ấy:
@@ -99,20 +106,26 @@ Trạng thái: r3, lượt soạn cuối (3/3) theo trần `per_new_packet`. Tha
      - riêng `bien-nhan-xanh` bị bỏ ⇒ đúng 2 ca và 1 mutant (`f02r3-bien-nhan-xanh-is-valid-khong-chot`);
      - lượt quét còn lại chạy theo đúng hàng của nó;
    - (g) lượt quét ném ⇒ ĐỎ, không BỎ QUA.
-3. **K5.** Ca tiến trình con có spy trên argv của tiến trình «Lệnh kiểm», chạy với các bộ biến sự kiện/diff điều khiển (kho git tạm có hai commit):
-   - diff không chạm vùng ⇒ đúng một lần chạy, không `--dot-bien`, kèm dòng BỎ QUA;
-   - diff chạm `ci_dang_ky_test.py` ⇒ có `--dot-bien`;
-   - diff chạm một tệp dưới `THU_MUC_HOP_DONG` ⇒ có `--dot-bien`;
-   - lặp lại ca trên khi `THU_MUC_HOP_DONG` trỏ thư mục khác `wp1460-r1` ⇒ có `--dot-bien`;
-   - diff chạm `ci.yml` ⇒ có `--dot-bien`;
-   - diff chạm `requirements.txt` ⇒ có `--dot-bien`;
-   - không biến sự kiện ⇒ có `--dot-bien`;
-   - sự kiện `schedule` ⇒ có `--dot-bien`;
-   - GỐC không phải tổ tiên của ĐẦU khi push ⇒ có `--dot-bien`;
-   - đồ thị criss-cross có hai gốc hợp nhất, dựng theo CẢ HAI thứ tự cha, mà `doc_diff` ra rỗng ⇒ có `--dot-bien` ở cả hai;
-   - đối chứng tuyến tính, đổi một tệp ngoài vùng ⇒ vẫn bỏ qua. Đối chứng này chạy trong cùng lệnh với hai ca criss-cross;
-   - đầu ra hai dòng sai một byte ⇒ ĐỎ.
-4. **Thời gian.** Ghi giây của bước `test registry` trong `gate-registry` trên lượt CI PR của H (ở đây diff chạm `ci_dang_ky_test.py` nên chạy đủ), và trên một lượt PR KHÔNG chạm vùng nếu có. Đây là số đo, không phải ngưỡng.
+3. **K5.** Ca tiến trình con có spy trên argv của tiến trình «Lệnh kiểm». Mọi ca dưới đây chạy trong MỘT lệnh, trên kho git tạm dựng tại chỗ, với cây đang chạy = working tree của kho tạm. Mỗi gạch ghi điều kiện ⇒ kỳ vọng:
+   - **(a) Đối chứng bỏ qua.** Đổi một tệp NGOÀI `V` ⇒ đúng một lần chạy, không `--dot-bien`, có dòng BỎ QUA.
+   - **(b) Một tệp trong `V` khác byte** ⇒ có `--dot-bien`. Lặp riêng cho từng loại:
+     - `ci_dang_ky_test.py`;
+     - một tệp dưới `THU_MUC_HOP_DONG`;
+     - `ci.yml`;
+     - `requirements.txt`.
+   - **(c) Tệp có mặt chỉ ở một phía.** Thêm, rồi xoá, một tệp dưới `THU_MUC_HOP_DONG` ⇒ có `--dot-bien`.
+   - **(d) Thư mục khác `wp1460-r1`.** Lặp (b) cho tệp dưới thư mục `hop_dong` khi `THU_MUC_HOP_DONG` trỏ một thư mục khác `wp1460-r1` ⇒ có `--dot-bien`.
+   - **(e) Hợp nhất đổi tên + sửa.** Một commit hợp nhất đưa nội dung mới vào một tệp được canh qua đổi tên ở nhánh kia. Cây đang chạy là cây hợp nhất; `CI_DANG_KY_DAU` là đầu PR ⇒ có `--dot-bien`.
+   - **(f) Clone nông `--depth 1` không có đối tượng GỐC** ⇒ có `--dot-bien`.
+   - **(g) Lịch sử criss-cross** theo cả hai thứ tự cha, mà đầu vào trong cây đang chạy khác GỐC ⇒ có `--dot-bien`. Đối chứng: lịch sử criss-cross mà đầu vào TRÙNG ⇒ bỏ qua. Ca này cho thấy quyết định không phụ thuộc lịch sử.
+   - **(h) Biến sự kiện bất thường** ⇒ có `--dot-bien`, mỗi trường hợp một ca:
+     - không có biến sự kiện;
+     - sự kiện `schedule`;
+     - GỐC toàn số 0;
+     - GỐC không phải 40 hex.
+   - **(i) Lỗi I/O.** Một tệp trong `V` không đọc được trên đĩa, hoặc `git` thoát khác 0 ⇒ có `--dot-bien`.
+   - **(j) Ca thường lệch byte.** Đầu ra hai dòng sai một byte ⇒ ĐỎ.
+4. **Thời gian.** Ghi giây của bước `test registry` trong `gate-registry` trên lượt CI PR của H (ở đây `ci_dang_ky_test.py` khác byte GỐC nên chạy đủ), và trên một lượt PR KHÔNG chạm vùng nếu có. Đây là số đo, không phải ngưỡng.
 5. **Đột biến riêng cho MỖI chốt mới.** Chạy trên BẢN SAO tạm, tên tệp riêng, tắt bytecode. Phân hạng bằng lớp ngoại lệ riêng của ca đích, neo tên ca; chết vì lỗi vô can ⇒ tín dụng giả. Tối thiểu:
    - (i) trả lại cổng phiên bản `* KHE_1460`;
    - (ii) `tran == 0` coi như ĐẠT;
@@ -125,14 +138,15 @@ Trạng thái: r3, lượt soạn cuối (3/3) theo trần `per_new_packet`. Tha
    - (ix) giữ mutant có ca đích bị bỏ trong mẫu `n/n`;
    - (x) giữ ca bị bỏ trong baseline đột biến;
    - (xi) ca BỎ QUA được đếm như ĐẠT;
-   - (xii) vùng 2b bỏ `THU_MUC_HOP_DONG`;
-   - (xiii) vùng ghi cứng `ops/specs/wp1460-r1/hop_dong/`;
-   - (xiv) vùng bỏ `ci.yml`;
-   - (xv) `doc_diff() is None` coi như không chạm vùng;
+   - (xii) tập `V` bỏ các tệp của `THU_MUC_HOP_DONG`;
+   - (xiii) tập `V` ghi cứng `ops/specs/wp1460-r1/hop_dong/`;
+   - (xiv) tập `V` bỏ `ci.yml`;
+   - (xv) tập `V` chỉ lấy danh sách tệp từ một phía (đĩa HOẶC GỐC);
    - (xvi) lượt thường so `DAU_RA_LENH_KIEM` đầy đủ, hoặc không so byte;
-   - (xvii) bỏ chốt «đúng một gốc hợp nhất»;
-   - (xviii) chốt chỉ đòi «ít nhất một» gốc hợp nhất;
-   - (xix) ca bọc của lượt quét KHÔNG bị bỏ vẫn bị bỏ, khi kết quả lẫn.
+   - (xvii) so với blob của `CI_DANG_KY_DAU` thay vì bytes trên đĩa;
+   - (xviii) lỗi `git cat-file` hay lỗi đọc tệp được coi là «trùng»;
+   - (xix) ca bọc của lượt quét KHÔNG bị bỏ vẫn bị bỏ, khi kết quả lẫn;
+   - (xx) dùng lại `doc_diff()` làm điều kiện bỏ qua.
 
    Đòi `n/n` giết thật.
 6. **Cổng kho.** `python .claude/dev/ci_dang_ky_test.py --chay` N/N, kèm số bỏ qua; Ruff F delta = 0 trên mọi `.py` đổi (đo nền master trước); numstat trong trần; CI PR Ubuntu xanh.
@@ -180,5 +194,6 @@ Trần mặc định của lớp `sensitive` theo `ADR-0053`: ≤ 6 tệp, ≤ 4
 | revision | thay đổi |
 |---|---|
 | r1 | bản đầu |
+| r4 | Review lượt 3, N2-08 (`mutation-cache-fingerprint-detached-from-inputs`, lần thứ 3 của lớp: N2-05 → N2-07 → N2-08). Bỏ diff/gốc hợp nhất. Bộ chọn K5 so BYTE từng tệp của `V` (hợp danh sách trên đĩa và tại GỐC) giữa cây đang chạy và blob GỐC; lỗi bất kỳ ⇒ chạy đủ. Khai tiền đề tin GỐC (2d). Nghiệm thu 3 viết lại với các ca: nông, hợp nhất đổi tên + sửa, criss-cross, tệp có mặt ở một phía. Đột biến (xii)–(xviii), (xx) viết lại. |
 | r3 | Review lượt 2, 2 P2. `skip-state-consumer-contract-incomplete` (N2-06): nghiệm thu 1 khai đúng ánh xạ một tên cũ thành hai tên mới; 2(c)/(f) ghi số đếm đã đo (4/3; 2/2; 2/1). `mutation-cache-fingerprint-detached-from-inputs` (N2-07): chốt «đúng một gốc hợp nhất» ở bộ chọn K5, kèm ca criss-cross theo hai thứ tự cha và đối chứng tuyến tính; thêm 3 đột biến. |
 | r2 | Review lượt 1, 5 finding, sửa theo lớp:<br>• `skip-state-consumer-contract-incomplete` (N2-01): bốn ca chứ không phải hai; lan BỎ QUA sang ca bọc, mutant và baseline (1a, 1d, 1f).<br>• `skip-waiver-masks-measured-failure` (N2-02): bảng 1c đặt `dat_het` trước mọi quyết định bỏ qua; có hàng riêng cho kết quả lẫn và kết quả ném.<br>• `mutation-cache-enrollment-without-verified-evidence`, `self-referential-final-head-cache-bootstrap`, `mutation-cache-fingerprint-detached-from-inputs` (N2-03..05): bỏ bản ghi khoá; dùng `doc_diff()` có sẵn, vùng đầu vào tính theo `THU_MUC_HOP_DONG` thực tế; phụ thuộc bắc cầu khai là giới hạn KHÔNG ĐO ĐƯỢC (2d).<br>Nghiệm thu và bảng đột biến viết lại theo đó. |

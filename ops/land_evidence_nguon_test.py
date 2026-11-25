@@ -776,6 +776,7 @@ def c35_l8_ngu_phap_tep_danh_gia_qua_cong():
                           (job, job.replace(" conclusion=", " ket_luan="), "dong_la"), (job, job + "\n" + job, "job_lap"), (job, job + skip, "dong_la"),
                           (job, job + skip + " (khong tinh)", "tap_skip_lech,dong_skip_sai_phien_ban,moc_lech"),
                           (job, job + skip + " -> not_measured (khong suy pass)", "tap_skip_lech,moc_lech"),
+                          (job, job + skip + " (khong tinh) x", "dong_la"), (job, job + skip + " -> not_measured (khong suy pass) x", "dong_la"),
                           (tong, tong.replace("MOC_GATE_OUTPUT: ", "MOC_GATE_OUTPUT "), "dong_la,thieu_moc"), (tong, "", "thieu_moc"),
                           (tong, tong + "\n" + tong, "moc_lap"), (tong, tong.replace(" job co ", " jobs co "), "dong_la,thieu_moc"),
                           (job, job + "\r", "xuong_dong_tron"), (job, job + "\rx", "cr_le")):
@@ -786,16 +787,31 @@ def c35_l8_ngu_phap_tep_danh_gia_qua_cong():
         [f"$.moc_gate_output: danh_gia_khong_passed:{DG}:not_measured:khong_phai_utf8"])
 
 
+# B02 (review mã lượt 3): bảng ngữ pháp của đợt A BẮT BUỘC đi qua L8 — tiền tố ca ⇒ SÀN số phần tử (đo 24-11-2026: 1733 · 3840 · 52 · 36 ·
+# 1 · 1280 · 1136 · 318). Mỗi tiền tố phải giải ra ĐÚNG MỘT ca của bộ test đợt A: bỏ, đổi tên hay nhân đôi một ca ⇒ c36 ĐỎ (c38 đo).
+A_CA = {"a124": 1700, "a125": 3800, "a126": 50, "a129": 30, "a131": 1, "a132": 1250, "a133": 1100, "a134": 300}
+
+
+def nap_a(ten):   # nạp theo ĐƯỜNG DẪN trong kho, không theo biến môi trường (bộ quét luật 9 trỏ biến ấy vào bản đột biến)
+    spec = importlib.util.spec_from_file_location(ten.replace(".", "_") + "_cho_l8", HERE / ten)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def chon_ca_a(so_dang_ky):
+    """Tên ca của bộ test đợt A cho TỪNG tiền tố bắt buộc; không đúng một ca ⇒ ĐỎ (không lọc theo "ca nào đang có")."""
+    khop = {tt: [t for t in so_dang_ky if t.split("_")[0] == tt] for tt in A_CA}
+    bang(all(len(v) == 1 for v in khop.values()), f"mỗi ca bắt buộc của đợt A phải giải ra ĐÚNG MỘT ca: { {k: v for k, v in khop.items() if len(v) != 1} }")
+    return {tt: v[0] for tt, v in khop.items()}
+
+
 @ca
 def c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a():
     """Luật 8 qua consumer của đợt B: IMPORT (không chép) các ca `*_qua_ho_so` của bộ test đợt A (bộ sinh 128 ký tự ASCII mỗi vị trí + đại
     diện mỗi general category + ngoài BMP, oracle viết từ đặc tả) rồi THAY consumer `kiem_ho_so` của module A bằng `main` → L8 ở đây."""
-    def nap_a(ten):   # nạp theo ĐƯỜNG DẪN trong kho, không theo biến môi trường (bộ quét luật 9 trỏ biến ấy vào bản đột biến)
-        spec = importlib.util.spec_from_file_location(ten.replace(".", "_") + "_cho_l8", HERE / ten)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        return mod
     a, that, m, yml, dem, ma = nap_a("gate_output_doi_chieu_test.py"), nap_a("gate_output_doi_chieu.py"), nap(), __import__("yaml"), [0], {}
+    chon = chon_ca_a(a.CA)   # TRƯỚC mọi việc khác: thiếu / đổi tên / trùng một ca bắt buộc thì ĐỎ ngay, không chạy bảng nào
     m.compile = lambda *x: ma.get(x) or ma.setdefault(x, compile(*x))   # nhớ đệm theo ĐỐI SỐ: cùng byte nguồn ⇒ cùng code, chỉ để nhanh
 
     def qua_l8(du_lieu, thu):
@@ -808,12 +824,53 @@ def c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a():
             m.main(["--root", str(ROOT_THAT), "--tep", str(Path(tam) / TEN)])
         return dong_l8(ra.getvalue())
     that.kiem_ho_so, a._M[:] = qua_l8, [that]   # hàm lá vẫn là module A THẬT; chỉ consumer đổi sang L8
-    for ten in [t for t in a.CA if t[:4] in ("a124", "a125", "a126", "a129", "a131", "a132", "a133", "a134")]:
+    for tt, ten in chon.items():
         truoc, (rc, dong) = dem[0], a.chay_ca(ten)
         if rc == 4:   # lỗi vô can trong ca của A phải GIỮ là lỗi vô can, không được thành tín hiệu chốt của ca này
             raise RuntimeError(dong)
-        bang(rc == 0 and dem[0] > truoc, f"{ten} qua main → L8 ({dem[0] - truoc} phần tử): rc={rc} {dong[:600]}")
-    bang(dem[0] >= 8000, f"bảng luật 8 của đợt A qua L8 chỉ còn {dem[0]} phần tử (đo 24-11-2026: 8396)")
+        bang(rc == 0 and dem[0] - truoc >= A_CA[tt], f"{ten} qua main → L8: {dem[0] - truoc} phần tử (sàn {A_CA[tt]}), rc={rc} {dong[:600]}")
+
+
+@ca
+def c37_l8_van_ban_tu_do_tep_danh_gia_qua_cong():
+    """Luật 8 qua L8, ba vị trí VĂN BẢN TỰ DO của tệp đánh giá mà bảng của đợt A không đưa qua consumer: vùng `.*` của dòng đầu, nhãn
+    (không chứa `]`), tên dòng skipped (hai dạng). Tệp mẫu mang băm bộ sinh GIẢ có chủ ý: đúng ngữ pháp ⇒ `bo_sinh_la`, sai ⇒ lý do của bộ phân
+    tích. Kỳ vọng theo mệnh đề đặc tả: LF tách dòng (`dong_la`; ở dòng đầu là `dau_tep_sai`), CR lẻ ⇒ `cr_le`, nhãn không chứa `]`, tên
+    không rỗng và kết thúc ở điểm SỚM NHẤT mà phần còn lại khớp trọn; mọi ký tự khác đi được qua tuyến (128 ASCII, mỗi general
+    category trừ Cs, ngoài BMP) là DƯƠNG."""
+    ten, cu, v3 = "danh-gia-gate-output-10.txt", ": skipped (khong tinh)", ": skipped -> not_measured (khong suy pass)"
+    mau = {"dau": "# Danh gia Gate output run 10 attempt 20 head " + "a" * 40 + " — {}(danh_gia_gate.py sha256 " + "a" * 64 + ")",
+           "nhan": "JOB 31 ten [{}] conclusion=success log_sha256=" + "a" * 64 + " -> passed: x",
+           "cu": "JOB 42 {}" + cu, "v3": "JOB 53 {}" + v3, "tong": "MOC_GATE_OUTPUT: passed (1/2 job co dau hieu duong)"}
+    goc, dung = {"dau": "", "nhan": "nhan", "cu": "x", "v3": "y", "tong": ""}, "bo_sinh_la"
+    vu_tru = [*map(chr, range(128)), *nap_a("gate_output_doi_chieu_test.py")._mau_loai_unicode("\r\n", ("Cs",))]
+    o = [(vt, c, "dau_tep_sai" if c == "\n" and vt == "dau" else "dong_la" if c == "\n" or c == "]" and vt == "nhan" else "cr_le" if c == "\r" else dung)
+         for vt in ("dau", "nhan", "cu", "v3") for c in vu_tru]
+    o += [("dau", "x (danh_gia_gate.py sha256 " + "b" * 64 + ") ", dung), ("dau", "café 𐐀 ) (", dung), ("nhan", "", dung),
+          ("nhan", "ubuntu-latest, x y [", dung), ("nhan", "a]b", "dong_la"), ("nhan", "a] [b", dung), ("cu", "", "dong_la"), ("v3", "", "dong_la"),   # `a] [b`: tên job lùi thành `ten [a]`, nhãn `b`
+          ("cu", "a" + cu + " b", dung), ("cu", "a" + v3 + " b", dung), ("cu", "a" + cu, dung), ("cu", "café 𐐀", dung),
+          ("v3", "a" + v3 + " b", dung), ("v3", "a" + cu + " b", dung), ("v3", "a" + v3, dung), ("v3", "café 𐐀", dung)]
+    bang(len(vu_tru) >= 150 and len(o) == 4 * len(vu_tru) + 16, f"vũ trụ ký tự co lại: {len(vu_tru)} ký tự, {len(o)} ô")
+    for vt, gt, mong in o:
+        ky8(json.dumps({"gate_output": f"measured — {ten}"}), {ten: "\n".join(d.format(gt if k == vt else goc[k]) for k, d in mau.items())}, 1,
+            f"{vt} {gt!r}", [f"$.gate_output: danh_gia_khong_passed:{ten}:not_measured:{mong}"])
+
+
+@ca
+def c38_c36_do_khi_bang_cua_dot_a_mat_ca():
+    """B02: chạy CHÍNH c36 trên sổ đăng ký ca của bộ test đợt A đã bị sửa — bỏ, đổi tên hay nhân đôi TỪNG ca bắt buộc đều phải làm c36
+    ĐỎ bằng tín hiệu chốt của nó (không phải lỗi vô can, không phải xanh); sổ nguyên vẹn giải ra đủ tám ca khác nhau."""
+    a = nap_a("gate_output_doi_chieu_test.py")
+    so, c36 = dict(a.CA), "c36_l8_ngu_phap_luat_8_qua_bang_cua_dot_a"
+    chon = chon_ca_a(so)
+    bang(len(set(chon.values())) == len(A_CA) == 8, f"sổ nguyên vẹn phải giải ra tám ca khác nhau: {chon}")
+    for tt, ten in chon.items():
+        for bien, so_moi in (("bỏ", {k: v for k, v in so.items() if k != ten}), ("đổi tên", {("renamed_" + k if k == ten else k): v for k, v in so.items()}),
+                             ("nhân đôi", so | {tt + "_ban_sao": so[ten]})):
+            a.CA = so_moi
+            with mock.patch.dict(CA[c36].__globals__, {"nap_a": lambda _: a}):
+                rc, dong = chay_ca(c36)
+            bang(rc == 3 and f"DO:{c36}:mỗi ca bắt buộc" in dong and tt in dong, f"{bien} ca {ten} của bộ test đợt A mà c36 không ĐỎ đúng chốt: rc={rc} {dong[:300]}")
 
 
 @ca
@@ -1026,6 +1083,7 @@ DOT_BIEN = (   # (tên, chuỗi gốc, chuỗi thay, TIỀN TỐ ca đích). Chu
     ("L8_nuot_ly_do_tep_danh_gia", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = [x for x in mod.kiem_ho_so(du_lieu, prov) if \"danh_gia_khong_passed\" not in x]", "c35"),
     ("L8_chuan_hoa_nfkc_truoc_khi_doi_chieu", 'kq = mod.kiem_ho_so(du_lieu, prov)',
      'kq = mod.kiem_ho_so(json.loads(unicodedata.normalize("NFKC", json.dumps(du_lieu, ensure_ascii=False))), prov)', "c36"),
+    ("L8_nuot_ly_do_bo_sinh_la", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = [x for x in mod.kiem_ho_so(du_lieu, prov) if \"bo_sinh_la\" not in x]", "c37"),
     ("L8_chi_chuyen_mot_so_ly_do", 'kq = mod.kiem_ho_so(du_lieu, prov)', "kq = [x for x in mod.kiem_ho_so(du_lieu, prov) if \"duong_khong\" in x or x[:3] == \"$: \"]", "c32"),
 )
 TU_KIEM = (   # (tên, gốc, thay, ca đích, hạng mong đợi)

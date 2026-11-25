@@ -202,7 +202,9 @@ DOT_BIEN = [   # (ten, tep: T = tep test nay · M = mo-dun, chuoi neo — DUNG M
     (f"d82_{i:02d}_{dich}", "T", f'doi("m{i:02d}",', f'{HONG_M}("m{i:02d}",', (dich,)) for i, dich in enumerate((
         "n10_khoa_workflow", "n10_on", "n10_quyen", "n10_concurrency", "n10_tap_job", "n10_khoa_job", "n10_runs_on", "n10_timeout", "n10_so_buoc",
         "n10_buoc1_if", "n10_buoc2_if", "n10_buoc3_if", "n10_buoc4_if", "n10_buoc1_gia_tri", "n10_buoc2_gia_tri", "n10_buoc3_gia_tri",
-        "n10_buoc4_gia_tri", "n10_dem_bieu_thuc"), 1)]
+        "n10_buoc4_gia_tri", "n10_dem_bieu_thuc"), 1)] + [   # hai ve con cua menh de (1) ma dong 82 khong tach rieng (executor them):
+    ("d82_01b_gia_tri_name", "T", ' or _lech(wf["name"]' + ', MONG_WF["name"], "name")', "", ("n10_ten",)),
+    ("d82_01c_hai_khoa_on", "T", " or [k for k in co" + " if co.count(k) > 1]", "", ("n10_hai_khoa_on",))]
 TU_KIEM = (   # (ten, chuoi neo, chuoi thay, ca dich, hang MONG)
     ("tk_giet_that", '"nguong"' + ": 3", '"nguong"' + ": 4", "tk_chot", "GIET"),
     ("tk_attribute_error_qua_except", '"ten"' + ': "abc"', '"ten"' + ": None", "tk_doi_kieu", "TIN_DUNG_GIA"),

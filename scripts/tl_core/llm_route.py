@@ -556,6 +556,10 @@ def tach_khoan(van_ban):
             # r6 (lượt 6 F2): và CẢ dòng phải đúng câu dẫn chuẩn (`_RE_CAU_DAN_TRON`) — câu dẫn khác ⇒ không bỏ ⇒ nguồn bị chặn.
             continue   # câu dẫn CHUẨN (wp1514 X3): dòng khác kết thúc ":" KHÔNG bị bỏ — có thể là phần đầu một khoản
         elif not co_so:
+            if i_dong == 0 and re.sub(r'[\s)"\u201d]+$', "", ln).endswith(":"):
+                # r7 (lượt 7 G1): nguồn mất số, dòng ĐẦU (sau tiêu đề) mở bằng `:` mà không phải câu dẫn chuẩn ⇒ có thể là câu dẫn lạ
+                # (bị giữ thành khoản rồi gom mọi dòng điểm vào) hoặc khoản đầu — không phân biệt được ⇒ chặn cả nguồn.
+                return None
             khoan.append([None, ln])
         else:
             return None

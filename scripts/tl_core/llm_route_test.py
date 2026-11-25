@@ -1119,6 +1119,22 @@ def ca_wp1514_luot6(m):
              f"F2 doi chung: cau dan chuan {cd!r} bi chan oan")
 
 
+def ca_wp1514_luot7(m):
+    """r7 (lượt 7 G1): nguồn mất số, dòng đầu kết `:` không phải câu dẫn chuẩn ⇒ chặn (không được gom điểm vào nó)."""
+    CD = "Trong Luật này, các từ ngữ dưới đây được hiểu như sau:"
+
+    def kn(*cap):
+        return [{"stt": i + 1, "thuat_ngu": a, "dinh_nghia": b} for i, (a, b) in enumerate(cap)]
+    g1 = "Điều 3.\nCác từ ngữ là các khái niệm sau:\na) Hồ sơ là tài liệu;\nb) Dữ liệu là thông tin."
+    bang(m.tach_khoan(g1) is None, f"G1: dong dau ket ':' ngoai danh sach phai mo ho: {m.tach_khoan(g1)}")
+    bang(m.lech_nguyen_van(kn(("Các từ ngữ", "các khái niệm sau:\na) Hồ sơ là tài liệu;\nb) Dữ liệu là thông tin.")), g1) != [],
+         "G1: khoi gop cau dan la + diem duoc nhan")
+    # Đối chứng: cùng khối đứng SAU câu dẫn chuẩn là khoản thật có điểm ⇒ vẫn đạt.
+    vb = f"Điều 3.\n{CD}\nChủ thể là một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân."
+    bang(m.lech_nguyen_van(kn(("Chủ thể", "một trong các đối tượng sau:\na) tổ chức;\nb) cá nhân.")), vb) == [],
+         "G1 doi chung: khoan that co diem sau cau dan chuan bi chan oan")
+
+
 def ca_usage_thieu_truong(m):
     bang(m._usage_sub({"x": {"outputTokens": 3}}) is None, "thieu inputTokens khong duoc bu 0")
     bang(m._usage_sub({"x": {}}) is None, "muc rong khong duoc thanh 4 so 0")
@@ -1135,7 +1151,7 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
       ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
       ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_auth_sai_kieu,
-      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5, ca_wp1514_luot6]
+      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5, ca_wp1514_luot6, ca_wp1514_luot7]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
@@ -1157,6 +1173,8 @@ DOT_BIEN = [
     # r6 (lượt 6 F1/F2).
     ('wp1514_l6_so_lieu_ke_dang_sau', ('_RE_SO_NOI_DONG = re.compile(r"(?<![\\w.,])(?:\\(\\d+\\)|\\d+[^\\S\\n]*[.)])(?![\\d\\n]|$)")', '_RE_SO_NOI_DONG = re.compile(r"(?:^|[^\\S\\n])\\(?\\d+[.)](?=[^\\S\\n]|[^\\W\\d_])")'), 'ca_wp1514_luot6'),
     ('wp1514_l6_cau_dan_mo_rong_chu_ngu', ('r"(?:Trong|Tại) (?:Luật|Bộ luật|Pháp lệnh|Nghị định|Nghị quyết|Thông tư|Thông tư liên tịch|Quyết định) này, "', 'r".*"'), 'ca_wp1514_luot6'),
+    # r7 (lượt 7 G1).
+    ('wp1514_l7_bo_chot_dong_dau_hai_cham', ('            if i_dong == 0 and re.sub(r\'[\\s)"\\u201d]+$\', "", ln).endswith(":"):\n                # r7', '            if False and re.sub(r\'[\\s)"\\u201d]+$\', "", ln).endswith(":"):\n                # r7'), 'ca_wp1514_luot7'),
     ('wp1514_l4_cau_dan_moi_vi_tri', ('elif i_dong == 0 and _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):', 'elif _RE_CAU_DAN_TRON.fullmatch(" ".join(ln.split())):'), 'ca_wp1514_luot4'),
     ("wp1514_l2_duoi_mot_luot", (r"""    duoi = re.sub(r'[\s)"\u201d]+$', "", str(txt))""", """    duoi = str(txt).rstrip().rstrip(')"\u201d').rstrip()"""), "ca_wp1514_luot2"),
     # wp1514: mỗi chốt mới một đột biến.
@@ -1203,7 +1221,7 @@ DOT_BIEN = [
      "ca_tron_co_so_va_mat_so"),
     ("diem_thanh_khoan", ('        elif _RE_DIEM.match(ln):\n            if not khoan:\n                return None\n            khoan[-1][1] += "\\n" + ln\n', ""),
      "ca_khoan_mat_so_co_diem_dat"),
-    ("nguon_mat_so_khong_tach", ("        elif not co_so:\n            khoan.append([None, ln])\n", ""), "ca_khoan_co_so_va_diem_dat"),
+    ("nguon_mat_so_khong_tach", ("                return None\n            khoan.append([None, ln])\n", "                return None\n"), "ca_khoan_co_so_va_diem_dat"),
     # Lượt 6 S2.
     ("tieu_de_long", ('_RE_TIEU_DE_DIEU = re.compile(r"^\\s*Điều\\s+(\\d+[a-zđ]?)\\s*[.:]")',
                       '_RE_TIEU_DE_DIEU = re.compile(r"^\\s*Điều\\s+(\\d+[a-zđ]?)\\b")'), "ca_ranh_gioi_luot4"),

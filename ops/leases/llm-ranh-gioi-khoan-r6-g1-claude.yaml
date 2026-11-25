@@ -79,3 +79,5 @@ max_lease_hours: 8
 review_calls_limit: 7
 review_calls_used_truoc: 6
 inference_calls_limit: 0
+da_bi_thay_the: llm-ranh-gioi-khoan-r7-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 7 (G1 P2); revision r7 (ops/specs/llm-ranh-gioi-khoan-r7.md).'

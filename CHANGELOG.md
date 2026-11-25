@@ -20,6 +20,8 @@
   thân `… 2.Abc` như bộ nhận số đầu dòng (E1); câu dẫn phải có đúng một dấu `:` và không có chữ "là" ở bất kỳ đâu (E2).
 - r6 (sau cross-review lượt 6, đặc tả `ops/specs/llm-ranh-gioi-khoan-r6.md`): đổi sang DANH SÁCH CHO PHÉP — câu dẫn chỉ được
   bỏ khi CẢ dòng đúng câu dẫn chuẩn (F2); chốt đánh số nội dòng phủ trọn cú pháp số đầu dòng, gồm `1 .` và `1."` (F1).
+- r7 (sau cross-review lượt 7, đặc tả `ops/specs/llm-ranh-gioi-khoan-r7.md`): nguồn mất số có dòng đầu kết `:` mà không phải câu
+  dẫn chuẩn ⇒ chặn cả nguồn, không gom các dòng điểm vào nó (G1).
 
 # ★ v1.36.71 — r380: `tl llm-order` + `tl llm-khai-niem` — gọi Claude cho script, subscription ↔ API key (#1503) (2026-11-24)
 

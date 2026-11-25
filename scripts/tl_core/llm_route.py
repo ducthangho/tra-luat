@@ -529,7 +529,15 @@ _RE_RANH_GIOI_LON = re.compile(
     r"^(?i:chương|mục|phần)\s+(?:[IVXLCDM]+|\d+|(?i:thứ\s+(?:nhất|hai|ba|tư|bốn|năm|sáu|bảy|tám|chín|mười)(?!\w))|[A-ZĐ])(?!\w)")
 # r12 (lượt 11 L2): tiêu đề Điều THIẾU dấu sau số (`Điều 4 Phạm vi`) — nhận khi CẢ đoạn không kết bằng dấu câu (tiêu đề không có
 # dấu câu cuối; dẫn chiếu trong thân điểm/khoản kết bằng `;` `.` …).
-_RE_DIEU_KHONG_DAU = re.compile(r"^Điều\s+\d+[a-zđ]?(?:\s+[^.;:,!?]*)?$", re.IGNORECASE)
+# r13 (lượt 12 M1): TIỀN TỐ và HẬU TỐ xét RIÊNG — tên Điều được có dấu câu GIỮA tên (`Điều 5 Phạm vi, đối tượng`); chỉ dấu câu
+# CUỐI đoạn (bỏ qua ngoặc/nháy đóng) phân biệt dẫn chiếu với tiêu đề. Số theo sau không phải chữ/số (`Điều 5—Phạm vi` cũng khớp).
+_RE_DIEU_KHONG_DAU = re.compile(r"^Điều\s+\d+[a-zđ]?(?!\w)", re.IGNORECASE)
+_RE_KET_DAU_CAU = re.compile(r"[.;:,!?][\s\"'”’»)\]]*$")
+
+
+def _la_tieu_de_khong_dau(chu):
+    """r13 (lượt 12 M1): đoạn mở bằng `Điều <số>` (không cần dấu sau số) và KHÔNG kết bằng dấu câu ⇒ hình dạng tiêu đề Điều."""
+    return bool(_RE_DIEU_KHONG_DAU.match(chu)) and not _RE_KET_DAU_CAU.search(chu)
 # Số khoản/điểm GÕ TAY ở đầu đoạn (không phải đánh số tự động).
 # r3 (lượt 2 B5): `(?!\d)` — thân mở bằng số thập phân (`1.5 lần`) không phải số gõ tay.
 _RE_SO_GO_TAY_DOCX = re.compile(r"^\(?\d+[^\S\n]*[.)](?!\d)")
@@ -668,7 +676,11 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
         if any(k.endswith("}restartNumberingAfterBreak") and v not in _TAT_OOXML for k, v in an.attrib.items()):
             loi = "abstractNum restartNumberingAfterBreak (danh so lai sau ngat section) khong ho tro"   # r5 (lượt 4 D2)
         for lvl in an.findall(_W + "lvl"):
-            il = int(lvl.get(_W + "ilvl", "0"))
+            try:   # r13 (lượt 12 M2): `w:ilvl` bắt buộc ở `lvl`; vắng/sai dạng ⇒ định nghĩa lỗi (chặn KHI DÙNG — A5)
+                il = _so_nguyen(lvl.get(_W + "ilvl"))
+            except ValueError as e:
+                loi = loi or f"lvl: {e}"
+                continue
             if not 0 <= il <= 8:   # r6 (lượt 5 E6): miền cấp OOXML 0–8
                 loi = loi or f"ilvl {il} ngoai mien 0-8"
                 continue
@@ -679,9 +691,13 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
                 loi = loi or f"cap {il}: lvlRestart/isLgl khong ho tro"
             if lvl.find(_W + "pStyle") is not None:   # r3 (lượt 2 B2): cấp gắn style chọn cấp hiển thị — chưa hỗ trợ
                 loi = loi or f"cap {il}: lvl gan pStyle khong ho tro"
+            try:   # r13 (lượt 12 M2): `start` lỗi ⇒ định nghĩa lỗi, chặn khi dùng (A5) — không ném lúc nạp
+                bd = _so_nguyen(st.get(_W + "val")) if st is not None else 0
+            except ValueError as e:
+                loi = loi or f"cap {il}: start {e}"
+                continue
             muc[il] = (fmt.get(_W + "val") if fmt is not None else "decimal",
-                       (txt.get(_W + "val") or "") if txt is not None else "",
-                       _so_nguyen(st.get(_W + "val")) if st is not None else 0)
+                       (txt.get(_W + "val") or "") if txt is not None else "", bd)
         aid_an = _so_id(an.get(_W + "abstractNumId"))
         if aid_an is None:
             continue   # r8 (lượt 7 G1): abstractNumId không hợp lệ ⇒ không ghép được ⇒ danh sách trỏ tới nó bị chặn
@@ -703,7 +719,11 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
         muc, loi = truu_tuong[_so_id(aid.get(_W + "val"))]
         muc = dict(muc)
         for ov in num.findall(_W + "lvlOverride"):
-            il = int(ov.get(_W + "ilvl", "0"))
+            try:   # r13 (lượt 12 M2): `w:ilvl` bắt buộc ở `lvlOverride`
+                il = _so_nguyen(ov.get(_W + "ilvl"))
+            except ValueError as e:
+                loi = loi or f"lvlOverride: {e}"
+                continue
             if not 0 <= il <= 8:
                 loi = loi or f"lvlOverride ilvl {il} ngoai mien 0-8"
                 continue
@@ -711,7 +731,10 @@ def _doc_danh_so(z, doc_gioi_han, chinh="word/document.xml"):
                 loi = loi or f"lvlOverride cap {il} ngoai startOverride"
                 continue
             fmt, txt, _ = muc.get(il, ("decimal", "", 0))
-            muc[il] = (fmt, txt, _so_nguyen(ov.find(_W + "startOverride").get(_W + "val")))
+            try:
+                muc[il] = (fmt, txt, _so_nguyen(ov.find(_W + "startOverride").get(_W + "val")))
+            except ValueError as e:
+                loi = loi or f"lvlOverride cap {il}: startOverride {e}"
         kq[nid] = {"muc": muc, "loi": loi}
     return kq
 
@@ -741,7 +764,10 @@ def _doc_kieu(z, doc_gioi_han, chinh="word/document.xml"):
             e = np_.find(_W + "numId")
             nid = (_so_id(e.get(_W + "val")) or "!") if e is not None else None   # r9 (lượt 8 H4): "!" = ID lỗi, khác vắng
             e = np_.find(_W + "ilvl")
-            il = int(e.get(_W + "val")) if e is not None else None
+            try:   # r13 (lượt 12 M2): ilvl lỗi ở style ⇒ "!" — chỉ chặn khi đoạn dùng style ấy CÓ đánh số
+                il = _so_nguyen(e.get(_W + "val")) if e is not None else None
+            except ValueError:
+                il = "!"
         rpr = st.find(_W + "rPr")
         kq[st.get(_W + "styleId")] = (b.get(_W + "val") if b is not None else None, nid, il,
                                       gach(rpr, "strike"), gach(rpr, "dstrike"))
@@ -935,10 +961,14 @@ def _phan_tich_doan(p, kieu):
             if nid is None:
                 kq["la"] = True   # r8 (lượt 7 G1): numId không hợp lệ ⇒ không biết danh sách
         e = np_.find(_W + "ilvl")
-        il = int(e.get(_W + "val")) if e is not None else il
+        il = _so_nguyen(e.get(_W + "val")) if e is not None else il   # r13 (lượt 12 M2): vắng/sai dạng ⇒ ValueError
     if nid == "!":
         kq["la"], nid = True, None   # r9 (lượt 8 H4): numId lỗi khai qua style ⇒ đoạn lạ
     # r10 (lượt 9 J2) → r11 (lượt 10 K1): phần tử `mc:` ở rPr/pPr nay bị `_chan_mc` chặn cho CẢ part.
+    if il == "!":
+        if nid not in (None, "0"):
+            raise ValueError("style co ilvl khong hop le tren doan danh so")   # r13 (lượt 12 M2)
+        il = None
     so = None if nid in (None, "0") else (nid, il or 0)
     # r7 (lượt 6 F5): cấp ngoài miền ở ĐOẠN không cần chốt riêng — chỉ đếm khi cấp có trong định nghĩa (đã giới hạn 0–8),
     # và bước xác thực chặn đoạn trỏ cấp không có định nghĩa.
@@ -975,8 +1005,11 @@ def doc_dieu_docx(nguon, dieu):
             raise ValueError("tai lieu co sua doi dau doan (track changes gop/tach doan) — ranh gioi doan khong tin duoc")
     for loai in ("moveFrom", "moveTo"):
         # r7 (lượt 6 F6): mốc phạm vi move phải CÂN theo id — mốc lẻ ⇒ thay đổi cấu trúc không xác định ⇒ dừng.
-        dau = sorted(e.get(_W + "id") for e in goc_cay.iter(_W + loai + "RangeStart"))
-        cuoi = sorted(e.get(_W + "id") for e in goc_cay.iter(_W + loai + "RangeEnd"))
+        dau = [e.get(_W + "id") for e in goc_cay.iter(_W + loai + "RangeStart")]
+        cuoi = [e.get(_W + "id") for e in goc_cay.iter(_W + loai + "RangeEnd")]
+        if None in dau or None in cuoi:   # r13 (lượt 12 M2): mốc thiếu `w:id` ⇒ không so được (sorted None/str ném TypeError)
+            raise ValueError(f"moc pham vi {loai} thieu w:id")
+        dau, cuoi = sorted(dau), sorted(cuoi)
         if dau != cuoi:
             raise ValueError(f"moc pham vi {loai} khong can (start {dau} / end {cuoi})")
     body = goc_cay.find(_W + "body")
@@ -1033,7 +1066,7 @@ def doc_dieu_docx(nguon, dieu):
     if doan[i0]["la"]:
         raise ValueError("tieu de Dieu co phan tu khong ho tro")   # r5 (lượt 4 D4)
     vung = doan[i0 + 1:]
-    if any(_RE_DIEU_BAT_KY.match(d["chu"]) or _RE_DIEU_KHONG_DAU.match(d["chu"]) or _RE_RANH_GIOI_LON.match(d["chu"]) for d in vung):
+    if any(_RE_DIEU_BAT_KY.match(d["chu"]) or _la_tieu_de_khong_dau(d["chu"]) or _RE_RANH_GIOI_LON.match(d["chu"]) for d in vung):
         raise ValueError("tep chua them tieu de Dieu/Chuong/Muc/Phan — chi de dung Dieu can doc trong tep")
     if any(d["la"] for d in vung):
         raise ValueError("Dieu co phan tu khong ho tro (ky hieu, truong, hinh, chu thich…) — khong biet chu that")

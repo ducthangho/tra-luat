@@ -33,6 +33,8 @@
   `Phần thứ …` nhận diện được; `lvlText` theo danh sách cho phép toàn chuỗi.
 - r12 (sau cross-review lượt 11, đặc tả `ops/specs/llm-khoan-docx-r12.md`): quan hệ OOXML so URI đầy đủ; tiêu đề Điều thiếu dấu
   ⇒ chặn; số thứ tự chữ/La Mã chặt hơn (không nuốt thuật ngữ); giá trị số thiếu ⇒ lỗi có kiểm soát; part chính đọc theo mã hoá khai.
+- r13 (sau cross-review lượt 12, đặc tả `ops/specs/llm-khoan-docx-r13.md`): tiêu đề Điều thiếu dấu xét riêng tiền tố và dấu câu CUỐI
+  (dấu câu giữa tên không còn lọt); `ilvl`/mốc move thiếu giá trị ⇒ lỗi có kiểm soát (rc 2) thay vì `TypeError`.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

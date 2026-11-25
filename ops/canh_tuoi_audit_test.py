@@ -520,7 +520,7 @@ def giai_db(nguon):
     return ra
 
 # ---- Nghiem thu 1: ba trang thai tung phep con T1-T7, lop J/R/S, thu lai, LIEN KET, U6, bac NEO ----
-D1U, KDD = r"/runs\?event=schedule", "khong_do_duoc"
+D1U, KDD, TMO = r"/runs\?event=schedule", "khong_do_duoc", "transport_nem:builtins.TimeoutError"
 
 def sua_tra(g, mau, ham, pt="GET"):
     """Sua THAN (va header) phan hoi thuong cua cac lan gui khop `mau`: `ham(than)` sua tai cho hoac tra (than moi, header them)."""
@@ -1793,6 +1793,15 @@ for _t, _s in K1:
     xoa("f01_k1_" + _t, "k1:" + _t, "n1_t1_mien_" + _t)
 ca_t1_mien("n1_t1_mien_job_attempt_am", lambda lu: lu["jobs"][2].update(run_attempt=-1))
 ca_t1_mien("n1_t1_mien_run_attempt_bool", lambda lu: lu["d2"].update(run_attempt=True))
+# Review ma luot 2 (N02-N05): moi NHANH CON cua mot chot K1 co ca rieng — khoa VANG khac `null`; `name` cua artifact; `status` cua job
+ca_t1_mien("n1_t1_mien_art_digest_vang", lambda lu: lu["arts"].append({"id": 90909090, "name": "khong-duoc-chon", "expired": False}))
+ca_t1_mien("n1_t1_mien_art_ten", lambda lu: art_thua(lu, name=7))
+ca_t1_mien("n1_t1_mien_run_conclusion_vang", lambda lu: lu["d2"].pop("conclusion"))
+ca_t1_mien("n1_t1_mien_job_status", lambda lu: lu["jobs"][0].update(status=7))
+db("rv2_n02_digest_vang", "k1:art_digest", 'rong(a, "digest")', 'isinstance(a.get("digest"), (str, type(None)))', "n1_t1_mien_art_digest_vang")
+db("rv2_n03_art_ten", "k1:art_khac", 'chuoi(a, "name") and ', "", "n1_t1_mien_art_ten")
+db("rv2_n04_conclusion_vang", "k1:run_conclusion", 'rong(run, "conclusion")', 'isinstance(run.get("conclusion"), (str, type(None)))', "n1_t1_mien_run_conclusion_vang")
+db("rv2_n05_job_status", "k1:job_chuoi", '"name", "status"', '"name"', "n1_t1_mien_job_status")
 ca_t1_mien("n1_t1_mien_doi_chung", lambda lu: art_thua(lu), ("dat", "dat"))   # `digest: null` duoc K1 cho phep; `conclusion: null` cua luot dang chay: n1_chua_xong
 
 def ca_thieu_body(ten, lan, muon):
@@ -1840,12 +1849,20 @@ def n15_tinh_cuoi_qua_han():   # phep tinh CUOI cua pha danh gia (nghia vu O) ho
 
 @ca
 def n15_w0_phan_tich_qua_han():   # TOAN BO W0 (ca phan tich va kiem mien nhip tim) tinh vao HAN_W0
-    for them, muon in ((181.0, ("d10_loi:het_gio", 0, 3)), (100.0, ("moi", 1, 0))):
+    for them, muon in ((181.0, ("d10_loi:het_gio", 0, 3)), (180.0, ("d10_loi:het_gio", 0, 3)), (100.0, ("moi", 1, 0))):
         g = dat_than(gh(), nt_cu(T0))
         with thay_ten("kiem_nhip_tim", nhay(g, them=them)):
             ma, bc, nk = luot_wd(g)
         mong((bc["nhip_tim_truoc"]["ma"], dem(nk, "PATCH"), ma), muon, f"kiem mien nhip tim tieu {them} s")
 khong("f02_w0_tron_ven", "w0:tron_ven", "n15_w0_phan_tich_qua_han")
+
+@ca
+def n15_w0_bien():   # N09: W0 hoan tat DUNG o HAN_W0 (180 s) la da het (bang han la het): nhip tim khong duoc dung; quan sat o MA doc truoc, khong o ma thoat
+    g = dat_than(gh(), nt_cu(T0))
+    with thay_ten("kiem_nhip_tim", nhay(g, them=180.0)):
+        ma, bc, nk = luot_wd(g)
+    mong((bc["nhip_tim_truoc"]["ma"], dem(nk, "PATCH"), ma), ("d10_loi:het_gio", 0, 3))
+db("rv2_n09_w0_bien", "w0:tron_ven", ">= c.han", "> c.han", "n15_w0_bien")
 
 @ca
 def n15_w0_tinh_ca_phan_tich():   # thoi gian phan tich o W0 bi TRU khoi ngan sach ghi con lai: W0 dung 170 s => lan gui dau cua pha ghi con 10 s
@@ -1864,12 +1881,105 @@ class LuongCham:
 
 @ca
 def n15_vong_doc_qua_han():   # ba khuc x 20 s: tung lan doc duoi 30 s nhung TONG vuot han cua lan thu => lan thu khong hoan tat
-    for giay, muon in ((20, (KDD, "transport_nem:builtins.TimeoutError", 3)), (5, ("fresh", "khung_xanh", 1))):
+    for giay, muon in ((20, (KDD, TMO, 3)), (7.5, (KDD, TMO, 3)), (5, ("fresh", "khung_xanh", 1))):
         g = gh()
         g.sua.append((D1U, "GET", lambda s, pt, url, than: (200, LuongCham(s, json.dumps(s.xu_ly(pt, url, than)[1]).encode(), giay))))
         ma, bc, nk = luot_wd(g)
         mong((bc["trang_thai"], bc["ma_chi_tiet"], dem(nk, "GET", D1U)), muon, f"moi lan doc {giay} s")
-khong("f02_vong_doc", "f02:vong_doc", "n15_vong_doc_qua_han")
+
+def boc_than(g, mau, pt, lam, ma_ep=None):
+    """Cac lan gui khop (`mau`, `pt`) tra than THUONG cua GitHub gia qua luong `lam(g, ma, byte)`; header giu nguyen, ma giu nguyen tru khi `ma_ep`."""
+    def tra(s, p, url, than):
+        ma, x, *hd = s.xu_ly(p, url, than)
+        return (ma_ep or ma, lam(s, ma_ep or ma, x if isinstance(x, bytes) else json.dumps(x).encode()), *hd)
+    g.sua.append((mau(g) if callable(mau) else mau, pt, tra))
+
+KHO_F = lambda g: rf"luu-tru\.example/goi/{g.luot[20]['idb']}$"   # goi bien nhan cua luot F tren host kho luu tru (D5, lop S)
+BON_DUONG = (   # bon noi goi cua bo doc dung chung: (hau to, nen, mau URL, phuong thuc, quan sat)
+    ("get_api", gh, D1U, "GET", lambda g, ma, bc, nk: (bc["ma_chi_tiet"], dem(nk, "GET", D1U))),
+    ("get_kho", gh, KHO_F, "GET", lambda g, ma, bc, nk: phep(bc, 20, "T2")),
+    ("patch", lambda: dat_than(gh(), nt_cu(T0)), ISS, "PATCH", lambda g, ma, bc, nk: (bc["ghi"]["W2"], bc["ghi"]["W3"], dem(nk, "PATCH"))),
+    ("post", lambda: gh(f="do"), CMU, "POST", lambda g, ma, bc, nk: (ma, dem(nk, "POST"), bc["ghi"]["W5"], nt_tren(g)["cho_bao"] is None, (nt_tren(g)["da_bao"] or {}).get("loai"))))
+
+def ca_vong_doc(i, muon, giay=20, hau=""):
+    """Chot `f02:vong_doc` tai MOT noi goi: than qua LuongCham (bon lan `read`, moi lan `giay` giay, deu duoi 30 s)."""
+    ten, nen, mau, pt, xem = BON_DUONG[i]
+    def chay():
+        g = nen()
+        boc_than(g, mau, pt, lambda s, ma, byte: LuongCham(s, byte, giay))
+        mong(xem(g, *luot_wd(g)), muon, f"{pt} {ten}: moi lan doc {giay} s")
+    ca(chay, f"n15_vong_doc_{hau or ten}")
+
+ca_vong_doc(0, (TMO, 3), 7.5, "bien")   # N01: lan doc CUOI (EOF) hoan tat DUNG o 30 s — bang han la da het => ba lan thu deu khong hoan tat
+ca_vong_doc(1, (KDD, TMO))                                                  # N08: host kho luu tru
+ca_vong_doc(2, ("chua_xac_nhan:" + TMO, "dat", 1))                          # PATCH: lan thu vuot 30 s (pha ghi con du) => chua xac nhan
+ca_vong_doc(3, (3, 1, "chua_xac_nhan", False, None))                        # N07: POST vuot 30 s => khong ack, su kien con cho
+khong("f02_vong_doc", "f02:vong_doc", "n15_vong_doc_qua_han", "n15_vong_doc_get_kho", "n15_vong_doc_patch", "n15_vong_doc_post")
+db("rv2_n01_vong_doc_bien", "f02:vong_doc", ">= het", "> het", "n15_vong_doc_bien")
+db("rv2_n08_vong_doc_mien_kho", "f02:vong_doc", ">= het", '>= het and urllib.parse.urlsplit(url).hostname == "api.github.com"', "n15_vong_doc_get_kho")
+db("f02_vong_doc_mien_patch", "f02:vong_doc", ">= het", '>= het and pt != "PATCH"', "n15_vong_doc_patch")
+db("rv2_n07_vong_doc_mien_post", "f02:vong_doc", ">= het", '>= het and pt != "POST"', "n15_vong_doc_post")
+
+class NenCham(io.RawIOBase):
+    """Luong NEN (vai `SocketIO`) cua mot HTTPResponse THAT doc qua BufferedReader THAT: MOI lan doc nen tra toi da `k` byte sau `giay` giay
+    don dieu. Mang `_sock` nhu SocketIO that va ghi tung `settimeout` nguoi doc ap len no; `dem` la luong dem goc ma HTTPResponse nhan."""
+    def __init__(self, g, byte, k):
+        super().__init__()
+        self.g, self.byte, self.k, self.giay, self.han, self._sock, self.dem = g, byte, k, 0, [], self, io.BufferedReader(self)
+
+    def readable(self): return True
+
+    def makefile(self, *a, **k): return self.dem
+
+    def settimeout(self, giay): self.han.append(giay)
+
+    def readinto(self, b):
+        d, self.byte = self.byte[:min(self.k, len(b))], self.byte[min(self.k, len(b)):]
+        self.g.t += self.giay
+        b[:len(d)] = d
+        return len(d)
+
+def phan_hoi_that(g, ds, ma, than, giay, k, chunked, loi):
+    """`http.client.HTTPResponse` THAT (tieu de phan tich boi `begin()` cua thu vien, khong ton thoi gian) tren NenCham; `loi` => boc trong HTTPError nhu urllib."""
+    dau = f"HTTP/1.1 {ma} X\r\n" + ("Transfer-Encoding: chunked" if chunked else f"Content-Length: {len(than)}") + "\r\n\r\n"
+    n = NenCham(g, dau.encode(), 4096)
+    r = http.client.HTTPResponse(n, method="GET")
+    r.begin()
+    n.byte, n.k, n.giay = (b"%x\r\n%b\r\n0\r\n\r\n" % (len(than), than) if chunked else than), k, giay
+    ds.append(n)
+    return urllib.error.HTTPError("https://x.example/", ma, "X", r.headers, r) if loi else r
+
+HAN_30 = [float(i) for i in range(30, 0, -1)]   # thoi gian CON LAI ap len socket truoc tung lan doc nen cua mot lan thu 30 s, moi lan doc nen 1 s
+BA_KIEU = ((1, 1, False), (1, 1, True), (0, 4096, False))   # cham Content-Length · cham chunked (ca dong kich co khuc) · nhanh (doi chung)
+
+def ca_nen(i, cham, nhanh, han, hau="", w0=0.0, ma_ep=None):
+    """F02 tai MOT noi goi, qua lop doc co dem THAT: mot `HTTPResponse.read` chua nhieu lan doc nen 1 s. Han tuyet doi cua lan thu phai rang
+    buoc TUNG lan doc nen: `settimeout` nhan dung thoi gian con lai `han`, lan doc nen o han khong dien ra. Doi chung nhanh: than doc tron, luong goc dong."""
+    ten, nen, mau, pt, xem = BON_DUONG[i]
+    def chay():
+        for giay, k, chunked in BA_KIEU:
+            g, ds = nen(), []
+            boc_than(g, mau, pt, lambda s, ma, byte: phan_hoi_that(s, ds, ma, byte, giay, k, chunked, bool(ma_ep)), ma_ep)
+            with thay_ten("kiem_nhip_tim", nhay(g, them=w0)):   # `w0` giay cua W0 => lan thu cua pha ghi bi kep theo han cua PHA
+                kq = xem(g, *luot_wd(g))
+            mong((kq, [n.han for n in ds] if giay else all(n.dem.closed for n in ds)), (cham, han) if giay else (nhanh, True), f"{pt} {ten}: {giay} s/lan doc nen, chunked={chunked}")
+    ca(chay, f"n15_nen_{hau or ten}")
+
+ca_nen(0, (TMO, 3), ("khung_xanh", 1), [HAN_30] * 3)
+ca_nen(1, (KDD, TMO), ("dat", "dat"), [HAN_30] * 3)
+ca_nen(2, ("chua_xac_nhan:het_gio", "doc_lai_loi:het_gio", 1), ("da_gui", "dat", 1), [HAN_30[20:]], w0=170.0)   # pha ghi con 10 s => han cua PHA kep lan thu
+ca_nen(3, (3, 1, "chua_xac_nhan", False, None), (1, 1, "da_gui", True, "canh_bao"), [HAN_30])
+ca_nen(0, (TMO, 3), ("http_github:403", 1), [HAN_30] * 3, "than_loi", ma_ep=403)   # than cua HTTPError (adapter tra chinh HTTPError lam luong)
+NEN4, NEN_R = [f"n15_nen_{d[0]}" for d in BON_DUONG], "isinstance(r, http.client.HTTPResponse)"
+khong("f02_nen", "f02:nen", *NEN4, "n15_nen_than_loi")
+khong("f02_nen_han", "f02:nen_han", *NEN4)
+db("f02_nen_han_bien", "f02:nen_han", "con <= 0", "con < 0", *NEN4)
+db("f02_nen_socket", "f02:nen_socket", "sock.settimeout(con)", "pass", *NEN4, "n16_socket_that")
+xoa("f02_nen_dong", "f02:nen_dong", *NEN4)
+db("f02_nen_loi", "f02:nen_loi", 'getattr(luong, "fp", None)', "None", "n15_nen_than_loi", "n16_socket_that")
+for _ten, _dk in (("get_api", 'not (pt == "GET" and urllib.parse.urlsplit(url).hostname == "api.github.com")'), ("get_kho", 'urllib.parse.urlsplit(url).hostname == "api.github.com"'),
+                  ("patch", 'pt != "PATCH"'), ("post", 'pt != "POST"')):
+    db("f02_nen_mien_" + _ten, "f02:nen", NEN_R, f"{NEN_R} and {_dk}", "n15_nen_" + _ten)
 
 @ca
 def n15_d14_khop_qua_han():   # D14: kiem luc hoan tat dung SAU phep khop comment
@@ -1914,6 +2024,13 @@ class PhanHoiGia:
     def __init__(self, ma, hd, byte): self.status, self.headers, self.than = ma, hd, io.BytesIO(byte)
     def read(self, n=-1): return self.than.read(n)
 
+def adapter(*a):
+    """Loi goi adapter THAT tai bien cua no: HTTPError lan ra la dieu CA doi (tin hieu rieng cua ca), khong phai loi vo can (N06)."""
+    try:
+        return M.transport_that(*a)
+    except urllib.error.HTTPError as e:
+        bang(False, f"HTTPError {e.code} lan khoi adapter; phai thanh phan hoi (ma, header, luong)")
+
 @ca
 def n16_transport_that():   # adapter urllib THAT qua lop mo gia (khong mang): timeout di toi `open`, KHONG tu theo chuyen huong, HTTPError thanh phan hoi
     goi = []
@@ -1932,16 +2049,51 @@ def n16_transport_that():   # adapter urllib THAT qua lop mo gia (khong mang): t
         return Mo()
     cu, urllib.request.build_opener = urllib.request.build_opener, mo_gia
     try:
-        ma, hd, luong = M.transport_that("PATCH", "https://api.github.com/x", {"Authorization": "Bearer t"}, {"body": "b"}, 7)
+        ma, hd, luong = adapter("PATCH", "https://api.github.com/x", {"Authorization": "Bearer t"}, {"body": "b"}, 7)
         mong((ma, hd, luong.read(4), goi[0][0], goi[0][3], goi[0][4], goi[0][2].get("Authorization")), (200, {"X-GitHub-Request-Id": "g"}, b'{"ok', "PATCH", b'{"body": "b"}', 7, "Bearer t"), "200")
-        ma, hd, luong = M.transport_that("GET", "https://api.github.com/chuyen", {}, None, 3.5)
+        ma, hd, luong = adapter("GET", "https://api.github.com/chuyen", {}, None, 3.5)
         mong((ma, hd.get("Location"), goi[1][3], goi[1][4]), (302, "https://luu-tru.example/dich", None, 3.5), "302 khong duoc tu theo")
-        ma, hd, luong = M.transport_that("GET", "https://api.github.com/khong-co", {}, None, 30)
+        ma, hd, luong = adapter("GET", "https://api.github.com/khong-co", {}, None, 30)
         mong((ma, luong.read(), goi[2][4]), (404, b'{"message": "Not Found"}', 30), "HTTPError thanh phan hoi")
     finally:
         urllib.request.build_opener = cu
 tho("r23_tu_theo_chuyen_huong", "def redirect_request(self, *a, **k):\n        return None", "def redirect_request(self, *a, **k):\n        return super().redirect_request(*a, **k)", "n16_transport_that")
 tho("r25_bo_timeout_adapter", ".open(req, timeout=timeout)", ".open(req, timeout=None)", "n16_transport_that")
+
+@contextlib.contextmanager
+def lop_mo(open_gia):
+    """Thay lop mo cua urllib bang mot lop ma `open(req, timeout)` la `open_gia` (khong mang)."""
+    cu, urllib.request.build_opener = urllib.request.build_opener, lambda *lop: type("Mo", (), {"open": lambda self, req, timeout=None: open_gia(req)})()
+    try:
+        yield
+    finally:
+        urllib.request.build_opener = cu
+
+def nem_http(ma, hd, fp):
+    """`open` nem HTTPError mang phan hoi `fp`, nhu urllib lam voi moi ma khong phai 2xx."""
+    def f(req): raise urllib.error.HTTPError(req.full_url, ma, "X", hd, fp)
+    return f
+
+@ca
+def n16_http_error():   # N06: HTTPError o bien adapter THANH phan hoi — ma, header va than doc duoc
+    with lop_mo(nem_http(404, {"X-GitHub-Request-Id": "g"}, io.BytesIO(b'{"message": "x"}'))):
+        ma, hd, luong = adapter("GET", "https://api.github.com/x", {}, None, 2.5)
+    mong((ma, hd, luong.read()), (404, {"X-GitHub-Request-Id": "g"}, b'{"message": "x"}'))
+tho("rv2_n06_http_error_lan_ra", "        r = e\n    return r.status", "        raise e\n    return r.status", "n16_http_error", "n16_transport_that")
+
+@ca
+def n16_socket_that():   # cau truc THAT cua thu vien (HTTPResponse -> BufferedReader -> SocketIO -> socket), khong mang: thoi gian con lai phai toi DUNG socket ay
+    for ma in (200, 404):
+        a, b = socket.socketpair()
+        a.settimeout(7)
+        b.sendall(f"HTTP/1.1 {ma} X\r\nContent-Length: 5\r\n\r\nhello".encode())
+        b.close()
+        r = http.client.HTTPResponse(a, method="GET")
+        r.begin()
+        a.close()   # nhu urllib `do_open`: dong doi tuong socket ngay, fd con song nho luong doc cua phan hoi
+        with lop_mo(nem_http(ma, r.headers, r) if ma == 404 else lambda req: r):
+            kq = M._mot_lan(M._NguCanh(M.transport_that, lambda: 0.0, None, "t", None), "GET", "https://api.github.com/x", {}, None, 12.5)
+        mong((kq[0], kq[2], a.gettimeout(), a.fileno()), (ma, b"hello", 12.5, -1), f"ma {ma}: than doc tron, socket nhan thoi gian con lai, fd dong khi than het")
 
 @ca
 def n9_main_ma_thoat():   # main(): ma thoat cua muc 9 di nguyen ven ra tien trinh; bao cao MOT dong JSON ASCII sort_keys; tom tat khi co GITHUB_STEP_SUMMARY

@@ -1,0 +1,2318 @@
+[
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2323957aca94e1cf328f6b9249f87a3a0f66ce01/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T08:48:29Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T08:48:29Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: script gọi Claude tự chọn API key ↔ subscription + doctor đo anthropic-api\n\n- .claude/dev/llm_route.py (dev-side, không vào gói): `tach-khai-niem` và `trang-thai`.\n  Đường `api` dùng SDK + TL_ANTHROPIC_API_KEY (rồi ANTHROPIC_API_KEY); đường `sub` dùng\n  `claude -p` đã cắt ngữ cảnh (~1,9k token thay vì ~92k, đo 24-11-2026), gỡ key khỏi env\n  con. Chỉ chuyển đường khi lỗi thuộc về đường (thiếu key/CLI, 401/402/403/429, hết\n  credit, mất mạng); lỗi thuộc về yêu cầu thì dừng. Chuẩn hoá chữ \"là\" thừa và kiểm cả\n  cụm \"<thuật ngữ> là <định nghĩa>\" có nguyên văn trong nguồn (lệch ⇒ rc=5).\n- llm_route_test.py: 17 ca, 11 đột biến trên bản sao tạm, chỉ tính giết bằng\n  TinHieuChotCa; đăng ký vào MOI của ci_dang_ky_test.py.\n- launcher.py: KHA_NANG `anthropic-api` (_do_anthropic_api). Mặc định không gọi mạng;\n  --kiem-song gửi một lời gọi Messages nhỏ, chỉ 2xx mới DUNG_DUOC; hết credit/bị từ chối\n  ⇒ CHUA_XAC_THUC; thiếu key ⇒ THIEU (tuỳ chọn, không cảnh báo thường trực).\n  t162 + 4 đột biến.\n- docs/GOI_AGENT_DA_NEN.md: nơi đặt key (không Network secrets, tên TL_, nạp khi phiên\n  khởi động lại), hai đường, cách xem credit.\n\nĐo thật 24-11-2026 trên Điều 3 Luật 134/2025/QH15: api 3.640 token, sub 5.010 token\n(cache_ghi 3.565), 8/8 khái niệm, hai đường trùng nhau sau chuẩn hoá.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "ca866492ff3195848f3dcdf620121f89e8e8c22b",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/ca866492ff3195848f3dcdf620121f89e8e8c22b"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/2323957aca94e1cf328f6b9249f87a3a0f66ce01",
+   "verification": {
+    "payload": "tree ca866492ff3195848f3dcdf620121f89e8e8c22b\nparent a99a74f75867172fe62f984d7528f5d5bd73dacb\nauthor Claude <noreply@anthropic.com> 1795510109 +0000\ncommitter Claude <noreply@anthropic.com> 1795510109 +0000\n\nllm_route: script gọi Claude tự chọn API key ↔ subscription + doctor đo anthropic-api\n\n- .claude/dev/llm_route.py (dev-side, không vào gói): `tach-khai-niem` và `trang-thai`.\n  Đường `api` dùng SDK + TL_ANTHROPIC_API_KEY (rồi ANTHROPIC_API_KEY); đường `sub` dùng\n  `claude -p` đã cắt ngữ cảnh (~1,9k token thay vì ~92k, đo 24-11-2026), gỡ key khỏi env\n  con. Chỉ chuyển đường khi lỗi thuộc về đường (thiếu key/CLI, 401/402/403/429, hết\n  credit, mất mạng); lỗi thuộc về yêu cầu thì dừng. Chuẩn hoá chữ \"là\" thừa và kiểm cả\n  cụm \"<thuật ngữ> là <định nghĩa>\" có nguyên văn trong nguồn (lệch ⇒ rc=5).\n- llm_route_test.py: 17 ca, 11 đột biến trên bản sao tạm, chỉ tính giết bằng\n  TinHieuChotCa; đăng ký vào MOI của ci_dang_ky_test.py.\n- launcher.py: KHA_NANG `anthropic-api` (_do_anthropic_api). Mặc định không gọi mạng;\n  --kiem-song gửi một lời gọi Messages nhỏ, chỉ 2xx mới DUNG_DUOC; hết credit/bị từ chối\n  ⇒ CHUA_XAC_THUC; thiếu key ⇒ THIEU (tuỳ chọn, không cảnh báo thường trực).\n  t162 + 4 đột biến.\n- docs/GOI_AGENT_DA_NEN.md: nơi đặt key (không Network secrets, tên TL_, nạp khi phiên\n  khởi động lại), hai đường, cách xem credit.\n\nĐo thật 24-11-2026 trên Điều 3 Luật 134/2025/QH15: api 3.640 token, sub 5.010 token\n(cache_ghi 3.565), 8/8 khái niệm, hai đường trùng nhau sau chuẩn hoá.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQHx4dWf7\nzqxhKH8gWTjR5BIcuff564PeWpqZLhlcNnDloToHga6eILcAl3kScxgg2Mi99FBwI/ssC579X+Vh\nhQY=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T08:48:33Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/2323957aca94e1cf328f6b9249f87a3a0f66ce01",
+  "node_id": "C_kwDOTNeRjdoAKDIzMjM5NTdhY2E5NGUxY2YzMjhmNmI5MjQ5Zjg3YTNhMGY2NmNlMDE",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/a99a74f75867172fe62f984d7528f5d5bd73dacb",
+    "sha": "a99a74f75867172fe62f984d7528f5d5bd73dacb",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/a99a74f75867172fe62f984d7528f5d5bd73dacb"
+   }
+  ],
+  "sha": "2323957aca94e1cf328f6b9249f87a3a0f66ce01",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2323957aca94e1cf328f6b9249f87a3a0f66ce01"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/efa2d72aa00dea3c94e670eaa6b3abc0d8715a95/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T09:02:14Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T09:02:14Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops/cong_cu.yaml: khai gói anthropic (tuỳ chọn) cho llm_route\n\ngate-cong-cu đỏ ở t16_moi_goi_ben_thu_ba_phai_duoc_khai_trong_ban_ke: gói bên thứ ba\n'anthropic' import ở .claude/dev/llm_route.py chưa có trong bản kê. Khai bat_buoc:false\n(nạp muộn; thiếu gói thì đường api lùi sang sub, test dùng client giả).\nCục bộ: cong_cu_test 60/61 (t16 đỏ) → 61/61 đạt.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "4d4fbee689b1e2b31bfd228c7b209a2382566c51",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/4d4fbee689b1e2b31bfd228c7b209a2382566c51"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/efa2d72aa00dea3c94e670eaa6b3abc0d8715a95",
+   "verification": {
+    "payload": "tree 4d4fbee689b1e2b31bfd228c7b209a2382566c51\nparent 2323957aca94e1cf328f6b9249f87a3a0f66ce01\nauthor Claude <noreply@anthropic.com> 1795510934 +0000\ncommitter Claude <noreply@anthropic.com> 1795510934 +0000\n\nops/cong_cu.yaml: khai gói anthropic (tuỳ chọn) cho llm_route\n\ngate-cong-cu đỏ ở t16_moi_goi_ben_thu_ba_phai_duoc_khai_trong_ban_ke: gói bên thứ ba\n'anthropic' import ở .claude/dev/llm_route.py chưa có trong bản kê. Khai bat_buoc:false\n(nạp muộn; thiếu gói thì đường api lùi sang sub, test dùng client giả).\nCục bộ: cong_cu_test 60/61 (t16 đỏ) → 61/61 đạt.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQCAJrvb/\nofPloi0LgnP6U9sTRiSzdc82XLKlytVN7rzw2pir45UupX4IRpmMqA9NqzHsDXbT+wqUJzDCRTaC\nlwA=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T09:02:17Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/efa2d72aa00dea3c94e670eaa6b3abc0d8715a95",
+  "node_id": "C_kwDOTNeRjdoAKGVmYTJkNzJhYTAwZGVhM2M5NGU2NzBlYWE2YjNhYmMwZDg3MTVhOTU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/2323957aca94e1cf328f6b9249f87a3a0f66ce01",
+    "sha": "2323957aca94e1cf328f6b9249f87a3a0f66ce01",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2323957aca94e1cf328f6b9249f87a3a0f66ce01"
+   }
+  ],
+  "sha": "efa2d72aa00dea3c94e670eaa6b3abc0d8715a95",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/efa2d72aa00dea3c94e670eaa6b3abc0d8715a95"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/257beee354cf4861c2d2978d195dfebaf81904d0/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T09:44:49Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T09:44:49Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "v1.36.71 r380: tl llm-order + tl llm-khai-niem — gọi Claude cho script, subscription ↔ API key\n\nChủ kho yêu cầu (#1503): lệnh tl dùng được trên Cowork, thứ tự đường mặc định sub,api\nvà đổi được bất cứ lúc nào.\n\n- Lõi dời từ .claude/dev/llm_route.py sang scripts/tl_core/llm_route.py (module THUẦN,\n  vào gói): thứ tự hiệu lực cờ > tệp ~/.tra_luat_llm.json (TL_LLM_ORDER_FILE) >\n  TL_LLM_ORDER > mặc định sub,api; tệp hỏng ⇒ rc 2 (fail-closed, không lùi im lặng);\n  ghi nguyên tử. Nguyên văn Điều lấy qua chính `tl extract` (tiến trình con).\n- Handler cmd_llm_order / cmd_llm_khai_niem ở ops_misc.py (khai _STUB_MAP, bẫy I11),\n  spec + meta ở command_registry.py, JSON qua _json_dumps (cổng deterministic),\n  hai lệnh vào _CREDS_LAZY_CMDS (không cần token webapp).\n- Selftest r380_llm_order_luu_doi_xoa, r380_llm_khai_niem_tu_tep_qua_sub; tên tĩnh cho\n  ruff theo tiền lệ l972a (delta F = 0 trên tl.py và tl_selftest.py).\n- Ratchet gói 186 → 187 (+ llm_route.py, runtime) kê khai ở r291/r357; llm_route_test.py\n  vào _RELEASE_EXCLUDE_NAMES_ANYWHERE. Ảnh chụp parser_surface + golden: chỉ thêm đúng\n  hai lệnh (đã đọc diff). Đoạn mô tả ở SKILL.md bỏ vì vượt ngưỡng cảnh báo 47 KiB —\n  con trỏ nằm ở KERNEL_APPENDIX §F + COMMANDS.md.\n- VERSION 1.36.71 (3 chỗ), CHANGELOG ★ r380.\n\nCổng: selftest 1788/1788 · workflow-audit/determinism-audit --strict rc=0 · golden rc=0 ·\ndoc-claims-check rc=0 · release-verify --strict 187/187 · llm_route_test 21/21 · 16/16 đột biến.\nChạy thật: `tl llm-khai-niem 134/2025/QH15 --dieu 3` qua sub, 8/8, 6.438 token.\nKHÔNG deploy Package.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "72c3c876f19cce43b19dc0043143bb33878b5f7a",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/72c3c876f19cce43b19dc0043143bb33878b5f7a"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/257beee354cf4861c2d2978d195dfebaf81904d0",
+   "verification": {
+    "payload": "tree 72c3c876f19cce43b19dc0043143bb33878b5f7a\nparent efa2d72aa00dea3c94e670eaa6b3abc0d8715a95\nauthor Claude <noreply@anthropic.com> 1795513489 +0000\ncommitter Claude <noreply@anthropic.com> 1795513489 +0000\n\nv1.36.71 r380: tl llm-order + tl llm-khai-niem — gọi Claude cho script, subscription ↔ API key\n\nChủ kho yêu cầu (#1503): lệnh tl dùng được trên Cowork, thứ tự đường mặc định sub,api\nvà đổi được bất cứ lúc nào.\n\n- Lõi dời từ .claude/dev/llm_route.py sang scripts/tl_core/llm_route.py (module THUẦN,\n  vào gói): thứ tự hiệu lực cờ > tệp ~/.tra_luat_llm.json (TL_LLM_ORDER_FILE) >\n  TL_LLM_ORDER > mặc định sub,api; tệp hỏng ⇒ rc 2 (fail-closed, không lùi im lặng);\n  ghi nguyên tử. Nguyên văn Điều lấy qua chính `tl extract` (tiến trình con).\n- Handler cmd_llm_order / cmd_llm_khai_niem ở ops_misc.py (khai _STUB_MAP, bẫy I11),\n  spec + meta ở command_registry.py, JSON qua _json_dumps (cổng deterministic),\n  hai lệnh vào _CREDS_LAZY_CMDS (không cần token webapp).\n- Selftest r380_llm_order_luu_doi_xoa, r380_llm_khai_niem_tu_tep_qua_sub; tên tĩnh cho\n  ruff theo tiền lệ l972a (delta F = 0 trên tl.py và tl_selftest.py).\n- Ratchet gói 186 → 187 (+ llm_route.py, runtime) kê khai ở r291/r357; llm_route_test.py\n  vào _RELEASE_EXCLUDE_NAMES_ANYWHERE. Ảnh chụp parser_surface + golden: chỉ thêm đúng\n  hai lệnh (đã đọc diff). Đoạn mô tả ở SKILL.md bỏ vì vượt ngưỡng cảnh báo 47 KiB —\n  con trỏ nằm ở KERNEL_APPENDIX §F + COMMANDS.md.\n- VERSION 1.36.71 (3 chỗ), CHANGELOG ★ r380.\n\nCổng: selftest 1788/1788 · workflow-audit/determinism-audit --strict rc=0 · golden rc=0 ·\ndoc-claims-check rc=0 · release-verify --strict 187/187 · llm_route_test 21/21 · 16/16 đột biến.\nChạy thật: `tl llm-khai-niem 134/2025/QH15 --dieu 3` qua sub, 8/8, 6.438 token.\nKHÔNG deploy Package.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQK+S/04E\nvSI5Nyxfd+tDZa+51Fg+3WuUY82KoXhC66h+wKAb0XUPPqJrJ2TsWh5cb6FdtiKnSqrm2dCWkBSV\nSQg=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T09:44:53Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/257beee354cf4861c2d2978d195dfebaf81904d0",
+  "node_id": "C_kwDOTNeRjdoAKDI1N2JlZWUzNTRjZjQ4NjFjMmQyOTc4ZDE5NWRmZWJhZjgxOTA0ZDA",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/efa2d72aa00dea3c94e670eaa6b3abc0d8715a95",
+    "sha": "efa2d72aa00dea3c94e670eaa6b3abc0d8715a95",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/efa2d72aa00dea3c94e670eaa6b3abc0d8715a95"
+   }
+  ],
+  "sha": "257beee354cf4861c2d2978d195dfebaf81904d0",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/257beee354cf4861c2d2978d195dfebaf81904d0"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/c3ba150b0b0843de98f420b92584098f438f3244/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T10:28:15Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T10:28:15Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: vá 12 finding cross-review Codex lượt 1 (PR #1503) + lưu hồ sơ review\n\nVerdict: ops/reviews/pr1503-review-1-codex/VERDICT.md (sha256 a71fbab1…, REQUEST_CHANGES,\n6 P1 · 5 P2 · 1 P3) trên 257beee; prompt neo sha256 097d34e3…; run.json của launcher\n(ma_thoat 0, 1010,7 s, model phục vụ đo được gpt-6.2-sol, effort xhigh).\n\n- F1 kiểm nguyên văn so TRỌN KHOẢN (tach_khoan: có/không số thứ tự, nối điểm a, b), đòi\n  stt == vị trí, khoản thiếu là lệch, nguồn không tách được ⇒ [0].\n- F2/F10 `claude -p`: subtype error_max_structured_output_retries/max_turns/max_budget ⇒\n  DỪNG; chỉ nhận khi rc 0 + subtype success + is_error False; mỗi tín hiệu một ca riêng.\n- F3 đường sub: CLAUDE_CODE_USE_* bật mà ngoài danh sách CHO PHÉP (CCR_V2, POWERSHELL_TOOL,\n  COWORK_PLUGINS, NATIVE_FILE_SEARCH — đo trong binary 2.1.331) ⇒ từ chối; ANTHROPIC_BASE_URL\n  chỉ host api.anthropic.com. Bản đầu chặn theo tiền tố đã chặn oan CCR_V2 — lộ ở lần chạy\n  thật, nay có ca + đột biến cho cả hai chiều.\n- F4 --out chỉ ghi khi đạt, ghi nguyên tử · F5 chuyển tiếp --config · F6 nguồn chạm trần\n  export ⇒ dừng trước model · F7 503/529/overloaded_error ⇒ chuyển đường (504 giữ dừng) ·\n  F8 doctor đòi Message có usage số nguyên, chịu JSON không phải object · F9 --thu-tu \"\" và\n  symlink đứt ⇒ fail-closed, --reset xoá cả symlink · F11 --tep lấy số Điều từ tiêu đề,\n  cấm ghép số hiệu · F12 tệp không UTF-8 ⇒ rc 2.\n\nCổng: selftest 1789/1789 (+ r380_llm_khai_niem_bien_dau_vao) · llm_route_test 31/31 ·\n34/34 đột biến · t162 1/1, 5/5 đột biến anthropic_api_* giết đúng lý do · workflow-audit/\ngolden/doc-claims rc=0 · release-verify --strict 187/187 · ruff F delta 0 (tl.py,\ntl_selftest.py, launcher.py, launcher_test.py). Chạy thật Điều 3 Luật 134/2025/QH15 qua\nđường mặc định sub: 8/8, đạt.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "06613ab496beaddaa820ec7e358113ed51035f5a",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/06613ab496beaddaa820ec7e358113ed51035f5a"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/c3ba150b0b0843de98f420b92584098f438f3244",
+   "verification": {
+    "payload": "tree 06613ab496beaddaa820ec7e358113ed51035f5a\nparent 257beee354cf4861c2d2978d195dfebaf81904d0\nauthor Claude <noreply@anthropic.com> 1795516095 +0000\ncommitter Claude <noreply@anthropic.com> 1795516095 +0000\n\nllm_route: vá 12 finding cross-review Codex lượt 1 (PR #1503) + lưu hồ sơ review\n\nVerdict: ops/reviews/pr1503-review-1-codex/VERDICT.md (sha256 a71fbab1…, REQUEST_CHANGES,\n6 P1 · 5 P2 · 1 P3) trên 257beee; prompt neo sha256 097d34e3…; run.json của launcher\n(ma_thoat 0, 1010,7 s, model phục vụ đo được gpt-6.2-sol, effort xhigh).\n\n- F1 kiểm nguyên văn so TRỌN KHOẢN (tach_khoan: có/không số thứ tự, nối điểm a, b), đòi\n  stt == vị trí, khoản thiếu là lệch, nguồn không tách được ⇒ [0].\n- F2/F10 `claude -p`: subtype error_max_structured_output_retries/max_turns/max_budget ⇒\n  DỪNG; chỉ nhận khi rc 0 + subtype success + is_error False; mỗi tín hiệu một ca riêng.\n- F3 đường sub: CLAUDE_CODE_USE_* bật mà ngoài danh sách CHO PHÉP (CCR_V2, POWERSHELL_TOOL,\n  COWORK_PLUGINS, NATIVE_FILE_SEARCH — đo trong binary 2.1.331) ⇒ từ chối; ANTHROPIC_BASE_URL\n  chỉ host api.anthropic.com. Bản đầu chặn theo tiền tố đã chặn oan CCR_V2 — lộ ở lần chạy\n  thật, nay có ca + đột biến cho cả hai chiều.\n- F4 --out chỉ ghi khi đạt, ghi nguyên tử · F5 chuyển tiếp --config · F6 nguồn chạm trần\n  export ⇒ dừng trước model · F7 503/529/overloaded_error ⇒ chuyển đường (504 giữ dừng) ·\n  F8 doctor đòi Message có usage số nguyên, chịu JSON không phải object · F9 --thu-tu \"\" và\n  symlink đứt ⇒ fail-closed, --reset xoá cả symlink · F11 --tep lấy số Điều từ tiêu đề,\n  cấm ghép số hiệu · F12 tệp không UTF-8 ⇒ rc 2.\n\nCổng: selftest 1789/1789 (+ r380_llm_khai_niem_bien_dau_vao) · llm_route_test 31/31 ·\n34/34 đột biến · t162 1/1, 5/5 đột biến anthropic_api_* giết đúng lý do · workflow-audit/\ngolden/doc-claims rc=0 · release-verify --strict 187/187 · ruff F delta 0 (tl.py,\ntl_selftest.py, launcher.py, launcher_test.py). Chạy thật Điều 3 Luật 134/2025/QH15 qua\nđường mặc định sub: 8/8, đạt.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQO2kelVj\n4AWEz2uc4dN02eHHVVH3tn3pyCczL+wWnMaZ6rWl2rKJnwI+YrdcZyYVC27zzDwADppgS6tmTbcM\nwwE=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T10:28:28Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/c3ba150b0b0843de98f420b92584098f438f3244",
+  "node_id": "C_kwDOTNeRjdoAKGMzYmExNTBiMGIwODQzZGU5OGY0MjBiOTI1ODQwOThmNDM4ZjMyNDQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/257beee354cf4861c2d2978d195dfebaf81904d0",
+    "sha": "257beee354cf4861c2d2978d195dfebaf81904d0",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/257beee354cf4861c2d2978d195dfebaf81904d0"
+   }
+  ],
+  "sha": "c3ba150b0b0843de98f420b92584098f438f3244",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/c3ba150b0b0843de98f420b92584098f438f3244"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ec0722ad128e3439899ba210ee567142f5552b34/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T10:28:15Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T10:28:15Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "Merge remote-tracking branch 'origin/master' into ccr-89c0d2e2-inanqb",
+   "tree": {
+    "sha": "22e588557bca2b5a88d1e178b35d6c3ab4c1e8ac",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/22e588557bca2b5a88d1e178b35d6c3ab4c1e8ac"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/ec0722ad128e3439899ba210ee567142f5552b34",
+   "verification": {
+    "payload": "tree 22e588557bca2b5a88d1e178b35d6c3ab4c1e8ac\nparent c3ba150b0b0843de98f420b92584098f438f3244\nparent 168d562b824db709ad88aa14f81d0ce3038cbfcb\nauthor Claude <noreply@anthropic.com> 1795516095 +0000\ncommitter Claude <noreply@anthropic.com> 1795516095 +0000\n\nMerge remote-tracking branch 'origin/master' into ccr-89c0d2e2-inanqb\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQBeHVffu\n72vwviPxDqKFb18IlL9Ws9OjqjUKc8CCMGinUFD2FQbDyM2y5cIBlGYQyR4cHg0Q+dFYusq1mz1i\n7wk=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T10:28:28Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/ec0722ad128e3439899ba210ee567142f5552b34",
+  "node_id": "C_kwDOTNeRjdoAKGVjMDcyMmFkMTI4ZTM0Mzk4OTliYTIxMGVlNTY3MTQyZjU1NTJiMzQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/c3ba150b0b0843de98f420b92584098f438f3244",
+    "sha": "c3ba150b0b0843de98f420b92584098f438f3244",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/c3ba150b0b0843de98f420b92584098f438f3244"
+   },
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/168d562b824db709ad88aa14f81d0ce3038cbfcb",
+    "sha": "168d562b824db709ad88aa14f81d0ce3038cbfcb",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/168d562b824db709ad88aa14f81d0ce3038cbfcb"
+   }
+  ],
+  "sha": "ec0722ad128e3439899ba210ee567142f5552b34",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ec0722ad128e3439899ba210ee567142f5552b34"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/b2933c808465bc35350edc9b94c8add5fc12c80f/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T10:31:03Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T10:31:03Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops/cong_cu.yaml: gỡ mục anthropic — làm `cong_cu.py kiem-tra` đỏ trên runner (rc=2)\n\nNguyên nhân gốc của mọi job đỏ trên efa2d72/257beee/ec0722a (gate, gate-cong-cu*,\ngate-packet-loop*, gate-registry): runner CI không cài SDK `anthropic`, probe của mục\ntrả rc=1 ⇒ `kiem-tra --json` trang_thai_tong=DO, rc=2 — kể cả với bat_buoc:false.\nTái hiện cục bộ bằng venv không có anthropic: rc=2 (DO) ⇒ sau khi gỡ: rc=0.\n\nMục ấy chỉ thêm (efa2d72) để thoả t16 khi lõi còn ở .claude/dev/. Lõi nay ở\nscripts/tl_core/, và t16 không quét import bên trong scripts/ — đo: `_goi_ngoai` thấy\n['jsonschema', 'yaml'], t16 ĐẠT. Bản kê nay trùng byte với master.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "5f7a8d4f95d97afc5a46ec59e9fbbc5b1ffa7cd8",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/5f7a8d4f95d97afc5a46ec59e9fbbc5b1ffa7cd8"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/b2933c808465bc35350edc9b94c8add5fc12c80f",
+   "verification": {
+    "payload": "tree 5f7a8d4f95d97afc5a46ec59e9fbbc5b1ffa7cd8\nparent ec0722ad128e3439899ba210ee567142f5552b34\nauthor Claude <noreply@anthropic.com> 1795516263 +0000\ncommitter Claude <noreply@anthropic.com> 1795516263 +0000\n\nops/cong_cu.yaml: gỡ mục anthropic — làm `cong_cu.py kiem-tra` đỏ trên runner (rc=2)\n\nNguyên nhân gốc của mọi job đỏ trên efa2d72/257beee/ec0722a (gate, gate-cong-cu*,\ngate-packet-loop*, gate-registry): runner CI không cài SDK `anthropic`, probe của mục\ntrả rc=1 ⇒ `kiem-tra --json` trang_thai_tong=DO, rc=2 — kể cả với bat_buoc:false.\nTái hiện cục bộ bằng venv không có anthropic: rc=2 (DO) ⇒ sau khi gỡ: rc=0.\n\nMục ấy chỉ thêm (efa2d72) để thoả t16 khi lõi còn ở .claude/dev/. Lõi nay ở\nscripts/tl_core/, và t16 không quét import bên trong scripts/ — đo: `_goi_ngoai` thấy\n['jsonschema', 'yaml'], t16 ĐẠT. Bản kê nay trùng byte với master.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQBEu8rbp\nWC4bPC4FHmghNOaqYXpIyIBT3Hu07zkXwmem4peZBVKDGQuF05ENKWnKCmaCb9ystU7x+Ss+0Nho\n8AM=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T10:31:06Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/b2933c808465bc35350edc9b94c8add5fc12c80f",
+  "node_id": "C_kwDOTNeRjdoAKGIyOTMzYzgwODQ2NWJjMzUzNTBlZGM5Yjk0YzhhZGQ1ZmMxMmM4MGY",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/ec0722ad128e3439899ba210ee567142f5552b34",
+    "sha": "ec0722ad128e3439899ba210ee567142f5552b34",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/ec0722ad128e3439899ba210ee567142f5552b34"
+   }
+  ],
+  "sha": "b2933c808465bc35350edc9b94c8add5fc12c80f",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/b2933c808465bc35350edc9b94c8add5fc12c80f"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/11db8149ab7340eed32d34c4cdf2ce9d3810d339/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T10:57:56Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T10:57:56Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: vá 8 finding cross-review Codex lượt 2 (PR #1503) + lưu hồ sơ review\n\nVerdict: ops/reviews/pr1503-review-2-codex/VERDICT.md (sha256 e9f9f8ce…, REQUEST_CHANGES,\n4 P1 · 4 P2) trên ec0722a; prompt neo sha256 0a9e4af9…; run.json (ma_thoat 0, 867,3 s,\nmodel phục vụ đo được gpt-6.2-sol, effort xhigh). Đối chiếu lượt 1: 5 ĐÃ VÁ THẬT, 5 VÁ MỘT\nPHẦN, 2 VÁ SINH LỖI MỚI (F1, F6) — tất cả phủ bởi N1–N8 dưới đây.\n\n- N1 tach_khoan FAIL-CLOSED: dòng không phải câu dẫn đứng trước khoản đầu ⇒ None; nguồn mất\n  số: dòng không \"là\" và không phải điểm ⇒ None; số khoản nguồn (1., 1.X, (1)) là stt kỳ\n  vọng; thuật ngữ không được chứa chữ \"là\" (tách tại \"là\" đầu tiên).\n- N2 duong_sub: kiểm kiểu envelope trước mọi phép tra; stop_reason refusal/max_tokens ⇒\n  DỪNG kể cả khi tự xưng success; lỗi SAU khi model đã chạy (có token) ⇒ DỪNG, chỉ lỗi\n  trước khi chạy mới chuyển đường; thành công 0 token ⇒ DỪNG.\n- N3 BOM: --tep đọc utf-8-sig; so_dieu_tu_tieu_de và tach_khoan gỡ U+FEFF.\n- N4 đường sub đo `claude auth status --json` với CÙNG env đã gỡ key: chỉ authMethod ∈\n  {claude.ai, oauth_token} + apiProvider firstParty + loggedIn (tập giá trị đọc từ binary\n  2.1.331: none, third_party, claude.ai, api_key_helper, oauth_token, api_key). Giới hạn đã\n  khai: không phân biệt hạn mức gói với extra usage.\n- N5 --out: thư mục ⇒ rc 2 trước khi gọi model; ghi nguyên tử giữ quyền tệp cũ (không dùng\n  `stat` — tl.py không có tên ấy, bẫy I11); lỗi I/O ⇒ rc 2; llm-order lỗi I/O ⇒ rc 2.\n- N6 CAP: chỉ chặn khi `tl extract` không tìm thấy Điều N+1 trong cùng bản export.\n- N7 mã HTTP quyết trước, `type` trong body chỉ dùng khi không có mã (504 + overloaded ⇒ dừng).\n- N8 doctor: đòi type message + model đúng + token nguyên không âm, in model trả về;\n  t162 thêm 3 mẫu riêng + 3 đột biến.\n\nCổng: selftest 1789/1789 · llm_route_test 40/40 · 47/47 đột biến · t162 1/1, 8/8 đột biến\nanthropic_api_* · workflow-audit/determinism/golden/doc-claims rc=0 · release-verify\n--strict 187/187 · ruff F delta 0 · kiem-tra không có anthropic rc=0. Chạy thật Điều 3 Luật\n134/2025/QH15 qua đường mặc định sub: 8/8, đạt, 5.009 token.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "c7c4d2b25444b39902f707bea0c2a3b737a970e1",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/c7c4d2b25444b39902f707bea0c2a3b737a970e1"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/11db8149ab7340eed32d34c4cdf2ce9d3810d339",
+   "verification": {
+    "payload": "tree c7c4d2b25444b39902f707bea0c2a3b737a970e1\nparent b2933c808465bc35350edc9b94c8add5fc12c80f\nauthor Claude <noreply@anthropic.com> 1795517876 +0000\ncommitter Claude <noreply@anthropic.com> 1795517876 +0000\n\nllm_route: vá 8 finding cross-review Codex lượt 2 (PR #1503) + lưu hồ sơ review\n\nVerdict: ops/reviews/pr1503-review-2-codex/VERDICT.md (sha256 e9f9f8ce…, REQUEST_CHANGES,\n4 P1 · 4 P2) trên ec0722a; prompt neo sha256 0a9e4af9…; run.json (ma_thoat 0, 867,3 s,\nmodel phục vụ đo được gpt-6.2-sol, effort xhigh). Đối chiếu lượt 1: 5 ĐÃ VÁ THẬT, 5 VÁ MỘT\nPHẦN, 2 VÁ SINH LỖI MỚI (F1, F6) — tất cả phủ bởi N1–N8 dưới đây.\n\n- N1 tach_khoan FAIL-CLOSED: dòng không phải câu dẫn đứng trước khoản đầu ⇒ None; nguồn mất\n  số: dòng không \"là\" và không phải điểm ⇒ None; số khoản nguồn (1., 1.X, (1)) là stt kỳ\n  vọng; thuật ngữ không được chứa chữ \"là\" (tách tại \"là\" đầu tiên).\n- N2 duong_sub: kiểm kiểu envelope trước mọi phép tra; stop_reason refusal/max_tokens ⇒\n  DỪNG kể cả khi tự xưng success; lỗi SAU khi model đã chạy (có token) ⇒ DỪNG, chỉ lỗi\n  trước khi chạy mới chuyển đường; thành công 0 token ⇒ DỪNG.\n- N3 BOM: --tep đọc utf-8-sig; so_dieu_tu_tieu_de và tach_khoan gỡ U+FEFF.\n- N4 đường sub đo `claude auth status --json` với CÙNG env đã gỡ key: chỉ authMethod ∈\n  {claude.ai, oauth_token} + apiProvider firstParty + loggedIn (tập giá trị đọc từ binary\n  2.1.331: none, third_party, claude.ai, api_key_helper, oauth_token, api_key). Giới hạn đã\n  khai: không phân biệt hạn mức gói với extra usage.\n- N5 --out: thư mục ⇒ rc 2 trước khi gọi model; ghi nguyên tử giữ quyền tệp cũ (không dùng\n  `stat` — tl.py không có tên ấy, bẫy I11); lỗi I/O ⇒ rc 2; llm-order lỗi I/O ⇒ rc 2.\n- N6 CAP: chỉ chặn khi `tl extract` không tìm thấy Điều N+1 trong cùng bản export.\n- N7 mã HTTP quyết trước, `type` trong body chỉ dùng khi không có mã (504 + overloaded ⇒ dừng).\n- N8 doctor: đòi type message + model đúng + token nguyên không âm, in model trả về;\n  t162 thêm 3 mẫu riêng + 3 đột biến.\n\nCổng: selftest 1789/1789 · llm_route_test 40/40 · 47/47 đột biến · t162 1/1, 8/8 đột biến\nanthropic_api_* · workflow-audit/determinism/golden/doc-claims rc=0 · release-verify\n--strict 187/187 · ruff F delta 0 · kiem-tra không có anthropic rc=0. Chạy thật Điều 3 Luật\n134/2025/QH15 qua đường mặc định sub: 8/8, đạt, 5.009 token.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQCnYw+JJ\n0BKec+HS6Ywz8b9s3iWUQrcwWmAcZ0/0k98CaFxRNYS55cAhjgsdlxRs2RzHaCnIo9BzmKqdogFC\nJQc=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T10:58:01Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/11db8149ab7340eed32d34c4cdf2ce9d3810d339",
+  "node_id": "C_kwDOTNeRjdoAKDExZGI4MTQ5YWI3MzQwZWVkMzJkMzRjNGNkZjJjZTlkMzgxMGQzMzk",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/b2933c808465bc35350edc9b94c8add5fc12c80f",
+    "sha": "b2933c808465bc35350edc9b94c8add5fc12c80f",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/b2933c808465bc35350edc9b94c8add5fc12c80f"
+   }
+  ],
+  "sha": "11db8149ab7340eed32d34c4cdf2ce9d3810d339",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/11db8149ab7340eed32d34c4cdf2ce9d3810d339"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/39dd04ed1918bc187e91b3902f17aec415d99506/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T10:57:58Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T10:57:58Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "Merge remote-tracking branch 'origin/master' into ccr-89c0d2e2-inanqb",
+   "tree": {
+    "sha": "a19b55ffe153a9ee9e5df60d9a86c2764122521d",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/a19b55ffe153a9ee9e5df60d9a86c2764122521d"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/39dd04ed1918bc187e91b3902f17aec415d99506",
+   "verification": {
+    "payload": "tree a19b55ffe153a9ee9e5df60d9a86c2764122521d\nparent 11db8149ab7340eed32d34c4cdf2ce9d3810d339\nparent 2cbb552876c2f0dd6e957db7c2408112c7527127\nauthor Claude <noreply@anthropic.com> 1795517878 +0000\ncommitter Claude <noreply@anthropic.com> 1795517878 +0000\n\nMerge remote-tracking branch 'origin/master' into ccr-89c0d2e2-inanqb\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQICqAcpo\nGMYcKc4Q1kbFwyiK/cY3SqfPpuGqP/K0UajgOB14oDIqXgi+YVW/eGpl7OwR6maXMLLk2uCb3ae2\nBQI=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T10:58:01Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/39dd04ed1918bc187e91b3902f17aec415d99506",
+  "node_id": "C_kwDOTNeRjdoAKDM5ZGQwNGVkMTkxOGJjMTg3ZTkxYjM5MDJmMTdhZWM0MTVkOTk1MDY",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/11db8149ab7340eed32d34c4cdf2ce9d3810d339",
+    "sha": "11db8149ab7340eed32d34c4cdf2ce9d3810d339",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/11db8149ab7340eed32d34c4cdf2ce9d3810d339"
+   },
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/2cbb552876c2f0dd6e957db7c2408112c7527127",
+    "sha": "2cbb552876c2f0dd6e957db7c2408112c7527127",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2cbb552876c2f0dd6e957db7c2408112c7527127"
+   }
+  ],
+  "sha": "39dd04ed1918bc187e91b3902f17aec415d99506",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/39dd04ed1918bc187e91b3902f17aec415d99506"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f351916ce8b29292d89a32ef38551b60de32f001/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T11:00:50Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T11:00:50Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "command_registry_test: số lệnh ghim 199 → 201 (+llm-order, +llm-khai-niem)\n\n`gate` đỏ trên b2933c8: test_compute_parser_coverage_schema_and_metrics (203 != 201) và\ntest_compute_parser_coverage_unregistered_only_filter (201 != 199) — ratchet số lệnh ghi cứng,\nđổi đúng +2 do hai lệnh r380. Cục bộ: FAILED (failures=2) → OK (10 tests). Tệp không vào gói\n(_RELEASE_EXCLUDE_NAMES_ANYWHERE) nên manifest không đổi; ai-dang-giu: NGƯỜI_GIỮ 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "a5f30697bcca8a9e65a53276f349b2e20efec169",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/a5f30697bcca8a9e65a53276f349b2e20efec169"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/f351916ce8b29292d89a32ef38551b60de32f001",
+   "verification": {
+    "payload": "tree a5f30697bcca8a9e65a53276f349b2e20efec169\nparent 39dd04ed1918bc187e91b3902f17aec415d99506\nauthor Claude <noreply@anthropic.com> 1795518050 +0000\ncommitter Claude <noreply@anthropic.com> 1795518050 +0000\n\ncommand_registry_test: số lệnh ghim 199 → 201 (+llm-order, +llm-khai-niem)\n\n`gate` đỏ trên b2933c8: test_compute_parser_coverage_schema_and_metrics (203 != 201) và\ntest_compute_parser_coverage_unregistered_only_filter (201 != 199) — ratchet số lệnh ghi cứng,\nđổi đúng +2 do hai lệnh r380. Cục bộ: FAILED (failures=2) → OK (10 tests). Tệp không vào gói\n(_RELEASE_EXCLUDE_NAMES_ANYWHERE) nên manifest không đổi; ai-dang-giu: NGƯỜI_GIỮ 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQPuLWje/\nzJuIrYs8fu66VZjLClzyRZOlvTFnMk0WngZdASqxmGsRnq0MRy7JWyrqU5ZWvPu5t8H0Dnjk3dUe\nEgI=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T11:00:54Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/f351916ce8b29292d89a32ef38551b60de32f001",
+  "node_id": "C_kwDOTNeRjdoAKGYzNTE5MTZjZThiMjkyOTJkODlhMzJlZjM4NTUxYjYwZGUzMmYwMDE",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/39dd04ed1918bc187e91b3902f17aec415d99506",
+    "sha": "39dd04ed1918bc187e91b3902f17aec415d99506",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/39dd04ed1918bc187e91b3902f17aec415d99506"
+   }
+  ],
+  "sha": "f351916ce8b29292d89a32ef38551b60de32f001",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f351916ce8b29292d89a32ef38551b60de32f001"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/254d4e2d3c789c32a29d6769170e2c0615a32502/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T11:36:25Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T11:36:25Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "pretooluse_guard: xếp llm-order + llm-khai-niem vào lớp GHI (gate-registry đỏ ở t15/t33)\n\ngate-registry đỏ trên f351916: pretooluse_guard_test t15_cong_kiem_bang_khop_nguon_that và\nt33_cong_hoi_RUNTIME_chu_khong_parse_van_ban — `--kiem-bang rc=4`: _TL_LENH_GHI thiếu\nllm-order (read_only=False), _TL_LENH_DOC thiếu llm-khai-niem (read_only=True).\n\nllm-khai-niem chuyển read_only=False CÓ CHỦ ĐÍCH thay vì thêm vào danh sách ĐỌC: lệnh tiêu\ncredit/hạn mức Claude và ghi --out/--nhat-ky, mà --nhat-ky nằm NGOÀI họ cờ sinh tệp hook canh\n— xếp ĐỌC thì subagent read-only chạy được nó. Sai về phía an toàn. Cả hai lệnh vào\n_TL_LENH_GHI. Golden: đúng hai dòng (read_only true→false, write_commands 107→108).\n\nCục bộ: --kiem-bang rc=4 → rc=0 · golden/workflow-audit/determinism/doc-claims rc=0 ·\nrelease-verify --strict 187/187 · command_registry_test OK. ai-dang-giu trên\n.claude/hooks/pretooluse_guard.py: NGƯỜI_GIỮ 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "17b70f78c88109c10931bc6641d2339b96761f06",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/17b70f78c88109c10931bc6641d2339b96761f06"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/254d4e2d3c789c32a29d6769170e2c0615a32502",
+   "verification": {
+    "payload": "tree 17b70f78c88109c10931bc6641d2339b96761f06\nparent f351916ce8b29292d89a32ef38551b60de32f001\nauthor Claude <noreply@anthropic.com> 1795520185 +0000\ncommitter Claude <noreply@anthropic.com> 1795520185 +0000\n\npretooluse_guard: xếp llm-order + llm-khai-niem vào lớp GHI (gate-registry đỏ ở t15/t33)\n\ngate-registry đỏ trên f351916: pretooluse_guard_test t15_cong_kiem_bang_khop_nguon_that và\nt33_cong_hoi_RUNTIME_chu_khong_parse_van_ban — `--kiem-bang rc=4`: _TL_LENH_GHI thiếu\nllm-order (read_only=False), _TL_LENH_DOC thiếu llm-khai-niem (read_only=True).\n\nllm-khai-niem chuyển read_only=False CÓ CHỦ ĐÍCH thay vì thêm vào danh sách ĐỌC: lệnh tiêu\ncredit/hạn mức Claude và ghi --out/--nhat-ky, mà --nhat-ky nằm NGOÀI họ cờ sinh tệp hook canh\n— xếp ĐỌC thì subagent read-only chạy được nó. Sai về phía an toàn. Cả hai lệnh vào\n_TL_LENH_GHI. Golden: đúng hai dòng (read_only true→false, write_commands 107→108).\n\nCục bộ: --kiem-bang rc=4 → rc=0 · golden/workflow-audit/determinism/doc-claims rc=0 ·\nrelease-verify --strict 187/187 · command_registry_test OK. ai-dang-giu trên\n.claude/hooks/pretooluse_guard.py: NGƯỜI_GIỮ 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQIcWZQuY\nnhLMYxEwBoZPxKTYIz7Or7wKjYagiKOBcF4fNrC6MuH4hXo80D9dl6lOk/ByHupOw4fyPGQXLG/A\nywE=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T11:36:29Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/254d4e2d3c789c32a29d6769170e2c0615a32502",
+  "node_id": "C_kwDOTNeRjdoAKDI1NGQ0ZTJkM2M3ODljMzJhMjlkNjc2OTE3MGUyYzA2MTVhMzI1MDI",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/f351916ce8b29292d89a32ef38551b60de32f001",
+    "sha": "f351916ce8b29292d89a32ef38551b60de32f001",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f351916ce8b29292d89a32ef38551b60de32f001"
+   }
+  ],
+  "sha": "254d4e2d3c789c32a29d6769170e2c0615a32502",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/254d4e2d3c789c32a29d6769170e2c0615a32502"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/7c826aef37b9ffe4d6a0477f4b7f77f5222d6c6d/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T12:09:07Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T12:09:07Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: vá 7 finding cross-review Codex lượt 3 (PR #1503) + lưu hồ sơ review\n\nVerdict: ops/reviews/pr1503-review-3-codex/VERDICT.md (sha256 f9ae2eea…, REQUEST_CHANGES,\n6 P1 · 1 P2) trên 254d4e2; lượt vượt trần 2, chủ kho đồng ý nâng trần (PR #1503 comment\n7130386289); prompt neo sha256 f4dc2a3a…; run.json (ma_thoat 0, 821,9 s, gpt-6.2-sol, xhigh).\nĐối chiếu lượt 2: N3, N5, N7 ĐÃ VÁ THẬT; N2, N8 một phần; N1, N4, N6 sinh lỗi mới — phủ bởi:\n\n- M1 tách thuật ngữ tại chữ \"là\" đầu tiên NGOÀI ngoặc, so theo VỊ TRÍ ranh giới (không so chuỗi\n  ghép); nguồn có số mà dòng không số mở bằng \"… là …\" ⇒ mơ hồ; khoản không có từ nối \"là\" (vd\n  \"bao gồm\") ⇒ lệch (chặn, không nhận sai). Chỉ dẫn cho model đổi theo cùng quy tắc.\n- M2 dấu \"model đã chạy\": mọi trường token modelUsage (kể cả cache) + khối `usage` tổng; số đo\n  sai kiểu ⇒ DỪNG (không biết ⇒ không tiêu tiền lần hai); `_usage_sub` không bù 0 cho trường thiếu.\n- M3 `auth status` chạy với `--setting-sources \"\"` như lời gọi model; kiểm kiểu authMethod.\n- M4 chạm CAP ⇒ chặn mọi Điều, bỏ lần đọc thứ hai (bằng chứng từ snapshot khác).\n- M5 --out trùng --nhat-ky (đường dẫn hoặc samefile) ⇒ rc 2 trước khi gọi model.\n- M6 doctor đòi khung Message (id msg_…, role, content) và input_tokens > 0.\n- M7 pretooluse_guard_test t33: số writer runtime 106 → 108.\n\nCổng: selftest 1789/1789 · llm_route_test 46/46 · 55/55 đột biến · t162 1/1, 10/10 đột biến\nanthropic_api_* · --kiem-bang rc=0 \"= 108\" · release-verify --strict 187/187 · doc-claims --strict,\ngolden, determinism, workflow-audit rc=0 · command_registry_test OK · ci_dang_ky ĐẠT · ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "93d5f1a92c32f21fc4d875a18e5c0a2559315b49",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/93d5f1a92c32f21fc4d875a18e5c0a2559315b49"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/7c826aef37b9ffe4d6a0477f4b7f77f5222d6c6d",
+   "verification": {
+    "payload": "tree 93d5f1a92c32f21fc4d875a18e5c0a2559315b49\nparent 254d4e2d3c789c32a29d6769170e2c0615a32502\nauthor Claude <noreply@anthropic.com> 1795522147 +0000\ncommitter Claude <noreply@anthropic.com> 1795522147 +0000\n\nllm_route: vá 7 finding cross-review Codex lượt 3 (PR #1503) + lưu hồ sơ review\n\nVerdict: ops/reviews/pr1503-review-3-codex/VERDICT.md (sha256 f9ae2eea…, REQUEST_CHANGES,\n6 P1 · 1 P2) trên 254d4e2; lượt vượt trần 2, chủ kho đồng ý nâng trần (PR #1503 comment\n7130386289); prompt neo sha256 f4dc2a3a…; run.json (ma_thoat 0, 821,9 s, gpt-6.2-sol, xhigh).\nĐối chiếu lượt 2: N3, N5, N7 ĐÃ VÁ THẬT; N2, N8 một phần; N1, N4, N6 sinh lỗi mới — phủ bởi:\n\n- M1 tách thuật ngữ tại chữ \"là\" đầu tiên NGOÀI ngoặc, so theo VỊ TRÍ ranh giới (không so chuỗi\n  ghép); nguồn có số mà dòng không số mở bằng \"… là …\" ⇒ mơ hồ; khoản không có từ nối \"là\" (vd\n  \"bao gồm\") ⇒ lệch (chặn, không nhận sai). Chỉ dẫn cho model đổi theo cùng quy tắc.\n- M2 dấu \"model đã chạy\": mọi trường token modelUsage (kể cả cache) + khối `usage` tổng; số đo\n  sai kiểu ⇒ DỪNG (không biết ⇒ không tiêu tiền lần hai); `_usage_sub` không bù 0 cho trường thiếu.\n- M3 `auth status` chạy với `--setting-sources \"\"` như lời gọi model; kiểm kiểu authMethod.\n- M4 chạm CAP ⇒ chặn mọi Điều, bỏ lần đọc thứ hai (bằng chứng từ snapshot khác).\n- M5 --out trùng --nhat-ky (đường dẫn hoặc samefile) ⇒ rc 2 trước khi gọi model.\n- M6 doctor đòi khung Message (id msg_…, role, content) và input_tokens > 0.\n- M7 pretooluse_guard_test t33: số writer runtime 106 → 108.\n\nCổng: selftest 1789/1789 · llm_route_test 46/46 · 55/55 đột biến · t162 1/1, 10/10 đột biến\nanthropic_api_* · --kiem-bang rc=0 \"= 108\" · release-verify --strict 187/187 · doc-claims --strict,\ngolden, determinism, workflow-audit rc=0 · command_registry_test OK · ci_dang_ky ĐẠT · ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQJOE/7+F\nIJOxgzrlarHGiTH6hhH7M5sEh2HOVAdioqQXFKs4fDMHwCRV1S4AyuyQ14MP9QCoZNpgZ2eqYDLh\npgg=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T12:09:11Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/7c826aef37b9ffe4d6a0477f4b7f77f5222d6c6d",
+  "node_id": "C_kwDOTNeRjdoAKDdjODI2YWVmMzdiOWZmZTRkNmEwNDc3ZjRiN2Y3N2Y1MjIyZDZjNmQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/254d4e2d3c789c32a29d6769170e2c0615a32502",
+    "sha": "254d4e2d3c789c32a29d6769170e2c0615a32502",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/254d4e2d3c789c32a29d6769170e2c0615a32502"
+   }
+  ],
+  "sha": "7c826aef37b9ffe4d6a0477f4b7f77f5222d6c6d",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/7c826aef37b9ffe4d6a0477f4b7f77f5222d6c6d"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/82e46a319580c69b341270fdc75c4b709f960189/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T12:09:07Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T12:09:07Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "Merge remote-tracking branch 'origin/master' into ccr-89c0d2e2-inanqb",
+   "tree": {
+    "sha": "9cc78f708aba6c4837d87fefc17fb91a359196e6",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/9cc78f708aba6c4837d87fefc17fb91a359196e6"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/82e46a319580c69b341270fdc75c4b709f960189",
+   "verification": {
+    "payload": "tree 9cc78f708aba6c4837d87fefc17fb91a359196e6\nparent 7c826aef37b9ffe4d6a0477f4b7f77f5222d6c6d\nparent 5259239d763c9ffc1677f033bd9a9cf23ede9299\nauthor Claude <noreply@anthropic.com> 1795522147 +0000\ncommitter Claude <noreply@anthropic.com> 1795522147 +0000\n\nMerge remote-tracking branch 'origin/master' into ccr-89c0d2e2-inanqb\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQH6XMhWs\nlTBdhoBpgY+Pt0JTmLmEEJ0waNarfvckz0Q2MnYhp3GHf1XTSqKwmhOgLTkT2RSOCantzdNbIPuO\nFgw=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T12:09:11Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/82e46a319580c69b341270fdc75c4b709f960189",
+  "node_id": "C_kwDOTNeRjdoAKDgyZTQ2YTMxOTU4MGM2OWIzNDEyNzBmZGM3NWM0YjcwOWY5NjAxODk",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/7c826aef37b9ffe4d6a0477f4b7f77f5222d6c6d",
+    "sha": "7c826aef37b9ffe4d6a0477f4b7f77f5222d6c6d",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/7c826aef37b9ffe4d6a0477f4b7f77f5222d6c6d"
+   },
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/5259239d763c9ffc1677f033bd9a9cf23ede9299",
+    "sha": "5259239d763c9ffc1677f033bd9a9cf23ede9299",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/5259239d763c9ffc1677f033bd9a9cf23ede9299"
+   }
+  ],
+  "sha": "82e46a319580c69b341270fdc75c4b709f960189",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/82e46a319580c69b341270fdc75c4b709f960189"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/9b4e0aa6ad48d361c91a76e18e12dd7c87ac9458/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T13:10:53Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T13:10:53Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: vá 5 finding cross-review Codex lượt 4 (PR #1503) + lưu hồ sơ review\n\n- Q1 (P1): từ nối \"là\" cấp khoản phải ngoài ngoặc và ngoài cụm trích dẫn, ở phần đầu\n  khoản (trước dòng điểm, không sau dấu \":\"); hai vế khác rỗng.\n- Q2 (P1): chỉ chuyển sang api khi envelope tự khai lỗi (is_error=True) kèm số đo đầy đủ\n  bằng 0; null/thiếu usage/chi phí dương/envelope thành công hỏng ⇒ dừng.\n- Q3 (P2): dòng mở bằng \"là\" hoặc còn trong ngoặc là tiếp dòng, không phải khoản mất số.\n- Q4 (P2): doctor đòi content khác rỗng gồm khối đúng kiểu, token đầu ra dương; mỗi\n  trường khung một mẫu hỏng và một đột biến riêng trong t162.\n- Q5 (P2): --nhat-ky là thư mục ⇒ rc 2 trước model; lỗi I/O nhật ký muộn ⇒ rc 2.\n\nĐo: selftest 1789/1789; llm_route_test 48/48 ca, 66/66 đột biến; t162 15/15 đột biến\nanthropic_api_* giết đúng lý do; audit đều rc 0; release-verify 187/187; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "82f89ff0099bfd367d8870342731a17bcf51e9f0",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/82f89ff0099bfd367d8870342731a17bcf51e9f0"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/9b4e0aa6ad48d361c91a76e18e12dd7c87ac9458",
+   "verification": {
+    "payload": "tree 82f89ff0099bfd367d8870342731a17bcf51e9f0\nparent 82e46a319580c69b341270fdc75c4b709f960189\nauthor Claude <noreply@anthropic.com> 1795525853 +0000\ncommitter Claude <noreply@anthropic.com> 1795525853 +0000\n\nllm_route: vá 5 finding cross-review Codex lượt 4 (PR #1503) + lưu hồ sơ review\n\n- Q1 (P1): từ nối \"là\" cấp khoản phải ngoài ngoặc và ngoài cụm trích dẫn, ở phần đầu\n  khoản (trước dòng điểm, không sau dấu \":\"); hai vế khác rỗng.\n- Q2 (P1): chỉ chuyển sang api khi envelope tự khai lỗi (is_error=True) kèm số đo đầy đủ\n  bằng 0; null/thiếu usage/chi phí dương/envelope thành công hỏng ⇒ dừng.\n- Q3 (P2): dòng mở bằng \"là\" hoặc còn trong ngoặc là tiếp dòng, không phải khoản mất số.\n- Q4 (P2): doctor đòi content khác rỗng gồm khối đúng kiểu, token đầu ra dương; mỗi\n  trường khung một mẫu hỏng và một đột biến riêng trong t162.\n- Q5 (P2): --nhat-ky là thư mục ⇒ rc 2 trước model; lỗi I/O nhật ký muộn ⇒ rc 2.\n\nĐo: selftest 1789/1789; llm_route_test 48/48 ca, 66/66 đột biến; t162 15/15 đột biến\nanthropic_api_* giết đúng lý do; audit đều rc 0; release-verify 187/187; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQDOOw3GF\nuIlimVhu9CluCqQM1owqXWHBXgFATy0qhBMma3s2GW0et38OdkfAILM7pih36hbgeDa3oqEEvxUb\nnQI=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T13:10:58Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/9b4e0aa6ad48d361c91a76e18e12dd7c87ac9458",
+  "node_id": "C_kwDOTNeRjdoAKDliNGUwYWE2YWQ0OGQzNjFjOTFhNzZlMThlMTJkZDdjODdhYzk0NTg",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/82e46a319580c69b341270fdc75c4b709f960189",
+    "sha": "82e46a319580c69b341270fdc75c4b709f960189",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/82e46a319580c69b341270fdc75c4b709f960189"
+   }
+  ],
+  "sha": "9b4e0aa6ad48d361c91a76e18e12dd7c87ac9458",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/9b4e0aa6ad48d361c91a76e18e12dd7c87ac9458"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/6f843b56573d724f51222c71ca775dbe6b1c0fa5/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T13:23:10Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T13:23:10Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops(reviews): lưu hồ sơ cross-review Codex lượt 5 PR #1503 (REQUEST_CHANGES, chạm trần 5)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "69976bc94323127898ffad47a95d2c66ceb82e26",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/69976bc94323127898ffad47a95d2c66ceb82e26"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/6f843b56573d724f51222c71ca775dbe6b1c0fa5",
+   "verification": {
+    "payload": "tree 69976bc94323127898ffad47a95d2c66ceb82e26\nparent 9b4e0aa6ad48d361c91a76e18e12dd7c87ac9458\nauthor Claude <noreply@anthropic.com> 1795526590 +0000\ncommitter Claude <noreply@anthropic.com> 1795526590 +0000\n\nops(reviews): lưu hồ sơ cross-review Codex lượt 5 PR #1503 (REQUEST_CHANGES, chạm trần 5)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQLM1IjTh\nPdMufJO4acRC4MOeX8tKKgqKnYxjOvtQ//2mNvEPnT+vp4NUNTAKRmwipM3GEKapKAHYvZ7lH9yz\ncw4=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T13:23:13Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/6f843b56573d724f51222c71ca775dbe6b1c0fa5",
+  "node_id": "C_kwDOTNeRjdoAKDZmODQzYjU2NTczZDcyNGY1MTIyMmM3MWNhNzc1ZGJlNmIxYzBmYTU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/9b4e0aa6ad48d361c91a76e18e12dd7c87ac9458",
+    "sha": "9b4e0aa6ad48d361c91a76e18e12dd7c87ac9458",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/9b4e0aa6ad48d361c91a76e18e12dd7c87ac9458"
+   }
+  ],
+  "sha": "6f843b56573d724f51222c71ca775dbe6b1c0fa5",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/6f843b56573d724f51222c71ca775dbe6b1c0fa5"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/9af35ba16c9c096d6a42330d92c8ae8c2c6a5b1c/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T13:51:32Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T13:51:32Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: đổi thiết kế sau Review Rescue Checkpoint lượt 5 (PR #1503)\n\nChủ kho chọn đổi thiết kế vì hai lớp P1 tái phát cả năm lượt cross-review.\n\n- R2 (phan-loai-sub): chuyển sub→api CHỈ khi lỗi trước lúc claude -p khởi chạy\n  (thiếu CLI, định tuyến, auth status, spawn hỏng). Đã khởi chạy thì mọi lỗi ⇒ dừng,\n  gợi ý chạy lại với --thu-tu api. Bỏ _dau_model_da_chay.\n- R1/R3 (ranh-gioi-khoan): ranh giới theo cấu trúc dòng. Nguồn có số: số liên tục từ\n  1, dòng không số phải là điểm hoặc tiếp dòng có bằng chứng. Nguồn mất số: mỗi dòng\n  một khoản. Bộ quét có trạng thái ngoặc/trích dẫn thay cho đếm/regex.\n- R4: doctor chỉ nhận khối text có text là chuỗi.\n- R5: --nhat-ky tạo thư mục cha như --out; chỉ chặn khi đích là thư mục hoặc cha bị\n  một tệp chắn.\n\nĐo: selftest 1789/1789; llm_route_test 47/47 ca, 64/64 đột biến; t162 15/15 đột\nbiến anthropic_api_*; Điều 3 Luật 134/2025/QH15 thật 8/8 không lệch; audit đều rc 0;\nrelease-verify 187/187; parser_surface chỉ đổi băm llm-khai-niem; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "1473c8984869418840e6ad10693ad176f7e7e989",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/1473c8984869418840e6ad10693ad176f7e7e989"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/9af35ba16c9c096d6a42330d92c8ae8c2c6a5b1c",
+   "verification": {
+    "payload": "tree 1473c8984869418840e6ad10693ad176f7e7e989\nparent 6f843b56573d724f51222c71ca775dbe6b1c0fa5\nauthor Claude <noreply@anthropic.com> 1795528292 +0000\ncommitter Claude <noreply@anthropic.com> 1795528292 +0000\n\nllm_route: đổi thiết kế sau Review Rescue Checkpoint lượt 5 (PR #1503)\n\nChủ kho chọn đổi thiết kế vì hai lớp P1 tái phát cả năm lượt cross-review.\n\n- R2 (phan-loai-sub): chuyển sub→api CHỈ khi lỗi trước lúc claude -p khởi chạy\n  (thiếu CLI, định tuyến, auth status, spawn hỏng). Đã khởi chạy thì mọi lỗi ⇒ dừng,\n  gợi ý chạy lại với --thu-tu api. Bỏ _dau_model_da_chay.\n- R1/R3 (ranh-gioi-khoan): ranh giới theo cấu trúc dòng. Nguồn có số: số liên tục từ\n  1, dòng không số phải là điểm hoặc tiếp dòng có bằng chứng. Nguồn mất số: mỗi dòng\n  một khoản. Bộ quét có trạng thái ngoặc/trích dẫn thay cho đếm/regex.\n- R4: doctor chỉ nhận khối text có text là chuỗi.\n- R5: --nhat-ky tạo thư mục cha như --out; chỉ chặn khi đích là thư mục hoặc cha bị\n  một tệp chắn.\n\nĐo: selftest 1789/1789; llm_route_test 47/47 ca, 64/64 đột biến; t162 15/15 đột\nbiến anthropic_api_*; Điều 3 Luật 134/2025/QH15 thật 8/8 không lệch; audit đều rc 0;\nrelease-verify 187/187; parser_surface chỉ đổi băm llm-khai-niem; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQORy4gLv\nl3av7DeTK42ZynBBNmH+R7vZYqHlcJ5OVQ0m2mhrKSd5wRSRC7rHoUFOuRVYWSo1at+0f4i97Ysw\nDgk=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T13:51:37Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/9af35ba16c9c096d6a42330d92c8ae8c2c6a5b1c",
+  "node_id": "C_kwDOTNeRjdoAKDlhZjM1YmExNmM5YzA5NmQ2YTQyMzMwZDkyYzhhZThjMmM2YTViMWM",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/6f843b56573d724f51222c71ca775dbe6b1c0fa5",
+    "sha": "6f843b56573d724f51222c71ca775dbe6b1c0fa5",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/6f843b56573d724f51222c71ca775dbe6b1c0fa5"
+   }
+  ],
+  "sha": "9af35ba16c9c096d6a42330d92c8ae8c2c6a5b1c",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/9af35ba16c9c096d6a42330d92c8ae8c2c6a5b1c"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2595a198b20d636cc171b099deb9ed22c2c98fcd/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T14:02:35Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T14:02:35Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops(reviews): lưu hồ sơ cross-review Codex lượt 6 PR #1503 (REQUEST_CHANGES, chạm trần 6)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "93cad7b24bc3961de1a5a75f927a3ae9711fda5a",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/93cad7b24bc3961de1a5a75f927a3ae9711fda5a"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/2595a198b20d636cc171b099deb9ed22c2c98fcd",
+   "verification": {
+    "payload": "tree 93cad7b24bc3961de1a5a75f927a3ae9711fda5a\nparent 9af35ba16c9c096d6a42330d92c8ae8c2c6a5b1c\nauthor Claude <noreply@anthropic.com> 1795528955 +0000\ncommitter Claude <noreply@anthropic.com> 1795528955 +0000\n\nops(reviews): lưu hồ sơ cross-review Codex lượt 6 PR #1503 (REQUEST_CHANGES, chạm trần 6)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQOv/dySL\ntaOAfWx8L+Mdm1R74StylG6jsm8re29KMzOykat7h+Def0Fl8vT4XocVS6t5pJM2dytTCXcx9Rzo\nlQA=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T14:02:39Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/2595a198b20d636cc171b099deb9ed22c2c98fcd",
+  "node_id": "C_kwDOTNeRjdoAKDI1OTVhMTk4YjIwZDYzNmNjMTcxYjA5OWRlYjllZDIyYzJjOThmY2Q",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/9af35ba16c9c096d6a42330d92c8ae8c2c6a5b1c",
+    "sha": "9af35ba16c9c096d6a42330d92c8ae8c2c6a5b1c",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/9af35ba16c9c096d6a42330d92c8ae8c2c6a5b1c"
+   }
+  ],
+  "sha": "2595a198b20d636cc171b099deb9ed22c2c98fcd",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2595a198b20d636cc171b099deb9ed22c2c98fcd"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/b5dc962aa77d9d56acacafda406f9aa1ab202c8d/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T14:25:19Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T14:25:19Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: vá 3 finding cross-review Codex lượt 6 (PR #1503)\n\n- S1 (P1): mốc khởi chạy là lúc Popen trả tiến trình (_chay_co_moc). Lỗi spawn ném\n  KhongKhoiChay ⇒ chuyển đường; mọi OSError sau mốc ⇒ dừng. Thư mục tạm tạo trước\n  mốc, dọn bằng ignore_errors nên lỗi dọn dẹp không quyết định đường.\n- S2 (P1): ngoặc tròn nằm trong trích dẫn là nội dung; nguồn mất số không có tiếp\n  dòng; tiêu đề Điều đòi dấu \".\" hoặc \":\" sau số (dùng chung cho metadata và phân đoạn).\n- S3 (P2): --out và --nhat-ky có quan hệ cha–con ⇒ rc 2 trước model.\n\nĐo: selftest 1789/1789; llm_route_test 47/47 ca, 71/71 đột biến; Điều 3 Luật\n134/2025/QH15 thật 8/8; audit đều rc 0; release-verify 187/187; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "8f8c1f38f95e164d918ef9c141e29444f9a00951",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/8f8c1f38f95e164d918ef9c141e29444f9a00951"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/b5dc962aa77d9d56acacafda406f9aa1ab202c8d",
+   "verification": {
+    "payload": "tree 8f8c1f38f95e164d918ef9c141e29444f9a00951\nparent 2595a198b20d636cc171b099deb9ed22c2c98fcd\nauthor Claude <noreply@anthropic.com> 1795530319 +0000\ncommitter Claude <noreply@anthropic.com> 1795530319 +0000\n\nllm_route: vá 3 finding cross-review Codex lượt 6 (PR #1503)\n\n- S1 (P1): mốc khởi chạy là lúc Popen trả tiến trình (_chay_co_moc). Lỗi spawn ném\n  KhongKhoiChay ⇒ chuyển đường; mọi OSError sau mốc ⇒ dừng. Thư mục tạm tạo trước\n  mốc, dọn bằng ignore_errors nên lỗi dọn dẹp không quyết định đường.\n- S2 (P1): ngoặc tròn nằm trong trích dẫn là nội dung; nguồn mất số không có tiếp\n  dòng; tiêu đề Điều đòi dấu \".\" hoặc \":\" sau số (dùng chung cho metadata và phân đoạn).\n- S3 (P2): --out và --nhat-ky có quan hệ cha–con ⇒ rc 2 trước model.\n\nĐo: selftest 1789/1789; llm_route_test 47/47 ca, 71/71 đột biến; Điều 3 Luật\n134/2025/QH15 thật 8/8; audit đều rc 0; release-verify 187/187; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQM4nBHHN\ncpyY6pXT7PHY6QjfdDefEeaJQTEjpNFifx9I99+7ifX4z674V+PeV2q1D0YodQih83RHQH5Kqe+6\nNgM=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T14:25:24Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/b5dc962aa77d9d56acacafda406f9aa1ab202c8d",
+  "node_id": "C_kwDOTNeRjdoAKGI1ZGM5NjJhYTc3ZDlkNTZhY2FjYWZkYTQwNmY5YWExYWIyMDJjOGQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/2595a198b20d636cc171b099deb9ed22c2c98fcd",
+    "sha": "2595a198b20d636cc171b099deb9ed22c2c98fcd",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/2595a198b20d636cc171b099deb9ed22c2c98fcd"
+   }
+  ],
+  "sha": "b5dc962aa77d9d56acacafda406f9aa1ab202c8d",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/b5dc962aa77d9d56acacafda406f9aa1ab202c8d"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/29611a87a02cdaa8e6b6f8719dd597d68b6c414a/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T14:35:22Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T14:35:22Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops(reviews): lưu hồ sơ cross-review Codex lượt 7 PR #1503 (REQUEST_CHANGES, chạm trần 7)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "33afcf9245f75e27d24e5b8e2a0b82bf91e3b8fb",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/33afcf9245f75e27d24e5b8e2a0b82bf91e3b8fb"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/29611a87a02cdaa8e6b6f8719dd597d68b6c414a",
+   "verification": {
+    "payload": "tree 33afcf9245f75e27d24e5b8e2a0b82bf91e3b8fb\nparent b5dc962aa77d9d56acacafda406f9aa1ab202c8d\nauthor Claude <noreply@anthropic.com> 1795530922 +0000\ncommitter Claude <noreply@anthropic.com> 1795530922 +0000\n\nops(reviews): lưu hồ sơ cross-review Codex lượt 7 PR #1503 (REQUEST_CHANGES, chạm trần 7)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQHf/5mmP\no4Sh2v2rC9oHhmrY9R4FKp2uFBx4I4qZnoOEN+RbgD1wm6ZEzigryMAlUOg1VntQbvbksDBUndsw\n3QY=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T14:35:25Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/29611a87a02cdaa8e6b6f8719dd597d68b6c414a",
+  "node_id": "C_kwDOTNeRjdoAKDI5NjExYTg3YTAyY2RhYThlNmI2Zjg3MTlkZDU5N2Q2OGI2YzQxNGE",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/b5dc962aa77d9d56acacafda406f9aa1ab202c8d",
+    "sha": "b5dc962aa77d9d56acacafda406f9aa1ab202c8d",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/b5dc962aa77d9d56acacafda406f9aa1ab202c8d"
+   }
+  ],
+  "sha": "29611a87a02cdaa8e6b6f8719dd597d68b6c414a",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/29611a87a02cdaa8e6b6f8719dd597d68b6c414a"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/fcd8e08f616833bcbbce499878e12c212db7cb38/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T14:54:58Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T14:54:58Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: đóng T1/T2 cross-review Codex lượt 7 bằng thiết kế (PR #1503)\n\n- T1 (P1): tiếp dòng ở nguồn có số không còn dựa vào trạng thái ngoặc/trích dẫn —\n  chỉ dòng mở bằng \"là\" sau một thuật ngữ chưa có từ nối; ngoặc trải nhiều dòng bị\n  chặn (giới hạn đã khai). Bộ quét giữ đúng một cụm trích dẫn đang mở, ký tự bên\n  trong là nội dung. Bỏ _dang_mo.\n- T2 (P2): lỗi sau khởi chạy ⇒ kill, đóng pipe, wait có giới hạn — không phụ thuộc\n  việc đọc lại.\n\nĐo: selftest 1789/1789; llm_route_test 47/47 ca, 71/71 đột biến; Điều 3 Luật\n134/2025/QH15 thật 8/8; audit đều rc 0; release-verify 187/187; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "def1057ca9695a8c8a2533ee85a015460cd3615a",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/def1057ca9695a8c8a2533ee85a015460cd3615a"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/fcd8e08f616833bcbbce499878e12c212db7cb38",
+   "verification": {
+    "payload": "tree def1057ca9695a8c8a2533ee85a015460cd3615a\nparent 29611a87a02cdaa8e6b6f8719dd597d68b6c414a\nauthor Claude <noreply@anthropic.com> 1795532098 +0000\ncommitter Claude <noreply@anthropic.com> 1795532098 +0000\n\nllm_route: đóng T1/T2 cross-review Codex lượt 7 bằng thiết kế (PR #1503)\n\n- T1 (P1): tiếp dòng ở nguồn có số không còn dựa vào trạng thái ngoặc/trích dẫn —\n  chỉ dòng mở bằng \"là\" sau một thuật ngữ chưa có từ nối; ngoặc trải nhiều dòng bị\n  chặn (giới hạn đã khai). Bộ quét giữ đúng một cụm trích dẫn đang mở, ký tự bên\n  trong là nội dung. Bỏ _dang_mo.\n- T2 (P2): lỗi sau khởi chạy ⇒ kill, đóng pipe, wait có giới hạn — không phụ thuộc\n  việc đọc lại.\n\nĐo: selftest 1789/1789; llm_route_test 47/47 ca, 71/71 đột biến; Điều 3 Luật\n134/2025/QH15 thật 8/8; audit đều rc 0; release-verify 187/187; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQOPWtPS0\nUDotwqrYrz7dgc8IWrUswKo1p9H2RFiFMZq42rQGeQzoVi31mMGA9d54Oa8erPe1uocv52jC16mo\nnQU=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T14:55:03Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/fcd8e08f616833bcbbce499878e12c212db7cb38",
+  "node_id": "C_kwDOTNeRjdoAKGZjZDhlMDhmNjE2ODMzYmNiYmNlNDk5ODc4ZTEyYzIxMmRiN2NiMzg",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/29611a87a02cdaa8e6b6f8719dd597d68b6c414a",
+    "sha": "29611a87a02cdaa8e6b6f8719dd597d68b6c414a",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/29611a87a02cdaa8e6b6f8719dd597d68b6c414a"
+   }
+  ],
+  "sha": "fcd8e08f616833bcbbce499878e12c212db7cb38",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/fcd8e08f616833bcbbce499878e12c212db7cb38"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/a93b8f3069cd845468545fa79c501a2a6a1782f0/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T14:54:59Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T14:54:59Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "Merge remote-tracking branch 'origin/master' into ccr-89c0d2e2-inanqb",
+   "tree": {
+    "sha": "2f2487f4c735ec243e66aa469424eb1614b36b07",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/2f2487f4c735ec243e66aa469424eb1614b36b07"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/a93b8f3069cd845468545fa79c501a2a6a1782f0",
+   "verification": {
+    "payload": "tree 2f2487f4c735ec243e66aa469424eb1614b36b07\nparent fcd8e08f616833bcbbce499878e12c212db7cb38\nparent a03a28ef076503c7fe93c208a4998c32590a977f\nauthor Claude <noreply@anthropic.com> 1795532099 +0000\ncommitter Claude <noreply@anthropic.com> 1795532099 +0000\n\nMerge remote-tracking branch 'origin/master' into ccr-89c0d2e2-inanqb\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQM6ufLsD\nmMO5Nk3jFeyWd3QvTkmo+vVfB/OxJc1gfInD5PthvNhr8KxY9DbaLimGnL/axQY2VGkaCDpri4s+\nwgs=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T14:55:03Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/a93b8f3069cd845468545fa79c501a2a6a1782f0",
+  "node_id": "C_kwDOTNeRjdoAKGE5M2I4ZjMwNjljZDg0NTQ2ODU0NWZhNzljNTAxYTJhNmExNzgyZjA",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/fcd8e08f616833bcbbce499878e12c212db7cb38",
+    "sha": "fcd8e08f616833bcbbce499878e12c212db7cb38",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/fcd8e08f616833bcbbce499878e12c212db7cb38"
+   },
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/a03a28ef076503c7fe93c208a4998c32590a977f",
+    "sha": "a03a28ef076503c7fe93c208a4998c32590a977f",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/a03a28ef076503c7fe93c208a4998c32590a977f"
+   }
+  ],
+  "sha": "a93b8f3069cd845468545fa79c501a2a6a1782f0",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/a93b8f3069cd845468545fa79c501a2a6a1782f0"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f681b75b1a400f54521211d004e86348b362f75a/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T15:10:19Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T15:10:19Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops(reviews): lưu hồ sơ cross-review Codex lượt 8 PR #1503 (REQUEST_CHANGES, chạm trần 8)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "6a8df5489e7c60b19a6d52e4a1571d3d339af746",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/6a8df5489e7c60b19a6d52e4a1571d3d339af746"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/f681b75b1a400f54521211d004e86348b362f75a",
+   "verification": {
+    "payload": "tree 6a8df5489e7c60b19a6d52e4a1571d3d339af746\nparent a93b8f3069cd845468545fa79c501a2a6a1782f0\nauthor Claude <noreply@anthropic.com> 1795533019 +0000\ncommitter Claude <noreply@anthropic.com> 1795533019 +0000\n\nops(reviews): lưu hồ sơ cross-review Codex lượt 8 PR #1503 (REQUEST_CHANGES, chạm trần 8)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQCyJR1wd\ndEgZ5aWkmqQKAR9eK6KrGI7haknOGxWfULe4+Re8l5u1gnRl5faQ07y6MaSAQP4krAmOvovpqh0s\ntQc=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T15:10:24Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/f681b75b1a400f54521211d004e86348b362f75a",
+  "node_id": "C_kwDOTNeRjdoAKGY2ODFiNzViMWE0MDBmNTQ1MjEyMTFkMDA0ZTg2MzQ4YjM2MmY3NWE",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/a93b8f3069cd845468545fa79c501a2a6a1782f0",
+    "sha": "a93b8f3069cd845468545fa79c501a2a6a1782f0",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/a93b8f3069cd845468545fa79c501a2a6a1782f0"
+   }
+  ],
+  "sha": "f681b75b1a400f54521211d004e86348b362f75a",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f681b75b1a400f54521211d004e86348b362f75a"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/50d151899ae528e2a7e4dbc67288b092c0961cd5/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T15:21:09Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T15:21:09Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: chặn mọi nguồn mơ hồ — U1/U2/U3 cross-review Codex lượt 8 (PR #1503)\n\n- U1/U3 (P1): một dòng (sau khi bỏ dấu số khoản/điểm đầu dòng) có ngoặc hay trích dẫn\n  không khép trong dòng, \")\"/\"”\" lẻ, hoặc trích dẫn cong lồng cùng kiểu ⇒ từ chối cả\n  nguồn (_dong_mo_ho). Chốt bảo thủ: chặn oan được, nhận nhầm thì không.\n- U2 (P2): wait có giới hạn TRƯỚC khi đóng pipe; trên Windows không đóng pipe đồng bộ.\n\nĐo: selftest 1789/1789; llm_route_test 48/48 ca, 79/79 đột biến; Điều 3 Luật\n134/2025/QH15 thật 8/8; audit đều rc 0; release-verify 187/187; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "4503cde4ba3fbed774b6926623c2b9b9aa69cff5",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/4503cde4ba3fbed774b6926623c2b9b9aa69cff5"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/50d151899ae528e2a7e4dbc67288b092c0961cd5",
+   "verification": {
+    "payload": "tree 4503cde4ba3fbed774b6926623c2b9b9aa69cff5\nparent f681b75b1a400f54521211d004e86348b362f75a\nauthor Claude <noreply@anthropic.com> 1795533669 +0000\ncommitter Claude <noreply@anthropic.com> 1795533669 +0000\n\nllm_route: chặn mọi nguồn mơ hồ — U1/U2/U3 cross-review Codex lượt 8 (PR #1503)\n\n- U1/U3 (P1): một dòng (sau khi bỏ dấu số khoản/điểm đầu dòng) có ngoặc hay trích dẫn\n  không khép trong dòng, \")\"/\"”\" lẻ, hoặc trích dẫn cong lồng cùng kiểu ⇒ từ chối cả\n  nguồn (_dong_mo_ho). Chốt bảo thủ: chặn oan được, nhận nhầm thì không.\n- U2 (P2): wait có giới hạn TRƯỚC khi đóng pipe; trên Windows không đóng pipe đồng bộ.\n\nĐo: selftest 1789/1789; llm_route_test 48/48 ca, 79/79 đột biến; Điều 3 Luật\n134/2025/QH15 thật 8/8; audit đều rc 0; release-verify 187/187; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQLFrd6N7\ng28jzO1UafV5mkq6poWzyVfg3bxvTYmppBw4rIUh4OEG5azSH2WFlkyjSCpPiVvHnVCFE/Gj6TTK\n1QE=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T15:21:12Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/50d151899ae528e2a7e4dbc67288b092c0961cd5",
+  "node_id": "C_kwDOTNeRjdoAKDUwZDE1MTg5OWFlNTI4ZTJhN2U0ZGJjNjcyODhiMDkyYzA5NjFjZDU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/f681b75b1a400f54521211d004e86348b362f75a",
+    "sha": "f681b75b1a400f54521211d004e86348b362f75a",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/f681b75b1a400f54521211d004e86348b362f75a"
+   }
+  ],
+  "sha": "50d151899ae528e2a7e4dbc67288b092c0961cd5",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/50d151899ae528e2a7e4dbc67288b092c0961cd5"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/1325e356dc2ee782785c3f2bd2184bdb70dff195/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T15:29:03Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T15:29:03Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops(reviews): lưu hồ sơ cross-review Codex lượt 9 PR #1503 (lượt chết giữa chừng, ma_thoat 1)\n\nVERDICT.md lưu nguyên trạng: Codex thoát ma_thoat=1 sau 398 s, tệp dừng sau V1 (P1),\nkhông có dòng VERDICT. Tính là lời gọi thứ 9 (chạm trần 9).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "d5fcb5617838478859e5d9a6e042f74ff4a7659b",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/d5fcb5617838478859e5d9a6e042f74ff4a7659b"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/1325e356dc2ee782785c3f2bd2184bdb70dff195",
+   "verification": {
+    "payload": "tree d5fcb5617838478859e5d9a6e042f74ff4a7659b\nparent 50d151899ae528e2a7e4dbc67288b092c0961cd5\nauthor Claude <noreply@anthropic.com> 1795534143 +0000\ncommitter Claude <noreply@anthropic.com> 1795534143 +0000\n\nops(reviews): lưu hồ sơ cross-review Codex lượt 9 PR #1503 (lượt chết giữa chừng, ma_thoat 1)\n\nVERDICT.md lưu nguyên trạng: Codex thoát ma_thoat=1 sau 398 s, tệp dừng sau V1 (P1),\nkhông có dòng VERDICT. Tính là lời gọi thứ 9 (chạm trần 9).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQGoACjQI\nPQCqw5OPMuNnZ4RIBRfc/XBrBCdr8b1YuFf5hbMYOGYxHQoMUwQSewBeroP5vMJwxMnG+j5WuGGe\ntg8=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T15:29:08Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/1325e356dc2ee782785c3f2bd2184bdb70dff195",
+  "node_id": "C_kwDOTNeRjdoAKDEzMjVlMzU2ZGMyZWU3ODI3ODVjM2YyYmQyMTg0YmRiNzBkZmYxOTU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/50d151899ae528e2a7e4dbc67288b092c0961cd5",
+    "sha": "50d151899ae528e2a7e4dbc67288b092c0961cd5",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/50d151899ae528e2a7e4dbc67288b092c0961cd5"
+   }
+  ],
+  "sha": "1325e356dc2ee782785c3f2bd2184bdb70dff195",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/1325e356dc2ee782785c3f2bd2184bdb70dff195"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/7bcb4bb3cb1bd4c6dc9f1321e848e78bd08d1fd1/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T15:46:37Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T15:46:37Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: danh sách cho phép kiểu dấu — V1 cross-review Codex lượt 9 (PR #1503)\n\n- V1 (P1): ngoài ( ) “ ” \", mọi dấu nhóm ngoặc/trích dẫn Unicode (Ps/Pe/Pi/Pf, cùng\n  vài dấu kép loại Po) ⇒ nguồn mơ hồ, từ chối cả nguồn. Danh sách CHO PHÉP thay cho\n  việc liệt kê từng kiểu dấu.\n\nĐo: selftest 1789/1789 (sau khi gỡ /tmp/.git rỗng do lượt Codex để lại; có nó thì 14 ca\nr973/wp433/wp727 đỏ — cùng tập ca đỏ sẵn Codex đã đo trên base); llm_route_test 48/48\nca, 82/82 đột biến; Điều 3 Luật 134/2025/QH15 thật 8/8; audit đều rc 0; release-verify\n187/187; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "cee3fe07852f2a1369e61d2f17e93ab81c156733",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/cee3fe07852f2a1369e61d2f17e93ab81c156733"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/7bcb4bb3cb1bd4c6dc9f1321e848e78bd08d1fd1",
+   "verification": {
+    "payload": "tree cee3fe07852f2a1369e61d2f17e93ab81c156733\nparent 1325e356dc2ee782785c3f2bd2184bdb70dff195\nauthor Claude <noreply@anthropic.com> 1795535197 +0000\ncommitter Claude <noreply@anthropic.com> 1795535197 +0000\n\nllm_route: danh sách cho phép kiểu dấu — V1 cross-review Codex lượt 9 (PR #1503)\n\n- V1 (P1): ngoài ( ) “ ” \", mọi dấu nhóm ngoặc/trích dẫn Unicode (Ps/Pe/Pi/Pf, cùng\n  vài dấu kép loại Po) ⇒ nguồn mơ hồ, từ chối cả nguồn. Danh sách CHO PHÉP thay cho\n  việc liệt kê từng kiểu dấu.\n\nĐo: selftest 1789/1789 (sau khi gỡ /tmp/.git rỗng do lượt Codex để lại; có nó thì 14 ca\nr973/wp433/wp727 đỏ — cùng tập ca đỏ sẵn Codex đã đo trên base); llm_route_test 48/48\nca, 82/82 đột biến; Điều 3 Luật 134/2025/QH15 thật 8/8; audit đều rc 0; release-verify\n187/187; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQLVWN7eU\n55T+FLfaOMf+m6GxAZZUizc3j9jd+tUFIo+Zvvu3DR3HmK1AkWl2X2n0svo95xYJowJtuGEr0jJI\nMQ8=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T15:46:48Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/7bcb4bb3cb1bd4c6dc9f1321e848e78bd08d1fd1",
+  "node_id": "C_kwDOTNeRjdoAKDdiY2I0YmIzY2IxYmQ0YzZkYzlmMTMyMWU4NDhlNzhiZDA4ZDFmZDE",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/1325e356dc2ee782785c3f2bd2184bdb70dff195",
+    "sha": "1325e356dc2ee782785c3f2bd2184bdb70dff195",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/1325e356dc2ee782785c3f2bd2184bdb70dff195"
+   }
+  ],
+  "sha": "7bcb4bb3cb1bd4c6dc9f1321e848e78bd08d1fd1",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/7bcb4bb3cb1bd4c6dc9f1321e848e78bd08d1fd1"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/74fbf22a113e40cfa75d75e8ceaf6a3fd988d388/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T15:51:08Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T15:51:08Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops(reviews): lưu hồ sơ lượt 10 PR #1503 — Codex bị bộ lọc nội dung chặn, không có verdict\n\nLượt 9 và lượt 10 cùng chết vì \"flagged for possible cybersecurity risk\" của nền. Tính là\nlời gọi thứ 10 (chạm trần 10).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "76cd65b083303f13fa730f23147b3694c0f39c23",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/76cd65b083303f13fa730f23147b3694c0f39c23"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/74fbf22a113e40cfa75d75e8ceaf6a3fd988d388",
+   "verification": {
+    "payload": "tree 76cd65b083303f13fa730f23147b3694c0f39c23\nparent 7bcb4bb3cb1bd4c6dc9f1321e848e78bd08d1fd1\nauthor Claude <noreply@anthropic.com> 1795535468 +0000\ncommitter Claude <noreply@anthropic.com> 1795535468 +0000\n\nops(reviews): lưu hồ sơ lượt 10 PR #1503 — Codex bị bộ lọc nội dung chặn, không có verdict\n\nLượt 9 và lượt 10 cùng chết vì \"flagged for possible cybersecurity risk\" của nền. Tính là\nlời gọi thứ 10 (chạm trần 10).\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQGeh+h6i\nX/cjzafaTSAL18cYRpEdm16ueGh/plIzrnQiPcjTom6HY6RBFBUgLdT+vi6nTEOg9jiiwjt6Lew3\nTQE=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T15:51:11Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/74fbf22a113e40cfa75d75e8ceaf6a3fd988d388",
+  "node_id": "C_kwDOTNeRjdoAKDc0ZmJmMjJhMTEzZTQwY2ZhNzVkNzVlOGNlYWY2YTNmZDk4OGQzODg",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/7bcb4bb3cb1bd4c6dc9f1321e848e78bd08d1fd1",
+    "sha": "7bcb4bb3cb1bd4c6dc9f1321e848e78bd08d1fd1",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/7bcb4bb3cb1bd4c6dc9f1321e848e78bd08d1fd1"
+   }
+  ],
+  "sha": "74fbf22a113e40cfa75d75e8ceaf6a3fd988d388",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/74fbf22a113e40cfa75d75e8ceaf6a3fd988d388"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/d55199efee706bb64679d8b06bc67a2d5bef758f/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T16:11:01Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T16:11:01Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "ops(reviews): lưu hồ sơ cross-review Codex lượt 11 PR #1503 (REQUEST_CHANGES, chạm trần 11)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "95de9d7fb98c577a5433dffb1f63b6d75755fc87",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/95de9d7fb98c577a5433dffb1f63b6d75755fc87"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/d55199efee706bb64679d8b06bc67a2d5bef758f",
+   "verification": {
+    "payload": "tree 95de9d7fb98c577a5433dffb1f63b6d75755fc87\nparent 74fbf22a113e40cfa75d75e8ceaf6a3fd988d388\nauthor Claude <noreply@anthropic.com> 1795536661 +0000\ncommitter Claude <noreply@anthropic.com> 1795536661 +0000\n\nops(reviews): lưu hồ sơ cross-review Codex lượt 11 PR #1503 (REQUEST_CHANGES, chạm trần 11)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQEpZKcaC\n7BTiHvRGK5lLUhWPB3AsJgCCaTK/JDLHPX6RaRGe3UB0eVo1OUTGk382amzsLpad3ybXHO6DjATJ\n6g8=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T16:11:05Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/d55199efee706bb64679d8b06bc67a2d5bef758f",
+  "node_id": "C_kwDOTNeRjdoAKGQ1NTE5OWVmZWU3MDZiYjY0Njc5ZDhiMDZiYzY3YTJkNWJlZjc1OGY",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/74fbf22a113e40cfa75d75e8ceaf6a3fd988d388",
+    "sha": "74fbf22a113e40cfa75d75e8ceaf6a3fd988d388",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/74fbf22a113e40cfa75d75e8ceaf6a3fd988d388"
+   }
+  ],
+  "sha": "d55199efee706bb64679d8b06bc67a2d5bef758f",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/d55199efee706bb64679d8b06bc67a2d5bef758f"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/89971602dc7067be37508af64600315eaa83145e/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T16:26:36Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T16:26:36Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route: hạ lời khai kiểm nguyên văn + vá X1/X3a sau cross-review lượt 11 (PR #1503)\n\nQuyết định chủ kho sau 11 lượt review: ranh giới khoản tách từ văn bản thô không\nchứng minh được, nên kết quả chỉ khai \"khớp nguyên văn từng khoản theo phân đoạn của\nbộ quét\" và luôn mang can_nguoi_duyet: true + pham_vi_kiem.\n\n- X1 (P1): nháy đơn thẳng ' vào danh sách dấu bị từ chối.\n- X3a (P1): tiêu đề Điều dính khoản đầu trên một dòng ⇒ từ chối.\n- X2, X3b, X3c, X4: ghi nợ ở issue riêng.\n\nĐo: selftest 1789/1789; llm_route_test 48/48 ca, 84/84 đột biến; Điều 3 Luật\n134/2025/QH15 thật 8/8; audit đều rc 0; release-verify 187/187; parser_surface chỉ\nđổi băm llm-khai-niem; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "1f181f638668a8986b3ecc22c58dc45f8f5a5c45",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/1f181f638668a8986b3ecc22c58dc45f8f5a5c45"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/89971602dc7067be37508af64600315eaa83145e",
+   "verification": {
+    "payload": "tree 1f181f638668a8986b3ecc22c58dc45f8f5a5c45\nparent d55199efee706bb64679d8b06bc67a2d5bef758f\nauthor Claude <noreply@anthropic.com> 1795537596 +0000\ncommitter Claude <noreply@anthropic.com> 1795537596 +0000\n\nllm_route: hạ lời khai kiểm nguyên văn + vá X1/X3a sau cross-review lượt 11 (PR #1503)\n\nQuyết định chủ kho sau 11 lượt review: ranh giới khoản tách từ văn bản thô không\nchứng minh được, nên kết quả chỉ khai \"khớp nguyên văn từng khoản theo phân đoạn của\nbộ quét\" và luôn mang can_nguoi_duyet: true + pham_vi_kiem.\n\n- X1 (P1): nháy đơn thẳng ' vào danh sách dấu bị từ chối.\n- X3a (P1): tiêu đề Điều dính khoản đầu trên một dòng ⇒ từ chối.\n- X2, X3b, X3c, X4: ghi nợ ở issue riêng.\n\nĐo: selftest 1789/1789; llm_route_test 48/48 ca, 84/84 đột biến; Điều 3 Luật\n134/2025/QH15 thật 8/8; audit đều rc 0; release-verify 187/187; parser_surface chỉ\nđổi băm llm-khai-niem; ruff F delta 0.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQJ/p9A4F\nxGtzXpMCSjVTFoJ5Br1912bKlAPxf1oJzM70pqyX8a6Pw0JlQ7DHP5M6HRBX7hK9KDc2O4Dysw5E\nCwo=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T16:26:40Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/89971602dc7067be37508af64600315eaa83145e",
+  "node_id": "C_kwDOTNeRjdoAKDg5OTcxNjAyZGM3MDY3YmUzNzUwOGFmNjQ2MDAzMTVlYWE4MzE0NWU",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/d55199efee706bb64679d8b06bc67a2d5bef758f",
+    "sha": "d55199efee706bb64679d8b06bc67a2d5bef758f",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/d55199efee706bb64679d8b06bc67a2d5bef758f"
+   }
+  ],
+  "sha": "89971602dc7067be37508af64600315eaa83145e",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/89971602dc7067be37508af64600315eaa83145e"
+ },
+ {
+  "author": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "comments_url": "https://api.github.com/repos/ducthangho/tra-luat/commits/8f0223757eeff3664ab3191715624f8d3e4f19b4/comments",
+  "commit": {
+   "author": {
+    "date": "2026-11-24T16:56:19Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "comment_count": 0,
+   "committer": {
+    "date": "2026-11-24T16:56:19Z",
+    "email": "noreply@anthropic.com",
+    "name": "Claude"
+   },
+   "message": "llm_route_test: thu hồi mọi tiến trình con thật của ca chạy-thật (CI gate-registry)\n\n`ci_dang_ky_test.py --chay` báo ĐỎ trên 8997160: \"con cháu còn sống sau khi bộ\nthoát\". Ca `ca_sau_khoi_chay_khong_chuyen` sinh tiến trình `time.sleep(30)` thật; dưới\nđột biến bỏ bước giết (qua_han_thanh_khong_khoi_chay) tiến trình ấy sống tiếp sau khi\nbộ test thoát. Nay mọi Popen thật của phần đó được ghi lại và luôn bị giết + thu hồi\ntrong `finally`.\n\nPhản chứng đo được: bản cũ để lại 1 tiến trình `time.sleep(30)` cùng session sau khi\nbộ thoát; bản mới để lại 0. llm_route_test 48/48 ca, 84/84 đột biến.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg",
+   "tree": {
+    "sha": "5fba9a26285c3ae025f883b1257d75adcbe65de0",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/git/trees/5fba9a26285c3ae025f883b1257d75adcbe65de0"
+   },
+   "url": "https://api.github.com/repos/ducthangho/tra-luat/git/commits/8f0223757eeff3664ab3191715624f8d3e4f19b4",
+   "verification": {
+    "payload": "tree 5fba9a26285c3ae025f883b1257d75adcbe65de0\nparent 89971602dc7067be37508af64600315eaa83145e\nauthor Claude <noreply@anthropic.com> 1795539379 +0000\ncommitter Claude <noreply@anthropic.com> 1795539379 +0000\n\nllm_route_test: thu hồi mọi tiến trình con thật của ca chạy-thật (CI gate-registry)\n\n`ci_dang_ky_test.py --chay` báo ĐỎ trên 8997160: \"con cháu còn sống sau khi bộ\nthoát\". Ca `ca_sau_khoi_chay_khong_chuyen` sinh tiến trình `time.sleep(30)` thật; dưới\nđột biến bỏ bước giết (qua_han_thanh_khong_khoi_chay) tiến trình ấy sống tiếp sau khi\nbộ test thoát. Nay mọi Popen thật của phần đó được ghi lại và luôn bị giết + thu hồi\ntrong `finally`.\n\nPhản chứng đo được: bản cũ để lại 1 tiến trình `time.sleep(30)` cùng session sau khi\nbộ thoát; bản mới để lại 0. llm_route_test 48/48 ca, 84/84 đột biến.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_015GtxrZQYT3Vt8PJdXrjEKg\n",
+    "reason": "valid",
+    "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgrLzsfFISF4by8Q+FKz27YpkK1USsBB+m\namu1QkJnbDsAAAADZ2l0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAAQP2DIjK0\n6B041SzsWb1sKEXGfRlpuvoHedSKswonivfI81pgVW5UayJNocJO7hLUmkeHaT4x75rUrFZ8A2Rt\nGgo=\n-----END SSH SIGNATURE-----",
+    "verified": true,
+    "verified_at": "2026-11-24T16:56:23Z"
+   }
+  },
+  "committer": {
+   "avatar_url": "https://avatars.githubusercontent.com/u/81847?v=4",
+   "events_url": "https://api.github.com/users/claude/events{/privacy}",
+   "followers_url": "https://api.github.com/users/claude/followers",
+   "following_url": "https://api.github.com/users/claude/following{/other_user}",
+   "gists_url": "https://api.github.com/users/claude/gists{/gist_id}",
+   "gravatar_id": "",
+   "html_url": "https://github.com/claude",
+   "id": 81847,
+   "login": "claude",
+   "node_id": "MDQ6VXNlcjgxODQ3",
+   "organizations_url": "https://api.github.com/users/claude/orgs",
+   "received_events_url": "https://api.github.com/users/claude/received_events",
+   "repos_url": "https://api.github.com/users/claude/repos",
+   "site_admin": false,
+   "starred_url": "https://api.github.com/users/claude/starred{/owner}{/repo}",
+   "subscriptions_url": "https://api.github.com/users/claude/subscriptions",
+   "type": "User",
+   "url": "https://api.github.com/users/claude",
+   "user_view_type": "public"
+  },
+  "html_url": "https://github.com/ducthangho/tra-luat/commit/8f0223757eeff3664ab3191715624f8d3e4f19b4",
+  "node_id": "C_kwDOTNeRjdoAKDhmMDIyMzc1N2VlZmYzNjY0YWIzMTkxNzE1NjI0ZjhkM2U0ZjE5YjQ",
+  "parents": [
+   {
+    "html_url": "https://github.com/ducthangho/tra-luat/commit/89971602dc7067be37508af64600315eaa83145e",
+    "sha": "89971602dc7067be37508af64600315eaa83145e",
+    "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/89971602dc7067be37508af64600315eaa83145e"
+   }
+  ],
+  "sha": "8f0223757eeff3664ab3191715624f8d3e4f19b4",
+  "url": "https://api.github.com/repos/ducthangho/tra-luat/commits/8f0223757eeff3664ab3191715624f8d3e4f19b4"
+ }
+]

@@ -18,6 +18,8 @@
 - r5 (sau cross-review lượt 4, đặc tả `ops/specs/llm-khoan-docx-r5.md`): Điều không đánh số tự động ⇒ dừng (bỏ lùi về đường
   thô); danh sách khoản còn tiếp sau điểm cắt ⇒ chặn; lọc chữ gạch ngang/đã xoá theo CÂY XML (không qua regex); đánh số lại
   sau ngắt section và .docx Strict ⇒ chặn có chẩn đoán.
+- r6 (sau cross-review lượt 5, đặc tả `ops/specs/llm-khoan-docx-r6.md`): tiêu đề ranh giới phải duy nhất và không kết `:`;
+  gạch toggle đếm theo tầng (nhiều tầng ⇒ chặn); hàng/ô bảng sửa đổi ⇒ chặn, `tcPr` hợp lệ; cấp danh sách ngoài 0–8 ⇒ chặn.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

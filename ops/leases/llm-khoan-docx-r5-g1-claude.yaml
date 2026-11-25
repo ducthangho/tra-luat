@@ -75,3 +75,5 @@ revision_ly_do: 'Cross-review luot 4 (D1-D3 P1, D4-D6 P2). Tran review tinh chun
 review_calls_limit: 5
 review_calls_used_truoc: 4
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r6-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 5 (E1-E6); revision r6 (ops/specs/llm-khoan-docx-r6.md), tran 7.'

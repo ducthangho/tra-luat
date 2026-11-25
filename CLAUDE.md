@@ -640,8 +640,12 @@ KHÔ, đòi gõ `XOA`/`TAO`, và bảo vệ nhánh mặc định tuyệt đối.
 hình dạng bản vá, hai lần, vì cùng một lý do: bất biến cần giữ là *"đừng làm commit thành không tra
 được"*, không phải *"đừng đụng không gian tên này"*, và một chốt cấm cả việc ĐÚNG thì người ta sẽ đi
 vòng quanh nó (đo được 21-08-2026: 16 nhánh `ops/**` đã land hết mà không đường nào dọn). Nhánh
-`luu-tru/**` xoá được khi commit CÒN TAG GIỮ; nhánh vùng làm việc xoá được khi `behind_by = 0` so với
-nhánh mặc định — tức mọi commit của nó đã nằm trong đó. **Ba trạng thái, không phải hai**: là tổ tiên ·
+`luu-tru/**` xoá được khi đầu nhánh CÒN một tag `luu-tru/*` giữ; nhánh vùng làm việc xoá được khi
+`behind_by = 0` so với nhánh mặc định (mọi commit đã nằm trong đó) **hoặc** khi có tag `luu-tru/*` trỏ
+đúng đầu nhánh. Nhánh có tiền tố ngoài mọi danh sách (`coord/`, `ccr-*`, `do-ci/`…) nay chịu cùng phép đo
+với vùng làm việc: trước #1532 `case` không có nhánh mặc định nên chúng bị xoá mà KHÔNG đo gì (run
+`45677710837`). Chỉ tag `luu-tru/*` được tính vì tag tên khác xoá được qua chính workflow này.
+**Ba trạng thái, không phải hai**: là tổ tiên ·
 không phải · KHÔNG ĐO ĐƯỢC, và cái thứ ba làm cổng ĐỎ. Xoá **TAG** mang tên các vùng ấy thì vẫn CẤM —
 tag không có quan hệ tổ-tiên để mà đo. Kèm chốt GHIM + **LEASE**: bước chốt ghi lại SHA đã đo, bước
 làm xoá bằng `git push --force-with-lease=<ref>:<sha ghim> origin :<ref>` chứ KHÔNG bằng

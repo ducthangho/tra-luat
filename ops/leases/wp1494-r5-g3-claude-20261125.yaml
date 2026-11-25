@@ -126,5 +126,6 @@
     "tran_moi": "6 tệp / 3500 dòng thêm theo `git diff --numstat B <H>`.",
     "nguon": "ops/specs/wp1494-r1/SPEC.md r5 @ a819291bb08af5e72cdd833b86544ea48d97b1fd, mục Kích thước, chép tóm theo bốn trường; nguyên văn ở đặc tả"
   },
-  "d134_waiver_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7157619068"
+  "d134_waiver_url": "https://github.com/ducthangho/tra-luat/issues/1172#issuecomment-7157619068",
+  "da_bi_thay_the": "wp1494-r5-g4-claude"
 }

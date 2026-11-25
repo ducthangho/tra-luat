@@ -391,8 +391,11 @@ biến môi trường của environment.
   ĐỘNG của Word/Google Doc (`w:numPr`): đoạn cấp khoản (định dạng số `1.`) mở khoản, đoạn cấp con cùng danh sách và
   điểm gõ tay (`a)`, `-`) nối vào khoản đang mở; chữ gạch ngang/đã xoá của dự thảo bị lọc như `tl extract`. Chặn
   (rc 2): đoạn không số giữa các khoản, hai danh sách ở cấp khoản, số khoản không liên tục từ 1 (danh sách chạy tiếp
-  từ Điều trước), số gõ tay lẫn số tự động, đánh số qua style, `lvlOverride` ngoài `startOverride`, định dạng số ngoài
-  `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn. Điều không có đánh số tự động ⇒ lùi về
+  từ Điều trước), số gõ tay lẫn số tự động, đoạn TRONG Điều đánh số qua style (đánh số qua style NGOÀI Điều vẫn được
+  đếm), `lvlOverride` ngoài `startOverride`, `lvlRestart`/`isLgl`/cấp gắn style, nhãn khoản khác `%N.`, định dạng số
+  ngoài `decimal`/`lowerLetter`/`upperLetter`/`bullet`, câu dẫn khác câu chuẩn, tiêu đề Điều ngoài `Điều N.` /
+  `Điều N. Giải thích từ ngữ`, bảng/khối lạ, ngắt dòng mềm, ký hiệu/trường/hình/chú thích trong Điều, chữ gạch
+  ngang còn sót, sửa đổi dấu đoạn. Điều không có đánh số tự động ⇒ lùi về
   đường thô. Tải `.docx` của Google Doc: Drive → Tải xuống → Microsoft Word. Đường `<số hiệu>` (qua `tl extract`)
   vẫn là văn bản thô.
 - **Cowork:** đường `sub` cần `claude` CLI, đường `api` cần SDK `anthropic` (không nằm trong

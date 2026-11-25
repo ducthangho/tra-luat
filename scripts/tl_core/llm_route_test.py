@@ -1260,12 +1260,6 @@ def ca_cau_truc_docx_dat(m):
     # Chữ GẠCH NGANG không vào nguyên văn.
     vb2, cap2, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu.", 1, xoa=" CŨ")))
     bang(cap2 == [(1, "Hồ sơ là tài liệu.")] and "CŨ" not in vb2, f"chu da bo lot vao: {cap2}")
-    # r2 A2: đánh số qua STYLE (chuỗi basedOn) được đếm như numPr trực tiếp.
-    kieu = (f'<w:styles {_WNS}><w:style w:styleId="DS"><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr>'
-            '</w:style><w:style w:styleId="DS2"><w:basedOn w:val="DS"/></w:style></w:styles>')
-    _, cap3, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu.", 1),
-                                         p_docx("Dữ liệu là thông tin.", kieu="DS2"), styles=kieu))
-    bang(cap3 == [(1, "Hồ sơ là tài liệu."), (2, "Dữ liệu là thông tin.")], f"style danh so khong duoc dem: {cap3}")
     # r2 A6/A7: điểm GÕ TAY (kể cả dính thân) nối vào khoản đang mở.
     _, cap4, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu gồm:", 1),
                                          p_docx("a)bản chính;"), p_docx("-bản sao.")))
@@ -1288,6 +1282,35 @@ def ca_cau_truc_docx_dat(m):
     vb7, _, k7 = _doc_hop_le(m, lam_docx(p_docx("Điều 3."), p_docx("Thiết bị gồm", 1), p_docx("máy là công cụ.", 1, 1), numbering=hoa))
     sai = [{"stt": 1, "thuat_ngu": "Thiết bị gồm\nA) máy", "dinh_nghia": "công cụ."}]
     bang(m.lech_nguyen_van(sai, vb7, k7) == [1], "tu noi cua diem bi lay lam tu noi cap khoan")
+    # r3 B4: dấu nối không ngắt (`w:noBreakHyphen`) là chữ hiển thị.
+    nbh = ('<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr><w:r><w:t>Hồ sơ là tài</w:t>'
+           '<w:noBreakHyphen/><w:t>liệu.</w:t></w:r></w:p>')
+    _, cap8, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3."), nbh))
+    bang(cap8 == [(1, "Hồ sơ là tài-liệu.")], f"dau noi khong ngat mat: {cap8}")
+    # r3 B5: thân mở bằng số thập phân không phải số gõ tay.
+    _, cap9, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3."), p_docx("1.5 lần là hệ số.", 1)))
+    bang(cap9 == [(1, "1.5 lần là hệ số.")], f"so thap phan dau than bi chan: {cap9}")
+    # r3 B6: wrapper `w:customXml` có `w:customXmlPr` vẫn đọc được.
+    cx = f'<w:customXml w:element="k"><w:customXmlPr/>{p_docx("Hồ sơ là tài liệu.", 1)}</w:customXml>'
+    _, cap10, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 3."), cx))
+    bang(cap10 == [(1, "Hồ sơ là tài liệu.")], f"customXml co customXmlPr bi chan: {cap10}")
+    # r3 B2: bảng LỒNG trước Điều — mục trong ô lồng đếm ĐÚNG MỘT lần (danh sách bắt đầu từ 0).
+    so0 = numbering(_lvl(0, "decimal", "%1.", start=0))
+    long_ = (f'<w:tbl><w:tr><w:tc><w:tbl><w:tr><w:tc>{p_docx("Mục số không.", 1)}</w:tc></w:tr></w:tbl><w:p/></w:tc></w:tr></w:tbl>')
+    _, cap11, _ = _doc_hop_le(m, lam_docx(p_docx("Điều 2."), long_, p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu.", 1), numbering=so0))
+    bang(cap11 == [(1, "Hồ sơ là tài liệu.")], f"bang long dem sai: {cap11}")
+
+
+def ca_cau_truc_docx_bang_truoc_lui(m):
+    """r3 (lượt 2 B7): bảng trong Điều KHÔNG đánh số ⇒ ValueError — chốt bảng chạy TRƯỚC khi lùi về đường thô."""
+    try:
+        m.doc_dieu_cau_truc(lam_docx(p_docx("Điều 3."), p_docx("Hồ sơ là tài liệu."),
+                                     "<w:tbl><w:tr><w:tc><w:p/></w:tc></w:tr></w:tbl>"), 3)
+    except m.KhongCauTruc:
+        raise TinHieuChotCa("bang trong Dieu khong danh so phai DUNG, khong lui ve duong tho") from None
+    except ValueError:
+        return
+    raise TinHieuChotCa("bang trong Dieu khong danh so phai bi chan")
 
 
 def ca_cau_truc_docx_chan(m):
@@ -1316,7 +1339,6 @@ def ca_cau_truc_docx_chan(m):
     chan(lam_docx(p_docx("Điều 2."), f"<w:tbl><w:tr><w:tc>{A}</w:tc></w:tr></w:tbl>", H, B), "muc trong bang truoc Dieu khong duoc dem")
     chan(lam_docx(H, A, "<w:tbl><w:tr><w:tc><w:p/></w:tc></w:tr></w:tbl>", B), "Dieu chua bang")
     # r2 A1/A7: bảng trong Điều KHÔNG đánh số ⇒ DỪNG, không lùi về đường thô.
-    chan(lam_docx(H, p_docx("Hồ sơ là tài liệu."), "<w:tbl><w:tr><w:tc><w:p/></w:tc></w:tr></w:tbl>"), "bang trong Dieu khong danh so")
     chan(lam_docx(p_docx("Điều 3.", ngat=True), A, B), "tieu de co ngat dong mem")
     chan(lam_docx(H, A, p_docx("Điều 5. Được sửa đổi như sau.", 1)), "doan danh so mo bang 'Dieu' (khong phai ranh gioi)")
     tron = numbering(_lvl(0, "decimal", "%1."), nums=[(1, 0, '<w:lvlOverride w:ilvl="0"><w:lvl w:ilvl="0"/></w:lvlOverride>')])
@@ -1334,6 +1356,33 @@ def ca_cau_truc_docx_chan(m):
     chan(lam_docx(H, lot2, styles=kg), "gach ngang theo style")
     gop = '<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:rPr><w:del w:id="9" w:author="x"/></w:rPr></w:pPr><w:r><w:t>Hồ sơ là</w:t></w:r></w:p>'
     chan(lam_docx(H, gop, p_docx("tài liệu.", 1)), "sua doi dau doan (gop doan)")
+    # r3 B2/B8: đánh số qua STYLE trong Điều ⇒ chặn; ở TRƯỚC Điều thì vẫn được ĐẾM (khoản đầu thành 2 ⇒ chặn).
+    kieu = (f'<w:styles {_WNS}><w:style w:styleId="DS"><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr>'
+            '</w:style><w:style w:styleId="DS2"><w:basedOn w:val="DS"/></w:style></w:styles>')
+    chan(lam_docx(H, A, p_docx("Dữ liệu là thông tin.", kieu="DS2"), styles=kieu), "danh so qua style trong Dieu")
+    chan(lam_docx(p_docx("Mục trước.", kieu="DS2"), H, B, styles=kieu), "muc danh so qua style truoc Dieu khong duoc dem")
+    chan(lam_docx(p_docx("Điều 3. Hồ sơ là tài liệu."), B), "tieu de dinh than khoan")
+    chan(lam_docx("<w:altChunk/>", H, A), "khoi la truoc Dieu")
+    kgr = f'<w:styles {_WNS}><w:style w:styleId="G"><w:rPr><w:strike/></w:rPr></w:style></w:styles>'
+    rg = '<w:p><w:r><w:t>Điều 4.</w:t></w:r><w:r><w:rPr><w:rStyle w:val="G"/></w:rPr><w:t> Bỏ</w:t></w:r></w:p>'
+    chan(lam_docx(H, A, rg, styles=kgr), "ranh gioi co chu gach ngang con sot")
+    k2 = f'<w:styles {_WNS}><w:style w:styleId="G2"><w:rPr><w:dstrike/></w:rPr></w:style></w:styles>'
+    lot3 = ('<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr><w:r><w:t>Hồ sơ là tài liệu.</w:t></w:r>'
+            '<w:r><w:rPr><w:rStyle w:val="G2"/><w:strike w:val="0"/></w:rPr><w:t> CŨ</w:t></w:r></w:p>')
+    chan(lam_docx(H, lot3, styles=k2), "gach kep theo style bi che boi tat gach don")
+    k3 = f'<w:styles {_WNS}><w:docDefaults><w:rPrDefault><w:rPr><w:strike/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>'
+    chan(lam_docx(H, A, styles=k3), "gach ngang tu docDefaults")
+    chan(lam_docx(H, A, p_docx("Dữ liệu là thông tin.", 1, ngat=True)), "ngat dong mem trong khoan")
+    chan(lam_docx(H, A, B, p_docx("", 1)), "doan danh so rong cuoi Dieu")
+    sym = ('<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr></w:pPr><w:r><w:t>Hồ sơ là</w:t>'
+           '<w:sym w:font="Symbol" w:char="F0B7"/></w:r></w:p>')
+    chan(lam_docx(H, sym), "phan tu hien thi chua hieu (w:sym)")
+    chan(lam_docx(p_docx("Điều 3.", 2), A, B), "tieu de duoc danh so tu dong (danh sach khac)")
+    chan(lam_docx(H, A, B, numbering=numbering(_lvl(0, "decimal", "%1.", them='<w:pStyle w:val="X"/>'))), "lvl gan pStyle")
+    lk = _NUMBERING_CHUAN.replace('<w:abstractNum w:abstractNumId="0">', '<w:abstractNum w:abstractNumId="0"><w:numStyleLink w:val="S"/>')
+    chan(lam_docx(H, A, B, numbering=lk), "numStyleLink")
+    la_ma = numbering(_lvl(0, "decimal", "%1.") + _lvl(1, "lowerRoman", "-"))
+    chan(lam_docx(H, A, p_docx("tổ chức.", 1, 1), numbering=la_ma), "numFmt khong ho tro o cap con")
     # Không đánh số tự động ⇒ KhongCauTruc, mang chữ Điều mỗi đoạn một dòng.
     try:
         m.doc_dieu_cau_truc(lam_docx(H, p_docx("Hồ sơ là tài liệu."), p_docx("Điều 4.")), 3)
@@ -1359,7 +1408,7 @@ CA = [ca_api_dat, ca_mac_dinh_sub_truoc, ca_uu_tien_bien_tl, ca_thieu_key_chuyen
       ca_nguon_mo_ho_thi_khong_dat, ca_so_khoan_nguon_va_dang_so, ca_tach_tai_la_dau_tien, ca_khoan_mat_so_co_diem_dat,
       ca_bom_tieu_de, ca_sub_stop_reason_va_kieu, ca_sub_xac_thuc_tai_khoan, ca_cap_co_ranh_gioi, ca_504_uu_tien_ma,
       ca_ngoac_goi_tat, ca_tron_co_so_va_mat_so, ca_khoan_bao_gom_bi_chan, ca_auth_sai_kieu,
-      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5, ca_wp1514_luot6, ca_wp1514_luot7, ca_wp1514_luot9, ca_cau_truc_docx_dat, ca_cau_truc_docx_chan]
+      ca_usage_thieu_truong, ca_ranh_gioi_luot4, ca_sau_khoi_chay_khong_chuyen, ca_nguon_mo_ho_luot8, ca_wp1514, ca_wp1514_luot2, ca_wp1514_luot3, ca_wp1514_luot4, ca_wp1514_luot5, ca_wp1514_luot6, ca_wp1514_luot7, ca_wp1514_luot9, ca_cau_truc_docx_dat, ca_cau_truc_docx_chan, ca_cau_truc_docx_bang_truoc_lui]
 
 # (tên, (chuỗi gốc, chuỗi thay), ca đích PHẢI đỏ bằng TinHieuChotCa)
 DOT_BIEN = [
@@ -1383,12 +1432,16 @@ DOT_BIEN = [
     # #1525: đường cấu trúc .docx — mỗi chốt một đột biến.
     ('wp1525_khong_loc_markup', ('        xml, _ = dm.strip_markup(goc_xml, "strip")', '        xml = goc_xml'), 'ca_cau_truc_docx_dat'),
     ('wp1525_nhan_nhieu_tieu_de', ('    if len(vi_tri) != 1:', '    if not vi_tri:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_nhan_bang_va_khoi_la', ('    if any(d["loai"] != "p" or d["trong_bang"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_khong_dem_trong_bang', ('            for tc in el.iter(_W + "tc"):\n                yield from _doan_trong(tc, True)\n', ''), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_bang_truoc_lui', ('    if any(d["loai"] != "p" or d["trong_bang"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_bang_truoc_lui'),
+    ('wp1525_bang_long_dem_hai_lan', ('            for tr in el.findall(_W + "tr"):\n                for tc in tr.findall(_W + "tc"):\n                    yield from _doan_trong(tc, True)', '            for tc in el.iter(_W + "tc"):\n                yield from _doan_trong(tc, True)'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_khong_dem_trong_bang', ('            for tr in el.findall(_W + "tr"):\n                for tc in tr.findall(_W + "tc"):\n                    yield from _doan_trong(tc, True)', '            pass'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_qua_sdt', ('            nd = el.find(_W + "sdtContent")\n            if nd is not None:\n                yield from _doan_trong(nd, trong_bang)\n', '            pass\n'), 'ca_cau_truc_docx_dat'),
-    ('wp1525_bo_qua_style_danh_so', ('    nid, il = _theo_kieu(kieu, psid, 1), _theo_kieu(kieu, psid, 2)', '    nid, il = None, None'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_customxmlpr_la', ('"commentRangeEnd", "customXmlPr", "sdtPr", "sdtEndPr"}', '"commentRangeEnd", "sdtPr", "sdtEndPr"}'), 'ca_cau_truc_docx_dat'),
+    ('wp1525_bo_qua_style_danh_so', ('    nid, il = _theo_kieu(kieu, psid, 1), _theo_kieu(kieu, psid, 2)', '    nid, il = None, None'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_style_trong_dieu', ('    if any(d["so_tu_style"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_gop_doan_khong_so', ('                raise ValueError(f"doan khong danh so giua cac khoan: {chu[:60]!r}")', '                khoan[-1][1] += "\\n" + chu'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_so_go_tay', ('        if _RE_SO_GO_TAY_DOCX.match(chu):', '        if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_so_go_tay_nuot_thap_phan', ('_RE_SO_GO_TAY_DOCX = re.compile(r"^\\(?\\d+[^\\S\\n]*[.)](?!\\d)")', '_RE_SO_GO_TAY_DOCX = re.compile(r"^\\(?\\d+[^\\S\\n]*[.)]")'), 'ca_cau_truc_docx_dat'),
     ('wp1525_gop_danh_sach_khac', ('            raise ValueError("doan danh so khong thuoc danh sach khoan (hoac cap con truoc khoan dau)")', '            khoan[-1][1] += "\\n" + chu'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_lien_tuc', ('    if [so for so, _, _ in khoan] != list(range(1, len(khoan) + 1)):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_chu_cap_khoan', ('    if fmt0 != "decimal" or not re.fullmatch', '    if False and not re.fullmatch'), 'ca_cau_truc_docx_chan'),
@@ -1396,13 +1449,24 @@ DOT_BIEN = [
     ('wp1525_bo_qua_loi_danh_sach', ('        if dn["loi"]:\n', '        if False:\n'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_lvlrestart', ('            if lvl.find(_W + "lvlRestart") is not None or _bat_ooxml(lvl.find(_W + "isLgl")):', '            if _bat_ooxml(lvl.find(_W + "isLgl")):'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_islgl', ('            if lvl.find(_W + "lvlRestart") is not None or _bat_ooxml(lvl.find(_W + "isLgl")):', '            if lvl.find(_W + "lvlRestart") is not None:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_lvl_pstyle', ('            if lvl.find(_W + "pStyle") is not None:', '            if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_numstylelink', ('        if an.find(_W + "numStyleLink") is not None or an.find(_W + "styleLink") is not None:', '        if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_fmt_cap_con', ('    if fmt not in ("decimal", "lowerLetter", "upperLetter"):\n        raise ValueError(f"numFmt {fmt!r} khong ho tro")', '    if False:\n        raise ValueError(f"numFmt {fmt!r} khong ho tro")'), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_qua_override_la', ('                loi = loi or f"lvlOverride cap {il} ngoai startOverride"\n', ''), 'ca_cau_truc_docx_chan'),
     ('wp1525_bo_qua_start_override', ('            muc[il] = (fmt, txt, int(ov.find(_W + "startOverride").get(_W + "val")))', '            pass'), 'ca_cau_truc_docx_dat'),
     ('wp1525_nhan_gach_con_sot', ('        raise ValueError("Dieu con chu gach ngang/da xoa sau bo loc markup — khong doc duoc nguyen van")', '        pass'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_bo_qua_gach_theo_style', ('                g_kieu = _theo_kieu(kieu, rs.get(_W + "val"), 3) if rs is not None else None', '                g_kieu = None'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_gach_kep_bi_che', ('        if (hl["strike"] or hl["dstrike"]) and "".join(chu_run).strip():', '        if hl["strike"] and "".join(chu_run).strip():'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_bo_qua_docdefaults', ('    nen = {t: (v if v is not None else mac[k])', '    nen = {t: v'), 'ca_cau_truc_docx_chan'),
     ('wp1525_nhan_gop_dau_doan', ('            raise ValueError("tai lieu co sua doi dau doan (track changes gop/tach doan) — ranh gioi doan khong tin duoc")', '            pass'), 'ca_cau_truc_docx_chan'),
-    ('wp1525_nhan_tieu_de_ngat_mem', ('    if doan[i0]["ngat"] or doan[i0]["so"] is not None:', '    if doan[i0]["so"] is not None:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_tieu_de_danh_so', ('        raise ValueError("doan tieu de Dieu duoc danh so tu dong")', '        pass'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_tieu_de_dinh_than', ('    if not _RE_TIEU_DE_TRON.match(doan[i0]["chu"]) or doan[i0]["con_bo"] or doan[i0]["la"]:', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_khoi_la_truoc', ('    if any(d["loai"] == "la" for d in doan[:i0]):', '    if False:'), 'ca_cau_truc_docx_chan'),
     ('wp1525_ranh_gioi_danh_so', ('                raise ValueError(f"doan danh so tu dong mo bang tieu de: {d[\'chu\'][:60]!r}")\n', '                pass\n'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_ranh_gioi_markup', ('            if d["con_bo"] or d["la"]:\n                # r3 (lượt 2 B1)', '            if False:\n                # r3 (lượt 2 B1)'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_ngat_mem_vung', ('    if any(d["ngat"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_doan_so_rong', ('    if any(d["so"] is not None and not d["chu"] for d in vung):', '    if False:'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_nhan_phan_tu_la', ('            else:\n                kq["la"] = True   # B4', '            else:\n                pass   # B4'), 'ca_cau_truc_docx_chan'),
+    ('wp1525_mat_noi_khong_ngat', ('_CON_RUN_CHU = {"t": None, "tab": " ", "noBreakHyphen": "-", "softHyphen": ""}', '_CON_RUN_CHU = {"t": None, "tab": " ", "softHyphen": ""}'), 'ca_cau_truc_docx_dat'),
     ('wp1525_cau_dan_nhieu', ('    if len(cd) > 1 or (cd and not _RE_CAU_DAN_TRON', '    if False or (cd and not _RE_CAU_DAN_TRON'), 'ca_cau_truc_docx_chan'),
     ('wp1525_cau_dan_tu_do', ('(cd and not _RE_CAU_DAN_TRON.fullmatch(" ".join(cd[0].split())))', 'False'), 'ca_cau_truc_docx_chan'),
     ('wp1525_lui_khong_mang_chu', ('"\\n".join([tieu_de, *(d["chu"] for d in vung)]))', '"")'), 'ca_cau_truc_docx_chan'),

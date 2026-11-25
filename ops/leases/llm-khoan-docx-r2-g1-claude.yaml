@@ -69,3 +69,5 @@ revision_ly_do: 'Cross-review luot 1 (A1-A4 P1, A5-A7 P2, A8 P3) can sua luat do
 review_calls_limit: 5
 review_calls_used_truoc: 1
 inference_calls_limit: 0
+da_bi_thay_the: llm-khoan-docx-r3-g1-claude
+da_bi_thay_the_ly_do: 'Cross-review luot 2 (B1-B8); revision r3 (ops/specs/llm-khoan-docx-r3.md).'

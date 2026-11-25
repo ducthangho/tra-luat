@@ -9,6 +9,9 @@
 - r2 (sau cross-review lượt 1, đặc tả `ops/specs/llm-khoan-docx-r2.md`): duyệt khối theo thứ tự tài liệu (sdt, bảng được đếm);
   đánh số qua style được đếm; `lvlRestart`/`isLgl`/nhãn khoản khác `%N.` ⇒ chặn; từ nối chỉ dò ở đầu khoản; chữ gạch ngang còn sót
   (tiền tố khác, theo style) và sửa đổi dấu đoạn ⇒ chặn; chỉ xác thực danh sách mà Điều dùng; điểm gõ tay dính thân được nhận.
+- r3 (sau cross-review lượt 2, đặc tả `ops/specs/llm-khoan-docx-r3.md`): danh sách CHO PHÉP phần tử trong đoạn/run (ký hiệu,
+  trường, hình ⇒ chặn; dấu nối không ngắt giữ); tiêu đề Điều phải đúng hình dạng; ngắt mềm/đoạn số rỗng/khối lạ ⇒ chặn; bảng
+  lồng đếm một lần; gạch đơn/kép tính riêng qua mọi tầng; đánh số qua style trong Điều ⇒ chặn.
 
 # ★ (chưa phát hành) — packet #1514 LLM-RANH-GIOI-KHOAN r1: chặn bảo thủ các lỗ ranh giới khoản còn nợ (#1512)
 

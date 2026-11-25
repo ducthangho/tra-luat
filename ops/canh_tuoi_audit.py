@@ -8,6 +8,7 @@ bien moi truong hay tham so nao doi kho, workflow duoc canh, so Issue, hang thoi
 import base64
 import datetime
 import hashlib
+import http.client
 import importlib
 import io
 import json
@@ -302,11 +303,38 @@ class _NguCanh:
         self.tran = dict({"TRAN_GOI": TRAN_GOI, "TRAN_MUC_ZIP": TRAN_MUC_ZIP, "TRAN_GIAI_NEN": TRAN_GIAI_NEN, "TRAN_GIAI_NEN_TONG": TRAN_GIAI_NEN_TONG}, **(tran or {}))
         self.han, self.pha_dg, self.can_dg, self.can_tn, self.giai_nen, self.nho = 0.0, False, False, False, 0, {}
 
+class _NenCoHan(io.RawIOBase):
+    """Lop doc NEN boc luong dem goc cua mot HTTPResponse THAT, de han tuyet doi cua lan thu rang buoc TUNG lan doc nen (mot `read` cua
+    HTTPResponse/BufferedReader co the chua nhieu lan doc nen; socket timeout chi chan tung lan). Moi lan doc nen: het han thi nem,
+    khong thi ap thoi gian CON LAI len socket roi doc TOI DA mot lan (`read1`: byte da dem san, hoac dung mot `recv`)."""
+    def __init__(self, goc, con): self.goc, self.con = goc, con
+
+    def readable(self): return True
+
+    def readinto(self, b):
+        con = self.con()
+        if con <= 0:  # f02:nen_han
+            raise TimeoutError("het han tuyet doi cua lan thu truoc mot lan doc nen")
+        sock = getattr(getattr(self.goc, "raw", None), "_sock", None)   # BufferedReader -> SocketIO -> socket; than khong nam tren socket thi None
+        if sock is not None:
+            sock.settimeout(con)  # f02:nen_socket
+        d = self.goc.read1(len(b))
+        b[:len(d)] = d
+        return len(d)
+
+    def close(self):
+        self.goc.close()  # f02:nen_dong
+        super().close()
+
 def _mot_lan(c, pt, url, hd, than, timeout):
-    """MOT lan thu vat ly: gui, roi doc than theo khuc va dung o byte thu TRAN_GOI + 1. Han TUYET DOI cua lan thu rang buoc ca vong doc
-    (socket timeout cua transport that chi chan TUNG thao tac blocking, khong chan tong thoi gian tai)."""
+    """MOT lan thu vat ly: gui, roi doc than theo khuc va dung o byte thu TRAN_GOI + 1. Han TUYET DOI cua lan thu (da kep theo han cua
+    pha) rang buoc ca vong doc lan TUNG lan doc nen ben trong mot `read` cua phan hoi that (GET API, GET kho luu tru, PATCH, POST va
+    than cua HTTPError di chung duong nay)."""
     het = c.dong_ho() + timeout
     ma, hd_ra, luong = c.transport(pt, url, hd, than, timeout)
+    r = luong if isinstance(luong, http.client.HTTPResponse) else getattr(luong, "fp", None)  # f02:nen_loi — HTTPError boc HTTPResponse trong `fp`
+    if isinstance(r, http.client.HTTPResponse):  # f02:nen
+        r.fp = io.BufferedReader(_NenCoHan(r.fp, lambda: het - c.dong_ho()))
     khuc, n = [], 0
     while True:
         b = luong.read(min(65536, c.tran["TRAN_GOI"] + 1 - n))

@@ -10,11 +10,13 @@ import contextlib
 import copy
 import datetime
 import hashlib
+import http.client
 import importlib.util
 import io
 import json
 import os
 import re
+import socket
 import subprocess
 import sys
 import tempfile
@@ -1315,8 +1317,8 @@ ca_doc("n8_qua_24h", ("cu", "cu", 1), nt=nt_cu(T8, 24 + 1 / 3600))
 ca_doc("n8_nhip_tim_cu", ("cu", "cu", 1), nt=nt_cu(T8, 25))
 khong("d64", "d64", "n8_hai_dong")
 khong("d142", "d142", "n8_khong_phai_object")
-khong("d116", "d116", "n8_tap_khoa_goc")
-khong("d62", "d62", "n8_luc_tuong_lai")
+khong("d116", "d116", "n8_tap_khoa_goc", "n8_W2_mien_tap_khoa", "n8_W7_mien_tap_khoa")
+khong("d62", "d62", "n8_luc_tuong_lai", "n8_W2_mien_tuong_lai", "n8_W7_mien_tuong_lai")
 db("d63", "d63", "> datetime.timedelta(hours=24)", ">= datetime.timedelta(hours=24)", "n8_bien_24h")
 khong("d74", "(c)", "n8_nhip_tim_cu")
 
@@ -1335,12 +1337,32 @@ for _j, (_k, _v) in enumerate((("id", "0-1"), ("loai", "x"), ("trang_thai", "xan
     MIEN += [(18 + _j, "da_bao", {"da_bao": dict(sk("fresh", "khung_xanh"), **{_k: _v})}), (27 + _j, "cho_bao", {"cho_bao": dict(CB, **{_k: _v})})]
 for _i, _mk, _sua in MIEN:
     ca_doc(f"n8_mien_m{_i}", (KDOC, f"nhip_tim_sai_mien:{_mk}:m{_i}", 1), nt=nt_cu(T8, **_sua))
+
+def ca_ghi_mien(noi, hau, nt, ma_mong, kq=None):
+    """Luat noi goi cho NGUOI GHI: trong MOT luot that, nhip tim `nt` duoc dat vao bien `_ghi_than` cua noi goi `noi` (W2 hoac W7). Ngoai mien
+    => bo kiem dung chung chan TRUOC PATCH cua noi ay voi ma cua DUNG dieu kien, ma thoat 3 (`kq` = (so PATCH, ma thoat) cua doi chung)."""
+    def chay():
+        g = dat_than(dat_f(gh(), "do"), nt_cu(T8))
+        with thay_ten("_ghi_than", lambda goc: lambda c, so, x, *a: goc(c, so, copy.deepcopy(nt) if a[3] == noi else x, *a)):
+            ma, bc, nk = luot_n(g)
+        mong((bc["ghi"].get(noi), dem(nk, "PATCH"), ma), (ma_mong, *(kq or (int(noi == "W7"), 3))), f"{noi} {hau}")
+    ca(chay, f"n8_{noi}_mien_{hau}")
+
+for _noi in ("W2", "W7"):
+    for _i, _mk, _sua in MIEN:
+        ca_ghi_mien(_noi, f"m{_i}", nt_cu(T8, **_sua), f"nhip_tim_sai_mien:{_mk}:m{_i}")
+    ca_ghi_mien(_noi, "tap_khoa", nt_cu(T8, x=1), "nhip_tim_tap_khoa")
+    ca_ghi_mien(_noi, "tuong_lai", nt_cu(T8, -1), "nhip_tim_tuong_lai")
+    ca_ghi_mien(_noi, "doi_chung", nt_cu(T8), "da_gui", (2, 1))   # nhip tim HOP LE dat vao cung bien ay thi noi ay gui
+
+def ba_noi(*hau): return [f"n8_{noi}mien_{h}" for h in hau for noi in ("", "W2_", "W7_")]   # W0 (nguoi doc) + W2 + W7 (nguoi ghi)
+
 for _i, _mk in [(i, k) for i, k, _ in MIEN if i in (1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 16, 25)]:
-    tho(f"d61_m{_i}", f'return SAI("{_mk}", {_i})', "pass", f"n8_mien_m{_i}")
-tho("d61_m12_m14", "return SAI(k, i)", "pass", "n8_mien_m12", "n8_mien_m14")
-tho("d61_m17_m26", "return SAI(ten, so)", "pass", "n8_mien_m17", "n8_mien_m26")
+    tho(f"d61_m{_i}", f'return SAI("{_mk}", {_i})', "pass", *ba_noi(f"m{_i}"))
+tho("d61_m12_m14", "return SAI(k, i)", "pass", *ba_noi("m12", "m14"))
+tho("d61_m17_m26", "return SAI(ten, so)", "pass", *ba_noi("m17", "m26"))
 for _j in range(7):
-    tho(f"d61_m{18 + _j}_m{27 + _j}", "return SAI(khoa, i" + (f" + {_j})" if _j else ")"), "pass", f"n8_mien_m{18 + _j}", f"n8_mien_m{27 + _j}")
+    tho(f"d61_m{18 + _j}_m{27 + _j}", "return SAI(khoa, i" + (f" + {_j})" if _j else ")"), "pass", *ba_noi(f"m{18 + _j}", f"m{27 + _j}"))
 
 @ca
 def n8_phan_chung_luot_1():   # phan chung cua review luot 1: sai KIEU => khong_doc_duoc, khong bao gio `moi`

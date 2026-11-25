@@ -329,7 +329,8 @@ class _NenCoHan(io.RawIOBase):
 def _mot_lan(c, pt, url, hd, than, timeout):
     """MOT lan thu vat ly: gui, roi doc than theo khuc va dung o byte thu TRAN_GOI + 1. Han TUYET DOI cua lan thu (da kep theo han cua
     pha) rang buoc ca vong doc lan TUNG lan doc nen ben trong mot `read` cua phan hoi that (GET API, GET kho luu tru, PATCH, POST va
-    than cua HTTPError di chung duong nay)."""
+    than cua HTTPError di chung duong nay). GIOI HAN: pha mo ket noi / gui / doc tieu de nam BEN TRONG `transport`, chi bi chan tung thao tac
+    blocking boi `timeout`; lan thu mo xong o hay sau han thi vong doc nem ngay (truoc lan doc nen dau tien, hoac sau lan `read` dau tien)."""
     het = c.dong_ho() + timeout
     ma, hd_ra, luong = c.transport(pt, url, hd, than, timeout)
     r = luong if isinstance(luong, http.client.HTTPResponse) else getattr(luong, "fp", None)  # f02:nen_loi — HTTPError boc HTTPResponse trong `fp`

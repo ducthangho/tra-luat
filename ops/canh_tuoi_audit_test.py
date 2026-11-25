@@ -2005,8 +2005,8 @@ ca_nen(3, (3, 1, "chua_xac_nhan", False, None), (1, 1, "da_gui", True, "canh_bao
 ca_nen(0, (TMO, 3), ("http_github:403", 1), [HAN_30] * 3, "than_loi", ma_ep=403)   # than cua HTTPError (adapter tra chinh HTTPError lam luong)
 NEN4, NEN_R = [f"n15_nen_{d[0]}" for d in BON_DUONG], "isinstance(r, http.client.HTTPResponse)"
 khong("f02_nen", "f02:nen", *NEN4, "n15_nen_than_loi")
-khong("f02_nen_han", "f02:nen_han", *NEN4)
-db("f02_nen_han_bien", "f02:nen_han", "con <= 0", "con < 0", *NEN4)
+khong("f02_nen_han", "f02:nen_han", *NEN4, "n16_socket_that")
+db("f02_nen_han_bien", "f02:nen_han", "con <= 0", "con < 0", *NEN4, "n16_socket_that")
 db("f02_nen_socket", "f02:nen_socket", "sock.settimeout(con)", "pass", *NEN4, "n16_socket_that")
 xoa("f02_nen_dong", "f02:nen_dong", *NEN4)
 db("f02_nen_nhieu_lan_doc", "f02:nen_mot_lan", "read1(", "read(", *NEN4)       # mot lan kiem han cho NHIEU lan doc nen
@@ -2119,7 +2119,7 @@ tho("rv2_n06_http_error_lan_ra", "        r = e\n    return r.status", "        
 
 @ca
 def n16_socket_that():   # cau truc THAT cua thu vien (HTTPResponse -> BufferedReader -> SocketIO -> socket), khong mang: thoi gian con lai phai toi DUNG socket ay
-    for ma in (200, 404):
+    for ma, mo_xong, muon in ((200, 0.0, (200, b"hello", 12.5, True)), (404, 0.0, (404, b"hello", 12.5, True)), (200, 12.5, (None, "TimeoutError", 7.0, False))):
         a, b = socket.socketpair()
         a.settimeout(7)
         b.sendall(f"HTTP/1.1 {ma} X\r\nContent-Length: 5\r\n\r\nhello".encode())
@@ -2127,9 +2127,14 @@ def n16_socket_that():   # cau truc THAT cua thu vien (HTTPResponse -> BufferedR
         r = http.client.HTTPResponse(a, method="GET")
         r.begin()
         a.close()   # nhu urllib `do_open`: dong doi tuong socket ngay, fd con song nho luong doc cua phan hoi
+        dh = iter([0.0] + [mo_xong] * 9)   # dong ho: 0 luc bat dau lan thu (han = 12,5), roi `mo_xong` tu luc transport tra ve
         with lop_mo(nem_http(ma, r.headers, r) if ma == 404 else lambda req: r):
-            kq = M._mot_lan(M._NguCanh(M.transport_that, lambda: 0.0, None, "t", None), "GET", "https://api.github.com/x", {}, None, 12.5)
-        mong((kq[0], kq[2], a.gettimeout(), a.fileno()), (ma, b"hello", 12.5, -1), f"ma {ma}: than doc tron, socket nhan thoi gian con lai, fd dong khi than het")
+            try:
+                kq = M._mot_lan(M._NguCanh(M.transport_that, lambda: next(dh), None, "t", None), "GET", "https://api.github.com/x", {}, None, 12.5)
+            except TimeoutError as e:
+                kq = (None, None, type(e).__name__)
+        mong((kq[0], kq[2], a.gettimeout(), a.fileno() == -1), muon, f"ma {ma}, mo xong o {mo_xong} s: (ma, than, timeout tren socket, fd da dong)")
+        r.close()   # mo xong DUNG o han => khong lan doc nen nao, socket khong bi dung toi (timeout van 7), than chua doc
 
 @ca
 def n9_main_ma_thoat():   # main(): ma thoat cua muc 9 di nguyen ven ra tien trinh; bao cao MOT dong JSON ASCII sort_keys; tom tat khi co GITHUB_STEP_SUMMARY

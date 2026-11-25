@@ -40,7 +40,9 @@ $script:ReGuid = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\
 $script:ReRecord = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json\z'
 $script:Help = @('px help', 'px config|status|start|stop|restart|connect|disconnect -ConfigPath <file> -RepositoryRoot <dir> -TargetId <id> [-Credential <PSCredential>] [-Force]',
     'px models [<provider>] -ConfigPath ... -RepositoryRoot ... -TargetId ...', 'px use <provider> <model id: provider | provider:variant | provider/model> -ConfigPath ... -RepositoryRoot ... -TargetId ...',
-    'px ask <provider> <prompt> [-Model <model id>] -ConfigPath ... -RepositoryRoot ... -TargetId ...', 'Every action supports -WhatIf and -Confirm.')
+    'px ask <provider> <prompt> [-Model <model id>] -ConfigPath ... -RepositoryRoot ... -TargetId ...',
+    'ask data: answer has complete <ElicitationsGroup> blocks removed; answerMarkup none|removed|unterminated; answerMarkupRemoved = blocks removed',
+    'Every action supports -WhatIf and -Confirm.')
 
 function Get-PxcSha256([byte[]]$Bytes) {
     $h = [Security.Cryptography.SHA256]::Create()
@@ -282,6 +284,33 @@ function Get-PxcPending([string]$Base, [string]$Protected) {
 }
 
 # ---- operations (endpoint side; also the in-process Local path after px's gate) ----
+# px-loc-markup r1 #1529 (#1457 r2: the Gemini web UI appended a suggestion block to an answer): drop each COMPLETE
+# <ElicitationsGroup ...>...</ElicitationsGroup> block (tag name compared Ordinal; the name must end at whitespace, '>', '/' or end of
+# text). An open tag without its own close, or a second open before that close, leaves the text untouched and reports 'unterminated'.
+# Only trailing whitespace is trimmed after a removal. The removed text is never returned or written anywhere.
+function Find-PxcOpenTag([string]$Text, [int]$From) {
+    while ($From -le $Text.Length) {
+        $i = $Text.IndexOf('<ElicitationsGroup', $From, [StringComparison]::Ordinal)
+        if ($i -lt 0) { return -1 }
+        $e = $i + 18
+        if ($e -ge $Text.Length -or [char]::IsWhiteSpace($Text[$e]) -or $Text[$e] -eq [char]'>' -or $Text[$e] -eq [char]'/') { return $i }
+        $From = $i + 1
+    }
+    return -1
+}
+function Remove-PxcElicitation([string]$Text) {
+    $close = '</ElicitationsGroup>'; $sb = [Text.StringBuilder]::new(); $pos = 0; $n = 0
+    while ($true) {
+        $i = Find-PxcOpenTag $Text $pos
+        if ($i -lt 0) { break }
+        $j = $Text.IndexOf($close, $i, [StringComparison]::Ordinal); $k = Find-PxcOpenTag $Text ($i + 18)
+        if ($j -lt 0 -or ($k -ge 0 -and $k -lt $j)) { return @{ Text = $Text; State = 'unterminated'; Removed = 0 } }
+        $null = $sb.Append($Text, $pos, $i - $pos); $pos = $j + $close.Length; $n++
+    }
+    if ($n -eq 0) { return @{ Text = $Text; State = 'none'; Removed = 0 } }
+    $null = $sb.Append($Text, $pos, $Text.Length - $pos)
+    return @{ Text = $sb.ToString().TrimEnd(); State = 'removed'; Removed = $n }
+}
 function Invoke-PxcAsk([string]$Base, [string]$Fp, [string]$Protected, [string]$Provider, [string]$Model, [string]$Prompt) {
     $url = Get-PxcGateway $Base
     if (-not (Test-PxcModel (Get-PxcAdvertised $url) $Provider $Model)) { Stop-Pxc 'ModelNotAdvertised' }
@@ -307,11 +336,13 @@ function Invoke-PxcAsk([string]$Base, [string]$Fp, [string]$Protected, [string]$
                 } catch { $parsed = $false }
             }
         }
+        $mk = @{ Text = $null; State = 'none'; Removed = 0 }
+        if ($parsed) { $mk = Remove-PxcElicitation $answer }
         $rec['state'] = $state; $final = $true
         try { Write-PxcRecord $rs.Stream $rec } catch { $final = $false }
         $outcome = $(if (-not $final) { 'finalize_failed' } elseif ($state -cne 'completed') { 'unknown' } elseif ($parsed) { 'ok' } else { 'response_unparsed' })
         return (New-PxcResult 'ask' $Fp 'Endpoint' $false $true $outcome ([ordered]@{ requestedModel = $Model; reportedModel = $(if ($reported -is [string]) { $reported })
-                    answer = $(if ($parsed) { $answer }); answerTrust = 'untrusted_data'; httpStatus = $status; recordId = $rs.Id
+                    answer = $(if ($parsed) { $mk.Text }); answerMarkup = $mk.State; answerMarkupRemoved = [int]$mk.Removed; answerTrust = 'untrusted_data'; httpStatus = $status; recordId = $rs.Id
                     recordState = $(if ($final) { $state } else { 'pending_finalize_failed' }) }))
     } finally { Close-PxcCtx $ctx }
 }

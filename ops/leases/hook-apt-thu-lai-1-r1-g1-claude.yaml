@@ -36,9 +36,12 @@ granted_on_instruction: 'chu kho 25/11 trong phien dispatcher: chon "Hook: bot t
 recorded_by: 'phiên điều phối session_015GtxrapMSm976JLC7Fp1HM'
 thay_the_cho: []
 leased_at_utc: '2026-11-25T07:54:32Z'
-heartbeat_at: '2026-11-25T07:54:32Z'
-lease_until: '2026-11-25T15:54:32Z'
-lease_expires_at_utc: '2026-11-25T15:54:32Z'
+heartbeat_at: '2026-11-25T08:22:57Z'
+lease_until: '2026-11-25T08:22:57Z'
+lease_expires_at_utc: '2026-11-25T08:22:57Z'
 max_lease_hours: 8
 review_calls_limit: 2
 inference_calls_limit: 0
+withdrawn_at_utc: '2026-11-25T08:22:57Z'
+withdrawn_by: 'phien dieu phoi session_015GtxrapMSm976JLC7Fp1HM'
+withdrawn_reason: 'r1 xong: hook + test, review Codex offline 1/2 approve (P3 da khoa bang 2 ve + 2 dot bien); ops/acceptance/hook-apt-thu-lai-1/r1/VERDICT.md. Thu hoi truoc merge vi khong con ghi them.'

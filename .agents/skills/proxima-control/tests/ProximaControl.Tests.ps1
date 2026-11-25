@@ -182,7 +182,7 @@ function New-PxArgs([string]$Action, $Tgt, [hashtable]$More = @{}) {
 $DefaultHttp = { param($Req) $p = ([Uri]$Req['Uri']).AbsolutePath; $m = $Req['Method']
     if ($m -ceq 'GET' -and $p -ceq '/api/status') { return @{ Status = 200; Body = '{"ok":true}' } }
     if ($m -ceq 'GET' -and $p -ceq '/v1/models') { return @{ Status = 200; Body = $global:PxcT.Models } }
-    if ($m -ceq 'POST' -and $p -ceq '/v1/chat/completions') { if ($global:PxcT.Chat) { return @{ Status = 200; Body = $global:PxcT.Chat } }; return @{ Status = 200; Body = '{"model":"prov/served","choices":[{"message":{"content":"answer-text"}}]}' } }
+    if ($m -ceq 'POST' -and $p -ceq '/v1/chat/completions') { if ($global:PxcT.Chat) { return @{ Status = 200; Body = $global:PxcT.Chat } }; return @{ Status = 200; Body = '{"model":"prov/m1","choices":[{"message":{"content":"answer-text"}}]}' } }
     return @{ Status = 404; Body = '' } }
 $DefaultProc = { param($ProcId) [pscustomobject]@{ SessionId = [uint32]0; ExecutablePath = $global:PxcT.Pids["$ProcId"] } }
 $DefaultSvc = { [pscustomobject]@{ Name = 'ProximaGateway'; PathName = '"' + $global:PxcT.ServiceExe + '"' } }
@@ -828,9 +828,9 @@ Invoke-Case 'X5-01' {
             if ($b.model -cne 'prov/m1' -or -not [string]::Equals([string]@($b.messages)[0].content, $prompt, [StringComparison]::Ordinal)) { Add-Fail 'BODY_NOT_VERBATIM' }
             if (@($pr[0].Headers | Where-Object { $_ -ceq 'Authorization: Bearer dummy-test-key' }).Count -ne 1) { Add-Fail 'KEY_NOT_SENT_ON_ASK' }
         }
-        $w.Routes['POST /v1/chat/completions'] = @(200, '{"model":"prov/served","choices":[{"message":{"content":"wire-answer"}}]}'); $before = $w.Log.Count
+        $w.Routes['POST /v1/chat/completions'] = @(200, '{"model":"prov/m2","choices":[{"message":{"content":"wire-answer"}}]}'); $before = $w.Log.Count
         $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'second'; Model = 'prov/m1' })
-        if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.data.requestedModel)" -cne 'prov/m1' -or "$($x.R.data.reportedModel)" -cne 'prov/served' -or "$($x.R.data.answer)" -cne 'wire-answer') { Add-Fail "WIRE_POSITIVE[$($x.Id)]" }
+        if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.data.requestedModel)" -cne 'prov/m1' -or "$($x.R.data.reportedModel)" -cne 'prov/m2' -or "$($x.R.data.answer)" -cne 'wire-answer') { Add-Fail "WIRE_POSITIVE[$($x.Id)]" }
         if ($w.Log.Count - $before -ne 2) { Add-Fail "WIRE_COUNTS[200] $($w.Log.Count - $before)" }
     } finally { Set-RealHttp $false; Stop-WireServer $w; Set-RestPort $Tg.Pos.Base $Tg.Pos.ProcId $Tg.Pos.ProcId; [Environment]::SetEnvironmentVariable('PROXIMA_API_KEY', $savedKey) }
     foreach ($c in @(@('timeout', { param($Req) if ($Req['Method'] -ceq 'POST') { throw [TimeoutException]::new('timeout') }; & $DefaultHttp $Req }),
@@ -1068,16 +1068,18 @@ Invoke-Case 'X5-10' {
     if ($post.Count - $n0 -ne 1 -or ([string]$post[-1]['Body'] | ConvertFrom-Json).model -cne 'gw:fast') { Add-Fail 'ASK_VARIANT_NOT_SENT' }
 }
 Invoke-Case 'X5-11' {
-    # px-loc-markup #1529 (#1457 r2): ask drops each COMPLETE <ElicitationsGroup ...>...</ElicitationsGroup> from answer (tag name Ordinal),
+    # px-loc-markup r3 #1529 (#1457 r2): ask drops each COMPLETE <ElicitationsGroup ...>...</ElicitationsGroup> from answer (tag name Ordinal),
     # reports answerMarkup/answerMarkupRemoved, leaves malformed or look-alike markup byte-identical, trims trailing whitespace only after a
-    # trailing block. No-leak is proved STRUCTURALLY (allowlist, r2 after review round 3), not by searching representations for a marker:
-    # (1) with verbose/debug/information forced on, every stream together carries exactly ONE object, the px.result.v1 result;
-    # (2) that result has exactly the known top-level and data keys, each with its expected value (answer Ordinal, reportedModel a plain id);
-    # (3) after a per-case journal reset the target's results tree holds exactly one file, the call's record, with exactly the five known
-    #     keys and expected values. Nothing else can carry the dropped text.
+    # trailing block, and echoes reportedModel only when it is an id this call got from GET /v1/models. Spec r3 N1 contract on the SHIPPED
+    # implementation, exact on three surfaces: (1) streams (verbose/debug/information forced on) carry exactly ONE object, the result;
+    # (2) the result's top-level and data keys are the known sets and EVERY value equals its expectation (mode, targetFingerprint from config,
+    # recordId from this case's fixed id generator, answer as a plain string, ...); (3) the results tree holds exactly one file, the call's
+    # record, whose BYTES equal the record built from its five known fields. Deliberate exfiltration elsewhere is for code review (spec r3).
     $drop = 'PXDROP7f3a'; $keepMk = 'PXKEEP7f3a'; $nl = [string][char]10; $crlf = [string][char]13 + $nl; $q = [string][char]34; $nb = [string][char]0xA0
-    $g = '<ElicitationsGroup message=' + $q + 'm ' + $drop + $q + '><Elicitation label=' + $q + 'l ' + $drop + $q + ' query=' + $q + 'q ' + $drop + $q + '/></ElicitationsGroup>'
+    $g = '<ElicitationsGroup message=' + $q + 'm ' + $drop + $q + '><Elicitation label=' + $q + $drop + $q + ' query=' + $q + 'q ' + $drop + $q + '/></ElicitationsGroup>'
     $open = '<ElicitationsGroup message=' + $q + 'x' + $q + '>'
+    $global:PxcT.Models = '{"data":[{"id":"prov/m1"},{"id":"prov/m2"},{"id":"prov/served"}]}'
+    $fp = Get-Fp $Tg.Pos; $u8 = [Text.UTF8Encoding]::new($false)
     # name, content, expected answer, answerMarkup, answerMarkupRemoved, gateway model, expected reportedModel ($null = absent)
     $cases = @(
         @('none', ('plain answer' + $nl), ('plain answer' + $nl), 'none', 0, 'prov/served', 'prov/served'),
@@ -1093,12 +1095,15 @@ Invoke-Case 'X5-11' {
         @('other name', 'OK <ElicitationsGroupX a="1">z</ElicitationsGroupX>', 'OK <ElicitationsGroupX a="1">z</ElicitationsGroupX>', 'none', 0, 'prov/served', 'prov/served'),
         @('case variant', 'OK <elicitationsgroup a="1">z</elicitationsgroup>', 'OK <elicitationsgroup a="1">z</elicitationsgroup>', 'none', 0, 'prov/served', 'prov/served'),
         @('kept outside', ('keep ' + $keepMk + $nl + $g), ('keep ' + $keepMk), 'removed', 1, 'prov/served', 'prov/served'),
-        @('model echo', ('OK ' + $g), 'OK', 'removed', 1, $g, $null))
+        @('model is whole block', ('OK ' + $g), 'OK', 'removed', 1, $g, $null),
+        @('model is dropped label', ('OK ' + $g), 'OK', 'removed', 1, $drop, $null),
+        @('model advertised other', 'plain', 'plain', 'none', 0, 'prov/m1', 'prov/m1'))
     $topKeys = 'action,data,dispatched,dryRun,mode,outcome,schema,targetFingerprint'
     $dataKeys = 'answer,answerMarkup,answerMarkupRemoved,answerTrust,httpStatus,recordId,recordState,reportedModel,requestedModel'
     $cmd = $script:PxCmd; $vp = $global:VerbosePreference; $dp = $global:DebugPreference; $ip = $global:InformationPreference
     foreach ($c in $cases) {
         Clear-Journal $Tg.Pos.Base
+        $id = [guid]::NewGuid().ToString('D'); $global:PxcT.IdHandler = [scriptblock]::Create("'$id'")
         $global:PxcT.Chat = (@{ model = $c[5]; choices = @(@{ message = @{ content = $c[1] } }) } | ConvertTo-Json -Depth 6 -Compress)
         $a = New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'p'; Model = 'prov/m2' }; $raw = @()
         try { $global:VerbosePreference = 'Continue'; $global:DebugPreference = 'Continue'; $global:InformationPreference = 'Continue'; $raw = @(& $cmd @a *>&1) }
@@ -1106,22 +1111,26 @@ Invoke-Case 'X5-11' {
         $r = @($raw | Where-Object { $null -ne $_ -and $_ -isnot [Management.Automation.ErrorRecord] -and $_ -isnot [string] -and $null -ne $_.PSObject.Properties['schema'] })
         if ($raw.Count -ne 1 -or $r.Count -ne 1) { Add-Fail "MARKUP_EXTRA_STREAM[$($c[0])]"; continue }
         $x = $r[0]; $tk = @($x.PSObject.Properties | ForEach-Object { $_.Name }); [Array]::Sort($tk, [StringComparer]::Ordinal)
-        if (($tk -join ',') -cne $topKeys -or "$($x.schema)" -cne 'px.result.v1' -or "$($x.action)" -cne 'ask' -or "$($x.outcome)" -cne 'ok' -or
-            $x.dryRun -ne $false -or $x.dispatched -ne $true -or "$($x.targetFingerprint)" -cnotmatch '\A[0-9a-f]{64}\z') { Add-Fail "MARKUP_RESULT_SHAPE[$($c[0])]"; continue }
-        $d = $x.data; $dk = @($(if ($d -is [Collections.IDictionary]) { $d.Keys } else { $d.PSObject.Properties | ForEach-Object { $_.Name } }) | ForEach-Object { [string]$_ })
-        [Array]::Sort($dk, [StringComparer]::Ordinal)
-        if (($dk -join ',') -cne $dataKeys -or "$($d.requestedModel)" -cne 'prov/m2' -or "$($d.answerTrust)" -cne 'untrusted_data' -or $d.httpStatus -ne 200 -or
-            "$($d.recordState)" -cne 'completed' -or "$($d.recordId)" -cnotmatch '\A[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}\z') { Add-Fail "MARKUP_RESULT_SHAPE[$($c[0])]"; continue }
-        if (-not [string]::Equals([string]$d.answer, [string]$c[2], [StringComparison]::Ordinal)) { Add-Fail "MARKUP_ANSWER[$($c[0])]" }
-        if ("$($d.answerMarkup)" -cne $c[3] -or $d.answerMarkupRemoved -isnot [int] -or $d.answerMarkupRemoved -ne $c[4]) { Add-Fail "MARKUP_STATE[$($c[0])]" }
-        if ($(if ($null -eq $c[6]) { $null -ne $d.reportedModel } else { -not [string]::Equals([string]$d.reportedModel, [string]$c[6], [StringComparison]::Ordinal) })) { Add-Fail "MARKUP_REPORTED_MODEL[$($c[0])]" }
-        $rp = "$($Tg.Pos.Base)\results\px-active\$($d.recordId).json"
+        if (($tk -join ',') -cne $topKeys -or $x.schema -isnot [string] -or $x.schema -cne 'px.result.v1' -or $x.action -cne 'ask' -or $x.outcome -cne 'ok' -or
+            $x.mode -isnot [string] -or $x.mode -cne 'Local' -or $x.dryRun -isnot [bool] -or $x.dryRun -or $x.dispatched -isnot [bool] -or -not $x.dispatched -or
+            $x.targetFingerprint -isnot [string] -or $x.targetFingerprint -cne $fp) { Add-Fail "MARKUP_RESULT_SHAPE[$($c[0])]"; continue }
+        $d = $x.data
+        if ($d -isnot [Collections.Specialized.OrderedDictionary] -or @($d.PSObject.Properties | Where-Object { $_.MemberType -ceq 'NoteProperty' }).Count) { Add-Fail "MARKUP_RESULT_SHAPE[$($c[0])]"; continue }
+        $dk = @($d.Keys | ForEach-Object { [string]$_ }); [Array]::Sort($dk, [StringComparer]::Ordinal)
+        if (($dk -join ',') -cne $dataKeys -or $d['requestedModel'] -cne 'prov/m2' -or $d['answerTrust'] -cne 'untrusted_data' -or $d['httpStatus'] -isnot [int] -or
+            $d['httpStatus'] -ne 200 -or $d['recordState'] -cne 'completed' -or $d['recordId'] -isnot [string] -or $d['recordId'] -cne $id) { Add-Fail "MARKUP_RESULT_SHAPE[$($c[0])]"; continue }
+        $ans = $d['answer']
+        if ($ans -isnot [string] -or @(([psobject]$ans).PSObject.Properties | Where-Object { $_.MemberType -ceq 'NoteProperty' }).Count -or
+            -not [string]::Equals($ans, [string]$c[2], [StringComparison]::Ordinal)) { Add-Fail "MARKUP_ANSWER[$($c[0])]" }
+        if ($d['answerMarkup'] -isnot [string] -or $d['answerMarkup'] -cne $c[3] -or $d['answerMarkupRemoved'] -isnot [int] -or $d['answerMarkupRemoved'] -ne $c[4]) { Add-Fail "MARKUP_STATE[$($c[0])]" }
+        $rm = $d['reportedModel']
+        if ($(if ($null -eq $c[6]) { $null -ne $rm } else { $rm -isnot [string] -or -not [string]::Equals($rm, [string]$c[6], [StringComparison]::Ordinal) })) { Add-Fail "MARKUP_REPORTED_MODEL[$($c[0])]" }
+        $rp = "$($Tg.Pos.Base)\results\px-active\$id.json"
         $files = @([IO.Directory]::GetFiles("$($Tg.Pos.Base)\results", '*', [IO.SearchOption]::AllDirectories))
         if ($files.Count -ne 1 -or -not [string]::Equals([IO.Path]::GetFullPath($files[0]), [IO.Path]::GetFullPath($rp), [StringComparison]::OrdinalIgnoreCase)) { Add-Fail "MARKUP_JOURNAL_SHAPE[$($c[0])]"; continue }
-        $j = $null; try { $j = [IO.File]::ReadAllText($rp) | ConvertFrom-Json } catch { $j = $null }
-        $jk = @($(if ($null -ne $j) { $j.PSObject.Properties | ForEach-Object { $_.Name } })); [Array]::Sort($jk, [StringComparer]::Ordinal)
-        if ($null -eq $j -or ($jk -join ',') -cne 'action,requestedModel,schema,state,targetFingerprint' -or "$($j.schema)" -cne 'px.active.v1' -or "$($j.action)" -cne 'ask' -or
-            "$($j.requestedModel)" -cne 'prov/m2' -or "$($j.state)" -cne 'completed' -or "$($j.targetFingerprint)" -cne "$($x.targetFingerprint)") { Add-Fail "MARKUP_JOURNAL_SHAPE[$($c[0])]" }
+        $want = $u8.GetBytes('{"schema":"px.active.v1","action":"ask","targetFingerprint":"' + $fp + '","requestedModel":"prov/m2","state":"completed"}')
+        $got = [IO.File]::ReadAllBytes($rp)
+        if ($got.Length -ne $want.Length -or [Convert]::ToBase64String($got) -cne [Convert]::ToBase64String($want)) { Add-Fail "MARKUP_JOURNAL_SHAPE[$($c[0])]" }
     }
     $global:PxcT.Chat = ''
 }
@@ -1135,7 +1144,7 @@ Invoke-Case 'X6-01' {
     $x = Invoke-Px (New-PxArgs 'use' $Tg.Pos @{ Provider = 'prov'; Value = 'prov/m2' }); Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /v1/models') 'use'
     if (-not $x.R -or "$($x.R.outcome)" -cne 'selected') { Add-Fail 'USE_POSITIVE' }
     $x = Invoke-Px (New-PxArgs 'ask' $Tg.Pos @{ Provider = 'prov'; Value = 'hello' }); Assert-Calls $x @('GetProcess', 'GetTcpListener', 'Http:GET /v1/models', 'NewId', 'Http:POST /v1/chat/completions') 'ask'
-    if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.data.requestedModel)" -cne 'prov/m2' -or "$($x.R.data.reportedModel)" -cne 'prov/served' -or "$($x.R.data.answer)" -cne 'answer-text' -or "$($x.R.data.answerTrust)" -cne 'untrusted_data') { Add-Fail 'ASK_POSITIVE' }
+    if (-not $x.R -or "$($x.R.outcome)" -cne 'ok' -or "$($x.R.data.requestedModel)" -cne 'prov/m2' -or "$($x.R.data.reportedModel)" -cne 'prov/m1' -or "$($x.R.data.answer)" -cne 'answer-text' -or "$($x.R.data.answerTrust)" -cne 'untrusted_data') { Add-Fail 'ASK_POSITIVE' }
     elseif ((Get-RecordState $Tg.Pos.Base $x.R.data.recordId) -cne 'completed') { Add-Fail 'ASK_RECORD_NOT_COMPLETED' }
     Clear-Journal $Tg.Svc.Base; $global:PxcT.UiHandler = { 0 }
     Assert-Calls (Invoke-Px (New-PxArgs 'start' $Tg.Svc)) @('UiSessions', 'GetService', 'ServiceControl:Start') 'start'
@@ -1199,7 +1208,7 @@ $Cx = @(@{ id = 'CX00'; file = ''; e = @(); red = @() },
     @{ id = 'CX13'; file = 'ProximaControl.psm1'; e = @('$Id.StartsWith($Provider + '':'', [StringComparison]::Ordinal)', '$Id.StartsWith($Provider + '':'', [StringComparison]::OrdinalIgnoreCase)'); red = @('X5-10:MODEL_ID_FORM_LOOSE[provider case variant]', 'X5-10:MODELS_FILTER_CASE_LOOSE') },
     @{ id = 'CX14'; file = 'ProximaControl.psm1'; e = @('if ($parsed) { $mk = Remove-PxcElicitation $answer }', 'if ($parsed) { $mk = @{ Text = $answer; State = ''none''; Removed = 0 } }'); red = @('X5-11:MARKUP_ANSWER[one block]', 'X5-11:MARKUP_STATE[one block]') },
     @{ id = 'CX15'; file = 'ProximaControl.psm1'; e = @('$i = $Text.IndexOf(''<ElicitationsGroup'', $From, [StringComparison]::Ordinal)', '$i = $Text.IndexOf(''<ElicitationsGroup'', $From, [StringComparison]::OrdinalIgnoreCase)'); red = @('X5-11:MARKUP_STATE[case variant]') },
-    @{ id = 'CX16'; file = 'ProximaControl.psm1'; e = @('reportedModel = $(if (Test-PxcReportedModel $reported) { $reported })', 'reportedModel = $(if ($reported -is [string]) { $reported })'); red = @('X5-11:MARKUP_REPORTED_MODEL[model echo]') })
+    @{ id = 'CX16'; file = 'ProximaControl.psm1'; e = @('reportedModel = $(if (Test-PxcAdvertisedId $adv $reported) { $reported })', 'reportedModel = $(if ($reported -is [string]) { $reported })'); red = @('X5-11:MARKUP_REPORTED_MODEL[model is dropped label]') })
 $Report.counterexample_ids = @($Cx | ForEach-Object { $_.id })
 function Get-Kill($Rep, [string[]]$Want) {
     $hit = [Collections.Generic.List[object]]::new()

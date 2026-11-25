@@ -325,7 +325,7 @@ ARGV_SAI = (("--ban", "../x"), ("--ban",), ("--ban", "2.3"), ("--ban", "v2.3.4")
 # Danh sách CHO PHÉP sự kiện audit: không cái nào tự nó ghi đĩa/sinh tiến trình/mở ổ cắm. Tên nào ngoài đây ⇒ ĐỎ (fail-closed).
 SU_KIEN_LANH = ("compile", "exec", "import", "marshal.loads", "os.listdir", "os.scandir", "sys._getframe", "sys._getframemodulename",
                 "object.__getattr__", "object.__setattr__", "object.__delattr__", "builtins.id", "code.__new__", "function.__new__",
-                "sys.excepthook", "sys.unraisablehook", "urllib.Request", "http.client.send",   # hai cái sau: transport THẬT nói vào ổ cắm GIẢ
+                "sys.excepthook", "sys.unraisablehook", "time.sleep", "urllib.Request", "http.client.send",   # hai cái sau: transport THẬT nói vào ổ cắm GIẢ
                 "cpython.PyInterpreterState_Clear", "cpython._PySys_ClearAuditHooks")   # trình thông dịch tự phát khi tắt
 # Danh sách CHO PHÉP cờ của `open` đọc: đúng các cờ mà `open(p)`/`os.open(p, O_RDONLY)` của CPython dùng trên Windows và POSIX.
 CO_DOC_CHO_PHEP = ("O_RDONLY", "O_BINARY", "O_NOINHERIT", "O_CLOEXEC")
@@ -389,7 +389,7 @@ class OcGia:
     def __init__(self, kn, luoc_do):
         self.kn, self.luoc_do, self.vao = kn, luoc_do, b""
     def sendall(self, du, *a):
-        self.vao += bytes(du)
+        self.vao += memoryview(du).cast("B")
     def makefile(self, *a, **kw):   # http.client đọc phản hồi ⇒ lúc này yêu cầu đã nằm trọn trong `vao`
         dau = self.vao.split(b"\r\n\r\n", 1)[0].decode("iso-8859-1").split("\r\n")
         pt, duong = dau[0].split(" ")[:2]
@@ -609,10 +609,13 @@ def main(argv):
     if ca == "lanh":   # đọc, liệt kê, mở CHỈ ĐỌC, callback lúc tắt KHÔNG ghi, sáu dạng lời gọi transport mà thư viện thật nhận
         open(__file__, encoding="utf-8").read(), os.listdir("."), Path(MOI).read_bytes(), os.close(os.open(MOI, os.O_RDONLY))
         threading._register_atexit(lambda: None), atexit.register(lambda: None)
+        __import__("time").sleep(0), threading.Event().wait(0)   # F01-x: chờ thuần không phải tác động tệp
         with mo(U, timeout=30) as r:
             r.read()
         mo(YC(U, headers={"User-Agent": "x"}), None, 2.5).read(), mo(U).read(), mo(U, timeout=True).read(), mo(U, timeout=None).read()
         urllib.request.build_opener().open(U, timeout=1).read()
+        mo(YC(U, data=[b"A"], method="GET", headers={"Content-Length": "1"}), timeout=30).read()   # F01-w: body iterable bytes hợp lệ
+        mo(YC(U, data=[b"A"], method="GET"), timeout=30).read()   # F01-w: chunked hợp lệ
         print("ok")
     elif ca == "path_tuyet_doi":
         Path(tam, "a.txt").write_text("x", encoding="utf-8")
@@ -701,7 +704,7 @@ def g4_quan_sat_va_transport_co_rang():   # F01-n/q/t/u/v: đối chứng dươn
              f"đối chứng {ngoai}: {_so_trang_thai(truoc, _chup(cay))}")
     x = kq["lanh"]
     bang(not _bi_chot(x) and (x.rc, x.ra, x.loi, x.roi) == (0, "ok\n", "", "SystemExit"), f"việc hợp lệ bị chốt oan: sk={x.sk} sai={x.sai} doi={x.doi} rc={x.rc} {x.loi!r}")
-    bang([(n["url"], n["pt"], n["han"]) for n in x.nk] == [("https://gia.invalid/9.8.7/agy_cli_linux_x64.tar.gz", "GET", h) for h in ("30", "2.5", None, "True", "None", "1")],
+    bang([(n["url"], n["pt"], n["han"]) for n in x.nk] == [("https://gia.invalid/9.8.7/agy_cli_linux_x64.tar.gz", "GET", h) for h in ("30", "2.5", None, "True", "None", "1", "30", "30")],
          f"nhật ký transport (đọc từ byte trên dây) lệch: {x.nk}")
     bang(x.nk[1]["tieu_de"].get("User-Agent") == "x", f"header không tới dây: {x.nk[1]}")
     for ten, dau in THU_GHI:
@@ -1198,6 +1201,10 @@ DOT_BIEN = (
     ("G2_bo_kiem_digest", "ma", '    if "sha256:" + hashlib.sha256(du).hexdigest() != a.get("digest"):', "    if False:", "g2_ghim_tu_choi_khi_sai"),
     ("G2_bo_kiem_tarball_ghim", "ma", '                return print(f"ghim-agy: ✗ tarball', '                pass; print(f"ghim-agy: ✗ tarball', "g2_ghim_tu_choi_khi_sai"),
     ("G2_bo_kiem_ban", "ma", ' and re.fullmatch(r"\\d+\\.\\d+\\.\\d+", argv[2])):', "):", "g2_ghim_tu_choi_khi_sai"),
+    # Lớp `ghim-output-oracle` lượt 5 (F01-w): socket giả phải giữ buffer protocol như socket thật
+    ("F01w_body_phan_tu_int", "ma", 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy"})', 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy", "Content-Length": "1"}, data=[1], method="GET")', "g1_ghim_in_dung_sau_cap"),
+    ("F01w_body_phan_tu_list", "ma", 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy"})', 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy", "Content-Length": "1"}, data=[[65]], method="GET")', "g1_ghim_in_dung_sau_cap"),
+    ("F01w_body_khong_lien_tuc", "ma", 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy"})', 'urllib.request.Request(url, headers={"User-Agent": "tra-luat-ghim-agy"}, data=memoryview(b"ABCD")[::2], method="GET")', "g1_ghim_in_dung_sau_cap"),
     # Lớp `ghim-output-oracle` lượt 3 (F01-n/q/r/s): đột biến SẢN PHẨM, mỗi cái chỉ chết được ở hậu điều chung của đúng ca
     ("F01n_path_write_text_tuyet_doi", "ma", "        dong = []", '        dong = []; Path(os.environ.get("TMPDIR") or os.environ.get("TEMP") or "/tmp", "ghim-agy-lot.txt").write_text("x", encoding="utf-8")', "g1_ghim_in_dung_sau_cap"),
     ("F01n_os_open", "ma", "        dong = []", '        dong = []; os.close(os.open(os.path.join(os.environ.get("TMPDIR") or os.environ.get("TEMP") or "/tmp", "ghim-agy-lot.bin"), os.O_WRONLY | os.O_CREAT | os.O_TRUNC))', "g3_ghim_ban_chi_dinh"),

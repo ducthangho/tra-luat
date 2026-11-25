@@ -30,11 +30,16 @@ input_packet_generations:
       dd68d28 ngay 17-11 khi chua thi cong (nhanh agent/doc-claims-dau-cham-g1-claude khong ton tai) — xem lease-...-g1-...-sau-rut-han.
 authorized_head_sha: c46f7287039d207b1d377d9a10c6e77191778404
 approver: ducthangho
-authorization_url: https://github.com/ducthangho/tra-luat/pull/1379
+authorization_url: https://github.com/ducthangho/tra-luat/pull/1379#issuecomment-7171861776
 authorization_ghi_chu: >-
   loi_khai_co_neo — chu kho chon "Merge c46f728" qua AskUserQuestion trong phien dieu phoi #1206 (17-11 ~23:59Z); khong co hien vat GitHub
   cua lua chon. Assurance cross_approved theo lease: verdict Codex offline approve run a5485408 (review-codex/a5485408/stdout.log.txt,
   reviewed_sha c46f728, reviewed_tree 84adb4b, spec_sha256 0712647). CAVEAT #566: ai bam merge khong do duoc (merged_by la danh tinh token).
+  Cap nhat 25-11-2026 (phien session_015GtxrapMSm976JLC7Fp1HM, lan luu tru ADR-0060): authorization_url cu tro PR chung chung (khong neo
+  comment/review) nen truot L-6 cua ops/kiem_ho_so_land.py — ho so duy nhat truot trong 101 ho so landed (do tren master c36a0d3). Chu
+  kho xac nhan lai quyet dinh 17-11 qua AskUserQuestion ngay 25-11; phien dang comment ghi ho, ghi lai SAU, issuecomment-7171861776
+  (doc nguoc REST: tac gia ducthangho, tao luc 2026-11-25T19:07:57Z, co SHA c46f728 day du). Quyet dinh goc van la
+  loi_khai_co_neo ngay 17-11; comment chi la hien vat ghi lai, khong doi assurance.
 land_operator: 'measured — readback-pr-1379.json: merged_at 2026-11-17T23:59:40Z, merge_commit_sha 3d6bfa5, draft false (bo draft ngay truoc merge); phien dieu phoi qua MCP merge_pull_request voi expectedHeadSha.'
 merge_method: merge
 merge_commit: 3d6bfa5361dc30caf1caea9ae2c3ffe1a563902f

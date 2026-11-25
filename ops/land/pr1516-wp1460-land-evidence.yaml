@@ -35,7 +35,9 @@ authorization_ghi_chu: >-
 land_operator: 'loi_khai_co_neo — chu kho tu bam merge; REST neo merged_by=ducthangho (readback-pr-1516.json), KHONG_DO_DUOC nguoi bam hay phien dung credential'
 merge_method: merge
 merge_commit: b4b79bf0cd301bb067a22c5245505d9a8ab232cb
-merge_commit_parents: [64b7f2c14776d5d0e1d34a6be4725490956f5bec, f5af7469c03e7fe421a3704c731f390842260304]
+merge_commit_tree: fd79936f57176c875fc6caa5cf392be3cc60e57c
+merge_commit_parents: [111bbbdc441fa66b62bff6c593ff435fb9bb69fa, f5af7469c03e7fe421a3704c731f390842260304]
+merge_commit_parents_nguon: 'measured — git cat-file -p b4b79bf0 (tree fd79936f, parent 111bbbdc, parent f5af7469); khop ci-provenance-45554804645/provenance.yaml. base.sha 64b7f2c1 trong readback-pr-1516.json la base CU cua PR luc mo, KHONG phai cha thu nhat (connector P2 r4691243149)'
 merge_goi: 'measured — readback-pr-1516.json: merged true, merge_commit_sha b4b79bf0, head.sha f5af7469, merged_at 2026-11-25T05:36:54Z'
 review:
   executor: 'Claude Fable 5.2 (Agent tool), 6 luot: 1 dung boi dieu phoi, 2 dung vi tran kich thuoc, 3-6 giao noi dung'
